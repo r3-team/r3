@@ -1,6 +1,7 @@
 import MyStore from '../../stores/store.js';
 
 export function getCaption(content,moduleId,id,captions,fallback) {
+	if(MyStore.getters['schema/moduleIdMap'][moduleId] === undefined) return '';
 	return getCaptionForLang(content,MyStore.getters.moduleIdMapLang[moduleId],
 		id,captions,fallback,MyStore.getters['schema/moduleIdMap'][moduleId].languageMain);
 };
