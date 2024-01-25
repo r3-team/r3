@@ -351,7 +351,7 @@
 				"importDone":"Import has been completed",
 				"testDone":"Connection test was successful"
 			},
-			"assignRoles":"Set roles by group membership<br />(disables manuel role assignment)",
+			"assignRoles":"Set roles by group membership<br />(disables manual role assignment)",
 			"bindUserDn":"Bind user DN",
 			"bindUserDnHint":"Example: CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw":"Bind user password",

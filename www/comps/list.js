@@ -834,11 +834,6 @@ let MyList = {
 			
 			// process finished batches
 			for(let i = 0, j = batches.length; i < j; i++) {
-				if(batches[i].columnIndexes.length === 0) {
-					batches.splice(i,1); // batches with no columns are removed
-					i--; j--;
-					continue;
-				}
 				if(batches[i].basis !== 0)
 					batches[i].style = `max-width:${batches[i].basis}px`;
 				
@@ -853,7 +848,9 @@ let MyList = {
 			for(let i = 0, j = batchesSortedBySmallestOrderIndex.length; i < j; i++) {
 				batches[batchesSortedBySmallestOrderIndex[i].batchOrderIndex].orderPosition = i;
 			}
-			return batches;
+			
+			// return all batches that have at least 1 column
+			return batches.filter(v => v.columnIndexes.length !== 0);
 		},
 		filtersCombined:(s) => {
 			let filters = s.filters
