@@ -81,10 +81,10 @@ let MyInputFiles = {
 				
 				<!-- new files upload -->
 				<template v-if="!readonly && !maxFiles">
-					<input hidden="hidden" id="upload" multiple="multiple" type="file"
-						@change="upload($event.target.files)"
-					/>
-					<label for="upload">
+					<label>
+						<input hidden="hidden" multiple="multiple" type="file"
+							@change="upload($event.target.files)"
+						/>
 						<my-button image="add.png"
 							:caption="capGen.button.add"
 							:naked="true"
@@ -551,14 +551,6 @@ let MyInputFiles = {
 		},
 		
 		// actions
-		fileRequest(fileId,chooseApp) {
-			ws.send('file','request',{
-				attributeId:this.attributeId,
-				fileId:fileId,
-				recordId:this.recordId,
-				chooseApp:chooseApp
-			},false);
-		},
 		copyFilesSelected() {
 			let v = {
 				attributeId:this.attributeId,
@@ -568,6 +560,14 @@ let MyInputFiles = {
 			ws.send('file','copy',v,true);
 			this.$store.commit('filesCopy',v);
 			this.fileIdsSelected = [];
+		},
+		fileRequest(fileId,chooseApp) {
+			ws.send('file','request',{
+				attributeId:this.attributeId,
+				fileId:fileId,
+				recordId:this.recordId,
+				chooseApp:chooseApp
+			},false);
 		},
 		pasteFilesStored() {
 			ws.send('file','paste',{
@@ -731,12 +731,10 @@ let MyInputFiles = {
 					}
 				};
 				xhr.onload = event => {
-					let res = JSON.parse(xhr.response);
+					const res = JSON.parse(xhr.response);
 					
-					if(typeof res.error !== 'undefined') {
-						this.$root.genericError('import failed');
-						return;
-					}
+					if(typeof res.error !== 'undefined')
+						return this.$root.genericError('import failed');
 					
 					this.updateCreate([{
 						id:res.id,
