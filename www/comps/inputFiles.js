@@ -80,17 +80,15 @@ let MyInputFiles = {
 				<slot name="input-icon" />
 				
 				<!-- new files upload -->
-				<template v-if="!readonly && !maxFiles">
-					<label>
-						<input hidden="hidden" multiple="multiple" type="file"
-							@change="upload($event.target.files)"
-						/>
-						<my-button image="add.png"
-							:caption="capGen.button.add"
-							:naked="true"
-						/>
-					</label>
-				</template>
+				<label v-if="!readonly && !maxFiles">
+					<input hidden="hidden" multiple="multiple" type="file"
+						@change="upload($event.target.files)"
+					/>
+					<my-button image="add.png"
+						:caption="capGen.button.add"
+						:naked="true"
+					/>
+				</label>
 				
 				<!-- file actions -->
 				<my-button image="files.png"

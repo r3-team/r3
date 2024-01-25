@@ -209,7 +209,7 @@ let MyList = {
 					</td>
 					<td>
 						<div class="list-input-row-items">
-							<input class="input" data-is-input="1" enterkeyhint="send"
+							<input class="input" data-is-input="1" data-is-input-empty="1" enterkeyhint="send"
 								@click="focus"
 								@focus="focus"
 								@keyup="updatedTextInput"
@@ -1436,7 +1436,7 @@ let MyList = {
 				this.filtersQuick = '';
 				this.reloadInside('dropdown');
 				
-				const inputEl = this.$refs.content.querySelector('[data-is-input="1"]');
+				const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
 				if(inputEl !== null)
 					inputEl.focus();
 			}
