@@ -1218,23 +1218,24 @@ let MyField = {
 				openFormContext === 'bulk' ? this.field.openFormBulk : this.field.openForm
 			));
 			
-			// apply relationship default attribute value via getter if used
-			if(openForm.attributeIdApply !== null
-				&& typeof this.joinsIndexMap[openForm.relationIndexApply] !== 'undefined'
-				&& this.joinsIndexMap[openForm.relationIndexApply].recordId !== 0) {
-				
-				const atrId    = openForm.attributeIdApply;
-				const recordId = this.joinsIndexMap[openForm.relationIndexApply].recordId;
-				
-				getterArgs = this.setGetterArgs(getterArgs,'attributes',`${atrId}_${recordId}`);
-			}
-			
 			let recordIds = [];
 			for(let row of rows) {
 				const id = row.indexRecordIds[openForm.relationIndexOpen];
 				
 				if(typeof id !== 'undefined' && id !== null)
 					recordIds.push(id);
+			}
+			
+			// apply relationship default attribute value via getter (for new records only)
+			if(recordIds.length === 0
+				&& openForm.attributeIdApply !== null
+				&& this.joinsIndexMap[openForm.relationIndexApply] !== undefined
+				&& this.joinsIndexMap[openForm.relationIndexApply].recordId !== 0) {
+				
+				const atrId    = openForm.attributeIdApply;
+				const recordId = this.joinsIndexMap[openForm.relationIndexApply].recordId;
+				
+				getterArgs = this.setGetterArgs(getterArgs,'attributes',`${atrId}_${recordId}`);
 			}
 			
 			// pop-up inline form (only inside none-inputs fields) and never on mobile
