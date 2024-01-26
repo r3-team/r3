@@ -782,7 +782,7 @@ let MyForm = {
 				// build form
 				this.lastFormId = this.form.id;
 				
-				// reset value stores
+				// reset field values
 				this.values    = {};
 				this.valuesDef = {};
 				this.valuesOrg = {};
@@ -907,18 +907,17 @@ let MyForm = {
 			return clean(v1) == clean(v2);
 		},
 		valueSet(indexAttributeId,value,isOriginal,updateJoins) {
-			let changed = this.values[indexAttributeId] !== value;
+			const changed = this.values[indexAttributeId] !== value;
 			this.values[indexAttributeId] = value;
 			
 			// set original value for change comparisson against current value
 			if(isOriginal)
 				this.valuesOrg[indexAttributeId] = JSON.parse(JSON.stringify(value));
 			
-			// update sub joins if value has changed from input
-			if(updateJoins && changed) {
-				let ia = this.getDetailsFromIndexAttributeId(indexAttributeId);
-				if(ia.outsideIn)
-					return;
+			// update joined data, if relevant (because relationship value changed or defaults were loaded)
+			if(updateJoins && (changed || isOriginal)) {
+				const ia = this.getDetailsFromIndexAttributeId(indexAttributeId);
+				if(ia.outsideIn) return;
 				
 				// get data from sub joins if relationship attribute value has changed
 				for(let k in this.joinsIndexMap) {
@@ -930,7 +929,7 @@ let MyForm = {
 		valuesSetAllDefault() {
 			for(let k in this.values) {
 				// overwrite default attribute default values
-				let ia = this.getDetailsFromIndexAttributeId(k);
+				const ia = this.getDetailsFromIndexAttributeId(k);
 				
 				if(typeof this.attributeIdMapDef[ia.attributeId] !== 'undefined') {
 					this.valuesDef[k] = ia.outsideIn && this.isAttributeRelationshipN1(this.attributeIdMap[ia.attributeId].content)
