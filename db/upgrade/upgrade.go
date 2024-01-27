@@ -185,7 +185,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			    js_function_id uuid,
 			    login_form_id uuid,
 			    language_code character(5) COLLATE pg_catalog."default" NOT NULL,
-			    content caption_content NOT NULL,
+			    content app.caption_content NOT NULL,
 			    value text COLLATE pg_catalog."default" NOT NULL,
 			    article_id uuid,
 			    tab_id uuid,
