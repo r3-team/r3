@@ -1,4 +1,4 @@
-<p><em>Updated 2023-09-05</em></p>
+<p><em>Updated 2024-01-28</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -250,8 +250,8 @@
 <p>For this situation, REI3 offers a dedicated text index option. A text index does not index every character, but instead breaks down the text content to its components. This gives us full-text search capabilities, which offer very fast, mult-word lookups. To use a text index, just select the option when adding a new index on a <a href="#relations">relation</a>.</p>
 <p>There is however another benefit with text indexes: Language specific lookups. If its possible to know the language of a text, full-text search can also break down words to their stems and remove stop-words. This enables lookups for words of the same stem as well as further improve performance. To enable this option, the relation on which the text attribute is stored, requires a dictionary attribute. This attribute is used to store the language of a text. If a dictionary attribute is used and given a value, lookups take into account specifics of the defined language to better find results.</p>
 <h2 id="triggers">Triggers</h2>
-<p>Triggers are an advanced feature, executing predefined functions when records inside your <a href="#relations">relations</a> are changed (created, updated or deleted). They are usually used for complex or event driven business logic and are not required in most use cases.</p>
-<p>To setup a trigger, a trigger function must be created first. A trigger function is a regular <a href="#backend-functions">backend function</a> of the type 'Trigger' - read its <a href="#backend-functions">documentation</a> for more details.</p>
+<p>Triggers are an advanced feature, reacting to changed records inside your <a href="#relations">relations</a> (on creation, update or deletion). They are usually used for complex or event driven business logic.</p>
+<p>A trigger calls a pre-existing <a href="#backend-functions">backend function</a> and executes the code inside of it. To create a trigger, you start with a backend function with the type 'trigger'. Once created, you can create a trigger event for the backend function on any relation inside the current application or any that your application <a href="#building-on-applications">builds on</a>. You can also create a trigger from inside a relation, by selecting an existing trigger backend function.</p>
 <p><img src="en_us_builder_pics/triggers.webp" alt="New trigger" /></p>
 <p>Multiple options exist for triggers:</p>
 <ul>
@@ -272,7 +272,7 @@
     THEN my_var := 123;
     ELSE my_var := 456;
 END IF;</code></pre>
-<p>For more details about triggers, you can lookup the <a href="https://www.postgresql.org/docs/15/trigger-definition.html">PostgreSQL trigger documentation</a>.</p>
+<p>For more details about triggers, you can lookup the <a href="https://www.postgresql.org/docs/current/trigger-definition.html">PostgreSQL trigger documentation</a>.</p>
 <h2 id="policies">Policies</h2>
 <p>A relation policy can limit what specific records are accessible to a logged in user via their <a href="#roles-and-access-management">role memberships</a>. This is done by using <a href="#backend-functions">backend functions</a> that serve as filter for specific actions. While <a href="#forms">forms</a>, <a href="#data-display-fields">data display fields</a> and other frontend elements can also <a href="#query-filters">filter records</a>, relation policies are applied globally and cannot be circumvented by changing the frontend.</p>
 <p>A policy can be set for different actions, these are:</p>
