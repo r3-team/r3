@@ -15,6 +15,9 @@ export function getColumnTitle(c,moduleId) {
 		getCaption('attributeTitle',moduleId,atr.id,atr.captions,atr.name));
 };
 export function getColumnTitleForLang(c,language) {
+	// sub queries can have empty attribute ID when newly created
+	if(c.attributeId === null) return '';
+	
 	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
 	return getCaptionForLang('columnTitle',language,c.id,c.captions,
 		getCaptionForLang('attributeTitle',language,atr.id,atr.captions,atr.name));
