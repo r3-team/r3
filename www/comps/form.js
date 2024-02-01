@@ -450,7 +450,7 @@ let MyForm = {
 				
 				// collection functions
 				collection_read:s.getCollectionMultiValues,
-				collection_update:(v) => s.updateCollections(false,undefined,v),
+				collection_update:s.updateCollections,
 				
 				// call other functions
 				call_backend:(id,...args) => {
@@ -581,7 +581,7 @@ let MyForm = {
 				show_form_message:s.messageSet,
 				
 				// legacy calls (<3.0)
-				update_collection:(v) => s.updateCollections(false,undefined,v)
+				update_collection:s.updateCollections
 			};
 		},
 		

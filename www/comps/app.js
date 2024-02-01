@@ -18,7 +18,7 @@ import {
 import {
 	consoleError,
 	genericError,
-	genericErrorWithFallback
+	resolveErrCode
 } from './shared/error.js';
 
 export {MyApp as default};
@@ -368,7 +368,7 @@ let MyApp = {
 		blockInput:         (s) => s.$store.getters.blockInput,
 		capErr:             (s) => s.$store.getters.captions.error,
 		capGen:             (s) => s.$store.getters.captions.generic,
-		captionMapCustom:             (s) => s.$store.getters.captionMapCustom,
+		captionMapCustom:   (s) => s.$store.getters.captionMapCustom,
 		colorHeaderAccent:  (s) => s.$store.getters.colorHeaderAccent,
 		colorHeaderMain:    (s) => s.$store.getters.colorHeaderMain,
 		isAdmin:            (s) => s.$store.getters.isAdmin,
@@ -406,10 +406,10 @@ let MyApp = {
 		consoleError,
 		formOpen,
 		genericError,
-		genericErrorWithFallback,
 		getCaption,
 		getStartFormId,
 		pemImport,
+		resolveErrCode,
 		srcBase64Icon,
 		updateCollections,
 		
@@ -469,7 +469,7 @@ let MyApp = {
 				
 				// affects everyone logged in
 				case 'collection_changed':
-					this.updateCollections(false,undefined,res.payload);
+					this.updateCollections(res.payload);
 				case 'config_changed':
 					if(this.isAdmin) {
 						ws.sendMultiple([
@@ -490,7 +490,7 @@ let MyApp = {
 						ws.send('lookup','get',{name:'access'},true).then(
 							res => {
 								this.$store.commit('access',res.payload);
-								this.updateCollections(false);
+								this.updateCollections();
 							},
 							this.genericError
 						);
@@ -683,13 +683,21 @@ let MyApp = {
 						this.$store.commit('system',res[8].payload);
 					}
 					
-					// load captions & collections
-					// if collection update error, continue for admins - otherwise it cannot be corrected
-					// non-admins are blocked as the system does not handle as expected
-					const p1 = this.captionsReload();
-					const p2 = this.updateCollections(this.isAdmin,err => alert(this.capErr.initCollection.replace('{MSG}',err)));
-					Promise.all([p1,p2]).then(
-						() => this.appReady = true,
+					// load captions, then collections
+					this.captionsReload().then(
+						() => this.updateCollections().then(
+							() => this.appReady = true,
+							err => {
+								alert(this.capErr.initCollection.replace('{MSG}',this.resolveErrCode(err)));
+								
+								// if collection update error, admins can continue to fix the issue
+								// non-admins are blocked as the system might not run as expected
+								if(this.isAdmin)
+									return this.appReady = true;
+								
+								this.setInitErr(err);
+							}
+						),
 						this.setInitErr
 					);
 				},
@@ -743,7 +751,7 @@ let MyApp = {
 				fetch(`./langs/${R3.appBuild}/${lang}`).then(
 					res => {
 						if(res.status !== 200)
-							return reject('Failed to load captions');
+							return reject('failed to load captions');
 						
 						res.json().then(v => {
 							this.$store.commit('captions',v);

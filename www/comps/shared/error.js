@@ -42,7 +42,6 @@ export function consoleError(err) {
 };
 
 export function resolveErrCode(message) {
-	
 	if(typeof message !== 'string')
 		return message;
 	

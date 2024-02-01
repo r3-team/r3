@@ -119,10 +119,8 @@ export function getCollectionMultiValues(collectionId,columnIds) {
 };
 
 // update known collections by retrieving their data queries
-// can continue on error or reject immediately, if desired
-// can optionally call a specific error function when rejected
 // can optionally update only a single collection instead of all collections
-export function updateCollections(continueOnError,errFnc,collectionId) {
+export function updateCollections(collectionId) {
 	return new Promise((resolve,reject) => {
 		const access          = MyStore.getters.access.collection;
 		const collectionIdMap = MyStore.getters['schema/collectionIdMap'];
@@ -156,7 +154,7 @@ export function updateCollections(continueOnError,errFnc,collectionId) {
 		};
 		
 		// either update specific or all collections
-		if(typeof collectionId !== 'undefined') {
+		if(collectionId !== undefined) {
 			addCollection(collectionId);
 		} else {
 			// collections are cleared on update as some might have been removed (roles changed)
@@ -181,13 +179,7 @@ export function updateCollections(continueOnError,errFnc,collectionId) {
 				}
 				resolve();
 			},
-			err => {
-				if(continueOnError && typeof errFnc !== 'undefined') {
-					errFnc(err);
-					return resolve();
-				}
-				reject(err);
-			}
+			reject
 		);
 	});
 };
