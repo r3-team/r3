@@ -89,7 +89,7 @@ let MyForm = {
 		>
 			<!-- title bar upper -->
 			<div class="top nowrap" :class="{ lower:!hasBarLower && !isSingleField }" v-if="!isWidget">
-				<div class="area nowrap">
+				<div class="area nowrap overflowHidden">
 					<my-button image="upward.png"
 						v-if="hasGoBack"
 						@trigger="openPrevAsk"
@@ -120,7 +120,7 @@ let MyForm = {
 					</transition>
 				</div>
 				
-				<div class="area">
+				<div class="area nowrap">
 					<template v-if="isData && !isBulkUpdate">
 						<my-button image="refresh.png"
 							v-if="!isMobile"

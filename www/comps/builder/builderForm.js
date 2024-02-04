@@ -57,8 +57,8 @@ let MyBuilderForm = {
 		<div class="contentBox builder-form-main">
 			
 			<div class="builder-form-content">
-				<div class="top">
-					<div class="area nowrap">
+				<div class="top nowrap">
+					<div class="area nowrap overflowHidden">
 						<img class="icon" src="images/fileText.png" />
 						<h1 class="title">{{ capApp.titleOne.replace('{NAME}',name) }}</h1>
 					</div>

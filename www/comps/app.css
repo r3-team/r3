@@ -417,6 +417,10 @@ h3{
 	margin:0px;
 	font-size:135%;
 	font-weight:normal;
+	min-width:0px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
 }
 .contentBox .top .separator{
 	width:10px;
@@ -453,6 +457,9 @@ h3{
 }
 .contentBox .top .area.nowrap{
 	flex-wrap:nowrap;
+}
+.contentBox .top .area.overflowHidden{
+	overflow:hidden;
 }
 .contentBox .content{
 	padding:var(--spacing);
