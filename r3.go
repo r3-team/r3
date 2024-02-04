@@ -195,8 +195,8 @@ func main() {
 		flag.PrintDefaults()
 
 		fmt.Printf("\n################################################################################\n")
-		fmt.Printf("This is the executable of %s, the open application platform, v%s\n", appName, appVersion)
-		fmt.Printf("Copyright (c) 2019-2022 Gabriel Victor Herbert\n\n")
+		fmt.Printf("This is the executable of %s, the open low-code platform, v%s\n", appName, appVersion)
+		fmt.Printf("Copyright (c) 2019-2024 Gabriel Victor Herbert\n\n")
 		fmt.Printf("%s can be installed as service (-install) or run from the console (-run).\n\n", appName)
 		fmt.Printf("When %s is running, use any modern browser to access it (port 443 by default).\n\n", appName)
 		fmt.Printf("For installation instructions, please refer to the included README file or visit\n")
