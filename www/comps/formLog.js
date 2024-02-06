@@ -186,6 +186,7 @@ let MyFormLog = {
 		consoleError,
 		getAttributeFileHref,
 		getAttributeFileVersionHref,
+		getCaption,
 		getDetailsFromIndexAttributeId,
 		getFieldOverwritesDefault,
 		getIndexAttributeId,
