@@ -2,7 +2,6 @@ import MyBuilderAttribute    from './builderAttribute.js';
 import MyBuilderPreset       from './builderPreset.js';
 import MyBuilderPgIndex      from './builderPgIndex.js';
 import MyBuilderPgTriggers   from './builderPgTriggers.js';
-import {getDependentModules} from '../shared/builder.js';
 import {srcBase64}           from '../shared/image.js';
 import {
 	copyValueDialog,
@@ -15,6 +14,10 @@ import {
 	isAttributeRelationship11,
 	isAttributeWithLength
 } from '../shared/attribute.js';
+import {
+	getDependentModules,
+	getDependentAttributes
+} from '../shared/builder.js';
 
 export {MyBuilderRelation as default};
 
@@ -611,10 +614,8 @@ let MyBuilderRelation = {
 				value:''
 			}];
 			
-			// relationships to and from base relation (from all attributes)
-			for(let k in s.attributeIdMap) {
-				let a = s.attributeIdMap[k];
-				
+			// relationships to and from base relation
+			for(const a of s.getDependentAttributes(s.moduleIdMap[s.relation.moduleId])) {
 				if(!s.isAttributeRelationship(a.content))
 					continue;
 				
@@ -716,6 +717,7 @@ let MyBuilderRelation = {
 		// externals
 		copyValueDialog,
 		getAttributeIcon,
+		getDependentAttributes,
 		getNilUuid,
 		isAttributeFiles,
 		isAttributeRelationship,

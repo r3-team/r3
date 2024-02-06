@@ -571,22 +571,10 @@ let MyBuilderPgFunction = {
 			}
 			return out;
 		},
-		triggers:(s) => {
-			let out = [];
-			for(const relId in s.relationIdMap) {
-				const rel = s.relationIdMap[relId];
-				
-				for(const trg of rel.triggers) {
-					if(trg.pgFunctionId === s.id)
-						out.push(trg);
-				}
-			}
-			return out;
-		},
 		
 		// simple
 		module:    (s) => s.pgFunction === false ? false : s.moduleIdMap[s.pgFunction.moduleId],
-		pgFunction:(s) => typeof s.pgFunctionIdMap[s.id] === 'undefined' ? false : s.pgFunctionIdMap[s.id],
+		pgFunction:(s) => s.pgFunctionIdMap[s.id] === undefined ? false : s.pgFunctionIdMap[s.id],
 		preview:   (s) => !s.showPreview ? '' : s.placeholdersUnset(true),
 		
 		// stores

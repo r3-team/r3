@@ -64,6 +64,26 @@ export function getDependentModules(moduleSource) {
 	return MyStore.getters['schema/modules'].filter(v => v.id === moduleSource.id || moduleSource.dependsOn.includes(v.id));
 };
 
+export function getDependentRelations(moduleSource) {
+	const modules = getDependentModules(moduleSource);
+	let rels = [];
+	for(const mod of modules) {
+		rels = rels.concat(mod.relations);
+	}
+	return rels;
+};
+
+export function getDependentAttributes(moduleSource) {
+	const modules = getDependentModules(moduleSource);
+	let atrs = [];
+	for(const mod of modules) {
+		for(const rel of mod.relations) {
+			atrs = atrs.concat(rel.attributes);
+		}
+	}
+	return atrs;
+};
+
 export function getFunctionHelp(functionPrefix,functionObj,builderLanguage) {
 	let help = `${functionObj.name}(${functionObj.codeArgs}) => ${functionObj.codeReturns}`;
 	

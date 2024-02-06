@@ -1,6 +1,7 @@
 import {isAttributeRelationship} from '../shared/attribute.js';
 import {
 	getDependentModules,
+	getDependentRelations,
 	getItemTitleRelation
 } from '../shared/builder.js';
 export {MyBuilderOpenFormInput as default};
@@ -200,12 +201,7 @@ let MyBuilderOpenFormInput = {
 				}
 				
 				// attributes on n:m relations
-				for(let relId in s.relationIdMap) {
-					let r = s.relationIdMap[relId];
-					
-					// only allow relations from own module or modules we declared as dependency
-					if(r.moduleId !== s.module.id && !s.module.dependsOn.includes(r.moduleId))
-						continue;
+				for(const r of s.getDependentRelations(s.module)) {
 					
 					// skip if record relation itself is n:m candidate
 					if(r.id === relationIdRecord)
@@ -246,6 +242,7 @@ let MyBuilderOpenFormInput = {
 	methods:{
 		// externals
 		getDependentModules,
+		getDependentRelations,
 		getItemTitleRelation,
 		isAttributeRelationship,
 		

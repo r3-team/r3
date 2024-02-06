@@ -10,6 +10,7 @@ import MyTabs                 from '../tabs.js';
 import {getFieldIcon}         from '../shared/field.js';
 import {routeParseParams}     from '../shared/router.js';
 import {
+	getDependentRelations,
 	getFieldHasQuery,
 	getFormEntityMapRef
 } from '../shared/builder.js';
@@ -738,6 +739,7 @@ let MyBuilderForm = {
 		// externals
 		copyValueDialog,
 		getDataFields,
+		getDependentRelations,
 		getFieldHasQuery,
 		getFieldIcon,
 		getFormEntityMapRef,
@@ -1082,15 +1084,10 @@ let MyBuilderForm = {
 			}
 			
 			// relationship attributes from outside (1:n)
-			for(let relId in this.relationIdMap) {
-				let rel = this.relationIdMap[relId];
-				
-				// only allow relations from own module or modules we declared as dependency
-				if(rel.moduleId !== this.module.id && !this.module.dependsOn.includes(rel.moduleId))
-					continue;
+			for(const rel of this.getDependentRelations(this.module)) {
 				
 				// relationship attributes referencing this relation (can be self reference)
-				for(let atr of rel.attributes) {
+				for(const atr of rel.attributes) {
 					if(atr.relationshipId !== relation.id)
 						continue;
 					
@@ -1105,12 +1102,12 @@ let MyBuilderForm = {
 				
 				// relationship attributes that can be used to build n:m relationships
 				let atrsN1 = [];
-				for(let atr of rel.attributes) {
+				for(const atr of rel.attributes) {
 					if(this.isAttributeRelationshipN1(atr.content))
 						atrsN1.push(atr);
 				}
 				
-				for(let atrN1 of atrsN1) {
+				for(const atrN1 of atrsN1) {
 					
 					// find attributes in relationship with us
 					if(atrN1.relationshipId !== relation.id)

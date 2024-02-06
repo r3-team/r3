@@ -1,5 +1,4 @@
 import MyBuilderCaption               from './builderCaption.js';
-import {getDependentModules}          from '../shared/builder.js';
 import {getNilUuid}                   from '../shared/generic.js';
 import {getCaptionByIndexAttributeId} from '../shared/query.js';
 import {
@@ -7,6 +6,10 @@ import {
 	isAttributeRelationship,
 	isAttributeRelationship11
 } from '../shared/attribute.js';
+import {
+	getDependentModules,
+	getDependentAttributes
+} from '../shared/builder.js';
 export {MyBuilderQuery as default};
 
 let MyBuilderQueryChoice = {
@@ -422,32 +425,13 @@ let MyBuilderQueryNestedJoin = {
 	computed:{
 		attributesUnused:(s) => {
 			let atrs = [];
-			
-			// get attributes of this relation and in relationship with this relation
-			for(let key in s.attributeIdMap) {
-				const atr = s.attributeIdMap[key];
-				
+			for(const atr of s.getDependentAttributes(s.module)) {
 				if(!s.isAttributeRelationship(atr.content))
 					continue;
 				
-				// relationship attribute is from current relation, add
-				if(atr.relationId === s.joinRelationId) {
+				// relationship attribute is from current relation or pointing to it
+				if(atr.relationId === s.joinRelationId || atr.relationshipId === s.joinRelationId)
 					atrs.push(atr);
-					continue;
-				}
-				
-				// relationship attribute is not pointing to us, ignore
-				if(atr.relationshipId !== s.joinRelationId)
-					continue;
-				
-				// if attribute is from other relation, check module dependency first
-				const rel = s.relationIdMap[atr.relationId];
-				const mod = s.moduleIdMap[rel.moduleId];
-				
-				if(mod.id !== s.module.id && !s.module.dependsOn.includes(mod.id))
-					continue;
-				
-				atrs.push(atr);
 			}
 			return atrs;
 		},
@@ -496,6 +480,7 @@ let MyBuilderQueryNestedJoin = {
 	},
 	methods:{
 		// externals
+		getDependentAttributes,
 		isAttributeRelationship,
 		isAttributeRelationship11,
 		
@@ -884,8 +869,8 @@ let MyBuilderQuery = {
 		},
 		
 		// entities, simple
-		module:  (s) => typeof s.moduleIdMap[s.moduleId]     === 'undefined' ? false : s.moduleIdMap[s.moduleId],
-		relation:(s) => typeof s.relationIdMap[s.relationId] === 'undefined' ? false : s.relationIdMap[s.relationId],
+		module:  (s) => s.moduleIdMap[s.moduleId]     === undefined ? false : s.moduleIdMap[s.moduleId],
+		relation:(s) => s.relationIdMap[s.relationId] === undefined ? false : s.relationIdMap[s.relationId],
 		
 		// stores
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
