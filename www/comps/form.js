@@ -311,38 +311,38 @@ let MyForm = {
 	data() {
 		return {
 			// states
-			badLoad:false,        // attempted record load with no return (can happen if access is lost during save)
-			badSave:false,        // attempted save (data SET) with invalid fields, also updates data fields
-			blockInputs:false,    // disable all user inputs (used by frontend functions)
-			lastFormId:'',        // when routing occurs: if ID is the same, no need to rebuild form
-			loading:false,        // form is currently loading, informs sub components when form is ready
-			message:null,         // form message
-			messageTimeout:null,  // form message expiration timeout
-			popUp:null,           // configuration for pop-up form (float)
-			popUpFieldIdSrc:null, // ID of field that pop-up form originated from
-			popUpFullscreen:false,// set this pop-up form to fullscreen mode
+			badLoad:false,          // attempted record load with no return (can happen if access is lost during save)
+			badSave:false,          // attempted save (data SET) with invalid fields, also updates data fields
+			blockInputs:false,      // disable all user inputs (used by frontend functions)
+			lastFormId:'',          // when routing occurs: if ID is the same, no need to rebuild form
+			loading:false,          // form is currently loading, informs sub components when form is ready
+			message:null,           // form message
+			messageTimeout:null,    // form message expiration timeout
+			popUp:null,             // configuration for pop-up form (float)
+			popUpFieldIdSrc:null,   // ID of field that pop-up form originated from
+			popUpFullscreen:false,  // set this pop-up form to fullscreen mode
 			recordActionFree:false, // set by DEL/SET calls before form functions, which can negate it to block following record actions
-			showHelp:false,       // show form context help
-			showLog:false,        // show data change log
-			titleOverwrite:null,  // custom form title, can be set via frontend function
-			updatingRecord:false, // form is currently attempting to update the current record (saving/deleting)
+			showHelp:false,         // show form context help
+			showLog:false,          // show data change log
+			titleOverwrite:null,    // custom form title, can be set via frontend function
+			updatingRecord:false,   // form is currently attempting to update the current record (saving/deleting)
 			
 			// form data
-			fields:[],            // all fields (nested within each other)
-			fieldIdsInvalid:[],   // field IDs with invalid values
-			fieldIdsTouched:[],   // field IDs that were touched (changed their value in some way)
-			fieldIdMapOverwrite:{}, // overwrites for fields: { caption, chart, error, order }
-			indexMapRecordId:{},  // record IDs for form, key: relation index
-			indexMapRecordKey:{}, // record en-/decryption keys, key: relation index
-			indexesNoDel:{},      // relation indexes with no DEL permission (via relation policy)
-			indexesNoSet:{},      // relation indexes with no SET permission (via relation policy)
+			fields:[],                    // all fields (nested within each other)
+			fieldIdsInvalid:[],           // field IDs with invalid values
+			fieldIdsTouched:[],           // field IDs that were touched (changed their value in some way)
+			fieldIdMapOverwrite:{},       // overwrites for fields: { caption, chart, error, order }
+			indexMapRecordId:{},          // record IDs for form, key: relation index
+			indexMapRecordKey:{},         // record en-/decryption keys, key: relation index
+			indexesNoDel:[],              // relation indexes with no DEL permission (via relation policy)
+			indexesNoSet:[],              // relation indexes with no SET permission (via relation policy)
 			loginIdsEncryptFor:[],        // login IDs for which data keys are encrypted (e2ee), for current form relations/records
-			loginIdsEncryptForOutside:{}, // login IDs for which data keys are encrypted (e2ee), for outside relation and record IDs
-			                              // [{loginIds:[5,12],relationId:'A-B-C-D',recordIds:[1,2]},{...}]
-			timers:{},            // frontend function timers, key = name, value = { id:XY, isInterval:true }
-			values:{},            // field values, key: index attribute ID
-			valuesDef:{},         // field value defaults (via field options)
-			valuesOrg:{},         // original field values, used to check for changes
+			loginIdsEncryptForOutside:[], // login IDs for which data keys are encrypted (e2ee), for outside relation and record IDs
+			                              // [{loginIds:[5,12], recordIds:[1,2], relationId:'A-B-C-D'}, {...}]
+			timers:{},                    // frontend function timers, key = name, value = { id:XY, isInterval:true }
+			values:{},                    // field values, key: index attribute ID
+			valuesDef:{},                 // field value defaults (via field options)
+			valuesOrg:{},                 // original field values, used to check for changes
 			
 			// query data
 			relationId:null,      // source relation ID
@@ -869,16 +869,8 @@ let MyForm = {
 			}
 			
 			// reset record
-			this.badSave     = false;
-			this.badLoad     = false;
 			this.blockInputs = false;
-			this.loginIdsEncryptFor        = [];
-			this.loginIdsEncryptForOutside = [];
-			this.indexesNoDel              = [];
-			this.indexesNoSet              = [];
-			this.indexMapRecordId          = {};
-			this.indexMapRecordKey         = {};
-			this.fieldIdMapOverwrite       = this.getFieldOverwritesDefault();
+			this.fieldIdMapOverwrite = this.getFieldOverwritesDefault();
 			this.valuesSetAllDefault();
 			this.timerClearAll();
 			this.popUp = null;
@@ -887,6 +879,16 @@ let MyForm = {
 			
 			if(!this.isWidget && !this.isMobile)
 				this.$nextTick(() => this.fieldSetFocus(this.form.fieldIdFocus,true));
+		},
+		resetRecordMeta() {
+			this.badSave                   = false;
+			this.badLoad                   = false;
+			this.loginIdsEncryptFor        = [];
+			this.loginIdsEncryptForOutside = [];
+			this.indexesNoDel              = [];
+			this.indexesNoSet              = [];
+			this.indexMapRecordId          = {};
+			this.indexMapRecordKey         = {};
 		},
 		releaseLoadingOnNextTick() {
 			// releases state on next tick for watching components to react to with updated data
@@ -1356,7 +1358,9 @@ let MyForm = {
 			// no or multiple records defined, no need to load record data
 			if(this.isNew || this.isBulkUpdate) {
 				this.triggerEventAfter('open');
-				return this.releaseLoadingOnNextTick();
+				this.releaseLoadingOnNextTick();
+				this.resetRecordMeta();
+				return;
 			}
 			
 			// set base record ID, necessary for form filter 'recordNew'
@@ -1389,15 +1393,8 @@ let MyForm = {
 			},true).then(
 				res => {
 					// reset states
-					this.badLoad = false;
-					this.badSave = false;
+					this.resetRecordMeta();
 					this.loading = true;
-					
-					// reset record meta
-					this.indexMapRecordId  = {};
-					this.indexMapRecordKey = {};
-					this.indexesNoDel      = [];
-					this.indexesNoSet      = [];
 					
 					this.valueSetByRows(res.payload.rows,expressions).then(
 						() => this.triggerEventAfter('open'),
