@@ -1357,9 +1357,9 @@ let MyForm = {
 			
 			// no or multiple records defined, no need to load record data
 			if(this.isNew || this.isBulkUpdate) {
+				this.resetRecordMeta();
 				this.triggerEventAfter('open');
 				this.releaseLoadingOnNextTick();
-				this.resetRecordMeta();
 				return;
 			}
 			
