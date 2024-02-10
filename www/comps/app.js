@@ -18,6 +18,7 @@ import {
 import {
 	consoleError,
 	genericError,
+	genericErrorWithFallback,
 	resolveErrCode
 } from './shared/error.js';
 
@@ -406,6 +407,7 @@ let MyApp = {
 		consoleError,
 		formOpen,
 		genericError,
+		genericErrorWithFallback,
 		getCaption,
 		getStartFormId,
 		pemImport,
