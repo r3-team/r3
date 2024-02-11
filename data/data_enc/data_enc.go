@@ -41,9 +41,12 @@ func SetKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 		return nil
 	}
 
+	// ignore existing, we cannot guarantee that only non-existing keys are inserted
+	// primary key is record_id + login_id
 	if _, err := tx.Prepare(ctx, "store_keys", fmt.Sprintf(`
 		INSERT INTO instance_e2ee."%s" (record_id, login_id, key_enc)
 		VALUES ($1,$2,$3)
+		ON CONFLICT (record_id,login_id) DO NOTHING
 	`, schema.GetEncKeyTableName(relationId))); err != nil {
 		return err
 	}

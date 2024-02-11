@@ -1547,7 +1547,8 @@ let MyForm = {
 					if(this.loginIdsEncryptFor.length !== 0) {
 						this.messageSet('[ENCRYPTING]');
 						
-						// get public keys for all logins to encrypt data key for
+						// get public keys for logins to encrypt data key for
+						// only returns keys if logins have not already encrypted all records
 						const res = await ws.send('loginKeys','getPublic',{
 							loginIds:this.loginIdsEncryptFor,
 							relationId:j.relationId,
