@@ -1226,9 +1226,9 @@ let MyField = {
 					recordIds.push(id);
 			}
 			
-			// apply relationship default attribute value via getter (for new records only)
-			if(recordIds.length === 0
-				&& openForm.attributeIdApply !== null
+			// apply relationship default attribute value via getter
+			// apply for existing records also, default values are needed for parent reference when clicking 'new' after opening existing record
+			if(openForm.attributeIdApply !== null
 				&& this.joinsIndexMap[openForm.relationIndexApply] !== undefined
 				&& this.joinsIndexMap[openForm.relationIndexApply].recordId !== 0) {
 				

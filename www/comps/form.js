@@ -942,7 +942,8 @@ let MyForm = {
 					this.valuesDef[k] = [this.attributeIdMapDef[ia.attributeIdNm]];
 				
 				// set default value, default value can be an object so it should be cloned as to not overwrite it
-				this.valueSet(k,JSON.parse(JSON.stringify(this.valuesDef[k])),true,true);
+				// only update joins on default value change if the current record is new, existing records load all their data at once
+				this.valueSet(k,JSON.parse(JSON.stringify(this.valuesDef[k])),true,this.isNew);
 			}
 		},
 		valueSetByField(indexAttributeId,value) {
@@ -1234,8 +1235,8 @@ let MyForm = {
 			if(typeof fieldIdSrc === 'undefined')
 				fieldIdSrc = null;
 			
-			let openSameForm  = this.form.id === openForm.formIdOpen;
-			let openPopUpForm = openForm.popUpType !== null;
+			const openSameForm  = this.form.id === openForm.formIdOpen;
+			const openPopUpForm = openForm.popUpType !== null;
 			
 			if(this.isPopUp || this.isWidget) {
 				// a pop-up/widget form can be reloaded by using itself as target (the same as regular forms)
