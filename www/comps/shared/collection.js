@@ -124,8 +124,8 @@ export function updateCollections(collectionId) {
 	return new Promise((resolve,reject) => {
 		const access          = MyStore.getters.access.collection;
 		const collectionIdMap = MyStore.getters['schema/collectionIdMap'];
-		let dataRequests    = []; // one request data GET for each valid collection
-		let requestIds      = []; // collection ID, in order, for each data GET request
+		let dataRequests      = []; // one request data GET for each valid collection
+		let requestIds        = []; // collection ID, in order, for each data GET request
 		
 		const addCollection = function(collectionId) {
 			if(typeof access[collectionId] === 'undefined' || access[collectionId] < 1)

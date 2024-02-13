@@ -486,7 +486,6 @@ let MyAdminModules = {
 		builderEnabled: (s) => s.$store.getters.builderEnabled,
 		capApp:         (s) => s.$store.getters.captions.admin.modules,
 		capGen:         (s) => s.$store.getters.captions.generic,
-		moduleIdMapLang:(s) => s.$store.getters.moduleIdMapLang,
 		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta,
 		productionMode: (s) => s.$store.getters.productionMode,
 		system:         (s) => s.$store.getters.system

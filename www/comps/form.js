@@ -690,7 +690,6 @@ let MyForm = {
 		loginId:            (s) => s.$store.getters.loginId,
 		loginPublicKey:     (s) => s.$store.getters.loginPublicKey,
 		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
-		moduleIdMapLang:    (s) => s.$store.getters.moduleIdMapLang,
 		patternStyle:       (s) => s.$store.getters.patternStyle,
 		settings:           (s) => s.$store.getters.settings
 	},

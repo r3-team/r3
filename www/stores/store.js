@@ -278,7 +278,13 @@ const MyStore = Vuex.createStore({
 			for(const id in state.moduleIdMapMeta) {
 				const meta = state.moduleIdMapMeta[id];
 				const mod  = MyStoreSchema.state.moduleIdMap[id];
-				
+
+				// rare error when loading schema for newly imported module, module is not yet in the module ID map, workaround for now
+				if(mod === undefined) {
+					out[id] = '';
+					continue;
+				}
+
 				// use login language if supported by module or custom captions - otherwise use module fallback
 				out[id] = meta.languagesCustom.includes(state.settings.languageCode) || mod.languages.includes(state.settings.languageCode)
 					? state.settings.languageCode : mod.languageMain;
