@@ -732,6 +732,9 @@ let MySettingsFixedTokens = {
 			</div>
 		</div>
 	</div>`,
+	props:{
+		languageCodesOfficial:{ type:Array, required:true }
+	},
 	data() {
 		return {
 			tokensFixed:[],
@@ -739,13 +742,11 @@ let MySettingsFixedTokens = {
 			showMfa:false,
 			showMfaText:false,
 			
-			// temporary
-			tokenIdDel:null, // ID of token to delete (dialog)
-			
 			// inputs
 			deviceOs:'amd64_windows',
 			tokenFixed:'',
 			tokenFixedB32:'',
+			tokenIdDel:null, // ID of token to delete (dialog)
 			tokenName:''
 		};
 	},
@@ -796,7 +797,7 @@ let MySettingsFixedTokens = {
 			window.open(`/client/download/?${call.join('&')}`);
 		},
 		loadCnf() {
-			let langCode = ['en_us','de_de'].includes(this.languageCode)
+			let langCode = this.languageCodesOfficial.includes(this.languageCode)
 				? this.languageCode : 'en_us';
 			
 			let isSsl = location.protocol.includes('https');
@@ -925,10 +926,7 @@ let MySettings = {
 							<td>{{ capApp.languageCode }}</td>
 							<td>
 								<select v-model="settingsInput.languageCode">
-									<option
-										v-for="l in languageCodes"
-										:value="l"
-									>{{ l }}</option>
+									<option v-for="l in languageCodes" :value="l">{{ displayLanguageCode(l) }}</option>
 								</select>
 							</td>
 						</tr>
@@ -1185,7 +1183,9 @@ let MySettings = {
 					<img class="icon" src="images/screen.png" />
 					<h1>{{ capApp.titleFixedTokens }}</h1>
 				</div>
-				<my-settings-fixed-tokens />
+				<my-settings-fixed-tokens
+					:languageCodesOfficial="languageCodesOfficial"
+				/>
 			</div>
 			
 			<!-- encryption -->
@@ -1201,6 +1201,7 @@ let MySettings = {
 	emits:['close','logout'],
 	data() {
 		return {
+			languageCodesOfficial:['en_us','de_de'],
 			searchDictionaryNew:'', // input for new search dictionary
 			settingsInput:{},       // copy of the settings object to work on
 			settingsLoaded:false    // once settings have been loaded, each change triggers DB update
@@ -1245,6 +1246,11 @@ let MySettings = {
 		// externals
 		setSetting,
 		
+		// presentation
+		displayLanguageCode(code) {
+			return this.languageCodesOfficial.includes(code) ? code : `${code} (${this.capApp.communityTranslation})`;	
+		},
+
 		// actions
 		dictAdd(entry) {
 			this.settingsInput.searchDictionaries.push(entry);
