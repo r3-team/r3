@@ -362,6 +362,7 @@ let MyList = {
 					>
 						<option v-for="o in limitOptions" :value="o">{{ o }}</option>
 					</select>
+					<span v-if="showPageLimit && count !== 0">/ {{ count }}</span>
 					
 					<my-button
 						@trigger="toggleLayout"

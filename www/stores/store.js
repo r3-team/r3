@@ -59,7 +59,6 @@ const MyStore = Vuex.createStore({
 		loginWidgetGroups:[], // user widgets, starting with widget groups
 		moduleEntries:[],     // module entries for header/home page
 		moduleIdLast:null,    // module ID of last active module
-		moduleIdMapLang:{},   // module ID map of used module language (either language overlapping with user language or fallback)
 		moduleIdMapMeta:{},   // module ID map of module meta data (is owner, hidden, position, date change, custom languages)
 		pageTitle:'',         // web page title, set by app/form depending on navigation
 		pageTitleFull:'',     // web page title + instance name
