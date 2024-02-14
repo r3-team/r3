@@ -156,14 +156,14 @@ let MyApp = {
 				</div>
 			</div>
 			
-			<!-- dialog window -->
-			<transition name="fade">
-				<my-dialog v-if="isAtDialog" />
-			</transition>
-			
 			<!-- feedback window -->
 			<transition name="fade">
 				<my-feedback v-if="isAtFeedback" />
+			</transition>
+			
+			<!-- dialog window -->
+			<transition name="fade">
+				<my-dialog v-if="isAtDialog" />
 			</transition>
 			
 			<!-- loading input blocker overlay -->

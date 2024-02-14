@@ -54,6 +54,7 @@
 			"zoomReset":"Zoom-Level zurücksetzen"
 		},
 		"dialog":{
+			"close":"Es existieren ungespeicherte Änderungen. Diese werden verloren gehen.<br /><br />Trotzdem fortfahren?",
 			"confirm":"Bitte bestätigen"
 		},
 		"error":{
@@ -1808,7 +1809,6 @@
 		"dialog":{
 			"bulkEncrypted":"Massenaktualisierung für verschlüsselte Daten wird aktuell nicht unterstützt.",
 			"bulkMultiple":"Massenaktualisierung mit mehreren Relationen wird aktuell nicht unterstützt.",
-			"close":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem das Formular schließen?",
 			"delete":"Bist du sicher, dass du diesen Datensatz <b>permanent</b> löschen möchtest?",
 			"encrypted":"Der Feldinhalt wird auf deinem System verschlüsselt bevor er zum Server geschickt wird.",
 			"new":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem einen neuen Datensatz erstellen?",

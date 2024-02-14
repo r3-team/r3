@@ -54,6 +54,7 @@
 			"zoomReset":"Réinitialiser le niveau de zoom"
 		},
 		"dialog":{
+			"close":"Il existe des modifications non enregistrées.<br /><br />Voulez-vous toujours fermer ce formulaire?",
 			"confirm":"Veuillez confirmer"
 		},
 		"error":{
@@ -1808,7 +1809,6 @@
 		"dialog":{
 			"bulkEncrypted":"La mise à jour en masse des données chiffrées n'est actuellement pas prise en charge.",
 			"bulkMultiple":"La mise à jour en masse avec plusieurs relations n'est actuellement pas prise en charge.",
-			"close":"Il existe des modifications non enregistrées.<br /><br />Voulez-vous toujours fermer ce formulaire?",
 			"delete":"Êtes-vous sûr de vouloir supprimer <b>définitivement</b> cet enregistrement?",
 			"encrypted":"Le contenu du champ sera chiffré sur votre système avant d'être envoyé au serveur.",
 			"new":"Il existe des modifications non enregistrées.<br /><br />Voulez-vous toujours ouvrir un nouvel enregistrement?",

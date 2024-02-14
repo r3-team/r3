@@ -54,6 +54,7 @@
 			"zoomReset":"Resetați nivelul de zoom"
 		},
 		"dialog":{
+			"close":"Există modificări nesalvate.<br /><br />Doriți în continuare să închideți acest formular?",
 			"confirm":"Va rog confirmați"
 		},
 		"error":{
@@ -1808,7 +1809,6 @@
 		"dialog":{
 			"bulkEncrypted":"Bulk update for encrypted data is currently not supported.",
 			"bulkMultiple":"Bulk update with multiple relations is currently not supported.",
-			"close":"Există modificări nesalvate.<br /><br />Doriți în continuare să închideți acest formular?",
 			"delete":"Sunteți sigur că doriți să ștergeți <b>permanent</b> această înregistrare?",
 			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.",
 			"new":"Există modificări nesalvate.<br /><br />Doriți în continuare să deschideți o înregistrare nouă?",

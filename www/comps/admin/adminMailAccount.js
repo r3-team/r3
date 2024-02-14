@@ -1,8 +1,9 @@
+import {dialogCloseAsk} from '../shared/dialog.js';
 export {MyAdminMailAccount as default};
 
 let MyAdminMailAccount = {
 	name:'my-admin-mail-account',
-	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
+	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 		
 		<div class="contentBox float">
 			<div class="top">
@@ -12,7 +13,7 @@ let MyAdminMailAccount = {
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
-						@trigger="$emit('close')"
+						@trigger="closeAsk"
 						:cancel="true"
 					/>
 				</div>
@@ -199,6 +200,9 @@ let MyAdminMailAccount = {
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
+		// externals
+		dialogCloseAsk,
+
 		handleHotkeys(e) {
 			if(e.ctrlKey && e.key === 's') {
 				if(this.canSave)
@@ -207,12 +211,18 @@ let MyAdminMailAccount = {
 				e.preventDefault();
 			}
 			if(e.key === 'Escape') {
-				this.$emit('close');
+				this.closeAsk();
 				e.preventDefault();
 			}
 		},
 		
 		// actions
+		closeAsk() {
+			this.dialogCloseAsk(this.close,this.hasChanges);
+		},
+		close() {
+			this.$emit('close');
+		},
 		reloadAndClose() {
 			ws.send('mailAccount','reload',{},true).then(
 				this.$emit('close'),

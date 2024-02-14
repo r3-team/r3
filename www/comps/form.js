@@ -2,6 +2,7 @@ import MyArticles                  from './articles.js';
 import MyField                     from './field.js';
 import MyFormLog                   from './formLog.js';
 import {hasAccessToRelation}       from './shared/access.js';
+import {dialogCloseAsk}            from './shared/dialog.js';
 import {consoleError}              from './shared/error.js';
 import {getFieldOverwritesDefault} from './shared/field.js';
 import {srcBase64}                 from './shared/image.js';
@@ -698,6 +699,7 @@ let MyForm = {
 		aesGcmDecryptBase64WithPhrase,
 		aesGcmEncryptBase64WithPhrase,
 		consoleError,
+		dialogCloseAsk,
 		fillRelationRecordIds,
 		filterIsCorrect,
 		filterOperatorIsSingleValue,
@@ -1032,23 +1034,7 @@ let MyForm = {
 		
 		// actions
 		closeAsk() {
-			if(!this.warnUnsaved)
-				return this.close();
-			
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.close,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.close,
-					exec:this.close,
-					keyEnter:true,
-					image:'ok.png'
-				},{
-					caption:this.capGen.button.cancel,
-					keyEscape:true,
-					image:'cancel.png'
-				}]
-			});
+			this.dialogCloseAsk(this.close,this.hasChanges);
 		},
 		close() {
 			this.$emit('close');

@@ -1,8 +1,9 @@
-import MyForm        from '../form.js';
-import MyTabs        from '../tabs.js';
-import MyInputSelect from '../inputSelect.js';
-import srcBase64Icon from '../shared/image.js';
-import {getCaption}  from '../shared/language.js';
+import MyForm           from '../form.js';
+import MyTabs           from '../tabs.js';
+import MyInputSelect    from '../inputSelect.js';
+import {dialogCloseAsk} from '../shared/dialog.js';
+import srcBase64Icon    from '../shared/image.js';
+import {getCaption}     from '../shared/language.js';
 export {MyAdminLogin as default};
 
 let MyAdminLoginRole = {
@@ -38,7 +39,7 @@ let MyAdminLogin = {
 		MyInputSelect,
 		MyTabs
 	},
-	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
+	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 		
 		<!-- login record form -->
 		<div class="app-sub-window under-header"
@@ -66,7 +67,7 @@ let MyAdminLogin = {
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
-						@trigger="$emit('close')"
+						@trigger="closeAsk"
 						:cancel="true"
 					/>
 				</div>
@@ -377,6 +378,7 @@ let MyAdminLogin = {
 	},
 	methods:{
 		// externals
+		dialogCloseAsk,
 		getCaption,
 		srcBase64Icon,
 		
@@ -388,7 +390,7 @@ let MyAdminLogin = {
 				e.preventDefault();
 			}
 			if(e.key === 'Escape' && !this.isFormOpen) {
-				this.$emit('close');
+				this.closeAsk();
 				e.preventDefault();
 			}
 		},
@@ -400,6 +402,12 @@ let MyAdminLogin = {
 		},
 		
 		// actions
+		closeAsk() {
+			this.dialogCloseAsk(this.close,this.hasChanges);
+		},
+		close() {
+			this.$emit('close');
+		},
 		openLoginForm(index) {
 			const frm = this.formIdMap[this.loginForms[index].formId];
 			const mod = this.moduleIdMap[frm.moduleId];

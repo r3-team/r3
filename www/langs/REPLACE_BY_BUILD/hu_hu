@@ -54,6 +54,7 @@
 			"zoomReset":"Zoom szint visszaállítása"
 		},
 		"dialog":{
+			"close":"Nem mentett változások vannak.<br /><br />Biztosan be szeretnéd zárni az űrlapot?",
 			"confirm":"Kérem, erősítse meg"
 		},
 		"error":{
@@ -1808,7 +1809,6 @@
 		"dialog":{
 			"bulkEncrypted":"A tömeges titkosított adatfrissítés jelenleg nem támogatott.",
 			"bulkMultiple":"A tömeges adatfrissítés több relációval jelenleg nem támogatott.",
-			"close":"Nem mentett változások vannak.<br /><br />Biztosan be szeretnéd zárni az űrlapot?",
 			"delete":"Biztos vagy benne, hogy véglegesen törölni szeretnéd ezt a rekordot?",
 			"encrypted":"A mező tartalma a rendszereden titkosítva lesz, mielőtt elküldésre kerül a szerverre.",
 			"new":"Nem mentett változások vannak.<br /><br />Mégis szeretnél új rekordot létrehozni?",

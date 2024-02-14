@@ -54,6 +54,7 @@
 			"zoomReset":"Atiestatīt attālumu"
 		},
 		"dialog":{
+			"close":"There are unsaved changes. If you continue, your changes will be lost.<br /><br />Do you want to continue?",
 			"confirm":"Lūdzu apstiprināt"
 		},
 		"error":{
@@ -1808,7 +1809,6 @@
 		"dialog":{
 			"bulkEncrypted":"Bulk update for encrypted data is currently not supported.",
 			"bulkMultiple":"Bulk update with multiple relations is currently not supported.",
-			"close":"There are unsaved changes.<br /><br />Do you still want to close this form?",
 			"delete":"Are you sure that you want to <b>permanently</b> delete this record?",
 			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.",
 			"new":"There are unsaved changes.<br /><br />Do you still want to open a new record?",

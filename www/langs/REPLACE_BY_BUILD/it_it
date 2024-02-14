@@ -54,6 +54,7 @@
 			"zoomReset":"Ripristina livello di zoom"
 		},
 		"dialog":{
+			"close":"Ci sono modifiche non salvate.<br /><br />Chiudere comunque questo modulo?",
 			"confirm":"Si prega di confermare"
 		},
 		"error":{
@@ -1808,7 +1809,6 @@
 		"dialog":{
 			"bulkEncrypted":"Bulk update for encrypted data is currently not supported.",
 			"bulkMultiple":"Bulk update with multiple relations is currently not supported.",
-			"close":"Ci sono modifiche non salvate.<br /><br />Chiudere comunque questo modulo?",
 			"delete":"Sei sicuro di voler eliminare questo record <b>in modo permanente</b>?",
 			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.",
 			"new":"Ci sono modifiche non salvate.<br /><br />Procedere con un nuovo record?",

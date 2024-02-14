@@ -1,9 +1,10 @@
-import {getCaption} from './shared/language.js';
+import {dialogCloseAsk} from './shared/dialog.js';
+import {getCaption}     from './shared/language.js';
 export {MyFeedback as default};
 
 let MyFeedback = {
 	name:'my-feedback',
-	template:`<div class="app-sub-window" @click.self="close">
+	template:`<div class="app-sub-window" @click.self="closeAsk">
 		<div class="contentBox feedback float">
 			<div class="top lower">
 				<div class="area">
@@ -12,7 +13,7 @@ let MyFeedback = {
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
-						@trigger="close"
+						@trigger="closeAsk"
 						:cancel="true"
 					/>
 				</div>
@@ -136,17 +137,21 @@ let MyFeedback = {
 	},
 	methods:{
 		// externals
+		dialogCloseAsk,
 		getCaption,
 		
 		// general
 		handleHotkeys(e) {
 			if(e.key === 'Escape') {
-				this.close();
+				this.closeAsk();
 				e.preventDefault();
 			}
 		},
 		
 		// actions
+		closeAsk() {
+			this.dialogCloseAsk(this.close,this.text !== '');
+		},
 		close() {
 			this.$store.commit('isAtFeedback',false);
 		},

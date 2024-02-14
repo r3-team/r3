@@ -1,10 +1,11 @@
-import MyInputColor from '../inputColor.js';
+import {dialogCloseAsk} from '../shared/dialog.js';
+import MyInputColor     from '../inputColor.js';
 export {MyAdminLoginTemplate as default};
 
 let MyAdminLoginTemplate = {
 	name:'my-admin-login-template',
 	components:{ MyInputColor },
-	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
+	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 		
 		<div class="contentBox admin-login-template float" v-if="inputsReady">
 			<div class="top">
@@ -14,7 +15,7 @@ let MyAdminLoginTemplate = {
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
-						@trigger="$emit('close')"
+						@trigger="closeAsk"
 						:cancel="true"
 					/>
 				</div>
@@ -396,6 +397,9 @@ let MyAdminLoginTemplate = {
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
+		// externals
+		dialogCloseAsk,
+
 		handleHotkeys(e) {
 			if(e.ctrlKey && e.key === 's') {
 				if(this.canSave)
@@ -404,7 +408,7 @@ let MyAdminLoginTemplate = {
 				e.preventDefault();
 			}
 			if(e.key === 'Escape') {
-				this.$emit('close');
+				this.closeAsk();
 				e.preventDefault();
 			}
 		},
@@ -416,6 +420,12 @@ let MyAdminLoginTemplate = {
 		},
 		
 		// actions
+		closeAsk() {
+			this.dialogCloseAsk(this.close,this.hasChanges);
+		},
+		close() {
+			this.$emit('close');
+		},
 		dictAdd(entry) {
 			this.settings.searchDictionaries.push(entry);
 			this.searchDictionaryNew = '';
