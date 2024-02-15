@@ -10,6 +10,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 )
 
 func adminMails() error {
@@ -95,14 +97,14 @@ func adminMails() error {
 	rows.Close()
 
 	// collect earliest expirying OAuth client
-	var dateExpirationOauth int64
+	var dateExpirationOauth int64 = -1
 	if err := db.Pool.QueryRow(db.Ctx, `
 		SELECT date_expiry
 		FROM instance.oauth_client
 		WHERE date_expiry > DATE_PART('EPOCH',CURRENT_DATE)
 		ORDER BY date_expiry ASC
 		LIMIT 1
-	`).Scan(&dateExpirationOauth); err != nil {
+	`).Scan(&dateExpirationOauth); err != nil && err != pgx.ErrNoRows {
 		return err
 	}
 
@@ -129,6 +131,9 @@ func adminMails() error {
 				body = templates.licenseExpirationBody
 
 			case "oauthClientExpiration":
+				if dateExpirationOauth == -1 {
+					continue
+				}
 				dateExpiration = dateExpirationOauth
 				subject = templates.oauthClientExpirationSubject
 				body = templates.oauthClientExpirationBody
