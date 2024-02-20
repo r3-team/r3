@@ -666,19 +666,8 @@ let MyField = {
 		},
 		tabIndexesHidden:{
 			handler(v) {
-				if(!this.isTabs) return;
-				
-				// use remembered tab if enabled and available
-				if(this.settings.tabRemember) {
-					let tabIndex = this.fieldOptionGet(this.field.id,'tabIndex',0);
-					if(this.field.tabs.length > tabIndex && !v.includes(tabIndex))
-						return this.tabIndexShow = tabIndex;
-				}
-				// use first valid tab
-				for(let i = 0, j = this.field.tabs.length; i < j; i++) {
-					if(!v.includes(i))
-						return this.tabIndexShow = i;
-				}
+				if(this.isTabs && v.includes(this.tabIndexShow))
+					this.setTabToValid();
 			},
 			immediate:true
 		}
@@ -1129,6 +1118,9 @@ let MyField = {
 		settings:           (s) => s.$store.getters.settings
 	},
 	mounted() {
+		if(this.isTabs)
+			this.setTabToValid();
+
 		// fill stored collection row indexes
 		this.collectionIdMapIndexes = this.fieldOptionGet(this.field.id,'collectionIdMapIndexes',{});
 	},
@@ -1284,6 +1276,18 @@ let MyField = {
 				this.tabIndexFieldIdMapCounter[String(tabIndex)] = {};
 			
 			this.tabIndexFieldIdMapCounter[String(tabIndex)][fieldId] = value;
+		},
+		setTabToValid() {
+			// set tab to valid one, either last remembered or first valid
+			if(this.settings.tabRemember) {
+				const tabIndex = this.fieldOptionGet(this.field.id,'tabIndex',0);
+				if(this.field.tabs.length > tabIndex && !this.tabIndexesHidden.includes(tabIndex))
+					return this.tabIndexShow = tabIndex;
+			}
+			for(let i = 0, j = this.field.tabs.length; i < j; i++) {
+				if(!this.tabIndexesHidden.includes(i))
+					return this.tabIndexShow = i;
+			}
 		},
 		setValue(val,valOld,indexAttributeId) {
 			if(val === '')
