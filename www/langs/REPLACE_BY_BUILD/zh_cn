@@ -1696,7 +1696,7 @@
 		"sendNok":"无法发送反馈。请稍后重试。",
 		"sendOk":"反馈已成功发送。谢谢！",
 		"textHint":"您的反馈",
-		"title":"发送匿名反馈",
+		"title":"发送匿名反馈"
 	},
 	"filter":{
 		"dialog":{
