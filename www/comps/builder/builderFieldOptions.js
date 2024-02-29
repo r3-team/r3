@@ -502,10 +502,10 @@ let MyBuilderFieldOptions = {
 					<td>{{ capApp.fieldAttributeIdAltRichtextFiles }}</td>
 					<td>
 						<select
-							@input="set('attributeIdAlt',$event.target.value)"
+							@input="setNull('attributeIdAlt',$event.target.value)"
 							:value="field.attributeIdAlt"
 						>
-							<option :value="null">-</option>
+							<option :value="">-</option>
 							<option
 								v-for="a in relationIdMap[joinsIndexMap[field.index].relationId].attributes.filter(v => isAttributeFiles(v.content))"
 								:value="a.id"
