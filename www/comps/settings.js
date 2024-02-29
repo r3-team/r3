@@ -436,10 +436,11 @@ let MySettingsAccount = {
 			return '';
 		},
 		
-		// password criteria
-		pwMatch:     (s) => s.pwNew0.length !== 0        && s.pwNew0 === s.pwNew1,
-		pwMetLength: (s) => s.pwSettings.length          <= s.pwNew0.length,
-		pwOldValid:  (s) => s.loginKeyAes                === s.pwOldKey,
+		// simple
+		e2eeInactive:(s) => !s.loginEncryption || s.loginPrivateKey === null, // encryption not enabled (or private key locked)
+		pwMatch:     (s) => s.pwNew0.length !== 0 && s.pwNew0 === s.pwNew1,
+		pwMetLength: (s) => s.pwSettings.length <= s.pwNew0.length,
+		pwOldValid:  (s) => s.loginKeyAes === s.pwOldKey || s.e2eeInactive,   // without login key, we cannot check old PW (backend still checks)
 		pwMetDigits: (s) => !s.pwSettings.requireDigits  || /\p{Nd}/u.test(s.pwNew0),
 		pwMetLower:  (s) => !s.pwSettings.requireLower   || /\p{Ll}/u.test(s.pwNew0),
 		pwMetSpecial:(s) => !s.pwSettings.requireSpecial || /[\p{P}\p{M}\p{S}\p{Z}]+/u.test(s.pwNew0),
@@ -472,6 +473,9 @@ let MySettingsAccount = {
 		pbkdf2PassToAesGcmKey,
 		
 		generateOldPwKey() {
+			if(this.e2eeInactive)
+				return;
+			
 			this.pbkdf2PassToAesGcmKey(this.pwOld,this.loginKeySalt,this.kdfIterations,true).then(
 				key => {
 					this.aesGcmExportBase64(key).then(
@@ -485,8 +489,7 @@ let MySettingsAccount = {
 		
 		// actions
 		setCheck() {
-			// encryption not enabled (or private key locked), just save new credentials
-			if(!this.loginEncryption || this.loginPrivateKey === null)
+			if(this.e2eeInactive)
 				return this.set(null,null);
 			
 			this.aesGcmImportBase64(this.loginKeyAes).then(
