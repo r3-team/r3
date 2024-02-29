@@ -47,17 +47,19 @@ let MyCalendarMonth = {
 				>
 					<div class="values-wrap" v-if="!e.placeholder" :style="getFullDayTextStyles(day,e)">
 						<span class="values" v-if="day === 1 || e.entryFirst">
-							<my-value-rich class="context-calendar"
-								v-for="(v,i) in e.values.filter(v => v !== null)"
-								:attributeId="columns[i].attributeId"
-								:basis="columns[i].basis"
-								:bold="columns[i].styles.includes('bold')"
-								:display="columns[i].display"
-								:italic="columns[i].styles.includes('italic')"
-								:key="i"
-								:length="columns[i].length"
-								:value="v"
-							/>
+							<template v-for="(v,i) in e.values">
+								<my-value-rich class="context-calendar"
+									v-if="v !== null"
+									:attributeId="columns[i].attributeId"
+									:basis="columns[i].basis"
+									:bold="columns[i].styles.includes('bold')"
+									:display="columns[i].display"
+									:italic="columns[i].styles.includes('italic')"
+									:key="i"
+									:length="columns[i].length"
+									:value="v"
+								/>
+							</template>
 						</span>
 					</div>
 				</div>

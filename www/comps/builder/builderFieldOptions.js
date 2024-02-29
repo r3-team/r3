@@ -505,7 +505,7 @@ let MyBuilderFieldOptions = {
 							@input="setNull('attributeIdAlt',$event.target.value)"
 							:value="field.attributeIdAlt"
 						>
-							<option :value="">-</option>
+							<option value="">-</option>
 							<option
 								v-for="a in relationIdMap[joinsIndexMap[field.index].relationId].attributes.filter(v => isAttributeFiles(v.content))"
 								:value="a.id"
@@ -522,7 +522,7 @@ let MyBuilderFieldOptions = {
 							@input="setNull('attributeIdAlt',$event.target.value)"
 							:value="field.attributeIdAlt"
 						>
-							<option :value="">-</option>
+							<option value="">-</option>
 							<option
 								v-for="a in relationIdMap[joinsIndexMap[field.index].relationId].attributes.filter(v => v.id !== field.attributeId && v.contentUse === attribute.contentUse)"
 								:value="a.id"
