@@ -753,10 +753,8 @@ let MyField = {
 			if(s.isTextarea || s.isRichtext)   out.push('top-aligned');
 			if(s.isHeader && s.field.richtext) out.push('headerRichtext');
 			
-			if(s.isContainer) {
-				out.push('container');
-				out.push(s.field.direction);
-			}
+			if(s.isContainer)
+				out.push('container', s.field.direction);
 			
 			if(s.flexDirParent === 'column' && (s.isHeader || s.isLineSingle))
 				out.push('noGrow');
@@ -1001,8 +999,8 @@ let MyField = {
 			&& !s.isRelationship && !s.isRichtext
 			&& !s.isUuid,
 		isLineSingle:(s) => s.isData && (
-			s.isLineInput || s.isBoolean || s.isColor || s.isDateInput ||
-			s.isRegconfig || s.isUuid || (s.isRelationship && !s.isRelationship1N)
+			s.isLineInput || s.isBoolean || s.isColor || s.isDateInput || s.isSlider ||
+			s.isLogin || s.isRegconfig || s.isUuid || (s.isRelationship && !s.isRelationship1N)
 		),
 		isValid:(s) => {
 			if(!s.isData || s.isReadonly) return true;
