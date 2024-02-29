@@ -1,6 +1,7 @@
 package mail_send
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
@@ -240,8 +241,17 @@ func do(m types.Mail) error {
 		return fmt.Errorf("unsupported authentication method '%s'", ma.AuthMethod)
 	}
 
-	if err := client.DialAndSend(msg); err != nil {
+	// send message
+	if err := client.DialWithContext(context.Background()); err != nil {
 		return err
+	}
+	if err := client.Send(msg); err != nil {
+		return err
+	}
+	if err := client.Close(); err != nil {
+		// some mail services do not cleanly close their connections
+		// we should not care too much if the email was successfully sent - still warn as this is not correct behavior
+		log.Warning("mail", "failed to disconnect from SMTP server", err)
 	}
 
 	// add to mail traffic log
