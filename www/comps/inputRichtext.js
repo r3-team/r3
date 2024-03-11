@@ -45,6 +45,7 @@ let MyInputRichtext = {
 				content_style:`
 					.mce-content-body{ background-color:transparent; }
 				`,
+				document_base_url:`${location.protocol}//${location.host}/`, // required when disabling 'relative_urls'
 				entity_encoding:'raw', // disable encoding of things like umlaute, not required for UTF8 storage and makes searches easier
 				height:'100%',
 				image_advtab:true,
@@ -54,6 +55,7 @@ let MyInputRichtext = {
 				min_height:200,
 				paste_data_images:true,
 				plugins:'code emoticons image link lists searchreplace table',
+				relative_urls:false, // if URL to internal path is used in link, Tiny cuts of base URL ('https://system/#/app/...' -> '#/app/...'), Tiny then fails to open relative URL
 				resize:false,
 				selector:'textarea',
 				toolbar:`bold italic forecolor paragraphgroup numlist bullist alignleft aligncenter alignright alignjustify`,
