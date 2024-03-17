@@ -6,19 +6,20 @@ import (
 	"r3/tools"
 	"r3/types"
 	"sync"
+	"sync/atomic"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var (
-	access_mx = sync.Mutex{}
-	debug     = false
-	nodeId    = pgtype.UUID{} // ID of the current node
-
-	outputCli bool // write logs also to command line
+	// simple options, accessible without lock
+	debug     atomic.Bool
+	outputCli atomic.Bool // write logs also to command line
 
 	// log levels
+	access_mx    = sync.RWMutex{}
+	nodeId       = pgtype.UUID{} // ID of the current node
 	contextLevel = map[string]int{
 		"api":       1,
 		"backup":    1,
@@ -121,16 +122,10 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 }
 
 func SetDebug(state bool) {
-	access_mx.Lock()
-	defer access_mx.Unlock()
-
-	debug = state
+	debug.Store(state)
 }
 func SetOutputCli(state bool) {
-	access_mx.Lock()
-	defer access_mx.Unlock()
-
-	outputCli = state
+	outputCli.Store(state)
 }
 func SetLogLevel(context string, level int) {
 	access_mx.Lock()
@@ -143,10 +138,9 @@ func SetLogLevel(context string, level int) {
 }
 func SetNodeId(id uuid.UUID) {
 	access_mx.Lock()
-	defer access_mx.Unlock()
-
 	nodeId.Bytes = id
 	nodeId.Valid = true
+	access_mx.Unlock()
 }
 
 func Info(context string, message string) {
@@ -160,13 +154,16 @@ func Error(context string, message string, err error) {
 }
 
 func write(level int, context string, message string, err error) {
-
+	access_mx.RLock()
+	nodeIdLocal := nodeId
 	levelActive, exists := contextLevel[context]
+	access_mx.RUnlock()
+
 	if !exists {
 		return
 	}
 
-	if !debug && level > levelActive {
+	if !debug.Load() && level > levelActive {
 		return
 	}
 
@@ -180,7 +177,7 @@ func write(level int, context string, message string, err error) {
 	}
 
 	// log to CLI if available
-	if outputCli {
+	if outputCli.Load() {
 		fmt.Printf("%s %s %s\n", tools.GetTimeSql(), context, message)
 	}
 
@@ -196,10 +193,10 @@ func write(level int, context string, message string, err error) {
 		if _, err := db.Pool.Exec(db.Ctx, `
 			INSERT INTO instance.log (level, context, message, date_milli, node_id)
 			VALUES ($1,$2,$3,$4,$5)
-		`, level, context, message, tools.GetTimeUnixMilli(), nodeId); err != nil {
+		`, level, context, message, tools.GetTimeUnixMilli(), nodeIdLocal); err != nil {
 
 			// if database logging fails, output error to CLI if available
-			if outputCli {
+			if outputCli.Load() {
 				fmt.Printf("failed to write log to DB, error: %v\n", err)
 			}
 		}

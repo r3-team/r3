@@ -8,6 +8,7 @@ import (
 	"r3/log"
 	"r3/tools"
 	"r3/types"
+	"sync/atomic"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -15,12 +16,12 @@ import (
 
 var (
 	SchedulerRestart      = make(chan bool, 10)
-	websocketClientCount  int
+	websocketClientCount  atomic.Int32
 	WebsocketClientEvents = make(chan types.ClusterWebsocketClientEvent, 10)
 )
 
 func SetWebsocketClientCount(value int) {
-	websocketClientCount = value
+	websocketClientCount.Store(int32(value))
 }
 
 // register cluster node with shared database

@@ -14,6 +14,7 @@ import (
 	"r3/request"
 	"r3/types"
 	"sync"
+	"sync/atomic"
 
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
@@ -26,6 +27,7 @@ type clientType struct {
 	ctx        context.Context    // global context for client requests
 	ctxCancel  context.CancelFunc // to abort requests in case of disconnect
 	fixedToken bool               // logged in with fixed token (limited access, only auth and server messages)
+	ioFailure  atomic.Bool        // client failed to read/write
 	loginId    int64              // client login ID, 0 = not logged in yet
 	noAuth     bool               // logged in without authentication (public auth, username only)
 	write_mx   sync.Mutex         // to force sequential writes
@@ -116,7 +118,9 @@ func (hub *hubType) start() {
 	var removeClient = func(client *clientType) {
 		if _, exists := hub.clients[client]; exists {
 			log.Info(handlerContext, fmt.Sprintf("disconnecting client at %s", client.address))
-			client.ws.WriteMessage(websocket.CloseMessage, []byte{}) // optional
+			if !client.ioFailure.Load() {
+				client.ws.WriteMessage(websocket.CloseMessage, []byte{})
+			}
 			client.ws.Close()
 			client.ctxCancel()
 			delete(hub.clients, client)
@@ -217,6 +221,7 @@ func (client *clientType) read() {
 	for {
 		_, message, err := client.ws.ReadMessage()
 		if err != nil {
+			client.ioFailure.Store(true)
 			hub.clientDel <- client
 			return
 		}
@@ -233,6 +238,7 @@ func (client *clientType) write(message []byte) {
 	defer client.write_mx.Unlock()
 
 	if err := client.ws.WriteMessage(websocket.TextMessage, message); err != nil {
+		client.ioFailure.Store(true)
 		hub.clientDel <- client
 		return
 	}

@@ -22,6 +22,7 @@ import (
 	"r3/tools"
 	"r3/transfer"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -71,9 +72,9 @@ var (
 	OsExit            chan os.Signal = make(chan os.Signal)
 
 	// main loop
-	loopInterval          = time.Second * time.Duration(1)  // loop interval
-	loopIntervalStartWait = time.Second * time.Duration(10) // loop waits at start
-	loopStopping          = false                           // loop is stopping
+	loopInterval                      = time.Second * time.Duration(1)  // loop interval
+	loopIntervalStartWait             = time.Second * time.Duration(10) // loop waits at start
+	loopStopping          atomic.Bool                                   // loop is stopping
 )
 
 func Start() {
@@ -82,7 +83,7 @@ func Start() {
 
 	for {
 		time.Sleep(loopInterval)
-		if loopStopping {
+		if loopStopping.Load() {
 			log.Info("scheduler", "stopped")
 			return
 		}
@@ -92,9 +93,7 @@ func Start() {
 	}
 }
 func Stop() {
-	change_mx.Lock()
-	loopStopping = true
-	change_mx.Unlock()
+	loopStopping.Store(true)
 	log.Info("scheduler", "stopping")
 }
 

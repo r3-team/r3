@@ -27,7 +27,7 @@ func CheckInNode() error {
 			stat_memory = $3, stat_sessions = $4
 		WHERE id = $5
 	`, tools.GetTimeUnix(), cache.GetHostname(), (m.Sys / 1024 / 1024),
-		websocketClientCount, cache.GetNodeId()); err != nil {
+		websocketClientCount.Load(), cache.GetNodeId()); err != nil {
 
 		return err
 	}
