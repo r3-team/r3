@@ -22,7 +22,7 @@ require (
 require (
 	github.com/emersion/go-sasl v0.0.0-20231106173351-e73c9f7bad43
 	github.com/jackc/pgx-gofrs-uuid v0.0.0-20230224015001-1d428863c2e2
-	github.com/jackc/pgx/v5 v5.5.3
+	github.com/jackc/pgx/v5 v5.5.4
 	github.com/wneessen/go-mail v0.4.1
 	github.com/xlzd/gotp v0.1.0
 	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a
