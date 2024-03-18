@@ -45,6 +45,7 @@ import (
 	"r3/scheduler"
 	"r3/tools"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -87,9 +88,9 @@ var (
 )
 
 type program struct {
-	embeddedDbOwned bool           // whether this instance has started the embedded database
+	embeddedDbOwned atomic.Bool    // whether this instance has started the embedded database
 	logger          service.Logger // logs to the operating system if called as service, otherwise to stdOut
-	stopping        bool
+	stopping        atomic.Bool
 	webServer       *http.Server
 }
 
@@ -136,7 +137,6 @@ func main() {
 	// initialize service
 	var err error
 	prg := &program{}
-	prg.stopping = false
 
 	svc, err := service.New(prg, svcConfig)
 	if err != nil {
@@ -310,7 +310,7 @@ func (prg *program) execute(svc service.Service) {
 
 		// we own the embedded DB if we can successfully start it
 		// otherwise another instance might be running it
-		prg.embeddedDbOwned = true
+		prg.embeddedDbOwned.Store(true)
 	}
 
 	// connect to database
@@ -541,10 +541,10 @@ func (prg *program) Stop(svc service.Service) error {
 		time.Sleep(500 * time.Millisecond)
 	}
 
-	if prg.stopping {
+	if prg.stopping.Load() {
 		return nil
 	}
-	prg.stopping = true
+	prg.stopping.Store(true)
 
 	// stop scheduler
 	scheduler.Stop()
@@ -572,7 +572,7 @@ func (prg *program) Stop(svc service.Service) error {
 	}
 
 	// stop embedded database if owned
-	if prg.embeddedDbOwned {
+	if prg.embeddedDbOwned.Load() {
 		if err := embedded.Stop(); err != nil {
 			prg.logger.Error(err)
 		}

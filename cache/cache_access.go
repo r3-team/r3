@@ -21,14 +21,22 @@ func GetAccessById(loginId int64) (types.LoginAccess, error) {
 		return types.LoginAccess{}, errors.New("invalid login ID 0")
 	}
 
+	// deliver from cache, if there
+	access_mx.RLock()
+	accessMap, exists := loginIdMapAccess[loginId]
+	access_mx.RUnlock()
+
+	if exists {
+		return accessMap, nil
+	}
+
+	// not in cache, load and then deliver
+	if err := load(loginId); err != nil {
+		return types.LoginAccess{}, err
+	}
+
 	access_mx.RLock()
 	defer access_mx.RUnlock()
-
-	if _, exists := loginIdMapAccess[loginId]; !exists {
-		if err := load(loginId); err != nil {
-			return types.LoginAccess{}, err
-		}
-	}
 	return loginIdMapAccess[loginId], nil
 }
 
@@ -44,10 +52,12 @@ func RenewAccessAll() error {
 
 // renew permissions for one login
 func RenewAccessById(loginId int64) error {
-	access_mx.Lock()
-	defer access_mx.Unlock()
 
-	if _, exists := loginIdMapAccess[loginId]; !exists {
+	// ignore if login access is not cached (nothing to renew)
+	access_mx.RLock()
+	_, exists := loginIdMapAccess[loginId]
+	access_mx.RUnlock()
+	if !exists {
 		return nil
 	}
 	return load(loginId)
@@ -55,13 +65,16 @@ func RenewAccessById(loginId int64) error {
 
 // load access permissions for login ID into cache
 func load(loginId int64) error {
-	Schema_mx.RLock()
-	defer Schema_mx.RUnlock()
 
 	roleIds, err := loadRoleIds(loginId)
 	if err != nil {
 		return err
 	}
+
+	Schema_mx.RLock()
+	defer Schema_mx.RUnlock()
+	access_mx.Lock()
+	defer access_mx.Unlock()
 
 	loginIdMapAccess[loginId] = types.LoginAccess{
 		RoleIds:    roleIds,
@@ -74,7 +87,7 @@ func load(loginId int64) error {
 	}
 
 	for _, roleId := range roleIds {
-		role, _ := RoleIdMap[roleId]
+		role := RoleIdMap[roleId]
 
 		// because access rights work cumulatively, apply highest right only
 		for id, access := range role.AccessApis {
