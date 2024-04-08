@@ -115,6 +115,7 @@ func getRoles(ldapId int32) ([]types.LdapRole, error) {
 		SELECT role_id, group_dn
 		FROM instance.ldap_role
 		WHERE ldap_id = $1
+		ORDER BY group_dn
 	`, ldapId)
 	if err != nil {
 		return roles, err

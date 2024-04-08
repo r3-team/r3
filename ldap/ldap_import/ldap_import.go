@@ -25,8 +25,11 @@ type loginType struct {
 	roleIds []uuid.UUID
 }
 
-var msAdExtDisabledAtrFlags = []string{"514", "546", "66050",
-	"66082", "262658", "262690", "328194", "328226"}
+var (
+	msAdExtDisabledAtrFlags = []string{"514", "546", "66050",
+		"66082", "262658", "262690", "328194", "328226"}
+	pageSize uint32 = 30
+)
 
 func RunAll() error {
 
@@ -60,10 +63,6 @@ func Run(ldapId int32) error {
 	if ldap.MsAdExt {
 		attributes = append(attributes, "userAccountControl")
 	}
-
-	// controls for paged requests
-	pagingControl := goldap.NewControlPaging(30)
-	controls := []goldap.Control{pagingControl}
 
 	// MS AD: we have two choices to lookup nested groups
 	// 1. lookup memberships of user (member attribute with LDAP_MATCHING_RULE_IN_CHAIN)
@@ -111,6 +110,8 @@ func Run(ldapId int32) error {
 		}
 
 		// paged LDAP request
+		pagingControl := goldap.NewControlPaging(pageSize)
+		controls := []goldap.Control{pagingControl}
 		for {
 			log.Info("ldap", fmt.Sprintf("querying '%s': '%s' in '%s'",
 				ldap.Name, filters, ldap.SearchDn))

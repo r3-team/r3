@@ -8,7 +8,7 @@ require (
 	github.com/emersion/go-message v0.18.0
 	github.com/gbrlsnchs/jwt/v3 v3.0.1
 	github.com/go-asn1-ber/asn1-ber v1.5.5 // indirect
-	github.com/go-ldap/ldap/v3 v3.4.6
+	github.com/go-ldap/ldap/v3 v3.4.7
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/gorilla/websocket v1.5.1
 	github.com/h2non/filetype v1.1.3
