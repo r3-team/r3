@@ -484,6 +484,9 @@
 			"node":"集群节点"
 		},
 		"mails":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this email account?<br /><br />This action is irreversible.</b>"
+			},
 			"option":{
 				"authMethod":{
 					"login":"LOGIN（O365 旧版 SMTP）",

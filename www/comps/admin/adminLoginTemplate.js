@@ -444,10 +444,12 @@ let MyAdminLoginTemplate = {
 					cancel:true,
 					caption:this.capGen.button.delete,
 					exec:this.del,
-					image:'delete.png'
+					image:'delete.png',
+					keyEnter:true
 				},{
 					caption:this.capGen.button.cancel,
-					image:'cancel.png'
+					image:'cancel.png',
+					keyEscape:true
 				}]
 			});
 		},

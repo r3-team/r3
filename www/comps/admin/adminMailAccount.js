@@ -38,7 +38,7 @@ let MyAdminMailAccount = {
 					/>
 					<my-button image="delete.png"
 						v-if="!isNew"
-						@trigger="del"
+						@trigger="delAsk"
 						:cancel="true"
 						:caption="capGen.button.delete"
 					/>
@@ -235,6 +235,22 @@ let MyAdminMailAccount = {
 		},
 		
 		// backend calls
+		delAsk() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.delete,
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.delete,
+					exec:this.del,
+					image:'delete.png',
+					keyEnter:true
+				},{
+					caption:this.capGen.button.cancel,
+					image:'cancel.png',
+					keyEscape:true
+				}]
+			});
+		},
 		del() {
 			ws.send('mailAccount','del',{id:this.id},true).then(
 				this.reloadAndClose,
