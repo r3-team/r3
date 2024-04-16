@@ -174,6 +174,9 @@ const MyStore = Vuex.createStore({
 			
 			state.sessionValueStore[payload.moduleId][payload.key] = payload.value;
 		},
+		sessionValueStoreReset:(state,payload) => {
+			state.sessionValueStore = {};
+		},
 		
 		// collections
 		collection:      (state,payload) => state.collectionIdMap[payload.id] = payload.rows,

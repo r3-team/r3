@@ -343,7 +343,7 @@ let MyLogin = {
 			this.appInitErr = true;
 		},
 		
-		// authenticate by username/password or public user
+		// authenticate by username/password with/without MFA
 		authenticate() {
 			if(!this.isValid) return;
 			
@@ -428,11 +428,12 @@ let MyLogin = {
 		
 		// authentication successful, prepare application load
 		appEnable(loginId,loginName) {
-			let token = JSON.parse(atob(this.token.split('.')[1]));
+			const token = JSON.parse(atob(this.token.split('.')[1]));
 			this.$store.commit('isAdmin',token.admin);
 			this.$store.commit('isNoAuth',token.noAuth);
 			this.$store.commit('loginId',loginId);
 			this.$store.commit('loginName',loginName);
+			this.$store.commit('sessionValueStoreReset');
 			this.$emit('authenticated');
 		}
 	}
