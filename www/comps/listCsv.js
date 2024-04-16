@@ -84,7 +84,7 @@ let MyListCsv = {
 			<my-button image="upload.png"
 				v-if="action === 'import'"
 				@trigger="send"
-				:active="file !== null"
+				:active="fileSet"
 				:caption="capGen.button.import"
 			/>
 		</div>
@@ -111,7 +111,8 @@ let MyListCsv = {
 			cacheDenialTimestamp:0,  // unix timestamp, used for CSV export cache denial
 			commaChar:',',
 			dateFormat:'Y-m-d',
-			file:null,
+			fileElm:null,
+			fileSet:false,
 			hasBool:false,
 			hasDate:false,
 			hasDatetime:false,
@@ -178,31 +179,36 @@ let MyListCsv = {
 			this.cacheDenialTimestamp = Math.floor(new Date().getTime() / 1000);
 		},
 		setFile(evt) {
-			this.file = evt.target.files[0];
+			this.fileElm = evt.target;
+			this.fileSet = true;
+		},
+		setMessage(msg,isError) {
+			this.message      = msg;
+			this.messageError = isError;
 		},
 		send() {
-			let that = this;
 			let formData    = new FormData();
 			let httpRequest = new XMLHttpRequest();
 			
-			httpRequest.upload.onprogress = function(event) {
+			httpRequest.upload.onprogress = event => {
 				if(event.lengthComputable) {}
 			};
-			httpRequest.onload = function(event) {
-				that.$store.commit('busyRemove');
-				let res = JSON.parse(httpRequest.response);
+			httpRequest.onerror = event => {
+				this.$store.commit('busyRemove');
+				this.setMessage(this.capApp.csvLoadError,true);
+			};
+			httpRequest.onload = event => {
+				this.$store.commit('busyRemove');
+				const res = JSON.parse(httpRequest.response);
 				
 				if(res.error === '') {
-					that.message = that.capApp.message.csvImportSuccess.replace('{COUNT}',res.count);
-					that.$emit('reload');
+					this.setMessage(this.capApp.message.csvImportSuccess.replace('{COUNT}',res.count),false);
+					this.$emit('reload');
 					return;
 				}
 				
-				let errRow = that.hasHeader ? res.count+2 : res.count+1;
-				
-				that.messageError = true;
-				that.message = that.capApp.csvLineError.replace(
-					'{COUNT}',errRow) + that.resolveErrCode(res.error);
+				const errRow = this.hasHeader ? res.count+2 : res.count+1;
+				this.setMessage(this.capApp.csvLineError.replace('{COUNT}',errRow) + this.resolveErrCode(res.error),true);
 			};
 			formData.append('token',this.token);
 			formData.append('columns',JSON.stringify(this.columns));
@@ -213,13 +219,14 @@ let MyListCsv = {
 			formData.append('timezone',this.timezone);
 			formData.append('commaChar',this.commaChar);
 			formData.append('ignoreHeader',this.hasHeader ? 'true' : 'false');
-			formData.append('file',this.file);
+			formData.append('file',this.fileElm.files[0]);
 			httpRequest.open('POST','csv/upload',true);
 			httpRequest.send(formData);
 			
-			that.message      = '';
-			that.messageError = false;
-			that.$store.commit('busyAdd');
+			this.fileElm.value = null;
+			this.fileSet       = false;
+			this.setMessage('',false);
+			this.$store.commit('busyAdd');
 		}
 	}
 };

@@ -1940,6 +1940,7 @@
 		"csvFile":"Fișier CSV",
 		"csvHasHeader":"Linia antetului",
 		"csvLineError":"Eroare la rândul {COUNT}: ",
+		"csvLoadError":"Failed to upload the CSV file. Please try again.",
 		"csvTime":"Formatul orei",
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Zona de timp",

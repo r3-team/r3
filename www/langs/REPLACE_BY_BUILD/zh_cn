@@ -1940,6 +1940,7 @@
 		"csvFile":"CSV 文件",
 		"csvHasHeader":"包含标题行",
 		"csvLineError":"第 {COUNT} 行存在错误：",
+		"csvLoadError":"Failed to upload the CSV file. Please try again.",
 		"csvTime":"时间格式",
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"时区",

@@ -1940,6 +1940,7 @@
 		"csvFile":"CSV fájl",
 		"csvHasHeader":"Fejlécsor",
 		"csvLineError":"Hiba a(z) {COUNT}. sorban: ",
+		"csvLoadError":"Failed to upload the CSV file. Please try again.",
 		"csvTime":"Időformátum",
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Időzóna",

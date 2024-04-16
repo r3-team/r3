@@ -1940,6 +1940,7 @@
 		"csvFile":"File CSV",
 		"csvHasHeader":"Linea intestazione",
 		"csvLineError":"Errore alla linea {COUNT}: ",
+		"csvLoadError":"Failed to upload the CSV file. Please try again.",
 		"csvTime":"Formato tempo",
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Fuso orario",

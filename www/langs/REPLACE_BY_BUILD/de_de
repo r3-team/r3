@@ -1940,6 +1940,7 @@
 		"csvFile":"CSV-Datei",
 		"csvHasHeader":"Überschriftenzeile",
 		"csvLineError":"Fehler in Zeile {COUNT}: ",
+		"csvLoadError":"CSV-Datei konnte nicht hochgeladen werden. Bitte noch einmal versuchen.",
 		"csvTime":"Uhrzeitsformat",
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Zeitzone",
