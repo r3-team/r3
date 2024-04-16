@@ -262,7 +262,7 @@
 			"proxyUrl":"代理 URL",
 			"proxyUrlDesc":"代理 URL，例如 'http://my-proxy.intern:8080' 或 'https://user:pass@my-proxy:8080'。",
 			"publicHostName":"公共主机名",
-			"publicHostNameDesc":"用于在诸如电子邮件通知等地方链接回系统。应为完整地址，例如 'https://internal-system.local' 或 'https://public-system.com'。",
+			"publicHostNameDesc":"用于在诸如电子邮件通知等地方链接回系统。应为完整地址，例如 'internal-system.local' 或 'public-system.com'。",
 			"pwForceDigit":"包含数字",
 			"pwForceLower":"包含小写字母",
 			"pwForceSpecial":"包含特殊字符",

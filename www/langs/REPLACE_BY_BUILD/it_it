@@ -262,7 +262,7 @@
 			"proxyUrl":"Proxy URL",
 			"proxyUrlDesc":"A proxy URL, such as 'http://my-proxy.intern:8080' or 'https://user:pass@my-proxy:8080'.",
 			"publicHostName":"Nome host pubblico",
-			"publicHostNameDesc":"Is used to link back to the system in things like email notifications. Should be the full address, such as 'https://internal-system.local' or 'https://public-system.com'.",
+			"publicHostNameDesc":"Is used to link back to the system in things like email notifications. Should be the full address without protocol, such as 'internal-system.local' or 'public-system.com'.",
 			"pwForceDigit":"Richiesti numeri",
 			"pwForceLower":"Richieste lettere minuscole",
 			"pwForceSpecial":"Richiesti caratteri speciali",

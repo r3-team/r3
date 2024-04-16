@@ -262,7 +262,7 @@
 			"proxyUrl":"Proxy-URL",
 			"proxyUrlDesc":"Eine Proxy-URL, wie z. B. \"http://my-proxy.intern:8080\" oder \"https://user:pass@my-proxy:8080\".",
 			"publicHostName":"Öffentlicher Hostname",
-			"publicHostNameDesc":"Wird verwendet, um in Dingen wie E-Mail-Benachrichtigungen auf das System zu verweisen. Es sollte die vollständige Adresse sein, z. B. \"https://internal-system.local\" oder \"https://public-system.com\".",
+			"publicHostNameDesc":"Wird verwendet, um in Dingen wie E-Mail-Benachrichtigungen auf das System zu verweisen. Es sollte die vollständige Adresse ohne Protokoll sein, z. B. \"internal-system.local\" oder \"public-system.com\".",
 			"pwForceDigit":"Erzwinge Zahl",
 			"pwForceLower":"Erzwinge Kleinbuchstaben",
 			"pwForceSpecial":"Erzwinge Sonderzeichen",
