@@ -408,6 +408,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return MailSpoolerDel_tx(tx, reqJson)
 		case "get":
 			return MailSpoolerGet(reqJson)
+		case "reset":
+			return MailSpoolerReset_tx(tx, reqJson)
 		}
 	case "mailTraffic":
 		switch action {

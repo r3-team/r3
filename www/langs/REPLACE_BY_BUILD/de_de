@@ -484,6 +484,9 @@
 			"node":"Cluster-Knoten"
 		},
 		"mails":{
+			"button":{
+				"attemptsReset":"Sendeversuche zurücksetzen"
+			},
 			"dialog":{
 				"delete":"Bist du sicher, dass du diesen E-Mail-Account löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>"
 			},

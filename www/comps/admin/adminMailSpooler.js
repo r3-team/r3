@@ -18,6 +18,12 @@ let MyAdminMailSpooler = {
 					@trigger="get"
 					:caption="capGen.button.refresh"
 				/>
+				<my-button image="autoRenew.png"
+					v-if="!noMails"
+					@trigger="reset"
+					:active="mailIdsSelected.length !== 0"
+					:caption="capApp.button.attemptsReset"
+				/>
 				<my-button image="delete.png"
 					v-if="!noMails"
 					@trigger="del"
@@ -196,7 +202,7 @@ let MyAdminMailSpooler = {
 			}
 		},
 		toggleMailId(id) {
-			let pos = this.mailIdsSelected.indexOf(id);
+			const pos = this.mailIdsSelected.indexOf(id);
 			
 			if(pos === -1) this.mailIdsSelected.push(id);
 			else           this.mailIdsSelected.splice(pos,1);
@@ -206,6 +212,7 @@ let MyAdminMailSpooler = {
 		del() {
 			ws.send('mailSpooler','del',{ids:this.mailIdsSelected},true).then(
 				() => {
+					this.mailIdsSelected = [];
 					this.offset = 0;
 					this.get();
 				},
@@ -229,6 +236,15 @@ let MyAdminMailSpooler = {
 		getAccounts() {
 			ws.send('mailAccount','get',{},true).then(
 				res => this.accountIdMap = res.payload,
+				this.$root.genericError
+			);
+		},
+		reset() {
+			ws.send('mailSpooler','reset',{ids:this.mailIdsSelected},true).then(
+				() => {
+					this.mailIdsSelected = [];
+					this.get();
+				},
 				this.$root.genericError
 			);
 		}

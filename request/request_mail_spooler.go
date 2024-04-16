@@ -17,15 +17,12 @@ func MailSpoolerDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) 
 		return nil, err
 	}
 
-	for _, id := range req.Ids {
-		if _, err := tx.Exec(db.Ctx, `
-			DELETE FROM instance.mail_spool
-			WHERE id = $1
-		`, id); err != nil {
-			return nil, err
-		}
-	}
-	return nil, nil
+	_, err := tx.Exec(db.Ctx, `
+		DELETE FROM instance.mail_spool
+		WHERE id = ANY($1)
+	`, req.Ids)
+
+	return nil, err
 }
 
 func MailSpoolerGet(reqJson json.RawMessage) (interface{}, error) {
@@ -136,4 +133,21 @@ func mailSpoolerRead(limit int, offset int, search string) ([]types.Mail, int64,
 		return mails, 0, err
 	}
 	return mails, total, nil
+}
+
+func MailSpoolerReset_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+	var req struct {
+		Ids []int64 `json:"ids"`
+	}
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+
+	_, err := tx.Exec(db.Ctx, `
+		UPDATE instance.mail_spool
+		SET attempt_count = 0, attempt_date = 0
+		WHERE id = ANY($1)
+	`, req.Ids)
+
+	return nil, err
 }

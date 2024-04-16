@@ -484,6 +484,9 @@
 			"node":"Nœud du cluster"
 		},
 		"mails":{
+			"button":{
+				"attemptsReset":"Reset send attempts"
+			},
 			"dialog":{
 				"delete":"Are you sure you want to delete this email account?<br /><br />This action is irreversible.</b>"
 			},
