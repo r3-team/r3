@@ -37,8 +37,8 @@ export let MyBuilderColumns = {
 					/>
 					<img class="icon clickable"
 						v-if="hasStyling"
-						@click="batch.columns[0].batchVertical = !batch.columns[0].batchVertical"
-						:src="batch.columns[0].batchVertical ? 'images/flexColumn.png' : 'images/flexRow.png'"
+						@click="toggleVertical(batch.columns[0])"
+						:src="batch.columns[0].styles.includes('vertical') ? 'images/flexColumn.png' : 'images/flexRow.png'"
 						:title="capApp.columnBatchDir"
 					/>
 					<img class="icon clickable" src="images/delete.png"
@@ -51,7 +51,7 @@ export let MyBuilderColumns = {
 				<draggable handle=".dragAnchor" class="children" animation="100" itemKey="id"
 					v-model="batch.columns"
 					@change="batches = batches"
-					:class="{ vertical:batch.columns[0].batchVertical }"
+					:class="{ vertical:batch.columns[0].styles.includes('vertical') }"
 					:group="groupColumns"
 				>
 					<template #item="{element:column}">
@@ -63,6 +63,7 @@ export let MyBuilderColumns = {
 									:naked="true"
 								/>
 								<img class="action clickable"
+									v-if="false"
 									@click="columnSetBy(column.id,'onMobile',!column.onMobile)"
 									:src="column.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
 									:title="capApp.onMobile"
@@ -129,7 +130,7 @@ export let MyBuilderColumns = {
 						out.push({
 							batch:c.batch,
 							columns:[c],
-							vertical:c.batchVertical
+							vertical:c.styles.includes('vertical')
 						});
 					}
 				}
@@ -197,6 +198,11 @@ export let MyBuilderColumns = {
 		},
 		toggleSize(oldVal,change) {
 			return oldVal+change < 0 ? 0 : oldVal+change;
+		},
+		toggleVertical(column) {
+			const pos = column.styles.indexOf('vertical');
+			if(pos === -1) column.styles.push('vertical');
+			else           column.styles.splice(pos,1);
 		}
 	}
 };
@@ -300,18 +306,14 @@ export let MyBuilderColumnTemplates = {
 				attributeId:attributeId,
 				index:index,
 				batch:null,
-				batchVertical:false,
 				basis:0,
 				length:0,
-				wrap:false,
 				display:'default',
 				groupBy:false,
 				aggregator:null,
 				distincted:false,
 				subQuery:subQuery,
 				query:this.getQueryTemplate(),
-				onMobile:true,
-				clipboard:false,
 				styles:[],
 				captions:{
 					columnTitle:{}

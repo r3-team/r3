@@ -464,15 +464,17 @@ type Column struct {
 	Captions    CaptionMap  `json:"captions"`   // column titles
 
 	// presentation
-	Basis         int         `json:"basis"`         // size basis (usually width)
-	Batch         pgtype.Int4 `json:"batch"`         // index of column batch (multiple columns as one)
-	BatchVertical bool        `json:"batchVertical"` // batch uses vertical layout for columns
-	Clipboard     bool        `json:"clipboard"`     // show copy-to-clipboard action?
-	Display       string      `json:"display"`       // how to display value (text, date, color, etc.)
-	Length        int         `json:"length"`        // text length limit (in characters)
-	OnMobile      bool        `json:"onMobile"`      // display this column on mobile?
-	Styles        []string    `json:"styles"`        // applied styles: bold, italic
-	Wrap          bool        `json:"wrap"`          // text wrap
+	Basis   int         `json:"basis"`   // size basis (usually width)
+	Batch   pgtype.Int4 `json:"batch"`   // index of column batch (multiple columns as one)
+	Display string      `json:"display"` // how to display value (email, gallery, etc.)
+	Length  int         `json:"length"`  // text length limit (in characters)
+	Styles  []string    `json:"styles"`  // alignEnd, alignMid, bold, clipboard, hideMobile, hidePc, italic, vertical, wrap
+
+	// legacy
+	BatchVertical bool `json:"batchVertical"`
+	Clipboard     bool `json:"clipboard"`
+	OnMobile      bool `json:"onMobile"`
+	Wrap          bool `json:"wrap"`
 }
 type Role struct {
 	Id                uuid.UUID         `json:"id"`

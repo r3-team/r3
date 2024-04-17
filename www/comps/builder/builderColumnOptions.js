@@ -33,8 +33,9 @@ let MyBuilderColumnOptions = {
 					<td>{{ capApp.onMobile }}</td>
 					<td>
 						<my-bool
-							@update:modelValue="set('onMobile',$event)"
-							:modelValue="column.onMobile"
+							@update:modelValue="setStyle('hideMobile',$event)"
+							:modelValue="column.styles.includes('hideMobile')"
+							:reversed="true"
 						/>
 					</td>
 				</tr>
@@ -93,8 +94,8 @@ let MyBuilderColumnOptions = {
 					<td>{{ capApp.columnWrap }}</td>
 					<td>
 						<my-bool
-							@update:modelValue="set('wrap',$event)"
-							:modelValue="column.wrap"
+							@update:modelValue="setStyle('wrap',$event)"
+							:modelValue="column.styles.includes('wrap')"
 						/>
 					</td>
 				</tr>
@@ -102,8 +103,8 @@ let MyBuilderColumnOptions = {
 					<td>{{ capApp.columnClipboard }}</td>
 					<td>
 						<my-bool
-							@update:modelValue="set('clipboard',$event)"
-							:modelValue="column.clipboard"
+							@update:modelValue="setStyle('clipboard',$event)"
+							:modelValue="column.styles.includes('clipboard')"
 						/>
 					</td>
 				</tr>
@@ -120,7 +121,6 @@ let MyBuilderColumnOptions = {
 							<option v-if="isString" value="phone"   >{{ capApp.option.display.phone }}</option>
 							<option v-if="isString" value="url"     >{{ capApp.option.display.url }}</option>
 							<option v-if="isFiles"  value="gallery" >{{ capApp.option.display.gallery }}</option>
-							<option value="hidden">{{ capApp.option.display.hidden }}</option>
 						</select>
 					</td>
 				</tr>

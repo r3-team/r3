@@ -100,10 +100,43 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
 	/*
-		ALTER TABLE instance.admin_mail ALTER COLUMN reason
-			TYPE instance.admin_mail_reason USING reason::text::instance.admin_mail_reason;
+		ALTER TABLE app.column ALTER COLUMN styles
+			TYPE app.column_style[] USING styles::CHARACTER VARYING(12)[]::app.column_style[];
+
+		ALTER TABLE app.column
+			DROP COLUMN batch_vertical,
+			DROP COLUMN clipboard,
+			DROP COLUMN on_mobile,
+			DROP COLUMN wrap;
 	*/
 
+	"3.7": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			-- cleanup from last release
+			ALTER TABLE instance.admin_mail ALTER COLUMN reason
+				TYPE instance.admin_mail_reason USING reason::text::instance.admin_mail_reason;
+
+			-- new column styles + cleanup of old ones
+			ALTER TABLE app.column ALTER COLUMN styles TYPE CHARACTER VARYING(12)[];
+
+			ALTER TYPE app.column_style ADD VALUE 'alignEnd';
+			ALTER TYPE app.column_style ADD VALUE 'alignMid';
+			ALTER TYPE app.column_style ADD VALUE 'clipboard';
+			ALTER TYPE app.column_style ADD VALUE 'hideMobile';
+			ALTER TYPE app.column_style ADD VALUE 'hidePc';
+			ALTER TYPE app.column_style ADD VALUE 'vertical';
+			ALTER TYPE app.column_style ADD VALUE 'wrap';
+
+			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'clipboard')  WHERE clipboard;
+			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'hideMobile') WHERE display = 'hidden' OR on_mobile = FALSE;
+			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'hidePc')     WHERE display = 'hidden';
+			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'vertical')   WHERE batch_vertical;
+			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'wrap')       WHERE wrap;
+
+			UPDATE app.column SET display = 'default' WHERE display = 'hidden';
+		`)
+		return "3.8", err
+	},
 	"3.6": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			-- cleanup from last release

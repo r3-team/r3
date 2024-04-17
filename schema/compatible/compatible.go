@@ -13,6 +13,35 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// < 3.8
+// migrate column styles
+func FixColumnNoMobile(column types.Column) types.Column {
+	// apply true as default for legacy value, otherwise "hideMobile" will be applied on every column set
+	column.OnMobile = true
+	return column
+}
+func FixColumnStyles(column types.Column) types.Column {
+	if column.BatchVertical {
+		column.Styles = append(column.Styles, "vertical")
+	}
+	if column.Clipboard {
+		column.Styles = append(column.Styles, "clipboard")
+	}
+	if column.Display == "hidden" || !column.OnMobile {
+		column.Styles = append(column.Styles, "hideMobile")
+	}
+	if column.Display == "hidden" {
+		column.Styles = append(column.Styles, "hidePc")
+	}
+	if column.Display == "hidden" {
+		column.Display = "default"
+	}
+	if column.Wrap {
+		column.Styles = append(column.Styles, "wrap")
+	}
+	return column
+}
+
 // < 3.7
 // migrate PG triggers from relations to module
 func FixPgTriggerLocation(triggers []types.PgTrigger, relations []types.Relation) []types.PgTrigger {
