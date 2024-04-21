@@ -106,7 +106,6 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		ALTER TABLE app.column
 			DROP COLUMN batch_vertical,
 			DROP COLUMN clipboard,
-			DROP COLUMN on_mobile,
 			DROP COLUMN wrap;
 	*/
 
@@ -122,16 +121,14 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TYPE app.column_style ADD VALUE 'alignEnd';
 			ALTER TYPE app.column_style ADD VALUE 'alignMid';
 			ALTER TYPE app.column_style ADD VALUE 'clipboard';
-			ALTER TYPE app.column_style ADD VALUE 'hideMobile';
-			ALTER TYPE app.column_style ADD VALUE 'hidePc';
+			ALTER TYPE app.column_style ADD VALUE 'hide';
 			ALTER TYPE app.column_style ADD VALUE 'vertical';
 			ALTER TYPE app.column_style ADD VALUE 'wrap';
 
-			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'clipboard')  WHERE clipboard;
-			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'hideMobile') WHERE display = 'hidden' OR on_mobile = FALSE;
-			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'hidePc')     WHERE display = 'hidden';
-			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'vertical')   WHERE batch_vertical;
-			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'wrap')       WHERE wrap;
+			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'clipboard') WHERE clipboard;
+			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'hide')      WHERE display = 'hidden';
+			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'vertical')  WHERE batch_vertical;
+			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'wrap')      WHERE wrap;
 
 			UPDATE app.column SET display = 'default' WHERE display = 'hidden';
 		`)

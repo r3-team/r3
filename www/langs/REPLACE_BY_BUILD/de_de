@@ -980,6 +980,8 @@
 			"columnHeaderData":"Datenabfrage",
 			"columnLength":"Länge (Charakt.)",
 			"columnLength0":"kein Limit",
+			"columnShowDefault":"Standardm. anzeigen",
+			"columnShowDefaultMobile":"Standardm. anzeigen auf mobil",
 			"columnSize":"Größe (Pixel)",
 			"columnSize0":"automatisch",
 			"columnStyles":"Style",

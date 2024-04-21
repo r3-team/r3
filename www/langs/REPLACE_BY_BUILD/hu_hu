@@ -980,6 +980,8 @@
 			"columnHeaderData":"Adatlekérdezés",
 			"columnLength":"Hossz (karakterben)",
 			"columnLength0":"Nincs Korlát",
+			"columnShowDefault":"Show by default",
+			"columnShowDefaultMobile":"Show by default on mobile",
 			"columnSize":"Méret (pixelben)",
 			"columnSize0":"Automatikus",
 			"columnStyles":"Stílus",

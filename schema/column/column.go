@@ -32,7 +32,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
 		SELECT id, attribute_id, index, batch, basis, length, display,
-			group_by, aggregator, distincted, sub_query, styles
+			group_by, aggregator, distincted, on_mobile, sub_query, styles
 		FROM app.column
 		WHERE %s_id = $1
 		ORDER BY position ASC
@@ -43,13 +43,9 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 
 	for rows.Next() {
 		var c types.Column
-
-		// fix defaults >= 3.8: Convert to new styles
-		c = compatible.FixColumnNoMobile(c)
-
 		if err := rows.Scan(&c.Id, &c.AttributeId, &c.Index, &c.Batch,
 			&c.Basis, &c.Length, &c.Display, &c.GroupBy, &c.Aggregator,
-			&c.Distincted, &c.SubQuery, &c.Styles); err != nil {
+			&c.Distincted, &c.OnMobile, &c.SubQuery, &c.Styles); err != nil {
 
 			return columns, err
 		}
@@ -120,12 +116,12 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 		if known {
 			if _, err := tx.Exec(db.Ctx, `
 				UPDATE app.column
-				SET attribute_id = $1, index = $2, position = $3, batch = $4,
-					basis = $5, length = $6, display = $7, group_by = $8,
-					aggregator = $9, distincted = $10, sub_query = $11, styles = $12
-				WHERE id = $13
+				SET attribute_id = $1, index = $2, position = $3, batch = $4, basis = $5,
+					length = $6, display = $7, group_by = $8, aggregator = $9, distincted = $10,
+					on_mobile = $11, sub_query = $12, styles = $13
+				WHERE id = $14
 			`, c.AttributeId, c.Index, position, c.Batch, c.Basis, c.Length, c.Display,
-				c.GroupBy, c.Aggregator, c.Distincted, c.SubQuery, c.Styles, c.Id); err != nil {
+				c.GroupBy, c.Aggregator, c.Distincted, c.OnMobile, c.SubQuery, c.Styles, c.Id); err != nil {
 
 				return err
 			}
@@ -133,12 +129,12 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 				INSERT INTO app.column (
 					id, %s_id, attribute_id, index, position, batch, basis, length,
-					display, group_by, aggregator, distincted, sub_query, styles
+					display, group_by, aggregator, distincted, on_mobile, sub_query, styles
 				)
-				VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+				VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
 			`, entity), c.Id, entityId, c.AttributeId, c.Index, position, c.Batch,
 				c.Basis, c.Length, c.Display, c.GroupBy, c.Aggregator, c.Distincted,
-				c.SubQuery, c.Styles); err != nil {
+				c.OnMobile, c.SubQuery, c.Styles); err != nil {
 
 				return err
 			}

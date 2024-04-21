@@ -980,6 +980,8 @@
 			"columnHeaderData":"Data retrieval",
 			"columnLength":"Length (chars.)",
 			"columnLength0":"no limit",
+			"columnShowDefault":"Show by default",
+			"columnShowDefaultMobile":"Show by default on mobile",
 			"columnSize":"Size (pixel)",
 			"columnSize0":"automatic",
 			"columnStyles":"Styles",

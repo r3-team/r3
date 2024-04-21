@@ -15,11 +15,6 @@ import (
 
 // < 3.8
 // migrate column styles
-func FixColumnNoMobile(column types.Column) types.Column {
-	// apply true as default for legacy value, otherwise "hideMobile" will be applied on every column set
-	column.OnMobile = true
-	return column
-}
 func FixColumnStyles(column types.Column) types.Column {
 	if column.BatchVertical {
 		column.Styles = append(column.Styles, "vertical")
@@ -27,14 +22,9 @@ func FixColumnStyles(column types.Column) types.Column {
 	if column.Clipboard {
 		column.Styles = append(column.Styles, "clipboard")
 	}
-	if column.Display == "hidden" || !column.OnMobile {
-		column.Styles = append(column.Styles, "hideMobile")
-	}
-	if column.Display == "hidden" {
-		column.Styles = append(column.Styles, "hidePc")
-	}
 	if column.Display == "hidden" {
 		column.Display = "default"
+		column.Styles = append(column.Styles, "hide")
 	}
 	if column.Wrap {
 		column.Styles = append(column.Styles, "wrap")

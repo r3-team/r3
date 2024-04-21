@@ -30,12 +30,22 @@ let MyBuilderColumnOptions = {
 			</tr>
 			<template v-if="!onlyData">
 				<tr>
-					<td>{{ capApp.onMobile }}</td>
+					<td>{{ capApp.columnShowDefault }}</td>
 					<td>
 						<my-bool
-							@update:modelValue="setStyle('hideMobile',$event)"
-							:modelValue="column.styles.includes('hideMobile')"
+							@update:modelValue="setStyle('hide',$event)"
+							:modelValue="column.styles.includes('hide')"
 							:reversed="true"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.columnShowDefaultMobile }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('onMobile',$event)"
+							:readonly="column.styles.includes('hide')"
+							:modelValue="column.onMobile && !column.styles.includes('hide')"
 						/>
 					</td>
 				</tr>

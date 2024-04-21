@@ -980,6 +980,8 @@
 			"columnHeaderData":"Récupération des données",
 			"columnLength":"Longueur (caractères)",
 			"columnLength0":"pas de limite",
+			"columnShowDefault":"Show by default",
+			"columnShowDefaultMobile":"Show by default on mobile",
 			"columnSize":"Taille (pixel)",
 			"columnSize0":"automatique",
 			"columnStyles":"Styles",
