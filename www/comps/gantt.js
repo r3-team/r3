@@ -287,16 +287,18 @@ let MyGantt = {
 						:key="k"
 						:style="styleLabel(g)"
 					>
-						<my-value-rich class="context-calendar-gantt"
-							v-for="c in g.columns.filter(v => !columnIndexesHidden.includes(v.index) && v.value !== null)"
-							:attribute-id="columns[c.index].attributeId"
-							:bold="columns[c.index].styles.includes('bold')"
-							:display="columns[c.index].display"
-							:italic="columns[c.index].styles.includes('italic')"
-							:key="c.index"
-							:length="columns[c.index].length"
-							:value="c.value"
-						/>
+						<div class="columnBatch ganttGroup" :class="{ vertical:g.vertical }">
+							<my-value-rich class="context-calendar-gantt"
+								v-for="c in g.columns.filter(v => !columnIndexesHidden.includes(v.index) && v.value !== null)"
+								:attribute-id="columns[c.index].attributeId"
+								:bold="columns[c.index].styles.includes('bold')"
+								:display="columns[c.index].display"
+								:italic="columns[c.index].styles.includes('italic')"
+								:key="c.index"
+								:length="columns[c.index].length"
+								:value="c.value"
+							/>
+						</div>
 					</div>
 				</div>
 				
@@ -874,8 +876,7 @@ let MyGantt = {
 					let groupColumns = []; // group column values
 					let values   = [];
 					
-					for(let i = 0, j = res.payload.rows.length; i < j; i++) {
-						let r = res.payload.rows[i];
+					for(const r of res.payload.rows) {
 						groupBy      = [];
 						groupColumns = [];
 						
@@ -889,19 +890,20 @@ let MyGantt = {
 						// parse non-calendar expression values
 						values = this.hasColor ? r.values.slice(3) : r.values.slice(2);
 						
-						for(let x = 0, y = values.length; x < y; x++) {
+						for(let i = 0, j = values.length; i < j; i++) {
 							
-							if(!this.group0LabelExpressionIndexes.includes(x))
+							if(!this.group0LabelExpressionIndexes.includes(i))
 								continue;
 							
 							// add non-file attributes as group criteria
-							let atr = this.attributeIdMap[this.columns[x].attributeId];
+							const atr = this.attributeIdMap[this.columns[i].attributeId];
 							if(atr.content !== 'files')
-								groupBy.push(values[x]);
+								groupBy.push(values[i]);
 							
 							groupColumns.push({
-								index:x,
-								value:values[x]
+								index:i,
+								value:values[i],
+								vertical:this.columns[i].styles.includes('vertical')
 							});
 						}
 						let groupName = groupBy.join(' ');
@@ -910,7 +912,8 @@ let MyGantt = {
 						if(typeof groupMap[groupName] === 'undefined') {
 							groupMap[groupName] = {
 								lines:[[]], // each line is an array of records
-								columns:groupColumns
+								columns:groupColumns,
+								vertical:groupColumns.length === 0 ? false : groupColumns[0].vertical
 							};
 						}
 						

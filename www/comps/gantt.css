@@ -33,7 +33,6 @@
 .gantt-label-entry{
 	flex:0 0 auto;
 	height:30px;
-	padding:0px 0px 0px 9px;
 	line-height:30px;
 	display:flex;
 	flex-flow:row nowrap;
