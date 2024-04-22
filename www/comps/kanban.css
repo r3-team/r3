@@ -167,7 +167,6 @@
 	cursor:move;
 }
 .kanban-card table{
-	margin:0px 6px 3px;
 	border-spacing:calc(var(--spacing) / 2) calc(var(--spacing) / 3);
     border-collapse:separate;
 }
@@ -178,25 +177,6 @@
 }
 .kanban-card table td.kanban-label{
 	color:var(--color-font-disabled);
-}
-.kanban-card table td .batch{
-	min-height:100%; /* relevant for color inputs */
-	margin:0px;
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	gap:6px;
-	
-	/* auto cutting text */
-	width:inherit; /* inherit from table cell */
-	overflow:hidden;
-}
-.kanban-card table td .batch.vertical{
-	margin:5px 0px;
-	flex-flow:column nowrap;
-	justify-content:center;
-	align-items:flex-start;
-	gap:4px;
 }
 
 /* user overwrites */

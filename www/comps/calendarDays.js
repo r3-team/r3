@@ -25,7 +25,7 @@ let MyCalendarDaysEvent = {
 			:class="{ clickable:hasUpdate }"
 			:style="styleCard"
 		>
-			<div class="batch" v-for="b in columnBatches" :class="{ vertical:b.vertical }">
+			<div class="columnBatch calendarDays" v-for="b in columnBatches" :class="{ vertical:b.vertical }">
 				<my-value-rich
 					v-for="ind in b.columnIndexes.filter(v => values[v] !== null)"
 					@clipboard="$emit('clipboard')"
@@ -349,7 +349,7 @@ let MyCalendarDays = {
 		},
 		
 		// simple
-		columnBatches:      (s) => s.getColumnBatches(null,s.columns,[],false),
+		columnBatches:      (s) => s.getColumnBatches(null,s.columns,[],[],false),
 		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
 		heightHourPx:       (s) => (s.isInput ? 3 : 11) * s.zoom,
 		heightHourPxFull:   (s) => 9 * s.zoom,

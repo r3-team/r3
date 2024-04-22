@@ -66,19 +66,35 @@ export function getOrderIndexesFromColumnBatch(columnBatch,columns,orders) {
 	return orderIndexesUsed;
 };
 
-export function getColumnBatches(moduleId,columns,columnIndexesIgnore,showCaptions) {
+export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,showCaptions) {
 	const isMobile = MyStore.getters.isMobile;
-	let batches   = [];
+	let batches    = [];
 	
 	let addColumn = (column,index) => {
 		const hidden = column.styles.includes('hide') || (isMobile && !column.onMobile);
+		const atr    = MyStore.getters['schema/attributeIdMap'][column.attributeId];
+		
+		// first non-encrypted/non-file attribute in batch can be sorted by
+		const noSort  = atr.encrypted || isAttributeFiles(atr.content);
+		const isColor = atr.contentUse === 'color';
 		
 		if(column.batch !== null) {
 			for(let i = 0, j = batches.length; i < j; i++) {
 				if(batches[i].batch !== column.batch || hidden)
 					continue;
 				
+				// add its own column index + sort setting + width to batch
 				batches[i].columnIndexes.push(index);
+				
+				if(!noSort) batches[i].columnIndexesSortBy.push(index);
+				if(isColor) batches[i].columnIndexColor = index;
+				
+				if(!batches[i].vertical)
+					batches[i].basis += column.basis;
+				
+				if(batches[i].vertical && column.basis > batches[i].basis)
+					batches[i].basis = column.basis;
+				
 				return;
 			}
 		}
@@ -86,9 +102,16 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,showCaptio
 		// create new column batch with itself as first column
 		// create even if first column is hidden as other columns in same batch might not be
 		batches.push({
+			basis:column.basis,
 			batch:column.batch,
+			batchOrderIndex:batches.length,
 			caption:showCaptions && moduleId !== null ? getColumnTitle(column,moduleId) : null,
 			columnIndexes:!hidden ? [index] : [],
+			columnIndexesSortBy:noSort ? [] : [index],
+			columnIndexColor:!isColor ? -1 : index,
+			orderIndexesSmallest:0, // smallest order index used to sort this column batch by
+			orderIndexesUsed:[],    // which order indexes were used to sort this column batch by, empty if batch was not sorted by
+			orderPosition:0,        // position of this column batch sort compared to other column batches (smallest sorted by first)
 			style:'',
 			vertical:column.styles.includes('vertical')
 		});
@@ -98,14 +121,24 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,showCaptio
 		if(!columnIndexesIgnore.includes(i))
 			addColumn(columns[i],i);
 	}
-	
-	// batches with no columns are removed
+
+	// process finished batches
 	for(let i = 0, j = batches.length; i < j; i++) {
-		if(batches[i].columnIndexes.length === 0) {
-			batches.splice(i,1);
-			i--; j--;
-			continue;
-		}
+		if(batches[i].basis !== 0)
+			batches[i].style = `max-width:${batches[i].basis}px`;
+		
+		batches[i].orderIndexesUsed     = getOrderIndexesFromColumnBatch(batches[i],columns,orders);
+		batches[i].orderIndexesSmallest = batches[i].orderIndexesUsed.length !== 0 ? Math.min(...batches[i].orderIndexesUsed) : 999;
 	}
-	return batches;
+	
+	// calculate which batch is sorted by in order (to show sort order indicators)
+	const batchesSortedBySmallestOrderIndex =
+		[...batches].sort((a,b) => a.orderIndexesSmallest > b.orderIndexesSmallest ? 1 : -1);
+	
+	for(let i = 0, j = batchesSortedBySmallestOrderIndex.length; i < j; i++) {
+		batches[batchesSortedBySmallestOrderIndex[i].batchOrderIndex].orderPosition = i;
+	}
+	
+	// return all batches that have at least 1 column
+	return batches.filter(v => v.columnIndexes.length !== 0);
 };

@@ -332,8 +332,8 @@ let MyListColumnBatch = {
 			if(!this.isValidFilter)
 				return;
 			
-			let atrId      = this.columnUsedFilter.attributeId;
-			let atrIndex   = this.columnUsedFilter.index;
+			const atrId    = this.columnUsedFilter.attributeId;
+			const atrIndex = this.columnUsedFilter.index;
 			let filters    = JSON.parse(JSON.stringify(this.filtersColumn));
 			let filterUsed = (
 				!this.isArrayInput && this.input !== '' ||
@@ -345,7 +345,7 @@ let MyListColumnBatch = {
 			
 			// add new filters for this column, if active
 			if(filterUsed) {
-				let hasNull = this.isArrayInput && this.input.includes(null);
+				const hasNull = this.isArrayInput && this.input.includes(null);
 				filters.push({
 					connector:'AND',
 					operator:typeof this.input === 'string' ? 'ILIKE' : '= ANY',

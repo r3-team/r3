@@ -223,34 +223,6 @@
 	height:24px;
 	margin:4px;
 }
-.list .layoutTable td .batch{
-	min-height:100%;
-	padding:0px 8px;
-	margin:3px 0px;
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	gap:6px;
-	
-	/* auto cutting text */
-	width:inherit; /* inherit from table cell */
-	overflow:hidden;
-}
-@-moz-document url-prefix() {
-    .list .layoutTable td .batch{
-		margin:0.3px 0px;
-    }
-}
-.list .layoutTable td .batch.vertical{
-	flex-flow:column nowrap;
-	justify-content:center;
-	align-items:flex-start;
-	gap:4px;
-}
-.list .layoutTable td .batch .drawing,
-.list .layoutTable td .batch .gallery-item{
-	max-height:var(--row-height);
-}
 .list .layoutTable .sub-actions{
 	display:flex;
 	flex-flow:row nowrap;
@@ -345,30 +317,10 @@
 	margin:var(--spacing) 50px 8px var(--spacing);
 }
 .list .layoutCards .card td{
-	padding:0px 24px 5px 0px;
 	vertical-align:bottom;
 }
 .list .layoutCards .card td.caption{
 	color:var(--color-font-disabled);
-}
-.list .layoutCards .card .batch{
-	display:flex;
-	flex-flow:row nowrap;
-	gap:6px;
-	
-	/* auto cutting text */
-	max-width:250px;
-	overflow:hidden;
-}
-.list .layoutCards .card .batch.vertical{
-	margin:5px 0px;
-	flex-flow:column nowrap;
-	justify-content:center;
-	align-items:flex-start;
-	gap:4px;
-}
-.list .layoutCards .card .batch .drawing{
-	width:100%;
 }
 
 

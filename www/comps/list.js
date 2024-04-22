@@ -11,6 +11,7 @@ import {consoleError}     from './shared/error.js';
 import {getCaption}       from './shared/language.js';
 import {isAttributeFiles} from './shared/attribute.js';
 import {
+	getColumnBatches,
 	getColumnTitle,
 	getOrderIndexesFromColumnBatch
 } from './shared/column.js';
@@ -488,7 +489,7 @@ let MyList = {
 								
 								<!-- row values per column batch -->
 								<td v-for="b in columnBatches" :style="b.style">
-									<div class="batch"
+									<div class="columnBatch"
 										:class="{ colored:b.columnIndexColor !== -1, vertical:b.vertical }"
 										:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
 									>
@@ -519,7 +520,7 @@ let MyList = {
 									</div>
 								</td>
 								<td v-if="!rowsFetching" colspan="999">
-									<div class="batch">{{ capGen.resultsNone }}</div>
+									<div class="columnBatch">{{ capGen.resultsNone }}</div>
 								</td>
 							</tr>
 						</tbody>
@@ -628,7 +629,7 @@ let MyList = {
 									<tr v-for="b in columnBatches">
 										<td class="caption" v-if="cardsCaptions">{{ b.caption }}</td>
 										<td>
-											<div class="batch" :class="{ vertical:b.vertical }">
+											<div class="columnBatch listCards" :class="{ vertical:b.vertical }">
 												<my-value-rich
 													v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
 													@clipboard="$emit('clipboard')"
@@ -776,83 +777,6 @@ let MyList = {
 		};
 	},
 	computed:{
-		// columns can be batched by using the same batch number
-		// first column in batch is used for header caption
-		columnBatches:(s) => {
-			let batches   = [];
-			let addColumn = (column,index) => {
-				const hidden = column.styles.includes('hide') || (s.isMobile && !column.onMobile);
-				const atr    = s.attributeIdMap[column.attributeId];
-				
-				// first non-encrypted/non-file attribute in batch can be sorted by
-				const noSort  = atr.encrypted || s.isAttributeFiles(atr.content);
-				const isColor = atr.contentUse === 'color';
-				
-				if(column.batch !== null) {
-					for(let i = 0, j = batches.length; i < j; i++) {
-						if(batches[i].batch !== column.batch)
-							continue;
-						
-						// do not add column if its hidden
-						if(hidden) return;
-						
-						// add its own column index + sort setting + width to batch
-						batches[i].columnIndexes.push(index);
-						
-						if(!noSort) batches[i].columnIndexesSortBy.push(index);
-						if(isColor) batches[i].columnIndexColor = index;
-						
-						if(!batches[i].vertical)
-							batches[i].basis += column.basis;
-						
-						if(batches[i].vertical && column.basis > batches[i].basis)
-							batches[i].basis = column.basis;
-						
-						return;
-					}
-				}
-				
-				// create new column batch with itself as first column
-				// create even if first column is hidden as other columns in same batch might not be
-				batches.push({
-					basis:column.basis,
-					batch:column.batch,
-					batchOrderIndex:batches.length,
-					caption:s.getColumnTitle(column,s.moduleId),
-					columnIndexes:!hidden ? [index] : [],
-					columnIndexesSortBy:noSort ? [] : [index],
-					columnIndexColor:!isColor ? -1 : index,
-					orderIndexesSmallest:0, // smallest order index used to sort this column batch by
-					orderIndexesUsed:[],    // which order indexes were used to sort this column batch by, empty if batch was not sorted by
-					orderPosition:0,        // position of this column batch sort compared to other column batches (smallest sorted by first)
-					style:'',
-					vertical:column.styles.includes('vertical')
-				});
-			};
-			for(let i = 0, j = s.columns.length; i < j; i++) {
-				addColumn(s.columns[i],i);
-			}
-			
-			// process finished batches
-			for(let i = 0, j = batches.length; i < j; i++) {
-				if(batches[i].basis !== 0)
-					batches[i].style = `max-width:${batches[i].basis}px`;
-				
-				batches[i].orderIndexesUsed     = s.getOrderIndexesFromColumnBatch(batches[i],s.columns,s.orders);
-				batches[i].orderIndexesSmallest = batches[i].orderIndexesUsed.length !== 0 ? Math.min(...batches[i].orderIndexesUsed) : 999;
-			}
-			
-			// calculate which batch is sorted by in order (to show sort order indicators)
-			const batchesSortedBySmallestOrderIndex =
-				[...batches].sort((a,b) => a.orderIndexesSmallest > b.orderIndexesSmallest ? 1 : -1);
-			
-			for(let i = 0, j = batchesSortedBySmallestOrderIndex.length; i < j; i++) {
-				batches[batchesSortedBySmallestOrderIndex[i].batchOrderIndex].orderPosition = i;
-			}
-			
-			// return all batches that have at least 1 column
-			return batches.filter(v => v.columnIndexes.length !== 0);
-		},
 		filtersCombined:(s) => {
 			let filters = s.filters
 				.concat(s.filtersParsedColumn)
@@ -980,6 +904,7 @@ let MyList = {
 		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
 		choiceFilters:       (s) => s.getChoiceFilters(s.choices,s.choiceId),
 		choiceIdDefault:     (s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,true),
 		expressions:         (s) => s.getQueryExpressions(s.columns),
 		hasBulkActions:      (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
 		hasChoices:          (s) => s.query.choices.length > 1,
@@ -1115,6 +1040,7 @@ let MyList = {
 		fillRelationRecordIds,
 		getCaption,
 		getChoiceFilters,
+		getColumnBatches,
 		getColumnTitle,
 		getFiltersEncapsulated,
 		getOrderIndexesFromColumnBatch,

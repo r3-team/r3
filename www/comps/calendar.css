@@ -123,14 +123,6 @@
 .calendar-days .event.clickable:active{
 	margin:3px;
 }
-.calendar-days .event .batch{
-	display:flex;
-	flex-flow:row nowrap;
-	gap:6px;
-}
-.calendar-days .event .batch.vertical{
-	flex-flow:column nowrap;
-}
 .calendar-days .dayInput{
 	height:100%;
 }

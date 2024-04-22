@@ -49,7 +49,7 @@ let MyKanbanCard = {
 				<tr v-for="b in columnBatches">
 					<td v-if="b.caption !== null" class="kanban-label">{{ b.caption }}</td>
 					<td>
-						<div class="batch" :class="{ vertical:b.vertical }">
+						<div class="columnBatch" :class="{ vertical:b.vertical }">
 							<my-value-rich
 								v-for="ind in b.columnIndexes.filter(v => values[v] !== null || columns[v].display === 'gallery')"
 								@clipboard="$emit('clipboard')"
@@ -506,7 +506,7 @@ let MyKanban = {
 		attributeIdAxisY:   (s) => s.relationIndexAxisY !== null && typeof s.joinsIndexMap[s.relationIndexAxisY] !== 'undefined'
 			? s.joinsIndexMap[s.relationIndexAxisY].attributeId : null,
 		choiceFilters:      (s) => s.getChoiceFilters(s.choices,s.choiceId),
-		columnBatches:      (s) => s.getColumnBatches(s.moduleId,s.columns,s.columnIndexesAxisX.concat(s.columnIndexesAxisY),s.showCaptions),
+		columnBatches:      (s) => s.getColumnBatches(s.moduleId,s.columns,s.columnIndexesAxisX.concat(s.columnIndexesAxisY),[],s.showCaptions),
 		columnIndexesAxisX: (s) => s.getAxisColumnIndexes([]),
 		columnIndexesAxisY: (s) => s.relationIndexAxisY === null
 			? [] : s.getAxisColumnIndexes(s.columnIndexesAxisX),

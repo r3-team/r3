@@ -1,0 +1,38 @@
+.columnBatch{
+	min-height:100%;
+	padding:0px 8px;
+	margin:3px 0px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:6px;
+	
+	/* auto cutting text */
+	width:inherit;
+	overflow:hidden;
+}
+@-moz-document url-prefix() {
+    .columnBatch{
+		margin:0.3px 0px;
+    }
+}
+.columnBatch.calendarDays{
+	min-height:unset;
+	padding:0px;
+	margin:0px;
+	width:unset;
+	overflow:initial;
+}
+.columnBatch.listCards{
+	max-width:250px;
+}
+.columnBatch.vertical{
+	flex-flow:column nowrap;
+	justify-content:center;
+	align-items:flex-start;
+	gap:4px;
+}
+.columnBatch .drawing,
+.columnBatch .gallery-item{
+	max-height:var(--row-height);
+}
