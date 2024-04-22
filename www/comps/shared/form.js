@@ -79,7 +79,7 @@ export async function getRowsDecrypted(rows,expressions) {
 export function getColumnIndexesHidden(columns) {
 	let out = [];
 	for(let i = 0, j = columns.length; i < j; i++) {
-		if(columns[i].display === 'hidden' || (MyStore.getters.isMobile && !columns[i].onMobile))
+		if(columns[i].styles.includes('hide') || (MyStore.getters.isMobile && !columns[i].onMobile))
 			out.push(i);
 	}
 	return out;

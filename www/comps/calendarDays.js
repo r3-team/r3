@@ -32,13 +32,13 @@ let MyCalendarDaysEvent = {
 					:attributeId="columns[ind].attributeId"
 					:basis="columns[ind].basis"
 					:bold="columns[ind].styles.includes('bold')"
-					:clipboard="columns[ind].clipboard"
+					:clipboard="columns[ind].styles.includes('clipboard')"
 					:display="columns[ind].display"
 					:italic="columns[ind].styles.includes('italic')"
 					:key="ind"
 					:length="columns[ind].length"
 					:value="values[ind]"
-					:wrap="columns[ind].wrap"
+					:wrap="columns[ind].styles.includes('wrap')"
 				/>
 			</div>
 		</div>

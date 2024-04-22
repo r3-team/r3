@@ -56,13 +56,13 @@ let MyKanbanCard = {
 								:attributeId="columns[ind].attributeId"
 								:basis="columns[ind].basis"
 								:bold="columns[ind].styles.includes('bold')"
-								:clipboard="columns[ind].clipboard"
+								:clipboard="columns[ind].styles.includes('clipboard')"
 								:display="columns[ind].display"
 								:italic="columns[ind].styles.includes('italic')"
 								:key="ind"
 								:length="columns[ind].length"
 								:value="values[ind]"
-								:wrap="columns[ind].wrap"
+								:wrap="columns[ind].styles.includes('wrap')"
 							/>
 						</div>
 					</td>
@@ -301,7 +301,7 @@ let MyKanban = {
 										:key="v.columnIndex"
 										:length="columns[v.columnIndex].length"
 										:value="v.value"
-										:wrap="columns[v.columnIndex].wrap"
+										:wrap="columns[v.columnIndex].styles.includes('wrap')"
 									/>
 								</div>
 							</th>
@@ -371,7 +371,7 @@ let MyKanban = {
 										:key="v.columnIndex"
 										:length="columns[v.columnIndex].length"
 										:value="v.value"
-										:wrap="columns[v.columnIndex].wrap"
+										:wrap="columns[v.columnIndex].styles.includes('wrap')"
 									/>
 								</div>
 							</td>
@@ -679,7 +679,7 @@ let MyKanban = {
 					
 					const column = this.columns[columnIndex];
 					
-					if(column.display === 'hidden' || (this.isMobile && !column.onMobile))
+					if(column.styles.includes('hide') || (this.isMobile && !column.onMobile))
 						continue;
 					
 					values.push({

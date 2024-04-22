@@ -135,7 +135,7 @@ let MyList = {
 									:display="columns[0].display"
 									:length="columns[0].length"
 									:value="r.values[0]"
-									:wrap="columns[0].wrap"
+									:wrap="columns[0].styles.includes('wrap')"
 								/>
 								
 								<!-- category input check box -->
@@ -161,13 +161,13 @@ let MyList = {
 										:class="{ clickable:inputAsCategory && !inputIsReadonly }"
 										:basis="columns[ci].basis"
 										:bold="columns[ci].styles.includes('bold')"
-										:clipboard="columns[ci].clipboard"
+										:clipboard="columns[ci].styles.includes('clipboard')"
 										:display="columns[ci].display"
 										:italic="columns[ci].styles.includes('italic')"
 										:key="ci"
 										:length="columns[ci].length"
 										:value="r.values[ci]"
-										:wrap="columns[ci].wrap"
+										:wrap="columns[ci].styles.includes('wrap')"
 									/>
 								</template>
 							</div>
@@ -498,13 +498,13 @@ let MyList = {
 											:attributeId="columns[ind].attributeId"
 											:basis="columns[ind].basis"
 											:bold="columns[ind].styles.includes('bold')"
-											:clipboard="columns[ind].clipboard"
+											:clipboard="columns[ind].styles.includes('clipboard')"
 											:display="columns[ind].display"
 											:italic="columns[ind].styles.includes('italic')"
 											:key="ind"
 											:length="columns[ind].length"
 											:value="r.values[ind]"
-											:wrap="columns[ind].wrap"
+											:wrap="columns[ind].styles.includes('wrap')"
 										/>
 									</div>
 								</td>
@@ -635,13 +635,13 @@ let MyList = {
 													:attributeId="columns[ind].attributeId"
 													:basis="columns[ind].basis"
 													:bold="columns[ind].styles.includes('bold')"
-													:clipboard="columns[ind].clipboard"
+													:clipboard="columns[ind].styles.includes('clipboard')"
 													:display="columns[ind].display"
 													:italic="columns[ind].styles.includes('italic')"
 													:key="ind"
 													:length="columns[ind].length"
 													:value="r.values[ind]"
-													:wrap="columns[ind].wrap"
+													:wrap="columns[ind].styles.includes('wrap')"
 												/>
 											</div>
 										</td>
@@ -781,7 +781,7 @@ let MyList = {
 		columnBatches:(s) => {
 			let batches   = [];
 			let addColumn = (column,index) => {
-				const hidden = column.display === 'hidden' || (s.isMobile && !column.onMobile);
+				const hidden = column.styles.includes('hide') || (s.isMobile && !column.onMobile);
 				const atr    = s.attributeIdMap[column.attributeId];
 				
 				// first non-encrypted/non-file attribute in batch can be sorted by
@@ -826,7 +826,7 @@ let MyList = {
 					orderIndexesUsed:[],    // which order indexes were used to sort this column batch by, empty if batch was not sorted by
 					orderPosition:0,        // position of this column batch sort compared to other column batches (smallest sorted by first)
 					style:'',
-					vertical:column.batchVertical
+					vertical:column.styles.includes('vertical')
 				});
 			};
 			for(let i = 0, j = s.columns.length; i < j; i++) {

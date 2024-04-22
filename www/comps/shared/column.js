@@ -71,7 +71,7 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,showCaptio
 	let batches   = [];
 	
 	let addColumn = (column,index) => {
-		const hidden = column.display === 'hidden' || (isMobile && !column.onMobile);
+		const hidden = column.styles.includes('hide') || (isMobile && !column.onMobile);
 		
 		if(column.batch !== null) {
 			for(let i = 0, j = batches.length; i < j; i++) {
@@ -90,7 +90,7 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,showCaptio
 			caption:showCaptions && moduleId !== null ? getColumnTitle(column,moduleId) : null,
 			columnIndexes:!hidden ? [index] : [],
 			style:'',
-			vertical:column.batchVertical
+			vertical:column.styles.includes('vertical')
 		});
 	};
 	
