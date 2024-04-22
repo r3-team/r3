@@ -124,6 +124,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TYPE app.column_style ADD VALUE 'hide';
 			ALTER TYPE app.column_style ADD VALUE 'vertical';
 			ALTER TYPE app.column_style ADD VALUE 'wrap';
+			ALTER TABLE app.column ALTER COLUMN batch_vertical DROP NOT NULL;
+			ALTER TABLE app.column ALTER COLUMN clipboard      DROP NOT NULL;
+			ALTER TABLE app.column ALTER COLUMN wrap           DROP NOT NULL;
 
 			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'clipboard') WHERE clipboard;
 			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'hide')      WHERE display = 'hidden';
