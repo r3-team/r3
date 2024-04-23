@@ -244,8 +244,7 @@ func processMessage(mailAccountId int32, msg *imap.Message,
 
 			if strings.Contains(headerType, "text") {
 
-				// some senders include both HTML and plain text
-				// in these cases, we only want the HTML version
+				// some senders include both HTML and plain text - in these cases, we only want the HTML version
 				if gotHtmlText {
 					continue
 				}
@@ -254,7 +253,15 @@ func processMessage(mailAccountId int32, msg *imap.Message,
 				if err != nil {
 					return err
 				}
-				body = string(b)
+
+				if headerType == "text/plain" {
+					// replace 2 new lines with a paragraph, 1 new line with a line break
+					body = regexp.MustCompile(`(.*)(\r\n){2,}`).ReplaceAllString(string(b), "<p>$1</p>")
+					body = regexp.MustCompile(`(.*)(\n){2,}`).ReplaceAllString(body, "<p>$1</p>")
+					body = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(body, "<br />")
+				} else {
+					body = string(b)
+				}
 
 				if headerType == "text/html" {
 					gotHtmlText = true
