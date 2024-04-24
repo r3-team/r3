@@ -314,6 +314,7 @@ export let MyBuilderColumnTemplates = {
 				distincted:false,
 				subQuery:subQuery,
 				query:this.getQueryTemplate(),
+				hidden:false,
 				onMobile:true,
 				styles:['wrap'],
 				captions:{

@@ -137,22 +137,6 @@ export function getSubQueryFilterExpressions(subQuery) {
 	}];
 };
 
-export function getQueryColumnsProcessed(columns,joinsIndexMap,
-	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,values) {
-	
-	columns = JSON.parse(JSON.stringify(columns));
-	for(let i = 0, j = columns.length; i < j; i++) {
-		if(!columns[i].subQuery)
-			continue;
-		
-		columns[i].query.filters = getQueryFiltersProcessed(
-			columns[i].query.filters,joinsIndexMap,
-			dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,values
-		);
-	}
-	return columns;
-};
-
 export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 	fieldIdsChanged,fieldIdsInvalid,values,collectionIdMapIndexFilter) {
 	

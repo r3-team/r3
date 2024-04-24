@@ -1,3 +1,5 @@
+import MyStore                    from '../../stores/store.js';
+import {getQueryFiltersProcessed} from './query.js';
 import {
 	isAttributeBoolean,
 	isAttributeFiles,
@@ -7,7 +9,44 @@ import {
 	getCaption,
 	getCaptionForLang
 } from './language.js';
-import MyStore from '../../stores/store.js';
+
+export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
+	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,values) {
+
+	columns = JSON.parse(JSON.stringify(columns));
+	let out = [];
+	for(const c of columns) {
+		// skip if columns are defined by user and its not included
+		//  or if column is hidden by default
+		//  or if column is not shown on mobile (and mobile is active)
+		if((columnIdsByUser.length !== 0 && !columnIdsByUser.includes(c.id)) ||
+			c.hidden || (!c.onMobile && MyStore.getters.isMobile)) {
+
+			continue;
+		}
+
+		// optimize style options access
+		c.styles = {
+			alignEnd:c.styles.includes('alignEnd'),
+			alignMid:c.styles.includes('alignMid'),
+			bold:c.styles.includes('bold'),
+			clipboard:c.styles.includes('clipboard'),
+			italic:c.styles.includes('italic'),
+			vertical:c.styles.includes('vertical'),
+			wrap:c.styles.includes('wrap')
+		};
+
+		// resolve sub query filters
+		if(c.subQuery) {
+			c.query.filters = getQueryFiltersProcessed(
+				c.query.filters,joinsIndexMap,
+				dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,values
+			);
+		}
+		out.push(c);
+	}
+	return out;
+};
 
 export function getColumnTitle(c,moduleId) {
 	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
@@ -67,20 +106,17 @@ export function getOrderIndexesFromColumnBatch(columnBatch,columns,orders) {
 };
 
 export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,showCaptions) {
-	const isMobile = MyStore.getters.isMobile;
-	let batches    = [];
+	let batches = [];
 	
 	let addColumn = (column,index) => {
-		const hidden = column.styles.includes('hide') || (isMobile && !column.onMobile);
-		const atr    = MyStore.getters['schema/attributeIdMap'][column.attributeId];
-		
 		// first non-encrypted/non-file attribute in batch can be sorted by
+		const atr     = MyStore.getters['schema/attributeIdMap'][column.attributeId];
 		const noSort  = atr.encrypted || isAttributeFiles(atr.content);
 		const isColor = atr.contentUse === 'color';
 		
 		if(column.batch !== null) {
 			for(let i = 0, j = batches.length; i < j; i++) {
-				if(batches[i].batch !== column.batch || hidden)
+				if(batches[i].batch !== column.batch)
 					continue;
 				
 				// add its own column index + sort setting + width to batch
@@ -100,20 +136,19 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sho
 		}
 		
 		// create new column batch with itself as first column
-		// create even if first column is hidden as other columns in same batch might not be
 		batches.push({
 			basis:column.basis,
 			batch:column.batch,
 			batchOrderIndex:batches.length,
 			caption:showCaptions && moduleId !== null ? getColumnTitle(column,moduleId) : null,
-			columnIndexes:!hidden ? [index] : [],
+			columnIndexes:[index],
 			columnIndexesSortBy:noSort ? [] : [index],
 			columnIndexColor:!isColor ? -1 : index,
 			orderIndexesSmallest:0, // smallest order index used to sort this column batch by
 			orderIndexesUsed:[],    // which order indexes were used to sort this column batch by, empty if batch was not sorted by
 			orderPosition:0,        // position of this column batch sort compared to other column batches (smallest sorted by first)
 			style:'',
-			vertical:column.styles.includes('vertical')
+			vertical:column.styles.vertical
 		});
 	};
 	

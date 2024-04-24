@@ -1,16 +1,13 @@
-import MyInputCollection from './inputCollection.js';
-import MyForm            from './form.js';
-import MyValueRich       from './valueRich.js';
-import srcBase64Icon     from './shared/image.js';
-import {getCaption}      from './shared/language.js';
+import MyInputCollection  from './inputCollection.js';
+import MyForm             from './form.js';
+import MyValueRich        from './valueRich.js';
+import srcBase64Icon      from './shared/image.js';
+import {getChoiceFilters} from './shared/form.js';
+import {getCaption}       from './shared/language.js';
 import {
 	fieldOptionGet,
 	fieldOptionSet
 } from './shared/field.js';
-import {
-	getChoiceFilters,
-	getColumnIndexesHidden
-} from './shared/form.js';
 import {
 	colorAdjustBg,
 	colorMakeContrastFont
@@ -54,9 +51,9 @@ let MyGanttLineRecord = {
 					v-if="!indexesHidden.includes(i) && v !== null"
 					:attribute-id="columns[i].attributeId"
 					:basis="columns[i].basis"
-					:bold="columns[i].styles.includes('bold')"
+					:bold="columns[i].styles.bold"
 					:display="columns[i].display"
-					:italic="columns[i].styles.includes('italic')"
+					:italic="columns[i].styles.italic"
 					:key="i"
 					:length="columns[i].length"
 					:value="v"
@@ -289,11 +286,11 @@ let MyGantt = {
 					>
 						<div class="columnBatch ganttGroup" :class="{ vertical:g.vertical }">
 							<my-value-rich class="context-calendar-gantt"
-								v-for="c in g.columns.filter(v => !columnIndexesHidden.includes(v.index) && v.value !== null)"
+								v-for="c in g.columns.filter(v => v.value !== null)"
 								:attribute-id="columns[c.index].attributeId"
-								:bold="columns[c.index].styles.includes('bold')"
+								:bold="columns[c.index].styles.bold"
 								:display="columns[c.index].display"
-								:italic="columns[c.index].styles.includes('italic')"
+								:italic="columns[c.index].styles.italic"
 								:key="c.index"
 								:length="columns[c.index].length"
 								:value="c.value"
@@ -339,7 +336,7 @@ let MyGantt = {
 							:date0Range="date0"
 							:date1Range="date1"
 							:hasUpdate="hasUpdate"
-							:indexesHidden="columnIndexesHidden.concat(group0LabelExpressionIndexes)"
+							:indexesHidden="group0LabelExpressionIndexes"
 							:isDays="isDays"
 							:pxPerSec="pxPerSec"
 							:key="i+'_'+li"
@@ -506,19 +503,18 @@ let MyGantt = {
 		},
 		
 		// simple
-		choiceFilters:      (s) => s.getChoiceFilters(s.choices,s.choiceId),
-		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
-		expressions:        (s) => s.getQueryExpressions(s.columns),
-		hasChoices:         (s) => s.choices.length > 1,
-		hasColor:           (s) => s.attributeIdColor !== null,
-		hasCreate:          (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyCreate,
-		hasUpdate:          (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate,
-		isDays:             (s) => s.stepType === 'days',
-		isEmpty:            (s) => s.groups.length === 0,
-		isHours:            (s) => s.stepType === 'hours',
-		joins:              (s) => s.fillRelationRecordIds(s.query.joins),
-		stepPixels:         (s) => s.stepBase * s.stepZoom,
-		styleHeaderItem:    (s) => `width:${s.stepPixels}px;`,
+		choiceFilters:  (s) => s.getChoiceFilters(s.choices,s.choiceId),
+		expressions:    (s) => s.getQueryExpressions(s.columns),
+		hasChoices:     (s) => s.choices.length > 1,
+		hasColor:       (s) => s.attributeIdColor !== null,
+		hasCreate:      (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyCreate,
+		hasUpdate:      (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate,
+		isDays:         (s) => s.stepType === 'days',
+		isEmpty:        (s) => s.groups.length === 0,
+		isHours:        (s) => s.stepType === 'hours',
+		joins:          (s) => s.fillRelationRecordIds(s.query.joins),
+		stepPixels:     (s) => s.stepBase * s.stepZoom,
+		styleHeaderItem:(s) => `width:${s.stepPixels}px;`,
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -540,6 +536,7 @@ let MyGantt = {
 		this.dateStart = this.getDateNowRounded();
 		
 		// setup watchers
+		this.$watch('columns',this.reset);
 		this.$watch('popUpFormInline',this.resize);
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
@@ -595,7 +592,6 @@ let MyGantt = {
 		fillRelationRecordIds,
 		getCaption,
 		getChoiceFilters,
-		getColumnIndexesHidden,
 		getDateFormat,
 		getDateFromUnix,
 		getQueryExpressions,
@@ -748,6 +744,9 @@ let MyGantt = {
 			
 			this.createHeaderItems();
 			this.get();
+		},
+		reset() {
+			this.groups = [];
 		},
 		
 		// page routing
@@ -903,7 +902,7 @@ let MyGantt = {
 							groupColumns.push({
 								index:i,
 								value:values[i],
-								vertical:this.columns[i].styles.includes('vertical')
+								vertical:this.columns[i].styles.vertical
 							});
 						}
 						let groupName = groupBy.join(' ');

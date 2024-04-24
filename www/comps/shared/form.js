@@ -76,15 +76,6 @@ export async function getRowsDecrypted(rows,expressions) {
 	return rows;
 };
 
-export function getColumnIndexesHidden(columns) {
-	let out = [];
-	for(let i = 0, j = columns.length; i < j; i++) {
-		if(columns[i].styles.includes('hide') || (MyStore.getters.isMobile && !columns[i].onMobile))
-			out.push(i);
-	}
-	return out;
-};
-
 export function getChoiceFilters(choices,choiceIdActive) {
 	if(choiceIdActive === null)
 		return [];

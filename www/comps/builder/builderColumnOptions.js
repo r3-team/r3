@@ -33,8 +33,8 @@ let MyBuilderColumnOptions = {
 					<td>{{ capApp.columnShowDefault }}</td>
 					<td>
 						<my-bool
-							@update:modelValue="setStyle('hide',$event)"
-							:modelValue="column.styles.includes('hide')"
+							@update:modelValue="set('hidden',$event)"
+							:modelValue="column.hidden"
 							:reversed="true"
 						/>
 					</td>
@@ -44,8 +44,8 @@ let MyBuilderColumnOptions = {
 					<td>
 						<my-bool
 							@update:modelValue="set('onMobile',$event)"
-							:readonly="column.styles.includes('hide')"
-							:modelValue="column.onMobile && !column.styles.includes('hide')"
+							:readonly="column.hidden"
+							:modelValue="column.onMobile && !column.hidden"
 						/>
 					</td>
 				</tr>

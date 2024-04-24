@@ -136,7 +136,7 @@ let MyList = {
 									:display="columns[0].display"
 									:length="columns[0].length"
 									:value="r.values[0]"
-									:wrap="columns[0].styles.includes('wrap')"
+									:wrap="columns[0].styles.wrap"
 								/>
 								
 								<!-- category input check box -->
@@ -161,14 +161,14 @@ let MyList = {
 										:attribute-id="columns[ci].attributeId"
 										:class="{ clickable:inputAsCategory && !inputIsReadonly }"
 										:basis="columns[ci].basis"
-										:bold="columns[ci].styles.includes('bold')"
-										:clipboard="columns[ci].styles.includes('clipboard')"
+										:bold="columns[ci].styles.bold"
+										:clipboard="columns[ci].styles.clipboard"
 										:display="columns[ci].display"
-										:italic="columns[ci].styles.includes('italic')"
+										:italic="columns[ci].styles.italic"
 										:key="ci"
 										:length="columns[ci].length"
 										:value="r.values[ci]"
-										:wrap="columns[ci].styles.includes('wrap')"
+										:wrap="columns[ci].styles.wrap"
 									/>
 								</template>
 							</div>
@@ -498,14 +498,14 @@ let MyList = {
 											@clipboard="$emit('clipboard')"
 											:attributeId="columns[ind].attributeId"
 											:basis="columns[ind].basis"
-											:bold="columns[ind].styles.includes('bold')"
-											:clipboard="columns[ind].styles.includes('clipboard')"
+											:bold="columns[ind].styles.bold"
+											:clipboard="columns[ind].styles.clipboard"
 											:display="columns[ind].display"
-											:italic="columns[ind].styles.includes('italic')"
+											:italic="columns[ind].styles.italic"
 											:key="ind"
 											:length="columns[ind].length"
 											:value="r.values[ind]"
-											:wrap="columns[ind].styles.includes('wrap')"
+											:wrap="columns[ind].styles.wrap"
 										/>
 									</div>
 								</td>
@@ -635,14 +635,14 @@ let MyList = {
 													@clipboard="$emit('clipboard')"
 													:attributeId="columns[ind].attributeId"
 													:basis="columns[ind].basis"
-													:bold="columns[ind].styles.includes('bold')"
-													:clipboard="columns[ind].styles.includes('clipboard')"
+													:bold="columns[ind].styles.bold"
+													:clipboard="columns[ind].styles.clipboard"
 													:display="columns[ind].display"
-													:italic="columns[ind].styles.includes('italic')"
+													:italic="columns[ind].styles.italic"
 													:key="ind"
 													:length="columns[ind].length"
 													:value="r.values[ind]"
-													:wrap="columns[ind].styles.includes('wrap')"
+													:wrap="columns[ind].styles.wrap"
 												/>
 											</div>
 										</td>
@@ -958,6 +958,7 @@ let MyList = {
 		}
 		
 		// setup watchers
+		this.$watch('columns',this.reset);
 		this.$watch('formLoading',(val) => {
 			if(val) return;
 			this.inputAutoSelectDone = false;
@@ -1130,6 +1131,10 @@ let MyList = {
 				return this.paramsUpdate(true);
 			
 			this.get();
+		},
+		reset() {
+			this.count = 0;
+			this.rows  = [];
 		},
 		
 		// parsing

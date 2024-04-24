@@ -118,22 +118,25 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- new column styles + cleanup of old ones
 			ALTER TABLE app.column ALTER COLUMN styles TYPE CHARACTER VARYING(12)[];
 
-			ALTER TYPE app.column_style ADD VALUE 'alignEnd';
-			ALTER TYPE app.column_style ADD VALUE 'alignMid';
-			ALTER TYPE app.column_style ADD VALUE 'clipboard';
-			ALTER TYPE app.column_style ADD VALUE 'hide';
-			ALTER TYPE app.column_style ADD VALUE 'vertical';
-			ALTER TYPE app.column_style ADD VALUE 'wrap';
 			ALTER TABLE app.column ALTER COLUMN batch_vertical DROP NOT NULL;
 			ALTER TABLE app.column ALTER COLUMN clipboard      DROP NOT NULL;
 			ALTER TABLE app.column ALTER COLUMN wrap           DROP NOT NULL;
 
+			ALTER TYPE app.column_style ADD VALUE 'alignEnd';
+			ALTER TYPE app.column_style ADD VALUE 'alignMid';
+			ALTER TYPE app.column_style ADD VALUE 'clipboard';
+			ALTER TYPE app.column_style ADD VALUE 'vertical';
+			ALTER TYPE app.column_style ADD VALUE 'wrap';
 			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'clipboard') WHERE clipboard;
-			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'hide')      WHERE display = 'hidden';
 			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'vertical')  WHERE batch_vertical;
 			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'wrap')      WHERE wrap;
-
-			UPDATE app.column SET display = 'default' WHERE display = 'hidden';
+			
+			ALTER TABLE app.column ADD COLUMN hidden BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.column ALTER COLUMN hidden DROP DEFAULT;
+			
+			UPDATE app.column
+			SET hidden = TRUE, display = 'default'
+			WHERE display = 'hidden';
 		`)
 		return "3.8", err
 	},

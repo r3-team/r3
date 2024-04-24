@@ -1,6 +1,5 @@
-import MyValueRich              from './valueRich.js';
-import {getColumnBatches}       from './shared/column.js';
-import {getColumnIndexesHidden} from './shared/form.js';
+import MyValueRich        from './valueRich.js';
+import {getColumnBatches} from './shared/column.js';
 import {
 	colorAdjustBg,
 	colorMakeContrastFont,
@@ -31,14 +30,14 @@ let MyCalendarDaysEvent = {
 					@clipboard="$emit('clipboard')"
 					:attributeId="columns[ind].attributeId"
 					:basis="columns[ind].basis"
-					:bold="columns[ind].styles.includes('bold')"
-					:clipboard="columns[ind].styles.includes('clipboard')"
+					:bold="columns[ind].styles.bold"
+					:clipboard="columns[ind].styles.clipboard"
 					:display="columns[ind].display"
-					:italic="columns[ind].styles.includes('italic')"
+					:italic="columns[ind].styles.italic"
 					:key="ind"
 					:length="columns[ind].length"
 					:value="values[ind]"
-					:wrap="columns[ind].styles.includes('wrap')"
+					:wrap="columns[ind].styles.wrap"
 				/>
 			</div>
 		</div>
@@ -212,8 +211,7 @@ let MyCalendarDays = {
 				// add non-hidden values
 				const values = s.hasColor ? row.values.slice(3) : row.values.slice(2);
 				for(let x = 0, y = values.length; x < y; x++) {
-					if(!s.columnIndexesHidden.includes(x))
-						ev.values.push(values[x]);
+					ev.values.push(values[x]);
 				}
 				
 				// check for full day event (stored as UTC zero)
@@ -349,13 +347,12 @@ let MyCalendarDays = {
 		},
 		
 		// simple
-		columnBatches:      (s) => s.getColumnBatches(null,s.columns,[],[],false),
-		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
-		heightHourPx:       (s) => (s.isInput ? 3 : 11) * s.zoom,
-		heightHourPxFull:   (s) => 9 * s.zoom,
-		heightHourStyle:    (s) => `height:${s.heightHourPx}px;`,
-		unixSelect0:        (s) => s.dateSelect0 !== null ? Math.floor(s.dateSelect0.getTime() / 1000) : 0,
-		unixSelect1:        (s) => s.dateSelect1 !== null ? Math.floor(s.dateSelect1.getTime() / 1000) : 0,
+		columnBatches:   (s) => s.getColumnBatches(null,s.columns,[],[],false),
+		heightHourPx:    (s) => (s.isInput ? 3 : 11) * s.zoom,
+		heightHourPxFull:(s) => 9 * s.zoom,
+		heightHourStyle: (s) => `height:${s.heightHourPx}px;`,
+		unixSelect0:     (s) => s.dateSelect0 !== null ? Math.floor(s.dateSelect0.getTime() / 1000) : 0,
+		unixSelect1:     (s) => s.dateSelect1 !== null ? Math.floor(s.dateSelect1.getTime() / 1000) : 0,
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -378,7 +375,6 @@ let MyCalendarDays = {
 		colorAdjustBg,
 		colorMakeContrastFont,
 		getColumnBatches,
-		getColumnIndexesHidden,
 		getDateFormatNoYear,
 		getDaysBetween,
 		getStringFilled,

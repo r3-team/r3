@@ -1,8 +1,8 @@
-import MyStore      from '../../stores/store.js';
-import {getNilUuid} from './generic.js';
+import MyStore               from '../../stores/store.js';
+import {getColumnsProcessed} from './column.js';
+import {getNilUuid}          from './generic.js';
 import {
 	getJoinIndexMap,
-	getQueryColumnsProcessed,
 	getQueryExpressions,
 	getQueryFiltersProcessed,
 	getRelationsJoined
@@ -23,7 +23,7 @@ export function getCollectionConsumerTemplate() {
 	};
 };
 export function getCollectionColumnIndex(collectionId,columnId) {
-	let colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
+	const colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
 	for(let i = 0, j = colSchema.columns.length; i < j; i++) {
 		if(columnId === colSchema.columns[i].id) {
 			return i;
@@ -139,7 +139,7 @@ export function updateCollections(collectionId) {
 			
 			const joinIndexMap = getJoinIndexMap(q.joins);
 			const filters      = getQueryFiltersProcessed(q.filters,joinIndexMap);
-			const columns      = getQueryColumnsProcessed(c.columns,joinIndexMap);
+			const columns      = getColumnsProcessed(c.columns,[],joinIndexMap);
 			
 			requestIds.push(c.id);
 			dataRequests.push(ws.prepare('data','get',{

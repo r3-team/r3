@@ -1,19 +1,21 @@
-import MyCalendar             from './calendar.js';
-import MyChart                from './chart.js';
-import MyGantt                from './gantt.js';
-import MyKanban               from './kanban.js';
-import MyInputDate            from './inputDate.js';
-import MyInputDrawing         from './inputDrawing.js';
-import MyInputFiles           from './inputFiles.js';
-import MyInputIframe          from './inputIframe.js';
-import MyInputLogin           from './inputLogin.js';
-import MyInputRichtext        from './inputRichtext.js';
-import MyInputSelect          from './inputSelect.js';
-import MyInputUuid            from './inputUuid.js';
-import MyList                 from './list.js';
-import {hasAccessToAttribute} from './shared/access.js';
-import {srcBase64}            from './shared/image.js';
-import {getCaption}           from './shared/language.js';
+import MyCalendar                 from './calendar.js';
+import MyChart                    from './chart.js';
+import MyGantt                    from './gantt.js';
+import MyKanban                   from './kanban.js';
+import MyInputDate                from './inputDate.js';
+import MyInputDrawing             from './inputDrawing.js';
+import MyInputFiles               from './inputFiles.js';
+import MyInputIframe              from './inputIframe.js';
+import MyInputLogin               from './inputLogin.js';
+import MyInputRichtext            from './inputRichtext.js';
+import MyInputSelect              from './inputSelect.js';
+import MyInputUuid                from './inputUuid.js';
+import MyList                     from './list.js';
+import {hasAccessToAttribute}     from './shared/access.js';
+import {getColumnsProcessed}      from './shared/column.js';
+import {srcBase64}                from './shared/image.js';
+import {getCaption}               from './shared/language.js';
+import {getQueryFiltersProcessed} from './shared/query.js';
 import {
 	getLinkMeta,
 	getNilUuid,
@@ -28,10 +30,6 @@ import {
 	getFormPopUpConfig,
 	setGetterArgs
 } from './shared/form.js';
-import {
-	getQueryColumnsProcessed,
-	getQueryFiltersProcessed
-} from './shared/query.js';
 import {
 	getIndexAttributeId,
 	isAttributeBoolean,
@@ -783,8 +781,8 @@ let MyField = {
 		},
 		fieldAttributeIdAlt:(s) => !s.isData || s.field.attributeIdAlt === null ? false
 			: s.getIndexAttributeId(s.field.index,s.field.attributeIdAlt,false,null),
-		columnsProcessed:(s) => !s.isQuery ? [] : s.getQueryColumnsProcessed(
-			s.field.columns,s.joinsIndexMap,s.dataFieldMap,
+		columnsProcessed:(s) => !s.isQuery ? [] : s.getColumnsProcessed(
+			s.field.columns,[],s.joinsIndexMap,s.dataFieldMap,
 			s.fieldIdsChanged,s.fieldIdsInvalid,s.values),
 		choicesProcessed:(s) => {
 			if(!s.isQuery) return [];
@@ -1127,12 +1125,12 @@ let MyField = {
 		fieldOptionGet,
 		fieldOptionSet,
 		getCaption,
+		getColumnsProcessed,
 		getFlexStyle,
 		getFormPopUpConfig,
 		getIndexAttributeId,
 		getLinkMeta,
 		getNilUuid,
-		getQueryColumnsProcessed,
 		getQueryFiltersProcessed,
 		hasAccessToAttribute,
 		isAttributeBoolean,

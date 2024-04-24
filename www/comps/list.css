@@ -135,14 +135,14 @@
 .list .layoutTable th:last-child{
 	padding-right:10px; /* for header toggle */
 }
-.list .layoutTable th .columnBatch{
+.list .layoutTable th .columnBatchHeader{
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:space-between;
 	align-items:stretch;
 }
-.list .layoutTable th .columBatchCaption{
+.list .layoutTable th .columBatchHeaderCaption{
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;

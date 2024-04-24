@@ -467,8 +467,9 @@ type Column struct {
 	Basis    int         `json:"basis"`    // size basis (usually width)
 	Batch    pgtype.Int4 `json:"batch"`    // index of column batch (multiple columns as one)
 	Display  string      `json:"display"`  // how to display value (email, gallery, etc.)
+	Hidden   bool        `json:"hidden"`   // hide column by default?
 	Length   int         `json:"length"`   // text length limit (in characters)
-	OnMobile bool        `json:"onMobile"` // display this column on mobile by default?
+	OnMobile bool        `json:"onMobile"` // display column on mobile by default?
 	Styles   []string    `json:"styles"`   // alignEnd, alignMid, bold, clipboard, hide, italic, vertical, wrap
 
 	// legacy

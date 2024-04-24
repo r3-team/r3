@@ -16,15 +16,15 @@ import (
 // < 3.8
 // migrate column styles
 func FixColumnStyles(column types.Column) types.Column {
+	if column.Display == "hidden" {
+		column.Hidden = true
+		column.Display = "default"
+	}
 	if column.BatchVertical {
 		column.Styles = append(column.Styles, "vertical")
 	}
 	if column.Clipboard {
 		column.Styles = append(column.Styles, "clipboard")
-	}
-	if column.Display == "hidden" {
-		column.Display = "default"
-		column.Styles = append(column.Styles, "hide")
 	}
 	if column.Wrap {
 		column.Styles = append(column.Styles, "wrap")

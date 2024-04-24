@@ -55,14 +55,14 @@ let MyKanbanCard = {
 								@clipboard="$emit('clipboard')"
 								:attributeId="columns[ind].attributeId"
 								:basis="columns[ind].basis"
-								:bold="columns[ind].styles.includes('bold')"
-								:clipboard="columns[ind].styles.includes('clipboard')"
+								:bold="columns[ind].styles.bold"
+								:clipboard="columns[ind].styles.clipboard"
 								:display="columns[ind].display"
-								:italic="columns[ind].styles.includes('italic')"
+								:italic="columns[ind].styles.italic"
 								:key="ind"
 								:length="columns[ind].length"
 								:value="values[ind]"
-								:wrap="columns[ind].styles.includes('wrap')"
+								:wrap="columns[ind].styles.wrap"
 							/>
 						</div>
 					</td>
@@ -295,13 +295,13 @@ let MyKanban = {
 										v-for="v in x.values.filter(v => v.value !== null)"
 										:attributeId="columns[v.columnIndex].attributeId"
 										:basis="columns[v.columnIndex].basis"
-										:bold="columns[v.columnIndex].styles.includes('bold')"
+										:bold="columns[v.columnIndex].styles.bold"
 										:display="columns[v.columnIndex].display"
-										:italic="columns[v.columnIndex].styles.includes('italic')"
+										:italic="columns[v.columnIndex].styles.italic"
 										:key="v.columnIndex"
 										:length="columns[v.columnIndex].length"
 										:value="v.value"
-										:wrap="columns[v.columnIndex].styles.includes('wrap')"
+										:wrap="columns[v.columnIndex].styles.wrap"
 									/>
 								</div>
 							</th>
@@ -365,13 +365,13 @@ let MyKanban = {
 										v-for="v in y.values.filter(v => v.value !== null)"
 										:attributeId="columns[v.columnIndex].attributeId"
 										:basis="columns[v.columnIndex].basis"
-										:bold="columns[v.columnIndex].styles.includes('bold')"
+										:bold="columns[v.columnIndex].styles.bold"
 										:display="columns[v.columnIndex].display"
-										:italic="columns[v.columnIndex].styles.includes('italic')"
+										:italic="columns[v.columnIndex].styles.italic"
 										:key="v.columnIndex"
 										:length="columns[v.columnIndex].length"
 										:value="v.value"
-										:wrap="columns[v.columnIndex].styles.includes('wrap')"
+										:wrap="columns[v.columnIndex].styles.wrap"
 									/>
 								</div>
 							</td>
@@ -536,6 +536,7 @@ let MyKanban = {
 	},
 	mounted() {
 		// setup watchers
+		this.$watch('columns',this.reset);
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
@@ -679,7 +680,7 @@ let MyKanban = {
 					
 					const column = this.columns[columnIndex];
 					
-					if(column.styles.includes('hide') || (this.isMobile && !column.onMobile))
+					if(column.hidden || (this.isMobile && !column.onMobile))
 						continue;
 					
 					values.push({
@@ -716,6 +717,11 @@ let MyKanban = {
 				return this.paramsUpdate(true);
 			
 			this.get();
+		},
+		reset() {
+			this.axisEntriesX      = [];
+			this.axisEntriesY      = [];
+			this.recordIdMapAxisXY = [];
 		},
 		
 		// page routing

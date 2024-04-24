@@ -1,5 +1,4 @@
 import MyValueRich              from './valueRich.js';
-import {getColumnIndexesHidden} from './shared/form.js';
 import {
 	colorAdjustBg,
 	colorMakeContrastFont,
@@ -52,9 +51,9 @@ let MyCalendarMonth = {
 									v-if="v !== null"
 									:attributeId="columns[i].attributeId"
 									:basis="columns[i].basis"
-									:bold="columns[i].styles.includes('bold')"
+									:bold="columns[i].styles.bold"
 									:display="columns[i].display"
-									:italic="columns[i].styles.includes('italic')"
+									:italic="columns[i].styles.italic"
 									:key="i"
 									:length="columns[i].length"
 									:value="v"
@@ -79,9 +78,9 @@ let MyCalendarMonth = {
 							v-if="v !== null"
 							:attributeId="columns[i].attributeId"
 							:basis="columns[i].basis"
-							:bold="columns[i].styles.includes('bold')"
+							:bold="columns[i].styles.bold"
 							:display="columns[i].display"
-							:italic="columns[i].styles.includes('italic')"
+							:italic="columns[i].styles.italic"
 							:key="i"
 							:length="columns[i].length"
 							:wrap="true"
@@ -157,8 +156,7 @@ let MyCalendarMonth = {
 				// add non-hidden values
 				let values = s.hasColor ? s.rows[i].values.slice(3) : s.rows[i].values.slice(2);
 				for(let x = 0, y = values.length; x < y; x++) {
-					if(!s.columnIndexesHidden.includes(x))
-						ev.values.push(values[x]);
+					ev.values.push(values[x]);
 				}
 				
 				// check for full day event (stored as UTC zero)
@@ -244,10 +242,9 @@ let MyCalendarMonth = {
 		},
 		
 		// simple
-		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
-		daysAfter:          (s) => s.date1.getDate(),
-		daysSelectable:     (s) => s.hasCreate || s.isInput,
-		month:              (s) => s.date.getMonth(), // active month (0-11)
+		daysAfter:     (s) => s.date1.getDate(),
+		daysSelectable:(s) => s.hasCreate || s.isInput,
+		month:         (s) => s.date.getMonth(), // active month (0-11)
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -260,7 +257,6 @@ let MyCalendarMonth = {
 		// externals
 		colorAdjustBg,
 		colorMakeContrastFont,
-		getColumnIndexesHidden,
 		getDateAtUtcZero,
 		getDaysBetween,
 		getStringFilled,
