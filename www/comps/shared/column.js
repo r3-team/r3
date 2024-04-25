@@ -14,16 +14,25 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
 	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,values) {
 
 	columns = JSON.parse(JSON.stringify(columns));
-	let out = [];
-	for(const c of columns) {
-		// skip if columns are defined by user and its not included
-		//  or if column is hidden by default
-		//  or if column is not shown on mobile (and mobile is active)
-		if((columnIdsByUser.length !== 0 && !columnIdsByUser.includes(c.id)) ||
-			c.hidden || (!c.onMobile && MyStore.getters.isMobile)) {
 
-			continue;
+	let batchMapCaptions = {};
+	let out = [];
+	for(let c of columns) {
+		// apply captions of first batch column to other batch columns (to display if first batch column is hidden)
+		if(c.batch !== null) {
+			if(batchMapCaptions[c.batch] === undefined)
+				batchMapCaptions[c.batch] = c.captions;
+			else
+				c.captions = batchMapCaptions[c.batch];
 		}
+
+		// skip if columns are defined by user and its not included
+		if(columnIdsByUser.length !== 0 && !columnIdsByUser.includes(c.id))
+			continue;
+		
+		// not defined by user, apply defaults
+		if(columnIdsByUser.length === 0 && (c.hidden || (!c.onMobile && MyStore.getters.isMobile)))
+			continue;
 
 		// optimize style options access
 		c.styles = {

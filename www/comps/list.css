@@ -395,6 +395,37 @@
 	justify-content:space-between;
 }
 
+/* options */
+.list-options{}
+.list-options-column-config{
+	display:flex;
+	flex-flow:column nowrap;
+	gap:3px;
+}
+.list-options-batch{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	padding:6px 12px;
+	gap:12px;
+	border:1px solid var(--color-border);
+	border-radius:16px;
+}
+.list-options-batch-columns{
+	display:flex;
+	flex-flow:row nowrap;
+	padding:5px 10px;
+	gap:9px;
+	background-color:var(--color-input);
+	border-radius:8px;
+}
+.list-options-batch-column{
+}
+.list-options-batch-column.notShown{
+	text-decoration:line-through;
+}
+
+
 
 /* user overwrites */
 .user-listSpaced .list .layoutTable table:not(.asInput){

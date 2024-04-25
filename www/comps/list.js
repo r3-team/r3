@@ -6,6 +6,7 @@ import MyInputOffset      from './inputOffset.js';
 import MyListAggregate    from './listAggregate.js';
 import MyListColumnBatch  from './listColumnBatch.js';
 import MyListCsv          from './listCsv.js';
+import MyListOptions      from './listOptions.js';
 import MyValueRich        from './valueRich.js';
 import {consoleError}     from './shared/error.js';
 import {getCaption}       from './shared/language.js';
@@ -49,6 +50,7 @@ let MyList = {
 		MyListAggregate,
 		MyListColumnBatch,
 		MyListCsv,
+		MyListOptions,
 		MyValueRich
 	},
 	template:`<div class="list" ref="content"
@@ -61,7 +63,7 @@ let MyList = {
 			v-if="showHover"
 			@click.self.stop="closeHover"
 		>
-			<div class="contentBox float" :class="{ 'list-csv':showCsv,'list-filters':showFilters }">
+			<div class="contentBox float" :class="{ 'list-csv':showCsv,'list-filters':showFilters, 'list-options':showOptions }">
 				<div class="top lower">
 					<div class="area">
 						<img class="icon" :src="hoverIconSrc" />
@@ -94,6 +96,14 @@ let MyList = {
 						:joins="joins"
 						:showReset="true"
 						:userFilter="true"
+					/>
+					<my-list-options
+						v-if="showOptions"
+						@set-column-ids-by-user="$emit('set-column-ids-by-user',$event)"
+						:columns="columns"
+						:columnsAll="columnsAll"
+						:columnBatches="columnBatches"
+						:moduleId="moduleId"
 					/>
 					<div class="row gap centered default-inputs" v-if="showAutoRenew">
 						<span>{{ capApp.autoRenewInput }}</span>
@@ -369,6 +379,12 @@ let MyList = {
 						@trigger="toggleLayout"
 						:captionTitle="capApp.button.layoutSwitchHint"
 						:image="isTable ? 'files_list1.png' : 'files_list3.png'"
+						:naked="true"
+					/>
+					
+					<my-button image="listCog.png"
+						@trigger="showOptions = !showOptions"
+						:captionTitle="capGen.options"
 						:naked="true"
 					/>
 				</div>
@@ -679,7 +695,8 @@ let MyList = {
 		choices:        { type:Array,   required:false, default:() => [] }, // processed query choices
 		collections:    { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
-		columns:        { type:Array,   required:true },                    // processed list columns
+		columns:        { type:Array,   required:true },                    // list columns, processed
+		columnsAll:     { type:Array,   required:false, default:() => [] }, // list columns, all
 		fieldId:        { type:String,  required:true },
 		filters:        { type:Array,   required:true },                    // processed query filters
 		layoutDefault:  { type:String,  required:false, default:'table' },  // default list layout: table, cards
@@ -715,7 +732,7 @@ let MyList = {
 		'blurred','clipboard','close-inline','focused','open-form',
 		'open-form-bulk','record-count-change','record-removed',
 		'record-selected','records-selected-init','set-args',
-		'set-collection-indexes'
+		'set-column-ids-by-user','set-collection-indexes'
 	],
 	data() {
 		return {
@@ -736,6 +753,7 @@ let MyList = {
 			showCsv:false,              // show UI for CSV import/export
 			showFilters:false,          // show UI for user filters
 			showHeader:true,            // show UI for list header
+			showOptions:false,          // show UI for list options
 			showTable:false,            // show regular list table as view or input dropdown
 			
 			// list constants
@@ -806,15 +824,17 @@ let MyList = {
 				s.attributeIdMap[s.columns[0].attributeId].content === 'files';
 		},
 		hoverCaption:(s) => {
-			if     (s.showCsv)       return s.capApp.button.csv;
+			if     (s.showAutoRenew) return s.capApp.autoRenew;
+			else if(s.showCsv)       return s.capApp.button.csv;
 			else if(s.showFilters)   return s.capGen.button.filterHint;
-			else if(s.showAutoRenew) return s.capApp.autoRenew;
+			else if(s.showOptions)   return s.capGen.options;
 			return '';
 		},
 		hoverIconSrc:(s) => {
-			if     (s.showCsv)       return 'images/fileSheet.png';
+			if     (s.showAutoRenew) return 'images/autoRenew.png';
+			else if(s.showCsv)       return 'images/fileSheet.png';
 			else if(s.showFilters)   return 'images/filterCog.png';
-			else if(s.showAutoRenew) return 'images/autoRenew.png';
+			else if(s.showOptions)   return 'images/listCog.png';
 			return '';
 		},
 		inputLinePlaceholder:(s) => {
@@ -921,7 +941,7 @@ let MyList = {
 		showActionTitles:    (s) => s.headerElements.includes('actionTitles'),
 		showAutoRenewIcon:   (s) => s.headerElements.includes('autoRenewIcon'),
 		showCollectionTitles:(s) => s.headerElements.includes('collectionTitles'),
-		showHover:           (s) => s.showCsv || s.showFilters || s.showAutoRenew,
+		showHover:           (s) => s.showAutoRenew || s.showCsv || s.showFilters || s.showOptions,
 		showPageLimit:       (s) => s.headerElements.includes('pageLimit'),
 		showInputAddLine:    (s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
 		showInputAddAll:     (s) => s.inputMulti && s.hasResults,
@@ -1239,6 +1259,7 @@ let MyList = {
 			this.showAutoRenew = false;
 			this.showCsv       = false;
 			this.showFilters   = false;
+			this.showOptions   = false;
 		},
 		escape() {
 			if(this.isInput) {

@@ -212,6 +212,7 @@ let MyField = {
 					@open-form-bulk="(...args) => openForm(args[0],[],args[1],'bulk')"
 					@record-count-change="$emit('set-counter',field.id,$event)"
 					@set-args="(...args) => $emit('set-form-args',...args)"
+					@set-column-ids-by-user="setColumnIdsByUser"
 					@set-collection-indexes="setCollectionIndexes"
 					:autoRenew="field.autoRenew"
 					:caption="isAlone ? caption : ''"
@@ -219,6 +220,7 @@ let MyField = {
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
 					:columns="columnsProcessed"
+					:columnsAll="field.columns"
 					:csvExport="field.csvExport"
 					:csvImport="field.csvImport"
 					:fieldId="field.id"
@@ -644,6 +646,7 @@ let MyField = {
 	data() {
 		return {
 			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
+			columnIdsByUser:[],
 			focused:false,
 			notTouched:true,              // data field was not touched by user
 			popUpFormInline:null,         // inline form for some field types (list)
@@ -782,7 +785,7 @@ let MyField = {
 		fieldAttributeIdAlt:(s) => !s.isData || s.field.attributeIdAlt === null ? false
 			: s.getIndexAttributeId(s.field.index,s.field.attributeIdAlt,false,null),
 		columnsProcessed:(s) => !s.isQuery ? [] : s.getColumnsProcessed(
-			s.field.columns,[],s.joinsIndexMap,s.dataFieldMap,
+			s.field.columns,s.columnIdsByUser,s.joinsIndexMap,s.dataFieldMap,
 			s.fieldIdsChanged,s.fieldIdsInvalid,s.values),
 		choicesProcessed:(s) => {
 			if(!s.isQuery) return [];
@@ -1117,6 +1120,8 @@ let MyField = {
 		if(this.isTabs)
 			this.setTabToValid();
 
+		this.columnIdsByUser = this.fieldOptionGet(this.field.id,'columnIdsByUser',[]);
+
 		// fill stored collection row indexes
 		this.collectionIdMapIndexes = this.fieldOptionGet(this.field.id,'collectionIdMapIndexes',{});
 	},
@@ -1255,6 +1260,10 @@ let MyField = {
 					valueNew.push(this.value[i]);
 			}
 			this.value = valueNew.length !== 0 ? valueNew : null;
+		},
+		setColumnIdsByUser(ids) {
+			this.columnIdsByUser = ids;
+			this.fieldOptionSet(this.field.id,'columnIdsByUser',ids);
 		},
 		setCollectionIndexes(collectionId,indexes) {
 			this.collectionIdMapIndexes[collectionId] = indexes;
