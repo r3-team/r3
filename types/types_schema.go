@@ -292,6 +292,7 @@ type FieldChart struct {
 	ChartOption string      `json:"chartOption"`
 	Columns     []Column    `json:"columns"`
 	Query       Query       `json:"query"`
+	Captions    CaptionMap  `json:"captions"`
 }
 type FieldContainer struct {
 	Id             uuid.UUID     `json:"id"`

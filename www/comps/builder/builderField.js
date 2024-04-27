@@ -149,7 +149,7 @@ let MyBuilderField = {
 					
 					<!-- field title -->
 					<my-builder-caption
-						v-if="isButton || isData || isList || isTabs || (isHeader && !field.richtext)"
+						v-if="isButton || isChart || isData || isList || isTabs || (isHeader && !field.richtext)"
 						v-model="field.captions.fieldTitle"
 						:contentName="title"
 						:dynamicSize="true"
@@ -390,6 +390,7 @@ let MyBuilderField = {
 		hasQuery:        (s) => s.getFieldHasQuery(s.field),
 		isButton:        (s) => s.field.content === 'button',
 		isCalendar:      (s) => s.field.content === 'calendar',
+		isChart:         (s) => s.field.content === 'chart',
 		isContainer:     (s) => s.field.content === 'container',
 		isData:          (s) => s.field.content === 'data',
 		isDrawing:       (s) => s.isData && s.attribute.contentUse === 'drawing',

@@ -924,7 +924,10 @@ let MyBuilderForm = {
 					}
 				},null,2),
 				query:this.getQueryTemplate(),
-				columns:[]
+				columns:[],
+				captions:{
+					fieldTitle:{}
+				}
 			};
 		},
 		createFieldContainer() {

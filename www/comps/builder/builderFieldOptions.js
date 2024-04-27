@@ -282,7 +282,7 @@ let MyBuilderFieldOptions = {
 	},
 	template:`<div class="builder-field-options">
 		<table class="generic-table-vertical tight fullWidth default-inputs">
-			<tr v-if="isButton || isData || isList || isTabs || (isHeader && !field.richtext)">
+			<tr v-if="isButton || isChart || isData || isList || isTabs || (isHeader && !field.richtext)">
 				<td>{{ capGen.title }}</td>
 				<td>
 					<my-builder-caption
@@ -303,7 +303,7 @@ let MyBuilderFieldOptions = {
 					/>
 				</td>
 			</tr>
-			<tr v-if="!isContainer && (!isHeader || !field.richtext)">
+			<tr v-if="!isChart && !isContainer && (!isHeader || !field.richtext)">
 				<td>{{ capGen.icon }}</td>
 				<td>
 					<my-builder-icon-input

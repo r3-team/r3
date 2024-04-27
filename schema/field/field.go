@@ -213,6 +213,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				ChartOption: chartOption.String,
 				Columns:     []types.Column{},
 				Query:       types.Query{},
+				Captions:    types.CaptionMap{},
 			})
 			posChartLookup = append(posChartLookup, pos)
 		case "container":
@@ -424,6 +425,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			return fields, err
 		}
 		field.Columns, err = column.Get("field", field.Id)
+		if err != nil {
+			return fields, err
+		}
+		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return fields, err
 		}
@@ -686,6 +691,9 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 				return err
 			}
 			if err := setChart_tx(tx, fieldId, f.ChartOption, f.Columns); err != nil {
+				return err
+			}
+			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
 				return err
 			}
 			fieldIdMapQuery[fieldId] = f.Query
