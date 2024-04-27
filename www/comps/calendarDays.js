@@ -347,7 +347,7 @@ let MyCalendarDays = {
 		},
 		
 		// simple
-		columnBatches:   (s) => s.getColumnBatches(null,s.columns,[],[],false),
+		columnBatches:   (s) => s.getColumnBatches(null,s.columns,[],[],[],false),
 		heightHourPx:    (s) => (s.isInput ? 3 : 11) * s.zoom,
 		heightHourPxFull:(s) => 9 * s.zoom,
 		heightHourStyle: (s) => `height:${s.heightHourPx}px;`,

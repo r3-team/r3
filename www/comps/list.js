@@ -99,10 +99,12 @@ let MyList = {
 					/>
 					<my-list-options
 						v-if="showOptions"
+						@set-column-batch-sort="setColumnBatchSort"
 						@set-column-ids-by-user="$emit('set-column-ids-by-user',$event)"
 						:columns="columns"
 						:columnsAll="columnsAll"
 						:columnBatches="columnBatches"
+						:columnBatchSort="columnBatchSort"
 						:moduleId="moduleId"
 					/>
 					<div class="row gap centered default-inputs" v-if="showAutoRenew">
@@ -742,6 +744,7 @@ let MyList = {
 			autoRenewTimer:null,        // interval timer for auto renew
 			choiceId:null,              // currently active choice
 			columnBatchIndexOption:-1,  // show options for column batch by index
+			columnBatchSort:[],
 			focused:false,
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
@@ -924,7 +927,7 @@ let MyList = {
 		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
 		choiceFilters:       (s) => s.getChoiceFilters(s.choices,s.choiceId),
 		choiceIdDefault:     (s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
-		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,true),
+		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,s.columnBatchSort,true),
 		expressions:         (s) => s.getQueryExpressions(s.columns),
 		hasBulkActions:      (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
 		hasChoices:          (s) => s.query.choices.length > 1,
@@ -1037,6 +1040,7 @@ let MyList = {
 		}
 		
 		// load cached list options
+		this.columnBatchSort = this.fieldOptionGet(this.fieldId,'columnBatchSort',[]);
 		this.columnIdMapAggr = this.fieldOptionGet(this.fieldId,'columnIdMapAggr',{});
 		this.filtersColumn   = this.fieldOptionGet(this.fieldId,'filtersColumn',[]);
 		this.filtersUser     = this.fieldOptionGet(this.fieldId,'filtersUser',[]);
@@ -1338,6 +1342,10 @@ let MyList = {
 			
 			// store timer option for field
 			this.fieldOptionSet(this.fieldId,'autoRenew',this.autoRenewInput);
+		},
+		setColumnBatchSort(value) {
+			this.columnBatchSort = value;
+			this.fieldOptionSet(this.fieldId,'columnBatchSort',value);
 		},
 		setOrder(columnBatch,directionAsc) {
 			// remove initial sorting when changing anything

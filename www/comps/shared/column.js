@@ -114,7 +114,7 @@ export function getOrderIndexesFromColumnBatch(columnBatch,columns,orders) {
 	return orderIndexesUsed;
 };
 
-export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,showCaptions) {
+export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sortByIndex,showCaptions) {
 	let batches = [];
 	
 	let addColumn = (column,index) => {
@@ -124,6 +124,7 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sho
 		const isColor = atr.contentUse === 'color';
 		
 		if(column.batch !== null) {
+			// assign column to existing batch if available
 			for(let i = 0, j = batches.length; i < j; i++) {
 				if(batches[i].batch !== column.batch)
 					continue;
@@ -182,6 +183,10 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sho
 	for(let i = 0, j = batchesSortedBySmallestOrderIndex.length; i < j; i++) {
 		batches[batchesSortedBySmallestOrderIndex[i].batchOrderIndex].orderPosition = i;
 	}
+
+	// apply sort order
+	if(sortByIndex.length !== 0)
+		batches.sort((a,b) => sortByIndex.indexOf(a.batchOrderIndex) - sortByIndex.indexOf(b.batchOrderIndex));
 	
 	// return all batches that have at least 1 column
 	return batches.filter(v => v.columnIndexes.length !== 0);
