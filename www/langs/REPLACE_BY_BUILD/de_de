@@ -99,6 +99,7 @@
 		"category":"Kategorie",
 		"collection":"Sammlung",
 		"collections":"Sammlungen",
+		"columns":"Spalten",
 		"color":"Farbe",
 		"comments":"Kommentare",
 		"content":"Inhalt",
@@ -1916,8 +1917,7 @@
 			"columnFilters":"Spaltenfilter anzeigen (Rechtsklick zum Entfernen)",
 			"columnOrderFlip":"Reihenfolge umdrehen (Rechtsklick zum Entfernen)",
 			"csv":"CSV",
-			"csvHint":"Datensätze über kommaseparierte Werte-Datei importieren/exportieren",
-			"layoutSwitchHint":"Darstellungsmodus der Liste ändern"
+			"csvHint":"Datensätze über kommaseparierte Werte-Datei importieren/exportieren"
 		},
 		"columnFilter":{
 			"contains":"Beinhaltet"
@@ -1932,12 +1932,15 @@
 		},
 		"option":{
 			"csvExport":"exportieren",
-			"csvImport":"importieren"
+			"csvImport":"importieren",
+			"layoutCards":"Karten",
+			"layoutTable":"Tabelle"
 		},
 		"aggregators":"Ergebnisse aggregieren",
 		"autoRenew":"Automatische Aktualisierung",
 		"autoRenewInput":"Alle X Sekunden Daten erneuern",
 		"autoRenewInputHint":"min. 10s",
+		"cardsCaptions":"Beschriftungen anzeigen",
 		"csvAction":"Aktion",
 		"csvBool":"Bool-Namen",
 		"csvCommaChar":"Trennzeichen",
@@ -1951,6 +1954,7 @@
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Zeitzone",
 		"csvTotalLimit":"Zeilenanzahl (0 = alle)",
+		"displayMode":"Anzeigemodus",
 		"fetching":"Daten werden geladen...",
 		"inputHintCreate":"Neuen Datensatz anlegen",
 		"inputHintOpen":"Datensatz öffnen",

@@ -99,6 +99,7 @@
 		"category":"Kategória",
 		"collection":"Gyűjtemény",
 		"collections":"Gyűjtemények",
+		"columns":"Columns",
 		"color":"Color",
 		"comments":"Megjegyzések",
 		"content":"Tartalom",
@@ -1916,8 +1917,7 @@
 			"columnFilters":"Oszlop szűrők megjelenítése (Jobb kattintás az eltávolításhoz)",
 			"columnOrderFlip":"Sorrend megfordítása (Jobb kattintás az eltávolításhoz)",
 			"csv":"CSV",
-			"csvHint":"Rekordok importálása/exportálása vesszővel elválasztott értékfájl segítségével",
-			"layoutSwitchHint":"Change list view mode"
+			"csvHint":"Rekordok importálása/exportálása vesszővel elválasztott értékfájl segítségével"
 		},
 		"columnFilter":{
 			"contains":"Tartalmazza"
@@ -1932,12 +1932,15 @@
 		},
 		"option":{
 			"csvExport":"exportálás",
-			"csvImport":"importálás"
+			"csvImport":"importálás",
+			"layoutCards":"Cards",
+			"layoutTable":"Table"
 		},
 		"aggregators":"Eredmények aggregálása",
 		"autoRenew":"Automatikus frissítés",
 		"autoRenewInput":"Minden X másodpercben az adatok automatikus frissítése",
 		"autoRenewInputHint":"min. 10s",
+		"cardsCaptions":"Show labels",
 		"csvAction":"Művelet",
 		"csvBool":"Bool nevek",
 		"csvCommaChar":"Elválasztó karakter",
@@ -1951,6 +1954,7 @@
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Időzóna",
 		"csvTotalLimit":"Sorok száma (0 = összes)",
+		"displayMode":"Display mode",
 		"fetching":"Adatok lekérése...",
 		"inputHintCreate":"Új adatsor létrehozása",
 		"inputHintOpen":"Adatsor megnyitása",

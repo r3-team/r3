@@ -99,6 +99,7 @@
 		"category":"Category",
 		"collection":"Collection",
 		"collections":"Collezioni",
+		"columns":"Columns",
 		"color":"Color",
 		"comments":"Comments",
 		"content":"Content",
@@ -1914,8 +1915,7 @@
 			"columnFilters":"Show column filters (right-click to remove)",
 			"columnOrderFlip":"Reverse order (right-click to remove)",
 			"csv":"CSV",
-			"csvHint":"Importa/esporta record tramite file di valori separati da virgole",
-			"layoutSwitchHint":"Change list view mode"
+			"csvHint":"Importa/esporta record tramite file di valori separati da virgole"
 		},
 		"columnFilter":{
 			"contains":"Contains"
@@ -1930,12 +1930,15 @@
 		},
 		"option":{
 			"csvExport":"esporta",
-			"csvImport":"importa"
+			"csvImport":"importa",
+			"layoutCards":"Cards",
+			"layoutTable":"Table"
 		},
 		"aggregators":"Aggregate results",
 		"autoRenew":"Rinnovo automatico",
 		"autoRenewInput":"Aggiorna i dati ogni X secondi",
 		"autoRenewInputHint":"min. 10s",
+		"cardsCaptions":"Show labels",
 		"csvAction":"Attenzione",
 		"csvBool":"Stringhe booleane",
 		"csvCommaChar":"Delimitatore campo",
@@ -1949,6 +1952,7 @@
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Fuso orario",
 		"csvTotalLimit":"Conteggio righe (0 = tutte)",
+		"displayMode":"Display mode",
 		"fetching":"Data is being retrieved...",
 		"inputHintCreate":"Crea nuovo record",
 		"inputHintOpen":"Apri record",

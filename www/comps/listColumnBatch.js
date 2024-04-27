@@ -10,7 +10,7 @@ let MyListColumnBatch = {
 	name:'my-list-column-batch',
 	template:`<div class="columnBatchHeader">
 		<my-button image="filter.png"
-			v-if="isValidFilter && isFiltered"
+			v-if="showIconFilter"
 			@trigger="click"
 			@trigger-right="input = ''; set()"
 			:blockBubble="true"
@@ -20,7 +20,7 @@ let MyListColumnBatch = {
 		/>
 		
 		<my-button
-			v-if="isOrdered && orderOverwritten"
+			v-if="showIconOrder"
 			@trigger="$emit('set-order',!isOrderedAsc)"
 			@trigger-right="$emit('set-order',null)"
 			:blockBubble="true"
@@ -30,7 +30,10 @@ let MyListColumnBatch = {
 			:naked="true"
 		/>
 		
-		<div class="columBatchHeaderCaption" @click.stop="click" :class="{ clickable:canOpen }">
+		<div class="columBatchHeaderCaption"
+			@click.stop="click"
+			:class="{ clickable:canOpen, hasIcons:showIconFilter || showIconOrder }"
+		>
 			<span v-if="show"><b>{{ columnBatch.caption }}</b></span>
 			<span v-else>{{ columnBatch.caption }}</span>
 		</div>
@@ -234,6 +237,8 @@ let MyListColumnBatch = {
 		isOrdered:      (s) => s.columnBatch.orderIndexesUsed.length !== 0,
 		isOrderedAsc:   (s) => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
 		isValidFilter:  (s) => s.columnUsedFilter !== null,
+		showIconFilter: (s) => s.isValidFilter && s.isFiltered,
+		showIconOrder:  (s) => s.isOrdered && s.orderOverwritten,
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],

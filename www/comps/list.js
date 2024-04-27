@@ -91,7 +91,7 @@ let MyList = {
 					<my-filters class="default-inputs"
 						v-if="showFilters"
 						v-model="filtersUser"
-						@apply="reloadInside('filtersUser')"
+						@apply="get"
 						:columns="columns"
 						:joins="joins"
 						:showReset="true"
@@ -99,12 +99,17 @@ let MyList = {
 					/>
 					<my-list-options
 						v-if="showOptions"
+						@reset="reloadInside('filtersUser')"
+						@set-cards-captions="setCardsCaptions"
 						@set-column-batch-sort="setColumnBatchSort"
 						@set-column-ids-by-user="$emit('set-column-ids-by-user',$event)"
+						@set-layout="setLayout"
+						:cardsCaptions="cardsCaptions"
 						:columns="columns"
 						:columnsAll="columnsAll"
 						:columnBatches="columnBatches"
 						:columnBatchSort="columnBatchSort"
+						:layout="layout"
 						:moduleId="moduleId"
 					/>
 					<div class="row gap centered default-inputs" v-if="showAutoRenew">
@@ -306,7 +311,7 @@ let MyList = {
 						v-if="hasPaging"
 						@input="offset = $event;reloadInside()"
 						:arrows="showOffsetArrows"
-						:caption="false"
+						:caption="showResultsCount && count > 1"
 						:limit="limit"
 						:offset="offset"
 						:total="count"
@@ -368,25 +373,14 @@ let MyList = {
 						</option>
 					</select>
 					
-					<select class="auto"
-						v-if="showPageLimit && hasPaging"
-						v-model.number="limit"
-						@change="reloadInside()"
-					>
-						<option v-for="o in limitOptions" :value="o">{{ o }}</option>
-					</select>
-					<span v-if="showPageLimit && count !== 0">/ {{ count }}</span>
-					
-					<my-button
-						@trigger="toggleLayout"
-						:captionTitle="capApp.button.layoutSwitchHint"
-						:image="isTable ? 'files_list1.png' : 'files_list3.png'"
-						:naked="true"
-					/>
-					
 					<my-button image="listCog.png"
 						@trigger="showOptions = !showOptions"
 						:captionTitle="capGen.options"
+						:naked="true"
+					/>
+					<my-button image="toggleUp.png"
+						@trigger="toggleHeader"
+						:captionTitle="capApp.button.collapseHeader"
 						:naked="true"
 					/>
 				</div>
@@ -433,11 +427,10 @@ let MyList = {
 											:rowCount="count"
 											:show="columnBatchIndexOption === i"
 										/>
-										<my-button
-											v-if="i === columnBatches.length-1"
+										<my-button image="toggleDown.png"
+											v-if="!showHeader && i === columnBatches.length-1"
 											@trigger="toggleHeader"
 											:captionTitle="capApp.button.collapseHeader"
-											:image="showHeader ? 'toggleUp.png' : 'toggleDown.png'"
 											:naked="true"
 										/>
 									</div>
@@ -578,12 +571,6 @@ let MyList = {
 							</div>
 							
 							<div class="row centered">
-								<my-button
-									@trigger="toggleCardsCaptions"
-									:caption="capGen.details"
-									:image="cardsCaptions ? 'checkbox1.png' : 'checkbox0.png'"
-									:naked="true"
-								/>
 								<!-- sorting -->
 								<template v-if="hasResults">
 									<span class="select">{{ capApp.orderBy }}</span>
@@ -600,11 +587,13 @@ let MyList = {
 								</template>
 							</div>
 							
-							<my-button
-								@trigger="toggleHeader"
-								:image="showHeader ? 'toggleUp.png' : 'toggleDown.png'"
-								:naked="true"
-							/>
+							<div class="row centered">
+								<my-button image="toggleDown.png"
+									v-if="!showHeader"
+									@trigger="toggleHeader"
+									:naked="true"
+								/>
+							</div>
 						</div>
 						
 						<div class="cards" @click="clickOnEmpty" :id="usesPageHistory ? scrollFormId : null">
@@ -792,7 +781,7 @@ let MyList = {
 				'refresh',                   // optional
 				'offsetArrows',              // optional
 				'collectionTitles',          // optional, show collection titles
-				'pageLimit',                 // not important
+				'resultsCount',              // not important
 				'autoRenewIcon'              // not important
 			]
 		};
@@ -945,12 +934,12 @@ let MyList = {
 		showAutoRenewIcon:   (s) => s.headerElements.includes('autoRenewIcon'),
 		showCollectionTitles:(s) => s.headerElements.includes('collectionTitles'),
 		showHover:           (s) => s.showAutoRenew || s.showCsv || s.showFilters || s.showOptions,
-		showPageLimit:       (s) => s.headerElements.includes('pageLimit'),
 		showInputAddLine:    (s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
 		showInputAddAll:     (s) => s.inputMulti && s.hasResults,
 		showInputHeader:     (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
 		showOffsetArrows:    (s) => s.headerElements.includes('offsetArrows'),
 		showRefresh:         (s) => s.headerElements.includes('refresh'),
+		showResultsCount:    (s) => s.headerElements.includes('resultsCount'),
 		showTitle:           (s) => s.headerElements.includes('listTitle'),
 		showCollectionCnt:   (s) => {
 			if(s.headerElements.includes('collectionValuesAll')) return 999;
@@ -1145,7 +1134,7 @@ let MyList = {
 					this.orderOverwritten = true;
 				break;
 				case 'manuel': break; // manual reload
-				default: break; // no special treatment
+				default:       break; // no special treatment
 			}
 			
 			// update route parameters, reloads list via watcher
@@ -1343,9 +1332,22 @@ let MyList = {
 			// store timer option for field
 			this.fieldOptionSet(this.fieldId,'autoRenew',this.autoRenewInput);
 		},
+		setCardsCaptions(v) {
+			this.cardsCaptions = v;
+			this.fieldOptionSet(this.fieldId,'cardsCaptions',v);
+		},
 		setColumnBatchSort(value) {
 			this.columnBatchSort = value;
 			this.fieldOptionSet(this.fieldId,'columnBatchSort',value);
+		},
+		setLayout(layout) {
+			this.layout = layout;
+			this.fieldOptionSet(this.fieldId,'layout',this.layout);
+			
+			this.$nextTick(() => {
+				if(this.isTable && typeof this.$refs.aggregations !== 'undefined')
+					this.$refs.aggregations.get()
+			});
 		},
 		setOrder(columnBatch,directionAsc) {
 			// remove initial sorting when changing anything
@@ -1386,10 +1388,6 @@ let MyList = {
 			}
 			this.reloadInside('order');
 		},
-		toggleCardsCaptions() {
-			this.cardsCaptions = !this.cardsCaptions;
-			this.fieldOptionSet(this.fieldId,'cardsCaptions',this.cardsCaptions);
-		},
 		toggleDropdown() {
 			this.showTable = !this.showTable;
 			
@@ -1405,15 +1403,6 @@ let MyList = {
 		toggleHeader() {
 			this.showHeader = !this.showHeader;
 			this.fieldOptionSet(this.fieldId,'header',this.showHeader);
-		},
-		toggleLayout() {
-			this.layout = this.isTable ? 'cards' : 'table';
-			this.fieldOptionSet(this.fieldId,'layout',this.layout);
-			
-			this.$nextTick(() => {
-				if(this.isTable && typeof this.$refs.aggregations !== 'undefined')
-					this.$refs.aggregations.get()
-			});
 		},
 		toggleUserFilters() {
 			this.showFilters = !this.showFilters;

@@ -99,6 +99,7 @@
 		"category":"类别",
 		"collection":"收藏",
 		"collections":"收藏",
+		"columns":"Columns",
 		"color":"颜色",
 		"comments":"评论",
 		"content":"内容",
@@ -1916,8 +1917,7 @@
 			"columnFilters":"显示列过滤器（右键单击以移除）",
 			"columnOrderFlip":"反转顺序（右键单击以移除）",
 			"csv":"CSV",
-			"csvHint":"通过逗号分隔值文件导入/导出记录",
-			"layoutSwitchHint":"更改列表视图模式"
+			"csvHint":"通过逗号分隔值文件导入/导出记录"
 		},
 		"columnFilter":{
 			"contains":"包含"
@@ -1932,12 +1932,15 @@
 		},
 		"option":{
 			"csvExport":"导出",
-			"csvImport":"导入"
+			"csvImport":"导入",
+			"layoutCards":"Cards",
+			"layoutTable":"Table"
 		},
 		"aggregators":"汇总结果",
 		"autoRenew":"自动更新",
 		"autoRenewInput":"每隔 X 秒刷新数据",
 		"autoRenewInputHint":"最少 10 秒",
+		"cardsCaptions":"Show labels",
 		"csvAction":"操作",
 		"csvBool":"布尔字符串",
 		"csvCommaChar":"字段分隔符",
@@ -1951,6 +1954,7 @@
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"时区",
 		"csvTotalLimit":"行数限制（0 = 全部）",
+		"displayMode":"Display mode",
 		"fetching":"正在检索数据...",
 		"inputHintCreate":"创建新记录",
 		"inputHintOpen":"打开记录",
