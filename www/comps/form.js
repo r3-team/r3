@@ -777,8 +777,9 @@ let MyForm = {
 				
 				// reset form states
 				this.$store.commit('pageTitle',this.title);
-				this.message = null;
-				this.showLog = false;
+				this.message        = null;
+				this.showLog        = false;
+				this.titleOverwrite = null;
 				
 				// build form
 				this.lastFormId = this.form.id;
