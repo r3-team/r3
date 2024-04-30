@@ -17,7 +17,7 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
 
 	let batchMapCaptions = {};
 	let out = [];
-	for(let c of columns) {
+	for(const c of columns) {
 		// apply captions of first batch column to other batch columns (to display if first batch column is hidden)
 		if(c.batch !== null) {
 			if(batchMapCaptions[c.batch] === undefined)
@@ -55,63 +55,6 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
 		out.push(c);
 	}
 	return out;
-};
-
-export function getColumnTitle(c,moduleId) {
-	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-	return getCaption('columnTitle',moduleId,c.id,c.captions,
-		getCaption('attributeTitle',moduleId,atr.id,atr.captions,atr.name));
-};
-export function getColumnTitleForLang(c,language) {
-	// sub queries can have empty attribute ID when newly created
-	if(c.attributeId === null) return '';
-	
-	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-	return getCaptionForLang('columnTitle',language,c.id,c.captions,
-		getCaptionForLang('attributeTitle',language,atr.id,atr.captions,atr.name));
-};
-
-export function getFirstColumnUsableAsAggregator(batch,columns) {
-	for(let ind of batch.columnIndexes) {
-		const c = columns[ind];
-		const a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-		
-		// anything that can be counted can serve as aggregation
-		// sub queries and already aggregated colums are not supported
-		if(!c.subQuery
-			&& c.aggregator === null
-			&& !a.encrypted
-			&& a.contentUse !== 'color'
-			&& a.contentUse !== 'drawing'
-			&& !isAttributeFiles(a.content)
-			&& !isAttributeBoolean(a.content)
-			&& !isAttributeString(a.content)
-		) return c;
-	}
-	return null;
-};
-
-export function getOrderIndexesFromColumnBatch(columnBatch,columns,orders) {
-	if(columnBatch.columnIndexesSortBy.length === 0)
-		return [];
-	
-	let orderIndexesUsed = [];
-	for(const columnIndexSort of columnBatch.columnIndexesSortBy) {
-		const col = columns[columnIndexSort];
-		
-		for(let i = 0, j = orders.length; i < j; i++) {
-			const order = orders[i];
-			
-			if(col.subQuery && order.expressionPos === columnIndexSort) {
-				orderIndexesUsed.push(i);
-				continue;
-			}
-			
-			if(order.attributeId === col.attributeId && order.index === col.index)
-				orderIndexesUsed.push(i);
-		}
-	}
-	return orderIndexesUsed;
 };
 
 export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sortByIndex,showCaptions) {
@@ -190,4 +133,62 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 	
 	// return all batches that have at least 1 column
 	return batches.filter(v => v.columnIndexes.length !== 0);
+};
+
+export function getColumnTitle(c,moduleId) {
+	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+	return getCaption('columnTitle',moduleId,c.id,c.captions,
+		getCaption('attributeTitle',moduleId,atr.id,atr.captions,atr.name));
+};
+
+export function getColumnTitleForLang(c,language) {
+	// sub queries can have empty attribute ID when newly created
+	if(c.attributeId === null) return '';
+	
+	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+	return getCaptionForLang('columnTitle',language,c.id,c.captions,
+		getCaptionForLang('attributeTitle',language,atr.id,atr.captions,atr.name));
+};
+
+export function getFirstColumnUsableAsAggregator(batch,columns) {
+	for(let ind of batch.columnIndexes) {
+		const c = columns[ind];
+		const a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+		
+		// anything that can be counted can serve as aggregation
+		// sub queries and already aggregated colums are not supported
+		if(!c.subQuery
+			&& c.aggregator === null
+			&& !a.encrypted
+			&& a.contentUse !== 'color'
+			&& a.contentUse !== 'drawing'
+			&& !isAttributeFiles(a.content)
+			&& !isAttributeBoolean(a.content)
+			&& !isAttributeString(a.content)
+		) return c;
+	}
+	return null;
+};
+
+export function getOrderIndexesFromColumnBatch(columnBatch,columns,orders) {
+	if(columnBatch.columnIndexesSortBy.length === 0)
+		return [];
+	
+	let orderIndexesUsed = [];
+	for(const columnIndexSort of columnBatch.columnIndexesSortBy) {
+		const col = columns[columnIndexSort];
+		
+		for(let i = 0, j = orders.length; i < j; i++) {
+			const order = orders[i];
+			
+			if(col.subQuery && order.expressionPos === columnIndexSort) {
+				orderIndexesUsed.push(i);
+				continue;
+			}
+			
+			if(order.attributeId === col.attributeId && order.index === col.index)
+				orderIndexesUsed.push(i);
+		}
+	}
+	return orderIndexesUsed;
 };

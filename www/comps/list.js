@@ -733,7 +733,7 @@ let MyList = {
 			autoRenewTimer:null,        // interval timer for auto renew
 			choiceId:null,              // currently active choice
 			columnBatchIndexOption:-1,  // show options for column batch by index
-			columnBatchSort:[],
+			columnBatchSort:[[],[]],
 			focused:false,
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
@@ -916,7 +916,7 @@ let MyList = {
 		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
 		choiceFilters:       (s) => s.getChoiceFilters(s.choices,s.choiceId),
 		choiceIdDefault:     (s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
-		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,s.columnBatchSort,true),
+		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,s.columnBatchSort[0],true),
 		expressions:         (s) => s.getQueryExpressions(s.columns),
 		hasBulkActions:      (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
 		hasChoices:          (s) => s.query.choices.length > 1,
@@ -1029,7 +1029,7 @@ let MyList = {
 		}
 		
 		// load cached list options
-		this.columnBatchSort = this.fieldOptionGet(this.fieldId,'columnBatchSort',[]);
+		this.columnBatchSort = this.fieldOptionGet(this.fieldId,'columnBatchSort',[[],[]]);
 		this.columnIdMapAggr = this.fieldOptionGet(this.fieldId,'columnIdMapAggr',{});
 		this.filtersColumn   = this.fieldOptionGet(this.fieldId,'filtersColumn',[]);
 		this.filtersUser     = this.fieldOptionGet(this.fieldId,'filtersUser',[]);

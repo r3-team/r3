@@ -411,7 +411,7 @@
 	line-height:unset !important;
 	color:var(--color-font-disabled) !important;
 	text-wrap:nowrap;
-	padding:3px 8px 3px 0px !important;
+	padding:3px 8px 3px 6px !important;
 	gap:8px;
 	display:flex;
 	flex-flow:row nowrap;

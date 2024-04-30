@@ -42,34 +42,51 @@ let MyListOptions = {
 			</td>
 			<td>
 				<div class="list-options-column-config">
-					<div class="list-options-batch input-custom dynamic"
-						v-for="(b,bi) in columnBatchesAll"
-						:class="{ notShown:!getBatchIsVisible(b) }"
-					>
-						<div class="row nowrap">
-							<my-button image="arrowUp.png"
-								@trigger="clickBatchSort(b,true)"
-								:active="bi !== 0"
-								:naked="true"
-							/>
-							<my-button image="arrowDown.png"
-								@trigger="clickBatchSort(b,false)"
-								:active="bi !== columnBatchesAll.length - 1"
-								:naked="true"
-							/>
-						</div>
-						<span v-if="b.columnIndexes.length > 1">{{ b.caption }}</span>
+					<template v-for="(b,bi) in columnBatchesAll">
+						<div class="list-options-batch input-custom dynamic" v-if="getBatchIsVisible(b,columnIdsShown)">
+							<div class="row nowrap">
+								<my-button image="arrowUp.png"
+									@trigger="clickBatchSort(b,true)"
+									:active="columnBatchSortAll.indexOf(b.batchOrderIndex) !== 0"
+									:naked="true"
+								/>
+								<my-button image="arrowDown.png"
+									@trigger="clickBatchSort(b,false)"
+									:active="columnBatchSortAll.indexOf(b.batchOrderIndex) !== columnBatches.length - 1"
+									:naked="true"
+								/>
+							</div>
+							<span v-if="b.columnIndexes.length > 1">{{ b.caption }}</span>
 
-						<div class="list-options-batch-columns">
-							<div class="list-options-batch-column clickable"
-								v-for="ci in b.columnIndexes"
-								@click="clickColumnInBatch(columnsAll[ci].id)"
-								:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
-							>
-								{{ b.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : b.caption }}
+							<div class="list-options-batch-columns">
+								<div class="list-options-batch-column clickable"
+									v-for="ci in b.columnIndexes"
+									@click="clickColumnInBatch(columnsAll[ci].id,b)"
+									:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
+								>
+									{{ b.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : b.caption }}
+								</div>
 							</div>
 						</div>
-					</div>
+					</template>
+
+					<br />
+					<span v-if="columnBatchesAll.filter(v => !getBatchIsVisible(v,columnIdsShown)).length !== 0">{{ capGen.notShown }}</span>
+					<template v-for="(b,bi) in columnBatchesAll">
+						<div class="list-options-batch input-custom dynamic" v-if="!getBatchIsVisible(b,columnIdsShown)">
+							<span v-if="b.columnIndexes.length > 1">{{ b.caption }}</span>
+
+							<div class="list-options-batch-columns">
+								<div class="list-options-batch-column clickable"
+									v-for="ci in b.columnIndexes"
+									@click="clickColumnInBatch(columnsAll[ci].id,b)"
+									:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
+								>
+									{{ b.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : b.caption }}
+								</div>
+							</div>
+						</div>
+					</template>
 				</div>
 			</td>
 		</tr>
@@ -79,12 +96,22 @@ let MyListOptions = {
 		columns:        { type:Array,   required:true }, // columns as they are visible to the field
 		columnsAll:     { type:Array,   required:true }, // all columns, regardless of visibility
 		columnBatches:  { type:Array,   required:true }, // column batches as they are visible to the field
-		columnBatchSort:{ type:Array,   required:true },
+		columnBatchSort:{ type:Array,   required:true }, // array of 2 arrays, [ batchSortShown, batchSortAll ]
         layout:         { type:String,  required:true },
         moduleId:       { type:String,  required:true }
 	},
 	emits:['reset', 'set-cards-captions', 'set-column-batch-sort', 'set-column-ids-by-user', 'set-layout'],
 	computed:{
+		columnBatchSortAll:(s) => {
+			if(s.columnBatchSort[1].length === s.columnBatchesAll.length)
+				return s.columnBatchSort[1];
+
+			let out = [];
+			for(let i = 0, j = s.columnBatchesAll.length; i < j; i++) {
+				out.push(i);
+			}
+			return out;
+		},
 		columnIdsShown:(s) => {
 			let out = [];
 			for(const c of s.columns) {
@@ -104,7 +131,8 @@ let MyListOptions = {
 		},
 
 		// simple
-		columnBatchesAll:(s) => s.getColumnBatches(s.moduleId,s.columnsAll,[],[],s.columnBatchSort,true),
+		columnBatchesAll:        (s) => s.getColumnBatches(s.moduleId,s.columnsAll,[],[],s.columnBatchSort[1],true),
+		columnBatchesAllUnsorted:(s) => s.getColumnBatches(s.moduleId,s.columnsAll,[],[],[],true),
 
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -117,9 +145,12 @@ let MyListOptions = {
 		getCaption,
 
 		// presentation
-		getBatchIsVisible(columnBatch) {
+		getBatchColumnCountVisible(columnBatch) {
+			return columnBatch.columnIndexes.filter(v => this.columnIdsShown.includes(this.columnsAll[v].id)).length;
+		},
+		getBatchIsVisible(columnBatch,columnIdsShown) {
 			for(const columnIndex of columnBatch.columnIndexes) {
-				if(this.columnIdsShown.includes(this.columnsAll[columnIndex].id))
+				if(columnIdsShown.includes(this.columnsAll[columnIndex].id))
 					return true;
 			}
 			return false;
@@ -131,39 +162,72 @@ let MyListOptions = {
 
 		// actions
 		clickBatchSort(batch,up) {
-			let out = JSON.parse(JSON.stringify(this.columnBatchSort));
+			let out = JSON.parse(JSON.stringify(this.columnBatchSortAll));
+			const pos    = out.indexOf(batch.batchOrderIndex);
+			const posNew = up ? pos - 1 : pos + 1;
+			out.splice(pos, 1);
+			out.splice(posNew, 0, batch.batchOrderIndex);
 
-			// no sort order defined, initialize
-			if(out.length === 0) {
-				for(let i = 0, j = this.columnBatchesAll.length; i < j; i++) {
-					out.push(this.columnBatchesAll[i].batchOrderIndex);
+			this.setBatchOrder(out,this.columnIdsShown);
+		},
+		clickColumnInBatch(columnId,columnBatch) {
+			let outCols = JSON.parse(JSON.stringify(this.columnIdsShown));
+			let outSort = JSON.parse(JSON.stringify(this.columnBatchSortAll));
+
+			const columnsInBatchCount = this.getBatchColumnCountVisible(columnBatch);
+
+			const pos = outCols.indexOf(columnId);
+			if(pos !== -1) {
+				outCols.splice(pos,1);
+
+				// column to be removed is last one in batch, move to end of batch all order
+				if(columnsInBatchCount === 1) {
+					const posBatch = outSort.indexOf(columnBatch.batchOrderIndex);
+					outSort.splice(posBatch,1);
+					outSort.push(columnBatch.batchOrderIndex);
 				}
 			}
+			else {
+				outCols.push(columnId);
 
-			const pos = out.indexOf(batch.batchOrderIndex);
-			if(pos === -1) {
-				out.push(batch.batchOrderIndex);
-			} else {
-				const posNew = up ? pos - 1 : pos + 1;
-				out.splice(pos, 1);
-				out.splice(posNew, 0, batch.batchOrderIndex);
-			}
-			this.$emit('set-column-batch-sort',out);
-		},
-		clickColumnInBatch(columnId) {
-			let out = JSON.parse(JSON.stringify(this.columnIdsShown));
-
-			let pos = out.indexOf(columnId);
-			if(pos !== -1) out.splice(pos,1);
-			else           out.push(columnId);
+				// column to be added is first one in batch, move batch to end of shown batch order
+				if(columnsInBatchCount === 0) {
+					const posBatch = outSort.indexOf(columnBatch.batchOrderIndex);
+					outSort.splice(posBatch,1);
+					outSort.splice(this.columnBatches.length,0,columnBatch.batchOrderIndex);
+				}
+			};
 			
-			this.$emit('set-column-ids-by-user',out);
+			this.$emit('set-column-ids-by-user',outCols);
+			this.setBatchOrder(outSort,outCols);
 		},
 		columnsReset() {
 			this.$emit('set-column-ids-by-user',[]);
-			this.$emit('set-column-batch-sort',[]);
+			this.$emit('set-column-batch-sort',[[],[]]);
 
 			setTimeout(() => this.$emit('reset'),1000);
+		},
+		setBatchOrder(batchSortAll,columnIdsShown) {
+			let batchSortShown = [];
+			let indexesMissing = [];
+
+			for(const batchIndex of batchSortAll) {
+				const batch = this.columnBatchesAllUnsorted[batchIndex];
+				if(this.getBatchIsVisible(batch,columnIdsShown))
+				batchSortShown.push(batchIndex);
+				else
+					indexesMissing.push(batchIndex);
+			}
+
+			indexesMissing.sort((a,b) => b - a);
+			for(const indexMissing of indexesMissing) {
+				for(let i = 0, j = batchSortShown.length; i < j; i++) {
+					if(batchSortShown[i] > indexMissing)
+						batchSortShown[i]--;
+				}
+			}
+
+			this.$emit('set-column-batch-sort',[batchSortShown,batchSortAll]);
 		}
 	}
 };
