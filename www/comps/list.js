@@ -104,13 +104,17 @@ let MyList = {
 						@set-column-batch-sort="setColumnBatchSort"
 						@set-column-ids-by-user="$emit('set-column-ids-by-user',$event)"
 						@set-layout="setLayout"
+						@set-page-limit="limit = $event;reloadInside()"
 						:cardsCaptions="cardsCaptions"
 						:columns="columns"
 						:columnsAll="columnsAll"
 						:columnBatches="columnBatches"
 						:columnBatchSort="columnBatchSort"
+						:hasPaging="hasPaging"
 						:layout="layout"
+						:limitDefault="limitDefault"
 						:moduleId="moduleId"
+						:pageLimit="limit"
 					/>
 					<div class="row gap centered default-inputs" v-if="showAutoRenew">
 						<span>{{ capApp.autoRenewInput }}</span>
@@ -832,14 +836,6 @@ let MyList = {
 		inputLinePlaceholder:(s) => {
 			if(s.focused) return '';
 			return s.anyInputRows ? s.capApp.inputPlaceholderAdd : s.capGen.threeDots;
-		},
-		limitOptions:(s) => {
-			let out = [10,25,50,100,250,500,1000];
-			
-			if(!out.includes(s.limitDefault))
-				out.unshift(s.limitDefault);
-			
-			return out.sort((a,b) => a-b);
 		},
 		pageCount:(s) => {
 			if(s.count === 0) return 0;

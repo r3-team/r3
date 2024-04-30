@@ -411,7 +411,7 @@
 	line-height:unset !important;
 	color:var(--color-font-disabled) !important;
 	text-wrap:nowrap;
-	padding:3px 8px 3px 6px !important;
+	padding:4px 8px 4px 6px !important;
 	gap:8px;
 	display:flex;
 	flex-flow:row nowrap;
@@ -432,6 +432,9 @@
 .list-options-batch-column{
 	color:var(--color-font);
 	line-height:22px;
+}
+.list-options-batch-column:hover{
+	text-decoration:underline;
 }
 .list-options-batch-column.notShown{
 	text-decoration:line-through;

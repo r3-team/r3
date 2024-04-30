@@ -1963,6 +1963,7 @@
 		"inputHintSelect":"Bestehenden Datensatz hinzufügen",
 		"inputPlaceholderAdd":"...weitere hinzufügen",
 		"orderBy":"Sortieren nach",
+		"pageLimit":"Ergebnisse pro Seite",
 		"quick":"Ergebnisse in allen Spalten filtern"
 	},
 	"settings":{

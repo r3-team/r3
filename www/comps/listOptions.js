@@ -8,6 +8,14 @@ let MyListOptions = {
 	name:'my-list-options',
 	template:`<table class="generic-table generic-table-vertical fullWidth">
 		<!-- general -->
+		<tr v-if="hasPaging">
+			<td>{{ capApp.pageLimit }}</td>
+			<td>
+				<select v-model="pageLimitInput">
+					<option v-for="o in pageLimitOptions" :value="o">{{ o }}</option>
+				</select>
+			</td>
+		</tr>
 		<tr>
 			<td>{{ capApp.displayMode }}</td>
 			<td>
@@ -17,14 +25,14 @@ let MyListOptions = {
 						<option value="cards">{{ capApp.option.layoutCards }}</option>
 					</select>
 					<my-button
-						@trigger="layout === 'table' ? layoutInput = 'cards' : layoutInput = 'table'"
-						:image="layoutInput === 'table' ? 'files_list1.png' : 'files_list3.png'"
+						@trigger="isTable ? layoutInput = 'cards' : layoutInput = 'table'"
+						:image="isTable ? 'files_list1.png' : 'files_list3.png'"
 						:naked="true"
 					/>
 				</div>
 			</td>
 		</tr>
-		<tr v-if="layoutInput === 'cards'">
+		<tr v-if="isCards">
 			<td>{{ capApp.cardsCaptions }}</td>
 			<td><my-bool v-model="cardsCaptionsInput" /></td>
 		</tr>
@@ -66,15 +74,18 @@ let MyListOptions = {
 								/>
 							</div>
 
-							<span v-if="element.columnIndexes.length > 1">{{ element.caption }}</span>
+							<!-- batch/columns -->
+							<div class="row wrap centered gap">
+								<span v-if="element.columnIndexes.length > 1">{{ element.caption }}</span>
 
-							<div class="list-options-batch-columns">
-								<div class="list-options-batch-column clickable"
-									v-for="ci in element.columnIndexes"
-									@click="clickColumnInBatch(columnsAll[ci].id,element)"
-									:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
-								>
-									{{ element.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : element.caption }}
+								<div class="list-options-batch-columns">
+									<div class="list-options-batch-column clickable"
+										v-for="ci in element.columnIndexes"
+										@click="clickColumnInBatch(columnsAll[ci].id,element)"
+										:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
+									>
+										{{ element.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : element.caption }}
+									</div>
 								</div>
 							</div>
 						</div>
@@ -86,15 +97,19 @@ let MyListOptions = {
 					<span>{{ capGen.notShown }}</span>
 					<template v-for="(b,bi) in columnBatchesAll">
 						<div class="list-options-batch input-custom dynamic" v-if="!getBatchIsVisible(b,columnIdsShown)">
-							<span v-if="b.columnIndexes.length > 1">{{ b.caption }}</span>
 
-							<div class="list-options-batch-columns">
-								<div class="list-options-batch-column clickable"
-									v-for="ci in b.columnIndexes"
-									@click="clickColumnInBatch(columnsAll[ci].id,b)"
-									:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
-								>
-									{{ b.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : b.caption }}
+							<!-- batch/columns -->
+							<div class="row wrap centered gap">
+								<span v-if="b.columnIndexes.length > 1">{{ b.caption }}</span>
+
+								<div class="list-options-batch-columns">
+									<div class="list-options-batch-column clickable"
+										v-for="ci in b.columnIndexes"
+										@click="clickColumnInBatch(columnsAll[ci].id,b)"
+										:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
+									>
+										{{ b.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : b.caption }}
+									</div>
 								</div>
 							</div>
 						</div>
@@ -110,7 +125,10 @@ let MyListOptions = {
 		columnBatches:  { type:Array,   required:true }, // column batches as they are visible to the field
 		columnBatchSort:{ type:Array,   required:true }, // batch sort definitions (2 arrays), [ batchSortShown, batchSortAll ]
         layout:         { type:String,  required:true }, // layout of list field: 'table', 'cards'
-        moduleId:       { type:String,  required:true }
+		hasPaging:      { type:Boolean, required:true },
+		limitDefault:   { type:Number,  required:true },
+        moduleId:       { type:String,  required:true },
+        pageLimit:      { type:Number,  required:true }
 	},
 	emits:['reset', 'set-cards-captions', 'set-column-batch-sort', 'set-column-ids-by-user', 'set-layout'],
 	computed:{
@@ -131,6 +149,14 @@ let MyListOptions = {
 			}
 			return out;
 		},
+		pageLimitOptions:(s) => {
+			let out = [10,25,50,100,250,500,1000];
+			
+			if(!out.includes(s.limitDefault))
+				out.unshift(s.limitDefault);
+			
+			return out.sort((a, b) => a - b);
+		},
 
 		// inputs
 		columnBatchesAllDrag:{
@@ -145,10 +171,16 @@ let MyListOptions = {
 			get()  { return this.layout; },
 			set(v) { this.$emit('set-layout',v); }
 		},
+		pageLimitInput:{
+			get()  { return this.pageLimit; },
+			set(v) { this.$emit('set-page-limit',parseInt(v)); }
+		},
 
 		// simple
 		columnBatchesAll:        (s) => s.getColumnBatches(s.moduleId,s.columnsAll,[],[],s.columnBatchSort[1],true),
 		columnBatchesAllUnsorted:(s) => s.getColumnBatches(s.moduleId,s.columnsAll,[],[],[],true),
+		isCards:                 (s) => s.layoutInput === 'cards',
+		isTable:                 (s) => s.layoutInput === 'table',
 
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -157,7 +189,8 @@ let MyListOptions = {
 		isMobile:      (s) => s.$store.getters.isMobile
 	},
 	mounted() {
-		if(this.columnBatchSort[1].length !== this.columnBatchesAll.length)
+		// invalid batch sort, reset
+		if(this.columnBatchSort[1].length !== 0 && this.columnBatchSort[1].length !== this.columnBatchesAll.length)
 			this.columnsReset();
 	},
 	methods:{

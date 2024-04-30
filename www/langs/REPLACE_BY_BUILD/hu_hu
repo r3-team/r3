@@ -1963,6 +1963,7 @@
 		"inputHintSelect":"Meglévő adatsor hozzáadása",
 		"inputPlaceholderAdd":"...további hozzáadása",
 		"orderBy":"Rendezési szempont",
+		"pageLimit":"Results per page",
 		"quick":"Eredmények szűrése minden oszlopban"
 	},
 	"settings":{

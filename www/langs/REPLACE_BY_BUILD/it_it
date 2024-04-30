@@ -1961,6 +1961,7 @@
 		"inputHintSelect":"Aggiungi record esistente",
 		"inputPlaceholderAdd":"...aggiungi di più",
 		"orderBy":"Ordina per",
+		"pageLimit":"Results per page",
 		"quick":"Filtra risultati in tutte le colonne"
 	},
 	"settings":{

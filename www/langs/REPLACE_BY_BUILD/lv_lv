@@ -1963,6 +1963,7 @@
 		"inputHintSelect":"Add existing record",
 		"inputPlaceholderAdd":"...add more",
 		"orderBy":"Order By",
+		"pageLimit":"Results per page",
 		"quick":"Filter results in all columns"
 	},
 	"settings":{

@@ -1963,6 +1963,7 @@
 		"inputHintSelect":"Ajouter un enregistrement existant",
 		"inputPlaceholderAdd":"...ajouter plus",
 		"orderBy":"Trier par",
+		"pageLimit":"Results per page",
 		"quick":"Filtrer les résultats dans toutes les colonnes"
 	},
 	"settings":{

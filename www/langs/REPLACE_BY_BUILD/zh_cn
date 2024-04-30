@@ -1963,6 +1963,7 @@
 		"inputHintSelect":"添加现有记录",
 		"inputPlaceholderAdd":"…添加更多",
 		"orderBy":"排序方式",
+		"pageLimit":"Results per page",
 		"quick":"在所有列中快速筛选结果"
 	},
 	"settings":{

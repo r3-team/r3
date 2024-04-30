@@ -1961,6 +1961,7 @@
 		"inputHintSelect":"Adăugați înregistrarea existentă",
 		"inputPlaceholderAdd":"...adăuga mai mult",
 		"orderBy":"Ordonează după",
+		"pageLimit":"Results per page",
 		"quick":"Filtrați rezultatele în toate coloanele"
 	},
 	"settings":{
