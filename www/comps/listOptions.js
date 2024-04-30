@@ -130,7 +130,7 @@ let MyListOptions = {
         moduleId:       { type:String,  required:true },
         pageLimit:      { type:Number,  required:true }
 	},
-	emits:['reset', 'set-cards-captions', 'set-column-batch-sort', 'set-column-ids-by-user', 'set-layout'],
+	emits:['reset', 'set-cards-captions', 'set-column-batch-sort', 'set-column-ids-by-user', 'set-layout', 'set-page-limit'],
 	computed:{
 		columnBatchSortAll:(s) => {
 			if(s.columnBatchSort[1].length === s.columnBatchesAll.length)

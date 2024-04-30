@@ -104,7 +104,7 @@ let MyList = {
 						@set-column-batch-sort="setColumnBatchSort"
 						@set-column-ids-by-user="$emit('set-column-ids-by-user',$event)"
 						@set-layout="setLayout"
-						@set-page-limit="limit = $event;reloadInside()"
+						@set-page-limit="setLimit"
 						:cardsCaptions="cardsCaptions"
 						:columns="columns"
 						:columnsAll="columnsAll"
@@ -1025,13 +1025,14 @@ let MyList = {
 		}
 		
 		// load cached list options
+		this.cardsCaptions   = this.fieldOptionGet(this.fieldId,'cardsCaptions',true);
 		this.columnBatchSort = this.fieldOptionGet(this.fieldId,'columnBatchSort',[[],[]]);
 		this.columnIdMapAggr = this.fieldOptionGet(this.fieldId,'columnIdMapAggr',{});
 		this.filtersColumn   = this.fieldOptionGet(this.fieldId,'filtersColumn',[]);
 		this.filtersUser     = this.fieldOptionGet(this.fieldId,'filtersUser',[]);
-		this.showHeader      = this.fieldOptionGet(this.fieldId,'header',true);
+		this.limit           = this.fieldOptionGet(this.fieldId,'limit',this.limitDefault);
 		this.layout          = this.fieldOptionGet(this.fieldId,'layout',this.layoutDefault);
-		this.cardsCaptions   = this.fieldOptionGet(this.fieldId,'cardsCaptions',true);
+		this.showHeader      = this.fieldOptionGet(this.fieldId,'header',true);
 	},
 	beforeUnmount() {
 		this.setAutoRenewTimer(true);
@@ -1161,10 +1162,9 @@ let MyList = {
 			}
 			
 			let args = [];
-			if(this.choiceId    !== null) args.push(`choice=${this.choiceId}`);
-			if(this.limit       !== 0)    args.push(`limit=${this.limit}`);
-			if(this.offset      !== 0)    args.push(`offset=${this.offset}`);
-			if(orders.length    !== 0)    args.push(`orderby=${orders.join(',')}`);
+			if(this.choiceId !== null) args.push(`choice=${this.choiceId}`);
+			if(this.offset   !== 0)    args.push(`offset=${this.offset}`);
+			if(orders.length !== 0)    args.push(`orderby=${orders.join(',')}`);
 			
 			this.$emit('set-args',args,pushHistory);
 		},
@@ -1174,17 +1174,15 @@ let MyList = {
 			// initial order by parameter follows query order
 			//  if user overwrites order, initial order is empty
 			let params = {
-				choice:     { parse:'string',   value:this.choiceIdDefault },
-				limit:      { parse:'int',      value:this.limitDefault },
-				offset:     { parse:'int',      value:0 },
-				orderby:    { parse:'listOrder',value:!this.orderOverwritten ? JSON.stringify(this.query.orders) : '[]' }
+				choice: { parse:'string',   value:this.choiceIdDefault },
+				offset: { parse:'int',      value:0 },
+				orderby:{ parse:'listOrder',value:!this.orderOverwritten ? JSON.stringify(this.query.orders) : '[]' }
 			};
 			this.routeParseParams(params);
 			
 			if(this.choiceId !== params['choice'].value)
 				this.choiceId = params['choice'].value;
 			
-			this.limit  = params['limit'].value;
 			this.offset = params['offset'].value;
 			this.orders = JSON.parse(params['orderby'].value);
 			
@@ -1332,18 +1330,23 @@ let MyList = {
 			this.cardsCaptions = v;
 			this.fieldOptionSet(this.fieldId,'cardsCaptions',v);
 		},
-		setColumnBatchSort(value) {
-			this.columnBatchSort = value;
-			this.fieldOptionSet(this.fieldId,'columnBatchSort',value);
+		setColumnBatchSort(v) {
+			this.columnBatchSort = v;
+			this.fieldOptionSet(this.fieldId,'columnBatchSort',v);
 		},
-		setLayout(layout) {
-			this.layout = layout;
+		setLayout(v) {
+			this.layout = v;
 			this.fieldOptionSet(this.fieldId,'layout',this.layout);
 			
 			this.$nextTick(() => {
 				if(this.isTable && typeof this.$refs.aggregations !== 'undefined')
 					this.$refs.aggregations.get()
 			});
+		},
+		setLimit(v) {
+			this.limit = v;
+			this.fieldOptionSet(this.fieldId,'limit',this.limit);
+			this.reloadInside();
 		},
 		setOrder(columnBatch,directionAsc) {
 			// remove initial sorting when changing anything
