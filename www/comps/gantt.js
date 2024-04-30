@@ -51,9 +51,9 @@ let MyGanttLineRecord = {
 					v-if="!indexesHidden.includes(i) && v !== null"
 					:attribute-id="columns[i].attributeId"
 					:basis="columns[i].basis"
-					:bold="columns[i].styles.bold"
+					:bold="columns[i].flags.bold"
 					:display="columns[i].display"
-					:italic="columns[i].styles.italic"
+					:italic="columns[i].flags.italic"
 					:key="i"
 					:length="columns[i].length"
 					:value="v"
@@ -288,9 +288,9 @@ let MyGantt = {
 							<my-value-rich class="context-calendar-gantt"
 								v-for="c in g.columns.filter(v => v.value !== null)"
 								:attribute-id="columns[c.index].attributeId"
-								:bold="columns[c.index].styles.bold"
+								:bold="columns[c.index].flags.bold"
 								:display="columns[c.index].display"
-								:italic="columns[c.index].styles.italic"
+								:italic="columns[c.index].flags.italic"
 								:key="c.index"
 								:length="columns[c.index].length"
 								:value="c.value"
@@ -902,7 +902,7 @@ let MyGantt = {
 							groupColumns.push({
 								index:i,
 								value:values[i],
-								vertical:this.columns[i].styles.vertical
+								vertical:this.columns[i].flags.vertical
 							});
 						}
 						let groupName = groupBy.join(' ');

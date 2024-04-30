@@ -30,14 +30,14 @@ let MyCalendarDaysEvent = {
 					@clipboard="$emit('clipboard')"
 					:attributeId="columns[ind].attributeId"
 					:basis="columns[ind].basis"
-					:bold="columns[ind].styles.bold"
-					:clipboard="columns[ind].styles.clipboard"
+					:bold="columns[ind].flags.bold"
+					:clipboard="columns[ind].flags.clipboard"
 					:display="columns[ind].display"
-					:italic="columns[ind].styles.italic"
+					:italic="columns[ind].flags.italic"
 					:key="ind"
 					:length="columns[ind].length"
 					:value="values[ind]"
-					:wrap="columns[ind].styles.wrap"
+					:wrap="columns[ind].flags.wrap"
 				/>
 			</div>
 		</div>

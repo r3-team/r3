@@ -153,7 +153,7 @@ let MyList = {
 									:display="columns[0].display"
 									:length="columns[0].length"
 									:value="r.values[0]"
-									:wrap="columns[0].styles.wrap"
+									:wrap="columns[0].flags.wrap"
 								/>
 								
 								<!-- category input check box -->
@@ -178,14 +178,14 @@ let MyList = {
 										:attribute-id="columns[ci].attributeId"
 										:class="{ clickable:inputAsCategory && !inputIsReadonly }"
 										:basis="columns[ci].basis"
-										:bold="columns[ci].styles.bold"
-										:clipboard="columns[ci].styles.clipboard"
+										:bold="columns[ci].flags.bold"
+										:clipboard="columns[ci].flags.clipboard"
 										:display="columns[ci].display"
-										:italic="columns[ci].styles.italic"
+										:italic="columns[ci].flags.italic"
 										:key="ci"
 										:length="columns[ci].length"
 										:value="r.values[ci]"
-										:wrap="columns[ci].styles.wrap"
+										:wrap="columns[ci].flags.wrap"
 									/>
 								</template>
 							</div>
@@ -509,14 +509,14 @@ let MyList = {
 											@clipboard="$emit('clipboard')"
 											:attributeId="columns[ind].attributeId"
 											:basis="columns[ind].basis"
-											:bold="columns[ind].styles.bold"
-											:clipboard="columns[ind].styles.clipboard"
+											:bold="columns[ind].flags.bold"
+											:clipboard="columns[ind].flags.clipboard"
 											:display="columns[ind].display"
-											:italic="columns[ind].styles.italic"
+											:italic="columns[ind].flags.italic"
 											:key="ind"
 											:length="columns[ind].length"
 											:value="r.values[ind]"
-											:wrap="columns[ind].styles.wrap"
+											:wrap="columns[ind].flags.wrap"
 										/>
 									</div>
 								</td>
@@ -642,14 +642,14 @@ let MyList = {
 													@clipboard="$emit('clipboard')"
 													:attributeId="columns[ind].attributeId"
 													:basis="columns[ind].basis"
-													:bold="columns[ind].styles.bold"
-													:clipboard="columns[ind].styles.clipboard"
+													:bold="columns[ind].flags.bold"
+													:clipboard="columns[ind].flags.clipboard"
 													:display="columns[ind].display"
-													:italic="columns[ind].styles.italic"
+													:italic="columns[ind].flags.italic"
 													:key="ind"
 													:length="columns[ind].length"
 													:value="r.values[ind]"
-													:wrap="columns[ind].styles.wrap"
+													:wrap="columns[ind].flags.wrap"
 												/>
 											</div>
 										</td>

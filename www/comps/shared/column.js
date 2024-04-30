@@ -35,7 +35,7 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
 			continue;
 
 		// optimize style options access
-		c.styles = {
+		c.flags = {
 			alignEnd:c.styles.includes('alignEnd'),
 			alignMid:c.styles.includes('alignMid'),
 			bold:c.styles.includes('bold'),
@@ -101,7 +101,7 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 			orderIndexesUsed:[],    // which order indexes were used to sort this column batch by, empty if batch was not sorted by
 			orderPosition:0,        // position of this column batch sort compared to other column batches (smallest sorted by first)
 			style:'',
-			vertical:column.styles.vertical
+			vertical:column.flags?.vertical !== undefined ? column.flags.vertical : false
 		});
 	};
 	

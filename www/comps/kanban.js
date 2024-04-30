@@ -55,14 +55,14 @@ let MyKanbanCard = {
 								@clipboard="$emit('clipboard')"
 								:attributeId="columns[ind].attributeId"
 								:basis="columns[ind].basis"
-								:bold="columns[ind].styles.bold"
-								:clipboard="columns[ind].styles.clipboard"
+								:bold="columns[ind].flags.bold"
+								:clipboard="columns[ind].flags.clipboard"
 								:display="columns[ind].display"
-								:italic="columns[ind].styles.italic"
+								:italic="columns[ind].flags.italic"
 								:key="ind"
 								:length="columns[ind].length"
 								:value="values[ind]"
-								:wrap="columns[ind].styles.wrap"
+								:wrap="columns[ind].flags.wrap"
 							/>
 						</div>
 					</td>
@@ -295,13 +295,13 @@ let MyKanban = {
 										v-for="v in x.values.filter(v => v.value !== null)"
 										:attributeId="columns[v.columnIndex].attributeId"
 										:basis="columns[v.columnIndex].basis"
-										:bold="columns[v.columnIndex].styles.bold"
+										:bold="columns[v.columnIndex].flags.bold"
 										:display="columns[v.columnIndex].display"
-										:italic="columns[v.columnIndex].styles.italic"
+										:italic="columns[v.columnIndex].flags.italic"
 										:key="v.columnIndex"
 										:length="columns[v.columnIndex].length"
 										:value="v.value"
-										:wrap="columns[v.columnIndex].styles.wrap"
+										:wrap="columns[v.columnIndex].flags.wrap"
 									/>
 								</div>
 							</th>
@@ -365,13 +365,13 @@ let MyKanban = {
 										v-for="v in y.values.filter(v => v.value !== null)"
 										:attributeId="columns[v.columnIndex].attributeId"
 										:basis="columns[v.columnIndex].basis"
-										:bold="columns[v.columnIndex].styles.bold"
+										:bold="columns[v.columnIndex].flags.bold"
 										:display="columns[v.columnIndex].display"
-										:italic="columns[v.columnIndex].styles.italic"
+										:italic="columns[v.columnIndex].flags.italic"
 										:key="v.columnIndex"
 										:length="columns[v.columnIndex].length"
 										:value="v.value"
-										:wrap="columns[v.columnIndex].styles.wrap"
+										:wrap="columns[v.columnIndex].flags.wrap"
 									/>
 								</div>
 							</td>
