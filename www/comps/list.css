@@ -436,7 +436,12 @@
 .list-options-batch-column.notShown{
 	text-decoration:line-through;
 }
-
+.list-options-batch img.dragAnchor{
+	height:24px;
+	margin-right:3px;
+	filter:var(--image-filter);
+	cursor:move;
+}
 
 
 /* user overwrites */

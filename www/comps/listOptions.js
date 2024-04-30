@@ -41,37 +41,49 @@ let MyListOptions = {
 				</div>
 			</td>
 			<td>
-				<div class="list-options-column-config">
-					<template v-for="(b,bi) in columnBatchesAll">
-						<div class="list-options-batch input-custom dynamic" v-if="getBatchIsVisible(b,columnIdsShown)">
-							<div class="row nowrap">
+				<draggable handle=".dragAnchor" group="filters" itemKey="id" animation="100" class="list-options-column-config"
+					v-model="columnBatchesAllDrag"
+					@change="dropBatchSort"
+					:fallbackOnBody="true"
+				>
+					<template #item="{element,index}">
+						<div class="list-options-batch input-custom dynamic" v-if="getBatchIsVisible(element,columnIdsShown)">
+							
+							<!-- batch sort -->
+							<img class="dragAnchor" src="images/drag.png" v-if="!isMobile" />
+
+							<!-- batch sort for mobile -->
+							<div class="row nowrap" v-if="isMobile">
 								<my-button image="arrowUp.png"
-									@trigger="clickBatchSort(b,true)"
-									:active="columnBatchSortAll.indexOf(b.batchOrderIndex) !== 0"
+									@trigger="clickBatchSort(element,true)"
+									:active="columnBatchSortAll.indexOf(element.batchOrderIndex) !== 0"
 									:naked="true"
 								/>
 								<my-button image="arrowDown.png"
-									@trigger="clickBatchSort(b,false)"
-									:active="columnBatchSortAll.indexOf(b.batchOrderIndex) !== columnBatches.length - 1"
+									@trigger="clickBatchSort(element,false)"
+									:active="columnBatchSortAll.indexOf(element.batchOrderIndex) !== columnBatches.length - 1"
 									:naked="true"
 								/>
 							</div>
-							<span v-if="b.columnIndexes.length > 1">{{ b.caption }}</span>
+
+							<span v-if="element.columnIndexes.length > 1">{{ element.caption }}</span>
 
 							<div class="list-options-batch-columns">
 								<div class="list-options-batch-column clickable"
-									v-for="ci in b.columnIndexes"
-									@click="clickColumnInBatch(columnsAll[ci].id,b)"
+									v-for="ci in element.columnIndexes"
+									@click="clickColumnInBatch(columnsAll[ci].id,element)"
 									:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
 								>
-									{{ b.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : b.caption }}
+									{{ element.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : element.caption }}
 								</div>
 							</div>
 						</div>
 					</template>
+				</draggable>
 
-					<br />
-					<span v-if="columnBatchesAll.filter(v => !getBatchIsVisible(v,columnIdsShown)).length !== 0">{{ capGen.notShown }}</span>
+				<br />
+				<div class="list-options-column-config" v-if="columnBatchesAll.filter(v => !getBatchIsVisible(v,columnIdsShown)).length !== 0">
+					<span>{{ capGen.notShown }}</span>
 					<template v-for="(b,bi) in columnBatchesAll">
 						<div class="list-options-batch input-custom dynamic" v-if="!getBatchIsVisible(b,columnIdsShown)">
 							<span v-if="b.columnIndexes.length > 1">{{ b.caption }}</span>
@@ -92,12 +104,12 @@ let MyListOptions = {
 		</tr>
 	</table>`,
 	props:{
-        cardsCaptions:  { type:Boolean, required:true },
+        cardsCaptions:  { type:Boolean, required:true }, // layout option for 'cards', show captions?
 		columns:        { type:Array,   required:true }, // columns as they are visible to the field
 		columnsAll:     { type:Array,   required:true }, // all columns, regardless of visibility
 		columnBatches:  { type:Array,   required:true }, // column batches as they are visible to the field
-		columnBatchSort:{ type:Array,   required:true }, // array of 2 arrays, [ batchSortShown, batchSortAll ]
-        layout:         { type:String,  required:true },
+		columnBatchSort:{ type:Array,   required:true }, // batch sort definitions (2 arrays), [ batchSortShown, batchSortAll ]
+        layout:         { type:String,  required:true }, // layout of list field: 'table', 'cards'
         moduleId:       { type:String,  required:true }
 	},
 	emits:['reset', 'set-cards-captions', 'set-column-batch-sort', 'set-column-ids-by-user', 'set-layout'],
@@ -121,6 +133,10 @@ let MyListOptions = {
 		},
 
 		// inputs
+		columnBatchesAllDrag:{
+			get()  { return this.columnBatchesAll; },
+			set(v) {}
+		},
 		cardsCaptionsInput:{
 			get()  { return this.cardsCaptions; },
 			set(v) { this.$emit('set-cards-captions',v); }
@@ -137,7 +153,12 @@ let MyListOptions = {
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		capApp:        (s) => s.$store.getters.captions.list,
-		capGen:        (s) => s.$store.getters.captions.generic
+		capGen:        (s) => s.$store.getters.captions.generic,
+		isMobile:      (s) => s.$store.getters.isMobile
+	},
+	mounted() {
+		if(this.columnBatchSort[1].length !== this.columnBatchesAll.length)
+			this.columnsReset();
 	},
 	methods:{
 		// external
@@ -205,16 +226,31 @@ let MyListOptions = {
 			this.$emit('set-column-ids-by-user',[]);
 			this.$emit('set-column-batch-sort',[[],[]]);
 
-			setTimeout(() => this.$emit('reset'),1000);
+			setTimeout(() => this.$emit('reset'),500);
+		},
+		dropBatchSort(v) {
+			if(typeof v.moved === undefined)
+				return;
+			
+			let out     = JSON.parse(JSON.stringify(this.columnBatchSortAll));
+			const batch = this.columnBatchesAll[v.moved.oldIndex];
+			
+			out.splice(v.moved.oldIndex, 1);
+			out.splice(v.moved.newIndex, 0, batch.batchOrderIndex);
+
+			this.setBatchOrder(out,this.columnIdsShown);
 		},
 		setBatchOrder(batchSortAll,columnIdsShown) {
 			let batchSortShown = [];
 			let indexesMissing = [];
 
+			// as batches get filtered down to what is available, the batch order indexes must be corrected
+			// [5,3,4,0] is missing indexes [1,2] -> is converted to: [3,1,2,0]
+			// we store both original and corrected sort order recover full sort order later
 			for(const batchIndex of batchSortAll) {
 				const batch = this.columnBatchesAllUnsorted[batchIndex];
 				if(this.getBatchIsVisible(batch,columnIdsShown))
-				batchSortShown.push(batchIndex);
+					batchSortShown.push(batchIndex);
 				else
 					indexesMissing.push(batchIndex);
 			}
@@ -226,7 +262,6 @@ let MyListOptions = {
 						batchSortShown[i]--;
 				}
 			}
-
 			this.$emit('set-column-batch-sort',[batchSortShown,batchSortAll]);
 		}
 	}
