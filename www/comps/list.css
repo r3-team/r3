@@ -119,6 +119,7 @@
 .list .layoutTable tfoot tr.aggregation td{
 	font-weight:bold;
 	border-top:2px solid var(--color-border);
+	padding:2px 8px;
 }
 .list .layoutTable th{
 	padding:0px;

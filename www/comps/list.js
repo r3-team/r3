@@ -1108,6 +1108,13 @@ let MyList = {
 		},
 		
 		// reloads
+		reloadAggregations(nextTick) {
+			if(!this.isTable || typeof this.$refs.aggregations === 'undefined')
+				return;
+
+			if(nextTick) this.$nextTick(this.$refs.aggregations.get);
+			else         this.$refs.aggregations.get();
+		},
 		reloadOutside() {
 			// outside state has changed, reload list or list input
 			if(!this.isInput)
@@ -1130,14 +1137,13 @@ let MyList = {
 					this.offset = 0;
 					this.orderOverwritten = true;
 				break;
-				case 'manuel': break; // manual reload
-				default:       break; // no special treatment
+				default: break; // no special treatment
 			}
 			
 			// update route parameters, reloads list via watcher
 			// enables browser history for fullpage list navigation
 			//  special cases: column/quick/user filters & manuel reloads (no page param change)
-			if(this.usesPageHistory && !['filtersColumn','filtersQuick','filtersUser','manual'].includes(entity))
+			if(this.usesPageHistory && !['filtersColumn','filtersQuick','filtersUser','limit','manual'].includes(entity))
 				return this.paramsUpdate(true);
 			
 			this.get();
@@ -1306,7 +1312,7 @@ let MyList = {
 			else                    delete(this.columnIdMapAggr[columnId]);
 			
 			this.fieldOptionSet(this.fieldId,'columnIdMapAggr',this.columnIdMapAggr);
-			this.$refs.aggregations.get();
+			this.reloadAggregations(false);
 		},
 		setAutoRenewTimer(justClear) {
 			// clear last timer
@@ -1333,20 +1339,16 @@ let MyList = {
 		setColumnBatchSort(v) {
 			this.columnBatchSort = v;
 			this.fieldOptionSet(this.fieldId,'columnBatchSort',v);
+			this.reloadAggregations(true);
 		},
 		setLayout(v) {
 			this.layout = v;
 			this.fieldOptionSet(this.fieldId,'layout',this.layout);
-			
-			this.$nextTick(() => {
-				if(this.isTable && typeof this.$refs.aggregations !== 'undefined')
-					this.$refs.aggregations.get()
-			});
 		},
 		setLimit(v) {
 			this.limit = v;
 			this.fieldOptionSet(this.fieldId,'limit',this.limit);
-			this.reloadInside();
+			this.reloadInside('limit');
 		},
 		setOrder(columnBatch,directionAsc) {
 			// remove initial sorting when changing anything
@@ -1574,8 +1576,7 @@ let MyList = {
 							this.$emit('record-count-change',this.count);
 							
 							// update aggregations as well
-							if(this.isTable && typeof this.$refs.aggregations !== 'undefined')
-								this.$refs.aggregations.get();
+							this.reloadAggregations(false);
 							
 							if(this.isInput) {
 								this.$nextTick(this.updateDropdownDirection);
