@@ -252,6 +252,9 @@ let MyAdminLoginTemplate = {
 							<select v-model="settings.pattern">
 								<option :value="null">-</option>
 								<option value="bubbles">Bubbles</option>
+								<option value="circuits">Circuits</option>
+								<option value="cubes">Cubes</option>
+								<option value="triangles">Triangles</option>
 								<option value="waves">Waves</option>
 							</select>
 						</td>

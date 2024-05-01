@@ -295,7 +295,7 @@ const MyStore = Vuex.createStore({
 		},
 		patternStyle:(state) => {
 			return state.settings.pattern !== null
-				? `background-image:url('images/pattern_${state.settings.pattern}.webp');background-repeat:repeat-x`
+				? `background-image:url('images/patterns/${state.settings.pattern}.webp');background-repeat:repeat-x`
 				: '';
 		},
 		pwaModuleId:(state) => {

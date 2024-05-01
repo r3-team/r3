@@ -137,6 +137,11 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			UPDATE app.column
 			SET hidden = TRUE, display = 'default'
 			WHERE display = 'hidden';
+
+			-- new background patterns
+			ALTER TYPE instance.login_setting_pattern ADD VALUE 'circuits';
+			ALTER TYPE instance.login_setting_pattern ADD VALUE 'cubes';
+			ALTER TYPE instance.login_setting_pattern ADD VALUE 'triangles';
 		`)
 		return "3.8", err
 	},
