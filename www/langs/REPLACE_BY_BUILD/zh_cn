@@ -928,6 +928,11 @@
 				"relationIndexAxisYHelp":"从中的每个可用记录都被用作看板行的关系。如果使用，看板变为二维（列和行）。此关系需要与看板卡片关系进行n:1连接。<br /><br />通过在看板行之间移动卡片，更新了关系值。<br /><br />在字段数据选择中，将第二个批处理列的值用作看板行标签。"
 			},
 			"option":{
+				"alignment":{
+					"def":"left",
+					"end":"right",
+					"mid":"center"
+				},
 				"display":{
 					"color":"颜色",
 					"default":"默认",
@@ -976,6 +981,7 @@
 			"collectionIdDef":"来自集合的默认值",
 			"collectionHint":"*仅当在数据查询中选定为筛选条件时，才会影响集合。",
 			"collectionTitle":"筛选集合",
+			"columnAlignment":"Alignment",
 			"columnBatch":"列批处理（拖放列以展开）",
 			"columnBatchDir":"列对齐方式（左右，上下）",
 			"columnBatchOff":"从批处理中移除列",

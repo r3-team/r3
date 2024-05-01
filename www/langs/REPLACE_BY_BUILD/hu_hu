@@ -928,6 +928,11 @@
 				"relationIndexAxisYHelp":"Relation from which every available record is used as a Kanban row. If used, the Kanban becomes two-dimensional (columns & rows). This relation needs to be joined n:1 to the Kanban cards relation.<br /><br />By moving cards between Kanban rows, the relationship value is being updated.<br /><br />Within the field data selection, values from the second batched column are used as Kanban row labels."
 			},
 			"option":{
+				"alignment":{
+					"def":"left",
+					"end":"right",
+					"mid":"center"
+				},
 				"display":{
 					"color":"Szín",
 					"default":"Alapértelmezett",
@@ -976,6 +981,7 @@
 			"collectionIdDef":"Alapértelmezett Érték(ek) a Gyűjteményből",
 			"collectionHint":"*A gyűjtemény csak akkor érintkezik, ha szűrőként van használva az adatlekérdezésben.",
 			"collectionTitle":"Gyűjtemény Szűrése",
+			"columnAlignment":"Alignment",
 			"columnBatch":"Oszlop Csomagolás (Helyezd az oszlopokat ide a kiterjesztéshez)",
 			"columnBatchDir":"Oszlopos Rendezés (balról-jobbra, fentről-lefelé)",
 			"columnBatchOff":"Oszlop Távolítása a Csomagból",

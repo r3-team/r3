@@ -928,6 +928,11 @@
 				"relationIndexAxisYHelp":"Relation à partir de laquelle chaque enregistrement disponible est utilisé comme rangée Kanban. Si utilisé, le Kanban devient bidimensionnel (colonnes et rangées). Cette relation doit être jointe n:1 à la relation des cartes Kanban.<br /><br />En déplaçant des cartes entre les rangées Kanban, la valeur de la relation est mise à jour.<br /><br />Dans la sélection des données de champ, les valeurs de la deuxième colonne groupée sont utilisées comme étiquettes de rangée Kanban."
 			},
 			"option":{
+				"alignment":{
+					"def":"left",
+					"end":"right",
+					"mid":"center"
+				},
 				"display":{
 					"color":"couleur",
 					"default":"par défaut",
@@ -976,6 +981,7 @@
 			"collectionIdDef":"Valeur(s) par défaut de la collection",
 			"collectionHint":"* La collection n'est affectée que si elle est sélectionnée comme critère de filtre dans la requête de données.",
 			"collectionTitle":"Collection de filtres",
+			"columnAlignment":"Alignment",
 			"columnBatch":"Lot de colonnes (glissez-déposez des colonnes pour les développer)",
 			"columnBatchDir":"Alignement des colonnes (gauche-droite, haut-bas)",
 			"columnBatchOff":"Supprimer la colonne du lot",

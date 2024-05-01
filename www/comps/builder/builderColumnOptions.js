@@ -85,6 +85,16 @@ let MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr>
+					<td>{{ capApp.columnAlignment }}</td>
+					<td>
+						<select v-model="alignment">
+							<option value="def">{{ capApp.option.alignment.def }}</option>
+							<option value="mid">{{ capApp.option.alignment.mid }}</option>
+							<option value="end">{{ capApp.option.alignment.end }}</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
 					<td>{{ capApp.columnSize }}</td>
 					<td>
 						<input
@@ -205,6 +215,25 @@ let MyBuilderColumnOptions = {
 		indexAttributeIds:(s) => !s.isSubQuery
 			? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins),
 		
+		// inputs
+		alignment:{
+			get()  {
+				if(this.column.styles.includes('alignEnd')) return 'end';
+				if(this.column.styles.includes('alignMid')) return 'mid';
+				return 'def';
+			},
+			set(v) {
+				let styles = JSON.parse(JSON.stringify(this.column.styles));
+
+				if(v !== 'end' &&  styles.includes('alignEnd')) styles.splice(styles.indexOf('alignEnd'),1);
+				if(v !== 'mid' &&  styles.includes('alignMid')) styles.splice(styles.indexOf('alignMid'),1);
+				if(v === 'end' && !styles.includes('alignEnd')) styles.push('alignEnd');
+				if(v === 'mid' && !styles.includes('alignMid')) styles.push('alignMid');
+
+				this.set('styles',styles);
+			}
+		},
+		
 		// simple
 		isFiles:   (s) => s.isAttributeFiles(s.attribute.content),
 		isString:  (s) => s.isAttributeString(s.attribute.content),
@@ -247,7 +276,7 @@ let MyBuilderColumnOptions = {
 		},
 		setStyle(name,val) {
 			let styles = JSON.parse(JSON.stringify(this.column.styles));
-			let pos    = styles.indexOf(name);
+			const pos  = styles.indexOf(name);
 			
 			if(pos === -1 && val)  styles.push(name);
 			if(pos !== -1 && !val) styles.splice(pos,1);

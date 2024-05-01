@@ -1,10 +1,17 @@
 .value-rich{
+	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
 	
 	/* auto cutting text */
 	overflow:hidden;
+}
+.value-rich.alignEnd{
+	justify-content:flex-end;
+}
+.value-rich.alignMid{
+	justify-content:center;
 }
 .value-rich.bold{
 	font-weight:bold;

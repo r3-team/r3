@@ -928,6 +928,11 @@
 				"relationIndexAxisYHelp":"Relation, von welcher jeder verfügbare Datensatz als Kanban-Zeile angezeigt wird. Falls genutzt, wird das Kanban zwei-dimensional (Spalten & Zeilen). Diese Relation muss per n:1 mit der Kanban-Karten-Relation verbunden sein.<br /><br />Durch Bewegen der Karten zwischen den Kanban-Zeilen, wird der Beziehungswert aktualisiert.<br /><br />Innerhalb der Felddatenauswahl, Werte vom zweiten Spaltenstapel werden als Beschriftung der Kanban-Zeilen genutzt."
 			},
 			"option":{
+				"alignment":{
+					"def":"links",
+					"end":"rechts",
+					"mid":"mittig"
+				},
 				"display":{
 					"color":"Farbe",
 					"default":"Standard",
@@ -976,6 +981,7 @@
 			"collectionIdDef":"Standardwert(e) aus Sammlung",
 			"collectionHint":"*Sammlung wird nur beeinflusst, wenn sie als Filterkriterium in der Datenabfrage genutzt wird.",
 			"collectionTitle":"Sammlung filtern",
+			"columnAlignment":"Ausrichtung",
 			"columnBatch":"Spaltenstapel (Spalten hier ablegen um zu erweitern)",
 			"columnBatchDir":"Spaltenausrichtung (links-rechts, hoch-runter)",
 			"columnBatchOff":"Spalte vom Stapel entfernen",

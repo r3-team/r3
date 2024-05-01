@@ -152,6 +152,8 @@ let MyList = {
 								<my-value-rich class="context-list-input"
 									v-else
 									@focus="focus"
+									:alignEnd="columns[0].flags.alignEnd"
+									:alignMid="columns[0].flags.alignMid"
 									:attribute-id="columns[0].attributeId"
 									:class="{ clickable:inputAsCategory && !inputIsReadonly }"
 									:basis="columns[0].basis"
@@ -180,6 +182,8 @@ let MyList = {
 										v-if="r.values[ci] !== null && (!hasGalleryIcon || bi !== 0 || cii !== 0)"
 										@focus="focus"
 										@trigger="inputTriggerRow(r)"
+										:alignEnd="columns[ci].flags.alignEnd"
+										:alignMid="columns[ci].flags.alignMid"
 										:attribute-id="columns[ci].attributeId"
 										:class="{ clickable:inputAsCategory && !inputIsReadonly }"
 										:basis="columns[ci].basis"
@@ -512,6 +516,8 @@ let MyList = {
 										<my-value-rich
 											v-for="ind in b.columnIndexes.filter(v => v !== b.columnIndexColor && r.values[v] !== null)"
 											@clipboard="$emit('clipboard')"
+											:alignEnd="columns[ind].flags.alignEnd"
+											:alignMid="columns[ind].flags.alignMid"
 											:attributeId="columns[ind].attributeId"
 											:basis="columns[ind].basis"
 											:bold="columns[ind].flags.bold"
@@ -645,6 +651,8 @@ let MyList = {
 												<my-value-rich
 													v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
 													@clipboard="$emit('clipboard')"
+													:alignEnd="columns[ind].flags.alignEnd"
+													:alignMid="columns[ind].flags.alignMid"
 													:attributeId="columns[ind].attributeId"
 													:basis="columns[ind].basis"
 													:bold="columns[ind].flags.bold"

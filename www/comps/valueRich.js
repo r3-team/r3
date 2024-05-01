@@ -21,7 +21,7 @@ let MyValueRich = {
 		@focus="$emit('focus')"
 		@click="$emit('trigger')"
 		@keyup.space.enter="$emit('trigger')"
-		:class="{ bold:bold, color:isColor, files:isFiles, italic:italic, wrap:wrap }"
+		:class="{ alignEnd:alignEnd, alignMid:alignMid, bold:bold, color:isColor, files:isFiles, italic:italic, wrap:wrap }"
 		:style="style"
 	>
 		<!-- copy to clipboard action -->
@@ -88,6 +88,8 @@ let MyValueRich = {
 		</template>
 	</div>`,
 	props:{
+		alignEnd:   { type:Boolean, required:false, default:false },
+		alignMid:   { type:Boolean, required:false, default:false },
 		attributeId:{ type:String,  required:true },
 		basis:      { type:Number,  required:false, default:0 },         // size basis (usually column width)
 		bold:       { type:Boolean, required:false, default:false },

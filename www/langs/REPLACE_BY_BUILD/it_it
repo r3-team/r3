@@ -928,6 +928,11 @@
 				"relationIndexAxisYHelp":"Relation from which every available record is used as a Kanban row. If used, the Kanban becomes two-dimensional (columns & rows). This relation needs to be joined n:1 to the Kanban cards relation.<br /><br />By moving cards between Kanban rows, the relationship value is being updated.<br /><br />Within the field data selection, values from the second batched column are used as Kanban row labels."
 			},
 			"option":{
+				"alignment":{
+					"def":"left",
+					"end":"right",
+					"mid":"center"
+				},
 				"display":{
 					"color":"colore",
 					"default":"predefinito",
@@ -976,6 +981,7 @@
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*La collezione è influenzata solo se è selezionata come criterio filtrante nella query dei dati.",
 			"collectionTitle":"Filter collection",
+			"columnAlignment":"Alignment",
 			"columnBatch":"Column batch (drag&drop columns to expand)",
 			"columnBatchDir":"Column alignment (left-right, up-down)",
 			"columnBatchOff":"Remove column from batch",
