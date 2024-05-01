@@ -1929,7 +1929,8 @@
 		"message":{
 			"csvExport":"A CSV export a jelenlegi lista szűrését és rendezését használja.",
 			"csvImport":"A CSV importáláshoz a(z) {COUNT} mezőre van szükség minden sorban a lenti listában, ugyanabban a sorrendben.",
-			"csvImportSuccess":"{COUNT} sor importálva lett"
+			"csvImportSuccess":"{COUNT} sor importálva lett",
+			"csvImportWarning":"Warning! This list can import data via CSV files. Some columns might be required; changing the order is fine, but removing columns can cause imports to fail."
 		},
 		"option":{
 			"csvExport":"exportálás",

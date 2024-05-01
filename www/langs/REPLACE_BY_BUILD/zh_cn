@@ -1929,7 +1929,8 @@
 		"message":{
 			"csvExport":"CSV 导出使用当前列表的过滤器和排序。",
 			"csvImport":"CSV 导入需要以下列表中所示的 {COUNT} 个字段，并且每行的顺序相同。",
-			"csvImportSuccess":"已导入 {COUNT} 行"
+			"csvImportSuccess":"已导入 {COUNT} 行",
+			"csvImportWarning":"Warning! This list can import data via CSV files. Some columns might be required; changing the order is fine, but removing columns can cause imports to fail."
 		},
 		"option":{
 			"csvExport":"导出",

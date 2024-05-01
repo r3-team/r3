@@ -115,20 +115,26 @@ let MyListOptions = {
 						</div>
 					</template>
 				</div>
+
+				<template v-if="csvImport">
+					<br />
+					<span>{{ capApp.message.csvImportWarning }}</span>
+				</template>
 			</td>
 		</tr>
 	</table>`,
 	props:{
-        cardsCaptions:  { type:Boolean, required:true }, // layout option for 'cards', show captions?
+		cardsCaptions:  { type:Boolean, required:true }, // layout option for 'cards', show captions?
 		columns:        { type:Array,   required:true }, // columns as they are visible to the field
 		columnsAll:     { type:Array,   required:true }, // all columns, regardless of visibility
 		columnBatches:  { type:Array,   required:true }, // column batches as they are visible to the field
 		columnBatchSort:{ type:Array,   required:true }, // batch sort definitions (2 arrays), [ batchSortShown, batchSortAll ]
-        layout:         { type:String,  required:true }, // layout of list field: 'table', 'cards'
+		csvImport:      { type:Boolean, required:true },
+		layout:         { type:String,  required:true }, // layout of list field: 'table', 'cards'
 		hasPaging:      { type:Boolean, required:true },
 		limitDefault:   { type:Number,  required:true },
-        moduleId:       { type:String,  required:true },
-        pageLimit:      { type:Number,  required:true }
+		moduleId:       { type:String,  required:true },
+		pageLimit:      { type:Number,  required:true }
 	},
 	emits:['reset', 'set-cards-captions', 'set-column-batch-sort', 'set-column-ids-by-user', 'set-layout', 'set-page-limit'],
 	computed:{

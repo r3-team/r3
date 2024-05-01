@@ -1929,7 +1929,8 @@
 		"message":{
 			"csvExport":"The CSV export uses filters and ordering from the current list.",
 			"csvImport":"The CSV import requires the {COUNT} field(s) from the list shown below, in the same order for each row.",
-			"csvImportSuccess":"{COUNT} lines were imported"
+			"csvImportSuccess":"{COUNT} lines were imported",
+			"csvImportWarning":"Warning! This list can import data via CSV files. Some columns might be required; changing the order is fine, but removing columns can cause imports to fail."
 		},
 		"option":{
 			"csvExport":"export",

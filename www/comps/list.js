@@ -110,6 +110,7 @@ let MyList = {
 						:columnsAll="columnsAll"
 						:columnBatches="columnBatches"
 						:columnBatchSort="columnBatchSort"
+						:csvImport="csvImport"
 						:hasPaging="hasPaging"
 						:layout="layout"
 						:limitDefault="limitDefault"

@@ -1929,7 +1929,8 @@
 		"message":{
 			"csvExport":"Der CSV-Export verwendet Filter und Sortierung der aktuellen Liste.",
 			"csvImport":"Der CSV-Import erfordert die {COUNT} Feld(er) der unten angezeigten Liste für jede Zeile und in der gleichen Reihenfolge.",
-			"csvImportSuccess":"{COUNT} Zeilen wurden importiert"
+			"csvImportSuccess":"{COUNT} Zeilen wurden importiert",
+			"csvImportWarning":"Warnung! Diese Liste kann Daten per CSV-Datei importieren. Manche Spalten können erforderlich sein; Ändern der Reihenfolge ist ok, aber Entfernen von Spalten kann CSV-Import verhindern."
 		},
 		"option":{
 			"csvExport":"exportieren",
