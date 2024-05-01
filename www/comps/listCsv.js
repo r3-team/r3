@@ -1,11 +1,12 @@
-import {resolveErrCode} from './shared/error.js';
+import {resolveErrCode}      from './shared/error.js';
+import {getQueryExpressions} from './shared/query.js';
 export {MyListCsv as default};
 
 let MyListCsv = {
 	name:'my-list-csv',
 	template:`
 		<p v-if="action === 'export'">{{ capApp.message.csvExport }}</p>
-		<p v-if="action === 'import'">{{ capApp.message.csvImport.replace('{COUNT}',this.columns.length) }}</p>
+		<p v-if="action === 'import'">{{ capApp.message.csvImport.replace('{COUNT}',columns.length) }}</p>
 		
 		<table>
 			<tr v-if="isExport && isImport">
@@ -93,14 +94,14 @@ let MyListCsv = {
 			<my-button image="download.png" :caption="capGen.button.export" />
 		</a>`,
 	props:{
-		columns:    { type:Array,  required:true },
-		expressions:{ type:Array,  required:true },
-		filters:    { type:Array,  required:true },
-		isExport:   { type:Boolean,required:true },
-		isImport:   { type:Boolean,required:true },
-		joins:      { type:Array,  required:true },
-		orders:     { type:Array,  required:true },
-		query:      { type:Object, required:true }
+		columns:      { type:Array,  required:true },
+		columnBatches:{ type:Array,  required:true },
+		filters:      { type:Array,  required:true },
+		isExport:     { type:Boolean,required:true },
+		isImport:     { type:Boolean,required:true },
+		joins:        { type:Array,  required:true },
+		orders:       { type:Array,  required:true },
+		query:        { type:Object, required:true }
 	},
 	emits:['reload'],
 	data() {
@@ -140,6 +141,15 @@ let MyListCsv = {
 		clearInterval(this.cacheDenialTimeout);
 	},
 	computed:{
+		columnsSorted:(s) => {
+			let out = [];
+			for(const b of s.columnBatches) {
+				for(const columnIndex of b.columnIndexes) {
+					out.push(s.columns[columnIndex]);
+				}
+			}
+			return out;
+		},
 		exportHref:(s) => {
 			let getters = [
 				`token=${s.token}`,
@@ -151,7 +161,7 @@ let MyListCsv = {
 				`language_code=${s.settings.languageCode}`,
 				`ignore_header=${s.hasHeader ? 'false' : 'true'}`,
 				`relation_id=${s.query.relationId}`,
-				`columns=${JSON.stringify(s.columns)}`,
+				`columns=${JSON.stringify(s.columnsSorted)}`,
 				`joins=${JSON.stringify(s.joins)}`,
 				`expressions=${JSON.stringify(s.expressions)}`,
 				`filters=${JSON.stringify(s.filters)}`,
@@ -161,7 +171,10 @@ let MyListCsv = {
 			];
 			return `/csv/download/export.csv?${getters.join('&')}`;
 		},
-		timezone:(s) => Intl.DateTimeFormat().resolvedOptions().timeZone,
+
+		// simple
+		expressions:(s) => s.getQueryExpressions(s.columnsSorted),
+		timezone:   (s) => Intl.DateTimeFormat().resolvedOptions().timeZone,
 		
 		// stores
 		token:         (s) => s.$store.getters['local/token'],
@@ -172,6 +185,7 @@ let MyListCsv = {
 	},
 	methods:{
 		// externals
+		getQueryExpressions,
 		resolveErrCode,
 		
 		// actions
@@ -211,7 +225,7 @@ let MyListCsv = {
 				this.setMessage(this.capApp.csvLineError.replace('{COUNT}',errRow) + this.resolveErrCode(res.error),true);
 			};
 			formData.append('token',this.token);
-			formData.append('columns',JSON.stringify(this.columns));
+			formData.append('columns',JSON.stringify(this.columnsSorted));
 			formData.append('joins',JSON.stringify(this.query.joins));
 			formData.append('lookups',JSON.stringify(this.query.lookups));
 			formData.append('boolTrue',this.boolNative ? 'true' : this.capGen.option.yes);
