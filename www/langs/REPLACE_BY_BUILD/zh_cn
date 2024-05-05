@@ -1110,6 +1110,7 @@
 				"get_preset_record_id":"instance.get_preset_record_id(preset_id UUID) => INTEGER<br /><br />返回与给定预设关联的记录ID。",
 				"get_record_id":"app.get_record_id(relation_index) => NUMBER|ARRAY<br /><br />返回指定关联索引（0为默认）的打开表单的记录ID。<br /><br />如果表单用于批量编辑模式，则仅可获取关联索引0的记录ID - 在这种情况下，将返回所有使用的记录ID的数组。",
 				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />返回当前登录的所有分配角色ID（包括嵌套角色）。",
+				"get_url_query_string":"app.get_url_query_string() => STRING<br /><br />Returns the current query parameters, such as:<br />'?arg1=hello&arg2=world'",
 				"go_back":"app.go_back() => UNDEFINED<br /><br />执行浏览器返回导航。",
 				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />如果当前登录有分配的角色（包括嵌套角色），返回true。",
 				"pdf_create":"app.pdf_create(filename, pageFormat, pageOrientation, pageMarginX, pageMarginY, htmlHeader, htmlBody, htmlFooter, cssStyles, attachAttributeId, attachRecordId) => UNDEFINED<br /><br />根据给定的HTML模板和CSS样式生成PDF文件。",

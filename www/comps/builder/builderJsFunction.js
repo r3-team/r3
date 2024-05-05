@@ -504,10 +504,10 @@ let MyBuilderJsFunction = {
 				'block_inputs','copy_to_clipboard','form_close','form_open',
 				'form_set_title','form_show_message','get_e2ee_data_key',
 				'get_e2ee_data_value','get_language_code','get_login_id',
-				'get_preset_record_id','get_record_id','get_role_ids','go_back',
-				'has_role','pdf_create','record_delete','record_new',
-				'record_reload','record_save','record_save_new',
-				'set_e2ee_by_login_ids','set_e2ee_by_login_ids_and_relation',
+				'get_preset_record_id','get_record_id','get_role_ids',
+				'get_url_query_string','go_back','has_role','pdf_create',
+				'record_delete','record_new','record_reload','record_save',
+				'record_save_new','set_e2ee_by_login_ids','set_e2ee_by_login_ids_and_relation',
 				'timer_clear','timer_set','value_store_get','value_store_set'
 			],
 			appFunctionsAsync:[

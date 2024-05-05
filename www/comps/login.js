@@ -269,27 +269,13 @@ let MyLogin = {
 			if(!v) return;
 			
 			// authenticate via login getter, if set
-			let pos = window.location.hash.indexOf('?');
+			const pos = window.location.hash.indexOf('?');
 			if(pos !== -1) {
-				let getters     = window.location.hash.substr(pos+1).split('&');
-				let gettersKeep = [];
-				let login       = '';
-				
-				for(let i = 0, j = getters.length; i < j; i++) {
-					let parts = getters[i].split('=');
-					
-					if(parts[0] === 'login') {
-						login = parts[1];
-						continue; // login getter is removed from URL
-					}
-					gettersKeep.push(getters[i]);
-				}
-				
-				if(login !== '') {
-					this.authenticatePublic(login);
-					this.$router.replace(
-						window.location.hash.substr(1,pos) + gettersKeep.join('&')
-					);
+				let params = new URLSearchParams(window.location.hash.substring(pos));
+				if(params.has('login')) {
+					this.authenticatePublic(params.get('login'));
+					params.delete('login');
+					this.$router.replace(`${window.location.hash.substring(0,pos)}?${params.toString()}`);
 					return;
 				}
 			}
