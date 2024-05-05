@@ -1,4 +1,4 @@
-<p><em>Updated 2023-11-19</em></p>
+<p><em>Updated 2024-03-04</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -146,7 +146,7 @@
 </ul></li>
 <li>Databases (dedicated deployment only)
 <ul>
-<li>PostgresSQL 13.0 database (or newer), UTF8 encoded, with full permissions</li>
+<li>PostgresSQL database (13.0 or newer), UTF8 encoded, with full permissions</li>
 </ul></li>
 </ul>
 <h2 id="clients">Clients</h2>
@@ -156,9 +156,9 @@
 <p>REI3 comes with a graphical installer for Windows Server. The installer supports both <a href="#stand-alone">stand-alone</a> and <a href="#dedicated">dedicated</a> deployment models.</p>
 <ul>
 <li><a href="#stand-alone">Stand-alone</a>: After following the installer, REI3 can be started immediately.</li>
-<li><a href="#dedicated">Dedicated</a>: After the installation, database connection details for an empty, UTF8 encoded <a href="#preparing-a-new-postgresql-database">PostgreSQL database</a> must be entered into the configuration file <code>config.json</code>. The file <code>config.json</code> is located inside the chosen application directory. The database user must have full permissions for the chosen database.</li>
+<li><a href="#dedicated">Dedicated</a>: After the installation, database connection details for an empty, UTF8 encoded <a href="#preparing-a-new-postgresql-database">PostgreSQL database</a> (13.0 or newer) must be entered into the configuration file <code>config.json</code>. The file <code>config.json</code> is located inside the chosen application directory. The database user must have full permissions for the chosen database.</li>
 </ul>
-<p>Independent of deployment model, REI3 is handled as a Windows service and can be started with the service manager (command: <code>service.msc</code>). REI3 will write to the Windows application log, should the service not start correctly.</p>
+<p>Independent of deployment model, REI3 is handled as a Windows service and can be started with the service manager (command: <code>services.msc</code>). REI3 will write to the Windows application log, should the service not start correctly.</p>
 <p>Because of licensing terms, we cannot distribute Ghostscript with REI3. If you want to create PDF thumbnails, you have to download and install a current version of Ghostscript on the REI3 server.</p>
 <h2 id="on-a-linux-server">On a Linux server</h2>
 <p>For Linux servers, REI3 is available as a compressed archive with pre-compiled binaries. The installation steps are:</p>
@@ -166,7 +166,7 @@
 <li>Extract the REI3 archive file to a location of your choice (<code>/opt/rei3/</code> for example).</li>
 <li>Make the file <code>r3</code> executable (<code>chmod u+x r3</code>).</li>
 <li>Copy the file <code>config_template.json</code> to <code>config.json</code> - keep it in the same directory as the <code>r3</code> executable.</li>
-<li>Add connection details to an empty, UTF8 encoded <a href="#preparing-a-new-postgresql-database">PostgreSQL database</a> to <code>config.json</code>. The database user must have full permissions for the chosen database.</li>
+<li>Add connection details to an empty, UTF8 encoded <a href="#preparing-a-new-postgresql-database">PostgreSQL database</a> (13.0 or newer) to <code>config.json</code>. The database user must have full permissions for the chosen database.</li>
 <li>Optional: Install ImageMagick and Ghostscript if you want to have thumbnails (<code>sudo apt install imagemagick ghostscript</code>).</li>
 <li>Optional: Install PostgreSQL client tools if you want to use the integrated backup feature (<code>sudo apt install postgresql-client</code>).</li>
 <li>Register REI3 with your service manager (<code>sudo ./r3 -install</code>).</li>

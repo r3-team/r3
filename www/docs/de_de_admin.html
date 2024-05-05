@@ -1,4 +1,4 @@
-<p><em>Aktualisiert 2023-11-19</em></p>
+<p><em>Aktualisiert 2024-03-04</em></p>
 <h1 id="inhaltsverzeichnis">Inhaltsverzeichnis</h1>
 <ol type="1">
 <li><a href="#einführung">Einführung</a></li>
@@ -43,7 +43,7 @@
 <li><a href="#plattformaktualisierung">Plattformaktualisierung</a></li>
 </ol></li>
 <li><a href="#clusterbetrieb-und-systemleistung">Clusterbetrieb und Systemleistung</a></li>
-<li><a href="#vorbereiten-einer-neuen-postgresql-datenbank">Preparing a new PostgreSQL database</a></li>
+<li><a href="#vorbereiten-einer-neuen-postgresql-datenbank">Vorbereiten einer neuen PostgreSQL-Datenbank</a></li>
 <li><a href="#cloudbetrieb">Cloudbetrieb</a></li>
 </ol>
 <h1 id="einführung">Einführung</h1>
@@ -145,7 +145,7 @@
 </ul></li>
 <li>Datenbank (nur dedizierte Bereitstellung)
 <ul>
-<li>PostgresSQL 13.0 Datenbank (oder neuer), UTF8 enkodiert, mit vollen Berechtigungen</li>
+<li>PostgresSQL Datenbank (13.0 oder neuer), UTF8 enkodiert, mit vollen Berechtigungen</li>
 </ul></li>
 </ul>
 <h2 id="endgeräte">Endgeräte</h2>
@@ -155,7 +155,7 @@
 <p>REI3 wird mit einem grafischen Installationsprogramm für Windows Server geliefert. Das Installationsprogramm unterstützt sowohl <a href="#eigenständig">eigenständige</a> als auch <a href="#dediziert">dedizierte</a> Bereitstellungsmodelle.</p>
 <ul>
 <li><a href="#eigenständig">Eigenständig</a>: Nach Ausführung des Installationsprogrammes kann REI3 sofort gestartet werden.</li>
-<li><a href="#dediziert">Dediziert</a>: Nach der Installation müssen Datenbankverbindungsdetails für eine leere, UTF8-enkodierte <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> in der Konfigurationsdatei <code>config.json</code> eingetragen werden. Die Datei <code>config.json</code> befindet sich im ausgewählten Anwendungsverzeichnis. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
+<li><a href="#dediziert">Dediziert</a>: Nach der Installation müssen Datenbankverbindungsdetails für eine leere, UTF8-enkodierte <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (13.0 oder neuer) in der Konfigurationsdatei <code>config.json</code> eingetragen werden. Die Datei <code>config.json</code> befindet sich im ausgewählten Anwendungsverzeichnis. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
 </ul>
 <p>Unabhängig vom Bereitstellungsmodell, wird REI3 unter Windows Server als Windows-Dienst behandelt und kann über den Service-Manager gestartet werden (Befehl: <code>services.msc</code>). Falls der Dienst nicht starten kann, schreibt REI3 in das Windows-Applikationslog.</p>
 <p>Aus lizenzrechtlichen Gründen können wir Ghostscript nicht zusammen mit REI3 ausliefern. Wenn Sie PDF-Thumbnails erstellen möchten, müssen Sie eine aktuelle Version von Ghostscript herunterladen und auf dem REI3-Server installieren.</p>
@@ -165,7 +165,7 @@
 <li>Extrahieren Sie das REI3-Archiv in ein Verzeichnis Ihrer Wahl (<code>/opt/rei3/</code> zum Beispiel).</li>
 <li>Machen Sie die Datei <code>r3</code> ausführbar (<code>chmod u+x r3</code>).</li>
 <li>Kopieren Sie die Datei <code>config_template.json</code> zu <code>config.json</code> - die Datei muss im gleichen Verzeichnis sein wie die ausführbare Datei <code>r3</code>.</li>
-<li>Fügen Sie der Datei <code>config.json</code> Verbindungsdetails zu einer leeren, UTF8-enkodierten <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> hinzu. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
+<li>Fügen Sie der Datei <code>config.json</code> Verbindungsdetails zu einer leeren, UTF8-enkodierten <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (13.0 oder neuer) hinzu. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
 <li>Optional: Installieren Sie ImageMagick und Ghostscript falls Thumbnails erwünscht sind (<code>sudo apt install imagemagick ghostscript</code>).</li>
 <li>Optional: Installieren Sie PostgreSQL-Client-Werkzeuge falls Sie die integrierte Backup-Funktion nutzen möchten (<code>sudo apt install postgresql-client</code>).</li>
 <li>Registrieren Sie REI3 im Service-Manager (<code>sudo ./r3 -install</code>).</li>

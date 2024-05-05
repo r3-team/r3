@@ -448,7 +448,11 @@ let MyForm = {
 					return typeof s.indexMapRecordId[relationIndex] !== 'undefined'
 						? s.indexMapRecordId[relationIndex] : -1;
 				},
-				
+				get_url_query_string:() => {
+					const pos = window.location.hash.indexOf('?');
+					return pos === -1 ? '' : window.location.hash.substring(pos+1);
+				},
+
 				// collection functions
 				collection_read:s.getCollectionMultiValues,
 				collection_update:s.updateCollections,
@@ -777,8 +781,9 @@ let MyForm = {
 				
 				// reset form states
 				this.$store.commit('pageTitle',this.title);
-				this.message = null;
-				this.showLog = false;
+				this.message        = null;
+				this.showLog        = false;
+				this.titleOverwrite = null;
 				
 				// build form
 				this.lastFormId = this.form.id;
