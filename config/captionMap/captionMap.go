@@ -26,6 +26,7 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 	caps.ColumnIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.FieldIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.FormIdMap = make(map[uuid.UUID]types.CaptionMap)
+	caps.FormActionIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.JsFunctionIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.LoginFormIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.MenuIdMap = make(map[uuid.UUID]types.CaptionMap)
@@ -41,6 +42,7 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 		WHEN attribute_id    IS NOT NULL THEN 'attribute'
 		WHEN column_id       IS NOT NULL THEN 'column'
 		WHEN field_id        IS NOT NULL THEN 'field'
+		WHEN form_action_id  IS NOT NULL THEN 'formAction'
 		WHEN form_id         IS NOT NULL THEN 'form'
 		WHEN js_function_id  IS NOT NULL THEN 'jsFunction'
 		WHEN login_form_id   IS NOT NULL THEN 'loginForm'
@@ -58,6 +60,7 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 		column_id,
 		field_id,
 		form_id,
+		form_action_id,
 		js_function_id,
 		login_form_id,
 		menu_id,
@@ -105,10 +108,15 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 					SELECT id FROM app.form WHERE module_id = $6
 				)
 			)
+			OR form_action_id IN (
+				SELECT id FROM app.form_action WHERE form_id IN (
+					SELECT id FROM app.form WHERE module_id = $7
+				)
+			)
 			OR tab_id IN (
 				SELECT id FROM app.tab WHERE field_id IN (
 					SELECT id FROM app.field WHERE form_id IN (
-						SELECT id FROM app.form WHERE module_id = $7
+						SELECT id FROM app.form WHERE module_id = $8
 					)
 				)
 			)
@@ -117,22 +125,22 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 					SELECT id FROM app.query
 					WHERE field_id IN (
 						SELECT id FROM app.field WHERE form_id IN (
-							SELECT id FROM app.form WHERE module_id = $8
+							SELECT id FROM app.form WHERE module_id = $9
 						)
 					)
 					-- only direct field queries have filter choices and therefore captions
 					-- most queries do not: form query, collection query, column sub query, filter sub query
 				)
 			)
-			OR article_id     IN (SELECT id FROM app.article     WHERE module_id = $9)
-			OR form_id        IN (SELECT id FROM app.form        WHERE module_id = $10)
-			OR js_function_id IN (SELECT id FROM app.js_function WHERE module_id = $11)
-			OR login_form_id  IN (SELECT id FROM app.login_form  WHERE module_id = $12)
-			OR menu_id        IN (SELECT id FROM app.menu        WHERE module_id = $13)
-			OR pg_function_id IN (SELECT id FROM app.pg_function WHERE module_id = $14)
-			OR role_id        IN (SELECT id FROM app.role        WHERE module_id = $15)
-			OR widget_id      IN (SELECT id FROM app.widget      WHERE module_id = $16)
-		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
+			OR article_id     IN (SELECT id FROM app.article     WHERE module_id = $10)
+			OR form_id        IN (SELECT id FROM app.form        WHERE module_id = $11)
+			OR js_function_id IN (SELECT id FROM app.js_function WHERE module_id = $12)
+			OR login_form_id  IN (SELECT id FROM app.login_form  WHERE module_id = $13)
+			OR menu_id        IN (SELECT id FROM app.menu        WHERE module_id = $14)
+			OR pg_function_id IN (SELECT id FROM app.pg_function WHERE module_id = $15)
+			OR role_id        IN (SELECT id FROM app.role        WHERE module_id = $16)
+			OR widget_id      IN (SELECT id FROM app.widget      WHERE module_id = $17)
+		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
 	}
 
 	if err != nil {
@@ -163,6 +171,8 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 			captionMap, exists = caps.FieldIdMap[entityId]
 		case "form":
 			captionMap, exists = caps.FormIdMap[entityId]
+		case "formAction":
+			captionMap, exists = caps.FormActionIdMap[entityId]
 		case "jsFunction":
 			captionMap, exists = caps.JsFunctionIdMap[entityId]
 		case "loginForm":
@@ -199,6 +209,8 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 			caps.FieldIdMap[entityId] = captionMap
 		case "form":
 			caps.FormIdMap[entityId] = captionMap
+		case "formAction":
+			caps.FormActionIdMap[entityId] = captionMap
 		case "jsFunction":
 			caps.JsFunctionIdMap[entityId] = captionMap
 		case "loginForm":

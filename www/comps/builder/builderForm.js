@@ -2,6 +2,7 @@ import MyBuilderCaption       from './builderCaption.js';
 import MyBuilderColumnOptions from './builderColumnOptions.js';
 import MyBuilderIconInput     from './builderIconInput.js';
 import MyBuilderFieldOptions  from './builderFieldOptions.js';
+import MyBuilderFormActions   from './builderFormActions.js';
 import MyBuilderFormFunctions from './builderFormFunctions.js';
 import MyBuilderFormStates    from './builderFormStates.js';
 import MyBuilderQuery         from './builderQuery.js';
@@ -46,6 +47,7 @@ let MyBuilderForm = {
 		MyBuilderColumnTemplates,
 		MyBuilderFields,
 		MyBuilderFieldOptions,
+		MyBuilderFormActions,
 		MyBuilderFormFunctions,
 		MyBuilderFormStates,
 		MyBuilderIconInput,
@@ -201,8 +203,8 @@ let MyBuilderForm = {
 			<template v-if="!fieldShow">
 				<my-tabs
 					v-model="tabTarget"
-					:entries="['content','states','functions','properties']"
-					:entriesText="[capGen.content,capApp.tabStates.replace('{CNT}',states.length),capApp.tabFunctions.replace('{CNT}',functions.length),capGen.properties]"
+					:entries="['content','states','actions','functions','properties']"
+					:entriesText="[capGen.content,capApp.tabStates.replace('{CNT}',states.length),capApp.tabActions.replace('{CNT}',actions.length),capApp.tabFunctions.replace('{CNT}',functions.length),capGen.properties]"
 				/>
 				
 				<!-- form content -->
@@ -373,6 +375,15 @@ let MyBuilderForm = {
 						:fieldIdMap="fieldIdMap"
 						:form="form"
 					/>
+
+					<!-- form actions -->
+					<my-builder-form-actions
+						v-if="tabTarget === 'actions'"
+						v-model="actions"
+						@createNew="(...args) => $emit('createNew',...args)"
+						:builderLanguage="builderLanguage"
+						:formId="form.id"
+					/>
 					
 					<!-- form functions -->
 					<my-builder-form-functions
@@ -513,10 +524,13 @@ let MyBuilderForm = {
 			name:'',             // form name
 			noDataActions:false, // disable all data actions (save, new, delete)
 			captions:{},         // form captions
-			fields:[],           // all fields (nested within each other)
-			functions:[],        // all functions
-			states:[],           // all states
 			fieldIdsRemove:[],   // IDs of fields to remove
+
+			// form sub entites
+			actions:[],          // form actions
+			fields:[],           // form fields (nested within each other)
+			functions:[],        // form functions
+			states:[],           // form states
 			
 			// form data from query
 			relationId:'', // source relation ID
@@ -525,20 +539,17 @@ let MyBuilderForm = {
 			
 			// state
 			columnIdShow:null,
-			fieldsShow:'add',    // which fields to show (add = template fields, edit = existing data fields)
-			fieldCounter:0,      // counter to generate unique IDs for all fields
-			                     // used to populate new fields and for template fields
-			fieldIdShow:null,    // field ID which is shown in sidebar to be edited
-			fieldMoveList:null,  // fields list from which to move field (move by click)
-			fieldMoveIndex:0,    // index of field which to move (move by click)
-			showColumnsAll:false,// show columns from all relevant fields regardless of whether field is selected
-			showFunctions:false, // show form functions
-			showSidebar:true,    // show form Builder sidebar
-			showStates:false,    // show form states
-			showTemplate1n:false,// show templates for 1:n relationship input fields
-			showTemplateN1:true, // show templates for n:1 relationship input fields
-			showTemplateNm:false,// show templates for n:m relationship input fields
-			tabTarget:'content', // sidebar tab target (content, states, functions, properties)
+			fieldsShow:'add',         // which fields to show (add = template fields, edit = existing data fields)
+			fieldCounter:0,           // counter to generate unique IDs for all fields (used to populate new fields and for template fields)
+			fieldIdShow:null,         // field ID which is shown in sidebar to be edited
+			fieldMoveList:null,       // fields list from which to move field (move by click)
+			fieldMoveIndex:0,         // index of field which to move (move by click)
+			showColumnsAll:false,     // show columns from all relevant fields regardless of whether field is selected
+			showSidebar:true,         // show form Builder sidebar
+			showTemplate1n:false,     // show templates for 1:n relationship input fields
+			showTemplateN1:true,      // show templates for n:1 relationship input fields
+			showTemplateNm:false,     // show templates for n:m relationship input fields
+			tabTarget:'content',      // sidebar tab target (content, states, actions, functions, properties)
 			tabTargetField:'content', // sidebar tab target for field (content, properties)
 			templateIndex:'-1',
 			uiScale:90,
@@ -555,6 +566,7 @@ let MyBuilderForm = {
 			|| s.fieldIdFocus              !== s.form.fieldIdFocus
 			|| s.name                      !== s.form.name
 			|| s.noDataActions             !== s.form.noDataActions
+			|| JSON.stringify(s.actions)   !== JSON.stringify(s.form.actions)
 			|| JSON.stringify(s.captions)  !== JSON.stringify(s.form.captions)
 			|| JSON.stringify(s.fields)    !== JSON.stringify(s.form.fields)
 			|| JSON.stringify(s.functions) !== JSON.stringify(s.form.functions)
@@ -565,23 +577,20 @@ let MyBuilderForm = {
 		columnIdMap:(s) => {
 			let map = {};
 			let collect = function(fields) {
-				for(let i = 0, j = fields.length; i < j; i++) {
-					
-					let f = fields[i];
-					if(f.content === 'container') {
-						collect(f.fields);
+				for(const field of fields) {
+					if(field.content === 'container') {
+						collect(field.fields);
 						continue;
 					}
-					if(f.content === 'tabs') {
-						for(let x = 0, y = f.tabs.length; x < y; x++) {
-							collect(f.tabs[x].fields);
+					if(field.content === 'tabs') {
+						for(const tab of field.tabs) {
+							collect(tab.fields);
 						}
 						continue;
 					}
-					
-					if(typeof f.columns !== 'undefined') {
-						for(let x = 0, y = f.columns.length; x < y; x++) {
-							map[f.columns[x].id] = f.columns[x];
+					if(typeof field.columns !== 'undefined') {
+						for(const c of field.columns) {
+							map[c.id] = c;
 						}
 					}
 				}
@@ -643,23 +652,18 @@ let MyBuilderForm = {
 			let getIndexIds = function(fields) {
 				let indexIds = [];
 				
-				for(let i = 0, j = fields.length; i < j; i++) {
-					let f = fields[i];
-					
+				for(const f of fields) {
 					switch(f.content) {
 						case 'data':
-							let atrIdNm = typeof f.attributeIdNm !== 'undefined' ? f.attributeIdNm : null;
-						
-							indexIds.push(s.getIndexAttributeId(
-								f.index,f.attributeId,f.outsideIn === true,atrIdNm
-							));
+							const atrIdNm = typeof f.attributeIdNm !== 'undefined' ? f.attributeIdNm : null;
+							indexIds.push(s.getIndexAttributeId(f.index,f.attributeId,f.outsideIn === true,atrIdNm));
 						break;
 						case 'container':
 							indexIds = indexIds.concat(getIndexIds(f.fields));
 						break;
 						case 'tabs':
-							for(let x = 0, y = f.tabs.length; x < y; x++) {
-								indexIds = indexIds.concat(getIndexIds(f.tabs[x].fields));
+							for(const t of f.tabs) {
+								indexIds = indexIds.concat(getIndexIds(t.fields));
 							}
 						break;
 					}
@@ -767,12 +771,12 @@ let MyBuilderForm = {
 			}
 			this.fields.push(parent);
 		},
-		open() {
-			this.$router.push(this.getFormRoute(this.form.id,0,false));
-		},
 		fieldMoveStore(evt) {
 			this.fieldMoveList  = evt.fieldList;
 			this.fieldMoveIndex = evt.fieldIndex;
+		},
+		open() {
+			this.$router.push(this.getFormRoute(this.form.id,0,false));
 		},
 		showMessage(msg,top,image) {
 			this.$store.commit('dialog',{
@@ -789,6 +793,7 @@ let MyBuilderForm = {
 			this.presetIdOpen   = this.form.presetIdOpen;
 			this.fieldIdFocus   = this.form.fieldIdFocus;
 			this.noDataActions  = this.form.noDataActions;
+			this.actions        = JSON.parse(JSON.stringify(this.form.actions));
 			this.captions       = JSON.parse(JSON.stringify(this.form.captions));
 			this.fields         = JSON.parse(JSON.stringify(this.form.fields));
 			this.functions      = JSON.parse(JSON.stringify(this.form.functions));
@@ -1280,24 +1285,15 @@ let MyBuilderForm = {
 			if(!this.canSave) return;
 			
 			// replace builder counter ID with empty field UUID for creation
-			let fieldsCleaned = this.replaceBuilderId(
-				JSON.parse(JSON.stringify(this.fields))
-			);
+			let fieldsCleaned = this.replaceBuilderId(JSON.parse(JSON.stringify(this.fields)));
 			
 			// check removed fields being referenced in form states
-			for(let i = 0, j = this.states.length; i < j; i++) {
-				let s = this.states[i];
-				
-				for(let x = 0, y = s.conditions.length; x < y; x++) {
-					let c = s.conditions[x];
-					
+			for(const s of this.states) {
+				for(const c of s.conditions) {
 					if(this.fieldIdsRemove.includes(c.side0.fieldId) || this.fieldIdsRemove.includes(c.side1.fieldId))
 						return this.showMessage(this.capApp.error.formStateFieldRemovedCondition.replace('{NAME}',s.description));
 				}
-				
-				for(let x = 0, y = s.effects.length; x < y; x++) {
-					let e = s.effects[x];
-					
+				for(const e of s.effects) {
 					if(this.fieldIdsRemove.includes(e.fieldId))
 						return this.showMessage(this.capApp.error.formStateFieldRemovedEffect.replace('{NAME}',s.description));
 				}
@@ -1309,8 +1305,8 @@ let MyBuilderForm = {
 			
 			// save form and delete removed fields
 			let requests = [];
-			for(let i = 0, j = this.fieldIdsRemove.length; i < j; i++) {
-				requests.push(ws.prepare('field','del',{id:this.fieldIdsRemove[i]}));
+			for(const fieldId of this.fieldIdsRemove) {
+				requests.push(ws.prepare('field','del',{id:fieldId}));
 			}
 			
 			requests.push(ws.prepare('form','set',{
@@ -1327,6 +1323,7 @@ let MyBuilderForm = {
 					joins:this.joins,
 					filters:this.filters
 				},
+				actions:this.actions,
 				fields:fieldsCleaned,
 				functions:this.functions,
 				states:this.states,

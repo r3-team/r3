@@ -104,6 +104,10 @@ func GetDefaultContent(entity string) types.CaptionMap {
 		return types.CaptionMap{
 			"formTitle": make(map[string]string),
 		}
+	case "formAction":
+		return types.CaptionMap{
+			"formActionTitle": make(map[string]string),
+		}
 	case "jsFunction":
 		return types.CaptionMap{
 			"jsFunctionDesc":  make(map[string]string),
@@ -161,6 +165,9 @@ func GetEntityName(content string) (string, error) {
 
 	case "fieldTitle", "fieldHelp":
 		return "field_id", nil
+
+	case "formActionTitle":
+		return "form_action_id", nil
 
 	case "formTitle", "formHelp":
 		return "form_id", nil

@@ -1,29 +1,33 @@
+import MyBuilderCaption        from './builderCaption.js';
+import MyBuilderIconInput      from './builderIconInput.js';
+import MyInputColor            from '../inputColor.js';
 import { getDependentModules } from '../shared/builder.js';
-export {MyBuilderFormFunctions as default};
+export {MyBuilderFormActions as default};
 
-let MyBuilderFormFunction = {
-	name:'my-builder-form-function',
-	template:`<tr class="builder-form-function">
+let MyBuilderFormAction = {
+	name:'my-builder-form-action',
+	components:{
+		MyBuilderCaption,
+		MyBuilderIconInput,
+		MyInputColor
+	},
+	template:`<tr class="builder-form-action">
 		<td>
 			<img class="dragAnchor" src="images/drag.png" />
 		</td>
 		<td>
-			<div class="row centered gap">
-				<my-bool
-					v-model="eventBefore"
-					:caption0="capGen.after"
-					:caption1="capGen.before"
-				/>
-				<select v-model="event">
-					<option value="open"  >{{ capApp.option.open   }}</option>
-					<option value="save"  >{{ capApp.option.save   }}</option>
-					<option value="delete">{{ capApp.option.delete }}</option>
-				</select>
-				<my-button image="question.png"
-					:active="jsFunctionId !== null"
-					@trigger="showHelp"
-				/>
-			</div>
+			<my-builder-caption
+				v-model="captions.formActionTitle"
+				:contentName="capGen.title"
+				:language="builderLanguage"
+			/>
+		</td>
+		<td>
+			<my-builder-icon-input
+				@input="iconId = $event"
+				:icon-id-selected="iconId"
+				:module="module"
+			/>
 		</td>
 		<td>
 			<div class="row gap">
@@ -52,6 +56,9 @@ let MyBuilderFormFunction = {
 				/>
 			</div>
 		</td>
+		<td class="color-input">
+			<my-input-color v-model="color" :allowNull="true" :downwards="true" />
+		</td>
 		<td>
 			<my-button image="delete.png"
 				@trigger="$emit('remove')"
@@ -61,19 +68,24 @@ let MyBuilderFormFunction = {
 		</td>
 	</tr>`,
 	props:{
-		formId:    { type:String, required:true },
-		modelValue:{ type:Object, required:true }
+		builderLanguage:{ type:String, required:true },
+		formId:         { type:String, required:true },
+		modelValue:     { type:Object, required:true }
 	},
 	emits:['createNew','remove','update:modelValue'],
 	computed:{
 		// inputs
-		event:{
-			get()  { return this.modelValue.event; },
-			set(v) { this.update('event',v); }
+		captions:{
+			get()  { return this.modelValue.captions; },
+			set(v) { this.update('captions',v); }
 		},
-		eventBefore:{
-			get()  { return this.modelValue.eventBefore; },
-			set(v) { this.update('eventBefore',v); }
+		color:{
+			get()  { return this.modelValue.color; },
+			set(v) { this.update('color',v); }
+		},
+		iconId:{
+			get()  { return this.modelValue.iconId; },
+			set(v) { this.update('iconId',v); }
 		},
 		jsFunctionId:{
 			get()  { return this.modelValue.jsFunctionId; },
@@ -85,7 +97,6 @@ let MyBuilderFormFunction = {
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
 		jsFunctionIdMap:(s) => s.$store.getters['schema/jsFunctionIdMap'],
-		capApp:         (s) => s.$store.getters.captions.builder.form.functions,
 		capGen:         (s) => s.$store.getters.captions.generic
 	},
 	methods:{
@@ -93,15 +104,6 @@ let MyBuilderFormFunction = {
 		getDependentModules,
 		
 		// actions
-		showHelp() {
-			let msg = '';
-			switch(this.event) {
-				case 'open':   msg = this.eventBefore ? this.capApp.help.formLoadedBefore    : this.capApp.help.formLoadedAfter;    break;
-				case 'delete': msg = this.eventBefore ? this.capApp.help.recordDeletedBefore : this.capApp.help.recordDeletedAfter; break;
-				case 'save':   msg = this.eventBefore ? this.capApp.help.recordSavedBefore   : this.capApp.help.recordSavedAfter;   break;
-			}
-			this.$store.commit('dialog',{ captionBody:msg, captionTop:this.capGen.contextHelp });
-		},
 		update(name,value) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = value;
@@ -110,10 +112,10 @@ let MyBuilderFormFunction = {
 	}
 };
 
-let MyBuilderFormFunctions = {
-	name:'my-builder-form-functions',
-	components:{ MyBuilderFormFunction },
-	template:`<div class="builder-form-functions">
+let MyBuilderFormActions = {
+	name:'my-builder-form-actions',
+	components:{ MyBuilderFormAction },
+	template:`<div class="builder-form-actions">
 		<div>
 			<my-button image="add.png"
 				@trigger="add"
@@ -124,19 +126,22 @@ let MyBuilderFormFunctions = {
 			<thead>
 				<tr>
 					<th></th>
-					<th>{{ capApp.event }}</th>
+					<th>{{ capGen.title }}</th>
+					<th>{{ capGen.icon }}</th>
 					<th>{{ capApp.jsFunctionId }}*</th>
+					<th>{{ capGen.color }}</th>
 				</tr>
 			</thead>
-			<draggable handle=".dragAnchor" tag="tbody" group="functions" itemKey="id" animation="100"
+			<draggable handle=".dragAnchor" tag="tbody" group="actions" itemKey="id" animation="100"
 				:fallbackOnBody="true"
 				:list="modelValue"
 			>
 				<template #item="{element,index}">
-					<my-builder-form-function
+					<my-builder-form-action
 						@createNew="(...args) => $emit('createNew',...args)"
 						@remove="remove(index)"
 						@update:modelValue="update(index,$event)"
+						:builderLanguage="builderLanguage"
 						:formId="formId"
 						:key="index"
 						:modelValue="element"
@@ -151,8 +156,9 @@ let MyBuilderFormFunctions = {
 		</div>
 	</div>`,
 	props:{
-		formId:    { type:String, required:true },
-		modelValue:{ type:Array,  required:true }
+		builderLanguage:{ type:String, required:true },
+		formId:         { type:String, required:true },
+		modelValue:     { type:Array,  required:true }
 	},
 	emits:['createNew','update:modelValue'],
 	computed:{
@@ -165,7 +171,7 @@ let MyBuilderFormFunctions = {
 		},
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.builder.form.functions,
+		capApp:(s) => s.$store.getters.captions.builder.form.actions,
 		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
@@ -173,8 +179,11 @@ let MyBuilderFormFunctions = {
 		add() {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v.unshift({
-				event:'open',
-				eventBefore:false,
+				captions:{
+					formActionTitle:{}
+				},
+				color:null,
+				iconId:null,
 				jsFunctionId:''
 			});
 			this.$emit('update:modelValue',v);

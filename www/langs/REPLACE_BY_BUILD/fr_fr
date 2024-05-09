@@ -868,6 +868,12 @@
 			"onMobile":"Afficher sur mobile"
 		},
 		"form":{
+			"actions":{
+				"warning":{
+					"noJsFunction":"At least one action has no frontend function assigned."
+				},
+				"jsFunctionId":"Exécuter la fonction frontend"
+			},
 			"button":{
 				"columnsAll":"Toutes les colonnes",
 				"layoutColumns":"{CNT} colonnes"
@@ -1088,6 +1094,7 @@
 			"subQuery":"Sous-requête",
 			"subQueryAttribute":"Attribut",
 			"tabs":"Onglets",
+			"tabActions":"Actions ({CNT})",
 			"tabContentCounter":"Compteur",
 			"tabContentCounterHint":"Affiche le nombre total de valeurs de champ dans le titre de l'onglet (nombre de lignes de liste, nombre de fichiers, etc.)",
 			"tabFunctions":"Fonctions ({CNT})",

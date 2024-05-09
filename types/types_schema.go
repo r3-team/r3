@@ -178,10 +178,18 @@ type Form struct {
 	NoDataActions  bool           `json:"noDataActions"` // disables record manipulation actions (new/save/delete)
 	Query          Query          `json:"query"`
 	Fields         []interface{}  `json:"fields"`
+	Actions        []FormAction   `json:"actions"`
 	Functions      []FormFunction `json:"functions"`
 	States         []FormState    `json:"states"`
 	ArticleIdsHelp []uuid.UUID    `json:"articleIdsHelp"` // IDs of articles for form context help, in order
 	Captions       CaptionMap     `json:"captions"`
+}
+type FormAction struct {
+	Id           uuid.UUID   `json:"id"`
+	JsFunctionId uuid.UUID   `json:"jsFunctionId"`
+	IconId       pgtype.UUID `json:"iconId"`
+	Color        pgtype.Text `json:"color"`
+	Captions     CaptionMap  `json:"captions"`
 }
 type FormFunction struct {
 	Position     int       `json:"position"`

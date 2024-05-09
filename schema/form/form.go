@@ -184,6 +184,10 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 		if err != nil {
 			return forms, err
 		}
+		form.Actions, err = getActions(form.Id)
+		if err != nil {
+			return forms, err
+		}
 		form.Functions, err = getFunctions(form.Id)
 		if err != nil {
 			return forms, err
@@ -255,22 +259,18 @@ func Set_tx(tx pgx.Tx, frm types.Form) error {
 		}
 	}
 
-	// set form functions
+	if err := setActions_tx(tx, frm.Id, frm.Actions); err != nil {
+		return err
+	}
 	if err := setFunctions_tx(tx, frm.Id, frm.Functions); err != nil {
 		return err
 	}
-
-	// set form states
 	if err := setStates_tx(tx, frm.Id, frm.States); err != nil {
 		return err
 	}
-
-	// set help articles
 	if err := article.Assign_tx(tx, "form", frm.Id, frm.ArticleIdsHelp); err != nil {
 		return err
 	}
-
-	// set form captions
 	// fix imports < 3.2: Migration from help captions to help articles
 	frm.Captions, err = compatible.FixCaptions_tx(tx, "form", frm.Id, frm.Captions)
 	if err != nil {

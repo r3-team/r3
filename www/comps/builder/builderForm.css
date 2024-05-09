@@ -351,6 +351,24 @@
 }
 
 
+/* form actions */
+.builder-form-actions{
+	display:flex;
+	flex-flow:column nowrap;
+	min-height:360px;
+	margin:0px;
+}
+.builder-form-actions table{
+	margin-top:20px;
+}
+.builder-form-actions table td{
+	padding:2px 4px;
+}
+.builder-form-actions table td.color-input{
+	min-width:200px;
+}
+
+
 /* form functions */
 .builder-form-functions{
 	display:flex;

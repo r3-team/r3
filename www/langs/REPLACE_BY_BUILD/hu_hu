@@ -868,6 +868,12 @@
 			"onMobile":"Mobil nézetben"
 		},
 		"form":{
+			"actions":{
+				"warning":{
+					"noJsFunction":"At least one action has no frontend function assigned."
+				},
+				"jsFunctionId":"Előtéri funkció végrehajtása"
+			},
 			"button":{
 				"columnsAll":"Minden Oszlop",
 				"layoutColumns":"{CNT} Oszlop"
@@ -1088,6 +1094,7 @@
 			"subQuery":"Al-lekérdezés",
 			"subQueryAttribute":"Attribútum",
 			"tabs":"Lapok",
+			"tabActions":"Actions ({CNT})",
 			"tabContentCounter":"Számláló",
 			"tabContentCounterHint":"Összesített mezőértékeket jelenít meg a lapcímeken (lista sorok, fájlok stb.)",
 			"tabFunctions":"Funkciók ({CNT})",

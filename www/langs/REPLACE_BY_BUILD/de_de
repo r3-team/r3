@@ -868,6 +868,12 @@
 			"onMobile":"In mobiler Ansicht"
 		},
 		"form":{
+			"actions":{
+				"warning":{
+					"noJsFunction":"Mindestens eine Aktion hat keine Frontend-Funktion zugewiesen."
+				},
+				"jsFunctionId":"Frontend-Funktion ausführen"
+			},
 			"button":{
 				"columnsAll":"Alle Spalten",
 				"layoutColumns":"{CNT} Spalten"
@@ -1088,6 +1094,7 @@
 			"subQuery":"Sub-Query",
 			"subQueryAttribute":"Attribut",
 			"tabs":"Tabs",
+			"tabActions":"Aktionen ({CNT})",
 			"tabContentCounter":"Zähler",
 			"tabContentCounterHint":"Zeigt zusammengezählte Feldwerte in Tabtitel (Listenzeilen, Dateien, usw.)",
 			"tabFunctions":"Funktionen ({CNT})",

@@ -868,6 +868,12 @@
 			"onMobile":"在移动设备上显示"
 		},
 		"form":{
+			"actions":{
+				"warning":{
+					"noJsFunction":"At least one action has no frontend function assigned."
+				},
+				"jsFunctionId":"执行前端函数"
+			},
 			"button":{
 				"columnsAll":"所有列",
 				"layoutColumns":"{CNT} 列"
@@ -1088,6 +1094,7 @@
 			"subQuery":"子查询",
 			"subQueryAttribute":"属性",
 			"tabs":"选项卡",
+			"tabActions":"Actions ({CNT})",
 			"tabContentCounter":"计数器",
 			"tabContentCounterHint":"在选项卡标题中显示字段值的汇总计数（列表行数、文件计数等）",
 			"tabFunctions":"函数（{CNT}）",

@@ -142,6 +142,56 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TYPE instance.login_setting_pattern ADD VALUE 'circuits';
 			ALTER TYPE instance.login_setting_pattern ADD VALUE 'cubes';
 			ALTER TYPE instance.login_setting_pattern ADD VALUE 'triangles';
+
+			-- form actions
+			CREATE TABLE IF NOT EXISTS app.form_action (
+				id uuid NOT NULL,
+				form_id uuid NOT NULL,
+				js_function_id uuid NOT NULL,
+				icon_id uuid,
+				position integer NOT NULL,
+				color character(6) COLLATE pg_catalog."default",
+				CONSTRAINT form_action_pkey PRIMARY KEY (id),
+				CONSTRAINT form_action_form_id_fkey FOREIGN KEY (form_id)
+					REFERENCES app.form (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT form_action_icon_id_fkey FOREIGN KEY (icon_id)
+					REFERENCES app.icon (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT form_action_js_function_id_fkey FOREIGN KEY (js_function_id)
+					REFERENCES app.js_function (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_form_action_form_id_fkey        ON app.form_action USING btree (form_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_form_action_icon_id_fkey        ON app.form_action USING btree (icon_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_form_action_js_function_id_fkey ON app.form_action USING btree (js_function_id ASC NULLS LAST);
+
+			-- form action captions
+			ALTER TYPE app.caption_content ADD VALUE 'formActionTitle';
+
+			ALTER TABLE app.caption ADD COLUMN form_action_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_form_action_id_fkey FOREIGN KEY (form_action_id)
+				REFERENCES app.form_action (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_form_action_id_fkey ON app.caption USING BTREE (form_action_id ASC NULLS LAST);
+
+			ALTER TABLE instance.caption ADD COLUMN form_action_id uuid;
+			ALTER TABLE instance.caption ADD CONSTRAINT caption_form_action_id_fkey FOREIGN KEY (form_action_id)
+				REFERENCES app.form_action (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_form_action_id_fkey ON instance.caption USING BTREE (form_action_id ASC NULLS LAST);
 		`)
 		return "3.8", err
 	},

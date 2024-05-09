@@ -8,6 +8,7 @@ type CaptionMapsAll struct {
 	ColumnIdMap      map[uuid.UUID]CaptionMap `json:"columnIdMap"`
 	FieldIdMap       map[uuid.UUID]CaptionMap `json:"fieldIdMap"`
 	FormIdMap        map[uuid.UUID]CaptionMap `json:"formIdMap"`
+	FormActionIdMap  map[uuid.UUID]CaptionMap `json:"formActionIdMap"`
 	JsFunctionIdMap  map[uuid.UUID]CaptionMap `json:"jsFunctionIdMap"`
 	LoginFormIdMap   map[uuid.UUID]CaptionMap `json:"loginFormIdMap"`
 	MenuIdMap        map[uuid.UUID]CaptionMap `json:"menuIdMap"`
