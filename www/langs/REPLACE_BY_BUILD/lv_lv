@@ -956,6 +956,7 @@
 					"italic":"italic"
 				},
 				"effectField":"Field",
+				"effectFormAction":"Action",
 				"effectTab":"Tab",
 				"ganttStepsDays":"days",
 				"ganttStepsHours":"hours"
@@ -963,6 +964,7 @@
 			"states":{
 				"option":{
 					"filterFieldIdHint":"By field",
+					"filterFormActionIdHint":"By action",
 					"filterTabIdHint":"By tab"
 				},
 				"conditions":"Conditions",

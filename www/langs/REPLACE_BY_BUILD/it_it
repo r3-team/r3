@@ -956,6 +956,7 @@
 					"italic":"italic"
 				},
 				"effectField":"Field",
+				"effectFormAction":"Action",
 				"effectTab":"Tab",
 				"ganttStepsDays":"giorni",
 				"ganttStepsHours":"ore"
@@ -963,6 +964,7 @@
 			"states":{
 				"option":{
 					"filterFieldIdHint":"Per campo",
+					"filterFormActionIdHint":"By action",
 					"filterTabIdHint":"By tab"
 				},
 				"conditions":"Condizioni",

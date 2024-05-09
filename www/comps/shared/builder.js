@@ -8,26 +8,31 @@ export function getFieldHasQuery(field) {
 		);
 };
 
-export function getFormEntityMapRef(fieldsParent) {
-	let refs      = { field:{}, tab:{} }; // ID maps for fields/tabs
-	let ctrFields = 0; // unique reference number for each field
-	let ctrTabs   = 0; // unique reference number for each tab
+export function getFormEntityMapRef(fieldsParent,formActions) {
+	let refs           = { field:{}, formAction:{}, tab:{} };
+	let ctrFields      = 0; // unique reference number for each field
+	let ctrFormActions = 0; // unique reference number for each form action
+	let ctrTabs        = 0; // unique reference number for each tab
 	
-	const collect = function(fields) {
+	const collectFromFields = function(fields) {
 		for(let f of fields) {
 			refs.field[f.id] = ctrFields++;
 			switch(f.content) {
-				case 'container': collect(f.fields); break;
+				case 'container': collectFromFields(f.fields); break;
 				case 'tabs':
 					for(let t of f.tabs) {
 						refs.tab[t.id] = ctrTabs++;
-						collect(t.fields);
+						collectFromFields(t.fields);
 					}
 				break;
 			}
 		}
 	};
-	collect(fieldsParent);
+	collectFromFields(fieldsParent);
+
+	for(const a of formActions) {
+		refs.formAction[a.id] = ctrFormActions++;
+	}
 	return refs;
 };
 

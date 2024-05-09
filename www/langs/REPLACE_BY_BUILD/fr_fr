@@ -956,6 +956,7 @@
 					"italic":"italique"
 				},
 				"effectField":"Champ",
+				"effectFormAction":"Action",
 				"effectTab":"Onglet",
 				"ganttStepsDays":"jours",
 				"ganttStepsHours":"heures"
@@ -963,6 +964,7 @@
 			"states":{
 				"option":{
 					"filterFieldIdHint":"Par champ",
+					"filterFormActionIdHint":"By action",
 					"filterTabIdHint":"Par onglet"
 				},
 				"conditions":"Conditions",

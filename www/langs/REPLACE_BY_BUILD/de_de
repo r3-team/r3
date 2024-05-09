@@ -956,6 +956,7 @@
 					"italic":"kursiv"
 				},
 				"effectField":"Feld",
+				"effectFormAction":"Aktion",
 				"effectTab":"Tab",
 				"ganttStepsDays":"Tage",
 				"ganttStepsHours":"Stunden"
@@ -963,6 +964,7 @@
 			"states":{
 				"option":{
 					"filterFieldIdHint":"Nach Feld",
+					"filterFormActionIdHint":"Nach Aktion",
 					"filterTabIdHint":"Nach Tab"
 				},
 				"conditions":"Konditionen",

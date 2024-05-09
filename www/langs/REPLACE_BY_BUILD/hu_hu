@@ -956,6 +956,7 @@
 					"italic":"Dőlt"
 				},
 				"effectField":"Mező",
+				"effectFormAction":"Action",
 				"effectTab":"Lap",
 				"ganttStepsDays":"Napok",
 				"ganttStepsHours":"Órák"
@@ -963,6 +964,7 @@
 			"states":{
 				"option":{
 					"filterFieldIdHint":"Mező alapján",
+					"filterFormActionIdHint":"By action",
 					"filterTabIdHint":"Lap alapján"
 				},
 				"conditions":"Feltételek",

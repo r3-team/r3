@@ -192,6 +192,17 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				DEFERRABLE INITIALLY DEFERRED;
 			
 			CREATE INDEX fki_caption_form_action_id_fkey ON instance.caption USING BTREE (form_action_id ASC NULLS LAST);
+
+			-- form action states
+			ALTER TABLE app.form_state_effect ADD COLUMN form_action_id uuid;
+			ALTER TABLE app.form_state_effect ADD CONSTRAINT form_state_effect_form_action_id_fkey FOREIGN KEY (form_action_id)
+				REFERENCES app.form_action (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_form_state_effect_form_action_id_fkey
+				ON app.form_state_effect USING btree (form_action_id ASC NULLS LAST);
 		`)
 		return "3.8", err
 	},

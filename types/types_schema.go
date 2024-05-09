@@ -233,16 +233,17 @@ type FormStateConditionSide struct {
 	Value        pgtype.Text `json:"value"`        // fixed value, can be anything including NULL
 }
 type FormStateEffect struct {
-	FieldId  pgtype.UUID `json:"fieldId"`  // affected field
-	TabId    pgtype.UUID `json:"tabId"`    // affected tab
-	NewState string      `json:"newState"` // effect state (hidden, readonly, default, required)
+	FormActionId pgtype.UUID `json:"formActionId"` // affected form action
+	FieldId      pgtype.UUID `json:"fieldId"`      // affected field
+	TabId        pgtype.UUID `json:"tabId"`        // affected tab
+	NewState     string      `json:"newState"`     // effect state (hidden, readonly, default, optional, required)
 }
 type Field struct {
 	Id       uuid.UUID   `json:"id"`
 	TabId    pgtype.UUID `json:"tabId"`
 	IconId   pgtype.UUID `json:"iconId"`
 	Content  string      `json:"content"`  // field content (button, header, data, list, calendar, chart, tabs)
-	State    string      `json:"state"`    // field default state (hidden, readonly, default, required)
+	State    string      `json:"state"`    // field default state (hidden, readonly, default, optional, required)
 	OnMobile bool        `json:"onMobile"` // display this field on mobile?
 }
 type FieldButton struct {

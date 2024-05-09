@@ -709,7 +709,7 @@ let MyBuilderForm = {
 		canSave:          (s) => s.hasChanges && !s.readonly,
 		columnShow:       (s) => s.columnIdShow === null ? false : s.columnIdMap[s.columnIdShow],
 		dataFields:       (s) => s.getDataFields(s.fields),
-		entityIdMapRef:   (s) => s.getFormEntityMapRef(s.fields),
+		entityIdMapRef:   (s) => s.getFormEntityMapRef(s.fields,s.actions),
 		fieldContentFocus:(s) => ['button','data'],
 		fieldShow:        (s) => s.fieldIdShow === null || typeof s.fieldIdMap[s.fieldIdShow] === 'undefined' ? false : s.fieldIdMap[s.fieldIdShow],
 		fieldShowHasQuery:(s) => s.fieldShow !== false && s.getFieldHasQuery(s.fieldShow),

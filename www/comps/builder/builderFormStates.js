@@ -8,12 +8,13 @@ let MyBuilderFormStateEffect = {
 		<!-- target -->
 		<select v-model="target" @input="changeTarget($event.target.value)">
 			<option value="field">{{ capApp.option.effectField }}</option>
+			<option value="formAction">{{ capApp.option.effectFormAction }}</option>
 			<option value="tab">{{ capApp.option.effectTab }}</option>
 		</select>
 		
 		<!-- affected field -->
-		<select v-if="target === 'field'" @input="update('fieldId',$event.target.value)" :value="effect.fieldId">
-			<option :value="null">-</option>
+		<select v-if="target === 'field'" @input="updateNull('fieldId',$event.target.value)" :value="effect.fieldId">
+			<option value="">-</option>
 			<option
 				v-for="(ref,fieldId) in entityIdMapRef.field"
 				:disabled="fieldId.startsWith('new')"
@@ -21,22 +22,25 @@ let MyBuilderFormStateEffect = {
 			>F{{ fieldId.startsWith('new') ? ref + ' (' + capGen.notSaved + ')' : ref }}</option>
 		</select>
 		
+		<!-- affected form action -->
+		<select v-if="target === 'formAction'" @input="updateNull('formActionId',$event.target.value)" :value="effect.formActionId">
+			<option value="">-</option>
+			<option v-for="(ref,id) in entityIdMapRef.formAction" :value="id">A{{ ref }}</option>
+		</select>
+		
 		<!-- affected tab -->
-		<select v-if="target === 'tab'" @input="update('tabId',$event.target.value)" :value="effect.tabId">
-			<option :value="null">-</option>
-			<option
-				v-for="(ref,id) in entityIdMapRef.tab"
-				:value="id"
-			>T{{ ref }}</option>
+		<select v-if="target === 'tab'" @input="updateNull('tabId',$event.target.value)" :value="effect.tabId">
+			<option value="">-</option>
+			<option v-for="(ref,id) in entityIdMapRef.tab" :value="id">T{{ ref }}</option>
 		</select>
 		
 		<!-- new state -->
 		<select @input="update('newState',$event.target.value)" :value="effect.newState">
 			<option value="hidden">{{ capApp.stateHidden }}</option>
 			<option value="default">{{ capApp.stateDefault }}</option>
+			<option value="readonly" :disabled="!isData && !isButton && !isAction">{{ capApp.stateReadonly }}</option>
 			<option value="optional" :disabled="!isData">{{ capApp.stateOptional }}</option>
 			<option value="required" :disabled="!isData">{{ capApp.stateRequired }}</option>
-			<option value="readonly" :disabled="!isData && !isButton">{{ capApp.stateReadonly }}</option>
 		</select>
 		
 		<my-button image="delete.png"
@@ -52,12 +56,13 @@ let MyBuilderFormStateEffect = {
 	emits:['remove','update:modelValue'],
 	data() {
 		return {
-			target:this.modelValue.tabId === null ? 'field' : 'tab'
-		};
+			target:'field'
+		}
 	},
 	computed:{
 		effect:  (s) => JSON.parse(JSON.stringify(s.modelValue)),
-		fieldSet:(s) => s.effect.fieldId !== null && typeof s.fieldIdMap[s.effect.fieldId] !== 'undefined',
+		fieldSet:(s) => s.effect.fieldId      !== null && typeof s.fieldIdMap[s.effect.fieldId] !== 'undefined',
+		isAction:(s) => s.effect.formActionId !== null,
 		isButton:(s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'button',
 		isData:  (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'data',
 		
@@ -65,10 +70,16 @@ let MyBuilderFormStateEffect = {
 		capApp:(s) => s.$store.getters.captions.builder.form,
 		capGen:(s) => s.$store.getters.captions.generic
 	},
+	mounted() {
+		// set initial target
+		if(this.modelValue.formActionId !== null) this.target = 'formAction';
+		if(this.modelValue.tabId        !== null) this.target = 'tab';
+	},
 	methods:{
 		changeTarget(target) {
 			this.$emit('update:modelValue',{
 				fieldId:null,
+				formActionId:null,
 				newState:'default',
 				tabId:null
 			});
@@ -78,6 +89,9 @@ let MyBuilderFormStateEffect = {
 			let v = JSON.parse(JSON.stringify(this.effect));
 			v[name] = value;
 			this.$emit('update:modelValue',v);
+		},
+		updateNull(name,value) {
+			this.update(name,value === '' ? null : value);
 		}
 	}
 };
@@ -92,13 +106,11 @@ let MyBuilderFormState = {
 				:captionTitle="capGen.button.show"
 				:image="open ? 'triangleDown.png' : 'triangleRight.png'"
 			/>
-			
 			<input class="description"
 				@input="update('description',-1,$event.target.value)"
 				:placeholder="capApp.descriptionHint"
 				:value="state.description"
 			/>
-			
 			<my-button image="delete.png"
 				@trigger="$emit('remove')"
 				:cancel="true"
@@ -207,13 +219,16 @@ let MyBuilderFormState = {
 			let v = JSON.parse(JSON.stringify(this.state));
 			v.effects.push({
 				fieldId:null,
+				formActionId:null,
 				tabId:null,
 				newState:'default'
 			});
 			this.$emit('update:modelValue',v);
 		},
 		getEffectKey(i,e) {
-			return e.tabId !== null ? `effect_${i}_${e.tabId}` : `effect_${i}_${e.field_id}`;
+			if(e.fieldId !== null) return `effect_${i}_${e.fieldId}`;
+			if(e.tabId   !== null) return `effect_${i}_${e.tabId}`;
+			return `effect_${i}_${e.formActionId}`
 		},
 		remove(name,i) {
 			let v = JSON.parse(JSON.stringify(this.state));
@@ -225,7 +240,6 @@ let MyBuilderFormState = {
 			
 			if(i !== -1) v[name][i] = value;
 			else         v[name]    = value;
-			
 			this.$emit('update:modelValue',v);
 		}
 	}
@@ -253,6 +267,15 @@ let MyBuilderFormStates = {
 							v-if="fieldIdsUsed.includes(fieldId)"
 							:value="fieldId"
 						>F{{ ref }}</option>
+					</template>
+				</select>
+				<select v-model="filterFormActionId">
+					<option value="">{{ capApp.option.filterFormActionIdHint }}</option>
+					<template v-for="(ref,formActionId) in entityIdMapRef.formAction">
+						<option
+							v-if="formActionIdsUsed.includes(formActionId)"
+							:value="formActionId"
+						>A{{ ref }}</option>
 					</template>
 				</select>
 				<select v-model="filterTabId">
@@ -296,6 +319,7 @@ let MyBuilderFormStates = {
 		return {
 			filter:'',
 			filterFieldId:'',
+			filterFormActionId:'',
 			filterTabId:'',
 			stateIndexesOpen:[]
 		};
@@ -303,9 +327,7 @@ let MyBuilderFormStates = {
 	computed:{
 		fieldIdsUsed() {
 			let out = [];
-			for(let i = 0, j = this.states.length; i < j; i++) {
-				let s = this.states[i];
-				
+			for(const s of this.states) {
 				for(let c of s.conditions) {
 					if(c.side0.fieldId !== null && !out.includes(c.side0.fieldId))
 						out.push(c.side0.fieldId);
@@ -313,10 +335,19 @@ let MyBuilderFormStates = {
 					if(c.side1.fieldId !== null && !out.includes(c.side1.fieldId))
 						out.push(c.side1.fieldId);
 				}
-				
 				for(let e of s.effects) {
 					if(e.fieldId !== null && !out.includes(e.fieldId))
 						out.push(e.fieldId);
+				}
+			}
+			return out;
+		},
+		formActionIdsUsed() {
+			let out = [];
+			for(let s of this.states) {
+				for(let e of s.effects) {
+					if(e.formActionId !== null && !out.includes(e.formActionId))
+						out.push(e.formActionId);
 				}
 			}
 			return out;
@@ -366,6 +397,18 @@ let MyBuilderFormStates = {
 					if(!show) continue;
 				}
 				
+				// check form action filter
+				if(this.filterFormActionId !== '') {
+					let show = false;
+					for(let e of s.effects) {
+						if(e.formActionId === this.filterFormActionId) {
+							show = true;
+							break;
+						}
+					}
+					if(!show) continue;
+				}
+				
 				// check tab filter
 				if(this.filterTabId !== '') {
 					let show = false;
@@ -377,7 +420,6 @@ let MyBuilderFormStates = {
 					}
 					if(!show) continue;
 				}
-				
 				out.push(i);
 			}
 			return out;

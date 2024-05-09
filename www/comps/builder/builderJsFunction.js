@@ -570,7 +570,7 @@ let MyBuilderJsFunction = {
 			s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === s.formId && s.formId !== null)),
 		
 		// simple
-		entityIdMapRef:    (s) => s.formId === null ? {} : s.getFormEntityMapRef(s.form.fields),
+		entityIdMapRef:    (s) => s.formId === null ? {} : s.getFormEntityMapRef(s.form.fields,s.form.actions),
 		fieldIdMap:        (s) => s.formId === null ? {} : s.getFieldMap(s.formIdMap[s.formId].fields),
 		form:              (s) => s.formId === null ? false : s.formIdMap[s.formId],
 		joinsIndexMap:     (s) => s.form !== false ? s.getJoinsIndexMap(s.form.query.joins) : {},

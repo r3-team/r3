@@ -16,11 +16,14 @@ let MyBuilderFormAction = {
 			<img class="dragAnchor" src="images/drag.png" />
 		</td>
 		<td>
-			<my-builder-caption
-				v-model="captions.formActionTitle"
-				:contentName="capGen.title"
-				:language="builderLanguage"
-			/>
+			<div class="row gap centered nowrap">
+				<b>A{{ position }}</b>
+				<my-builder-caption
+					v-model="captions.formActionTitle"
+					:contentName="capGen.title"
+					:language="builderLanguage"
+				/>
+			</div>
 		</td>
 		<td>
 			<my-builder-icon-input
@@ -70,6 +73,7 @@ let MyBuilderFormAction = {
 	props:{
 		builderLanguage:{ type:String, required:true },
 		formId:         { type:String, required:true },
+		position:       { type:Number, required:true },
 		modelValue:     { type:Object, required:true }
 	},
 	emits:['createNew','remove','update:modelValue'],
@@ -145,6 +149,7 @@ let MyBuilderFormActions = {
 						:formId="formId"
 						:key="index"
 						:modelValue="element"
+						:position="index"
 					/>
 				</template>
 			</draggable>

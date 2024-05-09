@@ -956,6 +956,7 @@
 					"italic":"斜体"
 				},
 				"effectField":"字段",
+				"effectFormAction":"Action",
 				"effectTab":"选项卡",
 				"ganttStepsDays":"天",
 				"ganttStepsHours":"小时"
@@ -963,6 +964,7 @@
 			"states":{
 				"option":{
 					"filterFieldIdHint":"按字段",
+					"filterFormActionIdHint":"By action",
 					"filterTabIdHint":"按选项卡"
 				},
 				"conditions":"条件",
