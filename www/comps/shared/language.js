@@ -23,6 +23,7 @@ export function getCaptionMapName(content) {
 		case 'columnTitle':      return 'columnIdMap';      break;
 		case 'fieldHelp':        // fallthrough
 		case 'fieldTitle':       return 'fieldIdMap';       break;
+		case 'formActionTitle':  return 'formActionIdMap';  break;
 		case 'formTitle':        return 'formIdMap';        break;
 		case 'jsFunctionTitle':  return 'jsFunctionIdMap';  break;
 		case 'loginFormTitle':   return 'loginFormIdMap';   break;

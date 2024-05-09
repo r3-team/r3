@@ -41,7 +41,6 @@ func RunIfRequired() error {
 
 // loop upgrade procedure until DB version matches application version
 func startLoop() error {
-
 	log.Info("server", "version discrepancy (platform<->database) recognized, starting automatic upgrade")
 
 	for {
@@ -150,6 +149,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				js_function_id uuid NOT NULL,
 				icon_id uuid,
 				position integer NOT NULL,
+				state app.state_effect NOT NULL,
 				color character(6) COLLATE pg_catalog."default",
 				CONSTRAINT form_action_pkey PRIMARY KEY (id),
 				CONSTRAINT form_action_form_id_fkey FOREIGN KEY (form_id)

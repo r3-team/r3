@@ -59,7 +59,14 @@ let MyBuilderFormAction = {
 				/>
 			</div>
 		</td>
-		<td class="color-input">
+		<td>
+			<select v-model="state">
+				<option value="hidden">{{ capApp.stateHidden }}</option>
+				<option value="default">{{ capApp.stateDefault }}</option>
+				<option value="readonly">{{ capApp.stateReadonly }}</option>
+			</select>
+		</td>
+		<td class="color-input" v-if="false">
 			<my-input-color v-model="color" :allowNull="true" :downwards="true" />
 		</td>
 		<td>
@@ -95,12 +102,17 @@ let MyBuilderFormAction = {
 			get()  { return this.modelValue.jsFunctionId; },
 			set(v) { this.update('jsFunctionId',v); }
 		},
+		state:{
+			get()  { return this.modelValue.state; },
+			set(v) { this.update('state',v); }
+		},
 		
 		// store
 		module:         (s) => s.moduleIdMap[s.formIdMap[s.formId].moduleId],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
 		jsFunctionIdMap:(s) => s.$store.getters['schema/jsFunctionIdMap'],
+		capApp:         (s) => s.$store.getters.captions.builder.form,
 		capGen:         (s) => s.$store.getters.captions.generic
 	},
 	methods:{
@@ -133,7 +145,9 @@ let MyBuilderFormActions = {
 					<th>{{ capGen.title }}</th>
 					<th>{{ capGen.icon }}</th>
 					<th>{{ capApp.jsFunctionId }}*</th>
-					<th>{{ capGen.color }}</th>
+					<th>{{ capAppForm.state }}</th>
+					<th v-if="false">{{ capGen.color }}</th>
+					<th></th>
 				</tr>
 			</thead>
 			<draggable handle=".dragAnchor" tag="tbody" group="actions" itemKey="id" animation="100"
@@ -176,8 +190,9 @@ let MyBuilderFormActions = {
 		},
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.builder.form.actions,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:    (s) => s.$store.getters.captions.builder.form.actions,
+		capAppForm:(s) => s.$store.getters.captions.builder.form,
+		capGen:    (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// actions
@@ -189,7 +204,8 @@ let MyBuilderFormActions = {
 				},
 				color:null,
 				iconId:null,
-				jsFunctionId:''
+				jsFunctionId:'',
+				state:'default'
 			});
 			this.$emit('update:modelValue',v);
 		},

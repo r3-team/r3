@@ -189,6 +189,7 @@ type FormAction struct {
 	JsFunctionId uuid.UUID   `json:"jsFunctionId"`
 	IconId       pgtype.UUID `json:"iconId"`
 	Color        pgtype.Text `json:"color"`
+	State        string      `json:"state"` // default state (hidden, default, readonly)
 	Captions     CaptionMap  `json:"captions"`
 }
 type FormFunction struct {
@@ -236,14 +237,14 @@ type FormStateEffect struct {
 	FormActionId pgtype.UUID `json:"formActionId"` // affected form action
 	FieldId      pgtype.UUID `json:"fieldId"`      // affected field
 	TabId        pgtype.UUID `json:"tabId"`        // affected tab
-	NewState     string      `json:"newState"`     // effect state (hidden, readonly, default, optional, required)
+	NewState     string      `json:"newState"`     // applied state (hidden, default, readonly, optional, required)
 }
 type Field struct {
 	Id       uuid.UUID   `json:"id"`
 	TabId    pgtype.UUID `json:"tabId"`
 	IconId   pgtype.UUID `json:"iconId"`
-	Content  string      `json:"content"`  // field content (button, header, data, list, calendar, chart, tabs)
-	State    string      `json:"state"`    // field default state (hidden, readonly, default, optional, required)
+	Content  string      `json:"content"`  // content (button, header, data, list, calendar, chart, tabs)
+	State    string      `json:"state"`    // default state (hidden, default, readonly, optional, required)
 	OnMobile bool        `json:"onMobile"` // display this field on mobile?
 }
 type FieldButton struct {

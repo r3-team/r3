@@ -1,5 +1,6 @@
 import MyArticles                  from './articles.js';
 import MyField                     from './field.js';
+import MyFormActions               from './formActions.js';
 import MyFormLog                   from './formLog.js';
 import {hasAccessToRelation}       from './shared/access.js';
 import {dialogCloseAsk}            from './shared/dialog.js';
@@ -56,6 +57,7 @@ let MyForm = {
 	components:{
 		MyArticles,
 		MyField,
+		MyFormActions,
 		MyFormLog
 	},
 	template:`<div class="form-wrap"
@@ -192,6 +194,14 @@ let MyForm = {
 						:active="hasChangesBulk && canUpdate"
 						:caption="capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length))"
 						:captionTitle="capGen.button.saveHint"
+					/>
+				</div>
+				<div class="area">
+					<my-form-actions
+						:entityIdMapState="entityIdMapState"
+						:formActions="form.actions"
+						:formId="formId"
+						:moduleId="moduleId"
 					/>
 				</div>
 				<div class="area">
@@ -590,7 +600,7 @@ let MyForm = {
 			};
 		},
 		
-		// state overwrite for different entities (fields, tabs)
+		// state overwrite for different entities (fields, formActions, tabs)
 		entityIdMapState:(s) => {
 			const getValueFromConditionSide = (side,operator) => {
 				switch(side.content) {
@@ -617,7 +627,7 @@ let MyForm = {
 				return false;
 			};
 			
-			let out = { field:{}, tab:{} };
+			let out = { field:{}, formAction:{}, tab:{} };
 			for(const state of s.form.states) {
 				if(state.conditions.length === 0 || state.effects.length === 0)
 					continue;
@@ -646,8 +656,9 @@ let MyForm = {
 				// apply effects if conditions are met
 				if(Function(line)()) {
 					for(const e of state.effects) {
-						if(e.fieldId !== null) out.field[e.fieldId] = e.newState;
-						if(e.tabId   !== null) out.tab[e.tabId]     = e.newState;
+						if(e.fieldId      !== null) out.field[e.fieldId]           = e.newState;
+						if(e.formActionId !== null) out.formAction[e.formActionId] = e.newState;
+						if(e.tabId        !== null) out.tab[e.tabId]               = e.newState;
 					}
 				}
 			}
