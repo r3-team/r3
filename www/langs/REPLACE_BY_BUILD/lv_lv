@@ -1721,7 +1721,7 @@
 		},
 		"moduleRelated":"Is this feedback for the open application? ({NAME})",
 		"sendNok":"Feedback could not be send. Please try again later.",
-		"sendOk":"Feedback was send successfully. Thank you!",
+		"sendOk":"Feedback was sent successfully. Thank you!",
 		"textHint":"Your feedback",
 		"title":"Send anonymous feedback"
 	},
