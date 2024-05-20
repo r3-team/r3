@@ -81,6 +81,7 @@
 			"sortDesc":"absteigend",
 			"yes":"ja"
 		},
+		"action":"Aktion",
 		"actions":"Aktionen",
 		"active":"Aktiv",
 		"after":"Danach",

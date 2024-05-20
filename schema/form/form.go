@@ -47,7 +47,8 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 		return err
 	}
 
-	// remove form functions (cannot be copied without recreating functions)
+	// remove form actions & functions (cannot be copied without recreating referenced functions)
+	form.Actions = make([]types.FormAction, 0)
 	form.Functions = make([]types.FormFunction, 0)
 
 	// remove field focus (copy not supported)

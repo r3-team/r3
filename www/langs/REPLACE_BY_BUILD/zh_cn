@@ -81,6 +81,7 @@
 			"sortDesc":"降序",
 			"yes":"是"
 		},
+		"action":"Action",
 		"actions":"操作",
 		"active":"活跃",
 		"after":"之后",

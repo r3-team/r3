@@ -81,6 +81,7 @@
 			"sortDesc":"csökkenő",
 			"yes":"igen"
 		},
+		"action":"Action",
 		"actions":"Műveletek",
 		"active":"Aktív",
 		"after":"After",

@@ -7,7 +7,7 @@ let MyFormAction = {
 	template:`<my-button
 		v-if="state !== 'hidden'"
 		:active="state !== 'readonly'"
-		:caption="getCaption('formActionTitle',moduleId,formId,formAction.captions)"
+		:caption="getCaption('formActionTitle',moduleId,formAction.id,formAction.captions)"
 		:imageBase64="formAction.iconId ? srcBase64(iconIdMap[formAction.iconId].file) : ''"
 	/>`,
 	props:{

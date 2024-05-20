@@ -341,16 +341,10 @@ let MyCaptionMapItem = {
 		};
 	},
 	computed:{
-		actionCaption:(s) => {
-			if(s.level >= s.levelMax) return s.item.name;
-			return `${s.item.name} (${s.item.children.length})`;
-		},
-		actionImage:(s) => {
-			if(s.level >= s.levelMax) return '';
-			return s.showChildrenIds.includes(s.item.id) ? 'triangleDown.png' : 'triangleRight.png';
-		},
-		children:(s) => typeof s.item.children !== 'undefined' ? s.item.children : [],
-		style:(s) => `margin-left:${s.level * 20}px;`
+		actionCaption:(s) => s.level >= s.levelMax || s.item.children.length === 0 ? s.item.name : `${s.item.name} (${s.item.children.length})`,
+		actionImage:  (s) => s.level >= s.levelMax ? '' : s.showChildrenIds.includes(s.item.id) ? 'triangleDown.png' : 'triangleRight.png',
+		children:     (s) => typeof s.item.children !== 'undefined' ? s.item.children : [],
+		style:        (s) => `margin-left:${s.level * 20}px;`
 	},
 	methods:{
 		toggleDisplay(list,value) {
@@ -369,7 +363,7 @@ let MyCaptionMapItems = {
 			<my-button
 				@trigger="show = !show"
 				:active="items.length !== 0"
-				:caption="name + ' (' + items.length + ')'"
+				:caption="label"
 				:images="[show ? 'triangleDown.png' : 'triangleRight.png',icon]"
 			/>
 		</td>
@@ -401,6 +395,9 @@ let MyCaptionMapItems = {
 		return {
 			show:false
 		};
+	},
+	computed:{
+		label:(s) => s.items.length === 0 ? s.name : `${s.name} (${s.items.length})`
 	}
 };
 
@@ -757,41 +754,48 @@ let MyCaptionMap = {
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
 		captionsFieldsByForms:(s) => {
-			let frmIdMap = {};
+			let frmIdMapChildren = {};
 			for(const frm of s.module.forms) {
 				const fieldIdMap = s.getFieldMap(frm.fields);
-				let fieldCaptions = [];
+				let formChildren = [];
 				
+				// form fields
 				for(const fldId in fieldIdMap) {
 					const fld = fieldIdMap[fldId];
 					
-					// check for field children (columns, tabs)
-					let fieldChildCaptions = [];
+					// check for fields with nesting (columns, tabs)
+					let fieldChildren = [];
 					if(fld.columns !== undefined) {
 						for(const col of fld.columns) {
 							if(s.captionMap.columnIdMap[col.id] !== undefined)
-								fieldChildCaptions.push(s.makeItem(col.id,s.getColumnTitle(col,s.moduleId),s.captionMap.columnIdMap[col.id],[]));
+								fieldChildren.push(s.makeItem(col.id,s.getColumnTitle(col,s.moduleId),s.captionMap.columnIdMap[col.id],[]));
 						}
 					}
 					if(fld.tabs !== undefined) {
 						for(const tab of fld.tabs) {
 							if(s.captionMap.tabIdMap[tab.id] !== undefined)
-								fieldChildCaptions.push(s.makeItem(tab.id,'-',s.captionMap.tabIdMap[tab.id],[]));
+								fieldChildren.push(s.makeItem(tab.id,'-',s.captionMap.tabIdMap[tab.id],[]));
 						}
 					}
 					
-					if(fieldChildCaptions.length !== 0 || s.captionMap.fieldIdMap[fldId] !== undefined)
-						fieldCaptions.push(s.makeItem(fldId,s.getFieldTitle(fld),s.captionMap.fieldIdMap[fldId],fieldChildCaptions));
+					if(fieldChildren.length !== 0 || s.captionMap.fieldIdMap[fldId] !== undefined)
+						formChildren.push(s.makeItem(fldId,s.getFieldTitle(fld),s.captionMap.fieldIdMap[fldId],fieldChildren));
 				}
-				// form has fields with captions or has captions itself
-				if(fieldCaptions.length !== 0 || s.captionMap.formIdMap[frm.id] !== undefined)
-					frmIdMap[frm.id] = fieldCaptions;
+
+				// form actions
+				for(const act of frm.actions) {
+					formChildren.push(s.makeItem(act.id,s.capGen.action,s.captionMap.formActionIdMap[act.id],[]));
+				}
+
+				// form has children with captions or has captions itself
+				if(formChildren.length !== 0 || s.captionMap.formIdMap[frm.id] !== undefined)
+					frmIdMapChildren[frm.id] = formChildren;
 			}
 			
 			// return sorted by form and field names
 			let out = [];
-			for(const id in frmIdMap) {
-				out.push(s.makeItem(id,s.formIdMap[id].name,s.captionMap.formIdMap[id],frmIdMap[id]));
+			for(const id in frmIdMapChildren) {
+				out.push(s.makeItem(id,s.formIdMap[id].name,s.captionMap.formIdMap[id],frmIdMapChildren[id]));
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
