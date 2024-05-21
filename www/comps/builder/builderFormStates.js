@@ -1,41 +1,37 @@
-import {getNilUuid} from '../shared/generic.js';
+import {getNilUuid}    from '../shared/generic.js';
+import {getFieldTitle} from '../shared/field.js';
 export {MyBuilderFormStates as default};
 
 let MyBuilderFormStateEffect = {
 	name:'my-builder-form-state-effect',
-	template:`<div class="builder-form-state-effect row gap">
+	template:`<div class="builder-form-state-effect row gap" :style="'order:'+order">
 		
 		<!-- target -->
-		<select v-model="target" @input="changeTarget($event.target.value)">
-			<option value="field">{{ capApp.option.effectField }}</option>
-			<option value="formAction">{{ capApp.option.effectFormAction }}</option>
-			<option value="tab">{{ capApp.option.effectTab }}</option>
-		</select>
-		
-		<!-- affected field -->
-		<select v-if="target === 'field'" @input="updateNull('fieldId',$event.target.value)" :value="effect.fieldId">
+		<select class="long" v-model="target">
 			<option value="">-</option>
-			<option
-				v-for="(ref,fieldId) in entityIdMapRef.field"
-				:disabled="fieldId.startsWith('new')"
-				:value="fieldId"
-			>F{{ fieldId.startsWith('new') ? ref + ' (' + capGen.notSaved + ')' : ref }}</option>
-		</select>
-		
-		<!-- affected form action -->
-		<select v-if="target === 'formAction'" @input="updateNull('formActionId',$event.target.value)" :value="effect.formActionId">
-			<option value="">-</option>
-			<option v-for="(ref,id) in entityIdMapRef.formAction" :value="id">A{{ ref }}</option>
-		</select>
-		
-		<!-- affected tab -->
-		<select v-if="target === 'tab'" @input="updateNull('tabId',$event.target.value)" :value="effect.tabId">
-			<option value="">-</option>
-			<option v-for="(ref,id) in entityIdMapRef.tab" :value="id">T{{ ref }}</option>
+			<optgroup :label="capApp.option.effectFormAction">
+				<option
+					v-for="(ref,id) in entityIdMapRef.formAction"
+					:value="'A'+id"
+				>A{{ ref }}</option>
+			</optgroup>
+			<optgroup :label="capApp.option.effectTab">
+				<option
+					v-for="(ref,id) in entityIdMapRef.tab"
+					:value="'T'+id"
+				>T{{ ref }}</option>
+			</optgroup>
+			<optgroup :label="capApp.option.effectField">
+				<option
+					v-for="(ref,fieldId) in entityIdMapRef.field"
+					:disabled="fieldId.startsWith('new')"
+					:value="'F'+fieldId"
+				>{{ getTitleEffect('F', ref, fieldId) }}</option>
+			</optgroup>
 		</select>
 		
 		<!-- new state -->
-		<select @input="update('newState',$event.target.value)" :value="effect.newState">
+		<select class="short" v-model="newState">
 			<option value="hidden">{{ capApp.stateHidden }}</option>
 			<option value="default">{{ capApp.stateDefault }}</option>
 			<option value="readonly" :disabled="!isData && !isButton && !isAction">{{ capApp.stateReadonly }}</option>
@@ -51,15 +47,37 @@ let MyBuilderFormStateEffect = {
 	props:{
 		entityIdMapRef:{ type:Object, required:true },
 		fieldIdMap:    { type:Object, required:true },
-		modelValue:    { type:Object, required:true }
+		modelValue:    { type:Object, required:true },
+		order:         { type:Number, required:true }
 	},
 	emits:['remove','update:modelValue'],
-	data() {
-		return {
-			target:'field'
-		}
-	},
 	computed:{
+		newState:{
+			get()  { return this.effect.newState },
+			set(v) {
+				let vOld = JSON.parse(JSON.stringify(this.effect));
+				vOld.newState = v;
+				this.$emit('update:modelValue',vOld);
+			}
+		},
+		target:{
+			get() {
+				if(this.effect.fieldId      !== null) return `F${this.effect.fieldId}`;
+				if(this.effect.formActionId !== null) return `A${this.effect.formActionId}`;
+				if(this.effect.tabId        !== null) return `T${this.effect.tabId}`;
+				return '';
+			},
+			set(v) {
+				this.$emit('update:modelValue',{
+					fieldId:     (v !== '' && v.charAt(0) === 'F') ? v.substring(1) : null,
+					formActionId:(v !== '' && v.charAt(0) === 'A') ? v.substring(1) : null,
+					tabId:       (v !== '' && v.charAt(0) === 'T') ? v.substring(1) : null,
+					newState:    'default',
+				});
+			}
+		},
+
+		// simple
 		effect:  (s) => JSON.parse(JSON.stringify(s.modelValue)),
 		fieldSet:(s) => s.effect.fieldId      !== null && typeof s.fieldIdMap[s.effect.fieldId] !== 'undefined',
 		isAction:(s) => s.effect.formActionId !== null,
@@ -70,28 +88,19 @@ let MyBuilderFormStateEffect = {
 		capApp:(s) => s.$store.getters.captions.builder.form,
 		capGen:(s) => s.$store.getters.captions.generic
 	},
-	mounted() {
-		// set initial target
-		if(this.modelValue.formActionId !== null) this.target = 'formAction';
-		if(this.modelValue.tabId        !== null) this.target = 'tab';
-	},
 	methods:{
-		changeTarget(target) {
-			this.$emit('update:modelValue',{
-				fieldId:null,
-				formActionId:null,
-				newState:'default',
-				tabId:null
-			});
-			this.target = target;
-		},
-		update(name,value) {
-			let v = JSON.parse(JSON.stringify(this.effect));
-			v[name] = value;
-			this.$emit('update:modelValue',v);
-		},
-		updateNull(name,value) {
-			this.update(name,value === '' ? null : value);
+		// externals
+		getFieldTitle,
+
+		// presentation
+		getTitleEffect(type,ref,id) {
+			const notSaved = id.startsWith('new');
+			const postfix  = notSaved ? ` (${this.capGen.notSaved})` : '';
+			let title      = '';
+
+			if(type === 'F') title = this.getFieldTitle(this.fieldIdMap[id]);
+			
+			return type + ref + ' - ' + title + postfix;
 		}
 	}
 };
@@ -148,8 +157,9 @@ let MyBuilderFormState = {
 					@remove="remove('effects',i)"
 					:entityIdMapRef="entityIdMapRef"
 					:fieldIdMap="fieldIdMap"
-					:key="getEffectKey(i,state.effects[i])"
+					:key="getEffectRef(state.effects[i])"
 					:modelValue="state.effects[i]"
+					:order="effectIndexesOrdered.indexOf(i)"
 				/>
 			</div>
 		</div>
@@ -169,6 +179,17 @@ let MyBuilderFormState = {
 		};
 	},
 	computed:{
+		effectIndexesOrdered:(s) => {
+			let effects = JSON.parse(JSON.stringify(s.state.effects));
+			let out     = new Array(effects.length);
+
+			for(let i = 0; i < effects.length; i++)
+				out[i] = i;
+			
+			out.sort((a,b) => s.getEffectRef(effects[a]) > s.getEffectRef(effects[b]) ? 1 : -1);
+			return out;
+		},
+
 		// inputs
 		conditions:{
 			get()  { return this.state.conditions; },
@@ -225,10 +246,11 @@ let MyBuilderFormState = {
 			});
 			this.$emit('update:modelValue',v);
 		},
-		getEffectKey(i,e) {
-			if(e.fieldId !== null) return `effect_${i}_${e.fieldId}`;
-			if(e.tabId   !== null) return `effect_${i}_${e.tabId}`;
-			return `effect_${i}_${e.formActionId}`
+		getEffectRef(effect) {
+			if(effect.fieldId      !== null) return 'F'+String(this.entityIdMapRef.field[effect.fieldId]).padStart(5,'0');
+			if(effect.formActionId !== null) return 'A'+String(this.entityIdMapRef.formAction[effect.formActionId]).padStart(5,'0');
+			if(effect.tabId        !== null) return 'T'+String(this.entityIdMapRef.tab[effect.tabId]).padStart(5,'0');
+			return '';
 		},
 		remove(name,i) {
 			let v = JSON.parse(JSON.stringify(this.state));

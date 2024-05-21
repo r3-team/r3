@@ -32,7 +32,7 @@ export function getFieldTitle(field) {
 		case 'calendar':  return field.gantt ? 'Gantt' : 'Calendar'; break;
 		case 'data':      return getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm); break;
 		case 'kanban':    return field.query.relationId === null ? 'Kanban' : `Kanban: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`; break;
-		case 'list':      return field.query.relationId === null ? 'List' : `List: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`; break;
+		case 'list':      return field.query.relationId === null ? 'List'   : `List: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`;   break;
 	}
 	return '';
 };
