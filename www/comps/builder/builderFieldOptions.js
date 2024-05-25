@@ -2,6 +2,7 @@ import MyBuilderCaption                from './builderCaption.js';
 import MyBuilderCollectionInput        from './builderCollectionInput.js';
 import MyBuilderIconInput              from './builderIconInput.js';
 import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
+import MyCodeEditor                    from '../codeEditor.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {getJoinsIndexMap}              from '../shared/query.js';
 import {
@@ -129,7 +130,10 @@ let MyBuilderFieldOptionsChartSerie = {
 
 let MyBuilderFieldOptionsChart = {
 	name:'my-builder-field-options-chart',
-	components:{MyBuilderFieldOptionsChartSerie},
+	components:{
+		MyBuilderFieldOptionsChartSerie,
+		MyCodeEditor
+	},
 	template:`
 		<tr>
 			<td>{{ capApp.axisType }} X</td>
@@ -176,11 +180,12 @@ let MyBuilderFieldOptionsChart = {
 		<tr>
 			<td colspan="999">
 				<p v-html="capApp.help"></p>
-				<textarea class="chart-option" spellcheck="false"
-					v-model="jsonInput"
-					@input="optionInput($event.target.value)"
-					:class="{error:jsonBad}"
-				/>
+				<div class="chart-option" :class="{error:jsonBad}">
+					<my-code-editor mode="json"
+						@update:modelValue="optionInput($event)"
+						:modelValue="jsonInput"
+					/>
+				</div>
 			</td>
 		</tr>
 	`,

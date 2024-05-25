@@ -96,6 +96,7 @@
 		"attributes":"属性",
 		"available":"可用的",
 		"before":"之前",
+		"bright":"Bright",
 		"busy":"工作中 - 点击此处中止",
 		"category":"类别",
 		"collection":"收藏",
@@ -111,6 +112,7 @@
 		"dateFormat2":"d.m.Y (30.12.2012)",
 		"dateFormat3":"d/m/Y (30/12/2012)",
 		"dateFormat4":"m/d/Y (12/30/2012)",
+		"dark":"Dark",
 		"description":"描述",
 		"details":"详细信息",
 		"displayed":"显示的",
@@ -191,7 +193,8 @@
 		"username":"用户名",
 		"version":"版本",
 		"warnings":"警告",
-		"widgets":"小部件"
+		"widgets":"小部件",
+		"wrap":"Wrap"
 	},
 	"admin":{
 		"backups":{

@@ -96,6 +96,7 @@
 		"attributes":"Attributes",
 		"available":"Available",
 		"before":"Before",
+		"bright":"Bright",
 		"busy":"Lucrează - Apasă aici pentru anulare",
 		"category":"Category",
 		"collection":"Collection",
@@ -111,6 +112,7 @@
 		"dateFormat2":"zz.ll.aaaa (30.12.2012)",
 		"dateFormat3":"aaaa/ll/zz (30/12/2012)",
 		"dateFormat4":"ll/zz/aa (12/30/2012)",
+		"dark":"Dark",
 		"description":"Descriere",
 		"details":"Details",
 		"displayed":"Displayed",
@@ -191,7 +193,8 @@
 		"version":"Versiune",
 		"unassigned":"Unassigned",
 		"warnings":"Warnings",
-		"widgets":"Widgets"
+		"widgets":"Widgets",
+		"wrap":"Wrap"
 	},
 	"admin":{
 		"backups":{

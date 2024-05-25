@@ -1,7 +1,7 @@
-import {textAddTab}     from '../shared/generic.js';
+import MyCodeEditor     from '../codeEditor.js';
+import MyInputColor     from '../inputColor.js';
 import {srcBase64}      from '../shared/image.js';
 import {MyModuleSelect} from '../input.js';
-import MyInputColor     from '../inputColor.js';
 export {MyAdminCustom as default};
 
 let MyAdminCustomLogo = {
@@ -58,6 +58,7 @@ let MyAdminCustom = {
 	name:'my-admin-custom',
 	components:{
 		MyAdminCustomLogo,
+		MyCodeEditor,
 		MyInputColor,
 		MyModuleSelect
 	},
@@ -264,12 +265,13 @@ let MyAdminCustom = {
 			</div>
 			<table class="generic-table-vertical large default-inputs">
 				<tr>
-					<td colspan="3">
-						<textarea class="css"
-							v-model="configInput.css"
-							@keydown.tab.prevent="configInput.css = textAddTab($event)"
-							:disabled="!activated"
-						/>
+					<td colspan="3" class="noPadding">
+						<div class="cssInput">
+							<my-code-editor mode="css"
+								v-model="configInput.css"
+								:readonly="!activated"
+							/>
+						</div>
 					</td>
 				</tr>
 			</table>
@@ -342,9 +344,6 @@ let MyAdminCustom = {
 		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	methods:{
-		// externals
-		textAddTab,
-		
 		// actions
 		applyColor(target,value) {
 			switch(target) {

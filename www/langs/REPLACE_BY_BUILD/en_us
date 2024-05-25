@@ -96,6 +96,7 @@
 		"attributes":"Attributes",
 		"available":"Available",
 		"before":"Before",
+		"bright":"Bright",
 		"busy":"Working - Click here to abort",
 		"category":"Category",
 		"collection":"Collection",
@@ -111,6 +112,7 @@
 		"dateFormat2":"d.m.Y (30.12.2012)",
 		"dateFormat3":"d/m/Y (30/12/2012)",
 		"dateFormat4":"m/d/Y (12/30/2012)",
+		"dark":"Dark",
 		"description":"Description",
 		"details":"Details",
 		"displayed":"Displayed",
@@ -191,7 +193,8 @@
 		"username":"Username",
 		"version":"Version",
 		"warnings":"Warnings",
-		"widgets":"Widgets"
+		"widgets":"Widgets",
+		"wrap":"Wrap"
 	},
 	"admin":{
 		"backups":{

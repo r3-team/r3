@@ -1,10 +1,10 @@
 import MyBuilderCaption    from './builderCaption.js';
 import MyBuilderPgTriggers from './builderPgTriggers.js';
+import MyCodeEditor        from '../codeEditor.js';
 import MyTabs              from '../tabs.js';
 import {
 	copyValueDialog,
-	getNilUuid,
-	textAddTab
+	getNilUuid
 } from '../shared/generic.js';
 import {
 	getDependentModules,
@@ -124,6 +124,7 @@ let MyBuilderPgFunction = {
 		MyBuilderCaption,
 		MyBuilderPgFunctionItemSchedule,
 		MyBuilderPgTriggers,
+		MyCodeEditor,
 		MyTabs
 	},
 	template:`<div class="builder-function">
@@ -179,23 +180,19 @@ let MyBuilderPgFunction = {
 				</div>
 			</div>
 			
-			<div class="content no-padding function-details default-inputs">
-				
-				<!-- function body input -->
-				<textarea class="input"
-					v-if="!showPreview"
+			<div class="content no-padding function-details">
+				<my-code-editor mode="pgsql"
+					v-show="!showPreview"
 					v-model="codeFunction"
-					@click="insertEntity"
-					@keydown.tab.prevent="codeFunction = textAddTab($event)"
-					:disabled="readonly"
-					:placeholder="capApp.code"
-				></textarea>
-				
-				<!-- function body preview -->
-				<textarea class="input" disabled="disabled"
-					v-if="showPreview"
+					@clicked="entityId = null"
+					:insertEntity="insertEntity"
+					:readonly="readonly"
+				/>
+				<my-code-editor mode="pgsql"
+					v-show="showPreview"
 					v-model="preview"
-				></textarea>
+					:readonly="true"
+				/>
 			</div>
 		</div>
 		
@@ -556,6 +553,43 @@ let MyBuilderPgFunction = {
 			|| s.isFrontendExec  !== s.pgFunction.isFrontendExec
 			|| JSON.stringify(s.schedules) !== JSON.stringify(s.pgFunction.schedules)
 			|| JSON.stringify(s.captions)  !== JSON.stringify(s.pgFunction.captions),
+		insertEntity:(s) => {
+			if(s.entityId === null)
+				return null;
+			
+			let text = null;
+			let mod, rel, atr, fnc;
+			
+			// build unique placeholder name
+			// relation:    {module_name}.[relation_name]
+			// pg function: {module_name}.[function_name]()
+			// attribute:   (module_name.relation_name.attribute_name)
+			switch(s.entity) {
+				case 'relation':
+					rel  = s.relationIdMap[s.entityId];
+					mod  = s.moduleIdMap[rel.moduleId];
+					text = `{${mod.name}}.[${rel.name}]`;
+				break;
+				case 'pgFunction':
+					fnc  = s.pgFunctionIdMap[s.entityId];
+					mod  = s.moduleIdMap[fnc.moduleId];
+					text = `{${mod.name}}.[${fnc.name}]()`;
+				break;
+				case 'attribute':
+					atr  = s.attributeIdMap[s.entityId];
+					rel  = s.relationIdMap[atr.relationId];
+					mod  = s.moduleIdMap[rel.moduleId];
+					text = `(${mod.name}.${rel.name}.${atr.name})`;
+					
+					if(s.addNew) text = 'NEW.'+text;
+					if(s.addOld) text = 'OLD.'+text;
+				break;
+				case 'instanceFunction':
+					text = `instance.${s.entityId}()`;
+				break;
+			}
+			return text;
+		},
 		modulesData:(s) => s.getDependentModules(s.module).filter(v => v.relations.length   !== 0),
 		modulesFnc: (s) => s.getDependentModules(s.module).filter(v => v.pgFunctions.length !== 0),
 		tabs:(s) => {
@@ -592,7 +626,6 @@ let MyBuilderPgFunction = {
 		getDependentModules,
 		getFunctionHelp,
 		getNilUuid,
-		textAddTab,
 		
 		// presentation
 		radioIcon(entity,id) {
@@ -614,61 +647,6 @@ let MyBuilderPgFunction = {
 				intervalType:'days',
 				intervalValue:3
 			});
-		},
-		insertEntity(evt) {
-			if(this.entityId === null)
-				return;
-			
-			let field = evt.target;
-			let text  = '';
-			let mod, rel, atr, fnc;
-			
-			// build unique placeholder name
-			// relation:    {module_name}.[relation_name]
-			// pg function: {module_name}.[function_name]()
-			// attribute:   (module_name.relation_name.attribute_name)
-			switch(this.entity) {
-				case 'relation':
-					rel  = this.relationIdMap[this.entityId];
-					mod  = this.moduleIdMap[rel.moduleId];
-					text = `{${mod.name}}.[${rel.name}]`;
-				break;
-				case 'pgFunction':
-					fnc  = this.pgFunctionIdMap[this.entityId];
-					mod  = this.moduleIdMap[fnc.moduleId];
-					text = `{${mod.name}}.[${fnc.name}]()`;
-				break;
-				case 'attribute':
-					atr  = this.attributeIdMap[this.entityId];
-					rel  = this.relationIdMap[atr.relationId];
-					mod  = this.moduleIdMap[rel.moduleId];
-					text = `(${mod.name}.${rel.name}.${atr.name})`;
-					
-					if(this.addNew) text = 'NEW.'+text;
-					if(this.addOld) text = 'OLD.'+text;
-				break;
-				case 'instanceFunction':
-					text = `instance.${this.entityId}()`;
-				break;
-			}
-			
-			if(field.selectionStart || field.selectionStart === '0') {
-				
-				let startPos = field.selectionStart;
-				let endPos   = field.selectionEnd;
-				
-				field.value = field.value.substring(0,startPos)
-					+ text
-					+ field.value.substring(endPos, field.value.length);
-				
-				field.selectionStart = startPos + text.length;
-				field.selectionEnd   = startPos + text.length;
-			}
-			else {
-				field.value += text;
-			}
-			this.codeFunction = field.value;
-			this.entityId = null;
 		},
 		reset() {
 			this.name           = this.pgFunction.name;

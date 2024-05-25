@@ -1,6 +1,8 @@
 import MyBuilderCaption   from './builderCaption.js';
 import MyBuilderQuery     from './builderQuery.js';
+import MyCodeEditor       from '../codeEditor.js';
 import {getFieldMap}      from '../shared/form.js';
+import {copyValueDialog}  from '../shared/generic.js';
 import {getJoinsIndexMap} from '../shared/query.js';
 import MyTabs             from '../tabs.js';
 import {
@@ -14,10 +16,6 @@ import {
 	getFieldIcon,
 	getFieldTitle
 } from '../shared/field.js';
-import {
-	copyValueDialog,
-	textAddTab
-} from '../shared/generic.js';
 export {MyBuilderJsFunction as default};
 
 let MyBuilderJsFunction = {
@@ -25,6 +23,7 @@ let MyBuilderJsFunction = {
 	components:{
 		MyBuilderCaption,
 		MyBuilderQuery,
+		MyCodeEditor,
 		MyTabs
 	},
 	template:`<div class="builder-function">
@@ -82,22 +81,18 @@ let MyBuilderJsFunction = {
 			</div>
 			
 			<div class="content no-padding function-details default-inputs">
-				
-				<!-- function body input -->
-				<textarea class="input"
-					v-if="!showPreview"
+				<my-code-editor mode="javascript"
+					v-show="!showPreview"
 					v-model="codeFunction"
-					@click="insertEntity"
-					@keydown.tab.prevent="codeFunction = textAddTab($event)"
-					:disabled="readonly"
-					:placeholder="capApp.code"
-				></textarea>
-				
-				<!-- function body preview -->
-				<textarea class="input" disabled="disabled"
-					v-if="showPreview"
+					@clicked="entityId = null"
+					:insertEntity="insertEntity"
+					:readonly="readonly"
+				/>
+				<my-code-editor mode="javascript"
+					v-show="showPreview"
 					v-model="preview"
-				></textarea>
+					:readonly="true"
+				/>
 			</div>
 		</div>
 		
@@ -555,17 +550,95 @@ let MyBuilderJsFunction = {
 			}
 			return out.sort((a, b) => a.ref - b.ref);
 		},
+		functionHelpJs:(s) => s.entity === 'jsFunction' && s.entityId !== null
+			? s.getFunctionHelp('js',s.jsFunctionIdMap[s.entityId],s.builderLanguage) : '',
+		functionHelpPg:(s) => s.entity === 'pgFunction' && s.entityId !== null
+			? s.getFunctionHelp('pg',s.pgFunctionIdMap[s.entityId],s.builderLanguage) : '',
 		hasChanges:(s) => s.name     !== s.jsFunction.name
 			|| s.codeArgs            !== s.jsFunction.codeArgs
 			|| s.codeFunction        !== s.placeholdersSet(s.jsFunction.codeFunction)
 			|| s.codeReturns         !== s.jsFunction.codeReturns
 			|| JSON.stringify(s.captions) !== JSON.stringify(s.jsFunction.captions),
-		
-		functionHelpJs:(s) => s.entity === 'jsFunction' && s.entityId !== null
-			? s.getFunctionHelp('js',s.jsFunctionIdMap[s.entityId],s.builderLanguage) : '',
-		
-		functionHelpPg:(s) => s.entity === 'pgFunction' && s.entityId !== null
-			? s.getFunctionHelp('pg',s.pgFunctionIdMap[s.entityId],s.builderLanguage) : '',
+			
+		insertEntity:(s) => {
+			if(s.entityId === null)
+				return null;
+			
+			let text    = '';
+			let prefix  = 'app';
+			let postfix = '';
+			let postfixAsync = '.then('
+				+ '\n\tres => { }, // if success: return value in \'res\''
+				+ '\n\terr => { }  // if error: error message in \'err\'\n)'
+			;
+			let mod, rel, atr, col, fnc, frm, fld, opt, args;
+			
+			// build unique placeholder name
+			switch(s.entity) {
+				case 'appFunction':
+					opt     = '';
+					postfix = '';
+					
+					if(typeof s.capApp.helpJsHint[s.entityId] !== 'undefined')
+						opt = s.capApp.helpJsHint[s.entityId];
+					
+					if(s.appFunctionsAsync.includes(s.entityId))
+						postfix = postfixAsync;
+					
+					text = `${prefix}.${s.entityId}(${opt})${postfix}`;
+				break;
+				case 'collection_read': // fallthrough
+				case 'collection_update':
+					col = s.collectionIdMap[s.entityId];
+					mod = s.moduleIdMap[col.moduleId];
+					let columns = [];
+					for(let i = 0, j = col.columns.length; i < j; i++) {
+						columns.push(`{column:${i}}`);
+					}
+					switch(s.entity) {
+						case 'collection_read':   text = `${prefix}.collection_read({${mod.name}.${col.name}},[${columns.join(',')}])`; break;
+						case 'collection_update': text = `${prefix}.collection_update({${mod.name}.${col.name}})${postfixAsync}`; break;
+					}
+				break;
+				case 'field_value_get':   text = `${prefix}.get_field_value({${s.displayFieldName(s.entityId)}})`;                         break;
+				case 'field_value_set':   text = `${prefix}.set_field_value({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`;   break;
+				case 'field_caption_set': text = `${prefix}.set_field_caption({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
+				case 'field_chart_set':   text = `${prefix}.set_field_chart({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`;   break;
+				case 'field_error_set':   text = `${prefix}.set_field_error({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`;   break;
+				case 'field_focus_set':   text = `${prefix}.set_field_focus({${s.displayFieldName(s.entityId)}})`;                         break;
+				case 'field_order_set':   text = `${prefix}.set_field_order({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`;   break;
+				case 'form':
+					frm  = s.formIdMap[s.entityId];
+					mod  = s.moduleIdMap[frm.moduleId];
+					text = `${prefix}.open_form({${mod.name}.${frm.name}},0,false)`;
+				break;
+				case 'jsFunction':
+					fnc  = s.jsFunctionIdMap[s.entityId];
+					mod  = s.moduleIdMap[fnc.moduleId];
+					args = fnc.codeArgs === '' ? '' : ', '+fnc.codeArgs.toUpperCase();
+					text = fnc.formId === null
+						? `${prefix}.call_frontend({${mod.name}.${fnc.name}}${args})`
+						: `${prefix}.call_frontend({${mod.name}.${s.formIdMap[fnc.formId].name}.${fnc.name}}${args})`;
+				break;
+				case 'pgFunction':
+					fnc  = s.pgFunctionIdMap[s.entityId];
+					mod  = s.moduleIdMap[fnc.moduleId];
+					
+					// add argument names to show function interface
+					// remove argument type and default value to keep it easy to read
+					let argsOut = [];
+					args = fnc.codeArgs.split(',');
+					for(let i = 0, j = args.length; i < j; i++) {
+						if(args[i] !== '')
+							argsOut.push(args[i].trim().split(' ')[0].toUpperCase());
+					}
+					let argsList = argsOut.length === 0 ? '' : ', '+argsOut.join(', ');
+					
+					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${argsList})${postfixAsync}`;
+				break;
+			}
+			return text;
+		},
 		jsFunctionsSorted:(s) => s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === null).concat(
 			s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === s.formId && s.formId !== null)),
 		
@@ -604,7 +677,6 @@ let MyBuilderJsFunction = {
 		getItemTitle,
 		getItemTitlePath,
 		getJoinsIndexMap,
-		textAddTab,
 		
 		// presentation
 		displayFieldName(fieldId) {
@@ -643,102 +715,6 @@ let MyBuilderJsFunction = {
 			const pos = this.holderFieldIdsOpen.indexOf(id);
 			if(pos === -1) this.holderFieldIdsOpen.push(id);
 			else           this.holderFieldIdsOpen.splice(pos,1);
-		},
-		insertEntity(evt) {
-			if(this.entityId === null)
-				return;
-			
-			let field   = evt.target;
-			let text    = '';
-			let prefix  = 'app';
-			let postfix = '';
-			let postfixAsync = '.then('
-				+ '\n\tres => { }, // if success: return value in \'res\''
-				+ '\n\terr => { }  // if error: error message in \'err\'\n)'
-			;
-			let mod, rel, atr, col, fnc, frm, fld, opt, args;
-			
-			// build unique placeholder name
-			switch(this.entity) {
-				case 'appFunction':
-					opt     = '';
-					postfix = '';
-					
-					if(typeof this.capApp.helpJsHint[this.entityId] !== 'undefined')
-						opt = this.capApp.helpJsHint[this.entityId];
-					
-					if(this.appFunctionsAsync.includes(this.entityId))
-						postfix = postfixAsync;
-					
-					text = `${prefix}.${this.entityId}(${opt})${postfix}`;
-				break;
-				case 'collection_read': // fallthrough
-				case 'collection_update':
-					col = this.collectionIdMap[this.entityId];
-					mod = this.moduleIdMap[col.moduleId];
-					let columns = [];
-					for(let i = 0, j = col.columns.length; i < j; i++) {
-						columns.push(`{column:${i}}`);
-					}
-					switch(this.entity) {
-						case 'collection_read':   text = `${prefix}.collection_read({${mod.name}.${col.name}},[${columns.join(',')}])`; break;
-						case 'collection_update': text = `${prefix}.collection_update({${mod.name}.${col.name}})${postfixAsync}`; break;
-					}
-				break;
-				case 'field_value_get':   text = `${prefix}.get_field_value({${this.displayFieldName(this.entityId)}})`;                         break;
-				case 'field_value_set':   text = `${prefix}.set_field_value({${this.displayFieldName(this.entityId)}}, ${this.capApp.value})`;   break;
-				case 'field_caption_set': text = `${prefix}.set_field_caption({${this.displayFieldName(this.entityId)}}, ${this.capApp.value})`; break;
-				case 'field_chart_set':   text = `${prefix}.set_field_chart({${this.displayFieldName(this.entityId)}}, ${this.capApp.value})`;   break;
-				case 'field_error_set':   text = `${prefix}.set_field_error({${this.displayFieldName(this.entityId)}}, ${this.capApp.value})`;   break;
-				case 'field_focus_set':   text = `${prefix}.set_field_focus({${this.displayFieldName(this.entityId)}})`;                         break;
-				case 'field_order_set':   text = `${prefix}.set_field_order({${this.displayFieldName(this.entityId)}}, ${this.capApp.value})`;   break;
-				case 'form':
-					frm  = this.formIdMap[this.entityId];
-					mod  = this.moduleIdMap[frm.moduleId];
-					text = `${prefix}.open_form({${mod.name}.${frm.name}},0,false)`;
-				break;
-				case 'jsFunction':
-					fnc  = this.jsFunctionIdMap[this.entityId];
-					mod  = this.moduleIdMap[fnc.moduleId];
-					args = fnc.codeArgs === '' ? '' : ', '+fnc.codeArgs.toUpperCase();
-					text = fnc.formId === null
-						? `${prefix}.call_frontend({${mod.name}.${fnc.name}}${args})`
-						: `${prefix}.call_frontend({${mod.name}.${this.formIdMap[fnc.formId].name}.${fnc.name}}${args})`;
-				break;
-				case 'pgFunction':
-					fnc  = this.pgFunctionIdMap[this.entityId];
-					mod  = this.moduleIdMap[fnc.moduleId];
-					
-					// add argument names to show function interface
-					// remove argument type and default value to keep it easy to read
-					let argsOut = [];
-					args = fnc.codeArgs.split(',');
-					for(let i = 0, j = args.length; i < j; i++) {
-						if(args[i] !== '')
-							argsOut.push(args[i].trim().split(' ')[0].toUpperCase());
-					}
-					let argsList = argsOut.length === 0 ? '' : ', '+argsOut.join(', ');
-					
-					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${argsList})${postfixAsync}`;
-				break;
-			}
-			
-			if(field.selectionStart || field.selectionStart === '0') {
-				let startPos = field.selectionStart;
-				let endPos   = field.selectionEnd;
-				
-				field.value = field.value.substring(0,startPos)
-					+ text
-					+ field.value.substring(endPos,field.value.length);
-				
-				field.selectionStart = startPos + text.length;
-				field.selectionEnd   = startPos + text.length;
-			}
-			else {
-				field.value += text;
-			}
-			this.codeFunction = field.value;
-			this.entityId = null;
 		},
 		toggleEntity(entityName,id) {
 			if(this.entity === entityName && this.entityId === id) {

@@ -96,6 +96,7 @@
 		"attributes":"Attributes",
 		"available":"Elérhető",
 		"before":"Before",
+		"bright":"Bright",
 		"busy":"Folyamatban - Kattintson ide a megszakításhoz",
 		"category":"Kategória",
 		"collection":"Gyűjtemény",
@@ -111,6 +112,7 @@
 		"dateFormat2":"n.h.É (30.12.2012)",
 		"dateFormat3":"n/h/É (30/12/2012)",
 		"dateFormat4":"h/n/É (12/30/2012)",
+		"dark":"Dark",
 		"description":"Leírás",
 		"details":"Részletek",
 		"displayed":"Megjelenített",
@@ -191,7 +193,8 @@
 		"username":"Felhasználónév",
 		"version":"Verzió",
 		"warnings":"Figyelmeztetések",
-		"widgets":"Widgets"
+		"widgets":"Widgets",
+		"wrap":"Wrap"
 	},
 	"admin":{
 		"backups":{

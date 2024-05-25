@@ -222,16 +222,3 @@ export function filterIsCorrect(operator,value0,value1) {
 export function filterOperatorIsSingleValue(operator) {
 	return !['= ANY','<> ALL','@>','<@','&&'].includes(operator);
 };
-
-export function textAddTab(evt) {
-	let elem     = evt.target;
-	let selStart = elem.selectionStart;
-	let selEnd   = elem.selectionEnd;
-	
-	elem.value = elem.value.substring(0,selStart)
-		+ "\t"+ elem.value.substring(selEnd);
-	
-	elem.selectionStart = selStart + 1;
-	elem.selectionEnd   = selStart + 1;
-	return elem.value;
-};

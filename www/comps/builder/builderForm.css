@@ -322,9 +322,14 @@
 	min-width:300px;
 	max-width:unset;
 	min-height:300px;
+	display:flex;
+	flex-flow:column nowrap;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+	overflow:hidden;
 }
 .builder-field-options .chart-option.error{
-	border:2px solid var(--color-error);
+	border-color:var(--color-error);
 }
 .builder-field-options .chart-option-serie .line{
 	display:flex;

@@ -96,6 +96,7 @@
 		"attributes":"Attribute",
 		"available":"Verfügbar",
 		"before":"Davor",
+		"bright":"Hell",
 		"busy":"Arbeitet - Zum Abbrechen hier klicken",
 		"category":"Kategorie",
 		"collection":"Sammlung",
@@ -111,6 +112,7 @@
 		"dateFormat2":"d.m.Y (30.12.2012)",
 		"dateFormat3":"d/m/Y (30/12/2012)",
 		"dateFormat4":"m/d/Y (12/30/2012)",
+		"dark":"Dunkel",
 		"description":"Beschreibung",
 		"details":"Details",
 		"displayed":"Angezeigt",
@@ -191,7 +193,8 @@
 		"version":"Version",
 		"unassigned":"Nicht zugewiesen",
 		"warnings":"Warnungen",
-		"widgets":"Widgets"
+		"widgets":"Widgets",
+		"wrap":"Umbrechen"
 	},
 	"admin":{
 		"backups":{

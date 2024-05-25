@@ -970,22 +970,6 @@
 .builder-function .response{
 	min-height:600px;
 }
-.builder-function .input{
-	flex:1 1 auto;
-	max-width:none;
-	font-family:'Lucida Console',Courier,monospace;
-	tab-size:4;
-	border:none !important;
-	border-radius:0px !important;
-	background-color:transparent;
-	padding:var(--spacing);
-}
-.builder-function .input:focus{
-	background-color:transparent;
-}
-.builder-function .input:disabled{
-	border:3px solid var(--color-border) !important;
-}
 .builder-function .message{
 	margin:0px 0px 18px;
 }
