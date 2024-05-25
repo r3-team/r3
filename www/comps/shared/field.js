@@ -41,7 +41,7 @@ export function getFieldOverwritesDefault() {
 	return { caption:{}, chart:{}, error:{}, order:{} };
 };
 
-// field options
+// locally stored field options
 export function fieldOptionGet(fieldId,optionName,fallbackValue) {
 	const map = MyStore.getters['local/fieldIdMapOption'];
 	return map[fieldId] !== undefined && map[fieldId][optionName] !== undefined

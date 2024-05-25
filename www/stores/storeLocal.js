@@ -7,6 +7,7 @@ const MyStoreLocal = {
 		appName:'App Name',    
 		appNameShort:'App',    
 		appVersion:'',         // full application version (as in 1.2.0.3422)
+		builderOptionMap:{},   // map builder options
 		companyColorHeader:'', // custom color on header
 		companyColorLogin:'',  // custom color on login screen
 		companyLoginImage:'',  // custom login background image
@@ -41,6 +42,10 @@ const MyStoreLocal = {
 		appVersion(state,payload) {
 			state.appVersion = payload;
 			set('appVersion',payload);
+		},
+		builderOptionSet(state,payload) {
+			state.builderOptionMap[payload.name] = payload.value;
+			set('builderOptionMap',state.builderOptionMap);
 		},
 		companyColorHeader(state,payload) {
 			state.companyColorHeader = payload;
@@ -139,6 +144,7 @@ const MyStoreLocal = {
 		appName:           (state) => state.appName,
 		appNameShort:      (state) => state.appNameShort,
 		appVersion:        (state) => state.appVersion,
+		builderOptionMap:  (state) => state.builderOptionMap,
 		companyColorHeader:(state) => state.companyColorHeader,
 		companyColorLogin: (state) => state.companyColorLogin,
 		companyLoginImage: (state) => state.companyLoginImage,

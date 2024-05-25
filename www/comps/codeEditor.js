@@ -1,3 +1,7 @@
+import {
+	builderOptionGet,
+	builderOptionSet
+} from './shared/builder.js';
 export {MyCodeEditor as default};
 
 let MyCodeEditor = {
@@ -7,10 +11,11 @@ let MyCodeEditor = {
 		<div class="code-editor-options default-inputs">
 			<div class="row gap">
 				<my-bool v-model="wrap"
+					@update:modelValue="storeOption('codeEditorWrap',$event)"
 					:caption0="capGen.wrap"
 					:caption1="capGen.wrap"
 				/>
-				<select v-model="theme">
+				<select v-model="theme" @input="storeOption('codeEditorTheme',$event.target.value)">
 					<optgroup :label="capGen.bright">
 						<option v-for="t in themesBright">{{ t }}</option>
 					</optgroup>
@@ -65,6 +70,8 @@ let MyCodeEditor = {
 		this.editor.session.setUseWorker(false);  // disable features like JS syntax checker
 		this.editor.on('change',this.change);
 		this.editor.on('click',this.click);
+		this.theme = this.builderOptionGet('codeEditorTheme',this.settings.dark ? 'cloud9_night' : 'cloud9_day');
+		this.wrap  = this.builderOptionGet('codeEditorWrap',false);
 		this.setOptions();
 
 		// react to setting changes
@@ -74,6 +81,11 @@ let MyCodeEditor = {
 		this.editor.destroy();
 	},
 	methods:{
+		// externals
+		builderOptionGet,
+		builderOptionSet,
+
+		// actions
 		change() {
 			if(!this.readonly)
 				this.$emit('update:modelValue',this.editor.getValue());
@@ -84,6 +96,11 @@ let MyCodeEditor = {
 				this.$emit('clicked');
 			}
 		},
+		storeOption(name,value) {
+			this.builderOptionSet(name,value);
+		},
+
+		// editor functions
 		setOptions() {
 			this.editor.setOptions({
 				enableAutoIndent:true,

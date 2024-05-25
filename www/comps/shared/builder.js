@@ -181,3 +181,15 @@ export function getItemTitleColumn(column,withTitle) {
 export function getItemTitleRelation(relationId,index) {
 	return `${index} ${MyStore.getters['schema/relationIdMap'][relationId].name}`;
 };
+
+// locally stored builder options
+export function builderOptionGet(optionName,fallbackValue) {
+	return MyStore.getters['local/builderOptionMap'][optionName] !== undefined
+		? MyStore.getters['local/builderOptionMap'][optionName] : fallbackValue;
+};
+export function builderOptionSet(optionName,value) {
+	MyStore.commit('local/builderOptionSet',{
+		name:optionName,
+		value:value
+	});
+};
