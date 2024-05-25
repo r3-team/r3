@@ -27,15 +27,18 @@ let MyCodeEditor = {
 		</div>
 	</div>`,
 	props:{
-		insertEntity:{ required:false, default:null },
-		mode:        { type:String,  required:true },
-		modelValue:  { required:true },
-		readonly:    { type:Boolean, required:false, default:false }
+		insertEntity: { required:false, default:null },
+		mode:         { type:String,  required:true },
+		modelValue:   { required:true },
+		modelValueAlt:{ type:String,  required:false, default:'' },
+		readonly:     { type:Boolean, required:false, default:false }
 	},
 	data() {
 		return {
 			editor:null,
 			printMargin:true,
+			sessionLive:'',
+			sessionPreview:'',
 			theme:'monokai',
 			themesBright:['chrome','cloud9_day','eclipse','github','textmate'],
 			themesDark:[
@@ -49,11 +52,22 @@ let MyCodeEditor = {
 	emits:['clicked','update:modelValue'],
 	watch:{
 		modelValue(v) {
-			if(v !== this.editor.getValue()) {
-				// use editor.session.setValue() also clears undo history (editor.setValue() does not)
-				this.editor.session.setValue(v);
+			if(v !== this.sessionLive.getValue()) {
+				this.sessionLive.setValue(v);
 				this.editor.clearSelection();
 			}
+		},
+		modelValueAlt(v) {
+			if(v === '') {
+				this.sessionLive.setScrollTop(this.sessionPreview.getScrollTop());
+				this.editor.setSession(this.sessionLive);
+				return;
+			}
+
+			this.sessionPreview.setScrollTop(this.sessionLive.getScrollTop());
+			this.sessionPreview.setValue(v);
+			this.editor.setSession(this.sessionPreview);
+			this.editor.clearSelection();
 		}
 	},
 	computed:{
@@ -63,11 +77,17 @@ let MyCodeEditor = {
 	mounted() {
 		// init ACE code editor
 		ace.require('ace/ext/searchbox');
+		this.sessionLive    = ace.createEditSession(this.modelValue);
+		this.sessionPreview = ace.createEditSession('');
+
+		// disable features like JS syntax checker
+		this.sessionLive.setUseWorker(false);
+		this.sessionPreview.setUseWorker(false);
+
 		this.editor = ace.edit(this.$refs.codeEditor);
-		this.editor.setValue(this.modelValue);
+		this.editor.setSession(this.sessionLive);
 		this.editor.clearSelection();             // reset selection
 		this.editor.setHighlightActiveLine(true); // mark selected line
-		this.editor.session.setUseWorker(false);  // disable features like JS syntax checker
 		this.editor.on('change',this.change);
 		this.editor.on('click',this.click);
 		this.theme = this.builderOptionGet('codeEditorTheme',this.settings.dark ? 'cloud9_night' : 'cloud9_day');
@@ -88,10 +108,10 @@ let MyCodeEditor = {
 		// actions
 		change() {
 			if(!this.readonly)
-				this.$emit('update:modelValue',this.editor.getValue());
+				this.$emit('update:modelValue',this.sessionLive.getValue());
 		},
 		click() {
-			if(this.insertEntity !== null){
+			if(!this.readonly && this.insertEntity !== null){
 				this.editor.insert(this.insertEntity);
 				this.$emit('clicked');
 			}

@@ -182,16 +182,11 @@ let MyBuilderPgFunction = {
 			
 			<div class="content no-padding function-details">
 				<my-code-editor mode="pgsql"
-					v-show="!showPreview"
 					v-model="codeFunction"
 					@clicked="entityId = null"
 					:insertEntity="insertEntity"
-					:readonly="readonly"
-				/>
-				<my-code-editor mode="pgsql"
-					v-show="showPreview"
-					v-model="preview"
-					:readonly="true"
+					:modelValueAlt="!showPreview ? '' : preview"
+					:readonly="readonly || showPreview"
 				/>
 			</div>
 		</div>
