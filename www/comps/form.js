@@ -198,6 +198,7 @@ let MyForm = {
 				</div>
 				<div class="area">
 					<my-form-actions
+						@execute-function="executeFunction"
 						:entityIdMapState="entityIdMapState"
 						:formActions="form.actions"
 						:formId="formId"

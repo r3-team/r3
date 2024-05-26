@@ -6,6 +6,7 @@ let MyFormAction = {
 	name:'my-form-action',
 	template:`<my-button
 		v-if="state !== 'hidden'"
+		@trigger="$emit('execute-function',formAction.jsFunctionId)"
 		:active="state !== 'readonly'"
 		:caption="getCaption('formActionTitle',moduleId,formAction.id,formAction.captions)"
 		:imageBase64="formAction.iconId ? srcBase64(iconIdMap[formAction.iconId].file) : ''"
@@ -16,6 +17,7 @@ let MyFormAction = {
 		formId:          { type:String, required:true },
 		moduleId:        { type:String, required:true }
 	},
+	emits:['execute-function'],
 	computed:{
 		state:(s) => typeof s.entityIdMapState.formAction[s.formAction.id] !== 'undefined'
 			? s.entityIdMapState.formAction[s.formAction.id]
@@ -36,6 +38,7 @@ let MyFormActions = {
 	components:{ MyFormAction },
 	template:`<my-form-action
 		v-for="a in formActions"
+		@execute-function="$emit('execute-function',$event)"
 		:entityIdMapState="entityIdMapState"
 		:formAction="a"
 		:formId="formId"
@@ -46,5 +49,6 @@ let MyFormActions = {
 		formActions:     { type:Array,  required:true },
 		formId:          { type:String, required:true },
 		moduleId:        { type:String, required:true }
-	}
+	},
+	emits:['execute-function']
 };
