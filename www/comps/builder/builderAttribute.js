@@ -226,12 +226,23 @@ let MyBuilderAttribute = {
 					
 					<!-- text/files length -->
 					<tr v-if="hasLength">
-						<td>{{ isString ? capApp.lengthText : capApp.lengthFiles }}</td>
+						<td>{{ lengthTitle }}</td>
 						<td>
 							<input type="number"
-								@keyup="updateLength"
-								v-model="values.length"
+								@keyup="updateLength($event.target.value)"
 								:disabled="readonly"
+								:value="values.length"
+							/>
+						</td>
+						<td v-html="isNumeric ? capApp.lengthNumericHint : ''"></td>
+					</tr>
+					<tr v-if="hasLengthFract">
+						<td>{{ capApp.lengthFract }}</td>
+						<td>
+							<input type="number"
+								@keyup="updateLengthFract($event.target.value)"
+								:disabled="readonly || values.length === 0"
+								:value="values.lengthFract"
 							/>
 						</td>
 						<td></td>
@@ -424,6 +435,11 @@ let MyBuilderAttribute = {
 			}
 		},
 		
+		lengthTitle:(s) => {
+			if(s.isString)  return s.capApp.lengthText;
+			if(s.isNumeric) return s.capApp.lengthNumeric;
+			return s.capApp.lengthFiles;
+		},
 		nameTaken:(s) => {
 			for(let a of s.relation.attributes) {
 				if(a.id !== s.attributeId && a.name === s.values.name)
@@ -436,7 +452,8 @@ let MyBuilderAttribute = {
 		canEncrypt:    (s) => s.relation.encryption && s.values.content === 'text',
 		canSave:       (s) => !s.readonly && s.hasChanges && !s.nameTaken,
 		hasChanges:    (s) => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		hasLength:     (s) => ['files','richtext','text','textarea'].includes(s.usedFor),
+		hasLength:     (s) => ['decimal','files','richtext','text','textarea'].includes(s.usedFor),
+		hasLengthFract:(s) => ['decimal'].includes(s.usedFor),
 		isId:          (s) => !s.isNew && s.values.name === 'id',
 		isNew:         (s) => s.attributeId === null,
 		title:         (s) => s.isNew ? s.capApp.new : s.capApp.edit.replace('{NAME}',s.values.name),
@@ -531,6 +548,7 @@ let MyBuilderAttribute = {
 					content:'text',
 					contentUse:'default',
 					length:0,
+					lengthFract:0,
 					name:'',
 					nullable:true,
 					encrypted:false,
@@ -562,14 +580,17 @@ let MyBuilderAttribute = {
 				default:         this.values.def = '';                                 break;
 			}
 		},
-		updateLength() {
-			if(!this.isString)
-				return;
+		updateLength(v) {
+			this.values.length = v === '' ? 0  : parseInt(v);
 			
-			if(this.values.length === '')
-				this.values.length = 0;
+			if(this.isString)
+				this.values.content = this.values.length === 0 ? 'text' : 'varchar';
 			
-			this.values.content = this.values.length === 0 ? 'text' : 'varchar';
+			if(this.isNumeric && this.values.length === 0)
+				this.values.lengthFract = 0;
+		},
+		updateLengthFract(v) {
+			this.values.lengthFract = v === '' ? 0  : parseInt(v);
 		},
 		
 		// backend calls

@@ -203,6 +203,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX IF NOT EXISTS fki_form_state_effect_form_action_id_fkey
 				ON app.form_state_effect USING btree (form_action_id ASC NULLS LAST);
+
+			-- fractional definition for numeric attributes
+			ALTER TABLE app.attribute ADD COLUMN length_fract INTEGER NOT NULL DEFAULT 0;
+			ALTER TABLE app.attribute ALTER COLUMN length_fract DROP NOT NULL;
 		`)
 		return "3.8", err
 	},

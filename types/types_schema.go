@@ -116,7 +116,8 @@ type Attribute struct {
 	Name           string      `json:"name"`           // name, used as table column
 	Content        string      `json:"content"`        // content (integer, varchar, text, real, uuid, files, n:1, ...)
 	ContentUse     string      `json:"contentUse"`     // content use (default, richtext, color, datetime, ...)
-	Length         int         `json:"length"`         // varchar length or max file size in KB (files attribute)
+	Length         int         `json:"length"`         // numeric precision (digits number + fractions) / varchar length / max file size in KB
+	LengthFract    int         `json:"lengthFract"`    // numeric scale (digits fractions)
 	Nullable       bool        `json:"nullable"`       // value is nullable
 	Encrypted      bool        `json:"encrypted"`      // value is encrypted (end-to-end for logins)
 	Def            string      `json:"def"`            // default value

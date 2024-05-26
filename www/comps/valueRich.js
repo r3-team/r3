@@ -220,12 +220,18 @@ let MyValueRich = {
 				case 'numeric': // fallthrough
 				case 'double precision':
 				case 'real':
-					const hasFraction = this.value % 1 !== 0;
-					let strNum        = String(this.value);
-					let strFraction   = '';
+					let hasFraction = this.value % 1 !== 0;
+					let strNum      = String(this.value);
+					let strFraction = '';
 					
 					if(hasFraction)
 						[strNum,strFraction] = strNum.split('.');
+
+					// apply fixed fraction component for numerics
+					if(atr.content === 'numeric' && atr.lengthFract !== 0) {
+						strFraction = strFraction.padEnd(atr.lengthFract,'0');
+						hasFraction = true;
+					}
 					
 					strNum = strNum.replace(/\B(?=(\d{3})+(?!\d))/g,this.settings.numberSepThousand);
 					
