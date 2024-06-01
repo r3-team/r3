@@ -9,13 +9,15 @@ let MyCodeEditor = {
 	template:`<div class="code-editor">
 	<div class="code-editor-field" ref="codeEditor"></div>
 		<div class="code-editor-options default-inputs">
-			<div class="row gap">
-				<my-bool v-model="wrap"
-					@update:modelValue="storeOption('codeEditorWrap',$event)"
-					:caption0="capGen.wrap"
-					:caption1="capGen.wrap"
+			<span><i>{{ mode }}</i></span>
+			<div class="row gap centered">
+				<my-button
+					@trigger="builderOptionSet('codeEditorWrap',!wrap); wrap = !wrap"
+					:caption="capGen.wrap"
+					:image="wrap ? 'checkbox1.png' : 'checkbox0.png'"
+					:naked="true"
 				/>
-				<select v-model="theme" @input="storeOption('codeEditorTheme',$event.target.value)">
+				<select v-model="theme" @input="builderOptionSet('codeEditorTheme',$event.target.value)">
 					<optgroup :label="capGen.bright">
 						<option v-for="t in themesBright">{{ t }}</option>
 					</optgroup>
@@ -115,9 +117,6 @@ let MyCodeEditor = {
 				this.editor.insert(this.insertEntity);
 				this.$emit('clicked');
 			}
-		},
-		storeOption(name,value) {
-			this.builderOptionSet(name,value);
 		},
 
 		// editor functions

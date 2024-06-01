@@ -961,7 +961,7 @@ table td.maximum{
 	margin:calc(var(--spacing) / 2.5);
 	gap:calc(var(--spacing) / 2.5);
 	align-items:center;
-	justify-content:flex-end;
+	justify-content:space-between;
 }
 
 
