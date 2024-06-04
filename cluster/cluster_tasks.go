@@ -60,13 +60,19 @@ func CollectionUpdated(collectionId uuid.UUID, loginIds []int64) error {
 
 	if len(loginIds) == 0 {
 		// no logins defined, update for all
-		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, CollectionChanged: collectionId}
+		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
+			CollectionChanged: collectionId,
+			Target:            types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser},
+		}
 		return nil
 	}
 
 	// logins defined, update for specific logins
 	for _, id := range loginIds {
-		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: id, CollectionChanged: collectionId}
+		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
+			CollectionChanged: collectionId,
+			Target:            types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser, LoginId: id},
+		}
 	}
 	return nil
 }
@@ -86,11 +92,11 @@ func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance 
 
 	// update websocket clients if relevant config changed
 	if switchToMaintenance {
-		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, KickNonAdmin: true}
+		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{KickNonAdmin: true}
 	}
 
 	// inform clients about changed config
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, ConfigChanged: true}
+	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{ConfigChanged: true}
 
 	// apply config to other areas
 	bruteforce.SetConfig()
@@ -98,68 +104,89 @@ func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance 
 	config.SetLogLevels()
 	return nil
 }
-func FilesCopied(updateNodes bool, loginId int64, attributeId uuid.UUID,
-	fileIds []uuid.UUID, recordId int64) error {
+func FilesCopied(updateNodes bool, address string, loginId int64,
+	attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
+
+	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceBrowser, LoginId: loginId}
 
 	if updateNodes {
 		if err := createEventsForOtherNodes("filesCopied", types.ClusterEventFilesCopied{
-			LoginId:     loginId,
 			AttributeId: attributeId,
 			FileIds:     fileIds,
 			RecordId:    recordId,
+			Target:      target,
 		}); err != nil {
 			return err
 		}
 	}
 	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
-		LoginId:                loginId,
 		FilesCopiedAttributeId: attributeId,
 		FilesCopiedFileIds:     fileIds,
 		FilesCopiedRecordId:    recordId,
+		Target:                 target,
 	}
 	return nil
 }
-func FileRequested(updateNodes bool, loginId int64, attributeId uuid.UUID,
+func FileRequested(updateNodes bool, address string, loginId int64, attributeId uuid.UUID,
 	fileId uuid.UUID, fileHash string, fileName string, chooseApp bool) error {
+
+	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceFatClient, LoginId: loginId}
 
 	if updateNodes {
 		if err := createEventsForOtherNodes("fileRequested", types.ClusterEventFileRequested{
-			LoginId:     loginId,
 			AttributeId: attributeId,
 			ChooseApp:   chooseApp,
 			FileId:      fileId,
 			FileHash:    fileHash,
 			FileName:    fileName,
+			Target:      target,
 		}); err != nil {
 			return err
 		}
 	}
 	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
-		LoginId:                  loginId,
 		FileRequestedAttributeId: attributeId,
 		FileRequestedChooseApp:   chooseApp,
 		FileRequestedFileId:      fileId,
 		FileRequestedFileHash:    fileHash,
 		FileRequestedFileName:    fileName,
+		Target:                   target,
 	}
 	return nil
 }
-func LoginDisabled(updateNodes bool, loginId int64) error {
+func JsFunctionCalled(updateNodes bool, address string, loginId int64, jsFunctionId uuid.UUID, arguments []interface{}) error {
+
+	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceBrowser, LoginId: loginId}
 	if updateNodes {
-		if err := createEventsForOtherNodes("loginDisabled", types.ClusterEventLogin{
-			LoginId: loginId,
+		if err := createEventsForOtherNodes("jsFunctionCalled", types.ClusterEventJsFunctionCalled{
+			JsFunctionId: jsFunctionId,
+			Arguments:    arguments,
+			Target:       target,
 		}); err != nil {
 			return err
 		}
 	}
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: loginId, Kick: true}
+	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
+		JsFunctionCalledJsFunctionId: jsFunctionId,
+		JsFunctionCalledArguments:    arguments,
+		Target:                       target,
+	}
+	return nil
+}
+func LoginDisabled(updateNodes bool, loginId int64) error {
+	target := types.ClusterEventTarget{LoginId: loginId}
+	if updateNodes {
+		if err := createEventsForOtherNodes("loginDisabled", types.ClusterEventLogin{Target: target}); err != nil {
+			return err
+		}
+	}
+	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{Target: target, Kick: true}
 	return nil
 }
 func LoginReauthorized(updateNodes bool, loginId int64) error {
+	target := types.ClusterEventTarget{LoginId: loginId}
 	if updateNodes {
-		if err := createEventsForOtherNodes("loginReauthorized", types.ClusterEventLogin{
-			LoginId: loginId,
-		}); err != nil {
+		if err := createEventsForOtherNodes("loginReauthorized", types.ClusterEventLogin{Target: target}); err != nil {
 			return err
 		}
 	}
@@ -170,7 +197,7 @@ func LoginReauthorized(updateNodes bool, loginId int64) error {
 	}
 
 	// inform client to retrieve new access cache
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: loginId, Renew: true}
+	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{Target: target, Renew: true}
 	return nil
 }
 func LoginReauthorizedAll(updateNodes bool) error {
@@ -186,7 +213,7 @@ func LoginReauthorizedAll(updateNodes bool) error {
 	}
 
 	// inform clients to retrieve new access cache
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, Renew: true}
+	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{Renew: true}
 	return nil
 }
 func MasterAssigned(state bool) error {
@@ -207,11 +234,11 @@ func SchemaChanged(updateNodes bool, moduleIds []uuid.UUID) error {
 	}
 
 	// inform all clients about schema reloading
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, SchemaLoading: true}
+	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{SchemaLoading: true}
 
 	// inform all clients about schema loading being finished, regardless of success or error
 	defer func() {
-		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, SchemaLoaded: true}
+		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{SchemaLoaded: true}
 	}()
 
 	if len(moduleIds) != 0 {
@@ -224,7 +251,7 @@ func SchemaChanged(updateNodes bool, moduleIds []uuid.UUID) error {
 		}
 
 		// inform clients to retrieve new access cache
-		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, Renew: true}
+		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{Renew: true}
 	} else {
 		// no module IDs are given if modules were deleted, module options were changed, or custom captions were updated
 		if err := cache.LoadModuleIdMapMeta(); err != nil {

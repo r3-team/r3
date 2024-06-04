@@ -22,16 +22,16 @@ import (
 
 // a websocket client
 type clientType struct {
-	address    string             // IP address, no port
-	admin      bool               // belongs to admin login?
-	ctx        context.Context    // global context for client requests
-	ctxCancel  context.CancelFunc // to abort requests in case of disconnect
-	fixedToken bool               // logged in with fixed token (limited access, only auth and server messages)
-	ioFailure  atomic.Bool        // client failed to read/write
-	loginId    int64              // client login ID, 0 = not logged in yet
-	noAuth     bool               // logged in without authentication (public auth, username only)
-	write_mx   sync.Mutex         // to force sequential writes
-	ws         *websocket.Conn    // websocket connection
+	address   string             // IP address, no port
+	admin     bool               // belongs to admin login?
+	ctx       context.Context    // global context for client requests
+	ctxCancel context.CancelFunc // to abort requests in case of disconnect
+	device    string             // client device
+	ioFailure atomic.Bool        // client failed to read/write
+	loginId   int64              // client login ID, 0 = not logged in yet
+	noAuth    bool               // logged in without authentication (public auth, username only)
+	write_mx  sync.Mutex         // to force sequential writes
+	ws        *websocket.Conn    // websocket connection
 }
 
 // a hub for all active websocket clients
@@ -91,25 +91,26 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info(handlerContext, fmt.Sprintf("new client connecting from %s", host))
-
 	// create global request context with abort function
 	ctx, ctxCancel := context.WithCancel(context.Background())
 
 	client := &clientType{
-		address:    host,
-		admin:      false,
-		ctx:        ctx,
-		ctxCancel:  ctxCancel,
-		fixedToken: false,
-		loginId:    0,
-		noAuth:     false,
-		write_mx:   sync.Mutex{},
-		ws:         ws,
+		address:   host,
+		admin:     false,
+		ctx:       ctx,
+		ctxCancel: ctxCancel,
+		device:    types.WebsocketClientDeviceBrowser,
+		loginId:   0,
+		noAuth:    false,
+		write_mx:  sync.Mutex{},
+		ws:        ws,
+	}
+
+	if r.Header.Get("User-Agent") == "r3-client-fat" {
+		client.device = types.WebsocketClientDeviceFatClient
 	}
 
 	hub.clientAdd <- client
-
 	go client.read()
 }
 
@@ -148,13 +149,13 @@ func (hub *hubType) start() {
 				var err error
 
 				if event.CollectionChanged != uuid.Nil {
-					jsonMsg, err = prepareUnrequested("collection_changed", event.CollectionChanged)
+					jsonMsg, err = prepareUnrequested("collectionChanged", event.CollectionChanged)
 				}
 				if event.ConfigChanged {
-					jsonMsg, err = prepareUnrequested("config_changed", nil)
+					jsonMsg, err = prepareUnrequested("configChanged", nil)
 				}
 				if event.FilesCopiedAttributeId != uuid.Nil {
-					jsonMsg, err = prepareUnrequested("files_copied", types.ClusterEventFilesCopied{
+					jsonMsg, err = prepareUnrequested("filesCopied", types.ClusterEventFilesCopied{
 						AttributeId: event.FilesCopiedAttributeId,
 						FileIds:     event.FilesCopiedFileIds,
 						RecordId:    event.FilesCopiedRecordId,
@@ -169,11 +170,17 @@ func (hub *hubType) start() {
 						FileName:    event.FileRequestedFileName,
 					})
 				}
+				if event.JsFunctionCalledJsFunctionId != uuid.Nil {
+					jsonMsg, err = prepareUnrequested("jsFunctionCalled", types.ClusterEventJsFunctionCalled{
+						JsFunctionId: event.JsFunctionCalledJsFunctionId,
+						Arguments:    event.JsFunctionCalledArguments,
+					})
+				}
 				if event.Renew {
 					jsonMsg, err = prepareUnrequested("reauthorized", nil)
 				}
 				if event.SchemaLoading {
-					jsonMsg, err = prepareUnrequested("schema_loading", nil)
+					jsonMsg, err = prepareUnrequested("schemaLoading", nil)
 				}
 				if event.SchemaLoaded {
 					data := struct {
@@ -185,7 +192,7 @@ func (hub *hubType) start() {
 						PresetIdMapRecordId: cache.GetPresetRecordIds(),
 						CaptionMapCustom:    cache.GetCaptionMapCustom(),
 					}
-					jsonMsg, err = prepareUnrequested("schema_loaded", data)
+					jsonMsg, err = prepareUnrequested("schemaLoaded", data)
 				}
 				if err != nil {
 					log.Error(handlerContext, "could not prepare unrequested transaction", err)
@@ -195,8 +202,10 @@ func (hub *hubType) start() {
 
 			for client, _ := range hub.clients {
 
-				// login ID 0 affects all
-				if event.LoginId != 0 && event.LoginId != client.loginId {
+				// check if target matches
+				if (event.Target.Address != "" && event.Target.Address != client.address) ||
+					(event.Target.Device != "" && event.Target.Device != client.device) ||
+					(event.Target.LoginId != 0 && event.Target.LoginId != client.loginId) {
 					continue
 				}
 
@@ -207,9 +216,7 @@ func (hub *hubType) start() {
 
 				// kick client, if requested
 				if event.Kick || (event.KickNonAdmin && !client.admin) {
-					log.Info(handlerContext, fmt.Sprintf("kicking client (login ID %d)",
-						client.loginId))
-
+					log.Info(handlerContext, fmt.Sprintf("kicking client (login ID %d)", client.loginId))
 					removeClient(client)
 				}
 			}
@@ -271,16 +278,9 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 	authRequest := len(reqTrans.Requests) == 1 && reqTrans.Requests[0].Ressource == "auth"
 
 	if !authRequest {
-		if client.fixedToken {
-			log.Warning(handlerContext, "blocked client request",
-				fmt.Errorf("only authentication allowed for fixed token clients"))
-
-			return []byte("{}")
-		}
-
 		// execute non-authentication transaction
-		resTrans = request.ExecTransaction(client.ctx, client.loginId,
-			client.admin, client.noAuth, reqTrans, resTrans)
+		resTrans = request.ExecTransaction(client.ctx, client.address, client.loginId,
+			client.admin, client.device, client.noAuth, reqTrans, resTrans)
 
 	} else {
 		// execute authentication request
@@ -300,9 +300,9 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 			resPayload, err = request.LoginAuthToken(req.Payload,
 				&client.loginId, &client.admin, &client.noAuth)
 
-		case "tokenFixed": // authentication via fixed token (fat-client)
-			resPayload, err = request.LoginAuthTokenFixed(req.Payload,
-				&client.loginId, &client.fixedToken)
+		case "tokenFixed": // authentication via fixed token (fat-client only)
+			resPayload, err = request.LoginAuthTokenFixed(req.Payload, &client.loginId)
+			client.device = types.WebsocketClientDeviceFatClient
 
 		case "user": // authentication via credentials
 			resPayload, err = request.LoginAuthUser(req.Payload,

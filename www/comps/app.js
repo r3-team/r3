@@ -8,6 +8,7 @@ import {getStartFormId}      from './shared/access.js';
 import {updateCollections}   from './shared/collection.js';
 import {formOpen}            from './shared/form.js';
 import {colorAdjustBgHeader} from './shared/generic.js';
+import {jsFunctionRun}       from './shared/jsFunction.js';
 import {getCaption}          from './shared/language.js';
 import srcBase64Icon         from './shared/image.js';
 import {
@@ -410,6 +411,7 @@ let MyApp = {
 		genericErrorWithFallback,
 		getCaption,
 		getStartFormId,
+		jsFunctionRun,
 		pemImport,
 		resolveErrCode,
 		srcBase64Icon,
@@ -454,10 +456,10 @@ let MyApp = {
 		wsBackendRequest(res) {
 			switch(res.ressource) {
 				// affects admins only
-				case 'schema_loading':
+				case 'schemaLoading':
 					this.$store.commit('busyAdd');
 				break;
-				case 'schema_loaded':
+				case 'schemaLoaded':
 					this.$store.commit('busyRemove');
 					this.$store.commit('captionMapCustom',res.payload.captionMapCustom);
 					this.$store.commit('schema/presetIdMapRecordId',res.payload.presetIdMapRecordId);
@@ -465,14 +467,18 @@ let MyApp = {
 				break;
 				
 				// affects current login only
-				case 'files_copied':
+				case 'filesCopied':
 					this.$store.commit('filesCopy',res.payload);
+				break;
+				case 'jsFunctionCalled':
+					this.jsFunctionRun(res.payload.jsFunctionId,res.payload.arguments,{});
+					console.log(res.payload);
 				break;
 				
 				// affects everyone logged in
-				case 'collection_changed':
+				case 'collectionChanged':
 					this.updateCollections(res.payload);
-				case 'config_changed':
+				case 'configChanged':
 					if(this.isAdmin) {
 						ws.sendMultiple([
 							ws.prepare('config','get',{}),

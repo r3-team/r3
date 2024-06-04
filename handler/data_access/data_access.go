@@ -13,6 +13,7 @@ import (
 	"r3/log"
 	"r3/login/login_auth"
 	"r3/request"
+	"r3/types"
 	"slices"
 	"time"
 )
@@ -83,7 +84,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	log.Info("server", fmt.Sprintf("DIRECT ACCESS, %s data, payload: %s", req.Action, req.Request))
 
-	res, err := request.Exec_tx(ctx, tx, loginId, isAdmin, noAuth, "data", req.Action, req.Request)
+	res, err := request.Exec_tx(ctx, tx, "", loginId, isAdmin,
+		types.WebsocketClientDeviceBrowser, noAuth, "data", req.Action, req.Request)
+
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 		return

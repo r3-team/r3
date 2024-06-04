@@ -13,7 +13,7 @@ import (
 )
 
 // request file(s) to be copied (synchronized across all clients for login)
-func FilesCopy(reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func FilesCopy(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
 	var req struct {
 		AttributeId uuid.UUID   `json:"attributeId"`
 		FileIds     []uuid.UUID `json:"fileIds"`
@@ -22,8 +22,7 @@ func FilesCopy(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, cluster.FilesCopied(true, loginId,
-		req.AttributeId, req.FileIds, req.RecordId)
+	return nil, cluster.FilesCopied(true, address, loginId, req.AttributeId, req.FileIds, req.RecordId)
 }
 
 // request file(s) to be pasted
@@ -42,7 +41,7 @@ func FilesPaste(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 }
 
 // request file to be opened by fat client
-func FileRequest(reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func FileRequest(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
 	var req struct {
 		AttributeId uuid.UUID `json:"attributeId"`
 		FileId      uuid.UUID `json:"fileId"`
@@ -72,6 +71,6 @@ func FileRequest(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 		return nil, err
 	}
 
-	return nil, cluster.FileRequested(true, loginId,
+	return nil, cluster.FileRequested(true, address, loginId,
 		req.AttributeId, req.FileId, hash.String, name, req.ChooseApp)
 }

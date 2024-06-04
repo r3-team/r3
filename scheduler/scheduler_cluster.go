@@ -68,27 +68,34 @@ func clusterProcessEvents() error {
 			if err := json.Unmarshal(e.Payload, &p); err != nil {
 				return err
 			}
-			err = cluster.FilesCopied(false, p.LoginId,
+			err = cluster.FilesCopied(false, p.Target.Address, p.Target.LoginId,
 				p.AttributeId, p.FileIds, p.RecordId)
 		case "fileRequested":
 			var p types.ClusterEventFileRequested
 			if err := json.Unmarshal(e.Payload, &p); err != nil {
 				return err
 			}
-			err = cluster.FileRequested(false, p.LoginId, p.AttributeId,
-				p.FileId, p.FileHash, p.FileName, p.ChooseApp)
+			err = cluster.FileRequested(false, p.Target.Address, p.Target.LoginId,
+				p.AttributeId, p.FileId, p.FileHash, p.FileName, p.ChooseApp)
+		case "jsFunctionCalled":
+			var p types.ClusterEventJsFunctionCalled
+			if err := json.Unmarshal(e.Payload, &p); err != nil {
+				return err
+			}
+			err = cluster.JsFunctionCalled(false, p.Target.Address, p.Target.LoginId,
+				p.JsFunctionId, p.Arguments)
 		case "loginDisabled":
 			var p types.ClusterEventLogin
 			if err := json.Unmarshal(e.Payload, &p); err != nil {
 				return err
 			}
-			err = cluster.LoginDisabled(false, p.LoginId)
+			err = cluster.LoginDisabled(false, p.Target.LoginId)
 		case "loginReauthorized":
 			var p types.ClusterEventLogin
 			if err := json.Unmarshal(e.Payload, &p); err != nil {
 				return err
 			}
-			err = cluster.LoginReauthorized(false, p.LoginId)
+			err = cluster.LoginReauthorized(false, p.Target.LoginId)
 		case "loginReauthorizedAll":
 			err = cluster.LoginReauthorizedAll(false)
 		case "masterAssigned":

@@ -207,6 +207,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- fractional definition for numeric attributes
 			ALTER TABLE app.attribute ADD COLUMN length_fract INTEGER NOT NULL DEFAULT 0;
 			ALTER TABLE app.attribute ALTER COLUMN length_fract DROP NOT NULL;
+			
+			-- new cluster event
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'jsFunctionCalled';
 		`)
 		return "3.8", err
 	},

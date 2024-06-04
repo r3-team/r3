@@ -78,7 +78,7 @@ func LoginAuthToken(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth
 }
 
 // attempt login via fixed token
-func LoginAuthTokenFixed(reqJson json.RawMessage, loginId *int64, fixedToken *bool) (interface{}, error) {
+func LoginAuthTokenFixed(reqJson json.RawMessage, loginId *int64) (interface{}, error) {
 
 	var (
 		req struct {
@@ -98,6 +98,5 @@ func LoginAuthTokenFixed(reqJson json.RawMessage, loginId *int64, fixedToken *bo
 		return nil, err
 	}
 	*loginId = req.LoginId
-	*fixedToken = true
 	return res, nil
 }

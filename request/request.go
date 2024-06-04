@@ -18,9 +18,8 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
-	isNoAuth bool, reqTrans types.RequestTransaction,
-	resTrans types.ResponseTransaction) types.ResponseTransaction {
+func ExecTransaction(ctxClient context.Context, address string, loginId int64, isAdmin bool, device string,
+	isNoAuth bool, reqTrans types.RequestTransaction, resTrans types.ResponseTransaction) types.ResponseTransaction {
 
 	// start transaction
 	ctx, ctxCancel := context.WithTimeout(ctxClient,
@@ -53,8 +52,8 @@ func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
 		log.Info("websocket", fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s",
 			reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
 
-		payload, err := Exec_tx(ctx, tx, loginId, isAdmin, isNoAuth,
-			req.Ressource, req.Action, req.Payload)
+		payload, err := Exec_tx(ctx, tx, address, loginId, isAdmin,
+			device, isNoAuth, req.Ressource, req.Action, req.Payload)
 
 		if err == nil {
 			// all clear, prepare response payload
@@ -98,10 +97,10 @@ func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
 	return resTrans
 }
 
-func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAuth bool,
-	ressource string, action string, reqJson json.RawMessage) (interface{}, error) {
+func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAdmin bool, device string,
+	isNoAuth bool, ressource string, action string, reqJson json.RawMessage) (interface{}, error) {
 
-	// public requests
+	// public requests: accessible to all
 	switch ressource {
 	case "public":
 		switch action {
@@ -110,11 +109,23 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	}
 
-	// authorized requests: non-admin
 	if loginId == 0 {
 		return nil, errors.New(handler.ErrUnauthorized)
 	}
 
+	// authorized requests: fat-client
+	if device == types.WebsocketClientDeviceFatClient {
+		switch ressource {
+		case "fatClient":
+			switch action {
+			case "jsFunctionCalled":
+				return FatClientJsFunctionCalled(ctx, tx, reqJson, loginId, address)
+			}
+		}
+		return nil, errors.New(handler.ErrUnauthorized)
+	}
+
+	// authorized requests: non-admin
 	switch ressource {
 	case "data":
 		switch action {
@@ -139,11 +150,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 	case "file":
 		switch action {
 		case "copy":
-			return FilesCopy(reqJson, loginId)
+			return FilesCopy(reqJson, loginId, address)
 		case "paste":
 			return FilesPaste(reqJson, loginId)
 		case "request":
-			return FileRequest(reqJson, loginId)
+			return FileRequest(reqJson, loginId, address)
 		}
 	case "login":
 		switch action {
@@ -170,6 +181,9 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 	case "loginPassword":
 		switch action {
 		case "set":
+			if isNoAuth {
+				return nil, errors.New(handler.ErrUnauthorized)
+			}
 			return LoginPasswortSet_tx(tx, reqJson, loginId)
 		}
 	case "loginSetting":

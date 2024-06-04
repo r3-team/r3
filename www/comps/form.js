@@ -3,12 +3,13 @@ import MyField                     from './field.js';
 import MyFormActions               from './formActions.js';
 import MyFormLog                   from './formLog.js';
 import {hasAccessToRelation}       from './shared/access.js';
+import {getCollectionValues}       from './shared/collection.js';
 import {dialogCloseAsk}            from './shared/dialog.js';
 import {consoleError}              from './shared/error.js';
 import {getFieldOverwritesDefault} from './shared/field.js';
+import {jsFunctionRun}             from './shared/jsFunction.js';
 import {srcBase64}                 from './shared/image.js';
 import {getCaption}                from './shared/language.js';
-import {generatePdf}               from './shared/pdf.js';
 import {
 	aesGcmDecryptBase64WithPhrase,
 	aesGcmEncryptBase64WithPhrase,
@@ -20,7 +21,6 @@ import {
 import {
 	filterIsCorrect,
 	filterOperatorIsSingleValue,
-	getNilUuid,
 	openLink
 } from './shared/generic.js';
 import {
@@ -38,11 +38,6 @@ import {
 	getIndexAttributeId,
 	getIndexAttributeIdByField
 } from './shared/attribute.js';
-import {
-	getCollectionMultiValues,
-	getCollectionValues,
-	updateCollections
-} from './shared/collection.js';
 import {
 	fillRelationRecordIds,
 	getJoinIndexMapExpanded,
@@ -198,7 +193,7 @@ let MyForm = {
 				</div>
 				<div class="area">
 					<my-form-actions
-						@execute-function="executeFunction"
+						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
 						:entityIdMapState="entityIdMapState"
 						:formActions="form.actions"
 						:formId="formId"
@@ -236,7 +231,7 @@ let MyForm = {
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
 					@clipboard="messageSet('[CLIPBOARD]')"
-					@execute-function="executeFunction"
+					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
 					@hotkey="handleHotkeys"
 					@open-form="openForm"
 					@set-form-args="setFormArgs"
@@ -438,19 +433,11 @@ let MyForm = {
 			return '';
 		},
 		
-		// helpers
+		// function overwrites
 		exposedFunctions:(s) => {
 			return {
-				// simple functions
-				block_inputs:        (v) => s.blockInputs = v,
-				copy_to_clipboard:   (v) => navigator.clipboard.writeText(v),
-				get_language_code:   ()  => s.settings.languageCode,
-				get_login_id:        ()  => s.loginId,
-				get_preset_record_id:(v) => typeof s.presetIdMapRecordId[v] !== 'undefined'
-					? s.presetIdMapRecordId[v] : null,
-				get_role_ids:        ()  => s.access.roleIds,
-				go_back:             ()  => window.history.back(),
-				has_role:            (v) => s.access.roleIds.includes(v),
+				block_inputs: (v) => s.blockInputs = v,
+				call_frontend:(id,...args) => s.jsFunctionRun(id,args,s.exposedFunctions),
 				get_record_id:(relationIndex) => {
 					// bulk forms do not retrieve record values, only base record IDs are available
 					if(s.isBulkUpdate && relationIndex === 0)
@@ -459,25 +446,6 @@ let MyForm = {
 					return typeof s.indexMapRecordId[relationIndex] !== 'undefined'
 						? s.indexMapRecordId[relationIndex] : -1;
 				},
-				get_url_query_string:() => {
-					const pos = window.location.hash.indexOf('?');
-					return pos === -1 ? '' : window.location.hash.substring(pos+1);
-				},
-
-				// collection functions
-				collection_read:s.getCollectionMultiValues,
-				collection_update:s.updateCollections,
-				
-				// call other functions
-				call_backend:(id,...args) => {
-					return new Promise((resolve,reject) => {
-						ws.send('pgFunction','exec',{id:id,args:args}).then(
-							res => resolve(res.payload),
-							err => reject(err)
-						);
-					});
-				},
-				call_frontend:(id,...args) => s.executeFunction(id,args),
 				
 				// form functions
 				form_close:s.isPopUp ? s.closeAsk : s.openPrevAsk,
@@ -497,45 +465,6 @@ let MyForm = {
 				record_reload:  () => { s.get();        s.recordActionFree = false; },
 				record_save:    () => { s.set(false);   s.recordActionFree = false; },
 				record_save_new:() => { s.set(true);    s.recordActionFree = false; },
-				
-				// PDF functions
-				pdf_create:(filename,format,orientation,marginX,marginY,header,body,footer,css,attributeId,recordId) => {
-					return new Promise((resolve,reject) => {
-						const uploadFile = typeof attributeId !== 'undefined' && typeof recordId !== 'undefined';
-						const callbackResult = (blob) => {
-							if(!uploadFile)
-								return resolve();
-							
-							let formData = new FormData();
-							let xhr      = new XMLHttpRequest();
-							xhr.onload = event => {
-								const res = JSON.parse(xhr.response);
-								if(typeof res.error !== 'undefined')
-									return reject(res.error);
-								
-								let value = {fileIdMapChange:{}};
-								value.fileIdMapChange[res.id] = {
-									action:'create',
-									name:filename,
-									version:-1
-								};
-								ws.send('data','set',{0:{
-									relationId:s.attributeIdMap[attributeId].relationId,
-									recordId:recordId,
-									attributes:[{attributeId:attributeId,value:value}]
-								}},true).then(() => resolve(),reject);
-							};
-							formData.append('token',s.token);
-							formData.append('attributeId',attributeId);
-							formData.append('fileId',s.getNilUuid());
-							formData.append('file',blob);
-							xhr.open('POST','data/upload',true);
-							xhr.send(formData);
-						};
-						s.generatePdf(filename,format,orientation,marginX,marginY,
-							header,body,footer,css,callbackResult,uploadFile);
-					});
-				},
 				
 				// timeout/interval function calls
 				timer_clear:s.timerClear,
@@ -594,10 +523,7 @@ let MyForm = {
 					},[],newTab,null);
 					s.recordActionFree = false;
 				},
-				show_form_message:s.messageSet,
-				
-				// legacy calls (<3.0)
-				update_collection:s.updateCollections
+				show_form_message:s.messageSet
 			};
 		},
 		
@@ -686,7 +612,6 @@ let MyForm = {
 		},
 		
 		// stores
-		token:              (s) => s.$store.getters['local/token'],
 		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap:      (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:     (s) => s.$store.getters['schema/attributeIdMap'],
@@ -719,10 +644,8 @@ let MyForm = {
 		fillRelationRecordIds,
 		filterIsCorrect,
 		filterOperatorIsSingleValue,
-		generatePdf,
 		getAttributeValueFromString,
 		getCaption,
-		getCollectionMultiValues,
 		getCollectionValues,
 		getDataFieldMap,
 		getDetailsFromIndexAttributeId,
@@ -732,7 +655,6 @@ let MyForm = {
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
 		getJoinIndexMapExpanded,
-		getNilUuid,
 		getQueryAttributePkFilter,
 		getQueryFiltersProcessed,
 		getRandomString,
@@ -742,12 +664,12 @@ let MyForm = {
 		hasAccessToRelation,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
+		jsFunctionRun,
 		openLink,
 		pemImport,
 		rsaDecrypt,
 		rsaEncrypt,
 		srcBase64,
-		updateCollections,
 		
 		// form management
 		handleHotkeys(e) {
@@ -1056,40 +978,6 @@ let MyForm = {
 		close() {
 			this.$emit('close');
 		},
-		executeFunction(jsFunctionId,args) {
-			if(typeof this.jsFunctionIdMap[jsFunctionId] === 'undefined')
-				return;
-			
-			if(typeof args === 'undefined')
-				args = [];
-			
-			let fnc  = this.jsFunctionIdMap[jsFunctionId];
-			let code = fnc.codeFunction;
-			
-			// first argument is exposed application functions object
-			// additional arguments are defined by function
-			let argNames = 'app';
-			
-			if(fnc.codeArgs !== '')
-				argNames += ','+fnc.codeArgs;
-			
-			// limit function code access
-			// strict mode does not allow overwriting already defined variables
-			// also blocked, restoration of access to window: let win = (function() {return this;}())
-			code = `'use strict';
-				let document       = {};
-				let history        = {};
-				let location       = {};
-				let navigator      = {};
-				let setInterval    = {};
-				let setTimeout     = {};
-				let XMLHttpRequest = {};
-				let WebSocket      = {};
-				let window         = {};
-				${code}
-			`;
-			return Function(argNames,code)(this.exposedFunctions,...args);
-		},
 		openBuilder(middle) {
 			if(!middle) {
 				this.$router.push('/builder/form/'+this.form.id);
@@ -1216,10 +1104,8 @@ let MyForm = {
 		triggerEventBefore(e) { this.triggerEvent(e,true); },
 		triggerEvent      (event,before) {
 			for(let f of this.form.functions) {
-				if(f.event !== event || f.eventBefore !== before)
-					continue;
-				
-				this.executeFunction(f.jsFunctionId);
+				if(f.event === event && f.eventBefore === before)
+					this.jsFunctionRun(f.jsFunctionId,[],this.exposedFunctions);
 			}
 		},
 		
