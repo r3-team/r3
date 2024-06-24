@@ -99,13 +99,19 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
 	/*
-		ALTER TABLE app.column ALTER COLUMN styles
-			TYPE app.column_style[] USING styles::CHARACTER VARYING(12)[]::app.column_style[];
-
 		ALTER TABLE app.column
 			DROP COLUMN batch_vertical,
 			DROP COLUMN clipboard,
 			DROP COLUMN wrap;
+
+		ALTER TABLE app.column ALTER COLUMN styles
+			TYPE app.column_style[] USING styles::CHARACTER VARYING(12)[]::app.column_style[];
+
+		ALTER TABLE instance_cluster.node_event ALTER COLUMN content
+			TYPE instance_cluster.node_event_content USING content::TEXT::instance_cluster.node_event_content;
+
+		ALTER TABLE instance_cluster.node_event ALTER COLUMN target_device
+			TYPE instance_cluster.node_event_target_device USING target_device::TEXT::instance_cluster.node_event_target_device;
 	*/
 
 	"3.7": func(tx pgx.Tx) (string, error) {
@@ -208,8 +214,20 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.attribute ADD COLUMN length_fract INTEGER NOT NULL DEFAULT 0;
 			ALTER TABLE app.attribute ALTER COLUMN length_fract DROP NOT NULL;
 			
-			-- new cluster event
-			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'jsFunctionCalled';
+			-- refactor cluster events
+			DELETE FROM instance_cluster.node_event;
+			ALTER TABLE instance_cluster.node_event ALTER COLUMN content TYPE TEXT;
+			DROP TYPE instance_cluster.node_event_content;
+			CREATE TYPE instance_cluster.node_event_content AS ENUM ('collectionUpdated', 'configChanged', 'loginDisabled',
+				'loginReauthorized', 'loginReauthorizedAll', 'masterAssigned', 'schemaChanged', 'shutdownTriggered',
+				'tasksChanged', 'taskTriggered', 'deviceBrowserApplyCopiedFiles', 'deviceBrowserCallJsFunction',
+				'deviceFatClientExecKeystrokes', 'deviceFatClientFocusWindow', 'deviceFatClientRequestFile');
+			
+			ALTER TABLE instance_cluster.node_event
+				ADD COLUMN target_address TEXT,
+				ADD COLUMN target_device TEXT,
+				ADD COLUMN target_login_id INTEGER;
+			CREATE TYPE instance_cluster.node_event_target_device AS ENUM ('browser','fatClient');
 		`)
 		return "3.8", err
 	},

@@ -116,10 +116,10 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	// authorized requests: fat-client
 	if device == types.WebsocketClientDeviceFatClient {
 		switch ressource {
-		case "fatClient":
+		case "device":
 			switch action {
-			case "jsFunctionCalled":
-				return FatClientJsFunctionCalled(ctx, tx, reqJson, loginId, address)
+			case "browserCallJsFunction":
+				return deviceBrowserCallJsFunction(reqJson, loginId, address)
 			}
 		}
 		return nil, errors.New(handler.ErrUnauthorized)
@@ -142,6 +142,17 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "setKeys":
 			return DataSetKeys_tx(ctx, tx, reqJson)
 		}
+	case "device":
+		switch action {
+		case "browserApplyCopiedFiles":
+			return deviceBrowserApplyCopiedFiles(reqJson, loginId, address)
+		case "fatClientExecKeystrokes":
+			return deviceFatClientExecKeystrokes(reqJson, loginId, address)
+		case "fatClientFocusWindow":
+			return deviceFatClientFocusWindow(reqJson, loginId, address)
+		case "fatClientRequestFile":
+			return deviceFatClientRequestFile(reqJson, loginId, address)
+		}
 	case "feedback":
 		switch action {
 		case "send":
@@ -149,12 +160,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		}
 	case "file":
 		switch action {
-		case "copy":
-			return FilesCopy(reqJson, loginId, address)
 		case "paste":
 			return FilesPaste(reqJson, loginId)
-		case "request":
-			return FileRequest(reqJson, loginId, address)
 		}
 	case "login":
 		switch action {

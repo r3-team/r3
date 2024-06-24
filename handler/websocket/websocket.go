@@ -141,84 +141,62 @@ func (hub *hubType) start() {
 
 		case event := <-cluster.WebsocketClientEvents:
 
+			// prepare json message for client based on event content
+			var err error = nil
 			jsonMsg := []byte{} // message back to client
-			kickEvent := event.Kick || event.KickNonAdmin
 
-			if !kickEvent {
-				// if clients are not kicked, prepare response
-				var err error
+			switch event.Content {
+			case "collectionChanged":
+				jsonMsg, err = prepareUnrequested("collectionChanged", event.Payload)
+			case "configChanged":
+				jsonMsg, err = prepareUnrequested("configChanged", nil)
+			case "renew":
+				jsonMsg, err = prepareUnrequested("reauthorized", nil)
+			case "schemaLoaded":
+				data := struct {
+					ModuleIdMapData     map[uuid.UUID]types.ModuleMeta `json:"moduleIdMapData"`
+					PresetIdMapRecordId map[uuid.UUID]int64            `json:"presetIdMapRecordId"`
+					CaptionMapCustom    types.CaptionMapsAll           `json:"captionMapCustom"`
+				}{
+					ModuleIdMapData:     cache.GetModuleIdMapMeta(),
+					PresetIdMapRecordId: cache.GetPresetRecordIds(),
+					CaptionMapCustom:    cache.GetCaptionMapCustom(),
+				}
+				jsonMsg, err = prepareUnrequested("schemaLoaded", data)
+			case "schemaLoading":
+				jsonMsg, err = prepareUnrequested("schemaLoading", nil)
 
-				if event.CollectionChanged != uuid.Nil {
-					jsonMsg, err = prepareUnrequested("collectionChanged", event.CollectionChanged)
-				}
-				if event.ConfigChanged {
-					jsonMsg, err = prepareUnrequested("configChanged", nil)
-				}
-				if event.FilesCopiedAttributeId != uuid.Nil {
-					jsonMsg, err = prepareUnrequested("filesCopied", types.ClusterEventFilesCopied{
-						AttributeId: event.FilesCopiedAttributeId,
-						FileIds:     event.FilesCopiedFileIds,
-						RecordId:    event.FilesCopiedRecordId,
-					})
-				}
-				if event.FileRequestedAttributeId != uuid.Nil {
-					jsonMsg, err = prepareUnrequested("fileRequested", types.ClusterEventFileRequested{
-						AttributeId: event.FileRequestedAttributeId,
-						ChooseApp:   event.FileRequestedChooseApp,
-						FileId:      event.FileRequestedFileId,
-						FileHash:    event.FileRequestedFileHash,
-						FileName:    event.FileRequestedFileName,
-					})
-				}
-				if event.JsFunctionCalledJsFunctionId != uuid.Nil {
-					jsonMsg, err = prepareUnrequested("jsFunctionCalled", types.ClusterEventJsFunctionCalled{
-						JsFunctionId: event.JsFunctionCalledJsFunctionId,
-						Arguments:    event.JsFunctionCalledArguments,
-					})
-				}
-				if event.Renew {
-					jsonMsg, err = prepareUnrequested("reauthorized", nil)
-				}
-				if event.SchemaLoading {
-					jsonMsg, err = prepareUnrequested("schemaLoading", nil)
-				}
-				if event.SchemaLoaded {
-					data := struct {
-						ModuleIdMapData     map[uuid.UUID]types.ModuleMeta `json:"moduleIdMapData"`
-						PresetIdMapRecordId map[uuid.UUID]int64            `json:"presetIdMapRecordId"`
-						CaptionMapCustom    types.CaptionMapsAll           `json:"captionMapCustom"`
-					}{
-						ModuleIdMapData:     cache.GetModuleIdMapMeta(),
-						PresetIdMapRecordId: cache.GetPresetRecordIds(),
-						CaptionMapCustom:    cache.GetCaptionMapCustom(),
-					}
-					jsonMsg, err = prepareUnrequested("schemaLoaded", data)
-				}
-				if err != nil {
-					log.Error(handlerContext, "could not prepare unrequested transaction", err)
-					continue
-				}
+			// device events
+			case "deviceBrowserApplyCopiedFiles":
+				jsonMsg, err = prepareUnrequested("filesCopied", event.Payload)
+			case "deviceBrowserCallJsFunction":
+				jsonMsg, err = prepareUnrequested("jsFunctionCalled", event.Payload)
+			case "deviceFatClientRequestFile":
+				jsonMsg, err = prepareUnrequested("fileRequested", event.Payload)
+			}
+
+			if err != nil {
+				log.Error(handlerContext, "could not prepare unrequested transaction", err)
+				continue
 			}
 
 			for client, _ := range hub.clients {
 
-				// check if target matches
+				// skip if target filter does not apply to client
 				if (event.Target.Address != "" && event.Target.Address != client.address) ||
 					(event.Target.Device != "" && event.Target.Device != client.device) ||
 					(event.Target.LoginId != 0 && event.Target.LoginId != client.loginId) {
 					continue
 				}
 
-				// non-kick event, send message
-				if !kickEvent {
-					go client.write(jsonMsg)
-				}
-
-				// kick client, if requested
-				if event.Kick || (event.KickNonAdmin && !client.admin) {
+				// disconnect and do not send message if kicked
+				if event.Content == "kick" || (event.Content == "kickNonAdmin" && !client.admin) {
 					log.Info(handlerContext, fmt.Sprintf("kicking client (login ID %d)", client.loginId))
 					removeClient(client)
+					continue
 				}
+
+				go client.write(jsonMsg)
 			}
 		}
 	}

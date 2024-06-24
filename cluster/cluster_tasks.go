@@ -60,27 +60,27 @@ func CollectionUpdated(collectionId uuid.UUID, loginIds []int64) error {
 
 	if len(loginIds) == 0 {
 		// no logins defined, update for all
-		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
-			CollectionChanged: collectionId,
-			Target:            types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser},
+		WebsocketClientEvents <- types.ClusterEvent{
+			Content: "collectionChanged",
+			Payload: collectionId,
+			Target:  types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser},
 		}
 		return nil
 	}
 
 	// logins defined, update for specific logins
 	for _, id := range loginIds {
-		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
-			CollectionChanged: collectionId,
-			Target:            types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser, LoginId: id},
+		WebsocketClientEvents <- types.ClusterEvent{
+			Content: "collectionChanged",
+			Payload: collectionId,
+			Target:  types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser, LoginId: id},
 		}
 	}
 	return nil
 }
 func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes("configChanged", types.ClusterEventConfigChanged{
-			SwitchToMaintenance: switchToMaintenance,
-		}); err != nil {
+		if err := createEventsForOtherNodes("configChanged", switchToMaintenance, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
@@ -92,11 +92,11 @@ func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance 
 
 	// update websocket clients if relevant config changed
 	if switchToMaintenance {
-		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{KickNonAdmin: true}
+		WebsocketClientEvents <- types.ClusterEvent{Content: "kickNonAdmin"}
 	}
 
 	// inform clients about changed config
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{ConfigChanged: true}
+	WebsocketClientEvents <- types.ClusterEvent{Content: "configChanged"}
 
 	// apply config to other areas
 	bruteforce.SetConfig()
@@ -104,89 +104,20 @@ func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance 
 	config.SetLogLevels()
 	return nil
 }
-func FilesCopied(updateNodes bool, address string, loginId int64,
-	attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
-
-	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceBrowser, LoginId: loginId}
-
-	if updateNodes {
-		if err := createEventsForOtherNodes("filesCopied", types.ClusterEventFilesCopied{
-			AttributeId: attributeId,
-			FileIds:     fileIds,
-			RecordId:    recordId,
-			Target:      target,
-		}); err != nil {
-			return err
-		}
-	}
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
-		FilesCopiedAttributeId: attributeId,
-		FilesCopiedFileIds:     fileIds,
-		FilesCopiedRecordId:    recordId,
-		Target:                 target,
-	}
-	return nil
-}
-func FileRequested(updateNodes bool, address string, loginId int64, attributeId uuid.UUID,
-	fileId uuid.UUID, fileHash string, fileName string, chooseApp bool) error {
-
-	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceFatClient, LoginId: loginId}
-
-	if updateNodes {
-		if err := createEventsForOtherNodes("fileRequested", types.ClusterEventFileRequested{
-			AttributeId: attributeId,
-			ChooseApp:   chooseApp,
-			FileId:      fileId,
-			FileHash:    fileHash,
-			FileName:    fileName,
-			Target:      target,
-		}); err != nil {
-			return err
-		}
-	}
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
-		FileRequestedAttributeId: attributeId,
-		FileRequestedChooseApp:   chooseApp,
-		FileRequestedFileId:      fileId,
-		FileRequestedFileHash:    fileHash,
-		FileRequestedFileName:    fileName,
-		Target:                   target,
-	}
-	return nil
-}
-func JsFunctionCalled(updateNodes bool, address string, loginId int64, jsFunctionId uuid.UUID, arguments []interface{}) error {
-
-	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceBrowser, LoginId: loginId}
-	if updateNodes {
-		if err := createEventsForOtherNodes("jsFunctionCalled", types.ClusterEventJsFunctionCalled{
-			JsFunctionId: jsFunctionId,
-			Arguments:    arguments,
-			Target:       target,
-		}); err != nil {
-			return err
-		}
-	}
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
-		JsFunctionCalledJsFunctionId: jsFunctionId,
-		JsFunctionCalledArguments:    arguments,
-		Target:                       target,
-	}
-	return nil
-}
 func LoginDisabled(updateNodes bool, loginId int64) error {
 	target := types.ClusterEventTarget{LoginId: loginId}
 	if updateNodes {
-		if err := createEventsForOtherNodes("loginDisabled", types.ClusterEventLogin{Target: target}); err != nil {
+		if err := createEventsForOtherNodes("loginDisabled", nil, target); err != nil {
 			return err
 		}
 	}
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{Target: target, Kick: true}
+	WebsocketClientEvents <- types.ClusterEvent{Content: "kick", Target: target}
 	return nil
 }
 func LoginReauthorized(updateNodes bool, loginId int64) error {
 	target := types.ClusterEventTarget{LoginId: loginId}
 	if updateNodes {
-		if err := createEventsForOtherNodes("loginReauthorized", types.ClusterEventLogin{Target: target}); err != nil {
+		if err := createEventsForOtherNodes("loginReauthorized", nil, target); err != nil {
 			return err
 		}
 	}
@@ -197,12 +128,12 @@ func LoginReauthorized(updateNodes bool, loginId int64) error {
 	}
 
 	// inform client to retrieve new access cache
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{Target: target, Renew: true}
+	WebsocketClientEvents <- types.ClusterEvent{Content: "renew", Target: target}
 	return nil
 }
 func LoginReauthorizedAll(updateNodes bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes("loginReauthorizedAll", nil); err != nil {
+		if err := createEventsForOtherNodes("loginReauthorizedAll", nil, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
@@ -213,7 +144,7 @@ func LoginReauthorizedAll(updateNodes bool) error {
 	}
 
 	// inform clients to retrieve new access cache
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{Renew: true}
+	WebsocketClientEvents <- types.ClusterEvent{Content: "renew"}
 	return nil
 }
 func MasterAssigned(state bool) error {
@@ -226,19 +157,17 @@ func MasterAssigned(state bool) error {
 }
 func SchemaChanged(updateNodes bool, moduleIds []uuid.UUID) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes("schemaChanged", types.ClusterEventSchemaChanged{
-			ModuleIds: moduleIds,
-		}); err != nil {
+		if err := createEventsForOtherNodes("schemaChanged", moduleIds, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
 
 	// inform all clients about schema reloading
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{SchemaLoading: true}
+	WebsocketClientEvents <- types.ClusterEvent{Content: "schemaLoading"}
 
 	// inform all clients about schema loading being finished, regardless of success or error
 	defer func() {
-		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{SchemaLoaded: true}
+		WebsocketClientEvents <- types.ClusterEvent{Content: "schemaLoaded"}
 	}()
 
 	if len(moduleIds) != 0 {
@@ -251,7 +180,7 @@ func SchemaChanged(updateNodes bool, moduleIds []uuid.UUID) error {
 		}
 
 		// inform clients to retrieve new access cache
-		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{Renew: true}
+		WebsocketClientEvents <- types.ClusterEvent{Content: "renew"}
 	} else {
 		// no module IDs are given if modules were deleted, module options were changed, or custom captions were updated
 		if err := cache.LoadModuleIdMapMeta(); err != nil {
@@ -268,7 +197,7 @@ func SchemaChanged(updateNodes bool, moduleIds []uuid.UUID) error {
 }
 func TasksChanged(updateNodes bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes("tasksChanged", nil); err != nil {
+		if err := createEventsForOtherNodes("tasksChanged", nil, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}

@@ -3,6 +3,7 @@ package request
 import (
 	"encoding/json"
 	"r3/cluster"
+	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -43,5 +44,6 @@ func ClusterNodeShutdown(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, cluster.CreateEventForNode(req.Id, "shutdownTriggered", "{}")
+	return nil, cluster.CreateEventForNodes([]uuid.UUID{req.Id},
+		"shutdownTriggered", "{}", types.ClusterEventTarget{})
 }

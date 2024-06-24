@@ -472,7 +472,6 @@ let MyApp = {
 				break;
 				case 'jsFunctionCalled':
 					this.jsFunctionRun(res.payload.jsFunctionId,res.payload.arguments,{});
-					console.log(res.payload);
 				break;
 				
 				// affects everyone logged in

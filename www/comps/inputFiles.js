@@ -555,12 +555,12 @@ let MyInputFiles = {
 				fileIds:this.fileIdsSelected,
 				recordId:this.recordId
 			};
-			ws.send('file','copy',v,true);
+			ws.send('device','browserApplyCopiedFiles',v,true);
 			this.$store.commit('filesCopy',v);
 			this.fileIdsSelected = [];
 		},
 		fileRequest(fileId,chooseApp) {
-			ws.send('file','request',{
+			ws.send('device','fatClientRequestFile',{
 				attributeId:this.attributeId,
 				fileId:fileId,
 				recordId:this.recordId,

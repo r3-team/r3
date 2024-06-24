@@ -12,12 +12,13 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var (
 	SchedulerRestart      = make(chan bool, 10)
 	websocketClientCount  atomic.Int32
-	WebsocketClientEvents = make(chan types.ClusterWebsocketClientEvent, 10)
+	WebsocketClientEvents = make(chan types.ClusterEvent, 10)
 )
 
 func SetWebsocketClientCount(value int) {
@@ -155,29 +156,54 @@ func SetNode_tx(tx pgx.Tx, id uuid.UUID, name string) error {
 }
 
 // helper
-func CreateEventForNode(nodeId uuid.UUID, content string, payload interface{}) error {
+// creates node events to some nodes (by node IDs) or all but the current node (if no node IDs are given)
+func CreateEventForNodes(nodeIds []uuid.UUID, content string, payload interface{}, target types.ClusterEventTarget) error {
 	payloadJson, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Pool.Exec(db.Ctx, `
-		INSERT INTO instance_cluster.node_event (node_id,content,payload)
-		VALUES ($1,$2,$3)
-	`, nodeId, content, payloadJson)
-	return err
+	address := pgtype.Text{
+		String: target.Address,
+		Valid:  target.Address != "",
+	}
+	device := pgtype.Text{
+		String: target.Device,
+		Valid:  target.Device != "",
+	}
+	loginId := pgtype.Int8{
+		Int64: target.LoginId,
+		Valid: target.LoginId != 0,
+	}
+
+	if len(nodeIds) == 0 {
+		// if no node IDs are defined, apply to all other nodes
+		if _, err := db.Pool.Exec(db.Ctx, `
+			INSERT INTO instance_cluster.node_event (
+				node_id, content, payload, target_address,
+				target_device, target_login_id
+			)
+			SELECT id, $1, $2, $3, $4, $5
+			FROM instance_cluster.node
+			WHERE id <> $6
+		`, content, payloadJson, address, device, loginId, cache.GetNodeId()); err != nil {
+			return err
+		}
+	} else {
+		if _, err := db.Pool.Exec(db.Ctx, `
+			INSERT INTO instance_cluster.node_event (
+				node_id, content, payload, target_address,
+				target_device, target_login_id
+			)
+			SELECT id, $1, $2, $3, $4, $5
+			FROM instance_cluster.node
+			WHERE id = ANY($6)
+		`, content, payloadJson, address, device, loginId, nodeIds); err != nil {
+			return err
+		}
+	}
+	return nil
 }
-func createEventsForOtherNodes(content string, payload interface{}) error {
-	payloadJson, err := json.Marshal(payload)
-	if err != nil {
-		return err
-	}
-
-	_, err = db.Pool.Exec(db.Ctx, `
-		INSERT INTO instance_cluster.node_event (node_id,content,payload)
-		SELECT id,$1,$2
-		FROM instance_cluster.node
-		WHERE id <> $3
-	`, content, payloadJson, cache.GetNodeId())
-	return err
+func createEventsForOtherNodes(content string, payload interface{}, target types.ClusterEventTarget) error {
+	return CreateEventForNodes([]uuid.UUID{}, content, payload, target)
 }
