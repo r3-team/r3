@@ -17,6 +17,7 @@ import (
 	"r3/schema/api"
 	"r3/schema/article"
 	"r3/schema/attribute"
+	"r3/schema/clientEvent"
 	"r3/schema/collection"
 	"r3/schema/compatible"
 	"r3/schema/form"
@@ -476,6 +477,23 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 			e.ModuleId, e.Id, e.FormId, e.Name, e.CodeArgs, e.CodeFunction,
 			e.CodeReturns, e.Captions), e.Id, idMapSkipped); err != nil {
 
+			return err
+		}
+	}
+
+	// client events
+	// refer to JS functions
+	for _, e := range mod.ClientEvents {
+		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set client event %s", e.Id))
+
+		if err := importCheckResultAndApply(tx, clientEvent.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}

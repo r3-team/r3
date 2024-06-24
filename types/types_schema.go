@@ -38,6 +38,7 @@ type Module struct {
 	JsFunctions     []JsFunction      `json:"jsFunctions"`
 	Collections     []Collection      `json:"collections"`
 	Apis            []Api             `json:"apis"`
+	ClientEvents    []ClientEvent     `json:"clientEvents"`
 	Widgets         []Widget          `json:"widgets"`
 	ArticleIdsHelp  []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
 	Captions        CaptionMap        `json:"captions"`
@@ -573,6 +574,17 @@ type Tab struct {
 	State          string        `json:"state"`          // tab default state (default, hidden)
 	Fields         []interface{} `json:"fields"`         // fields assigned to tab
 	Captions       CaptionMap    `json:"captions"`
+}
+type ClientEvent struct {
+	Id              uuid.UUID   `json:"id"`
+	ModuleId        uuid.UUID   `json:"moduleId"`
+	Action          string      `json:"action"`
+	Event           string      `json:"event"`
+	HotkeyModifier1 string      `json:"hotkeyModifier1"`
+	HotkeyModifier2 string      `json:"hotkeyModifier2"`
+	HotkeyChar      string      `json:"hotkeyChar"`
+	JsFunctionArgs  []string    `json:"jsFunctionArgs"`
+	JsFunctionId    pgtype.UUID `json:"jsFunctionId"`
 }
 type Widget struct {
 	Id         uuid.UUID          `json:"id"`

@@ -228,6 +228,41 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ADD COLUMN target_device TEXT,
 				ADD COLUMN target_login_id INTEGER;
 			CREATE TYPE instance_cluster.node_event_target_device AS ENUM ('browser','fatClient');
+
+			-- client events
+			CREATE TYPE app.client_event_action          AS ENUM ('callJsFunction');
+			CREATE TYPE app.client_event_event           AS ENUM ('onConnect', 'onDisconnect', 'onHotkey');
+			CREATE TYPE app.client_event_hotkey_modifier AS ENUM ('ALT', 'CTRL', 'SHIFT');
+			CREATE TYPE app.client_event_js_function_arg AS ENUM ('clipboard', 'hostname', 'username', 'windowTitle');
+			
+			CREATE TABLE IF NOT EXISTS app.client_event(
+				id uuid NOT NULL,
+				module_id uuid NOT NULL,
+				action app.client_event_action NOT NULL,
+				event app.client_event_event NOT NULL,
+				hotkey_modifier1 app.client_event_hotkey_modifier,
+				hotkey_mofifier2 app.client_event_hotkey_modifier,
+				hotkey_char "char",
+				js_function_args app.client_event_js_function_arg[],
+				js_function_id uuid,
+				CONSTRAINT client_event_pkey PRIMARY KEY (id),
+				CONSTRAINT client_event_js_function_id_fkey FOREIGN KEY (js_function_id)
+					REFERENCES app.js_function (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT client_event_module_id_fkey FOREIGN KEY (module_id)
+					REFERENCES app.module (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+
+			CREATE INDEX IF NOT EXISTS fki_client_event_module_fkey      ON app.client_event USING btree (module_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_client_event_js_function_fkey ON app.client_event USING btree (js_function_id ASC NULLS LAST);
+
+			-- missing indexes
+			CREATE INDEX IF NOT EXISTS fki_api_module_fkey ON app.api USING btree (module_id ASC NULLS LAST);
 		`)
 		return "3.8", err
 	},

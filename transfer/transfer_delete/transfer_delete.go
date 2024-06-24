@@ -9,6 +9,7 @@ import (
 	"r3/schema/api"
 	"r3/schema/article"
 	"r3/schema/attribute"
+	"r3/schema/clientEvent"
 	"r3/schema/collection"
 	"r3/schema/column"
 	"r3/schema/field"
@@ -96,6 +97,11 @@ func NotExisting_tx(tx pgx.Tx, module types.Module) error {
 
 	// APIs
 	if err := deleteApis_tx(tx, module.Id, module.Apis); err != nil {
+		return err
+	}
+
+	// client events
+	if err := deleteClientEvents_tx(tx, module.Id, module.ClientEvents); err != nil {
 		return err
 	}
 
@@ -494,6 +500,23 @@ func deleteApis_tx(tx pgx.Tx, moduleId uuid.UUID, apis []types.Api) error {
 	}
 	return nil
 }
+func deleteClientEvents_tx(tx pgx.Tx, moduleId uuid.UUID, clientEvents []types.ClientEvent) error {
+	idsKeep := make([]uuid.UUID, 0)
+	for _, entity := range clientEvents {
+		idsKeep = append(idsKeep, entity.Id)
+	}
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "client_event", moduleId, idsKeep)
+	if err != nil {
+		return err
+	}
+	for _, id := range idsDelete {
+		log.Info("transfer", fmt.Sprintf("del client event %s", id.String()))
+		if err := clientEvent.Del_tx(tx, id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 func deleteWidgets_tx(tx pgx.Tx, moduleId uuid.UUID, widgets []types.Widget) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range widgets {
@@ -552,9 +575,9 @@ func importGetIdsToDeleteFromModule_tx(tx pgx.Tx, entity string,
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !slices.Contains([]string{"api", "article", "collection", "form", "icon",
-		"js_function", "login_form", "menu", "pg_function", "pg_trigger",
-		"relation", "role", "widget"}, entity) {
+	if !slices.Contains([]string{"api", "article", "client_event", "collection",
+		"form", "icon", "js_function", "login_form", "menu", "pg_function",
+		"pg_trigger", "relation", "role", "widget"}, entity) {
 
 		return idsDelete, errors.New("unsupported type for delete check")
 	}

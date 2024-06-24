@@ -272,6 +272,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "setOne":
 			return CaptionMapSetOne_tx(tx, reqJson)
 		}
+	case "clientEvent":
+		switch action {
+		case "del":
+			return ClientEventDel_tx(tx, reqJson)
+		case "set":
+			return ClientEventSet_tx(tx, reqJson)
+		}
 	case "collection":
 		switch action {
 		case "del":
