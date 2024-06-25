@@ -116,6 +116,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	// authorized requests: fat-client
 	if device == types.WebsocketClientDeviceFatClient {
 		switch ressource {
+		case "clientEvent":
+			switch action {
+			case "get":
+				return loginClientEventGet(loginId)
+			}
 		case "device":
 			switch action {
 			case "browserCallJsFunction":
@@ -148,8 +153,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return deviceBrowserApplyCopiedFiles(reqJson, loginId, address)
 		case "fatClientExecKeystrokes":
 			return deviceFatClientExecKeystrokes(reqJson, loginId, address)
-		case "fatClientFocusWindow":
-			return deviceFatClientFocusWindow(reqJson, loginId, address)
 		case "fatClientRequestFile":
 			return deviceFatClientRequestFile(reqJson, loginId, address)
 		}

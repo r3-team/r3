@@ -241,8 +241,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				action app.client_event_action NOT NULL,
 				event app.client_event_event NOT NULL,
 				hotkey_modifier1 app.client_event_hotkey_modifier,
-				hotkey_mofifier2 app.client_event_hotkey_modifier,
-				hotkey_char "char",
+				hotkey_modifier2 app.client_event_hotkey_modifier,
+				hotkey_char character(1) COLLATE pg_catalog."default",
 				js_function_args app.client_event_js_function_arg[],
 				js_function_id uuid,
 				CONSTRAINT client_event_pkey PRIMARY KEY (id),
@@ -260,6 +260,28 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 			CREATE INDEX IF NOT EXISTS fki_client_event_module_fkey      ON app.client_event USING btree (module_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_client_event_js_function_fkey ON app.client_event USING btree (js_function_id ASC NULLS LAST);
+
+			-- client events, login settings
+			CREATE TABLE IF NOT EXISTS instance.login_client_event(
+				login_id integer NOT NULL,
+				client_event_id uuid NOT NULL,
+				hotkey_modifier1 app.client_event_hotkey_modifier NOT NULL,
+				hotkey_modifier2 app.client_event_hotkey_modifier,
+				hotkey_char character(1) COLLATE pg_catalog."default" NOT NULL,
+				CONSTRAINT login_client_event_pkey PRIMARY KEY (login_id, client_event_id),
+				CONSTRAINT login_client_event_client_event_id_fkey FOREIGN KEY (client_event_id)
+					REFERENCES app.client_event (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_client_event_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+			);
+
+			CREATE INDEX IF NOT EXISTS fki_login_client_event_login_id_fkey        ON instance.login_client_event USING btree (login_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_login_client_event_client_event_id_fkey ON instance.login_client_event USING btree (client_event_id ASC NULLS LAST);
 
 			-- missing indexes
 			CREATE INDEX IF NOT EXISTS fki_api_module_fkey ON app.api USING btree (module_id ASC NULLS LAST);

@@ -11,6 +11,7 @@ import (
 	"r3/schema/api"
 	"r3/schema/article"
 	"r3/schema/attribute"
+	"r3/schema/clientEvent"
 	"r3/schema/collection"
 	"r3/schema/form"
 	"r3/schema/icon"
@@ -63,7 +64,7 @@ func GetModuleCacheJson(moduleId uuid.UUID) (json.RawMessage, error) {
 
 	json, exists := moduleIdMapJson[moduleId]
 	if !exists {
-		return []byte{}, fmt.Errorf("Module %s does not exist in schema cache", moduleId)
+		return []byte{}, fmt.Errorf("module %s does not exist in schema cache", moduleId)
 	}
 	return json, nil
 }
@@ -170,6 +171,7 @@ func updateSchemaCache(moduleIds []uuid.UUID) error {
 		mod.JsFunctions = make([]types.JsFunction, 0)
 		mod.Collections = make([]types.Collection, 0)
 		mod.Apis = make([]types.Api, 0)
+		mod.ClientEvents = make([]types.ClientEvent, 0)
 		mod.Widgets = make([]types.Widget, 0)
 		ModuleApiNameMapId[mod.Name] = make(map[string]uuid.UUID)
 
@@ -308,6 +310,14 @@ func updateSchemaCache(moduleIds []uuid.UUID) error {
 		for _, a := range mod.Apis {
 			ApiIdMap[a.Id] = a
 			ModuleApiNameMapId[mod.Name][fmt.Sprintf("%s.v%d", a.Name, a.Version)] = a.Id
+		}
+
+		// get client events
+		log.Info("cache", "load client events")
+
+		mod.ClientEvents, err = clientEvent.Get(mod.Id)
+		if err != nil {
+			return err
 		}
 
 		// get widgets

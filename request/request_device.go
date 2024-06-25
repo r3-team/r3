@@ -41,9 +41,6 @@ func deviceFatClientExecKeystrokes(reqJson json.RawMessage, loginId int64, addre
 	return nil, nil
 
 }
-func deviceFatClientFocusWindow(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
-	return nil, nil
-}
 
 // request file to be opened by fat client
 func deviceFatClientRequestFile(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
