@@ -225,3 +225,6 @@ func ErrSchemaUnknownFunction(id uuid.UUID) error {
 func ErrSchemaUnknownPolicyAction(name string) error {
 	return fmt.Errorf("unknown policy action '%s'", name)
 }
+func ErrSchemaUnknownClientEvent(id uuid.UUID) error {
+	return fmt.Errorf("unknown client event '%s'", id)
+}

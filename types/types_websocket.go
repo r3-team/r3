@@ -1,6 +1,8 @@
 package types
 
+type WebsocketClientDevice int
+
 var (
-	WebsocketClientDeviceBrowser   = "browser"
-	WebsocketClientDeviceFatClient = "fatClient"
+	WebsocketClientDeviceBrowser   WebsocketClientDevice = 1
+	WebsocketClientDeviceFatClient WebsocketClientDevice = 2
 )

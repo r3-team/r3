@@ -19,7 +19,7 @@ func clusterProcessEvents() error {
 	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT content, payload,
 			COALESCE(target_address, ''),
-			COALESCE(target_device, ''),
+			COALESCE(target_device, 0),
 			COALESCE(target_login_id, 0)
 		FROM instance_cluster.node_event
 		WHERE node_id = $1

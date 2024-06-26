@@ -51,6 +51,7 @@ var (
 	RoleIdMap          = make(map[uuid.UUID]types.Role)        // all roles by ID
 	PgFunctionIdMap    = make(map[uuid.UUID]types.PgFunction)  // all PG functions by ID
 	ApiIdMap           = make(map[uuid.UUID]types.Api)         // all APIs by ID
+	ClientEventIdMap   = make(map[uuid.UUID]types.ClientEvent) // all client events by ID
 )
 
 func GetModuleIdMapMeta() map[uuid.UUID]types.ModuleMeta {
@@ -318,6 +319,9 @@ func updateSchemaCache(moduleIds []uuid.UUID) error {
 		mod.ClientEvents, err = clientEvent.Get(mod.Id)
 		if err != nil {
 			return err
+		}
+		for _, ce := range mod.ClientEvents {
+			ClientEventIdMap[ce.Id] = ce
 		}
 
 		// get widgets

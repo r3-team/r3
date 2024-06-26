@@ -167,9 +167,9 @@ func CreateEventForNodes(nodeIds []uuid.UUID, content string, payload interface{
 		String: target.Address,
 		Valid:  target.Address != "",
 	}
-	device := pgtype.Text{
-		String: target.Device,
-		Valid:  target.Device != "",
+	device := pgtype.Int2{
+		Int16: int16(target.Device),
+		Valid: target.Device != 0,
 	}
 	loginId := pgtype.Int8{
 		Int64: target.LoginId,

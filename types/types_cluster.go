@@ -1,6 +1,8 @@
 package types
 
-import "github.com/gofrs/uuid"
+import (
+	"github.com/gofrs/uuid"
+)
 
 // cluster node
 type ClusterNode struct {
@@ -52,14 +54,14 @@ type ClusterEventDeviceFatClientRequestFile struct {
 
 // cluster event client target filter
 type ClusterEventTarget struct {
-	Address string `json:"address"` // address used to connect via websocket, "" = address is irrelevant
-	Device  string `json:"device"`  // device to affect ("browser", "fatClient"), "" = device is irrelevant
-	LoginId int64  `json:"loginId"` // login ID to affect, 0 = all logins
+	Address string                `json:"address"` // address used to connect via websocket, "" = address is irrelevant
+	Device  WebsocketClientDevice `json:"device"`  // device to affect ("browser", "fatClient"), 0 = device is irrelevant
+	LoginId int64                 `json:"loginId"` // login ID to affect, 0 = all logins
 }
 
 // cluster event to be processed by nodes and, in most cases, to be distributed to clients of cluster nodes
 type ClusterEvent struct {
+	Content string             `json:"content"` // collectionChanged, configChanged, kick, kickNoAdmin, renew, schemaLoading, schemaLoaded, ...
+	Payload interface{}        `json:"payload"` // content dependent payload
 	Target  ClusterEventTarget `json:"target"`  // target filter, to which clients this event is to be sent
-	Content string             `json:"content"` // collectionChanged, configChanged, kick, kickNoAdmin, renew, schemaLoading, schemaLoaded
-	Payload interface{}        `json:"payload"`
 }

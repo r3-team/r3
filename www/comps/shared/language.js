@@ -20,6 +20,7 @@ export function getCaptionMapName(content) {
 		case 'articleBody':      // fallthrough
 		case 'articleTitle':     return 'articleIdMap';     break;
 		case 'attributeTitle':   return 'attributeIdMap';   break;
+		case 'clientEventTitle': return 'clientEventIdMap'; break;
 		case 'columnTitle':      return 'columnIdMap';      break;
 		case 'fieldHelp':        // fallthrough
 		case 'fieldTitle':       return 'fieldIdMap';       break;

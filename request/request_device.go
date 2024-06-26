@@ -12,17 +12,6 @@ import (
 )
 
 // requests for browser clients
-func deviceBrowserCallJsFunction(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
-
-	var req struct {
-		JsFunctionId uuid.UUID     `json:"jsFunctionId"`
-		Arguments    []interface{} `json:"arguments"`
-	}
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	return nil, cluster.DeviceBrowserCallJsFunction(true, address, loginId, req.JsFunctionId, req.Arguments)
-}
 func deviceBrowserApplyCopiedFiles(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
 	// request file(s) to be copied (synchronized across all clients for login)
 	var req struct {
@@ -39,10 +28,7 @@ func deviceBrowserApplyCopiedFiles(reqJson json.RawMessage, loginId int64, addre
 // requests for fat clients
 func deviceFatClientExecKeystrokes(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
 	return nil, nil
-
 }
-
-// request file to be opened by fat client
 func deviceFatClientRequestFile(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
 	var req struct {
 		AttributeId uuid.UUID `json:"attributeId"`

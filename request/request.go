@@ -18,8 +18,9 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func ExecTransaction(ctxClient context.Context, address string, loginId int64, isAdmin bool, device string,
-	isNoAuth bool, reqTrans types.RequestTransaction, resTrans types.ResponseTransaction) types.ResponseTransaction {
+func ExecTransaction(ctxClient context.Context, address string, loginId int64, isAdmin bool,
+	device types.WebsocketClientDevice, isNoAuth bool, reqTrans types.RequestTransaction,
+	resTrans types.ResponseTransaction) types.ResponseTransaction {
 
 	// start transaction
 	ctx, ctxCancel := context.WithTimeout(ctxClient,
@@ -97,8 +98,9 @@ func ExecTransaction(ctxClient context.Context, address string, loginId int64, i
 	return resTrans
 }
 
-func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAdmin bool, device string,
-	isNoAuth bool, ressource string, action string, reqJson json.RawMessage) (interface{}, error) {
+func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAdmin bool,
+	device types.WebsocketClientDevice, isNoAuth bool, ressource string, action string,
+	reqJson json.RawMessage) (interface{}, error) {
 
 	// public requests: accessible to all
 	switch ressource {
@@ -118,13 +120,10 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		switch ressource {
 		case "clientEvent":
 			switch action {
+			case "exec":
+				return clientEventExec(reqJson, loginId, address)
 			case "get":
 				return loginClientEventGet(loginId)
-			}
-		case "device":
-			switch action {
-			case "browserCallJsFunction":
-				return deviceBrowserCallJsFunction(reqJson, loginId, address)
 			}
 		}
 		return nil, errors.New(handler.ErrUnauthorized)
@@ -278,9 +277,9 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "clientEvent":
 		switch action {
 		case "del":
-			return ClientEventDel_tx(tx, reqJson)
+			return clientEventDel_tx(tx, reqJson)
 		case "set":
-			return ClientEventSet_tx(tx, reqJson)
+			return clientEventSet_tx(tx, reqJson)
 		}
 	case "collection":
 		switch action {

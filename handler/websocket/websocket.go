@@ -22,16 +22,16 @@ import (
 
 // a websocket client
 type clientType struct {
-	address   string             // IP address, no port
-	admin     bool               // belongs to admin login?
-	ctx       context.Context    // global context for client requests
-	ctxCancel context.CancelFunc // to abort requests in case of disconnect
-	device    string             // client device
-	ioFailure atomic.Bool        // client failed to read/write
-	loginId   int64              // client login ID, 0 = not logged in yet
-	noAuth    bool               // logged in without authentication (public auth, username only)
-	write_mx  sync.Mutex         // to force sequential writes
-	ws        *websocket.Conn    // websocket connection
+	address   string                      // IP address, no port
+	admin     bool                        // belongs to admin login?
+	ctx       context.Context             // global context for client requests
+	ctxCancel context.CancelFunc          // to abort requests in case of disconnect
+	device    types.WebsocketClientDevice // client device type (browser, fatClient)
+	ioFailure atomic.Bool                 // client failed to read/write
+	loginId   int64                       // client login ID, 0 = not logged in yet
+	noAuth    bool                        // logged in without authentication (public auth, username only)
+	write_mx  sync.Mutex                  // to force sequential writes
+	ws        *websocket.Conn             // websocket connection
 }
 
 // a hub for all active websocket clients
@@ -184,7 +184,7 @@ func (hub *hubType) start() {
 
 				// skip if target filter does not apply to client
 				if (event.Target.Address != "" && event.Target.Address != client.address) ||
-					(event.Target.Device != "" && event.Target.Device != client.device) ||
+					(event.Target.Device != 0 && event.Target.Device != client.device) ||
 					(event.Target.LoginId != 0 && event.Target.LoginId != client.loginId) {
 					continue
 				}
