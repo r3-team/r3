@@ -228,3 +228,12 @@ func ErrSchemaUnknownPolicyAction(name string) error {
 func ErrSchemaUnknownClientEvent(id uuid.UUID) error {
 	return fmt.Errorf("unknown client event '%s'", id)
 }
+func ErrSchemaUnknownPgFunction(id uuid.UUID) error {
+	return fmt.Errorf("unknown backend function '%s'", id)
+}
+func ErrSchemaTriggerPgFunctionCall(id uuid.UUID) error {
+	return fmt.Errorf("backend function '%s' is a trigger function, it cannot be called directly", id)
+}
+func ErrSchemaBadFrontendExecPgFunctionCall(id uuid.UUID) error {
+	return fmt.Errorf("backend function '%s' may not be called from the frontend", id)
+}

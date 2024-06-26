@@ -578,13 +578,14 @@ type Tab struct {
 type ClientEvent struct {
 	Id              uuid.UUID   `json:"id"`
 	ModuleId        uuid.UUID   `json:"moduleId"`
-	Action          string      `json:"action"`          // action to execute when event is running (callJsFunction)
+	Action          string      `json:"action"`          // action to execute when event is running (callJsFunction, callPgFunction)
 	Arguments       []string    `json:"arguments"`       // arguments to supply to function call (clipboard, hostname, username, windowTitle)
 	Event           string      `json:"event"`           // events to react to (onConnect, onDisconnect, onHotkey)
 	HotkeyModifier1 string      `json:"hotkeyModifier1"` // CTRL, ALT, SHIFT
 	HotkeyModifier2 string      `json:"hotkeyModifier2"` // CTRL, ALT, SHIFT
 	HotkeyChar      string      `json:"hotkeyChar"`
 	JsFunctionId    pgtype.UUID `json:"jsFunctionId"`
+	PgFunctionId    pgtype.UUID `json:"pgFunctionId"`
 	Captions        CaptionMap  `json:"captions"`
 }
 type Widget struct {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"r3/cache"
 	"r3/db"
+	"r3/handler"
 	"r3/schema/pgFunction"
 	"r3/types"
 	"strings"
@@ -40,13 +41,13 @@ func PgFunctionExec_tx(tx pgx.Tx, reqJson json.RawMessage, onlyFrontendFnc bool)
 
 	fnc, exists := cache.PgFunctionIdMap[req.Id]
 	if !exists {
-		return nil, fmt.Errorf("backend function (ID %s) does not exist", req.Id)
+		return nil, handler.ErrSchemaUnknownPgFunction(req.Id)
 	}
 	if fnc.IsTrigger {
-		return nil, fmt.Errorf("backend function (ID %s) is a trigger function, it cannot be called directly", req.Id)
+		return nil, handler.ErrSchemaTriggerPgFunctionCall(req.Id)
 	}
 	if onlyFrontendFnc && !fnc.IsFrontendExec {
-		return nil, fmt.Errorf("backend function (ID %s) may not be called from the frontend", req.Id)
+		return nil, handler.ErrSchemaBadFrontendExecPgFunctionCall(req.Id)
 	}
 
 	mod := cache.ModuleIdMap[fnc.ModuleId]

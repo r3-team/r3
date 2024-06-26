@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"r3/cache"
 	"r3/cluster"
+	"r3/db"
 	"r3/handler"
 	"r3/schema/clientEvent"
 	"r3/types"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -46,6 +48,35 @@ func clientEventExec(reqJson json.RawMessage, loginId int64, address string) (in
 	if ce.Action == "callJsFunction" && ce.JsFunctionId.Valid {
 		return nil, cluster.DeviceBrowserCallJsFunction(true, address, loginId, ce.JsFunctionId.Bytes, req.Arguments)
 	}
+	if ce.Action == "callPgFunction" && ce.PgFunctionId.Valid {
+
+		cache.Schema_mx.RLock()
+		fnc, exists := cache.PgFunctionIdMap[ce.PgFunctionId.Bytes]
+		cache.Schema_mx.RUnlock()
+
+		if !exists {
+			return nil, handler.ErrSchemaUnknownPgFunction(ce.PgFunctionId.Bytes)
+		}
+		if fnc.IsTrigger {
+			return nil, handler.ErrSchemaTriggerPgFunctionCall(ce.PgFunctionId.Bytes)
+		}
+
+		cache.Schema_mx.RLock()
+		mod := cache.ModuleIdMap[fnc.ModuleId]
+		cache.Schema_mx.RUnlock()
+
+		placeholders := make([]string, 0)
+		for i := range req.Arguments {
+			placeholders = append(placeholders, fmt.Sprintf("$%d", i+1))
+		}
+
+		var returnIf interface{}
+		err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`SELECT "%s"."%s"(%s)`, mod.Name, fnc.Name, strings.Join(placeholders, ",")),
+			req.Arguments...).Scan(&returnIf)
+
+		return nil, err
+	}
+
 	return nil, fmt.Errorf("invalid client event")
 }
 

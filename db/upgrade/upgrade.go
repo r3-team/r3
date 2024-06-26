@@ -226,7 +226,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ADD COLUMN target_login_id INTEGER;
 
 			-- client events
-			CREATE TYPE app.client_event_action          AS ENUM ('callJsFunction');
+			CREATE TYPE app.client_event_action          AS ENUM ('callJsFunction', 'callPgFunction');
 			CREATE TYPE app.client_event_argument        AS ENUM ('clipboard', 'hostname', 'username', 'windowTitle');
 			CREATE TYPE app.client_event_event           AS ENUM ('onConnect', 'onDisconnect', 'onHotkey');
 			CREATE TYPE app.client_event_hotkey_modifier AS ENUM ('ALT', 'CTRL', 'SHIFT');
@@ -241,9 +241,15 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				hotkey_modifier2 app.client_event_hotkey_modifier,
 				hotkey_char character(1) COLLATE pg_catalog."default",
 				js_function_id uuid,
+				pg_function_id uuid,
 				CONSTRAINT client_event_pkey PRIMARY KEY (id),
 				CONSTRAINT client_event_js_function_id_fkey FOREIGN KEY (js_function_id)
 					REFERENCES app.js_function (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT client_event_pg_function_id_fkey FOREIGN KEY (pg_function_id)
+					REFERENCES app.pg_function (id) MATCH SIMPLE
 					ON UPDATE NO ACTION
 					ON DELETE NO ACTION
 					DEFERRABLE INITIALLY DEFERRED,
@@ -254,8 +260,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					DEFERRABLE INITIALLY DEFERRED
 			);
 
-			CREATE INDEX IF NOT EXISTS fki_client_event_module_fkey      ON app.client_event USING btree (module_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_client_event_module_fkey      ON app.client_event USING btree (module_id      ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_client_event_js_function_fkey ON app.client_event USING btree (js_function_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_client_event_pg_function_fkey ON app.client_event USING btree (pg_function_id ASC NULLS LAST);
 
 			-- client events, login settings
 			CREATE TABLE IF NOT EXISTS instance.login_client_event(
