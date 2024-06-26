@@ -99,6 +99,7 @@
 		"bright":"Bright",
 		"busy":"工作中 - 点击此处中止",
 		"category":"类别",
+		"clientEvents":"Client application events",
 		"collection":"收藏",
 		"collections":"收藏",
 		"columns":"Columns",

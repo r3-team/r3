@@ -23,6 +23,7 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 
 	caps.ArticleIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.AttributeIdMap = make(map[uuid.UUID]types.CaptionMap)
+	caps.ClientEventIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.ColumnIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.FieldIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.FormIdMap = make(map[uuid.UUID]types.CaptionMap)
@@ -40,6 +41,7 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 	sqlSelect := `SELECT CASE
 		WHEN article_id      IS NOT NULL THEN 'article'
 		WHEN attribute_id    IS NOT NULL THEN 'attribute'
+		WHEN client_event_id IS NOT NULL THEN 'clientEvent'
 		WHEN column_id       IS NOT NULL THEN 'column'
 		WHEN field_id        IS NOT NULL THEN 'field'
 		WHEN form_action_id  IS NOT NULL THEN 'formAction'
@@ -57,6 +59,7 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 	COALESCE(
 		article_id,
 		attribute_id,
+		client_event_id,
 		column_id,
 		field_id,
 		form_id,
@@ -75,7 +78,7 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 	language_code,
 	value`
 
-	// fetch all or captions only for a single module
+	// fetch all or captions for a single module
 	var err error
 	var rows pgx.Rows
 	if !id.Valid {
@@ -132,15 +135,16 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 					-- most queries do not: form query, collection query, column sub query, filter sub query
 				)
 			)
-			OR article_id     IN (SELECT id FROM app.article     WHERE module_id = $10)
-			OR form_id        IN (SELECT id FROM app.form        WHERE module_id = $11)
-			OR js_function_id IN (SELECT id FROM app.js_function WHERE module_id = $12)
-			OR login_form_id  IN (SELECT id FROM app.login_form  WHERE module_id = $13)
-			OR menu_id        IN (SELECT id FROM app.menu        WHERE module_id = $14)
-			OR pg_function_id IN (SELECT id FROM app.pg_function WHERE module_id = $15)
-			OR role_id        IN (SELECT id FROM app.role        WHERE module_id = $16)
-			OR widget_id      IN (SELECT id FROM app.widget      WHERE module_id = $17)
-		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
+			OR article_id      IN (SELECT id FROM app.article      WHERE module_id = $10)
+			OR client_event_id IN (SELECT id FROM app.client_event WHERE module_id = $11)
+			OR form_id         IN (SELECT id FROM app.form         WHERE module_id = $12)
+			OR js_function_id  IN (SELECT id FROM app.js_function  WHERE module_id = $13)
+			OR login_form_id   IN (SELECT id FROM app.login_form   WHERE module_id = $14)
+			OR menu_id         IN (SELECT id FROM app.menu         WHERE module_id = $15)
+			OR pg_function_id  IN (SELECT id FROM app.pg_function  WHERE module_id = $16)
+			OR role_id         IN (SELECT id FROM app.role         WHERE module_id = $17)
+			OR widget_id       IN (SELECT id FROM app.widget       WHERE module_id = $18)
+		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
 	}
 
 	if err != nil {
@@ -165,6 +169,8 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 			captionMap, exists = caps.ArticleIdMap[entityId]
 		case "attribute":
 			captionMap, exists = caps.AttributeIdMap[entityId]
+		case "clientEvent":
+			captionMap, exists = caps.ClientEventIdMap[entityId]
 		case "column":
 			captionMap, exists = caps.ColumnIdMap[entityId]
 		case "field":
@@ -203,6 +209,8 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 			caps.ArticleIdMap[entityId] = captionMap
 		case "attribute":
 			caps.AttributeIdMap[entityId] = captionMap
+		case "clientEvent":
+			caps.ClientEventIdMap[entityId] = captionMap
 		case "column":
 			caps.ColumnIdMap[entityId] = captionMap
 		case "field":

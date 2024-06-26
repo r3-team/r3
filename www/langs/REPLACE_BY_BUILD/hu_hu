@@ -99,6 +99,7 @@
 		"bright":"Bright",
 		"busy":"Folyamatban - Kattintson ide a megszakításhoz",
 		"category":"Kategória",
+		"clientEvents":"Client application events",
 		"collection":"Gyűjtemény",
 		"collections":"Gyűjtemények",
 		"columns":"Columns",

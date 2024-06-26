@@ -5,6 +5,7 @@ import "github.com/gofrs/uuid"
 type CaptionMapsAll struct {
 	ArticleIdMap     map[uuid.UUID]CaptionMap `json:"articleIdMap"`
 	AttributeIdMap   map[uuid.UUID]CaptionMap `json:"attributeIdMap"`
+	ClientEventIdMap map[uuid.UUID]CaptionMap `json:"clientEventIdMap"`
 	ColumnIdMap      map[uuid.UUID]CaptionMap `json:"columnIdMap"`
 	FieldIdMap       map[uuid.UUID]CaptionMap `json:"fieldIdMap"`
 	FormIdMap        map[uuid.UUID]CaptionMap `json:"formIdMap"`

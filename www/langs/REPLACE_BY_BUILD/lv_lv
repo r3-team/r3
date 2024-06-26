@@ -99,6 +99,7 @@
 		"bright":"Bright",
 		"busy":"Strādā - Noklikšķiniet šeit, lai pārtrauktu",
 		"category":"Kategorija",
+		"clientEvents":"Client application events",
 		"collection":"Kolekcija",
 		"collections":"Collections",
 		"columns":"Columns",

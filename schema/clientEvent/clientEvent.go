@@ -3,6 +3,7 @@ package clientEvent
 import (
 	"r3/db"
 	"r3/schema"
+	"r3/schema/caption"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -34,6 +35,10 @@ func Get(moduleId uuid.UUID) ([]types.ClientEvent, error) {
 		if err := rows.Scan(&e.Id, &e.Action, &e.Event, &e.HotkeyModifier1,
 			&e.HotkeyModifier2, &e.HotkeyChar, &e.JsFunctionArgs, &e.JsFunctionId); err != nil {
 
+			return clientEvents, err
+		}
+		e.Captions, err = caption.Get("client_event", e.Id, []string{"clientEventTitle"})
+		if err != nil {
 			return clientEvents, err
 		}
 		clientEvents = append(clientEvents, e)
@@ -72,5 +77,5 @@ func Set_tx(tx pgx.Tx, ce types.ClientEvent) error {
 			return err
 		}
 	}
-	return nil
+	return caption.Set_tx(tx, ce.Id, ce.Captions)
 }

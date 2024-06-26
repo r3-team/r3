@@ -99,6 +99,7 @@
 		"bright":"Bright",
 		"busy":"En cours - Cliquez ici pour annuler",
 		"category":"Catégorie",
+		"clientEvents":"Client application events",
 		"collection":"Collection",
 		"collections":"Collections",
 		"columns":"Columns",

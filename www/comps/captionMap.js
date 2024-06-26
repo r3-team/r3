@@ -645,6 +645,16 @@ let MyCaptionMap = {
 							:name="capGen.queryChoices"
 							:readonly="readonly"
 						/>
+						<!-- client events -->
+						<my-caption-map-items icon="screen.png"
+							@update="storeChange"
+							:isCustom="isCustom"
+							:items="captionsClientEvents"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
+							:name="capGen.clientEvents"
+							:readonly="readonly"
+						/>
 					</tbody>
 				</table>
 				
@@ -734,6 +744,13 @@ let MyCaptionMap = {
 				out.push(s.makeItem(id,s.relationIdMap[id].name,null,relIdMap[id]));
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
+		},
+		captionsClientEvents:(s) => {
+			let out = [];
+			for(const ce of s.module.clientEvents) {
+				out.push(s.makeItem(ce.id,'-',s.captionMap.clientEventIdMap[id],[]));
+			}
+			return out;
 		},
 		captionsCollections:(s) => {
 			let collectionIdMap = {};

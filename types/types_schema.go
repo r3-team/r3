@@ -585,6 +585,7 @@ type ClientEvent struct {
 	HotkeyChar      string      `json:"hotkeyChar"`
 	JsFunctionArgs  []string    `json:"jsFunctionArgs"`
 	JsFunctionId    pgtype.UUID `json:"jsFunctionId"`
+	Captions        CaptionMap  `json:"captions"`
 }
 type Widget struct {
 	Id         uuid.UUID          `json:"id"`
