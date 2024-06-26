@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -53,6 +54,13 @@ func Set_tx(tx pgx.Tx, ce types.ClientEvent) error {
 	known, err := schema.CheckCreateId_tx(tx, &ce.Id, "client_event", "id")
 	if err != nil {
 		return err
+	}
+
+	if ce.Action != "callJsFunction" {
+		ce.JsFunctionId = pgtype.UUID{}
+	}
+	if ce.Action != "callPgFunction" {
+		ce.PgFunctionId = pgtype.UUID{}
 	}
 
 	if known {

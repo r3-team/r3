@@ -268,9 +268,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE TABLE IF NOT EXISTS instance.login_client_event(
 				login_id integer NOT NULL,
 				client_event_id uuid NOT NULL,
-				hotkey_modifier1 app.client_event_hotkey_modifier NOT NULL,
+				hotkey_modifier1 app.client_event_hotkey_modifier,
 				hotkey_modifier2 app.client_event_hotkey_modifier,
-				hotkey_char character(1) COLLATE pg_catalog."default" NOT NULL,
+				hotkey_char character(1) COLLATE pg_catalog."default",
 				CONSTRAINT login_client_event_pkey PRIMARY KEY (login_id, client_event_id),
 				CONSTRAINT login_client_event_client_event_id_fkey FOREIGN KEY (client_event_id)
 					REFERENCES app.client_event (id) MATCH SIMPLE

@@ -91,6 +91,7 @@
 		"applications":"应用程序",
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
+		"arguments":"Arguments",
 		"articles":"帮助文章",
 		"attribute":"属性",
 		"attributes":"属性",
@@ -118,6 +119,7 @@
 		"details":"详细信息",
 		"displayed":"显示的",
 		"errorTitle":"错误",
+		"event":"Event",
 		"everything":"全部",
 		"field":"字段",
 		"files":"文件",
@@ -126,6 +128,7 @@
 		"forms":"表单",
 		"help":"帮助",
 		"home":"主页",
+		"hotkey":"Hotkey",
 		"icon":"图标",
 		"icons":"图标",
 		"id":"ID",
@@ -141,6 +144,7 @@
 		"inputTooFewFiles":"文件太少",
 		"inputTooManyFiles":"文件太多",
 		"interval":"间隔",
+		"jsFunction":"Function (front)",
 		"jsFunctions":"函数（前端）",
 		"label":"标签",
 		"language":"语言",
@@ -164,6 +168,7 @@
 		"options":"Options",
 		"order":"顺序",
 		"password":"密码",
+		"pgFunction":"Function (back)",
 		"pgFunctions":"函数（后端）",
 		"preview":"预览",
 		"properties":"属性",
@@ -853,6 +858,31 @@
 			"titleHint":"标题可以在可用应用程序语言中进行翻译。如果未被字段或列标题覆盖，则会显示给用户。",
 			"usedFor":"数值类型"
 		},
+		"clientEvent":{
+			"action":{
+				"callJsFunction":"Execute frontend function",
+				"callPgFunction":"Execute backend function"
+			},
+			"arguments":{
+				"clipboard":"Clipboard content, null if empty",
+				"hostname":"Hostname of computer running the client",
+				"username":"Username of currently logged in user",
+				"windowTitle":"Title of currently open window"
+			},
+			"dialog":{
+				"delete":"Are you sure you want to delete this client application event?"
+			},
+			"event":{
+				"onConnect":"Client connects",
+				"onDisconnect":"Client disconnects",
+				"onHotkey":"Client reacts to hotkey"
+			},
+			"argumentsHint":"Arguments are provided by the client application to the chosen function, in the here defined order.",
+			"hotkeyHint":"Default hotkey that this client event listens to. Can be overwritten by users in their personal settings.",
+			"title":"Client application event",
+			"titleHint":"Visible to users in their personal settings.",
+			"titleNew":"New client application event"
+		},
 		"collection":{
 			"dialog":{
 				"delete":"您确定要删除此集合吗？"
@@ -1292,6 +1322,7 @@
 				"repo":"从仓库安装",
 				"versionCreate":"创建新版本"
 			},
+			"clientEventsHint":"REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client application events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
 			"color":"颜色",
 			"colorHint":"主要应用颜色 - 如果未被定制或用户设置覆盖，将显示在标题和菜单中。系统样式经过优化，适用于淡化的、偏暗的颜色（深淡色）。",
 			"dependsOn":"构建于",
@@ -1926,6 +1957,14 @@
 			"fileSize":"文件大小",
 			"tooLarge":"无法上传文件'{NAME}'，最大允许大小为 {SIZE}。",
 			"unsaved":"（未保存）"
+		},
+		"hotkey":{
+			"modifier":{
+				"ALT":"alt",
+				"CTRL":"ctrl",
+				"SHIFT":"shift"
+			},
+			"charHint":"1 character (a-z, 0-9)"
 		},
 		"iframe":{
 			"empty":"未设置 URL - 没有内容可显示"

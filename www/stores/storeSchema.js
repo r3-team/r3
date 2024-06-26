@@ -10,6 +10,7 @@ const MyStoreSchema = {
 		apiIdMap:{},
 		articleIdMap:{},
 		attributeIdMap:{},
+		clientEventIdMap:{},
 		collectionIdMap:{},
 		formIdMap:{},
 		iconIdMap:{},
@@ -123,6 +124,11 @@ const MyStoreSchema = {
 					state.apiIdMap[api.id] = api;
 				}
 				
+				// process client events
+				for(const clientEvent of mod.clientEvents) {
+					state.clientEventIdMap[clientEvent.id] = clientEvent;
+				}
+				
 				// process widgets
 				for(const widget of mod.widgets) {
 					state.widgetIdMap[widget.id] = widget;
@@ -151,6 +157,7 @@ const MyStoreSchema = {
 		apiIdMap:           (state) => state.apiIdMap,
 		articleIdMap:       (state) => state.articleIdMap,
 		attributeIdMap:     (state) => state.attributeIdMap,
+		clientEventIdMap:   (state) => state.clientEventIdMap,
 		collectionIdMap:    (state) => state.collectionIdMap,
 		formIdMap:          (state) => state.formIdMap,
 		formIdMapMenu:      (state) => state.formIdMapMenu,

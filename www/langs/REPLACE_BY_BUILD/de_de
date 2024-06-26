@@ -91,6 +91,7 @@
 		"applications":"Anwendungen",
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
+		"arguments":"Argumente",
 		"articles":"Hilfe-Artikel",
 		"attribute":"Attribut",
 		"attributes":"Attribute",
@@ -118,6 +119,7 @@
 		"details":"Details",
 		"displayed":"Angezeigt",
 		"errorTitle":"Fehler",
+		"event":"Ereignis",
 		"everything":"Alles",
 		"field":"Feld",
 		"files":"Dateien",
@@ -125,6 +127,7 @@
 		"form":"Formular",
 		"forms":"Formulare",
 		"home":"Start",
+		"hotkey":"Hotkey",
 		"help":"Hilfe",
 		"icon":"Icon",
 		"icons":"Icons",
@@ -141,6 +144,7 @@
 		"inputTooFewFiles":"Zu wenige Dateien",
 		"inputTooManyFiles":"Zu viele Dateien",
 		"interval":"Intervall",
+		"jsFunction":"Funktion (front)",
 		"jsFunctions":"Funktionen (front)",
 		"label":"Beschreibung",
 		"language":"Sprache",
@@ -164,6 +168,7 @@
 		"options":"Optionen",
 		"order":"Reihenf.",
 		"password":"Passwort",
+		"pgFunction":"Funktion (back)",
 		"pgFunctions":"Funktionen (back)",
 		"preview":"Vorschau",
 		"properties":"Eigenschaften",
@@ -853,6 +858,31 @@
 			"titleHint":"Der Titel kann in die verfügbaren Anwendungssprachen übersetzt werden. Er wird den Benutzern angezeigt, wenn er nicht durch einen Feld- oder Spaltentitel überschrieben wird.",
 			"usedFor":"Werttyp"
 		},
+		"clientEvent":{
+			"action":{
+				"callJsFunction":"Frontend-Funktion ausführen",
+				"callPgFunction":"Backend-Funktion ausführen"
+			},
+			"arguments":{
+				"clipboard":"Inhalt der Zwischenablage, null wenn leer",
+				"hostname":"Hostname des Client-Computers",
+				"username":"Benutzername des aktuell eingeloggten Benutzers",
+				"windowTitle":"Titel des aktuell offenen Fensters"
+			},
+			"dialog":{
+				"delete":"Bist du sicher, dass du dieses Client-Anwendungs-Ereignis löschen möchtest?"
+			},
+			"event":{
+				"onConnect":"Client verbindet sich",
+				"onDisconnect":"Client trennt sich",
+				"onHotkey":"Client reagiert auf Hotkey"
+			},
+			"argumentsHint":"Argumente werden von der Client-Anwendung der Funktion, in der hier ausgewählten Reihenfolge übergeben.",
+			"hotkeyHint":"Standard-Hotkey auf welchen dieses Ereignis reagiert. Kann von Benutzern in den persönlichen Einstellungen überschrieben werden.",
+			"title":"Client-Anwendungs-Ereignis",
+			"titleHint":"Sichtbar für Benutzer in ihren persönlichen Einstellungen.",
+			"titleNew":"Neues Client-Anwendungs-Ereignis"
+		},
 		"collection":{
 			"dialog":{
 				"delete":"Bist du sicher, dass du diese Sammlung löschen möchtest?"
@@ -1292,6 +1322,7 @@
 				"repo":"Vom Repository installieren",
 				"versionCreate":"Neue Version erzeugen"
 			},
+			"clientEventsHint":"REI3 hat eine Client-Anwendung, welche Benutzer über ihre persönlichen Einstellungen installieren können. Wenn diese läuft, kann sie in REI3 hochgeladene Dateien mit lokaler Software öffnen. Sie kann auch auf bestimmte Ereignisse wie z. B. Hotkey-Eingaben reagieren, indem sogenannte 'Client-Anwendungs-Ereignisse' definiert werden. Diese Ereignisse werden idR. genutzt, um Informationen vom Client zu REI3 zu schicken - entweder um Daten zu aktualisieren mithilfe von Backend-Funktionen oder mit einer offenen REI3-Browser-Sitzung zu interagieren mithilfe von Frontend-Funktionen.",
 			"color":"Farbe",
 			"colorHint":"Primäre Anwendungsfarbe - sichtbar in der obersten Leiste und Menü, wenn nicht durch Customizing und/oder Benutzereinstellung überschrieben. Die Systemdarstellung ist optimiert für ausgewaschene, dunklere Farben (dunkles Pastell).",
 			"dependsOn":"Baut auf",
@@ -1926,6 +1957,14 @@
 			"fileSize":"Dateigröße",
 			"tooLarge":"Datei \"{NAME}\" kann nicht hochgeladen werden, maximal erlaubte Größe ist {SIZE}.",
 			"unsaved":"(ungespeichert)"
+		},
+		"hotkey":{
+			"modifier":{
+				"ALT":"alt",
+				"CTRL":"strg",
+				"SHIFT":"umschalt"
+			},
+			"charHint":"1 Zeichen (a-z, 0-9)"
 		},
 		"iframe":{
 			"empty":"Keine URL gesetzt - nichts anzuzeigen"

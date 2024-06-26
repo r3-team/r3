@@ -91,6 +91,7 @@
 		"applications":"Applicazioni",
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
+		"arguments":"Arguments",
 		"articles":"Help articles",
 		"attribute":"Attribute",
 		"attributes":"Attributes",
@@ -118,6 +119,7 @@
 		"details":"Details",
 		"displayed":"Displayed",
 		"errorTitle":"Errore",
+		"event":"Event",
 		"everything":"Everything",
 		"field":"Field",
 		"files":"Files",
@@ -126,6 +128,7 @@
 		"forms":"Moduli",
 		"help":"Help",
 		"home":"Home",
+		"hotkey":"Hotkey",
 		"icon":"Icona",
 		"icons":"Icone",
 		"id":"ID",
@@ -141,6 +144,7 @@
 		"inputTooFewFiles":"Troppo pochi file",
 		"inputTooManyFiles":"Troppi file",
 		"interval":"Interval",
+		"jsFunction":"Function (front)",
 		"jsFunctions":"Funzioni (front)",
 		"label":"Label",
 		"language":"Language",
@@ -164,6 +168,7 @@
 		"options":"Options",
 		"order":"Ordine",
 		"password":"Password",
+		"pgFunction":"Function (back)",
 		"pgFunctions":"Funzioni (back)",
 		"preview":"Anteprima",
 		"properties":"Properties",
@@ -853,6 +858,31 @@
 			"titleHint":"The title can be translated in available application languages. It is shown to users if not overwritten by a field or column title.",
 			"usedFor":"Value type"
 		},
+		"clientEvent":{
+			"action":{
+				"callJsFunction":"Execute frontend function",
+				"callPgFunction":"Execute backend function"
+			},
+			"arguments":{
+				"clipboard":"Clipboard content, null if empty",
+				"hostname":"Hostname of computer running the client",
+				"username":"Username of currently logged in user",
+				"windowTitle":"Title of currently open window"
+			},
+			"dialog":{
+				"delete":"Are you sure you want to delete this client application event?"
+			},
+			"event":{
+				"onConnect":"Client connects",
+				"onDisconnect":"Client disconnects",
+				"onHotkey":"Client reacts to hotkey"
+			},
+			"argumentsHint":"Arguments are provided by the client application to the chosen function, in the here defined order.",
+			"hotkeyHint":"Default hotkey that this client event listens to. Can be overwritten by users in their personal settings.",
+			"title":"Client application event",
+			"titleHint":"Visible to users in their personal settings.",
+			"titleNew":"New client application event"
+		},
 		"collection":{
 			"dialog":{
 				"delete":"Sicuro di voler cancellare questa collezione?"
@@ -1290,6 +1320,7 @@
 				"repo":"Install from repository",
 				"versionCreate":"Crea nuova versione"
 			},
+			"clientEventsHint":"REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client application events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
 			"color":"Colore",
 			"colorHint":"Primary application color - shown in the header and menu if not overwritten by customizing and/or user settings. The system styles are optimized for washed out, darkish colors (dark pastel).",
 			"dependsOn":"Builds on",
@@ -1924,6 +1955,14 @@
 			"fileSize":"File size",
 			"tooLarge":"Impossibile caricare il file '{NAME}', la dimensione massima consentita è {SIZE}.",
 			"unsaved":"(unsaved)"
+		},
+		"hotkey":{
+			"modifier":{
+				"ALT":"alt",
+				"CTRL":"ctrl",
+				"SHIFT":"shift"
+			},
+			"charHint":"1 character (a-z, 0-9)"
 		},
 		"iframe":{
 			"empty":"No URL set - nothing to show"

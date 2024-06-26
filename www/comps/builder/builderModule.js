@@ -1,4 +1,5 @@
 import MyBuilderCaption      from './builderCaption.js';
+import MyBuilderClientEvent  from './builderClientEvent.js';
 import MyBuilderIconInput    from './builderIconInput.js';
 import srcBase64Icon         from '../shared/image.js';
 import {getDependentModules} from '../shared/builder.js';
@@ -68,6 +69,7 @@ let MyBuilderModule = {
 	name:'my-builder-module',
 	components:{
 		MyBuilderCaption,
+		MyBuilderClientEvent,
 		MyBuilderIconInput,
 		MyBuilderModuleStartForm,
 		MyInputColor,
@@ -295,6 +297,50 @@ let MyBuilderModule = {
 					<td>{{ capApp.iconPwaHint }}</td>
 				</tr>
 				
+				<tr>
+					<td colspan="2">
+						<div class="column gap">
+							<span><b>{{ capGen.clientEvents }}</b></span>
+
+							<div class="generic-entry-list height-large">
+								<div class="entry"
+									v-if="!readonly"
+									@click="clientEventIdEdit = null"
+									:class="{ clickable:!readonly }"
+								>
+									<div class="row gap centered">
+										<img class="icon" src="images/add.png" />
+										<span>{{ capGen.button.new }}</span>
+									</div>
+								</div>
+								
+								<div class="entry clickable"
+									@click="clientEventIdEdit = ce.id"
+									v-for="ce in module.clientEvents"
+								>
+									<div class="row centered gap">
+										<div class="lines">
+											<span>{{ ce.captions.clientEventTitle[builderLanguage] }}</span>
+											<span class="subtitle">[{{ clientEventSubtitle(ce) }}]</span>
+										</div>
+									</div>
+								</div>
+								<my-builder-client-event
+									v-if="clientEventIdEdit !== false"
+									@close="clientEventIdEdit = false"
+									@nextLanguage="$emit('nextLanguage')"
+									@newRecord="clientEventIdEdit = null"
+									:builderLanguage="builderLanguage"
+									:id="clientEventIdEdit"
+									:module="module"
+									:readonly="readonly"
+								/>
+							</div>
+						</div>
+					</td>
+					<td>{{ capApp.clientEventsHint }}</td>
+				</tr>
+				
 				<tr><td colspan="3"><b>{{ capApp.release }}</b></td></tr>
 				<tr>
 					<td>{{ capApp.releaseDate }}</td>
@@ -325,7 +371,7 @@ let MyBuilderModule = {
 	data() {
 		return {
 			// inputs
-			parentId:null,
+			color1:'217A4D',
 			formId:null,
 			iconId:null,
 			iconIdPwa1:null,
@@ -333,7 +379,7 @@ let MyBuilderModule = {
 			name:'',
 			namePwa:null,
 			namePwaShort:null,
-			color1:'217A4D',
+			parentId:null,
 			position:0,
 			releaseBuild:0,
 			releaseBuildApp:0,
@@ -348,6 +394,7 @@ let MyBuilderModule = {
 			},
 			
 			// states
+			clientEventIdEdit:false,
 			moduleIdDependsOnInput:null,
 			showDependencies:false,
 			showLanguages:false,
@@ -381,7 +428,10 @@ let MyBuilderModule = {
 		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap:     (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:    (s) => s.$store.getters['schema/attributeIdMap'],
+		jsFunctionIdMap:   (s) => s.$store.getters['schema/jsFunctionIdMap'],
+		pgFunctionIdMap:   (s) => s.$store.getters['schema/pgFunctionIdMap'],
 		capApp:            (s) => s.$store.getters.captions.builder.module,
+		capAppClientEvent: (s) => s.$store.getters.captions.builder.clientEvent,
 		capGen:            (s) => s.$store.getters.captions.generic
 	},
 	watch:{
@@ -440,6 +490,17 @@ let MyBuilderModule = {
 				this.dependsOn.push(moduleId);
 			else if(pos !== -1 && !state)
 				this.dependsOn.splice(pos,1);
+		},
+
+		// presentation
+		clientEventSubtitle(clientEvent) {
+			if(clientEvent.action === 'callJsFunction')
+				return `${this.capAppClientEvent.action.callJsFunction}: ${this.jsFunctionIdMap[clientEvent.jsFunctionId].name}()`;
+
+			if(clientEvent.action === 'callPgFunction')
+				return `${this.capAppClientEvent.action.callPgFunction}: ${this.pgFunctionIdMap[clientEvent.pgFunctionId].name}()`;
+
+			return '-';
 		},
 		
 		// backend calls

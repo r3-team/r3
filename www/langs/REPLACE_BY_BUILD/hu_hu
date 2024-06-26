@@ -91,6 +91,7 @@
 		"applications":"Alkalmazások",
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
+		"arguments":"Arguments",
 		"articles":"Súgó cikkek",
 		"attribute":"Attribútum",
 		"attributes":"Attributes",
@@ -118,6 +119,7 @@
 		"details":"Részletek",
 		"displayed":"Megjelenített",
 		"errorTitle":"Hiba",
+		"event":"Event",
 		"everything":"Everything",
 		"field":"Field",
 		"files":"Fájlok",
@@ -125,6 +127,7 @@
 		"form":"Űrlap",
 		"forms":"Űrlapok",
 		"home":"Kezdőlap",
+		"hotkey":"Hotkey",
 		"help":"Segítség",
 		"icon":"Ikon",
 		"icons":"Ikonok",
@@ -141,6 +144,7 @@
 		"inputTooFewFiles":"Túl kevés fájl",
 		"inputTooManyFiles":"Túl sok fájl",
 		"interval":"Intervallum",
+		"jsFunction":"Function (front)",
 		"jsFunctions":"Függvények (elöl)",
 		"label":"Label",
 		"language":"Language",
@@ -164,6 +168,7 @@
 		"options":"Options",
 		"order":"Sorrend",
 		"password":"Jelszó",
+		"pgFunction":"Function (back)",
 		"pgFunctions":"Függvények (hátul)",
 		"preview":"Előnézet",
 		"properties":"Tulajdonságok",
@@ -853,6 +858,31 @@
 			"titleHint":"A címet el lehet fordítani az elérhető alkalmazásnyelvekre. Megjelenik a felhasználóknak, ha nem kerül felülírásra egy mező vagy oszlop címe által.",
 			"usedFor":"Érték Típus"
 		},
+		"clientEvent":{
+			"action":{
+				"callJsFunction":"Execute frontend function",
+				"callPgFunction":"Execute backend function"
+			},
+			"arguments":{
+				"clipboard":"Clipboard content, null if empty",
+				"hostname":"Hostname of computer running the client",
+				"username":"Username of currently logged in user",
+				"windowTitle":"Title of currently open window"
+			},
+			"dialog":{
+				"delete":"Are you sure you want to delete this client application event?"
+			},
+			"event":{
+				"onConnect":"Client connects",
+				"onDisconnect":"Client disconnects",
+				"onHotkey":"Client reacts to hotkey"
+			},
+			"argumentsHint":"Arguments are provided by the client application to the chosen function, in the here defined order.",
+			"hotkeyHint":"Default hotkey that this client event listens to. Can be overwritten by users in their personal settings.",
+			"title":"Client application event",
+			"titleHint":"Visible to users in their personal settings.",
+			"titleNew":"New client application event"
+		},
 		"collection":{
 			"dialog":{
 				"delete":"Biztos vagy benne, hogy törölni szeretnéd ezt a gyűjteményt?"
@@ -1292,6 +1322,7 @@
 				"repo":"Repository-ból telepítés",
 				"versionCreate":"Új verzió létrehozása"
 			},
+			"clientEventsHint":"REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client application events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
 			"color":"Szín",
 			"colorHint":"Az alap alkalmazásszín - látható a felső sávban és a menüben, ha nincs testreszabva vagy felhasználói beállításokkal felülbírálva. A rendszeres megjelenítés ki van optimalizálva a halványabb, sötétebb színekhez (sötét pasztell).",
 			"dependsOn":"Alapul",
@@ -1926,6 +1957,14 @@
 			"fileSize":"Fájl méret",
 			"tooLarge":"A(z) \"{NAME}\" fájlt nem lehet feltölteni, a maximálisan engedélyezett méret: {SIZE}.",
 			"unsaved":"(nem mentett)"
+		},
+		"hotkey":{
+			"modifier":{
+				"ALT":"alt",
+				"CTRL":"ctrl",
+				"SHIFT":"shift"
+			},
+			"charHint":"1 character (a-z, 0-9)"
 		},
 		"iframe":{
 			"empty":"Nincs URL beállítva - nincs megjelenítendő tartalom"
