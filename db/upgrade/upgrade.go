@@ -229,7 +229,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE TYPE app.client_event_action          AS ENUM ('callJsFunction', 'callPgFunction');
 			CREATE TYPE app.client_event_argument        AS ENUM ('clipboard', 'hostname', 'username', 'windowTitle');
 			CREATE TYPE app.client_event_event           AS ENUM ('onConnect', 'onDisconnect', 'onHotkey');
-			CREATE TYPE app.client_event_hotkey_modifier AS ENUM ('ALT', 'CTRL', 'SHIFT');
+			CREATE TYPE app.client_event_hotkey_modifier AS ENUM ('ALT', 'CMD', 'CTRL', 'SHIFT');
 			
 			CREATE TABLE IF NOT EXISTS app.client_event(
 				id uuid NOT NULL,
@@ -237,9 +237,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				action app.client_event_action NOT NULL,
 				arguments app.client_event_argument[],
 				event app.client_event_event NOT NULL,
-				hotkey_modifier1 app.client_event_hotkey_modifier,
+				hotkey_modifier1 app.client_event_hotkey_modifier NOT NULL,
 				hotkey_modifier2 app.client_event_hotkey_modifier,
-				hotkey_char character(1) COLLATE pg_catalog."default",
+				hotkey_char character(1) COLLATE pg_catalog."default" NOT NULL,
 				js_function_id uuid,
 				pg_function_id uuid,
 				CONSTRAINT client_event_pkey PRIMARY KEY (id),
@@ -268,9 +268,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE TABLE IF NOT EXISTS instance.login_client_event(
 				login_id integer NOT NULL,
 				client_event_id uuid NOT NULL,
-				hotkey_modifier1 app.client_event_hotkey_modifier,
+				hotkey_modifier1 app.client_event_hotkey_modifier NOT NULL,
 				hotkey_modifier2 app.client_event_hotkey_modifier,
-				hotkey_char character(1) COLLATE pg_catalog."default",
+				hotkey_char character(1) COLLATE pg_catalog."default" NOT NULL,
 				CONSTRAINT login_client_event_pkey PRIMARY KEY (login_id, client_event_id),
 				CONSTRAINT login_client_event_client_event_id_fkey FOREIGN KEY (client_event_id)
 					REFERENCES app.client_event (id) MATCH SIMPLE

@@ -19,6 +19,12 @@ type LoginAccess struct {
 	Relation    map[uuid.UUID]int `json:"relation"`    // effective access to specific relations
 	Widget      map[uuid.UUID]int `json:"widget"`      // effective access to specific widgets
 }
+type LoginClientEvent struct {
+	// login client events exist if a login has enabled a hotkey client event
+	HotkeyChar      string      `json:"hotkeyChar"`
+	HotkeyModifier1 string      `json:"hotkeyModifier1"`
+	HotkeyModifier2 pgtype.Text `json:"hotkeyModifier2"`
+}
 type LoginPublicKey struct {
 	LoginId   int64   `json:"loginId"`   // ID of login
 	PublicKey string  `json:"publicKey"` // public key of login (not encrypted)

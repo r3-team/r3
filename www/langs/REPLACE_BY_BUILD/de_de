@@ -1953,6 +1953,7 @@
 		"hotkey":{
 			"modifier":{
 				"ALT":"alt",
+				"CMD":"win/cmd",
 				"CTRL":"strg",
 				"SHIFT":"umschalt"
 			},
@@ -2039,6 +2040,10 @@
 		},
 		"button":{
 			"logout":"Abmelden"
+		},
+		"clientEvents":{
+			"noEvents":"Aktuell sind keine REI3-Anwendungen verfügbar, die Hotkeys anbieten.",
+			"intro":"Wenn die REI3-Client-Anwendung (s. \"Geräte\") installiert ist, können globale Hotkeys eingestellt werden. Diese werden verwendet, um mit REI3 zu interagieren, wenn es im Hintergrund läuft."
 		},
 		"dialog":{
 			"searchDictionary":"Dieses System bietet eine Volltextsuche. Wo Volltextsuchen verfügbar sind, können selbst sehr große Texte schnell gefunden werden, mit erweiterten Suchfunktionen wie der Vergleich mit Synonymen oder Wortstämmen.<br /><br />\"Wörterbücher für Volltextsuchen\" lassen das System wissen, in welchen Sprachen ein Benutzer arbeitet, damit sprachspezifische Funktionen genutzt werden können."
@@ -2154,6 +2159,7 @@
 		"sundayFirstDow":"Sonntag ist 1. Wochentag",
 		"tabRemember":"Zuletzt genutzten Tab öffnen",
 		"titleAccount":"Konto",
+		"titleClientEvents":"Globale Hotkeys",
 		"titleEncryption":"Ende-zu-Ende-Verschlüsselung",
 		"titleFixedTokens":"Geräte",
 		"titleGeneral":"Allgemein",

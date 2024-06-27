@@ -82,6 +82,18 @@
 	word-break:break-all;
 }
 
+/* client events */
+.settings-client-events{
+	display:flex;
+	flex-flow:column nowrap;
+	gap:9px;
+}
+.settings-client-events .module-icon{
+	width:24px;
+	margin-right:8px;
+	filter:var(--image-filter);
+}
+
 /* mobile overwrites */
 .is-mobile .settings{
 	width:100%;

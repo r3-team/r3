@@ -1953,6 +1953,7 @@
 		"hotkey":{
 			"modifier":{
 				"ALT":"alt",
+				"CMD":"win/cmd",
 				"CTRL":"ctrl",
 				"SHIFT":"shift"
 			},
@@ -2039,6 +2040,10 @@
 		},
 		"button":{
 			"logout":"Kijelentkezés"
+		},
+		"clientEvents":{
+			"noEvents":"There are currently no REI3 applications accessible that offer hotkeys.",
+			"intro":"If the REI3 client application (see 'Devices') is installed, you can set global hotkeys. These are used to interact with REI3 as it runs in the background."
 		},
 		"dialog":{
 			"searchDictionary":"Ez a rendszer teljes szöveges keresést kínál. Ahol elérhető a teljes szöveges keresés, még nagyobb szövegek is gyorsan megtalálhatók, kibővített keresési funkciók, például szinonimák vagy szógyökök hasonlításával.<br /><br />A \"Teljes szövegkeresés szótárai\" lehetővé teszik a rendszer számára, hogy megtudja, milyen nyelveken dolgozik egy felhasználó, így nyelvspecifikus funkciókat lehet használni."
@@ -2154,6 +2159,7 @@
 		"sundayFirstDow":"A hét első napja Vasárnap",
 		"tabRemember":"Utolsó használt lap megnyitása",
 		"titleAccount":"Fiók",
+		"titleClientEvents":"Global hotkeys",
 		"titleEncryption":"Végponttól végpontig titkosítás",
 		"titleFixedTokens":"Eszközök",
 		"titleGeneral":"Általános",

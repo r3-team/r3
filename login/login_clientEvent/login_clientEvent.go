@@ -3,34 +3,72 @@ package login_clientEvent
 import (
 	"r3/db"
 	"r3/types"
+
+	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
-func Get(loginId int64) ([]types.ClientEvent, error) {
+func Del_tx(tx pgx.Tx, loginId int64, clientEventId uuid.UUID) error {
+	_, err := tx.Exec(db.Ctx, `
+		DELETE FROM instance.login_client_event
+		WHERE login_id        = $1
+		AND   client_event_id = $2
+	`, loginId, clientEventId)
+	return err
+}
 
-	clientEvents := make([]types.ClientEvent, 0)
+func Get(loginId int64) (map[uuid.UUID]types.LoginClientEvent, error) {
+	lceIdMap := make(map[uuid.UUID]types.LoginClientEvent)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT ce.id, ce.module_id, ce.action, ce.arguments, ce.event, ce.js_function_id,
-			ce.pg_function_id, lce.hotkey_modifier1, lce.hotkey_modifier2, lce.hotkey_char
-		FROM instance.login_client_event AS lce
-		JOIN app.client_event            AS ce  ON ce.id = lce.client_event_id
-		WHERE lce.login_id = $1
+		SELECT client_event_id, hotkey_modifier1, hotkey_modifier2, hotkey_char
+		FROM instance.login_client_event
+		WHERE login_id = $1
 	`, loginId)
 	if err != nil {
-		return clientEvents, err
+		return lceIdMap, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var ce types.ClientEvent
-
-		if err := rows.Scan(&ce.Id, &ce.ModuleId, &ce.Action, &ce.Arguments, &ce.Event,
-			&ce.JsFunctionId, &ce.PgFunctionId, &ce.HotkeyModifier1, &ce.HotkeyModifier2,
-			&ce.HotkeyChar); err != nil {
-
-			return clientEvents, err
+		var ceId uuid.UUID
+		var lce types.LoginClientEvent
+		if err := rows.Scan(&ceId, &lce.HotkeyModifier1, &lce.HotkeyModifier2, &lce.HotkeyChar); err != nil {
+			return lceIdMap, err
 		}
-		clientEvents = append(clientEvents, ce)
+		lceIdMap[ceId] = lce
 	}
-	return clientEvents, nil
+	return lceIdMap, nil
+}
+
+func Set_tx(tx pgx.Tx, loginId int64, clientEventId uuid.UUID, lce types.LoginClientEvent) error {
+	exists := false
+
+	if err := tx.QueryRow(db.Ctx, `
+	 	SELECT EXISTS(
+			SELECT client_event_id
+			FROM instance.login_client_event
+			WHERE login_id = $1
+			AND   client_event_id = $2
+		)
+	`, loginId, clientEventId).Scan(&exists); err != nil {
+		return err
+	}
+
+	var err error
+	if exists {
+		_, err = tx.Exec(db.Ctx, `
+			UPDATE instance.login_client_event
+			SET hotkey_modifier1 = $1, hotkey_modifier2 = $2, hotkey_char = $3
+			WHERE login_id        = $4
+			AND   client_event_id = $5
+		`, lce.HotkeyModifier1, lce.HotkeyModifier2, lce.HotkeyChar, loginId, clientEventId)
+	} else {
+		_, err = tx.Exec(db.Ctx, `
+			INSERT INTO instance.login_client_event (
+				login_id, client_event_id, hotkey_modifier1, hotkey_modifier2, hotkey_char)
+			VALUES ($1,$2,$3,$4,$5)
+		`, loginId, clientEventId, lce.HotkeyModifier1, lce.HotkeyModifier2, lce.HotkeyChar)
+	}
+	return err
 }

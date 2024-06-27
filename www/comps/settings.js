@@ -1,6 +1,9 @@
+import srcBase64Icon       from './shared/image.js';
+import {getCaption}        from './shared/language.js';
 import {set as setSetting} from './shared/settings.js';
 import {getUnixFormat}     from './shared/time.js';
 import MyInputColor        from './inputColor.js';
+import MyInputHotkey       from './inputHotkey.js';
 import {
 	aesGcmDecryptBase64,
 	aesGcmDecryptBase64WithPhrase,
@@ -553,6 +556,133 @@ let MySettingsAccount = {
 	}
 };
 
+let MySettingsClientEvents = {
+	name:'my-settings-client-events',
+	components:{ MyInputHotkey },
+	template:`<div class="settings-client-events">
+		<p>{{ capApp.intro }}</p>
+		<span v-if="modulesWithClientEvents.length === 0"><i>{{ capApp.noEvents }}</i></span>
+
+		<template v-for="mce in modulesWithClientEvents">
+			<div class="row gap centered">
+				<img class="module-icon" :src="srcBase64Icon(mce.module.iconId,'images/module.png')" />
+				<span>{{ getCaption('moduleTitle',mce.module.id,mce.module.id,mce.module.captions,mce.module.name) }}</span>
+			</div>
+
+			<div class="column gap" v-for="ce in mce.clientEvents">
+				<span>{{ getCaption('clientEventTitle',ce.moduleId,ce.id,ce.captions) }}</span>
+
+				<div class="row centered gap">
+					<my-bool
+						@update:modelValue="toggleHotkey(ce,$event)"
+						:grow="false"
+						:modelValue="clientEventIdMapLogin[ce.id] !== undefined"
+					/>
+					<my-input-hotkey
+						@update:char="set(ce,'char',$event)"
+						@update:modifier1="set(ce,'modifier1',$event)"
+						@update:modifier2="set(ce,'modifier2',$event)"
+						:char="ce.hotkeyChar"
+						:modifier1="ce.hotkeyModifier1"
+						:modifier2="ce.hotkeyModifier2"
+						:readonly="clientEventIdMapLogin[ce.id] === undefined"
+					/>
+				</div>
+			</div>
+		</template>
+	</div>`,
+	data() {
+		return {
+			clientEventIdMapLogin:{} // map of client events that the login has options for (only hotkeys)
+		};
+	},
+	computed:{
+		modulesWithClientEvents:(s) => {
+			let out = [];
+			for(const modId in s.moduleIdMap) {
+				const mod = s.moduleIdMap[modId];
+				let   ces = [];
+
+				for(const ce of mod.clientEvents) {
+					// only include hotkey events and only if there is access
+					if(ce.event !== 'onHotkey' || s.access.clientEvent[ce.id] === undefined)
+						continue;
+					
+					// overwrite defaults with login options if there
+					if(s.clientEventIdMapLogin[ce.id] !== undefined) {
+						ce.hotkeyChar      = s.clientEventIdMapLogin[ce.id].hotkeyChar;
+						ce.hotkeyModifier1 = s.clientEventIdMapLogin[ce.id].hotkeyModifier1;
+						ce.hotkeyModifier2 = s.clientEventIdMapLogin[ce.id].hotkeyModifier2;
+					}
+					ces.push(ce);
+				}
+				if(ces.length !== 0)
+					out.push({
+						module:mod,
+						clientEvents:ces
+					});
+			}
+			return out;
+		},
+
+		// stores
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		access:     (s) => s.$store.getters.access,
+		capApp:     (s) => s.$store.getters.captions.settings.clientEvents,
+		capGen:     (s) => s.$store.getters.captions.generic
+	},
+	mounted() {
+		this.get();
+	},
+	methods:{
+		// externals
+		getCaption,
+		srcBase64Icon,
+
+		// actions
+		toggleHotkey(clientEvent,state) {
+			if(state) this.set(clientEvent,'[noChange]',null);
+			else      this.del(clientEvent.id);
+		},
+
+		// backend calls
+		del(id) {
+			ws.send('loginClientEvent','del',{clientEventId:id},true).then(
+				this.get,
+				this.$root.genericError
+			);
+		},
+		get() {
+			ws.send('loginClientEvent','get',{},true).then(
+				res => this.clientEventIdMapLogin = res.payload,
+				this.$root.genericError
+			);
+		},
+		set(clientEvent,name,value) {
+			let lce = {
+				hotkeyChar:clientEvent.hotkeyChar,
+				hotkeyModifier1:clientEvent.hotkeyModifier1,
+				hotkeyModifier2:clientEvent.hotkeyModifier2
+			};
+			switch(name) {
+				case 'char':       lce.hotkeyChar      = value; break;
+				case 'modifier1':  lce.hotkeyModifier1 = value; break;
+				case 'modifier2':  lce.hotkeyModifier2 = value; break;
+				case '[noChange]': break; // do not change anything
+				default: return;
+			}
+
+			ws.send('loginClientEvent','set',{
+				clientEventId:clientEvent.id,
+				loginClientEvent:lce
+			},true).then(
+				this.get,
+				this.$root.genericError
+			);
+		}
+	}
+};
+
 let MySettingsFixedTokens = {
 	name:'my-settings-fixed-tokens',
 	template:`<div>
@@ -893,6 +1023,7 @@ let MySettings = {
 	components:{
 		MyInputColor,
 		MySettingsAccount,
+		MySettingsClientEvents,
 		MySettingsEncryption,
 		MySettingsFixedTokens
 	},
@@ -1183,7 +1314,7 @@ let MySettings = {
 				<my-settings-account />
 			</div>
 			
-			<!-- Fixed tokens (device access) -->
+			<!-- fixed tokens (device access) -->
 			<div class="contentPart short">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/screen.png" />
@@ -1192,6 +1323,15 @@ let MySettings = {
 				<my-settings-fixed-tokens
 					:languageCodesOfficial="languageCodesOfficial"
 				/>
+			</div>
+			
+			<!-- client events (global hotkeys) -->
+			<div class="contentPart short">
+				<div class="contentPartHeader">
+					<img class="icon" src="images/screen.png" />
+					<h1>{{ capApp.titleClientEvents }}</h1>
+				</div>
+				<my-settings-client-events />
 			</div>
 			
 			<!-- encryption -->

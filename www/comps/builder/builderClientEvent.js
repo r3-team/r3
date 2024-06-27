@@ -84,6 +84,7 @@ let MyBuilderClientEvent = {
 								v-model:modifier1="values.hotkeyModifier1"
 								v-model:modifier2="values.hotkeyModifier2"
 								:readonly="readonly"
+								:twoLines="true"
 							/>
 						</td>
 						<td>{{ capApp.hotkeyHint }}</td>
@@ -174,8 +175,7 @@ let MyBuilderClientEvent = {
 			actionValues:['callJsFunction','callPgFunction'],
 			argInput:'clipboard',
 			argValues:['clipboard','hostname','username','windowTitle'],
-			eventValues:['onHotkey','onConnect','onDisconnect'],
-			hotkeyValues:['ALT','CTRL','SHIFT']
+			eventValues:['onHotkey','onConnect','onDisconnect']
 		};
 	},
 	computed:{

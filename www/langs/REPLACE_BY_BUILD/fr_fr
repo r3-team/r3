@@ -1953,6 +1953,7 @@
 		"hotkey":{
 			"modifier":{
 				"ALT":"alt",
+				"CMD":"win/cmd",
 				"CTRL":"ctrl",
 				"SHIFT":"shift"
 			},
@@ -2039,6 +2040,10 @@
 		},
 		"button":{
 			"logout":"Déconnexion"
+		},
+		"clientEvents":{
+			"noEvents":"There are currently no REI3 applications accessible that offer hotkeys.",
+			"intro":"If the REI3 client application (see 'Devices') is installed, you can set global hotkeys. These are used to interact with REI3 as it runs in the background."
 		},
 		"dialog":{
 			"searchDictionary":"Ce système offre des capacités de recherche en texte intégral. Là où la recherche en texte intégral est utilisée, même de très grands textes peuvent être recherchés rapidement avec des fonctionnalités de recherche avancées telles que la comparaison de synonymes et de radicaux de mots.<br /><br />'Dictionnaires pour la recherche en texte intégral' informe le système des langues avec lesquelles un utilisateur travaille pour utiliser des fonctionnalités de recherche spécifiques à la langue."
@@ -2154,6 +2159,7 @@
 		"sundayFirstDow":"Dimanche est le 1er jour de la semaine",
 		"tabRemember":"Ouvrir le dernier onglet utilisé",
 		"titleAccount":"Compte",
+		"titleClientEvents":"Global hotkeys",
 		"titleEncryption":"Chiffrement de bout en bout",
 		"titleFixedTokens":"Appareils",
 		"titleGeneral":"Général",

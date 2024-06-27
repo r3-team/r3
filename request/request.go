@@ -123,7 +123,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			case "exec":
 				return clientEventExec(reqJson, loginId, address)
 			case "get":
-				return loginClientEventGet(loginId)
+				return clientEventGetForDevice(loginId)
 			}
 		}
 		return nil, errors.New(handler.ErrUnauthorized)
@@ -175,6 +175,15 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return LoginGetTokensFixed(loginId)
 		case "setTokenFixed":
 			return LoginSetTokenFixed_tx(tx, reqJson, loginId)
+		}
+	case "loginClientEvent":
+		switch action {
+		case "del":
+			return loginClientEventDel_tx(tx, reqJson, loginId)
+		case "get":
+			return loginClientEventGet(loginId)
+		case "set":
+			return loginClientEventSet_tx(tx, reqJson, loginId)
 		}
 	case "loginKeys":
 		switch action {

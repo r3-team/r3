@@ -582,9 +582,9 @@ type ClientEvent struct {
 	Action          string      `json:"action"`          // action to execute when event is running (callJsFunction, callPgFunction)
 	Arguments       []string    `json:"arguments"`       // arguments to supply to function call (clipboard, hostname, username, windowTitle)
 	Event           string      `json:"event"`           // events to react to (onConnect, onDisconnect, onHotkey)
-	HotkeyModifier1 pgtype.Text `json:"hotkeyModifier1"` // CTRL, ALT, SHIFT
-	HotkeyModifier2 pgtype.Text `json:"hotkeyModifier2"` // CTRL, ALT, SHIFT
-	HotkeyChar      pgtype.Text `json:"hotkeyChar"`      // single character
+	HotkeyChar      string      `json:"hotkeyChar"`      // single character
+	HotkeyModifier1 string      `json:"hotkeyModifier1"` // ALT, CMD, CTRL, SHIFT
+	HotkeyModifier2 pgtype.Text `json:"hotkeyModifier2"` // ALT, CMD, CTRL, SHIFT (optional)
 	JsFunctionId    pgtype.UUID `json:"jsFunctionId"`
 	PgFunctionId    pgtype.UUID `json:"pgFunctionId"`
 	Captions        CaptionMap  `json:"captions"`

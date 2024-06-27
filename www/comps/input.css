@@ -200,6 +200,12 @@
 }
 
 
+/* input hotkey */
+.input-hotkey{
+	flex:1 1 auto;
+}
+
+
 /* input iframe */
 .input-iframe{
 	display:flex;

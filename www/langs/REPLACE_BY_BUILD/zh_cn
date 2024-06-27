@@ -1953,6 +1953,7 @@
 		"hotkey":{
 			"modifier":{
 				"ALT":"alt",
+				"CMD":"win/cmd",
 				"CTRL":"ctrl",
 				"SHIFT":"shift"
 			},
@@ -2039,6 +2040,10 @@
 		},
 		"button":{
 			"logout":"登出"
+		},
+		"clientEvents":{
+			"noEvents":"There are currently no REI3 applications accessible that offer hotkeys.",
+			"intro":"If the REI3 client application (see 'Devices') is installed, you can set global hotkeys. These are used to interact with REI3 as it runs in the background."
 		},
 		"dialog":{
 			"searchDictionary":"该系统提供全文搜索功能。在使用全文搜索时，即使是非常大的文本也可以通过高级搜索功能（例如比较同义词和词干）快速查找。<br /><br />'用于全文搜索的词典' 通知系统用户使用特定语言的搜索功能，并指示系统哪些语言可以使用语言特定的搜索功能。"
@@ -2154,6 +2159,7 @@
 		"sundayFirstDow":"将星期天设为第一天",
 		"tabRemember":"打开上次使用的选项卡",
 		"titleAccount":"账户",
+		"titleClientEvents":"Global hotkeys",
 		"titleEncryption":"端到端加密",
 		"titleFixedTokens":"设备",
 		"titleGeneral":"常规",

@@ -1,7 +1,6 @@
-import MyStoreLocal            from './storeLocal.js';
-import MyStoreSchema           from './storeSchema.js';
-import tinycolor               from '../externals/tinycolor2.js';
-import { colorAdjustBgHeader } from '../comps/shared/generic.js';
+import MyStoreLocal  from './storeLocal.js';
+import MyStoreSchema from './storeSchema.js';
+import tinycolor     from '../externals/tinycolor2.js';
 export {MyStore as default};
 
 const MyStore = Vuex.createStore({
@@ -10,7 +9,7 @@ const MyStore = Vuex.createStore({
 		schema:MyStoreSchema
 	},
 	state:{
-		access:{},                     // access permissions for each entity (attribute, collection, menu, relation, widget), key: entity ID
+		access:{},                     // access permissions for each entity (attribute, clientEvent, collection, menu, relation, widget), key: entity ID
 		builderMode:false,             // builder mode active
 		busyCounter:0,                 // counter of calls making the app busy (WS requests, uploads, etc.)
 		captions:{},                   // all application captions in the user interface language
