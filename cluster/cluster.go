@@ -176,6 +176,10 @@ func CreateEventForNodes(nodeIds []uuid.UUID, content string, payload interface{
 		Valid: target.LoginId != 0,
 	}
 
+	// only generate events for nodes that have checked in within the last hour
+	// node events are temporary and not relevant for nodes checking in after the fact
+	checkInCutOff := tools.GetTimeUnix() - 3600
+
 	if len(nodeIds) == 0 {
 		// if no node IDs are defined, apply to all other nodes
 		if _, err := db.Pool.Exec(db.Ctx, `
@@ -185,8 +189,9 @@ func CreateEventForNodes(nodeIds []uuid.UUID, content string, payload interface{
 			)
 			SELECT id, $1, $2, $3, $4, $5
 			FROM instance_cluster.node
-			WHERE id <> $6
-		`, content, payloadJson, address, device, loginId, cache.GetNodeId()); err != nil {
+			WHERE id            <> $6
+			AND   date_check_in >  $7
+		`, content, payloadJson, address, device, loginId, cache.GetNodeId(), checkInCutOff); err != nil {
 			return err
 		}
 	} else {
@@ -197,8 +202,9 @@ func CreateEventForNodes(nodeIds []uuid.UUID, content string, payload interface{
 			)
 			SELECT id, $1, $2, $3, $4, $5
 			FROM instance_cluster.node
-			WHERE id = ANY($6)
-		`, content, payloadJson, address, device, loginId, nodeIds); err != nil {
+			WHERE id            = ANY($6)
+			AND   date_check_in > $7
+		`, content, payloadJson, address, device, loginId, nodeIds, checkInCutOff); err != nil {
 			return err
 		}
 	}
