@@ -121,9 +121,9 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "clientEvent":
 			switch action {
 			case "exec":
-				return clientEventExec(reqJson, loginId, address)
+				return clientEventExecFatClient(reqJson, loginId, address)
 			case "get":
-				return clientEventGetForDevice(loginId)
+				return clientEventGetFatClient(loginId)
 			}
 		}
 		return nil, errors.New(handler.ErrUnauthorized)
@@ -146,14 +146,16 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "setKeys":
 			return DataSetKeys_tx(ctx, tx, reqJson)
 		}
-	case "device":
+	case "event":
 		switch action {
-		case "browserApplyCopiedFiles":
-			return deviceBrowserApplyCopiedFiles(reqJson, loginId, address)
-		case "fatClientExecKeystrokes":
-			return deviceFatClientExecKeystrokes(reqJson, loginId, address)
-		case "fatClientRequestFile":
-			return deviceFatClientRequestFile(reqJson, loginId, address)
+		case "clientEventsChanged":
+			return eventClientEventsChanged(loginId, address)
+		case "filesCopied":
+			return eventFilesCopied(reqJson, loginId, address)
+		case "fileRequested":
+			return eventFileRequested(reqJson, loginId, address)
+		case "keystrokesRequested":
+			return eventKeystrokesRequested(reqJson, loginId, address)
 		}
 	case "feedback":
 		switch action {
@@ -163,7 +165,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "file":
 		switch action {
 		case "paste":
-			return FilesPaste(reqJson, loginId)
+			return filesPaste(reqJson, loginId)
 		}
 	case "login":
 		switch action {
@@ -202,7 +204,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			if isNoAuth {
 				return nil, errors.New(handler.ErrUnauthorized)
 			}
-			return LoginPasswortSet_tx(tx, reqJson, loginId)
+			return loginPasswortSet_tx(tx, reqJson, loginId)
 		}
 	case "loginSetting":
 		switch action {
@@ -224,7 +226,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "lookup":
 		switch action {
 		case "get":
-			return LookupGet(reqJson, loginId)
+			return lookupGet(reqJson, loginId)
 		}
 	case "pgFunction":
 		switch action {

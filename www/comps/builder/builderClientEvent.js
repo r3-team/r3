@@ -217,6 +217,7 @@ let MyBuilderClientEvent = {
 		closeReload() {
 			this.$root.schemaReload(this.module.id);
 			this.$emit('close');
+			ws.send('event','clientEventsChanged',{},false);
 		},
 		handleHotkeys(e) {
 			if(e.ctrlKey && e.key === 's' && this.canSave) {

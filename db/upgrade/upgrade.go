@@ -106,9 +106,6 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 		ALTER TABLE app.column ALTER COLUMN styles
 			TYPE app.column_style[] USING styles::CHARACTER VARYING(12)[]::app.column_style[];
-
-		ALTER TABLE instance_cluster.node_event ALTER COLUMN content
-			TYPE instance_cluster.node_event_content USING content::TEXT::instance_cluster.node_event_content;
 	*/
 
 	"3.7": func(tx pgx.Tx) (string, error) {
@@ -211,19 +208,18 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.attribute ADD COLUMN length_fract INTEGER NOT NULL DEFAULT 0;
 			ALTER TABLE app.attribute ALTER COLUMN length_fract DROP NOT NULL;
 			
-			-- refactor cluster events
-			DELETE FROM instance_cluster.node_event;
-			ALTER TABLE instance_cluster.node_event ALTER COLUMN content TYPE TEXT;
-			DROP TYPE instance_cluster.node_event_content;
-			CREATE TYPE instance_cluster.node_event_content AS ENUM ('collectionUpdated', 'configChanged', 'loginDisabled',
-				'loginReauthorized', 'loginReauthorizedAll', 'masterAssigned', 'schemaChanged', 'shutdownTriggered',
-				'tasksChanged', 'taskTriggered', 'deviceBrowserApplyCopiedFiles', 'deviceBrowserCallJsFunction',
-				'deviceFatClientExecKeystrokes', 'deviceFatClientFocusWindow', 'deviceFatClientRequestFile');
+			-- new cluster events
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'jsFunctionCalled';
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'clientEventsChanged';
 			
+			-- cluster event target filters
 			ALTER TABLE instance_cluster.node_event
 				ADD COLUMN target_address TEXT,
 				ADD COLUMN target_device SMALLINT,
 				ADD COLUMN target_login_id INTEGER;
+			
+			-- cleanup outdated cluster node events
+			DELETE FROM instance_cluster.node_event;
 
 			-- client events
 			CREATE TYPE app.client_event_action          AS ENUM ('callJsFunction', 'callPgFunction');

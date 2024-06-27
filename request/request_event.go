@@ -12,8 +12,8 @@ import (
 )
 
 // requests for browser clients
-func deviceBrowserApplyCopiedFiles(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
-	// request file(s) to be copied (synchronized across all clients for login)
+func eventFilesCopied(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
+	// request file(s) to be copied (synchronized across all browser clients)
 	var req struct {
 		AttributeId uuid.UUID   `json:"attributeId"`
 		FileIds     []uuid.UUID `json:"fileIds"`
@@ -22,14 +22,14 @@ func deviceBrowserApplyCopiedFiles(reqJson json.RawMessage, loginId int64, addre
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, cluster.DeviceBrowserApplyCopiedFiles(true, address, loginId, req.AttributeId, req.FileIds, req.RecordId)
+	return nil, cluster.FilesCopied(true, address, loginId, req.AttributeId, req.FileIds, req.RecordId)
 }
 
 // requests for fat clients
-func deviceFatClientExecKeystrokes(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
-	return nil, nil
+func eventClientEventsChanged(loginId int64, address string) (interface{}, error) {
+	return nil, cluster.ClientEventsChanged(true, address, loginId)
 }
-func deviceFatClientRequestFile(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
+func eventFileRequested(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
 	var req struct {
 		AttributeId uuid.UUID `json:"attributeId"`
 		FileId      uuid.UUID `json:"fileId"`
@@ -59,6 +59,9 @@ func deviceFatClientRequestFile(reqJson json.RawMessage, loginId int64, address 
 		return nil, err
 	}
 
-	return nil, cluster.DeviceFatClientRequestFile(true, address, loginId,
+	return nil, cluster.FileRequested(true, address, loginId,
 		req.AttributeId, req.FileId, hash.String, name, req.ChooseApp)
+}
+func eventKeystrokesRequested(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
+	return nil, nil
 }

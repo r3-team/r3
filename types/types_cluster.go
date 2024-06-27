@@ -17,7 +17,25 @@ type ClusterNode struct {
 	StatMemory    int64     `json:"statMemory"`
 }
 
-// cluster event payloads filled by functions
+// cluster event payloads
+type ClusterEventFilesCopied struct {
+	AttributeId uuid.UUID   `json:"attributeId"`
+	FileIds     []uuid.UUID `json:"fileIds"`
+	RecordId    int64       `json:"recordId"`
+}
+type ClusterEventFileRequested struct {
+	AttributeId uuid.UUID `json:"attributeId"`
+	ChooseApp   bool      `json:"chooseApp"`
+	FileId      uuid.UUID `json:"fileId"`
+	FileHash    string    `json:"fileHash"`
+	FileName    string    `json:"fileName"`
+}
+type ClusterEventJsFunctionCalled struct {
+	JsFunctionId uuid.UUID     `json:"jsFunctionId"`
+	Arguments    []interface{} `json:"arguments"`
+}
+
+// cluster event payloads used by instance functions
 type ClusterEventCollectionUpdated struct {
 	// filled by instance.update_collection()
 	CollectionId uuid.UUID `json:"collectionId"`
@@ -32,24 +50,6 @@ type ClusterEventTaskTriggered struct {
 	PgFunctionId         uuid.UUID `json:"pgFunctionId"`
 	PgFunctionScheduleId uuid.UUID `json:"pgFunctionScheduleId"`
 	TaskName             string    `json:"taskName"`
-}
-
-// cluster event payloads for inter-device communication
-type ClusterEventDeviceBrowserApplyCopiedFiles struct {
-	AttributeId uuid.UUID   `json:"attributeId"`
-	FileIds     []uuid.UUID `json:"fileIds"`
-	RecordId    int64       `json:"recordId"`
-}
-type ClusterEventDeviceBrowserCallJsFunction struct {
-	JsFunctionId uuid.UUID     `json:"jsFunctionId"`
-	Arguments    []interface{} `json:"arguments"`
-}
-type ClusterEventDeviceFatClientRequestFile struct {
-	AttributeId uuid.UUID `json:"attributeId"`
-	ChooseApp   bool      `json:"chooseApp"`
-	FileId      uuid.UUID `json:"fileId"`
-	FileHash    string    `json:"fileHash"`
-	FileName    string    `json:"fileName"`
 }
 
 // cluster event client target filter

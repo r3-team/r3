@@ -56,6 +56,21 @@ func CheckInNode() error {
 }
 
 // events relevant to all cluster nodes
+func ClientEventsChanged(updateNodes bool, address string, loginId int64) error {
+	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceFatClient, LoginId: loginId}
+
+	if updateNodes {
+		if err := createEventsForOtherNodes("clientEventsChanged", nil, target); err != nil {
+			return err
+		}
+	}
+	WebsocketClientEvents <- types.ClusterEvent{
+		Content: "clientEventsChanged",
+		Payload: nil,
+		Target:  target,
+	}
+	return nil
+}
 func CollectionUpdated(collectionId uuid.UUID, loginIds []int64) error {
 
 	if len(loginIds) == 0 {
@@ -102,6 +117,72 @@ func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance 
 	bruteforce.SetConfig()
 	config.ActivateLicense()
 	config.SetLogLevels()
+	return nil
+}
+func FilesCopied(updateNodes bool, address string, loginId int64,
+	attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
+
+	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceBrowser, LoginId: loginId}
+	payload := types.ClusterEventFilesCopied{
+		AttributeId: attributeId,
+		FileIds:     fileIds,
+		RecordId:    recordId,
+	}
+
+	if updateNodes {
+		if err := createEventsForOtherNodes("filesCopied", payload, target); err != nil {
+			return err
+		}
+	}
+	WebsocketClientEvents <- types.ClusterEvent{
+		Content: "filesCopied",
+		Payload: payload,
+		Target:  target,
+	}
+	return nil
+}
+func FileRequested(updateNodes bool, address string, loginId int64, attributeId uuid.UUID,
+	fileId uuid.UUID, fileHash string, fileName string, chooseApp bool) error {
+
+	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceFatClient, LoginId: loginId}
+	payload := types.ClusterEventFileRequested{
+		AttributeId: attributeId,
+		ChooseApp:   chooseApp,
+		FileId:      fileId,
+		FileHash:    fileHash,
+		FileName:    fileName,
+	}
+
+	if updateNodes {
+		if err := createEventsForOtherNodes("fileRequested", payload, target); err != nil {
+			return err
+		}
+	}
+	WebsocketClientEvents <- types.ClusterEvent{
+		Content: "fileRequested",
+		Payload: payload,
+		Target:  target,
+	}
+	return nil
+}
+func JsFunctionCalled(updateNodes bool, address string, loginId int64, jsFunctionId uuid.UUID, arguments []interface{}) error {
+
+	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceBrowser, LoginId: loginId}
+	payload := types.ClusterEventJsFunctionCalled{
+		JsFunctionId: jsFunctionId,
+		Arguments:    arguments,
+	}
+
+	if updateNodes {
+		if err := createEventsForOtherNodes("jsFunctionCalled", payload, target); err != nil {
+			return err
+		}
+	}
+	WebsocketClientEvents <- types.ClusterEvent{
+		Content: "jsFunctionCalled",
+		Payload: payload,
+		Target:  target,
+	}
 	return nil
 }
 func LoginDisabled(updateNodes bool, loginId int64) error {
@@ -156,18 +237,20 @@ func MasterAssigned(state bool) error {
 	return nil
 }
 func SchemaChanged(updateNodes bool, moduleIds []uuid.UUID) error {
+	target := types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser}
+
 	if updateNodes {
-		if err := createEventsForOtherNodes("schemaChanged", moduleIds, types.ClusterEventTarget{}); err != nil {
+		if err := createEventsForOtherNodes("schemaChanged", moduleIds, target); err != nil {
 			return err
 		}
 	}
 
 	// inform all clients about schema reloading
-	WebsocketClientEvents <- types.ClusterEvent{Content: "schemaLoading"}
+	WebsocketClientEvents <- types.ClusterEvent{Content: "schemaLoading", Target: target}
 
 	// inform all clients about schema loading being finished, regardless of success or error
 	defer func() {
-		WebsocketClientEvents <- types.ClusterEvent{Content: "schemaLoaded"}
+		WebsocketClientEvents <- types.ClusterEvent{Content: "schemaLoaded", Target: target}
 	}()
 
 	if len(moduleIds) != 0 {

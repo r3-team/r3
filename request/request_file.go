@@ -8,7 +8,7 @@ import (
 )
 
 // request file(s) to be pasted
-func FilesPaste(reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func filesPaste(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 	var req struct {
 		SrcAttributeId uuid.UUID   `json:"srcAttributeId"`
 		SrcFileIds     []uuid.UUID `json:"srcFileIds"`

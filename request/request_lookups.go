@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func LookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func lookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 
 	var req struct {
 		Name string `json:"name"`

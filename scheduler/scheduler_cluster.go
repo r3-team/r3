@@ -64,6 +64,8 @@ func clusterProcessEvents() error {
 		}
 
 		switch e.Content {
+		case "clientEventsChanged":
+			err = cluster.ClientEventsChanged(false, e.Target.Address, e.Target.LoginId)
 		case "collectionUpdated":
 			var p types.ClusterEventCollectionUpdated
 			if err := json.Unmarshal(jsonPayload, &p); err != nil {
@@ -76,6 +78,27 @@ func clusterProcessEvents() error {
 				return err
 			}
 			err = cluster.ConfigChanged(false, true, switchToMaintenance)
+		case "filesCopied":
+			var p types.ClusterEventFilesCopied
+			if err := json.Unmarshal(jsonPayload, &p); err != nil {
+				return err
+			}
+			err = cluster.FilesCopied(false, e.Target.Address,
+				e.Target.LoginId, p.AttributeId, p.FileIds, p.RecordId)
+		case "fileRequested":
+			var p types.ClusterEventFileRequested
+			if err := json.Unmarshal(jsonPayload, &p); err != nil {
+				return err
+			}
+			err = cluster.FileRequested(false, e.Target.Address, e.Target.LoginId,
+				p.AttributeId, p.FileId, p.FileHash, p.FileName, p.ChooseApp)
+		case "jsFunctionCalled":
+			var p types.ClusterEventJsFunctionCalled
+			if err := json.Unmarshal(jsonPayload, &p); err != nil {
+				return err
+			}
+			err = cluster.JsFunctionCalled(false, e.Target.Address,
+				e.Target.LoginId, p.JsFunctionId, p.Arguments)
 		case "loginDisabled":
 			err = cluster.LoginDisabled(false, e.Target.LoginId)
 		case "loginReauthorized":
@@ -104,30 +127,6 @@ func clusterProcessEvents() error {
 			runTaskDirectly(p.TaskName, p.PgFunctionId, p.PgFunctionScheduleId)
 		case "shutdownTriggered":
 			OsExit <- syscall.SIGTERM
-
-		// device events
-		case "deviceBrowserApplyCopiedFiles":
-			var p types.ClusterEventDeviceBrowserApplyCopiedFiles
-			if err := json.Unmarshal(jsonPayload, &p); err != nil {
-				return err
-			}
-			err = cluster.DeviceBrowserApplyCopiedFiles(false, e.Target.Address,
-				e.Target.LoginId, p.AttributeId, p.FileIds, p.RecordId)
-		case "deviceBrowserCallJsFunction":
-			var p types.ClusterEventDeviceBrowserCallJsFunction
-			if err := json.Unmarshal(jsonPayload, &p); err != nil {
-				return err
-			}
-			err = cluster.DeviceBrowserCallJsFunction(false, e.Target.Address,
-				e.Target.LoginId, p.JsFunctionId, p.Arguments)
-		case "deviceFatClientRequestFile":
-			var p types.ClusterEventDeviceFatClientRequestFile
-			if err := json.Unmarshal(jsonPayload, &p); err != nil {
-				return err
-			}
-			err = cluster.DeviceFatClientRequestFile(false, e.Target.Address,
-				e.Target.LoginId, p.AttributeId, p.FileId, p.FileHash, p.FileName,
-				p.ChooseApp)
 		}
 		if err != nil {
 			return err

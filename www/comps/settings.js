@@ -640,6 +640,12 @@ let MySettingsClientEvents = {
 		srcBase64Icon,
 
 		// actions
+		reloadWithChangedEvents() {
+			this.get();
+			
+			// inform connected fat clients about updated client events
+			ws.send('event','clientEventsChanged',{},false);
+		},
 		toggleHotkey(clientEvent,state) {
 			if(state) this.set(clientEvent,'[noChange]',null);
 			else      this.del(clientEvent.id);
@@ -648,7 +654,7 @@ let MySettingsClientEvents = {
 		// backend calls
 		del(id) {
 			ws.send('loginClientEvent','del',{clientEventId:id},true).then(
-				this.get,
+				this.reloadWithChangedEvents,
 				this.$root.genericError
 			);
 		},
@@ -676,7 +682,7 @@ let MySettingsClientEvents = {
 				clientEventId:clientEvent.id,
 				loginClientEvent:lce
 			},true).then(
-				this.get,
+				this.reloadWithChangedEvents,
 				this.$root.genericError
 			);
 		}

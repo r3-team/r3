@@ -27,7 +27,17 @@ func clientEventDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) 
 	return nil, clientEvent.Del_tx(tx, req.Id)
 }
 
-func clientEventGetForDevice(loginId int64) (interface{}, error) {
+func clientEventSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+
+	var req types.ClientEvent
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	return nil, clientEvent.Set_tx(tx, req)
+}
+
+// fat client requests
+func clientEventGetFatClient(loginId int64) (interface{}, error) {
 
 	var err error
 	var res struct {
@@ -64,8 +74,7 @@ func clientEventGetForDevice(loginId int64) (interface{}, error) {
 	cache.Schema_mx.RUnlock()
 	return res, nil
 }
-
-func clientEventExec(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
+func clientEventExecFatClient(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
 
 	var req struct {
 		Id        uuid.UUID     `json:"id"`
@@ -85,7 +94,7 @@ func clientEventExec(reqJson json.RawMessage, loginId int64, address string) (in
 
 	// execute valid actions
 	if ce.Action == "callJsFunction" && ce.JsFunctionId.Valid {
-		return nil, cluster.DeviceBrowserCallJsFunction(true, address, loginId, ce.JsFunctionId.Bytes, req.Arguments)
+		return nil, cluster.JsFunctionCalled(true, address, loginId, ce.JsFunctionId.Bytes, req.Arguments)
 	}
 	if ce.Action == "callPgFunction" && ce.PgFunctionId.Valid {
 
@@ -117,13 +126,4 @@ func clientEventExec(reqJson json.RawMessage, loginId int64, address string) (in
 	}
 
 	return nil, fmt.Errorf("invalid client event action")
-}
-
-func clientEventSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
-	var req types.ClientEvent
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	return nil, clientEvent.Set_tx(tx, req)
 }

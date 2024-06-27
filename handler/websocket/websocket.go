@@ -146,10 +146,18 @@ func (hub *hubType) start() {
 			jsonMsg := []byte{} // message back to client
 
 			switch event.Content {
+			case "clientEventsChanged":
+				jsonMsg, err = prepareUnrequested("clientEventsChanged", nil)
 			case "collectionChanged":
 				jsonMsg, err = prepareUnrequested("collectionChanged", event.Payload)
 			case "configChanged":
 				jsonMsg, err = prepareUnrequested("configChanged", nil)
+			case "filesCopied":
+				jsonMsg, err = prepareUnrequested("filesCopied", event.Payload)
+			case "fileRequested":
+				jsonMsg, err = prepareUnrequested("fileRequested", event.Payload)
+			case "jsFunctionCalled":
+				jsonMsg, err = prepareUnrequested("jsFunctionCalled", event.Payload)
 			case "renew":
 				jsonMsg, err = prepareUnrequested("reauthorized", nil)
 			case "schemaLoaded":
@@ -165,14 +173,6 @@ func (hub *hubType) start() {
 				jsonMsg, err = prepareUnrequested("schemaLoaded", data)
 			case "schemaLoading":
 				jsonMsg, err = prepareUnrequested("schemaLoading", nil)
-
-			// device events
-			case "deviceBrowserApplyCopiedFiles":
-				jsonMsg, err = prepareUnrequested("filesCopied", event.Payload)
-			case "deviceBrowserCallJsFunction":
-				jsonMsg, err = prepareUnrequested("jsFunctionCalled", event.Payload)
-			case "deviceFatClientRequestFile":
-				jsonMsg, err = prepareUnrequested("fileRequested", event.Payload)
 			}
 
 			if err != nil {
