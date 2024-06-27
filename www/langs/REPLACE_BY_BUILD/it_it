@@ -93,14 +93,15 @@
 		"appWebsite":"https://rei3.de",
 		"arguments":"Arguments",
 		"articles":"Help articles",
-		"attribute":"Attribute",
+		"attribute":"Attributi",
 		"attributes":"Attributes",
 		"available":"Available",
 		"before":"Before",
 		"bright":"Bright",
 		"busy":"Elaborazione - Clicca qui per annullare",
 		"category":"Category",
-		"clientEvents":"Client application events",
+		"clientEvent":"Client event",
+		"clientEvents":"Client events",
 		"collection":"Collection",
 		"collections":"Collezioni",
 		"columns":"Columns",
@@ -108,6 +109,7 @@
 		"comments":"Comments",
 		"content":"Content",
 		"contextHelp":"Context help",
+		"data":"Dati",
 		"date":"Data",
 		"dateFormat0":"Y-m-d (2012-12-30)",
 		"dateFormat1":"Y/m/d (2012/12/30)",
@@ -155,6 +157,7 @@
 		"loginForms":"Modulo login",
 		"menu":"Menu",
 		"menus":"Menus",
+		"menusSub":"Sub menus",
 		"missingCaption":"TITOLO MANCANTE",
 		"module":"Application",
 		"more":"More",
@@ -199,6 +202,7 @@
 		"version":"Versione",
 		"unassigned":"Unassigned",
 		"warnings":"Warnings",
+		"widget":"Widget",
 		"widgets":"Widgets",
 		"wrap":"Wrap"
 	},
@@ -870,7 +874,7 @@
 				"windowTitle":"Title of currently open window"
 			},
 			"dialog":{
-				"delete":"Are you sure you want to delete this client application event?"
+				"delete":"Are you sure you want to delete this client event?"
 			},
 			"event":{
 				"onConnect":"Client connects",
@@ -879,9 +883,9 @@
 			},
 			"argumentsHint":"Arguments are provided by the client application to the chosen function, in the here defined order.",
 			"hotkeyHint":"Default hotkey that this client event listens to. Can be overwritten by users in their personal settings.",
-			"title":"Client application event",
+			"title":"Client event",
 			"titleHint":"Visible to users in their personal settings.",
-			"titleNew":"New client application event"
+			"titleNew":"New client event"
 		},
 		"collection":{
 			"dialog":{
@@ -1035,6 +1039,8 @@
 			"columnHeaderData":"Recupero dei dati",
 			"columnLength":"Lunghezza (carat.)",
 			"columnLength0":"senza limite",
+			"columnShowDefault":"Show by default",
+			"columnShowDefaultMobile":"Show by default on mobile",
 			"columnSize":"Dimensione (pixel)",
 			"columnSize0":"automatico",
 			"columnStyles":"Styles",
@@ -1320,7 +1326,7 @@
 				"repo":"Install from repository",
 				"versionCreate":"Crea nuova versione"
 			},
-			"clientEventsHint":"REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client application events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
+			"clientEventsHint":"REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
 			"color":"Colore",
 			"colorHint":"Primary application color - shown in the header and menu if not overwritten by customizing and/or user settings. The system styles are optimized for washed out, darkish colors (dark pastel).",
 			"dependsOn":"Builds on",
@@ -1547,24 +1553,12 @@
 			"accessInherit":"[inherit]",
 			"accessRead":"Read",
 			"accessWrite":"Write",
-			"api":"API",
-			"apis":"APIs",
 			"assignable":"Assignabile",
-			"attribute":"Attributi",
 			"children":"Membro di",
-			"collection":"Collezione",
-			"collections":"Collezioni",
 			"content":"Type",
-			"data":"Dati",
-			"menu":"Menu",
-			"menus":"Menu",
-			"menusSub":"Sub menus",
 			"newRole":"Nuovo ruolo",
-			"relation":"Relazione",
 			"title":"Ruoli",
-			"titleOne":"Role '{NAME}'",
-			"widget":"Widget",
-			"widgets":"Widgets"
+			"titleOne":"Role '{NAME}'"
 		},
 		"start":{
 			"button":{

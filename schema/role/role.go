@@ -6,11 +6,12 @@ import (
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
+	"r3/schema/compatible"
 	"r3/types"
-	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -70,13 +71,15 @@ func getAccess(role types.Role) (types.Role, error) {
 
 	role.AccessApis = make(map[uuid.UUID]int)
 	role.AccessAttributes = make(map[uuid.UUID]int)
+	role.AccessClientEvents = make(map[uuid.UUID]int)
 	role.AccessCollections = make(map[uuid.UUID]int)
 	role.AccessRelations = make(map[uuid.UUID]int)
 	role.AccessMenus = make(map[uuid.UUID]int)
 	role.AccessWidgets = make(map[uuid.UUID]int)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT api_id, attribute_id, collection_id, menu_id, relation_id, widget_id, access
+		SELECT api_id, attribute_id, client_event_id, collection_id,
+			menu_id, relation_id, widget_id, access
 		FROM app.role_access
 		WHERE role_id = $1
 	`, role.Id)
@@ -86,31 +89,34 @@ func getAccess(role types.Role) (types.Role, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var apiId, attributeId, collectionId, menuId, relationId, widgetId uuid.NullUUID
+		var apiId, attributeId, clientEventId, collectionId, menuId, relationId, widgetId pgtype.UUID
 		var access int
 
-		if err := rows.Scan(&apiId, &attributeId, &collectionId,
+		if err := rows.Scan(&apiId, &attributeId, &clientEventId, &collectionId,
 			&menuId, &relationId, &widgetId, &access); err != nil {
 
 			return role, err
 		}
 		if apiId.Valid {
-			role.AccessApis[apiId.UUID] = access
+			role.AccessApis[apiId.Bytes] = access
 		}
 		if attributeId.Valid {
-			role.AccessAttributes[attributeId.UUID] = access
+			role.AccessAttributes[attributeId.Bytes] = access
+		}
+		if clientEventId.Valid {
+			role.AccessClientEvents[clientEventId.Bytes] = access
 		}
 		if collectionId.Valid {
-			role.AccessCollections[collectionId.UUID] = access
+			role.AccessCollections[collectionId.Bytes] = access
 		}
 		if menuId.Valid {
-			role.AccessMenus[menuId.UUID] = access
+			role.AccessMenus[menuId.Bytes] = access
 		}
 		if relationId.Valid {
-			role.AccessRelations[relationId.UUID] = access
+			role.AccessRelations[relationId.Bytes] = access
 		}
 		if widgetId.Valid {
-			role.AccessWidgets[widgetId.UUID] = access
+			role.AccessWidgets[widgetId.Bytes] = access
 		}
 	}
 	return role, nil
@@ -123,19 +129,7 @@ func Set_tx(tx pgx.Tx, role types.Role) error {
 	}
 
 	// compatibility fix: missing role content <3.0
-	if role.Content == "" {
-		if role.Name == "everyone" {
-			role.Content = "everyone"
-		} else if strings.Contains(strings.ToLower(role.Name), "admin") {
-			role.Content = "admin"
-		} else if strings.Contains(strings.ToLower(role.Name), "data") {
-			role.Content = "other"
-		} else if strings.Contains(strings.ToLower(role.Name), "csv") {
-			role.Content = "other"
-		} else {
-			role.Content = "user"
-		}
-	}
+	role = compatible.FixMissingRoleContent(role)
 
 	known, err := schema.CheckCreateId_tx(tx, &role.Id, "role", "id")
 	if err != nil {
@@ -194,6 +188,11 @@ func Set_tx(tx pgx.Tx, role types.Role) error {
 			return err
 		}
 	}
+	for trgId, access := range role.AccessClientEvents {
+		if err := setAccess_tx(tx, role.Id, trgId, "client_event", access); err != nil {
+			return err
+		}
+	}
 	for trgId, access := range role.AccessCollections {
 		if err := setAccess_tx(tx, role.Id, trgId, "collection", access); err != nil {
 			return err
@@ -229,6 +228,10 @@ func setAccess_tx(tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity string, acce
 		}
 	case "attribute": // 1 read, 2 write attribute value
 		if access < -1 || access > 2 {
+			return errors.New("invalid access level")
+		}
+	case "client_event": // 1 access client event
+		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}
 	case "collection": // 1 read collection

@@ -10,13 +10,14 @@ type Login struct {
 	Name string `json:"name"`
 }
 type LoginAccess struct {
-	RoleIds    []uuid.UUID       `json:"roleIds"`    // all assigned roles (incl. inherited)
-	Api        map[uuid.UUID]int `json:"api"`        // effective access to specific API
-	Attribute  map[uuid.UUID]int `json:"attribute"`  // effective access to specific attributes
-	Collection map[uuid.UUID]int `json:"collection"` // effective access to specific collection
-	Menu       map[uuid.UUID]int `json:"menu"`       // effective access to specific menus
-	Relation   map[uuid.UUID]int `json:"relation"`   // effective access to specific relations
-	Widget     map[uuid.UUID]int `json:"widget"`     // effective access to specific widgets
+	RoleIds     []uuid.UUID       `json:"roleIds"`     // all assigned roles (incl. inherited)
+	Api         map[uuid.UUID]int `json:"api"`         // effective access to specific API
+	Attribute   map[uuid.UUID]int `json:"attribute"`   // effective access to specific attributes
+	ClientEvent map[uuid.UUID]int `json:"clientEvent"` // effective access to specific client events
+	Collection  map[uuid.UUID]int `json:"collection"`  // effective access to specific collection
+	Menu        map[uuid.UUID]int `json:"menu"`        // effective access to specific menus
+	Relation    map[uuid.UUID]int `json:"relation"`    // effective access to specific relations
+	Widget      map[uuid.UUID]int `json:"widget"`      // effective access to specific widgets
 }
 type LoginPublicKey struct {
 	LoginId   int64   `json:"loginId"`   // ID of login

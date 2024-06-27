@@ -100,7 +100,8 @@
 		"bright":"Bright",
 		"busy":"Folyamatban - Kattintson ide a megszakításhoz",
 		"category":"Kategória",
-		"clientEvents":"Client application events",
+		"clientEvent":"Client event",
+		"clientEvents":"Client events",
 		"collection":"Gyűjtemény",
 		"collections":"Gyűjtemények",
 		"columns":"Columns",
@@ -108,6 +109,7 @@
 		"comments":"Megjegyzések",
 		"content":"Tartalom",
 		"contextHelp":"Kontextussegítség",
+		"data":"Adat",
 		"date":"Dátum",
 		"dateFormat0":"É-h-n (2012-12-30)",
 		"dateFormat1":"É/h/n (2012/12/30)",
@@ -155,6 +157,7 @@
 		"loginForms":"Bejelentkezési űrlapok",
 		"menu":"Menü",
 		"menus":"Menük",
+		"menusSub":"Sub menus",
 		"missingCaption":"HIÁNYZÓ CÍM",
 		"module":"Alkalmazás",
 		"more":"Továbbiak",
@@ -199,6 +202,7 @@
 		"username":"Felhasználónév",
 		"version":"Verzió",
 		"warnings":"Figyelmeztetések",
+		"widget":"Widget",
 		"widgets":"Widgets",
 		"wrap":"Wrap"
 	},
@@ -870,7 +874,7 @@
 				"windowTitle":"Title of currently open window"
 			},
 			"dialog":{
-				"delete":"Are you sure you want to delete this client application event?"
+				"delete":"Are you sure you want to delete this client event?"
 			},
 			"event":{
 				"onConnect":"Client connects",
@@ -879,9 +883,9 @@
 			},
 			"argumentsHint":"Arguments are provided by the client application to the chosen function, in the here defined order.",
 			"hotkeyHint":"Default hotkey that this client event listens to. Can be overwritten by users in their personal settings.",
-			"title":"Client application event",
+			"title":"Client event",
 			"titleHint":"Visible to users in their personal settings.",
-			"titleNew":"New client application event"
+			"titleNew":"New client event"
 		},
 		"collection":{
 			"dialog":{
@@ -1322,7 +1326,7 @@
 				"repo":"Repository-ból telepítés",
 				"versionCreate":"Új verzió létrehozása"
 			},
-			"clientEventsHint":"REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client application events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
+			"clientEventsHint":"REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
 			"color":"Szín",
 			"colorHint":"Az alap alkalmazásszín - látható a felső sávban és a menüben, ha nincs testreszabva vagy felhasználói beállításokkal felülbírálva. A rendszeres megjelenítés ki van optimalizálva a halványabb, sötétebb színekhez (sötét pasztell).",
 			"dependsOn":"Alapul",
@@ -1549,24 +1553,12 @@
 			"accessInherit":"[öröklés]",
 			"accessRead":"Read",
 			"accessWrite":"Write",
-			"api":"API",
-			"apis":"API-k",
 			"assignable":"Hozzárendelhető",
-			"attribute":"Attribútum",
 			"children":"Tagja ennek",
-			"collection":"Gyűjtemény",
-			"collections":"Gyűjtemények",
 			"content":"Tartalom",
-			"data":"Adat",
-			"menu":"Menü",
-			"menus":"Menük",
-			"menusSub":"Sub menus",
 			"newRole":"Új szerep",
-			"relation":"Reláció",
 			"title":"Szerepek",
-			"titleOne":"Szerep \"{NAME}\"",
-			"widget":"Widget",
-			"widgets":"Widgets"
+			"titleOne":"Szerep \"{NAME}\""
 		},
 		"start":{
 			"button":{

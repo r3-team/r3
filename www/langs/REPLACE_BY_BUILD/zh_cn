@@ -100,7 +100,8 @@
 		"bright":"Bright",
 		"busy":"工作中 - 点击此处中止",
 		"category":"类别",
-		"clientEvents":"Client application events",
+		"clientEvent":"Client event",
+		"clientEvents":"Client events",
 		"collection":"收藏",
 		"collections":"收藏",
 		"columns":"Columns",
@@ -108,6 +109,7 @@
 		"comments":"评论",
 		"content":"内容",
 		"contextHelp":"上下文帮助",
+		"data":"数据",
 		"date":"日期",
 		"dateFormat0":"Y-m-d (2012-12-30)",
 		"dateFormat1":"Y/m/d (2012/12/30)",
@@ -155,6 +157,7 @@
 		"loginForms":"登录表单",
 		"menu":"菜单",
 		"menus":"菜单",
+		"menusSub":"子菜单",
 		"missingCaption":"缺少标题",
 		"module":"应用程序",
 		"more":"更多",
@@ -199,6 +202,7 @@
 		"username":"用户名",
 		"version":"版本",
 		"warnings":"警告",
+		"widget":"新微件",
 		"widgets":"小部件",
 		"wrap":"Wrap"
 	},
@@ -870,7 +874,7 @@
 				"windowTitle":"Title of currently open window"
 			},
 			"dialog":{
-				"delete":"Are you sure you want to delete this client application event?"
+				"delete":"Are you sure you want to delete this client event?"
 			},
 			"event":{
 				"onConnect":"Client connects",
@@ -879,9 +883,9 @@
 			},
 			"argumentsHint":"Arguments are provided by the client application to the chosen function, in the here defined order.",
 			"hotkeyHint":"Default hotkey that this client event listens to. Can be overwritten by users in their personal settings.",
-			"title":"Client application event",
+			"title":"Client event",
 			"titleHint":"Visible to users in their personal settings.",
-			"titleNew":"New client application event"
+			"titleNew":"New client event"
 		},
 		"collection":{
 			"dialog":{
@@ -1322,7 +1326,7 @@
 				"repo":"从仓库安装",
 				"versionCreate":"创建新版本"
 			},
-			"clientEventsHint":"REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client application events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
+			"clientEventsHint":"REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
 			"color":"颜色",
 			"colorHint":"主要应用颜色 - 如果未被定制或用户设置覆盖，将显示在标题和菜单中。系统样式经过优化，适用于淡化的、偏暗的颜色（深淡色）。",
 			"dependsOn":"构建于",
@@ -1549,24 +1553,12 @@
 			"accessInherit":"[继承]",
 			"accessRead":"读取",
 			"accessWrite":"写入",
-			"api":"API",
-			"apis":"API",
 			"assignable":"可分配的",
-			"attribute":"属性",
 			"children":"成员",
-			"collection":"集合",
-			"collections":"集合",
 			"content":"类型",
-			"data":"数据",
-			"menu":"菜单",
-			"menus":"菜单",
-			"menusSub":"子菜单",
 			"newRole":"新建角色",
-			"relation":"关系",
 			"title":"角色",
-			"titleOne":"角色 '{NAME}'",
-			"widget":"小部件",
-			"widgets":"小部件"
+			"titleOne":"角色 '{NAME}'"
 		},
 		"start":{
 			"button":{

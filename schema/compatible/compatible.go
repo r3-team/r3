@@ -7,6 +7,7 @@ import (
 	"r3/db"
 	"r3/types"
 	"slices"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -222,6 +223,25 @@ func FixLegacyFileAttributeValue(jsonValue []byte) []types.DataGetValueFile {
 	var filesNew []types.DataGetValueFile
 	json.Unmarshal(jsonValue, &filesNew)
 	return filesNew
+}
+
+// < 3.0
+// fix missing role content
+func FixMissingRoleContent(role types.Role) types.Role {
+	if role.Content == "" {
+		if role.Name == "everyone" {
+			role.Content = "everyone"
+		} else if strings.Contains(strings.ToLower(role.Name), "admin") {
+			role.Content = "admin"
+		} else if strings.Contains(strings.ToLower(role.Name), "data") {
+			role.Content = "other"
+		} else if strings.Contains(strings.ToLower(role.Name), "csv") {
+			role.Content = "other"
+		} else {
+			role.Content = "user"
+		}
+	}
+	return role
 }
 
 // < 2.7

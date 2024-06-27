@@ -100,7 +100,8 @@
 		"bright":"Bright",
 		"busy":"Strādā - Noklikšķiniet šeit, lai pārtrauktu",
 		"category":"Kategorija",
-		"clientEvents":"Client application events",
+		"clientEvent":"Client event",
+		"clientEvents":"Client events",
 		"collection":"Kolekcija",
 		"collections":"Collections",
 		"columns":"Columns",
@@ -108,6 +109,7 @@
 		"comments":"Komentāri",
 		"content":"Saturs",
 		"contextHelp":"Konteksta palīdzība",
+		"data":"Data",
 		"date":"Datums",
 		"dateFormat0":"Y-m-d (2012-12-30)",
 		"dateFormat1":"Y/m/d (2012/12/30)",
@@ -155,6 +157,7 @@
 		"loginForms":"Login forms",
 		"menu":"Izvēlne",
 		"menus":"Menus",
+		"menusSub":"Sub menus",
 		"missingCaption":"TRŪKST UZRAKSTS",
 		"module":"Application",
 		"more":"Vairāk",
@@ -199,6 +202,7 @@
 		"username":"Lietotājvārds",
 		"version":"Versija",
 		"warnings":"Brīdinājumi",
+		"widget":"Widget",
 		"widgets":"Widgets",
 		"wrap":"Wrap"
 	},
@@ -870,7 +874,7 @@
 				"windowTitle":"Title of currently open window"
 			},
 			"dialog":{
-				"delete":"Are you sure you want to delete this client application event?"
+				"delete":"Are you sure you want to delete this client event?"
 			},
 			"event":{
 				"onConnect":"Client connects",
@@ -879,9 +883,9 @@
 			},
 			"argumentsHint":"Arguments are provided by the client application to the chosen function, in the here defined order.",
 			"hotkeyHint":"Default hotkey that this client event listens to. Can be overwritten by users in their personal settings.",
-			"title":"Client application event",
+			"title":"Client event",
 			"titleHint":"Visible to users in their personal settings.",
-			"titleNew":"New client application event"
+			"titleNew":"New client event"
 		},
 		"collection":{
 			"dialog":{
@@ -1322,7 +1326,7 @@
 				"repo":"Install from repository",
 				"versionCreate":"Create new version"
 			},
-			"clientEventsHint":"REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client application events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
+			"clientEventsHint":"REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
 			"color":"Color",
 			"colorHint":"Primary application color - shown in the header and menu if not overwritten by customizing and/or user settings. The system styles are optimized for washed out, darkish colors (dark pastel).",
 			"dependsOn":"Builds on",
@@ -1549,24 +1553,12 @@
 			"accessInherit":"[inherit]",
 			"accessRead":"Read",
 			"accessWrite":"Write",
-			"api":"API",
-			"apis":"APIs",
 			"assignable":"Assignable",
-			"attribute":"Attribute",
 			"children":"Member of",
-			"collection":"Collection",
-			"collections":"Collections",
 			"content":"Type",
-			"data":"Data",
-			"menu":"Menu",
-			"menus":"Menus",
-			"menusSub":"Sub menus",
 			"newRole":"New role",
-			"relation":"Relation",
 			"title":"Roles",
-			"titleOne":"Role '{NAME}'",
-			"widget":"Widget",
-			"widgets":"Widgets"
+			"titleOne":"Role '{NAME}'"
 		},
 		"start":{
 			"button":{

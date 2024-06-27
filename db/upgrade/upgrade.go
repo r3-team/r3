@@ -306,6 +306,17 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX fki_caption_client_event_id_fkey ON instance.caption USING BTREE (client_event_id ASC NULLS LAST);
 
+			-- client event permissions
+			ALTER TABLE app.role_access ADD COLUMN client_event_id uuid;
+			ALTER TABLE app.role_access ADD CONSTRAINT role_access_client_event_id_fkey FOREIGN KEY (client_event_id)
+				REFERENCES app.client_event (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX IF NOT EXISTS fki_role_access_client_event_id_fkey
+				ON app.role_access USING btree (client_event_id ASC NULLS LAST);
+
 			-- missing indexes
 			CREATE INDEX IF NOT EXISTS fki_api_module_fkey ON app.api USING btree (module_id ASC NULLS LAST);
 		`)

@@ -77,13 +77,14 @@ func load(loginId int64) error {
 	defer access_mx.Unlock()
 
 	loginIdMapAccess[loginId] = types.LoginAccess{
-		RoleIds:    roleIds,
-		Api:        make(map[uuid.UUID]int),
-		Attribute:  make(map[uuid.UUID]int),
-		Collection: make(map[uuid.UUID]int),
-		Menu:       make(map[uuid.UUID]int),
-		Relation:   make(map[uuid.UUID]int),
-		Widget:     make(map[uuid.UUID]int),
+		RoleIds:     roleIds,
+		Api:         make(map[uuid.UUID]int),
+		Attribute:   make(map[uuid.UUID]int),
+		ClientEvent: make(map[uuid.UUID]int),
+		Collection:  make(map[uuid.UUID]int),
+		Menu:        make(map[uuid.UUID]int),
+		Relation:    make(map[uuid.UUID]int),
+		Widget:      make(map[uuid.UUID]int),
 	}
 
 	for _, roleId := range roleIds {
@@ -102,6 +103,13 @@ func load(loginId int64) error {
 				loginIdMapAccess[loginId].Attribute[id] < access {
 
 				loginIdMapAccess[loginId].Attribute[id] = access
+			}
+		}
+		for id, access := range role.AccessClientEvents {
+			if _, exists := loginIdMapAccess[loginId].ClientEvent[id]; !exists ||
+				loginIdMapAccess[loginId].ClientEvent[id] < access {
+
+				loginIdMapAccess[loginId].ClientEvent[id] = access
 			}
 		}
 		for id, access := range role.AccessCollections {

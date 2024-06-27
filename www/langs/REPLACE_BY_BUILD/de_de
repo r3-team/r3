@@ -100,7 +100,8 @@
 		"bright":"Hell",
 		"busy":"Arbeitet - Zum Abbrechen hier klicken",
 		"category":"Kategorie",
-		"clientEvents":"Client-Anwendungs-Ereignisse",
+		"clientEvent":"Client-Ereignis",
+		"clientEvents":"Client-Ereignisse",
 		"collection":"Sammlung",
 		"collections":"Sammlungen",
 		"columns":"Spalten",
@@ -108,6 +109,7 @@
 		"comments":"Kommentare",
 		"content":"Inhalt",
 		"contextHelp":"Kontexthilfe",
+		"data":"Daten",
 		"date":"Datum",
 		"dateFormat0":"Y-m-d (2012-12-30)",
 		"dateFormat1":"Y/m/d (2012/12/30)",
@@ -155,6 +157,7 @@
 		"loginForms":"Anmeldeformulare",
 		"menu":"Menü",
 		"menus":"Menüs",
+		"menusSub":"Untermenüs",
 		"missingCaption":"MISSING CAPTION",
 		"module":"Anwendung",
 		"more":"Mehr",
@@ -199,6 +202,7 @@
 		"version":"Version",
 		"unassigned":"Nicht zugewiesen",
 		"warnings":"Warnungen",
+		"widget":"Widget",
 		"widgets":"Widgets",
 		"wrap":"Umbrechen"
 	},
@@ -870,18 +874,18 @@
 				"windowTitle":"Titel des aktuell offenen Fensters"
 			},
 			"dialog":{
-				"delete":"Bist du sicher, dass du dieses Client-Anwendungs-Ereignis löschen möchtest?"
+				"delete":"Bist du sicher, dass du dieses Client-Ereignis löschen möchtest?"
 			},
 			"event":{
 				"onConnect":"Client verbindet sich",
 				"onDisconnect":"Client trennt sich",
 				"onHotkey":"Client reagiert auf Hotkey"
 			},
-			"argumentsHint":"Argumente werden von der Client-Anwendung der Funktion, in der hier ausgewählten Reihenfolge übergeben.",
+			"argumentsHint":"Argumente werden von der Client-Anwendung der Funktion, in der hier ausgewählten Reihenfolge, übergeben.",
 			"hotkeyHint":"Standard-Hotkey auf welchen dieses Ereignis reagiert. Kann von Benutzern in den persönlichen Einstellungen überschrieben werden.",
-			"title":"Client-Anwendungs-Ereignis",
+			"title":"Client-Ereignis",
 			"titleHint":"Sichtbar für Benutzer in ihren persönlichen Einstellungen.",
-			"titleNew":"Neues Client-Anwendungs-Ereignis"
+			"titleNew":"Neues Client-Ereignis"
 		},
 		"collection":{
 			"dialog":{
@@ -1322,7 +1326,7 @@
 				"repo":"Vom Repository installieren",
 				"versionCreate":"Neue Version erzeugen"
 			},
-			"clientEventsHint":"REI3 hat eine Client-Anwendung, welche Benutzer über ihre persönlichen Einstellungen installieren können. Wenn diese läuft, kann sie in REI3 hochgeladene Dateien mit lokaler Software öffnen. Sie kann auch auf bestimmte Ereignisse wie z. B. Hotkey-Eingaben reagieren, indem sogenannte 'Client-Anwendungs-Ereignisse' definiert werden. Diese Ereignisse werden idR. genutzt, um Informationen vom Client zu REI3 zu schicken - entweder um Daten zu aktualisieren mithilfe von Backend-Funktionen oder mit einer offenen REI3-Browser-Sitzung zu interagieren mithilfe von Frontend-Funktionen.",
+			"clientEventsHint":"REI3 hat eine Client-Anwendung, welche Benutzer über ihre persönlichen Einstellungen installieren können. Wenn diese läuft, kann sie in REI3 hochgeladene Dateien mit lokaler Software öffnen. Sie kann auch auf bestimmte Ereignisse wie z. B. Hotkey-Eingaben reagieren, indem sogenannte 'Client-Ereignisse' definiert werden. Diese Ereignisse werden idR. genutzt, um Informationen vom Client zu REI3 zu schicken - entweder um Daten zu aktualisieren mithilfe von Backend-Funktionen oder mit einer offenen REI3-Browser-Sitzung zu interagieren mithilfe von Frontend-Funktionen.",
 			"color":"Farbe",
 			"colorHint":"Primäre Anwendungsfarbe - sichtbar in der obersten Leiste und Menü, wenn nicht durch Customizing und/oder Benutzereinstellung überschrieben. Die Systemdarstellung ist optimiert für ausgewaschene, dunklere Farben (dunkles Pastell).",
 			"dependsOn":"Baut auf",
@@ -1549,24 +1553,12 @@
 			"accessInherit":"[erben]",
 			"accessRead":"Lesen",
 			"accessWrite":"Schreiben",
-			"api":"API",
-			"apis":"APIs",
 			"assignable":"Zuweisbar",
-			"attribute":"Attribut",
 			"children":"Mitglied von",
-			"collection":"Sammlung",
-			"collections":"Sammlungen",
 			"content":"Typ",
-			"data":"Data",
-			"menu":"Menü",
-			"menus":"Menüs",
-			"menusSub":"Untermenüs",
 			"newRole":"Neue Rolle",
-			"relation":"Relation",
 			"title":"Rollen",
-			"titleOne":"Role \"{NAME}\"",
-			"widget":"Widget",
-			"widgets":"Widgets"
+			"titleOne":"Role \"{NAME}\""
 		},
 		"start":{
 			"button":{

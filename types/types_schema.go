@@ -491,19 +491,20 @@ type Column struct {
 	Wrap          bool `json:"wrap"`
 }
 type Role struct {
-	Id                uuid.UUID         `json:"id"`
-	ModuleId          uuid.UUID         `json:"moduleId"`
-	ChildrenIds       []uuid.UUID       `json:"childrenIds"`
-	Name              string            `json:"name"`
-	Content           string            `json:"content"`
-	Assignable        bool              `json:"assignable"`
-	AccessApis        map[uuid.UUID]int `json:"accessApis"`
-	AccessAttributes  map[uuid.UUID]int `json:"accessAttributes"`
-	AccessCollections map[uuid.UUID]int `json:"accessCollections"`
-	AccessMenus       map[uuid.UUID]int `json:"accessMenus"`
-	AccessRelations   map[uuid.UUID]int `json:"accessRelations"`
-	AccessWidgets     map[uuid.UUID]int `json:"accessWidgets"`
-	Captions          CaptionMap        `json:"captions"`
+	Id                 uuid.UUID         `json:"id"`
+	ModuleId           uuid.UUID         `json:"moduleId"`
+	ChildrenIds        []uuid.UUID       `json:"childrenIds"`
+	Name               string            `json:"name"`
+	Content            string            `json:"content"`
+	Assignable         bool              `json:"assignable"`
+	AccessApis         map[uuid.UUID]int `json:"accessApis"`
+	AccessAttributes   map[uuid.UUID]int `json:"accessAttributes"`
+	AccessClientEvents map[uuid.UUID]int `json:"accessClientEvents"`
+	AccessCollections  map[uuid.UUID]int `json:"accessCollections"`
+	AccessMenus        map[uuid.UUID]int `json:"accessMenus"`
+	AccessRelations    map[uuid.UUID]int `json:"accessRelations"`
+	AccessWidgets      map[uuid.UUID]int `json:"accessWidgets"`
+	Captions           CaptionMap        `json:"captions"`
 }
 type PgFunction struct {
 	Id             uuid.UUID            `json:"id"`

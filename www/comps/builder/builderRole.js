@@ -32,15 +32,17 @@ let MyBuilderRoleAccessApi = {
 	}
 };
 
-let MyBuilderRoleAccessWidget = {
-	name:'my-builder-role-access-widget',
+let MyBuilderRoleAccessClientEvent = {
+	name:'my-builder-role-access-client-event',
 	template:`<tr class="entry">
 		<td>
-			<span class="builder-role-td-name">{{ widget.name }}</span>
+			<span class="builder-role-td-name">
+				{{ clientEvent.captions.clientEventTitle[builderLanguage] }}
+			</span>
 		</td>
 		<td>
 			<my-bool
-				@update:modelValue="$emit('apply',widget.id,access === 1 ? -1 : 1)"
+				@update:modelValue="$emit('apply',clientEvent.id,access === 1 ? -1 : 1)"
 				:modelValue="access === 1 ? true : false"
 				:readonly="readonly"
 			/>
@@ -49,14 +51,14 @@ let MyBuilderRoleAccessWidget = {
 	</tr>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
-		widget:         { type:Object,  required:true },
+		clientEvent:    { type:Object,  required:true },
 		idMapAccess:    { type:Object,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
 	emits:['apply'],
 	computed:{
-		access:(s) => typeof s.idMapAccess[s.widget.id] === 'undefined'
-			? -1 : s.idMapAccess[s.widget.id]
+		access:(s) => typeof s.idMapAccess[s.clientEvent.id] === 'undefined'
+			? -1 : s.idMapAccess[s.clientEvent.id]
 	}
 };
 
@@ -285,11 +287,40 @@ let MyBuilderRoleAccessRelation = {
 	}
 };
 
+let MyBuilderRoleAccessWidget = {
+	name:'my-builder-role-access-widget',
+	template:`<tr class="entry">
+		<td>
+			<span class="builder-role-td-name">{{ widget.name }}</span>
+		</td>
+		<td>
+			<my-bool
+				@update:modelValue="$emit('apply',widget.id,access === 1 ? -1 : 1)"
+				:modelValue="access === 1 ? true : false"
+				:readonly="readonly"
+			/>
+		</td>
+		<td class="maximum"></td>
+	</tr>`,
+	props:{
+		builderLanguage:{ type:String,  required:true },
+		idMapAccess:    { type:Object,  required:true },
+		readonly:       { type:Boolean, required:true },
+		widget:         { type:Object,  required:true }
+	},
+	emits:['apply'],
+	computed:{
+		access:(s) => typeof s.idMapAccess[s.widget.id] === 'undefined'
+			? -1 : s.idMapAccess[s.widget.id]
+	}
+};
+
 let MyBuilderRole = {
 	name:'my-builder-role',
 	components:{
 		MyBuilderCaption,
 		MyBuilderRoleAccessApi,
+		MyBuilderRoleAccessClientEvent,
 		MyBuilderRoleAccessCollection,
 		MyBuilderRoleAccessMenu,
 		MyBuilderRoleAccessRelation,
@@ -344,8 +375,8 @@ let MyBuilderRole = {
 			<div class="column grow">
 				<my-tabs
 					v-model="tabTarget"
-					:entries="['data','menus','collections','apis','widgets']"
-					:entriesIcon="['images/database.png','images/menu.png','images/tray.png','images/api.png','images/tiles.png']"
+					:entries="['data','menus','collections','apis','widgets','clientEvents']"
+					:entriesIcon="['images/database.png','images/menu.png','images/tray.png','images/api.png','images/tiles.png','images/screen.png']"
 					:entriesText="tabCaptions"
 				/>
 				
@@ -354,11 +385,11 @@ let MyBuilderRole = {
 						<table class="generic-table sticky-top default-inputs">
 							<thead>
 								<tr>
-									<th>{{ capApp.relation }}</th>
+									<th>{{ capGen.relation }}</th>
 									<th colspan="2">
 										<my-button
 											@trigger="toggleRelationsAll"
-											:caption="capApp.attribute"
+											:caption="capGen.attribute"
 											:image="module.relations.length === relationIdsShown.length ? 'triangleDown.png' : 'triangleRight.png'"
 											:naked="true"
 										/>
@@ -405,7 +436,7 @@ let MyBuilderRole = {
 					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'menus'">
 						<thead>
 							<tr>
-								<th>{{ capApp.menu }}</th>
+								<th>{{ capGen.menu }}</th>
 								<th>
 									<my-button
 										@trigger="toggleMenusAll"
@@ -440,10 +471,31 @@ let MyBuilderRole = {
 						</tbody>
 					</table>
 					
+					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'clientEvents'">
+						<thead>
+							<tr>
+								<th>{{ capGen.clientEvent }}</th>
+								<th>{{ capApp.access }}</th>
+								<th class="maximum"></th>
+							</tr>
+						</thead>
+						<tbody>
+							<my-builder-role-access-client-event
+								v-for="ce in module.clientEvents"
+								@apply="(...args) => apply('clientEvent',args[0],args[1])"
+								:builderLanguage="builderLanguage"
+								:clientEvent="ce"
+								:idMapAccess="accessClientEvents"
+								:key="role.id + '_' + ce.id"
+								:readonly="readonly"
+							/>
+						</tbody>
+					</table>
+					
 					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'collections'">
 						<thead>
 							<tr>
-								<th>{{ capApp.collection }}</th>
+								<th>{{ capGen.collection }}</th>
 								<th>{{ capApp.access }}</th>
 								<th class="maximum"></th>
 							</tr>
@@ -464,7 +516,7 @@ let MyBuilderRole = {
 					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'apis'">
 						<thead>
 							<tr>
-								<th>{{ capApp.api }}</th>
+								<th>{{ capGen.api }}</th>
 								<th>{{ capApp.access }}</th>
 								<th class="maximum"></th>
 							</tr>
@@ -485,7 +537,7 @@ let MyBuilderRole = {
 					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'widgets'">
 						<thead>
 							<tr>
-								<th>{{ capApp.widget }}</th>
+								<th>{{ capGen.widget }}</th>
 								<th>{{ capApp.access }}</th>
 								<th class="maximum"></th>
 							</tr>
@@ -612,6 +664,7 @@ let MyBuilderRole = {
 			// inputs
 			accessApis:{},
 			accessAttributes:{},
+			accessClientEvents:{},
 			accessCollections:{},
 			accessMenus:{},
 			accessRelations:{},
@@ -634,14 +687,15 @@ let MyBuilderRole = {
 			s.name          !== s.role.name
 			|| s.content    !== s.role.content
 			|| s.assignable !== s.role.assignable
-			|| JSON.stringify(s.childrenIds)       !== JSON.stringify(s.role.childrenIds)
-			|| JSON.stringify(s.accessApis)        !== JSON.stringify(s.role.accessApis)
-			|| JSON.stringify(s.accessAttributes)  !== JSON.stringify(s.role.accessAttributes)
-			|| JSON.stringify(s.accessCollections) !== JSON.stringify(s.role.accessCollections)
-			|| JSON.stringify(s.accessMenus)       !== JSON.stringify(s.role.accessMenus)
-			|| JSON.stringify(s.accessRelations)   !== JSON.stringify(s.role.accessRelations)
-			|| JSON.stringify(s.accessWidgets)     !== JSON.stringify(s.role.accessWidgets)
-			|| JSON.stringify(s.captions)          !== JSON.stringify(s.role.captions),
+			|| JSON.stringify(s.childrenIds)        !== JSON.stringify(s.role.childrenIds)
+			|| JSON.stringify(s.accessApis)         !== JSON.stringify(s.role.accessApis)
+			|| JSON.stringify(s.accessAttributes)   !== JSON.stringify(s.role.accessAttributes)
+			|| JSON.stringify(s.accessClientEvents) !== JSON.stringify(s.role.accessClientEvents)
+			|| JSON.stringify(s.accessCollections)  !== JSON.stringify(s.role.accessCollections)
+			|| JSON.stringify(s.accessMenus)        !== JSON.stringify(s.role.accessMenus)
+			|| JSON.stringify(s.accessRelations)    !== JSON.stringify(s.role.accessRelations)
+			|| JSON.stringify(s.accessWidgets)      !== JSON.stringify(s.role.accessWidgets)
+			|| JSON.stringify(s.captions)           !== JSON.stringify(s.role.captions),
 		menuIdsAll:(s) => {
 			let out = [];
 			const getChildren = function(menus) {
@@ -658,11 +712,12 @@ let MyBuilderRole = {
 		},
 		tabCaptions:(s) => {
 			return [
-				`${s.capApp.data} (${s.module.relations.length})`,
-				`${s.capApp.menus} (${s.module.menus.length})`,
-				`${s.capApp.collections} (${s.module.collections.length})`,
-				`${s.capApp.apis} (${s.module.apis.length})`,
-				`${s.capApp.widgets} (${s.module.widgets.length})`
+				`${s.capGen.data} (${s.module.relations.length})`,
+				`${s.capGen.menus} (${s.module.menus.length})`,
+				`${s.capGen.collections} (${s.module.collections.length})`,
+				`${s.capGen.apis} (${s.module.apis.length})`,
+				`${s.capGen.widgets} (${s.module.widgets.length})`,
+				`${s.capGen.clientEvents} (${s.module.clientEvents.length})`
 			];
 		},
 		
@@ -686,12 +741,13 @@ let MyBuilderRole = {
 		// actions
 		apply(type,id,access) {
 			switch(type) {
-				case 'api':        this.accessApis[id]        = access; break;
-				case 'attribute':  this.accessAttributes[id]  = access; break;
-				case 'collection': this.accessCollections[id] = access; break;
-				case 'menu':       this.accessMenus[id]       = access; break;
-				case 'relation':   this.accessRelations[id]   = access; break;
-				case 'widget':     this.accessWidgets[id]     = access; break;
+				case 'api':         this.accessApis[id]         = access; break;
+				case 'attribute':   this.accessAttributes[id]   = access; break;
+				case 'clientEvent': this.accessClientEvents[id] = access; break;
+				case 'collection':  this.accessCollections[id]  = access; break;
+				case 'menu':        this.accessMenus[id]        = access; break;
+				case 'relation':    this.accessRelations[id]    = access; break;
+				case 'widget':      this.accessWidgets[id]      = access; break;
 			}
 		},
 		childAdd(id) {
@@ -703,17 +759,18 @@ let MyBuilderRole = {
 				this.childrenIds.splice(pos,1);
 		},
 		reset() {
-			this.name              = this.role.name;
-			this.content           = this.role.content;
-			this.assignable        = this.role.assignable;
-			this.childrenIds       = JSON.parse(JSON.stringify(this.role.childrenIds)),
-			this.accessApis        = JSON.parse(JSON.stringify(this.role.accessApis));
-			this.accessAttributes  = JSON.parse(JSON.stringify(this.role.accessAttributes));
-			this.accessCollections = JSON.parse(JSON.stringify(this.role.accessCollections));
-			this.accessMenus       = JSON.parse(JSON.stringify(this.role.accessMenus));
-			this.accessRelations   = JSON.parse(JSON.stringify(this.role.accessRelations));
-			this.accessWidgets     = JSON.parse(JSON.stringify(this.role.accessWidgets));
-			this.captions          = JSON.parse(JSON.stringify(this.role.captions));
+			this.name               = this.role.name;
+			this.content            = this.role.content;
+			this.assignable         = this.role.assignable;
+			this.childrenIds        = JSON.parse(JSON.stringify(this.role.childrenIds)),
+			this.accessApis         = JSON.parse(JSON.stringify(this.role.accessApis));
+			this.accessAttributes   = JSON.parse(JSON.stringify(this.role.accessAttributes));
+			this.accessClientEvents = JSON.parse(JSON.stringify(this.role.accessClientEvents));
+			this.accessCollections  = JSON.parse(JSON.stringify(this.role.accessCollections));
+			this.accessMenus        = JSON.parse(JSON.stringify(this.role.accessMenus));
+			this.accessRelations    = JSON.parse(JSON.stringify(this.role.accessRelations));
+			this.accessWidgets      = JSON.parse(JSON.stringify(this.role.accessWidgets));
+			this.captions           = JSON.parse(JSON.stringify(this.role.captions));
 			this.ready = true;
 		},
 		toggleMenu(id) {
@@ -780,6 +837,7 @@ let MyBuilderRole = {
 				childrenIds:this.childrenIds,
 				accessApis:this.accessApis,
 				accessAttributes:this.accessAttributes,
+				accessClientEvents:this.accessClientEvents,
 				accessCollections:this.accessCollections,
 				accessMenus:this.accessMenus,
 				accessRelations:this.accessRelations,
