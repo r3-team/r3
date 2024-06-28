@@ -185,6 +185,20 @@ func JsFunctionCalled(updateNodes bool, address string, loginId int64, jsFunctio
 	}
 	return nil
 }
+func KeystrokesRequested(updateNodes bool, address string, loginId int64, keystrokes string) error {
+	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceFatClient, LoginId: loginId}
+	if updateNodes {
+		if err := createEventsForOtherNodes("keystrokesRequested", keystrokes, target); err != nil {
+			return err
+		}
+	}
+	WebsocketClientEvents <- types.ClusterEvent{
+		Content: "keystrokesRequested",
+		Payload: keystrokes,
+		Target:  target,
+	}
+	return nil
+}
 func LoginDisabled(updateNodes bool, loginId int64) error {
 	target := types.ClusterEventTarget{LoginId: loginId}
 	if updateNodes {

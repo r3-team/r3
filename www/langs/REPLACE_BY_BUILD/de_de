@@ -1159,6 +1159,7 @@
 			},
 			"helpJs":{
 				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Sperrt alle Eingaben auf dem aktuellen Formular oder gibt diese wieder frei.",
+				"client_execute_keystrokes":"app.client_execute_keystrokes(keystrokes) => UNDEFINED<br /><br />Sendet eine Anfrage an einen REI3-Client, installiert und aktiv auf dem gleichen Computer wie die REI3-Browser-Sitzung, eine Reihe an Tastatureingaben durchzuführen. Diese Eingaben werden durch einen String definiert, wie z. B. \"Hallo Welt!\".<br /><br />Einige Sondertasten (ALT-TAB, TAB, ENTER, ESCAPE) werden ebenfalls unterstützt und können wie folgt verwendet werden:<br />\"Hallo,{ENTER}wie geht es dir?\"",
 				"collection_update":"app.collection_update(collection_id) => UNDEFINED<br /><br />Aktualisiert Werte für die spezifizierte Sammlung.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Kopiert Text zur Zwischenablage des Benutzers.",
 				"form_close":"app.form_close() => UNDEFINED<br /><br />Schließt das Formular (falls schwebend oder Subformular), ansonsten geht zurück in der Browser-Historie.",
@@ -1189,6 +1190,7 @@
 				"value_store_set":"app.value_store_set(key,value) => UNDEFINED<br /><br />Speichert einen Wert für eine spätere Verwendung. Werte werden mit einem Referenzschlüssel gespeichtert (ein beliebiger Name) und können nur in der gleichen Anwendung genutzt werden.<br /><br />Der Value-Store ist sitzungsbasiert; Werte sind nicht verfügbar auf einem anderen Gerät oder nachdem die Seite neu geladen worden ist."
 			},
 			"helpJsHint":{
+				"client_execute_keystrokes":"KEYSTROKES_STRING",
 				"copy_to_clipboard":"VALUE",
 				"form_open":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 				"form_set_title":"TITLE_STRING",

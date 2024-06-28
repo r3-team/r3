@@ -1159,6 +1159,7 @@
 			},
 			"helpJs":{
 				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />阻止或解除当前表单上所有输入框的操作。",
+				"client_execute_keystrokes":"app.client_execute_keystrokes(keystrokes) => UNDEFINED<br /><br />Sends a request to a REI3 client, installed and running on the same computer as the REI3 browser session, to execute a list of keystrokes. These keystrokes are defined by a string, such as 'Hello World!'.<br /><br />Some special keys (ALT-TAB, TAB, ENTER, ESCAPE) are also supported and can be used as such:<br />'Hello,{ENTER}How are you?'",
 				"collection_update":"app.collection_update(collection_id) => UNDEFINED<br /><br />更新指定集合的值。",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />将文本复制到用户的剪贴板。",
 				"form_close":"app.form_close() => UNDEFINED<br /><br />关闭表单（如果是浮动或子表单），否则返回浏览器历史记录。",
@@ -1189,6 +1190,7 @@
 				"value_store_set":"app.value_store_set(key,value) => UNDEFINED<br /><br />存储一个值以供以后使用。值使用引用键（任意名称）存储，并且只能在同一应用程序中访问。<br /><br />值存储基于会话；在另一个设备上，或用户刷新页面时，值不可用。"
 			},
 			"helpJsHint":{
+				"client_execute_keystrokes":"KEYSTROKES_STRING",
 				"copy_to_clipboard":"VALUE",
 				"form_open":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 				"form_set_title":"TITLE_STRING",

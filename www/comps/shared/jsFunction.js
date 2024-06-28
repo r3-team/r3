@@ -41,7 +41,10 @@ const exposedFunctionsDefaults = {
 		});
 	},
 
-	// form open (simple form, usually overwritten)
+	// fat client functions
+	client_execute_keystrokes:(keystrokes) => ws.send('event','keystrokesRequested',keystrokes),
+
+	// form open (simple version, usually overwritten)
 	form_open:(formId,recordId,newTab,popUp,maxY,maxX) => {
 		formOpen({
 			formIdOpen:formId, popUpType:popUp ? 'float' : null,

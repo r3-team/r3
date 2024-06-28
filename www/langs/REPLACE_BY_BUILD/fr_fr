@@ -1159,6 +1159,7 @@
 			},
 			"helpJs":{
 				"block_inputs":"app.block_inputs(true/false) => NON DÉFINI<br /><br />Bloque ou débloque tous les champs du formulaire actuel.",
+				"client_execute_keystrokes":"app.client_execute_keystrokes(keystrokes) => UNDEFINED<br /><br />Sends a request to a REI3 client, installed and running on the same computer as the REI3 browser session, to execute a list of keystrokes. These keystrokes are defined by a string, such as 'Hello World!'.<br /><br />Some special keys (ALT-TAB, TAB, ENTER, ESCAPE) are also supported and can be used as such:<br />'Hello,{ENTER}How are you?'",
 				"collection_update":"app.collection_update(collection_id) => NON DÉFINI<br /><br />Met à jour les valeurs de la collection spécifiée.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => NON DÉFINI<br /><br />Copie le texte dans le presse-papiers de l'utilisateur.",
 				"form_close":"app.form_close() => NON DÉFINI<br /><br />Ferme le formulaire (si flottant ou sous-formulaire), sinon retourne dans l'historique du navigateur.",
@@ -1189,6 +1190,7 @@
 				"value_store_set":"app.value_store_set(key,value) => NON DÉFINI<br /><br />Stocke une valeur pour une utilisation ultérieure. Les valeurs sont stockées avec une clé de référence (un nom arbitraire) et ne peuvent être accédées que dans la même application.<br /><br />Le stockage de valeurs est basé sur la session ; les valeurs ne sont pas disponibles sur un autre appareil ou lorsque l'utilisateur actualise la page."
 			},
 			"helpJsHint":{
+				"client_execute_keystrokes":"KEYSTROKES_STRING",
 				"copy_to_clipboard":"VALUE",
 				"form_open":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 				"form_set_title":"TITLE_STRING",

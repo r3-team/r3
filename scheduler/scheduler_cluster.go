@@ -99,6 +99,12 @@ func clusterProcessEvents() error {
 			}
 			err = cluster.JsFunctionCalled(false, e.Target.Address,
 				e.Target.LoginId, p.JsFunctionId, p.Arguments)
+		case "keystrokesRequested":
+			var keystrokes string
+			if err := json.Unmarshal(jsonPayload, &p); err != nil {
+				return err
+			}
+			err = cluster.KeystrokesRequested(false, e.Target.Address, e.Target.LoginId, keystrokes)
 		case "loginDisabled":
 			err = cluster.LoginDisabled(false, e.Target.LoginId)
 		case "loginReauthorized":

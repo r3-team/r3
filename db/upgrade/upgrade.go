@@ -211,6 +211,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- new cluster events
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'jsFunctionCalled';
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'clientEventsChanged';
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'keystrokesRequested';
 			
 			-- cluster event target filters
 			ALTER TABLE instance_cluster.node_event

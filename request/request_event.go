@@ -63,5 +63,10 @@ func eventFileRequested(reqJson json.RawMessage, loginId int64, address string) 
 		req.AttributeId, req.FileId, hash.String, name, req.ChooseApp)
 }
 func eventKeystrokesRequested(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
-	return nil, nil
+	var keystrokes string
+
+	if err := json.Unmarshal(reqJson, &keystrokes); err != nil {
+		return nil, err
+	}
+	return nil, cluster.KeystrokesRequested(true, address, loginId, keystrokes)
 }

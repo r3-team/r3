@@ -158,6 +158,8 @@ func (hub *hubType) start() {
 				jsonMsg, err = prepareUnrequested("fileRequested", event.Payload)
 			case "jsFunctionCalled":
 				jsonMsg, err = prepareUnrequested("jsFunctionCalled", event.Payload)
+			case "keystrokesRequested":
+				jsonMsg, err = prepareUnrequested("keystrokesRequested", event.Payload)
 			case "renew":
 				jsonMsg, err = prepareUnrequested("reauthorized", nil)
 			case "schemaLoaded":

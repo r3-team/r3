@@ -1159,6 +1159,7 @@
 			},
 			"helpJs":{
 				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Blocks or unblocks all inputs on the current form.",
+				"client_execute_keystrokes":"app.client_execute_keystrokes(keystrokes) => UNDEFINED<br /><br />Sends a request to a REI3 client, installed and running on the same computer as the REI3 browser session, to execute a list of keystrokes. These keystrokes are defined by a string, such as 'Hello World!'.<br /><br />Some special keys (ALT-TAB, TAB, ENTER, ESCAPE) are also supported and can be used as such:<br />'Hello,{ENTER}How are you?'",
 				"collection_update":"app.collection_update(collection_id) => UNDEFINED<br /><br />Updates values for the specified collection.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copies text to the users clipboard.",
 				"form_close":"app.form_close() => UNDEFINED<br /><br />Closes the form (if floating or sub form), otherwise goes back in browser history.",
@@ -1189,6 +1190,7 @@
 				"value_store_set":"app.value_store_set(key,value) => UNDEFINED<br /><br />Stores a value for later use. Values are stored with a reference key (an arbitrary name) and can only be accessed within the same application.<br /><br />The value store is session based; values are not available on another device or when the user refreshes the page."
 			},
 			"helpJsHint":{
+				"client_execute_keystrokes":"KEYSTROKES_STRING",
 				"copy_to_clipboard":"VALUE",
 				"form_open":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 				"form_set_title":"TITLE_STRING",
