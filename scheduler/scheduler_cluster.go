@@ -101,7 +101,7 @@ func clusterProcessEvents() error {
 				e.Target.LoginId, p.JsFunctionId, p.Arguments)
 		case "keystrokesRequested":
 			var keystrokes string
-			if err := json.Unmarshal(jsonPayload, &p); err != nil {
+			if err := json.Unmarshal(jsonPayload, &keystrokes); err != nil {
 				return err
 			}
 			err = cluster.KeystrokesRequested(false, e.Target.Address, e.Target.LoginId, keystrokes)

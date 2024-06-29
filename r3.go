@@ -56,9 +56,10 @@ import (
 
 var (
 	// overwritten by build parameters
-	appName      string = "REI3"
-	appNameShort string = "R3"
-	appVersion   string = "0.1.2.3"
+	appName          string = "REI3"
+	appNameShort     string = "R3"
+	appVersion       string = "0.1.2.3"
+	appVersionClient string = "0.1.2.3"
 
 	// start parameters
 	cli struct {
@@ -97,7 +98,14 @@ type program struct {
 func main() {
 
 	// set configuration parameters
-	config.SetAppVersion(appVersion)
+	if err := config.SetAppVersion(appVersion, "service"); err != nil {
+		fmt.Printf("failed to set app version, %v\n", err)
+		return
+	}
+	if err := config.SetAppVersion(appVersionClient, "fatClient"); err != nil {
+		fmt.Printf("failed to set app client version, %v\n", err)
+		return
+	}
 	config.SetAppName(appName, appNameShort)
 
 	// process configuration overwrites from command line

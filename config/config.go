@@ -9,6 +9,7 @@ import (
 	"r3/tools"
 	"r3/types"
 	"regexp"
+	"strconv"
 	"sync"
 
 	"github.com/gbrlsnchs/jwt/v3"
@@ -22,11 +23,9 @@ var (
 	appName      string
 	appNameShort string
 
-	// application version details (version syntax: major.minor.patch.build)
-	// only major/minor version updates may effect the database
-	appVersion      string // full version of this application (1.2.0.1023)
-	appVersionCut   string // major+minor version of this application (1.2)
-	appVersionBuild string // build counter of this application (1023)
+	// application versions
+	appVersion       types.Version // r3
+	appVersionClient types.Version // r3 fat client
 
 	// configuration file location
 	filePath      string // location of configuration file in JSON format
@@ -38,18 +37,24 @@ var (
 	// operation data
 	license     = types.License{}
 	tokenSecret *jwt.HMACSHA
+
+	// regex
+	rxVersionBuild = regexp.MustCompile(`^\d+\.\d+\.\d+\.`)
+	rxVersionCut   = regexp.MustCompile(`\.\d+\.\d+$`)
 )
 
-// returns
-// *full application version (1.2.0.1023)
-// *major+minor application version (1.2)
-// *build number (1023)
-// *database version (1.2), which is kept equal to major+minor app version
-func GetAppVersions() (string, string, string, string) {
+func GetAppVersion() types.Version {
 	access_mx.RLock()
 	defer access_mx.RUnlock()
-	return appVersion, appVersionCut, appVersionBuild, GetString("dbVersionCut")
+	return appVersion
 }
+
+func GetAppVersionClient() types.Version {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+	return appVersionClient
+}
+
 func GetAppName() (string, string) {
 	access_mx.RLock()
 	defer access_mx.RUnlock()
@@ -59,6 +64,9 @@ func GetConfigFilepath() string {
 	access_mx.RLock()
 	defer access_mx.RUnlock()
 	return filePath
+}
+func GetDbVersionCut() string {
+	return GetString("dbVersionCut")
 }
 func GetLicense() types.License {
 	access_mx.RLock()
@@ -92,12 +100,25 @@ func GetTokenSecret() *jwt.HMACSHA {
 }
 
 // setters
-func SetAppVersion(version string) {
+func SetAppVersion(versionFull string, target string) error {
 	access_mx.Lock()
 	defer access_mx.Unlock()
-	appVersion = version
-	appVersionCut = regexp.MustCompile(`\.\d+\.\d+$`).ReplaceAllString(version, "")
-	appVersionBuild = regexp.MustCompile(`^\d+\.\d+\.\d+\.`).ReplaceAllString(version, "")
+
+	build, err := strconv.Atoi(rxVersionBuild.ReplaceAllString(versionFull, ""))
+	if err != nil {
+		return err
+	}
+
+	if target == "service" {
+		appVersion.Build = build
+		appVersion.Cut = rxVersionCut.ReplaceAllString(versionFull, "")
+		appVersion.Full = versionFull
+	} else if target == "fatClient" {
+		appVersionClient.Build = build
+		appVersionClient.Cut = rxVersionCut.ReplaceAllString(versionFull, "")
+		appVersionClient.Full = versionFull
+	}
+	return nil
 }
 func SetAppName(name string, nameShort string) {
 	access_mx.Lock()

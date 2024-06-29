@@ -15,8 +15,7 @@ func updateCheck() error {
 	var check struct {
 		Version string `json:"version"`
 	}
-	appVersion, _, _, _ := config.GetAppVersions()
-	url := fmt.Sprintf("%s?old=%s", config.GetString("updateCheckUrl"), appVersion)
+	url := fmt.Sprintf("%s?old=%s", config.GetString("updateCheckUrl"), config.GetAppVersion().Full)
 
 	log.Info("server", fmt.Sprintf("starting update check at '%s'", url))
 

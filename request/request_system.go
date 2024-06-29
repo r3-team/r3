@@ -1,6 +1,7 @@
 package request
 
 import (
+	"fmt"
 	"r3/config"
 )
 
@@ -10,7 +11,7 @@ func SystemGet() (interface{}, error) {
 		AppBuild   string `json:"appBuild"`
 		EmbeddedDb bool   `json:"embeddedDb"`
 	}
-	_, _, res.AppBuild, _ = config.GetAppVersions()
+	res.AppBuild = fmt.Sprintf("%d", config.GetAppVersion().Build)
 	res.EmbeddedDb = config.File.Db.Embedded
 
 	return res, nil

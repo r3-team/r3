@@ -25,8 +25,6 @@ func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID,
 	skipVerify := config.GetUint64("repoSkipVerify") == 1
 
 	releaseBuild := 0
-	_, _, releaseBuildApp, _ := config.GetAppVersions()
-
 	if moduleId.Valid {
 		module, exists := cache.ModuleIdMap[moduleId.Bytes]
 		if !exists {
@@ -95,7 +93,7 @@ func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID,
 				types.DataSetAttribute{
 					AttributeId:   uuid.FromStringOrNil("e5e0fe54-38c7-4c00-8c48-2bdca0febc2b"), // release_build_app
 					AttributeIdNm: pgtype.UUID{},
-					Value:         releaseBuildApp,
+					Value:         config.GetAppVersion().Build,
 				},
 				types.DataSetAttribute{
 					AttributeId:   uuid.FromStringOrNil("22e93eba-bbc1-4a63-9f36-deca6b74e78d"), // text

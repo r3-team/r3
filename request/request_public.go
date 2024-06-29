@@ -37,7 +37,7 @@ func PublicGet() (interface{}, error) {
 	res.Activated = config.GetLicenseActive()
 	res.AppName = config.GetString("appName")
 	res.AppNameShort = config.GetString("appNameShort")
-	res.AppVersion, _, _, _ = config.GetAppVersions()
+	res.AppVersion = config.GetAppVersion().Full
 	res.CaptionMapCustom = cache.GetCaptionMapCustom()
 	res.ClusterNodeName = cache.GetNodeName()
 	res.CompanyColorHeader = config.GetString("companyColorHeader")

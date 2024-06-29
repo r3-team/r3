@@ -12,7 +12,6 @@ import (
 	"r3/tools"
 	"r3/tools/compress"
 	"r3/types"
-	"strconv"
 	"sync"
 )
 
@@ -196,14 +195,8 @@ func jobBackup(tocFile *types.BackupTocFile, jobName string) error {
 	}
 
 	// update TOC file
-	_, _, appBuild, _ := config.GetAppVersions()
-	appBuildInt, err := strconv.Atoi(appBuild)
-	if err != nil {
-		return err
-	}
-
 	tocFile.Backups = append(tocFile.Backups, types.BackupDef{
-		AppBuild:  appBuildInt,
+		AppBuild:  config.GetAppVersion().Build,
 		JobName:   jobName,
 		Timestamp: newTimestamp,
 	})

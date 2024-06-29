@@ -118,6 +118,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	// authorized requests: fat-client
 	if device == types.WebsocketClientDeviceFatClient {
 		switch ressource {
+		case "clientApp":
+			switch action {
+			case "getBuild": // current client app build
+				return config.GetAppVersionClient().Build, nil
+			}
 		case "clientEvent":
 			switch action {
 			case "exec":

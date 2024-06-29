@@ -23,8 +23,7 @@ import (
 // DB version is related to major+minor application version (e. g. app: 1.3.2.1999 -> 1.3)
 // -> DB changes are therefore exclusive to major or minor releases
 func RunIfRequired() error {
-	_, appVersionCut, _, dbVersionCut := config.GetAppVersions()
-	if appVersionCut == dbVersionCut {
+	if config.GetAppVersion().Cut == config.GetDbVersionCut() {
 		return nil
 	}
 
@@ -33,10 +32,7 @@ func RunIfRequired() error {
 	}
 
 	// reload config store, in case upgrade changed it
-	if err := config.LoadFromDb(); err != nil {
-		return err
-	}
-	return nil
+	return config.LoadFromDb()
 }
 
 // loop upgrade procedure until DB version matches application version
@@ -44,11 +40,8 @@ func startLoop() error {
 	log.Info("server", "version discrepancy (platform<->database) recognized, starting automatic upgrade")
 
 	for {
-		// get version info
-		_, appVersionCut, _, dbVersionCut := config.GetAppVersions()
-
 		// abort when versions match
-		if appVersionCut == dbVersionCut {
+		if config.GetAppVersion().Cut == config.GetDbVersionCut() {
 			log.Info("server", "version discrepancy has been resolved")
 			return nil
 		}
@@ -58,7 +51,7 @@ func startLoop() error {
 			return err
 		}
 
-		if err := oneIteration(tx, dbVersionCut); err != nil {
+		if err := oneIteration(tx, config.GetDbVersionCut()); err != nil {
 			tx.Rollback(db.Ctx)
 			return err
 		}

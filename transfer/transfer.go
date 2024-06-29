@@ -23,7 +23,6 @@ import (
 	"r3/db"
 	"r3/tools"
 	"r3/types"
-	"strconv"
 	"sync"
 
 	"github.com/gofrs/uuid"
@@ -51,14 +50,8 @@ func AddVersion_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 		return errors.New("module does not exist")
 	}
 
-	_, _, appBuild, _ := config.GetAppVersions()
-	appBuildInt, err := strconv.Atoi(appBuild)
-	if err != nil {
-		return err
-	}
-
 	// update version info
-	file.Content.Module.ReleaseBuildApp = appBuildInt
+	file.Content.Module.ReleaseBuildApp = config.GetAppVersion().Build
 	file.Content.Module.ReleaseBuild = file.Content.Module.ReleaseBuild + 1
 	file.Content.Module.ReleaseDate = tools.GetTimeUnix()
 
@@ -135,15 +128,9 @@ func GetModuleChangedWithDependencies(moduleId uuid.UUID) (map[uuid.UUID]bool, e
 // verifies that the importing module matches the running application build
 func verifyCompatibilityWithApp(moduleId uuid.UUID, releaseBuildApp int) error {
 
-	_, _, appBuild, _ := config.GetAppVersions()
-	appBuildInt, err := strconv.Atoi(appBuild)
-	if err != nil {
-		return err
-	}
-
-	if appBuildInt < releaseBuildApp {
+	if config.GetAppVersion().Build < releaseBuildApp {
 		return fmt.Errorf("module was released for application version %d (current version %d)",
-			releaseBuildApp, appBuildInt)
+			releaseBuildApp, config.GetAppVersion().Build)
 	}
 	return nil
 }
