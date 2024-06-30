@@ -145,6 +145,7 @@
 		"inputSmall":"Az érték túl kicsi (min. {MIN})",
 		"inputTooFewFiles":"Túl kevés fájl",
 		"inputTooManyFiles":"Túl sok fájl",
+		"install":"Install",
 		"interval":"Intervallum",
 		"jsFunction":"Function (front)",
 		"jsFunctions":"Függvények (elöl)",
@@ -199,6 +200,8 @@
 		"token":"Token",
 		"type":"Típus",
 		"unassigned":"Unassigned",
+		"uninstall":"Uninstall",
+		"update":"Update",
 		"username":"Felhasználónév",
 		"version":"Verzió",
 		"warnings":"Figyelmeztetések",
@@ -2095,15 +2098,23 @@
 				"ics":"Naptár alkalmazás",
 				"totp":"Több faktoros"
 			},
-			"install":{
-				"intro":"A kliensalkalmazással közvetlenül megnyithat és szerkeszthet fájlokat az REI3-ból.",
+			"device":{
+				"adminInfo":"<b>Info for admins:</b> The REI3 client application does not work while REI3 is in maintenance mode.",
+				"intro0":"The REI3 client application is an optional piece of software that offers additional functionality. Once installed, the following features are available:",
+				"intro1":"Files uploaded to REI3 can be edited directly with local software. Make sure that you have a default application selected for the given file extension. On Windows you can shift-click to choose the application to use.",
+				"intro2":"Global hotkeys can be used to execute actions in REI3 applications, while REI3 runs in the background.",
 				"nameHint":"'Munka PC-m'",
-				"steps":"Telepítés lépései",
-				"step1":"Válassza ki az eszköz nevét:",
-				"step2":"Válassza ki az operációs rendszert:",
-				"step3":"Töltsön le egy alkalmazást és konfigurációs fájlt ugyanabba a mappába:",
-				"step4":"Indítsa el az alkalmazást",
-				"step5":"Most már telepítve van, és megjelenik a rendszerikon területen."
+				"os":"Operating system:",
+				"installStep1":"Choose a device name:",
+				"installStep2":"Download the application & config file to the same folder:",
+				"installStep3":"Start the application. It will install itself and then appear in your system tray.",
+				"installStep4":"You can now delete the downloaded application & config files.",
+				"uninstallStep1":"Right-click on the REI3 client tray icon and disable the 'auto-start' option.",
+				"uninstallStep2":"Right-click on the REI3 client tray icon again to quit the application.",
+				"uninstallStep3":"The REI3 client application is now uninstalled.",
+				"updateStep1":"Download the new application file:",
+				"updateStep2":"Start the application. It will execute the update and then appear in your system tray.",
+				"updateStep3":"You can now delete the downloaded application file."
 			},
 			"message":{
 				"delete":"Biztos benne, hogy törölni szeretné ezt a bejegyzést? Ezt nem lehet visszavonni."
@@ -2121,7 +2132,7 @@
 				"nameHint":"'Saját okostelefonom'",
 				"outro":"Használja a QR-kódot a fiókjának hozzáadásához az Authenticator alkalmazásához. Ha befejezte, zárja be ezt az ablakot. Ezt a folyamatot megismételheti, hogy több eszközön is aktiválja a Több Faktoros Hitelesítést (MFA)."
 			},
-			"titleAdd":"Kliens alkalmazás telepítése",
+			"titleAdd":"Manage REI3 client application",
 			"titleContext":"Használat",
 			"titleDateCreate":"Létrehozva",
 			"titleMfa":"Több Faktoros Hitelesítés hozzáadása",

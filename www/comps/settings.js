@@ -4,6 +4,7 @@ import {set as setSetting} from './shared/settings.js';
 import {getUnixFormat}     from './shared/time.js';
 import MyInputColor        from './inputColor.js';
 import MyInputHotkey       from './inputHotkey.js';
+import MyTabs              from './tabs.js';
 import {
 	aesGcmDecryptBase64,
 	aesGcmDecryptBase64WithPhrase,
@@ -691,6 +692,7 @@ let MySettingsClientEvents = {
 
 let MySettingsFixedTokens = {
 	name:'my-settings-fixed-tokens',
+	components:{MyTabs},
 	template:`<div>
 		<div class="settings-tokens" v-if="tokensFixed.length !== 0">
 			<table class="generic-table sticky-top bright default-inputs">
@@ -796,8 +798,8 @@ let MySettingsFixedTokens = {
 		</div>
 		
 		<!-- device install sub window -->
-		<div class="app-sub-window" v-if="showInstall">
-			<div class="contentBox float">
+		<div class="app-sub-window" v-if="showInstall" @mousedown.self="showInstall = false">
+			<div class="contentBox float settings-devices">
 				<div class="top lower">
 					<div class="area">
 						<img class="icon" src="images/screen.png" />
@@ -810,64 +812,102 @@ let MySettingsFixedTokens = {
 						/>
 					</div>
 				</div>
-				
-				<div class="content">
-					<div class="column">
-						<span>{{ capApp.install.intro }}</span>
-						<br /><br />
-						
-						<h2>{{ capApp.install.steps }}</h2>
-						<ol>
-							<li>
-								<div class="column gap default-inputs">
-									<span>{{ capApp.install.step1 }}</span>
-									<div class="row gap">
-										<input v-model="tokenName" v-focus :placeholder="capApp.install.nameHint" />
-										<my-button image="save.png"
-											@trigger="set('client')"
-											:active="tokenName !== '' && !tokenSet"
-										/>
-									</div>
-									<br />
-								</div>
-							</li>
-							<li>
-								<div class="column gap default-inputs">
-									<span>{{ capApp.install.step2 }}</span>
-									<select v-model="deviceOs">
-										<option value="amd64_windows">Windows (x64)</option>
-										<option value="amd64_linux">Linux (x64)</option>
-										<option value="arm64_linux">Linux (ARM64)</option>
-										<option value="amd64_mac">MacOS (x64)</option>
-									</select>
-									<br />
-								</div>
-							</li>
-							<li>
-								<div class="column gap">
-									<span>{{ capApp.install.step3 }}</span>
-									<div class="row gap">
-										<my-button image="download.png"
-											@trigger="loadApp"
-											:active="tokenSet"
-											:caption="capApp.button.loadApp"
-										/>
-										<my-button image="download.png"
-											@trigger="loadCnf"
-											:active="tokenSet"
-											:caption="capApp.button.loadCnf"
-										/>
-									</div>
-									<br />
-								</div>
-							</li>
-							<li>{{ capApp.install.step4 }}</li>
-						</ol>
-						<br />
-						<span>{{ capApp.install.step5 }}</span>
-						<img src="images/install_tray.png" class="settings-install" />
+
+				<div class="settings-devices-header column gap">
+					<span>{{ capApp.device.intro0 }}</span>
+					<ul>
+						<li>{{ capApp.device.intro1 }}</li>
+						<li>{{ capApp.device.intro2 }}</li>
+					</ul>
+					<div class="column gap default-inputs">
+						<span>{{ capApp.device.os }}</span>
+						<select v-model="deviceOs">
+							<option value="amd64_windows">Windows (x64)</option>
+							<option value="amd64_linux">Linux (x64)</option>
+							<option value="arm64_linux">Linux (ARM64)</option>
+							<option value="amd64_mac">MacOS (x64)</option>
+						</select>
 					</div>
+					<template v-if="isAdmin">
+						<br />
+						<span v-html="capApp.device.adminInfo"></span>
+					</template>
 				</div>
+				
+				<my-tabs
+					v-model="tabTarget"
+					:entries="['install','update','uninstall']"
+					:entriesIcon="['images/screen.png','images/screenRefresh.png','images/screenRemove.png']"
+					:entriesText="[capGen.install,capGen.update,capGen.uninstall]"
+				/>
+				<ol v-if="tabTarget === 'install'">
+					<li>
+						<div class="column gap default-inputs">
+							<span>{{ capApp.device.installStep1 }}</span>
+							<div class="row gap">
+								<input v-model="tokenName" v-focus :placeholder="capApp.device.nameHint" />
+								<my-button image="save.png"
+									@trigger="set('client')"
+									:active="tokenName !== '' && !tokenSet"
+								/>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="column gap">
+							<span>{{ capApp.device.installStep2 }}</span>
+							<div class="row gap">
+								<my-button image="download.png"
+									@trigger="loadApp"
+									:active="tokenSet"
+									:caption="capApp.button.loadApp"
+								/>
+								<my-button image="download.png"
+									@trigger="loadCnf"
+									:active="tokenSet"
+									:caption="capApp.button.loadCnf"
+								/>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="column">
+							<span>{{ capApp.device.installStep3 }}</span>
+							<img src="images/install_tray.png" class="settings-install" />
+						</div>
+					</li>
+					<li>{{ capApp.device.installStep4 }}</li>
+				</ol>
+				<ol v-if="tabTarget === 'update'">
+					<li>
+						<div class="column gap">
+							<span>{{ capApp.device.updateStep1 }}</span>
+							<div class="row gap">
+								<my-button image="download.png"
+									@trigger="loadApp"
+									:caption="capApp.button.loadApp"
+								/>
+							</div>
+						</div>
+					</li>
+					<li>
+						<div class="column">
+							<span>{{ capApp.device.updateStep2 }}</span>
+							<img src="images/install_tray.png" class="settings-install" />
+						</div>
+					</li>
+					<li>{{ capApp.device.updateStep3 }}</li>
+				</ol>
+				<ol v-if="tabTarget === 'uninstall'">
+					<li>
+						<div class="column">
+							<span>{{ capApp.device.uninstallStep1 }}</span>
+							<img src="images/install_tray.png" class="settings-install" />
+						</div>
+					</li>
+					<li>{{ capApp.device.uninstallStep2 }}</li>
+					<li>{{ capApp.device.uninstallStep3 }}</li>
+				</ol>
 			</div>
 		</div>
 	</div>`,
@@ -876,6 +916,7 @@ let MySettingsFixedTokens = {
 	},
 	data() {
 		return {
+			tabTarget:"install",
 			tokensFixed:[],
 			showInstall:false,
 			showMfa:false,
@@ -900,11 +941,12 @@ let MySettingsFixedTokens = {
 		
 		// stores
 		appNameShort:(s) => s.$store.getters['local/appNameShort'],
-		languageCode:(s) => s.$store.getters.settings.languageCode,
-		loginName:   (s) => s.$store.getters.loginName,
 		token:       (s) => s.$store.getters['local/token'],
 		capApp:      (s) => s.$store.getters.captions.settings.tokensFixed,
-		capGen:      (s) => s.$store.getters.captions.generic
+		capGen:      (s) => s.$store.getters.captions.generic,
+		isAdmin:     (s) => s.$store.getters.isAdmin,
+		languageCode:(s) => s.$store.getters.settings.languageCode,
+		loginName:   (s) => s.$store.getters.loginName
 	},
 	watch:{
 		qrCodeUri(v) {

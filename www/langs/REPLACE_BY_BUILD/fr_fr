@@ -145,6 +145,7 @@
 		"inputSmall":"La valeur est trop petite (min. {MIN})",
 		"inputTooFewFiles":"Trop peu de fichiers",
 		"inputTooManyFiles":"Trop de fichiers",
+		"install":"Install",
 		"interval":"Intervalle",
 		"jsFunction":"Function (front)",
 		"jsFunctions":"Fonctions (front)",
@@ -199,6 +200,8 @@
 		"token":"Jeton",
 		"type":"Type",
 		"unassigned":"Non attribué",
+		"uninstall":"Uninstall",
+		"update":"Update",
 		"username":"Nom d'utilisateur",
 		"version":"Version",
 		"warnings":"Avertissements",
@@ -2095,15 +2098,23 @@
 				"ics":"Application de calendrier",
 				"totp":"Multi-facteur"
 			},
-			"install":{
-				"intro":"Avec l'application client, vous pouvez ouvrir et éditer directement des fichiers depuis REI3.",
+			"device":{
+				"adminInfo":"<b>Info for admins:</b> The REI3 client application does not work while REI3 is in maintenance mode.",
+				"intro0":"The REI3 client application is an optional piece of software that offers additional functionality. Once installed, the following features are available:",
+				"intro1":"Files uploaded to REI3 can be edited directly with local software. Make sure that you have a default application selected for the given file extension. On Windows you can shift-click to choose the application to use.",
+				"intro2":"Global hotkeys can be used to execute actions in REI3 applications, while REI3 runs in the background.",
 				"nameHint":"'Mon PC de travail'",
-				"steps":"Étapes d'installation",
-				"step1":"Choisissez un nom de périphérique :",
-				"step2":"Sélectionnez votre système d'exploitation :",
-				"step3":"Téléchargez l'application et le fichier de configuration dans le même dossier :",
-				"step4":"Démarrer l'application.",
-				"step5":"Elle est maintenant installée et apparaîtra dans votre barre d'état système."
+				"os":"Operating system:",
+				"installStep1":"Choose a device name:",
+				"installStep2":"Download the application & config file to the same folder:",
+				"installStep3":"Start the application. It will install itself and then appear in your system tray.",
+				"installStep4":"You can now delete the downloaded application & config files.",
+				"uninstallStep1":"Right-click on the REI3 client tray icon and disable the 'auto-start' option.",
+				"uninstallStep2":"Right-click on the REI3 client tray icon again to quit the application.",
+				"uninstallStep3":"The REI3 client application is now uninstalled.",
+				"updateStep1":"Download the new application file:",
+				"updateStep2":"Start the application. It will execute the update and then appear in your system tray.",
+				"updateStep3":"You can now delete the downloaded application file."
 			},
 			"message":{
 				"delete":"Êtes-vous sûr de vouloir supprimer cette entrée ? Cela ne peut pas être annulé."
@@ -2121,7 +2132,7 @@
 				"nameHint":"'Mon smartphone'",
 				"outro":"Utilisez le code QR pour ajouter ce compte à votre application d'authentification. Une fois terminé, fermez cette fenêtre. Vous pouvez répéter ce processus pour activer la MFA avec plusieurs appareils."
 			},
-			"titleAdd":"Installer l'application client",
+			"titleAdd":"Manage REI3 client application",
 			"titleContext":"Utilisation",
 			"titleDateCreate":"Créé",
 			"titleMfa":"Configuration de l'authentification multi-facteur",

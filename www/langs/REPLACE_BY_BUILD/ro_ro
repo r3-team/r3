@@ -145,6 +145,7 @@
 		"inputSmall":"Valoarea este prea mică (min. {MIN})",
 		"inputTooFewFiles":"Prea puține fișiere",
 		"inputTooManyFiles":"Prea mult fișiere",
+		"install":"Install",
 		"interval":"Interval",
 		"jsFunction":"Function (front)",
 		"jsFunctions":"Funcții (front)",
@@ -201,6 +202,8 @@
 		"username":"Nume utilizator",
 		"version":"Versiune",
 		"unassigned":"Unassigned",
+		"uninstall":"Uninstall",
+		"update":"Update",
 		"warnings":"Warnings",
 		"widget":"Widget",
 		"widgets":"Widgets",
@@ -2095,15 +2098,23 @@
 				"ics":"Calendar app",
 				"totp":"Multi-factor"
 			},
-			"install":{
-				"intro":"With the client application you can directly open and edit files from within REI3.",
+			"device":{
+				"adminInfo":"<b>Info for admins:</b> The REI3 client application does not work while REI3 is in maintenance mode.",
+				"intro0":"The REI3 client application is an optional piece of software that offers additional functionality. Once installed, the following features are available:",
+				"intro1":"Files uploaded to REI3 can be edited directly with local software. Make sure that you have a default application selected for the given file extension. On Windows you can shift-click to choose the application to use.",
+				"intro2":"Global hotkeys can be used to execute actions in REI3 applications, while REI3 runs in the background.",
 				"nameHint":"'My Work PC'",
-				"steps":"Installation steps",
-				"step1":"Choose a device name:",
-				"step2":"Select your operating system:",
-				"step3":"Download the application & config file to the same folder:",
-				"step4":"Start the application.",
-				"step5":"It is now installed and will appear in your system tray."
+				"os":"Operating system:",
+				"installStep1":"Choose a device name:",
+				"installStep2":"Download the application & config file to the same folder:",
+				"installStep3":"Start the application. It will install itself and then appear in your system tray.",
+				"installStep4":"You can now delete the downloaded application & config files.",
+				"uninstallStep1":"Right-click on the REI3 client tray icon and disable the 'auto-start' option.",
+				"uninstallStep2":"Right-click on the REI3 client tray icon again to quit the application.",
+				"uninstallStep3":"The REI3 client application is now uninstalled.",
+				"updateStep1":"Download the new application file:",
+				"updateStep2":"Start the application. It will execute the update and then appear in your system tray.",
+				"updateStep3":"You can now delete the downloaded application file."
 			},
 			"message":{
 				"delete":"Are you sure you want to delete this entry? This cannot be undone."
@@ -2121,7 +2132,7 @@
 				"nameHint":"'My smartphone'",
 				"outro":"Use the QR code to add this account to your authenticator app. When you are done, close this window. You can repeat this process to enable MFA with multiple devices."
 			},
-			"titleAdd":"Install client application",
+			"titleAdd":"Manage REI3 client application",
 			"titleContext":"Use",
 			"titleDateCreate":"Created",
 			"titleMfa":"Setup multi-factor authentication",

@@ -145,6 +145,7 @@
 		"inputSmall":"Wert ist zu klein (min. {MIN})",
 		"inputTooFewFiles":"Zu wenige Dateien",
 		"inputTooManyFiles":"Zu viele Dateien",
+		"install":"Installieren",
 		"interval":"Intervall",
 		"jsFunction":"Funktion (front)",
 		"jsFunctions":"Funktionen (front)",
@@ -198,6 +199,8 @@
 		"title":"Titel",
 		"token":"Token",
 		"type":"Typ",
+		"uninstall":"Deinstallieren",
+		"update":"Aktualisieren",
 		"username":"Benutzername",
 		"version":"Version",
 		"unassigned":"Nicht zugewiesen",
@@ -2095,15 +2098,23 @@
 				"ics":"Kalender-App",
 				"totp":"Multi-Faktor"
 			},
-			"install":{
-				"intro":"Mit der Client-Anwendung können Dateien direkt aus REI3 geöffnet und bearbeitet werden.",
+			"device":{
+				"adminInfo":"<b>Info für Admins:</b> Die REI3-Client-Anwendung funktioniert nicht, wenn sich REI3 im Wartungsmodus befindet.",
+				"intro0":"Die REI3-Client-Anwendung ist eine optionale Software, die zusätzliche Funktionen bietet. Sobald sie installiert ist, stehen die folgenden Funktionen zur Verfügung:",
+				"intro1":"In REI3 hochgeladene Dateien können direkt mit lokaler Software bearbeitet werden. Eine Standardanwendung für die jeweilige Dateierweiterung muss definiert sein. Unter Windows kann mit Umschalt+Mausklick eine Anwendung ausgewählt werden.",
+				"intro2":"Globale Hotkeys können verwendet werden, um Aktionen in REI3-Anwendungen auszuführen, während REI3 im Hintergrund läuft.",
 				"nameHint":"'Mein Arbeits-PC'",
-				"steps":"Installationsschritte",
-				"step1":"Gerätename auswählen:",
-				"step2":"Betriebssystem auswählen:",
-				"step3":"Anwendung & Konfigdatei in den gleichen Ordner herunterladen:",
-				"step4":"Die Anwendung starten",
-				"step5":"Sie ist jetzt installiert und erscheint im Systemtray."
+				"os":"Betriebssystem:",
+				"installStep1":"Gerätename auswählen:",
+				"installStep2":"Anwendungs- & Konfigdatei in den gleichen Ordner herunterladen:",
+				"installStep3":"Die Anwendung starten. Sie wird sich installieren und dann im Systemtray erscheinen.",
+				"installStep4":"Die heruntergeladenen Anwendungs- & Konfigdateien können jetzt gelöscht werden.",
+				"uninstallStep1":"Rechts-klicken auf das Tray-Icon vom REI3-Client und die Option \"Autostart\" deaktivieren.",
+				"uninstallStep2":"Nochmal reckts-klicken auf das Tray-Icon vom REI3-Client und die Anwendung beenden.",
+				"uninstallStep3":"Der REI3-Client ist jetzt deinstalliert.",
+				"updateStep1":"Die neue Anwendungsdatei herunterladen:",
+				"updateStep2":"Die Anwendung starten. Sie wird das Update ausführen und dann im Systemtray erscheinen.",
+				"updateStep3":"Die heruntergeladene Anwendungsdatei kann gelöscht werden."
 			},
 			"message":{
 				"delete":"Sind Sie sicher, dass Sie diesen Eintrag löschen wollen? Dies kann nicht rückgängig gemacht werden."
@@ -2121,7 +2132,7 @@
 				"nameHint":"'Mein Smartphone'",
 				"outro":"Verwenden Sie den QR-Code, um dieses Konto zu Ihrer Authenticator-App hinzuzufügen. Wenn Sie fertig sind, schließen Sie dieses Fenster. Sie können diesen Vorgang wiederholen, um MFA für mehrere Geräte zu aktivieren."
 			},
-			"titleAdd":"Client-Anwendung installieren",
+			"titleAdd":"REI3-Client-Anwendung verwalten",
 			"titleContext":"Verwendung",
 			"titleDateCreate":"Erstellt",
 			"titleMfa":"Multifaktor-Authentifizierung hinzufügen",

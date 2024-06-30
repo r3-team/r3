@@ -82,6 +82,22 @@
 	word-break:break-all;
 }
 
+/* devices */
+.settings-devices{
+	width:100%;
+	max-width:650px;
+}
+.settings-devices-header{
+	padding:20px;
+	border-bottom:1px solid var(--color-border);
+}
+.settings-devices ol{
+	min-height:400px;
+}
+.settings-devices ol li{
+	padding:5px 5px 12px 5px;
+}
+
 /* client events */
 .settings-client-events{
 	display:flex;

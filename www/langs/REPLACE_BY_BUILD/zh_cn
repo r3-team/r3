@@ -145,6 +145,7 @@
 		"inputSmall":"值过小（最小为 {MIN}）",
 		"inputTooFewFiles":"文件太少",
 		"inputTooManyFiles":"文件太多",
+		"install":"Install",
 		"interval":"间隔",
 		"jsFunction":"Function (front)",
 		"jsFunctions":"函数（前端）",
@@ -199,6 +200,8 @@
 		"token":"令牌",
 		"type":"类型",
 		"unassigned":"未分配的",
+		"uninstall":"Uninstall",
+		"update":"Update",
 		"username":"用户名",
 		"version":"版本",
 		"warnings":"警告",
@@ -2095,15 +2098,23 @@
 				"ics":"日历应用",
 				"totp":"多因素"
 			},
-			"install":{
-				"intro":"使用客户端应用程序，您可以直接从 REI3 中打开和编辑文件。",
+			"device":{
+				"adminInfo":"<b>Info for admins:</b> The REI3 client application does not work while REI3 is in maintenance mode.",
+				"intro0":"The REI3 client application is an optional piece of software that offers additional functionality. Once installed, the following features are available:",
+				"intro1":"Files uploaded to REI3 can be edited directly with local software. Make sure that you have a default application selected for the given file extension. On Windows you can shift-click to choose the application to use.",
+				"intro2":"Global hotkeys can be used to execute actions in REI3 applications, while REI3 runs in the background.",
 				"nameHint":"'我的工作电脑'",
-				"steps":"安装步骤",
-				"step1":"选择设备名称：",
-				"step2":"选择您的操作系统：",
-				"step3":"将应用程序和配置文件下载到同一个文件夹中：",
-				"step4":"启动该应用程序。",
-				"step5":"现在已安装，并将显示在您的系统托盘中。"
+				"os":"Operating system:",
+				"installStep1":"Choose a device name:",
+				"installStep2":"Download the application & config file to the same folder:",
+				"installStep3":"Start the application. It will install itself and then appear in your system tray.",
+				"installStep4":"You can now delete the downloaded application & config files.",
+				"uninstallStep1":"Right-click on the REI3 client tray icon and disable the 'auto-start' option.",
+				"uninstallStep2":"Right-click on the REI3 client tray icon again to quit the application.",
+				"uninstallStep3":"The REI3 client application is now uninstalled.",
+				"updateStep1":"Download the new application file:",
+				"updateStep2":"Start the application. It will execute the update and then appear in your system tray.",
+				"updateStep3":"You can now delete the downloaded application file."
 			},
 			"message":{
 				"delete":"您确定要删除此条目吗？此操作无法撤消。"
@@ -2121,7 +2132,7 @@
 				"nameHint":"'我的智能手机'",
 				"outro":"使用 QR 码将此帐户添加到您的身份验证器应用程序。完成后关闭此窗口。您可以重复此过程以使用多个设备启用 MFA。"
 			},
-			"titleAdd":"安装客户端应用程序",
+			"titleAdd":"Manage REI3 client application",
 			"titleContext":"使用",
 			"titleDateCreate":"创建日期",
 			"titleMfa":"设置多因素身份验证",
