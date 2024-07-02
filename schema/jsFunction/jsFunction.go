@@ -12,7 +12,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var (
@@ -34,7 +33,7 @@ func Get(moduleId uuid.UUID) ([]types.JsFunction, error) {
 	functions := make([]types.JsFunction, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, form_id, name, code_args, code_function, code_returns
+		SELECT id, form_id, name, code_args, code_function, code_returns, is_client_event_exec
 		FROM app.js_function
 		WHERE module_id = $1
 		ORDER BY name ASC
@@ -46,8 +45,8 @@ func Get(moduleId uuid.UUID) ([]types.JsFunction, error) {
 	for rows.Next() {
 		var f types.JsFunction
 
-		if err := rows.Scan(&f.Id, &f.FormId, &f.Name,
-			&f.CodeArgs, &f.CodeFunction, &f.CodeReturns); err != nil {
+		if err := rows.Scan(&f.Id, &f.FormId, &f.Name, &f.CodeArgs,
+			&f.CodeFunction, &f.CodeReturns, &f.IsClientEventExec); err != nil {
 
 			return functions, err
 		}
@@ -65,18 +64,16 @@ func Get(moduleId uuid.UUID) ([]types.JsFunction, error) {
 	}
 	return functions, nil
 }
-func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, formId pgtype.UUID,
-	name string, codeArgs string, codeFunction string, codeReturns string,
-	captions types.CaptionMap) error {
+func Set_tx(tx pgx.Tx, fnc types.JsFunction) error {
 
 	// remove only invalid character (dot), used for form function references
-	name = strings.Replace(name, ".", "", -1)
+	fnc.Name = strings.Replace(fnc.Name, ".", "", -1)
 
-	if name == "" {
+	if fnc.Name == "" {
 		return fmt.Errorf("function name must not be empty")
 	}
 
-	known, err := schema.CheckCreateId_tx(tx, &id, "js_function", "id")
+	known, err := schema.CheckCreateId_tx(tx, &fnc.Id, "js_function", "id")
 	if err != nil {
 		return err
 	}
@@ -84,23 +81,23 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, formId pgtype.UUID,
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.js_function
-			SET name = $1, code_args = $2, code_function = $3, code_returns = $4
-			WHERE id = $5
-		`, name, codeArgs, codeFunction, codeReturns, id); err != nil {
+			SET name = $1, code_args = $2, code_function = $3, code_returns = $4, is_client_event_exec = $5
+			WHERE id = $6
+		`, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsClientEventExec, fnc.Id); err != nil {
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.js_function (id, module_id,
-				form_id, name, code_args, code_function, code_returns)
-			VALUES ($1,$2,$3,$4,$5,$6,$7)
-		`, id, moduleId, formId, name, codeArgs, codeFunction, codeReturns); err != nil {
+			INSERT INTO app.js_function (id, module_id, form_id, name,
+				code_args, code_function, code_returns, is_client_event_exec)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+		`, fnc.Id, fnc.ModuleId, fnc.FormId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsClientEventExec); err != nil {
 			return err
 		}
 	}
 
 	// set captions
-	if err := caption.Set_tx(tx, id, captions); err != nil {
+	if err := caption.Set_tx(tx, fnc.Id, fnc.Captions); err != nil {
 		return err
 	}
 
@@ -108,26 +105,26 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, formId pgtype.UUID,
 	if _, err := tx.Exec(db.Ctx, `
 		DELETE FROM app.js_function_depends
 		WHERE js_function_id = $1
-	`, id); err != nil {
+	`, fnc.Id); err != nil {
 		return err
 	}
 
-	if err := storeDependencies_tx(tx, id, "collection", fmt.Sprintf(`%s\.collection_(read|update)\('(%s)'`, rxPrefix, rxUuid), 2, codeFunction); err != nil {
+	if err := storeDependencies_tx(tx, fnc.Id, "collection", fmt.Sprintf(`%s\.collection_(read|update)\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(tx, id, "field", fmt.Sprintf(`%s\.(get|set)_field_(value|caption|chart|error|focus|order)\('(%s)'`, rxPrefix, rxUuid), 3, codeFunction); err != nil {
+	if err := storeDependencies_tx(tx, fnc.Id, "field", fmt.Sprintf(`%s\.(get|set)_field_(value|caption|chart|error|focus|order)\('(%s)'`, rxPrefix, rxUuid), 3, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(tx, id, "js_function", fmt.Sprintf(`%s\.call_frontend\('(%s)'`, rxPrefix, rxUuid), 1, codeFunction); err != nil {
+	if err := storeDependencies_tx(tx, fnc.Id, "js_function", fmt.Sprintf(`%s\.call_frontend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(tx, id, "pg_function", fmt.Sprintf(`%s\.call_backend\('(%s)'`, rxPrefix, rxUuid), 1, codeFunction); err != nil {
+	if err := storeDependencies_tx(tx, fnc.Id, "pg_function", fmt.Sprintf(`%s\.call_backend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(tx, id, "form", fmt.Sprintf(`%s\.open_form\('(%s)'`, rxPrefix, rxUuid), 1, codeFunction); err != nil {
+	if err := storeDependencies_tx(tx, fnc.Id, "form", fmt.Sprintf(`%s\.open_form\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(tx, id, "role", fmt.Sprintf(`%s\.has_role\('(%s)'`, rxPrefix, rxUuid), 1, codeFunction); err != nil {
+	if err := storeDependencies_tx(tx, fnc.Id, "role", fmt.Sprintf(`%s\.has_role\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
 	return nil

@@ -27,6 +27,5 @@ func JsFunctionSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, jsFunction.Set_tx(tx, req.ModuleId, req.Id, req.FormId,
-		req.Name, req.CodeArgs, req.CodeFunction, req.CodeReturns, req.Captions)
+	return nil, jsFunction.Set_tx(tx, req)
 }

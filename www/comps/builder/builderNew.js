@@ -287,6 +287,7 @@ let MyBuilderNew = {
 							fields:[],
 							functions:[],
 							states:[],
+							actions:[],
 							articleIdsHelp:[],
 							captions:{
 								formTitle:{}
@@ -303,6 +304,7 @@ let MyBuilderNew = {
 						codeArgs:'',
 						codeFunction:'',
 						codeReturns:'',
+						isClientEventExec:false,
 						captions:{
 							jsFunctionTitle:{},
 							jsFunctionDesc:{}
@@ -371,6 +373,7 @@ let MyBuilderNew = {
 						childrenIds:[],
 						accessApis:{},
 						accessAttributes:{},
+						accessClientEvents:{},
 						accessCollections:{},
 						accessMenus:{},
 						accessRelations:{}

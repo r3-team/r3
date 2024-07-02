@@ -371,7 +371,7 @@ let MyBuilderJsFunction = {
 						/>
 					</div>
 					<div class="entities" v-if="showHolderFncInstance">
-						<div class="entity" v-for="fnc in appFunctions">
+						<div class="entity" v-for="fnc in appFunctions.filter(v => !isClientEventExec || appFunctionsClientEvent.includes(v))">
 							<div class="entity-title">
 								<my-button
 									@trigger="selectEntity('appFunction',fnc)"
@@ -419,23 +419,6 @@ let MyBuilderJsFunction = {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capApp.form }}</td>
-							<td>
-								<div class="row centered">
-									<select v-model="formId" disabled>
-										<option :value="null">-</option>
-										<option v-for="f in moduleIdMap[jsFunction.moduleId].forms" :value="f.id">
-											{{ f.name }}
-										</option>
-									</select>
-									<my-button image="open.png"
-										@trigger="openForm"
-										:active="formId !== null"
-									/>
-								</div>
-							</td>
-						</tr>
-						<tr>
 							<td>{{ capApp.codeArgs }}</td>
 							<td>
 								<textarea
@@ -453,6 +436,27 @@ let MyBuilderJsFunction = {
 									:disabled="readonly"
 									:placeholder="capApp.codeReturnsHintJs"
 								/>
+							</td>
+						</tr>
+						<tr v-if="formId === null">
+							<td>{{ capGen.clientEvent }}</td>
+							<td><my-bool v-model="isClientEventExec" :readonly="readonly" /></td>
+						</tr>
+						<tr v-if="formId !== null">
+							<td>{{ capApp.form }}</td>
+							<td>
+								<div class="row centered gap">
+									<select v-model="formId" disabled>
+										<option :value="null">-</option>
+										<option v-for="f in moduleIdMap[jsFunction.moduleId].forms" :value="f.id">
+											{{ f.name }}
+										</option>
+									</select>
+									<my-button image="open.png"
+										@trigger="openForm"
+										:active="formId !== null"
+									/>
+								</div>
 							</td>
 						</tr>
 					</table>
@@ -490,6 +494,7 @@ let MyBuilderJsFunction = {
 			codeArgs:'',
 			codeFunction:'',
 			codeReturns:'',
+			isClientEventExec:false,
 			appFunctions:[
 				'block_inputs','client_execute_keystrokes','copy_to_clipboard',
 				'form_close','form_open','form_set_title','form_show_message',
@@ -502,6 +507,11 @@ let MyBuilderJsFunction = {
 			],
 			appFunctionsAsync:[
 				'get_e2ee_data_key','get_e2ee_data_value','pdf_create'
+			],
+			appFunctionsClientEvent:[
+				'client_execute_keystrokes','copy_to_clipboard','form_open',
+				'get_preset_record_id','get_url_query_string','get_language_code',
+				'get_login_id','get_role_ids','go_back','has_role','pdf_create'
 			],
 			
 			// states
@@ -553,6 +563,7 @@ let MyBuilderJsFunction = {
 			|| s.codeArgs            !== s.jsFunction.codeArgs
 			|| s.codeFunction        !== s.placeholdersSet(s.jsFunction.codeFunction)
 			|| s.codeReturns         !== s.jsFunction.codeReturns
+			|| s.isClientEventExec   !== s.jsFunction.isClientEventExec
 			|| JSON.stringify(s.captions) !== JSON.stringify(s.jsFunction.captions),
 			
 		insertEntity:(s) => {
@@ -687,12 +698,13 @@ let MyBuilderJsFunction = {
 			this.$router.push('/builder/form/'+this.formId);
 		},
 		reset() {
-			this.name         = this.jsFunction.name;
-			this.formId       = this.jsFunction.formId;
-			this.codeArgs     = this.jsFunction.codeArgs;
-			this.codeFunction = this.placeholdersSet(this.jsFunction.codeFunction);
-			this.codeReturns  = this.jsFunction.codeReturns;
-			this.captions     = JSON.parse(JSON.stringify(this.jsFunction.captions));
+			this.name              = this.jsFunction.name;
+			this.formId            = this.jsFunction.formId;
+			this.codeArgs          = this.jsFunction.codeArgs;
+			this.codeFunction      = this.placeholdersSet(this.jsFunction.codeFunction);
+			this.codeReturns       = this.jsFunction.codeReturns;
+			this.isClientEventExec = this.jsFunction.isClientEventExec;
+			this.captions          = JSON.parse(JSON.stringify(this.jsFunction.captions));
 		},
 		selectEntity(entity,id) {
 			if(entity === this.entity && id === this.entityId)
@@ -930,6 +942,7 @@ let MyBuilderJsFunction = {
 					codeArgs:this.codeArgs,
 					codeFunction:this.placeholdersUnset(),
 					codeReturns:this.codeReturns,
+					isClientEventExec:this.isClientEventExec,
 					captions:this.captions
 				}),
 				ws.prepare('schema','check',{moduleId:this.module.id})

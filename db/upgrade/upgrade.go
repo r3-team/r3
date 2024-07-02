@@ -306,6 +306,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 			CREATE INDEX IF NOT EXISTS fki_role_access_client_event_id_fkey
 				ON app.role_access USING btree (client_event_id ASC NULLS LAST);
+			
+			-- client event option for JS functions
+			ALTER TABLE app.js_function ADD COLUMN is_client_event_exec BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.js_function ALTER COLUMN is_client_event_exec DROP NOT NULL;
 
 			-- missing indexes
 			CREATE INDEX IF NOT EXISTS fki_api_module_fkey ON app.api USING btree (module_id ASC NULLS LAST);

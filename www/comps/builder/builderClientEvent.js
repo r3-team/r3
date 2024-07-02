@@ -105,7 +105,7 @@ let MyBuilderClientEvent = {
 							<select v-model="jsFunctionId" :disabled="readonly">
 								<option value="">[{{ capGen.nothingSelected }}]</option>
 								<option
-									v-for="fnc in module.jsFunctions.filter(v => v.formId === null)"
+									v-for="fnc in module.jsFunctions.filter(v => v.formId === null && v.isClientEventExec)"
 									:value="fnc.id"
 								>{{ fnc.name }}()</option>
 							</select>

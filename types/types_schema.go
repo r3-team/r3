@@ -559,14 +559,15 @@ type PgIndexAttribute struct {
 	OrderAsc    bool      `json:"orderAsc"`
 }
 type JsFunction struct {
-	Id           uuid.UUID   `json:"id"`
-	ModuleId     uuid.UUID   `json:"moduleId"`
-	FormId       pgtype.UUID `json:"formId"`
-	Name         string      `json:"name"`
-	CodeArgs     string      `json:"codeArgs"`
-	CodeFunction string      `json:"codeFunction"`
-	CodeReturns  string      `json:"codeReturns"`
-	Captions     CaptionMap  `json:"captions"`
+	Id                uuid.UUID   `json:"id"`
+	ModuleId          uuid.UUID   `json:"moduleId"`
+	FormId            pgtype.UUID `json:"formId"`
+	Name              string      `json:"name"`
+	CodeArgs          string      `json:"codeArgs"`
+	CodeFunction      string      `json:"codeFunction"`
+	CodeReturns       string      `json:"codeReturns"`
+	IsClientEventExec bool        `json:"isClientEventExec"` // can be executed from client events
+	Captions          CaptionMap  `json:"captions"`
 }
 type Tab struct {
 	Id             uuid.UUID     `json:"id"`
