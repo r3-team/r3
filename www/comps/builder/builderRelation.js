@@ -2,6 +2,7 @@ import MyBuilderAttribute    from './builderAttribute.js';
 import MyBuilderPreset       from './builderPreset.js';
 import MyBuilderPgIndex      from './builderPgIndex.js';
 import MyBuilderPgTriggers   from './builderPgTriggers.js';
+import MyTabs                from '../tabs.js';
 import {srcBase64}           from '../shared/image.js';
 import {
 	copyValueDialog,
@@ -134,15 +135,19 @@ let MyBuilderRelation = {
 		MyBuilderPreset,
 		MyBuilderPgIndex,
 		MyBuilderPgTriggers,
-		MyBuilderRelationsItemPolicy
+		MyBuilderRelationsItemPolicy,
+		MyTabs
 	},
-	template:`<div class="contentBox builder-relation">
+	template:`<div class="contentBox grow scroll">
 		<div class="top lower nowrap">
 			<div class="area">
 				<img class="icon" src="images/database.png" />
 				<h1 class="title">{{ capApp.titleOne.replace('{NAME}',name) }}</h1>
 			</div>
 			<div class="area">
+				<div class="row gap default-inputs" v-if="tabTarget === 'attributes'">
+					<input v-model="attributeFilter" :placeholder="capGen.threeDots" />
+				</div>
 				<my-button image="visible1.png"
 					@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
 					:caption="capGen.id"
@@ -157,309 +162,170 @@ let MyBuilderRelation = {
 			</div>
 		</div>
 		
-		<div class="content no-padding">
+		<div class="content no-padding builder-relation">
+			<my-tabs
+				v-model="tabTarget"
+				:entries="['attributes','indexes','triggers','presets','policies','properties','relationships','data']"
+				:entriesText="tabCaptions"
+			/>
 			
 			<!-- attributes -->
-			<div class="contentPart full">
-				<div class="contentPartHeader clickable" @click="showAttributes = !showAttributes">
-					<img class="icon" :src="displayArrow(showAttributes)" />
-					<div class="row centered grow space-between gap">
-						<h1>{{ capApp.attributes.replace('{CNT}',relation.attributes.length) }}</h1>
-						<div class="default-inputs" v-if="showAttributes">
-							<input @click.stop="" v-model="attributeFilter" :placeholder="capGen.threeDots" />
-						</div>
+
+			<div class="generic-entry-list tab-content" v-if="tabTarget === 'attributes'">
+				<div class="entry"
+					v-if="!readonly"
+					@click="attributeIdEdit = null"
+					:class="{ clickable:!readonly }"
+				>
+					<div class="row gap centered">
+						<img class="icon" src="images/add.png" />
+						<span>{{ capGen.button.new }}</span>
 					</div>
 				</div>
 				
-				<div class="generic-entry-list height-large" v-if="showAttributes">
-					<div class="entry"
-						v-if="!readonly"
-						@click="attributeIdEdit = null"
-						:class="{ clickable:!readonly }"
-					>
-						<div class="row gap centered">
-							<img class="icon" src="images/add.png" />
-							<span>{{ capGen.button.new }}</span>
+				<div class="entry clickable"
+					@click="attributeIdEdit = atr.id"
+					v-for="atr in relation.attributes.filter(v => attributeFilter === '' || v.name.includes(attributeFilter.toLowerCase()))"
+				>
+					<div class="row centered gap">
+						<my-button
+							:active="false"
+							:captionTitle="capApp.attributeContent"
+							:image="getAttributeIcon(atr,false,false)"
+							:naked="true"
+						/>
+						<div class="lines">
+							<span>{{ atr.name }}</span>
+							<span class="subtitle" v-if="typeof atr.captions.attributeTitle[builderLanguage] !== 'undefined'">
+								[{{ atr.captions.attributeTitle[builderLanguage] }}]
+							</span>
 						</div>
 					</div>
-					
-					<div class="entry clickable"
-						@click="attributeIdEdit = atr.id"
-						v-for="atr in relation.attributes.filter(v => attributeFilter === '' || v.name.includes(attributeFilter.toLowerCase()))"
-					>
-						<div class="row centered gap">
-							<my-button
-								:active="false"
-								:captionTitle="capApp.attributeContent"
-								:image="getAttributeIcon(atr,false,false)"
-								:naked="true"
-							/>
-							<div class="lines">
-								<span>{{ atr.name }}</span>
-								<span class="subtitle" v-if="typeof atr.captions.attributeTitle[builderLanguage] !== 'undefined'">
-									[{{ atr.captions.attributeTitle[builderLanguage] }}]
-								</span>
-							</div>
-						</div>
-						<div class="row centered gap">
-							<my-button image="lock.png"
-								v-if="atr.encrypted"
-								:active="false"
-								:captionTitle="capApp.attributeEncrypted"
-								:naked="true"
-							/>
-							<my-button
-								v-if="isAttributeWithLength(atr.content) && atr.length !== 0"
-								:active="false"
-								:caption="'['+String(atr.length)+']'"
-								:captionTitle="capApp.attributeLength"
-								:naked="true"
-							/>
-							<my-button image="asterisk.png"
-								v-if="!atr.nullable"
-								:active="false"
-								:captionTitle="capApp.attributeNotNullable"
-								:naked="true"
-							/>
-							<my-button
-								:active="false"
-								:captionTitle="atr.iconId === null ? capApp.attributeNoIcon : capGen.icon"
-								:image="atr.iconId === null ? 'icon_missing.png' : ''"
-								:imageBase64="atr.iconId !== null ? srcBase64(iconIdMap[atr.iconId].file) : ''"
-								:naked="true"
-							/>
-						</div>
-					</div>
-					
-					<!-- attribute dialog -->
-					<my-builder-attribute
-						v-if="attributeIdEdit !== false"
-						@close="attributeIdEdit = false"
-						@nextLanguage="$emit('nextLanguage')"
-						@new-record="attributeIdEdit = null"
-						:attributeId="attributeIdEdit"
-						:builderLanguage="builderLanguage"
-						:readonly="readonly"
-						:relation="relation"
-					/>
-				</div>
-			</div>
-			
-			<!-- relation properties -->
-			<div class="contentPart full">
-				<div class="contentPartHeader clickable" @click="showRelation = !showRelation">
-					<img class="icon" :src="displayArrow(showRelation)" />
-					<h1>{{ capGen.properties }}</h1>
-				</div>
-				
-				<template v-if="showRelation">
-					<table class="generic-table-vertical default-inputs">
-						<tr>
-							<td>{{ capGen.name }}</td>
-							<td><input class="long" v-model="name" :disabled="readonly" /></td>
-							<td>{{ capApp.nameHint }}</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.comments }}</td>
-							<td colspan="2"><textarea class="dynamic" v-model="comment" :disabled="readonly"></textarea></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.encryption }}</td>
-							<td><my-bool v-model="encryption" :readonly="true" /></td>
-							<td>{{ capApp.encryptionHint }}</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.retention }}</td>
-							<td>
-								<table>
-									<tr>
-										<td>{{ capApp.retentionCount }}</td>
-										<td><input v-model.number="retentionCount" :disabled="readonly" /></td>
-									</tr>
-									<tr>
-										<td>{{ capApp.retentionDays }}</td>
-										<td><input v-model.number="retentionDays" :disabled="readonly" /></td>
-									</tr>
-								</table>
-							</td>
-							<td>{{ capApp.retentionHint }}</td>
-						</tr>
-					</table>
-					
-					<div class="row">
-						<my-button image="save.png"
-							@trigger="set"
-							:active="canSave"
-							:caption="capGen.button.save"
-							:captionTitle="capGen.button.save"
+					<div class="row centered gap">
+						<my-button image="lock.png"
+							v-if="atr.encrypted"
+							:active="false"
+							:captionTitle="capApp.attributeEncrypted"
+							:naked="true"
+						/>
+						<my-button
+							v-if="isAttributeWithLength(atr.content) && atr.length !== 0"
+							:active="false"
+							:caption="'['+String(atr.length)+']'"
+							:captionTitle="capApp.attributeLength"
+							:naked="true"
+						/>
+						<my-button image="asterisk.png"
+							v-if="!atr.nullable"
+							:active="false"
+							:captionTitle="capApp.attributeNotNullable"
+							:naked="true"
+						/>
+						<my-button
+							:active="false"
+							:captionTitle="atr.iconId === null ? capApp.attributeNoIcon : capGen.icon"
+							:image="atr.iconId === null ? 'icon_missing.png' : ''"
+							:imageBase64="atr.iconId !== null ? srcBase64(iconIdMap[atr.iconId].file) : ''"
+							:naked="true"
 						/>
 					</div>
-				</template>
+				</div>
+				
+				<!-- attribute dialog -->
+				<my-builder-attribute
+					v-if="attributeIdEdit !== false"
+					@close="attributeIdEdit = false"
+					@nextLanguage="$emit('nextLanguage')"
+					@new-record="attributeIdEdit = null"
+					:attributeId="attributeIdEdit"
+					:builderLanguage="builderLanguage"
+					:readonly="readonly"
+					:relation="relation"
+				/>
 			</div>
 			
 			<!-- indexes -->
-			<div class="contentPart full" v-if="relation.attributes.length !== 0">
-				<div class="contentPartHeader clickable" @click="showIndexes = !showIndexes">
-					<img class="icon" :src="displayArrow(showIndexes)" />
-					<h1>{{ capApp.indexes.replace('{CNT}',relation.indexes.length) }}</h1>
+			<div class="generic-entry-list tab-content" v-if="tabTarget === 'indexes'">
+				<div class="entry"
+					v-if="!readonly"
+					@click="indexIdEdit = null"
+					:class="{ clickable:!readonly }"
+				>
+					<div class="row gap centered">
+						<img class="icon" src="images/add.png" />
+						<span>{{ capGen.button.new }}</span>
+					</div>
 				</div>
 				
-				<div class="generic-entry-list height-small" v-if="showIndexes">
-					<div class="entry"
-						v-if="!readonly"
-						@click="indexIdEdit = null"
-						:class="{ clickable:!readonly }"
-					>
-						<div class="row gap centered">
-							<img class="icon" src="images/add.png" />
-							<span>{{ capGen.button.new }}</span>
-						</div>
+				<div class="entry clickable"
+					@click="indexIdEdit = ind.id"
+					v-for="ind in relation.indexes"
+				>
+					<div class="row centered gap">
+						<my-button image="databaseAsterisk.png"
+							:active="false"
+							:naked="true"
+						/>
+						<div class="lines"><span>{{ displayIndexName(ind) }}</span></div>
 					</div>
-					
-					<div class="entry clickable"
-						@click="indexIdEdit = ind.id"
-						v-for="ind in relation.indexes"
-					>
-						<div class="row centered gap">
-							<my-button image="databaseAsterisk.png"
-								:active="false"
-								:naked="true"
-							/>
-							<div class="lines"><span>{{ displayIndexName(ind) }}</span></div>
-						</div>
-						<div class="row centered gap">
-							<my-button image="asterisk.png"
-								v-if="ind.noDuplicates"
-								:active="false"
-								:captionTitle="capApp.indexUnique"
-								:naked="true"
-							/>
-							<my-button image="cogMultiple.png"
-								v-if="ind.primaryKey || ind.autoFki"
-								:active="false"
-								:captionTitle="capApp.indexSystem"
-								:naked="true"
-							/>
-							<my-button image="key.png"
-								v-if="ind.primaryKey"
-								:active="false"
-								:captionTitle="capApp.indexPrimaryKey"
-								:naked="true"
-							/>
-							<my-button
-								v-if="ind.autoFki"
-								:active="false"
-								:captionTitle="capApp.indexAutoFki"
-								:image="attributeIdMap[ind.attributes[0].attributeId].content === '1:1' ? 'link1.png' : 'link3.png'"
-								:naked="true"
-							/>
-							<my-button image="languages.png"
-								v-if="ind.method === 'GIN'"
-								:active="false"
-								:captionTitle="capApp.indexText"
-								:naked="true"
-							/>
-						</div>
+					<div class="row centered gap">
+						<my-button image="asterisk.png"
+							v-if="ind.noDuplicates"
+							:active="false"
+							:captionTitle="capApp.indexUnique"
+							:naked="true"
+						/>
+						<my-button image="cogMultiple.png"
+							v-if="ind.primaryKey || ind.autoFki"
+							:active="false"
+							:captionTitle="capApp.indexSystem"
+							:naked="true"
+						/>
+						<my-button image="key.png"
+							v-if="ind.primaryKey"
+							:active="false"
+							:captionTitle="capApp.indexPrimaryKey"
+							:naked="true"
+						/>
+						<my-button
+							v-if="ind.autoFki"
+							:active="false"
+							:captionTitle="capApp.indexAutoFki"
+							:image="attributeIdMap[ind.attributes[0].attributeId].content === '1:1' ? 'link1.png' : 'link3.png'"
+							:naked="true"
+						/>
+						<my-button image="languages.png"
+							v-if="ind.method === 'GIN'"
+							:active="false"
+							:captionTitle="capApp.indexText"
+							:naked="true"
+						/>
 					</div>
-					
-					<!-- index dialog -->
-					<my-builder-pg-index
-						v-if="indexIdEdit !== false"
-						@close="indexIdEdit = false"
-						:pgIndexId="indexIdEdit"
-						:builderLanguage="builderLanguage"
-						:readonly="readonly"
-						:relation="relation"
-					/>
 				</div>
+				
+				<!-- index dialog -->
+				<my-builder-pg-index
+					v-if="indexIdEdit !== false"
+					@close="indexIdEdit = false"
+					:pgIndexId="indexIdEdit"
+					:builderLanguage="builderLanguage"
+					:readonly="readonly"
+					:relation="relation"
+				/>
 			</div>
 			
 			<!-- triggers -->
-			<div class="contentPart full">
-				<div class="contentPartHeader clickable" @click="showTriggers = !showTriggers">
-					<img class="icon" :src="displayArrow(showTriggers)" />
-					<h1>{{ capApp.triggers.replace('{CNT}',triggerCnt) }}</h1>
-				</div>
-				
+			<div class="tab-content" v-if="tabTarget === 'triggers'">
 				<my-builder-pg-triggers
-					v-if="showTriggers"
 					:contextEntity="'relation'"
 					:contextId="relation.id"
 					:readonly="readonly"
 				/>
 			</div>
 			
-			<!-- policies -->
-			<div class="contentPart full">
-				<div class="contentPartHeader clickable" @click="showPolicies = !showPolicies">
-					<img class="icon" :src="displayArrow(showPolicies)" />
-					<h1>{{ capApp.policies.replace('{CNT}',relation.policies.length) }}</h1>
-				</div>
-				
-				<template v-if="showPolicies">
-					<table class="default-inputs">
-						<thead v-if="policies.length !== 0">
-							<tr>
-								<td></td>
-								<td></td>
-								<td colspan="3">{{ capApp.policyActions }}</td>
-								<td colspan="2">{{ capApp.policyFunctions }}</td>
-								<td colspan="2"></td>
-							</tr>
-							<tr>
-								<td>{{ capGen.order }}</td>
-								<td>{{ capGen.role }}</td>
-								<td>{{ capApp.policyActionSelect }}</td>
-								<td>{{ capApp.policyActionUpdate }}</td>
-								<td>{{ capApp.policyActionDelete }}</td>
-								<td>{{ capApp.policyFunctionExcl }}</td>
-								<td>{{ capApp.policyFunctionIncl }}</td>
-								<td colspan="2"></td>
-							</tr>
-						</thead>
-						<draggable handle=".dragAnchor" tag="tbody" group="policies" itemKey="id" animation="100"
-							:fallbackOnBody="true"
-							:list="policies"
-						>
-							<template #item="{element,index}">
-								<my-builder-relations-item-policy
-									@remove="policies.splice(index,1)"
-									@update:modelValue="policies[index] = $event"
-									:modelValue="element"
-									:moduleId="relation.moduleId"
-									:readonly="readonly"
-								/>
-							</template>
-						</draggable>
-					</table>
-					<p style="width:900px;" v-if="policies.length !== 0">
-						{{ capApp.policyExplanation }}
-					</p>
-					
-					<div class="row gap">
-						<my-button image="add.png"
-							@trigger="addPolicy"
-							:active="!readonly"
-							:caption="capGen.button.add"
-						/>
-						<my-button image="save.png"
-							@trigger="set"
-							:active="!readonly && hasChanges"
-							:caption="capGen.button.save"
-							:captionTitle="capGen.button.save"
-						/>
-					</div>
-				</template>
-			</div>
-			
 			<!-- presets -->
-			<div class="contentPart full" v-if="relation.attributes.length !== 0">
-				<div class="contentPartHeader clickable" @click="showPresets = !showPresets">
-					<img class="icon" :src="displayArrow(showPresets)" />
-					<h1>{{ capApp.presets.replace('{CNT}',relation.presets.length) }}</h1>
-				</div>
-				
-				<table class="preset-records default-inputs" v-if="showPresets">
+			<div class="tab-content" v-if="tabTarget === 'presets'">
+				<table class="preset-records default-inputs">
 					<thead>
 						<tr>
 							<th>{{ capGen.actions }}</th>
@@ -490,44 +356,131 @@ let MyBuilderRelation = {
 				</table>
 			</div>
 			
-			<!-- relationship graph -->
-			<div class="contentPart full">
-				<div class="contentPartHeader clickable" @click="showGraph = !showGraph">
-					<img class="icon" :src="displayArrow(showGraph)" />
-					<h1>{{ capApp.graph }}</h1>
-				</div>
+			<!-- policies -->
+			<div class="tab-content" v-if="tabTarget === 'policies'">
+				<table class="default-inputs">
+					<thead v-if="policies.length !== 0">
+						<tr>
+							<td></td>
+							<td></td>
+							<td colspan="3">{{ capApp.policyActions }}</td>
+							<td colspan="2">{{ capApp.policyFunctions }}</td>
+							<td colspan="2"></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.order }}</td>
+							<td>{{ capGen.role }}</td>
+							<td>{{ capApp.policyActionSelect }}</td>
+							<td>{{ capApp.policyActionUpdate }}</td>
+							<td>{{ capApp.policyActionDelete }}</td>
+							<td>{{ capApp.policyFunctionExcl }}</td>
+							<td>{{ capApp.policyFunctionIncl }}</td>
+							<td colspan="2"></td>
+						</tr>
+					</thead>
+					<draggable handle=".dragAnchor" tag="tbody" group="policies" itemKey="id" animation="100"
+						:fallbackOnBody="true"
+						:list="policies"
+					>
+						<template #item="{element,index}">
+							<my-builder-relations-item-policy
+								@remove="policies.splice(index,1)"
+								@update:modelValue="policies[index] = $event"
+								:modelValue="element"
+								:moduleId="relation.moduleId"
+								:readonly="readonly"
+							/>
+						</template>
+					</draggable>
+				</table>
+				<p style="width:900px;" v-if="policies.length !== 0">
+					{{ capApp.policyExplanation }}
+				</p>
 				
-				<div class="graph" v-if="showGraph">
-					<echarts
-						:option="graphOption"
-						:theme="settings.dark ? 'dark' : ''"
+				<div class="row gap">
+					<my-button image="add.png"
+						@trigger="addPolicy"
+						:active="!readonly"
+						:caption="capGen.button.add"
+					/>
+					<my-button image="save.png"
+						@trigger="set"
+						:active="!readonly && hasChanges"
+						:caption="capGen.button.save"
+						:captionTitle="capGen.button.save"
 					/>
 				</div>
 			</div>
 			
-			<!-- data view -->
-			<div class="contentPart full">
-				<div class="contentPartHeader clickable" @click="togglePreview">
-					<img class="icon" :src="displayArrow(showPreview)" />
-					<h1>{{ capApp.preview }}</h1>
-				</div>
+			<!-- relation properties -->
+			<div class="tab-content" v-if="tabTarget === 'properties'">
+				<table class="generic-table-vertical default-inputs">
+					<tr>
+						<td>{{ capGen.name }}</td>
+						<td><input class="long" v-model="name" :disabled="readonly" /></td>
+						<td>{{ capApp.nameHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capGen.comments }}</td>
+						<td colspan="2"><textarea class="dynamic" v-model="comment" :disabled="readonly"></textarea></td>
+					</tr>
+					<tr>
+						<td>{{ capApp.encryption }}</td>
+						<td><my-bool v-model="encryption" :readonly="true" /></td>
+						<td>{{ capApp.encryptionHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.retention }}</td>
+						<td>
+							<table>
+								<tr>
+									<td>{{ capApp.retentionCount }}</td>
+									<td><input v-model.number="retentionCount" :disabled="readonly" /></td>
+								</tr>
+								<tr>
+									<td>{{ capApp.retentionDays }}</td>
+									<td><input v-model.number="retentionDays" :disabled="readonly" /></td>
+								</tr>
+							</table>
+						</td>
+						<td>{{ capApp.retentionHint }}</td>
+					</tr>
+				</table>
 				
-				<div class="preview default-inputs" v-if="showPreview">
-					<div class="row gap centered actions">
+				<div class="row">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="canSave"
+						:caption="capGen.button.save"
+						:captionTitle="capGen.button.save"
+					/>
+				</div>
+			</div>
+
+			<!-- relationship graph -->
+			<div class="tab-content graph" v-if="tabTarget === 'relationships'">
+				<echarts
+					:option="graphOption"
+					:theme="settings.dark ? 'dark' : ''"
+				/>
+			</div>
+			
+			<!-- data view -->
+			<div class="tab-content builder-relation-preview default-inputs" v-if="tabTarget === 'data'">
+				<div class="row gap centered space-between">
+					<div class="row gap centered">
 						<my-button image="pagePrev.png"
 							@trigger="previewPage(false)"
 							:active="previewOffset > 0"
 						/>
+						<input class="short" disabled="true" :title="capApp.previewPage" :value="(previewOffset / previewLimit) + 1" />
 						<my-button image="pageNext.png"
 							@trigger="previewPage(true)"
 							:active="previewRows.length === previewLimit"
 						/>
-						
-						<span>{{ capApp.previewPage }}</span>
-						<input class="short" disabled="true"
-							:value="(previewOffset / previewLimit) + 1"
-						/>
-						
+					</div>
+					
+					<div class="row gap centered">
 						<span>{{ capApp.previewLimit }}</span>
 						<select class="short"
 							v-model.number="previewLimit"
@@ -535,24 +488,22 @@ let MyBuilderRelation = {
 						>
 							<option v-for="i in 10" :value="i*10">{{ i*10 }}</option>
 						</select>
-						
-						<span>{{ capApp.previewRowCount }}</span>
-						<input class="short" disabled="true"
-							:value="previewRowCount"
-						/>
 					</div>
 					
+					<div class="row gap centered">
+						<span>{{ capApp.previewRowCount }}</span>
+						<input class="short" disabled="true" :value="previewRowCount" />
+					</div>
+				</div>
+				
+				<div class="builder-relation-preview-data shade">
 					<table>
 						<thead>
-							<tr>
-								<th v-for="a in attributesNotFiles">{{ a.name }}</th>
-							</tr>
+							<tr><th v-for="a in attributesNotFiles">{{ a.name }}</th></tr>
 						</thead>
 						<tbody>
 							<tr v-for="r in previewRows">
-								<td v-for="v in r" :title="v">
-									{{ displayDataValue(v) }}
-								</td>
+								<td v-for="v in r" :title="v">{{ displayDataValue(v) }}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -570,6 +521,10 @@ let MyBuilderRelation = {
 		relation:{
 			handler() { this.reset(); },
 			immediate:true
+		},
+		tabTarget(vNew,vOld) {
+			if(vNew === 'data')
+				this.getPreview();
 		}
 	},
 	data() {
@@ -591,17 +546,28 @@ let MyBuilderRelation = {
 			previewRows:[],
 			previewRowCount:0,
 			previewValueLength:50,
-			showAttributes:true,
-			showGraph:false,
-			showIndexes:false,
-			showPolicies:false,
-			showPresets:false,
-			showPreview:false,
-			showRelation:false,
-			showTriggers:false
+			tabTarget:'attributes'
 		};
 	},
 	computed:{
+		tabCaptions:(s) => {
+			let triggerCnt = 0;
+			for(const mod of s.modules) {
+				triggerCnt += mod.pgTriggers.filter(trg => trg.relationId === s.id).length;
+			}
+
+			return [
+				s.capApp.attributes.replace('{CNT}',s.relation.attributes.length),
+				s.capApp.indexes.replace('{CNT}',s.relation.indexes.length),
+				s.capApp.triggers.replace('{CNT}',triggerCnt),
+				s.capApp.presets.replace('{CNT}',s.relation.presets.length),
+				s.capApp.policies.replace('{CNT}',s.relation.policies.length),
+				s.capGen.properties,
+				s.capApp.graph,
+				s.capApp.preview
+			];
+		},
+
 		// relationship graph
 		graphOption:(s) => {
 			let edges = [];
@@ -690,13 +656,6 @@ let MyBuilderRelation = {
 			|| s.retentionCount           !== s.relation.retentionCount
 			|| s.retentionDays            !== s.relation.retentionDays
 			|| JSON.stringify(s.policies) !== JSON.stringify(s.relation.policies),
-		triggerCnt:(s) => {
-			let cnt = 0;
-			for(const mod of s.modules) {
-				cnt += mod.pgTriggers.filter(trg => trg.relationId === s.id).length;
-			}
-			return cnt;
-		},
 		
 		// simple
 		attributesNotFiles:(s) => s.relation === false ? [] : s.relation.attributes.filter(v => !s.isAttributeFiles(v.content)),
@@ -726,14 +685,8 @@ let MyBuilderRelation = {
 		srcBase64,
 		
 		// presentation
-		displayArrow(state) {
-			return state ? 'images/triangleDown.png' : 'images/triangleRight.png';
-		},
 		displayDataValue(v) {
-			if(typeof v !== 'string')
-				return v;
-			
-			return v.length < this.previewValueLength
+			return typeof v !== 'string' || v.length < this.previewValueLength
 				? v : v.substring(0, this.previewValueLength-3) + '...';
 		},
 		displayIndexName(ind) {
@@ -776,14 +729,8 @@ let MyBuilderRelation = {
 			this.retentionDays  = this.relation.retentionDays;
 			this.policies       = JSON.parse(JSON.stringify(this.relation.policies));
 			
-			if(this.showPreview)
+			if(this.tabTarget === 'data')
 				this.previewReload();
-		},
-		togglePreview() {
-			this.showPreview = !this.showPreview;
-			
-			if(this.showPreview)
-				this.getPreview();
 		},
 		
 		// backend calls
