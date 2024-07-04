@@ -5,7 +5,7 @@ export {MyBuilderPgTriggers as default};
 let MyBuilderPgTriggers = {
 	name:'my-builder-pg-triggers',
 	components:{MyBuilderPgTrigger},
-	template:`<div class="generic-entry-list height-small" :class="{ singleColumn:singleColumn }">
+	template:`<div class="generic-entry-list" :class="{ singleColumn:singleColumn }">
 		<div class="entry"
 			v-if="!readonly"
 			@click="idEdit = null"

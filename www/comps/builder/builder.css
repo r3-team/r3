@@ -812,18 +812,6 @@
 	border-bottom:1px solid var(--color-border);
 }
 
-/* preset */
-.builder-preset .preset-values{
-	padding:10px;
-	margin:5px 25px 10px 25px;
-	border:1px solid var(--color-border);
-	border-top:none;
-	border-radius:0px 0px 5px 5px;
-}
-.builder-preset .preset-values textarea{
-	height:30px;
-}
-
 /* icons */
 .builder-icons{
 	display:flex;

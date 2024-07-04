@@ -1471,10 +1471,11 @@
 			"dialog":{
 				"delete":"Biztos vagy benne, hogy törölni szeretnéd ezt a beállított rekordot?<br /><br /><b>FIGYELEM!</b><br /><br />A külső kulcs definíciójától függően (ON UPDATE/DELETE), a beállított rekordok törlése ügyféladatak elvesztéséhez (CASCADED) vagy alkalmazásfrissítési problémákhoz (NO ACTION) vezethet."
 			},
-			"new":"Új rekord",
 			"protected":"Védett",
-			"value":"Attribútum értéke",
-			"valueCount":"{CNT} érték"
+			"protectedHint":"After creation, a protected preset record can only be deleted in the Builder. Protected presets are often used for data that is required for the application to work, such as workflow states or configuration options.<br /><br />Unprotected presets can be deleted at any time; these are often used for example data.<br /><br />Regardless of the protection setting of the preset record, it´s values can be edited, unless they are also protected (see below).",
+			"values":"Attribute values",
+			"title":"Preset '{NAME}'",
+			"titleNew":"New preset"
 		},
 		"query":{
 			"choice":"Sor",

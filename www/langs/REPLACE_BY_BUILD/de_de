@@ -1471,10 +1471,11 @@
 			"dialog":{
 				"delete":"Bist du sicher, dass du diesen vordefinierten Datensatz löschen möchtest?<br /><br /><b>WARNUNG!</b><br /><br />Abhängig der Definition von Fremdschlüsseln (ON UPDATE/DELETE), Löschen von vordefinierten Datensätzen kann zu Verlust von Kundendaten (CASCADED) oder zu Problemen beim Anwendungs-Update führen (NO ACTION)."
 			},
-			"new":"Neuer Datensatz",
 			"protected":"Geschützt",
-			"value":"Attributwert",
-			"valueCount":"{CNT} Wert(e)"
+			"protectedHint":"Nach Erstellung kann ein geschützter, vordefinierter Datensatz nur im Builder gelöscht werden. Geschützte Datensätze werden oft für Daten genutzt, die zur korrekten Ausführung der Anwendung erforderlich sind, wie z. B. Workflow-Zustände oder Konfigurationsoptionen.<br /><br />Ungeschützte, vordefinierte Datensätze können jederzeit gelöscht werden; sie werden oft für Beispieldaten verwendet.<br /><br />Unabhängig von den Schutzeinstellungen des Datensatzes, können dessen Werte editiert werden, es sei denn die Werte werden ebenfalls geschützt (s. unten).",
+			"values":"Attributwerte",
+			"title":"Datensatz '{NAME}'",
+			"titleNew":"Neuer Datensatz"
 		},
 		"query":{
 			"choice":"Satz",

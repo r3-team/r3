@@ -2,6 +2,7 @@ import MyBuilderAttribute    from './builderAttribute.js';
 import MyBuilderPreset       from './builderPreset.js';
 import MyBuilderPgIndex      from './builderPgIndex.js';
 import MyBuilderPgTriggers   from './builderPgTriggers.js';
+import MyBuilderPresets      from './builderPresets.js';
 import MyTabs                from '../tabs.js';
 import {srcBase64}           from '../shared/image.js';
 import {
@@ -135,6 +136,7 @@ let MyBuilderRelation = {
 		MyBuilderPreset,
 		MyBuilderPgIndex,
 		MyBuilderPgTriggers,
+		MyBuilderPresets,
 		MyBuilderRelationsItemPolicy,
 		MyTabs
 	},
@@ -325,35 +327,10 @@ let MyBuilderRelation = {
 			
 			<!-- presets -->
 			<div class="tab-content" v-if="tabTarget === 'presets'">
-				<table class="preset-records default-inputs">
-					<thead>
-						<tr>
-							<th>{{ capGen.actions }}</th>
-							<th>{{ capGen.name }}</th>
-							<th>{{ capGen.id }}</th>
-							<th>{{ capApp.presetProtected }}</th>
-							<th>{{ capApp.presetValues }}</th>
-							<th>{{ capApp.presetValuesPreview }}</th>
-						</tr>
-					</thead>
-					
-					<!-- new record -->
-					<my-builder-preset
-						:builder-language="builderLanguage"
-						:readonly="readonly"
-						:relation="relation"
-					/>
-					
-					<!-- existing records -->
-					<my-builder-preset
-						v-for="p in relation.presets"
-						:builder-language="builderLanguage"
-						:key="p.id"
-						:preset="p"
-						:readonly="readonly"
-						:relation="relation"
-					/>
-				</table>
+				<my-builder-presets
+					:relation="relation"
+					:readonly="readonly"
+				/>
 			</div>
 			
 			<!-- policies -->

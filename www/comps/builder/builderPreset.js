@@ -1,4 +1,5 @@
 import {isAttributeRelationship} from '../shared/attribute.js';
+import {getDependentModules}     from '../shared/builder.js';
 import {
 	copyValueDialog,
 	getNilUuid
@@ -8,23 +9,30 @@ export {MyBuilderPreset as default};
 let MyBuilderPresetValue = {
 	name:'my-builder-preset-value',
 	template:`<tr>
-		<td><span>{{ attribute.name }}</span></td>
+		<td>{{ attribute.name }}</td>
 		<td>
-			<select v-if="isRelationship" v-model="presetIdReferInput" :disabled="readonly">
+			<div class="row centered">
+				<my-bool v-model="protectedInput" :readonly="readonly" />
+				<my-button
+					:active="false"
+					:image="protected ? 'lock.png' : 'lockOpen.png'"
+					:naked="true"
+				/>
+			</div>
+		</td>
+		<td>
+			<select class="dynamic" v-if="isRelationship" v-model="presetIdReferInput" :disabled="readonly">
 				<option :value="null">[{{ attribute.content }}]</option>
-				<option v-for="p in relationship.presets" :value="p.id">
-					{{ p.name }}
-				</option>
+				<option v-for="p in relationship.presets" :value="p.id">{{ p.name }}</option>
 			</select>
 			
-			<textarea
+			<textarea class="dynamic startAsOneLine"
 				v-if="!isRelationship"
 				v-model="valueInput"
 				:disabled="readonly"
 				:placeholder="attribute.content"
 			></textarea>
 		</td>
-		<td><my-bool v-model="protectedInput" :readonly="readonly" /></td>
 	</tr>`,
 	props:{
 		attribute:    { type:Object,  required:true },
@@ -62,136 +70,131 @@ let MyBuilderPresetValue = {
 
 let MyBuilderPreset = {
 	name:'my-builder-preset',
-	components:{MyBuilderPresetValue},
-	template:`<tbody class="builder-preset">
-		<tr>
-			<td>
-				<div class="row gap">
+	components:{ MyBuilderPresetValue },
+	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
+		<div class="contentBox scroll float" v-if="values !== null">
+			<div class="top">
+				<div class="area nowrap">
+					<img class="icon" :src="values.protected ? 'images/lock.png' : 'images/lockOpen.png'" />
+					<h1 class="title">{{ isNew ? capApp.titleNew : capApp.title.replace('{NAME}',values.name) }}</h1>
+				</div>
+				<div class="area">
+					<my-button image="cancel.png"
+						@trigger="$emit('close')"
+						:cancel="true"
+					/>
+				</div>
+			</div>
+			<div class="top lower">
+				<div class="area">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="hasChanges && !readonly"
-						:caption="isNew ? capGen.button.create : ''"
-						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+						:active="canSave"
+						:caption="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="refresh.png"
+						@trigger="reset"
+						:active="hasChanges"
+						:caption="capGen.button.refresh"
+					/>
+					<my-button image="visible1.png"
+						@trigger="copyValueDialog(values.name,id,id)"
+						:active="!isNew"
+						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="delAsk"
 						:active="!readonly"
 						:cancel="true"
-						:captionTitle="capGen.button.delete"
+						:caption="capGen.button.delete"
 					/>
 				</div>
-			</td>
-			<td>
-				<input v-model="name" :disabled="readonly" :placeholder="isNew ? capApp.new : ''" />
-			</td>
-			<td>
-				<my-button image="visible1.png"
-					@trigger="copyValueDialog(name,preset.id,preset.id)"
-					:active="!isNew"
-				/>
-			</td>
-			<td><my-bool v-model="protected" :readonly="readonly" /></td>
-			<td class="minimum">
-				<my-button
-					@trigger="showValues = !showValues"
-					:caption="capApp.valueCount.replace('{CNT}',values.length)"
-				/>
-			</td>
-			<td>
-				<input disabled="readonly" :value="previewLine" />
-			</td>
-		</tr>
-		<tr v-if="showValues">
-			<td colspan="999">
-				<div class="preset-values">
-					<table>
-						<thead>
-							<tr>
-								<th colspan="2" class="no-padding">{{ capApp.value }}</th>
-								<th>{{ capApp.protected }}</th>
-							</tr>
-						</thead>
-						<tbody>
-							<my-builder-preset-value
-								v-for="(a,i) in relation.attributes.filter(v => v.name !== 'id')"
-								@set="(...args) => childSet(a.id,...args)"
-								:attribute="a"
-								:key="a.id"
-								:preset-id-refer="childGet(a.id,'presetIdRefer')"
-								:protected="childGet(a.id,'protected')"
-								:readonly="readonly"
-								:value="childGet(a.id,'value')"
-							/>
-						</tbody>
-					</table>
-				</div>
-			</td>
-		</tr>
-	</tbody>`,
+			</div>
+			
+			<div class="content default-inputs">
+				<table class="generic-table-vertical">
+					<tr>
+						<td><span>{{ capGen.name }}</span></td>
+						<td colspan="2"><input class="dynamic" v-model="values.name" /></td>
+					</tr>
+					<tr>
+						<td><span>{{ capApp.protected }}</span></td>
+						<td>
+							<div class="row centered">
+								<my-bool v-model="values.protected" :readonly="readonly" />
+								<my-button
+									:active="false"
+									:image="values.protected ? 'lock.png' : 'lockOpen.png'"
+									:naked="true"
+								/>
+							</div>
+						</td>
+						<td v-html="capApp.protectedHint"></td>
+					</tr>
+					<tr>
+						<td colspan="3"><b>{{ capApp.values }}</b></td>
+					</tr>
+					<my-builder-preset-value
+						v-for="(a,i) in relation.attributes.filter(v => v.name !== 'id')"
+						@set="(...args) => childSet(a.id,...args)"
+						:attribute="a"
+						:key="a.id"
+						:preset-id-refer="childGet(a.id,'presetIdRefer')"
+						:protected="childGet(a.id,'protected')"
+						:readonly="readonly"
+						:value="childGet(a.id,'value')"
+					/>
+				</table>
+			</div>
+		</div>
+	</div>`,
 	props:{
+		id:      { required:true },
 		readonly:{ type:Boolean, required:true },
-		relation:{ type:Object,  required:true },
-		preset:{
-			type:Object,
-			required:false,
-			default:function() { return{
-				id:null,
-				name:'',
-				presetIdRefer:null,
-				protected:true,
-				values:[]
-			}}
-		}
+		relation:{ type:Object,  required:true }
 	},
+	emits:['close'],
 	data() {
 		return {
-			showValues:false,
-			name:this.preset.name,
-			protected:this.preset.protected,
-			values:JSON.parse(JSON.stringify(this.preset.values))
+			values:null,
+			valuesOrg:null
 		};
 	},
 	computed:{
-		hasChanges:(s) => {
-			if(s.name === '')
-				return false;
-			
-			return (s.isNew && s.values.length !== 0)
-				|| s.name !== s.preset.name
-				|| s.protected !== s.preset.protected
-				|| JSON.stringify(s.values) !== JSON.stringify(s.preset.values);
-		},
-		previewLine:(s) => {
-			let items = [];
-			for(let v of s.values) {
-				if(v.value !== '')
-					items.push(v.value);
-			}
-			return items.join(', ');
-		},
 		attributeIdMapValue:(s) => {
 			let map = {};
-			for(let v of s.values) {
+			for(let v of s.values.values) {
 				map[v.attributeId] = v;
 			}
 			return map;
 		},
-		
-		// simple states
-		isNew:(s) => s.preset.id === null,
+
+		// simple
+		canSave:   (s) => s.values !== null && s.values.name !== '' && s.hasChanges,
+		hasChanges:(s) => JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		isNew:     (s) => s.id === null,
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		capApp:        (s) => s.$store.getters.captions.builder.preset,
 		capGen:        (s) => s.$store.getters.captions.generic
 	},
+	mounted() {
+		this.reset();
+		window.addEventListener('keydown',this.handleHotkeys);
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
+	},
 	methods:{
 		// externals
 		copyValueDialog,
+		getDependentModules,
 		getNilUuid,
 		isAttributeRelationship,
 		
+		// actions
 		childGet(atrId,mode) {
 			const exists = typeof this.attributeIdMapValue[atrId] !== 'undefined';
 			
@@ -209,38 +212,70 @@ let MyBuilderPreset = {
 			return false;
 		},
 		childSet(atrId,presetIdRefer,protec,value) {
-			let atr = this.attributeIdMap[atrId];
+			const atr = this.attributeIdMap[atrId];
 			
 			// no preset value yet for attribute, create one
-			if(typeof this.attributeIdMapValue[atrId] === 'undefined') {
-				this.values.push({
+			if(this.attributeIdMapValue[atrId] === undefined)
+				return this.values.values.push({
 					id:this.getNilUuid(),
 					attributeId:atrId,
 					presetIdRefer:presetIdRefer,
 					protected:protec,
 					value:value
 				});
-				return;
-			}
 			
 			// update existing preset value
-			for(let i = 0, j = this.values.length; i < j; i++) {
-				if(this.values[i].attributeId !== atrId)
+			for(let i = 0, j = this.values.values.length; i < j; i++) {
+				if(this.values.values[i].attributeId !== atrId)
 					continue;
 				
 				// remove preset value if nothing is set
-				if((this.isAttributeRelationship(atr.content) && presetIdRefer === null)
-					|| (!this.isAttributeRelationship(atr.content) && value === '')) {
-					
-					this.values.splice(i,1);
+				if((this.isAttributeRelationship(atr.content) && presetIdRefer === null) ||
+					(!this.isAttributeRelationship(atr.content) && value === ''))
+				{
+					this.values.values.splice(i,1);
 					break;
 				}
 				
-				this.values[i].presetIdRefer = presetIdRefer;
-				this.values[i].protected     = protec;
-				this.values[i].value         = value;
+				this.values.values[i].presetIdRefer = presetIdRefer;
+				this.values.values[i].protected     = protec;
+				this.values.values[i].value         = value;
 				break;
 			}
+		},
+		closeReload() {
+			this.$root.schemaReload(this.relation.moduleId);
+			this.$emit('close');
+		},
+		handleHotkeys(e) {
+			if(e.ctrlKey && e.key === 's' && this.canSave) {
+				this.set();
+				e.preventDefault();
+			}
+			if(e.key === 'Escape') {
+				this.$emit('close');
+				e.preventDefault();
+			}
+		},
+		reset() {
+			if(this.id === null) {
+				this.values = {
+					id:null,
+					name:'',
+					relationId:this.relation.id,
+					protected:true,
+					values:[]
+				};
+			}
+			else {
+				for(const p of this.relation.presets) {
+					if(p.id === this.id) {
+						this.values = JSON.parse(JSON.stringify(p));
+						break;
+					}
+				}
+			}
+			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
 		
 		// backend calls
@@ -259,26 +294,14 @@ let MyBuilderPreset = {
 			});
 		},
 		del(rel) {
-			ws.send('preset','del',{id:this.preset.id},true).then(
-				() => this.$root.schemaReload(this.relation.moduleId),
+			ws.send('preset','del',{id:this.id},true).then(
+				this.closeReload,
 				this.$root.genericError
 			);
 		},
 		set() {
-			ws.send('preset','set',{
-				id:this.preset.id,
-				relationId:this.relation.id,
-				name:this.name,
-				protected:this.protected,
-				values:this.values
-			},true).then(
-				() => {
-					if(this.isNew) {
-						this.name   = '';
-						this.values = [];
-					}
-					this.$root.schemaReload(this.relation.moduleId);
-				},
+			ws.send('preset','set',this.values,true).then(
+				this.closeReload,
 				this.$root.genericError
 			);
 		}
