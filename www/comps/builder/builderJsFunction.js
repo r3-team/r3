@@ -786,7 +786,7 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace field IDs with placeholders
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|chart|error|focus|order)\\('(${uuid})'`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|chart|error|focus|order|file_link|file_link_version)\\('(${uuid})'`,'g');
 			body = body.replace(pat,(match,mode,part,id) => this.fieldIdMap[id] !== undefined
 				? `${prefix}.${mode}_field_${part}({${this.displayFieldName(id)}}` : match
 			);
@@ -857,7 +857,7 @@ let MyBuilderJsFunction = {
 			
 			// replace field value/caption get/set placeholders
 			// stored as: app.get_field_value(F12: 0 display_name... or app.get_field_value(F13: Container...
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|chart|error|focus|order)\\(\{F(\\d+)\:.*?\}`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|chart|error|focus|order|file_link|file_link_version)\\(\{F(\\d+)\:.*?\}`,'g');
 			body = body.replace(pat,(match,mode,part,ref) => {
 				for(let fieldId in this.entityIdMapRef.field) {
 					if(this.entityIdMapRef.field[fieldId] === parseInt(ref))
