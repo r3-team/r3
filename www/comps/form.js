@@ -560,10 +560,10 @@ let MyForm = {
 				},
 				
 				// field manipulation
-				get_field_file_link:(fieldId, fileMeta) => s.fieldIdMapData[fieldId] === undefined
-					? undefined : s.getAttributeFileHref(s.fieldIdMapData[fieldId].attributeId, fileMeta.id, fileMeta.name, s.token),
-				get_field_file_link_version:(fieldId, id, name, version) => s.fieldIdMapData[fieldId] === undefined
-					? undefined : s.getAttributeFileVersionHref(s.fieldIdMapData[fieldId].attributeId, id, name, version, s.token),
+				get_field_file_link:(fieldId, fileId, filename) => s.fieldIdMapData[fieldId] === undefined
+					? undefined : s.getAttributeFileHref(s.fieldIdMapData[fieldId].attributeId, fileId, filename, s.token),
+				get_field_file_link_version:(fieldId, fileId, filename, version) => s.fieldIdMapData[fieldId] === undefined
+					? undefined : s.getAttributeFileVersionHref(s.fieldIdMapData[fieldId].attributeId, fileId, filename, version, s.token),
 				get_field_value:(fieldId) => s.fieldIdMapData[fieldId] === undefined
 					? undefined : s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false)],
 				set_field_caption:(fieldId,caption)  => s.fieldIdMapOverwrite.caption[fieldId] = caption,
