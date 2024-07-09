@@ -6,7 +6,7 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-func Get() (interface{}, error) {
+func schedulersGet() (interface{}, error) {
 
 	type nodeMeta struct {
 		Name        string `json:"name"`
@@ -54,11 +54,12 @@ func Get() (interface{}, error) {
 			) AS node_meta
 		FROM instance.schedule AS s
 		LEFT JOIN app.pg_function_schedule AS fs ON fs.id  = s.pg_function_schedule_id
+		LEFT JOIN app.pg_function          AS pg ON pg.id  = fs.pg_function_id
 		LEFT JOIN instance.task            AS t  ON t.name = s.task_name
 		ORDER BY
-			t.name            ASC,
-			fs.pg_function_id ASC,
-			fs.id             ASC
+			t.name       ASC,
+			pg.module_id ASC,
+			pg.name      ASC
 	`)
 	if err != nil {
 		return tasks, err

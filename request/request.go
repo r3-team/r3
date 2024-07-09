@@ -590,7 +590,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "scheduler":
 		switch action {
 		case "get":
-			return Get()
+			return schedulersGet()
 		}
 	case "schema":
 		switch action {

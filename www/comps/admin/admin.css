@@ -8,6 +8,11 @@
 	font-style:italic;
 	text-align:center;
 }
+.admin .module-icon{
+	width:24px;
+	margin-right:9px;
+	filter:var(--image-filter);
+}
 
 /* system logs */
 .admin-logs{
@@ -30,11 +35,6 @@
 /* logins */
 .admin-logins .login-record{
 	max-width:400px;
-}
-.admin-logins .module-icon{
-	width:24px;
-	margin-right:9px;
-	filter:var(--image-filter);
 }
 .admin-login{
 	min-width:1000px;
@@ -292,11 +292,6 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-direction:column;
-}
-.admin-modules .module-icon{
-	width:24px;
-	margin-right:8px;
-	filter:var(--image-filter);
 }
 .admin-modules .message{
 	margin:0px;

@@ -1,4 +1,5 @@
 import {getStringFilled} from '../shared/generic.js';
+import srcBase64Icon     from '../shared/image.js';
 import {getUnixFormat}   from '../shared/time.js';
 import {getCaption}      from '../shared/language.js';
 export {MyAdminScheduler as default};
@@ -152,7 +153,12 @@ let MyAdminScheduler = {
 					</thead>
 					<tbody>
 						<tr v-for="s in pgFunctionSchedulers">
-							<td>{{ displayModuleName(s.pgFunctionId) }}</td>
+							<td>
+								<div class="row gap centered">
+									<img class="module-icon" :src="srcBase64Icon(moduleIdMap[pgFunctionIdMap[s.pgFunctionId].moduleId].iconId,'images/module.png')" />
+									<span>{{ displayModuleName(s.pgFunctionId) }}</span>
+								</div>
+							</td>
 							<td>{{ displayFunctionName(s.pgFunctionId) }}</td>
 							<td>{{ displaySchedule(s.pgFunctionId,s.pgFunctionScheduleId) }}</td>
 							<td>{{ displayTime(s.dateAttempt) }}</td>
@@ -188,7 +194,6 @@ let MyAdminScheduler = {
 		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	computed:{
-		hasChanges:(s) => JSON.stringify(s.schedulers) !== JSON.stringify(s.schedulersInput),
 		hasAppSchedules:(s) => {
 			for(let e of s.schedulers) {
 				if(e.taskName === '')
@@ -196,14 +201,10 @@ let MyAdminScheduler = {
 			}
 			return false;
 		},
-		pgFunctionSchedulers:(s) => {
-			let out = [];
-			for(let e of s.schedulers) {
-				if(e.taskName === '' && e.intervalType !== 'once')
-					out.push(e);
-			}
-			return out;
-		},
+
+		// simple
+		hasChanges:          (s) => JSON.stringify(s.schedulers) !== JSON.stringify(s.schedulersInput),
+		pgFunctionSchedulers:(s) => s.schedulers.filter(v => v.taskName === '' && v.intervalType !== 'once'),
 		
 		// stores
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
@@ -217,6 +218,7 @@ let MyAdminScheduler = {
 		getCaption,
 		getStringFilled,
 		getUnixFormat,
+		srcBase64Icon,
 		
 		// presentation
 		displayTime(unixTime) {
