@@ -500,17 +500,18 @@ let MyForm = {
 				// field manipulation
 				get_field_value:(fieldId) => s.fieldIdMapData[fieldId] === undefined
 					? undefined : s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false)],
-				set_field_caption:(fieldId,caption)  => s.fieldIdMapOverwrite.caption[fieldId] = caption,
-				set_field_chart:  (fieldId,option)   => s.fieldIdMapOverwrite.chart[fieldId]   = option,
-				set_field_error:  (fieldId,errorMsg) => s.fieldIdMapOverwrite.error[fieldId]   = errorMsg,
-				set_field_focus:  (fieldId)          => s.fieldSetFocus(fieldId,false),
-				set_field_order:  (fieldId,order)    => s.fieldIdMapOverwrite.order[fieldId]   = order,
-				set_field_value:  (fieldId,value)    => {
+				set_field_caption:(fieldId,caption)     => s.fieldIdMapOverwrite.caption[fieldId] = caption,
+				set_field_chart:  (fieldId,option)      => s.fieldIdMapOverwrite.chart[fieldId]   = option,
+				set_field_error:  (fieldId,errorMsg)    => s.fieldIdMapOverwrite.error[fieldId]   = errorMsg,
+				set_field_focus:  (fieldId)             => s.fieldSetFocus(fieldId,false),
+				set_field_order:  (fieldId,order)       => s.fieldIdMapOverwrite.order[fieldId]   = order,
+				set_field_value:  (fieldId,value,isChg) => {
 					// use common return codes: 0 = success, 1 = error
 					if(s.fieldIdMapData[fieldId] === undefined) return 1;
+					if(isChg                     === undefined) isChg = true;
 					
 					s.valueSet(s.getIndexAttributeIdByField(
-						s.fieldIdMapData[fieldId],false),value,false,true);
+						s.fieldIdMapData[fieldId],false),value,!isChg,true);
 					
 					return 0;
 				},

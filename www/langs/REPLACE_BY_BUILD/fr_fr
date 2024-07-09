@@ -1295,7 +1295,8 @@
 			"titlePg":"Fonctions côté serveur",
 			"titlePgOne":"Fonction côté serveur '{NAME}'",
 			"triggers":"Triggers",
-			"value":"VALEUR"
+			"value":"VALEUR",
+			"valueInit":"IS_CHANGED_TRUE_FALSE"
 		},
 		"icon":{
 			"add":"Ajouter/éditer le fichier d'icône",
@@ -1472,7 +1473,7 @@
 				"delete":"Êtes-vous sûr de vouloir supprimer cet enregistrement prédéfini ?<br /><br /><b>AVERTISSEMENT !</b><br /><br />En fonction de la définition de la clé étrangère (ON UPDATE/DELETE), la suppression des enregistrements prédéfinis peut entraîner la perte de données client (CASCADE) ou des problèmes de mise à niveau de l'application (NO ACTION)."
 			},
 			"protected":"Protégé",
-			"protectedHint":"After creation, a protected preset record can only be deleted in the Builder. Protected presets are often used for data that is required for the application to work, such as workflow states or configuration options.<br /><br />Unprotected presets can be deleted at any time; these are often used for example data.<br /><br />Regardless of the protection setting of the preset record, it´s values can be edited, unless they are also protected (see below).",
+			"protectedHint":"After creation, a protected preset record can only be deleted in the Builder. Protected presets are often used for data that is required for the application to work, such as workflow states or configuration options.<br /><br />Unprotected presets can be deleted at any time; these are often used for example data.<br /><br />Regardless of the protection setting of the preset record, its values can be edited, unless they are also protected (see below).",
 			"values":"Attribute values",
 			"title":"Preset '{NAME}'",
 			"titleNew":"New preset",

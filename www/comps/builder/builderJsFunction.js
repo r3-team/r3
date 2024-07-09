@@ -606,13 +606,13 @@ let MyBuilderJsFunction = {
 						case 'collection_update': text = `${prefix}.collection_update({${mod.name}.${col.name}})${postfixAsync}`; break;
 					}
 				break;
-				case 'field_value_get':   text = `${prefix}.get_field_value({${s.displayFieldName(s.entityId)}})`;                         break;
-				case 'field_value_set':   text = `${prefix}.set_field_value({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`;   break;
+				case 'field_value_get':   text = `${prefix}.get_field_value({${s.displayFieldName(s.entityId)}})`; break;
+				case 'field_value_set':   text = `${prefix}.set_field_value({${s.displayFieldName(s.entityId)}}, ${s.capApp.value}, ${s.capApp.valueInit})`; break;
 				case 'field_caption_set': text = `${prefix}.set_field_caption({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
-				case 'field_chart_set':   text = `${prefix}.set_field_chart({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`;   break;
-				case 'field_error_set':   text = `${prefix}.set_field_error({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`;   break;
-				case 'field_focus_set':   text = `${prefix}.set_field_focus({${s.displayFieldName(s.entityId)}})`;                         break;
-				case 'field_order_set':   text = `${prefix}.set_field_order({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`;   break;
+				case 'field_chart_set':   text = `${prefix}.set_field_chart({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
+				case 'field_error_set':   text = `${prefix}.set_field_error({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
+				case 'field_focus_set':   text = `${prefix}.set_field_focus({${s.displayFieldName(s.entityId)}})`; break;
+				case 'field_order_set':   text = `${prefix}.set_field_order({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
 				case 'form':
 					frm  = s.formIdMap[s.entityId];
 					mod  = s.moduleIdMap[frm.moduleId];

@@ -1295,7 +1295,8 @@
 			"titlePg":"Backend functions",
 			"titlePgOne":"Backend function '{NAME}'",
 			"triggers":"Triggers",
-			"value":"VALUE"
+			"value":"VALUE",
+			"valueInit":"IS_CHANGED_TRUE_FALSE"
 		},
 		"icon":{
 			"add":"Add/edit icon file",
@@ -1472,7 +1473,7 @@
 				"delete":"Are you sure you want to delete this preset record?<br /><br /><b>WARNING!</b><br /><br />Depending on foreign key definition (ON UPDATE/DELETE), deletion of preset records may cause loss of customer data (CASCADED) or application upgrade issues (NO ACTION)."
 			},
 			"protected":"Protected",
-			"protectedHint":"After creation, a protected preset record can only be deleted in the Builder. Protected presets are often used for data that is required for the application to work, such as workflow states or configuration options.<br /><br />Unprotected presets can be deleted at any time; these are often used for example data.<br /><br />Regardless of the protection setting of the preset record, it´s values can be edited, unless they are also protected (see below).",
+			"protectedHint":"After creation, a protected preset record can only be deleted in the Builder. Protected presets are often used for data that is required for the application to work, such as workflow states or configuration options.<br /><br />Unprotected presets can be deleted at any time; these are often used for example data.<br /><br />Regardless of the protection setting of the preset record, its values can be edited, unless they are also protected (see below).",
 			"values":"Attribute values",
 			"title":"Preset '{NAME}'",
 			"titleNew":"New preset",

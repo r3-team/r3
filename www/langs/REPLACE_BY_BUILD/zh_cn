@@ -1295,7 +1295,8 @@
 			"titlePg":"后端函数",
 			"titlePgOne":"后端函数 '{NAME}'",
 			"triggers":"触发器",
-			"value":"数值"
+			"value":"数值",
+			"valueInit":"IS_CHANGED_TRUE_FALSE"
 		},
 		"icon":{
 			"add":"添加/编辑图标文件",
@@ -1472,7 +1473,7 @@
 				"delete":"确定要删除此预设记录吗？<br /><br /><b>警告！</b><br /><br />根据外键定义（ON UPDATE/DELETE），删除预设记录可能导致客户数据丢失（级联）或应用程序升级问题（NO ACTION）。"
 			},
 			"protected":"受保护",
-			"protectedHint":"After creation, a protected preset record can only be deleted in the Builder. Protected presets are often used for data that is required for the application to work, such as workflow states or configuration options.<br /><br />Unprotected presets can be deleted at any time; these are often used for example data.<br /><br />Regardless of the protection setting of the preset record, it´s values can be edited, unless they are also protected (see below).",
+			"protectedHint":"After creation, a protected preset record can only be deleted in the Builder. Protected presets are often used for data that is required for the application to work, such as workflow states or configuration options.<br /><br />Unprotected presets can be deleted at any time; these are often used for example data.<br /><br />Regardless of the protection setting of the preset record, its values can be edited, unless they are also protected (see below).",
 			"values":"Attribute values",
 			"title":"Preset '{NAME}'",
 			"titleNew":"New preset",

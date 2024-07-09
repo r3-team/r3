@@ -1295,7 +1295,8 @@
 			"titlePg":"Backend-Funktionen",
 			"titlePgOne":"Backend-Funktionen \"{NAME}\"",
 			"triggers":"Trigger",
-			"value":"VALUE"
+			"value":"VALUE",
+			"valueInit":"IS_CHANGED_TRUE_FALSE"
 		},
 		"icon":{
 			"add":"Icon-Datei hinzufügen/bearbeiten",
