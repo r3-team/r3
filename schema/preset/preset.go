@@ -268,28 +268,32 @@ func setRecord_tx(tx pgx.Tx, presetId uuid.UUID, recordId int64, values []types.
 			continue
 		}
 
-		atrName, err := schema.GetAttributeNameById_tx(tx, value.AttributeId)
+		_, _, atrName, atrContent, err := schema.GetAttributeDetailsById_tx(tx, value.AttributeId)
 		if err != nil {
 			return err
 		}
 
 		sqlNames = append(sqlNames, fmt.Sprintf(`"%s"`, atrName))
 
-		if value.PresetIdRefer.Valid {
-			// use refered preset record ID as value
-			recordId, exists, err := getRecordIdByReferal_tx(tx, value.PresetIdRefer.Bytes)
-			if err != nil {
-				return err
-			}
+		if schema.IsContentRelationship(atrContent) {
+			if value.PresetIdRefer.Valid {
+				// use refered preset record ID as value
+				recordIdRefer, exists, err := getRecordIdByReferal_tx(tx, value.PresetIdRefer.Bytes)
+				if err != nil {
+					return err
+				}
 
-			// if refered record does not exist, do not set record
-			// otherwise potential NOT NULL constraint would be breached
-			if !exists {
-				return fmt.Errorf("referenced preset '%s' does not exist",
-					uuid.FromBytesOrNil(value.PresetIdRefer.Bytes[:]))
-			}
+				// if refered record does not exist, do not set record
+				// otherwise potential NOT NULL constraint would be breached
+				if !exists {
+					return fmt.Errorf("referenced preset '%s' does not exist",
+						uuid.FromBytesOrNil(value.PresetIdRefer.Bytes[:]))
+				}
 
-			sqlValues = append(sqlValues, recordId)
+				sqlValues = append(sqlValues, recordIdRefer)
+			} else {
+				sqlValues = append(sqlValues, nil)
+			}
 		} else {
 			sqlValues = append(sqlValues, value.Value)
 		}
