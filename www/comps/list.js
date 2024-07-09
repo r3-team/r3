@@ -1042,6 +1042,8 @@ let MyList = {
 		this.limit           = this.fieldOptionGet(this.fieldId,'limit',this.limitDefault);
 		this.layout          = this.fieldOptionGet(this.fieldId,'layout',this.layoutDefault);
 		this.showHeader      = this.fieldOptionGet(this.fieldId,'header',true);
+
+		window.addEventListener('keydown',this.handleHotkeys);
 	},
 	beforeUnmount() {
 		this.setAutoRenewTimer(true);
@@ -1049,6 +1051,8 @@ let MyList = {
 	unmounted() {
 		if(!this.Input)
 			window.removeEventListener('resize',this.resized);
+
+		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
 		// externals
@@ -1072,6 +1076,16 @@ let MyList = {
 		isDropdownUpwards,
 		routeChangeFieldReload,
 		routeParseParams,
+
+		handleHotkeys(e) {
+			if(e.key === 'Escape' && (this.showAutoRenew || this.showCsv || this.showFilters || this.showOptions)) {
+				this.showAutoRenew = false;
+				this.showCsv       = false;
+				this.showFilters   = false;
+				this.showOptions   = false;
+				e.preventDefault();
+			}
+		},
 		
 		// presentation
 		displayRecordCheck(state) {
