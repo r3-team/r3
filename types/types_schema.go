@@ -107,7 +107,7 @@ type PresetValue struct {
 	PresetIdRefer pgtype.UUID `json:"presetIdRefer"`
 	AttributeId   uuid.UUID   `json:"attributeId"`
 	Protected     bool        `json:"protected"`
-	Value         string      `json:"value"`
+	Value         pgtype.Text `json:"value"`
 }
 type Attribute struct {
 	Id             uuid.UUID   `json:"id"`

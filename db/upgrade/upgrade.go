@@ -311,6 +311,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.js_function ADD COLUMN is_client_event_exec BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.js_function ALTER COLUMN is_client_event_exec DROP NOT NULL;
 
+			-- nullable preset values
+			ALTER TABLE app.preset_value ALTER COLUMN value DROP NOT NULL;
+
 			-- missing indexes
 			CREATE INDEX IF NOT EXISTS fki_api_module_fkey ON app.api USING btree (module_id ASC NULLS LAST);
 		`)

@@ -158,7 +158,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 
 	if recordExists {
 		// update preset record if available
-		if err := setRecord_tx(tx, relationId, id, recordId, values, fullRelName); err != nil {
+		if err := setRecord_tx(tx, id, recordId, values, fullRelName); err != nil {
 			return err
 		}
 
@@ -167,7 +167,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 		// * it did not exist before or
 		// * it did exist, but not anymore and is currently a protected preset
 		//   (preset record was deleted before it was protected)
-		if err := setRecord_tx(tx, relationId, id, 0, values, fullRelName); err != nil {
+		if err := setRecord_tx(tx, id, 0, values, fullRelName); err != nil {
 			return err
 		}
 	}
@@ -252,8 +252,7 @@ func setValues_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, values []
 
 // set preset record
 // returns whether record could be created/updated
-func setRecord_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, recordId int64,
-	values []types.PresetValue, fullRelName string) error {
+func setRecord_tx(tx pgx.Tx, presetId uuid.UUID, recordId int64, values []types.PresetValue, fullRelName string) error {
 
 	sqlRefs := make([]string, 0)
 	sqlNames := make([]string, 0)
@@ -264,8 +263,7 @@ func setRecord_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, recordId 
 	for _, value := range values {
 
 		// only update existing values if they are protected
-		// unprotected values can be overwritten by customer
-		// in effect, unprotected values work as one-time-only values (pre-filled data)
+		// unprotected values can be overwritten by customer (one-time-only values, like pre-filled or example data)
 		if !isNew && !value.Protected {
 			continue
 		}
@@ -275,32 +273,26 @@ func setRecord_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, recordId 
 			return err
 		}
 
-		// check for fixed value
-		if !value.PresetIdRefer.Valid {
-
-			if value.Value == "" {
-				// no value set, ignore
-				continue
-			}
-			sqlNames = append(sqlNames, fmt.Sprintf(`"%s"`, atrName))
-			sqlValues = append(sqlValues, value.Value)
-			continue
-		}
-
-		// use refered preset record ID as value
-		recordId, exists, err := getRecordIdByReferal_tx(tx, value.PresetIdRefer.Bytes)
-		if err != nil {
-			return err
-		}
-
-		// if refered record does not exist, do not set record
-		// otherwise potential NOT NULL constraint would be breached
-		if !exists {
-			return fmt.Errorf("referenced preset '%s' does not exist",
-				uuid.FromBytesOrNil(value.PresetIdRefer.Bytes[:]))
-		}
 		sqlNames = append(sqlNames, fmt.Sprintf(`"%s"`, atrName))
-		sqlValues = append(sqlValues, recordId)
+
+		if value.PresetIdRefer.Valid {
+			// use refered preset record ID as value
+			recordId, exists, err := getRecordIdByReferal_tx(tx, value.PresetIdRefer.Bytes)
+			if err != nil {
+				return err
+			}
+
+			// if refered record does not exist, do not set record
+			// otherwise potential NOT NULL constraint would be breached
+			if !exists {
+				return fmt.Errorf("referenced preset '%s' does not exist",
+					uuid.FromBytesOrNil(value.PresetIdRefer.Bytes[:]))
+			}
+
+			sqlValues = append(sqlValues, recordId)
+		} else {
+			sqlValues = append(sqlValues, value.Value)
+		}
 	}
 
 	if isNew {
@@ -367,9 +359,9 @@ func getRecordIdByReferal_tx(tx pgx.Tx, presetId uuid.UUID) (int64, bool, error)
 	if err := tx.QueryRow(db.Ctx, `
 		SELECT pr.record_id_wofk, r.name, m.name
 		FROM instance.preset_record AS pr
-		INNER JOIN app.preset AS p ON p.id = pr.preset_id
+		INNER JOIN app.preset   AS p ON p.id = pr.preset_id
 		INNER JOIN app.relation AS r ON r.id = p.relation_id
-		INNER JOIN app.module AS m ON m.id = r.module_id
+		INNER JOIN app.module   AS m ON m.id = r.module_id
 		WHERE pr.preset_id = $1
 	`, presetId).Scan(&recordId, &relName, &modName); err != nil && err != pgx.ErrNoRows {
 		return 0, false, err

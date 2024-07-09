@@ -9,8 +9,8 @@ export {MyBuilderPreset as default};
 let MyBuilderPresetValue = {
 	name:'my-builder-preset-value',
 	template:`<tr>
-		<td>{{ attribute.name }}</td>
-		<td>
+		<td>{{ attribute.name + (attribute.nullable ? '' : '*') }}</td>
+		<td v-if="exists">
 			<div class="row centered">
 				<my-bool v-model="protectedInput" :readonly="readonly" />
 				<my-button
@@ -20,7 +20,7 @@ let MyBuilderPresetValue = {
 				/>
 			</div>
 		</td>
-		<td>
+		<td v-if="exists">
 			<select class="dynamic" v-if="isRelationship" v-model="presetIdReferInput" :disabled="readonly">
 				<option :value="null">[{{ attribute.content }}]</option>
 				<option v-for="p in relationship.presets" :value="p.id">{{ p.name }}</option>
@@ -33,13 +33,21 @@ let MyBuilderPresetValue = {
 				:placeholder="attribute.content"
 			></textarea>
 		</td>
+		<td colspan="2" v-if="!exists">
+			<my-button image="edit.png"
+				@trigger="$emit('set',null,false,null)"
+				:caption="capApp.valueNotSet"
+				:naked="true"
+			/>
+		</td>
 	</tr>`,
 	props:{
 		attribute:    { type:Object,  required:true },
+		exists:       { type:Boolean, required:true }, // preset value is not yet set
 		presetIdRefer:{ required:true },
 		protected:    { type:Boolean, required:true },
 		readonly:     { type:Boolean, required:true },
-		value:        { type:String,  required:true }
+		value:        { required:true }
 	},
 	emits:['set'],
 	computed:{
@@ -56,12 +64,13 @@ let MyBuilderPresetValue = {
 			set(v) { return this.$emit('set',this.presetIdRefer,v,this.value); }
 		},
 		valueInput:{
-			get()  { return this.value; },
+			get()  { return this.value === null ? '' : this.value; },
 			set(v) { return this.$emit('set',this.presetIdRefer,this.protected,v); }
 		},
 		
 		// stores
-		relationIdMap:(s) => s.$store.getters['schema/relationIdMap']
+		relationIdMap:(s) => s.$store.getters['schema/relationIdMap'],
+		capApp:       (s) => s.$store.getters.captions.builder.preset
 	},
 	methods:{
 		isAttributeRelationship
@@ -139,6 +148,7 @@ let MyBuilderPreset = {
 						v-for="(a,i) in relation.attributes.filter(v => v.name !== 'id')"
 						@set="(...args) => childSet(a.id,...args)"
 						:attribute="a"
+						:exists="attributeIdMapValue[a.id] !== undefined"
 						:key="a.id"
 						:preset-id-refer="childGet(a.id,'presetIdRefer')"
 						:protected="childGet(a.id,'protected')"
@@ -228,14 +238,9 @@ let MyBuilderPreset = {
 			for(let i = 0, j = this.values.values.length; i < j; i++) {
 				if(this.values.values[i].attributeId !== atrId)
 					continue;
-				
-				// remove preset value if nothing is set
-				if((this.isAttributeRelationship(atr.content) && presetIdRefer === null) ||
-					(!this.isAttributeRelationship(atr.content) && value === ''))
-				{
-					this.values.values.splice(i,1);
-					break;
-				}
+
+				if(value === '')
+					value = null;
 				
 				this.values.values[i].presetIdRefer = presetIdRefer;
 				this.values.values[i].protected     = protec;

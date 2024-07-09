@@ -1475,7 +1475,8 @@
 			"protectedHint":"Nach Erstellung kann ein geschützter, vordefinierter Datensatz nur im Builder gelöscht werden. Geschützte Datensätze werden oft für Daten genutzt, die zur korrekten Ausführung der Anwendung erforderlich sind, wie z. B. Workflow-Zustände oder Konfigurationsoptionen.<br /><br />Ungeschützte, vordefinierte Datensätze können jederzeit gelöscht werden; sie werden oft für Beispieldaten verwendet.<br /><br />Unabhängig von den Schutzeinstellungen des Datensatzes, können dessen Werte editiert werden, es sei denn die Werte werden ebenfalls geschützt (s. unten).",
 			"values":"Attributwerte",
 			"title":"Datensatz '{NAME}'",
-			"titleNew":"Neuer Datensatz"
+			"titleNew":"Neuer Datensatz",
+			"valueNotSet":"Hier klicken, um einen Wert für das Attribut zu setzen."
 		},
 		"query":{
 			"choice":"Satz",

@@ -62,7 +62,7 @@ let MyBuilderPresets = {
 		getPreview(preset) {
 			let items = [];
 			for(let v of preset.values) {
-				if(v.value !== '')
+				if(v.value !== null)
 					items.push(v.protected ? `[${v.value}]` : v.value);
 			}
 			const line = items.join(', ');

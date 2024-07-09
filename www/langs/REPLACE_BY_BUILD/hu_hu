@@ -1475,7 +1475,8 @@
 			"protectedHint":"After creation, a protected preset record can only be deleted in the Builder. Protected presets are often used for data that is required for the application to work, such as workflow states or configuration options.<br /><br />Unprotected presets can be deleted at any time; these are often used for example data.<br /><br />Regardless of the protection setting of the preset record, it´s values can be edited, unless they are also protected (see below).",
 			"values":"Attribute values",
 			"title":"Preset '{NAME}'",
-			"titleNew":"New preset"
+			"titleNew":"New preset",
+			"valueNotSet":"Click here to set a value for this attribute."
 		},
 		"query":{
 			"choice":"Sor",
