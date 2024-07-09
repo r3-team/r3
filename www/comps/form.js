@@ -66,7 +66,7 @@ let MyForm = {
 			@mousedown.self="$refs.popUpForm.closeAsk()"
 		>
 			<my-form ref="popUpForm"
-				@close="popUp = null"
+				@close="closePopUp"
 				@record-deleted="popUpRecordChanged('deleted',$event)"
 				@record-updated="popUpRecordChanged('updated',$event)"
 				@records-open="popUp.recordIds = $event"
@@ -813,7 +813,7 @@ let MyForm = {
 			this.fieldIdMapOverwrite = this.getFieldOverwritesDefault();
 			this.valuesSetAllDefault();
 			this.timerClearAll();
-			this.popUp = null;
+			this.closePopUp();
 			this.popUpFieldIdSrc = null;
 			this.get();
 			
@@ -977,6 +977,10 @@ let MyForm = {
 		},
 		close() {
 			this.$emit('close');
+		},
+		closePopUp() {
+			this.popUp = null;
+			this.$store.commit('pageTitle',this.title);
 		},
 		openBuilder(middle) {
 			if(!middle) {
