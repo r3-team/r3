@@ -45,6 +45,7 @@ const (
 	ErrCodeDbsConstraintNotNull     int = 5
 	ErrCodeDbsIndexFailUnique       int = 6
 	ErrCodeDbsInvalidTypeSyntax     int = 7
+	ErrCodeDbsChangedCachePlan      int = 8
 	ErrCodeLicValidityExpired       int = 1
 	ErrCodeLicLoginsReached         int = 2
 	ErrCodeSecUnauthorized          int = 1
@@ -55,8 +56,9 @@ const (
 var (
 	// errors
 	errContexts     = []string{"APP", "CSV", "DBS", "LIC", "SEC"}
-	errCodeRx       = regexp.MustCompile(`^{ERR_([A-Z]{3})_(\d{3})}`)
+	errCodeDbsCache = regexp.MustCompile(fmt.Sprintf("^{ERR_DBS_%03d}", ErrCodeDbsChangedCachePlan))
 	errCodeLicRx    = regexp.MustCompile(`^{ERR_LIC_(\d{3})}`)
+	errCodeRx       = regexp.MustCompile(`^{ERR_([A-Z]{3})_(\d{3})}`)
 	errExpectedList = []errExpected{
 
 		// security/access
@@ -153,6 +155,10 @@ var (
 			convertFn: func(err error) error { return CreateErrCode("DBS", ErrCodeDbsConstraintUniqueLogin) },
 			matchRx:   regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \"login_name_key\" \(SQLSTATE 23505\)`),
 		},
+		errExpected{ // error in prepared statement cache due to changed schema
+			convertFn: func(err error) error { return CreateErrCode("DBS", ErrCodeDbsChangedCachePlan) },
+			matchRx:   regexp.MustCompile(`^ERROR\: cached plan must not change result type \(SQLSTATE 0A000\)`),
+		},
 	}
 )
 
@@ -205,8 +211,12 @@ func ConvertToErrCode(err error, anonymizeIfUnexpected bool) (error, bool) {
 	return err, false
 }
 
+// error code checker
 func CheckForLicenseErrCode(err error) bool {
 	return errCodeLicRx.MatchString(err.Error())
+}
+func CheckForDbsCacheErrCode(err error) bool {
+	return errCodeDbsCache.MatchString(err.Error())
 }
 
 // default schema errors

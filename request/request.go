@@ -18,6 +18,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+// executes a websocket transaction with multiple requests within a single DB transaction
 func ExecTransaction(ctxClient context.Context, address string, loginId int64, isAdmin bool,
 	device types.WebsocketClientDevice, isNoAuth bool, reqTrans types.RequestTransaction,
 	resTrans types.ResponseTransaction) types.ResponseTransaction {
@@ -28,72 +29,87 @@ func ExecTransaction(ctxClient context.Context, address string, loginId int64, i
 
 	defer ctxCancel()
 
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		log.Error("websocket", "cannot begin transaction", err)
-		resTrans.Error = handler.ErrGeneral
-		return resTrans
-	}
+	// run in a loop as there is an error case where it needs to be repeated
+	runAgainNewCache := false
+	for runOnce := true; runOnce || runAgainNewCache; runOnce = false {
 
-	// set local transaction configuration parameters
-	// these are used by system functions, such as instance.get_login_id()
-	if _, err := tx.Exec(ctx, `
-		SELECT SET_CONFIG('r3.login_id',$1,TRUE)
-	`, strconv.FormatInt(loginId, 10)); err != nil {
+		tx, err := db.Pool.Begin(ctx)
+		if err != nil {
+			log.Error("websocket", "cannot begin transaction", err)
+			resTrans.Error = handler.ErrGeneral
+			return resTrans
+		}
 
-		log.Error("websocket", fmt.Sprintf("TRANSACTION %d, transaction config failure (login ID %d)",
-			reqTrans.TransactionNr, loginId), err)
-
-		return resTrans
-	}
-
-	// work through requests
-	for _, req := range reqTrans.Requests {
-
-		log.Info("websocket", fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s",
-			reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
-
-		payload, err := Exec_tx(ctx, tx, address, loginId, isAdmin,
-			device, isNoAuth, req.Ressource, req.Action, req.Payload)
-
-		if err == nil {
-			// all clear, prepare response payload
-			var res types.Response
-			res.Payload, err = json.Marshal(payload)
-			if err == nil {
-				resTrans.Responses = append(resTrans.Responses, res)
-				continue
+		if runAgainNewCache {
+			if err := tx.Conn().DeallocateAll(ctx); err != nil {
+				log.Error("websocket", "failed to deallocate DB connection", err)
+				resTrans.Error = handler.ErrGeneral
+				return resTrans
 			}
+			runAgainNewCache = false
+			resTrans.Error = ""
 		}
 
-		// error case, convert to error code for requestor
-		returnErr, isExpectedErr := handler.ConvertToErrCode(err, !isAdmin)
-		if !isExpectedErr {
-			log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, request %s %s failure (login ID %d)",
-				reqTrans.TransactionNr, req.Ressource, req.Action, loginId), err)
+		// set local transaction configuration parameters
+		// these are used by system functions, such as instance.get_login_id()
+		if _, err := tx.Exec(ctx, `SELECT SET_CONFIG('r3.login_id',$1,TRUE)`, strconv.FormatInt(loginId, 10)); err != nil {
+
+			log.Error("websocket", fmt.Sprintf("TRANSACTION %d, transaction config failure (login ID %d)",
+				reqTrans.TransactionNr, loginId), err)
+
+			return resTrans
 		}
 
-		resTrans.Error = fmt.Sprintf("%v", returnErr)
-		resTrans.Responses = make([]types.Response, 0) // clear all responses
-		break
-	}
+		// work through requests
+		for _, req := range reqTrans.Requests {
 
-	// check if error occured in any request
-	if resTrans.Error == "" {
-		if err := tx.Commit(ctx); err != nil {
+			log.Info("websocket", fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s",
+				reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
 
+			payload, err := Exec_tx(ctx, tx, address, loginId, isAdmin,
+				device, isNoAuth, req.Ressource, req.Action, req.Payload)
+
+			if err == nil {
+				// all clear, prepare response payload
+				var res types.Response
+				res.Payload, err = json.Marshal(payload)
+				if err == nil {
+					resTrans.Responses = append(resTrans.Responses, res)
+					continue
+				}
+			}
+
+			// error case, convert to error code for requestor
 			returnErr, isExpectedErr := handler.ConvertToErrCode(err, !isAdmin)
 			if !isExpectedErr {
-				log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, commit failure (login ID %d)",
-					reqTrans.TransactionNr, loginId), err)
+				log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, request %s %s failure (login ID %d)",
+					reqTrans.TransactionNr, req.Ressource, req.Action, loginId), err)
+			}
+
+			if handler.CheckForDbsCacheErrCode(returnErr) {
+				runAgainNewCache = true
 			}
 			resTrans.Error = fmt.Sprintf("%v", returnErr)
-			resTrans.Responses = make([]types.Response, 0) // clear all responses
+			break
+		}
 
+		// check if error occured in any request
+		if resTrans.Error == "" {
+			if err := tx.Commit(ctx); err != nil {
+
+				returnErr, isExpectedErr := handler.ConvertToErrCode(err, !isAdmin)
+				if !isExpectedErr {
+					log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, commit failure (login ID %d)",
+						reqTrans.TransactionNr, loginId), err)
+				}
+				resTrans.Error = fmt.Sprintf("%v", returnErr)
+				resTrans.Responses = make([]types.Response, 0)
+				tx.Rollback(ctx)
+			}
+		} else {
+			resTrans.Responses = make([]types.Response, 0)
 			tx.Rollback(ctx)
 		}
-	} else {
-		tx.Rollback(ctx)
 	}
 	return resTrans
 }
