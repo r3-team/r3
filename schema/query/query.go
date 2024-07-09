@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"r3/db"
-	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
 	"slices"
@@ -176,51 +175,66 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 		return fmt.Errorf("unknown query parent entity '%s'", entity)
 	}
 
-	// sub query (via query filter) requires second element for key
 	var err error
-	known := false
+	createNew := false
+	noBaseRelation := !query.RelationId.Valid
 	subQuery := entity == "query_filter_query"
 
-	if !subQuery {
-		known, err = schema.CheckCreateId_tx(tx, &entityId, "query", fmt.Sprintf("%s_id", entity))
+	// check if its a new query, old query (for the same entity) still needs to be checked as it could have been remade
+	if query.Id == uuid.Nil {
+		query.Id, err = uuid.NewV4()
 		if err != nil {
+			return err
+		}
+		createNew = true
+	}
+
+	// check whether a query for the parent entity already exists
+	var queryIdExisting pgtype.UUID
+
+	if !subQuery {
+		if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+			SELECT id
+			FROM app.query
+			WHERE %s_id = $1
+		`, entity), entityId).Scan(&queryIdExisting); err != nil && err != pgx.ErrNoRows {
 			return err
 		}
 	} else {
 		if err := tx.QueryRow(db.Ctx, `
-			SELECT EXISTS(
-				SELECT id
-				FROM app.query
-				WHERE query_filter_query_id = $1
-				AND query_filter_position = $2
-				AND query_filter_side = $3
-			)
-		`, entityId, filterPosition, filterSide).Scan(&known); err != nil {
+			SELECT id
+			FROM app.query
+			WHERE query_filter_query_id = $1
+			AND   query_filter_position = $2
+			AND   query_filter_side     = $3
+		`, entityId, filterPosition, filterSide).Scan(&queryIdExisting); err != nil && err != pgx.ErrNoRows {
 			return err
 		}
 	}
 
-	// query without a base relation is not used and therefore not needed
-	if !query.RelationId.Valid {
-		if known {
+	if !queryIdExisting.Valid {
+		// query does not exist, create
+		createNew = true
+	} else {
+		// query exists - delete if it was remade (different ID) or is not required anymore (query without a base relation)
+		if query.Id.String() != string(queryIdExisting.Bytes[:]) || noBaseRelation {
 			if _, err := tx.Exec(db.Ctx, `
 				DELETE FROM app.query
 				WHERE id = $1
-			`, query.Id); err != nil {
+			`, queryIdExisting); err != nil {
 				return err
 			}
+			createNew = true
 		}
+	}
+
+	if noBaseRelation {
+		// no query needed
 		return nil
 	}
 
-	if !known {
-		if query.Id == uuid.Nil {
-			query.Id, err = uuid.NewV4()
-			if err != nil {
-				return err
-			}
-		}
-
+	// create or update query
+	if createNew {
 		if !subQuery {
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 				INSERT INTO app.query (id, relation_id, fixed_limit, %s_id)
@@ -231,8 +245,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 		} else {
 			if _, err := tx.Exec(db.Ctx, `
 				INSERT INTO app.query (id, relation_id, fixed_limit,
-					query_filter_query_id, query_filter_position,
-					query_filter_side)
+					query_filter_query_id, query_filter_position, query_filter_side)
 				VALUES ($1,$2,$3,$4,$5,$6)
 			`, query.Id, query.RelationId, query.FixedLimit, entityId,
 				filterPosition, filterSide); err != nil {
