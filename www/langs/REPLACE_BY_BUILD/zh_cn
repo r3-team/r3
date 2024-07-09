@@ -1233,6 +1233,8 @@
 				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER\n\n通知连接的客户端更新指定的集合。如果给定登录 ID，则只影响属于这些登录的客户端。"
 },
 			"option":{
+				"fieldGetFileLinks":"Read file links",
+				"fieldGetFileLinksHint":"Returns array of download URLs for uploaded files, only valid for the current user session.",
 				"fieldGetValue":"读取数值",
 				"fieldSetCaption":"填写标题",
 				"fieldSetChart":"填写ECharts选项对象",

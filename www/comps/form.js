@@ -1,15 +1,16 @@
-import MyArticles                  from './articles.js';
-import MyField                     from './field.js';
-import MyFormActions               from './formActions.js';
-import MyFormLog                   from './formLog.js';
-import {hasAccessToRelation}       from './shared/access.js';
-import {getCollectionValues}       from './shared/collection.js';
-import {dialogCloseAsk}            from './shared/dialog.js';
-import {consoleError}              from './shared/error.js';
-import {getFieldOverwritesDefault} from './shared/field.js';
-import {jsFunctionRun}             from './shared/jsFunction.js';
-import {srcBase64}                 from './shared/image.js';
-import {getCaption}                from './shared/language.js';
+import MyArticles                    from './articles.js';
+import MyField                       from './field.js';
+import MyFormActions                 from './formActions.js';
+import MyFormLog                     from './formLog.js';
+import {hasAccessToRelation}         from './shared/access.js';
+import {getAttributeFileVersionHref} from './shared/attribute.js';
+import {getCollectionValues}         from './shared/collection.js';
+import {dialogCloseAsk}              from './shared/dialog.js';
+import {consoleError}                from './shared/error.js';
+import {getFieldOverwritesDefault}   from './shared/field.js';
+import {jsFunctionRun}               from './shared/jsFunction.js';
+import {srcBase64}                   from './shared/image.js';
+import {getCaption}                  from './shared/language.js';
 import {
 	aesGcmDecryptBase64WithPhrase,
 	aesGcmEncryptBase64WithPhrase,
@@ -499,6 +500,17 @@ let MyForm = {
 				// field manipulation
 				get_field_value:(fieldId) => s.fieldIdMapData[fieldId] === undefined
 					? undefined : s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false)],
+				get_field_file_links:(fieldId) => {
+					const fld = s.fieldIdMapData[fieldId];
+					if(fld === undefined || s.values[s.getIndexAttributeIdByField(fld,false)] === null)
+						return null;
+
+					let out = [];
+					for(const f of s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false)]) {
+						out.push(s.getAttributeFileVersionHref(fld.attributeId, f.id, f.name, f.version, s.token));
+					}
+					return out;
+				},
 				set_field_caption:(fieldId,caption)     => s.fieldIdMapOverwrite.caption[fieldId] = caption,
 				set_field_chart:  (fieldId,option)      => s.fieldIdMapOverwrite.chart[fieldId]   = option,
 				set_field_error:  (fieldId,errorMsg)    => s.fieldIdMapOverwrite.error[fieldId]   = errorMsg,
@@ -620,6 +632,7 @@ let MyForm = {
 		iconIdMap:          (s) => s.$store.getters['schema/iconIdMap'],
 		jsFunctionIdMap:    (s) => s.$store.getters['schema/jsFunctionIdMap'],
 		presetIdMapRecordId:(s) => s.$store.getters['schema/presetIdMapRecordId'],
+		token:              (s) => s.$store.getters['local/token'],
 		access:             (s) => s.$store.getters.access,
 		builderEnabled:     (s) => s.$store.getters.builderEnabled,
 		capApp:             (s) => s.$store.getters.captions.form,
@@ -644,6 +657,7 @@ let MyForm = {
 		fillRelationRecordIds,
 		filterIsCorrect,
 		filterOperatorIsSingleValue,
+		getAttributeFileVersionHref,
 		getAttributeValueFromString,
 		getCaption,
 		getCollectionValues,

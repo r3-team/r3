@@ -1,6 +1,7 @@
 import MyBuilderCaption   from './builderCaption.js';
 import MyBuilderQuery     from './builderQuery.js';
 import MyCodeEditor       from '../codeEditor.js';
+import {isAttributeFiles} from '../shared/attribute.js';
 import {getFieldMap}      from '../shared/form.js';
 import {copyValueDialog}  from '../shared/generic.js';
 import {getJoinsIndexMap} from '../shared/query.js';
@@ -176,6 +177,14 @@ let MyBuilderJsFunction = {
 											@trigger="selectEntity('field_value_get',field.id)"
 											:caption="capApp.option.fieldGetValue"
 											:image="radioIcon('field_value_get',field.id)"
+											:naked="true"
+										/>
+										<my-button
+											v-if="field.isDataFile"
+											@trigger="selectEntity('field_value_get_file_links',field.id)"
+											:caption="capApp.option.fieldGetFileLinks"
+											:captionTitle="capApp.option.fieldGetFileLinksHint"
+											:image="radioIcon('field_value_get_file_links',field.id)"
 											:naked="true"
 										/>
 										<my-button
@@ -549,6 +558,7 @@ let MyBuilderJsFunction = {
 					id:id,
 					isChart:f.content === 'chart',
 					isData:f.content === 'data',
+					isDataFile:f.content === 'data' && s.isAttributeFiles(s.attributeIdMap[f.attributeId].content),
 					name:s.displayFieldName(id),
 					ref:s.entityIdMapRef.field[id]
 				});
@@ -606,13 +616,14 @@ let MyBuilderJsFunction = {
 						case 'collection_update': text = `${prefix}.collection_update({${mod.name}.${col.name}})${postfixAsync}`; break;
 					}
 				break;
-				case 'field_value_get':   text = `${prefix}.get_field_value({${s.displayFieldName(s.entityId)}})`; break;
-				case 'field_value_set':   text = `${prefix}.set_field_value({${s.displayFieldName(s.entityId)}}, ${s.capApp.value}, ${s.capApp.valueInit})`; break;
-				case 'field_caption_set': text = `${prefix}.set_field_caption({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
-				case 'field_chart_set':   text = `${prefix}.set_field_chart({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
-				case 'field_error_set':   text = `${prefix}.set_field_error({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
-				case 'field_focus_set':   text = `${prefix}.set_field_focus({${s.displayFieldName(s.entityId)}})`; break;
-				case 'field_order_set':   text = `${prefix}.set_field_order({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
+				case 'field_value_get':            text = `${prefix}.get_field_value({${s.displayFieldName(s.entityId)}})`; break;
+				case 'field_value_get_file_links': text = `${prefix}.get_field_file_links({${s.displayFieldName(s.entityId)}})`; break;
+				case 'field_value_set':            text = `${prefix}.set_field_value({${s.displayFieldName(s.entityId)}}, ${s.capApp.value}, ${s.capApp.valueInit})`; break;
+				case 'field_caption_set':          text = `${prefix}.set_field_caption({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
+				case 'field_chart_set':            text = `${prefix}.set_field_chart({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
+				case 'field_error_set':            text = `${prefix}.set_field_error({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
+				case 'field_focus_set':            text = `${prefix}.set_field_focus({${s.displayFieldName(s.entityId)}})`; break;
+				case 'field_order_set':            text = `${prefix}.set_field_order({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
 				case 'form':
 					frm  = s.formIdMap[s.entityId];
 					mod  = s.moduleIdMap[frm.moduleId];
@@ -683,6 +694,7 @@ let MyBuilderJsFunction = {
 		getItemTitle,
 		getItemTitlePath,
 		getJoinsIndexMap,
+		isAttributeFiles,
 		
 		// presentation
 		displayFieldName(fieldId) {
@@ -769,7 +781,7 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace field IDs with placeholders
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|chart|error|focus|order)\\('(${uuid})'`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|chart|error|focus|order|file_links)\\('(${uuid})'`,'g');
 			body = body.replace(pat,(match,mode,part,id) => this.fieldIdMap[id] !== undefined
 				? `${prefix}.${mode}_field_${part}({${this.displayFieldName(id)}}` : match
 			);
@@ -840,7 +852,7 @@ let MyBuilderJsFunction = {
 			
 			// replace field value/caption get/set placeholders
 			// stored as: app.get_field_value(F12: 0 display_name... or app.get_field_value(F13: Container...
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|chart|error|focus|order)\\(\{F(\\d+)\:.*?\}`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|chart|error|focus|order|file_links)\\(\{F(\\d+)\:.*?\}`,'g');
 			body = body.replace(pat,(match,mode,part,ref) => {
 				for(let fieldId in this.entityIdMapRef.field) {
 					if(this.entityIdMapRef.field[fieldId] === parseInt(ref))

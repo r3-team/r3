@@ -1233,6 +1233,8 @@
 				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER<br /><br />Értesíti a kapcsolódó klienseket, hogy frissítsék a meghatározott gyűjteményt. Ha megadott felhasználói azonosítókat (login_ids), akkor csak azokat a klienseket értesíti, akik ezekhez a felhasználókhoz tartoznak."
 			},
 			"option":{
+				"fieldGetFileLinks":"Read file links",
+				"fieldGetFileLinksHint":"Returns array of download URLs for uploaded files, only valid for the current user session.",
 				"fieldGetValue":"Érték olvasása",
 				"fieldSetCaption":"Címke beállítása",
 				"fieldSetChart":"Write ECharts option object",

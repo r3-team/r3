@@ -1233,6 +1233,8 @@
 				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER\n\nInforme les clients connectés de mettre à jour la collection spécifiée. Si des IDs d'utilisateur sont fournis, seuls les clients appartenant à ces utilisateurs sont concernés."
 			},
 			"option":{
+				"fieldGetFileLinks":"Read file links",
+				"fieldGetFileLinksHint":"Returns array of download URLs for uploaded files, only valid for the current user session.",
 				"fieldGetValue":"Lire la valeur",
 				"fieldSetCaption":"Écrire la légende",
 				"fieldSetChart":"Write ECharts option object",

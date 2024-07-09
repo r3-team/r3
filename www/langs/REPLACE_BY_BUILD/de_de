@@ -1233,6 +1233,8 @@
 				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER<br /><br />Informiert verbundene Clients, die angegebene Sammlung zu aktualisieren. Wenn Anmelde-IDs mitgegeben worden sind, werden nur Clients informiert, die zu den jeweiligen Anmeldungen gehören."
 			},
 			"option":{
+				"fieldGetFileLinks":"Dateilinks lesen",
+				"fieldGetFileLinksHint":"Liefert ein Array an Download-Links für hochgeladene Dateien, nur gültig für die aktuelle Benutzersitzung.",
 				"fieldGetValue":"Wert lesen",
 				"fieldSetCaption":"Titel setzen",
 				"fieldSetChart":"ECharts-Optionen-Objekt setzen",
