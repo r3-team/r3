@@ -2,7 +2,7 @@
 	flex:4 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
-	overflow:visible;
+	overflow:auto;
 }
 .form-wrap.inline{
 	border-left:1px solid var(--color-border);
@@ -45,6 +45,11 @@
 .form .fields.onlyOne>.field{
 	margin:0px;
 	overflow:auto;
+}
+.form .form-title-wrap{
+	/* to cut off form title with ellipsis but leave space for button shadows */
+	margin:-5px 0px;
+	overflow:hidden;
 }
 
 /* data change log */

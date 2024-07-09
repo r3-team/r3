@@ -83,18 +83,17 @@ let MyForm = {
 		<!-- form proper -->
 		<div class="form contentBox grow scroll"
 			v-if="!isMobile || (!showLog && !showHelp)"
-			:class="{ float:isPopUpFloating, popUp:isPopUp }"
+			:class="{ float:isPopUpFloating }"
 		>
 			<!-- title bar upper -->
 			<div class="top nowrap" :class="{ lower:!hasBarLower && !isSingleField }" v-if="!isWidget">
-				<div class="area nowrap overflowHidden">
+				<div class="area nowrap form-title-wrap">
 					<my-button image="upward.png"
 						v-if="hasGoBack"
 						@trigger="openPrevAsk"
 						:active="!updatingRecord"
 						:captionTitle="capGen.button.goBack"
 					/>
-					
 					<img class="icon"
 						v-if="iconId !== null"
 						:src="srcBase64(iconIdMap[iconId].file)"
