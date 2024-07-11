@@ -37,11 +37,16 @@ func authCheckSystemMode(admin bool) error {
 	return nil
 }
 
-func createToken(loginId int64, username string, admin bool, noAuth bool) (string, error) {
+func createToken(loginId int64, username string, admin bool, noAuth bool, tokenExpiryHours pgtype.Int4) (string, error) {
 
 	// token is valid for multiple days, if user decides to stay logged in
 	now := time.Now()
-	expiryHoursTime := time.Duration(int64(config.GetUint64("tokenExpiryHours")))
+	var expiryHoursTime time.Duration
+	if tokenExpiryHours.Valid {
+		expiryHoursTime = time.Duration(int64(tokenExpiryHours.Int32))
+	} else {
+		expiryHoursTime = time.Duration(int64(config.GetUint64("tokenExpiryHours")))
+	}
 
 	token, err := jwt.Sign(tokenPayload{
 		Payload: jwt.Payload{
@@ -87,13 +92,14 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 	var saltKdf string
 	var admin bool
 	var noAuth bool
+	var tokenExpiryHours pgtype.Int4
 
 	err := db.Pool.QueryRow(db.Ctx, `
-		SELECT id, ldap_id, salt, hash, salt_kdf, admin, no_auth
+		SELECT id, ldap_id, salt, hash, salt_kdf, admin, no_auth, token_expiry_hours
 		FROM instance.login
 		WHERE active
 		AND name = $1
-	`, username).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin, &noAuth)
+	`, username).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin, &noAuth, &tokenExpiryHours)
 
 	if err != nil && err != pgx.ErrNoRows {
 		return "", "", mfaTokens, err
@@ -177,7 +183,7 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 	}
 
 	// create session token
-	token, err := createToken(loginId, username, admin, noAuth)
+	token, err := createToken(loginId, username, admin, noAuth, tokenExpiryHours)
 	if err != nil {
 		return "", "", mfaTokens, err
 	}
@@ -281,6 +287,6 @@ func TokenFixed(loginId int64, context string, tokenFixed string, grantLanguageC
 
 	// everything in order, auth successful
 	*grantLanguageCode = languageCode
-	*grantToken, err = createToken(loginId, username, false, false)
+	*grantToken, err = createToken(loginId, username, false, false, pgtype.Int4{})
 	return err
 }

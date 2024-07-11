@@ -449,7 +449,8 @@
 				"password":"This will overwrite the current password for this login. Multi-factor-authentication is not affected by this change. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
 				"records":"Login has {COUNT} application records assigned.",
 				"roles":"Login has {COUNT} roles assigned.",
-				"template":"Predefined settings (display and theme options) are applied from the chosen template."
+				"template":"Predefined settings (display and theme options) are applied from the chosen template.",
+				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
 			"admin":"Admin",
 			"ldap":"LDAP assigned",
@@ -462,7 +463,8 @@
 			"roleContentUser":"User",
 			"template":"Login template",
 			"title":"Login '{NAME}'",
-			"titleNew":"New login"
+			"titleNew":"New login",
+			"tokenExpiryHours":"Massima durata della sessione in ore"
 		},
 		"loginTemplate":{
 			"dialog":{

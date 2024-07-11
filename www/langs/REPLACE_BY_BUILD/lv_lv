@@ -449,7 +449,8 @@
 				"password":"Šī darbība pārrakstīs pašreizējo paroli šai pieteikšanai. Daudzfaktoru autentifikācija netiks ietekmēta ar šo izmaiņu. Gali līdz galim šifrēšana (E2EE) būs nepieejama, līdz lietotājs sniegs saistīto rezerves kodu.",
 				"records":"Pieteikšanai ir piešķirti {COUNT} lietojumprogrammu ieraksti.",
 				"roles":"Pieteikšanai ir piešķirtas {COUNT} lomas.",
-				"template":"No izvēlētās veidnes tiek piemēroti iepriekš noteiktie iestatījumi (parādīšanas un tēmas opcijas)."
+				"template":"No izvēlētās veidnes tiek piemēroti iepriekš noteiktie iestatījumi (parādīšanas un tēmas opcijas).",
+				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
 			"admin":"Administrators",
 			"ldap":"Assigned to LDAP",
@@ -462,7 +463,8 @@
 			"roleContentUser":"User",
 			"template":"Login template",
 			"title":"Login '{NAME}'",
-			"titleNew":"New login"
+			"titleNew":"New login",
+			"tokenExpiryHours":"Maksimālais sesijas laiks stundās"
 		},
 		"loginTemplate":{
 			"dialog":{

@@ -449,7 +449,8 @@
 				"password":"Cela écrasera le mot de passe actuel pour cette connexion. L'authentification multi-facteurs n'est pas affectée par ce changement. Le chiffrement de bout en bout (E2EE) ne sera pas disponible tant que l'utilisateur ne fournira pas le code de sauvegarde associé.",
 				"records":"La connexion a {COUNT} enregistrements d'applications attribués.",
 				"roles":"La connexion a {COUNT} rôles attribués.",
-				"template":"Les paramètres prédéfinis (options d'affichage et de thème) sont appliqués à partir du modèle choisi."
+				"template":"Les paramètres prédéfinis (options d'affichage et de thème) sont appliqués à partir du modèle choisi.",
+				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
 			"admin":"Admin",
 			"ldap":"Attribué LDAP",
@@ -462,7 +463,8 @@
 			"roleContentUser":"Utilisateur",
 			"template":"Modèle de connexion",
 			"title":"Connexion '{NAME}'",
-			"titleNew":"Nouvelle connexion"
+			"titleNew":"Nouvelle connexion",
+			"tokenExpiryHours":"Durée maximale de session en heures"
 		},
 		"loginTemplate":{
 			"dialog":{

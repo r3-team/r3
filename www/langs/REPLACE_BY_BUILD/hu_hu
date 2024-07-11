@@ -449,7 +449,8 @@
 				"password":"Ezzel az aktuális jelszó felülírásra kerül a bejelentkezéshez. Az MFA-t ez nem érinti. Az end-to-end titkosítás (E2EE) csak akkor lesz újra elérhető, ha a felhasználó beírja a biztonsági mentési kódját.",
 				"records":"A bejelentkezéshez {COUNT} alkalmazás rekord van rendelve.",
 				"roles":"A bejelentkezéshez {COUNT} szerep van rendelve.",
-				"template":"A kiválasztott sablon előre beállított beállításai (megjelenítési és elrendezési lehetőségek) alkalmazódnak."
+				"template":"A kiválasztott sablon előre beállított beállításai (megjelenítési és elrendezési lehetőségek) alkalmazódnak.",
+				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
 			"admin":"Adminisztrátor",
 			"ldap":"LDAP-hoz rendelve",
@@ -462,7 +463,8 @@
 			"roleContentUser":"Felhasználó",
 			"template":"Bejelentkezési sablon",
 			"title":"Bejelentkezés \"{NAME}\"",
-			"titleNew":"Új bejelentkezés"
+			"titleNew":"Új bejelentkezés",
+			"tokenExpiryHours":"Makszimális munkamenet-idő órában"
 		},
 		"loginTemplate":{
 			"dialog":{

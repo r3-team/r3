@@ -186,6 +186,18 @@ let MyAdminLogin = {
 						<td><my-bool v-model="noAuth" :readonly="isLdap" /></td>
 						<td>{{ capApp.hint.noAuth }}</td>
 					</tr>
+					<tr>
+						<td>
+							<div class="title-cell">
+								<img src="images/clock.png" />
+								<span>{{ capApp.tokenExpiryHours }}</span>
+							</div>
+						</td>
+						<td class="default-inputs">
+							<input v-model="tokenExpiryHours" />
+						</td>
+						<td>{{ capApp.hint.tokenExpiryHours }}</td>
+					</tr>
 					<tr v-if="isNew">
 						<td>
 							<div class="title-cell">
@@ -292,12 +304,13 @@ let MyAdminLogin = {
 			admin:false,
 			pass:'',
 			noAuth:false,
+			tokenExpiryHours:'',
 			records:[],
 			roleIds:[],
 			templateId:null,
 			
 			// states
-			inputKeys:['name','active','admin','pass','noAuth','records','roleIds'],
+			inputKeys:['name','active','admin','pass','noAuth','tokenExpiryHours','records','roleIds'],
 			inputsOrg:{},      // map of original input values, key = input key
 			inputsReady:false, // inputs have been loaded
 			recordInput:'',    // record lookup input
@@ -489,15 +502,16 @@ let MyAdminLogin = {
 					if(res.payload.logins.length !== 1) return;
 					
 					let login = res.payload.logins[0];
-					this.ldapId  = login.ldapId;
-					this.ldapKey = login.ldapKey;
-					this.name    = login.name;
-					this.active  = login.active;
-					this.admin   = login.admin;
-					this.noAuth  = login.noAuth;
-					this.records = login.records;
-					this.roleIds = login.roleIds;
-					this.pass    = '';
+					this.ldapId           = login.ldapId;
+					this.ldapKey          = login.ldapKey;
+					this.name             = login.name;
+					this.active           = login.active;
+					this.admin            = login.admin;
+					this.noAuth           = login.noAuth;
+					this.tokenExpiryHours = login.tokenExpiryHours;
+					this.records          = login.records;
+					this.roleIds          = login.roleIds;
+					this.pass             = '';
 					this.inputsLoaded();
 				},
 				this.$root.genericError
@@ -552,6 +566,7 @@ let MyAdminLogin = {
 				active:this.active,
 				admin:this.admin,
 				noAuth:this.noAuth,
+				tokenExpiryHours:/^(0|[1-9]\d*)$/.test(this.tokenExpiryHours) ? parseInt(this.tokenExpiryHours) : null,
 				roleIds:this.roleIds,
 				records:records,
 				templateId:this.templateId

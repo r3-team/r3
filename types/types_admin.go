@@ -24,16 +24,17 @@ type Log struct {
 }
 
 type LoginAdmin struct {
-	Id           int64              `json:"id"`
-	LdapId       pgtype.Int4        `json:"ldapId"`
-	LdapKey      pgtype.Text        `json:"ldapKey"`
-	Name         string             `json:"name"`
-	Active       bool               `json:"active"`
-	Admin        bool               `json:"admin"`
-	NoAuth       bool               `json:"noAuth"`
-	LanguageCode string             `json:"languageCode"`
-	Records      []LoginAdminRecord `json:"records"`
-	RoleIds      []uuid.UUID        `json:"roleIds"`
+	Id               int64              `json:"id"`
+	LdapId           pgtype.Int4        `json:"ldapId"`
+	LdapKey          pgtype.Text        `json:"ldapKey"`
+	Name             string             `json:"name"`
+	Active           bool               `json:"active"`
+	Admin            bool               `json:"admin"`
+	NoAuth           bool               `json:"noAuth"`
+	LanguageCode     string             `json:"languageCode"`
+	TokenExpiryHours pgtype.Int4        `json:"tokenExpiryHours"`
+	Records          []LoginAdminRecord `json:"records"`
+	RoleIds          []uuid.UUID        `json:"roleIds"`
 }
 type LoginAdminRecord struct {
 	Id    pgtype.Int8 `json:"id"`    // record ID

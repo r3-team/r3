@@ -37,7 +37,7 @@ func Get(byId int64, byString string, limit int, offset int,
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
 	qb.AddList("SELECT", []string{"l.id", "l.ldap_id", "l.ldap_key",
-		"l.name", "l.admin", "l.no_auth", "l.active"})
+		"l.name", "l.admin", "l.no_auth", "l.active", "l.token_expiry_hours"})
 
 	qb.Set("FROM", "instance.login AS l")
 
@@ -94,8 +94,8 @@ func Get(byId int64, byString string, limit int, offset int,
 		var l types.LoginAdmin
 		var records []string
 
-		if err := rows.Scan(&l.Id, &l.LdapId, &l.LdapKey, &l.Name,
-			&l.Admin, &l.NoAuth, &l.Active, &records); err != nil {
+		if err := rows.Scan(&l.Id, &l.LdapId, &l.LdapKey, &l.Name, &l.Admin,
+			&l.NoAuth, &l.Active, &l.TokenExpiryHours, &records); err != nil {
 
 			return logins, 0, err
 		}
@@ -165,7 +165,8 @@ func Get(byId int64, byString string, limit int, offset int,
 // returns created login ID if new login
 func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4,
 	ldapKey pgtype.Text, name string, pass string, admin bool, noAuth bool,
-	active bool, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
+	active bool, tokenExpiryHours pgtype.Int4, roleIds []uuid.UUID,
+	records []types.LoginAdminRecordSet) (int64, error) {
 
 	if name == "" {
 		return 0, errors.New("name must not be empty")
@@ -193,13 +194,13 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 	if isNew {
 		if err := tx.QueryRow(db.Ctx, `
 			INSERT INTO instance.login (
-				ldap_id, ldap_key, name, salt, hash,
-				salt_kdf, admin, no_auth, active
+				ldap_id, ldap_key, name, salt, hash, salt_kdf,
+				admin, no_auth, active, token_expiry_hours
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
 			RETURNING id
 		`, ldapId, ldapKey, name, &salt, &hash, saltKdf,
-			admin, noAuth, active).Scan(&id); err != nil {
+			admin, noAuth, active, tokenExpiryHours).Scan(&id); err != nil {
 
 			return 0, err
 		}
@@ -226,9 +227,9 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE instance.login
 			SET ldap_id = $1, ldap_key = $2, name = $3, admin = $4,
-				no_auth = $5, active = $6
-			WHERE id = $7
-		`, ldapId, ldapKey, name, admin, noAuth, active, id); err != nil {
+				no_auth = $5, active = $6, token_expiry_hours = $7
+			WHERE id = $8
+		`, ldapId, ldapKey, name, admin, noAuth, active, tokenExpiryHours, id); err != nil {
 			return 0, err
 		}
 
@@ -431,7 +432,7 @@ func CreateAdmin(username string, password string) error {
 	defer tx.Rollback(db.Ctx)
 
 	if _, err := Set_tx(tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{},
-		username, password, true, false, true, []uuid.UUID{},
+		username, password, true, false, true, pgtype.Int4{}, []uuid.UUID{},
 		[]types.LoginAdminRecordSet{}); err != nil {
 
 		return err
@@ -508,7 +509,7 @@ func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
 		}
 
 		_, err = Set_tx(tx, id, loginTemplateId, ldapIdSql, ldapKeySql,
-			ldapName, "", admin, false, ldapActive, roleIds,
+			ldapName, "", admin, false, ldapActive, pgtype.Int4{}, roleIds,
 			[]types.LoginAdminRecordSet{})
 
 		return id, true, err

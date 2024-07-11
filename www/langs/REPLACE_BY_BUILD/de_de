@@ -449,7 +449,8 @@
 				"password":"Hiermit wird das aktuelle Password für die Anmeldung überschrieben. Multi-Faktor-Authentifizierung ist davon nicht betroffen. Ende-zu-Ende-Verschlüsselung (E2EE) wird erst wieder verfügbar sein, wenn der Benutzer seinen Backup-Code eingibt.",
 				"records":"Anmeldung sind {COUNT} Anwendungsdatensätze zugeordnet.",
 				"roles":"Anmeldung sind {COUNT} Rollen zugewiesen.",
-				"template":"Vorausgewählte Einstellungen (Anzeige- & Darstellungsoptionen) der gewählten Vorlage werden angewendet."
+				"template":"Vorausgewählte Einstellungen (Anzeige- & Darstellungsoptionen) der gewählten Vorlage werden angewendet.",
+				"tokenExpiryHours":"Überschreibt die globale Einstellung für die max. Sitzungszeit."
 			},
 			"admin":"Admin",
 			"ldap":"LDAP zugewiesen",
@@ -462,7 +463,8 @@
 			"roleContentUser":"Benutzer",
 			"template":"Anmeldevorlage",
 			"title":"Anmeldung \"{NAME}\"",
-			"titleNew":"Neue Anmeldung"
+			"titleNew":"Neue Anmeldung",
+			"tokenExpiryHours":"Max. Sitzungszeit in Stunden"
 		},
 		"loginTemplate":{
 			"dialog":{

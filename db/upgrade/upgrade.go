@@ -314,6 +314,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- nullable preset values
 			ALTER TABLE app.preset_value ALTER COLUMN value DROP NOT NULL;
 
+			-- session time overwrite for individual logins
+			ALTER TABLE instance.login ADD COLUMN token_expiry_hours INTEGER;
+
 			-- missing indexes
 			CREATE INDEX IF NOT EXISTS fki_api_module_fkey ON app.api USING btree (module_id ASC NULLS LAST);
 		`)

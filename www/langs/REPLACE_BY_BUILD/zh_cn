@@ -449,7 +449,8 @@
 				"password":"这将覆盖此登录的当前密码。多因素身份验证不受此更改影响。端到端加密（E2EE）在用户提供相关备份代码之前将不可用。",
 				"records":"登录已分配 {COUNT} 个应用程序记录。",
 				"roles":"登录已分配 {COUNT} 个角色。",
-				"template":"预定义设置（显示和主题选项）将从所选模板应用。"
+				"template":"预定义设置（显示和主题选项）将从所选模板应用。",
+				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
 			"admin":"管理员",
 			"ldap":"已分配 LDAP",
@@ -462,7 +463,8 @@
 			"roleContentUser":"用户",
 			"template":"登录模板",
 			"title":"登录 '{NAME}'",
-			"titleNew":"新登录"
+			"titleNew":"新登录",
+			"tokenExpiryHours":"会话最长时间（小时）"
 		},
 		"loginTemplate":{
 			"dialog":{
