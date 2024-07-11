@@ -273,6 +273,11 @@ func setRecord_tx(tx pgx.Tx, presetId uuid.UUID, recordId int64, values []types.
 			return err
 		}
 
+		if schema.IsContentFiles(atrContent) {
+			// files cannot be applied via presets
+			continue
+		}
+
 		sqlNames = append(sqlNames, fmt.Sprintf(`"%s"`, atrName))
 
 		if schema.IsContentRelationship(atrContent) {
@@ -295,7 +300,12 @@ func setRecord_tx(tx pgx.Tx, presetId uuid.UUID, recordId int64, values []types.
 				sqlValues = append(sqlValues, nil)
 			}
 		} else {
-			sqlValues = append(sqlValues, value.Value)
+			if value.Value.Valid && value.Value.String == "" && !schema.IsContentText(atrContent) {
+				// prior to 3.8 preset values were forced to be empty string if NULL
+				sqlValues = append(sqlValues, nil)
+			} else {
+				sqlValues = append(sqlValues, value.Value)
+			}
 		}
 	}
 

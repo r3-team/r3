@@ -1,5 +1,8 @@
-import {isAttributeRelationship} from '../shared/attribute.js';
-import {getDependentModules}     from '../shared/builder.js';
+import {getDependentModules} from '../shared/builder.js';
+import {
+	isAttributeFiles,
+	isAttributeRelationship
+} from '../shared/attribute.js';
 import {
 	copyValueDialog,
 	getNilUuid
@@ -125,7 +128,7 @@ let MyBuilderPreset = {
 				<table class="generic-table-vertical">
 					<tr>
 						<td><span>{{ capGen.name }}</span></td>
-						<td colspan="2"><input class="dynamic" v-model="values.name" /></td>
+						<td colspan="2"><input class="dynamic" v-model="values.name" :disabled="readonly" /></td>
 					</tr>
 					<tr>
 						<td><span>{{ capApp.protected }}</span></td>
@@ -145,7 +148,7 @@ let MyBuilderPreset = {
 						<td colspan="3"><b>{{ capApp.values }}</b></td>
 					</tr>
 					<my-builder-preset-value
-						v-for="(a,i) in relation.attributes.filter(v => v.name !== 'id')"
+						v-for="(a,i) in relation.attributes.filter(v => v.name !== 'id' && !isAttributeFiles(v.content))"
 						@set="(...args) => childSet(a.id,...args)"
 						:attribute="a"
 						:exists="attributeIdMapValue[a.id] !== undefined"
@@ -202,6 +205,7 @@ let MyBuilderPreset = {
 		copyValueDialog,
 		getDependentModules,
 		getNilUuid,
+		isAttributeFiles,
 		isAttributeRelationship,
 		
 		// actions
