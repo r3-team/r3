@@ -317,6 +317,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- session time overwrite for individual logins
 			ALTER TABLE instance.login ADD COLUMN token_expiry_hours INTEGER;
 
+			-- new login setting
+			ALTER TABLE instance.login_setting ADD   COLUMN bool_as_icon BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN bool_as_icon DROP DEFAULT;
+
 			-- missing indexes
 			CREATE INDEX IF NOT EXISTS fki_api_module_fkey ON app.api USING btree (module_id ASC NULLS LAST);
 		`)

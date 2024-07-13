@@ -2145,6 +2145,7 @@
 			"titleMfa":"Configuration de l'authentification multi-facteur",
 			"titleName":"Nom de l'appareil"
 		},
+		"boolAsIcon":"Boolean values as icons",
 		"borders":"Bordures",
 		"bordersSquared":"Carrées",
 		"colorClassicMode":"Schéma de couleurs",

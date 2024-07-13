@@ -2145,6 +2145,7 @@
 			"titleMfa":"设置多因素身份验证",
 			"titleName":"设备名称"
 		},
+		"boolAsIcon":"Boolean values as icons",
 		"borders":"边框",
 		"bordersSquared":"方形",
 		"colorClassicMode":"颜色方案",

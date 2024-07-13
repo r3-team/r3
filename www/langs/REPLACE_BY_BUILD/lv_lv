@@ -2145,6 +2145,7 @@
 			"titleMfa":"Setup multi-factor authentication",
 			"titleName":"Device name"
 		},
+		"boolAsIcon":"Boolean values as icons",
 		"borders":"Robežas",
 		"bordersSquared":"Kvadrātveida",
 		"colorClassicMode":"Krāsu shēma",

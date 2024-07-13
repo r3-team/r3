@@ -2145,6 +2145,7 @@
 			"titleMfa":"Setup multi-factor authentication",
 			"titleName":"Device name"
 		},
+		"boolAsIcon":"Boolean values as icons",
 		"borders":"Borders",
 		"bordersSquared":"Squared",
 		"colorClassicMode":"Color scheme",

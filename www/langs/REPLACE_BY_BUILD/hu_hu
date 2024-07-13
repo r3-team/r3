@@ -2145,6 +2145,7 @@
 			"titleMfa":"Több Faktoros Hitelesítés hozzáadása",
 			"titleName":"Eszköz neve"
 		},
+		"boolAsIcon":"Boolean values as icons",
 		"borders":"Borders",
 		"bordersSquared":"Squared",
 		"colorClassicMode":"Color scheme",

@@ -1174,10 +1174,11 @@ let MySettings = {
 						<tr>
 							<td colspan="2"><b>{{ capApp.titleSubMisc }}</b></td>
 						</tr>
-						<tr><td colspan="2"><my-button-check v-model="settingsInput.sundayFirstDow"   :caption="capApp.sundayFirstDow" /></td></tr>
-						<tr><td colspan="2"><my-button-check v-model="settingsInput.tabRemember"      :caption="capApp.tabRemember" /></td></tr>
-						<tr><td colspan="2"><my-button-check v-model="settingsInput.warnUnsaved"      :caption="capApp.warnUnsaved" /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settingsInput.sundayFirstDow"   :caption="capApp.sundayFirstDow"   /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settingsInput.tabRemember"      :caption="capApp.tabRemember"      /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settingsInput.warnUnsaved"      :caption="capApp.warnUnsaved"      /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.mobileScrollForm" :caption="capApp.mobileScrollForm" /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settingsInput.boolAsIcon"       :caption="capApp.boolAsIcon"       /></td></tr>
 					</tbody>
 				</table>
 			</div>

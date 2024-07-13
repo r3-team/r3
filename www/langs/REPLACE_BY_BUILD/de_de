@@ -2145,6 +2145,7 @@
 			"titleMfa":"Multifaktor-Authentifizierung hinzufügen",
 			"titleName":"Gerätename"
 		},
+		"boolAsIcon":"Wahrheitswerte als Icons",
 		"borders":"Rahmen",
 		"bordersSquared":"Eckig",
 		"colorClassicMode":"Farbschema",

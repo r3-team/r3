@@ -138,10 +138,11 @@ let MyAdminLoginTemplate = {
 					<tr>
 						<td colspan="2"><b>{{ capAppSet.titleSubMisc }}</b></td>
 					</tr>
-					<tr><td colspan="2"><my-button-check v-model="settings.sundayFirstDow"   :caption="capAppSet.sundayFirstDow" /></td></tr>
-					<tr><td colspan="2"><my-button-check v-model="settings.tabRemember"      :caption="capAppSet.tabRemember" /></td></tr>
-					<tr><td colspan="2"><my-button-check v-model="settings.warnUnsaved"      :caption="capAppSet.warnUnsaved" /></td></tr>
+					<tr><td colspan="2"><my-button-check v-model="settings.sundayFirstDow"   :caption="capAppSet.sundayFirstDow"   /></td></tr>
+					<tr><td colspan="2"><my-button-check v-model="settings.tabRemember"      :caption="capAppSet.tabRemember"      /></td></tr>
+					<tr><td colspan="2"><my-button-check v-model="settings.warnUnsaved"      :caption="capAppSet.warnUnsaved"      /></td></tr>
 					<tr><td colspan="2"><my-button-check v-model="settings.mobileScrollForm" :caption="capAppSet.mobileScrollForm" /></td></tr>
+					<tr><td colspan="2"><my-button-check v-model="settings.boolAsIcon"       :caption="capAppSet.boolAsIcon"       /></td></tr>
 					
 					<!-- theming -->
 					<tr>
@@ -333,6 +334,7 @@ let MyAdminLoginTemplate = {
 		
 		// new template, apply defaults
 		this.settings = {
+			boolAsIcon:true,
 			bordersAll:false,
 			bordersSquared:false,
 			colorClassicMode:false,

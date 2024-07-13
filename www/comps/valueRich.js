@@ -51,11 +51,14 @@ let MyValueRich = {
 		</span>
 		
 		<!-- boolean value -->
-		<img class="boolean"
-			v-if="isBoolean && value !== null"
-			:class="{ ok:value }"
-			:src="value ? 'images/ok.png' : 'images/cancel.png'"
-		/>
+		<template v-if="isBoolean && value !== null">
+			<img class="boolean"
+				v-if="settings.boolAsIcon"
+				:class="{ ok:value }"
+				:src="value ? 'images/ok.png' : 'images/cancel.png'"
+			/>
+			<span v-else>{{ value ? capGen.option.yes : capGen.option.no }}</span>
+		</template>
 		
 		<!-- files -->
 		<a target="_blank"
