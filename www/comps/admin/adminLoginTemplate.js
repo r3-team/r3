@@ -92,22 +92,6 @@ let MyAdminLoginTemplate = {
 						</td>
 					</tr>
 					<tr>
-						<td>{{ capAppSet.sundayFirstDow }}</td>
-						<td><div class="row"><my-bool v-model="settings.sundayFirstDow" :grow="false" /></div></td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.tabRemember }}</td>
-						<td><div class="row"><my-bool v-model="settings.tabRemember" :grow="false" /></div></td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.warnUnsaved }}</td>
-						<td><div class="row"><my-bool v-model="settings.warnUnsaved" :grow="false" /></div></td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.mobileScrollForm }}</td>
-						<td><div class="row"><my-bool v-model="settings.mobileScrollForm" :grow="false" /></div></td>
-					</tr>
-					<tr>
 						<td>{{ capAppSet.searchDictionaries }}</td>
 						<td>
 							<div class="column gap">
@@ -151,6 +135,13 @@ let MyAdminLoginTemplate = {
 							</select>
 						</td>
 					</tr>
+					<tr>
+						<td colspan="2"><b>{{ capAppSet.titleSubMisc }}</b></td>
+					</tr>
+					<tr><td colspan="2"><my-button-check v-model="settings.sundayFirstDow"   :caption="capAppSet.sundayFirstDow" /></td></tr>
+					<tr><td colspan="2"><my-button-check v-model="settings.tabRemember"      :caption="capAppSet.tabRemember" /></td></tr>
+					<tr><td colspan="2"><my-button-check v-model="settings.warnUnsaved"      :caption="capAppSet.warnUnsaved" /></td></tr>
+					<tr><td colspan="2"><my-button-check v-model="settings.mobileScrollForm" :caption="capAppSet.mobileScrollForm" /></td></tr>
 					
 					<!-- theming -->
 					<tr>
@@ -166,18 +157,8 @@ let MyAdminLoginTemplate = {
 						<td>{{ capAppSet.borders }}</td>
 						<td>
 							<div class="row gap">
-								<my-bool
-									v-model="settings.bordersAll"
-									:caption0="capGen.less"
-									:caption1="capGen.more"
-									:grow="false"
-								/>
-								<my-bool
-									v-model="settings.bordersSquared"
-									:caption0="capAppSet.bordersSquaredOff"
-									:caption1="capAppSet.bordersSquared"
-									:grow="false"
-								/>
+								<my-button-check v-model="settings.bordersAll"     :caption="capGen.more" />
+								<my-button-check v-model="settings.bordersSquared" :caption="capAppSet.bordersSquared" />
 							</div>
 						</td>
 					</tr>
@@ -231,18 +212,8 @@ let MyAdminLoginTemplate = {
 						<td>{{ capAppSet.listRows }}</td>
 						<td>
 							<div class="row gap">
-								<my-bool
-									v-model="settings.listSpaced"
-									:caption0="capAppSet.listSpacedOff"
-									:caption1="capAppSet.listSpacedOn"
-									:grow="false"
-								/>
-								<my-bool
-									v-model="settings.listColored"
-									:caption0="capAppSet.listColoredOff"
-									:caption1="capAppSet.listColoredOn"
-									:grow="false"
-								/>
+								<my-button-check v-model="settings.listSpaced"  :caption="capAppSet.listSpaced" />
+								<my-button-check v-model="settings.listColored" :caption="capAppSet.listColored" />
 							</div>
 						</td>
 					</tr>
@@ -270,17 +241,11 @@ let MyAdminLoginTemplate = {
 						<td>{{ capGen.applications }}</td>
 						<td>
 							<div class="row gap">
-								<my-bool v-model="settings.headerModules"
-									:caption0="capGen.button.hide"
-									:caption1="capGen.button.show"
-									:grow="false"
-								/>
-								<my-bool
-									v-if="settings.headerModules"
+								<my-button-check v-model="settings.headerModules" :caption="capGen.button.show" />
+								<my-button-check
 									v-model="settings.headerCaptions"
-									:caption0="capAppSet.headerCaptionsOff"
-									:caption1="capAppSet.headerCaptions"
-									:grow="false"
+									:caption="capAppSet.headerCaptions"
+									:readonly="!settings.headerModules"
 								/>
 							</div>
 						</td>

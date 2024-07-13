@@ -1124,22 +1124,6 @@ let MySettings = {
 								</select>
 							</td>
 						</tr>
-						<tr>
-							<td>{{ capApp.sundayFirstDow }}</td>
-							<td><div class="row"><my-bool v-model="settingsInput.sundayFirstDow" :grow="false" /></div></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.tabRemember }}</td>
-							<td><div class="row"><my-bool v-model="settingsInput.tabRemember" :grow="false" /></div></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.warnUnsaved }}</td>
-							<td><div class="row"><my-bool v-model="settingsInput.warnUnsaved" :grow="false" /></div></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.mobileScrollForm }}</td>
-							<td><div class="row"><my-bool v-model="settingsInput.mobileScrollForm" :grow="false" /></div></td>
-						</tr>
 						<tr class="default-inputs">
 							<td>{{ capApp.searchDictionaries }}</td>
 							<td>
@@ -1187,6 +1171,13 @@ let MySettings = {
 								</select>
 							</td>
 						</tr>
+						<tr>
+							<td colspan="2"><b>{{ capApp.titleSubMisc }}</b></td>
+						</tr>
+						<tr><td colspan="2"><my-button-check v-model="settingsInput.sundayFirstDow"   :caption="capApp.sundayFirstDow" /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settingsInput.tabRemember"      :caption="capApp.tabRemember" /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settingsInput.warnUnsaved"      :caption="capApp.warnUnsaved" /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settingsInput.mobileScrollForm" :caption="capApp.mobileScrollForm" /></td></tr>
 					</tbody>
 				</table>
 			</div>
@@ -1203,18 +1194,8 @@ let MySettings = {
 							<td>{{ capApp.borders }}</td>
 							<td>
 								<div class="row gap">
-									<my-bool
-										v-model="settingsInput.bordersAll"
-										:caption0="capGen.less"
-										:caption1="capGen.more"
-										:grow="false"
-									/>
-									<my-bool
-										v-model="settingsInput.bordersSquared"
-										:caption0="capApp.bordersSquaredOff"
-										:caption1="capApp.bordersSquared"
-										:grow="false"
-									/>
+									<my-button-check v-model="settingsInput.bordersAll"     :caption="capGen.more" />
+									<my-button-check v-model="settingsInput.bordersSquared" :caption="capApp.bordersSquared" />
 								</div>
 							</td>
 						</tr>
@@ -1268,18 +1249,8 @@ let MySettings = {
 							<td>{{ capApp.listRows }}</td>
 							<td>
 								<div class="row gap">
-									<my-bool
-										v-model="settingsInput.listSpaced"
-										:caption0="capApp.listSpacedOff"
-										:caption1="capApp.listSpacedOn"
-										:grow="false"
-									/>
-									<my-bool
-										v-model="settingsInput.listColored"
-										:caption0="capApp.listColoredOff"
-										:caption1="capApp.listColoredOn"
-										:grow="false"
-									/>
+									<my-button-check v-model="settingsInput.listSpaced"  :caption="capApp.listSpaced" />
+									<my-button-check v-model="settingsInput.listColored" :caption="capApp.listColored" />
 								</div>
 							</td>
 						</tr>
@@ -1307,17 +1278,11 @@ let MySettings = {
 							<td>{{ capGen.applications }}</td>
 							<td>
 								<div class="row gap">
-									<my-bool v-model="settingsInput.headerModules"
-										:caption0="capGen.button.hide"
-										:caption1="capGen.button.show"
-										:grow="false"
-									/>
-									<my-bool
-										v-if="settingsInput.headerModules"
+									<my-button-check v-model="settingsInput.headerModules" :caption="capGen.button.show" />
+									<my-button-check
 										v-model="settingsInput.headerCaptions"
-										:caption0="capApp.headerCaptionsOff"
-										:caption1="capApp.headerCaptions"
-										:grow="false"
+										:caption="capApp.headerCaptions"
+										:readonly="!settingsInput.headerModules"
 									/>
 								</div>
 							</td>

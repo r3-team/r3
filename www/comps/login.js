@@ -101,12 +101,10 @@ let MyLogin = {
 			
 			<div class="row centered space-between">
 				<div class="row">
-					<my-button
+					<my-button-check
 						v-if="tokenKeepEnable"
-						@trigger="tokenKeepInput = !tokenKeepInput"
+						v-model="tokenKeepInput"
 						:caption="message.stayLoggedIn[language]"
-						:image="tokenKeep ? 'checkbox1.png' : 'checkbox0.png'"
-						:naked="true"
 					/>
 				</div>
 				<button

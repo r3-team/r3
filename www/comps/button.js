@@ -1,3 +1,4 @@
+export {MyButtonCheck};
 export {MyButton as default};
 
 let MyButton = {
@@ -118,4 +119,23 @@ let MyButton = {
 			this.$emit('trigger-shift');
 		}
 	}
+};
+
+let MyButtonCheck = {
+	name:'my-button-check',
+	template:`<my-button
+		@trigger="$emit('update:modelValue',!modelValue)"
+		:active="!readonly"
+		:caption="caption"
+		:captionTitle="captionTitle"
+		:image="modelValue ? 'checkbox1.png' : 'checkbox0.png'"
+		:naked="true"
+	/>`,
+	props:{
+		caption:     { type:String,  required:true },
+		captionTitle:{ type:String,  required:false, default:'' },
+		modelValue:  { type:Boolean, required:true },
+		readonly:    { type:Boolean, required:false, default:false }
+	},
+	emits:['update:modelValue']
 };

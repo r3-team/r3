@@ -3,6 +3,7 @@ import MyButton  from './comps/button.js';
 import MyFilters from './comps/filters.js';
 import MyHome    from './comps/home.js';
 import MyStore   from './stores/store.js';
+import {MyButtonCheck} from './comps/button.js';
 import {
 	MyGoForm,
 	MyGoModule
@@ -275,6 +276,7 @@ const app = Vue.createApp(MyApp)
 	.component('my-bool',MyBool)
 	.component('my-bool-string-number',MyBoolStringNumber)
 	.component('my-button',MyButton)
+	.component('my-button-check',MyButtonCheck)
 	.component('my-filters',MyFilters);
 
 app.directive('click-outside',{
