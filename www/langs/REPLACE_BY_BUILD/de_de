@@ -186,6 +186,7 @@
 		"results":"{CNT} Ergebnisse",
 		"resultsNone":"- keine Ergebnisse -",
 		"resultsOf":"/ {CNT}",
+		"returns":"Gibt zurück",
 		"role":"Rolle",
 		"roles":"Rollen",
 		"selected":"Ausgewählt",

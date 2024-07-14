@@ -186,6 +186,7 @@
 		"results":"{CNT} eredmény",
 		"resultsNone":"- nincs eredmény -",
 		"resultsOf":"/ {CNT}",
+		"returns":"Returns",
 		"role":"Szerep",
 		"roles":"Szerepek",
 		"selected":"Kiválasztva",

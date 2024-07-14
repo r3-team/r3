@@ -1,15 +1,13 @@
-import MyBuilderQuery from './builder/builderQuery.js';
-import MyInputDate    from './inputDate.js';
-import {getCaption}   from './shared/language.js';
+import MyBuilderQuery          from './builder/builderQuery.js';
+import MyInputDate             from './inputDate.js';
+import {isAttributeString}     from './shared/attribute.js';
+import {getColumnIsFilterable} from './shared/column.js';
+import {getCaption}            from './shared/language.js';
 import {
 	getDependentModules,
 	getItemTitleColumn,
 	getItemTitleNoRelationship
 } from './shared/builder.js';
-import {
-	isAttributeFiles,
-	isAttributeString
-} from './shared/attribute.js';
 import {
 	getNestedIndexAttributeIdsByJoins,
 	getQueryTemplate
@@ -174,30 +172,53 @@ let MyFilterConnector = {
 let MyFilterAttribute = {
 	name:'my-filter-attribute',
 	template:`<select v-model="value">
-		
-		<option
-			v-if="!groupQueries"
-			v-for="nia in nestedIndexAttributeIds"
-			:value="nia"
-		>
-			{{ getAttributeCaption(nia) }}
-		</option>
-		
-		<optgroup v-if="groupQueries" v-for="n in nestingLevels" :label="getQueryLabel(n-1)">
+		<template v-if="columnsMode" v-for="b in columnBatches">
+
+			<!-- single column batch -->
 			<option
-				v-for="nia in nestedIndexAttributeIds.filter(v => v.substring(0,1) === String(n-1))"
+				v-if="getColumnBatchIndexesValid(b).length === 1"
+				:value="getNestedIndexAttributeIdByColumnIndex(getColumnBatchIndexesValid(b)[0])"
+			>
+				{{ b.caption }}
+			</option>
+
+			<!-- multi column batch -->
+			<optgroup v-if="getColumnBatchIndexesValid(b).length > 1" :label="b.caption">
+				<option
+					v-for="ci in getColumnBatchIndexesValid(b)"
+					:value="getNestedIndexAttributeIdByColumnIndex(ci)"
+				>
+					{{ getAttributeCaption(columns[ci].attributeId) }}
+				</option>
+			</optgroup>
+		</template>
+		
+		<template v-if="!columnsMode">
+			<option
+				v-if="!groupQueriesNested"
+				v-for="nia in nestedIndexAttributeIds"
 				:value="nia"
 			>
-				{{ getAttributeCaption(nia) }}
+				{{ getNestedIndexAttributeCaption(nia) }}
 			</option>
-		</optgroup>
+			
+			<optgroup v-if="groupQueriesNested" v-for="n in nestingLevels" :label="getQueryLabel(n-1)">
+				<option
+					v-for="nia in nestedIndexAttributeIds.filter(v => v.substring(0,1) === String(n-1))"
+					:value="nia"
+				>
+					{{ getNestedIndexAttributeCaption(nia) }}
+				</option>
+			</optgroup>
+		</template>
 	</select>`,
 	props:{
-		columnsMode:   { type:Boolean, required:true },
-		groupQueries:  { type:Boolean, required:false, default:false },
-		modelValue:    { type:String,  required:true },
-		nestingLevels: { type:Number,  required:true },
-		nestedIndexAttributeIds:{ type:Array, required:true }
+		columns:                { type:Array,   required:true },
+		columnBatches:          { type:Array,   required:true },
+		groupQueriesNested:     { type:Boolean, required:false, default:false },
+		modelValue:             { type:String,  required:true },
+		nestedIndexAttributeIds:{ type:Array,   required:true },
+		nestingLevels:          { type:Number,  required:true }
 	},
 	emits:['update:modelValue'],
 	computed:{
@@ -205,6 +226,9 @@ let MyFilterAttribute = {
 			get()  { return this.modelValue; },
 			set(v) { this.$emit('update:modelValue',v); }
 		},
+
+		// simple
+		columnsMode:(s) => s.columns.length !== 0,
 		
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
@@ -214,23 +238,36 @@ let MyFilterAttribute = {
 	methods:{
 		// externals
 		getCaption,
+		getColumnIsFilterable,
 		getItemTitleNoRelationship,
-		
-		// presentation
-		getAttributeCaption(nestedIndexAttributeId) {
+
+		getAttributeCaption(attributeId) {
+			const atr = this.attributeIdMap[attributeId];
+			const rel = this.relationIdMap[atr.relationId];
+			return this.getCaption('attributeTitle',rel.moduleId,atr.id,atr.captions,atr.name);
+		},
+		getColumnBatchIndexesValid(columnBatch) {
+			let out = [];
+			for(const columnIndex of columnBatch.columnIndexes) {
+				if(this.getColumnIsFilterable(this.columns[columnIndex]))
+					out.push(columnIndex);
+			}
+			return out;
+		},
+		getNestedIndexAttributeIdByColumnIndex(columnIndex) {
+			if(columnIndex >= this.columns.length) return '';
+			const column = this.columns[columnIndex];
+			return `0_${column.index}_${column.attributeId}`;
+		},
+		getNestedIndexAttributeCaption(nestedIndexAttributeId) {
 			const v   = nestedIndexAttributeId.split('_');
 			const atr = this.attributeIdMap[v[2]];
-			const rel = this.relationIdMap[atr.relationId];
-			
-			return this.columnsMode
-				? this.getCaption('attributeTitle',rel.moduleId,atr.id,atr.captions,atr.name)
-				: this.getItemTitleNoRelationship(atr.id,v[1]);
+			return this.getItemTitleNoRelationship(atr.id,v[1]);
 		},
 		getQueryLabel(nestingLevel) {
-			if(nestingLevel === 0)
-				return this.capApp.nestingMain;
-			
-			return this.capApp.nestingSub + ' ' + nestingLevel;
+			return nestingLevel === 0
+				? this.capApp.nestingMain
+				: this.capApp.nestingSub + ' ' + nestingLevel;
 		}
 	}
 };
@@ -294,8 +331,9 @@ let MyFilterSide = {
 				<my-filter-attribute
 					v-if="isAttribute"
 					v-model="nestedIndexAttribute"
-					:columnsMode="columnsMode"
-					:groupQueries="nestingLevels !== 0 && !isSubQuery && builderMode"
+					:columns="columns"
+					:columnBatches="columnBatches"
+					:groupQueriesNested="nestingLevels !== 0 && !isSubQuery && builderMode"
 					:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
 					:nestingLevels="nestingLevels"
 				/>
@@ -401,39 +439,6 @@ let MyFilterSide = {
 		
 		<!-- sub query inputs -->
 		<div class="subQuery shade" v-if="isSubQuery && showQuery">
-			<table class="default-inputs">
-				<tr>
-					<td>{{ capApp.subQueryAttribute }}</td>
-					<td>
-						<!-- sub query attribute input -->
-						<my-filter-attribute
-							v-model="nestedIndexAttribute"
-							:columnsMode="columnsMode"
-							:groupQueries="nestingLevels !== 0 && !isSubQuery && builderMode"
-							:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
-							:nestingLevels="nestingLevels"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.subQueryAggregator }}</td>
-					<td>
-						<!-- sub query aggregator input -->
-						<select v-model="queryAggregator">
-							<option value=""     >-</option>
-							<option value="array">{{ capGen.option.aggArray }}</option>
-							<option value="avg"  >{{ capGen.option.aggAvg }}</option>
-							<option value="count">{{ capGen.option.aggCount }}</option>
-							<option value="json" >{{ capGen.option.aggJson }}</option>
-							<option value="list" >{{ capGen.option.aggList }}</option>
-							<option value="max"  >{{ capGen.option.aggMax }}</option>
-							<option value="min"  >{{ capGen.option.aggMin }}</option>
-							<option value="sum"  >{{ capGen.option.aggSum }}</option>
-						</select>
-					</td>
-				</tr>
-			</table>
-			
 			<!-- filter sub query -->
 			<my-builder-query
 				@set-choices="setQuery('choices',$event)"
@@ -457,13 +462,51 @@ let MyFilterSide = {
 				:orders="query.orders"
 				:relationId="query.relationId"
 			/>
+			<template v-if="query.relationId !== null">
+				<br />
+				<h3>{{ capGen.returns }}</h3>
+				<table class="default-inputs">
+					<tr>
+						<td>{{ capApp.subQueryAttribute }}</td>
+						<td>
+							<!-- sub query attribute input -->
+							<my-filter-attribute
+								v-model="nestedIndexAttribute"
+								:columns="columns"
+								:columnBatches="columnBatches"
+								:groupQueriesNested="nestingLevels !== 0 && !isSubQuery && builderMode"
+								:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
+								:nestingLevels="nestingLevels"
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.subQueryAggregator }}</td>
+						<td>
+							<!-- sub query aggregator input -->
+							<select v-model="queryAggregator">
+								<option value=""     >-</option>
+								<option value="array">{{ capGen.option.aggArray }}</option>
+								<option value="avg"  >{{ capGen.option.aggAvg }}</option>
+								<option value="count">{{ capGen.option.aggCount }}</option>
+								<option value="json" >{{ capGen.option.aggJson }}</option>
+								<option value="list" >{{ capGen.option.aggList }}</option>
+								<option value="max"  >{{ capGen.option.aggMax }}</option>
+								<option value="min"  >{{ capGen.option.aggMin }}</option>
+								<option value="sum"  >{{ capGen.option.aggSum }}</option>
+							</select>
+						</td>
+					</tr>
+				</table>
+			</template>
 		</div>
 	</div>`,
 	props:{
 		builderMode:   { type:Boolean, required:true },
 		columnDate:    { type:Boolean, required:false, default:false },
 		columnTime:    { type:Boolean, required:false, default:false },
-		columnsMode:   { type:Boolean, required:true },
+		columns:       { type:Array,   required:true },
+		columnBatches: { type:Array,   required:true },
 		disableContent:{ type:Array,   required:true },
 		entityIdMapRef:{ type:Object,  required:true },
 		fieldIdMap:    { type:Object,  required:true },
@@ -587,6 +630,7 @@ let MyFilterSide = {
 		},
 		
 		// simple
+		columnsMode: (s) => s.columns.length !== 0,
 		contentData: (s) => ['attribute','collection','preset','subQuery','value','true'].filter(v => !s.disableContent.includes(v)),
 		contentDate: (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
 		contentForm: (s) => ['field','fieldChanged','fieldValid','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
@@ -706,7 +750,8 @@ let MyFilter = {
 			v-model="side0Input"
 			@apply-value="$emit('apply-value')"
 			:builderMode="builderMode"
-			:columnsMode="columnsMode"
+			:columns="columns"
+			:columnBatches="columnBatches"
 			:disableContent="disableContent"
 			:entityIdMapRef="entityIdMapRef"
 			:fieldIdMap="fieldIdMap"
@@ -735,7 +780,8 @@ let MyFilter = {
 			:builderMode="builderMode"
 			:columnDate="side0ColumDate"
 			:columnTime="side0ColumTime"
-			:columnsMode="columnsMode"
+			:columns="columns"
+			:columnBatches="columnBatches"
 			:disableContent="disableContent"
 			:entityIdMapRef="entityIdMapRef"
 			:fieldIdMap="fieldIdMap"
@@ -771,19 +817,19 @@ let MyFilter = {
 		/>
 	</div>`,
 	props:{
-		builderMode:    { type:Boolean, required:true },
-		columns:        { type:Array,   required:false, default:() => [] },
-		columnsMode:    { type:Boolean, required:true },
-		disableContent: { type:Array,   required:true },
-		entityIdMapRef: { type:Object,  required:true },
-		fieldIdMap:     { type:Object,  required:true },
-		indentation:    { type:Number,  required:true },
-		joins:          { type:Array,   required:true },
-		joinsParents:   { type:Array,   required:true },
-		moduleId:       { type:String,  required:true },
-		multipleFilters:{ type:Boolean, required:true },
-		nestedIndexAttributeIds:{ type:Array, required:true },
-		nestingLevels:  { type:Number,  required:true },
+		builderMode:            { type:Boolean, required:true },
+		columns:                { type:Array,   required:true },
+		columnBatches:          { type:Array,   required:true },
+		disableContent:         { type:Array,   required:true },
+		entityIdMapRef:         { type:Object,  required:true },
+		fieldIdMap:             { type:Object,  required:true },
+		indentation:            { type:Number,  required:true },
+		joins:                  { type:Array,   required:true },
+		joinsParents:           { type:Array,   required:true },
+		moduleId:               { type:String,  required:true },
+		multipleFilters:        { type:Boolean, required:true },
+		nestedIndexAttributeIds:{ type:Array,   required:true },
+		nestingLevels:          { type:Number,  required:true },
 		
 		// filter inputs
 		connector:{ type:String, required:true },
@@ -923,7 +969,7 @@ let MyFilters = {
 	components:{MyFilter},
 	template:`<div class="filters" :class="{ userFilter:userFilter }">
 		<div class="column">
-			<div class="filter-actions" v-if="nestedIndexAttributeIds.length !== 0">
+			<div class="filter-actions" v-if="nestedIndexAttributeIds.length !== 0 || columnsMode">
 				<slot name="title" />
 				<div>
 					<my-button image="add.png"
@@ -947,7 +993,7 @@ let MyFilters = {
 						@update="setValue"
 						:builderMode="builderMode"
 						:columns="columns"
-						:columnsMode="columnsMode"
+						:columnBatches="columnBatches"
 						:connector="element.connector"
 						:disableContent="disableContent"
 						:entityIdMapRef="entityIdMapRef"
@@ -969,7 +1015,7 @@ let MyFilters = {
 			</draggable>
 		</div>
 		
-		<div class="filter-actions end" v-if="userFilter && nestedIndexAttributeIds.length !== 0">
+		<div class="filter-actions end" v-if="userFilter && (nestedIndexAttributeIds.length !== 0 || columnsMode)">
 			<div class="row gap">
 				<my-button image="add.png"
 					v-if="showAdd"
@@ -998,6 +1044,7 @@ let MyFilters = {
 	props:{
 		builderMode:   { type:Boolean, required:false, default:false },
 		columns:       { type:Array,   required:false, default:() => [] },
+		columnBatches: { type:Array,   required:false, default:() => [] },
 		disableContent:{ type:Array,   required:false, default:() => [] }, // content to disable (attribute, record, field, true, ...)
 		entityIdMapRef:{ type:Object,  required:false, default:() => {return {}} },
 		fieldIdMap:    { type:Object,  required:false, default:() => {return {}} },
@@ -1042,29 +1089,13 @@ let MyFilters = {
 		//  relation join index
 		//  attribute ID
 		nestedIndexAttributeIds:(s) => {
-			let out = [];
-			
-			// columns defined, provide filter criteria based on column attributes
-			// used for user filters on list fields
-			//  user filters can only ever access main query (no access to sub queries)
-			if(s.columnsMode) {
-				for(const col of s.columns) {
-					const atr = s.attributeIdMap[col.attributeId];
-					
-					if(col.subQuery || (col.aggregator !== null && col.aggregator !== 'record'))
-						continue;
-					
-					if(s.isAttributeFiles(atr.content) || atr.encrypted)
-						continue;
-					
-					out.push(`0_${col.index}_${atr.id}`);
-				}
-				return out;
-			}
+			if(s.columnsMode)
+				return []; // not required if filtered by columns/column batches
 			
 			// no columns defined, provide filter criteria based on attributes from joined relation
 			//  as filters can be used in sub queries, we access all joins from all parent queries
 			// used for pre-defining list filters for queries
+			let out = [];
 			out = s.getNestedIndexAttributeIdsByJoins(s.joins,s.joinsParents.length,false);
 			for(let i = 0, j = s.joinsParents.length; i < j; i++) {
 				out = out.concat(s.getNestedIndexAttributeIdsByJoins(s.joinsParents[i],i,false));
@@ -1083,8 +1114,8 @@ let MyFilters = {
 	},
 	methods:{
 		// externals
+		getColumnIsFilterable,
 		getNestedIndexAttributeIdsByJoins,
-		isAttributeFiles,
 		
 		getIndentation(filterIndex) {
 			let indentation = 0;
@@ -1093,9 +1124,6 @@ let MyFilters = {
 			}
 			return indentation;
 		},
-		reset() {
-			this.filters = JSON.parse(JSON.stringify(this.modelValue));
-		},
 		
 		// actions
 		add() {
@@ -1103,23 +1131,33 @@ let MyFilters = {
 				connector:'AND',
 				operator:'ILIKE',
 				side0:{
+					attributeId:null,
+					attributeIndex:0,
+					attributeNested:0,
 					brackets:0,
 					collectionId:null,
 					columnId:null,
 					content:'field',
 					fieldId:null,
 					ftsDict:null,
+					query:null,
+					queryAggregator:null,
 					presetId:null,
 					roleId:null,
 					value:''
 				},
 				side1:{
+					attributeId:null,
+					attributeIndex:0,
+					attributeNested:0,
 					brackets:0,
 					collectionId:null,
 					columnId:null,
 					content:'value',
 					fieldId:null,
 					ftsDict:null,
+					query:null,
+					queryAggregator:null,
 					presetId:null,
 					roleId:null,
 					value:''
@@ -1128,18 +1166,27 @@ let MyFilters = {
 			
 			if(!this.frontendOnly) {
 				// add first available attribute as left side filter value
-				let p = this.nestedIndexAttributeIds[0].split('_');
-				v.side0.attributeId     = p[2];
-				v.side0.attributeIndex  = parseInt(p[1]);
-				v.side0.attributeNested = parseInt(p[0]);
-				v.side0.content         = 'attribute';
-				v.side0.query           = null;
-				v.side0.queryAggregator = null;
-				v.side1.attributeId     = null;
-				v.side1.attributeIndex  = 0;
-				v.side1.attributeNested = 0;
-				v.side1.query           = null;
-				v.side1.queryAggregator = null;
+				if(this.columnsMode) {
+					for(const b of this.columnBatches) {
+						for(const ci of b.columnIndexes) {
+							const column = this.columns[ci];
+							if(this.getColumnIsFilterable(column)) {
+								v.side0.attributeId    = column.attributeId;
+								v.side0.attributeIndex = column.index;
+								v.side0.content        = 'attribute';
+								break;
+							}
+						}
+						if(v.side0.attributeId !== null)
+							break;
+					}
+				} else {
+					const p = this.nestedIndexAttributeIds[0].split('_');
+					v.side0.attributeId     = p[2];
+					v.side0.attributeIndex  = parseInt(p[1]);
+					v.side0.attributeNested = parseInt(p[0]);
+					v.side0.content         = 'attribute';
+				}
 			}
 			this.filters.push(v);
 			this.set();
@@ -1160,6 +1207,9 @@ let MyFilters = {
 			this.filters = [];
 			this.set();
 			this.$emit('apply');
+		},
+		reset() {
+			this.filters = JSON.parse(JSON.stringify(this.modelValue));
 		},
 		set() {
 			// overwrite first filter with only valid connector

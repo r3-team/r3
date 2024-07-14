@@ -135,6 +135,17 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 	return batches.filter(v => v.columnIndexes.length !== 0);
 };
 
+export function getColumnIsFilterable(c) {
+	if(c.subQuery || (c.aggregator !== null && c.aggregator !== 'record'))
+		return false;
+	
+	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+	if(isAttributeFiles(atr.content) || atr.encrypted || atr.contentUse === 'color')
+		return false;
+
+	return true;
+};
+
 export function getColumnTitle(c,moduleId) {
 	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
 	return getCaption('columnTitle',moduleId,c.id,c.captions,

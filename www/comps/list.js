@@ -93,6 +93,7 @@ let MyList = {
 						v-model="filtersUser"
 						@apply="get"
 						:columns="columns"
+						:columnBatches="columnBatches"
 						:joins="joins"
 						:showReset="true"
 						:userFilter="true"

@@ -154,16 +154,16 @@ export function getAttributeIcon(attribute,outsideIn,isNm) {
 	return 'noPic.png';
 };
 
-export function isAttributeBoolean(content)   { return content === 'boolean'; };
-export function isAttributeDecimal(content)   { return attributeContentNames.decimal.includes(content); };
-export function isAttributeFiles(content)     { return content === 'files'; };
-export function isAttributeFloat(content)     { return attributeContentNames.float.includes(content); };
-export function isAttributeInteger(content)   { return attributeContentNames.integer.includes(content); };
-export function isAttributeNumeric(content)   { return content === 'numeric'; };
-export function isAttributeRegconfig(content) { return content === 'regconfig'; };
-export function isAttributeString(content)    { return attributeContentNames.text.includes(content); };
-export function isAttributeUuid(content)      { return content === 'uuid'; };
-export function isAttributeWithLength(content){ return isAttributeFiles(content) || isAttributeString(content) }
+export function isAttributeBoolean(content)        { return content === 'boolean'; };
+export function isAttributeDecimal(content)        { return attributeContentNames.decimal.includes(content); };
+export function isAttributeFiles(content)          { return content === 'files'; };
+export function isAttributeFloat(content)          { return attributeContentNames.float.includes(content); };
+export function isAttributeInteger(content)        { return attributeContentNames.integer.includes(content); };
+export function isAttributeNumeric(content)        { return content === 'numeric'; };
+export function isAttributeRegconfig(content)      { return content === 'regconfig'; };
+export function isAttributeString(content)         { return attributeContentNames.text.includes(content); };
+export function isAttributeUuid(content)           { return content === 'uuid'; };
+export function isAttributeWithLength(content)     { return isAttributeFiles(content) || isAttributeString(content) }
 export function isAttributeRelationship(content)   { return attributeContentNames.relationship.includes(content); };
 export function isAttributeRelationship11(content) { return content === '1:1'; };
 export function isAttributeRelationshipN1(content) { return content === 'n:1'; };
