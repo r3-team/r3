@@ -14,6 +14,7 @@ import (
 	"r3/schema/pgFunction"
 	"r3/types"
 	"slices"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -160,6 +161,10 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 	known, err := schema.CheckCreateId_tx(tx, &mod.Id, "module", "id")
 	if err != nil {
 		return mod.Id, err
+	}
+
+	if strings.HasPrefix(mod.Name, "instance") {
+		return mod.Id, fmt.Errorf("application name must not start with 'instance'")
 	}
 
 	if known {
