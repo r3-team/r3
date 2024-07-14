@@ -307,6 +307,8 @@
 			"titlePerformance":"性能",
 			"titleRepo":"应用程序存储库",
 			"tokenExpiryHours":"会话最长时间（小时）",
+			"tokenReauthHours":"Force login before session end, in hours",
+			"tokenReauthHoursHint":"This setting forces authentication with credentials at the next interactive system access, X hours before the maximum session time is reached. It is used to avoid the active session expiring while a user is working in the system.<br /><br />Should be set to a value larger than the expected maximum continuous time a user is using the application. 12 hours as an example.",
 			"updateCheck":"版本状态",
 			"updateCheckCurrent":"当前",
 			"updateCheckNewer":"最新",

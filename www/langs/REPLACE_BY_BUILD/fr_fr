@@ -307,6 +307,8 @@
 			"titlePerformance":"Performance",
 			"titleRepo":"Répertoire d'applications",
 			"tokenExpiryHours":"Durée maximale de session en heures",
+			"tokenReauthHours":"Force login before session end, in hours",
+			"tokenReauthHoursHint":"This setting forces authentication with credentials at the next interactive system access, X hours before the maximum session time is reached. It is used to avoid the active session expiring while a user is working in the system.<br /><br />Should be set to a value larger than the expected maximum continuous time a user is using the application. 12 hours as an example.",
 			"updateCheck":"État de la version",
 			"updateCheckCurrent":"Actuelle",
 			"updateCheckNewer":"Dernière version",

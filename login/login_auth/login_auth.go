@@ -210,12 +210,20 @@ func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *boo
 	}
 
 	var tp tokenPayload
+	now := tools.GetTimeUnix()
 	if _, err := jwt.Verify([]byte(token), config.GetTokenSecret(), &tp); err != nil {
 		return "", err
 	}
 
-	if tools.GetTimeUnix() > tp.ExpirationTime.Unix() {
+	// token expiration time reached
+	if now > tp.ExpirationTime.Unix() {
 		return "", errors.New("token expired")
+	}
+
+	// token still valid, but renewal is required
+	// token authentication is cut off X hours before expiration to avoid expiration during an active user session
+	if uint64((tp.ExpirationTime.Unix()-now)/3600) < config.GetUint64("tokenReauthHours") {
+		return "", errors.New("token renewal required")
 	}
 
 	if err := authCheckSystemMode(tp.Admin); err != nil {

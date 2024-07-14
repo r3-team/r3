@@ -113,6 +113,15 @@ let MyAdminConfig = {
 						<td><input v-model="configInput.tokenExpiryHours" /></td>
 					</tr>
 					<tr>
+						<td>{{ capApp.tokenReauthHours }}</td>
+						<td>
+							<div class="row gap">
+								<input v-model="configInput.tokenReauthHours" />
+								<my-button image="question.png" @trigger="showHelp(capApp.tokenReauthHoursHint)" />
+							</div>
+						</td>
+					</tr>
+					<tr>
 						<td colspan="2"><br /><h3>{{ capApp.pwTitle }}</h3></td>
 					</tr>
 					<tr>

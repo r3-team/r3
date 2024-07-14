@@ -307,6 +307,8 @@
 			"titlePerformance":"Leistung",
 			"titleRepo":"Anwendungs-Repository",
 			"tokenExpiryHours":"Max. Sitzungszeit in Stunden",
+			"tokenReauthHours":"Anmeldung vor Sitzungsablauf erzwingen, in Stunden",
+			"tokenReauthHoursHint":"Diese Einstellung erzwingt eine Anmeldung mit Zugangsdaten beim nächsten interaktiven Systemzugriff, X Stunden bevor die maximale Sitzungszeit erreicht ist. Dies dient einen Ablauf der Sitzungszeit zu vermeiden, während ein Benutzer aktiv im System arbeitet.<br /><br />Sollte auf einen Wert gesetzt werden, der größer ist als die zu erwartende, maximal durchgängige Arbeitszeit eines Benutzer in der Anwendung. Beispielsweise: 12 Stunden.",
 			"updateCheck":"Versionsstand",
 			"updateCheckCurrent":"Aktuell",
 			"updateCheckNewer":"Cutting-Edge",

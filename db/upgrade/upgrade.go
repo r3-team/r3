@@ -321,6 +321,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE instance.login_setting ADD   COLUMN bool_as_icon BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN bool_as_icon DROP DEFAULT;
 
+			-- new config option
+			INSERT INTO instance.config (name, value) VALUES ('tokenReauthHours', 12);
+
 			-- missing indexes
 			CREATE INDEX IF NOT EXISTS fki_api_module_fkey ON app.api USING btree (module_id ASC NULLS LAST);
 		`)
