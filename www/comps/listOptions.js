@@ -1,7 +1,8 @@
 import {
 	getColumnBatches
 } from './shared/column.js';
-import {getCaption} from './shared/language.js';
+import {getCaption}                    from './shared/language.js';
+import {setSingle as setSettingSingle} from './shared/settings.js';
 export {MyListOptions as default};
 
 let MyListOptions = {
@@ -35,6 +36,24 @@ let MyListOptions = {
 		<tr v-if="isCards">
 			<td>{{ capApp.cardsCaptions }}</td>
 			<td><my-bool v-model="cardsCaptionsInput" /></td>
+		</tr>
+		<tr>
+			<td>{{ capAppSet.listRows }}</td>
+			<td>
+				<div class="row gap">
+					<my-button-check
+						@update:modelValue="setSettingSingle('listSpaced',!settings.listSpaced)"
+						:caption="capAppSet.listSpaced"
+						:modelValue="settings.listSpaced"
+					/>
+					<my-button-check
+						v-if="isTable"
+						@update:modelValue="setSettingSingle('listColored',!settings.listColored)"
+						:caption="capAppSet.listColored"
+						:modelValue="settings.listColored"
+					/>
+				</div>
+			</td>
 		</tr>
 
 		<!-- column options -->
@@ -191,8 +210,10 @@ let MyListOptions = {
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		capApp:        (s) => s.$store.getters.captions.list,
+		capAppSet:     (s) => s.$store.getters.captions.settings,
 		capGen:        (s) => s.$store.getters.captions.generic,
-		isMobile:      (s) => s.$store.getters.isMobile
+		isMobile:      (s) => s.$store.getters.isMobile,
+		settings:      (s) => s.$store.getters.settings
 	},
 	mounted() {
 		// invalid batch sort, reset
@@ -203,6 +224,7 @@ let MyListOptions = {
 		// external
 		getColumnBatches,
 		getCaption,
+		setSettingSingle,
 
 		// presentation
 		getBatchColumnCountVisible(columnBatch) {

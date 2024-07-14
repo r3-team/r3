@@ -1246,15 +1246,6 @@ let MySettings = {
 								</select>
 							</td>
 						</tr>
-						<tr>
-							<td>{{ capApp.listRows }}</td>
-							<td>
-								<div class="row gap">
-									<my-button-check v-model="settingsInput.listSpaced"  :caption="capApp.listSpaced" />
-									<my-button-check v-model="settingsInput.listColored" :caption="capApp.listColored" />
-								</div>
-							</td>
-						</tr>
 						<tr class="default-inputs">
 							<td>{{ capApp.pattern }}</td>
 							<td>
