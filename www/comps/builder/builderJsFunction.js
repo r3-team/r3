@@ -520,7 +520,8 @@ let MyBuilderJsFunction = {
 			appFunctionsClientEvent:[
 				'client_execute_keystrokes','copy_to_clipboard','form_open',
 				'get_preset_record_id','get_url_query_string','get_language_code',
-				'get_login_id','get_role_ids','go_back','has_role','pdf_create'
+				'get_login_id','get_role_ids','go_back','has_role','pdf_create',
+				'value_store_get','value_store_set'
 			],
 			
 			// states

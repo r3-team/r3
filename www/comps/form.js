@@ -476,15 +476,6 @@ let MyForm = {
 					};
 				},
 				
-				// session value store
-				value_store_get:(k) => typeof s.$store.getters.sessionValueStore[s.moduleId] !== 'undefined'
-					&& typeof s.$store.getters.sessionValueStore[s.moduleId][k] !== 'undefined'
-						? s.$store.getters.sessionValueStore[s.moduleId][k]
-						: undefined,
-				value_store_set:(k,v) => s.$store.commit('sessionValueStore',{
-					moduleId:s.moduleId,key:k,value:v
-				}),
-				
 				// e2e encryption
 				set_e2ee_by_login_ids:ids => s.loginIdsEncryptFor = ids,
 				set_e2ee_by_login_ids_and_relation:(loginIds,relationId,recordIds) => {

@@ -14,7 +14,7 @@ import {
 const errFnc = () => console.warn('Function is not available in this context.');
 
 // these functions are available by default globally
-const exposedFunctionsDefaults = {
+const exposedFunctionsGlobal = {
 	get_preset_record_id:(v) => typeof MyStore.getters['schema/presetIdMapRecordId'][v] !== 'undefined'
 		? MyStore.getters['schema/presetIdMapRecordId'][v] : null,
 	get_url_query_string:() => {
@@ -130,7 +130,7 @@ const exposedFunctionsDefaults = {
 	update_collection:                 errFnc
 };
 
-export function jsFunctionRun(jsFunctionId,args,exposedFunctions) {
+export function jsFunctionRun(jsFunctionId,args,exposedFunctionsContext) {
 	const fnc = MyStore.getters['schema/jsFunctionIdMap'][jsFunctionId];
 	if(fnc === 'undefined')
 		return;
@@ -153,6 +153,21 @@ export function jsFunctionRun(jsFunctionId,args,exposedFunctions) {
 		let WebSocket      = {};
 		let window         = {};
 		${fnc.codeFunction}`;
+	
+	const exposedFunctionsModule = {
+		// session value store
+		value_store_get:(k) => typeof MyStore.getters.sessionValueStore[fnc.moduleId] !== 'undefined'
+			&& typeof MyStore.getters.sessionValueStore[fnc.moduleId][k] !== 'undefined'
+				? MyStore.getters.sessionValueStore[fnc.moduleId][k]
+				: undefined,
+		value_store_set:(k,v) => MyStore.commit('sessionValueStore',{
+			moduleId:fnc.moduleId,key:k,value:v
+		})
+	};
 
-	return Function(argNames,code)({ ...exposedFunctionsDefaults, ...exposedFunctions }, ...args);
+	return Function(argNames,code)({
+		...exposedFunctionsGlobal, // globally available functions
+		...exposedFunctionsModule, // functions available for module of running function
+		...exposedFunctionsContext // functions available in calling context
+	}, ...args);
 };
