@@ -1219,6 +1219,7 @@
 				"clean_up_e2ee_keys":"instance.clean_up_e2ee_keys(login_id INTEGER,relation_id UUID,record_ids_access INTEGER[]) => VOID<br /><br />删除登录用户不再访问的记录的端到端加密数据密钥。这将使登录用户无法解密。",
 				"file_link":"instance.file_link(file_id UUID,file_name TEXT,attribute_id UUID,record_id BIGINT) => VOID<br /><br />将现有文件链接到另一个记录（添加到所选文件属性）。此链接是硬链接，意味着访问的是同一个文件。<br /><br />重命名或删除文件时，更改仅影响文件链接。无论是否删除，实际文件都会保留，只要存在一个文件链接。",
 				"files_get":"instance.files_get(attribute_id UUID,record_id BIGINT,include_deleted BOOLEAN DEFAULT FALSE) => instance.file_meta[]<br /><br />返回所选文件属性和记录的文件元数据（可以选择包括已删除文件）。返回的类型 'instance.file_meta' 包括：<br /><blockquote>id UUID,<br />login_id_creator INTEGER,<br />hash TEXT,<br />name TEXT,<br />size_kb INTEGER,<br />version INTEGER,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
+				"get_e2ee_data_key_enc":"instance.get_e2ee_data_key_enc(<blockquote>login_id INTEGER,<br />relation_id UUID,<br />record_id BIGINT</blockquote>) => TEXT<br /><br />Returns the encrypted data key for the given relation record and the chosen login. Data keys exist for individual records for every login that has access to it. They can be decrypted on the frontend with the associated login private key.",
 				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />返回执行操作的登录ID。",
 				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />返回用于访问数据后端的登录的5字母语言代码（'en_us'等）。",
 				"get_name":"instance.get_name() => TEXT<br /><br />返回在管理员面板的自定义窗口中定义的实例名称。",

@@ -324,6 +324,32 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- new config option
 			INSERT INTO instance.config (name, value) VALUES ('tokenReauthHours', 12);
 
+			-- missing instance function to retrieve encrypted E2EE data keys
+			CREATE OR REPLACE FUNCTION instance.get_e2ee_data_key_enc(
+				login_id integer,
+				relation_id uuid,
+				record_id bigint
+			)
+				RETURNS TEXT
+				LANGUAGE 'plpgsql'
+				STABLE PARALLEL UNSAFE
+			AS $BODY$
+				DECLARE
+					key_enc TEXT;
+				BEGIN
+					EXECUTE '
+						SELECT key_enc
+						FROM instance_e2ee."keys_' || relation_id || '"
+						WHERE login_id  = $1
+						AND   record_id = $2
+					'
+					USING login_id, record_id
+					INTO key_enc;
+					
+					RETURN key_enc;
+				END;
+			$BODY$;
+
 			-- missing indexes
 			CREATE INDEX IF NOT EXISTS fki_api_module_fkey ON app.api USING btree (module_id ASC NULLS LAST);
 		`)
