@@ -145,7 +145,8 @@ func (hub *hubType) start() {
 
 			// prepare json message for client based on event content
 			var err error = nil
-			jsonMsg := []byte{} // message back to client
+			jsonMsg := []byte{}      // message back to client
+			singleRecipient := false // message is only sent to single recipient (first valid one)
 
 			switch event.Content {
 			case "clientEventsChanged":
@@ -160,8 +161,10 @@ func (hub *hubType) start() {
 				jsonMsg, err = prepareUnrequested("fileRequested", event.Payload)
 			case "jsFunctionCalled":
 				jsonMsg, err = prepareUnrequested("jsFunctionCalled", event.Payload)
+				singleRecipient = true
 			case "keystrokesRequested":
 				jsonMsg, err = prepareUnrequested("keystrokesRequested", event.Payload)
+				singleRecipient = true
 			case "renew":
 				jsonMsg, err = prepareUnrequested("reauthorized", nil)
 			case "schemaLoaded":
@@ -204,6 +207,10 @@ func (hub *hubType) start() {
 				}
 
 				go client.write(jsonMsg)
+
+				if singleRecipient {
+					break
+				}
 			}
 		}
 	}
