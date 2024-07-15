@@ -2030,6 +2030,7 @@
 		"csvTotalLimit":"Sorok száma (0 = összes)",
 		"displayMode":"Display mode",
 		"fetching":"Adatok lekérése...",
+		"globalSettings":"Global settings",
 		"inputHintCreate":"Új adatsor létrehozása",
 		"inputHintOpen":"Adatsor megnyitása",
 		"inputHintRemove":"Adatsor eltávolítása",

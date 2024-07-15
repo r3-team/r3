@@ -2030,6 +2030,7 @@
 		"csvTotalLimit":"Număr de rânduri (0 = toate)",
 		"displayMode":"Display mode",
 		"fetching":"Data is being retrieved...",
+		"globalSettings":"Global settings",
 		"inputHintCreate":"Creați o înregistrare nouă",
 		"inputHintOpen":"Deschideți înregistrarea",
 		"inputHintRemove":"Ștergeți înregistrarea",

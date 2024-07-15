@@ -2030,6 +2030,7 @@
 		"csvTotalLimit":"行数限制（0 = 全部）",
 		"displayMode":"Display mode",
 		"fetching":"正在检索数据...",
+		"globalSettings":"Global settings",
 		"inputHintCreate":"创建新记录",
 		"inputHintOpen":"打开记录",
 		"inputHintRemove":"移除记录",

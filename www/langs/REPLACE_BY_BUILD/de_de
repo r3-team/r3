@@ -2030,6 +2030,7 @@
 		"csvTotalLimit":"Zeilenanzahl (0 = alle)",
 		"displayMode":"Anzeigemodus",
 		"fetching":"Daten werden geladen...",
+		"globalSettings":"Globale Einstellungen",
 		"inputHintCreate":"Neuen Datensatz anlegen",
 		"inputHintOpen":"Datensatz öffnen",
 		"inputHintRemove":"Datensatz entfernen",

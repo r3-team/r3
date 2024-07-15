@@ -37,24 +37,6 @@ let MyListOptions = {
 			<td>{{ capApp.cardsCaptions }}</td>
 			<td><my-bool v-model="cardsCaptionsInput" /></td>
 		</tr>
-		<tr>
-			<td>{{ capAppSet.listRows }}</td>
-			<td>
-				<div class="row gap">
-					<my-button-check
-						@update:modelValue="setSettingSingle('listSpaced',!settings.listSpaced)"
-						:caption="capAppSet.listSpaced"
-						:modelValue="settings.listSpaced"
-					/>
-					<my-button-check
-						v-if="isTable"
-						@update:modelValue="setSettingSingle('listColored',!settings.listColored)"
-						:caption="capAppSet.listColored"
-						:modelValue="settings.listColored"
-					/>
-				</div>
-			</td>
-		</tr>
 
 		<!-- column options -->
 		<tr v-if="columnsAll.length > 1">
@@ -139,6 +121,28 @@ let MyListOptions = {
 					<br />
 					<span>{{ capApp.message.csvImportWarning }}</span>
 				</template>
+			</td>
+		</tr>
+		
+		<tr>
+			<td colspan="2"><b>{{ capApp.globalSettings }}</b></td>
+		</tr>
+		<tr>
+			<td>{{ capAppSet.listRows }}</td>
+			<td>
+				<div class="row gap">
+					<my-button-check
+						@update:modelValue="setSettingGlobal('listSpaced',!settings.listSpaced)"
+						:caption="capAppSet.listSpaced"
+						:modelValue="settings.listSpaced"
+					/>
+					<my-button-check
+						v-if="isTable"
+						@update:modelValue="setSettingGlobal('listColored',!settings.listColored)"
+						:caption="capAppSet.listColored"
+						:modelValue="settings.listColored"
+					/>
+				</div>
 			</td>
 		</tr>
 	</table>`,
@@ -324,6 +328,10 @@ let MyListOptions = {
 				}
 			}
 			this.$emit('set-column-batch-sort',[batchSortShown,batchSortAll]);
+		},
+		setSettingGlobal(name,value) {
+			this.setSettingSingle(name,value);
+			setTimeout(() => this.$emit('reset'),500);
 		}
 	}
 };

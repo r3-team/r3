@@ -2030,6 +2030,7 @@
 		"csvTotalLimit":"Nombre de lignes (0 = toutes)",
 		"displayMode":"Display mode",
 		"fetching":"Les données sont en cours de récupération...",
+		"globalSettings":"Global settings",
 		"inputHintCreate":"Créer un nouvel enregistrement",
 		"inputHintOpen":"Ouvrir un enregistrement",
 		"inputHintRemove":"Supprimer un enregistrement",

@@ -2030,6 +2030,7 @@
 		"csvTotalLimit":"Row count (0 = all)",
 		"displayMode":"Display mode",
 		"fetching":"Data is being retrieved...",
+		"globalSettings":"Global settings",
 		"inputHintCreate":"Create new record",
 		"inputHintOpen":"Open record",
 		"inputHintRemove":"Remove record",
