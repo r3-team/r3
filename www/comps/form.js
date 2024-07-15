@@ -486,8 +486,6 @@ let MyForm = {
 				}),
 				
 				// e2e encryption
-				get_e2ee_data_key:  (dataKeyEnc)    => s.rsaDecrypt(s.loginPrivateKey,dataKeyEnc),
-				get_e2ee_data_value:(dataKey,value) => s.aesGcmDecryptBase64WithPhrase(value,dataKey),
 				set_e2ee_by_login_ids:ids => s.loginIdsEncryptFor = ids,
 				set_e2ee_by_login_ids_and_relation:(loginIds,relationId,recordIds) => {
 					s.loginIdsEncryptForOutside.push({

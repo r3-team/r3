@@ -6,6 +6,10 @@ import {
 	getCollectionMultiValues,
 	updateCollections
 } from './collection.js';
+import {
+	aesGcmDecryptBase64WithPhrase,
+	rsaDecrypt
+} from './crypto.js';
 
 const errFnc = () => console.warn('Function is not available in this context.');
 
@@ -40,6 +44,10 @@ const exposedFunctionsDefaults = {
 			);
 		});
 	},
+				
+	// e2e encryption
+	get_e2ee_data_key:  (dataKeyEnc)    => rsaDecrypt(MyStore.getters.loginPrivateKey,dataKeyEnc),
+	get_e2ee_data_value:(dataKey,value) => aesGcmDecryptBase64WithPhrase(value,dataKey),
 
 	// fat client functions
 	client_execute_keystrokes:(keystrokes) => ws.send('event','keystrokesRequested',keystrokes),
@@ -96,8 +104,6 @@ const exposedFunctionsDefaults = {
 	form_close:                        errFnc,
 	form_set_title:                    errFnc,
 	form_show_message:                 errFnc,
-	get_e2ee_data_key:                 errFnc,
-	get_e2ee_data_value:               errFnc,
 	get_field_value:                   errFnc,
 	get_record_id:                     errFnc,
 	record_delete:                     errFnc,
