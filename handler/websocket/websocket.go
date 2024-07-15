@@ -28,6 +28,7 @@ type clientType struct {
 	ctxCancel context.CancelFunc          // to abort requests in case of disconnect
 	device    types.WebsocketClientDevice // client device type (browser, fatClient)
 	ioFailure atomic.Bool                 // client failed to read/write
+	local     bool                        // client is local (::1, 127.0.0.1)
 	loginId   int64                       // client login ID, 0 = not logged in yet
 	noAuth    bool                        // logged in without authentication (public auth, username only)
 	write_mx  sync.Mutex                  // to force sequential writes
@@ -100,6 +101,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		ctx:       ctx,
 		ctxCancel: ctxCancel,
 		device:    types.WebsocketClientDeviceBrowser,
+		local:     host == "::1" || host == "127.0.0.1",
 		loginId:   0,
 		noAuth:    false,
 		write_mx:  sync.Mutex{},
@@ -182,10 +184,13 @@ func (hub *hubType) start() {
 				continue
 			}
 
+			eventLocal := event.Target.Address == "::1" || event.Target.Address == "127.0.0.1"
+
 			for client, _ := range hub.clients {
+				bothLocal := eventLocal && client.local
 
 				// skip if target filter does not apply to client
-				if (event.Target.Address != "" && event.Target.Address != client.address) ||
+				if (event.Target.Address != "" && event.Target.Address != client.address && !bothLocal) ||
 					(event.Target.Device != 0 && event.Target.Device != client.device) ||
 					(event.Target.LoginId != 0 && event.Target.LoginId != client.loginId) {
 					continue
