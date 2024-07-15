@@ -83,6 +83,7 @@ let MyCodeEditor = {
 		this.sessionPreview = ace.createEditSession('');
 
 		// disable features like JS syntax checker
+		this.sessionLive.setUseSoftTabs(false);
 		this.sessionLive.setUseWorker(false);
 		this.sessionPreview.setUseWorker(false);
 
