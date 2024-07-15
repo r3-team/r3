@@ -297,6 +297,14 @@ func processMessage(mailAccountId int32, msg *imap.Message,
 				return err
 			}
 
+			if name == "" {
+				// name is not always given, regular case: Outlook forwards messages without file name
+				contentType, _, err := h.ContentType()
+				if err == nil && contentType == "message/rfc822" {
+					name = "ForwardedMessage.eml"
+				}
+			}
+
 			files = append(files, types.MailFile{
 				File: b,
 				Name: name,
