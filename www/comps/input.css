@@ -365,6 +365,9 @@
 .input-date .date-inputs input::placeholder{
 	font-family:monospace;
 }
+.input-date .date-inputs .mobile-inputs{
+	flex:1 1 auto;
+}
 .input-date .date-inputs .mobile-inputs input{
 	min-width:100px;
 	height:28px;
