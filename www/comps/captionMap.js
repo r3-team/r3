@@ -748,7 +748,7 @@ let MyCaptionMap = {
 		captionsClientEvents:(s) => {
 			let out = [];
 			for(const ce of s.module.clientEvents) {
-				out.push(s.makeItem(ce.id,'-',s.captionMap.clientEventIdMap[id],[]));
+				out.push(s.makeItem(ce.id,'-',s.captionMap.clientEventIdMap[ce.id],[]));
 			}
 			return out;
 		},
