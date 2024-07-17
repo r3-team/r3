@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"r3/db"
 	"r3/schema"
+	"r3/schema/compatible"
 	"r3/types"
 	"strings"
 
@@ -300,12 +301,7 @@ func setRecord_tx(tx pgx.Tx, presetId uuid.UUID, recordId int64, values []types.
 				sqlValues = append(sqlValues, nil)
 			}
 		} else {
-			if value.Value.Valid && value.Value.String == "" && !schema.IsContentText(atrContent) {
-				// prior to 3.8 preset values were forced to be empty string if NULL
-				sqlValues = append(sqlValues, nil)
-			} else {
-				sqlValues = append(sqlValues, value.Value)
-			}
+			sqlValues = append(sqlValues, compatible.FixPresetNull(value.Value))
 		}
 	}
 

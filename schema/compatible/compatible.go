@@ -16,6 +16,12 @@ import (
 
 // < 3.8
 // migrate column styles
+func FixPresetNull(value pgtype.Text) interface{} {
+	if !value.Valid || value.String == "" {
+		return nil
+	}
+	return value
+}
 func FixColumnStyles(column types.Column) types.Column {
 	if column.Display == "hidden" {
 		column.Hidden = true

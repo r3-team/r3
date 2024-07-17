@@ -52,7 +52,7 @@ const exposedFunctionsGlobal = {
 	// fat client functions
 	client_execute_keystrokes:(keystrokes) => ws.send('event','keystrokesRequested',keystrokes),
 
-	// form open (simple version, usually overwritten)
+	// form open (simple global version)
 	form_open:(formId,recordId,newTab,popUp,maxY,maxX) => {
 		formOpen({
 			formIdOpen:formId, popUpType:popUp ? 'float' : null,
@@ -121,8 +121,6 @@ const exposedFunctionsGlobal = {
 	set_field_value:                   errFnc,
 	timer_clear:                       errFnc,
 	timer_set:                         errFnc,
-	value_store_get:                   errFnc,
-	value_store_set:                   errFnc,
 
 	// depreciated
 	open_form:                         errFnc,
@@ -154,6 +152,7 @@ export function jsFunctionRun(jsFunctionId,args,exposedFunctionsContext) {
 		let window         = {};
 		${fnc.codeFunction}`;
 	
+	// exposed functions, running in the context of the function module
 	const exposedFunctionsModule = {
 		// session timers
 		timer_clear_global:(name) => {
