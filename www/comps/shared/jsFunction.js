@@ -155,6 +155,27 @@ export function jsFunctionRun(jsFunctionId,args,exposedFunctionsContext) {
 		${fnc.codeFunction}`;
 	
 	const exposedFunctionsModule = {
+		// session timers
+		timer_clear_global:(name) => {
+			MyStore.commit('sessionTimerStoreClear',{
+				moduleId:fnc.moduleId,
+				name:name
+			});
+		},
+		timer_set_global:(name,isInterval,fncCall,milliseconds) => {
+			MyStore.commit('sessionTimerStoreClear',{
+				moduleId:fnc.moduleId,
+				name:name
+			});
+			MyStore.commit('sessionTimerStore',{
+				fnc:fncCall,
+				isInterval:isInterval,
+				milliseconds:milliseconds,
+				moduleId:fnc.moduleId,
+				name:name
+			});
+		},
+
 		// session value store
 		value_store_get:(k) => typeof MyStore.getters.sessionValueStore[fnc.moduleId] !== 'undefined'
 			&& typeof MyStore.getters.sessionValueStore[fnc.moduleId][k] !== 'undefined'

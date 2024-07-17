@@ -1193,7 +1193,9 @@
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => NON DÉFINI<br /><br />Lorsqu'elle est appelée, le chiffrement de bout en bout est mis à jour lors de la prochaine sauvegarde du formulaire. Les clés de données pour les relations sur le formulaire avec le chiffrement activé seront chiffrées avec la clé publique de chaque connexion définie. Cela permet le déchiffrement ultérieur de ces enregistrements pour les utilisateurs.<br /><br />Si cette fonction n'est pas utilisée, le déchiffrement n'est possible que pour le créateur.",
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => NON DÉFINI<br /><br />Lorsqu'elle est appelée, le chiffrement de bout en bout est mis à jour pour la relation spécifiée et les enregistrements lors de la prochaine sauvegarde du formulaire. Les clés de données pour les enregistrements de relation seront chiffrées avec la clé publique de chaque connexion définie. Cela permet le déchiffrement ultérieur de ces enregistrements pour les utilisateurs.",
 				"timer_clear":"app.timer_clear(name) => NON DÉFINI<br /><br />Abandonne un minuteur avec le nom donné, précédemment créé avec 'app.timer_set()'.",
+				"timer_clear_global":"app.timer_clear_global(name) => UNDEFINED<br /><br />Aborts a global timer with the given name, previously created with 'app.timer_set_global()'.",
 				"timer_set":"app.timer_set(name,isInterval,function,milliseconds) => NON DÉFINI<br /><br />Exécute une fonction donnée après un temps spécifié en millisecondes. Si 'isInterval' est défini sur TRUE, la fonction est appelée de manière répétée.<br /><br />Un minuteur est toujours lié au formulaire actuel. Lors de la réinitialisation ou de la sortie du formulaire, les minuteurs sont également réinitialisés.<br /><br />Chaque minuteur doit avoir un nom unique, qui peut être utilisé pour abandonner ultérieurement le minuteur avec 'timer_clear()'; les minuteurs avec le même nom s'écrasent mutuellement.",
+				"timer_set_global":"app.timer_set_global(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />Executes a given function after a specified time in milliseconds. If 'isInterval' is set to TRUE, the function is repeatedly called.<br /><br />A global timer continues even if the current context (like a form from which it was started) is closed.<br /><br />Each timer must have a unique name, which can be used to later abort the timer with 'timer_clear_global()'; global timers with the same name, from the same application, overwrite each other.",
 				"value_store_get":"app.value_store_get(key) => VALUE_ANY_TYPE<br /><br />Renvoie une valeur, précédemment stockée avec la clé donnée.",
 				"value_store_set":"app.value_store_set(key,value) => NON DÉFINI<br /><br />Stocke une valeur pour une utilisation ultérieure. Les valeurs sont stockées avec une clé de référence (un nom arbitraire) et ne peuvent être accédées que dans la même application.<br /><br />Le stockage de valeurs est basé sur la session ; les valeurs ne sont pas disponibles sur un autre appareil ou lorsque l'utilisateur actualise la page."
 			},
@@ -1210,7 +1212,9 @@
 				"has_role":"ROLE_ID_STRING",
 				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES, ATTACH_ATTRIBUTE_ID, ATTACH_RECORD_ID",
 				"timer_clear":"TIMER_NAME",
+				"timer_clear_global":"TIMER_NAME",
 				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
+				"timer_set_global":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
 				"value_store_get":"KEY",
 				"value_store_set":"KEY, VALUE"
 			},

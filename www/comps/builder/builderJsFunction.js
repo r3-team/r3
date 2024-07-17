@@ -512,7 +512,8 @@ let MyBuilderJsFunction = {
 				'get_url_query_string','go_back','has_role','pdf_create',
 				'record_delete','record_new','record_reload','record_save',
 				'record_save_new','set_e2ee_by_login_ids','set_e2ee_by_login_ids_and_relation',
-				'timer_clear','timer_set','value_store_get','value_store_set'
+				'timer_clear','timer_clear_global','timer_set','timer_set_global',
+				'value_store_get','value_store_set'
 			],
 			appFunctionsAsync:[
 				'get_e2ee_data_key','get_e2ee_data_value','pdf_create'
@@ -521,7 +522,7 @@ let MyBuilderJsFunction = {
 				'client_execute_keystrokes','copy_to_clipboard','form_open',
 				'get_preset_record_id','get_url_query_string','get_language_code',
 				'get_login_id','get_role_ids','go_back','has_role','pdf_create',
-				'value_store_get','value_store_set'
+				'timer_clear_global','timer_set_global','value_store_get','value_store_set'
 			],
 			
 			// states

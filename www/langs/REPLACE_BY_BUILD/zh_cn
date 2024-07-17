@@ -1193,7 +1193,9 @@
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />调用后，端到端加密将在下一次表单保存时更新。启用了加密的表单上的关联数据密钥将使用每个定义的登录用户的公钥进行加密，从而使用户可以稍后解密这些记录。<br /><br />如果不使用此函数，则只有创建者才能解密。",
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />调用后，端到端加密将在下一次表单保存时为指定的关联和记录更新。关联记录的数据密钥将使用每个已定义登录用户的公钥进行加密，从而使用户可以稍后解密这些记录。",
 				"timer_clear":"app.timer_clear(name) => UNDEFINED<br /><br />终止之前使用 'app.timer_set()' 创建的具有指定名称的计时器。",
+				"timer_clear_global":"app.timer_clear_global(name) => UNDEFINED<br /><br />Aborts a global timer with the given name, previously created with 'app.timer_set_global()'.",
 				"timer_set":"app.timer_set(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />在指定的毫秒数后执行给定的函数。如果 'isInterval' 设置为 TRUE，该函数将被重复调用。<br /><br />计时器始终绑定到当前表单。当重置或离开表单时，计时器也将被重置。<br /><br />每个计时器必须有唯一的名称，可用于以后使用 'timer_clear()' 终止计时器；具有相同名称的计时器会互相覆盖。",
+				"timer_set_global":"app.timer_set_global(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />Executes a given function after a specified time in milliseconds. If 'isInterval' is set to TRUE, the function is repeatedly called.<br /><br />A global timer continues even if the current context (like a form from which it was started) is closed.<br /><br />Each timer must have a unique name, which can be used to later abort the timer with 'timer_clear_global()'; global timers with the same name, from the same application, overwrite each other.",
 				"value_store_get":"app.value_store_get(key) => VALUE_ANY_TYPE<br /><br />返回先前使用给定键存储的值。",
 				"value_store_set":"app.value_store_set(key,value) => UNDEFINED<br /><br />存储一个值以供以后使用。值使用引用键（任意名称）存储，并且只能在同一应用程序中访问。<br /><br />值存储基于会话；在另一个设备上，或用户刷新页面时，值不可用。"
 			},
@@ -1210,7 +1212,9 @@
 				"has_role":"ROLE_ID_STRING",
 				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES, ATTACH_ATTRIBUTE_ID, ATTACH_RECORD_ID",
 				"timer_clear":"TIMER_NAME",
+				"timer_clear_global":"TIMER_NAME",
 				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
+				"timer_set_global":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
 				"value_store_get":"KEY",
 				"value_store_set":"KEY, VALUE"
 			},

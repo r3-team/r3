@@ -1193,7 +1193,9 @@
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Relationen auf dem Formular mit aktivierter Verschlüsselung werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln.<br /><br />Wenn diese Funktion nicht aufgerufen wird, kann nur der Ersteller entschlüsseln.",
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung für die definierte Relation und Datensätze beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Datensätze der Relation werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln.",
 				"timer_clear":"app.timer_clear(name) => UNDEFINED<br /><br />Bricht einen Timer mit dem angegebenen Namen ab, welcher vorher mit \"app.timer_set()\" erstellt worden ist.",
+				"timer_clear_global":"app.timer_clear_global(name) => UNDEFINED<br /><br />Bricht einen globalen Timer mit dem angegebenen Namen ab, welcher vorher mit \"app.timer_set_global()\" erstellt worden ist.",
 				"timer_set":"app.timer_set(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />Führt eine Funktion nach einer definierten Zeit in Millisekunden aus. Wenn \"isInterval\" auf TRUE gestellt ist, wird die Funktion wiederholt ausgeführt.<br /><br />Ein Timer ist immer an das aktuelle Formular gebunden. Wenn das Formular zurückgesetzt oder verlassen wird, werden auch Timer zurückgesetzt.<br /><br />Jeder Timer braucht einen einzigartigen Namen, welcher später genutzt werden kann, um den Timer mit \"app.timer_clear()\" abzubrechen; Timer mit dem gleichen Namen überschreiben sich gegenseitig.",
+				"timer_set_global":"app.timer_set_global(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />Führt eine Funktion nach einer definierten Zeit in Millisekunden aus. Wenn \"isInterval\" auf TRUE gestellt ist, wird die Funktion wiederholt ausgeführt.<br /><br />Ein globaler Timer wird fortgeführt, selbst wenn der Kontext (bspw. ein Formular auf dem er gestartet worden ist) verlassen wurde.<br /><br />Jeder globale Timer braucht einen einzigartigen Namen, welcher später genutzt werden kann, um den Timer mit \"app.timer_clear_global()\" abzubrechen; globale Timer mit dem gleichen Namen, von der gleichen Anwendung, überschreiben sich gegenseitig.",
 				"value_store_get":"app.value_store_get(key) => VALUE_ANY_TYPE<br /><br />Liefert einen Wert, der vorher mit einem gewählten Schlüssel gespeichert worden ist.",
 				"value_store_set":"app.value_store_set(key,value) => UNDEFINED<br /><br />Speichert einen Wert für eine spätere Verwendung. Werte werden mit einem Referenzschlüssel gespeichtert (ein beliebiger Name) und können nur in der gleichen Anwendung genutzt werden.<br /><br />Der Value-Store ist sitzungsbasiert; Werte sind nicht verfügbar auf einem anderen Gerät oder nachdem die Seite neu geladen worden ist."
 			},
@@ -1210,7 +1212,9 @@
 				"has_role":"ROLE_ID_STRING",
 				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES, ATTACH_ATTRIBUTE_ID, ATTACH_RECORD_ID",
 				"timer_clear":"TIMER_NAME",
+				"timer_clear_global":"TIMER_NAME",
 				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
+				"timer_set_global":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
 				"value_store_get":"KEY",
 				"value_store_set":"KEY, VALUE"
 			},

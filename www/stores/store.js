@@ -67,6 +67,7 @@ const MyStore = Vuex.createStore({
 		routingGuards:[],     // functions to call before routing, abort if any returns falls
 		searchDictionaries:[],// dictionaries used for full text search for this login, ['english', 'german', ...]
 		settings:{},          // setting values for logged in user, key: settings name
+		sessionTimerStore:{}, // user session timer store for frontent functions,     { moduleId1:{ timerName1:{ id:jsTimerId, isInterval:true }, ... }, ... }
 		sessionValueStore:{}, // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
 		system:{},            // system details (admin only)
 		tokenKeepEnable:false // allow users to keep token to 'stay logged in'
@@ -167,8 +168,31 @@ const MyStore = Vuex.createStore({
 					return state.routingGuards.splice(i,1);
 			}
 		},
+		sessionTimerStore:(state,payload) => {
+			if(state.sessionTimerStore[payload.moduleId] === undefined)
+				state.sessionTimerStore[payload.moduleId] = {};
+
+			state.sessionTimerStore[payload.moduleId][payload.name] = {
+				id:payload.isInterval
+					? setInterval(payload.fnc, payload.milliseconds)
+					: setTimeout(payload.fnc, payload.milliseconds),
+				isInterval:payload.isInterval
+			};
+		},
+		sessionTimerStoreClear:(state,payload) => {
+			if(state.sessionTimerStore[payload.moduleId] !== undefined &&
+				state.sessionTimerStore[payload.moduleId][payload.name] !== undefined) {
+
+				if(state.sessionTimerStore[payload.moduleId][payload.name].isInterval)
+					clearInterval(state.sessionTimerStore[payload.moduleId][payload.name].id);
+				else
+					clearTimeout(state.sessionTimerStore[payload.moduleId][payload.name].id);
+				
+				delete(state.sessionTimerStore[payload.moduleId][payload.name]);
+			}
+		},
 		sessionValueStore:(state,payload) => {
-			if(typeof state.sessionValueStore[payload.moduleId] === 'undefined')
+			if(state.sessionValueStore[payload.moduleId] === undefined)
 				state.sessionValueStore[payload.moduleId] = {};
 			
 			state.sessionValueStore[payload.moduleId][payload.key] = payload.value;
