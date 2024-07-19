@@ -1025,13 +1025,11 @@ let MyFilters = {
 				/>
 			</div>
 			<div class="row gap">
-				<my-button image="delete.png"
-					v-if="anyFilters"
+				<my-button image="cancel.png"
 					@trigger="removeAll"
 					:active="anyFilters"
 					:cancel="true"
-					:caption="capGen.button.all"
-					:captionTitle="capGen.button.reset"
+					:caption="capGen.button.reset"
 				/>
 				<my-button image="ok.png"
 					@trigger="apply"
