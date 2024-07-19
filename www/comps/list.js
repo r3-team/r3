@@ -63,7 +63,7 @@ let MyList = {
 			v-if="showHover"
 			@click.self.stop="closeHover"
 		>
-			<div class="contentBox float" :class="{ 'list-csv':showCsv,'list-filters':showFilters, 'list-options':showOptions }">
+			<div class="contentBox float scroll" :class="{ 'list-csv':showCsv,'list-filters':showFilters, 'list-options':showOptions }">
 				<div class="top lower">
 					<div class="area">
 						<img class="icon" :src="hoverIconSrc" />
