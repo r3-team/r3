@@ -117,6 +117,16 @@ let MyForm = {
 						</h1>
 					</transition>
 				</div>
+
+				<div class="area" v-if="!hasBarLower">
+					<my-form-actions
+						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
+						:entityIdMapState="entityIdMapState"
+						:formActions="form.actions"
+						:formId="formId"
+						:moduleId="moduleId"
+					/>
+				</div>
 				
 				<div class="area nowrap">
 					<template v-if="isData && !isBulkUpdate">
@@ -166,27 +176,27 @@ let MyForm = {
 			<div class="top lower" v-if="hasBarLower && !isWidget">
 				<div class="area">
 					<my-button image="new.png"
-						v-if="!isBulkUpdate && allowNew && !noDataActions"
+						v-if="!isBulkUpdate && allowNew"
 						@trigger="openNewAsk(false)"
 						@trigger-middle="openNewAsk(true)"
-						:active="(!isNew || hasChanges) && canCreate"
+						:active="(!isNew || hasChanges) && canCreate && !blockInputs"
 						:caption="capGen.button.new"
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button image="save.png" alt-image="add.png"
-						v-if="!isBulkUpdate && !noDataActions"
+						v-if="!isBulkUpdate"
 						@trigger="set(false)"
 						@trigger-alt="set(true)"
-						:active="hasChanges && canUpdate"
+						:active="hasChanges && canUpdate && !blockInputs"
 						:altAction="!isMobile && allowNew && canCreate"
 						:altCaptionTitle="capGen.button.saveNewHint"
 						:caption="capGen.button.save"
 						:captionTitle="capGen.button.saveHint"
 					/>
 					<my-button image="save.png"
-						v-if="isBulkUpdate && !noDataActions"
+						v-if="isBulkUpdate"
 						@trigger="setBulkUpdate"
-						:active="hasChangesBulk && canUpdate"
+						:active="hasChangesBulk && canUpdate && !blockInputs"
 						:caption="capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length))"
 						:captionTitle="capGen.button.saveHint"
 					/>
@@ -213,12 +223,25 @@ let MyForm = {
 						:cancel="true"
 					/>
 					<my-button image="shred.png"
-						v-if="!isBulkUpdate && allowDel && !noDataActions"
+						v-if="!isBulkUpdate && allowDel"
 						@trigger="delAsk"
-						:active="canDelete"
+						:active="canDelete && !blockInputs"
 						:cancel="true"
 						:caption="capGen.button.delete"
 						:captionTitle="capGen.button.deleteHint"
+					/>
+				</div>
+			</div>
+			
+			<!-- title bar widget -->
+			<div class="top lower" v-if="isWidget">
+				<div class="area">
+					<my-form-actions
+						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
+						:entityIdMapState="entityIdMapState"
+						:formActions="form.actions"
+						:formId="formId"
+						:moduleId="moduleId"
 					/>
 				</div>
 			</div>
@@ -287,7 +310,7 @@ let MyForm = {
 	props:{
 		allowDel:         { type:Boolean, required:false, default:true },
 		allowNew:         { type:Boolean, required:false, default:true },
-		attributeIdMapDef:{ type:Object,  required:false, default:() => {return {};} }, // map of attribute default values (new record)
+		attributeIdMapDef:{ type:Object,  required:false, default:() => {return {};} }, // map of attribute default values
 		formId:           { type:String,  required:true },
 		hasHelp:          { type:Boolean, required:false, default:true },
 		hasLog:           { type:Boolean, required:false, default:true },
@@ -299,7 +322,6 @@ let MyForm = {
 	},
 	emits:['close','record-deleted','record-updated','records-open'],
 	mounted() {
-		// reset form if either content or record changes
 		this.$watch(() => [this.formId,this.recordIds],() => { this.reset() },{
 			immediate:true
 		});
@@ -335,10 +357,11 @@ let MyForm = {
 			updatingRecord:false,   // form is currently attempting to update the current record (saving/deleting)
 			
 			// form data
-			fields:[],                    // all fields (nested within each other)
 			fieldIdsInvalid:[],           // field IDs with invalid values
 			fieldIdsTouched:[],           // field IDs that were touched (changed their value in some way)
-			fieldIdMapOverwrite:{},       // overwrites for fields: { caption, chart, error, order }
+			fieldIdMapOverwrite:{         // overwrites for fields
+				caption:{}, chart:{}, error:{}, order:{}
+			},
 			indexMapRecordId:{},          // record IDs for form, key: relation index
 			indexMapRecordKey:{},         // record en-/decryption keys, key: relation index
 			indexesNoDel:[],              // relation indexes with no DEL permission (via relation policy)
@@ -347,18 +370,88 @@ let MyForm = {
 			loginIdsEncryptForOutside:[], // login IDs for which data keys are encrypted (e2ee), for outside relation and record IDs
 			                              // [{loginIds:[5,12], recordIds:[1,2], relationId:'A-B-C-D'}, {...}]
 			timers:{},                    // frontend function timers, key = name, value = { id:XY, isInterval:true }
-			values:{},                    // field values, key: index attribute ID
-			valuesDef:{},                 // field value defaults (via field options)
-			valuesOrg:{},                 // original field values, used to check for changes
-			
-			// query data
-			relationId:null,      // source relation ID
-			joins:[],             // joined relations, incl. source relation at index 0
-			filters:[]            // form filters
+			valuesNew:{},                 // changed valuse by index attribute ID (for sending changes)
+			valuesOld:{}                  // preexisting values by index attribute ID (for change comparisson)
 		};
 	},
 	computed:{
-		// states
+		// field values, key: index attribute ID
+		values:   (s) => { return { ...s.valuesDef, ...s.valuesNew }; }, // current values by index attribute ID
+		valuesOrg:(s) => { return { ...s.valuesDef, ...s.valuesOld }; }, // original values by index attribute ID
+		valuesDef:(s) => {
+			let out = {};
+			let parseFields = (fields) => {
+				for(const f of fields) {
+					if(f.content === 'container') {
+						parseFields(f.fields);
+						continue;
+					}
+					if(f.content === 'tabs') {
+						for(let t of f.tabs) {
+							parseFields(t.fields);
+						}
+						continue;
+					}
+					
+					if(f.content !== 'data')
+						continue;
+					
+					// apply data field default value
+					let def              = null;
+					let attribute        = s.attributeIdMap[f.attributeId];
+					let indexAttributeId = s.getIndexAttributeIdByField(f,false);
+					let isRelationship   = s.isAttributeRelationship(attribute.content);
+					let isRelationshipN1 = s.isAttributeRelationshipN1(attribute.content);
+					let isRelMulti       = isRelationship && f.attributeIdNm !== null || (f.outsideIn && isRelationshipN1);
+					
+					if(f.def !== '')
+						def = s.getAttributeValueFromString(
+							attribute.content,
+							s.getResolvedPlaceholders(f.def));
+					
+					if(f.defCollection !== null)
+						def = s.getCollectionValues(
+							f.defCollection.collectionId,
+							f.defCollection.columnIdDisplay,
+							!isRelMulti
+						);
+					
+					if(isRelationship && f.defPresetIds.length > 0) {
+						if(!isRelMulti) {
+							def = s.presetIdMapRecordId[f.defPresetIds[0]];
+						}
+						else {
+							def = [];
+							for(let i = 0, j = f.defPresetIds.length; i < j; i++) {
+								def.push(s.presetIdMapRecordId[f.defPresetIds[i]]);
+							}
+						}
+					}
+					
+					out[indexAttributeId] = def;
+					
+					// set value and default for altern. field attribute
+					if(f.attributeIdAlt !== null)
+						out[s.getIndexAttributeId(f.index,f.attributeIdAlt,false,null)] = null;
+				}
+			};
+			parseFields(s.fields);
+
+			// apply default values, set for attributes (usually via getters/arguments)
+			for(let k in out) {
+				const ia = s.getDetailsFromIndexAttributeId(k);
+				
+				if(s.attributeIdMapDef[ia.attributeId] !== undefined) {
+					out[k] = ia.outsideIn && s.isAttributeRelationshipN1(s.attributeIdMap[ia.attributeId].content)
+						? [s.attributeIdMapDef[ia.attributeId]] : s.attributeIdMapDef[ia.attributeId];
+				}
+				
+				if(s.attributeIdMapDef[ia.attributeIdNm] !== undefined)
+					out[k] = [s.attributeIdMapDef[ia.attributeIdNm]];
+			}
+			return out;
+		},
+
 		bgStyle:(s) => s.isPopUp || s.isWidget ? '' : `background-color:${s.colorMenu.toString()};`,
 		canCreate:(s) =>!s.updatingRecord
 			&& s.joins.length !== 0
@@ -377,8 +470,10 @@ let MyForm = {
 			return true;
 		},
 		canUpdate:     (s) => !s.badLoad && !s.updatingRecord,
-		hasBarLower:   (s) => s.isData || s.form.fields.length === 0,
-		hasChanges:    (s) => !s.noDataActions && s.fieldIdsChanged.length !== 0,
+		hasActions:    (s) => s.form.actions.length !== 0,
+		hasBarLower:   (s) => s.isData && !s.form.noDataActions,
+		hasBarWidget:  (s) => s.isWidget && s.hasActions,
+		hasChanges:    (s) => !s.form.noDataActions && s.fieldIdsChanged.length !== 0,
 		hasChangesBulk:(s) => s.isBulkUpdate && s.fieldIdsTouched.length !== 0,
 		hasGoBack:     (s) => s.isData && !s.isMobile && !s.isPopUp,
 		helpAvailable: (s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
@@ -387,21 +482,15 @@ let MyForm = {
 		isNew:         (s) => s.recordIds.length === 0,
 		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','kanban','list','tabs'].includes(s.fields[0].content),
 		menuActive:    (s) => typeof s.formIdMapMenu[s.form.id] === 'undefined' ? null : s.formIdMapMenu[s.form.id],
-		noDataActions: (s) => s.form.noDataActions || s.blockInputs,
 		warnUnsaved:   (s) => s.hasChanges && s.settings.warnUnsaved,
-		
+
 		// entities
-		fieldIdMapData:(s) => s.getDataFieldMap(s.fields),
-		form:(s) => s.formIdMap[s.formId],
-		iconId:(s) => {
-			if(s.form.iconId !== null)
-				return s.form.iconId;
-			
-			if(s.menuActive !== null && s.menuActive.formId === s.form.id)
-				return s.menuActive.iconId;
-			
-			return null;
-		},
+		fieldIdMapData: (s) => s.getDataFieldMap(s.fields),
+		fields:         (s) => s.form.fields,
+		filters:        (s) => s.form.query.filters,
+		form:           (s) => s.formIdMap[s.formId],
+		joins:          (s) => s.fillRelationRecordIds(s.form.query.joins),
+		relationId:     (s) => s.form.query.relationId,
 		relationsJoined:(s) => s.getRelationsJoined(s.joins),
 		joinsIndexMap:  (s) => s.getJoinIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet),
 		joinsIndexesDel:(s) => {
@@ -416,6 +505,15 @@ let MyForm = {
 				}
 			}
 			return out;
+		},
+		iconId:(s) => {
+			if(s.form.iconId !== null)
+				return s.form.iconId;
+			
+			if(s.menuActive !== null && s.menuActive.formId === s.form.id)
+				return s.menuActive.iconId;
+			
+			return null;
 		},
 		
 		// presentation
@@ -708,99 +806,19 @@ let MyForm = {
 				typeof duration !== 'undefined' ? duration : 3000);
 		},
 		reset() {
-			// set form to loading as all data is being changed
-			// it will be released once form is ready
+			// set form to loading as data is being changed, will be released once form is ready
 			this.loading = true;
 			this.$store.commit('isAtMenu',false);
 			
-			// rebuild entire form if ID changed
+			// rebuild form if ID changed
 			if(this.lastFormId !== this.form.id) {
-				
-				// reset form states
 				this.$store.commit('pageTitle',this.title);
-				this.message        = null;
-				this.showLog        = false;
-				this.titleOverwrite = null;
-				
-				// build form
-				this.lastFormId = this.form.id;
-				
-				// reset field values
-				this.values    = {};
-				this.valuesDef = {};
-				this.valuesOrg = {};
-				
-				let fillFieldValueTemplates = (fields) => {
-					for(const f of fields) {
-						if(f.content === 'container') {
-							fillFieldValueTemplates(f.fields);
-							continue;
-						}
-						if(f.content === 'tabs') {
-							for(let t of f.tabs) {
-								fillFieldValueTemplates(t.fields);
-							}
-							continue;
-						}
-						
-						if(f.content !== 'data')
-							continue;
-						
-						// apply data field default value
-						let def              = null;
-						let attribute        = this.attributeIdMap[f.attributeId];
-						let indexAttributeId = this.getIndexAttributeIdByField(f,false);
-						let isRelationship   = this.isAttributeRelationship(attribute.content);
-						let isRelationshipN1 = this.isAttributeRelationshipN1(attribute.content);
-						let isRelMulti       = isRelationship && f.attributeIdNm !== null || (f.outsideIn && isRelationshipN1);
-						
-						if(f.def !== '')
-							def = this.getAttributeValueFromString(
-								attribute.content,
-								this.getResolvedPlaceholders(f.def));
-						
-						if(f.defCollection !== null)
-							def = this.getCollectionValues(
-								f.defCollection.collectionId,
-								f.defCollection.columnIdDisplay,
-								!isRelMulti
-							);
-						
-						if(isRelationship && f.defPresetIds.length > 0) {
-							if(!isRelMulti) {
-								def = this.presetIdMapRecordId[f.defPresetIds[0]];
-							}
-							else {
-								def = [];
-								for(let i = 0, j = f.defPresetIds.length; i < j; i++) {
-									def.push(this.presetIdMapRecordId[f.defPresetIds[i]]);
-								}
-							}
-						}
-						
-						this.valuesDef[indexAttributeId] = def;
-						this.valueSet(indexAttributeId,JSON.parse(JSON.stringify(def)),true,false);
-						
-						// set value and default for altern. field attribute
-						if(f.attributeIdAlt !== null) {
-							
-							const indexAttributeIdAlt = this.getIndexAttributeId(
-								f.index,f.attributeIdAlt,false,null);
-							
-							this.valuesDef[indexAttributeIdAlt] = null;
-							this.valueSet(indexAttributeIdAlt,null,true,false);
-						}
-					}
-				};
-				
-				this.fields = this.form.fields;
+				this.message         = null;
+				this.showLog         = false;
+				this.titleOverwrite  = null;
+				this.lastFormId      = this.form.id;
 				this.fieldIdsInvalid = [];
 				this.fieldIdsTouched = [];
-				fillFieldValueTemplates(this.fields);
-				
-				this.relationId = this.form.query.relationId;
-				this.joins      = this.fillRelationRecordIds(this.form.query.joins);
-				this.filters    = this.form.query.filters;
 				
 				// set preset record to open, if defined
 				if(this.form.presetIdOpen !== null && this.relationId !== null) {
@@ -811,13 +829,14 @@ let MyForm = {
 				}
 			}
 			
-			// reset record
+			// reset form behaviour and load record
 			this.blockInputs = false;
 			this.fieldIdMapOverwrite = this.getFieldOverwritesDefault();
-			this.valuesSetAllDefault();
 			this.timerClearAll();
 			this.closePopUp();
 			this.popUpFieldIdSrc = null;
+			this.valuesNew       = {};
+			this.valuesOld       = {};
 			this.get();
 			
 			if(!this.isWidget && !this.isMobile)
@@ -852,12 +871,10 @@ let MyForm = {
 			return clean(v1) == clean(v2);
 		},
 		valueSet(indexAttributeId,value,isOriginal,updateJoins) {
-			const changed = this.values[indexAttributeId] !== value;
-			this.values[indexAttributeId] = value;
-			
-			// set original value for change comparisson against current value
-			if(isOriginal)
-				this.valuesOrg[indexAttributeId] = JSON.parse(JSON.stringify(value));
+			const changed = this.valuesNew[indexAttributeId] !== value;
+
+			if(changed)    this.valuesNew[indexAttributeId] = value;
+			if(isOriginal) this.valuesOld[indexAttributeId] = JSON.parse(JSON.stringify(value));
 			
 			// update joined data, if relevant (because relationship value changed or defaults were loaded)
 			if(updateJoins && (changed || isOriginal)) {
@@ -869,24 +886,6 @@ let MyForm = {
 					if(this.joinsIndexMap[k].attributeId === ia.attributeId)
 						this.getFromSubJoin(this.joinsIndexMap[k],value);
 				}
-			}
-		},
-		valuesSetAllDefault() {
-			for(let k in this.values) {
-				// overwrite default attribute default values
-				const ia = this.getDetailsFromIndexAttributeId(k);
-				
-				if(typeof this.attributeIdMapDef[ia.attributeId] !== 'undefined') {
-					this.valuesDef[k] = ia.outsideIn && this.isAttributeRelationshipN1(this.attributeIdMap[ia.attributeId].content)
-						? [this.attributeIdMapDef[ia.attributeId]] : this.attributeIdMapDef[ia.attributeId];
-				}
-				
-				if(typeof this.attributeIdMapDef[ia.attributeIdNm] !== 'undefined')
-					this.valuesDef[k] = [this.attributeIdMapDef[ia.attributeIdNm]];
-				
-				// set default value, default value can be an object so it should be cloned as to not overwrite it
-				// only update joins on default value change if the current record is new, existing records load all their data at once
-				this.valueSet(k,JSON.parse(JSON.stringify(this.valuesDef[k])),true,this.isNew);
 			}
 		},
 		valueSetByField(indexAttributeId,value) {
@@ -1063,18 +1062,18 @@ let MyForm = {
 						(field.outsideIn && this.isAttributeRelationshipN1(atr.content));
 					
 					if(!isMulti) {
-						this.values[iaId] = isDeleted ? null : recordId;
+						this.valuesNew[iaId] = isDeleted ? null : recordId;
 					}
 					else if(isDeleted) {
-						let pos = this.values[iaId].indexOf(recordId);
-						if(pos !== -1) this.values[iaId].splice(pos,1);
+						const pos = this.valuesNew[iaId].indexOf(recordId);
+						if(pos !== -1) this.valuesNew[iaId].splice(pos,1);
 					}
 					else if(isUpdated) {
-						if(this.values[iaId] === null) {
-							this.values[iaId] = [recordId];
+						if(this.valuesNew[iaId] === null) {
+							this.valuesNew[iaId] = [recordId];
 						}
-						else if(this.values[iaId].indexOf(recordId) === -1) {
-							this.values[iaId].push(recordId);
+						else if(this.valuesNew[iaId].indexOf(recordId) === -1) {
+							this.valuesNew[iaId].push(recordId);
 						}
 					}
 				}
@@ -1265,7 +1264,7 @@ let MyForm = {
 			// add index attributes to be retrieved
 			let expressions = [];
 			for(let ia in this.values) {
-				let d = this.getDetailsFromIndexAttributeId(ia);
+				const d = this.getDetailsFromIndexAttributeId(ia);
 				expressions.push({
 					attributeId:d.attributeId,
 					attributeIdNm:d.attributeIdNm,
@@ -1333,7 +1332,7 @@ let MyForm = {
 			// collect which values from connected joins can be retrieved
 			let expressions = [];
 			for(let ia in this.values) {
-				let d = this.getDetailsFromIndexAttributeId(ia);
+				const d = this.getDetailsFromIndexAttributeId(ia);
 				
 				if(joinIndexes.includes(d.index))
 					expressions.push({
@@ -1602,7 +1601,7 @@ let MyForm = {
 					this.recordActionFree = true;
 					
 					// clear form changes, relevant for after-save functions that open a form
-					this.valuesOrg = JSON.parse(JSON.stringify(this.values));
+					this.valuesOld = JSON.parse(JSON.stringify(this.valuesNew));
 					
 					this.triggerEventAfter('save');
 					

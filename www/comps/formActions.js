@@ -19,7 +19,7 @@ let MyFormAction = {
 	},
 	emits:['execute-function'],
 	computed:{
-		state:(s) => typeof s.entityIdMapState.formAction[s.formAction.id] !== 'undefined'
+		state:(s) => s.entityIdMapState.formAction[s.formAction.id] !== undefined
 			? s.entityIdMapState.formAction[s.formAction.id]
 			: s.formAction.state,
 		

@@ -177,7 +177,7 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 			// form
 			case 'field':
 				const fld = dataFieldIdMap[s.fieldId];
-				if(typeof fld !== 'undefined') {
+				if(fld !== undefined) {
 					const atrIdNm = typeof fld.attributeIdNm !== 'undefined'
 						? fld.attributeIdNm : null;
 					
