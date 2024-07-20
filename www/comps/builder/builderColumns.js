@@ -82,6 +82,16 @@ export let MyBuilderColumns = {
 									>
 										<span>{{ getFlexBasis(column.basis) }}</span>
 									</div>
+									<img class="action clickable" src="images/visible0.png"
+										v-if="column.hidden"
+										@click="columnSetBy(column.id,'hidden',false)"
+										:title="capApp.columnShowDefaultOff"
+									/>
+									<img class="action clickable" src="images/smartphoneOff.png"
+										v-if="!column.hidden && !column.onMobile"
+										@click="columnSetBy(column.id,'onMobile',true)"
+										:title="capApp.columnShowDefaultMobileOff"
+									/>
 									<img class="action end clickable" src="images/columnOff.png"
 										v-if="batch.columns.length !== 1"
 										@click="columnSetBy(column.id,'batch',null)"
