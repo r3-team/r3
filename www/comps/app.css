@@ -489,7 +489,7 @@ h3{
 	box-shadow:1px 1px 3px var(--color-shade);
 	border-radius:6px;
 	border-color:var(--color-border-bright);
-	background-color:var(--color-bright);
+	background-color:var(--color-bg-bright);
 	overflow:auto;
 }
 .contentBox .content .contentPart.short{
@@ -814,7 +814,7 @@ table td.maximum{
 	background-color:var(--color-bg);
 }
 .generic-table.bright>tbody>tr>td{
-	background-color:var(--color-bright);
+	background-color:var(--color-input);
 }
 .generic-table>thead>tr>th:first-child,
 .generic-table>tbody>tr>td:first-child{
@@ -1382,7 +1382,7 @@ table td.maximum{
 .user-dark *{
 	/* color overwites */
 	--color-bg:            #252525;
-	--color-bg-bright:     #363636;
+	--color-bg-bright:     #313131;
 	--color-bright:        #323232;
 	--color-border:        #111111;
 	--color-border-bright: #8f8f8f;
@@ -1399,7 +1399,7 @@ table td.maximum{
 	
 	--color-accent1:       hsl(316, 7%, 40%);
 	--color-accent2:       hsl(128, 4%,30%);
-	--color-accent3:       hsl(199,11%,35%);
+	--color-accent3:       hsl(199, 11%, 27%);
 	--color-accent3-alt:   hsl(199,11%,45%);
 	--color-accent4:       hsl(339, 4%,61%);
 	--color-action:        hsl(195, 27%, 26%);
