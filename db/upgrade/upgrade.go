@@ -108,6 +108,13 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				TYPE instance.admin_mail_reason USING reason::text::instance.admin_mail_reason;
 
 			-- new column styles + cleanup of old ones
+			ALTER TABLE app.column ADD COLUMN hidden BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.column ALTER COLUMN hidden DROP DEFAULT;
+			
+			UPDATE app.column
+			SET hidden = TRUE, display = 'default'
+			WHERE display = 'hidden';
+
 			ALTER TABLE app.column ALTER COLUMN styles TYPE CHARACTER VARYING(12)[];
 
 			ALTER TABLE app.column ALTER COLUMN batch_vertical DROP NOT NULL;
@@ -122,13 +129,6 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'clipboard') WHERE clipboard;
 			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'vertical')  WHERE batch_vertical;
 			UPDATE app.column SET styles = ARRAY_APPEND(styles, 'wrap')      WHERE wrap;
-			
-			ALTER TABLE app.column ADD COLUMN hidden BOOLEAN NOT NULL DEFAULT FALSE;
-			ALTER TABLE app.column ALTER COLUMN hidden DROP DEFAULT;
-			
-			UPDATE app.column
-			SET hidden = TRUE, display = 'default'
-			WHERE display = 'hidden';
 
 			-- new background patterns
 			ALTER TYPE instance.login_setting_pattern ADD VALUE 'circuits';
