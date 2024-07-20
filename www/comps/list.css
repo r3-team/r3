@@ -204,7 +204,7 @@
 .list .layoutTable td{
 	padding:0px;
 	border-bottom:1px solid var(--color-border);
-	background-color:var(--color-input);
+	background-color:var(--color-bright);
 }
 .list .layoutTable td:last-child{
 	border-right:none;
@@ -278,7 +278,7 @@
 	position:relative;
 	border-right:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
-	background-color:var(--color-input);
+	background-color:var(--color-bright);
 }
 .list .layoutCards .card .actions{
 	position:absolute;
@@ -399,7 +399,9 @@
 }
 
 /* options */
-.list-options{}
+.list-options{
+	min-width:420px;
+}
 .list-options-column-config{
 	display:flex;
 	flex-flow:column nowrap;

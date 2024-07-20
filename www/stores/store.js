@@ -19,6 +19,7 @@ const MyStore = Vuex.createStore({
 		colorHeaderDefault:'262626',   // default header color, if not overwritten
 		colorLoginDefault:'262626',    // default login color, if not overwritten
 		colorMenuDefault:'2d3033',     // default menu color, if not overwritten
+		colorMenuDefaultDark:'1e2022', // default menu color, if not overwritten, dark mode
 		config:{},                     // configuration values (admin only)
 		constants:{                    // constant variables, codes/messages/IDs
 			kdfIterations:10000,       // number of iterations for PBKDF2 key derivation function
@@ -284,11 +285,15 @@ const MyStore = Vuex.createStore({
 			return tinycolor(MyStoreLocal.state.activated && MyStoreLocal.state.companyColorLogin !== '' ? MyStoreLocal.state.companyColorLogin : state.colorLoginDefault);
 		},
 		colorMenu:(state,payload) => {
-			return tinycolor(state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault);
+			return tinycolor(state.settings.colorMenu !== null
+				? state.settings.colorMenu
+				: (state.settings.dark ? state.colorMenuDefaultDark : state.colorMenuDefault));
 		},
 		colorMenuStyle:(state,payload) => {
-			const colorRgb = state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault;
-			const color    = tinycolor(colorRgb).lighten(4);
+			const colorRgb = state.settings.colorMenu !== null
+				? state.settings.colorMenu
+				: (state.settings.dark ? state.colorMenuDefaultDark : state.colorMenuDefault);
+			const color = tinycolor(colorRgb).lighten(4);
 			return `background:radial-gradient(at right bottom, ${color.toString()} 20%, #${colorRgb} 60%);`;
 		},
 		licenseDays:(state) => {

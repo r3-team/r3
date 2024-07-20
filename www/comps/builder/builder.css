@@ -96,7 +96,7 @@
 	display:flex;
 	flex-flow:column nowrap;
 	border-radius:6px;
-	background-color:var(--color-input);
+	background-color:var(--color-bright);
 	box-sizing:border-box;
 }
 .builder-modules .item-wrap.new{
@@ -222,10 +222,10 @@
 	flex-flow:column nowrap;
 	display:flex;
 	color:inherit;
-	border:1px solid var(--color-border-bright);
+	border:1px solid var(--color-border);
 	border-radius:12px;
 	box-shadow:1px 1px 3px var(--color-shade);
-	background-color:var(--color-input);
+	background-color:var(--color-bright);
 }
 .builder-start .builder-start-entities{
 	display:flex;
