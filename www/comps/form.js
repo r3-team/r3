@@ -120,6 +120,7 @@ let MyForm = {
 
 				<div class="area" v-if="!hasBarLower">
 					<my-form-actions
+						v-if="hasFormActions"
 						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
 						:entityIdMapState="entityIdMapState"
 						:formActions="form.actions"
@@ -173,7 +174,7 @@ let MyForm = {
 			</div>
 			
 			<!-- title bar lower -->
-			<div class="top lower" v-if="hasBarLower && !isWidget">
+			<div class="top lower" v-if="hasBarLower">
 				<div class="area">
 					<my-button image="new.png"
 						v-if="!isBulkUpdate && allowNew"
@@ -203,6 +204,7 @@ let MyForm = {
 				</div>
 				<div class="area">
 					<my-form-actions
+						v-if="hasFormActions"
 						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
 						:entityIdMapState="entityIdMapState"
 						:formActions="form.actions"
@@ -234,7 +236,7 @@ let MyForm = {
 			</div>
 			
 			<!-- title bar widget -->
-			<div class="top lower" v-if="isWidget">
+			<div class="top lower" v-if="hasBarWidget">
 				<div class="area">
 					<my-form-actions
 						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
@@ -470,11 +472,11 @@ let MyForm = {
 			return true;
 		},
 		canUpdate:     (s) => !s.badLoad && !s.updatingRecord,
-		hasActions:    (s) => s.form.actions.length !== 0,
-		hasBarLower:   (s) => s.isData && !s.form.noDataActions,
-		hasBarWidget:  (s) => s.isWidget && s.hasActions,
+		hasBarLower:   (s) => !s.isWidget && s.isData && !s.form.noDataActions,
+		hasBarWidget:  (s) => s.isWidget && s.hasFormActions,
 		hasChanges:    (s) => !s.form.noDataActions && s.fieldIdsChanged.length !== 0,
 		hasChangesBulk:(s) => s.isBulkUpdate && s.fieldIdsTouched.length !== 0,
+		hasFormActions:(s) => s.form.actions.filter(v => (s.entityIdMapState.formAction[v.id] !== undefined ? s.entityIdMapState.formAction[v.id] : v.state) !== 'hidden').length > 0,
 		hasGoBack:     (s) => s.isData && !s.isMobile && !s.isPopUp,
 		helpAvailable: (s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
 		isBulkUpdate:  (s) => s.isData && s.recordIds.length > 1,
