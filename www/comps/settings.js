@@ -1203,7 +1203,7 @@ let MySettings = {
 						<tr class="default-inputs">
 							<td>{{ capApp.fontFamily }}</td>
 							<td>
-								<div class="row gap">
+								<div class="row gap wrap">
 									<select v-model="settingsInput.fontFamily">
 										<optgroup label="sans-serif">
 											<option value="calibri">Calibri</option>
@@ -1226,7 +1226,7 @@ let MySettings = {
 										</optgroup>
 									</select>
 									
-									<select class="dynamic" v-model="settingsInput.fontSize" :title="capApp.fontSize">
+									<select v-model="settingsInput.fontSize" :title="capApp.fontSize">
 										<option v-for="i in 11"
 											:value="70 + (i*5)"
 										>{{ (70 + (i*5)) + '%' }}</option>

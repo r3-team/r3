@@ -481,7 +481,6 @@ h3{
 .contentBox .content .contentPart{
 	flex:1 1 500px;
 	max-width:550px;
-	min-width:450px;
 	margin:calc(var(--spacing) / 2.5);
 	padding:12px;
 	display:flex;
@@ -495,7 +494,6 @@ h3{
 .contentBox .content .contentPart.short{
 	flex:1 1 300px;
 	max-width:450px;
-	min-width:380px;
 }
 .contentBox .content .contentPart.long{
 	flex:1 1 800px;
