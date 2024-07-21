@@ -1,4 +1,4 @@
-<p><em>Updated 2024-01-28</em></p>
+<p><em>Updated 2024-07-21</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -53,6 +53,7 @@
 <li><a href="#calling-apis">Calling APIs</a></li>
 </ol></li>
 <li><a href="#collections">Collections</a></li>
+<li><a href="#client-events">Client-Events</a></li>
 <li><a href="#end-to-end-encryption">End-to-end encryption</a>
 <ol type="1">
 <li><a href="#how-to-use">How to use</a></li>
@@ -671,7 +672,7 @@ END IF;</code></pre>
 <li>User changes the value of a field.</li>
 </ul>
 <p><img src="en_us_builder_pics/function_frontend.webp" alt="Frontend function" /></p>
-<p>Frontend functions can be used in a 'global context', which means that they can be used und reused throughout the application. This is useful for general helper functions, like validating inputs, logging access or converting values (like time conversions or Markdown to HTML).</p>
+<p>Frontend functions can be used in a 'global context', which means that they can be used and reused throughout the application. This is useful for general helper functions, like validating inputs, logging access or converting values (like time conversions or Markdown to HTML).</p>
 <p>You can however also bind a frontend function to a <a href="#forms">form</a>. This means that it can only be used in the context of the form, but can therefore access form entities like input fields. These functions are usually used for data manipulation/validation purposes.</p>
 <p>Within the function code, dynamic placeholders are used to reference other entities like other functions, input fields and so on. Placeholders are important as they protect your function when you make changes to referenced entities.</p>
 <p>Frontend functions can also call 'instance functions'; these are functions that can be accessed to interact with the REI3 system directly. Instance function can check a user´s role membership, navigate the user to different places, copy values to the users clipboard, execute <a href="#backend-functions">backend functions</a>, and more. To learn more about specific instance functions, you can read the contextual help that each function provides.</p>
@@ -721,6 +722,17 @@ END IF;</code></pre>
 <li>As a notification, shown within a menu entry: Menu entries can reference collection values to show context-relevant data, like counters reflecting the total number of items on a list that the menu entry would show.</li>
 </ul>
 <p>Collections can offer any data from the database, to be used on the frontend, regardless of context. They have downsides however. As they are not regularly updated during a user´s session, their values might be outdated. When manipulating data affecting a collection, the user would need to refresh the page or a function would need to trigger a collection update. Depending on the contents of the collection, this limitation may not be relevant or might be easily addressable by rare, event-driven updates.</p>
+<h1 id="client-events">Client events</h1>
+<p>REI3 includes the optional REI3 client software, which can be installed by users from their personal settings. This piece of software runs on Windows, Linux (X11 only) and MacOS. It was created to enable interactions between the REI3 web application (running in a browser or via progressive web app) and the user´s computer.</p>
+<p>A client event is a definition of what should occur, when the REI3 client recognizes a specific event. It´s defined in the Builder, in the application setting page and can react to:</p>
+<ul>
+<li>The REI3 client connecting to or disconnecting from the REI3 server. This can be useful for logging or for running data preparation scripts (for things like reporting) based on the connecting user.</li>
+<li>The REI3 client recognizing pressed hotkeys on the user´s computer. This is likely the most common use case for client events, allowing for interactions with REI3, without it needing to be in the foreground.</li>
+</ul>
+<p>An example: A REI3 application could define a hotkey client event. When the user presses the hotkey, the REI3 client sends the contents of the clipboard to a frontend function, which looks up relevant data inside the REI3 application and opens a corresponding form. This way, users could copy some text like an invoice number or email address and push a hotkey to find corresponding data inside REI3.</p>
+<p>Each client event can execute either a back- or frontend function and can then provide one or more arguments. These can be things like the currently open window title or the contents of the user´s clipboard.</p>
+<p>When using frontend functions, an active REI3 session must be running on the same computer as the REI3 client - events are only forwarded to the same origin point. Backend functions directly interact with the REI3 server, only requiring that the REI3 client is connected to it.</p>
+<p>Hotkeys for client events must be enabled by each individual user in their personal settings and can be re-assigned there as well.</p>
 <h1 id="end-to-end-encryption">End-to-end encryption</h1>
 <p>Encryption can be used to protect sensitive data. Various forms of encryption exist to address different scenarios and risk levels. End-to-end encryption (or E2EE) is especially useful as it protects data whether or not the system is running and independent of the privilege level of a bad actor. What makes E2EE so powerful is that data is being encrypted for only the individuals that may access that data - not even the server itself can read or act on the data.</p>
 <p>Usually, end-to-end encryption is harder to implement as it can be complex; with REI3, its integrated into the platform and can be used by any REI3 application with little effort. However, some <a href="#limitations">limitations</a> exist as encrypted data is not accessible to REI3 on the backend (server side).</p>
@@ -803,7 +815,7 @@ END IF;</code></pre>
 <li>Data fields (relationship inputs, lists, calendars, Gantts, etc.) have a 'mobile device' toggle for each column. If toggled off, these columns are not shown if the screen size is too small. In most cases it is easier for mobile device users to see less data and click on a specific record to get details than to scroll a large view.</li>
 <li><a href="#form-layouts">Forms</a> offer hiding of specific fields/containers for mobile devices. While it is not useful to hide important input fields, on some forms, related data is shown because there is more screen space available; these fields can be hidden on mobile devices to make form handling easier.</li>
 </ul>
-<p>To simulate mobile devices, resizing the browser window is sufficient - REI3 will switch to mobile view when the screen space reaches a threshold. With small adjustments, existing forms/list views can be adjusted for better usability on mobile devices without sacrificing functionality. Even if applications are not meant to be used on these devices, it is always welcome when no other device is available und the application just works.</p>
+<p>To simulate mobile devices, resizing the browser window is sufficient - REI3 will switch to mobile view when the screen space reaches a threshold. With small adjustments, existing forms/list views can be adjusted for better usability on mobile devices without sacrificing functionality. Even if applications are not meant to be used on these devices, it is always welcome when no other device is available and the application just works.</p>
 <h1 id="working-with-emails">Working with emails</h1>
 <p>REI3 can retrieve emails from IMAP mailboxes and send emails with SMTP. Mail functions are executed by a central mail spooler, included in every REI3 instance. This spooler periodically fetches and sends emails with defined mail accounts.</p>
 <p>To enable mailing features for different applications within the same instance, unique mail account names can be chosen by administrators. These account names can then be used in <a href="#backend-functions">backend functions</a> to process messages coming in from (or be send with) defined mail accounts. By adding corresponding options in their applications, authors can let administrators choose the appropriate mail account.</p>
