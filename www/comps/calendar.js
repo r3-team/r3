@@ -466,7 +466,12 @@ let MyCalendar = {
 		this.date.setHours(0,0,0);
 		
 		// setup watchers
-		this.$watch('columns',this.reset);
+		this.$watch('columns',(valOld,valNew) => {
+			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
+				this.rows = [];
+				this.reloadOutside();
+			}
+		});
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
@@ -587,9 +592,6 @@ let MyCalendar = {
 				return this.paramsUpdate(true);
 			
 			this.get();
-		},
-		reset() {
-			this.rows = [];
 		},
 		
 		// page routing
