@@ -122,7 +122,9 @@ func (hub *hubType) start() {
 		if _, exists := hub.clients[client]; exists {
 			log.Info(handlerContext, fmt.Sprintf("disconnecting client at %s", client.address))
 			if !client.ioFailure.Load() {
+				client.write_mx.Lock()
 				client.ws.WriteMessage(websocket.CloseMessage, []byte{})
+				client.write_mx.Unlock()
 			}
 			client.ws.Close()
 			client.ctxCancel()
