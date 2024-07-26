@@ -317,6 +317,11 @@ let MyAdminModules = {
 					@trigger="goToRepo"
 					:caption="capApp.button.repository"
 				/>
+				<my-button image="refresh.png"
+					@trigger="updateRepo"
+					:active="modules.length !== 0"
+					:caption="capApp.button.repositoryRefresh"
+				/>
 				<my-button
 					@trigger="installAll"
 					:active="moduleIdsUpdate.length !== 0 && !installStarted && !productionMode"
@@ -534,6 +539,12 @@ let MyAdminModules = {
 		},
 		updateMeta(moduleId,meta) {
 			this.moduleIdMapUpdated[moduleId] = meta;
+		},
+		updateRepo() {
+			ws.send('repoModule','update',{},true).then(
+				this.getRepo,
+				this.$root.genericError
+			);
 		},
 		
 		// backend calls

@@ -565,6 +565,7 @@
 		"modules":{
 			"button":{
 				"repository":"Repository-ból hozzáadás",
+				"repositoryRefresh":"Check repository for updates",
 				"update":"Frissítés {VERSION}-ra",
 				"updateAll":"Az összes frissítése ({COUNT})"
 			},

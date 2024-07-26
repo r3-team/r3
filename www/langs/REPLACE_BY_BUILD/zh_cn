@@ -565,6 +565,7 @@
 		"modules":{
 			"button":{
 				"repository":"从存储库添加",
+				"repositoryRefresh":"Check repository for updates",
 				"update":"升级到 v{VERSION}",
 				"updateAll":"全部更新（{COUNT}）"
 			},

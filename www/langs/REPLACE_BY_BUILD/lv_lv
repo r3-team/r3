@@ -565,6 +565,7 @@
 		"modules":{
 			"button":{
 				"repository":"Pievienot no repozitorija",
+				"repositoryRefresh":"Check repository for updates",
 				"update":"Atjaunināt uz v{VERSION}",
 				"updateAll":"Atjaunināt visu ({COUNT})"
 			},

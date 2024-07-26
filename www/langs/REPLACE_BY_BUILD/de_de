@@ -565,6 +565,7 @@
 		"modules":{
 			"button":{
 				"repository":"Vom Repository hinzufügen",
+				"repositoryRefresh":"Repository auf Updates prüfen",
 				"update":"Auf v{VERSION} aktualisieren",
 				"updateAll":"Alle aktualisieren ({COUNT})"
 			},

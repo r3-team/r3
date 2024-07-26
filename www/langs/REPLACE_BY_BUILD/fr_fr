@@ -565,6 +565,7 @@
 		"modules":{
 			"button":{
 				"repository":"Ajouter depuis le référentiel",
+				"repositoryRefresh":"Check repository for updates",
 				"update":"Mettre à jour vers vers v{VERSION}",
 				"updateAll":"Mettre à jour tout ({COUNT})"
 			},

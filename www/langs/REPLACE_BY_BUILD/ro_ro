@@ -565,6 +565,7 @@
 		"modules":{
 			"button":{
 				"repository":"Adăugați din depozit",
+				"repositoryRefresh":"Check repository for updates",
 				"update":"Actualizați la v{VERSION}",
 				"updateAll":"Actualizați tot ({COUNT})"
 			},

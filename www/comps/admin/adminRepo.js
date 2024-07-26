@@ -122,11 +122,6 @@ let MyAdminRepo = {
 					@trigger="updateRepo"
 					:caption="capGen.button.refresh"
 				/>
-				<my-button
-					@trigger="toggleShowInstalled"
-					:caption="capApp.button.showInstalled"
-					:image="showInstalled ? 'checkbox1.png' : 'checkbox0.png'" 
-				/>
 			</div>
 				
 			<div class="area nowrap default-inputs">
@@ -141,6 +136,12 @@ let MyAdminRepo = {
 			</div>
 				
 			<div class="area wrap default-inputs">
+				<my-button
+					@trigger="toggleShowInstalled"
+					:caption="capApp.button.showInstalled"
+					:image="showInstalled ? 'checkbox1.png' : 'checkbox0.png'" 
+					:naked="true"
+				/>
 				<my-button
 					@trigger="limit = 10;limitSet()"
 					:caption="capGen.limit"

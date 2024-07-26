@@ -565,6 +565,7 @@
 		"modules":{
 			"button":{
 				"repository":"Aggiungi dall'archivio",
+				"repositoryRefresh":"Check repository for updates",
 				"update":"Aggiorna a v{VERSION}",
 				"updateAll":"Aggiorna tutti ({COUNT})"
 			},
