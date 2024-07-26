@@ -100,7 +100,6 @@ let MyList = {
 					/>
 					<my-list-options
 						v-if="showOptions"
-						@reset="reloadInside('filtersUser')"
 						@set-cards-captions="setCardsCaptions"
 						@set-column-batch-sort="setColumnBatchSort"
 						@set-column-ids-by-user="$emit('set-column-ids-by-user',$event)"
@@ -850,18 +849,10 @@ let MyList = {
 		pageCount:(s) => {
 			if(s.count === 0) return 0;
 			
-			let cnt = Math.floor(s.count / s.limit);
+			const cnt = Math.floor(s.count / s.limit);
 			return s.count % s.limit !== 0 ? cnt+1 : cnt;
 		},
-		rowsClear:(s) => {
-			let rows = [];
-			for(let r of s.rows) {
-				if(!s.inputRecordIds.includes(r.indexRecordIds['0']))
-					rows.push(r);
-			}
-			return rows;
-		},
-		
+
 		// filters
 		filtersParsedColumn:(s) => s.getFiltersEncapsulated(
 			JSON.parse(JSON.stringify(s.filtersColumn))
@@ -936,6 +927,7 @@ let MyList = {
 		joins:               (s) => s.fillRelationRecordIds(s.query.joins),
 		relationsJoined:     (s) => s.getRelationsJoined(s.joins),
 		rowSelect:           (s) => s.isInput || s.hasUpdate,
+		rowsClear:           (s) => s.rows.filter(v => !s.inputRecordIds.includes(v.indexRecordIds['0'])),
 		showActionTitles:    (s) => s.headerElements.includes('actionTitles'),
 		showAutoRenewIcon:   (s) => s.headerElements.includes('autoRenewIcon'),
 		showCollectionTitles:(s) => s.headerElements.includes('collectionTitles'),
@@ -976,7 +968,13 @@ let MyList = {
 		}
 		
 		// setup watchers
-		this.$watch('columns',this.reset);
+		this.$watch('columns',(valOld,valNew) => {
+			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
+				this.count = 0;
+				this.rows  = [];
+				this.reloadOutside();
+			}
+		});
 		this.$watch('formLoading',(val) => {
 			if(val) return;
 			this.inputAutoSelectDone = false;
@@ -1171,10 +1169,6 @@ let MyList = {
 				return this.paramsUpdate(true);
 			
 			this.get();
-		},
-		reset() {
-			this.count = 0;
-			this.rows  = [];
 		},
 		
 		// parsing

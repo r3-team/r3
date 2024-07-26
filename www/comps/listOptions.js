@@ -159,7 +159,7 @@ let MyListOptions = {
 		moduleId:       { type:String,  required:true },
 		pageLimit:      { type:Number,  required:true }
 	},
-	emits:['reset', 'set-cards-captions', 'set-column-batch-sort', 'set-column-ids-by-user', 'set-layout', 'set-page-limit'],
+	emits:['set-cards-captions', 'set-column-batch-sort', 'set-column-ids-by-user', 'set-layout', 'set-page-limit'],
 	computed:{
 		columnBatchSortAll:(s) => {
 			if(s.columnBatchSort[1].length === s.columnBatchesAll.length)
@@ -290,8 +290,6 @@ let MyListOptions = {
 		columnsReset() {
 			this.$emit('set-column-ids-by-user',[]);
 			this.$emit('set-column-batch-sort',[[],[]]);
-
-			setTimeout(() => this.$emit('reset'),500);
 		},
 		dropBatchSort(v) {
 			if(typeof v.moved === undefined)
@@ -331,7 +329,6 @@ let MyListOptions = {
 		},
 		setSettingGlobal(name,value) {
 			this.setSettingSingle(name,value);
-			setTimeout(() => this.$emit('reset'),500);
 		}
 	}
 };
