@@ -840,6 +840,14 @@ let MyForm = {
 			this.valuesNew       = {};
 			this.valuesOld       = {};
 			this.get();
+
+			// for new records: apply defaults to update joins
+			if(this.isNew) {
+				for(const ia in this.valuesDef) {
+					if(this.valuesDef[ia] !== null)
+						this.valueSet(ia,this.valuesDef[ia],true,true);
+				}
+			}
 			
 			if(!this.isWidget && !this.isMobile)
 				this.$nextTick(() => this.fieldSetFocus(this.form.fieldIdFocus,true));
