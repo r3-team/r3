@@ -151,7 +151,8 @@ let MyMenuItem = {
 			else               return this.$store.commit('isAtMenu',false);
 		},
 		clickMiddle() {
- 			window.open('#'+this.getFormRoute(this.menu.formId,0,true),'_blank');
+			if(this.menu.formId !== null)
+ 				window.open('#'+this.getFormRoute(this.menu.formId,0,true),'_blank');
 		},
 		clickSubMenus() {
 			if(this.hasChildren)
