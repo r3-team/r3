@@ -694,7 +694,7 @@ let MyForm = {
 		},
 		fieldIdsChanged:(s) => {
 			let out = [];
-			for(let fieldId in s.fieldIdMapData) {
+			for(const fieldId in s.fieldIdMapData) {
 				const f  = s.fieldIdMapData[fieldId];
 				let   ia = s.getIndexAttributeIdByField(f,false);
 				
@@ -873,10 +873,14 @@ let MyForm = {
 		// field value control
 		valueIsEqual(v1,v2) {
 			const clean = v => {
-				if(!Array.isArray(v)) return v;
-				
-				v.sort();
-				return JSON.stringify(v);
+				if(Array.isArray(v)) {
+					v.sort();
+					return JSON.stringify(v);
+				}
+				if(typeof v === 'object')
+					return JSON.stringify(v);
+
+				return v;
 			};
 			return clean(v1) == clean(v2);
 		},
