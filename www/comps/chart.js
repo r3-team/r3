@@ -70,7 +70,8 @@ let MyChart = {
 		
 		// simple
 		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
-		hasChoices:   (s) => s.choices.length > 1 && s.optionOverwrite === null,
+		hasChoices:   (s) => s.choices.length > 1 && !s.hasOverwrite,
+		hasOverwrite: (s) => s.optionOverwrite !== null,
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -80,15 +81,15 @@ let MyChart = {
 		window.addEventListener('resize',this.resize);
 	},
 	mounted() {
-		if(this.optionOverwrite !== null) {
-			this.option = this.optionOverwrite;
-			this.ready  = true;
-			return;
-		}
-		
 		// setup watchers
-		this.$watch('formLoading',(val) => {
+		this.$watch('formLoading',val => {
 			if(!val) this.get();
+		});
+		this.$watch('optionOverwrite',val => {
+			if(val !== null) {
+				this.option = this.optionOverwrite;
+				this.ready  = true;
+			}
 		});
 		this.$watch(() => [this.columns,this.filters],(newVals,oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
@@ -122,6 +123,10 @@ let MyChart = {
 		
 		// backend calls
 		get() {
+			// no need to fetch data if entire options object (incl. data) is overwritten
+			if(this.hasOverwrite)
+				return;
+
 			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.query.joins),
