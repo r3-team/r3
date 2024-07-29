@@ -345,6 +345,7 @@ let MyForm = {
 			badLoad:false,          // attempted record load with no return (can happen if access is lost during save)
 			badSave:false,          // attempted save (data SET) with invalid fields, also updates data fields
 			blockInputs:false,      // disable all user inputs (used by frontend functions)
+			firstLoad:true,         // form was not used before
 			lastFormId:'',          // when routing occurs: if ID is the same, no need to rebuild form
 			loading:false,          // form is currently loading, informs sub components when form is ready
 			message:null,           // form message
@@ -815,12 +816,17 @@ let MyForm = {
 			// rebuild form if ID changed
 			if(this.lastFormId !== this.form.id) {
 				this.$store.commit('pageTitle',this.title);
-				this.message         = null;
-				this.showLog         = false;
-				this.titleOverwrite  = null;
-				this.lastFormId      = this.form.id;
-				this.fieldIdsInvalid = [];
-				this.fieldIdsTouched = [];
+				this.message        = null;
+				this.showLog        = false;
+				this.titleOverwrite = null;
+				this.lastFormId     = this.form.id;
+
+				if(!this.firstLoad) {
+					// on first load, field states do not need to be reset
+					// addresses issue in which field valid states are set before reset() is executed
+					this.fieldIdsInvalid = [];
+					this.fieldIdsTouched = [];
+				}
 				
 				// set preset record to open, if defined
 				if(this.form.presetIdOpen !== null && this.relationId !== null) {
@@ -833,6 +839,7 @@ let MyForm = {
 			
 			// reset form behaviour and load record
 			this.blockInputs = false;
+			this.firstLoad   = false;
 			this.fieldIdMapOverwrite = this.getFieldOverwritesDefault();
 			this.timerClearAll();
 			this.closePopUp();
@@ -982,7 +989,7 @@ let MyForm = {
 			this.fieldIdsTouched.push(fieldId);
 		},
 		fieldSetValid(state,fieldId) {
-			let pos = this.fieldIdsInvalid.indexOf(fieldId);
+			const pos = this.fieldIdsInvalid.indexOf(fieldId);
 			if(state  && pos !== -1) return this.fieldIdsInvalid.splice(pos,1); 
 			if(!state && pos === -1) return this.fieldIdsInvalid.push(fieldId);
 		},
