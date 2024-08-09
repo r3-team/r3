@@ -120,6 +120,7 @@
 		"description":"Descriere",
 		"details":"Details",
 		"displayed":"Displayed",
+		"encryption":"Encryption",
 		"errorTitle":"Eroare",
 		"event":"Event",
 		"everything":"Everything",
@@ -520,6 +521,10 @@
 					"login":"LOGIN (O365 legacy SMTP)",
 					"plain":"PLAIN",
 					"xoauth2":"OAUTH 2.0"
+				},
+				"encryption":{
+					"ssl":"SSL/TLS",
+					"starttls":"STARTTLS"
 				}
 			},
 			"account":"Cont de email",
@@ -538,7 +543,6 @@
 			"accountPort":"Portul",
 			"accountSendAs":"Adresa de trimitere",
 			"accountSendAsHint":"By default, the sender address should be the same as the email address of the mailbox. Some email systems however allow multiple sender addresses for accounts.",
-			"accountStartTls":"STARTTLS",
 			"accountTest":"Test email",
 			"accountUser":"Nume utilizator",
 			"attachmentsNoPreview":"vizibil numai pentru intrare",

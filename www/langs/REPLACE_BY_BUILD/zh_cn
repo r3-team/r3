@@ -120,6 +120,7 @@
 		"description":"描述",
 		"details":"详细信息",
 		"displayed":"显示的",
+		"encryption":"Encryption",
 		"errorTitle":"错误",
 		"event":"Event",
 		"everything":"全部",
@@ -520,6 +521,10 @@
 					"login":"LOGIN（O365 旧版 SMTP）",
 					"plain":"PLAIN",
 					"xoauth2":"OAUTH 2.0"
+				},
+				"encryption":{
+					"ssl":"SSL/TLS",
+					"starttls":"STARTTLS"
 				}
 			},
 			"account":"电子邮件帐户",
@@ -538,7 +543,6 @@
 			"accountPort":"端口",
 			"accountSendAs":"发送地址",
 			"accountSendAsHint":"默认情况下，发件人地址应该与邮箱的电子邮件地址相同。但某些电子邮件系统允许为帐户设定多个发件人地址。",
-			"accountStartTls":"STARTTLS",
 			"accountTest":"测试邮件",
 			"accountUser":"用户名",
 			"attachmentsNoPreview":"仅对收件箱可见",

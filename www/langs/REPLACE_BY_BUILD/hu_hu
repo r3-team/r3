@@ -120,6 +120,7 @@
 		"description":"Leírás",
 		"details":"Részletek",
 		"displayed":"Megjelenített",
+		"encryption":"Encryption",
 		"errorTitle":"Hiba",
 		"event":"Event",
 		"everything":"Everything",
@@ -520,6 +521,10 @@
 					"login":"LOGIN (O365 Legacy SMTP-hez)",
 					"plain":"PLAIN",
 					"xoauth2":"OAUTH 2.0"
+				},
+				"encryption":{
+					"ssl":"SSL/TLS",
+					"starttls":"STARTTLS"
 				}
 			},
 			"account":"E-mail fiók",
@@ -538,7 +543,6 @@
 			"accountPort":"Port",
 			"accountSendAs":"Küldő cím",
 			"accountSendAsHint":"By default, the sender address should be the same as the email address of the mailbox. Some email systems however allow multiple sender addresses for accounts.",
-			"accountStartTls":"STARTTLS",
 			"accountTest":"Teszt e-mail",
 			"accountUser":"Felhasználónév",
 			"attachmentsNoPreview":"Csak bejövő üzenetekben látható",

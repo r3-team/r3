@@ -120,6 +120,7 @@
 		"description":"Beschreibung",
 		"details":"Details",
 		"displayed":"Angezeigt",
+		"encryption":"Verschlüsselung",
 		"errorTitle":"Fehler",
 		"event":"Ereignis",
 		"everything":"Alles",
@@ -520,6 +521,10 @@
 					"login":"LOGIN (O365 legacy SMTP)",
 					"plain":"PLAIN",
 					"xoauth2":"OAUTH 2.0"
+				},
+				"encryption":{
+					"ssl":"SSL/TLS",
+					"starttls":"STARTTLS"
 				}
 			},
 			"account":"E-Mail-Account",
@@ -538,7 +543,6 @@
 			"accountPort":"Port",
 			"accountSendAs":"Sendeadresse",
 			"accountSendAsHint":"Standardmäßig sollte die Absenderadresse mit der E-Mail-Adresse des Postfachs identisch sein. Einige E-Mail-Systeme erlauben jedoch mehrere Absenderadressen für Konten.",
-			"accountStartTls":"STARTTLS",
 			"accountTest":"Test-E-Mail",
 			"accountUser":"Benutzername",
 			"attachmentsNoPreview":"nur für eingehende sichtbar",

@@ -111,8 +111,16 @@ let MyAdminMailAccount = {
 						<td>{{ capApp.accountSendAsHint }}</td>
 					</tr>
 					<tr>
-						<td>{{ capApp.accountStartTls }}*</td>
-						<td><my-bool v-model="inputs.startTls" /></td>
+						<td>{{ capGen.encryption }}*</td>
+						<td>
+							<select
+								@change="inputs.startTls = $event.target.value === 'starttls'"
+								:value="inputs.startTls ? 'starttls' : 'ssl'"
+							>
+								<option value="starttls">{{ capApp.option.encryption.starttls }}</option>
+								<option value="ssl">{{ capApp.option.encryption.ssl }}</option>
+							</select>
+						</td>
 						<td></td>
 					</tr>
 					<tr>

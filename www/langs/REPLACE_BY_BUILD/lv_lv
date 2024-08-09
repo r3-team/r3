@@ -120,6 +120,7 @@
 		"description":"Apraksts",
 		"details":"Detaļas",
 		"displayed":"Rādīts",
+		"encryption":"Encryption",
 		"errorTitle":"Kļūda",
 		"event":"Event",
 		"everything":"Viss",
@@ -520,6 +521,10 @@
 					"login":"LOGIN (priekš O365 legacy SMTP)",
 					"plain":"PLAIN",
 					"xoauth2":"OAUTH 2.0"
+				},
+				"encryption":{
+					"ssl":"SSL/TLS",
+					"starttls":"STARTTLS"
 				}
 			},
 			"account":"E-pasta konts",
@@ -538,7 +543,6 @@
 			"accountPort":"Ports",
 			"accountSendAs":"Nosūtīšanas adrese",
 			"accountSendAsHint":"By default, the sender address should be the same as the email address of the mailbox. Some email systems however allow multiple sender addresses for accounts.",
-			"accountStartTls":"STARTTLS",
 			"accountTest":"Pārbaudīt e-pastu",
 			"accountUser":"Lietotājvārds",
 			"attachmentsNoPreview":"redzami tikai ienākošajiem",
