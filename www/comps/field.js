@@ -505,7 +505,7 @@ let MyField = {
 					@blurred="blur"
 					@focused="focus"
 					@open-form="(...args) => openForm(args[0],[],args[1],null)"
-					@record-selected="relationshipRecordSelected"
+					@records-selected="relationshipRecordsSelected"
 					@record-removed="relationshipRecordRemoved"
 					@records-selected-init="$emit('set-value-init',fieldAttributeId,$event,true,true)"
 					:choices="choicesProcessed"
@@ -1239,16 +1239,12 @@ let MyField = {
 			
 			this.$emit('open-form',recordIds,openForm,getterArgs,middleClick,this.field.id);
 		},
-		relationshipRecordSelected(recordId,middleClick) {
-			if(recordId === null)
-				return this.value = null;
+		relationshipRecordsSelected(recordIds) {
+			if(recordIds === null)     return this.value = null;
+			if(!this.isRelationship1N) return this.value = recordIds[0];
+			if(this.value === null)    return this.value = recordIds;
 			
-			if(!this.isRelationship1N)
-				return this.value = recordId;
-			
-			let v = this.value === null ? [] : this.value;
-			v.push(recordId);
-			this.value = v;
+			this.value = this.value.concat(recordIds);
 		},
 		relationshipRecordRemoved(recordId) {
 			if(!this.isRelationship1N)

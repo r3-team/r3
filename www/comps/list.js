@@ -735,7 +735,7 @@ let MyList = {
 	emits:[
 		'blurred','clipboard','close-inline','focused','open-form',
 		'open-form-bulk','record-count-change','record-removed',
-		'record-selected','records-selected-init','set-args',
+		'records-selected','records-selected-init','set-args',
 		'set-column-ids-by-user','set-collection-indexes'
 	],
 	data() {
@@ -992,19 +992,18 @@ let MyList = {
 					return this.reloadOutside();
 			}
 		});
-		this.$watch('inputRecordIds',(val) => {
-			if(!this.isInput || this.inputAsCategory)
-				return;
-			
-			// update input if record IDs are different (different count or IDs)
-			if(val.length !== this.rowsInput.length)
-				return this.reloadOutside();
-			
-			for(let i = 0, j = this.rowsInput.length; i < j; i++) {
-				if(!val.includes(this.rowsInput[i].indexRecordIds[0]))
+		if(this.isInput && !this.inputAsCategory) {
+			this.$watch('inputRecordIds',(val) => {
+				// update input if record IDs are different (different count or IDs)
+				if(val.length !== this.rowsInput.length)
 					return this.reloadOutside();
-			}
-		});
+				
+				for(let i = 0, j = this.rowsInput.length; i < j; i++) {
+					if(!val.includes(this.rowsInput[i].indexRecordIds[0]))
+						return this.reloadOutside();
+				}
+			});
+		}
 		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
 				if(this.routeChangeFieldReload(newVals,oldVals)) {
@@ -1249,22 +1248,22 @@ let MyList = {
 			if(!this.isInput)
 				return this.clickOpen(row,middleClick);
 			
-			const recordId = row.indexRecordIds['0'];
-			
-			if(!this.inputAsCategory) {
-				if(!this.inputRecordIds.includes(recordId)) {
-					if(this.inputMulti) this.rowsInput.push(row);
-					else                this.rowsInput = [row];
-				}
-				this.showTable    = false;
-				this.filtersQuick = '';
-			}
-			this.toggleRecordId(recordId,middleClick);
+			if(this.inputMulti) this.rowsInput.push(row);
+			else                this.rowsInput = [row];
+
+			this.showTable    = false;
+			this.filtersQuick = '';
+			this.$emit('records-selected',[row.indexRecordIds['0']]);
 		},
 		clickRowAll() {
-			for(let r of this.rows) {
-				this.clickRow(r,false);
+			let ids = [];
+			for(const row of this.rows) {
+				ids.push(row.indexRecordIds['0']);
 			}
+			this.rowsInput    = this.rowsInput.concat(this.rows);
+			this.showTable    = false;
+			this.filtersQuick = '';
+			this.$emit('records-selected',ids);
 		},
 		closeHover() {
 			this.showAutoRenew = false;
@@ -1426,12 +1425,6 @@ let MyList = {
 		toggleUserFilters() {
 			this.showFilters = !this.showFilters;
 		},
-		toggleRecordId(id,middleClick) {
-			if(this.inputRecordIds.includes(id))
-				this.$emit('record-removed',id);
-			else
-				this.$emit('record-selected',id,middleClick);
-		},
 		updatedTextInput(event) {
 			if(event.code === 'Tab' || event.code === 'Escape')
 				return;
@@ -1482,9 +1475,12 @@ let MyList = {
 		
 		// user actions, inputs
 		inputTriggerRow(row) {
-			if(this.inputAsCategory && !this.inputIsReadonly)
-				this.toggleRecordId(row.indexRecordIds['0'],false);
-			
+			if(this.inputAsCategory && !this.inputIsReadonly) {
+				const id = row.indexRecordIds['0'];
+
+				if(this.inputRecordIds.includes(id)) this.$emit('record-removed', id);
+				else                                 this.$emit('records-selected', [id]);
+			}
 			this.focus();
 		},
 		inputTriggerRowRemove(i) {
