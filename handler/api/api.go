@@ -71,8 +71,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	/*
 		Parse URL, such as:
-		GET /api/lsw_invoices/contracts/v1?limit=10
-		GET /api/lsw_invoices/contracts/v1/45
+		GET    /api/lsw_invoices/contracts/v1?limit=10
+		GET    /api/lsw_invoices/contracts/v1/45
 		DELETE /api/lsw_invoices/contracts/v1/45
 
 		Rules:
@@ -208,6 +208,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer tx.Rollback(ctx)
+
+	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
+		return
+	}
 
 	if isDelete {
 		if recordId < 1 {

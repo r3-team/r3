@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"r3/tools"
 	"r3/types"
+	"strconv"
 	"time"
 
 	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
@@ -68,6 +69,13 @@ func Open(config types.FileTypeDb) error {
 		return err
 	}
 	return Pool.Ping(context.Background())
+}
+
+// set transaction config parameters
+// these are used by system functions, such as instance.get_login_id()
+func SetSessionConfig_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
+	_, err := tx.Exec(ctx, `SELECT SET_CONFIG('r3.login_id',$1,TRUE)`, strconv.FormatInt(loginId, 10))
+	return err
 }
 
 func Close() {

@@ -12,7 +12,6 @@ import (
 	"r3/handler"
 	"r3/log"
 	"r3/types"
-	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -52,8 +51,7 @@ func ExecTransaction(ctxClient context.Context, address string, loginId int64, i
 
 		// set local transaction configuration parameters
 		// these are used by system functions, such as instance.get_login_id()
-		if _, err := tx.Exec(ctx, `SELECT SET_CONFIG('r3.login_id',$1,TRUE)`, strconv.FormatInt(loginId, 10)); err != nil {
-
+		if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
 			log.Error("websocket", fmt.Sprintf("TRANSACTION %d, transaction config failure (login ID %d)",
 				reqTrans.TransactionNr, loginId), err)
 
