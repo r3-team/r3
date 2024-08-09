@@ -45,6 +45,7 @@ let MyInputRichtext = {
 				content_style:`
 					.mce-content-body{ background-color:transparent; }
 				`,
+				contextmenu:'copy cut paste | undo | link | inserttable table',
 				document_base_url:`${location.protocol}//${location.host}/`, // required when disabling 'relative_urls'
 				entity_encoding:'raw', // disable encoding of things like umlaute, not required for UTF8 storage and makes searches easier
 				height:'100%',
