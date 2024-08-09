@@ -536,8 +536,11 @@ let MyGantt = {
 		this.dateStart = this.getDateNowRounded();
 		
 		// setup watchers
-		this.$watch('columns',this.reset);
 		this.$watch('popUpFormInline',this.resize);
+		this.$watch('columns',(valOld,valNew) => {
+			if(JSON.stringify(valOld) !== JSON.stringify(valNew))
+				this.reset();
+		});
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
@@ -545,7 +548,7 @@ let MyGantt = {
 			// if field is hidden, steps cannot be calculated
 			if(!val) this.$nextTick(() => this.setSteps(true));
 		});
-		this.$watch(() => [this.choices,this.columns,this.filters],(newVals, oldVals) => {
+		this.$watch(() => [this.choices,this.filters],(newVals, oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
 				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
 					return this.reloadOutside();

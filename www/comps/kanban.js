@@ -550,7 +550,7 @@ let MyKanban = {
 		this.$watch('isHidden',(val) => {
 			if(!val) this.$nextTick(() => this.get());
 		});
-		this.$watch(() => [this.choices,this.columns,this.filters],(newVals, oldVals) => {
+		this.$watch(() => [this.choices,this.filters],(newVals, oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
 				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
 					return this.reloadOutside();
