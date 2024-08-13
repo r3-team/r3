@@ -43,6 +43,7 @@ let MyChart = {
 		columns:        { type:Array,   required:true },
 		filters:        { type:Array,   required:true },
 		formLoading:    { type:Boolean, required:true },
+		isHidden:       { type:Boolean, required:true },
 		limit:          { type:Number,  required:true },
 		moduleId:       { type:String,  required:true },
 		needsHeader:    { type:Boolean, required:true },
@@ -85,6 +86,9 @@ let MyChart = {
 		this.$watch('formLoading',val => {
 			if(!val) this.get();
 		});
+		this.$watch('isHidden',val => {
+			if(!val) this.$nextTick(this.resize);
+		});
 		this.$watch('optionOverwrite',val => {
 			if(val !== null) {
 				this.option = this.optionOverwrite;
@@ -118,7 +122,8 @@ let MyChart = {
 			this.get();
 		},
 		resize() {
-			this.$refs.chart.resize();
+			if(typeof this.$refs.chart !== 'undefined')
+				this.$refs.chart.resize();
 		},
 		
 		// backend calls
