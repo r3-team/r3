@@ -1253,6 +1253,7 @@
 				"fieldGetFileLinks":"Read file links",
 				"fieldGetFileLinksHint":"Returns array of download URLs for uploaded files, only valid for the current user session.",
 				"fieldGetValue":"读取数值",
+				"fieldGetValueChanged":"Value changed?",
 				"fieldSetCaption":"填写标题",
 				"fieldSetChart":"填写ECharts选项对象",
 				"fieldSetError":"填写错误消息",

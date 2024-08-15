@@ -194,6 +194,12 @@ let MyBuilderJsFunction = {
 											:naked="true"
 										/>
 										<my-button
+											@trigger="selectEntity('field_value_get_changed',field.id)"
+											:caption="capApp.option.fieldGetValueChanged"
+											:image="radioIcon('field_value_get_changed',field.id)"
+											:naked="true"
+										/>
+										<my-button
 											@trigger="selectEntity('field_caption_set',field.id)"
 											:caption="capApp.option.fieldSetCaption"
 											:image="radioIcon('field_caption_set',field.id)"
@@ -619,6 +625,7 @@ let MyBuilderJsFunction = {
 					}
 				break;
 				case 'field_value_get':            text = `${prefix}.get_field_value({${s.displayFieldName(s.entityId)}})`; break;
+				case 'field_value_get_changed':    text = `${prefix}.get_field_value_changed({${s.displayFieldName(s.entityId)}})`; break;
 				case 'field_value_get_file_links': text = `${prefix}.get_field_file_links({${s.displayFieldName(s.entityId)}})`; break;
 				case 'field_value_set':            text = `${prefix}.set_field_value({${s.displayFieldName(s.entityId)}}, ${s.capApp.value}, ${s.capApp.valueInit})`; break;
 				case 'field_caption_set':          text = `${prefix}.set_field_caption({${s.displayFieldName(s.entityId)}}, ${s.capApp.value})`; break;
@@ -783,7 +790,7 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace field IDs with placeholders
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|chart|error|focus|order|file_links)\\('(${uuid})'`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\\('(${uuid})'`,'g');
 			body = body.replace(pat,(match,mode,part,id) => this.fieldIdMap[id] !== undefined
 				? `${prefix}.${mode}_field_${part}({${this.displayFieldName(id)}}` : match
 			);
@@ -852,9 +859,9 @@ let MyBuilderJsFunction = {
 				return `${prefix}\.collection_read('${col.id}',[${columnIds.join(',')}]`;
 			});
 			
-			// replace field value/caption get/set placeholders
-			// stored as: app.get_field_value(F12: 0 display_name... or app.get_field_value(F13: Container...
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|chart|error|focus|order|file_links)\\(\{F(\\d+)\:.*?\}`,'g');
+			// replace field get/set value/caption/error/focus/etc. placeholders
+			// stored as: app.get_field_value({F12: 0 display_name... or app.get_field_value({F13: Container...
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\\(\{F(\\d+)\:.*?\}`,'g');
 			body = body.replace(pat,(match,mode,part,ref) => {
 				for(let fieldId in this.entityIdMapRef.field) {
 					if(this.entityIdMapRef.field[fieldId] === parseInt(ref))

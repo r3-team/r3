@@ -1253,6 +1253,7 @@
 				"fieldGetFileLinks":"Read file links",
 				"fieldGetFileLinksHint":"Returns array of download URLs for uploaded files, only valid for the current user session.",
 				"fieldGetValue":"Érték olvasása",
+				"fieldGetValueChanged":"Value changed?",
 				"fieldSetCaption":"Címke beállítása",
 				"fieldSetChart":"Write ECharts option object",
 				"fieldSetError":"Hibaüzenet beállítása",

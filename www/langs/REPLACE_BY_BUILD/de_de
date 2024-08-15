@@ -1253,6 +1253,7 @@
 				"fieldGetFileLinks":"Dateilinks lesen",
 				"fieldGetFileLinksHint":"Liefert ein Array an Download-Links für hochgeladene Dateien, nur gültig für die aktuelle Benutzersitzung.",
 				"fieldGetValue":"Wert lesen",
+				"fieldGetValueChanged":"Wert geändert?",
 				"fieldSetCaption":"Titel setzen",
 				"fieldSetChart":"ECharts-Optionen-Objekt setzen",
 				"fieldSetError":"Fehlermeldung setzen",

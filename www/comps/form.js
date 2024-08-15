@@ -590,6 +590,10 @@ let MyForm = {
 				// field manipulation
 				get_field_value:(fieldId) => s.fieldIdMapData[fieldId] === undefined
 					? undefined : s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false)],
+				get_field_value_changed:(fieldId) => {
+					const ia = s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false);
+					return !s.valueIsEqual(s.values[ia],s.valuesOrg[ia]);
+				},
 				get_field_file_links:(fieldId) => {
 					const fld = s.fieldIdMapData[fieldId];
 					if(fld === undefined || s.values[s.getIndexAttributeIdByField(fld,false)] === null)
