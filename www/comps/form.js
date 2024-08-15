@@ -1073,16 +1073,17 @@ let MyForm = {
 			window.history.back();
 		},
 		popUpRecordChanged(change,recordId) {
-			if(this.popUpFieldIdSrc !== null && typeof this.fieldIdMapData[this.popUpFieldIdSrc] !== 'undefined') {
+			const isDeleted = change === 'deleted';
+			const isUpdated = change === 'updated';
+
+			if(recordId !== null && this.popUpFieldIdSrc !== null && this.fieldIdMapData[this.popUpFieldIdSrc] !== undefined) {
 				// update data field value to reflect change of pop-up form record
-				let field = this.fieldIdMapData[this.popUpFieldIdSrc];
-				let atr   = this.attributeIdMap[field.attributeId];
-				let iaId  = this.getIndexAttributeIdByField(field,false);
+				const field = this.fieldIdMapData[this.popUpFieldIdSrc];
+				const atr   = this.attributeIdMap[field.attributeId];
+				const iaId  = this.getIndexAttributeIdByField(field,false);
 				
 				if(this.isAttributeRelationship(atr.content)) {
-					let isDeleted = change === 'deleted';
-					let isUpdated = change === 'updated';
-					let isMulti = field.attributeIdNm !== null ||
+					const isMulti = field.attributeIdNm !== null ||
 						(field.outsideIn && this.isAttributeRelationshipN1(atr.content));
 					
 					if(!isMulti) {
@@ -1102,9 +1103,13 @@ let MyForm = {
 					}
 				}
 			}
+
 			// reload form to update fields (incl. non-data field like lists)
 			this.loading = true;
 			this.releaseLoadingOnNextTick();
+
+			// inform parent form about sub form record change as well
+			this.$emit(isUpdated ? 'record-updated' : 'record-deleted', null);
 		},
 		scrollToInvalidField() {
 			const el = this.$refs.fields.querySelector(`[data-field-is-valid="0"]`);
