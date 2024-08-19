@@ -162,7 +162,7 @@
 	right:unset;
 	left:-1px;
 }
-.list .layoutTable th .columnOptionWrap.lastInRow{
+.list .layoutTable th .columnOptionWrap.dropdownRight{
 	right:0px;
 	left:unset;
 }

@@ -42,7 +42,7 @@ let MyListColumnBatch = {
 		<div class="input-dropdown-wrap columnOptionWrap"
 			v-if="show"
 			v-click-outside="escaped"
-			:class="{ lastInRow:lastInRow }"
+			:class="{ dropdownRight:dropdownRight }"
 		>
 			<div class="input-dropdown default-inputs columnOption">
 				
@@ -146,9 +146,9 @@ let MyListColumnBatch = {
 		columnBatch:     { type:Object,  required:true }, // column batch to show options for
 		columnIdMapAggr: { type:Object,  required:true },
 		columns:         { type:Array,   required:true }, // list columns
+		dropdownRight:   { type:Boolean, required:true },
 		filters:         { type:Array,   required:true }, // list filters (predefined)
 		filtersColumn:   { type:Array,   required:true }, // list filters from users column selection
-		lastInRow:       { type:Boolean, required:true },
 		joins:           { type:Array,   required:true }, // list joins
 		orders:          { type:Array,   required:true }, // list orders
 		orderOverwritten:{ type:Boolean, required:true }, // list orders were overwritten by user
