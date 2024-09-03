@@ -143,7 +143,6 @@ func main() {
 	}
 
 	// initialize service
-	var err error
 	prg := &program{}
 
 	svc, err := service.New(prg, svcConfig)
@@ -159,10 +158,8 @@ func main() {
 
 	// listen to global shutdown channel
 	go func() {
-		select {
-		case <-scheduler.OsExit:
-			prg.executeAborted(svc, nil)
-		}
+		<-scheduler.OsExit
+		prg.executeAborted(svc, nil)
 	}()
 
 	// add shut down in case of SIGTERM (terminal closed)
@@ -531,6 +528,8 @@ func (prg *program) executeAborted(svc service.Service, err error) {
 		if err := prg.Stop(svc); err != nil {
 			prg.logger.Error(err)
 		}
+		// in cases like cluster node shutdown, there is no exit signal
+		os.Exit(0)
 	} else {
 		if err := svc.Stop(); err != nil {
 			prg.logger.Error(err)
@@ -574,7 +573,6 @@ func (prg *program) Stop(svc service.Service) error {
 		if err := cluster.StopNode(); err != nil {
 			prg.logger.Error(err)
 		}
-
 		db.Close()
 		log.Info("server", "stopped database handler")
 	}

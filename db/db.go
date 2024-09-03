@@ -32,6 +32,7 @@ func OpenWait(timeoutSeconds int64, config types.FileTypeDb) error {
 		}
 		time.Sleep(time.Millisecond * 500)
 	}
+	Pool = nil
 	return fmt.Errorf("timeout reached, last error: %s", err)
 }
 
@@ -80,5 +81,4 @@ func SetSessionConfig_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 
 func Close() {
 	Pool.Close()
-	Pool = nil
 }

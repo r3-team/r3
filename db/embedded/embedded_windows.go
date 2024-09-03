@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"r3/config"
@@ -73,11 +74,8 @@ func status() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
-	if strings.Contains(foundLine, msgState1) {
-		return true, nil
-	}
-	return false, nil
+	// returns true if DB server is running
+	return strings.Contains(foundLine, msgState1), nil
 }
 
 // executes call and waits for specified lines to return
@@ -85,7 +83,6 @@ func status() (bool, error) {
 func execWaitFor(call string, args []string, waitFor []string, waitTime int) (string, error) {
 
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(waitTime)*time.Second)
-
 	cmd := exec.CommandContext(ctx, call, args...)
 	tools.CmdAddSysProgAttrs(cmd)
 	cmd.Env = append(os.Environ(), fmt.Sprintf("LC_MESSAGES=%s", locale))
@@ -100,16 +97,17 @@ func execWaitFor(call string, args []string, waitFor []string, waitTime int) (st
 		return "", err
 	}
 
-	done := make(chan bool)
-	var doneErr error = nil
-	var doneLine string = ""
+	type chanReturnType struct {
+		err  error
+		line string
+	}
+	chanReturn := make(chan chanReturnType)
 
 	// react to call timeout
 	go func() {
 		for {
 			<-ctx.Done()
-			doneErr = errors.New("timeout reached")
-			done <- true
+			chanReturn <- chanReturnType{err: errors.New("timeout reached")}
 			return
 		}
 	}()
@@ -117,45 +115,44 @@ func execWaitFor(call string, args []string, waitFor []string, waitTime int) (st
 	// react to new lines from standard output
 	go func() {
 		if err := cmd.Start(); err != nil {
-			doneErr = err
-			done <- true
+			chanReturn <- chanReturnType{err: err}
 			return
 		}
 
-		log := []string{}
 		buf := bufio.NewReader(stdout)
+		bufLines := []string{}
 		for {
 			line, _, err := buf.ReadLine()
 			if err != nil {
-				doneErr = err
+				if err != io.EOF {
+					// log error if not end-of-file
+					log.Error("server", "failed to read from std out", err)
+				}
 				break
 			}
-			log = append(log, string(line))
+			bufLines = append(bufLines, string(line))
 
 			// success if expected lines turned up
 			for _, waitLine := range waitFor {
-
 				if strings.Contains(string(line), waitLine) {
-
-					doneLine = waitLine
-					done <- true
+					chanReturn <- chanReturnType{
+						err:  nil,
+						line: waitLine,
+					}
 					return
 				}
 			}
 		}
 
-		if len(log) == 0 {
+		if len(bufLines) == 0 {
 			// nothing turned up
-			doneErr = errors.New("output is empty")
-			done <- true
-			return
+			chanReturn <- chanReturnType{err: errors.New("output is empty")}
+		} else {
+			// expected lines did not turn up
+			chanReturn <- chanReturnType{err: fmt.Errorf("unexpected output, got: %s", strings.Join(bufLines, ","))}
 		}
-
-		// expected lines did not turn up
-		doneErr = fmt.Errorf("unexpected output, got: %s", strings.Join(log, ","))
-		done <- true
 	}()
 
-	<-done
-	return doneLine, doneErr
+	res := <-chanReturn
+	return res.line, res.err
 }
