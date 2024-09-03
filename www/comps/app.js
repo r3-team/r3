@@ -477,6 +477,7 @@ let MyApp = {
 				// affects everyone logged in
 				case 'collectionChanged':
 					this.updateCollections(res.payload);
+				break;
 				case 'configChanged':
 					if(this.isAdmin) {
 						ws.sendMultiple([
