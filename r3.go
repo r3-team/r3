@@ -517,6 +517,7 @@ func (prg *program) execute(svc service.Service) {
 			GetCertificate: cache.GetCert,
 		}
 		switch config.File.Web.TlsMinVersion {
+		case "": // prior to 3.8.4, defaults to not apply min. TLS version
 		case "1.1":
 			prg.webServer.TLSConfig.MinVersion = tls.VersionTLS11
 		case "1.2":
