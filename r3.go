@@ -523,6 +523,9 @@ func (prg *program) execute(svc service.Service) {
 			prg.webServer.TLSConfig.MinVersion = tls.VersionTLS12
 		case "1.3":
 			prg.webServer.TLSConfig.MinVersion = tls.VersionTLS13
+		default:
+			log.Warning("server", "failed to apply min. TLS version",
+				fmt.Errorf("version '%s' is not supported (valid: 1.1, 1.2 or 1.3)", config.File.Web.TlsMinVersion))
 		}
 		if err := prg.webServer.ServeTLS(webListener, "", ""); err != nil && err != http.ErrServerClosed {
 			prg.executeAborted(svc, err)
