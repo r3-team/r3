@@ -25,6 +25,7 @@
 		"cert": "cert.crt",
 		"key": "cert.key",
 		"listen": "0.0.0.0",
-		"port": 443
+		"port": 443,
+		"tlsMinVersion":"1.2"
 	}
 }

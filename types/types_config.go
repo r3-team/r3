@@ -25,10 +25,11 @@ type FileType struct {
 	Portable bool `json:"portable"`
 
 	Web struct {
-		Cert   string `json:"cert"`
-		Key    string `json:"key"`
-		Listen string `json:"listen"`
-		Port   int    `json:"port"`
+		Cert          string `json:"cert"`
+		Key           string `json:"key"`
+		Listen        string `json:"listen"`
+		Port          int    `json:"port"`
+		TlsMinVersion string `json:"tlsMinVersion"`
 	} `json:"web"`
 }
 

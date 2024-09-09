@@ -510,8 +510,19 @@ func (prg *program) execute(svc service.Service) {
 			prg.executeAborted(svc, err)
 			return
 		}
+
+		// PreferServerCipherSuites & CipherSuites are deprecated
+		// https://github.com/golang/go/issues/45430
 		prg.webServer.TLSConfig = &tls.Config{
 			GetCertificate: cache.GetCert,
+		}
+		switch config.File.Web.TlsMinVersion {
+		case "1.1":
+			prg.webServer.TLSConfig.MinVersion = tls.VersionTLS11
+		case "1.2":
+			prg.webServer.TLSConfig.MinVersion = tls.VersionTLS12
+		case "1.3":
+			prg.webServer.TLSConfig.MinVersion = tls.VersionTLS13
 		}
 		if err := prg.webServer.ServeTLS(webListener, "", ""); err != nil && err != http.ErrServerClosed {
 			prg.executeAborted(svc, err)
