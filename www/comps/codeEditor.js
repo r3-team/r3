@@ -124,7 +124,7 @@ let MyCodeEditor = {
 		setOptions() {
 			this.editor.setOptions({
 				enableAutoIndent:true,
-				fontSize:14 * this.settings.fontSize / 100,
+				fontSize:17 * this.settings.fontSize / 100,
 				mode:`ace/mode/${this.mode}`,
 				readOnly:this.readonly,
 				theme:`ace/theme/${this.theme}`,
