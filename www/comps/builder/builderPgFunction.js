@@ -363,7 +363,7 @@ let MyBuilderPgFunction = {
 									:naked="true"
 								/>
 								<my-button image="question.png"
-									@trigger="showHelp(fnc+'()',capApp.helpPg[fnc])"
+									@trigger="showHelp(fnc+'()',capApp.helpPg[fnc],capApp.helpPgArgs[fnc])"
 									:captionTitle="capGen.help"
 									:naked="true"
 								/>
@@ -553,7 +553,7 @@ let MyBuilderPgFunction = {
 				return null;
 			
 			let text = null;
-			let mod, rel, atr, fnc;
+			let mod, rel, atr, fnc, args;
 			
 			// build unique placeholder name
 			// relation:    {module_name}.[relation_name]
@@ -568,7 +568,7 @@ let MyBuilderPgFunction = {
 				case 'pgFunction':
 					fnc  = s.pgFunctionIdMap[s.entityId];
 					mod  = s.moduleIdMap[fnc.moduleId];
-					text = `{${mod.name}}.[${fnc.name}]()`;
+					text = `{${mod.name}}.[${fnc.name}](${fnc.codeArgs})`;
 				break;
 				case 'attribute':
 					atr  = s.attributeIdMap[s.entityId];
@@ -580,7 +580,8 @@ let MyBuilderPgFunction = {
 					if(s.addOld) text = 'OLD.'+text;
 				break;
 				case 'instanceFunction':
-					text = `instance.${s.entityId}()`;
+					args = s.capApp.helpPgArgs[s.entityId] !== undefined ? s.capApp.helpPgArgs[s.entityId].join(', ') : '';
+					text = `instance.${s.entityId}(${args})`;
 				break;
 			}
 			return text;
@@ -675,7 +676,10 @@ let MyBuilderPgFunction = {
 			this.entity   = entity;
 			this.entityId = id;
 		},
-		showHelp(top,text) {
+		showHelp(top,text,args) {
+			if(args !== undefined)
+				text = text.replace('{ARGS}',`<blockquote>${args.join(',<br />')}</blockquote>`);
+
 			this.$store.commit('dialog',{
 				captionTop:top,
 				captionBody:text,

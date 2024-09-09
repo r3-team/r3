@@ -397,7 +397,7 @@ let MyBuilderJsFunction = {
 									:naked="true"
 								/>
 								<my-button image="question.png"
-									@trigger="showHelp(fnc+'()',capApp.helpJs[fnc])"
+									@trigger="showHelp(fnc+'()',capApp.helpJs[fnc],capApp.helpJsArgs[fnc])"
 									:captionTitle="capGen.help"
 									:naked="true"
 								/>
@@ -511,7 +511,7 @@ let MyBuilderJsFunction = {
 			codeReturns:'',
 			isClientEventExec:false,
 			appFunctions:[
-				'block_inputs','client_execute_keystrokes','copy_to_clipboard',
+				'block_inputs','client_execute_keystrokes','copy_to_clipboard','dialog_show',
 				'form_close','form_open','form_set_title','form_show_message',
 				'get_e2ee_data_key','get_e2ee_data_value','get_language_code',
 				'get_login_id','get_preset_record_id','get_record_id','get_role_ids',
@@ -522,7 +522,7 @@ let MyBuilderJsFunction = {
 				'value_store_get','value_store_set'
 			],
 			appFunctionsAsync:[
-				'get_e2ee_data_key','get_e2ee_data_value','pdf_create'
+				'dialog_show','get_e2ee_data_key','get_e2ee_data_value','pdf_create'
 			],
 			appFunctionsClientEvent:[
 				'client_execute_keystrokes','copy_to_clipboard','form_open',
@@ -573,10 +573,6 @@ let MyBuilderJsFunction = {
 			}
 			return out.sort((a, b) => a.ref - b.ref);
 		},
-		functionHelpJs:(s) => s.entity === 'jsFunction' && s.entityId !== null
-			? s.getFunctionHelp('js',s.jsFunctionIdMap[s.entityId],s.builderLanguage) : '',
-		functionHelpPg:(s) => s.entity === 'pgFunction' && s.entityId !== null
-			? s.getFunctionHelp('pg',s.pgFunctionIdMap[s.entityId],s.builderLanguage) : '',
 		hasChanges:(s) => s.name     !== s.jsFunction.name
 			|| s.codeArgs            !== s.jsFunction.codeArgs
 			|| s.codeFunction        !== s.placeholdersSet(s.jsFunction.codeFunction)
@@ -600,16 +596,9 @@ let MyBuilderJsFunction = {
 			// build unique placeholder name
 			switch(s.entity) {
 				case 'appFunction':
-					opt     = '';
-					postfix = '';
-					
-					if(typeof s.capApp.helpJsHint[s.entityId] !== 'undefined')
-						opt = s.capApp.helpJsHint[s.entityId];
-					
-					if(s.appFunctionsAsync.includes(s.entityId))
-						postfix = postfixAsync;
-					
-					text = `${prefix}.${s.entityId}(${opt})${postfix}`;
+					opt     = s.capApp.helpJsArgs[s.entityId] !== undefined ? s.capApp.helpJsArgs[s.entityId].join(', ') : '';
+					postfix = s.appFunctionsAsync.includes(s.entityId) ? postfixAsync : '';
+					text    = `${prefix}.${s.entityId}(${opt})${postfix}`;
 				break;
 				case 'collection_read': // fallthrough
 				case 'collection_update':
@@ -641,7 +630,7 @@ let MyBuilderJsFunction = {
 				case 'jsFunction':
 					fnc  = s.jsFunctionIdMap[s.entityId];
 					mod  = s.moduleIdMap[fnc.moduleId];
-					args = fnc.codeArgs === '' ? '' : ', '+fnc.codeArgs.toUpperCase();
+					args = fnc.codeArgs === '' ? '' : ', '+fnc.codeArgs;
 					text = fnc.formId === null
 						? `${prefix}.call_frontend({${mod.name}.${fnc.name}}${args})`
 						: `${prefix}.call_frontend({${mod.name}.${s.formIdMap[fnc.formId].name}.${fnc.name}}${args})`;
@@ -649,18 +638,8 @@ let MyBuilderJsFunction = {
 				case 'pgFunction':
 					fnc  = s.pgFunctionIdMap[s.entityId];
 					mod  = s.moduleIdMap[fnc.moduleId];
-					
-					// add argument names to show function interface
-					// remove argument type and default value to keep it easy to read
-					let argsOut = [];
-					args = fnc.codeArgs.split(',');
-					for(let i = 0, j = args.length; i < j; i++) {
-						if(args[i] !== '')
-							argsOut.push(args[i].trim().split(' ')[0].toUpperCase());
-					}
-					let argsList = argsOut.length === 0 ? '' : ', '+argsOut.join(', ');
-					
-					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${argsList})${postfixAsync}`;
+					args = fnc.codeArgs === '' ? '' : ', ' + fnc.codeArgs;
+					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${args})${postfixAsync}`;
 				break;
 			}
 			return text;
@@ -753,7 +732,10 @@ let MyBuilderJsFunction = {
 			this.entity   = entityName;
 			this.entityId = id;
 		},
-		showHelp(top,text) {
+		showHelp(top,text,args) {
+			if(args !== undefined)
+				text = text.replace('{ARGS}',`<blockquote>${args.join(',<br />')}</blockquote>`);
+
 			this.$store.commit('dialog',{
 				captionTop:top,
 				captionBody:text

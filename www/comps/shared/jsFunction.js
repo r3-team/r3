@@ -99,6 +99,37 @@ const exposedFunctionsGlobal = {
 		});
 	},
 
+	// dialog functions
+	dialog_show:(title,body,buttons) => {
+		return new Promise((resolve,reject) => {
+			if(title === undefined)     title   = '';
+			if(body  === undefined)     body    = '';
+			if(!Array.isArray(buttons)) buttons = [];
+
+			let btns = [];
+			for(let i = 0, j = buttons.length; i < j; i++) {
+				if(typeof buttons[i] == 'string')
+					btns.push({
+						caption:buttons[i],
+						exec:() => resolve(i)
+					});
+			}
+
+			if(btns.length === 0)
+				btns.push({
+					caption:MyStore.getters.captions.generic.button.ok,
+					exec:() => resolve(-1),
+					image:'ok.png'
+				});
+
+			MyStore.commit('dialog',{
+				captionBody:body,
+				captionTop:title,
+				buttons:btns
+			});
+		});
+	},
+
 	// not available as default
 	block_inputs:                      errFnc,
 	form_close:                        errFnc,

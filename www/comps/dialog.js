@@ -8,9 +8,7 @@ let MyDialog = {
 		<div class="contentBox dialog float" :style="styles">
 			<div class="top lower">
 				<div class="area">
-					<img class="icon"
-						:src="image === null ? 'images/ok.png' : 'images/'+image"
-					/>
+					<img class="icon" :src="image === null ? 'images/ok.png' : 'images/'+image" />
 					<div class="caption">{{ captionTop }}</div>
 				</div>
 				<div class="area">
