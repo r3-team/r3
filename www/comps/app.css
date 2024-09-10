@@ -748,7 +748,7 @@ table td.maximum{
 	box-sizing:border-box;
 	outline:none;
 }
-.navigation .entry.isTitle{
+.navigation .entry.isTitle.grow{
 	flex:1 1 auto;
 }
 .navigation .entry.inactive{

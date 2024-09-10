@@ -692,6 +692,7 @@
 			"systemTasks":"Rendszerfeladatok (globális)",
 			"systemTasksNode":"Rendszerfeladatok (Klaszter csomópont)"
 		},
+		"navigationActivation":"Activation",
 		"navigationBackups":"Mentések",
 		"navigationCaptionMap":"Translations",
 		"navigationCluster":"Klaszter",
@@ -699,7 +700,7 @@
 		"navigationCustom":"Egyedi",
 		"navigationFiles":"Fájlok",
 		"navigationLdaps":"LDAP Bejelentkezések",
-		"navigationLicense":"REI3 Professional",
+		"navigationLicense":"Professional",
 		"navigationLogins":"Bejelentkezések",
 		"navigationLoginTemplates":"Bejelentkezési Sablonok",
 		"navigationLogs":"Naplók",

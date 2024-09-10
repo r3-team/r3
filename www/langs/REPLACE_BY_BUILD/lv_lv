@@ -692,6 +692,7 @@
 			"systemTasks":"Sistēmas uzdevumi (globālie)",
 			"systemTasksNode":"Sistēmas uzdevumi (klastra mezgli)"
 		},
+		"navigationActivation":"Activation",
 		"navigationBackups":"Rezerves kopijas",
 		"navigationCaptionMap":"Translations",
 		"navigationCluster":"Klasters",
@@ -699,7 +700,7 @@
 		"navigationCustom":"Pielāgošana",
 		"navigationFiles":"Faili",
 		"navigationLdaps":"LDAP pieteikšanās",
-		"navigationLicense":"REI3 Professional",
+		"navigationLicense":"Professional",
 		"navigationLogins":"Pieteikšanās",
 		"navigationLoginTemplates":"Pieteikšanās veidnes",
 		"navigationLogs":"Žurnāli",

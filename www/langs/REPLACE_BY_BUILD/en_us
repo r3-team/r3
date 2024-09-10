@@ -692,6 +692,7 @@
 			"systemTasks":"System tasks (global)",
 			"systemTasksNode":"System tasks (cluster nodes)"
 		},
+		"navigationActivation":"Activation",
 		"navigationBackups":"Backups",
 		"navigationCaptionMap":"Translations",
 		"navigationCluster":"Cluster",
@@ -699,7 +700,7 @@
 		"navigationCustom":"Customizing",
 		"navigationFiles":"Files",
 		"navigationLdaps":"LDAP-Logins",
-		"navigationLicense":"REI3 Professional",
+		"navigationLicense":"Professional",
 		"navigationLogins":"Logins",
 		"navigationLoginTemplates":"Login templates",
 		"navigationLogs":"Logs",

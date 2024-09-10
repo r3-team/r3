@@ -184,49 +184,49 @@ let MyBuilder = {
 			
 			<!-- module sub component navigation header -->
 			<div class="navigation-entities-header" v-if="subMenu">
-				<router-link class="entry isTitle clickable"
+				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'forms'"
 					:to="'/builder/forms/'+module.id"
 				>
 					<img src="images/fileText.png" />
 					<span>{{ capGen.forms }}</span>
 				</router-link>
-				<router-link class="entry isTitle clickable"
+				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'roles'"
 					:to="'/builder/roles/'+module.id"
 				>
 					<img src="images/personMultiple.png" />
 					<span>{{ capGen.roles }}</span>
 				</router-link>
-				<router-link class="entry isTitle clickable"
+				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'relations'"
 					:to="'/builder/relations/'+module.id"
 				>
 					<img src="images/database.png" />
 					<span>{{ capGen.relations }}</span>
 				</router-link>
-				<router-link class="entry isTitle clickable"
+				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'collections'"
 					:to="'/builder/collections/'+module.id"
 				>
 					<img src="images/tray.png" />
 					<span>{{ capGen.collections }}</span>
 				</router-link>
-				<router-link class="entry isTitle clickable"
+				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'apis'"
 					:to="'/builder/apis/'+module.id"
 				>
 					<img src="images/api.png" />
 					<span>{{ capGen.apis }}</span>
 				</router-link>
-				<router-link class="entry isTitle clickable"
+				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'pg-functions'"
 					:to="'/builder/pg-functions/'+module.id"
 				>
 					<img src="images/codeDatabase.png" />
 					<span>{{ capGen.pgFunctions }}</span>
 				</router-link>
-				<router-link class="entry isTitle clickable"
+				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'js-functions'"
 					:to="'/builder/js-functions/'+module.id"
 				>

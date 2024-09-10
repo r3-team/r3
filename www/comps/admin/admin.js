@@ -103,9 +103,15 @@ let MyAdmin = {
 			</router-link>
 			
 			<!-- REI3 Professional -->
-			<router-link class="entry clickable separator" tag="div" to="/admin/license">
-				<img src="images/key.png" />
+			<div class="entry isTitle separator" tag="div">
+				<img src="images/icon_naked.png" />
 				<span>{{ licenseTitle }}</span>
+			</div>
+			
+			<!-- activation -->
+			<router-link class="entry clickable" tag="div" to="/admin/license">
+				<img src="images/key.png" />
+				<span>{{ capApp.navigationActivation }}</span>
 			</router-link>
 			
 			<!-- customizing -->
@@ -174,7 +180,7 @@ let MyAdmin = {
 			if(s.$route.path.includes('custom'))          return s.capApp.navigationCustom;
 			if(s.$route.path.includes('docs'))            return s.capApp.navigationDocs;
 			if(s.$route.path.includes('files'))           return s.capApp.navigationFiles;
-			if(s.$route.path.includes('license'))         return s.capApp.navigationLicense;
+			if(s.$route.path.includes('license'))         return s.capApp.navigationActivation;
 			if(s.$route.path.includes('logins'))          return s.capApp.navigationLogins;
 			if(s.$route.path.includes('login-templates')) return s.capApp.navigationLoginTemplates;
 			if(s.$route.path.includes('logs'))            return s.capApp.navigationLogs;

@@ -692,6 +692,7 @@
 			"systemTasks":"系统任务（全局）",
 			"systemTasksNode":"系统任务（集群节点）"
 		},
+		"navigationActivation":"Activation",
 		"navigationBackups":"备份",
 		"navigationCaptionMap":"翻译",
 		"navigationCluster":"集群",
@@ -699,7 +700,7 @@
 		"navigationCustom":"定制",
 		"navigationFiles":"文件",
 		"navigationLdaps":"LDAP 登录",
-		"navigationLicense":"REI3 专业版",
+		"navigationLicense":"专业版",
 		"navigationLogins":"登录",
 		"navigationLoginTemplates":"登录模板",
 		"navigationLogs":"日志",
