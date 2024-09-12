@@ -55,15 +55,14 @@ func (qb *QueryBuilder) AddPara(name string, value interface{}) {
 
 	qb.cParas[name] = value
 }
-func (qb *QueryBuilder) Set(component string, value interface{}) {
-	switch component {
-	case "FROM":
-		qb.cFrom = value.(string)
-	case "LIMIT":
-		qb.cLimit = value.(int)
-	case "OFFSET":
-		qb.cOffset = value.(int)
-	}
+func (qb *QueryBuilder) SetFrom(value string) {
+	qb.cFrom = value
+}
+func (qb *QueryBuilder) SetOffset(value int) {
+	qb.cOffset = value
+}
+func (qb *QueryBuilder) SetLimit(value int) {
+	qb.cLimit = value
 }
 func (qb *QueryBuilder) Reset(component string) {
 	switch component {

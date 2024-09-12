@@ -46,7 +46,7 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
 	qb.AddList("SELECT", []string{"l.level", "l.context", "l.message", "l.date_milli", "COALESCE(m.name,'-')", "n.name"})
-	qb.Set("FROM", "instance.log AS l")
+	qb.SetFrom("instance.log AS l")
 	qb.Add("JOIN", "LEFT JOIN app.module AS m ON m.id = l.module_id")
 	qb.Add("JOIN", "LEFT JOIN instance_cluster.node AS n ON n.id = l.node_id")
 
@@ -74,8 +74,8 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 	}
 
 	qb.Add("ORDER", "l.date_milli DESC")
-	qb.Set("OFFSET", offset)
-	qb.Set("LIMIT", limit)
+	qb.SetOffset(offset)
+	qb.SetLimit(limit)
 
 	query, err := qb.GetQuery()
 	if err != nil {

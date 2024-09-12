@@ -33,7 +33,7 @@ func GetRecords(attributeIdLookup uuid.UUID, idsExclude []int64,
 	qb.AddList("SELECT", []string{fmt.Sprintf(`"%s"`, schema.PkName),
 		fmt.Sprintf(`"%s"`, atr.Name)})
 
-	qb.Set("FROM", fmt.Sprintf(`"%s"."%s"`, mod.Name, rel.Name))
+	qb.SetFrom(fmt.Sprintf(`"%s"."%s"`, mod.Name, rel.Name))
 
 	if len(idsExclude) != 0 {
 		qb.Add("WHERE", fmt.Sprintf(`"%s" <> ALL({IDS_EXCLUDE})`, schema.PkName))
@@ -49,7 +49,7 @@ func GetRecords(attributeIdLookup uuid.UUID, idsExclude []int64,
 	}
 
 	qb.Add("ORDER", fmt.Sprintf(`"%s" ASC`, atr.Name))
-	qb.Set("LIMIT", 10)
+	qb.SetLimit(10)
 
 	query, err := qb.GetQuery()
 	if err != nil {

@@ -10,6 +10,7 @@ import (
 	"r3/handler"
 	"r3/schema"
 	"r3/types"
+	"reflect"
 	"slices"
 	"sort"
 	"strings"
@@ -212,6 +213,9 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 				shipValues.values = append(shipValues.values, int64(v))
 			case []interface{}:
 				for _, v1 := range v {
+					if v1 == nil || reflect.TypeOf(v1).String() != "float64" {
+						return fmt.Errorf("invalid type for relationship value")
+					}
 					shipValues.values = append(shipValues.values, int64(v1.(float64)))
 				}
 			}

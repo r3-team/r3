@@ -21,7 +21,7 @@ func GetModule(byString string, languageCode string, limit int,
 		"rm.change_log", "rm.author", "rm.in_store", "rm.release_build",
 		"rm.release_build_app", "rm.release_date", "rm.file"})
 
-	qb.Set("FROM", "instance.repo_module AS rm")
+	qb.SetFrom("instance.repo_module AS rm")
 
 	// simple filters
 	if !getInstalled {
@@ -75,10 +75,10 @@ func GetModule(byString string, languageCode string, limit int,
 		qb.AddPara("{NAME}", fmt.Sprintf("%%%s%%", byString))
 	}
 	qb.Add("ORDER", "rm.release_date DESC")
-	qb.Set("OFFSET", offset)
+	qb.SetOffset(offset)
 
 	if limit != 0 {
-		qb.Set("LIMIT", limit)
+		qb.SetLimit(limit)
 	}
 
 	query, err := qb.GetQuery()

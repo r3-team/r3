@@ -277,8 +277,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		// check for valid date values (start/end)
 		if len(result.Values) < 2 ||
-			fmt.Sprintf("%s", reflect.TypeOf(result.Values[0])) != "int64" ||
-			fmt.Sprintf("%s", reflect.TypeOf(result.Values[1])) != "int64" {
+			result.Values[0] == nil ||
+			result.Values[1] == nil ||
+			reflect.TypeOf(result.Values[0]).String() != "int64" ||
+			reflect.TypeOf(result.Values[1]).String() != "int64" {
 
 			handler.AbortRequest(w, handlerContext, errors.New("invalid values for date"),
 				handler.ErrGeneral)

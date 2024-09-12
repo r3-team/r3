@@ -39,7 +39,7 @@ func Get(byId int64, byString string, limit int, offset int,
 	qb.AddList("SELECT", []string{"l.id", "l.ldap_id", "l.ldap_key",
 		"l.name", "l.admin", "l.no_auth", "l.active", "l.token_expiry_hours"})
 
-	qb.Set("FROM", "instance.login AS l")
+	qb.SetFrom("instance.login AS l")
 
 	// resolve requests for login records (records connected to logins via login attribute)
 	parts := make([]string, 0)
@@ -77,8 +77,8 @@ func Get(byId int64, byString string, limit int, offset int,
 	}
 
 	qb.Add("ORDER", "l.name ASC")
-	qb.Set("LIMIT", limit)
-	qb.Set("OFFSET", offset)
+	qb.SetLimit(limit)
+	qb.SetOffset(offset)
 
 	query, err := qb.GetQuery()
 	if err != nil {
@@ -142,7 +142,7 @@ func Get(byId int64, byString string, limit int, offset int,
 	var qb_cnt tools.QueryBuilder
 	qb_cnt.UseDollarSigns()
 	qb_cnt.AddList("SELECT", []string{"COUNT(*)"})
-	qb_cnt.Set("FROM", "instance.login")
+	qb_cnt.SetFrom("instance.login")
 
 	if byString != "" {
 		qb_cnt.Add("WHERE", `name ILIKE {NAME}`)
@@ -323,7 +323,7 @@ func GetNames(id int64, idsExclude []int64, byString string, noLdapAssign bool) 
 	qb.UseDollarSigns()
 	qb.AddList("SELECT", []string{"id", "name"})
 
-	qb.Set("FROM", "instance.login")
+	qb.SetFrom("instance.login")
 
 	if id != 0 {
 		qb.Add("WHERE", `id = {ID}`)
@@ -352,7 +352,7 @@ func GetNames(id int64, idsExclude []int64, byString string, noLdapAssign bool) 
 	}
 
 	qb.Add("ORDER", "name ASC")
-	qb.Set("LIMIT", 10)
+	qb.SetLimit(10)
 
 	query, err := qb.GetQuery()
 	if err != nil {
