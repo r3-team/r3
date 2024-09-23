@@ -9,9 +9,14 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"r3/log"
 	"r3/types"
+	"slices"
 )
+
+// license revocations
+var revocations = []string{"LI00334231"}
 
 // public key of OC2020_license_key, created 2020-10-05
 var publicKey = `-----BEGIN RSA PUBLIC KEY-----
@@ -104,6 +109,12 @@ func ActivateLicense() {
 
 	if err := rsa.VerifyPKCS1v15(key, crypto.SHA256, hashed[:], signature); err != nil {
 		log.Error("server", "failed to verify license", err)
+		return
+	}
+
+	// check if license has been revoked
+	if slices.Contains(revocations, licFile.License.LicenseId) {
+		log.Error("server", "failed to enable license", fmt.Errorf("license ID '%s' has been revoked", licFile.License.LicenseId))
 		return
 	}
 
