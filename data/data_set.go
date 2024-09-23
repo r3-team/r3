@@ -513,20 +513,19 @@ func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
 	dataGet := types.DataGet{
 		RelationId:  relationId,
 		IndexSource: 0,
-		Filters: []types.DataGetFilter{
-			types.DataGetFilter{
-				Connector: "AND",
-				Operator:  "=",
-				Side0: types.DataGetFilterSide{
-					AttributeId: pgtype.UUID{
-						Bytes: rel.AttributeIdPk,
-						Valid: true,
-					},
-				},
-				Side1: types.DataGetFilterSide{
-					Value: recordId,
+		Filters: []types.DataGetFilter{{
+			Connector: "AND",
+			Operator:  "=",
+			Side0: types.DataGetFilterSide{
+				AttributeId: pgtype.UUID{
+					Bytes: rel.AttributeIdPk,
+					Valid: true,
 				},
 			},
+			Side1: types.DataGetFilterSide{
+				Value: recordId,
+			},
+		},
 		},
 	}
 

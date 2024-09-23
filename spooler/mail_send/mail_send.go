@@ -178,6 +178,7 @@ func do(m types.Mail) error {
 			)
 			FROM instance_file."%s" AS r
 			WHERE r.record_id = $1
+			AND   r.date_delete IS NULL
 		`, schema.GetFilesTableName(atr.Id)), m.RecordId.Int64)
 
 		if err != nil {
