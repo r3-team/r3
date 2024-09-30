@@ -1090,16 +1090,23 @@ let MyForm = {
 					if(!isMulti) {
 						this.valuesNew[iaId] = isDeleted ? null : recordId;
 					}
-					else if(isDeleted) {
-						const pos = this.valuesNew[iaId].indexOf(recordId);
-						if(pos !== -1) this.valuesNew[iaId].splice(pos,1);
-					}
-					else if(isUpdated) {
-						if(this.valuesNew[iaId] === null) {
-							this.valuesNew[iaId] = [recordId];
+					else {
+						let val = JSON.parse(JSON.stringify(this.values[iaId]));
+
+						if(isDeleted && val !== null) {
+							const pos = val.indexOf(recordId);
+							if(pos !== -1) val.splice(pos,1);
+
+							this.valuesNew[iaId] = val;
 						}
-						else if(this.valuesNew[iaId].indexOf(recordId) === -1) {
-							this.valuesNew[iaId].push(recordId);
+						else if(isUpdated) {
+							if(val === null) {
+								this.valuesNew[iaId] = [recordId];
+							}
+							else if(val.indexOf(recordId) === -1) {
+								val.push(recordId);
+								this.valuesNew[iaId] = val;
+							}
 						}
 					}
 				}
