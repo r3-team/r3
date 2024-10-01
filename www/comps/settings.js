@@ -906,7 +906,6 @@ let MySettingsFixedTokens = {
 						</div>
 					</li>
 					<li>{{ capApp.device.uninstallStep2 }}</li>
-					<li>{{ capApp.device.uninstallStep3 }}</li>
 				</ol>
 			</div>
 		</div>

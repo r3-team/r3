@@ -2160,9 +2160,8 @@
 				"installStep2":"Anwendungs- & Konfigdatei in den gleichen Ordner herunterladen:",
 				"installStep3":"Die Anwendung starten. Sie wird sich installieren und dann im Systemtray erscheinen.",
 				"installStep4":"Die heruntergeladenen Anwendungs- & Konfigdateien können jetzt gelöscht werden.",
-				"uninstallStep1":"Rechts-klicken auf das Tray-Icon vom REI3-Client und die Option \"Autostart\" deaktivieren.",
-				"uninstallStep2":"Nochmal reckts-klicken auf das Tray-Icon vom REI3-Client und die Anwendung beenden.",
-				"uninstallStep3":"Der REI3-Client ist jetzt deinstalliert.",
+				"uninstallStep1":"Rechts-klicken auf das Tray-Icon vom REI3-Client und die Option \"Deinstallieren\" auswählen.",
+				"uninstallStep2":"Der REI3-Client ist jetzt deinstalliert.",
 				"updateStep1":"Die neue Anwendungsdatei herunterladen:",
 				"updateStep2":"Die Anwendung starten. Sie wird das Update ausführen und dann im Systemtray erscheinen.",
 				"updateStep3":"Die heruntergeladene Anwendungsdatei kann gelöscht werden."

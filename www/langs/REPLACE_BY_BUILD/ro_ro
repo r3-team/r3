@@ -2160,9 +2160,8 @@
 				"installStep2":"Download the application & config file to the same folder:",
 				"installStep3":"Start the application. It will install itself and then appear in your system tray.",
 				"installStep4":"You can now delete the downloaded application & config files.",
-				"uninstallStep1":"Right-click on the REI3 client tray icon and disable the 'auto-start' option.",
-				"uninstallStep2":"Right-click on the REI3 client tray icon again to quit the application.",
-				"uninstallStep3":"The REI3 client application is now uninstalled.",
+				"uninstallStep1":"Right-click on the REI3 client tray icon and choose the 'uninstall' option.",
+				"uninstallStep2":"The REI3 client application is now uninstalled.",
 				"updateStep1":"Download the new application file:",
 				"updateStep2":"Start the application. It will execute the update and then appear in your system tray.",
 				"updateStep3":"You can now delete the downloaded application file."
