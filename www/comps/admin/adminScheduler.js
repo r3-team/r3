@@ -268,9 +268,9 @@ let MyAdminScheduler = {
 			);
 			
 			switch(s.intervalType) {
-				case 'months': parts.push(this.capApp.scheduleLineDayMonths.replace('{DAY}',s.atDay+1)); break;
-				case 'weeks':  parts.push(this.capApp.scheduleLineDayWeeks.replace('{DAY}',s.atDay));    break;
-				case 'years':  parts.push(this.capApp.scheduleLineDayYears.replace('{DAY}',s.atDay));    break;
+				case 'months': parts.push(this.capApp.scheduleLineDayMonths.replace('{DAY}',s.atDay)); break;
+				case 'weeks':  parts.push(this.capApp.scheduleLineDayWeeks.replace('{DAY}',s.atDay));  break;
+				case 'years':  parts.push(this.capApp.scheduleLineDayYears.replace('{DAY}',s.atDay));  break;
 			}
 			
 			if(['days','weeks','months','years'].includes(s.intervalType))
