@@ -225,6 +225,9 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 			return err
 		}
 
+		// overwrite invalid inputs
+		s.AtDay = schema.GetValidAtDay(s.IntervalType, s.AtDay)
+
 		if known {
 			if _, err := tx.Exec(db.Ctx, `
 				UPDATE app.pg_function_schedule

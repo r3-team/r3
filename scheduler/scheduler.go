@@ -512,6 +512,7 @@ func getNextRunFromSchedule(s taskSchedule) int64 {
 	}
 
 	// more complex intervals, add dates and set to target day/time
+	// as no timezone is defined, tm will be in local time, which will affect all date operations
 	tm := time.Unix(s.runLastUnix, 0)
 
 	switch s.intervalType {
@@ -531,23 +532,23 @@ func getNextRunFromSchedule(s taskSchedule) int64 {
 	targetDay := tm.Day()
 	targetMonth := tm.Month()
 
+	// overwrite invalid inputs
+	s.atDay = schema.GetValidAtDay(s.intervalType, s.atDay)
+
 	switch s.intervalType {
 	case "weeks":
-		// 6 is highest allowed value (0 = sunday, 6 = saturday)
-		if s.atDay <= 6 {
-			// add difference between target weekday and current weekday to target day
-			targetDay += s.atDay - int(tm.Weekday())
-		}
+		// add difference between target weekday and last ran weekday to target day
+		targetDay += s.atDay - int(tm.Weekday())
 	case "months":
 		// set specified day
 		targetDay = s.atDay
 	case "years":
 		// set to month january, adding days as specified (70 days will end up in March)
-		targetMonth = 1
 		targetDay = s.atDay
+		targetMonth = 1
 	}
 
-	// apply target month/day and time
+	// apply target month/day and time at local time
 	tm = time.Date(tm.Year(), targetMonth, targetDay, s.atHour, s.atMinute,
 		s.atSecond, 0, tm.Location())
 

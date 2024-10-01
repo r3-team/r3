@@ -46,6 +46,27 @@ func IsContentText(content string) bool {
 	return content == "varchar" || content == "text"
 }
 
+// scheduler checks
+func GetValidAtDay(intervalType string, atDay int) int {
+	switch intervalType {
+	case "months":
+		// day < 1 would go to previous month, which is undesirable on a monthly interval
+		if atDay < 1 || atDay > 31 {
+			atDay = 1
+		}
+	case "weeks":
+		// 0 = Sunday, 6 = Saturday
+		if atDay < 0 || atDay > 6 {
+			atDay = 1
+		}
+	case "years":
+		if atDay > 365 {
+			atDay = 1
+		}
+	}
+	return atDay
+}
+
 // fully validates module dependencies
 func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	var cnt int
