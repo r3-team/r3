@@ -263,6 +263,86 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				RETURN 0;
 			END;
 			$BODY$;
+
+			CREATE OR REPLACE FUNCTION instance.login_meta_set(
+				_login_id INTEGER,
+				_department TEXT,
+				_email TEXT,
+				_location TEXT,
+				_name_display TEXT,
+				_name_fore TEXT,
+				_name_sur TEXT,
+				_notes TEXT,
+				_organization TEXT,
+				_phone_fax TEXT,
+				_phone_landline TEXT,
+				_phone_mobile TEXT)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+			DECLARE
+			BEGIN
+				IF (
+					SELECT id
+					FROM instance.login
+					WHERE id = _login_id
+				) IS NULL THEN
+				 	RETURN 1;
+				END IF;
+
+				IF (
+					SELECT login_id
+					FROM instance.login_meta
+					WHERE login_id = _login_id
+				) IS NULL THEN
+					INSERT INTO instance.login_meta (
+						login_id,
+						department,
+						email,
+						location,
+						name_display,
+						name_fore,
+						name_sur,
+						notes,
+						organization,
+						phone_fax,
+						phone_landline,
+						phone_mobile
+					)
+					VALUES (
+						_login_id,
+						COALESCE(_department, ''),
+						COALESCE(_email, ''),
+						COALESCE(_location, ''),
+						COALESCE(_name_display, ''),
+						COALESCE(_name_fore, ''),
+						COALESCE(_name_sur, ''),
+						COALESCE(_notes, ''),
+						COALESCE(_organization, ''),
+						COALESCE(_phone_fax, ''),
+						COALESCE(_phone_landline, ''),
+						COALESCE(_phone_mobile, '')
+					);
+				ELSE
+					UPDATE instance.login_meta
+					SET
+						department     = COALESCE(_department, ''),
+						email          = COALESCE(_email, ''),
+						location       = COALESCE(_location, ''),
+						name_display   = COALESCE(_name_display, ''),
+						name_fore      = COALESCE(_name_fore, ''),
+						name_sur       = COALESCE(_name_sur, ''),
+						notes          = COALESCE(_notes, ''),
+						organization   = COALESCE(_organization, ''),
+						phone_fax      = COALESCE(_phone_fax, ''),
+						phone_landline = COALESCE(_phone_landline, ''),
+						phone_mobile   = COALESCE(_phone_mobile, '')
+					WHERE login_id = _login_id;
+				END IF;
+
+				RETURN 0;
+			END;
+			$BODY$;
 		`)
 		return "3.9", err
 	},

@@ -532,9 +532,10 @@ let MyBuilderPgFunction = {
 				'abort_show_message','clean_up_e2ee_keys','file_link',
 				'files_get','get_e2ee_data_key_enc','get_name','get_login_id',
 				'get_login_language_code','get_preset_record_id','get_public_hostname',
-				'get_role_ids','has_role','has_role_any','log_error','log_info', 'login_sync_all',
-				'log_warning','mail_delete','mail_delete_after_attach','mail_get_next',
-				'mail_send','rest_call','update_collection'
+				'get_role_ids','has_role','has_role_any','log_error','log_info',
+				'login_meta_set','login_sync_all','log_warning','mail_delete',
+				'mail_delete_after_attach','mail_get_next','mail_send',
+				'rest_call','update_collection'
 			],
 			showHolderFncInstance:false,
 			showHolderFncModule:false,
