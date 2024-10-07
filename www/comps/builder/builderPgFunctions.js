@@ -39,6 +39,12 @@ let MyBuilderPgFunctions = {
 						</span>
 					</div>
 					<div class="row">
+						<my-button image="personArrow.png"
+							v-if="f.isLoginSync"
+							:active="false"
+							:captionTitle="capApp.isLoginSync"
+							:naked="true"
+						/>
 						<my-button image="databasePlay.png"
 							v-if="f.isTrigger"
 							:active="false"

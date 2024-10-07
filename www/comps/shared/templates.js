@@ -1,5 +1,6 @@
 export function getTemplateArgs(name) {
 	switch(name) {
+		case 'loginSync':        return '_event TEXT, _login instance.login_data'; break;
 		case 'restAuthResponse': // fallthrough
 		case 'restDataResponse': return 'http_status INTEGER, response TEXT, callback TEXT'; break;
 		default: return ''; break;
@@ -7,6 +8,7 @@ export function getTemplateArgs(name) {
 };
 export function getTemplateFnc(name,isTrigger) {
 	switch(name) {
+		case 'loginSync':        return loginSync;        break;
 		case 'mailsFromSpooler': return mailsFromSpooler; break;
 		case 'restAuthRequest':  return restAuthRequest;  break;
 		case 'restAuthResponse': return restAuthResponse; break;
@@ -21,6 +23,85 @@ export function getTemplateFnc(name,isTrigger) {
 export function getTemplateReturn(isTrigger) {
 	return isTrigger ? 'TRIGGER' : 'INTEGER';
 };
+
+// login sync
+let loginSync = `/*
+	# Introduction
+	This is the template for the login sync function. A login sync serves to
+	inform an application about changed logins so that it can update data
+	associated with them. It is executed whenever a login is changed.
+	
+	The most common use case is for applications to create user records, in
+	order to connect them to logins. To connect a user record, the login ID is
+	stored on the corresponding relation. This record can be in relationships
+	to define access permissions, store last user access and so on.
+	
+	The login ID can be filtered for in both frontend and backend to get records
+	associated with the current login.
+
+	# Use
+	A login sync function always takes 2 arguments.
+	The first argument '_event' (TEXT) contains the reason for the login sync:
+	* 'UPDATE' if login was created or changed.
+	* 'DELETE' if login was deleted.
+	
+	The second argument '_login' contains the meta data of the affected login:
+	* id             INTEGER // ID of the login
+	* username       TEXT    // username of the login
+	* is_active      BOOLEAN
+	* is_admin       BOOLEAN
+	* is_public      BOOLEAN
+	* department     TEXT
+	* email          TEXT
+	* location       TEXT
+	* name_display   TEXT
+	* name_fore      TEXT
+	* name_sur       TEXT
+	* organization   TEXT
+	* phone_fax      TEXT
+	* phone_mobile   TEXT
+	* phone_landline TEXT
+*/
+$BODY$
+DECLARE
+BEGIN
+	/* Example implementation
+	In update event, check if a record for the current login ID already exist;
+	create one if not, update it otherwise. In delete event, remove the login
+	association but keep the user record.
+	
+	IF _event = 'UPDATED' THEN
+		IF (
+			SELECT id
+			FROM my_app.my_users
+			WHERE login_id = _login.id
+		) IS NULL THEN
+			INSERT INTO my_app.my_users (
+				firstname,
+				lastname,
+				login_id
+			) VALUES (
+				_login.name_fore,
+				_login.name_sur,
+				_login.id
+			);
+		ELSE
+			UPDATE my_app.my_users
+			SET
+				firstname = _login.name_fore,
+				lastname  = _login.name_sur
+			WHERE login_id = _login.id;
+		END IF;
+	ELSE
+		UPDATE my_app.my_users
+		SET login_id = NULL
+		WHERE login_id = _login.id;
+	END IF;
+	*/
+
+	RETURN 0;
+END;
+$BODY$`;
 
 // mail processing
 let mailsFromSpooler = `-- this is an example of how to process mails waiting in the mail spooler

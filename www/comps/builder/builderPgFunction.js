@@ -428,11 +428,11 @@ let MyBuilderPgFunction = {
 						</tr>
 						<tr v-if="!isTrigger">
 							<td>{{ capApp.codeArgs }}</td>
-							<td><textarea v-model="codeArgs" @keyup="resetExec" :disabled="isTrigger || readonly" placeholder="-"></textarea></td>
+							<td><textarea v-model="codeArgs" @keyup="resetExec" :disabled="isTrigger || isLoginSync || readonly" placeholder="-"></textarea></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.codeReturns }}</td>
-							<td><input v-model="codeReturns" :disabled="isTrigger || readonly" placeholder="-" /></td>
+							<td><input v-model="codeReturns" :disabled="isTrigger || isLoginSync || readonly" placeholder="-" /></td>
 						</tr>
 						<tr v-if="isTrigger">
 							<td>{{ capApp.triggers }}</td>
@@ -445,11 +445,15 @@ let MyBuilderPgFunction = {
 								/>
 							</td>
 						</tr>
-						<tr v-if="!isTrigger">
+						<tr v-if="isLoginSync">
+							<td>{{ capApp.isLoginSync }}</td>
+							<td><my-bool v-model="isLoginSync" :readonly="true" /></td>
+						</tr>
+						<tr v-if="!isTrigger && !isLoginSync">
 							<td>{{ capApp.isFrontendExec }}</td>
 							<td><my-bool v-model="isFrontendExec" :readonly="isTrigger || readonly" /></td>
 						</tr>
-						<tr v-if="!isTrigger">
+						<tr v-if="!isTrigger && !isLoginSync">
 							<td>
 								<div class="column">
 									<span>{{ capApp.schedules }}</span>
@@ -506,6 +510,7 @@ let MyBuilderPgFunction = {
 			codeFunction:'',
 			codeReturns:'',
 			isFrontendExec:false,
+			isLoginSync:false,
 			isTrigger:false,
 			schedules:[],
 			
@@ -527,7 +532,7 @@ let MyBuilderPgFunction = {
 				'abort_show_message','clean_up_e2ee_keys','file_link',
 				'files_get','get_e2ee_data_key_enc','get_name','get_login_id',
 				'get_login_language_code','get_preset_record_id','get_public_hostname',
-				'get_role_ids','has_role','has_role_any','log_error','log_info',
+				'get_role_ids','has_role','has_role_any','log_error','log_info', 'login_sync_all',
 				'log_warning','mail_delete','mail_delete_after_attach','mail_get_next',
 				'mail_send','rest_call','update_collection'
 			],
@@ -651,6 +656,7 @@ let MyBuilderPgFunction = {
 			this.codeFunction   = this.placeholdersSet(this.pgFunction.codeFunction);
 			this.codeReturns    = this.pgFunction.codeReturns;
 			this.isFrontendExec = this.pgFunction.isFrontendExec;
+			this.isLoginSync    = this.pgFunction.isLoginSync;
 			this.isTrigger      = this.pgFunction.isTrigger;
 			this.schedules      = JSON.parse(JSON.stringify(this.pgFunction.schedules));
 			this.addNew         = false;

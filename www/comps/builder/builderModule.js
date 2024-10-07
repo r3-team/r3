@@ -8,8 +8,14 @@ import {MyModuleSelect}      from '../input.js';
 import MyInputColor          from '../inputColor.js';
 import {
 	copyValueDialog,
-	getNilUuid
+	getNilUuid,
+	getRandomInt
 } from '../shared/generic.js';
+import {
+	getTemplateArgs,
+	getTemplateFnc,
+	getTemplateReturn
+} from '../shared/templates.js';
 export {MyBuilderModule as default};
 
 let MyBuilderModuleStartForm = {
@@ -265,12 +271,24 @@ let MyBuilderModule = {
 				</tr>
 				<tr>
 					<td>{{ capApp.namePwa }}</td>
-					<td><input v-model="namePwa" :disabled="readonly" /></td>
+					<td>
+						<input maxlength="60"
+							:disabled="readonly"
+							:value="namePwa === null ? '' : namePwa"
+							@input="applyNullString('namePwa',$event.target.value)"
+						/>
+					</td>
 					<td>{{ capApp.namePwaHint }}</td>
 				</tr>
 				<tr>
 					<td>{{ capApp.namePwaShort }}</td>
-					<td><input v-model="namePwaShort" :disabled="readonly" /></td>
+					<td>
+						<input maxlength="12"
+							:disabled="readonly"
+							:value="namePwaShort === null ? '' : namePwaShort"
+							@input="applyNullString('namePwaShort',$event.target.value)"
+						/>
+					</td>
 					<td>{{ capApp.namePwaShortHint }}</td>
 				</tr>
 				<tr>
@@ -295,6 +313,41 @@ let MyBuilderModule = {
 						</div>
 					</td>
 					<td>{{ capApp.iconPwaHint }}</td>
+				</tr>
+				
+				<tr>
+					<td colspan="2"><b>{{ capApp.loginSync }}</b></td>
+					<td>{{ capApp.loginSyncHint }}</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.pgFunctionIdLoginSync }}</td>
+					<td>
+						<div class="column gap">
+							<div class="row gap">
+								<select
+									@input="applyNullString('pgFunctionIdLoginSync',$event.target.value)"
+									:value="pgFunctionIdLoginSync === null ? '' : pgFunctionIdLoginSync"
+								>
+									<option value="">-</option>
+									<option v-for="fnc in module.pgFunctions.filter(v => v.isLoginSync)" :value="fnc.id">
+										{{ fnc.name }}
+									</option>
+								</select>
+								<my-button image="open.png"
+									@trigger="$router.push('/builder/pg-function/'+pgFunctionIdLoginSync)"
+									:active="pgFunctionIdLoginSync !== null"
+									:captionTitle="capGen.button.open"
+								/>
+							</div>
+							<div class="row">
+								<my-button image="add.png"
+									@trigger="setNewLoginSync"
+									:caption="capApp.button.loginSyncCreate"
+								/>
+							</div>
+						</div>
+					</td>
+					<td>{{ capApp.pgFunctionIdLoginSyncHint }}</td>
 				</tr>
 				
 				<tr>
@@ -376,6 +429,7 @@ let MyBuilderModule = {
 			iconId:null,
 			iconIdPwa1:null,
 			iconIdPwa2:null,
+			pgFunctionIdLoginSync:null,
 			name:'',
 			namePwa:null,
 			namePwaShort:null,
@@ -403,17 +457,18 @@ let MyBuilderModule = {
 	},
 	computed:{
 		hasChanges:(s) =>
-			s.parentId        !== s.module.parentId
-			|| s.formId       !== s.module.formId
-			|| s.iconId       !== s.module.iconId
-			|| s.iconIdPwa1   !== s.module.iconIdPwa1
-			|| s.iconIdPwa2   !== s.module.iconIdPwa2
-			|| s.name         !== s.module.name
-			|| s.namePwa      !== s.module.namePwa
-			|| s.namePwaShort !== s.module.namePwaShort
-			|| s.color1       !== s.module.color1
-			|| s.position     !== s.module.position
-			|| s.languageMain !== s.module.languageMain
+			s.parentId                 !== s.module.parentId
+			|| s.formId                !== s.module.formId
+			|| s.iconId                !== s.module.iconId
+			|| s.iconIdPwa1            !== s.module.iconIdPwa1
+			|| s.iconIdPwa2            !== s.module.iconIdPwa2
+			|| s.pgFunctionIdLoginSync !== s.module.pgFunctionIdLoginSync
+			|| s.name                  !== s.module.name
+			|| s.namePwa               !== s.module.namePwa
+			|| s.namePwaShort          !== s.module.namePwaShort
+			|| s.color1                !== s.module.color1
+			|| s.position              !== s.module.position
+			|| s.languageMain          !== s.module.languageMain
 			|| JSON.stringify(s.dependsOn)  !== JSON.stringify(s.module.dependsOn)
 			|| JSON.stringify(s.startForms) !== JSON.stringify(s.module.startForms)
 			|| JSON.stringify(s.languages)  !== JSON.stringify(s.module.languages)
@@ -445,6 +500,10 @@ let MyBuilderModule = {
 		copyValueDialog,
 		getDependentModules,
 		getNilUuid,
+		getRandomInt,
+		getTemplateArgs,
+		getTemplateFnc,
+		getTemplateReturn,
 		getUnixFormat,
 		srcBase64Icon,
 		
@@ -452,24 +511,25 @@ let MyBuilderModule = {
 			if(!this.module) return;
 			
 			// values
-			this.parentId        = this.module.parentId;
-			this.formId          = this.module.formId;
-			this.iconId          = this.module.iconId;
-			this.iconIdPwa1      = this.module.iconIdPwa1;
-			this.iconIdPwa2      = this.module.iconIdPwa2;
-			this.name            = this.module.name;
-			this.namePwa         = this.module.namePwa;
-			this.namePwaShort    = this.module.namePwaShort;
-			this.color1          = this.module.color1;
-			this.position        = this.module.position;
-			this.languageMain    = this.module.languageMain;
-			this.releaseBuild    = this.module.releaseBuild;
-			this.releaseBuildApp = this.module.releaseBuildApp;
-			this.releaseDate     = this.module.releaseDate;
-			this.dependsOn       = JSON.parse(JSON.stringify(this.module.dependsOn));
-			this.startForms      = JSON.parse(JSON.stringify(this.module.startForms));
-			this.languages       = JSON.parse(JSON.stringify(this.module.languages));
-			this.captions        = JSON.parse(JSON.stringify(this.module.captions));
+			this.parentId              = this.module.parentId;
+			this.formId                = this.module.formId;
+			this.iconId                = this.module.iconId;
+			this.iconIdPwa1            = this.module.iconIdPwa1;
+			this.iconIdPwa2            = this.module.iconIdPwa2;
+			this.pgFunctionIdLoginSync = this.module.pgFunctionIdLoginSync;
+			this.name                  = this.module.name;
+			this.namePwa               = this.module.namePwa;
+			this.namePwaShort          = this.module.namePwaShort;
+			this.color1                = this.module.color1;
+			this.position              = this.module.position;
+			this.languageMain          = this.module.languageMain;
+			this.releaseBuild          = this.module.releaseBuild;
+			this.releaseBuildApp       = this.module.releaseBuildApp;
+			this.releaseDate           = this.module.releaseDate;
+			this.dependsOn             = JSON.parse(JSON.stringify(this.module.dependsOn));
+			this.startForms            = JSON.parse(JSON.stringify(this.module.startForms));
+			this.languages             = JSON.parse(JSON.stringify(this.module.languages));
+			this.captions              = JSON.parse(JSON.stringify(this.module.captions));
 		},
 		
 		// actions
@@ -479,6 +539,9 @@ let MyBuilderModule = {
 				formId:null,
 				roleId:null
 			});
+		},
+		applyNullString(key,value) {
+			this[key] = value === '' ? null : value;
 		},
 		goBack() {
 			window.history.back();
@@ -515,9 +578,10 @@ let MyBuilderModule = {
 					iconId:this.iconId,
 					iconIdPwa1:this.iconIdPwa1,
 					iconIdPwa2:this.iconIdPwa2,
+					pgFunctionIdLoginSync:this.pgFunctionIdLoginSync,
 					name:this.name,
-					namePwa:this.namePwa !== '' ? this.namePwa : null,
-					namePwaShort:this.namePwaShort !== '' ? this.namePwaShort : null,
+					namePwa:this.namePwa,
+					namePwaShort:this.namePwaShort,
 					color1:this.color1,
 					position:this.position,
 					languageMain:this.languageMain,
@@ -534,6 +598,38 @@ let MyBuilderModule = {
 			];
 			
 			ws.sendMultiple(requests,true).then(
+				() => this.$root.schemaReload(this.id),
+				this.$root.genericError
+			);
+		},
+		setNewLoginSync() {
+			let fncName = 'login_sync';
+			for(let fnc of this.module.pgFunctions) {
+				if(fnc.name === fncName) {
+					fncName = `login_sync_${this.getRandomInt(100000,200000)}`;
+					break;
+				}
+			}
+			
+			ws.sendMultiple([
+				ws.prepare('pgFunction','set',{
+					id:this.getNilUuid(),
+					moduleId:this.id,
+					name:fncName,
+					codeArgs:this.getTemplateArgs('loginSync'),
+					codeFunction:this.getTemplateFnc('loginSync',false),
+					codeReturns:this.getTemplateReturn(false),
+					isFrontendExec:false,
+					isLoginSync:true,
+					isTrigger:false,
+					schedules:[],
+					captions:{
+						pgFunctionTitle:{},
+						pgFunctionDesc:{}
+					}
+				}),
+				ws.prepare('schema','check',{moduleId:this.id})
+			],true).then(
 				() => this.$root.schemaReload(this.id),
 				this.$root.genericError
 			);

@@ -71,6 +71,7 @@ let MyBuilderNew = {
 							<select v-model="inputs.template">
 								<option value="">-</option>
 								<option value="mailsFromSpooler">{{ capApp.template.mailsFromSpooler }}</option>
+								<option value="loginSync">{{ capApp.template.loginSync }}</option>
 								<option value="restAuthRequest">{{ capApp.template.restAuthRequest }}</option>
 								<option value="restAuthResponse">{{ capApp.template.restAuthResponse }}</option>
 								<option value="restDataResponse">{{ capApp.template.restDataResponse }}</option>
@@ -342,6 +343,7 @@ let MyBuilderNew = {
 						codeFunction:this.getTemplateFnc(this.inputs.template,this.inputs.isTrigger),
 						codeReturns:this.getTemplateReturn(this.inputs.isTrigger),
 						isFrontendExec:false,
+						isLoginSync:this.inputs.template === 'loginSync',
 						isTrigger:this.inputs.isTrigger,
 						schedules:[],
 						captions:{
