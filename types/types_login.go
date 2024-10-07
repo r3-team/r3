@@ -25,6 +25,23 @@ type LoginClientEvent struct {
 	HotkeyModifier1 string      `json:"hotkeyModifier1"`
 	HotkeyModifier2 pgtype.Text `json:"hotkeyModifier2"`
 }
+type LoginMeta struct {
+	Department    string `json:"department"`
+	Email         string `json:"email"`
+	Location      string `json:"location"`
+	Notes         string `json:"notes"`
+	Organization  string `json:"organization"`
+	PhoneFax      string `json:"phoneFax"`
+	PhoneLandline string `json:"phoneLandline"`
+	PhoneMobile   string `json:"phoneMobile"`
+	NameDisplay   string `json:"nameDisplay"`
+	NameFore      string `json:"nameFore"`
+	NameSur       string `json:"nameSur"`
+}
+type LoginMfaToken struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+}
 type LoginPublicKey struct {
 	LoginId   int64   `json:"loginId"`   // ID of login
 	PublicKey string  `json:"publicKey"` // public key of login (not encrypted)
@@ -40,10 +57,6 @@ type LoginTokenFixed struct {
 	Context    string `json:"context"` // what is being used for (client, ics, totp)
 	Token      string `json:"token"`
 	DateCreate int64  `json:"dateCreate"`
-}
-type LoginMfaToken struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
 }
 type LoginWidgetGroupItem struct {
 	WidgetId pgtype.UUID `json:"widgetId"` // ID of a module widget, empty if system widget is used

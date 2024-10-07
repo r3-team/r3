@@ -82,6 +82,7 @@ func LoginGet(reqJson json.RawMessage) (interface{}, error) {
 			ByString       string                      `json:"byString"`
 			Limit          int                         `json:"limit"`
 			Offset         int                         `json:"offset"`
+			Meta           bool                        `json:"meta"`
 			RecordRequests []types.LoginAdminRecordGet `json:"recordRequests"`
 		}
 		res struct {
@@ -95,7 +96,7 @@ func LoginGet(reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 	res.Logins, res.Total, err = login.Get(req.ById, req.ByString,
-		req.Limit, req.Offset, req.RecordRequests)
+		req.Limit, req.Offset, req.Meta, req.RecordRequests)
 
 	return res, err
 }
@@ -151,6 +152,7 @@ func LoginSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 		Admin            bool                        `json:"admin"`
 		NoAuth           bool                        `json:"noAuth"`
 		TokenExpiryHours pgtype.Int4                 `json:"tokenExpiryHours"`
+		Meta             types.LoginMeta             `json:"meta"`
 		RoleIds          []uuid.UUID                 `json:"roleIds"`
 		Records          []types.LoginAdminRecordSet `json:"records"`
 		TemplateId       pgtype.Int8                 `json:"templateId"`
@@ -161,7 +163,7 @@ func LoginSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	}
 	return login.Set_tx(tx, req.Id, req.TemplateId, req.LdapId, req.LdapKey,
 		req.Name, req.Pass, req.Admin, req.NoAuth, req.Active, req.TokenExpiryHours,
-		req.RoleIds, req.Records)
+		req.Meta, req.RoleIds, req.Records)
 }
 func LoginSetMembers_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 

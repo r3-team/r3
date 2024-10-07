@@ -456,6 +456,20 @@
 				"template":"Predefined settings (display and theme options) are applied from the chosen template.",
 				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
+			"meta":{
+				"department":"Department",
+				"email":"Email",
+				"location":"Location",
+				"name":"Name",
+				"nameDisplay":"Display name",
+				"nameFore":"Forename",
+				"nameSur":"Surname",
+				"notes":"Description",
+				"organization":"Organization",
+				"phoneFax":"Phone: Fax",
+				"phoneLandline":"Phone: Landline",
+				"phoneMobile":"Phone: Mobile"
+			},
 			"admin":"Administrator",
 			"ldap":"LDAP assigned",
 			"ldapAssignActive":"Rolurile sunt atribuite prin apartenența la grupul LDAP",

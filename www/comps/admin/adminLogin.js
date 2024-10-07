@@ -136,6 +136,65 @@ let MyAdminLogin = {
 						<td><my-bool v-model="admin" /></td>
 						<td>{{ capApp.hint.admin }}</td>
 					</tr>
+
+					<!-- meta data -->
+					<tr>
+						<td>
+							<div class="title-cell">
+								<img src="images/question.png" />
+								<span>{{ capGen.details }}</span>
+							</div>
+						</td>
+						<td colspan="2">
+							<table class="generic-table default-inputs meta">
+								<tr>
+									<td class="minimum">{{ capApp.meta.name }}</td>
+									<td>
+										<div class="row gap">
+											<input class="dynamic" v-model="meta.nameFore" :disabled="isLdap" :placeholder="capApp.meta.nameFore" />
+											<input class="dynamic" v-model="meta.nameSur"  :disabled="isLdap" :placeholder="capApp.meta.nameSur"  />
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td class="minimum">{{ capApp.meta.nameDisplay }}</td>
+									<td><input class="dynamic" v-model="meta.nameDisplay" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">{{ capApp.meta.organization }}</td>
+									<td><input class="dynamic" v-model="meta.organization" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">{{ capApp.meta.location }}</td>
+									<td><input class="dynamic" v-model="meta.location" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">{{ capApp.meta.department }}</td>
+									<td><input class="dynamic" v-model="meta.department" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">{{ capApp.meta.email }}</td>
+									<td><input class="dynamic" v-model="meta.email" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">{{ capApp.meta.phoneMobile }}</td>
+									<td><input class="dynamic" v-model="meta.phoneMobile" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">{{ capApp.meta.phoneLandline }}</td>
+									<td><input class="dynamic" v-model="meta.phoneLandline" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">{{ capApp.meta.phoneFax }}</td>
+									<td><input class="dynamic" v-model="meta.phoneFax" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">{{ capApp.meta.notes }}</td>
+									<td><textarea class="dynamic" v-model="meta.notes" :disabled="isLdap"></textarea></td>
+								</tr>
+							</table>
+						</td>
+					</tr>
 					
 					<!-- login records -->
 					<tr v-for="(lf,lfi) in loginForms">
@@ -304,13 +363,14 @@ let MyAdminLogin = {
 			admin:false,
 			pass:'',
 			noAuth:false,
+			meta:{},
 			tokenExpiryHours:'',
 			records:[],
 			roleIds:[],
 			templateId:null,
 			
 			// states
-			inputKeys:['name','active','admin','pass','noAuth','tokenExpiryHours','records','roleIds'],
+			inputKeys:['name','active','admin','pass','meta','noAuth','tokenExpiryHours','records','roleIds'],
 			inputsOrg:{},      // map of original input values, key = input key
 			inputsReady:false, // inputs have been loaded
 			recordInput:'',    // record lookup input
@@ -496,6 +556,7 @@ let MyAdminLogin = {
 		get() {
 			ws.send('login','get',{
 				byId:this.id,
+				meta:true,
 				recordRequests:this.loginFormLookups
 			},true).then(
 				res => {
@@ -507,6 +568,7 @@ let MyAdminLogin = {
 					this.name             = login.name;
 					this.active           = login.active;
 					this.admin            = login.admin;
+					this.meta             = login.meta;
 					this.noAuth           = login.noAuth;
 					this.tokenExpiryHours = login.tokenExpiryHours;
 					this.records          = login.records;
@@ -565,6 +627,7 @@ let MyAdminLogin = {
 				pass:this.pass,
 				active:this.active,
 				admin:this.admin,
+				meta:this.meta,
 				noAuth:this.noAuth,
 				tokenExpiryHours:/^(0|[1-9]\d*)$/.test(this.tokenExpiryHours) ? parseInt(this.tokenExpiryHours) : null,
 				roleIds:this.roleIds,

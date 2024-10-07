@@ -92,15 +92,180 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
 	/*
-		ALTER TABLE app.column
-			DROP COLUMN batch_vertical,
-			DROP COLUMN clipboard,
-			DROP COLUMN wrap;
-
-		ALTER TABLE app.column ALTER COLUMN styles
-			TYPE app.column_style[] USING styles::CHARACTER VARYING(12)[]::app.column_style[];
+		nothing yet
 	*/
 
+	"3.8": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			-- cleanup from last release
+			ALTER TABLE app.column
+				DROP COLUMN batch_vertical,
+				DROP COLUMN clipboard,
+				DROP COLUMN wrap;
+
+			ALTER TABLE app.column ALTER COLUMN styles
+				TYPE app.column_style[] USING styles::CHARACTER VARYING(12)[]::app.column_style[];
+			
+			-- login sync
+			CREATE TABLE IF NOT EXISTS instance.login_meta (
+				login_id integer NOT NULL,
+				organization character varying(512) COLLATE pg_catalog."default",
+				location character varying(512) COLLATE pg_catalog."default",
+				department character varying(512) COLLATE pg_catalog."default",
+				email character varying(512) COLLATE pg_catalog."default",
+				phone_mobile character varying(512) COLLATE pg_catalog."default",
+				phone_landline character varying(512) COLLATE pg_catalog."default",
+				phone_fax character varying(512) COLLATE pg_catalog."default",
+				notes character varying(8196) COLLATE pg_catalog."default",
+				name_fore character varying(512) COLLATE pg_catalog."default",
+				name_sur character varying(512) COLLATE pg_catalog."default",
+				name_display character varying(512) COLLATE pg_catalog."default",
+				CONSTRAINT login_meta_pkey PRIMARY KEY (login_id),
+				CONSTRAINT login_meta_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+
+			CREATE TYPE instance.login_data AS (
+				-- login
+				id INTEGER,
+				is_active BOOLEAN,
+				is_admin BOOLEAN,
+				is_public BOOLEAN,
+				username character varying(128),
+
+				-- meta
+				organization character varying(512),
+				location character varying(512),
+				department character varying(512),
+				email character varying(512),
+				phone_mobile character varying(512),
+				phone_landline character varying(512),
+				phone_fax character varying(512),
+				notes character varying(512),
+				name_fore character varying(512),
+				name_sur character varying(512),
+				name_display character varying(512)
+			);
+
+			ALTER TABLE app.module
+				ADD COLUMN pg_function_id_login_sync UUID,
+				ADD CONSTRAINT pg_function_id_login_sync_fkey FOREIGN KEY (pg_function_id_login_sync)
+					REFERENCES app.pg_function (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_pg_function_id_login_sync_fkey ON app.module USING btree (pg_function_id_login_sync ASC NULLS LAST);
+
+			ALTER TABLE app.pg_function ADD COLUMN is_login_sync BOOL NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.pg_function ALTER COLUMN is_login_sync DROP DEFAULT;
+
+			CREATE OR REPLACE FUNCTION instance.login_sync(
+				_module_name TEXT,
+				_pg_function_name TEXT,
+				_login_id INTEGER,
+				_event TEXT)
+				RETURNS void
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+			DECLARE
+				_d   instance.login_data;
+				_rec RECORD;
+				_sql TEXT;
+			BEGIN
+				IF _event <> 'DELETED' AND _event <> 'UPDATED' THEN
+					RETURN;
+				END IF;
+
+				_sql := FORMAT('SELECT "%s"."%s"($1,$2)', _module_name, _pg_function_name);
+
+				FOR _rec IN (
+					SELECT
+						l.id,
+						l.name,
+						l.active,
+						l.admin,
+						l.no_auth,
+						m.department,
+						m.email,
+						m.location,
+						m.name_display,
+						m.name_fore,
+						m.name_sur,
+						m.organization,
+						m.phone_fax,
+						m.phone_mobile,
+						m.phone_landline
+					FROM      instance.login      AS l
+					LEFT JOIN instance.login_meta AS m ON m.login_id = l.id
+					WHERE _login_id IS NULL
+					OR    _login_id = l.id
+				) LOOP
+					-- login
+					_d.id        := _rec.id;
+					_d.username  := _rec.name;
+					_d.is_active := _rec.active;
+					_d.is_admin  := _rec.admin;
+					_d.is_public := _rec.no_auth;
+					
+					-- meta
+					_d.department     := COALESCE(_rec.department, '');
+					_d.email          := COALESCE(_rec.email, '');
+					_d.location       := COALESCE(_rec.location, '');
+					_d.name_display   := COALESCE(_rec.name_display, '');
+					_d.name_fore      := COALESCE(_rec.name_fore, '');
+					_d.name_sur       := COALESCE(_rec.name_sur, '');
+					_d.organization   := COALESCE(_rec.organization, '');
+					_d.phone_fax      := COALESCE(_rec.phone_fax, '');
+					_d.phone_mobile   := COALESCE(_rec.phone_mobile, '');
+					_d.phone_landline := COALESCE(_rec.phone_landline, ''); 
+				
+					EXECUTE _sql USING _event, _d;
+				END LOOP;
+			END;
+			$BODY$;
+			
+			CREATE OR REPLACE FUNCTION instance.login_sync_all(_module_id UUID)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+			DECLARE
+				_module_name      TEXT;
+				_pg_function_name TEXT;
+			BEGIN
+				-- resolve entity names
+				SELECT
+					m.name, (
+						SELECT name
+						FROM app.pg_function
+						WHERE module_id = m.id
+						AND   id        = m.pg_function_id_login_sync
+					)
+				INTO
+					_module_name,
+					_pg_function_name
+				FROM app.module AS m
+				WHERE m.id = _module_id;
+				
+				IF _module_name IS NULL OR _pg_function_name IS NULL THEN
+					RETURN 1;
+				END IF;
+
+				PERFORM instance.login_sync(
+					_module_name,
+					_pg_function_name,
+					NULL,
+					'UPDATED'
+				);
+				RETURN 0;
+			END;
+			$BODY$;
+		`)
+		return "3.9", err
+	},
 	"3.7": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			-- cleanup from last release

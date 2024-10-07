@@ -456,6 +456,20 @@
 				"template":"预定义设置（显示和主题选项）将从所选模板应用。",
 				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
+			"meta":{
+				"department":"Department",
+				"email":"Email",
+				"location":"Location",
+				"name":"Name",
+				"nameDisplay":"Display name",
+				"nameFore":"Forename",
+				"nameSur":"Surname",
+				"notes":"Description",
+				"organization":"Organization",
+				"phoneFax":"Phone: Fax",
+				"phoneLandline":"Phone: Landline",
+				"phoneMobile":"Phone: Mobile"
+			},
 			"admin":"管理员",
 			"ldap":"已分配 LDAP",
 			"ldapAssignActive":"角色由 LDAP 组成员身份分配",

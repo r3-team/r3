@@ -75,7 +75,5 @@ func PgFunctionSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, pgFunction.Set_tx(tx, req.ModuleId, req.Id, req.Name, req.CodeArgs,
-		req.CodeFunction, req.CodeReturns, req.IsFrontendExec, req.IsTrigger,
-		req.Schedules, req.Captions)
+	return nil, pgFunction.Set_tx(tx, req)
 }

@@ -456,6 +456,20 @@
 				"template":"Vorausgewählte Einstellungen (Anzeige- & Darstellungsoptionen) der gewählten Vorlage werden angewendet.",
 				"tokenExpiryHours":"Überschreibt die globale Einstellung für die max. Sitzungszeit."
 			},
+			"meta":{
+				"department":"Abteilung",
+				"email":"E-Mail",
+				"location":"Standort",
+				"name":"Name",
+				"nameDisplay":"Anzeigename",
+				"nameFore":"Vorname",
+				"nameSur":"Nachname",
+				"notes":"Beschreibung",
+				"organization":"Organisation",
+				"phoneFax":"Telefon: Fax",
+				"phoneLandline":"Telefon: Festnetz",
+				"phoneMobile":"Telefon: Mobil"
+			},
 			"admin":"Admin",
 			"ldap":"LDAP zugewiesen",
 			"ldapAssignActive":"Rollen werden anhand LDAP-Gruppenmitgliedschaften zugewiesen",

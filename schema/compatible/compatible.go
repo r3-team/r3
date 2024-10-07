@@ -343,3 +343,11 @@ func FixMissingOpenForm(formIdOpen pgtype.UUID, attributeIdRecord pgtype.UUID,
 	}
 	return oForm
 }
+
+// fix missing trigger state
+func FixMissingTriggerState(fnc types.PgFunction) types.PgFunction {
+	if strings.ToUpper(fnc.CodeReturns) == "TRIGGER" && !fnc.IsTrigger {
+		fnc.IsTrigger = true
+	}
+	return fnc
+}

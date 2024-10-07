@@ -361,11 +361,7 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 		log.Info("transfer", fmt.Sprintf("set PG function %s", e.Id))
 
-		if err := importCheckResultAndApply(tx, pgFunction.Set_tx(tx,
-			e.ModuleId, e.Id, e.Name, e.CodeArgs, e.CodeFunction, e.CodeReturns,
-			e.IsFrontendExec, e.IsTrigger, e.Schedules, e.Captions),
-			e.Id, idMapSkipped); err != nil {
-
+		if err := importCheckResultAndApply(tx, pgFunction.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}

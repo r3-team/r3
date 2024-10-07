@@ -8,40 +8,41 @@ import (
 )
 
 type Module struct {
-	Id              uuid.UUID         `json:"id"`
-	ParentId        pgtype.UUID       `json:"parentId"`        // module parent ID
-	FormId          pgtype.UUID       `json:"formId"`          // default start form
-	IconId          pgtype.UUID       `json:"iconId"`          // module icon in header/menu
-	IconIdPwa1      pgtype.UUID       `json:"iconIdPwa1"`      // PWA icon, 192x192
-	IconIdPwa2      pgtype.UUID       `json:"iconIdPwa2"`      // PWA icon, 512x512
-	Name            string            `json:"name"`            // name of module, is used for DB schema
-	NamePwa         pgtype.Text       `json:"namePwa"`         // name of module shown for PWA
-	NamePwaShort    pgtype.Text       `json:"namePwaShort"`    // name of module shown for PWA, short version
-	Color1          pgtype.Text       `json:"color1"`          // primary module color (used for header)
-	Position        int               `json:"position"`        // position of module in nav. contexts (home, header)
-	LanguageMain    string            `json:"languageMain"`    // language code of main language (for fallback)
-	ReleaseBuild    int               `json:"releaseBuild"`    // build of this module, incremented with each release
-	ReleaseBuildApp int               `json:"releaseBuildApp"` // build of app at last release
-	ReleaseDate     int64             `json:"releaseDate"`     // date of last release
-	DependsOn       []uuid.UUID       `json:"dependsOn"`       // modules that this module is dependent on
-	StartForms      []ModuleStartForm `json:"startForms"`      // start forms, assigned via role membership
-	Languages       []string          `json:"languages"`       // language codes that this module supports
-	Relations       []Relation        `json:"relations"`
-	Forms           []Form            `json:"forms"`
-	Menus           []Menu            `json:"menus"`
-	Icons           []Icon            `json:"icons"`
-	Roles           []Role            `json:"roles"`
-	Articles        []Article         `json:"articles"`
-	LoginForms      []LoginForm       `json:"loginForms"`
-	PgFunctions     []PgFunction      `json:"pgFunctions"`
-	PgTriggers      []PgTrigger       `json:"pgTriggers"`
-	JsFunctions     []JsFunction      `json:"jsFunctions"`
-	Collections     []Collection      `json:"collections"`
-	Apis            []Api             `json:"apis"`
-	ClientEvents    []ClientEvent     `json:"clientEvents"`
-	Widgets         []Widget          `json:"widgets"`
-	ArticleIdsHelp  []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
-	Captions        CaptionMap        `json:"captions"`
+	Id                    uuid.UUID         `json:"id"`
+	ParentId              pgtype.UUID       `json:"parentId"`              // module parent ID
+	FormId                pgtype.UUID       `json:"formId"`                // default start form
+	IconId                pgtype.UUID       `json:"iconId"`                // module icon in header/menu
+	IconIdPwa1            pgtype.UUID       `json:"iconIdPwa1"`            // PWA icon, 192x192
+	IconIdPwa2            pgtype.UUID       `json:"iconIdPwa2"`            // PWA icon, 512x512
+	PgFunctionIdLoginSync pgtype.UUID       `json:"pgFunctionIdLoginSync"` // function called, when login meta changes
+	Name                  string            `json:"name"`                  // name of module, is used for DB schema
+	NamePwa               pgtype.Text       `json:"namePwa"`               // name of module shown for PWA
+	NamePwaShort          pgtype.Text       `json:"namePwaShort"`          // name of module shown for PWA, short version
+	Color1                pgtype.Text       `json:"color1"`                // primary module color (used for header)
+	Position              int               `json:"position"`              // position of module in nav. contexts (home, header)
+	LanguageMain          string            `json:"languageMain"`          // language code of main language (for fallback)
+	ReleaseBuild          int               `json:"releaseBuild"`          // build of this module, incremented with each release
+	ReleaseBuildApp       int               `json:"releaseBuildApp"`       // build of app at last release
+	ReleaseDate           int64             `json:"releaseDate"`           // date of last release
+	DependsOn             []uuid.UUID       `json:"dependsOn"`             // modules that this module is dependent on
+	StartForms            []ModuleStartForm `json:"startForms"`            // start forms, assigned via role membership
+	Languages             []string          `json:"languages"`             // language codes that this module supports
+	Relations             []Relation        `json:"relations"`
+	Forms                 []Form            `json:"forms"`
+	Menus                 []Menu            `json:"menus"`
+	Icons                 []Icon            `json:"icons"`
+	Roles                 []Role            `json:"roles"`
+	Articles              []Article         `json:"articles"`
+	LoginForms            []LoginForm       `json:"loginForms"`
+	PgFunctions           []PgFunction      `json:"pgFunctions"`
+	PgTriggers            []PgTrigger       `json:"pgTriggers"`
+	JsFunctions           []JsFunction      `json:"jsFunctions"`
+	Collections           []Collection      `json:"collections"`
+	Apis                  []Api             `json:"apis"`
+	ClientEvents          []ClientEvent     `json:"clientEvents"`
+	Widgets               []Widget          `json:"widgets"`
+	ArticleIdsHelp        []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
+	Captions              CaptionMap        `json:"captions"`
 }
 type ModuleStartForm struct {
 	Position int       `json:"position"`
@@ -514,7 +515,8 @@ type PgFunction struct {
 	CodeFunction   string               `json:"codeFunction"`
 	CodeReturns    string               `json:"codeReturns"`
 	IsFrontendExec bool                 `json:"isFrontendExec"` // can be executed from frontend
-	IsTrigger      bool                 `json:"isTrigger"`      // is relation TRIGGER function
+	IsLoginSync    bool                 `json:"isLoginSync"`
+	IsTrigger      bool                 `json:"isTrigger"` // is relation TRIGGER function
 	Schedules      []PgFunctionSchedule `json:"schedules"`
 	Captions       CaptionMap           `json:"captions"`
 }

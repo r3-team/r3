@@ -30,6 +30,7 @@ type LoginAdmin struct {
 	Name             string             `json:"name"`
 	Active           bool               `json:"active"`
 	Admin            bool               `json:"admin"`
+	Meta             LoginMeta          `json:"meta"`
 	NoAuth           bool               `json:"noAuth"`
 	LanguageCode     string             `json:"languageCode"`
 	TokenExpiryHours pgtype.Int4        `json:"tokenExpiryHours"`

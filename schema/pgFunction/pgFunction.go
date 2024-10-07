@@ -7,6 +7,7 @@ import (
 	"r3/db/check"
 	"r3/schema"
 	"r3/schema/caption"
+	"r3/schema/compatible"
 	"r3/types"
 	"regexp"
 	"slices"
@@ -45,7 +46,7 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 
 	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT id, name, code_args, code_function, code_returns,
-			is_frontend_exec, is_trigger
+			is_frontend_exec, is_login_sync, is_trigger
 		FROM app.pg_function
 		WHERE module_id = $1
 		ORDER BY name ASC
@@ -58,7 +59,7 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 		var f types.PgFunction
 
 		if err := rows.Scan(&f.Id, &f.Name, &f.CodeArgs, &f.CodeFunction,
-			&f.CodeReturns, &f.IsFrontendExec, &f.IsTrigger); err != nil {
+			&f.CodeReturns, &f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger); err != nil {
 
 			return functions, err
 		}
@@ -124,47 +125,48 @@ func getSchedules_tx(tx pgx.Tx, pgFunctionId uuid.UUID) ([]types.PgFunctionSched
 	return schedules, nil
 }
 
-func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
-	codeArgs string, codeFunction string, codeReturns string,
-	isFrontendExec bool, isTrigger bool, schedules []types.PgFunctionSchedule,
-	captions types.CaptionMap) error {
+func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 
-	if err := check.DbIdentifier(name); err != nil {
+	if err := check.DbIdentifier(fnc.Name); err != nil {
 		return err
 	}
 
-	nameMod, err := schema.GetModuleNameById_tx(tx, moduleId)
+	nameMod, err := schema.GetModuleNameById_tx(tx, fnc.ModuleId)
 	if err != nil {
 		return err
 	}
 
 	// fix imports < 2.6: New "isTrigger" state
-	if strings.ToUpper(codeReturns) == "TRIGGER" && !isTrigger {
-		isTrigger = true
+	fnc = compatible.FixMissingTriggerState(fnc)
+
+	// enforce valid function configuration
+	if fnc.IsLoginSync {
+		fnc.CodeReturns = "INTEGER"
+		fnc.IsTrigger = false
+		fnc.IsFrontendExec = false
+	}
+	if fnc.IsTrigger {
+		fnc.CodeReturns = "TRIGGER"
+		fnc.IsFrontendExec = false
+		fnc.IsLoginSync = false
 	}
 
-	// enforce trigger function
-	if isTrigger {
-		codeReturns = "TRIGGER"
-		isFrontendExec = false
-	}
-
-	if codeFunction == "" || codeReturns == "" {
+	if fnc.CodeFunction == "" || fnc.CodeReturns == "" {
 		return errors.New("empty function body or missing returns")
 	}
 
-	known, err := schema.CheckCreateId_tx(tx, &id, "pg_function", "id")
+	known, err := schema.CheckCreateId_tx(tx, &fnc.Id, "pg_function", "id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		_, nameEx, _, isTriggerEx, err := schema.GetPgFunctionDetailsById_tx(tx, id)
+		_, nameEx, _, isTriggerEx, err := schema.GetPgFunctionDetailsById_tx(tx, fnc.Id)
 		if err != nil {
 			return err
 		}
 
-		if isTrigger != isTriggerEx {
+		if fnc.IsTrigger != isTriggerEx {
 			return errors.New("cannot convert between trigger and non-trigger function")
 		}
 
@@ -173,17 +175,17 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 			SET name = $1, code_args = $2, code_function = $3,
 				code_returns = $4, is_frontend_exec = $5
 			WHERE id = $6
-		`, name, codeArgs, codeFunction, codeReturns, isFrontendExec, id); err != nil {
+		`, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsFrontendExec, fnc.Id); err != nil {
 			return err
 		}
 
-		if name != nameEx {
-			if err := RecreateAffectedBy_tx(tx, "pg_function", id); err != nil {
+		if fnc.Name != nameEx {
+			if err := RecreateAffectedBy_tx(tx, "pg_function", fnc.Id); err != nil {
 				return fmt.Errorf("failed to recreate affected PG functions, %s", err)
 			}
 		}
 
-		if !isTrigger {
+		if !fnc.IsTrigger {
 			// drop and recreate non-trigger function because function arguments can change
 			// two functions with the same name but different interfaces can exist (overloading)
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
@@ -192,25 +194,25 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 				return err
 			}
 		} else {
-			if name != nameEx {
+			if fnc.Name != nameEx {
 				// rename instead of drop function if trigger
 				// we cannot drop trigger functions without recreating triggers
 				// renaming changes the function name in the trigger and allows us to replace it
 				// as triggers do not take arguments, overloading is not a problem
 				if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 					ALTER FUNCTION "%s"."%s" RENAME TO "%s"
-				`, nameMod, nameEx, name)); err != nil {
+				`, nameMod, nameEx, fnc.Name)); err != nil {
 					return err
 				}
 			}
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.pg_function (id, module_id, name, code_args,
-				code_function, code_returns, is_frontend_exec, is_trigger)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-		`, id, moduleId, name, codeArgs, codeFunction,
-			codeReturns, isFrontendExec, isTrigger); err != nil {
+			INSERT INTO app.pg_function (id, module_id, name, code_args, code_function,
+				code_returns, is_frontend_exec, is_login_sync, is_trigger)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+		`, fnc.Id, fnc.ModuleId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction,
+			fnc.CodeReturns, fnc.IsFrontendExec, fnc.IsLoginSync, fnc.IsTrigger); err != nil {
 
 			return err
 		}
@@ -218,7 +220,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 
 	// set schedules
 	scheduleIds := make([]uuid.UUID, 0)
-	for _, s := range schedules {
+	for _, s := range fnc.Schedules {
 
 		known, err = schema.CheckCreateId_tx(tx, &s.Id, "pg_function_schedule", "id")
 		if err != nil {
@@ -246,7 +248,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 					interval_type, interval_value
 				)
 				VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-			`, s.Id, id, s.AtSecond, s.AtMinute, s.AtHour, s.AtDay,
+			`, s.Id, fnc.Id, s.AtSecond, s.AtMinute, s.AtHour, s.AtDay,
 				s.IntervalType, s.IntervalValue); err != nil {
 
 				return err
@@ -267,17 +269,17 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		DELETE FROM app.pg_function_schedule
 		WHERE pg_function_id = $1
 		AND id <> ALL($2)
-	`, id, scheduleIds); err != nil {
+	`, fnc.Id, scheduleIds); err != nil {
 		return err
 	}
 
 	// set captions
-	if err := caption.Set_tx(tx, id, captions); err != nil {
+	if err := caption.Set_tx(tx, fnc.Id, fnc.Captions); err != nil {
 		return err
 	}
 
 	// apply function to database
-	codeFunction, err = processDependentIds_tx(tx, id, codeFunction)
+	fnc.CodeFunction, err = processDependentIds_tx(tx, fnc.Id, fnc.CodeFunction)
 	if err != nil {
 		return fmt.Errorf("failed to process entity IDs, %s", err)
 	}
@@ -285,7 +287,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	_, err = tx.Exec(db.Ctx, fmt.Sprintf(`
 		CREATE OR REPLACE FUNCTION "%s"."%s"(%s)
 		RETURNS %s LANGUAGE plpgsql AS %s
-	`, nameMod, name, codeArgs, codeReturns, codeFunction))
+	`, nameMod, fnc.Name, fnc.CodeArgs, fnc.CodeReturns, fnc.CodeFunction))
 	return err
 }
 
@@ -306,8 +308,7 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 		WHERE %s_id_on = $1
 	`, entity), entityId)
 	if err != nil {
-		return fmt.Errorf("failed to get PG function ID for %s ID %s: %w",
-			entity, entityId, err)
+		return fmt.Errorf("failed to get PG function ID for %s ID %s: %w", entity, entityId, err)
 	}
 
 	for rows.Next() {
@@ -324,11 +325,11 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 		var f types.PgFunction
 		if err := tx.QueryRow(db.Ctx, `
 			SELECT id, module_id, name, code_args, code_function, code_returns,
-				is_frontend_exec, is_trigger
+				is_frontend_exec, is_login_sync, is_trigger
 			FROM app.pg_function
 			WHERE id = $1
 		`, id).Scan(&f.Id, &f.ModuleId, &f.Name, &f.CodeArgs, &f.CodeFunction,
-			&f.CodeReturns, &f.IsFrontendExec, &f.IsTrigger); err != nil {
+			&f.CodeReturns, &f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger); err != nil {
 
 			return err
 		}
@@ -341,11 +342,7 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 		if err != nil {
 			return err
 		}
-
-		if err := Set_tx(tx, f.ModuleId, f.Id, f.Name, f.CodeArgs,
-			f.CodeFunction, f.CodeReturns, f.IsFrontendExec, f.IsTrigger,
-			f.Schedules, f.Captions); err != nil {
-
+		if err := Set_tx(tx, f); err != nil {
 			return err
 		}
 	}

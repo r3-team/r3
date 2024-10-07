@@ -7,10 +7,13 @@ import (
 	"r3/cache"
 	"r3/db"
 	"r3/handler"
+	"r3/log"
+	"r3/login/login_meta"
 	"r3/login/login_setting"
 	"r3/schema"
 	"r3/tools"
 	"r3/types"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -21,12 +24,15 @@ import (
 
 // delete one login
 func Del_tx(tx pgx.Tx, id int64) error {
+	// sync deletion before deleting the record as record meta data must be retrieved one last time
+	syncLogin(tx, "DELETED", id)
+
 	_, err := tx.Exec(db.Ctx, `DELETE FROM instance.login WHERE id = $1`, id)
 	return err
 }
 
 // get logins with meta data and total count
-func Get(byId int64, byString string, limit int, offset int,
+func Get(byId int64, byString string, limit int, offset int, meta bool,
 	recordRequests []types.LoginAdminRecordGet) ([]types.LoginAdmin, int, error) {
 
 	cache.Schema_mx.RLock()
@@ -134,6 +140,16 @@ func Get(byId int64, byString string, limit int, offset int,
 		}
 	}
 
+	// collect meta data
+	if meta {
+		for i, l := range logins {
+			logins[i].Meta, err = login_meta.Get(l.Id)
+			if err != nil {
+				return logins, 0, err
+			}
+		}
+	}
+
 	// get total count
 	if byId != 0 {
 		return logins, 1, nil
@@ -165,7 +181,7 @@ func Get(byId int64, byString string, limit int, offset int,
 // returns created login ID if new login
 func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4,
 	ldapKey pgtype.Text, name string, pass string, admin bool, noAuth bool,
-	active bool, tokenExpiryHours pgtype.Int4, roleIds []uuid.UUID,
+	active bool, tokenExpiryHours pgtype.Int4, meta types.LoginMeta, roleIds []uuid.UUID,
 	records []types.LoginAdminRecordSet) (int64, error) {
 
 	if name == "" {
@@ -239,6 +255,14 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 			}
 		}
 	}
+
+	// set meta data
+	if err := login_meta.Set_tx(tx, id, meta); err != nil {
+		return 0, err
+	}
+
+	// execute login sync
+	syncLogin(tx, "UPDATED", id)
 
 	// set records
 	for _, record := range records {
@@ -432,8 +456,9 @@ func CreateAdmin(username string, password string) error {
 	defer tx.Rollback(db.Ctx)
 
 	if _, err := Set_tx(tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{},
-		username, password, true, false, true, pgtype.Int4{}, []uuid.UUID{},
-		[]types.LoginAdminRecordSet{}); err != nil {
+		username, password, true, false, true, pgtype.Int4{},
+		types.LoginMeta{NameFore: "Admin", NameSur: "User", NameDisplay: username},
+		[]uuid.UUID{}, []types.LoginAdminRecordSet{}); err != nil {
 
 		return err
 	}
@@ -509,8 +534,8 @@ func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
 		}
 
 		_, err = Set_tx(tx, id, loginTemplateId, ldapIdSql, ldapKeySql,
-			ldapName, "", admin, false, ldapActive, pgtype.Int4{}, roleIds,
-			[]types.LoginAdminRecordSet{})
+			ldapName, "", admin, false, ldapActive, pgtype.Int4{}, types.LoginMeta{},
+			roleIds, []types.LoginAdminRecordSet{})
 
 		return id, true, err
 	}
@@ -525,4 +550,32 @@ func GenerateSaltHash(pw string) (salt pgtype.Text, hash pgtype.Text) {
 		hash.Valid = true
 	}
 	return salt, hash
+}
+
+// call login sync function for every module that has one to inform about changed login meta data
+func syncLogin(tx pgx.Tx, action string, id int64) {
+	logContext := "server"
+	logErr := "failed to execute login sync"
+
+	if !slices.Contains([]string{"DELETED", "UPDATED"}, action) {
+		log.Error(logContext, logErr, fmt.Errorf("unknown action '%s'", action))
+		return
+	}
+
+	cache.Schema_mx.RLock()
+	for _, mod := range cache.ModuleIdMap {
+		if !mod.PgFunctionIdLoginSync.Valid {
+			continue
+		}
+
+		fnc, exists := cache.PgFunctionIdMap[mod.PgFunctionIdLoginSync.Bytes]
+		if !exists {
+			continue
+		}
+
+		if _, err := tx.Exec(db.Ctx, `SELECT instance.login_sync($1,$2,$3,$4)`, mod.Name, fnc.Name, id, action); err != nil {
+			log.Error(logContext, logErr, err)
+		}
+	}
+	cache.Schema_mx.RUnlock()
 }

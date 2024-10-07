@@ -46,6 +46,10 @@
 	display:flex;
 	flex-flow:column nowrap;
 }
+.admin-login table.meta{
+	width:100%;
+	max-width:500px;
+}
 .admin-login .role-select{
 	margin-top:5px;
 	border-bottom:1px solid var(--color-border);

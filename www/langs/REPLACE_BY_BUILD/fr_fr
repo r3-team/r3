@@ -456,6 +456,20 @@
 				"template":"Les paramètres prédéfinis (options d'affichage et de thème) sont appliqués à partir du modèle choisi.",
 				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
+			"meta":{
+				"department":"Department",
+				"email":"Email",
+				"location":"Location",
+				"name":"Name",
+				"nameDisplay":"Display name",
+				"nameFore":"Forename",
+				"nameSur":"Surname",
+				"notes":"Description",
+				"organization":"Organization",
+				"phoneFax":"Phone: Fax",
+				"phoneLandline":"Phone: Landline",
+				"phoneMobile":"Phone: Mobile"
+			},
 			"admin":"Admin",
 			"ldap":"Attribué LDAP",
 			"ldapAssignActive":"Les rôles sont attribués par les appartenances aux groupes LDAP",

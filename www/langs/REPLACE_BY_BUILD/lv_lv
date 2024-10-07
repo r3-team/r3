@@ -456,6 +456,20 @@
 				"template":"No izvēlētās veidnes tiek piemēroti iepriekš noteiktie iestatījumi (parādīšanas un tēmas opcijas).",
 				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
+			"meta":{
+				"department":"Department",
+				"email":"Email",
+				"location":"Location",
+				"name":"Name",
+				"nameDisplay":"Display name",
+				"nameFore":"Forename",
+				"nameSur":"Surname",
+				"notes":"Description",
+				"organization":"Organization",
+				"phoneFax":"Phone: Fax",
+				"phoneLandline":"Phone: Landline",
+				"phoneMobile":"Phone: Mobile"
+			},
 			"admin":"Administrators",
 			"ldap":"Assigned to LDAP",
 			"ldapAssignActive":"Roles are assigned based on LDAP group memberships",
