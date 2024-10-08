@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"r3/cache"
+	"r3/cluster"
 	"r3/db"
 	"r3/handler"
 	"r3/log"
@@ -25,7 +26,7 @@ import (
 // delete one login
 func Del_tx(tx pgx.Tx, id int64) error {
 	// sync deletion before deleting the record as record meta data must be retrieved one last time
-	syncLogin(tx, "DELETED", id)
+	syncLogin_tx(tx, "DELETED", id)
 
 	_, err := tx.Exec(db.Ctx, `DELETE FROM instance.login WHERE id = $1`, id)
 	return err
@@ -262,7 +263,7 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 	}
 
 	// execute login sync
-	syncLogin(tx, "UPDATED", id)
+	syncLogin_tx(tx, "UPDATED", id)
 
 	// set records
 	for _, record := range records {
@@ -478,21 +479,21 @@ func ResetTotp_tx(tx pgx.Tx, loginId int64) error {
 // updates internal login backend with logins from LDAP
 // uses unique key value to update login record
 // can optionally update login roles
-// returns login ID and whether login needed to be changed
-func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
-	ldapActive bool, ldapRoleIds []uuid.UUID, loginTemplateId pgtype.Int8,
-	updateRoles bool) (int64, bool, error) {
+func SetLdapLogin(ldapId int32, ldapKey string, name string, active bool,
+	meta types.LoginMeta, roleIds []uuid.UUID, loginTemplateId pgtype.Int8,
+	updateRoles bool) error {
 
 	// existing login details
-	var id int64
+	var loginId int64
+	var adminEx, activeEx bool
+	var metaEx types.LoginMeta
 	var nameEx string
-	var roleIds []uuid.UUID
-	var admin, active bool
+	var roleIdsEx []uuid.UUID
 
 	// get login details and check whether roles could be updated
 	var rolesEqual pgtype.Bool
 
-	err := tx.QueryRow(db.Ctx, `
+	err := db.Pool.QueryRow(db.Ctx, `
 		SELECT r1.id, r1.name, r1.admin, r1.active, r1.roles,
 			(r1.roles <@ r2.roles AND r1.roles @> r2.roles) AS equal
 		FROM (
@@ -502,44 +503,94 @@ func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
 				WHERE lr.login_id = l.id
 			) AS roles
 			FROM instance.login AS l
-			WHERE l.ldap_id = $1::integer
-			AND l.ldap_key = $2::text
+			WHERE l.ldap_id  = $1::integer
+			AND   l.ldap_key = $2::text
 		) AS r1
 		
 		INNER JOIN (
 			SELECT $3::uuid[] AS roles
 		) AS r2 ON true
-	`, ldapId, ldapKey, ldapRoleIds).Scan(&id, &nameEx,
-		&admin, &active, &roleIds, &rolesEqual)
+	`, ldapId, ldapKey, roleIds).Scan(&loginId, &nameEx,
+		&adminEx, &activeEx, &roleIdsEx, &rolesEqual)
 
 	if err != nil && err != pgx.ErrNoRows {
-		return 0, false, err
+		return err
 	}
 
-	// create if new
-	// update if name, active state or roles changed
 	newLogin := err == pgx.ErrNoRows
-	rolesNeedUpdate := updateRoles && !rolesEqual.Bool
+	rolesBothEmpty := len(roleIdsEx) == 0 && len(roleIds) == 0
+	rolesChanged := updateRoles && !rolesEqual.Bool && !rolesBothEmpty
 
-	if newLogin || nameEx != ldapName || active != ldapActive || rolesNeedUpdate {
-
-		ldapIdSql := pgtype.Int4{Int32: ldapId, Valid: true}
-		ldapKeySql := pgtype.Text{String: ldapKey, Valid: true}
-
-		if rolesNeedUpdate {
-			roleIds = ldapRoleIds
+	// get meta data
+	if !newLogin {
+		metaEx, err = login_meta.Get(loginId)
+		if err != nil {
+			return err
 		}
-		if newLogin {
-			active = true
-		}
-
-		_, err = Set_tx(tx, id, loginTemplateId, ldapIdSql, ldapKeySql,
-			ldapName, "", admin, false, ldapActive, pgtype.Int4{}, types.LoginMeta{},
-			roleIds, []types.LoginAdminRecordSet{})
-
-		return id, true, err
 	}
-	return id, false, nil
+
+	metaChanged := metaEx.Department != meta.Department ||
+		metaEx.Email != meta.Email ||
+		metaEx.Location != meta.Location ||
+		metaEx.NameDisplay != meta.NameDisplay ||
+		metaEx.NameFore != meta.NameFore ||
+		metaEx.NameSur != meta.NameSur ||
+		metaEx.Notes != meta.Notes ||
+		metaEx.Organization != meta.Organization ||
+		metaEx.PhoneFax != meta.PhoneFax ||
+		metaEx.PhoneLandline != meta.PhoneLandline ||
+		metaEx.PhoneMobile != meta.PhoneMobile
+
+	// abort if no changes are there to apply
+	if !newLogin && nameEx == name && activeEx == active && !rolesChanged && !metaChanged {
+		return nil
+	}
+
+	// update if name, active state or roles changed
+	ldapIdSql := pgtype.Int4{Int32: ldapId, Valid: true}
+	ldapKeySql := pgtype.Text{String: ldapKey, Valid: true}
+
+	if rolesChanged {
+		roleIdsEx = roleIds
+	}
+
+	tx, err := db.Pool.Begin(db.Ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(db.Ctx)
+
+	log.Info("ldap", fmt.Sprintf("user account '%s' is new or has been changed, updating login", name))
+
+	if _, err := Set_tx(tx, loginId, loginTemplateId, ldapIdSql, ldapKeySql, name, "",
+		adminEx, false, active, pgtype.Int4{}, meta, roleIdsEx, []types.LoginAdminRecordSet{}); err != nil {
+
+		return err
+	}
+
+	// commit before renewing access cache (to apply new permissions)
+	if err := tx.Commit(db.Ctx); err != nil {
+		return err
+	}
+
+	// roles needed to be changed for active login, reauthorize
+	if active && rolesChanged {
+		log.Info("ldap", fmt.Sprintf("user account '%s' received new roles, renewing access permissions", name))
+
+		if err := cluster.LoginReauthorized(true, loginId); err != nil {
+			log.Warning("ldap", fmt.Sprintf("could not renew access permissions for '%s'", name), err)
+		}
+	}
+
+	// login was disabled, kick
+	if !active && activeEx {
+		log.Info("ldap", fmt.Sprintf("user account '%s' is locked, kicking active sessions", name))
+
+		if err := cluster.LoginDisabled(true, loginId); err != nil {
+			log.Warning("ldap", fmt.Sprintf("could not kick active sessions for '%s'", name), err)
+		}
+	}
+	return nil
 }
 
 func GenerateSaltHash(pw string) (salt pgtype.Text, hash pgtype.Text) {
@@ -553,7 +604,7 @@ func GenerateSaltHash(pw string) (salt pgtype.Text, hash pgtype.Text) {
 }
 
 // call login sync function for every module that has one to inform about changed login meta data
-func syncLogin(tx pgx.Tx, action string, id int64) {
+func syncLogin_tx(tx pgx.Tx, action string, id int64) {
 	logContext := "server"
 	logErr := "failed to execute login sync"
 

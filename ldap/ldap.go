@@ -3,6 +3,7 @@ package ldap
 import (
 	"r3/db"
 	"r3/types"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -19,12 +20,38 @@ func Get() ([]types.Ldap, error) {
 	ldaps := make([]types.Ldap, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, login_template_id, name, host, port, bind_user_dn,
-			bind_user_pw, search_class, search_dn, key_attribute,
-			login_attribute, member_attribute, assign_roles, ms_ad_ext,
-			starttls, tls, tls_verify
-		FROM instance.ldap
-		ORDER BY name ASC
+		SELECT
+			l.id,
+			l.login_template_id,
+			l.name,
+			l.host,
+			l.port,
+			l.bind_user_dn,
+			l.bind_user_pw,
+			l.search_class,
+			l.search_dn,
+			l.key_attribute,
+			l.login_attribute,
+			l.member_attribute,
+			l.assign_roles,
+			l.ms_ad_ext,
+			l.starttls,
+			l.tls,
+			l.tls_verify,
+			COALESCE(m.department, ''),
+			COALESCE(m.email, ''),
+			COALESCE(m.location, ''),
+			COALESCE(m.name_display, ''),
+			COALESCE(m.name_fore, ''),
+			COALESCE(m.name_sur, ''),
+			COALESCE(m.notes, ''),
+			COALESCE(m.organization, ''),
+			COALESCE(m.phone_fax, ''),
+			COALESCE(m.phone_landline, ''),
+			COALESCE(m.phone_mobile, '')
+		FROM      instance.ldap                      AS l
+		LEFT JOIN instance.ldap_attribute_login_meta AS m ON m.ldap_id = l.id
+		ORDER BY l.name ASC
 	`)
 	if err != nil {
 		return ldaps, err
@@ -32,14 +59,19 @@ func Get() ([]types.Ldap, error) {
 
 	for rows.Next() {
 		var l types.Ldap
+		var m types.LoginMeta
 		if err := rows.Scan(&l.Id, &l.LoginTemplateId, &l.Name, &l.Host,
 			&l.Port, &l.BindUserDn, &l.BindUserPw, &l.SearchClass, &l.SearchDn,
 			&l.KeyAttribute, &l.LoginAttribute, &l.MemberAttribute,
-			&l.AssignRoles, &l.MsAdExt, &l.Starttls, &l.Tls, &l.TlsVerify); err != nil {
+			&l.AssignRoles, &l.MsAdExt, &l.Starttls, &l.Tls, &l.TlsVerify,
+			&m.Department, &m.Email, &m.Location, &m.NameDisplay, &m.NameFore,
+			&m.NameSur, &m.Notes, &m.Organization, &m.PhoneFax, &m.PhoneLandline,
+			&m.PhoneMobile); err != nil {
 
 			rows.Close()
 			return ldaps, err
 		}
+		l.LoginMetaAttributes = m
 		ldaps = append(ldaps, l)
 	}
 	rows.Close()
@@ -89,6 +121,10 @@ func Set_tx(tx pgx.Tx, l types.Ldap) error {
 		}
 	}
 
+	if err := setLoginMetaAttributes_tx(tx, l.Id, l.LoginMetaAttributes); err != nil {
+		return err
+	}
+
 	// update LDAP role assignment
 	if _, err := tx.Exec(db.Ctx, `
 		DELETE FROM instance.ldap_role
@@ -106,6 +142,57 @@ func Set_tx(tx pgx.Tx, l types.Ldap) error {
 		}
 	}
 	return nil
+}
+
+func setLoginMetaAttributes_tx(tx pgx.Tx, ldapId int32, m types.LoginMeta) error {
+	var exists bool
+	if err := tx.QueryRow(db.Ctx, `
+		SELECT EXISTS(
+			SELECT ldap_id
+			FROM instance.ldap_attribute_login_meta
+			WHERE ldap_id = $1
+		)
+	`, ldapId).Scan(&exists); err != nil {
+		return err
+	}
+
+	// trim whitespaces from attributes
+	m.Department = strings.TrimSpace(m.Department)
+	m.Email = strings.TrimSpace(m.Email)
+	m.Location = strings.TrimSpace(m.Location)
+	m.NameDisplay = strings.TrimSpace(m.NameDisplay)
+	m.NameFore = strings.TrimSpace(m.NameFore)
+	m.NameSur = strings.TrimSpace(m.NameSur)
+	m.Notes = strings.TrimSpace(m.Notes)
+	m.Organization = strings.TrimSpace(m.Organization)
+	m.PhoneFax = strings.TrimSpace(m.PhoneFax)
+	m.PhoneLandline = strings.TrimSpace(m.PhoneLandline)
+	m.PhoneMobile = strings.TrimSpace(m.PhoneMobile)
+
+	var err error
+	if !exists {
+		_, err = tx.Exec(db.Ctx, `
+			INSERT INTO instance.ldap_attribute_login_meta (
+				ldap_id, department, email, location, name_display,
+				name_fore, name_sur, notes, organization, phone_fax,
+				phone_landline, phone_mobile
+			)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		`, ldapId, m.Department, m.Email, m.Location, m.NameDisplay,
+			m.NameFore, m.NameSur, m.Notes, m.Organization, m.PhoneFax,
+			m.PhoneLandline, m.PhoneMobile)
+	} else {
+		_, err = tx.Exec(db.Ctx, `
+			UPDATE instance.ldap_attribute_login_meta
+			SET department = $1, email = $2, location = $3, name_display = $4,
+				name_fore = $5, name_sur = $6, notes = $7, organization = $8,
+				phone_fax = $9, phone_landline = $10, phone_mobile = $11
+			WHERE ldap_id = $12
+		`, m.Department, m.Email, m.Location, m.NameDisplay, m.NameFore,
+			m.NameSur, m.Notes, m.Organization, m.PhoneFax, m.PhoneLandline,
+			m.PhoneMobile, ldapId)
+	}
+	return err
 }
 
 func getRoles(ldapId int32) ([]types.LdapRole, error) {

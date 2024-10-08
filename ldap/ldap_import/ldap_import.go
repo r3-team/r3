@@ -5,9 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"r3/cache"
-	"r3/cluster"
 	"r3/config"
-	"r3/db"
 	"r3/ldap/ldap_conn"
 	"r3/log"
 	"r3/login"
@@ -22,6 +20,7 @@ import (
 type loginType struct {
 	active  bool
 	name    string
+	meta    types.LoginMeta
 	roleIds []uuid.UUID
 }
 
@@ -62,6 +61,41 @@ func Run(ldapId int32) error {
 	// MS AD, add user account control (currently for account (de)activation)
 	if ldap.MsAdExt {
 		attributes = append(attributes, "userAccountControl")
+	}
+
+	// add login meta attributes if set
+	if ldap.LoginMetaAttributes.Department != "" {
+		attributes = append(attributes, ldap.LoginMetaAttributes.Department)
+	}
+	if ldap.LoginMetaAttributes.Email != "" {
+		attributes = append(attributes, ldap.LoginMetaAttributes.Email)
+	}
+	if ldap.LoginMetaAttributes.Location != "" {
+		attributes = append(attributes, ldap.LoginMetaAttributes.Location)
+	}
+	if ldap.LoginMetaAttributes.NameDisplay != "" {
+		attributes = append(attributes, ldap.LoginMetaAttributes.NameDisplay)
+	}
+	if ldap.LoginMetaAttributes.NameFore != "" {
+		attributes = append(attributes, ldap.LoginMetaAttributes.NameFore)
+	}
+	if ldap.LoginMetaAttributes.NameSur != "" {
+		attributes = append(attributes, ldap.LoginMetaAttributes.NameSur)
+	}
+	if ldap.LoginMetaAttributes.Notes != "" {
+		attributes = append(attributes, ldap.LoginMetaAttributes.Notes)
+	}
+	if ldap.LoginMetaAttributes.Organization != "" {
+		attributes = append(attributes, ldap.LoginMetaAttributes.Organization)
+	}
+	if ldap.LoginMetaAttributes.PhoneFax != "" {
+		attributes = append(attributes, ldap.LoginMetaAttributes.PhoneFax)
+	}
+	if ldap.LoginMetaAttributes.PhoneLandline != "" {
+		attributes = append(attributes, ldap.LoginMetaAttributes.PhoneLandline)
+	}
+	if ldap.LoginMetaAttributes.PhoneMobile != "" {
+		attributes = append(attributes, ldap.LoginMetaAttributes.PhoneMobile)
 	}
 
 	// MS AD: we have two choices to lookup nested groups
@@ -156,6 +190,40 @@ func Run(ldapId int32) error {
 					}
 				}
 
+				if ldap.LoginMetaAttributes.Department != "" {
+					l.meta.Department = entry.GetAttributeValue(ldap.LoginMetaAttributes.Department)
+				}
+				if ldap.LoginMetaAttributes.Email != "" {
+					l.meta.Email = entry.GetAttributeValue(ldap.LoginMetaAttributes.Email)
+				}
+				if ldap.LoginMetaAttributes.Location != "" {
+					l.meta.Location = entry.GetAttributeValue(ldap.LoginMetaAttributes.Location)
+				}
+				if ldap.LoginMetaAttributes.NameDisplay != "" {
+					l.meta.NameDisplay = entry.GetAttributeValue(ldap.LoginMetaAttributes.NameDisplay)
+				}
+				if ldap.LoginMetaAttributes.NameFore != "" {
+					l.meta.NameFore = entry.GetAttributeValue(ldap.LoginMetaAttributes.NameFore)
+				}
+				if ldap.LoginMetaAttributes.NameSur != "" {
+					l.meta.NameSur = entry.GetAttributeValue(ldap.LoginMetaAttributes.NameSur)
+				}
+				if ldap.LoginMetaAttributes.Notes != "" {
+					l.meta.Notes = entry.GetAttributeValue(ldap.LoginMetaAttributes.Notes)
+				}
+				if ldap.LoginMetaAttributes.Organization != "" {
+					l.meta.Organization = entry.GetAttributeValue(ldap.LoginMetaAttributes.Organization)
+				}
+				if ldap.LoginMetaAttributes.PhoneFax != "" {
+					l.meta.PhoneFax = entry.GetAttributeValue(ldap.LoginMetaAttributes.PhoneFax)
+				}
+				if ldap.LoginMetaAttributes.PhoneLandline != "" {
+					l.meta.PhoneLandline = entry.GetAttributeValue(ldap.LoginMetaAttributes.PhoneLandline)
+				}
+				if ldap.LoginMetaAttributes.PhoneMobile != "" {
+					l.meta.PhoneMobile = entry.GetAttributeValue(ldap.LoginMetaAttributes.PhoneMobile)
+				}
+
 				// role ID is empty if just users are queried
 				if ldap.AssignRoles && role.RoleId != uuid.Nil && !slices.Contains(l.roleIds, role.RoleId) {
 					l.roleIds = append(l.roleIds, role.RoleId)
@@ -179,51 +247,14 @@ func Run(ldapId int32) error {
 
 	// import logins
 	for key, l := range logins {
-		if err := importLogin(l, key, ldap); err != nil {
+		log.Info("ldap", fmt.Sprintf("processing login '%s' (key: %s, roles: %d)", l.name, key, len(l.roleIds)))
+
+		if err := login.SetLdapLogin(ldap.Id, key, l.name, l.active, l.meta, l.roleIds, ldap.LoginTemplateId, ldap.AssignRoles); err != nil {
 			log.Warning("ldap", fmt.Sprintf("failed to import login '%s'", l.name), err)
 			continue
 		}
 	}
 
 	log.Info("ldap", fmt.Sprintf("finished login import for '%s'", ldap.Name))
-	return nil
-}
-
-func importLogin(l loginType, key string, ldap types.Ldap) error {
-
-	log.Info("ldap", fmt.Sprintf("importing login '%s' (key: %s, roles: %d)",
-		l.name, key, len(l.roleIds)))
-
-	tx, err := db.Pool.Begin(db.Ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(db.Ctx)
-
-	loginId, changed, err := login.SetLdapLogin_tx(tx, ldap.Id, key, l.name,
-		l.active, l.roleIds, ldap.LoginTemplateId, ldap.AssignRoles)
-
-	if err != nil {
-		return err
-	}
-
-	// commit before renewing access cache (to apply new permissions)
-	if err := tx.Commit(db.Ctx); err != nil {
-		return err
-	}
-
-	if changed {
-		if l.active {
-			if err := cluster.LoginReauthorized(true, loginId); err != nil {
-				log.Warning("ldap", fmt.Sprintf("could not renew access permissions for '%s'",
-					l.name), err)
-			}
-		} else {
-			log.Info("ldap", fmt.Sprintf("user account '%s' is locked, kicking active sessions",
-				l.name))
-
-			cluster.LoginDisabled(true, loginId)
-		}
-	}
 	return nil
 }

@@ -376,6 +376,19 @@
 				"importDone":"Az importálás befejeződött",
 				"testDone":"A kapcsolat tesztelése sikeres volt"
 			},
+			"metaHint":{
+				"department":"Example: department",
+				"email":"Example: mail",
+				"location":"Example: physicalDeliveryOfficeName",
+				"nameDisplay":"Example: displayName",
+				"nameFore":"Example: givenName",
+				"nameSur":"Example: sn",
+				"notes":"Example: description",
+				"organization":"Example: company",
+				"phoneFax":"Example: facsimileTelephoneNumber",
+				"phoneLandline":"Example: telephoneNumber",
+				"phoneMobile":"Example: mobile"
+			},
 			"assignRoles":"Szerepek hozzárendelése csoporttagság alapján<br />(letiltja a kézi szerephozzárendelést)",
 			"bindUserDn":"Felhasználó DN kötéshez",
 			"bindUserDnHint":"Példa: CN=readonly,OU=User,DC=mycompany,DC=local",

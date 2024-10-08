@@ -376,6 +376,19 @@
 				"importDone":"Import has been completed",
 				"testDone":"Connection test was successful"
 			},
+			"metaHint":{
+				"department":"Example: department",
+				"email":"Example: mail",
+				"location":"Example: physicalDeliveryOfficeName",
+				"nameDisplay":"Example: displayName",
+				"nameFore":"Example: givenName",
+				"nameSur":"Example: sn",
+				"notes":"Example: description",
+				"organization":"Example: company",
+				"phoneFax":"Example: facsimileTelephoneNumber",
+				"phoneLandline":"Example: telephoneNumber",
+				"phoneMobile":"Example: mobile"
+			},
 			"assignRoles":"Set roles by group membership<br />(disables manual role assignment)",
 			"bindUserDn":"Bind user DN",
 			"bindUserDnHint":"Example: CN=readonly,OU=User,DC=mycompany,DC=local",

@@ -376,6 +376,19 @@
 				"importDone":"导入已完成",
 				"testDone":"连接测试成功"
 			},
+			"metaHint":{
+				"department":"Example: department",
+				"email":"Example: mail",
+				"location":"Example: physicalDeliveryOfficeName",
+				"nameDisplay":"Example: displayName",
+				"nameFore":"Example: givenName",
+				"nameSur":"Example: sn",
+				"notes":"Example: description",
+				"organization":"Example: company",
+				"phoneFax":"Example: facsimileTelephoneNumber",
+				"phoneLandline":"Example: telephoneNumber",
+				"phoneMobile":"Example: mobile"
+			},
 			"assignRoles":"通过组成员身份设置角色<br />(禁用手动角色分配)",
 			"bindUserDn":"绑定用户 DN",
 			"bindUserDnHint":"示例：CN=readonly,OU=User,DC=mycompany,DC=local",

@@ -137,17 +137,17 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				username character varying(128),
 
 				-- meta
-				organization character varying(512),
-				location character varying(512),
 				department character varying(512),
 				email character varying(512),
-				phone_mobile character varying(512),
-				phone_landline character varying(512),
-				phone_fax character varying(512),
-				notes character varying(512),
+				location character varying(512),
+				name_display character varying(512),
 				name_fore character varying(512),
 				name_sur character varying(512),
-				name_display character varying(512)
+				notes character varying(512),
+				organization character varying(512),
+				phone_fax character varying(512),
+				phone_landline character varying(512),
+				phone_mobile character varying(512)
 			);
 
 			ALTER TABLE app.module
@@ -163,6 +163,29 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.pg_function ADD COLUMN is_login_sync BOOL NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.pg_function ALTER COLUMN is_login_sync DROP DEFAULT;
 
+			-- login sync LDAP attributes
+			CREATE TABLE IF NOT EXISTS instance.ldap_attribute_login_meta (
+				ldap_id integer NOT NULL,
+				department TEXT,
+				email TEXT,
+				location TEXT,
+				name_display TEXT,
+				name_fore TEXT,
+				name_sur TEXT,
+				notes TEXT,
+				organization TEXT,
+				phone_fax TEXT,
+				phone_landline TEXT,
+				phone_mobile TEXT,
+				CONSTRAINT ldap_attribute_login_meta_pkey PRIMARY KEY (ldap_id),
+				CONSTRAINT ldap_attribute_login_meta_ldap_id_fkey FOREIGN KEY (ldap_id)
+					REFERENCES instance.ldap (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+
+			-- login sync instance functions
 			CREATE OR REPLACE FUNCTION instance.login_sync(
 				_module_name TEXT,
 				_pg_function_name TEXT,

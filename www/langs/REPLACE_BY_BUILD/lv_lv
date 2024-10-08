@@ -376,6 +376,19 @@
 				"importDone":"Imports ir pabeigts",
 				"testDone":"Savienojuma pārbaude veiksmīga"
 			},
+			"metaHint":{
+				"department":"Example: department",
+				"email":"Example: mail",
+				"location":"Example: physicalDeliveryOfficeName",
+				"nameDisplay":"Example: displayName",
+				"nameFore":"Example: givenName",
+				"nameSur":"Example: sn",
+				"notes":"Example: description",
+				"organization":"Example: company",
+				"phoneFax":"Example: facsimileTelephoneNumber",
+				"phoneLandline":"Example: telephoneNumber",
+				"phoneMobile":"Example: mobile"
+			},
 			"assignRoles":"Iestatīt lomas pēc grupas piederības<br />(izslēdz manuālu lomas piešķiršanu)",
 			"bindUserDn":"Sasaistīt lietotāja DN",
 			"bindUserDnHint":"Piemērs: CN=readonly,OU=Lietotājs,DC=manafirma,DC=locale",

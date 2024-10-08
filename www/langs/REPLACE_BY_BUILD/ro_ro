@@ -376,6 +376,19 @@
 				"importDone":"Importul a fost finalizat",
 				"testDone":"Testul de conectare a avut succes"
 			},
+			"metaHint":{
+				"department":"Example: department",
+				"email":"Example: mail",
+				"location":"Example: physicalDeliveryOfficeName",
+				"nameDisplay":"Example: displayName",
+				"nameFore":"Example: givenName",
+				"nameSur":"Example: sn",
+				"notes":"Example: description",
+				"organization":"Example: company",
+				"phoneFax":"Example: facsimileTelephoneNumber",
+				"phoneLandline":"Example: telephoneNumber",
+				"phoneMobile":"Example: mobile"
+			},
 			"assignRoles":"Setați roluri în funcție de apartenența la grup<br />(dezactivați atribuirea manuală a rolului)",
 			"bindUserDn":"Fixați utilizatorul DN",
 			"bindUserDnHint":"Exemplu: CN=readonly,OU=User,DC=mycompany,DC=local",

@@ -122,30 +122,67 @@ let MyAdminLdaps = {
 							<td>{{ capApp.searchDn }}</td>
 							<td><input v-model="searchDn" :placeholder="capApp.searchDnHint" /></td>
 						</tr>
-						<tr v-if="showExpert">
-							<td>{{ capApp.searchClass }}</td>
-							<td>
-								<input v-model="searchClass"
-									:placeholder="capApp.searchClassHint"
-								/>
-							</td>
-						</tr>
-						<tr v-if="showExpert">
-							<td>{{ capApp.keyAttribute }}</td>
-							<td>
-								<input v-model="keyAttribute"
-									:placeholder="capApp.keyAttributeHint"
-								/>
-							</td>
-						</tr>
-						<tr v-if="showExpert">
-							<td>{{ capApp.loginAttribute }}</td>
-							<td>
-								<input v-model="loginAttribute"
-									:placeholder="capApp.loginAttributeHint"
-								/>
-							</td>
-						</tr>
+						<template v-if="showExpert">
+							<tr>
+								<td>{{ capApp.searchClass }}</td>
+								<td><input v-model="searchClass" :placeholder="capApp.searchClassHint" /></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.keyAttribute }}</td>
+								<td><input v-model="keyAttribute" :placeholder="capApp.keyAttributeHint" /></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.loginAttribute }}</td>
+								<td><input v-model="loginAttribute" :placeholder="capApp.loginAttributeHint" /></td>
+							</tr>
+							<tr>
+								<td colspan="2"><b>{{ capGen.details }}</b></td>
+							</tr>
+							<tr>
+								<td>{{ capAppLogin.meta.department }}</td>
+								<td><input v-model="loginMetaAttributes.department" :placeholder="capApp.metaHint.department" /></td>
+							</tr>
+							<tr>
+								<td>{{ capAppLogin.meta.email }}</td>
+								<td><input v-model="loginMetaAttributes.email" :placeholder="capApp.metaHint.email" /></td>
+							</tr>
+							<tr>
+								<td>{{ capAppLogin.meta.location }}</td>
+								<td><input v-model="loginMetaAttributes.location" :placeholder="capApp.metaHint.location" /></td>
+							</tr>
+							<tr>
+								<td>{{ capAppLogin.meta.nameDisplay }}</td>
+								<td><input v-model="loginMetaAttributes.nameDisplay" :placeholder="capApp.metaHint.nameDisplay" /></td>
+							</tr>
+							<tr>
+								<td>{{ capAppLogin.meta.nameFore }}</td>
+								<td><input v-model="loginMetaAttributes.nameFore" :placeholder="capApp.metaHint.nameFore" /></td>
+							</tr>
+							<tr>
+								<td>{{ capAppLogin.meta.nameSur }}</td>
+								<td><input v-model="loginMetaAttributes.nameSur" :placeholder="capApp.metaHint.nameSur" /></td>
+							</tr>
+							<tr>
+								<td>{{ capAppLogin.meta.notes }}</td>
+								<td><input v-model="loginMetaAttributes.notes" :placeholder="capApp.metaHint.notes" /></td>
+							</tr>
+							<tr>
+								<td>{{ capAppLogin.meta.organization }}</td>
+								<td><input v-model="loginMetaAttributes.organization" :placeholder="capApp.metaHint.organization" /></td>
+							</tr>
+							<tr>
+								<td>{{ capAppLogin.meta.phoneFax }}</td>
+								<td><input v-model="loginMetaAttributes.phoneFax" :placeholder="capApp.metaHint.phoneFax" /></td>
+							</tr>
+							<tr>
+								<td>{{ capAppLogin.meta.phoneLandline }}</td>
+								<td><input v-model="loginMetaAttributes.phoneLandline" :placeholder="capApp.metaHint.phoneLandline" /></td>
+							</tr>
+							<tr>
+								<td>{{ capAppLogin.meta.phoneMobile }}</td>
+								<td><input v-model="loginMetaAttributes.phoneMobile" :placeholder="capApp.metaHint.phoneMobile" /></td>
+							</tr>
+						</template>
 						<tr>
 							<td>{{ capApp.tls }}</td>
 							<td><my-bool v-model="tls" :readonly="starttls" /></td>
@@ -246,6 +283,19 @@ let MyAdminLdaps = {
 			bindUserPw:'',
 			keyAttribute:'',
 			loginAttribute:'',
+			loginMetaAttributes:{
+				department:'department',
+				email:'mail',
+				location:'physicalDeliveryOfficeName',
+				nameDisplay:'displayName',
+				nameFore:'givenName',
+				nameSur:'sn',
+				notes:'description',
+				organization:'company',
+				phoneFax:'facsimileTelephoneNumber',
+				phoneLandline:'telephoneNumber',
+				phoneMobile:'mobile'
+			},
 			loginTemplateId:'',
 			memberAttribute:'',
 			searchClass:'',
@@ -259,10 +309,12 @@ let MyAdminLdaps = {
 			
 			// states
 			idEdit:-1,         // ID of LDAP connection being edited (0 = new)
-			inputKeys:['name','host','port','bindUserDn','bindUserPw',
-				'keyAttribute','loginAttribute','loginTemplateId',
-				'memberAttribute','searchClass','searchDn','assignRoles',
-				'msAdExt','starttls','tls','tlsVerify','roles'],
+			inputKeys:[
+				'name','host','port','bindUserDn','bindUserPw',
+				'keyAttribute','loginAttribute','loginMetaAttributes',
+				'loginTemplateId','memberAttribute','searchClass','searchDn',
+				'assignRoles','msAdExt','starttls','tls','tlsVerify','roles'
+			],
 			inputsOrg:{},      // map of original input values, key = input key
 			ldaps:[],
 			showExpert:false,
@@ -292,6 +344,7 @@ let MyAdminLdaps = {
 		modules:     (s) => s.$store.getters['schema/modules'],
 		roleIdMap:   (s) => s.$store.getters['schema/roleIdMap'],
 		capApp:      (s) => s.$store.getters.captions.admin.ldaps,
+		capAppLogin: (s) => s.$store.getters.captions.admin.login,
 		capGen:      (s) => s.$store.getters.captions.generic,
 		licenseValid:(s) => s.$store.getters.licenseValid
 	},
@@ -311,6 +364,19 @@ let MyAdminLdaps = {
 				bindUserDn:'',
 				bindUserPw:'',
 				keyAttribute:'objectGUID',
+				loginMetaAttributes:{
+					department:'department',
+					email:'mail',
+					location:'physicalDeliveryOfficeName',
+					nameDisplay:'displayName',
+					nameFore:'givenName',
+					nameSur:'sn',
+					notes:'description',
+					organization:'company',
+					phoneFax:'facsimileTelephoneNumber',
+					phoneLandline:'telephoneNumber',
+					phoneMobile:'mobile'
+				},
 				loginAttribute:'sAMAccountName',
 				loginTemplateId:null,
 				memberAttribute:'memberOf',
@@ -427,6 +493,7 @@ let MyAdminLdaps = {
 				bindUserPw:this.bindUserPw,
 				keyAttribute:this.keyAttribute,
 				loginAttribute:this.loginAttribute,
+				loginMetaAttributes:this.loginMetaAttributes,
 				loginTemplateId:this.loginTemplateId,
 				memberAttribute:this.memberAttribute,
 				searchClass:this.searchClass,
