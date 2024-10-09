@@ -638,6 +638,7 @@ let MyForm = {
 					case 'field':        return s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[side.fieldId],false)]; break;
 					case 'fieldChanged': return s.fieldIdsChanged.includes(side.fieldId); break;
 					case 'fieldValid':   return !s.fieldIdsInvalid.includes(side.fieldId); break;
+					case 'formChanged':  return s.hasChanges; break;
 					case 'languageCode': return s.settings.languageCode; break;
 					case 'login':        return s.loginId; break;
 					case 'preset':       return s.presetIdMapRecordId[side.presetId]; break;

@@ -188,6 +188,7 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 			break;
 			case 'fieldChanged': s.value = fieldIdsChanged.includes(s.fieldId);  break;
 			case 'fieldValid':   s.value = !fieldIdsInvalid.includes(s.fieldId); break;
+			case 'formChanged':  s.value = fieldIdsChanged.length !== 0;         break;
 			case 'javascript':   s.value = Function(s.value)();                  break;
 			case 'record':       if(typeof joinsIndexMap['0'] !== 'undefined') s.value = joinsIndexMap['0'].recordId;       break;
 			case 'recordNew':    if(typeof joinsIndexMap['0'] !== 'undefined') s.value = joinsIndexMap['0'].recordId === 0; break;

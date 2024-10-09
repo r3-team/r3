@@ -371,6 +371,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 			-- comment for mail accounts
 			ALTER TABLE instance.mail_account ADD COLUMN comment TEXT;
+
+			-- filter state: form changed
+			ALTER TYPE app.filter_side_content ADD VALUE 'formChanged';
 		`)
 		return "3.9", err
 	},
