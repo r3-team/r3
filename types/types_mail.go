@@ -35,6 +35,7 @@ type MailAccount struct {
 	HostName      string      `json:"hostName"`
 	HostPort      int64       `json:"hostPort"`
 	OauthClientId pgtype.Int4 `json:"oauthClientId"` // oauth client, if authmethod XOAUTH2 is used
+	Comment       string      `json:"comment"`
 }
 type MailFile struct {
 	Id   uuid.UUID `json:"id"`

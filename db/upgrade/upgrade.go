@@ -368,6 +368,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				RETURN 0;
 			END;
 			$BODY$;
+
+			-- comment for mail accounts
+			ALTER TABLE instance.mail_account ADD COLUMN comment TEXT;
 		`)
 		return "3.9", err
 	},

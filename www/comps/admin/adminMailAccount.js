@@ -133,6 +133,10 @@ let MyAdminMailAccount = {
 						<td><input v-model.number="inputs.hostPort" /></td>
 						<td></td>
 					</tr>
+					<tr>
+						<td>{{ capGen.comments }}*</td>
+						<td colspan="2"><textarea v-model="inputs.comment"></textarea></td>
+					</tr>
 				</table>
 			</div>
 		</div>
@@ -166,6 +170,7 @@ let MyAdminMailAccount = {
 		inputsOrg:(s) => s.isNew ? {
 			id:0,
 			name:'',
+			comment:'',
 			mode:'smtp',
 			authMethod:'plain',
 			username:'',
@@ -269,6 +274,7 @@ let MyAdminMailAccount = {
 			ws.send('mailAccount','set',{
 				id:this.id,
 				name:this.inputs.name,
+				comment:this.inputs.comment,
 				mode:this.inputs.mode,
 				authMethod:this.inputs.authMethod,
 				username:this.inputs.username,

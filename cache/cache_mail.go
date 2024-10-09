@@ -57,7 +57,7 @@ func LoadMailAccountMap() error {
 
 	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT id, oauth_client_id, name, mode, auth_method, username,
-			password, start_tls, send_as, host_name, host_port
+			password, start_tls, send_as, host_name, host_port, comment
 		FROM instance.mail_account
 	`)
 	if err != nil {
@@ -70,7 +70,7 @@ func LoadMailAccountMap() error {
 
 		if err := rows.Scan(&ma.Id, &ma.OauthClientId, &ma.Name, &ma.Mode,
 			&ma.AuthMethod, &ma.Username, &ma.Password, &ma.StartTls,
-			&ma.SendAs, &ma.HostName, &ma.HostPort); err != nil {
+			&ma.SendAs, &ma.HostName, &ma.HostPort, &ma.Comment); err != nil {
 
 			return err
 		}
