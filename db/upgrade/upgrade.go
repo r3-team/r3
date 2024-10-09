@@ -218,6 +218,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 						m.name_display,
 						m.name_fore,
 						m.name_sur,
+						m.notes,
 						m.organization,
 						m.phone_fax,
 						m.phone_mobile,
@@ -241,6 +242,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					_d.name_display   := COALESCE(_rec.name_display, '');
 					_d.name_fore      := COALESCE(_rec.name_fore, '');
 					_d.name_sur       := COALESCE(_rec.name_sur, '');
+					_d.notes          := COALESCE(_rec.notes, '');
 					_d.organization   := COALESCE(_rec.organization, '');
 					_d.phone_fax      := COALESCE(_rec.phone_fax, '');
 					_d.phone_mobile   := COALESCE(_rec.phone_mobile, '');

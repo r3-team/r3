@@ -38,14 +38,13 @@ func LoginAuthUser(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth 
 		return nil, err
 	}
 
-	res.Token, res.SaltKdf, res.MfaTokens, err = login_auth.User(req.Username,
-		req.Password, req.MfaTokenId, req.MfaTokenPin, loginId, admin, noAuth)
+	res.LoginName, res.Token, res.SaltKdf, res.MfaTokens, err = login_auth.User(
+		req.Username, req.Password, req.MfaTokenId, req.MfaTokenPin, loginId, admin, noAuth)
 
 	if err != nil {
 		return nil, err
 	}
 	res.LoginId = *loginId
-	res.LoginName = req.Username
 	return res, nil
 }
 

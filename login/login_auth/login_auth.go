@@ -71,15 +71,15 @@ func storeLastAuthDate(loginId int64) error {
 	return err
 }
 
-// performs authentication attempt for user by using username and password
-// returns JWT, KDF salt, MFA token list (if MFA is required)
+// performs authentication attempt for user by using username, password and MFA PINs (if used)
+// returns login name, JWT, KDF salt, MFA token list (if MFA is required)
 func User(username string, password string, mfaTokenId pgtype.Int4,
 	mfaTokenPin pgtype.Text, grantLoginId *int64, grantAdmin *bool,
-	grantNoAuth *bool) (string, string, []types.LoginMfaToken, error) {
+	grantNoAuth *bool) (string, string, string, []types.LoginMfaToken, error) {
 
 	mfaTokens := make([]types.LoginMfaToken, 0)
 	if username == "" {
-		return "", "", mfaTokens, errors.New("username not given")
+		return "", "", "", mfaTokens, errors.New("username not given")
 	}
 
 	// usernames are case insensitive
@@ -92,45 +92,47 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 	var saltKdf string
 	var admin bool
 	var noAuth bool
+	var nameDisplay pgtype.Text
 	var tokenExpiryHours pgtype.Int4
 
 	err := db.Pool.QueryRow(db.Ctx, `
-		SELECT id, ldap_id, salt, hash, salt_kdf, admin, no_auth, token_expiry_hours
-		FROM instance.login
-		WHERE active
-		AND name = $1
-	`, username).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin, &noAuth, &tokenExpiryHours)
+		SELECT l.id, l.ldap_id, l.salt, l.hash, l.salt_kdf, l.admin, l.no_auth, l.token_expiry_hours, lm.name_display
+		FROM      instance.login      AS l
+		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
+		WHERE l.active
+		AND   l.name = $1
+	`, username).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin, &noAuth, &tokenExpiryHours, &nameDisplay)
 
 	if err != nil && err != pgx.ErrNoRows {
-		return "", "", mfaTokens, err
+		return "", "", "", mfaTokens, err
 	}
 
 	// username not found / user inactive must result in same response as authentication failed
 	// otherwise we can probe the system for valid user names
 	if err == pgx.ErrNoRows {
-		return "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
+		return "", "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
 	}
 
 	if !noAuth && password == "" {
-		return "", "", mfaTokens, errors.New("password not given")
+		return "", "", "", mfaTokens, errors.New("password not given")
 	}
 
 	if !noAuth {
 		if ldapId.Valid {
 			// authentication against LDAP
 			if err := ldap_auth.Check(ldapId.Int32, username, password); err != nil {
-				return "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
+				return "", "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
 			}
 		} else {
 			// authentication against stored hash
 			if !hash.Valid || !salt.Valid || hash.String != tools.Hash(salt.String+password) {
-				return "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
+				return "", "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
 			}
 		}
 	}
 
 	if err := authCheckSystemMode(admin); err != nil {
-		return "", "", mfaTokens, err
+		return "", "", "", mfaTokens, err
 	}
 
 	// login ok
@@ -146,13 +148,13 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 			AND   id       = $2
 			AND   context  = 'totp'
 		`, loginId, mfaTokenId.Int32).Scan(&mfaToken); err != nil {
-			return "", "", mfaTokens, err
+			return "", "", "", mfaTokens, err
 		}
 
 		if mfaTokenPin.String != gotp.NewDefaultTOTP(base32.StdEncoding.WithPadding(
 			base32.NoPadding).EncodeToString(mfaToken)).Now() {
 
-			return "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
+			return "", "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
 		}
 
 	} else {
@@ -164,13 +166,13 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 			AND   context  = 'totp'
 		`, loginId)
 		if err != nil {
-			return "", "", mfaTokens, err
+			return "", "", "", mfaTokens, err
 		}
 
 		for rows.Next() {
 			var m types.LoginMfaToken
 			if err := rows.Scan(&m.Id, &m.Name); err != nil {
-				return "", "", mfaTokens, err
+				return "", "", "", mfaTokens, err
 			}
 			mfaTokens = append(mfaTokens, m)
 		}
@@ -178,27 +180,31 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 
 		// MFA tokens available, return with list
 		if len(mfaTokens) != 0 {
-			return "", "", mfaTokens, nil
+			return "", "", "", mfaTokens, nil
 		}
 	}
 
 	// create session token
 	token, err := createToken(loginId, username, admin, noAuth, tokenExpiryHours)
 	if err != nil {
-		return "", "", mfaTokens, err
+		return "", "", "", mfaTokens, err
 	}
 
 	// everything in order, auth successful
 	if err := login_license.RequestConcurrent(loginId, admin); err != nil {
-		return "", "", mfaTokens, err
+		return "", "", "", mfaTokens, err
 	}
 	if err := storeLastAuthDate(loginId); err != nil {
-		return "", "", mfaTokens, err
+		return "", "", "", mfaTokens, err
 	}
 	*grantLoginId = loginId
 	*grantAdmin = admin
 	*grantNoAuth = noAuth
-	return token, saltKdf, mfaTokens, nil
+
+	if nameDisplay.Valid && nameDisplay.String != "" {
+		return nameDisplay.String, token, saltKdf, mfaTokens, nil
+	}
+	return username, token, saltKdf, mfaTokens, nil
 }
 
 // performs authentication attempt for user by using existing JWT token, signed by server
@@ -231,18 +237,23 @@ func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *boo
 	}
 
 	// check if login is active
-	active := false
-	name := ""
+	var active bool
+	var name string
+	var nameDisplay pgtype.Text
 
 	if err := db.Pool.QueryRow(db.Ctx, `
-		SELECT name, active
-		FROM instance.login
-		WHERE id = $1
-	`, tp.LoginId).Scan(&name, &active); err != nil {
+		SELECT l.name, lm.name_display, l.active
+		FROM      instance.login      AS l
+		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
+		WHERE l.id = $1
+	`, tp.LoginId).Scan(&name, &nameDisplay, &active); err != nil {
 		return "", err
 	}
 	if !active {
 		return "", errors.New("login inactive")
+	}
+	if nameDisplay.Valid && nameDisplay.String != "" {
+		name = nameDisplay.String
 	}
 
 	// everything in order, auth successful

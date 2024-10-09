@@ -23,13 +23,14 @@ func GetPublic(ctx context.Context, relationId uuid.UUID,
 	loginNamesNoPublicKey := make([]string, 0)
 
 	rows, err := db.Pool.Query(ctx, fmt.Sprintf(`
-		SELECT l.id, l.name, l.key_public, ARRAY(
+		SELECT l.id, l.name, lm.name_display, l.key_public, ARRAY(
 			SELECT record_id
 			FROM instance_e2ee."%s"
 			WHERE record_id = ANY($1)
 			AND   login_id  = l.id
 		)
-		FROM instance.login AS l
+		FROM      instance.login      AS l
+		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
 		WHERE l.id = ANY($2)
 	`, schema.GetEncKeyTableName(relationId)), recordIds, loginIds)
 	if err != nil {
@@ -40,10 +41,11 @@ func GetPublic(ctx context.Context, relationId uuid.UUID,
 	for rows.Next() {
 		var loginId int64
 		var name string
+		var nameDisplay pgtype.Text
 		var key pgtype.Text
 		var recordIdsReady []int64
 
-		if err := rows.Scan(&loginId, &name, &key, &recordIdsReady); err != nil {
+		if err := rows.Scan(&loginId, &name, &nameDisplay, &key, &recordIdsReady); err != nil {
 			return keys, err
 		}
 
@@ -54,6 +56,9 @@ func GetPublic(ctx context.Context, relationId uuid.UUID,
 
 		// login has no public key, error
 		if !key.Valid {
+			if nameDisplay.Valid && nameDisplay.String != "" {
+				name = nameDisplay.String
+			}
 			loginNamesNoPublicKey = append(loginNamesNoPublicKey, name)
 			continue
 		}

@@ -57,6 +57,7 @@ let loginSync = `/*
 	* name_display   TEXT
 	* name_fore      TEXT
 	* name_sur       TEXT
+	* notes          TEXT
 	* organization   TEXT
 	* phone_fax      TEXT
 	* phone_mobile   TEXT

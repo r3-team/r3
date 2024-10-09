@@ -47,7 +47,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var isAdmin bool
 	var noAuth bool
 
-	token, _, mfaTokens, err := login_auth.User(req.Username, req.Password,
+	_, token, _, mfaTokens, err := login_auth.User(req.Username, req.Password,
 		pgtype.Int4{}, pgtype.Text{}, &loginId, &isAdmin, &noAuth)
 
 	if err != nil {

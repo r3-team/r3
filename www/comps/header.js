@@ -169,6 +169,7 @@ let MyHeader = {
 				@keyup.enter="$emit('show-settings')"
 			>
 				<img src="images/person.png" />
+				<span>{{ loginName }}</span>
 			</div>
 			
 			<!-- log off -->
@@ -326,6 +327,7 @@ let MyHeader = {
 		isAtMenu:         (s) => s.$store.getters.isAtMenu,
 		isMobile:         (s) => s.$store.getters.isMobile,
 		isNoAuth:         (s) => s.$store.getters.isNoAuth,
+		loginName:        (s) => s.$store.getters.loginName,
 		moduleEntries:    (s) => s.$store.getters.moduleEntries,
 		pwaModuleId:      (s) => s.$store.getters.pwaModuleId,
 		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,

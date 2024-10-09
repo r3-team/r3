@@ -84,9 +84,10 @@ func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordId int64,
 	}
 
 	rows, err := tx.Query(ctx, `
-		SELECT d.id, d.relation_id, l.name, d.date_change
+		SELECT d.id, d.relation_id, d.date_change, l.name, lm.name_display
 		FROM instance.data_log as d
-		LEFT JOIN instance.login AS l ON l.id = d.login_id_wofk
+		LEFT JOIN instance.login      AS l  ON l.id        = d.login_id_wofk
+		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
 		WHERE d.record_id_wofk = $1
 		AND d.id IN (
 			SELECT data_log_id
@@ -102,12 +103,16 @@ func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordId int64,
 	for rows.Next() {
 		var l types.DataLog
 		var name pgtype.Text
+		var nameDisplay pgtype.Text
 
-		if err := rows.Scan(&l.Id, &l.RelationId, &name, &l.DateChange); err != nil {
+		if err := rows.Scan(&l.Id, &l.RelationId, &l.DateChange, &name, &nameDisplay); err != nil {
 			return logs, err
 		}
 		l.RecordId = recordId
 		l.LoginName = name.String
+		if nameDisplay.Valid && nameDisplay.String != "" {
+			l.LoginName = nameDisplay.String
+		}
 		logs = append(logs, l)
 	}
 	rows.Close()
