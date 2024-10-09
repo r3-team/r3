@@ -1388,7 +1388,8 @@
 			"attributeLookup":"查找属性",
 			"formOpen":"打开的表单",
 			"newLoginForm":"新建登录表单",
-			"title":"登录表单"
+			"title":"登录表单",
+			"titleDepr":"Login forms are deprecated as of REI3.9. Though they will continue to work for a while, please consider switching to the login sync mechanism (s. Builder documentation)."
 		},
 		"menu":{
 			"button":{

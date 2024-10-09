@@ -1388,7 +1388,8 @@
 			"attributeLookup":"Attribut de recherche",
 			"formOpen":"Formulaire à ouvrir",
 			"newLoginForm":"Nouveau formulaire de connexion",
-			"title":"Formulaires de connexion"
+			"title":"Formulaires de connexion",
+			"titleDepr":"Login forms are deprecated as of REI3.9. Though they will continue to work for a while, please consider switching to the login sync mechanism (s. Builder documentation)."
 		},
 		"menu":{
 			"button":{

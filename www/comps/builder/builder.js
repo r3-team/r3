@@ -150,6 +150,7 @@ let MyBuilder = {
 					</router-link>
 					
 					<router-link class="entry clickable"
+						v-if="hasLoginForms"
 						:to="'/builder/login-forms/'+module.id"
 					>
 						<img src="images/personCog.png" />
@@ -233,6 +234,7 @@ let MyBuilder = {
 					<img src="images/codeScreen.png" />
 					<span>{{ capGen.jsFunctions }}</span>
 				</router-link>
+
 				<div class="row gap centered default-inputs transparent">
 					<input class="short" placeholder="..." spellcheck="false"
 						v-model="filter"
@@ -450,6 +452,7 @@ let MyBuilder = {
 		
 		// simple
 		createNewOpen:(s) => s.createNewEntity !== null,
+		hasLoginForms:(s) => !s.isNew && s.module.loginForms.length !== 0,
 		isNew:        (s) => s.moduleId === '',
 		jsFunctions:  (s) => s.getJsFunctionsProcessed(s.module.jsFunctions,s.filter),
 		module:       (s) => s.isNew ? false : s.moduleIdMap[s.moduleId],

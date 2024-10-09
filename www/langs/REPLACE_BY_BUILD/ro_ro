@@ -1388,7 +1388,8 @@
 			"attributeLookup":"Atribut de căutare",
 			"formOpen":"Formular pentru deschidere",
 			"newLoginForm":"Formular nou de autentificare",
-			"title":"Formulare de autentificare"
+			"title":"Formulare de autentificare",
+			"titleDepr":"Login forms are deprecated as of REI3.9. Though they will continue to work for a while, please consider switching to the login sync mechanism (s. Builder documentation)."
 		},
 		"menu":{
 			"button":{

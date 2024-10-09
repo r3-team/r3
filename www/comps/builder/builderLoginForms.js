@@ -182,6 +182,9 @@ let MyBuilderLoginForms = {
 		</div>
 		
 		<div class="content default-inputs" v-if="module">
+			<h2><b>{{ capApp.titleDepr }}</b></h2>
+			<br />
+
 			<table>
 				<thead>
 					<tr>

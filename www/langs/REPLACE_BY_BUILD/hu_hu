@@ -1388,7 +1388,8 @@
 			"attributeLookup":"Keresési attribútum",
 			"formOpen":"Megnyitandó űrlap",
 			"newLoginForm":"Új bejelentkezési űrlap",
-			"title":"Bejelentkezési űrlapok"
+			"title":"Bejelentkezési űrlapok",
+			"titleDepr":"Login forms are deprecated as of REI3.9. Though they will continue to work for a while, please consider switching to the login sync mechanism (s. Builder documentation)."
 		},
 		"menu":{
 			"button":{

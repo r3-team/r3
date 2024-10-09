@@ -1388,7 +1388,8 @@
 			"attributeLookup":"Auswahlattribut",
 			"formOpen":"Zu öffnendes Formular",
 			"newLoginForm":"Neues Anmeldeformular",
-			"title":"Anmeldeformulare"
+			"title":"Anmeldeformulare",
+			"titleDepr":"Anmeldeformulare sind seit REI3.9 veraltet. Auch wenn sie noch für eine Weile funktionieren werden, sollte auf das Anmelde-Sync-Verfahren gewechselt werden (s. Builder-Dokumentation)."
 		},
 		"menu":{
 			"button":{

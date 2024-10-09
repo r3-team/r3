@@ -1388,7 +1388,8 @@
 			"attributeLookup":"Attributo di ricerca",
 			"formOpen":"Modulo da aprire",
 			"newLoginForm":"Nuovo modulo login",
-			"title":"Moduli Login"
+			"title":"Moduli Login",
+			"titleDepr":"Login forms are deprecated as of REI3.9. Though they will continue to work for a while, please consider switching to the login sync mechanism (s. Builder documentation)."
 		},
 		"menu":{
 			"button":{
