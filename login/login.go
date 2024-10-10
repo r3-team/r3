@@ -479,9 +479,8 @@ func ResetTotp_tx(tx pgx.Tx, loginId int64) error {
 // updates internal login backend with logins from LDAP
 // uses unique key value to update login record
 // can optionally update login roles
-func SetLdapLogin(ldapId int32, ldapKey string, name string, active bool,
-	meta types.LoginMeta, roleIds []uuid.UUID, loginTemplateId pgtype.Int8,
-	updateRoles bool) error {
+func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
+	active bool, meta types.LoginMeta, roleIds []uuid.UUID) error {
 
 	// existing login details
 	var loginId int64
@@ -510,7 +509,7 @@ func SetLdapLogin(ldapId int32, ldapKey string, name string, active bool,
 		INNER JOIN (
 			SELECT $3::uuid[] AS roles
 		) AS r2 ON true
-	`, ldapId, ldapKey, roleIds).Scan(&loginId, &nameEx,
+	`, ldap.Id, ldapKey, roleIds).Scan(&loginId, &nameEx,
 		&adminEx, &activeEx, &roleIdsEx, &rolesEqual)
 
 	if err != nil && err != pgx.ErrNoRows {
@@ -519,27 +518,60 @@ func SetLdapLogin(ldapId int32, ldapKey string, name string, active bool,
 
 	newLogin := err == pgx.ErrNoRows
 	rolesBothEmpty := len(roleIdsEx) == 0 && len(roleIds) == 0
-	rolesChanged := updateRoles && !rolesEqual.Bool && !rolesBothEmpty
+	rolesChanged := ldap.AssignRoles && !rolesEqual.Bool && !rolesBothEmpty
 
-	// get meta data
+	// apply changed meta data from LDAP attributes, if they are defined
+	var metaChanged bool = false
 	if !newLogin {
 		metaEx, err = login_meta.Get(loginId)
 		if err != nil {
 			return err
 		}
+		if ldap.LoginMetaAttributes.Department != "" && meta.Department != metaEx.Department {
+			metaEx.Department = meta.Department
+			metaChanged = true
+		}
+		if ldap.LoginMetaAttributes.Email != "" && meta.Email != metaEx.Email {
+			metaEx.Email = meta.Email
+			metaChanged = true
+		}
+		if ldap.LoginMetaAttributes.Location != "" && meta.Location != metaEx.Location {
+			metaEx.Location = meta.Location
+			metaChanged = true
+		}
+		if ldap.LoginMetaAttributes.NameDisplay != "" && meta.NameDisplay != metaEx.NameDisplay {
+			metaEx.NameDisplay = meta.NameDisplay
+			metaChanged = true
+		}
+		if ldap.LoginMetaAttributes.NameFore != "" && meta.NameFore != metaEx.NameFore {
+			metaEx.NameFore = meta.NameFore
+			metaChanged = true
+		}
+		if ldap.LoginMetaAttributes.NameSur != "" && meta.NameSur != metaEx.NameSur {
+			metaEx.NameSur = meta.NameSur
+			metaChanged = true
+		}
+		if ldap.LoginMetaAttributes.Notes != "" && meta.Notes != metaEx.Notes {
+			metaEx.Notes = meta.Notes
+			metaChanged = true
+		}
+		if ldap.LoginMetaAttributes.Organization != "" && meta.Organization != metaEx.Organization {
+			metaEx.Organization = meta.Organization
+			metaChanged = true
+		}
+		if ldap.LoginMetaAttributes.PhoneFax != "" && meta.PhoneFax != metaEx.PhoneFax {
+			metaEx.PhoneFax = meta.PhoneFax
+			metaChanged = true
+		}
+		if ldap.LoginMetaAttributes.PhoneLandline != "" && meta.PhoneLandline != metaEx.PhoneLandline {
+			metaEx.PhoneLandline = meta.PhoneLandline
+			metaChanged = true
+		}
+		if ldap.LoginMetaAttributes.PhoneMobile != "" && meta.PhoneMobile != metaEx.PhoneMobile {
+			metaEx.PhoneMobile = meta.PhoneMobile
+			metaChanged = true
+		}
 	}
-
-	metaChanged := metaEx.Department != meta.Department ||
-		metaEx.Email != meta.Email ||
-		metaEx.Location != meta.Location ||
-		metaEx.NameDisplay != meta.NameDisplay ||
-		metaEx.NameFore != meta.NameFore ||
-		metaEx.NameSur != meta.NameSur ||
-		metaEx.Notes != meta.Notes ||
-		metaEx.Organization != meta.Organization ||
-		metaEx.PhoneFax != meta.PhoneFax ||
-		metaEx.PhoneLandline != meta.PhoneLandline ||
-		metaEx.PhoneMobile != meta.PhoneMobile
 
 	// abort if no changes are there to apply
 	if !newLogin && nameEx == name && activeEx == active && !rolesChanged && !metaChanged {
@@ -547,7 +579,7 @@ func SetLdapLogin(ldapId int32, ldapKey string, name string, active bool,
 	}
 
 	// update if name, active state or roles changed
-	ldapIdSql := pgtype.Int4{Int32: ldapId, Valid: true}
+	ldapIdSql := pgtype.Int4{Int32: ldap.Id, Valid: true}
 	ldapKeySql := pgtype.Text{String: ldapKey, Valid: true}
 
 	if rolesChanged {
@@ -562,8 +594,8 @@ func SetLdapLogin(ldapId int32, ldapKey string, name string, active bool,
 
 	log.Info("ldap", fmt.Sprintf("user account '%s' is new or has been changed, updating login", name))
 
-	if _, err := Set_tx(tx, loginId, loginTemplateId, ldapIdSql, ldapKeySql, name, "",
-		adminEx, false, active, pgtype.Int4{}, meta, roleIdsEx, []types.LoginAdminRecordSet{}); err != nil {
+	if _, err := Set_tx(tx, loginId, ldap.LoginTemplateId, ldapIdSql, ldapKeySql, name, "",
+		adminEx, false, active, pgtype.Int4{}, metaEx, roleIdsEx, []types.LoginAdminRecordSet{}); err != nil {
 
 		return err
 	}

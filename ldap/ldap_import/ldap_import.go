@@ -249,7 +249,7 @@ func Run(ldapId int32) error {
 	for key, l := range logins {
 		log.Info("ldap", fmt.Sprintf("processing login '%s' (key: %s, roles: %d)", l.name, key, len(l.roleIds)))
 
-		if err := login.SetLdapLogin(ldap.Id, key, l.name, l.active, l.meta, l.roleIds, ldap.LoginTemplateId, ldap.AssignRoles); err != nil {
+		if err := login.SetLdapLogin(ldap, key, l.name, l.active, l.meta, l.roleIds); err != nil {
 			log.Warning("ldap", fmt.Sprintf("failed to import login '%s'", l.name), err)
 			continue
 		}
