@@ -82,7 +82,7 @@ let MyInputFiles = {
 				<!-- new files upload -->
 				<label v-if="!readonly && !maxFiles">
 					<input hidden="hidden" multiple="multiple" type="file"
-						@change="upload($event.target.files)"
+						@change="upload($event.target.files,$event.target)"
 					/>
 					<my-button image="add.png"
 						:caption="capGen.button.add"
@@ -543,7 +543,7 @@ let MyInputFiles = {
 			this.dragActive = false;
 			if(!this.maxFiles) {
 				this.getFilesFromDataItems(event.dataTransfer.items).then(
-					files => this.upload(files)
+					files => this.upload(files,null)
 				);
 			}
 		},
@@ -698,15 +698,8 @@ let MyInputFiles = {
 			// when form is reloaded or sort updated, file name changes are applied
 			this.update(fileId,'rename',name);
 		},
-		upload(files) {
+		upload(files,inputTarget) {
 			let maxSize = this.attributeIdMap[this.attributeId].length;
-			let updateTotal = () => {
-				let total = 0;
-				for(let f of files) {
-					total += f.hasProgress;
-				}
-				this.progress = Math.floor(total / files.length);
-			}
 			
 			for(let file of files) {
 				if(maxSize !== 0 && Math.floor(file.size/1024) > maxSize) {
@@ -718,17 +711,10 @@ let MyInputFiles = {
 				}
 				
 				// upload file
-				let formData = new FormData();
-				let xhr      = new XMLHttpRequest();
+				let xhr = new XMLHttpRequest();
 				file.hasProgress = 0;
-				
-				xhr.upload.onprogress = function(event) {
-					if(event.lengthComputable) {
-						file.hasProgress = Math.floor(event.loaded / event.total * 100);
-						updateTotal();
-					}
-				};
-				xhr.onload = event => {
+
+				xhr.addEventListener('load', () => {
 					const res = JSON.parse(xhr.response);
 					
 					if(typeof res.error !== 'undefined')
@@ -740,7 +726,24 @@ let MyInputFiles = {
 						size:Math.floor(file.size/1024),
 						changed:0
 					}]);
-				};
+
+					// reset input to allow same file to be uploaded twice
+					if(inputTarget !== null)
+						inputTarget.value = '';
+				});
+				xhr.upload.addEventListener('progress', event => {
+					if(!event.lengthComputable)
+						return;
+					
+					file.hasProgress = Math.floor(event.loaded / event.total * 100);
+					let total = 0;
+					for(let f of files) {
+						total += f.hasProgress;
+					}
+					this.progress = Math.floor(total / files.length);
+				});
+
+				let formData = new FormData();
 				formData.append('token',this.token);
 				formData.append('attributeId',this.attributeId);
 				formData.append('fileId',this.getNilUuid())

@@ -28,7 +28,12 @@ self.addEventListener('install', event => {
 
 // request to fetch resource
 self.addEventListener('fetch', event => {
-	
+
+	// service worker cannot handle POST
+	// it also breaks POST progress (on things like uploads) if worker attempts to handle POST
+	if(event.request.method === 'POST')
+		return;
+
 	// respond with cached resource or fetch it first
 	event.respondWith(
 		caches.open(appCacheName).then(cache => {

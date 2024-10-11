@@ -378,7 +378,7 @@ let MyBuilderPgFunction = {
 							<td>{{ capApp.codeArgs }}</td>
 							<td>
 								<div class="column gap">
-									<input class="long"
+									<input class="dynamic"
 										v-model="execArgs[i]"
 										v-for="(a,i) in execArgInputs"
 										:disabled="readonly"
@@ -389,7 +389,7 @@ let MyBuilderPgFunction = {
 						</tr>
 						<tr>
 							<td>{{ capApp.execResponse }}</td>
-							<td><textarea class="long response" v-model="execResponse" disabled></textarea></td>
+							<td><textarea class="dynamic response" v-model="execResponse" disabled></textarea></td>
 						</tr>
 					</table>
 					<my-button image="settingsPlay.png"
@@ -673,7 +673,7 @@ let MyBuilderPgFunction = {
 			this.execResponse = '';
 			
 			for(let a of this.execArgInputs) {
-				this.execArgs.push('');
+				this.execArgs.push(null);
 			}
 		},
 		selectEntity(entity,id) {
@@ -867,11 +867,18 @@ let MyBuilderPgFunction = {
 			);
 		},
 		exec() {
+			// convert to NULL if inputs are empty
+			let args = JSON.parse(JSON.stringify(this.execArgs));
+			for(let i = 0, j = args.length; i < j; i++) {
+				if(args[i] === '')
+					args[i] = null
+			}
+
 			ws.send('pgFunction','execAny',{
 				id:this.pgFunction.id,
-				args:this.execArgs
+				args:args
 			},true).then(
-				res => this.execResponse = res.payload,
+				res => this.execResponse = res.payload === null ? '[NULL]' : res.payload,
 				this.$root.genericError
 			);
 		},

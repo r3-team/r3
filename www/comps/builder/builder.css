@@ -1015,6 +1015,9 @@
 .builder-function .entity:last-child{
 	border:none;
 }
+.builder-function .entity:hover{
+	background-color:var(--color-list-row-even);
+}
 .builder-function .entity-title{
 	display:flex;
 	flex-flow:row nowrap;
