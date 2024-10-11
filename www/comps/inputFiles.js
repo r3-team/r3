@@ -82,7 +82,7 @@ let MyInputFiles = {
 				<!-- new files upload -->
 				<label v-if="!readonly && !maxFiles">
 					<input hidden="hidden" multiple="multiple" type="file"
-						@change="upload($event.target.files)"
+						@change="upload($event.target.files,$event.target)"
 					/>
 					<my-button image="add.png"
 						:caption="capGen.button.add"
@@ -543,7 +543,7 @@ let MyInputFiles = {
 			this.dragActive = false;
 			if(!this.maxFiles) {
 				this.getFilesFromDataItems(event.dataTransfer.items).then(
-					files => this.upload(files)
+					files => this.upload(files,null)
 				);
 			}
 		},
@@ -698,7 +698,7 @@ let MyInputFiles = {
 			// when form is reloaded or sort updated, file name changes are applied
 			this.update(fileId,'rename',name);
 		},
-		upload(files) {
+		upload(files,inputTarget) {
 			let maxSize = this.attributeIdMap[this.attributeId].length;
 			
 			for(let file of files) {
@@ -726,6 +726,10 @@ let MyInputFiles = {
 						size:Math.floor(file.size/1024),
 						changed:0
 					}]);
+
+					// reset input to allow same file to be uploaded twice
+					if(inputTarget !== null)
+						inputTarget.value = '';
 				});
 				xhr.upload.addEventListener('progress', event => {
 					if(!event.lengthComputable)
