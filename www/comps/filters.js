@@ -742,7 +742,7 @@ let MyFilter = {
 			:readonly="position === 0"
 		/>
 		<my-filter-brackets class="brackets"
-			v-if="multipleFilters"
+			v-if="multipleFilters || isAnyBracketsSet"
 			v-model="brackets0Input"
 			:left="true"
 		/>
@@ -807,7 +807,7 @@ let MyFilter = {
 		</select>
 		
 		<my-filter-brackets class="brackets"
-			v-if="multipleFilters"
+			v-if="multipleFilters || isAnyBracketsSet"
 			v-model="brackets1Input"
 			:left="false"
 		/>
@@ -928,10 +928,11 @@ let MyFilter = {
 			}
 			return null;
 		},
-		side0ColumDate:(s) => s.side0Column && ['date','datetime'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
-		side0ColumTime:(s) => s.side0Column && ['datetime','time'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
-		isNullOperator:(s) => ['IS NULL','IS NOT NULL'].includes(s.operator),
-		isStringInput: (s) => (
+		side0ColumDate:  (s) => s.side0Column && ['date','datetime'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
+		side0ColumTime:  (s) => s.side0Column && ['datetime','time'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
+		isAnyBracketsSet:(s) => s.brackets0Input !== 0 || s.brackets1Input !== 0,
+		isNullOperator:  (s) => ['IS NULL','IS NOT NULL'].includes(s.operator),
+		isStringInput:   (s) => (
 			typeof s.side0.attributeId !== 'undefined' &&
 			s.side0.attributeId !== null &&
 			s.isAttributeString(s.attributeIdMap[s.side0.attributeId].content)
