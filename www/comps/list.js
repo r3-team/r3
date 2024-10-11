@@ -388,6 +388,7 @@ let MyList = {
 						:naked="true"
 					/>
 					<my-button image="toggleUp.png"
+						v-if="!isCards"
 						@trigger="toggleHeader"
 						:captionTitle="capApp.button.collapseHeader"
 						:naked="true"
