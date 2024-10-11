@@ -233,7 +233,7 @@ let MyAdminMailAccount = {
 		},
 		reloadAndClose() {
 			ws.send('mailAccount','reload',{},true).then(
-				this.$emit('close'),
+				() => this.$emit('close'),
 				this.$root.genericError
 			);
 		},
