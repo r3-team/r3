@@ -1109,6 +1109,9 @@ let MyForm = {
 							}
 						}
 					}
+
+					if(field.jsFunctionId !== null)
+						this.jsFunctionRun(field.jsFunctionId,[],this.exposedFunctions);
 				}
 			}
 
