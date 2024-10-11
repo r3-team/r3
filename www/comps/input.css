@@ -87,6 +87,7 @@
 }
 .input-select .entry.inactive{
 	color:var(--color-font-disabled);
+	-webkit-text-fill-color:var(--color-font-disabled); /* fix for Safari < 18.0 */
 }
 
 /* collection input */
@@ -361,6 +362,7 @@
 .input-date .date-inputs input:disabled{
 	color:var(--color-font-disabled);
 	background-color:var(--color-input-disabled);
+	-webkit-text-fill-color:var(--color-font-disabled); /* fix for Safari < 18.0 */
 }
 .input-date .date-inputs input::placeholder{
 	font-family:monospace;

@@ -168,6 +168,8 @@
 }
 .field .input:disabled{
 	color:inherit; /* readonly state is represented by field background */
+	opacity:1;     /* standardize across browsers */
+	-webkit-text-fill-color:var(--color-font-disabled); /* fix for Safari < 18.0 */
 }
 .field .input .list{
 	margin:0px;
