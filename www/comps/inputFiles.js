@@ -700,13 +700,6 @@ let MyInputFiles = {
 		},
 		upload(files) {
 			let maxSize = this.attributeIdMap[this.attributeId].length;
-			let updateTotal = () => {
-				let total = 0;
-				for(let f of files) {
-					total += f.hasProgress;
-				}
-				this.progress = Math.floor(total / files.length);
-			}
 			
 			for(let file of files) {
 				if(maxSize !== 0 && Math.floor(file.size/1024) > maxSize) {
@@ -718,17 +711,10 @@ let MyInputFiles = {
 				}
 				
 				// upload file
-				let formData = new FormData();
-				let xhr      = new XMLHttpRequest();
+				let xhr = new XMLHttpRequest();
 				file.hasProgress = 0;
-				
-				xhr.upload.onprogress = function(event) {
-					if(event.lengthComputable) {
-						file.hasProgress = Math.floor(event.loaded / event.total * 100);
-						updateTotal();
-					}
-				};
-				xhr.onload = event => {
+
+				xhr.addEventListener('load', () => {
 					const res = JSON.parse(xhr.response);
 					
 					if(typeof res.error !== 'undefined')
@@ -740,7 +726,20 @@ let MyInputFiles = {
 						size:Math.floor(file.size/1024),
 						changed:0
 					}]);
-				};
+				});
+				xhr.upload.addEventListener('progress', event => {
+					if(!event.lengthComputable)
+						return;
+					
+					file.hasProgress = Math.floor(event.loaded / event.total * 100);
+					let total = 0;
+					for(let f of files) {
+						total += f.hasProgress;
+					}
+					this.progress = Math.floor(total / files.length);
+				});
+
+				let formData = new FormData();
 				formData.append('token',this.token);
 				formData.append('attributeId',this.attributeId);
 				formData.append('fileId',this.getNilUuid())
