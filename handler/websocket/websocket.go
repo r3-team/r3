@@ -11,6 +11,7 @@ import (
 	"r3/cluster"
 	"r3/handler"
 	"r3/log"
+	"r3/login/login_session"
 	"r3/request"
 	"r3/types"
 	"sync"
@@ -22,6 +23,7 @@ import (
 
 // a websocket client
 type clientType struct {
+	id        uuid.UUID                   // unique ID for client (for registering/de-registering login sessions)
 	address   string                      // IP address, no port
 	admin     bool                        // belongs to admin login?
 	ctx       context.Context             // global context for client requests
@@ -94,8 +96,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// create global request context with abort function
 	ctx, ctxCancel := context.WithCancel(context.Background())
+	clientId, err := uuid.NewV4()
+	if err != nil {
+		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		ws.Close()
+		return
+	}
 
 	client := &clientType{
+		id:        clientId,
 		address:   host,
 		admin:     false,
 		ctx:       ctx,
@@ -130,6 +139,10 @@ func (hub *hubType) start() {
 			client.ctxCancel()
 			delete(hub.clients, client)
 			cluster.SetWebsocketClientCount(len(hub.clients))
+
+			if err := login_session.LogRemove(client.id); err != nil {
+				log.Error(handlerContext, "failed to remove login session log", err)
+			}
 		}
 	}
 
@@ -327,6 +340,10 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		if resTrans.Error == "" {
 			log.Info(handlerContext, fmt.Sprintf("authenticated client (login ID %d, admin: %v)",
 				client.loginId, client.admin))
+
+			if err := login_session.Log(client.id, client.loginId, client.device); err != nil {
+				log.Error(handlerContext, "failed to create login session log", err)
+			}
 		}
 	}
 

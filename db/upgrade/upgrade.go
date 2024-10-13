@@ -106,6 +106,31 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.column ALTER COLUMN styles
 				TYPE app.column_style[] USING styles::CHARACTER VARYING(12)[]::app.column_style[];
 			
+			-- limited logins
+			CREATE TYPE instance.login_session_device AS ENUM ('browser','fatClient');
+			
+			CREATE TABLE IF NOT EXISTS instance.login_session (
+				id UUID NOT NULL,
+				device instance.login_session_device NOT NULL,
+				login_id INTEGER NOT NULL,
+				node_id UUID NOT NULL,
+				date BIGINT NOT NULL,
+				CONSTRAINT login_session_pkey PRIMARY KEY (id),
+				CONSTRAINT login_session_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_session_node_id_fkey FOREIGN KEY (node_id)
+					REFERENCES instance_cluster.node (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_login_session_login_id_fkey ON instance.login_session USING btree (login_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_login_session_node_id_fkey  ON instance.login_session USING btree (node_id  ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_login_session_date          ON instance.login_session USING btree (date     ASC NULLS LAST);
+			
 			-- login sync
 			CREATE TABLE IF NOT EXISTS instance.login_meta (
 				login_id integer NOT NULL,

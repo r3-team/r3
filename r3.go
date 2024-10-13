@@ -42,6 +42,7 @@ import (
 	"r3/handler/websocket"
 	"r3/log"
 	"r3/login"
+	"r3/login/login_session"
 	"r3/scheduler"
 	"r3/tools"
 	"strings"
@@ -372,6 +373,11 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
+	// remove login sessions logs for this cluster node (in case they were not removed on shutdown)
+	if err := login_session.LogsRemoveForNode(); err != nil {
+		prg.logger.Error(err)
+	}
+
 	// initialize caches
 	// module meta data must be loaded before module schema (informs about what modules to load)
 	if err := cache.LoadModuleIdMapMeta(); err != nil {
@@ -567,6 +573,11 @@ func (prg *program) Stop(svc service.Service) error {
 		return nil
 	}
 	prg.stopping.Store(true)
+
+	// remove login session logs for this cluster node
+	if err := login_session.LogsRemoveForNode(); err != nil {
+		prg.logger.Error(err)
+	}
 
 	// stop scheduler
 	scheduler.Stop()
