@@ -8,7 +8,6 @@ import (
 	"r3/log"
 	"r3/tools"
 	"r3/types"
-	"sync/atomic"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -17,13 +16,8 @@ import (
 
 var (
 	SchedulerRestart      = make(chan bool, 10)
-	websocketClientCount  atomic.Int32
 	WebsocketClientEvents = make(chan types.ClusterEvent, 10)
 )
-
-func SetWebsocketClientCount(value int) {
-	websocketClientCount.Store(int32(value))
-}
 
 // register cluster node with shared database
 // read existing node ID from configuration file if exists
@@ -74,8 +68,8 @@ func StartNode() error {
 
 		if _, err := db.Pool.Exec(db.Ctx, `
 			INSERT INTO instance_cluster.node (id,name,hostname,date_started,
-				date_check_in,stat_sessions,stat_memory,cluster_master,running)
-			VALUES ($1,$2,$3,$4,0,-1,-1,false,true)
+				date_check_in,stat_memory,cluster_master,running)
+			VALUES ($1,$2,$3,$4,0,-1,false,true)
 		`, nodeId, nodeName, cache.GetHostname(), tools.GetTimeUnix()); err != nil {
 			return err
 		}
@@ -124,7 +118,7 @@ func GetNodes() ([]types.ClusterNode, error) {
 
 	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT id, name, hostname, cluster_master, running,
-			date_check_in, date_started, stat_memory, stat_sessions
+			date_check_in, date_started, stat_memory
 		FROM instance_cluster.node
 		ORDER BY name
 	`)
@@ -137,8 +131,7 @@ func GetNodes() ([]types.ClusterNode, error) {
 		var n types.ClusterNode
 
 		if err := rows.Scan(&n.Id, &n.Name, &n.Hostname, &n.ClusterMaster,
-			&n.Running, &n.DateCheckIn, &n.DateStarted, &n.StatMemory,
-			&n.StatSessions); err != nil {
+			&n.Running, &n.DateCheckIn, &n.DateStarted, &n.StatMemory); err != nil {
 
 			return nodes, err
 		}

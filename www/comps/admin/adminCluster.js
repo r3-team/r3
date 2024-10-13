@@ -73,10 +73,6 @@ let MyAdminClusterNode = {
 				<td>{{ capApp.statMemory }}</td>
 				<td><b>{{ statMemory }} MB</b></td>
 			</tr>
-			<tr>
-				<td>{{ capApp.statSessions }}</td>
-				<td><b>{{ statSessions }}</b></td>
-			</tr>
 		</table>
 	</div>`,
 	emits:['del','set','shutdown'],
@@ -87,8 +83,7 @@ let MyAdminClusterNode = {
 		id:          { type:String,  required:true },
 		name:        { type:String,  required:true },
 		running:     { type:Boolean, required:true },
-		statMemory:  { type:Number,  required:true },
-		statSessions:{ type:Number,  required:true }
+		statMemory:  { type:Number,  required:true }
 	},
 	computed:{
 		available:(s) => s.running && !s.missing,
@@ -213,7 +208,6 @@ let MyAdminCluster = {
 					:name="nodes[nodeIndexMaster].name"
 					:running="nodes[nodeIndexMaster].running"
 					:statMemory="nodes[nodeIndexMaster].statMemory"
-					:statSessions="nodes[nodeIndexMaster].statSessions"
 				/>
 			</div>
 			
@@ -233,7 +227,6 @@ let MyAdminCluster = {
 						:name="n.name"
 						:running="n.running"
 						:statMemory="n.statMemory"
-						:statSessions="n.statSessions"
 					/>
 				</div>
 			</template>

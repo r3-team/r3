@@ -244,9 +244,8 @@
 			"dateCheckIn":"Dernière vérification",
 			"dateStarted":"Démarrage du nœud",
 			"hostname":"Nom d'hôte",
-			"statMemory":"Utilisation de la mémoire",
-			"statSessions":"Sessions utilisateur"
-			},
+			"statMemory":"Utilisation de la mémoire"
+		},
 		"config":{
 			"button":{
 				"apply":"Appliquer les changements"

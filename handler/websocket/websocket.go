@@ -138,7 +138,6 @@ func (hub *hubType) start() {
 			client.ws.Close()
 			client.ctxCancel()
 			delete(hub.clients, client)
-			cluster.SetWebsocketClientCount(len(hub.clients))
 
 			if err := login_session.LogRemove(client.id); err != nil {
 				log.Error(handlerContext, "failed to remove login session log", err)
@@ -151,7 +150,6 @@ func (hub *hubType) start() {
 		select {
 		case client := <-hub.clientAdd:
 			hub.clients[client] = true
-			cluster.SetWebsocketClientCount(len(hub.clients))
 
 		case client := <-hub.clientDel:
 			removeClient(client)

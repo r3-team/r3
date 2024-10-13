@@ -244,8 +244,7 @@
 			"dateCheckIn":"Last check-in",
 			"dateStarted":"Node started",
 			"hostname":"Hostname",
-			"statMemory":"Memory usage",
-			"statSessions":"User sessions"
+			"statMemory":"Memory usage"
 		},
 		"config":{
 			"button":{

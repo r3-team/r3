@@ -9,7 +9,7 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/ldap/ldap_auth"
-	"r3/login/login_license"
+	"r3/login/login_session"
 	"r3/tools"
 	"r3/types"
 	"slices"
@@ -61,15 +61,6 @@ func createToken(loginId int64, username string, admin bool, noAuth bool, tokenE
 	}, config.GetTokenSecret())
 	return string(token), err
 }
-func storeLastAuthDate(loginId int64) error {
-	_, err := db.Pool.Exec(db.Ctx, `
-		UPDATE instance.login
-		SET date_auth_last = $1
-		WHERE id = $2
-	`, tools.GetTimeUnix(), loginId)
-
-	return err
-}
 
 // performs authentication attempt for user by using username, password and MFA PINs (if used)
 // returns login name, JWT, KDF salt, MFA token list (if MFA is required)
@@ -91,17 +82,20 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 	var hash sql.NullString
 	var saltKdf string
 	var admin bool
+	var limited bool
 	var noAuth bool
 	var nameDisplay pgtype.Text
 	var tokenExpiryHours pgtype.Int4
 
 	err := db.Pool.QueryRow(db.Ctx, `
-		SELECT l.id, l.ldap_id, l.salt, l.hash, l.salt_kdf, l.admin, l.no_auth, l.token_expiry_hours, lm.name_display
+		SELECT l.id, l.ldap_id, l.salt, l.hash, l.salt_kdf, l.admin,
+			l.no_auth, l.limited, l.token_expiry_hours, lm.name_display
 		FROM      instance.login      AS l
 		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
 		WHERE l.active
 		AND   l.name = $1
-	`, username).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin, &noAuth, &tokenExpiryHours, &nameDisplay)
+	`, username).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin,
+		&noAuth, &limited, &tokenExpiryHours, &nameDisplay)
 
 	if err != nil && err != pgx.ErrNoRows {
 		return "", "", "", mfaTokens, err
@@ -191,10 +185,7 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 	}
 
 	// everything in order, auth successful
-	if err := login_license.RequestConcurrent(loginId, admin); err != nil {
-		return "", "", "", mfaTokens, err
-	}
-	if err := storeLastAuthDate(loginId); err != nil {
+	if err := login_session.CheckConcurrentAccess(limited, loginId, admin); err != nil {
 		return "", "", "", mfaTokens, err
 	}
 	*grantLoginId = loginId
@@ -240,13 +231,14 @@ func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *boo
 	var active bool
 	var name string
 	var nameDisplay pgtype.Text
+	var limited bool
 
 	if err := db.Pool.QueryRow(db.Ctx, `
-		SELECT l.name, lm.name_display, l.active
+		SELECT l.name, lm.name_display, l.active, l.limited
 		FROM      instance.login      AS l
 		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
 		WHERE l.id = $1
-	`, tp.LoginId).Scan(&name, &nameDisplay, &active); err != nil {
+	`, tp.LoginId).Scan(&name, &nameDisplay, &active, &limited); err != nil {
 		return "", err
 	}
 	if !active {
@@ -257,10 +249,7 @@ func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *boo
 	}
 
 	// everything in order, auth successful
-	if err := login_license.RequestConcurrent(tp.LoginId, tp.Admin); err != nil {
-		return "", err
-	}
-	if err := storeLastAuthDate(tp.LoginId); err != nil {
+	if err := login_session.CheckConcurrentAccess(limited, tp.LoginId, tp.Admin); err != nil {
 		return "", err
 	}
 	*grantLoginId = tp.LoginId

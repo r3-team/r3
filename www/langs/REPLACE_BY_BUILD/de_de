@@ -244,8 +244,7 @@
 			"dateCheckIn":"Letzter Check-in",
 			"dateStarted":"Knoten gestartet",
 			"hostname":"Hostname",
-			"statMemory":"Speicherverbrauch",
-			"statSessions":"Benutzersitzungen"
+			"statMemory":"Speicherverbrauch"
 		},
 		"config":{
 			"button":{

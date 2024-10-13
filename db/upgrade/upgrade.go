@@ -107,6 +107,18 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				TYPE app.column_style[] USING styles::CHARACTER VARYING(12)[]::app.column_style[];
 			
 			-- limited logins
+			ALTER TABLE instance.login DROP COLUMN date_auth_last;
+			ALTER TABLE instance.login ADD COLUMN limited BOOL NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.login ALTER COLUMN limited DROP DEFAULT;
+
+			UPDATE instance.login AS l
+			SET limited = ((
+				SELECT COUNT(*)
+				FROM instance.login_role
+				WHERE login_id = l.id
+			) < 2);
+
+			-- new login session managements
 			CREATE TYPE instance.login_session_device AS ENUM ('browser','fatClient');
 			
 			CREATE TABLE IF NOT EXISTS instance.login_session (
@@ -130,6 +142,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX IF NOT EXISTS fki_login_session_login_id_fkey ON instance.login_session USING btree (login_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_login_session_node_id_fkey  ON instance.login_session USING btree (node_id  ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_login_session_date          ON instance.login_session USING btree (date     ASC NULLS LAST);
+
+			ALTER TABLE instance_cluster.node DROP COLUMN stat_sessions;
 			
 			-- login sync
 			CREATE TABLE IF NOT EXISTS instance.login_meta (

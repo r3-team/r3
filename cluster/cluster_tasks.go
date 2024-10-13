@@ -23,12 +23,9 @@ func CheckInNode() error {
 
 	if _, err := db.Pool.Exec(db.Ctx, `
 		UPDATE instance_cluster.node
-		SET date_check_in = $1, hostname = $2,
-			stat_memory = $3, stat_sessions = $4
-		WHERE id = $5
-	`, tools.GetTimeUnix(), cache.GetHostname(), (m.Sys / 1024 / 1024),
-		websocketClientCount.Load(), cache.GetNodeId()); err != nil {
-
+		SET date_check_in = $1, hostname = $2, stat_memory = $3
+		WHERE id = $4
+	`, tools.GetTimeUnix(), cache.GetHostname(), (m.Sys / 1024 / 1024), cache.GetNodeId()); err != nil {
 		return err
 	}
 

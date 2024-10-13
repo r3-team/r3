@@ -244,8 +244,7 @@
 			"dateCheckIn":"Pēdējā reģistrācija",
 			"dateStarted":"Mezgla startēšana",
 			"hostname":"Resursdatora nosaukums",
-			"statMemory":"Atmiņas izmantošana",
-			"statSessions":"Lietotāju sesijas"
+			"statMemory":"Atmiņas izmantošana"
 		},
 		"config":{
 			"button":{

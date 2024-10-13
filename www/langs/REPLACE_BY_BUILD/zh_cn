@@ -244,8 +244,7 @@
 			"dateCheckIn":"最后检查时间",
 			"dateStarted":"节点启动时间",
 			"hostname":"主机名",
-			"statMemory":"内存使用情况",
-			"statSessions":"用户会话"
+			"statMemory":"内存使用情况"
 		},
 		"config":{
 			"button":{

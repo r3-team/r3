@@ -440,6 +440,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "set":
 			return LoginFormSet_tx(tx, reqJson)
 		}
+	case "loginSession":
+		switch action {
+		case "get":
+			return LoginSessionsGet()
+		}
 	case "loginTemplate":
 		switch action {
 		case "del":

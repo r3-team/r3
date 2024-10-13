@@ -244,8 +244,7 @@
 			"dateCheckIn":"Utolsó ellenőrzés",
 			"dateStarted":"Csomópont elindítva",
 			"hostname":"Gazdagépnév",
-			"statMemory":"Memóriahasználat",
-			"statSessions":"Felhasználói munkamenetek"
+			"statMemory":"Memóriahasználat"
 		},
 		"config":{
 			"button":{

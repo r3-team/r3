@@ -78,9 +78,13 @@ func GetLicenseActive() bool {
 	defer access_mx.RUnlock()
 	return license.ValidUntil > tools.GetTimeUnix()
 }
-func GetLicenseLoginCount() int64 {
+func GetLicenseLoginCount(limitedLogins bool) int64 {
 	access_mx.RLock()
 	defer access_mx.RUnlock()
+
+	if limitedLogins {
+		return license.LoginCount * 3
+	}
 	return license.LoginCount
 }
 func GetLicenseUsed() bool {
