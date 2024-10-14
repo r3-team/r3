@@ -24,6 +24,7 @@ import MyAdminFiles          from './comps/admin/adminFiles.js';
 import MyAdminLdaps          from './comps/admin/adminLdaps.js';
 import MyAdminLicense        from './comps/admin/adminLicense.js';
 import MyAdminLogins         from './comps/admin/adminLogins.js';
+import MyAdminLoginSessions  from './comps/admin/adminLoginSessions.js';
 import MyAdminLoginTemplates from './comps/admin/adminLoginTemplates.js';
 import MyAdminLogs           from './comps/admin/adminLogs.js';
 import MyAdminMailAccounts   from './comps/admin/adminMailAccounts.js';
@@ -92,6 +93,7 @@ const MyRouter = VueRouter.createRouter({
 			{ path:'ldaps',           component:MyAdminLdaps },
 			{ path:'license',         component:MyAdminLicense },
 			{ path:'logins',          component:MyAdminLogins },
+			{ path:'login-sessions',  component:MyAdminLoginSessions },
 			{ path:'login-templates', component:MyAdminLoginTemplates },
 			{ path:'logs',            component:MyAdminLogs },
 			{ path:'mail-accounts',   component:MyAdminMailAccounts },

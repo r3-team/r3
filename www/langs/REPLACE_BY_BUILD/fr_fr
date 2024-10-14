@@ -438,6 +438,7 @@
 			"licenseExpired":"La licence a expiré",
 			"licenseId":"ID de licence",
 			"loginCount":"Connexions simultanées",
+			"loginCountLimited":"Concurrent logins (limited)",
 			"registeredFor":"Enregistré pour",
 			"untilDays":"Valide pour jours",
 			"upload":"Télécharger le fichier de licence :",
@@ -496,6 +497,25 @@
 			"title":"Connexion '{NAME}'",
 			"titleNew":"Nouvelle connexion",
 			"tokenExpiryHours":"Durée maximale de session en heures"
+		},
+		"loginSessions":{
+			"option":{
+				"browser":"Browser session",
+				"fatClient":"REI3 Client"
+			},
+			"titles":{
+				"address":"Address",
+				"admin":"Admin",
+				"date":"Started",
+				"device":"Device",
+				"limited":"Limited",
+				"loginDepartment":"Department",
+				"loginDisplay":"Display name",
+				"loginName":"Login name",
+				"noAuth":"Public",
+				"nodeName":"Cluster node"
+			},
+			"noData":"No sessions available"
 		},
 		"loginTemplate":{
 			"dialog":{
@@ -729,6 +749,7 @@
 		"navigationLdaps":"Connexions LDAP",
 		"navigationLicense":"Professional",
 		"navigationLogins":"Connexions",
+		"navigationLoginSessions":"Login sessions",
 		"navigationLoginTemplates":"Modèles de connexion",
 		"navigationLogs":"Journaux",
 		"navigationMailAccounts":"Comptes email",

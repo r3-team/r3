@@ -438,6 +438,7 @@
 			"licenseExpired":"Lizenz ist abgelaufen",
 			"licenseId":"Lizenz-ID",
 			"loginCount":"Gleichzeitige Anmeldungen",
+			"loginCountLimited":"Gleichzeitige Anmeldungen (limitiert)",
 			"registeredFor":"Registriert für",
 			"untilDays":"Gültig für Tage",
 			"upload":"Lizenzdatei hochladen:",
@@ -496,6 +497,25 @@
 			"title":"Anmeldung \"{NAME}\"",
 			"titleNew":"Neue Anmeldung",
 			"tokenExpiryHours":"Max. Sitzungszeit in Stunden"
+		},
+		"loginSessions":{
+			"option":{
+				"browser":"Browser-Sitzung",
+				"fatClient":"REI3 Client"
+			},
+			"titles":{
+				"address":"Adresse",
+				"admin":"Admin",
+				"date":"Gestartet",
+				"device":"Gerät",
+				"limited":"Limitiert",
+				"loginDepartment":"Abteilung",
+				"loginDisplay":"Anzeigename",
+				"loginName":"Anmeldename",
+				"noAuth":"Öffentlich",
+				"nodeName":"Cluster-Knoten"
+			},
+			"noData":"Keine Sitzungen verfügbar"
 		},
 		"loginTemplate":{
 			"dialog":{
@@ -729,6 +749,7 @@
 		"navigationLdaps":"LDAP-Anmeldungen",
 		"navigationLicense":"Professional",
 		"navigationLogins":"Anmeldungen",
+		"navigationLoginSessions":"Anmeldesitzungen",
 		"navigationLoginTemplates":"Anmeldevorlagen",
 		"navigationLogs":"Logs",
 		"navigationMailAccounts":"E-Mail-Accounts",

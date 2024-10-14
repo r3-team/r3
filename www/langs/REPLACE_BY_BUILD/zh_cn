@@ -438,6 +438,7 @@
 			"licenseExpired":"许可已过期",
 			"licenseId":"许可 ID",
 			"loginCount":"并发登录数",
+			"loginCountLimited":"Concurrent logins (limited)",
 			"registeredFor":"注册用途",
 			"untilDays":"有效天数",
 			"upload":"上传许可文件：",
@@ -496,6 +497,25 @@
 			"title":"登录 '{NAME}'",
 			"titleNew":"新登录",
 			"tokenExpiryHours":"会话最长时间（小时）"
+		},
+		"loginSessions":{
+			"option":{
+				"browser":"Browser session",
+				"fatClient":"REI3 Client"
+			},
+			"titles":{
+				"address":"Address",
+				"admin":"Admin",
+				"date":"Started",
+				"device":"Device",
+				"limited":"Limited",
+				"loginDepartment":"Department",
+				"loginDisplay":"Display name",
+				"loginName":"Login name",
+				"noAuth":"Public",
+				"nodeName":"Cluster node"
+			},
+			"noData":"No sessions available"
 		},
 		"loginTemplate":{
 			"dialog":{
@@ -729,6 +749,7 @@
 		"navigationLdaps":"LDAP 登录",
 		"navigationLicense":"专业版",
 		"navigationLogins":"登录",
+		"navigationLoginSessions":"Login sessions",
 		"navigationLoginTemplates":"登录模板",
 		"navigationLogs":"日志",
 		"navigationMailAccounts":"邮件帐户",

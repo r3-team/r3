@@ -438,6 +438,7 @@
 			"licenseExpired":"License has expired",
 			"licenseId":"License ID",
 			"loginCount":"Concurrent logins",
+			"loginCountLimited":"Concurrent logins (limited)",
 			"registeredFor":"Registered for",
 			"untilDays":"Valid for days",
 			"upload":"Upload license file:",
@@ -496,6 +497,25 @@
 			"title":"Login '{NAME}'",
 			"titleNew":"New login",
 			"tokenExpiryHours":"Max. session time in hours"
+		},
+		"loginSessions":{
+			"option":{
+				"browser":"Browser session",
+				"fatClient":"REI3 Client"
+			},
+			"titles":{
+				"address":"Address",
+				"admin":"Admin",
+				"date":"Started",
+				"device":"Device",
+				"limited":"Limited",
+				"loginDepartment":"Department",
+				"loginDisplay":"Display name",
+				"loginName":"Login name",
+				"noAuth":"Public",
+				"nodeName":"Cluster node"
+			},
+			"noData":"No sessions available"
 		},
 		"loginTemplate":{
 			"dialog":{
@@ -729,6 +749,7 @@
 		"navigationLdaps":"LDAP-Logins",
 		"navigationLicense":"Professional",
 		"navigationLogins":"Logins",
+		"navigationLoginSessions":"Login sessions",
 		"navigationLoginTemplates":"Login templates",
 		"navigationLogs":"Logs",
 		"navigationMailAccounts":"Email accounts",

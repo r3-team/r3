@@ -188,9 +188,9 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 		return 0, errors.New("name must not be empty")
 	}
 
-	name = strings.ToLower(name)  // usernames are case insensitive
-	isNew := id == 0              // ID 0 is new login
-	isLimited := len(roleIds) < 2 // limited logins have at most 1 role
+	name = strings.ToLower(name)                       // usernames are case insensitive
+	isNew := id == 0                                   // ID 0 is new login
+	isLimited := len(roleIds) < 2 && !admin && !noAuth // limited logins have at most 1 role, cannot be admin or without authentication
 
 	if !isNew {
 		// check for existing login

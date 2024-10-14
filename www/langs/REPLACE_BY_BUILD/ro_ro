@@ -438,6 +438,7 @@
 			"licenseExpired":"Licența este expirată",
 			"licenseId":"Licență ID",
 			"loginCount":"Concurrent logins",
+			"loginCountLimited":"Concurrent logins (limited)",
 			"registeredFor":"Înregistrat pentru",
 			"untilDays":"Valid for days",
 			"upload":"Încărcați fișierul de licență:",
@@ -496,6 +497,25 @@
 			"title":"Login '{NAME}'",
 			"titleNew":"New login",
 			"tokenExpiryHours":"Durata max. a unei sesiuni în ore"
+		},
+		"loginSessions":{
+			"option":{
+				"browser":"Browser session",
+				"fatClient":"REI3 Client"
+			},
+			"titles":{
+				"address":"Address",
+				"admin":"Admin",
+				"date":"Started",
+				"device":"Device",
+				"limited":"Limited",
+				"loginDepartment":"Department",
+				"loginDisplay":"Display name",
+				"loginName":"Login name",
+				"noAuth":"Public",
+				"nodeName":"Cluster node"
+			},
+			"noData":"No sessions available"
 		},
 		"loginTemplate":{
 			"dialog":{
@@ -729,6 +749,7 @@
 		"navigationLdaps":"Autentificări-LDAP",
 		"navigationLicense":"Professional",
 		"navigationLogins":"Autentificări",
+		"navigationLoginSessions":"Login sessions",
 		"navigationLoginTemplates":"Login templates",
 		"navigationLogs":"Jurnale",
 		"navigationMailAccounts":"Conturi de e-mail",

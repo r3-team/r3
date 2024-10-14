@@ -414,8 +414,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return LoginDel_tx(tx, reqJson)
 		case "get":
 			return LoginGet(reqJson)
-		case "getConcurrent":
-			return LoginGetConcurrent()
 		case "getMembers":
 			return LoginGetMembers(reqJson)
 		case "getRecords":
@@ -443,7 +441,9 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "loginSession":
 		switch action {
 		case "get":
-			return LoginSessionsGet()
+			return LoginSessionsGet(reqJson)
+		case "getConcurrent":
+			return LoginSessionConcurrentGet()
 		}
 	case "loginTemplate":
 		switch action {

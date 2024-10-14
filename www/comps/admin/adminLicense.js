@@ -82,6 +82,12 @@ let MyAdminLicense = {
 							<b>{{ concurrentLogins + ' / ' + license.loginCount }}</b>
 						</td>
 					</tr>
+					<tr>
+						<td>{{ capApp.loginCountLimited }}</td>
+						<td :class="{ invalid:concurrentLogins >= license.loginCount * limitedFactor }">
+							<b>{{ concurrentLoginsLimited + ' / ' + license.loginCount * limitedFactor }}</b>
+						</td>
+					</tr>
 				</table>
 			</div>
 			
@@ -93,20 +99,22 @@ let MyAdminLicense = {
 		</div>
 	</div>`,
 	props:{
-		concurrentLogins:{ type:Number, required:true },
-		menuTitle:       { type:String, required:true }
+		concurrentLogins:       { type:Number, required:true },
+		concurrentLoginsLimited:{ type:Number, required:true },
+		menuTitle:              { type:String, required:true }
 	},
 	computed:{
 		licenseInstalled:(s) => s.license.validUntil !== 0,
 		
 		// stores
-		token:       (s) => s.$store.getters['local/token'],
-		capApp:      (s) => s.$store.getters.captions.admin.license,
-		capGen:      (s) => s.$store.getters.captions.generic,
-		license:     (s) => s.$store.getters.license,
-		licenseDays: (s) => s.$store.getters.licenseDays,
-		licenseValid:(s) => s.$store.getters.licenseValid,
-		settings:    (s) => s.$store.getters.settings
+		token:        (s) => s.$store.getters['local/token'],
+		capApp:       (s) => s.$store.getters.captions.admin.license,
+		capGen:       (s) => s.$store.getters.captions.generic,
+		license:      (s) => s.$store.getters.license,
+		licenseDays:  (s) => s.$store.getters.licenseDays,
+		licenseValid: (s) => s.$store.getters.licenseValid,
+		limitedFactor:(s) => s.$store.getters.constants.loginLimitedFactor,
+		settings:     (s) => s.$store.getters.settings
 	},
 	mounted() {
 		this.$store.commit('pageTitle',this.menuTitle);

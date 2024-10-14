@@ -127,6 +127,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				login_id INTEGER NOT NULL,
 				node_id UUID NOT NULL,
 				date BIGINT NOT NULL,
+				address TEXT NOT NULL,
 				CONSTRAINT login_session_pkey PRIMARY KEY (id),
 				CONSTRAINT login_session_login_id_fkey FOREIGN KEY (login_id)
 					REFERENCES instance.login (id) MATCH SIMPLE

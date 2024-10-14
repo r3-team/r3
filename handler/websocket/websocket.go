@@ -339,7 +339,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 			log.Info(handlerContext, fmt.Sprintf("authenticated client (login ID %d, admin: %v)",
 				client.loginId, client.admin))
 
-			if err := login_session.Log(client.id, client.loginId, client.device); err != nil {
+			if err := login_session.Log(client.id, client.loginId, client.address, client.device); err != nil {
 				log.Error(handlerContext, "failed to create login session log", err)
 			}
 		}

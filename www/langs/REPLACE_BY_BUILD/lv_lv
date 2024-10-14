@@ -438,6 +438,7 @@
 			"licenseExpired":"Licence ir beigusies",
 			"licenseId":"Licences ID",
 			"loginCount":"Vienlaicīgās pieteikšanās",
+			"loginCountLimited":"Concurrent logins (limited)",
 			"registeredFor":"Reģistrēts līdz",
 			"untilDays":"Derīgs dienām",
 			"upload":"Augšupielādēt licences failu:",
@@ -496,6 +497,25 @@
 			"title":"Login '{NAME}'",
 			"titleNew":"New login",
 			"tokenExpiryHours":"Maksimālais sesijas laiks stundās"
+		},
+		"loginSessions":{
+			"option":{
+				"browser":"Browser session",
+				"fatClient":"REI3 Client"
+			},
+			"titles":{
+				"address":"Address",
+				"admin":"Admin",
+				"date":"Started",
+				"device":"Device",
+				"limited":"Limited",
+				"loginDepartment":"Department",
+				"loginDisplay":"Display name",
+				"loginName":"Login name",
+				"noAuth":"Public",
+				"nodeName":"Cluster node"
+			},
+			"noData":"No sessions available"
 		},
 		"loginTemplate":{
 			"dialog":{
@@ -729,6 +749,7 @@
 		"navigationLdaps":"LDAP pieteikšanās",
 		"navigationLicense":"Professional",
 		"navigationLogins":"Pieteikšanās",
+		"navigationLoginSessions":"Login sessions",
 		"navigationLoginTemplates":"Pieteikšanās veidnes",
 		"navigationLogs":"Žurnāli",
 		"navigationMailAccounts":"E-pasta konti",

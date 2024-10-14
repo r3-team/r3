@@ -30,16 +30,22 @@ let MyAdmin = {
 				<span>{{ capApp.navigationLogins }}</span>
 			</router-link>
 			
-			<!-- roles -->
-			<router-link class="entry clickable" tag="div" to="/admin/roles">
-				<img src="images/admin.png" />
-				<span>{{ capApp.navigationRoles }}</span>
-			</router-link>
-			
 			<!-- login templates -->
 			<router-link class="entry clickable" tag="div" to="/admin/login-templates">
 				<img src="images/personTemplate.png" />
 				<span>{{ capApp.navigationLoginTemplates }}</span>
+			</router-link>
+			
+			<!-- login sessions -->
+			<router-link class="entry clickable" tag="div" to="/admin/login-sessions">
+				<img src="images/personServer.png" />
+				<span>{{ capApp.navigationLoginSessions }}</span>
+			</router-link>
+			
+			<!-- roles -->
+			<router-link class="entry clickable" tag="div" to="/admin/roles">
+				<img src="images/admin.png" />
+				<span>{{ capApp.navigationRoles }}</span>
 			</router-link>
 			
 			<!-- modules -->
@@ -143,6 +149,7 @@ let MyAdmin = {
 			v-if="ready"
 			v-show="!showDocs"
 			:concurrentLogins="concurrentLogins"
+			:concurrentLoginsLimited="concurrentLoginsLimited"
 			:menuTitle="contentTitle"
 		/>
 		
@@ -159,7 +166,8 @@ let MyAdmin = {
 	},
 	data() {
 		return {
-			concurrentLogins:0, // count of concurrent logins
+			concurrentLogins:0,        // count of concurrent logins (full)
+			concurrentLoginsLimited:0, // count of concurrent logins (limited)
 			ready:false,
 			showDocs:false
 		};
@@ -182,6 +190,7 @@ let MyAdmin = {
 			if(s.$route.path.includes('files'))           return s.capApp.navigationFiles;
 			if(s.$route.path.includes('license'))         return s.capApp.navigationActivation;
 			if(s.$route.path.includes('logins'))          return s.capApp.navigationLogins;
+			if(s.$route.path.includes('login-sessions'))  return s.capApp.navigationLoginSessions;
 			if(s.$route.path.includes('login-templates')) return s.capApp.navigationLoginTemplates;
 			if(s.$route.path.includes('logs'))            return s.capApp.navigationLogs;
 			if(s.$route.path.includes('ldaps'))           return s.capApp.navigationLdaps;
@@ -197,21 +206,25 @@ let MyAdmin = {
 		},
 		licenseTitle:(s) => !s.activated
 			? s.capApp.navigationLicense
-			:`${s.capApp.navigationLicense} (${s.concurrentLogins} / ${s.license.loginCount})`,
+			:`${s.capApp.navigationLicense} (${s.concurrentLogins}/${s.license.loginCount} - ${s.concurrentLoginsLimited}/${s.license.loginCount * s.limitedFactor})`,
 		
 		// stores
-		activated:(s) => s.$store.getters['local/activated'],
-		bgStyle:  (s) => s.$store.getters.colorMenuStyle,
-		capApp:   (s) => s.$store.getters.captions.admin,
-		colorMenu:(s) => s.$store.getters.colorMenu,
-		isAdmin:  (s) => s.$store.getters.isAdmin,
-		license:  (s) => s.$store.getters.license
+		activated:    (s) => s.$store.getters['local/activated'],
+		bgStyle:      (s) => s.$store.getters.colorMenuStyle,
+		capApp:       (s) => s.$store.getters.captions.admin,
+		colorMenu:    (s) => s.$store.getters.colorMenu,
+		isAdmin:      (s) => s.$store.getters.isAdmin,
+		license:      (s) => s.$store.getters.license,
+		limitedFactor:(s) => s.$store.getters.constants.loginLimitedFactor
 	},
 	methods:{
 		// backend calls
 		getConcurrentLogins() {
-			ws.send('login','getConcurrent',{},true).then(
-				res => this.concurrentLogins = res.payload,
+			ws.send('loginSession','getConcurrent',{},true).then(
+				res => {
+					this.concurrentLogins        = res.payload.full;
+					this.concurrentLoginsLimited = res.payload.limited;
+				},
 				this.$root.genericError
 			);
 		}

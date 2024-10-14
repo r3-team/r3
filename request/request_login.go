@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"r3/cluster"
 	"r3/login"
-	"r3/login/login_session"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -99,10 +98,6 @@ func LoginGet(reqJson json.RawMessage) (interface{}, error) {
 		req.Limit, req.Offset, req.Meta, req.RecordRequests)
 
 	return res, err
-}
-func LoginGetConcurrent() (interface{}, error) {
-	cnt, _, err := login_session.LogsGetConcurrentCount(false, 0)
-	return cnt, err
 }
 func LoginGetMembers(reqJson json.RawMessage) (interface{}, error) {
 

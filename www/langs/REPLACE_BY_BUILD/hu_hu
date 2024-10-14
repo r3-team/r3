@@ -438,6 +438,7 @@
 			"licenseExpired":"A licenc lejárt",
 			"licenseId":"Licencazonosító",
 			"loginCount":"Egyszerre történő bejelentkezések",
+			"loginCountLimited":"Concurrent logins (limited)",
 			"registeredFor":"Regisztrálva erre:",
 			"untilDays":"Érvényes napokig",
 			"upload":"Licencfájl feltöltése:",
@@ -496,6 +497,25 @@
 			"title":"Bejelentkezés \"{NAME}\"",
 			"titleNew":"Új bejelentkezés",
 			"tokenExpiryHours":"Makszimális munkamenet-idő órában"
+		},
+		"loginSessions":{
+			"option":{
+				"browser":"Browser session",
+				"fatClient":"REI3 Client"
+			},
+			"titles":{
+				"address":"Address",
+				"admin":"Admin",
+				"date":"Started",
+				"device":"Device",
+				"limited":"Limited",
+				"loginDepartment":"Department",
+				"loginDisplay":"Display name",
+				"loginName":"Login name",
+				"noAuth":"Public",
+				"nodeName":"Cluster node"
+			},
+			"noData":"No sessions available"
 		},
 		"loginTemplate":{
 			"dialog":{
@@ -729,6 +749,7 @@
 		"navigationLdaps":"LDAP Bejelentkezések",
 		"navigationLicense":"Professional",
 		"navigationLogins":"Bejelentkezések",
+		"navigationLoginSessions":"Login sessions",
 		"navigationLoginTemplates":"Bejelentkezési Sablonok",
 		"navigationLogs":"Naplók",
 		"navigationMailAccounts":"E-mail Fiókok",
