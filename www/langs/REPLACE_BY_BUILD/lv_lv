@@ -458,15 +458,9 @@
 			"hint":{
 				"admin":"Administratora privilēģijas ietver lietojumprogrammu un lietotāju pārvaldību. Administratori var arī aktivizēt uzturēšanas un veidotāja režīmus.",
 				"active":"Ja tiek deaktivizēts, aktīvās sesijas tiks pārtrauktas.",
-				"isAdmin":"Pieteikšanai ir administratora privilēģijas.",
-				"isInactive":"Pieteikšanai ir deaktivizētas privilēģijas.",
-				"isLdap":"Pieteikšanai ir piešķirts LDAP savienojums.",
-				"isNoAuth":"Publiskā pieteikšanās ir aktivizēta.",
 				"name":"Pieteikšanās lietotājvārds - jābūt unikālam sistēmā.",
 				"noAuth":"Publiskām pieteikšanām nav nepieciešama autentifikācija. Piekļuve sistēmai ir iespējama tikai ar URL.",
 				"password":"Šī darbība pārrakstīs pašreizējo paroli šai pieteikšanai. Daudzfaktoru autentifikācija netiks ietekmēta ar šo izmaiņu. Gali līdz galim šifrēšana (E2EE) būs nepieejama, līdz lietotājs sniegs saistīto rezerves kodu.",
-				"records":"Pieteikšanai ir piešķirti {COUNT} lietojumprogrammu ieraksti.",
-				"roles":"Pieteikšanai ir piešķirtas {COUNT} lomas.",
 				"template":"No izvēlētās veidnes tiek piemēroti iepriekš noteiktie iestatījumi (parādīšanas un tēmas opcijas).",
 				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
@@ -483,10 +477,20 @@
 				"phoneLandline":"Phone: Landline",
 				"phoneMobile":"Phone: Mobile"
 			},
+			"titles":{
+				"active":"Active",
+				"admin":"Admin",
+				"ldap":"LDAP",
+				"limited":"Limited",
+				"name":"Name",
+				"noAuth":"Public"
+			},
 			"admin":"Administrators",
 			"ldap":"Assigned to LDAP",
 			"ldapAssignActive":"Roles are assigned based on LDAP group memberships",
 			"ldapMeta":"Details are imported via LDAP",
+			"limited":"Limited login",
+			"limitedDesc":"When a login has at most a single role assigned, it counts as a 'limited' login. Useful for users that only need access to parts of an application for things like request handling or form submission.<br /><br />Limited logins cannot have admin or public access and take from a separate license pool.",
 			"noAuth":"Public access",
 			"password":"Set new password",
 			"roles":"Roles ({COUNT})",
@@ -495,6 +499,7 @@
 			"roleContentUser":"User",
 			"template":"Login template",
 			"title":"Login '{NAME}'",
+			"titleLimited":"Limited login '{NAME}'",
 			"titleNew":"New login",
 			"tokenExpiryHours":"Maksimālais sesijas laiks stundās"
 		},

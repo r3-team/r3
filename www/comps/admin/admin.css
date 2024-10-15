@@ -36,6 +36,20 @@
 .admin-logins .login-record{
 	max-width:400px;
 }
+.admin-logins img.line-icon{
+	width:24px;
+	height:24x;
+	filter:var(--image-filter);
+}
+.admin-logins tr:hover td{
+	background-color:var(--color-accent3) !important;
+}
+.admin-logins td.loginName{
+	width:500px;
+}
+.admin-logins td.bools{
+	width:200px;
+}
 .admin-login{
 	min-width:1000px;
 	max-width:1200px;
@@ -100,8 +114,8 @@
 
 /* login sessions */
 .admin-sessions img.line-icon{
-	width:16px;
-	height:16px;
+	width:24px;
+	height:24px;
 	filter:var(--image-filter);
 }
 

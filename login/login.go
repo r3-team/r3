@@ -32,8 +32,8 @@ func Del_tx(tx pgx.Tx, id int64) error {
 }
 
 // get logins with meta data and total count
-func Get(byId int64, byString string, limit int, offset int, meta bool,
-	recordRequests []types.LoginAdminRecordGet) ([]types.LoginAdmin, int, error) {
+func Get(byId int64, byString string, orderBy string, orderAsc bool, limit int, offset int,
+	meta bool, roles bool, recordRequests []types.LoginAdminRecordGet) ([]types.LoginAdmin, int, error) {
 
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
@@ -42,8 +42,8 @@ func Get(byId int64, byString string, limit int, offset int, meta bool,
 
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
-	qb.AddList("SELECT", []string{"l.id", "l.ldap_id", "l.ldap_key",
-		"l.name", "l.admin", "l.no_auth", "l.active", "l.token_expiry_hours"})
+	qb.AddList("SELECT", []string{"l.id", "l.ldap_id", "l.ldap_key", "l.name",
+		"l.admin", "l.limited", "l.no_auth", "l.active", "l.token_expiry_hours"})
 
 	qb.SetFrom("instance.login AS l")
 
@@ -74,6 +74,7 @@ func Get(byId int64, byString string, limit int, offset int, meta bool,
 		qb.Add("SELECT", "NULL")
 	}
 
+	// prepare filters
 	if byString != "" {
 		qb.Add("WHERE", `l.name ILIKE {NAME}`)
 		qb.AddPara("{NAME}", fmt.Sprintf("%%%s%%", byString))
@@ -82,9 +83,30 @@ func Get(byId int64, byString string, limit int, offset int, meta bool,
 		qb.AddPara("{ID}", byId)
 	}
 
-	qb.Add("ORDER", "l.name ASC")
-	qb.SetLimit(limit)
-	qb.SetOffset(offset)
+	// prepare order, limit and offset
+	if byId == 0 {
+		var orderAscSql = "ASC"
+		if !orderAsc {
+			orderAscSql = "DESC"
+		}
+		switch orderBy {
+		case "admin":
+			qb.Add("ORDER", fmt.Sprintf("l.admin %s, l.name ASC", orderAscSql))
+		case "ldap":
+			qb.Add("ORDER", fmt.Sprintf("l.ldap_id %s, l.name ASC", orderAscSql))
+		case "noAuth":
+			qb.Add("ORDER", fmt.Sprintf("l.no_auth %s, l.name ASC", orderAscSql))
+		case "limited":
+			qb.Add("ORDER", fmt.Sprintf("l.limited %s, l.name ASC", orderAscSql))
+		case "active":
+			qb.Add("ORDER", fmt.Sprintf("l.active %s, l.name ASC", orderAscSql))
+		default:
+			qb.Add("ORDER", fmt.Sprintf("l.name %s", orderAscSql))
+		}
+
+		qb.SetLimit(limit)
+		qb.SetOffset(offset)
+	}
 
 	query, err := qb.GetQuery()
 	if err != nil {
@@ -100,7 +122,7 @@ func Get(byId int64, byString string, limit int, offset int, meta bool,
 		var l types.LoginAdmin
 		var records []string
 
-		if err := rows.Scan(&l.Id, &l.LdapId, &l.LdapKey, &l.Name, &l.Admin,
+		if err := rows.Scan(&l.Id, &l.LdapId, &l.LdapKey, &l.Name, &l.Admin, &l.Limited,
 			&l.NoAuth, &l.Active, &l.TokenExpiryHours, &records); err != nil {
 
 			return logins, 0, err
@@ -132,14 +154,6 @@ func Get(byId int64, byString string, limit int, offset int, meta bool,
 	}
 	rows.Close()
 
-	// collect role IDs
-	for i, l := range logins {
-		logins[i].RoleIds, err = getRoleIds(l.Id)
-		if err != nil {
-			return logins, 0, err
-		}
-	}
-
 	// collect meta data
 	if meta {
 		for i, l := range logins {
@@ -150,11 +164,22 @@ func Get(byId int64, byString string, limit int, offset int, meta bool,
 		}
 	}
 
-	// get total count
+	// collect role IDs
+	if roles {
+		for i, l := range logins {
+			logins[i].RoleIds, err = getRoleIds(l.Id)
+			if err != nil {
+				return logins, 0, err
+			}
+		}
+	}
+
+	// return single login if requested
 	if byId != 0 {
 		return logins, 1, nil
 	}
 
+	// get total count
 	var qb_cnt tools.QueryBuilder
 	qb_cnt.UseDollarSigns()
 	qb_cnt.AddList("SELECT", []string{"COUNT(*)"})

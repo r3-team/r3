@@ -458,15 +458,9 @@
 			"hint":{
 				"admin":"Les privilèges d'administrateur incluent la gestion des applications et des utilisateurs. Les administrateurs peuvent également activer les modes de maintenance et de création.",
 				"active":"Lorsqu'il est désactivé, les sessions actives seront terminées.",
-				"isAdmin":"La connexion a des privilèges d'administrateur.",
-				"isInactive":"La connexion est désactivée.",
-				"isLdap":"La connexion est attribuée à une connexion LDAP.",
-				"isNoAuth":"La connexion publique est activée.",
 				"name":"Nom d'utilisateur - doit être unique dans le système.",
 				"noAuth":"Les connexions publiques ne nécessitent pas d'authentification. L'accès au système est possible uniquement avec une URL.",
 				"password":"Cela écrasera le mot de passe actuel pour cette connexion. L'authentification multi-facteurs n'est pas affectée par ce changement. Le chiffrement de bout en bout (E2EE) ne sera pas disponible tant que l'utilisateur ne fournira pas le code de sauvegarde associé.",
-				"records":"La connexion a {COUNT} enregistrements d'applications attribués.",
-				"roles":"La connexion a {COUNT} rôles attribués.",
 				"template":"Les paramètres prédéfinis (options d'affichage et de thème) sont appliqués à partir du modèle choisi.",
 				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
@@ -483,10 +477,20 @@
 				"phoneLandline":"Phone: Landline",
 				"phoneMobile":"Phone: Mobile"
 			},
+			"titles":{
+				"active":"Active",
+				"admin":"Admin",
+				"ldap":"LDAP",
+				"limited":"Limited",
+				"name":"Name",
+				"noAuth":"Public"
+			},
 			"admin":"Admin",
 			"ldap":"Attribué LDAP",
 			"ldapAssignActive":"Les rôles sont attribués par les appartenances aux groupes LDAP",
 			"ldapMeta":"Details are imported via LDAP",
+			"limited":"Limited login",
+			"limitedDesc":"When a login has at most a single role assigned, it counts as a 'limited' login. Useful for users that only need access to parts of an application for things like request handling or form submission.<br /><br />Limited logins cannot have admin or public access and take from a separate license pool.",
 			"noAuth":"Accès public",
 			"password":"Définir un nouveau mot de passe",
 			"roles":"Rôles ({COUNT})",
@@ -495,6 +499,7 @@
 			"roleContentUser":"Utilisateur",
 			"template":"Modèle de connexion",
 			"title":"Connexion '{NAME}'",
+			"titleLimited":"Limited login '{NAME}'",
 			"titleNew":"Nouvelle connexion",
 			"tokenExpiryHours":"Durée maximale de session en heures"
 		},

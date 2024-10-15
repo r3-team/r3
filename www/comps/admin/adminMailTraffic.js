@@ -35,28 +35,26 @@ let MyAdminMailTraffic = {
 					:active="offset+limit < total"
 					:naked="true"
 				/>
-				
-				<select v-model.number="limit" @change="startAtPageFirst">
-					<option>10</option>
-					<option>25</option>
-					<option>50</option>
-					<option>100</option>
-					<option>500</option>
-					<option>1000</option>
-				</select>
 			</div>
 			<div class="area default-inputs">
 				<div class="row gap default-inputs">
-					<input class="short"
-						v-model="search"
-						@keyup.enter="startAtPageFirst"
-						:placeholder="capGen.textSearch"
-					/>
 					<my-button
 						@trigger="showOptions = !showOptions"
 						:caption="capGen.settings"
 						:image="showOptions ? 'visible1.png' : 'visible0.png'"
 					/>
+					<input class="short"
+						v-model="search"
+						@keyup.enter="startAtPageFirst"
+						:placeholder="capGen.textSearch"
+					/>
+					<select class="short" v-model.number="limit" @change="startAtPageFirst">
+						<option>10</option>
+						<option>25</option>
+						<option>50</option>
+						<option>100</option>
+						<option>500</option>
+					</select>
 				</div>
 			</div>
 		</div>

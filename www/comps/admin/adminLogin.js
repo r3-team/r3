@@ -1,6 +1,7 @@
 import MyForm           from '../form.js';
 import MyTabs           from '../tabs.js';
 import MyInputSelect    from '../inputSelect.js';
+import {getLoginIcon}   from '../shared/admin.js';
 import {dialogCloseAsk} from '../shared/dialog.js';
 import srcBase64Icon    from '../shared/image.js';
 import {getCaption}     from '../shared/language.js';
@@ -62,8 +63,9 @@ let MyAdminLogin = {
 		<div class="contentBox admin-login float" v-if="inputsReady">
 			<div class="top">
 				<div class="area nowrap">
-					<img class="icon" src="images/person.png" />
-					<h1 class="title">{{ isNew ? capApp.titleNew : capApp.title.replace('{NAME}',name) }}</h1>
+					<img class="icon" :src="getLoginIcon(active,admin,isLimited,noAuth)" />
+					<h1 class="title" v-if="!isNew && isLimited">{{ capApp.titleLimited.replace('{NAME}',name) }}</h1>
+					<h1 class="title" v-else>{{ isNew ? capApp.titleNew : capApp.title.replace('{NAME}',name) }}</h1>
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
@@ -132,6 +134,15 @@ let MyAdminLogin = {
 							</select>
 						</td>
 						<td></td>
+					</tr>
+					<tr v-if="isLimited">
+						<td>
+							<div class="title-cell">
+								<img src="images/personDot.png" />
+								<span>{{ capApp.limited }}</span>
+							</div>
+						</td>
+						<td colspan="2"><span v-html="capApp.limitedDesc"></span></td>
 					</tr>
 				</table>
 
@@ -360,12 +371,12 @@ let MyAdminLogin = {
 			id:0,
 			ldapId:null,
 			ldapKey:null,
-			name:'',
 			active:true,
 			admin:false,
-			pass:'',
-			noAuth:false,
 			meta:{},
+			name:'',
+			noAuth:false,
+			pass:'',
 			tokenExpiryHours:'',
 			records:[],
 			roleIds:[],
@@ -422,9 +433,11 @@ let MyAdminLogin = {
 		canSave:   (s) => s.hasChanges && s.name !== '',
 		isFormOpen:(s) => s.loginFormIndexOpen !== null,
 		isLdap:    (s) => s.ldapId !== null,
-		isNew:     (s) => s.id     === 0,
+		isLimited: (s) => s.activated && s.roleIds.length < 2 && !s.admin && !s.noAuth,
+		isNew:     (s) => s.id === 0,
 		
 		// stores
+		activated:      (s) => s.$store.getters['local/activated'],
 		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
@@ -455,6 +468,7 @@ let MyAdminLogin = {
 		// externals
 		dialogCloseAsk,
 		getCaption,
+		getLoginIcon,
 		srcBase64Icon,
 		
 		handleHotkeys(e) {
@@ -559,6 +573,7 @@ let MyAdminLogin = {
 			ws.send('login','get',{
 				byId:this.id,
 				meta:true,
+				roles:true,
 				recordRequests:this.loginFormLookups
 			},true).then(
 				res => {

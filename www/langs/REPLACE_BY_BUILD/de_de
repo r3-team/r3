@@ -458,15 +458,9 @@
 			"hint":{
 				"admin":"Adminberechtigungen erlauben die Verwaltung von Anwendungen und Anmeldungen. Admins können ebenfalls den Wartungs- und Builder-Modus aktivieren.",
 				"active":"Bei Deaktivierung werden aktive Sitzungen beendet.",
-				"isAdmin":"Anmeldung hat Adminberechtigungen.",
-				"isInactive":"Anmeldung ist deaktiviert.",
-				"isLdap":"Anmeldung ist einer LDAP-Verbindung zugewiesen.",
-				"isNoAuth":"Öffentliche Anmeldung ist aktiv.",
 				"name":"Benutzername für die Anmeldung - muss im System einzigartig sein.",
 				"noAuth":"Öffentliche Anmeldungen brauchen keine Authentifizierung. Systemzugriff ist nur mit einer URL möglich.",
 				"password":"Hiermit wird das aktuelle Password für die Anmeldung überschrieben. Multi-Faktor-Authentifizierung ist davon nicht betroffen. Ende-zu-Ende-Verschlüsselung (E2EE) wird erst wieder verfügbar sein, wenn der Benutzer seinen Backup-Code eingibt.",
-				"records":"Anmeldung sind {COUNT} Anwendungsdatensätze zugeordnet.",
-				"roles":"Anmeldung sind {COUNT} Rollen zugewiesen.",
 				"template":"Vorausgewählte Einstellungen (Anzeige- & Darstellungsoptionen) der gewählten Vorlage werden angewendet.",
 				"tokenExpiryHours":"Überschreibt die globale Einstellung für die max. Sitzungszeit."
 			},
@@ -483,10 +477,20 @@
 				"phoneLandline":"Telefon: Festnetz",
 				"phoneMobile":"Telefon: Mobil"
 			},
+			"titles":{
+				"active":"Aktiv",
+				"admin":"Admin",
+				"ldap":"LDAP",
+				"limited":"Limitiert",
+				"name":"Name",
+				"noAuth":"Öffentlich"
+			},
 			"admin":"Admin",
 			"ldap":"LDAP zugewiesen",
 			"ldapAssignActive":"Rollen werden anhand LDAP-Gruppenmitgliedschaften zugewiesen",
 			"ldapMeta":"Details werden über LDAP importiert",
+			"limited":"Limitierte Anmeldung",
+			"limitedDesc":"Wenn eine Anmeldung nicht mehr als eine Rolle zugewiesen hat, zählt diese als \"limitiert\". Praktisch für Benutzer, die nur Zugriff auf Teile einer Anwendung brauchen, für Dinge wie Anfragen oder Abschicken von Formularen.<br /><br />Limitierte Anmeldungen können keine Admins oder öffentliche Anmeldungen sein und bedienen sich von einem separaten Lizenz-Vorrat.",
 			"noAuth":"Öffentlicher Zugriff",
 			"password":"Neues Passwort setzen",
 			"roles":"Rollen ({COUNT}）",
@@ -495,6 +499,7 @@
 			"roleContentUser":"Benutzer",
 			"template":"Anmeldevorlage",
 			"title":"Anmeldung \"{NAME}\"",
+			"titleLimited":"Limitierte Anmeldung \"{NAME}\"",
 			"titleNew":"Neue Anmeldung",
 			"tokenExpiryHours":"Max. Sitzungszeit in Stunden"
 		},

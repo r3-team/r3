@@ -1,5 +1,6 @@
-import MyInputOffset from '../inputOffset.js';
-import MyAdminLogin  from './adminLogin.js';
+import MyInputOffset  from '../inputOffset.js';
+import MyAdminLogin   from './adminLogin.js';
+import {getLoginIcon} from '../shared/admin.js';
 export {MyAdminLogins as default};
 
 let MyAdminLogins = {
@@ -36,86 +37,62 @@ let MyAdminLogins = {
 				/>
 			</div>
 			<div class="area wrap default-inputs">
-				<my-button
-					@trigger="limitSet(20)"
-					:caption="capGen.limit"
-					:naked="true"
-				/>
-				<select class="short selector"
-					@change="limitSet($event.target.value)"
-					:value="limit"
-				>
-					<option :value="20">{{ 20 }}</option>
-					<option :value="30">{{ 30 }}</option>
-					<option :value="50">{{ 50 }}</option>
-					<option :value="100">{{ 100 }}</option>
-					<option :value="200">{{ 200 }}</option>
-					<option :value="500">{{ 500 }}</option>
-				</select>
-				<input class="selector"
+				<input class="short"
 					v-model="byString"
 					@keyup.enter.space="byStringSet"
 					:placeholder="capGen.username"
 				/>
+				<select class="short"
+					@change="limitSet($event.target.value)"
+					:value="limit"
+				>
+					<option>10</option>
+					<option>25</option>
+					<option>50</option>
+					<option>100</option>
+					<option>500</option>
+				</select>
 			</div>
 		</div>
 		
-		<div class="content grow">
-			<div class="generic-entry-list wide">
-				<div class="entry clickable"
-					v-for="(l,i) in logins"
-					@click="loginIdOpen = l.id"
-					:key="l.id"
-					:title="l.name"
-				>
-					<div class="row centered">
-						<my-button image="person.png"
-							v-if="l.active"
-							:active="false"
-							:naked="true"
-						/>
-						<my-button image="remove.png"
-							v-if="!l.active"
-							:active="false"
-							:captionTitle="capApp.hint.isInactive"
-							:naked="true"
-						/>
-						<span>{{ l.name }}</span>
-					</div>
-					<div class="row">
-						<my-button image="globe.png"
-							v-if="l.noAuth"
-							:active="false"
-							:captionTitle="capApp.hint.isNoAuth"
-							:naked="true"
-						/>
-						<my-button image="personCog.png"
-							v-if="l.admin"
-							:active="false"
-							:captionTitle="capApp.hint.isAdmin"
-							:naked="true"
-						/>
-						<my-button image="hierarchy.png"
-							v-if="l.ldapId !== null"
-							:active="false"
-							:captionTitle="capApp.hint.isLdap"
-							:naked="true"
-						/>
-						<my-button image="admin.png"
-							:active="false"
-							:caption="String(l.roleIds.length)"
-							:captionTitle="capApp.hint.roles.replace('{COUNT}',String(l.roleIds.length))"
-							:naked="true"
-						/>
-						<my-button image="builder.png"
-							:active="false"
-							:caption="String(l.records.filter(v => v.id !== null).length)"
-							:captionTitle="capApp.hint.records.replace('{COUNT}',String(l.records.filter(v => v.id !== null).length))"
-							:naked="true"
-						/>
-					</div>
-				</div>
-			</div>
+		<div class="content grow no-padding">
+			<table class="generic-table sticky-top bright">
+				<thead>
+					<tr>
+						<th class="clickable"
+							v-for="t in titles"
+							@click="orderBySet(t)"
+						>
+							<div class="row gap centered">
+								<img class="line-icon"
+									v-if="orderBy === t"
+									:src="orderAsc ? 'images/triangleUp.png' : 'images/triangleDown.png'"
+								/>
+								<span>{{ capApp.titles[t] }}</span>
+							</div>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr class="clickable"
+						v-for="l in logins"
+						:key="l.id"
+						@click="loginIdOpen = l.id"
+					>
+						<td class="loginName">
+							<div class="row gap centered">
+								<img class="line-icon" :src="getLoginIcon(l.active,l.admin,l.limited,l.noAuth)" />
+								<span>{{ l.name }}</span>
+							</div>
+						</td>
+						<td class="bools">{{ l.admin ? capGen.option.yes : capGen.option.no }}</td>
+						<td class="bools">{{ l.ldapId !== null ? capGen.option.yes : capGen.option.no }}</td>
+						<td class="bools">{{ l.noAuth ? capGen.option.yes : capGen.option.no }}</td>
+						<td class="bools">{{ l.limited ? capGen.option.yes : capGen.option.no }}</td>
+						<td class="bools">{{ l.active ? capGen.option.yes : capGen.option.no }}</td>
+					</tr>
+				</tbody>
+			</table>
 			
 			<!-- login -->
 			<my-admin-login
@@ -142,7 +119,10 @@ let MyAdminLogins = {
 			limit:50,
 			loginIdOpen:null,
 			offset:0,
+			orderAsc:true,
+			orderBy:'name',
 			total:0,
+			titles:['name','admin','ldap','noAuth','limited','active']
 		};
 	},
 	computed:{
@@ -177,6 +157,9 @@ let MyAdminLogins = {
 		this.$store.commit('pageTitle',this.menuTitle);
 	},
 	methods:{
+		// externals
+		getLoginIcon,
+
 		// actions
 		byStringSet() {
 			this.offset = 0;
@@ -191,6 +174,19 @@ let MyAdminLogins = {
 			this.offset = newOffset;
 			this.get();
 		},
+		orderBySet(newOrderBy) {
+			if(newOrderBy === 'roles')
+				return;
+
+			if(this.orderBy === newOrderBy) {
+				this.orderAsc = !this.orderAsc;
+			}
+			else {
+				this.orderBy  = newOrderBy;
+				this.orderAsc = true;
+			}
+			this.get();
+		},
 		
 		// backend calls
 		get() {
@@ -199,7 +195,10 @@ let MyAdminLogins = {
 				byString:this.byString,
 				limit:this.limit,
 				offset:this.offset,
+				orderAsc:['active','admin','limited','noAuth'].includes(this.orderBy) ? !this.orderAsc : this.orderAsc,
+				orderBy:this.orderBy,
 				meta:false,
+				roles:false,
 				recordRequests:this.loginFormLookups
 			},true).then(
 				res => {

@@ -458,15 +458,9 @@
 			"hint":{
 				"admin":"Admin privileges include management of applications and users. Admins can also enable maintenance and builder modes.",
 				"active":"When deactivated, active sessions will be terminated.",
-				"isAdmin":"Login has admin privileges.",
-				"isInactive":"Login is deactivated.",
-				"isLdap":"Login is assigned to a LDAP connection.",
-				"isNoAuth":"Public login is enabled.",
 				"name":"Login username - must be unique within the system.",
 				"noAuth":"Public logins do not require authentication. System access is possible with only a URL.",
 				"password":"This will overwrite the current password for this login. Multi-factor-authentication is not affected by this change. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
-				"records":"Login has {COUNT} application records assigned.",
-				"roles":"Login has {COUNT} roles assigned.",
 				"template":"Predefined settings (display and theme options) are applied from the chosen template.",
 				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
@@ -483,10 +477,20 @@
 				"phoneLandline":"Phone: Landline",
 				"phoneMobile":"Phone: Mobile"
 			},
+			"titles":{
+				"active":"Active",
+				"admin":"Admin",
+				"ldap":"LDAP",
+				"limited":"Limited",
+				"name":"Name",
+				"noAuth":"Public"
+			},
 			"admin":"Admin",
 			"ldap":"LDAP assigned",
 			"ldapAssignActive":"Roles are assigned by LDAP group memberships",
 			"ldapMeta":"Details are imported via LDAP",
+			"limited":"Limited login",
+			"limitedDesc":"When a login has at most a single role assigned, it counts as a 'limited' login. Useful for users that only need access to parts of an application for things like request handling or form submission.<br /><br />Limited logins cannot have admin or public access and take from a separate license pool.",
 			"noAuth":"Public access",
 			"password":"Set new password",
 			"roles":"Roles ({COUNT})",
@@ -495,6 +499,7 @@
 			"roleContentUser":"User",
 			"template":"Login template",
 			"title":"Login '{NAME}'",
+			"titleLimited":"Limited login '{NAME}'",
 			"titleNew":"New login",
 			"tokenExpiryHours":"Max. session time in hours"
 		},

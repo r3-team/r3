@@ -142,24 +142,21 @@ let MyAdminRepo = {
 					:image="showInstalled ? 'checkbox1.png' : 'checkbox0.png'" 
 					:naked="true"
 				/>
-				<my-button
-					@trigger="limit = 10;limitSet()"
-					:caption="capGen.limit"
-					:naked="true"
+				<input class="entry short"
+					v-model="byString"
+					@keyup.enter="get"
+					:placeholder="capGen.textSearch"
 				/>
 				<select class="entry short selector"
 					v-model.number="limit"
 					@change="limitSet"
 				>
-					<option value="10">10</option>
-					<option value="50">50</option>
-					<option value="100">100</option>
+					<option>10</option>
+					<option>25</option>
+					<option>50</option>
+					<option>100</option>
+					<option>500</option>
 				</select>
-				<input class="entry selector"
-					v-model="byString"
-					@keyup.enter="get"
-					:placeholder="capGen.textSearch"
-				/>
 			</div>
 		</div>
 		

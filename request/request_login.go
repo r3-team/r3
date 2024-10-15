@@ -81,7 +81,10 @@ func LoginGet(reqJson json.RawMessage) (interface{}, error) {
 			ByString       string                      `json:"byString"`
 			Limit          int                         `json:"limit"`
 			Offset         int                         `json:"offset"`
+			OrderAsc       bool                        `json:"orderAsc"`
+			OrderBy        string                      `json:"orderBy"`
 			Meta           bool                        `json:"meta"`
+			Roles          bool                        `json:"roles"`
 			RecordRequests []types.LoginAdminRecordGet `json:"recordRequests"`
 		}
 		res struct {
@@ -94,8 +97,8 @@ func LoginGet(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	res.Logins, res.Total, err = login.Get(req.ById, req.ByString,
-		req.Limit, req.Offset, req.Meta, req.RecordRequests)
+	res.Logins, res.Total, err = login.Get(req.ById, req.ByString, req.OrderBy,
+		req.OrderAsc, req.Limit, req.Offset, req.Meta, req.Roles, req.RecordRequests)
 
 	return res, err
 }

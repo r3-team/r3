@@ -30,16 +30,16 @@ let MyAdmin = {
 				<span>{{ capApp.navigationLogins }}</span>
 			</router-link>
 			
-			<!-- login templates -->
-			<router-link class="entry clickable" tag="div" to="/admin/login-templates">
-				<img src="images/personTemplate.png" />
-				<span>{{ capApp.navigationLoginTemplates }}</span>
-			</router-link>
-			
 			<!-- login sessions -->
 			<router-link class="entry clickable" tag="div" to="/admin/login-sessions">
 				<img src="images/personServer.png" />
 				<span>{{ capApp.navigationLoginSessions }}</span>
+			</router-link>
+			
+			<!-- login templates -->
+			<router-link class="entry clickable" tag="div" to="/admin/login-templates">
+				<img src="images/personTemplate.png" />
+				<span>{{ capApp.navigationLoginTemplates }}</span>
 			</router-link>
 			
 			<!-- roles -->

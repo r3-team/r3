@@ -180,7 +180,7 @@ func logsGetConcurrentForLogin(limitedLogins bool, loginId int64) (cnt int64, ex
 	// get count of login sessions, logged for cluster nodes checked in within the last 24h
 	// get whether current login is included in retrieved login sessions
 	err = db.Pool.QueryRow(db.Ctx, `
-		SELECT COUNT(*), $3 = ANY(ARRAY_AGG(id))
+		SELECT COUNT(*), COALESCE($3 = ANY(ARRAY_AGG(id)), FALSE)
 		FROM instance.login
 		WHERE id IN (
 			SELECT login_id

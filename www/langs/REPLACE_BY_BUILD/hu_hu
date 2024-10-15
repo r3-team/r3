@@ -458,15 +458,9 @@
 			"hint":{
 				"admin":"Az adminisztrátori jogosultságok lehetővé teszik az alkalmazások és bejelentkezések kezelését. Az adminok aktiválhatják a karbantartási és építő módot is.",
 				"active":"A deaktiválás aktív munkameneteket zár le.",
-				"isAdmin":"A bejelentkezés rendelkezik adminisztrátori jogosultságokkal.",
-				"isInactive":"A bejelentkezés inaktív.",
-				"isLdap":"A bejelentkezés egy LDAP kapcsolathoz van rendelve.",
-				"isNoAuth":"A nyilvános bejelentkezés aktív.",
 				"name":"A bejelentkezés felhasználóneve - egyedinek kell lennie a rendszerben.",
 				"noAuth":"A nyilvános bejelentkezésekhez nincs szükség hitelesítésre. A rendszerhozzáférés csak URL segítségével lehetséges.",
 				"password":"Ezzel az aktuális jelszó felülírásra kerül a bejelentkezéshez. Az MFA-t ez nem érinti. Az end-to-end titkosítás (E2EE) csak akkor lesz újra elérhető, ha a felhasználó beírja a biztonsági mentési kódját.",
-				"records":"A bejelentkezéshez {COUNT} alkalmazás rekord van rendelve.",
-				"roles":"A bejelentkezéshez {COUNT} szerep van rendelve.",
 				"template":"A kiválasztott sablon előre beállított beállításai (megjelenítési és elrendezési lehetőségek) alkalmazódnak.",
 				"tokenExpiryHours":"Overwrites the global setting for max. session time."
 			},
@@ -483,10 +477,20 @@
 				"phoneLandline":"Phone: Landline",
 				"phoneMobile":"Phone: Mobile"
 			},
+			"titles":{
+				"active":"Active",
+				"admin":"Admin",
+				"ldap":"LDAP",
+				"limited":"Limited",
+				"name":"Name",
+				"noAuth":"Public"
+			},
 			"admin":"Adminisztrátor",
 			"ldap":"LDAP-hoz rendelve",
 			"ldapAssignActive":"A szerepek LDAP csoporttagságok alapján vannak hozzárendelve",
 			"ldapMeta":"Details are imported via LDAP",
+			"limited":"Limited login",
+			"limitedDesc":"When a login has at most a single role assigned, it counts as a 'limited' login. Useful for users that only need access to parts of an application for things like request handling or form submission.<br /><br />Limited logins cannot have admin or public access and take from a separate license pool.",
 			"noAuth":"Nyilvános hozzáférés",
 			"password":"Új jelszó beállítása",
 			"roles":"Szerepek ({COUNT}）",
@@ -495,6 +499,7 @@
 			"roleContentUser":"Felhasználó",
 			"template":"Bejelentkezési sablon",
 			"title":"Bejelentkezés \"{NAME}\"",
+			"titleLimited":"Limited login '{NAME}'",
 			"titleNew":"Új bejelentkezés",
 			"tokenExpiryHours":"Makszimális munkamenet-idő órában"
 		},

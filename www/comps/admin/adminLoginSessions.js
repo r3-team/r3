@@ -1,3 +1,4 @@
+import {getLoginIcon}  from '../shared/admin.js';
 import {getUnixFormat} from '../shared/time.js';
 import MyInputOffset   from '../inputOffset.js';
 export {MyAdminSessions as default};
@@ -35,14 +36,12 @@ let MyAdminSessions = {
 					@keyup.enter="startAtPageFirst"
 					:placeholder="capGen.textSearch"
 				/>
-				
 				<select v-model.number="limit" @change="startAtPageFirst">
 					<option>10</option>
 					<option>25</option>
 					<option>50</option>
 					<option>100</option>
 					<option>500</option>
-					<option>1000</option>
 				</select>
 			</div>
 		</div>
@@ -51,30 +50,36 @@ let MyAdminSessions = {
 			
 			<span v-if="noData"><i>{{ capApp.noData }}</i></span>
 			
-			<table class="generic-table bright" v-if="!noData">
+			<table class="generic-table sticky-top bright" v-if="!noData">
 				<thead>
 					<tr>
 						<th class="clickable"
 							v-for="t in titles"
 							@click="orderBySet(t)"
 						>
-							<div class="row gap">
+							<div class="row gap centered">
 								<img class="line-icon"
 									v-if="orderBy === t"
 									:src="orderAsc ? 'images/triangleUp.png' : 'images/triangleDown.png'"
 								/>
 								<span>{{ capApp.titles[t] }}</span>
 							</div>
-						</td>
+						</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr v-for="s in sessions">
-						<td>{{ s.loginName }}</td>
+						<td>{{ getUnixFormat(s.date,settings.dateFormat+' H:i') }}</td>
+						<td>
+							<div class="row gap centered">
+								<img class="line-icon" :src="getLoginIcon(true,s.admin,s.limited,s.noAuth)" />
+								<span>{{ s.loginName }}</span>
+							</div>
+						</td>
 						<td>{{ s.loginDisplay }}</td>
 						<td>
 							<div class="row gap centered">
-								<img class="line-icon" src="images/department.png" />
+								<img v-if="s.loginDepartment !== ''" class="line-icon" src="images/department.png" />
 								<span>{{ s.loginDepartment }}</span>
 							</div>
 						</td>
@@ -95,7 +100,6 @@ let MyAdminSessions = {
 							</div>
 						</td>
 						<td>{{ s.address }}</td>
-						<td>{{ getUnixFormat(s.date,settings.dateFormat+' H:i') }}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -117,8 +121,8 @@ let MyAdminSessions = {
 			orderAsc:false,
 			orderBy:'date',
 			titles:[
-				'loginName','loginDisplay','loginDepartment','admin',
-				'noAuth','limited','nodeName','device','address','date'
+				'date','loginName','loginDisplay','loginDepartment',
+				'admin','noAuth','limited','nodeName','device','address'
 			]
 		};
 	},
@@ -137,6 +141,7 @@ let MyAdminSessions = {
 	},
 	methods:{
 		// externals
+		getLoginIcon,
 		getUnixFormat,
 
 		// actions
@@ -165,7 +170,7 @@ let MyAdminSessions = {
 				byString:this.byString === '' ? null : this.byString,
 				limit:this.limit,
 				offset:this.offset,
-				orderAsc:this.orderAsc,
+				orderAsc:['admin','limited','noAuth'].includes(this.orderBy) ? !this.orderAsc : this.orderAsc,
 				orderBy:this.orderBy
 			},true).then(
 				res => {
