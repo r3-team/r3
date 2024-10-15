@@ -107,15 +107,8 @@ let MyAdminLogin = {
 				</div>
 			</div>
 			
-			<my-tabs
-				v-model="tabTarget"
-				:entries="['properties','roles']"
-				:entriesIcon="['images/edit.png','images/personMultiple.png']"
-				:entriesText="[capGen.properties,capApp.roles.replace('{COUNT}',roleTotalNonHidden)]"
-			/>
-			
-			<div class="content" :class="{ 'no-padding':tabTarget === 'roles' }">
-				<table class="generic-table generic-table-vertical fullWidth" v-if="tabTarget === 'properties'">
+			<div class="content">
+				<table class="generic-table generic-table-vertical fullWidth">
 					<tr>
 						<td>
 							<div class="title-cell">
@@ -125,163 +118,6 @@ let MyAdminLogin = {
 						</td>
 						<td class="default-inputs"><input v-model="name" v-focus :disabled="isLdap" /></td>
 						<td>{{ capApp.hint.name }}</td>
-					</tr>
-					<tr>
-						<td>
-							<div class="title-cell">
-								<img src="images/personCog.png" />
-								<span>{{ capApp.admin }}</span>
-							</div>
-						</td>
-						<td><my-bool v-model="admin" /></td>
-						<td>{{ capApp.hint.admin }}</td>
-					</tr>
-
-					<!-- meta data -->
-					<tr>
-						<td>
-							<div class="title-cell">
-								<img src="images/question.png" />
-								<span>{{ capGen.details }}</span>
-							</div>
-						</td>
-						<td colspan="2">
-							<table class="generic-table default-inputs meta">
-								<tr>
-									<td class="minimum">{{ capApp.meta.name }}</td>
-									<td>
-										<div class="row gap">
-											<input class="dynamic" v-model="meta.nameFore" :disabled="isLdap" :placeholder="capApp.meta.nameFore" />
-											<input class="dynamic" v-model="meta.nameSur"  :disabled="isLdap" :placeholder="capApp.meta.nameSur"  />
-										</div>
-									</td>
-								</tr>
-								<tr>
-									<td class="minimum">{{ capApp.meta.nameDisplay }}</td>
-									<td><input class="dynamic" v-model="meta.nameDisplay" :disabled="isLdap" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">{{ capApp.meta.organization }}</td>
-									<td><input class="dynamic" v-model="meta.organization" :disabled="isLdap" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">{{ capApp.meta.location }}</td>
-									<td><input class="dynamic" v-model="meta.location" :disabled="isLdap" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">{{ capApp.meta.department }}</td>
-									<td><input class="dynamic" v-model="meta.department" :disabled="isLdap" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">{{ capApp.meta.email }}</td>
-									<td><input class="dynamic" v-model="meta.email" :disabled="isLdap" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">{{ capApp.meta.phoneMobile }}</td>
-									<td><input class="dynamic" v-model="meta.phoneMobile" :disabled="isLdap" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">{{ capApp.meta.phoneLandline }}</td>
-									<td><input class="dynamic" v-model="meta.phoneLandline" :disabled="isLdap" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">{{ capApp.meta.phoneFax }}</td>
-									<td><input class="dynamic" v-model="meta.phoneFax" :disabled="isLdap" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">{{ capApp.meta.notes }}</td>
-									<td><textarea class="dynamic" v-model="meta.notes" :disabled="isLdap"></textarea></td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-					
-					<!-- login records -->
-					<tr v-for="(lf,lfi) in loginForms">
-						<td>
-							<div class="title-cell">
-								<img :src="srcBase64Icon(moduleIdMap[lf.moduleId].iconId,'images/module.png')" />
-								<span>{{ getCaption('loginFormTitle',lf.moduleId,lf.id,lf.captions,lf.name) }}</span>
-							</div>
-						</td>
-						<td>
-							<div class="field dropdown">
-								<div class="field-content data intent">
-									<my-input-select
-										@open="openLoginForm(lfi)"
-										@request-data="getRecords(lfi)"
-										@updated-text-input="recordInput = $event"
-										@update:selected="updateLoginRecord(lfi,$event)"
-										:nakedIcons="true"
-										:options="recordList"
-										:placeholder="capGen.threeDots"
-										:selected="records[lfi].id"
-										:showOpen="true"
-										:inputTextSet="records[lfi].label"
-									/>
-								</div>
-							</div>
-						</td>
-						<td></td>
-					</tr>
-					
-					<tr>
-						<td>
-							<div class="title-cell">
-								<img src="images/remove.png" />
-								<span>{{ capGen.active }}</span>
-							</div>
-						</td>
-						<td><my-bool v-model="active" /></td>
-						<td>{{ capApp.hint.active }}</td>
-					</tr>
-					<tr>
-						<td>
-							<div class="title-cell">
-								<img src="images/globe.png" />
-								<span>{{ capApp.noAuth }}</span>
-							</div>
-						</td>
-						<td><my-bool v-model="noAuth" :readonly="isLdap" /></td>
-						<td>{{ capApp.hint.noAuth }}</td>
-					</tr>
-					<tr>
-						<td>
-							<div class="title-cell">
-								<img src="images/clock.png" />
-								<span>{{ capApp.tokenExpiryHours }}</span>
-							</div>
-						</td>
-						<td class="default-inputs">
-							<input v-model="tokenExpiryHours" />
-						</td>
-						<td>{{ capApp.hint.tokenExpiryHours }}</td>
-					</tr>
-					<tr v-if="isNew">
-						<td>
-							<div class="title-cell">
-								<img src="images/personTemplate.png" />
-								<span>{{ capApp.template }}</span>
-							</div>
-						</td>
-						<td class="default-inputs">
-							<select v-model="templateId">
-								<option v-for="t in templates" :title="t.comment" :value="t.id">
-									{{ t.name }}
-								</option>
-							</select>
-						</td>
-						<td>{{ capApp.hint.template }}</td>
-					</tr>
-					<tr v-if="!isLdap">
-						<td>
-							<div class="title-cell">
-								<img src="images/lock.png" />
-								<span>{{ capApp.password }}</span>
-							</div>
-						</td>
-						<td class="default-inputs"><input v-model="pass" :placeholder="capGen.threeDots" /></td>
-						<td>{{ capApp.hint.password }}</td>
 					</tr>
 					<tr v-if="isLdap">
 						<td>
@@ -298,50 +134,216 @@ let MyAdminLogin = {
 						<td></td>
 					</tr>
 				</table>
-				
-				<!-- roles -->
-				<table class="generic-table bright sticky-top role-select" v-if="tabTarget === 'roles'">
-					<thead>
-						<tr>
-							<th v-if="isLdapAssignedRoles" colspan="4"><b>{{ capApp.ldapAssignActive }}</b></th>
-						</tr>
-						<tr>
-							<th class="minimum">
-								<div class="row centered gap space-between default-inputs">
-									<span>{{ capGen.application }}</span>
-									<input class="short" placeholder="..." v-model="roleFilter" :title="capGen.button.filter" />
-								</div>
-							</th>
-							<th><my-button @trigger="toggleRolesByContent('admin')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentAdmin" :naked="true" /></th>
-							<th><my-button @trigger="toggleRolesByContent('user')"  :active="!isLdapAssignedRoles" :caption="capApp.roleContentUser"  :naked="true" /></th>
-							<th><my-button @trigger="toggleRolesByContent('other')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentOther" :naked="true" /></th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr
-							v-for="m in modulesFiltered"
-							:class="{ grouping:m.parentId === null }"
-							:key="m.id"
-						>
-							<td class="minimum">
-								<div class="row centered">
-									<my-button image="dash.png"
-										v-if="m.parentId !== null"
-										:active="false"
-										:naked="true"
-									/>
-									<img class="module-icon" :src="srcBase64Icon(m.iconId,'images/module.png')" />
-									<span>{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) }}</span>
-								</div>
-							</td>
+
+				<div class="login-details">
+					<my-tabs class="login-details-tabs"
+						v-model="tabTarget"
+						:entries="['meta','roles','properties']"
+						:entriesIcon="['images/question.png','images/personMultiple.png','images/edit.png']"
+						:entriesText="[capGen.details,capApp.roles.replace('{COUNT}',roleTotalNonHidden),capGen.properties]"
+					/>
+					<div class="login-details-content" :class="{ roles:tabTarget === 'roles' }">
+
+						<!-- meta data -->
+						<table class="generic-table default-inputs admin-login-meta" v-if="tabTarget === 'meta'">
+							<tr v-if="isLdap">
+								<td colspan="2"><i>{{ capApp.ldapMeta }}</i></td>
+							</tr>
+							<tr>
+								<td class="minimum">{{ capApp.meta.nameFore }}</td>
+								<td><input class="dynamic" v-model="meta.nameFore"  :disabled="isLdap" /></td>
+							</tr>
+							<tr>
+								<td class="minimum">{{ capApp.meta.nameSur }}</td>
+								<td><input class="dynamic" v-model="meta.nameSur"  :disabled="isLdap" /></td>
+							</tr>
+							<tr>
+								<td class="minimum">{{ capApp.meta.nameDisplay }}</td>
+								<td><input class="dynamic" v-model="meta.nameDisplay" :disabled="isLdap" /></td>
+							</tr>
+							<tr>
+								<td class="minimum">{{ capApp.meta.organization }}</td>
+								<td><input class="dynamic" v-model="meta.organization" :disabled="isLdap" /></td>
+							</tr>
+							<tr>
+								<td class="minimum">{{ capApp.meta.location }}</td>
+								<td><input class="dynamic" v-model="meta.location" :disabled="isLdap" /></td>
+							</tr>
+							<tr>
+								<td class="minimum">{{ capApp.meta.department }}</td>
+								<td><input class="dynamic" v-model="meta.department" :disabled="isLdap" /></td>
+							</tr>
+							<tr>
+								<td class="minimum">{{ capApp.meta.email }}</td>
+								<td><input class="dynamic" v-model="meta.email" :disabled="isLdap" /></td>
+							</tr>
+							<tr>
+								<td class="minimum">{{ capApp.meta.phoneMobile }}</td>
+								<td><input class="dynamic" v-model="meta.phoneMobile" :disabled="isLdap" /></td>
+							</tr>
+							<tr>
+								<td class="minimum">{{ capApp.meta.phoneLandline }}</td>
+								<td><input class="dynamic" v-model="meta.phoneLandline" :disabled="isLdap" /></td>
+							</tr>
+							<tr>
+								<td class="minimum">{{ capApp.meta.phoneFax }}</td>
+								<td><input class="dynamic" v-model="meta.phoneFax" :disabled="isLdap" /></td>
+							</tr>
+							<tr>
+								<td class="minimum">{{ capApp.meta.notes }}</td>
+								<td><textarea class="dynamic" v-model="meta.notes" :disabled="isLdap"></textarea></td>
+							</tr>
+						</table>
+						
+						<!-- roles -->
+						<table class="generic-table bright" v-if="tabTarget === 'roles'">
+							<thead>
+								<tr>
+									<th v-if="isLdapAssignedRoles" colspan="4"><b>{{ capApp.ldapAssignActive }}</b></th>
+								</tr>
+								<tr>
+									<th class="minimum">
+										<div class="row centered gap space-between default-inputs">
+											<span>{{ capGen.application }}</span>
+											<input class="short" placeholder="..." v-model="roleFilter" :title="capGen.button.filter" />
+										</div>
+									</th>
+									<th><my-button @trigger="toggleRolesByContent('admin')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentAdmin" :naked="true" /></th>
+									<th><my-button @trigger="toggleRolesByContent('user')"  :active="!isLdapAssignedRoles" :caption="capApp.roleContentUser"  :naked="true" /></th>
+									<th><my-button @trigger="toggleRolesByContent('other')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentOther" :naked="true" /></th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr
+									v-for="m in modulesFiltered"
+									:class="{ grouping:m.parentId === null }"
+									:key="m.id"
+								>
+									<td class="minimum">
+										<div class="row centered">
+											<my-button image="dash.png"
+												v-if="m.parentId !== null"
+												:active="false"
+												:naked="true"
+											/>
+											<img class="module-icon" :src="srcBase64Icon(m.iconId,'images/module.png')" />
+											<span>{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) }}</span>
+										</div>
+									</td>
+									
+									<!-- roles to toggle -->
+									<my-admin-login-role content="admin" @toggle="toggleRoleId($event)" :module="m" :readonly="isLdapAssignedRoles" :roleIds="roleIds" />
+									<my-admin-login-role content="user"  @toggle="toggleRoleId($event)" :module="m" :readonly="isLdapAssignedRoles" :roleIds="roleIds" />
+									<my-admin-login-role content="other" @toggle="toggleRoleId($event)" :module="m" :readonly="isLdapAssignedRoles" :roleIds="roleIds" />
+								</tr>
+							</tbody>
+						</table>
+
+						<!-- properties -->
+						<table class="generic-table generic-table-vertical fullWidth" v-if="tabTarget === 'properties'">
+							<tr>
+								<td>
+									<div class="title-cell">
+										<img src="images/personCog.png" />
+										<span>{{ capApp.admin }}</span>
+									</div>
+								</td>
+								<td><my-bool v-model="admin" /></td>
+								<td>{{ capApp.hint.admin }}</td>
+							</tr>
 							
-							<!-- roles to toggle -->
-							<my-admin-login-role content="admin" @toggle="toggleRoleId($event)" :module="m" :readonly="isLdapAssignedRoles" :roleIds="roleIds" />
-							<my-admin-login-role content="user"  @toggle="toggleRoleId($event)" :module="m" :readonly="isLdapAssignedRoles" :roleIds="roleIds" />
-							<my-admin-login-role content="other" @toggle="toggleRoleId($event)" :module="m" :readonly="isLdapAssignedRoles" :roleIds="roleIds" />
-						</tr>
-					</tbody>
-				</table>
+							<!-- login records -->
+							<tr v-for="(lf,lfi) in loginForms">
+								<td>
+									<div class="title-cell">
+										<img :src="srcBase64Icon(moduleIdMap[lf.moduleId].iconId,'images/module.png')" />
+										<span>{{ getCaption('loginFormTitle',lf.moduleId,lf.id,lf.captions,lf.name) }}</span>
+									</div>
+								</td>
+								<td>
+									<div class="field dropdown">
+										<div class="field-content data intent">
+											<my-input-select
+												@open="openLoginForm(lfi)"
+												@request-data="getRecords(lfi)"
+												@updated-text-input="recordInput = $event"
+												@update:selected="updateLoginRecord(lfi,$event)"
+												:nakedIcons="true"
+												:options="recordList"
+												:placeholder="capGen.threeDots"
+												:selected="records[lfi].id"
+												:showOpen="true"
+												:inputTextSet="records[lfi].label"
+											/>
+										</div>
+									</div>
+								</td>
+								<td></td>
+							</tr>
+							
+							<tr>
+								<td>
+									<div class="title-cell">
+										<img src="images/remove.png" />
+										<span>{{ capGen.active }}</span>
+									</div>
+								</td>
+								<td><my-bool v-model="active" /></td>
+								<td>{{ capApp.hint.active }}</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="title-cell">
+										<img src="images/globe.png" />
+										<span>{{ capApp.noAuth }}</span>
+									</div>
+								</td>
+								<td><my-bool v-model="noAuth" :readonly="isLdap" /></td>
+								<td>{{ capApp.hint.noAuth }}</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="title-cell">
+										<img src="images/clock.png" />
+										<span>{{ capApp.tokenExpiryHours }}</span>
+									</div>
+								</td>
+								<td class="default-inputs">
+									<input v-model="tokenExpiryHours" />
+								</td>
+								<td>{{ capApp.hint.tokenExpiryHours }}</td>
+							</tr>
+							<tr v-if="isNew">
+								<td>
+									<div class="title-cell">
+										<img src="images/personTemplate.png" />
+										<span>{{ capApp.template }}</span>
+									</div>
+								</td>
+								<td class="default-inputs">
+									<select v-model="templateId">
+										<option v-for="t in templates" :title="t.comment" :value="t.id">
+											{{ t.name }}
+										</option>
+									</select>
+								</td>
+								<td>{{ capApp.hint.template }}</td>
+							</tr>
+							<tr v-if="!isLdap">
+								<td>
+									<div class="title-cell">
+										<img src="images/lock.png" />
+										<span>{{ capApp.password }}</span>
+									</div>
+								</td>
+								<td class="default-inputs">
+									<input type="password" v-model="pass" :placeholder="capGen.threeDots" />
+								</td>
+								<td>{{ capApp.hint.password }}</td>
+							</tr>
+						</table>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>`,
@@ -376,7 +378,7 @@ let MyAdminLogin = {
 			recordInput:'',    // record lookup input
 			recordList:[],     // record lookup dropdown values
 			roleFilter:'',     // filter for role selection
-			tabTarget:'properties',
+			tabTarget:'meta',
 			templates:[],      // login templates
 			
 			// login form
