@@ -121,6 +121,22 @@ let MyAdminLogin = {
 						<td class="default-inputs"><input v-model="name" v-focus :disabled="isLdap" /></td>
 						<td>{{ capApp.hint.name }}</td>
 					</tr>
+					<tr v-if="isNew">
+						<td>
+							<div class="title-cell">
+								<img src="images/personTemplate.png" />
+								<span>{{ capApp.template }}</span>
+							</div>
+						</td>
+						<td class="default-inputs">
+							<select v-model="templateId">
+								<option v-for="t in templates" :title="t.comment" :value="t.id">
+									{{ t.name }}
+								</option>
+							</select>
+						</td>
+						<td>{{ capApp.hint.template }}</td>
+					</tr>
 					<tr v-if="isLdap">
 						<td>
 							<div class="title-cell">
@@ -134,15 +150,6 @@ let MyAdminLogin = {
 							</select>
 						</td>
 						<td></td>
-					</tr>
-					<tr v-if="isLimited">
-						<td>
-							<div class="title-cell">
-								<img src="images/personDot.png" />
-								<span>{{ capApp.limited }}</span>
-							</div>
-						</td>
-						<td colspan="2"><span v-html="capApp.limitedDesc"></span></td>
 					</tr>
 				</table>
 
@@ -324,22 +331,8 @@ let MyAdminLogin = {
 								</td>
 								<td>{{ capApp.hint.tokenExpiryHours }}</td>
 							</tr>
-							<tr v-if="isNew">
-								<td>
-									<div class="title-cell">
-										<img src="images/personTemplate.png" />
-										<span>{{ capApp.template }}</span>
-									</div>
-								</td>
-								<td class="default-inputs">
-									<select v-model="templateId">
-										<option v-for="t in templates" :title="t.comment" :value="t.id">
-											{{ t.name }}
-										</option>
-									</select>
-								</td>
-								<td>{{ capApp.hint.template }}</td>
-							</tr>
+
+							<tr v-if="anyAction"><td colspan="3"><b>{{ capGen.actions }}</b></td></tr>
 							<tr v-if="!isLdap">
 								<td>
 									<div class="title-cell">
@@ -351,6 +344,17 @@ let MyAdminLogin = {
 									<input type="password" v-model="pass" :placeholder="capGen.threeDots" />
 								</td>
 								<td>{{ capApp.hint.password }}</td>
+							</tr>
+
+							<tr v-if="anyInfo"><td colspan="3"><b>{{ capGen.information }}</b></td></tr>
+							<tr v-if="isLimited">
+								<td>
+									<div class="title-cell">
+										<img src="images/personDot.png" />
+										<span>{{ capApp.limited }}</span>
+									</div>
+								</td>
+								<td colspan="2"><span v-html="capApp.limitedDesc"></span></td>
 							</tr>
 						</table>
 					</div>
@@ -430,6 +434,8 @@ let MyAdminLogin = {
 			(s.roleFilter === '' || s.getCaption('moduleTitle',v.id,v.id,v.captions,v.name).toLowerCase().includes(s.roleFilter.toLowerCase()))),
 		
 		// simple states
+		anyAction: (s) => !s.isLdap,
+		anyInfo:   (s) => s.isLimited,
 		canSave:   (s) => s.hasChanges && s.name !== '',
 		isFormOpen:(s) => s.loginFormIndexOpen !== null,
 		isLdap:    (s) => s.ldapId !== null,

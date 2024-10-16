@@ -603,10 +603,10 @@ let MyBuilderModule = {
 			);
 		},
 		setNewLoginSync() {
-			let fncName = 'login_sync';
+			let fncName = 'user_sync';
 			for(let fnc of this.module.pgFunctions) {
 				if(fnc.name === fncName) {
-					fncName = `login_sync_${this.getRandomInt(100000,200000)}`;
+					fncName = `user_sync_${this.getRandomInt(100000,200000)}`;
 					break;
 				}
 			}

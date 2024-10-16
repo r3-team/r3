@@ -530,12 +530,11 @@ let MyBuilderPgFunction = {
 			holderRelationText:'',       // text filter for module relations
 			instanceFunctionIds:[
 				'abort_show_message','clean_up_e2ee_keys','file_link',
-				'files_get','get_e2ee_data_key_enc','get_name','get_login_id',
-				'get_login_language_code','get_preset_record_id','get_public_hostname',
-				'get_role_ids','has_role','has_role_any','log_error','log_info',
-				'login_meta_set','login_sync_all','log_warning','mail_delete',
-				'mail_delete_after_attach','mail_get_next','mail_send',
-				'rest_call','update_collection'
+				'files_get','get_e2ee_data_key_enc','get_language_code','get_name',
+				'get_preset_record_id','get_public_hostname','get_role_ids','get_user_id',
+				'has_role','has_role_any','log_error','log_info','log_warning','mail_delete',
+				'mail_delete_after_attach','mail_get_next','mail_send','rest_call',
+				'update_collection','user_meta_set','user_sync_all',
 			],
 			showHolderFncInstance:false,
 			showHolderFncModule:false,

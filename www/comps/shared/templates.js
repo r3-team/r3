@@ -1,6 +1,6 @@
 export function getTemplateArgs(name) {
 	switch(name) {
-		case 'loginSync':        return '_event TEXT, _login instance.login_data'; break;
+		case 'loginSync':        return '_event TEXT, _user instance.user_data'; break;
 		case 'restAuthResponse': // fallthrough
 		case 'restDataResponse': return 'http_status INTEGER, response TEXT, callback TEXT'; break;
 		default: return ''; break;
@@ -27,29 +27,28 @@ export function getTemplateReturn(isTrigger) {
 // login sync
 let loginSync = `/*
 	# Introduction
-	This is the template for the login sync function. A login sync serves to
-	inform an application about changed logins so that it can update data
-	associated with them. It is executed whenever a login is changed.
+	This is the template for the user sync function. A user sync serves to
+	inform an application about changed users so that it can update data
+	associated with them. It is executed whenever a user is changed.
 	
-	The most common use case is for applications to create user records, in
-	order to connect them to logins. To connect a user record, the login ID is
-	stored on the corresponding relation. This record can be in relationships
-	to define access permissions, store last user access and so on.
+	The most common use case is for applications to store data related to users
+	to use with relationships, such as group memberships or audit logs.
 	
-	The login ID can be filtered for in both frontend and backend to get records
-	associated with the current login.
+	The user ID can be filtered with in both frontend and backend to get data
+	associated with the currently logged in user.
 
 	# Use
-	A login sync function always takes 2 arguments.
-	The first argument '_event' (TEXT) contains the reason for the login sync:
-	* 'UPDATE' if login was created or changed.
-	* 'DELETE' if login was deleted.
+	A user sync function always receives two arguments.
+	The first argument '_event' (TEXT) contains the reason for the user sync:
+	* 'UPDATE' if user was created or changed.
+	* 'DELETE' if user was deleted.
 	
-	The second argument '_login' contains the meta data of the affected login:
-	* id             INTEGER // ID of the login
-	* username       TEXT    // username of the login
+	The second argument '_user' contains the meta data of the affected user:
+	* id             INTEGER // ID of the user
+	* username       TEXT    // username of the user
 	* is_active      BOOLEAN
 	* is_admin       BOOLEAN
+	* is_limited     BOOLEAN
 	* is_public      BOOLEAN
 	* department     TEXT
 	* email          TEXT
@@ -67,36 +66,36 @@ $BODY$
 DECLARE
 BEGIN
 	/* Example implementation
-	In update event, check if a record for the current login ID already exist;
-	create one if not, update it otherwise. In delete event, remove the login
-	association but keep the user record.
+	In update event, check if a record for the current user ID already exists;
+	if not, create one - update otherwise.
+	In delete event, remove the user association but keep the user record.
 	
 	IF _event = 'UPDATED' THEN
 		IF (
 			SELECT id
 			FROM my_app.my_users
-			WHERE login_id = _login.id
+			WHERE user_id = _user.id
 		) IS NULL THEN
 			INSERT INTO my_app.my_users (
 				firstname,
 				lastname,
-				login_id
+				user_id
 			) VALUES (
-				_login.name_fore,
-				_login.name_sur,
-				_login.id
+				_user.name_fore,
+				_user.name_sur,
+				_user.id
 			);
 		ELSE
 			UPDATE my_app.my_users
 			SET
-				firstname = _login.name_fore,
-				lastname  = _login.name_sur
-			WHERE login_id = _login.id;
+				firstname = _user.name_fore,
+				lastname  = _user.name_sur
+			WHERE user_id = _user.id;
 		END IF;
 	ELSE
 		UPDATE my_app.my_users
-		SET login_id = NULL
-		WHERE login_id = _login.id;
+		SET user_id = NULL
+		WHERE user_id = _user.id;
 	END IF;
 	*/
 

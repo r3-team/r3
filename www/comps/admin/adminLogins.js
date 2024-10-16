@@ -56,7 +56,7 @@ let MyAdminLogins = {
 		</div>
 		
 		<div class="content grow no-padding">
-			<table class="generic-table sticky-top bright">
+			<table class="generic-table sticky-top bright admin-logins-list">
 				<thead>
 					<tr>
 						<th class="clickable"

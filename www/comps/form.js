@@ -578,8 +578,8 @@ let MyForm = {
 				},
 				
 				// e2e encryption
-				set_e2ee_by_login_ids:ids => s.loginIdsEncryptFor = ids,
-				set_e2ee_by_login_ids_and_relation:(loginIds,relationId,recordIds) => {
+				set_e2ee_by_user_ids:ids => s.loginIdsEncryptFor = ids,
+				set_e2ee_by_user_ids_and_relation:(loginIds,relationId,recordIds) => {
 					s.loginIdsEncryptForOutside.push({
 						loginIds:loginIds,
 						relationId:relationId,
@@ -616,6 +616,16 @@ let MyForm = {
 						s.fieldIdMapData[fieldId],false),value,!isChg,true);
 					
 					return 0;
+				},
+
+				// legacy calls (<3.9)
+				set_e2ee_by_login_ids:ids => s.loginIdsEncryptFor = ids,
+				set_e2ee_by_login_ids_and_relation:(loginIds,relationId,recordIds) => {
+					s.loginIdsEncryptForOutside.push({
+						loginIds:loginIds,
+						relationId:relationId,
+						recordIds:recordIds
+					});
 				},
 				
 				// legacy calls (<3.5)

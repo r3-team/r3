@@ -41,7 +41,7 @@
 	height:24x;
 	filter:var(--image-filter);
 }
-.admin-logins tr:hover td{
+.admin-logins-list tr:hover td{
 	background-color:var(--color-accent3) !important;
 }
 .admin-logins td.loginName{

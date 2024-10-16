@@ -168,11 +168,12 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					DEFERRABLE INITIALLY DEFERRED
 			);
 
-			CREATE TYPE instance.login_data AS (
+			CREATE TYPE instance.user_data AS (
 				-- login
 				id INTEGER,
 				is_active BOOLEAN,
 				is_admin BOOLEAN,
+				is_limited BOOLEAN,
 				is_public BOOLEAN,
 				username character varying(128),
 
@@ -226,7 +227,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			);
 
 			-- login sync instance functions
-			CREATE OR REPLACE FUNCTION instance.login_sync(
+			CREATE OR REPLACE FUNCTION instance.user_sync(
 				_module_name TEXT,
 				_pg_function_name TEXT,
 				_login_id INTEGER,
@@ -235,7 +236,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				LANGUAGE 'plpgsql'
 			AS $BODY$
 			DECLARE
-				_d   instance.login_data;
+				_d   instance.user_data;
 				_rec RECORD;
 				_sql TEXT;
 			BEGIN
@@ -251,6 +252,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 						l.name,
 						l.active,
 						l.admin,
+						l.limited,
 						l.no_auth,
 						m.department,
 						m.email,
@@ -269,11 +271,12 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					OR    _login_id = l.id
 				) LOOP
 					-- login
-					_d.id        := _rec.id;
-					_d.username  := _rec.name;
-					_d.is_active := _rec.active;
-					_d.is_admin  := _rec.admin;
-					_d.is_public := _rec.no_auth;
+					_d.id         := _rec.id;
+					_d.username   := _rec.name;
+					_d.is_active  := _rec.active;
+					_d.is_admin   := _rec.admin;
+					_d.is_limited := _rec.limited;
+					_d.is_public  := _rec.no_auth;
 					
 					-- meta
 					_d.department     := COALESCE(_rec.department, '');
@@ -293,7 +296,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			END;
 			$BODY$;
 			
-			CREATE OR REPLACE FUNCTION instance.login_sync_all(_module_id UUID)
+			CREATE OR REPLACE FUNCTION instance.user_sync_all(_module_id UUID)
 				RETURNS integer
 				LANGUAGE 'plpgsql'
 			AS $BODY$
@@ -319,7 +322,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					RETURN 1;
 				END IF;
 
-				PERFORM instance.login_sync(
+				PERFORM instance.user_sync(
 					_module_name,
 					_pg_function_name,
 					NULL,
@@ -329,7 +332,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			END;
 			$BODY$;
 
-			CREATE OR REPLACE FUNCTION instance.login_meta_set(
+			CREATE OR REPLACE FUNCTION instance.user_meta_set(
 				_login_id INTEGER,
 				_department TEXT,
 				_email TEXT,
@@ -406,6 +409,76 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				END IF;
 
 				RETURN 0;
+			END;
+			$BODY$;
+
+			-- rename all public interfaces from 'login' to 'user'
+			ALTER TYPE instance.file_meta ADD ATTRIBUTE user_id_creator INTEGER;
+
+			CREATE OR REPLACE FUNCTION instance.files_get(
+				attribute_id uuid,
+				record_id bigint,
+				include_deleted boolean DEFAULT false)
+				RETURNS instance.file_meta[]
+				LANGUAGE 'plpgsql'
+				STABLE PARALLEL UNSAFE
+			AS $BODY$
+				DECLARE
+					file  instance.file_meta;
+					files instance.file_meta[];
+					rec   RECORD;
+				BEGIN
+					FOR rec IN
+						EXECUTE FORMAT('
+							SELECT r.file_id, r.name, v.login_id, v.hash, v.version, v.size_kb, v.date_change, r.date_delete
+							FROM instance_file.%I AS r
+							JOIN instance.file_version AS v
+								ON  v.file_id = r.file_id
+								AND v.version = (
+									SELECT MAX(s.version)
+									FROM instance.file_version AS s
+									WHERE s.file_id = r.file_id
+								)
+							WHERE r.record_id = $1
+							AND ($2 OR r.date_delete IS NULL)
+						', CONCAT(attribute_id::TEXT,'_record')) USING record_id, include_deleted
+					LOOP
+						file.id               := rec.file_id;
+						file.login_id_creator := rec.login_id; -- for calls <R3.9
+						file.user_id_creator  := rec.login_id;
+						file.hash             := rec.hash;
+						file.name             := rec.name;
+						file.size_kb          := rec.size_kb;
+						file.version          := rec.version;
+						file.date_change      := rec.date_change;
+						file.date_delete      := rec.date_delete;
+						
+						files := ARRAY_APPEND(files,file);
+					END LOOP;
+					
+					RETURN files;
+				END;
+			$BODY$;
+
+			CREATE OR REPLACE FUNCTION instance.get_user_id()
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+				STABLE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				RETURN instance.get_login_id();
+			END;
+			$BODY$;
+
+			CREATE OR REPLACE FUNCTION instance.get_language_code()
+				RETURNS text
+				LANGUAGE 'plpgsql'
+				STABLE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				RETURN instance.get_login_language_code();
 			END;
 			$BODY$;
 

@@ -514,10 +514,10 @@ let MyBuilderJsFunction = {
 				'block_inputs','client_execute_keystrokes','copy_to_clipboard','dialog_show',
 				'form_close','form_open','form_set_title','form_show_message',
 				'get_e2ee_data_key','get_e2ee_data_value','get_language_code',
-				'get_login_id','get_preset_record_id','get_record_id','get_role_ids',
-				'get_url_query_string','go_back','has_role','pdf_create',
+				'get_preset_record_id','get_record_id','get_role_ids',
+				'get_url_query_string','get_user_id','go_back','has_role','pdf_create',
 				'record_delete','record_new','record_reload','record_save',
-				'record_save_new','set_e2ee_by_login_ids','set_e2ee_by_login_ids_and_relation',
+				'record_save_new','set_e2ee_by_user_ids','set_e2ee_by_user_ids_and_relation',
 				'timer_clear','timer_clear_global','timer_set','timer_set_global',
 				'value_store_get','value_store_set'
 			],
@@ -527,7 +527,7 @@ let MyBuilderJsFunction = {
 			appFunctionsClientEvent:[
 				'client_execute_keystrokes','copy_to_clipboard','form_open',
 				'get_preset_record_id','get_url_query_string','get_language_code',
-				'get_login_id','get_role_ids','go_back','has_role','pdf_create',
+				'get_role_ids','get_user_id','go_back','has_role','pdf_create',
 				'timer_clear_global','timer_set_global','value_store_get','value_store_set'
 			],
 			

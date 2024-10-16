@@ -25,7 +25,7 @@ const exposedFunctionsGlobal = {
 	// simple
 	copy_to_clipboard:(v) => navigator.clipboard.writeText(v),
 	get_language_code:()  => MyStore.getters.settings.languageCode,
-	get_login_id:     ()  => MyStore.getters.loginId,
+	get_user_id:      ()  => MyStore.getters.loginId,
 	get_role_ids:     ()  => MyStore.getters.access.roleIds,
 	go_back:          ()  => window.history.back(),
 	has_role:         (v) => MyStore.getters.access.roleIds.includes(v),
@@ -130,33 +130,38 @@ const exposedFunctionsGlobal = {
 		});
 	},
 
+	// deprecated but valid
+	get_login_id:() => MyStore.getters.loginId,
+
 	// not available as default
-	block_inputs:                      errFnc,
-	form_close:                        errFnc,
-	form_set_title:                    errFnc,
-	form_show_message:                 errFnc,
-	get_field_file_links:              errFnc,
-	get_field_value:                   errFnc,
-	get_field_value_changed:           errFnc,
-	get_record_id:                     errFnc,
-	record_delete:                     errFnc,
-	record_new:                        errFnc,
-	record_reload:                     errFnc,
-	record_save:                       errFnc,
-	record_save_new:                   errFnc,
+	block_inputs:                     errFnc,
+	form_close:                       errFnc,
+	form_set_title:                   errFnc,
+	form_show_message:                errFnc,
+	get_field_file_links:             errFnc,
+	get_field_value:                  errFnc,
+	get_field_value_changed:          errFnc,
+	get_record_id:                    errFnc,
+	record_delete:                    errFnc,
+	record_new:                       errFnc,
+	record_reload:                    errFnc,
+	record_save:                      errFnc,
+	record_save_new:                  errFnc,
+	set_e2ee_by_user_ids:             errFnc,
+	set_e2ee_by_user_ids_and_relation:errFnc,
+	set_field_caption:                errFnc,
+	set_field_chart:                  errFnc,
+	set_field_error:                  errFnc,
+	set_field_focus:                  errFnc,
+	set_field_order:                  errFnc,
+	set_field_value:                  errFnc,
+	timer_clear:                      errFnc,
+	timer_set:                        errFnc,
+
+	// not available as default and deprecated
+	open_form:                         errFnc,
 	set_e2ee_by_login_ids:             errFnc,
 	set_e2ee_by_login_ids_and_relation:errFnc,
-	set_field_caption:                 errFnc,
-	set_field_chart:                   errFnc,
-	set_field_error:                   errFnc,
-	set_field_focus:                   errFnc,
-	set_field_order:                   errFnc,
-	set_field_value:                   errFnc,
-	timer_clear:                       errFnc,
-	timer_set:                         errFnc,
-
-	// depreciated
-	open_form:                         errFnc,
 	show_form_message:                 errFnc,
 	update_collection:                 errFnc
 };

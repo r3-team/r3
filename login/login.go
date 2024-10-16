@@ -514,7 +514,7 @@ func GenerateSaltHash(pw string) (salt pgtype.Text, hash pgtype.Text) {
 // call login sync function for every module that has one to inform about changed login meta data
 func syncLogin_tx(tx pgx.Tx, action string, id int64) {
 	logContext := "server"
-	logErr := "failed to execute login sync"
+	logErr := "failed to execute user sync"
 
 	if !slices.Contains([]string{"DELETED", "UPDATED"}, action) {
 		log.Error(logContext, logErr, fmt.Errorf("unknown action '%s'", action))
@@ -532,7 +532,7 @@ func syncLogin_tx(tx pgx.Tx, action string, id int64) {
 			continue
 		}
 
-		if _, err := tx.Exec(db.Ctx, `SELECT instance.login_sync($1,$2,$3,$4)`, mod.Name, fnc.Name, id, action); err != nil {
+		if _, err := tx.Exec(db.Ctx, `SELECT instance.user_sync($1,$2,$3,$4)`, mod.Name, fnc.Name, id, action); err != nil {
 			log.Error(logContext, logErr, err)
 		}
 	}
