@@ -162,6 +162,9 @@ let MyAdmin = {
 		$route(val) {
 			if(val.hash === '')
 				this.showDocs = false;
+
+			if(this.activated && (val.path.includes('license') || val.path.includes('login-sessions')))
+				this.getConcurrentLogins();
 		}
 	},
 	data() {

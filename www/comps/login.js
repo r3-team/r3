@@ -181,8 +181,8 @@ let MyLogin = {
 						en_US:'System activation has expired - please contact your system administrator'
 					},
 					'{ERR_LIC_002}':{
-						de:'Anzahl gleichzeitiger Anmeldungen erreicht - bitte den Systemadministrator kontaktieren',
-						en_US:'Concurrent login count reached - please contact your system administrator'
+						de:'Anzahl gleichzeitiger Benutzer erreicht - bitte den Systemadministrator kontaktieren',
+						en_US:'Concurrent user count reached - please contact your system administrator'
 					}
 				},
 				loading:{

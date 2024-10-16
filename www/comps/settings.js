@@ -372,7 +372,7 @@ let MySettingsAccount = {
 	template:`<table class="default-inputs">
 		<!-- pw change -->
 		<tr>
-			<td>{{ capGen.login }}</td>
+			<td>{{ capGen.name }}</td>
 			<td><input disabled="disabled" :value="loginName" /></td>
 		</tr>
 		<tr>

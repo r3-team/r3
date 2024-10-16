@@ -84,8 +84,8 @@ let MyAdminLicense = {
 					</tr>
 					<tr>
 						<td>{{ capApp.loginCountLimited }}</td>
-						<td :class="{ invalid:concurrentLogins >= license.loginCount * limitedFactor }">
-							<b>{{ concurrentLoginsLimited + ' / ' + license.loginCount * limitedFactor }}</b>
+						<td :class="{ invalid:concurrentLoginsLimited >= licenseCountLimited }">
+							<b>{{ concurrentLoginsLimited + ' / ' + licenseCountLimited }}</b>
 						</td>
 					</tr>
 				</table>
@@ -104,7 +104,8 @@ let MyAdminLicense = {
 		menuTitle:              { type:String, required:true }
 	},
 	computed:{
-		licenseInstalled:(s) => s.license.validUntil !== 0,
+		licenseCountLimited:(s) => s.license.loginCount * s.limitedFactor,
+		licenseInstalled:   (s) => s.license.validUntil !== 0,
 		
 		// stores
 		token:        (s) => s.$store.getters['local/token'],
