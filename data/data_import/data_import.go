@@ -7,6 +7,7 @@ import (
 	"r3/cache"
 	"r3/data"
 	"r3/handler"
+	"r3/log"
 	"r3/schema"
 	"r3/types"
 	"slices"
@@ -115,7 +116,7 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 	for i := 0; i < attempts; i++ {
 
 		for _, join := range joins {
-			dataSet, _ := dataSetsByIndex[join.Index]
+			dataSet := dataSetsByIndex[join.Index]
 
 			if dataSet.RecordId != 0 {
 				continue // record already looked up
@@ -135,7 +136,7 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 			for _, pgIndexAtrId := range pgIndexAtrIds {
 
-				pgIndexAtr, _ := cache.AttributeIdMap[pgIndexAtrId]
+				pgIndexAtr := cache.AttributeIdMap[pgIndexAtrId]
 
 				if !schema.IsContentRelationship(pgIndexAtr.Content) {
 					// PG index attribute is non-relationship, can directly be used
@@ -214,25 +215,39 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 		}
 	}
 
-	// apply join create/update restrictions after resolving unique indexes
+	// go through to be created/updated records after resolving unique indexes
 	for _, join := range joins {
+		dataSet := dataSetsByIndex[join.Index]
+		newRecord := dataSet.RecordId == 0
+		badNulls := false
 
-		if !join.ApplyUpdate && dataSetsByIndex[join.Index].RecordId != 0 {
+		// check for not nullable attributes for which values are set to NULL
+		// only on joins != -1, as primary record should throw an error if it cannot be imported
+		if join.IndexFrom != -1 {
+			for _, setAtr := range dataSet.Attributes {
+				atr := cache.AttributeIdMap[setAtr.AttributeId]
 
-			// existing record but must not update
-			// remove attribute values - still keep record itself for updating relationship attributes where allowed
-			dataSet := dataSetsByIndex[join.Index]
-			dataSet.Attributes = make([]types.DataSetAttribute, 0)
-			dataSetsByIndex[join.Index] = dataSet
-			continue
+				if !atr.Nullable && setAtr.Value == nil {
+					rel := cache.RelationIdMap[atr.RelationId]
+					log.Info("csv", fmt.Sprintf("skips record on relation '%s', no value set for required attribute '%s'",
+						rel.Name, atr.Name))
+
+					badNulls = true
+					break
+				}
+			}
 		}
 
-		if !join.ApplyCreate && dataSetsByIndex[join.Index].RecordId == 0 {
-
-			// new record but must not create
-			// remove entire data SET - if it does not exist and must not be created, it cannot be used as relationship either
+		if newRecord && (badNulls || !join.ApplyCreate) {
+			// new record cannot or must not be created (required attribute values are NULL or join setting)
+			// remove entire data SET - if it does not exist and won´t be created, it cannot be used as relationship either
 			delete(dataSetsByIndex, join.Index)
-			continue
+		}
+		if !newRecord && (badNulls || !join.ApplyUpdate) {
+			// existing record, but cannot or must not be updated (required attribute values are NULL or join setting)
+			// remove attribute values - still keep record itself for updating relationship attributes where allowed
+			dataSet.Attributes = make([]types.DataSetAttribute, 0)
+			dataSetsByIndex[join.Index] = dataSet
 		}
 	}
 

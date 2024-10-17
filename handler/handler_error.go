@@ -62,23 +62,23 @@ var (
 	errExpectedList = []errExpected{
 
 		// security/access
-		errExpected{ // unauthorized
+		{ // unauthorized
 			convertFn: func(err error) error { return CreateErrCode("SEC", ErrCodeSecUnauthorized) },
 			matchRx:   regexp.MustCompile(fmt.Sprintf(`^%s$`, ErrUnauthorized)),
 		},
 
 		// application
-		errExpected{ // context deadline reached
+		{ // context deadline reached
 			convertFn: func(err error) error { return CreateErrCode("APP", ErrCodeAppContextExceeded) },
 			matchRx:   regexp.MustCompile(`^timeout\: context deadline exceeded$`),
 		},
-		errExpected{ // context canceled
+		{ // context canceled
 			convertFn: func(err error) error { return CreateErrCode("APP", ErrCodeAppContextCanceled) },
 			matchRx:   regexp.MustCompile(`^timeout\: context canceled$`),
 		},
 
 		// CSV handling
-		errExpected{ // wrong number of fields
+		{ // wrong number of fields
 			convertFn: func(err error) error {
 				matches := regexp.MustCompile(`^record on line (\d+)\: wrong number of fields`).FindStringSubmatch(err.Error())
 				if len(matches) != 2 {
@@ -91,7 +91,7 @@ var (
 		},
 
 		// database messages (postgres)
-		errExpected{ // custom error message from application, used in instance.abort_show_message()
+		{ // custom error message from application, used in instance.abort_show_message()
 			convertFn: func(err error) error {
 				matches := regexp.MustCompile(`^ERROR\: R3_MSG\: (.*)`).FindStringSubmatch(err.Error())
 				if len(matches) != 2 {
@@ -102,7 +102,7 @@ var (
 			},
 			matchRx: regexp.MustCompile(`^ERROR\: R3_MSG\: `),
 		},
-		errExpected{ // unique constraint violation, custom unique index
+		{ // unique constraint violation, custom unique index
 			convertFn: func(err error) error {
 				matches := regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \"ind_(.{36})\"`).FindStringSubmatch(err.Error())
 				if len(matches) != 2 {
@@ -114,7 +114,7 @@ var (
 			},
 			matchRx: regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \"ind_.{36}\"`),
 		},
-		errExpected{ // foreign key constraint violation
+		{ // foreign key constraint violation
 			convertFn: func(err error) error {
 				matches := regexp.MustCompile(`^ERROR\: .+ on table \".+\" violates foreign key constraint \"fk_(.{36})\"`).FindStringSubmatch(err.Error())
 				if len(matches) != 2 {
@@ -125,7 +125,7 @@ var (
 			},
 			matchRx: regexp.MustCompile(`^ERROR\: .+ on table \".+\" violates foreign key constraint \"fk_.{36}\"`),
 		},
-		errExpected{ // NOT NULL constraint violation
+		{ // NOT NULL constraint violation
 			convertFn: func(err error) error {
 				matches := regexp.MustCompile(`^ERROR\: null value in column \"(.+)\" violates not-null constraint \(SQLSTATE 23502\)`).FindStringSubmatch(err.Error())
 				if len(matches) != 2 {
@@ -136,7 +136,7 @@ var (
 			},
 			matchRx: regexp.MustCompile(`^ERROR\: null value in column \".+\" violates not-null constraint \(SQLSTATE 23502\)`),
 		},
-		errExpected{ // invalid syntax for type
+		{ // invalid syntax for type
 			convertFn: func(err error) error {
 				matches := regexp.MustCompile(`^ERROR\: invalid input syntax for type \w+\: \"(.+)\"`).FindStringSubmatch(err.Error())
 				if len(matches) != 2 {
@@ -147,15 +147,15 @@ var (
 			},
 			matchRx: regexp.MustCompile(`^ERROR\: invalid input syntax for type \w+\: \".+\"`),
 		},
-		errExpected{ // failed to create unique index due to existing non-unique values
+		{ // failed to create unique index due to existing non-unique values
 			convertFn: func(err error) error { return CreateErrCode("DBS", ErrCodeDbsIndexFailUnique) },
 			matchRx:   regexp.MustCompile(`^ERROR\: could not create unique index \"ind_.{36}\" \(SQLSTATE 23505\)`),
 		},
-		errExpected{ // duplicate key violation: login name
+		{ // duplicate key violation: login name
 			convertFn: func(err error) error { return CreateErrCode("DBS", ErrCodeDbsConstraintUniqueLogin) },
 			matchRx:   regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \"login_name_key\" \(SQLSTATE 23505\)`),
 		},
-		errExpected{ // error in prepared statement cache due to changed schema
+		{ // error in prepared statement cache due to changed schema
 			convertFn: func(err error) error { return CreateErrCode("DBS", ErrCodeDbsChangedCachePlan) },
 			matchRx:   regexp.MustCompile(`^ERROR\: cached plan must not change result type \(SQLSTATE 0A000\)`),
 		},
