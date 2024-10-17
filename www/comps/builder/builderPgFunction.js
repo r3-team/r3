@@ -2,6 +2,7 @@ import MyBuilderCaption    from './builderCaption.js';
 import MyBuilderPgTriggers from './builderPgTriggers.js';
 import MyCodeEditor        from '../codeEditor.js';
 import MyTabs              from '../tabs.js';
+import {getAttributeIcon}  from '../shared/attribute.js';
 import {
 	copyValueDialog,
 	getNilUuid
@@ -280,6 +281,7 @@ let MyBuilderPgFunction = {
 											:caption="atr.name + (atr.nullable ? '' : '*')"
 											:captionTitle="titleAttribute(atr)"
 											:image="radioIcon('attribute',atr.id)"
+											:images="[getAttributeIcon(atr,false,false)]"
 											:naked="true"
 										/>
 									</div>
@@ -641,6 +643,7 @@ let MyBuilderPgFunction = {
 	methods:{
 		// externals
 		copyValueDialog,
+		getAttributeIcon,
 		getDependentModules,
 		getFunctionHelp,
 		getNilUuid,
