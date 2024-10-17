@@ -1402,7 +1402,9 @@
 			"titlePgOne":"Backend-Funktionen \"{NAME}\"",
 			"triggers":"Trigger",
 			"value":"VALUE",
-			"valueInit":"IS_CHANGED_TRUE_FALSE"
+			"valueInit":"IS_CHANGED_TRUE_FALSE",
+			"volatility":"Volatilität",
+			"volatilityHelp":"<b>Experteneinstellung</b><p>Volatilität definiert wie bzw. ob Funktionsergebnisse zwischengespeichert werden.</p><ul><li>'VOLATILE' ist die sicherste Einstellung - die Funktion darf Änderungen an der Datenbank vornehmen, Zwischenspeicherung ist deaktiviert.</li><li>Funktionen mit der Einstellung 'STABLE' können zwischengespeichert werden, da sie keine Änderungen an der Datenbank vornehmen dürfen. Dies führt zu einer erheblich besseren Leistung, vor allem bei Relationsrichtlinien.</li><li>'IMMUTABLE'-Funktionen müssen das gleiche Ergebnis für den gleichen Input liefern. Sie dürfen weder Änderungen an der Datenbank vornehmen, noch sollten sie davon lesen, um sicherzustellen, dass sie unabhängig vom Zustand der Datenbank das gleiche Ergebnis zurückgeben.</li></ul><p>Mehr Informationen in der offiziellen <a target=\"_blank\" href=\"https://www.postgresql.org/docs/current/xfunc-volatility.html\">Doku</a>.</p>"
 		},
 		"icon":{
 			"add":"Icon-Datei hinzufügen/bearbeiten",

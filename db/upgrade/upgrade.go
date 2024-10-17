@@ -92,7 +92,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
 	/*
-		nothing yet
+		ALTER TABLE app.pg_function ALTER volatility
+			TYPE app.pg_function_volatility USING volatility::TEXT::app.pg_function_volatility;
 	*/
 
 	"3.8": func(tx pgx.Tx) (string, error) {
@@ -487,6 +488,11 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 			-- filter state: form changed
 			ALTER TYPE app.filter_side_content ADD VALUE 'formChanged';
+
+			-- volatility settings for PG functions
+			CREATE TYPE app.pg_function_volatility AS ENUM ('VOLATILE','STABLE','IMMUTABLE');
+			ALTER TABLE app.pg_function ADD   COLUMN volatility TEXT NOT NULL DEFAULT 'VOLATILE';
+			ALTER TABLE app.pg_function ALTER COLUMN volatility DROP NOT NULL;
 		`)
 		return "3.9", err
 	},

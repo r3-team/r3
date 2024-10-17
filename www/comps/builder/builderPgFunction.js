@@ -434,6 +434,21 @@ let MyBuilderPgFunction = {
 							<td>{{ capApp.codeReturns }}</td>
 							<td><input v-model="codeReturns" :disabled="isTrigger || isLoginSync || readonly" placeholder="-" /></td>
 						</tr>
+						<tr v-if="!isTrigger">
+							<td>{{ capApp.volatility }}</td>
+							<td>
+								<div class="row gap">
+									<select class="dynamic" v-model="volatility" :disabled="readonly">
+										<option>VOLATILE</option>
+										<option>STABLE</option>
+										<option>IMMUTABLE</option>
+									</select>
+									<my-button image="question.png"
+										@trigger="showHelpVolatility"
+									/>
+								</div>
+							</td>
+						</tr>
 						<tr v-if="isTrigger">
 							<td>{{ capApp.triggers }}</td>
 							<td>
@@ -512,6 +527,7 @@ let MyBuilderPgFunction = {
 			isFrontendExec:false,
 			isLoginSync:false,
 			isTrigger:false,
+			volatility:'VOLATILE',
 			schedules:[],
 			
 			// execution
@@ -545,12 +561,12 @@ let MyBuilderPgFunction = {
 		};
 	},
 	computed:{
-		execArgInputs:(s) => s.codeArgs.trim() === '' ? [] : s.codeArgs.split(','),
 		hasChanges:(s) => s.name !== s.pgFunction.name
 			|| s.codeArgs        !== s.pgFunction.codeArgs
 			|| s.codeFunction    !== s.placeholdersSet(s.pgFunction.codeFunction)
 			|| s.codeReturns     !== s.pgFunction.codeReturns
 			|| s.isFrontendExec  !== s.pgFunction.isFrontendExec
+			|| s.volatility      !== s.pgFunction.volatility
 			|| JSON.stringify(s.schedules) !== JSON.stringify(s.pgFunction.schedules)
 			|| JSON.stringify(s.captions)  !== JSON.stringify(s.pgFunction.captions),
 		insertEntity:(s) => {
@@ -591,8 +607,6 @@ let MyBuilderPgFunction = {
 			}
 			return text;
 		},
-		modulesData:(s) => s.getDependentModules(s.module).filter(v => v.relations.length   !== 0),
-		modulesFnc: (s) => s.getDependentModules(s.module).filter(v => v.pgFunctions.length !== 0),
 		tabs:(s) => {
 			let out = {
 				icons:['images/code.png','images/edit.png'],
@@ -608,9 +622,12 @@ let MyBuilderPgFunction = {
 		},
 		
 		// simple
-		module:    (s) => s.pgFunction === false ? false : s.moduleIdMap[s.pgFunction.moduleId],
-		pgFunction:(s) => s.pgFunctionIdMap[s.id] === undefined ? false : s.pgFunctionIdMap[s.id],
-		preview:   (s) => !s.showPreview ? '' : s.placeholdersUnset(true),
+		execArgInputs:(s) => s.codeArgs.trim() === '' ? [] : s.codeArgs.split(','),
+		module:       (s) => s.pgFunction === false ? false : s.moduleIdMap[s.pgFunction.moduleId],
+		modulesData:  (s) => s.getDependentModules(s.module).filter(v => v.relations.length   !== 0),
+		modulesFnc:   (s) => s.getDependentModules(s.module).filter(v => v.pgFunctions.length !== 0),
+		pgFunction:   (s) => s.pgFunctionIdMap[s.id] === undefined ? false : s.pgFunctionIdMap[s.id],
+		preview:      (s) => !s.showPreview ? '' : s.placeholdersUnset(true),
 		
 		// stores
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
@@ -658,6 +675,7 @@ let MyBuilderPgFunction = {
 			this.isFrontendExec = this.pgFunction.isFrontendExec;
 			this.isLoginSync    = this.pgFunction.isLoginSync;
 			this.isTrigger      = this.pgFunction.isTrigger;
+			this.volatility     = this.pgFunction.volatility;
 			this.schedules      = JSON.parse(JSON.stringify(this.pgFunction.schedules));
 			this.addNew         = false;
 			this.addOld         = false;
@@ -689,6 +707,13 @@ let MyBuilderPgFunction = {
 			this.$store.commit('dialog',{
 				captionTop:top,
 				captionBody:text,
+				image:'question.png'
+			});
+		},
+		showHelpVolatility(top,text,args) {
+			this.$store.commit('dialog',{
+				captionTop:this.capApp.volatility,
+				captionBody:this.capApp.volatilityHelp,
 				image:'question.png'
 			});
 		},
@@ -894,6 +919,7 @@ let MyBuilderPgFunction = {
 					codeFunction:this.placeholdersUnset(false),
 					codeReturns:this.codeReturns,
 					isFrontendExec:this.isFrontendExec,
+					volatility:this.volatility,
 					schedules:this.schedules,
 					captions:this.captions
 				}),

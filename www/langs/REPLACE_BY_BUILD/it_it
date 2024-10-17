@@ -1402,7 +1402,9 @@
 			"titlePgOne":"Funzioni backend '{NAME}'",
 			"triggers":"Triggers",
 			"value":"VALUE",
-			"valueInit":"IS_CHANGED_TRUE_FALSE"
+			"valueInit":"IS_CHANGED_TRUE_FALSE",
+			"volatility":"Volatility",
+			"volatilityHelp":"<b>Expert setting</b><p>Volatility is used to define how/if the function results can be cached.</p><ul><li>'VOLATILE' is the safest option, saying that the function can make changes to the database, disabling caching.</li><li>'STABLE' functions can be cached within a transaction as they do not make changes to the database. This results in much better performance, especially for relation policies.</li><li>'IMMUTABLE' functions are required to deliver the same result for the same input. They are not allowed to make changes to the database and should not even read from it, to ensure that the return for any given input is identical, regardless of the database state.</li></ul><p>More information in the official <a target=\"_blank\" href=\"https://www.postgresql.org/docs/current/xfunc-volatility.html\">docs</a>.</p>"
 		},
 		"icon":{
 			"add":"Aggiungi/modifica file icona",

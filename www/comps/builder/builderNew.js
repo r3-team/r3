@@ -345,6 +345,7 @@ let MyBuilderNew = {
 						isFrontendExec:false,
 						isLoginSync:this.inputs.template === 'loginSync',
 						isTrigger:this.inputs.isTrigger,
+						volatility:'VOLATILE',
 						schedules:[],
 						captions:{
 							pgFunctionTitle:{},

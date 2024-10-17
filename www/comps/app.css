@@ -651,6 +651,7 @@ table td.maximum{
 	color:var(--color-font-disabled);
 	background-color:var(--color-input-disabled);
 	-webkit-text-fill-color:var(--color-font-disabled); /* fix for Safari < 18.0 */
+	opacity:1; /* fix for some browsers applying lower opacity on disabled selects */
 }
 .default-inputs input:focus,
 .default-inputs select:focus,

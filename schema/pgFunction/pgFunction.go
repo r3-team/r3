@@ -46,7 +46,7 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 
 	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT id, name, code_args, code_function, code_returns,
-			is_frontend_exec, is_login_sync, is_trigger
+			is_frontend_exec, is_login_sync, is_trigger, volatility
 		FROM app.pg_function
 		WHERE module_id = $1
 		ORDER BY name ASC
@@ -58,8 +58,8 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 	for rows.Next() {
 		var f types.PgFunction
 
-		if err := rows.Scan(&f.Id, &f.Name, &f.CodeArgs, &f.CodeFunction,
-			&f.CodeReturns, &f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger); err != nil {
+		if err := rows.Scan(&f.Id, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns,
+			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility); err != nil {
 
 			return functions, err
 		}
@@ -139,6 +139,9 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 	// fix imports < 2.6: New "isTrigger" state
 	fnc = compatible.FixMissingTriggerState(fnc)
 
+	// fix imports < 3.9: Missing volatility setting
+	fnc = compatible.FixMissingVolatility(fnc)
+
 	// enforce valid function configuration
 	if fnc.IsLoginSync {
 		fnc.CodeReturns = "INTEGER"
@@ -173,9 +176,9 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.pg_function
 			SET name = $1, code_args = $2, code_function = $3,
-				code_returns = $4, is_frontend_exec = $5
-			WHERE id = $6
-		`, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsFrontendExec, fnc.Id); err != nil {
+				code_returns = $4, is_frontend_exec = $5, volatility = $6
+			WHERE id = $7
+		`, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsFrontendExec, fnc.Volatility, fnc.Id); err != nil {
 			return err
 		}
 
@@ -186,11 +189,9 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 		}
 
 		if !fnc.IsTrigger {
-			// drop and recreate non-trigger function because function arguments can change
+			// drop non-trigger function because function arguments can change
 			// two functions with the same name but different interfaces can exist (overloading)
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-				DROP FUNCTION "%s"."%s"
-			`, nameMod, nameEx)); err != nil {
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`DROP FUNCTION "%s"."%s"`, nameMod, nameEx)); err != nil {
 				return err
 			}
 		} else {
@@ -209,10 +210,10 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.pg_function (id, module_id, name, code_args, code_function,
-				code_returns, is_frontend_exec, is_login_sync, is_trigger)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+				code_returns, is_frontend_exec, is_login_sync, is_trigger, volatility)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
 		`, fnc.Id, fnc.ModuleId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction,
-			fnc.CodeReturns, fnc.IsFrontendExec, fnc.IsLoginSync, fnc.IsTrigger); err != nil {
+			fnc.CodeReturns, fnc.IsFrontendExec, fnc.IsLoginSync, fnc.IsTrigger, fnc.Volatility); err != nil {
 
 			return err
 		}
@@ -286,8 +287,8 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 
 	_, err = tx.Exec(db.Ctx, fmt.Sprintf(`
 		CREATE OR REPLACE FUNCTION "%s"."%s"(%s)
-		RETURNS %s LANGUAGE plpgsql AS %s
-	`, nameMod, fnc.Name, fnc.CodeArgs, fnc.CodeReturns, fnc.CodeFunction))
+		RETURNS %s LANGUAGE plpgsql %s AS %s
+	`, nameMod, fnc.Name, fnc.CodeArgs, fnc.CodeReturns, fnc.Volatility, fnc.CodeFunction))
 	return err
 }
 

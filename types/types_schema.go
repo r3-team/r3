@@ -514,9 +514,10 @@ type PgFunction struct {
 	CodeArgs       string               `json:"codeArgs"`
 	CodeFunction   string               `json:"codeFunction"`
 	CodeReturns    string               `json:"codeReturns"`
-	IsFrontendExec bool                 `json:"isFrontendExec"` // can be executed from frontend
-	IsLoginSync    bool                 `json:"isLoginSync"`
-	IsTrigger      bool                 `json:"isTrigger"` // is relation TRIGGER function
+	IsFrontendExec bool                 `json:"isFrontendExec"` // can be called from JS function
+	IsLoginSync    bool                 `json:"isLoginSync"`    // special login sync function
+	IsTrigger      bool                 `json:"isTrigger"`      // is relation TRIGGER function
+	Volatility     string               `json:"volatility"`     // VOLATILE, STABLE, IMMUTABLE
 	Schedules      []PgFunctionSchedule `json:"schedules"`
 	Captions       CaptionMap           `json:"captions"`
 }

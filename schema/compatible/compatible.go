@@ -14,6 +14,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// < 3.9
+// fix missing volatility setting
+func FixMissingVolatility(fnc types.PgFunction) types.PgFunction {
+	if fnc.Volatility == "" {
+		fnc.Volatility = "VOLATILE"
+	}
+	return fnc
+}
+
 // < 3.8
 // migrate column styles
 func FixPresetNull(value pgtype.Text) interface{} {
