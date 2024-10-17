@@ -8,17 +8,22 @@ import MyBuilderFormStates    from './builderFormStates.js';
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
 import MyTabs                 from '../tabs.js';
-import {getFieldIcon}         from '../shared/field.js';
+import {getColumnIcon}        from '../shared/column.js';
 import {routeParseParams}     from '../shared/router.js';
 import {
 	getDependentRelations,
 	getFieldHasQuery,
-	getFormEntityMapRef
+	getFormEntityMapRef,
+	getItemTitleColumn
 } from '../shared/builder.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
 } from './builderColumns.js';
+import {
+	getFieldIcon,
+	getFieldTitle
+} from '../shared/field.js';
 import {
 	copyValueDialog,
 	getNilUuid
@@ -182,18 +187,33 @@ let MyBuilderForm = {
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
 		
 			<!-- form builder sidebar -->
-			<div class="top lower">
+			<div class="top lower" :class="{ clickable:fieldShow }" @click="fieldIdShow = null; columnIdShow = null;">
 				<div class="area">
-					<img class="icon" :src="'images/' + (!fieldShow ? 'fileText.png' : getFieldIcon(fieldShow))" />
-					<h1 v-if="!fieldShow">{{ capApp.sidebarForm }}</h1>
-					<h1 v-if="fieldShow" class="selected-ref">
-						{{ capApp.sidebarField.replace('{NAME}','F'+entityIdMapRef.field[fieldShow.id]) }}
-					</h1>
+					<img class="icon" src="images/fileText.png" />
+					<h1>{{ capApp.sidebarForm }}</h1>
+				</div>
+			</div>
+			<div class="top lower" v-if="fieldShow" :class="{ clickable:columnShow }" @click="columnIdShow = null;">
+				<div class="area">
+					<img class="icon" :src="'images/' + getFieldIcon(fieldShow)" />
+					<h2>{{ capApp.sidebarField.replace('{NAME}','F' + entityIdMapRef.field[fieldShow.id] + ', ' + getFieldTitle(fieldShow)) }}</h2>
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
-						v-if="fieldShow"
 						@trigger="fieldIdShow = null; columnIdShow = null;"
+						:cancel="true"
+						:captionTitle="capGen.button.close"
+					/>
+				</div>
+			</div>
+			<div class="top lower" v-if="columnShow">
+				<div class="area">
+					<img class="icon" :src="'images/' + getColumnIcon(columnShow)" />
+					<h2>{{ capApp.sidebarFieldColumn.replace('{NAME}',getItemTitleColumn(columnShow,false)) }}</h2>
+				</div>
+				<div class="area">
+					<my-button image="cancel.png"
+						@trigger="columnIdShow = null;"
 						:cancel="true"
 						:captionTitle="capGen.button.close"
 					/>
@@ -396,13 +416,13 @@ let MyBuilderForm = {
 			</template>
 			
 			<!-- field content -->
-			<template v-if="fieldShow">
+			<template v-if="fieldShow && !columnShow">
 				<my-tabs
 					v-if="fieldShowHasQuery"
 					v-model="tabTargetField"
-					:entries="['content','properties']"
-					:entriesIcon="['images/database.png','images/edit.png',]"
-					:entriesText="[capGen.content,capGen.properties]"
+					:entries="['properties','content']"
+					:entriesIcon="['images/edit.png','images/database.png']"
+					:entriesText="[capGen.properties,capGen.content]"
 				/>
 				<div class="content grow">
 					
@@ -446,7 +466,7 @@ let MyBuilderForm = {
 							:relationId="fieldShow.query.relationId"
 							:relationIdStart="fieldQueryRelationIdStart"
 						/>
-						
+
 						<!-- column templates query fields -->
 						<br />
 						<h2>{{ capApp.sidebarFieldColumns }}</h2>
@@ -459,46 +479,45 @@ let MyBuilderForm = {
 								:joins="fieldShow.query.joins"
 							/>
 						</div>
-						
-						<!-- column settings -->
-						<div class="column-options" ref="columnOptions" v-if="columnShow">
-							<h3 class="selected-ref">{{ capApp.sidebarFieldColumnSettings }}</h3>
-							
-							<my-builder-query
-								v-if="columnShow.subQuery"
-								@set-choices="fieldColumnQuerySet('choices',$event)"
-								@set-filters="fieldColumnQuerySet('filters',$event)"
-								@set-fixed-limit="fieldColumnQuerySet('fixedLimit',$event)"
-								@set-joins="fieldColumnQuerySet('joins',$event)"
-								@set-lookups="fieldColumnQuerySet('lookups',$event)"
-								@set-orders="fieldColumnQuerySet('orders',$event)"
-								@set-relation-id="fieldColumnQuerySet('relationId',$event)"
-								:allowChoices="false"
-								:allowOrders="true"
-								:builderLanguage="builderLanguage"
-								:choices="columnShow.query.choices"
-								:entityIdMapRef="entityIdMapRef"
-								:fieldIdMap="fieldIdMap"
-								:filters="columnShow.query.filters"
-								:fixedLimit="columnShow.query.fixedLimit"
-								:joins="columnShow.query.joins"
-								:joinsParents="[fieldShow.query.joins]"
-								:orders="columnShow.query.orders"
-								:lookups="columnShow.query.lookups"
-								:moduleId="module.id"
-								:relationId="columnShow.query.relationId"
-							/>
-							
-							<my-builder-column-options
-								@set="(...args) => fieldColumnPropertySet(args[0],args[1])"
-								:builderLanguage="builderLanguage"
-								:column="columnShow"
-								:hasCaptions="fieldShow.content === 'list'"
-								:moduleId="module.id"
-								:onlyData="false"
-							/>
-						</div>
 					</template>
+				</div>
+			</template>
+
+			<!-- column settings -->
+			<template v-if="columnShow">
+				<div class="column-options" ref="columnOptions" v-if="columnShow">
+					<my-builder-query
+						v-if="columnShow.subQuery"
+						@set-choices="fieldColumnQuerySet('choices',$event)"
+						@set-filters="fieldColumnQuerySet('filters',$event)"
+						@set-fixed-limit="fieldColumnQuerySet('fixedLimit',$event)"
+						@set-joins="fieldColumnQuerySet('joins',$event)"
+						@set-lookups="fieldColumnQuerySet('lookups',$event)"
+						@set-orders="fieldColumnQuerySet('orders',$event)"
+						@set-relation-id="fieldColumnQuerySet('relationId',$event)"
+						:allowChoices="false"
+						:allowOrders="true"
+						:builderLanguage="builderLanguage"
+						:choices="columnShow.query.choices"
+						:entityIdMapRef="entityIdMapRef"
+						:fieldIdMap="fieldIdMap"
+						:filters="columnShow.query.filters"
+						:fixedLimit="columnShow.query.fixedLimit"
+						:joins="columnShow.query.joins"
+						:joinsParents="[fieldShow.query.joins]"
+						:orders="columnShow.query.orders"
+						:lookups="columnShow.query.lookups"
+						:moduleId="module.id"
+						:relationId="columnShow.query.relationId"
+					/>
+					<my-builder-column-options
+						@set="(...args) => fieldColumnPropertySet(args[0],args[1])"
+						:builderLanguage="builderLanguage"
+						:column="columnShow"
+						:hasCaptions="fieldShow.content === 'list'"
+						:moduleId="module.id"
+						:onlyData="false"
+					/>
 				</div>
 			</template>
 		</div>
@@ -742,13 +761,16 @@ let MyBuilderForm = {
 	methods:{
 		// externals
 		copyValueDialog,
+		getColumnIcon,
 		getDataFields,
 		getDependentRelations,
 		getFieldHasQuery,
 		getFieldIcon,
+		getFieldTitle,
 		getFormEntityMapRef,
 		getFormRoute,
 		getIndexAttributeId,
+		getItemTitleColumn,
 		getJoinsIndexMap,
 		getNilUuid,
 		getQueryTemplate,

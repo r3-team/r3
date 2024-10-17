@@ -26,17 +26,6 @@
 	border-bottom:1px solid var(--color-border);
 	border-radius:3px;
 }
-.builder-form .sidebar .column-options{
-	margin-top:20px;
-}
-.builder-form .sidebar .column-options h3{
-	margin:3px 6px;
-}
-.builder-form .sidebar .selected-ref{
-	text-decoration:underline;
-	text-decoration-color:var(--color-form-builder-selected);
-	text-decoration-thickness:4px;
-}
 
 .builder-form .sidebar .warning{
 	margin:6px;

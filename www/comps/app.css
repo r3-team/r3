@@ -398,6 +398,7 @@ h3{
 	flex-flow:row wrap;
 	justify-content:space-between;
 	align-content:center;
+	border-bottom:1px solid transparent;
 }
 .contentBox .top.lower{
 	border-bottom:1px solid var(--color-border);
@@ -413,7 +414,8 @@ h3{
 .contentBox.float .top{
 	border-radius:12px 12px 0px 0px;
 }
-.contentBox .top h1{
+.contentBox .top h1,
+.contentBox .top h2{
 	margin:0px;
 	font-size:135%;
 	font-weight:normal;
@@ -421,6 +423,9 @@ h3{
 	text-overflow:ellipsis;
 	white-space:nowrap;
 	overflow:hidden;
+}
+.contentBox .top h2{
+	font-size:110%;
 }
 .contentBox .top .separator{
 	width:10px;

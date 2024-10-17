@@ -1,6 +1,7 @@
 import MyStore                    from '../../stores/store.js';
 import {getQueryFiltersProcessed} from './query.js';
 import {
+	getAttributeIcon,
 	isAttributeBoolean,
 	isAttributeFiles,
 	isAttributeString
@@ -133,6 +134,12 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 	
 	// return all batches that have at least 1 column
 	return batches.filter(v => v.columnIndexes.length !== 0);
+};
+
+export function getColumnIcon(column) {
+	return column.subQuery
+		? 'database.png'
+		: `${getAttributeIcon(MyStore.getters['schema/attributeIdMap'][column.attributeId],false,false)}`;
 };
 
 export function getColumnIsFilterable(c) {

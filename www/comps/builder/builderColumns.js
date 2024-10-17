@@ -1,14 +1,16 @@
-import MyBuilderCaption        from './builderCaption.js';
-import {getItemTitleColumn}    from '../shared/builder.js';
-import {getColumnTitleForLang} from '../shared/column.js';
-import {getFlexBasis}          from '../shared/form.js';
-import {getRandomInt}          from '../shared/generic.js';
-import {getQueryTemplate}      from '../shared/query.js';
+import MyBuilderCaption     from './builderCaption.js';
+import {getItemTitleColumn} from '../shared/builder.js';
+import {getFlexBasis}       from '../shared/form.js';
+import {getRandomInt}       from '../shared/generic.js';
+import {getQueryTemplate}   from '../shared/query.js';
 import {
-	getAttributeIcon,
 	getIndexAttributeId,
 	isAttributeRelationship
 } from '../shared/attribute.js';
+import {
+	getColumnIcon,
+	getColumnTitleForLang
+} from '../shared/column.js';
 
 export let MyBuilderColumns = {
 	name:'my-builder-columns',
@@ -59,14 +61,8 @@ export let MyBuilderColumns = {
 							<div class="builder-field-header">
 								<my-button
 									@trigger="$emit('column-id-show',column.id)"
-									:image="!column.subQuery ? getAttributeIcon(attributeIdMap[column.attributeId],false,false) : 'database.png'"
+									:image="getColumnIcon(column)"
 									:naked="true"
-								/>
-								<img class="action clickable"
-									v-if="false"
-									@click="columnSetBy(column.id,'onMobile',!column.onMobile)"
-									:src="column.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
-									:title="capApp.onMobile"
 								/>
 								<div class="title word-break"
 									:title="getItemTitleColumn(column,false)"
@@ -186,7 +182,7 @@ export let MyBuilderColumns = {
 	},
 	methods:{
 		// externals
-		getAttributeIcon,
+		getColumnIcon,
 		getColumnTitleForLang,
 		getFlexBasis,
 		getItemTitleColumn,
@@ -233,7 +229,7 @@ export let MyBuilderColumnTemplates = {
 					/>
 					<my-button
 						:active="false"
-						:image="!c.subQuery ? getAttributeIcon(attributeIdMap[c.attributeId],false,false) : 'database.png'"
+						:image="getColumnIcon(c)"
 						:naked="true"
 					/>
 					<div class="title word-break" :title="getItemTitleColumn(c,false)">
@@ -299,7 +295,7 @@ export let MyBuilderColumnTemplates = {
 	},
 	methods:{
 		// externals
-		getAttributeIcon,
+		getColumnIcon,
 		getIndexAttributeId,
 		getItemTitleColumn,
 		getQueryTemplate,
