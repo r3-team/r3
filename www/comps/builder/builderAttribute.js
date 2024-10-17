@@ -71,224 +71,226 @@ let MyBuilderAttribute = {
 			
 			<div class="content default-inputs">
 				<table class="generic-table-vertical">
-					<tr>
-						<td>{{ capGen.name }}</td>
-						<td>
-							<div class="row gap centered">
-								<input v-focus v-model="values.name" :disabled="readonly || isId" />
-								<my-button image="visible1.png"
-									@trigger="copyValueDialog(values.name,attributeId,attributeId)"
-									:active="!isNew"
-									:caption="capGen.id"
-								/>
-							</div>
-							<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
-						</td>
-						<td>{{ capApp.nameHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.title }}</td>
-						<td>
-							<div class="row gap centered">
-								<my-builder-caption
-									v-model="values.captions.attributeTitle"
-									:language="builderLanguage"
+					<tbody>
+						<tr>
+							<td>{{ capGen.name }}</td>
+							<td>
+								<div class="row gap centered">
+									<input v-focus v-model="values.name" :disabled="readonly || isId" />
+									<my-button image="visible1.png"
+										@trigger="copyValueDialog(values.name,attributeId,attributeId)"
+										:active="!isNew"
+										:caption="capGen.id"
+									/>
+								</div>
+								<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
+							</td>
+							<td>{{ capApp.nameHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.title }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-builder-caption
+										v-model="values.captions.attributeTitle"
+										:language="builderLanguage"
+										:readonly="readonly"
+									/>
+									<my-button image="languages.png"
+										@trigger="$emit('next-language')"
+										:active="module.languages.length > 1"
+									/>
+								</div>
+							</td>
+							<td>{{ capApp.titleHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.icon }}</td>
+							<td>
+								<my-builder-icon-input
+									@input="values.iconId = $event"
+									:iconIdSelected="values.iconId"
+									:module="module"
 									:readonly="readonly"
 								/>
-								<my-button image="languages.png"
-									@trigger="$emit('next-language')"
-									:active="module.languages.length > 1"
-								/>
-							</div>
-						</td>
-						<td>{{ capApp.titleHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.icon }}</td>
-						<td>
-							<my-builder-icon-input
-								@input="values.iconId = $event"
-								:iconIdSelected="values.iconId"
-								:module="module"
-								:readonly="readonly"
-							/>
-						</td>
-						<td>{{ capApp.iconHint }}</td>
-					</tr>
-					<tr v-if="!isId">
-						<td>{{ capApp.usedFor }}</td>
-						<td>
-							<div class="row centered gap">
-								<select v-model="usedFor" :disabled="readonly" @change="changedUsedFor">
-									<optgroup :label="capGen.standard">
-										<option value="text"     :disabled="!isNew && !isString">{{ capApp.option.text }}</option>
-										<option value="textarea" :disabled="!isNew && !isString">{{ capApp.option.textarea }}</option>
-										<option value="richtext" :disabled="!isNew && !isString">{{ capApp.option.richtext }}</option>
-										<option value="number"   :disabled="!isNew && !isInteger">{{ capApp.option.number }}</option>
-										<option value="decimal"  :disabled="!isNew && !isNumeric">{{ capApp.option.decimal }}</option>
-										<option value="color"    :disabled="!isNew && !isString">{{ capApp.option.color }}</option>
-										<option value="iframe"   :disabled="!isNew && !isString">{{ capApp.option.iframe }}</option>
-										<option value="drawing"  :disabled="!isNew && !isString">{{ capApp.option.drawing }}</option>
-										<option value="boolean"  :disabled="!isNew && !isBoolean">{{ capApp.option.boolean }}</option>
-										<option value="files"    :disabled="!isNew && !isFiles">{{ capApp.option.files }}</option>
-									</optgroup>
-									<optgroup :label="capApp.datetimes" :disabled="!isNew && !isInteger">
-										<option value="datetime">{{ capApp.option.datetime }}</option>
-										<option value="date">{{ capApp.option.date }}</option>
-										<option value="time">{{ capApp.option.time }}</option>
-									</optgroup>
-									<optgroup :label="capGen.relationships" :disabled="!isNew && !isRelationship">
-										<option value="relationshipN1">{{ capApp.option.relationshipN1 }}</option>
-										<option value="relationship11">{{ capApp.option.relationship11 }}</option>
-									</optgroup>
-									<optgroup :label="capApp.expert" :disabled="!isNew && !isFloat && !isUuid">
-										<option value="float"     :disabled="!isNew && !isFloat">{{ capApp.option.float }}</option>
-										<option value="uuid"      :disabled="!isNew && !isUuid">{{ capApp.option.uuid }}</option>
-										<option value="regconfig" :disabled="!isNew && !isRegconfig">{{ capApp.option.regconfig }}</option>
-									</optgroup>
-								</select>
-								<my-button
-									:active="false"
-									:image="getAttributeIcon(values,false,false)"
-									:naked="true"
-								/>
-							</div>
-						</td>
-						<td>{{ capApp.usedForHint[usedFor] }}</td>
-					</tr>
-					
-					<!-- relationship settings -->
-					<template v-if="isRelationship">
-						<tr>
-							<td>{{ capApp.relationshipId }}</td>
+							</td>
+							<td>{{ capApp.iconHint }}</td>
+						</tr>
+						<tr v-if="!isId">
+							<td>{{ capApp.usedFor }}</td>
 							<td>
-								<select
-									v-model="values.relationshipId"
-									:disabled="!isNew || readonly"
-								>
-									<option :value="null">-</option>
-									<option v-for="rel in module.relations" :value="rel.id">
-										{{ rel.name }}
-									</option>
-									
-									<!-- relations from other modules -->
-									<optgroup
-										v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.relations.length !== 0)"
-										:label="mod.name"
+								<div class="row centered gap">
+									<select v-model="usedFor" :disabled="readonly" @change="changedUsedFor">
+										<optgroup :label="capGen.standard">
+											<option value="text"     :disabled="!isNew && !isString">{{ capApp.option.text }}</option>
+											<option value="textarea" :disabled="!isNew && !isString">{{ capApp.option.textarea }}</option>
+											<option value="richtext" :disabled="!isNew && !isString">{{ capApp.option.richtext }}</option>
+											<option value="number"   :disabled="!isNew && !isInteger">{{ capApp.option.number }}</option>
+											<option value="decimal"  :disabled="!isNew && !isNumeric">{{ capApp.option.decimal }}</option>
+											<option value="color"    :disabled="!isNew && !isString">{{ capApp.option.color }}</option>
+											<option value="iframe"   :disabled="!isNew && !isString">{{ capApp.option.iframe }}</option>
+											<option value="drawing"  :disabled="!isNew && !isString">{{ capApp.option.drawing }}</option>
+											<option value="boolean"  :disabled="!isNew && !isBoolean">{{ capApp.option.boolean }}</option>
+											<option value="files"    :disabled="!isNew && !isFiles">{{ capApp.option.files }}</option>
+										</optgroup>
+										<optgroup :label="capApp.datetimes" :disabled="!isNew && !isInteger">
+											<option value="datetime">{{ capApp.option.datetime }}</option>
+											<option value="date">{{ capApp.option.date }}</option>
+											<option value="time">{{ capApp.option.time }}</option>
+										</optgroup>
+										<optgroup :label="capGen.relationships" :disabled="!isNew && !isRelationship">
+											<option value="relationshipN1">{{ capApp.option.relationshipN1 }}</option>
+											<option value="relationship11">{{ capApp.option.relationship11 }}</option>
+										</optgroup>
+										<optgroup :label="capApp.expert" :disabled="!isNew && !isFloat && !isUuid">
+											<option value="float"     :disabled="!isNew && !isFloat">{{ capApp.option.float }}</option>
+											<option value="uuid"      :disabled="!isNew && !isUuid">{{ capApp.option.uuid }}</option>
+											<option value="regconfig" :disabled="!isNew && !isRegconfig">{{ capApp.option.regconfig }}</option>
+										</optgroup>
+									</select>
+									<my-button
+										:active="false"
+										:image="getAttributeIcon(values,false,false)"
+										:naked="true"
+									/>
+								</div>
+							</td>
+							<td>{{ capApp.usedForHint[usedFor] }}</td>
+						</tr>
+						
+						<!-- relationship settings -->
+						<template v-if="isRelationship">
+							<tr>
+								<td>{{ capApp.relationshipId }}</td>
+								<td>
+									<select
+										v-model="values.relationshipId"
+										:disabled="!isNew || readonly"
 									>
-										<option v-for="rel in mod.relations" :value="rel.id">
-											{{ mod.name + ': ' + rel.name }}
+										<option :value="null">-</option>
+										<option v-for="rel in module.relations" :value="rel.id">
+											{{ rel.name }}
 										</option>
-									</optgroup>
-								</select>
+										
+										<!-- relations from other modules -->
+										<optgroup
+											v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.relations.length !== 0)"
+											:label="mod.name"
+										>
+											<option v-for="rel in mod.relations" :value="rel.id">
+												{{ mod.name + ': ' + rel.name }}
+											</option>
+										</optgroup>
+									</select>
+								</td>
+								<td></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.onDelete }}</td>
+								<td>
+									<select v-model="values.onDelete" :disabled="readonly">
+										<option value="NO ACTION">NO ACTION</option>
+										<option value="CASCADE">CASCADE</option>
+										<option value="SET NULL">SET NULL</option>
+										<option value="RESTRICT">RESTRICT</option>
+									</select>
+								</td>
+								<td>{{ capApp.option.relationshipActionsHints[values.onDelete] }}</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.onUpdate }}</td>
+								<td>
+									<select v-model="values.onUpdate" :disabled="readonly">
+										<option value="NO ACTION">NO ACTION</option>
+										<option value="CASCADE">CASCADE</option>
+										<option value="SET NULL">SET NULL</option>
+										<option value="RESTRICT">RESTRICT</option>
+									</select>
+								</td>
+								<td>{{ capApp.option.relationshipActionsHintsOnUpdate }}</td>
+							</tr>
+						</template>
+						
+						<!-- bigint -->
+						<tr v-if="isInteger && !isTime">
+							<td>{{ isDate || isDatetime ? capApp.bigintDates : capApp.bigint }}</td>
+							<td><my-bool v-model="bigint" :readonly="readonly" /></td>
+							<td>{{ isDate || isDatetime ? capApp.bigintDatesHint : capApp.bigintHint }}</td>
+						</tr>
+						
+						<!-- double precision -->
+						<tr v-if="isFloat">
+							<td>{{ capApp.doublePrecision }}</td>
+							<td><my-bool v-model="doublePrecision" :readonly="readonly" /></td>
+							<td>{{ capApp.doublePrecisionHint }}</td>
+						</tr>
+						
+						<!-- text/files length -->
+						<tr v-if="hasLength">
+							<td>{{ lengthTitle }}</td>
+							<td>
+								<input type="number"
+									@keyup="updateLength($event.target.value)"
+									:disabled="readonly"
+									:value="values.length"
+								/>
+							</td>
+							<td v-html="isNumeric ? capApp.lengthNumericHint : ''"></td>
+						</tr>
+						<tr v-if="hasLengthFract">
+							<td>{{ capApp.lengthFract }}</td>
+							<td>
+								<input type="number"
+									@keyup="updateLengthFract($event.target.value)"
+									:disabled="readonly || values.length === 0"
+									:value="values.lengthFract"
+								/>
 							</td>
 							<td></td>
 						</tr>
-						<tr>
-							<td>{{ capApp.onDelete }}</td>
-							<td>
-								<select v-model="values.onDelete" :disabled="readonly">
-									<option value="NO ACTION">NO ACTION</option>
-									<option value="CASCADE">CASCADE</option>
-									<option value="SET NULL">SET NULL</option>
-									<option value="RESTRICT">RESTRICT</option>
-								</select>
-							</td>
-							<td>{{ capApp.option.relationshipActionsHints[values.onDelete] }}</td>
+						
+						<!-- encrypted -->
+						<tr v-if="canEncrypt">
+							<td>{{ capApp.encrypted }}</td>
+							<td><my-bool v-model="values.encrypted" :readonly="readonly" /></td>
+							<td>{{ capApp.encryptedHint }}</td>
 						</tr>
-						<tr>
-							<td>{{ capApp.onUpdate }}</td>
-							<td>
-								<select v-model="values.onUpdate" :disabled="readonly">
-									<option value="NO ACTION">NO ACTION</option>
-									<option value="CASCADE">CASCADE</option>
-									<option value="SET NULL">SET NULL</option>
-									<option value="RESTRICT">RESTRICT</option>
-								</select>
-							</td>
-							<td>{{ capApp.option.relationshipActionsHintsOnUpdate }}</td>
+						
+						<!-- nullable -->
+						<tr v-if="!isId">
+							<td>{{ capApp.nullable }}</td>
+							<td><my-bool v-model="values.nullable" :readonly="readonly || isId" :reversed="true" /></td>
+							<td>{{ capApp.nullableHint }}</td>
 						</tr>
-					</template>
-					
-					<!-- bigint -->
-					<tr v-if="isInteger && !isTime">
-						<td>{{ isDate || isDatetime ? capApp.bigintDates : capApp.bigint }}</td>
-						<td><my-bool v-model="bigint" :readonly="readonly" /></td>
-						<td>{{ isDate || isDatetime ? capApp.bigintDatesHint : capApp.bigintHint }}</td>
-					</tr>
-					
-					<!-- double precision -->
-					<tr v-if="isFloat">
-						<td>{{ capApp.doublePrecision }}</td>
-						<td><my-bool v-model="doublePrecision" :readonly="readonly" /></td>
-						<td>{{ capApp.doublePrecisionHint }}</td>
-					</tr>
-					
-					<!-- text/files length -->
-					<tr v-if="hasLength">
-						<td>{{ lengthTitle }}</td>
-						<td>
-							<input type="number"
-								@keyup="updateLength($event.target.value)"
-								:disabled="readonly"
-								:value="values.length"
-							/>
-						</td>
-						<td v-html="isNumeric ? capApp.lengthNumericHint : ''"></td>
-					</tr>
-					<tr v-if="hasLengthFract">
-						<td>{{ capApp.lengthFract }}</td>
-						<td>
-							<input type="number"
-								@keyup="updateLengthFract($event.target.value)"
-								:disabled="readonly || values.length === 0"
-								:value="values.lengthFract"
-							/>
-						</td>
-						<td></td>
-					</tr>
-					
-					<!-- encrypted -->
-					<tr v-if="canEncrypt">
-						<td>{{ capApp.encrypted }}</td>
-						<td><my-bool v-model="values.encrypted" :readonly="readonly" /></td>
-						<td>{{ capApp.encryptedHint }}</td>
-					</tr>
-					
-					<!-- nullable -->
-					<tr v-if="!isId">
-						<td>{{ capApp.nullable }}</td>
-						<td><my-bool v-model="values.nullable" :readonly="readonly || isId" :reversed="true" /></td>
-						<td>{{ capApp.nullableHint }}</td>
-					</tr>
-					
-					<!-- defaults -->
-					<tr v-if="!isId && !isFiles && !isRelationship">
-						<td>{{ capApp.defaults }}</td>
-						<td>
-							<div class="column centered gap">
-								<select v-model="defaultsOption" @change="updateDefaultsOption" :disabled="readonly">
-									<option value="fixed">{{ capApp.option.defaults.fixed }}</option>
-									<option value="date"     :disabled="!isDate">{{ capApp.option.defaults.date }}</option>
-									<option value="datetime" :disabled="!isDatetime">{{ capApp.option.defaults.datetime }}</option>
-									<option value="uuid"     :disabled="!isUuid">{{ capApp.option.defaults.uuid }}</option>
-								</select>
-								<input placeholder="..."
-									v-if="defaultsOption === 'fixed'"
-									v-model="values.def"
-									:disabled="readonly"
-								/>
-							</div>
-						</td>
-						<td>{{ capApp.defaultsHint }}</td>
-					</tr>
-					
-					<!-- expert info -->
-					<tr>
-						<td>{{ capApp.content }}</td>
-						<td><input :value="values.content" disabled="disabled" /></td>
-						<td>{{ capApp.contentHint }}</td>
-					</tr>
+						
+						<!-- defaults -->
+						<tr v-if="!isId && !isFiles && !isRelationship">
+							<td>{{ capApp.defaults }}</td>
+							<td>
+								<div class="column centered gap">
+									<select v-model="defaultsOption" @change="updateDefaultsOption" :disabled="readonly">
+										<option value="fixed">{{ capApp.option.defaults.fixed }}</option>
+										<option value="date"     :disabled="!isDate">{{ capApp.option.defaults.date }}</option>
+										<option value="datetime" :disabled="!isDatetime">{{ capApp.option.defaults.datetime }}</option>
+										<option value="uuid"     :disabled="!isUuid">{{ capApp.option.defaults.uuid }}</option>
+									</select>
+									<input placeholder="..."
+										v-if="defaultsOption === 'fixed'"
+										v-model="values.def"
+										:disabled="readonly"
+									/>
+								</div>
+							</td>
+							<td>{{ capApp.defaultsHint }}</td>
+						</tr>
+						
+						<!-- expert info -->
+						<tr>
+							<td>{{ capApp.content }}</td>
+							<td><input :value="values.content" disabled="disabled" /></td>
+							<td>{{ capApp.contentHint }}</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 		</div>

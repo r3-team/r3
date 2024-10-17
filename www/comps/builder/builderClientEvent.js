@@ -49,112 +49,114 @@ let MyBuilderClientEvent = {
 			
 			<div class="content default-inputs">
 				<table class="generic-table-vertical">
-					<tr>
-						<td>{{ capGen.title }}</td>
-						<td>
-							<div class="row gap centered">
-								<my-builder-caption class="dynamic"
-									v-model="values.captions.clientEventTitle"
-									:language="builderLanguage"
-									:readonly="readonly"
-								/>
-								<my-button image="languages.png"
-									@trigger="$emit('nextLanguage')"
-									:active="module.languages.length > 1"
-								/>
-							</div>
-						</td>
-						<td>{{ capApp.titleHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.event }}</td>
-						<td colspan="2">
-							<select v-model="values.event" :disabled="readonly">
-								<option v-for="v in eventValues" :value="v">
-									{{ capApp.event[v] }}
-								</option>
-							</select>
-						</td>
-					</tr>
-					<tr v-if="values.event === 'onHotkey'">
-						<td>{{ capGen.hotkey }}*</td>
-						<td>
-							<my-input-hotkey
-								v-model:char="values.hotkeyChar"
-								v-model:modifier1="values.hotkeyModifier1"
-								v-model:modifier2="values.hotkeyModifier2"
-								:readonly="readonly"
-								:twoLines="true"
-							/>
-						</td>
-						<td>{{ capApp.hotkeyHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.action }}</td>
-						<td colspan="2">
-							<select v-model="values.action" :disabled="readonly">
-								<option v-for="v in actionValues" :value="v">
-									{{ capApp.action[v] }}
-								</option>
-							</select>
-						</td>
-					</tr>
-					<tr v-if="values.action === 'callJsFunction'">
-						<td>{{ capGen.jsFunction }}*</td>
-						<td colspan="2">
-							<select v-model="jsFunctionId" :disabled="readonly">
-								<option value="">[{{ capGen.nothingSelected }}]</option>
-								<option
-									v-for="fnc in module.jsFunctions.filter(v => v.formId === null && v.isClientEventExec)"
-									:value="fnc.id"
-								>{{ fnc.name }}()</option>
-							</select>
-						</td>
-					</tr>
-					<tr v-if="values.action === 'callPgFunction'">
-						<td>{{ capGen.pgFunction }}*</td>
-						<td colspan="2">
-							<select v-model="pgFunctionId" :disabled="readonly">
-								<option value="">[{{ capGen.nothingSelected }}]</option>
-								<option
-									v-for="fnc in module.pgFunctions.filter(v => !v.isTrigger)"
-									:value="fnc.id"
-								>{{ fnc.name }}()</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.arguments }}</td>
-						<td>
-							<div class="column gap">
+					<tbody>
+						<tr>
+							<td>{{ capGen.title }}</td>
+							<td>
 								<div class="row gap centered">
-									<select v-model="argInput" :disabled="readonly">
-										<option
-											v-for="v in argValues"
-											:disabled="values.arguments.includes(v)"
-											:value="v"
-										>
-											{{ capApp.arguments[v] }}
-										</option>
-									</select>
-									<my-button image="add.png"
-										@trigger="values.arguments.push(argInput)"
-										:active="values.arguments.length < argValues.length && !readonly"
+									<my-builder-caption class="dynamic"
+										v-model="values.captions.clientEventTitle"
+										:language="builderLanguage"
+										:readonly="readonly"
+									/>
+									<my-button image="languages.png"
+										@trigger="$emit('nextLanguage')"
+										:active="module.languages.length > 1"
 									/>
 								</div>
-								<div class="column">
-									<my-button image="cancel.png"
-										v-for="(v,i) in values.arguments"
-										@trigger="values.arguments.splice(i,1)"
-										:active="!readonly"
-										:caption="'Arg' + (i+1) + ': ' + capApp.arguments[v]"
-										:naked="true"
-									/>
+							</td>
+							<td>{{ capApp.titleHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.event }}</td>
+							<td colspan="2">
+								<select v-model="values.event" :disabled="readonly">
+									<option v-for="v in eventValues" :value="v">
+										{{ capApp.event[v] }}
+									</option>
+								</select>
+							</td>
+						</tr>
+						<tr v-if="values.event === 'onHotkey'">
+							<td>{{ capGen.hotkey }}*</td>
+							<td>
+								<my-input-hotkey
+									v-model:char="values.hotkeyChar"
+									v-model:modifier1="values.hotkeyModifier1"
+									v-model:modifier2="values.hotkeyModifier2"
+									:readonly="readonly"
+									:twoLines="true"
+								/>
+							</td>
+							<td>{{ capApp.hotkeyHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.action }}</td>
+							<td colspan="2">
+								<select v-model="values.action" :disabled="readonly">
+									<option v-for="v in actionValues" :value="v">
+										{{ capApp.action[v] }}
+									</option>
+								</select>
+							</td>
+						</tr>
+						<tr v-if="values.action === 'callJsFunction'">
+							<td>{{ capGen.jsFunction }}*</td>
+							<td colspan="2">
+								<select v-model="jsFunctionId" :disabled="readonly">
+									<option value="">[{{ capGen.nothingSelected }}]</option>
+									<option
+										v-for="fnc in module.jsFunctions.filter(v => v.formId === null && v.isClientEventExec)"
+										:value="fnc.id"
+									>{{ fnc.name }}()</option>
+								</select>
+							</td>
+						</tr>
+						<tr v-if="values.action === 'callPgFunction'">
+							<td>{{ capGen.pgFunction }}*</td>
+							<td colspan="2">
+								<select v-model="pgFunctionId" :disabled="readonly">
+									<option value="">[{{ capGen.nothingSelected }}]</option>
+									<option
+										v-for="fnc in module.pgFunctions.filter(v => !v.isTrigger)"
+										:value="fnc.id"
+									>{{ fnc.name }}()</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.arguments }}</td>
+							<td>
+								<div class="column gap">
+									<div class="row gap centered">
+										<select v-model="argInput" :disabled="readonly">
+											<option
+												v-for="v in argValues"
+												:disabled="values.arguments.includes(v)"
+												:value="v"
+											>
+												{{ capApp.arguments[v] }}
+											</option>
+										</select>
+										<my-button image="add.png"
+											@trigger="values.arguments.push(argInput)"
+											:active="values.arguments.length < argValues.length && !readonly"
+										/>
+									</div>
+									<div class="column">
+										<my-button image="cancel.png"
+											v-for="(v,i) in values.arguments"
+											@trigger="values.arguments.splice(i,1)"
+											:active="!readonly"
+											:caption="'Arg' + (i+1) + ': ' + capApp.arguments[v]"
+											:naked="true"
+										/>
+									</div>
 								</div>
-							</div>
-						</td>
-						<td>{{ capApp.argumentsHint }}</td>
-					</tr>
+							</td>
+							<td>{{ capApp.argumentsHint }}</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 		</div>

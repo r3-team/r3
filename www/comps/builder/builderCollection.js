@@ -205,51 +205,53 @@ let MyBuilderCollection = {
 			<!-- collection properties -->
 			<div class="content" v-if="tabTarget === 'properties'">
 				<table class="generic-table-vertical tight fullWidth default-inputs">
-					<tr>
-						<td>{{ capGen.name }}</td>
-						<td><input v-model="name" :disabled="readonly" /></td>
-					</tr>
-					<tr>
-						<td>{{ capGen.icon }}</td>
-						<td>
-							<my-builder-icon-input
-								@input="iconId = $event"
-								:iconIdSelected="iconId"
-								:module="module"
-								:title="capGen.icon"
-								:readonly="readonly"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<div class="column gap">
-								<span>{{ capApp.inHeader }}</span>
-								<my-button image="add.png"
-									@trigger="collectionAdd"
-									:active="!readonly"
-									:caption="capGen.button.add"
-									:naked="true"
+					<tbody>
+						<tr>
+							<td>{{ capGen.name }}</td>
+							<td><input v-model="name" :disabled="readonly" /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.icon }}</td>
+							<td>
+								<my-builder-icon-input
+									@input="iconId = $event"
+									:iconIdSelected="iconId"
+									:module="module"
+									:title="capGen.icon"
+									:readonly="readonly"
 								/>
-							</div>
-						</td>
-						<td>
-							<my-builder-collection-input
-								v-for="(c,i) in inHeader"
-								@remove="collectionRemove(i)"
-								@update:consumer="collectionSet(i,$event)"
-								:allowFormOpen="true"
-								:allowRemove="true"
-								:consumer="c"
-								:fixedCollection="true"
-								:module="module"
-								:readonly="readonly"
-								:showMultiValue="false"
-								:showNoDisplayEmpty="true"
-								:showOnMobile="true"
-							/>
-						</td>
-					</tr>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<div class="column gap">
+									<span>{{ capApp.inHeader }}</span>
+									<my-button image="add.png"
+										@trigger="collectionAdd"
+										:active="!readonly"
+										:caption="capGen.button.add"
+										:naked="true"
+									/>
+								</div>
+							</td>
+							<td>
+								<my-builder-collection-input
+									v-for="(c,i) in inHeader"
+									@remove="collectionRemove(i)"
+									@update:consumer="collectionSet(i,$event)"
+									:allowFormOpen="true"
+									:allowRemove="true"
+									:consumer="c"
+									:fixedCollection="true"
+									:module="module"
+									:readonly="readonly"
+									:showMultiValue="false"
+									:showNoDisplayEmpty="true"
+									:showOnMobile="true"
+								/>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 		</div>

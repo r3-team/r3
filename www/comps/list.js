@@ -139,88 +139,90 @@ let MyList = {
 				:class="{ clickable:!inputMulti && !inputIsReadonly, 'multi-line':inputMulti }"
 			>
 				<table class="list-input-rows">
-					<tr v-for="(r,i) in rowsInput">
-						
-						<!-- icons / checkboxes -->
-						<td class="minimum">
-							<div class="list-input-row-items nowrap">
-								
-								<!-- either field/attribute icon or gallery file from first column -->
-								<slot name="input-icon"
-									v-if="!hasGalleryIcon || r.values[0] === null"
-								/>
-								<my-value-rich class="context-list-input"
-									v-else
-									@focus="focus"
-									:alignEnd="columns[0].flags.alignEnd"
-									:alignMid="columns[0].flags.alignMid"
-									:attribute-id="columns[0].attributeId"
-									:class="{ clickable:inputAsCategory && !inputIsReadonly }"
-									:basis="columns[0].basis"
-									:display="columns[0].display"
-									:length="columns[0].length"
-									:value="r.values[0]"
-									:wrap="columns[0].flags.wrap"
-								/>
-								
-								<!-- category input check box -->
-								<my-button
-									v-if="inputAsCategory"
-									@trigger="inputTriggerRow(r)"
-									:active="!inputIsReadonly"
-									:image="displayRecordCheck(inputRecordIds.includes(r.indexRecordIds['0']))"
-									:naked="true"
-								/>
-							</div>
-						</td>
-						
-						<!-- values -->
-						<td v-for="(b,bi) in columnBatches" :style="b.style">
-							<div class="list-input-row-items">
-								<template v-for="(ci,cii) in b.columnIndexes">
-									<my-value-rich class="context-list-input"
-										v-if="r.values[ci] !== null && (!hasGalleryIcon || bi !== 0 || cii !== 0)"
-										@focus="focus"
-										@trigger="inputTriggerRow(r)"
-										:alignEnd="columns[ci].flags.alignEnd"
-										:alignMid="columns[ci].flags.alignMid"
-										:attribute-id="columns[ci].attributeId"
-										:class="{ clickable:inputAsCategory && !inputIsReadonly }"
-										:basis="columns[ci].basis"
-										:bold="columns[ci].flags.bold"
-										:clipboard="columns[ci].flags.clipboard"
-										:display="columns[ci].display"
-										:italic="columns[ci].flags.italic"
-										:key="ci"
-										:length="columns[ci].length"
-										:value="r.values[ci]"
-										:wrap="columns[ci].flags.wrap"
+					<tbody>
+						<tr v-for="(r,i) in rowsInput">
+							
+							<!-- icons / checkboxes -->
+							<td class="minimum">
+								<div class="list-input-row-items nowrap">
+									
+									<!-- either field/attribute icon or gallery file from first column -->
+									<slot name="input-icon"
+										v-if="!hasGalleryIcon || r.values[0] === null"
 									/>
-								</template>
-							</div>
-						</td>
-						
-						<!-- actions -->
-						<td class="minimum">
-							<div class="list-input-row-items nogap nowrap">
-								<my-button image="open.png"
-									v-if="hasUpdate"
-									@trigger="clickOpen(r,false)"
-									@trigger-middle="clickOpen(r,true)"
-									:blockBubble="true"
-									:captionTitle="capApp.inputHintOpen"
-									:naked="true"
-								/>
-								<my-button image="cancel.png"
-									v-if="!inputAsCategory"
-									@trigger="inputTriggerRowRemove(i)"
-									:active="!inputIsReadonly"
-									:captionTitle="capApp.inputHintRemove"
-									:naked="true"
-								/>
-							</div>
-						</td>
-					</tr>
+									<my-value-rich class="context-list-input"
+										v-else
+										@focus="focus"
+										:alignEnd="columns[0].flags.alignEnd"
+										:alignMid="columns[0].flags.alignMid"
+										:attribute-id="columns[0].attributeId"
+										:class="{ clickable:inputAsCategory && !inputIsReadonly }"
+										:basis="columns[0].basis"
+										:display="columns[0].display"
+										:length="columns[0].length"
+										:value="r.values[0]"
+										:wrap="columns[0].flags.wrap"
+									/>
+									
+									<!-- category input check box -->
+									<my-button
+										v-if="inputAsCategory"
+										@trigger="inputTriggerRow(r)"
+										:active="!inputIsReadonly"
+										:image="displayRecordCheck(inputRecordIds.includes(r.indexRecordIds['0']))"
+										:naked="true"
+									/>
+								</div>
+							</td>
+							
+							<!-- values -->
+							<td v-for="(b,bi) in columnBatches" :style="b.style">
+								<div class="list-input-row-items">
+									<template v-for="(ci,cii) in b.columnIndexes">
+										<my-value-rich class="context-list-input"
+											v-if="r.values[ci] !== null && (!hasGalleryIcon || bi !== 0 || cii !== 0)"
+											@focus="focus"
+											@trigger="inputTriggerRow(r)"
+											:alignEnd="columns[ci].flags.alignEnd"
+											:alignMid="columns[ci].flags.alignMid"
+											:attribute-id="columns[ci].attributeId"
+											:class="{ clickable:inputAsCategory && !inputIsReadonly }"
+											:basis="columns[ci].basis"
+											:bold="columns[ci].flags.bold"
+											:clipboard="columns[ci].flags.clipboard"
+											:display="columns[ci].display"
+											:italic="columns[ci].flags.italic"
+											:key="ci"
+											:length="columns[ci].length"
+											:value="r.values[ci]"
+											:wrap="columns[ci].flags.wrap"
+										/>
+									</template>
+								</div>
+							</td>
+							
+							<!-- actions -->
+							<td class="minimum">
+								<div class="list-input-row-items nogap nowrap">
+									<my-button image="open.png"
+										v-if="hasUpdate"
+										@trigger="clickOpen(r,false)"
+										@trigger-middle="clickOpen(r,true)"
+										:blockBubble="true"
+										:captionTitle="capApp.inputHintOpen"
+										:naked="true"
+									/>
+									<my-button image="cancel.png"
+										v-if="!inputAsCategory"
+										@trigger="inputTriggerRowRemove(i)"
+										:active="!inputIsReadonly"
+										:captionTitle="capApp.inputHintRemove"
+										:naked="true"
+									/>
+								</div>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 			
@@ -230,41 +232,43 @@ let MyList = {
 				@click="clickInputEmpty"
 				:class="{ clickable:!inputIsReadonly }"
 			>
-				<tr>
-					<td class="minimum">
-						<slot name="input-icon" />
-					</td>
-					<td>
-						<div class="list-input-row-items">
-							<input class="input" data-is-input="1" data-is-input-empty="1" enterkeyhint="send"
-								@click="focus"
-								@focus="focus"
-								@keyup="updatedTextInput"
-								v-model="filtersQuick"
-								:class="{ invalid:!inputValid }"
-								:disabled="inputIsReadonly"
-								:placeholder="inputLinePlaceholder"
-								:tabindex="!inputIsReadonly ? 0 : -1"
-							/>
-						</div>
-					</td>
-					<td class="minimum">
-						<div class="list-input-row-items nogap nowrap">
-							<my-button image="add.png"
-								v-if="!inputIsReadonly && hasCreate"
-								@trigger="$emit('open-form',[],false)"
-								@trigger-middle="$emit('open-form',[],true)"
-								:blockBubble="true"
-								:captionTitle="capApp.inputHintCreate"
-								:naked="true"
-							/>
-							<my-button image="pageDown.png"
-								:active="!inputIsReadonly"
-								:naked="true"
-							/>
-						</div>
-					</td>
-				</tr>
+				<tbody>
+					<tr>
+						<td class="minimum">
+							<slot name="input-icon" />
+						</td>
+						<td>
+							<div class="list-input-row-items">
+								<input class="input" data-is-input="1" data-is-input-empty="1" enterkeyhint="send"
+									@click="focus"
+									@focus="focus"
+									@keyup="updatedTextInput"
+									v-model="filtersQuick"
+									:class="{ invalid:!inputValid }"
+									:disabled="inputIsReadonly"
+									:placeholder="inputLinePlaceholder"
+									:tabindex="!inputIsReadonly ? 0 : -1"
+								/>
+							</div>
+						</td>
+						<td class="minimum">
+							<div class="list-input-row-items nogap nowrap">
+								<my-button image="add.png"
+									v-if="!inputIsReadonly && hasCreate"
+									@trigger="$emit('open-form',[],false)"
+									@trigger-middle="$emit('open-form',[],true)"
+									:blockBubble="true"
+									:captionTitle="capApp.inputHintCreate"
+									:naked="true"
+								/>
+								<my-button image="pageDown.png"
+									:active="!inputIsReadonly"
+									:naked="true"
+								/>
+							</div>
+						</td>
+					</tr>
+				</tbody>
 			</table>
 		</template>
 		
@@ -645,29 +649,31 @@ let MyList = {
 								
 								<!-- row values per column batch -->
 								<table>
-									<tr v-for="b in columnBatches">
-										<td class="caption" v-if="cardsCaptions">{{ b.caption }}</td>
-										<td>
-											<div class="columnBatch listCards" :class="{ vertical:b.vertical }">
-												<my-value-rich
-													v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
-													@clipboard="$emit('clipboard')"
-													:alignEnd="columns[ind].flags.alignEnd"
-													:alignMid="columns[ind].flags.alignMid"
-													:attributeId="columns[ind].attributeId"
-													:basis="columns[ind].basis"
-													:bold="columns[ind].flags.bold"
-													:clipboard="columns[ind].flags.clipboard"
-													:display="columns[ind].display"
-													:italic="columns[ind].flags.italic"
-													:key="ind"
-													:length="columns[ind].length"
-													:value="r.values[ind]"
-													:wrap="columns[ind].flags.wrap"
-												/>
-											</div>
-										</td>
-									</tr>
+									<tbody>
+										<tr v-for="b in columnBatches">
+											<td class="caption" v-if="cardsCaptions">{{ b.caption }}</td>
+											<td>
+												<div class="columnBatch listCards" :class="{ vertical:b.vertical }">
+													<my-value-rich
+														v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
+														@clipboard="$emit('clipboard')"
+														:alignEnd="columns[ind].flags.alignEnd"
+														:alignMid="columns[ind].flags.alignMid"
+														:attributeId="columns[ind].attributeId"
+														:basis="columns[ind].basis"
+														:bold="columns[ind].flags.bold"
+														:clipboard="columns[ind].flags.clipboard"
+														:display="columns[ind].display"
+														:italic="columns[ind].flags.italic"
+														:key="ind"
+														:length="columns[ind].length"
+														:value="r.values[ind]"
+														:wrap="columns[ind].flags.wrap"
+													/>
+												</div>
+											</td>
+										</tr>
+									</tbody>
 								</table>
 							</div>
 						</div>

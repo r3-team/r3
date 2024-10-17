@@ -392,36 +392,40 @@ let MyBuilderRelation = {
 			<!-- relation properties -->
 			<div class="tab-content" v-if="tabTarget === 'properties'">
 				<table class="generic-table-vertical default-inputs">
-					<tr>
-						<td>{{ capGen.name }}</td>
-						<td><input class="long" v-model="name" :disabled="readonly" /></td>
-						<td>{{ capApp.nameHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.comments }}</td>
-						<td colspan="2"><textarea class="dynamic" v-model="comment" :disabled="readonly"></textarea></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.encryption }}</td>
-						<td><my-bool v-model="encryption" :readonly="true" /></td>
-						<td>{{ capApp.encryptionHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.retention }}</td>
-						<td>
-							<table>
-								<tr>
-									<td>{{ capApp.retentionCount }}</td>
-									<td><input v-model.number="retentionCount" :disabled="readonly" /></td>
-								</tr>
-								<tr>
-									<td>{{ capApp.retentionDays }}</td>
-									<td><input v-model.number="retentionDays" :disabled="readonly" /></td>
-								</tr>
-							</table>
-						</td>
-						<td>{{ capApp.retentionHint }}</td>
-					</tr>
+					<tbody>
+						<tr>
+							<td>{{ capGen.name }}</td>
+							<td><input class="long" v-model="name" :disabled="readonly" /></td>
+							<td>{{ capApp.nameHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.comments }}</td>
+							<td colspan="2"><textarea class="dynamic" v-model="comment" :disabled="readonly"></textarea></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.encryption }}</td>
+							<td><my-bool v-model="encryption" :readonly="true" /></td>
+							<td>{{ capApp.encryptionHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.retention }}</td>
+							<td>
+								<table>
+									<tbody>
+										<tr>
+											<td>{{ capApp.retentionCount }}</td>
+											<td><input v-model.number="retentionCount" :disabled="readonly" /></td>
+										</tr>
+										<tr>
+											<td>{{ capApp.retentionDays }}</td>
+											<td><input v-model.number="retentionDays" :disabled="readonly" /></td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+							<td>{{ capApp.retentionHint }}</td>
+						</tr>
+					</tbody>
 				</table>
 				
 				<div class="row">

@@ -7,144 +7,146 @@ export {MyListOptions as default};
 
 let MyListOptions = {
 	name:'my-list-options',
-	template:`<table class="generic-table generic-table-vertical fullWidth">
-		<!-- general -->
-		<tr v-if="hasPaging">
-			<td>{{ capApp.pageLimit }}</td>
-			<td>
-				<select v-model="pageLimitInput">
-					<option v-for="o in pageLimitOptions" :value="o">{{ o }}</option>
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<td>{{ capApp.displayMode }}</td>
-			<td>
-				<div class="row nowrap gap">
-					<select v-model="layoutInput">
-						<option value="table">{{ capApp.option.layoutTable }}</option>
-						<option value="cards">{{ capApp.option.layoutCards }}</option>
+	template:`<table class="generic-table-vertical fullWidth">
+		<tbody>
+			<!-- general -->
+			<tr v-if="hasPaging">
+				<td>{{ capApp.pageLimit }}</td>
+				<td>
+					<select v-model="pageLimitInput">
+						<option v-for="o in pageLimitOptions" :value="o">{{ o }}</option>
 					</select>
-					<my-button
-						@trigger="isTable ? layoutInput = 'cards' : layoutInput = 'table'"
-						:image="isTable ? 'files_list1.png' : 'files_list3.png'"
-						:naked="true"
-					/>
-				</div>
-			</td>
-		</tr>
-		<tr v-if="isCards">
-			<td>{{ capApp.cardsCaptions }}</td>
-			<td><my-bool v-model="cardsCaptionsInput" /></td>
-		</tr>
+				</td>
+			</tr>
+			<tr>
+				<td>{{ capApp.displayMode }}</td>
+				<td>
+					<div class="row nowrap gap">
+						<select v-model="layoutInput">
+							<option value="table">{{ capApp.option.layoutTable }}</option>
+							<option value="cards">{{ capApp.option.layoutCards }}</option>
+						</select>
+						<my-button
+							@trigger="isTable ? layoutInput = 'cards' : layoutInput = 'table'"
+							:image="isTable ? 'files_list1.png' : 'files_list3.png'"
+							:naked="true"
+						/>
+					</div>
+				</td>
+			</tr>
+			<tr v-if="isCards">
+				<td>{{ capApp.cardsCaptions }}</td>
+				<td><my-bool v-model="cardsCaptionsInput" /></td>
+			</tr>
 
-		<!-- column options -->
-		<tr v-if="columnsAll.length > 1">
-			<td>
-				<div class="column gap">
-					<span>{{ capGen.columns }}</span>
-					<my-button image="refresh.png"
-						@trigger="columnsReset"
-						:caption="capGen.button.reset"
-					/>
-				</div>
-			</td>
-			<td>
-				<draggable handle=".dragAnchor" group="filters" itemKey="id" animation="100" class="list-options-column-config"
-					v-model="columnBatchesAllDrag"
-					@change="dropBatchSort"
-					:fallbackOnBody="true"
-				>
-					<template #item="{element,index}">
-						<div class="list-options-batch input-custom dynamic" v-if="getBatchIsVisible(element,columnIdsShown)">
-							
-							<!-- batch sort -->
-							<img class="dragAnchor" src="images/drag.png" v-if="!isMobile" />
+			<!-- column options -->
+			<tr v-if="columnsAll.length > 1">
+				<td>
+					<div class="column gap">
+						<span>{{ capGen.columns }}</span>
+						<my-button image="refresh.png"
+							@trigger="columnsReset"
+							:caption="capGen.button.reset"
+						/>
+					</div>
+				</td>
+				<td>
+					<draggable handle=".dragAnchor" group="filters" itemKey="id" animation="100" class="list-options-column-config"
+						v-model="columnBatchesAllDrag"
+						@change="dropBatchSort"
+						:fallbackOnBody="true"
+					>
+						<template #item="{element,index}">
+							<div class="list-options-batch input-custom dynamic" v-if="getBatchIsVisible(element,columnIdsShown)">
+								
+								<!-- batch sort -->
+								<img class="dragAnchor" src="images/drag.png" v-if="!isMobile" />
 
-							<!-- batch sort for mobile -->
-							<div class="row nowrap" v-if="isMobile">
-								<my-button image="arrowUp.png"
-									@trigger="clickBatchSort(element,true)"
-									:active="columnBatchSortAll.indexOf(element.batchOrderIndex) !== 0"
-									:naked="true"
-								/>
-								<my-button image="arrowDown.png"
-									@trigger="clickBatchSort(element,false)"
-									:active="columnBatchSortAll.indexOf(element.batchOrderIndex) !== columnBatches.length - 1"
-									:naked="true"
-								/>
-							</div>
+								<!-- batch sort for mobile -->
+								<div class="row nowrap" v-if="isMobile">
+									<my-button image="arrowUp.png"
+										@trigger="clickBatchSort(element,true)"
+										:active="columnBatchSortAll.indexOf(element.batchOrderIndex) !== 0"
+										:naked="true"
+									/>
+									<my-button image="arrowDown.png"
+										@trigger="clickBatchSort(element,false)"
+										:active="columnBatchSortAll.indexOf(element.batchOrderIndex) !== columnBatches.length - 1"
+										:naked="true"
+									/>
+								</div>
 
-							<!-- batch/columns -->
-							<div class="row wrap centered gap">
-								<span v-if="element.columnIndexes.length > 1">{{ element.caption }}</span>
+								<!-- batch/columns -->
+								<div class="row wrap centered gap">
+									<span v-if="element.columnIndexes.length > 1">{{ element.caption }}</span>
 
-								<div class="list-options-batch-columns">
-									<div class="list-options-batch-column clickable"
-										v-for="ci in element.columnIndexes"
-										@click="clickColumnInBatch(columnsAll[ci].id,element)"
-										:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
-									>
-										{{ element.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : element.caption }}
+									<div class="list-options-batch-columns">
+										<div class="list-options-batch-column clickable"
+											v-for="ci in element.columnIndexes"
+											@click="clickColumnInBatch(columnsAll[ci].id,element)"
+											:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
+										>
+											{{ element.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : element.caption }}
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-					</template>
-				</draggable>
+						</template>
+					</draggable>
 
-				<br />
-				<div class="list-options-column-config" v-if="columnBatchesAll.filter(v => !getBatchIsVisible(v,columnIdsShown)).length !== 0">
-					<span>{{ capGen.notShown }}</span>
-					<template v-for="(b,bi) in columnBatchesAll">
-						<div class="list-options-batch input-custom dynamic" v-if="!getBatchIsVisible(b,columnIdsShown)">
-
-							<!-- batch/columns -->
-							<div class="row wrap centered gap">
-								<span v-if="b.columnIndexes.length > 1">{{ b.caption }}</span>
-
-								<div class="list-options-batch-columns">
-									<div class="list-options-batch-column clickable"
-										v-for="ci in b.columnIndexes"
-										@click="clickColumnInBatch(columnsAll[ci].id,b)"
-										:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
-									>
-										{{ b.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : b.caption }}
-									</div>
-								</div>
-							</div>
-						</div>
-					</template>
-				</div>
-
-				<template v-if="csvImport">
 					<br />
-					<span>{{ capApp.message.csvImportWarning }}</span>
-				</template>
-			</td>
-		</tr>
-		
-		<tr>
-			<td colspan="2"><b>{{ capApp.globalSettings }}</b></td>
-		</tr>
-		<tr>
-			<td>{{ capAppSet.listRows }}</td>
-			<td>
-				<div class="row gap">
-					<my-button-check
-						@update:modelValue="setSettingGlobal('listSpaced',!settings.listSpaced)"
-						:caption="capAppSet.listSpaced"
-						:modelValue="settings.listSpaced"
-					/>
-					<my-button-check
-						v-if="isTable"
-						@update:modelValue="setSettingGlobal('listColored',!settings.listColored)"
-						:caption="capAppSet.listColored"
-						:modelValue="settings.listColored"
-					/>
-				</div>
-			</td>
-		</tr>
+					<div class="list-options-column-config" v-if="columnBatchesAll.filter(v => !getBatchIsVisible(v,columnIdsShown)).length !== 0">
+						<span>{{ capGen.notShown }}</span>
+						<template v-for="(b,bi) in columnBatchesAll">
+							<div class="list-options-batch input-custom dynamic" v-if="!getBatchIsVisible(b,columnIdsShown)">
+
+								<!-- batch/columns -->
+								<div class="row wrap centered gap">
+									<span v-if="b.columnIndexes.length > 1">{{ b.caption }}</span>
+
+									<div class="list-options-batch-columns">
+										<div class="list-options-batch-column clickable"
+											v-for="ci in b.columnIndexes"
+											@click="clickColumnInBatch(columnsAll[ci].id,b)"
+											:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
+										>
+											{{ b.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : b.caption }}
+										</div>
+									</div>
+								</div>
+							</div>
+						</template>
+					</div>
+
+					<template v-if="csvImport">
+						<br />
+						<span>{{ capApp.message.csvImportWarning }}</span>
+					</template>
+				</td>
+			</tr>
+			
+			<tr>
+				<td colspan="2"><b>{{ capApp.globalSettings }}</b></td>
+			</tr>
+			<tr>
+				<td>{{ capAppSet.listRows }}</td>
+				<td>
+					<div class="row gap">
+						<my-button-check
+							@update:modelValue="setSettingGlobal('listSpaced',!settings.listSpaced)"
+							:caption="capAppSet.listSpaced"
+							:modelValue="settings.listSpaced"
+						/>
+						<my-button-check
+							v-if="isTable"
+							@update:modelValue="setSettingGlobal('listColored',!settings.listColored)"
+							:caption="capAppSet.listColored"
+							:modelValue="settings.listColored"
+						/>
+					</div>
+				</td>
+			</tr>
+		</tbody>
 	</table>`,
 	props:{
 		cardsCaptions:  { type:Boolean, required:true }, // layout option for 'cards', show captions?

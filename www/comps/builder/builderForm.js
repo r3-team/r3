@@ -321,69 +321,71 @@ let MyBuilderForm = {
 					
 					<!-- form properties -->
 					<table class="generic-table-vertical tight fullWidth default-inputs" v-if="tabTarget === 'properties'">
-						<tr>
-							<td>{{ capGen.name }}</td>
-							<td><input class="long" v-model="name" :disabled="readonly" /></td>
-						</tr>
-						<tr>
-							<td>{{ capGen.title }}</td>
-							<td>
-								<my-builder-caption
-									v-model="captions.formTitle"
-									:contentName="capApp.formTitle"
-									:language="builderLanguage"
-									:longInput="true"
-									:readonly="readonly"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.icon }}</td>
-							<td>
-								<my-builder-icon-input
-									@input="iconId = $event"
-									:iconIdSelected="iconId"
-									:module="module"
-									:title="capApp.icon"
-									:readonly="readonly"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.noDataActions }}</td>
-							<td><my-bool v-model="noDataActions" :readonly="readonly" /></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.presetOpen }}</td>
-							<td>
-								<select v-model="presetIdOpen" :disabled="readonly">
-									<option :value="null" v-if="presetCandidates.length === 0">
-										{{ capGen.nothingThere }}
-									</option>
-									<option :value="null" v-if="presetCandidates.length !== 0">
-										{{ capGen.nothingSelected }}
-									</option>
-									<option v-for="p in presetCandidates" :key="p.id" :value="p.id">
-										{{ p.name }}
-									</option>
-								</select>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.fieldIdFocus }}</td>
-							<td>
-								<select v-model="fieldIdFocus" :disabled="readonly">
-									<option :value="null">-</option>
-									<template v-for="(ref,fieldId) in entityIdMapRef.field">
-										<option
-											v-if="fieldContentFocus.includes(fieldIdMap[fieldId].content)"
-											:disabled="fieldId.startsWith('new')"
-											:value="fieldId"
-										>F{{ fieldId.startsWith('new') ? ref + ' (' + capGen.notSaved + ')' : ref }}</option>
-									</template>
-								</select>
-							</td>
-						</tr>
+						<tbody>
+							<tr>
+								<td>{{ capGen.name }}</td>
+								<td><input class="long" v-model="name" :disabled="readonly" /></td>
+							</tr>
+							<tr>
+								<td>{{ capGen.title }}</td>
+								<td>
+									<my-builder-caption
+										v-model="captions.formTitle"
+										:contentName="capApp.formTitle"
+										:language="builderLanguage"
+										:longInput="true"
+										:readonly="readonly"
+									/>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.icon }}</td>
+								<td>
+									<my-builder-icon-input
+										@input="iconId = $event"
+										:iconIdSelected="iconId"
+										:module="module"
+										:title="capApp.icon"
+										:readonly="readonly"
+									/>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.noDataActions }}</td>
+								<td><my-bool v-model="noDataActions" :readonly="readonly" /></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.presetOpen }}</td>
+								<td>
+									<select v-model="presetIdOpen" :disabled="readonly">
+										<option :value="null" v-if="presetCandidates.length === 0">
+											{{ capGen.nothingThere }}
+										</option>
+										<option :value="null" v-if="presetCandidates.length !== 0">
+											{{ capGen.nothingSelected }}
+										</option>
+										<option v-for="p in presetCandidates" :key="p.id" :value="p.id">
+											{{ p.name }}
+										</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.fieldIdFocus }}</td>
+								<td>
+									<select v-model="fieldIdFocus" :disabled="readonly">
+										<option :value="null">-</option>
+										<template v-for="(ref,fieldId) in entityIdMapRef.field">
+											<option
+												v-if="fieldContentFocus.includes(fieldIdMap[fieldId].content)"
+												:disabled="fieldId.startsWith('new')"
+												:value="fieldId"
+											>F{{ fieldId.startsWith('new') ? ref + ' (' + capGen.notSaved + ')' : ref }}</option>
+										</template>
+									</select>
+								</td>
+							</tr>
+						</tbody>
 					</table>
 					
 					<!-- form states -->

@@ -287,265 +287,831 @@ let MyBuilderFieldOptions = {
 	},
 	template:`<div class="builder-field-options">
 		<table class="generic-table-vertical tight fullWidth default-inputs">
-			<tr v-if="isButton || isChart || isData || isList || isTabs || (isHeader && !field.richtext)">
-				<td>{{ capGen.title }}</td>
-				<td>
-					<my-builder-caption
-						@update:modelValue="field.captions.fieldTitle = $event;set('captions',field.captions)"
-						:language="builderLanguage"
-						:modelValue="field.captions.fieldTitle"
-					/>
-				</td>
-			</tr>
-			<tr v-if="isData">
-				<td>{{ capApp.fieldHelp }}</td>
-				<td>
-					<my-builder-caption
-						@update:modelValue="field.captions.fieldHelp = $event;set('captions',field.captions)"
-						:language="builderLanguage"
-						:modelValue="field.captions.fieldHelp"
-						:multiLine="true"
-					/>
-				</td>
-			</tr>
-			<tr v-if="!isChart && !isContainer && (!isHeader || !field.richtext)">
-				<td>{{ capGen.icon }}</td>
-				<td>
-					<my-builder-icon-input
-						@input="set('iconId',$event)"
-						:icon-id-selected="field.iconId"
-						:module="module"
-						:title="capGen.icon"
-					/>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capApp.state }}</td>
-				<td>
-					<select
-						@input="set('state',$event.target.value)"
-						:value="field.state"
-					>
-						<option value="hidden">{{ capApp.stateHidden }}</option>
-						<option value="default">{{ capApp.stateDefault }}</option>
-						<option v-if="isData" value="optional">{{ capApp.stateOptional }}</option>
-						<option v-if="isData" value="required">{{ capApp.stateRequired }}</option>
-						<option v-if="isData || isButton" value="readonly">{{ capApp.stateReadonly }}</option>
-					</select>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capApp.onMobile }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('onMobile',$event)"
-						:modelValue="field.onMobile"
-					/>
-				</td>
-			</tr>
-			
-			<template v-if="isHeader">
-				<tr>
-					<td>{{ capApp.headerRichtext }}</td>
+			<tbody>
+				<tr v-if="isButton || isChart || isData || isList || isTabs || (isHeader && !field.richtext)">
+					<td>{{ capGen.title }}</td>
 					<td>
-						<my-bool
-							@update:modelValue="set('richtext',$event)"
-							:modelValue="field.richtext"
+						<my-builder-caption
+							@update:modelValue="field.captions.fieldTitle = $event;set('captions',field.captions)"
+							:language="builderLanguage"
+							:modelValue="field.captions.fieldTitle"
 						/>
 					</td>
 				</tr>
-				<tr v-if="field.richtext">
-					<td colspan="2">
-						<div class="headerRichtext">
-							<my-builder-caption
-								@update:modelValue="field.captions.fieldTitle = $event;set('captions',field.captions)"
-								:language="builderLanguage"
-								:modelValue="field.captions.fieldTitle"
-								:richtext="true"
-							/>
-						</div>
-					</td>
-				</tr>
-				<tr v-if="!field.richtext">
-					<td>{{ capApp.headerSize }}</td>
+				<tr v-if="isData">
+					<td>{{ capApp.fieldHelp }}</td>
 					<td>
-						<select
-							@input="setInt('size',$event.target.value,false)"
-							:value="field.size"
-						>
-							<option value="1">h1</option>
-							<option value="2">h2</option>
-							<option value="3">h3</option>
-						</select>
-					</td>
-				</tr>
-			</template>
-			
-			<template v-if="isData">
-				<tr>
-					<td>{{ capGen.attribute }}</td>
-					<td>
-						<div class="row centered gap">
-							<my-button
-								:active="false"
-								:image="getAttributeIcon(attribute,field.outsideIn,field.attributeIdNm !== null)"
-								:naked="true"
-							/>
-							<input disabled="disabled"
-								:title="getItemTitlePath(field.attributeId)"
-								:value="getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm)"
-							/>
-							<my-button image="open.png"
-								@trigger="openAttribute(attribute.relationId,false)"
-								@trigger-middle="openAttribute(attribute.relationId,true)"
-								:caption="capGen.open"
-							/>
-						</div>
-					</td>
-				</tr>
-				<tr v-if="!isDrawing && !isRelationship && !isRegconfig">
-					<td>{{ capApp.fieldMin }}</td>
-					<td>
-						<input
-							@input="setInt('min',$event.target.value,true)"
-							:value="field.min"
+						<my-builder-caption
+							@update:modelValue="field.captions.fieldHelp = $event;set('captions',field.captions)"
+							:language="builderLanguage"
+							:modelValue="field.captions.fieldHelp"
+							:multiLine="true"
 						/>
 					</td>
 				</tr>
-				<tr v-if="!isDrawing && !isRelationship && !isRegconfig">
-					<td>{{ capApp.fieldMax }}</td>
+				<tr v-if="!isChart && !isContainer && (!isHeader || !field.richtext)">
+					<td>{{ capGen.icon }}</td>
 					<td>
-						<input
-							@input="setInt('max',$event.target.value,true)"
-							:value="field.max"
-						/>
-					</td>
-				</tr>
-				<tr v-if="!isRelationship && displayOptions.length > 1">
-					<td>{{ capApp.display }}</td>
-					<td>
-						<select
-							@input="set('display',$event.target.value)"
-							:value="field.display"
-						>
-							<option v-for="o in displayOptions" :value="o">{{ capApp.option.display[o] }}</option>
-						</select>
-					</td>
-				</tr>
-				<tr v-if="!isFiles && !isDrawing && !isRelationship">
-					<td>{{ capApp.fieldClipboard }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('clipboard',$event)"
-							:modelValue="field.clipboard"
-						/>
-					</td>
-				</tr>
-				<tr v-if="!isDrawing && !isRelationship">
-					<td>{{ capApp.fieldRegexCheck }}</td>
-					<td>
-						<input
-							@input="setNull('regexCheck',$event.target.value)"
-							:value="field.regexCheck"
-						/>
-					</td>
-				</tr>
-				
-				<!-- default values -->
-				<tr v-if="!isFiles && !isDrawing && !isRelationship">
-					<td>{{ capApp.fieldDefault }}</td>
-					<td>
-						<input
-							@input="set('def',$event.target.value)"
-							:placeholder="capApp.fieldDefaultHint"
-							:value="field.def"
-						/>
-					</td>
-				</tr>
-				<tr v-if="!isFiles && !isDrawing && field.def === ''">
-					<td>{{ capApp.collectionIdDef }}</td>
-					<td>
-						<my-builder-collection-input
-							@update:consumer="set('defCollection',$event)"
-							:allowFormOpen="false"
-							:allowRemove="false"
-							:consumer="field.defCollection"
-							:fixedCollection="false"
+						<my-builder-icon-input
+							@input="set('iconId',$event)"
+							:icon-id-selected="field.iconId"
 							:module="module"
-							:readonly="false"
-							:showMultiValue="false"
-							:showNoDisplayEmpty="false"
-							:showOnMobile="false"
+							:title="capGen.icon"
 						/>
 					</td>
 				</tr>
-				<tr v-if="isRelationship">
-					<td>{{ capApp.fieldDefaultPresetIds }}</td>
+				<tr>
+					<td>{{ capApp.state }}</td>
 					<td>
-						<select @change="presetIdAdd($event.target.value)">
-							<option value="">-</option>
-							<template v-for="p in presetIdMap">
-								<option
-									v-if="!field.defPresetIds.includes(p.id)"
-									:key="p.id"
-									:value="p.id"
-								>{{ p.name }}</option>
-							</template>
+						<select
+							@input="set('state',$event.target.value)"
+							:value="field.state"
+						>
+							<option value="hidden">{{ capApp.stateHidden }}</option>
+							<option value="default">{{ capApp.stateDefault }}</option>
+							<option v-if="isData" value="optional">{{ capApp.stateOptional }}</option>
+							<option v-if="isData" value="required">{{ capApp.stateRequired }}</option>
+							<option v-if="isData || isButton" value="readonly">{{ capApp.stateReadonly }}</option>
 						</select>
-						
-						<my-button image="cancel.png"
-							v-for="presetId in field.defPresetIds"
-							@trigger="presetIdRemove(presetId)"
-							:caption="presetIdMap[presetId].name"
-							:key="presetId"
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.onMobile }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('onMobile',$event)"
+							:modelValue="field.onMobile"
 						/>
 					</td>
 				</tr>
 				
-				<!-- alternative field inputs -->
-				<tr v-if="isString && attribute.contentUse === 'richtext'">
-					<td>{{ capApp.fieldAttributeIdAltRichtextFiles }}</td>
-					<td>
-						<select
-							@input="setNull('attributeIdAlt',$event.target.value)"
-							:value="field.attributeIdAlt"
-						>
-							<option value="">-</option>
-							<option
-								v-for="a in relationIdMap[joinsIndexMap[field.index].relationId].attributes.filter(v => isAttributeFiles(v.content))"
-								:value="a.id"
-							>
-								{{ a.name }}
-							</option>
-						</select>
-					</td>
-				</tr>
-				<tr v-if="isDate || isDatetime">
-					<td>{{ capApp.fieldAttributeIdAltDateTo }}</td>
-					<td>
-						<select
-							@input="setNull('attributeIdAlt',$event.target.value)"
-							:value="field.attributeIdAlt"
-						>
-							<option value="">-</option>
-							<option
-								v-for="a in relationIdMap[joinsIndexMap[field.index].relationId].attributes.filter(v => v.id !== field.attributeId && v.contentUse === attribute.contentUse)"
-								:value="a.id"
-							>
-								{{ a.name }}
-							</option>
-						</select>
-					</td>
-				</tr>
-				
-				<!-- relationship inputs -->
-				<template v-if="isRelationship">
+				<template v-if="isHeader">
 					<tr>
-						<td>{{ capApp.category }}</td>
+						<td>{{ capApp.headerRichtext }}</td>
 						<td>
 							<my-bool
-								@update:modelValue="set('category',$event)"
-								:modelValue="field.category"
+								@update:modelValue="set('richtext',$event)"
+								:modelValue="field.richtext"
+							/>
+						</td>
+					</tr>
+					<tr v-if="field.richtext">
+						<td colspan="2">
+							<div class="headerRichtext">
+								<my-builder-caption
+									@update:modelValue="field.captions.fieldTitle = $event;set('captions',field.captions)"
+									:language="builderLanguage"
+									:modelValue="field.captions.fieldTitle"
+									:richtext="true"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="!field.richtext">
+						<td>{{ capApp.headerSize }}</td>
+						<td>
+							<select
+								@input="setInt('size',$event.target.value,false)"
+								:value="field.size"
+							>
+								<option value="1">h1</option>
+								<option value="2">h2</option>
+								<option value="3">h3</option>
+							</select>
+						</td>
+					</tr>
+				</template>
+				
+				<template v-if="isData">
+					<tr>
+						<td>{{ capGen.attribute }}</td>
+						<td>
+							<div class="row centered gap">
+								<my-button
+									:active="false"
+									:image="getAttributeIcon(attribute,field.outsideIn,field.attributeIdNm !== null)"
+									:naked="true"
+								/>
+								<input disabled="disabled"
+									:title="getItemTitlePath(field.attributeId)"
+									:value="getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm)"
+								/>
+								<my-button image="open.png"
+									@trigger="openAttribute(attribute.relationId,false)"
+									@trigger-middle="openAttribute(attribute.relationId,true)"
+									:caption="capGen.open"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="!isDrawing && !isRelationship && !isRegconfig">
+						<td>{{ capApp.fieldMin }}</td>
+						<td>
+							<input
+								@input="setInt('min',$event.target.value,true)"
+								:value="field.min"
+							/>
+						</td>
+					</tr>
+					<tr v-if="!isDrawing && !isRelationship && !isRegconfig">
+						<td>{{ capApp.fieldMax }}</td>
+						<td>
+							<input
+								@input="setInt('max',$event.target.value,true)"
+								:value="field.max"
+							/>
+						</td>
+					</tr>
+					<tr v-if="!isRelationship && displayOptions.length > 1">
+						<td>{{ capApp.display }}</td>
+						<td>
+							<select
+								@input="set('display',$event.target.value)"
+								:value="field.display"
+							>
+								<option v-for="o in displayOptions" :value="o">{{ capApp.option.display[o] }}</option>
+							</select>
+						</td>
+					</tr>
+					<tr v-if="!isFiles && !isDrawing && !isRelationship">
+						<td>{{ capApp.fieldClipboard }}</td>
+						<td>
+							<my-bool
+								@update:modelValue="set('clipboard',$event)"
+								:modelValue="field.clipboard"
+							/>
+						</td>
+					</tr>
+					<tr v-if="!isDrawing && !isRelationship">
+						<td>{{ capApp.fieldRegexCheck }}</td>
+						<td>
+							<input
+								@input="setNull('regexCheck',$event.target.value)"
+								:value="field.regexCheck"
+							/>
+						</td>
+					</tr>
+					
+					<!-- default values -->
+					<tr v-if="!isFiles && !isDrawing && !isRelationship">
+						<td>{{ capApp.fieldDefault }}</td>
+						<td>
+							<input
+								@input="set('def',$event.target.value)"
+								:placeholder="capApp.fieldDefaultHint"
+								:value="field.def"
+							/>
+						</td>
+					</tr>
+					<tr v-if="!isFiles && !isDrawing && field.def === ''">
+						<td>{{ capApp.collectionIdDef }}</td>
+						<td>
+							<my-builder-collection-input
+								@update:consumer="set('defCollection',$event)"
+								:allowFormOpen="false"
+								:allowRemove="false"
+								:consumer="field.defCollection"
+								:fixedCollection="false"
+								:module="module"
+								:readonly="false"
+								:showMultiValue="false"
+								:showNoDisplayEmpty="false"
+								:showOnMobile="false"
+							/>
+						</td>
+					</tr>
+					<tr v-if="isRelationship">
+						<td>{{ capApp.fieldDefaultPresetIds }}</td>
+						<td>
+							<select @change="presetIdAdd($event.target.value)">
+								<option value="">-</option>
+								<template v-for="p in presetIdMap">
+									<option
+										v-if="!field.defPresetIds.includes(p.id)"
+										:key="p.id"
+										:value="p.id"
+									>{{ p.name }}</option>
+								</template>
+							</select>
+							
+							<my-button image="cancel.png"
+								v-for="presetId in field.defPresetIds"
+								@trigger="presetIdRemove(presetId)"
+								:caption="presetIdMap[presetId].name"
+								:key="presetId"
+							/>
+						</td>
+					</tr>
+					
+					<!-- alternative field inputs -->
+					<tr v-if="isString && attribute.contentUse === 'richtext'">
+						<td>{{ capApp.fieldAttributeIdAltRichtextFiles }}</td>
+						<td>
+							<select
+								@input="setNull('attributeIdAlt',$event.target.value)"
+								:value="field.attributeIdAlt"
+							>
+								<option value="">-</option>
+								<option
+									v-for="a in relationIdMap[joinsIndexMap[field.index].relationId].attributes.filter(v => isAttributeFiles(v.content))"
+									:value="a.id"
+								>
+									{{ a.name }}
+								</option>
+							</select>
+						</td>
+					</tr>
+					<tr v-if="isDate || isDatetime">
+						<td>{{ capApp.fieldAttributeIdAltDateTo }}</td>
+						<td>
+							<select
+								@input="setNull('attributeIdAlt',$event.target.value)"
+								:value="field.attributeIdAlt"
+							>
+								<option value="">-</option>
+								<option
+									v-for="a in relationIdMap[joinsIndexMap[field.index].relationId].attributes.filter(v => v.id !== field.attributeId && v.contentUse === attribute.contentUse)"
+									:value="a.id"
+								>
+									{{ a.name }}
+								</option>
+							</select>
+						</td>
+					</tr>
+					
+					<!-- relationship inputs -->
+					<template v-if="isRelationship">
+						<tr>
+							<td>{{ capApp.category }}</td>
+							<td>
+								<my-bool
+									@update:modelValue="set('category',$event)"
+									:modelValue="field.category"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.filterQuick }}</td>
+							<td>
+								<my-bool
+									@update:modelValue="set('filterQuick',$event)"
+									:modelValue="field.filterQuick"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.autoSelect }}</td>
+							<td>
+							<input
+								@input="setInt('autoSelect',$event.target.value,false)"
+								:placeholder="capApp.autoSelectHint"
+								:value="field.autoSelect"
+							/>
+							</td>
+						</tr>
+					</template>
+				</template>
+				
+				<template v-if="isCalendar">
+					<tr>
+						<td>{{ capApp.date0 }}</td>
+						<td>
+							<select
+								@input="setIndexAttribute('date0',$event.target.value)"
+								:value="getIndexAttributeId(field.indexDate0,field.attributeIdDate0,false,null)"
+							>
+								<option :value="getIndexAttributeId(null,null,false,null)">-</option>
+								<optgroup
+									v-for="j in field.query.joins"
+									:label="j.index+' '+relationIdMap[j.relationId].name"
+								>
+									<option
+										v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeInteger(v.content))"
+										:value="getIndexAttributeId(j.index,a.id,false,null)"
+									>
+										{{ a.name }}
+									</option>
+								</optgroup>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.date1 }}</td>
+						<td>
+							<select
+								@input="setIndexAttribute('date1',$event.target.value)"
+								:value="getIndexAttributeId(field.indexDate1,field.attributeIdDate1,false,null)"
+							>
+								<option :value="getIndexAttributeId(null,null,false,null)">-</option>
+								<optgroup
+									v-for="j in field.query.joins"
+									:label="j.index+' '+relationIdMap[j.relationId].name"
+								>
+									<option
+										v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeInteger(v.content))"
+										:value="getIndexAttributeId(j.index,a.id,false,null)"
+									>
+										{{ a.name }}
+									</option>
+								</optgroup>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.dateColor }}</td>
+						<td>
+							<select
+								@input="setIndexAttribute('color',$event.target.value)"
+								:value="getIndexAttributeId(field.indexColor,field.attributeIdColor,false,null)"
+							>
+								<option :value="getIndexAttributeId(null,null,false,null)">-</option>
+								<optgroup
+									v-for="j in field.query.joins"
+									:label="j.index+' '+relationIdMap[j.relationId].name"
+								>
+									<option
+										v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeString(v.content))"
+										:value="getIndexAttributeId(j.index,a.id,false,null)"
+									>
+										{{ a.name }}
+									</option>
+								</optgroup>
+							</select>
+						</td>
+					</tr>
+					<template v-if="!field.gantt">
+						<tr>
+							<td>{{ capApp.days }}</td>
+							<td>
+								<select
+									@input="setInt('days',$event.target.value,false)"
+									:value="field.days"
+								>
+									<option :value="1" >{{ capCal.option.days1  }}</option>
+									<option :value="3" >{{ capCal.option.days3  }}</option>
+									<option :value="5" >{{ capCal.option.days5  }}</option>
+									<option :value="7" >{{ capCal.option.days7  }}</option>
+									<option :value="42">{{ capCal.option.days42 }}</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.daysToggle }}</td>
+							<td>
+								<my-bool
+									@update:modelValue="set('daysToggle',$event)"
+									:modelValue="field.daysToggle"
+								/>
+							</td>
+						</tr>
+					</template>
+					<template v-if="field.gantt">
+						<tr>
+							<td>{{ capApp.gantt }}</td>
+							<td><i>{{ capApp.ganttNotes }}</i></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.ganttSteps }}</td>
+							<td>
+								<select
+									@input="setNull('ganttSteps',$event.target.value)"
+									:value="field.ganttSteps"
+								>
+									<option value="days" >{{ capApp.option.ganttStepsDays }}</option>
+									<option value="hours">{{ capApp.option.ganttStepsHours }}</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.ganttStepsToggle }}</td>
+							<td>
+								<my-bool
+									@update:modelValue="set('ganttStepsToggle',$event)"
+									:modelValue="field.ganttStepsToggle"
+								/>
+							</td>
+						</tr>
+					</template>
+					<tr v-if="!field.gantt">
+						<td>{{ capApp.ics }}</td>
+						<td>
+							<my-bool
+								@update:modelValue="set('ics',$event)"
+								:modelValue="field.ics"
+							/>
+						</td>
+					</tr>
+					<template v-if="field.ics">
+						<tr>
+							<td>{{ capApp.dateRange0 }}</td>
+							<td>
+								<input
+									@input="setInt('dateRange0',$event.target.value * 86400,false)"
+									:placeholder="capApp.dateRangeHint"
+									:value="field.dateRange0 / 86400"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.dateRange1 }}</td>
+							<td>
+								<input
+									@input="setInt('dateRange1',$event.target.value * 86400,false)"
+									:placeholder="capApp.dateRangeHint"
+									:value="field.dateRange1 / 86400"
+								/>
+							</td>
+						</tr>
+					</template>
+				</template>
+				
+				<template v-if="isContainer">
+					<tr>
+						<td>{{ capApp.fieldSize }}</td>
+						<td>
+							<div class="row gap" v-if="field.basis !== 0">
+								<input class="short"
+									@input="setInt('basis',$event.target.value,false)"
+									:value="field.basis"
+								/>
+								<my-button image="add.png"
+									@trigger="setInt('basis',field.basis+50,false)"
+								/>
+								<my-button image="remove.png"
+									@trigger="setInt('basis',field.basis-50,false)"
+									:active="field.basis >= 50"
+								/>
+							</div>
+							<my-button
+								v-if="field.basis === 0"
+								@trigger="setInt('basis',300,false)"
+								:caption="capApp.fieldSize0"
+								:naked="true"
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.flexSizeGrow }}</td>
+						<td>
+							<div class="row gap">
+								<input class="short"
+									@input="setInt('grow',$event.target.value,false)"
+									:value="field.grow"
+								/>
+								<my-button image="add.png"
+									@trigger="setInt('grow',field.grow+1,false)"
+								/>
+								<my-button image="remove.png"
+									@trigger="setInt('grow',field.grow-1,false)"
+									:active="field.grow > 0"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="field.basis !== 0">
+						<td>{{ capApp.flexSizeMax }}</td>
+						<td>
+							<input
+								@input="setInt('perMax',$event.target.value,false)"
+								:value="field.perMax"
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.flexSizeShrink }}</td>
+						<td>
+							<div class="row gap">
+								<input class="short"
+									@input="setInt('shrink',$event.target.value,false)"
+									:value="field.shrink"
+								/>
+								<my-button image="add.png"
+									@trigger="setInt('shrink',field.shrink+1,false)"
+								/>
+								<my-button image="remove.png"
+									@trigger="setInt('shrink',field.shrink-1,false)"
+									:active="field.shrink > 0"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="field.basis !== 0">
+						<td>{{ capApp.flexSizeMin }}</td>
+						<td>
+							<input
+								@input="setInt('perMin',$event.target.value,false)"
+								:value="field.perMin"
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2"><b>{{ capApp.containerContent }}</b></td>
+					</tr>
+					<tr>
+						<td>{{ capApp.fieldDirection }}</td>
+						<td>
+							<div class="row gap">
+								<select
+									@input="set('direction',$event.target.value)"
+									:value="field.direction"
+								>
+									<option value="row">row</option>
+									<option value="column">column</option>
+								</select>
+								<my-button
+									@trigger="set('direction',field.direction === 'row' ? 'column' : 'row' )"
+									:captionTitle="capApp.fieldDirection+': '+field.direction"
+									:image="field.direction === 'row' ? 'flexRow.png' : 'flexColumn.png'"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.flexWrap }}</td>
+						<td>
+							<div class="row gap">
+								<my-bool
+									@update:modelValue="set('wrap',$event)"
+									:modelValue="field.wrap"
+								/>
+								<my-button
+									:active="false"
+									:captionTitle="capApp.flexWrap+': '+field.wrap"
+									:image="field.wrap ? 'wrap1.png' : 'wrap0.png'"
+									:naked="true"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.flexJustifyContent }}</td>
+						<td>
+							<div class="row">
+								<select
+									@input="set('justifyContent',$event.target.value)"
+									:value="field.justifyContent"
+								>
+									<option value="flex-start">flex-start</option>
+									<option value="flex-end">flex-end</option>
+									<option value="center">center</option>
+									<option value="space-between">space-between</option>
+									<option value="space-around">space-around</option>
+									<option value="space-evenly">space-evenly</option>
+								</select>
+								<my-button
+									:active="false"
+									:captionTitle="capApp.flexJustifyContentHint"
+									:image="field.direction === 'row' ? 'axisX.png' : 'axisY.png'"
+									:naked="true"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.flexAlignItems }}</td>
+						<td>
+							<div class="row">
+								<select
+									@input="set('alignItems',$event.target.value)"
+									:value="field.alignItems"
+								>
+									<option value="flex-start">flex-start</option>
+									<option value="flex-end">flex-end</option>
+									<option value="center">center</option>
+									<option value="baseline">baseline</option>
+									<option value="stretch">stretch</option>
+								</select>
+								<my-button
+									:active="false"
+									:captionTitle="capApp.flexAlignItemsHint"
+									:image="field.direction === 'row' ? 'axisY.png' : 'axisX.png'"
+									:naked="true"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.flexAlignContent }}</td>
+						<td>
+							<div class="row">
+								<select
+									@input="set('alignContent',$event.target.value)"
+									:disabled="!field.wrap"
+									:value="field.alignContent"
+								>
+									<option value="flex-start">flex-start</option>
+									<option value="flex-end">flex-end</option>
+									<option value="center">center</option>
+									<option value="space-between">space-between</option>
+									<option value="space-around">space-around</option>
+									<option value="space-evenly">space-evenly</option>
+									<option value="stretch">stretch</option>
+								</select>
+								<my-button
+									:active="false"
+									:captionTitle="capApp.flexAlignContentHint"
+									:image="field.direction === 'row' ? 'axisXAlign.png' : 'axisYAlign.png'"
+									:naked="true"
+								/>
+							</div>
+						</td>
+					</tr>
+				</template>
+				
+				<template v-if="isTabs">
+					<tr>
+						<td>
+							<div class="column">
+								<span>{{ capApp.tabs }}</span>
+								<my-button image="add.png"
+									@trigger="tabAdd(i)"
+									:caption="capGen.button.add"
+									:naked="true"
+								/>
+							</div>
+						</td>
+						<td>
+							<div class="column">
+								<table>
+									<thead>
+										<tr>
+											<th colspan="2"></th>
+											<th>{{ capGen.title }}</th>
+											<th :title="capApp.tabContentCounterHint">{{ capApp.tabContentCounter }}</th>
+											<th colspan="2">{{ capGen.status }}</th>
+										</tr>
+									</thead>
+									<draggable handle=".dragAnchor" group="tabs" itemKey="id" animation="100" tag="tbody"
+										:fallbackOnBody="true"
+										:list="field.tabs"
+									>
+										<template #item="{element,index}">
+											<tr>
+												<td><img class="action dragAnchor" src="images/drag.png" /></td>
+												<td>T{{ typeof entityIdMapRef.tab[element.id] !== 'undefined' ? entityIdMapRef.tab[element.id] : '' }}</td>
+												<td>
+													<my-builder-caption
+														@update:modelValue="element.captions.tabTitle = $event;set('tabs',field.tabs)"
+														:language="builderLanguage"
+														:modelValue="element.captions.tabTitle"
+													/>
+												</td>
+												<td>
+													<my-bool
+														@update:modelValue="element.contentCounter = $event;set('tabs',field.tabs)"
+														:modelValue="element.contentCounter"
+													/>
+												</td>
+												<td>
+													<select class="short"
+														@input="element.state = $event.target.value;set('tabs',field.tabs)"
+														:value="element.state"
+													>
+														<option value="hidden">{{ capApp.stateHidden }}</option>
+														<option value="default">{{ capApp.stateDefault }}</option>
+													</select>
+												</td>
+												<td>
+													<my-button image="cancel.png"
+														@trigger="field.tabs.splice(index,1);set('tabs',field.tabs)"
+														:active="field.tabs.length > 1"
+														:naked="true"
+													/>
+												</td>
+											</tr>
+										</template>
+									</draggable>
+								</table>
+							</div>
+						</td>
+					</tr>
+				</template>
+				
+				<template v-if="isKanban">
+					<tr v-if="field.query.relationId !== null">
+						<td>{{ capApp.kanban.relationIndexData }}</td>
+						<td>
+							<div class="row gap">
+								<select
+									@input="setInt('relationIndexData',$event.target.value,true)"
+									:value="field.relationIndexData === null ? '' : field.relationIndexData"
+								>
+									<option value="">-</option>
+									<option
+										v-for="j in field.query.joins"
+										:value="j.index"
+									>{{ j.index+' '+relationIdMap[j.relationId].name }}</option>
+								</select>
+								<my-button image="question.png"
+									@trigger="showHelp(capApp.kanban.relationIndexDataHelp)"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="field.relationIndexData !== null">
+						<td>{{ capApp.kanban.relationIndexAxisX }}</td>
+						<td>
+							<div class="row gap">
+								<select
+									@input="setInt('relationIndexAxisX',$event.target.value,true)"
+									:value="field.relationIndexAxisX === null ? '' : field.relationIndexAxisX"
+								>
+									<option value="">-</option>
+									<option
+										v-for="j in joinsKanbanAxis.filter(v => v.index !== field.relationIndexAxisY)"
+										:value="j.index"
+									>{{ j.index+' '+relationIdMap[j.relationId].name }}</option>
+								</select>
+								<my-button image="question.png"
+									@trigger="showHelp(capApp.kanban.relationIndexAxisXHelp)"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="field.relationIndexData !== null">
+						<td>{{ capApp.kanban.relationIndexAxisY }}</td>
+						<td>
+							<div class="row gap">
+								<select
+									@input="setInt('relationIndexAxisY',$event.target.value,true)"
+									:value="field.relationIndexAxisY === null ? '' : field.relationIndexAxisY"
+								>
+									<option value="">-</option>
+									<option
+										v-for="j in joinsKanbanAxis.filter(v => v.index !== field.relationIndexAxisX)"
+										:value="j.index"
+									>{{ j.index+' '+relationIdMap[j.relationId].name }}</option>
+								</select>
+								<my-button image="question.png"
+									@trigger="showHelp(capApp.kanban.relationIndexAxisYHelp)"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="field.relationIndexData !== null">
+						<td v-html="capApp.kanban.attributeIdSort"></td>
+						<td>
+							<div class="row gap">
+								<select
+									@input="setNull('attributeIdSort',$event.target.value)"
+									:value="field.attributeIdSort === null ? '' : field.attributeIdSort"
+								>
+									<option value="">-</option>
+									<optgroup v-for="j in field.query.joins.filter(v => v.index === field.relationIndexData)"
+										:label="j.index+' '+relationIdMap[j.relationId].name"
+									>
+										<option
+											v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeInteger(v.content) && v.name !== 'id')"
+											:value="a.id"
+										>
+											{{ a.name }}
+										</option>
+									</optgroup>
+								</select>
+								<my-button image="question.png"
+									@trigger="showHelp(capApp.kanban.attributeIdSortHelp)"
+								/>
+							</div>
+						</td>
+					</tr>
+				</template>
+				
+				<template v-if="isList">
+					<tr>
+						<td>{{ capApp.display }}</td>
+						<td>
+							<select
+								@input="set('layout',$event.target.value)"
+								:value="field.layout"
+							>
+								<option value="table">table</option>
+								<option value="cards">cards</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.limit }}</td>
+						<td>
+							<input
+								@input="setInt('resultLimit',$event.target.value,false)"
+								:value="field.resultLimit"
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.autoRenew }}</td>
+						<td>
+							<input
+								v-if="field.autoRenew !== null"
+								@input="setInt('autoRenew',$event.target.value,true)"
+								:placeholder="capApp.autoRenewHint"
+								:value="field.autoRenew"
+							/>
+							<my-button
+								v-else
+								@trigger="setInt('autoRenew',300,false)"
+								:caption="capApp.autoRenew0"
+								:naked="true"
 							/>
 						</td>
 					</tr>
@@ -559,710 +1125,146 @@ let MyBuilderFieldOptions = {
 						</td>
 					</tr>
 					<tr>
-						<td>{{ capApp.autoSelect }}</td>
-						<td>
-						<input
-							@input="setInt('autoSelect',$event.target.value,false)"
-							:placeholder="capApp.autoSelectHint"
-							:value="field.autoSelect"
-						/>
-						</td>
-					</tr>
-				</template>
-			</template>
-			
-			<template v-if="isCalendar">
-				<tr>
-					<td>{{ capApp.date0 }}</td>
-					<td>
-						<select
-							@input="setIndexAttribute('date0',$event.target.value)"
-							:value="getIndexAttributeId(field.indexDate0,field.attributeIdDate0,false,null)"
-						>
-							<option :value="getIndexAttributeId(null,null,false,null)">-</option>
-							<optgroup
-								v-for="j in field.query.joins"
-								:label="j.index+' '+relationIdMap[j.relationId].name"
-							>
-								<option
-									v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeInteger(v.content))"
-									:value="getIndexAttributeId(j.index,a.id,false,null)"
-								>
-									{{ a.name }}
-								</option>
-							</optgroup>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.date1 }}</td>
-					<td>
-						<select
-							@input="setIndexAttribute('date1',$event.target.value)"
-							:value="getIndexAttributeId(field.indexDate1,field.attributeIdDate1,false,null)"
-						>
-							<option :value="getIndexAttributeId(null,null,false,null)">-</option>
-							<optgroup
-								v-for="j in field.query.joins"
-								:label="j.index+' '+relationIdMap[j.relationId].name"
-							>
-								<option
-									v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeInteger(v.content))"
-									:value="getIndexAttributeId(j.index,a.id,false,null)"
-								>
-									{{ a.name }}
-								</option>
-							</optgroup>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.dateColor }}</td>
-					<td>
-						<select
-							@input="setIndexAttribute('color',$event.target.value)"
-							:value="getIndexAttributeId(field.indexColor,field.attributeIdColor,false,null)"
-						>
-							<option :value="getIndexAttributeId(null,null,false,null)">-</option>
-							<optgroup
-								v-for="j in field.query.joins"
-								:label="j.index+' '+relationIdMap[j.relationId].name"
-							>
-								<option
-									v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeString(v.content))"
-									:value="getIndexAttributeId(j.index,a.id,false,null)"
-								>
-									{{ a.name }}
-								</option>
-							</optgroup>
-						</select>
-					</td>
-				</tr>
-				<template v-if="!field.gantt">
-					<tr>
-						<td>{{ capApp.days }}</td>
-						<td>
-							<select
-								@input="setInt('days',$event.target.value,false)"
-								:value="field.days"
-							>
-								<option :value="1" >{{ capCal.option.days1  }}</option>
-								<option :value="3" >{{ capCal.option.days3  }}</option>
-								<option :value="5" >{{ capCal.option.days5  }}</option>
-								<option :value="7" >{{ capCal.option.days7  }}</option>
-								<option :value="42">{{ capCal.option.days42 }}</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.daysToggle }}</td>
+						<td>{{ capApp.csvImport }}</td>
 						<td>
 							<my-bool
-								@update:modelValue="set('daysToggle',$event)"
-								:modelValue="field.daysToggle"
+								@update:modelValue="set('csvImport',$event)"
+								:modelValue="field.csvImport"
 							/>
 						</td>
 					</tr>
-				</template>
-				<template v-if="field.gantt">
 					<tr>
-						<td>{{ capApp.gantt }}</td>
-						<td><i>{{ capApp.ganttNotes }}</i></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.ganttSteps }}</td>
-						<td>
-							<select
-								@input="setNull('ganttSteps',$event.target.value)"
-								:value="field.ganttSteps"
-							>
-								<option value="days" >{{ capApp.option.ganttStepsDays }}</option>
-								<option value="hours">{{ capApp.option.ganttStepsHours }}</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.ganttStepsToggle }}</td>
+						<td>{{ capApp.csvExport }}</td>
 						<td>
 							<my-bool
-								@update:modelValue="set('ganttStepsToggle',$event)"
-								:modelValue="field.ganttStepsToggle"
+								@update:modelValue="set('csvExport',$event)"
+								:modelValue="field.csvExport"
 							/>
 						</td>
 					</tr>
 				</template>
-				<tr v-if="!field.gantt">
-					<td>{{ capApp.ics }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('ics',$event)"
-							:modelValue="field.ics"
-						/>
-					</td>
-				</tr>
-				<template v-if="field.ics">
+				
+				<!-- chart options -->
+				<my-builder-field-options-chart
+					v-if="isChart"
+					@update:modelValue="set('chartOption',$event)"
+					:columns="field.columns"
+					:modelValue="field.chartOption"
+				/>
+				
+				<!-- execute JS function -->
+				<template v-if="isButton || isData">
 					<tr>
-						<td>{{ capApp.dateRange0 }}</td>
+						<td v-if="isButton">{{ capApp.jsFunctionButton }}</td>
+						<td v-if="isData">{{ capApp.jsFunctionData }}</td>
 						<td>
-							<input
-								@input="setInt('dateRange0',$event.target.value * 86400,false)"
-								:placeholder="capApp.dateRangeHint"
-								:value="field.dateRange0 / 86400"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.dateRange1 }}</td>
-						<td>
-							<input
-								@input="setInt('dateRange1',$event.target.value * 86400,false)"
-								:placeholder="capApp.dateRangeHint"
-								:value="field.dateRange1 / 86400"
-							/>
-						</td>
-					</tr>
-				</template>
-			</template>
-			
-			<template v-if="isContainer">
-				<tr>
-					<td>{{ capApp.fieldSize }}</td>
-					<td>
-						<div class="row gap" v-if="field.basis !== 0">
-							<input class="short"
-								@input="setInt('basis',$event.target.value,false)"
-								:value="field.basis"
-							/>
-							<my-button image="add.png"
-								@trigger="setInt('basis',field.basis+50,false)"
-							/>
-							<my-button image="remove.png"
-								@trigger="setInt('basis',field.basis-50,false)"
-								:active="field.basis >= 50"
-							/>
-						</div>
-						<my-button
-							v-if="field.basis === 0"
-							@trigger="setInt('basis',300,false)"
-							:caption="capApp.fieldSize0"
-							:naked="true"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.flexSizeGrow }}</td>
-					<td>
-						<div class="row gap">
-							<input class="short"
-								@input="setInt('grow',$event.target.value,false)"
-								:value="field.grow"
-							/>
-							<my-button image="add.png"
-								@trigger="setInt('grow',field.grow+1,false)"
-							/>
-							<my-button image="remove.png"
-								@trigger="setInt('grow',field.grow-1,false)"
-								:active="field.grow > 0"
-							/>
-						</div>
-					</td>
-				</tr>
-				<tr v-if="field.basis !== 0">
-					<td>{{ capApp.flexSizeMax }}</td>
-					<td>
-						<input
-							@input="setInt('perMax',$event.target.value,false)"
-							:value="field.perMax"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.flexSizeShrink }}</td>
-					<td>
-						<div class="row gap">
-							<input class="short"
-								@input="setInt('shrink',$event.target.value,false)"
-								:value="field.shrink"
-							/>
-							<my-button image="add.png"
-								@trigger="setInt('shrink',field.shrink+1,false)"
-							/>
-							<my-button image="remove.png"
-								@trigger="setInt('shrink',field.shrink-1,false)"
-								:active="field.shrink > 0"
-							/>
-						</div>
-					</td>
-				</tr>
-				<tr v-if="field.basis !== 0">
-					<td>{{ capApp.flexSizeMin }}</td>
-					<td>
-						<input
-							@input="setInt('perMin',$event.target.value,false)"
-							:value="field.perMin"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="2"><b>{{ capApp.containerContent }}</b></td>
-				</tr>
-				<tr>
-					<td>{{ capApp.fieldDirection }}</td>
-					<td>
-						<div class="row gap">
-							<select
-								@input="set('direction',$event.target.value)"
-								:value="field.direction"
-							>
-								<option value="row">row</option>
-								<option value="column">column</option>
-							</select>
-							<my-button
-								@trigger="set('direction',field.direction === 'row' ? 'column' : 'row' )"
-								:captionTitle="capApp.fieldDirection+': '+field.direction"
-								:image="field.direction === 'row' ? 'flexRow.png' : 'flexColumn.png'"
-							/>
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.flexWrap }}</td>
-					<td>
-						<div class="row gap">
-							<my-bool
-								@update:modelValue="set('wrap',$event)"
-								:modelValue="field.wrap"
-							/>
-							<my-button
-								:active="false"
-								:captionTitle="capApp.flexWrap+': '+field.wrap"
-								:image="field.wrap ? 'wrap1.png' : 'wrap0.png'"
-								:naked="true"
-							/>
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.flexJustifyContent }}</td>
-					<td>
-						<div class="row">
-							<select
-								@input="set('justifyContent',$event.target.value)"
-								:value="field.justifyContent"
-							>
-								<option value="flex-start">flex-start</option>
-								<option value="flex-end">flex-end</option>
-								<option value="center">center</option>
-								<option value="space-between">space-between</option>
-								<option value="space-around">space-around</option>
-								<option value="space-evenly">space-evenly</option>
-							</select>
-							<my-button
-								:active="false"
-								:captionTitle="capApp.flexJustifyContentHint"
-								:image="field.direction === 'row' ? 'axisX.png' : 'axisY.png'"
-								:naked="true"
-							/>
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.flexAlignItems }}</td>
-					<td>
-						<div class="row">
-							<select
-								@input="set('alignItems',$event.target.value)"
-								:value="field.alignItems"
-							>
-								<option value="flex-start">flex-start</option>
-								<option value="flex-end">flex-end</option>
-								<option value="center">center</option>
-								<option value="baseline">baseline</option>
-								<option value="stretch">stretch</option>
-							</select>
-							<my-button
-								:active="false"
-								:captionTitle="capApp.flexAlignItemsHint"
-								:image="field.direction === 'row' ? 'axisY.png' : 'axisX.png'"
-								:naked="true"
-							/>
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.flexAlignContent }}</td>
-					<td>
-						<div class="row">
-							<select
-								@input="set('alignContent',$event.target.value)"
-								:disabled="!field.wrap"
-								:value="field.alignContent"
-							>
-								<option value="flex-start">flex-start</option>
-								<option value="flex-end">flex-end</option>
-								<option value="center">center</option>
-								<option value="space-between">space-between</option>
-								<option value="space-around">space-around</option>
-								<option value="space-evenly">space-evenly</option>
-								<option value="stretch">stretch</option>
-							</select>
-							<my-button
-								:active="false"
-								:captionTitle="capApp.flexAlignContentHint"
-								:image="field.direction === 'row' ? 'axisXAlign.png' : 'axisYAlign.png'"
-								:naked="true"
-							/>
-						</div>
-					</td>
-				</tr>
-			</template>
-			
-			<template v-if="isTabs">
-				<tr>
-					<td>
-						<div class="column">
-							<span>{{ capApp.tabs }}</span>
-							<my-button image="add.png"
-								@trigger="tabAdd(i)"
-								:caption="capGen.button.add"
-								:naked="true"
-							/>
-						</div>
-					</td>
-					<td>
-						<div class="column">
-							<table>
-								<thead>
-								<tr>
-									<th colspan="2"></th>
-									<th>{{ capGen.title }}</th>
-									<th :title="capApp.tabContentCounterHint">{{ capApp.tabContentCounter }}</th>
-									<th colspan="2">{{ capGen.status }}</th>
-								</tr>
-								</thead>
-								<draggable handle=".dragAnchor" group="tabs" itemKey="id" animation="100" tag="tbody"
-									:fallbackOnBody="true"
-									:list="field.tabs"
+							<div class="row gap">
+								<select
+									@input="setNull('jsFunctionId',$event.target.value)"
+									:value="field.jsFunctionId"
 								>
-									<template #item="{element,index}">
-										<tr>
-											<td><img class="action dragAnchor" src="images/drag.png" /></td>
-											<td>T{{ typeof entityIdMapRef.tab[element.id] !== 'undefined' ? entityIdMapRef.tab[element.id] : '' }}</td>
-											<td>
-												<my-builder-caption
-													@update:modelValue="element.captions.tabTitle = $event;set('tabs',field.tabs)"
-													:language="builderLanguage"
-													:modelValue="element.captions.tabTitle"
-												/>
-											</td>
-											<td>
-												<my-bool
-													@update:modelValue="element.contentCounter = $event;set('tabs',field.tabs)"
-													:modelValue="element.contentCounter"
-												/>
-											</td>
-											<td>
-												<select class="short"
-													@input="element.state = $event.target.value;set('tabs',field.tabs)"
-													:value="element.state"
-												>
-													<option value="hidden">{{ capApp.stateHidden }}</option>
-													<option value="default">{{ capApp.stateDefault }}</option>
-												</select>
-											</td>
-											<td>
-												<my-button image="cancel.png"
-													@trigger="field.tabs.splice(index,1);set('tabs',field.tabs)"
-													:active="field.tabs.length > 1"
-													:naked="true"
-												/>
-											</td>
-										</tr>
-									</template>
-								</draggable>
-							</table>
-						</div>
-					</td>
-				</tr>
-			</template>
-			
-			<template v-if="isKanban">
-				<tr v-if="field.query.relationId !== null">
-					<td>{{ capApp.kanban.relationIndexData }}</td>
-					<td>
-						<div class="row gap">
-							<select
-								@input="setInt('relationIndexData',$event.target.value,true)"
-								:value="field.relationIndexData === null ? '' : field.relationIndexData"
-							>
-								<option value="">-</option>
-								<option
-									v-for="j in field.query.joins"
-									:value="j.index"
-								>{{ j.index+' '+relationIdMap[j.relationId].name }}</option>
-							</select>
-							<my-button image="question.png"
-								@trigger="showHelp(capApp.kanban.relationIndexDataHelp)"
-							/>
-						</div>
-					</td>
-				</tr>
-				<tr v-if="field.relationIndexData !== null">
-					<td>{{ capApp.kanban.relationIndexAxisX }}</td>
-					<td>
-						<div class="row gap">
-							<select
-								@input="setInt('relationIndexAxisX',$event.target.value,true)"
-								:value="field.relationIndexAxisX === null ? '' : field.relationIndexAxisX"
-							>
-								<option value="">-</option>
-								<option
-									v-for="j in joinsKanbanAxis.filter(v => v.index !== field.relationIndexAxisY)"
-									:value="j.index"
-								>{{ j.index+' '+relationIdMap[j.relationId].name }}</option>
-							</select>
-							<my-button image="question.png"
-								@trigger="showHelp(capApp.kanban.relationIndexAxisXHelp)"
-							/>
-						</div>
-					</td>
-				</tr>
-				<tr v-if="field.relationIndexData !== null">
-					<td>{{ capApp.kanban.relationIndexAxisY }}</td>
-					<td>
-						<div class="row gap">
-							<select
-								@input="setInt('relationIndexAxisY',$event.target.value,true)"
-								:value="field.relationIndexAxisY === null ? '' : field.relationIndexAxisY"
-							>
-								<option value="">-</option>
-								<option
-									v-for="j in joinsKanbanAxis.filter(v => v.index !== field.relationIndexAxisX)"
-									:value="j.index"
-								>{{ j.index+' '+relationIdMap[j.relationId].name }}</option>
-							</select>
-							<my-button image="question.png"
-								@trigger="showHelp(capApp.kanban.relationIndexAxisYHelp)"
-							/>
-						</div>
-					</td>
-				</tr>
-				<tr v-if="field.relationIndexData !== null">
-					<td v-html="capApp.kanban.attributeIdSort"></td>
-					<td>
-						<div class="row gap">
-							<select
-								@input="setNull('attributeIdSort',$event.target.value)"
-								:value="field.attributeIdSort === null ? '' : field.attributeIdSort"
-							>
-								<option value="">-</option>
-								<optgroup v-for="j in field.query.joins.filter(v => v.index === field.relationIndexData)"
-									:label="j.index+' '+relationIdMap[j.relationId].name"
-								>
+									<option value="">-</option>
 									<option
-										v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeInteger(v.content) && v.name !== 'id')"
-										:value="a.id"
-									>
-										{{ a.name }}
-									</option>
-								</optgroup>
-							</select>
-							<my-button image="question.png"
-								@trigger="showHelp(capApp.kanban.attributeIdSortHelp)"
-							/>
-						</div>
-					</td>
-				</tr>
-			</template>
-			
-			<template v-if="isList">
-				<tr>
-					<td>{{ capApp.display }}</td>
-					<td>
-						<select
-							@input="set('layout',$event.target.value)"
-							:value="field.layout"
-						>
-							<option value="table">table</option>
-							<option value="cards">cards</option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.limit }}</td>
-					<td>
-						<input
-							@input="setInt('resultLimit',$event.target.value,false)"
-							:value="field.resultLimit"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.autoRenew }}</td>
-					<td>
-						<input
-							v-if="field.autoRenew !== null"
-							@input="setInt('autoRenew',$event.target.value,true)"
-							:placeholder="capApp.autoRenewHint"
-							:value="field.autoRenew"
-						/>
-						<my-button
-							v-else
-							@trigger="setInt('autoRenew',300,false)"
-							:caption="capApp.autoRenew0"
-							:naked="true"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.filterQuick }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('filterQuick',$event)"
-							:modelValue="field.filterQuick"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.csvImport }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('csvImport',$event)"
-							:modelValue="field.csvImport"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.csvExport }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('csvExport',$event)"
-							:modelValue="field.csvExport"
-						/>
-					</td>
-				</tr>
-			</template>
-			
-			<!-- chart options -->
-			<my-builder-field-options-chart
-				v-if="isChart"
-				@update:modelValue="set('chartOption',$event)"
-				:columns="field.columns"
-				:modelValue="field.chartOption"
-			/>
-			
-			<!-- execute JS function -->
-			<template v-if="isButton || isData">
-				<tr>
-					<td v-if="isButton">{{ capApp.jsFunctionButton }}</td>
-					<td v-if="isData">{{ capApp.jsFunctionData }}</td>
-					<td>
-						<div class="row gap">
-							<select
-								@input="setNull('jsFunctionId',$event.target.value)"
-								:value="field.jsFunctionId"
-							>
-								<option value="">-</option>
-								<option
-									v-for="fnc in module.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
-									:value="fnc.id"
-								>
-									{{ fnc.name }}
-								</option>
-								<optgroup
-									v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.jsFunctions.length !== 0)"
-									:label="mod.name"
-								>
-									<option
-										v-for="fnc in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+										v-for="fnc in module.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
 										:value="fnc.id"
 									>
 										{{ fnc.name }}
 									</option>
-								</optgroup>
-							</select>
-							<my-button image="add.png"
-								v-if="field.jsFunctionId === null"
-								@trigger="$emit('createNew','jsFunction',{formId:formId})"
-								:captionTitle="capGen.button.new"
-							/>
-							<my-button image="open.png"
-								v-if="field.jsFunctionId !== null"
-								@trigger="$router.push('/builder/js-function/'+field.jsFunctionId)"
-								:captionTitle="capGen.button.open"
-							/>
-						</div>
+									<optgroup
+										v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.jsFunctions.length !== 0)"
+										:label="mod.name"
+									>
+										<option
+											v-for="fnc in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+											:value="fnc.id"
+										>
+											{{ fnc.name }}
+										</option>
+									</optgroup>
+								</select>
+								<my-button image="add.png"
+									v-if="field.jsFunctionId === null"
+									@trigger="$emit('createNew','jsFunction',{formId:formId})"
+									:captionTitle="capGen.button.new"
+								/>
+								<my-button image="open.png"
+									v-if="field.jsFunctionId !== null"
+									@trigger="$router.push('/builder/js-function/'+field.jsFunctionId)"
+									:captionTitle="capGen.button.open"
+								/>
+							</div>
+						</td>
+					</tr>
+				</template>
+				
+				<!-- open form & open form bulk -->
+				<tr v-if="isButton || ((isList || isCalendar || isKanban || isRelationship) && field.query.relationId !== null)">
+					<td>{{ capApp.openForm }}</td>
+					<td>
+						<my-builder-open-form-input
+							@update:openForm="set('openForm',$event)"
+							:allowAllForms="isButton"
+							:allowNewRecords="true"
+							:allowPopUpInline="isCalendar || isKanban || isList"
+							:joinsIndexMap="joinsIndexMap"
+							:joinsIndexMapField="joinsIndexMapField"
+							:module="module"
+							:openForm="field.openForm"
+						/>
 					</td>
 				</tr>
-			</template>
-			
-			<!-- open form & open form bulk -->
-			<tr v-if="isButton || ((isList || isCalendar || isKanban || isRelationship) && field.query.relationId !== null)">
-				<td>{{ capApp.openForm }}</td>
-				<td>
-					<my-builder-open-form-input
-						@update:openForm="set('openForm',$event)"
-						:allowAllForms="isButton"
-						:allowNewRecords="true"
-						:allowPopUpInline="isCalendar || isKanban || isList"
-						:joinsIndexMap="joinsIndexMap"
-						:joinsIndexMapField="joinsIndexMapField"
-						:module="module"
-						:openForm="field.openForm"
-					/>
-				</td>
-			</tr>
-			<tr v-if="isList && field.query.relationId !== null">
-				<td v-html="capApp.openFormBulk"></td>
-				<td>
-					<my-builder-open-form-input
-						@update:openForm="set('openFormBulk',$event)"
-						:allowAllForms="false"
-						:allowNewRecords="false"
-						:allowPopUpInline="true"
-						:forcePopUp="true"
-						:joinsIndexMap="joinsIndexMap"
-						:joinsIndexMapField="joinsIndexMapField"
-						:module="module"
-						:openForm="field.openFormBulk"
-					/>
-				</td>
-			</tr>
-			
-			<!-- consume collection -->
-			<template v-if="isList || isCalendar || isKanban">
-				<tr>
+				<tr v-if="isList && field.query.relationId !== null">
+					<td v-html="capApp.openFormBulk"></td>
 					<td>
-						<div class="column">
-							<span>{{ capApp.collectionTitle }}</span>
-							<my-button image="add.png"
-								@trigger="collectionAdd"
-								:caption="capGen.button.add"
-								:naked="true"
-							/>
-						</div>
-					</td>
-					<td>
-						<div class="builder-field-options-collection-label">
-							<my-builder-collection-input
-								v-for="(c,i) in field.collections"
-								@remove="collectionRemove(i)"
-								@update:consumer="setCollection(i,$event)"
-								:allowFormOpen="false"
-								:allowRemove="true"
-								:consumer="c"
-								:fixedCollection="false"
-								:module="module"
-								:readonly="false"
-								:showMultiValue="true"
-								:showNoDisplayEmpty="false"
-								:showOnMobile="false"
-							/>
-							<span v-if="field.collections.length !== 0">{{ capApp.collectionHint }}</span>
-						</div>
+						<my-builder-open-form-input
+							@update:openForm="set('openFormBulk',$event)"
+							:allowAllForms="false"
+							:allowNewRecords="false"
+							:allowPopUpInline="true"
+							:forcePopUp="true"
+							:joinsIndexMap="joinsIndexMap"
+							:joinsIndexMapField="joinsIndexMapField"
+							:module="module"
+							:openForm="field.openFormBulk"
+						/>
 					</td>
 				</tr>
-			</template>
+				
+				<!-- consume collection -->
+				<template v-if="isList || isCalendar || isKanban">
+					<tr>
+						<td>
+							<div class="column">
+								<span>{{ capApp.collectionTitle }}</span>
+								<my-button image="add.png"
+									@trigger="collectionAdd"
+									:caption="capGen.button.add"
+									:naked="true"
+								/>
+							</div>
+						</td>
+						<td>
+							<div class="builder-field-options-collection-label">
+								<my-builder-collection-input
+									v-for="(c,i) in field.collections"
+									@remove="collectionRemove(i)"
+									@update:consumer="setCollection(i,$event)"
+									:allowFormOpen="false"
+									:allowRemove="true"
+									:consumer="c"
+									:fixedCollection="false"
+									:module="module"
+									:readonly="false"
+									:showMultiValue="true"
+									:showNoDisplayEmpty="false"
+									:showOnMobile="false"
+								/>
+								<span v-if="field.collections.length !== 0">{{ capApp.collectionHint }}</span>
+							</div>
+						</td>
+					</tr>
+				</template>
+			</tbody>
 		</table>
 	</div>`,
 	props:{

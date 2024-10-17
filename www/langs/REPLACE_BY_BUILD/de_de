@@ -474,9 +474,10 @@
 				"nameSur":"Nachname",
 				"notes":"Beschreibung",
 				"organization":"Organisation",
-				"phoneFax":"Telefon: Fax",
-				"phoneLandline":"Telefon: Festnetz",
-				"phoneMobile":"Telefon: Mobil"
+				"phone":"Telefon",
+				"phoneFax":"Fax",
+				"phoneLandline":"Festnetz",
+				"phoneMobile":"Mobil"
 			},
 			"titles":{
 				"active":"Aktiv",

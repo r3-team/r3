@@ -339,25 +339,27 @@ let MyWidgets = {
 				</div>
 				<div class="widgets-sidebar-content-box default-inputs">
 					<table>
-						<tr>
-							<td>{{ capApp.flow }}</td>
-							<td>
-								<select v-model="flowInput">
-									<option value="column">{{ capApp.option.flowColumn }}</option>
-									<option value="row">{{ capApp.option.flowRow }}</option>
-								</select>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.width }}</td>
-							<td>
-								<div class="row centered gap">
-									<my-button image="remove.png" @trigger="widthInput -= widthSteps" :active="widthInput > widthSteps" />
-									<input disabled="disabled" :value="widthInput" />
-									<my-button image="add.png" @trigger="widthInput += widthSteps" />
-								</div>
-							</td>
-						</tr>
+						<tbody>
+							<tr>
+								<td>{{ capApp.flow }}</td>
+								<td>
+									<select v-model="flowInput">
+										<option value="column">{{ capApp.option.flowColumn }}</option>
+										<option value="row">{{ capApp.option.flowRow }}</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.width }}</td>
+								<td>
+									<div class="row centered gap">
+										<my-button image="remove.png" @trigger="widthInput -= widthSteps" :active="widthInput > widthSteps" />
+										<input disabled="disabled" :value="widthInput" />
+										<my-button image="add.png" @trigger="widthInput += widthSteps" />
+									</div>
+								</td>
+							</tr>
+						</tbody>
 					</table>
 				</div>
 			</div>

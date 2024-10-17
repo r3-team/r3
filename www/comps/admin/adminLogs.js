@@ -73,43 +73,45 @@ let MyAdminLogs = {
 			<!-- options -->
 			<div v-if="showOptions" class="admin-logs-settings">
 				<table class="default-inputs">
-					<tr>
-						<td>{{ capApp.keepDays }}</td>
-						<td colspan="2">
-							<input class="short" v-model="configInput.logsKeepDays" />
-						</td>
-						<td>
-							<my-button image="save.png"
-								@trigger="setConfig"
-								:active="config.logsKeepDays !== configInput.logsKeepDays"
-								:caption="capGen.button.save"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.logLevel }}</td>
-						<td>
-							<select v-model="levelContext">
-								<option v-for="c in contextsValid" :value="getConfigLogContextName(c)">
-									{{ capApp.contextLabel[c] }}
-								</option>
-							</select>
-						</td>
-						<td>
-							<select v-model="configInput[levelContext]">
-								<option value="1">{{ capApp.logLevel1 }}</option>
-								<option value="2">{{ capApp.logLevel2 }}</option>
-								<option value="3">{{ capApp.logLevel3 }}</option>
-							</select>
-						</td>
-						<td>
-							<my-button image="save.png"
-								@trigger="setConfig"
-								:active="config[levelContext] !== configInput[levelContext]"
-								:caption="capGen.button.save"
-							/>
-						</td>
-					</tr>
+					<tbody>
+						<tr>
+							<td>{{ capApp.keepDays }}</td>
+							<td colspan="2">
+								<input class="short" v-model="configInput.logsKeepDays" />
+							</td>
+							<td>
+								<my-button image="save.png"
+									@trigger="setConfig"
+									:active="config.logsKeepDays !== configInput.logsKeepDays"
+									:caption="capGen.button.save"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.logLevel }}</td>
+							<td>
+								<select v-model="levelContext">
+									<option v-for="c in contextsValid" :value="getConfigLogContextName(c)">
+										{{ capApp.contextLabel[c] }}
+									</option>
+								</select>
+							</td>
+							<td>
+								<select v-model="configInput[levelContext]">
+									<option value="1">{{ capApp.logLevel1 }}</option>
+									<option value="2">{{ capApp.logLevel2 }}</option>
+									<option value="3">{{ capApp.logLevel3 }}</option>
+								</select>
+							</td>
+							<td>
+								<my-button image="save.png"
+									@trigger="setConfig"
+									:active="config[levelContext] !== configInput[levelContext]"
+									:caption="capGen.button.save"
+								/>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 			

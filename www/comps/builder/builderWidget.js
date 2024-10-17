@@ -54,82 +54,84 @@ let MyBuilderWidget = {
 			
 			<div class="content default-inputs">
 				<table class="generic-table-vertical">
-					<tr>
-						<td>{{ capGen.name }}</td>
-						<td>
-							<div class="row gap centered">
-								<input v-focus v-model="values.name" :disabled="readonly" />
-								<my-button image="visible1.png"
-									@trigger="copyValueDialog(values.name,widgetId,widgetId)"
-									:active="!isNew"
-									:caption="capGen.id"
-								/>
-							</div>
-							<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
-						</td>
-						<td>{{ capApp.nameHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.title }}</td>
-						<td>
-							<div class="row gap centered">
-								<my-builder-caption
-									v-model="values.captions.widgetTitle"
-									:dynamicSize="true"
-									:language="builderLanguage"
+					<tbody>
+						<tr>
+							<td>{{ capGen.name }}</td>
+							<td>
+								<div class="row gap centered">
+									<input v-focus v-model="values.name" :disabled="readonly" />
+									<my-button image="visible1.png"
+										@trigger="copyValueDialog(values.name,widgetId,widgetId)"
+										:active="!isNew"
+										:caption="capGen.id"
+									/>
+								</div>
+								<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
+							</td>
+							<td>{{ capApp.nameHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.title }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-builder-caption
+										v-model="values.captions.widgetTitle"
+										:dynamicSize="true"
+										:language="builderLanguage"
+										:readonly="readonly"
+									/>
+									<my-button image="languages.png"
+										@trigger="$emit('next-language')"
+										:active="module.languages.length > 1"
+									/>
+								</div>
+							</td>
+							<td>{{ capApp.titleHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.size }}</td>
+							<td>
+								<div class="row gap centered">
+									<input type="range" min="1" max="2"
+										v-model.number="values.size"
+										:disabled="readonly"
+									/>
+									<span>{{ values.size }}</span>
+								</div>
+							</td>
+							<td>{{ capApp.sizeHint }}</td>
+						</tr>
+						<tr v-if="values.collection === null">
+							<td>{{ capGen.form }}</td>
+							<td>
+								<my-builder-form-input
+									v-model="values.formId"
+									:module="module"
 									:readonly="readonly"
+									:showOpen="true"
 								/>
-								<my-button image="languages.png"
-									@trigger="$emit('next-language')"
-									:active="module.languages.length > 1"
+							</td>
+							<td>{{ capApp.formHint }}</td>
+						</tr>
+						<tr v-if="values.formId === null">
+							<td>{{ capGen.collection }}</td>
+							<td>
+								<my-builder-collection-input
+									@update:consumer="values.collection = $event"
+									:allowFormOpen="true"
+									:allowRemove="false"
+									:consumer="values.collection"
+									:fixedCollection="false"
+									:module="module"
+									:readonly="readonly"
+									:showMultiValue="false"
+									:showNoDisplayEmpty="true"
+									:showOnMobile="true"
 								/>
-							</div>
-						</td>
-						<td>{{ capApp.titleHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.size }}</td>
-						<td>
-							<div class="row gap centered">
-								<input type="range" min="1" max="2"
-									v-model.number="values.size"
-									:disabled="readonly"
-								/>
-								<span>{{ values.size }}</span>
-							</div>
-						</td>
-						<td>{{ capApp.sizeHint }}</td>
-					</tr>
-					<tr v-if="values.collection === null">
-						<td>{{ capGen.form }}</td>
-						<td>
-							<my-builder-form-input
-								v-model="values.formId"
-								:module="module"
-								:readonly="readonly"
-								:showOpen="true"
-							/>
-						</td>
-						<td>{{ capApp.formHint }}</td>
-					</tr>
-					<tr v-if="values.formId === null">
-						<td>{{ capGen.collection }}</td>
-						<td>
-							<my-builder-collection-input
-								@update:consumer="values.collection = $event"
-								:allowFormOpen="true"
-								:allowRemove="false"
-								:consumer="values.collection"
-								:fixedCollection="false"
-								:module="module"
-								:readonly="readonly"
-								:showMultiValue="false"
-								:showNoDisplayEmpty="true"
-								:showOnMobile="true"
-							/>
-						</td>
-						<td>{{ capApp.collectionHint }}</td>
-					</tr>
+							</td>
+							<td>{{ capApp.collectionHint }}</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 		</div>

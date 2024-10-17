@@ -32,43 +32,45 @@ let MyAdminBackups = {
 			</div>
 			
 			<table class="default-inputs">
-				<tr class="backup-dir">
-					<td>{{ capApp.dir }}</td>
-					<td colspan="3"><input v-model="configInput.backupDir" /></td>
-				</tr>
-				
-				<!-- daily -->
-				<tr>
-					<td>{{ capApp.daily }}</td>
-					<td><my-bool-string-number v-model="configInput.backupDaily" /></td>
+				<tbody>
+					<tr class="backup-dir">
+						<td>{{ capApp.dir }}</td>
+						<td colspan="3"><input v-model="configInput.backupDir" /></td>
+					</tr>
 					
-					<template v-if="configInput.backupDaily === '1'">
-						<td class="versions">{{ capApp.count }}</td>
-						<td><input class="short" v-model="configInput.backupCountDaily" /></td>
-					</template>
-				</tr>
-				
-				<!-- weekly -->
-				<tr>
-					<td>{{ capApp.weekly }}</td>
-					<td><my-bool-string-number v-model="configInput.backupWeekly" /></td>
+					<!-- daily -->
+					<tr>
+						<td>{{ capApp.daily }}</td>
+						<td><my-bool-string-number v-model="configInput.backupDaily" /></td>
+						
+						<template v-if="configInput.backupDaily === '1'">
+							<td class="versions">{{ capApp.count }}</td>
+							<td><input class="short" v-model="configInput.backupCountDaily" /></td>
+						</template>
+					</tr>
 					
-					<template v-if="configInput.backupWeekly === '1'">
-						<td class="versions">{{ capApp.count }}</td>
-						<td><input class="short" v-model="configInput.backupCountWeekly" /></td>
-					</template>
-				</tr>
-				
-				<!-- monthly -->
-				<tr>
-					<td>{{ capApp.monthly }}</td>
-					<td><my-bool-string-number v-model="configInput.backupMonthly" /></td>
+					<!-- weekly -->
+					<tr>
+						<td>{{ capApp.weekly }}</td>
+						<td><my-bool-string-number v-model="configInput.backupWeekly" /></td>
+						
+						<template v-if="configInput.backupWeekly === '1'">
+							<td class="versions">{{ capApp.count }}</td>
+							<td><input class="short" v-model="configInput.backupCountWeekly" /></td>
+						</template>
+					</tr>
 					
-					<template v-if="configInput.backupMonthly === '1'">
-						<td class="versions">{{ capApp.count }}</td>
-						<td><input class="short" v-model="configInput.backupCountMonthly" /></td>
-					</template>
-				</tr>
+					<!-- monthly -->
+					<tr>
+						<td>{{ capApp.monthly }}</td>
+						<td><my-bool-string-number v-model="configInput.backupMonthly" /></td>
+						
+						<template v-if="configInput.backupMonthly === '1'">
+							<td class="versions">{{ capApp.count }}</td>
+							<td><input class="short" v-model="configInput.backupCountMonthly" /></td>
+						</template>
+					</tr>
+				</tbody>
 			</table>
 			<div class="note">{{ capApp.dirNote }}</div>
 			<br />

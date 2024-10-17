@@ -126,38 +126,40 @@ let MyBuilderPreset = {
 			
 			<div class="content default-inputs">
 				<table class="generic-table-vertical">
-					<tr>
-						<td><span>{{ capGen.name }}</span></td>
-						<td colspan="2"><input class="dynamic" v-model="values.name" :disabled="readonly" /></td>
-					</tr>
-					<tr>
-						<td><span>{{ capApp.protected }}</span></td>
-						<td>
-							<div class="row centered">
-								<my-bool v-model="values.protected" :readonly="readonly" />
-								<my-button
-									:active="false"
-									:image="values.protected ? 'lock.png' : 'lockOpen.png'"
-									:naked="true"
-								/>
-							</div>
-						</td>
-						<td v-html="capApp.protectedHint"></td>
-					</tr>
-					<tr>
-						<td colspan="3"><b>{{ capApp.values }}</b></td>
-					</tr>
-					<my-builder-preset-value
-						v-for="(a,i) in relation.attributes.filter(v => v.name !== 'id' && !isAttributeFiles(v.content))"
-						@set="(...args) => childSet(a.id,...args)"
-						:attribute="a"
-						:exists="attributeIdMapValue[a.id] !== undefined"
-						:key="a.id"
-						:preset-id-refer="childGet(a.id,'presetIdRefer')"
-						:protected="childGet(a.id,'protected')"
-						:readonly="readonly"
-						:value="childGet(a.id,'value')"
-					/>
+					<tbody>
+						<tr>
+							<td><span>{{ capGen.name }}</span></td>
+							<td colspan="2"><input class="dynamic" v-model="values.name" :disabled="readonly" /></td>
+						</tr>
+						<tr>
+							<td><span>{{ capApp.protected }}</span></td>
+							<td>
+								<div class="row centered">
+									<my-bool v-model="values.protected" :readonly="readonly" />
+									<my-button
+										:active="false"
+										:image="values.protected ? 'lock.png' : 'lockOpen.png'"
+										:naked="true"
+									/>
+								</div>
+							</td>
+							<td v-html="capApp.protectedHint"></td>
+						</tr>
+						<tr>
+							<td colspan="3"><b>{{ capApp.values }}</b></td>
+						</tr>
+						<my-builder-preset-value
+							v-for="(a,i) in relation.attributes.filter(v => v.name !== 'id' && !isAttributeFiles(v.content))"
+							@set="(...args) => childSet(a.id,...args)"
+							:attribute="a"
+							:exists="attributeIdMapValue[a.id] !== undefined"
+							:key="a.id"
+							:preset-id-refer="childGet(a.id,'presetIdRefer')"
+							:protected="childGet(a.id,'protected')"
+							:readonly="readonly"
+							:value="childGet(a.id,'value')"
+						/>
+					</tbody>
 				</table>
 			</div>
 		</div>

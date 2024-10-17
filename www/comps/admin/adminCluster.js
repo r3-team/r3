@@ -42,37 +42,39 @@ let MyAdminClusterNode = {
 		</div>
 		
 		<table>
-			<tr>
-				<td class="node-id" colspan="3"><b>{{ id }}</b></td>
-			</tr>
-			<tr class="default-inputs">
-				<td>{{ capGen.name }}</td>
-				<td>
-					<div class="row gap centered">
-						<input v-model="nameInput" :disabled="!licenseValid" />
-						<my-button image="save.png"
-							@trigger="$emit('set',nameInput)"
-							:active="name !== nameInput"
-						/>
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capApp.hostname }}</td>
-				<td><b>{{ hostname }}</b></td>
-			</tr>
-			<tr>
-				<td>{{ capApp.dateCheckIn }}</td>
-				<td><b>{{ displayDate(dateCheckIn) }}</b></td>
-			</tr>
-			<tr>
-				<td>{{ capApp.dateStarted }}</td>
-				<td><b>{{ displayDate(dateStarted) }}</b></td>
-			</tr>
-			<tr>
-				<td>{{ capApp.statMemory }}</td>
-				<td><b>{{ statMemory }} MB</b></td>
-			</tr>
+			<tbody>
+				<tr>
+					<td class="node-id" colspan="3"><b>{{ id }}</b></td>
+				</tr>
+				<tr class="default-inputs">
+					<td>{{ capGen.name }}</td>
+					<td>
+						<div class="row gap centered">
+							<input v-model="nameInput" :disabled="!licenseValid" />
+							<my-button image="save.png"
+								@trigger="$emit('set',nameInput)"
+								:active="name !== nameInput"
+							/>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.hostname }}</td>
+					<td><b>{{ hostname }}</b></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.dateCheckIn }}</td>
+					<td><b>{{ displayDate(dateCheckIn) }}</b></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.dateStarted }}</td>
+					<td><b>{{ displayDate(dateStarted) }}</b></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.statMemory }}</td>
+					<td><b>{{ statMemory }} MB</b></td>
+				</tr>
+			</tbody>
 		</table>
 	</div>`,
 	emits:['del','set','shutdown'],
@@ -181,15 +183,17 @@ let MyAdminCluster = {
 				<h1>{{ capApp.title.config }}</h1>
 			</div>
 			<table>
-				<tr class="default-inputs">
-					<td>{{ capApp.configNodeMissing }}</td>
-					<td>
-						<input
-							v-model="configInput.clusterNodeMissingAfter"
-							:disabled="!licenseValid"
-						/>
-					</td>
-				</tr>
+				<tbody>
+					<tr class="default-inputs">
+						<td>{{ capApp.configNodeMissing }}</td>
+						<td>
+							<input
+								v-model="configInput.clusterNodeMissingAfter"
+								:disabled="!licenseValid"
+							/>
+						</td>
+					</tr>
+				</tbody>
 			</table>
 			
 			<br />

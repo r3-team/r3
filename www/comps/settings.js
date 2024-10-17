@@ -25,10 +25,12 @@ let MySettingsEncryption = {
 	
 		<p>{{ capApp.description }}</p>
 		<table>
-			<tr>
-				<td class="minimum">{{ capGen.status }}:</td>
-				<td><b>{{ statusCaption }}</b></td>
-			</tr>
+			<tbody>
+				<tr>
+					<td class="minimum">{{ capGen.status }}:</td>
+					<td><b>{{ statusCaption }}</b></td>
+				</tr>
+			</tbody>
 		</table>
 		<br />
 		
@@ -64,14 +66,16 @@ let MySettingsEncryption = {
 				<p v-html="capApp.backupCodeDesc"></p>
 				
 				<table>
-					<tr>
-						<td><my-bool v-model="confirmBackupCode" /></td>
-						<td>{{ capApp.confirmBackupCode }}</td>
-					</tr>
-					<tr>
-						<td><my-bool v-model="confirmEncryption" /></td>
-						<td>{{ capApp.confirmEncryption }}</td>
-					</tr>
+					<tbody>
+						<tr>
+							<td><my-bool v-model="confirmBackupCode" /></td>
+							<td>{{ capApp.confirmBackupCode }}</td>
+						</tr>
+						<tr>
+							<td><my-bool v-model="confirmEncryption" /></td>
+							<td>{{ capApp.confirmEncryption }}</td>
+						</tr>
+					</tbody>
 				</table>
 				<br />
 				<br />
@@ -90,28 +94,30 @@ let MySettingsEncryption = {
 			<p>{{ capApp.regainAccessDesc }}</p>
 			
 			<table class="default-inputs">
-				<tr>
-					<td>{{ capApp.prevPassword }}</td>
-					<td><input v-model="regainPassword" /></td>
-					<td>
-						<my-button image="key.png"
-							@trigger="unlockWithPassphrase"
-							:active="regainPassword !== ''"
-							:caption="capGen.button.unlock"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.backupCode }}</td>
-					<td><textarea v-model="regainBackupCode"></textarea></td>
-					<td>
-						<my-button image="key.png"
-							@trigger="unlockWithBackupCode"
-							:active="regainBackupCode !== ''"
-							:caption="capGen.button.unlock"
-						/>
-					</td>
-				</tr>
+				<tbody>
+					<tr>
+						<td>{{ capApp.prevPassword }}</td>
+						<td><input v-model="regainPassword" /></td>
+						<td>
+							<my-button image="key.png"
+								@trigger="unlockWithPassphrase"
+								:active="regainPassword !== ''"
+								:caption="capGen.button.unlock"
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.backupCode }}</td>
+						<td><textarea v-model="regainBackupCode"></textarea></td>
+						<td>
+							<my-button image="key.png"
+								@trigger="unlockWithBackupCode"
+								:active="regainBackupCode !== ''"
+								:caption="capGen.button.unlock"
+							/>
+						</td>
+					</tr>
+				</tbody>
 			</table>
 		</template>
 		
@@ -370,23 +376,25 @@ let MySettingsEncryption = {
 let MySettingsAccount = {
 	name:'my-settings-account',
 	template:`<table class="default-inputs">
-		<!-- pw change -->
-		<tr>
-			<td>{{ capGen.name }}</td>
-			<td><input disabled="disabled" :value="loginName" /></td>
-		</tr>
-		<tr>
-			<td>{{ capApp.pwOld }}</td>
-			<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
-		</tr>
-		<tr>
-			<td>{{ capApp.pwNew0 }}</td>
-			<td><input autocomplete="new-password" type="password" v-model="pwNew0" @input="newInput = true" /></td>
-		</tr>
-		<tr>
-			<td>{{ capApp.pwNew1 }}</td>
-			<td><input autocomplete="new-password" type="password" v-model="pwNew1" @input="newInput = true" /></td>
-		</tr>
+		<tbody>
+			<!-- pw change -->
+			<tr>
+				<td>{{ capGen.name }}</td>
+				<td><input disabled="disabled" :value="loginName" /></td>
+			</tr>
+			<tr>
+				<td>{{ capApp.pwOld }}</td>
+				<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
+			</tr>
+			<tr>
+				<td>{{ capApp.pwNew0 }}</td>
+				<td><input autocomplete="new-password" type="password" v-model="pwNew0" @input="newInput = true" /></td>
+			</tr>
+			<tr>
+				<td>{{ capApp.pwNew1 }}</td>
+				<td><input autocomplete="new-password" type="password" v-model="pwNew1" @input="newInput = true" /></td>
+			</tr>
+		</tbody>
 	</table>
 	
 	<div class="settings-account-action">

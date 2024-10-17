@@ -85,69 +85,71 @@ let MyBuilderMenuItems = {
 						
 						<div class="content default-inputs">
 							<table class="generic-table-vertical tight fullWidth default-inputs">
-								<tr>
-									<td>{{ capApp.showChildrenHint }}</td>
-									<td>
-										<my-bool v-model="element.showChildren"
-											:readonly="readonly"
-										/>
-									</td>
-								</tr>
-								<tr>
-									<td>{{ capGen.color }}</td>
-									<td>
-										<div class="column gap">
-											<div class="row gap">
-												<input class="short"
-													@input="element.color = applyColor($event.target.value)"
-													:disabled="readonly"
-													:value="element.color"
+								<tbody>
+									<tr>
+										<td>{{ capApp.showChildrenHint }}</td>
+										<td>
+											<my-bool v-model="element.showChildren"
+												:readonly="readonly"
+											/>
+										</td>
+									</tr>
+									<tr>
+										<td>{{ capGen.color }}</td>
+										<td>
+											<div class="column gap">
+												<div class="row gap">
+													<input class="short"
+														@input="element.color = applyColor($event.target.value)"
+														:disabled="readonly"
+														:value="element.color"
+													/>
+													<my-button image="cancel.png"
+														@trigger="element.color = null"
+														:active="element.color !== null"
+														:naked="true"
+													/>
+												</div>
+												<chrome-picker
+													v-if="!readonly"
+													@update:modelValue="element.color = $event.hex.substr(1)"
+													:disable-alpha="true"
+													:disable-fields="true"
+													:modelValue="element.color !== null ? element.color : '000000'"
 												/>
-												<my-button image="cancel.png"
-													@trigger="element.color = null"
-													:active="element.color !== null"
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<div class="column gap">
+												<span>{{ capApp.collections }}</span>
+												<my-button image="add.png"
+													@trigger="element.collections.push(getCollectionConsumerTemplate())"
+													:active="!readonly"
+													:caption="capGen.button.add"
 													:naked="true"
 												/>
 											</div>
-											<chrome-picker
-												v-if="!readonly"
-												@update:modelValue="element.color = $event.hex.substr(1)"
-												:disable-alpha="true"
-												:disable-fields="true"
-												:modelValue="element.color !== null ? element.color : '000000'"
+										</td>
+										<td>
+											<my-builder-collection-input
+												v-for="(c,i) in element.collections"
+												@remove="element.collections.splice(i,1)"
+												@update:consumer="element.collections[i] = $event"
+												:allowFormOpen="false"
+												:allowRemove="true"
+												:consumer="c"
+												:fixedCollection="false"
+												:module="module"
+												:readonly="readonly"
+												:showMultiValue="false"
+												:showNoDisplayEmpty="true"
+												:showOnMobile="true"
 											/>
-										</div>
-									</td>
-								</tr>
-								<tr>
-									<td>
-										<div class="column gap">
-											<span>{{ capApp.collections }}</span>
-											<my-button image="add.png"
-												@trigger="element.collections.push(getCollectionConsumerTemplate())"
-												:active="!readonly"
-												:caption="capGen.button.add"
-												:naked="true"
-											/>
-										</div>
-									</td>
-									<td>
-										<my-builder-collection-input
-											v-for="(c,i) in element.collections"
-											@remove="element.collections.splice(i,1)"
-											@update:consumer="element.collections[i] = $event"
-											:allowFormOpen="false"
-											:allowRemove="true"
-											:consumer="c"
-											:fixedCollection="false"
-											:module="module"
-											:readonly="readonly"
-											:showMultiValue="false"
-											:showNoDisplayEmpty="true"
-											:showOnMobile="true"
-										/>
-									</td>
-								</tr>
+										</td>
+									</tr>
+								</tbody>
 							</table>
 						</div>
 					</div>

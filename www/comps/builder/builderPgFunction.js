@@ -376,23 +376,25 @@ let MyBuilderPgFunction = {
 				
 				<template v-if="tabTarget === 'exec'">
 					<table class="generic-table-vertical tight fullWidth">
-						<tr v-if="execArgInputs.length > 0">
-							<td>{{ capApp.codeArgs }}</td>
-							<td>
-								<div class="column gap">
-									<input class="dynamic"
-										v-model="execArgs[i]"
-										v-for="(a,i) in execArgInputs"
-										:disabled="readonly"
-										:placeholder="a.trim()"
-									/>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.execResponse }}</td>
-							<td><textarea class="dynamic response" v-model="execResponse" disabled></textarea></td>
-						</tr>
+						<tbody>
+							<tr v-if="execArgInputs.length > 0">
+								<td>{{ capApp.codeArgs }}</td>
+								<td>
+									<div class="column gap">
+										<input class="dynamic"
+											v-model="execArgs[i]"
+											v-for="(a,i) in execArgInputs"
+											:disabled="readonly"
+											:placeholder="a.trim()"
+										/>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.execResponse }}</td>
+								<td><textarea class="dynamic response" v-model="execResponse" disabled></textarea></td>
+							</tr>
+						</tbody>
 					</table>
 					<my-button image="settingsPlay.png"
 						@trigger="exec"
@@ -403,95 +405,97 @@ let MyBuilderPgFunction = {
 				
 				<template v-if="tabTarget === 'properties'">
 					<table class="generic-table-vertical tight fullWidth">
-						<tr>
-							<td>{{ capGen.name }}</td>
-							<td><input v-model="name" :disabled="readonly" /></td>
-						</tr>
-						<tr>
-							<td>{{ capGen.title }}</td>
-							<td>
-								<my-builder-caption
-									v-model="captions.pgFunctionTitle"
-									:language="builderLanguage"
-									:readonly="readonly"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.description }}</td>
-							<td>
-								<my-builder-caption
-									v-model="captions.pgFunctionDesc"
-									:language="builderLanguage"
-									:multiLine="true"
-									:readonly="readonly"
-								/>
-							</td>
-						</tr>
-						<tr v-if="!isTrigger">
-							<td>{{ capApp.codeArgs }}</td>
-							<td><textarea v-model="codeArgs" @keyup="resetExec" :disabled="isTrigger || isLoginSync || readonly" placeholder="-"></textarea></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.codeReturns }}</td>
-							<td><input v-model="codeReturns" :disabled="isTrigger || isLoginSync || readonly" placeholder="-" /></td>
-						</tr>
-						<tr v-if="!isTrigger">
-							<td>{{ capApp.volatility }}</td>
-							<td>
-								<div class="row gap">
-									<select class="dynamic" v-model="volatility" :disabled="readonly">
-										<option>VOLATILE</option>
-										<option>STABLE</option>
-										<option>IMMUTABLE</option>
-									</select>
-									<my-button image="question.png"
-										@trigger="showHelpVolatility"
+						<tbody>
+							<tr>
+								<td>{{ capGen.name }}</td>
+								<td><input v-model="name" :disabled="readonly" /></td>
+							</tr>
+							<tr>
+								<td>{{ capGen.title }}</td>
+								<td>
+									<my-builder-caption
+										v-model="captions.pgFunctionTitle"
+										:language="builderLanguage"
+										:readonly="readonly"
 									/>
-								</div>
-							</td>
-						</tr>
-						<tr v-if="isTrigger">
-							<td>{{ capApp.triggers }}</td>
-							<td>
-								<my-builder-pg-triggers
-									:contextEntity="'pgFunction'"
-									:contextId="id"
-									:readonly="readonly"
-									:singleColumn="true"
-								/>
-							</td>
-						</tr>
-						<tr v-if="isLoginSync">
-							<td>{{ capApp.isLoginSync }}</td>
-							<td><my-bool v-model="isLoginSync" :readonly="true" /></td>
-						</tr>
-						<tr v-if="!isTrigger && !isLoginSync">
-							<td>{{ capApp.isFrontendExec }}</td>
-							<td><my-bool v-model="isFrontendExec" :readonly="isTrigger || readonly" /></td>
-						</tr>
-						<tr v-if="!isTrigger && !isLoginSync">
-							<td>
-								<div class="column">
-									<span>{{ capApp.schedules }}</span>
-									<my-button image="add.png"
-										@trigger="addSchedule"
-										:active="!readonly"
-										:caption="capGen.button.add"
-										:naked="true"
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.description }}</td>
+								<td>
+									<my-builder-caption
+										v-model="captions.pgFunctionDesc"
+										:language="builderLanguage"
+										:multiLine="true"
+										:readonly="readonly"
 									/>
-								</div>
-							</td>
-							<td>
-								<my-builder-pg-function-item-schedule
-									v-for="(s,i) in schedules"
-									v-model="schedules[i]"
-									@remove="schedules.splice(i,1)"
-									:key="i"
-									:readonly="readonly"
-								/>
-							</td>
-						</tr>
+								</td>
+							</tr>
+							<tr v-if="!isTrigger">
+								<td>{{ capApp.codeArgs }}</td>
+								<td><textarea v-model="codeArgs" @keyup="resetExec" :disabled="isTrigger || isLoginSync || readonly" placeholder="-"></textarea></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.codeReturns }}</td>
+								<td><input v-model="codeReturns" :disabled="isTrigger || isLoginSync || readonly" placeholder="-" /></td>
+							</tr>
+							<tr v-if="!isTrigger">
+								<td>{{ capApp.volatility }}</td>
+								<td>
+									<div class="row gap">
+										<select class="dynamic" v-model="volatility" :disabled="readonly">
+											<option>VOLATILE</option>
+											<option>STABLE</option>
+											<option>IMMUTABLE</option>
+										</select>
+										<my-button image="question.png"
+											@trigger="showHelpVolatility"
+										/>
+									</div>
+								</td>
+							</tr>
+							<tr v-if="isTrigger">
+								<td>{{ capApp.triggers }}</td>
+								<td>
+									<my-builder-pg-triggers
+										:contextEntity="'pgFunction'"
+										:contextId="id"
+										:readonly="readonly"
+										:singleColumn="true"
+									/>
+								</td>
+							</tr>
+							<tr v-if="isLoginSync">
+								<td>{{ capApp.isLoginSync }}</td>
+								<td><my-bool v-model="isLoginSync" :readonly="true" /></td>
+							</tr>
+							<tr v-if="!isTrigger && !isLoginSync">
+								<td>{{ capApp.isFrontendExec }}</td>
+								<td><my-bool v-model="isFrontendExec" :readonly="isTrigger || readonly" /></td>
+							</tr>
+							<tr v-if="!isTrigger && !isLoginSync">
+								<td>
+									<div class="column">
+										<span>{{ capApp.schedules }}</span>
+										<my-button image="add.png"
+											@trigger="addSchedule"
+											:active="!readonly"
+											:caption="capGen.button.add"
+											:naked="true"
+										/>
+									</div>
+								</td>
+								<td>
+									<my-builder-pg-function-item-schedule
+										v-for="(s,i) in schedules"
+										v-model="schedules[i]"
+										@remove="schedules.splice(i,1)"
+										:key="i"
+										:readonly="readonly"
+									/>
+								</td>
+							</tr>
+						</tbody>
 					</table>
 				</template>
 			</div>

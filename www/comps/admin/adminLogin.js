@@ -110,107 +110,164 @@ let MyAdminLogin = {
 			</div>
 			
 			<div class="content">
-				<table class="generic-table generic-table-vertical fullWidth">
-					<tr>
-						<td>
-							<div class="title-cell">
-								<img src="images/person.png" />
-								<span>{{ capGen.name }}</span>
-							</div>
-						</td>
-						<td class="default-inputs"><input v-model="name" v-focus :disabled="isLdap" /></td>
-						<td>{{ capApp.hint.name }}</td>
-					</tr>
-					<tr v-if="isNew">
-						<td>
-							<div class="title-cell">
-								<img src="images/personTemplate.png" />
-								<span>{{ capApp.template }}</span>
-							</div>
-						</td>
-						<td class="default-inputs">
-							<select v-model="templateId">
-								<option v-for="t in templates" :title="t.comment" :value="t.id">
-									{{ t.name }}
-								</option>
-							</select>
-						</td>
-						<td>{{ capApp.hint.template }}</td>
-					</tr>
-					<tr v-if="isLdap">
-						<td>
-							<div class="title-cell">
-								<img src="images/hierarchy.png" />
-								<span>{{ capApp.ldap }}</span>
-							</div>
-						</td>
-						<td class="default-inputs">
-							<select v-model="ldapId" disabled="disabled">
-								<option :value="l.id" v-for="l in ldaps">{{ l.name }}</option>
-							</select>
-						</td>
-						<td></td>
-					</tr>
+				<table class="generic-table-vertical fullWidth">
+					<tbody>
+						<tr>
+							<td>
+								<div class="title-cell">
+									<img src="images/person.png" />
+									<span>{{ capGen.name }}</span>
+								</div>
+							</td>
+							<td class="default-inputs"><input v-model="name" v-focus :disabled="isLdap" /></td>
+							<td>{{ capApp.hint.name }}</td>
+						</tr>
+						<tr v-if="isNew">
+							<td>
+								<div class="title-cell">
+									<img src="images/personTemplate.png" />
+									<span>{{ capApp.template }}</span>
+								</div>
+							</td>
+							<td class="default-inputs">
+								<select v-model="templateId">
+									<option v-for="t in templates" :title="t.comment" :value="t.id">
+										{{ t.name }}
+									</option>
+								</select>
+							</td>
+							<td>{{ capApp.hint.template }}</td>
+						</tr>
+						<tr v-if="isLdap">
+							<td>
+								<div class="title-cell">
+									<img src="images/hierarchy.png" />
+									<span>{{ capApp.ldap }}</span>
+								</div>
+							</td>
+							<td class="default-inputs">
+								<select v-model="ldapId" disabled="disabled">
+									<option :value="l.id" v-for="l in ldaps">{{ l.name }}</option>
+								</select>
+							</td>
+							<td></td>
+						</tr>
+					</tbody>
 				</table>
 
 				<div class="login-details">
 					<my-tabs class="login-details-tabs"
 						v-model="tabTarget"
 						:entries="['meta','roles','properties']"
-						:entriesIcon="['images/question.png','images/personMultiple.png','images/edit.png']"
+						:entriesIcon="['images/editBox.png','images/personMultiple.png','images/personCog.png']"
 						:entriesText="[capGen.details,capApp.roles.replace('{COUNT}',roleTotalNonHidden),capGen.properties]"
 					/>
 					<div class="login-details-content" :class="{ roles:tabTarget === 'roles' }">
 
 						<!-- meta data -->
-						<table class="generic-table default-inputs admin-login-meta" v-if="tabTarget === 'meta'">
-							<tr v-if="isLdap">
-								<td colspan="2"><i>{{ capApp.ldapMeta }}</i></td>
-							</tr>
-							<tr>
-								<td class="minimum">{{ capApp.meta.nameFore }}</td>
-								<td><input class="dynamic" v-model="meta.nameFore"  :disabled="isLdap" /></td>
-							</tr>
-							<tr>
-								<td class="minimum">{{ capApp.meta.nameSur }}</td>
-								<td><input class="dynamic" v-model="meta.nameSur"  :disabled="isLdap" /></td>
-							</tr>
-							<tr>
-								<td class="minimum">{{ capApp.meta.nameDisplay }}</td>
-								<td><input class="dynamic" v-model="meta.nameDisplay" :disabled="isLdap" /></td>
-							</tr>
-							<tr>
-								<td class="minimum">{{ capApp.meta.organization }}</td>
-								<td><input class="dynamic" v-model="meta.organization" :disabled="isLdap" /></td>
-							</tr>
-							<tr>
-								<td class="minimum">{{ capApp.meta.location }}</td>
-								<td><input class="dynamic" v-model="meta.location" :disabled="isLdap" /></td>
-							</tr>
-							<tr>
-								<td class="minimum">{{ capApp.meta.department }}</td>
-								<td><input class="dynamic" v-model="meta.department" :disabled="isLdap" /></td>
-							</tr>
-							<tr>
-								<td class="minimum">{{ capApp.meta.email }}</td>
-								<td><input class="dynamic" v-model="meta.email" :disabled="isLdap" /></td>
-							</tr>
-							<tr>
-								<td class="minimum">{{ capApp.meta.phoneMobile }}</td>
-								<td><input class="dynamic" v-model="meta.phoneMobile" :disabled="isLdap" /></td>
-							</tr>
-							<tr>
-								<td class="minimum">{{ capApp.meta.phoneLandline }}</td>
-								<td><input class="dynamic" v-model="meta.phoneLandline" :disabled="isLdap" /></td>
-							</tr>
-							<tr>
-								<td class="minimum">{{ capApp.meta.phoneFax }}</td>
-								<td><input class="dynamic" v-model="meta.phoneFax" :disabled="isLdap" /></td>
-							</tr>
-							<tr>
-								<td class="minimum">{{ capApp.meta.notes }}</td>
-								<td><textarea class="dynamic" v-model="meta.notes" :disabled="isLdap"></textarea></td>
-							</tr>
+						<table class="generic-table-vertical default-inputs admin-login-meta" v-if="tabTarget === 'meta'">
+							<tbody>
+								<tr v-if="isLdap">
+									<td colspan="2" class="grouping"><b>{{ capApp.ldapMeta }}</b></td>
+								</tr>
+								<tr>
+									<td class="minimum">
+										<div class="title-cell">
+											<img src="images/editBox.png" />
+											<span>{{ capGen.name }}</span>
+										</div>
+									</td>
+									<td>
+										<table class="fullWidth">
+											<tbody>
+												<tr>
+													<td class="minimum">{{ capApp.meta.nameFore }}</td>
+													<td><input class="dynamic" v-model="meta.nameFore" :disabled="isLdap" /></td>
+												</tr>
+												<tr>
+													<td class="minimum">{{ capApp.meta.nameSur }}</td>
+													<td><input class="dynamic" v-model="meta.nameSur" :disabled="isLdap" /></td>
+												</tr>
+												<tr>
+													<td class="minimum">{{ capApp.meta.nameDisplay }}</td>
+													<td><input class="dynamic" v-model="meta.nameDisplay" :disabled="isLdap" /></td>
+												</tr>
+											</tbody>
+										</table>
+									</td>
+								</tr>
+								<tr>
+									<td class="minimum">
+										<div class="title-cell">
+											<img src="images/building1.png" />
+											<span>{{ capApp.meta.organization }}</span>
+										</div>
+									</td>
+									<td><input class="dynamic" v-model="meta.organization" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">
+										<div class="title-cell">
+											<img src="images/building2.png" />
+											<span>{{ capApp.meta.location }}</span>
+										</div>
+									</td>
+									<td><input class="dynamic" v-model="meta.location" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">
+										<div class="title-cell">
+											<img src="images/department.png" />
+											<span>{{ capApp.meta.department }}</span>
+										</div>
+									</td>
+									<td><input class="dynamic" v-model="meta.department" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">
+										<div class="title-cell">
+											<img src="images/mail2.png" />
+											<span>{{ capApp.meta.email }}</span>
+										</div>
+									</td>
+									<td><input class="dynamic" v-model="meta.email" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">
+										<div class="title-cell">
+											<img src="images/phone.png" />
+											<span>{{ capApp.meta.phone }}</span>
+										</div>
+									</td>
+									<td>
+										<table class="fullWidth">
+											<tbody>
+												<tr>
+													<td class="minimum">{{ capApp.meta.phoneMobile }}</td>
+													<td><input class="dynamic" v-model="meta.phoneMobile" :disabled="isLdap" /></td>
+												</tr>
+												<tr>
+													<td class="minimum">{{ capApp.meta.phoneLandline }}</td>
+													<td><input class="dynamic" v-model="meta.phoneLandline" :disabled="isLdap" /></td>
+												</tr>
+												<tr>
+													<td class="minimum">{{ capApp.meta.phoneFax }}</td>
+													<td><input class="dynamic" v-model="meta.phoneFax" :disabled="isLdap" /></td>
+												</tr>
+											</tbody>
+										</table>
+									</td>
+								</tr>
+								<tr>
+									<td class="minimum">
+										<div class="title-cell">
+											<img src="images/text_lines.png" />
+											<span>{{ capApp.meta.notes }}</span>
+										</div>
+									</td>
+									<td><textarea class="dynamic" v-model="meta.notes" :disabled="isLdap"></textarea></td>
+								</tr>
+							</tbody>
 						</table>
 						
 						<!-- roles -->
@@ -258,104 +315,106 @@ let MyAdminLogin = {
 						</table>
 
 						<!-- properties -->
-						<table class="generic-table generic-table-vertical fullWidth" v-if="tabTarget === 'properties'">
-							<tr>
-								<td>
-									<div class="title-cell">
-										<img src="images/personCog.png" />
-										<span>{{ capApp.admin }}</span>
-									</div>
-								</td>
-								<td><my-bool v-model="admin" /></td>
-								<td>{{ capApp.hint.admin }}</td>
-							</tr>
-							
-							<!-- login records -->
-							<tr v-for="(lf,lfi) in loginForms">
-								<td>
-									<div class="title-cell">
-										<img :src="srcBase64Icon(moduleIdMap[lf.moduleId].iconId,'images/module.png')" />
-										<span>{{ getCaption('loginFormTitle',lf.moduleId,lf.id,lf.captions,lf.name) }}</span>
-									</div>
-								</td>
-								<td>
-									<div class="field dropdown">
-										<div class="field-content data intent">
-											<my-input-select
-												@open="openLoginForm(lfi)"
-												@request-data="getRecords(lfi)"
-												@updated-text-input="recordInput = $event"
-												@update:selected="updateLoginRecord(lfi,$event)"
-												:nakedIcons="true"
-												:options="recordList"
-												:placeholder="capGen.threeDots"
-												:selected="records[lfi].id"
-												:showOpen="true"
-												:inputTextSet="records[lfi].label"
-											/>
+						<table class="generic-table-vertical fullWidth" v-if="tabTarget === 'properties'">
+							<tbody>
+								<tr>
+									<td>
+										<div class="title-cell">
+											<img src="images/personCog.png" />
+											<span>{{ capApp.admin }}</span>
 										</div>
-									</div>
-								</td>
-								<td></td>
-							</tr>
-							
-							<tr>
-								<td>
-									<div class="title-cell">
-										<img src="images/remove.png" />
-										<span>{{ capGen.active }}</span>
-									</div>
-								</td>
-								<td><my-bool v-model="active" /></td>
-								<td>{{ capApp.hint.active }}</td>
-							</tr>
-							<tr>
-								<td>
-									<div class="title-cell">
-										<img src="images/globe.png" />
-										<span>{{ capApp.noAuth }}</span>
-									</div>
-								</td>
-								<td><my-bool v-model="noAuth" :readonly="isLdap" /></td>
-								<td>{{ capApp.hint.noAuth }}</td>
-							</tr>
-							<tr>
-								<td>
-									<div class="title-cell">
-										<img src="images/clock.png" />
-										<span>{{ capApp.tokenExpiryHours }}</span>
-									</div>
-								</td>
-								<td class="default-inputs">
-									<input v-model="tokenExpiryHours" />
-								</td>
-								<td>{{ capApp.hint.tokenExpiryHours }}</td>
-							</tr>
+									</td>
+									<td><my-bool v-model="admin" /></td>
+									<td>{{ capApp.hint.admin }}</td>
+								</tr>
+								
+								<!-- login records -->
+								<tr v-for="(lf,lfi) in loginForms">
+									<td>
+										<div class="title-cell">
+											<img :src="srcBase64Icon(moduleIdMap[lf.moduleId].iconId,'images/module.png')" />
+											<span>{{ getCaption('loginFormTitle',lf.moduleId,lf.id,lf.captions,lf.name) }}</span>
+										</div>
+									</td>
+									<td>
+										<div class="field dropdown">
+											<div class="field-content data intent">
+												<my-input-select
+													@open="openLoginForm(lfi)"
+													@request-data="getRecords(lfi)"
+													@updated-text-input="recordInput = $event"
+													@update:selected="updateLoginRecord(lfi,$event)"
+													:nakedIcons="true"
+													:options="recordList"
+													:placeholder="capGen.threeDots"
+													:selected="records[lfi].id"
+													:showOpen="true"
+													:inputTextSet="records[lfi].label"
+												/>
+											</div>
+										</div>
+									</td>
+									<td></td>
+								</tr>
+								
+								<tr>
+									<td>
+										<div class="title-cell">
+											<img src="images/remove.png" />
+											<span>{{ capGen.active }}</span>
+										</div>
+									</td>
+									<td><my-bool v-model="active" /></td>
+									<td>{{ capApp.hint.active }}</td>
+								</tr>
+								<tr>
+									<td>
+										<div class="title-cell">
+											<img src="images/globe.png" />
+											<span>{{ capApp.noAuth }}</span>
+										</div>
+									</td>
+									<td><my-bool v-model="noAuth" :readonly="isLdap" /></td>
+									<td>{{ capApp.hint.noAuth }}</td>
+								</tr>
+								<tr>
+									<td>
+										<div class="title-cell">
+											<img src="images/clock.png" />
+											<span>{{ capApp.tokenExpiryHours }}</span>
+										</div>
+									</td>
+									<td class="default-inputs">
+										<input v-model="tokenExpiryHours" />
+									</td>
+									<td>{{ capApp.hint.tokenExpiryHours }}</td>
+								</tr>
 
-							<tr v-if="anyAction"><td colspan="3"><b>{{ capGen.actions }}</b></td></tr>
-							<tr v-if="!isLdap">
-								<td>
-									<div class="title-cell">
-										<img src="images/lock.png" />
-										<span>{{ capApp.password }}</span>
-									</div>
-								</td>
-								<td class="default-inputs">
-									<input type="password" v-model="pass" :placeholder="capGen.threeDots" />
-								</td>
-								<td>{{ capApp.hint.password }}</td>
-							</tr>
+								<tr v-if="anyAction"><td colspan="3" class="grouping">{{ capGen.actions }}</td></tr>
+								<tr v-if="!isLdap">
+									<td>
+										<div class="title-cell">
+											<img src="images/lock.png" />
+											<span>{{ capApp.password }}</span>
+										</div>
+									</td>
+									<td class="default-inputs">
+										<input type="password" v-model="pass" :placeholder="capGen.threeDots" />
+									</td>
+									<td>{{ capApp.hint.password }}</td>
+								</tr>
 
-							<tr v-if="anyInfo"><td colspan="3"><b>{{ capGen.information }}</b></td></tr>
-							<tr v-if="isLimited">
-								<td>
-									<div class="title-cell">
-										<img src="images/personDot.png" />
-										<span>{{ capApp.limited }}</span>
-									</div>
-								</td>
-								<td colspan="2"><span v-html="capApp.limitedDesc"></span></td>
-							</tr>
+								<tr v-if="anyInfo"><td colspan="3" class="grouping">{{ capGen.information }}</td></tr>
+								<tr v-if="isLimited">
+									<td>
+										<div class="title-cell">
+											<img src="images/personDot.png" />
+											<span>{{ capApp.limited }}</span>
+										</div>
+									</td>
+									<td colspan="2"><span v-html="capApp.limitedDesc"></span></td>
+								</tr>
+							</tbody>
 						</table>
 					</div>
 				</div>

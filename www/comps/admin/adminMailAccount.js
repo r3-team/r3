@@ -46,97 +46,99 @@ let MyAdminMailAccount = {
 			</div>
 			
 			<div class="content default-inputs">
-				<table class="generic-table generic-table-vertical fullWidth">
-					<tr>
-						<td>{{ capGen.name }}*</td>
-						<td><input v-model="inputs.name" /></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.accountMode }}*</td>
-						<td>
-							<select v-model="inputs.mode">
-								<option value="smtp">SMTP</option>
-								<option value="imap">IMAP</option>
-							</select>
-						</td>
-						<td v-if="!isSmtp"><span v-html="capApp.accountModeHintImap"></span></td>
-						<td v-if="isSmtp"><span v-html="capApp.accountModeHintSmtp"></span></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.accountAuthMethod }}*</td>
-						<td>
-							<select v-model="inputs.authMethod">
-								<option value="plain">{{ capApp.option.authMethod.plain }}</option>
-								<option value="xoauth2">{{ capApp.option.authMethod.xoauth2 }}</option>
-								<option value="login" :disabled="!isSmtp">{{ capApp.option.authMethod.login }}</option>
-							</select>
-						</td>
-						<td v-if="inputs.authMethod === 'login'">{{ capApp.accountAuthMethodHintLogin }}</td>
-						<td v-if="inputs.authMethod === 'plain'">{{ capApp.accountAuthMethodHintPlain }}</td>
-						<td v-if="inputs.authMethod === 'xoauth2'">{{ capApp.accountAuthMethodHintXOAuth2 }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.accountUser }}*</td>
-						<td><input v-model="inputs.username" /></td>
-						<td></td>
-					</tr>
-					<tr v-if="!isOauth">
-						<td>{{ capApp.accountPass }}*</td>
-						<td><input v-model="inputs.password" type="password" /></td>
-						<td></td>
-					</tr>
-					<tr v-if="isOauth">
-						<td>{{ capApp.accountOauth }}*</td>
-						<td>
-							<div class="row centered">
-								<select
-									@change="inputs.oauthClientId = $event.target.value !== '' ? parseInt($event.target.value) : null"
-									:value="inputs.oauthClientId !== null ? String(inputs.oauthClientId) : ''"
-								>
-									<option value="">-</option>
-									<option v-for="o in oauthClientIdMap" :value="o.id">{{ o.name }}</option>
+				<table class="generic-table-vertical fullWidth">
+					<tbody>
+						<tr>
+							<td>{{ capGen.name }}*</td>
+							<td><input v-model="inputs.name" /></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.accountMode }}*</td>
+							<td>
+								<select v-model="inputs.mode">
+									<option value="smtp">SMTP</option>
+									<option value="imap">IMAP</option>
 								</select>
-								<my-button image="lockCog.png"
-									:active="false"
-									:naked="true"
-								/>
-							</div>
-						</td>
-						<td>{{ capApp.accountOauthHint }}</td>
-					</tr>
-					<tr v-if="isSmtp">
-						<td>{{ capApp.accountSendAs }}*</td>
-						<td><input v-model="inputs.sendAs" /></td>
-						<td>{{ capApp.accountSendAsHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.encryption }}*</td>
-						<td>
-							<select
-								@change="inputs.startTls = $event.target.value === 'starttls'"
-								:value="inputs.startTls ? 'starttls' : 'ssl'"
-							>
-								<option value="starttls">{{ capApp.option.encryption.starttls }}</option>
-								<option value="ssl">{{ capApp.option.encryption.ssl }}</option>
-							</select>
-						</td>
-						<td></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.accountHost }}*</td>
-						<td><input v-model="inputs.hostName" /></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.accountPort }}*</td>
-						<td><input v-model.number="inputs.hostPort" /></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td>{{ capGen.comments }}*</td>
-						<td colspan="2"><textarea v-model="inputs.comment"></textarea></td>
-					</tr>
+							</td>
+							<td v-if="!isSmtp"><span v-html="capApp.accountModeHintImap"></span></td>
+							<td v-if="isSmtp"><span v-html="capApp.accountModeHintSmtp"></span></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.accountAuthMethod }}*</td>
+							<td>
+								<select v-model="inputs.authMethod">
+									<option value="plain">{{ capApp.option.authMethod.plain }}</option>
+									<option value="xoauth2">{{ capApp.option.authMethod.xoauth2 }}</option>
+									<option value="login" :disabled="!isSmtp">{{ capApp.option.authMethod.login }}</option>
+								</select>
+							</td>
+							<td v-if="inputs.authMethod === 'login'">{{ capApp.accountAuthMethodHintLogin }}</td>
+							<td v-if="inputs.authMethod === 'plain'">{{ capApp.accountAuthMethodHintPlain }}</td>
+							<td v-if="inputs.authMethod === 'xoauth2'">{{ capApp.accountAuthMethodHintXOAuth2 }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.accountUser }}*</td>
+							<td><input v-model="inputs.username" /></td>
+							<td></td>
+						</tr>
+						<tr v-if="!isOauth">
+							<td>{{ capApp.accountPass }}*</td>
+							<td><input v-model="inputs.password" type="password" /></td>
+							<td></td>
+						</tr>
+						<tr v-if="isOauth">
+							<td>{{ capApp.accountOauth }}*</td>
+							<td>
+								<div class="row centered">
+									<select
+										@change="inputs.oauthClientId = $event.target.value !== '' ? parseInt($event.target.value) : null"
+										:value="inputs.oauthClientId !== null ? String(inputs.oauthClientId) : ''"
+									>
+										<option value="">-</option>
+										<option v-for="o in oauthClientIdMap" :value="o.id">{{ o.name }}</option>
+									</select>
+									<my-button image="lockCog.png"
+										:active="false"
+										:naked="true"
+									/>
+								</div>
+							</td>
+							<td>{{ capApp.accountOauthHint }}</td>
+						</tr>
+						<tr v-if="isSmtp">
+							<td>{{ capApp.accountSendAs }}*</td>
+							<td><input v-model="inputs.sendAs" /></td>
+							<td>{{ capApp.accountSendAsHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.encryption }}*</td>
+							<td>
+								<select
+									@change="inputs.startTls = $event.target.value === 'starttls'"
+									:value="inputs.startTls ? 'starttls' : 'ssl'"
+								>
+									<option value="starttls">{{ capApp.option.encryption.starttls }}</option>
+									<option value="ssl">{{ capApp.option.encryption.ssl }}</option>
+								</select>
+							</td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.accountHost }}*</td>
+							<td><input v-model="inputs.hostName" /></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.accountPort }}*</td>
+							<td><input v-model.number="inputs.hostPort" /></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.comments }}*</td>
+							<td colspan="2"><textarea v-model="inputs.comment"></textarea></td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 		</div>

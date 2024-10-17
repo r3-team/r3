@@ -48,236 +48,238 @@ let MyAdminLoginTemplate = {
 			</div>
 			
 			<div class="content default-inputs">
-				<table class="generic-table generic-table-vertical fullWidth">
-					<tr>
-						<td>{{ capGen.name }}*</td>
-						<td><input v-model="name" v-focus :disabled="isGlobal" /></td>
-					</tr>
-					<tr v-if="isGlobal">
-						<td colspan="2">{{ capApp.global }}</td>
-					</tr>
-					<tr v-if="!isGlobal">
-						<td>{{ capGen.comments }}</td>
-						<td><textarea v-model="comment" /></td>
-					</tr>
-					
-					<!-- general settings -->
-					<tr>
-						<td class="grouping" colspan="2">
-							<br />
-							<div class="contentPartHeader">
-								<img class="icon" src="images/settings.png" />
-								<h1>{{ capAppSet.titleGeneral }}</h1>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.languageCode }}</td>
-						<td>
-							<select v-model="settings.languageCode">
-								<option v-for="l in languageCodes" :value="l">{{ l }}</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.dateFormat }}</td>
-						<td>
-							<select v-model="settings.dateFormat">
-								<option value="Y-m-d">{{ capGen.dateFormat0 }}</option>
-								<option value="Y/m/d">{{ capGen.dateFormat1 }}</option>
-								<option value="d.m.Y">{{ capGen.dateFormat2 }}</option>
-								<option value="d/m/Y">{{ capGen.dateFormat3 }}</option>
-								<option value="m/d/Y">{{ capGen.dateFormat4 }}</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.searchDictionaries }}</td>
-						<td>
-							<div class="column gap">
-								<select v-model="searchDictionaryNew" @change="dictAdd($event.target.value)">
-									<option value="">{{ capAppSet.searchDictionaryNew }}</option>
-									<option v-for="d in searchDictionaries.filter(v => !settings.searchDictionaries.includes(v) && v !== 'simple')">
-										{{ d }}
-									</option>
+				<table class="generic-table-vertical fullWidth">
+					<tbody>
+						<tr>
+							<td>{{ capGen.name }}*</td>
+							<td><input v-model="name" v-focus :disabled="isGlobal" /></td>
+						</tr>
+						<tr v-if="isGlobal">
+							<td colspan="2">{{ capApp.global }}</td>
+						</tr>
+						<tr v-if="!isGlobal">
+							<td>{{ capGen.comments }}</td>
+							<td><textarea v-model="comment" /></td>
+						</tr>
+						
+						<!-- general settings -->
+						<tr>
+							<td class="grouping" colspan="2">
+								<br />
+								<div class="contentPartHeader">
+									<img class="icon" src="images/settings.png" />
+									<h1>{{ capAppSet.titleGeneral }}</h1>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.languageCode }}</td>
+							<td>
+								<select v-model="settings.languageCode">
+									<option v-for="l in languageCodes" :value="l">{{ l }}</option>
 								</select>
-								<div class="row wrap gap">
-									<div v-for="d in settings.searchDictionaries" class="row centered gap">
-										<span>{{ d }}</span>
-										<my-button image="delete.png" @trigger="dictDel(d)" :cancel="true" />
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.dateFormat }}</td>
+							<td>
+								<select v-model="settings.dateFormat">
+									<option value="Y-m-d">{{ capGen.dateFormat0 }}</option>
+									<option value="Y/m/d">{{ capGen.dateFormat1 }}</option>
+									<option value="d.m.Y">{{ capGen.dateFormat2 }}</option>
+									<option value="d/m/Y">{{ capGen.dateFormat3 }}</option>
+									<option value="m/d/Y">{{ capGen.dateFormat4 }}</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.searchDictionaries }}</td>
+							<td>
+								<div class="column gap">
+									<select v-model="searchDictionaryNew" @change="dictAdd($event.target.value)">
+										<option value="">{{ capAppSet.searchDictionaryNew }}</option>
+										<option v-for="d in searchDictionaries.filter(v => !settings.searchDictionaries.includes(v) && v !== 'simple')">
+											{{ d }}
+										</option>
+									</select>
+									<div class="row wrap gap">
+										<div v-for="d in settings.searchDictionaries" class="row centered gap">
+											<span>{{ d }}</span>
+											<my-button image="delete.png" @trigger="dictDel(d)" :cancel="true" />
+										</div>
 									</div>
 								</div>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2"><b>{{ capAppSet.titleSubNumbers }}</b></td>
-					</tr>
-					<tr class="default-inputs">
-						<td>{{ capAppSet.numberSepThousand }}</td>
-						<td>
-							<select v-model="settings.numberSepThousand">
-								<option value=".">{{ capAppSet.option.numberSeparator.dot }}</option>
-								<option value=",">{{ capAppSet.option.numberSeparator.comma }}</option>
-								<option value="'">{{ capAppSet.option.numberSeparator.apos }}</option>
-								<option value="·">{{ capAppSet.option.numberSeparator.mdot }}</option>
-							</select>
-						</td>
-					</tr>
-					<tr class="default-inputs">
-						<td>{{ capAppSet.numberSepDecimal }}</td>
-						<td>
-							<select v-model="settings.numberSepDecimal">
-								<option value=".">{{ capAppSet.option.numberSeparator.dot }}</option>
-								<option value=",">{{ capAppSet.option.numberSeparator.comma }}</option>
-								<option value="'">{{ capAppSet.option.numberSeparator.apos }}</option>
-								<option value="·">{{ capAppSet.option.numberSeparator.mdot }}</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2"><b>{{ capAppSet.titleSubMisc }}</b></td>
-					</tr>
-					<tr><td colspan="2"><my-button-check v-model="settings.sundayFirstDow"   :caption="capAppSet.sundayFirstDow"   /></td></tr>
-					<tr><td colspan="2"><my-button-check v-model="settings.tabRemember"      :caption="capAppSet.tabRemember"      /></td></tr>
-					<tr><td colspan="2"><my-button-check v-model="settings.warnUnsaved"      :caption="capAppSet.warnUnsaved"      /></td></tr>
-					<tr><td colspan="2"><my-button-check v-model="settings.mobileScrollForm" :caption="capAppSet.mobileScrollForm" /></td></tr>
-					<tr><td colspan="2"><my-button-check v-model="settings.boolAsIcon"       :caption="capAppSet.boolAsIcon"       /></td></tr>
-					
-					<!-- theming -->
-					<tr>
-						<td class="grouping" colspan="2">
-							<br />
-							<div class="contentPartHeader">
-								<img class="icon" src="images/visible1.png" />
-								<h1>{{ capAppSet.titleTheme }}</h1>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.borders }}</td>
-						<td>
-							<div class="row gap">
-								<my-button-check v-model="settings.bordersAll"     :caption="capGen.more" />
-								<my-button-check v-model="settings.bordersSquared" :caption="capAppSet.bordersSquared" />
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.fontFamily }}</td>
-						<td>
-							<div class="row gap">
-								<select v-model="settings.fontFamily">
-									<optgroup label="sans-serif">
-										<option value="calibri">Calibri</option>
-										<option value="helvetica">Helvetica</option>
-										<option value="segoe_ui">Segoe UI</option>
-										<option value="trebuchet_ms">Trebuchet MS</option>
-										<option value="verdana">Verdana</option>
-									</optgroup>
-									<optgroup label="serif">
-										<option value="georgia">Georgia</option>
-										<option value="times_new_roman">Times New Roman</option>
-									</optgroup>
-									<optgroup label="cursive">
-										<option value="comic_sans_ms">Comic Sans</option>
-										<option value="segoe_script">Segoe Script</option>
-									</optgroup>
-									<optgroup label="monospace">
-										<option value="consolas">Consolas</option>
-										<option value="lucida_console">Lucida Console</option>
-									</optgroup>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"><b>{{ capAppSet.titleSubNumbers }}</b></td>
+						</tr>
+						<tr class="default-inputs">
+							<td>{{ capAppSet.numberSepThousand }}</td>
+							<td>
+								<select v-model="settings.numberSepThousand">
+									<option value=".">{{ capAppSet.option.numberSeparator.dot }}</option>
+									<option value=",">{{ capAppSet.option.numberSeparator.comma }}</option>
+									<option value="'">{{ capAppSet.option.numberSeparator.apos }}</option>
+									<option value="·">{{ capAppSet.option.numberSeparator.mdot }}</option>
 								</select>
-									
-								<select class="short" v-model="settings.fontSize" :title="capAppSet.fontSize">
-									<option v-for="i in 11"
-										:value="70 + (i*5)"
-									>{{ (70 + (i*5)) + '%' }}</option>
+							</td>
+						</tr>
+						<tr class="default-inputs">
+							<td>{{ capAppSet.numberSepDecimal }}</td>
+							<td>
+								<select v-model="settings.numberSepDecimal">
+									<option value=".">{{ capAppSet.option.numberSeparator.dot }}</option>
+									<option value=",">{{ capAppSet.option.numberSeparator.comma }}</option>
+									<option value="'">{{ capAppSet.option.numberSeparator.apos }}</option>
+									<option value="·">{{ capAppSet.option.numberSeparator.mdot }}</option>
 								</select>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.spacing }}</td>
-						<td>
-							<select v-model.number="settings.spacing">
-								<option :value="1">{{ capGen.option.size0 }}</option>
-								<option :value="2">{{ capGen.option.size1 }}</option>
-								<option :value="3">{{ capGen.option.size2 }}</option>
-								<option :value="4">{{ capGen.option.size3 }}</option>
-								<option :value="5">{{ capGen.option.size4 }}</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.listRows }}</td>
-						<td>
-							<div class="row gap">
-								<my-button-check v-model="settings.listSpaced"  :caption="capAppSet.listSpaced" />
-								<my-button-check v-model="settings.listColored" :caption="capAppSet.listColored" />
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.pattern }}</td>
-						<td>
-							<select v-model="settings.pattern">
-								<option :value="null">-</option>
-								<option value="bubbles">Bubbles</option>
-								<option value="circuits">Circuits</option>
-								<option value="cubes">Cubes</option>
-								<option value="triangles">Triangles</option>
-								<option value="waves">Waves</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.dark }}</td>
-						<td><div class="row"><my-bool v-model="settings.dark" :grow="false" /></div></td>
-					</tr>
-					<tr>
-						<td colspan="2"><b>{{ capAppSet.titleSubHeader }}</b></td>
-					</tr>
-					<tr>
-						<td>{{ capGen.applications }}</td>
-						<td>
-							<div class="row gap">
-								<my-button-check v-model="settings.headerModules" :caption="capGen.button.show" />
-								<my-button-check
-									v-model="settings.headerCaptions"
-									:caption="capAppSet.headerCaptions"
-									:readonly="!settings.headerModules"
-								/>
-							</div>
-						</td>
-					</tr>
-					<tr class="default-inputs">
-						<td>{{ capAppSet.colorClassicMode }}</td>
-						<td>
-							<select
-								@input="settings.colorClassicMode = $event.target.value === '1'"
-								:value="settings.colorClassicMode ? '1' : '0'"
-							>
-								<option value="0">{{ capAppSet.colorClassicMode0 }}</option>
-								<option value="1">{{ capAppSet.colorClassicMode1 }}</option>
-							</select>
-						</td>
-					</tr>
-					<tr v-if="!settings.colorClassicMode">
-						<td>{{ capAppSet.colorHeader }}</td>
-						<td><my-input-color v-model="settings.colorHeader" :allowNull="true" /></td>
-					</tr>
-					<tr v-if="!settings.colorClassicMode">
-						<td>{{ capAppSet.colorHeaderSingle }}</td>
-						<td><div class="row"><my-bool v-model="settings.colorHeaderSingle" :grow="false" :reversed="true" /></div></td>
-					</tr>
-					<tr>
-						<td colspan="2"><b>{{ capAppSet.titleSubMenu }}</b></td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.colorMenu }}</td>
-						<td><my-input-color v-model="settings.colorMenu" :allowNull="true" /></td>
-					</tr>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"><b>{{ capAppSet.titleSubMisc }}</b></td>
+						</tr>
+						<tr><td colspan="2"><my-button-check v-model="settings.sundayFirstDow"   :caption="capAppSet.sundayFirstDow"   /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settings.tabRemember"      :caption="capAppSet.tabRemember"      /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settings.warnUnsaved"      :caption="capAppSet.warnUnsaved"      /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settings.mobileScrollForm" :caption="capAppSet.mobileScrollForm" /></td></tr>
+						<tr><td colspan="2"><my-button-check v-model="settings.boolAsIcon"       :caption="capAppSet.boolAsIcon"       /></td></tr>
+						
+						<!-- theming -->
+						<tr>
+							<td class="grouping" colspan="2">
+								<br />
+								<div class="contentPartHeader">
+									<img class="icon" src="images/visible1.png" />
+									<h1>{{ capAppSet.titleTheme }}</h1>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.borders }}</td>
+							<td>
+								<div class="row gap">
+									<my-button-check v-model="settings.bordersAll"     :caption="capGen.more" />
+									<my-button-check v-model="settings.bordersSquared" :caption="capAppSet.bordersSquared" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.fontFamily }}</td>
+							<td>
+								<div class="row gap">
+									<select v-model="settings.fontFamily">
+										<optgroup label="sans-serif">
+											<option value="calibri">Calibri</option>
+											<option value="helvetica">Helvetica</option>
+											<option value="segoe_ui">Segoe UI</option>
+											<option value="trebuchet_ms">Trebuchet MS</option>
+											<option value="verdana">Verdana</option>
+										</optgroup>
+										<optgroup label="serif">
+											<option value="georgia">Georgia</option>
+											<option value="times_new_roman">Times New Roman</option>
+										</optgroup>
+										<optgroup label="cursive">
+											<option value="comic_sans_ms">Comic Sans</option>
+											<option value="segoe_script">Segoe Script</option>
+										</optgroup>
+										<optgroup label="monospace">
+											<option value="consolas">Consolas</option>
+											<option value="lucida_console">Lucida Console</option>
+										</optgroup>
+									</select>
+										
+									<select class="short" v-model="settings.fontSize" :title="capAppSet.fontSize">
+										<option v-for="i in 11"
+											:value="70 + (i*5)"
+										>{{ (70 + (i*5)) + '%' }}</option>
+									</select>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.spacing }}</td>
+							<td>
+								<select v-model.number="settings.spacing">
+									<option :value="1">{{ capGen.option.size0 }}</option>
+									<option :value="2">{{ capGen.option.size1 }}</option>
+									<option :value="3">{{ capGen.option.size2 }}</option>
+									<option :value="4">{{ capGen.option.size3 }}</option>
+									<option :value="5">{{ capGen.option.size4 }}</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.listRows }}</td>
+							<td>
+								<div class="row gap">
+									<my-button-check v-model="settings.listSpaced"  :caption="capAppSet.listSpaced" />
+									<my-button-check v-model="settings.listColored" :caption="capAppSet.listColored" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.pattern }}</td>
+							<td>
+								<select v-model="settings.pattern">
+									<option :value="null">-</option>
+									<option value="bubbles">Bubbles</option>
+									<option value="circuits">Circuits</option>
+									<option value="cubes">Cubes</option>
+									<option value="triangles">Triangles</option>
+									<option value="waves">Waves</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.dark }}</td>
+							<td><div class="row"><my-bool v-model="settings.dark" :grow="false" /></div></td>
+						</tr>
+						<tr>
+							<td colspan="2"><b>{{ capAppSet.titleSubHeader }}</b></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.applications }}</td>
+							<td>
+								<div class="row gap">
+									<my-button-check v-model="settings.headerModules" :caption="capGen.button.show" />
+									<my-button-check
+										v-model="settings.headerCaptions"
+										:caption="capAppSet.headerCaptions"
+										:readonly="!settings.headerModules"
+									/>
+								</div>
+							</td>
+						</tr>
+						<tr class="default-inputs">
+							<td>{{ capAppSet.colorClassicMode }}</td>
+							<td>
+								<select
+									@input="settings.colorClassicMode = $event.target.value === '1'"
+									:value="settings.colorClassicMode ? '1' : '0'"
+								>
+									<option value="0">{{ capAppSet.colorClassicMode0 }}</option>
+									<option value="1">{{ capAppSet.colorClassicMode1 }}</option>
+								</select>
+							</td>
+						</tr>
+						<tr v-if="!settings.colorClassicMode">
+							<td>{{ capAppSet.colorHeader }}</td>
+							<td><my-input-color v-model="settings.colorHeader" :allowNull="true" /></td>
+						</tr>
+						<tr v-if="!settings.colorClassicMode">
+							<td>{{ capAppSet.colorHeaderSingle }}</td>
+							<td><div class="row"><my-bool v-model="settings.colorHeaderSingle" :grow="false" :reversed="true" /></div></td>
+						</tr>
+						<tr>
+							<td colspan="2"><b>{{ capAppSet.titleSubMenu }}</b></td>
+						</tr>
+						<tr>
+							<td>{{ capAppSet.colorMenu }}</td>
+							<td><my-input-color v-model="settings.colorMenu" :allowNull="true" /></td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 		</div>

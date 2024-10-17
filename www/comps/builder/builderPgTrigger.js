@@ -47,99 +47,101 @@ let MyBuilderPgTrigger = {
 			
 			<div class="content default-inputs">
 				<table class="generic-table-vertical">
-					<tr>
-						<td>{{ capApp.execute }}*</td>
-						<td>
-							<div class="row gap centered">
-								<select
-									v-if="!isExternal"
-									v-model="values.pgFunctionId"
-									:disabled="readonly || isFromPgFunction"
-								>
-									<option :value="null">[{{ capGen.nothingSelected }}]</option>
-									<option
-										v-for="fnc in module.pgFunctions.filter(v => v.codeReturns === 'trigger' || v.codeReturns === 'TRIGGER')"
-										:value="fnc.id"
-									>{{ fnc.name }}()</option>
-								</select>
-								<input disabled="disabled"
-									v-if="isExternal"
-									:value="moduleIdMap[pgFunctionIdMap[values.pgFunctionId].moduleId].name + ': ' + pgFunctionIdMap[values.pgFunctionId].name + '()'"
-								/>
-								<my-button image="open.png"
-									v-if="isFromRelation && values.pgFunctionId !== null"
-									@trigger="open"
-									:captionTitle="capGen.button.open"
-								/>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.relation }}*</td>
-						<td>
-							<div class="row gap centered">
-								<select
-									v-model="values.relationId"
-									:disabled="readonly || isFromRelation || isExternal || !isNew"
-								>
-									<option :value="null">-</option>
-									<option v-for="rel in module.relations" :value="rel.id">
-										{{ rel.name }}
-									</option>
-									<optgroup
-										v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.relations.length !== 0)"
-										:label="mod.name"
+					<tbody>
+						<tr>
+							<td>{{ capApp.execute }}*</td>
+							<td>
+								<div class="row gap centered">
+									<select
+										v-if="!isExternal"
+										v-model="values.pgFunctionId"
+										:disabled="readonly || isFromPgFunction"
 									>
-										<option v-for="rel in mod.relations" :value="rel.id">
-											{{ mod.name + ': ' + rel.name }}
+										<option :value="null">[{{ capGen.nothingSelected }}]</option>
+										<option
+											v-for="fnc in module.pgFunctions.filter(v => v.codeReturns === 'trigger' || v.codeReturns === 'TRIGGER')"
+											:value="fnc.id"
+										>{{ fnc.name }}()</option>
+									</select>
+									<input disabled="disabled"
+										v-if="isExternal"
+										:value="moduleIdMap[pgFunctionIdMap[values.pgFunctionId].moduleId].name + ': ' + pgFunctionIdMap[values.pgFunctionId].name + '()'"
+									/>
+									<my-button image="open.png"
+										v-if="isFromRelation && values.pgFunctionId !== null"
+										@trigger="open"
+										:captionTitle="capGen.button.open"
+									/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.relation }}*</td>
+							<td>
+								<div class="row gap centered">
+									<select
+										v-model="values.relationId"
+										:disabled="readonly || isFromRelation || isExternal || !isNew"
+									>
+										<option :value="null">-</option>
+										<option v-for="rel in module.relations" :value="rel.id">
+											{{ rel.name }}
 										</option>
-									</optgroup>
-								</select>
-								<my-button image="open.png"
-									v-if="isFromPgFunction && values.relationId !== null"
-									@trigger="open"
-									:captionTitle="capGen.button.open"
+										<optgroup
+											v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.relations.length !== 0)"
+											:label="mod.name"
+										>
+											<option v-for="rel in mod.relations" :value="rel.id">
+												{{ mod.name + ': ' + rel.name }}
+											</option>
+										</optgroup>
+									</select>
+									<my-button image="open.png"
+										v-if="isFromPgFunction && values.relationId !== null"
+										@trigger="open"
+										:captionTitle="capGen.button.open"
+									/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.fires }}</td>
+							<td>
+								<div class="row gap centered">
+									<select v-model="values.fires" :disabled="readonly || isExternal">
+										<option value="BEFORE">BEFORE</option>
+										<option value="AFTER">AFTER</option>
+									</select>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.onInsert }}</td>
+							<td><my-bool v-model="values.onInsert" :readonly="readonly || isExternal" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.onUpdate }}</td>
+							<td><my-bool v-model="values.onUpdate" :readonly="readonly || isExternal" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.onDelete }}</td>
+							<td><my-bool v-model="values.onDelete" :readonly="readonly || isExternal" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.perRow }}</td>
+							<td><my-bool v-model="values.perRow" :readonly="readonly || isExternal" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.isDeferred }}</td>
+							<td>
+								<my-bool
+									@update:modelValue="setDeferred($event)"
+									:readonly="!constraintOk || readonly || isExternal"
+									:modelValue="values.isDeferred"
 								/>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.fires }}</td>
-						<td>
-							<div class="row gap centered">
-								<select v-model="values.fires" :disabled="readonly || isExternal">
-									<option value="BEFORE">BEFORE</option>
-									<option value="AFTER">AFTER</option>
-								</select>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.onInsert }}</td>
-						<td><my-bool v-model="values.onInsert" :readonly="readonly || isExternal" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.onUpdate }}</td>
-						<td><my-bool v-model="values.onUpdate" :readonly="readonly || isExternal" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.onDelete }}</td>
-						<td><my-bool v-model="values.onDelete" :readonly="readonly || isExternal" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.perRow }}</td>
-						<td><my-bool v-model="values.perRow" :readonly="readonly || isExternal" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.isDeferred }}</td>
-						<td>
-							<my-bool
-								@update:modelValue="setDeferred($event)"
-								:readonly="!constraintOk || readonly || isExternal"
-								:modelValue="values.isDeferred"
-							/>
-						</td>
-					</tr>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 		</div>

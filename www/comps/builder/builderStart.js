@@ -90,42 +90,44 @@ let MyBuilderStart = {
 					<h1>{{ isVisible ? capApp.appVisible : capApp.appVisibleOff }}</h1>
 				</div>
 				<table>
-					<tr>
-						<td><my-builder-start-icon :bad="!hasStartForm" :small="true" /></td>
-						<td>{{ hasStartForm ? capApp.checkStartForm : capApp.checkStartFormOff }}</td>
-						<td>
-							<router-link v-if="!hasStartForm" :to="'/builder/module/'+id">
-								<my-button image="settings.png" :caption="capApp.button.fix" />
-							</router-link>
-						</td>
-					</tr>
-					<tr>
-						<td><my-builder-start-icon :bad="!hasMenu" :small="true" /></td>
-						<td>{{ hasMenu ? capApp.checkMenu : capApp.checkMenuOff }}</td>
-						<td>
-							<router-link v-if="!hasMenu" :to="'/builder/menu/'+id">
-								<my-button image="settings.png" :caption="capApp.button.fix" />
-							</router-link>
-						</td>
-					</tr>
-					<tr>
-						<td><my-builder-start-icon :bad="!hasMenuInRole" :small="true" /></td>
-						<td>{{ hasMenuInRole ? capApp.checkMenuInRole : capApp.checkMenuInRoleOff }}</td>
-						<td>
-							<router-link v-if="!hasMenuInRole" :to="'/builder/roles/'+id">
-								<my-button image="settings.png" :caption="capApp.button.fix" />
-							</router-link>
-						</td>
-					</tr>
-					<tr>
-						<td><my-builder-start-icon :bad="isHiddenAdmin" :small="true" /></td>
-						<td>{{ !isHiddenAdmin ? capApp.checkNotHidden : capApp.checkNotHiddenOff }}</td>
-						<td>
-							<router-link v-if="isHiddenAdmin" to="/admin/modules">
-								<my-button image="settings.png" :caption="capApp.button.fix" />
-							</router-link>
-						</td>
-					</tr>
+					<tbody>
+						<tr>
+							<td><my-builder-start-icon :bad="!hasStartForm" :small="true" /></td>
+							<td>{{ hasStartForm ? capApp.checkStartForm : capApp.checkStartFormOff }}</td>
+							<td>
+								<router-link v-if="!hasStartForm" :to="'/builder/module/'+id">
+									<my-button image="settings.png" :caption="capApp.button.fix" />
+								</router-link>
+							</td>
+						</tr>
+						<tr>
+							<td><my-builder-start-icon :bad="!hasMenu" :small="true" /></td>
+							<td>{{ hasMenu ? capApp.checkMenu : capApp.checkMenuOff }}</td>
+							<td>
+								<router-link v-if="!hasMenu" :to="'/builder/menu/'+id">
+									<my-button image="settings.png" :caption="capApp.button.fix" />
+								</router-link>
+							</td>
+						</tr>
+						<tr>
+							<td><my-builder-start-icon :bad="!hasMenuInRole" :small="true" /></td>
+							<td>{{ hasMenuInRole ? capApp.checkMenuInRole : capApp.checkMenuInRoleOff }}</td>
+							<td>
+								<router-link v-if="!hasMenuInRole" :to="'/builder/roles/'+id">
+									<my-button image="settings.png" :caption="capApp.button.fix" />
+								</router-link>
+							</td>
+						</tr>
+						<tr>
+							<td><my-builder-start-icon :bad="isHiddenAdmin" :small="true" /></td>
+							<td>{{ !isHiddenAdmin ? capApp.checkNotHidden : capApp.checkNotHiddenOff }}</td>
+							<td>
+								<router-link v-if="isHiddenAdmin" to="/admin/modules">
+									<my-button image="settings.png" :caption="capApp.button.fix" />
+								</router-link>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 			

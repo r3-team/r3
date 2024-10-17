@@ -35,68 +35,70 @@ let MyAdminConfig = {
 				</div>
 				
 				<table class="default-inputs">
-					<tr>
-						<td>{{ capApp.appVersion }}</td>
-						<td>{{ appVersion }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.updateCheck }}</td>
-						<td v-if="updateCheckText !== capApp.updateCheckOlder">
-							{{ updateCheckText }}
-						</td>
-						<td v-else>
-							<a href="https://rei3.de/download" target="_blank">{{ updateCheckText }}</a>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.licenseState }}</td>
-						<td v-if="licenseValid">{{ capApp.licenseStateOk.replace('{COUNT}',this.licenseDays) }}</td>
-						<td v-if="!licenseValid">{{ capApp.licenseStateNok }}</td>
-					</tr>
-					<tr><td colspan="2"></td></tr>
-					<tr>
-						<td>{{ capApp.publicHostName }}</td>
-						<td>
-							<div class="row gap centered">
-								<input v-model="configInput.publicHostName" />
-								<my-button image="question.png"
-									@trigger="showHelp(capApp.publicHostNameDesc)"
+					<tbody>
+						<tr>
+							<td>{{ capApp.appVersion }}</td>
+							<td>{{ appVersion }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.updateCheck }}</td>
+							<td v-if="updateCheckText !== capApp.updateCheckOlder">
+								{{ updateCheckText }}
+							</td>
+							<td v-else>
+								<a href="https://rei3.de/download" target="_blank">{{ updateCheckText }}</a>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.licenseState }}</td>
+							<td v-if="licenseValid">{{ capApp.licenseStateOk.replace('{COUNT}',this.licenseDays) }}</td>
+							<td v-if="!licenseValid">{{ capApp.licenseStateNok }}</td>
+						</tr>
+						<tr><td colspan="2"></td></tr>
+						<tr>
+							<td>{{ capApp.publicHostName }}</td>
+							<td>
+								<div class="row gap centered">
+									<input v-model="configInput.publicHostName" />
+									<my-button image="question.png"
+										@trigger="showHelp(capApp.publicHostNameDesc)"
+									/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.proxyUrl }}</td>
+							<td>
+								<div class="row gap centered">
+									<input v-model="configInput.proxyUrl" />
+									<my-button image="question.png"
+										@trigger="showHelp(capApp.proxyUrlDesc)"
+									/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.productionMode }}</td>
+							<td>
+								<my-bool-string-number
+									v-model="configInput.productionMode"
+									@update:modelValue="informProductionMode"
+									:reversed="true"
+									:readonly="configInput.builderMode === '1'"
 								/>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.proxyUrl }}</td>
-						<td>
-							<div class="row gap centered">
-								<input v-model="configInput.proxyUrl" />
-								<my-button image="question.png"
-									@trigger="showHelp(capApp.proxyUrlDesc)"
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.builderMode }}</td>
+							<td>
+								<my-bool-string-number
+									v-model="configInput.builderMode"
+									@update:modelValue="informBuilderMode"
+									:readonly="configInput.productionMode === '1'"
 								/>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.productionMode }}</td>
-						<td>
-							<my-bool-string-number
-								v-model="configInput.productionMode"
-								@update:modelValue="informProductionMode"
-								:reversed="true"
-								:readonly="configInput.builderMode === '1'"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.builderMode }}</td>
-						<td>
-							<my-bool-string-number
-								v-model="configInput.builderMode"
-								@update:modelValue="informBuilderMode"
-								:readonly="configInput.productionMode === '1'"
-							/>
-						</td>
-					</tr>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 			
@@ -108,42 +110,44 @@ let MyAdminConfig = {
 				</div>
 				
 				<table class="default-inputs">
-					<tr>
-						<td>{{ capApp.tokenExpiryHours }}</td>
-						<td><input v-model="configInput.tokenExpiryHours" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.tokenReauthHours }}</td>
-						<td>
-							<div class="row gap">
-								<input v-model="configInput.tokenReauthHours" />
-								<my-button image="question.png" @trigger="showHelp(capApp.tokenReauthHoursHint)" />
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2"><br /><h3>{{ capApp.pwTitle }}</h3></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.pwLengthMin }}</td>
-						<td><input v-model="configInput.pwLengthMin" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.pwForceDigit }}</td>
-						<td><my-bool-string-number v-model="configInput.pwForceDigit" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.pwForceLower }}</td>
-						<td><my-bool-string-number v-model="configInput.pwForceLower" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.pwForceUpper }}</td>
-						<td><my-bool-string-number v-model="configInput.pwForceUpper" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.pwForceSpecial }}</td>
-						<td><my-bool-string-number v-model="configInput.pwForceSpecial" /></td>
-					</tr>
+					<tbody>
+						<tr>
+							<td>{{ capApp.tokenExpiryHours }}</td>
+							<td><input v-model="configInput.tokenExpiryHours" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.tokenReauthHours }}</td>
+							<td>
+								<div class="row gap">
+									<input v-model="configInput.tokenReauthHours" />
+									<my-button image="question.png" @trigger="showHelp(capApp.tokenReauthHoursHint)" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"><br /><h3>{{ capApp.pwTitle }}</h3></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.pwLengthMin }}</td>
+							<td><input v-model="configInput.pwLengthMin" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.pwForceDigit }}</td>
+							<td><my-bool-string-number v-model="configInput.pwForceDigit" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.pwForceLower }}</td>
+							<td><my-bool-string-number v-model="configInput.pwForceLower" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.pwForceUpper }}</td>
+							<td><my-bool-string-number v-model="configInput.pwForceUpper" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.pwForceSpecial }}</td>
+							<td><my-bool-string-number v-model="configInput.pwForceSpecial" /></td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 			
@@ -172,78 +176,80 @@ let MyAdminConfig = {
 				</div>
 				
 				<table class="default-inputs">
-					<tr>
-						<td>{{ capApp.repoUrl }}</td>
-						<td><input v-model="configInput.repoUrl" /></td>
-					</tr>
-					<tr>
-						<td>{{ capGen.username }}</td>
-						<td><input v-model="configInput.repoUser" /></td>
-					</tr>
-					<tr>
-						<td>{{ capGen.password }}</td>
-						<td><input type="password" v-model="configInput.repoPass" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.repoSkipVerify }}</td>
-						<td>
-							<my-bool-string-number
-								v-model="configInput.repoSkipVerify"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.repoFeedback }}</td>
-						<td>
-							<my-bool-string-number
-								v-model="configInput.repoFeedback"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2"><br /><h3>{{ capApp.repoKeyManagement }}</h3></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.repoPublicKeys }}</td>
-						<td>
-							<div class="repo-key" v-for="(key,name) in publicKeys">
-								<my-button
-									:active="false"
-									:caption="name"
-									:naked="true"
+					<tbody>
+						<tr>
+							<td>{{ capApp.repoUrl }}</td>
+							<td><input v-model="configInput.repoUrl" /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.username }}</td>
+							<td><input v-model="configInput.repoUser" /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.password }}</td>
+							<td><input type="password" v-model="configInput.repoPass" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.repoSkipVerify }}</td>
+							<td>
+								<my-bool-string-number
+									v-model="configInput.repoSkipVerify"
 								/>
-								<div class="row gap">
-									<my-button image="search.png"
-										@trigger="publicKeyShow(name,key)"
-									/>
-									<my-button image="cancel.png"
-										@trigger="publicKeyRemove(name)"
-										:cancel="true"
-									/>
-								</div>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.repoPublicKeyAdd }}</td>
-						<td>
-							<div class="column gap">
-								<input v-model="publicKeyInputName"
-									:placeholder="capApp.repoPublicKeyInputNameHint"
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.repoFeedback }}</td>
+							<td>
+								<my-bool-string-number
+									v-model="configInput.repoFeedback"
 								/>
-								<textarea v-model="publicKeyInputValue"
-									:placeholder="capApp.repoPublicKeyInputValueHint"
-								></textarea>
-								<div>
-									<my-button image="add.png"
-										@trigger="publicKeyAdd"
-										:active="publicKeyInputName !== '' && publicKeyInputValue !== ''"
-										:caption="capGen.button.add"
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2"><br /><h3>{{ capApp.repoKeyManagement }}</h3></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.repoPublicKeys }}</td>
+							<td>
+								<div class="repo-key" v-for="(key,name) in publicKeys">
+									<my-button
+										:active="false"
+										:caption="name"
+										:naked="true"
 									/>
+									<div class="row gap">
+										<my-button image="search.png"
+											@trigger="publicKeyShow(name,key)"
+										/>
+										<my-button image="cancel.png"
+											@trigger="publicKeyRemove(name)"
+											:cancel="true"
+										/>
+									</div>
 								</div>
-							</div>
-						</td>
-					</tr>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.repoPublicKeyAdd }}</td>
+							<td>
+								<div class="column gap">
+									<input v-model="publicKeyInputName"
+										:placeholder="capApp.repoPublicKeyInputNameHint"
+									/>
+									<textarea v-model="publicKeyInputValue"
+										:placeholder="capApp.repoPublicKeyInputValueHint"
+									></textarea>
+									<div>
+										<my-button image="add.png"
+											@trigger="publicKeyAdd"
+											:active="publicKeyInputName !== '' && publicKeyInputValue !== ''"
+											:caption="capGen.button.add"
+										/>
+									</div>
+								</div>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 			
@@ -255,34 +261,36 @@ let MyAdminConfig = {
 				</div>
 				
 				<table class="default-inputs">
-					<tr>
-						<td>{{ capApp.dbTimeoutDataWs }}</td>
-						<td><input class="short"
-							v-model="configInput.dbTimeoutDataWs"
-							:placeholder="capApp.dbTimeoutHint"
-						/></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.dbTimeoutDataRest }}</td>
-						<td><input class="short"
-							v-model="configInput.dbTimeoutDataRest"
-							:placeholder="capApp.dbTimeoutHint"
-						/></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.dbTimeoutCsv }}</td>
-						<td><input class="short"
-							v-model="configInput.dbTimeoutCsv"
-							:placeholder="capApp.dbTimeoutHint"
-						/></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.dbTimeoutIcs }}</td>
-						<td><input class="short"
-							v-model="configInput.dbTimeoutIcs"
-							:placeholder="capApp.dbTimeoutHint"
-						/></td>
-					</tr>
+					<tbody>
+						<tr>
+							<td>{{ capApp.dbTimeoutDataWs }}</td>
+							<td><input class="short"
+								v-model="configInput.dbTimeoutDataWs"
+								:placeholder="capApp.dbTimeoutHint"
+							/></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.dbTimeoutDataRest }}</td>
+							<td><input class="short"
+								v-model="configInput.dbTimeoutDataRest"
+								:placeholder="capApp.dbTimeoutHint"
+							/></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.dbTimeoutCsv }}</td>
+							<td><input class="short"
+								v-model="configInput.dbTimeoutCsv"
+								:placeholder="capApp.dbTimeoutHint"
+							/></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.dbTimeoutIcs }}</td>
+							<td><input class="short"
+								v-model="configInput.dbTimeoutIcs"
+								:placeholder="capApp.dbTimeoutHint"
+							/></td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 			
@@ -294,22 +302,24 @@ let MyAdminConfig = {
 				</div>
 				
 				<table class="default-inputs">
-					<tr>
-						<td>{{ capApp.icsDownload }}</td>
-						<td>
-							<my-bool-string-number
-								v-model="configInput.icsDownload"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.icsDaysPre }}</td>
-						<td><input v-model="configInput.icsDaysPre" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.icsDaysPost }}</td>
-						<td><input v-model="configInput.icsDaysPost" /></td>
-					</tr>
+					<tbody>
+						<tr>
+							<td>{{ capApp.icsDownload }}</td>
+							<td>
+								<my-bool-string-number
+									v-model="configInput.icsDownload"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.icsDaysPre }}</td>
+							<td><input v-model="configInput.icsDaysPre" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.icsDaysPost }}</td>
+							<td><input v-model="configInput.icsDaysPost" /></td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 			
@@ -321,26 +331,28 @@ let MyAdminConfig = {
 				</div>
 				
 				<table class="default-inputs">
-					<tr>
-						<td>{{ capApp.bruteforceProtection }}</td>
-						<td>
-							<my-bool-string-number
-								v-model="configInput.bruteforceProtection"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.bruteforceAttempts }}</td>
-						<td><input v-model="configInput.bruteforceAttempts" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.bruteforceCountTracked }}</td>
-						<td>{{ bruteforceCountTracked }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.bruteforceCountBlocked }}</td>
-						<td>{{ bruteforceCountBlocked }}</td>
-					</tr>
+					<tbody>
+						<tr>
+							<td>{{ capApp.bruteforceProtection }}</td>
+							<td>
+								<my-bool-string-number
+									v-model="configInput.bruteforceProtection"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.bruteforceAttempts }}</td>
+							<td><input v-model="configInput.bruteforceAttempts" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.bruteforceCountTracked }}</td>
+							<td>{{ bruteforceCountTracked }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.bruteforceCountBlocked }}</td>
+							<td>{{ bruteforceCountBlocked }}</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 			

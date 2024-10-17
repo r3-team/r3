@@ -408,72 +408,74 @@ let MyBuilderJsFunction = {
 				
 				<template v-if="tabTarget === 'properties'">
 					<table class="generic-table-vertical tight fullWidth">
-						<tr>
-							<td>{{ capGen.name }}</td>
-							<td><input v-model="name" :disabled="readonly" /></td>
-						</tr>
-						<tr>
-							<td>{{ capGen.title }}</td>
-							<td>
-								<my-builder-caption
-									v-model="captions.jsFunctionTitle"
-									:language="builderLanguage"
-									:readonly="readonly"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.description }}</td>
-							<td>
-								<my-builder-caption
-									v-model="captions.jsFunctionDesc"
-									:language="builderLanguage"
-									:multiLine="true"
-									:readonly="readonly"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.codeArgs }}</td>
-							<td>
-								<textarea
-									v-model="codeArgs"
-									:disabled="readonly"
-									:placeholder="capApp.codeArgsHintJs"
-								></textarea>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.codeReturns }}</td>
-							<td>
-								<input
-									v-model="codeReturns"
-									:disabled="readonly"
-									:placeholder="capApp.codeReturnsHintJs"
-								/>
-							</td>
-						</tr>
-						<tr v-if="formId === null">
-							<td>{{ capGen.clientEvent }}</td>
-							<td><my-bool v-model="isClientEventExec" :readonly="readonly" /></td>
-						</tr>
-						<tr v-if="formId !== null">
-							<td>{{ capApp.form }}</td>
-							<td>
-								<div class="row centered gap">
-									<select v-model="formId" disabled>
-										<option :value="null">-</option>
-										<option v-for="f in moduleIdMap[jsFunction.moduleId].forms" :value="f.id">
-											{{ f.name }}
-										</option>
-									</select>
-									<my-button image="open.png"
-										@trigger="openForm"
-										:active="formId !== null"
+						<tbody>
+							<tr>
+								<td>{{ capGen.name }}</td>
+								<td><input v-model="name" :disabled="readonly" /></td>
+							</tr>
+							<tr>
+								<td>{{ capGen.title }}</td>
+								<td>
+									<my-builder-caption
+										v-model="captions.jsFunctionTitle"
+										:language="builderLanguage"
+										:readonly="readonly"
 									/>
-								</div>
-							</td>
-						</tr>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.description }}</td>
+								<td>
+									<my-builder-caption
+										v-model="captions.jsFunctionDesc"
+										:language="builderLanguage"
+										:multiLine="true"
+										:readonly="readonly"
+									/>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.codeArgs }}</td>
+								<td>
+									<textarea
+										v-model="codeArgs"
+										:disabled="readonly"
+										:placeholder="capApp.codeArgsHintJs"
+									></textarea>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.codeReturns }}</td>
+								<td>
+									<input
+										v-model="codeReturns"
+										:disabled="readonly"
+										:placeholder="capApp.codeReturnsHintJs"
+									/>
+								</td>
+							</tr>
+							<tr v-if="formId === null">
+								<td>{{ capGen.clientEvent }}</td>
+								<td><my-bool v-model="isClientEventExec" :readonly="readonly" /></td>
+							</tr>
+							<tr v-if="formId !== null">
+								<td>{{ capApp.form }}</td>
+								<td>
+									<div class="row centered gap">
+										<select v-model="formId" disabled>
+											<option :value="null">-</option>
+											<option v-for="f in moduleIdMap[jsFunction.moduleId].forms" :value="f.id">
+												{{ f.name }}
+											</option>
+										</select>
+										<my-button image="open.png"
+											@trigger="openForm"
+											:active="formId !== null"
+										/>
+									</div>
+								</td>
+							</tr>
+						</tbody>
 					</table>
 				</template>
 			</div>

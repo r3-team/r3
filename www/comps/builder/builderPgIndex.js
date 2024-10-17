@@ -40,67 +40,69 @@ let MyBuilderPgIndex = {
 			
 			<div class="content default-inputs">
 				<table class="generic-table-vertical">
-					<tr>
-						<td>{{ capGen.type }}</td>
-						<td>
-							<select v-model="values.method" :disabled="!isNew || readonly">
-								<option value="BTREE">{{ capApp.method.BTREE }}</option>
-								<option value="GIN">{{ capApp.method.GIN }}</option>
-							</select>
-						</td>
-						<td>{{ capApp.description[values.method] }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.attributes }}</td>
-						<td>
-							<div class="column gap">
-								<div class="row gap" v-if="isNew">
-									<select v-model="attributeInput" :disabled="!isNew || readonly">
-										<template v-for="a in relation.attributes.filter(v => !attributeIdsUsed.includes(v.id))">
-											<option :value="a.id + '_ASC'">
-												{{ getAttributeCaption(a.id,true) }}
-											</option>
-											<option v-if="isBtree" :value="a.id + '_DESC'">
-												{{ getAttributeCaption(a.id,false) }}
-											</option>
-										</template>
-									</select>
-									<my-button image="add.png"
-										@trigger="addAttribute"
-										:active="isNew && attributeInput !== '' && (isBtree || values.attributes.length < 1)"
-									/>
+					<tbody>
+						<tr>
+							<td>{{ capGen.type }}</td>
+							<td>
+								<select v-model="values.method" :disabled="!isNew || readonly">
+									<option value="BTREE">{{ capApp.method.BTREE }}</option>
+									<option value="GIN">{{ capApp.method.GIN }}</option>
+								</select>
+							</td>
+							<td>{{ capApp.description[values.method] }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.attributes }}</td>
+							<td>
+								<div class="column gap">
+									<div class="row gap" v-if="isNew">
+										<select v-model="attributeInput" :disabled="!isNew || readonly">
+											<template v-for="a in relation.attributes.filter(v => !attributeIdsUsed.includes(v.id))">
+												<option :value="a.id + '_ASC'">
+													{{ getAttributeCaption(a.id,true) }}
+												</option>
+												<option v-if="isBtree" :value="a.id + '_DESC'">
+													{{ getAttributeCaption(a.id,false) }}
+												</option>
+											</template>
+										</select>
+										<my-button image="add.png"
+											@trigger="addAttribute"
+											:active="isNew && attributeInput !== '' && (isBtree || values.attributes.length < 1)"
+										/>
+									</div>
+									<div v-for="indAtr in values.attributes">
+										{{ getAttributeCaption(indAtr.attributeId,indAtr.orderAsc) }}
+									</div>
 								</div>
-								<div v-for="indAtr in values.attributes">
-									{{ getAttributeCaption(indAtr.attributeId,indAtr.orderAsc) }}
-								</div>
-							</div>
-						</td>
-						<td>{{ capApp.attributesHint }}</td>
-					</tr>
-					<tr v-if="isBtree">
-						<td>{{ capApp.unique }}</td>
-						<td><my-bool v-model="values.noDuplicates" :readonly="!isNew || readonly" /></td>
-						<td>{{ capApp.uniqueHint }}</td>
-					</tr>
-					<tr v-if="isGin">
-						<td>{{ capApp.dictionary }}</td>
-						<td>
-							<select v-model="values.attributeIdDict" :disabled="!isNew || readonly">
-								<option v-for="a in relation.attributes.filter(v => v.content === 'regconfig')" :value="a.id">
-									{{ a.name }}
-								</option>
-							</select>
-						</td>
-						<td>{{ capApp.dictionaryHint }}</td>
-					</tr>
-					<tr v-if="isSystem">
-						<td>{{ capGen.notice }}</td>
-						<td colspan="2">{{ capApp.system }}</td>
-					</tr>
-					<tr v-if="!isSystem">
-						<td>{{ capGen.notice }}</td>
-						<td colspan="2">{{ capApp.noUpdate }}</td>
-					</tr>
+							</td>
+							<td>{{ capApp.attributesHint }}</td>
+						</tr>
+						<tr v-if="isBtree">
+							<td>{{ capApp.unique }}</td>
+							<td><my-bool v-model="values.noDuplicates" :readonly="!isNew || readonly" /></td>
+							<td>{{ capApp.uniqueHint }}</td>
+						</tr>
+						<tr v-if="isGin">
+							<td>{{ capApp.dictionary }}</td>
+							<td>
+								<select v-model="values.attributeIdDict" :disabled="!isNew || readonly">
+									<option v-for="a in relation.attributes.filter(v => v.content === 'regconfig')" :value="a.id">
+										{{ a.name }}
+									</option>
+								</select>
+							</td>
+							<td>{{ capApp.dictionaryHint }}</td>
+						</tr>
+						<tr v-if="isSystem">
+							<td>{{ capGen.notice }}</td>
+							<td colspan="2">{{ capApp.system }}</td>
+						</tr>
+						<tr v-if="!isSystem">
+							<td>{{ capGen.notice }}</td>
+							<td colspan="2">{{ capApp.noUpdate }}</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 		</div>

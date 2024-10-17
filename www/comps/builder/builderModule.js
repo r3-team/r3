@@ -109,304 +109,306 @@ let MyBuilderModule = {
 		
 		<div class="content default-inputs">
 			<table class="generic-table-vertical">
-				<tr>
-					<td>{{ capGen.name }}</td>
-					<td><input v-model="name" :disabled="readonly" :placeholder="capApp.nameHolder" /></td>
-					<td>{{ capApp.nameHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capGen.title }}</td>
-					<td>
-						<my-builder-caption class="title"
-							v-model="captions.moduleTitle"
-							:contentName="capGen.title"
-							:language="builderLanguage"
-							:readonly="readonly"
-						/>
-					</td>
-					<td>{{ capApp.titleHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.dependsOn }}</td>
-					<td>
-						<div class="item-list">
-							<my-button image="delete.png"
-								v-for="m in modules.filter(v => v.id !== module.id && dependsOn.includes(v.id))"
-								@trigger="toggleDependsOn(m.id,false)"
-								:active="!readonly"
-								:caption="m.name"
-								:naked="true"
+				<tbody>
+					<tr>
+						<td>{{ capGen.name }}</td>
+						<td><input v-model="name" :disabled="readonly" :placeholder="capApp.nameHolder" /></td>
+						<td>{{ capApp.nameHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capGen.title }}</td>
+						<td>
+							<my-builder-caption class="title"
+								v-model="captions.moduleTitle"
+								:contentName="capGen.title"
+								:language="builderLanguage"
+								:readonly="readonly"
 							/>
-						</div>
-						<my-module-select
-							v-if="!readonly"
-							@update:modelValue="toggleDependsOn($event,true)"
-							:moduleIdsFilter="dependsOn.concat([id])"
-							:modelValue="moduleIdDependsOnInput"
-							:preSelectOne="false"
-						/>
-					</td>
-					<td>{{ capApp.dependsOnHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capGen.icon }}</td>
-					<td>
-						<my-builder-icon-input
-							@input="iconId = $event"
-							:icon-id-selected="iconId"
-							:module="module"
-							:readonly="readonly"
-						/>
-					</td>
-					<td>{{ capApp.iconHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.color }}</td>
-					<td><my-input-color v-model="color1" :allowNull="true" :readonly="readonly" /></td>
-					<td>{{ capApp.colorHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.parent }}</td>
-					<td>
-						<select v-model="parentId" :disabled="readonly">
-							<option :value="null">-</option>
-							<option
-								v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.parentId === null)"
-								:value="mod.id"
-							>
-								{{ mod.name }}
-							</option>
-						</select>
-					</td>
-					<td>{{ capApp.parentHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.position }}</td>
-					<td><input class="short" v-model.number="position" :disabled="readonly" /></td>
-					<td>{{ capApp.positionHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.startFormDefault }}</td>
-					<td>
-						<select v-model="formId" :disabled="readonly">
-							<option :value="null">-</option>
-							<option v-for="f in module.forms" :value="f.id">
-								{{ f.name }}
-							</option>
-						</select>
-					</td>
-					<td>{{ capApp.startFormDefaultHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.startFormByRole }}</td>
-					<td>
-						<div class="item-list">
-							<draggable handle=".dragAnchor" group="start-forms" itemKey="id" animation="100"
-								:fallbackOnBody="true"
-								:list="startForms"
-							>
-								<template #item="{element,index}">
-									<my-builder-module-start-form
-										@remove="startForms.splice(index,1)"
-										@update:modelValue="startForms[index] = $event"
-										:modelValue="element"
-										:module="module"
-										:readonly="readonly"
-									/>
-								</template>
-							</draggable>
-						</div>
-							
-						<my-button image="add.png"
-							@trigger="addStartForm"
-							:active="!readonly"
-							:caption="capGen.button.add"
-						/>
-					</td>
-					<td>{{ capApp.startFormByRoleHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.languages }}</td>
-					<td>
-						<!-- language entry and header title -->
-						<div class="item-list">
-							<div class="item shade" v-for="(l,i) in languages">
-								<input type="text"
-									v-model="languages[i]"
-									:disabled="readonly"
-									:placeholder="capApp.languageCodeHint"
-								/>
+						</td>
+						<td>{{ capApp.titleHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.dependsOn }}</td>
+						<td>
+							<div class="item-list">
 								<my-button image="delete.png"
-									@trigger="languages.splice(i,1)"
+									v-for="m in modules.filter(v => v.id !== module.id && dependsOn.includes(v.id))"
+									@trigger="toggleDependsOn(m.id,false)"
 									:active="!readonly"
-									:cancel="true"
+									:caption="m.name"
+									:naked="true"
 								/>
 							</div>
-						</div>
-						
-						<my-button image="add.png"
-							@trigger="languages.push('')"
-							:active="!readonly"
-							:caption="capGen.button.add"
-						/>
-					</td>
-					<td>{{ capApp.languagesHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.languageMain }}</td>
-					<td>
-						<select v-model="languageMain" :disabled="readonly">
-							<option
-								v-for="l in languages"
-								:value="l"
-							>{{ l }}</option>
-						</select>
-					</td>
-					<td>{{ capApp.languageMainHint }}</td>
-				</tr>
-				
-				<tr>
-					<td colspan="2"><b>{{ capApp.pwa }}</b></td>
-					<td>{{ capApp.pwaHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.namePwa }}</td>
-					<td>
-						<input maxlength="60"
-							:disabled="readonly"
-							:value="namePwa === null ? '' : namePwa"
-							@input="applyNullString('namePwa',$event.target.value)"
-						/>
-					</td>
-					<td>{{ capApp.namePwaHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.namePwaShort }}</td>
-					<td>
-						<input maxlength="12"
-							:disabled="readonly"
-							:value="namePwaShort === null ? '' : namePwaShort"
-							@input="applyNullString('namePwaShort',$event.target.value)"
-						/>
-					</td>
-					<td>{{ capApp.namePwaShortHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.iconPwa }}</td>
-					<td>
-						<div class="row gap centered">
-							<span>192x192 px</span>
+							<my-module-select
+								v-if="!readonly"
+								@update:modelValue="toggleDependsOn($event,true)"
+								:moduleIdsFilter="dependsOn.concat([id])"
+								:modelValue="moduleIdDependsOnInput"
+								:preSelectOne="false"
+							/>
+						</td>
+						<td>{{ capApp.dependsOnHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capGen.icon }}</td>
+						<td>
 							<my-builder-icon-input
-								@input="iconIdPwa1 = $event"
-								:icon-id-selected="iconIdPwa1"
+								@input="iconId = $event"
+								:icon-id-selected="iconId"
 								:module="module"
 								:readonly="readonly"
 							/>
-							<span></span>
-							<span>512x512 px</span>
-							<my-builder-icon-input
-								@input="iconIdPwa2 = $event"
-								:icon-id-selected="iconIdPwa2"
-								:module="module"
-								:readonly="readonly"
-							/>
-						</div>
-					</td>
-					<td>{{ capApp.iconPwaHint }}</td>
-				</tr>
-				
-				<tr>
-					<td colspan="2"><b>{{ capApp.loginSync }}</b></td>
-					<td>{{ capApp.loginSyncHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.pgFunctionIdLoginSync }}</td>
-					<td>
-						<div class="column gap">
-							<div class="row gap">
-								<select
-									@input="applyNullString('pgFunctionIdLoginSync',$event.target.value)"
-									:value="pgFunctionIdLoginSync === null ? '' : pgFunctionIdLoginSync"
+						</td>
+						<td>{{ capApp.iconHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.color }}</td>
+						<td><my-input-color v-model="color1" :allowNull="true" :readonly="readonly" /></td>
+						<td>{{ capApp.colorHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.parent }}</td>
+						<td>
+							<select v-model="parentId" :disabled="readonly">
+								<option :value="null">-</option>
+								<option
+									v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.parentId === null)"
+									:value="mod.id"
 								>
-									<option value="">-</option>
-									<option v-for="fnc in module.pgFunctions.filter(v => v.isLoginSync)" :value="fnc.id">
-										{{ fnc.name }}
-									</option>
-								</select>
-								<my-button image="open.png"
-									@trigger="$router.push('/builder/pg-function/'+pgFunctionIdLoginSync)"
-									:active="pgFunctionIdLoginSync !== null"
-									:captionTitle="capGen.button.open"
-								/>
-							</div>
-							<div class="row">
-								<my-button image="add.png"
-									@trigger="setNewLoginSync"
-									:caption="capApp.button.loginSyncCreate"
-								/>
-							</div>
-						</div>
-					</td>
-					<td>{{ capApp.pgFunctionIdLoginSyncHint }}</td>
-				</tr>
-				
-				<tr>
-					<td colspan="2">
-						<div class="column gap">
-							<span><b>{{ capGen.clientEvents }}</b></span>
-
-							<div class="generic-entry-list height-large">
-								<div class="entry"
-									v-if="!readonly"
-									@click="clientEventIdEdit = null"
-									:class="{ clickable:!readonly }"
+									{{ mod.name }}
+								</option>
+							</select>
+						</td>
+						<td>{{ capApp.parentHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.position }}</td>
+						<td><input class="short" v-model.number="position" :disabled="readonly" /></td>
+						<td>{{ capApp.positionHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.startFormDefault }}</td>
+						<td>
+							<select v-model="formId" :disabled="readonly">
+								<option :value="null">-</option>
+								<option v-for="f in module.forms" :value="f.id">
+									{{ f.name }}
+								</option>
+							</select>
+						</td>
+						<td>{{ capApp.startFormDefaultHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.startFormByRole }}</td>
+						<td>
+							<div class="item-list">
+								<draggable handle=".dragAnchor" group="start-forms" itemKey="id" animation="100"
+									:fallbackOnBody="true"
+									:list="startForms"
 								>
-									<div class="row gap centered">
-										<img class="icon" src="images/add.png" />
-										<span>{{ capGen.button.new }}</span>
-									</div>
-								</div>
+									<template #item="{element,index}">
+										<my-builder-module-start-form
+											@remove="startForms.splice(index,1)"
+											@update:modelValue="startForms[index] = $event"
+											:modelValue="element"
+											:module="module"
+											:readonly="readonly"
+										/>
+									</template>
+								</draggable>
+							</div>
 								
-								<div class="entry clickable"
-									@click="clientEventIdEdit = ce.id"
-									v-for="ce in module.clientEvents"
-								>
-									<div class="row centered gap">
-										<div class="lines">
-											<span>{{ ce.captions.clientEventTitle[builderLanguage] }}</span>
-											<span class="subtitle">[{{ clientEventSubtitle(ce) }}]</span>
-										</div>
-									</div>
+							<my-button image="add.png"
+								@trigger="addStartForm"
+								:active="!readonly"
+								:caption="capGen.button.add"
+							/>
+						</td>
+						<td>{{ capApp.startFormByRoleHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.languages }}</td>
+						<td>
+							<!-- language entry and header title -->
+							<div class="item-list">
+								<div class="item shade" v-for="(l,i) in languages">
+									<input type="text"
+										v-model="languages[i]"
+										:disabled="readonly"
+										:placeholder="capApp.languageCodeHint"
+									/>
+									<my-button image="delete.png"
+										@trigger="languages.splice(i,1)"
+										:active="!readonly"
+										:cancel="true"
+									/>
 								</div>
-								<my-builder-client-event
-									v-if="clientEventIdEdit !== false"
-									@close="clientEventIdEdit = false"
-									@nextLanguage="$emit('nextLanguage')"
-									@newRecord="clientEventIdEdit = null"
-									:builderLanguage="builderLanguage"
-									:id="clientEventIdEdit"
+							</div>
+							
+							<my-button image="add.png"
+								@trigger="languages.push('')"
+								:active="!readonly"
+								:caption="capGen.button.add"
+							/>
+						</td>
+						<td>{{ capApp.languagesHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.languageMain }}</td>
+						<td>
+							<select v-model="languageMain" :disabled="readonly">
+								<option
+									v-for="l in languages"
+									:value="l"
+								>{{ l }}</option>
+							</select>
+						</td>
+						<td>{{ capApp.languageMainHint }}</td>
+					</tr>
+					
+					<tr>
+						<td colspan="2"><b>{{ capApp.pwa }}</b></td>
+						<td>{{ capApp.pwaHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.namePwa }}</td>
+						<td>
+							<input maxlength="60"
+								:disabled="readonly"
+								:value="namePwa === null ? '' : namePwa"
+								@input="applyNullString('namePwa',$event.target.value)"
+							/>
+						</td>
+						<td>{{ capApp.namePwaHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.namePwaShort }}</td>
+						<td>
+							<input maxlength="12"
+								:disabled="readonly"
+								:value="namePwaShort === null ? '' : namePwaShort"
+								@input="applyNullString('namePwaShort',$event.target.value)"
+							/>
+						</td>
+						<td>{{ capApp.namePwaShortHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.iconPwa }}</td>
+						<td>
+							<div class="row gap centered">
+								<span>192x192 px</span>
+								<my-builder-icon-input
+									@input="iconIdPwa1 = $event"
+									:icon-id-selected="iconIdPwa1"
+									:module="module"
+									:readonly="readonly"
+								/>
+								<span></span>
+								<span>512x512 px</span>
+								<my-builder-icon-input
+									@input="iconIdPwa2 = $event"
+									:icon-id-selected="iconIdPwa2"
 									:module="module"
 									:readonly="readonly"
 								/>
 							</div>
-						</div>
-					</td>
-					<td>{{ capApp.clientEventsHint }}</td>
-				</tr>
-				
-				<tr><td colspan="3"><b>{{ capApp.release }}</b></td></tr>
-				<tr>
-					<td>{{ capApp.releaseDate }}</td>
-					<td colspan="2"><input :value="displayReleaseDate" disabled="disabled" /></td>
-				</tr>
-				<tr>
-					<td>{{ capApp.releaseBuild }}</td>
-					<td colspan="2"><input class="short" v-model="releaseBuild" disabled="disabled" /></td>
-				</tr>
-				<tr>
-					<td>{{ capApp.releaseBuildApp }}</td>
-					<td colspan="2"><input class="short" v-model="releaseBuildApp" disabled="disabled" /></td>
-				</tr>
+						</td>
+						<td>{{ capApp.iconPwaHint }}</td>
+					</tr>
+					
+					<tr>
+						<td colspan="2"><b>{{ capApp.loginSync }}</b></td>
+						<td>{{ capApp.loginSyncHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.pgFunctionIdLoginSync }}</td>
+						<td>
+							<div class="column gap">
+								<div class="row gap">
+									<select
+										@input="applyNullString('pgFunctionIdLoginSync',$event.target.value)"
+										:value="pgFunctionIdLoginSync === null ? '' : pgFunctionIdLoginSync"
+									>
+										<option value="">-</option>
+										<option v-for="fnc in module.pgFunctions.filter(v => v.isLoginSync)" :value="fnc.id">
+											{{ fnc.name }}
+										</option>
+									</select>
+									<my-button image="open.png"
+										@trigger="$router.push('/builder/pg-function/'+pgFunctionIdLoginSync)"
+										:active="pgFunctionIdLoginSync !== null"
+										:captionTitle="capGen.button.open"
+									/>
+								</div>
+								<div class="row">
+									<my-button image="add.png"
+										@trigger="setNewLoginSync"
+										:caption="capApp.button.loginSyncCreate"
+									/>
+								</div>
+							</div>
+						</td>
+						<td>{{ capApp.pgFunctionIdLoginSyncHint }}</td>
+					</tr>
+					
+					<tr>
+						<td colspan="2">
+							<div class="column gap">
+								<span><b>{{ capGen.clientEvents }}</b></span>
+
+								<div class="generic-entry-list height-large">
+									<div class="entry"
+										v-if="!readonly"
+										@click="clientEventIdEdit = null"
+										:class="{ clickable:!readonly }"
+									>
+										<div class="row gap centered">
+											<img class="icon" src="images/add.png" />
+											<span>{{ capGen.button.new }}</span>
+										</div>
+									</div>
+									
+									<div class="entry clickable"
+										@click="clientEventIdEdit = ce.id"
+										v-for="ce in module.clientEvents"
+									>
+										<div class="row centered gap">
+											<div class="lines">
+												<span>{{ ce.captions.clientEventTitle[builderLanguage] }}</span>
+												<span class="subtitle">[{{ clientEventSubtitle(ce) }}]</span>
+											</div>
+										</div>
+									</div>
+									<my-builder-client-event
+										v-if="clientEventIdEdit !== false"
+										@close="clientEventIdEdit = false"
+										@nextLanguage="$emit('nextLanguage')"
+										@newRecord="clientEventIdEdit = null"
+										:builderLanguage="builderLanguage"
+										:id="clientEventIdEdit"
+										:module="module"
+										:readonly="readonly"
+									/>
+								</div>
+							</div>
+						</td>
+						<td>{{ capApp.clientEventsHint }}</td>
+					</tr>
+					
+					<tr><td colspan="3"><b>{{ capApp.release }}</b></td></tr>
+					<tr>
+						<td>{{ capApp.releaseDate }}</td>
+						<td colspan="2"><input :value="displayReleaseDate" disabled="disabled" /></td>
+					</tr>
+					<tr>
+						<td>{{ capApp.releaseBuild }}</td>
+						<td colspan="2"><input class="short" v-model="releaseBuild" disabled="disabled" /></td>
+					</tr>
+					<tr>
+						<td>{{ capApp.releaseBuildApp }}</td>
+						<td colspan="2"><input class="short" v-model="releaseBuildApp" disabled="disabled" /></td>
+					</tr>
+				</tbody>
 			</table>
 		</div>
 	</div>`,

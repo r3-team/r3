@@ -38,26 +38,28 @@ let MyAdminLicense = {
 				<h2>{{ capApp.active }}</h2>
 				<div class="file shade" v-if="licenseInstalled">
 					<table>
-						<tr>
-							<td>{{ capApp.licenseId }}</td>
-							<td>{{ license.licenseId }}</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.clientId }}</td>
-							<td>{{ license.clientId }}</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.registeredFor }}</td>
-							<td>{{ license.registeredFor }}</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.loginCount }}</td>
-							<td>{{ license.loginCount }}</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.validUntil }}</td>
-							<td>{{ getUnixFormat(license.validUntil,settings.dateFormat) }}</td>
-						</tr>
+						<tbody>
+							<tr>
+								<td>{{ capApp.licenseId }}</td>
+								<td>{{ license.licenseId }}</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.clientId }}</td>
+								<td>{{ license.clientId }}</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.registeredFor }}</td>
+								<td>{{ license.registeredFor }}</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.loginCount }}</td>
+								<td>{{ license.loginCount }}</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.validUntil }}</td>
+								<td>{{ getUnixFormat(license.validUntil,settings.dateFormat) }}</td>
+							</tr>
+						</tbody>
 					</table>
 					<img src="images/logo_license.webp" />
 					<div class="actions">
@@ -70,24 +72,26 @@ let MyAdminLicense = {
 				
 				<h2>{{ capApp.currentState }}</h2>
 				<table class="current-values">
-					<tr>
-						<td>{{ capApp.untilDays }}</td>
-						<td :class="{ invalid:!licenseValid }">
-							<b>{{ licenseValid ? this.licenseDays : capApp.licenseExpired }}</b>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.loginCount }}</td>
-						<td :class="{ invalid:concurrentLogins >= license.loginCount }">
-							<b>{{ concurrentLogins + ' / ' + license.loginCount }}</b>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.loginCountLimited }}</td>
-						<td :class="{ invalid:concurrentLoginsLimited >= licenseCountLimited }">
-							<b>{{ concurrentLoginsLimited + ' / ' + licenseCountLimited }}</b>
-						</td>
-					</tr>
+					<tbody>
+						<tr>
+							<td>{{ capApp.untilDays }}</td>
+							<td :class="{ invalid:!licenseValid }">
+								<b>{{ licenseValid ? this.licenseDays : capApp.licenseExpired }}</b>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.loginCount }}</td>
+							<td :class="{ invalid:concurrentLogins >= license.loginCount }">
+								<b>{{ concurrentLogins + ' / ' + license.loginCount }}</b>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.loginCountLimited }}</td>
+							<td :class="{ invalid:concurrentLoginsLimited >= licenseCountLimited }">
+								<b>{{ concurrentLoginsLimited + ' / ' + licenseCountLimited }}</b>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 			

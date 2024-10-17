@@ -91,31 +91,33 @@ let MyAdminCustom = {
 			</div>
 			
 			<table class="generic-table-vertical default-inputs">
-				<tr>
-					<td>{{ capApp.appName }}</td>
-					<td><input class="long" :disabled="!activated" v-model="configInput.appName" /></td>
-					<td>{{ capApp.appNameHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.appNameShort }}</td>
-					<td><input class="long" :disabled="!activated" v-model="configInput.appNameShort" /></td>
-					<td>{{ capApp.appNameShortHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.companyName }}</td>
-					<td><input class="long" :disabled="!activated" v-model="configInput.companyName" /></td>
-					<td>{{ capApp.companyNameHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.companyWelcome }}</td>
-					<td>
-						<textarea class="companyWelcome long"
-							v-model="configInput.companyWelcome"
-							:disabled="!activated"
-						></textarea>
-					</td>
-					<td>{{ capApp.companyWelcomeHint }}</td>
-				</tr>
+				<tbody>
+					<tr>
+						<td>{{ capApp.appName }}</td>
+						<td><input class="long" :disabled="!activated" v-model="configInput.appName" /></td>
+						<td>{{ capApp.appNameHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.appNameShort }}</td>
+						<td><input class="long" :disabled="!activated" v-model="configInput.appNameShort" /></td>
+						<td>{{ capApp.appNameShortHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.companyName }}</td>
+						<td><input class="long" :disabled="!activated" v-model="configInput.companyName" /></td>
+						<td>{{ capApp.companyNameHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.companyWelcome }}</td>
+						<td>
+							<textarea class="companyWelcome long"
+								v-model="configInput.companyWelcome"
+								:disabled="!activated"
+							></textarea>
+						</td>
+						<td>{{ capApp.companyWelcomeHint }}</td>
+					</tr>
+				</tbody>
 			</table>
 			
 			<br />
@@ -124,22 +126,24 @@ let MyAdminCustom = {
 				<h1>{{ capApp.titleLoginPage }}</h1>
 			</div>
 			<table class="generic-table-vertical">
-				<tr>
-					<td>{{ capApp.companyLoginImage }}</td>
-					<td>
-						<my-admin-custom-logo
-							v-model="configInput.companyLoginImage"
-							:maxSizeKb="256"
-							:readonly="!activated"
-						/>
-					</td>
-					<td>{{ capApp.companyLoginImageHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.tokenKeepEnable }}</td>
-					<td><my-bool-string-number v-model="configInput.tokenKeepEnable" :readonly="!activated" /></td>
-					<td>{{ capApp.tokenKeepEnableHint }}</td>
-				</tr>
+				<tbody>
+					<tr>
+						<td>{{ capApp.companyLoginImage }}</td>
+						<td>
+							<my-admin-custom-logo
+								v-model="configInput.companyLoginImage"
+								:maxSizeKb="256"
+								:readonly="!activated"
+							/>
+						</td>
+						<td>{{ capApp.companyLoginImageHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.tokenKeepEnable }}</td>
+						<td><my-bool-string-number v-model="configInput.tokenKeepEnable" :readonly="!activated" /></td>
+						<td>{{ capApp.tokenKeepEnableHint }}</td>
+					</tr>
+				</tbody>
 			</table>
 			
 			<br />
@@ -148,16 +152,18 @@ let MyAdminCustom = {
 				<h1>{{ capApp.titleColors }}</h1>
 			</div>
 			<table class="generic-table-vertical">
-				<tr>
-					<td>{{ capApp.companyColorLogin }}</td>
-					<td><my-input-color v-model="configInput.companyColorLogin" :readonly="!activated" /></td>
-					<td>{{ capApp.companyColorLoginHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.companyColorHeader }}</td>
-					<td><my-input-color v-model="configInput.companyColorHeader" :readonly="!activated" /></td>
-					<td>{{ capApp.companyColorHeaderHint }}</td>
-				</tr>
+				<tbody>
+					<tr>
+						<td>{{ capApp.companyColorLogin }}</td>
+						<td><my-input-color v-model="configInput.companyColorLogin" :readonly="!activated" /></td>
+						<td>{{ capApp.companyColorLoginHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.companyColorHeader }}</td>
+						<td><my-input-color v-model="configInput.companyColorHeader" :readonly="!activated" /></td>
+						<td>{{ capApp.companyColorHeaderHint }}</td>
+					</tr>
+				</tbody>
 			</table>
 			
 			<br />
@@ -166,28 +172,30 @@ let MyAdminCustom = {
 				<h1>{{ capApp.titleLogos }}</h1>
 			</div>
 			<table class="generic-table-vertical default-inputs">
-				<tr>
-					<td>{{ capApp.companyLogo }}</td>
-					<td>
-						<my-admin-custom-logo
-							v-model="configInput.companyLogo"
-							:maxSizeKb="64"
-							:readonly="!activated"
-						/>
-					</td>
-					<td>{{ capApp.companyLogoHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.companyLogoUrl }}</td>
-					<td>
-						<input
-							v-model="configInput.companyLogoUrl"
-							:disabled="!activated"
-							:placeholder="capApp.companyLogoUrlDesc"
-						/>
-					</td>
-					<td>{{ capApp.companyLogoUrlHint }}</td>
-				</tr>
+				<tbody>
+					<tr>
+						<td>{{ capApp.companyLogo }}</td>
+						<td>
+							<my-admin-custom-logo
+								v-model="configInput.companyLogo"
+								:maxSizeKb="64"
+								:readonly="!activated"
+							/>
+						</td>
+						<td>{{ capApp.companyLogoHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.companyLogoUrl }}</td>
+						<td>
+							<input
+								v-model="configInput.companyLogoUrl"
+								:disabled="!activated"
+								:placeholder="capApp.companyLogoUrlDesc"
+							/>
+						</td>
+						<td>{{ capApp.companyLogoUrlHint }}</td>
+					</tr>
+				</tbody>
 			</table>
 			
 			<br />
@@ -196,66 +204,68 @@ let MyAdminCustom = {
 				<h1>{{ capApp.titlePwas }}</h1>
 			</div>
 			<table class="generic-table-vertical default-inputs">
-				<tr>
-					<td>{{ capApp.iconPwa1 }}</td>
-					<td>
-						<my-admin-custom-logo
-							v-model="configInput.iconPwa1"
-							:maxSizeKb="128"
-							:readonly="!activated"
-						/>
-					</td>
-					<td>{{ capApp.iconPwa1Hint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.iconPwa2 }}</td>
-					<td>
-						<my-admin-custom-logo
-							v-model="configInput.iconPwa2"
-							:maxSizeKb="128"
-							:readonly="!activated"
-						/>
-					</td>
-					<td>{{ capApp.iconPwa2Hint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.pwaDomain }}</td>
-					<td>
-						<div class="column gap">
-							<div class="row centered gap" v-for="(pd,i) in pwaDomains" :key="pd.moduleId">
-								<input
-									@keyup="applyPwaDomain(i,'domain',$event.target.value)"
-									:disabled="!activated"
-									:placeholder="capApp.pwaDomainHint"
-									:title="capApp.pwaDomainHint"
-									:value="pd.domain"
-								/>
-								<my-module-select
-									v-if="activated"
-									@update:modelValue="applyPwaDomain(i,'moduleId',$event)"
-									:modelValue="pd.moduleId"
-									:moduleIdsFilter="pwaModuleIdsUsed.filter(v => v !== pd.moduleId)"
-									:preSelectOne="true"
-								/>
-								<my-button image="delete.png"
-									@trigger="pwaDomainDel(i)"
-									:captionTitle="capGen.button.delete"
-									:cancel="true"
-								/>
+				<tbody>
+					<tr>
+						<td>{{ capApp.iconPwa1 }}</td>
+						<td>
+							<my-admin-custom-logo
+								v-model="configInput.iconPwa1"
+								:maxSizeKb="128"
+								:readonly="!activated"
+							/>
+						</td>
+						<td>{{ capApp.iconPwa1Hint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.iconPwa2 }}</td>
+						<td>
+							<my-admin-custom-logo
+								v-model="configInput.iconPwa2"
+								:maxSizeKb="128"
+								:readonly="!activated"
+							/>
+						</td>
+						<td>{{ capApp.iconPwa2Hint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.pwaDomain }}</td>
+						<td>
+							<div class="column gap">
+								<div class="row centered gap" v-for="(pd,i) in pwaDomains" :key="pd.moduleId">
+									<input
+										@keyup="applyPwaDomain(i,'domain',$event.target.value)"
+										:disabled="!activated"
+										:placeholder="capApp.pwaDomainHint"
+										:title="capApp.pwaDomainHint"
+										:value="pd.domain"
+									/>
+									<my-module-select
+										v-if="activated"
+										@update:modelValue="applyPwaDomain(i,'moduleId',$event)"
+										:modelValue="pd.moduleId"
+										:moduleIdsFilter="pwaModuleIdsUsed.filter(v => v !== pd.moduleId)"
+										:preSelectOne="true"
+									/>
+									<my-button image="delete.png"
+										@trigger="pwaDomainDel(i)"
+										:captionTitle="capGen.button.delete"
+										:cancel="true"
+									/>
+								</div>
+								<div>
+									<my-button image="add.png"
+										@trigger="pwaDomainAdd"
+										:caption="capGen.button.add"
+									/>
+								</div>
+								<p v-if="pwaDomains.length !== 0">
+									{{ capApp.pwaDomainHint2 }}
+								</p>
 							</div>
-							<div>
-								<my-button image="add.png"
-									@trigger="pwaDomainAdd"
-									:caption="capGen.button.add"
-								/>
-							</div>
-							<p v-if="pwaDomains.length !== 0">
-								{{ capApp.pwaDomainHint2 }}
-							</p>
-						</div>
-					</td>
-					<td v-html="capApp.pwaDomainHint1"></td>
-				</tr>
+						</td>
+						<td v-html="capApp.pwaDomainHint1"></td>
+					</tr>
+				</tbody>
 			</table>
 			
 			<br />
@@ -264,16 +274,18 @@ let MyAdminCustom = {
 				<h1>{{ capApp.titleCss }}</h1>
 			</div>
 			<table class="generic-table-vertical large default-inputs">
-				<tr>
-					<td colspan="3" class="noPadding">
-						<div class="cssInput">
-							<my-code-editor mode="css"
-								v-model="configInput.css"
-								:readonly="!activated"
-							/>
-						</div>
-					</td>
-				</tr>
+				<tbody>
+					<tr>
+						<td colspan="3" class="noPadding">
+							<div class="cssInput">
+								<my-code-editor mode="css"
+									v-model="configInput.css"
+									:readonly="!activated"
+								/>
+							</div>
+						</td>
+					</tr>
+				</tbody>
 			</table>
 		</div>
 	</div>`,

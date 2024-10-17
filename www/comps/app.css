@@ -855,7 +855,7 @@ table td.maximum{
 	border-collapse:separate;
 	border-spacing:0px 6px;
 }
-.generic-table-vertical>tr>td:not(.grouping){
+.generic-table-vertical>tbody>tr>td:not(.grouping){
 	max-width:420px;
 	padding:10px 15px;
 	vertical-align:top;
@@ -863,20 +863,20 @@ table td.maximum{
 	border:1px solid var(--color-border);
 	box-shadow:1px 1px 3px var(--color-shade);
 }
-.generic-table-vertical.tight>tr>td{
+.generic-table-vertical.tight>tbody>tr>td{
 	padding:4px 6px 4px 15px;
 }
-.generic-table-vertical>tr>td:first-child{
+.generic-table-vertical>tbody>tr>td:first-child{
 	font-size:110%;
 	line-height:150%;
 	border-top-left-radius:10px;
 	border-bottom-left-radius:10px;
 }
-.generic-table-vertical>tr>td:last-child{
+.generic-table-vertical>tbody>tr>td:last-child{
 	border-top-right-radius:10px;
 	border-bottom-right-radius:10px;
 }
-.generic-table-vertical.large>tr>td{
+.generic-table-vertical.large>tbody>tr>td{
 	max-width:720px;
 }
 .generic-table-vertical tr.noPadding,

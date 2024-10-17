@@ -178,22 +178,24 @@ let MyBuilderModulesExport = {
 		
 		<div class="content default-inputs" v-if="show">
 			<table>
-				<tr>
-					<td>
-						<my-module-select
-							@update:modelValue="id = $event;moduleIdMapChanged = null"
-							:modelValue="id"
-						/>
-					</td>
-					<td>
-						<!-- check for changes -->
-						<my-button image="refresh.png"
-							@trigger="check"
-							:active="id !== null"
-							:caption="capApp.button.check"
-						/>
-					</td>
-				</tr>
+				<tbody>
+					<tr>
+						<td>
+							<my-module-select
+								@update:modelValue="id = $event;moduleIdMapChanged = null"
+								:modelValue="id"
+							/>
+						</td>
+						<td>
+							<!-- check for changes -->
+							<my-button image="refresh.png"
+								@trigger="check"
+								:active="id !== null"
+								:caption="capApp.button.check"
+							/>
+						</td>
+					</tr>
+				</tbody>
 			</table>
 			
 			<!-- export states -->

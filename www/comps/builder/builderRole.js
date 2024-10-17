@@ -562,81 +562,83 @@ let MyBuilderRole = {
 				<div class="content padding default-inputs">
 					<h3 class="title">{{ capGen.properties }}</h3>
 					<table class="generic-table-vertical default-inputs">
-						<tr>
-							<td>{{ capGen.name }}</td>
-							<td><input v-model="name" :disabled="isEveryone || readonly" /></td>
-						</tr>
-						<tr>
-							<td>{{ capGen.title }}</td>
-							<td>
-								<my-builder-caption
-									v-model="captions.roleTitle"
-									:contentName="capGen.title"
-									:language="builderLanguage"
-									:readonly="readonly"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.description }}</td>
-							<td>
-								<my-builder-caption
-									v-model="captions.roleDesc"
-									:contentName="capGen.description"
-									:language="builderLanguage"
-									:multiLine="true"
-									:readonly="readonly"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.category }}</td>
-							<td>
-								<select v-model="content" :disabled="readonly">
-									<option value="admin">{{ capApp.option.contentAdmin }}</option>
-									<option value="user">{{ capApp.option.contentUser }}</option>
-									<option value="other">{{ capApp.option.contentOther }}</option>
-									<option v-if="isEveryone" value="everyone">
-										{{ capApp.option.contentEveryone }}
-									</option>
-								</select>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.assignable }}</td>
-							<td><my-bool v-model="assignable" :readonly="readonly" /></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.children }}</td>
-							<td>
-								<my-button image="delete.png"
-									v-for="c in childrenIds"
-									@trigger="childRemove(c)"
-									:active="!readonly"
-									:caption="moduleIdMap[roleIdMap[c].moduleId].name + '->' + roleIdMap[c].name"
-									:naked="true"
-								/>
-								
-								<select
-									@change="childAdd($event.target.value)"
-									:disabled="readonly"
-									:value="null"
-								>
-									<option disabled :value="null">[{{ capGen.button.add }}]</option>
-									<optgroup
-										v-for="mod in getDependentModules(module)"
-										:label="mod.name"
-									>
-										<option
-											v-for="r in mod.roles.filter(v => v.id !== role.id && !childrenIds.includes(v.id) && v.name !== 'everyone')"
-											:value="r.id"
-										>
-											{{ r.name }}
+						<tbody>
+							<tr>
+								<td>{{ capGen.name }}</td>
+								<td><input v-model="name" :disabled="isEveryone || readonly" /></td>
+							</tr>
+							<tr>
+								<td>{{ capGen.title }}</td>
+								<td>
+									<my-builder-caption
+										v-model="captions.roleTitle"
+										:contentName="capGen.title"
+										:language="builderLanguage"
+										:readonly="readonly"
+									/>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.description }}</td>
+								<td>
+									<my-builder-caption
+										v-model="captions.roleDesc"
+										:contentName="capGen.description"
+										:language="builderLanguage"
+										:multiLine="true"
+										:readonly="readonly"
+									/>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.category }}</td>
+								<td>
+									<select v-model="content" :disabled="readonly">
+										<option value="admin">{{ capApp.option.contentAdmin }}</option>
+										<option value="user">{{ capApp.option.contentUser }}</option>
+										<option value="other">{{ capApp.option.contentOther }}</option>
+										<option v-if="isEveryone" value="everyone">
+											{{ capApp.option.contentEveryone }}
 										</option>
-									</optgroup>
-								</select>
-							</td>
-						</tr>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.assignable }}</td>
+								<td><my-bool v-model="assignable" :readonly="readonly" /></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.children }}</td>
+								<td>
+									<my-button image="delete.png"
+										v-for="c in childrenIds"
+										@trigger="childRemove(c)"
+										:active="!readonly"
+										:caption="moduleIdMap[roleIdMap[c].moduleId].name + '->' + roleIdMap[c].name"
+										:naked="true"
+									/>
+									
+									<select
+										@change="childAdd($event.target.value)"
+										:disabled="readonly"
+										:value="null"
+									>
+										<option disabled :value="null">[{{ capGen.button.add }}]</option>
+										<optgroup
+											v-for="mod in getDependentModules(module)"
+											:label="mod.name"
+										>
+											<option
+												v-for="r in mod.roles.filter(v => v.id !== role.id && !childrenIds.includes(v.id) && v.name !== 'everyone')"
+												:value="r.id"
+											>
+												{{ r.name }}
+											</option>
+										</optgroup>
+									</select>
+								</td>
+							</tr>
+						</tbody>
 					</table>
 				</div>
 			</div>

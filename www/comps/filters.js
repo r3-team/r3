@@ -466,37 +466,39 @@ let MyFilterSide = {
 				<br />
 				<h3>{{ capGen.returns }}</h3>
 				<table class="default-inputs">
-					<tr>
-						<td>{{ capApp.subQueryAttribute }}</td>
-						<td>
-							<!-- sub query attribute input -->
-							<my-filter-attribute
-								v-model="nestedIndexAttribute"
-								:columns="columns"
-								:columnBatches="columnBatches"
-								:groupQueriesNested="nestingLevels !== 0 && !isSubQuery && builderMode"
-								:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
-								:nestingLevels="nestingLevels"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.subQueryAggregator }}</td>
-						<td>
-							<!-- sub query aggregator input -->
-							<select v-model="queryAggregator">
-								<option value=""     >-</option>
-								<option value="array">{{ capGen.option.aggArray }}</option>
-								<option value="avg"  >{{ capGen.option.aggAvg }}</option>
-								<option value="count">{{ capGen.option.aggCount }}</option>
-								<option value="json" >{{ capGen.option.aggJson }}</option>
-								<option value="list" >{{ capGen.option.aggList }}</option>
-								<option value="max"  >{{ capGen.option.aggMax }}</option>
-								<option value="min"  >{{ capGen.option.aggMin }}</option>
-								<option value="sum"  >{{ capGen.option.aggSum }}</option>
-							</select>
-						</td>
-					</tr>
+					<tbody>
+						<tr>
+							<td>{{ capApp.subQueryAttribute }}</td>
+							<td>
+								<!-- sub query attribute input -->
+								<my-filter-attribute
+									v-model="nestedIndexAttribute"
+									:columns="columns"
+									:columnBatches="columnBatches"
+									:groupQueriesNested="nestingLevels !== 0 && !isSubQuery && builderMode"
+									:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
+									:nestingLevels="nestingLevels"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.subQueryAggregator }}</td>
+							<td>
+								<!-- sub query aggregator input -->
+								<select v-model="queryAggregator">
+									<option value=""     >-</option>
+									<option value="array">{{ capGen.option.aggArray }}</option>
+									<option value="avg"  >{{ capGen.option.aggAvg }}</option>
+									<option value="count">{{ capGen.option.aggCount }}</option>
+									<option value="json" >{{ capGen.option.aggJson }}</option>
+									<option value="list" >{{ capGen.option.aggList }}</option>
+									<option value="max"  >{{ capGen.option.aggMax }}</option>
+									<option value="min"  >{{ capGen.option.aggMin }}</option>
+									<option value="sum"  >{{ capGen.option.aggSum }}</option>
+								</select>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 			</template>
 		</div>

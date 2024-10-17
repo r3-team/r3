@@ -50,82 +50,84 @@ let MyAdminOauthClient = {
 			</div>
 			
 			<div class="content default-inputs">
-				<table class="generic-table generic-table-vertical fullWidth">
-					<tr>
-						<td>{{ capGen.name }}*</td>
-						<td><input v-model="inputs.name" :disabled="readonly" v-focus /></td>
-						<td>{{ capApp.nameHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.tenant }}</td>
-						<td><input v-model="inputs.tenant" :disabled="readonly" /></td>
-						<td>{{ capApp.tenantHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.clientId }}*</td>
-						<td><input v-model="inputs.clientId" :disabled="readonly" /></td>
-						<td>{{ capApp.clientIdHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.clientSecret }}*</td>
-						<td><input v-model="inputs.clientSecret" :disabled="readonly" type="password" /></td>
-						<td>{{ capApp.clientSecretHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.dateExpiry }}</td>
-						<td>
-							<div class="input-custom admin-oauth-client-date-wrap">
-								<my-input-date
-									@set-unix-from="inputs.dateExpiry = $event"
-									:isDate="true"
-									:isTime="false"
-									:isValid="true"
-									:unixFrom="inputs.dateExpiry"
-								/>
-							</div>
-						</td>
-						<td>{{ capApp.dateExpiryHint }}</td>
-					</tr>
-					<tr v-if="isNew">
-						<td>{{ capApp.template }}</td>
-						<td>
-							<select @change="applyTemplate($event.target.value)" :disabled="readonly">
-								<option value="custom">{{ capApp.option.template.custom }}</option>
-								<option value="ms365_mail">{{ capApp.option.template.ms365_mail }}</option>
-							</select>
-						</td>
-						<td>{{ capApp.templateHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.scopes }}*</td>
-						<td>
-							<div class="column gap">
-								<my-button image="cancel.png"
-									v-for="(s,i) in inputs.scopes"
-									@trigger="inputs.scopes.splice(i,1)"
-									:active="!readonly"
-									:caption="s"
-									:naked="true"
-								/>
-								<div class="row gap centered">
-									<input v-model="scopeLine" :disabled="readonly" />
-									<my-button image="add.png"
-										@trigger="inputs.scopes.push(scopeLine);scopeLine = ''"
-										:active="scopeLine !== ''"
+				<table class="generic-table-vertical fullWidth">
+					<tbody>
+						<tr>
+							<td>{{ capGen.name }}*</td>
+							<td><input v-model="inputs.name" :disabled="readonly" v-focus /></td>
+							<td>{{ capApp.nameHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.tenant }}</td>
+							<td><input v-model="inputs.tenant" :disabled="readonly" /></td>
+							<td>{{ capApp.tenantHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.clientId }}*</td>
+							<td><input v-model="inputs.clientId" :disabled="readonly" /></td>
+							<td>{{ capApp.clientIdHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.clientSecret }}*</td>
+							<td><input v-model="inputs.clientSecret" :disabled="readonly" type="password" /></td>
+							<td>{{ capApp.clientSecretHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.dateExpiry }}</td>
+							<td>
+								<div class="input-custom admin-oauth-client-date-wrap">
+									<my-input-date
+										@set-unix-from="inputs.dateExpiry = $event"
+										:isDate="true"
+										:isTime="false"
+										:isValid="true"
+										:unixFrom="inputs.dateExpiry"
 									/>
 								</div>
-							</div>
-						</td>
-						<td>{{ capApp.scopesHint }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.tokenUrl }}*</td>
-						<td><input v-model="inputs.tokenUrl" :disabled="readonly" /></td>
-						<td>{{ capApp.tokenUrlHint }}</td>
-					</tr>
-					<tr>
-						<td colspan="3"><span v-html="capApp.intro"></span></td>
-					</tr>
+							</td>
+							<td>{{ capApp.dateExpiryHint }}</td>
+						</tr>
+						<tr v-if="isNew">
+							<td>{{ capApp.template }}</td>
+							<td>
+								<select @change="applyTemplate($event.target.value)" :disabled="readonly">
+									<option value="custom">{{ capApp.option.template.custom }}</option>
+									<option value="ms365_mail">{{ capApp.option.template.ms365_mail }}</option>
+								</select>
+							</td>
+							<td>{{ capApp.templateHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.scopes }}*</td>
+							<td>
+								<div class="column gap">
+									<my-button image="cancel.png"
+										v-for="(s,i) in inputs.scopes"
+										@trigger="inputs.scopes.splice(i,1)"
+										:active="!readonly"
+										:caption="s"
+										:naked="true"
+									/>
+									<div class="row gap centered">
+										<input v-model="scopeLine" :disabled="readonly" />
+										<my-button image="add.png"
+											@trigger="inputs.scopes.push(scopeLine);scopeLine = ''"
+											:active="scopeLine !== ''"
+										/>
+									</div>
+								</div>
+							</td>
+							<td>{{ capApp.scopesHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.tokenUrl }}*</td>
+							<td><input v-model="inputs.tokenUrl" :disabled="readonly" /></td>
+							<td>{{ capApp.tokenUrlHint }}</td>
+						</tr>
+						<tr>
+							<td colspan="3"><span v-html="capApp.intro"></span></td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 		</div>

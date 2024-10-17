@@ -83,34 +83,36 @@ let MyFormLog = {
 							</div>
 							<div class="field-content intent data disabled">
 								<table class="file-changes">
-									<tr v-for="(c,fileId) in v.fileIdMapChange">
-										<td v-if="c.action === 'create'">{{ capApp.fileCreated }}</td>
-										<td v-if="c.action === 'delete'">{{ capApp.fileDeleted }}</td>
-										<td v-if="c.action === 'rename'">{{ capApp.fileRenamed }}</td>
-										<td v-if="c.action === 'update'">{{ capApp.fileUpdated }}</td>
-										<td>
-											<!-- latest file version -->
-											<a target="_blank"
-												v-if="c.action !== 'update'"
-												:href="getAttributeFileHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,token)"
-											>
-												<my-button image="download.png"
-													:caption="c.name"
-													:naked="true"
-												/>
-											</a>
-											<!-- specific file version -->
-											<a target="_blank"
-												v-else
-												:href="getAttributeFileVersionHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,c.version,token)"
-											>
-												<my-button image="download.png"
-													:caption="c.name + ' (v' + c.version + ')'"
-													:naked="true"
-												/>
-											</a>
-										</td>
-									</tr>
+									<tbody>
+										<tr v-for="(c,fileId) in v.fileIdMapChange">
+											<td v-if="c.action === 'create'">{{ capApp.fileCreated }}</td>
+											<td v-if="c.action === 'delete'">{{ capApp.fileDeleted }}</td>
+											<td v-if="c.action === 'rename'">{{ capApp.fileRenamed }}</td>
+											<td v-if="c.action === 'update'">{{ capApp.fileUpdated }}</td>
+											<td>
+												<!-- latest file version -->
+												<a target="_blank"
+													v-if="c.action !== 'update'"
+													:href="getAttributeFileHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,token)"
+												>
+													<my-button image="download.png"
+														:caption="c.name"
+														:naked="true"
+													/>
+												</a>
+												<!-- specific file version -->
+												<a target="_blank"
+													v-else
+													:href="getAttributeFileVersionHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,c.version,token)"
+												>
+													<my-button image="download.png"
+														:caption="c.name + ' (v' + c.version + ')'"
+														:naked="true"
+													/>
+												</a>
+											</td>
+										</tr>
+									</tbody>
 								</table>
 							</div>
 						</div>

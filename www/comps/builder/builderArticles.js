@@ -259,44 +259,46 @@ let MyBuilderArticles = {
 				<h2>{{ capApp.titleAssign }}</h2>
 				
 				<table>
-					<!-- article target -->
-					<tr>
-						<td>{{ capApp.assignTo }}</td>
-						<td>
-							<select v-model="assignTarget" @change="reset">
-								<option value="module">{{ capApp.option.assignModule }}</option>
-								<option value="form">{{ capApp.option.assignForm }}</option>
-							</select>
-						</td>
-					</tr>
-					<tr v-if="assignTarget === 'form'">
-						<td>{{ capGen.form }}</td>
-						<td>
-							<select v-model="formIdAssignTo" @change="reset" :disabled="readonly">
-								<option :value="null">-</option>
-								<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
-							</select>
-						</td>
-					</tr>
-					
-					<!-- add article -->
-					<tr v-if="assignTarget !== 'form' || formIdAssignTo !== null">
-						<td>{{ capApp.addArticle }}</td>
-						<td>
-							<select v-model="articleIdAdd" @change="articleAdd($event.target.value)" :disabled="readonly">
-								<option :value="null">-</option>
-								<option v-for="a in module.articles.filter(v => !articleIdsAssigned.includes(v.id))" :value="a.id">{{ a.name }}</option>
-								<optgroup
-									v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.articles.length !== 0)"
-									:label="mod.name"
-								>
-									<option v-for="a in mod.articles.filter(v => !articleIdsAssigned.includes(v.id))" :value="a.id">
-										{{ mod.name + ': ' + a.name }}
-									</option>
-								</optgroup>
-							</select>
-						</td>
-					</tr>
+					<tbody>
+						<!-- article target -->
+						<tr>
+							<td>{{ capApp.assignTo }}</td>
+							<td>
+								<select v-model="assignTarget" @change="reset">
+									<option value="module">{{ capApp.option.assignModule }}</option>
+									<option value="form">{{ capApp.option.assignForm }}</option>
+								</select>
+							</td>
+						</tr>
+						<tr v-if="assignTarget === 'form'">
+							<td>{{ capGen.form }}</td>
+							<td>
+								<select v-model="formIdAssignTo" @change="reset" :disabled="readonly">
+									<option :value="null">-</option>
+									<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
+								</select>
+							</td>
+						</tr>
+						
+						<!-- add article -->
+						<tr v-if="assignTarget !== 'form' || formIdAssignTo !== null">
+							<td>{{ capApp.addArticle }}</td>
+							<td>
+								<select v-model="articleIdAdd" @change="articleAdd($event.target.value)" :disabled="readonly">
+									<option :value="null">-</option>
+									<option v-for="a in module.articles.filter(v => !articleIdsAssigned.includes(v.id))" :value="a.id">{{ a.name }}</option>
+									<optgroup
+										v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.articles.length !== 0)"
+										:label="mod.name"
+									>
+										<option v-for="a in mod.articles.filter(v => !articleIdsAssigned.includes(v.id))" :value="a.id">
+											{{ mod.name + ': ' + a.name }}
+										</option>
+									</optgroup>
+								</select>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 				
 				<div class="actions">

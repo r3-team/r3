@@ -46,27 +46,29 @@ let MyKanbanCard = {
 			<span v-if="isTemplate">{{ capGen.button.new }}</span>
 			
 			<table v-if="!isTemplate">
-				<tr v-for="b in columnBatches">
-					<td v-if="b.caption !== null" class="kanban-label">{{ b.caption }}</td>
-					<td>
-						<div class="columnBatch" :class="{ vertical:b.vertical }">
-							<my-value-rich
-								v-for="ind in b.columnIndexes.filter(v => values[v] !== null || columns[v].display === 'gallery')"
-								@clipboard="$emit('clipboard')"
-								:attributeId="columns[ind].attributeId"
-								:basis="columns[ind].basis"
-								:bold="columns[ind].flags.bold"
-								:clipboard="columns[ind].flags.clipboard"
-								:display="columns[ind].display"
-								:italic="columns[ind].flags.italic"
-								:key="ind"
-								:length="columns[ind].length"
-								:value="values[ind]"
-								:wrap="columns[ind].flags.wrap"
-							/>
-						</div>
-					</td>
-				</tr>
+				<tbody>
+					<tr v-for="b in columnBatches">
+						<td v-if="b.caption !== null" class="kanban-label">{{ b.caption }}</td>
+						<td>
+							<div class="columnBatch" :class="{ vertical:b.vertical }">
+								<my-value-rich
+									v-for="ind in b.columnIndexes.filter(v => values[v] !== null || columns[v].display === 'gallery')"
+									@clipboard="$emit('clipboard')"
+									:attributeId="columns[ind].attributeId"
+									:basis="columns[ind].basis"
+									:bold="columns[ind].flags.bold"
+									:clipboard="columns[ind].flags.clipboard"
+									:display="columns[ind].display"
+									:italic="columns[ind].flags.italic"
+									:key="ind"
+									:length="columns[ind].length"
+									:value="values[ind]"
+									:wrap="columns[ind].flags.wrap"
+								/>
+							</div>
+						</td>
+					</tr>
+				</tbody>
 			</table>
 		</div>
 	</div>`,
