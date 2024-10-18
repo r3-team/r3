@@ -120,6 +120,12 @@ let MyAdmin = {
 				<span>{{ capApp.navigationActivation }}</span>
 			</router-link>
 			
+			<!-- system message -->
+			<router-link class="entry clickable" tag="div" to="/admin/system-msg" :class="{ inactive:!activated }">
+				<img src="images/warning.png" />
+				<span>{{ capApp.navigationSystemMsg }}</span>
+			</router-link>
+			
 			<!-- customizing -->
 			<router-link class="entry clickable" tag="div" to="/admin/custom" :class="{ inactive:!activated }">
 				<img src="images/colors.png" />
@@ -205,6 +211,7 @@ let MyAdmin = {
 			if(s.$route.path.includes('repo'))            return s.capApp.navigationRepo;
 			if(s.$route.path.includes('roles'))           return s.capApp.navigationRoles;
 			if(s.$route.path.includes('scheduler'))       return s.capApp.navigationScheduler;
+			if(s.$route.path.includes('system-msg'))      return s.capApp.navigationSystemMsg;
 			return '';
 		},
 		licenseTitle:(s) => !s.activated

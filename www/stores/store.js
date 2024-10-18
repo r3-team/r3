@@ -212,7 +212,7 @@ const MyStore = Vuex.createStore({
 		},
 		systemMsg:(state,payload) => {
 			// if any content changed, reset whether the system message was already shown to user
-			state.systemMsgTextShown = JSON.stringify(state.systemMsg) !== JSON.stringify(payload);
+			state.systemMsgTextShown = JSON.stringify(state.systemMsg) === JSON.stringify(payload);
 			state.systemMsg          = payload;
 		},
 		
@@ -258,7 +258,6 @@ const MyStore = Vuex.createStore({
 		searchDictionaries:      (state,payload) => state.searchDictionaries       = payload,
 		settings:                (state,payload) => state.settings                 = payload,
 		system:                  (state,payload) => state.system                   = payload,
-		systemMsg:               (state,payload) => state.systemMsg                = payload,
 		systemMsgActive:         (state,payload) => state.systemMsgActive          = payload,
 		systemMsgTextShown:      (state,payload) => state.systemMsgTextShown       = payload,
 		tokenKeepEnable:         (state,payload) => state.tokenKeepEnable          = payload

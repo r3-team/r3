@@ -56,6 +56,7 @@
 		"dialog":{
 			"close":"There are unsaved changes. If you continue, your changes will be lost.<br /><br />Do you want to continue?",
 			"confirm":"Lūdzu apstiprināt",
+			"maintenanceComing":"The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your work before then.",
 			"systemMsg":"System message"
 		},
 		"error":{
@@ -748,6 +749,20 @@
 			"systemTasks":"Sistēmas uzdevumi (globālie)",
 			"systemTasksNode":"Sistēmas uzdevumi (klastra mezgli)"
 		},
+		"systemMsg":{
+			"state":{
+				"date0Set":"Message will be shown starting <b>{DATE}</b>.",
+				"date1Set":"Message will be shown until <b>{DATE}</b>.",
+				"datesSet":"Message will be shown between <b>{DATE0}</b> and <b>{DATE1}</b>.",
+				"unset":"<b>Message is not active</b>"
+			},
+			"date0":"Show from",
+			"date1":"Show until",
+			"description":"Administrators can use this feature to inform users about events such as planned downtimes. Both logged in, as well as users starting new sessions, will receive the message.<br /><br />If the message is changed while the time period is active, the updated version will again be shown to users.",
+			"maintenance":"Maintenance",
+			"maintenanceHint":"If enabled, switch to maintenance mode once 'show until' is reached.",
+			"text":"Message"
+		},
 		"navigationActivation":"Activation",
 		"navigationBackups":"Rezerves kopijas",
 		"navigationCaptionMap":"Translations",
@@ -769,6 +784,7 @@
 		"navigationRepo":"Repozitorijs",
 		"navigationRoles":"Dalībnieki",
 		"navigationScheduler":"Plānotājs",
+		"navigationSystemMsg":"System message",
 		"title":"Administrators",
 		"titleDocs":"Administratīvā dokumentācija"
 	},

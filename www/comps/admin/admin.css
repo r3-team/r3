@@ -119,6 +119,28 @@
 	filter:var(--image-filter);
 }
 
+/* system message */
+.admin-system-msg{}
+.admin-system-msg-date{
+	width:370px;
+	padding:3px 0px;
+	position:relative;
+	box-shadow:var(--shadow-input);
+	border-radius:5px;
+}
+.admin-system-msg-date:focus-within{
+	box-shadow:1px 1px 8px var(--color-shade);
+	outline:2px solid var(--color-accent1);
+	transition:box-shadow 0.3s, outline 0.2s;
+}
+.admin-system-msg-table{
+	width:1000px;
+}
+.admin-system-msg-text{
+	height:600px;
+	display:flex;
+}
+
 /* customizing */
 .admin-custom table{
 	width:100%;

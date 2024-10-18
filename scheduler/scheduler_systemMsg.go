@@ -15,7 +15,7 @@ func systemMsgMaintenance() error {
 	switchToMaintenance := config.GetUint64("systemMsgMaintenance") == 1
 	systemInMaintenance := config.GetUint64("productionMode") == 0
 
-	if date1 < now && switchToMaintenance && !systemInMaintenance {
+	if date1 != 0 && date1 < now && switchToMaintenance && !systemInMaintenance {
 		tx, err := db.Pool.Begin(db.Ctx)
 		if err != nil {
 			return err

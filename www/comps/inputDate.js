@@ -387,7 +387,8 @@ let MyInputDate = {
 		isRange:   { type:Boolean, required:false, default:false },
 		isReadonly:{ type:Boolean, required:false, default:false },
 		unixFrom:  { required:true },
-		unixTo:    { required:false, default:null }
+		unixTo:    { required:false, default:null },
+		useMonth:  { type:Boolean, required:false, default:false },
 	},
 	emits:['blurred','focused','set-unix-from','set-unix-to'],
 	data() {
@@ -401,7 +402,7 @@ let MyInputDate = {
 		};
 	},
 	mounted() {
-		this.viewMonth = this.fullDay;
+		this.viewMonth = this.fullDay || this.useMonth;
 	},
 	computed:{
 		// full day events start and end at 00:00:00 UTC

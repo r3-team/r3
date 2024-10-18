@@ -759,11 +759,16 @@ let MyApp = {
 
 		// system message
 		systemMsgCheck() {
+			if(this.timerSystemMsg !== null) {
+				clearInterval(this.timerSystemMsg);
+				this.timerSystemMsg = null;
+			}
+
 			if(this.systemMsgDate0 === 0 && this.systemMsgDate1 === 0) {
 				this.$store.commit('systemMsgActive',false);
-				this.timerSystemMsg = null;
 				return;
 			}
+
 			this.timerSystemMsg = setInterval(() => {
 				const now       = Math.floor(new Date().getTime() / 1000);
 				const msgActive =
@@ -773,7 +778,7 @@ let MyApp = {
 				if(msgActive !== this.systemMsgActive)
 					this.$store.commit('systemMsgActive',msgActive);
 
-				if(msgActive && this.appReady && this.systemMsgText !== '' && !this.systemMsgTextShown) {
+				if(msgActive && this.appReady && this.activated && this.systemMsgText !== '' && !this.systemMsgTextShown) {
 					// switched to active, message text available and not yet shown -> show system message once
 					// wait for appReady as captions are not available before and authentication should occur first
 					this.$store.commit('dialog',{
@@ -783,7 +788,7 @@ let MyApp = {
 					});
 					this.$store.commit('systemMsgTextShown',true);
 				}
-			}, 5000);
+			},2000);
 		},
 		
 		// backend reloads

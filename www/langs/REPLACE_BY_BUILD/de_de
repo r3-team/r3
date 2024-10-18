@@ -56,7 +56,8 @@
 		"dialog":{
 			"close":"Es existieren ungespeicherte Änderungen. Diese werden verloren gehen.<br /><br />Trotzdem fortfahren?",
 			"confirm":"Bitte bestätigen",
-			"systemMsg":"Systemmeldung"
+			"maintenanceComing":"Das System wird in einen geplanten Wartungsmodus gesetzt: <b>{DATE}</b>. Änderungen sollten vorher gespeichert werden.",
+			"systemMsg":"Systemnachricht"
 		},
 		"error":{
 			"nameTaken":"Name bereits in Benutzung, bitte einen anderen wählen."
@@ -748,6 +749,20 @@
 			"systemTasks":"Systemaufgaben (global)",
 			"systemTasksNode":"Systemaufgaben (Clusterknoten)"
 		},
+		"systemMsg":{
+			"state":{
+				"date0Set":"Nachricht wird angezeigt ab <b>{DATE}</b>.",
+				"date1Set":"Nachricht wird angezeigt bis <b>{DATE}</b>.",
+				"datesSet":"Nachricht wird angezeigt zwischen <b>{DATE0}</b> und <b>{DATE1}</b>.",
+				"unset":"<b>Nachricht ist nicht aktiv</b>"
+			},
+			"date0":"Anzeigen von",
+			"date1":"Anzeigen bis",
+			"description":"Administratoren können dieses Feature nutzen, um Benutzer über Ereignisse zu informieren, wie z. B. geplante Downtimes. Sowohl angemeldete, als auch Benutzer, die eine neue Sitzung starten, erhalten diese Nachricht.<br /><br />Sollte die Nachricht während der Anzeigeperiode geändert werden, wird die aktualisierte Version der Nachricht Benutzern erneut angezeigt.",
+			"maintenance":"Wartung",
+			"maintenanceHint":"Wenn aktiviert ist, wird in den Wartungsmodus gewechselt, sobald \"anzeigen bis\" erreicht ist.",
+			"text":"Nachricht"
+		},
 		"navigationActivation":"Aktivierung",
 		"navigationBackups":"Sicherungen",
 		"navigationCaptionMap":"Übersetzungen",
@@ -769,6 +784,7 @@
 		"navigationRepo":"Repository",
 		"navigationRoles":"Mitgliedschaften",
 		"navigationScheduler":"Aufgabenplaner",
+		"navigationSystemMsg":"Systemnachricht",
 		"title":"Admin",
 		"titleDocs":"Admin-Dokumentation"
 	},

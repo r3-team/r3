@@ -1,7 +1,9 @@
-import srcBase64Icon    from './shared/image.js';
-import {getColumnTitle} from './shared/column.js';
-import {formOpen}       from './shared/form.js';
-import {getCaption}     from './shared/language.js';
+import srcBase64Icon     from './shared/image.js';
+import {getColumnTitle}  from './shared/column.js';
+import {formOpen}        from './shared/form.js';
+import {getStringFilled} from './shared/generic.js';
+import {getCaption}      from './shared/language.js';
+import {getDateFormat}   from './shared/time.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
@@ -104,8 +106,6 @@ let MyHeader = {
 		</div>
 		
 		<div ref="empty" class="entries empty"></div>
-
-		<div v-if="systemMsgText !== null">{{ systemMsgText }}</div>
 		
 		<div ref="system" class="entries">
 			
@@ -164,6 +164,18 @@ let MyHeader = {
 				<img src="images/feedback.png" />
 			</div>
 			
+			<!-- system message, maintenance timer -->
+			<div class="entry clickable" tabindex="0"
+				v-if="maintenanceInSec > 0"
+				@click="openSystemMsg"
+				@keyup.enter="openSystemMsg"
+			>
+				<img src="images/warning.png" />
+				<span v-if="showMaintenance">
+					{{ getStringFilled(Math.floor(maintenanceInSec / 60),2,'0') + ':' + getStringFilled(maintenanceInSec % 60,2,'0') }}
+				</span>
+			</div>
+			
 			<!-- settings -->
 			<div class="entry no-wrap clickable" tabindex="0"
 				v-if="!isNoAuth"
@@ -191,19 +203,34 @@ let MyHeader = {
 	props:{
 		keysLocked:{ type:Boolean, required:true }
 	},
+	watch:{
+		maintenanceComing(v) {
+			if(!v) {
+				clearInterval(this.timerMaintenanceComing);
+				this.maintenanceInSec = 0;
+				return this.timerMaintenanceComing = null;
+			}
+			this.timerMaintenanceComing = setInterval(() => {
+				this.maintenanceInSec = this.systemMsgDate1 - Math.floor(new Date().getTime() / 1000);
+			}, 1000);
+		}
+	},
 	emits:['logout','show-collection-input','show-module-hover-menu','show-settings'],
 	data() {
 		return {
+			maintenanceInSec:0,
 			layoutCheckTimer:null,
 			layoutElements:[],               // elements that are shown, based on available space
 			layoutElementsAvailableInOrder:[ // elements that can be shown, in order of priority
-				'moduleTitles',   // module titles, take up the most space, removed fully
-				'collections',    // collection values/icons, replaced by hover menu
-				'moduleIcons',    // module icons, replaced by hover menu
-				'navigationNext', // browser forward navigation, optional
-				'navigationPrev', // browser previous navigation, optional
-				'feedback'        // feedback action, optional
-			]
+				'moduleTitles',    // module titles, take up the most space, removed fully
+				'collections',     // collection values/icons, replaced by hover menu
+				'moduleIcons',     // module icons, replaced by hover menu
+				'navigationNext',  // browser forward navigation, optional
+				'navigationPrev',  // browser previous navigation, optional
+				'feedback',        // feedback action, optional
+				'maintenanceTimer' // timer for upcoming maintenance
+			],
+			timerMaintenanceComing:null
 		};
 	},
 	computed:{
@@ -288,6 +315,13 @@ let MyHeader = {
 			
 			return elms;
 		},
+		maintenanceComing:(s) => {
+			const now = Math.floor(new Date().getTime() / 1000);
+			return s.activated && s.systemMsgActive && s.systemMsgMaintenance &&
+				(s.systemMsgDate0 === 0 || s.systemMsgDate0 < now) &&
+				(s.systemMsgDate1 === 0 || s.systemMsgDate1 > now) &&
+				(s.systemMsgDate1 - now < 1800);
+		},
 		
 		// returns which module to show if regular navigation is disabled
 		moduleSingle:(s) => s.moduleIdLast !== null && s.isMobile
@@ -308,33 +342,39 @@ let MyHeader = {
 		pwaSingle:       (s) => s.pwaModuleId !== null,
 		showCollections: (s) => s.layoutElementsProcessed.includes('collections'),
 		showFeedback:    (s) => s.layoutElementsProcessed.includes('feedback') && s.feedback && !s.isNoAuth,
+		showMaintenance: (s) => s.layoutElementsProcessed.includes('maintenanceTimer'),
 		showModuleIcons: (s) => s.layoutElementsProcessed.includes('moduleIcons'),
 		showModuleTitles:(s) => s.layoutElementsProcessed.includes('moduleTitles'),
 		showNavNext:     (s) => s.layoutElementsProcessed.includes('navigationNext'),
 		showNavPrev:     (s) => s.layoutElementsProcessed.includes('navigationPrev'),
 		
 		// stores
-		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleNameMap:    (s) => s.$store.getters['schema/moduleNameMap'],
-		formIdMap:        (s) => s.$store.getters['schema/formIdMap'],
-		collectionIdMap:  (s) => s.$store.getters['schema/collectionIdMap'],
-		builderEnabled:   (s) => s.$store.getters.builderEnabled,
-		busyCounter:      (s) => s.$store.getters.busyCounter,
-		capErr:           (s) => s.$store.getters.captions.error,
-		capGen:           (s) => s.$store.getters.captions.generic,
-		colorHeaderAccent:(s) => s.$store.getters.colorHeaderAccent,
-		colorHeaderMain:  (s) => s.$store.getters.colorHeaderMain,
-		feedback:         (s) => s.$store.getters.feedback,
-		isAdmin:          (s) => s.$store.getters.isAdmin,
-		isAtMenu:         (s) => s.$store.getters.isAtMenu,
-		isMobile:         (s) => s.$store.getters.isMobile,
-		isNoAuth:         (s) => s.$store.getters.isNoAuth,
-		loginName:        (s) => s.$store.getters.loginName,
-		moduleEntries:    (s) => s.$store.getters.moduleEntries,
-		pwaModuleId:      (s) => s.$store.getters.pwaModuleId,
-		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
-		settings:         (s) => s.$store.getters.settings,
-		systemMsgText:    (s) => s.$store.getters.systemMsgText
+		activated:           (s) => s.$store.getters['local/activated'],
+		moduleIdMap:         (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleNameMap:       (s) => s.$store.getters['schema/moduleNameMap'],
+		formIdMap:           (s) => s.$store.getters['schema/formIdMap'],
+		collectionIdMap:     (s) => s.$store.getters['schema/collectionIdMap'],
+		builderEnabled:      (s) => s.$store.getters.builderEnabled,
+		busyCounter:         (s) => s.$store.getters.busyCounter,
+		capErr:              (s) => s.$store.getters.captions.error,
+		capGen:              (s) => s.$store.getters.captions.generic,
+		colorHeaderAccent:   (s) => s.$store.getters.colorHeaderAccent,
+		colorHeaderMain:     (s) => s.$store.getters.colorHeaderMain,
+		feedback:            (s) => s.$store.getters.feedback,
+		isAdmin:             (s) => s.$store.getters.isAdmin,
+		isAtMenu:            (s) => s.$store.getters.isAtMenu,
+		isMobile:            (s) => s.$store.getters.isMobile,
+		isNoAuth:            (s) => s.$store.getters.isNoAuth,
+		loginName:           (s) => s.$store.getters.loginName,
+		moduleEntries:       (s) => s.$store.getters.moduleEntries,
+		pwaModuleId:         (s) => s.$store.getters.pwaModuleId,
+		moduleIdLast:        (s) => s.$store.getters.moduleIdLast,
+		settings:            (s) => s.$store.getters.settings,
+		systemMsgActive:     (s) => s.$store.getters.systemMsgActive,
+		systemMsgDate0:      (s) => s.$store.getters.systemMsgDate0,
+		systemMsgDate1:      (s) => s.$store.getters.systemMsgDate1,
+		systemMsgMaintenance:(s) => s.$store.getters.systemMsgMaintenance,
+		systemMsgText:       (s) => s.$store.getters.systemMsgText
 	},
 	created() {
 		window.addEventListener('resize',this.windowResized);
@@ -356,6 +396,8 @@ let MyHeader = {
 		getCollectionColumn,
 		getCollectionValues,
 		getColumnTitle,
+		getDateFormat,
+		getStringFilled,
 		srcBase64Icon,
 		
 		// display
@@ -403,6 +445,14 @@ let MyHeader = {
 			// no active module in mobile mode: navigate to module
 			if(!this.moduleSingleActive && this.isMobile)
 				return this.$router.push(`/app/${this.moduleSingle.name}/${this.moduleSingle.name}`);
+		},
+		openSystemMsg() {
+			const d = this.getDateFormat(new Date(this.systemMsgDate1*1000),'H:i');
+			this.$store.commit('dialog',{
+				captionTop:this.capGen.dialog.systemMsg,
+				captionBody:this.systemMsgText !== '' ? this.systemMsgText : this.capGen.dialog.maintenanceComing.replace('{DATE}',d),
+				image:'warning.png'
+			});
 		},
 		openFeedback() { this.$store.commit('isAtFeedback',true); },
 		pagePrev()     { window.history.back(); },
