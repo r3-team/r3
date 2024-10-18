@@ -56,11 +56,11 @@ func ConfigSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	}
 
 	// check for config changes that have specific consequences
-	switchToMaintenance := false
+	productionModeChange := false
 	if value, exists := req["productionMode"]; exists &&
 		value != strconv.FormatInt(int64(config.GetUint64("productionMode")), 10) {
 
-		switchToMaintenance = true
+		productionModeChange = true
 	}
 
 	// update config values in DB and local config store
@@ -93,5 +93,5 @@ func ConfigSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 			}
 		}
 	}
-	return nil, cluster.ConfigChanged(true, false, switchToMaintenance)
+	return nil, cluster.ConfigChanged(true, false, productionModeChange)
 }

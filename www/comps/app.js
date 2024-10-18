@@ -189,6 +189,7 @@ let MyApp = {
 			schemaLoaded:false,   // app schema has been loaded
 			showHoverNav:false,   // alternative hover menu for module navigation
 			showSettings:false,   // login settings
+			timerSystemMsg:null,  // timer checking for system message start/stop
 			wsConnected:false     // connection to backend has been established (websocket)
 		};
 	},
@@ -385,7 +386,12 @@ let MyApp = {
 		moduleIdMapMeta:    (s) => s.$store.getters.moduleIdMapMeta,
 		patternStyle:       (s) => s.$store.getters.patternStyle,
 		popUpFormGlobal:    (s) => s.$store.getters.popUpFormGlobal,
-		settings:           (s) => s.$store.getters.settings
+		settings:           (s) => s.$store.getters.settings,
+		systemMsgActive:    (s) => s.$store.getters.systemMsgActive,
+		systemMsgDate0:     (s) => s.$store.getters.systemMsgDate0,
+		systemMsgDate1:     (s) => s.$store.getters.systemMsgDate1,
+		systemMsgText:      (s) => s.$store.getters.systemMsgText,
+		systemMsgTextShown: (s) => s.$store.getters.systemMsgTextShown
 	},
 	created() {
 		window.addEventListener('keydown',this.handleKeydown);
@@ -578,12 +584,14 @@ let MyApp = {
 					this.$store.commit('pageTitleRefresh'); // update page title with new app name
 					this.$store.commit('pwaDomainMap',res.payload.pwaDomainMap);
 					this.$store.commit('searchDictionaries',res.payload.searchDictionaries);
+					this.$store.commit('systemMsg',res.payload.systemMsg);
 					this.$store.commit('tokenKeepEnable',res.payload.tokenKeepEnable);
 					
 					if(!res.payload.tokenKeepEnable)
 						this.$store.commit('local/tokenKeep',false);
 					
 					this.publicLoaded = true;
+					this.systemMsgCheck();
 					this.stateChange();
 				},
 				this.setInitErr
@@ -747,6 +755,35 @@ let MyApp = {
 					k.fnc();
 				}
 			}
+		},
+
+		// system message
+		systemMsgCheck() {
+			if(this.systemMsgDate0 === 0 && this.systemMsgDate1 === 0) {
+				this.$store.commit('systemMsgActive',false);
+				this.timerSystemMsg = null;
+				return;
+			}
+			this.timerSystemMsg = setInterval(() => {
+				const now       = Math.floor(new Date().getTime() / 1000);
+				const msgActive =
+					(this.systemMsgDate0 === 0 || this.systemMsgDate0 < now) &&
+					(this.systemMsgDate1 === 0 || this.systemMsgDate1 > now);
+				
+				if(msgActive !== this.systemMsgActive)
+					this.$store.commit('systemMsgActive',msgActive);
+
+				if(msgActive && this.appReady && this.systemMsgText !== '' && !this.systemMsgTextShown) {
+					// switched to active, message text available and not yet shown -> show system message once
+					// wait for appReady as captions are not available before and authentication should occur first
+					this.$store.commit('dialog',{
+						captionTop:this.capGen.dialog.systemMsg,
+						captionBody:this.systemMsgText,
+						image:'warning.png'
+					});
+					this.$store.commit('systemMsgTextShown',true);
+				}
+			}, 5000);
 		},
 		
 		// backend reloads

@@ -90,9 +90,9 @@ func CollectionUpdated(collectionId uuid.UUID, loginIds []int64) error {
 	}
 	return nil
 }
-func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance bool) error {
+func ConfigChanged(updateNodes bool, loadConfigFromDb bool, productionModeChange bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes("configChanged", switchToMaintenance, types.ClusterEventTarget{}); err != nil {
+		if err := createEventsForOtherNodes("configChanged", productionModeChange, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
@@ -102,12 +102,10 @@ func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance 
 		config.LoadFromDb()
 	}
 
-	// update websocket clients if relevant config changed
-	if switchToMaintenance {
+	// inform clients about changed config
+	if productionModeChange {
 		WebsocketClientEvents <- types.ClusterEvent{Content: "kickNonAdmin"}
 	}
-
-	// inform clients about changed config
 	WebsocketClientEvents <- types.ClusterEvent{Content: "configChanged"}
 
 	// apply config to other areas

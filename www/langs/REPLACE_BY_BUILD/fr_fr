@@ -55,7 +55,8 @@
 		},
 		"dialog":{
 			"close":"Il existe des modifications non enregistrées.<br /><br />Voulez-vous toujours fermer ce formulaire?",
-			"confirm":"Veuillez confirmer"
+			"confirm":"Veuillez confirmer",
+			"systemMsg":"System message"
 		},
 		"error":{
 			"nameTaken":"Ce nom est déjà pris, veuillez en choisir un autre."
@@ -724,6 +725,7 @@
 				"mailSend":"Envoi d'email",
 				"repoCheck":"Exécuter la mise à jour du référentiel",
 				"restExecute":"Exécuter des appels REST",
+				"systemMsgMaintenance":"Enable maintenance mode after system message",
 				"updateCheck":"Vérifier les mises à jour de la plateforme"
 			},
 			"dateAttempt":"Dernier démarrage",

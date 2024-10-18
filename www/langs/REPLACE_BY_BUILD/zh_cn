@@ -55,7 +55,8 @@
 		},
 		"dialog":{
 			"close":"存在未保存的更改。如果继续，您的更改将会丢失。<br /><br />您确定要继续吗？",
-			"confirm":"请确认"
+			"confirm":"请确认",
+			"systemMsg":"System message"
 		},
 		"error":{
 			"nameTaken":"名称已被使用，请选择其他名称。"
@@ -724,6 +725,7 @@
 				"mailSend":"电子邮件发送",
 				"repoCheck":"执行存储库更新",
 				"restExecute":"执行 REST 调用",
+				"systemMsgMaintenance":"Enable maintenance mode after system message",
 				"updateCheck":"检查平台更新"
 			},
 			"dateAttempt":"上次启动",

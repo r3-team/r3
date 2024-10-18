@@ -22,7 +22,7 @@ var (
 		"companyLogo", "companyLogoUrl", "companyName", "companyWelcome", "css",
 		"dbVersionCut", "exportPrivateKey", "iconPwa1", "iconPwa2",
 		"instanceId", "licenseFile", "publicHostName", "proxyUrl", "repoPass",
-		"repoPublicKeys", "repoUrl", "repoUser", "tokenSecret",
+		"repoPublicKeys", "repoUrl", "repoUser", "systemMsgText", "tokenSecret",
 		"updateCheckUrl", "updateCheckVersion"}
 
 	NamesUint64 = []string{"backupDaily", "backupMonthly", "backupWeekly",
@@ -36,7 +36,8 @@ var (
 		"logModule", "logServer", "logScheduler", "logTransfer", "logWebsocket",
 		"logsKeepDays", "mailTrafficKeepDays", "productionMode", "pwForceDigit",
 		"pwForceLower", "pwForceSpecial", "pwForceUpper", "pwLengthMin",
-		"repoChecked", "repoFeedback", "repoSkipVerify", "tokenExpiryHours",
+		"repoChecked", "repoFeedback", "repoSkipVerify", "systemMsgDate0",
+		"systemMsgDate1", "systemMsgMaintenance", "tokenExpiryHours",
 		"tokenKeepEnable", "tokenReauthHours"}
 
 	NamesUint64Slice = []string{"loginBackgrounds"}

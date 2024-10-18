@@ -55,7 +55,8 @@
 		},
 		"dialog":{
 			"close":"Ci sono modifiche non salvate.<br /><br />Chiudere comunque questo modulo?",
-			"confirm":"Si prega di confermare"
+			"confirm":"Si prega di confermare",
+			"systemMsg":"System message"
 		},
 		"error":{
 			"nameTaken":"Name is already taken, please choose another."
@@ -724,6 +725,7 @@
 				"mailSend":"Invio email",
 				"repoCheck":"Esegui l'aggiornamento dell'archivio",
 				"restExecute":"Execute REST calls",
+				"systemMsgMaintenance":"Enable maintenance mode after system message",
 				"updateCheck":"Verifica aggiornamenti della piattaforma"
 			},
 			"dateAttempt":"Ultimo avvio",

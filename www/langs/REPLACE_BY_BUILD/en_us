@@ -55,7 +55,8 @@
 		},
 		"dialog":{
 			"close":"There are unsaved changes. If you continue, your changes will be lost.<br /><br />Do you want to continue?",
-			"confirm":"Please confirm"
+			"confirm":"Please confirm",
+			"systemMsg":"System message"
 		},
 		"error":{
 			"nameTaken":"Name is already taken, please choose another."
@@ -724,6 +725,7 @@
 				"mailSend":"Email dispatch",
 				"repoCheck":"Execute repository update",
 				"restExecute":"Execute REST calls",
+				"systemMsgMaintenance":"Enable maintenance mode after system message",
 				"updateCheck":"Check for platform updates"
 			},
 			"dateAttempt":"Last start",

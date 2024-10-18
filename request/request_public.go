@@ -10,7 +10,17 @@ import (
 )
 
 func PublicGet() (interface{}, error) {
-	var res struct {
+
+	// random background from available list
+	var loginBackgrounds = config.GetUint64Slice("loginBackgrounds")
+	var loginBackground uint64
+	if len(loginBackgrounds) == 0 {
+		loginBackground = 0
+	} else {
+		loginBackground = loginBackgrounds[rand.Intn(len(loginBackgrounds))]
+	}
+
+	return struct {
 		Activated           bool                           `json:"activated"`
 		AppName             string                         `json:"appName"`
 		AppNameShort        string                         `json:"appNameShort"`
@@ -32,36 +42,36 @@ func PublicGet() (interface{}, error) {
 		ProductionMode      uint64                         `json:"productionMode"`
 		PwaDomainMap        map[string]uuid.UUID           `json:"pwaDomainMap"`
 		SearchDictionaries  []string                       `json:"searchDictionaries"`
+		SystemMsg           types.SystemMsg                `json:"systemMsg"`
 		TokenKeepEnable     bool                           `json:"tokenKeepEnable"`
-	}
-	res.Activated = config.GetLicenseActive()
-	res.AppName = config.GetString("appName")
-	res.AppNameShort = config.GetString("appNameShort")
-	res.AppVersion = config.GetAppVersion().Full
-	res.CaptionMapCustom = cache.GetCaptionMapCustom()
-	res.ClusterNodeName = cache.GetNodeName()
-	res.CompanyColorHeader = config.GetString("companyColorHeader")
-	res.CompanyColorLogin = config.GetString("companyColorLogin")
-	res.CompanyLoginImage = config.GetString("companyLoginImage")
-	res.CompanyLogo = config.GetString("companyLogo")
-	res.CompanyLogoUrl = config.GetString("companyLogoUrl")
-	res.CompanyName = config.GetString("companyName")
-	res.CompanyWelcome = config.GetString("companyWelcome")
-	res.Css = config.GetString("css")
-	res.LanguageCodes = cache.GetCaptionLanguageCodes()
-	res.ModuleIdMapMeta = cache.GetModuleIdMapMeta()
-	res.PresetIdMapRecordId = cache.GetPresetRecordIds()
-	res.ProductionMode = config.GetUint64("productionMode")
-	res.PwaDomainMap = cache.GetPwaDomainMap()
-	res.SearchDictionaries = cache.GetSearchDictionaries()
-	res.TokenKeepEnable = config.GetUint64("tokenKeepEnable") == 1
-
-	// random background from available list
-	var loginBackgrounds = config.GetUint64Slice("loginBackgrounds")
-	if len(loginBackgrounds) == 0 {
-		res.LoginBackground = 0
-	} else {
-		res.LoginBackground = loginBackgrounds[rand.Intn(len(loginBackgrounds))]
-	}
-	return res, nil
+	}{
+		Activated:           config.GetLicenseActive(),
+		AppName:             config.GetString("appName"),
+		AppNameShort:        config.GetString("appNameShort"),
+		AppVersion:          config.GetAppVersion().Full,
+		CaptionMapCustom:    cache.GetCaptionMapCustom(),
+		ClusterNodeName:     cache.GetNodeName(),
+		CompanyColorHeader:  config.GetString("companyColorHeader"),
+		CompanyColorLogin:   config.GetString("companyColorLogin"),
+		CompanyLoginImage:   config.GetString("companyLoginImage"),
+		CompanyLogo:         config.GetString("companyLogo"),
+		CompanyLogoUrl:      config.GetString("companyLogoUrl"),
+		CompanyName:         config.GetString("companyName"),
+		CompanyWelcome:      config.GetString("companyWelcome"),
+		Css:                 config.GetString("css"),
+		LanguageCodes:       cache.GetCaptionLanguageCodes(),
+		LoginBackground:     loginBackground,
+		ModuleIdMapMeta:     cache.GetModuleIdMapMeta(),
+		PresetIdMapRecordId: cache.GetPresetRecordIds(),
+		ProductionMode:      config.GetUint64("productionMode"),
+		PwaDomainMap:        cache.GetPwaDomainMap(),
+		SearchDictionaries:  cache.GetSearchDictionaries(),
+		SystemMsg: types.SystemMsg{
+			Date0:       config.GetUint64("systemMsgDate0"),
+			Date1:       config.GetUint64("systemMsgDate1"),
+			Maintenance: config.GetUint64("systemMsgMaintenance") == 1,
+			Text:        config.GetString("systemMsgText"),
+		},
+		TokenKeepEnable: config.GetUint64("tokenKeepEnable") == 1,
+	}, nil
 }

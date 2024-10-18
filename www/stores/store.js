@@ -32,47 +32,55 @@ const MyStore = Vuex.createStore({
 		dialogButtons:[],
 		dialogImage:null,
 		dialogStyles:'',
-		dialogTextDisplay:'', // display option (html, textarea, richtext)
-		feedback:false,       // feedback function is enabled
-		feedbackUrl:'',       // feedback receiver, URL of current repository
-		filesCopy:{           // meta data for file copy (filled on copy, emptied on paste)
+		dialogTextDisplay:'',          // display option (html, textarea, richtext)
+		feedback:false,                // feedback function is enabled
+		feedbackUrl:'',                // feedback receiver, URL of current repository
+		filesCopy:{                    // meta data for file copy (filled on copy, emptied on paste)
 			attributeId:null,
 			fileIds:[]
 		},
-		isAdmin:false,        // user is admin
-		isAtDialog:false,     // app shows generic dialog
-		isAtFeedback:false,   // app shows feedback dialog
-		isAtMenu:false,       // user navigated to menu (only relevant if isMobile)
-		isAtModule:false,     // app currently shows a module (instead of Builder, admin panel, settings, etc.)
-		isMobile:false,       // app runs on small screen (probably mobile)
-		isNoAuth:false,       // user logged in without authentication
-		keyDownHandlers:[],   // global handlers, reacting for key down events (for hotkey events)
-		license:{},           // license info (admin only)
-		licenseValid:false,   // license is valid (set and within validity period)
-		loginEncryption:false,// user login E2E encryption is used
-		loginHasClient:false, // login has an associated client (to allow for local file handling)
-		loginId:-1,           // user login ID
-		loginName:'',         // user login name
-		loginPrivateKey:null, // user login private key for decryption (non-exportable key)
+		isAdmin:false,                 // user is admin
+		isAtDialog:false,              // app shows generic dialog
+		isAtFeedback:false,            // app shows feedback dialog
+		isAtMenu:false,                // user navigated to menu (only relevant if isMobile)
+		isAtModule:false,              // app currently shows a module (instead of Builder, admin panel, settings, etc.)
+		isMobile:false,                // app runs on small screen (probably mobile)
+		isNoAuth:false,                // user logged in without authentication
+		keyDownHandlers:[],            // global handlers, reacting for key down events (for hotkey events)
+		license:{},                    // license info (admin only)
+		licenseValid:false,            // license is valid (set and within validity period)
+		loginEncryption:false,         // user login E2E encryption is used
+		loginHasClient:false,          // login has an associated client (to allow for local file handling)
+		loginId:-1,                    // user login ID
+		loginName:'',                  // user login name
+		loginPrivateKey:null,          // user login private key for decryption (non-exportable key)
 		loginPrivateKeyEnc:null,       // user login private key PEM, encrypted with login key
 		loginPrivateKeyEncBackup:null, // user login private key PEM, encrypted with backup code
-		loginPublicKey:null,  // user login public key for encryption (exportable key)
-		loginWidgetGroups:[], // user widgets, starting with widget groups
-		moduleEntries:[],     // module entries for header/home page
-		moduleIdLast:null,    // module ID of last active module
-		moduleIdMapMeta:{},   // module ID map of module meta data (is owner, hidden, position, date change, custom languages)
-		pageTitle:'',         // web page title, set by app/form depending on navigation
-		pageTitleFull:'',     // web page title + instance name
-		popUpFormGlobal:null, // configuration of global pop-up form
-		productionMode:false, // system in production mode, false if maintenance
-		pwaDomainMap:{},      // map of modules per PWA sub domain, key: sub domain, value: module ID
-		routingGuards:[],     // functions to call before routing, abort if any returns falls
-		searchDictionaries:[],// dictionaries used for full text search for this login, ['english', 'german', ...]
-		settings:{},          // setting values for logged in user, key: settings name
-		sessionTimerStore:{}, // user session timer store for frontent functions,     { moduleId1:{ timerName1:{ id:jsTimerId, isInterval:true }, ... }, ... }
-		sessionValueStore:{}, // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
-		system:{},            // system details (admin only)
-		tokenKeepEnable:false // allow users to keep token to 'stay logged in'
+		loginPublicKey:null,           // user login public key for encryption (exportable key)
+		loginWidgetGroups:[],          // user widgets, starting with widget groups
+		moduleEntries:[],              // module entries for header/home page
+		moduleIdLast:null,             // module ID of last active module
+		moduleIdMapMeta:{},            // module ID map of module meta data (is owner, hidden, position, date change, custom languages)
+		pageTitle:'',                  // web page title, set by app/form depending on navigation
+		pageTitleFull:'',              // web page title + instance name
+		popUpFormGlobal:null,          // configuration of global pop-up form
+		productionMode:false,          // system in production mode, false if maintenance
+		pwaDomainMap:{},               // map of modules per PWA sub domain, key: sub domain, value: module ID
+		routingGuards:[],              // functions to call before routing, abort if any returns falls
+		searchDictionaries:[],         // dictionaries used for full text search for this login, ['english', 'german', ...]
+		settings:{},                   // setting values for logged in user, key: settings name
+		sessionTimerStore:{},          // user session timer store for frontent functions,     { moduleId1:{ timerName1:{ id:jsTimerId, isInterval:true }, ... }, ... }
+		sessionValueStore:{},          // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
+		system:{},                     // system details (admin only)
+		systemMsg:{                    // system message
+			date0:0,                   // date from
+			date1:1,                   // date to
+			maintenance:false,         // switch to maintenance mode at 'date to',
+			text:''                    // message
+		},
+		systemMsgActive:false,         // system message is active based on date0 / date1
+		systemMsgTextShown:false,      // system message text was already shown to the user
+		tokenKeepEnable:false          // allow users to keep token to 'stay logged in'
 	},
 	mutations:{
 		config:(state,payload) => {
@@ -202,6 +210,11 @@ const MyStore = Vuex.createStore({
 		sessionValueStoreReset:(state,payload) => {
 			state.sessionValueStore = {};
 		},
+		systemMsg:(state,payload) => {
+			// if any content changed, reset whether the system message was already shown to user
+			state.systemMsgTextShown = JSON.stringify(state.systemMsg) !== JSON.stringify(payload);
+			state.systemMsg          = payload;
+		},
 		
 		// collections
 		collection:      (state,payload) => state.collectionIdMap[payload.id] = payload.rows,
@@ -245,6 +258,9 @@ const MyStore = Vuex.createStore({
 		searchDictionaries:      (state,payload) => state.searchDictionaries       = payload,
 		settings:                (state,payload) => state.settings                 = payload,
 		system:                  (state,payload) => state.system                   = payload,
+		systemMsg:               (state,payload) => state.systemMsg                = payload,
+		systemMsgActive:         (state,payload) => state.systemMsgActive          = payload,
+		systemMsgTextShown:      (state,payload) => state.systemMsgTextShown       = payload,
 		tokenKeepEnable:         (state,payload) => state.tokenKeepEnable          = payload
 	},
 	getters:{
@@ -388,6 +404,12 @@ const MyStore = Vuex.createStore({
 		sessionValueStore:       (state) => state.sessionValueStore,
 		settings:                (state) => state.settings,
 		system:                  (state) => state.system,
+		systemMsgActive:         (state) => state.systemMsgActive,
+		systemMsgDate0:          (state) => state.systemMsg.date0,
+		systemMsgDate1:          (state) => state.systemMsg.date1,
+		systemMsgMaintenance:    (state) => state.systemMsg.maintenance,
+		systemMsgText:           (state) => state.systemMsg.text,
+		systemMsgTextShown:      (state) => state.systemMsgTextShown,
 		tokenKeepEnable:         (state) => state.tokenKeepEnable
 	}
 });

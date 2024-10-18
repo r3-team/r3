@@ -493,6 +493,20 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE TYPE app.pg_function_volatility AS ENUM ('VOLATILE','STABLE','IMMUTABLE');
 			ALTER TABLE app.pg_function ADD   COLUMN volatility TEXT NOT NULL DEFAULT 'VOLATILE';
 			ALTER TABLE app.pg_function ALTER COLUMN volatility DROP NOT NULL;
+
+			-- system messages
+			INSERT INTO instance.config (name, value) VALUES ('systemMsgDate0', '0');
+			INSERT INTO instance.config (name, value) VALUES ('systemMsgDate1', '0');
+			INSERT INTO instance.config (name, value) VALUES ('systemMsgText', '');
+			INSERT INTO instance.config (name, value) VALUES ('systemMsgMaintenance', '0');
+
+			INSERT INTO instance.task (
+				name,interval_seconds,cluster_master_only,
+				embedded_only,active_only,active
+			) VALUES ('systemMsgMaintenance',30,true,false,true,true);
+			
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('systemMsgMaintenance',0,0);
 		`)
 		return "3.9", err
 	},

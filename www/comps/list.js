@@ -1109,7 +1109,7 @@ let MyList = {
 		headerAdjust() {
 			this.headerCheckTimer = null;
 			
-			if(typeof this.$refs.empty === 'undefined' || this.$refs.empty.offsetWidth > 10 || this.headerElements.length === 0)
+			if(typeof this.$refs.empty === 'undefined' || this.$refs.empty === null || this.$refs.empty.offsetWidth > 10 || this.headerElements.length === 0)
 				return;
 			
 			// space insufficient and still elements available to reduce

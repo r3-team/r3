@@ -104,6 +104,8 @@ let MyHeader = {
 		</div>
 		
 		<div ref="empty" class="entries empty"></div>
+
+		<div v-if="systemMsgText !== null">{{ systemMsgText }}</div>
 		
 		<div ref="system" class="entries">
 			
@@ -331,7 +333,8 @@ let MyHeader = {
 		moduleEntries:    (s) => s.$store.getters.moduleEntries,
 		pwaModuleId:      (s) => s.$store.getters.pwaModuleId,
 		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
-		settings:         (s) => s.$store.getters.settings
+		settings:         (s) => s.$store.getters.settings,
+		systemMsgText:    (s) => s.$store.getters.systemMsgText
 	},
 	created() {
 		window.addEventListener('resize',this.windowResized);

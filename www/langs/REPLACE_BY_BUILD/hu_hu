@@ -55,7 +55,8 @@
 		},
 		"dialog":{
 			"close":"Nem mentett változások vannak.<br /><br />Biztosan be szeretnéd zárni az űrlapot?",
-			"confirm":"Kérem, erősítse meg"
+			"confirm":"Kérem, erősítse meg",
+			"systemMsg":"System message"
 		},
 		"error":{
 			"nameTaken":"Name is already taken, please choose another."
@@ -724,6 +725,7 @@
 				"mailSend":"E-mailek küldése",
 				"repoCheck":"Repository frissítése",
 				"restExecute":"REST hívások végrehajtása",
+				"systemMsgMaintenance":"Enable maintenance mode after system message",
 				"updateCheck":"Platform frissítések keresése"
 			},
 			"dateAttempt":"Utolsó indítás",

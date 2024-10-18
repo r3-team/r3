@@ -55,7 +55,8 @@
 		},
 		"dialog":{
 			"close":"There are unsaved changes. If you continue, your changes will be lost.<br /><br />Do you want to continue?",
-			"confirm":"Lūdzu apstiprināt"
+			"confirm":"Lūdzu apstiprināt",
+			"systemMsg":"System message"
 		},
 		"error":{
 			"nameTaken":"Vārds jau ir aizņemts, lūdzu, izvēlieties citu."
@@ -724,6 +725,7 @@
 				"mailSend":"Sūtīt e-pastu",
 				"repoCheck":"Pārbaudīt repozitorija atjauninājumu",
 				"restExecute":"Izpildīt REST pieprasījumus",
+				"systemMsgMaintenance":"Enable maintenance mode after system message",
 				"updateCheck":"Pārbaudīt platformas atjauninājumus"
 			},
 			"dateAttempt":"Pēdējais palaišanas mēģinājums",

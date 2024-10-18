@@ -386,6 +386,9 @@ func load() error {
 		case "restExecute":
 			t.nameLog = "REST call execution"
 			t.fn = rest_send.DoAll
+		case "systemMsgMaintenance":
+			t.nameLog = "Set maintenance mode after system message"
+			t.fn = systemMsgMaintenance
 		case "updateCheck":
 			t.nameLog = "Check for platform updates from official website"
 			t.fn = updateCheck

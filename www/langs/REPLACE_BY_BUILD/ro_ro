@@ -55,7 +55,8 @@
 		},
 		"dialog":{
 			"close":"Există modificări nesalvate.<br /><br />Doriți în continuare să închideți acest formular?",
-			"confirm":"Va rog confirmați"
+			"confirm":"Va rog confirmați",
+			"systemMsg":"System message"
 		},
 		"error":{
 			"nameTaken":"Name is already taken, please choose another."
@@ -724,6 +725,7 @@
 				"mailSend":"Expediere prin e-mail",
 				"repoCheck":"Executați actualizarea depozitului",
 				"restExecute":"Execute REST calls",
+				"systemMsgMaintenance":"Enable maintenance mode after system message",
 				"updateCheck":"Verificați dacă există actualizări ale platformei"
 			},
 			"dateAttempt":"Ultimul rulaj",

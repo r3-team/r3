@@ -55,7 +55,8 @@
 		},
 		"dialog":{
 			"close":"Es existieren ungespeicherte Änderungen. Diese werden verloren gehen.<br /><br />Trotzdem fortfahren?",
-			"confirm":"Bitte bestätigen"
+			"confirm":"Bitte bestätigen",
+			"systemMsg":"Systemmeldung"
 		},
 		"error":{
 			"nameTaken":"Name bereits in Benutzung, bitte einen anderen wählen."
@@ -724,6 +725,7 @@
 				"mailSend":"E-Mails versenden",
 				"repoCheck":"Aktualisieren des Repository",
 				"restExecute":"REST-Aufrufe durchführen",
+				"systemMsgMaintenance":"Wartungsmodus nach Systemmeldung aktivieren",
 				"updateCheck":"Nach Plattform-Updates suchen"
 			},
 			"dateAttempt":"Letzter Start",
