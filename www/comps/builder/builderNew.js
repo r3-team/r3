@@ -64,6 +64,18 @@ let MyBuilderNew = {
 						<p v-html="capApp.jsFunctionFormIdHint"></p>
 					</template>
 					
+					<!-- variable: assigned form -->
+					<template v-if="entity === 'variable'">
+						<div class="row centered gap">
+							<span>{{ capApp.variableFormId }}</span>
+							<select v-model="inputs.formId">
+								<option :value="null">-</option>
+								<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
+							</select>
+						</div>
+						<p v-html="capApp.variableFormIdHint"></p>
+					</template>
+					
 					<!-- PG function: trigger/function template -->
 					<template v-if="entity === 'pgFunction'">
 						<div class="row centered gap">
@@ -152,11 +164,16 @@ let MyBuilderNew = {
 				case 'pgFunction': searchList = s.module.pgFunctions; break;
 				case 'relation':   searchList = s.module.relations;   break;
 				case 'role':       searchList = s.module.roles;       break;
+				case 'variable':   searchList = s.module.variables;   break;
 				case 'widget':     searchList = s.module.widgets;     break;
 			}
 			for(let e of searchList) {
 				// only compare names of functions within the same scope (global or form)
 				if(s.entity === 'jsFunction' && e.formId !== s.inputs.formId)
+					continue;
+
+				// only compare names of variables within the same scope (global or form)
+				if(s.entity === 'variable' && e.formId !== s.inputs.formId)
 					continue;
 				
 				if(e.name === s.inputs.name)
@@ -176,6 +193,7 @@ let MyBuilderNew = {
 				case 'pgFunction': return s.capApp.pgFunction; break;
 				case 'relation':   return s.capApp.relation;   break;
 				case 'role':       return s.capApp.role;       break;
+				case 'variable':   return s.capApp.variable;   break;
 				case 'widget':     return s.capApp.widget;     break;
 			}
 			return '';
@@ -190,11 +208,12 @@ let MyBuilderNew = {
 				case 'pgFunction': return 'images/codeDatabase.png';   break;
 				case 'relation':   return 'images/database.png';       break;
 				case 'role':       return 'images/personMultiple.png'; break;
+				case 'variable':   return 'images/variable.png';       break;
 				case 'widget':     return 'images/tiles.png';          break;
 			}
 			return '';
 		},
-		showOptions:(s) => ['form','jsFunction','pgFunction','relation'].includes(s.entity),
+		showOptions:(s) => ['form','jsFunction','pgFunction','relation','variable'].includes(s.entity),
 		
 		// stores
 		module:     (s) => s.moduleIdMap[s.moduleId],
@@ -380,6 +399,15 @@ let MyBuilderNew = {
 						accessCollections:{},
 						accessMenus:{},
 						accessRelations:{}
+					};
+				break;
+				case 'variable':
+					request = {
+						id:this.getNilUuid(),
+						moduleId:this.moduleId,
+						formId:this.inputs.formId,
+						name:this.inputs.name,
+						comment:null
 					};
 				break;
 				case 'widget':

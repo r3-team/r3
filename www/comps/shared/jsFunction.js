@@ -44,7 +44,11 @@ const exposedFunctionsGlobal = {
 			);
 		});
 	},
-				
+
+	// variables
+	get_variable:(k)   => MyStore.getters.variableIdMapGlobal[k] !== undefined ? MyStore.getters.variableIdMapGlobal[k] : null,
+	set_variable:(k,v) => MyStore.commit('variableStoreValueById',{id:k,value:v}),
+	
 	// e2e encryption
 	get_e2ee_data_key:  (dataKeyEnc)    => rsaDecrypt(MyStore.getters.loginPrivateKey,dataKeyEnc),
 	get_e2ee_data_value:(dataKey,value) => aesGcmDecryptBase64WithPhrase(value,dataKey),

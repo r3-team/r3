@@ -208,6 +208,7 @@
 		"uninstall":"Deinstallieren",
 		"update":"Aktualisieren",
 		"username":"Benutzername",
+		"variables":"Variabeln",
 		"version":"Version",
 		"unassigned":"Nicht zugewiesen",
 		"warnings":"Warnungen",
@@ -1410,6 +1411,7 @@
 			"placeholders":"Platzhalter",
 			"placeholdersCollections":"Sammlungen",
 			"placeholdersFormFields":"Formularfelder",
+			"placeholdersVariables":"Variabeln",
 			"runOnce":"Einmalig",
 			"runRegular":"Regelmäßig",
 			"runType":"Ausführung",
@@ -1547,6 +1549,9 @@
 			"relationEncryption":"Ende-zu-Ende-Verschlüsselung",
 			"relationEncryptionHint":"Erlaubt Ende-zu-Ende-Verschlüsselung (E2EE) für Attribute auf dieser Relation. E2EE hat Vor- und Nachteile - die Builder-Dokumentation sollte hierzu gelesen werden. Diese Einstellung kann nachträglich nicht geändert werden.",
 			"role":"Neue Rolle",
+			"variable":"Neue Variable",
+			"variableFormId":"An Formular zugewiesen",
+			"variableFormIdHint":"Eine Variable einem Formular zuzuweisen, bindet diese an das Formular. Sie kann dann nur im Kontext des Formulars genutzt werden und sie wird zurückgesetzt, wenn das Formular geschlossen wird.<br /><br />Ohne eine Zuweisung ist die Variable \"global\" und bleibt demnach persistent in der aktuellen Benutzersitzung.",
 			"widget":"Neues Widget"
 		},
 		"openFormInput":{
@@ -1731,6 +1736,13 @@
 			"titleRolesHint":"Festlegen, was man sehen und tun darf.",
 			"titleRelations":"Relationen definieren",
 			"titleRelationsHint":"Um Datensätze zu speichern und Daten zuweisen."
+		},
+		"variable":{
+			"dialog":{
+				"delete":"Bist du sicher, dass du diese Variable löschen möchtest?"
+			},
+			"edit":"Variable '{NAME}'",
+			"title":"Variabeln"
 		},
 		"widget":{
 			"dialog":{

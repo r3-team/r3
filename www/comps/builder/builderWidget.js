@@ -28,14 +28,9 @@ let MyBuilderWidget = {
 			<div class="top lower">
 				<div class="area">
 					<my-button image="save.png"
-						@trigger="set(false)"
+						@trigger="set"
 						:active="canSave"
-						:caption="isNew ? capGen.button.create : capGen.button.save"
-					/>
-					<my-button image="save_new.png"
-						@trigger="set(true)"
-						:active="canSave"
-						:caption="isNew ? capGen.button.createNew : capGen.button.saveNew"
+						:caption="capGen.button.save"
 					/>
 					<my-button image="refresh.png"
 						@trigger="reset"
@@ -43,7 +38,6 @@ let MyBuilderWidget = {
 						:caption="capGen.button.refresh"
 					/>
 					<my-button image="delete.png"
-						v-if="!isNew"
 						@trigger="del"
 						:active="!readonly"
 						:cancel="true"
@@ -62,7 +56,6 @@ let MyBuilderWidget = {
 									<input v-focus v-model="values.name" :disabled="readonly" />
 									<my-button image="visible1.png"
 										@trigger="copyValueDialog(values.name,widgetId,widgetId)"
-										:active="!isNew"
 										:caption="capGen.id"
 									/>
 								</div>
@@ -142,7 +135,7 @@ let MyBuilderWidget = {
 		readonly:       { type:Boolean, required:true },
 		widgetId:       { required:true }
 	},
-	emits:['close','next-language','new-record'],
+	emits:['close','next-language'],
 	data() {
 		return {
 			// widget values
@@ -160,10 +153,9 @@ let MyBuilderWidget = {
 		},
 		
 		// simple
-		canSave:       (s) => !s.readonly && s.hasChanges && !s.nameTaken,
-		hasChanges:    (s) => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		isNew:         (s) => s.widgetId === null,
-		title:         (s) => s.isNew ? s.capApp.new : s.capApp.edit.replace('{NAME}',s.values.name),
+		canSave:   (s) => !s.readonly && s.hasChanges && !s.nameTaken,
+		hasChanges:(s) => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		title:     (s) => s.capApp.edit.replace('{NAME}',s.values.name),
 		
 		// stores
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
@@ -239,22 +231,13 @@ let MyBuilderWidget = {
 				this.$root.genericError
 			);
 		},
-		set(saveAndNew) {
+		set() {
 			ws.sendMultiple([
 				ws.prepare('widget','set',this.values),
 				ws.prepare('schema','check',{ moduleId:this.module.id })
 			],true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
-					
-					if(saveAndNew) {
-						this.$emit('new-record');
-						this.values.id     = null;
-						this.values.name   = '';
-						this.values.formId = null;
-						this.resetOrg();
-						return;
-					}
 					this.$emit('close');
 				},
 				this.$root.genericError

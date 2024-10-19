@@ -209,6 +209,7 @@
 		"uninstall":"Uninstall",
 		"update":"Update",
 		"username":"Nom d'utilisateur",
+		"variables":"Variables",
 		"version":"Version",
 		"warnings":"Avertissements",
 		"widget":"Widget",
@@ -1410,6 +1411,7 @@
 			"placeholders":"Espaces réservés",
 			"placeholdersCollections":"Collections",
 			"placeholdersFormFields":"Champs du formulaire",
+			"placeholdersVariables":"Variables",
 			"runOnce":"Une fois",
 			"runRegular":"Régulièrement",
 			"runType":"Exécution",
@@ -1547,6 +1549,9 @@
 			"relationEncryption":"Chiffrement de bout en bout",
 			"relationEncryptionHint":"Active le chiffrement de bout en bout (E2EE) pour les attributs de cette relation. E2EE a des avantages et des inconvénients - veuillez lire attentivement la documentation du Builder avant de l'utiliser. Ce paramètre ne peut pas être modifié ultérieurement.",
 			"role":"Nouveau rôle",
+			"variable":"New variable",
+			"variableFormId":"Assigned to form",
+			"variableFormIdHint":"Assigning a variable to a form binds it to the particular form. It can then only be used on that form and its values will be reset once the form closes.<br /><br />Not assigning a variable to a form makes it 'global' and therefore persistent in the current user session.",
 			"widget":"Nouveau widget"
 		},
 		"openFormInput":{
@@ -1731,6 +1736,13 @@
 			"titleRolesHint":"Définissez ce que chacun peut faire ou voir.",
 			"titleRelations":"Définir des relations",
 			"titleRelationsHint":"Pour stocker et ajouter des données aux enregistrements."
+		},
+		"variable":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this variable?"
+			},
+			"edit":"Variable '{NAME}'",
+			"title":"Variables"
 		},
 		"widget":{
 			"dialog":{

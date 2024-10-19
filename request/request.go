@@ -623,6 +623,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "storeExportKey":
 			return TransferStoreExportKey(reqJson)
 		}
+	case "variable":
+		switch action {
+		case "del":
+			return VariableDel_tx(tx, reqJson)
+		case "set":
+			return VariableSet_tx(tx, reqJson)
+		}
 	case "widget":
 		switch action {
 		case "del":

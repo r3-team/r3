@@ -172,6 +172,13 @@ let MyBuilder = {
 					</router-link>
 					
 					<router-link class="entry clickable"
+						:to="'/builder/variables/'+module.id"
+					>
+						<img src="images/variable.png" />
+						<span>{{ capGen.variables }}</span>
+					</router-link>
+					
+					<router-link class="entry clickable"
 						:to="'/builder/widgets/'+module.id"
 					>
 						<img src="images/tiles.png" />
@@ -297,6 +304,15 @@ let MyBuilder = {
 					>{{ a.name + ' (v' + a.version + ')' }}</router-link>
 				</template>
 				
+				<!-- variables -->
+				<template v-if="navigation === 'variables'">
+					<router-link class="entry clickable"
+						v-for="a in module.variables.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
+						:key="a.id"
+						:to="'/builder/variable/'+a.id" 
+					>{{ a.name }}</router-link>
+				</template>
+				
 				<!-- widgets -->
 				<template v-if="navigation === 'widgets'">
 					<router-link class="entry clickable"
@@ -406,6 +422,7 @@ let MyBuilder = {
 						case 'relation':    targetIdMap = this.relationIdMap;   break;
 						case 'role':        targetIdMap = this.roleIdMap;       break;
 						case 'pg-function': targetIdMap = this.pgFunctionIdMap; break;
+						case 'variable':    targetIdMap = this.variableIdMap;   break;
 						case 'widget':      targetIdMap = this.widgetIdMap;     break;
 					}
 				}
@@ -469,6 +486,7 @@ let MyBuilder = {
 		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
 		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
 		roleIdMap:      (s) => s.$store.getters['schema/roleIdMap'],
+		variableIdMap:  (s) => s.$store.getters['schema/variableIdMap'],
 		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
 		bgStyle:        (s) => s.$store.getters.colorMenuStyle,
 		builderEnabled: (s) => s.$store.getters.builderEnabled,
@@ -495,6 +513,7 @@ let MyBuilder = {
 				case 'pg-functions': entity = 'pgFunction'; break;
 				case 'relations':    entity = 'relation';   break;
 				case 'roles':        entity = 'role';       break;
+				case 'variables':    entity = 'variable';   break;
 				case 'widgets':      entity = 'widget';     break;
 			}
 			this.createNew(entity,{name:this.filter});
@@ -506,7 +525,7 @@ let MyBuilder = {
 		nextLanguage() {
 			if(this.createNewOpen) return;
 			
-			let pos = this.module.languages.indexOf(this.builderLanguage);
+			const pos = this.module.languages.indexOf(this.builderLanguage);
 			if(pos === -1 || pos >= this.module.languages.length - 1)
 				return this.builderLanguage = this.module.languages[0];
 			

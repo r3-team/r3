@@ -80,7 +80,8 @@ const MyStore = Vuex.createStore({
 		},
 		systemMsgActive:false,         // system message is active based on date0 / date1
 		systemMsgTextShown:false,      // system message text was already shown to the user
-		tokenKeepEnable:false          // allow users to keep token to 'stay logged in'
+		tokenKeepEnable:false,         // allow users to keep token to 'stay logged in',
+		variableIdMapGlobal:{}         // variable values by ID (global variables only)
 	},
 	mutations:{
 		config:(state,payload) => {
@@ -214,6 +215,9 @@ const MyStore = Vuex.createStore({
 			// if any content changed, reset whether the system message was already shown to user
 			state.systemMsgTextShown = JSON.stringify(state.systemMsg) === JSON.stringify(payload);
 			state.systemMsg          = payload;
+		},
+		variableStoreValueById:(state,payload) => {
+			state.variableIdMapGlobal[payload.id] = payload.value;
 		},
 		
 		// collections
@@ -409,6 +413,7 @@ const MyStore = Vuex.createStore({
 		systemMsgMaintenance:    (state) => state.systemMsg.maintenance,
 		systemMsgText:           (state) => state.systemMsg.text,
 		systemMsgTextShown:      (state) => state.systemMsgTextShown,
-		tokenKeepEnable:         (state) => state.tokenKeepEnable
+		tokenKeepEnable:         (state) => state.tokenKeepEnable,
+		variableIdMapGlobal:     (state) => state.variableIdMapGlobal
 	}
 });

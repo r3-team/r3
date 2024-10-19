@@ -507,6 +507,40 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
 			VALUES ('systemMsgMaintenance',0,0);
+
+			-- variables
+			CREATE TABLE app.variable (
+			    id uuid NOT NULL,
+			    module_id uuid NOT NULL,
+			    form_id uuid,
+			    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+			    comment TEXT,
+			    CONSTRAINT variable_pkey PRIMARY KEY (id),
+			    CONSTRAINT variable_form_id_fkey FOREIGN KEY (form_id)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT variable_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX fki_variable_module_id_fkey ON app.variable USING btree (module_id ASC NULLS LAST);
+			CREATE INDEX fki_variable_form_id_fkey   ON app.variable USING btree (form_id   ASC NULLS LAST);
+			CREATE UNIQUE INDEX ind_variable_name_global_unique ON app.variable (module_id, name)          WHERE form_id IS NULL;
+			CREATE UNIQUE INDEX ind_variable_name_form_unique   ON app.variable (module_id, name, form_id) WHERE form_id IS NOT NULL;
+			
+			ALTER TABLE app.js_function_depends ADD COLUMN variable_id_on UUID;
+			ALTER TABLE app.js_function_depends ADD CONSTRAINT js_function_depends_variable_id_on_fkey FOREIGN KEY (variable_id_on)
+				REFERENCES app.variable (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_variable_id_on_fkey ON app.js_function_depends
+				USING BTREE (variable_id_on ASC NULLS LAST);
 		`)
 		return "3.9", err
 	},

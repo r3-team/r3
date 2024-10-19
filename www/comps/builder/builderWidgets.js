@@ -70,7 +70,6 @@ let MyBuilderWidgets = {
 			@close="widgetIdEdit = false"
 			@next-language="$emit('nextLanguage')"
 			@new-record="widgetIdEdit = null"
-			:attributeId="widgetIdEdit"
 			:builderLanguage="builderLanguage"
 			:module="module"
 			:readonly="readonly"
@@ -89,7 +88,7 @@ let MyBuilderWidgets = {
 		};
 	},
 	computed:{
-		module:(s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
+		module:(s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		
 		// stores
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],

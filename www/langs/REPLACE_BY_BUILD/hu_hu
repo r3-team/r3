@@ -209,6 +209,7 @@
 		"uninstall":"Uninstall",
 		"update":"Update",
 		"username":"Felhasználónév",
+		"variables":"Variables",
 		"version":"Verzió",
 		"warnings":"Figyelmeztetések",
 		"widget":"Widget",
@@ -1410,6 +1411,7 @@
 			"placeholders":"Helyőrzők",
 			"placeholdersCollections":"Gyűjtemények",
 			"placeholdersFormFields":"Űrlap mezők",
+			"placeholdersVariables":"Variables",
 			"runOnce":"Egyszer",
 			"runRegular":"Rendszeres",
 			"runType":"Végrehajtás típusa",
@@ -1547,6 +1549,9 @@
 			"relationEncryption":"Vége-ponttól-vége-pontig titkosítás",
 			"relationEncryptionHint":"Lehetővé teszi a vége-ponttól-vége-pontig titkosítást (E2EE) ennek az összefüggésnek az attribútumaira. Az E2EE-nek előnyei és hátrányai vannak - erről a Builder dokumentációban olvashat. Ezt a beállítást később nem lehet megváltoztatni.",
 			"role":"Új szerep",
+			"variable":"New variable",
+			"variableFormId":"Assigned to form",
+			"variableFormIdHint":"Assigning a variable to a form binds it to the particular form. It can then only be used on that form and its values will be reset once the form closes.<br /><br />Not assigning a variable to a form makes it 'global' and therefore persistent in the current user session.",
 			"widget":"New widget"
 		},
 		"openFormInput":{
@@ -1731,6 +1736,13 @@
 			"titleRolesHint":"Beállítani, hogy ki mit láthat és tehet meg.",
 			"titleRelations":"Relációk definiálása",
 			"titleRelationsHint":"Adatok tárolása és kapcsolódása."
+		},
+		"variable":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this variable?"
+			},
+			"edit":"Variable '{NAME}'",
+			"title":"Variables"
 		},
 		"widget":{
 			"dialog":{

@@ -404,6 +404,54 @@ let MyBuilderJsFunction = {
 							</div>
 						</div>
 					</div>
+					
+					<!-- variable input -->
+					<div class="entities-title">
+						<my-button
+							@trigger="showHolderVariable = !showHolderVariable"
+							:caption="capApp.placeholdersVariables"
+							:images="[showHolderVariable ? 'triangleDown.png' : 'triangleRight.png','tray.png']"
+							:large="true"
+							:naked="true"
+						/>
+						<div class="row centered gap">
+							<template v-if="showHolderVariable">
+								<input class="short" v-model="holderVariableFilter" :placeholder="capGen.threeDots" :title="capGen.button.filter" />
+							</template>
+						</div>
+					</div>
+					<div class="entities" v-if="showHolderVariable">
+						<div class="entity" v-for="v in variablesSorted.filter(v => holderVariableFilter === '' || v.name.toLowerCase().includes(holderVariableFilter.toLowerCase()))">
+							<div class="entity-title">
+								<my-button
+									@trigger="toggleVariableShow(v.id)"
+									:image="holderVariableIdsOpen.includes(v.id) ? 'triangleDown.png' : 'triangleRight.png'"
+									:naked="true"
+									:caption="v.formId === null ? v.name : form.name + ': ' + v.name"
+									:captionTitle="v.name"
+								/>
+								<router-link :key="v.id" :to="'/builder/variables/'+module.id+'?variableIdEdit='+v.id">
+									<my-button image="open.png" :captionTitle="capGen.button.open" :naked="true" />
+								</router-link>
+							</div>
+							<div class="entity-children" v-if="holderVariableIdsOpen.includes(v.id)">
+								<div class="entity-title">
+									<my-button
+										@trigger="selectEntity('variable_get',v.id)"
+										:caption="capGen.button.read"
+										:image="radioIcon('variable_get',v.id)"
+										:naked="true"
+									/>
+									<my-button
+										@trigger="selectEntity('variable_set',v.id)"
+										:caption="capGen.button.update"
+										:image="radioIcon('variable_set',v.id)"
+										:naked="true"
+									/>
+								</div>
+							</div>
+						</div>
+					</div>
 				</template>
 				
 				<template v-if="tabTarget === 'properties'">
@@ -541,9 +589,11 @@ let MyBuilderJsFunction = {
 			holderCollectionFilter:'',
 			holderCollectionIdsOpen:[],
 			holderCollectionModuleId:null,
+			holderVariableFilter:'',
 			holderFieldFilter:'',
 			holderFieldIdsOpen:[],
 			holderFieldOnlyData:true,
+			holderVariableIdsOpen:[],
 			holderFncBackendFilter:'',
 			holderFncBackendModuleId:null,
 			holderFncFrontendFilter:'',
@@ -553,6 +603,7 @@ let MyBuilderJsFunction = {
 			showHolderFncBackend:false,
 			showHolderFncFrontend:false,
 			showHolderFncInstance:false,
+			showHolderVariable:false,
 			showPreview:false,
 			showSidebar:true,
 			tabTarget:'content'
@@ -643,11 +694,21 @@ let MyBuilderJsFunction = {
 					args = fnc.codeArgs === '' ? '' : ', ' + fnc.codeArgs;
 					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${args})${postfixAsync}`;
 				break;
+				case 'variable_get': // fallthrough
+				case 'variable_set':
+					const va     = s.variableIdMap[s.entityId];
+					const frmOpt = va.formId === null ? '' : `.${s.formIdMap[va.formId].name}`;
+					const mode   = s.entity  === 'variable_get' ? 'get' : 'set';
+					const value  = s.entity  === 'variable_get' ? '' : `, ${s.capApp.value}`;
+					text         = `${prefix}.${mode}_variable({${s.module.name}${frmOpt}.${va.name}}${value})`;
+				break;
 			}
 			return text;
 		},
 		jsFunctionsSorted:(s) => s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === null).concat(
 			s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === s.formId && s.formId !== null)),
+		variablesSorted:(s) => s.moduleIdMap[s.module.id].variables.filter(v => v.formId === null).concat(
+			s.moduleIdMap[s.module.id].variables.filter(v => v.formId === s.formId && s.formId !== null)),
 		
 		// simple
 		entityIdMapRef:    (s) => s.formId === null ? {} : s.getFormEntityMapRef(s.form.fields,s.form.actions),
@@ -669,6 +730,7 @@ let MyBuilderJsFunction = {
 		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
 		jsFunctionIdMap:(s) => s.$store.getters['schema/jsFunctionIdMap'],
 		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
+		variableIdMap:  (s) => s.$store.getters['schema/variableIdMap'],
 		capApp:         (s) => s.$store.getters.captions.builder.function,
 		capGen:         (s) => s.$store.getters.captions.generic
 	},
@@ -724,6 +786,11 @@ let MyBuilderJsFunction = {
 			const pos = this.holderFieldIdsOpen.indexOf(id);
 			if(pos === -1) this.holderFieldIdsOpen.push(id);
 			else           this.holderFieldIdsOpen.splice(pos,1);
+		},
+		toggleVariableShow(id) {
+			const pos = this.holderVariableIdsOpen.indexOf(id);
+			if(pos === -1) this.holderVariableIdsOpen.push(id);
+			else           this.holderVariableIdsOpen.splice(pos,1);
 		},
 		toggleEntity(entityName,id) {
 			if(this.entity === entityName && this.entityId === id) {
@@ -801,6 +868,18 @@ let MyBuilderJsFunction = {
 				return match;
 			});
 			
+			// replace variable IDs with placeholders
+			pat = new RegExp(`${prefix}\.(get|set)_variable\\('(${uuid})'`,'g');
+			body = body.replace(pat,(match,mode,variableId) => {
+				if(this.variableIdMap[variableId] === 'undefined')
+					return match;
+				
+				const variable = this.variableIdMap[variableId];
+				const module   = this.moduleIdMap[variable.moduleId];
+				const frmOpt   = variable.formId === null ? '' : `.${this.formIdMap[variable.formId].name}`;
+
+				return `${prefix}.${mode}_variable({${module.name}${frmOpt}.${variable.name}}`;
+			});
 			return body;
 		},
 		placeholdersUnset() {
@@ -898,15 +977,46 @@ let MyBuilderJsFunction = {
 			// replace form assigned frontend function placeholders
 			// stored as: app.call_frontend({r3_organizations.contact.set_defaults},12...
 			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.]+)\.(.+)\}`,'g');
-			body = body.replace(pat,(match,modName,formName,fncName) => {
+			body = body.replace(pat,(match,modName,frmName,fncName) => {
 				if(this.form === false || this.moduleNameMap[modName] === undefined)
 					return match;
 				
 				const mod = this.moduleNameMap[modName];
 				
 				for(let f of mod.jsFunctions) {
-					if(f.formId !== null && f.formId === this.form.id && formName === this.form.name && f.name === fncName)
+					if(f.formId !== null && f.formId === this.form.id && frmName === this.form.name && f.name === fncName)
 						return `${prefix}\.call_frontend('${f.id}'`;
+				}
+				return match;
+			});
+			
+			// replace global variable placeholders
+			// stored as: app.get_variable({module.variable})
+			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.(.+)\}`,'g');
+			body = body.replace(pat,(match,mode,modName,vaName) => {
+				if(this.moduleNameMap[modName] !== undefined) {
+					const mod = this.moduleNameMap[modName];
+					for(let k in this.variableIdMap) {
+						if(this.variableIdMap[k].moduleId === mod.id && this.variableIdMap[k].name === vaName) {
+							return `${prefix}\.${mode}_variable('${k}'`;
+						}
+					}
+				}
+				return match;
+			});
+			
+			// replace form assigned variable placeholders
+			// stored as: app.get_variable({module.variable})
+			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.]+)\.(.+)\}`,'g');
+			body = body.replace(pat,(match,mode,modName,frmName,vaName) => {
+				if(this.form !== false && this.moduleNameMap[modName] !== undefined) {
+					const mod = this.moduleNameMap[modName];
+					for(let k in this.variableIdMap) {
+						const va = this.variableIdMap[k];
+						if(va.formId !== null && va.formId === this.form.id && frmName === this.form.name && va.moduleId === mod.id && va.name === vaName) {
+							return `${prefix}\.${mode}_variable('${k}'`;
+						}
+					}
 				}
 				return match;
 			});

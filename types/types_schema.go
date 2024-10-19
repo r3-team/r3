@@ -40,6 +40,7 @@ type Module struct {
 	Collections           []Collection      `json:"collections"`
 	Apis                  []Api             `json:"apis"`
 	ClientEvents          []ClientEvent     `json:"clientEvents"`
+	Variables             []Variable        `json:"variables"`
 	Widgets               []Widget          `json:"widgets"`
 	ArticleIdsHelp        []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
 	Captions              CaptionMap        `json:"captions"`
@@ -592,6 +593,13 @@ type ClientEvent struct {
 	JsFunctionId    pgtype.UUID `json:"jsFunctionId"`
 	PgFunctionId    pgtype.UUID `json:"pgFunctionId"`
 	Captions        CaptionMap  `json:"captions"`
+}
+type Variable struct {
+	Id       uuid.UUID   `json:"id"`
+	ModuleId uuid.UUID   `json:"moduleId"`
+	FormId   pgtype.UUID `json:"formId"` // if assigned to form, otherwise global
+	Name     string      `json:"name"`
+	Comment  pgtype.Text `json:"comment"` // author comment
 }
 type Widget struct {
 	Id         uuid.UUID          `json:"id"`

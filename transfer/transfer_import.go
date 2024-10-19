@@ -32,6 +32,7 @@ import (
 	"r3/schema/preset"
 	"r3/schema/relation"
 	"r3/schema/role"
+	"r3/schema/variable"
 	"r3/schema/widget"
 	"r3/tools"
 	"r3/transfer/transfer_delete"
@@ -330,6 +331,22 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set API %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, api.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
+			return err
+		}
+	}
+
+	// variables
+	for _, e := range mod.Variables {
+		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set variable %s", e.Id))
+
+		if err := importCheckResultAndApply(tx, variable.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}

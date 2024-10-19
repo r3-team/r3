@@ -61,6 +61,7 @@ import MyBuilderRelations   from './comps/builder/builderRelations.js';
 import MyBuilderRole        from './comps/builder/builderRole.js';
 import MyBuilderRoles       from './comps/builder/builderRoles.js';
 import MyBuilderStart       from './comps/builder/builderStart.js';
+import MyBuilderVariables   from './comps/builder/builderVariables.js';
 import MyBuilderWidgets     from './comps/builder/builderWidgets.js';
 
 // router
@@ -214,6 +215,11 @@ const MyRouter = VueRouter.createRouter({
 				path:'api/:id',
 				meta:{ nav:'apis', target:'api' },
 				component:MyBuilderApi,
+				props:true
+			},{
+				path:'variables/:id',
+				meta:{ nav:'variables', target:'module' },
+				component:MyBuilderVariables,
 				props:true
 			},{
 				path:'widgets/:id',

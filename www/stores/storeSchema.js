@@ -23,6 +23,7 @@ const MyStoreSchema = {
 		pgTriggerIdMap:{},
 		relationIdMap:{},
 		roleIdMap:{},
+		variableIdMap:{},
 		widgetIdMap:{},
 		
 		// computed
@@ -128,6 +129,11 @@ const MyStoreSchema = {
 				for(const clientEvent of mod.clientEvents) {
 					state.clientEventIdMap[clientEvent.id] = clientEvent;
 				}
+
+				// process variables
+				for(const variable of mod.variables) {
+					state.variableIdMap[variable.id] = variable;
+				}
 				
 				// process widgets
 				for(const widget of mod.widgets) {
@@ -172,6 +178,7 @@ const MyStoreSchema = {
 		presetIdMapRecordId:(state) => state.presetIdMapRecordId,
 		relationIdMap:      (state) => state.relationIdMap,
 		roleIdMap:          (state) => state.roleIdMap,
+		variableIdMap:      (state) => state.variableIdMap,
 		widgetIdMap:        (state) => state.widgetIdMap,
 		
 		languageCodes:(state) => {

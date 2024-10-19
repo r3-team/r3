@@ -681,7 +681,7 @@ let MyField = {
 				if(!this.isData) return false;
 				
 				// if only alt attribute is set, field still needs primary attribute value (form log)
-				return typeof this.values[this.fieldAttributeId] !== 'undefined'
+				return this.values[this.fieldAttributeId] !== undefined
 					? this.values[this.fieldAttributeId] : null;
 			},
 			set(val,valOld) {
@@ -698,7 +698,7 @@ let MyField = {
 				if(!this.isData) return false;
 				
 				// if only primary attribute is set, field still needs alt attribute value (form log)
-				return typeof this.values[this.fieldAttributeIdAlt] !== 'undefined'
+				return this.values[this.fieldAttributeIdAlt] !== undefined
 					? this.values[this.fieldAttributeIdAlt] : null;
 			},
 			set(val,valOld) {
@@ -813,15 +813,15 @@ let MyField = {
 		presetValue:(s) => {
 			if(!s.isData) return false;
 			
-			let join = s.joinsIndexMap[s.field.index];
-			let rel  = s.relationIdMap[join.relationId];
+			const join = s.joinsIndexMap[s.field.index];
+			const rel  = s.relationIdMap[join.relationId];
 			for(let preset of rel.presets) {
 				if(s.presetIdMapRecordId[preset.id] !== join.recordId)
 					continue;
 				
-				for(let i = 0, j = preset.values.length; i < j; i++) {
-					if(preset.values[i].attributeId === s.attribute.id)
-						return preset.values[i];
+				for(let value of preset.values) {
+					if(value.attributeId === s.attribute.id)
+						return value;
 				}
 			}
 			return false;

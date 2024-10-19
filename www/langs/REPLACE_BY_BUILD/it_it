@@ -205,11 +205,12 @@
 		"title":"Titolo",
 		"token":"Token",
 		"type":"Type",
-		"username":"Username",
-		"version":"Versione",
 		"unassigned":"Unassigned",
 		"uninstall":"Uninstall",
 		"update":"Update",
+		"username":"Username",
+		"variables":"Variables",
+		"version":"Versione",
 		"warnings":"Warnings",
 		"widget":"Widget",
 		"widgets":"Widgets",
@@ -1410,6 +1411,7 @@
 			"placeholders":"Segnaposti",
 			"placeholdersCollections":"Collections",
 			"placeholdersFormFields":"Form fields",
+			"placeholdersVariables":"Variables",
 			"runOnce":"Once",
 			"runRegular":"Regularly",
 			"runType":"Execution",
@@ -1547,6 +1549,9 @@
 			"relationEncryption":"End-to-end Encryption",
 			"relationEncryptionHint":"Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later.",
 			"role":"New role",
+			"variable":"New variable",
+			"variableFormId":"Assigned to form",
+			"variableFormIdHint":"Assigning a variable to a form binds it to the particular form. It can then only be used on that form and its values will be reset once the form closes.<br /><br />Not assigning a variable to a form makes it 'global' and therefore persistent in the current user session.",
 			"widget":"New widget"
 		},
 		"openFormInput":{
@@ -1731,6 +1736,13 @@
 			"titleRolesHint":"Define what everyone can do or see.",
 			"titleRelations":"Define relations",
 			"titleRelationsHint":"To store and add data to records."
+		},
+		"variable":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this variable?"
+			},
+			"edit":"Variable '{NAME}'",
+			"title":"Variables"
 		},
 		"widget":{
 			"dialog":{

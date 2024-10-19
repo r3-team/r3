@@ -374,7 +374,8 @@ let MyForm = {
 			                              // [{loginIds:[5,12], recordIds:[1,2], relationId:'A-B-C-D'}, {...}]
 			timers:{},                    // frontend function timers, key = name, value = { id:XY, isInterval:true }
 			valuesNew:{},                 // changed valuse by index attribute ID (for sending changes)
-			valuesOld:{}                  // preexisting values by index attribute ID (for change comparisson)
+			valuesOld:{},                 // preexisting values by index attribute ID (for change comparisson)
+			variableIdMapLocal:{}         // variable values by ID (form assigned variables only)
 		};
 	},
 	computed:{
@@ -576,6 +577,22 @@ let MyForm = {
 						isInterval:isInterval
 					};
 				},
+
+				// variables
+				get_variable:(k) => {
+					const va = s.variableIdMap[k];
+					if(va.formId !== null && va.formId === s.formId)
+						return s.variableIdMapLocal[k] !== undefined ? s.variableIdMapLocal[k] : null;
+
+					return s.variableIdMapGlobal[k] !== undefined ? s.variableIdMapGlobal[k] : null;
+				},
+				set_variable:(k,v) => {
+					const va = s.variableIdMap[k];
+					if(va.formId !== null && va.formId === s.formId)
+						return s.variableIdMapLocal[k] = v;
+
+					s.$store.commit('variableStoreValueById',{id:k,value:v});
+				},
 				
 				// e2e encryption
 				set_e2ee_by_user_ids:ids => s.loginIdsEncryptFor = ids,
@@ -734,6 +751,7 @@ let MyForm = {
 		iconIdMap:          (s) => s.$store.getters['schema/iconIdMap'],
 		jsFunctionIdMap:    (s) => s.$store.getters['schema/jsFunctionIdMap'],
 		presetIdMapRecordId:(s) => s.$store.getters['schema/presetIdMapRecordId'],
+		variableIdMap:      (s) => s.$store.getters['schema/variableIdMap'],
 		token:              (s) => s.$store.getters['local/token'],
 		access:             (s) => s.$store.getters.access,
 		builderEnabled:     (s) => s.$store.getters.builderEnabled,
@@ -748,7 +766,8 @@ let MyForm = {
 		loginPublicKey:     (s) => s.$store.getters.loginPublicKey,
 		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
 		patternStyle:       (s) => s.$store.getters.patternStyle,
-		settings:           (s) => s.$store.getters.settings
+		settings:           (s) => s.$store.getters.settings,
+		variableIdMapGlobal:(s) => s.$store.getters.variableIdMapGlobal
 	},
 	methods:{
 		// externals
@@ -828,10 +847,11 @@ let MyForm = {
 			// rebuild form if ID changed
 			if(this.lastFormId !== this.form.id) {
 				this.$store.commit('pageTitle',this.title);
-				this.message        = null;
-				this.showLog        = false;
-				this.titleOverwrite = null;
-				this.lastFormId     = this.form.id;
+				this.message            = null;
+				this.showLog            = false;
+				this.titleOverwrite     = null;
+				this.lastFormId         = this.form.id;
+				this.variableIdMapLocal = {};
 
 				if(!this.firstLoad) {
 					// on first load, field states do not need to be reset

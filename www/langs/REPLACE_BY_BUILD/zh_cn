@@ -209,6 +209,7 @@
 		"uninstall":"Uninstall",
 		"update":"Update",
 		"username":"用户名",
+		"variables":"Variables",
 		"version":"版本",
 		"warnings":"警告",
 		"widget":"新微件",
@@ -1410,6 +1411,7 @@
 			"placeholders":"占位符",
 			"placeholdersCollections":"集合",
 			"placeholdersFormFields":"表单字段",
+			"placeholdersVariables":"Variables",
 			"runOnce":"一次",
 			"runRegular":"定期",
 			"runType":"执行类型",
@@ -1547,6 +1549,9 @@
 			"relationEncryption":"端到端加密",
 			"relationEncryptionHint":"为该关系上的属性启用端到端加密（E2EE）。E2EE具有利弊，请在使用前仔细阅读构建者文档。此设置稍后无法更改。",
 			"role":"新角色",
+			"variable":"New variable",
+			"variableFormId":"Assigned to form",
+			"variableFormIdHint":"Assigning a variable to a form binds it to the particular form. It can then only be used on that form and its values will be reset once the form closes.<br /><br />Not assigning a variable to a form makes it 'global' and therefore persistent in the current user session.",
 			"widget":"新微件"
 		},
 		"openFormInput":{
@@ -1731,6 +1736,13 @@
 			"titleRolesHint":"定义每个人可以做什么或看到什么。",
 			"titleRelations":"定义关系",
 			"titleRelationsHint":"存储和添加数据到记录中。"
+		},
+		"variable":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this variable?"
+			},
+			"edit":"Variable '{NAME}'",
+			"title":"Variables"
 		},
 		"widget":{
 			"dialog":{
