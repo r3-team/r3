@@ -175,19 +175,15 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 			break;
 			
 			// form
-			case 'field': // fallthrough
-			case 'fieldEmpty':
+			case 'field':
 				const fld = dataFieldIdMap[s.fieldId];
 				if(fld !== undefined) {
 					const atrIdNm = typeof fld.attributeIdNm !== 'undefined'
 						? fld.attributeIdNm : null;
 					
-					const value = JSON.parse(JSON.stringify(values[getIndexAttributeId(
+					s.value = JSON.parse(JSON.stringify(values[getIndexAttributeId(
 						fld.index,fld.attributeId,fld.outsideIn === true,atrIdNm
-					)]))
-					
-					if(s.content === 'field') s.value = value;
-					else                      s.value = value === null;
+					)]));
 				}
 			break;
 			case 'fieldChanged': s.value = fieldIdsChanged.includes(s.fieldId);  break;

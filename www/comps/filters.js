@@ -635,7 +635,7 @@ let MyFilterSide = {
 		columnsMode: (s) => s.columns.length !== 0,
 		contentData: (s) => ['attribute','collection','preset','subQuery','value','true'].filter(v => !s.disableContent.includes(v)),
 		contentDate: (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
-		contentForm: (s) => ['formChanged','field','fieldChanged','fieldEmpty','fieldValid','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
+		contentForm: (s) => ['formChanged','field','fieldChanged','fieldValid','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
 		contentLogin:(s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
 		module:      (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
 		
@@ -643,7 +643,7 @@ let MyFilterSide = {
 		isAnyDate:    (s) => ['nowDate','nowDatetime','nowTime'].includes(s.content),
 		isAttribute:  (s) => s.content === 'attribute',
 		isCollection: (s) => s.content === 'collection',
-		isField:      (s) => ['field','fieldChanged','fieldEmpty','fieldValid'].includes(s.content),
+		isField:      (s) => ['field','fieldChanged','fieldValid'].includes(s.content),
 		isJavascript: (s) => s.content === 'javascript',
 		isNullPartner:(s) => !s.leftSide && s.isNullOperator,
 		isPreset:     (s) => s.content === 'preset',
@@ -697,7 +697,7 @@ let MyFilterSide = {
 				v.collectionId = null;
 				v.columnId     = null;
 			}
-			if(!['field','fieldChanged','fieldEmpty','fieldValid'].includes(v.content))
+			if(!['field','fieldChanged','fieldValid'].includes(v.content))
 				v.fieldId  = null;
 			
 			if(v.content !== 'preset') v.presetId = null;

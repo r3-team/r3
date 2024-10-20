@@ -664,7 +664,6 @@ let MyForm = {
 					case 'collection':   return getCollectionValues(side.collectionId,side.columnId,s.filterOperatorIsSingleValue(operator)); break;
 					case 'field':        return s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[side.fieldId],false)]; break;
 					case 'fieldChanged': return s.fieldIdsChanged.includes(side.fieldId); break;
-					case 'fieldEmpty':   return s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[side.fieldId],false)] === null; break;
 					case 'fieldValid':   return !s.fieldIdsInvalid.includes(side.fieldId); break;
 					case 'formChanged':  return s.hasChanges; break;
 					case 'languageCode': return s.settings.languageCode; break;

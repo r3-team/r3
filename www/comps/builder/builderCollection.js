@@ -285,7 +285,7 @@ let MyBuilderCollection = {
 			// state
 			columnIdShow:null,
 			filtersDisable:[
-				'collection','formChanged','field','fieldChanged','fieldEmpty',
+				'collection','formChanged','field','fieldChanged',
 				'fieldValid','javascript','record','recordNew'
 			],
 			showPreview:false,

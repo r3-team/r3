@@ -633,7 +633,7 @@ let MyBuilderApi = {
 			// state
 			columnIdShow:null,
 			filtersDisable:[
-				'collection','field','fieldChanged','fieldEmpty','fieldValid',
+				'collection','field','fieldChanged','fieldValid',
 				'formChanged','javascript','record','recordNew'
 			],
 			showPreview:false,
