@@ -138,15 +138,14 @@ export function getSubQueryFilterExpressions(subQuery) {
 };
 
 export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
-	fieldIdsChanged,fieldIdsInvalid,values,collectionIdMapIndexFilter) {
+	fieldIdsChanged,fieldIdsInvalid,fieldValues,collectionIdMapIndexFilter,variableIdMapLocal) {
 	
-	if(typeof dataFieldIdMap  === 'undefined') dataFieldIdMap  = {};
-	if(typeof fieldIdsChanged === 'undefined') fieldIdsChanged = [];
-	if(typeof fieldIdsInvalid === 'undefined') fieldIdsInvalid = [];
-	if(typeof values          === 'undefined') values          = {};
-	
-	if(typeof collectionIdMapIndexFilter === 'undefined')
-		collectionIdMapIndexFilter = {};
+	if(typeof dataFieldIdMap             === 'undefined') dataFieldIdMap             = {};
+	if(typeof fieldIdsChanged            === 'undefined') fieldIdsChanged            = [];
+	if(typeof fieldIdsInvalid            === 'undefined') fieldIdsInvalid            = [];
+	if(typeof fieldValues                === 'undefined') fieldValues                = {};
+	if(typeof collectionIdMapIndexFilter === 'undefined') collectionIdMapIndexFilter = {};
+	if(typeof variableIdMapLocal         === 'undefined') variableIdMapLocal         = {};
 	
 	let getFilterSideProcessed = function(s,operator) {
 		switch(s.content) {
@@ -165,13 +164,22 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 				s.query.expressions = getSubQueryFilterExpressions(s);
 				s.query.filters     = getQueryFiltersProcessed(
 					s.query.filters,joinsIndexMap,dataFieldIdMap,
-					fieldIdsChanged,fieldIdsInvalid,values,
-					collectionIdMapIndexFilter
+					fieldIdsChanged,fieldIdsInvalid,fieldValues,
+					collectionIdMapIndexFilter,variableIdMapLocal
 				);
 				s.query.limit = s.query.fixedLimit;
 			break;
-			case 'true':
-				s.value = true;
+			case 'true': s.value = true; break;
+			case 'variable':
+				if(variableIdMapLocal[s.variableId] !== undefined) {
+					s.value = variableIdMapLocal[s.variableId];
+				}
+				else if(MyStore.getters.variableIdMapGlobal[s.variableId] !== undefined) {
+					s.value = MyStore.getters.variableIdMapGlobal[s.variableId];
+				}
+				else {
+					s.value = null;
+				}
 			break;
 			
 			// form
@@ -181,7 +189,7 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 					const atrIdNm = typeof fld.attributeIdNm !== 'undefined'
 						? fld.attributeIdNm : null;
 					
-					s.value = JSON.parse(JSON.stringify(values[getIndexAttributeId(
+					s.value = JSON.parse(JSON.stringify(fieldValues[getIndexAttributeId(
 						fld.index,fld.attributeId,fld.outsideIn === true,atrIdNm
 					)]));
 				}
@@ -220,6 +228,7 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 		delete(s.fieldId);
 		delete(s.presetId);
 		delete(s.roleId);
+		delete(s.variableId);
 		return s;
 	};
 	

@@ -131,6 +131,7 @@
 		"filters":"Szűrők",
 		"form":"Űrlap",
 		"forms":"Űrlapok",
+		"global":"Global",
 		"home":"Kezdőlap",
 		"hotkey":"Hotkey",
 		"help":"Segítség",
@@ -1938,7 +1939,8 @@
 				"role":"user has role",
 				"subQuery":"Al-lekérdezés",
 				"true":"Igaz",
-				"value":"Állandó érték"
+				"value":"Állandó érték",
+				"variable":"variable value"
 			},
 			"contentHint":{
 				"attribute":"Az aktuális lekérdezés attribútumértéke.",
@@ -1959,7 +1961,8 @@
 				"role":"IGAZ/HAMIS, attól függően, hogy a jelenlegi bejelentkezéshez van-e rendelve a választott szerep.",
 				"subQuery":"A kiválasztott al-lekérdezés visszatérési értéke.",
 				"true":"IGAZ érték összehasonlításhoz más IGAZ értékekkel.",
-				"value":"Egy statikus érték az összehasonlításhoz."
+				"value":"Egy statikus érték az összehasonlításhoz.",
+				"variable":"Current variable value."
 			},
 			"nowMode":{
 				"days":"Nap",

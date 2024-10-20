@@ -442,14 +442,14 @@ func getFilterSide(queryId uuid.UUID, filterPosition int, side int) (types.Query
 	if err := db.Pool.QueryRow(db.Ctx, `
 		SELECT attribute_id, attribute_index, attribute_nested, brackets,
 			collection_id, column_id, content, field_id, now_offset, preset_id,
-			role_id, query_aggregator, value
+			role_id, variable_id, query_aggregator, value
 		FROM app.query_filter_side
 		WHERE query_id = $1
 		AND query_filter_position = $2
 		AND side = $3
 	`, queryId, filterPosition, side).Scan(&s.AttributeId, &s.AttributeIndex,
-		&s.AttributeNested, &s.Brackets, &s.CollectionId, &s.ColumnId,
-		&s.Content, &s.FieldId, &s.NowOffset, &s.PresetId, &s.RoleId,
+		&s.AttributeNested, &s.Brackets, &s.CollectionId, &s.ColumnId, &s.Content,
+		&s.FieldId, &s.NowOffset, &s.PresetId, &s.RoleId, &s.VariableId,
 		&s.QueryAggregator, &s.Value); err != nil {
 
 		return s, err
@@ -506,13 +506,13 @@ func SetFilterSide_tx(tx pgx.Tx, queryId uuid.UUID, filterPosition int,
 			query_id, query_filter_position, side, attribute_id,
 			attribute_index, attribute_nested, brackets, collection_id,
 			column_id, content, field_id, now_offset, preset_id, role_id,
-			query_aggregator, value
+			variable_id, query_aggregator, value
 		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
 	`, queryId, filterPosition, side, s.AttributeId, s.AttributeIndex,
 		s.AttributeNested, s.Brackets, s.CollectionId, s.ColumnId, s.Content,
-		s.FieldId, s.NowOffset, s.PresetId, s.RoleId, s.QueryAggregator,
-		s.Value); err != nil {
+		s.FieldId, s.NowOffset, s.PresetId, s.RoleId, s.VariableId,
+		s.QueryAggregator, s.Value); err != nil {
 
 		return err
 	}

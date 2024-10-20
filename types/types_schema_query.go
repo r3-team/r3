@@ -75,6 +75,7 @@ type QueryFilterSide struct {
 	FieldId      pgtype.UUID `json:"fieldId"`      // frontend field value
 	PresetId     pgtype.UUID `json:"presetId"`     // preset ID of record to be compared
 	RoleId       pgtype.UUID `json:"roleId"`       // role ID assigned to user
+	VariableId   pgtype.UUID `json:"variableId"`   // variable ID of value to compare
 
 	NowOffset pgtype.Int4 `json:"nowOffset"` // offset in seconds (+/-) for now* content (e. g. nowDatetime - 86400 -> last day)
 }

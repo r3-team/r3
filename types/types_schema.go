@@ -229,12 +229,13 @@ type FormStateCondition struct {
 }
 type FormStateConditionSide struct {
 	Brackets     int         `json:"brackets"`     // opening/closing brackets (side 0/1)
-	Content      string      `json:"content"`      // collection, field, fieldChanged, fieldValid, formChanged, login, preset, recordNew, role, true, value
+	Content      string      `json:"content"`      // collection, field, fieldChanged, fieldValid, formChanged, login, preset, recordNew, role, true, value, variable
 	CollectionId pgtype.UUID `json:"collectionId"` // collection ID of which column value to compare
 	ColumnId     pgtype.UUID `json:"columnId"`     // column ID from collection of which value to compare
-	FieldId      pgtype.UUID `json:"fieldId"`      // field for value/has changed?
+	FieldId      pgtype.UUID `json:"fieldId"`      // field ID, for checks: value / has changed / is valid
 	PresetId     pgtype.UUID `json:"presetId"`     // preset ID of record to be compared
 	RoleId       pgtype.UUID `json:"roleId"`       // role ID assigned to user
+	VariableId   pgtype.UUID `json:"variableId"`   // variable ID of value to retrieve
 	Value        pgtype.Text `json:"value"`        // fixed value, can be anything including NULL
 }
 type FormStateEffect struct {

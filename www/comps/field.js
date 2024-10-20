@@ -307,6 +307,7 @@ let MyField = {
 							:parentIsCounting="t.contentCounter"
 							:parentIsHidden="isHidden || i !== tabIndexShow"
 							:values="values"
+							:variableIdMapLocal="variableIdMapLocal"
 						/>
 					</div>
 				</div>
@@ -616,6 +617,7 @@ let MyField = {
 			:parentIsCounting="parentIsCounting"
 			:parentIsHidden="isHidden"
 			:values="values"
+			:variableIdMapLocal="variableIdMapLocal"
 		/>
 	</div>`,
 	props:{
@@ -638,7 +640,8 @@ let MyField = {
 		moduleId:           { type:String,  required:true },
 		parentIsCounting:   { type:Boolean, required:false, default:false }, // field parent is counting records (tab counter)
 		parentIsHidden:     { type:Boolean, required:false, default:false }, // field parent has its content hidden (tab/container)
-		values:             { type:Object,  required:true }
+		values:             { type:Object,  required:true },
+		variableIdMapLocal: { type:Object,  required:true }                  // variable values by ID (variables assigned to form)
 	},
 	emits:[
 		'clipboard','execute-function','hotkey','open-form','set-form-args',
@@ -796,14 +799,15 @@ let MyField = {
 				choices[i].filters = s.getQueryFiltersProcessed(
 					choices[i].filters,s.joinsIndexMap,s.dataFieldMap,
 					s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
-					s.collectionIdMapIndexes
+					s.collectionIdMapIndexes,s.variableIdMapLocal
 				);
 			}
 			return choices;
 		},
 		filtersProcessed:(s) => !s.isQuery ? [] : s.getQueryFiltersProcessed(
 			s.field.query.filters,s.joinsIndexMap,s.dataFieldMap,
-			s.fieldIdsChanged,s.fieldIdsInvalid,s.values,s.collectionIdMapIndexes
+			s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
+			s.collectionIdMapIndexes,s.variableIdMapLocal
 		),
 		iconId:(s) => {
 			if(s.field.iconId !== null)                 return s.field.iconId;

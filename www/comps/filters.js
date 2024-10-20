@@ -401,6 +401,21 @@ let MyFilterSide = {
 					</option>
 				</select>
 				
+				<!-- variable input -->
+				<select v-model="variableId" v-if="!columnsMode && isVariable">
+					<option :value="null">-</option>
+					<optgroup :label="capGen.form">
+						<option v-for="v in module.variables.filter(v => v.formId === formId)" :value="v.id">
+							{{ formIdMap[formId].name + ': ' + v.name }}
+						</option>
+					</optgroup>
+					<optgroup :label="capGen.global">
+						<option v-for="v in module.variables.filter(v => v.formId === null)" :value="v.id">
+							{{ v.name }}
+						</option>
+					</optgroup>
+				</select>
+				
 				<!-- date offset input -->
 				<template v-if="!columnsMode && isAnyDate">
 					<input
@@ -455,6 +470,7 @@ let MyFilterSide = {
 				:fieldIdMap="fieldIdMap"
 				:filters="query.filters"
 				:fixedLimit="query.fixedLimit"
+				:formId="formId"
 				:joins="query.joins"
 				:joinsParents="joinsParents.concat([joins])"
 				:lookups="query.lookups"
@@ -512,6 +528,7 @@ let MyFilterSide = {
 		disableContent:{ type:Array,   required:true },
 		entityIdMapRef:{ type:Object,  required:true },
 		fieldIdMap:    { type:Object,  required:true },
+		formId:        { type:String,  required:true },
 		isNullOperator:{ type:Boolean, required:true },
 		joins:         { type:Array,   required:true },
 		joinsParents:  { type:Array,   required:true },
@@ -619,6 +636,10 @@ let MyFilterSide = {
 			get()  { return this.modelValue.roleId; },
 			set(v) { this.set('roleId',v); }
 		},
+		variableId:{
+			get()  { return this.modelValue.variableId; },
+			set(v) { this.set('variableId',v); }
+		},
 		valueFixText:{
 			get()  { return this.modelValue.value; },
 			set(v) { this.set('value',v); }
@@ -633,7 +654,7 @@ let MyFilterSide = {
 		
 		// simple
 		columnsMode: (s) => s.columns.length !== 0,
-		contentData: (s) => ['attribute','collection','preset','subQuery','value','true'].filter(v => !s.disableContent.includes(v)),
+		contentData: (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
 		contentDate: (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
 		contentForm: (s) => ['formChanged','field','fieldChanged','fieldValid','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
 		contentLogin:(s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
@@ -650,9 +671,11 @@ let MyFilterSide = {
 		isRole:       (s) => s.content === 'role',
 		isSubQuery:   (s) => s.content === 'subQuery',
 		isValue:      (s) => s.content === 'value',
+		isVariable:   (s) => s.content === 'variable',
 		
 		// stores
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
 		capApp:         (s) => s.$store.getters.captions.filter,
 		capGen:         (s) => s.$store.getters.captions.generic
@@ -700,9 +723,10 @@ let MyFilterSide = {
 			if(!['field','fieldChanged','fieldValid'].includes(v.content))
 				v.fieldId  = null;
 			
-			if(v.content !== 'preset') v.presetId = null;
-			if(v.content !== 'role')   v.roleId   = null; 
-			if(v.content !== 'value')  v.value    = null;
+			if(v.content !== 'preset')   v.presetId   = null;
+			if(v.content !== 'role')     v.roleId     = null; 
+			if(v.content !== 'value')    v.value      = null;
+			if(v.content !== 'variable') v.variableId = null;
 			
 			if(v.content !== 'subQuery') {
 				v.query           = null;
@@ -757,6 +781,7 @@ let MyFilter = {
 			:disableContent="disableContent"
 			:entityIdMapRef="entityIdMapRef"
 			:fieldIdMap="fieldIdMap"
+			:formId="formId"
 			:isNullOperator="isNullOperator"
 			:joins="joins"
 			:joinsParents="joinsParents"
@@ -787,6 +812,7 @@ let MyFilter = {
 			:disableContent="disableContent"
 			:entityIdMapRef="entityIdMapRef"
 			:fieldIdMap="fieldIdMap"
+			:formId="formId"
 			:isNullOperator="isNullOperator"
 			:joins="joins"
 			:joinsParents="joinsParents"
@@ -825,6 +851,7 @@ let MyFilter = {
 		disableContent:         { type:Array,   required:true },
 		entityIdMapRef:         { type:Object,  required:true },
 		fieldIdMap:             { type:Object,  required:true },
+		formId:                 { type:String,  required:true },
 		indentation:            { type:Number,  required:true },
 		joins:                  { type:Array,   required:true },
 		joinsParents:           { type:Array,   required:true },
@@ -1001,6 +1028,7 @@ let MyFilters = {
 						:disableContent="disableContent"
 						:entityIdMapRef="entityIdMapRef"
 						:fieldIdMap="fieldIdMap"
+						:formId="formId"
 						:indentation="getIndentation(index)"
 						:joins="joins"
 						:joinsParents="joinsParents"
@@ -1050,6 +1078,7 @@ let MyFilters = {
 		entityIdMapRef:{ type:Object,  required:false, default:() => {return {}} },
 		fieldIdMap:    { type:Object,  required:false, default:() => {return {}} },
 		filterAddCnt:  { type:Number,  required:false, default:0 },
+		formId:        { type:String,  required:false, default:'' },
 		frontendOnly:  { type:Boolean, required:false, default:false },    // filter criteria must not contain backend types (attributes/queries)
 		joins:         { type:Array,   required:false, default:() => [] },
 		joinsParents:  { type:Array,   required:false, default:() => [] },

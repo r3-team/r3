@@ -131,6 +131,7 @@
 		"filters":"Filter",
 		"form":"Formular",
 		"forms":"Formulare",
+		"global":"Global",
 		"home":"Start",
 		"hotkey":"Hotkey",
 		"help":"Hilfe",
@@ -1938,7 +1939,8 @@
 				"role":"Benutzer hat Rolle",
 				"subQuery":"Sub-Query",
 				"true":"Wahrheitswert",
-				"value":"Fester Wert"
+				"value":"Fester Wert",
+				"variable":"Wert einer Variable"
 			},
 			"contentHint":{
 				"attribute":"Attributwert der aktuellen Query.",
@@ -1959,7 +1961,8 @@
 				"role":"WAHR/FALSCH, abhängig davon, ob der aktuelle Benutzer die gewählte Rolle zugewiesen ist.",
 				"subQuery":"Rückgabewert der gewählten Sub-Query.",
 				"true":"WAHR-Wert zum Vergleich mit anderen WAHR-Werten.",
-				"value":"Ein statischer Wert zum Vergleich."
+				"value":"Ein statischer Wert zum Vergleich.",
+				"variable":"Aktueller Wert einer Variable"
 			},
 			"nowMode":{
 				"days":"Tage",

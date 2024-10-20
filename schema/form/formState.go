@@ -92,14 +92,14 @@ func getStateConditionSide(formStateId uuid.UUID, position int, side int) (types
 
 	err := db.Pool.QueryRow(db.Ctx, `
 		SELECT collection_id, column_id, field_id, preset_id,
-			role_id, brackets, content, value
+			role_id, variable_id, brackets, content, value
 		FROM app.form_state_condition_side
 		WHERE form_state_id = $1
 		AND form_state_condition_position = $2
 		AND side = $3
 	`, formStateId, position, side).Scan(&s.CollectionId, &s.ColumnId,
-		&s.FieldId, &s.PresetId, &s.RoleId, &s.Brackets, &s.Content,
-		&s.Value)
+		&s.FieldId, &s.PresetId, &s.RoleId, &s.VariableId, &s.Brackets,
+		&s.Content, &s.Value)
 
 	return s, err
 }
@@ -235,11 +235,11 @@ func setStateConditionSide_tx(tx pgx.Tx, formStateId uuid.UUID,
 		INSERT INTO app.form_state_condition_side (
 			form_state_id, form_state_condition_position, side,
 			collection_id, column_id, field_id, preset_id, role_id,
-			brackets, content, value
+			variable_id, brackets, content, value
 		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
 	`, formStateId, position, side, s.CollectionId, s.ColumnId, s.FieldId,
-		s.PresetId, s.RoleId, s.Brackets, s.Content, s.Value)
+		s.PresetId, s.RoleId, s.VariableId, s.Brackets, s.Content, s.Value)
 
 	return err
 }

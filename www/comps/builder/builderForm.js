@@ -241,8 +241,9 @@ let MyBuilderForm = {
 						:allowFixedLimit="false"
 						:builderLanguage="builderLanguage"
 						:filters="filters"
-						:filtersDisable="['formChanged','field','fieldChanged','fieldValid']"
+						:filtersDisable="['formChanged','field','fieldChanged','fieldValid','variable']"
 						:fixedLimit="0"
+						:formId="id"
 						:joins="joins"
 						:moduleId="form.moduleId"
 						:relationId="relationId"
@@ -461,6 +462,7 @@ let MyBuilderForm = {
 							:fieldIdMap="fieldIdMap"
 							:filters="fieldShow.query.filters"
 							:fixedLimit="fieldShow.query.fixedLimit"
+							:formId="id"
 							:joins="fieldShow.query.joins"
 							:moduleId="module.id"
 							:orders="fieldShow.query.orders"
@@ -505,6 +507,7 @@ let MyBuilderForm = {
 						:fieldIdMap="fieldIdMap"
 						:filters="columnShow.query.filters"
 						:fixedLimit="columnShow.query.fixedLimit"
+						:formId="id"
 						:joins="columnShow.query.joins"
 						:joinsParents="[fieldShow.query.joins]"
 						:orders="columnShow.query.orders"
@@ -732,12 +735,12 @@ let MyBuilderForm = {
 		dataFields:       (s) => s.getDataFields(s.fields),
 		entityIdMapRef:   (s) => s.getFormEntityMapRef(s.fields,s.actions),
 		fieldContentFocus:(s) => ['button','data'],
-		fieldShow:        (s) => s.fieldIdShow === null || typeof s.fieldIdMap[s.fieldIdShow] === 'undefined' ? false : s.fieldIdMap[s.fieldIdShow],
+		fieldShow:        (s) => s.fieldIdShow === null || s.fieldIdMap[s.fieldIdShow] === undefined ? false : s.fieldIdMap[s.fieldIdShow],
 		fieldShowHasQuery:(s) => s.fieldShow !== false && s.getFieldHasQuery(s.fieldShow),
-		form:             (s) => typeof s.formIdMap[s.id] === 'undefined' ? false : s.formIdMap[s.id],
+		form:             (s) => s.formIdMap[s.id] === undefined ? false : s.formIdMap[s.id],
 		joinsIndexMap:    (s) => s.getJoinsIndexMap(s.joins),
 		presetCandidates: (s) => s.relation === false ? [] : s.relationIdMap[s.relationId].presets,
-		relation:         (s) => typeof s.relationIdMap[s.relationId] === 'undefined' ? false : s.relationIdMap[s.relationId],
+		relation:         (s) => s.relationIdMap[s.relationId] === undefined ? false : s.relationIdMap[s.relationId],
 		
 		// stores
 		module:        (s) => s.moduleIdMap[s.form.moduleId],

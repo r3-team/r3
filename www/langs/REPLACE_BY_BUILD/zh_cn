@@ -131,6 +131,7 @@
 		"filters":"过滤器",
 		"form":"表单",
 		"forms":"表单",
+		"global":"Global",
 		"help":"帮助",
 		"home":"主页",
 		"hotkey":"Hotkey",
@@ -1938,7 +1939,8 @@
 				"role":"user has role",
 				"subQuery":"子查询",
 				"true":"真值",
-				"value":"固定值"
+				"value":"固定值",
+				"variable":"variable value"
 			},
 			"contentHint":{
 				"attribute":"当前查询的属性值。",
@@ -1959,7 +1961,8 @@
 				"role":"根据当前登录是否具有给定角色分配而为 TRUE/FALSE。",
 				"subQuery":"返回给定子查询的值。",
 				"true":"用于与其他 TRUE 值进行比较的 TRUE 值。",
-				"value":"要与之进行比较的静态值。"
+				"value":"要与之进行比较的静态值。",
+				"variable":"Current variable value."
 			},
 			"nowMode":{
 				"days":"天",

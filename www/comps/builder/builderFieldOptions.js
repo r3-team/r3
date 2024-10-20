@@ -1164,21 +1164,18 @@ let MyBuilderFieldOptions = {
 									:value="field.jsFunctionId"
 								>
 									<option value="">-</option>
-									<option
-										v-for="fnc in module.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
-										:value="fnc.id"
-									>
+									<option v-for="fnc in module.jsFunctions.filter(v => v.formId === formId)" :value="fnc.id">
 										{{ fnc.name }}
+									</option>
+									<option v-for="fnc in module.jsFunctions.filter(v => v.formId === null)" :value="fnc.id">
+										{{ '[' + capGen.global + '] ' + fnc.name }}
 									</option>
 									<optgroup
 										v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.jsFunctions.length !== 0)"
 										:label="mod.name"
 									>
-										<option
-											v-for="fnc in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
-											:value="fnc.id"
-										>
-											{{ fnc.name }}
+										<option v-for="fnc in mod.jsFunctions.filter(v => v.formId === null)" :value="fnc.id">
+											{{ '[' + capGen.global + '] ' + fnc.name }}
 										</option>
 									</optgroup>
 								</select>

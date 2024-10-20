@@ -131,6 +131,7 @@
 		"filters":"Filtres",
 		"form":"Formulaire",
 		"forms":"Formulaires",
+		"global":"Global",
 		"help":"Aide",
 		"home":"Accueil",
 		"hotkey":"Hotkey",
@@ -1938,7 +1939,8 @@
 				"role":"l'utilisateur a un rôle",
 				"subQuery":"sous-requête",
 				"true":"valeur vraie",
-				"value":"valeur fixe"
+				"value":"valeur fixe",
+				"variable":"variable value"
 			},
 			"contentHint":{
 				"attribute":"Valeur d'attribut de la requête actuelle.",
@@ -1959,7 +1961,8 @@
 				"role":"TRUE/FALSE, en fonction de la présence ou de l'absence du rôle donné à l'utilisateur actuelle.",
 				"subQuery":"Valeur de retour de la sous-requête donnée.",
 				"true":"Valeur TRUE pour comparer avec d'autres valeurs TRUE.",
-				"value":"Une valeur statique à comparer."
+				"value":"Une valeur statique à comparer.",
+				"variable":"Current variable value."
 			},
 			"nowMode":{
 				"days":"jours",

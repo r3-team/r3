@@ -280,6 +280,7 @@ let MyForm = {
 					:key="f.id"
 					:moduleId="moduleId"
 					:values="values"
+					:variableIdMapLocal="variableIdMapLocal"
 				/>
 			</div>
 		</div>
@@ -298,6 +299,7 @@ let MyForm = {
 			:joinsIndexMap="joinsIndexMap"
 			:moduleId="moduleId"
 			:values="values"
+			:variableIdMapLocal="variableIdMapLocal"
 		/>
 		
 		<!-- form help articles -->
@@ -669,7 +671,7 @@ let MyForm = {
 					case 'languageCode': return s.settings.languageCode; break;
 					case 'login':        return s.loginId; break;
 					case 'preset':       return s.presetIdMapRecordId[side.presetId]; break;
-					case 'record':       return typeof s.joinsIndexMap['0'] !== 'undefined' ? s.joinsIndexMap['0'].recordId : false; break;
+					case 'record':       return s.joinsIndexMap['0'] !== undefined ? s.joinsIndexMap['0'].recordId : false; break;
 					case 'recordNew':    return s.isNew; break;
 					case 'role':         return s.access.roleIds.includes(side.roleId); break;
 					case 'true':         return true; break;
@@ -680,6 +682,13 @@ let MyForm = {
 							if(side.value.toLowerCase() === 'false') return false;
 						}
 						return side.value;
+					break;
+					case 'variable':
+						const va = s.variableIdMap[side.variableId];
+						if(va.formId !== null && va.formId === s.formId)
+							return s.variableIdMapLocal[va.id] !== undefined ? s.variableIdMapLocal[va.id] : null;
+	
+						return s.variableIdMapGlobal[va.id] !== undefined ? s.variableIdMapGlobal[va.id] : null;
 					break;
 				}
 				return false;

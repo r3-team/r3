@@ -74,6 +74,7 @@ let MyFormLog = {
 							:key="indexAttributeIdMapField[ia].id"
 							:moduleId="moduleId"
 							:values="{ ...values, ...l.values }"
+							:variableIdMapLocal="variableIdMapLocal"
 						/>
 						
 						<!-- file attribute logs -->
@@ -122,16 +123,17 @@ let MyFormLog = {
 		</div>
 	</div>`,
 	props:{
-		dataFieldMap:     { type:Object,  required:true },
-		entityIdMapState: { type:Object,  required:true },
-		form:             { type:Object,  required:true },
-		formLoading:      { type:Boolean, required:true },
-		isPopUp:          { type:Boolean, required:true },
-		isPopUpFloating:  { type:Boolean, required:true },
-		indexMapRecordKey:{ type:Object,  required:true },
-		joinsIndexMap:    { type:Object,  required:true },
-		moduleId:         { type:String,  required:true },
-		values:           { type:Object,  required:true }
+		dataFieldMap:      { type:Object,  required:true },
+		entityIdMapState:  { type:Object,  required:true },
+		form:              { type:Object,  required:true },
+		formLoading:       { type:Boolean, required:true },
+		isPopUp:           { type:Boolean, required:true },
+		isPopUpFloating:   { type:Boolean, required:true },
+		indexMapRecordKey: { type:Object,  required:true },
+		joinsIndexMap:     { type:Object,  required:true },
+		moduleId:          { type:String,  required:true },
+		values:            { type:Object,  required:true },
+		variableIdMapLocal:{ type:Object,  required:true }
 	},
 	emits:['close-log'],
 	watch:{

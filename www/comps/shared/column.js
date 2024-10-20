@@ -12,7 +12,7 @@ import {
 } from './language.js';
 
 export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
-	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,values) {
+	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,fieldValues) {
 
 	columns = JSON.parse(JSON.stringify(columns));
 
@@ -49,8 +49,8 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
 		// resolve sub query filters
 		if(c.subQuery) {
 			c.query.filters = getQueryFiltersProcessed(
-				c.query.filters,joinsIndexMap,
-				dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,values
+				c.query.filters,joinsIndexMap,dataFieldIdMap,
+				fieldIdsChanged,fieldIdsInvalid,fieldValues
 			);
 		}
 		out.push(c);

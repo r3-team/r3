@@ -131,6 +131,7 @@
 		"filters":"Filtri",
 		"form":"Form",
 		"forms":"Moduli",
+		"global":"Global",
 		"help":"Help",
 		"home":"Home",
 		"hotkey":"Hotkey",
@@ -1938,7 +1939,8 @@
 				"role":"user has role",
 				"subQuery":"sub query",
 				"true":"true value",
-				"value":"fixed value"
+				"value":"fixed value",
+				"variable":"variable value"
 			},
 			"contentHint":{
 				"attribute":"Attribute value from the current query.",
@@ -1959,7 +1961,8 @@
 				"role":"TRUE/FALSE, depending on the whether the current login has the given role assigned.",
 				"subQuery":"Return value of the given sub query.",
 				"true":"TRUE value to compare other TRUE values against.",
-				"value":"A static value to compare against."
+				"value":"A static value to compare against.",
+				"variable":"Current variable value."
 			},
 			"nowMode":{
 				"days":"days",

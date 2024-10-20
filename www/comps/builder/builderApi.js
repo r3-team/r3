@@ -634,7 +634,7 @@ let MyBuilderApi = {
 			columnIdShow:null,
 			filtersDisable:[
 				'collection','field','fieldChanged','fieldValid',
-				'formChanged','javascript','record','recordNew'
+				'formChanged','javascript','record','recordNew','variable'
 			],
 			showPreview:false,
 			showSidebar:true,

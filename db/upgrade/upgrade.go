@@ -541,6 +541,30 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				DEFERRABLE INITIALLY DEFERRED;
 			CREATE INDEX IF NOT EXISTS fki_js_function_depends_variable_id_on_fkey ON app.js_function_depends
 				USING BTREE (variable_id_on ASC NULLS LAST);
+			
+			ALTER TABLE app.form_state_condition_side
+				ADD COLUMN variable_id UUID,
+				ADD CONSTRAINT form_state_condition_side_variable_id_fkey FOREIGN KEY (variable_id)
+					REFERENCES app.variable (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX fki_form_state_condition_side_variable_id_fkey ON app.form_state_condition_side
+				USING btree (variable_id ASC NULLS LAST);
+			
+			ALTER TABLE app.query_filter_side
+				ADD COLUMN variable_id UUID,
+				ADD CONSTRAINT query_filter_side_variable_id_fkey FOREIGN KEY (variable_id)
+					REFERENCES app.variable (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX fki_query_filter_side_variable_id_fkey ON app.query_filter_side
+				USING btree (variable_id ASC NULLS LAST);
+			
+			ALTER TYPE app.filter_side_content ADD VALUE 'variable';
 		`)
 		return "3.9", err
 	},

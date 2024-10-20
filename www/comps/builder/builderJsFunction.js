@@ -311,7 +311,7 @@ let MyBuilderJsFunction = {
 								<my-button
 									@trigger="selectEntity('jsFunction',fnc.id)"
 									:adjusts="true"
-									:caption="fnc.formId === null ? fnc.name : form.name + ': ' + fnc.name"
+									:caption="fnc.formId === null ? '[' + capGen.global + '] ' + fnc.name : fnc.name"
 									:captionTitle="fnc.name"
 									:image="radioIcon('jsFunction',fnc.id)"
 									:naked="true"
@@ -427,7 +427,7 @@ let MyBuilderJsFunction = {
 									@trigger="toggleVariableShow(v.id)"
 									:image="holderVariableIdsOpen.includes(v.id) ? 'triangleDown.png' : 'triangleRight.png'"
 									:naked="true"
-									:caption="v.formId === null ? v.name : form.name + ': ' + v.name"
+									:caption="v.formId === null ? '[' + capGen.global + '] ' + v.name : v.name"
 									:captionTitle="v.name"
 								/>
 								<router-link :key="v.id" :to="'/builder/variables/'+module.id+'?variableIdEdit='+v.id">
@@ -705,10 +705,10 @@ let MyBuilderJsFunction = {
 			}
 			return text;
 		},
-		jsFunctionsSorted:(s) => s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === null).concat(
-			s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === s.formId && s.formId !== null)),
-		variablesSorted:(s) => s.moduleIdMap[s.module.id].variables.filter(v => v.formId === null).concat(
-			s.moduleIdMap[s.module.id].variables.filter(v => v.formId === s.formId && s.formId !== null)),
+		jsFunctionsSorted:(s) => s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === s.formId && s.formId !== null).concat(
+			s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === null)),
+		variablesSorted:(s) => s.moduleIdMap[s.module.id].variables.filter(v => v.formId === s.formId && s.formId !== null).concat(
+			s.moduleIdMap[s.module.id].variables.filter(v => v.formId === null)),
 		
 		// simple
 		entityIdMapRef:    (s) => s.formId === null ? {} : s.getFormEntityMapRef(s.form.fields,s.form.actions),

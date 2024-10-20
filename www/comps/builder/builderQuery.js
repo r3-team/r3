@@ -55,6 +55,7 @@ let MyBuilderQueryChoice = {
 			:builderMode="true"
 			:entityIdMapRef="entityIdMapRef"
 			:fieldIdMap="fieldIdMap"
+			:formId="formId"
 			:joins="joins"
 			:joinsParents="joinsParents"
 			:moduleId="moduleId"
@@ -72,6 +73,7 @@ let MyBuilderQueryChoice = {
 		choice:         { type:Object, required:true },
 		entityIdMapRef: { type:Object, required:true },
 		fieldIdMap:     { type:Object, required:true },
+		formId:         { type:String, required:true },
 		joins:          { type:Array,  required:true },
 		joinsParents:   { type:Array,  required:true },
 		moduleId:       { type:String, required:true },
@@ -639,6 +641,7 @@ let MyBuilderQuery = {
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
 				:filterAddCnt="filterAddCnt"
+				:formId="formId"
 				:joins="joins"
 				:joinsParents="joinsParents"
 				:moduleId="moduleId"
@@ -681,6 +684,7 @@ let MyBuilderQuery = {
 				:choice="choicesInput[i]"
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
+				:formId="formId"
 				:joins="joins"
 				:joinsParents="joinsParents"
 				:key="i+'_'+c.id"
@@ -749,6 +753,7 @@ let MyBuilderQuery = {
 		filters:        { type:Array,   required:true },
 		filtersDisable: { type:Array,   required:false, default:() => [] }, // filter content to disable (attribute, javascript, collection, preset, ...)
 		fixedLimit:     { type:Number,  required:true },
+		formId:         { type:String,  required:false, default:'' },       // ID of form in which context the query is used
 		lookups:        { type:Array,   required:false, default:() => [] },
 		joins:          { type:Array,   required:true },                    // available relations, incl. source relation
 		joinsParents:   { type:Array,   required:false, default:() => [] }, // each item is an array of joins from a parent query

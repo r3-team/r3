@@ -140,6 +140,7 @@ let MyBuilderFormState = {
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
 				:filterAddCnt="filterAddCnt"
+				:formId="form.id"
 				:moduleId="form.moduleId"
 				:showAdd="true"
 				:showMove="true"
