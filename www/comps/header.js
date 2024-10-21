@@ -166,12 +166,12 @@ let MyHeader = {
 			
 			<!-- system message, maintenance timer -->
 			<div class="entry clickable" tabindex="0"
-				v-if="maintenanceInSec > 0"
+				v-if="showMaintenance && systemMsgActive"
 				@click="openSystemMsg"
 				@keyup.enter="openSystemMsg"
 			>
 				<img src="images/warning.png" />
-				<span v-if="showMaintenance">
+				<span v-if="maintenanceInSec > 0">
 					{{ getStringFilled(Math.floor(maintenanceInSec / 60),2,'0') + ':' + getStringFilled(maintenanceInSec % 60,2,'0') }}
 				</span>
 			</div>
@@ -317,7 +317,7 @@ let MyHeader = {
 		},
 		maintenanceComing:(s) => {
 			const now = Math.floor(new Date().getTime() / 1000);
-			return s.activated && s.systemMsgActive && s.systemMsgMaintenance &&
+			return s.systemMsgActive && s.systemMsgMaintenance &&
 				(s.systemMsgDate0 === 0 || s.systemMsgDate0 < now) &&
 				(s.systemMsgDate1 === 0 || s.systemMsgDate1 > now) &&
 				(s.systemMsgDate1 - now < 1800);
@@ -349,7 +349,6 @@ let MyHeader = {
 		showNavPrev:     (s) => s.layoutElementsProcessed.includes('navigationPrev'),
 		
 		// stores
-		activated:           (s) => s.$store.getters['local/activated'],
 		moduleIdMap:         (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:       (s) => s.$store.getters['schema/moduleNameMap'],
 		formIdMap:           (s) => s.$store.getters['schema/formIdMap'],

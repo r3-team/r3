@@ -775,12 +775,15 @@ let MyApp = {
 					(this.systemMsgDate0 === 0 || this.systemMsgDate0 < now) &&
 					(this.systemMsgDate1 === 0 || this.systemMsgDate1 > now);
 				
+				// wait for appReady as captions are not available before and authentication should occur first
+				if(!this.appReady || !this.activated)
+					return;
+				
 				if(msgActive !== this.systemMsgActive)
 					this.$store.commit('systemMsgActive',msgActive);
 
-				if(msgActive && this.appReady && this.activated && this.systemMsgText !== '' && !this.systemMsgTextShown) {
+				if(msgActive && this.systemMsgText !== '' && !this.systemMsgTextShown) {
 					// switched to active, message text available and not yet shown -> show system message once
-					// wait for appReady as captions are not available before and authentication should occur first
 					this.$store.commit('dialog',{
 						captionTop:this.capGen.dialog.systemMsg,
 						captionBody:this.systemMsgText,
