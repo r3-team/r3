@@ -38,7 +38,7 @@ let MyBuilderWidget = {
 						:caption="capGen.button.refresh"
 					/>
 					<my-button image="delete.png"
-						@trigger="del"
+						@trigger="delAsk"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"

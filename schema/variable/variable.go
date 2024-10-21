@@ -18,10 +18,13 @@ func Get(moduleId uuid.UUID) ([]types.Variable, error) {
 
 	variables := make([]types.Variable, 0)
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, form_id, name, comment
-		FROM app.variable
-		WHERE module_id = $1
-		ORDER BY name ASC
+		SELECT v.id, v.form_id, v.name, v.comment
+		FROM      app.variable  AS v
+		LEFT JOIN app.form      AS f ON f.id = v.form_id
+		WHERE v.module_id = $1
+		ORDER BY
+			f.name ASC NULLS FIRST,
+			v.name ASC
 	`, moduleId)
 	if err != nil {
 		return variables, err
