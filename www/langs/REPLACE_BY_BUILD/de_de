@@ -151,6 +151,7 @@
 		"inputTooFewFiles":"Zu wenige Dateien",
 		"inputTooManyFiles":"Zu viele Dateien",
 		"install":"Installieren",
+		"internalName":"Der Name dient als interne Referenz - er wird den Benutzern nicht angezeigt.",
 		"interval":"Intervall",
 		"jsFunction":"Funktion (front)",
 		"jsFunctions":"Funktionen (front)",
@@ -1743,6 +1744,8 @@
 				"delete":"Bist du sicher, dass du diese Variable löschen möchtest?"
 			},
 			"edit":"Variable '{NAME}'",
+			"formIdHint":"Variable ist nur im Kontext des zugewiesenen Formulars gültig.",
+			"global":"Globale Variable",
 			"title":"Variabeln"
 		},
 		"widget":{
@@ -1752,7 +1755,6 @@
 			"collectionHint":"Widget zeigt den Inhalt der ausgewählten Sammlung.",
 			"edit":"Widget '{NAME}'",
 			"formHint":"Widget zeigt den Inhalt des ausgewählten Formulars.",
-			"nameHint":"Der Name dient als interne Referenz - er wird den Benutzern nicht angezeigt.",
 			"new":"Neues Widget",
 			"sizeHint":"Widgets werden als Kacheln angezeigt, wobei jede Kachel 1 oder 2 Plätze besetzt.",
 			"title":"Widgets",

@@ -152,6 +152,7 @@
 		"inputTooManyFiles":"文件太多",
 		"install":"Install",
 		"interval":"间隔",
+		"internalName":"名称作为内部引用，不会显示给用户。",
 		"jsFunction":"Function (front)",
 		"jsFunctions":"函数（前端）",
 		"label":"标签",
@@ -1743,6 +1744,8 @@
 				"delete":"Are you sure you want to delete this variable?"
 			},
 			"edit":"Variable '{NAME}'",
+			"formIdHint":"Variable is only available in the context of the assigned form.",
+			"global":"Global variable",
 			"title":"Variables"
 		},
 		"widget":{
@@ -1752,7 +1755,6 @@
 			"collectionHint":"小部件将显示所选集合的内容。",
 			"edit":"编辑小部件“{NAME}”",
 			"formHint":"小部件将显示所选表单的内容。",
-			"nameHint":"名称作为内部引用，不会显示给用户。",
 			"new":"新建小部件",
 			"sizeHint":"小部件以瓷砖形式显示，每个瓷砖占据1或2个瓷砖的空间。",
 			"title":"小部件",

@@ -57,9 +57,9 @@ let MyBuilderVariable = {
 								</div>
 								<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
 							</td>
-							<td></td>
+							<td>{{ capGen.internalName }}</td>
 						</tr>
-						<tr>
+						<tr v-if="values.formId !== null">
 							<td>{{ capGen.form }}</td>
 							<td>
 								<my-builder-form-input
@@ -69,7 +69,16 @@ let MyBuilderVariable = {
 									:showOpen="true"
 								/>
 							</td>
-							<td></td>
+							<td>{{ capApp.formIdHint }}</td>
+						</tr>
+						<tr v-if="values.formId === null">
+							<td colspan="3"><i>{{ capApp.global }}</i></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.comments }}</td>
+							<td colspan="2">
+								<textarea class="dynamic" v-model="values.comment" :disabled="readonly"></textarea>
+							</td>
 						</tr>
 					</tbody>
 				</table>

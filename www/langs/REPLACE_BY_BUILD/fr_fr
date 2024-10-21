@@ -152,6 +152,7 @@
 		"inputTooManyFiles":"Trop de fichiers",
 		"install":"Install",
 		"interval":"Intervalle",
+		"internalName":"Le nom sert de référence interne - il n'est pas affiché aux utilisateurs.",
 		"jsFunction":"Function (front)",
 		"jsFunctions":"Fonctions (front)",
 		"label":"Étiquette",
@@ -1743,6 +1744,8 @@
 				"delete":"Are you sure you want to delete this variable?"
 			},
 			"edit":"Variable '{NAME}'",
+			"formIdHint":"Variable is only available in the context of the assigned form.",
+			"global":"Global variable",
 			"title":"Variables"
 		},
 		"widget":{
@@ -1752,7 +1755,6 @@
 			"collectionHint":"Le widget affichera le contenu d'une collection choisie.",
 			"edit":"Widget '{NAME}'",
 			"formHint":"Le widget affichera le contenu d'un formulaire choisi.",
-			"nameHint":"Le nom sert de référence interne - il n'est pas affiché aux utilisateurs.",
 			"new":"Nouveau widget",
 			"sizeHint":"Les widgets sont affichés sous forme de tuiles, chacun occupant un espace de 1 ou 2 tuiles.",
 			"title":"Widgets",

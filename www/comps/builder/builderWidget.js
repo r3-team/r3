@@ -61,7 +61,7 @@ let MyBuilderWidget = {
 								</div>
 								<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
 							</td>
-							<td>{{ capApp.nameHint }}</td>
+							<td>{{ capGen.internalName }}</td>
 						</tr>
 						<tr>
 							<td>{{ capGen.title }}</td>
