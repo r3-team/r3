@@ -410,7 +410,7 @@ let MyBuilderJsFunction = {
 						<my-button
 							@trigger="showHolderVariable = !showHolderVariable"
 							:caption="capApp.placeholdersVariables"
-							:images="[showHolderVariable ? 'triangleDown.png' : 'triangleRight.png','tray.png']"
+							:images="[showHolderVariable ? 'triangleDown.png' : 'triangleRight.png','variable.png']"
 							:large="true"
 							:naked="true"
 						/>
@@ -568,8 +568,7 @@ let MyBuilderJsFunction = {
 				'get_url_query_string','get_user_id','go_back','has_role','pdf_create',
 				'record_delete','record_new','record_reload','record_save',
 				'record_save_new','set_e2ee_by_user_ids','set_e2ee_by_user_ids_and_relation',
-				'timer_clear','timer_clear_global','timer_set','timer_set_global',
-				'value_store_get','value_store_set'
+				'timer_clear','timer_clear_global','timer_set','timer_set_global'
 			],
 			appFunctionsAsync:[
 				'dialog_show','get_e2ee_data_key','get_e2ee_data_value','pdf_create'
@@ -578,7 +577,7 @@ let MyBuilderJsFunction = {
 				'client_execute_keystrokes','copy_to_clipboard','form_open',
 				'get_preset_record_id','get_url_query_string','get_language_code',
 				'get_role_ids','get_user_id','go_back','has_role','pdf_create',
-				'timer_clear_global','timer_set_global','value_store_get','value_store_set'
+				'timer_clear_global','timer_set_global'
 			],
 			
 			// states

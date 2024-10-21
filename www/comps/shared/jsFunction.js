@@ -218,6 +218,7 @@ export function jsFunctionRun(jsFunctionId,args,exposedFunctionsContext) {
 		},
 
 		// session value store
+		// DEPRECATED as of R3.9, replaced by global variables
 		value_store_get:(k) => typeof MyStore.getters.sessionValueStore[fnc.moduleId] !== 'undefined'
 			&& typeof MyStore.getters.sessionValueStore[fnc.moduleId][k] !== 'undefined'
 				? MyStore.getters.sessionValueStore[fnc.moduleId][k]

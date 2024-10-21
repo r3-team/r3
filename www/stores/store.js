@@ -70,7 +70,6 @@ const MyStore = Vuex.createStore({
 		searchDictionaries:[],         // dictionaries used for full text search for this login, ['english', 'german', ...]
 		settings:{},                   // setting values for logged in user, key: settings name
 		sessionTimerStore:{},          // user session timer store for frontent functions,     { moduleId1:{ timerName1:{ id:jsTimerId, isInterval:true }, ... }, ... }
-		sessionValueStore:{},          // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
 		system:{},                     // system details (admin only)
 		systemMsg:{                    // system message
 			date0:0,                   // date from
@@ -81,7 +80,10 @@ const MyStore = Vuex.createStore({
 		systemMsgActive:false,         // system message is active based on date0 / date1
 		systemMsgTextShown:false,      // system message text was already shown to the user
 		tokenKeepEnable:false,         // allow users to keep token to 'stay logged in',
-		variableIdMapGlobal:{}         // variable values by ID (global variables only)
+		variableIdMapGlobal:{},        // variable values by ID (global variables only)
+
+		// DEPRECATED as of R3.9, replaced by global variables
+		sessionValueStore:{} // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
 	},
 	mutations:{
 		config:(state,payload) => {
@@ -202,15 +204,6 @@ const MyStore = Vuex.createStore({
 				delete(state.sessionTimerStore[payload.moduleId][payload.name]);
 			}
 		},
-		sessionValueStore:(state,payload) => {
-			if(state.sessionValueStore[payload.moduleId] === undefined)
-				state.sessionValueStore[payload.moduleId] = {};
-			
-			state.sessionValueStore[payload.moduleId][payload.key] = payload.value;
-		},
-		sessionValueStoreReset:(state,payload) => {
-			state.sessionValueStore = {};
-		},
 		systemMsg:(state,payload) => {
 			// if any content changed, reset whether the system message was already shown to user
 			state.systemMsgTextShown = JSON.stringify(state.systemMsg) === JSON.stringify(payload);
@@ -264,7 +257,18 @@ const MyStore = Vuex.createStore({
 		system:                  (state,payload) => state.system                   = payload,
 		systemMsgActive:         (state,payload) => state.systemMsgActive          = payload,
 		systemMsgTextShown:      (state,payload) => state.systemMsgTextShown       = payload,
-		tokenKeepEnable:         (state,payload) => state.tokenKeepEnable          = payload
+		tokenKeepEnable:         (state,payload) => state.tokenKeepEnable          = payload,
+
+		// DEPRECATED
+		sessionValueStore:(state,payload) => {
+			if(state.sessionValueStore[payload.moduleId] === undefined)
+				state.sessionValueStore[payload.moduleId] = {};
+			
+			state.sessionValueStore[payload.moduleId][payload.key] = payload.value;
+		},
+		sessionValueStoreReset:(state,payload) => {
+			state.sessionValueStore = {};
+		}
 	},
 	getters:{
 		colorHeaderAccent:(state,payload) => {
@@ -404,7 +408,6 @@ const MyStore = Vuex.createStore({
 		pwaDomainMap:            (state) => state.pwaDomainMap,
 		routingGuards:           (state) => state.routingGuards,
 		searchDictionaries:      (state) => state.searchDictionaries,
-		sessionValueStore:       (state) => state.sessionValueStore,
 		settings:                (state) => state.settings,
 		system:                  (state) => state.system,
 		systemMsgActive:         (state) => state.systemMsgActive,
@@ -414,6 +417,9 @@ const MyStore = Vuex.createStore({
 		systemMsgText:           (state) => state.systemMsg.text,
 		systemMsgTextShown:      (state) => state.systemMsgTextShown,
 		tokenKeepEnable:         (state) => state.tokenKeepEnable,
-		variableIdMapGlobal:     (state) => state.variableIdMapGlobal
+		variableIdMapGlobal:     (state) => state.variableIdMapGlobal,
+
+		// DEPRECATED
+		sessionValueStore:(state) => state.sessionValueStore
 	}
 });

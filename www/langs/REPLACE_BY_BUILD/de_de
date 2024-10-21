@@ -1280,9 +1280,7 @@
 				"timer_clear":"app.timer_clear({ARGS}) => UNDEFINED<br /><br />Bricht einen Timer mit dem angegebenen Namen ab, welcher vorher mit \"app.timer_set()\" erstellt worden ist.",
 				"timer_clear_global":"app.timer_clear_global({ARGS}) => UNDEFINED<br /><br />Bricht einen globalen Timer mit dem angegebenen Namen ab, welcher vorher mit \"app.timer_set_global()\" erstellt worden ist.",
 				"timer_set":"app.timer_set({ARGS}) => UNDEFINED<br /><br />Führt eine Funktion nach einer definierten Zeit in Millisekunden aus. Wenn \"isInterval\" auf TRUE gestellt ist, wird die Funktion wiederholt ausgeführt.<br /><br />Ein Timer ist immer an das aktuelle Formular gebunden. Wenn das Formular zurückgesetzt oder verlassen wird, werden auch Timer zurückgesetzt.<br /><br />Jeder Timer braucht einen einzigartigen Namen, welcher später genutzt werden kann, um den Timer mit \"app.timer_clear()\" abzubrechen; Timer mit dem gleichen Namen überschreiben sich gegenseitig.",
-				"timer_set_global":"app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Führt eine Funktion nach einer definierten Zeit in Millisekunden aus. Wenn \"isInterval\" auf TRUE gestellt ist, wird die Funktion wiederholt ausgeführt.<br /><br />Ein globaler Timer wird fortgeführt, selbst wenn der Kontext (bspw. ein Formular auf dem er gestartet worden ist) verlassen wurde.<br /><br />Jeder globale Timer braucht einen einzigartigen Namen, welcher später genutzt werden kann, um den Timer mit \"app.timer_clear_global()\" abzubrechen; globale Timer mit dem gleichen Namen, von der gleichen Anwendung, überschreiben sich gegenseitig.",
-				"value_store_get":"app.value_store_get({ARGS}) => VALUE_ANY_TYPE<br /><br />Liefert einen Wert, der vorher mit einem gewählten Schlüssel gespeichert worden ist.",
-				"value_store_set":"app.value_store_set({ARGS}) => UNDEFINED<br /><br />Speichert einen Wert für eine spätere Verwendung. Werte werden mit einem Referenzschlüssel gespeichtert (ein beliebiger Name) und können nur in der gleichen Anwendung genutzt werden.<br /><br />Der Value-Store ist sitzungsbasiert; Werte sind nicht verfügbar auf einem anderen Gerät oder nachdem die Seite neu geladen worden ist."
+				"timer_set_global":"app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Führt eine Funktion nach einer definierten Zeit in Millisekunden aus. Wenn \"isInterval\" auf TRUE gestellt ist, wird die Funktion wiederholt ausgeführt.<br /><br />Ein globaler Timer wird fortgeführt, selbst wenn der Kontext (bspw. ein Formular auf dem er gestartet worden ist) verlassen wurde.<br /><br />Jeder globale Timer braucht einen einzigartigen Namen, welcher später genutzt werden kann, um den Timer mit \"app.timer_clear_global()\" abzubrechen; globale Timer mit dem gleichen Namen, von der gleichen Anwendung, überschreiben sich gegenseitig."
 			},
 			"helpJsArgs":{
 				"block_inputs":["block_input BOOLEAN"],
@@ -1304,9 +1302,7 @@
 				"timer_clear":["name STRING"],
 				"timer_clear_global":["name STRING"],
 				"timer_set":["name STRING", "is_interval BOOLEAN", "function FUNCTION", "milliseconds NUMBER"],
-				"timer_set_global":["name STRING", "is_interval BOOLEAN", "function FUNCTION", "milliseconds NUMBER"],
-				"value_store_get":["key STRING"],
-				"value_store_set":["key STRING", "value ANYTHING"]
+				"timer_set_global":["name STRING", "is_interval BOOLEAN", "function FUNCTION", "milliseconds NUMBER"]
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message({ARGS}) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",

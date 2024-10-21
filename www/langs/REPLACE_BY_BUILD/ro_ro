@@ -1280,9 +1280,7 @@
 				"timer_clear":"app.timer_clear({ARGS}) => UNDEFINED<br /><br />Aborts a timer with the given name, previously created with 'app.timer_set()'.",
 				"timer_clear_global":"app.timer_clear_global({ARGS}) => UNDEFINED<br /><br />Aborts a global timer with the given name, previously created with 'app.timer_set_global()'.",
 				"timer_set":"app.timer_set({ARGS}) => UNDEFINED<br /><br />Executes a given function after a specified time in milliseconds. If 'isInterval' is set to TRUE, the function is repeatedly called.<br /><br />A timer is always bound to the current form. When resetting or leaving the form, timers are reset as well.<br /><br />Each timer must have a unique name, which can be used to later abort the timer with 'timer_clear()'; timers with the same name overwrite each other.",
-				"timer_set_global":"app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Executes a given function after a specified time in milliseconds. If 'isInterval' is set to TRUE, the function is repeatedly called.<br /><br />A global timer continues even if the current context (like a form from which it was started) is closed.<br /><br />Each timer must have a unique name, which can be used to later abort the timer with 'timer_clear_global()'; global timers with the same name, from the same application, overwrite each other.",
-				"value_store_get":"app.value_store_get({ARGS}) => VALUE_ANY_TYPE<br /><br />Returns a value, previously stored with the given key.",
-				"value_store_set":"app.value_store_set({ARGS}) => UNDEFINED<br /><br />Stores a value for later use. Values are stored with a reference key (an arbitrary name) and can only be accessed within the same application.<br /><br />The value store is session based; values are not available on another device or when the user refreshes the page."
+				"timer_set_global":"app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Executes a given function after a specified time in milliseconds. If 'isInterval' is set to TRUE, the function is repeatedly called.<br /><br />A global timer continues even if the current context (like a form from which it was started) is closed.<br /><br />Each timer must have a unique name, which can be used to later abort the timer with 'timer_clear_global()'; global timers with the same name, from the same application, overwrite each other."
 			},
 			"helpJsArgs":{
 				"block_inputs":["block_input BOOLEAN"],
@@ -1304,9 +1302,7 @@
 				"timer_clear":["name STRING"],
 				"timer_clear_global":["name STRING"],
 				"timer_set":["name STRING", "is_interval BOOLEAN", "function FUNCTION", "milliseconds NUMBER"],
-				"timer_set_global":["name STRING", "is_interval BOOLEAN", "function FUNCTION", "milliseconds NUMBER"],
-				"value_store_get":["key STRING"],
-				"value_store_set":["key STRING", "value ANYTHING"]
+				"timer_set_global":["name STRING", "is_interval BOOLEAN", "function FUNCTION", "milliseconds NUMBER"]
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message({ARGS}) => VOID<br /><br />Anulează operația și trimite un mesaj utilizatorului care rulează acum și care este afișat pe ecranul utilizatorului.",

@@ -1280,9 +1280,7 @@
 				"timer_clear":"app.timer_clear({ARGS}) => UNDEFINED<br /><br />终止之前使用 'app.timer_set()' 创建的具有指定名称的计时器。",
 				"timer_clear_global":"app.timer_clear_global({ARGS}) => UNDEFINED<br /><br />Aborts a global timer with the given name, previously created with 'app.timer_set_global()'.",
 				"timer_set":"app.timer_set({ARGS}) => UNDEFINED<br /><br />在指定的毫秒数后执行给定的函数。如果 'isInterval' 设置为 TRUE，该函数将被重复调用。<br /><br />计时器始终绑定到当前表单。当重置或离开表单时，计时器也将被重置。<br /><br />每个计时器必须有唯一的名称，可用于以后使用 'timer_clear()' 终止计时器；具有相同名称的计时器会互相覆盖。",
-				"timer_set_global":"app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Executes a given function after a specified time in milliseconds. If 'isInterval' is set to TRUE, the function is repeatedly called.<br /><br />A global timer continues even if the current context (like a form from which it was started) is closed.<br /><br />Each timer must have a unique name, which can be used to later abort the timer with 'timer_clear_global()'; global timers with the same name, from the same application, overwrite each other.",
-				"value_store_get":"app.value_store_get({ARGS}) => VALUE_ANY_TYPE<br /><br />返回先前使用给定键存储的值。",
-				"value_store_set":"app.value_store_set({ARGS}) => UNDEFINED<br /><br />存储一个值以供以后使用。值使用引用键（任意名称）存储，并且只能在同一应用程序中访问。<br /><br />值存储基于会话；在另一个设备上，或用户刷新页面时，值不可用。"
+				"timer_set_global":"app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Executes a given function after a specified time in milliseconds. If 'isInterval' is set to TRUE, the function is repeatedly called.<br /><br />A global timer continues even if the current context (like a form from which it was started) is closed.<br /><br />Each timer must have a unique name, which can be used to later abort the timer with 'timer_clear_global()'; global timers with the same name, from the same application, overwrite each other."
 			},
 			"helpJsArgs":{
 				"block_inputs":["block_input BOOLEAN"],
@@ -1304,9 +1302,7 @@
 				"timer_clear":["name STRING"],
 				"timer_clear_global":["name STRING"],
 				"timer_set":["name STRING", "is_interval BOOLEAN", "function FUNCTION", "milliseconds NUMBER"],
-				"timer_set_global":["name STRING", "is_interval BOOLEAN", "function FUNCTION", "milliseconds NUMBER"],
-				"value_store_get":["key STRING"],
-				"value_store_set":["key STRING", "value ANYTHING"]
+				"timer_set_global":["name STRING", "is_interval BOOLEAN", "function FUNCTION", "milliseconds NUMBER"]
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message({ARGS}) => VOID<br /><br />中止操作并向执行用户发送消息，该消息将显示在用户界面上。",
