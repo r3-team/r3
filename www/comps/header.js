@@ -183,7 +183,7 @@ let MyHeader = {
 				@keyup.enter="$emit('show-settings')"
 			>
 				<img src="images/person.png" />
-				<span>{{ loginName }}</span>
+				<span v-if="showLoginName">{{ loginName }}</span>
 			</div>
 			
 			<!-- log off -->
@@ -228,7 +228,8 @@ let MyHeader = {
 				'navigationNext',  // browser forward navigation, optional
 				'navigationPrev',  // browser previous navigation, optional
 				'feedback',        // feedback action, optional
-				'maintenanceTimer' // timer for upcoming maintenance
+				'maintenanceTimer',// timer for upcoming maintenance
+				'loginName'        // display name for current login
 			],
 			timerMaintenanceComing:null
 		};
@@ -342,6 +343,7 @@ let MyHeader = {
 		pwaSingle:       (s) => s.pwaModuleId !== null,
 		showCollections: (s) => s.layoutElementsProcessed.includes('collections'),
 		showFeedback:    (s) => s.layoutElementsProcessed.includes('feedback') && s.feedback && !s.isNoAuth,
+		showLoginName:   (s) => s.layoutElementsProcessed.includes('loginName'),
 		showMaintenance: (s) => s.layoutElementsProcessed.includes('maintenanceTimer'),
 		showModuleIcons: (s) => s.layoutElementsProcessed.includes('moduleIcons'),
 		showModuleTitles:(s) => s.layoutElementsProcessed.includes('moduleTitles'),
