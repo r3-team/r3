@@ -1,5 +1,5 @@
-import {getQueryTemplate}    from '../shared/query.js';
-import {getNilUuid}          from '../shared/generic.js';
+import {getQueryTemplate} from '../shared/query.js';
+import {getNilUuid}       from '../shared/generic.js';
 import {
 	getTemplateArgs,
 	getTemplateFnc,

@@ -2,6 +2,9 @@ import {isAttributeRelationship} from './attribute.js';
 import MyStore                   from '../../stores/store.js';
 
 export function getFieldHasQuery(field) {
+	if(field.content === 'variable' && field.variableId !== null)
+		return isAttributeRelationship(MyStore.getters['schema/variableIdMap'][field.variableId].content);
+
 	return ['calendar','chart','kanban','list'].includes(field.content)
 		? true : field.content === 'data' && isAttributeRelationship(
 			MyStore.getters['schema/attributeIdMap'][field.attributeId].content

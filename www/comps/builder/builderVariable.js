@@ -107,9 +107,8 @@ let MyBuilderVariable = {
 										<option value="date">{{ capAppAtr.option.date }}</option>
 										<option value="time">{{ capAppAtr.option.time }}</option>
 									</optgroup>
-									<optgroup v-if="false" :label="capGen.relationships">
-										<option value="relationshipN1">{{ capAppAtr.option.relationshipN1 }}</option>
-										<option value="relationship11">{{ capAppAtr.option.relationship11 }}</option>
+									<optgroup :label="capGen.relationships">
+										<option value="relationshipN1">{{ capGen.relationship }}</option>
 									</optgroup>
 									<optgroup :label="capAppAtr.expert">
 										<option value="float"    >{{ capAppAtr.option.float }}</option>

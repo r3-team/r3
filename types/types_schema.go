@@ -459,6 +459,8 @@ type FieldVariable struct {
 	State        string      `json:"state"`
 	OnMobile     bool        `json:"onMobile"`
 	Clipboard    bool        `json:"clipboard"`
+	Columns      []Column    `json:"columns"`
+	Query        Query       `json:"query"`
 	Captions     CaptionMap  `json:"captions"`
 }
 type Collection struct {

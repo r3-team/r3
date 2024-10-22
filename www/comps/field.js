@@ -504,7 +504,7 @@ let MyField = {
 					:filterQuick="field.filterQuick"
 					:filters="filtersProcessed"
 					:formLoading="formLoading"
-					:hasOpenForm="field.openForm !== null"
+					:hasOpenForm="!isVariable && field.openForm !== null"
 					:header="false"
 					:inputAsCategory="field.category"
 					:inputAutoSelect="field.autoSelect"
@@ -1083,7 +1083,7 @@ let MyField = {
 		// composite
 		isActive:        (s) => !s.isMobile || s.field.onMobile,
 		isEncrypted:     (s) => s.isData && s.attribute.encrypted,
-		isNew:           (s) => s.isData && s.joinsIndexMap[s.field.index].recordId === 0,
+		isNew:           (s) => s.isData && !s.isVariable && s.joinsIndexMap[s.field.index].recordId === 0,
 		isBoolean:       (s) => s.isData && s.isAttributeBoolean(s.contentData),
 		isCategory:      (s) => s.isData && s.isRelationship && s.field.category,
 		isClipboard:     (s) => s.isData && s.field.clipboard && !s.isFiles && !s.isRelationship,

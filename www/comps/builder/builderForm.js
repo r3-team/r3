@@ -1104,6 +1104,8 @@ let MyBuilderForm = {
 				jsFunctionId:null,
 				iconId:null,
 				content:'variable',
+				columns:[],
+				query:this.getQueryTemplate(),
 				state:'default',
 				onMobile:true,
 				clipboard:false,

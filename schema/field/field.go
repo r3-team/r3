@@ -576,10 +576,18 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		fields[pos] = field
 	}
 
-	// lookup variable fields: captions
+	// lookup variable fields: open form, query, columns, captions
 	for _, pos := range posVariableLookup {
 		var field = fields[pos].(types.FieldVariable)
 
+		field.Query, err = query.Get("field", field.Id, 0, 0)
+		if err != nil {
+			return fields, err
+		}
+		field.Columns, err = column.Get("field", field.Id)
+		if err != nil {
+			return fields, err
+		}
 		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle", "fieldHelp"})
 		if err != nil {
 			return fields, err
@@ -871,6 +879,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
 				return err
 			}
+			fieldIdMapQuery[fieldId] = f.Query
 
 		default:
 			return errors.New("unknown field content")
@@ -1318,19 +1327,22 @@ func setVariable_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldVariable) error {
 	}
 
 	if known {
-		_, err = tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.field_variable
 			SET variable_id = $1, js_function_id = $2, clipboard = $3
 			WHERE field_id = $4
-		`, f.VariableId, f.JsFunctionId, f.Clipboard, fieldId)
-
-		return err
+		`, f.VariableId, f.JsFunctionId, f.Clipboard, fieldId); err != nil {
+			return err
+		}
+	} else {
+		if _, err := tx.Exec(db.Ctx, `
+			INSERT INTO app.field_variable (field_id, variable_id, js_function_id, clipboard)
+			VALUES ($1,$2,$3,$4)
+		`, fieldId, f.VariableId, f.JsFunctionId, f.Clipboard); err != nil {
+			return err
+		}
 	}
 
-	_, err = tx.Exec(db.Ctx, `
-		INSERT INTO app.field_variable (field_id, variable_id, js_function_id, clipboard)
-		VALUES ($1,$2,$3,$4)
-	`, fieldId, f.VariableId, f.JsFunctionId, f.Clipboard)
-
-	return err
+	// set columns
+	return column.Set_tx(tx, "field", fieldId, f.Columns)
 }

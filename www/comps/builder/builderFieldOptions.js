@@ -1225,7 +1225,7 @@ let MyBuilderFieldOptions = {
 				</tr>
 				
 				<!-- open form & open form bulk -->
-				<tr v-if="isButton || ((isList || isCalendar || isKanban || isRelationship) && field.query.relationId !== null)">
+				<tr v-if="hasOpenForm">
 					<td>{{ capApp.openForm }}</td>
 					<td>
 						<my-builder-open-form-input
@@ -1346,6 +1346,7 @@ let MyBuilderFieldOptions = {
 		
 		// simple states
 		hasCaption:      (s) => s.isData || s.isHeader,
+		hasOpenForm:     (s) => s.isButton || ((s.isList || s.isCalendar || s.isKanban || s.isRelationship) && s.field.query.relationId !== null),
 		isButton:        (s) => s.field.content === 'button',
 		isCalendar:      (s) => s.field.content === 'calendar',
 		isChart:         (s) => s.field.content === 'chart',
@@ -1358,7 +1359,6 @@ let MyBuilderFieldOptions = {
 		isHeader:        (s) => s.field.content === 'header',
 		isList:          (s) => s.field.content === 'list',
 		isKanban:        (s) => s.field.content === 'kanban',
-		isOpenForm:      (s) => typeof s.field.openForm !== 'undefined' && s.field.openForm !== null,
 		isQuery:         (s) => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
 		isTabs:          (s) => s.field.content === 'tabs',
 		isVariable:      (s) => s.field.content === 'variable',
