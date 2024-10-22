@@ -407,7 +407,9 @@ let MyBuilderNew = {
 						moduleId:this.moduleId,
 						formId:this.inputs.formId,
 						name:this.inputs.name,
-						comment:null
+						comment:null,
+						content:'text',
+						contentUse:'default'
 					};
 				break;
 				case 'widget':

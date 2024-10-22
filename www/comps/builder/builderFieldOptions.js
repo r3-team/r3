@@ -288,7 +288,7 @@ let MyBuilderFieldOptions = {
 	template:`<div class="builder-field-options">
 		<table class="generic-table-vertical tight fullWidth default-inputs">
 			<tbody>
-				<tr v-if="isButton || isChart || isData || isList || isTabs || (isHeader && !field.richtext)">
+				<tr v-if="isButton || isChart || isData || isList || isTabs || isVariable || (isHeader && !field.richtext)">
 					<td>{{ capGen.title }}</td>
 					<td>
 						<my-builder-caption
@@ -298,7 +298,7 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<tr v-if="isData">
+				<tr v-if="isData || isVariable">
 					<td>{{ capApp.fieldHelp }}</td>
 					<td>
 						<my-builder-caption
@@ -433,15 +433,6 @@ let MyBuilderFieldOptions = {
 							</select>
 						</td>
 					</tr>
-					<tr v-if="!isFiles && !isDrawing && !isRelationship">
-						<td>{{ capApp.fieldClipboard }}</td>
-						<td>
-							<my-bool
-								@update:modelValue="set('clipboard',$event)"
-								:modelValue="field.clipboard"
-							/>
-						</td>
-					</tr>
 					<tr v-if="!isDrawing && !isRelationship">
 						<td>{{ capApp.fieldRegexCheck }}</td>
 						<td>
@@ -571,6 +562,16 @@ let MyBuilderFieldOptions = {
 						</tr>
 					</template>
 				</template>
+
+				<tr v-if="(isData && !isFiles && !isDrawing && !isRelationship) || isVariable">
+					<td>{{ capGen.clipboard }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('clipboard',$event)"
+							:modelValue="field.clipboard"
+						/>
+					</td>
+				</tr>
 				
 				<template v-if="isCalendar">
 					<tr>
@@ -1151,48 +1152,77 @@ let MyBuilderFieldOptions = {
 					:columns="field.columns"
 					:modelValue="field.chartOption"
 				/>
+
+				<!-- variable -->
+				<tr v-if="isVariable">
+					<td>{{ capGen.variable }}</td>
+					<td>
+						<div class="row gap">
+							<select
+								@input="setNull('variableId',$event.target.value)"
+								:value="field.variableId"
+							>
+								<option value="">-</option>
+								<option v-for="v in module.variables.filter(v => v.formId === formId)" :value="v.id">
+									{{ v.name }}
+								</option>
+								<option v-for="v in module.variables.filter(v => v.formId === null)" :value="v.id">
+									{{ '[' + capGen.global + '] ' + v.name }}
+								</option>
+							</select>
+							<my-button image="add.png"
+								v-if="field.variableId === null"
+								@trigger="$emit('createNew','variable')"
+								:captionTitle="capGen.button.new"
+							/>
+							<my-button image="open.png"
+								v-if="field.variableId !== null"
+								@trigger="$router.push('/builder/variables/'+moduleId+'?variableIdEdit='+field.variableId)"
+								:captionTitle="capGen.button.open"
+							/>
+						</div>
+					</td>
+				</tr>
 				
 				<!-- execute JS function -->
-				<template v-if="isButton || isData">
-					<tr>
-						<td v-if="isButton">{{ capApp.jsFunctionButton }}</td>
-						<td v-if="isData">{{ capApp.jsFunctionData }}</td>
-						<td>
-							<div class="row gap">
-								<select
-									@input="setNull('jsFunctionId',$event.target.value)"
-									:value="field.jsFunctionId"
+				<tr v-if="isButton || isData || isVariable">
+					<td v-if="isButton">{{ capApp.jsFunctionButton }}</td>
+					<td v-if="isData || isVariable">{{ capApp.jsFunctionData }}</td>
+					<td>
+						<div class="row gap">
+							<select
+								@input="setNull('jsFunctionId',$event.target.value)"
+								:value="field.jsFunctionId"
+							>
+								<option value="">-</option>
+								<option v-for="fnc in module.jsFunctions.filter(v => v.formId === formId)" :value="fnc.id">
+									{{ fnc.name }}
+								</option>
+								<option v-for="fnc in module.jsFunctions.filter(v => v.formId === null)" :value="fnc.id">
+									{{ '[' + capGen.global + '] ' + fnc.name }}
+								</option>
+								<optgroup
+									v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.jsFunctions.length !== 0)"
+									:label="mod.name"
 								>
-									<option value="">-</option>
-									<option v-for="fnc in module.jsFunctions.filter(v => v.formId === formId)" :value="fnc.id">
-										{{ fnc.name }}
-									</option>
-									<option v-for="fnc in module.jsFunctions.filter(v => v.formId === null)" :value="fnc.id">
+									<option v-for="fnc in mod.jsFunctions.filter(v => v.formId === null)" :value="fnc.id">
 										{{ '[' + capGen.global + '] ' + fnc.name }}
 									</option>
-									<optgroup
-										v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.jsFunctions.length !== 0)"
-										:label="mod.name"
-									>
-										<option v-for="fnc in mod.jsFunctions.filter(v => v.formId === null)" :value="fnc.id">
-											{{ '[' + capGen.global + '] ' + fnc.name }}
-										</option>
-									</optgroup>
-								</select>
-								<my-button image="add.png"
-									v-if="field.jsFunctionId === null"
-									@trigger="$emit('createNew','jsFunction',{formId:formId})"
-									:captionTitle="capGen.button.new"
-								/>
-								<my-button image="open.png"
-									v-if="field.jsFunctionId !== null"
-									@trigger="$router.push('/builder/js-function/'+field.jsFunctionId)"
-									:captionTitle="capGen.button.open"
-								/>
-							</div>
-						</td>
-					</tr>
-				</template>
+								</optgroup>
+							</select>
+							<my-button image="add.png"
+								v-if="field.jsFunctionId === null"
+								@trigger="$emit('createNew','jsFunction',{formId:formId})"
+								:captionTitle="capGen.button.new"
+							/>
+							<my-button image="open.png"
+								v-if="field.jsFunctionId !== null"
+								@trigger="$router.push('/builder/js-function/'+field.jsFunctionId)"
+								:captionTitle="capGen.button.open"
+							/>
+						</div>
+					</td>
+				</tr>
 				
 				<!-- open form & open form bulk -->
 				<tr v-if="isButton || ((isList || isCalendar || isKanban || isRelationship) && field.query.relationId !== null)">
@@ -1331,6 +1361,7 @@ let MyBuilderFieldOptions = {
 		isOpenForm:      (s) => typeof s.field.openForm !== 'undefined' && s.field.openForm !== null,
 		isQuery:         (s) => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
 		isTabs:          (s) => s.field.content === 'tabs',
+		isVariable:      (s) => s.field.content === 'variable',
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
 		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.attribute.content),

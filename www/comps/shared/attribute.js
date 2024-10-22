@@ -154,6 +154,68 @@ export function getAttributeIcon(attribute,outsideIn,isNm) {
 	return 'noPic.png';
 };
 
+export function getAttributeContentUse(content,use) {
+
+	if(isAttributeString(content)) {
+		switch(use) {
+			case 'color':    return 'color';    break;
+			case 'drawing':  return 'drawing';  break;
+			case 'iframe':   return 'iframe';   break;
+			case 'richtext': return 'richtext'; break;
+			case 'textarea': return 'textarea'; break;
+			case 'default':  return 'text';     break;
+		}
+	}
+
+	if(isAttributeInteger(content)) {
+		switch(use) {
+			case 'date':     return 'date';     break;
+			case 'datetime': return 'datetime'; break;
+			case 'default':  return 'number';   break;
+			case 'time':     return 'time';     break;
+		}
+	}
+
+	if(isAttributeBoolean(content))        return 'boolean';
+	if(isAttributeNumeric(content))        return 'decimal';
+	if(isAttributeFiles(content))          return 'files';
+	if(isAttributeFloat(content))          return 'float';
+	if(isAttributeRegconfig(content))      return 'regconfig';
+	if(isAttributeUuid(content))           return 'uuid';
+	if(isAttributeRelationship11(content)) return 'relationship11';
+	if(isAttributeRelationshipN1(content)) return 'relationshipN1';
+	
+	return 'text';
+}
+export function getAttributeContentsByUse(usedFor,length,largeNumbers) {
+	switch(usedFor) {
+		// default uses
+		case 'text':           return { content:length === 0 ? 'text'   : 'varchar',       contentUse:'default' }; break;
+		case 'number':         return { content:largeNumbers ? 'bigint' : 'integer',       contentUse:'default' }; break;
+		case 'boolean':        return { content:'boolean',                                 contentUse:'default' }; break;
+		case 'decimal':        return { content:'numeric',                                 contentUse:'default' }; break;
+		case 'files':          return { content:'files',                                   contentUse:'default' }; break;
+		case 'float':          return { content:largeNumbers ? 'double precision': 'real', contentUse:'default' }; break;
+		case 'regconfig':      return { content:'regconfig',                               contentUse:'default' }; break;
+		case 'uuid':           return { content:'uuid',                                    contentUse:'default' }; break;
+		case 'relationship11': return { content:'1:1',                                     contentUse:'default' }; break;
+		case 'relationshipN1': return { content:'n:1',                                     contentUse:'default' }; break;
+
+		// special uses: strings
+		case 'color':    return { content:'varchar',                         contentUse:'color' };    break;
+		case 'drawing':  return { content:'text',                            contentUse:'drawing' };  break;
+		case 'iframe':   return { content:'text',                            contentUse:'iframe' };   break;
+		case 'richtext': return { content:length === 0 ? 'text' : 'varchar', contentUse:'richtext' }; break;
+		case 'textarea': return { content:length === 0 ? 'text' : 'varchar', contentUse:'textarea' }; break;
+
+		// special uses: integers
+		case 'date':     return { content:largeNumbers ? 'bigint' : 'integer', contentUse:'date' };     break;
+		case 'datetime': return { content:largeNumbers ? 'bigint' : 'integer', contentUse:'datetime' }; break;
+		case 'time':     return { content:'integer',                           contentUse:'time' };     break;
+	}
+	return { content:'text', contentUse:'default' };
+}
+
 export function isAttributeBoolean(content)        { return content === 'boolean'; };
 export function isAttributeDecimal(content)        { return attributeContentNames.decimal.includes(content); };
 export function isAttributeFiles(content)          { return content === 'files'; };

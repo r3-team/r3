@@ -18,6 +18,7 @@ export function getFieldIcon(field) {
 		case 'kanban':    return 'kanban.png'; break;
 		case 'list':      return 'files_list2.png'; break;
 		case 'tabs':      return 'tabs.png'; break;
+		case 'variable':  return 'variable.png'; break;
 	}
 	return 'noPic.png';
 };
@@ -31,8 +32,9 @@ export function getFieldTitle(field) {
 		case 'tabs':      return 'Tabs';      break;
 		case 'calendar':  return field.gantt ? 'Gantt' : 'Calendar'; break;
 		case 'data':      return getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm); break;
-		case 'kanban':    return field.query.relationId === null ? 'Kanban' : `Kanban: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`; break;
-		case 'list':      return field.query.relationId === null ? 'List'   : `List: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`;   break;
+		case 'kanban':    return field.query.relationId === null ? 'Kanban'   : `Kanban: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`; break;
+		case 'list':      return field.query.relationId === null ? 'List'     : `List: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`;   break;
+		case 'variable':  return field.variableId       === null ? 'Variable' : `Variable: ${MyStore.getters['schema/variableIdMap'][field.variableId].name}`;     break;
 	}
 	return '';
 };

@@ -1,5 +1,9 @@
 import MyBuilderFormInput from './builderFormInput.js';
 import {copyValueDialog}  from '../shared/generic.js';
+import {
+	getAttributeContentUse,
+	getAttributeContentsByUse
+} from '../shared/attribute.js';
 export {MyBuilderVariable as default};
 
 let MyBuilderVariable = {
@@ -80,6 +84,42 @@ let MyBuilderVariable = {
 								<textarea class="dynamic" v-model="values.comment" :disabled="readonly"></textarea>
 							</td>
 						</tr>
+						<tr>
+							<td class="grouping">{{ capApp.inputOptions }}</td>
+						</tr>
+						<tr>
+							<td>{{ capAppAtr.usedFor }}</td>
+							<td>
+								<select v-model="usedFor" :disabled="readonly">
+									<optgroup :label="capGen.standard">
+										<option value="text"    >{{ capAppAtr.option.text }}</option>
+										<option value="textarea">{{ capAppAtr.option.textarea }}</option>
+										<option value="richtext">{{ capAppAtr.option.richtext }}</option>
+										<option value="number"  >{{ capAppAtr.option.number }}</option>
+										<option value="decimal" >{{ capAppAtr.option.decimal }}</option>
+										<option value="color"   >{{ capAppAtr.option.color }}</option>
+										<option value="iframe"  >{{ capAppAtr.option.iframe }}</option>
+										<option value="drawing" >{{ capAppAtr.option.drawing }}</option>
+										<option value="boolean" >{{ capAppAtr.option.boolean }}</option>
+									</optgroup>
+									<optgroup :label="capAppAtr.datetimes">
+										<option value="datetime">{{ capAppAtr.option.datetime }}</option>
+										<option value="date">{{ capAppAtr.option.date }}</option>
+										<option value="time">{{ capAppAtr.option.time }}</option>
+									</optgroup>
+									<optgroup v-if="false" :label="capGen.relationships">
+										<option value="relationshipN1">{{ capAppAtr.option.relationshipN1 }}</option>
+										<option value="relationship11">{{ capAppAtr.option.relationship11 }}</option>
+									</optgroup>
+									<optgroup :label="capAppAtr.expert">
+										<option value="float"    >{{ capAppAtr.option.float }}</option>
+										<option value="uuid"     >{{ capAppAtr.option.uuid }}</option>
+										<option value="regconfig">{{ capAppAtr.option.regconfig }}</option>
+									</optgroup>
+								</select>
+							</td>
+							<td></td>
+						</tr>
 					</tbody>
 				</table>
 			</div>
@@ -105,6 +145,14 @@ let MyBuilderVariable = {
 			}
 			return false;
 		},
+		usedFor:{
+			get() { return this.getAttributeContentUse(this.values.content, this.values.contentUse); },
+			set(v) {
+				const p = this.getAttributeContentsByUse(v,0,true);
+				this.values.content    = p.content;
+				this.values.contentUse = p.contentUse;
+			}
+		},
 		
 		// simple
 		canSave:   (s) => !s.readonly && s.hasChanges && !s.nameTaken,
@@ -116,6 +164,7 @@ let MyBuilderVariable = {
 		moduleIdMap:  (s) => s.$store.getters['schema/moduleIdMap'],
 		variableIdMap:(s) => s.$store.getters['schema/variableIdMap'],
 		capApp:       (s) => s.$store.getters.captions.builder.variable,
+		capAppAtr:    (s) => s.$store.getters.captions.builder.attribute,
 		capGen:       (s) => s.$store.getters.captions.generic
 	},
 	mounted() {
@@ -128,6 +177,8 @@ let MyBuilderVariable = {
 	methods:{
 		// external
 		copyValueDialog,
+		getAttributeContentUse,
+		getAttributeContentsByUse,
 		
 		// actions
 		handleHotkeys(e) {

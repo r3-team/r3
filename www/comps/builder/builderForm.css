@@ -122,7 +122,7 @@
 	border-radius:0px;
 }
 .builder-field.isTemplate.notData:not(.sortable-ghost){
-	width:33%;
+	width:40%;
 	flex:1 0 auto;
 }
 .builder-field.selected{

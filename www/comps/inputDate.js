@@ -280,8 +280,6 @@ let MyInputDate = {
 		MyInputDateEntry
 	},
 	template:`<div class="input-date"
-		@blur="$emit('blurred')"
-		@focus="$emit('focused')"
 		@keyup.esc="escaped"
 		v-click-outside="escaped"
 	>
@@ -390,7 +388,7 @@ let MyInputDate = {
 		unixTo:    { required:false, default:null },
 		useMonth:  { type:Boolean, required:false, default:false },
 	},
-	emits:['blurred','focused','set-unix-from','set-unix-to'],
+	emits:['set-unix-from','set-unix-to'],
 	data() {
 		return {
 			date:new Date(),    // date to control calendar navigation
@@ -465,10 +463,6 @@ let MyInputDate = {
 		// events
 		escaped() {
 			this.showCalendar = false;
-		},
-		focused() {
-			if(!this.isReadonly && !this.showCalendar)
-				this.showCalendar = true;
 		},
 		updateDropdownDirection() {
 			let headersPx  = 200; // rough height in px of all headers (menu/form) combined

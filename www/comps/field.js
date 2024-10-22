@@ -316,8 +316,6 @@ let MyField = {
 				<input class="input" data-is-input="1"
 					v-if="isLineInput"
 					v-model="value"
-					@blur="blur"
-					@focus="focus"
 					@click="click"
 					:class="{ invalid:showInvalid }"
 					:disabled="isReadonly"
@@ -375,8 +373,6 @@ let MyField = {
 				<!-- color input -->
 				<div class="color-input" v-if="isColor">
 					<input class="input" data-is-input="1" type="text"
-						@blur="blur"
-						@focus="focus"
 						v-model="value"
 						:class="{ invalid:showInvalid }"
 						:disabled="isReadonly"
@@ -402,8 +398,6 @@ let MyField = {
 				<textarea class="input textarea" data-is-input="1"
 					v-if="isTextarea"
 					v-model="value"
-					@blur="blur"
-					@focus="focus"
 					@click="click"
 					:class="{ invalid:showInvalid }"
 					:disabled="isReadonly"
@@ -437,8 +431,6 @@ let MyField = {
 				<my-input-login
 					v-if="isLogin"
 					v-model="value"
-					@blurred="blur"
-					@focused="focus"
 					:readonly="isReadonly"
 					:placeholder="capGen.threeDots"
 				/>
@@ -446,8 +438,6 @@ let MyField = {
 				<!-- date / datetime / time input -->
 				<my-input-date
 					v-if="isDateInput"
-					@blurred="blur"
-					@focused="focus"
 					@set-unix-from="value = $event"
 					@set-unix-to="valueAlt = $event"
 					:isDate="isDatetime || isDate"
@@ -504,8 +494,6 @@ let MyField = {
 				<!-- relationship input -->
 				<my-list
 					v-if="isRelationship"
-					@blurred="blur"
-					@focused="focus"
 					@open-form="(...args) => openForm(args[0],[],args[1],null)"
 					@records-selected="relationshipRecordsSelected"
 					@record-removed="relationshipRecordRemoved"
@@ -651,7 +639,6 @@ let MyField = {
 		return {
 			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
 			columnIdsByUser:[],
-			focused:false,
 			notTouched:true,              // data field was not touched by user
 			popUpFormInline:null,         // inline form for some field types (list)
 			regconfigInput:'',
@@ -682,23 +669,28 @@ let MyField = {
 		value:{
 			get() {
 				if(!this.isData) return false;
+
+				if(this.isVariable) {
+					if(this.variable.formId !== null)
+						return this.variableIdMapLocal[this.variable.id] !== undefined ? this.variableIdMapLocal[this.variable.id] : null;
+					
+					return this.variableIdMapGlobal[this.variable.id] !== undefined ? this.variableIdMapGlobal[this.variable.id] : null;
+				}
 				
 				// if only alt attribute is set, field still needs primary attribute value (form log)
 				return this.values[this.fieldAttributeId] !== undefined
 					? this.values[this.fieldAttributeId] : null;
 			},
 			set(val,valOld) {
-				if(this.isDecimal)
-					val = val.replace(',','.');
-				
 				this.setValue(val,valOld,this.fieldAttributeId);
 			}
 		},
 		
-		// field value for alternative data attribute
+		// field value for alternative data attribute (not available for variables)
 		valueAlt:{
 			get() {
-				if(!this.isData) return false;
+				if(!this.isData)    return false;
+				if(this.isVariable) return false;
 				
 				// if only primary attribute is set, field still needs alt attribute value (form log)
 				return this.values[this.fieldAttributeIdAlt] !== undefined
@@ -780,13 +772,13 @@ let MyField = {
 			return out.join(';');
 		},
 		fieldAttributeId:(s) => {
-			if(!s.isData) return false;
+			if(!s.isData || s.isVariable) return false;
 			
-			let atrIdNm = s.field.attributeIdNm !== undefined ? s.field.attributeIdNm : null;
+			const atrIdNm = s.field.attributeIdNm !== undefined ? s.field.attributeIdNm : null;
 			return s.getIndexAttributeId(s.field.index,
 				s.field.attributeId,s.field.outsideIn === true,atrIdNm);
 		},
-		fieldAttributeIdAlt:(s) => !s.isData || s.field.attributeIdAlt === null ? false
+		fieldAttributeIdAlt:(s) => !s.isData || s.isVariable || s.field.attributeIdAlt === null ? false
 			: s.getIndexAttributeId(s.field.index,s.field.attributeIdAlt,false,null),
 		columnsProcessed:(s) => !s.isQuery ? [] : s.getColumnsProcessed(
 			s.field.columns,s.columnIdsByUser,s.joinsIndexMap,s.dataFieldMap,
@@ -810,9 +802,9 @@ let MyField = {
 			s.collectionIdMapIndexes,s.variableIdMapLocal
 		),
 		iconId:(s) => {
-			if(s.field.iconId !== null)                 return s.field.iconId;
-			if(s.isData && s.attribute.iconId !== null) return s.attribute.iconId;
-			return false;
+			if(s.field.iconId !== null) return s.field.iconId;
+
+			return s.isData && !s.isVariable && s.attribute.iconId !== null ? s.attribute.iconId : false;
 		},
 		presetValue:(s) => {
 			if(!s.isData) return false;
@@ -860,6 +852,9 @@ let MyField = {
 			// apply form state if available
 			if(typeof s.entityIdMapState.field[s.field.id] !== 'undefined')
 				state = s.entityIdMapState.field[s.field.id];
+
+			if(s.isVariable)
+				return state;
 			
 			// overwrites for 'default' state for data fields
 			if(s.isData && state === 'default') {
@@ -941,7 +936,8 @@ let MyField = {
 		
 		// data input states
 		inputCanWrite:(s) => {
-			if(!s.isData) return false;
+			if(!s.isData)    return false;
+			if(s.isVariable) return true;
 			
 			// if field shows preset value and it is protected (set more than once)
 			if(s.presetValue !== false && s.presetValue.protected)
@@ -1048,8 +1044,10 @@ let MyField = {
 		},
 		
 		// simple
-		attribute:  (s) => !s.isData || s.attributeIdMap[s.field.attributeId] === undefined
-			? false : s.attributeIdMap[s.field.attributeId],
+		attribute:  (s) => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false ,
+		content:    (s) => s.isVariable ? 'data' : s.field.content,
+		contentData:(s) => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
+		contentUse: (s) => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
 		customErr:  (s) => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
 		hasCaption: (s) => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
@@ -1057,17 +1055,19 @@ let MyField = {
 		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
 		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),
+		variable:   (s) => !s.isVariable ? false : s.variableIdMap[s.field.variableId],
 		
-		// content
-		isButton:   (s) => s.field.content === 'button',
-		isCalendar: (s) => s.field.content === 'calendar',
-		isChart:    (s) => s.field.content === 'chart',
-		isContainer:(s) => s.field.content === 'container',
-		isData:     (s) => s.field.content === 'data',
-		isHeader:   (s) => s.field.content === 'header',
-		isKanban:   (s) => s.field.content === 'kanban',
-		isList:     (s) => s.field.content === 'list',
-		isTabs:     (s) => s.field.content === 'tabs',
+		// content types
+		isButton:   (s) => s.content === 'button',
+		isCalendar: (s) => s.content === 'calendar',
+		isChart:    (s) => s.content === 'chart',
+		isContainer:(s) => s.content === 'container',
+		isData:     (s) => s.content === 'data',
+		isHeader:   (s) => s.content === 'header',
+		isKanban:   (s) => s.content === 'kanban',
+		isList:     (s) => s.content === 'list',
+		isTabs:     (s) => s.content === 'tabs',
+		isVariable: (s) => s.field.content === 'variable',
 		
 		// states
 		isAlone:   (s) => s.isAloneInForm || s.isAloneInTab,
@@ -1084,29 +1084,29 @@ let MyField = {
 		isActive:        (s) => !s.isMobile || s.field.onMobile,
 		isEncrypted:     (s) => s.isData && s.attribute.encrypted,
 		isNew:           (s) => s.isData && s.joinsIndexMap[s.field.index].recordId === 0,
-		isBoolean:       (s) => s.isData && s.isAttributeBoolean(s.attribute.content),
+		isBoolean:       (s) => s.isData && s.isAttributeBoolean(s.contentData),
 		isCategory:      (s) => s.isData && s.isRelationship && s.field.category,
 		isClipboard:     (s) => s.isData && s.field.clipboard && !s.isFiles && !s.isRelationship,
-		isColor:         (s) => s.isData && s.attribute.contentUse === 'color',
-		isDate:          (s) => s.isData && s.attribute.contentUse === 'date',
-		isDatetime:      (s) => s.isData && s.attribute.contentUse === 'datetime',
+		isColor:         (s) => s.isData && s.contentUse === 'color',
+		isDate:          (s) => s.isData && s.contentUse === 'date',
+		isDatetime:      (s) => s.isData && s.contentUse === 'datetime',
 		isDateInput:     (s) => s.isData && s.isDatetime || s.isDate || s.isTime,
-		isDateRange:     (s) => s.isDateInput && s.field.attributeIdAlt !== null,
-		isDecimal:       (s) => s.isData && s.isAttributeDecimal(s.attribute.content),
-		isDrawing:       (s) => s.isData && s.attribute.contentUse === 'drawing',
+		isDateRange:     (s) => s.isDateInput && !s.isVariable && s.field.attributeIdAlt !== null,
+		isDecimal:       (s) => s.isData && s.isAttributeDecimal(s.contentData),
+		isDrawing:       (s) => s.isData && s.contentUse === 'drawing',
 		isDropdown:      (s) => s.isData && (s.isRelationship || s.isDateInput || s.isLogin || s.isColor || s.isRegconfig),
-		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
-		isIframe:        (s) => s.isData && s.attribute.contentUse === 'iframe',
-		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
+		isFiles:         (s) => s.isData && s.isAttributeFiles(s.contentData),
+		isIframe:        (s) => s.isData && s.contentUse === 'iframe',
+		isInteger:       (s) => s.isData && s.isAttributeInteger(s.contentData),
 		isQuery:         (s) => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
-		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.attribute.content),
-		isRichtext:      (s) => s.isData && s.attribute.contentUse === 'richtext',
-		isString:        (s) => s.isData && s.isAttributeString(s.attribute.content),
-		isTextarea:      (s) => s.isData && s.attribute.contentUse === 'textarea',
-		isTime:          (s) => s.isData && s.attribute.contentUse === 'time',
-		isUuid:          (s) => s.isData && s.isAttributeUuid(s.attribute.content),
-		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.attribute.content),
-		isRelationship1N:(s) => s.isRelationship && s.field.outsideIn === true && s.attribute.content === 'n:1',
+		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.contentData),
+		isRichtext:      (s) => s.isData && s.contentUse === 'richtext',
+		isString:        (s) => s.isData && s.isAttributeString(s.contentData),
+		isTextarea:      (s) => s.isData && s.contentUse === 'textarea',
+		isTime:          (s) => s.isData && s.contentUse === 'time',
+		isUuid:          (s) => s.isData && s.isAttributeUuid(s.contentData),
+		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.contentData),
+		isRelationship1N:(s) => s.isRelationship && s.field.outsideIn === true && s.contentData === 'n:1',
 		
 		// stores
 		token:              (s) => s.$store.getters['local/token'],
@@ -1114,12 +1114,14 @@ let MyField = {
 		attributeIdMap:     (s) => s.$store.getters['schema/attributeIdMap'],
 		iconIdMap:          (s) => s.$store.getters['schema/iconIdMap'],
 		presetIdMapRecordId:(s) => s.$store.getters['schema/presetIdMapRecordId'],
+		variableIdMap:      (s) => s.$store.getters['schema/variableIdMap'],
 		access:             (s) => s.$store.getters.access,
 		capApp:             (s) => s.$store.getters.captions.form,
 		capGen:             (s) => s.$store.getters.captions.generic,
 		isMobile:           (s) => s.$store.getters.isMobile,
 		searchDictionaries: (s) => s.$store.getters.searchDictionaries,
-		settings:           (s) => s.$store.getters.settings
+		settings:           (s) => s.$store.getters.settings,
+		variableIdMapGlobal:(s) => s.$store.getters.variableIdMapGlobal,
 	},
 	mounted() {
 		if(this.isTabs)
@@ -1183,15 +1185,9 @@ let MyField = {
 		},
 		
 		// actions
-		blur() {
-			this.focused = false;
-		},
 		copyToClipboard() {
 			navigator.clipboard.writeText(this.value);
 			this.$emit('clipboard');
-		},
-		focus() {
-			this.focused = true;
 		},
 		click() {
 			if(this.isColor && !this.isReadonly)
@@ -1296,19 +1292,31 @@ let MyField = {
 			}
 		},
 		setValue(val,valOld,indexAttributeId) {
+
+			// clean inputs
+			if(this.isDecimal)
+				val = val.replace(',','.');
+
 			if(val === '')
 				val = null;
-			
-			// parse string input to integer if integer field and valid integer value
+
 			if(this.isInteger && val !== null && /^\-?\d+$/.test(val))
 				val = parseInt(val);
 			
-			if(this.notTouched && val !== valOld) {
-				this.notTouched = false;
-				this.$emit('set-touched',this.field.id);
+			if(!this.isVariable) {
+				// regular field, send changes up to the form
+				if(this.notTouched && val !== valOld) {
+					this.notTouched = false;
+					this.$emit('set-touched',this.field.id);
+				}
+				this.$emit('set-value',indexAttributeId,val);
+			} else {
+				// variable field, send changes to the variable
+				if(this.variable.formId !== null)
+					this.variableIdMapLocal[this.variable.id] = val;
+				else
+					this.$store.commit('variableStoreValueById',{id:this.variable.id,value:val});
 			}
-			
-			this.$emit('set-value',indexAttributeId,val);
 			
 			if(this.field.jsFunctionId !== null)
 				this.$emit('execute-function',this.field.jsFunctionId);

@@ -22,7 +22,7 @@ let MyInputLogin = {
 		placeholder: { type:String,  required:false, default:'' },
 		readonly:    { type:Boolean, required:false, default:false }
 	},
-	emits:['blurred','focused','update:modelValue'],
+	emits:['update:modelValue'],
 	watch:{
 		loginId:{
 			handler(valNew,valOld) {

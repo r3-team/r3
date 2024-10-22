@@ -658,6 +658,7 @@ let MyBuilderForm = {
 				fields.push(this.createFieldChart());     // chart
 				fields.push(this.createFieldHeader());    // header
 				fields.push(this.createFieldButton());    // button
+				fields.push(this.createFieldVariable());  // variable
 				
 				// data fields from relations
 				if(this.relation) {
@@ -1094,6 +1095,22 @@ let MyBuilderForm = {
 						tabTitle:{}
 					}
 				}]
+			};
+		},
+		createFieldVariable() {
+			return {
+				id:'template_variable',
+				variableId:null,
+				jsFunctionId:null,
+				iconId:null,
+				content:'variable',
+				state:'default',
+				onMobile:true,
+				clipboard:false,
+				captions:{
+					fieldTitle:{},
+					fieldHelp:{}
+				}
 			};
 		},
 		createFieldsForRelation(relation,index) {

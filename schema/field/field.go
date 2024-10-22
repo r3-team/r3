@@ -73,7 +73,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		
 		-- list field
 		fl.auto_renew, fl.csv_export, fl.csv_import, fl.layout,
-		fl.filter_quick, fl.result_limit
+		fl.filter_quick, fl.result_limit,
+
+		-- variable field
+		fv.variable_id, fv.js_function_id, fv.clipboard
 		
 		FROM app.field AS f
 		LEFT JOIN app.field_button            AS fb ON fb.field_id = f.id
@@ -85,6 +88,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		LEFT JOIN app.field_header            AS fh ON fh.field_id = f.id
 		LEFT JOIN app.field_kanban            AS fk ON fk.field_id = f.id
 		LEFT JOIN app.field_list              AS fl ON fl.field_id = f.id
+		LEFT JOIN app.field_variable          AS fv ON fv.field_id = f.id
 		LEFT JOIN app.attribute               AS a  ON a.id        = fd.attribute_id
 		WHERE f.form_id = $1
 		ORDER BY f.position ASC
@@ -106,6 +110,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	posListLookup := make([]int, 0)
 	posParentLookup := make([]int, 0)
 	posTabsLookup := make([]int, 0)
+	posVariableLookup := make([]int, 0)
 	posMapParentId := make(map[int]uuid.UUID)
 	posMapTabId := make(map[int]uuid.UUID)
 
@@ -126,10 +131,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		var attributeId, attributeIdAlt, attributeIdNm, attributeIdDate0,
 			attributeIdDate1, attributeIdColor, attributeIdKanbanSort,
 			fieldParentId, iconId, jsFunctionIdButton, jsFunctionIdData,
-			tabId pgtype.UUID
-		var category, clipboard, csvExport, csvImport, daysToggle, filterQuick,
-			filterQuickList, gantt, ganttStepsToggle, ics, outsideIn, richtext,
-			wrap pgtype.Bool
+			jsFunctionIdVariable, tabId, variableId pgtype.UUID
+		var category, clipboard, clipboardVariable, csvExport, csvImport,
+			daysToggle, filterQuick, filterQuickList, gantt, ganttStepsToggle,
+			ics, outsideIn, richtext, wrap pgtype.Bool
 		var defPresetIds []uuid.UUID
 
 		if err := rows.Scan(&fieldId, &fieldParentId, &tabId, &iconId, &content,
@@ -144,7 +149,8 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			&category, &filterQuick, &outsideIn, &autoSelect, &defPresetIds,
 			&relationIndexKanbanData, &relationIndexKanbanAxisX,
 			&relationIndexKanbanAxisY, &attributeIdKanbanSort, &autoRenew,
-			&csvExport, &csvImport, &layout, &filterQuickList, &resultLimit); err != nil {
+			&csvExport, &csvImport, &layout, &filterQuickList, &resultLimit,
+			&variableId, &jsFunctionIdVariable, &clipboardVariable); err != nil {
 
 			rows.Close()
 			return fields, err
@@ -373,6 +379,20 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			})
 			posTabsLookup = append(posTabsLookup, pos)
 			posParentLookup = append(posParentLookup, pos)
+
+		case "variable":
+			fields = append(fields, types.FieldVariable{
+				Id:           fieldId,
+				VariableId:   variableId,
+				JsFunctionId: jsFunctionIdVariable,
+				IconId:       iconId,
+				Content:      content,
+				State:        state,
+				OnMobile:     onMobile,
+				Clipboard:    clipboardVariable.Bool,
+				Captions:     types.CaptionMap{},
+			})
+			posVariableLookup = append(posVariableLookup, pos)
 		}
 		pos++
 	}
@@ -556,7 +576,18 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		fields[pos] = field
 	}
 
-	// get sorted keys for field positions with parent Id
+	// lookup variable fields: captions
+	for _, pos := range posVariableLookup {
+		var field = fields[pos].(types.FieldVariable)
+
+		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle", "fieldHelp"})
+		if err != nil {
+			return fields, err
+		}
+		fields[pos] = field
+	}
+
+	// get sorted keys for field positions with parent ID
 	orderedPos := make([]int, 0, len(posMapParentId))
 	for k := range posMapParentId {
 		orderedPos = append(orderedPos, k)
@@ -823,6 +854,18 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 				WHERE field_id = $1
 				AND id <> ALL($2)
 			`, f.Id, idsKeep); err != nil {
+				return err
+			}
+			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
+				return err
+			}
+
+		case "variable":
+			var f types.FieldVariable
+			if err := json.Unmarshal(fieldJson, &f); err != nil {
+				return err
+			}
+			if err := setVariable_tx(tx, fieldId, f); err != nil {
 				return err
 			}
 			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
@@ -1266,4 +1309,28 @@ func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 
 	// set columns
 	return column.Set_tx(tx, "field", fieldId, columns)
+}
+func setVariable_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldVariable) error {
+
+	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_variable", "field_id")
+	if err != nil {
+		return err
+	}
+
+	if known {
+		_, err = tx.Exec(db.Ctx, `
+			UPDATE app.field_variable
+			SET variable_id = $1, js_function_id = $2, clipboard = $3
+			WHERE field_id = $4
+		`, f.VariableId, f.JsFunctionId, f.Clipboard, fieldId)
+
+		return err
+	}
+
+	_, err = tx.Exec(db.Ctx, `
+		INSERT INTO app.field_variable (field_id, variable_id, js_function_id, clipboard)
+		VALUES ($1,$2,$3,$4)
+	`, fieldId, f.VariableId, f.JsFunctionId, f.Clipboard)
+
+	return err
 }

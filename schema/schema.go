@@ -565,6 +565,17 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 					FROM app.form
 					WHERE module_id = $2
 				)
+
+				UNION
+				
+				SELECT fv.js_function_id
+				FROM app.field_variable AS fv
+				JOIN app.field          AS f ON f.id = fv.field_id
+				WHERE f.form_id IN (
+					SELECT id
+					FROM app.form
+					WHERE module_id = $2
+				)
 				
 				UNION
 				

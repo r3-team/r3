@@ -7,6 +7,7 @@ import {
 	getItemTitle
 } from '../shared/builder.js';
 import {
+	getAttributeContentUse,
 	getAttributeIcon,
 	isAttributeBoolean,
 	isAttributeFiles,
@@ -322,28 +323,7 @@ let MyBuilderAttribute = {
 			set(v) { this.values.content = v ? 'double precision' : 'real'; }
 		},
 		usedFor:{
-			get() {
-				if(this.isBoolean)   return 'boolean';
-				if(this.isColor)     return 'color';
-				if(this.isDate)      return 'date';
-				if(this.isDatetime)  return 'datetime';
-				if(this.isDrawing)   return 'drawing';
-				if(this.isNumber)    return 'number';
-				if(this.isNumeric)   return 'decimal';
-				if(this.isFiles)     return 'files';
-				if(this.isFloat)     return 'float';
-				if(this.isIframe)    return 'iframe';
-				if(this.isRegconfig) return 'regconfig';
-				if(this.isRichtext)  return 'richtext';
-				if(this.isText)      return 'text';
-				if(this.isTextarea)  return 'textarea';
-				if(this.isTime)      return 'time';
-				if(this.isUuid)      return 'uuid';
-				if(this.isRelationship11) return 'relationship11';
-				if(this.isRelationshipN1) return 'relationshipN1';
-				
-				return 'text';
-			},
+			get() { return this.getAttributeContentUse(this.values.content, this.values.contentUse); },
 			set(v) {
 				switch(v) {
 					// text uses
@@ -507,6 +487,7 @@ let MyBuilderAttribute = {
 	methods:{
 		// external
 		copyValueDialog,
+		getAttributeContentUse,
 		getAttributeIcon,
 		getDependentModules,
 		getFieldMap,

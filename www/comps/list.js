@@ -740,7 +740,7 @@ let MyList = {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'blurred','clipboard','close-inline','focused','open-form',
+		'clipboard','close-inline','open-form',
 		'open-form-bulk','record-count-change','record-removed',
 		'records-selected','records-selected-init','set-args',
 		'set-column-ids-by-user','set-collection-indexes'
@@ -1230,7 +1230,6 @@ let MyList = {
 		blur() {
 			this.focused   = false;
 			this.showTable = false;
-			this.$emit('blurred');
 		},
 		clickColumn(columnBatchIndex) {
 			this.columnBatchIndexOption = this.columnBatchIndexOption === columnBatchIndex
@@ -1288,7 +1287,6 @@ let MyList = {
 			if(!this.inputIsReadonly && this.isInput && !this.inputAsCategory && !this.showTable) {
 				this.focused      = true;
 				this.filtersQuick = '';
-				this.$emit('focused');
 			}
 		},
 		keyDown(e) {

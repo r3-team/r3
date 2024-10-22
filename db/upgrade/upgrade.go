@@ -515,6 +515,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			    form_id uuid,
 			    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
 			    comment TEXT,
+			    content app.attribute_content NOT NULL,
+			    content_use attribute_content_use NOT NULL,
 			    CONSTRAINT variable_pkey PRIMARY KEY (id),
 			    CONSTRAINT variable_form_id_fkey FOREIGN KEY (form_id)
 			        REFERENCES app.form (id) MATCH SIMPLE
@@ -565,6 +567,40 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				USING btree (variable_id ASC NULLS LAST);
 			
 			ALTER TYPE app.filter_side_content ADD VALUE 'variable';
+
+			-- variables as inputs
+			ALTER TYPE app.field_content ADD VALUE 'variable';
+
+			CREATE TABLE IF NOT EXISTS app.field_variable(
+				field_id uuid NOT NULL,
+				variable_id uuid,
+				js_function_id uuid,
+				clipboard boolean NOT NULL,
+				CONSTRAINT field_variable_pkey PRIMARY KEY (field_id),
+				CONSTRAINT field_variable_variable_id_fkey FOREIGN KEY (variable_id)
+					REFERENCES app.variable (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+					NOT VALID,
+				CONSTRAINT field_variable_field_id_fkey FOREIGN KEY (field_id)
+					REFERENCES app.field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+					NOT VALID,
+				CONSTRAINT field_variable_js_function_id_fkey FOREIGN KEY (js_function_id)
+					REFERENCES app.js_function (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
+
+			CREATE INDEX IF NOT EXISTS fki_field_variable_variable_fkey
+				ON app.field_variable USING btree (variable_id ASC NULLS LAST);
+
+			CREATE INDEX IF NOT EXISTS fki_field_variable_js_function_id
+				ON app.field_variable USING btree (js_function_id ASC NULLS LAST);
 		`)
 		return "3.9", err
 	},

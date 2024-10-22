@@ -1,7 +1,7 @@
-import MyBuilderCaption          from './builderCaption.js';
-import MyBuilderFields           from './builderFields.js';
-import {MyBuilderColumns}        from './builderColumns.js';
-import {getFlexBasis}            from '../shared/form.js';
+import MyBuilderCaption   from './builderCaption.js';
+import MyBuilderFields    from './builderFields.js';
+import {MyBuilderColumns} from './builderColumns.js';
+import {getFlexBasis}     from '../shared/form.js';
 import {
 	getFieldHasQuery,
 	getItemTitle
@@ -307,7 +307,7 @@ let MyBuilderField = {
 				container:s.isContainer,
 				isTemplate:s.isTemplate,
 				notData:!s.isData,
-				noGrow:s.flexDirParent === 'column' && (s.isHeader || (
+				noGrow:s.flexDirParent === 'column' && (s.isHeader || s.isVariable || (
 					s.isData && !s.isRelationship1N && !s.isRichtext &&
 					!s.isTextarea && !s.isDrawing && !s.isFiles && !s.isIframe)
 				),
@@ -406,6 +406,7 @@ let MyBuilderField = {
 		isSelected:      (s) => s.field.id      === s.fieldIdShow,
 		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.attribute.content),
 		isRelationship1N:(s) => s.isRelationship && s.field.outsideIn === true && s.attribute.content === 'n:1',
+		isVariable:      (s) => s.field.content === 'variable',
 		parentChildren:  (s) => s.isContainer ? s.field.fields : (s.isTabs ? s.field.tabs[s.tabIndex].fields : []),
 		moveActive:      (s) => s.fieldMoveList !== null,
 		reference:       (s) => s.isTemplate ? '' : 'F' + s.entityIdMapRef.field[s.field.id],

@@ -450,6 +450,17 @@ type FieldTabs struct {
 	Captions CaptionMap  `json:"captions"`
 	Tabs     []Tab       `json:"tabs"`
 }
+type FieldVariable struct {
+	Id           uuid.UUID   `json:"id"`
+	VariableId   pgtype.UUID `json:"variableId"`
+	JsFunctionId pgtype.UUID `json:"jsFunctionId"`
+	IconId       pgtype.UUID `json:"iconId"`
+	Content      string      `json:"content"`
+	State        string      `json:"state"`
+	OnMobile     bool        `json:"onMobile"`
+	Clipboard    bool        `json:"clipboard"`
+	Captions     CaptionMap  `json:"captions"`
+}
 type Collection struct {
 	Id       uuid.UUID            `json:"id"`
 	ModuleId uuid.UUID            `json:"moduleId"`
@@ -596,11 +607,13 @@ type ClientEvent struct {
 	Captions        CaptionMap  `json:"captions"`
 }
 type Variable struct {
-	Id       uuid.UUID   `json:"id"`
-	ModuleId uuid.UUID   `json:"moduleId"`
-	FormId   pgtype.UUID `json:"formId"` // if assigned to form, otherwise global
-	Name     string      `json:"name"`
-	Comment  pgtype.Text `json:"comment"` // author comment
+	Id         uuid.UUID   `json:"id"`
+	ModuleId   uuid.UUID   `json:"moduleId"`
+	FormId     pgtype.UUID `json:"formId"` // if assigned to form, otherwise global
+	Name       string      `json:"name"`
+	Comment    pgtype.Text `json:"comment"` // author comment
+	Content    string      `json:"content"`
+	ContentUse string      `json:"contentUse"`
 }
 type Widget struct {
 	Id         uuid.UUID          `json:"id"`
