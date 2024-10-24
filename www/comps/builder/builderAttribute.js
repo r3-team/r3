@@ -33,7 +33,7 @@ let MyBuilderAttribute = {
 		<div class="contentBox builder-attribute float" v-if="values !== null">
 			<div class="top">
 				<div class="area nowrap">
-					<img class="icon" :src="'images/'+getAttributeIcon(values,false,false)" />
+					<img class="icon" :src="'images/'+getAttributeIcon(values.content,values.contentUse,false,false)" />
 					<h1 class="title">{{ title }}</h1>
 				</div>
 				<div class="area">
@@ -151,7 +151,7 @@ let MyBuilderAttribute = {
 									</select>
 									<my-button
 										:active="false"
-										:image="getAttributeIcon(values,false,false)"
+										:image="getAttributeIcon(values.content,values.contentUse,false,false)"
 										:naked="true"
 									/>
 								</div>

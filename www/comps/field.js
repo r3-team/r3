@@ -1106,7 +1106,7 @@ let MyField = {
 		isTime:          (s) => s.isData && s.contentUse === 'time',
 		isUuid:          (s) => s.isData && s.isAttributeUuid(s.contentData),
 		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.contentData),
-		isRelationship1N:(s) => s.isRelationship && s.field.outsideIn === true && s.contentData === 'n:1',
+		isRelationship1N:(s) => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
 		
 		// stores
 		token:              (s) => s.$store.getters['local/token'],

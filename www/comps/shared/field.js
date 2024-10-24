@@ -5,8 +5,10 @@ import MyStore            from '../../stores/store.js';
 export function getFieldIcon(field) {
 	switch(field.content) {
 		case 'data':
+			const atr = MyStore.getters['schema/attributeIdMap'][field.attributeId];
 			return getAttributeIcon(
-				MyStore.getters['schema/attributeIdMap'][field.attributeId],
+				atr.content,
+				atr.contentUse,
 				field.outsideIn,
 				field.attributeIdNm !== null);
 		break;

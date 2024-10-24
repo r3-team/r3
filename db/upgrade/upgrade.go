@@ -567,6 +567,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				USING btree (variable_id ASC NULLS LAST);
 			
 			ALTER TYPE app.filter_side_content ADD VALUE 'variable';
+			ALTER TYPE app.attribute_content   ADD VALUE '1:n';
 
 			-- variables as inputs
 			ALTER TYPE app.field_content ADD VALUE 'variable';

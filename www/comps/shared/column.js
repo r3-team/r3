@@ -137,9 +137,10 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 };
 
 export function getColumnIcon(column) {
-	return column.subQuery
-		? 'database.png'
-		: `${getAttributeIcon(MyStore.getters['schema/attributeIdMap'][column.attributeId],false,false)}`;
+	if(column.subQuery) return 'database.png';
+	
+	const atr = MyStore.getters['schema/attributeIdMap'][column.attributeId];
+	return `${getAttributeIcon(atr.content,atr.contentUse,false,false)}`;
 };
 
 export function getColumnIsFilterable(c) {

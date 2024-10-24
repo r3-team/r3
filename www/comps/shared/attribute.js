@@ -4,7 +4,7 @@ let attributeContentNames = {
 	decimal:['numeric','real','double precision'],
 	float:['real','double precision'],
 	integer:['integer','bigint'],
-	relationship:['1:1','n:1'],
+	relationship:['1:1','n:1','1:n'],
 	text:['varchar','text']
 };
 
@@ -91,6 +91,7 @@ export function getAttributeValueFromString(content,value) {
 	if(isAttributeDecimal(content))        return parseFloat(value);
 	if(isAttributeRelationship11(content)) return parseInt(value);
 	if(isAttributeRelationshipN1(content)) return JSON.parse(value);
+	if(isAttributeRelationship1N(content)) return JSON.parse(value);
 	return value;
 };
 
@@ -116,9 +117,9 @@ export function getAttributeValuesFromGetter(getter) {
 	return map;
 };
 
-export function getAttributeIcon(attribute,outsideIn,isNm) {
-	if(isAttributeString(attribute.content)) {
-		switch(attribute.contentUse) {
+export function getAttributeIcon(content,contentUse,outsideIn,isNm) {
+	if(isAttributeString(content)) {
+		switch(contentUse) {
 			case 'default':  return 'text.png';       break;
 			case 'richtext': return 'text_rich.png';  break;
 			case 'textarea': return 'text_lines.png'; break;
@@ -127,30 +128,28 @@ export function getAttributeIcon(attribute,outsideIn,isNm) {
 			case 'iframe':   return 'iframe.png';     break;
 		}
 	}
-	if(isAttributeInteger(attribute.content)) {
-		switch(attribute.contentUse) {
+	if(isAttributeInteger(content)) {
+		switch(contentUse) {
 			case 'datetime': return 'calendarTime.png'; break;
 			case 'date':     return 'calendar.png';     break;
 			case 'time':     return 'clock.png';        break;
 			default:         return 'numbers.png';      break;
 		}
 	}
-	if(isAttributeBoolean(attribute.content))   return 'bool.png';
-	if(isAttributeUuid(attribute.content))      return 'uuid.png';
-	if(isAttributeFloat(attribute.content))     return 'numbers_float.png';
-	if(isAttributeNumeric(attribute.content))   return 'numbers_decimal.png';
-	if(isAttributeFiles(attribute.content))     return 'files.png';
-	if(isAttributeRegconfig(attribute.content)) return 'languages.png';
+	if(isAttributeBoolean(content))        return 'bool.png';
+	if(isAttributeUuid(content))           return 'uuid.png';
+	if(isAttributeFloat(content))          return 'numbers_float.png';
+	if(isAttributeNumeric(content))        return 'numbers_decimal.png';
+	if(isAttributeFiles(content))          return 'files.png';
+	if(isAttributeRegconfig(content))      return 'languages.png';
+	if(isAttributeRelationship11(content)) return 'link1.png';
+	if(isAttributeRelationship1N(content)) return 'link2.png';
 	
-	if(isAttributeRelationship11(attribute.content))
-		return 'link1.png';
-	
-	if(isAttributeRelationshipN1(attribute.content)) {
+	if(isAttributeRelationshipN1(content)) {
 		if(isNm) return 'link4.png';
 		
 		return outsideIn ? 'link2.png' : 'link3.png';
 	}
-	
 	return 'noPic.png';
 };
 
@@ -184,6 +183,7 @@ export function getAttributeContentUse(content,use) {
 	if(isAttributeUuid(content))           return 'uuid';
 	if(isAttributeRelationship11(content)) return 'relationship11';
 	if(isAttributeRelationshipN1(content)) return 'relationshipN1';
+	if(isAttributeRelationship1N(content)) return 'relationship1N';
 	
 	return 'text';
 }
@@ -200,6 +200,7 @@ export function getAttributeContentsByUse(usedFor,length,largeNumbers) {
 		case 'uuid':           return { content:'uuid',                                    contentUse:'default' }; break;
 		case 'relationship11': return { content:'1:1',                                     contentUse:'default' }; break;
 		case 'relationshipN1': return { content:'n:1',                                     contentUse:'default' }; break;
+		case 'relationship1N': return { content:'1:n',                                     contentUse:'default' }; break;
 
 		// special uses: strings
 		case 'color':    return { content:'varchar',                         contentUse:'color' };    break;
@@ -229,3 +230,4 @@ export function isAttributeWithLength(content)     { return isAttributeFiles(con
 export function isAttributeRelationship(content)   { return attributeContentNames.relationship.includes(content); };
 export function isAttributeRelationship11(content) { return content === '1:1'; };
 export function isAttributeRelationshipN1(content) { return content === 'n:1'; };
+export function isAttributeRelationship1N(content) { return content === '1:n'; };

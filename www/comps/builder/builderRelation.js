@@ -172,7 +172,6 @@ let MyBuilderRelation = {
 			/>
 			
 			<!-- attributes -->
-
 			<div class="generic-entry-list tab-content" v-if="tabTarget === 'attributes'">
 				<div class="entry"
 					v-if="!readonly"
@@ -193,7 +192,7 @@ let MyBuilderRelation = {
 						<my-button
 							:active="false"
 							:captionTitle="capApp.attributeContent"
-							:image="getAttributeIcon(atr,false,false)"
+							:image="getAttributeIcon(atr.content,atr.contentUse,false,false)"
 							:naked="true"
 						/>
 						<div class="lines">

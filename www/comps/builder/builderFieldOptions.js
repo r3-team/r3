@@ -387,14 +387,14 @@ let MyBuilderFieldOptions = {
 						<td>{{ capGen.attribute }}</td>
 						<td>
 							<div class="row centered gap">
-								<my-button
-									:active="false"
-									:image="getAttributeIcon(attribute,field.outsideIn,field.attributeIdNm !== null)"
-									:naked="true"
-								/>
 								<input disabled="disabled"
 									:title="getItemTitlePath(field.attributeId)"
 									:value="getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm)"
+								/>
+								<my-button
+									:active="false"
+									:image="getAttributeIcon(attribute.content,attribute.contentUse,field.outsideIn,field.attributeIdNm !== null)"
+									:naked="true"
 								/>
 								<my-button image="open.png"
 									@trigger="openAttribute(attribute.relationId,false)"
@@ -1170,6 +1170,12 @@ let MyBuilderFieldOptions = {
 									{{ '[' + capGen.global + '] ' + v.name }}
 								</option>
 							</select>
+							<my-button
+								v-if="field.variableId !== null"
+								:active="false"
+								:image="getAttributeIcon(variableIdMap[field.variableId].content,variableIdMap[field.variableId].contentUse,false,false)"
+								:naked="true"
+							/>
 							<my-button image="add.png"
 								v-if="field.variableId === null"
 								@trigger="$emit('createNew','variable')"
@@ -1374,6 +1380,7 @@ let MyBuilderFieldOptions = {
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		formIdMap:     (s) => s.$store.getters['schema/formIdMap'],
+		variableIdMap: (s) => s.$store.getters['schema/variableIdMap'],
 		capApp:        (s) => s.$store.getters.captions.builder.form,
 		capCal:        (s) => s.$store.getters.captions.calendar,
 		capGen:        (s) => s.$store.getters.captions.generic

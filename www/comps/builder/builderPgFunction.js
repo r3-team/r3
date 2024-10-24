@@ -281,7 +281,7 @@ let MyBuilderPgFunction = {
 											:caption="atr.name + (atr.nullable ? '' : '*')"
 											:captionTitle="titleAttribute(atr)"
 											:image="radioIcon('attribute',atr.id)"
-											:images="[getAttributeIcon(atr,false,false)]"
+											:images="[getAttributeIcon(atr.content,atr.contentUse,false,false)]"
 											:naked="true"
 										/>
 									</div>

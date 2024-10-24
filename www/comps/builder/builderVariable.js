@@ -2,7 +2,8 @@ import MyBuilderFormInput from './builderFormInput.js';
 import {copyValueDialog}  from '../shared/generic.js';
 import {
 	getAttributeContentUse,
-	getAttributeContentsByUse
+	getAttributeContentsByUse,
+	getAttributeIcon
 } from '../shared/attribute.js';
 export {MyBuilderVariable as default};
 
@@ -90,32 +91,40 @@ let MyBuilderVariable = {
 						<tr>
 							<td>{{ capAppAtr.usedFor }}</td>
 							<td>
-								<select v-model="usedFor" :disabled="readonly">
-									<optgroup :label="capGen.standard">
-										<option value="text"    >{{ capAppAtr.option.text }}</option>
-										<option value="textarea">{{ capAppAtr.option.textarea }}</option>
-										<option value="richtext">{{ capAppAtr.option.richtext }}</option>
-										<option value="number"  >{{ capAppAtr.option.number }}</option>
-										<option value="decimal" >{{ capAppAtr.option.decimal }}</option>
-										<option value="color"   >{{ capAppAtr.option.color }}</option>
-										<option value="iframe"  >{{ capAppAtr.option.iframe }}</option>
-										<option value="drawing" >{{ capAppAtr.option.drawing }}</option>
-										<option value="boolean" >{{ capAppAtr.option.boolean }}</option>
-									</optgroup>
-									<optgroup :label="capAppAtr.datetimes">
-										<option value="datetime">{{ capAppAtr.option.datetime }}</option>
-										<option value="date">{{ capAppAtr.option.date }}</option>
-										<option value="time">{{ capAppAtr.option.time }}</option>
-									</optgroup>
-									<optgroup :label="capGen.relationships">
-										<option value="relationshipN1">{{ capGen.relationship }}</option>
-									</optgroup>
-									<optgroup :label="capAppAtr.expert">
-										<option value="float"    >{{ capAppAtr.option.float }}</option>
-										<option value="uuid"     >{{ capAppAtr.option.uuid }}</option>
-										<option value="regconfig">{{ capAppAtr.option.regconfig }}</option>
-									</optgroup>
-								</select>
+								<div class="row gap">
+									<select v-model="usedFor" :disabled="readonly">
+										<optgroup :label="capGen.standard">
+											<option value="text"    >{{ capAppAtr.option.text }}</option>
+											<option value="textarea">{{ capAppAtr.option.textarea }}</option>
+											<option value="richtext">{{ capAppAtr.option.richtext }}</option>
+											<option value="number"  >{{ capAppAtr.option.number }}</option>
+											<option value="decimal" >{{ capAppAtr.option.decimal }}</option>
+											<option value="color"   >{{ capAppAtr.option.color }}</option>
+											<option value="iframe"  >{{ capAppAtr.option.iframe }}</option>
+											<option value="drawing" >{{ capAppAtr.option.drawing }}</option>
+											<option value="boolean" >{{ capAppAtr.option.boolean }}</option>
+										</optgroup>
+										<optgroup :label="capAppAtr.datetimes">
+											<option value="datetime">{{ capAppAtr.option.datetime }}</option>
+											<option value="date">{{ capAppAtr.option.date }}</option>
+											<option value="time">{{ capAppAtr.option.time }}</option>
+										</optgroup>
+										<optgroup :label="capGen.relationships">
+											<option value="relationshipN1">{{ capAppAtr.option.relationship1 }}</option>
+											<option value="relationship1N">{{ capAppAtr.option.relationshipN }}</option>
+										</optgroup>
+										<optgroup :label="capAppAtr.expert">
+											<option value="float"    >{{ capAppAtr.option.float }}</option>
+											<option value="uuid"     >{{ capAppAtr.option.uuid }}</option>
+											<option value="regconfig">{{ capAppAtr.option.regconfig }}</option>
+										</optgroup>
+									</select>
+									<my-button
+										:active="false"
+										:image="getAttributeIcon(values.content,values.contentUse,false,false)"
+										:naked="true"
+									/>
+								</div>
 							</td>
 							<td></td>
 						</tr>
@@ -178,6 +187,7 @@ let MyBuilderVariable = {
 		copyValueDialog,
 		getAttributeContentUse,
 		getAttributeContentsByUse,
+		getAttributeIcon,
 		
 		// actions
 		handleHotkeys(e) {
