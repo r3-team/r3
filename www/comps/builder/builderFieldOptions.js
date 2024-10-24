@@ -1178,7 +1178,7 @@ let MyBuilderFieldOptions = {
 							/>
 							<my-button image="add.png"
 								v-if="field.variableId === null"
-								@trigger="$emit('createNew','variable')"
+								@trigger="$emit('createNew','variable',{formId:formId})"
 								:captionTitle="capGen.button.new"
 							/>
 							<my-button image="open.png"
