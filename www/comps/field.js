@@ -671,6 +671,9 @@ let MyField = {
 				if(!this.isData) return false;
 
 				if(this.isVariable) {
+					if(this.variable === false)
+						return null;
+
 					if(this.variable.formId !== null)
 						return this.variableIdMapLocal[this.variable.id] !== undefined ? this.variableIdMapLocal[this.variable.id] : null;
 					
@@ -1055,7 +1058,7 @@ let MyField = {
 		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
 		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),
-		variable:   (s) => !s.isVariable ? false : s.variableIdMap[s.field.variableId],
+		variable:   (s) => (!s.isVariable || s.field.variableId === null) ? false : s.variableIdMap[s.field.variableId],
 		
 		// content types
 		isButton:   (s) => s.content === 'button',
