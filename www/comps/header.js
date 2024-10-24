@@ -164,6 +164,16 @@ let MyHeader = {
 				<img src="images/feedback.png" />
 			</div>
 			
+			<!-- logout notification, session expiration -->
+			<div class="entry clickable" tabindex="0"
+				v-if="logoutInSec !== 0"
+				@click="clickLogoutTimer"
+				@keyup.enter="clickLogoutTimer"
+			>
+				<img src="images/logoff.png" />
+				<span>{{ getStringFilled(Math.floor(logoutInSec / 60),2,'0') + ':' + getStringFilled(logoutInSec % 60,2,'0') }}</span>
+			</div>
+			
 			<!-- system message, maintenance timer -->
 			<div class="entry clickable" tabindex="0"
 				v-if="showMaintenance && systemMsgActive"
@@ -201,7 +211,8 @@ let MyHeader = {
 		</div>
 	</div>`,
 	props:{
-		keysLocked:{ type:Boolean, required:true }
+		keysLocked: { type:Boolean, required:true },
+		logoutInSec:{ type:Number,  required:true }
 	},
 	watch:{
 		maintenanceComing(v) {
@@ -215,7 +226,7 @@ let MyHeader = {
 			}, 1000);
 		}
 	},
-	emits:['logout','show-collection-input','show-module-hover-menu','show-settings'],
+	emits:['logout','logoutExpire','show-collection-input','show-module-hover-menu','show-settings'],
 	data() {
 		return {
 			maintenanceInSec:0,
@@ -367,6 +378,7 @@ let MyHeader = {
 		isMobile:            (s) => s.$store.getters.isMobile,
 		isNoAuth:            (s) => s.$store.getters.isNoAuth,
 		loginName:           (s) => s.$store.getters.loginName,
+		loginSessionExpires: (s) => s.$store.getters.loginSessionExpires,
 		moduleEntries:       (s) => s.$store.getters.moduleEntries,
 		pwaModuleId:         (s) => s.$store.getters.pwaModuleId,
 		moduleIdLast:        (s) => s.$store.getters.moduleIdLast,
@@ -438,6 +450,25 @@ let MyHeader = {
 		},
 		
 		// actions
+		clickLogoutTimer() {
+			const d = this.getDateFormat(new Date(this.loginSessionExpires*1000),'H:i');
+			this.$store.commit('dialog',{
+				captionBody:this.capGen.dialog.logoutComing.replace('{DATE}',d),
+				captionTop:this.capGen.dialog.logoutComingTitle,
+				image:'logoff.png',
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.relog1,
+					exec:() => this.$emit('logoutExpire'),
+					keyEnter:true,
+					image:'logoff.png'
+				},{
+					caption:this.capGen.button.relog0,
+					keyEscape:true,
+					image:'clock.png'
+				}]
+			});
+		},
 		clickSingleModuleLink() {
 			// module active in mobile mode: toggle menu
 			if(this.moduleSingleActive && this.isMobile)

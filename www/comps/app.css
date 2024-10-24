@@ -244,7 +244,7 @@ h3{
 	flex-flow:column nowrap;
 	background-color:var(--color-bg);
 }
-#app.is-not-ready{
+#app.login-visible{
 	height:auto;
 	min-height:100%;
 	background-image:url('../images/backgrounds/0.webp');

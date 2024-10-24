@@ -34,6 +34,8 @@
 			"read":"Read",
 			"refresh":"Reload",
 			"refreshHint":"Reload record",
+			"relog0":"Re-login later",
+			"relog1":"Re-login now",
 			"remove":"Remove",
 			"reset":"Reset",
 			"restore":"Restore",
@@ -56,7 +58,9 @@
 		"dialog":{
 			"close":"There are unsaved changes. If you continue, your changes will be lost.<br /><br />Do you want to continue?",
 			"confirm":"Please confirm",
-			"maintenanceComing":"The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your work before then.",
+			"logoutComing":"For security reasons, you need to re-enter your login credentials every now and then.<br /><br />You will be automatically logged off at <b>{DATE}</b>.<br /><br />Please save your changes before then.<br /><br />",
+			"logoutComingTitle":"You are about to be logged off",
+			"maintenanceComing":"The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your changes before then.",
 			"systemMsg":"System message"
 		},
 		"error":{
@@ -316,8 +320,6 @@
 			"titlePerformance":"Performance",
 			"titleRepo":"Application repository",
 			"tokenExpiryHours":"Max. session time in hours",
-			"tokenReauthHours":"Force login before session end, in hours",
-			"tokenReauthHoursHint":"This setting forces authentication with credentials at the next interactive system access, X hours before the maximum session time is reached. It is used to avoid the active session expiring while a user is working in the system.<br /><br />Should be set to a value larger than the expected maximum continuous time a user is using the application. 12 hours as an example.",
 			"updateCheck":"Version state",
 			"updateCheckCurrent":"Current",
 			"updateCheckNewer":"Cutting edge",

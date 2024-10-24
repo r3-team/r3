@@ -52,6 +52,12 @@ let MyLogin = {
 				<span>{{ message.httpMode[language] }}</span>
 			</div>
 			
+			<!-- session expired -->
+			<div class="message warning" v-if="loginSessionExpired">
+				<img src="images/warning.png" />
+				<span>{{ message.sessionExpired[language] }}</span>
+			</div>
+			
 			<!-- unexpected error message -->
 			<div class="message warning" v-if="appInitErr">
 				<img src="images/warning.png" />
@@ -209,6 +215,10 @@ let MyLogin = {
 					de:'Passwort',
 					en_US:'Password'
 				},
+				sessionExpired:{
+					de:'Sitzung abgelaufen - bitte erneut anmelden',
+					en_US:'Session expired - please login again'
+				},
 				stayLoggedIn:{
 					de:'Angemeldet bleiben',
 					en_US:'Stay logged in'
@@ -246,21 +256,22 @@ let MyLogin = {
 		showMfa:   (s) => s.mfaTokens.length !== 0,
 		
 		// stores
-		activated:         (s) => s.$store.getters['local/activated'],
-		appName:           (s) => s.$store.getters['local/appName'],
-		appVersion:        (s) => s.$store.getters['local/appVersion'],
-		companyName:       (s) => s.$store.getters['local/companyName'],
-		companyWelcome:    (s) => s.$store.getters['local/companyWelcome'],
-		customLogo:        (s) => s.$store.getters['local/customLogo'],
-		customLogoUrl:     (s) => s.$store.getters['local/customLogoUrl'],
-		token:             (s) => s.$store.getters['local/token'],
-		tokenKeep:         (s) => s.$store.getters['local/tokenKeep'],
-		clusterNodeName:   (s) => s.$store.getters.clusterNodeName,
-		colorLogin:        (s) => s.$store.getters.colorLogin,
-		cryptoApiAvailable:(s) => s.$store.getters.cryptoApiAvailable,
-		kdfIterations:     (s) => s.$store.getters.constants.kdfIterations,
-		productionMode:    (s) => s.$store.getters.productionMode,
-		tokenKeepEnable:   (s) => s.$store.getters.tokenKeepEnable
+		activated:          (s) => s.$store.getters['local/activated'],
+		appName:            (s) => s.$store.getters['local/appName'],
+		appVersion:         (s) => s.$store.getters['local/appVersion'],
+		companyName:        (s) => s.$store.getters['local/companyName'],
+		companyWelcome:     (s) => s.$store.getters['local/companyWelcome'],
+		customLogo:         (s) => s.$store.getters['local/customLogo'],
+		customLogoUrl:      (s) => s.$store.getters['local/customLogoUrl'],
+		token:              (s) => s.$store.getters['local/token'],
+		tokenKeep:          (s) => s.$store.getters['local/tokenKeep'],
+		clusterNodeName:    (s) => s.$store.getters.clusterNodeName,
+		colorLogin:         (s) => s.$store.getters.colorLogin,
+		cryptoApiAvailable: (s) => s.$store.getters.cryptoApiAvailable,
+		kdfIterations:      (s) => s.$store.getters.constants.kdfIterations,
+		loginSessionExpired:(s) => s.$store.getters.loginSessionExpired,
+		productionMode:     (s) => s.$store.getters.productionMode,
+		tokenKeepEnable:    (s) => s.$store.getters.tokenKeepEnable
 	},
 	watch:{
 		loginReady(v) {
@@ -417,6 +428,8 @@ let MyLogin = {
 			this.$store.commit('isNoAuth',token.noAuth);
 			this.$store.commit('loginId',loginId);
 			this.$store.commit('loginName',loginName);
+			this.$store.commit('loginSessionExpired',false);
+			this.$store.commit('loginSessionExpires',token.exp);
 			this.$store.commit('sessionValueStoreReset');
 			this.$emit('authenticated');
 		}

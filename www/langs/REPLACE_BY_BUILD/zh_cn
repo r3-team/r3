@@ -34,6 +34,8 @@
 			"read":"读取",
 			"refresh":"重新加载",
 			"refreshHint":"重新加载记录",
+			"relog0":"Re-login later",
+			"relog1":"Re-login now",
 			"remove":"移除",
 			"reset":"重置",
 			"restore":"恢复",
@@ -56,7 +58,9 @@
 		"dialog":{
 			"close":"存在未保存的更改。如果继续，您的更改将会丢失。<br /><br />您确定要继续吗？",
 			"confirm":"请确认",
-			"maintenanceComing":"The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your work before then.",
+			"logoutComing":"For security reasons, you need to re-enter your login credentials every now and then.<br /><br />You will be automatically logged off at <b>{DATE}</b>.<br /><br />Please save your changes before then.<br /><br />",
+			"logoutComingTitle":"You are about to be logged off",
+			"maintenanceComing":"The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your changes before then.",
 			"systemMsg":"System message"
 		},
 		"error":{
@@ -316,8 +320,6 @@
 			"titlePerformance":"性能",
 			"titleRepo":"应用程序存储库",
 			"tokenExpiryHours":"会话最长时间（小时）",
-			"tokenReauthHours":"Force login before session end, in hours",
-			"tokenReauthHoursHint":"This setting forces authentication with credentials at the next interactive system access, X hours before the maximum session time is reached. It is used to avoid the active session expiring while a user is working in the system.<br /><br />Should be set to a value larger than the expected maximum continuous time a user is using the application. 12 hours as an example.",
 			"updateCheck":"版本状态",
 			"updateCheckCurrent":"当前",
 			"updateCheckNewer":"最新",

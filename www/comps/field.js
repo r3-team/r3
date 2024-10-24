@@ -1109,7 +1109,6 @@ let MyField = {
 		isRelationship1N:(s) => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
 		
 		// stores
-		token:              (s) => s.$store.getters['local/token'],
 		relationIdMap:      (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:     (s) => s.$store.getters['schema/attributeIdMap'],
 		iconIdMap:          (s) => s.$store.getters['schema/iconIdMap'],

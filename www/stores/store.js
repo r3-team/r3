@@ -57,6 +57,8 @@ const MyStore = Vuex.createStore({
 		loginPrivateKeyEnc:null,       // user login private key PEM, encrypted with login key
 		loginPrivateKeyEncBackup:null, // user login private key PEM, encrypted with backup code
 		loginPublicKey:null,           // user login public key for encryption (exportable key)
+		loginSessionExpired:false,     // set to true, when session expires
+		loginSessionExpires:null,      // unix timestamp of session expiration date
 		loginWidgetGroups:[],          // user widgets, starting with widget groups
 		moduleEntries:[],              // module entries for header/home page
 		moduleIdLast:null,             // module ID of last active module
@@ -245,6 +247,8 @@ const MyStore = Vuex.createStore({
 		loginPrivateKeyEnc:      (state,payload) => state.loginPrivateKeyEnc       = payload,
 		loginPrivateKeyEncBackup:(state,payload) => state.loginPrivateKeyEncBackup = payload,
 		loginPublicKey:          (state,payload) => state.loginPublicKey           = payload,
+		loginSessionExpired:     (state,payload) => state.loginSessionExpired      = payload,
+		loginSessionExpires:     (state,payload) => state.loginSessionExpires      = payload,
 		loginWidgetGroups:       (state,payload) => state.loginWidgetGroups        = payload,
 		moduleEntries:           (state,payload) => state.moduleEntries            = payload,
 		moduleIdLast:            (state,payload) => state.moduleIdLast             = payload,
@@ -398,6 +402,8 @@ const MyStore = Vuex.createStore({
 		loginPrivateKeyEnc:      (state) => state.loginPrivateKeyEnc,
 		loginPrivateKeyEncBackup:(state) => state.loginPrivateKeyEncBackup,
 		loginPublicKey:          (state) => state.loginPublicKey,
+		loginSessionExpired:     (state) => state.loginSessionExpired,
+		loginSessionExpires:     (state) => state.loginSessionExpires,
 		loginWidgetGroups:       (state) => state.loginWidgetGroups,
 		moduleEntries:           (state) => state.moduleEntries,
 		moduleIdLast:            (state) => state.moduleIdLast,

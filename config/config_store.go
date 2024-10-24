@@ -38,7 +38,7 @@ var (
 		"pwForceLower", "pwForceSpecial", "pwForceUpper", "pwLengthMin",
 		"repoChecked", "repoFeedback", "repoSkipVerify", "systemMsgDate0",
 		"systemMsgDate1", "systemMsgMaintenance", "tokenExpiryHours",
-		"tokenKeepEnable", "tokenReauthHours"}
+		"tokenKeepEnable"}
 
 	NamesUint64Slice = []string{"loginBackgrounds"}
 )

@@ -602,6 +602,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 			CREATE INDEX IF NOT EXISTS fki_field_variable_js_function_id
 				ON app.field_variable USING btree (js_function_id ASC NULLS LAST);
+			
+			-- remove not needed configuration option
+			DELETE FROM instance.config WHERE name = 'tokenReauthHours';
 		`)
 		return "3.9", err
 	},

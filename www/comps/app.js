@@ -37,7 +37,7 @@ let MyApp = {
 	},
 	template:`<div :class="classes" id="app" :style="styles">
 		
-		<my-login ref="login" v-if="!appReady"
+		<my-login ref="login" v-if="!appReady || loginSessionExpired"
 			@authenticated="initApp"
 			:backendReady="wsConnected"
 			:httpMode="httpMode"
@@ -46,18 +46,24 @@ let MyApp = {
 		
 		<template v-if="appReady">
 			<my-header
-				@logout="sessionInvalid"
+				v-show="!loginSessionExpired"
+				@logout="sessionInvalid(false)"
+				@logoutExpire="sessionInvalid(true)"
 				@show-collection-input="collectionEntries = $event"
 				@show-module-hover-menu="showHoverNav = true"
 				@show-settings="showSettings = !showSettings"
 				:keysLocked="loginEncryption && loginPrivateKey === null"
+				:logoutInSec="logoutInSec"
 			/>
 			
-			<router-view class="app-content" />
+			<router-view class="app-content"
+				v-show="!loginSessionExpired"
+			/>
 			
 			<!-- global pop-up form window -->
 			<div class="app-sub-window under-header"
 				v-if="popUpFormGlobal !== null"
+				v-show="!loginSessionExpired"
 				@mousedown.self="$refs.popUpForm.closeAsk()"
 			>
 				<my-form ref="popUpForm"
@@ -74,17 +80,19 @@ let MyApp = {
 			<!-- login settings -->
 			<div class="app-sub-window under-header"
 				v-if="showSettings"
+				v-show="!loginSessionExpired"
 				@mousedown.self="showSettings = false"
 			>
 				<my-settings
 					@close="showSettings = false"
-					@logout="showSettings = false;sessionInvalid()"
+					@logout="showSettings = false;sessionInvalid(false)"
 				/>
 			</div>
 			
 			<!-- alternative module hover menu -->
 			<div class="app-sub-window at-left no-scroll"
 				v-if="showHoverNav"
+				v-show="!loginSessionExpired"
 				@mousedown.self="showHoverNav = false"
 			>
 				<div class="module-hover-menu"
@@ -141,6 +149,7 @@ let MyApp = {
 			<!-- mobile collection selection input -->
 			<div class="app-sub-window at-top no-scroll"
 				v-if="collectionEntries.length !== 0"
+				v-show="!loginSessionExpired"
 				@mousedown.self="collectionEntries = []"
 			>
 				<div class="fullscreen-collection-input shade">
@@ -159,16 +168,22 @@ let MyApp = {
 			
 			<!-- feedback window -->
 			<transition name="fade">
-				<my-feedback v-if="isAtFeedback" />
+				<my-feedback
+					v-if="isAtFeedback"
+					v-show="!loginSessionExpired"
+				/>
 			</transition>
 			
 			<!-- dialog window -->
 			<transition name="fade">
-				<my-dialog v-if="isAtDialog" />
+				<my-dialog
+					v-if="isAtDialog"
+					v-show="!loginSessionExpired"
+				/>
 			</transition>
 			
 			<!-- loading input blocker overlay -->
-			<div class="input-block-overlay-bg" :class="{show:blockInput}">
+			<div class="input-block-overlay-bg" :class="{show:blockInput}" v-show="!loginSessionExpired">
 				<div class="input-block-overlay">
 					<img class="busy" src="images/load.gif" />
 					<my-button class="cancel-action" image="cancel.png"
@@ -185,6 +200,7 @@ let MyApp = {
 			appReady:false,       // app is loaded and user authenticated
 			collectionEntries:[], // collection entries shown in pop-up window (for mobile use)
 			loginReady:false,     // app is ready for authentication
+			logoutInSec:0,        // for timer in header, when session is to be logged out due to expiration
 			publicLoaded:false,   // public data has been loaded
 			schemaLoaded:false,   // app schema has been loaded
 			showHoverNav:false,   // alternative hover menu for module navigation
@@ -240,8 +256,8 @@ let MyApp = {
 	computed:{
 		// presentation
 		classes:(s) => {
-			if(!s.appReady)
-				return 'is-not-ready';
+			if(!s.appReady || s.loginSessionExpired)
+				return 'login-visible';
 			
 			let classes = [
 				'user-spacing',`spacing-value${s.settings.spacing}`,
@@ -258,7 +274,7 @@ let MyApp = {
 			return classes.join(' ');
 		},
 		styles:(s) => {
-			if(!s.appReady)
+			if(!s.appReady || s.loginSessionExpired)
 				return s.loginBackground;
 			
 			let styles = [`font-size:${s.settings.fontSize}%`];
@@ -382,6 +398,8 @@ let MyApp = {
 		keyDownHandlers:    (s) => s.$store.getters.keyDownHandlers,
 		loginEncryption:    (s) => s.$store.getters.loginEncryption,
 		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
+		loginSessionExpired:(s) => s.$store.getters.loginSessionExpired,
+		loginSessionExpires:(s) => s.$store.getters.loginSessionExpires,
 		moduleIdLast:       (s) => s.$store.getters.moduleIdLast,
 		moduleIdMapMeta:    (s) => s.$store.getters.moduleIdMapMeta,
 		patternStyle:       (s) => s.$store.getters.patternStyle,
@@ -398,9 +416,10 @@ let MyApp = {
 		window.addEventListener('resize',this.setMobileView);
 	},
 	mounted() {
-		setInterval(this.wsReconnect,2000); // websocket reconnect loop
-		this.wsConnect();                   // connect to backend via websocket
-		this.setMobileView();               // initial state, mobile view: yes/no
+		setInterval(this.wsReconnect,2000);        // websocket reconnect loop
+		setInterval(this.sessionExpireCheck,1000); // session expiration check
+		this.wsConnect();                          // connect to backend via websocket
+		this.setMobileView();                      // initial state, mobile view: yes/no
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleKeydown);
@@ -534,22 +553,39 @@ let MyApp = {
 		},
 		
 		// session control
-		sessionInvalid() {
+		sessionExpireCheck() {
+			if(this.loginSessionExpires === null) return;
+
+			const now = Math.floor(new Date().getTime() / 1000);
+
+			if(this.loginSessionExpires < now)
+				return this.sessionInvalid(true);
+
+			if(this.loginSessionExpires - 1800 < now)
+				this.logoutInSec = this.loginSessionExpires - now;
+			else
+				this.logoutInSec = 0;
+		},
+		sessionInvalid(sessionExpired) {
 			this.$store.commit('local/loginKeyAes',null);
 			this.$store.commit('local/loginKeySalt',null);
-			this.$store.commit('local/token','');
-			this.$store.commit('local/tokenKeep',false);
 			this.$store.commit('loginEncryption',false);
 			this.$store.commit('loginPrivateKey',null);
 			this.$store.commit('loginPrivateKeyEnc',null);
 			this.$store.commit('loginPrivateKeyEncBackup',null);
 			this.$store.commit('loginPublicKey',null);
-			
-			// reconnect for another login attempt
-			this.wsReconnect(true);
-			
+			this.$store.commit('loginSessionExpires',null);
 			this.$store.commit('pageTitle','Login');
-			this.appReady = false;
+			
+			if(sessionExpired) {
+				this.$store.commit('loginSessionExpired',true);
+			} else {
+				// proper logout, reset websocket connection, clear tokens, reset frontend
+				this.$store.commit('local/token','');
+				this.$store.commit('local/tokenKeep',false);
+				this.wsReconnect(true);
+				this.appReady = false;
+			}
 		},
 		
 		// public info retrieval
