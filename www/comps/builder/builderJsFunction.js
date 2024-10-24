@@ -199,6 +199,8 @@ let MyBuilderJsFunction = {
 											:image="radioIcon('field_value_get_changed',field.id)"
 											:naked="true"
 										/>
+									</template>
+									<template v-if="field.isData || field.isVariable">
 										<my-button
 											@trigger="selectEntity('field_caption_set',field.id)"
 											:caption="capApp.option.fieldSetCaption"
@@ -619,6 +621,7 @@ let MyBuilderJsFunction = {
 					isChart:f.content === 'chart',
 					isData:f.content === 'data',
 					isDataFile:f.content === 'data' && s.isAttributeFiles(s.attributeIdMap[f.attributeId].content),
+					isVariable:f.content === 'variable',
 					name:s.displayFieldName(id),
 					ref:s.entityIdMapRef.field[id]
 				});
