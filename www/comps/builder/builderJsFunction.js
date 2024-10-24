@@ -428,7 +428,7 @@ let MyBuilderJsFunction = {
 									:image="holderVariableIdsOpen.includes(v.id) ? 'triangleDown.png' : 'triangleRight.png'"
 									:naked="true"
 									:caption="v.formId === null ? '[' + capGen.global + '] ' + v.name : v.name"
-									:captionTitle="v.name"
+									:captionTitle="v.comment === null ? v.name : v.name + ', ' + v.comment"
 								/>
 								<router-link :key="v.id" :to="'/builder/variables/'+module.id+'?variableIdEdit='+v.id">
 									<my-button image="open.png" :captionTitle="capGen.button.open" :naked="true" />
