@@ -766,8 +766,8 @@
 			"date0":"Anzeigen von",
 			"date1":"Anzeigen bis",
 			"description":"Administratoren können dieses Feature nutzen, um Benutzer über Ereignisse zu informieren, wie z. B. geplante Downtimes. Sowohl angemeldete, als auch Benutzer, die eine neue Sitzung starten, erhalten diese Nachricht.<br /><br />Sollte die Nachricht während der Anzeigeperiode geändert werden, wird die aktualisierte Version der Nachricht Benutzern erneut angezeigt.",
-			"maintenance":"Wartung",
-			"maintenanceHint":"Wenn aktiviert ist, wird in den Wartungsmodus gewechselt, sobald \"anzeigen bis\" erreicht ist.",
+			"maintenance":"In Wartungsmodus wechseln",
+			"maintenanceHint":"Wenn aktiviert, wird das System in den Wartungsmodus gebracht, sobald \"anzeigen bis\" erreicht ist. 30 Minuten vor Aktivierung des Wartungsmodus wird Benutzern ein Countdown angezeigt.",
 			"text":"Nachricht"
 		},
 		"navigationActivation":"Aktivierung",

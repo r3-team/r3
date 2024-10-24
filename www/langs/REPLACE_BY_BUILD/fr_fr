@@ -766,8 +766,8 @@
 			"date0":"Show from",
 			"date1":"Show until",
 			"description":"Administrators can use this feature to inform users about events such as planned downtimes. Both logged in, as well as users starting new sessions, will receive the message.<br /><br />If the message is changed while the time period is active, the updated version will again be shown to users.",
-			"maintenance":"Maintenance",
-			"maintenanceHint":"If enabled, switch to maintenance mode once 'show until' is reached.",
+			"maintenance":"Switch to maintenance",
+			"maintenanceHint":"If enabled, the system will switch to maintenance mode once 'show until' is reached. 30 minutes before the switch to maintenance mode occurs, a countdown timer will be visible to users.",
 			"text":"Message"
 		},
 		"navigationActivation":"Activation",
