@@ -18,11 +18,18 @@ func Log(id uuid.UUID, loginId int64, address string, device types.WebsocketClie
 	if err != nil {
 		return err
 	}
+	now := tools.GetTimeUnix()
 
+	// on conflict constraint requires full name for ID column in WHERE definition
 	if _, err := tx.Exec(db.Ctx, `
 		INSERT INTO instance.login_session(id, login_id, node_id, address, device, date)
 		VALUES ($1,$2,$3,$4,$5,$6)
-	`, id, loginId, cache.GetNodeId(), address, types.WebsocketClientDeviceNames[device], tools.GetTimeUnix()); err != nil {
+		ON CONFLICT
+			ON CONSTRAINT login_session_pkey
+			DO UPDATE
+				SET date = $7
+				WHERE instance.login_session.id = $8
+	`, id, loginId, cache.GetNodeId(), address, types.WebsocketClientDeviceNames[device], now, now, id); err != nil {
 		return err
 	}
 	return tx.Commit(db.Ctx)

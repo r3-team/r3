@@ -80,29 +80,29 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// get client host address
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		return
+	}
+
+	// create unique client ID for session tracking
+	clientId, err := uuid.NewV4()
+	if err != nil {
+		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		return
+	}
+
+	// upgrade to websocket
 	ws, err := clientUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 		return
 	}
 
-	// get client host address
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
-		ws.Close()
-		return
-	}
-
 	// create global request context with abort function
 	ctx, ctxCancel := context.WithCancel(context.Background())
-	clientId, err := uuid.NewV4()
-	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
-		ws.Close()
-		return
-	}
-
 	client := &clientType{
 		id:        clientId,
 		address:   host,
