@@ -1081,7 +1081,7 @@ let MyField = {
 		isSlider:  (s) => s.isData && s.field.display === 'slider',
 		
 		// composite
-		isActive:        (s) => !s.isMobile || s.field.onMobile,
+		isActive:        (s) => (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
 		isEncrypted:     (s) => s.isData && s.attribute.encrypted,
 		isNew:           (s) => s.isData && !s.isVariable && s.joinsIndexMap[s.field.index].recordId === 0,
 		isBoolean:       (s) => s.isData && s.isAttributeBoolean(s.contentData),
