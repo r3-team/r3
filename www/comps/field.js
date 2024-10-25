@@ -320,7 +320,7 @@ let MyField = {
 					:class="{ invalid:showInvalid }"
 					:disabled="isReadonly"
 					:placeholder="capGen.threeDots"
-					:type="!isPassword || showPassword ? 'text' : 'password'"
+					:type="lineInputType"
 				/>
 				
 				<!-- iframe input -->
@@ -809,6 +809,10 @@ let MyField = {
 
 			return s.isData && !s.isVariable && s.attribute.iconId !== null ? s.attribute.iconId : false;
 		},
+		lineInputType:(s) => {
+			if(s.isMobile && (s.isDecimal || s.isInteger)) return 'number';
+			return !s.isPassword || s.showPassword ? 'text' : 'password';
+		},
 		presetValue:(s) => {
 			if(!s.isData) return false;
 			
@@ -1017,8 +1021,11 @@ let MyField = {
 			if(!s.isData)                                            return true;
 			if(s.customErr !== null)                                 return false;
 			if(s.inputRegex !== null && !s.inputRegex.test(s.value)) return false;
-			if(s.isDecimal && !/^-?\d+\.?\d*$/.test(s.value))        return false;
-			if(s.isInteger && !/^-?\d+$/.test(s.value))              return false;
+
+			if(typeof s.value === 'string') {
+				if(s.isDecimal && !/^-?\d+[\.\,]?\d*$/.test(s.value)) return false;
+				if(s.isInteger && !/^-?\d+$/.test(s.value))           return false;
+			}
 			
 			if(s.isUuid && !/^[0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12}$/i.test(s.value))
 				return false;
@@ -1294,16 +1301,17 @@ let MyField = {
 			}
 		},
 		setValue(val,valOld,indexAttributeId) {
-
 			// clean inputs
-			if(this.isDecimal)
-				val = val.replace(',','.');
-
 			if(val === '')
 				val = null;
 
-			if(this.isInteger && val !== null && /^\-?\d+$/.test(val))
-				val = parseInt(val);
+			if(val !== null && typeof val === 'string') {
+				if(this.isInteger && /^\-?\d+$/.test(val))
+					val = parseInt(val);
+
+				if(this.isDecimal)
+					val = val.replace(',','.');
+			}
 			
 			if(!this.isVariable) {
 				// regular field, send changes up to the form
