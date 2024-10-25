@@ -24,17 +24,25 @@ let MyBuilderPresetValue = {
 			</div>
 		</td>
 		<td v-if="exists">
-			<select class="dynamic" v-if="isRelationship" v-model="presetIdReferInput" :disabled="readonly">
-				<option :value="null">[{{ attribute.content }}]</option>
-				<option v-for="p in relationship.presets" :value="p.id">{{ p.name }}</option>
-			</select>
-			
-			<textarea class="dynamic startAsOneLine"
-				v-if="!isRelationship"
-				v-model="valueInput"
-				:disabled="readonly"
-				:placeholder="attribute.content"
-			></textarea>
+			<div class="row gap">
+				<select class="dynamic" v-if="isRelationship" v-model="presetIdReferInput" :disabled="readonly">
+					<option :value="null">[{{ attribute.content }}]</option>
+					<option v-for="p in relationship.presets" :value="p.id">{{ p.name }}</option>
+				</select>
+				
+				<textarea class="dynamic startAsOneLine"
+					v-if="!isRelationship"
+					v-model="valueInput"
+					:disabled="readonly"
+					:placeholder="attribute.content"
+				></textarea>
+
+				<my-button image="cancel.png"
+					@trigger="$emit('del')"
+					:active="!readonly"
+					:naked="true"
+				/>
+			</div>
 		</td>
 		<td colspan="2" v-if="!exists">
 			<my-button image="edit.png"
@@ -52,7 +60,7 @@ let MyBuilderPresetValue = {
 		readonly:     { type:Boolean, required:true },
 		value:        { required:true }
 	},
-	emits:['set'],
+	emits:['del','set'],
 	computed:{
 		isRelationship:(s) => s.isAttributeRelationship(s.attribute.content),
 		relationship:  (s) => !s.isRelationship ? false : s.relationIdMap[s.attribute.relationshipId],
@@ -150,6 +158,7 @@ let MyBuilderPreset = {
 						</tr>
 						<my-builder-preset-value
 							v-for="(a,i) in relation.attributes.filter(v => v.name !== 'id' && !isAttributeFiles(v.content))"
+							@del="childDel(a.id)"
 							@set="(...args) => childSet(a.id,...args)"
 							:attribute="a"
 							:exists="attributeIdMapValue[a.id] !== undefined"
@@ -212,7 +221,7 @@ let MyBuilderPreset = {
 		
 		// actions
 		childGet(atrId,mode) {
-			const exists = typeof this.attributeIdMapValue[atrId] !== 'undefined';
+			const exists = this.attributeIdMapValue[atrId] !== undefined;
 			
 			switch(mode) {
 				case 'presetIdRefer':
@@ -226,6 +235,12 @@ let MyBuilderPreset = {
 				break;
 			}
 			return false;
+		},
+		childDel(atrId) {
+			for(let i = 0, j = this.values.values.length; i < j; i++) {
+				if(this.values.values[i].attributeId === atrId)
+					return this.values.values.splice(i,1);
+			}
 		},
 		childSet(atrId,presetIdRefer,protec,value) {
 			const atr = this.attributeIdMap[atrId];
