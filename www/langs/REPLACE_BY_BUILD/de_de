@@ -59,7 +59,7 @@
 			"close":"Es existieren ungespeicherte Änderungen. Diese werden verloren gehen.<br /><br />Trotzdem fortfahren?",
 			"confirm":"Bitte bestätigen",
 			"logoutComing":"Aus Sicherheitsgründen müssen Anmeldedaten hin und wieder neu eingegeben werden.<br /><br />Diese Benutzersitzung wird um <b>{DATE}</b> automatisch abgemeldet.<br /><br />Änderungen sollten vorher gespeichert werden.<br /><br />",
-			"logoutComingTitle":"You are about to be logged off",
+			"logoutComingTitle":"Die Benutzersitzung wird bald abgemeldet",
 			"maintenanceComing":"Das System wird in einen geplanten Wartungsmodus gesetzt: <b>{DATE}</b>. Änderungen sollten vorher gespeichert werden.",
 			"systemMsg":"Systemnachricht"
 		},
