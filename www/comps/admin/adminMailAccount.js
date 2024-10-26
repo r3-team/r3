@@ -135,7 +135,7 @@ let MyAdminMailAccount = {
 							<td></td>
 						</tr>
 						<tr>
-							<td>{{ capGen.comments }}*</td>
+							<td>{{ capGen.comments }}</td>
 							<td colspan="2"><textarea v-model="inputs.comment"></textarea></td>
 						</tr>
 					</tbody>
@@ -172,7 +172,7 @@ let MyAdminMailAccount = {
 		inputsOrg:(s) => s.isNew ? {
 			id:0,
 			name:'',
-			comment:'',
+			comment:null,
 			mode:'smtp',
 			authMethod:'plain',
 			username:'',
@@ -273,6 +273,9 @@ let MyAdminMailAccount = {
 			);
 		},
 		set() {
+			if(this.inputs.comment === '')
+				this.inputs.comment = null;
+
 			ws.send('mailAccount','set',{
 				id:this.id,
 				name:this.inputs.name,
