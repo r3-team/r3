@@ -18,7 +18,7 @@ let MyBuilderPresets = {
 		
 		<div class="entry clickable"
 			@click="idEdit = p.id"
-			v-for="p in relation.presets"
+			v-for="p in relation.presets.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 		>
 			<div class="row centered gap">
 				<my-button
@@ -44,6 +44,7 @@ let MyBuilderPresets = {
 		/>
 	</div>`,
 	props:{
+		filter:  { type:String,  required:true },
 		readonly:{ type:Boolean, required:true },
 		relation:{ type:Object,  required:true }
 	},

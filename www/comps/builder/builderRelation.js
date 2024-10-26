@@ -147,8 +147,8 @@ let MyBuilderRelation = {
 				<h1 class="title">{{ capApp.titleOne.replace('{NAME}',name) }}</h1>
 			</div>
 			<div class="area">
-				<div class="row gap default-inputs" v-if="tabTarget === 'attributes'">
-					<input v-model="attributeFilter" :placeholder="capGen.threeDots" />
+				<div class="row gap default-inputs" v-if="['attributes','presets'].includes(tabTarget)">
+					<input v-model="nameFilter" :placeholder="capGen.threeDots" />
 				</div>
 				<my-button image="visible1.png"
 					@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
@@ -186,7 +186,7 @@ let MyBuilderRelation = {
 				
 				<div class="entry clickable"
 					@click="attributeIdEdit = atr.id"
-					v-for="atr in relation.attributes.filter(v => attributeFilter === '' || v.name.includes(attributeFilter.toLowerCase()))"
+					v-for="atr in relation.attributes.filter(v => nameFilter === '' || v.name.includes(nameFilter.toLowerCase()))"
 				>
 					<div class="row centered gap">
 						<my-button
@@ -327,6 +327,7 @@ let MyBuilderRelation = {
 			<!-- presets -->
 			<div class="tab-content" v-if="tabTarget === 'presets'">
 				<my-builder-presets
+					:filter="nameFilter"
 					:relation="relation"
 					:readonly="readonly"
 				/>
@@ -520,7 +521,7 @@ let MyBuilderRelation = {
 			retentionDays:null,
 			
 			// states
-			attributeFilter:'',
+			nameFilter:'',
 			previewLimit:10,
 			previewOffset:0,
 			previewRows:[],
