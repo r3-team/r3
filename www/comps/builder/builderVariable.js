@@ -1,3 +1,4 @@
+import MyCodeEditor       from '../codeEditor.js';
 import MyBuilderFormInput from './builderFormInput.js';
 import {copyValueDialog}  from '../shared/generic.js';
 import {
@@ -10,7 +11,8 @@ export {MyBuilderVariable as default};
 let MyBuilderVariable = {
 	name:'my-builder-variable',
 	components:{
-		MyBuilderFormInput
+		MyBuilderFormInput,
+		MyCodeEditor
 	},
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-variable float" v-if="values !== null">
@@ -83,6 +85,20 @@ let MyBuilderVariable = {
 							<td>{{ capGen.comments }}</td>
 							<td colspan="2">
 								<textarea class="dynamic" v-model="values.comment" :disabled="readonly"></textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.preview }}</td>
+							<td colspan="2" v-if="values.formId === null">
+								<div class="preview">
+									<my-code-editor mode="json"
+										:modelValue="preview === null ? '' : JSON.stringify(preview,null,'\t')"
+										:readonly="true"
+									/>
+								</div>
+							</td>
+							<td colspan="2" v-else>
+								<i>{{ capApp.noPreview }}</i>
 							</td>
 						</tr>
 						<tr>
@@ -165,15 +181,17 @@ let MyBuilderVariable = {
 		// simple
 		canSave:   (s) => !s.readonly && s.hasChanges && !s.nameTaken,
 		hasChanges:(s) => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		preview:   (s) => s.variableIdMapGlobal[s.variableId] !== undefined ? s.variableIdMapGlobal[s.variableId] : null,
 		title:     (s) => s.capApp.edit.replace('{NAME}',s.values.name),
 		
 		// stores
-		formIdMap:    (s) => s.$store.getters['schema/formIdMap'],
-		moduleIdMap:  (s) => s.$store.getters['schema/moduleIdMap'],
-		variableIdMap:(s) => s.$store.getters['schema/variableIdMap'],
-		capApp:       (s) => s.$store.getters.captions.builder.variable,
-		capAppAtr:    (s) => s.$store.getters.captions.builder.attribute,
-		capGen:       (s) => s.$store.getters.captions.generic
+		formIdMap:          (s) => s.$store.getters['schema/formIdMap'],
+		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
+		variableIdMap:      (s) => s.$store.getters['schema/variableIdMap'],
+		variableIdMapGlobal:(s) => s.$store.getters.variableIdMapGlobal,
+		capApp:             (s) => s.$store.getters.captions.builder.variable,
+		capAppAtr:          (s) => s.$store.getters.captions.builder.attribute,
+		capGen:             (s) => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.reset();

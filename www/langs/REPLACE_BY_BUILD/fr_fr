@@ -1746,8 +1746,9 @@
 			},
 			"edit":"Variable '{NAME}'",
 			"formIdHint":"Variable is only available in the context of the assigned form.",
-			"inputOptions":"Settings for use as input field",
 			"global":"Global variable",
+			"inputOptions":"Settings for use as input field",
+			"noPreview":"No preview is available for form assigned variables. They only exist in the context of the open form.",
 			"title":"Variables"
 		},
 		"widget":{

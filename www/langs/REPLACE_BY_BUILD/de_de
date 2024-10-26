@@ -1746,8 +1746,9 @@
 			},
 			"edit":"Variable '{NAME}'",
 			"formIdHint":"Variable ist nur im Kontext des zugewiesenen Formulars gültig.",
-			"inputOptions":"Einstellungen zur Nutzung als Eingabefeld",
 			"global":"Globale Variable",
+			"inputOptions":"Einstellungen zur Nutzung als Eingabefeld",
+			"noPreview":"Keine Vorschau verfügbar für an Formular zugewiesene Variable. Diese existiert nur im Kontext des offenen Formulars.",
 			"title":"Variabeln"
 		},
 		"widget":{
