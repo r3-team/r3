@@ -185,7 +185,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				name_display character varying(512),
 				name_fore character varying(512),
 				name_sur character varying(512),
-				notes character varying(512),
+				notes character varying(8196),
 				organization character varying(512),
 				phone_fax character varying(512),
 				phone_landline character varying(512),
