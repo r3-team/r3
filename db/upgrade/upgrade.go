@@ -108,16 +108,19 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				TYPE app.column_style[] USING styles::CHARACTER VARYING(12)[]::app.column_style[];
 			
 			-- limited logins
-			ALTER TABLE instance.login DROP COLUMN date_auth_last;
-			ALTER TABLE instance.login ADD COLUMN limited BOOL NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.login DROP  COLUMN date_auth_last;
+			ALTER TABLE instance.login ADD   COLUMN limited BOOL NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.login ALTER COLUMN limited DROP DEFAULT;
 
 			UPDATE instance.login AS l
-			SET limited = ((
+			SET limited = TRUE
+			WHERE ((
 				SELECT COUNT(*)
 				FROM instance.login_role
 				WHERE login_id = l.id
-			) < 2);
+			) < 2)
+			AND admin   = FALSE
+			AND no_auth = FALSE;
 
 			-- new login session managements
 			CREATE TYPE instance.login_session_device AS ENUM ('browser','fatClient');
@@ -516,7 +519,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
 			    comment TEXT,
 			    content app.attribute_content NOT NULL,
-			    content_use attribute_content_use NOT NULL,
+			    content_use app.attribute_content_use NOT NULL,
 			    CONSTRAINT variable_pkey PRIMARY KEY (id),
 			    CONSTRAINT variable_form_id_fkey FOREIGN KEY (form_id)
 			        REFERENCES app.form (id) MATCH SIMPLE
