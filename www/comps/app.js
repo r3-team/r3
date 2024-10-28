@@ -834,7 +834,7 @@ let MyApp = {
 		captionsReload() {
 			return new Promise((resolve,reject) => {
 				// force valid system captions
-				let lang = ['de_de','en_us','fr_fr','hu_hu','it_it','lv_lv','ro_ro','zh_cn'].includes(this.settings.languageCode)
+				let lang = ['ar_eg','de_de','en_us','fr_fr','hu_hu','it_it','lv_lv','ro_ro','zh_cn'].includes(this.settings.languageCode)
 					? this.settings.languageCode : 'en_us';
 				
 				fetch(`./langs/${R3.appBuild}/${lang}`).then(
