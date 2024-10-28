@@ -319,8 +319,10 @@ let MyHeader = {
 			if(s.isMobile || !s.settings.headerCaptions || !s.settings.headerModules)
 				elmDel('moduleTitles');
 			
-			if(s.isMobile)
+			if(s.isMobile) {
 				elmDel('collections');
+				elmDel('loginName');
+			}
 			
 			if(s.isMobile || s.pwaSingle || !s.settings.headerModules)
 				elmDel('moduleIcons');
