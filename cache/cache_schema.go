@@ -126,11 +126,8 @@ func UpdateSchema(moduleIds []uuid.UUID, initialLoad bool) error {
 
 	// update change date for updated modules
 	now := tools.GetTimeUnix()
-
-	for _, id := range moduleIds {
-		if err := module_meta.SetDateChange(id, now); err != nil {
-			return err
-		}
+	if err := module_meta.SetDateChange(moduleIds, now); err != nil {
+		return err
 	}
 
 	// update module meta cache

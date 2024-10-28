@@ -66,13 +66,12 @@ self.addEventListener('fetch', event => {
 self.addEventListener('activate', event => {
 	
 	// remove old caches
-	let cacheAllowlist = [appCacheName];
 	event.waitUntil(
 		caches.keys().then(cacheNames => {
 			return Promise.all(
-				cacheNames.map(cacheName => {
-					if(cacheAllowlist.indexOf(cacheName) === -1)
-						return caches.delete(cacheName);
+				cacheNames.map(name => {
+					if(name !== appCacheName)
+						return caches.delete(name);
 				})
 			);
 		})

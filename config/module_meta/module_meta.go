@@ -2,6 +2,7 @@ package module_meta
 
 import (
 	"r3/db"
+	"r3/tools"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -88,12 +89,19 @@ func GetOwner(moduleId uuid.UUID) (bool, error) {
 	return isOwner, err
 }
 
-func SetDateChange(moduleId uuid.UUID, date int64) error {
+func SetDateChange(moduleIds []uuid.UUID, date int64) error {
 	_, err := db.Pool.Exec(db.Ctx, `
 		UPDATE instance.module_meta
 		SET date_change = $2
-		WHERE module_id = $1
-	`, moduleId, date)
+		WHERE module_id = ANY($1)
+	`, moduleIds, date)
+	return err
+}
+func SetDateChangeAllToNow() error {
+	_, err := db.Pool.Exec(db.Ctx, `
+		UPDATE instance.module_meta
+		SET date_change = $1
+	`, tools.GetTimeUnix())
 	return err
 }
 func SetHash_tx(tx pgx.Tx, moduleId uuid.UUID, hash string) error {

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"r3/config"
+	"r3/config/module_meta"
 	"r3/db"
 	"r3/log"
 	"r3/schema"
@@ -32,7 +33,12 @@ func RunIfRequired() error {
 	}
 
 	// reload config store, in case upgrade changed it
-	return config.LoadFromDb()
+	if err := config.LoadFromDb(); err != nil {
+		return err
+	}
+
+	// update change date for all modules to invalidate caches based on old, possibly invalid schema
+	return module_meta.SetDateChangeAllToNow()
 }
 
 // loop upgrade procedure until DB version matches application version
