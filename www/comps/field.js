@@ -1017,6 +1017,26 @@ let MyField = {
 			if(!s.isValidValue)           return false;
 			return true;
 		},
+		isValidMax:(s) => {
+			if(!s.isData || s.isVariable || s.value === null || s.field.max === null) return true;
+			if((s.isDecimal || s.isInteger) && s.value > s.field.max)                 return false;
+			if(s.isString && s.value.length > s.field.max)                            return false;
+			
+			if(s.isFiles) return typeof s.value.fileCount !== 'undefined'
+				? s.value.fileCount <= s.field.max : s.value.length <= s.field.max;
+			
+			return true;
+		},
+		isValidMin:(s) => {
+			if(!s.isData || s.isVariable || s.value === null || s.field.min === null) return true;
+			if((s.isDecimal || s.isInteger) && s.value < s.field.min)                 return false;
+			if(s.isString && s.value.length < s.field.min)                            return false;
+			
+			if(s.isFiles) return typeof s.value.fileCount !== 'undefined'
+				? s.value.fileCount >= s.field.min : s.value.length >= s.field.min;
+			
+			return true;
+		},
 		isValidValue:(s) => {
 			if(!s.isData)                                            return true;
 			if(s.customErr !== null)                                 return false;
@@ -1032,26 +1052,6 @@ let MyField = {
 			
 			return s.isValidMin && s.isValidMax;
 		},
-		isValidMin:(s) => {
-			if(!s.isData || s.value === null || s.field.min === null) return true;
-			if((s.isDecimal || s.isInteger) && s.value < s.field.min) return false;
-			if(s.isString && s.value.length < s.field.min)            return false;
-			
-			if(s.isFiles) return typeof s.value.fileCount !== 'undefined'
-				? s.value.fileCount >= s.field.min : s.value.length >= s.field.min;
-			
-			return true;
-		},
-		isValidMax:(s) => {
-			if(!s.isData || s.value === null || s.field.max === null) return true;
-			if((s.isDecimal || s.isInteger) && s.value > s.field.max) return false;
-			if(s.isString && s.value.length > s.field.max)            return false;
-			
-			if(s.isFiles) return typeof s.value.fileCount !== 'undefined'
-				? s.value.fileCount <= s.field.max : s.value.length <= s.field.max;
-			
-			return true;
-		},
 		
 		// simple
 		attribute:  (s) => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false ,
@@ -1062,7 +1062,7 @@ let MyField = {
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
 		hasCaption: (s) => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
 		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles,
-		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
+		inputRegex: (s) => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
 		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),
 		variable:   (s) => (!s.isVariable || s.field.variableId === null) ? false : s.variableIdMap[s.field.variableId],
@@ -1322,6 +1322,9 @@ let MyField = {
 				this.$emit('set-value',indexAttributeId,val);
 			} else {
 				// variable field, send changes to the variable
+				if(this.notTouched)
+					this.notTouched = false;
+
 				if(this.variable.formId !== null)
 					this.variableIdMapLocal[this.variable.id] = val;
 				else
