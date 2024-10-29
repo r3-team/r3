@@ -149,7 +149,7 @@ let MyBuilderField = {
 					
 					<!-- field title -->
 					<my-builder-caption
-						v-if="isButton || isChart || isData || isList || isTabs || (isHeader && !field.richtext)"
+						v-if="isButton || isChart || isData || isList || isTabs || isVariable || (isHeader && !field.richtext)"
 						v-model="field.captions.fieldTitle"
 						:contentName="title"
 						:dynamicSize="true"
