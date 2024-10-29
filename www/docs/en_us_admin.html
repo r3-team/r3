@@ -1,4 +1,4 @@
-<p><em>Updated 2024-03-04</em></p>
+<p><em>Updated 2024-10-29</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -31,7 +31,6 @@
 <li><a href="#builder-mode">Builder mode</a></li>
 <li><a href="#authentication-and-authorization">Authentication and authorization</a></li>
 <li><a href="#authentication-and-authorization-via-ldap">Authentication and authorization via LDAP</a></li>
-<li><a href="#connecting-logins-to-data-sets">Connecting logins to data sets</a></li>
 </ol></li>
 <li><a href="#manage-applications">Manage applications</a></li>
 <li><a href="#backup-and-recovery">Backup and recovery</a>
@@ -55,7 +54,7 @@
 <tr class="header">
 <th></th>
 <th style="text-align: center;">Dedicated</th>
-<th style="text-align: center;">Standalone</th>
+<th style="text-align: center;">Stand-alone</th>
 <th style="text-align: center;">Portable</th>
 <th style="text-align: center;">Docker</th>
 </tr>
@@ -206,28 +205,22 @@
 <p><img src="en_us_admin_pics/builder_mode.webp" alt="Builder mode" /></p>
 <p>Please be aware that changing applications has permanent consequences up to and including data loss. Do not attempt to use the Builder in any productive instance. For testing or developing applications, a separated instance should be used. The portable version makes this easy on Windows clients. On Linux a separated application service, accessing a separate database, serves the same purpose.</p>
 <h2 id="authentication-and-authorization">Authentication and authorization</h2>
-<p>To let users access the system, individual logins must be created by an REI3 administrator or imported from a <a href="#authentication-and-authorization-via-ldap">directory service</a>. Login names can be anything from names to employee IDs to email addresses - they only need to be unique within a REI3 instance.</p>
-<p><img src="en_us_admin_pics/authentication.webp" alt="Logins" /></p>
-<p>To access any application or data, roles have to be assigned to logins. This can be done by an REI3 administrator manually, or they can be assigned automatically according to group memberships within a <a href="#authentication-and-authorization-via-ldap">directory service</a>. Role permissions are cumulative - the more roles a user has, the larger the access.</p>
+<p>To let users access the system, they must be created by an REI3 administrator or imported from a <a href="#authentication-and-authorization-via-ldap">directory service</a>. Usernames can be anything from personal names to employee IDs to email addresses - they only need to be unique within a REI3 instance.</p>
+<p>To access any application or data, roles have to be assigned to users. This can be done by an REI3 administrator manually, or they can be assigned automatically according to group memberships within a <a href="#authentication-and-authorization-via-ldap">directory service</a>. Role permissions are cumulative - the more roles a user has, the larger the access.</p>
 <p>To increase account security, REI3 administrators can choose password complexity options in the admin interface. Additionaly, MFA (multi-factor authentication) in the form of TOTP (time-based one-time-passwords) is available to users and can be reset by administrators. MFA can be setup on multiple devices and is supported by most authenticator apps (anything that supports TOTP).</p>
 <h2 id="authentication-and-authorization-via-ldap">Authentication and authorization via LDAP</h2>
 <p>REI3 hosts its own, internal authentication backend. To integrate into existing infrastructures, REI3 can utilize LDAP services to offer:</p>
 <ul>
-<li>LDAP-Authentication: User accounts are imported from LDAP regularly to create local logins. Login credentials are then checked live against the LDAP.
+<li>LDAP-Authentication: Users are imported from LDAP regularly. Credentials are then checked live during login against the LDAP.
 <ul>
-<li>Using multiple LDAD connections (or mixing local with LDAP logins), can cause name duplications to occur. The LDAP connection can be configured to use email addresses or other attributes for login names instead.</li>
+<li>Using multiple LDAD connections (or mixing local with LDAP users), can cause username duplications to occur. The LDAP connection can be configured to use email addresses or other attributes for usernames instead.</li>
 <li>Microsoft AD only: When a user account is disabled, active sessions are automatically closed during the next LDAP import.</li>
 </ul></li>
-<li>LDAP-Authorization: By reading group memberships, application roles can automatically be assigned to logins.
+<li>LDAP-Authorization: By reading group memberships, application roles can automatically be assigned to users.
 <ul>
 <li>Microsoft AD only: Nested group memberships are automatically resolved.</li>
 </ul></li>
 </ul>
-<h2 id="connecting-logins-to-data-sets">Connecting logins to data sets</h2>
-<p>To facilitate workflows and other features with relation to the current user, logins can be connected to data sets. One example is the application 'Organizations', which connects logins to company contacts. With this connection, applications can use organization details of the corresponding company contact to retrieve contact information, assign work, track time, manage projects and so on.</p>
-<p><img src="en_us_admin_pics/login_form.webp" alt="Connect logins to data sets" /></p>
-<p>There is no limit in the number of applications or data sets that can be connected to a login. Logins can also be connected to other entities like customers, requestors and so on.</p>
-<p>If at least one app that offers connecting data sets to logins is installed, REI3 administrators can create new or assign existing data sets in the admin interface for logins.</p>
 <h1 id="manage-applications">Manage applications</h1>
 <p>To get use out of REI3, applications need to be installed. To manage applications, the maintenance mode must be enabled first.</p>
 <p>Applications are installed via the admin user interface. They can be retrieved from multiple sources:</p>
@@ -260,7 +253,7 @@
 <p>For full backups, we recommend using internal PostgreSQL tools, like <code>pg_dump</code> to backup and <code>pg_restore</code> to recover the database. Examples:</p>
 <ul>
 <li>To backup to a directory: pg_dump -h HOSTNAME -p 5432 -U USERNAME -Fd -f TARGETDIR</li>
-<li>To recover from a directory: pg_restore -h HOSTNAME -p 5432 -U USERNAME -d TARGETDBNAME SOURCEDIR</li>
+<li>To recover from a directory: pg_restore -h HOSTNAME -p 5432 --no-owner -U USERNAME -d TARGETDBNAME SOURCEDIR</li>
 </ul>
 <p>Good practices:</p>
 <ul>
@@ -291,7 +284,7 @@
 </ul>
 <p>Setting up clustering itself is very simple:</p>
 <ol type="1">
-<li>The already running REI3 server is by default already part of a one-server cluster, with itself as the cluster master. Nothing needs to be done here.</li>
+<li>The first REI3 server is by default already part of a one-server cluster, with itself as the cluster master. Nothing needs to be done here.</li>
 <li>To add additional server nodes, install REI3 on other servers and use the same database and file path settings in the REI3 configuration file <code>config.json</code>.
 <ul>
 <li>The file paths for the entire cluster must point to the same storage location - usually networks shares work well for this requirement.</li>
