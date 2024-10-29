@@ -331,7 +331,7 @@ let MyBuilderFieldOptions = {
 							<option value="default">{{ capApp.stateDefault }}</option>
 							<option v-if="isData" value="optional">{{ capApp.stateOptional }}</option>
 							<option v-if="isData" value="required">{{ capApp.stateRequired }}</option>
-							<option v-if="isData || isButton" value="readonly">{{ capApp.stateReadonly }}</option>
+							<option v-if="isData || isButton || isVariable" value="readonly">{{ capApp.stateReadonly }}</option>
 						</select>
 					</td>
 				</tr>

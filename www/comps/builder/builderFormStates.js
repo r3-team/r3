@@ -34,7 +34,7 @@ let MyBuilderFormStateEffect = {
 		<select class="short" v-model="newState">
 			<option value="hidden">{{ capApp.stateHidden }}</option>
 			<option value="default">{{ capApp.stateDefault }}</option>
-			<option value="readonly" :disabled="!isData && !isButton && !isAction">{{ capApp.stateReadonly }}</option>
+			<option value="readonly" :disabled="!isData && !isButton && !isAction && !isVariable">{{ capApp.stateReadonly }}</option>
 			<option value="optional" :disabled="!isData">{{ capApp.stateOptional }}</option>
 			<option value="required" :disabled="!isData">{{ capApp.stateRequired }}</option>
 		</select>
@@ -78,11 +78,12 @@ let MyBuilderFormStateEffect = {
 		},
 
 		// simple
-		effect:  (s) => JSON.parse(JSON.stringify(s.modelValue)),
-		fieldSet:(s) => s.effect.fieldId      !== null && typeof s.fieldIdMap[s.effect.fieldId] !== 'undefined',
-		isAction:(s) => s.effect.formActionId !== null,
-		isButton:(s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'button',
-		isData:  (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'data',
+		effect:    (s) => JSON.parse(JSON.stringify(s.modelValue)),
+		fieldSet:  (s) => s.effect.fieldId      !== null && typeof s.fieldIdMap[s.effect.fieldId] !== 'undefined',
+		isAction:  (s) => s.effect.formActionId !== null,
+		isButton:  (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'button',
+		isData:    (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'data',
+		isVariable:(s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'variable',
 		
 		// store
 		capApp:(s) => s.$store.getters.captions.builder.form,
