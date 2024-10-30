@@ -326,11 +326,11 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 		var f types.PgFunction
 		if err := tx.QueryRow(db.Ctx, `
 			SELECT id, module_id, name, code_args, code_function, code_returns,
-				is_frontend_exec, is_login_sync, is_trigger
+				is_frontend_exec, is_login_sync, is_trigger, volatility
 			FROM app.pg_function
 			WHERE id = $1
-		`, id).Scan(&f.Id, &f.ModuleId, &f.Name, &f.CodeArgs, &f.CodeFunction,
-			&f.CodeReturns, &f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger); err != nil {
+		`, id).Scan(&f.Id, &f.ModuleId, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns,
+			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility); err != nil {
 
 			return err
 		}
