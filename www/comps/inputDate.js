@@ -22,25 +22,41 @@ export {MyInputDate as default};
 let MyInputDateEntryInput = {
 	name:'my-input-date-entry-input',
 	template:`<input data-is-input="1"
-		v-model="value"
-		@change="$emit('update:modelValue',$event.target.value)"
-		@keyup.enter.stop="$emit('update:modelValue',$event.target.value)"
+		@change="change($event)"
+		@keydown="keydownPressed = true"
+		@keyup="keyup($event)"
 		:disabled="isReadonly"
+		:maxlength="size"
 		:placeholder="caption"
 		:style="styles"
+		:value="modelValue"
 	/>`,
+	data() {
+		return {
+			keydownPressed:false // to block keyup to fire in next input component, if input focus switches quickly
+		};
+	},
 	props:{
 		caption:   { type:String,  required:true },
 		isReadonly:{ type:Boolean, required:true },
 		modelValue:{ required:true },
 		size:      { type:Number,  required:true }
 	},
-	emits:['update:modelValue'],
+	emits:['filled','update:modelValue'],
 	computed:{
-		styles:(s) => `width:${s.size}ch;`,
-		value:{
-			get()  { return this.modelValue; },
-			set(v) {}
+		styles:(s) => `width:${s.size}ch;`
+	},
+	methods:{
+		change(e) {
+			this.$emit('update:modelValue',e.target.value);
+		},
+		keyup(e) {
+			// on number input
+			if(this.keydownPressed && /[0-9]/.test(e.key) && e.target.value.length >= this.size) {
+				this.$emit('update:modelValue',e.target.value);
+				this.$nextTick(() => this.$emit('filled'));
+			}
+			this.keydownPressed = false;
 		}
 	}
 };
@@ -68,11 +84,14 @@ let MyInputDateEntry = {
 			<template v-for="i in 5">
 				<my-input-date-entry-input
 					v-if="i % 2 !== 0"
+					@filled="moveInputFromDate(i-1)"
 					@update:modelValue="parseInput(getInputType(i-1),$event)"
 					:caption="getInputCaption(i-1)"
 					:isReadonly="isReadonly"
 					:modelValue="getInputValue(i-1)"
+					:ref="'D' + (i-1)"
 					:size="getInputSize(i-1)"
+					:test="'D' + (i-1)"
 				/>
 				<span v-if="i === 1 || i === 3">{{ inputSeparatorSymbol }}</span>
 			</template>
@@ -82,7 +101,8 @@ let MyInputDateEntry = {
 		<template v-if="!isMobile && isTime">
 			<span v-if="isDate" class="time-separator"></span>
 			
-			<my-input-date-entry-input
+			<my-input-date-entry-input ref="H"
+				@filled="moveInput('M')"
 				@update:modelValue="parseInput('H',$event)"
 				:caption="capApp.inputHour"
 				:isReadonly="isReadonly"
@@ -90,7 +110,8 @@ let MyInputDateEntry = {
 				:size="2"
 			/>
 			<span>:</span>
-			<my-input-date-entry-input
+			<my-input-date-entry-input ref="M"
+				@filled="moveInput('S')"
 				@update:modelValue="parseInput('M',$event)"
 				:caption="capApp.inputMinute"
 				:isReadonly="isReadonly"
@@ -98,7 +119,7 @@ let MyInputDateEntry = {
 				:size="2"
 			/>
 			<span>:</span>
-			<my-input-date-entry-input
+			<my-input-date-entry-input ref="S"
 				@update:modelValue="parseInput('S',$event)"
 				:caption="capApp.inputSecond"
 				:isReadonly="isReadonly"
@@ -215,7 +236,32 @@ let MyInputDateEntry = {
 				// empty time: start with UTC zero
 				d = !this.isTimeOnly ? this.getDateAtUtcZero(new Date()) : new Date(0);
 			}
+
+			// input checks
+			switch(name) {
+				case 'm':
+					if(p > 12) p = 12;
+					if(p < 1)  p = 1;
+				break;
+				case 'd':
+					if(p > 31) p = 31;
+					if(p < 1)  p = 1;
+				break;
+				case 'H':
+					if(p > 23) p = 23;
+					if(p < 0)  p = 0;
+				break;
+				case 'M':
+					if(p > 59) p = 59;
+					if(p < 0)  p = 0;
+				break;
+				case 'S':
+					if(p > 59) p = 59;
+					if(p < 0)  p = 0;
+				break;
+			}
 			
+			// apply inputs
 			if(this.isTimeOnly) {
 				switch(name) {
 					case 'H': d.setUTCHours(p);   break;
@@ -236,9 +282,9 @@ let MyInputDateEntry = {
 					case 'Y': d.setFullYear(p); break;
 					case 'm': d.setMonth(p-1);  break;
 					case 'd': d.setDate(p);     break;
-					case 'H': d.setHours(p);   break;
-					case 'M': d.setMinutes(p); break;
-					case 'S': d.setSeconds(p); break;
+					case 'H': d.setHours(p);    break;
+					case 'M': d.setMinutes(p);  break;
+					case 'S': d.setSeconds(p);  break;
 				}
 				
 				if(this.isDateOnly)
@@ -266,6 +312,23 @@ let MyInputDateEntry = {
 				case 'd': return this.inputDay;    break;
 				case 'H': return this.inputHour;   break;
 				case 'M': return this.inputMinute; break;
+			}
+		},
+		moveInput(ref) {
+			if(this.$refs[ref] !== undefined) {
+				// date inputs are in v-for loop, which elements are arrays
+				const el = Array.isArray(this.$refs[ref]) ? this.$refs[ref][0].$el : this.$refs[ref].$el;
+				el.focus();
+				
+				// wait for new values to apply before selecting all values in input element
+				this.$nextTick(() => el.select());
+			}
+		},
+		moveInputFromDate(position) {
+			switch(position) {
+				case 0: this.moveInput('D2'); break;
+				case 2: this.moveInput('D4'); break;
+				case 4: if(this.isTime) this.moveInput('H'); break;
 			}
 		}
 	}
