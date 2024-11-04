@@ -1083,6 +1083,7 @@
 					"email":"email",
 					"gallery":"gallery",
 					"hidden":"ascuns",
+					"login":"user (deprecated)",
 					"password":"password",
 					"phone":"telefon",
 					"slider":"valoarea cursorului",

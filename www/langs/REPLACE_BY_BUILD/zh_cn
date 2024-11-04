@@ -1083,6 +1083,7 @@
 					"email":"电子邮件",
 					"gallery":"图库",
 					"hidden":"隐藏",
+					"login":"user (deprecated)",
 					"password":"密码",
 					"phone":"电话",
 					"slider":"值滑块",

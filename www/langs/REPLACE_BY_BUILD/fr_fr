@@ -1083,6 +1083,7 @@
 					"email":"e-mail",
 					"gallery":"galerie",
 					"hidden":"caché",
+					"login":"user (deprecated)",
 					"password":"mot de passe",
 					"phone":"téléphone",
 					"slider":"curseur de valeur",

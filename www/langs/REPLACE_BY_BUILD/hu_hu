@@ -1083,6 +1083,7 @@
 					"email":"E-mail",
 					"gallery":"Galéria",
 					"hidden":"Rejtett",
+					"login":"user (deprecated)",
 					"password":"Jelszó",
 					"phone":"Telefon",
 					"slider":"Értékcsúszka",

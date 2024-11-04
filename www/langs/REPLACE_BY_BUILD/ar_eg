@@ -1083,6 +1083,7 @@
 					"email":"بريد إلكتروني",
 					"gallery":"معرض",
 					"hidden":"مختفي",
+					"login":"user (deprecated)",
 					"password":"كلمة المرور",
 					"phone":"هاتف",
 					"slider":"شريط تمرير القيمة",
