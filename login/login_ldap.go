@@ -59,7 +59,9 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 
 	// apply changed meta data from LDAP attributes, if they are defined
 	var metaChanged bool = false
-	if !newLogin {
+	if newLogin {
+		metaEx = meta
+	} else {
 		metaEx, err = login_meta.Get(loginId)
 		if err != nil {
 			return err
