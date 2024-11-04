@@ -859,12 +859,9 @@ let MyField = {
 			// apply form state if available
 			if(typeof s.entityIdMapState.field[s.field.id] !== 'undefined')
 				state = s.entityIdMapState.field[s.field.id];
-
-			if(s.isVariable)
-				return state;
 			
 			// overwrites for 'default' state for data fields
-			if(s.isData && state === 'default') {
+			if(s.isData && !s.isVariable && state === 'default') {
 				if(!s.inputCanWrite) state = 'readonly';
 				
 				if(s.inputCanWrite                          // can write
@@ -874,15 +871,16 @@ let MyField = {
 					&& (!s.isNew || s.attribute.def === '') // existing record or new one with no defaults
 				) state = 'required';
 			}
-			
-			// overwrite in log viewer context, only hidden or readonly allowed
-			if(s.logViewer && state !== 'hidden')
-				state = 'readonly';
-			
-			// overwrite visible data field to readonly if form could not load record
-			if(s.isData && s.formReadonly && state !== 'hidden')
-				state = 'readonly';
-			
+
+			if(state !== 'hidden') {
+				// overwrite in log viewer context, only hidden or readonly allowed
+				if(s.logViewer)
+					state = 'readonly';
+
+				// overwrite visible data/button/variable field to readonly if form is readonly
+				if(s.formReadonly && (s.isData || s.isButton || s.isVariable))
+					state = 'readonly';
+			}
 			return state;
 		},
 		tabIndexesHidden:(s) => {
