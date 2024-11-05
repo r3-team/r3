@@ -197,6 +197,7 @@ let MyAdminModulesItem = {
 				captionTop:this.capApp.changeLog,
 				captionBody:this.changeLog,
 				image:'time.png',
+				textDisplay:'richtext',
 				width:1000
 			});
 		},
