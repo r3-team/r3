@@ -408,6 +408,15 @@ func deleteFormFields_tx(tx pgx.Tx, moduleId uuid.UUID, form types.Form) error {
 						return err
 					}
 				}
+
+			case "variable":
+				var fieldVar types.FieldVariable
+				if err := json.Unmarshal(fieldJson, &fieldVar); err != nil {
+					return err
+				}
+				for _, column := range fieldVar.Columns {
+					idsKeepColumns = append(idsKeepColumns, column.Id)
+				}
 			}
 		}
 		return nil
