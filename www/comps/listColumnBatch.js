@@ -110,15 +110,16 @@ let MyListColumnBatch = {
 					<my-button
 						@trigger="valueToggleAll"
 						:caption="'['+capGen.button.selectAll+']'"
-						:image="input.length === values.length ? 'checkbox1.png' : 'checkbox0.png'"
+						:image="(isInputEmpty || input.length === values.length) && !zeroSelection ? 'checkbox1.png' : 'checkbox0.png'"
 						:naked="true"
 					/>
 					<div class="columnFilterValues">
 						<my-button
 							v-for="v of values"
 							@trigger="valueToggle(v)"
+							:adjusts="true"
 							:caption="displayValue(v)"
-							:image="input.includes(v) ? 'checkbox1.png' : 'checkbox0.png'"
+							:image="(isInputEmpty || input.includes(v)) && !zeroSelection ? 'checkbox1.png' : 'checkbox0.png'"
 							:naked="true"
 						/>
 					</div>
@@ -162,9 +163,10 @@ let MyListColumnBatch = {
 	],
 	data() {
 		return {
-			input:'',          // value input (either string if text, or array if selected from values)
-			values:[],         // values available to filter with (all values a list could have for column)
-			valuesLoaded:false // values loaded once
+			input:'',           // value input (either string if text, or array if selected from values)
+			values:[],          // values available to filter with (all values a list could have for column)
+			valuesLoaded:false, // values loaded once,
+			zeroSelection:false
 		};
 	},
 	mounted() {
@@ -173,7 +175,7 @@ let MyListColumnBatch = {
 		
 		// apply input values from column filter (must be first index)
 		if(this.columnFilterIndexes.length !== 0) {
-			let f = this.filtersColumn[this.columnFilterIndexes[0]];
+			const f = this.filtersColumn[this.columnFilterIndexes[0]];
 			if(f.side1.content === 'value')
 				this.input = f.side1.value;
 		}
@@ -217,7 +219,7 @@ let MyListColumnBatch = {
 			let out      = [];
 			
 			for(let i = 0, j = s.filtersColumn.length; i < j; i++) {
-				let f = s.filtersColumn[i];
+				const f = s.filtersColumn[i];
 				if(f.side0.attributeId === atrId && f.side0.attributeIndex === atrIndex)
 					out.push(i);
 			}
@@ -234,6 +236,7 @@ let MyListColumnBatch = {
 		isArrayInput:   (s) => typeof s.input === 'object',
 		isDateOrTime:   (s) => s.isValidFilter && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
 		isFiltered:     (s) => s.columnFilterIndexes.length !== 0,
+		isInputEmpty:   (s) => (s.isArrayInput && s.input.length === 0) || !s.isArrayInput && s.input === '',
 		isOrdered:      (s) => s.columnBatch.orderIndexesUsed.length !== 0,
 		isOrderedAsc:   (s) => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
 		isValidFilter:  (s) => s.columnUsedFilter !== null,
@@ -258,7 +261,7 @@ let MyListColumnBatch = {
 			if(v === null)
 				return '[' + this.capGen.button.empty + ']';
 			
-			let atr = this.attributeIdMap[this.columnUsedFilter.attributeId];
+			const atr = this.attributeIdMap[this.columnUsedFilter.attributeId];
 			
 			if(atr.content === 'boolean')
 				return v ? this.capGen.option.yes : this.capGen.option.no;
@@ -280,27 +283,30 @@ let MyListColumnBatch = {
 			this.$emit('close');
 		},
 		valueToggle(v) {
+			if(this.isInputEmpty && !this.zeroSelection)
+				this.input = JSON.parse(JSON.stringify(this.values));
+
 			if(typeof this.input !== 'object')
 				this.input = [];
 			
-			let p = this.input.indexOf(v);
+			const p = this.input.indexOf(v);
 			if(p !== -1) this.input.splice(p,1);
 			else         this.input.push(v);
 			
-			if(this.input.length === 0)
+			if(this.input.length === 0 || this.input.length === this.values.length)
 				this.input = '';
-			
+
+			this.zeroSelection = false;
 			this.set();
 		},
 		valueToggleAll() {
-			if(typeof this.input !== 'object')
-				this.input = [];
-			
-			if(this.input.length === this.values.length)
-				this.input = [];
-			else
-				this.input = JSON.parse(JSON.stringify(this.values));
-			
+			if(!this.isInputEmpty || this.zeroSelection) {
+				this.zeroSelection = false;
+				this.input = '';
+			}
+			else {
+				this.zeroSelection = true;
+			}
 			this.set();
 		},
 		
@@ -323,7 +329,7 @@ let MyListColumnBatch = {
 				limit:1000
 			},false).then(
 				res => {
-					for(let row of res.payload.rows) {
+					for(const row of res.payload.rows) {
 						this.values.push(row.values[0]);
 					}
 					this.valuesLoaded = true;
@@ -347,9 +353,9 @@ let MyListColumnBatch = {
 			
 			// remove existing filters for this column
 			filters = filters.filter((v,i) => !this.columnFilterIndexes.includes(i));
-			
-			// add new filters for this column, if active
+
 			if(filterUsed) {
+				// add new filters for this column, if active
 				const hasNull = this.isArrayInput && this.input.includes(null);
 				filters.push({
 					connector:'AND',
