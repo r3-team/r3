@@ -188,48 +188,44 @@ let MyBuilderRelation = {
 					@click="attributeIdEdit = atr.id"
 					v-for="atr in relation.attributes.filter(v => nameFilter === '' || v.name.includes(nameFilter.toLowerCase()))"
 				>
-					<div class="row centered gap">
-						<my-button
-							:active="false"
-							:captionTitle="capApp.attributeContent"
-							:image="getAttributeIcon(atr.content,atr.contentUse,false,false)"
-							:naked="true"
-						/>
-						<div class="lines">
-							<span>{{ atr.name }}</span>
-							<span class="subtitle" v-if="typeof atr.captions.attributeTitle[builderLanguage] !== 'undefined'">
-								[{{ atr.captions.attributeTitle[builderLanguage] }}]
-							</span>
-						</div>
+					<my-button
+						:active="false"
+						:captionTitle="capApp.attributeContent"
+						:image="getAttributeIcon(atr.content,atr.contentUse,false,false)"
+						:naked="true"
+					/>
+					<div class="lines">
+						<span>{{ atr.name }}</span>
+						<span class="subtitle" v-if="typeof atr.captions.attributeTitle[builderLanguage] !== 'undefined'">
+							[{{ atr.captions.attributeTitle[builderLanguage] }}]
+						</span>
 					</div>
-					<div class="row centered gap">
-						<my-button image="lock.png"
-							v-if="atr.encrypted"
-							:active="false"
-							:captionTitle="capApp.attributeEncrypted"
-							:naked="true"
-						/>
-						<my-button
-							v-if="isAttributeWithLength(atr.content) && atr.length !== 0"
-							:active="false"
-							:caption="'['+String(atr.length)+']'"
-							:captionTitle="capApp.attributeLength"
-							:naked="true"
-						/>
-						<my-button image="asterisk.png"
-							v-if="!atr.nullable"
-							:active="false"
-							:captionTitle="capApp.attributeNotNullable"
-							:naked="true"
-						/>
-						<my-button
-							:active="false"
-							:captionTitle="atr.iconId === null ? capApp.attributeNoIcon : capGen.icon"
-							:image="atr.iconId === null ? 'icon_missing.png' : ''"
-							:imageBase64="atr.iconId !== null ? srcBase64(iconIdMap[atr.iconId].file) : ''"
-							:naked="true"
-						/>
-					</div>
+					<my-button image="lock.png"
+						v-if="atr.encrypted"
+						:active="false"
+						:captionTitle="capApp.attributeEncrypted"
+						:naked="true"
+					/>
+					<my-button
+						v-if="isAttributeWithLength(atr.content) && atr.length !== 0"
+						:active="false"
+						:caption="'['+String(atr.length)+']'"
+						:captionTitle="capApp.attributeLength"
+						:naked="true"
+					/>
+					<my-button image="asterisk.png"
+						v-if="!atr.nullable"
+						:active="false"
+						:captionTitle="capApp.attributeNotNullable"
+						:naked="true"
+					/>
+					<my-button
+						:active="false"
+						:captionTitle="atr.iconId === null ? capApp.attributeNoIcon : capGen.icon"
+						:image="atr.iconId === null ? 'icon_missing.png' : ''"
+						:imageBase64="atr.iconId !== null ? srcBase64(iconIdMap[atr.iconId].file) : ''"
+						:naked="true"
+					/>
 				</div>
 				
 				<!-- attribute dialog -->
@@ -262,46 +258,42 @@ let MyBuilderRelation = {
 					@click="indexIdEdit = ind.id"
 					v-for="ind in relation.indexes"
 				>
-					<div class="row centered gap">
-						<my-button image="databaseAsterisk.png"
-							:active="false"
-							:naked="true"
-						/>
-						<div class="lines"><span>{{ displayIndexName(ind) }}</span></div>
-					</div>
-					<div class="row centered gap">
-						<my-button image="asterisk.png"
-							v-if="ind.noDuplicates"
-							:active="false"
-							:captionTitle="capApp.indexUnique"
-							:naked="true"
-						/>
-						<my-button image="cogMultiple.png"
-							v-if="ind.primaryKey || ind.autoFki"
-							:active="false"
-							:captionTitle="capApp.indexSystem"
-							:naked="true"
-						/>
-						<my-button image="key.png"
-							v-if="ind.primaryKey"
-							:active="false"
-							:captionTitle="capApp.indexPrimaryKey"
-							:naked="true"
-						/>
-						<my-button
-							v-if="ind.autoFki"
-							:active="false"
-							:captionTitle="capApp.indexAutoFki"
-							:image="attributeIdMap[ind.attributes[0].attributeId].content === '1:1' ? 'link1.png' : 'link3.png'"
-							:naked="true"
-						/>
-						<my-button image="languages.png"
-							v-if="ind.method === 'GIN'"
-							:active="false"
-							:captionTitle="capApp.indexText"
-							:naked="true"
-						/>
-					</div>
+					<my-button image="databaseAsterisk.png"
+						:active="false"
+						:naked="true"
+					/>
+					<div class="lines"><span>{{ displayIndexName(ind) }}</span></div>
+					<my-button image="asterisk.png"
+						v-if="ind.noDuplicates"
+						:active="false"
+						:captionTitle="capApp.indexUnique"
+						:naked="true"
+					/>
+					<my-button image="cogMultiple.png"
+						v-if="ind.primaryKey || ind.autoFki"
+						:active="false"
+						:captionTitle="capApp.indexSystem"
+						:naked="true"
+					/>
+					<my-button image="key.png"
+						v-if="ind.primaryKey"
+						:active="false"
+						:captionTitle="capApp.indexPrimaryKey"
+						:naked="true"
+					/>
+					<my-button
+						v-if="ind.autoFki"
+						:active="false"
+						:captionTitle="capApp.indexAutoFki"
+						:image="attributeIdMap[ind.attributes[0].attributeId].content === '1:1' ? 'link1.png' : 'link3.png'"
+						:naked="true"
+					/>
+					<my-button image="languages.png"
+						v-if="ind.method === 'GIN'"
+						:active="false"
+						:captionTitle="capApp.indexText"
+						:naked="true"
+					/>
 				</div>
 				
 				<!-- index dialog -->

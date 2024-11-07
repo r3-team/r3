@@ -185,7 +185,7 @@ let MyBuilderApiPreview = {
 			return out.length === 0 ? '' : `?${out.join('&')}`;
 		},
 		request:(s) => {
-			if(s.isAuth) return `{\n\t"username": "API_LOGIN_USERNAME",\n\t"password": "API_LOGIN_PASSWORD"\n}`;
+			if(s.isAuth) return `{\n\t"username": "API_USER_NAME",\n\t"password": "API_USER_PASSWORD"\n}`;
 			if(s.isPost) return s.getBodyPreview(true);
 			return s.capApp.empty;
 		},

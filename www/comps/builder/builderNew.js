@@ -151,7 +151,7 @@ let MyBuilderNew = {
 	computed:{
 		nameMaxLength:(s) => {
 			switch(s.entity) {
-				case 'api':        return 64; break;
+				case 'api':        return 60; break;
 				case 'collection': return 64; break;
 				case 'form':       return 64; break;
 				case 'jsFunction': return 64; break;

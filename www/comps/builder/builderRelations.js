@@ -33,29 +33,30 @@ let MyBuilderRelations = {
 					:title="r.comment"
 					:to="'/builder/relation/'+r.id" 
 				>
-					<span>{{ r.name }}</span>
-					<div class="row gap">
-						<my-button image="lock.png"
-							v-if="r.encryption"
-							:active="false"
-							:captionTitle="capApp.encryptionHint"
-							:naked="true"
-						/>
-						<my-button image="time.png"
-							v-if="r.retentionCount !== null || r.retentionDays !== null"
-							:active="false"
-							:caption="displayRetention(r)"
-							:captionTitle="capApp.retentionHint"
-							:naked="true"
-						/>
-						<my-button image="files_list2.png"
-							v-if="r.attributes.length !== 0"
-							:active="false"
-							:caption="String(r.attributes.length)"
-							:captionTitle="capApp.attributes.replace('{CNT}',r.attributes.length)"
-							:naked="true"
-						/>
+					<div class="lines">
+						<span>{{ r.name }}</span>
+						<span class="subtitle" v-if="r.comment !== null">{{ r.comment }}</span>
 					</div>
+					<my-button image="lock.png"
+						v-if="r.encryption"
+						:active="false"
+						:captionTitle="capApp.encryptionHint"
+						:naked="true"
+					/>
+					<my-button image="time.png"
+						v-if="r.retentionCount !== null || r.retentionDays !== null"
+						:active="false"
+						:caption="displayRetention(r)"
+						:captionTitle="capApp.retentionHint"
+						:naked="true"
+					/>
+					<my-button image="files_list2.png"
+						v-if="r.attributes.length !== 0"
+						:active="false"
+						:caption="String(r.attributes.length)"
+						:captionTitle="capApp.attributes.replace('{CNT}',r.attributes.length)"
+						:naked="true"
+					/>
 				</router-link>
 			</div>
 		</div>

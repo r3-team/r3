@@ -35,25 +35,21 @@ let MyBuilderVariables = {
 					v-for="v in module.variables.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 					@click="variableIdEdit = v.id"
 				>
-					<div class="row centered gap">
-						<my-button
-							:active="false"
-							:image="getAttributeIcon(v.content,v.contentUse,false,false)"
-							:naked="true"
-						/>
-						<div class="lines">
-							<span v-if="v.formId === null">{{ v.name }}</span>
-							<span v-if="v.formId !== null"><b>{{ formIdMap[v.formId].name }}:</b> {{ v.name }}</span>
-						</div>
+					<my-button
+						:active="false"
+						:image="getAttributeIcon(v.content,v.contentUse,false,false)"
+						:naked="true"
+					/>
+					<div class="lines">
+						<span v-if="v.formId === null">{{ v.name }}</span>
+						<span v-if="v.formId !== null"><b>{{ formIdMap[v.formId].name }}:</b> {{ v.name }}</span>
 					</div>
-					<div class="row">
-						<my-button image="fileText.png"
-							v-if="v.formId !== null"
-							:active="false"
-							:captionTitle="capApp.form"
-							:naked="true"
-						/>
-					</div>
+					<my-button image="fileText.png"
+						v-if="v.formId !== null"
+						:active="false"
+						:captionTitle="capApp.form"
+						:naked="true"
+					/>
 				</div>
 			</div>
 		</div>

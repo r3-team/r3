@@ -904,6 +904,7 @@ table td.maximum{
 	margin:3px 8px 3px 0px;
 	display:flex;
 	flex-flow:row nowrap;
+	gap:calc(var(--spacing) / 2.5);
 	align-items:center;
 	justify-content:space-between;
 	font-size:100%;
@@ -945,6 +946,14 @@ table td.maximum{
 	display:flex;
 	flex-flow:column nowrap;
 	gap:5px;
+	flex:1 1 auto;
+	overflow:auto;
+}
+.generic-entry-list .lines span{
+	min-width:0px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
 }
 .generic-entry-list .subtitle{
 	font-size:80%;

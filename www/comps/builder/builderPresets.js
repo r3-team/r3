@@ -20,18 +20,14 @@ let MyBuilderPresets = {
 			@click="idEdit = p.id"
 			v-for="p in relation.presets.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 		>
-			<div class="row centered gap">
-				<my-button
-					:active="false"
-					:image="p.protected ? 'lock.png' : 'lockOpen.png'"
-					:naked="true"
-				/>
-				<div class="lines">
-					<span>{{ p.name }}</span>
-					<span class="subtitle">{{ getPreview(p) }}</span>
-				</div>
-			</div>
-			<div class="row centered gap">
+			<my-button
+				:active="false"
+				:image="p.protected ? 'lock.png' : 'lockOpen.png'"
+				:naked="true"
+			/>
+			<div class="lines">
+				<span>{{ p.name }}</span>
+				<span class="subtitle">{{ getPreview(p) }}</span>
 			</div>
 		</div>
 		

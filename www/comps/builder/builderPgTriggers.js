@@ -21,44 +21,40 @@ let MyBuilderPgTriggers = {
 			@click="idEdit = trg.id"
 			v-for="trg in triggers"
 		>
-			<div class="row centered gap">
-				<my-button image="databasePlay.png"
-					:active="false"
-					:naked="true"
-				/>
-				<div class="lines">
-					<span>{{ trg.fires }}</span>
-					<span class="subtitle">
-						{{ isFromRelation ? pgFunctionIdMap[trg.pgFunctionId].name + '()' : relationIdMap[trg.relationId].name }}
-					</span>
-				</div>
+			<my-button image="databasePlay.png"
+				:active="false"
+				:naked="true"
+			/>
+			<div class="lines">
+				<span>{{ trg.fires }}</span>
+				<span class="subtitle">
+					{{ isFromRelation ? pgFunctionIdMap[trg.pgFunctionId].name + '()' : relationIdMap[trg.relationId].name }}
+				</span>
 			</div>
-			<div class="row centered gap">
-				<my-button image="recordCreate.png"
-					v-if="trg.onInsert"
-					:active="false"
-					:captionTitle="capApp.onInsert"
-					:naked="true"
-				/>
-				<my-button image="recordUpdate.png"
-					v-if="trg.onUpdate"
-					:active="false"
-					:captionTitle="capApp.onUpdate"
-					:naked="true"
-				/>
-				<my-button image="recordDelete.png"
-					v-if="trg.onDelete"
-					:active="false"
-					:captionTitle="capApp.onDelete"
-					:naked="true"
-				/>
-				<my-button image="lettersZzz.png"
-					v-if="trg.isDeferred"
-					:active="false"
-					:captionTitle="capApp.isDeferred"
-					:naked="true"
-				/>
-			</div>
+			<my-button image="recordCreate.png"
+				v-if="trg.onInsert"
+				:active="false"
+				:captionTitle="capApp.onInsert"
+				:naked="true"
+			/>
+			<my-button image="recordUpdate.png"
+				v-if="trg.onUpdate"
+				:active="false"
+				:captionTitle="capApp.onUpdate"
+				:naked="true"
+			/>
+			<my-button image="recordDelete.png"
+				v-if="trg.onDelete"
+				:active="false"
+				:captionTitle="capApp.onDelete"
+				:naked="true"
+			/>
+			<my-button image="lettersZzz.png"
+				v-if="trg.isDeferred"
+				:active="false"
+				:captionTitle="capApp.isDeferred"
+				:naked="true"
+			/>
 		</div>
 		
 		<my-builder-pg-trigger
