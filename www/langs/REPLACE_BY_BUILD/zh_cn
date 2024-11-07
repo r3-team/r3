@@ -64,7 +64,8 @@
 			"systemMsg":"System message"
 		},
 		"error":{
-			"nameTaken":"名称已被使用，请选择其他名称。"
+			"nameTaken":"名称已被使用，请选择其他名称。",
+			"nameTooLong":"Name is too long, max. allowed length is {LEN} characters."
 		},
 		"option":{
 			"aggArray":"数组",

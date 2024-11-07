@@ -64,7 +64,8 @@
 			"systemMsg":"Systemnachricht"
 		},
 		"error":{
-			"nameTaken":"Name bereits in Benutzung, bitte einen anderen wählen."
+			"nameTaken":"Name bereits in Benutzung, bitte einen anderen wählen.",
+			"nameTooLong":"Name zu lang, max. erlaubte Länge ist {LEN} Zeichen."
 		},
 		"option":{
 			"aggArray":"Array",

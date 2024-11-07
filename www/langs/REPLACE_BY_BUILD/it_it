@@ -64,7 +64,8 @@
 			"systemMsg":"System message"
 		},
 		"error":{
-			"nameTaken":"Name is already taken, please choose another."
+			"nameTaken":"Name is already taken, please choose another.",
+			"nameTooLong":"Name is too long, max. allowed length is {LEN} characters."
 		},
 		"option":{
 			"aggArray":"vettore",

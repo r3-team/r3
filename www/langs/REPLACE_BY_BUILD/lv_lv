@@ -64,7 +64,8 @@
 			"systemMsg":"System message"
 		},
 		"error":{
-			"nameTaken":"Vārds jau ir aizņemts, lūdzu, izvēlieties citu."
+			"nameTaken":"Vārds jau ir aizņemts, lūdzu, izvēlieties citu.",
+			"nameTooLong":"Name is too long, max. allowed length is {LEN} characters."
 		},
 		"option":{
 			"aggArray":"masīvs",

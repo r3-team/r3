@@ -64,7 +64,8 @@
 			"systemMsg":"System message"
 		},
 		"error":{
-			"nameTaken":"الاسم مأخوذ بالفعل، يرجى اختيار اسم آخر."
+			"nameTaken":"الاسم مأخوذ بالفعل، يرجى اختيار اسم آخر.",
+			"nameTooLong":"Name is too long, max. allowed length is {LEN} characters."
 		},
 		"option":{
 			"aggArray":"صفيف",

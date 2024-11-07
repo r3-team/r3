@@ -109,6 +109,7 @@ let MyBuilderNew = {
 				</div>
 				
 				<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
+				<p class="error" v-if="nameTooLong">{{ capGen.error.nameTooLong.replace('{LEN}',nameMaxLength) }}</p>
 				
 				<div class="row">
 					<my-button image="save.png"
@@ -148,8 +149,21 @@ let MyBuilderNew = {
 		};
 	},
 	computed:{
-		// inputs
-		canSave:  (s) => s.inputs.name !== '' && !s.nameTaken,
+		nameMaxLength:(s) => {
+			switch(s.entity) {
+				case 'api':        return 64; break;
+				case 'collection': return 64; break;
+				case 'form':       return 64; break;
+				case 'jsFunction': return 64; break;
+				case 'module':     return 60; break;
+				case 'pgFunction': return 60; break;
+				case 'relation':   return 60; break;
+				case 'role':       return 64; break;
+				case 'variable':   return 64; break;
+				case 'widget':     return 64; break;
+			}
+			return 0;
+		},
 		nameTaken:(s) => {
 			if(s.inputs.name === '')
 				return false;
@@ -213,6 +227,10 @@ let MyBuilderNew = {
 			}
 			return '';
 		},
+
+		// simple
+		canSave:    (s) => s.inputs.name !== '' && !s.nameTaken && !s.nameTooLong,
+		nameTooLong:(s) => s.inputs.name !== '' && s.inputs.name.length > s.nameMaxLength,
 		showOptions:(s) => ['form','jsFunction','pgFunction','relation','variable'].includes(s.entity),
 		
 		// stores
