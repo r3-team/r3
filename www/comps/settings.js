@@ -382,6 +382,8 @@ let MySettingsAccount = {
 				<td>{{ capGen.name }}</td>
 				<td><input disabled="disabled" :value="loginName" /></td>
 			</tr>
+			<tr><td colspan="2"></td></tr>
+			<tr><td colspan="2"><b>{{ capApp.titlePwChange }}</b></td></tr>
 			<tr>
 				<td>{{ capApp.pwOld }}</td>
 				<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
@@ -714,7 +716,14 @@ let MySettingsFixedTokens = {
 				<tbody>
 					<tr v-for="t in tokensFixed">
 						<td>{{ t.name }}</td>
-						<td>{{ displayContext(t.context) }}</td>
+						<td>
+							<my-button
+								:active="false"
+								:caption="displayContextText(t.context)"
+								:image="displayContextIcon(t.context)"
+								:naked="true"
+							/>
+						</td>
 						<td><span :title="getUnixFormat(t.dateCreate,'Y-m-d H:i:S')">{{ getUnixFormat(t.dateCreate,'Y-m-d') }}</span></td>
 						<td>
 							<div class="row">
@@ -1017,7 +1026,15 @@ let MySettingsFixedTokens = {
 		},
 		
 		// presentation
-		displayContext(v) {
+		displayContextIcon(v) {
+			switch(v) {
+				case 'client': return 'screen.png';     break;
+				case 'ics':    return 'calendar.png';   break;
+				case 'totp':   return 'smartphone.png'; break;
+			}
+			return '';
+		},
+		displayContextText(v) {
 			switch(v) {
 				case 'client': return this.capApp.context.client; break;
 				case 'ics':    return this.capApp.context.ics;    break;
