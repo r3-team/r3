@@ -1268,7 +1268,7 @@
 				"get_e2ee_data_key":"app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Décrypte la clé de données fournie avec la clé privée de l'utilisateur actuelle.",
 				"get_e2ee_data_value":"app.get_e2ee_data_value({ARGS}) => STRING<br /><br />Décrypte la valeur de données avec la clé de données fournie.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Renvoie le code de langue à 5 lettres ('en_us', ...) de l'utilisateur actuelle.",
-				"get_preset_record_id":"instance.get_preset_record_id({ARGS}) => INTEGER<br /><br />Renvoie l'ID de l'enregistrement associé au préréglage donné.",
+				"get_preset_record_id":"app.get_preset_record_id({ARGS}) => INTEGER<br /><br />Renvoie l'ID de l'enregistrement associé au préréglage donné.",
 				"get_record_id":"app.get_record_id({ARGS}) => NUMBER|ARRAY<br /><br />Renvoie l'ID de l'enregistrement du formulaire ouvert pour l'index de relation spécifié (0 est par défaut).<br /><br />Si le formulaire est utilisé en mode d'édition en masse, seuls les ID d'enregistrement de l'index de relation 0 sont disponibles - dans ce cas, un tableau de tous les ID d'enregistrement utilisés est renvoyé.",
 				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Renvoie tous les ID de rôle attribués à l'utilisateur actuelle (les rôles imbriqués sont inclus).",
 				"get_url_query_string":"app.get_url_query_string() => STRING<br /><br />Returns the current query parameters, such as:<br />'?arg1=hello&arg2=world'",

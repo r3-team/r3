@@ -1268,7 +1268,7 @@
 				"get_e2ee_data_key":"app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Decrypts provided data key with the private key of the current user.",
 				"get_e2ee_data_value":"app.get_e2ee_data_value({ARGS}) => STRING<br /><br />Decrypts data value with the provided data key.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Returns the 5-letter language code ('en_us', ...) of the current user.",
-				"get_preset_record_id":"instance.get_preset_record_id({ARGS}) => INTEGER<br /><br />Returns the ID of the record that is associated with the given preset.",
+				"get_preset_record_id":"app.get_preset_record_id({ARGS}) => INTEGER<br /><br />Returns the ID of the record that is associated with the given preset.",
 				"get_record_id":"app.get_record_id({ARGS}) => NUMBER|ARRAY<br /><br />Restituisce l'Id del record del modulo aperto per l'indice della relazione specificata (0 per predefinita).<br /><br />If form is used in bulk editing mode, only record IDs of relation index 0 are available - in this case, an array for all used record IDs is returned.",
 				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Returns all assigned role IDs for the current user (nested roles are included).",
 				"get_url_query_string":"app.get_url_query_string() => STRING<br /><br />Returns the current query parameters, such as:<br />'?arg1=hello&arg2=world'",

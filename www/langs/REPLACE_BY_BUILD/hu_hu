@@ -1268,7 +1268,7 @@
 				"get_e2ee_data_key":"app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Decrypts provided data key with the private key of the current user.",
 				"get_e2ee_data_value":"app.get_e2ee_data_value({ARGS}) => STRING<br /><br />A mellékelt adatkulcs segítségével visszafejti az adatértéket.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Returns the 5-letter language code ('en_us', ...) of the current user.",
-				"get_preset_record_id":"instance.get_preset_record_id({ARGS}) => INTEGER<br /><br />Visszaadja az előre meghatározott rekord azonosítóját.",
+				"get_preset_record_id":"app.get_preset_record_id({ARGS}) => INTEGER<br /><br />Visszaadja az előre meghatározott rekord azonosítóját.",
 				"get_record_id":"app.get_record_id({ARGS}) => NUMBER<br /><br />Visszaadja az aktuális űrlap megnyitott rekordjának azonosítóját a kiválasztott kapcsolatindexhez (0 az alapértelmezett).",
 				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Returns all assigned role IDs for the current user (nested roles are included).",
 				"get_url_query_string":"app.get_url_query_string() => STRING<br /><br />Returns the current query parameters, such as:<br />'?arg1=hello&arg2=world'",

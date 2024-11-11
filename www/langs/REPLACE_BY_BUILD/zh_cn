@@ -1268,7 +1268,7 @@
 				"get_e2ee_data_key":"app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Decrypts provided data key with the private key of the current user.",
 				"get_e2ee_data_value":"app.get_e2ee_data_value({ARGS}) => STRING<br /><br />使用提供的数据密钥解密数据值。",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Returns the 5-letter language code ('en_us', ...) of the current user.",
-				"get_preset_record_id":"instance.get_preset_record_id({ARGS}) => INTEGER<br /><br />返回与给定预设关联的记录ID。",
+				"get_preset_record_id":"app.get_preset_record_id({ARGS}) => INTEGER<br /><br />返回与给定预设关联的记录ID。",
 				"get_record_id":"app.get_record_id({ARGS}) => NUMBER|ARRAY<br /><br />返回指定关联索引（0为默认）的打开表单的记录ID。<br /><br />如果表单用于批量编辑模式，则仅可获取关联索引0的记录ID - 在这种情况下，将返回所有使用的记录ID的数组。",
 				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Returns all assigned role IDs for the current user (nested roles are included).",
 				"get_url_query_string":"app.get_url_query_string() => STRING<br /><br />Returns the current query parameters, such as:<br />'?arg1=hello&arg2=world'",

@@ -1268,7 +1268,7 @@
 				"get_e2ee_data_key":"app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Entschlüsselt den beigefügten Datenschlüssel mit dem privaten Schlüssel des aktuellen Benutzers.",
 				"get_e2ee_data_value":"app.get_e2ee_data_value({ARGS}) => STRING<br /><br />Entschlüsselt einen Datenwert mit dem beigefügten Datenschlüssel.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Liefert den 5-stelligen Sprach-Code ('en_us', ...) des aktuellen Benutzers.",
-				"get_preset_record_id":"instance.get_preset_record_id({ARGS}) => INTEGER<br /><br />Liefert die ID des vordefinierten Datensatzes.",
+				"get_preset_record_id":"app.get_preset_record_id({ARGS}) => INTEGER<br /><br />Liefert die ID des vordefinierten Datensatzes.",
 				"get_record_id":"app.get_record_id({ARGS}) => NUMBER|ARRAY<br /><br />Liefert die Datensatz-ID des offenen Formulars für den ausgewählten Relationsindex (0 ist der Standard).<br /><br />Wenn Formular zur Massenbearbeitung genutzt wird, sind nur Datensatz-IDs vom Relationsindex 0 verfügbar - in diesem Fall wird ein Array aller genutzten Datensatz-IDs zurückgegeben.",
 				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Liefert die IDs aller zugewiesenen Rollen für den aktuellen Benutzer (geerbte Rollen sind inkludiert).",
 				"get_url_query_string":"app.get_url_query_string() => STRING<br /><br />Liefert die aktuellen URL-Parameter, wie bspw. \"?arg1=hello&arg2=world\"",
