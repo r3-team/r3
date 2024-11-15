@@ -9,25 +9,26 @@ import (
 	"r3/config"
 )
 
-func getToken(url string, skipVerify bool) (string, error) {
+func getToken(url string) (string, error) {
 
-	var req struct {
+	var req = struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
+	}{
+		Username: config.GetString("repoUser"),
+		Password: config.GetString("repoPass"),
 	}
-	req.Username = config.GetString("repoUser")
-	req.Password = config.GetString("repoPass")
 
 	var res struct {
 		Token string `json:"token"`
 	}
-	if err := post(url, req, &res, skipVerify); err != nil {
+	if err := post("", url, req, &res); err != nil {
 		return "", err
 	}
 	return res.Token, nil
 }
 
-func post(url string, reqIf interface{}, resIf interface{}, skipVerify bool) error {
+func post(token string, url string, reqIf interface{}, resIf interface{}) error {
 
 	reqJson, err := json.Marshal(reqIf)
 	if err != nil {
@@ -38,8 +39,14 @@ func post(url string, reqIf interface{}, resIf interface{}, skipVerify bool) err
 	if err != nil {
 		return err
 	}
+
 	httpReq.Header.Set("User-Agent", "r3-application")
 
+	if token != "" {
+		httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	}
+
+	skipVerify := config.GetUint64("repoSkipVerify") == 1
 	httpClient, err := config.GetHttpClient(skipVerify, 30)
 	if err != nil {
 		return err

@@ -9,8 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func getModuleMetas(token string, url string, skipVerify bool,
-	repoModuleMap map[uuid.UUID]types.RepoModule) error {
+func getModuleMetas(token string, url string, repoModuleMap map[uuid.UUID]types.RepoModule) error {
 
 	var req struct {
 		Token   string        `json:"token"`
@@ -75,7 +74,7 @@ func getModuleMetas(token string, url string, skipVerify bool,
 		Count int                   `json:"count"`
 		Rows  []types.DataGetResult `json:"rows"`
 	}
-	if err := post(url, req, &res, skipVerify); err != nil {
+	if err := post(token, url, req, &res); err != nil {
 		return err
 	}
 

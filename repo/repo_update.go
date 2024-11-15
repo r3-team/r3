@@ -51,23 +51,22 @@ func Update() error {
 	dataAuthUrl := fmt.Sprintf("%s/data/auth", baseUrl)
 	dataAccessUrl := fmt.Sprintf("%s/data/access", baseUrl)
 
-	skipVerify := config.GetUint64("repoSkipVerify") == 1
 	repoModuleMap := make(map[uuid.UUID]types.RepoModule)
 
 	// get authentication token
-	token, err := getToken(dataAuthUrl, skipVerify)
+	token, err := getToken(dataAuthUrl)
 	if err != nil {
 		return err
 	}
 
 	// get modules, their latest releases and translated module meta data
-	if err := getModules(token, dataAccessUrl, skipVerify, repoModuleMap); err != nil {
+	if err := getModules(token, dataAccessUrl, repoModuleMap); err != nil {
 		return fmt.Errorf("failed to get modules, %w", err)
 	}
-	if err := getModuleReleases(token, dataAccessUrl, skipVerify, repoModuleMap, lastRun); err != nil {
+	if err := getModuleReleases(token, dataAccessUrl, repoModuleMap, lastRun); err != nil {
 		return fmt.Errorf("failed to get module releases, %w", err)
 	}
-	if err := getModuleMetas(token, dataAccessUrl, skipVerify, repoModuleMap); err != nil {
+	if err := getModuleMetas(token, dataAccessUrl, repoModuleMap); err != nil {
 		return fmt.Errorf("failed to get meta info for modules, %w", err)
 	}
 

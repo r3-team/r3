@@ -20,7 +20,7 @@ func Download(fileId uuid.UUID) (string, error) {
 	skipVerify := config.GetUint64("repoSkipVerify") == 1
 
 	// get authentication token
-	token, err := getToken(dataAuthUrl, skipVerify)
+	token, err := getToken(dataAuthUrl)
 	if err != nil {
 		return "", err
 	}
