@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"errors"
 	"fmt"
 	"r3/config"
 	"r3/db"
@@ -9,64 +10,27 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-/* R3 repo entities
-author								49c10371-c3ee-4d42-8961-d6d8ccda7bc7
-author.name							295f5bd9-772a-41f0-aa81-530a0678e441
-
-language							820de67e-ee99-44f9-a37a-4a7d3ac7301c
-language.code						19bd7a3b-9b3d-45da-9c07-4d8f62874b35
-
-module								08dfb28b-dbb4-4b70-8231-142235516385
-module.name							fbab278a-4898-4f46-a1d7-35d1a80ee3dc
-module.uuid							98bc635b-097e-4cf0-92c9-2bb97a7c2a5e
-module.in_store						0ba7005c-834b-4d2b-a967-d748f91c2bed
-module.author						a72f2de6-e1ee-4432-804b-b57f44013f4c
-module.log_summary					f36130a9-bfed-42dc-920f-036ffd0d35b0
-
-module_release						a300afae-a8c5-4cfc-9375-d85f45c6347c
-module_release.file					b28e8f5c-ebeb-4565-941b-4d942eedc588
-module_release.module				922dc949-873f-4a21-9699-8740c0491b3a
-module_release.release_build		d0766fcc-7a68-490c-9c81-f542ad37109b
-module_release.release_build_app	ce998cfd-a66f-423c-b82b-d2b48a21c288
-module_release.release_date			9f9b6cda-069d-405b-bbb8-c0d12bbce910
-
-module_transl_meta					12ae386b-d1d2-48b2-a60b-2d5a11c42826
-module_transl_meta.description		3cd8b8b1-3d3f-41b0-ba6c-d7ef567a686f
-module_transl_meta.language			8aa84747-8224-4f8d-baf1-2d87df374fe6
-module_transl_meta.module			1091d013-988c-442b-beff-c853e8df20a8
-module_transl_meta.support_page		4793cd87-0bc9-4797-9538-ca733007a1d1
-module_transl_meta.title			6f66272a-7713-45a8-9565-b0157939399b
-*/
-
-// update internal module repository from external data API
+// update internal module repository from external repository API
 func Update() error {
-
-	lastRun := config.GetUint64("repoChecked")
 	thisRun := uint64(tools.GetTimeUnix())
-
 	baseUrl := config.GetString("repoUrl")
-
-	dataAuthUrl := fmt.Sprintf("%s/data/auth", baseUrl)
-	dataAccessUrl := fmt.Sprintf("%s/data/access", baseUrl)
 
 	repoModuleMap := make(map[uuid.UUID]types.RepoModule)
 
 	// get authentication token
-	token, err := getToken(dataAuthUrl)
+	token, err := getToken(baseUrl)
 	if err != nil {
 		return err
 	}
 
 	// get modules, their latest releases and translated module meta data
-	if err := getModules(token, dataAccessUrl, repoModuleMap); err != nil {
+	if err := getModules(token, baseUrl, repoModuleMap); err != nil {
 		return fmt.Errorf("failed to get modules, %w", err)
 	}
-	if err := getModuleReleases(token, dataAccessUrl, repoModuleMap, lastRun); err != nil {
-		return fmt.Errorf("failed to get module releases, %w", err)
-	}
-	if err := getModuleMetas(token, dataAccessUrl, repoModuleMap); err != nil {
+	if err := getModuleMetas(token, baseUrl, repoModuleMap); err != nil {
 		return fmt.Errorf("failed to get meta info for modules, %w", err)
 	}
 
@@ -190,6 +154,119 @@ func removeModules_tx(tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) e
 		WHERE module_id_wofk <> ALL($1)
 	`, moduleIds); err != nil {
 		return err
+	}
+	return nil
+}
+
+func getModules(token string, baseUrl string, repoModuleMap map[uuid.UUID]types.RepoModule) error {
+
+	type moduleResponse struct {
+		Module struct {
+			Uuid       uuid.UUID   `json:"uuid"`
+			Name       string      `json:"name"`
+			InStore    bool        `json:"in_store"`
+			LogSummary pgtype.Text `json:"log_summary"`
+		} `json:"0(module)"`
+		Release struct {
+			ReleaseBuild    int                      `json:"release_build"`
+			ReleaseBuildApp int                      `json:"release_build_app"`
+			ReleaseDate     int64                    `json:"release_date"`
+			File            []types.DataGetValueFile `json:"file"`
+		} `json:"1(module_release)"`
+		Author struct {
+			Name string `json:"name"`
+		} `json:"2(author)"`
+	}
+
+	limit := 100
+	offset := 0
+
+	for true {
+		url := fmt.Sprintf("%s/api/lsw_repo/module/v1?limit=%d&offset=%d", baseUrl, limit, offset)
+
+		var res []moduleResponse
+		if err := httpCallGet(token, url, "", &res); err != nil {
+			return err
+		}
+
+		for _, mod := range res {
+
+			if len(mod.Release.File) != 1 {
+				return fmt.Errorf("module release does not have exactly 1 file, file count: %d",
+					len(mod.Release.File))
+			}
+
+			repo := types.RepoModule{
+				ModuleId:        mod.Module.Uuid,
+				Name:            mod.Module.Name,
+				InStore:         mod.Module.InStore,
+				ChangeLog:       mod.Module.LogSummary,
+				ReleaseBuild:    mod.Release.ReleaseBuild,
+				ReleaseBuildApp: mod.Release.ReleaseBuildApp,
+				ReleaseDate:     mod.Release.ReleaseDate,
+				FileId:          mod.Release.File[0].Id,
+				Author:          mod.Author.Name,
+			}
+
+			// finish up
+			repo.LanguageCodeMeta = make(map[string]types.RepoModuleMeta)
+			repoModuleMap[repo.ModuleId] = repo
+		}
+
+		if len(res) >= limit {
+			offset += limit
+			continue
+		}
+		break
+	}
+	return nil
+}
+
+func getModuleMetas(token string, baseUrl string, repoModuleMap map[uuid.UUID]types.RepoModule) error {
+
+	type moduleMetaResponse struct {
+		Meta struct {
+			Description string `json:"description"`
+			SupportPage string `json:"support_page"`
+			Title       string `json:"title"`
+		} `json:"0(module_transl_meta)"`
+		Module struct {
+			Uuid uuid.UUID `json:"uuid"`
+		} `json:"1(module)"`
+		Language struct {
+			Code string `json:"code"`
+		} `json:"2(language)"`
+	}
+
+	limit := 100
+	offset := 0
+
+	for true {
+		url := fmt.Sprintf("%s/api/lsw_repo/module_meta/v1?limit=%d&offset=%d", baseUrl, limit, offset)
+
+		var res []moduleMetaResponse
+		if err := httpCallGet(token, url, "", &res); err != nil {
+			return err
+		}
+
+		for _, mod := range res {
+			if _, exists := repoModuleMap[mod.Module.Uuid]; !exists {
+				return errors.New("meta for non-existing module")
+			}
+
+			meta := types.RepoModuleMeta{
+				Description: mod.Meta.Description,
+				SupportPage: mod.Meta.SupportPage,
+				Title:       mod.Meta.Title,
+			}
+			repoModuleMap[mod.Module.Uuid].LanguageCodeMeta[mod.Language.Code] = meta
+		}
+
+		if len(res) >= limit {
+			offset += limit
+			continue
+		}
+		break
 	}
 	return nil
 }

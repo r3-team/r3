@@ -6,16 +6,21 @@ import (
 )
 
 type RepoModule struct {
-	ModuleId         uuid.UUID                 `json:"moduleId"`
-	FileId           uuid.UUID                 `json:"fileId"`
-	Name             string                    `json:"name"`
-	ChangeLog        pgtype.Text               `json:"changeLog"`
-	Author           string                    `json:"author"`
-	InStore          bool                      `json:"inStore"`
-	ReleaseBuild     int                       `json:"releaseBuild"`    // module version
-	ReleaseBuildApp  int                       `json:"releaseBuildApp"` // platform version
-	ReleaseDate      int                       `json:"releaseDate"`     // module release date
-	LanguageCodeMeta map[string]RepoModuleMeta `json:"languageCodeMeta"`
+	// module meta data
+	ModuleId  uuid.UUID   `json:"moduleId"`
+	Name      string      `json:"name"`
+	ChangeLog pgtype.Text `json:"changeLog"`
+	Author    string      `json:"author"`
+	InStore   bool        `json:"inStore"`
+
+	// meta data of latest module release
+	FileId          uuid.UUID `json:"fileId"`
+	ReleaseBuild    int       `json:"releaseBuild"`    // module version
+	ReleaseBuildApp int       `json:"releaseBuildApp"` // platform version
+	ReleaseDate     int64     `json:"releaseDate"`
+
+	// translated meta data
+	LanguageCodeMeta map[string]RepoModuleMeta `json:"languageCodeMeta"` // key = language code (en_us, de_de, ...)
 }
 
 type RepoModuleMeta struct {

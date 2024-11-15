@@ -9,7 +9,7 @@ import (
 	"r3/config"
 )
 
-func getToken(url string) (string, error) {
+func getToken(baseUrl string) (string, error) {
 
 	var req = struct {
 		Username string `json:"username"`
@@ -22,20 +22,30 @@ func getToken(url string) (string, error) {
 	var res struct {
 		Token string `json:"token"`
 	}
-	if err := post("", url, req, &res); err != nil {
+	if err := httpCallPost("", fmt.Sprintf("%s/api/auth", baseUrl), req, &res); err != nil {
 		return "", err
 	}
 	return res.Token, nil
 }
 
-func post(token string, url string, reqIf interface{}, resIf interface{}) error {
+func httpCallGet(token string, url string, reqIf interface{}, resIf interface{}) error {
+	return httpCall(http.MethodGet, token, url, reqIf, resIf)
+}
+func httpCallPost(token string, url string, reqIf interface{}, resIf interface{}) error {
+	return httpCall(http.MethodPost, token, url, reqIf, resIf)
+}
+func httpCall(method string, token string, url string, reqIf interface{}, resIf interface{}) error {
+
+	if method != http.MethodGet && method != http.MethodPost {
+		return fmt.Errorf("invalid HTTP method '%s'", method)
+	}
 
 	reqJson, err := json.Marshal(reqIf)
 	if err != nil {
 		return err
 	}
 
-	httpReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(reqJson))
+	httpReq, err := http.NewRequest(method, url, bytes.NewBuffer(reqJson))
 	if err != nil {
 		return err
 	}

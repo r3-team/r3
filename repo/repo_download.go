@@ -11,16 +11,16 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+// attribute ID of lsw_repo, module_release->file
 var fileAttributeId = "b28e8f5c-ebeb-4565-941b-4d942eedc588"
 
 func Download(fileId uuid.UUID) (string, error) {
 
 	baseUrl := config.GetString("repoUrl")
-	dataAuthUrl := fmt.Sprintf("%s/data/auth", baseUrl)
 	skipVerify := config.GetUint64("repoSkipVerify") == 1
 
 	// get authentication token
-	token, err := getToken(dataAuthUrl)
+	token, err := getToken(baseUrl)
 	if err != nil {
 		return "", err
 	}

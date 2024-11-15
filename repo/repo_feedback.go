@@ -27,7 +27,7 @@ func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID,
 	baseUrl := config.GetString("repoUrl")
 
 	// get authentication token
-	token, err := getToken(fmt.Sprintf("%s/api/auth", baseUrl))
+	token, err := getToken(baseUrl)
 	if err != nil {
 		return err
 	}
@@ -64,5 +64,5 @@ func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID,
 	}
 
 	var res interface{}
-	return post(token, fmt.Sprintf("%s/api/lsw_repo/feedback/v1", baseUrl), req, &res)
+	return httpCallPost(token, fmt.Sprintf("%s/api/lsw_repo/feedback/v1", baseUrl), req, &res)
 }
