@@ -15,9 +15,7 @@ import (
 
 // update internal module repository from external repository API
 func Update() error {
-	thisRun := uint64(tools.GetTimeUnix())
 	baseUrl := config.GetString("repoUrl")
-
 	repoModuleMap := make(map[uuid.UUID]types.RepoModule)
 
 	// get authentication token
@@ -47,7 +45,7 @@ func Update() error {
 	if err := addModules_tx(tx, repoModuleMap); err != nil {
 		return fmt.Errorf("failed to add modules, %w", err)
 	}
-	if err := config.SetUint64_tx(tx, "repoChecked", thisRun); err != nil {
+	if err := config.SetUint64_tx(tx, "repoChecked", uint64(tools.GetTimeUnix())); err != nil {
 		return err
 	}
 	return tx.Commit(db.Ctx)
@@ -196,21 +194,18 @@ func getModules(token string, baseUrl string, repoModuleMap map[uuid.UUID]types.
 					len(mod.Release.File))
 			}
 
-			repo := types.RepoModule{
-				ModuleId:        mod.Module.Uuid,
-				Name:            mod.Module.Name,
-				InStore:         mod.Module.InStore,
-				ChangeLog:       mod.Module.LogSummary,
-				ReleaseBuild:    mod.Release.ReleaseBuild,
-				ReleaseBuildApp: mod.Release.ReleaseBuildApp,
-				ReleaseDate:     mod.Release.ReleaseDate,
-				FileId:          mod.Release.File[0].Id,
-				Author:          mod.Author.Name,
+			repoModuleMap[mod.Module.Uuid] = types.RepoModule{
+				ModuleId:         mod.Module.Uuid,
+				Name:             mod.Module.Name,
+				InStore:          mod.Module.InStore,
+				ChangeLog:        mod.Module.LogSummary,
+				ReleaseBuild:     mod.Release.ReleaseBuild,
+				ReleaseBuildApp:  mod.Release.ReleaseBuildApp,
+				ReleaseDate:      mod.Release.ReleaseDate,
+				FileId:           mod.Release.File[0].Id,
+				Author:           mod.Author.Name,
+				LanguageCodeMeta: make(map[string]types.RepoModuleMeta),
 			}
-
-			// finish up
-			repo.LanguageCodeMeta = make(map[string]types.RepoModuleMeta)
-			repoModuleMap[repo.ModuleId] = repo
 		}
 
 		if len(res) >= limit {
@@ -254,12 +249,11 @@ func getModuleMetas(token string, baseUrl string, repoModuleMap map[uuid.UUID]ty
 				return errors.New("meta for non-existing module")
 			}
 
-			meta := types.RepoModuleMeta{
+			repoModuleMap[mod.Module.Uuid].LanguageCodeMeta[mod.Language.Code] = types.RepoModuleMeta{
 				Description: mod.Meta.Description,
 				SupportPage: mod.Meta.SupportPage,
 				Title:       mod.Meta.Title,
 			}
-			repoModuleMap[mod.Module.Uuid].LanguageCodeMeta[mod.Language.Code] = meta
 		}
 
 		if len(res) >= limit {
