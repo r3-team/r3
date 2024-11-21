@@ -54,6 +54,8 @@ func clusterProcessEvents() error {
 	}
 
 	// react to collected events
+	collectionUpdates := make([]types.ClusterEventCollectionUpdated, 0)
+
 	for _, e := range events {
 		log.Info("cluster", fmt.Sprintf("node is reacting to event '%s'", e.Content))
 		var jsonPayload []byte
@@ -71,7 +73,8 @@ func clusterProcessEvents() error {
 			if err := json.Unmarshal(jsonPayload, &p); err != nil {
 				return err
 			}
-			err = cluster.CollectionUpdated(p.CollectionId, p.LoginIds)
+			collectionUpdates = append(collectionUpdates, p)
+			err = nil
 		case "configChanged":
 			var switchToMaintenance bool
 			if err := json.Unmarshal(jsonPayload, &switchToMaintenance); err != nil {
@@ -138,5 +141,8 @@ func clusterProcessEvents() error {
 			return err
 		}
 	}
+
+	// apply collection updates
+	cluster.CollectionsUpdated(collectionUpdates)
 	return nil
 }

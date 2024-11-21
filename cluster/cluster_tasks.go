@@ -68,27 +68,56 @@ func ClientEventsChanged(updateNodes bool, address string, loginId int64) error 
 	}
 	return nil
 }
-func CollectionUpdated(collectionId uuid.UUID, loginIds []int64) error {
+func CollectionsUpdated(updates []types.ClusterEventCollectionUpdated) {
 
-	if len(loginIds) == 0 {
-		// no logins defined, update for all
-		WebsocketClientEvents <- types.ClusterEvent{
-			Content: "collectionChanged",
-			Payload: collectionId,
-			Target:  types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser},
+	// if triggers are badly designed or bulk updates executed, many identical collection updates can be triggered at once
+	collectionIdMapGlobal := make(map[uuid.UUID]bool)
+	collectionIdMapLogins := make(map[uuid.UUID]map[int64]bool)
+
+	// first, go through global collection updates (for all logins)
+	for _, upd := range updates {
+		if len(upd.LoginIds) != 0 {
+			continue
 		}
-		return nil
+		if _, exists := collectionIdMapGlobal[upd.CollectionId]; !exists {
+			collectionIdMapGlobal[upd.CollectionId] = true
+
+			WebsocketClientEvents <- types.ClusterEvent{
+				Content: "collectionChanged",
+				Payload: upd.CollectionId,
+				Target:  types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser},
+			}
+		}
 	}
 
-	// logins defined, update for specific logins
-	for _, id := range loginIds {
-		WebsocketClientEvents <- types.ClusterEvent{
-			Content: "collectionChanged",
-			Payload: collectionId,
-			Target:  types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser, LoginId: id},
+	// go through collection updates for specific logins
+	for _, upd := range updates {
+		if len(upd.LoginIds) == 0 {
+			continue
+		}
+
+		// no need to update for specific logins, if global update already exists
+		if _, exists := collectionIdMapGlobal[upd.CollectionId]; exists {
+			continue
+		}
+
+		// update for specific logins, if not done already
+		if _, exists := collectionIdMapLogins[upd.CollectionId]; !exists {
+			collectionIdMapLogins[upd.CollectionId] = make(map[int64]bool)
+		}
+
+		for _, loginId := range upd.LoginIds {
+			if _, exists := collectionIdMapLogins[upd.CollectionId][loginId]; !exists {
+				collectionIdMapLogins[upd.CollectionId][loginId] = true
+
+				WebsocketClientEvents <- types.ClusterEvent{
+					Content: "collectionChanged",
+					Payload: upd.CollectionId,
+					Target:  types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser, LoginId: loginId},
+				}
+			}
 		}
 	}
-	return nil
 }
 func ConfigChanged(updateNodes bool, loadConfigFromDb bool, productionModeChange bool) error {
 	if updateNodes {
