@@ -1,6 +1,7 @@
 import MyStore                        from '../../stores/store.js';
 import {getAttributeValuesFromGetter} from './attribute.js';
 import {consoleError}                 from './error.js';
+import {openLink}                     from './generic.js';
 import {
 	aesGcmDecryptBase64WithPhrase,
 	rsaDecrypt
@@ -272,12 +273,20 @@ export function getFormPopUpConfig(recordIds,openForm,getterArgs,getterName) {
 	return conf;
 };
 
-export function formOpen(openForm) {
+export function formOpen(openForm,newTab) {
 	if(openForm === null)
 		return;
+
+	if(newTab === undefined)
+		newTab = false;
 	
-	if(openForm.popUpType !== null)
+	if(openForm.popUpType !== null && !newTab)
 		return MyStore.commit('popUpFormGlobal',getFormPopUpConfig([],openForm,[],null));
+
+	const path = getFormRoute(openForm.formIdOpen,0,false);
 	
-	this.$router.push(getFormRoute(openForm.formIdOpen,0,false));
+	if(newTab)
+		return openLink('#'+path,true);
+
+	this.$router.push(path);
 };

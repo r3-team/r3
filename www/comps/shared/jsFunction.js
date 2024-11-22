@@ -61,7 +61,7 @@ const exposedFunctionsGlobal = {
 		formOpen({
 			formIdOpen:formId, popUpType:popUp ? 'float' : null,
 			maxHeight:maxY, maxWidth:maxX
-		});
+		},newTab);
 	},
 				
 	// PDF functions

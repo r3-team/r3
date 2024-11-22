@@ -93,7 +93,9 @@ let MyWidget = {
 					/>
 					<span
 						v-if="collectionHasDisplay"
-						@click="clickCollection"
+						@click.ctrl.exact="clickCollection(true)"
+						@click.left.exact="clickCollection(false)"
+						@click.middle.exact="clickCollection(true)"
 						:class="{ clickable:collectionOpenForm }"
 					>{{ collectionValue + ' ' + collectionTitle }}</span>
 				</div>
@@ -213,9 +215,9 @@ let MyWidget = {
 		srcBase64Icon,
 		
 		// actions
-		clickCollection() {
+		clickCollection(middleClick) {
 			if(this.collectionOpenForm)
-				this.formOpen(this.collectionOpenForm);
+				this.formOpen(this.collectionOpenForm,middleClick);
 		},
 		openBuilder(middle) {
 			if(!this.moduleWidget)

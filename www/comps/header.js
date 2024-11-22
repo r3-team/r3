@@ -113,8 +113,10 @@ let MyHeader = {
 			<div class="entry no-wrap" tabindex="0"
 				v-if="showCollections"
 				v-for="e in collectionEntries"
-				@click="formOpen(e.openForm)"
-				@keyup.enter="formOpen(e.openForm)"
+				@click.ctrl.exact="formOpen(e.openForm,true)"
+				@click.left.exact="formOpen(e.openForm,false)"
+				@click.middle.exact="formOpen(e.openForm,true)"
+				@keyup.enter="formOpen(e.openForm,false)"
 				:class="{ clickable:e.openForm !== null, readonly:e.openForm === null }"
 				:title="e.title"
 			>

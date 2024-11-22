@@ -155,7 +155,7 @@ let MyApp = {
 				<div class="fullscreen-collection-input shade">
 					<div class="entry clickable" tabindex="0"
 						v-for="e in collectionEntries"
-						@click="formOpen(e.openForm);collectionEntries = []"
+						@click="formOpen(e.openForm,false);collectionEntries = []"
 					>
 						<div class="row centered gap">
 							<img v-if="e.iconId !== null" :src="srcBase64Icon(e.iconId,'')" />
