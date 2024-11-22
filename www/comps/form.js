@@ -1197,17 +1197,12 @@ let MyForm = {
 		
 		// navigation
 		openForm(recordIds,openForm,getterArgs,newTab,fieldIdSrc) {
-			if(typeof recordIds === 'undefined' || recordIds === null)
-				recordIds = [];
-			
-			if(typeof openForm === 'undefined' || openForm === null)
-				openForm = { formIdOpen:this.form.id, popUpType:null };
-			
-			if(typeof getterArgs === 'undefined' || getterArgs === null)
-				getterArgs = [];
-			
-			if(typeof fieldIdSrc === 'undefined')
-				fieldIdSrc = null;
+			// apply defaults
+			if(typeof recordIds  === 'undefined' || recordIds  === null) recordIds  = [];
+			if(typeof openForm   === 'undefined' || openForm   === null) openForm   = { formIdOpen:this.form.id, popUpType:null };
+			if(typeof getterArgs === 'undefined' || getterArgs === null) getterArgs = [];
+			if(typeof newTab     === 'undefined')                        newTab     = false;
+			if(typeof fieldIdSrc === 'undefined')                        fieldIdSrc = null;
 			
 			const openSameForm  = this.form.id === openForm.formIdOpen;
 			const openPopUpForm = openForm.popUpType !== null;
@@ -1224,8 +1219,8 @@ let MyForm = {
 					openForm.popUpType = 'float';
 			}
 			
-			// open pop-up form if configured
-			if(openForm.popUpType !== null) {
+			// open pop-up form unless new tab is requested
+			if(openForm.popUpType !== null && !newTab) {
 				this.popUp = this.getFormPopUpConfig(recordIds,openForm,getterArgs,'attributes');
 				this.popUpFieldIdSrc = fieldIdSrc;
 				return;
