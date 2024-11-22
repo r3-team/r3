@@ -496,8 +496,9 @@ let MyList = {
 							<!-- result rows -->
 							<tr
 								v-for="(r,ri) in rowsClear"
-								@click="clickRow(r,false)"
-								@click.middle="clickRow(r,true)"
+								@click.ctrl.exact="clickRow(r,true)"
+								@click.left.exact="clickRow(r,false)"
+								@click.middle.exact="clickRow(r,true)"
 								@keyup.enter.space="clickRow(r,false)"
 								:class="{ rowSelect:rowSelect && !inputIsReadonly, active:popUpFormInline !== null && popUpFormInline.recordIds.includes(r.indexRecordIds['0']) }"
 								:key="ri + '_' + r.indexRecordIds['0']"
@@ -627,8 +628,9 @@ let MyList = {
 							
 							<div class="card"
 								v-for="(r,ri) in rowsClear"
-								@click.stop="clickRow(r,false)"
-								@click.middle.stop="clickRow(r,true)"
+								@click.ctrl.exact.stop="clickRow(r,true)"
+								@click.left.stop.exact="clickRow(r,false)"
+								@click.middle.exact.stop="clickRow(r,true)"
 								@keyup.enter.space.stop="clickRow(r,false)"
 								:class="{ rowSelect:rowSelect && !inputIsReadonly }"
 								:key="ri + '_' + r.indexRecordIds['0']"

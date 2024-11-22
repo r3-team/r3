@@ -39,8 +39,9 @@ let MyKanbanCard = {
 		></div>
 		
 		<div class="kanban-card-content"
-			@click="$emit('click')"
-			@click.middle="$emit('click-middle')"
+			@click.ctrl.exact="$emit('click-middle')"
+			@click.left.exact="$emit('click')"
+			@click.middle.exact="$emit('click-middle')"
 			:class="{ clickable:clickable, template:isTemplate }"
 		>
 			<span v-if="isTemplate">{{ capGen.button.new }}</span>

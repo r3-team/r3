@@ -4,8 +4,9 @@ export {MyButton as default};
 let MyButton = {
 	name:'my-button',
 	template:`<div class="button" data-is-input="1"
-		@click.exact="trigger"
-		@click.shift="triggerShift"
+		@click.ctrl.exact ="triggerMiddle"
+		@click.left.exact="trigger"
+		@click.shift.exact="triggerShift"
 		@click.prevent.middle="triggerMiddle"
 		@click.prevent.right="triggerRight"
 		@keyup.enter.space="trigger"

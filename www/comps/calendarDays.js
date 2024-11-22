@@ -16,8 +16,9 @@ let MyCalendarDaysEvent = {
 	name:'my-calendar-days-event',
 	components:{ MyValueRich },
 	template:`<div class="eventWrap"
-		@click="$emit('click')"
-		@click.middle="$emit('click-middle')"
+		@click.ctrl.exact="$emit('click-middle')"
+		@click.left.exact="$emit('click')"
+		@click.middle.exact="$emit('click-middle')"
 		:style="style"
 	>
 		<div class="event" tabindex="0"
@@ -80,7 +81,7 @@ let MyCalendarDays = {
 					<my-calendar-days-event class="full"
 						v-for="ei in d.eventIndexes"
 						@click="eventClick(events.fullDaysEvents[ei].row,false)"
-						@click-middle="eventClick(events.fullDaysEvents[ei].row,false)"
+						@click-middle="eventClick(events.fullDaysEvents[ei].row,true)"
 						@clipboard="$emit('clipboard')"
 						:columns="columns"
 						:columnBatches="columnBatches"

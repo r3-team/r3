@@ -1207,11 +1207,11 @@ let MyField = {
 		closeInline() {
 			this.popUpFormInline = null;
 		},
-		openForm(rows,getterArgs,middleClick,openFormContext) {
+		openForm(rows,getterArgs,newTab,openFormContext) {
 			// set defaults
 			if(typeof rows            === 'undefined') rows            = [];
 			if(typeof getterArgs      === 'undefined') getterArgs      = [];
-			if(typeof middleClick     === 'undefined') middleClick     = false;
+			if(typeof newTab          === 'undefined') newTab          = false;
 			if(typeof openFormContext === 'undefined') openFormContext = null;
 			
 			// form open context
@@ -1241,11 +1241,11 @@ let MyField = {
 			
 			// pop-up inline form (only inside none-inputs fields) and never on mobile
 			// pop-up float forms are sent upwards to the parent form to deal with
-			if(openForm.popUpType === 'inline' && !this.isMobile)
+			if(openForm.popUpType === 'inline' && !this.isMobile && !newTab)
 				return this.popUpFormInline = this.getFormPopUpConfig(
 					recordIds,openForm,getterArgs,'attributes');
 			
-			this.$emit('open-form',recordIds,openForm,getterArgs,middleClick,this.field.id);
+			this.$emit('open-form',recordIds,openForm,getterArgs,newTab,this.field.id);
 		},
 		relationshipRecordsSelected(recordIds) {
 			if(recordIds === null)     return this.value = null;

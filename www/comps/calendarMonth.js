@@ -37,8 +37,9 @@ let MyCalendarMonth = {
 				
 				<!-- full day events -->
 				<div class="event"
-					@click.left="clickRecord($event,e.row,false)"
-					@click.middle="clickRecord($event,e.row,true)"
+					@click.ctrl.exact="clickRecord($event,e.row,true)"
+					@click.left.exact="clickRecord($event,e.row,false)"
+					@click.middle.exact="clickRecord($event,e.row,true)"
 					@mouseup.left="stopBubbleIfRecord($event,!e.placeholder)"
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => v.fullDay || v.placeholder)"
 					:class="{ first:e.entryFirst, last:e.entryLast, placeholder:e.placeholder, clickable:hasUpdate }"
@@ -65,8 +66,9 @@ let MyCalendarMonth = {
 				
 				<!-- partial day events -->
 				<div class="part"
-					@click.left="clickRecord($event,e.row,false)"
-					@click.middle="clickRecord($event,e.row,true)"
+					@click.ctrl.exact="clickRecord($event,e.row,true)"
+					@click.left.exact="clickRecord($event,e.row,false)"
+					@click.middle.exact="clickRecord($event,e.row,true)"
 					@mouseup.left="stopBubbleIfRecord($event,true)"
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => !v.fullDay && !v.placeholder)"
 					:class="{ clickable:hasUpdate }"

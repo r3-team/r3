@@ -1197,7 +1197,7 @@ let MyForm = {
 		
 		// navigation
 		openForm(recordIds,openForm,getterArgs,newTab,fieldIdSrc) {
-			// apply defaults
+			// set defaults
 			if(typeof recordIds  === 'undefined' || recordIds  === null) recordIds  = [];
 			if(typeof openForm   === 'undefined' || openForm   === null) openForm   = { formIdOpen:this.form.id, popUpType:null };
 			if(typeof getterArgs === 'undefined' || getterArgs === null) getterArgs = [];

@@ -38,8 +38,9 @@ let MyGanttLineRecord = {
 	components:{MyValueRich},
 	template:
 	`<div class="gantt-line-record"
-		@click="clickRecord(false)"
-		@click.middle="clickRecord(true)"
+		@click.ctrl.exact="clickRecord(true)"
+		@click.left.exact="clickRecord(false)"
+		@click.middle.exact="clickRecord(true)"
 		:style="style"
 	>
 		<div class="record-values"
