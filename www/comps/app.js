@@ -781,13 +781,13 @@ let MyApp = {
 		},
 		
 		// hotkeys
-		handleKeydown(evt) {
+		handleKeydown(e) {
 			for(let k of this.keyDownHandlers) {
-				if(k.sleep !== undefined || (k.keyCtrl && !evt.ctrlKey))
+				if(k.sleep !== undefined || (k.keyCtrl && !e.ctrlKey))
 					continue;
 				
-				if(k.key === evt.key) {
-					evt.preventDefault();
+				if(k.key === e.key) {
+					e.preventDefault();
 					k.fnc();
 				}
 			}

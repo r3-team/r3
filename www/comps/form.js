@@ -334,12 +334,14 @@ let MyForm = {
 			this.$store.commit('routingGuardAdd',this.routingGuard);
 		
 		window.addEventListener('keydown',this.handleHotkeys);
+		window.addEventListener('keyup',this.handleHotkeys);
 	},
 	unmounted() {
 		if(!this.isWidget)
 			this.$store.commit('routingGuardDel',this.routingGuard);
 		
 		window.removeEventListener('keydown',this.handleHotkeys);
+		window.removeEventListener('keyup',this.handleHotkeys);
 	},
 	data() {
 		return {
@@ -819,16 +821,19 @@ let MyForm = {
 		handleHotkeys(e) {
 			// ignore hotkeys if pop-up form (child of this form) is open or if its a widget
 			if(this.popUp !== null || this.isWidget) return;
-			
-			if(this.isPopUp && e.key === 'Escape')
-				this.closeAsk();
-			
-			if(this.isData && e.ctrlKey && e.key === 's') {
-				e.preventDefault();
-				
-				if(!this.blockInputs && this.canUpdate) {
-					if(!this.isBulkUpdate && this.hasChanges)     this.set(false);
-					if(this.isBulkUpdate  && this.hasChangesBulk) this.setBulkUpdate();
+
+			if(e.type === 'keyup') {
+				if(this.isPopUp && e.key === 'Escape')
+					this.closeAsk();
+			}
+			if(e.type === 'keydown') {
+				if(this.isData && e.ctrlKey && e.key === 's') {
+					e.preventDefault();
+
+					if(!this.blockInputs && this.canUpdate) {
+						if(!this.isBulkUpdate && this.hasChanges)     this.set(false);
+						if(this.isBulkUpdate  && this.hasChangesBulk) this.setBulkUpdate();
+					}
 				}
 			}
 		},
@@ -918,7 +923,15 @@ let MyForm = {
 			this.$nextTick(() => this.loading = false);
 		},
 		routingGuard() {
-			return !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
+			const unsavedOk = !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
+			if(!this.isPopUp)
+				return unsavedOk;
+
+			// always block routing if form is pop-up, just close if its allowed
+			if(unsavedOk)
+				this.close();
+
+			return false;
 		},
 		
 		// field value control
@@ -1110,7 +1123,6 @@ let MyForm = {
 			});
 		},
 		openPrev() {
-			this.$store.commit('routingGuardDel',this.routingGuard);
 			window.history.back();
 		},
 		popUpRecordChanged(change,recordId) {

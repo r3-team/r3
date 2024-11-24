@@ -240,7 +240,7 @@ const MyRouter = VueRouter.createRouter({
 	scrollBehavior(to,from,savedPosition) {
 		
 		// recover scroll position of form element if available
-		if(typeof MyRouterPositions[to.path] !== 'undefined') {
+		if(MyRouterPositions[to.path] !== undefined) {
 			let e = document.getElementById(MyStore.getters.constants.scrollFormId);
 			
 			if(e !== null)
@@ -264,13 +264,14 @@ const MyRouter = VueRouter.createRouter({
 	}
 });
 MyRouter.beforeEach((to,from) => {
-	// confirm unsaved form changes
-	for(let f of MyStore.getters.routingGuards) {
-		if(!f()) return false;
+	// check last registered routing guard (the currently shown form)
+	if(MyStore.getters.routingGuards.length !== 0) {
+		const lastGuard = MyStore.getters.routingGuards[MyStore.getters.routingGuards.length-1];
+		if(!lastGuard()) return false;
 	}
 	
 	// store scroll position of form element if available
-	let e = document.getElementById(MyStore.getters.constants.scrollFormId);
+	const e = document.getElementById(MyStore.getters.constants.scrollFormId);
 	if(e !== null)
 		MyRouterPositions[from.path] = e.scrollTop;
 	
