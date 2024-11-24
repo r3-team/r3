@@ -8,7 +8,7 @@ export function set(settings) {
 			MyStore.commit('settings',JSON.parse(JSON.stringify(settings)));
 			
 			if(langOld !== settings.languageCode)
-				this.$root.captionsReload();
+				MyStore.getters.appFunctions.captionsReload();
 		},
 		genericError
 	);

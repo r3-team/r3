@@ -1,6 +1,7 @@
-import MyStoreLocal  from './storeLocal.js';
-import MyStoreSchema from './storeSchema.js';
-import tinycolor     from '../externals/tinycolor2.js';
+import MyStoreLocal   from './storeLocal.js';
+import MyStoreSchema  from './storeSchema.js';
+import tinycolor      from '../externals/tinycolor2.js';
+import {genericError} from '../comps/shared/error.js';
 export {MyStore as default};
 
 const MyStore = Vuex.createStore({
@@ -10,6 +11,13 @@ const MyStore = Vuex.createStore({
 	},
 	state:{
 		access:{},                     // access permissions for each entity (attribute, clientEvent, collection, menu, relation, widget), key: entity ID
+		appFunctions:{                 // globally accessible functions, additional ones can be registered via appFunctionRegister mutation
+			loginReauthAll:(blocking) => {
+				ws.send('login','reauthAll',{},blocking).then(
+					() => {}, genericError
+				);
+			}
+		},
 		builderMode:false,             // builder mode active
 		busyCounter:0,                 // counter of calls making the app busy (WS requests, uploads, etc.)
 		captions:{},                   // all application captions in the user interface language
@@ -88,6 +96,9 @@ const MyStore = Vuex.createStore({
 		sessionValueStore:{} // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
 	},
 	mutations:{
+		appFunctionRegister:(state,payload) => {
+			state.appFunctions[payload.name] = payload.fnc;
+		},
 		config:(state,payload) => {
 			state.builderMode = payload.builderMode === '1';
 			state.config      = payload;
@@ -365,6 +376,7 @@ const MyStore = Vuex.createStore({
 		
 		// simple
 		access:                  (state) => state.access,
+		appFunctions:            (state) => state.appFunctions,
 		blockInput:              (state) => state.busyCounter > 0,
 		builderEnabled:          (state) => state.builderMode && !state.productionMode,
 		busyCounter:             (state) => state.busyCounter,

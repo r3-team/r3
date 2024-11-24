@@ -420,6 +420,11 @@ let MyApp = {
 		setInterval(this.sessionExpireCheck,1000); // session expiration check
 		this.wsConnect();                          // connect to backend via websocket
 		this.setMobileView();                      // initial state, mobile view: yes/no
+
+		// register globally accessible functions
+		this.$store.commit('appFunctionRegister',{name:'captionsReload',fnc:this.captionsReload});
+		this.$store.commit('appFunctionRegister',{name:'initPublic',    fnc:this.initPublic});
+		this.$store.commit('appFunctionRegister',{name:'sessionInvalid',fnc:this.sessionInvalid});
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleKeydown);
@@ -849,12 +854,6 @@ let MyApp = {
 					}
 				);
 			});
-		},
-		loginReauthAll(blocking) {
-			ws.send('login','reauthAll',{},blocking).then(
-				() => {},
-				this.genericError
-			);
 		},
 		schemaReload(moduleId) {
 			let payload = typeof moduleId === 'undefined'

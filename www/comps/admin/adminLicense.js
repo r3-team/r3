@@ -113,6 +113,7 @@ let MyAdminLicense = {
 		
 		// stores
 		token:        (s) => s.$store.getters['local/token'],
+		appFunctions: (s) => s.$store.getters.appFunctions,
 		capApp:       (s) => s.$store.getters.captions.admin.license,
 		capGen:       (s) => s.$store.getters.captions.generic,
 		license:      (s) => s.$store.getters.license,
@@ -170,12 +171,12 @@ let MyAdminLicense = {
 				}
 			}
 			httpRequest.onload = function(event) {
-				let res = JSON.parse(httpRequest.response);
+				const res = JSON.parse(httpRequest.response);
 				
 				if(res.error !== '')
 					return that.$root.genericError('license upload failed');
 				
-				that.$root.initPublic();
+				that.appFunctions.initPublic();
 				that.get();
 			}
 			

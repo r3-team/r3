@@ -730,10 +730,11 @@ let MyBuilderRole = {
 		role:      (s) => typeof s.roleIdMap[s.id] === 'undefined' ? false : s.roleIdMap[s.id],
 		
 		// stores
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		roleIdMap:  (s) => s.$store.getters['schema/roleIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.role,
-		capGen:     (s) => s.$store.getters.captions.generic
+		moduleIdMap: (s) => s.$store.getters['schema/moduleIdMap'],
+		roleIdMap:   (s) => s.$store.getters['schema/roleIdMap'],
+		appFunctions:(s) => s.$store.getters.appFunctions,
+		capApp:      (s) => s.$store.getters.captions.builder.role,
+		capGen:      (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -822,7 +823,7 @@ let MyBuilderRole = {
 			ws.send('role','del',{id:this.role.id},true).then(
 				() => {
 					this.$root.schemaReload(this.role.moduleId);
-					this.$root.loginReauthAll(false);
+					this.appFunctions.loginReauthAll(false);
 					this.$router.push('/builder/roles/'+this.role.moduleId);
 				},
 				this.$root.genericError
@@ -848,7 +849,7 @@ let MyBuilderRole = {
 			},true).then(
 				() => {
 					this.$root.schemaReload(this.role.moduleId);
-					this.$root.loginReauthAll(false);
+					this.appFunctions.loginReauthAll(false);
 				},
 				this.$root.genericError
 			);
