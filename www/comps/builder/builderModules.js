@@ -273,7 +273,7 @@ let MyBuilderModulesExport = {
 			return `${m.name}_${m.releaseBuild}.rei3`;
 		},
 		exportHref:(s) => {
-			return `/export/${s.exportFileName}?module_id=${s.id}&token=${s.token}`;
+			return `/export/${s.exportFileName}?module_id=${s.id}&token=${s.token}&date=${Math.floor(new Date().getTime() / 1000)}`;
 		},
 		exportValid:(s) => {
 			if(s.moduleIdMapChanged === null)
