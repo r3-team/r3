@@ -109,6 +109,7 @@ let MyFeedback = {
 			messageError:false,
 			moduleRelated:true,
 			mood:3,
+			sent:false,
 			showInfo:false,
 			text:''
 		};
@@ -150,7 +151,7 @@ let MyFeedback = {
 		
 		// actions
 		closeAsk() {
-			this.dialogCloseAsk(this.close,this.text !== '');
+			this.dialogCloseAsk(this.close,this.text !== '' && !this.sent);
 		},
 		close() {
 			this.$store.commit('isAtFeedback',false);
@@ -167,7 +168,10 @@ let MyFeedback = {
 				mood:this.mood,
 				text:this.text
 			},true).then(
-				() => this.message = this.capApp.sendOk,
+				() => {
+					this.message = this.capApp.sendOk;
+					this.sent    = true;
+				},
 				() => {
 					this.message      = this.capApp.sendNok;
 					this.messageError = true;
