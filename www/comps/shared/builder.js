@@ -1,5 +1,11 @@
 import {isAttributeRelationship} from './attribute.js';
-import MyStore                   from '../../stores/store.js';
+import {
+	getJoinsIndexMap,
+	getQueryExpressions,
+	getQueryFiltersProcessed,
+	getRelationsJoined
+} from './query.js';
+import MyStore from '../../stores/store.js';
 
 export function getFieldHasQuery(field) {
 	if(field.content === 'variable' && field.variableId !== null)
@@ -112,6 +118,29 @@ export function getFunctionHelp(functionPrefix,functionObj,builderLanguage) {
 		help += `<br /><br />${functionObj.captions[cap][builderLanguage]}`;
 	}
 	return help;
+};
+
+export function getSqlPreview(query,columns) {
+	ws.send('dataSql','get',{
+		relationId:query.relationId,
+		joins:getRelationsJoined(query.joins),
+		expressions:getQueryExpressions(columns),
+		filters:getQueryFiltersProcessed(query.filters,
+			getJoinsIndexMap(query.joins)),
+		orders:query.orders,
+		limit:query.fixedLimit !== 0 ? query.fixedLimit : 0
+	},true).then(
+		res => {
+			MyStore.commit('dialog',{
+				captionTop:MyStore.getters.captions.generic.sqlPreview,
+				captionBody:res.payload,
+				image:'database.png',
+				textDisplay:'textarea',
+				width:800
+			});
+		},
+		MyStore.getters.appFunctions.genericError
+	);
 };
 
 export function getValueFromJson(inputJson,nameChain,valueFallback) {

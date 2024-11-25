@@ -12,11 +12,15 @@ const MyStore = Vuex.createStore({
 	state:{
 		access:{},                     // access permissions for each entity (attribute, clientEvent, collection, menu, relation, widget), key: entity ID
 		appFunctions:{                 // globally accessible functions, additional ones can be registered via appFunctionRegister mutation
+			genericError:genericError,
 			loginReauthAll:(blocking) => {
-				ws.send('login','reauthAll',{},blocking).then(
-					() => {}, genericError
-				);
-			}
+				ws.send('login','reauthAll',{},blocking).then(() => {}, genericError);
+			},
+
+			// to be set by app.js
+			captionsReload:() => {},
+			initPublic:    () => {},
+			sessionInvalid:() => {}
 		},
 		builderMode:false,             // builder mode active
 		busyCounter:0,                 // counter of calls making the app busy (WS requests, uploads, etc.)
@@ -96,8 +100,10 @@ const MyStore = Vuex.createStore({
 		sessionValueStore:{} // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
 	},
 	mutations:{
-		appFunctionRegister:(state,payload) => {
-			state.appFunctions[payload.name] = payload.fnc;
+		appFunctionsRegister:(state,payload) => {
+			for(const v of payload) {
+				state.appFunctions[v.name] = v.fnc;
+			}
 		},
 		config:(state,payload) => {
 			state.builderMode = payload.builderMode === '1';

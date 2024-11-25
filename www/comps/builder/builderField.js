@@ -2,6 +2,7 @@ import MyBuilderCaption   from './builderCaption.js';
 import MyBuilderFields    from './builderFields.js';
 import {MyBuilderColumns} from './builderColumns.js';
 import {getFlexBasis}     from '../shared/form.js';
+import {getJoinsIndexMap} from '../shared/query.js';
 import {
 	getFieldHasQuery,
 	getItemTitle
@@ -14,12 +15,6 @@ import {
 	getFieldIcon,
 	getFieldTitle
 } from '../shared/field.js';
-import {
-	getJoinsIndexMap,
-	getQueryExpressions,
-	getQueryFiltersProcessed,
-	getRelationsJoined
-} from '../shared/query.js';
 export {MyBuilderField as default};
 
 let MyBuilderField = {
@@ -139,13 +134,6 @@ let MyBuilderField = {
 							<span>S{{ field.shrink }}</span>
 						</div>
 					</template>
-					
-					<!-- action: list data SQL preview -->
-					<img class="action clickable" src="images/code.png"
-						v-if="['calendar','chart','kanban','list'].includes(field.content)"
-						@click="getSqlPreview(field)"
-						:title="capApp.sql"
-					/>
 					
 					<!-- field title -->
 					<my-builder-caption
@@ -433,9 +421,6 @@ let MyBuilderField = {
 		getFlexBasis,
 		getItemTitle,
 		getJoinsIndexMap,
-		getQueryExpressions,
-		getQueryFiltersProcessed,
-		getRelationsJoined,
 		isAttributeFiles,
 		isAttributeRelationship,
 		
@@ -461,30 +446,6 @@ let MyBuilderField = {
 			if(oldVal === 0)      return startSize;
 			
 			return oldVal+change;
-		},
-		
-		// backend calls
-		getSqlPreview() {
-			ws.send('dataSql','get',{
-				relationId:this.field.query.relationId,
-				joins:this.getRelationsJoined(this.field.query.joins),
-				expressions:this.getQueryExpressions(this.field.columns),
-				filters:this.getQueryFiltersProcessed(this.field.query.filters,
-					this.getJoinsIndexMap(this.field.query.joins)),
-				orders:this.field.query.orders,
-				limit:this.field.query.fixedLimit !== 0 ? this.field.query.fixedLimit : 0
-			},true).then(
-				res => {
-					this.$store.commit('dialog',{
-						captionTop:this.capApp.sql,
-						captionBody:res.payload,
-						image:'database.png',
-						textDisplay:'textarea',
-						width:800
-					});
-				},
-				this.$root.genericError
-			);
 		}
 	}
 };

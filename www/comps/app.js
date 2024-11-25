@@ -423,9 +423,11 @@ let MyApp = {
 		this.setMobileView();                      // initial state, mobile view: yes/no
 
 		// register globally accessible functions
-		this.$store.commit('appFunctionRegister',{name:'captionsReload',fnc:this.captionsReload});
-		this.$store.commit('appFunctionRegister',{name:'initPublic',    fnc:this.initPublic});
-		this.$store.commit('appFunctionRegister',{name:'sessionInvalid',fnc:this.sessionInvalid});
+		this.$store.commit('appFunctionsRegister',[
+			{name:'captionsReload',fnc:this.captionsReload},
+			{name:'initPublic',    fnc:this.initPublic},
+			{name:'sessionInvalid',fnc:this.sessionInvalid}
+		]);
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleKeydown);

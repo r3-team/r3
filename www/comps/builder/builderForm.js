@@ -14,7 +14,8 @@ import {
 	getDependentRelations,
 	getFieldHasQuery,
 	getFormEntityMapRef,
-	getItemTitleColumn
+	getItemTitleColumn,
+	getSqlPreview
 } from '../shared/builder.js';
 import {
 	MyBuilderColumns,
@@ -471,6 +472,14 @@ let MyBuilderForm = {
 							:relationIdStart="fieldQueryRelationIdStart"
 						/>
 
+						<!-- SQL preview -->
+						<div class="row">
+							<my-button image="code.png"
+								@trigger="getSqlPreview(fieldShow.query,fieldShow.columns)"
+								:caption="capGen.sqlPreview"
+							/>
+						</div>
+
 						<!-- column templates query fields -->
 						<br />
 						<h2>{{ capApp.sidebarFieldColumns }}</h2>
@@ -780,6 +789,7 @@ let MyBuilderForm = {
 		getJoinsIndexMap,
 		getNilUuid,
 		getQueryTemplate,
+		getSqlPreview,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		routeParseParams,
