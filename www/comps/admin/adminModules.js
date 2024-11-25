@@ -162,21 +162,21 @@ let MyAdminModulesItem = {
 		// simple
 		changeLog:       (s) => s.repoModule === false ? '' : s.repoModule.changeLog,
 		isInRepo:        (s) => s.repoModule !== false,
-		isOutdated:      (s) => s.isInRepo && s.repoModule.releaseBuild > s.module.releaseBuild,
-		isOutdatedApp:   (s) => s.isInRepo && s.repoModule.releaseBuildApp > s.system.appBuild,
+		isOutdated:      (s) => s.isInRepo && s.repoModule.releaseBuild    > s.module.releaseBuild,
+		isOutdatedApp:   (s) => s.isInRepo && s.repoModule.releaseBuildApp > s.appVersionBuild,
 		isReadyForUpdate:(s) => s.isInRepo && s.isOutdated && !s.isOutdatedApp,
 		isUpToDate:      (s) => s.isInRepo && !s.isOutdated,
 		
 		// stores
-		modules:       (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		articleIdMap:  (s) => s.$store.getters['schema/articleIdMap'],
-		builderEnabled:(s) => s.$store.getters.builderEnabled,
-		capApp:        (s) => s.$store.getters.captions.admin.modules,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		productionMode:(s) => s.$store.getters.productionMode,
-		settings:      (s) => s.$store.getters.settings,
-		system:        (s) => s.$store.getters.system
+		appVersionBuild:(s) => s.$store.getters['local/appVersionBuild'],
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		articleIdMap:   (s) => s.$store.getters['schema/articleIdMap'],
+		builderEnabled: (s) => s.$store.getters.builderEnabled,
+		capApp:         (s) => s.$store.getters.captions.admin.modules,
+		capGen:         (s) => s.$store.getters.captions.generic,
+		productionMode: (s) => s.$store.getters.productionMode,
+		settings:       (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
@@ -471,7 +471,7 @@ let MyAdminModules = {
 		moduleIdsUpdate:(s) => {
 			let out = [];
 			for(let rm of s.repoModules) {
-				if(rm.releaseBuildApp <= s.system.appBuild
+				if(rm.releaseBuildApp <= s.appVersionBuild
 					&& typeof s.moduleIdMap[rm.moduleId] !== 'undefined'
 					&& rm.releaseBuild > s.moduleIdMap[rm.moduleId].releaseBuild
 				) {
@@ -486,6 +486,7 @@ let MyAdminModules = {
 		hasChanges:   (s) => Object.keys(s.moduleIdMapUpdated).length !== 0,
 		
 		// stores
+		appVersionBuild:(s) => s.$store.getters['local/appVersionBuild'],
 		token:          (s) => s.$store.getters['local/token'],
 		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
@@ -493,8 +494,7 @@ let MyAdminModules = {
 		capApp:         (s) => s.$store.getters.captions.admin.modules,
 		capGen:         (s) => s.$store.getters.captions.generic,
 		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta,
-		productionMode: (s) => s.$store.getters.productionMode,
-		system:         (s) => s.$store.getters.system
+		productionMode: (s) => s.$store.getters.productionMode
 	},
 	methods:{
 		// error handling

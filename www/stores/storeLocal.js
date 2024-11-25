@@ -6,7 +6,8 @@ const MyStoreLocal = {
 		activated:false,       // application is activated via valid license file
 		appName:'App Name',    
 		appNameShort:'App',    
-		appVersion:'',         // full application version (as in 1.2.0.3422)
+		appVersion:'',         // application version, full string (1.2.0.3422)
+		appVersionBuild:0,     // application version, build number (3422)
 		builderOptionMap:{},   // map builder options
 		companyColorHeader:'', // custom color on header
 		companyColorLogin:'',  // custom color on login screen
@@ -42,6 +43,7 @@ const MyStoreLocal = {
 		appVersion(state,payload) {
 			state.appVersion = payload;
 			set('appVersion',payload);
+			set('appVersionBuild',parseInt(payload.replace(/^\d+\.\d+\.\d+\./,'')));
 		},
 		builderOptionSet(state,payload) {
 			state.builderOptionMap[payload.name] = payload.value;
@@ -144,6 +146,7 @@ const MyStoreLocal = {
 		appName:           (state) => state.appName,
 		appNameShort:      (state) => state.appNameShort,
 		appVersion:        (state) => state.appVersion,
+		appVersionBuild:   (state) => state.appVersionBuild,
 		builderOptionMap:  (state) => state.builderOptionMap,
 		companyColorHeader:(state) => state.companyColorHeader,
 		companyColorLogin: (state) => state.companyColorLogin,

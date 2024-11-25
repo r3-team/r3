@@ -70,17 +70,17 @@ let MyAdminRepoModule = {
 		
 		// simple
 		description: (s) => s.meta.description.replace(/(?:\r\n|\r|\n)/g,'<br />'),
-		isCompatible:(s) => parseInt(s.system.appBuild) >= s.repoModule.releaseBuildApp,
-		isInstalled: (s) => typeof s.moduleIdMap[s.repoModule.moduleId] !== 'undefined',
+		isCompatible:(s) => s.appVersionBuild >= s.repoModule.releaseBuildApp,
+		isInstalled: (s) => s.moduleIdMap[s.repoModule.moduleId] !== undefined,
 		releaseDate: (s) => s.getUnixFormat(s.repoModule.releaseDate,s.settings.dateFormat),
 		
 		// stores
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:        (s) => s.$store.getters.captions.admin.repo,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		productionMode:(s) => s.$store.getters.productionMode,
-		settings:      (s) => s.$store.getters.settings,
-		system:        (s) => s.$store.getters.system
+		appVersionBuild:(s) => s.$store.getters['local/appVersionBuild'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:         (s) => s.$store.getters.captions.admin.repo,
+		capGen:         (s) => s.$store.getters.captions.generic,
+		productionMode: (s) => s.$store.getters.productionMode,
+		settings:       (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals

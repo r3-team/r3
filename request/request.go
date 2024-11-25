@@ -602,11 +602,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "reload":
 			return SchemaReload(reqJson)
 		}
-	case "system":
-		switch action {
-		case "get":
-			return SystemGet()
-		}
 	case "task":
 		switch action {
 		case "informChanged":

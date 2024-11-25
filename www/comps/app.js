@@ -376,6 +376,7 @@ let MyApp = {
 		// stores
 		activated:          (s) => s.$store.getters['local/activated'],
 		appVersion:         (s) => s.$store.getters['local/appVersion'],
+		appVersionBuild:    (s) => s.$store.getters['local/appVersionBuild'],
 		css:                (s) => s.$store.getters['local/css'],
 		loginBackground:    (s) => s.$store.getters['local/loginBackground'],
 		loginKeyAes:        (s) => s.$store.getters['local/loginKeyAes'],
@@ -670,7 +671,7 @@ let MyApp = {
 				// module not included, remove
 				this.$store.commit('schema/delModule',k);
 				
-				window.caches.open(R3.appBuild).then(cache => {
+				window.caches.open(String(this.appVersionBuild)).then(cache => {
 					cache.matchAll().then(res => {
 						res.forEach((element,index,array) => {
 							if(element.url.includes(`schema.json?module_id=${k}`))
@@ -708,7 +709,6 @@ let MyApp = {
 			if(this.isAdmin) {
 				requests.push(ws.prepare('config','get',{}));
 				requests.push(ws.prepare('license','get',{}));
-				requests.push(ws.prepare('system','get',{}));
 			}
 			
 			ws.sendMultiple(requests,true).then(
@@ -737,7 +737,6 @@ let MyApp = {
 					if(this.isAdmin) {
 						this.$store.commit('config',res[6].payload);
 						this.$store.commit('license',res[7].payload);
-						this.$store.commit('system',res[8].payload);
 					}
 					
 					// load captions, then collections
@@ -842,7 +841,7 @@ let MyApp = {
 				const lang = ['ar_eg','de_de','en_us','fr_fr','hu_hu','it_it','lv_lv','ro_ro','zh_cn'].includes(this.settings.languageCode)
 					? this.settings.languageCode : 'en_us';
 				
-				fetch(`./langs/${lang}?build=${R3.appBuild}`).then(
+				fetch(`./langs/${lang}?build=${this.appVersionBuild}`).then(
 					res => {
 						if(res.status !== 200)
 							return reject('failed to load captions');
