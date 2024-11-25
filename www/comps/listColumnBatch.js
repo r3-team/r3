@@ -32,11 +32,16 @@ let MyListColumnBatch = {
 		
 		<div class="columBatchHeaderCaption"
 			@click.stop="click"
-			:class="{ clickable:canOpen, hasIcons:showIconFilter || showIconOrder }"
-		>
-			<span v-if="show"><b>{{ columnBatch.caption }}</b></span>
-			<span v-else>{{ columnBatch.caption }}</span>
-		</div>
+			:class="{ clickable:canOpen, dropdownActive:show, hasIcons:showIconFilter || showIconOrder }"
+			:title="columnBatch.caption"
+		>{{ columnBatch.caption }}</div>
+
+		<my-button image="toggleDown.png"
+			v-if="showToggle"
+			@trigger="$emit('toggle-header')"
+			:captionTitle="capApp.button.collapseHeader"
+			:naked="true"
+		/>
 		
 		<!-- column options dropdown -->
 		<div class="input-dropdown-wrap columnOptionWrap"
@@ -155,11 +160,12 @@ let MyListColumnBatch = {
 		orderOverwritten:{ type:Boolean, required:true }, // list orders were overwritten by user
 		relationId:      { type:String,  required:true }, // list query base relation ID
 		rowCount:        { type:Number,  required:true }, // list total row count
-		show:            { type:Boolean, required:true }
+		show:            { type:Boolean, required:true },
+		showToggle:      { type:Boolean, required:true }
 	},
 	emits:[
 		'close','del-aggregator','del-order','set-aggregator',
-		'set-filters','set-order','toggle'
+		'set-filters','set-order','toggle','toggle-header'
 	],
 	data() {
 		return {

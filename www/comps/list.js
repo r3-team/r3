@@ -419,35 +419,29 @@ let MyList = {
 									/>
 								</th>
 								<th v-for="(b,i) in columnBatches">
-									<div class="row centered">
-										<my-list-column-batch
-											@close="columnBatchIndexOption = -1"
-											@del-aggregator="setAggregators"
-											@del-order="setOrder(b,null)"
-											@set-aggregator="setAggregators"
-											@set-filters="filtersColumn = $event;reloadInside('filtersColumn')"
-											@set-order="setOrder(b,$event)"
-											@toggle="clickColumn(i)"
-											:columnBatch="b"
-											:columnIdMapAggr="columnIdMapAggr"
-											:columns="columns"
-											:dropdownRight="(columnBatches.length > 1 && i === columnBatches.length - 1) || (columnBatches.length > 3 && i === columnBatches.length - 2)"
-											:filters="filters"
-											:filtersColumn="filtersColumn"
-											:joins="relationsJoined"
-											:orders="orders"
-											:orderOverwritten="orderOverwritten"
-											:relationId="query.relationId"
-											:rowCount="count"
-											:show="columnBatchIndexOption === i"
-										/>
-										<my-button image="toggleDown.png"
-											v-if="!showHeader && i === columnBatches.length-1"
-											@trigger="toggleHeader"
-											:captionTitle="capApp.button.collapseHeader"
-											:naked="true"
-										/>
-									</div>
+									<my-list-column-batch
+										@close="columnBatchIndexOption = -1"
+										@del-aggregator="setAggregators"
+										@del-order="setOrder(b,null)"
+										@set-aggregator="setAggregators"
+										@set-filters="filtersColumn = $event;reloadInside('filtersColumn')"
+										@set-order="setOrder(b,$event)"
+										@toggle="clickColumn(i)"
+										@toggle-header="toggleHeader"
+										:columnBatch="b"
+										:columnIdMapAggr="columnIdMapAggr"
+										:columns="columns"
+										:dropdownRight="(columnBatches.length > 1 && i === columnBatches.length - 1) || (columnBatches.length > 3 && i === columnBatches.length - 2)"
+										:filters="filters"
+										:filtersColumn="filtersColumn"
+										:joins="relationsJoined"
+										:orders="orders"
+										:orderOverwritten="orderOverwritten"
+										:relationId="query.relationId"
+										:rowCount="count"
+										:show="columnBatchIndexOption === i"
+										:showToggle="!showHeader && i === columnBatches.length-1"
+									/>
 								</th>
 							</tr>
 						</thead>

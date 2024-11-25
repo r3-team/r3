@@ -137,20 +137,21 @@
 	padding-right:10px; /* for header toggle */
 }
 .list .layoutTable th .columnBatchHeader{
-	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
-	justify-content:space-between;
 	align-items:stretch;
 }
 .list .layoutTable th .columBatchHeaderCaption{
 	flex:1 1 auto;
-	display:flex;
-	flex-flow:column nowrap;
-	justify-content:center;
 	padding:6px 2px 6px 6px;
-	border-radius:2px;
-	transition:background-color 0.3s;
+	/* text ellipsis */
+	width:50px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
+}
+.list .layoutTable th .columBatchHeaderCaption.dropdownActive{
+	font-weight:bold;
 }
 .list .layoutTable th .columBatchHeaderCaption.hasIcons{
 	padding:6px 2px 6px 0px;
