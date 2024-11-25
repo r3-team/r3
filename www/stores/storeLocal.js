@@ -42,8 +42,9 @@ const MyStoreLocal = {
 		},
 		appVersion(state,payload) {
 			state.appVersion = payload;
-			set('appVersion',payload);
-			set('appVersionBuild',parseInt(payload.replace(/^\d+\.\d+\.\d+\./,'')));
+			state.appVersionBuild = parseInt(payload.replace(/^\d+\.\d+\.\d+\./,''));
+			set('appVersion',state.appVersion);
+			set('appVersionBuild',state.appVersionBuild);
 		},
 		builderOptionSet(state,payload) {
 			state.builderOptionMap[payload.name] = payload.value;

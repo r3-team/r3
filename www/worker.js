@@ -6,9 +6,9 @@ const appCacheBase = [
 	'/',
 	'/index.html',
 	'/manifest.json',
-	'/scripts_REPLACE_BY_BUILD.js',
-	'/styles_REPLACE_BY_BUILD.css',
-	'/websocket_REPLACE_BY_BUILD.js'
+	'/scripts.js?build=REPLACE_BY_BUILD',
+	'/styles.css?build=REPLACE_BY_BUILD',
+	'/websocket.js?build=REPLACE_BY_BUILD'
 ];
 const appCacheModuleFileRegex = /schema\.json\?module_id=([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
 
