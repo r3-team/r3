@@ -954,6 +954,7 @@ table td.maximum{
 	text-overflow:ellipsis;
 	white-space:nowrap;
 	overflow:hidden;
+	line-height:normal; /* FF fix */
 }
 .generic-entry-list .subtitle{
 	font-size:80%;
