@@ -1555,6 +1555,7 @@
 			"titleNew": "New trigger"
 		},
 		"preset": {
+			"addMissing": "Set all values",
 			"dialog": {
 				"delete": "Sigur doriți să ștergeți această înregistrare prestabilită?<br /><br /><b>AVERTIZARE!</b><br /><br />În funcție de definirea cheii primare (ON UPDATE/DELETE), Ștergerea înregistrărilor prestabilite poate cauza pierderea datelor clienților (CASCADED) sau probleme de actualizare a aplicației (NO ACTION)."
 			},

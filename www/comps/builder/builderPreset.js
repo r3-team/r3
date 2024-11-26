@@ -154,10 +154,19 @@ let MyBuilderPreset = {
 							<td v-html="capApp.protectedHint"></td>
 						</tr>
 						<tr>
-							<td colspan="3"><b>{{ capApp.values }}</b></td>
+							<td colspan="3">
+								<div class="row space-between">
+									<b>{{ capApp.values }}</b>
+									<my-button image="edit.png"
+										@trigger="childAddAllMissing"
+										:active="values.values.length < attributesValid.length"
+										:caption="capApp.addMissing"
+									/>
+								</div>
+							</td>
 						</tr>
 						<my-builder-preset-value
-							v-for="(a,i) in relation.attributes.filter(v => v.name !== 'id' && !isAttributeFiles(v.content))"
+							v-for="(a,i) in attributesValid"
 							@del="childDel(a.id)"
 							@set="(...args) => childSet(a.id,...args)"
 							:attribute="a"
@@ -195,9 +204,10 @@ let MyBuilderPreset = {
 		},
 
 		// simple
-		canSave:   (s) => s.values !== null && s.values.name !== '' && s.hasChanges,
-		hasChanges:(s) => JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		isNew:     (s) => s.id === null,
+		attributesValid:(s) => s.relation.attributes.filter(v => v.name !== 'id' && !s.isAttributeFiles(v.content)),
+		canSave:        (s) => s.values !== null && s.values.name !== '' && s.hasChanges,
+		hasChanges:     (s) => JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
+		isNew:          (s) => s.id === null,
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -220,6 +230,12 @@ let MyBuilderPreset = {
 		isAttributeRelationship,
 		
 		// actions
+		childAddAllMissing() {
+			for(const atr of this.attributesValid) {
+				if(this.attributeIdMapValue[atr.id] === undefined)
+					this.childSet(atr.id,null,false,null);
+			}
+		},
 		childGet(atrId,mode) {
 			const exists = this.attributeIdMapValue[atrId] !== undefined;
 			

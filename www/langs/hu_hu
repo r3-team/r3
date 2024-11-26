@@ -1555,6 +1555,7 @@
 			"titleNew": "New trigger"
 		},
 		"preset": {
+			"addMissing": "Set all values",
 			"dialog": {
 				"delete": "Biztos vagy benne, hogy törölni szeretnéd ezt a beállított rekordot?<br /><br /><b>FIGYELEM!</b><br /><br />A külső kulcs definíciójától függően (ON UPDATE/DELETE), a beállított rekordok törlése ügyféladatak elvesztéséhez (CASCADED) vagy alkalmazásfrissítési problémákhoz (NO ACTION) vezethet."
 			},

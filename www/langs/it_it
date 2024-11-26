@@ -1555,6 +1555,7 @@
 			"titleNew": "New trigger"
 		},
 		"preset": {
+			"addMissing": "Set all values",
 			"dialog": {
 				"delete": "Sei sicuro di voler eliminare questo record predefinito?<br /><br /><b>ATTENZIONE!</b><br /><br />A seconda della definizione della chiave esterna (ON UPDATE/DELETE), l'eliminazione di i record preimpostati possono causare la perdita dei dati del cliente (CASCADED) o problemi di aggiornamento dell'applicazione (NO ACTION)."
 			},

@@ -1555,6 +1555,7 @@
 			"titleNew": "New trigger"
 		},
 		"preset": {
+			"addMissing": "Set all values",
 			"dialog": {
 				"delete": "Are you sure you want to delete this preset record?<br /><br /><b>WARNING!</b><br /><br />Depending on foreign key definition (ON UPDATE/DELETE), deletion of preset records may cause loss of customer data (CASCADED) or application upgrade issues (NO ACTION)."
 			},

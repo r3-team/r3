@@ -1555,6 +1555,7 @@
 			"titleNew": "Neuer Trigger"
 		},
 		"preset": {
+			"addMissing": "Alle Werte setzen",
 			"dialog": {
 				"delete": "Bist du sicher, dass du diesen vordefinierten Datensatz löschen möchtest?<br /><br /><b>WARNUNG!</b><br /><br />Abhängig der Definition von Fremdschlüsseln (ON UPDATE/DELETE), Löschen von vordefinierten Datensätzen kann zu Verlust von Kundendaten (CASCADED) oder zu Problemen beim Anwendungs-Update führen (NO ACTION)."
 			},

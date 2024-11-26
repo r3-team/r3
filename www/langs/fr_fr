@@ -1555,6 +1555,7 @@
 			"titleNew": "New trigger"
 		},
 		"preset": {
+			"addMissing": "Set all values",
 			"dialog": {
 				"delete": "Êtes-vous sûr de vouloir supprimer cet enregistrement prédéfini ?<br /><br /><b>AVERTISSEMENT !</b><br /><br />En fonction de la définition de la clé étrangère (ON UPDATE/DELETE), la suppression des enregistrements prédéfinis peut entraîner la perte de données client (CASCADE) ou des problèmes de mise à niveau de l'application (NO ACTION)."
 			},
