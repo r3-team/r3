@@ -721,7 +721,7 @@
 }
 .builder-column-options{
 	max-width:500px;
-	padding:8px 12px;
+	padding:8px var(--spacing);
 }
 
 /* tabs */

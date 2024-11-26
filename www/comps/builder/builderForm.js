@@ -499,7 +499,7 @@ let MyBuilderForm = {
 
 			<!-- column settings -->
 			<template v-if="columnShow">
-				<div class="column-options" ref="columnOptions" v-if="columnShow">
+				<div class="builder-column-options" ref="columnOptions" v-if="columnShow">
 					<my-builder-query
 						v-if="columnShow.subQuery"
 						@set-choices="fieldColumnQuerySet('choices',$event)"
