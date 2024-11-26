@@ -1954,7 +1954,8 @@
 			"help": "Súgó",
 			"helpHint": "Súgóoldalak megjelenítése",
 			"log": "Előzmények",
-			"logHint": "Módosítástörténet megjelenítése"
+			"logHint": "Módosítástörténet megjelenítése",
+			"urlHint": "Copy URL to clipboard"
 		},
 		"dialog": {
 			"bulkEncrypted": "A tömeges titkosított adatfrissítés jelenleg nem támogatott.",

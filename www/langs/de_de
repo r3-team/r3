@@ -1954,7 +1954,8 @@
 			"help": "Hilfe",
 			"helpHint": "Hilfeseiten anzeigen",
 			"log": "Historie",
-			"logHint": "Änderungshistorie anzeigen"
+			"logHint": "Änderungshistorie anzeigen",
+			"urlHint": "URL in Zwischenablage kopieren"
 		},
 		"dialog": {
 			"bulkEncrypted": "Massenaktualisierung für verschlüsselte Daten wird aktuell nicht unterstützt.",

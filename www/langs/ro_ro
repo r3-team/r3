@@ -1954,7 +1954,8 @@
 			"help": "Ajutor",
 			"helpHint": "Afișați paginile de ajutor",
 			"log": "Jurnale",
-			"logHint": "Deschideți jurnalele de modificări"
+			"logHint": "Deschideți jurnalele de modificări",
+			"urlHint": "Copy URL to clipboard"
 		},
 		"dialog": {
 			"bulkEncrypted": "Bulk update for encrypted data is currently not supported.",

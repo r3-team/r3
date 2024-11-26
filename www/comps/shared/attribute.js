@@ -116,6 +116,13 @@ export function getAttributeValuesFromGetter(getter) {
 	}
 	return map;
 };
+export function getGetterFromAttributeValues(attributeIdMap) {
+	let out = [];
+	for(const k in attributeIdMap) {
+		out.push(`${k}_${attributeIdMap[k]}`);
+	}
+	return out.length === 0 ? [] : [`attributes=${out.join(',')}`];
+};
 
 export function getAttributeIcon(content,contentUse,outsideIn,isNm) {
 	if(isAttributeString(content)) {

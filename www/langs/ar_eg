@@ -1954,7 +1954,8 @@
 			"help": "يساعد",
 			"helpHint": "عرض صفحات المساعدة",
 			"log": "سجلات",
-			"logHint": "فتح سجلات التغيير"
+			"logHint": "فتح سجلات التغيير",
+			"urlHint": "Copy URL to clipboard"
 		},
 		"dialog": {
 			"bulkEncrypted": "التحديث المجمع للبيانات المشفرة غير مدعوم حاليًا.",

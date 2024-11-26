@@ -12,6 +12,15 @@ import {jsFunctionRun}               from './shared/jsFunction.js';
 import {srcBase64}                   from './shared/image.js';
 import {getCaption}                  from './shared/language.js';
 import {
+	isAttributeRelationship,
+	isAttributeRelationshipN1,
+	getAttributeValueFromString,
+	getDetailsFromIndexAttributeId,
+	getGetterFromAttributeValues,
+	getIndexAttributeId,
+	getIndexAttributeIdByField
+} from './shared/attribute.js';
+import {
 	aesGcmDecryptBase64WithPhrase,
 	aesGcmEncryptBase64WithPhrase,
 	getRandomString,
@@ -31,14 +40,6 @@ import {
 	getResolvedPlaceholders,
 	getRowsDecrypted
 } from './shared/form.js';
-import {
-	isAttributeRelationship,
-	isAttributeRelationshipN1,
-	getAttributeValueFromString,
-	getDetailsFromIndexAttributeId,
-	getIndexAttributeId,
-	getIndexAttributeIdByField
-} from './shared/attribute.js';
 import {
 	fillRelationRecordIds,
 	getJoinIndexMapExpanded,
@@ -146,6 +147,12 @@ let MyForm = {
 						/>
 					</template>
 					
+					<my-button image="link.png"
+						v-if="isPopUp && !isBulkUpdate && !isMobile"
+						@trigger="copyFormUrlToClipboard(false)"
+						@trigger-middle="copyFormUrlToClipboard(true)"
+						:captionTitle="capApp.button.urlHint"
+					/>
 					<my-button image="question.png"
 						v-if="hasHelp"
 						@trigger="showHelp = !showHelp"
@@ -798,6 +805,7 @@ let MyForm = {
 		getFieldOverwritesDefault,
 		getFormPopUpConfig,
 		getFormRoute,
+		getGetterFromAttributeValues,
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
 		getJoinIndexMapExpanded,
@@ -1061,6 +1069,13 @@ let MyForm = {
 		closePopUp() {
 			this.popUp = null;
 			this.$store.commit('pageTitle',this.title);
+		},
+		copyFormUrlToClipboard(middleClick) {
+			const path = this.getFormRoute(this.form.id,(this.isNew ? 0 : this.recordIds[0]),
+				true,this.getGetterFromAttributeValues(this.attributeIdMapDef));
+			
+			if(!middleClick) navigator.clipboard.writeText(`${location.protocol}//${location.host}/#${path}`);
+			else             window.open(`${location.protocol}//${location.host}/#${path}`);
 		},
 		openBuilder(middle) {
 			if(!middle) {

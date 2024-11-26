@@ -1954,7 +1954,8 @@
 			"help": "帮助",
 			"helpHint": "显示帮助页面",
 			"log": "日志",
-			"logHint": "打开变更日志"
+			"logHint": "打开变更日志",
+			"urlHint": "Copy URL to clipboard"
 		},
 		"dialog": {
 			"bulkEncrypted": "当前不支持加密数据的批量更新。",

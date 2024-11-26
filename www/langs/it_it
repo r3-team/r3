@@ -1954,7 +1954,8 @@
 			"help": "Aiuto",
 			"helpHint": "Mostra pagine aiuto",
 			"log": "Log",
-			"logHint": "Apri log modifiche"
+			"logHint": "Apri log modifiche",
+			"urlHint": "Copy URL to clipboard"
 		},
 		"dialog": {
 			"bulkEncrypted": "Bulk update for encrypted data is currently not supported.",

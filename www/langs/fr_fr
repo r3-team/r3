@@ -1954,7 +1954,8 @@
 			"help": "Aide",
 			"helpHint": "Afficher les pages d'aide",
 			"log": "Journaux",
-			"logHint": "Ouvrir les journaux des modifications"
+			"logHint": "Ouvrir les journaux des modifications",
+			"urlHint": "Copy URL to clipboard"
 		},
 		"dialog": {
 			"bulkEncrypted": "La mise à jour en masse des données chiffrées n'est actuellement pas prise en charge.",
