@@ -514,7 +514,7 @@ let MyBuilderRelation = {
 			
 			// states
 			nameFilter:'',
-			previewLimit:10,
+			previewLimit:50,
 			previewOffset:0,
 			previewRows:[],
 			previewRowCount:0,
