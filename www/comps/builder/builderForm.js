@@ -11,6 +11,12 @@ import MyTabs                 from '../tabs.js';
 import {getColumnIcon}        from '../shared/column.js';
 import {routeParseParams}     from '../shared/router.js';
 import {
+	getIndexAttributeId,
+	isAttributeBoolean,
+	isAttributeRelationship,
+	isAttributeRelationshipN1
+} from '../shared/attribute.js';
+import {
 	getDependentRelations,
 	getFieldHasQuery,
 	getFormEntityMapRef,
@@ -29,11 +35,6 @@ import {
 	copyValueDialog,
 	getNilUuid
 } from '../shared/generic.js';
-import {
-	getIndexAttributeId,
-	isAttributeRelationship,
-	isAttributeRelationshipN1
-} from '../shared/attribute.js';
 import {
 	getDataFields,
 	getFormRoute
@@ -790,6 +791,7 @@ let MyBuilderForm = {
 		getNilUuid,
 		getQueryTemplate,
 		getSqlPreview,
+		isAttributeBoolean,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		routeParseParams,
@@ -1022,6 +1024,9 @@ let MyBuilderForm = {
 				collectionIdDef:null,
 				columnIdDef:null
 			};
+			if(this.isAttributeBoolean(attribute.content))
+				field.def = 'true';
+
 			if(this.isAttributeRelationship(attribute.content)) {
 				field.attributeIdNm = attributeIdNm;
 				field.columns       = [];
