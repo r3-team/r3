@@ -402,19 +402,19 @@ func Set_tx(tx pgx.Tx, atr types.Attribute) error {
 		// insert attribute reference
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.attribute (id, relation_id, relationship_id,
-				icon_id, name, content, content_use, length, nullable,
-				encrypted, def, on_update, on_delete)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+				icon_id, name, content, content_use, length, length_fract,
+				nullable, encrypted, def, on_update, on_delete)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
 		`, atr.Id, atr.RelationId, atr.RelationshipId, atr.IconId, atr.Name,
-			atr.Content, atr.ContentUse, atr.Length, atr.Nullable, atr.Encrypted,
-			atr.Def, onUpdateNull, onDeleteNull); err != nil {
+			atr.Content, atr.ContentUse, atr.Length, atr.LengthFract, atr.Nullable,
+			atr.Encrypted, atr.Def, onUpdateNull, onDeleteNull); err != nil {
 
 			return err
 		}
 
 		// apply PK characteristics, if PK attribute
 		if atr.Name == schema.PkName {
-			if err := createPK_tx(tx, moduleName, relationName, atr.Id, atr.RelationId); err != nil {
+			if err := createPK_tx(tx, moduleName, relationName, atr.RelationId); err != nil {
 				return err
 			}
 
@@ -555,8 +555,7 @@ func getContentColumnDefinition(content string, length int, lengthFract int, con
 }
 
 // primary key handling
-func createPK_tx(tx pgx.Tx, moduleName string, relationName string,
-	id uuid.UUID, relationId uuid.UUID) error {
+func createPK_tx(tx pgx.Tx, moduleName string, relationName string, relationId uuid.UUID) error {
 
 	// create PK sequence
 	// default type is BIGINT if not otherwise specified (works in all our cases)
@@ -570,15 +569,13 @@ func createPK_tx(tx pgx.Tx, moduleName string, relationName string,
 	// additional single quotes are required for nextval()
 	def := fmt.Sprintf(`NEXTVAL('"%s"."%s"')`, moduleName, schema.GetSequenceName(relationId))
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		ALTER TABLE "%s"."%s" ALTER COLUMN "%s" SET DEFAULT %s,
 			ADD CONSTRAINT "%s" PRIMARY KEY ("%s")
 	`, moduleName, relationName, schema.PkName, def,
-		schema.GetPkConstraintName(relationId), schema.PkName)); err != nil {
+		schema.GetPkConstraintName(relationId), schema.PkName))
 
-		return err
-	}
-	return nil
+	return err
 }
 func updatePK_tx(tx pgx.Tx, moduleName string, relationName string,
 	relationId uuid.UUID, content string) error {
