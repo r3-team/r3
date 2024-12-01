@@ -227,27 +227,51 @@ let MyBuilderAttribute = {
 						</tr>
 						
 						<!-- text/files length -->
-						<tr v-if="hasLength">
+						<tr v-if="hasLength && !hasLengthFract">
 							<td>{{ lengthTitle }}</td>
 							<td>
 								<input type="number"
-									@keyup="updateLength($event.target.value)"
+									@keyup="updateLengths('length',$event.target.value)"
 									:disabled="readonly"
 									:value="values.length"
 								/>
 							</td>
-							<td v-html="isNumeric ? capApp.lengthNumericHint : ''"></td>
-						</tr>
-						<tr v-if="hasLengthFract">
-							<td>{{ capApp.lengthFract }}</td>
-							<td>
-								<input type="number"
-									@keyup="updateLengthFract($event.target.value)"
-									:disabled="readonly || values.length === 0"
-									:value="values.lengthFract"
-								/>
-							</td>
 							<td></td>
+						</tr>
+						
+						<!-- decimal length -->
+						<tr v-if="hasLengthFract">
+							<td>{{ capApp.lengthNumeric }}</td>
+							<td>
+								<table>
+									<tbody>
+										<tr>
+											<td>{{ capApp.lengthFract0 }}</td>
+											<td>{{ capApp.lengthFract1 }}</td>
+										</tr>
+										<tr>
+											<td>
+												<input type="number"
+													@keyup="updateLengths('length',$event.target.value)"
+													:disabled="readonly"
+													:value="values.length - values.lengthFract"
+												/>
+											</td>
+											<td>
+												<input type="number"
+													@keyup="updateLengths('lengthFract',$event.target.value)"
+													:disabled="readonly"
+													:value="values.lengthFract"
+												/>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+							<td v-if="values.length !== 0 || values.lengthFract !== 0">
+								{{ capApp.lengthFractHint.replace('{C0}','9'.repeat(values.length - values.lengthFract)).replace('{C1}','9'.repeat(values.lengthFract)) }}
+							</td>
+							<td v-else>{{ capApp.lengthFractHintMax }}</td>
 						</tr>
 						
 						<!-- encrypted -->
@@ -563,17 +587,23 @@ let MyBuilderAttribute = {
 				default:         this.values.def = '';                                 break;
 			}
 		},
-		updateLength(v) {
-			this.values.length = v === '' ? 0  : parseInt(v);
-			
-			if(this.isString)
-				this.values.content = this.values.length === 0 ? 'text' : 'varchar';
-			
-			if(this.isNumeric && this.values.length === 0)
-				this.values.lengthFract = 0;
-		},
-		updateLengthFract(v) {
-			this.values.lengthFract = v === '' ? 0  : parseInt(v);
+		updateLengths(name,v) {
+			var newValue = v === '' ? 0  : parseInt(v);
+			var oldValue = this.values[name];
+
+			switch(name) {
+				case 'length':
+					if(this.hasLengthFract)
+						newValue += this.values.lengthFract;
+
+					if(this.isString)
+						this.values.content = newValue === 0 ? 'text' : 'varchar';
+				break;
+				case 'lengthFract':
+					this.values.length += newValue - oldValue;
+				break;
+			}
+			this.values[name] = newValue;
 		},
 		
 		// backend calls
