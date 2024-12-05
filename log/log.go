@@ -82,7 +82,7 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 		return nil, 0, err
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, query, qb.GetParaValues()...)
+	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), query, qb.GetParaValues()...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -115,7 +115,7 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 		return nil, 0, err
 	}
 
-	if err := db.Pool.QueryRow(db.Ctx, query, qb.GetParaValues()...).Scan(&total); err != nil {
+	if err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), query, qb.GetParaValues()...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 	return logs, total, nil
@@ -153,10 +153,10 @@ func Error(context string, message string, err error) {
 	write(1, context, message, err)
 }
 
-func write(level int, context string, message string, err error) {
+func write(level int, logContext string, message string, err error) {
 	access_mx.RLock()
 	nodeIdLocal := nodeId
-	levelActive, exists := contextLevel[context]
+	levelActive, exists := contextLevel[logContext]
 	access_mx.RUnlock()
 
 	if !exists {
@@ -178,7 +178,7 @@ func write(level int, context string, message string, err error) {
 
 	// log to CLI if available
 	if outputCli.Load() {
-		fmt.Printf("%s %s %s\n", tools.GetTimeSql(), context, message)
+		fmt.Printf("%s %s %s\n", tools.GetTimeSql(), logContext, message)
 	}
 
 	// log to database if available
@@ -190,10 +190,10 @@ func write(level int, context string, message string, err error) {
 			message = message[:10000]
 		}
 
-		if _, err := db.Pool.Exec(db.Ctx, `
+		if _, err := db.Pool.Exec(db.GetCtxTimeoutLogWrite(), `
 			INSERT INTO instance.log (level, context, message, date_milli, node_id)
 			VALUES ($1,$2,$3,$4,$5)
-		`, level, context, message, tools.GetTimeUnixMilli(), nodeIdLocal); err != nil {
+		`, level, logContext, message, tools.GetTimeUnixMilli(), nodeIdLocal); err != nil {
 
 			// if database logging fails, output error to CLI if available
 			if outputCli.Load() {

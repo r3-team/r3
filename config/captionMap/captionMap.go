@@ -82,9 +82,9 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 	var err error
 	var rows pgx.Rows
 	if !id.Valid {
-		rows, err = db.Pool.Query(db.Ctx, fmt.Sprintf(`%s FROM %s.caption`, sqlSelect, target))
+		rows, err = db.Pool.Query(db.GetCtxTimeoutSysTask(), fmt.Sprintf(`%s FROM %s.caption`, sqlSelect, target))
 	} else {
-		rows, err = db.Pool.Query(db.Ctx, fmt.Sprintf(`
+		rows, err = db.Pool.Query(db.GetCtxTimeoutSysTask(), fmt.Sprintf(`
 			%s
 			FROM %s.caption
 			WHERE module_id = $1
@@ -258,7 +258,7 @@ func SetOne_tx(tx pgx.Tx, target string, entityId uuid.UUID,
 
 	// empty value, delete
 	if value == "" {
-		_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		_, err := tx.Exec(db.GetCtxTimeoutSysTask(), fmt.Sprintf(`
 			DELETE FROM %s.caption
 			WHERE %s            = $1
 			AND   content       = $2
@@ -270,7 +270,7 @@ func SetOne_tx(tx pgx.Tx, target string, entityId uuid.UUID,
 
 	// insert or update
 	var exists bool
-	if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
+	if err := tx.QueryRow(db.GetCtxTimeoutSysTask(), fmt.Sprintf(`
 		SELECT EXISTS (
 			SELECT 1
 			FROM %s.caption
@@ -283,14 +283,14 @@ func SetOne_tx(tx pgx.Tx, target string, entityId uuid.UUID,
 	}
 
 	if !exists {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(db.GetCtxTimeoutSysTask(), fmt.Sprintf(`
 			INSERT INTO %s.caption (%s, content, language_code, value)
 			VALUES ($1,$2,$3,$4)
 		`, target, entity), entityId, content, languageCode, value); err != nil {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(db.GetCtxTimeoutSysTask(), fmt.Sprintf(`
 			UPDATE %s.caption
 			SET value = $1
 			WHERE %s            = $2

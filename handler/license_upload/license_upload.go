@@ -76,18 +76,19 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// set license
-		tx, err := db.Pool.Begin(db.Ctx)
+		ctx := db.GetCtxTimeoutSysTask()
+		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
 			return
 		}
-		defer tx.Rollback(db.Ctx)
+		defer tx.Rollback(ctx)
 
 		if err := config.SetString_tx(tx, "licenseFile", buf.String()); err != nil {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
 			return
 		}
-		tx.Commit(db.Ctx)
+		tx.Commit(ctx)
 
 		// apply new config
 		if err := cluster.ConfigChanged(true, false, false); err != nil {

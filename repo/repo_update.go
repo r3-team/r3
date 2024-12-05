@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/config"
@@ -33,31 +34,32 @@ func Update() error {
 	}
 
 	// apply changes to local module store
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutSysTask()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
-	if err := removeModules_tx(tx, repoModuleMap); err != nil {
+	if err := removeModules_tx(ctx, tx, repoModuleMap); err != nil {
 		return fmt.Errorf("failed to remove modules, %w", err)
 	}
-	if err := addModules_tx(tx, repoModuleMap); err != nil {
+	if err := addModules_tx(ctx, tx, repoModuleMap); err != nil {
 		return fmt.Errorf("failed to add modules, %w", err)
 	}
 	if err := config.SetUint64_tx(tx, "repoChecked", uint64(tools.GetTimeUnix())); err != nil {
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }
 
-func addModules_tx(tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) error {
+func addModules_tx(ctx context.Context, tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) error {
 
 	for _, sm := range repoModuleMap {
 
 		// add module and release data
 		var exists bool
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			SELECT EXISTS (
 				SELECT module_id_wofk
 				FROM instance.repo_module
@@ -68,7 +70,7 @@ func addModules_tx(tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) erro
 		}
 
 		if !exists {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO instance.repo_module (
 					module_id_wofk, name, change_log, author, in_store,
 					release_build, release_build_app, release_date, file
@@ -83,7 +85,7 @@ func addModules_tx(tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) erro
 		} else {
 			// if no release is set, update module data only
 			if sm.ReleaseBuild == 0 {
-				if _, err := tx.Exec(db.Ctx, `
+				if _, err := tx.Exec(ctx, `
 					UPDATE instance.repo_module
 					SET name = $1, change_log = $2, author = $3, in_store = $4
 					WHERE module_id_wofk = $5
@@ -93,7 +95,7 @@ func addModules_tx(tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) erro
 					return err
 				}
 			} else {
-				if _, err := tx.Exec(db.Ctx, `
+				if _, err := tx.Exec(ctx, `
 					UPDATE instance.repo_module
 					SET name = $1, change_log = $2, author = $3, in_store = $4,
 						release_build = $5, release_build_app = $6,
@@ -109,7 +111,7 @@ func addModules_tx(tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) erro
 		}
 
 		// add translated module meta
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			DELETE FROM instance.repo_module_meta
 			WHERE module_id_wofk = $1
 		`, sm.ModuleId); err != nil {
@@ -118,7 +120,7 @@ func addModules_tx(tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) erro
 
 		for languageCode, meta := range sm.LanguageCodeMeta {
 
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO instance.repo_module_meta (
 					module_id_wofk, language_code, title,
 					description, support_page
@@ -134,20 +136,20 @@ func addModules_tx(tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) erro
 	return nil
 }
 
-func removeModules_tx(tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) error {
+func removeModules_tx(ctx context.Context, tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) error {
 
 	moduleIds := make([]uuid.UUID, 0)
 	for id, _ := range repoModuleMap {
 		moduleIds = append(moduleIds, id)
 	}
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.repo_module
 		WHERE module_id_wofk <> ALL($1)
 	`, moduleIds); err != nil {
 		return err
 	}
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.repo_module_meta
 		WHERE module_id_wofk <> ALL($1)
 	`, moduleIds); err != nil {

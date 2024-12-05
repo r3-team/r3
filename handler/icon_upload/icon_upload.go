@@ -90,12 +90,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// insert/update icon
-		tx, err := db.Pool.Begin(db.Ctx)
+		ctx := db.GetCtxTimeoutSysTask()
+		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
 			return
 		}
-		defer tx.Rollback(db.Ctx)
+		defer tx.Rollback(ctx)
 
 		buf := new(bytes.Buffer)
 		if _, err := buf.ReadFrom(part); err != nil {
@@ -113,7 +114,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
 			return
 		}
-		tx.Commit(db.Ctx)
+		if err := tx.Commit(ctx); err != nil {
+			handler.AbortRequest(w, context, err, handler.ErrGeneral)
+			return
+		}
 	}
 	w.Write([]byte(`{"error": ""}`))
 }

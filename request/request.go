@@ -328,11 +328,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "cluster":
 		switch action {
 		case "delNode":
-			return ClusterNodeDel_tx(tx, reqJson)
+			return ClusterNodeDel_tx(ctx, tx, reqJson)
 		case "getNodes":
-			return ClusterNodesGet()
+			return ClusterNodesGet(ctx)
 		case "setNode":
-			return ClusterNodeSet_tx(tx, reqJson)
+			return ClusterNodeSet_tx(ctx, tx, reqJson)
 		case "shutdownNode":
 			return ClusterNodeShutdown(reqJson)
 		}

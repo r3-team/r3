@@ -178,9 +178,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	ctx, ctxCancel := context.WithTimeout(context.Background(),
+		time.Duration(int64(config.GetUint64("dbTimeoutDataRest")))*time.Second)
+
+	defer ctxCancel()
+
 	// get login language code (for filters)
 	var languageCode string
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(ctx, `
 		SELECT language_code
 		FROM instance.login_setting
 		WHERE login_id = $1
@@ -197,11 +202,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// execute request
-	ctx, ctxCancel := context.WithTimeout(context.Background(),
-		time.Duration(int64(config.GetUint64("dbTimeoutDataRest")))*time.Second)
-
-	defer ctxCancel()
-
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)

@@ -219,7 +219,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		var modName string
 		var modNameParent string
 
-		if err := db.Pool.QueryRow(db.Ctx, `
+		if err := db.Pool.QueryRow(ctx, `
 			SELECT name, COALESCE((
 				SELECT name
 				FROM app.module

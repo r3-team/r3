@@ -44,16 +44,17 @@ func updateCheck() error {
 		return err
 	}
 
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutSysTask()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
 	if err := config.SetString_tx(tx, "updateCheckVersion", check.Version); err != nil {
 		return err
 	}
-	if err := tx.Commit(db.Ctx); err != nil {
+	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
 

@@ -112,13 +112,14 @@ func callExecute(c restCall) error {
 	defer httpRes.Body.Close()
 
 	// successfully executed
-	tx, err := db.Pool.Begin(db.Ctx)
+	// execute callback if enabled
+	ctx := db.GetCtxTimeoutPgFunc()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
-	// execute callback if enabled
 	if c.pgFunctionIdCallback.Valid {
 		bodyRaw, err := io.ReadAll(httpRes.Body)
 		if err != nil {
@@ -134,7 +135,7 @@ func callExecute(c restCall) error {
 			return fmt.Errorf("unknown module '%s'", fnc.ModuleId)
 		}
 
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`SELECT "%s"."%s"($1,$2,$3)`,
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1,$2,$3)`,
 			mod.Name, fnc.Name), httpRes.StatusCode, bodyRaw, c.callbackValue); err != nil {
 
 			return err
@@ -142,11 +143,11 @@ func callExecute(c restCall) error {
 	}
 
 	// delete REST call from spooler
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.rest_spool
 		WHERE id = $1
 	`, c.id); err != nil {
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }

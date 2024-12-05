@@ -84,7 +84,7 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 	var recordIds []int64
 	var version int64 = 0
 	if !isNewFile {
-		if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+		if err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), fmt.Sprintf(`
 			SELECT v.version+1, (
 				SELECT ARRAY_AGG(r.record_id)
 				FROM instance_file."%s" AS r
@@ -142,30 +142,30 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 		GetFilePathThumb(fileId), false)
 
 	// store file meta data in database
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutSysTask()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback(ctx)
 
-	if err := FileApplyVersion_tx(db.Ctx, tx, isNewFile, attributeId,
+	if err := FileApplyVersion_tx(ctx, tx, isNewFile, attributeId,
 		attribute.RelationId, fileId, hash, part.FileName(),
 		fileSizeKb, version, recordIds, loginId); err != nil {
 
-		tx.Rollback(db.Ctx)
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }
 
 // stores database changes for uploaded/updated files
-func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
-	attributeId uuid.UUID, relationId uuid.UUID, fileId uuid.UUID, fileHash string,
-	fileName string, fileSizeKb int64, fileVersion int64, recordIds []int64,
-	loginId int64) error {
+func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool, attributeId uuid.UUID,
+	relationId uuid.UUID, fileId uuid.UUID, fileHash string, fileName string,
+	fileSizeKb int64, fileVersion int64, recordIds []int64, loginId int64) error {
 
 	if isNewFile {
 		// store file reference
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO instance.file (id, ref_counter) VALUES ($1,0)
 		`, fileId); err != nil {
 			return err
@@ -177,7 +177,7 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
 		Int32: int32(loginId),
 		Valid: loginId != -1,
 	}
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		INSERT INTO instance.file_version (
 			file_id,version,login_id,hash,size_kb,date_change)
 		VALUES ($1,$2,$3,$4,$5,$6)
@@ -222,7 +222,7 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
 	logValuesOld := []interface{}{nil}
 
 	for _, recordId := range recordIds {
-		if err := setLog_tx(db.Ctx, tx, relationId, logAttributes,
+		if err := setLog_tx(ctx, tx, relationId, logAttributes,
 			logAttributeFileIndexes, false, logValuesOld, recordId,
 			loginId); err != nil {
 
@@ -363,7 +363,7 @@ func FilesSetDeletedForRecord_tx(ctx context.Context, tx pgx.Tx,
 
 func FileGetLatestVersion(fileId uuid.UUID) (int64, error) {
 	var version int64
-	err := db.Pool.QueryRow(db.Ctx, `
+	err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
 		SELECT MAX(version)
 		FROM instance.file_version
 		WHERE file_id = $1

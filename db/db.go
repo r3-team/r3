@@ -15,8 +15,17 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var Ctx = context.TODO()
-var Pool *pgxpool.Pool
+var (
+	Ctx  = context.Background()
+	Pool *pgxpool.Pool
+
+	// default context timeouts
+	ctxDefTimeoutDbTask   = 300 * time.Second // heavy DB operations (init/upgrade/relation retention cleanup)
+	ctxDefTimeoutLogWrite = 5 * time.Second   // writing to database log
+	ctxDefTimeoutPgFunc   = 240 * time.Second // executing plsql functions, to be replaced by config option
+	ctxDefTimeoutSysTask  = 30 * time.Second  // executing small system tasks
+	ctxDefTimeoutTransfer = 300 * time.Second // executing module transfers, to be replaced by config option
+)
 
 // attempts to open a database connection
 // repeat attempts until successful or predefined time limit is reached
@@ -70,6 +79,27 @@ func Open(config types.FileTypeDb) error {
 		return err
 	}
 	return Pool.Ping(context.Background())
+}
+
+func GetCtxTimeoutDbTask() context.Context {
+	ctx, _ := context.WithTimeout(context.Background(), ctxDefTimeoutDbTask)
+	return ctx
+}
+func GetCtxTimeoutLogWrite() context.Context {
+	ctx, _ := context.WithTimeout(context.Background(), ctxDefTimeoutLogWrite)
+	return ctx
+}
+func GetCtxTimeoutPgFunc() context.Context {
+	ctx, _ := context.WithTimeout(context.Background(), ctxDefTimeoutPgFunc)
+	return ctx
+}
+func GetCtxTimeoutSysTask() context.Context {
+	ctx, _ := context.WithTimeout(context.Background(), ctxDefTimeoutSysTask)
+	return ctx
+}
+func GetCtxTimeoutTransfer() context.Context {
+	ctx, _ := context.WithTimeout(context.Background(), ctxDefTimeoutTransfer)
+	return ctx
 }
 
 // set transaction config parameters

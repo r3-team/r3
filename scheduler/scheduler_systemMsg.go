@@ -16,17 +16,20 @@ func systemMsgMaintenance() error {
 	systemInMaintenance := config.GetUint64("productionMode") == 0
 
 	if date1 != 0 && date1 < now && switchToMaintenance && !systemInMaintenance {
-		tx, err := db.Pool.Begin(db.Ctx)
+		ctx := db.GetCtxTimeoutSysTask()
+		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
 			return err
 		}
+		defer tx.Rollback(ctx)
+
 		if err := config.SetUint64_tx(tx, "systemMsgMaintenance", 0); err != nil {
 			return err
 		}
 		if err := config.SetUint64_tx(tx, "productionMode", 0); err != nil {
 			return err
 		}
-		if err := tx.Commit(db.Ctx); err != nil {
+		if err := tx.Commit(ctx); err != nil {
 			return err
 		}
 		cluster.ConfigChanged(true, false, true)

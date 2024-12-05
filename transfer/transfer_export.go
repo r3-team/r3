@@ -39,16 +39,17 @@ func ExportToFile(moduleId uuid.UUID, zipFilePath string) error {
 		return errors.New("no export key for module signing set")
 	}
 
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutTransfer()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
 	// export all modules as JSON files
 	var moduleJsonPaths []string
 	var moduleIdsExported []uuid.UUID
-	if err := export_tx(tx, moduleId, true, &moduleJsonPaths, &moduleIdsExported); err != nil {
+	if err := export_tx(tx, moduleId, &moduleJsonPaths, &moduleIdsExported); err != nil {
 		return err
 	}
 
@@ -56,11 +57,10 @@ func ExportToFile(moduleId uuid.UUID, zipFilePath string) error {
 	if err := writeFilesToZip(zipFilePath, moduleJsonPaths); err != nil {
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }
 
-func export_tx(tx pgx.Tx, moduleId uuid.UUID, original bool, filePaths *[]string,
-	moduleIdsExported *[]uuid.UUID) error {
+func export_tx(tx pgx.Tx, moduleId uuid.UUID, filePaths *[]string, moduleIdsExported *[]uuid.UUID) error {
 
 	// ignore if already exported (dependent on modules can have similar dependencies)
 	if slices.Contains(*moduleIdsExported, moduleId) {
@@ -78,7 +78,7 @@ func export_tx(tx pgx.Tx, moduleId uuid.UUID, original bool, filePaths *[]string
 
 	// export all modules that this module is dependent on
 	for _, modId := range file.Content.Module.DependsOn {
-		if err := export_tx(tx, modId, false, filePaths, moduleIdsExported); err != nil {
+		if err := export_tx(tx, modId, filePaths, moduleIdsExported); err != nil {
 			return err
 		}
 	}

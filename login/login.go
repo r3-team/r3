@@ -475,11 +475,12 @@ func SetTokenFixed_tx(tx pgx.Tx, loginId int64, name string, context string) (st
 // create new admin user
 func CreateAdmin(username string, password string) error {
 
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutSysTask()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
 	if _, err := Set_tx(tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{},
 		username, password, true, false, true, pgtype.Int4{},
@@ -488,7 +489,7 @@ func CreateAdmin(username string, password string) error {
 
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }
 
 // reset all TOTP keys

@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"context"
 	"fmt"
 	"r3/config"
 	"r3/db"
@@ -14,7 +15,7 @@ import (
 func PrepareDbIfNew() error {
 
 	var exists bool
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
 		SELECT exists(
 			SELECT FROM pg_tables
 			WHERE schemaname = 'instance'
@@ -27,29 +28,30 @@ func PrepareDbIfNew() error {
 		return nil
 	}
 
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutDbTask()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
-	if err := initAppSchema_tx(tx); err != nil {
+	if err := initAppSchema_tx(ctx, tx); err != nil {
 		return err
 	}
 
-	if err := initInstanceValues_tx(tx); err != nil {
+	if err := initInstanceValues_tx(ctx, tx); err != nil {
 		return err
 	}
 
 	// replace database password for embedded database
 	if config.File.Db.Embedded {
-		if err := renewDbUserPw_tx(tx); err != nil {
+		if err := renewDbUserPw_tx(ctx, tx); err != nil {
 			return err
 		}
 	}
 
 	// commit changes
-	if err := tx.Commit(db.Ctx); err != nil {
+	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
 
@@ -72,16 +74,13 @@ func PrepareDbIfNew() error {
 	}
 
 	// create initial login
-	if err := login.CreateAdmin("admin", "admin"); err != nil {
-		return err
-	}
-	return nil
+	return login.CreateAdmin("admin", "admin")
 }
 
-func renewDbUserPw_tx(tx pgx.Tx) error {
+func renewDbUserPw_tx(ctx context.Context, tx pgx.Tx) error {
 	newPass := tools.RandStringRunes(48)
 
-	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`ALTER USER %s WITH PASSWORD '%s'`,
+	_, err := tx.Exec(ctx, fmt.Sprintf(`ALTER USER %s WITH PASSWORD '%s'`,
 		config.File.Db.User, newPass))
 
 	if err != nil {
@@ -118,11 +117,11 @@ func renewDbUserPw_tx(tx pgx.Tx) error {
 */
 
 // instance initalized to 3.0
-func initInstanceValues_tx(tx pgx.Tx) error {
+func initInstanceValues_tx(ctx context.Context, tx pgx.Tx) error {
 
 	appName, appNameShort := config.GetAppName()
 
-	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	_, err := tx.Exec(ctx, fmt.Sprintf(`
 		-- config
 		INSERT INTO instance.config (name,value) VALUES
 			('appName','%s'),
@@ -229,8 +228,8 @@ func initInstanceValues_tx(tx pgx.Tx) error {
 }
 
 // app initalized to 3.0
-func initAppSchema_tx(tx pgx.Tx) error {
-	_, err := tx.Exec(db.Ctx, `
+func initAppSchema_tx(ctx context.Context, tx pgx.Tx) error {
+	_, err := tx.Exec(ctx, `
 --
 -- PostgreSQL database dump
 --

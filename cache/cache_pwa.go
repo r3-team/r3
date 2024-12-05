@@ -24,7 +24,7 @@ func GetPwaIcon(id uuid.UUID) (string, error) {
 	}
 
 	var f []byte
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
 		SELECT file
 		FROM app.icon
 		WHERE id = $1
@@ -53,7 +53,7 @@ func LoadPwaDomainMap() error {
 
 	pwaDomainMap = make(map[string]uuid.UUID)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), `
 		SELECT module_id, domain
 		FROM instance.pwa_domain
 	`)

@@ -27,7 +27,7 @@ func LoadSearchDictionaries() error {
 	dict_mx.Lock()
 	defer dict_mx.Unlock()
 
-	err := db.Pool.QueryRow(db.Ctx, `
+	err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
 		SELECT ARRAY_AGG(cfgname::TEXT)
 		FROM pg_catalog.pg_ts_config
 	`).Scan(&dict)

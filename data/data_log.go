@@ -27,7 +27,7 @@ func DelLogsBackground() error {
 		// delete logs for relations with no retention
 		if !r.RetentionCount.Valid && !r.RetentionDays.Valid {
 
-			if _, err := db.Pool.Exec(db.Ctx, `
+			if _, err := db.Pool.Exec(db.GetCtxTimeoutDbTask(), `
 				DELETE FROM instance.data_log
 				WHERE id IN (
 					SELECT data_log_id
@@ -47,7 +47,7 @@ func DelLogsBackground() error {
 		// delete logs according to retention settings
 		now := tools.GetTimeUnix()
 
-		if _, err := db.Pool.Exec(db.Ctx, `
+		if _, err := db.Pool.Exec(db.GetCtxTimeoutDbTask(), `
 			DELETE FROM instance.data_log AS p
 			WHERE p.relation_id = $1
 			

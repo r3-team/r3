@@ -34,7 +34,7 @@ func renewPresetRecordIds() error {
 
 	presetIdMapRecordId = make(map[uuid.UUID]int64)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), `
 		SELECT preset_id, record_id_wofk
 		FROM instance.preset_record
 	`)

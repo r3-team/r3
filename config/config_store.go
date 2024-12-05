@@ -141,7 +141,7 @@ func LoadFromDb() error {
 		storeUint64Slice[name] = make([]uint64, 0)
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, "SELECT name, value FROM instance.config")
+	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), "SELECT name, value FROM instance.config")
 	if err != nil {
 		return err
 	}

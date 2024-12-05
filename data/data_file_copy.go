@@ -23,7 +23,7 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 		return files, err
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), fmt.Sprintf(`
 		SELECT v.file_id, r.name, v.version, v.hash, v.size_kb, v.date_change
 		FROM instance.file_version AS v
 		JOIN instance_file."%s"    AS r
@@ -82,26 +82,7 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 
 		// insert every successfully created file immediately
 		// (to have the reference to clean in case of issues)
-		tx, err := db.Pool.Begin(db.Ctx)
-		if err != nil {
-			return files, err
-		}
-
-		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO instance.file (id, ref_counter) VALUES ($1,0)
-		`, idNew); err != nil {
-			tx.Rollback(db.Ctx)
-			return files, err
-		}
-		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO instance.file_version (
-				file_id, version, login_id, hash, size_kb, date_change)
-			VALUES ($1,$2,$3,$4,$5,$6)
-		`, idNew, 0, loginId, f.Hash, f.Size, f.Changed); err != nil {
-			tx.Rollback(db.Ctx)
-			return files, err
-		}
-		if err := tx.Commit(db.Ctx); err != nil {
+		if err := copyFilesRef(idNew, loginId, f); err != nil {
 			return files, err
 		}
 
@@ -110,4 +91,29 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 		files[i].Version = 0
 	}
 	return files, nil
+}
+
+func copyFilesRef(idNew uuid.UUID, loginId int64, f types.DataGetValueFile) error {
+
+	ctx := db.GetCtxTimeoutSysTask()
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO instance.file (id, ref_counter) VALUES ($1,0)
+	`, idNew); err != nil {
+		return err
+	}
+
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO instance.file_version (
+			file_id, version, login_id, hash, size_kb, date_change)
+		VALUES ($1,$2,$3,$4,$5,$6)
+	`, idNew, 0, loginId, f.Hash, f.Size, f.Changed); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }

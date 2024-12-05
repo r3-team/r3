@@ -21,7 +21,7 @@ func CheckInNode() error {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 
-	if _, err := db.Pool.Exec(db.Ctx, `
+	if _, err := db.Pool.Exec(db.GetCtxTimeoutSysTask(), `
 		UPDATE instance_cluster.node
 		SET date_check_in = $1, hostname = $2, stat_memory = $3
 		WHERE id = $4
@@ -31,7 +31,7 @@ func CheckInNode() error {
 
 	// check whether current cluster master is doing its job
 	var masterLastCheckIn int64
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
 		SELECT date_check_in
 		FROM instance_cluster.node
 		WHERE cluster_master
@@ -43,7 +43,7 @@ func CheckInNode() error {
 		log.Info("cluster", "node has recognized an absent master, requesting role for itself")
 
 		// cluster master missing, request cluster master role for this node
-		if _, err := db.Pool.Exec(db.Ctx, `
+		if _, err := db.Pool.Exec(db.GetCtxTimeoutSysTask(), `
 			SELECT instance_cluster.master_role_request($1)
 		`, cache.GetNodeId()); err != nil {
 			return err

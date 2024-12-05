@@ -84,17 +84,18 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 func getSchedules(pgFunctionId uuid.UUID) ([]types.PgFunctionSchedule, error) {
 	schedules := make([]types.PgFunctionSchedule, 0)
 
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutSysTask()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return schedules, err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
 	schedules, err = getSchedules_tx(tx, pgFunctionId)
 	if err != nil {
 		return schedules, err
 	}
-	tx.Commit(db.Ctx)
+	tx.Commit(ctx)
 
 	return schedules, nil
 }

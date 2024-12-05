@@ -36,7 +36,7 @@ func LoadOauthClientMap() error {
 
 	oauthClientIdMap = make(map[int32]types.OauthClient)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), `
 		SELECT id, name, client_id, client_secret, date_expiry, scopes, tenant, token_url
 		FROM instance.oauth_client
 	`)

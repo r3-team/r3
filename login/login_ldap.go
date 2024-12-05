@@ -29,7 +29,7 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 	// get login details and check whether roles could be updated
 	var rolesEqual pgtype.Bool
 
-	err := db.Pool.QueryRow(db.Ctx, `
+	err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
 		SELECT r1.id, r1.name, r1.admin, r1.active, r1.roles,
 			(r1.roles <@ r2.roles AND r1.roles @> r2.roles) AS equal
 		FROM (
@@ -125,11 +125,12 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 		roleIdsEx = roleIds
 	}
 
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutSysTask()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
 	log.Info("ldap", fmt.Sprintf("user account '%s' is new or has been changed, updating login", name))
 
@@ -140,7 +141,7 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 	}
 
 	// commit before renewing access cache (to apply new permissions)
-	if err := tx.Commit(db.Ctx); err != nil {
+	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
 

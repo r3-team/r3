@@ -90,11 +90,12 @@ func ImportFromFiles(filePathsImport []string) error {
 	}
 
 	// import modules
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutTransfer()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
 	idMapSkipped := make(map[uuid.UUID]types.Void)
 	loopsToRun := 10
@@ -167,7 +168,7 @@ func ImportFromFiles(filePathsImport []string) error {
 
 	log.Info("transfer", "module files were moved to transfer path if imported")
 
-	if err := tx.Commit(db.Ctx); err != nil {
+	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
 	log.Info("transfer", "changes were commited successfully")

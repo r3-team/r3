@@ -1,6 +1,7 @@
 package upgrade
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -52,17 +53,18 @@ func startLoop() error {
 			return nil
 		}
 
-		tx, err := db.Pool.Begin(db.Ctx)
+		ctx := db.GetCtxTimeoutDbTask()
+		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
 			return err
 		}
 
-		if err := oneIteration(tx, config.GetDbVersionCut()); err != nil {
-			tx.Rollback(db.Ctx)
+		if err := oneIteration(ctx, tx, config.GetDbVersionCut()); err != nil {
+			tx.Rollback(ctx)
 			return err
 		}
 
-		if err := tx.Commit(db.Ctx); err != nil {
+		if err := tx.Commit(ctx); err != nil {
 			return err
 		}
 		log.Info("server", "upgrade successful")
@@ -70,7 +72,7 @@ func startLoop() error {
 	return nil
 }
 
-func oneIteration(tx pgx.Tx, dbVersionCut string) error {
+func oneIteration(ctx context.Context, tx pgx.Tx, dbVersionCut string) error {
 
 	// log before upgrade because changes to log table index
 	//  caused infinite lock when trying to log to DB afterwards
@@ -82,7 +84,7 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 		return fmt.Errorf("DB version '%s' not recognized, platform update required",
 			dbVersionCut)
 	}
-	dbVersionCutNew, err := upgradeFunctions[dbVersionCut](tx)
+	dbVersionCutNew, err := upgradeFunctions[dbVersionCut](ctx, tx)
 	if err != nil {
 		log.Error("server", "upgrade NOT successful", err)
 		return err
@@ -94,7 +96,7 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 
 // upgrade functions for database
 // mapped by current database version string, returns new database version string
-var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
+var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, error){
 
 	// clean up on next release
 	/*
@@ -102,8 +104,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			TYPE app.pg_function_volatility USING volatility::TEXT::app.pg_function_volatility;
 	*/
 
-	"3.8": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"3.8": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- cleanup from last release
 			ALTER TABLE app.column
 				DROP COLUMN batch_vertical,
@@ -617,8 +619,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "3.9", err
 	},
-	"3.7": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"3.7": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- cleanup from last release
 			ALTER TABLE instance.admin_mail ALTER COLUMN reason
 				TYPE instance.admin_mail_reason USING reason::text::instance.admin_mail_reason;
@@ -871,8 +873,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "3.8", err
 	},
-	"3.6": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"3.6": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- cleanup from last release
 			ALTER TABLE instance.login_widget_group_item ALTER COLUMN content
 				TYPE instance.widget_content USING content::text::instance.widget_content;
@@ -1077,8 +1079,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "3.7", err
 	},
-	"3.5": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"3.5": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- remove outdated login settings / add new login settings
 			ALTER TABLE instance.login_setting DROP COLUMN field_clean;
 			ALTER TABLE instance.login_setting DROP COLUMN menu_colored;
@@ -1244,8 +1246,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "3.6", err
 	},
-	"3.4": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"3.4": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- cleanup from last release
 			ALTER TABLE app.open_form ALTER COLUMN pop_up_type
 			 TYPE app.open_form_pop_up_type USING pop_up_type::text::app.open_form_pop_up_type;
@@ -1402,8 +1404,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "3.5", err
 	},
-	"3.3": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"3.3": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- cleanup from last release
 			ALTER TABLE app.attribute ALTER COLUMN content_use DROP DEFAULT;
 			ALTER TABLE app.attribute ALTER COLUMN content_use
@@ -1667,8 +1669,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "3.4", err
 	},
-	"3.2": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"3.2": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- clean up from last release
 			ALTER TABLE app.caption ALTER COLUMN content
 				TYPE app.caption_content USING content::text::app.caption_content;
@@ -2032,8 +2034,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "3.3", err
 	},
-	"3.1": func(tx pgx.Tx) (string, error) {
-		if _, err := tx.Exec(db.Ctx, `
+	"3.1": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		if _, err := tx.Exec(ctx, `
 			-- new tabs field
 			ALTER TYPE app.field_state RENAME TO state_effect;
 			ALTER TYPE app.field_content ADD VALUE 'tabs';
@@ -2298,7 +2300,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		// add triggers to file record relations (file reference counter update)
 		attributeIds := make([]uuid.UUID, 0)
 		refLookups := make([]string, 0)
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			SELECT ARRAY_AGG(id)
 			FROM app.attribute
 			WHERE content = 'files'
@@ -2309,7 +2311,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		for _, attributeId := range attributeIds {
 			tName := schema.GetFilesTableName(attributeId)
 
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				CREATE TRIGGER "%s" BEFORE INSERT OR DELETE ON instance_file."%s"
 					FOR EACH ROW EXECUTE FUNCTION instance.trg_file_ref_counter_update();
 			`, schema.GetFilesTriggerName(attributeId), tName)); err != nil {
@@ -2326,7 +2328,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			}
 			refCnts := make([]refCnt, 0)
 
-			rows, err := tx.Query(db.Ctx, fmt.Sprintf(`
+			rows, err := tx.Query(ctx, fmt.Sprintf(`
 				SELECT f.id, ( SELECT SUM(s) FROM (%s) AS ref_counts ) AS cnt
 				FROM instance.file AS f
 			`, strings.Join(refLookups, " UNION ALL ")))
@@ -2344,7 +2346,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			rows.Close()
 
 			for _, r := range refCnts {
-				if _, err := tx.Exec(db.Ctx, `
+				if _, err := tx.Exec(ctx, `
 					UPDATE instance.file
 					SET ref_counter = $1
 					WHERE id = $2
@@ -2355,8 +2357,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 		return "3.2", nil
 	},
-	"3.0": func(tx pgx.Tx) (string, error) {
-		if _, err := tx.Exec(db.Ctx, `
+	"3.0": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		if _, err := tx.Exec(ctx, `
 			-- clean up from last upgrade
 			ALTER TABLE app.role ALTER COLUMN content
 				TYPE app.role_content USING content::text::app.role_content;
@@ -2534,7 +2536,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 		fileAtrs := make([]fileAtr, 0)
 
-		rows, err := tx.Query(db.Ctx, `
+		rows, err := tx.Query(ctx, `
 			SELECT a.id, a.name, r.name, m.name
 			FROM app.attribute AS a
 			JOIN app.relation  AS r ON r.id = a.relation_id
@@ -2561,7 +2563,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		for _, fa := range fileAtrs {
 			tNameR := fmt.Sprintf("%s_record", fa.attributeId)
 
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				CREATE TABLE instance_file."%s" (
 					file_id uuid NOT NULL,
 					record_id bigint NOT NULL,
@@ -2595,7 +2597,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			}
 
 			// insert files from JSON attribute values
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				INSERT INTO instance.file (id)
 					SELECT j.id
 					FROM "%s"."%s" AS r
@@ -2606,7 +2608,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			`, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
 				return "", err
 			}
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				INSERT INTO instance.file_version (file_id, version, size_kb, date_change)
 					SELECT j.id, 0, j.size, EXTRACT(EPOCH FROM NOW())
 					FROM "%s"."%s" AS r
@@ -2617,7 +2619,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			`, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
 				return "", err
 			}
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				INSERT INTO instance_file."%s" (record_id, file_id, name)
 					SELECT r.id, j.id, j.name
 					FROM "%s"."%s" AS r
@@ -2629,7 +2631,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			}
 
 			// delete original files attribute columns
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				ALTER TABLE "%s"."%s" DROP COLUMN "%s"
 			`, fa.moduleName, fa.relationName, fa.attributeName)); err != nil {
 				return "", err
@@ -2637,7 +2639,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 			// rename files on disk to new versioning
 			fileIds := make([]uuid.UUID, 0)
-			if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
+			if err := tx.QueryRow(ctx, fmt.Sprintf(`
 				SELECT ARRAY_AGG(DISTINCT file_id)
 				FROM instance_file."%s"
 			`, tNameR)).Scan(&fileIds); err != nil {
@@ -2666,7 +2668,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 
 		// delete original files attribute change logs (+ logs that would be empty afterwards)
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			DELETE FROM instance.data_log_value
 			WHERE attribute_id IN (
 			    SELECT id
@@ -2676,7 +2678,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`); err != nil {
 			return "", err
 		}
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			DELETE FROM instance.data_log AS l
 			WHERE (
 			    SELECT COUNT(*)
@@ -2688,8 +2690,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 		return "3.1", err
 	},
-	"2.7": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"2.7": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- cleanup from last release
 			ALTER TABLE app.form_state_condition_side ALTER COLUMN content
 				TYPE app.filter_side_content USING content::text::app.filter_side_content;
@@ -2988,8 +2990,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "3.0", err
 	},
-	"2.6": func(tx pgx.Tx) (string, error) {
-		if _, err := tx.Exec(db.Ctx, `
+	"2.6": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		if _, err := tx.Exec(ctx, `
 			-- extend and rename query filter side content (to be used by form state condition as well)
 			ALTER TYPE app.query_filter_side_content ADD VALUE 'fieldChanged';
 			ALTER TYPE app.query_filter_side_content RENAME TO filter_side_content;
@@ -3175,7 +3177,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 		// set KDF salts for every login
 		loginIds := make([]int64, 0)
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			SELECT ARRAY_AGG(id::INTEGER)
 			FROM instance.login
 		`).Scan(&loginIds); err != nil {
@@ -3183,7 +3185,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 
 		for _, id := range loginIds {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				UPDATE instance.login
 				SET salt_kdf = $1
 				WHERE id = $2
@@ -3208,7 +3210,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			Login1       pgtype.Bool
 			Value1       pgtype.Text
 		}
-		rows, err := tx.Query(db.Ctx, `
+		rows, err := tx.Query(ctx, `
 			SELECT form_state_id, position, field_id0, field_id1, preset_id1, role_id,
 				brackets0, brackets1, operator, field_changed, login1, new_record, value1
 			FROM app.form_state_condition
@@ -3237,7 +3239,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			brackets int, content string, value pgtype.Text,
 			fieldId pgtype.UUID, presetId pgtype.UUID, roleId pgtype.UUID) error {
 
-			_, err := tx.Exec(db.Ctx, `
+			_, err := tx.Exec(ctx, `
 				INSERT INTO app.form_state_condition_side (
 					form_state_id, form_state_condition_position, side,
 					brackets, content, value, field_id, preset_id, role_id
@@ -3315,7 +3317,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			}
 
 			if operatorOverwrite != "" {
-				if _, err := tx.Exec(db.Ctx, `
+				if _, err := tx.Exec(ctx, `
 					UPDATE app.form_state_condition
 					SET operator = $1
 					WHERE form_state_id = $2
@@ -3325,7 +3327,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				}
 			}
 		}
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			ALTER TABLE app.form_state_condition
 				DROP COLUMN field_id0,
 				DROP COLUMN field_id1,
@@ -3342,8 +3344,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 		return "2.7", nil
 	},
-	"2.5": func(tx pgx.Tx) (string, error) {
-		if _, err := tx.Exec(db.Ctx, `
+	"2.5": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		if _, err := tx.Exec(ctx, `
 			-- new login setting
 			ALTER TABLE instance.login_setting ADD COLUMN warn_unsaved BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN warn_unsaved DROP DEFAULT;
@@ -3709,7 +3711,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 		results := make([]result, 0)
 
-		rows, err := tx.Query(db.Ctx, `
+		rows, err := tx.Query(ctx, `
 			SELECT field_id, form_id_open, attribute_id_record FROM app.field_button
 			WHERE form_id_open IS NOT NULL
 			UNION
@@ -3740,7 +3742,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 		for _, r := range results {
 
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO app.open_form (
 					field_id, form_id_open, attribute_id_apply,
 					relation_index, pop_up, max_height, max_width
@@ -3751,7 +3753,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			}
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			ALTER TABLE app.field_button
 				DROP COLUMN form_id_open,
 				DROP COLUMN attribute_id_record;
@@ -3770,8 +3772,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 		return "2.6", err
 	},
-	"2.4": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"2.4": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- repo change logs
 			ALTER TABLE instance.repo_module ADD COLUMN change_log TEXT;
 			
@@ -3915,8 +3917,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "2.5", err
 	},
-	"2.3": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"2.3": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			CREATE TABLE IF NOT EXISTS app.field_chart (
 			    field_id uuid NOT NULL,
 			    chart_option text NOT NULL,
@@ -4041,8 +4043,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "2.4", err
 	},
-	"2.2": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"2.2": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			CREATE TABLE IF NOT EXISTS app.login_form(
 				id uuid NOT NULL,
 				module_id uuid NOT NULL,
@@ -4097,7 +4099,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "2.3", err
 	},
-	"2.1": func(tx pgx.Tx) (string, error) {
+	"2.1": func(ctx context.Context, tx pgx.Tx) (string, error) {
 
 		// replace PG function schedule positions with new IDs
 		type schedule struct {
@@ -4106,7 +4108,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 		schedules := make([]schedule, 0)
 
-		rows, err := tx.Query(db.Ctx, `
+		rows, err := tx.Query(ctx, `
 			SELECT pg_function_id, position
 			FROM app.pg_function_schedule
 		`)
@@ -4123,7 +4125,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 		rows.Close()
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			-- new PG function schedule IDs
 			ALTER TABLE app.pg_function_schedule ADD COLUMN id UUID;
 			ALTER TABLE instance.scheduler ADD COLUMN pg_function_schedule_id UUID;
@@ -4138,7 +4140,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				return "", err
 			}
 
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				UPDATE app.pg_function_schedule
 				SET id = $1
 				WHERE pg_function_id = $2
@@ -4147,7 +4149,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				return "", err
 			}
 
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				UPDATE instance.scheduler
 				SET pg_function_schedule_id = $1
 				WHERE pg_function_id                = $2
@@ -4157,7 +4159,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			}
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			ALTER TABLE instance.scheduler DROP COLUMN pg_function_id;
 			ALTER TABLE instance.scheduler DROP COLUMN pg_function_schedule_position;
 			
@@ -4337,8 +4339,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 		return "2.2", nil
 	},
-	"2.0": func(tx pgx.Tx) (string, error) {
-		if _, err := tx.Exec(db.Ctx, `
+	"2.0": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		if _, err := tx.Exec(ctx, `
 			-- consolidated field default state
 			ALTER TABLE app.field ADD COLUMN state app.field_state NOT NULL DEFAULT 'default';
 			ALTER TABLE app.field ALTER COLUMN state DROP DEFAULT;
@@ -4451,8 +4453,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 		return "2.1", nil
 	},
-	"1.9": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"1.9": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- gantt extensions to calendar field
 			ALTER TABLE app.field_calendar ADD COLUMN gantt boolean NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.field_calendar ADD COLUMN gantt_steps character varying(12) COLLATE pg_catalog."default";
@@ -4767,7 +4769,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		// migrate old mail configuration to new system
 		var mailFrom, mailHost, mailPass, mailPort, mailUser string
 
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			SELECT 
 				(SELECT value FROM instance.config WHERE name = 'mailFrom'),
 				(SELECT value FROM instance.config WHERE name = 'mailHost'),
@@ -4784,7 +4786,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				return "", err
 			}
 
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO instance.mail_account (name,mode,start_tls,
 					username,password,send_as,host_name,host_port)
 				VALUES (	'Default_send','smtp',TRUE,$1,$2,$3,$4,$5);
@@ -4792,7 +4794,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				return "", err
 			}
 		}
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			DELETE FROM instance.config WHERE name IN (
 				'mailFrom','mailHost','mailPass','mailPort','mailUser'
 			);
@@ -4801,8 +4803,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 		return "2.0", nil
 	},
-	"1.8": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"1.8": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- ICS option
 			ALTER TABLE app.field_calendar ADD COLUMN ics boolean NOT NULL DEFAULT false;
 			ALTER TABLE app.field_calendar ALTER COLUMN ics DROP DEFAULT;
@@ -4878,8 +4880,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "1.9", err
 	},
-	"1.7": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"1.7": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- prepare clean up of bad NOT NULL operator type in next version
 			--  (new ENUM value cannot be used in same TX)
 			ALTER TYPE app.condition_operator ADD VALUE 'IS NOT NULL';
@@ -5053,10 +5055,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "1.8", err
 	},
-	"1.6": func(tx pgx.Tx) (string, error) {
+	"1.6": func(ctx context.Context, tx pgx.Tx) (string, error) {
 
 		// add auto FK index column to PG indexes
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			ALTER TABLE app.pg_index ADD COLUMN auto_fki boolean NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.pg_index ALTER COLUMN auto_fki DROP DEFAULT;
 		`); err != nil {
@@ -5074,7 +5076,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 		atrRels := make([]atrRelType, 0)
 
-		rows, err := tx.Query(db.Ctx, `
+		rows, err := tx.Query(ctx, `
 			SELECT m.name, r.id, a.id, a.content
 			FROM app.attribute AS a
 			INNER JOIN app.relation AS r ON r.id = a.relation_id
@@ -5095,7 +5097,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		rows.Close()
 
 		for _, ar := range atrRels {
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				DROP INDEX "%s"."fki_%s"
 			`, ar.moduleName, ar.attributeId.String())); err != nil {
 				return "", err
@@ -5108,7 +5110,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 
 		// apply other DB changes
-		_, err = tx.Exec(db.Ctx, `
+		_, err = tx.Exec(ctx, `
 			-- query choices
 			CREATE TABLE app.query_choice (
 			    id uuid NOT NULL,
@@ -5150,8 +5152,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "1.7", err
 	},
-	"1.5": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"1.5": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			ALTER TYPE app.data_display ADD VALUE 'url';
 			ALTER TYPE app.field_state ADD VALUE 'default';
 			
@@ -5180,7 +5182,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "1.6", err
 	},
-	"1.4": func(tx pgx.Tx) (string, error) {
+	"1.4": func(ctx context.Context, tx pgx.Tx) (string, error) {
 
 		// create ID attributes for all relations
 		type rel struct {
@@ -5189,7 +5191,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 		rels := make([]rel, 0)
 
-		rows, err := tx.Query(db.Ctx, `
+		rows, err := tx.Query(ctx, `
 			SELECT id, pkey_type
 			FROM app.relation
 		`)
@@ -5218,7 +5220,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				return "", err
 			}
 
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO app.attribute (id, relation_id, name, length, content, def, nullable)
 				VALUES ($1,$2,'id',0,$3,'',false)
 			`, id, r.Id, content); err != nil {
@@ -5226,7 +5228,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			}
 		}
 
-		_, err = tx.Exec(db.Ctx, `
+		_, err = tx.Exec(ctx, `
 			-- remove legacy primary key definition from relation
 			ALTER TABLE app.relation DROP COLUMN pkey_type;
 			DROP TYPE app.relation_pkey_type;
@@ -5270,8 +5272,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "1.5", err
 	},
-	"1.3": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"1.3": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			-- fix wrong defer configurations
 			ALTER TABLE app.field DROP CONSTRAINT field_icon_id_fkey;
 			ALTER TABLE app.field
@@ -5306,8 +5308,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "1.4", err
 	},
-	"1.2": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"1.2": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			CREATE TABLE app.field_data_relationship_preset (
 			    field_id uuid NOT NULL,
 			    preset_id uuid NOT NULL,
@@ -5339,8 +5341,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "1.3", err
 	},
-	"1.1": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"1.1": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			ALTER TYPE app.data_display ADD VALUE 'gallery';
 			
 			ALTER TABLE app.column ADD COLUMN basis smallint NOT NULL DEFAULT 0;
@@ -5359,15 +5361,15 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`)
 		return "1.2", err
 	},
-	"1.0": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"1.0": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			ALTER TABLE instance.login ADD COLUMN no_auth boolean NOT NULL DEFAULT false;
 			ALTER TABLE instance.login ALTER COLUMN no_auth DROP DEFAULT;
 		`)
 		return "1.1", err
 	},
-	"0.91": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+	"0.91": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
 			INSERT INTO instance.config (name,value)
 				VALUES ('updateCheckUrl','https://rei3.de/version');
 			

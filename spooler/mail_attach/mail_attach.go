@@ -126,16 +126,17 @@ func do(mail types.Mail) error {
 
 	// store file changes
 	// update the database only after all files have physically been saved
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutSysTask()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
 	fileIdMapChange := make(map[uuid.UUID]types.DataSetFileChange)
 	rel, _ := cache.RelationIdMap[atr.RelationId]
 	for _, f := range filesMail {
-		if err := data.FileApplyVersion_tx(db.Ctx, tx, true, atr.Id, rel.Id,
+		if err := data.FileApplyVersion_tx(ctx, tx, true, atr.Id, rel.Id,
 			f.Id, f.Hash, f.Name, f.Size, 0, []int64{mail.RecordId.Int64}, -1); err != nil {
 
 			return err
@@ -147,17 +148,17 @@ func do(mail types.Mail) error {
 			Version: -1,
 		}
 	}
-	if err := data.FilesApplyAttributChanges_tx(db.Ctx, tx, mail.RecordId.Int64,
+	if err := data.FilesApplyAttributChanges_tx(ctx, tx, mail.RecordId.Int64,
 		atr.Id, fileIdMapChange); err != nil {
 		return err
 	}
 
 	// all done, delete mail
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.mail_spool
 		WHERE id = $1
 	`, mail.Id); err != nil {
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }

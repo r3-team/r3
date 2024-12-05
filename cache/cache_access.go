@@ -147,7 +147,7 @@ func load(loginId int64) error {
 func loadRoleIds(loginId int64) ([]uuid.UUID, error) {
 	roleIds := make([]uuid.UUID, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), `
 		-- get nested children of assigned roles
 		WITH RECURSIVE child_ids AS (
 			SELECT role_id_child

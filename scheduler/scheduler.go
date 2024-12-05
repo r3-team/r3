@@ -457,21 +457,22 @@ func load() error {
 // helpers
 func runPgFunction(pgFunctionId uuid.UUID) error {
 
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutPgFunc()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
 	modName, fncName, _, _, err := schema.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
 	if err != nil {
 		return err
 	}
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`SELECT "%s"."%s"()`, modName, fncName)); err != nil {
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"()`, modName, fncName)); err != nil {
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }
 
 // get unix time and index of task schedule to run next

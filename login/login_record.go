@@ -56,7 +56,7 @@ func GetRecords(attributeIdLookup uuid.UUID, idsExclude []int64,
 		return records, err
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, query, qb.GetParaValues()...)
+	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), query, qb.GetParaValues()...)
 	if err != nil {
 		return records, err
 	}
