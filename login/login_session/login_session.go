@@ -14,14 +14,16 @@ import (
 )
 
 func Log(id uuid.UUID, loginId int64, address string, device types.WebsocketClientDevice) error {
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutLogWrite()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	now := tools.GetTimeUnix()
+	defer tx.Rollback(ctx)
 
 	// on conflict constraint requires full name for ID column in WHERE definition
-	if _, err := tx.Exec(db.Ctx, `
+	now := tools.GetTimeUnix()
+	if _, err := tx.Exec(ctx, `
 		INSERT INTO instance.login_session(id, login_id, node_id, address, device, date)
 		VALUES ($1,$2,$3,$4,$5,$6)
 		ON CONFLICT
@@ -32,22 +34,24 @@ func Log(id uuid.UUID, loginId int64, address string, device types.WebsocketClie
 	`, id, loginId, cache.GetNodeId(), address, types.WebsocketClientDeviceNames[device], now, now, id); err != nil {
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }
 
 func LogRemove(id uuid.UUID) error {
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutLogWrite()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback(ctx)
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.login_session
 		WHERE id = $1
 	`, id); err != nil {
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }
 
 func LogsGet(byString pgtype.Text, limit int, offset int, orderBy string, orderAsc bool) (interface{}, error) {
@@ -166,18 +170,20 @@ func LogsGet(byString pgtype.Text, limit int, offset int, orderBy string, orderA
 }
 
 func LogsRemoveForNode() error {
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := db.GetCtxTimeoutSysTask()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback(ctx)
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.login_session
 		WHERE node_id = $1
 	`, cache.GetNodeId()); err != nil {
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }
 
 // retrieves concurrent session count for limited or not-limited logins
