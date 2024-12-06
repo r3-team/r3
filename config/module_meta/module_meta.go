@@ -91,7 +91,7 @@ func GetOwner(moduleId uuid.UUID) (bool, error) {
 }
 
 func SetDateChange(moduleIds []uuid.UUID, date int64) error {
-	_, err := db.Pool.Exec(db.Ctx, `
+	_, err := db.Pool.Exec(context.Background(), `
 		UPDATE instance.module_meta
 		SET date_change = $2
 		WHERE module_id = ANY($1)

@@ -5102,7 +5102,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			`, ar.moduleName, ar.attributeId.String())); err != nil {
 				return "", err
 			}
-			if err := pgIndex.SetAutoFkiForAttribute_tx(db.Ctx, tx, ar.relationId,
+			if err := pgIndex.SetAutoFkiForAttribute_tx(ctx, tx, ar.relationId,
 				ar.attributeId, (ar.content == "1:1")); err != nil {
 
 				return "", err
