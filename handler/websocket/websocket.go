@@ -28,7 +28,7 @@ type clientType struct {
 	id        uuid.UUID                   // unique ID for client (for registering/de-registering login sessions)
 	address   string                      // IP address, no port
 	admin     bool                        // belongs to admin login?
-	ctx       context.Context             // global context for client requests
+	ctx       context.Context             // context for requests from this client
 	ctxCancel context.CancelFunc          // to abort requests in case of disconnect
 	device    types.WebsocketClientDevice // client device type (browser, fatClient)
 	ioFailure atomic.Bool                 // client failed to read/write
@@ -290,16 +290,17 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 	// take over transaction number for response so client can match it locally
 	resTrans.TransactionNr = reqTrans.TransactionNr
 
+	// inherit the client context, to abort if the client is disconnected
+	ctx, ctxCanc := context.WithTimeout(client.ctx,
+		time.Duration(int64(config.GetUint64("dbTimeoutDataWs")))*time.Second)
+
+	defer ctxCanc()
+
 	// client can either authenticate or execute requests
 	authRequest := len(reqTrans.Requests) == 1 && reqTrans.Requests[0].Ressource == "auth"
 
 	if !authRequest {
 		// execute non-authentication transaction
-		ctx, ctxCanc := context.WithTimeout(client.ctx,
-			time.Duration(int64(config.GetUint64("dbTimeoutDataWs")))*time.Second)
-
-		defer ctxCanc()
-
 		resTrans = request.ExecTransaction(ctx, client.address, client.loginId,
 			client.admin, client.device, client.noAuth, reqTrans, resTrans)
 
@@ -318,15 +319,15 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 		switch req.Action {
 		case "token": // authentication via JSON web token
-			resPayload, err = request.LoginAuthToken(req.Payload,
+			resPayload, err = request.LoginAuthToken(ctx, req.Payload,
 				&client.loginId, &client.admin, &client.noAuth)
 
 		case "tokenFixed": // authentication via fixed token (fat-client only)
-			resPayload, err = request.LoginAuthTokenFixed(req.Payload, &client.loginId)
+			resPayload, err = request.LoginAuthTokenFixed(ctx, req.Payload, &client.loginId)
 			client.device = types.WebsocketClientDeviceFatClient
 
 		case "user": // authentication via credentials
-			resPayload, err = request.LoginAuthUser(req.Payload,
+			resPayload, err = request.LoginAuthUser(ctx, req.Payload,
 				&client.loginId, &client.admin, &client.noAuth)
 		}
 

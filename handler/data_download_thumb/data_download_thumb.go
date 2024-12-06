@@ -1,18 +1,21 @@
 package data_download_thumb
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"path/filepath"
 	"r3/bruteforce"
+	"r3/config"
 	"r3/data"
 	"r3/data/data_image"
 	"r3/handler"
 	"r3/login/login_auth"
 	"strings"
+	"time"
 )
 
-var context = "data_download_thumb"
+var logContext = "data_download_thumb"
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 
@@ -30,16 +33,21 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// get authentication token
 	token, err := handler.ReadGetterFromUrl(r, "token")
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
+
+	ctx, ctxCanc := context.WithTimeout(context.Background(),
+		time.Duration(int64(config.GetUint64("dbTimeoutDataWs")))*time.Second)
+
+	defer ctxCanc()
 
 	// check token, any login is generally allowed to attempt a download
 	var loginId int64
 	var admin bool
 	var noAuth bool
-	if _, err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrAuthFailed)
+	if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+		handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}
@@ -47,18 +55,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// parse other getters
 	attributeId, err := handler.ReadUuidGetterFromUrl(r, "attribute_id")
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
 	fileId, err := handler.ReadUuidGetterFromUrl(r, "file_id")
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
 
 	// check file access privilege
 	if err := data.MayAccessFile(loginId, attributeId); err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrUnauthorized)
+		handler.AbortRequest(w, logContext, err, handler.ErrUnauthorized)
 		return
 	}
 
@@ -67,7 +75,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = os.Stat(filePath)
 	if err != nil && !os.IsNotExist(err) {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
 
@@ -78,7 +86,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		version, err := data.FileGetLatestVersion(fileId)
 		if err != nil {
-			handler.AbortRequest(w, context, err, handler.ErrGeneral)
+			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 			return
 		}
 		filePathSrc := data.GetFilePathVersion(fileId, version)

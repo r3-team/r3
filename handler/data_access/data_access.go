@@ -59,22 +59,22 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx, ctxCanc := context.WithTimeout(context.Background(),
+		time.Duration(int64(config.GetUint64("dbTimeoutDataRest")))*time.Second)
+
+	defer ctxCanc()
+
 	// authenticate requestor
 	var loginId int64
 	var isAdmin bool
 	var noAuth bool
-	if _, err := login_auth.Token(req.Token, &loginId, &isAdmin, &noAuth); err != nil {
+	if _, err := login_auth.Token(ctx, req.Token, &loginId, &isAdmin, &noAuth); err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}
 
 	// execute request
-	ctx, ctxCanc := context.WithTimeout(context.Background(),
-		time.Duration(int64(config.GetUint64("dbTimeoutDataRest")))*time.Second)
-
-	defer ctxCanc()
-
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)

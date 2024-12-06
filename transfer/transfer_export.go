@@ -30,16 +30,13 @@ import (
 // if the exported module had any changes, the module meta (version,
 //
 //	dependent app version, release date) will be updated
-func ExportToFile(moduleId uuid.UUID, zipFilePath string) error {
+func ExportToFile(ctx context.Context, moduleId uuid.UUID, zipFilePath string) error {
 
 	log.Info("transfer", fmt.Sprintf("start export for module %s", moduleId))
 
 	if exportKey == "" {
 		return errors.New("no export key for module signing set")
 	}
-
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutTransfer)
-	defer ctxCanc()
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {

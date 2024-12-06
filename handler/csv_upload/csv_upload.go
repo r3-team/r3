@@ -139,11 +139,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		ctx, ctxCanc := context.WithTimeout(context.Background(),
+			time.Duration(int64(config.GetUint64("dbTimeoutCsv")))*time.Second)
+
+		defer ctxCanc()
+
 		// check token
 		var loginId int64
 		var admin bool
 		var noAuth bool
-		if _, err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
+		if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
 			handler.AbortRequest(w, handlerContext, err, handler.ErrUnauthorized)
 			bruteforce.BadAttempt(r)
 			return
@@ -174,7 +179,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// read file
-		res.Count, err = importFromCsv(filePath, loginId, boolTrue, dateFormat,
+		res.Count, err = importFromCsv(ctx, filePath, loginId, boolTrue, dateFormat,
 			timezone, commaChar, ignoreHeader, columns, joins, lookups)
 
 		if err != nil {
@@ -197,10 +202,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 // import all lines from CSV, optionally skipping a header line
 // returns to which line it got
-func importFromCsv(filePath string, loginId int64, boolTrue string,
-	dateFormat string, timezone string, commaChar string, ignoreHeader bool,
-	columns []types.Column, joins []types.QueryJoin,
-	lookups []types.QueryLookup) (int, error) {
+func importFromCsv(ctx context.Context, filePath string, loginId int64, boolTrue string,
+	dateFormat string, timezone string, commaChar string, ignoreHeader bool, columns []types.Column,
+	joins []types.QueryJoin, lookups []types.QueryLookup) (int, error) {
 
 	log.Info("csv", fmt.Sprintf("starts import from file '%s' via upload", filePath))
 
@@ -209,11 +213,6 @@ func importFromCsv(filePath string, loginId int64, boolTrue string,
 		return 0, err
 	}
 	defer file.Close()
-
-	ctx, ctxCanc := context.WithTimeout(context.Background(),
-		time.Duration(int64(config.GetUint64("dbTimeoutCsv")))*time.Second)
-
-	defer ctxCanc()
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {

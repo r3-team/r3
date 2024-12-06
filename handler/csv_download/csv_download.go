@@ -161,11 +161,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx, ctxCanc := context.WithTimeout(context.Background(),
+		time.Duration(int64(config.GetUint64("dbTimeoutCsv")))*time.Second)
+
+	defer ctxCanc()
+
 	// check token
 	var loginId int64
 	var admin bool
 	var noAuth bool
-	if _, err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
+	if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrUnauthorized)
 		bruteforce.BadAttempt(r)
 		return
@@ -269,7 +274,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for {
-		total, err := dataToCsv(writer, get, locUser, boolTrue, boolFalse,
+		total, err := dataToCsv(ctx, writer, get, locUser, boolTrue, boolFalse,
 			dateFormat, columnAttributeContentUse, loginId)
 
 		if err != nil {
@@ -295,14 +300,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	os.Remove(filePath)
 }
 
-func dataToCsv(writer *csv.Writer, get types.DataGet, locUser *time.Location,
-	boolTrue string, boolFalse string, dateFormat string,
-	columnAttributeContentUse []string, loginId int64) (int, error) {
-
-	ctx, ctxCanc := context.WithTimeout(context.Background(),
-		time.Duration(int64(config.GetUint64("dbTimeoutCsv")))*time.Second)
-
-	defer ctxCanc()
+func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUser *time.Location, boolTrue string,
+	boolFalse string, dateFormat string, columnAttributeContentUse []string, loginId int64) (int, error) {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {

@@ -12,6 +12,7 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/login/login_auth"
+	"time"
 )
 
 var logContext = "license_upload"
@@ -48,11 +49,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		ctx, ctxCanc := context.WithTimeout(context.Background(),
+			time.Duration(int64(config.GetUint64("dbTimeoutDataWs")))*time.Second)
+
+		defer ctxCanc()
+
 		// check token
 		var loginId int64
 		var admin bool
 		var noAuth bool
-		if _, err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
+		if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
 			handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
 			bruteforce.BadAttempt(r)
 			return
@@ -77,9 +83,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// set license
-		ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-		defer ctxCanc()
-
 		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
 			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)

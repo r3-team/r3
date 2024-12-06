@@ -2,12 +2,14 @@ package transfer_import
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"os"
 	"r3/config"
+	"r3/db"
 	"r3/handler"
 	"r3/log"
 	"r3/login/login_auth"
@@ -64,11 +66,14 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 			continue
 		}
 
+		ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutTransfer)
+		defer ctxCanc()
+
 		// check token
 		var loginId int64
 		var admin bool
 		var noAuth bool
-		if _, err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
+		if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
 			finishRequest(err)
 			return
 		}
