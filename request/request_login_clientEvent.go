@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/login/login_clientEvent"
 	"r3/types"
@@ -9,21 +10,21 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func loginClientEventDel_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func loginClientEventDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
 	var req struct {
 		ClientEventId uuid.UUID `json:"clientEventId"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login_clientEvent.Del_tx(tx, loginId, req.ClientEventId)
+	return nil, login_clientEvent.Del_tx(ctx, tx, loginId, req.ClientEventId)
 }
 
-func loginClientEventGet(loginId int64) (interface{}, error) {
-	return login_clientEvent.Get(loginId)
+func loginClientEventGet_tx(ctx context.Context, tx pgx.Tx, loginId int64) (interface{}, error) {
+	return login_clientEvent.Get_tx(ctx, tx, loginId)
 }
 
-func loginClientEventSet_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func loginClientEventSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
 	var req struct {
 		ClientEventId    uuid.UUID              `json:"clientEventId"`
 		LoginClientEvent types.LoginClientEvent `json:"loginClientEvent"`
@@ -31,5 +32,5 @@ func loginClientEventSet_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login_clientEvent.Set_tx(tx, loginId, req.ClientEventId, req.LoginClientEvent)
+	return nil, login_clientEvent.Set_tx(ctx, tx, loginId, req.ClientEventId, req.LoginClientEvent)
 }

@@ -191,7 +191,7 @@ func deleteRelationPgIndexes_tx(tx pgx.Tx, moduleId uuid.UUID, relations []types
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del PG index %s", id.String()))
-		if err := pgIndex.Del_tx(tx, id); err != nil {
+		if err := pgIndex.Del_tx(db.Ctx, tx, id); err != nil {
 			return err
 		}
 	}
@@ -577,7 +577,7 @@ func deletePgFunctions_tx(tx pgx.Tx, moduleId uuid.UUID, pgFunctions []types.PgF
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del PG function %s", id.String()))
-		if err := pgFunction.Del_tx(tx, id); err != nil {
+		if err := pgFunction.Del_tx(db.Ctx, tx, id); err != nil {
 			return err
 		}
 	}

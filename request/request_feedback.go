@@ -5,10 +5,9 @@ import (
 	"r3/repo"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/jackc/pgx/v5"
 )
 
-func FeedbackSend_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func FeedbackSend(reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Code          int         `json:"code"`

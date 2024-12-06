@@ -1,6 +1,7 @@
 package login
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -258,11 +259,11 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 				return 0, err
 			}
 		}
-		s, err := login_setting.Get(pgtype.Int8{}, loginTemplateId)
+		s, err := login_setting.Get_tx(db.Ctx, tx, pgtype.Int8{}, loginTemplateId)
 		if err != nil {
 			return 0, err
 		}
-		if err := login_setting.Set_tx(tx, pgtype.Int8{Int64: id, Valid: true}, pgtype.Int8{}, s, true); err != nil {
+		if err := login_setting.Set_tx(db.Ctx, tx, pgtype.Int8{Int64: id, Valid: true}, pgtype.Int8{}, s, true); err != nil {
 			return 0, err
 		}
 	} else {
@@ -276,7 +277,7 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 		}
 
 		if pass != "" {
-			if err := SetSaltHash_tx(tx, salt, hash, id); err != nil {
+			if err := SetSaltHash_tx(db.Ctx, tx, salt, hash, id); err != nil {
 				return 0, err
 			}
 		}
@@ -324,8 +325,8 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 	return id, setRoleIds_tx(tx, id, roleIds)
 }
 
-func SetSaltHash_tx(tx pgx.Tx, salt pgtype.Text, hash pgtype.Text, id int64) error {
-	_, err := tx.Exec(db.Ctx, `
+func SetSaltHash_tx(ctx context.Context, tx pgx.Tx, salt pgtype.Text, hash pgtype.Text, id int64) error {
+	_, err := tx.Exec(ctx, `
 		UPDATE instance.login
 		SET salt = $1, hash = $2
 		WHERE id = $3
@@ -366,7 +367,7 @@ func GetByRole(roleId uuid.UUID) ([]types.Login, error) {
 
 // get names for public lookups for non-admins
 // returns slice of up to 10 logins
-func GetNames(id int64, idsExclude []int64, byString string, noLdapAssign bool) ([]types.Login, error) {
+func GetNames_tx(ctx context.Context, tx pgx.Tx, id int64, idsExclude []int64, byString string, noLdapAssign bool) ([]types.Login, error) {
 	names := make([]types.Login, 0)
 
 	var qb tools.QueryBuilder
@@ -409,7 +410,7 @@ func GetNames(id int64, idsExclude []int64, byString string, noLdapAssign bool) 
 		return names, err
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, query, qb.GetParaValues()...)
+	rows, err := tx.Query(ctx, query, qb.GetParaValues()...)
 	if err != nil {
 		return names, err
 	}
@@ -426,18 +427,18 @@ func GetNames(id int64, idsExclude []int64, byString string, noLdapAssign bool) 
 }
 
 // user creatable fixed (permanent) tokens for less sensitive access permissions
-func DelTokenFixed(loginId int64, id int64) error {
-	_, err := db.Pool.Exec(db.Ctx, `
+func DelTokenFixed_tx(ctx context.Context, tx pgx.Tx, loginId int64, id int64) error {
+	_, err := tx.Exec(ctx, `
 		DELETE FROM instance.login_token_fixed
 		WHERE login_id = $1
 		AND   id       = $2
 	`, loginId, id)
 	return err
 }
-func GetTokensFixed(loginId int64) ([]types.LoginTokenFixed, error) {
+func GetTokensFixed_tx(ctx context.Context, tx pgx.Tx, loginId int64) ([]types.LoginTokenFixed, error) {
 	tokens := make([]types.LoginTokenFixed, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT id, name, context, token, date_create
 		FROM instance.login_token_fixed
 		WHERE login_id = $1
@@ -459,11 +460,11 @@ func GetTokensFixed(loginId int64) ([]types.LoginTokenFixed, error) {
 	}
 	return tokens, nil
 }
-func SetTokenFixed_tx(tx pgx.Tx, loginId int64, name string, context string) (string, error) {
+func SetTokenFixed_tx(ctx context.Context, tx pgx.Tx, loginId int64, name string, context string) (string, error) {
 	min, max := 32, 48
 	tokenFixed := tools.RandStringRunes(rand.Intn(max-min+1) + min)
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		INSERT INTO instance.login_token_fixed (login_id,token,name,context,date_create)
 			VALUES ($1,$2,$3,$4,$5)
 	`, loginId, tokenFixed, name, context, tools.GetTimeUnix()); err != nil {

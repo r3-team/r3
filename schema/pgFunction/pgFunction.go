@@ -1,6 +1,7 @@
 package pgFunction
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/db"
@@ -17,20 +18,20 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
 	nameMod, nameEx, _, _, err := schema.GetPgFunctionDetailsById_tx(tx, id)
 	if err != nil {
 		return err
 	}
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		DROP FUNCTION "%s"."%s"
 	`, nameMod, nameEx)); err != nil {
 		return err
 	}
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.pg_function
 		WHERE id = $1
 	`, id); err != nil {
@@ -126,7 +127,7 @@ func getSchedules_tx(tx pgx.Tx, pgFunctionId uuid.UUID) ([]types.PgFunctionSched
 	return schedules, nil
 }
 
-func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 
 	if err := check.DbIdentifier(fnc.Name); err != nil {
 		return err
@@ -174,7 +175,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 			return errors.New("cannot convert between trigger and non-trigger function")
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.pg_function
 			SET name = $1, code_args = $2, code_function = $3,
 				code_returns = $4, is_frontend_exec = $5, volatility = $6
@@ -192,7 +193,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 		if !fnc.IsTrigger {
 			// drop non-trigger function because function arguments can change
 			// two functions with the same name but different interfaces can exist (overloading)
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`DROP FUNCTION "%s"."%s"`, nameMod, nameEx)); err != nil {
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`DROP FUNCTION "%s"."%s"`, nameMod, nameEx)); err != nil {
 				return err
 			}
 		} else {
@@ -201,7 +202,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 				// we cannot drop trigger functions without recreating triggers
 				// renaming changes the function name in the trigger and allows us to replace it
 				// as triggers do not take arguments, overloading is not a problem
-				if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				if _, err := tx.Exec(ctx, fmt.Sprintf(`
 					ALTER FUNCTION "%s"."%s" RENAME TO "%s"
 				`, nameMod, nameEx, fnc.Name)); err != nil {
 					return err
@@ -209,7 +210,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 			}
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.pg_function (id, module_id, name, code_args, code_function,
 				code_returns, is_frontend_exec, is_login_sync, is_trigger, volatility)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
@@ -233,7 +234,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 		s.AtDay = schema.GetValidAtDay(s.IntervalType, s.AtDay)
 
 		if known {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				UPDATE app.pg_function_schedule
 				SET at_second = $1, at_minute = $2, at_hour = $3, at_day = $4,
 					interval_type = $5, interval_value = $6
@@ -244,7 +245,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 				return err
 			}
 		} else {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO app.pg_function_schedule (
 					id, pg_function_id, at_second, at_minute, at_hour, at_day,
 					interval_type, interval_value
@@ -255,7 +256,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 
 				return err
 			}
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO instance.schedule (
 					pg_function_schedule_id,date_attempt,date_success
 				)
@@ -267,7 +268,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 		scheduleIds = append(scheduleIds, s.Id)
 	}
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.pg_function_schedule
 		WHERE pg_function_id = $1
 		AND id <> ALL($2)
@@ -286,7 +287,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 		return fmt.Errorf("failed to process entity IDs, %s", err)
 	}
 
-	_, err = tx.Exec(db.Ctx, fmt.Sprintf(`
+	_, err = tx.Exec(ctx, fmt.Sprintf(`
 		CREATE OR REPLACE FUNCTION "%s"."%s"(%s)
 		RETURNS %s LANGUAGE plpgsql %s AS %s
 	`, nameMod, fnc.Name, fnc.CodeArgs, fnc.CodeReturns, fnc.Volatility, fnc.CodeFunction))
@@ -344,7 +345,7 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 		if err != nil {
 			return err
 		}
-		if err := Set_tx(tx, f); err != nil {
+		if err := Set_tx(db.Ctx, tx, f); err != nil {
 			return err
 		}
 	}

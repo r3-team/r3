@@ -1,10 +1,10 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"r3/cache"
-	"r3/db"
 	"r3/handler"
 	"r3/schema/pgFunction"
 	"r3/types"
@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func PgFunctionDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func PgFunctionDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id uuid.UUID `json:"id"`
@@ -23,10 +23,10 @@ func PgFunctionDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, pgFunction.Del_tx(tx, req.Id)
+	return nil, pgFunction.Del_tx(ctx, tx, req.Id)
 }
 
-func PgFunctionExec_tx(tx pgx.Tx, reqJson json.RawMessage, onlyFrontendFnc bool) (interface{}, error) {
+func PgFunctionExec_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, onlyFrontendFnc bool) (interface{}, error) {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
@@ -58,7 +58,7 @@ func PgFunctionExec_tx(tx pgx.Tx, reqJson json.RawMessage, onlyFrontendFnc bool)
 	}
 
 	var returnIf interface{}
-	if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
+	if err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT "%s"."%s"(%s)
 	`, mod.Name, fnc.Name, strings.Join(placeholders, ",")),
 		req.Args...).Scan(&returnIf); err != nil {
@@ -68,12 +68,12 @@ func PgFunctionExec_tx(tx pgx.Tx, reqJson json.RawMessage, onlyFrontendFnc bool)
 	return returnIf, nil
 }
 
-func PgFunctionSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func PgFunctionSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req types.PgFunction
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, pgFunction.Set_tx(tx, req)
+	return nil, pgFunction.Set_tx(ctx, tx, req)
 }

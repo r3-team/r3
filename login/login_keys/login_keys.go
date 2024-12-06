@@ -86,11 +86,11 @@ func GetPublic(ctx context.Context, relationId uuid.UUID,
 	return keys, nil
 }
 
-func Reset_tx(tx pgx.Tx, loginId int64) error {
+func Reset_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		UPDATE instance.login
 		SET key_private_enc = NULL, key_private_enc_backup = NULL, key_public = NULL
 		WHERE id = $1
@@ -101,7 +101,7 @@ func Reset_tx(tx pgx.Tx, loginId int64) error {
 	// delete unusable data keys
 	for _, rel := range cache.RelationIdMap {
 		if rel.Encryption {
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				DELETE FROM instance_e2ee."%s"
 				WHERE login_id = $1
 			`, schema.GetEncKeyTableName(rel.Id)), loginId); err != nil {
@@ -112,10 +112,10 @@ func Reset_tx(tx pgx.Tx, loginId int64) error {
 	return nil
 }
 
-func Store_tx(tx pgx.Tx, loginId int64, privateKeyEnc string,
+func Store_tx(ctx context.Context, tx pgx.Tx, loginId int64, privateKeyEnc string,
 	privateKeyEncBackup string, publicKey string) error {
 
-	_, err := tx.Exec(db.Ctx, `
+	_, err := tx.Exec(ctx, `
 		UPDATE instance.login
 		SET key_private_enc = $1, key_private_enc_backup = $2, key_public = $3
 		WHERE id = $4
@@ -124,9 +124,9 @@ func Store_tx(tx pgx.Tx, loginId int64, privateKeyEnc string,
 	return err
 }
 
-func StorePrivate_tx(tx pgx.Tx, loginId int64, privateKeyEnc string) error {
+func StorePrivate_tx(ctx context.Context, tx pgx.Tx, loginId int64, privateKeyEnc string) error {
 
-	_, err := tx.Exec(db.Ctx, `
+	_, err := tx.Exec(ctx, `
 		UPDATE instance.login
 		SET key_private_enc = $1
 		WHERE id = $2

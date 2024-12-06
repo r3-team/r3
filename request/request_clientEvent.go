@@ -1,11 +1,11 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"r3/cache"
 	"r3/cluster"
-	"r3/db"
 	"r3/handler"
 	"r3/login/login_clientEvent"
 	"r3/schema/clientEvent"
@@ -37,7 +37,7 @@ func clientEventSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) 
 }
 
 // fat client requests
-func clientEventGetFatClient(loginId int64) (interface{}, error) {
+func clientEventGetFatClient_tx(ctx context.Context, tx pgx.Tx, loginId int64) (interface{}, error) {
 
 	var err error
 	var res struct {
@@ -48,7 +48,7 @@ func clientEventGetFatClient(loginId int64) (interface{}, error) {
 	res.ClientEventIdMapLogin = make(map[uuid.UUID]types.LoginClientEvent)
 
 	// collect login client events for login (currently only used to enable and overwrite hotkeys)
-	res.ClientEventIdMapLogin, err = login_clientEvent.Get(loginId)
+	res.ClientEventIdMapLogin, err = login_clientEvent.Get_tx(ctx, tx, loginId)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func clientEventGetFatClient(loginId int64) (interface{}, error) {
 	cache.Schema_mx.RUnlock()
 	return res, nil
 }
-func clientEventExecFatClient(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
+func clientEventExecFatClient_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
 
 	var req struct {
 		Id        uuid.UUID     `json:"id"`
@@ -119,7 +119,7 @@ func clientEventExecFatClient(reqJson json.RawMessage, loginId int64, address st
 		}
 
 		var returnIf interface{}
-		err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`SELECT "%s"."%s"(%s)`, mod.Name, fnc.Name, strings.Join(placeholders, ",")),
+		err := tx.QueryRow(ctx, fmt.Sprintf(`SELECT "%s"."%s"(%s)`, mod.Name, fnc.Name, strings.Join(placeholders, ",")),
 			req.Arguments...).Scan(&returnIf)
 
 		return nil, err

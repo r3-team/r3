@@ -1,9 +1,9 @@
 package login_check
 
 import (
+	"context"
 	"fmt"
 	"r3/config"
-	"r3/db"
 	"r3/tools"
 	"regexp"
 
@@ -11,11 +11,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func Password(tx pgx.Tx, loginId int64, pwOld string) error {
+func Password(ctx context.Context, tx pgx.Tx, loginId int64, pwOld string) error {
 	var salt, hash string
 	var ldapId pgtype.Int4
 
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT salt, hash, ldap_id
 		FROM instance.login
 		WHERE active

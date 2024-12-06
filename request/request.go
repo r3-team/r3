@@ -12,21 +12,14 @@ import (
 	"r3/handler"
 	"r3/log"
 	"r3/types"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 )
 
 // executes a websocket transaction with multiple requests within a single DB transaction
-func ExecTransaction(ctxClient context.Context, address string, loginId int64, isAdmin bool,
+func ExecTransaction(ctx context.Context, address string, loginId int64, isAdmin bool,
 	device types.WebsocketClientDevice, isNoAuth bool, reqTrans types.RequestTransaction,
 	resTrans types.ResponseTransaction) types.ResponseTransaction {
-
-	// start transaction
-	ctx, ctxCancel := context.WithTimeout(ctxClient,
-		time.Duration(int64(config.GetUint64("dbTimeoutDataWs")))*time.Second)
-
-	defer ctxCancel()
 
 	// run in a loop as there is an error case where it needs to be repeated
 	runAgainNewCache := false
@@ -43,6 +36,7 @@ func ExecTransaction(ctxClient context.Context, address string, loginId int64, i
 			if err := tx.Conn().DeallocateAll(ctx); err != nil {
 				log.Error("websocket", "failed to deallocate DB connection", err)
 				resTrans.Error = handler.ErrGeneral
+				tx.Rollback(ctx)
 				return resTrans
 			}
 			runAgainNewCache = false
@@ -52,6 +46,8 @@ func ExecTransaction(ctxClient context.Context, address string, loginId int64, i
 		// set local transaction configuration parameters
 		// these are used by system functions, such as instance.get_login_id()
 		if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+			tx.Rollback(ctx)
+
 			log.Error("websocket", fmt.Sprintf("TRANSACTION %d, transaction config failure (login ID %d)",
 				reqTrans.TransactionNr, loginId), err)
 
@@ -140,9 +136,9 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "clientEvent":
 			switch action {
 			case "exec":
-				return clientEventExecFatClient(reqJson, loginId, address)
+				return clientEventExecFatClient_tx(ctx, tx, reqJson, loginId, address)
 			case "get":
-				return clientEventGetFatClient(loginId)
+				return clientEventGetFatClient_tx(ctx, tx, loginId)
 			}
 		}
 		return nil, errors.New(handler.ErrUnauthorized)
@@ -179,7 +175,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "feedback":
 		switch action {
 		case "send":
-			return FeedbackSend_tx(tx, reqJson)
+			return FeedbackSend(reqJson)
 		}
 	case "file":
 		switch action {
@@ -189,33 +185,33 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "login":
 		switch action {
 		case "getNames":
-			return LoginGetNames(reqJson)
+			return LoginGetNames_tx(ctx, tx, reqJson)
 		case "delTokenFixed":
-			return LoginDelTokenFixed(reqJson, loginId)
+			return LoginDelTokenFixed_tx(ctx, tx, reqJson, loginId)
 		case "getTokensFixed":
-			return LoginGetTokensFixed(loginId)
+			return LoginGetTokensFixed_tx(ctx, tx, loginId)
 		case "setTokenFixed":
-			return LoginSetTokenFixed_tx(tx, reqJson, loginId)
+			return LoginSetTokenFixed_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginClientEvent":
 		switch action {
 		case "del":
-			return loginClientEventDel_tx(tx, reqJson, loginId)
+			return loginClientEventDel_tx(ctx, tx, reqJson, loginId)
 		case "get":
-			return loginClientEventGet(loginId)
+			return loginClientEventGet_tx(ctx, tx, loginId)
 		case "set":
-			return loginClientEventSet_tx(tx, reqJson, loginId)
+			return loginClientEventSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginKeys":
 		switch action {
 		case "getPublic":
 			return LoginKeysGetPublic(ctx, reqJson)
 		case "reset":
-			return LoginKeysReset_tx(tx, loginId)
+			return LoginKeysReset_tx(ctx, tx, loginId)
 		case "store":
-			return LoginKeysStore_tx(tx, reqJson, loginId)
+			return LoginKeysStore_tx(ctx, tx, reqJson, loginId)
 		case "storePrivate":
-			return LoginKeysStorePrivate_tx(tx, reqJson, loginId)
+			return LoginKeysStorePrivate_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginPassword":
 		switch action {
@@ -223,34 +219,34 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			if isNoAuth {
 				return nil, errors.New(handler.ErrUnauthorized)
 			}
-			return loginPasswortSet_tx(tx, reqJson, loginId)
+			return loginPasswortSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginSetting":
 		switch action {
 		case "get":
-			return LoginSettingsGet(loginId)
+			return LoginSettingsGet(ctx, tx, loginId)
 		case "set":
 			if isNoAuth {
 				return nil, errors.New(handler.ErrUnauthorized)
 			}
-			return LoginSettingsSet_tx(tx, reqJson, loginId)
+			return LoginSettingsSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginWidgetGroups":
 		switch action {
 		case "get":
-			return LoginWidgetGroupsGet(loginId)
+			return LoginWidgetGroupsGet_tx(ctx, tx, loginId)
 		case "set":
-			return LoginWidgetGroupsSet_tx(tx, reqJson, loginId)
+			return LoginWidgetGroupsSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "lookup":
 		switch action {
 		case "get":
-			return lookupGet(reqJson, loginId)
+			return lookupGet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "pgFunction":
 		switch action {
 		case "exec": // user may exec non-trigger backend function, available to frontend
-			return PgFunctionExec_tx(tx, reqJson, true)
+			return PgFunctionExec_tx(ctx, tx, reqJson, true)
 		}
 	}
 
@@ -448,11 +444,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "loginTemplate":
 		switch action {
 		case "del":
-			return LoginTemplateDel_tx(tx, reqJson)
+			return LoginTemplateDel_tx(ctx, tx, reqJson)
 		case "get":
-			return LoginTemplateGet(reqJson)
+			return LoginTemplateGet_tx(ctx, tx, reqJson)
 		case "set":
-			return LoginTemplateSet_tx(tx, reqJson)
+			return LoginTemplateSet_tx(ctx, tx, reqJson)
 		}
 	case "mailAccount":
 		switch action {
@@ -525,20 +521,18 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "pgFunction":
 		switch action {
 		case "del":
-			return PgFunctionDel_tx(tx, reqJson)
+			return PgFunctionDel_tx(ctx, tx, reqJson)
 		case "execAny": // admin may exec any non-trigger backend function
-			return PgFunctionExec_tx(tx, reqJson, false)
+			return PgFunctionExec_tx(ctx, tx, reqJson, false)
 		case "set":
-			return PgFunctionSet_tx(tx, reqJson)
+			return PgFunctionSet_tx(ctx, tx, reqJson)
 		}
 	case "pgIndex":
 		switch action {
 		case "del":
-			return PgIndexDel_tx(tx, reqJson)
-		case "get":
-			return PgIndexGet(reqJson)
+			return PgIndexDel_tx(ctx, tx, reqJson)
 		case "set":
-			return PgIndexSet_tx(tx, reqJson)
+			return PgIndexSet_tx(ctx, tx, reqJson)
 		}
 	case "pgTrigger":
 		switch action {

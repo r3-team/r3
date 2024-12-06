@@ -37,7 +37,7 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
 	// delete FK index if relationship attribute
 	if schema.IsContentRelationship(content) {
-		if err := pgIndex.DelAutoFkiForAttribute_tx(tx, id); err != nil {
+		if err := pgIndex.DelAutoFkiForAttribute_tx(db.Ctx, tx, id); err != nil {
 			return err
 		}
 	}
@@ -259,10 +259,10 @@ func Set_tx(tx pgx.Tx, atr types.Attribute) error {
 				// rebuild foreign key index if content changed (as in 1:1 -> n:1)
 				// this also adds/removes unique constraint, if required
 				if atr.Content != contentEx {
-					if err := pgIndex.DelAutoFkiForAttribute_tx(tx, atr.Id); err != nil {
+					if err := pgIndex.DelAutoFkiForAttribute_tx(db.Ctx, tx, atr.Id); err != nil {
 						return err
 					}
-					if err := pgIndex.SetAutoFkiForAttribute_tx(tx, atr.RelationId, atr.Id, (atr.Content == "1:1")); err != nil {
+					if err := pgIndex.SetAutoFkiForAttribute_tx(db.Ctx, tx, atr.RelationId, atr.Id, (atr.Content == "1:1")); err != nil {
 						return err
 					}
 				}
@@ -420,7 +420,7 @@ func Set_tx(tx pgx.Tx, atr types.Attribute) error {
 
 			// create PK PG index reference for new attributes
 			if isNew {
-				if err := pgIndex.SetPrimaryKeyForAttribute_tx(tx, atr.RelationId, atr.Id); err != nil {
+				if err := pgIndex.SetPrimaryKeyForAttribute_tx(db.Ctx, tx, atr.RelationId, atr.Id); err != nil {
 					return err
 				}
 			}
@@ -468,7 +468,7 @@ func Set_tx(tx pgx.Tx, atr types.Attribute) error {
 			}
 			if isNew {
 				// add automatic FK index for new attributes
-				if err := pgIndex.SetAutoFkiForAttribute_tx(tx, atr.RelationId,
+				if err := pgIndex.SetAutoFkiForAttribute_tx(db.Ctx, tx, atr.RelationId,
 					atr.Id, (atr.Content == "1:1")); err != nil {
 
 					return err

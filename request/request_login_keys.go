@@ -23,11 +23,11 @@ func LoginKeysGetPublic(ctx context.Context, reqJson json.RawMessage) (interface
 	return login_keys.GetPublic(ctx, req.RelationId, req.RecordIds, req.LoginIds)
 }
 
-func LoginKeysReset_tx(tx pgx.Tx, loginId int64) (interface{}, error) {
-	return nil, login_keys.Reset_tx(tx, loginId)
+func LoginKeysReset_tx(ctx context.Context, tx pgx.Tx, loginId int64) (interface{}, error) {
+	return nil, login_keys.Reset_tx(ctx, tx, loginId)
 }
 
-func LoginKeysStore_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func LoginKeysStore_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
 
 	var req struct {
 		PrivateKeyEnc       string `json:"privateKeyEnc"`
@@ -38,11 +38,11 @@ func LoginKeysStore_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (inter
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login_keys.Store_tx(tx, loginId,
+	return nil, login_keys.Store_tx(ctx, tx, loginId,
 		req.PrivateKeyEnc, req.PrivateKeyEncBackup, req.PublicKey)
 }
 
-func LoginKeysStorePrivate_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func LoginKeysStorePrivate_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
 
 	var req struct {
 		PrivateKeyEnc string `json:"privateKeyEnc"`
@@ -51,5 +51,5 @@ func LoginKeysStorePrivate_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64)
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login_keys.StorePrivate_tx(tx, loginId, req.PrivateKeyEnc)
+	return nil, login_keys.StorePrivate_tx(ctx, tx, loginId, req.PrivateKeyEnc)
 }

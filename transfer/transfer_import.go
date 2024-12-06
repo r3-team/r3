@@ -1,6 +1,7 @@
 package transfer
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -137,7 +138,7 @@ func ImportFromFiles(filePathsImport []string) error {
 				}
 			}
 
-			if err := importModule_tx(tx, m, firstRun, lastRun, idMapSkipped); err != nil {
+			if err := importModule_tx(ctx, tx, m, firstRun, lastRun, idMapSkipped); err != nil {
 				return err
 			}
 
@@ -181,7 +182,7 @@ func ImportFromFiles(filePathsImport []string) error {
 	return cluster.SchemaChanged(true, moduleIdsUpdated)
 }
 
-func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
+func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 	idMapSkipped map[uuid.UUID]types.Void) error {
 
 	// we use a sensible import order to avoid conflicts but some cannot be avoided:
@@ -379,7 +380,7 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 		log.Info("transfer", fmt.Sprintf("set PG function %s", e.Id))
 
-		if err := importCheckResultAndApply(tx, pgFunction.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(tx, pgFunction.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -413,7 +414,7 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 			}
 			log.Info("transfer", fmt.Sprintf("set index %s", e.Id))
 
-			if err := importCheckResultAndApply(tx, pgIndex.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
+			if err := importCheckResultAndApply(tx, pgIndex.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
 				return err
 			}
 		}

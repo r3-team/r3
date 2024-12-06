@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"r3/login"
@@ -9,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func loginPasswortSet_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func loginPasswortSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
 
 	var req struct {
 		PwNew0 string `json:"pwNew0"`
@@ -24,7 +25,7 @@ func loginPasswortSet_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (int
 		return nil, fmt.Errorf("invalid input")
 	}
 
-	if err := login_check.Password(tx, loginId, req.PwOld); err != nil {
+	if err := login_check.Password(ctx, tx, loginId, req.PwOld); err != nil {
 		return nil, err
 	}
 	if err := login_check.PasswordComplexity(req.PwNew0); err != nil {
@@ -32,5 +33,5 @@ func loginPasswortSet_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (int
 	}
 
 	salt, hash := login.GenerateSaltHash(req.PwNew0)
-	return nil, login.SetSaltHash_tx(tx, salt, hash, loginId)
+	return nil, login.SetSaltHash_tx(ctx, tx, salt, hash, loginId)
 }

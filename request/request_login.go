@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/base32"
 	"encoding/json"
 	"r3/cluster"
@@ -13,7 +14,7 @@ import (
 )
 
 // user requests
-func LoginGetNames(reqJson json.RawMessage) (interface{}, error) {
+func LoginGetNames_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		ByString     string  `json:"byString"`
@@ -25,21 +26,21 @@ func LoginGetNames(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return login.GetNames(req.Id, req.IdsExclude, req.ByString, req.NoLdapAssign)
+	return login.GetNames_tx(ctx, tx, req.Id, req.IdsExclude, req.ByString, req.NoLdapAssign)
 }
-func LoginDelTokenFixed(reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func LoginDelTokenFixed_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
 	var req struct {
 		Id int64 `json:"id"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login.DelTokenFixed(loginId, req.Id)
+	return nil, login.DelTokenFixed_tx(ctx, tx, loginId, req.Id)
 }
-func LoginGetTokensFixed(loginId int64) (interface{}, error) {
-	return login.GetTokensFixed(loginId)
+func LoginGetTokensFixed_tx(ctx context.Context, tx pgx.Tx, loginId int64) (interface{}, error) {
+	return login.GetTokensFixed_tx(ctx, tx, loginId)
 }
-func LoginSetTokenFixed_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func LoginSetTokenFixed_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
 
 	var (
 		err error
@@ -56,7 +57,7 @@ func LoginSetTokenFixed_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (i
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	res.TokenFixed, err = login.SetTokenFixed_tx(tx, loginId, req.Name, req.Context)
+	res.TokenFixed, err = login.SetTokenFixed_tx(ctx, tx, loginId, req.Name, req.Context)
 	res.TokenFixedB32 = base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString([]byte(res.TokenFixed))
 
 	return res, err

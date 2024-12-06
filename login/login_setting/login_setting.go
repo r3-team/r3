@@ -1,16 +1,16 @@
 package login_setting
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func Get(loginId pgtype.Int8, loginTemplateId pgtype.Int8) (types.Settings, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8) (types.Settings, error) {
 
 	var s types.Settings
 	if (loginId.Valid && loginTemplateId.Valid) || (!loginId.Valid && !loginTemplateId.Valid) {
@@ -25,7 +25,7 @@ func Get(loginId pgtype.Int8, loginTemplateId pgtype.Int8) (types.Settings, erro
 		entryName = "login_template_id"
 	}
 
-	err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+	err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT language_code, date_format, sunday_first_dow, font_size,
 			borders_all, borders_squared, header_captions, header_modules,
 			spacing, dark, hint_update_version, mobile_scroll_form,
@@ -52,7 +52,7 @@ func Get(loginId pgtype.Int8, loginTemplateId pgtype.Int8) (types.Settings, erro
 	return s, err
 }
 
-func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types.Settings, isNew bool) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types.Settings, isNew bool) error {
 
 	if (loginId.Valid && loginTemplateId.Valid) || (!loginId.Valid && !loginTemplateId.Valid) {
 		return errors.New("settings can only be applied for either login or login template")
@@ -67,7 +67,7 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 	}
 
 	if isNew {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			INSERT INTO instance.login_setting (%s, language_code, date_format,
 				sunday_first_dow, font_size, borders_all, borders_squared,
 				header_captions, header_modules, spacing, dark,
@@ -88,7 +88,7 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			UPDATE instance.login_setting
 			SET language_code = $1, date_format = $2, sunday_first_dow = $3,
 				font_size = $4, borders_all = $5, borders_squared = $6,
@@ -115,7 +115,7 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 
 	// update full text search dictionaries
 	if !isNew {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			DELETE FROM instance.login_search_dict
 			WHERE %s = $1
 		`, entryName), entryId); err != nil {
@@ -124,7 +124,7 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 	}
 
 	for i, dictName := range s.SearchDictionaries {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			INSERT INTO instance.login_search_dict (%s, position, name)
 			VALUES ($1, $2, $3)
 		`, entryName), entryId, i, dictName); err != nil {
