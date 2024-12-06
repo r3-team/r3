@@ -15,7 +15,7 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 
 	states := make([]types.FormState, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, description
 		FROM app.form_state
 		WHERE form_id = $1
@@ -55,7 +55,7 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, error) {
 	conditions := make([]types.FormStateCondition, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT position, connector, operator
 		FROM app.form_state_condition
 		WHERE form_state_id = $1
@@ -91,7 +91,7 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 func getStateConditionSide(formStateId uuid.UUID, position int, side int) (types.FormStateConditionSide, error) {
 	var s types.FormStateConditionSide
 
-	err := db.Pool.QueryRow(db.Ctx, `
+	err := db.Pool.QueryRow(context.Background(), `
 		SELECT collection_id, column_id, field_id, preset_id,
 			role_id, variable_id, brackets, content, value
 		FROM app.form_state_condition_side
@@ -109,7 +109,7 @@ func getStateEffects(formStateId uuid.UUID) ([]types.FormStateEffect, error) {
 
 	effects := make([]types.FormStateEffect, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT field_id, form_action_id, tab_id, new_state
 		FROM app.form_state_effect
 		WHERE form_state_id = $1

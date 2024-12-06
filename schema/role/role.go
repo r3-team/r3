@@ -27,7 +27,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Get(moduleId uuid.UUID) ([]types.Role, error) {
 	roles := make([]types.Role, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT r.id, r.name, r.content, r.assignable, ARRAY(
 			SELECT role_id_child
 			FROM app.role_child
@@ -78,7 +78,7 @@ func getAccess(role types.Role) (types.Role, error) {
 	role.AccessMenus = make(map[uuid.UUID]int)
 	role.AccessWidgets = make(map[uuid.UUID]int)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT api_id, attribute_id, client_event_id, collection_id,
 			menu_id, relation_id, widget_id, access
 		FROM app.role_access

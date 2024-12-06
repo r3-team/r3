@@ -33,7 +33,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 
 	fields := make([]interface{}, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT f.id, f.parent_id, f.tab_id, f.icon_id, f.content, f.state,
 		f.on_mobile, a.content,
 		
@@ -647,7 +647,7 @@ func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
 	var f types.FieldCalendar
 	f.Id = fieldId
 
-	err := db.Pool.QueryRow(db.Ctx, `
+	err := db.Pool.QueryRow(context.Background(), `
 		SELECT attribute_id_date0, attribute_id_date1, index_date0, index_date1,
 			date_range0, date_range1, days, days_toggle
 		FROM app.field_calendar

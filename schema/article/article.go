@@ -62,7 +62,7 @@ func Get(moduleId uuid.UUID) ([]types.Article, error) {
 
 	articles := make([]types.Article, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, name
 		FROM app.article
 		WHERE module_id = $1

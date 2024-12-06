@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -16,7 +17,10 @@ import (
 
 // optimize DB
 func dbOptimize() error {
-	_, err := db.Pool.Exec(db.Ctx, `VACUUM`)
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbTask)
+	defer ctxCanc()
+
+	_, err := db.Pool.Exec(ctx, `VACUUM`)
 	return err
 }
 
@@ -48,12 +52,15 @@ func cleanupTemp() error {
 
 // deletes expired logs
 func cleanupLogs() error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbTask)
+	defer ctxCanc()
+
 	keepForDays := config.GetUint64("logsKeepDays")
 	if keepForDays == 0 {
 		return nil
 	}
 
-	_, err := db.Pool.Exec(db.Ctx, `
+	_, err := db.Pool.Exec(ctx, `
 		DELETE FROM instance.log
 		WHERE date_milli < $1
 	`, (tools.GetTimeUnix()-(oneDayInSeconds*int64(keepForDays)))*1000)
@@ -67,7 +74,10 @@ func cleanupMailTraffic() error {
 		return nil
 	}
 
-	_, err := db.Pool.Exec(db.Ctx, `
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbTask)
+	defer ctxCanc()
+
+	_, err := db.Pool.Exec(ctx, `
 		DELETE FROM instance.mail_traffic
 		WHERE date < $1
 	`, tools.GetTimeUnix()-(oneDayInSeconds*int64(keepForDays)))
@@ -82,7 +92,7 @@ func cleanUpFiles() error {
 
 	// delete file record assignments, if file link was deleted and retention has been reached
 	attributeIdsFile := make([]uuid.UUID, 0)
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(context.Background(), `
 		SELECT ARRAY_AGG(id)
 		FROM app.attribute
 		WHERE content = 'files'
@@ -91,7 +101,7 @@ func cleanUpFiles() error {
 	}
 
 	for _, atrId := range attributeIdsFile {
-		if _, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := db.Pool.Exec(context.Background(), fmt.Sprintf(`
 			DELETE FROM instance_file."%s"
 			WHERE date_delete IS NOT NULL
 			AND   date_delete < $1
@@ -113,7 +123,7 @@ func cleanUpFiles() error {
 		removeCnt := 0
 		fileVersions := make([]fileVersion, 0)
 
-		rows, err := db.Pool.Query(db.Ctx, `
+		rows, err := db.Pool.Query(context.Background(), `
 			SELECT v.file_id, v.version
 			FROM instance.file_version AS v
 			
@@ -165,7 +175,7 @@ func cleanUpFiles() error {
 				}
 			}
 
-			if _, err := db.Pool.Exec(db.Ctx, `
+			if _, err := db.Pool.Exec(context.Background(), `
 					DELETE FROM instance.file_version
 					WHERE file_id = $1
 					AND   version = $2
@@ -192,7 +202,7 @@ func cleanUpFiles() error {
 	// delete files that no records references
 	for {
 		fileIds := make([]uuid.UUID, 0)
-		if err := db.Pool.QueryRow(db.Ctx, `
+		if err := db.Pool.QueryRow(context.Background(), `
 			SELECT ARRAY_AGG(id)
 			FROM instance.file
 			WHERE ref_counter = 0
@@ -207,7 +217,7 @@ func cleanUpFiles() error {
 		for _, fileId := range fileIds {
 
 			versions := make([]int64, 0)
-			if err := db.Pool.QueryRow(db.Ctx, `
+			if err := db.Pool.QueryRow(context.Background(), `
 				SELECT ARRAY_AGG(version)
 				FROM instance.file_version
 				WHERE file_id = $1
@@ -236,7 +246,7 @@ func cleanUpFiles() error {
 
 				// either file version existed on disk and could be deleted or it didn´t exist
 				// either case we delete the file reference
-				if _, err := db.Pool.Exec(db.Ctx, `
+				if _, err := db.Pool.Exec(context.Background(), `
 						DELETE FROM instance.file_version
 						WHERE file_id = $1
 						AND   version = $2
@@ -256,7 +266,7 @@ func cleanUpFiles() error {
 		}
 
 		// delete references of files that have no versions left
-		tag, err := db.Pool.Exec(db.Ctx, `
+		tag, err := db.Pool.Exec(context.Background(), `
 			DELETE FROM instance.file AS f
 			WHERE 0 = (
 				SELECT COUNT(*)

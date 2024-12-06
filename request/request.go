@@ -168,7 +168,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "filesCopied":
 			return eventFilesCopied(reqJson, loginId, address)
 		case "fileRequested":
-			return eventFileRequested(reqJson, loginId, address)
+			return eventFileRequested(ctx, reqJson, loginId, address)
 		case "keystrokesRequested":
 			return eventKeystrokesRequested(reqJson, loginId, address)
 		}
@@ -505,13 +505,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "oauthClient":
 		switch action {
 		case "del":
-			return OauthClientDel_tx(tx, reqJson)
+			return OauthClientDel_tx(ctx, tx, reqJson)
 		case "get":
 			return OauthClientGet()
 		case "reload":
 			return OauthClientReload()
 		case "set":
-			return OauthClientSet_tx(tx, reqJson)
+			return OauthClientSet_tx(ctx, tx, reqJson)
 		}
 	case "package":
 		switch action {
@@ -567,7 +567,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "repoModule":
 		switch action {
 		case "get":
-			return RepoModuleGet(reqJson)
+			return RepoModuleGet_tx(ctx, tx, reqJson)
 		case "install":
 			return RepoModuleInstall(reqJson)
 		case "installAll":

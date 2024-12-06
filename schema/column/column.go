@@ -31,7 +31,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 		return columns, errors.New("bad entity")
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 		SELECT id, attribute_id, index, batch, basis, length, display, group_by,
 			aggregator, distincted, hidden, on_mobile, sub_query, styles
 		FROM app.column

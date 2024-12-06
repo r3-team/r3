@@ -19,7 +19,7 @@ func Get(moduleId uuid.UUID) ([]types.Icon, error) {
 
 	icons := make([]types.Icon, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, name, file
 		FROM app.icon
 		WHERE module_id = $1

@@ -20,7 +20,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Get(moduleId uuid.UUID) ([]types.Widget, error) {
 
 	widgets := make([]types.Widget, 0)
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, form_id, name, size
 		FROM app.widget
 		WHERE module_id = $1

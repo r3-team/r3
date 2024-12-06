@@ -41,7 +41,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	}
 
 	for _, atrId := range atrIdsFile {
-		if err := attribute.FileRelationsDelete_tx(tx, atrId); err != nil {
+		if err := attribute.FileRelationsDelete_tx(ctx, tx, atrId); err != nil {
 			return err
 		}
 	}
@@ -77,7 +77,7 @@ func delPkSeq_tx(ctx context.Context, tx pgx.Tx, modName string, id uuid.UUID) e
 func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 
 	relations := make([]types.Relation, 0)
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, name, comment, encryption, retention_count, retention_days, (
 			SELECT id
 			FROM app.attribute
@@ -201,5 +201,5 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation) error {
 	}
 
 	// set policies
-	return setPolicies_tx(tx, rel.Id, rel.Policies)
+	return setPolicies_tx(ctx, tx, rel.Id, rel.Policies)
 }

@@ -18,7 +18,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Get(moduleId uuid.UUID) ([]types.Variable, error) {
 
 	variables := make([]types.Variable, 0)
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT v.id, v.form_id, v.name, v.comment, v.content, v.content_use
 		FROM      app.variable  AS v
 		LEFT JOIN app.form      AS f ON f.id = v.form_id

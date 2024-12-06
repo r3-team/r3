@@ -28,7 +28,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Tab, error) {
 		return tabs, errors.New("bad entity")
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 		SELECT id, content_counter, state
 		FROM app.tab
 		WHERE %s_id = $1

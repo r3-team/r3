@@ -38,7 +38,7 @@ func DoAll() error {
 		anySuccess := false
 
 		// collect spooled REST calls
-		rows, err := db.Pool.Query(db.Ctx, `
+		rows, err := db.Pool.Query(context.Background(), `
 			SELECT id, pg_function_id_callback, method, headers,
 				url, body, callback_value, skip_verify
 			FROM instance.rest_spool
@@ -66,7 +66,7 @@ func DoAll() error {
 			if err := callExecute(c); err != nil {
 				log.Error("api", fmt.Sprintf("failed to execute REST call %s '%s'", c.method, c.url), err)
 
-				_, err := db.Pool.Exec(db.Ctx, `
+				_, err := db.Pool.Exec(context.Background(), `
 					UPDATE instance.rest_spool
 					SET attempt_count = attempt_count + 1
 					WHERE id = $1

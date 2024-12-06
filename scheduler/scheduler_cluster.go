@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"r3/cache"
@@ -16,7 +17,7 @@ import (
 // collect cluster events from shared database for node to react to
 func clusterProcessEvents() error {
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT content, payload,
 			COALESCE(target_address, ''),
 			COALESCE(target_device, 0),
@@ -46,7 +47,7 @@ func clusterProcessEvents() error {
 	}
 
 	// delete collected events
-	if _, err := db.Pool.Exec(db.Ctx, `
+	if _, err := db.Pool.Exec(context.Background(), `
 		DELETE FROM instance_cluster.node_event
 		WHERE node_id = $1
 	`, cache.GetNodeId()); err != nil {

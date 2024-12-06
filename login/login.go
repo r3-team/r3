@@ -168,7 +168,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 	// collect role IDs
 	if roles {
 		for i, l := range logins {
-			logins[i].RoleIds, err = getRoleIds(l.Id)
+			logins[i].RoleIds, err = getRoleIds(ctx, l.Id)
 			if err != nil {
 				return logins, 0, err
 			}

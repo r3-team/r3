@@ -18,7 +18,7 @@ func Get(entity string, id uuid.UUID, expectedContents []string) (types.CaptionM
 		caps[content] = make(map[string]string)
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 		SELECT language_code, content, value
 		FROM app.caption
 		WHERE %s_id = $1

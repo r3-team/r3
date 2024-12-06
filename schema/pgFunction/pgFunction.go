@@ -45,7 +45,7 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 	var err error
 	functions := make([]types.PgFunction, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, name, code_args, code_function, code_returns,
 			is_frontend_exec, is_login_sync, is_trigger, volatility
 		FROM app.pg_function

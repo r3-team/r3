@@ -20,7 +20,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Get(moduleId uuid.UUID) ([]types.ClientEvent, error) {
 
 	clientEvents := make([]types.ClientEvent, 0)
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, action, arguments, event, hotkey_modifier1,
 			hotkey_modifier2, hotkey_char, js_function_id, pg_function_id
 		FROM app.client_event

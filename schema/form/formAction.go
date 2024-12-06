@@ -14,7 +14,7 @@ import (
 func getActions(formId uuid.UUID) ([]types.FormAction, error) {
 	actions := make([]types.FormAction, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, js_function_id, icon_id, state, color
 		FROM app.form_action
 		WHERE form_id = $1

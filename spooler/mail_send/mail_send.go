@@ -34,7 +34,7 @@ func DoAll() error {
 	now := tools.GetTimeUnix()
 	mails := make([]types.Mail, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, to_list, cc_list, bcc_list, subject, body, attempt_count,
 			mail_account_id, record_id_wofk, attribute_id
 		FROM instance.mail_spool
@@ -69,7 +69,7 @@ func DoAll() error {
 			log.Error("mail", fmt.Sprintf("is unable to send (attempt %d)",
 				m.AttemptCount+1), err)
 
-			if _, err := db.Pool.Exec(db.Ctx, `
+			if _, err := db.Pool.Exec(context.Background(), `
 				UPDATE instance.mail_spool
 				SET attempt_count = $1, attempt_date = $2
 				WHERE id = $3
@@ -82,7 +82,7 @@ func DoAll() error {
 		// everything went well, delete spool entry
 		log.Info("mail", "successfully sent message")
 
-		if _, err := db.Pool.Exec(db.Ctx, `
+		if _, err := db.Pool.Exec(context.Background(), `
 			DELETE FROM instance.mail_spool
 			WHERE id = $1
 		`, m.Id); err != nil {
@@ -170,7 +170,7 @@ func do(m types.Mail) error {
 				m.AttributeId.Bytes)
 		}
 
-		rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+		rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 			SELECT r.file_id, r.name, (
 				SELECT MAX(v.version)
 				FROM  instance.file_version AS v
@@ -256,7 +256,7 @@ func do(m types.Mail) error {
 	}
 
 	// add to mail traffic log
-	if _, err := db.Pool.Exec(db.Ctx, `
+	if _, err := db.Pool.Exec(context.Background(), `
 		INSERT INTO instance.mail_traffic (from_list, to_list, cc_list,
 			subject, date, files, mail_account_id, outgoing)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,TRUE)

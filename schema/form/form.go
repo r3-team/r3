@@ -147,7 +147,7 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 		sqlValues = append(sqlValues, ids)
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 		SELECT id, preset_id_open, icon_id, field_id_focus, name, no_data_actions, ARRAY(
 			SELECT article_id
 			FROM app.article_form

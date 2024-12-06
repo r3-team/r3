@@ -12,7 +12,7 @@ import (
 func getFunctions(formId uuid.UUID) ([]types.FormFunction, error) {
 	fncs := make([]types.FormFunction, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT js_function_id, event, event_before
 		FROM app.form_function
 		WHERE form_id = $1

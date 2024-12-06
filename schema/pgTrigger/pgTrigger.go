@@ -39,7 +39,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Get(moduleId uuid.UUID) ([]types.PgTrigger, error) {
 	triggers := make([]types.PgTrigger, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, relation_id, pg_function_id, on_insert, on_update, on_delete,
 			is_constraint, is_deferrable, is_deferred, per_row, fires,
 			code_condition

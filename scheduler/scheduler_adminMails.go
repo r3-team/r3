@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"r3/config"
@@ -31,6 +32,9 @@ func adminMails() error {
 		oauthClientExpirationSubject: `Your REI3 OAuth client is about to expire`,
 	}
 
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
 	var sendMail = func(subject string, body string, dateExpiration int64, reason string) error {
 		// get mail receivers
 		if config.GetString("adminMails") == "" {
@@ -55,20 +59,26 @@ func adminMails() error {
 		body = strings.Replace(body, "{URL}", config.GetString("publicHostName"), -1)
 		body = strings.Replace(body, "{DATE}", time.Unix(dateExpiration, 0).String(), -1)
 
-		if _, err := db.Pool.Exec(db.Ctx, `
+		tx, err := db.Pool.Begin(ctx)
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback(ctx)
+
+		if _, err := tx.Exec(ctx, `
 			SELECT instance.mail_send($1,$2,$3)
 		`, subject, body, strings.Join(toList, ",")); err != nil {
 			return err
 		}
 
-		if _, err := db.Pool.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE instance.admin_mail
 			SET date_last_sent = DATE_PART('EPOCH',CURRENT_DATE)
 			WHERE reason = $1
 		`, reason); err != nil {
 			return err
 		}
-		return nil
+		return tx.Commit(ctx)
 	}
 
 	// collect admin mail definitions
@@ -79,7 +89,7 @@ func adminMails() error {
 	}
 	adminMails := make([]adminMail, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(ctx, `
 		SELECT reason, days_before, date_last_sent
 		FROM instance.admin_mail
 	`)
@@ -98,7 +108,7 @@ func adminMails() error {
 
 	// collect earliest expirying OAuth client
 	var dateExpirationOauth int64 = -1
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(ctx, `
 		SELECT date_expiry
 		FROM instance.oauth_client
 		WHERE date_expiry > DATE_PART('EPOCH',CURRENT_DATE)

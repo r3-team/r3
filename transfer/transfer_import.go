@@ -194,7 +194,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 	// use import loops to allow for repeated attempts
 
 	// module
-	run, err := importCheckRunAndSave(tx, firstRun, mod.Id, idMapSkipped)
+	run, err := importCheckRunAndSave(ctx, tx, firstRun, mod.Id, idMapSkipped)
 	if err != nil {
 		return err
 	}
@@ -209,7 +209,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 	// articles
 	for _, e := range mod.Articles {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -227,7 +227,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 	// icons
 	for _, e := range mod.Icons {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -245,7 +245,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 	// relations
 	for _, e := range mod.Relations {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -267,7 +267,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 				continue
 			}
 
-			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+			run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 			if err != nil {
 				return err
 			}
@@ -289,7 +289,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 				continue
 			}
 
-			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+			run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 			if err != nil {
 				return err
 			}
@@ -306,7 +306,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 	// collections
 	for _, e := range mod.Collections {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -325,7 +325,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 	// APIs
 	for _, e := range mod.Apis {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -341,7 +341,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 	// variables
 	for _, e := range mod.Variables {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -357,7 +357,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 	// widgets
 	for _, e := range mod.Widgets {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -373,7 +373,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 	// PG functions, refer to relations/attributes/pg_functions (self reference)
 	for _, e := range mod.PgFunctions {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -390,7 +390,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 	// PG triggers, refer to PG functions
 	mod.PgTriggers = compatible.FixPgTriggerLocation(mod.PgTriggers, mod.Relations)
 	for _, e := range mod.PgTriggers {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -407,7 +407,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 	// PG indexes
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Indexes {
-			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+			run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 			if err != nil {
 				return err
 			}
@@ -424,7 +424,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 	// forms, refer to relations/attributes/collections/JS functions
 	for _, e := range mod.Forms {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -440,7 +440,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 	// login forms, refer to forms/attributes
 	for _, e := range mod.LoginForms {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -465,7 +465,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 	// roles, refer to relations/attributes/menu
 	for _, e := range mod.Roles {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -481,7 +481,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 	// JS functions, refer to forms/fields/roles/pg_functions/js_functions (self reference)
 	for _, e := range mod.JsFunctions {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -498,7 +498,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 	// client events
 	// refer to JS functions
 	for _, e := range mod.ClientEvents {
-		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
 		}
@@ -519,7 +519,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 	//  because of this some preset referals might not work and are ignored
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Presets {
-			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+			run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 			if err != nil {
 				return err
 			}
@@ -551,7 +551,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 // checks if this action needs to run and sets savepoint inside DB transaction if so
 // returns true if action needs to run
-func importCheckRunAndSave(tx pgx.Tx, firstRun bool, entityId uuid.UUID,
+func importCheckRunAndSave(ctx context.Context, tx pgx.Tx, firstRun bool, entityId uuid.UUID,
 	idMapSkipped map[uuid.UUID]types.Void) (bool, error) {
 
 	_, skipped := idMapSkipped[entityId]
@@ -561,7 +561,7 @@ func importCheckRunAndSave(tx pgx.Tx, firstRun bool, entityId uuid.UUID,
 		return false, nil
 	}
 
-	if _, err := tx.Exec(db.Ctx, `SAVEPOINT transfer_import`); err != nil {
+	if _, err := tx.Exec(ctx, `SAVEPOINT transfer_import`); err != nil {
 		return false, err
 	}
 	return true, nil
@@ -585,7 +585,7 @@ func importCheckResultAndApply(ctx context.Context, tx pgx.Tx, resultErr error, 
 	// error case
 	log.Info("transfer", fmt.Sprintf("skipped entity on this run, error: %s", resultErr))
 
-	if _, err := tx.Exec(db.Ctx, `ROLLBACK TO SAVEPOINT transfer_import`); err != nil {
+	if _, err := tx.Exec(ctx, `ROLLBACK TO SAVEPOINT transfer_import`); err != nil {
 		return err
 	}
 	idMapSkipped[entityId] = types.Void{}

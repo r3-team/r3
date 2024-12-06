@@ -63,7 +63,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	}
 
 	for _, atrId := range atrIdsFile {
-		if err := attribute.FileRelationsDelete_tx(tx, atrId); err != nil {
+		if err := attribute.FileRelationsDelete_tx(ctx, tx, atrId); err != nil {
 			return err
 		}
 	}
@@ -83,7 +83,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Get(ids []uuid.UUID) ([]types.Module, error) {
 	modules := make([]types.Module, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
 			pg_function_id_login_sync, name, name_pwa, name_pwa_short, color1,
 			position, language_main, release_build, release_build_app, release_date,
@@ -243,7 +243,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 		}
 
 		// create module meta data record for instance
-		if err := module_meta.Create_tx(tx, mod.Id, false, create, mod.Position); err != nil {
+		if err := module_meta.Create_tx(ctx, tx, mod.Id, false, create, mod.Position); err != nil {
 			return mod.Id, err
 		}
 	}
@@ -344,7 +344,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {
 
 	startForms := make([]types.ModuleStartForm, 0)
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT role_id, form_id
 		FROM app.module_start_form
 		WHERE module_id = $1
@@ -368,7 +368,7 @@ func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {
 func getDependsOn_tx(tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
 
 	moduleIdsDependsOn := make([]uuid.UUID, 0)
-	rows, err := tx.Query(db.Ctx, `
+	rows, err := tx.Query(context.Background(), `
 		SELECT module_id_on
 		FROM app.module_depends
 		WHERE module_id = $1

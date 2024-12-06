@@ -76,7 +76,7 @@ func Get(moduleId uuid.UUID, id uuid.UUID) ([]types.Api, error) {
 		sqlValues = append(sqlValues, id)
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 		SELECT id, module_id, name, comment, has_delete, has_get,
 			has_post, limit_def, limit_max, verbose_def, version
 		FROM app.api

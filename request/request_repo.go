@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/db"
 	"r3/repo"
@@ -8,9 +9,10 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
-func RepoModuleGet(reqJson json.RawMessage) (interface{}, error) {
+func RepoModuleGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var (
 		err error
@@ -32,9 +34,9 @@ func RepoModuleGet(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	res.RepoModules, res.Count, err = repo.GetModule(req.ByString,
-		req.LanguageCode, req.Limit, req.Offset, req.GetInstalled,
-		req.GetNew, req.GetInStore)
+	res.RepoModules, res.Count, err = repo.GetModule_tx(ctx, tx, req.ByString,
+		req.LanguageCode, req.Limit, req.Offset, req.GetInstalled, req.GetNew,
+		req.GetInStore)
 
 	if err != nil {
 		return nil, err
@@ -65,7 +67,7 @@ func RepoModuleInstallAll() (interface{}, error) {
 	fileIds := make([]uuid.UUID, 0)
 	filePaths := make([]string, 0)
 
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(context.Background(), `
 		SELECT ARRAY_AGG(rm.file)
 		FROM app.module AS m
 		INNER JOIN instance.repo_module AS rm ON rm.module_id_wofk = m.id

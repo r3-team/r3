@@ -62,7 +62,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Get(relationId uuid.UUID) ([]types.PgIndex, error) {
 	pgIndexes := make([]types.PgIndex, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, attribute_id_dict, method, no_duplicates, auto_fki, primary_key
 		FROM app.pg_index
 		WHERE relation_id = $1
@@ -101,7 +101,7 @@ func Get(relationId uuid.UUID) ([]types.PgIndex, error) {
 func GetAttributes(pgIndexId uuid.UUID) ([]types.PgIndexAttribute, error) {
 	attributes := make([]types.PgIndexAttribute, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT attribute_id, order_asc
 		FROM app.pg_index_attribute
 		WHERE pg_index_id = $1

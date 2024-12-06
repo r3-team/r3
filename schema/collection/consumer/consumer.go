@@ -24,7 +24,7 @@ func GetOne(entity string, entityId uuid.UUID, content string) (types.Collection
 		return c, errors.New("invalid collection consumer entity")
 	}
 
-	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+	if err := db.Pool.QueryRow(context.Background(), fmt.Sprintf(`
 		SELECT id, collection_id, column_id_display, 
 			multi_value, no_display_empty, on_mobile
 		FROM app.collection_consumer
@@ -49,7 +49,7 @@ func Get(entity string, entityId uuid.UUID, content string) ([]types.CollectionC
 		return consumers, errors.New("invalid collection consumer entity")
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 		SELECT id, collection_id, column_id_display,
 			multi_value, no_display_empty, on_mobile
 		FROM app.collection_consumer

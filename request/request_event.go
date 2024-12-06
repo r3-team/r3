@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"r3/cluster"
@@ -29,7 +30,7 @@ func eventFilesCopied(reqJson json.RawMessage, loginId int64, address string) (i
 func eventClientEventsChanged(loginId int64, address string) (interface{}, error) {
 	return nil, cluster.ClientEventsChanged(true, address, loginId)
 }
-func eventFileRequested(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
+func eventFileRequested(ctx context.Context, reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
 	var req struct {
 		AttributeId uuid.UUID `json:"attributeId"`
 		FileId      uuid.UUID `json:"fileId"`
@@ -45,7 +46,7 @@ func eventFileRequested(reqJson json.RawMessage, loginId int64, address string) 
 	// files before 3.1 do not have a hash value, empty hash is then compared against new file version hash
 	var hash pgtype.Text
 	var name string
-	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+	if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
 		SELECT v.hash, r.name
 		FROM instance.file_version AS v
 		JOIN instance_file."%s"    AS r

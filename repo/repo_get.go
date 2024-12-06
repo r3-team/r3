@@ -1,16 +1,17 @@
 package repo
 
 import (
+	"context"
 	"fmt"
-	"r3/db"
 	"r3/tools"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 // returns modules from repository and total count
-func GetModule(byString string, languageCode string, limit int,
+func GetModule_tx(ctx context.Context, tx pgx.Tx, byString string, languageCode string, limit int,
 	offset int, getInstalled bool, getNew bool, getInStore bool) ([]types.RepoModule, int, error) {
 
 	repoModules := make([]types.RepoModule, 0)
@@ -86,7 +87,7 @@ func GetModule(byString string, languageCode string, limit int,
 		return repoModules, 0, err
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, query, qb.GetParaValues()...)
+	rows, err := tx.Query(ctx, query, qb.GetParaValues()...)
 	if err != nil {
 		return repoModules, 0, err
 	}
@@ -101,7 +102,7 @@ func GetModule(byString string, languageCode string, limit int,
 
 			return repoModules, 0, err
 		}
-		rm.LanguageCodeMeta, err = getModuleMeta(rm.ModuleId)
+		rm.LanguageCodeMeta, err = getModuleMeta_tx(ctx, tx, rm.ModuleId)
 		if err != nil {
 			return repoModules, 0, err
 		}
@@ -125,18 +126,18 @@ func GetModule(byString string, languageCode string, limit int,
 			return repoModules, 0, err
 		}
 
-		if err := db.Pool.QueryRow(db.Ctx, query, qb.GetParaValues()...).Scan(&total); err != nil {
+		if err := tx.QueryRow(ctx, query, qb.GetParaValues()...).Scan(&total); err != nil {
 			return repoModules, 0, err
 		}
 	}
 	return repoModules, total, nil
 }
 
-func getModuleMeta(moduleId uuid.UUID) (map[string]types.RepoModuleMeta, error) {
+func getModuleMeta_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) (map[string]types.RepoModuleMeta, error) {
 
 	metaMap := make(map[string]types.RepoModuleMeta)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT language_code, title, description, support_page
 		FROM instance.repo_module_meta
 		WHERE module_id_wofk = $1

@@ -23,7 +23,7 @@ var (
 	CtxDefTimeoutDbTask   = 300 * time.Second // heavy DB operations (init/upgrade/relation retention cleanup)
 	CtxDefTimeoutLogWrite = 30 * time.Second  // writing to database log
 	CtxDefTimeoutPgFunc   = 240 * time.Second // executing plsql functions, to be replaced by config option
-	CtxDefTimeoutSysTask  = 30 * time.Second  // executing small system tasks
+	CtxDefTimeoutSysTask  = 30 * time.Second  // executing system tasks
 	CtxDefTimeoutTransfer = 600 * time.Second // executing module transfers, to be replaced by config option
 )
 

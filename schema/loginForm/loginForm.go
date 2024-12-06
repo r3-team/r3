@@ -19,7 +19,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Get(moduleId uuid.UUID) ([]types.LoginForm, error) {
 
 	loginForms := make([]types.LoginForm, 0)
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, attribute_id_login, attribute_id_lookup, form_id, name
 		FROM app.login_form
 		WHERE module_id = $1

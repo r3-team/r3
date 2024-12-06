@@ -41,7 +41,7 @@ func Get(moduleId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 		nullCheck = "AND parent_id = $2"
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 		SELECT id, form_id, icon_id, show_children, color
 		FROM app.menu
 		WHERE module_id = $1

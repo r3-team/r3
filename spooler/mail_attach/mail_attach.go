@@ -19,7 +19,7 @@ import (
 func DoAll() error {
 	mails := make([]types.Mail, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, record_id_wofk, attribute_id
 		FROM instance.mail_spool
 		WHERE outgoing = FALSE
@@ -68,7 +68,7 @@ func do(mail types.Mail) error {
 	fileIds := make([]uuid.UUID, 0)
 	filesMail := make([]types.MailFile, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT file, file_name, file_size
 		FROM instance.mail_spool_file
 		WHERE mail_id = $1
@@ -95,7 +95,7 @@ func do(mail types.Mail) error {
 
 	// no attachments to process, just delete mail
 	if len(filesMail) == 0 {
-		_, err = db.Pool.Exec(db.Ctx, `
+		_, err = db.Pool.Exec(context.Background(), `
 			DELETE FROM instance.mail_spool
 			WHERE id = $1
 		`, mail.Id)

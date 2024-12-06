@@ -56,7 +56,7 @@ func Get(relationId uuid.UUID) ([]types.Preset, error) {
 
 	presets := make([]types.Preset, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, name, protected
 		FROM app.preset
 		WHERE relation_id = $1
@@ -180,7 +180,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, 
 func getValues(presetId uuid.UUID) ([]types.PresetValue, error) {
 	values := make([]types.PresetValue, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, preset_id, preset_id_refer, attribute_id, protected, value
 		FROM app.preset_value
 		WHERE preset_id = $1
@@ -311,7 +311,7 @@ func setRecord_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID, recordId i
 			sqlRefs = append(sqlRefs, fmt.Sprintf(`$%d`, i+1))
 		}
 
-		if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
+		if err := tx.QueryRow(ctx, fmt.Sprintf(`
 			INSERT INTO %s (%s)
 			VALUES (%s)
 			RETURNING "%s"
@@ -325,7 +325,7 @@ func setRecord_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID, recordId i
 		}
 
 		// connect instance record ID to preset
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE instance.preset_record
 			SET record_id_wofk = $1
 			WHERE preset_id = $2
@@ -341,7 +341,7 @@ func setRecord_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID, recordId i
 			refId := fmt.Sprintf("$%d", len(sqlRefs)+1)
 			sqlValues = append(sqlValues, recordId)
 
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				UPDATE %s
 				SET %s
 				WHERE "%s" = %s

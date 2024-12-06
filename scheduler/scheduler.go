@@ -276,7 +276,7 @@ func load() error {
 	tasks = nil
 
 	// get system tasks and their states
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT t.name, t.embedded_only, t.interval_seconds,
 			t.cluster_master_only, s.id, s.date_attempt, ns.date_attempt
 		FROM instance.task AS t
@@ -404,7 +404,7 @@ func load() error {
 	if cache.GetIsClusterMaster() {
 		pgFunctionIdMapTasks := make(map[uuid.UUID]task)
 
-		rows, err = db.Pool.Query(db.Ctx, `
+		rows, err = db.Pool.Query(context.Background(), `
 			SELECT f.name, fs.pg_function_id, fs.id, fs.at_hour, fs.at_minute,
 				fs.at_second, fs.at_day, fs.interval_type, fs.interval_value,
 				s.id, s.date_attempt
@@ -573,7 +573,7 @@ func storeTaskDate(t task, dateContent string) error {
 
 		if t.taskSchedule.clusterMasterOnly {
 			// store cluster master schedule meta globally
-			_, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
+			_, err := db.Pool.Exec(context.Background(), fmt.Sprintf(`
 				UPDATE instance.schedule
 				SET date_%s = $1
 				WHERE id = $2
@@ -582,7 +582,7 @@ func storeTaskDate(t task, dateContent string) error {
 		} else {
 			// store node schedule meta independently
 			// insert is always 'attempt', while update can be either
-			_, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
+			_, err := db.Pool.Exec(context.Background(), fmt.Sprintf(`
 				INSERT INTO instance_cluster.node_schedule
 					(node_id, schedule_id, date_attempt, date_success)
 				VALUES ($1,$2,$3,0)
@@ -594,7 +594,7 @@ func storeTaskDate(t task, dateContent string) error {
 	}
 
 	// PG function schedule task, schedule meta always stored globally
-	_, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
+	_, err := db.Pool.Exec(context.Background(), fmt.Sprintf(`
 		UPDATE instance.schedule
 		SET date_%s = $1
 		WHERE id = $2

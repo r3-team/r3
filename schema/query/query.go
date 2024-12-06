@@ -38,7 +38,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 		`, filterPosition, filterSide)
 	}
 
-	err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+	err := db.Pool.QueryRow(context.Background(), fmt.Sprintf(`
 		SELECT id, relation_id, fixed_limit
 		FROM app.query
 		WHERE %s_id = $1
@@ -55,7 +55,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	}
 
 	// retrieve joins
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT relation_id, attribute_id, index_from, index, connector,
 			apply_create, apply_update, apply_delete
 		FROM app.query_join
@@ -87,7 +87,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	}
 
 	// retrieve orderings
-	rows, err = db.Pool.Query(db.Ctx, `
+	rows, err = db.Pool.Query(context.Background(), `
 		SELECT attribute_id, index, ascending
 		FROM app.query_order
 		WHERE query_id = $1
@@ -109,7 +109,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	rows.Close()
 
 	// retrieve lookups
-	rows, err = db.Pool.Query(db.Ctx, `
+	rows, err = db.Pool.Query(context.Background(), `
 		SELECT pg_index_id, index
 		FROM app.query_lookup
 		WHERE query_id = $1
@@ -131,7 +131,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	rows.Close()
 
 	// retrieve choices
-	rows, err = db.Pool.Query(db.Ctx, `
+	rows, err = db.Pool.Query(context.Background(), `
 		SELECT id, name
 		FROM app.query_choice
 		WHERE query_id = $1
@@ -395,7 +395,7 @@ func getFilters(queryId uuid.UUID, queryChoiceId pgtype.UUID) ([]types.QueryFilt
 	}
 
 	// get filters
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 		SELECT connector, operator, position
 		FROM app.query_filter
 		WHERE query_id = $1
@@ -440,7 +440,7 @@ func getFilterSide(queryId uuid.UUID, filterPosition int, side int) (types.Query
 	var s types.QueryFilterSide
 	var err error
 
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(context.Background(), `
 		SELECT attribute_id, attribute_index, attribute_nested, brackets,
 			collection_id, column_id, content, field_id, now_offset, preset_id,
 			role_id, variable_id, query_aggregator, value

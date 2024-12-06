@@ -8,10 +8,10 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func getRoleIds(loginId int64) ([]uuid.UUID, error) {
+func getRoleIds(ctx context.Context, loginId int64) ([]uuid.UUID, error) {
 	roleIds := make([]uuid.UUID, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(ctx, `
 		SELECT role_id
 		FROM instance.login_role
 		WHERE login_id = $1

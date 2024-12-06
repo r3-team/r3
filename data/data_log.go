@@ -18,7 +18,7 @@ import (
 
 // delete data change logs according to retention settings
 func DelLogsBackground() error {
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbTask)
 	defer ctxCanc()
 
 	tx, err := db.Pool.Begin(ctx)

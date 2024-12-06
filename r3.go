@@ -585,8 +585,8 @@ func (prg *program) Stop(svc service.Service) error {
 	// stop web server if running
 	if prg.webServer != nil {
 
-		ctx, cancelWeb := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancelWeb()
+		ctx, ctxCanc := context.WithTimeout(context.Background(), 5*time.Second)
+		defer ctxCanc()
 
 		if err := prg.webServer.Shutdown(ctx); err != nil {
 			prg.logger.Error(err)

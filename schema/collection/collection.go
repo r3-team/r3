@@ -22,7 +22,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Get(moduleId uuid.UUID) ([]types.Collection, error) {
 	collections := make([]types.Collection, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, icon_id, name
 		FROM app.collection
 		WHERE module_id = $1

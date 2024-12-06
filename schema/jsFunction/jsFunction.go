@@ -33,7 +33,7 @@ func Get(moduleId uuid.UUID) ([]types.JsFunction, error) {
 	var err error
 	functions := make([]types.JsFunction, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, form_id, name, code_args, code_function, code_returns, is_client_event_exec
 		FROM app.js_function
 		WHERE module_id = $1

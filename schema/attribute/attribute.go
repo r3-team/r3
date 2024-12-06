@@ -45,7 +45,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
 	// delete attribute database entities
 	if schema.IsContentFiles(content) {
-		if err := FileRelationsDelete_tx(tx, id); err != nil {
+		if err := FileRelationsDelete_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	} else {
@@ -69,7 +69,7 @@ func Get(relationId uuid.UUID) ([]types.Attribute, error) {
 	var onDeleteNull pgtype.Text
 
 	attributes := make([]types.Attribute, 0)
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, relationship_id, icon_id, name, content, content_use,
 			length, length_fract, nullable, encrypted, def, on_update, on_delete
 		FROM app.attribute
@@ -348,7 +348,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute) error {
 	} else {
 		// create attribute column (files attribute have no column)
 		if isFiles {
-			if err := fileRelationsCreate_tx(tx, atr.Id, moduleName, relationName); err != nil {
+			if err := fileRelationsCreate_tx(ctx, tx, atr.Id, moduleName, relationName); err != nil {
 				return err
 			}
 		} else {
