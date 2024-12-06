@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"context"
 	"r3/cluster"
 	"r3/config"
 	"r3/db"
@@ -16,17 +17,19 @@ func systemMsgMaintenance() error {
 	systemInMaintenance := config.GetUint64("productionMode") == 0
 
 	if date1 != 0 && date1 < now && switchToMaintenance && !systemInMaintenance {
-		ctx := db.GetCtxTimeoutSysTask()
+		ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+		defer ctxCanc()
+
 		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
 			return err
 		}
 		defer tx.Rollback(ctx)
 
-		if err := config.SetUint64_tx(tx, "systemMsgMaintenance", 0); err != nil {
+		if err := config.SetUint64_tx(ctx, tx, "systemMsgMaintenance", 0); err != nil {
 			return err
 		}
-		if err := config.SetUint64_tx(tx, "productionMode", 0); err != nil {
+		if err := config.SetUint64_tx(ctx, tx, "productionMode", 0); err != nil {
 			return err
 		}
 		if err := tx.Commit(ctx); err != nil {

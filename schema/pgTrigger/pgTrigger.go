@@ -1,6 +1,7 @@
 package pgTrigger
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/db"
@@ -13,20 +14,20 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
-	nameMod, nameRel, err := schema.GetPgTriggerNamesById_tx(tx, id)
+	nameMod, nameRel, err := schema.GetPgTriggerNamesById_tx(ctx, tx, id)
 	if err != nil {
 		return err
 	}
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		DROP TRIGGER "%s" ON "%s"."%s"
 	`, getName(id), nameMod, nameRel)); err != nil {
 		return err
 	}
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.pg_trigger
 		WHERE id = $1
 	`, id); err != nil {
@@ -66,14 +67,14 @@ func Get(moduleId uuid.UUID) ([]types.PgTrigger, error) {
 	return triggers, nil
 }
 
-func Set_tx(tx pgx.Tx, trg types.PgTrigger) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, trg types.PgTrigger) error {
 
-	nameMod, nameRel, err := schema.GetRelationNamesById_tx(tx, trg.RelationId)
+	nameMod, nameRel, err := schema.GetRelationNamesById_tx(ctx, tx, trg.RelationId)
 	if err != nil {
 		return err
 	}
 
-	known, err := schema.CheckCreateId_tx(tx, &trg.Id, "pg_trigger", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &trg.Id, "pg_trigger", "id")
 	if err != nil {
 		return err
 	}
@@ -95,7 +96,7 @@ func Set_tx(tx pgx.Tx, trg types.PgTrigger) error {
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.pg_trigger
 			SET pg_function_id = $1, on_insert = $2, on_update = $3,
 				on_delete = $4, is_constraint = $5, is_deferrable = $6,
@@ -109,13 +110,13 @@ func Set_tx(tx pgx.Tx, trg types.PgTrigger) error {
 		}
 
 		// remove existing trigger
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			DROP TRIGGER "%s" ON "%s"."%s"
 		`, getName(trg.Id), nameMod, nameRel)); err != nil {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.pg_trigger (id, module_id, pg_function_id, relation_id,
 				on_insert, on_update, on_delete, is_constraint, is_deferrable,
 				is_deferred, per_row, fires, code_condition)
@@ -169,12 +170,12 @@ func Set_tx(tx pgx.Tx, trg types.PgTrigger) error {
 	}
 
 	// create trigger
-	nameModFnc, nameFnc, argsFnc, _, err := schema.GetPgFunctionDetailsById_tx(tx, trg.PgFunctionId)
+	nameModFnc, nameFnc, argsFnc, _, err := schema.GetPgFunctionDetailsById_tx(ctx, tx, trg.PgFunctionId)
 	if err != nil {
 		return err
 	}
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		CREATE %s "%s"
 		%s %s
 		ON "%s"."%s"

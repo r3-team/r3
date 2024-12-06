@@ -1,6 +1,7 @@
 package log
 
 import (
+	"context"
 	"fmt"
 	"r3/db"
 	"r3/tools"
@@ -9,6 +10,7 @@ import (
 	"sync/atomic"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -37,7 +39,7 @@ var (
 	}
 )
 
-func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
+func Get_tx(ctx context.Context, tx pgx.Tx, dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 	context string, byString string) ([]types.Log, int, error) {
 
 	logs := make([]types.Log, 0)
@@ -82,7 +84,7 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 		return nil, 0, err
 	}
 
-	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), query, qb.GetParaValues()...)
+	rows, err := tx.Query(ctx, query, qb.GetParaValues()...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -115,7 +117,7 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 		return nil, 0, err
 	}
 
-	if err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), query, qb.GetParaValues()...).Scan(&total); err != nil {
+	if err := tx.QueryRow(ctx, query, qb.GetParaValues()...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 	return logs, total, nil
@@ -190,7 +192,10 @@ func write(level int, logContext string, message string, err error) {
 			message = message[:10000]
 		}
 
-		if _, err := db.Pool.Exec(db.GetCtxTimeoutLogWrite(), `
+		ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutLogWrite)
+		defer ctxCanc()
+
+		if _, err := db.Pool.Exec(ctx, `
 			INSERT INTO instance.log (level, context, message, date_milli, node_id)
 			VALUES ($1,$2,$3,$4,$5)
 		`, level, logContext, message, tools.GetTimeUnixMilli(), nodeIdLocal); err != nil {

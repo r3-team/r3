@@ -1,15 +1,17 @@
 package relation
 
 import (
+	"context"
 	"fmt"
 	"r3/db"
 	"r3/schema"
 	"strings"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
-func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {
+func GetPreview(ctx context.Context, tx pgx.Tx, id uuid.UUID, limit int, offset int) (interface{}, error) {
 
 	var modName, relName string
 	atrNames := make([]string, 0)
@@ -23,7 +25,7 @@ func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {
 	}
 
 	// get relation/attribute/module details
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(ctx, `
 		SELECT r.name, m.name, ARRAY(
 			SELECT name
 			FROM app.attribute
@@ -39,7 +41,7 @@ func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {
 	}
 
 	// get total count of tupels from relation
-	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+	if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
 		SELECT COUNT(*)
 		FROM "%s"."%s"
 	`, modName, relName)).Scan(&res.RowCount); err != nil {
@@ -47,7 +49,7 @@ func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {
 	}
 
 	// get records from relation
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(ctx, fmt.Sprintf(`
 		SELECT "%s"
 		FROM "%s"."%s"
 		ORDER BY "%s" ASC

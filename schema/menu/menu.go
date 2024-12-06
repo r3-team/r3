@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"context"
 	"fmt"
 	"r3/db"
 	"r3/schema"
@@ -13,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, moduleIdNew uuid.UUID) error {
+func Copy_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, moduleIdNew uuid.UUID) error {
 
 	menus, err := Get(moduleId, pgtype.UUID{})
 	if err != nil {
@@ -23,11 +24,11 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, moduleIdNew uuid.UUID) error {
 	// reset entity IDs
 	menus = NilIds(menus, moduleIdNew)
 
-	return Set_tx(tx, pgtype.UUID{}, menus)
+	return Set_tx(ctx, tx, pgtype.UUID{}, menus)
 }
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, `DELETE FROM app.menu WHERE id = $1`, id)
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
+	_, err := tx.Exec(ctx, `DELETE FROM app.menu WHERE id = $1`, id)
 	return err
 }
 
@@ -82,16 +83,16 @@ func Get(moduleId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 	return menus, nil
 }
 
-func Set_tx(tx pgx.Tx, parentId pgtype.UUID, menus []types.Menu) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, parentId pgtype.UUID, menus []types.Menu) error {
 
 	for i, m := range menus {
-		known, err := schema.CheckCreateId_tx(tx, &m.Id, "menu", "id")
+		known, err := schema.CheckCreateId_tx(ctx, tx, &m.Id, "menu", "id")
 		if err != nil {
 			return err
 		}
 
 		if known {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				UPDATE app.menu
 				SET parent_id = $1, form_id = $2, icon_id = $3, position = $4,
 					show_children = $5, color = $6
@@ -100,7 +101,7 @@ func Set_tx(tx pgx.Tx, parentId pgtype.UUID, menus []types.Menu) error {
 				return err
 			}
 		} else {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO app.menu (id, module_id, parent_id, form_id,
 					icon_id, position, show_children, color)
 				VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
@@ -110,17 +111,17 @@ func Set_tx(tx pgx.Tx, parentId pgtype.UUID, menus []types.Menu) error {
 		}
 
 		// set children
-		if err := Set_tx(tx, pgtype.UUID{Bytes: m.Id, Valid: true}, m.Menus); err != nil {
+		if err := Set_tx(ctx, tx, pgtype.UUID{Bytes: m.Id, Valid: true}, m.Menus); err != nil {
 			return err
 		}
 
 		// set collections
-		if err := consumer.Set_tx(tx, "menu", m.Id, "menuDisplay", m.Collections); err != nil {
+		if err := consumer.Set_tx(ctx, tx, "menu", m.Id, "menuDisplay", m.Collections); err != nil {
 			return err
 		}
 
 		// set captions
-		if err := caption.Set_tx(tx, m.Id, m.Captions); err != nil {
+		if err := caption.Set_tx(ctx, tx, m.Id, m.Captions); err != nil {
 			return err
 		}
 	}

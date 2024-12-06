@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/schema/pgTrigger"
 	"r3/types"
@@ -9,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func PgTriggerDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func PgTriggerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id uuid.UUID `json:"id"`
@@ -18,14 +19,14 @@ func PgTriggerDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, pgTrigger.Del_tx(tx, req.Id)
+	return nil, pgTrigger.Del_tx(ctx, tx, req.Id)
 }
 
-func PgTriggerSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func PgTriggerSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.PgTrigger
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, pgTrigger.Set_tx(tx, req)
+	return nil, pgTrigger.Set_tx(ctx, tx, req)
 }

@@ -34,7 +34,9 @@ func Update() error {
 	}
 
 	// apply changes to local module store
-	ctx := db.GetCtxTimeoutSysTask()
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -47,7 +49,7 @@ func Update() error {
 	if err := addModules_tx(ctx, tx, repoModuleMap); err != nil {
 		return fmt.Errorf("failed to add modules, %w", err)
 	}
-	if err := config.SetUint64_tx(tx, "repoChecked", uint64(tools.GetTimeUnix())); err != nil {
+	if err := config.SetUint64_tx(ctx, tx, "repoChecked", uint64(tools.GetTimeUnix())); err != nil {
 		return err
 	}
 	return tx.Commit(ctx)

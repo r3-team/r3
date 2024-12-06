@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func LoginSettingsGet(ctx context.Context, tx pgx.Tx, loginId int64) (interface{}, error) {
+func LoginSettingsGet_tx(ctx context.Context, tx pgx.Tx, loginId int64) (interface{}, error) {
 	return login_setting.Get_tx(ctx, tx,
 		pgtype.Int8{Int64: loginId, Valid: true},
 		pgtype.Int8{})

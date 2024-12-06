@@ -70,10 +70,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// execute request
-	ctx, ctxCancel := context.WithTimeout(context.Background(),
+	ctx, ctxCanc := context.WithTimeout(context.Background(),
 		time.Duration(int64(config.GetUint64("dbTimeoutDataRest")))*time.Second)
 
-	defer ctxCancel()
+	defer ctxCanc()
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {

@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/schema/module"
 	"r3/transfer"
@@ -10,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func ModuleCheckChange_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func ModuleCheckChange(reqJson json.RawMessage) (interface{}, error) {
 	var (
 		err error
 		req struct {
@@ -32,20 +33,20 @@ func ModuleCheckChange_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, erro
 	return res, nil
 }
 
-func ModuleDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func ModuleDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Id uuid.UUID `json:"id"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, module.Del_tx(tx, req.Id)
+	return nil, module.Del_tx(ctx, tx, req.Id)
 }
 
-func ModuleSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func ModuleSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.Module
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return module.SetReturnId_tx(tx, req)
+	return module.SetReturnId_tx(ctx, tx, req)
 }

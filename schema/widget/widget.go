@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"context"
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
@@ -11,8 +12,8 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, `DELETE FROM app.widget WHERE id = $1`, id)
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
+	_, err := tx.Exec(ctx, `DELETE FROM app.widget WHERE id = $1`, id)
 	return err
 }
 
@@ -54,15 +55,15 @@ func Get(moduleId uuid.UUID) ([]types.Widget, error) {
 	return widgets, nil
 }
 
-func Set_tx(tx pgx.Tx, widget types.Widget) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, widget types.Widget) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &widget.Id, "widget", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &widget.Id, "widget", "id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.widget
 			SET form_id = $1, name = $2, size = $3
 			WHERE id = $4
@@ -70,7 +71,7 @@ func Set_tx(tx pgx.Tx, widget types.Widget) error {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.widget (id,module_id,form_id,name,size)
 			VALUES ($1,$2,$3,$4,$5)
 		`, widget.Id, widget.ModuleId, widget.FormId, widget.Name, widget.Size); err != nil {
@@ -79,12 +80,12 @@ func Set_tx(tx pgx.Tx, widget types.Widget) error {
 	}
 
 	// set collection
-	if err := consumer.Set_tx(tx, "widget", widget.Id, "widgetDisplay",
+	if err := consumer.Set_tx(ctx, tx, "widget", widget.Id, "widgetDisplay",
 		[]types.CollectionConsumer{widget.Collection}); err != nil {
 
 		return err
 	}
 
 	// set captions
-	return caption.Set_tx(tx, widget.Id, widget.Captions)
+	return caption.Set_tx(ctx, tx, widget.Id, widget.Captions)
 }

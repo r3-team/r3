@@ -1,10 +1,10 @@
 package transfer_delete
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/log"
 	"r3/schema/api"
 	"r3/schema/article"
@@ -36,240 +36,240 @@ import (
 
 // delete entities from local schema which are not present in module
 // FKs are deferred, only known hard dependency for order: triggers must be deleted first
-func NotExisting_tx(tx pgx.Tx, module types.Module) error {
+func NotExisting_tx(ctx context.Context, tx pgx.Tx, module types.Module) error {
 
 	// PG triggers are deleted before import, known issues:
 	// * DB error if preset changes fire triggers that are deleted later
 	// * DB error if PG functions are deleted before referring triggers
 
 	// login forms
-	if err := deleteLoginForms_tx(tx, module.Id, module.LoginForms); err != nil {
+	if err := deleteLoginForms_tx(ctx, tx, module.Id, module.LoginForms); err != nil {
 		return err
 	}
 
 	// relations, its PG indexes, attributes and presets
-	if err := deleteRelations_tx(tx, module.Id, module.Relations); err != nil {
+	if err := deleteRelations_tx(ctx, tx, module.Id, module.Relations); err != nil {
 		return err
 	}
-	if err := deleteRelationPgIndexes_tx(tx, module.Id, module.Relations); err != nil {
+	if err := deleteRelationPgIndexes_tx(ctx, tx, module.Id, module.Relations); err != nil {
 		return err
 	}
-	if err := deleteRelationAttributes_tx(tx, module.Id, module.Relations); err != nil {
+	if err := deleteRelationAttributes_tx(ctx, tx, module.Id, module.Relations); err != nil {
 		return err
 	}
-	if err := deleteRelationPresets_tx(tx, module.Id, module.Relations); err != nil {
+	if err := deleteRelationPresets_tx(ctx, tx, module.Id, module.Relations); err != nil {
 		return err
 	}
 
 	// collections
-	if err := deleteCollections_tx(tx, module.Id, module.Collections); err != nil {
+	if err := deleteCollections_tx(ctx, tx, module.Id, module.Collections); err != nil {
 		return err
 	}
 
 	// PG functions
-	if err := deletePgFunctions_tx(tx, module.Id, module.PgFunctions); err != nil {
+	if err := deletePgFunctions_tx(ctx, tx, module.Id, module.PgFunctions); err != nil {
 		return err
 	}
 
 	// roles
-	if err := deleteRoles_tx(tx, module.Id, module.Roles); err != nil {
+	if err := deleteRoles_tx(ctx, tx, module.Id, module.Roles); err != nil {
 		return err
 	}
 
 	// menus
-	if err := deleteMenus_tx(tx, module.Id, module.Menus); err != nil {
+	if err := deleteMenus_tx(ctx, tx, module.Id, module.Menus); err != nil {
 		return err
 	}
 
 	// forms, cascades fields
-	if err := deleteForms_tx(tx, module.Id, module.Forms); err != nil {
+	if err := deleteForms_tx(ctx, tx, module.Id, module.Forms); err != nil {
 		return err
 	}
 
 	// icons
-	if err := deleteIcons_tx(tx, module.Id, module.Icons); err != nil {
+	if err := deleteIcons_tx(ctx, tx, module.Id, module.Icons); err != nil {
 		return err
 	}
 
 	// articles
-	if err := deleteArticles_tx(tx, module.Id, module.Articles); err != nil {
+	if err := deleteArticles_tx(ctx, tx, module.Id, module.Articles); err != nil {
 		return err
 	}
 
 	// APIs
-	if err := deleteApis_tx(tx, module.Id, module.Apis); err != nil {
+	if err := deleteApis_tx(ctx, tx, module.Id, module.Apis); err != nil {
 		return err
 	}
 
 	// client events
-	if err := deleteClientEvents_tx(tx, module.Id, module.ClientEvents); err != nil {
+	if err := deleteClientEvents_tx(ctx, tx, module.Id, module.ClientEvents); err != nil {
 		return err
 	}
 
 	// variables
-	if err := deleteVariables_tx(tx, module.Id, module.Variables); err != nil {
+	if err := deleteVariables_tx(ctx, tx, module.Id, module.Variables); err != nil {
 		return err
 	}
 
 	// widgets
-	if err := deleteWidgets_tx(tx, module.Id, module.Widgets); err != nil {
+	if err := deleteWidgets_tx(ctx, tx, module.Id, module.Widgets); err != nil {
 		return err
 	}
 
 	// JS functions
-	if err := deleteJsFunctions_tx(tx, module.Id, module.JsFunctions); err != nil {
+	if err := deleteJsFunctions_tx(ctx, tx, module.Id, module.JsFunctions); err != nil {
 		return err
 	}
 	return nil
 }
-func NotExistingPgTriggers_tx(tx pgx.Tx, moduleId uuid.UUID, pgTriggers []types.PgTrigger) error {
-	return deletePgTriggers_tx(tx, moduleId, pgTriggers)
+func NotExistingPgTriggers_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, pgTriggers []types.PgTrigger) error {
+	return deletePgTriggers_tx(ctx, tx, moduleId, pgTriggers)
 }
 
 // deletions
-func deleteLoginForms_tx(tx pgx.Tx, moduleId uuid.UUID, loginForms []types.LoginForm) error {
+func deleteLoginForms_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, loginForms []types.LoginForm) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range loginForms {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "login_form", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "login_form", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del login form %s", id.String()))
-		if err := loginForm.Del_tx(tx, id); err != nil {
+		if err := loginForm.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deletePgTriggers_tx(tx pgx.Tx, moduleId uuid.UUID, pgTriggers []types.PgTrigger) error {
+func deletePgTriggers_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, pgTriggers []types.PgTrigger) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, trg := range pgTriggers {
 		idsKeep = append(idsKeep, trg.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "pg_trigger", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "pg_trigger", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del PG trigger %s", id.String()))
-		if err := pgTrigger.Del_tx(tx, id); err != nil {
+		if err := pgTrigger.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteRelations_tx(tx pgx.Tx, moduleId uuid.UUID, relations []types.Relation) error {
+func deleteRelations_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, relations []types.Relation) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range relations {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "relation", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "relation", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del relation %s", id.String()))
-		if err := relation.Del_tx(tx, id); err != nil {
+		if err := relation.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteRelationPgIndexes_tx(tx pgx.Tx, moduleId uuid.UUID, relations []types.Relation) error {
+func deleteRelationPgIndexes_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, relations []types.Relation) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, rel := range relations {
 		for _, ind := range rel.Indexes {
 			idsKeep = append(idsKeep, ind.Id)
 		}
 	}
-	idsDelete, err := importGetIdsToDeleteFromRelation_tx(tx, "pg_index", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromRelation_tx(ctx, tx, "pg_index", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del PG index %s", id.String()))
-		if err := pgIndex.Del_tx(db.Ctx, tx, id); err != nil {
+		if err := pgIndex.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteRelationAttributes_tx(tx pgx.Tx, moduleId uuid.UUID, relations []types.Relation) error {
+func deleteRelationAttributes_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, relations []types.Relation) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, rel := range relations {
 		for _, atr := range rel.Attributes {
 			idsKeep = append(idsKeep, atr.Id)
 		}
 	}
-	idsDelete, err := importGetIdsToDeleteFromRelation_tx(tx, "attribute", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromRelation_tx(ctx, tx, "attribute", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del attribute %s", id.String()))
-		if err := attribute.Del_tx(tx, id); err != nil {
+		if err := attribute.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteRelationPresets_tx(tx pgx.Tx, moduleId uuid.UUID, relations []types.Relation) error {
+func deleteRelationPresets_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, relations []types.Relation) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, rel := range relations {
 		for _, pre := range rel.Presets {
 			idsKeep = append(idsKeep, pre.Id)
 		}
 	}
-	idsDelete, err := importGetIdsToDeleteFromRelation_tx(tx, "preset", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromRelation_tx(ctx, tx, "preset", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del preset %s", id.String()))
-		if err := preset.Del_tx(tx, id); err != nil {
+		if err := preset.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteCollections_tx(tx pgx.Tx, moduleId uuid.UUID, collections []types.Collection) error {
+func deleteCollections_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, collections []types.Collection) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, col := range collections {
 		idsKeep = append(idsKeep, col.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "collection", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "collection", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del collection %s", id.String()))
-		if err := collection.Del_tx(tx, id); err != nil {
+		if err := collection.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteRoles_tx(tx pgx.Tx, moduleId uuid.UUID, roles []types.Role) error {
+func deleteRoles_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, roles []types.Role) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range roles {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "role", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "role", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del role %s", id.String()))
-		if err := role.Del_tx(tx, id); err != nil {
+		if err := role.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteMenus_tx(tx pgx.Tx, moduleId uuid.UUID, menus []types.Menu) error {
+func deleteMenus_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, menus []types.Menu) error {
 	idsKeep := make([]uuid.UUID, 0)
 	var menuNestedParse func(items []types.Menu)
 	menuNestedParse = func(items []types.Menu) {
@@ -280,43 +280,43 @@ func deleteMenus_tx(tx pgx.Tx, moduleId uuid.UUID, menus []types.Menu) error {
 	}
 	menuNestedParse(menus)
 
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "menu", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "menu", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del menu %s", id.String()))
-		if err := menu.Del_tx(tx, id); err != nil {
+		if err := menu.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteForms_tx(tx pgx.Tx, moduleId uuid.UUID, forms []types.Form) error {
+func deleteForms_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, forms []types.Form) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range forms {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "form", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "form", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del form %s", id.String()))
-		if err := form.Del_tx(tx, id); err != nil {
+		if err := form.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 
 	// fields, includes/cascades columns & tabs
 	for _, entity := range forms {
-		if err := deleteFormFields_tx(tx, moduleId, entity); err != nil {
+		if err := deleteFormFields_tx(ctx, tx, moduleId, entity); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteFormFields_tx(tx pgx.Tx, moduleId uuid.UUID, form types.Form) error {
+func deleteFormFields_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, form types.Form) error {
 	var err error
 	idsKeepFields := make([]uuid.UUID, 0)
 	idsKeepColumns := make([]uuid.UUID, 0)
@@ -428,173 +428,173 @@ func deleteFormFields_tx(tx pgx.Tx, moduleId uuid.UUID, form types.Form) error {
 	}
 
 	// delete fields
-	idsDelete, err = importGetIdsToDeleteFromForm_tx(tx, "field", form.Id, idsKeepFields)
+	idsDelete, err = importGetIdsToDeleteFromForm_tx(ctx, tx, "field", form.Id, idsKeepFields)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del field %s", id.String()))
-		if err := field.Del_tx(tx, id); err != nil {
+		if err := field.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 
 	// delete tabs
-	idsDelete, err = importGetIdsToDeleteFromField_tx(tx, "tab", form.Id, idsKeepTabs)
+	idsDelete, err = importGetIdsToDeleteFromField_tx(ctx, tx, "tab", form.Id, idsKeepTabs)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del tab %s", id.String()))
-		if err := tab.Del_tx(tx, id); err != nil {
+		if err := tab.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 
 	// delete columns
-	idsDelete, err = importGetIdsToDeleteFromField_tx(tx, "column", form.Id, idsKeepColumns)
+	idsDelete, err = importGetIdsToDeleteFromField_tx(ctx, tx, "column", form.Id, idsKeepColumns)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del column %s", id.String()))
-		if err := column.Del_tx(tx, id); err != nil {
+		if err := column.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteIcons_tx(tx pgx.Tx, moduleId uuid.UUID, icons []types.Icon) error {
+func deleteIcons_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, icons []types.Icon) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range icons {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "icon", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "icon", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del icon %s", id.String()))
-		if err := icon.Del_tx(tx, id); err != nil {
+		if err := icon.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteArticles_tx(tx pgx.Tx, moduleId uuid.UUID, articles []types.Article) error {
+func deleteArticles_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, articles []types.Article) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range articles {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "article", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "article", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del article %s", id.String()))
-		if err := article.Del_tx(tx, id); err != nil {
+		if err := article.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteApis_tx(tx pgx.Tx, moduleId uuid.UUID, apis []types.Api) error {
+func deleteApis_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, apis []types.Api) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range apis {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "api", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "api", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del API %s", id.String()))
-		if err := api.Del_tx(tx, id); err != nil {
+		if err := api.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteClientEvents_tx(tx pgx.Tx, moduleId uuid.UUID, clientEvents []types.ClientEvent) error {
+func deleteClientEvents_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, clientEvents []types.ClientEvent) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range clientEvents {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "client_event", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "client_event", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del client event %s", id.String()))
-		if err := clientEvent.Del_tx(tx, id); err != nil {
+		if err := clientEvent.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteVariables_tx(tx pgx.Tx, moduleId uuid.UUID, variables []types.Variable) error {
+func deleteVariables_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, variables []types.Variable) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range variables {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "variable", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "variable", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del variable %s", id.String()))
-		if err := variable.Del_tx(tx, id); err != nil {
+		if err := variable.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteWidgets_tx(tx pgx.Tx, moduleId uuid.UUID, widgets []types.Widget) error {
+func deleteWidgets_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, widgets []types.Widget) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range widgets {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "widget", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "widget", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del widget %s", id.String()))
-		if err := widget.Del_tx(tx, id); err != nil {
+		if err := widget.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deletePgFunctions_tx(tx pgx.Tx, moduleId uuid.UUID, pgFunctions []types.PgFunction) error {
+func deletePgFunctions_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, pgFunctions []types.PgFunction) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range pgFunctions {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "pg_function", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "pg_function", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del PG function %s", id.String()))
-		if err := pgFunction.Del_tx(db.Ctx, tx, id); err != nil {
+		if err := pgFunction.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteJsFunctions_tx(tx pgx.Tx, moduleId uuid.UUID, jsFunctions []types.JsFunction) error {
+func deleteJsFunctions_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, jsFunctions []types.JsFunction) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range jsFunctions {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "js_function", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "js_function", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del JS function %s", id.String()))
-		if err := jsFunction.Del_tx(tx, id); err != nil {
+		if err := jsFunction.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
@@ -602,7 +602,7 @@ func deleteJsFunctions_tx(tx pgx.Tx, moduleId uuid.UUID, jsFunctions []types.JsF
 }
 
 // lookups
-func importGetIdsToDeleteFromModule_tx(tx pgx.Tx, entity string,
+func importGetIdsToDeleteFromModule_tx(ctx context.Context, tx pgx.Tx, entity string,
 	moduleId uuid.UUID, idsKeep []uuid.UUID) ([]uuid.UUID, error) {
 
 	idsDelete := make([]uuid.UUID, 0)
@@ -614,7 +614,7 @@ func importGetIdsToDeleteFromModule_tx(tx pgx.Tx, entity string,
 		return idsDelete, errors.New("unsupported type for delete check")
 	}
 
-	err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
+	err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT ARRAY_AGG(id)
 		FROM app.%s
 		WHERE id <> ALL($1)
@@ -626,8 +626,8 @@ func importGetIdsToDeleteFromModule_tx(tx pgx.Tx, entity string,
 	}
 	return idsDelete, nil
 }
-func importGetIdsToDeleteFromRelation_tx(tx pgx.Tx, entity string, moduleId uuid.UUID,
-	idsKeep []uuid.UUID) ([]uuid.UUID, error) {
+func importGetIdsToDeleteFromRelation_tx(ctx context.Context, tx pgx.Tx, entity string,
+	moduleId uuid.UUID, idsKeep []uuid.UUID) ([]uuid.UUID, error) {
 
 	idsDelete := make([]uuid.UUID, 0)
 
@@ -635,7 +635,7 @@ func importGetIdsToDeleteFromRelation_tx(tx pgx.Tx, entity string, moduleId uuid
 		return idsDelete, errors.New("unsupport type for delete check")
 	}
 
-	err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
+	err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT ARRAY_AGG(id)
 		FROM app.%s
 		WHERE id <> ALL($1)
@@ -651,8 +651,8 @@ func importGetIdsToDeleteFromRelation_tx(tx pgx.Tx, entity string, moduleId uuid
 	}
 	return idsDelete, nil
 }
-func importGetIdsToDeleteFromForm_tx(tx pgx.Tx, entity string, formId uuid.UUID,
-	idsKeep []uuid.UUID) ([]uuid.UUID, error) {
+func importGetIdsToDeleteFromForm_tx(ctx context.Context, tx pgx.Tx, entity string,
+	formId uuid.UUID, idsKeep []uuid.UUID) ([]uuid.UUID, error) {
 
 	idsDelete := make([]uuid.UUID, 0)
 
@@ -660,7 +660,7 @@ func importGetIdsToDeleteFromForm_tx(tx pgx.Tx, entity string, formId uuid.UUID,
 		return idsDelete, errors.New("unsupport type for delete check")
 	}
 
-	err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
+	err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT ARRAY_AGG(id)
 		FROM app.%s
 		WHERE id <> ALL($1)
@@ -672,8 +672,8 @@ func importGetIdsToDeleteFromForm_tx(tx pgx.Tx, entity string, formId uuid.UUID,
 	}
 	return idsDelete, nil
 }
-func importGetIdsToDeleteFromField_tx(tx pgx.Tx, entity string, formId uuid.UUID,
-	idsKeep []uuid.UUID) ([]uuid.UUID, error) {
+func importGetIdsToDeleteFromField_tx(ctx context.Context, tx pgx.Tx, entity string,
+	formId uuid.UUID, idsKeep []uuid.UUID) ([]uuid.UUID, error) {
 
 	idsDelete := make([]uuid.UUID, 0)
 
@@ -681,7 +681,7 @@ func importGetIdsToDeleteFromField_tx(tx pgx.Tx, entity string, formId uuid.UUID
 		return idsDelete, errors.New("unsupport type for delete check")
 	}
 
-	err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
+	err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT ARRAY_AGG(id)
 		FROM app.%s
 		WHERE id <> ALL($1)

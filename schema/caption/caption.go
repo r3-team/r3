@@ -1,6 +1,7 @@
 package caption
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/db"
@@ -43,7 +44,7 @@ func Get(entity string, id uuid.UUID, expectedContents []string) (types.CaptionM
 	return caps, nil
 }
 
-func Set_tx(tx pgx.Tx, id uuid.UUID, captions types.CaptionMap) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, captions types.CaptionMap) error {
 
 	for content, codes := range captions {
 
@@ -53,7 +54,7 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, captions types.CaptionMap) error {
 		}
 
 		// delete captions for this content
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			DELETE FROM app.caption
 			WHERE %s = $1
 			AND content = $2
@@ -68,7 +69,7 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, captions types.CaptionMap) error {
 				continue
 			}
 
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				INSERT INTO app.caption (language_code, %s, value, content)
 				VALUES ($1,$2,$3,$4)
 			`, entityName), code, id, value, content); err != nil {

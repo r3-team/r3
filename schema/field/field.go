@@ -1,6 +1,7 @@
 package field
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -23,8 +24,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, `DELETE FROM app.field WHERE id = $1`, id)
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
+	_, err := tx.Exec(ctx, `DELETE FROM app.field WHERE id = $1`, id)
 	return err
 }
 
@@ -679,7 +680,7 @@ func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
 	return f, nil
 }
 
-func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID,
+func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID,
 	fields []interface{}, fieldIdMapQuery map[uuid.UUID]types.Query) error {
 
 	for pos, fieldIf := range fields {
@@ -693,8 +694,8 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 		if err := json.Unmarshal(fieldJson, &f); err != nil {
 			return err
 		}
-		fieldId, err := setGeneric_tx(tx, formId, f.Id, parentId, tabId,
-			f.IconId, f.Content, f.State, f.OnMobile, pos)
+		fieldId, err := setGeneric_tx(ctx, tx, formId, f.Id, parentId,
+			tabId, f.IconId, f.Content, f.State, f.OnMobile, pos)
 
 		if err != nil {
 			return err
@@ -706,12 +707,12 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setButton_tx(tx, fieldId, f.AttributeIdRecord,
+			if err := setButton_tx(ctx, tx, fieldId, f.AttributeIdRecord,
 				f.FormIdOpen, f.OpenForm, f.JsFunctionId); err != nil {
 
 				return err
 			}
-			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
+			if err := caption.Set_tx(ctx, tx, fieldId, f.Captions); err != nil {
 				return err
 			}
 		case "calendar":
@@ -719,7 +720,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setCalendar_tx(tx, fieldId, f); err != nil {
+			if err := setCalendar_tx(ctx, tx, fieldId, f); err != nil {
 				return err
 			}
 			fieldIdMapQuery[fieldId] = f.Query
@@ -729,10 +730,10 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setChart_tx(tx, fieldId, f.ChartOption, f.Columns); err != nil {
+			if err := setChart_tx(ctx, tx, fieldId, f.ChartOption, f.Columns); err != nil {
 				return err
 			}
-			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
+			if err := caption.Set_tx(ctx, tx, fieldId, f.Captions); err != nil {
 				return err
 			}
 			fieldIdMapQuery[fieldId] = f.Query
@@ -742,7 +743,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setContainer_tx(tx, fieldId, f.Direction, f.JustifyContent,
+			if err := setContainer_tx(ctx, tx, fieldId, f.Direction, f.JustifyContent,
 				f.AlignItems, f.AlignContent, f.Wrap, f.Grow, f.Shrink, f.Basis,
 				f.PerMin, f.PerMax); err != nil {
 
@@ -750,7 +751,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			}
 
 			// update container children
-			if err := Set_tx(tx, formId, pgtype.UUID{Bytes: fieldId, Valid: true},
+			if err := Set_tx(ctx, tx, formId, pgtype.UUID{Bytes: fieldId, Valid: true},
 				pgtype.UUID{}, f.Fields, fieldIdMapQuery); err != nil {
 
 				return err
@@ -761,13 +762,13 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setData_tx(tx, fieldId, f.AttributeId, f.AttributeIdAlt,
+			if err := setData_tx(ctx, tx, fieldId, f.AttributeId, f.AttributeIdAlt,
 				f.Index, f.Def, f.Display, f.Min, f.Max, f.RegexCheck, f.JsFunctionId,
 				f.Clipboard, f.DefCollection, f.CollectionIdDef, f.ColumnIdDef); err != nil {
 
 				return err
 			}
-			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
+			if err := caption.Set_tx(ctx, tx, fieldId, f.Captions); err != nil {
 				return err
 			}
 
@@ -782,7 +783,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 				if err := json.Unmarshal(fieldJson, &f); err != nil {
 					return err
 				}
-				if err := setDataRelationship_tx(tx, fieldId, f.FormIdOpen,
+				if err := setDataRelationship_tx(ctx, tx, fieldId, f.FormIdOpen,
 					f.AttributeIdRecord, f.AttributeIdNm, f.Columns, f.Category,
 					f.FilterQuick, f.OutsideIn, f.AutoSelect, f.DefPresetIds,
 					f.OpenForm); err != nil {
@@ -797,10 +798,10 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setHeader_tx(tx, fieldId, f); err != nil {
+			if err := setHeader_tx(ctx, tx, fieldId, f); err != nil {
 				return err
 			}
-			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
+			if err := caption.Set_tx(ctx, tx, fieldId, f.Captions); err != nil {
 				return err
 			}
 
@@ -809,7 +810,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setKanban_tx(tx, fieldId, f); err != nil {
+			if err := setKanban_tx(ctx, tx, fieldId, f); err != nil {
 				return err
 			}
 			fieldIdMapQuery[fieldId] = f.Query
@@ -819,14 +820,14 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setList_tx(tx, fieldId, f.AttributeIdRecord, f.FormIdOpen,
+			if err := setList_tx(ctx, tx, fieldId, f.AttributeIdRecord, f.FormIdOpen,
 				f.AutoRenew, f.CsvExport, f.CsvImport, f.Layout, f.FilterQuick,
 				f.ResultLimit, f.Columns, f.Collections, f.OpenForm,
 				f.OpenFormBulk); err != nil {
 
 				return err
 			}
-			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
+			if err := caption.Set_tx(ctx, tx, fieldId, f.Captions); err != nil {
 				return err
 			}
 			fieldIdMapQuery[fieldId] = f.Query
@@ -843,12 +844,12 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			// insert/update/delete tabs
 			idsKeep := make([]uuid.UUID, 0)
 			for i, t := range f.Tabs {
-				t.Id, err = tab.Set_tx(tx, "field", fieldId, i, t)
+				t.Id, err = tab.Set_tx(ctx, tx, "field", fieldId, i, t)
 				if err != nil {
 					return err
 				}
 
-				if err := Set_tx(tx, formId,
+				if err := Set_tx(ctx, tx, formId,
 					pgtype.UUID{Bytes: fieldId, Valid: true},
 					pgtype.UUID{Bytes: t.Id, Valid: true},
 					t.Fields, fieldIdMapQuery); err != nil {
@@ -857,14 +858,14 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 				}
 				idsKeep = append(idsKeep, t.Id)
 			}
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				DELETE FROM app.tab
 				WHERE field_id = $1
 				AND id <> ALL($2)
 			`, f.Id, idsKeep); err != nil {
 				return err
 			}
-			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
+			if err := caption.Set_tx(ctx, tx, fieldId, f.Captions); err != nil {
 				return err
 			}
 
@@ -873,10 +874,10 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setVariable_tx(tx, fieldId, f); err != nil {
+			if err := setVariable_tx(ctx, tx, fieldId, f); err != nil {
 				return err
 			}
-			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
+			if err := caption.Set_tx(ctx, tx, fieldId, f.Captions); err != nil {
 				return err
 			}
 			fieldIdMapQuery[fieldId] = f.Query
@@ -888,17 +889,17 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 	return nil
 }
 
-func setGeneric_tx(tx pgx.Tx, formId uuid.UUID, id uuid.UUID,
+func setGeneric_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, id uuid.UUID,
 	parentId pgtype.UUID, tabId pgtype.UUID, iconId pgtype.UUID, content string,
 	state string, onMobile bool, position int) (uuid.UUID, error) {
 
-	known, err := schema.CheckCreateId_tx(tx, &id, "field", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &id, "field", "id")
 	if err != nil {
 		return id, err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.field
 			SET parent_id = $1, tab_id = $2, icon_id = $3, state = $4,
 				on_mobile = $5, position = $6
@@ -907,7 +908,7 @@ func setGeneric_tx(tx pgx.Tx, formId uuid.UUID, id uuid.UUID,
 			return id, err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field (id, form_id, parent_id, tab_id,
 				icon_id, content, state, on_mobile, position)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
@@ -917,10 +918,10 @@ func setGeneric_tx(tx pgx.Tx, formId uuid.UUID, id uuid.UUID,
 	}
 	return id, nil
 }
-func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
+func setButton_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	formIdOpen pgtype.UUID, oForm types.OpenForm, jsFunctionId pgtype.UUID) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_button", "field_id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_button", "field_id")
 	if err != nil {
 		return err
 	}
@@ -929,7 +930,7 @@ func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.field_button
 			SET js_function_id = $1
 			WHERE field_id = $2
@@ -937,7 +938,7 @@ func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field_button (field_id, js_function_id)
 			VALUES ($1,$2)
 		`, fieldId, jsFunctionId); err != nil {
@@ -946,11 +947,11 @@ func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	}
 
 	// set open form
-	return openForm.Set_tx(tx, "field", fieldId, oForm, pgtype.Text{})
+	return openForm.Set_tx(ctx, tx, "field", fieldId, oForm, pgtype.Text{})
 }
-func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldCalendar) error {
+func setCalendar_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.FieldCalendar) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_calendar", "field_id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_calendar", "field_id")
 	if err != nil {
 		return err
 	}
@@ -962,7 +963,7 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldCalendar) error {
 	f.Days = compatible.FixCalendarDefaultView(f.Days)
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.field_calendar
 			SET attribute_id_date0 = $1, attribute_id_date1 = $2,
 				attribute_id_color = $3, index_date0 = $4, index_date1 = $5,
@@ -978,7 +979,7 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldCalendar) error {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field_calendar (
 				field_id, attribute_id_date0, attribute_id_date1,
 				attribute_id_color, index_date0, index_date1, index_color,
@@ -995,27 +996,27 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldCalendar) error {
 	}
 
 	// set open form
-	if err := openForm.Set_tx(tx, "field", fieldId, f.OpenForm, pgtype.Text{}); err != nil {
+	if err := openForm.Set_tx(ctx, tx, "field", fieldId, f.OpenForm, pgtype.Text{}); err != nil {
 		return err
 	}
 
 	// set collection consumer
-	if err := consumer.Set_tx(tx, "field", fieldId, "fieldFilterSelector", f.Collections); err != nil {
+	if err := consumer.Set_tx(ctx, tx, "field", fieldId, "fieldFilterSelector", f.Collections); err != nil {
 		return err
 	}
 
 	// set columns
-	return column.Set_tx(tx, "field", fieldId, f.Columns)
+	return column.Set_tx(ctx, tx, "field", fieldId, f.Columns)
 }
-func setChart_tx(tx pgx.Tx, fieldId uuid.UUID, chartOption string, columns []types.Column) error {
+func setChart_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, chartOption string, columns []types.Column) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_chart", "field_id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_chart", "field_id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.field_chart
 			SET chart_option = $1
 			WHERE field_id = $2
@@ -1023,26 +1024,26 @@ func setChart_tx(tx pgx.Tx, fieldId uuid.UUID, chartOption string, columns []typ
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field_chart (field_id, chart_option)
 			VALUES ($1,$2)
 		`, fieldId, chartOption); err != nil {
 			return err
 		}
 	}
-	return column.Set_tx(tx, "field", fieldId, columns)
+	return column.Set_tx(ctx, tx, "field", fieldId, columns)
 }
-func setContainer_tx(tx pgx.Tx, fieldId uuid.UUID, direction string,
+func setContainer_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, direction string,
 	justifyContent string, alignItems string, alignContent string, wrap bool,
 	grow int, shrink int, basis int, perMin int, perMax int) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_container", "field_id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_container", "field_id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.field_container
 			SET direction = $1, justify_content = $2, align_items = $3,
 				align_content = $4, wrap = $5, grow = $6, shrink = $7, basis = $8,
@@ -1054,7 +1055,7 @@ func setContainer_tx(tx pgx.Tx, fieldId uuid.UUID, direction string,
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field_container (
 				field_id, direction, justify_content, align_items,
 				align_content, wrap, grow, shrink, basis, per_min, per_max
@@ -1068,13 +1069,12 @@ func setContainer_tx(tx pgx.Tx, fieldId uuid.UUID, direction string,
 	}
 	return nil
 }
-func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
-	attributeIdAlt pgtype.UUID, index int, def string, display string,
-	min pgtype.Int4, max pgtype.Int4, regexCheck pgtype.Text,
-	jsFunctionId pgtype.UUID, clipboard bool, defCollection types.CollectionConsumer,
-	collectionIdDef pgtype.UUID, columnIdDef pgtype.UUID) error {
+func setData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
+	attributeIdAlt pgtype.UUID, index int, def string, display string, min pgtype.Int4,
+	max pgtype.Int4, regexCheck pgtype.Text, jsFunctionId pgtype.UUID, clipboard bool,
+	defCollection types.CollectionConsumer, collectionIdDef pgtype.UUID, columnIdDef pgtype.UUID) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_data", "field_id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_data", "field_id")
 	if err != nil {
 		return err
 	}
@@ -1087,19 +1087,19 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 	}
 
 	// fix imports < 3.3: Migrate display option to attribute content use
-	display, err = compatible.MigrateDisplayToContentUse_tx(tx, attributeId, display)
+	display, err = compatible.MigrateDisplayToContentUse_tx(ctx, tx, attributeId, display)
 	if err != nil {
 		return err
 	}
 	if attributeIdAlt.Valid {
-		_, err = compatible.MigrateDisplayToContentUse_tx(tx, attributeIdAlt.Bytes, display)
+		_, err = compatible.MigrateDisplayToContentUse_tx(ctx, tx, attributeIdAlt.Bytes, display)
 		if err != nil {
 			return err
 		}
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.field_data
 			SET attribute_id = $1, attribute_id_alt = $2, index = $3,
 				def = $4, display = $5,min = $6, max = $7, regex_check = $8,
@@ -1111,7 +1111,7 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field_data (
 				field_id, attribute_id, attribute_id_alt, index, def, display,
 				min, max, regex_check, js_function_id, clipboard
@@ -1125,21 +1125,21 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 	}
 
 	// set collection consumer
-	return consumer.Set_tx(tx, "field", fieldId, "fieldDataDefault",
+	return consumer.Set_tx(ctx, tx, "field", fieldId, "fieldDataDefault",
 		[]types.CollectionConsumer{defCollection})
 }
-func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
-	attributeIdRecord pgtype.UUID, attributeIdNm pgtype.UUID,
+func setDataRelationship_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID,
+	formIdOpen pgtype.UUID, attributeIdRecord pgtype.UUID, attributeIdNm pgtype.UUID,
 	columns []types.Column, category bool, filterQuick bool, outsideIn bool,
 	autoSelect int, defPresetIds []uuid.UUID, oForm types.OpenForm) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_data_relationship", "field_id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_data_relationship", "field_id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.field_data_relationship
 			SET 	attribute_id_nm = $1, category = $2, filter_quick = $3,
 				outside_in = $4, auto_select = $5
@@ -1150,7 +1150,7 @@ func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field_data_relationship (
 				field_id, attribute_id_nm, category,
 				filter_quick, outside_in, auto_select
@@ -1163,7 +1163,7 @@ func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID
 	}
 
 	// set default preset IDs
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.field_data_relationship_preset
 		WHERE field_id = $1
 	`, fieldId); err != nil {
@@ -1171,7 +1171,7 @@ func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID
 	}
 
 	for _, presetId := range defPresetIds {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field_data_relationship_preset (field_id, preset_id)
 			VALUES ($1,$2)
 		`, fieldId, presetId); err != nil {
@@ -1183,20 +1183,20 @@ func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID
 	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
 
 	// set open form
-	if err := openForm.Set_tx(tx, "field", fieldId, oForm, pgtype.Text{}); err != nil {
+	if err := openForm.Set_tx(ctx, tx, "field", fieldId, oForm, pgtype.Text{}); err != nil {
 		return err
 	}
-	return column.Set_tx(tx, "field", fieldId, columns)
+	return column.Set_tx(ctx, tx, "field", fieldId, columns)
 }
-func setHeader_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldHeader) error {
+func setHeader_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.FieldHeader) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_header", "field_id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_header", "field_id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.field_header
 			SET richtext = $1, size = $2
 			WHERE field_id = $3
@@ -1204,7 +1204,7 @@ func setHeader_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldHeader) error {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field_header (field_id, richtext, size)
 			VALUES ($1,$2,$3)
 		`, fieldId, f.Richtext, f.Size); err != nil {
@@ -1213,9 +1213,9 @@ func setHeader_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldHeader) error {
 	}
 	return nil
 }
-func setKanban_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldKanban) error {
+func setKanban_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.FieldKanban) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_kanban", "field_id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_kanban", "field_id")
 	if err != nil {
 		return err
 	}
@@ -1228,7 +1228,7 @@ func setKanban_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldKanban) error {
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.field_kanban
 			SET relation_index_data = $1, relation_index_axis_x = $2,
 				relation_index_axis_y = $3, attribute_id_sort = $4
@@ -1239,7 +1239,7 @@ func setKanban_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldKanban) error {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field_kanban (
 				field_id, relation_index_data, relation_index_axis_x,
 				relation_index_axis_y, attribute_id_sort
@@ -1253,31 +1253,31 @@ func setKanban_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldKanban) error {
 	}
 
 	// set open form
-	if err := openForm.Set_tx(tx, "field", fieldId, f.OpenForm, pgtype.Text{}); err != nil {
+	if err := openForm.Set_tx(ctx, tx, "field", fieldId, f.OpenForm, pgtype.Text{}); err != nil {
 		return err
 	}
 
 	// set collection consumer
-	if err := consumer.Set_tx(tx, "field", fieldId, "fieldFilterSelector", f.Collections); err != nil {
+	if err := consumer.Set_tx(ctx, tx, "field", fieldId, "fieldFilterSelector", f.Collections); err != nil {
 		return err
 	}
 
 	// set columns
-	return column.Set_tx(tx, "field", fieldId, f.Columns)
+	return column.Set_tx(ctx, tx, "field", fieldId, f.Columns)
 }
-func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
+func setList_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	formIdOpen pgtype.UUID, autoRenew pgtype.Int4, csvExport bool, csvImport bool,
 	layout string, filterQuick bool, resultLimit int, columns []types.Column,
 	collections []types.CollectionConsumer, oForm types.OpenForm,
 	oFormBulk types.OpenForm) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_list", "field_id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_list", "field_id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.field_list
 			SET auto_renew = $1, csv_export = $2, csv_import = $3, layout = $4,
 				filter_quick = $5, result_limit = $6
@@ -1288,7 +1288,7 @@ func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field_list (
 				field_id, auto_renew, csv_export, csv_import,
 				layout, filter_quick, result_limit
@@ -1304,30 +1304,30 @@ func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
 
 	// set open forms
-	if err := openForm.Set_tx(tx, "field", fieldId, oForm, pgtype.Text{}); err != nil {
+	if err := openForm.Set_tx(ctx, tx, "field", fieldId, oForm, pgtype.Text{}); err != nil {
 		return err
 	}
-	if err := openForm.Set_tx(tx, "field", fieldId, oFormBulk, pgtype.Text{String: "bulk", Valid: true}); err != nil {
+	if err := openForm.Set_tx(ctx, tx, "field", fieldId, oFormBulk, pgtype.Text{String: "bulk", Valid: true}); err != nil {
 		return err
 	}
 
 	// set collection consumer
-	if err := consumer.Set_tx(tx, "field", fieldId, "fieldFilterSelector", collections); err != nil {
+	if err := consumer.Set_tx(ctx, tx, "field", fieldId, "fieldFilterSelector", collections); err != nil {
 		return err
 	}
 
 	// set columns
-	return column.Set_tx(tx, "field", fieldId, columns)
+	return column.Set_tx(ctx, tx, "field", fieldId, columns)
 }
-func setVariable_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldVariable) error {
+func setVariable_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.FieldVariable) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_variable", "field_id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_variable", "field_id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.field_variable
 			SET variable_id = $1, js_function_id = $2, clipboard = $3
 			WHERE field_id = $4
@@ -1335,7 +1335,7 @@ func setVariable_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldVariable) error {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field_variable (field_id, variable_id, js_function_id, clipboard)
 			VALUES ($1,$2,$3,$4)
 		`, fieldId, f.VariableId, f.JsFunctionId, f.Clipboard); err != nil {
@@ -1344,5 +1344,5 @@ func setVariable_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldVariable) error {
 	}
 
 	// set columns
-	return column.Set_tx(tx, "field", fieldId, f.Columns)
+	return column.Set_tx(ctx, tx, "field", fieldId, f.Columns)
 }

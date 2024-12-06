@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/schema/jsFunction"
 	"r3/types"
@@ -9,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func JsFunctionDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func JsFunctionDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id uuid.UUID `json:"id"`
@@ -18,14 +19,14 @@ func JsFunctionDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, jsFunction.Del_tx(tx, req.Id)
+	return nil, jsFunction.Del_tx(ctx, tx, req.Id)
 }
 
-func JsFunctionSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func JsFunctionSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.JsFunction
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, jsFunction.Set_tx(tx, req)
+	return nil, jsFunction.Set_tx(ctx, tx, req)
 }

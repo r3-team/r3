@@ -24,16 +24,16 @@ import (
 )
 
 // delete one login
-func Del_tx(tx pgx.Tx, id int64) error {
+func Del_tx(ctx context.Context, tx pgx.Tx, id int64) error {
 	// sync deletion before deleting the record as record meta data must be retrieved one last time
-	syncLogin_tx(tx, "DELETED", id)
+	syncLogin_tx(ctx, tx, "DELETED", id)
 
-	_, err := tx.Exec(db.Ctx, `DELETE FROM instance.login WHERE id = $1`, id)
+	_, err := tx.Exec(ctx, `DELETE FROM instance.login WHERE id = $1`, id)
 	return err
 }
 
 // get logins with meta data and total count
-func Get(byId int64, byString string, orderBy string, orderAsc bool, limit int, offset int,
+func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy string, orderAsc bool, limit int, offset int,
 	meta bool, roles bool, recordRequests []types.LoginAdminRecordGet) ([]types.LoginAdmin, int, error) {
 
 	cache.Schema_mx.RLock()
@@ -114,7 +114,7 @@ func Get(byId int64, byString string, orderBy string, orderAsc bool, limit int, 
 		return logins, 0, err
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, query, qb.GetParaValues()...)
+	rows, err := tx.Query(ctx, query, qb.GetParaValues()...)
 	if err != nil {
 		return logins, 0, err
 	}
@@ -197,7 +197,7 @@ func Get(byId int64, byString string, orderBy string, orderAsc bool, limit int, 
 	}
 
 	var total int
-	if err := db.Pool.QueryRow(db.Ctx, query_cnt, qb_cnt.GetParaValues()...).Scan(&total); err != nil {
+	if err := tx.QueryRow(ctx, query_cnt, qb_cnt.GetParaValues()...).Scan(&total); err != nil {
 		return logins, 0, err
 	}
 	return logins, total, nil
@@ -205,10 +205,9 @@ func Get(byId int64, byString string, orderBy string, orderAsc bool, limit int, 
 
 // set login with meta data
 // returns created login ID if new login
-func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4,
-	ldapKey pgtype.Text, name string, pass string, admin bool, noAuth bool,
-	active bool, tokenExpiryHours pgtype.Int4, meta types.LoginMeta, roleIds []uuid.UUID,
-	records []types.LoginAdminRecordSet) (int64, error) {
+func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4,
+	ldapKey pgtype.Text, name string, pass string, admin bool, noAuth bool, active bool,
+	tokenExpiryHours pgtype.Int4, meta types.LoginMeta, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
 
 	if name == "" {
 		return 0, errors.New("name must not be empty")
@@ -221,7 +220,7 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 	if !isNew {
 		// check for existing login
 		var temp string
-		err := tx.QueryRow(db.Ctx, `SELECT name FROM instance.login WHERE id = $1`, id).Scan(&temp)
+		err := tx.QueryRow(ctx, `SELECT name FROM instance.login WHERE id = $1`, id).Scan(&temp)
 		if err == pgx.ErrNoRows {
 			return 0, fmt.Errorf("no login with ID %d", id)
 		}
@@ -235,7 +234,7 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 	saltKdf := tools.RandStringRunes(16)
 
 	if isNew {
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.login (
 				ldap_id, ldap_key, name, salt, hash, salt_kdf,
 				admin, no_auth, limited, active, token_expiry_hours
@@ -251,7 +250,7 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 		// apply default login settings from login template
 		if !loginTemplateId.Valid {
 			// get GLOBAL template
-			if err := tx.QueryRow(db.Ctx, `
+			if err := tx.QueryRow(ctx, `
 				SELECT id
 				FROM instance.login_template
 				WHERE name = 'GLOBAL'
@@ -259,15 +258,15 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 				return 0, err
 			}
 		}
-		s, err := login_setting.Get_tx(db.Ctx, tx, pgtype.Int8{}, loginTemplateId)
+		s, err := login_setting.Get_tx(ctx, tx, pgtype.Int8{}, loginTemplateId)
 		if err != nil {
 			return 0, err
 		}
-		if err := login_setting.Set_tx(db.Ctx, tx, pgtype.Int8{Int64: id, Valid: true}, pgtype.Int8{}, s, true); err != nil {
+		if err := login_setting.Set_tx(ctx, tx, pgtype.Int8{Int64: id, Valid: true}, pgtype.Int8{}, s, true); err != nil {
 			return 0, err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE instance.login
 			SET ldap_id = $1, ldap_key = $2, name = $3, admin = $4,
 				no_auth = $5, limited = $6, active = $7, token_expiry_hours = $8
@@ -277,19 +276,19 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 		}
 
 		if pass != "" {
-			if err := SetSaltHash_tx(db.Ctx, tx, salt, hash, id); err != nil {
+			if err := SetSaltHash_tx(ctx, tx, salt, hash, id); err != nil {
 				return 0, err
 			}
 		}
 	}
 
 	// set meta data
-	if err := login_meta.Set_tx(tx, id, meta); err != nil {
+	if err := login_meta.Set_tx(ctx, tx, id, meta); err != nil {
 		return 0, err
 	}
 
 	// execute login sync
-	syncLogin_tx(tx, "UPDATED", id)
+	syncLogin_tx(ctx, tx, "UPDATED", id)
 
 	// set records
 	for _, record := range records {
@@ -302,7 +301,7 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 		mod := cache.ModuleIdMap[rel.ModuleId]
 		if !isNew {
 			// remove old record (first to free up unique index)
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				UPDATE "%s"."%s"
 				SET "%s" = null
 				WHERE "%s" = $1
@@ -312,7 +311,7 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 		}
 
 		// set new record
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			UPDATE "%s"."%s"
 			SET "%s" = $1
 			WHERE "%s" = $2
@@ -322,7 +321,7 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 	}
 
 	// set roles
-	return id, setRoleIds_tx(tx, id, roleIds)
+	return id, setRoleIds_tx(ctx, tx, id, roleIds)
 }
 
 func SetSaltHash_tx(ctx context.Context, tx pgx.Tx, salt pgtype.Text, hash pgtype.Text, id int64) error {
@@ -336,10 +335,10 @@ func SetSaltHash_tx(ctx context.Context, tx pgx.Tx, salt pgtype.Text, hash pgtyp
 }
 
 // get login to role memberships
-func GetByRole(roleId uuid.UUID) ([]types.Login, error) {
+func GetByRole_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID) ([]types.Login, error) {
 	logins := make([]types.Login, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT id, name
 		FROM instance.login
 		WHERE active
@@ -475,15 +474,16 @@ func SetTokenFixed_tx(ctx context.Context, tx pgx.Tx, loginId int64, name string
 
 // create new admin user
 func CreateAdmin(username string, password string) error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
 
-	ctx := db.GetCtxTimeoutSysTask()
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	if _, err := Set_tx(tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{},
+	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{},
 		username, password, true, false, true, pgtype.Int4{},
 		types.LoginMeta{NameFore: "Admin", NameSur: "User", NameDisplay: username},
 		[]uuid.UUID{}, []types.LoginAdminRecordSet{}); err != nil {
@@ -494,8 +494,8 @@ func CreateAdmin(username string, password string) error {
 }
 
 // reset all TOTP keys
-func ResetTotp_tx(tx pgx.Tx, loginId int64) error {
-	_, err := db.Pool.Exec(db.Ctx, `
+func ResetTotp_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
+	_, err := tx.Exec(ctx, `
 		DELETE FROM instance.login_token_fixed
 		WHERE login_id = $1
 		AND   context  = 'totp'
@@ -514,7 +514,7 @@ func GenerateSaltHash(pw string) (salt pgtype.Text, hash pgtype.Text) {
 }
 
 // call login sync function for every module that has one to inform about changed login meta data
-func syncLogin_tx(tx pgx.Tx, action string, id int64) {
+func syncLogin_tx(ctx context.Context, tx pgx.Tx, action string, id int64) {
 	logContext := "server"
 	logErr := "failed to execute user sync"
 
@@ -534,7 +534,7 @@ func syncLogin_tx(tx pgx.Tx, action string, id int64) {
 			continue
 		}
 
-		if _, err := tx.Exec(db.Ctx, `SELECT instance.user_sync($1,$2,$3,$4)`, mod.Name, fnc.Name, id, action); err != nil {
+		if _, err := tx.Exec(ctx, `SELECT instance.user_sync($1,$2,$3,$4)`, mod.Name, fnc.Name, id, action); err != nil {
 			log.Error(logContext, logErr, err)
 		}
 	}

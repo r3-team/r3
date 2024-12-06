@@ -18,6 +18,14 @@ import (
 
 // delete data change logs according to retention settings
 func DelLogsBackground() error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
 
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
@@ -27,7 +35,7 @@ func DelLogsBackground() error {
 		// delete logs for relations with no retention
 		if !r.RetentionCount.Valid && !r.RetentionDays.Valid {
 
-			if _, err := db.Pool.Exec(db.GetCtxTimeoutDbTask(), `
+			if _, err := tx.Exec(ctx, `
 				DELETE FROM instance.data_log
 				WHERE id IN (
 					SELECT data_log_id
@@ -47,7 +55,7 @@ func DelLogsBackground() error {
 		// delete logs according to retention settings
 		now := tools.GetTimeUnix()
 
-		if _, err := db.Pool.Exec(db.GetCtxTimeoutDbTask(), `
+		if _, err := tx.Exec(ctx, `
 			DELETE FROM instance.data_log AS p
 			WHERE p.relation_id = $1
 			
@@ -67,7 +75,7 @@ func DelLogsBackground() error {
 			return err
 		}
 	}
-	return nil
+	return tx.Commit(ctx)
 }
 
 // get data change logs for specified record and attributes

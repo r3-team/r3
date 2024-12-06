@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/db"
@@ -15,7 +16,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Copy_tx(tx pgx.Tx, id uuid.UUID) error {
+func Copy_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
 	apis, err := Get(uuid.Nil, id)
 	if err != nil {
@@ -28,7 +29,7 @@ func Copy_tx(tx pgx.Tx, id uuid.UUID) error {
 	api := apis[0]
 
 	// get new version number (latest + 1)
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT MAX(version) + 1
 		FROM app.api
 		WHERE module_id = $1
@@ -53,11 +54,11 @@ func Copy_tx(tx pgx.Tx, id uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	return Set_tx(tx, api)
+	return Set_tx(ctx, tx, api)
 }
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, `DELETE FROM app.api WHERE id = $1`, id)
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
+	_, err := tx.Exec(ctx, `DELETE FROM app.api WHERE id = $1`, id)
 	return err
 }
 
@@ -114,19 +115,19 @@ func Get(moduleId uuid.UUID, id uuid.UUID) ([]types.Api, error) {
 	return apis, nil
 }
 
-func Set_tx(tx pgx.Tx, api types.Api) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, api types.Api) error {
 
 	if err := check.DbIdentifier(api.Name); err != nil {
 		return err
 	}
 
-	known, err := schema.CheckCreateId_tx(tx, &api.Id, "api", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &api.Id, "api", "id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.api
 			SET name = $1, comment = $2, has_delete = $3, has_get = $4,
 				has_post = $5, limit_def = $6, limit_max = $7, verbose_def = $8,
@@ -138,7 +139,7 @@ func Set_tx(tx pgx.Tx, api types.Api) error {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.api (id, module_id, name, comment, has_delete,
 				has_get, has_post, limit_def, limit_max, verbose_def, version)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
@@ -148,8 +149,8 @@ func Set_tx(tx pgx.Tx, api types.Api) error {
 			return err
 		}
 	}
-	if err := query.Set_tx(tx, "api", api.Id, 0, 0, api.Query); err != nil {
+	if err := query.Set_tx(ctx, tx, "api", api.Id, 0, 0, api.Query); err != nil {
 		return err
 	}
-	return column.Set_tx(tx, "api", api.Id, api.Columns)
+	return column.Set_tx(ctx, tx, "api", api.Id, api.Columns)
 }

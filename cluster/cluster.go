@@ -47,7 +47,7 @@ func StartNode() error {
 
 	// check whether node is already registered
 	var nodeName string
-	err = db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
+	err = db.Pool.QueryRow(context.Background(), `
 		SELECT name
 		FROM instance_cluster.node
 		WHERE id = $1
@@ -60,14 +60,14 @@ func StartNode() error {
 
 	if !exists {
 		// generate new node name
-		if err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
+		if err := db.Pool.QueryRow(context.Background(), `
 			SELECT CONCAT('node',(COUNT(*)+1)::TEXT)
 			FROM instance_cluster.node
 		`).Scan(&nodeName); err != nil {
 			return err
 		}
 
-		if _, err := db.Pool.Exec(db.GetCtxTimeoutSysTask(), `
+		if _, err := db.Pool.Exec(context.Background(), `
 			INSERT INTO instance_cluster.node (id,name,hostname,date_started,
 				date_check_in,stat_memory,cluster_master,running)
 			VALUES ($1,$2,$3,$4,0,-1,false,true)
@@ -76,7 +76,7 @@ func StartNode() error {
 		}
 	} else {
 		// node is starting up - set start time, disable master role and delete missed events
-		if _, err := db.Pool.Exec(db.GetCtxTimeoutSysTask(), `
+		if _, err := db.Pool.Exec(context.Background(), `
 			UPDATE instance_cluster.node
 			SET date_started = $1, cluster_master = false, running = true
 			WHERE id = $2
@@ -84,7 +84,7 @@ func StartNode() error {
 			return err
 		}
 
-		if _, err := db.Pool.Exec(db.GetCtxTimeoutSysTask(), `
+		if _, err := db.Pool.Exec(context.Background(), `
 			DELETE FROM instance_cluster.node_event
 			WHERE node_id = $1
 		`, nodeId); err != nil {
@@ -100,7 +100,7 @@ func StartNode() error {
 }
 func StopNode() error {
 	// on shutdown: Give up master role and disable running state
-	_, err := db.Pool.Exec(db.GetCtxTimeoutSysTask(), `
+	_, err := db.Pool.Exec(context.Background(), `
 		UPDATE instance_cluster.node
 		SET cluster_master = false, running = false
 		WHERE id = $1
@@ -176,7 +176,7 @@ func CreateEventForNodes(nodeIds []uuid.UUID, content string, payload interface{
 
 	if len(nodeIds) == 0 {
 		// if no node IDs are defined, apply to all other nodes
-		if _, err := db.Pool.Exec(db.GetCtxTimeoutSysTask(), `
+		if _, err := db.Pool.Exec(context.Background(), `
 			INSERT INTO instance_cluster.node_event (
 				node_id, content, payload, target_address,
 				target_device, target_login_id
@@ -189,7 +189,7 @@ func CreateEventForNodes(nodeIds []uuid.UUID, content string, payload interface{
 			return err
 		}
 	} else {
-		if _, err := db.Pool.Exec(db.GetCtxTimeoutSysTask(), `
+		if _, err := db.Pool.Exec(context.Background(), `
 			INSERT INTO instance_cluster.node_event (
 				node_id, content, payload, target_address,
 				target_device, target_login_id

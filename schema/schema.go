@@ -1,9 +1,9 @@
 package schema
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
-	"r3/db"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -13,7 +13,7 @@ import (
 // if nil, it is overwritten with a new one
 // if not nil, it is checked whether the ID is known already
 // returns whether the ID was already known
-func CheckCreateId_tx(tx pgx.Tx, id *uuid.UUID, relName string, pkName string) (bool, error) {
+func CheckCreateId_tx(ctx context.Context, tx pgx.Tx, id *uuid.UUID, relName string, pkName string) (bool, error) {
 
 	var err error
 	if *id == uuid.Nil {
@@ -22,7 +22,7 @@ func CheckCreateId_tx(tx pgx.Tx, id *uuid.UUID, relName string, pkName string) (
 	}
 
 	var known bool
-	err = tx.QueryRow(db.Ctx, fmt.Sprintf(`
+	err = tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT EXISTS(SELECT * FROM app.%s WHERE "%s" = $1)
 	`, relName, pkName), id).Scan(&known)
 
@@ -68,12 +68,12 @@ func GetValidAtDay(intervalType string, atDay int) int {
 }
 
 // fully validates module dependencies
-func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
+func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
 	var cnt int
 	var name1, name2 sql.NullString
 
 	// check parent module without dependency
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(name, ', ')
 		FROM app.module
 		WHERE id = (
@@ -96,7 +96,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check attribute relationships with external relations
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(CONCAT(r.name, '.', a.name), ', ')
 		FROM app.attribute AS a
 		INNER JOIN app.relation AS r
@@ -126,7 +126,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check query relation access
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(COALESCE(f.name,lf.name), ', ')
 		FROM app.query AS q
 		LEFT JOIN app.form  AS f  ON f.id  = q.form_id  -- query for form
@@ -163,7 +163,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check field access to external forms
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(f3.name, ', '), STRING_AGG(f1.name, ', ')
 		FROM app.open_form AS of
 		INNER JOIN app.form  AS f1 ON f1.id = of.form_id_open -- opened form
@@ -194,7 +194,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check collection access to external forms
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(f.name, ', ')
 		FROM app.open_form AS of
 		INNER JOIN app.form                AS f  ON f.id  = of.form_id_open
@@ -225,7 +225,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check relation policy access to external roles
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(r.name, ', ')
 		FROM app.relation_policy AS rp
 		INNER JOIN app.role     AS r ON r.id = rp.role_id
@@ -254,7 +254,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check trigger access to external relations
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(r.name, ', ')
 		FROM app.pg_trigger AS t
 		INNER JOIN app.relation AS r ON r.id = t.relation_id
@@ -281,7 +281,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check widget access to external forms
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(f.name, ', ')
 		FROM app.widget AS h
 		INNER JOIN app.form AS f ON f.id = h.form_id
@@ -310,7 +310,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check menu access to external forms
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(f.name, ', ')
 		FROM app.menu AS h
 		INNER JOIN app.form AS f ON f.id = h.form_id
@@ -339,7 +339,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check access to external icons
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*)
 		FROM app.icon
 		WHERE id IN (
@@ -394,7 +394,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check PG function access to external pgFunctions/modules/relations/attributes
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*)
 		FROM app.module
 		WHERE id IN (
@@ -460,7 +460,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check JS function access to external pgFunctions/jsFunctions/forms/fields/roles
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*)
 		FROM app.module
 		WHERE id IN (
@@ -538,7 +538,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check field (button/data) & form function access to external JS functions
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*)
 		FROM app.module
 		WHERE id IN (
@@ -605,7 +605,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check role membership inside external parent roles
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(r.name, ', ')
 		FROM app.role AS r
 		INNER JOIN app.module AS m
@@ -636,7 +636,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	// check data presets without dependency
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*)
 		FROM app.preset
 		WHERE id IN (

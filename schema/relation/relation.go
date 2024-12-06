@@ -1,6 +1,7 @@
 package relation
 
 import (
+	"context"
 	"fmt"
 	"r3/db"
 	"r3/db/check"
@@ -14,15 +15,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
-	modName, relName, err := schema.GetRelationNamesById_tx(tx, id)
+	modName, relName, err := schema.GetRelationNamesById_tx(ctx, tx, id)
 	if err != nil {
 		return err
 	}
 
 	// drop e2e encryption relation if its there
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		DROP TABLE IF EXISTS instance_e2ee."%s"
 	`, schema.GetEncKeyTableName(id))); err != nil {
 		return err
@@ -30,7 +31,7 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
 	// delete file relations for file attributes
 	atrIdsFile := make([]uuid.UUID, 0)
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(ctx, `
 		SELECT ARRAY_AGG(id)
 		FROM app.attribute
 		WHERE relation_id = $1
@@ -50,7 +51,7 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 	// issue can occur if deletion order is wrong (relation deleted before referencing relationship attribute)
 	// CASCADE removes the foreign key from the affected attribute - then either the attribute or its relation is deleted afterwards during the transfer
 	// invalid CASCADE is blocked by the system as referenced relations cannot be deleted in the first place
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`DROP TABLE "%s"."%s" CASCADE`,
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`DROP TABLE "%s"."%s" CASCADE`,
 		modName, relName)); err != nil {
 
 		return err
@@ -58,16 +59,16 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
 	// delete primary key sequence
 	// (is not removed automatically)
-	if err := delPkSeq_tx(tx, modName, id); err != nil {
+	if err := delPkSeq_tx(ctx, tx, modName, id); err != nil {
 		return err
 	}
 
 	// delete relation reference
-	_, err = tx.Exec(db.Ctx, `DELETE FROM app.relation WHERE id = $1`, id)
+	_, err = tx.Exec(ctx, `DELETE FROM app.relation WHERE id = $1`, id)
 	return err
 }
-func delPkSeq_tx(tx pgx.Tx, modName string, id uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+func delPkSeq_tx(ctx context.Context, tx pgx.Tx, modName string, id uuid.UUID) error {
+	_, err := tx.Exec(ctx, fmt.Sprintf(`
 		DROP SEQUENCE "%s"."%s"
 	`, modName, schema.GetSequenceName(id)))
 	return err
@@ -113,31 +114,31 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 	return relations, nil
 }
 
-func Set_tx(tx pgx.Tx, rel types.Relation) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation) error {
 
 	if err := check.DbIdentifier(rel.Name); err != nil {
 		return err
 	}
 
-	moduleName, err := schema.GetModuleNameById_tx(tx, rel.ModuleId)
+	moduleName, err := schema.GetModuleNameById_tx(ctx, tx, rel.ModuleId)
 	if err != nil {
 		return err
 	}
 
 	isNew := rel.Id == uuid.Nil
-	known, err := schema.CheckCreateId_tx(tx, &rel.Id, "relation", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &rel.Id, "relation", "id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		_, nameEx, err := schema.GetRelationNamesById_tx(tx, rel.Id)
+		_, nameEx, err := schema.GetRelationNamesById_tx(ctx, tx, rel.Id)
 		if err != nil {
 			return err
 		}
 
 		// update relation reference
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.relation
 			SET name = $1, comment = $2, retention_count = $3, retention_days = $4
 			WHERE id = $5
@@ -147,26 +148,26 @@ func Set_tx(tx pgx.Tx, rel types.Relation) error {
 
 		// if name changed, update relation and all affected entities
 		if nameEx != rel.Name {
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				ALTER TABLE "%s"."%s"
 				RENAME TO "%s"
 			`, moduleName, nameEx, rel.Name)); err != nil {
 				return err
 			}
 
-			if err := pgFunction.RecreateAffectedBy_tx(tx, "relation", rel.Id); err != nil {
+			if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, "relation", rel.Id); err != nil {
 				return fmt.Errorf("failed to recreate affected PG functions, %s", err)
 			}
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			CREATE TABLE "%s"."%s" ()
 		`, moduleName, rel.Name)); err != nil {
 			return err
 		}
 
 		// insert relation reference
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.relation (id, module_id, name, comment,
 				encryption, retention_count, retention_days)
 			VALUES ($1,$2,$3,$4,$5,$6,$7)
@@ -178,7 +179,7 @@ func Set_tx(tx pgx.Tx, rel types.Relation) error {
 
 		// create primary key attribute if relation is new (e. g. not imported or updated)
 		if isNew {
-			if err := attribute.Set_tx(tx, types.Attribute{
+			if err := attribute.Set_tx(ctx, tx, types.Attribute{
 				Id:             uuid.Nil,
 				RelationId:     rel.Id,
 				RelationshipId: pgtype.UUID{},

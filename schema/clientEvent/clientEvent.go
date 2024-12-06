@@ -1,6 +1,7 @@
 package clientEvent
 
 import (
+	"context"
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
@@ -11,8 +12,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, `DELETE FROM app.client_event WHERE id = $1`, id)
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
+	_, err := tx.Exec(ctx, `DELETE FROM app.client_event WHERE id = $1`, id)
 	return err
 }
 
@@ -49,9 +50,9 @@ func Get(moduleId uuid.UUID) ([]types.ClientEvent, error) {
 	return clientEvents, nil
 }
 
-func Set_tx(tx pgx.Tx, ce types.ClientEvent) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, ce types.ClientEvent) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &ce.Id, "client_event", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &ce.Id, "client_event", "id")
 	if err != nil {
 		return err
 	}
@@ -64,7 +65,7 @@ func Set_tx(tx pgx.Tx, ce types.ClientEvent) error {
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.client_event
 			SET action = $1, arguments = $2, event = $3, hotkey_modifier1 = $4,
 				hotkey_modifier2 = $5, hotkey_char = $6, js_function_id = $7, pg_function_id = $8
@@ -75,7 +76,7 @@ func Set_tx(tx pgx.Tx, ce types.ClientEvent) error {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.client_event (id, module_id, action, arguments, event, hotkey_modifier1,
 				hotkey_modifier2, hotkey_char, js_function_id, pg_function_id)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
@@ -85,5 +86,5 @@ func Set_tx(tx pgx.Tx, ce types.ClientEvent) error {
 			return err
 		}
 	}
-	return caption.Set_tx(tx, ce.Id, ce.Captions)
+	return caption.Set_tx(ctx, tx, ce.Id, ce.Captions)
 }

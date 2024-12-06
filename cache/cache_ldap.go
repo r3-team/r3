@@ -1,7 +1,9 @@
 package cache
 
 import (
+	"context"
 	"errors"
+	"r3/db"
 	"r3/ldap"
 	"r3/types"
 	"sync"
@@ -30,17 +32,24 @@ func GetLdap(id int32) (types.Ldap, error) {
 }
 
 func LoadLdapMap() error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
 
-	ldap_mx.Lock()
-	defer ldap_mx.Unlock()
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Commit(ctx)
 
-	ldaps, err := ldap.Get()
+	ldaps, err := ldap.Get_tx(ctx, tx)
 	if err != nil {
 		return err
 	}
 
-	ldapIdMap = make(map[int32]types.Ldap)
+	ldap_mx.Lock()
+	defer ldap_mx.Unlock()
 
+	ldapIdMap = make(map[int32]types.Ldap)
 	for _, ldap := range ldaps {
 		ldapIdMap[ldap.Id] = ldap
 	}

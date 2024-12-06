@@ -1,14 +1,16 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/log"
 	"r3/types"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func LogGet(reqJson json.RawMessage) (interface{}, error) {
+func LogGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var (
 		err error
@@ -29,7 +31,7 @@ func LogGet(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	res.Logs, res.Total, err = log.Get(req.DateFrom, req.DateTo,
+	res.Logs, res.Total, err = log.Get_tx(ctx, tx, req.DateFrom, req.DateTo,
 		req.Limit, req.Offset, req.Context, req.ByString)
 
 	return res, err

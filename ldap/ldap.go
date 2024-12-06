@@ -1,6 +1,7 @@
 package ldap
 
 import (
+	"context"
 	"r3/db"
 	"r3/types"
 	"strings"
@@ -8,18 +9,18 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Del_tx(tx pgx.Tx, id int32) error {
-	_, err := tx.Exec(db.Ctx, `
+func Del_tx(ctx context.Context, tx pgx.Tx, id int32) error {
+	_, err := tx.Exec(ctx, `
 		DELETE FROM instance.ldap
 		WHERE id = $1
 	`, id)
 	return err
 }
 
-func Get() ([]types.Ldap, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 	ldaps := make([]types.Ldap, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(ctx, `
 		SELECT
 			l.id,
 			l.login_template_id,
@@ -77,7 +78,7 @@ func Get() ([]types.Ldap, error) {
 	rows.Close()
 
 	for i, _ := range ldaps {
-		ldaps[i].Roles, err = getRoles(ldaps[i].Id)
+		ldaps[i].Roles, err = getRoles(ctx, tx, ldaps[i].Id)
 		if err != nil {
 			return ldaps, err
 		}
@@ -85,10 +86,10 @@ func Get() ([]types.Ldap, error) {
 	return ldaps, nil
 }
 
-func Set_tx(tx pgx.Tx, l types.Ldap) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) error {
 
 	if l.Id == 0 {
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.ldap (
 				login_template_id, name, host, port, bind_user_dn, bind_user_pw,
 				search_class, search_dn, key_attribute, login_attribute,
@@ -104,7 +105,7 @@ func Set_tx(tx pgx.Tx, l types.Ldap) error {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE instance.ldap
 			SET login_template_id = $1, name = $2, host = $3, port = $4,
 				bind_user_dn = $5, bind_user_pw = $6, search_class = $7,
@@ -121,12 +122,12 @@ func Set_tx(tx pgx.Tx, l types.Ldap) error {
 		}
 	}
 
-	if err := setLoginMetaAttributes_tx(tx, l.Id, l.LoginMetaAttributes); err != nil {
+	if err := setLoginMetaAttributes_tx(ctx, tx, l.Id, l.LoginMetaAttributes); err != nil {
 		return err
 	}
 
 	// update LDAP role assignment
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.ldap_role
 		WHERE ldap_id = $1
 	`, l.Id); err != nil {
@@ -134,7 +135,7 @@ func Set_tx(tx pgx.Tx, l types.Ldap) error {
 	}
 
 	for _, role := range l.Roles {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO instance.ldap_role (ldap_id, role_id, group_dn)
 			VALUES ($1,$2,$3)
 		`, l.Id, role.RoleId, role.GroupDn); err != nil {
@@ -144,9 +145,9 @@ func Set_tx(tx pgx.Tx, l types.Ldap) error {
 	return nil
 }
 
-func setLoginMetaAttributes_tx(tx pgx.Tx, ldapId int32, m types.LoginMeta) error {
+func setLoginMetaAttributes_tx(ctx context.Context, tx pgx.Tx, ldapId int32, m types.LoginMeta) error {
 	var exists bool
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT EXISTS(
 			SELECT ldap_id
 			FROM instance.ldap_attribute_login_meta
@@ -171,7 +172,7 @@ func setLoginMetaAttributes_tx(tx pgx.Tx, ldapId int32, m types.LoginMeta) error
 
 	var err error
 	if !exists {
-		_, err = tx.Exec(db.Ctx, `
+		_, err = tx.Exec(ctx, `
 			INSERT INTO instance.ldap_attribute_login_meta (
 				ldap_id, department, email, location, name_display,
 				name_fore, name_sur, notes, organization, phone_fax,
@@ -182,7 +183,7 @@ func setLoginMetaAttributes_tx(tx pgx.Tx, ldapId int32, m types.LoginMeta) error
 			m.NameFore, m.NameSur, m.Notes, m.Organization, m.PhoneFax,
 			m.PhoneLandline, m.PhoneMobile)
 	} else {
-		_, err = tx.Exec(db.Ctx, `
+		_, err = tx.Exec(ctx, `
 			UPDATE instance.ldap_attribute_login_meta
 			SET department = $1, email = $2, location = $3, name_display = $4,
 				name_fore = $5, name_sur = $6, notes = $7, organization = $8,
@@ -195,10 +196,10 @@ func setLoginMetaAttributes_tx(tx pgx.Tx, ldapId int32, m types.LoginMeta) error
 	return err
 }
 
-func getRoles(ldapId int32) ([]types.LdapRole, error) {
+func getRoles(ctx context.Context, tx pgx.Tx, ldapId int32) ([]types.LdapRole, error) {
 	roles := make([]types.LdapRole, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT role_id, group_dn
 		FROM instance.ldap_role
 		WHERE ldap_id = $1

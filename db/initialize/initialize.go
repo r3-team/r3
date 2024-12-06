@@ -13,9 +13,11 @@ import (
 )
 
 func PrepareDbIfNew() error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbTask)
+	defer ctxCanc()
 
 	var exists bool
-	if err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
+	if err := db.Pool.QueryRow(ctx, `
 		SELECT exists(
 			SELECT FROM pg_tables
 			WHERE schemaname = 'instance'
@@ -28,7 +30,6 @@ func PrepareDbIfNew() error {
 		return nil
 	}
 
-	ctx := db.GetCtxTimeoutDbTask()
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -73,7 +74,7 @@ func PrepareDbIfNew() error {
 		return err
 	}
 
-	// create initial login
+	// create initial login last, in case database upgrade is required beforehand
 	return login.CreateAdmin("admin", "admin")
 }
 

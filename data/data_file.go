@@ -65,6 +65,9 @@ func GetFilePathVersion(fileId uuid.UUID, version int64) string {
 func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 	part *multipart.Part, isNewFile bool) error {
 
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
 	var err error
 
 	cache.Schema_mx.RLock()
@@ -84,7 +87,7 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 	var recordIds []int64
 	var version int64 = 0
 	if !isNewFile {
-		if err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), fmt.Sprintf(`
+		if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
 			SELECT v.version+1, (
 				SELECT ARRAY_AGG(r.record_id)
 				FROM instance_file."%s" AS r
@@ -142,7 +145,6 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 		GetFilePathThumb(fileId), false)
 
 	// store file meta data in database
-	ctx := db.GetCtxTimeoutSysTask()
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -362,8 +364,11 @@ func FilesSetDeletedForRecord_tx(ctx context.Context, tx pgx.Tx,
 }
 
 func FileGetLatestVersion(fileId uuid.UUID) (int64, error) {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
 	var version int64
-	err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
+	err := db.Pool.QueryRow(ctx, `
 		SELECT MAX(version)
 		FROM instance.file_version
 		WHERE file_id = $1

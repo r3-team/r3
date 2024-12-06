@@ -1,6 +1,7 @@
 package login_session
 
 import (
+	"context"
 	"fmt"
 	"r3/cache"
 	"r3/config"
@@ -10,11 +11,14 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Log(id uuid.UUID, loginId int64, address string, device types.WebsocketClientDevice) error {
-	ctx := db.GetCtxTimeoutLogWrite()
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutLogWrite)
+	defer ctxCanc()
+
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -38,7 +42,9 @@ func Log(id uuid.UUID, loginId int64, address string, device types.WebsocketClie
 }
 
 func LogRemove(id uuid.UUID) error {
-	ctx := db.GetCtxTimeoutLogWrite()
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutLogWrite)
+	defer ctxCanc()
+
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -54,7 +60,7 @@ func LogRemove(id uuid.UUID) error {
 	return tx.Commit(ctx)
 }
 
-func LogsGet(byString pgtype.Text, limit int, offset int, orderBy string, orderAsc bool) (interface{}, error) {
+func LogsGet_tx(ctx context.Context, tx pgx.Tx, byString pgtype.Text, limit int, offset int, orderBy string, orderAsc bool) (interface{}, error) {
 	type session struct {
 		LoginId         int64  `json:"loginId"`
 		LoginName       string `json:"loginName"`
@@ -109,7 +115,7 @@ func LogsGet(byString pgtype.Text, limit int, offset int, orderBy string, orderA
 	}
 
 	// get session count
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*)
 		FROM      instance.login_session AS ls
 		JOIN      instance.login         AS l ON l.id = ls.login_id
@@ -127,7 +133,7 @@ func LogsGet(byString pgtype.Text, limit int, offset int, orderBy string, orderA
 	}
 
 	// get session logs
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT ls.login_id, ls.address, ls.device, ls.date, l.admin, l.limited, l.no_auth,
 			l.name, COALESCE(m.name_display, ''), COALESCE(m.department, ''), n.name
 		FROM      instance.login_session AS ls
@@ -170,7 +176,9 @@ func LogsGet(byString pgtype.Text, limit int, offset int, orderBy string, orderA
 }
 
 func LogsRemoveForNode() error {
-	ctx := db.GetCtxTimeoutSysTask()
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -209,9 +217,9 @@ func logsGetConcurrentForLogin(limitedLogins bool, loginId int64) (cnt int64, ex
 
 	return cnt, existed, err
 }
-func LogsGetConcurrentCounts() (cntFull int64, cntLimited int64, err error) {
+func LogsGetConcurrentCounts_tx(ctx context.Context, tx pgx.Tx) (cntFull int64, cntLimited int64, err error) {
 
-	err = db.Pool.QueryRow(db.Ctx, `
+	err = tx.QueryRow(ctx, `
 		SELECT
 			COUNT(1) FILTER(WHERE limited = FALSE),
 			COUNT(1) FILTER(WHERE limited = TRUE)

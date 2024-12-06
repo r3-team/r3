@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"encoding/json"
 	"math/rand"
 	"os"
@@ -165,14 +166,14 @@ func SetInstanceIdIfEmpty() error {
 		return err
 	}
 
-	ctx := db.GetCtxTimeoutSysTask()
+	ctx := context.Background()
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	if err := SetString_tx(tx, "instanceId", id.String()); err != nil {
+	if err := SetString_tx(ctx, tx, "instanceId", id.String()); err != nil {
 		return err
 	}
 	return tx.Commit(ctx)
@@ -226,13 +227,13 @@ func ProcessTokenSecret() error {
 		min, max := 32, 48
 		secret = tools.RandStringRunes(rand.Intn(max-min+1) + min)
 
-		ctx := db.GetCtxTimeoutSysTask()
+		ctx := context.Background()
 		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
 			return err
 		}
 
-		if err := SetString_tx(tx, "tokenSecret", secret); err != nil {
+		if err := SetString_tx(ctx, tx, "tokenSecret", secret); err != nil {
 			tx.Rollback(ctx)
 			return err
 		}

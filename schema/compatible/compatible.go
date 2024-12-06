@@ -2,9 +2,9 @@
 package compatible
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"r3/db"
 	"r3/types"
 	"slices"
 	"strings"
@@ -108,10 +108,10 @@ func FixAttributeContentUse(contentUse string) string {
 	}
 	return contentUse
 }
-func MigrateDisplayToContentUse_tx(tx pgx.Tx, attributeId uuid.UUID, display string) (string, error) {
+func MigrateDisplayToContentUse_tx(ctx context.Context, tx pgx.Tx, attributeId uuid.UUID, display string) (string, error) {
 
 	if slices.Contains([]string{"textarea", "richtext", "date", "datetime", "time", "color"}, display) {
-		_, err := tx.Exec(db.Ctx, `
+		_, err := tx.Exec(ctx, `
 			UPDATE app.attribute
 			SET content_use = $1
 			WHERE id = $2
@@ -124,7 +124,7 @@ func MigrateDisplayToContentUse_tx(tx pgx.Tx, attributeId uuid.UUID, display str
 
 // < 3.2
 // migrate old module/form help pages to help articles
-func FixCaptions_tx(tx pgx.Tx, entity string, entityId uuid.UUID, captionMap types.CaptionMap) (types.CaptionMap, error) {
+func FixCaptions_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, captionMap types.CaptionMap) (types.CaptionMap, error) {
 
 	var articleId uuid.UUID
 	var moduleId uuid.UUID
@@ -135,7 +135,7 @@ func FixCaptions_tx(tx pgx.Tx, entity string, entityId uuid.UUID, captionMap typ
 		moduleId = entityId
 		name = "Migrated from application help"
 	case "form":
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			SELECT module_id, CONCAT('Migrated from form help of ', name)
 			FROM app.form
 			WHERE id = $1
@@ -171,7 +171,7 @@ func FixCaptions_tx(tx pgx.Tx, entity string, entityId uuid.UUID, captionMap typ
 		// solution: we do not touch migrated articles until a version >= 3.2 is released,
 		//  in which module authors can handle/update the migrated articles
 		exists := false
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			SELECT EXISTS (
 				SELECT id
 				FROM app.article
@@ -185,7 +185,7 @@ func FixCaptions_tx(tx pgx.Tx, entity string, entityId uuid.UUID, captionMap typ
 			continue
 		}
 
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			INSERT INTO app.article (id, module_id, name)
 			VALUES (gen_random_uuid(), $1, $2)
 			RETURNING id
@@ -194,7 +194,7 @@ func FixCaptions_tx(tx pgx.Tx, entity string, entityId uuid.UUID, captionMap typ
 		}
 
 		for langCode, value := range langMap {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO app.caption (article_id, content, language_code, value)
 				VALUES ($1, 'articleBody', $2, $3)
 			`, articleId, langCode, value); err != nil {
@@ -204,14 +204,14 @@ func FixCaptions_tx(tx pgx.Tx, entity string, entityId uuid.UUID, captionMap typ
 
 		switch content {
 		case "moduleHelp":
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO app.article_help (article_id, module_id, position)
 				VALUES ($1, $2, 0)
 			`, articleId, moduleId); err != nil {
 				return captionMap, err
 			}
 		case "formHelp":
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO app.article_form (article_id, form_id, position)
 				VALUES ($1, $2, 0)
 			`, articleId, entityId); err != nil {

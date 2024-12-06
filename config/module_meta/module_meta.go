@@ -1,6 +1,7 @@
 package module_meta
 
 import (
+	"context"
 	"r3/db"
 	"r3/tools"
 	"r3/types"
@@ -104,24 +105,24 @@ func SetDateChangeAllToNow() error {
 	`, tools.GetTimeUnix())
 	return err
 }
-func SetHash_tx(tx pgx.Tx, moduleId uuid.UUID, hash string) error {
-	_, err := tx.Exec(db.Ctx, `
+func SetHash_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, hash string) error {
+	_, err := tx.Exec(ctx, `
 		UPDATE instance.module_meta
 		SET hash = $1
 		WHERE module_id = $2
 	`, hash, moduleId)
 	return err
 }
-func SetLanguagesCustom(tx pgx.Tx, moduleId uuid.UUID, languages []string) error {
-	_, err := tx.Exec(db.Ctx, `
+func SetLanguagesCustom_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, languages []string) error {
+	_, err := tx.Exec(ctx, `
 		UPDATE instance.module_meta
 		SET languages_custom = $1
 		WHERE module_id = $2
 	`, languages, moduleId)
 	return err
 }
-func SetOptions_tx(tx pgx.Tx, moduleId uuid.UUID, hidden bool, owner bool, position int) error {
-	_, err := tx.Exec(db.Ctx, `
+func SetOptions_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, hidden bool, owner bool, position int) error {
+	_, err := tx.Exec(ctx, `
 		UPDATE instance.module_meta
 		SET hidden = $1, owner = $2, position = $3
 		WHERE module_id = $4

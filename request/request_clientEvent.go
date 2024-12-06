@@ -16,7 +16,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func clientEventDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func clientEventDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id uuid.UUID `json:"id"`
@@ -24,16 +24,16 @@ func clientEventDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, clientEvent.Del_tx(tx, req.Id)
+	return nil, clientEvent.Del_tx(ctx, tx, req.Id)
 }
 
-func clientEventSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func clientEventSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req types.ClientEvent
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, clientEvent.Set_tx(tx, req)
+	return nil, clientEvent.Set_tx(ctx, tx, req)
 }
 
 // fat client requests

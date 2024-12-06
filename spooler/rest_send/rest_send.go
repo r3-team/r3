@@ -3,6 +3,7 @@
 package rest_send
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -113,7 +114,9 @@ func callExecute(c restCall) error {
 
 	// successfully executed
 	// execute callback if enabled
-	ctx := db.GetCtxTimeoutPgFunc()
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutPgFunc)
+	defer ctxCanc()
+
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err

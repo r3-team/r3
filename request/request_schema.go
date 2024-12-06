@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/cluster"
 	"r3/schema"
@@ -10,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func SchemaCheck_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func SchemaCheck_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		ModuleId uuid.UUID `json:"moduleId"`
@@ -19,7 +20,7 @@ func SchemaCheck_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, schema.ValidateDependency_tx(tx, req.ModuleId)
+	return nil, schema.ValidateDependency_tx(ctx, tx, req.ModuleId)
 }
 
 func SchemaReload(reqJson json.RawMessage) (interface{}, error) {

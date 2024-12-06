@@ -1,6 +1,7 @@
 package collection
 
 import (
+	"context"
 	"r3/db"
 	"r3/schema"
 	"r3/schema/collection/consumer"
@@ -13,8 +14,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, `DELETE FROM app.collection WHERE id = $1`, id)
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
+	_, err := tx.Exec(ctx, `DELETE FROM app.collection WHERE id = $1`, id)
 	return err
 }
 
@@ -61,16 +62,16 @@ func Get(moduleId uuid.UUID) ([]types.Collection, error) {
 	return collections, nil
 }
 
-func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, iconId pgtype.UUID, name string,
+func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, iconId pgtype.UUID, name string,
 	columns []types.Column, queryIn types.Query, inHeader []types.CollectionConsumer) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &id, "collection", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &id, "collection", "id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.collection
 			SET icon_id = $1, name = $2
 			WHERE id = $3
@@ -78,18 +79,18 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, iconId pgtype.UUID, nam
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.collection (id,icon_id,module_id,name)
 			VALUES ($1,$2,$3,$4)
 		`, id, iconId, moduleId, name); err != nil {
 			return err
 		}
 	}
-	if err := query.Set_tx(tx, "collection", id, 0, 0, queryIn); err != nil {
+	if err := query.Set_tx(ctx, tx, "collection", id, 0, 0, queryIn); err != nil {
 		return err
 	}
-	if err := column.Set_tx(tx, "collection", id, columns); err != nil {
+	if err := column.Set_tx(ctx, tx, "collection", id, columns); err != nil {
 		return err
 	}
-	return consumer.Set_tx(tx, "collection", id, "headerDisplay", inHeader)
+	return consumer.Set_tx(ctx, tx, "collection", id, "headerDisplay", inHeader)
 }

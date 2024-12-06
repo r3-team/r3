@@ -1,16 +1,17 @@
 package data
 
 import (
+	"context"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"r3/tools"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
-func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
+func CopyFiles_tx(ctx context.Context, tx pgx.Tx, loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 	srcRecordId int64, dstAttributeId uuid.UUID) ([]types.DataGetValueFile, error) {
 
 	files := make([]types.DataGetValueFile, 0)
@@ -23,7 +24,7 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 		return files, err
 	}
 
-	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT v.file_id, r.name, v.version, v.hash, v.size_kb, v.date_change
 		FROM instance.file_version AS v
 		JOIN instance_file."%s"    AS r
@@ -82,7 +83,7 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 
 		// insert every successfully created file immediately
 		// (to have the reference to clean in case of issues)
-		if err := copyFilesRef(idNew, loginId, f); err != nil {
+		if err := copyFilesRef(ctx, tx, idNew, loginId, f); err != nil {
 			return files, err
 		}
 
@@ -93,15 +94,7 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 	return files, nil
 }
 
-func copyFilesRef(idNew uuid.UUID, loginId int64, f types.DataGetValueFile) error {
-
-	ctx := db.GetCtxTimeoutSysTask()
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
+func copyFilesRef(ctx context.Context, tx pgx.Tx, idNew uuid.UUID, loginId int64, f types.DataGetValueFile) error {
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO instance.file (id, ref_counter) VALUES ($1,0)
 	`, idNew); err != nil {
@@ -115,5 +108,5 @@ func copyFilesRef(idNew uuid.UUID, loginId int64, f types.DataGetValueFile) erro
 	`, idNew, 0, loginId, f.Hash, f.Size, f.Changed); err != nil {
 		return err
 	}
-	return tx.Commit(ctx)
+	return nil
 }

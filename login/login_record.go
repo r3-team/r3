@@ -1,19 +1,20 @@
 package login
 
 import (
+	"context"
 	"fmt"
 	"r3/cache"
-	"r3/db"
 	"r3/schema"
 	"r3/tools"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 // get relation records as login associate
 // returns slice of up to 10 records
-func GetRecords(attributeIdLookup uuid.UUID, idsExclude []int64,
+func GetRecords_tx(ctx context.Context, tx pgx.Tx, attributeIdLookup uuid.UUID, idsExclude []int64,
 	byId int64, byString string) ([]types.LoginRecord, error) {
 
 	cache.Schema_mx.RLock()
@@ -56,7 +57,7 @@ func GetRecords(attributeIdLookup uuid.UUID, idsExclude []int64,
 		return records, err
 	}
 
-	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), query, qb.GetParaValues()...)
+	rows, err := tx.Query(ctx, query, qb.GetParaValues()...)
 	if err != nil {
 		return records, err
 	}

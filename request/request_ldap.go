@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/ldap"
 	"r3/ldap/ldap_check"
@@ -10,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func LdapDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func LdapDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Id int32 `json:"id"`
 	}
@@ -18,20 +19,20 @@ func LdapDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, ldap.Del_tx(tx, req.Id)
+	return nil, ldap.Del_tx(ctx, tx, req.Id)
 }
 
-func LdapGet() (interface{}, error) {
-	return ldap.Get()
+func LdapGet_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
+	return ldap.Get_tx(ctx, tx)
 }
 
-func LdapSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func LdapSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.Ldap
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, ldap.Set_tx(tx, req)
+	return nil, ldap.Set_tx(ctx, tx, req)
 }
 
 func LdapImport(reqJson json.RawMessage) (interface{}, error) {

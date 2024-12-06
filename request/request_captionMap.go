@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/config/captionMap"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func CaptionMapGet(reqJson json.RawMessage) (interface{}, error) {
+func CaptionMapGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		ModuleId pgtype.UUID `json:"moduleId"`
@@ -19,10 +20,10 @@ func CaptionMapGet(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return captionMap.Get(req.ModuleId, req.Target)
+	return captionMap.Get_tx(ctx, tx, req.ModuleId, req.Target)
 }
 
-func CaptionMapSetOne_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func CaptionMapSetOne_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Content      string    `json:"content"`
@@ -35,6 +36,6 @@ func CaptionMapSetOne_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, captionMap.SetOne_tx(tx, req.Target, req.EntityId,
-		req.Content, req.LanguageCode, req.Value)
+	return nil, captionMap.SetOne_tx(ctx, tx, req.Target,
+		req.EntityId, req.Content, req.LanguageCode, req.Value)
 }

@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"fmt"
 	"r3/db"
 	"r3/types"
@@ -50,12 +51,10 @@ func GetMailAccountsExist() bool {
 }
 
 func LoadMailAccountMap() error {
-	mail_mx.Lock()
-	defer mail_mx.Unlock()
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
 
-	mailAccountIdMap = make(map[int32]types.MailAccount)
-
-	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), `
+	rows, err := db.Pool.Query(ctx, `
 		SELECT id, oauth_client_id, name, mode, auth_method, username,
 			password, start_tls, send_as, host_name, host_port, comment
 		FROM instance.mail_account
@@ -65,6 +64,10 @@ func LoadMailAccountMap() error {
 	}
 	defer rows.Close()
 
+	mail_mx.Lock()
+	defer mail_mx.Unlock()
+
+	mailAccountIdMap = make(map[int32]types.MailAccount)
 	for rows.Next() {
 		var ma types.MailAccount
 

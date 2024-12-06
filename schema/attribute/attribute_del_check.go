@@ -1,13 +1,14 @@
 package attribute
 
 import (
+	"context"
 	"r3/db"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
-func DelCheck_tx(tx pgx.Tx, attributeId uuid.UUID) (interface{}, error) {
+func DelCheck_tx(ctx context.Context, tx pgx.Tx, attributeId uuid.UUID) (interface{}, error) {
 
 	// dependencies we need for further checks
 	var queryIds []uuid.UUID
@@ -30,7 +31,7 @@ func DelCheck_tx(tx pgx.Tx, attributeId uuid.UUID) (interface{}, error) {
 	dependencies.Fields = make([]depField, 0)
 
 	// collect affected queries
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		-- get nested children of queries
 		WITH RECURSIVE queries AS (
 			-- initial result set: all queries that include attribute in any way
@@ -69,7 +70,7 @@ func DelCheck_tx(tx pgx.Tx, attributeId uuid.UUID) (interface{}, error) {
 	}
 
 	// collect affected columns
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT ARRAY_AGG(column_id)
 		FROM app.query
 		WHERE column_id IS NOT NULL
@@ -79,7 +80,7 @@ func DelCheck_tx(tx pgx.Tx, attributeId uuid.UUID) (interface{}, error) {
 	}
 
 	// collect affected APIs, collections, forms, PG indexes, login forms
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT
 			ARRAY(
 				-- APIs with affected queries
@@ -149,7 +150,7 @@ func DelCheck_tx(tx pgx.Tx, attributeId uuid.UUID) (interface{}, error) {
 	}
 
 	// collect affected fields
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(ctx, `
 		SELECT frm.id, fld.id
 		FROM app.field      AS fld
 		INNER JOIN app.form AS frm ON frm.id = fld.form_id

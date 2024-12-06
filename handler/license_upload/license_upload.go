@@ -2,6 +2,7 @@ package license_upload
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -13,7 +14,7 @@ import (
 	"r3/login/login_auth"
 )
 
-var context = "license_upload"
+var logContext = "license_upload"
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 
@@ -26,7 +27,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	reader, err := r.MultipartReader()
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
 
@@ -52,47 +53,52 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		var admin bool
 		var noAuth bool
 		if _, err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
-			handler.AbortRequest(w, context, err, handler.ErrAuthFailed)
+			handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
 			bruteforce.BadAttempt(r)
 			return
 		}
 
 		if !admin {
-			handler.AbortRequest(w, context, err, handler.ErrUnauthorized)
+			handler.AbortRequest(w, logContext, err, handler.ErrUnauthorized)
 			return
 		}
 
 		// read file into buffer
 		buf := new(bytes.Buffer)
 		if _, err := buf.ReadFrom(part); err != nil {
-			handler.AbortRequest(w, context, err, handler.ErrGeneral)
+			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 			return
 		}
 
 		// check size
 		if int(len(buf.Bytes())/1024) > 64 {
-			handler.AbortRequest(w, context, errors.New("license file size > 64kb"), handler.ErrGeneral)
+			handler.AbortRequest(w, logContext, errors.New("license file size > 64kb"), handler.ErrGeneral)
 			return
 		}
 
 		// set license
-		ctx := db.GetCtxTimeoutSysTask()
+		ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+		defer ctxCanc()
+
 		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
-			handler.AbortRequest(w, context, err, handler.ErrGeneral)
+			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 			return
 		}
 		defer tx.Rollback(ctx)
 
-		if err := config.SetString_tx(tx, "licenseFile", buf.String()); err != nil {
-			handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		if err := config.SetString_tx(ctx, tx, "licenseFile", buf.String()); err != nil {
+			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 			return
 		}
-		tx.Commit(ctx)
+		if err := tx.Commit(ctx); err != nil {
+			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+			return
+		}
 
 		// apply new config
 		if err := cluster.ConfigChanged(true, false, false); err != nil {
-			handler.AbortRequest(w, context, err, handler.ErrGeneral)
+			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 			return
 		}
 	}

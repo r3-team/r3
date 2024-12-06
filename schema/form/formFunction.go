@@ -1,6 +1,7 @@
 package form
 
 import (
+	"context"
 	"r3/db"
 	"r3/types"
 
@@ -32,9 +33,9 @@ func getFunctions(formId uuid.UUID) ([]types.FormFunction, error) {
 	return fncs, nil
 }
 
-func setFunctions_tx(tx pgx.Tx, formId uuid.UUID, fncs []types.FormFunction) error {
+func setFunctions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, fncs []types.FormFunction) error {
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.form_function
 		WHERE form_id = $1
 	`, formId); err != nil {
@@ -42,7 +43,7 @@ func setFunctions_tx(tx pgx.Tx, formId uuid.UUID, fncs []types.FormFunction) err
 	}
 
 	for i, f := range fncs {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.form_function (
 				form_id, position, js_function_id, event, event_before
 			)

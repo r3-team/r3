@@ -1,6 +1,7 @@
 package mail_receive
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/base64"
 	"errors"
@@ -171,8 +172,7 @@ func do(ma types.MailAccount) error {
 	return nil
 }
 
-func processMessage(mailAccountId int32, msg *imap.Message,
-	section *imap.BodySectionName) error {
+func processMessage(mailAccountId int32, msg *imap.Message, section *imap.BodySectionName) error {
 
 	if msg == nil {
 		return errors.New("server did not return message")
@@ -332,7 +332,9 @@ func processMessage(mailAccountId int32, msg *imap.Message,
 		}
 	}
 
-	ctx := db.GetCtxTimeoutSysTask()
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err

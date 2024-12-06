@@ -1,15 +1,15 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"r3/db"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
-func TaskSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func TaskSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Active   bool   `json:"active"`
 		Interval int64  `json:"interval"`
@@ -21,7 +21,7 @@ func TaskSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	}
 
 	var activeOnly bool
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT active_only
 		FROM instance.task
 		WHERE name = $1
@@ -33,7 +33,7 @@ func TaskSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 		return nil, fmt.Errorf("cannot disable active-only task")
 	}
 
-	_, err := tx.Exec(db.Ctx, `
+	_, err := tx.Exec(ctx, `
 		UPDATE instance.task
 		SET interval_seconds = $1, active = $2
 		WHERE name = $3
@@ -41,7 +41,7 @@ func TaskSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	return nil, err
 }
 
-func TaskRun(reqJson json.RawMessage) (interface{}, error) {
+func TaskRun_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		// trigger PG function scheduler by ID
@@ -55,7 +55,7 @@ func TaskRun(reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	_, err := db.Pool.Exec(db.Ctx, `
+	_, err := tx.Exec(ctx, `
 		SELECT instance_cluster.run_task($1,$2,$3)
 	`, req.TaskName, req.PgFunctionId, req.PgFunctionScheduleId)
 

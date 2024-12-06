@@ -1,6 +1,7 @@
 package preset
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/db"
@@ -13,13 +14,13 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
 	var recordId int64
 	var modName, relName string
 	var protected bool
 
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT pr.record_id_wofk, r.name, m.name, p.protected
 		FROM app.preset AS p
 		INNER JOIN instance.preset_record AS pr ON pr.preset_id = p.id
@@ -34,7 +35,7 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 	// protected records are system-relevant and are controlled by the module author, they decided when they are deleted
 	// non-protected records are optional and can be controlled by the instance users, they might want to keep them
 	if protected && recordId != 0 {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			DELETE FROM "%s"."%s"
 			WHERE id = $1
 		`, modName, relName), recordId); err != nil {
@@ -42,7 +43,7 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 		}
 	}
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.preset
 		WHERE id = $1
 	`, id); err != nil {
@@ -90,25 +91,25 @@ func Get(relationId uuid.UUID) ([]types.Preset, error) {
 // set preset
 // included setting of preset values and creation/update of preset record
 // returns whether preset record was created/updated
-func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
+func Set_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 	protected bool, values []types.PresetValue) error {
 
 	if len(values) == 0 {
 		return errors.New("cannot set preset with zero values")
 	}
 
-	modName, relName, err := schema.GetRelationNamesById_tx(tx, relationId)
+	modName, relName, err := schema.GetRelationNamesById_tx(ctx, tx, relationId)
 	if err != nil {
 		return err
 	}
 
-	known, err := schema.CheckCreateId_tx(tx, &id, "preset", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &id, "preset", "id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.preset
 			SET name = $1, protected = $2
 			WHERE id = $3
@@ -116,7 +117,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.preset (id, relation_id, name, protected)
 			VALUES ($1,$2,$3,$4)
 		`, id, relationId, name, protected); err != nil {
@@ -125,7 +126,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 
 		// instance data reference
 		// connects preset from schema to record from instance
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO instance.preset_record (preset_id, record_id_wofk)
 			VALUES ($1,0)
 		`, id); err != nil {
@@ -134,7 +135,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 	}
 
 	// set new preset values
-	if err := setValues_tx(tx, relationId, id, values); err != nil {
+	if err := setValues_tx(ctx, tx, relationId, id, values); err != nil {
 		return err
 	}
 
@@ -145,7 +146,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 	var recordExists bool = false
 	var fullRelName = fmt.Sprintf(`"%s"."%s"`, modName, relName)
 
-	if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
+	if err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT record_id_wofk, EXISTS(
 			SELECT FROM %s
 			WHERE "%s" = record_id_wofk
@@ -159,7 +160,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 
 	if recordExists {
 		// update preset record if available
-		if err := setRecord_tx(tx, id, recordId, values, fullRelName); err != nil {
+		if err := setRecord_tx(ctx, tx, id, recordId, values, fullRelName); err != nil {
 			return err
 		}
 
@@ -168,7 +169,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 		// * it did not exist before or
 		// * it did exist, but not anymore and is currently a protected preset
 		//   (preset record was deleted before it was protected)
-		if err := setRecord_tx(tx, id, 0, values, fullRelName); err != nil {
+		if err := setRecord_tx(ctx, tx, id, 0, values, fullRelName); err != nil {
 			return err
 		}
 	}
@@ -203,10 +204,10 @@ func getValues(presetId uuid.UUID) ([]types.PresetValue, error) {
 	return values, nil
 }
 
-func setValues_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, values []types.PresetValue) error {
+func setValues_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, values []types.PresetValue) error {
 
 	// delete old preset values
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.preset_value
 		WHERE preset_id = $1
 	`, presetId); err != nil {
@@ -226,7 +227,7 @@ func setValues_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, values []
 
 		// make sure that preset values belong to the correct relation
 		var relationIdAtr uuid.UUID
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			SELECT relation_id
 			FROM app.attribute
 			WHERE id = $1
@@ -238,7 +239,7 @@ func setValues_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, values []
 			return fmt.Errorf("cannot save preset values, at least 1 attribute value is from a different relation")
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.preset_value (id, preset_id,
 				preset_id_refer, attribute_id, protected, value)
 			VALUES ($1,$2,$3,$4,$5,$6)
@@ -253,7 +254,7 @@ func setValues_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, values []
 
 // set preset record
 // returns whether record could be created/updated
-func setRecord_tx(tx pgx.Tx, presetId uuid.UUID, recordId int64, values []types.PresetValue, fullRelName string) error {
+func setRecord_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID, recordId int64, values []types.PresetValue, fullRelName string) error {
 
 	sqlRefs := make([]string, 0)
 	sqlNames := make([]string, 0)
@@ -269,7 +270,7 @@ func setRecord_tx(tx pgx.Tx, presetId uuid.UUID, recordId int64, values []types.
 			continue
 		}
 
-		_, _, atrName, atrContent, err := schema.GetAttributeDetailsById_tx(tx, value.AttributeId)
+		_, _, atrName, atrContent, err := schema.GetAttributeDetailsById_tx(ctx, tx, value.AttributeId)
 		if err != nil {
 			return err
 		}
@@ -284,7 +285,7 @@ func setRecord_tx(tx pgx.Tx, presetId uuid.UUID, recordId int64, values []types.
 		if schema.IsContentRelationship(atrContent) {
 			if value.PresetIdRefer.Valid {
 				// use refered preset record ID as value
-				recordIdRefer, exists, err := getRecordIdByReferal_tx(tx, value.PresetIdRefer.Bytes)
+				recordIdRefer, exists, err := getRecordIdByReferal_tx(ctx, tx, value.PresetIdRefer.Bytes)
 				if err != nil {
 					return err
 				}
@@ -360,13 +361,13 @@ func setRecord_tx(tx pgx.Tx, presetId uuid.UUID, recordId int64, values []types.
 // get ID of refered preset record
 // returns record ID and whether refered record actually exists
 // (unprotected preset record can get deleted)
-func getRecordIdByReferal_tx(tx pgx.Tx, presetId uuid.UUID) (int64, bool, error) {
+func getRecordIdByReferal_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID) (int64, bool, error) {
 
 	var recordId int64
 	var relName string
 	var modName string
 
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT pr.record_id_wofk, r.name, m.name
 		FROM instance.preset_record AS pr
 		INNER JOIN app.preset   AS p ON p.id = pr.preset_id
@@ -384,7 +385,7 @@ func getRecordIdByReferal_tx(tx pgx.Tx, presetId uuid.UUID) (int64, bool, error)
 	// check whether preset record actually exist (might have been deleted)
 	exists := false
 
-	if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
+	if err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT EXISTS (
 			SELECT FROM "%s"."%s"
 			WHERE id = $1

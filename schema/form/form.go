@@ -1,6 +1,7 @@
 package form
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,7 +20,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error {
+func Copy_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error {
 
 	forms, err := Get(uuid.Nil, []uuid.UUID{id})
 	if err != nil {
@@ -120,11 +121,11 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 			}
 		}
 	}
-	return Set_tx(tx, form)
+	return Set_tx(ctx, tx, form)
 }
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, "DELETE FROM app.form WHERE id = $1", id)
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
+	_, err := tx.Exec(ctx, "DELETE FROM app.form WHERE id = $1", id)
 	return err
 }
 
@@ -206,18 +207,18 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 	return forms, nil
 }
 
-func Set_tx(tx pgx.Tx, frm types.Form) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 
 	// remove only invalid character (dot), used for form function references
 	frm.Name = strings.Replace(frm.Name, ".", "", -1)
 
-	known, err := schema.CheckCreateId_tx(tx, &frm.Id, "form", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &frm.Id, "form", "id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.form
 			SET preset_id_open = $1, icon_id = $2, field_id_focus = $3,
 				name = $4, no_data_actions = $5
@@ -228,7 +229,7 @@ func Set_tx(tx pgx.Tx, frm types.Form) error {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.form (id, module_id, preset_id_open, icon_id,
 				field_id_focus, name, no_data_actions)
 			VALUES ($1,$2,$3,$4,$5,$6,$7)
@@ -240,13 +241,13 @@ func Set_tx(tx pgx.Tx, frm types.Form) error {
 	}
 
 	// set form query
-	if err := query.Set_tx(tx, "form", frm.Id, 0, 0, frm.Query); err != nil {
+	if err := query.Set_tx(ctx, tx, "form", frm.Id, 0, 0, frm.Query); err != nil {
 		return err
 	}
 
 	// set fields (recursive)
 	fieldIdMapQuery := make(map[uuid.UUID]types.Query)
-	if err := field.Set_tx(tx, frm.Id, pgtype.UUID{}, pgtype.UUID{},
+	if err := field.Set_tx(ctx, tx, frm.Id, pgtype.UUID{}, pgtype.UUID{},
 		frm.Fields, fieldIdMapQuery); err != nil {
 
 		return err
@@ -255,29 +256,29 @@ func Set_tx(tx pgx.Tx, frm types.Form) error {
 	// set field queries after fields themselves
 	// query filters can reference fields so they must all exist
 	for fieldId, queryIn := range fieldIdMapQuery {
-		if err := query.Set_tx(tx, "field", fieldId, 0, 0, queryIn); err != nil {
+		if err := query.Set_tx(ctx, tx, "field", fieldId, 0, 0, queryIn); err != nil {
 			return err
 		}
 	}
 
-	if err := setActions_tx(tx, frm.Id, frm.Actions); err != nil {
+	if err := setActions_tx(ctx, tx, frm.Id, frm.Actions); err != nil {
 		return err
 	}
-	if err := setFunctions_tx(tx, frm.Id, frm.Functions); err != nil {
+	if err := setFunctions_tx(ctx, tx, frm.Id, frm.Functions); err != nil {
 		return err
 	}
-	if err := setStates_tx(tx, frm.Id, frm.States); err != nil {
+	if err := setStates_tx(ctx, tx, frm.Id, frm.States); err != nil {
 		return err
 	}
-	if err := article.Assign_tx(tx, "form", frm.Id, frm.ArticleIdsHelp); err != nil {
+	if err := article.Assign_tx(ctx, tx, "form", frm.Id, frm.ArticleIdsHelp); err != nil {
 		return err
 	}
 	// fix imports < 3.2: Migration from help captions to help articles
-	frm.Captions, err = compatible.FixCaptions_tx(tx, "form", frm.Id, frm.Captions)
+	frm.Captions, err = compatible.FixCaptions_tx(ctx, tx, "form", frm.Id, frm.Captions)
 	if err != nil {
 		return err
 	}
-	return caption.Set_tx(tx, frm.Id, frm.Captions)
+	return caption.Set_tx(ctx, tx, frm.Id, frm.Captions)
 }
 
 // form duplication

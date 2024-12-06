@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"fmt"
 	"r3/db"
 	"r3/types"
@@ -36,7 +37,7 @@ func LoadOauthClientMap() error {
 
 	oauthClientIdMap = make(map[int32]types.OauthClient)
 
-	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, name, client_id, client_secret, date_expiry, scopes, tenant, token_url
 		FROM instance.oauth_client
 	`)

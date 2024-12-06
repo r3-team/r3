@@ -53,18 +53,7 @@ func startLoop() error {
 			return nil
 		}
 
-		ctx := db.GetCtxTimeoutDbTask()
-		tx, err := db.Pool.Begin(ctx)
-		if err != nil {
-			return err
-		}
-
-		if err := oneIteration(ctx, tx, config.GetDbVersionCut()); err != nil {
-			tx.Rollback(ctx)
-			return err
-		}
-
-		if err := tx.Commit(ctx); err != nil {
+		if err := oneIteration(config.GetDbVersionCut()); err != nil {
 			return err
 		}
 		log.Info("server", "upgrade successful")
@@ -72,7 +61,15 @@ func startLoop() error {
 	return nil
 }
 
-func oneIteration(ctx context.Context, tx pgx.Tx, dbVersionCut string) error {
+func oneIteration(dbVersionCut string) error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDbTask)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
 
 	// log before upgrade because changes to log table index
 	//  caused infinite lock when trying to log to DB afterwards
@@ -91,7 +88,10 @@ func oneIteration(ctx context.Context, tx pgx.Tx, dbVersionCut string) error {
 	}
 
 	// update database version
-	return config.SetString_tx(tx, "dbVersionCut", dbVersionCutNew)
+	if err := config.SetString_tx(ctx, tx, "dbVersionCut", dbVersionCutNew); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }
 
 // upgrade functions for database

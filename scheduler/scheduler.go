@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -456,15 +457,16 @@ func load() error {
 
 // helpers
 func runPgFunction(pgFunctionId uuid.UUID) error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutPgFunc)
+	defer ctxCanc()
 
-	ctx := db.GetCtxTimeoutPgFunc()
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	modName, fncName, _, _, err := schema.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
+	modName, fncName, _, _, err := schema.GetPgFunctionDetailsById_tx(ctx, tx, pgFunctionId)
 	if err != nil {
 		return err
 	}

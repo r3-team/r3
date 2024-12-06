@@ -299,10 +299,10 @@ func dataToCsv(writer *csv.Writer, get types.DataGet, locUser *time.Location,
 	boolTrue string, boolFalse string, dateFormat string,
 	columnAttributeContentUse []string, loginId int64) (int, error) {
 
-	ctx, ctxCancel := context.WithTimeout(context.Background(),
+	ctx, ctxCanc := context.WithTimeout(context.Background(),
 		time.Duration(int64(config.GetUint64("dbTimeoutCsv")))*time.Second)
 
-	defer ctxCancel()
+	defer ctxCanc()
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {

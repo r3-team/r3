@@ -295,8 +295,10 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 	if !authRequest {
 		// execute non-authentication transaction
-		ctx, _ := context.WithTimeout(client.ctx,
+		ctx, ctxCanc := context.WithTimeout(client.ctx,
 			time.Duration(int64(config.GetUint64("dbTimeoutDataWs")))*time.Second)
+
+		defer ctxCanc()
 
 		resTrans = request.ExecTransaction(ctx, client.address, client.loginId,
 			client.admin, client.device, client.noAuth, reqTrans, resTrans)

@@ -1,12 +1,13 @@
 package request
 
 import (
-	"r3/db"
+	"context"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
-func schedulersGet() (interface{}, error) {
+func schedulersGet_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
 
 	type nodeMeta struct {
 		Name        string `json:"name"`
@@ -28,7 +29,7 @@ func schedulersGet() (interface{}, error) {
 	}
 	tasks := make([]task, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT fs.pg_function_id,
 			s.pg_function_schedule_id,
 			s.date_attempt,

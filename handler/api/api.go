@@ -178,10 +178,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ctx, ctxCancel := context.WithTimeout(context.Background(),
+	ctx, ctxCanc := context.WithTimeout(context.Background(),
 		time.Duration(int64(config.GetUint64("dbTimeoutDataRest")))*time.Second)
 
-	defer ctxCancel()
+	defer ctxCanc()
 
 	// get login language code (for filters)
 	var languageCode string

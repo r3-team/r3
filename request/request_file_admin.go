@@ -1,17 +1,18 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // returns deleted or unassigned files
-func FileGet() (interface{}, error) {
+func FileGet_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
 	type file struct {
 		Id       uuid.UUID   `json:"id"`
 		Name     string      `json:"name"`
@@ -26,7 +27,7 @@ func FileGet() (interface{}, error) {
 	res.AttributeIdMapDeleted = make(map[uuid.UUID][]file)
 
 	attributeIdsFile := make([]uuid.UUID, 0)
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT ARRAY_AGG(id)
 		FROM app.attribute
 		WHERE content = 'files'
@@ -38,7 +39,7 @@ func FileGet() (interface{}, error) {
 	// if file is assigned to multiple records, return all
 	// files without record assignment are just deleted in cleanup, not retrieved here
 	for _, atrId := range attributeIdsFile {
-		rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+		rows, err := tx.Query(ctx, fmt.Sprintf(`
 			SELECT file_id, name, date_delete, record_id, (
 				SELECT v.size_kb
 				FROM instance.file_version AS v
@@ -71,7 +72,7 @@ func FileGet() (interface{}, error) {
 
 // removed deletion state from file
 // file must still be assigned to a record to be restored to its file attribute
-func FileRestore(reqJson json.RawMessage) (interface{}, error) {
+func FileRestore_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		AttributeId uuid.UUID `json:"attributeId"`
 		FileId      uuid.UUID `json:"fileId"`
@@ -81,7 +82,7 @@ func FileRestore(reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	_, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
+	_, err := tx.Exec(ctx, fmt.Sprintf(`
 		UPDATE instance_file."%s"
 		SET date_delete = NULL
 		WHERE file_id   = $1

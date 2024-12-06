@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/db"
@@ -76,14 +77,14 @@ func Get(entity string, entityId uuid.UUID, content string) ([]types.CollectionC
 	}
 	return consumers, nil
 }
-func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, content string,
+func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, content string,
 	consumers []types.CollectionConsumer) error {
 
 	if !slices.Contains(entitiesAllowed, entity) {
 		return errors.New("invalid collection consumer entity")
 	}
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM app.collection_consumer
 		WHERE %s_id   = $1
 		AND   content = $2
@@ -105,7 +106,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, content string,
 		}
 
 		if entity == "collection" {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO app.collection_consumer (id, collection_id,
 					column_id_display, content, multi_value, no_display_empty,
 					on_mobile)
@@ -116,7 +117,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, content string,
 				return err
 			}
 		} else {
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				INSERT INTO app.collection_consumer (id, collection_id, %s_id, 
 					column_id_display, content, multi_value, no_display_empty,
 					on_mobile)
@@ -128,7 +129,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, content string,
 			}
 		}
 
-		if err := openForm.Set_tx(tx, "collection_consumer",
+		if err := openForm.Set_tx(ctx, tx, "collection_consumer",
 			c.Id, c.OpenForm, pgtype.Text{}); err != nil {
 
 			return err

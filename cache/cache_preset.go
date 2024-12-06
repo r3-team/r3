@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"r3/db"
 	"sync"
 
@@ -34,7 +35,7 @@ func renewPresetRecordIds() error {
 
 	presetIdMapRecordId = make(map[uuid.UUID]int64)
 
-	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT preset_id, record_id_wofk
 		FROM instance.preset_record
 	`)

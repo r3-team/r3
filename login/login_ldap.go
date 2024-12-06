@@ -1,6 +1,7 @@
 package login
 
 import (
+	"context"
 	"fmt"
 	"r3/cluster"
 	"r3/db"
@@ -29,7 +30,16 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 	// get login details and check whether roles could be updated
 	var rolesEqual pgtype.Bool
 
-	err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	err = tx.QueryRow(ctx, `
 		SELECT r1.id, r1.name, r1.admin, r1.active, r1.roles,
 			(r1.roles <@ r2.roles AND r1.roles @> r2.roles) AS equal
 		FROM (
@@ -125,16 +135,9 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 		roleIdsEx = roleIds
 	}
 
-	ctx := db.GetCtxTimeoutSysTask()
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
 	log.Info("ldap", fmt.Sprintf("user account '%s' is new or has been changed, updating login", name))
 
-	if _, err := Set_tx(tx, loginId, ldap.LoginTemplateId, ldapIdSql, ldapKeySql, name, "",
+	if _, err := Set_tx(ctx, tx, loginId, ldap.LoginTemplateId, ldapIdSql, ldapKeySql, name, "",
 		adminEx, false, active, pgtype.Int4{}, metaEx, roleIdsEx, []types.LoginAdminRecordSet{}); err != nil {
 
 		return err

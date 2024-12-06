@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"r3/db"
 	"slices"
 	"sync"
@@ -27,7 +28,7 @@ func LoadSearchDictionaries() error {
 	dict_mx.Lock()
 	defer dict_mx.Unlock()
 
-	err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
+	err := db.Pool.QueryRow(context.Background(), `
 		SELECT ARRAY_AGG(cfgname::TEXT)
 		FROM pg_catalog.pg_ts_config
 	`).Scan(&dict)

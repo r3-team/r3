@@ -1,6 +1,7 @@
 package transfer
 
 import (
+	"context"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
@@ -30,8 +31,6 @@ import (
 //
 //	dependent app version, release date) will be updated
 func ExportToFile(moduleId uuid.UUID, zipFilePath string) error {
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
 
 	log.Info("transfer", fmt.Sprintf("start export for module %s", moduleId))
 
@@ -39,12 +38,17 @@ func ExportToFile(moduleId uuid.UUID, zipFilePath string) error {
 		return errors.New("no export key for module signing set")
 	}
 
-	ctx := db.GetCtxTimeoutTransfer()
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutTransfer)
+	defer ctxCanc()
+
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
+
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	// export all modules as JSON files
 	var moduleJsonPaths []string

@@ -1,6 +1,7 @@
 package tab
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/db"
@@ -15,8 +16,8 @@ import (
 
 var allowedEntities = []string{"field"}
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, `DELETE FROM app.tab WHERE id = $1`, id)
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
+	_, err := tx.Exec(ctx, `DELETE FROM app.tab WHERE id = $1`, id)
 	return err
 }
 
@@ -56,18 +57,18 @@ func Get(entity string, entityId uuid.UUID) ([]types.Tab, error) {
 	return tabs, nil
 }
 
-func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, position int, tab types.Tab) (uuid.UUID, error) {
+func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, position int, tab types.Tab) (uuid.UUID, error) {
 	if !slices.Contains(allowedEntities, entity) {
 		return tab.Id, errors.New("bad entity")
 	}
 
-	known, err := schema.CheckCreateId_tx(tx, &tab.Id, "tab", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &tab.Id, "tab", "id")
 	if err != nil {
 		return tab.Id, err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.tab
 			SET position = $1, content_counter = $2, state = $3
 			WHERE id = $4
@@ -75,12 +76,12 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, position int, tab type
 			return tab.Id, err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			INSERT INTO app.tab (id, %s_id, position, content_counter, state)
 			VALUES ($1,$2,$3,$4,$5)
 		`, entity), tab.Id, entityId, position, tab.ContentCounter, tab.State); err != nil {
 			return tab.Id, err
 		}
 	}
-	return tab.Id, caption.Set_tx(tx, tab.Id, tab.Captions)
+	return tab.Id, caption.Set_tx(ctx, tx, tab.Id, tab.Captions)
 }

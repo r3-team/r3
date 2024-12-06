@@ -64,7 +64,7 @@ func LoginSetTokenFixed_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessa
 }
 
 // admin requests
-func LoginDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func LoginDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id int64 `json:"id"`
@@ -72,9 +72,9 @@ func LoginDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login.Del_tx(tx, req.Id)
+	return nil, login.Del_tx(ctx, tx, req.Id)
 }
-func LoginGet(reqJson json.RawMessage) (interface{}, error) {
+func LoginGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var (
 		req struct {
@@ -98,12 +98,12 @@ func LoginGet(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	res.Logins, res.Total, err = login.Get(req.ById, req.ByString, req.OrderBy,
+	res.Logins, res.Total, err = login.Get_tx(ctx, tx, req.ById, req.ByString, req.OrderBy,
 		req.OrderAsc, req.Limit, req.Offset, req.Meta, req.Roles, req.RecordRequests)
 
 	return res, err
 }
-func LoginGetMembers(reqJson json.RawMessage) (interface{}, error) {
+func LoginGetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var (
 		err error
@@ -119,13 +119,13 @@ func LoginGetMembers(reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	res.Logins, err = login.GetByRole(req.RoleId)
+	res.Logins, err = login.GetByRole_tx(ctx, tx, req.RoleId)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
-func LoginGetRecords(reqJson json.RawMessage) (interface{}, error) {
+func LoginGetRecords_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		AttributeIdLookup uuid.UUID `json:"attributeIdLookup"`
@@ -137,9 +137,9 @@ func LoginGetRecords(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return login.GetRecords(req.AttributeIdLookup, req.IdsExclude, req.ById, req.ByString)
+	return login.GetRecords_tx(ctx, tx, req.AttributeIdLookup, req.IdsExclude, req.ById, req.ByString)
 }
-func LoginSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func LoginSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id               int64                       `json:"id"`
@@ -160,11 +160,11 @@ func LoginSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return login.Set_tx(tx, req.Id, req.TemplateId, req.LdapId, req.LdapKey,
+	return login.Set_tx(ctx, tx, req.Id, req.TemplateId, req.LdapId, req.LdapKey,
 		req.Name, req.Pass, req.Admin, req.NoAuth, req.Active, req.TokenExpiryHours,
 		req.Meta, req.RoleIds, req.Records)
 }
-func LoginSetMembers_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func LoginSetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		RoleId   uuid.UUID `json:"roleId"`
@@ -174,7 +174,7 @@ func LoginSetMembers_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error)
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login.SetRoleLoginIds_tx(tx, req.RoleId, req.LoginIds)
+	return nil, login.SetRoleLoginIds_tx(ctx, tx, req.RoleId, req.LoginIds)
 }
 func LoginKick(reqJson json.RawMessage) (interface{}, error) {
 
@@ -201,12 +201,12 @@ func LoginReauth(reqJson json.RawMessage) (interface{}, error) {
 func LoginReauthAll() (interface{}, error) {
 	return nil, cluster.LoginReauthorizedAll(true)
 }
-func LoginResetTotp_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func LoginResetTotp_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Id int64 `json:"id"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login.ResetTotp_tx(tx, req.Id)
+	return nil, login.ResetTotp_tx(ctx, tx, req.Id)
 }

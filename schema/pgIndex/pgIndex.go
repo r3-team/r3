@@ -42,7 +42,7 @@ func DelAutoFkiForAttribute_tx(ctx context.Context, tx pgx.Tx, attributeId uuid.
 }
 func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
-	moduleName, _, err := schema.GetPgIndexNamesById_tx(tx, id)
+	moduleName, _, err := schema.GetPgIndexNamesById_tx(ctx, tx, id)
 	if err != nil {
 		return err
 	}
@@ -165,7 +165,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, pgi types.PgIndex) error {
 	}
 
 	var err error
-	known, err := schema.CheckCreateId_tx(tx, &pgi.Id, "pg_index", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &pgi.Id, "pg_index", "id")
 	if err != nil {
 		return err
 	}
@@ -225,7 +225,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, pgi types.PgIndex) error {
 	if isBtree {
 		indexCols := make([]string, 0)
 		for _, atr := range pgi.Attributes {
-			name, err := schema.GetAttributeNameById_tx(tx, atr.AttributeId)
+			name, err := schema.GetAttributeNameById_tx(ctx, tx, atr.AttributeId)
 			if err != nil {
 				return err
 			}
@@ -241,13 +241,13 @@ func Set_tx(ctx context.Context, tx pgx.Tx, pgi types.PgIndex) error {
 	if isGin {
 		nameDict := ""
 		if pgi.AttributeIdDict.Valid {
-			nameDict, err = schema.GetAttributeNameById_tx(tx, pgi.AttributeIdDict.Bytes)
+			nameDict, err = schema.GetAttributeNameById_tx(ctx, tx, pgi.AttributeIdDict.Bytes)
 			if err != nil {
 				return err
 			}
 		}
 
-		name, err := schema.GetAttributeNameById_tx(tx, pgi.Attributes[0].AttributeId)
+		name, err := schema.GetAttributeNameById_tx(ctx, tx, pgi.Attributes[0].AttributeId)
 		if err != nil {
 			return err
 		}
@@ -261,7 +261,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, pgi types.PgIndex) error {
 
 	}
 
-	modName, relName, err := schema.GetRelationNamesById_tx(tx, pgi.RelationId)
+	modName, relName, err := schema.GetRelationNamesById_tx(ctx, tx, pgi.RelationId)
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"encoding/base64"
 	"r3/db"
 	"sync"
@@ -24,7 +25,7 @@ func GetPwaIcon(id uuid.UUID) (string, error) {
 	}
 
 	var f []byte
-	if err := db.Pool.QueryRow(db.GetCtxTimeoutSysTask(), `
+	if err := db.Pool.QueryRow(context.Background(), `
 		SELECT file
 		FROM app.icon
 		WHERE id = $1
@@ -53,7 +54,7 @@ func LoadPwaDomainMap() error {
 
 	pwaDomainMap = make(map[string]uuid.UUID)
 
-	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT module_id, domain
 		FROM instance.pwa_domain
 	`)

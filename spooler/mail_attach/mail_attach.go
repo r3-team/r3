@@ -2,6 +2,7 @@ package mail_attach
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -126,7 +127,9 @@ func do(mail types.Mail) error {
 
 	// store file changes
 	// update the database only after all files have physically been saved
-	ctx := db.GetCtxTimeoutSysTask()
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err

@@ -44,33 +44,33 @@ var (
 )
 
 // store setters
-func SetString_tx(tx pgx.Tx, name string, value string) error {
+func SetString_tx(ctx context.Context, tx pgx.Tx, name string, value string) error {
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
 	if _, exists := storeString[name]; !exists {
 		return fmt.Errorf("configuration string value '%s' does not exist", name)
 	}
-	if err := writeToDb_tx(tx, name, value); err != nil {
+	if err := writeToDb_tx(ctx, tx, name, value); err != nil {
 		return err
 	}
 	storeString[name] = value
 	return nil
 }
-func SetUint64_tx(tx pgx.Tx, name string, value uint64) error {
+func SetUint64_tx(ctx context.Context, tx pgx.Tx, name string, value uint64) error {
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
 	if _, exists := storeUint64[name]; !exists {
 		return fmt.Errorf("configuration uint64 value '%s' does not exist", name)
 	}
-	if err := writeToDb_tx(tx, name, fmt.Sprintf("%d", value)); err != nil {
+	if err := writeToDb_tx(ctx, tx, name, fmt.Sprintf("%d", value)); err != nil {
 		return err
 	}
 	storeUint64[name] = value
 	return nil
 }
-func SetUint64Slice_tx(tx pgx.Tx, name string, value []uint64) error {
+func SetUint64Slice_tx(ctx context.Context, tx pgx.Tx, name string, value []uint64) error {
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
@@ -81,7 +81,7 @@ func SetUint64Slice_tx(tx pgx.Tx, name string, value []uint64) error {
 	if err != nil {
 		return err
 	}
-	if err := writeToDb_tx(tx, name, string(vJson)); err != nil {
+	if err := writeToDb_tx(ctx, tx, name, string(vJson)); err != nil {
 		return err
 	}
 	storeUint64Slice[name] = value
@@ -127,6 +127,9 @@ func GetUint64Slice(name string) []uint64 {
 }
 
 func LoadFromDb() error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
@@ -141,7 +144,7 @@ func LoadFromDb() error {
 		storeUint64Slice[name] = make([]uint64, 0)
 	}
 
-	rows, err := db.Pool.Query(db.GetCtxTimeoutSysTask(), "SELECT name, value FROM instance.config")
+	rows, err := db.Pool.Query(ctx, "SELECT name, value FROM instance.config")
 	if err != nil {
 		return err
 	}
@@ -173,8 +176,8 @@ func LoadFromDb() error {
 	return nil
 }
 
-func writeToDb_tx(tx pgx.Tx, name string, value string) error {
-	_, err := tx.Exec(context.Background(), `
+func writeToDb_tx(ctx context.Context, tx pgx.Tx, name string, value string) error {
+	_, err := tx.Exec(ctx, `
 		UPDATE instance.config SET value = $1 WHERE name = $2
 	`, value, name)
 

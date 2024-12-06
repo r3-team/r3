@@ -1,7 +1,9 @@
 package cache
 
 import (
+	"context"
 	"r3/config/captionMap"
+	"r3/db"
 	"r3/types"
 	"sync"
 
@@ -24,10 +26,23 @@ func GetCaptionMapCustom() types.CaptionMapsAll {
 }
 
 func LoadCaptionMapCustom() error {
-	caption_mx.Lock()
-	defer caption_mx.Unlock()
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
 
-	var err error
-	captionMapCustom, err = captionMap.Get(pgtype.UUID{}, "instance")
-	return err
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	cus, err := captionMap.Get_tx(ctx, tx, pgtype.UUID{}, "instance")
+	if err != nil {
+		return err
+	}
+
+	caption_mx.Lock()
+	captionMapCustom = cus
+	caption_mx.Unlock()
+
+	return tx.Commit(ctx)
 }

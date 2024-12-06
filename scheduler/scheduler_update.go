@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -44,14 +45,16 @@ func updateCheck() error {
 		return err
 	}
 
-	ctx := db.GetCtxTimeoutSysTask()
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	if err := config.SetString_tx(tx, "updateCheckVersion", check.Version); err != nil {
+	if err := config.SetString_tx(ctx, tx, "updateCheckVersion", check.Version); err != nil {
 		return err
 	}
 	if err := tx.Commit(ctx); err != nil {

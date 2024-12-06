@@ -1,6 +1,7 @@
 package module
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/config/module_meta"
@@ -20,16 +21,16 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
-	name, err := schema.GetModuleNameById_tx(tx, id)
+	name, err := schema.GetModuleNameById_tx(ctx, tx, id)
 	if err != nil {
 		return err
 	}
 
 	// drop e2ee data key relations for module relations with encryption
 	relIdsEncrypted := make([]uuid.UUID, 0)
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT ARRAY_AGG(id)
 		FROM app.relation
 		WHERE module_id = $1
@@ -39,7 +40,7 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 	}
 
 	for _, relId := range relIdsEncrypted {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			DROP TABLE IF EXISTS instance_e2ee."%s"
 		`, schema.GetEncKeyTableName(relId))); err != nil {
 			return err
@@ -48,7 +49,7 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
 	// drop file attribute relations
 	atrIdsFile := make([]uuid.UUID, 0)
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(ctx, `
 		SELECT ARRAY_AGG(id)
 		FROM app.attribute
 		WHERE relation_id IN (
@@ -68,14 +69,14 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 	}
 
 	// drop module schema
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`DROP SCHEMA "%s" CASCADE`,
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`DROP SCHEMA "%s" CASCADE`,
 		name)); err != nil {
 
 		return err
 	}
 
 	// delete module reference
-	_, err = tx.Exec(db.Ctx, `DELETE FROM app.module WHERE id = $1`, id)
+	_, err = tx.Exec(ctx, `DELETE FROM app.module WHERE id = $1`, id)
 	return err
 }
 
@@ -143,11 +144,11 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 	return modules, nil
 }
 
-func Set_tx(tx pgx.Tx, mod types.Module) error {
-	_, err := SetReturnId_tx(tx, mod)
+func Set_tx(ctx context.Context, tx pgx.Tx, mod types.Module) error {
+	_, err := SetReturnId_tx(ctx, tx, mod)
 	return err
 }
-func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
+func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 
 	if err := check.DbIdentifier(mod.Name); err != nil {
 		return mod.Id, err
@@ -158,7 +159,7 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 	}
 
 	create := mod.Id == uuid.Nil
-	known, err := schema.CheckCreateId_tx(tx, &mod.Id, "module", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &mod.Id, "module", "id")
 	if err != nil {
 		return mod.Id, err
 	}
@@ -169,7 +170,7 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 
 	if known {
 		var nameEx string
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			SELECT name
 			FROM app.module
 			WHERE id = $1
@@ -177,7 +178,7 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 			return mod.Id, err
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.module SET parent_id = $1, form_id = $2, icon_id = $3,
 				icon_id_pwa1 = $4, icon_id_pwa2 = $5, pg_function_id_login_sync = $6,
 				name = $7, name_pwa = $8, name_pwa_short = $9, color1 = $10, position = $11,
@@ -193,23 +194,23 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 		}
 
 		if mod.Name != nameEx {
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`ALTER SCHEMA "%s" RENAME TO "%s"`,
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`ALTER SCHEMA "%s" RENAME TO "%s"`,
 				nameEx, mod.Name)); err != nil {
 
 				return mod.Id, err
 			}
 
-			if err := pgFunction.RecreateAffectedBy_tx(tx, "module", mod.Id); err != nil {
+			if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, "module", mod.Id); err != nil {
 				return mod.Id, fmt.Errorf("failed to recreate affected PG functions, %s", err)
 			}
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`CREATE SCHEMA "%s"`, mod.Name)); err != nil {
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`CREATE SCHEMA "%s"`, mod.Name)); err != nil {
 			return mod.Id, err
 		}
 
 		// insert module reference
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.module (
 				id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
 				pg_function_id_login_sync, name, name_pwa, name_pwa_short, color1,
@@ -233,7 +234,7 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 				return mod.Id, err
 			}
 
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO app.role (id, module_id, name, content, assignable)
 				VALUES ($1,$2,'everyone','everyone',false)
 			`, roleId, mod.Id); err != nil {
@@ -260,7 +261,7 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 		}
 
 		// existing dependency has been removed
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			DELETE FROM app.module_depends
 			WHERE module_id = $1
 			AND module_id_on = $2
@@ -280,7 +281,7 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 			return mod.Id, errors.New("module dependency to itself is not allowed")
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.module_depends (module_id, module_id_on)
 			VALUES ($1,$2)
 		`, mod.Id, moduleIdOn); err != nil {
@@ -289,7 +290,7 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 	}
 
 	// set start forms
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.module_start_form
 		WHERE module_id = $1
 	`, mod.Id); err != nil {
@@ -297,7 +298,7 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 	}
 
 	for i, sf := range mod.StartForms {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.module_start_form (module_id, position, role_id, form_id)
 			VALUES ($1,$2,$3,$4)
 		`, mod.Id, i, sf.RoleId, sf.FormId); err != nil {
@@ -306,7 +307,7 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 	}
 
 	// set languages
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.module_language
 		WHERE module_id = $1
 	`, mod.Id); err != nil {
@@ -318,7 +319,7 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 			return mod.Id, errors.New("language code must have 5 characters")
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.module_language (module_id, language_code)
 			VALUES ($1,$2)
 		`, mod.Id, code); err != nil {
@@ -327,17 +328,17 @@ func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 	}
 
 	// set help articles
-	if err := article.Assign_tx(tx, "module", mod.Id, mod.ArticleIdsHelp); err != nil {
+	if err := article.Assign_tx(ctx, tx, "module", mod.Id, mod.ArticleIdsHelp); err != nil {
 		return mod.Id, err
 	}
 
 	// set captions
 	// fix imports < 3.2: Migration from help captions to help articles
-	mod.Captions, err = compatible.FixCaptions_tx(tx, "module", mod.Id, mod.Captions)
+	mod.Captions, err = compatible.FixCaptions_tx(ctx, tx, "module", mod.Id, mod.Captions)
 	if err != nil {
 		return mod.Id, err
 	}
-	return mod.Id, caption.Set_tx(tx, mod.Id, mod.Captions)
+	return mod.Id, caption.Set_tx(ctx, tx, mod.Id, mod.Captions)
 }
 
 func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {
