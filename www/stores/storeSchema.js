@@ -4,6 +4,7 @@ export {MyStoreSchema as default};
 const MyStoreSchema = {
 	namespaced:true,
 	state:{
+		languageCodes:[],       // language codes available, both official & community
 		presetIdMapRecordId:{}, // record IDs by preset, key: preset ID
 		
 		// references to specific module entities
@@ -27,8 +28,7 @@ const MyStoreSchema = {
 		widgetIdMap:{},
 		
 		// computed
-		formIdMapMenu:{},
-		languageCodes:[]
+		formIdMapMenu:{}
 	},
 	mutations:{
 		delModule(state,payload) {
@@ -170,6 +170,7 @@ const MyStoreSchema = {
 		iconIdMap:          (state) => state.iconIdMap,
 		indexIdMap:         (state) => state.indexIdMap,
 		jsFunctionIdMap:    (state) => state.jsFunctionIdMap,
+		languageCodes:      (state) => state.languageCodes,
 		loginFormIdMap:     (state) => state.loginFormIdMap,
 		moduleIdMap:        (state) => state.moduleIdMap,
 		moduleNameMap:      (state) => state.moduleNameMap,
@@ -181,14 +182,15 @@ const MyStoreSchema = {
 		variableIdMap:      (state) => state.variableIdMap,
 		widgetIdMap:        (state) => state.widgetIdMap,
 		
-		languageCodes:(state) => {
+		languageCodesModules:(state) => {
+			let out = JSON.parse(JSON.stringify(state.languageCodes));
 			for(const k in state.moduleIdMap) {
 				for(const lang of state.moduleIdMap[k].languages) {
-					if(state.languageCodes.indexOf(lang) === -1)
-						state.languageCodes.push(lang);
+					if(out.indexOf(lang) === -1)
+						out.push(lang);
 				}
 			}
-			return state.languageCodes;
+			return out;
 		},
 		modules:(state) => {
 			const getCombinedName = (m) => m.parentId === null ? m.name : `${state.moduleIdMap[m.parentId].name}_${m.name}`;

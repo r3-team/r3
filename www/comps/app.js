@@ -380,6 +380,7 @@ let MyApp = {
 		css:                (s) => s.$store.getters['local/css'],
 		loginBackground:    (s) => s.$store.getters['local/loginBackground'],
 		loginKeyAes:        (s) => s.$store.getters['local/loginKeyAes'],
+		languageCodes:      (s) => s.$store.getters['schema/languageCodes'],
 		modules:            (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
 		formIdMap:          (s) => s.$store.getters['schema/formIdMap'],
@@ -840,7 +841,7 @@ let MyApp = {
 		captionsReload() {
 			return new Promise((resolve,reject) => {
 				// force valid system captions
-				const lang = ['ar_eg','de_de','en_us','fr_fr','hu_hu','it_it','lv_lv','ro_ro','zh_cn'].includes(this.settings.languageCode)
+				const lang = this.languageCodes.includes(this.settings.languageCode)
 					? this.settings.languageCode : 'en_us';
 				
 				fetch(`./langs/${lang}?build=${this.appVersionBuild}`).then(

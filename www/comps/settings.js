@@ -1132,7 +1132,7 @@ let MySettings = {
 							<td>{{ capApp.languageCode }}</td>
 							<td>
 								<select v-model="settingsInput.languageCode">
-									<option v-for="l in languageCodes" :value="l">{{ displayLanguageCode(l) }}</option>
+									<option v-for="l in languageCodesModules" :value="l">{{ displayLanguageCode(l) }}</option>
 								</select>
 							</td>
 						</tr>
@@ -1392,8 +1392,8 @@ let MySettings = {
 		}
 	},
 	computed:{
-		languageCodes:(s) => {
-			let langs = s.$store.getters['schema/languageCodes'];
+		languageCodesModules:(s) => {
+			let langs = s.$store.getters['schema/languageCodesModules'];
 			for(const k in s.moduleIdMapMeta) {
 				for(const l of s.moduleIdMapMeta[k].languagesCustom) {
 					if(!langs.includes(l))
@@ -1404,6 +1404,7 @@ let MySettings = {
 		},
 		
 		// stores
+		languageCodes:     (s) => s.$store.getters['schema/languageCodes'],
 		searchDictionaries:(s) => s.$store.getters['searchDictionaries'],
 		capGen:            (s) => s.$store.getters.captions.generic,
 		capApp:            (s) => s.$store.getters.captions.settings,
@@ -1423,7 +1424,13 @@ let MySettings = {
 		
 		// presentation
 		displayLanguageCode(code) {
-			return this.languageCodesOfficial.includes(code) ? code : `${code} (${this.capApp.communityTranslation})`;	
+			if(this.languageCodesOfficial.includes(code))
+				return code;
+
+			if(this.languageCodes.includes(code))
+				return `${code} (${this.capApp.communityTranslation})`;
+
+			return `${code} (${this.capApp.moduleTranslation})`;
 		},
 
 		// actions

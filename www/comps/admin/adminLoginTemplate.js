@@ -321,7 +321,7 @@ let MyAdminLoginTemplate = {
 		isNew:   (s) => s.id     === 0,
 		
 		// stores
-		languageCodes:     (s) => s.$store.getters['schema/languageCodes'],
+		languageCodes:     (s) => s.$store.getters['schema/languageCodesModules'],
 		searchDictionaries:(s) => s.$store.getters['searchDictionaries'],
 		capApp:            (s) => s.$store.getters.captions.admin.loginTemplate,
 		capAppSet:         (s) => s.$store.getters.captions.settings,
