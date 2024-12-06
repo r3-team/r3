@@ -663,7 +663,7 @@ let MyApp = {
 				
 				// module not known or updated, fetch
 				if(this.moduleIdMap[k] === undefined || metaOld.dateChange !== metaNew.dateChange)
-					modulesFetch.push(`./cache/download/schema.json?module_id=${k}&date=${metaNew.dateChange}`);
+					modulesFetch.push(`./cache/download/schema.json?module_id=${k}&date=${metaNew.dateChange}&build=${this.appVersionBuild}`);
 			}
 			
 			for(const k in this.moduleIdMapMeta) {

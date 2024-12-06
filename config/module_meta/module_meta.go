@@ -3,7 +3,6 @@ package module_meta
 import (
 	"context"
 	"r3/db"
-	"r3/tools"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -96,13 +95,6 @@ func SetDateChange(moduleIds []uuid.UUID, date int64) error {
 		SET date_change = $2
 		WHERE module_id = ANY($1)
 	`, moduleIds, date)
-	return err
-}
-func SetDateChangeAllToNow() error {
-	_, err := db.Pool.Exec(db.Ctx, `
-		UPDATE instance.module_meta
-		SET date_change = $1
-	`, tools.GetTimeUnix())
 	return err
 }
 func SetHash_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, hash string) error {
