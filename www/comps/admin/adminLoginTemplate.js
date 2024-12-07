@@ -336,7 +336,7 @@ let MyAdminLoginTemplate = {
 		// simple states
 		canSave: (s) => s.hasChanges && s.name !== '',
 		isGlobal:(s) => s.name === 'GLOBAL',
-		isNew:   (s) => s.id     === 0,
+		isNew:   (s) => s.id === 0,
 		
 		// stores
 		languageCodes:        (s) => s.$store.getters['schema/languageCodes'],

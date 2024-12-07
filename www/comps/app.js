@@ -840,10 +840,21 @@ let MyApp = {
 		// backend reloads
 		captionsReload() {
 			return new Promise((resolve,reject) => {
-				// force valid system captions
-				const lang = this.languageCodes.includes(this.settings.languageCode)
-					? this.settings.languageCode : 'en_us';
-				
+				let lang = 'en_us';
+
+				if(this.languageCodes.includes(this.settings.languageCode)) {
+					// user language supported, apply
+					lang = this.settings.languageCode;
+				} else {
+					// user language not supported, apply language with same prefix if it exists
+					const prefix = this.settings.languageCode.substring(0,2);
+					for(const l of this.languageCodes) {
+						if(l.startsWith(prefix)) {
+							lang = l;
+							break;
+						}
+					}
+				}
 				fetch(`./langs/${lang}?build=${this.appVersionBuild}`).then(
 					res => {
 						if(res.status !== 200)
