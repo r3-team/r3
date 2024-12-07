@@ -71,25 +71,22 @@ func Get(moduleId uuid.UUID) ([]types.Article, error) {
 	if err != nil {
 		return articles, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var a types.Article
 		if err := rows.Scan(&a.Id, &a.Name); err != nil {
-			rows.Close()
 			return articles, err
 		}
 		a.ModuleId = moduleId
 		articles = append(articles, a)
 	}
-	rows.Close()
 
-	// get title/body captions
 	for i, a := range articles {
-		a.Captions, err = caption.Get("article", a.Id, []string{"articleBody", "articleTitle"})
+		articles[i].Captions, err = caption.Get("article", a.Id, []string{"articleBody", "articleTitle"})
 		if err != nil {
 			return articles, err
 		}
-		articles[i] = a
 	}
 	return articles, nil
 }

@@ -63,9 +63,8 @@ func Get(moduleId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 		menus = append(menus, m)
 	}
 
+	// get children & collections & captions
 	for i, m := range menus {
-
-		// get children & collections & captions
 		m.Menus, err = Get(moduleId, pgtype.UUID{Bytes: m.Id, Valid: true})
 		if err != nil {
 			return menus, err

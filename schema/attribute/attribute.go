@@ -79,6 +79,7 @@ func Get(relationId uuid.UUID) ([]types.Attribute, error) {
 	if err != nil {
 		return attributes, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var atr types.Attribute
@@ -93,15 +94,12 @@ func Get(relationId uuid.UUID) ([]types.Attribute, error) {
 		atr.RelationId = relationId
 		attributes = append(attributes, atr)
 	}
-	rows.Close()
 
-	// get captions
 	for i, atr := range attributes {
-		atr.Captions, err = caption.Get("attribute", atr.Id, []string{"attributeTitle"})
+		attributes[i].Captions, err = caption.Get("attribute", atr.Id, []string{"attributeTitle"})
 		if err != nil {
 			return attributes, err
 		}
-		attributes[i] = atr
 	}
 	return attributes, nil
 }

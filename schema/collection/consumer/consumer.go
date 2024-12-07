@@ -64,16 +64,17 @@ func Get(entity string, entityId uuid.UUID, content string) ([]types.CollectionC
 	for rows.Next() {
 		var c types.CollectionConsumer
 
-		if err := rows.Scan(&c.Id, &c.CollectionId, &c.ColumnIdDisplay,
-			&c.MultiValue, &c.NoDisplayEmpty, &c.OnMobile); err != nil {
-
-			return consumers, err
-		}
-		c.OpenForm, err = openForm.Get("collection_consumer", c.Id, pgtype.Text{})
-		if err != nil {
+		if err := rows.Scan(&c.Id, &c.CollectionId, &c.ColumnIdDisplay, &c.MultiValue, &c.NoDisplayEmpty, &c.OnMobile); err != nil {
 			return consumers, err
 		}
 		consumers = append(consumers, c)
+	}
+
+	for i, c := range consumers {
+		consumers[i].OpenForm, err = openForm.Get("collection_consumer", c.Id, pgtype.Text{})
+		if err != nil {
+			return consumers, err
+		}
 	}
 	return consumers, nil
 }

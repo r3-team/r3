@@ -30,6 +30,7 @@ func Get(moduleId uuid.UUID) ([]types.ClientEvent, error) {
 	if err != nil {
 		return clientEvents, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var e types.ClientEvent
@@ -39,14 +40,15 @@ func Get(moduleId uuid.UUID) ([]types.ClientEvent, error) {
 
 			return clientEvents, err
 		}
-		e.Captions, err = caption.Get("client_event", e.Id, []string{"clientEventTitle"})
+		clientEvents = append(clientEvents, e)
+	}
+
+	for i, e := range clientEvents {
+		clientEvents[i].Captions, err = caption.Get("client_event", e.Id, []string{"clientEventTitle"})
 		if err != nil {
 			return clientEvents, err
 		}
-		clientEvents = append(clientEvents, e)
 	}
-	rows.Close()
-
 	return clientEvents, nil
 }
 

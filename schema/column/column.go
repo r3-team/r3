@@ -41,6 +41,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 	if err != nil {
 		return columns, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var c types.Column
@@ -55,7 +56,6 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 		}
 		columns = append(columns, c)
 	}
-	rows.Close()
 
 	for i, c := range columns {
 		if c.SubQuery {
@@ -67,7 +67,6 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 			c.Query.RelationId = pgtype.UUID{}
 		}
 
-		// get captions
 		c.Captions, err = caption.Get("column", c.Id, []string{"columnTitle"})
 		if err != nil {
 			return columns, err

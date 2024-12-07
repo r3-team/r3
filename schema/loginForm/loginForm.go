@@ -43,11 +43,10 @@ func Get(moduleId uuid.UUID) ([]types.LoginForm, error) {
 
 	// get captions
 	for i, l := range loginForms {
-		l.Captions, err = caption.Get("login_form", l.Id, []string{"loginFormTitle"})
+		loginForms[i].Captions, err = caption.Get("login_form", l.Id, []string{"loginFormTitle"})
 		if err != nil {
 			return loginForms, err
 		}
-		loginForms[i] = l
 	}
 	return loginForms, nil
 }

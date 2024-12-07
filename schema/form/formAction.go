@@ -30,11 +30,14 @@ func getActions(formId uuid.UUID) ([]types.FormAction, error) {
 		if err := rows.Scan(&a.Id, &a.JsFunctionId, &a.IconId, &a.State, &a.Color); err != nil {
 			return actions, err
 		}
-		a.Captions, err = caption.Get("form_action", a.Id, []string{"formActionTitle"})
+		actions = append(actions, a)
+	}
+
+	for i, a := range actions {
+		actions[i].Captions, err = caption.Get("form_action", a.Id, []string{"formActionTitle"})
 		if err != nil {
 			return actions, err
 		}
-		actions = append(actions, a)
 	}
 	return actions, nil
 }
