@@ -14,7 +14,6 @@ let MyListColumnBatch = {
 			@trigger="click"
 			@trigger-right="input = ''; set()"
 			:blockBubble="true"
-			:caption="isArrayInput ? String(input.length) : ''"
 			:captionTitle="capApp.button.columnFilters"
 			:naked="true"
 		/>
@@ -134,7 +133,7 @@ let MyListColumnBatch = {
 				<div class="row space-between">
 					<my-button image="remove.png"
 						v-if="showFilterAny"
-						@trigger="input = ''; set()"
+						@trigger="clear"
 						:active="input !== ''"
 						:cancel="true"
 						:caption="capGen.button.clear"
@@ -171,7 +170,6 @@ let MyListColumnBatch = {
 		return {
 			input:'',           // value input (either string if text, or array if selected from values)
 			values:[],          // values available to filter with (all values a list could have for column)
-			valuesLoaded:false, // values loaded once,
 			zeroSelection:false
 		};
 	},
@@ -281,6 +279,11 @@ let MyListColumnBatch = {
 		},
 		
 		// actions
+		clear() {
+			this.input = '';
+			this.set();
+			this.loadValues();
+		},
 		click() {
 			if(this.canOpen)
 				this.$emit('toggle');
@@ -318,9 +321,10 @@ let MyListColumnBatch = {
 		
 		// retrieval
 		loadValues() {
-			if(!this.show || !this.isValidFilter || this.valuesLoaded)
+			if(!this.show || !this.isValidFilter)
 				return;
 			
+			this.values = [];
 			ws.send('data','get',{
 				relationId:this.relationId,
 				joins:this.joins,
@@ -338,7 +342,6 @@ let MyListColumnBatch = {
 					for(const row of res.payload.rows) {
 						this.values.push(row.values[0]);
 					}
-					this.valuesLoaded = true;
 				},
 				this.$root.genericError
 			);

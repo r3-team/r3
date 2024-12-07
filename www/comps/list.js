@@ -432,7 +432,7 @@ let MyList = {
 										:columnIdMapAggr="columnIdMapAggr"
 										:columns="columns"
 										:dropdownRight="(columnBatches.length > 1 && i === columnBatches.length - 1) || (columnBatches.length > 3 && i === columnBatches.length - 2)"
-										:filters="filters"
+										:filters="filtersCombined"
 										:filtersColumn="filtersColumn"
 										:joins="relationsJoined"
 										:orders="orders"
