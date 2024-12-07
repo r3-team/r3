@@ -29,6 +29,7 @@ func DoAll() error {
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var m types.Mail
@@ -38,7 +39,6 @@ func DoAll() error {
 		}
 		mails = append(mails, m)
 	}
-	rows.Close()
 
 	for _, m := range mails {
 		if err := do(m); err != nil {
@@ -76,6 +76,7 @@ func do(mail types.Mail) error {
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var f types.MailFile
@@ -91,7 +92,6 @@ func do(mail types.Mail) error {
 		fileIds = append(fileIds, f.Id)
 		filesMail = append(filesMail, f)
 	}
-	rows.Close()
 
 	// no attachments to process, just delete mail
 	if len(filesMail) == 0 {

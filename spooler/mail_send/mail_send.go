@@ -45,6 +45,7 @@ func DoAll() error {
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var m types.Mail
@@ -57,7 +58,6 @@ func DoAll() error {
 		}
 		mails = append(mails, m)
 	}
-	rows.Close()
 
 	log.Info("mail", fmt.Sprintf("found %d messages to be sent", len(mails)))
 
@@ -169,6 +169,7 @@ func do(m types.Mail) error {
 			return fmt.Errorf("cannot attach file(s) from non-file attribute %s",
 				m.AttributeId.Bytes)
 		}
+		files := make([]types.DataGetValueFile, 0)
 
 		rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 			SELECT r.file_id, r.name, (
@@ -184,7 +185,7 @@ func do(m types.Mail) error {
 		if err != nil {
 			return err
 		}
-		files := make([]types.DataGetValueFile, 0)
+		defer rows.Close()
 
 		for rows.Next() {
 			var f types.DataGetValueFile
@@ -193,7 +194,6 @@ func do(m types.Mail) error {
 			}
 			files = append(files, f)
 		}
-		rows.Close()
 
 		for _, f := range files {
 			filePath := data.GetFilePathVersion(f.Id, f.Version)
@@ -256,16 +256,14 @@ func do(m types.Mail) error {
 	}
 
 	// add to mail traffic log
-	if _, err := db.Pool.Exec(context.Background(), `
+	_, err = db.Pool.Exec(context.Background(), `
 		INSERT INTO instance.mail_traffic (from_list, to_list, cc_list,
 			subject, date, files, mail_account_id, outgoing)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,TRUE)
 	`, m.FromList, m.ToList, m.CcList, m.Subject,
-		tools.GetTimeUnix(), fileList, m.AccountId); err != nil {
+		tools.GetTimeUnix(), fileList, m.AccountId)
 
-		return err
-	}
-	return nil
+	return err
 }
 
 // helper

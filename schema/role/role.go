@@ -40,6 +40,7 @@ func Get(moduleId uuid.UUID) ([]types.Role, error) {
 	if err != nil {
 		return roles, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var r types.Role
@@ -49,7 +50,6 @@ func Get(moduleId uuid.UUID) ([]types.Role, error) {
 		r.ModuleId = moduleId
 		roles = append(roles, r)
 	}
-	rows.Close()
 
 	// get access & captions
 	for i, r := range roles {

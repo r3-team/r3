@@ -57,6 +57,7 @@ func FileGet_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
 		for rows.Next() {
 			var f file
 			if err := rows.Scan(&f.Id, &f.Name, &f.Deleted, &f.RecordId, &f.Size); err != nil {
+				rows.Close()
 				return nil, err
 			}
 

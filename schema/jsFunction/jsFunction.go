@@ -42,6 +42,7 @@ func Get(moduleId uuid.UUID) ([]types.JsFunction, error) {
 	if err != nil {
 		return functions, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var f types.JsFunction
@@ -53,7 +54,6 @@ func Get(moduleId uuid.UUID) ([]types.JsFunction, error) {
 		}
 		functions = append(functions, f)
 	}
-	rows.Close()
 
 	for i, f := range functions {
 		f.ModuleId = moduleId

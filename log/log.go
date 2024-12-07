@@ -88,21 +88,18 @@ func Get_tx(ctx context.Context, tx pgx.Tx, dateFrom pgtype.Int8, dateTo pgtype.
 	if err != nil {
 		return nil, 0, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var l types.Log
 		var dateMilli int64
 
-		if err := rows.Scan(&l.Level, &l.Context, &l.Message,
-			&dateMilli, &l.ModuleName, &l.NodeName); err != nil {
-
+		if err := rows.Scan(&l.Level, &l.Context, &l.Message, &dateMilli, &l.ModuleName, &l.NodeName); err != nil {
 			return nil, 0, err
 		}
-
 		l.Date = int64(dateMilli / 1000)
 		logs = append(logs, l)
 	}
-	rows.Close()
 
 	// get total count
 	qb.UseDollarSigns()

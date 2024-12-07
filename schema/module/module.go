@@ -111,6 +111,7 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 	if err != nil {
 		return modules, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var m types.Module
@@ -120,12 +121,10 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 			&m.ReleaseBuild, &m.ReleaseBuildApp, &m.ReleaseDate, &m.DependsOn,
 			&m.ArticleIdsHelp, &m.Languages); err != nil {
 
-			rows.Close()
 			return modules, err
 		}
 		modules = append(modules, m)
 	}
-	rows.Close()
 
 	// get start forms & captions
 	for i, mod := range modules {

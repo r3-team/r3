@@ -52,14 +52,13 @@ func setActions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, actions []t
 	}
 
 	// remove non-specified actions
-	if _, err := tx.Exec(ctx, `
+	_, err = tx.Exec(ctx, `
 		DELETE FROM app.form_action
 		WHERE form_id = $1
 		AND id <> ALL($2)
-	`, formId, actionIds); err != nil {
-		return err
-	}
-	return nil
+	`, formId, actionIds)
+
+	return err
 }
 
 func setAction_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, a types.FormAction, position int) (uuid.UUID, error) {

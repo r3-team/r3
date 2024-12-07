@@ -51,6 +51,7 @@ func Get(moduleId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 	if err != nil {
 		return menus, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var m types.Menu
@@ -61,7 +62,6 @@ func Get(moduleId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 		m.ModuleId = moduleId
 		menus = append(menus, m)
 	}
-	rows.Close()
 
 	for i, m := range menus {
 

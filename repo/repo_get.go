@@ -102,11 +102,15 @@ func GetModule_tx(ctx context.Context, tx pgx.Tx, byString string, languageCode 
 
 			return repoModules, 0, err
 		}
+		repoModules = append(repoModules, rm)
+	}
+
+	for i, rm := range repoModules {
 		rm.LanguageCodeMeta, err = getModuleMeta_tx(ctx, tx, rm.ModuleId)
 		if err != nil {
 			return repoModules, 0, err
 		}
-		repoModules = append(repoModules, rm)
+		repoModules[i] = rm
 	}
 
 	// get total

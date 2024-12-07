@@ -28,6 +28,7 @@ func Get(moduleId uuid.UUID) ([]types.LoginForm, error) {
 	if err != nil {
 		return loginForms, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var l types.LoginForm
@@ -39,7 +40,6 @@ func Get(moduleId uuid.UUID) ([]types.LoginForm, error) {
 		l.ModuleId = moduleId
 		loginForms = append(loginForms, l)
 	}
-	rows.Close()
 
 	// get captions
 	for i, l := range loginForms {

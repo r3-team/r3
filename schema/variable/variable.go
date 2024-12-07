@@ -30,6 +30,7 @@ func Get(moduleId uuid.UUID) ([]types.Variable, error) {
 	if err != nil {
 		return variables, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var v types.Variable
@@ -39,7 +40,6 @@ func Get(moduleId uuid.UUID) ([]types.Variable, error) {
 		}
 		variables = append(variables, v)
 	}
-	rows.Close()
 
 	return variables, nil
 }

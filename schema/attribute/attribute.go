@@ -660,6 +660,7 @@ func updateReferingFKs_tx(ctx context.Context, tx pgx.Tx, relationshipId uuid.UU
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var u update
@@ -668,7 +669,6 @@ func updateReferingFKs_tx(ctx context.Context, tx pgx.Tx, relationshipId uuid.UU
 		}
 		updates = append(updates, u)
 	}
-	rows.Close()
 
 	for _, u := range updates {
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`

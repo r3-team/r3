@@ -29,6 +29,7 @@ func Get(moduleId uuid.UUID) ([]types.Widget, error) {
 	if err != nil {
 		return widgets, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var w types.Widget
@@ -38,19 +39,17 @@ func Get(moduleId uuid.UUID) ([]types.Widget, error) {
 		w.ModuleId = moduleId
 		widgets = append(widgets, w)
 	}
-	rows.Close()
 
 	// get collections & captions
 	for i, w := range widgets {
-		w.Captions, err = caption.Get("widget", w.Id, []string{"widgetTitle"})
+		widgets[i].Captions, err = caption.Get("widget", w.Id, []string{"widgetTitle"})
 		if err != nil {
 			return widgets, err
 		}
-		w.Collection, err = consumer.GetOne("widget", w.Id, "widgetDisplay")
+		widgets[i].Collection, err = consumer.GetOne("widget", w.Id, "widgetDisplay")
 		if err != nil {
 			return widgets, err
 		}
-		widgets[i] = w
 	}
 	return widgets, nil
 }

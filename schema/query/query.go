@@ -65,20 +65,18 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	if err != nil {
 		return q, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var j types.QueryJoin
 
-		if err := rows.Scan(&j.RelationId, &j.AttributeId, &j.IndexFrom,
-			&j.Index, &j.Connector, &j.ApplyCreate, &j.ApplyUpdate,
-			&j.ApplyDelete); err != nil {
+		if err := rows.Scan(&j.RelationId, &j.AttributeId, &j.IndexFrom, &j.Index,
+			&j.Connector, &j.ApplyCreate, &j.ApplyUpdate, &j.ApplyDelete); err != nil {
 
-			rows.Close()
 			return q, err
 		}
 		q.Joins = append(q.Joins, j)
 	}
-	rows.Close()
 
 	// retrieve filters
 	q.Filters, err = getFilters(q.Id, pgtype.UUID{})
@@ -96,17 +94,16 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	if err != nil {
 		return q, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var o types.QueryOrder
 
 		if err := rows.Scan(&o.AttributeId, &o.Index, &o.Ascending); err != nil {
-			rows.Close()
 			return q, err
 		}
 		q.Orders = append(q.Orders, o)
 	}
-	rows.Close()
 
 	// retrieve lookups
 	rows, err = db.Pool.Query(context.Background(), `
@@ -118,17 +115,16 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	if err != nil {
 		return q, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var l types.QueryLookup
 
 		if err := rows.Scan(&l.PgIndexId, &l.Index); err != nil {
-			rows.Close()
 			return q, err
 		}
 		q.Lookups = append(q.Lookups, l)
 	}
-	rows.Close()
 
 	// retrieve choices
 	rows, err = db.Pool.Query(context.Background(), `
@@ -140,28 +136,25 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	if err != nil {
 		return q, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var c types.QueryChoice
 
 		if err := rows.Scan(&c.Id, &c.Name); err != nil {
-			rows.Close()
 			return q, err
 		}
 		q.Choices = append(q.Choices, c)
 	}
-	rows.Close()
 
 	for i, c := range q.Choices {
 		c.Filters, err = getFilters(q.Id, pgtype.UUID{Bytes: c.Id, Valid: true})
 		if err != nil {
-			rows.Close()
 			return q, err
 		}
 
 		c.Captions, err = caption.Get("query_choice", c.Id, []string{"queryChoiceTitle"})
 		if err != nil {
-			rows.Close()
 			return q, err
 		}
 		q.Choices[i] = c
@@ -395,6 +388,12 @@ func getFilters(queryId uuid.UUID, queryChoiceId pgtype.UUID) ([]types.QueryFilt
 	}
 
 	// get filters
+	type typeFilterPos struct {
+		filter   types.QueryFilter
+		position int
+	}
+	filterPos := make([]typeFilterPos, 0)
+
 	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 		SELECT connector, operator, position
 		FROM app.query_filter
@@ -405,12 +404,7 @@ func getFilters(queryId uuid.UUID, queryChoiceId pgtype.UUID) ([]types.QueryFilt
 	if err != nil {
 		return filters, err
 	}
-
-	type typeFilterPos struct {
-		filter   types.QueryFilter
-		position int
-	}
-	filterPos := make([]typeFilterPos, 0)
+	defer rows.Close()
 
 	for rows.Next() {
 		var fp typeFilterPos
@@ -420,7 +414,6 @@ func getFilters(queryId uuid.UUID, queryChoiceId pgtype.UUID) ([]types.QueryFilt
 		}
 		filterPos = append(filterPos, fp)
 	}
-	rows.Close()
 
 	for _, fp := range filterPos {
 

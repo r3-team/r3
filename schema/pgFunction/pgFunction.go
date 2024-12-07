@@ -55,6 +55,7 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 	if err != nil {
 		return functions, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var f types.PgFunction
@@ -66,7 +67,6 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 		}
 		functions = append(functions, f)
 	}
-	rows.Close()
 
 	for i, f := range functions {
 		f.ModuleId = moduleId
@@ -313,6 +313,7 @@ func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity string, entity
 	if err != nil {
 		return fmt.Errorf("failed to get PG function ID for %s ID %s: %w", entity, entityId, err)
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var id uuid.UUID
@@ -321,7 +322,6 @@ func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity string, entity
 		}
 		pgFunctionIds = append(pgFunctionIds, id)
 	}
-	rows.Close()
 
 	for _, id := range pgFunctionIds {
 

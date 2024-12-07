@@ -57,6 +57,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 	if err != nil {
 		return ldaps, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var l types.Ldap
@@ -69,13 +70,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 			&m.NameSur, &m.Notes, &m.Organization, &m.PhoneFax, &m.PhoneLandline,
 			&m.PhoneMobile); err != nil {
 
-			rows.Close()
 			return ldaps, err
 		}
 		l.LoginMetaAttributes = m
 		ldaps = append(ldaps, l)
 	}
-	rows.Close()
 
 	for i, _ := range ldaps {
 		ldaps[i].Roles, err = getRoles(ctx, tx, ldaps[i].Id)

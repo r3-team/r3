@@ -20,10 +20,10 @@ func RepoModuleGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (
 			ByString     string `json:"byString"`
 			LanguageCode string `json:"languageCode"`
 			Limit        int    `json:"limit"`
-			Offset       int    `json:"offset"`
 			GetInstalled bool   `json:"getInstalled"`
-			GetNew       bool   `json:"getNew"`
 			GetInStore   bool   `json:"getInStore"`
+			GetNew       bool   `json:"getNew"`
+			Offset       int    `json:"offset"`
 		}
 		res struct {
 			Count       int                `json:"count"`

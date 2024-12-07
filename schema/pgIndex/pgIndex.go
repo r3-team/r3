@@ -72,6 +72,7 @@ func Get(relationId uuid.UUID) ([]types.PgIndex, error) {
 	if err != nil {
 		return pgIndexes, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var pgi types.PgIndex
@@ -84,7 +85,6 @@ func Get(relationId uuid.UUID) ([]types.PgIndex, error) {
 		pgi.RelationId = relationId
 		pgIndexes = append(pgIndexes, pgi)
 	}
-	rows.Close()
 
 	// get index attributes
 	for i, pgi := range pgIndexes {

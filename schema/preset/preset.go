@@ -65,17 +65,16 @@ func Get(relationId uuid.UUID) ([]types.Preset, error) {
 	if err != nil {
 		return presets, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var p types.Preset
 		if err := rows.Scan(&p.Id, &p.Name, &p.Protected); err != nil {
-			rows.Close()
 			return presets, err
 		}
 		p.RelationId = relationId
 		presets = append(presets, p)
 	}
-	rows.Close()
 
 	// get preset values
 	for i, p := range presets {
@@ -194,9 +193,7 @@ func getValues(presetId uuid.UUID) ([]types.PresetValue, error) {
 
 	for rows.Next() {
 		var v types.PresetValue
-		if err := rows.Scan(&v.Id, &v.PresetId, &v.PresetIdRefer, &v.AttributeId,
-			&v.Protected, &v.Value); err != nil {
-
+		if err := rows.Scan(&v.Id, &v.PresetId, &v.PresetIdRefer, &v.AttributeId, &v.Protected, &v.Value); err != nil {
 			return values, err
 		}
 		values = append(values, v)

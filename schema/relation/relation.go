@@ -103,13 +103,14 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 		r.ModuleId = moduleId
 		r.Attributes = make([]types.Attribute, 0)
 		r.Triggers = make([]types.PgTrigger, 0)
+		relations = append(relations, r)
+	}
 
-		r.Policies, err = getPolicies(r.Id)
+	for i, r := range relations {
+		relations[i].Policies, err = getPolicies(r.Id)
 		if err != nil {
 			return relations, err
 		}
-
-		relations = append(relations, r)
 	}
 	return relations, nil
 }

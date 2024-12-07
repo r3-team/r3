@@ -150,6 +150,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 	if err != nil {
 		return caps, err
 	}
+	defer rows.Close()
 
 	var content string
 	var entity string
@@ -239,8 +240,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			caps.WidgetIdMap[entityId] = captionMap
 		}
 	}
-	rows.Close()
-
 	return caps, nil
 }
 

@@ -48,11 +48,10 @@ func Get(entity string, entityId uuid.UUID) ([]types.Tab, error) {
 	}
 
 	for i, tab := range tabs {
-		tab.Captions, err = caption.Get("tab", tab.Id, []string{"tabTitle"})
+		tabs[i].Captions, err = caption.Get("tab", tab.Id, []string{"tabTitle"})
 		if err != nil {
 			return tabs, err
 		}
-		tabs[i] = tab
 	}
 	return tabs, nil
 }

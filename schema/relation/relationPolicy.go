@@ -18,7 +18,6 @@ func delPolicies_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) error 
 }
 
 func getPolicies(relationId uuid.UUID) ([]types.RelationPolicy, error) {
-
 	policies := make([]types.RelationPolicy, 0)
 
 	rows, err := db.Pool.Query(context.Background(), `
@@ -36,9 +35,8 @@ func getPolicies(relationId uuid.UUID) ([]types.RelationPolicy, error) {
 	for rows.Next() {
 		var p types.RelationPolicy
 
-		if err := rows.Scan(&p.RoleId, &p.PgFunctionIdExcl,
-			&p.PgFunctionIdIncl, &p.ActionDelete, &p.ActionSelect,
-			&p.ActionUpdate); err != nil {
+		if err := rows.Scan(&p.RoleId, &p.PgFunctionIdExcl, &p.PgFunctionIdIncl,
+			&p.ActionDelete, &p.ActionSelect, &p.ActionUpdate); err != nil {
 
 			return policies, err
 		}

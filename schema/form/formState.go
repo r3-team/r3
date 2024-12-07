@@ -26,6 +26,7 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 	if err != nil {
 		return states, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var s types.FormState
@@ -35,7 +36,6 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 		}
 		states = append(states, s)
 	}
-	rows.Close()
 
 	for i, _ := range states {
 
@@ -64,6 +64,7 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 	if err != nil {
 		return conditions, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var c types.FormStateCondition
@@ -72,7 +73,6 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 		}
 		conditions = append(conditions, c)
 	}
-	rows.Close()
 
 	for i, c := range conditions {
 		c.Side0, err = getStateConditionSide(formStateId, c.Position, 0)
