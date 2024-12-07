@@ -76,7 +76,15 @@ let MyAdminLoginTemplate = {
 							<td>{{ capAppSet.languageCode }}</td>
 							<td>
 								<select v-model="settings.languageCode">
-									<option v-for="l in languageCodes" :value="l">{{ l }}</option>
+									<optgroup :label="capAppSet.translation.official">
+										<option v-for="l in languageCodesOfficial" :value="l">{{ l }}</option>
+									</optgroup>
+									<optgroup :label="capAppSet.translation.community">
+										<option v-for="l in languageCodes.filter(v => !languageCodesOfficial.includes(v))" :value="l">{{ l }}</option>
+									</optgroup>
+									<optgroup :label="capAppSet.translation.other">
+										<option v-for="l in languageCodesModulesAndCustom" :value="l">{{ l }}</option>
+									</optgroup>
 								</select>
 							</td>
 						</tr>
@@ -314,6 +322,16 @@ let MyAdminLoginTemplate = {
 			}
 			return false;
 		},
+		languageCodesModulesAndCustom:(s) => {
+			let langs = s.languageCodesModules;
+			for(const k in s.moduleIdMapMeta) {
+				for(const l of s.moduleIdMapMeta[k].languagesCustom) {
+					if(!langs.includes(l) && !s.languageCodesOfficial.includes(l))
+						langs.push(l);
+				}
+			}
+			return langs
+		},
 		
 		// simple states
 		canSave: (s) => s.hasChanges && s.name !== '',
@@ -321,11 +339,14 @@ let MyAdminLoginTemplate = {
 		isNew:   (s) => s.id     === 0,
 		
 		// stores
-		languageCodes:     (s) => s.$store.getters['schema/languageCodesModules'],
-		searchDictionaries:(s) => s.$store.getters['searchDictionaries'],
-		capApp:            (s) => s.$store.getters.captions.admin.loginTemplate,
-		capAppSet:         (s) => s.$store.getters.captions.settings,
-		capGen:            (s) => s.$store.getters.captions.generic
+		languageCodes:        (s) => s.$store.getters['schema/languageCodes'],
+		languageCodesModules: (s) => s.$store.getters['schema/languageCodesModules'],
+		searchDictionaries:   (s) => s.$store.getters['searchDictionaries'],
+		capApp:               (s) => s.$store.getters.captions.admin.loginTemplate,
+		capAppSet:            (s) => s.$store.getters.captions.settings,
+		capGen:               (s) => s.$store.getters.captions.generic,
+		languageCodesOfficial:(s) => s.$store.getters.constants.languageCodesOfficial,
+		moduleIdMapMeta:      (s) => s.$store.getters.moduleIdMapMeta,
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);

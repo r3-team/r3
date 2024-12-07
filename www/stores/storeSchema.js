@@ -183,10 +183,10 @@ const MyStoreSchema = {
 		widgetIdMap:        (state) => state.widgetIdMap,
 		
 		languageCodesModules:(state) => {
-			let out = JSON.parse(JSON.stringify(state.languageCodes));
+			let out = [];
 			for(const k in state.moduleIdMap) {
 				for(const lang of state.moduleIdMap[k].languages) {
-					if(out.indexOf(lang) === -1)
+					if(!state.languageCodes.includes(lang))
 						out.push(lang);
 				}
 			}

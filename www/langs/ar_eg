@@ -2376,7 +2376,6 @@
 		"colorHeader": "الكتابة فوق اللون",
 		"colorHeaderSingle": "لون مميز",
 		"colorMenu": "الكتابة فوق اللون",
-		"communityTranslation": "ترجمة المجتمع",
 		"dark": "الوضع المظلم",
 		"dateFormat": "تنسيق التاريخ",
 		"dialog": {
@@ -2418,7 +2417,6 @@
 		"listRows": "صفوف القائمة",
 		"listSpaced": "أكبر",
 		"mobileScrollForm": "الهاتف المحمول: قم بتمرير النموذج بأكمله",
-		"moduleTranslation": "only application",
 		"numberSepDecimal": "فاصل عشري",
 		"numberSepThousand": "فاصل الآلاف",
 		"option": {
@@ -2494,6 +2492,11 @@
 			"titleDateCreate": "مخلوق",
 			"titleMfa": "إعداد المصادقة متعددة العوامل",
 			"titleName": "اسم الجهاز"
+		},
+		"translation": {
+			"community": "ترجمة المجتمع",
+			"official": "Official",
+			"other": "Only application"
 		},
 		"warnUnsaved": "تحذيرات بشأن التغييرات غير المحفوظة"
 	},

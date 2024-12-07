@@ -927,9 +927,6 @@ let MySettingsFixedTokens = {
 			</div>
 		</div>
 	</div>`,
-	props:{
-		languageCodesOfficial:{ type:Array, required:true }
-	},
 	data() {
 		return {
 			tabTarget:"install",
@@ -956,13 +953,14 @@ let MySettingsFixedTokens = {
 		tokenSet:(s) => s.tokenFixed !== '',
 		
 		// stores
-		appNameShort:(s) => s.$store.getters['local/appNameShort'],
-		token:       (s) => s.$store.getters['local/token'],
-		capApp:      (s) => s.$store.getters.captions.settings.tokensFixed,
-		capGen:      (s) => s.$store.getters.captions.generic,
-		isAdmin:     (s) => s.$store.getters.isAdmin,
-		languageCode:(s) => s.$store.getters.settings.languageCode,
-		loginName:   (s) => s.$store.getters.loginName
+		appNameShort:         (s) => s.$store.getters['local/appNameShort'],
+		token:                (s) => s.$store.getters['local/token'],
+		capApp:               (s) => s.$store.getters.captions.settings.tokensFixed,
+		capGen:               (s) => s.$store.getters.captions.generic,
+		isAdmin:              (s) => s.$store.getters.isAdmin,
+		languageCode:         (s) => s.$store.getters.settings.languageCode,
+		languageCodesOfficial:(s) => s.$store.getters.constants.languageCodesOfficial,
+		loginName:            (s) => s.$store.getters.loginName
 	},
 	watch:{
 		qrCodeUri(v) {
@@ -1132,7 +1130,15 @@ let MySettings = {
 							<td>{{ capApp.languageCode }}</td>
 							<td>
 								<select v-model="settingsInput.languageCode">
-									<option v-for="l in languageCodesModules" :value="l">{{ displayLanguageCode(l) }}</option>
+									<optgroup :label="capApp.translation.official">
+										<option v-for="l in languageCodesOfficial" :value="l">{{ l }}</option>
+									</optgroup>
+									<optgroup :label="capApp.translation.community">
+										<option v-for="l in languageCodes.filter(v => !languageCodesOfficial.includes(v))" :value="l">{{ l }}</option>
+									</optgroup>
+									<optgroup :label="capApp.translation.other">
+										<option v-for="l in languageCodesModulesAndCustom" :value="l">{{ l }}</option>
+									</optgroup>
 								</select>
 							</td>
 						</tr>
@@ -1349,9 +1355,7 @@ let MySettings = {
 					<img class="icon" src="images/screen.png" />
 					<h1>{{ capApp.titleFixedTokens }}</h1>
 				</div>
-				<my-settings-fixed-tokens
-					:languageCodesOfficial="languageCodesOfficial"
-				/>
+				<my-settings-fixed-tokens />
 			</div>
 			
 			<!-- client events (global hotkeys) -->
@@ -1376,7 +1380,6 @@ let MySettings = {
 	emits:['close','logout'],
 	data() {
 		return {
-			languageCodesOfficial:['en_us','de_de'],
 			searchDictionaryNew:'', // input for new search dictionary
 			settingsInput:{},       // copy of the settings object to work on
 			settingsLoaded:false    // once settings have been loaded, each change triggers DB update
@@ -1392,11 +1395,11 @@ let MySettings = {
 		}
 	},
 	computed:{
-		languageCodesModules:(s) => {
-			let langs = s.$store.getters['schema/languageCodesModules'];
+		languageCodesModulesAndCustom:(s) => {
+			let langs = s.languageCodesModules;
 			for(const k in s.moduleIdMapMeta) {
 				for(const l of s.moduleIdMapMeta[k].languagesCustom) {
-					if(!langs.includes(l))
+					if(!langs.includes(l) && !s.languageCodesOfficial.includes(l))
 						langs.push(l);
 				}
 			}
@@ -1404,13 +1407,15 @@ let MySettings = {
 		},
 		
 		// stores
-		languageCodes:     (s) => s.$store.getters['schema/languageCodes'],
-		searchDictionaries:(s) => s.$store.getters['searchDictionaries'],
-		capGen:            (s) => s.$store.getters.captions.generic,
-		capApp:            (s) => s.$store.getters.captions.settings,
-		moduleIdMapMeta:   (s) => s.$store.getters.moduleIdMapMeta,
-		patternStyle:      (s) => s.$store.getters.patternStyle,
-		settings:          (s) => s.$store.getters.settings
+		languageCodes:        (s) => s.$store.getters['schema/languageCodes'],
+		languageCodesModules: (s) => s.$store.getters['schema/languageCodesModules'],
+		searchDictionaries:   (s) => s.$store.getters['searchDictionaries'],
+		capGen:               (s) => s.$store.getters.captions.generic,
+		capApp:               (s) => s.$store.getters.captions.settings,
+		languageCodesOfficial:(s) => s.$store.getters.constants.languageCodesOfficial,
+		moduleIdMapMeta:      (s) => s.$store.getters.moduleIdMapMeta,
+		patternStyle:         (s) => s.$store.getters.patternStyle,
+		settings:             (s) => s.$store.getters.settings
 	},
 	mounted() {
 		this.settingsInput = JSON.parse(JSON.stringify(this.settings));
@@ -1421,17 +1426,6 @@ let MySettings = {
 	methods:{
 		// externals
 		setSetting,
-		
-		// presentation
-		displayLanguageCode(code) {
-			if(this.languageCodesOfficial.includes(code))
-				return code;
-
-			if(this.languageCodes.includes(code))
-				return `${code} (${this.capApp.communityTranslation})`;
-
-			return `${code} (${this.capApp.moduleTranslation})`;
-		},
 
 		// actions
 		dictAdd(entry) {

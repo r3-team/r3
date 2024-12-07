@@ -2376,7 +2376,6 @@
 		"colorHeader": "Pārrakstīt krāsu",
 		"colorHeaderSingle": "Akcenta krāsa",
 		"colorMenu": "Pārrakstīt krāsu",
-		"communityTranslation": "community transl.",
 		"dark": "Tumšais režīms",
 		"dateFormat": "Datuma formāts",
 		"dialog": {
@@ -2418,7 +2417,6 @@
 		"listRows": "Saraksta rindas",
 		"listSpaced": "Liels",
 		"mobileScrollForm": "Mobilais: Ritiniet visu veidlapu",
-		"moduleTranslation": "only application",
 		"numberSepDecimal": "Decimālpunkta atdalītājs",
 		"numberSepThousand": "Tūkstošu atdalītājs",
 		"option": {
@@ -2494,6 +2492,11 @@
 			"titleDateCreate": "Created",
 			"titleMfa": "Setup multi-factor authentication",
 			"titleName": "Device name"
+		},
+		"translation": {
+			"community": "Community translation",
+			"official": "Official",
+			"other": "Only application"
 		},
 		"warnUnsaved": "Brīdinājumi par nesaglabātām izmaiņām"
 	},

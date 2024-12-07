@@ -2376,7 +2376,6 @@
 		"colorHeader": "覆盖颜色",
 		"colorHeaderSingle": "强调颜色",
 		"colorMenu": "覆盖颜色",
-		"communityTranslation": "社区翻译",
 		"dark": "夜间模式",
 		"dateFormat": "日期格式",
 		"dialog": {
@@ -2418,7 +2417,6 @@
 		"listRows": "列表行数",
 		"listSpaced": "较大",
 		"mobileScrollForm": "移动端：滚动整个表单",
-		"moduleTranslation": "only application",
 		"numberSepDecimal": "小数分隔符",
 		"numberSepThousand": "千位分隔符",
 		"option": {
@@ -2494,6 +2492,11 @@
 			"titleDateCreate": "创建日期",
 			"titleMfa": "设置多因素身份验证",
 			"titleName": "设备名称"
+		},
+		"translation": {
+			"community": "社区翻译",
+			"official": "Official",
+			"other": "Only application"
 		},
 		"warnUnsaved": "未保存更改的警告"
 	},

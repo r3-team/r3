@@ -35,6 +35,9 @@ const MyStore = Vuex.createStore({
 		config:{},                     // configuration values (admin only)
 		constants:{                    // constant variables, codes/messages/IDs
 			kdfIterations:10000,       // number of iterations for PBKDF2 key derivation function
+			languageCodesOfficial:[    // officially supported language codes
+				'en_us','de_de'
+			],
 			loginLimitedFactor:3,      // factor, how many limited logins are enabled for each full login
 			keyLength:64,              // length of new symmetric keys for data encryption
 			scrollFormId:'form-scroll' // ID of form page element (to recover scroll position during routing)

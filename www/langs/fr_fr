@@ -2376,7 +2376,6 @@
 		"colorHeader": "Couleur écrasée",
 		"colorHeaderSingle": "Couleur d'accentuation",
 		"colorMenu": "Couleur écrasée",
-		"communityTranslation": "community transl.",
 		"dark": "Mode sombre",
 		"dateFormat": "Format de date",
 		"dialog": {
@@ -2418,7 +2417,6 @@
 		"listRows": "Lignes de liste",
 		"listSpaced": "Plus grand",
 		"mobileScrollForm": "Mobile : Faire défiler tout le formulaire",
-		"moduleTranslation": "only application",
 		"numberSepDecimal": "Séparateur décimal",
 		"numberSepThousand": "Séparateur de milliers",
 		"option": {
@@ -2494,6 +2492,11 @@
 			"titleDateCreate": "Créé",
 			"titleMfa": "Configuration de l'authentification multi-facteur",
 			"titleName": "Nom de l'appareil"
+		},
+		"translation": {
+			"community": "Community translation",
+			"official": "Official",
+			"other": "Only application"
 		},
 		"warnUnsaved": "Avertissements pour les modifications non enregistrées"
 	},

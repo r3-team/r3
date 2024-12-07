@@ -2376,7 +2376,6 @@
 		"colorHeader": "Farbe überschreiben",
 		"colorHeaderSingle": "Akzentfarbe",
 		"colorMenu": "Farbe überschreiben",
-		"communityTranslation": "Community-Übers.",
 		"dark": "Dunkle Ansicht",
 		"dateFormat": "Datumsformat",
 		"dialog": {
@@ -2418,7 +2417,6 @@
 		"listRows": "Listenzeilen",
 		"listSpaced": "Größer",
 		"mobileScrollForm": "Mobil: Gesamtes Formular scrollen",
-		"moduleTranslation": "nur Anwendung",
 		"numberSepDecimal": "Dezimal-Trennzeichen",
 		"numberSepThousand": "Tausender-Trennzeichen",
 		"option": {
@@ -2494,6 +2492,11 @@
 			"titleDateCreate": "Erstellt",
 			"titleMfa": "Multifaktor-Authentifizierung hinzufügen",
 			"titleName": "Gerätename"
+		},
+		"translation": {
+			"community": "Community-Übersetzung",
+			"official": "Offiziell",
+			"other": "Nur Anwendung"
 		},
 		"warnUnsaved": "Warnung bei ungespeicherten Änderungen"
 	},

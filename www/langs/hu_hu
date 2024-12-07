@@ -2376,7 +2376,6 @@
 		"colorHeader": "Overwrite color",
 		"colorHeaderSingle": "Accent color",
 		"colorMenu": "Overwrite color",
-		"communityTranslation": "community transl.",
 		"dark": "Sötét nézet",
 		"dateFormat": "Dátumformátum",
 		"dialog": {
@@ -2418,7 +2417,6 @@
 		"listRows": "List rows",
 		"listSpaced": "Larger",
 		"mobileScrollForm": "Mobil: Teljes űrlap görgetése",
-		"moduleTranslation": "only application",
 		"numberSepDecimal": "Decimal separator",
 		"numberSepThousand": "Thousands separator",
 		"option": {
@@ -2494,6 +2492,11 @@
 			"titleDateCreate": "Létrehozva",
 			"titleMfa": "Több Faktoros Hitelesítés hozzáadása",
 			"titleName": "Eszköz neve"
+		},
+		"translation": {
+			"community": "Community translation",
+			"official": "Official",
+			"other": "Only application"
 		},
 		"warnUnsaved": "Figyelmeztetés mentetlen változtatásoknál"
 	},
