@@ -2,6 +2,7 @@ import {isAttributeFiles}                 from './shared/attribute.js';
 import {getFirstColumnUsableAsAggregator} from './shared/column.js';
 import {
 	getUnixFormat,
+	getUnixShifted,
 	getUtcTimeStringFromUnix
 } from './shared/time.js';
 export {MyListColumnBatch as default};
@@ -257,6 +258,7 @@ let MyListColumnBatch = {
 		// externals
 		getFirstColumnUsableAsAggregator,
 		getUnixFormat,
+		getUnixShifted,
 		getUtcTimeStringFromUnix,
 		isAttributeFiles,
 		
@@ -271,9 +273,9 @@ let MyListColumnBatch = {
 				return v ? this.capGen.option.yes : this.capGen.option.no;
 			
 			switch(atr.contentUse) {
-				case 'datetime': return this.getUnixFormat(v,this.dateFormat + ' H:i:S'); break;
-				case 'date':     return this.getUnixFormat(v,this.dateFormat);            break;
-				case 'time':     return this.getUtcTimeStringFromUnix(v);                 break;
+				case 'date':     return this.getUnixFormat(this.getUnixShifted(v,true),this.dateFormat); break;
+				case 'datetime': return this.getUnixFormat(v,this.dateFormat + ' H:i');                  break;
+				case 'time':     return this.getUtcTimeStringFromUnix(v);                                break;
 				default: return String(v); break;
 			}
 		},
