@@ -17,95 +17,67 @@ import (
 )
 
 // executes a websocket transaction with multiple requests within a single DB transaction
-func ExecTransaction(ctx context.Context, address string, loginId int64, isAdmin bool,
-	device types.WebsocketClientDevice, isNoAuth bool, reqTrans types.RequestTransaction,
-	resTrans types.ResponseTransaction) types.ResponseTransaction {
+func ExecTransaction(ctx context.Context, address string, loginId int64, isAdmin bool, device types.WebsocketClientDevice,
+	isNoAuth bool, reqTrans types.RequestTransaction, clearDbCache bool) ([]types.Response, error) {
 
-	// run in a loop as there is an error case where it needs to be repeated
-	runAgainNewCache := false
-	for runOnce := true; runOnce || runAgainNewCache; runOnce = false {
+	responses := make([]types.Response, 0)
 
-		tx, err := db.Pool.Begin(ctx)
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		log.Error("websocket", "cannot begin transaction", err)
+		return responses, errors.New(handler.ErrGeneral)
+	}
+	defer tx.Rollback(ctx)
+
+	if clearDbCache {
+		if err := tx.Conn().DeallocateAll(ctx); err != nil {
+			log.Error("websocket", "failed to deallocate DB connection", err)
+			return responses, err
+		}
+	}
+
+	// set session parameters, used by system functions such as instance.get_user_id()
+	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+
+		log.Error("websocket", fmt.Sprintf("TRANSACTION %d, transaction config failure (login ID %d)",
+			reqTrans.TransactionNr, loginId), err)
+
+		return responses, err
+	}
+
+	// work through requests
+	for _, req := range reqTrans.Requests {
+
+		log.Info("websocket", fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s",
+			reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
+
+		payload, err := Exec_tx(ctx, tx, address, loginId, isAdmin, device, isNoAuth, req.Ressource, req.Action, req.Payload)
 		if err != nil {
-			log.Error("websocket", "cannot begin transaction", err)
-			resTrans.Error = handler.ErrGeneral
-			return resTrans
-		}
-
-		if runAgainNewCache {
-			if err := tx.Conn().DeallocateAll(ctx); err != nil {
-				log.Error("websocket", "failed to deallocate DB connection", err)
-				resTrans.Error = handler.ErrGeneral
-				tx.Rollback(ctx)
-				return resTrans
-			}
-			runAgainNewCache = false
-			resTrans.Error = ""
-		}
-
-		// set local transaction configuration parameters
-		// these are used by system functions, such as instance.get_login_id()
-		if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
-			tx.Rollback(ctx)
-
-			log.Error("websocket", fmt.Sprintf("TRANSACTION %d, transaction config failure (login ID %d)",
-				reqTrans.TransactionNr, loginId), err)
-
-			return resTrans
-		}
-
-		// work through requests
-		for _, req := range reqTrans.Requests {
-
-			log.Info("websocket", fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s",
-				reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
-
-			payload, err := Exec_tx(ctx, tx, address, loginId, isAdmin,
-				device, isNoAuth, req.Ressource, req.Action, req.Payload)
-
-			if err == nil {
-				// all clear, prepare response payload
-				var res types.Response
-				res.Payload, err = json.Marshal(payload)
-				if err == nil {
-					resTrans.Responses = append(resTrans.Responses, res)
-					continue
-				}
-			}
-
-			// error case, convert to error code for requestor
-			returnErr, isExpectedErr := handler.ConvertToErrCode(err, !isAdmin)
-			if !isExpectedErr {
+			returnErr, isExpected := handler.ConvertToErrCode(err, !isAdmin)
+			if !isExpected {
 				log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, request %s %s failure (login ID %d)",
 					reqTrans.TransactionNr, req.Ressource, req.Action, loginId), err)
 			}
-
-			if handler.CheckForDbsCacheErrCode(returnErr) {
-				runAgainNewCache = true
-			}
-			resTrans.Error = fmt.Sprintf("%v", returnErr)
-			break
+			return responses, returnErr
 		}
 
-		// check if error occured in any request
-		if resTrans.Error == "" {
-			if err := tx.Commit(ctx); err != nil {
-
-				returnErr, isExpectedErr := handler.ConvertToErrCode(err, !isAdmin)
-				if !isExpectedErr {
-					log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, commit failure (login ID %d)",
-						reqTrans.TransactionNr, loginId), err)
-				}
-				resTrans.Error = fmt.Sprintf("%v", returnErr)
-				resTrans.Responses = make([]types.Response, 0)
-				tx.Rollback(ctx)
-			}
-		} else {
-			resTrans.Responses = make([]types.Response, 0)
-			tx.Rollback(ctx)
+		var res types.Response
+		res.Payload, err = json.Marshal(payload)
+		if err != nil {
+			return responses, err
 		}
+		responses = append(responses, res)
 	}
-	return resTrans
+
+	if err := tx.Commit(ctx); err != nil {
+		returnErr, isExpected := handler.ConvertToErrCode(err, !isAdmin)
+		if !isExpected {
+			log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, commit failure (login ID %d)",
+				reqTrans.TransactionNr, loginId), err)
+		}
+		return responses, returnErr
+	}
+	return responses, nil
 }
 
 func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAdmin bool,

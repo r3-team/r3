@@ -274,6 +274,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 	}()
 
 	var (
+		err      error
 		reqTrans types.RequestTransaction
 		resTrans types.ResponseTransaction
 	)
@@ -301,8 +302,24 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 	if !authRequest {
 		// execute non-authentication transaction
-		resTrans = request.ExecTransaction(ctx, client.address, client.loginId,
-			client.admin, client.device, client.noAuth, reqTrans, resTrans)
+		resTrans.Responses, err = request.ExecTransaction(ctx, client.address, client.loginId,
+			client.admin, client.device, client.noAuth, reqTrans, false)
+
+		if err != nil {
+			if handler.CheckForDbsCacheErrCode(err) {
+				// known PGX cache error, repeat with cleared DB statement/description cache
+				resTrans.Responses, err = request.ExecTransaction(ctx, client.address, client.loginId,
+					client.admin, client.device, client.noAuth, reqTrans, true)
+
+				if err != nil {
+					resTrans.Responses = make([]types.Response, 0)
+					resTrans.Error = err.Error()
+				}
+			} else {
+				resTrans.Responses = make([]types.Response, 0)
+				resTrans.Error = err.Error()
+			}
+		}
 
 	} else {
 		// execute authentication request
