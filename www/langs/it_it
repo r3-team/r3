@@ -7,7 +7,7 @@
 			"dirNote": "*Assicurati che questo percorso punti a un percorso di rete separato o che il suo contenuto venga copiato regolarmente su un secondo sistema. Ciò è necessario per il ripristino in caso di guasto completo del sistema.",
 			"full": "Full backup",
 			"list": "Backup sets",
-			"monthly": "Mensile",
+			"monthly": "Every 30 days",
 			"title": "Backup completi integrati",
 			"weekly": "Settimanale"
 		},

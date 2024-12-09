@@ -7,7 +7,7 @@
 			"dirNote": "*Assurez-vous que ce chemin pointe vers un emplacement réseau distinct ou que son contenu soit copié régulièrement vers un deuxième système. Ceci est nécessaire pour la récupération en cas de défaillance complète du système.",
 			"full": "Sauvegarde complète",
 			"list": "Ensembles de sauvegarde",
-			"monthly": "Mensuel",
+			"monthly": "Every 30 days",
 			"title": "Sauvegardes complètes intégrées",
 			"weekly": "Hebdomadaire"
 		},

@@ -7,7 +7,7 @@
 			"dirNote": "*Make sure this path points to a separate network location or its contents is copied to a second system regularly. This is necessary for recovery in case of complete system failure.",
 			"full": "Full backup",
 			"list": "Backup sets",
-			"monthly": "Monthly",
+			"monthly": "Every 30 days",
 			"title": "Integrated full backups",
 			"weekly": "Weekly"
 		},

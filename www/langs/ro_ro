@@ -7,7 +7,7 @@
 			"dirNote": "*Asigurați-vă că această cale indică o locație separată din rețea sau că conținutul acesteia este copiat în mod regulat pe un al doilea sistem. Acest lucru este necesar pentru recuperare în cazul unei defecțiuni complete a sistemului.",
 			"full": "Full backup",
 			"list": "Backup sets",
-			"monthly": "Lunar",
+			"monthly": "Every 30 days",
 			"title": "Backup-uri complete integrate",
 			"weekly": "Săptămânal"
 		},

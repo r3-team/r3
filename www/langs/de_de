@@ -7,7 +7,7 @@
 			"dirNote": "*Stelle sicher, dass dieser Pfad auf einen separaten Netzwerkspeicherort zeigt oder der Verzeichnisinhalt regelmäßig auf ein Zweitsystem kopiert wird. Dies ist für eine Wiederherstellung notwendig, falls das System komplett ausfällt.",
 			"full": "Vollsicherung",
 			"list": "Sicherungssätze",
-			"monthly": "Monatlich",
+			"monthly": "Alle 30 Tage",
 			"title": "Integrierte Vollsicherungen",
 			"weekly": "Wöchentlich"
 		},

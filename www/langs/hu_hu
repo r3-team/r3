@@ -7,7 +7,7 @@
 			"dirNote": "*Győződjön meg róla, hogy ez az elérési út egy külön hálózati tárhelyre mutat, vagy a könyvtár tartalmát rendszeresen másolják egy második rendszerre. Ez a teljes helyreállításhoz szükséges, ha a rendszer teljesen leáll.",
 			"full": "Teljes biztonsági mentés",
 			"list": "Biztonsági mentési fájlok",
-			"monthly": "Havi",
+			"monthly": "Every 30 days",
 			"title": "Integrált teljes biztonsági mentések",
 			"weekly": "Heti"
 		},
