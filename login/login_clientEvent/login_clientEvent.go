@@ -1,15 +1,15 @@
 package login_clientEvent
 
 import (
-	"r3/db"
+	"context"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
-func Del_tx(tx pgx.Tx, loginId int64, clientEventId uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, `
+func Del_tx(ctx context.Context, tx pgx.Tx, loginId int64, clientEventId uuid.UUID) error {
+	_, err := tx.Exec(ctx, `
 		DELETE FROM instance.login_client_event
 		WHERE login_id        = $1
 		AND   client_event_id = $2
@@ -17,10 +17,10 @@ func Del_tx(tx pgx.Tx, loginId int64, clientEventId uuid.UUID) error {
 	return err
 }
 
-func Get(loginId int64) (map[uuid.UUID]types.LoginClientEvent, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, loginId int64) (map[uuid.UUID]types.LoginClientEvent, error) {
 	lceIdMap := make(map[uuid.UUID]types.LoginClientEvent)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT client_event_id, hotkey_modifier1, hotkey_modifier2, hotkey_char
 		FROM instance.login_client_event
 		WHERE login_id = $1
@@ -41,10 +41,10 @@ func Get(loginId int64) (map[uuid.UUID]types.LoginClientEvent, error) {
 	return lceIdMap, nil
 }
 
-func Set_tx(tx pgx.Tx, loginId int64, clientEventId uuid.UUID, lce types.LoginClientEvent) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, loginId int64, clientEventId uuid.UUID, lce types.LoginClientEvent) error {
 	exists := false
 
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 	 	SELECT EXISTS(
 			SELECT client_event_id
 			FROM instance.login_client_event
@@ -57,14 +57,14 @@ func Set_tx(tx pgx.Tx, loginId int64, clientEventId uuid.UUID, lce types.LoginCl
 
 	var err error
 	if exists {
-		_, err = tx.Exec(db.Ctx, `
+		_, err = tx.Exec(ctx, `
 			UPDATE instance.login_client_event
 			SET hotkey_modifier1 = $1, hotkey_modifier2 = $2, hotkey_char = $3
 			WHERE login_id        = $4
 			AND   client_event_id = $5
 		`, lce.HotkeyModifier1, lce.HotkeyModifier2, lce.HotkeyChar, loginId, clientEventId)
 	} else {
-		_, err = tx.Exec(db.Ctx, `
+		_, err = tx.Exec(ctx, `
 			INSERT INTO instance.login_client_event (
 				login_id, client_event_id, hotkey_modifier1, hotkey_modifier2, hotkey_char)
 			VALUES ($1,$2,$3,$4,$5)

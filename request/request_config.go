@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"r3/cluster"
@@ -48,7 +49,7 @@ func ConfigGet() (interface{}, error) {
 	return res, nil
 }
 
-func ConfigSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func ConfigSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req map[string]string
 	if err := json.Unmarshal(reqJson, &req); err != nil {
@@ -67,7 +68,7 @@ func ConfigSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	for name, value := range req {
 
 		if slices.Contains(config.NamesString, name) {
-			if err := config.SetString_tx(tx, name, value); err != nil {
+			if err := config.SetString_tx(ctx, tx, name, value); err != nil {
 				return nil, err
 			}
 		} else if slices.Contains(config.NamesUint64, name) {
@@ -77,7 +78,7 @@ func ConfigSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 				return nil, err
 			}
 
-			if err := config.SetUint64_tx(tx, name, val); err != nil {
+			if err := config.SetUint64_tx(ctx, tx, name, val); err != nil {
 				return nil, err
 			}
 
@@ -88,7 +89,7 @@ func ConfigSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 				return nil, err
 			}
 
-			if err := config.SetUint64Slice_tx(tx, name, val); err != nil {
+			if err := config.SetUint64Slice_tx(ctx, tx, name, val); err != nil {
 				return nil, err
 			}
 		}

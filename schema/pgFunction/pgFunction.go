@@ -1,6 +1,7 @@
 package pgFunction
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/db"
@@ -17,20 +18,20 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
-	nameMod, nameEx, _, _, err := schema.GetPgFunctionDetailsById_tx(tx, id)
+	nameMod, nameEx, _, _, err := schema.GetPgFunctionDetailsById_tx(ctx, tx, id)
 	if err != nil {
 		return err
 	}
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		DROP FUNCTION "%s"."%s"
 	`, nameMod, nameEx)); err != nil {
 		return err
 	}
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.pg_function
 		WHERE id = $1
 	`, id); err != nil {
@@ -44,7 +45,7 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 	var err error
 	functions := make([]types.PgFunction, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, name, code_args, code_function, code_returns,
 			is_frontend_exec, is_login_sync, is_trigger, volatility
 		FROM app.pg_function
@@ -54,6 +55,7 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 	if err != nil {
 		return functions, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var f types.PgFunction
@@ -65,7 +67,6 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 		}
 		functions = append(functions, f)
 	}
-	rows.Close()
 
 	for i, f := range functions {
 		f.ModuleId = moduleId
@@ -84,24 +85,25 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 func getSchedules(pgFunctionId uuid.UUID) ([]types.PgFunctionSchedule, error) {
 	schedules := make([]types.PgFunctionSchedule, 0)
 
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return schedules, err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
-	schedules, err = getSchedules_tx(tx, pgFunctionId)
+	schedules, err = getSchedules_tx(ctx, tx, pgFunctionId)
 	if err != nil {
 		return schedules, err
 	}
-	tx.Commit(db.Ctx)
-
-	return schedules, nil
+	return schedules, tx.Commit(ctx)
 }
-func getSchedules_tx(tx pgx.Tx, pgFunctionId uuid.UUID) ([]types.PgFunctionSchedule, error) {
+func getSchedules_tx(ctx context.Context, tx pgx.Tx, pgFunctionId uuid.UUID) ([]types.PgFunctionSchedule, error) {
 	schedules := make([]types.PgFunctionSchedule, 0)
 
-	rows, err := tx.Query(db.Ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT id, at_second, at_minute, at_hour, at_day, interval_type, interval_value
 		FROM app.pg_function_schedule
 		WHERE pg_function_id = $1
@@ -125,13 +127,13 @@ func getSchedules_tx(tx pgx.Tx, pgFunctionId uuid.UUID) ([]types.PgFunctionSched
 	return schedules, nil
 }
 
-func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 
 	if err := check.DbIdentifier(fnc.Name); err != nil {
 		return err
 	}
 
-	nameMod, err := schema.GetModuleNameById_tx(tx, fnc.ModuleId)
+	nameMod, err := schema.GetModuleNameById_tx(ctx, tx, fnc.ModuleId)
 	if err != nil {
 		return err
 	}
@@ -158,13 +160,13 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 		return errors.New("empty function body or missing returns")
 	}
 
-	known, err := schema.CheckCreateId_tx(tx, &fnc.Id, "pg_function", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fnc.Id, "pg_function", "id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		_, nameEx, _, isTriggerEx, err := schema.GetPgFunctionDetailsById_tx(tx, fnc.Id)
+		_, nameEx, _, isTriggerEx, err := schema.GetPgFunctionDetailsById_tx(ctx, tx, fnc.Id)
 		if err != nil {
 			return err
 		}
@@ -173,7 +175,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 			return errors.New("cannot convert between trigger and non-trigger function")
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.pg_function
 			SET name = $1, code_args = $2, code_function = $3,
 				code_returns = $4, is_frontend_exec = $5, volatility = $6
@@ -183,7 +185,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 		}
 
 		if fnc.Name != nameEx {
-			if err := RecreateAffectedBy_tx(tx, "pg_function", fnc.Id); err != nil {
+			if err := RecreateAffectedBy_tx(ctx, tx, "pg_function", fnc.Id); err != nil {
 				return fmt.Errorf("failed to recreate affected PG functions, %s", err)
 			}
 		}
@@ -191,7 +193,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 		if !fnc.IsTrigger {
 			// drop non-trigger function because function arguments can change
 			// two functions with the same name but different interfaces can exist (overloading)
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`DROP FUNCTION "%s"."%s"`, nameMod, nameEx)); err != nil {
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`DROP FUNCTION "%s"."%s"`, nameMod, nameEx)); err != nil {
 				return err
 			}
 		} else {
@@ -200,7 +202,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 				// we cannot drop trigger functions without recreating triggers
 				// renaming changes the function name in the trigger and allows us to replace it
 				// as triggers do not take arguments, overloading is not a problem
-				if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				if _, err := tx.Exec(ctx, fmt.Sprintf(`
 					ALTER FUNCTION "%s"."%s" RENAME TO "%s"
 				`, nameMod, nameEx, fnc.Name)); err != nil {
 					return err
@@ -208,7 +210,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 			}
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.pg_function (id, module_id, name, code_args, code_function,
 				code_returns, is_frontend_exec, is_login_sync, is_trigger, volatility)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
@@ -223,7 +225,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 	scheduleIds := make([]uuid.UUID, 0)
 	for _, s := range fnc.Schedules {
 
-		known, err = schema.CheckCreateId_tx(tx, &s.Id, "pg_function_schedule", "id")
+		known, err = schema.CheckCreateId_tx(ctx, tx, &s.Id, "pg_function_schedule", "id")
 		if err != nil {
 			return err
 		}
@@ -232,7 +234,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 		s.AtDay = schema.GetValidAtDay(s.IntervalType, s.AtDay)
 
 		if known {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				UPDATE app.pg_function_schedule
 				SET at_second = $1, at_minute = $2, at_hour = $3, at_day = $4,
 					interval_type = $5, interval_value = $6
@@ -243,7 +245,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 				return err
 			}
 		} else {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO app.pg_function_schedule (
 					id, pg_function_id, at_second, at_minute, at_hour, at_day,
 					interval_type, interval_value
@@ -254,7 +256,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 
 				return err
 			}
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO instance.schedule (
 					pg_function_schedule_id,date_attempt,date_success
 				)
@@ -266,7 +268,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 		scheduleIds = append(scheduleIds, s.Id)
 	}
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.pg_function_schedule
 		WHERE pg_function_id = $1
 		AND id <> ALL($2)
@@ -275,17 +277,17 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 	}
 
 	// set captions
-	if err := caption.Set_tx(tx, fnc.Id, fnc.Captions); err != nil {
+	if err := caption.Set_tx(ctx, tx, fnc.Id, fnc.Captions); err != nil {
 		return err
 	}
 
 	// apply function to database
-	fnc.CodeFunction, err = processDependentIds_tx(tx, fnc.Id, fnc.CodeFunction)
+	fnc.CodeFunction, err = processDependentIds_tx(ctx, tx, fnc.Id, fnc.CodeFunction)
 	if err != nil {
 		return fmt.Errorf("failed to process entity IDs, %s", err)
 	}
 
-	_, err = tx.Exec(db.Ctx, fmt.Sprintf(`
+	_, err = tx.Exec(ctx, fmt.Sprintf(`
 		CREATE OR REPLACE FUNCTION "%s"."%s"(%s)
 		RETURNS %s LANGUAGE plpgsql %s AS %s
 	`, nameMod, fnc.Name, fnc.CodeArgs, fnc.CodeReturns, fnc.Volatility, fnc.CodeFunction))
@@ -294,7 +296,7 @@ func Set_tx(tx pgx.Tx, fnc types.PgFunction) error {
 
 // recreate all PG functions, affected by a changed entity for which a dependency exists
 // relevant entities: modules, relations, attributes, pg functions
-func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
+func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID) error {
 
 	pgFunctionIds := make([]uuid.UUID, 0)
 
@@ -303,7 +305,7 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 	}
 
 	// stay in transaction to get altered states
-	rows, err := tx.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT pg_function_id
 		FROM app.pg_function_depends
 		WHERE %s_id_on = $1
@@ -311,6 +313,7 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 	if err != nil {
 		return fmt.Errorf("failed to get PG function ID for %s ID %s: %w", entity, entityId, err)
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var id uuid.UUID
@@ -319,12 +322,11 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 		}
 		pgFunctionIds = append(pgFunctionIds, id)
 	}
-	rows.Close()
 
 	for _, id := range pgFunctionIds {
 
 		var f types.PgFunction
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			SELECT id, module_id, name, code_args, code_function, code_returns,
 				is_frontend_exec, is_login_sync, is_trigger, volatility
 			FROM app.pg_function
@@ -335,7 +337,7 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 			return err
 		}
 
-		f.Schedules, err = getSchedules_tx(tx, f.Id)
+		f.Schedules, err = getSchedules_tx(ctx, tx, f.Id)
 		if err != nil {
 			return err
 		}
@@ -343,7 +345,7 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 		if err != nil {
 			return err
 		}
-		if err := Set_tx(tx, f); err != nil {
+		if err := Set_tx(ctx, tx, f); err != nil {
 			return err
 		}
 	}
@@ -354,10 +356,10 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 // as entity names can change any time, keeping IDs is safer
 // to create a PG function, we need to replace these IDs with proper names
 // we also store IDs of all entities so that we can create foreign keys and ensure consistency
-func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error) {
+func processDependentIds_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, body string) (string, error) {
 
 	// rebuilt dependency records for this function
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.pg_function_depends
 		WHERE pg_function_id = $1
 	`, id); err != nil {
@@ -384,12 +386,12 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[modId] = true
 
-		modName, err := schema.GetModuleNameById_tx(tx, modId)
+		modName, err := schema.GetModuleNameById_tx(ctx, tx, modId)
 		if err != nil {
 			return "", err
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.pg_function_depends (pg_function_id, module_id_on)
 			VALUES ($1,$2)
 		`, id, modId); err != nil {
@@ -418,12 +420,12 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[fncId] = true
 
-		fncName, err := schema.GetPgFunctionNameById_tx(tx, fncId)
+		fncName, err := schema.GetPgFunctionNameById_tx(ctx, tx, fncId)
 		if err != nil {
 			return "", err
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.pg_function_depends (pg_function_id, pg_function_id_on)
 			VALUES ($1,$2)
 		`, id, fncId); err != nil {
@@ -452,12 +454,12 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[relId] = true
 
-		_, relName, err := schema.GetRelationNamesById_tx(tx, relId)
+		_, relName, err := schema.GetRelationNamesById_tx(ctx, tx, relId)
 		if err != nil {
 			return "", err
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.pg_function_depends (pg_function_id, relation_id_on)
 			VALUES ($1,$2)
 		`, id, relId); err != nil {
@@ -486,12 +488,12 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[atrId] = true
 
-		atrName, err := schema.GetAttributeNameById_tx(tx, atrId)
+		atrName, err := schema.GetAttributeNameById_tx(ctx, tx, atrId)
 		if err != nil {
 			return "", err
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.pg_function_depends (pg_function_id, attribute_id_on)
 			VALUES ($1,$2)
 		`, id, atrId); err != nil {

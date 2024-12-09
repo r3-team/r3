@@ -1,8 +1,8 @@
 package login_template
 
 import (
+	"context"
 	"fmt"
-	"r3/db"
 	"r3/login/login_setting"
 	"r3/types"
 
@@ -10,8 +10,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func Del_tx(tx pgx.Tx, id int64) error {
-	_, err := tx.Exec(db.Ctx, `
+func Del_tx(ctx context.Context, tx pgx.Tx, id int64) error {
+	_, err := tx.Exec(ctx, `
 		DELETE FROM instance.login_template
 		WHERE id = $1
 		AND name <> 'GLOBAL' -- protect global default
@@ -19,7 +19,7 @@ func Del_tx(tx pgx.Tx, id int64) error {
 	return err
 }
 
-func Get(byId int64) ([]types.LoginTemplateAdmin, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, byId int64) ([]types.LoginTemplateAdmin, error) {
 	templates := make([]types.LoginTemplateAdmin, 0)
 
 	sqlParams := make([]interface{}, 0)
@@ -29,7 +29,7 @@ func Get(byId int64) ([]types.LoginTemplateAdmin, error) {
 		sqlWhere = "WHERE id = $1"
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT id, name, comment
 		FROM instance.login_template
 		%s
@@ -49,7 +49,8 @@ func Get(byId int64) ([]types.LoginTemplateAdmin, error) {
 	rows.Close()
 
 	for i, _ := range templates {
-		templates[i].Settings, err = login_setting.Get(
+		templates[i].Settings, err = login_setting.Get_tx(
+			ctx, tx,
 			pgtype.Int8{},
 			pgtype.Int8{Int64: templates[i].Id, Valid: true})
 
@@ -60,11 +61,11 @@ func Get(byId int64) ([]types.LoginTemplateAdmin, error) {
 	return templates, nil
 }
 
-func Set_tx(tx pgx.Tx, t types.LoginTemplateAdmin) (int64, error) {
+func Set_tx(ctx context.Context, tx pgx.Tx, t types.LoginTemplateAdmin) (int64, error) {
 
 	isNew := t.Id == 0
 	if isNew {
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.login_template (name, comment)
 			VALUES ($1,$2)
 			RETURNING id
@@ -72,7 +73,7 @@ func Set_tx(tx pgx.Tx, t types.LoginTemplateAdmin) (int64, error) {
 			return t.Id, err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE instance.login_template
 			SET name = $1, comment = $2
 			WHERE id = $3
@@ -82,7 +83,7 @@ func Set_tx(tx pgx.Tx, t types.LoginTemplateAdmin) (int64, error) {
 		}
 	}
 
-	return t.Id, login_setting.Set_tx(tx,
+	return t.Id, login_setting.Set_tx(ctx, tx,
 		pgtype.Int8{},
 		pgtype.Int8{Int64: t.Id, Valid: true},
 		t.Settings, isNew)

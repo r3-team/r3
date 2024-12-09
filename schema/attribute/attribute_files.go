@@ -1,20 +1,20 @@
 package attribute
 
 import (
+	"context"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
-func fileRelationsCreate_tx(tx pgx.Tx, attributeId uuid.UUID,
+func fileRelationsCreate_tx(ctx context.Context, tx pgx.Tx, attributeId uuid.UUID,
 	moduleName string, relationName string) error {
 
 	tNameR := schema.GetFilesTableName(attributeId)
 
-	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	_, err := tx.Exec(ctx, fmt.Sprintf(`
 		CREATE TABLE instance_file."%s" (
 			file_id uuid NOT NULL,
 			record_id bigint NOT NULL,
@@ -51,8 +51,8 @@ func fileRelationsCreate_tx(tx pgx.Tx, attributeId uuid.UUID,
 	return err
 }
 
-func FileRelationsDelete_tx(tx pgx.Tx, attributeId uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+func FileRelationsDelete_tx(ctx context.Context, tx pgx.Tx, attributeId uuid.UUID) error {
+	_, err := tx.Exec(ctx, fmt.Sprintf(`
 		DROP TABLE instance_file."%s"
 	`, schema.GetFilesTableName(attributeId)))
 	return err

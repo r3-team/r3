@@ -46,11 +46,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequestWithCode(w, "api", httpCode, errToLog, errMsgUser)
 	}
 
+	ctx, ctxCanc := context.WithTimeout(context.Background(),
+		time.Duration(int64(config.GetUint64("dbTimeoutDataRest")))*time.Second)
+
+	defer ctxCanc()
+
 	// check token
 	var loginId int64
 	var admin bool
 	var noAuth bool
-	if _, err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
+	if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
 		abort(http.StatusUnauthorized, err, handler.ErrUnauthorized)
 		bruteforce.BadAttempt(r)
 		return
@@ -180,7 +185,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// get login language code (for filters)
 	var languageCode string
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(ctx, `
 		SELECT language_code
 		FROM instance.login_setting
 		WHERE login_id = $1
@@ -197,11 +202,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// execute request
-	ctx, ctxCancel := context.WithTimeout(context.Background(),
-		time.Duration(int64(config.GetUint64("dbTimeoutDataRest")))*time.Second)
-
-	defer ctxCancel()
-
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)

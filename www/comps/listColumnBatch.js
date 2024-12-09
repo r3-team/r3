@@ -2,6 +2,7 @@ import {isAttributeFiles}                 from './shared/attribute.js';
 import {getFirstColumnUsableAsAggregator} from './shared/column.js';
 import {
 	getUnixFormat,
+	getUnixShifted,
 	getUtcTimeStringFromUnix
 } from './shared/time.js';
 export {MyListColumnBatch as default};
@@ -14,7 +15,6 @@ let MyListColumnBatch = {
 			@trigger="click"
 			@trigger-right="input = ''; set()"
 			:blockBubble="true"
-			:caption="isArrayInput ? String(input.length) : ''"
 			:captionTitle="capApp.button.columnFilters"
 			:naked="true"
 		/>
@@ -134,7 +134,7 @@ let MyListColumnBatch = {
 				<div class="row space-between">
 					<my-button image="remove.png"
 						v-if="showFilterAny"
-						@trigger="input = ''; set()"
+						@trigger="clear"
 						:active="input !== ''"
 						:cancel="true"
 						:caption="capGen.button.clear"
@@ -171,7 +171,6 @@ let MyListColumnBatch = {
 		return {
 			input:'',           // value input (either string if text, or array if selected from values)
 			values:[],          // values available to filter with (all values a list could have for column)
-			valuesLoaded:false, // values loaded once,
 			zeroSelection:false
 		};
 	},
@@ -259,6 +258,7 @@ let MyListColumnBatch = {
 		// externals
 		getFirstColumnUsableAsAggregator,
 		getUnixFormat,
+		getUnixShifted,
 		getUtcTimeStringFromUnix,
 		isAttributeFiles,
 		
@@ -273,14 +273,19 @@ let MyListColumnBatch = {
 				return v ? this.capGen.option.yes : this.capGen.option.no;
 			
 			switch(atr.contentUse) {
-				case 'datetime': return this.getUnixFormat(v,this.dateFormat + ' H:i:S'); break;
-				case 'date':     return this.getUnixFormat(v,this.dateFormat);            break;
-				case 'time':     return this.getUtcTimeStringFromUnix(v);                 break;
+				case 'date':     return this.getUnixFormat(this.getUnixShifted(v,true),this.dateFormat); break;
+				case 'datetime': return this.getUnixFormat(v,this.dateFormat + ' H:i');                  break;
+				case 'time':     return this.getUtcTimeStringFromUnix(v);                                break;
 				default: return String(v); break;
 			}
 		},
 		
 		// actions
+		clear() {
+			this.input = '';
+			this.set();
+			this.loadValues();
+		},
 		click() {
 			if(this.canOpen)
 				this.$emit('toggle');
@@ -318,9 +323,10 @@ let MyListColumnBatch = {
 		
 		// retrieval
 		loadValues() {
-			if(!this.show || !this.isValidFilter || this.valuesLoaded)
+			if(!this.show || !this.isValidFilter)
 				return;
 			
+			this.values = [];
 			ws.send('data','get',{
 				relationId:this.relationId,
 				joins:this.joins,
@@ -338,7 +344,6 @@ let MyListColumnBatch = {
 					for(const row of res.payload.rows) {
 						this.values.push(row.values[0]);
 					}
-					this.valuesLoaded = true;
 				},
 				this.$root.genericError
 			);

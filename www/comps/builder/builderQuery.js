@@ -978,19 +978,17 @@ let MyBuilderQuery = {
 			this.joinsInput = this.joinsInput;
 		},
 		relationRemove(index) {
-			for(let i = 0, j = this.joinsInput.length; i < j; i++) {
-				if(this.joinsInput[i].index !== index)
-					continue;
-				
-				this.joinsInput.splice(i,1);
-				break;
-			}
+			// remove relation & lookup
+			this.joinsInput   = this.joinsInput.filter(v => v.index !== index);
+			this.lookupsInput = this.lookupsInput.filter(v => v.index !== index);
 			
 			if(index === 0) {
 				// source relation has changed
 				this.relationIdInput = null;
 				this.filtersInput    = [];
 			}
+
+			// inform parent about removed index, to remove affected fields/columns/etc.
 			this.$emit('index-removed',index);
 		},
 		relationApplyToggle(index,content) {

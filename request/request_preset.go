@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/schema/preset"
 	"r3/types"
@@ -9,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func PresetDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func PresetDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id uuid.UUID `json:"id"`
@@ -18,16 +19,16 @@ func PresetDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, preset.Del_tx(tx, req.Id)
+	return nil, preset.Del_tx(ctx, tx, req.Id)
 }
 
-func PresetSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func PresetSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req types.Preset
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, preset.Set_tx(tx, req.RelationId, req.Id, req.Name,
-		req.Protected, req.Values)
+	return nil, preset.Set_tx(ctx, tx, req.RelationId, req.Id,
+		req.Name, req.Protected, req.Values)
 }

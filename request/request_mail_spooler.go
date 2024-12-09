@@ -1,15 +1,15 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"r3/db"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func MailSpoolerDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func MailSpoolerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Ids []int64 `json:"ids"`
 	}
@@ -17,7 +17,7 @@ func MailSpoolerDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) 
 		return nil, err
 	}
 
-	_, err := tx.Exec(db.Ctx, `
+	_, err := tx.Exec(ctx, `
 		DELETE FROM instance.mail_spool
 		WHERE id = ANY($1)
 	`, req.Ids)
@@ -25,7 +25,7 @@ func MailSpoolerDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) 
 	return nil, err
 }
 
-func MailSpoolerGet(reqJson json.RawMessage) (interface{}, error) {
+func MailSpoolerGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var (
 		err error
@@ -44,17 +44,16 @@ func MailSpoolerGet(reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	res.Mails, res.Total, err = mailSpoolerRead(req.Limit, req.Offset, req.Search)
+	res.Mails, res.Total, err = mailSpoolerRead(ctx, tx, req.Limit, req.Offset, req.Search)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func mailSpoolerRead(limit int, offset int, search string) ([]types.Mail, int64, error) {
+func mailSpoolerRead(ctx context.Context, tx pgx.Tx, limit int, offset int, search string) ([]types.Mail, int64, error) {
 
-	var searchFields = []string{"from_list", "to_list",
-		"cc_list", "bcc_list", "subject", "body"}
+	var searchFields = []string{"from_list", "to_list", "cc_list", "bcc_list", "subject", "body"}
 
 	// prepare SQL request and arguments
 	sqlArgs := make([]interface{}, 0)
@@ -73,7 +72,7 @@ func mailSpoolerRead(limit int, offset int, search string) ([]types.Mail, int64,
 	}
 
 	mails := make([]types.Mail, 0)
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT id, from_list, to_list, cc_list, bcc_list, subject,
 			body, attempt_count, attempt_date, outgoing, date,
 			mail_account_id, record_id_wofk, attribute_id,
@@ -125,7 +124,7 @@ func mailSpoolerRead(limit int, offset int, search string) ([]types.Mail, int64,
 	}
 
 	var total int64
-	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+	if err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT COUNT(*)
 		FROM instance.mail_spool
 		%s
@@ -135,7 +134,7 @@ func mailSpoolerRead(limit int, offset int, search string) ([]types.Mail, int64,
 	return mails, total, nil
 }
 
-func MailSpoolerReset_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func MailSpoolerReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Ids []int64 `json:"ids"`
 	}
@@ -143,7 +142,7 @@ func MailSpoolerReset_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error
 		return nil, err
 	}
 
-	_, err := tx.Exec(db.Ctx, `
+	_, err := tx.Exec(ctx, `
 		UPDATE instance.mail_spool
 		SET attempt_count = 0, attempt_date = 0
 		WHERE id = ANY($1)

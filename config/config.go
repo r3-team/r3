@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"encoding/json"
 	"math/rand"
 	"os"
@@ -165,16 +166,17 @@ func SetInstanceIdIfEmpty() error {
 		return err
 	}
 
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx := context.Background()
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
-	if err := SetString_tx(tx, "instanceId", id.String()); err != nil {
+	if err := SetString_tx(ctx, tx, "instanceId", id.String()); err != nil {
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }
 
 // config file
@@ -222,19 +224,22 @@ func WriteFile() error {
 func ProcessTokenSecret() error {
 	secret := GetString("tokenSecret")
 	if secret == "" {
-		tx, err := db.Pool.Begin(db.Ctx)
+		min, max := 32, 48
+		secret = tools.RandStringRunes(rand.Intn(max-min+1) + min)
+
+		ctx := context.Background()
+		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
 			return err
 		}
 
-		min, max := 32, 48
-		secret = tools.RandStringRunes(rand.Intn(max-min+1) + min)
-
-		if err := SetString_tx(tx, "tokenSecret", secret); err != nil {
-			tx.Rollback(db.Ctx)
+		if err := SetString_tx(ctx, tx, "tokenSecret", secret); err != nil {
+			tx.Rollback(ctx)
 			return err
 		}
-		tx.Commit(db.Ctx)
+		if err := tx.Commit(ctx); err != nil {
+			return err
+		}
 	}
 
 	access_mx.Lock()

@@ -2,6 +2,7 @@ package mail_attach
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -18,7 +19,7 @@ import (
 func DoAll() error {
 	mails := make([]types.Mail, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, record_id_wofk, attribute_id
 		FROM instance.mail_spool
 		WHERE outgoing = FALSE
@@ -28,6 +29,7 @@ func DoAll() error {
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var m types.Mail
@@ -37,7 +39,6 @@ func DoAll() error {
 		}
 		mails = append(mails, m)
 	}
-	rows.Close()
 
 	for _, m := range mails {
 		if err := do(m); err != nil {
@@ -67,7 +68,7 @@ func do(mail types.Mail) error {
 	fileIds := make([]uuid.UUID, 0)
 	filesMail := make([]types.MailFile, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT file, file_name, file_size
 		FROM instance.mail_spool_file
 		WHERE mail_id = $1
@@ -75,6 +76,7 @@ func do(mail types.Mail) error {
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var f types.MailFile
@@ -90,11 +92,10 @@ func do(mail types.Mail) error {
 		fileIds = append(fileIds, f.Id)
 		filesMail = append(filesMail, f)
 	}
-	rows.Close()
 
 	// no attachments to process, just delete mail
 	if len(filesMail) == 0 {
-		_, err = db.Pool.Exec(db.Ctx, `
+		_, err = db.Pool.Exec(context.Background(), `
 			DELETE FROM instance.mail_spool
 			WHERE id = $1
 		`, mail.Id)
@@ -126,16 +127,19 @@ func do(mail types.Mail) error {
 
 	// store file changes
 	// update the database only after all files have physically been saved
-	tx, err := db.Pool.Begin(db.Ctx)
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
 	fileIdMapChange := make(map[uuid.UUID]types.DataSetFileChange)
 	rel, _ := cache.RelationIdMap[atr.RelationId]
 	for _, f := range filesMail {
-		if err := data.FileApplyVersion_tx(db.Ctx, tx, true, atr.Id, rel.Id,
+		if err := data.FileApplyVersion_tx(ctx, tx, true, atr.Id, rel.Id,
 			f.Id, f.Hash, f.Name, f.Size, 0, []int64{mail.RecordId.Int64}, -1); err != nil {
 
 			return err
@@ -147,17 +151,17 @@ func do(mail types.Mail) error {
 			Version: -1,
 		}
 	}
-	if err := data.FilesApplyAttributChanges_tx(db.Ctx, tx, mail.RecordId.Int64,
+	if err := data.FilesApplyAttributChanges_tx(ctx, tx, mail.RecordId.Int64,
 		atr.Id, fileIdMapChange); err != nil {
 		return err
 	}
 
 	// all done, delete mail
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.mail_spool
 		WHERE id = $1
 	`, mail.Id); err != nil {
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }

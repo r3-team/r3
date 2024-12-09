@@ -9,6 +9,7 @@ import (
 	"r3/bruteforce"
 	"r3/cache"
 	"r3/cluster"
+	"r3/config"
 	"r3/handler"
 	"r3/log"
 	"r3/login/login_session"
@@ -16,6 +17,7 @@ import (
 	"r3/types"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
@@ -26,7 +28,7 @@ type clientType struct {
 	id        uuid.UUID                   // unique ID for client (for registering/de-registering login sessions)
 	address   string                      // IP address, no port
 	admin     bool                        // belongs to admin login?
-	ctx       context.Context             // global context for client requests
+	ctx       context.Context             // context for requests from this client
 	ctxCancel context.CancelFunc          // to abort requests in case of disconnect
 	device    types.WebsocketClientDevice // client device type (browser, fatClient)
 	ioFailure atomic.Bool                 // client failed to read/write
@@ -127,22 +129,31 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 func (hub *hubType) start() {
 
-	var removeClient = func(client *clientType) {
-		if _, exists := hub.clients[client]; exists {
-			log.Info(handlerContext, fmt.Sprintf("disconnecting client at %s", client.address))
-			if !client.ioFailure.Load() {
-				client.write_mx.Lock()
-				client.ws.WriteMessage(websocket.CloseMessage, []byte{})
-				client.write_mx.Unlock()
-			}
-			client.ws.Close()
-			client.ctxCancel()
-			delete(hub.clients, client)
+	var removeClient = func(client *clientType, wasKicked bool) {
+		if _, exists := hub.clients[client]; !exists {
+			return
+		}
 
+		if !client.ioFailure.Load() {
+			client.write_mx.Lock()
+			client.ws.WriteMessage(websocket.CloseMessage, []byte{})
+			client.write_mx.Unlock()
+		}
+		client.ws.Close()
+		client.ctxCancel()
+		delete(hub.clients, client)
+
+		// run DB calls in async func as they must not block hub operations during heavy DB load
+		go func() {
+			if wasKicked {
+				log.Info(handlerContext, fmt.Sprintf("kicked client (login ID %d) at %s", client.loginId, client.address))
+			} else {
+				log.Info(handlerContext, fmt.Sprintf("disconnected client (login ID %d) at %s", client.loginId, client.address))
+			}
 			if err := login_session.LogRemove(client.id); err != nil {
 				log.Error(handlerContext, "failed to remove login session log", err)
 			}
-		}
+		}()
 	}
 
 	for {
@@ -152,11 +163,11 @@ func (hub *hubType) start() {
 			hub.clients[client] = true
 
 		case client := <-hub.clientDel:
-			removeClient(client)
+			removeClient(client, false)
 
 		case event := <-cluster.WebsocketClientEvents:
 
-			// prepare json message for client based on event content
+			// prepare json message for client(s) based on event content
 			var err error = nil
 			jsonMsg := []byte{}      // message back to client
 			singleRecipient := false // message is only sent to single recipient (first valid one)
@@ -196,7 +207,8 @@ func (hub *hubType) start() {
 			}
 
 			if err != nil {
-				log.Error(handlerContext, "could not prepare unrequested transaction", err)
+				// run DB calls in async func as they must not block hub operations during heavy DB load
+				go log.Error(handlerContext, "could not prepare unrequested transaction", err)
 				continue
 			}
 
@@ -214,8 +226,7 @@ func (hub *hubType) start() {
 
 				// disconnect and do not send message if kicked
 				if event.Content == "kick" || (event.Content == "kickNonAdmin" && !client.admin) {
-					log.Info(handlerContext, fmt.Sprintf("kicking client (login ID %d)", client.loginId))
-					removeClient(client)
+					removeClient(client, true)
 					continue
 				}
 
@@ -279,12 +290,18 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 	// take over transaction number for response so client can match it locally
 	resTrans.TransactionNr = reqTrans.TransactionNr
 
+	// inherit the client context, to abort if the client is disconnected
+	ctx, ctxCanc := context.WithTimeout(client.ctx,
+		time.Duration(int64(config.GetUint64("dbTimeoutDataWs")))*time.Second)
+
+	defer ctxCanc()
+
 	// client can either authenticate or execute requests
 	authRequest := len(reqTrans.Requests) == 1 && reqTrans.Requests[0].Ressource == "auth"
 
 	if !authRequest {
 		// execute non-authentication transaction
-		resTrans = request.ExecTransaction(client.ctx, client.address, client.loginId,
+		resTrans = request.ExecTransaction(ctx, client.address, client.loginId,
 			client.admin, client.device, client.noAuth, reqTrans, resTrans)
 
 	} else {
@@ -302,15 +319,15 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 		switch req.Action {
 		case "token": // authentication via JSON web token
-			resPayload, err = request.LoginAuthToken(req.Payload,
+			resPayload, err = request.LoginAuthToken(ctx, req.Payload,
 				&client.loginId, &client.admin, &client.noAuth)
 
 		case "tokenFixed": // authentication via fixed token (fat-client only)
-			resPayload, err = request.LoginAuthTokenFixed(req.Payload, &client.loginId)
+			resPayload, err = request.LoginAuthTokenFixed(ctx, req.Payload, &client.loginId)
 			client.device = types.WebsocketClientDeviceFatClient
 
 		case "user": // authentication via credentials
-			resPayload, err = request.LoginAuthUser(req.Payload,
+			resPayload, err = request.LoginAuthUser(ctx, req.Payload,
 				&client.loginId, &client.admin, &client.noAuth)
 		}
 

@@ -265,7 +265,7 @@ const MyRouter = VueRouter.createRouter({
 });
 MyRouter.beforeEach((to,from) => {
 	// check last registered routing guard (the currently shown form)
-	if(MyStore.getters.routingGuards.length !== 0) {
+	if(MyStore.getters.routingGuards.length !== 0 && !to.fullPath.startsWith('/builder/form/')) {
 		const lastGuard = MyStore.getters.routingGuards[MyStore.getters.routingGuards.length-1];
 		if(!lastGuard()) return false;
 	}

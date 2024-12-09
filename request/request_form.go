@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/schema/form"
 	"r3/types"
@@ -9,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func FormCopy_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func FormCopy_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id       uuid.UUID `json:"id"`
@@ -20,10 +21,10 @@ func FormCopy_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, form.Copy_tx(tx, req.ModuleId, req.Id, req.NewName)
+	return nil, form.Copy_tx(ctx, tx, req.ModuleId, req.Id, req.NewName)
 }
 
-func FormDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func FormDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id uuid.UUID `json:"id"`
@@ -32,14 +33,14 @@ func FormDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, form.Del_tx(tx, req.Id)
+	return nil, form.Del_tx(ctx, tx, req.Id)
 }
 
-func FormSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func FormSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.Form
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, form.Set_tx(tx, req)
+	return nil, form.Set_tx(ctx, tx, req)
 }

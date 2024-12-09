@@ -1,6 +1,7 @@
 package column
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/db"
@@ -18,8 +19,8 @@ import (
 
 var allowedEntities = []string{"api", "collection", "field"}
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, `DELETE FROM app.column WHERE id = $1`, id)
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
+	_, err := tx.Exec(ctx, `DELETE FROM app.column WHERE id = $1`, id)
 	return err
 }
 
@@ -30,7 +31,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 		return columns, errors.New("bad entity")
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 		SELECT id, attribute_id, index, batch, basis, length, display, group_by,
 			aggregator, distincted, hidden, on_mobile, sub_query, styles
 		FROM app.column
@@ -40,6 +41,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 	if err != nil {
 		return columns, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var c types.Column
@@ -54,7 +56,6 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 		}
 		columns = append(columns, c)
 	}
-	rows.Close()
 
 	for i, c := range columns {
 		if c.SubQuery {
@@ -66,7 +67,6 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 			c.Query.RelationId = pgtype.UUID{}
 		}
 
-		// get captions
 		c.Captions, err = caption.Get("column", c.Id, []string{"columnTitle"})
 		if err != nil {
 			return columns, err
@@ -76,7 +76,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 	return columns, nil
 }
 
-func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column) error {
 
 	if !slices.Contains(allowedEntities, entity) {
 		return errors.New("bad entity")
@@ -88,7 +88,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 		idsKeep = append(idsKeep, c.Id)
 	}
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM app.column
 		WHERE %s_id = $1
 		AND id <> ALL($2)
@@ -99,13 +99,13 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 	// insert new/update existing columns
 	for position, c := range columns {
 
-		known, err := schema.CheckCreateId_tx(tx, &c.Id, "column", "id")
+		known, err := schema.CheckCreateId_tx(ctx, tx, &c.Id, "column", "id")
 		if err != nil {
 			return err
 		}
 
 		// fix imports < 3.3: Migrate display option to attribute content use
-		c.Display, err = compatible.MigrateDisplayToContentUse_tx(tx, c.AttributeId, c.Display)
+		c.Display, err = compatible.MigrateDisplayToContentUse_tx(ctx, tx, c.AttributeId, c.Display)
 		if err != nil {
 			return err
 		}
@@ -114,7 +114,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 		c = compatible.FixColumnStyles(c)
 
 		if known {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				UPDATE app.column
 				SET attribute_id = $1, index = $2, position = $3, batch = $4, basis = $5,
 					length = $6, display = $7, group_by = $8, aggregator = $9, distincted = $10,
@@ -127,7 +127,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 				return err
 			}
 		} else {
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				INSERT INTO app.column (
 					id, %s_id, attribute_id, index, position, batch, basis, length,
 					display, group_by, aggregator, distincted, hidden, on_mobile,
@@ -143,13 +143,13 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 		}
 
 		if c.SubQuery {
-			if err := query.Set_tx(tx, "column", c.Id, 0, 0, c.Query); err != nil {
+			if err := query.Set_tx(ctx, tx, "column", c.Id, 0, 0, c.Query); err != nil {
 				return err
 			}
 		}
 
 		// set captions
-		if err := caption.Set_tx(tx, c.Id, c.Captions); err != nil {
+		if err := caption.Set_tx(ctx, tx, c.Id, c.Captions); err != nil {
 			return err
 		}
 	}

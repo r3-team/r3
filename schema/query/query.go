@@ -1,6 +1,7 @@
 package query
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/db"
@@ -37,7 +38,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 		`, filterPosition, filterSide)
 	}
 
-	err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+	err := db.Pool.QueryRow(context.Background(), fmt.Sprintf(`
 		SELECT id, relation_id, fixed_limit
 		FROM app.query
 		WHERE %s_id = $1
@@ -54,7 +55,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	}
 
 	// retrieve joins
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT relation_id, attribute_id, index_from, index, connector,
 			apply_create, apply_update, apply_delete
 		FROM app.query_join
@@ -64,20 +65,18 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	if err != nil {
 		return q, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var j types.QueryJoin
 
-		if err := rows.Scan(&j.RelationId, &j.AttributeId, &j.IndexFrom,
-			&j.Index, &j.Connector, &j.ApplyCreate, &j.ApplyUpdate,
-			&j.ApplyDelete); err != nil {
+		if err := rows.Scan(&j.RelationId, &j.AttributeId, &j.IndexFrom, &j.Index,
+			&j.Connector, &j.ApplyCreate, &j.ApplyUpdate, &j.ApplyDelete); err != nil {
 
-			rows.Close()
 			return q, err
 		}
 		q.Joins = append(q.Joins, j)
 	}
-	rows.Close()
 
 	// retrieve filters
 	q.Filters, err = getFilters(q.Id, pgtype.UUID{})
@@ -86,7 +85,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	}
 
 	// retrieve orderings
-	rows, err = db.Pool.Query(db.Ctx, `
+	rows, err = db.Pool.Query(context.Background(), `
 		SELECT attribute_id, index, ascending
 		FROM app.query_order
 		WHERE query_id = $1
@@ -95,20 +94,19 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	if err != nil {
 		return q, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var o types.QueryOrder
 
 		if err := rows.Scan(&o.AttributeId, &o.Index, &o.Ascending); err != nil {
-			rows.Close()
 			return q, err
 		}
 		q.Orders = append(q.Orders, o)
 	}
-	rows.Close()
 
 	// retrieve lookups
-	rows, err = db.Pool.Query(db.Ctx, `
+	rows, err = db.Pool.Query(context.Background(), `
 		SELECT pg_index_id, index
 		FROM app.query_lookup
 		WHERE query_id = $1
@@ -117,20 +115,19 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	if err != nil {
 		return q, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var l types.QueryLookup
 
 		if err := rows.Scan(&l.PgIndexId, &l.Index); err != nil {
-			rows.Close()
 			return q, err
 		}
 		q.Lookups = append(q.Lookups, l)
 	}
-	rows.Close()
 
 	// retrieve choices
-	rows, err = db.Pool.Query(db.Ctx, `
+	rows, err = db.Pool.Query(context.Background(), `
 		SELECT id, name
 		FROM app.query_choice
 		WHERE query_id = $1
@@ -139,28 +136,25 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	if err != nil {
 		return q, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var c types.QueryChoice
 
 		if err := rows.Scan(&c.Id, &c.Name); err != nil {
-			rows.Close()
 			return q, err
 		}
 		q.Choices = append(q.Choices, c)
 	}
-	rows.Close()
 
 	for i, c := range q.Choices {
 		c.Filters, err = getFilters(q.Id, pgtype.UUID{Bytes: c.Id, Valid: true})
 		if err != nil {
-			rows.Close()
 			return q, err
 		}
 
 		c.Captions, err = caption.Get("query_choice", c.Id, []string{"queryChoiceTitle"})
 		if err != nil {
-			rows.Close()
 			return q, err
 		}
 		q.Choices[i] = c
@@ -168,7 +162,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	return q, nil
 }
 
-func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
+func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 	filterSide int, query types.Query) error {
 
 	if !slices.Contains(allowedEntities, entity) {
@@ -193,7 +187,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 	var queryIdExisting pgtype.UUID
 
 	if !subQuery {
-		if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+		if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
 			SELECT id
 			FROM app.query
 			WHERE %s_id = $1
@@ -201,7 +195,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 			return err
 		}
 	} else {
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			SELECT id
 			FROM app.query
 			WHERE query_filter_query_id = $1
@@ -218,7 +212,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 	} else {
 		// query exists - delete if it was remade (different ID) or is not required anymore (query without a base relation)
 		if query.Id.String() != string(queryIdExisting.Bytes[:]) || noBaseRelation {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				DELETE FROM app.query
 				WHERE id = $1
 			`, queryIdExisting); err != nil {
@@ -236,14 +230,14 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 	// create or update query
 	if createNew {
 		if !subQuery {
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				INSERT INTO app.query (id, relation_id, fixed_limit, %s_id)
 				VALUES ($1,$2,$3,$4)
 			`, entity), query.Id, query.RelationId, query.FixedLimit, entityId); err != nil {
 				return err
 			}
 		} else {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO app.query (id, relation_id, fixed_limit,
 					query_filter_query_id, query_filter_position, query_filter_side)
 				VALUES ($1,$2,$3,$4,$5,$6)
@@ -254,7 +248,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 			}
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.query
 			SET relation_id = $1, fixed_limit = $2
 			WHERE id = $3
@@ -264,7 +258,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 	}
 
 	// reset joins
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.query_join
 		WHERE query_id = $1
 	`, query.Id); err != nil {
@@ -277,7 +271,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 			return errors.New("invalid join connector")
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.query_join (
 				query_id, relation_id, attribute_id, position, index_from,
 				index, connector, apply_create, apply_update, apply_delete
@@ -292,18 +286,18 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 	}
 
 	// reset filters
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.query_filter
 		WHERE query_id = $1
 	`, query.Id); err != nil {
 		return err
 	}
-	if err := setFilters_tx(tx, query.Id, pgtype.UUID{}, query.Filters, 0); err != nil {
+	if err := setFilters_tx(ctx, tx, query.Id, pgtype.UUID{}, query.Filters, 0); err != nil {
 		return err
 	}
 
 	// reset ordering
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.query_order
 		WHERE query_id = $1
 	`, query.Id); err != nil {
@@ -312,7 +306,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 
 	for position, o := range query.Orders {
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.query_order (
 				query_id, attribute_id, position, index, ascending
 			)
@@ -323,7 +317,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 	}
 
 	// reset lookups
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.query_lookup
 		WHERE query_id = $1
 	`, query.Id); err != nil {
@@ -332,7 +326,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 
 	for _, l := range query.Lookups {
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.query_lookup (query_id, pg_index_id, index)
 			VALUES ($1,$2,$3)
 		`, query.Id, l.PgIndexId, l.Index); err != nil {
@@ -341,7 +335,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 	}
 
 	// reset choices
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.query_choice
 		WHERE query_id = $1
 	`, query.Id); err != nil {
@@ -357,7 +351,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 			}
 		}
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.query_choice (id, query_id, name, position)
 			VALUES ($1,$2,$3,$4)
 		`, c.Id, query.Id, c.Name, position); err != nil {
@@ -369,12 +363,12 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 		//  (necessary as query ID + position is used as PK
 		positionOffset := (position + 1) * 100
 
-		if err := setFilters_tx(tx, query.Id, pgtype.UUID{Bytes: c.Id, Valid: true},
+		if err := setFilters_tx(ctx, tx, query.Id, pgtype.UUID{Bytes: c.Id, Valid: true},
 			c.Filters, positionOffset); err != nil {
 
 			return err
 		}
-		if err := caption.Set_tx(tx, c.Id, c.Captions); err != nil {
+		if err := caption.Set_tx(ctx, tx, c.Id, c.Captions); err != nil {
 			return err
 		}
 	}
@@ -394,7 +388,13 @@ func getFilters(queryId uuid.UUID, queryChoiceId pgtype.UUID) ([]types.QueryFilt
 	}
 
 	// get filters
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	type typeFilterPos struct {
+		filter   types.QueryFilter
+		position int
+	}
+	filterPos := make([]typeFilterPos, 0)
+
+	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 		SELECT connector, operator, position
 		FROM app.query_filter
 		WHERE query_id = $1
@@ -404,12 +404,7 @@ func getFilters(queryId uuid.UUID, queryChoiceId pgtype.UUID) ([]types.QueryFilt
 	if err != nil {
 		return filters, err
 	}
-
-	type typeFilterPos struct {
-		filter   types.QueryFilter
-		position int
-	}
-	filterPos := make([]typeFilterPos, 0)
+	defer rows.Close()
 
 	for rows.Next() {
 		var fp typeFilterPos
@@ -419,7 +414,6 @@ func getFilters(queryId uuid.UUID, queryChoiceId pgtype.UUID) ([]types.QueryFilt
 		}
 		filterPos = append(filterPos, fp)
 	}
-	rows.Close()
 
 	for _, fp := range filterPos {
 
@@ -439,7 +433,7 @@ func getFilterSide(queryId uuid.UUID, filterPosition int, side int) (types.Query
 	var s types.QueryFilterSide
 	var err error
 
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(context.Background(), `
 		SELECT attribute_id, attribute_index, attribute_nested, brackets,
 			collection_id, column_id, content, field_id, now_offset, preset_id,
 			role_id, variable_id, query_aggregator, value
@@ -466,7 +460,7 @@ func getFilterSide(queryId uuid.UUID, filterPosition int, side int) (types.Query
 	return s, nil
 }
 
-func setFilters_tx(tx pgx.Tx, queryId uuid.UUID, queryChoiceId pgtype.UUID,
+func setFilters_tx(ctx context.Context, tx pgx.Tx, queryId uuid.UUID, queryChoiceId pgtype.UUID,
 	filters []types.QueryFilter, positionOffset int) error {
 
 	for position, f := range filters {
@@ -481,7 +475,7 @@ func setFilters_tx(tx pgx.Tx, queryId uuid.UUID, queryChoiceId pgtype.UUID,
 
 		position += positionOffset
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.query_filter (query_id, query_choice_id,
 				position, connector, operator)
 			VALUES ($1,$2,$3,$4,$5)
@@ -489,19 +483,19 @@ func setFilters_tx(tx pgx.Tx, queryId uuid.UUID, queryChoiceId pgtype.UUID,
 			return err
 		}
 
-		if err := SetFilterSide_tx(tx, queryId, position, 0, f.Side0); err != nil {
+		if err := SetFilterSide_tx(ctx, tx, queryId, position, 0, f.Side0); err != nil {
 			return err
 		}
-		if err := SetFilterSide_tx(tx, queryId, position, 1, f.Side1); err != nil {
+		if err := SetFilterSide_tx(ctx, tx, queryId, position, 1, f.Side1); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func SetFilterSide_tx(tx pgx.Tx, queryId uuid.UUID, filterPosition int,
+func SetFilterSide_tx(ctx context.Context, tx pgx.Tx, queryId uuid.UUID, filterPosition int,
 	side int, s types.QueryFilterSide) error {
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		INSERT INTO app.query_filter_side (
 			query_id, query_filter_position, side, attribute_id,
 			attribute_index, attribute_nested, brackets, collection_id,
@@ -518,7 +512,7 @@ func SetFilterSide_tx(tx pgx.Tx, queryId uuid.UUID, filterPosition int,
 	}
 
 	if s.Content == "subQuery" {
-		if err := Set_tx(tx, "query_filter_query", queryId,
+		if err := Set_tx(ctx, tx, "query_filter_query", queryId,
 			filterPosition, side, s.Query); err != nil {
 
 			return err

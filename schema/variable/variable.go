@@ -1,6 +1,7 @@
 package variable
 
 import (
+	"context"
 	"r3/db"
 	"r3/schema"
 	"r3/types"
@@ -9,15 +10,15 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Del_tx(tx pgx.Tx, id uuid.UUID) error {
-	_, err := tx.Exec(db.Ctx, `DELETE FROM app.variable WHERE id = $1`, id)
+func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
+	_, err := tx.Exec(ctx, `DELETE FROM app.variable WHERE id = $1`, id)
 	return err
 }
 
 func Get(moduleId uuid.UUID) ([]types.Variable, error) {
 
 	variables := make([]types.Variable, 0)
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT v.id, v.form_id, v.name, v.comment, v.content, v.content_use
 		FROM      app.variable  AS v
 		LEFT JOIN app.form      AS f ON f.id = v.form_id
@@ -29,6 +30,7 @@ func Get(moduleId uuid.UUID) ([]types.Variable, error) {
 	if err != nil {
 		return variables, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var v types.Variable
@@ -38,20 +40,19 @@ func Get(moduleId uuid.UUID) ([]types.Variable, error) {
 		}
 		variables = append(variables, v)
 	}
-	rows.Close()
 
 	return variables, nil
 }
 
-func Set_tx(tx pgx.Tx, v types.Variable) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, v types.Variable) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &v.Id, "variable", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &v.Id, "variable", "id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.variable
 			SET name = $1, comment = $2, content = $3, content_use = $4
 			WHERE id = $5
@@ -59,7 +60,7 @@ func Set_tx(tx pgx.Tx, v types.Variable) error {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.variable (id, module_id, form_id, name, comment, content, content_use)
 			VALUES ($1,$2,$3,$4,$5,$6,$7)
 		`, v.Id, v.ModuleId, v.FormId, v.Name, v.Comment, v.Content, v.ContentUse); err != nil {

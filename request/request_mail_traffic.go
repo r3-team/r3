@@ -1,13 +1,15 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"r3/db"
 	"r3/types"
+
+	"github.com/jackc/pgx/v5"
 )
 
-func MailTrafficGet(reqJson json.RawMessage) (interface{}, error) {
+func MailTrafficGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var (
 		req struct {
@@ -43,7 +45,7 @@ func MailTrafficGet(reqJson json.RawMessage) (interface{}, error) {
 		}
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT from_list, to_list, cc_list, bcc_list,
 			subject, outgoing, date, files, mail_account_id
 		FROM instance.mail_traffic
@@ -82,7 +84,7 @@ func MailTrafficGet(reqJson json.RawMessage) (interface{}, error) {
 		}
 	}
 
-	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+	if err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT COUNT(*)
 		FROM instance.mail_traffic
 		%s

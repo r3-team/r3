@@ -1,6 +1,7 @@
 package form
 
 import (
+	"context"
 	"r3/db"
 	"r3/schema"
 	"r3/schema/compatible"
@@ -14,7 +15,7 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 
 	states := make([]types.FormState, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, description
 		FROM app.form_state
 		WHERE form_id = $1
@@ -25,6 +26,7 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 	if err != nil {
 		return states, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var s types.FormState
@@ -34,7 +36,6 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 		}
 		states = append(states, s)
 	}
-	rows.Close()
 
 	for i, _ := range states {
 
@@ -54,7 +55,7 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, error) {
 	conditions := make([]types.FormStateCondition, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT position, connector, operator
 		FROM app.form_state_condition
 		WHERE form_state_id = $1
@@ -63,6 +64,7 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 	if err != nil {
 		return conditions, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var c types.FormStateCondition
@@ -71,7 +73,6 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 		}
 		conditions = append(conditions, c)
 	}
-	rows.Close()
 
 	for i, c := range conditions {
 		c.Side0, err = getStateConditionSide(formStateId, c.Position, 0)
@@ -90,7 +91,7 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 func getStateConditionSide(formStateId uuid.UUID, position int, side int) (types.FormStateConditionSide, error) {
 	var s types.FormStateConditionSide
 
-	err := db.Pool.QueryRow(db.Ctx, `
+	err := db.Pool.QueryRow(context.Background(), `
 		SELECT collection_id, column_id, field_id, preset_id,
 			role_id, variable_id, brackets, content, value
 		FROM app.form_state_condition_side
@@ -108,7 +109,7 @@ func getStateEffects(formStateId uuid.UUID) ([]types.FormStateEffect, error) {
 
 	effects := make([]types.FormStateEffect, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT field_id, form_action_id, tab_id, new_state
 		FROM app.form_state_effect
 		WHERE form_state_id = $1
@@ -130,14 +131,14 @@ func getStateEffects(formStateId uuid.UUID) ([]types.FormStateEffect, error) {
 }
 
 // set given form states, deletes non-specified states
-func setStates_tx(tx pgx.Tx, formId uuid.UUID, states []types.FormState) error {
+func setStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, states []types.FormState) error {
 
 	var err error
 	stateIds := make([]uuid.UUID, 0)
 
 	for _, s := range states {
 
-		s.Id, err = setState_tx(tx, formId, s)
+		s.Id, err = setState_tx(ctx, tx, formId, s)
 		if err != nil {
 			return err
 		}
@@ -145,7 +146,7 @@ func setStates_tx(tx pgx.Tx, formId uuid.UUID, states []types.FormState) error {
 	}
 
 	// remove non-specified states
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.form_state
 		WHERE form_id = $1
 		AND id <> ALL($2)
@@ -156,22 +157,22 @@ func setStates_tx(tx pgx.Tx, formId uuid.UUID, states []types.FormState) error {
 }
 
 // sets new/existing form state, returns form state ID
-func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID, error) {
+func setState_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID, error) {
 
-	known, err := schema.CheckCreateId_tx(tx, &state.Id, "form_state", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &state.Id, "form_state", "id")
 	if err != nil {
 		return state.Id, err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.form_state SET description = $1
 			WHERE id = $2
 		`, state.Description, state.Id); err != nil {
 			return state.Id, err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.form_state (id, form_id, description)
 			VALUES ($1,$2,$3)
 		`, state.Id, formId, state.Description); err != nil {
@@ -180,7 +181,7 @@ func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID,
 	}
 
 	// reset conditions
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.form_state_condition
 		WHERE form_state_id = $1
 	`, state.Id); err != nil {
@@ -192,7 +193,7 @@ func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID,
 		// fix legacy conditions format < 2.7
 		c = compatible.MigrateNewConditions(c)
 
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.form_state_condition (
 				form_state_id, position, connector, operator
 			)
@@ -200,16 +201,16 @@ func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID,
 		`, state.Id, i, c.Connector, c.Operator); err != nil {
 			return state.Id, err
 		}
-		if err := setStateConditionSide_tx(tx, state.Id, i, 0, c.Side0); err != nil {
+		if err := setStateConditionSide_tx(ctx, tx, state.Id, i, 0, c.Side0); err != nil {
 			return state.Id, err
 		}
-		if err := setStateConditionSide_tx(tx, state.Id, i, 1, c.Side1); err != nil {
+		if err := setStateConditionSide_tx(ctx, tx, state.Id, i, 1, c.Side1); err != nil {
 			return state.Id, err
 		}
 	}
 
 	// reset effects
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM app.form_state_effect
 		WHERE form_state_id = $1
 	`, state.Id); err != nil {
@@ -217,7 +218,7 @@ func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID,
 	}
 
 	for _, e := range state.Effects {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.form_state_effect (
 				form_state_id, field_id, form_action_id, tab_id, new_state
 			)
@@ -228,10 +229,10 @@ func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID,
 	}
 	return state.Id, nil
 }
-func setStateConditionSide_tx(tx pgx.Tx, formStateId uuid.UUID,
+func setStateConditionSide_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID,
 	position int, side int, s types.FormStateConditionSide) error {
 
-	_, err := tx.Exec(db.Ctx, `
+	_, err := tx.Exec(ctx, `
 		INSERT INTO app.form_state_condition_side (
 			form_state_id, form_state_condition_position, side,
 			collection_id, column_id, field_id, preset_id, role_id,

@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/schema/relation"
 	"r3/types"
@@ -9,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func RelationDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func RelationDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Id uuid.UUID `json:"id"`
 	}
@@ -17,40 +18,18 @@ func RelationDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, relation.Del_tx(tx, req.Id)
+	return nil, relation.Del_tx(ctx, tx, req.Id)
 }
 
-func RelationGet(reqJson json.RawMessage) (interface{}, error) {
-
-	var (
-		err error
-		req struct {
-			ModuleId uuid.UUID `json:"moduleId"`
-		}
-		res struct {
-			Relations []types.Relation `json:"relations"`
-		}
-	)
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	res.Relations, err = relation.Get(req.ModuleId)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func RelationSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func RelationSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.Relation
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, relation.Set_tx(tx, req)
+	return nil, relation.Set_tx(ctx, tx, req)
 }
 
-func RelationPreview(reqJson json.RawMessage) (interface{}, error) {
+func RelationPreview_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id     uuid.UUID `json:"id"`
@@ -61,5 +40,5 @@ func RelationPreview(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return relation.GetPreview(req.Id, req.Limit, req.Offset)
+	return relation.GetPreview(ctx, tx, req.Id, req.Limit, req.Offset)
 }

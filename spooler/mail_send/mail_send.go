@@ -34,7 +34,7 @@ func DoAll() error {
 	now := tools.GetTimeUnix()
 	mails := make([]types.Mail, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, to_list, cc_list, bcc_list, subject, body, attempt_count,
 			mail_account_id, record_id_wofk, attribute_id
 		FROM instance.mail_spool
@@ -45,6 +45,7 @@ func DoAll() error {
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var m types.Mail
@@ -57,7 +58,6 @@ func DoAll() error {
 		}
 		mails = append(mails, m)
 	}
-	rows.Close()
 
 	log.Info("mail", fmt.Sprintf("found %d messages to be sent", len(mails)))
 
@@ -69,7 +69,7 @@ func DoAll() error {
 			log.Error("mail", fmt.Sprintf("is unable to send (attempt %d)",
 				m.AttemptCount+1), err)
 
-			if _, err := db.Pool.Exec(db.Ctx, `
+			if _, err := db.Pool.Exec(context.Background(), `
 				UPDATE instance.mail_spool
 				SET attempt_count = $1, attempt_date = $2
 				WHERE id = $3
@@ -82,7 +82,7 @@ func DoAll() error {
 		// everything went well, delete spool entry
 		log.Info("mail", "successfully sent message")
 
-		if _, err := db.Pool.Exec(db.Ctx, `
+		if _, err := db.Pool.Exec(context.Background(), `
 			DELETE FROM instance.mail_spool
 			WHERE id = $1
 		`, m.Id); err != nil {
@@ -169,8 +169,9 @@ func do(m types.Mail) error {
 			return fmt.Errorf("cannot attach file(s) from non-file attribute %s",
 				m.AttributeId.Bytes)
 		}
+		files := make([]types.DataGetValueFile, 0)
 
-		rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+		rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 			SELECT r.file_id, r.name, (
 				SELECT MAX(v.version)
 				FROM  instance.file_version AS v
@@ -184,7 +185,7 @@ func do(m types.Mail) error {
 		if err != nil {
 			return err
 		}
-		files := make([]types.DataGetValueFile, 0)
+		defer rows.Close()
 
 		for rows.Next() {
 			var f types.DataGetValueFile
@@ -193,7 +194,6 @@ func do(m types.Mail) error {
 			}
 			files = append(files, f)
 		}
-		rows.Close()
 
 		for _, f := range files {
 			filePath := data.GetFilePathVersion(f.Id, f.Version)
@@ -256,16 +256,14 @@ func do(m types.Mail) error {
 	}
 
 	// add to mail traffic log
-	if _, err := db.Pool.Exec(db.Ctx, `
+	_, err = db.Pool.Exec(context.Background(), `
 		INSERT INTO instance.mail_traffic (from_list, to_list, cc_list,
 			subject, date, files, mail_account_id, outgoing)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,TRUE)
 	`, m.FromList, m.ToList, m.CcList, m.Subject,
-		tools.GetTimeUnix(), fileList, m.AccountId); err != nil {
+		tools.GetTimeUnix(), fileList, m.AccountId)
 
-		return err
-	}
-	return nil
+	return err
 }
 
 // helper

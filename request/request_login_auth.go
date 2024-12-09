@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/login/login_auth"
 	"r3/types"
@@ -11,7 +12,7 @@ import (
 // attempt login via user credentials
 // applies login ID, admin and no auth state to provided parameters if successful
 // returns token and success state
-func LoginAuthUser(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth *bool) (interface{}, error) {
+func LoginAuthUser(ctx context.Context, reqJson json.RawMessage, loginId *int64, admin *bool, noAuth *bool) (interface{}, error) {
 
 	var (
 		err error
@@ -39,7 +40,7 @@ func LoginAuthUser(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth 
 	}
 
 	res.LoginName, res.Token, res.SaltKdf, res.MfaTokens, err = login_auth.User(
-		req.Username, req.Password, req.MfaTokenId, req.MfaTokenPin, loginId, admin, noAuth)
+		ctx, req.Username, req.Password, req.MfaTokenId, req.MfaTokenPin, loginId, admin, noAuth)
 
 	if err != nil {
 		return nil, err
@@ -50,7 +51,7 @@ func LoginAuthUser(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth 
 
 // attempt login via JWT
 // applies login ID, admin and no auth state to provided parameters if successful
-func LoginAuthToken(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth *bool) (interface{}, error) {
+func LoginAuthToken(ctx context.Context, reqJson json.RawMessage, loginId *int64, admin *bool, noAuth *bool) (interface{}, error) {
 
 	var (
 		err error
@@ -67,7 +68,7 @@ func LoginAuthToken(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth
 		return nil, err
 	}
 
-	res.LoginName, err = login_auth.Token(req.Token, loginId, admin, noAuth)
+	res.LoginName, err = login_auth.Token(ctx, req.Token, loginId, admin, noAuth)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +78,7 @@ func LoginAuthToken(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth
 }
 
 // attempt login via fixed token
-func LoginAuthTokenFixed(reqJson json.RawMessage, loginId *int64) (interface{}, error) {
+func LoginAuthTokenFixed(ctx context.Context, reqJson json.RawMessage, loginId *int64) (interface{}, error) {
 
 	var (
 		req struct {
@@ -93,7 +94,7 @@ func LoginAuthTokenFixed(reqJson json.RawMessage, loginId *int64) (interface{}, 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := login_auth.TokenFixed(req.LoginId, "client", req.TokenFixed, &res.LanguageCode, &res.Token); err != nil {
+	if err := login_auth.TokenFixed(ctx, req.LoginId, "client", req.TokenFixed, &res.LanguageCode, &res.Token); err != nil {
 		return nil, err
 	}
 	*loginId = req.LoginId

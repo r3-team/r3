@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"fmt"
 	"r3/db"
 	"r3/types"
@@ -31,12 +32,10 @@ func GetOauthClient(id int32) (types.OauthClient, error) {
 }
 
 func LoadOauthClientMap() error {
-	oauthClient_mx.Lock()
-	defer oauthClient_mx.Unlock()
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
 
-	oauthClientIdMap = make(map[int32]types.OauthClient)
-
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(ctx, `
 		SELECT id, name, client_id, client_secret, date_expiry, scopes, tenant, token_url
 		FROM instance.oauth_client
 	`)
@@ -44,6 +43,10 @@ func LoadOauthClientMap() error {
 		return err
 	}
 	defer rows.Close()
+
+	oauthClient_mx.Lock()
+	defer oauthClient_mx.Unlock()
+	oauthClientIdMap = make(map[int32]types.OauthClient)
 
 	for rows.Next() {
 		var c types.OauthClient

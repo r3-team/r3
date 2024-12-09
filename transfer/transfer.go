@@ -5,6 +5,7 @@ package transfer
 
 import (
 	"archive/zip"
+	"context"
 	"crypto"
 	"crypto/rsa"
 	"crypto/sha256"
@@ -20,7 +21,6 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/config/module_meta"
-	"r3/db"
 	"r3/tools"
 	"r3/types"
 	"sync"
@@ -38,7 +38,7 @@ func StoreExportKey(key string) {
 	exportKey = key
 }
 
-func AddVersion_tx(tx pgx.Tx, moduleId uuid.UUID) error {
+func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
@@ -61,22 +61,20 @@ func AddVersion_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 		return err
 	}
 
-	if err := module_meta.SetHash_tx(tx, moduleId, hashedStr); err != nil {
+	if err := module_meta.SetHash_tx(ctx, tx, moduleId, hashedStr); err != nil {
 		return err
 	}
 
-	if _, err := tx.Exec(db.Ctx, `
+	_, err = tx.Exec(ctx, `
 		UPDATE app.module
 		SET release_build_app = $1, release_build = $2,
 			release_date = $3
 		WHERE id = $4
 	`, file.Content.Module.ReleaseBuildApp,
 		file.Content.Module.ReleaseBuild,
-		file.Content.Module.ReleaseDate, moduleId); err != nil {
+		file.Content.Module.ReleaseDate, moduleId)
 
-		return err
-	}
-	return nil
+	return err
 }
 
 // start with 1 module and check whether it or its dependend upon modules had changed

@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/db"
@@ -23,7 +24,7 @@ func GetOne(entity string, entityId uuid.UUID, content string) (types.Collection
 		return c, errors.New("invalid collection consumer entity")
 	}
 
-	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+	if err := db.Pool.QueryRow(context.Background(), fmt.Sprintf(`
 		SELECT id, collection_id, column_id_display, 
 			multi_value, no_display_empty, on_mobile
 		FROM app.collection_consumer
@@ -48,7 +49,7 @@ func Get(entity string, entityId uuid.UUID, content string) ([]types.CollectionC
 		return consumers, errors.New("invalid collection consumer entity")
 	}
 
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
 		SELECT id, collection_id, column_id_display,
 			multi_value, no_display_empty, on_mobile
 		FROM app.collection_consumer
@@ -63,27 +64,28 @@ func Get(entity string, entityId uuid.UUID, content string) ([]types.CollectionC
 	for rows.Next() {
 		var c types.CollectionConsumer
 
-		if err := rows.Scan(&c.Id, &c.CollectionId, &c.ColumnIdDisplay,
-			&c.MultiValue, &c.NoDisplayEmpty, &c.OnMobile); err != nil {
-
-			return consumers, err
-		}
-		c.OpenForm, err = openForm.Get("collection_consumer", c.Id, pgtype.Text{})
-		if err != nil {
+		if err := rows.Scan(&c.Id, &c.CollectionId, &c.ColumnIdDisplay, &c.MultiValue, &c.NoDisplayEmpty, &c.OnMobile); err != nil {
 			return consumers, err
 		}
 		consumers = append(consumers, c)
 	}
+
+	for i, c := range consumers {
+		consumers[i].OpenForm, err = openForm.Get("collection_consumer", c.Id, pgtype.Text{})
+		if err != nil {
+			return consumers, err
+		}
+	}
 	return consumers, nil
 }
-func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, content string,
+func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, content string,
 	consumers []types.CollectionConsumer) error {
 
 	if !slices.Contains(entitiesAllowed, entity) {
 		return errors.New("invalid collection consumer entity")
 	}
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM app.collection_consumer
 		WHERE %s_id   = $1
 		AND   content = $2
@@ -105,7 +107,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, content string,
 		}
 
 		if entity == "collection" {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO app.collection_consumer (id, collection_id,
 					column_id_display, content, multi_value, no_display_empty,
 					on_mobile)
@@ -116,7 +118,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, content string,
 				return err
 			}
 		} else {
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				INSERT INTO app.collection_consumer (id, collection_id, %s_id, 
 					column_id_display, content, multi_value, no_display_empty,
 					on_mobile)
@@ -128,7 +130,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, content string,
 			}
 		}
 
-		if err := openForm.Set_tx(tx, "collection_consumer",
+		if err := openForm.Set_tx(ctx, tx, "collection_consumer",
 			c.Id, c.OpenForm, pgtype.Text{}); err != nil {
 
 			return err

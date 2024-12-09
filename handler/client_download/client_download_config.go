@@ -1,12 +1,14 @@
 package client_download
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"r3/bruteforce"
 	"r3/config"
 	"r3/handler"
 	"r3/login/login_auth"
+	"time"
 
 	"github.com/gofrs/uuid"
 )
@@ -21,16 +23,21 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 	// get authentication token
 	token, err := handler.ReadGetterFromUrl(r, "token")
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
+
+	ctx, ctxCanc := context.WithTimeout(context.Background(),
+		time.Duration(int64(config.GetUint64("dbTimeoutDataWs")))*time.Second)
+
+	defer ctxCanc()
 
 	// check token
 	var loginId int64
 	var admin bool
 	var noAuth bool
-	if _, err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrAuthFailed)
+	if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+		handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}
@@ -38,32 +45,32 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 	// parse getters
 	tokenFixed, err := handler.ReadGetterFromUrl(r, "tokenFixed")
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
 	hostName, err := handler.ReadGetterFromUrl(r, "hostName")
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
 	hostPort, err := handler.ReadInt64GetterFromUrl(r, "hostPort")
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
 	languageCode, err := handler.ReadGetterFromUrl(r, "languageCode")
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
 	deviceName, err := handler.ReadGetterFromUrl(r, "deviceName")
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
 	ssl, err := handler.ReadInt64GetterFromUrl(r, "ssl")
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
 
@@ -109,12 +116,12 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 
 	fJson, err := json.MarshalIndent(f, "", "\t")
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
 
 	if _, err := w.Write(fJson); err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 		return
 	}
 }

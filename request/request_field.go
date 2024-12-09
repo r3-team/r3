@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/schema/field"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func FieldDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func FieldDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id uuid.UUID `json:"id"`
@@ -17,8 +18,5 @@ func FieldDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := field.Del_tx(tx, req.Id); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return nil, field.Del_tx(ctx, tx, req.Id)
 }

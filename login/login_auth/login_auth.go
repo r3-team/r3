@@ -1,6 +1,7 @@
 package login_auth
 
 import (
+	"context"
 	"database/sql"
 	"encoding/base32"
 	"errors"
@@ -64,7 +65,7 @@ func createToken(loginId int64, username string, admin bool, noAuth bool, tokenE
 
 // performs authentication attempt for user by using username, password and MFA PINs (if used)
 // returns login name, JWT, KDF salt, MFA token list (if MFA is required)
-func User(username string, password string, mfaTokenId pgtype.Int4,
+func User(ctx context.Context, username string, password string, mfaTokenId pgtype.Int4,
 	mfaTokenPin pgtype.Text, grantLoginId *int64, grantAdmin *bool,
 	grantNoAuth *bool) (string, string, string, []types.LoginMfaToken, error) {
 
@@ -87,7 +88,7 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 	var nameDisplay pgtype.Text
 	var tokenExpiryHours pgtype.Int4
 
-	err := db.Pool.QueryRow(db.Ctx, `
+	err := db.Pool.QueryRow(ctx, `
 		SELECT l.id, l.ldap_id, l.salt, l.hash, l.salt_kdf, l.admin,
 			l.no_auth, l.limited, l.token_expiry_hours, lm.name_display
 		FROM      instance.login      AS l
@@ -135,7 +136,7 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 
 		// validate provided MFA token
 		var mfaToken []byte
-		if err := db.Pool.QueryRow(db.Ctx, `
+		if err := db.Pool.QueryRow(ctx, `
 			SELECT token
 			FROM instance.login_token_fixed
 			WHERE login_id = $1
@@ -153,7 +154,7 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 
 	} else {
 		// get available MFA tokens
-		rows, err := db.Pool.Query(db.Ctx, `
+		rows, err := db.Pool.Query(ctx, `
 			SELECT id, name
 			FROM instance.login_token_fixed
 			WHERE login_id = $1
@@ -200,7 +201,7 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 
 // performs authentication attempt for user by using existing JWT token, signed by server
 // returns username
-func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *bool) (string, error) {
+func Token(ctx context.Context, token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *bool) (string, error) {
 
 	if token == "" {
 		return "", errors.New("empty token")
@@ -226,7 +227,7 @@ func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *boo
 	var nameDisplay pgtype.Text
 	var limited bool
 
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(ctx, `
 		SELECT l.name, lm.name_display, l.active, l.limited
 		FROM      instance.login      AS l
 		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
@@ -254,7 +255,7 @@ func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *boo
 // performs authentication for user by using fixed (permanent) token
 // used for application access (like ICS download or fat-client access)
 // cannot grant admin access
-func TokenFixed(loginId int64, context string, tokenFixed string, grantLanguageCode *string, grantToken *string) error {
+func TokenFixed(ctx context.Context, loginId int64, context string, tokenFixed string, grantLanguageCode *string, grantToken *string) error {
 
 	if tokenFixed == "" {
 		return errors.New("empty token")
@@ -268,7 +269,7 @@ func TokenFixed(loginId int64, context string, tokenFixed string, grantLanguageC
 	// check for existing token
 	languageCode := ""
 	username := ""
-	err := db.Pool.QueryRow(db.Ctx, `
+	err := db.Pool.QueryRow(ctx, `
 		SELECT s.language_code, l.name
 		FROM instance.login_token_fixed AS t
 		INNER JOIN instance.login_setting AS s ON s.login_id = t.login_id

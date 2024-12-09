@@ -1,16 +1,16 @@
 package schema
 
 import (
+	"context"
 	"fmt"
-	"r3/db"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
-func GetModuleNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
+func GetModuleNameById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (string, error) {
 	var name string
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT name
 		FROM app.module
 		WHERE id = $1
@@ -19,10 +19,10 @@ func GetModuleNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
 	}
 	return name, nil
 }
-func GetModuleDetailsByRelationId_tx(tx pgx.Tx, id uuid.UUID) (uuid.UUID, string, error) {
+func GetModuleDetailsByRelationId_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (uuid.UUID, string, error) {
 	var moduleId uuid.UUID
 	var name string
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT id, name
 		FROM app.module
 		WHERE id = (
@@ -37,9 +37,9 @@ func GetModuleDetailsByRelationId_tx(tx pgx.Tx, id uuid.UUID) (uuid.UUID, string
 }
 
 // returns module and relation names for given relation ID
-func GetRelationNamesById_tx(tx pgx.Tx, id uuid.UUID) (string, string, error) {
+func GetRelationNamesById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (string, string, error) {
 	var moduleName, name string
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT r.name, m.name
 		FROM app.relation AS r
 		INNER JOIN app.module AS m ON m.id = r.module_id
@@ -49,10 +49,10 @@ func GetRelationNamesById_tx(tx pgx.Tx, id uuid.UUID) (string, string, error) {
 	}
 	return moduleName, name, nil
 }
-func GetRelationDetailsById_tx(tx pgx.Tx, id uuid.UUID) (string, bool, error) {
+func GetRelationDetailsById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (string, bool, error) {
 	var name string
 	var encryption bool
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT name, encryption
 		FROM app.relation
 		WHERE id = $1
@@ -63,11 +63,11 @@ func GetRelationDetailsById_tx(tx pgx.Tx, id uuid.UUID) (string, bool, error) {
 }
 
 // returns module, relation and attribute names as well as attribute content for given attribute ID
-func GetAttributeDetailsById_tx(tx pgx.Tx, id uuid.UUID) (string,
+func GetAttributeDetailsById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (string,
 	string, string, string, error) {
 
 	var moduleName, relationName, name, content string
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT m.name, r.name, a.name, a.content
 		FROM app.attribute AS a
 		INNER JOIN app.relation AS r ON r.id = a.relation_id
@@ -78,9 +78,9 @@ func GetAttributeDetailsById_tx(tx pgx.Tx, id uuid.UUID) (string,
 	}
 	return moduleName, relationName, name, content, nil
 }
-func GetAttributeNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
+func GetAttributeNameById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (string, error) {
 	var name string
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT name
 		FROM app.attribute
 		WHERE id = $1
@@ -89,9 +89,9 @@ func GetAttributeNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
 	}
 	return name, nil
 }
-func GetAttributeContentByRelationPk_tx(tx pgx.Tx, relationId uuid.UUID) (string, error) {
+func GetAttributeContentByRelationPk_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) (string, error) {
 	var content string
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT content
 		FROM app.attribute
 		WHERE relation_id = $1
@@ -103,9 +103,9 @@ func GetAttributeContentByRelationPk_tx(tx pgx.Tx, relationId uuid.UUID) (string
 	return content, nil
 }
 
-func GetFormNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
+func GetFormNameById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (string, error) {
 	var name string
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT name
 		FROM app.form
 		WHERE id = $1
@@ -116,9 +116,9 @@ func GetFormNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
 }
 
 // returns module and PG function names+arguments for given PG function ID
-func GetPgFunctionNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
+func GetPgFunctionNameById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (string, error) {
 	var name string
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT name
 		FROM app.pg_function
 		WHERE id = $1
@@ -127,10 +127,10 @@ func GetPgFunctionNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
 	}
 	return name, nil
 }
-func GetPgFunctionDetailsById_tx(tx pgx.Tx, id uuid.UUID) (string, string, string, bool, error) {
+func GetPgFunctionDetailsById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (string, string, string, bool, error) {
 	var moduleName, name, args string
 	var isTrigger bool
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT f.name, f.code_args, f.is_trigger, m.name
 		FROM app.pg_function AS f
 		INNER JOIN app.module AS m ON m.id = f.module_id
@@ -142,9 +142,9 @@ func GetPgFunctionDetailsById_tx(tx pgx.Tx, id uuid.UUID) (string, string, strin
 }
 
 // returns module and relation names for given PG trigger ID
-func GetPgTriggerNamesById_tx(tx pgx.Tx, id uuid.UUID) (string, string, error) {
+func GetPgTriggerNamesById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (string, string, error) {
 	var moduleName, relationName string
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT r.name, m.name
 		FROM app.pg_trigger AS t
 		INNER JOIN app.relation AS r ON r.id = t.relation_id
@@ -157,9 +157,9 @@ func GetPgTriggerNamesById_tx(tx pgx.Tx, id uuid.UUID) (string, string, error) {
 }
 
 // returns module and relation names for given PG index ID
-func GetPgIndexNamesById_tx(tx pgx.Tx, id uuid.UUID) (string, string, error) {
+func GetPgIndexNamesById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (string, string, error) {
 	var moduleName, relationName string
-	if err := tx.QueryRow(db.Ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT r.name, m.name
 		FROM app.pg_index AS i
 		INNER JOIN app.relation AS r ON r.id = i.relation_id

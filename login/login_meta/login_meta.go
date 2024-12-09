@@ -1,6 +1,7 @@
 package login_meta
 
 import (
+	"context"
 	"r3/db"
 	"r3/types"
 
@@ -24,15 +25,15 @@ func Get(id int64) (types.LoginMeta, error) {
 	return m, nil
 }
 
-func Set_tx(tx pgx.Tx, id int64, meta types.LoginMeta) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, id int64, meta types.LoginMeta) error {
 
 	var exists bool
-	if err := tx.QueryRow(db.Ctx, `SELECT EXISTS(SELECT login_id FROM instance.login_meta WHERE login_id = $1)`, id).Scan(&exists); err != nil {
+	if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT login_id FROM instance.login_meta WHERE login_id = $1)`, id).Scan(&exists); err != nil {
 		return err
 	}
 
 	if !exists {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO instance.login_meta (
 				login_id, email, department, location, name_display, name_fore, name_sur,
 				notes, organization, phone_fax, phone_landline, phone_mobile
@@ -45,7 +46,7 @@ func Set_tx(tx pgx.Tx, id int64, meta types.LoginMeta) error {
 			return err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE instance.login_meta
 			SET email = $1, department = $2, location = $3, name_display = $4, name_fore = $5,
 				name_sur = $6, notes = $7, organization = $8, phone_fax = $9, phone_landline = $10,

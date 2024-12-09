@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/transfer"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func TransferAddVersion_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func TransferAddVersion_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		ModuleId uuid.UUID `json:"moduleId"`
@@ -17,7 +18,7 @@ func TransferAddVersion_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, err
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, transfer.AddVersion_tx(tx, req.ModuleId)
+	return nil, transfer.AddVersion_tx(ctx, tx, req.ModuleId)
 }
 
 func TransferStoreExportKey(reqJson json.RawMessage) (interface{}, error) {

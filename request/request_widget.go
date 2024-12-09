@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/schema/widget"
 	"r3/types"
@@ -9,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func WidgetDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func WidgetDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id uuid.UUID `json:"id"`
@@ -17,14 +18,14 @@ func WidgetDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, widget.Del_tx(tx, req.Id)
+	return nil, widget.Del_tx(ctx, tx, req.Id)
 }
 
-func WidgetSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func WidgetSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req types.Widget
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, widget.Set_tx(tx, req)
+	return nil, widget.Set_tx(ctx, tx, req)
 }

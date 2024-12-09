@@ -1,6 +1,7 @@
 package form
 
 import (
+	"context"
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
@@ -13,7 +14,7 @@ import (
 func getActions(formId uuid.UUID) ([]types.FormAction, error) {
 	actions := make([]types.FormAction, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, js_function_id, icon_id, state, color
 		FROM app.form_action
 		WHERE form_id = $1
@@ -29,21 +30,24 @@ func getActions(formId uuid.UUID) ([]types.FormAction, error) {
 		if err := rows.Scan(&a.Id, &a.JsFunctionId, &a.IconId, &a.State, &a.Color); err != nil {
 			return actions, err
 		}
-		a.Captions, err = caption.Get("form_action", a.Id, []string{"formActionTitle"})
+		actions = append(actions, a)
+	}
+
+	for i, a := range actions {
+		actions[i].Captions, err = caption.Get("form_action", a.Id, []string{"formActionTitle"})
 		if err != nil {
 			return actions, err
 		}
-		actions = append(actions, a)
 	}
 	return actions, nil
 }
 
-func setActions_tx(tx pgx.Tx, formId uuid.UUID, actions []types.FormAction) error {
+func setActions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, actions []types.FormAction) error {
 	var err error
 	actionIds := make([]uuid.UUID, 0)
 
 	for i, a := range actions {
-		a.Id, err = setAction_tx(tx, formId, a, i)
+		a.Id, err = setAction_tx(ctx, tx, formId, a, i)
 		if err != nil {
 			return err
 		}
@@ -51,25 +55,24 @@ func setActions_tx(tx pgx.Tx, formId uuid.UUID, actions []types.FormAction) erro
 	}
 
 	// remove non-specified actions
-	if _, err := tx.Exec(db.Ctx, `
+	_, err = tx.Exec(ctx, `
 		DELETE FROM app.form_action
 		WHERE form_id = $1
 		AND id <> ALL($2)
-	`, formId, actionIds); err != nil {
-		return err
-	}
-	return nil
+	`, formId, actionIds)
+
+	return err
 }
 
-func setAction_tx(tx pgx.Tx, formId uuid.UUID, a types.FormAction, position int) (uuid.UUID, error) {
+func setAction_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, a types.FormAction, position int) (uuid.UUID, error) {
 
-	known, err := schema.CheckCreateId_tx(tx, &a.Id, "form_action", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &a.Id, "form_action", "id")
 	if err != nil {
 		return a.Id, err
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE app.form_action
 			SET js_function_id = $1, icon_id = $2, position = $3, state = $4, color = $5
 			WHERE id = $6
@@ -77,14 +80,14 @@ func setAction_tx(tx pgx.Tx, formId uuid.UUID, a types.FormAction, position int)
 			return a.Id, err
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.form_action (id, form_id, js_function_id, icon_id, position, state, color)
 			VALUES ($1,$2,$3,$4,$5,$6,$7)
 		`, a.Id, formId, a.JsFunctionId, a.IconId, position, a.State, a.Color); err != nil {
 			return a.Id, err
 		}
 	}
-	if err := caption.Set_tx(tx, a.Id, a.Captions); err != nil {
+	if err := caption.Set_tx(ctx, tx, a.Id, a.Captions); err != nil {
 		return a.Id, err
 	}
 	return a.Id, nil

@@ -1,16 +1,17 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"r3/cache"
 	"r3/config"
-	"r3/db"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func lookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func lookupGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
 
 	var req struct {
 		Name string `json:"name"`
@@ -34,7 +35,7 @@ func lookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 
 	case "loginHasClient":
 		var hasClient bool
-		err := db.Pool.QueryRow(db.Ctx, `
+		err := tx.QueryRow(ctx, `
 			SELECT EXISTS(
 				SELECT *
 				FROM instance.login_token_fixed
@@ -53,7 +54,7 @@ func lookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 			Public           pgtype.Text `json:"public"`
 		}
 
-		err := db.Pool.QueryRow(db.Ctx, `
+		err := tx.QueryRow(ctx, `
 			SELECT key_private_enc, key_private_enc_backup, key_public
 			FROM instance.login
 			WHERE id = $1

@@ -1,16 +1,17 @@
 package login
 
 import (
+	"context"
 	"r3/db"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
-func getRoleIds(loginId int64) ([]uuid.UUID, error) {
+func getRoleIds(ctx context.Context, loginId int64) ([]uuid.UUID, error) {
 	roleIds := make([]uuid.UUID, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := db.Pool.Query(ctx, `
 		SELECT role_id
 		FROM instance.login_role
 		WHERE login_id = $1
@@ -30,9 +31,9 @@ func getRoleIds(loginId int64) ([]uuid.UUID, error) {
 	return roleIds, nil
 }
 
-func SetRoleLoginIds_tx(tx pgx.Tx, roleId uuid.UUID, loginIds []int64) error {
+func SetRoleLoginIds_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, loginIds []int64) error {
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.login_role
 		WHERE role_id = $1
 	`, roleId); err != nil {
@@ -40,7 +41,7 @@ func SetRoleLoginIds_tx(tx pgx.Tx, roleId uuid.UUID, loginIds []int64) error {
 	}
 
 	for _, loginId := range loginIds {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO instance.login_role (login_id, role_id)
 			VALUES ($1,$2)
 		`, loginId, roleId); err != nil {
@@ -50,9 +51,9 @@ func SetRoleLoginIds_tx(tx pgx.Tx, roleId uuid.UUID, loginIds []int64) error {
 	return nil
 }
 
-func setRoleIds_tx(tx pgx.Tx, loginId int64, roleIds []uuid.UUID) error {
+func setRoleIds_tx(ctx context.Context, tx pgx.Tx, loginId int64, roleIds []uuid.UUID) error {
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.login_role
 		WHERE login_id = $1
 	`, loginId); err != nil {
@@ -60,7 +61,7 @@ func setRoleIds_tx(tx pgx.Tx, loginId int64, roleIds []uuid.UUID) error {
 	}
 
 	for _, roleId := range roleIds {
-		if _, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO instance.login_role (login_id, role_id)
 			VALUES ($1,$2)
 		`, loginId, roleId); err != nil {

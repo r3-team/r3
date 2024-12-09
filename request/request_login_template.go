@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"r3/login/login_template"
 	"r3/types"
@@ -8,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func LoginTemplateDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func LoginTemplateDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Id int64 `json:"id"`
 	}
@@ -16,9 +17,9 @@ func LoginTemplateDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login_template.Del_tx(tx, req.Id)
+	return nil, login_template.Del_tx(ctx, tx, req.Id)
 }
-func LoginTemplateGet(reqJson json.RawMessage) (interface{}, error) {
+func LoginTemplateGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		ById int64 `json:"byId"`
 	}
@@ -26,13 +27,13 @@ func LoginTemplateGet(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return login_template.Get(req.ById)
+	return login_template.Get_tx(ctx, tx, req.ById)
 }
-func LoginTemplateSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func LoginTemplateSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.LoginTemplateAdmin
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return login_template.Set_tx(tx, req)
+	return login_template.Set_tx(ctx, tx, req)
 }

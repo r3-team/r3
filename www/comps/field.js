@@ -681,8 +681,16 @@ let MyField = {
 				}
 				
 				// if only alt attribute is set, field still needs primary attribute value (form log)
-				return this.values[this.fieldAttributeId] !== undefined
-					? this.values[this.fieldAttributeId] : null;
+				if(this.values[this.fieldAttributeId] === undefined)
+					return null;
+				
+				// apply fixed decimal length to newly loaded decimal numbers
+				if(this.notTouched && this.isDecimal && typeof this.values[this.fieldAttributeId] === 'number' && (
+					this.attribute.length !== 0 || this.attribute.lengthFract !== 0
+				)) {
+					return this.values[this.fieldAttributeId].toFixed(this.attribute.lengthFract);
+				}
+				return this.values[this.fieldAttributeId];
 			},
 			set(val,valOld) {
 				this.setValue(val,valOld,this.fieldAttributeId);
@@ -749,6 +757,10 @@ let MyField = {
 			if(s.isIframe)   out.push('iframe');
 			if(s.isReadonly) out.push('readonly');
 			if(s.isRichtext) out.push('richtext');
+
+			// for CSS overwrites for number fields
+			if(s.isInteger) out.push('integer');
+			if(s.isDecimal) out.push('decimal');
 			
 			if(s.isTextarea || s.isRichtext)   out.push('top-aligned');
 			if(s.isHeader && s.field.richtext) out.push('headerRichtext');

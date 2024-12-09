@@ -15,8 +15,17 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var Ctx = context.TODO()
-var Pool *pgxpool.Pool
+var (
+	Ctx  = context.Background()
+	Pool *pgxpool.Pool
+
+	// default context timeouts
+	CtxDefTimeoutDbTask   = 300 * time.Second // heavy DB operations (init/upgrade/relation retention cleanup)
+	CtxDefTimeoutLogWrite = 30 * time.Second  // writing to database log
+	CtxDefTimeoutPgFunc   = 240 * time.Second // executing plsql functions, to be replaced by config option
+	CtxDefTimeoutSysTask  = 30 * time.Second  // executing system tasks
+	CtxDefTimeoutTransfer = 600 * time.Second // executing module transfers, to be replaced by config option
+)
 
 // attempts to open a database connection
 // repeat attempts until successful or predefined time limit is reached

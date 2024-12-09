@@ -1,6 +1,7 @@
 package openForm
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"r3/db"
@@ -15,7 +16,7 @@ import (
 
 var entitiesAllowed = []string{"column", "collection_consumer", "field"}
 
-func Get(entity string, id uuid.UUID, context pgtype.Text) (f types.OpenForm, err error) {
+func Get(entity string, id uuid.UUID, formContext pgtype.Text) (f types.OpenForm, err error) {
 
 	if !slices.Contains(entitiesAllowed, entity) {
 		return f, errors.New("invalid open form entity")
@@ -25,12 +26,12 @@ func Get(entity string, id uuid.UUID, context pgtype.Text) (f types.OpenForm, er
 	sqlArgs = append(sqlArgs, id)
 
 	sqlWhere := "AND context IS NULL"
-	if context.Valid {
-		sqlArgs = append(sqlArgs, context.String)
+	if formContext.Valid {
+		sqlArgs = append(sqlArgs, formContext.String)
 		sqlWhere = "AND context = $2"
 	}
 
-	err = db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+	err = db.Pool.QueryRow(context.Background(), fmt.Sprintf(`
 		SELECT form_id_open, relation_index_open, attribute_id_apply,
 			relation_index_apply, pop_up_type, max_height, max_width
 		FROM app.open_form
@@ -51,7 +52,7 @@ func Get(entity string, id uuid.UUID, context pgtype.Text) (f types.OpenForm, er
 	return f, err
 }
 
-func Set_tx(tx pgx.Tx, entity string, id uuid.UUID, f types.OpenForm, context pgtype.Text) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, entity string, id uuid.UUID, f types.OpenForm, context pgtype.Text) error {
 
 	if !slices.Contains(entitiesAllowed, entity) {
 		return errors.New("invalid open form entity")
@@ -72,7 +73,7 @@ func Set_tx(tx pgx.Tx, entity string, id uuid.UUID, f types.OpenForm, context pg
 		sqlWhere = "AND context = $2"
 	}
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM app.open_form
 		WHERE %s_id = $1
 		%s
@@ -84,7 +85,7 @@ func Set_tx(tx pgx.Tx, entity string, id uuid.UUID, f types.OpenForm, context pg
 		return nil
 	}
 
-	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	_, err := tx.Exec(ctx, fmt.Sprintf(`
 		INSERT INTO app.open_form (
 			%s_id, context, form_id_open, relation_index_open, attribute_id_apply,
 			relation_index_apply, pop_up_type, max_height, max_width

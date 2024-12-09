@@ -3,6 +3,7 @@
 package rest_send
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -37,7 +38,7 @@ func DoAll() error {
 		anySuccess := false
 
 		// collect spooled REST calls
-		rows, err := db.Pool.Query(db.Ctx, `
+		rows, err := db.Pool.Query(context.Background(), `
 			SELECT id, pg_function_id_callback, method, headers,
 				url, body, callback_value, skip_verify
 			FROM instance.rest_spool
@@ -65,7 +66,7 @@ func DoAll() error {
 			if err := callExecute(c); err != nil {
 				log.Error("api", fmt.Sprintf("failed to execute REST call %s '%s'", c.method, c.url), err)
 
-				_, err := db.Pool.Exec(db.Ctx, `
+				_, err := db.Pool.Exec(context.Background(), `
 					UPDATE instance.rest_spool
 					SET attempt_count = attempt_count + 1
 					WHERE id = $1
@@ -112,13 +113,16 @@ func callExecute(c restCall) error {
 	defer httpRes.Body.Close()
 
 	// successfully executed
-	tx, err := db.Pool.Begin(db.Ctx)
+	// execute callback if enabled
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutPgFunc)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(db.Ctx)
+	defer tx.Rollback(ctx)
 
-	// execute callback if enabled
 	if c.pgFunctionIdCallback.Valid {
 		bodyRaw, err := io.ReadAll(httpRes.Body)
 		if err != nil {
@@ -134,7 +138,7 @@ func callExecute(c restCall) error {
 			return fmt.Errorf("unknown module '%s'", fnc.ModuleId)
 		}
 
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`SELECT "%s"."%s"($1,$2,$3)`,
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1,$2,$3)`,
 			mod.Name, fnc.Name), httpRes.StatusCode, bodyRaw, c.callbackValue); err != nil {
 
 			return err
@@ -142,11 +146,11 @@ func callExecute(c restCall) error {
 	}
 
 	// delete REST call from spooler
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.rest_spool
 		WHERE id = $1
 	`, c.id); err != nil {
 		return err
 	}
-	return tx.Commit(db.Ctx)
+	return tx.Commit(ctx)
 }

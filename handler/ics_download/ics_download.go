@@ -59,10 +59,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx, ctxCanc := context.WithTimeout(context.Background(),
+		time.Duration(int64(config.GetUint64("dbTimeoutIcs")))*time.Second)
+
+	defer ctxCanc()
+
 	// authenticate via fixed token
 	var languageCode string
 	var tokenNotUsed string
-	if err := login_auth.TokenFixed(loginId, "ics", tokenFixed, &languageCode, &tokenNotUsed); err != nil {
+	if err := login_auth.TokenFixed(ctx, loginId, "ics", tokenFixed, &languageCode, &tokenNotUsed); err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
@@ -190,11 +195,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get data
-	ctx, ctxCancel := context.WithTimeout(context.Background(),
-		time.Duration(int64(config.GetUint64("dbTimeoutIcs")))*time.Second)
-
-	defer ctxCancel()
-
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
@@ -219,7 +219,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		var modName string
 		var modNameParent string
 
-		if err := db.Pool.QueryRow(db.Ctx, `
+		if err := db.Pool.QueryRow(ctx, `
 			SELECT name, COALESCE((
 				SELECT name
 				FROM app.module

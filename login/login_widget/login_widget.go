@@ -1,7 +1,7 @@
 package login_widget
 
 import (
-	"r3/db"
+	"context"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -9,10 +9,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func Get(loginId int64) ([]types.LoginWidgetGroup, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, loginId int64) ([]types.LoginWidgetGroup, error) {
 	groups := make([]types.LoginWidgetGroup, 0)
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT g.id, g.title, w.widget_id, w.module_id, w.content
 		FROM instance.login_widget_group           AS g
 		LEFT JOIN instance.login_widget_group_item AS w ON w.login_widget_group_id = g.id
@@ -61,9 +61,9 @@ func Get(loginId int64) ([]types.LoginWidgetGroup, error) {
 	return groups, nil
 }
 
-func Set_tx(tx pgx.Tx, loginId int64, groups []types.LoginWidgetGroup) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, loginId int64, groups []types.LoginWidgetGroup) error {
 
-	if _, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.login_widget_group
 		WHERE login_id = $1
 	`, loginId); err != nil {
@@ -73,7 +73,7 @@ func Set_tx(tx pgx.Tx, loginId int64, groups []types.LoginWidgetGroup) error {
 	for posGroup, g := range groups {
 
 		var groupId uuid.UUID
-		if err := tx.QueryRow(db.Ctx, `
+		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.login_widget_group (login_id, title, position)
 			VALUES ($1,$2,$3)
 			RETURNING id
@@ -82,7 +82,7 @@ func Set_tx(tx pgx.Tx, loginId int64, groups []types.LoginWidgetGroup) error {
 		}
 
 		for posItem, w := range g.Items {
-			if _, err := tx.Exec(db.Ctx, `
+			if _, err := tx.Exec(ctx, `
 				INSERT INTO instance.login_widget_group_item (
 					login_widget_group_id, position, widget_id, module_id, content)
 				VALUES ($1,$2,$3,$4,$5)
