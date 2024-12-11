@@ -392,7 +392,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		}
 
 		// attribute expression
-		if err := addSelect(pos, expr, indexRelationIds, &inSelect, nestingLevel); err != nil {
+		if err := addSelect(pos, expr, &inSelect, nestingLevel); err != nil {
 			return "", "", err
 		}
 
@@ -503,8 +503,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 // add SELECT for attribute in given relation index
 // if attribute is from another relation than given index (relationship), attribute value = tupel IDs in relation with given index via given attribute
 // 'outside in' is important in cases of self reference, where direction cannot be ascertained by attribute
-func addSelect(exprPos int, expr types.DataGetExpression,
-	indexRelationIds map[int]uuid.UUID, inSelect *[]string, nestingLevel int) error {
+func addSelect(exprPos int, expr types.DataGetExpression, inSelect *[]string, nestingLevel int) error {
 
 	relCode := getRelationCode(expr.Index, nestingLevel)
 

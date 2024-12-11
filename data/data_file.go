@@ -206,12 +206,12 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool, attribu
 	}
 
 	logAttributes := []types.DataSetAttribute{
-		types.DataSetAttribute{
+		{
 			AttributeId:   attributeId,
 			AttributeIdNm: pgtype.UUID{},
 			Value: types.DataSetFileChanges{
 				FileIdMapChange: map[uuid.UUID]types.DataSetFileChange{
-					fileId: types.DataSetFileChange{
+					fileId: {
 						Action:  "update",
 						Name:    fileName,
 						Version: fileVersion,

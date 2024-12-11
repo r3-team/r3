@@ -54,6 +54,7 @@ type QueryJoin struct {
 type QueryFilter struct {
 	Connector string          `json:"connector"` // AND, OR
 	Operator  string          `json:"operator"`  // comparison operator (=, <>, etc.)
+	Index     int             `json:"index"`     // relation index to apply filter to (0 = filter query, 1+ = filter relation join)
 	Side0     QueryFilterSide `json:"side0"`     // comparison: left side
 	Side1     QueryFilterSide `json:"side1"`     // comparison: right side
 }

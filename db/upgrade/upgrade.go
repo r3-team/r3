@@ -94,10 +94,47 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		ALTER TABLE app.pg_function ALTER volatility
-			TYPE app.pg_function_volatility USING volatility::TEXT::app.pg_function_volatility;
+		nothing yet
 	*/
 
+	"3.9": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
+			-- cleanup from last release
+			ALTER TABLE app.pg_function ALTER COLUMN volatility DROP DEFAULT;
+
+			ALTER TABLE app.pg_function ALTER volatility
+				TYPE app.pg_function_volatility USING volatility::TEXT::app.pg_function_volatility;
+			
+			-- join query filter
+			ALTER TABLE app.query             ADD   COLUMN     query_filter_index SMALLINT NOT NULL DEFAULT 0;
+			ALTER TABLE app.query             ALTER COLUMN     query_filter_index DROP DEFAULT;
+			ALTER TABLE app.query             DROP  CONSTRAINT query_filter_subquery_fkey;
+
+			ALTER TABLE app.query_filter_side ADD   COLUMN     query_filter_index SMALLINT NOT NULL DEFAULT 0;
+			ALTER TABLE app.query_filter_side ALTER COLUMN     query_filter_index DROP DEFAULT;
+			ALTER TABLE app.query_filter_side DROP  CONSTRAINT query_filter_side_query_id_query_filter_position_fkey;
+			ALTER TABLE app.query_filter_side DROP  CONSTRAINT query_filter_side_pkey;
+			ALTER TABLE app.query_filter_side ADD   CONSTRAINT query_filter_side_pkey PRIMARY KEY (query_id, query_filter_index, query_filter_position, side);
+
+			ALTER TABLE app.query_filter      ADD   COLUMN     index SMALLINT NOT NULL DEFAULT 0;
+			ALTER TABLE app.query_filter      ALTER COLUMN     index DROP DEFAULT;
+			ALTER TABLE app.query_filter      DROP  CONSTRAINT query_filter_pkey;
+			ALTER TABLE app.query_filter      ADD   CONSTRAINT query_filter_pkey PRIMARY KEY (query_id, "index", "position");
+
+			ALTER TABLE app.query_filter_side ADD CONSTRAINT query_filter_side_query_filter_fkey FOREIGN KEY (query_id, query_filter_index, query_filter_position)
+				REFERENCES app.query_filter (query_id, "index", "position") MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			ALTER TABLE app.query ADD CONSTRAINT query_filter_subquery_fkey FOREIGN KEY (query_filter_query_id, query_filter_index, query_filter_position, query_filter_side)
+				REFERENCES app.query_filter_side (query_id, query_filter_index, query_filter_position, side) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+		`)
+		return "3.10", err
+	},
 	"3.8": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `
 			-- cleanup from last release
