@@ -1572,6 +1572,8 @@
 			"choice": "Satz",
 			"choices": "Filtersätze ({COUNT})*",
 			"choicesHint": "*Erste Satz ist erstmal aktiv - Auswahl möglich, wenn 2 oder mehr existieren.",
+			"filterJoinAdd": "Join-Filter hinzufügen",
+			"filterJoinAddHint": "Ein Join-Filter wird nicht auf die gesamte Abfrage angewendet, sondern nur auf die Relation, die verbunden wird.<br /><br />Er kann ungewollte Datensätze von einer links-verbundenen (left join) Relation herausfiltern, ohne die gesamte Zeile vom Ergebnis zu entfernen.<br /><br />Er ist ebenfalls nützlich, um 1:n-Beziehungen zu filtern.",
 			"filters": "Filter ({COUNT})",
 			"fixedLimit": "Festes Ergebnislimit",
 			"fixedLimit0": "nicht aktiv",

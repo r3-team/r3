@@ -1572,6 +1572,8 @@
 			"choice": "Ensemble",
 			"choices": "Ensembles de filtres ({COUNT})*",
 			"choicesHint": "*Le premier ensemble est actif par défaut - le choix est disponible s'il y en a 2 ou plus.",
+			"filterJoinAdd": "Add join filter",
+			"filterJoinAddHint": "A join filter is not applied to the entire query, but only to the relation being joined.<br /><br />It can filter out an undesired record from a left-joined relation without removing the entire data row from the result.<br /><br />It is also useful for filtering 1:n relationships.",
 			"filters": "Filtres ({COUNT})",
 			"fixedLimit": "Limite de résultats fixe",
 			"fixedLimit0": "non actif",

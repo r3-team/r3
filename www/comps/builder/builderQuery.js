@@ -23,22 +23,35 @@ let MyBuilderQueryFilter = {
 			@trigger="show = !show"
 			:active="modelValue.length !== 0"
 			:caption="capApp.filters.replace('{COUNT}',modelValue.length)"
-			:image="displayArrow(show,modelValue.length)"
+			:image="displayArrow(visible)"
 			:large="true"
 			:naked="true"
 		/>
-		<div class="row gap default-inputs">
-			<select v-model.number="joinIndex" class="dynamic">
-				<option v-for="j in joins" :value="j.index">{{ j.index }}</option>
-			</select>
-			<my-button image="add.png"
-				@trigger="add"
-				:caption="capGen.button.add"
-				:naked="true"
-			/>
+		<div class="row centered default-inputs" v-if="visible && joins.length > 1">
+			<div class="row gap">
+				<my-button image="add.png"
+					@trigger="add(indexTarget)"
+					:active="indexTargets.includes(indexTarget)"
+					:caption="capApp.filterJoinAdd"
+					:naked="true"
+				/>
+				<select v-model.number="indexTarget" class="dynamic">
+					<option v-for="index in indexTargets" :value="index">
+						{{ relationLabel(index) }}
+					</option>
+				</select>
+				<my-button image="question.png"
+					@trigger="showHelp"
+				/>
+			</div>
 		</div>
+		<my-button image="add.png"
+			@trigger="add(0)"
+			:caption="capGen.button.add"
+			:naked="true"
+		/>
 	</div>
-	<div class="column" v-show="show">
+	<div class="builder-query-filter" v-show="visible">
 		<template v-for="(filters,index) in filtersByIndexMap">
 			<my-button
 				v-if="parseInt(index) !== 0 && relationLabel(parseInt(index)) !== ''"
@@ -53,6 +66,7 @@ let MyBuilderQueryFilter = {
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
 				:formId="formId"
+				:indexTarget="parseInt(index)"
 				:joins="joins"
 				:joinsParents="joinsParents"
 				:modelValue="filters"
@@ -72,7 +86,7 @@ let MyBuilderQueryFilter = {
 	},
 	data() {
 		return {
-			joinIndex:0,
+			indexTarget:0,
 			show:false
 		};
 	},
@@ -88,6 +102,16 @@ let MyBuilderQueryFilter = {
 			}
 			return out;
 		},
+		indexTargets:(s) => {
+			let out = [];
+			for(const j of s.joins.filter(v => v.index !== 0)) {
+				out.push(j.index);
+			}
+			return out;
+		},
+
+		// simple
+		visible:(s) => s.show && s.modelValue.length !== 0,
 
 		// stores
 		capApp:(s) => s.$store.getters.captions.builder.query,
@@ -111,9 +135,9 @@ let MyBuilderQueryFilter = {
 		},
 
 		// actions
-		add() {
+		add(indexTarget) {
 			let f = this.getQueryFilterNew();
-			f.index = this.joinIndex;
+			f.index = indexTarget;
 			
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v.push(f);
@@ -123,7 +147,12 @@ let MyBuilderQueryFilter = {
 		set(filters,index) {
 			const filtersOtherIndexes = this.modelValue.filter(v => v.index !== index);
 			this.$emit('update:modelValue',filtersOtherIndexes.concat(filters));
-		}
+		},
+		showHelp() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.filterJoinAddHint
+			});
+		},
 	}
 };
 

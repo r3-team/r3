@@ -1572,6 +1572,8 @@
 			"choice": "设置",
 			"choices": "过滤器集合（{COUNT}）*",
 			"choicesHint": "*第一个集合默认处于活动状态 - 如果存在2个或更多，则可选择。",
+			"filterJoinAdd": "Add join filter",
+			"filterJoinAddHint": "A join filter is not applied to the entire query, but only to the relation being joined.<br /><br />It can filter out an undesired record from a left-joined relation without removing the entire data row from the result.<br /><br />It is also useful for filtering 1:n relationships.",
 			"filters": "过滤器（{COUNT}）",
 			"fixedLimit": "固定结果限制",
 			"fixedLimit0": "未激活",

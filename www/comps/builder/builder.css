@@ -444,6 +444,11 @@
 	align-items:center;
 	justify-content:space-between;
 }
+.builder-query-filter{
+	display:flex;
+	flex-flow:column nowrap;
+	padding:calc(var(--spacing) / 2) 0px 0px;
+}
 
 /* variable */
 .builder-variable .preview{

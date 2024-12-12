@@ -998,9 +998,10 @@ let MyFilters = {
 	name:'my-filters',
 	components:{MyFilter},
 	template:`<div class="filters">
-		<draggable handle=".dragAnchor" group="filters" itemKey="id" animation="100"
+		<draggable handle=".dragAnchor" itemKey="id" animation="100"
 			@change="set"
 			:fallbackOnBody="true"
+			:group="filters + String(indexTarget)"
 			:list="filters"
 		>
 			<template #item="{element,index}">
@@ -1040,6 +1041,7 @@ let MyFilters = {
 		entityIdMapRef:{ type:Object,  required:false, default:() => {return {}} },
 		fieldIdMap:    { type:Object,  required:false, default:() => {return {}} },
 		formId:        { type:String,  required:false, default:'' },
+		indexTarget:   { type:Number,  required:false, default:0 },
 		joins:         { type:Array,   required:false, default:() => [] },
 		joinsParents:  { type:Array,   required:false, default:() => [] },
 		modelValue:    { type:Array,   required:true },

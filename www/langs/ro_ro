@@ -1572,6 +1572,8 @@
 			"choice": "Setați",
 			"choices": "Seturi de filtre ({COUNT})*",
 			"choicesHint": "*Primul set este activ implicit - alegeți dacă există 2 sau mai multe.",
+			"filterJoinAdd": "Add join filter",
+			"filterJoinAddHint": "A join filter is not applied to the entire query, but only to the relation being joined.<br /><br />It can filter out an undesired record from a left-joined relation without removing the entire data row from the result.<br /><br />It is also useful for filtering 1:n relationships.",
 			"filters": "Filtre ({COUNT})",
 			"fixedLimit": "Rezultat cu limită fixă",
 			"fixedLimit0": "nu este activ",

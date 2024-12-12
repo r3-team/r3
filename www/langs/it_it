@@ -1572,6 +1572,8 @@
 			"choice": "Imposta",
 			"choices": "Filtri impostati ({COUNT})*",
 			"choicesHint": "*Il primo set è attivo per impostazione predefinita - scelta disponibile se ne esistono 2 o più.",
+			"filterJoinAdd": "Add join filter",
+			"filterJoinAddHint": "A join filter is not applied to the entire query, but only to the relation being joined.<br /><br />It can filter out an undesired record from a left-joined relation without removing the entire data row from the result.<br /><br />It is also useful for filtering 1:n relationships.",
 			"filters": "Filtri ({COUNT})",
 			"fixedLimit": "Limite risultati impostato",
 			"fixedLimit0": "non attivo",
