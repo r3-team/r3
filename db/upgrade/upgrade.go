@@ -106,8 +106,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				TYPE app.pg_function_volatility USING volatility::TEXT::app.pg_function_volatility;
 			
 			-- join query filter
-			ALTER TABLE app.query             ADD   COLUMN     query_filter_index SMALLINT NOT NULL DEFAULT 0;
-			ALTER TABLE app.query             ALTER COLUMN     query_filter_index DROP DEFAULT;
+			ALTER TABLE app.query             ADD   COLUMN     query_filter_index SMALLINT;
 			ALTER TABLE app.query             DROP  CONSTRAINT query_filter_subquery_fkey;
 
 			ALTER TABLE app.query_filter_side ADD   COLUMN     query_filter_index SMALLINT NOT NULL DEFAULT 0;
@@ -132,6 +131,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
+
+			UPDATE app.query
+			SET query_filter_index = 0
+			WHERE query_filter_position IS NOT NULL;
 		`)
 		return "3.10", err
 	},

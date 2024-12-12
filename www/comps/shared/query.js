@@ -253,6 +253,7 @@ export function getJoinIndexMap(joins) {
 export function getQueryAttributePkFilter(relationId,recordId,index,not) {
 	return {
 		connector:'AND',
+		index:0,
 		operator:not ? '<>' : '=',
 		side0:{
 			attributeId:MyStore.getters['schema/relationIdMap'][relationId].attributeIdPk,
@@ -269,6 +270,7 @@ export function getQueryAttributePkFilter(relationId,recordId,index,not) {
 export function getQueryAttributesPkFilter(relationId,recordIds,index,not) {
 	return {
 		connector:'AND',
+		index:0,
 		operator:not ? '<> ALL' : '= ANY',
 		side0:{
 			attributeId:MyStore.getters['schema/relationIdMap'][relationId].attributeIdPk,
@@ -293,11 +295,52 @@ export function getQueryTemplateIfNull(query) {
 	return query === null ? getQueryTemplate() : query;
 };
 
+export function getQueryFilterNew() {
+	return {
+		connector:'AND',
+		operator:'=',
+		index:0,
+		side0:{
+			attributeId:null,
+			attributeIndex:0,
+			attributeNested:0,
+			brackets:0,
+			collectionId:null,
+			columnId:null,
+			content:'attribute',
+			fieldId:null,
+			ftsDict:null,
+			query:null,
+			queryAggregator:null,
+			presetId:null,
+			roleId:null,
+			value:''
+		},
+		side1:{
+			attributeId:null,
+			attributeIndex:0,
+			attributeNested:0,
+			brackets:0,
+			collectionId:null,
+			columnId:null,
+			content:'value',
+			fieldId:null,
+			ftsDict:null,
+			query:null,
+			queryAggregator:null,
+			presetId:null,
+			roleId:null,
+			value:''
+		}
+	};
+};
+
 export function getQueryFiltersDateRange(attributeId0,index0,date0,attributeId1,index1,date1) {
 	// set query filters for records which attribute value range (attribute 0 to 1)
 	//  occur within defined date range (date 0 to 1)
 	return [{
 		connector:'AND',
+		index:0,
 		operator:'<=',
 		side0:{
 			attributeId:attributeId0,
@@ -310,6 +353,7 @@ export function getQueryFiltersDateRange(attributeId0,index0,date0,attributeId1,
 		}
 	},{
 		connector:'AND',
+		index:0,
 		operator:'<=',
 		side0:{
 			brackets:0,
@@ -324,12 +368,14 @@ export function getQueryFiltersDateRange(attributeId0,index0,date0,attributeId1,
 };
 
 export function getFiltersEncapsulated(filters) {
-	// add brackets to encapsulate a filter set from other filter sets
-	//  some sets: query filters, quick filters, custom user filters
+	let filtersBase  = filters.filter(v => v.index === 0);
+	let filtersJoins = filters.filter(v => v.index !== 0);
+
+	// add brackets to encapsulate filter set from other sets (query filters, quick filters, user filters, ...)
 	// otherwise a single OR would negate all other filters
-	if(filters.length !== 0) {
-		filters[0].side0.brackets++;
-		filters[filters.length-1].side1.brackets++;
+	if(filtersBase.length !== 0) {
+		filtersBase[0].side0.brackets++;
+		filtersBase[filtersBase.length-1].side1.brackets++;
 	}
-	return filters;
+	return filtersBase.concat(filtersJoins);
 };

@@ -422,7 +422,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err != nil {
 			return fields, err
 		}
-		field.Query, err = query.Get("field", field.Id, 0, 0)
+		field.Query, err = query.Get("field", field.Id, 0, 0, 0)
 		if err != nil {
 			return fields, err
 		}
@@ -441,7 +441,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posChartLookup {
 		var field = fields[pos].(types.FieldChart)
 
-		field.Query, err = query.Get("field", field.Id, 0, 0)
+		field.Query, err = query.Get("field", field.Id, 0, 0, 0)
 		if err != nil {
 			return fields, err
 		}
@@ -479,7 +479,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err != nil {
 			return fields, err
 		}
-		field.Query, err = query.Get("field", field.Id, 0, 0)
+		field.Query, err = query.Get("field", field.Id, 0, 0, 0)
 		if err != nil {
 			return fields, err
 		}
@@ -517,7 +517,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err != nil {
 			return fields, err
 		}
-		field.Query, err = query.Get("field", field.Id, 0, 0)
+		field.Query, err = query.Get("field", field.Id, 0, 0, 0)
 		if err != nil {
 			return fields, err
 		}
@@ -548,7 +548,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err != nil {
 			return fields, err
 		}
-		field.Query, err = query.Get("field", field.Id, 0, 0)
+		field.Query, err = query.Get("field", field.Id, 0, 0, 0)
 		if err != nil {
 			return fields, err
 		}
@@ -581,7 +581,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posVariableLookup {
 		var field = fields[pos].(types.FieldVariable)
 
-		field.Query, err = query.Get("field", field.Id, 0, 0)
+		field.Query, err = query.Get("field", field.Id, 0, 0, 0)
 		if err != nil {
 			return fields, err
 		}
@@ -665,7 +665,7 @@ func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
 	if err != nil {
 		return f, err
 	}
-	f.Query, err = query.Get("field", f.Id, 0, 0)
+	f.Query, err = query.Get("field", f.Id, 0, 0, 0)
 	if err != nil {
 		return f, err
 	}

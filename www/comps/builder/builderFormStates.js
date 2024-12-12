@@ -140,11 +140,8 @@ let MyBuilderFormState = {
 				:disableContent="['attribute','javascript','nowDate','nowDatetime','nowTime','subQuery']"
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
-				:filterAddCnt="filterAddCnt"
 				:formId="form.id"
 				:moduleId="form.moduleId"
-				:showAdd="true"
-				:showMove="true"
 			/>
 			
 			<my-button image="add.png"
@@ -175,11 +172,6 @@ let MyBuilderFormState = {
 		open:          { type:Boolean, required:true }
 	},
 	emits:['open','remove','update:modelValue'],
-	data() {
-		return {
-			filterAddCnt:0 // ugly hack to add filter
-		};
-	},
 	computed:{
 		effectIndexesOrdered:(s) => {
 			let effects = JSON.parse(JSON.stringify(s.state.effects));
@@ -214,6 +206,7 @@ let MyBuilderFormState = {
 			let v = JSON.parse(JSON.stringify(this.state));
 			v.conditions.push({
 				connector:'AND',
+				index:0,
 				operator:'=',
 				side0:{
 					brackets:0,

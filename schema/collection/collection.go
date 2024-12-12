@@ -45,7 +45,7 @@ func Get(moduleId uuid.UUID) ([]types.Collection, error) {
 
 	// collect query and columns
 	for i, c := range collections {
-		c.Query, err = query.Get("collection", c.Id, 0, 0)
+		c.Query, err = query.Get("collection", c.Id, 0, 0, 0)
 		if err != nil {
 			return collections, err
 		}
@@ -86,7 +86,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, ic
 			return err
 		}
 	}
-	if err := query.Set_tx(ctx, tx, "collection", id, 0, 0, queryIn); err != nil {
+	if err := query.Set_tx(ctx, tx, "collection", id, 0, 0, 0, queryIn); err != nil {
 		return err
 	}
 	if err := column.Set_tx(ctx, tx, "collection", id, columns); err != nil {

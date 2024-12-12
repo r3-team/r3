@@ -6,6 +6,7 @@ import MyInputOffset      from './inputOffset.js';
 import MyListAggregate    from './listAggregate.js';
 import MyListColumnBatch  from './listColumnBatch.js';
 import MyListCsv          from './listCsv.js';
+import MyListFilters      from './listFilters.js';
 import MyListOptions      from './listOptions.js';
 import MyValueRich        from './valueRich.js';
 import {consoleError}     from './shared/error.js';
@@ -50,6 +51,7 @@ let MyList = {
 		MyListAggregate,
 		MyListColumnBatch,
 		MyListCsv,
+		MyListFilters,
 		MyListOptions,
 		MyValueRich
 	},
@@ -63,7 +65,7 @@ let MyList = {
 			v-if="showHover"
 			@click.self.stop="closeHover"
 		>
-			<div class="contentBox float scroll" :class="{ 'list-csv':showCsv,'list-filters':showFilters, 'list-options':showOptions }">
+			<div class="contentBox float scroll" :class="{ 'list-csv':showCsv, 'list-filters-wrap':showFilters, 'list-options':showOptions }">
 				<div class="top lower">
 					<div class="area">
 						<img class="icon" :src="hoverIconSrc" />
@@ -88,15 +90,13 @@ let MyList = {
 						:orders="orders"
 						:query="query"
 					/>
-					<my-filters class="default-inputs"
+					<my-list-filters
 						v-if="showFilters"
 						v-model="filtersUser"
 						@apply="get"
 						:columns="columns"
 						:columnBatches="columnBatches"
 						:joins="joins"
-						:showReset="true"
-						:userFilter="true"
 					/>
 					<my-list-options
 						v-if="showOptions"

@@ -178,7 +178,7 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 
 	// collect form query, fields, functions, states and captions
 	for i, form := range forms {
-		form.Query, err = query.Get("form", form.Id, 0, 0)
+		form.Query, err = query.Get("form", form.Id, 0, 0, 0)
 		if err != nil {
 			return forms, err
 		}
@@ -241,7 +241,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 	}
 
 	// set form query
-	if err := query.Set_tx(ctx, tx, "form", frm.Id, 0, 0, frm.Query); err != nil {
+	if err := query.Set_tx(ctx, tx, "form", frm.Id, 0, 0, 0, frm.Query); err != nil {
 		return err
 	}
 
@@ -256,7 +256,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 	// set field queries after fields themselves
 	// query filters can reference fields so they must all exist
 	for fieldId, queryIn := range fieldIdMapQuery {
-		if err := query.Set_tx(ctx, tx, "field", fieldId, 0, 0, queryIn); err != nil {
+		if err := query.Set_tx(ctx, tx, "field", fieldId, 0, 0, 0, queryIn); err != nil {
 			return err
 		}
 	}

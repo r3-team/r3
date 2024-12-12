@@ -59,7 +59,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 
 	for i, c := range columns {
 		if c.SubQuery {
-			c.Query, err = query.Get("column", c.Id, 0, 0)
+			c.Query, err = query.Get("column", c.Id, 0, 0, 0)
 			if err != nil {
 				return columns, err
 			}
@@ -143,7 +143,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, c
 		}
 
 		if c.SubQuery {
-			if err := query.Set_tx(ctx, tx, "column", c.Id, 0, 0, c.Query); err != nil {
+			if err := query.Set_tx(ctx, tx, "column", c.Id, 0, 0, 0, c.Query); err != nil {
 				return err
 			}
 		}

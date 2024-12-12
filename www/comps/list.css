@@ -366,11 +366,23 @@
 	border-bottom:1px dotted var(--color-border);
 }
 
-/* filtesr */
-.list-filters{
+/* filters */
+.list-filters-wrap{
 	width:100%;
 	max-width:950px;
-	min-height:360px;
+	min-height:420px;
+}
+.list-filters{
+	height:100%;
+	display:flex;
+	flex-flow:column;
+	justify-content:space-between;
+	gap:var(--spacing);
+}
+.list-filters-content{
+	max-height:450px;
+	padding:5px 10px;
+	overflow:auto;
 }
 
 /* CSV */

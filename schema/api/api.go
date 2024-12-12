@@ -102,7 +102,7 @@ func Get(moduleId uuid.UUID, id uuid.UUID) ([]types.Api, error) {
 
 	// collect query and columns
 	for i, a := range apis {
-		a.Query, err = query.Get("api", a.Id, 0, 0)
+		a.Query, err = query.Get("api", a.Id, 0, 0, 0)
 		if err != nil {
 			return apis, err
 		}
@@ -149,7 +149,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, api types.Api) error {
 			return err
 		}
 	}
-	if err := query.Set_tx(ctx, tx, "api", api.Id, 0, 0, api.Query); err != nil {
+	if err := query.Set_tx(ctx, tx, "api", api.Id, 0, 0, 0, api.Query); err != nil {
 		return err
 	}
 	return column.Set_tx(ctx, tx, "api", api.Id, api.Columns)

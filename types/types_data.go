@@ -19,6 +19,7 @@ import (
 //	this is required as a sub query from the same relation might refer to itself or to a parent query with similar relations/attributes
 type DataGetFilter struct {
 	Connector string            `json:"connector"` // clause connector (AND|OR), first clause is always AND
+	Index     int               `json:"index"`     // relation index to apply filter to (0 = filter query, 1+ = filter relation join)
 	Operator  string            `json:"operator"`  // operator (=, <, >, ...)
 	Side0     DataGetFilterSide `json:"side0"`     // comparison: left side
 	Side1     DataGetFilterSide `json:"side1"`     // comparison: right side
