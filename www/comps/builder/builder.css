@@ -719,9 +719,11 @@
 	margin:0px 3px 3px 0px;
 	cursor:move;
 }
-.builder-column-options{
-	max-width:500px;
+.builder-column-options {
 	padding:8px var(--spacing);
+}
+.builder-column-options-table{
+	max-width:500px;
 }
 
 /* tabs */
