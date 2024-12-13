@@ -870,6 +870,7 @@ let MyList = {
 			let addFilter = (operator,atrId,atrIndex,dict) => {
 				out.push({
 					connector:out.length === 0 ? 'AND' : 'OR',
+					index:0,
 					operator:operator,
 					side0:{ attributeId:atrId, attributeIndex:atrIndex, brackets:0 },
 					side1:{ brackets:0, ftsDict:dict, value:s.filtersQuick }

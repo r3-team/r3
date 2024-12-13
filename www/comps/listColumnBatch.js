@@ -370,6 +370,7 @@ let MyListColumnBatch = {
 				const hasNull = this.isArrayInput && this.input.includes(null);
 				filters.push({
 					connector:'AND',
+					index:0,
 					operator:typeof this.input === 'string' ? 'ILIKE' : '= ANY',
 					side0:{
 						attributeId:atrId,
@@ -386,6 +387,7 @@ let MyListColumnBatch = {
 				if(hasNull) {
 					filters.push({
 						connector:'OR',
+						index:0,
 						operator:'IS NULL',
 						side0:{
 							attributeId:atrId,

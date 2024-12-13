@@ -515,6 +515,7 @@ func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
 		IndexSource: 0,
 		Filters: []types.DataGetFilter{{
 			Connector: "AND",
+			Index:     0,
 			Operator:  "=",
 			Side0: types.DataGetFilterSide{
 				AttributeId: pgtype.UUID{

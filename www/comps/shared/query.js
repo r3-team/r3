@@ -368,8 +368,8 @@ export function getQueryFiltersDateRange(attributeId0,index0,date0,attributeId1,
 };
 
 export function getFiltersEncapsulated(filters) {
-	let filtersBase  = filters.filter(v => v.index === 0);
-	let filtersJoins = filters.filter(v => v.index !== 0);
+	let filtersBase = filters.filter(v => v.index === 0);
+	let filtersJoin = filters.filter(v => v.index !== 0);
 
 	// add brackets to encapsulate filter set from other sets (query filters, quick filters, user filters, ...)
 	// otherwise a single OR would negate all other filters
@@ -377,5 +377,5 @@ export function getFiltersEncapsulated(filters) {
 		filtersBase[0].side0.brackets++;
 		filtersBase[filtersBase.length-1].side1.brackets++;
 	}
-	return filtersBase.concat(filtersJoins);
+	return filtersBase.concat(filtersJoin);
 };

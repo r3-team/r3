@@ -122,6 +122,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if dateRange0 != 0 {
 		dataGet.Filters = append(dataGet.Filters, types.DataGetFilter{
 			Connector: "AND",
+			Index:     0,
 			Operator:  ">=",
 			Side0: types.DataGetFilterSide{
 				AttributeId: pgtype.UUID{
@@ -141,6 +142,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if dateRange1 != 0 {
 		dataGet.Filters = append(dataGet.Filters, types.DataGetFilter{
 			Connector: "AND",
+			Index:     0,
 			Operator:  "<=",
 			Side0: types.DataGetFilterSide{
 				AttributeId: pgtype.UUID{

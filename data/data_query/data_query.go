@@ -56,10 +56,7 @@ func ConvertSubQueryToDataGet(query types.Query, queryAggregator pgtype.Text,
 	}
 }
 
-func ConvertQueryToDataFilter(filters []types.QueryFilter,
-	loginId int64, languageCode string) []types.DataGetFilter {
-
-	filtersOut := make([]types.DataGetFilter, len(filters))
+func ConvertQueryToDataFilter(filters []types.QueryFilter, loginId int64, languageCode string) []types.DataGetFilter {
 
 	var processSide = func(side types.QueryFilterSide) types.DataGetFilterSide {
 		sideOut := types.DataGetFilterSide{
@@ -109,23 +106,31 @@ func ConvertQueryToDataFilter(filters []types.QueryFilter,
 		return sideOut
 	}
 
-	for i, filter := range filters {
+	// process both base & join filters
+	filtersBase := make([]types.DataGetFilter, 0)
+	filtersJoin := make([]types.DataGetFilter, 0)
 
-		filterOut := types.DataGetFilter{
-			Connector: filter.Connector,
-			Operator:  filter.Operator,
-			Side0:     processSide(filter.Side0),
-			Side1:     processSide(filter.Side1),
+	for _, f := range filters {
+		filter := types.DataGetFilter{
+			Connector: f.Connector,
+			Index:     f.Index,
+			Operator:  f.Operator,
+			Side0:     processSide(f.Side0),
+			Side1:     processSide(f.Side1),
 		}
-		if i == 0 {
-			filterOut.Side0.Brackets++
+		if f.Index == 0 {
+			filtersBase = append(filtersBase, filter)
+		} else {
+			filtersJoin = append(filtersJoin, filter)
 		}
-		if i == len(filters)-1 {
-			filterOut.Side1.Brackets++
-		}
-		filtersOut[i] = filterOut
 	}
-	return filtersOut
+
+	// encapsulate base filters
+	if len(filtersBase) > 0 {
+		filtersBase[0].Side0.Brackets++
+		filtersBase[len(filtersBase)-1].Side1.Brackets++
+	}
+	return slices.Concat(filtersBase, filtersJoin)
 }
 
 func ConvertQueryToDataJoins(joins []types.QueryJoin) []types.DataGetJoin {
