@@ -17,7 +17,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var regexRelId = regexp.MustCompile(`^\_r(\d+)id`) // finds: _r3id
@@ -751,11 +750,13 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 		}
 
 		if isLikeOperator(filter.Operator) {
-			if v, ok := s.Value.(pgtype.Text); ok {
-				s.Value = v.String
+			// add wildcard characters before/after for (I)LIKE comparison unless input includes them
+			v := fmt.Sprintf("%s", s.Value)
+			if strings.Contains(v, "%") {
+				s.Value = v
+			} else {
+				s.Value = fmt.Sprintf("%%%s%%", v)
 			}
-			// special syntax for (I)LIKE comparison (add wildcard characters)
-			s.Value = fmt.Sprintf("%%%s%%", s.Value)
 		}
 
 		// PGX fix: cannot use proper true/false values in SQL parameters
