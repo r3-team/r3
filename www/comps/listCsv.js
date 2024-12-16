@@ -153,7 +153,7 @@ let MyListCsv = {
 			return out;
 		},
 		exportHref:(s) => {
-			let getters = [
+			const getters = [
 				`token=${s.token}`,
 				`bool_false=${s.boolNative ? 'false' : s.capGen.option.no}`,
 				`bool_true=${s.boolNative ? 'true' : s.capGen.option.yes}`,
@@ -163,11 +163,11 @@ let MyListCsv = {
 				`language_code=${s.settings.languageCode}`,
 				`ignore_header=${s.hasHeader ? 'false' : 'true'}`,
 				`relation_id=${s.query.relationId}`,
-				`columns=${JSON.stringify(s.columnsSorted)}`,
-				`joins=${JSON.stringify(s.joins)}`,
-				`expressions=${JSON.stringify(s.expressions)}`,
-				`filters=${JSON.stringify(s.filters)}`,
-				`orders=${JSON.stringify(s.orders)}`,
+				`columns=${encodeURIComponent(JSON.stringify(s.columnsSorted))}`,
+				`joins=${encodeURIComponent(JSON.stringify(s.joins))}`,
+				`expressions=${encodeURIComponent(JSON.stringify(s.expressions))}`,
+				`filters=${encodeURIComponent(JSON.stringify(s.filters))}`,
+				`orders=${encodeURIComponent(JSON.stringify(s.orders))}`,
 				`total_limit=${s.totalLimit}`,
 				`timestamp=${s.cacheDenialTimestamp}`
 			];
