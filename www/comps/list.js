@@ -804,10 +804,13 @@ let MyList = {
 	},
 	computed:{
 		filtersCombined:(s) => {
+			// already encapsulated filters: list, choice, quick, column
 			let filters = s.filters
-				.concat(s.filtersParsedColumn)
+				.concat(s.filtersColumn)
 				.concat(s.filtersParsedQuick)
-				.concat(s.filtersParsedUser)
+				.concat(s.getFiltersEncapsulated(
+					JSON.parse(JSON.stringify(s.filtersUser))
+				))
 				.concat(s.choiceFilters);
 			
 			if(s.anyInputRows)
@@ -857,12 +860,6 @@ let MyList = {
 		},
 
 		// filters
-		filtersParsedColumn:(s) => s.getFiltersEncapsulated(
-			JSON.parse(JSON.stringify(s.filtersColumn))
-		),
-		filtersParsedUser:(s) => s.getFiltersEncapsulated(
-			JSON.parse(JSON.stringify(s.filtersUser))
-		),
 		filtersParsedQuick:(s) => {
 			if(s.filtersQuick === '') return [];
 			
