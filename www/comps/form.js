@@ -621,11 +621,16 @@ let MyForm = {
 				get_field_value_changed:(fieldId) => s.fieldIdsChanged.includes(fieldId),
 				get_field_file_links:(fieldId) => {
 					const fld = s.fieldIdMapData[fieldId];
-					if(fld === undefined || s.values[s.getIndexAttributeIdByField(fld,false)] === null)
+					const val = s.values[s.getIndexAttributeIdByField(fld,false)];
+					
+					if(fld !== undefined && val !== null && !Array.isArray(val))
+						console.warn('Failed to generate file links, file input has unsaved changes');
+					
+					if(fld === undefined || val === null || !Array.isArray(val))
 						return null;
-
+					
 					let out = [];
-					for(const f of s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false)]) {
+					for(const f of val) {
 						out.push(s.getAttributeFileVersionHref(fld.attributeId, f.id, f.name, f.version, s.token));
 					}
 					return out;
