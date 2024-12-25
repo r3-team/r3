@@ -81,9 +81,9 @@ export function getChoiceFilters(choices,choiceIdActive) {
 	if(choiceIdActive === null)
 		return [];
 	
-	for(let i = 0, j = choices.length; i < j; i++) {
-		if(choices[i].id === choiceIdActive)
-			return choices[i].filters;
+	for(const c of choices) {
+		if(c.id === choiceIdActive)
+			return c.filters;
 	}
 	return [];
 };
