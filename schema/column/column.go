@@ -51,9 +51,6 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 
 			return columns, err
 		}
-		if c.Styles == nil {
-			c.Styles = make([]string, 0)
-		}
 		columns = append(columns, c)
 	}
 

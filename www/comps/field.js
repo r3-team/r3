@@ -758,9 +758,9 @@ let MyField = {
 			if(s.isReadonly) out.push('readonly');
 			if(s.isRichtext) out.push('richtext');
 
-			// for CSS overwrites for number fields
-			if(s.isInteger) out.push('integer');
-			if(s.isDecimal) out.push('decimal');
+			for(const flag of s.field.flags) {
+				out.push(`flag-${flag}`);
+			}
 			
 			if(s.isTextarea || s.isRichtext)   out.push('top-aligned');
 			if(s.isHeader && s.field.richtext) out.push('headerRichtext');

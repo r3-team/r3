@@ -109,6 +109,19 @@
 	cursor:default;
 }
 
+
+/* field flags */
+.field.flag-alignEnd .input{
+	text-align:right;
+}
+.field.flag-monospace .input{
+	font-family:Consolas,Courier,monospace;
+}
+.field.flag-hideInputs .input-iframe-actions{
+	display:none;
+}
+
+
 /* label field */
 .field .header-label{
 	display:flex;

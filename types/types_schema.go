@@ -250,6 +250,7 @@ type Field struct {
 	IconId   pgtype.UUID `json:"iconId"`
 	Content  string      `json:"content"`  // content (button, header, data, list, calendar, chart, tabs)
 	State    string      `json:"state"`    // default state (hidden, default, readonly, optional, required)
+	Flags    []string    `json:"flags"`    // flags for field display/behaviour options (clipboard, monospace, alignEnd, ...)
 	OnMobile bool        `json:"onMobile"` // display this field on mobile?
 }
 type FieldButton struct {
@@ -258,6 +259,7 @@ type FieldButton struct {
 	IconId       pgtype.UUID `json:"iconId"`
 	Content      string      `json:"content"`
 	State        string      `json:"state"`
+	Flags        []string    `json:"flags"`
 	OnMobile     bool        `json:"onMobile"`
 	JsFunctionId pgtype.UUID `json:"jsFunctionId"` // JS function to executing when triggering button
 	OpenForm     OpenForm    `json:"openForm"`
@@ -273,6 +275,7 @@ type FieldCalendar struct {
 	IconId           pgtype.UUID          `json:"iconId"`
 	Content          string               `json:"content"`
 	State            string               `json:"state"`
+	Flags            []string             `json:"flags"`
 	OnMobile         bool                 `json:"onMobile"`
 	AttributeIdDate0 uuid.UUID            `json:"attributeIdDate0"`
 	AttributeIdDate1 uuid.UUID            `json:"attributeIdDate1"`
@@ -303,6 +306,7 @@ type FieldChart struct {
 	IconId      pgtype.UUID `json:"iconId"`
 	Content     string      `json:"content"`
 	State       string      `json:"state"`
+	Flags       []string    `json:"flags"`
 	OnMobile    bool        `json:"onMobile"`
 	ChartOption string      `json:"chartOption"`
 	Columns     []Column    `json:"columns"`
@@ -315,6 +319,7 @@ type FieldContainer struct {
 	IconId         pgtype.UUID   `json:"iconId"`
 	Content        string        `json:"content"`
 	State          string        `json:"state"`
+	Flags          []string      `json:"flags"`
 	OnMobile       bool          `json:"onMobile"`
 	Fields         []interface{} `json:"fields"`
 	Direction      string        `json:"direction"`
@@ -334,6 +339,7 @@ type FieldData struct {
 	IconId         pgtype.UUID        `json:"iconId"`
 	Content        string             `json:"content"`
 	State          string             `json:"state"`
+	Flags          []string           `json:"flags"`
 	OnMobile       bool               `json:"onMobile"`
 	Clipboard      bool               `json:"clipboard"`      // enable copy-to-clipboard action
 	AttributeId    uuid.UUID          `json:"attributeId"`    // data attribute
@@ -358,6 +364,7 @@ type FieldDataRelationship struct {
 	IconId         pgtype.UUID `json:"iconId"`
 	Content        string      `json:"content"`
 	State          string      `json:"state"`
+	Flags          []string    `json:"flags"`
 	OnMobile       bool        `json:"onMobile"`
 	Clipboard      bool        `json:"clipboard"`
 	AttributeId    uuid.UUID   `json:"attributeId"`
@@ -395,6 +402,7 @@ type FieldHeader struct {
 	IconId   pgtype.UUID `json:"iconId"`
 	Content  string      `json:"content"`
 	State    string      `json:"state"`
+	Flags    []string    `json:"flags"`
 	OnMobile bool        `json:"onMobile"`
 	Richtext bool        `json:"richtext"`
 	Size     int         `json:"size"`
@@ -406,6 +414,7 @@ type FieldKanban struct {
 	IconId             pgtype.UUID          `json:"iconId"`
 	Content            string               `json:"content"`
 	State              string               `json:"state"`
+	Flags              []string             `json:"flags"`
 	OnMobile           bool                 `json:"onMobile"`
 	RelationIndexData  int                  `json:"relationIndexData"`
 	RelationIndexAxisX int                  `json:"relationIndexAxisX"`
@@ -422,6 +431,7 @@ type FieldList struct {
 	IconId       pgtype.UUID          `json:"iconId"`
 	Content      string               `json:"content"`
 	State        string               `json:"state"`
+	Flags        []string             `json:"flags"`
 	OnMobile     bool                 `json:"onMobile"`
 	CsvExport    bool                 `json:"csvExport"`
 	CsvImport    bool                 `json:"csvImport"`
@@ -446,6 +456,7 @@ type FieldTabs struct {
 	IconId   pgtype.UUID `json:"iconId"`
 	Content  string      `json:"content"`
 	State    string      `json:"state"`
+	Flags    []string    `json:"flags"`
 	OnMobile bool        `json:"onMobile"`
 	Captions CaptionMap  `json:"captions"`
 	Tabs     []Tab       `json:"tabs"`
@@ -457,6 +468,7 @@ type FieldVariable struct {
 	IconId       pgtype.UUID `json:"iconId"`
 	Content      string      `json:"content"`
 	State        string      `json:"state"`
+	Flags        []string    `json:"flags"`
 	OnMobile     bool        `json:"onMobile"`
 	Clipboard    bool        `json:"clipboard"`
 	Columns      []Column    `json:"columns"`

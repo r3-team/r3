@@ -94,7 +94,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		nothing yet
+		ALTER TABLE app.field ALTER COLUMN flags
+			TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
 	*/
 
 	"3.9": func(ctx context.Context, tx pgx.Tx) (string, error) {
@@ -135,6 +136,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			UPDATE app.query
 			SET query_filter_index = 0
 			WHERE query_filter_position IS NOT NULL;
+
+			-- field flags
+			CREATE TYPE app.field_flag AS ENUM ('alignEnd','hideInputs','monospace');
+			ALTER TABLE app.field ADD COLUMN flags TEXT[] NOT NULL DEFAULT '{}';
+
+			-- make column styles not nullable
+			UPDATE app.column SET styles = '{}' WHERE styles IS NULL;
+			ALTER TABLE app.column ALTER COLUMN styles SET NOT NULL;
 		`)
 		return "3.10", err
 	},

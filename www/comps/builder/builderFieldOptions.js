@@ -563,12 +563,44 @@ let MyBuilderFieldOptions = {
 					</template>
 				</template>
 
-				<tr v-if="(isData && !isFiles && !isDrawing && !isRelationship) || isVariable">
-					<td>{{ capGen.clipboard }}</td>
+				<template v-if="(isData && !isFiles && !isDrawing && !isRelationship && !isDate && !isDatetime && !isTime) || isVariable">
+					<tr>
+						<td>{{ capGen.clipboard }}</td>
+						<td>
+							<my-bool
+								@update:modelValue="set('clipboard',$event)"
+								:modelValue="field.clipboard"
+							/>
+						</td>
+					</tr>
+					<tr v-if="!isIFrame">
+						<td>{{ capGen.alignment }}</td>
+						<td>
+							<my-bool
+								@update:modelValue="setFlags('alignEnd',$event)"
+								:caption0="capApp.option.alignment.def"
+								:caption1="capApp.option.alignment.end"
+								:modelValue="field.flags.includes('alignEnd')"
+							/>
+						</td>
+					</tr>
+					<tr v-if="!isIFrame">
+						<td>{{ capGen.monospace }}</td>
+						<td>
+							<my-bool
+								@update:modelValue="setFlags('monospace',$event)"
+								:modelValue="field.flags.includes('monospace')"
+							/>
+						</td>
+					</tr>
+				</template>
+
+				<tr v-if="isIFrame">
+					<td>{{ capApp.hideInputs }}</td>
 					<td>
 						<my-bool
-							@update:modelValue="set('clipboard',$event)"
-							:modelValue="field.clipboard"
+							@update:modelValue="setFlags('hideInputs',$event)"
+							:modelValue="field.flags.includes('hideInputs')"
 						/>
 					</td>
 				</tr>
@@ -1363,6 +1395,7 @@ let MyBuilderFieldOptions = {
 		isDisplayDefault:(s) => s.isData && s.attribute.contentUse === 'default',
 		isDrawing:       (s) => s.isData && s.attribute.contentUse === 'drawing',
 		isHeader:        (s) => s.field.content === 'header',
+		isIFrame:        (s) => s.isData && s.attribute.contentUse === 'iframe',
 		isList:          (s) => s.field.content === 'list',
 		isKanban:        (s) => s.field.content === 'kanban',
 		isQuery:         (s) => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
@@ -1373,6 +1406,7 @@ let MyBuilderFieldOptions = {
 		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.attribute.content),
 		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.attribute.content),
 		isString:        (s) => s.isData && s.isAttributeString(s.attribute.content),
+		isTime:          (s) => s.isData && s.attribute.contentUse === 'time',
 		
 		// stores
 		module:        (s) => s.moduleIdMap[s.moduleId],
@@ -1455,6 +1489,11 @@ let MyBuilderFieldOptions = {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
 			v[i] = value;
 			this.set('collections',v);
+		},
+		setFlags(name,state) {
+			const pos = this.field.flags.indexOf(name);
+			if(state  && pos === -1) this.field.flags.push(name);
+			if(!state && pos !== -1) this.field.flags.splice(pos,1);
 		},
 		setIndexAttribute(name,indexAttributeId) {
 			let values = this.getDetailsFromIndexAttributeId(indexAttributeId);

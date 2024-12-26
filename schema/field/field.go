@@ -35,7 +35,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 
 	rows, err := db.Pool.Query(context.Background(), `
 		SELECT f.id, f.parent_id, f.tab_id, f.icon_id, f.content, f.state,
-		f.on_mobile, a.content,
+		f.flags, f.on_mobile, a.content,
 		
 		-- button field
 		fb.js_function_id,
@@ -137,11 +137,12 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			daysToggle, filterQuick, filterQuickList, gantt, ganttStepsToggle,
 			ics, outsideIn, richtext, wrap pgtype.Bool
 		var defPresetIds []uuid.UUID
+		var flags []string
 
 		if err := rows.Scan(&fieldId, &fieldParentId, &tabId, &iconId, &content,
-			&state, &onMobile, &atrContent, &jsFunctionIdButton, &attributeIdDate0,
-			&attributeIdDate1, &attributeIdColor, &indexDate0, &indexDate1,
-			&indexColor, &ics, &gantt, &ganttSteps, &ganttStepsToggle,
+			&state, &flags, &onMobile, &atrContent, &jsFunctionIdButton,
+			&attributeIdDate0, &attributeIdDate1, &attributeIdColor, &indexDate0,
+			&indexDate1, &indexColor, &ics, &gantt, &ganttSteps, &ganttStepsToggle,
 			&dateRange0, &dateRange1, &days, &daysToggle, &chartOption,
 			&direction, &justifyContent, &alignItems, &alignContent, &wrap,
 			&grow, &shrink, &basis, &perMin, &perMax, &richtext, &size,
@@ -169,6 +170,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				IconId:       iconId,
 				Content:      content,
 				State:        state,
+				Flags:        flags,
 				OnMobile:     onMobile,
 				JsFunctionId: jsFunctionIdButton,
 				OpenForm:     types.OpenForm{},
@@ -185,6 +187,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				IconId:           iconId,
 				Content:          content,
 				State:            state,
+				Flags:            flags,
 				OnMobile:         onMobile,
 				AttributeIdDate0: attributeIdDate0.Bytes,
 				AttributeIdDate1: attributeIdDate1.Bytes,
@@ -216,6 +219,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				IconId:      iconId,
 				Content:     content,
 				State:       state,
+				Flags:       flags,
 				OnMobile:    onMobile,
 				ChartOption: chartOption.String,
 				Columns:     []types.Column{},
@@ -230,6 +234,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				IconId:         iconId,
 				Content:        content,
 				State:          state,
+				Flags:          flags,
 				OnMobile:       onMobile,
 				Direction:      direction.String,
 				JustifyContent: justifyContent.String,
@@ -253,6 +258,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 					IconId:         iconId,
 					Content:        content,
 					State:          state,
+					Flags:          flags,
 					OnMobile:       onMobile,
 					Clipboard:      clipboard.Bool,
 					AttributeId:    attributeId.Bytes,
@@ -289,6 +295,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 					IconId:         iconId,
 					Content:        content,
 					State:          state,
+					Flags:          flags,
 					OnMobile:       onMobile,
 					Clipboard:      clipboard.Bool,
 					AttributeId:    attributeId.Bytes,
@@ -316,6 +323,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				IconId:   iconId,
 				Content:  content,
 				State:    state,
+				Flags:    flags,
 				OnMobile: onMobile,
 				Richtext: richtext.Bool,
 				Size:     int(size.Int16),
@@ -330,6 +338,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				IconId:             iconId,
 				Content:            content,
 				State:              state,
+				Flags:              flags,
 				OnMobile:           onMobile,
 				RelationIndexData:  int(relationIndexKanbanData.Int16),
 				RelationIndexAxisX: int(relationIndexKanbanAxisX.Int16),
@@ -348,6 +357,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				IconId:       iconId,
 				Content:      content,
 				State:        state,
+				Flags:        flags,
 				OnMobile:     onMobile,
 				Columns:      []types.Column{},
 				AutoRenew:    autoRenew,
@@ -374,6 +384,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				IconId:   iconId,
 				Content:  content,
 				State:    state,
+				Flags:    flags,
 				OnMobile: onMobile,
 				Captions: types.CaptionMap{},
 				Tabs:     []types.Tab{},
@@ -389,6 +400,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				IconId:       iconId,
 				Content:      content,
 				State:        state,
+				Flags:        flags,
 				OnMobile:     onMobile,
 				Clipboard:    clipboardVariable.Bool,
 				Captions:     types.CaptionMap{},
@@ -695,7 +707,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UU
 			return err
 		}
 		fieldId, err := setGeneric_tx(ctx, tx, formId, f.Id, parentId,
-			tabId, f.IconId, f.Content, f.State, f.OnMobile, pos)
+			tabId, f.IconId, f.Content, f.State, f.Flags, f.OnMobile, pos)
 
 		if err != nil {
 			return err
@@ -891,7 +903,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UU
 
 func setGeneric_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, id uuid.UUID,
 	parentId pgtype.UUID, tabId pgtype.UUID, iconId pgtype.UUID, content string,
-	state string, onMobile bool, position int) (uuid.UUID, error) {
+	state string, flags []string, onMobile bool, position int) (uuid.UUID, error) {
 
 	known, err := schema.CheckCreateId_tx(ctx, tx, &id, "field", "id")
 	if err != nil {
@@ -902,17 +914,17 @@ func setGeneric_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, id uuid.UUI
 		if _, err := tx.Exec(ctx, `
 			UPDATE app.field
 			SET parent_id = $1, tab_id = $2, icon_id = $3, state = $4,
-				on_mobile = $5, position = $6
-			WHERE id = $7
-		`, parentId, tabId, iconId, state, onMobile, position, id); err != nil {
+				flags = $5, on_mobile = $6, position = $7
+			WHERE id = $8
+		`, parentId, tabId, iconId, state, flags, onMobile, position, id); err != nil {
 			return id, err
 		}
 	} else {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.field (id, form_id, parent_id, tab_id,
-				icon_id, content, state, on_mobile, position)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-		`, id, formId, parentId, tabId, iconId, content, state, onMobile, position); err != nil {
+				icon_id, content, state, flags, on_mobile, position)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+		`, id, formId, parentId, tabId, iconId, content, state, flags, onMobile, position); err != nil {
 			return id, err
 		}
 	}

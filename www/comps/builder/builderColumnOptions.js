@@ -85,7 +85,7 @@ let MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr>
-					<td>{{ capApp.columnAlignment }}</td>
+					<td>{{ capGen.alignment }}</td>
 					<td>
 						<select v-model="alignment">
 							<option value="def">{{ capApp.option.alignment.def }}</option>

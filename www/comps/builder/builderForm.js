@@ -874,6 +874,7 @@ let MyBuilderForm = {
 				jsFunctionId:null,
 				content:'button',
 				state:'default',
+				flags:[],
 				openForm:null,
 				onMobile:true,
 				captions:{
@@ -887,6 +888,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'calendar',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				attributeIdDate0:null,
 				attributeIdDate1:null,
@@ -913,6 +915,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'calendar',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				attributeIdDate0:null,
 				attributeIdDate1:null,
@@ -939,6 +942,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'chart',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				chartOption:JSON.stringify({
 					dataset:{
@@ -981,6 +985,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'container',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				fields:[],
 				direction:'column',
@@ -1003,6 +1008,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'data',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				attributeId:attribute.id,
 				attributeIdAlt:null, // altern. attribute (used for date period)
@@ -1045,6 +1051,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'header',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				size:2,
 				captions:{
@@ -1058,6 +1065,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'kanban',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				columns:[],
 				collections:[],
@@ -1075,6 +1083,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'list',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				columns:[],
 				collections:[],
@@ -1098,6 +1107,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'tabs',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				captions:{
 					fieldTitle:{}
@@ -1122,6 +1132,7 @@ let MyBuilderForm = {
 				columns:[],
 				query:this.getQueryTemplate(),
 				state:'default',
+				flags:[],
 				onMobile:true,
 				clipboard:false,
 				captions:{
