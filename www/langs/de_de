@@ -2246,6 +2246,11 @@
 		}
 	},
 	"input": {
+		"barcode": {
+			"deviceMissing": "Es wurde kein Gerät vom Typ \"Kamera\" gefunden. Bitte erneut versuchen.",
+			"deviceSelect": "Bitte ein Eingabegerät auswählen",
+			"title": "Code aus Kamerabild auslesen"
+		},
 		"date": {
 			"button": {
 				"todayHint": "Heute/jetzt",

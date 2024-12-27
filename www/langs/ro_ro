@@ -2246,6 +2246,11 @@
 		}
 	},
 	"input": {
+		"barcode": {
+			"deviceMissing": "No input devices of type 'camera' found. Please try again.",
+			"deviceSelect": "Please select an input device",
+			"title": "Capture code from camera image"
+		},
 		"date": {
 			"button": {
 				"todayHint": "Today/now",

@@ -144,6 +144,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- make column styles not nullable
 			UPDATE app.column SET styles = '{}' WHERE styles IS NULL;
 			ALTER TABLE app.column ALTER COLUMN styles SET NOT NULL;
+
+			-- barcode attribute use
+			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode';
 		`)
 		return "3.10", err
 	},

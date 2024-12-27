@@ -2,6 +2,7 @@ import MyCalendar                 from './calendar.js';
 import MyChart                    from './chart.js';
 import MyGantt                    from './gantt.js';
 import MyKanban                   from './kanban.js';
+import MyInputBarcode             from './inputBarcode.js';
 import MyInputDate                from './inputDate.js';
 import MyInputDrawing             from './inputDrawing.js';
 import MyInputFiles               from './inputFiles.js';
@@ -51,6 +52,7 @@ let MyField = {
 		MyChart,
 		MyGantt,
 		MyKanban,
+		MyInputBarcode,
 		MyInputDate,
 		MyInputDrawing,
 		MyInputFiles,
@@ -338,6 +340,14 @@ let MyField = {
 				<my-input-uuid
 					v-if="isUuid"
 					v-model="value"
+					:readonly="isReadonly"
+				/>
+				
+				<!-- QR/barcode scanner -->
+				<my-input-barcode
+					v-if="isBarcode"
+					v-model="value"
+					:clipboard="isClipboard"
 					:readonly="isReadonly"
 				/>
 				
@@ -1102,6 +1112,7 @@ let MyField = {
 		
 		// composite
 		isActive:        (s) => (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
+		isBarcode:       (s) => s.isData && s.contentUse === 'barcode',
 		isEncrypted:     (s) => s.isData && s.attribute.encrypted,
 		isNew:           (s) => s.isData && !s.isVariable && s.joinsIndexMap[s.field.index].recordId === 0,
 		isBoolean:       (s) => s.isData && s.isAttributeBoolean(s.contentData),
