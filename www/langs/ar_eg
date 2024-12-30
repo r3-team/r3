@@ -686,6 +686,7 @@
 			"onDelete": "الإجراء عند الحذف",
 			"onUpdate": "الإجراء عند التغيير",
 			"option": {
+				"barcode": "Barcode/QR code",
 				"boolean": "نعم/لا",
 				"color": "لون",
 				"date": "تاريخ",
@@ -724,6 +725,7 @@
 			"titleHint": "يمكن ترجمة العنوان بلغات التطبيق المتاحة. ",
 			"usedFor": "نوع القيمة",
 			"usedForHint": {
+				"barcode": "A barcode or QR code value. Can store various formats. Corresponding inputs can be used to scan barcodes / QR codes but also generate them based on the current value.",
 				"boolean": "قيمة صحيحة/خطأ. ",
 				"color": "قيم اللون. ",
 				"date": "قيمة التاريخ. ",
@@ -2247,9 +2249,12 @@
 	},
 	"input": {
 		"barcode": {
+			"capture": "Capture code from camera image",
 			"deviceMissing": "No input devices of type 'camera' found. Please try again.",
 			"deviceSelect": "Please select an input device",
-			"title": "Capture code from camera image"
+			"formatInvalidValue": "Value is not supported by chosen format.",
+			"formatMissing": "Please select a format to display value:",,
+			"formatResetHint": "Switch code format to display value in"
 		},
 		"date": {
 			"button": {

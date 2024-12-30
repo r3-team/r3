@@ -686,6 +686,7 @@
 			"onDelete": "Aktion bei Löschung",
 			"onUpdate": "Aktion bei Änderung",
 			"option": {
+				"barcode": "Barcode/QR-Code",
 				"boolean": "Ja/nein",
 				"color": "Farbe",
 				"date": "Datum",
@@ -724,6 +725,7 @@
 			"titleHint": "Der Titel kann in die verfügbaren Anwendungssprachen übersetzt werden. Er wird den Benutzern angezeigt, wenn er nicht durch einen Feld- oder Spaltentitel überschrieben wird.",
 			"usedFor": "Werttyp",
 			"usedForHint": {
+				"barcode": "Ein Barcode oder QR-Code-Wert. Kann verschiedene Formate haben. Eingabefelder können Codes per Kamera einlesen und diese aus Werten erzeugen.",
 				"boolean": "Wahr/Falsch-Wert. Wird für einfache Ja/Nein-Werte verwendet. Wenn ein leerer Wert erlaubt ist, gibt es 3 mögliche Werte: wahr/falsch/leer.",
 				"color": "Farbwerte. Kann in Ansichten zur Gestaltung von Ausgaben verwendet werden, um Merkmale eines Datensatzes darzustellen. Beispielsweise kann eine Priorität anhand einer zugewiesenen Kategorie farblich sichtbar gemacht werden.",
 				"date": "Ein Datumswert. Wird für reine Datumswerte verwendet, wie z. B. einem Geburts- oder Kaufdatum.",
@@ -2247,9 +2249,12 @@
 	},
 	"input": {
 		"barcode": {
+			"capture": "Code mit Kamera erfassen",
 			"deviceMissing": "Es wurde kein Gerät vom Typ \"Kamera\" gefunden. Bitte erneut versuchen.",
 			"deviceSelect": "Bitte ein Eingabegerät auswählen",
-			"title": "Code aus Kamerabild auslesen"
+			"formatInvalidValue": "Wert wird vom gewählten Format nicht unterstützt.",
+			"formatMissing": "Bitte ein Format auswählen, um den Wert anzuzeigen:",
+			"formatResetHint": "Format zur Anzeige wechseln"
 		},
 		"date": {
 			"button": {

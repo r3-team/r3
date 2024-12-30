@@ -133,6 +133,7 @@ export function getAttributeIcon(content,contentUse,outsideIn,isNm) {
 			case 'color':    return 'colors.png';     break;
 			case 'drawing':  return 'drawing.png';    break;
 			case 'iframe':   return 'iframe.png';     break;
+			case 'barcode':  return 'barcode.png';    break;
 		}
 	}
 	if(isAttributeInteger(content)) {
@@ -164,6 +165,7 @@ export function getAttributeContentUse(content,use) {
 
 	if(isAttributeString(content)) {
 		switch(use) {
+			case 'barcode':  return 'barcode';  break;
 			case 'color':    return 'color';    break;
 			case 'drawing':  return 'drawing';  break;
 			case 'iframe':   return 'iframe';   break;

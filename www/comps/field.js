@@ -536,7 +536,7 @@ let MyField = {
 				
 				<!-- copy to clipboard action -->
 				<my-button image="copyClipboard.png"
-					v-if="isClipboard && !isFiles && !isIframe"
+					v-if="isClipboard && !isFiles && !isIframe && !isBarcode"
 					@trigger="copyToClipboard"
 					:active="value !== null"
 					:captionTitle="capGen.button.copyClipboard"
@@ -1026,7 +1026,7 @@ let MyField = {
 			&& !s.isLogin        && !s.isSlider
 			&& !s.isTextarea     && !s.isRegconfig
 			&& !s.isRelationship && !s.isRichtext
-			&& !s.isUuid,
+			&& !s.isUuid         && !s.isBarcode,
 		isLineSingle:(s) => s.isData && (
 			s.isLineInput || s.isBoolean || s.isColor || s.isDateInput || s.isSlider ||
 			s.isLogin || s.isRegconfig || s.isUuid || (s.isRelationship && !s.isRelationship1N)
@@ -1081,7 +1081,7 @@ let MyField = {
 		customErr:  (s) => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
 		hasCaption: (s) => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
-		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles,
+		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode,
 		inputRegex: (s) => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
 		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),

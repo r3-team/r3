@@ -686,6 +686,7 @@
 			"onDelete": "Action when deleted",
 			"onUpdate": "Action when changed",
 			"option": {
+				"barcode": "Barcode/QR code",
 				"boolean": "Yes/no",
 				"color": "Color",
 				"date": "Date",
@@ -724,6 +725,7 @@
 			"titleHint": "The title can be translated in available application languages. It is shown to users if not overwritten by a field or column title.",
 			"usedFor": "Value type",
 			"usedForHint": {
+				"barcode": "A barcode or QR code value. Can store various formats. Corresponding inputs can be used to scan barcodes / QR codes but also generate them based on the current value.",
 				"boolean": "True/false value. Used for simple yes/no values. If an empty value is allowed, 3 possible values exist: true/false/empty.",
 				"color": "Color values. Can be used in most views to style outputs to show characteristics of a record, like its importance, based on an assigned category.",
 				"date": "A date value. Used for date-only values, like date of birth or purchase date.",
@@ -2247,9 +2249,12 @@
 	},
 	"input": {
 		"barcode": {
+			"capture": "Capture code from camera image",
 			"deviceMissing": "No input devices of type 'camera' found. Please try again.",
 			"deviceSelect": "Please select an input device",
-			"title": "Capture code from camera image"
+			"formatInvalidValue": "Value is not supported by chosen format.",
+			"formatMissing": "Please select a format to display value:",
+			"formatResetHint": "Switch code format to display value in"
 		},
 		"date": {
 			"button": {

@@ -686,6 +686,7 @@
 			"onDelete": "删除时的操作",
 			"onUpdate": "更改时的操作",
 			"option": {
+				"barcode": "Barcode/QR code",
 				"boolean": "是/否",
 				"color": "颜色",
 				"date": "日期",
@@ -724,6 +725,7 @@
 			"titleHint": "标题可以在可用应用程序语言中进行翻译。如果未被字段或列标题覆盖，则会显示给用户。",
 			"usedFor": "数值类型",
 			"usedForHint": {
+				"barcode": "A barcode or QR code value. Can store various formats. Corresponding inputs can be used to scan barcodes / QR codes but also generate them based on the current value.",
 				"boolean": "真/假值。用于简单的是/否值。如果允许空值，则存在3个可能的值：true/false/empty。",
 				"color": "颜色数值。可以在大多数视图中使用，以样式化输出来显示记录的特征，例如基于分配的类别，显示其重要性。",
 				"date": "日期数值。用于仅日期的数值，如出生日期或购买日期。",
@@ -2247,9 +2249,12 @@
 	},
 	"input": {
 		"barcode": {
+			"capture": "Capture code from camera image",
 			"deviceMissing": "No input devices of type 'camera' found. Please try again.",
 			"deviceSelect": "Please select an input device",
-			"title": "Capture code from camera image"
+			"formatInvalidValue": "Value is not supported by chosen format.",
+			"formatMissing": "Please select a format to display value:",
+			"formatResetHint": "Switch code format to display value in"
 		},
 		"date": {
 			"button": {

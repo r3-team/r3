@@ -296,7 +296,7 @@ let MyBuilderField = {
 				isTemplate:s.isTemplate,
 				notData:!s.isData,
 				noGrow:s.flexDirParent === 'column' && (s.isHeader || s.isVariable || (
-					s.isData && !s.isRelationship1N && !s.isRichtext &&
+					s.isData && !s.isRelationship1N && !s.isRichtext && !s.isBarcode &&
 					!s.isTextarea && !s.isDrawing && !s.isFiles && !s.isIframe)
 				),
 				selected:s.isSelected,
@@ -376,6 +376,7 @@ let MyBuilderField = {
 		
 		// simple
 		hasQuery:        (s) => s.getFieldHasQuery(s.field),
+		isBarcode:       (s) => s.isData && s.attribute.contentUse === 'barcode',
 		isButton:        (s) => s.field.content === 'button',
 		isCalendar:      (s) => s.field.content === 'calendar',
 		isChart:         (s) => s.field.content === 'chart',

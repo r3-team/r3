@@ -119,6 +119,7 @@ let MyBuilderVariable = {
 											<option value="iframe"  >{{ capAppAtr.option.iframe }}</option>
 											<option value="drawing" >{{ capAppAtr.option.drawing }}</option>
 											<option value="boolean" >{{ capAppAtr.option.boolean }}</option>
+											<option value="barcode" >{{ capAppAtr.option.barcode }}</option>
 										</optgroup>
 										<optgroup :label="capAppAtr.datetimes">
 											<option value="datetime">{{ capAppAtr.option.datetime }}</option>

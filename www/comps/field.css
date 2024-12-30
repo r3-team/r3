@@ -2,6 +2,7 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
+	max-height:calc(100% - var(--spacing)); /* for barcode fields, max. full size of parent - margin-bottom */
 }
 .field.container{
 	display:flex;

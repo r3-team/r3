@@ -132,6 +132,7 @@ let MyBuilderAttribute = {
 											<option value="iframe"   :disabled="!isNew && !isString">{{ capApp.option.iframe }}</option>
 											<option value="drawing"  :disabled="!isNew && !isString">{{ capApp.option.drawing }}</option>
 											<option value="boolean"  :disabled="!isNew && !isBoolean">{{ capApp.option.boolean }}</option>
+											<option value="barcode"  :disabled="!isNew && !isBarcode">{{ capApp.option.barcode }}</option>
 											<option value="files"    :disabled="!isNew && !isFiles">{{ capApp.option.files }}</option>
 										</optgroup>
 										<optgroup :label="capApp.datetimes" :disabled="!isNew && !isInteger">
@@ -376,6 +377,11 @@ let MyBuilderAttribute = {
 						this.values.contentUse = 'iframe';
 						this.values.length     = 0;
 					break;
+					case 'barcode':
+						this.values.content    = 'text';
+						this.values.contentUse = 'barcode';
+						this.values.length     = 0;
+					break;
 					
 					// boolean uses
 					case 'boolean':
@@ -478,6 +484,7 @@ let MyBuilderAttribute = {
 		isUuid:          (s) => s.isAttributeUuid(s.values.content),
 		
 		// content use
+		isBarcode: (s) => s.isString  && s.values.contentUse === 'barcode',
 		isColor:   (s) => s.isString  && s.values.contentUse === 'color',
 		isDate:    (s) => s.isInteger && s.values.contentUse === 'date',
 		isDatetime:(s) => s.isInteger && s.values.contentUse === 'datetime',

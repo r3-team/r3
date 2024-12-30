@@ -686,6 +686,7 @@
 			"onDelete": "Action lors de la suppression",
 			"onUpdate": "Action lors de la modification",
 			"option": {
+				"barcode": "Barcode/QR code",
 				"boolean": "Oui/non",
 				"color": "Couleur",
 				"date": "Date",
@@ -724,6 +725,7 @@
 			"titleHint": "Le titre peut être traduit dans les langues d'application disponibles. Il est affiché aux utilisateurs s'il n'est pas écrasé par un titre de champ ou de colonne.",
 			"usedFor": "Type de valeur",
 			"usedForHint": {
+				"barcode": "A barcode or QR code value. Can store various formats. Corresponding inputs can be used to scan barcodes / QR codes but also generate them based on the current value.",
 				"boolean": "Valeur vrai/faux. Utilisé pour les valeurs oui/non simples. Si une valeur vide est autorisée, 3 valeurs possibles existent : vrai/faux/vide.",
 				"color": "Valeurs de couleur. Peut être utilisé dans la plupart des vues pour styliser les sorties pour montrer les caractéristiques d'un enregistrement, comme son importance, basé sur une catégorie attribuée.",
 				"date": "Une valeur de date. Utilisé pour les valeurs de date uniquement, comme la date de naissance ou la date d'achat.",
@@ -2247,9 +2249,12 @@
 	},
 	"input": {
 		"barcode": {
+			"capture": "Capture code from camera image",
 			"deviceMissing": "No input devices of type 'camera' found. Please try again.",
 			"deviceSelect": "Please select an input device",
-			"title": "Capture code from camera image"
+			"formatInvalidValue": "Value is not supported by chosen format.",
+			"formatMissing": "Please select a format to display value:",
+			"formatResetHint": "Switch code format to display value in"
 		},
 		"date": {
 			"button": {

@@ -686,6 +686,7 @@
 			"onDelete": "Törlési Művelet",
 			"onUpdate": "Frissítési Művelet",
 			"option": {
+				"barcode": "Barcode/QR code",
 				"boolean": "Igen/Nem",
 				"color": "Szín",
 				"date": "Dátum",
@@ -724,6 +725,7 @@
 			"titleHint": "A címet el lehet fordítani az elérhető alkalmazásnyelvekre. Megjelenik a felhasználóknak, ha nem kerül felülírásra egy mező vagy oszlop címe által.",
 			"usedFor": "Érték Típus",
 			"usedForHint": {
+				"barcode": "A barcode or QR code value. Can store various formats. Corresponding inputs can be used to scan barcodes / QR codes but also generate them based on the current value.",
 				"boolean": "Igaz/Hamis érték. Egyszerű igen/nem értékekhez használják. Ha üres érték engedélyezett, három lehetséges érték van: igaz/hamis/üres.",
 				"color": "Színértékek. Felhasználhatók kilátások tervezéséhez adatok megjelenítésére, például egy rekord jellemzőinek kiemelésére szín alapján. Például prioritás színkódolására egy adott kategória alapján.",
 				"date": "Dátumérték. Tiszta dátumértékekhez használják, mint például a születési vagy vásárlási dátum.",
@@ -2247,9 +2249,12 @@
 	},
 	"input": {
 		"barcode": {
+			"capture": "Capture code from camera image",
 			"deviceMissing": "No input devices of type 'camera' found. Please try again.",
 			"deviceSelect": "Please select an input device",
-			"title": "Capture code from camera image"
+			"formatInvalidValue": "Value is not supported by chosen format.",
+			"formatMissing": "Please select a format to display value:",
+			"formatResetHint": "Switch code format to display value in"
 		},
 		"date": {
 			"button": {

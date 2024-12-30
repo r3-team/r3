@@ -1385,6 +1385,7 @@ let MyBuilderFieldOptions = {
 		// simple states
 		hasCaption:      (s) => s.isData || s.isHeader,
 		hasOpenForm:     (s) => s.isButton || ((s.isList || s.isCalendar || s.isKanban || s.isRelationship) && s.field.query.relationId !== null),
+		isBarcode:       (s) => s.isData && s.attribute.contentUse === 'barcode',
 		isButton:        (s) => s.field.content === 'button',
 		isCalendar:      (s) => s.field.content === 'calendar',
 		isChart:         (s) => s.field.content === 'chart',

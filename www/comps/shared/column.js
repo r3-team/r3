@@ -181,6 +181,7 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 			&& !a.encrypted
 			&& a.contentUse !== 'color'
 			&& a.contentUse !== 'drawing'
+			&& a.contentUse !== 'barcode'
 			&& !isAttributeFiles(a.content)
 			&& !isAttributeBoolean(a.content)
 			&& !isAttributeString(a.content)
