@@ -1328,14 +1328,12 @@
 			"option": {
 				"fieldGetFileLinks": "Dateilinks lesen",
 				"fieldGetFileLinksHint": "Liefert ein Array an Download-Links für hochgeladene Dateien, nur gültig für die aktuelle Benutzersitzung.",
-				"fieldGetValue": "Wert lesen",
 				"fieldGetValueChanged": "Wert geändert?",
 				"fieldSetCaption": "Titel setzen",
 				"fieldSetChart": "ECharts-Optionen-Objekt setzen",
 				"fieldSetError": "Fehlermeldung setzen",
 				"fieldSetFocus": "Zur Feldeingabe springen",
 				"fieldSetOrder": "Feldreihenfolge im Element setzen",
-				"fieldSetValue": "Wert setzen",
 				"intervalDays": "Tage",
 				"intervalHours": "Stunden",
 				"intervalMinutes": "Minuten",
@@ -2067,6 +2065,8 @@
 			"undo": "Rückgängig",
 			"unlock": "Entsperren",
 			"update": "Aktualisieren",
+			"valueRead": "Wert lesen",
+			"valueWrite": "Wert schreiben",
 			"zoomReset": "Zoom-Level zurücksetzen"
 		},
 		"category": "Kategorie",

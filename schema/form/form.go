@@ -65,7 +65,7 @@ func Copy_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, n
 			// replace IDs inside fields
 			// first run: field IDs
 			// second run: IDs for (sub)queries, columns, tabs
-			fieldIf, err = replaceFieldIds(fieldIf, idMapReplaced, runs == 0)
+			fieldIf, err = replaceFieldIds(ctx, tx, fieldIf, idMapReplaced, runs == 0)
 			if err != nil {
 				return err
 			}
@@ -282,7 +282,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 }
 
 // form duplication
-func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID, setFieldIds bool) (interface{}, error) {
+func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf interface{},
+	idMapReplaced map[uuid.UUID]uuid.UUID, setFieldIds bool) (interface{}, error) {
+
 	var err error
 
 	// replace form ID to open if it was replaced (field opening its own form)
@@ -313,6 +315,17 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			}
 		} else {
 			field.OpenForm = replaceOpenForm(field.OpenForm)
+		}
+
+		// remove references to form bound entities that do not exist after form copy
+		if field.JsFunctionId.Valid {
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, "js_function", field.JsFunctionId.Bytes)
+			if err != nil {
+				return nil, err
+			}
+			if isBound {
+				field.JsFunctionId = pgtype.UUID{}
+			}
 		}
 		fieldIf = field
 
@@ -364,7 +377,7 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			}
 		}
 		for i, _ := range field.Fields {
-			field.Fields[i], err = replaceFieldIds(field.Fields[i], idMapReplaced, setFieldIds)
+			field.Fields[i], err = replaceFieldIds(ctx, tx, field.Fields[i], idMapReplaced, setFieldIds)
 			if err != nil {
 				return nil, err
 			}
@@ -379,6 +392,17 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			}
 		} else {
 			field.DefCollection = replaceCollectionConsumer(field.DefCollection)
+		}
+
+		// remove references to form bound entities that do not exist after form copy
+		if field.JsFunctionId.Valid {
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, "js_function", field.JsFunctionId.Bytes)
+			if err != nil {
+				return nil, err
+			}
+			if isBound {
+				field.JsFunctionId = pgtype.UUID{}
+			}
 		}
 		fieldIf = field
 
@@ -399,6 +423,17 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 				return nil, err
 			}
 			field.DefCollection = replaceCollectionConsumer(field.DefCollection)
+		}
+
+		// remove references to form bound entities that do not exist after form copy
+		if field.JsFunctionId.Valid {
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, "js_function", field.JsFunctionId.Bytes)
+			if err != nil {
+				return nil, err
+			}
+			if isBound {
+				field.JsFunctionId = pgtype.UUID{}
+			}
 		}
 		fieldIf = field
 
@@ -473,7 +508,7 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 		}
 		for i, tab := range field.Tabs {
 			for fi, _ := range tab.Fields {
-				tab.Fields[fi], err = replaceFieldIds(tab.Fields[fi], idMapReplaced, setFieldIds)
+				tab.Fields[fi], err = replaceFieldIds(ctx, tx, tab.Fields[fi], idMapReplaced, setFieldIds)
 				if err != nil {
 					return nil, err
 				}
@@ -482,8 +517,46 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 		}
 		fieldIf = field
 
+	case types.FieldVariable:
+		if setFieldIds {
+			field.Id, err = schema.ReplaceUuid(field.Id, idMapReplaced)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			field.Columns, err = schema.ReplaceColumnIds(field.Columns, idMapReplaced)
+			if err != nil {
+				return nil, err
+			}
+			field.Query, err = schema.ReplaceQueryIds(field.Query, idMapReplaced)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// remove references to form bound entities that do not exist after form copy
+		if field.JsFunctionId.Valid {
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, "js_function", field.JsFunctionId.Bytes)
+			if err != nil {
+				return nil, err
+			}
+			if isBound {
+				field.JsFunctionId = pgtype.UUID{}
+			}
+		}
+		if field.VariableId.Valid {
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, "variable", field.VariableId.Bytes)
+			if err != nil {
+				return nil, err
+			}
+			if isBound {
+				field.VariableId = pgtype.UUID{}
+			}
+		}
+		fieldIf = field
+
 	default:
-		return nil, fmt.Errorf("unknown field type, interface: '%T'", fieldIf)
+		return nil, fmt.Errorf("unknown field type '%T'", fieldIf)
 	}
 	return fieldIf, nil
 }

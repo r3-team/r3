@@ -1328,14 +1328,12 @@
 			"option": {
 				"fieldGetFileLinks": "Read file links",
 				"fieldGetFileLinksHint": "Returns array of download URLs for uploaded files, only valid for the current user session.",
-				"fieldGetValue": "Lire la valeur",
 				"fieldGetValueChanged": "Value changed?",
 				"fieldSetCaption": "Écrire la légende",
 				"fieldSetChart": "Write ECharts option object",
 				"fieldSetError": "Écrire le message d'erreur",
 				"fieldSetFocus": "Sauter à la saisie du champ",
 				"fieldSetOrder": "Set field order in parent",
-				"fieldSetValue": "Écrire la valeur",
 				"intervalDays": "Jours",
 				"intervalHours": "Heures",
 				"intervalMinutes": "Minutes",
@@ -2067,6 +2065,8 @@
 			"undo": "Annuler",
 			"unlock": "Déverrouiller",
 			"update": "Update",
+			"valueRead": "Lire la valeur",
+			"valueWrite": "Écrire la valeur",
 			"zoomReset": "Réinitialiser le niveau de zoom"
 		},
 		"category": "Catégorie",

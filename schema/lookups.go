@@ -170,3 +170,19 @@ func GetPgIndexNamesById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (strin
 	}
 	return moduleName, relationName, nil
 }
+
+func GetIsFormBound_tx(ctx context.Context, tx pgx.Tx, entity string, id uuid.UUID) (bool, error) {
+
+	if entity != "js_function" && entity != "variable" {
+		return false, fmt.Errorf("invalid entity '%s'", entity)
+	}
+
+	isFormBound := false
+	err := tx.QueryRow(ctx, fmt.Sprintf(`
+		SELECT form_id IS NOT NULL
+		FROM app.%s
+		WHERE id = $1
+	`, entity), id).Scan(&isFormBound)
+
+	return isFormBound, err
+}

@@ -1328,14 +1328,12 @@
 			"option": {
 				"fieldGetFileLinks": "Read file links",
 				"fieldGetFileLinksHint": "Returns array of download URLs for uploaded files, only valid for the current user session.",
-				"fieldGetValue": "读取数值",
 				"fieldGetValueChanged": "Value changed?",
 				"fieldSetCaption": "填写标题",
 				"fieldSetChart": "填写ECharts选项对象",
 				"fieldSetError": "填写错误消息",
 				"fieldSetFocus": "跳转到字段输入",
 				"fieldSetOrder": "设置字段在父级中的顺序",
-				"fieldSetValue": "填写数值",
 				"intervalDays": "天",
 				"intervalHours": "小时",
 				"intervalMinutes": "分钟",
@@ -2067,6 +2065,8 @@
 			"undo": "撤销",
 			"unlock": "解锁",
 			"update": "更新",
+			"valueRead": "读取数值",
+			"valueWrite": "填写数值",
 			"zoomReset": "重置缩放级别"
 		},
 		"category": "类别",
