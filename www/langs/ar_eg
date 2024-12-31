@@ -1326,14 +1326,12 @@
 			"option": {
 				"fieldGetFileLinks": "قراءة روابط الملفات",
 				"fieldGetFileLinksHint": "إرجاع مجموعة من عناوين URL للتنزيل للملفات التي تم تحميلها، وهي صالحة فقط لجلسة المستخدم الحالية.",
-				"fieldGetValue": "قراءة القيمة",
 				"fieldGetValueChanged": "تغيرت القيمة؟",
 				"fieldSetCaption": "اكتب التسمية التوضيحية",
 				"fieldSetChart": "كتابة كائن خيار ECharts",
 				"fieldSetError": "كتابة رسالة خطأ",
 				"fieldSetFocus": "انتقل إلى حقل الإدخال",
 				"fieldSetOrder": "تعيين ترتيب الحقل في الأصل",
-				"fieldSetValue": "اكتب القيمة",
 				"intervalDays": "أيام",
 				"intervalHours": "ساعات",
 				"intervalMinutes": "دقائق",
@@ -2062,6 +2060,8 @@
 			"undo": "تراجع",
 			"unlock": "فتح",
 			"update": "تحديث",
+			"valueRead": "قراءة القيمة",
+			"valueWrite": "اكتب القيمة",
 			"zoomReset": "إعادة ضبط مستوى التكبير/التصغير"
 		},
 		"category": "فئة",

@@ -1326,14 +1326,12 @@
 			"option": {
 				"fieldGetFileLinks": "Read file links",
 				"fieldGetFileLinksHint": "Returns array of download URLs for uploaded files, only valid for the current user session.",
-				"fieldGetValue": "Read value",
 				"fieldGetValueChanged": "Value changed?",
 				"fieldSetCaption": "Write caption",
 				"fieldSetChart": "Write ECharts option object",
 				"fieldSetError": "Write error message",
 				"fieldSetFocus": "Jump to field input",
 				"fieldSetOrder": "Set field order in parent",
-				"fieldSetValue": "Write value",
 				"intervalDays": "Days",
 				"intervalHours": "Hours",
 				"intervalMinutes": "Minutes",
@@ -2062,6 +2060,8 @@
 			"undo": "Undo",
 			"unlock": "Unlock",
 			"update": "Update",
+			"valueRead": "Read value",
+			"valueWrite": "Write value",
 			"zoomReset": "Reset zoom level"
 		},
 		"category": "Category",

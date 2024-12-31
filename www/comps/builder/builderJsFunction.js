@@ -175,7 +175,7 @@ let MyBuilderJsFunction = {
 									<template v-if="field.isData">
 										<my-button
 											@trigger="selectEntity('field_value_get',field.id)"
-											:caption="capApp.option.fieldGetValue"
+											:caption="capGen.button.valueRead"
 											:image="radioIcon('field_value_get',field.id)"
 											:naked="true"
 										/>
@@ -189,7 +189,7 @@ let MyBuilderJsFunction = {
 										/>
 										<my-button
 											@trigger="selectEntity('field_value_set',field.id)"
-											:caption="capApp.option.fieldSetValue"
+											:caption="capGen.button.valueWrite"
 											:image="radioIcon('field_value_set',field.id)"
 											:naked="true"
 										/>
@@ -440,13 +440,13 @@ let MyBuilderJsFunction = {
 								<div class="entity-title">
 									<my-button
 										@trigger="selectEntity('variable_get',v.id)"
-										:caption="capGen.button.read"
+										:caption="capGen.button.valueRead"
 										:image="radioIcon('variable_get',v.id)"
 										:naked="true"
 									/>
 									<my-button
 										@trigger="selectEntity('variable_set',v.id)"
-										:caption="capGen.button.update"
+										:caption="capGen.button.valueWrite"
 										:image="radioIcon('variable_set',v.id)"
 										:naked="true"
 									/>
