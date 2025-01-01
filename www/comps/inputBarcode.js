@@ -17,7 +17,7 @@ let MyInputBarcode = {
 			/>
 			<my-button image="camera.png"
 				v-if="!readonly"
-				@trigger="open"
+				@trigger="openCamera"
 				:captionTitle="capApp.capture"
 				:naked="true"
 			/>
@@ -32,7 +32,8 @@ let MyInputBarcode = {
 
 		<!-- preview image -->
 		<div class="input-barcode-preview" v-show="inputFormat !== null && !valueInvalid">
-			<img class="input-barcode-preview" ref="barcodePreview"
+			<img class="input-barcode-preview clickable" ref="barcodePreview"
+				@click.left="openImage"
 				:class="{ 'max-size':inputFormat === 'QR_CODE' }"
 				:title="inputFormat"
 			/>
@@ -235,7 +236,7 @@ let MyInputBarcode = {
 			if(e.key === 'Escape' && this.showDialog)
 				this.close();
 		},
-		open() {
+		openCamera() {
 			this.devices          = [];
 			this.deviceIdSelected = null;
 			this.showDialog       = true;
@@ -244,6 +245,18 @@ let MyInputBarcode = {
 				if(devices.length === 1) this.deviceInit(devices[0].id);
 				else                     this.devices = devices;
 			}).catch(console.warn);
+		},
+		openImage() {
+			if(this.modelValue === null)
+				return;
+			
+			const image = JSON.parse(this.modelValue).image;
+			if(image === '')
+				return;
+
+			var newTab = window.open();
+			newTab.document.write(`<!DOCTYPE html><body><img src="${image}" style="width:100%;max-width:450px;"></body>`);
+			newTab.document.close();
 		},
 		scanned(text,res) {
 			this.$emit('update:modelValue',JSON.stringify({
