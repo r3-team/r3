@@ -11,6 +11,7 @@ import {
 	colorAdjustBg,
 	getHtmlStripped,
 	getLinkMeta,
+	openDataImageAsNewTag,
 	openLink
 } from './shared/generic.js';
 export {MyValueRich as default};
@@ -26,7 +27,7 @@ let MyValueRich = {
 	>
 		<!-- copy to clipboard action -->
 		<my-button image="copyClipboard.png"
-			v-if="clipboard && !isFiles && !isGallery"
+			v-if="clipboard && !isFiles"
 			@trigger="copyToClipboard"
 			:active="value !== null"
 			:blockBubble="true"
@@ -59,6 +60,20 @@ let MyValueRich = {
 			/>
 			<span v-else>{{ value ? capGen.option.yes : capGen.option.no }}</span>
 		</template>
+
+		<!-- barcode -->
+		<img class="barcode clickable"
+			v-if="isBarcode && isGallery && value !== null"
+			@click.left.stop="openDataImageAsNewTag(JSON.parse(value).image)"
+			:src="JSON.parse(value).image"
+		/>
+		
+		<!-- drawing -->
+		<img class="drawing clickable"
+			v-if="isDrawing && value !== null"
+			@click.left.stop="openDataImageAsNewTag(JSON.parse(value).image)"
+			:src="JSON.parse(value).image"
+		/>
 		
 		<!-- files -->
 		<a target="_blank"
@@ -75,10 +90,8 @@ let MyValueRich = {
 			/>
 		</a>
 		
-		<!-- drawing -->
-		<img class="drawing" v-if="isDrawing && value !== null" :src="JSON.parse(value).image" />
-		
-		<template v-if="isGallery">
+		<!-- files as gallery -->
+		<template v-if="isFiles && isGallery">
 			<img class="gallery-item"
 				v-for="f in files"
 				:src="getAttributeFileThumbHref(attributeId,f.id,f.name,f.version,token)"
@@ -112,6 +125,7 @@ let MyValueRich = {
 	},
 	data() {
 		return {
+			isBarcode:false,
 			isBoolean:false,
 			isColor:false,
 			isDrawing:false,
@@ -126,20 +140,23 @@ let MyValueRich = {
 	},
 	computed:{
 		files:(s) => !s.isFiles || s.value === null ? [] : s.value,
-		link: (s) => !s.isLink || s.value === null ? false : s.getLinkMeta(s.display,s.value),
+		link: (s) => {
+			if(!s.isLink || s.value === null) return false;
+			
+			return s.getLinkMeta(s.display, s.isBarcode ? JSON.parse(s.value).text : s.value);
+		},
 		
 		// styles
 		style:(s) => {
 			let out = [];
-			if(s.basis !== 0)    out.push(`max-width:${s.basis}px`);
-			else if(s.isGallery) out.push(`max-width:40px`);
+			if(s.basis !== 0) out.push(`max-width:${s.basis}px`);
 			
 			if(s.isColor)
 				out.push(`background-color:${s.colorAdjustBg(s.value)}`);
 			
 			return out.join(';');
 		},
-		styleImage:(s) => `width:${(99 - s.files.length) / s.files.length}%`,
+		styleImage:(s) => `width:${100 / s.files.length}%`,
 		
 		// store
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -157,12 +174,16 @@ let MyValueRich = {
 		getUnixFormat,
 		getUnixShifted,
 		getUtcTimeStringFromUnix,
+		openDataImageAsNewTag,
 		openLink,
 		
 		copyToClipboard() {
-			navigator.clipboard.writeText(
-				!this.isPassword ? this.stringValueFull : this.value
-			);
+			let value = !this.isPassword ? this.stringValueFull : this.value;
+
+			if(this.isBarcode && this.value !== null)
+				value = JSON.parse(this.value).text;
+
+			navigator.clipboard.writeText(value);
 			this.$emit('clipboard');
 		},
 		setValue() {
@@ -183,6 +204,12 @@ let MyValueRich = {
 					
 					// handle different uses and display options
 					switch(atr.contentUse) {
+						case 'barcode':
+							this.isBarcode = true;
+
+							if(this.value !== null)
+								this.stringValueFull = JSON.parse(this.value).text;
+						break;
 						case 'color':   return this.isColor   = true; break;
 						case 'drawing': return this.isDrawing = true; break;
 						case 'richtext':
@@ -192,6 +219,7 @@ let MyValueRich = {
 						default: directValue = true; break;
 					}
 					switch(this.display) {
+						case 'gallery': return this.isGallery = this.display === 'gallery'; break;
 						case 'password':
 							this.isPassword      = true;
 							this.stringValueFull = '**********';
@@ -199,9 +227,7 @@ let MyValueRich = {
 						break;
 						case 'email': // fallthrough
 						case 'phone': // fallthrough
-						case 'url':
-							this.isLink = true;
-						break;
+						case 'url': this.isLink = true; break;
 					}
 				break;
 				

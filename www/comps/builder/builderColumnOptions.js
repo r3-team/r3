@@ -136,11 +136,12 @@ let MyBuilderColumnOptions = {
 							:value="column.display"
 						>
 							<option value="default">{{ capApp.option.display.default }}</option>
-							<option v-if="isString" value="email"   >{{ capApp.option.display.email }}</option>
-							<option v-if="isString" value="password">{{ capApp.option.display.password }}</option>
-							<option v-if="isString" value="phone"   >{{ capApp.option.display.phone }}</option>
-							<option v-if="isString" value="url"     >{{ capApp.option.display.url }}</option>
-							<option v-if="isFiles"  value="gallery" >{{ capApp.option.display.gallery }}</option>
+							<option v-if="isString"  value="email"   >{{ capApp.option.display.email }}</option>
+							<option v-if="isString"  value="password">{{ capApp.option.display.password }}</option>
+							<option v-if="isString"  value="phone"   >{{ capApp.option.display.phone }}</option>
+							<option v-if="isString"  value="url"     >{{ capApp.option.display.url }}</option>
+							<option v-if="isFiles"   value="gallery" >{{ capApp.option.display.gallery }}</option>
+							<option v-if="isBarcode" value="gallery" >{{ capApp.option.display.gallery }}</option>
 						</select>
 					</td>
 				</tr>
@@ -235,6 +236,7 @@ let MyBuilderColumnOptions = {
 		},
 		
 		// simple
+		isBarcode: (s) => s.isString && s.attribute.contentUse === 'barcode',
 		isFiles:   (s) => s.isAttributeFiles(s.attribute.content),
 		isString:  (s) => s.isAttributeString(s.attribute.content),
 		isSubQuery:(s) => s.column.subQuery,

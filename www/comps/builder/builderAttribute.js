@@ -131,8 +131,8 @@ let MyBuilderAttribute = {
 											<option value="color"    :disabled="!isNew && !isString">{{ capApp.option.color }}</option>
 											<option value="iframe"   :disabled="!isNew && !isString">{{ capApp.option.iframe }}</option>
 											<option value="drawing"  :disabled="!isNew && !isString">{{ capApp.option.drawing }}</option>
-											<option value="boolean"  :disabled="!isNew && !isBoolean">{{ capApp.option.boolean }}</option>
 											<option value="barcode"  :disabled="!isNew && !isBarcode">{{ capApp.option.barcode }}</option>
+											<option value="boolean"  :disabled="!isNew && !isBoolean">{{ capApp.option.boolean }}</option>
 											<option value="files"    :disabled="!isNew && !isFiles">{{ capApp.option.files }}</option>
 										</optgroup>
 										<optgroup :label="capApp.datetimes" :disabled="!isNew && !isInteger">

@@ -1,3 +1,5 @@
+
+import { openDataImageAsNewTag } from './shared/generic.js';
 export {MyInputBarcode as default};
 
 let MyInputBarcode = {
@@ -126,7 +128,7 @@ let MyInputBarcode = {
 	},
 	watch:{
 		modelValue:{
-			handler(v) { this.updatePreview(); },
+			handler(v) { this.preview(); },
 			immediate:false
 		}
 	},
@@ -151,24 +153,17 @@ let MyInputBarcode = {
 		window.addEventListener('keydown',this.handleHotkeys);
 
 		// ref elements are registered after mounted(), so preview must wait until then
-		this.updatePreview();
+		this.preview();
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
-		update(name,value) {
-			let v = {
-				format:this.inputFormat,
-				image:null,
-				text:this.inputText
-			};
-			v[name] = value;
+		// externals
+		openDataImageAsNewTag,
 
-			if(v.text === '') this.$emit('update:modelValue',null);
-			else              this.$emit('update:modelValue',JSON.stringify(v));
-		},
-		updatePreview() {
+		// presentation
+		preview() {
 			let format;
 			switch(this.inputFormat) {
 				case 'CODABAR':  format = 'CODABAR'; break;
@@ -247,16 +242,8 @@ let MyInputBarcode = {
 			}).catch(console.warn);
 		},
 		openImage() {
-			if(this.modelValue === null)
-				return;
-			
-			const image = JSON.parse(this.modelValue).image;
-			if(image === '')
-				return;
-
-			var newTab = window.open();
-			newTab.document.write(`<!DOCTYPE html><body><img src="${image}" style="width:100%;max-width:450px;"></body>`);
-			newTab.document.close();
+			if(this.modelValue !== null)
+				this.openDataImageAsNewTag(JSON.parse(this.modelValue).image);
 		},
 		scanned(text,res) {
 			this.$emit('update:modelValue',JSON.stringify({
@@ -264,6 +251,17 @@ let MyInputBarcode = {
 				text:text
 			}));
 			this.close();
+		},
+		update(name,value) {
+			let v = {
+				format:this.inputFormat,
+				image:null,
+				text:this.inputText
+			};
+			v[name] = value;
+
+			if(v.text === '') this.$emit('update:modelValue',null);
+			else              this.$emit('update:modelValue',JSON.stringify(v));
 		}
 	}
 };

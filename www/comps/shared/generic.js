@@ -222,3 +222,12 @@ export function filterIsCorrect(operator,value0,value1) {
 export function filterOperatorIsSingleValue(operator) {
 	return !['= ANY','<> ALL','@>','<@','&&'].includes(operator);
 };
+
+export function openDataImageAsNewTag(data) {
+	if(data === '')
+		return;
+
+	var newTab = window.open();
+	newTab.document.write(`<!DOCTYPE html><body><img src="${data}" style="width:100%;max-width:450px;"></body>`);
+	newTab.document.close();
+};
