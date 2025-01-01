@@ -147,6 +147,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- barcode attribute use
 			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode';
+
+			-- new filter side content
+			ALTER TYPE app.filter_side_content ADD VALUE 'getter';
 		`)
 		return "3.10", err
 	},

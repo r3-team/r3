@@ -1849,6 +1849,7 @@
 	},
 	"filter": {
 		"add": "يضيف",
+		"contentApi": "API",
 		"contentData": "بيانات",
 		"contentDate": "التاريخ/الوقت الحالي",
 		"contentForm": "النموذج الحالي",
@@ -1856,6 +1857,7 @@
 		"dialog": {
 			"ftsHelp": "يمكن للبحث عن النص الكامل العثور بسرعة على التطابقات في النصوص الكبيرة بناءً على الكلمات أو العبارات. <br /><br />خيارات البحث التالية موجودة:<ul><li>كلمة محددة</li><ul><li>يبحث: <b>دخول</b></li><li>سيبحث \"الإدخال\" عن نصوص تحتوي على كلمات مثل \"إدخال\" أو \"إدخالات\" أو \"إدخالات القائمة\".</li><li>تطابق صالح: \"لقد قمت بفحص كافة إدخالات البيانات ذات الصلة.\"</li></ul><li>كل الكلمات</li><ul><li>يبحث: <b>صنع القهوة</b></li><li>سيبحث خيار \"صنع القهوة\" عن نصوص إذا كانت تحتوي على الكلمتين المرتبطتين بكلمة \"صنع\" (مثل \"صنع\") و\"قهوة\" (مثل \"آلة صنع القهوة\"). </li><li>تطابق صالح: \"لقد أصلحنا الآلة، ومازلنا نصنع قهوة سيئة.\"</li></ul><li>أي كلمات</li><ul><li>يبحث: <b>الشاي أو القهوة</b></li><li>سيبحث \"شاي أو قهوة\" عن نصوص إذا كانت تحتوي على كلمات مرتبطة بكلمة \"شاي\" (مثل \"شارب الشاي\") أو \"قهوة\" (مثل \"آلة صنع القهوة\").</li><li>مطابقة صالحة: \"القهوة تساعدني خلال اليوم.\"</li></ul><li>بدون كلمات</li><ul><li>يبحث: <b>شاي - قهوة</b></li><li>سيبحث \"tea -coffee\" عن النصوص إذا كانت تحتوي على كلمات متعلقة بـ \"tea\" ولكن ليس كلمات مرتبطة بـ \"coffee\".</li><li>تطابق صالح: \"أنا أستمتع بالشاي بانتظام.\"</li></ul><li>الكلمات تليها</li><ul><li>يبحث: <b>\"اصنع القهوة\"</b></li><li>ستجد عبارة \"make Coffee\" (بين علامتي الاقتباس المزدوجتين) نصوصًا إذا كانت تحتوي على كلمات مرتبطة بـ \"make\" متبوعة بكلمات مرتبطة بـ \"coffee\". </li><li>تطابق صالح: \"سأقضي استراحة الغداء في إعداد القهوة لزملائي\".</li></ul></ul>"
 		},
+		"getterHint": "Parameter name",
 		"javascriptHint": "على سبيل المثال: إرجاع تاريخ جديد ().getFullYear ()؛",
 		"nestingMain": "الاستعلام الرئيسي",
 		"nestingSub": "الاستعلام الفرعي",
@@ -1878,6 +1880,7 @@
 				"fieldChanged": "تغير المجال",
 				"fieldValid": "الحقل صالح",
 				"formChanged": "form has unsaved changes",
+				"getter": "URL parameter",
 				"javascript": "جافا سكريبت",
 				"languageCode": "لغة تسجيل الدخول",
 				"login": "معرف تسجيل الدخول",
@@ -1900,6 +1903,7 @@
 				"fieldChanged": "TRUE/FALSE، اعتمادًا على ما إذا كانت قيمة الحقل قد تغيرت.",
 				"fieldValid": "TRUE/FALSE، اعتمادًا على ما إذا كانت قيمة الحقل صالحة حاليًا.",
 				"formChanged": "TRUE/FALSE, depending on whether form currently has unsaved changes.",
+				"getter": "Value of a URL parameter, such as 'https://system?param=123' with 'param' being the name and '123' the value.",
 				"javascript": "إرجاع قيمة تعبير Javascript المحدد.",
 				"languageCode": "رمز لغة المستخدم الذي تم اختياره (en_us، de_de، ...) لتسجيل الدخول الحالي.",
 				"login": "معرف تسجيل الدخول الحالي (عدد صحيح).",
@@ -2253,7 +2257,7 @@
 			"deviceMissing": "No input devices of type 'camera' found. Please try again.",
 			"deviceSelect": "Please select an input device",
 			"formatInvalidValue": "Value is not supported by chosen format.",
-			"formatMissing": "Please select a format to display value:",,
+			"formatMissing": "Please select a format to display value:",
 			"formatResetHint": "Switch code format to display value in"
 		},
 		"date": {

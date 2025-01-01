@@ -1849,6 +1849,7 @@
 	},
 	"filter": {
 		"add": "添加",
+		"contentApi": "API",
 		"contentData": "数据",
 		"contentDate": "当前日期/时间",
 		"contentForm": "当前表单",
@@ -1856,6 +1857,7 @@
 		"dialog": {
 			"ftsHelp": "全文搜索可以根据单词或短语快速在大文本中找到匹配项。与搜索特定字符不同，全文搜索会将单词分解为其词根，以便与搜索查询进行匹配。<br /><br />存在以下搜索选项：<ul><li>具体单词</li><ul><li>搜索：<b>entry</b></li><li>'entry' 将找到包含类似 'entry'、'entries' 或 'list-entries' 的单词的文本。</li><li>有效匹配：'我已检查了所有相关的数据条目。'</li></ul><li>所有单词</li><ul><li>搜索：<b>making coffee</b></li><li>'making coffee' 将在包含与 'make'（如 'making'）和 'coffee'（如 'coffee machine'）相关的单词的文本中找到匹配项。它不会找到 'coffee maker'，因为 'maker' 是自己的词干。</li><li>有效匹配：'我们修好了咖啡机，现在做出来的咖啡仍然很糟糕。'</li></ul><li>任意单词</li><ul><li>搜索：<b>tea or coffee</b></li><li>'tea or coffee' 将在包含与 'tea'（如 'tea drinker'）或 'coffee'（如 'coffee machine'）相关的单词的文本中找到匹配项。</li><li>有效匹配：'咖啡让我度过了一天。'</li></ul><li>排除单词</li><ul><li>搜索：<b>tea -coffee</b></li><li>'tea -coffee' 将在包含与 'tea' 相关但不包含与 'coffee' 相关的单词的文本中找到匹配项。</li><li>有效匹配：'我经常喝茶。'</li></ul><li>后续单词</li><ul><li>搜索：<b>\"make coffee\"</b></li><li>'\"make coffee\"'（双引号内）将在包含与 'make' 相关的单词后跟着与 'coffee' 相关的单词的文本中找到匹配项。顺序很重要 - 包含 'coffee making' 的文本不会被包括，因为单词顺序错误。</li><li>有效匹配：'我将花时间为同事做咖啡。'</li></ul></ul>"
 		},
+		"getterHint": "Parameter name",
 		"javascriptHint": "示例：return new Date().getFullYear();",
 		"nestingMain": "主查询",
 		"nestingSub": "子查询",
@@ -1878,6 +1880,7 @@
 				"fieldChanged": "字段变更",
 				"fieldValid": "字段有效",
 				"formChanged": "form has unsaved changes",
+				"getter": "URL parameter",
 				"javascript": "JavaScript",
 				"languageCode": "user language",
 				"login": "user ID",
@@ -1900,6 +1903,7 @@
 				"fieldChanged": "根据字段值是否已更改而为 TRUE/FALSE。",
 				"fieldValid": "根据字段值当前是否有效而为 TRUE/FALSE。",
 				"formChanged": "TRUE/FALSE, depending on whether form currently has unsaved changes.",
+				"getter": "Value of a URL parameter, such as 'https://system?param=123' with 'param' being the name and '123' the value.",
 				"javascript": "返回给定 JavaScript 表达式的值。",
 				"languageCode": "当前登录的所选用户语言代码（en_us、de_de 等）。",
 				"login": "当前登录的 ID（整数）。",

@@ -9,7 +9,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func ConvertColumnToExpression(column types.Column, loginId int64, languageCode string) types.DataGetExpression {
+func ConvertColumnToExpression(column types.Column, loginId int64, languageCode string,
+	getterKeyMapValue map[string]string) types.DataGetExpression {
 
 	expr := types.DataGetExpression{
 		AttributeId: pgtype.UUID{Bytes: column.AttributeId, Valid: true},
@@ -28,35 +29,33 @@ func ConvertColumnToExpression(column types.Column, loginId int64, languageCode 
 			RelationId:  column.Query.RelationId.Bytes,
 			Joins:       ConvertQueryToDataJoins(column.Query.Joins),
 			Expressions: []types.DataGetExpression{expr},
-			Filters:     ConvertQueryToDataFilter(column.Query.Filters, loginId, languageCode),
+			Filters:     ConvertQueryToDataFilter(column.Query.Filters, loginId, languageCode, getterKeyMapValue),
 			Orders:      ConvertQueryToDataOrders(column.Query.Orders),
 			Limit:       column.Query.FixedLimit,
 		},
 	}
 }
 
-func ConvertSubQueryToDataGet(query types.Query, queryAggregator pgtype.Text,
-	attributeId pgtype.UUID, attributeIndex int, loginId int64,
-	languageCode string) types.DataGet {
+func ConvertSubQueryToDataGet(query types.Query, queryAggregator pgtype.Text, attributeId pgtype.UUID,
+	attributeIndex int, loginId int64, languageCode string, getterKeyMapValue map[string]string) types.DataGet {
 
 	return types.DataGet{
 		RelationId: query.RelationId.Bytes,
 		Joins:      ConvertQueryToDataJoins(query.Joins),
-		Expressions: []types.DataGetExpression{
-			types.DataGetExpression{
-				Aggregator:    queryAggregator,
-				AttributeId:   attributeId,
-				AttributeIdNm: pgtype.UUID{},
-				Index:         attributeIndex,
-			},
-		},
-		Filters: ConvertQueryToDataFilter(query.Filters, loginId, languageCode),
+		Expressions: []types.DataGetExpression{{
+			Aggregator:    queryAggregator,
+			AttributeId:   attributeId,
+			AttributeIdNm: pgtype.UUID{},
+			Index:         attributeIndex,
+		}},
+		Filters: ConvertQueryToDataFilter(query.Filters, loginId, languageCode, getterKeyMapValue),
 		Orders:  ConvertQueryToDataOrders(query.Orders),
 		Limit:   query.FixedLimit,
 	}
 }
 
-func ConvertQueryToDataFilter(filters []types.QueryFilter, loginId int64, languageCode string) []types.DataGetFilter {
+func ConvertQueryToDataFilter(filters []types.QueryFilter, loginId int64,
+	languageCode string, getterKeyMapValue map[string]string) []types.DataGetFilter {
 
 	var processSide = func(side types.QueryFilterSide) types.DataGetFilterSide {
 		sideOut := types.DataGetFilterSide{
@@ -69,12 +68,20 @@ func ConvertQueryToDataFilter(filters []types.QueryFilter, loginId int64, langua
 			Value:           side.Value,
 		}
 		switch side.Content {
+		// API
+		case "getter":
+			if value, ok := getterKeyMapValue[side.Value.String]; ok {
+				sideOut.Value = value
+			} else {
+				sideOut.Value = nil
+			}
+
 		// data
 		case "preset":
 			sideOut.Value = cache.GetPresetRecordId(side.PresetId.Bytes)
 		case "subQuery":
 			sideOut.Query = ConvertSubQueryToDataGet(side.Query, side.QueryAggregator,
-				side.AttributeId, side.AttributeIndex, loginId, languageCode)
+				side.AttributeId, side.AttributeIndex, loginId, languageCode, getterKeyMapValue)
 		case "true":
 			sideOut.Value = true
 

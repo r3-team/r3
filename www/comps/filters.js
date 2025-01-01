@@ -289,6 +289,13 @@ let MyFilterSide = {
 					@input="setContent"
 					:value="content"
 				>
+					<optgroup v-if="contentApi.length !== 0" :label="capApp.contentApi">
+						<option
+							v-for="c in contentApi"
+							:title="capApp.option.contentHint[c]"
+							:value="c"
+						>{{ capApp.option.content[c] }}</option>
+					</optgroup>
 					<optgroup v-if="contentData.length !== 0" :label="capApp.contentData">
 						<option
 							v-for="c in contentData"
@@ -432,12 +439,12 @@ let MyFilterSide = {
 				</template>
 				
 				<!-- fixed value input -->
-				<template v-if="isValue || isJavascript">
-					<input placeholder="..."
+				<template v-if="isValue || isJavascript || isGetter">
+					<input
 						v-if="!columnDate && !columnTime"
 						@keyup.enter="$emit('apply-value')"
 						v-model="valueFixText"
-						:placeholder="isValue ? capApp.valueHint : capApp.javascriptHint"
+						:placeholder="fixedValuePlaceholder"
 					/>
 					
 					<div class="input-custom date-wrap" v-if="columnDate || columnTime">
@@ -556,6 +563,14 @@ let MyFilterSide = {
 				false
 			);
 		},
+
+		// presentation
+		fixedValuePlaceholder:(s) => {
+			if(s.isValue)      return s.capApp.valueHint;
+			if(s.isGetter)     return s.capApp.getterHint;
+			if(s.isJavascript) return s.capApp.javascriptHint;
+			return '';
+		},
 		
 		// inputs
 		brackets:{
@@ -654,6 +669,7 @@ let MyFilterSide = {
 		
 		// simple
 		columnsMode: (s) => s.columns.length !== 0,
+		contentApi:  (s) => ['getter'].filter(v => !s.disableContent.includes(v)),
 		contentData: (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
 		contentDate: (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
 		contentForm: (s) => ['formChanged','field','fieldChanged','fieldValid','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
@@ -665,6 +681,7 @@ let MyFilterSide = {
 		isAttribute:  (s) => s.content === 'attribute',
 		isCollection: (s) => s.content === 'collection',
 		isField:      (s) => ['field','fieldChanged','fieldValid'].includes(s.content),
+		isGetter:     (s) => s.content === 'getter',
 		isJavascript: (s) => s.content === 'javascript',
 		isNullPartner:(s) => !s.leftSide && s.isNullOperator,
 		isPreset:     (s) => s.content === 'preset',

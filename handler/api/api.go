@@ -27,6 +27,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+var (
+	defaultGetters = []string{"limit", "offset", "verbose"}
+)
+
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if blocked := bruteforce.Check(r); blocked {
@@ -156,20 +160,29 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// parse general getters
+	// parse URL getters
 	var getters struct {
 		limit   int
 		offset  int
 		verbose bool
+
+		filters map[string]string
 	}
+	getters.filters = make(map[string]string)
 	getters.limit = api.LimitDef
 	getters.verbose = api.VerboseDef
 
-	for getter, value := range r.URL.Query() {
-		if len(value) == 1 && getter == "limit" || getter == "offset" || getter == "verbose" {
-			n, err := strconv.Atoi(value[0])
+	for getter, values := range r.URL.Query() {
+		if len(values) != 1 {
+			// https://system?p1=123&p1=456 would result in multiple values for getter 'p1', this is currently not supported
+			continue
+		}
+
+		if slices.Contains(defaultGetters, getter) {
+			// default getters
+			n, err := strconv.Atoi(values[0])
 			if err != nil {
-				abort(http.StatusBadRequest, err, fmt.Sprintf("invalid value '%s' for %s", value[0], getter))
+				abort(http.StatusBadRequest, err, fmt.Sprintf("invalid value '%s' for %s", values[0], getter))
 				return
 			}
 			switch getter {
@@ -179,6 +192,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				getters.offset = n
 			case "verbose":
 				getters.verbose = n == 1
+			}
+		} else {
+			if isGet {
+				// filter getters, only relevant for GET calls
+				getters.filters[getter] = values[0]
 			}
 		}
 	}
@@ -324,13 +342,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		// build expressions from columns
 		for _, column := range api.Columns {
-			dataGet.Expressions = append(dataGet.Expressions,
-				data_query.ConvertColumnToExpression(column, loginId, languageCode))
+			dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertColumnToExpression(
+				column, loginId, languageCode, getters.filters))
 		}
 
-		// apply query filters
+		// apply filters
 		dataGet.Filters = data_query.ConvertQueryToDataFilter(
-			api.Query.Filters, loginId, languageCode)
+			api.Query.Filters, loginId, languageCode, getters.filters)
 
 		// add record filter
 		if recordId != 0 {
@@ -362,6 +380,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			abort(http.StatusServiceUnavailable, nil, err.Error())
 			return
 		}
+		fmt.Println(query)
 
 		// parse output
 		rows := make([]interface{}, 0)

@@ -1849,6 +1849,7 @@
 	},
 	"filter": {
 		"add": "Ajouter",
+		"contentApi": "API",
 		"contentData": "Données",
 		"contentDate": "Date/heure actuelle",
 		"contentForm": "Formulaire actuel",
@@ -1856,6 +1857,7 @@
 		"dialog": {
 			"ftsHelp": "La recherche en texte intégral peut trouver rapidement des correspondances dans de grands textes en fonction de mots ou de phrases. Au lieu de rechercher des caractères spécifiques, la recherche en texte intégral décompose les mots en racines pour les faire correspondre à une requête de recherche.<br /><br />Les options de recherche suivantes existent:<ul><li>Mot spécifique</li><ul><li>Recherche : <b>entry</b></li><li>'entry' trouvera des textes contenant des mots comme 'entry', 'entries' ou 'list-entries'.</li><li>Correspondance valide : 'I have checked all relevant data entries.'</li></ul><li>Tous les mots</li><ul><li>Recherche : <b>making coffee</b></li><li>'making coffee' trouvera des textes s'ils contiennent à la fois des mots liés à 'make' (comme 'making') et à 'coffee' (comme 'coffee machine'). Il ne trouvera pas 'coffee maker' car 'maker' est sa propre racine de mot.</li><li>Correspondance valide : 'We fixed the machine, still makes terrible coffee.'</li></ul><li>N'importe quel mot</li><ul><li>Recherche : <b>tea or coffee</b></li><li>'tea or coffee' trouvera des textes s'ils contiennent soit des mots liés à 'tea' (comme 'tea drinker') soit à 'coffee' (comme 'coffee machine').</li><li>Correspondance valide : 'Coffee gets me through the day.'</li></ul><li>Sans mots</li><ul><li>Recherche : <b>tea -coffee</b></li><li>'tea -coffee' trouvera des textes s'ils contiennent des mots liés à 'tea' mais pas des mots liés à 'coffee'.</li><li>Correspondance valide : 'I enjoy tea regularly.'</li></ul><li>Mots suivis</li><ul><li>Recherche : <b>\"make coffee\"</b></li><li>'\"make coffee\"' (entre guillemets doubles) trouvera des textes s'ils contiennent des mots liés à 'make' suivis de mots liés à 'coffee'. L'ordre est important - les textes contenant 'coffee making' ne seront pas inclus, car l'ordre des mots est incorrect.</li><li>Correspondance valide : 'I´ll spent the lunch break making coffee for my colleagues.'</li></ul></ul>"
 		},
+		"getterHint": "Parameter name",
 		"javascriptHint": "Ex.: return new Date().getFullYear();",
 		"nestingMain": "Requête principale",
 		"nestingSub": "Sous-requête",
@@ -1878,6 +1880,7 @@
 				"fieldChanged": "champ modifié",
 				"fieldValid": "champ valide",
 				"formChanged": "form has unsaved changes",
+				"getter": "URL parameter",
 				"javascript": "JavaScript",
 				"languageCode": "langue de l'utilisateur",
 				"login": "ID de l'utilisateur",
@@ -1900,6 +1903,7 @@
 				"fieldChanged": "TRUE/FALSE, en fonction de la modification de la valeur du champ.",
 				"fieldValid": "TRUE/FALSE, en fonction de la validité actuelle de la valeur du champ.",
 				"formChanged": "TRUE/FALSE, depending on whether form currently has unsaved changes.",
+				"getter": "Value of a URL parameter, such as 'https://system?param=123' with 'param' being the name and '123' the value.",
 				"javascript": "Valeur de retour de l'expression JavaScript donnée.",
 				"languageCode": "Le code de langue de l'utilisateur choisi (en_us, de_de, ...) de l'utilisateur actuelle.",
 				"login": "ID de l'utilisateur actuelle (entier).",

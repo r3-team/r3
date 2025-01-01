@@ -1849,6 +1849,7 @@
 	},
 	"filter": {
 		"add": "Hozzáadás",
+		"contentApi": "API",
 		"contentData": "Adatok",
 		"contentDate": "Jelenlegi dátum/idő",
 		"contentForm": "Jelenlegi űrlap",
@@ -1856,6 +1857,7 @@
 		"dialog": {
 			"ftsHelp": "A teljes szövegkeresés gyorsan talál egyezéseket a szavak vagy kifejezések alapján még hosszú szövegekben is. A teljes szövegkeresés során a szavakat azok gyökereire bontják és egy keresési lekérdezéssel hasonlítják össze, ahelyett, hogy konkrét karaktereket keresnének.<br /><br />Az alábbi keresési lehetőségek állnak rendelkezésre:<ul><li>Konkrét szó</li><ul><li>Keresés: <b>Bejegyzés</b></li><li>A 'Bejegyzés' megtalálja a szövegeket, amelyek hasonló szavakat tartalmaznak, mint 'Bejegyzés', 'Bejegyzések' vagy 'Bejegyzésre'.</li><li>Érvényes eredmény: 'Minden releváns bejegyzést ellenőriztem.'</li></ul><li>Minden szó</li><ul><li>Keresés: <b>Kávé főzés</b></li><li>A 'Kávé főzés' megtalálja a szövegeket, amelyek hasonló szavakat tartalmaznak mind 'Kávé' mind 'főzés' vonatkozásában. Nincs találat például a 'Kávéfőző' szóra, mert az saját szógyökeret használ.</li><li>Érvényes eredmény: 'A gép ki van javítva, de jó kávét még mindig nem főz.'</li></ul><li>Bármely szó</li><ul><li>Keresés: <b>Tee VAGY Kávé</b></li><li>A 'Tee VAGY Kávé' megtalálja a szövegeket, amelyek tartalmazzák a 'Tee' vagy a 'Kávé' szavakat.</li><li>Érvényes eredmény: 'Nincs nálam kávé nélkül.'</li></ul><li>Kizárt szavak</li><ul><li>Keresés: <b>Tee -Kávé</b></li><li>A 'Tee -Kávé' megtalálja a szövegeket, amelyek tartalmazzák a 'Tee' szót, de nem a 'Kávé' szót.</li><li>Érvényes eredmény: 'Szeretem a teát.'</li></ul><li>Követett szavak</li><ul><li>Keresés: <b>\"Kávé főzés\"</b></li><li>A '\"Kávé főzés\"' (idézőjelek között) megtalálja a szövegeket, amelyek tartalmazzák a 'Kávé' szavat, majd a 'főzés' szavat. A sorrend számít, tehát a szavak azonos sorrendben történő megjelenése szükséges - nem találja meg azokat a szövegeket, amelyek ugyanezeket a szavakat fordított sorrendben tartalmazzák.</li><li>Érvényes eredmény: 'A szünetet kávéfőzéssel töltöm.'</li></ul></ul>"
 		},
+		"getterHint": "Parameter name",
 		"javascriptHint": "Példa: return new Date().getFullYear();",
 		"nestingMain": "Fő lekérdezés",
 		"nestingSub": "Al-lekérdezés",
@@ -1878,6 +1880,7 @@
 				"fieldChanged": "Mező módosult",
 				"fieldValid": "Mező érvényes",
 				"formChanged": "form has unsaved changes",
+				"getter": "URL parameter",
 				"javascript": "JavaScript",
 				"languageCode": "user language",
 				"login": "user ID",
@@ -1900,6 +1903,7 @@
 				"fieldChanged": "IGAZ/HAMIS, attól függően, hogy megváltozott-e a mező értéke.",
 				"fieldValid": "IGAZ/HAMIS, attól függően, hogy a mező értéke érvényes-e jelenleg.",
 				"formChanged": "IGAZ/HAMIS, depending on whether form currently has unsaved changes.",
+				"getter": "Value of a URL parameter, such as 'https://system?param=123' with 'param' being the name and '123' the value.",
 				"javascript": "A kiválasztott JavaScript kifejezés visszatérési értéke.",
 				"languageCode": "A jelenlegi bejelentkezés által választott nyelv kódja (en_us, hu_hu, ...).",
 				"login": "Az aktuális bejelentkezés azonosítója (Integer).",
