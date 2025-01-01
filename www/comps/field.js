@@ -347,6 +347,7 @@ let MyField = {
 				<my-input-barcode
 					v-if="isBarcode"
 					v-model="value"
+					@copyToClipboard="copyToClipboard"
 					:clipboard="isClipboard"
 					:readonly="isReadonly"
 				/>
@@ -1216,7 +1217,11 @@ let MyField = {
 		
 		// actions
 		copyToClipboard() {
-			navigator.clipboard.writeText(this.value);
+			const value = !this.isBarcode || this.value === null
+				? this.value
+				: JSON.parse(this.value).text;
+			
+			navigator.clipboard.writeText(value);
 			this.$emit('clipboard');
 		},
 		click() {
