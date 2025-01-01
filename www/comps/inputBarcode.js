@@ -10,12 +10,13 @@ let MyInputBarcode = {
 				:placeholder="capGen.threeDots"
 			/>
 			<my-button image="barcode.png"
-				v-if="inputFormat !== null"
+				v-if="inputFormat !== null && !readonly"
 				@trigger="update('format',null)"
 				:captionTitle="capApp.formatResetHint"
 				:naked="true"
 			/>
 			<my-button image="camera.png"
+				v-if="!readonly"
 				@trigger="open"
 				:captionTitle="capApp.capture"
 				:naked="true"
@@ -29,13 +30,15 @@ let MyInputBarcode = {
 			/>
 		</div>
 
+		<!-- preview image -->
 		<div class="input-barcode-preview" v-show="inputFormat !== null && !valueInvalid">
 			<img class="input-barcode-preview" ref="barcodePreview"
 				:class="{ 'max-size':inputFormat === 'QR_CODE' }"
 				:title="inputFormat"
 			/>
 		</div>
-
+		
+		<!-- messages / options -->
 		<div class="input-barcode-format default-inputs" v-if="(inputFormat === null && inputText !== '') || valueInvalid">
 			<h2 v-if="valueInvalid">{{ capApp.formatInvalidValue }}</h2>
 			<h2>{{ capApp.formatMissing }}</h2>
@@ -52,7 +55,7 @@ let MyInputBarcode = {
 			</select>
 		</div>
 
-		<!-- snap dialog -->
+		<!-- camera dialog -->
 		<div class="app-sub-window" @click.self="close" v-if="showDialog">
 			<div class="contentBox float input-barcode-dialog">
 				<div class="top lower">
@@ -123,7 +126,7 @@ let MyInputBarcode = {
 	watch:{
 		modelValue:{
 			handler(v) { this.updatePreview(); },
-			immediate:true
+			immediate:false
 		}
 	},
 	computed:{
@@ -145,6 +148,9 @@ let MyInputBarcode = {
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);
+
+		// ref elements are registered after mounted(), so preview must wait until then
+		this.updatePreview();
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleHotkeys);
@@ -176,7 +182,7 @@ let MyInputBarcode = {
 				default:         format = null;      break;
 			}
 
-			if(format === null || this.inputText === '')
+			if(format === null || this.inputText === '' || this.$refs.barcodePreview === undefined)
 				return;
 
 			if(format !== 'QRCODE') {
