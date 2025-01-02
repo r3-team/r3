@@ -30,6 +30,7 @@ type Module struct {
 	Relations             []Relation        `json:"relations"`
 	Forms                 []Form            `json:"forms"`
 	Menus                 []Menu            `json:"menus"`
+	MenuTabs              []MenuTab         `json:"menuTabs"`
 	Icons                 []Icon            `json:"icons"`
 	Roles                 []Role            `json:"roles"`
 	Articles              []Article         `json:"articles"`
@@ -130,6 +131,7 @@ type Attribute struct {
 }
 type Menu struct {
 	Id           uuid.UUID            `json:"id"`
+	MenuTabId    pgtype.UUID          `json:"menuTabId"`
 	ModuleId     uuid.UUID            `json:"moduleId"`
 	FormId       pgtype.UUID          `json:"formId"`
 	IconId       pgtype.UUID          `json:"iconId"`
@@ -138,6 +140,13 @@ type Menu struct {
 	ShowChildren bool                 `json:"showChildren"`
 	Collections  []CollectionConsumer `json:"collections"` // collection values to display on menu entry
 	Captions     CaptionMap           `json:"captions"`
+}
+type MenuTab struct {
+	Id       uuid.UUID   `json:"id"`
+	ModuleId uuid.UUID   `json:"moduleId"`
+	IconId   pgtype.UUID `json:"iconId"`
+	Position int         `json:"position"`
+	Captions CaptionMap  `json:"captions"`
 }
 type LoginForm struct {
 	Id                uuid.UUID  `json:"id"`

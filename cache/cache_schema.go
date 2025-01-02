@@ -18,6 +18,7 @@ import (
 	"r3/schema/jsFunction"
 	"r3/schema/loginForm"
 	"r3/schema/menu"
+	"r3/schema/menuTab"
 	"r3/schema/module"
 	"r3/schema/pgFunction"
 	"r3/schema/pgIndex"
@@ -162,6 +163,7 @@ func updateSchemaCache(moduleIds []uuid.UUID) error {
 		mod.Relations = make([]types.Relation, 0)
 		mod.Forms = make([]types.Form, 0)
 		mod.Menus = make([]types.Menu, 0)
+		mod.MenuTabs = make([]types.MenuTab, 0)
 		mod.Icons = make([]types.Icon, 0)
 		mod.Roles = make([]types.Role, 0)
 		mod.Articles = make([]types.Article, 0)
@@ -226,6 +228,14 @@ func updateSchemaCache(moduleIds []uuid.UUID) error {
 		log.Info("cache", "load forms")
 
 		mod.Forms, err = form.Get(mod.Id, []uuid.UUID{})
+		if err != nil {
+			return err
+		}
+
+		// get menu tabs
+		log.Info("cache", "load menu tabs")
+
+		mod.MenuTabs, err = menuTab.Get(mod.Id)
 		if err != nil {
 			return err
 		}

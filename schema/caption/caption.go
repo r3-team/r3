@@ -126,6 +126,10 @@ func GetDefaultContent(entity string) types.CaptionMap {
 		return types.CaptionMap{
 			"menuTitle": make(map[string]string),
 		}
+	case "menuTab":
+		return types.CaptionMap{
+			"menuTabTitle": make(map[string]string),
+		}
 	case "module":
 		return types.CaptionMap{
 			"moduleTitle": make(map[string]string),
@@ -188,6 +192,9 @@ func GetEntityName(content string) (string, error) {
 
 	case "menuTitle":
 		return "menu_id", nil
+
+	case "menuTabTitle":
+		return "menu_tab_id", nil
 
 	case "moduleTitle":
 		return "module_id", nil

@@ -18,6 +18,7 @@ import (
 	"r3/schema/jsFunction"
 	"r3/schema/loginForm"
 	"r3/schema/menu"
+	"r3/schema/menuTab"
 	"r3/schema/pgFunction"
 	"r3/schema/pgIndex"
 	"r3/schema/pgTrigger"
@@ -78,6 +79,11 @@ func NotExisting_tx(ctx context.Context, tx pgx.Tx, module types.Module) error {
 
 	// menus
 	if err := deleteMenus_tx(ctx, tx, module.Id, module.Menus); err != nil {
+		return err
+	}
+
+	// menu tabs
+	if err := deleteMenuTabs_tx(ctx, tx, module.Id, module.MenuTabs); err != nil {
 		return err
 	}
 
@@ -292,6 +298,23 @@ func deleteMenus_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, menus []
 	}
 	return nil
 }
+func deleteMenuTabs_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, menuTabs []types.MenuTab) error {
+	idsKeep := make([]uuid.UUID, 0)
+	for _, mt := range menuTabs {
+		idsKeep = append(idsKeep, mt.Id)
+	}
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "menu_tab", moduleId, idsKeep)
+	if err != nil {
+		return err
+	}
+	for _, id := range idsDelete {
+		log.Info("transfer", fmt.Sprintf("del menu tab %s", id.String()))
+		if err := menuTab.Del_tx(ctx, tx, id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 func deleteForms_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, forms []types.Form) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range forms {
@@ -310,13 +333,13 @@ func deleteForms_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, forms []
 
 	// fields, includes/cascades columns & tabs
 	for _, entity := range forms {
-		if err := deleteFormFields_tx(ctx, tx, moduleId, entity); err != nil {
+		if err := deleteFormFields_tx(ctx, tx, entity); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func deleteFormFields_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, form types.Form) error {
+func deleteFormFields_tx(ctx context.Context, tx pgx.Tx, form types.Form) error {
 	var err error
 	idsKeepFields := make([]uuid.UUID, 0)
 	idsKeepColumns := make([]uuid.UUID, 0)
@@ -608,7 +631,7 @@ func importGetIdsToDeleteFromModule_tx(ctx context.Context, tx pgx.Tx, entity st
 	idsDelete := make([]uuid.UUID, 0)
 
 	if !slices.Contains([]string{"api", "article", "client_event", "collection",
-		"form", "icon", "js_function", "login_form", "menu", "pg_function",
+		"form", "icon", "js_function", "login_form", "menu", "menu_tab", "pg_function",
 		"pg_trigger", "relation", "role", "variable", "widget"}, entity) {
 
 		return idsDelete, errors.New("unsupported type for delete check")

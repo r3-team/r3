@@ -150,6 +150,52 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- new filter side content
 			ALTER TYPE app.filter_side_content ADD VALUE 'getter';
+
+			-- menu tabs
+			CREATE TABLE IF NOT EXISTS app.menu_tab(
+				id uuid NOT NULL,
+				module_id uuid NOT NULL,
+				icon_id uuid,
+				"position" integer NOT NULL,
+				CONSTRAINT menu_tab_pkey PRIMARY KEY (id),
+				CONSTRAINT menu_tab_module_id_fkey FOREIGN KEY (module_id)
+					REFERENCES app.module (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT menu_tab_icon_id_fkey FOREIGN KEY (icon_id)
+					REFERENCES app.icon (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
+
+			CREATE INDEX IF NOT EXISTS fki_menu_tab_icon_id_fkey
+				ON app.menu_tab USING btree (icon_id ASC NULLS LAST);
+
+			CREATE INDEX IF NOT EXISTS fki_menu_tab_module_id_fkey
+				ON app.menu_tab USING btree (module_id ASC NULLS LAST);
+			
+			-- menu tab captions
+			ALTER TYPE app.caption_content ADD VALUE 'menuTabTitle';
+
+			ALTER TABLE app.caption ADD COLUMN menu_tab_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_menu_tab_id_fkey FOREIGN KEY (menu_tab_id)
+				REFERENCES app.menu_tab (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_menu_tab_id_fkey ON app.caption USING BTREE (menu_tab_id ASC NULLS LAST);
+
+			ALTER TABLE instance.caption ADD COLUMN menu_tab_id uuid;
+			ALTER TABLE instance.caption ADD CONSTRAINT caption_menu_tab_id_fkey FOREIGN KEY (menu_tab_id)
+				REFERENCES app.menu_tab (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_menu_tab_id_fkey ON instance.caption USING BTREE (menu_tab_id ASC NULLS LAST);
 		`)
 		return "3.10", err
 	},

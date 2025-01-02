@@ -26,6 +26,7 @@ import (
 	"r3/schema/jsFunction"
 	"r3/schema/loginForm"
 	"r3/schema/menu"
+	"r3/schema/menuTab"
 	"r3/schema/module"
 	"r3/schema/pgFunction"
 	"r3/schema/pgIndex"
@@ -457,7 +458,24 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 	}
 
-	// menus, refer to forms/icons
+	// menu tabs, refer to icons
+	log.Info("transfer", "set menu tabs")
+	for _, e := range mod.MenuTabs {
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set menu tab %s", e.Id))
+
+		if err := importCheckResultAndApply(ctx, tx, menuTab.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+			return err
+		}
+	}
+
+	// menus, refer to forms/icons/menu_tabs
 	log.Info("transfer", "set menus")
 	if err := menu.Set_tx(ctx, tx, pgtype.UUID{}, mod.Menus); err != nil {
 		return err
