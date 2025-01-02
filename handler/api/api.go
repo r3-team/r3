@@ -320,6 +320,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Offset:      getters.offset,
 		}
 
+		if api.Query.FixedLimit != 0 && api.Query.FixedLimit < dataGet.Limit {
+			dataGet.Limit = api.Query.FixedLimit
+		}
+
 		// abort if requested limit exceeds max limit
 		// better to abort as smaller than requested result count might suggest the absence of more data
 		if api.LimitMax < dataGet.Limit {
@@ -380,7 +384,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			abort(http.StatusServiceUnavailable, nil, err.Error())
 			return
 		}
-		fmt.Println(query)
 
 		// parse output
 		rows := make([]interface{}, 0)
