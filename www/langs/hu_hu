@@ -1386,7 +1386,8 @@
 		},
 		"menu": {
 			"button": {
-				"add": "Hozzáadás"
+				"add": "Hozzáadás",
+				"addTab": "Add tab"
 			},
 			"collections": "Gyűjtemény értékei megjelenítése a menüben",
 			"copy": "Minden menüelem másolása innen",

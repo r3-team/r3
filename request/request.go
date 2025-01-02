@@ -449,14 +449,12 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return MailTrafficGet_tx(ctx, tx, reqJson)
 		}
-	case "menu":
+	case "menuTab":
 		switch action {
-		case "copy":
-			return MenuCopy_tx(ctx, tx, reqJson)
 		case "del":
-			return MenuDel_tx(ctx, tx, reqJson)
+			return MenuTabDel_tx(ctx, tx, reqJson)
 		case "set":
-			return MenuSet_tx(ctx, tx, reqJson)
+			return MenuTabSet_tx(ctx, tx, reqJson)
 		}
 	case "module":
 		switch action {

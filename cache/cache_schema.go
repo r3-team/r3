@@ -17,7 +17,6 @@ import (
 	"r3/schema/icon"
 	"r3/schema/jsFunction"
 	"r3/schema/loginForm"
-	"r3/schema/menu"
 	"r3/schema/menuTab"
 	"r3/schema/module"
 	"r3/schema/pgFunction"
@@ -33,7 +32,6 @@ import (
 	"sync"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/exp/maps"
 )
 
@@ -236,14 +234,6 @@ func updateSchemaCache(moduleIds []uuid.UUID) error {
 		log.Info("cache", "load menu tabs")
 
 		mod.MenuTabs, err = menuTab.Get(mod.Id)
-		if err != nil {
-			return err
-		}
-
-		// get menus
-		log.Info("cache", "load menus")
-
-		mod.Menus, err = menu.Get(mod.Id, pgtype.UUID{})
 		if err != nil {
 			return err
 		}

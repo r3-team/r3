@@ -17,7 +17,6 @@ import (
 	"r3/schema/icon"
 	"r3/schema/jsFunction"
 	"r3/schema/loginForm"
-	"r3/schema/menu"
 	"r3/schema/menuTab"
 	"r3/schema/pgFunction"
 	"r3/schema/pgIndex"
@@ -74,11 +73,6 @@ func NotExisting_tx(ctx context.Context, tx pgx.Tx, module types.Module) error {
 
 	// roles
 	if err := deleteRoles_tx(ctx, tx, module.Id, module.Roles); err != nil {
-		return err
-	}
-
-	// menus
-	if err := deleteMenus_tx(ctx, tx, module.Id, module.Menus); err != nil {
 		return err
 	}
 
@@ -270,29 +264,6 @@ func deleteRoles_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, roles []
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del role %s", id.String()))
 		if err := role.Del_tx(ctx, tx, id); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-func deleteMenus_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, menus []types.Menu) error {
-	idsKeep := make([]uuid.UUID, 0)
-	var menuNestedParse func(items []types.Menu)
-	menuNestedParse = func(items []types.Menu) {
-		for _, m := range items {
-			idsKeep = append(idsKeep, m.Id)
-			menuNestedParse(m.Menus)
-		}
-	}
-	menuNestedParse(menus)
-
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "menu", moduleId, idsKeep)
-	if err != nil {
-		return err
-	}
-	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del menu %s", id.String()))
-		if err := menu.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}

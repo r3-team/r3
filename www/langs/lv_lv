@@ -1386,7 +1386,8 @@
 		},
 		"menu": {
 			"button": {
-				"add": "Add entry"
+				"add": "Add entry",
+				"addTab": "Add tab"
 			},
 			"collections": "Show collection values in menu",
 			"copy": "Copy all menu items from",

@@ -104,7 +104,9 @@ const MyStoreSchema = {
 					state.formIdMap[form.id]   = form;
 					mod.formNameMap[form.name] = form;
 				}
-				getFormIdsFromMenus(mod.menus);
+				for(const mt of mod.menuTabs) {
+					getFormIdsFromMenus(mt.menus);
+				}
 				
 				// process roles
 				for(const role of mod.roles) {

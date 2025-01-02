@@ -96,6 +96,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 	/*
 		ALTER TABLE app.field ALTER COLUMN flags
 			TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
+
+		ALTER TABLE app.menu ALTER COLUMN menu_tab_id SET NOT NULL;
 	*/
 
 	"3.9": func(ctx context.Context, tx pgx.Tx) (string, error) {
@@ -196,6 +198,26 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				DEFERRABLE INITIALLY DEFERRED;
 			
 			CREATE INDEX fki_caption_menu_tab_id_fkey ON instance.caption USING BTREE (menu_tab_id ASC NULLS LAST);
+
+			-- generate first menu tab
+			INSERT INTO app.menu_tab (id, module_id, position)
+				SELECT gen_random_uuid(), id, 0 FROM app.module;
+
+			-- menu assocation with tabs
+			ALTER TABLE app.menu ADD COLUMN menu_tab_id UUID;
+			ALTER TABLE app.menu ADD CONSTRAINT menu_menu_tab_id_fkey FOREIGN KEY (menu_tab_id)
+				REFERENCES app.menu_tab (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			UPDATE app.menu AS m
+			SET menu_tab_id = (
+				SELECT id
+				FROM app.menu_tab
+				WHERE module_id = m.module_id
+			);
+			ALTER TABLE app.menu DROP COLUMN module_id;
 		`)
 		return "3.10", err
 	},

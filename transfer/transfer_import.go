@@ -25,7 +25,6 @@ import (
 	"r3/schema/icon"
 	"r3/schema/jsFunction"
 	"r3/schema/loginForm"
-	"r3/schema/menu"
 	"r3/schema/menuTab"
 	"r3/schema/module"
 	"r3/schema/pgFunction"
@@ -45,13 +44,12 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type importMeta struct {
 	filePath string       // path of module import file (decompressed JSON file)
 	hash     string       // hash of module content
-	isNew    bool         // module was already in system (upgrade)
+	isNew    bool         // module was not already in system (is installed not upgraded)
 	module   types.Module // module content
 }
 
@@ -83,6 +81,18 @@ func ImportFromFiles(filePathsImport []string) error {
 	modules, err := parseModulesFromPaths(filePathsModules, moduleIdMapImportMeta)
 	if err != nil {
 		return err
+	}
+
+	// apply compatibility fixes
+	for i := range modules {
+		// fix import < 3.7: move triggers from relations to module
+		modules[i].PgTriggers = compatible.FixPgTriggerLocation(modules[i].PgTriggers, modules[i].Relations)
+
+		// fix import < 3.10: add initial menu tab
+		modules[i].MenuTabs, err = compatible.FixMissingMenuTab(modules[i].Id, modules[i].MenuTabs, modules[i].Menus)
+		if err != nil {
+			return err
+		}
 	}
 
 	// run a full VACUUM before imports
@@ -134,9 +144,7 @@ func ImportFromFiles(filePathsImport []string) error {
 				if other entities rely on deleted states (presets), they are applied on next loop
 			*/
 			if firstRun && !moduleIdMapImportMeta[m.Id].isNew {
-				if err := transfer_delete.NotExistingPgTriggers_tx(ctx, tx, m.Id,
-					compatible.FixPgTriggerLocation(m.PgTriggers, m.Relations)); err != nil {
-
+				if err := transfer_delete.NotExistingPgTriggers_tx(ctx, tx, m.Id, m.PgTriggers); err != nil {
 					return err
 				}
 			}
@@ -389,7 +397,6 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 	}
 
 	// PG triggers, refer to PG functions
-	mod.PgTriggers = compatible.FixPgTriggerLocation(mod.PgTriggers, mod.Relations)
 	for _, e := range mod.PgTriggers {
 		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
@@ -459,8 +466,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 	}
 
 	// menu tabs, refer to icons
-	log.Info("transfer", "set menu tabs")
-	for _, e := range mod.MenuTabs {
+	for i, e := range mod.MenuTabs {
 		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
@@ -470,15 +476,9 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info("transfer", fmt.Sprintf("set menu tab %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, menuTab.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, menuTab.Set_tx(ctx, tx, i, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
-	}
-
-	// menus, refer to forms/icons/menu_tabs
-	log.Info("transfer", "set menus")
-	if err := menu.Set_tx(ctx, tx, pgtype.UUID{}, mod.Menus); err != nil {
-		return err
 	}
 
 	// roles, refer to relations/attributes/menu

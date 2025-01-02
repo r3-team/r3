@@ -167,7 +167,7 @@ let MyMenu = {
 	template:`<div class="menu"
 		:class="{ isDark:color.isDark() }"
 		:style="bgStyle"
-		v-if="hasAccessToAnyMenu(module.menus,menuAccess)"
+		v-if="hasAccessToAnyMenu(module.menuTabs,menuAccess)"
 	>
 		<div class="menu-header row space-between gap">
 			<div class="row centered gap">
@@ -188,7 +188,7 @@ let MyMenu = {
 		<div class="menu-content">
 			<div class="menu-items">
 				<my-menu-item
-					v-for="m in module.menus"
+					v-for="m in module.menuTabs[0].menus"
 					:colorParent="null"
 					:formIdActive="formIdActive"
 					:formOpensPreset="formOpensPreset"
@@ -207,9 +207,9 @@ let MyMenu = {
 		</div>
 	</div>`,
 	props:{
-		isActiveModule: { type:Boolean, required:true },
 		formIdActive:   { type:String,  required:true },
 		formOpensPreset:{ type:Boolean, required:true },
+		isActiveModule: { type:Boolean, required:true },
 		module:         { type:Object,  required:true },
 		recordOpen:     { type:Boolean, required:true }
 	},

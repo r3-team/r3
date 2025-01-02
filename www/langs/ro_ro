@@ -1386,7 +1386,8 @@
 		},
 		"menu": {
 			"button": {
-				"add": "Adaugă înregistrare"
+				"add": "Adaugă înregistrare",
+				"addTab": "Add tab"
 			},
 			"collections": "Show collection values in menu",
 			"copy": "Copiați toate elementele de meniu din",

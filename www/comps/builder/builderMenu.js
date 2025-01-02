@@ -2,9 +2,11 @@ import MyBuilderCaption                from './builderCaption.js';
 import MyBuilderCollectionInput        from './builderCollectionInput.js';
 import MyBuilderFormInput              from './builderFormInput.js';
 import MyBuilderIconInput              from './builderIconInput.js';
+import MyTabs                          from '../tabs.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {getDependentModules}           from '../shared/builder.js';
 import {getNilUuid}                    from '../shared/generic.js';
+import srcBase64Icon                   from '../shared/image.js';
 export {MyBuilderMenu as default};
 
 let MyBuilderMenuItems = {
@@ -164,7 +166,6 @@ let MyBuilderMenuItems = {
 				
 				<!-- nested menus -->
 				<my-builder-menu-items class="nested"
-					@remove="$emit('remove',$event)"
 					:builderLanguage="builderLanguage"
 					:colorParent="element.color"
 					:list="element.menus"
@@ -174,7 +175,6 @@ let MyBuilderMenuItems = {
 			</div>
 		</template>
 	</draggable>`,
-	emits:['remove'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		colorParent:    { required:false, default:null },
@@ -211,16 +211,16 @@ let MyBuilderMenuItems = {
 		},
 		remove(id,i) {
 			this.list.splice(i,1);
-			
-			// ID must be handled separately as it must be deleted in backend
-			this.$emit('remove',id);
 		}
 	}
 };
 
 let MyBuilderMenu = {
 	name:'my-builder-menu',
-	components:{ MyBuilderMenuItems },
+	components:{
+		MyBuilderMenuItems,
+		MyTabs
+	},
 	template:`<div v-if="module" class="builder-menus contentBox grow">
 		
 		<div class="top">
@@ -242,22 +242,37 @@ let MyBuilderMenu = {
 					:caption="capGen.button.refresh"
 				/>
 				<my-button image="add.png"
-					@trigger="add"
+					@trigger="addEntry"
 					:active="!readonly"
 					:caption="capApp.button.add"
+				/>
+				<my-button image="add.png"
+					@trigger="addTab"
+					:active="!readonly"
+					:caption="capApp.button.addTab"
 				/>
 			</div>
 		</div>
 		
-		<div class="content default-inputs">
-		
-			<my-builder-menu-items
-				@remove="removeById"
-				:builderLanguage="builderLanguage"
-				:module="module"
-				:list="menus"
-				:readonly="readonly"
+		<div class="content no-padding default-inputs">
+
+			<my-tabs
+				v-if="menuTabs.length > 1"
+				v-model="menuTabIdShown"
+				:entries="tabs.ids"
+				:entriesIcon="tabs.imgs"
+				:entriesText="tabs.caps"
 			/>
+		
+			<template v-for="mt in menuTabs">
+				<my-builder-menu-items
+					v-if="mt.id === menuTabIdShown"
+					:builderLanguage="builderLanguage"
+					:module="module"
+					:list="mt.menus"
+					:readonly="readonly"
+				/>
+			</template>
 			
 			<div class="builder-menus-actions">
 				<span>{{ capApp.copy }}</span>
@@ -286,9 +301,9 @@ let MyBuilderMenu = {
 	data() {
 		return {
 			newCnt:0, // temporary menu IDs, replaced with NULL UUIDs on SET
-			menus:[],
 			menuIdCopy:null,
-			menuIdsRemove:[],
+			menuTabs:[],
+			menuTabIdShown:null,
 			showCollections:false
 		};
 	},
@@ -300,13 +315,34 @@ let MyBuilderMenu = {
 	},
 	watch:{
 		module:{
-			handler() { this.reset(); },
+			handler() {
+				this.menuTabIdShown = this.module.menuTabs[0].id;
+				this.reset();
+			},
 			immediate:true
 		}
 	},
 	computed:{
-		hasChanges:(s) => s.menuIdsRemove.length !== 0 || JSON.stringify(s.menus) !== JSON.stringify(s.module.menus),
-		module:    (s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
+		tabs:(s) => {
+			let ids  = [];
+			let imgs = [];
+			let caps = [];
+
+			for(const mt of s.menuTabs) {
+				ids.push(mt.id);
+				imgs.push(s.srcBase64Icon(mt.iconId,'images/icon_missing.png'));
+				caps.push('TAB CAP!');
+			}
+			return {
+				ids:ids,
+				imgs:imgs,
+				caps:caps
+			};
+		},
+
+		// simple
+		hasChanges:(s) => JSON.stringify(s.menuTabs) !== JSON.stringify(s.module.menuTabs),
+		module:    (s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		
 		// stores
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
@@ -318,35 +354,46 @@ let MyBuilderMenu = {
 		// externals
 		getDependentModules,
 		getNilUuid,
+		srcBase64Icon,
 		
 		// actions
-		add() {
-			this.menus.unshift({
-				id:this.newCnt++,
-				moduleId:this.id,
-				formId:null,
+		addEntry() {
+			for(let i = 0, j = this.menuTabs.length; i < j; i++) {
+				if(this.menuTabs[i].id !== this.menuTabIdShown)
+					continue;
+
+				return this.menuTabs[i].menus.unshift({
+					id:this.newCnt++,
+					formId:null,
+					iconId:null,
+					menus:[],
+					showChildren:false,
+					color:null,
+					collections:[],
+					captions:{
+						menuTitle:{}
+					}
+				});
+			}
+		},
+		addTab() {
+			this.menuTabs.push({
+				moduleId:this.module.id,
 				iconId:null,
 				menus:[],
-				showChildren:false,
-				color:null,
-				collections:[],
 				captions:{
-					menuTitle:{}
+					menuTabTitle:{}
 				}
 			});
 		},
-		removeById(menuId) {
-			if(!Number.isInteger(menuId))
-				this.menuIdsRemove.push(menuId);
-		},
 		reset() {
 			if(this.module)
-				this.menus = JSON.parse(JSON.stringify(this.module.menus));
+				this.menuTabs = JSON.parse(JSON.stringify(this.module.menuTabs));
 		},
 		
 		// backend functions
 		copy() {
-			ws.send('menu','copy',{
+			/*ws.send('menu','copy',{
 				moduleId:this.menuIdCopy,
 				moduleIdNew:this.module.id
 			},true).then(
@@ -355,36 +402,29 @@ let MyBuilderMenu = {
 					this.$root.schemaReload(this.module.id);
 				},
 				this.$root.genericError
-			);
+			);*/
 		},
 		set() {
-			let that     = this;
-			let requests = [];
-			
-			for(let i = 0, j = this.menuIdsRemove.length; i < j; i++) {
-				requests.push(ws.prepare('menu','del',{ id:this.menuIdsRemove[i] }));
-			}
-			this.menuIdsRemove = [];
-			
 			// replace temporary counter IDs with NULL UUIDs for SET
 			let replaceIds;
-			replaceIds = function(menus) {
+			replaceIds = menus => {
 				for(let i = 0, j = menus.length; i < j; i++) {
 					
 					if(Number.isInteger(menus[i].id))
-						menus[i].id = that.getNilUuid();
+						menus[i].id = this.getNilUuid();
 					
 					menus[i].menus = replaceIds(menus[i].menus);
 				}
 				return menus;
 			}
-			
-			requests.push(ws.prepare('menu','set',replaceIds(
-				JSON.parse(JSON.stringify(this.menus))
-			)));
-			requests.push(ws.prepare('schema','check',
-				{moduleId:this.module.id}
-			));
+
+			let requests = [];
+			for(let i = 0, j = this.menuTabs.length; i < j; i++) {
+				let mt = JSON.parse(JSON.stringify(this.menuTabs[i]));
+				mt.menus = replaceIds(mt.menus);
+				requests.push(ws.prepare('menuTab','set',{menuTab:mt,position:i}));
+			}
+			requests.push(ws.prepare('schema','check',{moduleId:this.module.id}));
 			
 			ws.sendMultiple(requests,true).then(
 				() => this.$root.schemaReload(this.module.id),

@@ -15,6 +15,25 @@ import (
 )
 
 // < 3.10
+// fix missing menu tab (at least 1 must exist)
+func FixMissingMenuTab(moduleId uuid.UUID, mts []types.MenuTab, menus []types.Menu) ([]types.MenuTab, error) {
+	if len(mts) == 0 {
+		menuTabId, err := uuid.NewV4()
+		if err != nil {
+			return mts, err
+		}
+
+		mts = append(mts, types.MenuTab{
+			Id:       menuTabId,
+			ModuleId: moduleId,
+			IconId:   pgtype.UUID{},
+			Menus:    menus,
+		})
+	}
+	return mts, nil
+}
+
+// < 3.10
 // fix nil field flags
 func FixNilFieldFlags(flags []string) []string {
 	if flags == nil {

@@ -1386,7 +1386,8 @@
 		},
 		"menu": {
 			"button": {
-				"add": "Aggiungi voce"
+				"add": "Aggiungi voce",
+				"addTab": "Add tab"
 			},
 			"collections": "Show collection values in menu",
 			"copy": "Copia tutte le voci di menu da",

@@ -29,7 +29,6 @@ type Module struct {
 	Languages             []string          `json:"languages"`             // language codes that this module supports
 	Relations             []Relation        `json:"relations"`
 	Forms                 []Form            `json:"forms"`
-	Menus                 []Menu            `json:"menus"`
 	MenuTabs              []MenuTab         `json:"menuTabs"`
 	Icons                 []Icon            `json:"icons"`
 	Roles                 []Role            `json:"roles"`
@@ -45,6 +44,9 @@ type Module struct {
 	Widgets               []Widget          `json:"widgets"`
 	ArticleIdsHelp        []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
 	Captions              CaptionMap        `json:"captions"`
+
+	// legacy
+	Menus []Menu `json:"menus"`
 }
 type ModuleStartForm struct {
 	Position int       `json:"position"`
@@ -131,8 +133,6 @@ type Attribute struct {
 }
 type Menu struct {
 	Id           uuid.UUID            `json:"id"`
-	MenuTabId    pgtype.UUID          `json:"menuTabId"`
-	ModuleId     uuid.UUID            `json:"moduleId"`
 	FormId       pgtype.UUID          `json:"formId"`
 	IconId       pgtype.UUID          `json:"iconId"`
 	Menus        []Menu               `json:"menus"`
@@ -145,7 +145,7 @@ type MenuTab struct {
 	Id       uuid.UUID   `json:"id"`
 	ModuleId uuid.UUID   `json:"moduleId"`
 	IconId   pgtype.UUID `json:"iconId"`
-	Position int         `json:"position"`
+	Menus    []Menu      `json:"menus"`
 	Captions CaptionMap  `json:"captions"`
 }
 type LoginForm struct {

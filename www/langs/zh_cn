@@ -1386,7 +1386,8 @@
 		},
 		"menu": {
 			"button": {
-				"add": "添加条目"
+				"add": "添加条目",
+				"addTab": "Add tab"
 			},
 			"collections": "在菜单中显示集合数值",
 			"copy": "从以下复制所有菜单项",

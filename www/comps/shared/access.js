@@ -18,10 +18,12 @@ export function hasAccessToAttribute(access,attributeId,relationId,requestedAcce
 	return false;
 };
 
-export function hasAccessToAnyMenu(menus,menuAccess) {
-	for(let i = 0, j = menus.length; i < j; i++) {
-		if(menuAccess[menus[i].id] === 1)
-			return true;
+export function hasAccessToAnyMenu(menuTabs,menuAccess) {
+	for(const mt of menuTabs) {
+		for(const m of mt.menus) {
+			if(menuAccess[m.id] === 1)
+				return true;
+		}
 	}
 	return false;
 };
@@ -37,7 +39,7 @@ export function hasAnyAssignableRole(roles) {
 export function getStartFormId(module,access) {
 	
 	// return NULL if no menu access is granted at all
-	if(!hasAccessToAnyMenu(module.menus,access.menu))
+	if(!hasAccessToAnyMenu(module.menuTabs,access.menu))
 		return null;
 	
 	// check role specific start form

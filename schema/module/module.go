@@ -225,9 +225,10 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 		}
 
 		if create {
-			// insert default 'everyone' role for module
-			// only relevant if module did not exist before
-			// otherwise everyone role with ID (and possible assignments) already exists
+			// generate entities that need to be created if module did not exist before
+			// otherwise they are imported with existing IDs (and foreign key references)
+
+			// generate default 'everyone' role for module
 			roleId, err := uuid.NewV4()
 			if err != nil {
 				return mod.Id, err
@@ -237,6 +238,19 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 				INSERT INTO app.role (id, module_id, name, content, assignable)
 				VALUES ($1,$2,'everyone','everyone',false)
 			`, roleId, mod.Id); err != nil {
+				return mod.Id, err
+			}
+
+			// generate first menu tab
+			menuTabId, err := uuid.NewV4()
+			if err != nil {
+				return mod.Id, err
+			}
+
+			if _, err := tx.Exec(ctx, `
+				INSERT INTO app.menu_tab (id, module_id, position)
+				VALUES ($1,$2,0)
+			`, menuTabId, mod.Id); err != nil {
 				return mod.Id, err
 			}
 		}
