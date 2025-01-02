@@ -706,6 +706,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UU
 		if err := json.Unmarshal(fieldJson, &f); err != nil {
 			return err
 		}
+
+		// fix imports < 3.10: New field flags
+		f.Flags = compatible.FixNilFieldFlags(f.Flags)
+
 		fieldId, err := setGeneric_tx(ctx, tx, formId, f.Id, parentId,
 			tabId, f.IconId, f.Content, f.State, f.Flags, f.OnMobile, pos)
 

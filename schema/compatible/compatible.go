@@ -14,6 +14,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// < 3.10
+// fix nil field flags
+func FixNilFieldFlags(flags []string) []string {
+	if flags == nil {
+		return make([]string, 0)
+	}
+	return flags
+}
+
 // < 3.9
 // fix missing volatility setting
 func FixMissingVolatility(fnc types.PgFunction) types.PgFunction {
