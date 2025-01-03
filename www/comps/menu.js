@@ -185,18 +185,41 @@ let MyMenu = {
 				:captionTitle="capGen.button.openBuilder"
 			/>
 		</div>
+		<div class="menu-tabs">
+			<div class="menu-tab clickable"
+				v-for="(mt,i) in module.menuTabs"
+				@click.left="menuTabIndexShown = i"
+				:class="{ active:i === menuTabIndexShown, centered:!showTabLabels }"
+				:style="tabStyles"
+				:title="getCaption('menuTabTitle',module.id,mt.id,mt.captions,capGen.menu)"
+			>
+				<img :src="srcBase64Icon(mt.iconId,'images/files_list1.png')" />
+				<span v-if="showTabLabels">{{ getCaption('menuTabTitle',module.id,mt.id,mt.captions,capGen.menu) }}</span>
+			</div>
+			<div class="menu-tab clickable"
+				:class="{ centered:!showTabLabels }"
+				:style="tabStyles"
+				:title="capGen.favorites"
+			>
+				<img src="images/star1.png" />
+				<span v-if="showTabLabels">{{ capGen.favorites }}</span>
+			</div>
+		</div>
 		<div class="menu-content">
 			<div class="menu-items">
-				<my-menu-item
-					v-for="m in module.menuTabs[0].menus"
-					:colorParent="null"
-					:formIdActive="formIdActive"
-					:formOpensPreset="formOpensPreset"
-					:key="m.id"
-					:menu="m"
-					:module="module"
-					:recordOpen="recordOpen"
-				/>
+				<template v-for="(mt,mti) in module.menuTabs">
+					<my-menu-item
+						v-if="mti === menuTabIndexShown"
+						v-for="m in mt.menus"
+						:colorParent="null"
+						:formIdActive="formIdActive"
+						:formOpensPreset="formOpensPreset"
+						:key="m.id"
+						:menu="m"
+						:module="module"
+						:recordOpen="recordOpen"
+					/>
+				</template>
 			</div>
 			<div class="menu-footer">
 				<img class="menu-footer-logo clickable"
@@ -214,6 +237,10 @@ let MyMenu = {
 		recordOpen:     { type:Boolean, required:true }
 	},
 	computed:{
+		// simple
+		showTabLabels:(s) => s.module.menuTabs.length < 3,
+		tabStyles:    (s) => `width:${100 / (s.module.menuTabs.length + 1)}%;`,
+
 		// stores
 		customLogo:    (s) => s.$store.getters['local/customLogo'],
 		customLogoUrl: (s) => s.$store.getters['local/customLogoUrl'],
@@ -228,12 +255,18 @@ let MyMenu = {
 		menuAccess:    (s) => s.$store.getters.access.menu,
 		settings:      (s) => s.$store.getters.settings
 	},
+	data() {
+		return {
+			menuTabIndexShown:0
+		};
+	},
 	methods:{
 		// externals
 		getCaption,
 		hasAccessToAnyMenu,
 		openLink,
 		srcBase64,
+		srcBase64Icon,
 		
 		// actions
 		openBuilder(middle) {

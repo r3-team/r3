@@ -6,6 +6,7 @@
 	flex-flow:column nowrap;
 	box-sizing:border-box;
 	color:var(--color-font-dark);
+	overflow:hidden;
 }
 .menu.isDark{
 	color:var(--color-font-bright);
@@ -29,16 +30,60 @@
 	font-weight:bold;
 	font-size:130%;
 }
+.menu-tabs{
+	display:flex;
+	flex-flow:row nowrap;
+}
+.menu-tab{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	padding:8px;
+	gap:9px;
+	border-right:1px solid var(--color-border-bright);
+	border-bottom:1px solid var(--color-border-bright);
+	overflow:hidden;
+	background:rgba(255,255,255,0.06);
+}
+.menu-tab:last-child{
+	border-right:none;
+}
+.menu-tab:hover{
+	background:rgba(255,255,255,0.02);
+}
+.menu-tab.active{
+	border-bottom:none;
+	background:transparent;
+}
+.menu-tab.centered{
+	justify-content:center;
+}
+.menu-tab img{
+	width:24px;
+	height:24px;
+	filter:var(--image-filter-dark);
+}
+.menu.isDark .menu-tab img{
+	filter:var(--image-filter-bright);
+}
+.menu-tab span{
+	min-width:0px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
+}
 .menu-content{
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
+	overflow-x:hidden;
 	overflow-y:auto;
 }
 .menu-items{
 	font-size:105%;
 	flex:1 1 auto;
-	padding:4px 0px 0px 0px;
+	padding:9px 0px 0px 0px;
 }
 .menu-items-children{
 	background-color:rgba(0,0,0,0.08);

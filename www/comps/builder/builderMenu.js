@@ -2,12 +2,10 @@ import MyBuilderCaption                from './builderCaption.js';
 import MyBuilderCollectionInput        from './builderCollectionInput.js';
 import MyBuilderFormInput              from './builderFormInput.js';
 import MyBuilderIconInput              from './builderIconInput.js';
-import MyTabs                          from '../tabs.js';
+import MyBuilderMenuTabSelect          from './builderMenuTabSelect.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {getDependentModules}           from '../shared/builder.js';
 import {getNilUuid}                    from '../shared/generic.js';
-import srcBase64Icon                   from '../shared/image.js';
-import {getCaptionForLang}             from '../shared/language.js';
 export {MyBuilderMenu as default};
 
 let MyBuilderMenuItems = {
@@ -216,7 +214,6 @@ let MyBuilderMenuItems = {
 	}
 };
 
-
 let MyBuilderMenuTabOptions = {
 	name:'my-builder-menu-tab-options',
 	components:{
@@ -271,7 +268,7 @@ let MyBuilderMenu = {
 	components:{
 		MyBuilderMenuItems,
 		MyBuilderMenuTabOptions,
-		MyTabs
+		MyBuilderMenuTabSelect
 	},
 	template:`<div v-if="module" class="builder-menus contentBox grow">
 		<div class="top">
@@ -315,24 +312,21 @@ let MyBuilderMenu = {
 		
 		<div class="content row no-padding default-inputs">
 			<div class="builder-menus-main">
-				<my-tabs
+				<my-builder-menu-tab-select
 					v-if="menuTabs.length > 1"
 					v-model="menuTabIdShown"
-					:entries="tabs.ids"
-					:entriesIcon="tabs.imgs"
-					:entriesText="tabs.caps"
+					:builderLanguage="builderLanguage"
+					:menuTabs="menuTabs"
 				/>
-				<div class="builder-menus-content">
-					<template v-for="mt in menuTabs">
-						<my-builder-menu-items
-							v-if="mt.id === menuTabIdShown"
-							:builderLanguage="builderLanguage"
-							:module="module"
-							:list="mt.menus"
-							:readonly="readonly"
-						/>
-					</template>
-				</div>
+				<template v-for="mt in menuTabs">
+					<my-builder-menu-items class="builder-menus-content"
+						v-if="mt.id === menuTabIdShown"
+						:builderLanguage="builderLanguage"
+						:module="module"
+						:list="mt.menus"
+						:readonly="readonly"
+					/>
+				</template>
 				
 				<div class="builder-menus-actions">
 					<span>{{ capApp.copy }}</span>
@@ -413,22 +407,6 @@ let MyBuilderMenu = {
 			}
 			return out;
 		},
-		tabs:(s) => {
-			let ids  = [];
-			let imgs = [];
-			let caps = [];
-
-			for(const mt of s.menuTabs) {
-				ids.push(mt.id);
-				imgs.push(s.srcBase64Icon(mt.iconId,'images/icon_missing.png'));
-				caps.push(s.getCaptionForLang('menuTabTitle',s.builderLanguage,mt.id,mt.captions,s.capGen.menu));
-			}
-			return {
-				ids:ids,
-				imgs:imgs,
-				caps:caps
-			};
-		},
 
 		// inputs
 		menuTabShown:{
@@ -459,10 +437,8 @@ let MyBuilderMenu = {
 	},
 	methods:{
 		// externals
-		getCaptionForLang,
 		getDependentModules,
 		getNilUuid,
-		srcBase64Icon,
 		
 		// actions
 		addEntry() {

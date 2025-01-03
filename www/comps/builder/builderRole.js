@@ -1,7 +1,8 @@
-import MyBuilderCaption      from './builderCaption.js';
-import MyTabs                from '../tabs.js';
-import {getDependentModules} from '../shared/builder.js';
-import {copyValueDialog}     from '../shared/generic.js';
+import MyBuilderCaption       from './builderCaption.js';
+import MyBuilderMenuTabSelect from './builderMenuTabSelect.js';
+import MyTabs                 from '../tabs.js';
+import {getDependentModules}  from '../shared/builder.js';
+import {copyValueDialog}      from '../shared/generic.js';
 export {MyBuilderRole as default};
 
 let MyBuilderRoleAccessApi = {
@@ -319,6 +320,7 @@ let MyBuilderRole = {
 	name:'my-builder-role',
 	components:{
 		MyBuilderCaption,
+		MyBuilderMenuTabSelect,
 		MyBuilderRoleAccessApi,
 		MyBuilderRoleAccessClientEvent,
 		MyBuilderRoleAccessCollection,
@@ -381,95 +383,106 @@ let MyBuilderRole = {
 				/>
 				
 				<div class="builder-role-content">
-					<template v-if="tabTarget === 'data'">
-						<table class="generic-table sticky-top default-inputs">
-							<thead>
-								<tr>
-									<th>{{ capGen.relation }}</th>
-									<th colspan="2">
-										<my-button
-											@trigger="toggleRelationsAll"
-											:caption="capGen.attribute"
-											:image="module.relations.length === relationIdsShown.length ? 'triangleDown.png' : 'triangleRight.png'"
-											:naked="true"
-										/>
-									</th>
-									<th>
-										<div class="mixed-header">
-											<img src="images/visible1.png" />
-											<span>{{ capApp.accessRead }}</span>
-										</div>
-									</th>
-									<th>
-										<div class="mixed-header">
-											<img src="images/edit.png" />
-											<span>{{ capApp.accessWrite }}</span>
-										</div>
-									</th>
-									<th>
-										<div class="mixed-header">
-											<img src="images/delete.png" />
-											<span>{{ capApp.accessDelete }}</span>
-										</div>
-									</th>
-									<th class="maximum"></th>
-								</tr>
-							</thead>
-							<tbody>
-								<my-builder-role-access-relation
-									v-for="rel in module.relations"
-									@apply-attribute="(...args) => apply('attribute',args[0],args[1])"
-									@apply-relation="(...args) => apply('relation',args[0],args[1])"
-									@relation-selected="toggleRelation"
-									:attributeIdMapAccess="accessAttributes"
-									:key="role.id + '_' + rel.id"
-									:relation="rel"
-									:role="role"
-									:readonly="readonly"
-									:relationIdMapAccess="accessRelations"
-									:showEntries="relationIdsShown.includes(rel.id)"
-								/>
-							</tbody>
-						</table>
-					</template>
-					
-					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'menus'">
+					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'data'">
 						<thead>
 							<tr>
-								<th>{{ capGen.menu }}</th>
-								<th>
+								<th>{{ capGen.relation }}</th>
+								<th colspan="2">
 									<my-button
-										@trigger="toggleMenusAll"
-										:caption="capApp.menusSub"
-										:image="menuIdsAll.length === menuIdsShow.length ? 'triangleDown.png' : 'triangleRight.png'"
+										@trigger="toggleRelationsAll"
+										:caption="capGen.attribute"
+										:image="module.relations.length === relationIdsShown.length ? 'triangleDown.png' : 'triangleRight.png'"
 										:naked="true"
 									/>
 								</th>
 								<th>
 									<div class="mixed-header">
 										<img src="images/visible1.png" />
-										<span>{{ capApp.access }}</span>
+										<span>{{ capApp.accessRead }}</span>
+									</div>
+								</th>
+								<th>
+									<div class="mixed-header">
+										<img src="images/edit.png" />
+										<span>{{ capApp.accessWrite }}</span>
+									</div>
+								</th>
+								<th>
+									<div class="mixed-header">
+										<img src="images/delete.png" />
+										<span>{{ capApp.accessDelete }}</span>
 									</div>
 								</th>
 								<th class="maximum"></th>
 							</tr>
 						</thead>
 						<tbody>
-							<my-builder-role-access-menu
-								v-for="men in module.menus"
-								@apply="(...args) => apply('menu',args[0],args[1])"
-								@toggle="toggleMenu"
-								:builderLanguage="builderLanguage"
-								:depth="0"
-								:idMapAccess="accessMenus"
-								:key="role.id + '_' + men.id"
-								:menu="men"
-								:menuIdsShow="menuIdsShow"
+							<my-builder-role-access-relation
+								v-for="rel in module.relations"
+								@apply-attribute="(...args) => apply('attribute',args[0],args[1])"
+								@apply-relation="(...args) => apply('relation',args[0],args[1])"
+								@relation-selected="toggleRelation"
+								:attributeIdMapAccess="accessAttributes"
+								:key="role.id + '_' + rel.id"
+								:relation="rel"
 								:role="role"
 								:readonly="readonly"
+								:relationIdMapAccess="accessRelations"
+								:showEntries="relationIdsShown.includes(rel.id)"
 							/>
 						</tbody>
 					</table>
+					
+					<template v-if="tabTarget === 'menus'">
+						<div v-if="module.menuTabs.length > 1">
+							<div class="builder-role-menu-tab-select"></div>
+							<my-builder-menu-tab-select
+								v-model="menuTabIdShown"
+								:builderLanguage="builderLanguage"
+								:menuTabs="module.menuTabs"
+							/>
+						</div>
+						<table class="generic-table sticky-top default-inputs">
+							<thead>
+								<tr>
+									<th>{{ capGen.menu }}</th>
+									<th>
+										<my-button
+											@trigger="toggleMenusAll"
+											:caption="capApp.menusSub"
+											:image="menuIdsAll.length === menuIdsShow.length ? 'triangleDown.png' : 'triangleRight.png'"
+											:naked="true"
+										/>
+									</th>
+									<th>
+										<div class="mixed-header">
+											<img src="images/visible1.png" />
+											<span>{{ capApp.access }}</span>
+										</div>
+									</th>
+									<th class="maximum"></th>
+								</tr>
+							</thead>
+							<tbody>
+								<template v-for="mt in module.menuTabs">
+									<my-builder-role-access-menu
+										v-if="mt.id === menuTabIdShown"
+										v-for="men in mt.menus"
+										@apply="(...args) => apply('menu',args[0],args[1])"
+										@toggle="toggleMenu"
+										:builderLanguage="builderLanguage"
+										:depth="0"
+										:idMapAccess="accessMenus"
+										:key="role.id + '_' + men.id"
+										:menu="men"
+										:menuIdsShow="menuIdsShow"
+										:role="role"
+										:readonly="readonly"
+									/>
+								</template>
+							</tbody>
+						</table>
+					</template>
 					
 					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'clientEvents'">
 						<thead>
@@ -679,6 +692,7 @@ let MyBuilderRole = {
 			
 			// states
 			menuIdsShow:[],
+			menuTabIdShown:null,
 			ready:false,
 			relationIdsShown:[],
 			tabTarget:'data'
@@ -709,13 +723,15 @@ let MyBuilderRole = {
 					getChildren(m.menus);
 				}
 			};
-			getChildren(s.module.menus);
+			for(const mt of s.module.menuTabs) {
+				getChildren(mt.menus);
+			}
 			return out;
 		},
 		tabCaptions:(s) => {
 			return [
 				`${s.capGen.data} (${s.module.relations.length})`,
-				`${s.capGen.menus} (${s.module.menus.length})`,
+				`${s.capGen.menus} (${s.module.menuTabs.length})`,
 				`${s.capGen.collections} (${s.module.collections.length})`,
 				`${s.capGen.apis} (${s.module.apis.length})`,
 				`${s.capGen.widgets} (${s.module.widgets.length})`,
@@ -774,6 +790,10 @@ let MyBuilderRole = {
 			this.accessRelations    = JSON.parse(JSON.stringify(this.role.accessRelations));
 			this.accessWidgets      = JSON.parse(JSON.stringify(this.role.accessWidgets));
 			this.captions           = JSON.parse(JSON.stringify(this.role.captions));
+
+			if(this.menuTabIdShown === null && this.module.menuTabs.length !== 0)
+				this.menuTabIdShown = this.module.menuTabs[0].id;
+				
 			this.ready = true;
 		},
 		toggleMenu(id) {
