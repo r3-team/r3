@@ -1,6 +1,5 @@
 import srcBase64Icon        from './shared/image.js';
 import {srcBase64}          from './shared/image.js';
-import {hasAccessToAnyMenu} from './shared/access.js';
 import {getColumnTitle}     from './shared/column.js';
 import {getFormRoute}       from './shared/form.js';
 import {openLink}           from './shared/generic.js';
@@ -167,7 +166,7 @@ let MyMenu = {
 	template:`<div class="menu"
 		:class="{ isDark:color.isDark() }"
 		:style="bgStyle"
-		v-if="hasAccessToAnyMenu(module.menuTabs,menuAccess)"
+		v-if="menuTabsAccess.length !== 0"
 	>
 		<div class="menu-header row space-between gap">
 			<div class="row centered gap">
@@ -187,7 +186,7 @@ let MyMenu = {
 		</div>
 		<div class="menu-tabs">
 			<div class="menu-tab clickable"
-				v-for="(mt,i) in module.menuTabs"
+				v-for="(mt,i) in menuTabsAccess"
 				@click.left="menuTabIndexShown = i"
 				:class="{ active:i === menuTabIndexShown, centered:!showTabLabels }"
 				:style="tabStyles"
@@ -207,7 +206,7 @@ let MyMenu = {
 		</div>
 		<div class="menu-content">
 			<div class="menu-items">
-				<template v-for="(mt,mti) in module.menuTabs">
+				<template v-for="(mt,mti) in menuTabsAccess">
 					<my-menu-item
 						v-if="mti === menuTabIndexShown"
 						v-for="m in mt.menus"
@@ -237,9 +236,22 @@ let MyMenu = {
 		recordOpen:     { type:Boolean, required:true }
 	},
 	computed:{
+		menuTabsAccess:(s) => {
+			let out = [];
+			for(const mt of s.module.menuTabs) {
+				for(const m of mt.menus) {
+					if(s.menuAccess[m.id] === 1) {
+						out.push(mt);
+						break;
+					}
+				}
+			}
+			return out;
+		},
+
 		// simple
-		showTabLabels:(s) => s.module.menuTabs.length < 3,
-		tabStyles:    (s) => `width:${100 / (s.module.menuTabs.length + 1)}%;`,
+		showTabLabels:(s) => s.menuTabsAccess.length < 3,
+		tabStyles:    (s) => `width:${100 / (s.menuTabsAccess.length + 1)}%;`,
 
 		// stores
 		customLogo:    (s) => s.$store.getters['local/customLogo'],
@@ -263,7 +275,6 @@ let MyMenu = {
 	methods:{
 		// externals
 		getCaption,
-		hasAccessToAnyMenu,
 		openLink,
 		srcBase64,
 		srcBase64Icon,
