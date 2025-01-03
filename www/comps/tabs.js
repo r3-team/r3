@@ -17,7 +17,7 @@ let MyTabs = {
 		entries:    { type:Array,  required:true },
 		entriesIcon:{ type:Array,  required:false, default:() => [] }, // icons for entries, same order
 		entriesText:{ type:Array,  required:true },                    // labels for entries, same order
-		modelValue: { type:String, required:true }
+		modelValue: { required:true }
 	},
 	emits:['update:modelValue']
 };

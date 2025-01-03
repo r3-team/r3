@@ -1387,13 +1387,18 @@
 		"menu": {
 			"button": {
 				"add": "إضافة إدخال",
-				"addTab": "Add tab"
+				"addTab": "Add tab",
+				"delete": "Delete tab"
 			},
 			"collections": "إظهار قيم المجموعة في القائمة",
 			"copy": "انسخ كافة عناصر القائمة من",
+			"dialog": {
+				"delete": "Are you sure that you want to <b>permanently</b> delete the active menu tab?"
+			},
 			"formId": "- اختر النموذج -",
 			"showChildrenHint": "إظهار الإدخالات الفرعية بشكل افتراضي",
-			"title": "القوائم"
+			"title": "القوائم",
+			"titleMenuTab": "Tab properties"
 		},
 		"module": {
 			"button": {

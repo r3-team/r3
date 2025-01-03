@@ -1387,13 +1387,18 @@
 		"menu": {
 			"button": {
 				"add": "Eintrag hinzufügen",
-				"addTab": "Tab hinzufügen"
+				"addTab": "Tab hinzufügen",
+				"delete": "Tab löschen"
 			},
 			"collections": "Sammlungswerte im Menü anzeigen",
 			"copy": "Alle Menüeintrage kopieren von",
+			"dialog": {
+				"delete": "Bist du sicher, dass du den aktiven Menütab <b>permanent</b> löschen möchtest?"
+			},
 			"formId": "- Formular auswählen -",
 			"showChildrenHint": "Standardmäßig Untereinträge anzeigen",
-			"title": "Menüs"
+			"title": "Menüs",
+			"titleMenuTab": "Tabeigenschaften"
 		},
 		"module": {
 			"button": {

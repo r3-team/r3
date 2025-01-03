@@ -1387,13 +1387,18 @@
 		"menu": {
 			"button": {
 				"add": "添加条目",
-				"addTab": "Add tab"
+				"addTab": "Add tab",
+				"delete": "Delete tab"
 			},
 			"collections": "在菜单中显示集合数值",
 			"copy": "从以下复制所有菜单项",
+			"dialog": {
+				"delete": "Are you sure that you want to <b>permanently</b> delete the active menu tab?"
+			},
 			"formId": "- 选择表单 -",
 			"showChildrenHint": "默认显示子条目",
-			"title": "菜单"
+			"title": "菜单",
+			"titleMenuTab": "Tab properties"
 		},
 		"module": {
 			"button": {

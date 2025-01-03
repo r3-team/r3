@@ -1387,13 +1387,18 @@
 		"menu": {
 			"button": {
 				"add": "Add entry",
-				"addTab": "Add tab"
+				"addTab": "Add tab",
+				"delete": "Delete tab"
 			},
 			"collections": "Show collection values in menu",
 			"copy": "Copy all menu items from",
+			"dialog": {
+				"delete": "Are you sure that you want to <b>permanently</b> delete the active menu tab?"
+			},
 			"formId": "- Select form -",
 			"showChildrenHint": "Show sub entries by default",
-			"title": "Menus"
+			"title": "Menus",
+			"titleMenuTab": "Tab properties"
 		},
 		"module": {
 			"button": {

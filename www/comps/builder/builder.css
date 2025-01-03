@@ -1093,6 +1093,24 @@
 .builder-menus-actions select{
 	margin:0px 6px 0px 0px !important;
 }
+.builder-menus-main{
+	flex:3 3 auto;
+	display:row;
+	flex-flow:row nowrap;
+}
+.builder-menus-content{
+	flex:1 1 auto;
+	display:row;
+	flex-flow:row nowrap;
+	padding:calc(var(--spacing) * 1.5) var(--spacing);
+}
+.builder-menus-sidebar{
+	flex:0 0.5 450px;
+	display:row;
+	flex-flow:column nowrap;
+	padding:var(--spacing);
+	border-left:1px solid var(--color-border);
+}
 .builder-menu{
 	min-height:30px;
 	margin:0px 5px 5px 0px;

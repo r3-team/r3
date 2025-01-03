@@ -7,6 +7,7 @@ import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {getDependentModules}           from '../shared/builder.js';
 import {getNilUuid}                    from '../shared/generic.js';
 import srcBase64Icon                   from '../shared/image.js';
+import {getCaptionForLang}             from '../shared/language.js';
 export {MyBuilderMenu as default};
 
 let MyBuilderMenuItems = {
@@ -215,14 +216,64 @@ let MyBuilderMenuItems = {
 	}
 };
 
+
+let MyBuilderMenuTabOptions = {
+	name:'my-builder-menu-tab-options',
+	components:{
+		MyBuilderCaption,
+		MyBuilderIconInput
+	},
+	template:`<table class="generic-table-vertical tight fullWidth default-inputs">
+		<tbody>
+			<tr>
+				<td>{{ capGen.title }}</td>
+				<td>
+					<my-builder-caption
+						@update:modelValue="set('captions',{menuTabTitle:$event})"
+						:language="builderLanguage"
+						:modelValue="modelValue.captions.menuTabTitle"
+					/>
+				</td>
+			</tr>
+			<tr>
+				<td>{{ capGen.icon }}</td>
+				<td>
+					<my-builder-icon-input
+						@input="set('iconId',$event)"
+						:icon-id-selected="modelValue.iconId"
+						:module="module"
+						:title="capGen.icon"
+					/>
+				</td>
+			</tr>
+		</tbody>
+	</table>`,
+	props:{
+		builderLanguage:{ type:String, required:true },
+		module:         { type:Object, required:true },
+		modelValue:     { type:Object, required:true }
+	},
+	emits:['update:modelValue'],
+	computed:{
+		capGen:(s) => s.$store.getters.captions.generic
+	},
+	methods:{
+		set(name,value) {
+			let v = JSON.parse(JSON.stringify(this.modelValue));
+			v[name] = value;
+			this.$emit('update:modelValue',v);
+		}
+	}
+};
+
 let MyBuilderMenu = {
 	name:'my-builder-menu',
 	components:{
 		MyBuilderMenuItems,
+		MyBuilderMenuTabOptions,
 		MyTabs
 	},
 	template:`<div v-if="module" class="builder-menus contentBox grow">
-		
 		<div class="top">
 			<div class="area nowrap">
 				<img class="icon" src="images/menu.png" />
@@ -252,43 +303,62 @@ let MyBuilderMenu = {
 					:caption="capApp.button.addTab"
 				/>
 			</div>
+			<div class="area nowrap">
+				<my-button image="delete.png"
+					@trigger="delAsk"
+					:active="canDelete"
+					:cancel="true"
+					:caption="capApp.button.delete"
+				/>
+			</div>
 		</div>
 		
-		<div class="content no-padding default-inputs">
-
-			<my-tabs
-				v-if="menuTabs.length > 1"
-				v-model="menuTabIdShown"
-				:entries="tabs.ids"
-				:entriesIcon="tabs.imgs"
-				:entriesText="tabs.caps"
-			/>
-		
-			<template v-for="mt in menuTabs">
-				<my-builder-menu-items
-					v-if="mt.id === menuTabIdShown"
+		<div class="content row no-padding default-inputs">
+			<div class="builder-menus-main">
+				<my-tabs
+					v-if="menuTabs.length > 1"
+					v-model="menuTabIdShown"
+					:entries="tabs.ids"
+					:entriesIcon="tabs.imgs"
+					:entriesText="tabs.caps"
+				/>
+				<div class="builder-menus-content">
+					<template v-for="mt in menuTabs">
+						<my-builder-menu-items
+							v-if="mt.id === menuTabIdShown"
+							:builderLanguage="builderLanguage"
+							:module="module"
+							:list="mt.menus"
+							:readonly="readonly"
+						/>
+					</template>
+				</div>
+				
+				<div class="builder-menus-actions">
+					<span>{{ capApp.copy }}</span>
+					<select v-model="menuIdCopy" :disabled="readonly">
+						<option :value="null">-</option>
+						<option
+							v-for="mod in getDependentModules(module).filter(v => v.id !== module.id)"
+							:value="mod.id"
+						>
+							{{ mod.name }}
+						</option>
+					</select>
+					<my-button image="ok.png"
+						@trigger="copy"
+						:active="menuIdCopy !== null && !readonly"
+						:caption="capGen.button.apply"
+					/>
+				</div>
+			</div>
+			<div class="builder-menus-sidebar">
+				<h3 class="title">{{ capApp.titleMenuTab }}</h3>
+				<my-builder-menu-tab-options
+					v-if="menuTabShown !== false"
+					v-model="menuTabShown"
 					:builderLanguage="builderLanguage"
 					:module="module"
-					:list="mt.menus"
-					:readonly="readonly"
-				/>
-			</template>
-			
-			<div class="builder-menus-actions">
-				<span>{{ capApp.copy }}</span>
-				<select v-model="menuIdCopy" :disabled="readonly">
-					<option :value="null">-</option>
-					<option
-						v-for="mod in getDependentModules(module).filter(v => v.id !== module.id)"
-						:value="mod.id"
-					>
-						{{ mod.name }}
-					</option>
-				</select>
-				<my-button image="ok.png"
-					@trigger="copy"
-					:active="menuIdCopy !== null && !readonly"
-					:caption="capGen.button.apply"
 				/>
 			</div>
 		</div>
@@ -300,7 +370,8 @@ let MyBuilderMenu = {
 	},
 	data() {
 		return {
-			newCnt:0, // temporary menu IDs, replaced with NULL UUIDs on SET
+			newCntEntry:0, // temporary menu IDs, replaced with NULL UUIDs on SET
+			newCntTab:0,   // temporary menu tab IDs, replaced with NULL UUIDs on SET
 			menuIdCopy:null,
 			menuTabs:[],
 			menuTabIdShown:null,
@@ -316,13 +387,32 @@ let MyBuilderMenu = {
 	watch:{
 		module:{
 			handler() {
-				this.menuTabIdShown = this.module.menuTabs[0].id;
 				this.reset();
+				this.switchToValidMenuTab();
 			},
 			immediate:true
 		}
 	},
 	computed:{
+		canDelete:(s) => {
+			if(s.readonly)                         return false;
+			if(Number.isInteger(s.menuTabIdShown)) return true; // new menu tab can always be deleted
+
+			// if shown menu tab is not new, at least 1 other menu tab must exist in the schema
+			let cntSavedMenuTabs = 0;
+			for(const mt of s.menuTabs) {
+				if(!Number.isInteger(mt.id))
+					cntSavedMenuTabs++;
+			}
+			return cntSavedMenuTabs > 1;
+		},
+		menuTabIds:(s) => {
+			let out = []
+			for(const mt of s.menuTabs) {
+				out.push(mt.id);
+			}
+			return out;
+		},
 		tabs:(s) => {
 			let ids  = [];
 			let imgs = [];
@@ -331,13 +421,30 @@ let MyBuilderMenu = {
 			for(const mt of s.menuTabs) {
 				ids.push(mt.id);
 				imgs.push(s.srcBase64Icon(mt.iconId,'images/icon_missing.png'));
-				caps.push('TAB CAP!');
+				caps.push(s.getCaptionForLang('menuTabTitle',s.builderLanguage,mt.id,mt.captions,s.capGen.menu));
 			}
 			return {
 				ids:ids,
 				imgs:imgs,
 				caps:caps
 			};
+		},
+
+		// inputs
+		menuTabShown:{
+			get() {
+				for(const mt of this.menuTabs) {
+					if(mt.id === this.menuTabIdShown)
+						return mt;
+				}
+				return false;
+			},
+			set(v) {
+				for(let i = 0, j = this.menuTabs.length; i < j; i++) {
+					if(this.menuTabs[i].id === v.id)
+						this.menuTabs[i] = v;
+				}
+			}
 		},
 
 		// simple
@@ -352,6 +459,7 @@ let MyBuilderMenu = {
 	},
 	methods:{
 		// externals
+		getCaptionForLang,
 		getDependentModules,
 		getNilUuid,
 		srcBase64Icon,
@@ -363,7 +471,7 @@ let MyBuilderMenu = {
 					continue;
 
 				return this.menuTabs[i].menus.unshift({
-					id:this.newCnt++,
+					id:this.newCntEntry++,
 					formId:null,
 					iconId:null,
 					menus:[],
@@ -378,6 +486,7 @@ let MyBuilderMenu = {
 		},
 		addTab() {
 			this.menuTabs.push({
+				id:this.newCntTab++,
 				moduleId:this.module.id,
 				iconId:null,
 				menus:[],
@@ -387,8 +496,17 @@ let MyBuilderMenu = {
 			});
 		},
 		reset() {
-			if(this.module)
-				this.menuTabs = JSON.parse(JSON.stringify(this.module.menuTabs));
+			if(!this.module)
+				return;
+			
+			this.menuTabs = JSON.parse(JSON.stringify(this.module.menuTabs));
+			this.switchToValidMenuTab();
+		},
+
+		// presentation
+		switchToValidMenuTab() {
+			if(!this.menuTabIds.includes(this.menuTabIdShown))
+				this.menuTabIdShown = this.module.menuTabs.length === 0 ? null : this.module.menuTabs[0].id;
 		},
 		
 		// backend functions
@@ -404,24 +522,60 @@ let MyBuilderMenu = {
 				this.$root.genericError
 			);*/
 		},
+		delAsk() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.delete,
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.delete,
+					exec:this.del,
+					image:'delete.png'
+				},{
+					caption:this.capGen.button.cancel,
+					image:'cancel.png'
+				}]
+			});
+		},
+		del() {
+			// if ID is a number, the menu tab was not saved yet, can just be removed
+			if(Number.isInteger(this.menuTabIdShown)) {
+				for(let i = 0, j = this.menuTabs.length; i < j; i++) {
+					if(this.menuTabs[i].id === this.menuTabIdShown) {
+						this.menuTabs.splice(i,1);
+						this.switchToValidMenuTab();
+						return;
+					}
+				}
+				return;
+			}
+
+			ws.send('menuTab','del',this.menuTabIdShown,true).then(
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
+			);
+		},
 		set() {
 			// replace temporary counter IDs with NULL UUIDs for SET
-			let replaceIds;
-			replaceIds = menus => {
+			let replaceMenuIds;
+			replaceMenuIds = menus => {
 				for(let i = 0, j = menus.length; i < j; i++) {
 					
 					if(Number.isInteger(menus[i].id))
 						menus[i].id = this.getNilUuid();
 					
-					menus[i].menus = replaceIds(menus[i].menus);
+					menus[i].menus = replaceMenuIds(menus[i].menus);
 				}
 				return menus;
-			}
+			};
 
 			let requests = [];
 			for(let i = 0, j = this.menuTabs.length; i < j; i++) {
 				let mt = JSON.parse(JSON.stringify(this.menuTabs[i]));
-				mt.menus = replaceIds(mt.menus);
+				mt.menus = replaceMenuIds(mt.menus);
+
+				if(Number.isInteger(mt.id))
+					mt.id = this.getNilUuid();
+
 				requests.push(ws.prepare('menuTab','set',{menuTab:mt,position:i}));
 			}
 			requests.push(ws.prepare('schema','check',{moduleId:this.module.id}));
