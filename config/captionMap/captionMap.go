@@ -31,6 +31,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 	caps.JsFunctionIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.LoginFormIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.MenuIdMap = make(map[uuid.UUID]types.CaptionMap)
+	caps.MenuTabIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.ModuleIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.PgFunctionIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.QueryChoiceIdMap = make(map[uuid.UUID]types.CaptionMap)
@@ -49,6 +50,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 		WHEN js_function_id  IS NOT NULL THEN 'jsFunction'
 		WHEN login_form_id   IS NOT NULL THEN 'loginForm'
 		WHEN menu_id         IS NOT NULL THEN 'menu'
+		WHEN menu_tab_id     IS NOT NULL THEN 'menuTab'
 		WHEN module_id       IS NOT NULL THEN 'module'
 		WHEN pg_function_id  IS NOT NULL THEN 'pgFunction'
 		WHEN query_choice_id IS NOT NULL THEN 'queryChoice'
@@ -67,6 +69,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 		js_function_id,
 		login_form_id,
 		menu_id,
+		menu_tab_id,
 		module_id,
 		pg_function_id,
 		query_choice_id,
@@ -116,10 +119,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 					SELECT id FROM app.form WHERE module_id = $7
 				)
 			)
+			OR menu_id IN (
+				SELECT id FROM app.menu WHERE menu_tab_id IN (
+					SELECT id FROM app.menu_tab WHERE module_id = $8
+				)
+			)
 			OR tab_id IN (
 				SELECT id FROM app.tab WHERE field_id IN (
 					SELECT id FROM app.field WHERE form_id IN (
-						SELECT id FROM app.form WHERE module_id = $8
+						SELECT id FROM app.form WHERE module_id = $9
 					)
 				)
 			)
@@ -128,23 +136,23 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 					SELECT id FROM app.query
 					WHERE field_id IN (
 						SELECT id FROM app.field WHERE form_id IN (
-							SELECT id FROM app.form WHERE module_id = $9
+							SELECT id FROM app.form WHERE module_id = $10
 						)
 					)
 					-- only direct field queries have filter choices and therefore captions
 					-- most queries do not: form query, collection query, column sub query, filter sub query
 				)
 			)
-			OR article_id      IN (SELECT id FROM app.article      WHERE module_id = $10)
-			OR client_event_id IN (SELECT id FROM app.client_event WHERE module_id = $11)
-			OR form_id         IN (SELECT id FROM app.form         WHERE module_id = $12)
-			OR js_function_id  IN (SELECT id FROM app.js_function  WHERE module_id = $13)
-			OR login_form_id   IN (SELECT id FROM app.login_form   WHERE module_id = $14)
-			OR menu_id         IN (SELECT id FROM app.menu         WHERE module_id = $15)
-			OR pg_function_id  IN (SELECT id FROM app.pg_function  WHERE module_id = $16)
-			OR role_id         IN (SELECT id FROM app.role         WHERE module_id = $17)
-			OR widget_id       IN (SELECT id FROM app.widget       WHERE module_id = $18)
-		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
+			OR article_id      IN (SELECT id FROM app.article      WHERE module_id = $11)
+			OR client_event_id IN (SELECT id FROM app.client_event WHERE module_id = $12)
+			OR form_id         IN (SELECT id FROM app.form         WHERE module_id = $13)
+			OR js_function_id  IN (SELECT id FROM app.js_function  WHERE module_id = $14)
+			OR login_form_id   IN (SELECT id FROM app.login_form   WHERE module_id = $15)
+			OR menu_tab_id     IN (SELECT id FROM app.menu_tab     WHERE module_id = $16)
+			OR pg_function_id  IN (SELECT id FROM app.pg_function  WHERE module_id = $17)
+			OR role_id         IN (SELECT id FROM app.role         WHERE module_id = $18)
+			OR widget_id       IN (SELECT id FROM app.widget       WHERE module_id = $19)
+		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
 	}
 
 	if err != nil {
@@ -186,6 +194,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			captionMap, exists = caps.LoginFormIdMap[entityId]
 		case "menu":
 			captionMap, exists = caps.MenuIdMap[entityId]
+		case "menuTab":
+			captionMap, exists = caps.MenuTabIdMap[entityId]
 		case "module":
 			captionMap, exists = caps.ModuleIdMap[entityId]
 		case "pgFunction":
@@ -226,6 +236,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			caps.LoginFormIdMap[entityId] = captionMap
 		case "menu":
 			caps.MenuIdMap[entityId] = captionMap
+		case "menuTab":
+			caps.MenuTabIdMap[entityId] = captionMap
 		case "module":
 			caps.ModuleIdMap[entityId] = captionMap
 		case "pgFunction":

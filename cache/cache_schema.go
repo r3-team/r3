@@ -160,7 +160,6 @@ func updateSchemaCache(moduleIds []uuid.UUID) error {
 		log.Info("cache", fmt.Sprintf("parsing module '%s'", mod.Name))
 		mod.Relations = make([]types.Relation, 0)
 		mod.Forms = make([]types.Form, 0)
-		mod.Menus = make([]types.Menu, 0)
 		mod.MenuTabs = make([]types.MenuTab, 0)
 		mod.Icons = make([]types.Icon, 0)
 		mod.Roles = make([]types.Role, 0)

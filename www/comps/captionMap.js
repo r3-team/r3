@@ -543,13 +543,14 @@ let MyCaptionMap = {
 							:name="capGen.forms"
 							:readonly="readonly"
 						/>
-						<!-- menus -->
+						<!-- menu tabs -->
 						<my-caption-map-items icon="menu.png"
 							@update="storeChange"
 							:isCustom="isCustom"
-							:items="captionsMenus"
+							:items="captionsMenusByMenuTabs"
 							:languages="showLanguageCodes"
 							:languagesCustom="languagesCustom"
+							:levelMax="2"
 							:name="capGen.menus"
 							:readonly="readonly"
 						/>
@@ -732,7 +733,7 @@ let MyCaptionMap = {
 			for(let atrId in s.captionMap.attributeIdMap) {
 				const atr   = s.attributeIdMap[atrId];
 				const relId = atr.relationId;
-				if(typeof relIdMap[relId] === 'undefined')
+				if(relIdMap[relId] === undefined)
 					relIdMap[relId] = [];
 				
 				relIdMap[relId].push(s.makeItem(atrId,atr.name,s.captionMap.attributeIdMap[atrId],[]));
@@ -816,10 +817,21 @@ let MyCaptionMap = {
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
-		captionsMenus:(s) => {
-			let out = [];
-			for(const id in s.captionMap.menuIdMap) {
-				out.push(s.makeItem(id,'-',s.captionMap.menuIdMap[id],[]));
+		captionsMenusByMenuTabs:(s) => {
+			let out          = [];
+			let menuTabIdMap = {};
+			for(const mt of s.module.menuTabs) {
+				menuTabIdMap[mt.id] = mt;
+			}
+
+			for(const id in s.captionMap.menuTabIdMap) {
+				let children = [];
+				if(menuTabIdMap[id] !== undefined) {
+					for(const m of menuTabIdMap[id].menus) {
+						children.push(s.makeItem(m.id,'-',s.captionMap.menuIdMap[m.id],[]));
+					}
+				}
+				out.push(s.makeItem(id,'-',s.captionMap.menuTabIdMap[id],children));
 			}
 			return out;
 		},
