@@ -6,6 +6,7 @@ let MyTabs = {
 		<div class="tab-entry" tabindex="0"
 			v-for="(e,i) in entries"
 			@click="$emit('update:modelValue',e)"
+			@dragover="$emit('update:modelValue',e)"
 			@key.enter="$emit('update:modelValue',e)"
 			:class="{ active:e === modelValue, clickable:e !== modelValue }"
 		>

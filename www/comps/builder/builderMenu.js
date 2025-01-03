@@ -320,7 +320,7 @@ let MyBuilderMenu = {
 				/>
 				<template v-for="mt in menuTabs">
 					<my-builder-menu-items class="builder-menus-content"
-						v-if="mt.id === menuTabIdShown"
+						v-show="mt.id === menuTabIdShown"
 						:builderLanguage="builderLanguage"
 						:module="module"
 						:list="mt.menus"
