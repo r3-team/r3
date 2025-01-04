@@ -162,11 +162,17 @@ export function getFormRoute(formId,recordId,stayInModule,getArgs) {
 	
 	// optional: stay in context of currently open module
 	// useful to navigate through forms but keeping the current module context open (menu, title, etc.)
-	if(stayInModule &&
-		typeof this.$route.params.moduleNameChild !== 'undefined' &&
-		typeof MyStore.getters['schema/moduleNameMap'][this.$route.params.moduleNameChild] !== 'undefined'
-	) {
-		moduleId = MyStore.getters['schema/moduleNameMap'][this.$route.params.moduleNameChild].id;
+	if(stayInModule) {
+		if(typeof this.$route.params.moduleNameChild !== 'undefined' &&
+			MyStore.getters['schema/moduleNameMap'][this.$route.params.moduleNameChild] !== undefined) {
+			
+			moduleId = MyStore.getters['schema/moduleNameMap'][this.$route.params.moduleNameChild].id;
+		}
+		else if(typeof this.$route.params.moduleName !== 'undefined' &&
+			MyStore.getters['schema/moduleNameMap'][this.$route.params.moduleName] !== undefined) {
+			
+			moduleId = MyStore.getters['schema/moduleNameMap'][this.$route.params.moduleName].id;
+		}
 	}
 	
 	let module = MyStore.getters['schema/moduleIdMap'][moduleId];

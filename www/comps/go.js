@@ -18,7 +18,7 @@ let MyGoModule = {
 	},
 	mounted() {
 		// route to home if invalid module was given
-		if(typeof this.moduleNameMap[this.moduleName] === 'undefined')
+		if(this.moduleNameMap[this.moduleName] === undefined)
 			return this.$router.push('/');
 		
 		let module = this.moduleNameMap[this.moduleName];
@@ -26,10 +26,10 @@ let MyGoModule = {
 		
 		// route to start form of child module
 		if(this.moduleNameChild !== '') {
-			if(typeof this.moduleNameMap[this.moduleNameChild] === 'undefined')
+			if(this.moduleNameMap[this.moduleNameChild] === undefined)
 				return this.$router.push('/');
 			
-			let child = this.moduleNameMap[this.moduleNameChild];
+			const child = this.moduleNameMap[this.moduleNameChild];
 			startFormId = this.getStartFormId(child,this.access);
 			
 			if(startFormId !== null)
@@ -43,11 +43,9 @@ let MyGoModule = {
 			return this.$router.replace(`/app/${module.name}/${module.name}/form/${startFormId}`);
 		
 		// start form (or module in general) is inaccessible, reroute to first accessible child module
-		for(let i = 0, j = this.moduleEntries.length; i < j; i++) {
-			let m = this.moduleEntries[i];
-			
-			if(m.id === module.id && m.children.length > 0)
-				return this.$router.replace(`/app/${module.name}/${m.children[0].name}/form/${m.children[0].formId}`);
+		for(const me of this.moduleEntries) {
+			if(me.id === module.id && me.children.length > 0)
+				return this.$router.replace(`/app/${module.name}/${me.children[0].name}/form/${me.children[0].formId}`);
 		}
 		
 		// no start form exists, route to home
@@ -95,7 +93,7 @@ let MyGoForm = {
 		moduleNameActive:{
 			handler() {
 				// if module cannot be resolved, go home
-				if(typeof this.moduleNameMap[this.moduleNameActive] === 'undefined')
+				if(this.moduleNameMap[this.moduleNameActive] === undefined)
 					return this.$router.replace('/');
 				
 				let module = this.moduleNameMap[this.moduleNameActive];
