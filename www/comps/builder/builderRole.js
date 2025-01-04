@@ -437,7 +437,7 @@ let MyBuilderRole = {
 						<div v-if="module.menuTabs.length > 1">
 							<div class="builder-role-menu-tab-select"></div>
 							<my-builder-menu-tab-select
-								v-model="menuTabIdShown"
+								v-model="menuTabsIndexShown"
 								:builderLanguage="builderLanguage"
 								:menuTabs="module.menuTabs"
 							/>
@@ -464,9 +464,9 @@ let MyBuilderRole = {
 								</tr>
 							</thead>
 							<tbody>
-								<template v-for="mt in module.menuTabs">
+								<template v-for="(mt,i) in module.menuTabs">
 									<my-builder-role-access-menu
-										v-if="mt.id === menuTabIdShown"
+										v-if="i === menuTabsIndexShown"
 										v-for="men in mt.menus"
 										@apply="(...args) => apply('menu',args[0],args[1])"
 										@toggle="toggleMenu"
@@ -692,7 +692,7 @@ let MyBuilderRole = {
 			
 			// states
 			menuIdsShow:[],
-			menuTabIdShown:null,
+			menuTabsIndexShown:0,
 			ready:false,
 			relationIdsShown:[],
 			tabTarget:'data'
@@ -791,9 +791,9 @@ let MyBuilderRole = {
 			this.accessWidgets      = JSON.parse(JSON.stringify(this.role.accessWidgets));
 			this.captions           = JSON.parse(JSON.stringify(this.role.captions));
 
-			if(this.menuTabIdShown === null && this.module.menuTabs.length !== 0)
-				this.menuTabIdShown = this.module.menuTabs[0].id;
-				
+			if(this.menuTabsIndexShown > this.module.menuTabs.length - 1)
+				this.menuTabsIndexShown = 0;
+			
 			this.ready = true;
 		},
 		toggleMenu(id) {
