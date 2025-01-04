@@ -1392,9 +1392,6 @@
 			},
 			"collections": "Afficher les valeurs de la collection dans le menu",
 			"copy": "Copier tous les éléments du menu depuis",
-			"dialog": {
-				"delete": "Are you sure that you want to <b>permanently</b> delete the active menu tab?"
-			},
 			"formId": "- Sélectionnez le formulaire -",
 			"showChildrenHint": "Afficher les sous-entrées par défaut",
 			"title": "Menus",

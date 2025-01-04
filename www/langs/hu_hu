@@ -1392,9 +1392,6 @@
 			},
 			"collections": "Gyűjtemény értékei megjelenítése a menüben",
 			"copy": "Minden menüelem másolása innen",
-			"dialog": {
-				"delete": "Are you sure that you want to <b>permanently</b> delete the active menu tab?"
-			},
 			"formId": "- Űrlap kiválasztása -",
 			"showChildrenHint": "Almenüelemek alapértelmezés szerinti megjelenítése",
 			"title": "Menük",

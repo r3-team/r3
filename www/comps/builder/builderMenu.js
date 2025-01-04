@@ -300,27 +300,19 @@ let MyBuilderMenu = {
 					:caption="capApp.button.addTab"
 				/>
 			</div>
-			<div class="area nowrap">
-				<my-button image="delete.png"
-					@trigger="delAsk"
-					:active="canDelete"
-					:cancel="true"
-					:caption="capApp.button.delete"
-				/>
-			</div>
 		</div>
 		
 		<div class="content row no-padding default-inputs">
 			<div class="builder-menus-main">
 				<my-builder-menu-tab-select
 					v-if="menuTabs.length > 1"
-					v-model="menuTabIdShown"
+					v-model="menuTabsIndexShown"
 					:builderLanguage="builderLanguage"
 					:menuTabs="menuTabs"
 				/>
-				<template v-for="mt in menuTabs">
+				<template v-for="(mt,i) in menuTabs">
 					<my-builder-menu-items class="builder-menus-content"
-						v-show="mt.id === menuTabIdShown"
+						v-show="i === menuTabsIndexShown"
 						:builderLanguage="builderLanguage"
 						:module="module"
 						:list="mt.menus"
@@ -347,7 +339,25 @@ let MyBuilderMenu = {
 				</div>
 			</div>
 			<div class="builder-menus-sidebar">
-				<h3 class="title">{{ capApp.titleMenuTab }}</h3>
+				<div class="row centered space-between">
+					<h2 class="title">{{ capApp.titleMenuTab }}</h2>
+					<div class="row gap">
+						<my-button image="pagePrev.png"
+							@trigger="moveTab(false)"
+							:active="menuTabsIndexShown !== 0"
+						/>
+						<my-button image="pageNext.png"
+							@trigger="moveTab(true)"
+							:active="menuTabsIndexShown !== menuTabs.length-1"
+						/>
+						<my-button image="delete.png"
+							@trigger="del"
+							:active="canDelete"
+							:cancel="true"
+							:caption="capApp.button.delete"
+						/>
+					</div>
+				</div>
 				<my-builder-menu-tab-options
 					v-if="menuTabShown !== false"
 					v-model="menuTabShown"
@@ -368,7 +378,8 @@ let MyBuilderMenu = {
 			newCntTab:0,   // temporary menu tab IDs, replaced with NULL UUIDs on SET
 			menuIdCopy:null,
 			menuTabs:[],
-			menuTabIdShown:null,
+			menuTabsIndexShown:0,
+			menuTabIdsRemoved:[],
 			showCollections:false
 		};
 	},
@@ -388,35 +399,9 @@ let MyBuilderMenu = {
 		}
 	},
 	computed:{
-		canDelete:(s) => {
-			if(s.readonly)                         return false;
-			if(Number.isInteger(s.menuTabIdShown)) return true; // new menu tab can always be deleted
-
-			// if shown menu tab is not new, at least 1 other menu tab must exist in the schema
-			let cntSavedMenuTabs = 0;
-			for(const mt of s.menuTabs) {
-				if(!Number.isInteger(mt.id))
-					cntSavedMenuTabs++;
-			}
-			return cntSavedMenuTabs > 1;
-		},
-		menuTabIds:(s) => {
-			let out = []
-			for(const mt of s.menuTabs) {
-				out.push(mt.id);
-			}
-			return out;
-		},
-
 		// inputs
 		menuTabShown:{
-			get() {
-				for(const mt of this.menuTabs) {
-					if(mt.id === this.menuTabIdShown)
-						return mt;
-				}
-				return false;
-			},
+			get() { return this.menuTabs[this.menuTabsIndexShown]; },
 			set(v) {
 				for(let i = 0, j = this.menuTabs.length; i < j; i++) {
 					if(this.menuTabs[i].id === v.id)
@@ -426,7 +411,8 @@ let MyBuilderMenu = {
 		},
 
 		// simple
-		hasChanges:(s) => JSON.stringify(s.menuTabs) !== JSON.stringify(s.module.menuTabs),
+		canDelete: (s) => !s.readonly && s.menuTabs.length > 1,
+		hasChanges:(s) => JSON.stringify(s.menuTabs) !== JSON.stringify(s.module.menuTabs) || s.menuTabIdsRemoved.length !== 0,
 		module:    (s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		
 		// stores
@@ -442,23 +428,18 @@ let MyBuilderMenu = {
 		
 		// actions
 		addEntry() {
-			for(let i = 0, j = this.menuTabs.length; i < j; i++) {
-				if(this.menuTabs[i].id !== this.menuTabIdShown)
-					continue;
-
-				return this.menuTabs[i].menus.unshift({
-					id:this.newCntEntry++,
-					formId:null,
-					iconId:null,
-					menus:[],
-					showChildren:false,
-					color:null,
-					collections:[],
-					captions:{
-						menuTitle:{}
-					}
-				});
-			}
+			this.menuTabs[this.menuTabsIndexShown].menus.unshift({
+				id:this.newCntEntry++,
+				formId:null,
+				iconId:null,
+				menus:[],
+				showChildren:false,
+				color:null,
+				collections:[],
+				captions:{
+					menuTitle:{}
+				}
+			});
 		},
 		addTab() {
 			this.menuTabs.push({
@@ -471,6 +452,11 @@ let MyBuilderMenu = {
 				}
 			});
 		},
+		moveTab(forward) {
+			const newIndex = forward ? this.menuTabsIndexShown+1 : this.menuTabsIndexShown-1;
+			this.menuTabs.splice(newIndex, 0, this.menuTabs.splice(this.menuTabsIndexShown,1)[0]);
+			this.menuTabsIndexShown = newIndex;
+		},
 		reset() {
 			if(!this.module)
 				return;
@@ -481,8 +467,8 @@ let MyBuilderMenu = {
 
 		// presentation
 		switchToValidMenuTab() {
-			if(!this.menuTabIds.includes(this.menuTabIdShown))
-				this.menuTabIdShown = this.module.menuTabs.length === 0 ? null : this.module.menuTabs[0].id;
+			if(this.menuTabsIndexShown > this.menuTabs.length - 1)
+				this.menuTabsIndexShown = 0;
 		},
 		
 		// backend functions
@@ -498,37 +484,12 @@ let MyBuilderMenu = {
 				this.$root.genericError
 			);*/
 		},
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
-			// if ID is a number, the menu tab was not saved yet, can just be removed
-			if(Number.isInteger(this.menuTabIdShown)) {
-				for(let i = 0, j = this.menuTabs.length; i < j; i++) {
-					if(this.menuTabs[i].id === this.menuTabIdShown) {
-						this.menuTabs.splice(i,1);
-						this.switchToValidMenuTab();
-						return;
-					}
-				}
-				return;
-			}
+			if(!Number.isInteger(this.menuTabs[this.menuTabsIndexShown].id))
+				this.menuTabIdsRemoved.push(this.menuTabs[this.menuTabsIndexShown].id);
 
-			ws.send('menuTab','del',this.menuTabIdShown,true).then(
-				() => this.$root.schemaReload(this.module.id),
-				this.$root.genericError
-			);
+			this.menuTabs.splice(this.menuTabsIndexShown,1);
+			this.switchToValidMenuTab();
 		},
 		set() {
 			// replace temporary counter IDs with NULL UUIDs for SET
@@ -554,10 +515,16 @@ let MyBuilderMenu = {
 
 				requests.push(ws.prepare('menuTab','set',{menuTab:mt,position:i}));
 			}
+			for(const id of this.menuTabIdsRemoved) {
+				requests.push(ws.prepare('menuTab','del',id));
+			}
 			requests.push(ws.prepare('schema','check',{moduleId:this.module.id}));
 			
 			ws.sendMultiple(requests,true).then(
-				() => this.$root.schemaReload(this.module.id),
+				() => {
+					this.menuTabIdsRemoved = [];
+					this.$root.schemaReload(this.module.id);
+				},
 				this.$root.genericError
 			);
 		}

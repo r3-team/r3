@@ -1390,9 +1390,6 @@
 				"addTab": "Add tab",
 				"delete": "Delete tab"
 			},
-			"dialog": {
-				"delete": "Are you sure that you want to <b>permanently</b> delete the active menu tab?"
-			},
 			"collections": "Show collection values in menu",
 			"copy": "Copy all menu items from",
 			"formId": "- Select form -",

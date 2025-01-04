@@ -8,7 +8,7 @@ let MyBuilderMenuTabSelect = {
 	components:{MyTabs},
 	template:`<my-tabs
 		@update:modelValue="$emit('update:modelValue',$event)"
-		:entries="tabs.ids"
+		:entries="tabs.indx"
 		:entriesIcon="tabs.imgs"
 		:entriesText="tabs.caps"
 		:modelValue="modelValue"
@@ -21,17 +21,18 @@ let MyBuilderMenuTabSelect = {
 	emits:['update:modelValue'],
 	computed:{
 		tabs:(s) => {
-			let ids  = [];
+			let indx = [];
 			let imgs = [];
 			let caps = [];
 		
-			for(const mt of s.menuTabs) {
-				ids.push(mt.id);
+			for(let i = 0, j = s.menuTabs.length; i < j; i++) {
+				const mt = s.menuTabs[i];
+				indx.push(i);
 				imgs.push(s.srcBase64Icon(mt.iconId,'images/icon_missing.png'));
 				caps.push(s.getCaptionForLang('menuTabTitle',s.builderLanguage,mt.id,mt.captions,'-'));
 			}
 			return {
-				ids:ids,
+				indx:indx,
 				imgs:imgs,
 				caps:caps
 			};

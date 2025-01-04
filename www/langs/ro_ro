@@ -1392,9 +1392,6 @@
 			},
 			"collections": "Show collection values in menu",
 			"copy": "Copiați toate elementele de meniu din",
-			"dialog": {
-				"delete": "Are you sure that you want to <b>permanently</b> delete the active menu tab?"
-			},
 			"formId": "- Selectați formularul -",
 			"showChildrenHint": "Afișați implicit subintrările",
 			"title": "Meniuri",
