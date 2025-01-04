@@ -6,6 +6,7 @@ import MyBuilderMenuTabSelect          from './builderMenuTabSelect.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {getDependentModules}           from '../shared/builder.js';
 import {getNilUuid}                    from '../shared/generic.js';
+import {getCaptionForLang}             from '../shared/language.js';
 export {MyBuilderMenu as default};
 
 let MyBuilderMenuItems = {
@@ -157,7 +158,7 @@ let MyBuilderMenuItems = {
 				</div>
 				
 				<my-button image="delete.png"
-					@trigger="remove(element.id,index)"
+					@trigger="remove(index)"
 					:active="!readonly"
 					:cancel="true"
 					:captionTitle="capGen.button.delete"
@@ -208,7 +209,7 @@ let MyBuilderMenuItems = {
 		applyColor(input) {
 			return input === '' ? null : input;
 		},
-		remove(id,i) {
+		remove(i) {
 			this.list.splice(i,1);
 		}
 	}
@@ -319,26 +320,8 @@ let MyBuilderMenu = {
 						:readonly="readonly"
 					/>
 				</template>
-				
-				<div class="builder-menus-actions">
-					<span>{{ capApp.copy }}</span>
-					<select v-model="menuIdCopy" :disabled="readonly">
-						<option :value="null">-</option>
-						<option
-							v-for="mod in getDependentModules(module).filter(v => v.id !== module.id)"
-							:value="mod.id"
-						>
-							{{ mod.name }}
-						</option>
-					</select>
-					<my-button image="ok.png"
-						@trigger="copy"
-						:active="menuIdCopy !== null && !readonly"
-						:caption="capGen.button.apply"
-					/>
-				</div>
 			</div>
-			<div class="builder-menus-sidebar">
+			<div class="builder-menus-sidebar column gap">
 				<div class="row centered space-between">
 					<h2 class="title">{{ capApp.titleMenuTab }}</h2>
 					<div class="row gap">
@@ -364,6 +347,33 @@ let MyBuilderMenu = {
 					:builderLanguage="builderLanguage"
 					:module="module"
 				/>
+				
+				<!-- actions -->
+				<span>{{ capApp.copy }}</span>
+				<div class="row gap">
+					<select v-model="copyModuleId" :disabled="readonly">
+						<option
+							v-for="mod in getDependentModules(module)"
+							:value="mod.id"
+						>
+							{{ mod.name }}
+						</option>
+					</select>
+					<select v-model="copyMenuTabId" :disabled="readonly || copyModuleId === null">
+						<option
+							v-if="copyModuleId !== null"
+							v-for="mt in moduleIdMap[copyModuleId].menuTabs"
+							:value="mt.id"
+						>
+							{{ getCaptionForLang('menuTabTitle',builderLanguage,mt.id,mt.captions,capGen.menu) }}
+						</option>
+					</select>
+					<my-button image="ok.png"
+						@trigger="copy"
+						:active="copyModuleId !== null && copyMenuTabId !== null && !readonly"
+						:caption="capGen.button.ok"
+					/>
+				</div>
 			</div>
 		</div>
 	</div>`,
@@ -374,13 +384,13 @@ let MyBuilderMenu = {
 	},
 	data() {
 		return {
+			copyMenuTabId:null,
+			copyModuleId:null,
 			newCntEntry:0, // temporary menu IDs, replaced with NULL UUIDs on SET
 			newCntTab:0,   // temporary menu tab IDs, replaced with NULL UUIDs on SET
-			menuIdCopy:null,
 			menuTabs:[],
 			menuTabsIndexShown:0,
-			menuTabIdsRemoved:[],
-			showCollections:false
+			menuTabIdsRemoved:[]
 		};
 	},
 	mounted() {
@@ -423,6 +433,7 @@ let MyBuilderMenu = {
 	},
 	methods:{
 		// externals
+		getCaptionForLang,
 		getDependentModules,
 		getNilUuid,
 		
@@ -452,17 +463,40 @@ let MyBuilderMenu = {
 				}
 			});
 		},
+		copy() {
+			const mod = this.moduleIdMap[this.copyModuleId];
+			for(const mt of mod.menuTabs) {
+				if(mt.id === this.copyMenuTabId) {
+					return this.menuTabs[this.menuTabsIndexShown].menus = this.replaceMenuIdsNested(
+						this.menuTabs[this.menuTabsIndexShown].menus.concat(JSON.parse(JSON.stringify(mt.menus))),false);
+				}
+			}
+		},
 		moveTab(forward) {
 			const newIndex = forward ? this.menuTabsIndexShown+1 : this.menuTabsIndexShown-1;
 			this.menuTabs.splice(newIndex, 0, this.menuTabs.splice(this.menuTabsIndexShown,1)[0]);
 			this.menuTabsIndexShown = newIndex;
 		},
+		replaceMenuIdsNested(menus,newToNilUuid) {
+			for(let i = 0, j = menus.length; i < j; i++) {
+
+				// replace temporary counter IDs with NULL UUIDs (for SET of new menu entries)
+				if(newToNilUuid && Number.isInteger(menus[i].id))
+					menus[i].id = this.getNilUuid();
+
+				// replace existing UUIDs with temporary counter IDs (for menu copy)
+				if(!newToNilUuid && !Number.isInteger(menus[i].id))
+					menus[i].id = this.newCntEntry++;
+				
+				menus[i].menus = this.replaceMenuIdsNested(menus[i].menus,newToNilUuid);
+			}
+			return menus;
+		},
 		reset() {
-			if(!this.module)
-				return;
-			
-			this.menuTabs = JSON.parse(JSON.stringify(this.module.menuTabs));
-			this.switchToValidMenuTab();
+			if(this.module) {
+				this.menuTabs = JSON.parse(JSON.stringify(this.module.menuTabs));
+				this.switchToValidMenuTab();
+			}
 		},
 
 		// presentation
@@ -472,18 +506,6 @@ let MyBuilderMenu = {
 		},
 		
 		// backend functions
-		copy() {
-			/*ws.send('menu','copy',{
-				moduleId:this.menuIdCopy,
-				moduleIdNew:this.module.id
-			},true).then(
-				() => {
-					this.menuIdCopy = null;
-					this.$root.schemaReload(this.module.id);
-				},
-				this.$root.genericError
-			);*/
-		},
 		del() {
 			if(!Number.isInteger(this.menuTabs[this.menuTabsIndexShown].id))
 				this.menuTabIdsRemoved.push(this.menuTabs[this.menuTabsIndexShown].id);
@@ -492,23 +514,10 @@ let MyBuilderMenu = {
 			this.switchToValidMenuTab();
 		},
 		set() {
-			// replace temporary counter IDs with NULL UUIDs for SET
-			let replaceMenuIds;
-			replaceMenuIds = menus => {
-				for(let i = 0, j = menus.length; i < j; i++) {
-					
-					if(Number.isInteger(menus[i].id))
-						menus[i].id = this.getNilUuid();
-					
-					menus[i].menus = replaceMenuIds(menus[i].menus);
-				}
-				return menus;
-			};
-
 			let requests = [];
 			for(let i = 0, j = this.menuTabs.length; i < j; i++) {
-				let mt = JSON.parse(JSON.stringify(this.menuTabs[i]));
-				mt.menus = replaceMenuIds(mt.menus);
+				let mt   = JSON.parse(JSON.stringify(this.menuTabs[i]));
+				mt.menus = this.replaceMenuIdsNested(mt.menus,true);
 
 				if(Number.isInteger(mt.id))
 					mt.id = this.getNilUuid();

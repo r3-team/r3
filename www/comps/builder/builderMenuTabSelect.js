@@ -29,14 +29,17 @@ let MyBuilderMenuTabSelect = {
 				const mt = s.menuTabs[i];
 				indx.push(i);
 				imgs.push(s.srcBase64Icon(mt.iconId,'images/icon_missing.png'));
-				caps.push(s.getCaptionForLang('menuTabTitle',s.builderLanguage,mt.id,mt.captions,'-'));
+				caps.push(s.getCaptionForLang('menuTabTitle',s.builderLanguage,mt.id,mt.captions,s.capGen.menu));
 			}
 			return {
 				indx:indx,
 				imgs:imgs,
 				caps:caps
 			};
-		}
+		},
+
+		// stores
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
