@@ -153,8 +153,8 @@ let MyListColumnBatch = {
 		columnIdMapAggr: { type:Object,  required:true },
 		columns:         { type:Array,   required:true }, // list columns
 		dropdownRight:   { type:Boolean, required:true },
-		filters:         { type:Array,   required:true }, // list filters (predefined)
-		filtersColumn:   { type:Array,   required:true }, // list filters from users column selection
+		filters:         { type:Array,   required:true }, // list filters all combined (columns, list, quick, user, choices, ...)
+		filtersColumn:   { type:Array,   required:true }, // list filters from users column batch selections
 		joins:           { type:Array,   required:true }, // list joins
 		orders:          { type:Array,   required:true }, // list orders
 		orderOverwritten:{ type:Boolean, required:true }, // list orders were overwritten by user
@@ -214,7 +214,7 @@ let MyListColumnBatch = {
 			return null;
 		},
 		
-		// returns indexes of column user filters that this column is responsible for
+		// indexes of column user filters that this column is responsible for
 		columnFilterIndexes:(s) => {
 			if(!s.isValidFilter)
 				return [];
@@ -232,21 +232,22 @@ let MyListColumnBatch = {
 		},
 		
 		// simple
-		aggrColumn:     (s) => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns),
-		canOpen:        (s) => s.rowCount > 1 || s.isFiltered,
-		canOrder:       (s) => s.columnBatch.columnIndexesSortBy.length !== 0,
-		showFilterAny:  (s) => s.showFilterItems || s.showFilterText,
-		showFilterItems:(s) => s.values.length != 0,
-		showFilterText: (s) => s.values.length >= 5 && !s.isDateOrTime,
-		isArrayInput:   (s) => typeof s.input === 'object',
-		isDateOrTime:   (s) => s.isValidFilter && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
-		isFiltered:     (s) => s.columnFilterIndexes.length !== 0,
-		isInputEmpty:   (s) => (s.isArrayInput && s.input.length === 0) || !s.isArrayInput && s.input === '',
-		isOrdered:      (s) => s.columnBatch.orderIndexesUsed.length !== 0,
-		isOrderedAsc:   (s) => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
-		isValidFilter:  (s) => s.columnUsedFilter !== null,
-		showIconFilter: (s) => s.isValidFilter && s.isFiltered,
-		showIconOrder:  (s) => s.isOrdered && s.orderOverwritten,
+		aggrColumn:       (s) => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns),
+		canOpen:          (s) => s.rowCount > 1 || s.isFiltered,
+		canOrder:         (s) => s.columnBatch.columnIndexesSortBy.length !== 0,
+		filtersColumnThis:(s) => s.filtersColumn.filter((v,i) => s.columnFilterIndexes.includes(i)),
+		isArrayInput:     (s) => typeof s.input === 'object',
+		isDateOrTime:     (s) => s.isValidFilter && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
+		isFiltered:       (s) => s.columnFilterIndexes.length !== 0,
+		isInputEmpty:     (s) => (s.isArrayInput && s.input.length === 0) || !s.isArrayInput && s.input === '',
+		isOrdered:        (s) => s.columnBatch.orderIndexesUsed.length !== 0,
+		isOrderedAsc:     (s) => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
+		isValidFilter:    (s) => s.columnUsedFilter !== null,
+		showFilterAny:    (s) => s.showFilterItems || s.showFilterText,
+		showFilterItems:  (s) => s.values.length != 0,
+		showFilterText:   (s) => s.values.length >= 5 && !s.isDateOrTime,
+		showIconFilter:   (s) => s.isValidFilter && s.isFiltered,
+		showIconOrder:    (s) => s.isOrdered && s.orderOverwritten,
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -336,7 +337,14 @@ let MyListColumnBatch = {
 					aggregator:'first',
 					distincted:true
 				}],
-				filters:this.filters,
+				filters:this.filters.filter(v => {
+					// remove filters coming from this column batch
+					for(const f of this.filtersColumnThis) {
+						if(JSON.stringify(f) === JSON.stringify(v))
+							return false;
+					}
+					return true;
+				}),
 				orders:[{ascending:true,expressionPos:0}],
 				limit:1000
 			},false).then(

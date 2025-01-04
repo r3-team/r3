@@ -274,6 +274,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 	}()
 
 	var (
+		err      error
 		reqTrans types.RequestTransaction
 		resTrans types.ResponseTransaction
 	)
@@ -301,8 +302,24 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 	if !authRequest {
 		// execute non-authentication transaction
-		resTrans = request.ExecTransaction(ctx, client.address, client.loginId,
-			client.admin, client.device, client.noAuth, reqTrans, resTrans)
+		resTrans.Responses, err = request.ExecTransaction(ctx, client.address, client.loginId,
+			client.admin, client.device, client.noAuth, reqTrans, false)
+
+		if err != nil {
+			if handler.CheckForDbsCacheErrCode(err) {
+				// known PGX cache error, repeat with cleared DB statement/description cache
+				resTrans.Responses, err = request.ExecTransaction(ctx, client.address, client.loginId,
+					client.admin, client.device, client.noAuth, reqTrans, true)
+
+				if err != nil {
+					resTrans.Responses = make([]types.Response, 0)
+					resTrans.Error = err.Error()
+				}
+			} else {
+				resTrans.Responses = make([]types.Response, 0)
+				resTrans.Error = err.Error()
+			}
+		}
 
 	} else {
 		// execute authentication request
@@ -319,16 +336,14 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 		switch req.Action {
 		case "token": // authentication via JSON web token
-			resPayload, err = request.LoginAuthToken(ctx, req.Payload,
-				&client.loginId, &client.admin, &client.noAuth)
+			resPayload, err = request.LoginAuthToken(ctx, req.Payload, &client.loginId, &client.admin, &client.noAuth)
 
 		case "tokenFixed": // authentication via fixed token (fat-client only)
 			resPayload, err = request.LoginAuthTokenFixed(ctx, req.Payload, &client.loginId)
 			client.device = types.WebsocketClientDeviceFatClient
 
 		case "user": // authentication via credentials
-			resPayload, err = request.LoginAuthUser(ctx, req.Payload,
-				&client.loginId, &client.admin, &client.noAuth)
+			resPayload, err = request.LoginAuthUser(ctx, req.Payload, &client.loginId, &client.admin, &client.noAuth)
 		}
 
 		if err != nil {
@@ -352,9 +367,10 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 			}
 		}
 
-		if resTrans.Error == "" {
-			log.Info(handlerContext, fmt.Sprintf("authenticated client (login ID %d, admin: %v)",
-				client.loginId, client.admin))
+		// authentication can return with no error but incomplete if MFA is on but 2nd factor not provided yet
+		//  in this case the login ID is still 0
+		if resTrans.Error == "" && client.loginId != 0 {
+			log.Info(handlerContext, fmt.Sprintf("authenticated client (login ID %d, admin: %v)", client.loginId, client.admin))
 
 			if err := login_session.Log(client.id, client.loginId, client.address, client.device); err != nil {
 				log.Error(handlerContext, "failed to create login session log", err)

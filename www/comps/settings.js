@@ -1136,7 +1136,7 @@ let MySettings = {
 									<optgroup :label="capApp.translation.community">
 										<option v-for="l in languageCodes.filter(v => !languageCodesOfficial.includes(v))" :value="l">{{ l }}</option>
 									</optgroup>
-									<optgroup :label="capApp.translation.other">
+									<optgroup v-if="languageCodesModulesAndCustom.length !== 0" :label="capApp.translation.other">
 										<option v-for="l in languageCodesModulesAndCustom" :value="l">{{ l }}</option>
 									</optgroup>
 								</select>
