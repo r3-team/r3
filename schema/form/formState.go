@@ -4,7 +4,6 @@ import (
 	"context"
 	"r3/db"
 	"r3/schema"
-	"r3/schema/compatible"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -189,10 +188,6 @@ func setState_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, state types.F
 	}
 
 	for i, c := range state.Conditions {
-
-		// fix legacy conditions format < 2.7
-		c = compatible.MigrateNewConditions(c)
-
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.form_state_condition (
 				form_state_id, position, connector, operator

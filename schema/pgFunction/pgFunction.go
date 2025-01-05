@@ -138,9 +138,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 		return err
 	}
 
-	// fix imports < 2.6: New "isTrigger" state
-	fnc = compatible.FixMissingTriggerState(fnc)
-
 	// fix imports < 3.9: Missing volatility setting
 	fnc = compatible.FixMissingVolatility(fnc)
 

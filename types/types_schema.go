@@ -223,18 +223,6 @@ type FormStateCondition struct {
 	Operator  string                 `json:"operator"`  // comparison operator (=, <>, etc.)
 	Side0     FormStateConditionSide `json:"side0"`     // comparison: left side
 	Side1     FormStateConditionSide `json:"side1"`     // comparison: right side
-
-	// legacy, replaced by FormStateConditionSide
-	Brackets0    int         `json:"brackets0"`
-	Brackets1    int         `json:"brackets1"`
-	FieldId0     pgtype.UUID `json:"fieldId0"`     // if set: field0 value for match (not required for: newRecord, roleId)
-	FieldId1     pgtype.UUID `json:"fieldId1"`     // if set: field0 value must match field1 value
-	PresetId1    pgtype.UUID `json:"presetId1"`    // if set: field0 value must match preset record value
-	RoleId       pgtype.UUID `json:"roleId"`       // if set: with operator '=' login must have role ('<>' must not have role)
-	FieldChanged pgtype.Bool `json:"fieldChanged"` // if set: true matches field value changed, false matches unchanged
-	NewRecord    pgtype.Bool `json:"newRecord"`    // if set: true matches new, false existing record
-	Login1       pgtype.Bool `json:"login1"`       // if set: true matches login ID of current user
-	Value1       pgtype.Text `json:"value1"`       // fixed value for direct field0 match
 }
 type FormStateConditionSide struct {
 	Brackets     int         `json:"brackets"`     // opening/closing brackets (side 0/1)
@@ -273,10 +261,6 @@ type FieldButton struct {
 	JsFunctionId pgtype.UUID `json:"jsFunctionId"` // JS function to executing when triggering button
 	OpenForm     OpenForm    `json:"openForm"`
 	Captions     CaptionMap  `json:"captions"`
-
-	// legacy
-	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
-	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
 }
 type FieldCalendar struct {
 	Id               uuid.UUID            `json:"id"`
@@ -304,10 +288,6 @@ type FieldCalendar struct {
 	Columns          []Column             `json:"columns"`
 	Collections      []CollectionConsumer `json:"collections"` // collections to select values for query filters
 	Query            Query                `json:"query"`
-
-	// legacy
-	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
-	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
 }
 type FieldChart struct {
 	Id          uuid.UUID   `json:"id"`
@@ -400,10 +380,8 @@ type FieldDataRelationship struct {
 	Captions      CaptionMap         `json:"captions"`
 
 	// legacy
-	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
-	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
-	CollectionIdDef   pgtype.UUID `json:"collectionIdDef"`
-	ColumnIdDef       pgtype.UUID `json:"columnIdDef"`
+	CollectionIdDef pgtype.UUID `json:"collectionIdDef"`
+	ColumnIdDef     pgtype.UUID `json:"columnIdDef"`
 }
 type FieldHeader struct {
 	Id       uuid.UUID   `json:"id"`
@@ -454,10 +432,6 @@ type FieldList struct {
 	OpenFormBulk OpenForm             `json:"openFormBulk"` // form for bulk actions (multiple record updates)
 	Query        Query                `json:"query"`
 	Captions     CaptionMap           `json:"captions"`
-
-	// legacy
-	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
-	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
 }
 type FieldTabs struct {
 	Id       uuid.UUID   `json:"id"`

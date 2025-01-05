@@ -174,10 +174,6 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				OnMobile:     onMobile,
 				JsFunctionId: jsFunctionIdButton,
 				OpenForm:     types.OpenForm{},
-
-				// legacy
-				FormIdOpen:        pgtype.UUID{},
-				AttributeIdRecord: pgtype.UUID{},
 			})
 			posButtonLookup = append(posButtonLookup, pos)
 		case "calendar":
@@ -206,10 +202,6 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				Columns:          []types.Column{},
 				Query:            types.Query{},
 				OpenForm:         types.OpenForm{},
-
-				// legacy
-				FormIdOpen:        pgtype.UUID{},
-				AttributeIdRecord: pgtype.UUID{},
 			})
 			posCalendarLookup = append(posCalendarLookup, pos)
 		case "chart":
@@ -282,10 +274,8 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 					Captions:       types.CaptionMap{},
 
 					// legacy
-					FormIdOpen:        pgtype.UUID{},
-					AttributeIdRecord: pgtype.UUID{},
-					CollectionIdDef:   pgtype.UUID{},
-					ColumnIdDef:       pgtype.UUID{},
+					CollectionIdDef: pgtype.UUID{},
+					ColumnIdDef:     pgtype.UUID{},
 				})
 				posDataRelLookup = append(posDataRelLookup, pos)
 			} else {
@@ -370,10 +360,6 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				OpenForm:     types.OpenForm{},
 				OpenFormBulk: types.OpenForm{},
 				ResultLimit:  int(resultLimit.Int16),
-
-				// legacy
-				FormIdOpen:        pgtype.UUID{},
-				AttributeIdRecord: pgtype.UUID{},
 			})
 			posListLookup = append(posListLookup, pos)
 
@@ -723,9 +709,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UU
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setButton_tx(ctx, tx, fieldId, f.AttributeIdRecord,
-				f.FormIdOpen, f.OpenForm, f.JsFunctionId); err != nil {
-
+			if err := setButton_tx(ctx, tx, fieldId, f.OpenForm, f.JsFunctionId); err != nil {
 				return err
 			}
 			if err := caption.Set_tx(ctx, tx, fieldId, f.Captions); err != nil {
@@ -799,10 +783,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UU
 				if err := json.Unmarshal(fieldJson, &f); err != nil {
 					return err
 				}
-				if err := setDataRelationship_tx(ctx, tx, fieldId, f.FormIdOpen,
-					f.AttributeIdRecord, f.AttributeIdNm, f.Columns, f.Category,
-					f.FilterQuick, f.OutsideIn, f.AutoSelect, f.DefPresetIds,
-					f.OpenForm); err != nil {
+				if err := setDataRelationship_tx(ctx, tx, fieldId, f.AttributeIdNm, f.Columns, f.Category,
+					f.FilterQuick, f.OutsideIn, f.AutoSelect, f.DefPresetIds, f.OpenForm); err != nil {
 
 					return err
 				}
@@ -836,9 +818,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UU
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setList_tx(ctx, tx, fieldId, f.AttributeIdRecord, f.FormIdOpen,
-				f.AutoRenew, f.CsvExport, f.CsvImport, f.Layout, f.FilterQuick,
-				f.ResultLimit, f.Columns, f.Collections, f.OpenForm,
+			if err := setList_tx(ctx, tx, fieldId, f.AutoRenew, f.CsvExport, f.CsvImport,
+				f.Layout, f.FilterQuick, f.ResultLimit, f.Columns, f.Collections, f.OpenForm,
 				f.OpenFormBulk); err != nil {
 
 				return err
@@ -934,16 +915,12 @@ func setGeneric_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, id uuid.UUI
 	}
 	return id, nil
 }
-func setButton_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
-	formIdOpen pgtype.UUID, oForm types.OpenForm, jsFunctionId pgtype.UUID) error {
+func setButton_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, oForm types.OpenForm, jsFunctionId pgtype.UUID) error {
 
 	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_button", "field_id")
 	if err != nil {
 		return err
 	}
-
-	// fix imports < 2.6: New open form entity
-	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
 
 	if known {
 		if _, err := tx.Exec(ctx, `
@@ -971,9 +948,6 @@ func setCalendar_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.F
 	if err != nil {
 		return err
 	}
-
-	// fix imports < 2.6: New open form entity
-	f.OpenForm = compatible.FixMissingOpenForm(f.FormIdOpen, f.AttributeIdRecord, f.OpenForm)
 
 	// fix imports < 3.5: Default view
 	f.Days = compatible.FixCalendarDefaultView(f.Days)
@@ -1145,8 +1119,7 @@ func setData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, attributeId u
 		[]types.CollectionConsumer{defCollection})
 }
 func setDataRelationship_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID,
-	formIdOpen pgtype.UUID, attributeIdRecord pgtype.UUID, attributeIdNm pgtype.UUID,
-	columns []types.Column, category bool, filterQuick bool, outsideIn bool,
+	attributeIdNm pgtype.UUID, columns []types.Column, category bool, filterQuick bool, outsideIn bool,
 	autoSelect int, defPresetIds []uuid.UUID, oForm types.OpenForm) error {
 
 	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_data_relationship", "field_id")
@@ -1194,9 +1167,6 @@ func setDataRelationship_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID,
 			return err
 		}
 	}
-
-	// fix imports < 2.6: New open form entity
-	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
 
 	// set open form
 	if err := openForm.Set_tx(ctx, tx, "field", fieldId, oForm, pgtype.Text{}); err != nil {
@@ -1281,11 +1251,9 @@ func setKanban_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.Fie
 	// set columns
 	return column.Set_tx(ctx, tx, "field", fieldId, f.Columns)
 }
-func setList_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
-	formIdOpen pgtype.UUID, autoRenew pgtype.Int4, csvExport bool, csvImport bool,
-	layout string, filterQuick bool, resultLimit int, columns []types.Column,
-	collections []types.CollectionConsumer, oForm types.OpenForm,
-	oFormBulk types.OpenForm) error {
+func setList_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, autoRenew pgtype.Int4, csvExport bool,
+	csvImport bool, layout string, filterQuick bool, resultLimit int, columns []types.Column,
+	collections []types.CollectionConsumer, oForm types.OpenForm, oFormBulk types.OpenForm) error {
 
 	known, err := schema.CheckCreateId_tx(ctx, tx, &fieldId, "field_list", "field_id")
 	if err != nil {
@@ -1316,8 +1284,6 @@ func setList_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, attributeIdRe
 			return err
 		}
 	}
-	// fix imports < 2.6: New open form entity
-	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
 
 	// set open forms
 	if err := openForm.Set_tx(ctx, tx, "field", fieldId, oForm, pgtype.Text{}); err != nil {
