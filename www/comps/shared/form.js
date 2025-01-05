@@ -146,6 +146,14 @@ export function getFieldMap(fields) {
 	return out;
 };
 
+export function getFormStateIdMap(states) {
+	let out = {};
+	for(const st of states) {
+		out[st.id] = st;
+	}
+	return out;
+};
+
 export function getFormPopUpTemplate() {
 	return {
 		attributeIdMapDef:null, // default attribute values for pop-up form

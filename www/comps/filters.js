@@ -376,6 +376,14 @@ let MyFilterSide = {
 					</template>
 				</select>
 				
+				<!-- form state input -->
+				<select v-model="formStateId" v-if="!columnsMode && isFormState">
+					<option
+						v-for="state in formIdMap[formId].states"
+						:value="state.id"
+					>{{ state.description }}</option>
+				</select>
+				
 				<!-- preset input -->
 				<select v-model="presetId" v-if="!columnsMode && isPreset">
 					<option :value="null"></option>
@@ -592,6 +600,10 @@ let MyFilterSide = {
 			get()  { return this.modelValue.fieldId; },
 			set(v) { this.set('fieldId',v); }
 		},
+		formStateId:{ // form state IDs only exist in context of filters as form state conditions
+			get()  { return this.modelValue.formStateId !== undefined ? this.modelValue.formStateId : null; },
+			set(v) { this.set('formStateId',v); }
+		},
 		nestedIndexAttribute:{
 			get()  {
 				return `${this.modelValue.attributeNested}`+
@@ -672,7 +684,7 @@ let MyFilterSide = {
 		contentApi:  (s) => ['getter'].filter(v => !s.disableContent.includes(v)),
 		contentData: (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
 		contentDate: (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
-		contentForm: (s) => ['formChanged','field','fieldChanged','fieldValid','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
+		contentForm: (s) => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
 		contentLogin:(s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
 		module:      (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
 		
@@ -681,6 +693,7 @@ let MyFilterSide = {
 		isAttribute:  (s) => s.content === 'attribute',
 		isCollection: (s) => s.content === 'collection',
 		isField:      (s) => ['field','fieldChanged','fieldValid'].includes(s.content),
+		isFormState:  (s) => s.content === 'formState',
 		isGetter:     (s) => s.content === 'getter',
 		isJavascript: (s) => s.content === 'javascript',
 		isNullPartner:(s) => !s.leftSide && s.isNullOperator,
@@ -739,6 +752,9 @@ let MyFilterSide = {
 			}
 			if(!['field','fieldChanged','fieldValid'].includes(v.content))
 				v.fieldId  = null;
+
+			if(!['formState'].includes(v.content))
+				v.formStateId = null;
 			
 			if(v.content !== 'preset')   v.presetId   = null;
 			if(v.content !== 'role')     v.roleId     = null; 

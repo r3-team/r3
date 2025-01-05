@@ -29,7 +29,6 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 
 	for rows.Next() {
 		var s types.FormState
-
 		if err := rows.Scan(&s.Id, &s.Description); err != nil {
 			return states, err
 		}
@@ -37,12 +36,10 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 	}
 
 	for i, _ := range states {
-
 		states[i].Conditions, err = getStateConditions(states[i].Id)
 		if err != nil {
 			return states, nil
 		}
-
 		states[i].Effects, err = getStateEffects(states[i].Id)
 		if err != nil {
 			return states, nil
@@ -91,15 +88,14 @@ func getStateConditionSide(formStateId uuid.UUID, position int, side int) (types
 	var s types.FormStateConditionSide
 
 	err := db.Pool.QueryRow(context.Background(), `
-		SELECT collection_id, column_id, field_id, preset_id,
-			role_id, variable_id, brackets, content, value
+		SELECT collection_id, column_id, field_id, form_state_id_result,
+			preset_id, role_id, variable_id, brackets, content, value
 		FROM app.form_state_condition_side
 		WHERE form_state_id = $1
 		AND form_state_condition_position = $2
 		AND side = $3
-	`, formStateId, position, side).Scan(&s.CollectionId, &s.ColumnId,
-		&s.FieldId, &s.PresetId, &s.RoleId, &s.VariableId, &s.Brackets,
-		&s.Content, &s.Value)
+	`, formStateId, position, side).Scan(&s.CollectionId, &s.ColumnId, &s.FieldId, &s.FormStateId,
+		&s.PresetId, &s.RoleId, &s.VariableId, &s.Brackets, &s.Content, &s.Value)
 
 	return s, err
 }
@@ -136,7 +132,6 @@ func setStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, states []typ
 	stateIds := make([]uuid.UUID, 0)
 
 	for _, s := range states {
-
 		s.Id, err = setState_tx(ctx, tx, formId, s)
 		if err != nil {
 			return err
@@ -229,12 +224,12 @@ func setStateConditionSide_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.U
 
 	_, err := tx.Exec(ctx, `
 		INSERT INTO app.form_state_condition_side (
-			form_state_id, form_state_condition_position, side,
-			collection_id, column_id, field_id, preset_id, role_id,
+			form_state_id, form_state_condition_position, side, collection_id,
+			column_id, field_id, form_state_id_result, preset_id, role_id,
 			variable_id, brackets, content, value
 		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-	`, formStateId, position, side, s.CollectionId, s.ColumnId, s.FieldId,
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+	`, formStateId, position, side, s.CollectionId, s.ColumnId, s.FieldId, s.FormStateId,
 		s.PresetId, s.RoleId, s.VariableId, s.Brackets, s.Content, s.Value)
 
 	return err

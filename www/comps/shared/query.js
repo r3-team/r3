@@ -147,7 +147,7 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 	if(typeof collectionIdMapIndexFilter === 'undefined') collectionIdMapIndexFilter = {};
 	if(typeof variableIdMapLocal         === 'undefined') variableIdMapLocal         = {};
 	
-	let getFilterSideProcessed = function(s,operator) {
+	const getFilterSideProcessed = function(s,operator) {
 		switch(s.content) {
 			// data
 			case 'collection':

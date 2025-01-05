@@ -218,6 +218,19 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				WHERE module_id = m.module_id
 			);
 			ALTER TABLE app.menu DROP COLUMN module_id;
+
+			-- form state as form state condition
+			ALTER TABLE app.form_state_condition_side ADD COLUMN form_state_id_result UUID;
+			ALTER TABLE app.form_state_condition_side ADD CONSTRAINT form_state_condition_side_form_state_id_result_fkey FOREIGN KEY (form_state_id_result)
+				REFERENCES app.form_state (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_form_state_id_result_fkey
+    			ON app.form_state_condition_side USING btree (form_state_id_result ASC NULLS LAST);
+			
+			ALTER TYPE app.filter_side_content ADD VALUE 'formState';
 		`)
 		return "3.10", err
 	},

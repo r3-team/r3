@@ -148,6 +148,15 @@ export function openLink(href,blank) {
 	window.open(href,blank ? '_blank' : '_self');
 };
 
+export function openDataImageAsNewTag(data) {
+	if(data === '')
+		return;
+
+	var newTab = window.open();
+	newTab.document.write(`<!DOCTYPE html><body><img src="${data}" style="width:100%;max-width:450px;"></body>`);
+	newTab.document.close();
+};
+
 export function filterIsCorrect(operator,value0,value1) {
 	switch(operator) {
 		case 'IS NULL':     return value0 === null;  break;
@@ -221,13 +230,4 @@ export function filterIsCorrect(operator,value0,value1) {
 
 export function filterOperatorIsSingleValue(operator) {
 	return !['= ANY','<> ALL','@>','<@','&&'].includes(operator);
-};
-
-export function openDataImageAsNewTag(data) {
-	if(data === '')
-		return;
-
-	var newTab = window.open();
-	newTab.document.write(`<!DOCTYPE html><body><img src="${data}" style="width:100%;max-width:450px;"></body>`);
-	newTab.document.close();
 };

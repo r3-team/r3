@@ -37,6 +37,7 @@ import {
 	getDataFieldMap,
 	getFormPopUpConfig,
 	getFormRoute,
+	getFormStateIdMap,
 	getResolvedPlaceholders,
 	getRowsDecrypted
 } from './shared/form.js';
@@ -500,6 +501,7 @@ let MyForm = {
 		warnUnsaved:   (s) => s.hasChanges && s.settings.warnUnsaved,
 
 		// entities
+		formStateIdMap: (s) => s.getFormStateIdMap(s.form.states),
 		fieldIdMapData: (s) => s.getDataFieldMap(s.fields),
 		fields:         (s) => s.form.fields,
 		filters:        (s) => s.form.query.filters,
@@ -675,13 +677,14 @@ let MyForm = {
 		
 		// state overwrite for different entities (fields, formActions, tabs)
 		entityIdMapState:(s) => {
-			const getValueFromConditionSide = (side,operator) => {
+			const getValueFromConditionSide = (side,operator,recursionLevel) => {
 				switch(side.content) {
 					case 'collection':   return getCollectionValues(side.collectionId,side.columnId,s.filterOperatorIsSingleValue(operator)); break;
 					case 'field':        return s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[side.fieldId],false)]; break;
 					case 'fieldChanged': return s.fieldIdsChanged.includes(side.fieldId); break;
 					case 'fieldValid':   return !s.fieldIdsInvalid.includes(side.fieldId); break;
 					case 'formChanged':  return s.hasChanges; break;
+					case 'formState':    return isFormStateActive(s.formStateIdMap[side.formStateId],recursionLevel + 1); break;
 					case 'languageCode': return s.settings.languageCode; break;
 					case 'login':        return s.loginId; break;
 					case 'preset':       return s.presetIdMapRecordId[side.presetId]; break;
@@ -707,16 +710,22 @@ let MyForm = {
 				}
 				return false;
 			};
-			
-			let out = { field:{}, formAction:{}, tab:{} };
-			for(const state of s.form.states) {
-				if(state.conditions.length === 0 || state.effects.length === 0)
-					continue;
+
+			const isFormStateActive = (state,recursionLevel) => {
+				if(recursionLevel > 10) {
+					console.warn(`Failed to evaluate form state '${state.description}' (${state.id}), max. level of recursion reached (10).`);
+					return false;
+				}
+
+				// form state must have some condition to be evaluated, effects are optional as the state could be used as condition
+				if(state.conditions.length === 0)
+					return false;
 				
-				// parse condition expressions
 				let line = 'return ';
+
+				// parse condition expressions
 				for(let i = 0, j = state.conditions.length; i < j; i++) {
-					let c = state.conditions[i];
+					const c = state.conditions[i];
 					
 					if(i !== 0)
 						line += c.connector === 'AND' ? '&&' : '||';
@@ -726,16 +735,21 @@ let MyForm = {
 					
 					// get boolean expression by checking filter condition
 					line += s.filterIsCorrect(c.operator,
-						getValueFromConditionSide(c.side0,c.operator),
-						getValueFromConditionSide(c.side1,c.operator)
+						getValueFromConditionSide(c.side0,c.operator,recursionLevel),
+						getValueFromConditionSide(c.side1,c.operator,recursionLevel)
 					) ? 'true' : 'false';
 					
 					// brackets close
 					line += ')'.repeat(c.side1.brackets);
 				}
-				
-				// apply effects if conditions are met
-				if(Function(line)()) {
+				return Function(line)();
+			};
+			
+			let out = { field:{}, formAction:{}, tab:{} };
+			for(const state of s.form.states) {
+				if(isFormStateActive(state,0)) {
+
+					// apply effects if conditions are met
 					for(const e of state.effects) {
 						if(e.fieldId      !== null) out.field[e.fieldId]           = e.newState;
 						if(e.formActionId !== null) out.formAction[e.formActionId] = e.newState;
@@ -810,6 +824,7 @@ let MyForm = {
 		getFieldOverwritesDefault,
 		getFormPopUpConfig,
 		getFormRoute,
+		getFormStateIdMap,
 		getGetterFromAttributeValues,
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
