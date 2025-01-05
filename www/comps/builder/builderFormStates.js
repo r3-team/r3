@@ -34,9 +34,9 @@ let MyBuilderFormStateEffect = {
 		<select class="short" v-model="newState">
 			<option value="hidden">{{ capApp.stateHidden }}</option>
 			<option value="default">{{ capApp.stateDefault }}</option>
-			<option value="readonly" :disabled="!isData && !isButton && !isAction && !isVariable">{{ capApp.stateReadonly }}</option>
-			<option value="optional" :disabled="!isData">{{ capApp.stateOptional }}</option>
-			<option value="required" :disabled="!isData">{{ capApp.stateRequired }}</option>
+			<option value="readonly" :disabled="!isData && !isVariable && !isButton && !isAction">{{ capApp.stateReadonly }}</option>
+			<option value="optional" :disabled="!isData && !isVariable">{{ capApp.stateOptional }}</option>
+			<option value="required" :disabled="!isData && !isVariable">{{ capApp.stateRequired }}</option>
 		</select>
 		
 		<my-button image="delete.png"
