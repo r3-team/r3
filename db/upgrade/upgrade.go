@@ -231,6 +231,35 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
     			ON app.form_state_condition_side USING btree (form_state_id_result ASC NULLS LAST);
 			
 			ALTER TYPE app.filter_side_content ADD VALUE 'formState';
+
+			-- login favorite forms
+			CREATE TABLE instance.login_favorite (
+				id uuid NOT NULL,
+				login_id integer NOT NULL,
+				module_id uuid NOT NULL,
+				form_id uuid NOT NULL,
+				title character varying(128),
+				"position" smallint NOT NULL,
+				CONSTRAINT login_favorite_pkey PRIMARY KEY (id),
+				CONSTRAINT login_favorite_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_favorite_module_id_fkey FOREIGN KEY (module_id)
+					REFERENCES app.module (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_favorite_form_id_fkey FOREIGN KEY (form_id)
+					REFERENCES app.form (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX fki_login_favorite_login_id_fkey  ON instance.login_favorite USING BTREE (login_id  ASC NULLS LAST);
+			CREATE INDEX fki_login_favorite_module_id_fkey ON instance.login_favorite USING BTREE (module_id ASC NULLS LAST);
+			CREATE INDEX fki_login_favorite_form_id_fkey   ON instance.login_favorite USING BTREE (form_id   ASC NULLS LAST);
 		`)
 		return "3.10", err
 	},

@@ -174,6 +174,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "set":
 			return loginClientEventSet_tx(ctx, tx, reqJson, loginId)
 		}
+	case "loginFavorite":
+		switch action {
+		case "get":
+			return LoginGetFavorite_tx(ctx, tx, loginId)
+		case "set":
+			return LoginSetFavorite_tx(ctx, tx, reqJson, loginId)
+		}
 	case "loginKeys":
 		switch action {
 		case "getPublic":

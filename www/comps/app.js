@@ -700,6 +700,7 @@ let MyApp = {
 		// final app meta retrieval, after authentication
 		initApp() {
 			let requests = [
+				ws.prepare('loginFavorite','get',{}),
 				ws.prepare('loginSetting','get',{}),
 				ws.prepare('loginWidgetGroups','get',{}),
 				ws.prepare('lookup','get',{name:'access'}),
@@ -716,30 +717,31 @@ let MyApp = {
 			
 			ws.sendMultiple(requests,true).then(
 				async res => {
-					this.$store.commit('settings',res[0].payload);
-					this.$store.commit('loginWidgetGroups',res[1].payload);
-					this.$store.commit('access',res[2].payload);
-					this.$store.commit('feedback',res[3].payload.feedback);
-					this.$store.commit('feedbackUrl',res[3].payload.feedbackUrl);
-					this.$store.commit('loginHasClient',res[4].payload);
+					this.$store.commit('favorites',res[0].payload);
+					this.$store.commit('settings',res[1].payload);
+					this.$store.commit('loginWidgetGroups',res[2].payload);
+					this.$store.commit('access',res[3].payload);
+					this.$store.commit('feedback',res[4].payload.feedback);
+					this.$store.commit('feedbackUrl',res[4].payload.feedbackUrl);
+					this.$store.commit('loginHasClient',res[5].payload);
 					
-					if(this.loginKeyAes !== null && res[5].payload.privateEnc !== null) {
+					if(this.loginKeyAes !== null && res[6].payload.privateEnc !== null) {
 						this.$store.commit('loginEncryption',true);
 						this.$store.commit('loginPrivateKey',null);
-						this.$store.commit('loginPrivateKeyEnc',res[5].payload.privateEnc);
-						this.$store.commit('loginPrivateKeyEncBackup',res[5].payload.privateEncBackup);
+						this.$store.commit('loginPrivateKeyEnc',res[6].payload.privateEnc);
+						this.$store.commit('loginPrivateKeyEncBackup',res[6].payload.privateEncBackup);
 						
-						await this.pemImport(res[5].payload.public,'RSA',true)
+						await this.pemImport(res[6].payload.public,'RSA',true)
 							.then(res => this.$store.commit('loginPublicKey',res))
 							.catch(this.setInitErr);
 						
-						await this.pemImportPrivateEnc(res[5].payload.privateEnc)
+						await this.pemImportPrivateEnc(res[6].payload.privateEnc)
 							.catch(this.setInitErr);
 					}
 					
 					if(this.isAdmin) {
-						this.$store.commit('config',res[6].payload);
-						this.$store.commit('license',res[7].payload);
+						this.$store.commit('config',res[7].payload);
+						this.$store.commit('license',res[8].payload);
 					}
 					
 					// load captions, then collections

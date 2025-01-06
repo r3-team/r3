@@ -25,6 +25,12 @@ type LoginClientEvent struct {
 	HotkeyModifier1 string      `json:"hotkeyModifier1"`
 	HotkeyModifier2 pgtype.Text `json:"hotkeyModifier2"`
 }
+type LoginFavorite struct {
+	Id       uuid.UUID   `json:"id"`
+	ModuleId uuid.UUID   `json:"moduleId"` // ID of module in which menu favorite is shown (forms from build-on modules could be shown in other module)
+	FormId   uuid.UUID   `json:"formId"`   // ID of form to show
+	Title    pgtype.Text `json:"title"`    // user defined title of favorite, empty if not set
+}
 type LoginMeta struct {
 	Department    string `json:"department"`
 	Email         string `json:"email"`
