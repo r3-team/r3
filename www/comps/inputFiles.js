@@ -386,7 +386,7 @@ let MyInputFiles = {
 			this.viewMode = 'gallery';
 		
 		// apply last chosen view mode
-		this.setViewMode(this.fieldOptionGet(this.fieldId,'fileViewMode',this.viewMode));
+		this.setViewMode(this.fieldOptionGet(null,this.fieldId,'fileViewMode',this.viewMode));
 	},
 	unmounted() {
 		window.removeEventListener('resize',this.resized);
@@ -628,8 +628,10 @@ let MyInputFiles = {
 			if(!this.viewModes.includes(mode))
 				return this.viewMode = 'listCompact';
 			
-			this.viewMode = mode;
-			this.fieldOptionSet(this.fieldId,'fileViewMode',mode);
+			if(mode !== this.viewMode) {
+				this.viewMode = mode;
+				this.fieldOptionSet(null,this.fieldId,'fileViewMode',mode);
+			}
 		},
 		toggle(fileId) {
 			let pos = this.fileIdsSelected.indexOf(fileId);

@@ -232,7 +232,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			
 			ALTER TYPE app.filter_side_content ADD VALUE 'formState';
 
-			-- login favorite forms
+			-- persistent login config
+			ALTER TABLE instance.login ADD   COLUMN date_favorites BIGINT NOT NULL DEFAULT 0;
+			ALTER TABLE instance.login ALTER COLUMN date_favorites DROP DEFAULT;
+
+			-- login favorites
 			CREATE TABLE instance.login_favorite (
 				id uuid NOT NULL,
 				login_id integer NOT NULL,
@@ -260,6 +264,39 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX fki_login_favorite_login_id_fkey  ON instance.login_favorite USING BTREE (login_id  ASC NULLS LAST);
 			CREATE INDEX fki_login_favorite_module_id_fkey ON instance.login_favorite USING BTREE (module_id ASC NULLS LAST);
 			CREATE INDEX fki_login_favorite_form_id_fkey   ON instance.login_favorite USING BTREE (form_id   ASC NULLS LAST);
+
+			-- login options
+			CREATE TABLE IF NOT EXISTS instance.login_options (
+				login_id integer NOT NULL,
+				login_favorite_id uuid,
+				field_id uuid NOT NULL,
+				date_change bigint NOT NULL,
+				options text COLLATE pg_catalog."default" NOT NULL,
+				CONSTRAINT login_options_field_id_fkey FOREIGN KEY (field_id)
+					REFERENCES app.field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_options_login_favorite_id_fkey FOREIGN KEY (login_favorite_id)
+					REFERENCES instance.login_favorite (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+					NOT VALID,
+				CONSTRAINT login_options_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX fki_login_options_login_id_fkey          ON instance.login_options USING BTREE (login_id          ASC NULLS LAST);
+			CREATE INDEX fki_login_options_login_favorite_id_fkey ON instance.login_options USING BTREE (login_favorite_id ASC NULLS LAST);
+			CREATE INDEX fki_login_options_field_id_fkey          ON instance.login_options USING BTREE (field_id          ASC NULLS LAST);
+			CREATE UNIQUE INDEX ind_login_options_unique          ON instance.login_options USING BTREE (
+				login_id ASC NULLS LAST,
+				COALESCE(login_favorite_id,'00000000-0000-0000-0000-000000000000') ASC NULLS LAST,
+				field_id ASC NULLS LAST
+			);
 		`)
 		return "3.10", err
 	},

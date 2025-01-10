@@ -1,4 +1,4 @@
-package login_favorite
+package login_favorites
 
 import (
 	"context"
@@ -8,9 +8,22 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Get_tx(ctx context.Context, tx pgx.Tx, loginId int64) (map[uuid.UUID][]types.LoginFavorite, error) {
-
+func Get_tx(ctx context.Context, tx pgx.Tx, dateCache int64, loginId int64) (map[uuid.UUID][]types.LoginFavorite, int64, error) {
 	favorites := make(map[uuid.UUID][]types.LoginFavorite)
+
+	var dateFavorites int64
+	if err := tx.QueryRow(ctx, `
+		SELECT date_favorites
+		FROM instance.login
+		WHERE id = $1
+	`, loginId).Scan(&dateFavorites); err != nil {
+		return favorites, 0, err
+	}
+
+	if dateCache == dateFavorites {
+		// cache valid, return empty but with same timestamp to let client know that cache is still valid
+		return favorites, dateCache, nil
+	}
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, module_id, form_id, title
@@ -19,7 +32,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginId int64) (map[uuid.UUID][]type
 		ORDER BY position ASC
 	`, loginId)
 	if err != nil {
-		return favorites, err
+		return favorites, 0, err
 	}
 	defer rows.Close()
 
@@ -28,7 +41,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginId int64) (map[uuid.UUID][]type
 		var moduleId uuid.UUID
 
 		if err := rows.Scan(&f.Id, &moduleId, &f.FormId, &f.Title); err != nil {
-			return favorites, err
+			return favorites, 0, err
 		}
 		_, exists := favorites[moduleId]
 		if !exists {
@@ -36,10 +49,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginId int64) (map[uuid.UUID][]type
 		}
 		favorites[moduleId] = append(favorites[moduleId], f)
 	}
-	return favorites, nil
+	return favorites, 0, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, loginId int64, moduleIdMapFavorites map[uuid.UUID][]types.LoginFavorite) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, loginId int64, dateCache int64, moduleIdMapFavorites map[uuid.UUID][]types.LoginFavorite) error {
 
 	var err error
 	idsKeep := make([]uuid.UUID, 0)
@@ -77,6 +90,15 @@ func Set_tx(ctx context.Context, tx pgx.Tx, loginId int64, moduleIdMapFavorites 
 		WHERE id       <> ALL($1)
 		AND   login_id =  $2
 	`, idsKeep, loginId); err != nil {
+		return err
+	}
+
+	// update cache timestamp
+	if _, err := tx.Exec(ctx, `
+		UPDATE instance.login
+		SET date_favorites = $1
+		WHERE id = $2
+	`, dateCache, loginId); err != nil {
 		return err
 	}
 	return nil

@@ -48,6 +48,11 @@ type LoginMfaToken struct {
 	Id   int64  `json:"id"`
 	Name string `json:"name"`
 }
+type LoginOptions struct {
+	FavoriteId pgtype.UUID `json:"favoriteId"` // NOT NULL if options are valid in context of a favorite form
+	FieldId    uuid.UUID   `json:"fieldId"`
+	Options    string      `json:"options"`
+}
 type LoginPublicKey struct {
 	LoginId   int64   `json:"loginId"`   // ID of login
 	PublicKey string  `json:"publicKey"` // public key of login (not encrypted)

@@ -913,7 +913,7 @@ let MyList = {
 		anyInputRows:        (s) => s.inputRecordIds.length !== 0,
 		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
 		choiceFilters:       (s) => s.getChoiceFilters(s.choices,s.choiceId),
-		choiceIdDefault:     (s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		choiceIdDefault:     (s) => s.fieldOptionGet(null,s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
 		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,s.columnBatchSort[0],true),
 		expressions:         (s) => s.getQueryExpressions(s.columns),
 		hasBulkActions:      (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
@@ -1028,19 +1028,19 @@ let MyList = {
 		
 		// set initial auto renew timer
 		if(this.autoRenew !== null) {
-			this.autoRenewInput = this.fieldOptionGet(this.fieldId,'autoRenew',this.autoRenew);
+			this.autoRenewInput = this.fieldOptionGet(null,this.fieldId,'autoRenew',this.autoRenew);
 			this.setAutoRenewTimer(false);
 		}
 		
 		// load cached list options
-		this.cardsCaptions   = this.fieldOptionGet(this.fieldId,'cardsCaptions',true);
-		this.columnBatchSort = this.fieldOptionGet(this.fieldId,'columnBatchSort',[[],[]]);
-		this.columnIdMapAggr = this.fieldOptionGet(this.fieldId,'columnIdMapAggr',{});
-		this.filtersColumn   = this.fieldOptionGet(this.fieldId,'filtersColumn',[]);
-		this.filtersUser     = this.fieldOptionGet(this.fieldId,'filtersUser',[]);
-		this.limit           = this.fieldOptionGet(this.fieldId,'limit',this.limitDefault);
-		this.layout          = this.fieldOptionGet(this.fieldId,'layout',this.layoutDefault);
-		this.showHeader      = this.fieldOptionGet(this.fieldId,'header',true);
+		this.cardsCaptions   = this.fieldOptionGet(null,this.fieldId,'cardsCaptions',true);
+		this.columnBatchSort = this.fieldOptionGet(null,this.fieldId,'columnBatchSort',[[],[]]);
+		this.columnIdMapAggr = this.fieldOptionGet(null,this.fieldId,'columnIdMapAggr',{});
+		this.filtersColumn   = this.fieldOptionGet(null,this.fieldId,'filtersColumn',[]);
+		this.filtersUser     = this.fieldOptionGet(null,this.fieldId,'filtersUser',[]);
+		this.limit           = this.fieldOptionGet(null,this.fieldId,'limit',this.limitDefault);
+		this.layout          = this.fieldOptionGet(null,this.fieldId,'layout',this.layoutDefault);
+		this.showHeader      = this.fieldOptionGet(null,this.fieldId,'header',true);
 
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
@@ -1153,7 +1153,7 @@ let MyList = {
 				case 'filtersUser': this.offset = 0; break;
 				case 'choice':
 					this.offset = 0;
-					this.fieldOptionSet(this.fieldId,'choiceId',this.choiceId);
+					this.fieldOptionSet(null,this.fieldId,'choiceId',this.choiceId);
 				break;
 				case 'order':
 					this.offset = 0;
@@ -1327,7 +1327,7 @@ let MyList = {
 			if(aggregator !== null) this.columnIdMapAggr[columnId] = aggregator;
 			else                    delete(this.columnIdMapAggr[columnId]);
 			
-			this.fieldOptionSet(this.fieldId,'columnIdMapAggr',this.columnIdMapAggr);
+			this.fieldOptionSet(null,this.fieldId,'columnIdMapAggr',this.columnIdMapAggr);
 			this.reloadAggregations(false);
 		},
 		setAutoRenewTimer(justClear) {
@@ -1346,24 +1346,27 @@ let MyList = {
 			this.autoRenewTimer = setInterval(this.get,this.autoRenewInput * 1000);
 			
 			// store timer option for field
-			this.fieldOptionSet(this.fieldId,'autoRenew',this.autoRenewInput);
+			this.fieldOptionSet(null,this.fieldId,'autoRenew',this.autoRenewInput);
 		},
 		setCardsCaptions(v) {
 			this.cardsCaptions = v;
-			this.fieldOptionSet(this.fieldId,'cardsCaptions',v);
+			this.fieldOptionSet(null,this.fieldId,'cardsCaptions',v);
 		},
 		setColumnBatchSort(v) {
+			if(JSON.stringify(v) === JSON.stringify(this.columnBatchSort))
+				return;
+
 			this.columnBatchSort = v;
-			this.fieldOptionSet(this.fieldId,'columnBatchSort',v);
+			this.fieldOptionSet(null,this.fieldId,'columnBatchSort',v);
 			this.reloadAggregations(true);
 		},
 		setLayout(v) {
 			this.layout = v;
-			this.fieldOptionSet(this.fieldId,'layout',this.layout);
+			this.fieldOptionSet(null,this.fieldId,'layout',this.layout);
 		},
 		setLimit(v) {
 			this.limit = v;
-			this.fieldOptionSet(this.fieldId,'limit',this.limit);
+			this.fieldOptionSet(null,this.fieldId,'limit',this.limit);
 			this.reloadInside('limit');
 		},
 		setOrder(columnBatch,directionAsc) {
@@ -1419,7 +1422,7 @@ let MyList = {
 		},
 		toggleHeader() {
 			this.showHeader = !this.showHeader;
-			this.fieldOptionSet(this.fieldId,'header',this.showHeader);
+			this.fieldOptionSet(null,this.fieldId,'header',this.showHeader);
 		},
 		toggleUserFilters() {
 			this.showFilters = !this.showFilters;
@@ -1594,8 +1597,8 @@ let MyList = {
 							if(this.isInput) {
 								this.$nextTick(this.updateDropdownDirection);
 							} else {
-								this.fieldOptionSet(this.fieldId,'filtersColumn',this.filtersColumn);
-								this.fieldOptionSet(this.fieldId,'filtersUser',this.filtersUser);
+								this.fieldOptionSet(null,this.fieldId,'filtersColumn',this.filtersColumn);
+								this.fieldOptionSet(null,this.fieldId,'filtersUser',this.filtersUser);
 							}
 						},
 						this.consoleError

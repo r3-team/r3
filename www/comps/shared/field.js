@@ -46,15 +46,18 @@ export function getFieldOverwritesDefault() {
 };
 
 // locally stored field options
-export function fieldOptionGet(fieldId,optionName,fallbackValue) {
-	const map = MyStore.getters['local/fieldIdMapOption'];
-	return map[fieldId] !== undefined && map[fieldId][optionName] !== undefined
-		? map[fieldId][optionName] : fallbackValue;
+export function fieldOptionGet(favoriteId,fieldId,name,fallbackValue) {
+	const s = MyStore.getters['local/loginOptions'];
+
+	if(favoriteId !== null)
+		return s.favoriteIdMap[favoriteId]?.fieldIdMap[fieldId]?.[name] !== undefined
+			? JSON.parse(JSON.stringify(s.favoriteIdMap[favoriteId].fieldIdMap[fieldId][name]))
+			: fallbackValue;
+
+	return s.fieldIdMap[fieldId]?.[name] !== undefined
+		? JSON.parse(JSON.stringify(s.fieldIdMap[fieldId][name]))
+		: fallbackValue;
 };
-export function fieldOptionSet(fieldId,optionName,value) {
-	MyStore.commit('local/fieldOptionSet',{
-		fieldId:fieldId,
-		name:optionName,
-		value:value
-	});
+export function fieldOptionSet(favoriteId,fieldId,name,value) {
+	MyStore.commit('local/loginOption',{favoriteId,fieldId,name,value});
 };

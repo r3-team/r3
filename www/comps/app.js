@@ -380,6 +380,7 @@ let MyApp = {
 		css:                (s) => s.$store.getters['local/css'],
 		loginBackground:    (s) => s.$store.getters['local/loginBackground'],
 		loginKeyAes:        (s) => s.$store.getters['local/loginKeyAes'],
+		loginOptionsDate:   (s) => s.$store.getters['local/loginOptionsDate'],
 		languageCodes:      (s) => s.$store.getters['schema/languageCodes'],
 		modules:            (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
@@ -700,7 +701,7 @@ let MyApp = {
 		// final app meta retrieval, after authentication
 		initApp() {
 			let requests = [
-				ws.prepare('loginFavorite','get',{}),
+				ws.prepare('loginOptions','get',{dateCache:this.loginOptionsDate}),
 				ws.prepare('loginSetting','get',{}),
 				ws.prepare('loginWidgetGroups','get',{}),
 				ws.prepare('lookup','get',{name:'access'}),
@@ -717,7 +718,7 @@ let MyApp = {
 			
 			ws.sendMultiple(requests,true).then(
 				async res => {
-					this.$store.commit('favorites',res[0].payload);
+					this.$store.commit('local/loginOptions',res[0].payload);
 					this.$store.commit('settings',res[1].payload);
 					this.$store.commit('loginWidgetGroups',res[2].payload);
 					this.$store.commit('access',res[3].payload);

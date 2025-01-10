@@ -236,10 +236,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	if isNew {
 		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.login (
-				ldap_id, ldap_key, name, salt, hash, salt_kdf,
-				admin, no_auth, limited, active, token_expiry_hours
+				ldap_id, ldap_key, name, salt, hash, salt_kdf, admin,
+				no_auth, limited, active, token_expiry_hours, date_favorites
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,0)
 			RETURNING id
 		`, ldapId, ldapKey, name, &salt, &hash, saltKdf, admin, noAuth,
 			isLimited, active, tokenExpiryHours).Scan(&id); err != nil {

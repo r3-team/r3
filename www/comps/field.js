@@ -1158,10 +1158,10 @@ let MyField = {
 		if(this.isTabs)
 			this.setTabToValid();
 
-		this.columnIdsByUser = this.fieldOptionGet(this.field.id,'columnIdsByUser',[]);
+		this.columnIdsByUser = this.fieldOptionGet(null,this.field.id,'columnIdsByUser',[]);
 
 		// fill stored collection row indexes
-		this.collectionIdMapIndexes = this.fieldOptionGet(this.field.id,'collectionIdMapIndexes',{});
+		this.collectionIdMapIndexes = this.fieldOptionGet(null,this.field.id,'collectionIdMapIndexes',{});
 	},
 	methods:{
 		// externals
@@ -1295,14 +1295,14 @@ let MyField = {
 		},
 		setColumnIdsByUser(ids) {
 			this.columnIdsByUser = ids;
-			this.fieldOptionSet(this.field.id,'columnIdsByUser',ids);
+			this.fieldOptionSet(null,this.field.id,'columnIdsByUser',ids);
 		},
 		setCollectionIndexes(collectionId,indexes) {
 			this.collectionIdMapIndexes[collectionId] = indexes;
-			this.fieldOptionSet(this.field.id,'collectionIdMapIndexes',this.collectionIdMapIndexes);
+			this.fieldOptionSet(null,this.field.id,'collectionIdMapIndexes',this.collectionIdMapIndexes);
 		},
 		setTab(tabIndex) {
-			this.fieldOptionSet(this.field.id,'tabIndex',tabIndex);
+			this.fieldOptionSet(null,this.field.id,'tabIndex',tabIndex);
 			this.tabIndexShow = tabIndex;
 		},
 		setTabCounter(tabIndex,fieldId,value) {
@@ -1317,7 +1317,7 @@ let MyField = {
 		setTabToValid() {
 			// set tab to valid one, either last remembered or first valid
 			if(this.settings.tabRemember) {
-				const tabIndex = this.fieldOptionGet(this.field.id,'tabIndex',0);
+				const tabIndex = this.fieldOptionGet(null,this.field.id,'tabIndex',0);
 				if(this.field.tabs.length > tabIndex && !this.tabIndexesHidden.includes(tabIndex))
 					return this.tabIndexShow = tabIndex;
 			}

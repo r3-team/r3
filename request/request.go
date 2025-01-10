@@ -177,9 +177,9 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "loginFavorite":
 		switch action {
 		case "get":
-			return LoginGetFavorite_tx(ctx, tx, loginId)
+			return LoginGetFavorites_tx(ctx, tx, reqJson, loginId)
 		case "set":
-			return LoginSetFavorite_tx(ctx, tx, reqJson, loginId)
+			return LoginSetFavorites_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginKeys":
 		switch action {
@@ -191,6 +191,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return LoginKeysStore_tx(ctx, tx, reqJson, loginId)
 		case "storePrivate":
 			return LoginKeysStorePrivate_tx(ctx, tx, reqJson, loginId)
+		}
+	case "loginOptions":
+		switch action {
+		case "get":
+			return LoginOptionsGet_tx(ctx, tx, reqJson, loginId)
+		case "set":
+			return LoginOptionsSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginPassword":
 		switch action {

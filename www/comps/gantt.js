@@ -424,7 +424,7 @@ let MyGantt = {
 	computed:{
 		// default is user field option, fallback is first choice in list
 		choiceIdDefault:(s) => s.fieldOptionGet(
-			s.fieldId,'choiceId',
+			null,s.fieldId,'choiceId',
 			s.choices.length === 0 ? null : s.choices[0].id
 		),
 		
@@ -566,8 +566,8 @@ let MyGantt = {
 		
 		// setup watchers for presentation changes
 		this.$watch(() => [this.showGroupLabels,this.stepZoom],() => {
-			this.fieldOptionSet(this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
-			this.fieldOptionSet(this.fieldId,'ganttStepZoom',this.stepZoom);
+			this.fieldOptionSet(null,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
+			this.fieldOptionSet(null,this.fieldId,'ganttStepZoom',this.stepZoom);
 			this.$nextTick(() => this.setSteps(false));
 		});
 		
@@ -580,8 +580,8 @@ let MyGantt = {
 		}
 		
 		// initial field options
-		this.showGroupLabels = this.fieldOptionGet(this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
-		this.stepZoom        = this.fieldOptionGet(this.fieldId,'ganttStepZoom',this.stepZoom);
+		this.showGroupLabels = this.fieldOptionGet(null,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
+		this.stepZoom        = this.fieldOptionGet(null,this.fieldId,'ganttStepZoom',this.stepZoom);
 		
 		this.ready = true;
 		this.$nextTick(() => this.setSteps(false));
@@ -676,7 +676,7 @@ let MyGantt = {
 		
 		// actions
 		choiceIdSet(choiceId) {
-			this.fieldOptionSet(this.fieldId,'choiceId',choiceId);
+			this.fieldOptionSet(null,this.fieldId,'choiceId',choiceId);
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
