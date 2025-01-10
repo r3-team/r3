@@ -270,6 +270,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				login_id integer NOT NULL,
 				login_favorite_id uuid,
 				field_id uuid NOT NULL,
+				is_mobile boolean NOT NULL,
 				date_change bigint NOT NULL,
 				options text COLLATE pg_catalog."default" NOT NULL,
 				CONSTRAINT login_options_field_id_fkey FOREIGN KEY (field_id)
@@ -295,7 +296,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE UNIQUE INDEX ind_login_options_unique          ON instance.login_options USING BTREE (
 				login_id ASC NULLS LAST,
 				COALESCE(login_favorite_id,'00000000-0000-0000-0000-000000000000') ASC NULLS LAST,
-				field_id ASC NULLS LAST
+				field_id ASC NULLS LAST,
+				is_mobile ASC NULLS LAST
 			);
 		`)
 		return "3.10", err

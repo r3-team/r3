@@ -380,7 +380,8 @@ let MyApp = {
 		css:                (s) => s.$store.getters['local/css'],
 		loginBackground:    (s) => s.$store.getters['local/loginBackground'],
 		loginKeyAes:        (s) => s.$store.getters['local/loginKeyAes'],
-		loginOptionsDate:   (s) => s.$store.getters['local/loginOptionsDate'],
+		loginOptions:       (s) => s.$store.getters['local/loginOptions'],
+		loginOptionsMobile: (s) => s.$store.getters['local/loginOptionsMobile'],
 		languageCodes:      (s) => s.$store.getters['schema/languageCodes'],
 		modules:            (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
@@ -701,7 +702,10 @@ let MyApp = {
 		// final app meta retrieval, after authentication
 		initApp() {
 			let requests = [
-				ws.prepare('loginOptions','get',{dateCache:this.loginOptionsDate}),
+				ws.prepare('loginOptions','get',{
+					dateCache:this.isMobile ? this.loginOptionsMobile.dateCache : this.loginOptions.dateCache,
+					isMobile:this.isMobile
+				}),
 				ws.prepare('loginSetting','get',{}),
 				ws.prepare('loginWidgetGroups','get',{}),
 				ws.prepare('lookup','get',{name:'access'}),

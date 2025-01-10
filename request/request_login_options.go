@@ -17,9 +17,11 @@ func LoginOptionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage,
 		err error
 		req struct {
 			DateCache int64 `json:"dateCache"`
+			IsMobile  bool  `json:"isMobile"`
 		}
 		res struct {
 			DateCache int64                `json:"dateCache"`
+			IsMobile  bool                 `json:"isMobile"`
 			Options   []types.LoginOptions `json:"options"`
 		}
 	)
@@ -28,7 +30,8 @@ func LoginOptionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage,
 	}
 
 	res.DateCache = tools.GetTimeUnix()
-	res.Options, err = login_options.Get_tx(ctx, tx, loginId, req.DateCache)
+	res.IsMobile = req.IsMobile
+	res.Options, err = login_options.Get_tx(ctx, tx, loginId, req.IsMobile, req.DateCache)
 	if err != nil {
 		return nil, err
 	}
@@ -39,10 +42,11 @@ func LoginOptionsSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage,
 	var req struct {
 		FavoriteId pgtype.UUID `json:"favoriteId"` // NULL if option is for non-favorited form
 		FieldId    uuid.UUID   `json:"fieldId"`
+		IsMobile   bool        `json:"isMobile"`
 		Options    string      `json:"options"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login_options.Set_tx(ctx, tx, loginId, req.FavoriteId, req.FieldId, req.Options)
+	return nil, login_options.Set_tx(ctx, tx, loginId, req.FavoriteId, req.FieldId, req.IsMobile, req.Options)
 }

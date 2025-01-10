@@ -47,17 +47,19 @@ export function getFieldOverwritesDefault() {
 
 // locally stored field options
 export function fieldOptionGet(favoriteId,fieldId,name,fallbackValue) {
-	const s = MyStore.getters['local/loginOptions'];
+	const isMobile = MyStore.getters.isMobile;
+	const base     = isMobile ? MyStore.getters['local/loginOptionsMobile'] : MyStore.getters['local/loginOptions'];
 
 	if(favoriteId !== null)
-		return s.favoriteIdMap[favoriteId]?.fieldIdMap[fieldId]?.[name] !== undefined
-			? JSON.parse(JSON.stringify(s.favoriteIdMap[favoriteId].fieldIdMap[fieldId][name]))
+		return base.favoriteIdMap[favoriteId]?.fieldIdMap[fieldId]?.[name] !== undefined
+			? JSON.parse(JSON.stringify(base.favoriteIdMap[favoriteId].fieldIdMap[fieldId][name]))
 			: fallbackValue;
 
-	return s.fieldIdMap[fieldId]?.[name] !== undefined
-		? JSON.parse(JSON.stringify(s.fieldIdMap[fieldId][name]))
+	return base.fieldIdMap[fieldId]?.[name] !== undefined
+		? JSON.parse(JSON.stringify(base.fieldIdMap[fieldId][name]))
 		: fallbackValue;
 };
 export function fieldOptionSet(favoriteId,fieldId,name,value) {
-	MyStore.commit('local/loginOption',{favoriteId,fieldId,name,value});
+	const isMobile = MyStore.getters.isMobile;
+	MyStore.commit('local/loginOption',{favoriteId,fieldId,isMobile,name,value});
 };

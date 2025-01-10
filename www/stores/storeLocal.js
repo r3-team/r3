@@ -19,11 +19,16 @@ const MyStoreLocal = {
 		css:'',                // custom CSS, applied to everything
 		fieldIdMapOption:{},   // map of field IDs with field options (reset on schema change)
 		loginBackground:0,     // background image for login page
-		loginOptions:{         // field options set by login (might include other option types in the future)
+		loginOptions:{         // field options set by login (might include options besides fields in the future)
+			dateCache:0,       // used to get delta changes since last retrieval
 			favoriteIdMap:{},  // field options for favorite forms (includes options for fields)
 			fieldIdMap:{}      // field options for generic forms
 		},
-		loginOptionsDate:0,    // date of valid cache for login options
+		loginOptionsMobile:{   // same as loginOptions (s. above) but for mobile view
+			dateCache:0,
+			favoriteIdMap:{},
+			fieldIdMap:{}
+		},
 		loginKeyAes:null,      // en-/decryption key for login private key
 		loginKeySalt:null,     // salt for login key KDF
 		menuIdMapOpen:{},      // map of menu IDs with open state (true/false)
@@ -103,6 +108,8 @@ const MyStoreLocal = {
 			const getOptions = (obj,fieldId) => obj[fieldId] === undefined ? {} : JSON.parse(JSON.stringify(obj[fieldId]));
 			const favoriteId = payload.favoriteId; // optional, if options are set in context of favorite form
 			const fieldId    = payload.fieldId;
+			const isMobile   = payload.isMobile;
+			const base       = isMobile ? state.loginOptionsMobile : state.loginOptions;
 			const name       = payload.name;
 			const value      = JSON.parse(JSON.stringify(payload.value));
 			const isEmptyValue =
@@ -112,13 +119,13 @@ const MyStoreLocal = {
 				typeof value === 'number' && value === 0 ||
 				typeof value === 'null';
 
-			// overwrite value target if options are set for favorite
-			if(favoriteId !== null && state.loginOptions.favoriteIdMap[favoriteId] === undefined)
-				state.loginOptions.favoriteIdMap[favoriteId] = { fieldIdMap:{} };
+			// overwrite target if options are set for favorite
+			if(favoriteId !== null && base.favoriteIdMap[favoriteId] === undefined)
+				base.favoriteIdMap[favoriteId] = { fieldIdMap:{} };
 
 			const target = favoriteId !== null
-				? state.loginOptions.favoriteIdMap[favoriteId].fieldIdMap
-				: state.loginOptions.fieldIdMap;
+				? base.favoriteIdMap[favoriteId].fieldIdMap
+				: base.fieldIdMap;
 
 			// set options for field
 			let options = getOptions(target,fieldId);
@@ -131,28 +138,29 @@ const MyStoreLocal = {
 			ws.send('loginOptions','set',{
 				favoriteId:favoriteId,
 				fieldId:fieldId,
+				isMobile:isMobile,
 				options:JSON.stringify(options)
 			},false).then(() => {},console.warn);
 
 			if(Object.keys(options).length === 0) delete target[fieldId];
 			else                                  target[fieldId] = options;
 
-			set('loginOptions',state.loginOptions);
+			set(payload.isMobile ? 'loginOptionsMobile' : 'loginOptions', base);
 		},
 		loginOptions(state,payload) {
+			const base = payload.isMobile ? state.loginOptionsMobile : state.loginOptions;
 			for(const o of payload.options) {
-				if(o.favoriteId !== null && state.loginOptions.favoriteIdMap[o.favoriteId] === undefined)
-					state.loginOptions.favoriteIdMap[o.favoriteId] = { fieldIdMap:{} };
+				if(o.favoriteId !== null && base.favoriteIdMap[o.favoriteId] === undefined)
+					base.favoriteIdMap[o.favoriteId] = { fieldIdMap:{} };
 
 				const target = o.favoriteId !== null
-					? state.loginOptions.favoriteIdMap[o.favoriteId].fieldIdMap
-					: state.loginOptions.fieldIdMap;
+					? base.favoriteIdMap[o.favoriteId].fieldIdMap
+					: base.fieldIdMap;
 
 				target[o.fieldId] = JSON.parse(o.options);
 			}
-			set('loginOptions',state.loginOptions);
-			set('loginOptionsDate',payload.dateCache);
-			state.loginOptionsDate = payload.dateCache;
+			base.dateCache = payload.dateCache;
+			set(payload.isMobile ? 'loginOptionsMobile' : 'loginOptions', base);
 		},
 		menuIdMapOpenToggle(state,payload) {
 			if(typeof state.menuIdMapOpen[payload] === 'undefined')
@@ -209,7 +217,7 @@ const MyStoreLocal = {
 		loginKeyAes:       (state) => state.loginKeyAes,
 		loginKeySalt:      (state) => state.loginKeySalt,
 		loginOptions:      (state) => state.loginOptions,
-		loginOptionsDate:  (state) => state.loginOptionsDate,
+		loginOptionsMobile:(state) => state.loginOptionsMobile,
 		menuIdMapOpen:     (state) => state.menuIdMapOpen,
 		token:             (state) => state.token,
 		tokenKeep:         (state) => state.tokenKeep,
