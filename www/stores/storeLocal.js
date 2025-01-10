@@ -17,7 +17,6 @@ const MyStoreLocal = {
 		companyName:'',        // custom company name on login screen
 		companyWelcome:'',     // custom welcome message on login screen
 		css:'',                // custom CSS, applied to everything
-		fieldIdMapOption:{},   // map of field IDs with field options (reset on schema change)
 		loginBackground:0,     // background image for login page
 		loginOptions:{         // field options set by login (might include options besides fields in the future)
 			dateCache:0,       // used to get delta changes since last retrieval
@@ -213,7 +212,6 @@ const MyStoreLocal = {
 		companyName:       (state) => state.companyName,
 		companyWelcome:    (state) => state.companyWelcome,
 		css:               (state) => state.css,
-		fieldIdMapOption:  (state) => state.fieldIdMapOption,
 		loginKeyAes:       (state) => state.loginKeyAes,
 		loginKeySalt:      (state) => state.loginKeySalt,
 		loginOptions:      (state) => state.loginOptions,

@@ -45,7 +45,7 @@ let MyListOptions = {
 					<div class="column gap">
 						<span>{{ capGen.columns }}</span>
 						<my-button image="refresh.png"
-							@trigger="columnsReset"
+							@trigger="$emit('reset-columns')"
 							:caption="capGen.button.reset"
 						/>
 					</div>
@@ -161,7 +161,7 @@ let MyListOptions = {
 		moduleId:       { type:String,  required:true },
 		pageLimit:      { type:Number,  required:true }
 	},
-	emits:['set-cards-captions', 'set-column-batch-sort', 'set-column-ids-by-user', 'set-layout', 'set-page-limit'],
+	emits:['reset-columns', 'set-cards-captions', 'set-column-batch-sort', 'set-column-ids-by-user', 'set-layout', 'set-page-limit'],
 	computed:{
 		columnBatchSortAll:(s) => {
 			if(s.columnBatchSort[1].length === s.columnBatchesAll.length)
@@ -224,7 +224,7 @@ let MyListOptions = {
 	mounted() {
 		// invalid batch sort, reset
 		if(this.columnBatchSort[1].length !== 0 && this.columnBatchSort[1].length !== this.columnBatchesAll.length)
-			this.columnsReset();
+			this.$emit('reset-columns');
 	},
 	methods:{
 		// external
@@ -288,10 +288,6 @@ let MyListOptions = {
 			
 			this.$emit('set-column-ids-by-user',outCols);
 			this.setBatchOrder(outSort,outCols);
-		},
-		columnsReset() {
-			this.$emit('set-column-ids-by-user',[]);
-			this.$emit('set-column-batch-sort',[[],[]]);
 		},
 		dropBatchSort(v) {
 			if(typeof v.moved === undefined)

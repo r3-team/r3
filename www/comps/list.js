@@ -100,6 +100,7 @@ let MyList = {
 					/>
 					<my-list-options
 						v-if="showOptions"
+						@reset-columns="resetColumns"
 						@set-cards-captions="setCardsCaptions"
 						@set-column-batch-sort="setColumnBatchSort"
 						@set-column-ids-by-user="$emit('set-column-ids-by-user',$event)"
@@ -1320,6 +1321,12 @@ let MyList = {
 					return this.$refs[this.refTabindex+String(this.rows.length-1)][0].focus();
 				}
 			}
+		},
+		resetColumns() {
+			this.$emit('set-column-ids-by-user',[]);
+			this.filtersColumn = [];
+			this.setColumnBatchSort([[],[]]);
+			this.reloadInside('filtersColumn');
 		},
 		setAggregators(columnId,aggregator) {
 			if(!this.isTable) return;
