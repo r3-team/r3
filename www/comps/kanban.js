@@ -457,6 +457,7 @@ let MyKanban = {
 		columns:            { type:Array,   required:true }, // processed list columns
 		collections:        { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
+		favoriteId:         { required:false, default:null },
 		fieldId:            { type:String,  required:true },
 		filters:            { type:Array,   required:true }, // processed query filters
 		formLoading:        { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
@@ -492,7 +493,7 @@ let MyKanban = {
 	computed:{
 		choiceIdDefault:(s) => s.fieldOptionGet(
 			// default is user field option, fallback is first choice in list
-			null,s.fieldId,'choiceId',
+			s.favoriteId,s.fieldId,'choiceId',
 			s.choices.length === 0 ? null : s.choices[0].id
 		),
 		columnIndexesData:(s) => {
@@ -578,13 +579,13 @@ let MyKanban = {
 		
 		// setup watchers for presentation changes
 		this.$watch(() => [this.showCaptions,this.zoom],() => {
-			this.fieldOptionSet(null,this.fieldId,'kanbanShowCaptions',this.showCaptions);
-			this.fieldOptionSet(null,this.fieldId,'kanbanZoom',this.zoom);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'kanbanShowCaptions',this.showCaptions);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'kanbanZoom',this.zoom);
 		});
 		
 		// initial field options
-		this.showCaptions = this.fieldOptionGet(null,this.fieldId,'kanbanShowCaptions',this.showCaptions);
-		this.zoom         = this.fieldOptionGet(null,this.fieldId,'kanbanZoom',this.zoom);
+		this.showCaptions = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanShowCaptions',this.showCaptions);
+		this.zoom         = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanZoom',this.zoom);
 		
 		this.ready = true;
 		this.$nextTick(() => this.get());
@@ -616,7 +617,7 @@ let MyKanban = {
 			this.$emit('open-form',[],args,middleClick);
 		},
 		choiceIdSet(choiceId) {
-			this.fieldOptionSet(null,this.fieldId,'choiceId',choiceId);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',choiceId);
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},

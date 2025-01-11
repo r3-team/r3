@@ -18,24 +18,27 @@ let MyMenuFavoritesEdit = {
 			:list="favoritesEdit"
 		>
 			<template #item="{element,index}">
-				<div class="row gap">
+				<div class="row gap centered">
 					<img v-if="favoritesEdit.length > 1" class="dragAnchor" src="images/drag.png" />
 					<input v-model="element.title" />
 					<my-button image="delete.png"
 						@trigger="remove(index)"
+						:cancel="true"
 					/>
 				</div>
 			</template>
 		</draggable>
 
-		<div class="row gap">
+		<div class="row gap space-between">
 			<my-button image="save.png"
 				@trigger="set"
 				:active="hasChanges"
+				:caption="capGen.button.save"
 			/>
 			<my-button image="cancel.png"
 				@trigger="reset"
 				:cancel="true"
+				:caption="capGen.button.cancel"
 			/>
 		</div>
 	</div>`,
@@ -49,7 +52,8 @@ let MyMenuFavoritesEdit = {
 		hasChanges:(s) => JSON.stringify(s.favorites) !== JSON.stringify(s.favoritesEdit),
 
 		// stores
-		loginFavorites:(s) => s.$store.getters['local/loginFavorites']
+		loginFavorites:(s) => s.$store.getters['local/loginFavorites'],
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	data() {
 		return {
@@ -88,13 +92,14 @@ let MyMenuFavorite = {
 		</div>
 	</div>`,
 	props:{
-		formId:   { type:String, required:true },
-		moduleId: { type:String, required:true },
-		recordId: { required:true },
-		title:    { type:String, required:true }
+		favoriteId:{ type:String, required:true },
+		formId:    { type:String, required:true },
+		moduleId:  { type:String, required:true },
+		recordId:  { required:true },
+		title:     { type:String, required:true }
 	},
 	computed:{
-		route:(s) => s.getFormRoute(s.formId,s.recordId === null ? 0 : s.recordId,true)
+		route:(s) => s.getFormRoute(s.favoriteId,s.formId,s.recordId === null ? 0 : s.recordId,true)
 	},
 	methods:{
 		// externals
@@ -238,7 +243,7 @@ let MyMenuItem = {
 				return this.clickSubMenus();
 			
 			if(this.menu.formId !== this.formIdActive || (this.recordOpen && !this.formOpensPreset))
-				return this.$router.push(this.getFormRoute(this.menu.formId,0,true));
+				return this.$router.push(this.getFormRoute(null,this.menu.formId,0,true));
 			
 			// form is set and we are already there
 			if(!this.isMobile) return this.clickSubMenus();
@@ -246,7 +251,7 @@ let MyMenuItem = {
 		},
 		clickMiddle() {
 			if(this.menu.formId !== null)
- 				window.open('#'+this.getFormRoute(this.menu.formId,0,true),'_blank');
+ 				window.open('#'+this.getFormRoute(null,this.menu.formId,0,true),'_blank');
 		},
 		clickSubMenus() {
 			if(this.hasChildren)
@@ -323,6 +328,7 @@ let MyMenu = {
 					<my-menu-favorite
 						v-if="!isAtFavoritesEdit"
 						v-for="f in favorites"
+						:favoriteId="f.id"
 						:formId="f.formId"
 						:key="f.id"
 						:moduleId="module.id"

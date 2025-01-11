@@ -183,12 +183,12 @@
 	display:flex;
 	flex-flow:column;
 	padding:12px 9px;
-	gap:8px;
+	gap:20px;
 }
 .menu-favorites-edit-list{
 	display:flex;
 	flex-flow:column;
-	gap:8px;
+	gap:5px;
 }
 .menu-favorites-edit-list .dragAnchor{
 	height:24px;

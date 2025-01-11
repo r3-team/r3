@@ -705,6 +705,7 @@ let MyList = {
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		columns:        { type:Array,   required:true },                    // list columns, processed
 		columnsAll:     { type:Array,   required:false, default:() => [] }, // list columns, all
+		favoriteId:     { required:false, default:null },
 		fieldId:        { type:String,  required:true },
 		filters:        { type:Array,   required:true },                    // processed query filters
 		layoutDefault:  { type:String,  required:false, default:'table' },  // default list layout: table, cards
@@ -914,7 +915,7 @@ let MyList = {
 		anyInputRows:        (s) => s.inputRecordIds.length !== 0,
 		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
 		choiceFilters:       (s) => s.getChoiceFilters(s.choices,s.choiceId),
-		choiceIdDefault:     (s) => s.fieldOptionGet(null,s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		choiceIdDefault:     (s) => s.fieldOptionGet(s.favoriteId,s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
 		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,s.columnBatchSort[0],true),
 		expressions:         (s) => s.getQueryExpressions(s.columns),
 		hasBulkActions:      (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
@@ -970,6 +971,7 @@ let MyList = {
 		}
 		
 		// setup watchers
+		this.$watch('favoriteId',this.initOptions);
 		this.$watch('columns',(valOld,valNew) => {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
 				this.count = 0;
@@ -1015,33 +1017,13 @@ let MyList = {
 				}
 			});
 		}
-		
-		if(this.usesPageHistory) {
-			// set initial states via route parameters
-			this.paramsUpdated();     // load existing parameters from route query
-			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-		} else {
-			// sub lists are initiated once
-			this.choiceId = this.choiceIdDefault;
-			this.limit    = this.limitDefault;
-			this.orders   = JSON.parse(JSON.stringify(this.query.orders));
-		}
+
+		// initialize list options
+		this.initOptions();
 		
 		// set initial auto renew timer
-		if(this.autoRenew !== null) {
-			this.autoRenewInput = this.fieldOptionGet(null,this.fieldId,'autoRenew',this.autoRenew);
+		if(this.autoRenew !== null)
 			this.setAutoRenewTimer(false);
-		}
-		
-		// load cached list options
-		this.cardsCaptions   = this.fieldOptionGet(null,this.fieldId,'cardsCaptions',true);
-		this.columnBatchSort = this.fieldOptionGet(null,this.fieldId,'columnBatchSort',[[],[]]);
-		this.columnIdMapAggr = this.fieldOptionGet(null,this.fieldId,'columnIdMapAggr',{});
-		this.filtersColumn   = this.fieldOptionGet(null,this.fieldId,'filtersColumn',[]);
-		this.filtersUser     = this.fieldOptionGet(null,this.fieldId,'filtersUser',[]);
-		this.limit           = this.fieldOptionGet(null,this.fieldId,'limit',this.limitDefault);
-		this.layout          = this.fieldOptionGet(null,this.fieldId,'layout',this.layoutDefault);
-		this.showHeader      = this.fieldOptionGet(null,this.fieldId,'header',true);
 
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
@@ -1138,13 +1120,6 @@ let MyList = {
 			if(nextTick) this.$nextTick(this.$refs.aggregations.get);
 			else         this.$refs.aggregations.get();
 		},
-		reloadOutside() {
-			// outside state has changed, reload list or list input
-			if(!this.isInput)
-				return this.get();
-			
-			this.getInput();
-		},
 		reloadInside(entity) {
 			// inside state has changed, reload list (not relevant for list input)
 			switch(entity) {
@@ -1154,7 +1129,7 @@ let MyList = {
 				case 'filtersUser': this.offset = 0; break;
 				case 'choice':
 					this.offset = 0;
-					this.fieldOptionSet(null,this.fieldId,'choiceId',this.choiceId);
+					this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',this.choiceId);
 				break;
 				case 'order':
 					this.offset = 0;
@@ -1170,6 +1145,13 @@ let MyList = {
 				return this.paramsUpdate(true);
 			
 			this.get();
+		},
+		reloadOutside() {
+			// outside state has changed, reload list or list input
+			if(!this.isInput)
+				return this.get();
+			
+			this.getInput();
 		},
 		
 		// parsing
@@ -1284,6 +1266,27 @@ let MyList = {
 				this.filtersQuick = '';
 			}
 		},
+		initOptions() {
+			if(this.usesPageHistory) {
+				// set initial states via route parameters
+				this.paramsUpdated();     // load existing parameters from route query
+				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
+			} else {
+				// sub lists do not have route parameters, get initalized via defaults
+				this.choiceId = this.choiceIdDefault;
+				this.limit    = this.limitDefault;
+				this.orders   = JSON.parse(JSON.stringify(this.query.orders));
+			}
+			this.autoRenewInput  = this.fieldOptionGet(this.favoriteId,this.fieldId,'autoRenew',this.autoRenew);
+			this.cardsCaptions   = this.fieldOptionGet(this.favoriteId,this.fieldId,'cardsCaptions',true);
+			this.columnBatchSort = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnBatchSort',[[],[]]);
+			this.columnIdMapAggr = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnIdMapAggr',{});
+			this.filtersColumn   = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersColumn',[]);
+			this.filtersUser     = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersUser',[]);
+			this.limit           = this.fieldOptionGet(this.favoriteId,this.fieldId,'limit',this.limitDefault);
+			this.layout          = this.fieldOptionGet(this.favoriteId,this.fieldId,'layout',this.layoutDefault);
+			this.showHeader      = this.fieldOptionGet(this.favoriteId,this.fieldId,'header',true);
+		},
 		keyDown(e) {
 			let focusTarget = null;
 			let arrow       = false;
@@ -1334,7 +1337,7 @@ let MyList = {
 			if(aggregator !== null) this.columnIdMapAggr[columnId] = aggregator;
 			else                    delete(this.columnIdMapAggr[columnId]);
 			
-			this.fieldOptionSet(null,this.fieldId,'columnIdMapAggr',this.columnIdMapAggr);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnIdMapAggr',this.columnIdMapAggr);
 			this.reloadAggregations(false);
 		},
 		setAutoRenewTimer(justClear) {
@@ -1353,27 +1356,27 @@ let MyList = {
 			this.autoRenewTimer = setInterval(this.get,this.autoRenewInput * 1000);
 			
 			// store timer option for field
-			this.fieldOptionSet(null,this.fieldId,'autoRenew',this.autoRenewInput);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'autoRenew',this.autoRenewInput);
 		},
 		setCardsCaptions(v) {
 			this.cardsCaptions = v;
-			this.fieldOptionSet(null,this.fieldId,'cardsCaptions',v);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'cardsCaptions',v);
 		},
 		setColumnBatchSort(v) {
 			if(JSON.stringify(v) === JSON.stringify(this.columnBatchSort))
 				return;
 
 			this.columnBatchSort = v;
-			this.fieldOptionSet(null,this.fieldId,'columnBatchSort',v);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnBatchSort',v);
 			this.reloadAggregations(true);
 		},
 		setLayout(v) {
 			this.layout = v;
-			this.fieldOptionSet(null,this.fieldId,'layout',this.layout);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'layout',this.layout);
 		},
 		setLimit(v) {
 			this.limit = v;
-			this.fieldOptionSet(null,this.fieldId,'limit',this.limit);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'limit',this.limit);
 			this.reloadInside('limit');
 		},
 		setOrder(columnBatch,directionAsc) {
@@ -1429,7 +1432,7 @@ let MyList = {
 		},
 		toggleHeader() {
 			this.showHeader = !this.showHeader;
-			this.fieldOptionSet(null,this.fieldId,'header',this.showHeader);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'header',this.showHeader);
 		},
 		toggleUserFilters() {
 			this.showFilters = !this.showFilters;
@@ -1604,8 +1607,8 @@ let MyList = {
 							if(this.isInput) {
 								this.$nextTick(this.updateDropdownDirection);
 							} else {
-								this.fieldOptionSet(null,this.fieldId,'filtersColumn',this.filtersColumn);
-								this.fieldOptionSet(null,this.fieldId,'filtersUser',this.filtersUser);
+								this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersColumn',this.filtersColumn);
+								this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersUser',this.filtersUser);
 							}
 						},
 						this.consoleError

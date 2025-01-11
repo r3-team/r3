@@ -107,6 +107,7 @@ let MyField = {
 					:collectionIdMapIndexes="collectionIdMapIndexes"
 					:daysShowDef="field.days"
 					:daysShowToggle="field.daysToggle"
+					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:filters="filtersProcessed"
 					:formLoading="formLoading"
@@ -139,6 +140,7 @@ let MyField = {
 					:columns="columnsProcessed"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
+					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:days0="field.dateRange0 / 86400"
 					:days1="field.dateRange1 / 86400"
@@ -173,6 +175,7 @@ let MyField = {
 					:columns="columnsProcessed"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
+					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:filters="filtersProcessed"
 					:formLoading="formLoading"
@@ -226,6 +229,7 @@ let MyField = {
 					:columnsAll="field.columns"
 					:csvExport="field.csvExport"
 					:csvImport="field.csvImport"
+					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:filterQuick="field.filterQuick"
 					:filters="filtersProcessed"
@@ -292,6 +296,7 @@ let MyField = {
 							@set-value-init="(...args) => $emit('set-value-init',...args)"
 							:dataFieldMap="dataFieldMap"
 							:entityIdMapState="entityIdMapState"
+							:favoriteId="favoriteId"
 							:field="f"
 							:fieldIdsChanged="fieldIdsChanged"
 							:fieldIdsInvalid="fieldIdsInvalid"
@@ -488,6 +493,7 @@ let MyField = {
 					@file-count-change="$emit('set-counter',field.id,$event)"
 					:attributeId="field.attributeId"
 					:countAllowed="field.max !== null ? field.max : 0"
+					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:formLoading="formLoading"
 					:isHidden="isHidden"
@@ -600,6 +606,7 @@ let MyField = {
 			:isBulkUpdate="isBulkUpdate"
 			:dataFieldMap="dataFieldMap"
 			:entityIdMapState="entityIdMapState"
+			:favoriteId="favoriteId"
 			:field="f"
 			:fieldIdsChanged="fieldIdsChanged"
 			:fieldIdsInvalid="fieldIdsInvalid"
@@ -622,6 +629,7 @@ let MyField = {
 	props:{
 		dataFieldMap:       { type:Object,  required:true },
 		entityIdMapState:   { type:Object,  required:false, default:() => {return {}} }, // overwritten states
+		favoriteId:         { required:false, default:null },
 		field:              { type:Object,  required:true },
 		fieldIdsChanged:    { type:Array,   required:false, default:() => {return []} },
 		fieldIdsInvalid:    { type:Array,   required:false, default:() => {return []} },
@@ -1158,10 +1166,10 @@ let MyField = {
 		if(this.isTabs)
 			this.setTabToValid();
 
-		this.columnIdsByUser = this.fieldOptionGet(null,this.field.id,'columnIdsByUser',[]);
+		this.columnIdsByUser = this.fieldOptionGet(this.favoriteId,this.field.id,'columnIdsByUser',[]);
 
 		// fill stored collection row indexes
-		this.collectionIdMapIndexes = this.fieldOptionGet(null,this.field.id,'collectionIdMapIndexes',{});
+		this.collectionIdMapIndexes = this.fieldOptionGet(this.favoriteId,this.field.id,'collectionIdMapIndexes',{});
 	},
 	methods:{
 		// externals
@@ -1295,14 +1303,14 @@ let MyField = {
 		},
 		setColumnIdsByUser(ids) {
 			this.columnIdsByUser = ids;
-			this.fieldOptionSet(null,this.field.id,'columnIdsByUser',ids);
+			this.fieldOptionSet(this.favoriteId,this.field.id,'columnIdsByUser',ids);
 		},
 		setCollectionIndexes(collectionId,indexes) {
 			this.collectionIdMapIndexes[collectionId] = indexes;
-			this.fieldOptionSet(null,this.field.id,'collectionIdMapIndexes',this.collectionIdMapIndexes);
+			this.fieldOptionSet(this.favoriteId,this.field.id,'collectionIdMapIndexes',this.collectionIdMapIndexes);
 		},
 		setTab(tabIndex) {
-			this.fieldOptionSet(null,this.field.id,'tabIndex',tabIndex);
+			this.fieldOptionSet(this.favoriteId,this.field.id,'tabIndex',tabIndex);
 			this.tabIndexShow = tabIndex;
 		},
 		setTabCounter(tabIndex,fieldId,value) {
@@ -1317,7 +1325,7 @@ let MyField = {
 		setTabToValid() {
 			// set tab to valid one, either last remembered or first valid
 			if(this.settings.tabRemember) {
-				const tabIndex = this.fieldOptionGet(null,this.field.id,'tabIndex',0);
+				const tabIndex = this.fieldOptionGet(this.favoriteId,this.field.id,'tabIndex',0);
 				if(this.field.tabs.length > tabIndex && !this.tabIndexesHidden.includes(tabIndex))
 					return this.tabIndexShow = tabIndex;
 			}

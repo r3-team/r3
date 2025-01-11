@@ -73,16 +73,18 @@ let MyGoForm = {
 		<my-form class="isMain"
 			v-show="!isMobile || !isAtMenu"
 			:attributeIdMapDef="getterAttributeIdMapDefaults"
+			:favoriteId="favoriteId"
 			:formId="formId"
 			:moduleId="moduleId"
 			:recordIds="recordIds"
 		/>
 	</div>`,
 	props:{
-		formId:         { type:String, required:true },
-		moduleName:     { type:String, required:true },
-		moduleNameChild:{ type:String, required:false, default:'' },
-		recordIdString: { type:String, required:false, default:'' }
+		favoriteIdString:{ type:String, required:false, default:'' },
+		formId:          { type:String, required:true },
+		moduleName:      { type:String, required:true },
+		moduleNameChild: { type:String, required:false, default:'' },
+		recordIdString:  { type:String, required:false, default:'' }
 	},
 	data() {
 		return {
@@ -96,7 +98,7 @@ let MyGoForm = {
 				if(this.moduleNameMap[this.moduleNameActive] === undefined)
 					return this.$router.replace('/');
 				
-				let module = this.moduleNameMap[this.moduleNameActive];
+				const module = this.moduleNameMap[this.moduleNameActive];
 				this.moduleId = module.id;
 				this.$store.commit('moduleIdLast',module.id);
 			},
@@ -104,6 +106,7 @@ let MyGoForm = {
 		}
 	},
 	computed:{
+		favoriteId:(s) => s.favoriteIdString !== '' ? s.favoriteIdString : null,
 		getterAttributeIdMapDefaults:(s) => typeof s.$route.query.attributes === 'undefined'
 			? {} : s.getAttributeValuesFromGetter(s.$route.query.attributes),
 		

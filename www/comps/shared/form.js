@@ -168,7 +168,7 @@ export function getFormPopUpTemplate() {
 	};
 };
 
-export function getFormRoute(formId,recordId,stayInModule,getArgs) {
+export function getFormRoute(favoriteId,formId,recordId,stayInModule,getArgs) {
 	let moduleId = MyStore.getters['schema/formIdMap'][formId].moduleId;
 	
 	// optional: stay in context of currently open module
@@ -196,6 +196,9 @@ export function getFormRoute(formId,recordId,stayInModule,getArgs) {
 	}
 	
 	let route = `${target}/form/${formId}`;
+
+	if(favoriteId !== null)
+		route += `/fav/${favoriteId}`;
 	
 	if(recordId !== 0)
 		route += `/${recordId}`;
@@ -317,7 +320,7 @@ export function formOpen(openForm,newTab) {
 	if(openForm.popUpType !== null && !newTab)
 		return MyStore.commit('popUpFormGlobal',getFormPopUpConfig([],openForm,[],null));
 
-	const path = getFormRoute(openForm.formIdOpen,0,false);
+	const path = getFormRoute(null,openForm.formIdOpen,0,false);
 	
 	if(newTab)
 		return openLink('#'+path,true);

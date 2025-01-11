@@ -279,6 +279,7 @@ let MyForm = {
 					:isBulkUpdate="isBulkUpdate"
 					:dataFieldMap="fieldIdMapData"
 					:entityIdMapState="entityIdMapState"
+					:favoriteId="favoriteId"
 					:field="f"
 					:fieldIdsChanged="fieldIdsChanged"
 					:fieldIdsInvalid="fieldIdsInvalid"
@@ -327,6 +328,7 @@ let MyForm = {
 		allowDel:         { type:Boolean, required:false, default:true },
 		allowNew:         { type:Boolean, required:false, default:true },
 		attributeIdMapDef:{ type:Object,  required:false, default:() => {return {};} }, // map of attribute default values
+		favoriteId:       { required:false, default:null },
 		formId:           { type:String,  required:true },
 		hasHelp:          { type:Boolean, required:false, default:true },
 		hasLog:           { type:Boolean, required:false, default:true },
@@ -338,7 +340,7 @@ let MyForm = {
 	},
 	emits:['close','record-deleted','record-updated','records-open'],
 	mounted() {
-		this.$watch(() => [this.formId,this.recordIds],() => { this.reset() },{
+		this.$watch(() => [this.favoriteId,this.formId,this.recordIds],this.reset,{
 			immediate:true
 		});
 		
@@ -1096,7 +1098,7 @@ let MyForm = {
 			this.$store.commit('pageTitle',this.title);
 		},
 		copyFormUrlToClipboard(middleClick) {
-			const path = this.getFormRoute(this.form.id,(this.isNew ? 0 : this.recordIds[0]),
+			const path = this.getFormRoute(this.favoriteId,this.form.id,(this.isNew ? 0 : this.recordIds[0]),
 				true,this.getGetterFromAttributeValues(this.attributeIdMapDef));
 			
 			if(!middleClick) navigator.clipboard.writeText(`${location.protocol}//${location.host}/#${path}`);
@@ -1300,7 +1302,7 @@ let MyForm = {
 			
 			// full form navigation, only single record allowed as target
 			let recordIdOpen = recordIds.length === 1 ? recordIds[0] : 0;
-			const path = this.getFormRoute(openForm.formIdOpen,recordIdOpen,true,getterArgs);
+			const path = this.getFormRoute(null,openForm.formIdOpen,recordIdOpen,true,getterArgs);
 			
 			if(newTab)
 				return this.openLink('#'+path,true);
@@ -1320,7 +1322,7 @@ let MyForm = {
 			return this.$router.replace(path);
 		},
 		setFormArgs(args,push) {
-			const path = this.getFormRoute(this.form.id,
+			const path = this.getFormRoute(this.favoriteId,this.form.id,
 				(this.isNew ? 0 : this.recordIds[0]),true,args);
 			
 			if(this.$route.fullPath === path || this.isPopUp || this.isWidget)

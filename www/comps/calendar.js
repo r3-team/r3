@@ -259,7 +259,7 @@ let MyCalendar = {
 					/>
 					<input class="zoomSlider" type="range" min="2" max="8"
 						v-model.number="zoom"
-						@change="fieldOptionSet(null,fieldId,'zoom',$event.target.value);"
+						@change="fieldOptionSet(favoriteId,fieldId,'zoom',$event.target.value);"
 					>
 				</template>
 				
@@ -376,6 +376,7 @@ let MyCalendar = {
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		daysShowDef:     { type:Number,  required:true },
 		daysShowToggle:  { type:Boolean, required:true },
+		favoriteId:      { required:false, default:null },
 		fieldId:         { type:String,  required:false, default:'' },
 		filters:         { type:Array,   required:true },
 		formLoading:     { type:Boolean, required:false, default:false },
@@ -430,7 +431,7 @@ let MyCalendar = {
 		).concat(s.getQueryExpressions(s.columns)),
 		
 		// default is user field option, fallback is first choice in list
-		choiceIdDefault:(s) => s.fieldOptionGet(null,s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		choiceIdDefault:(s) => s.fieldOptionGet(s.favoriteId,s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
 		
 		// simple
 		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
@@ -497,9 +498,9 @@ let MyCalendar = {
 		
 		// apply field options (before paramsUpdated to apply calendar view)
 		if(this.daysShowToggle)
-			this.daysShow = parseInt(this.fieldOptionGet(null,this.fieldId,'daysShow',this.daysShowDef));
+			this.daysShow = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'daysShow',this.daysShowDef));
 		
-		this.zoom = parseInt(this.fieldOptionGet(null,this.fieldId,'zoom',this.zoomDefault));
+		this.zoom = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'zoom',this.zoomDefault));
 		
 		if(this.usesPageHistory) {
 			// set initial states via route parameters
@@ -534,7 +535,7 @@ let MyCalendar = {
 		choiceIdSet(choiceId) {
 			if(choiceId === this.choiceId) return;
 			
-			this.fieldOptionSet(null,this.fieldId,'choiceId',choiceId);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',choiceId);
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
@@ -554,7 +555,7 @@ let MyCalendar = {
 		},
 		daysShowSet(v) {
 			this.daysShow = v;
-			this.fieldOptionSet(null,this.fieldId,'daysShow',v);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'daysShow',v);
 			this.reloadInside();
 		},
 		goToToday() {

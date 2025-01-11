@@ -378,6 +378,7 @@ let MyGantt = {
 		columns:         { type:Array,   required:true }, // processed list columns
 		collections:     { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
+		favoriteId:      { required:false, default:null },
 		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true }, // processed query filters
 		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
@@ -424,7 +425,7 @@ let MyGantt = {
 	computed:{
 		// default is user field option, fallback is first choice in list
 		choiceIdDefault:(s) => s.fieldOptionGet(
-			null,s.fieldId,'choiceId',
+			s.favoriteId,s.fieldId,'choiceId',
 			s.choices.length === 0 ? null : s.choices[0].id
 		),
 		
@@ -566,8 +567,8 @@ let MyGantt = {
 		
 		// setup watchers for presentation changes
 		this.$watch(() => [this.showGroupLabels,this.stepZoom],() => {
-			this.fieldOptionSet(null,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
-			this.fieldOptionSet(null,this.fieldId,'ganttStepZoom',this.stepZoom);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'ganttStepZoom',this.stepZoom);
 			this.$nextTick(() => this.setSteps(false));
 		});
 		
@@ -580,8 +581,8 @@ let MyGantt = {
 		}
 		
 		// initial field options
-		this.showGroupLabels = this.fieldOptionGet(null,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
-		this.stepZoom        = this.fieldOptionGet(null,this.fieldId,'ganttStepZoom',this.stepZoom);
+		this.showGroupLabels = this.fieldOptionGet(this.favoriteId,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
+		this.stepZoom        = this.fieldOptionGet(this.favoriteId,this.fieldId,'ganttStepZoom',this.stepZoom);
 		
 		this.ready = true;
 		this.$nextTick(() => this.setSteps(false));
@@ -676,7 +677,7 @@ let MyGantt = {
 		
 		// actions
 		choiceIdSet(choiceId) {
-			this.fieldOptionSet(null,this.fieldId,'choiceId',choiceId);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',choiceId);
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},

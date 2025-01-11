@@ -334,6 +334,7 @@ let MyInputFiles = {
 	props:{
 		attributeId: { type:String,  required:true },
 		countAllowed:{ type:Number,  required:true }, // number of allowed files
+		favoriteId:  { required:false, default:null },
 		fieldId:     { type:String,  required:true },
 		formLoading: { type:Boolean, required:true }, // to react to form load events
 		isHidden:    { type:Boolean, required:false, default:false },
@@ -386,7 +387,7 @@ let MyInputFiles = {
 			this.viewMode = 'gallery';
 		
 		// apply last chosen view mode
-		this.setViewMode(this.fieldOptionGet(null,this.fieldId,'fileViewMode',this.viewMode));
+		this.setViewMode(this.fieldOptionGet(this.favoriteId,this.fieldId,'fileViewMode',this.viewMode));
 	},
 	unmounted() {
 		window.removeEventListener('resize',this.resized);
@@ -630,7 +631,7 @@ let MyInputFiles = {
 			
 			if(mode !== this.viewMode) {
 				this.viewMode = mode;
-				this.fieldOptionSet(null,this.fieldId,'fileViewMode',mode);
+				this.fieldOptionSet(this.favoriteId,this.fieldId,'fileViewMode',mode);
 			}
 		},
 		toggle(fileId) {

@@ -818,7 +818,7 @@ let MyBuilderForm = {
 			this.fieldMoveIndex = evt.fieldIndex;
 		},
 		open() {
-			this.$router.push(this.getFormRoute(this.form.id,0,false));
+			this.$router.push(this.getFormRoute(null,this.form.id,0,false));
 		},
 		showMessage(msg,top,image) {
 			this.$store.commit('dialog',{
