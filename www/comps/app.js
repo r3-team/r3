@@ -379,6 +379,7 @@ let MyApp = {
 		appVersionBuild:    (s) => s.$store.getters['local/appVersionBuild'],
 		css:                (s) => s.$store.getters['local/css'],
 		loginBackground:    (s) => s.$store.getters['local/loginBackground'],
+		loginFavorites:     (s) => s.$store.getters['local/loginFavorites'],
 		loginKeyAes:        (s) => s.$store.getters['local/loginKeyAes'],
 		loginOptions:       (s) => s.$store.getters['local/loginOptions'],
 		loginOptionsMobile: (s) => s.$store.getters['local/loginOptionsMobile'],
@@ -702,6 +703,7 @@ let MyApp = {
 		// final app meta retrieval, after authentication
 		initApp() {
 			let requests = [
+				ws.prepare('loginFavorites','get',{dateCache:this.loginFavorites.dateCache}),
 				ws.prepare('loginOptions','get',{
 					dateCache:this.isMobile ? this.loginOptionsMobile.dateCache : this.loginOptions.dateCache,
 					isMobile:this.isMobile
@@ -722,31 +724,32 @@ let MyApp = {
 			
 			ws.sendMultiple(requests,true).then(
 				async res => {
-					this.$store.commit('local/loginOptions',res[0].payload);
-					this.$store.commit('settings',res[1].payload);
-					this.$store.commit('loginWidgetGroups',res[2].payload);
-					this.$store.commit('access',res[3].payload);
-					this.$store.commit('feedback',res[4].payload.feedback);
-					this.$store.commit('feedbackUrl',res[4].payload.feedbackUrl);
-					this.$store.commit('loginHasClient',res[5].payload);
+					this.$store.commit('local/loginFavorites',res[0].payload);
+					this.$store.commit('local/loginOptions',res[1].payload);
+					this.$store.commit('settings',res[2].payload);
+					this.$store.commit('loginWidgetGroups',res[3].payload);
+					this.$store.commit('access',res[4].payload);
+					this.$store.commit('feedback',res[5].payload.feedback);
+					this.$store.commit('feedbackUrl',res[5].payload.feedbackUrl);
+					this.$store.commit('loginHasClient',res[6].payload);
 					
-					if(this.loginKeyAes !== null && res[6].payload.privateEnc !== null) {
+					if(this.loginKeyAes !== null && res[7].payload.privateEnc !== null) {
 						this.$store.commit('loginEncryption',true);
 						this.$store.commit('loginPrivateKey',null);
-						this.$store.commit('loginPrivateKeyEnc',res[6].payload.privateEnc);
-						this.$store.commit('loginPrivateKeyEncBackup',res[6].payload.privateEncBackup);
+						this.$store.commit('loginPrivateKeyEnc',res[7].payload.privateEnc);
+						this.$store.commit('loginPrivateKeyEncBackup',res[7].payload.privateEncBackup);
 						
-						await this.pemImport(res[6].payload.public,'RSA',true)
+						await this.pemImport(res[7].payload.public,'RSA',true)
 							.then(res => this.$store.commit('loginPublicKey',res))
 							.catch(this.setInitErr);
 						
-						await this.pemImportPrivateEnc(res[6].payload.privateEnc)
+						await this.pemImportPrivateEnc(res[7].payload.privateEnc)
 							.catch(this.setInitErr);
 					}
 					
 					if(this.isAdmin) {
-						this.$store.commit('config',res[7].payload);
-						this.$store.commit('license',res[8].payload);
+						this.$store.commit('config',res[8].payload);
+						this.$store.commit('license',res[9].payload);
 					}
 					
 					// load captions, then collections

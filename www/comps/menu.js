@@ -11,6 +11,101 @@ import {
 
 export {MyMenu as default};
 
+let MyMenuFavoritesEdit = {
+	name:'my-menu-favorites-edit',
+	template:`<div class="menu-favorites-edit default-inputs">
+		<draggable handle=".dragAnchor" class="menu-favorites-edit-list" group="favorites" itemKey="id" animation="150"
+			:list="favoritesEdit"
+		>
+			<template #item="{element,index}">
+				<div class="row gap">
+					<img v-if="favoritesEdit.length > 1" class="dragAnchor" src="images/drag.png" />
+					<input v-model="element.title" />
+					<my-button image="delete.png"
+						@trigger="remove(index)"
+					/>
+				</div>
+			</template>
+		</draggable>
+
+		<div class="row gap">
+			<my-button image="save.png"
+				@trigger="set"
+				:active="hasChanges"
+			/>
+			<my-button image="cancel.png"
+				@trigger="reset"
+				:cancel="true"
+			/>
+		</div>
+	</div>`,
+	props:{
+		favorites:{ type:Array,  required:true },
+		moduleId: { type:String, required:true }
+	},
+	emits:['close'],
+	computed:{
+		// simple
+		hasChanges:(s) => JSON.stringify(s.favorites) !== JSON.stringify(s.favoritesEdit),
+
+		// stores
+		loginFavorites:(s) => s.$store.getters['local/loginFavorites']
+	},
+	data() {
+		return {
+			favoritesEdit:[]
+		};
+	},
+	mounted() {
+		this.favoritesEdit = JSON.parse(JSON.stringify(this.favorites));
+	},
+	methods:{
+		// actions
+		remove(i) {
+			this.favoritesEdit.splice(i,1);
+		},
+		reset() {
+			this.$emit('close');
+		},
+		set() {
+			let m = JSON.parse(JSON.stringify(this.loginFavorites.moduleIdMap));
+			m[this.moduleId] = this.favoritesEdit;
+			this.$store.commit('local/loginFavoritesModuleIdMapChange',m);
+			this.$emit('close');
+		}
+	}
+};
+
+let MyMenuFavorite = {
+	name:'my-menu-favorite',
+	template:`<div class="item">
+		<div class="line noHighlight" tabindex="0"
+			@click="click"
+			@click.middle="clickMiddle"
+			@keyup.enter.space="click"
+		>
+			<div class="caption">{{ title }}</div>
+		</div>
+	</div>`,
+	props:{
+		formId:   { type:String, required:true },
+		moduleId: { type:String, required:true },
+		recordId: { required:true },
+		title:    { type:String, required:true }
+	},
+	computed:{
+		route:(s) => s.getFormRoute(s.formId,s.recordId === null ? 0 : s.recordId,true)
+	},
+	methods:{
+		// externals
+		getFormRoute,
+
+		// actions
+		click()       { this.$router.push(this.route); },
+		clickMiddle() { window.open('#'+this.route,'_blank'); }
+	}
+};
+
 let MyMenuItem = {
 	name:'my-menu-item',
 	template:`<div class="item" v-if="active">
@@ -69,7 +164,7 @@ let MyMenuItem = {
 	},
 	mounted() {
 		// show children if no preference is recorded and default is true
-		if(typeof this.menuIdMapOpen[this.menu.id] === 'undefined' && this.menu.showChildren)
+		if(this.menuIdMapOpen[this.menu.id] === undefined && this.menu.showChildren)
 			this.clickSubMenus();
 	},
 	computed:{
@@ -162,7 +257,11 @@ let MyMenuItem = {
 
 let MyMenu = {
 	name:'my-menu',
-	components:{MyMenuItem},
+	components:{
+		MyMenuFavorite,
+		MyMenuFavoritesEdit,
+		MyMenuItem
+	},
 	template:`<div class="menu"
 		:class="{ isDark:color.isDark() }"
 		:style="bgStyle"
@@ -187,8 +286,8 @@ let MyMenu = {
 		<div class="menu-tabs">
 			<div class="menu-tab clickable"
 				v-for="(mt,i) in menuTabsAccess"
-				@click.left="menuTabIndexShown = i"
-				:class="{ active:i === menuTabIndexShown, centered:!showTabLabels }"
+				@click.left="menuTabIndexShown = i; isAtFavorites = false"
+				:class="{ active:i === menuTabIndexShown && !isAtFavorites, centered:!showTabLabels }"
 				:style="tabStyles"
 				:title="getCaption('menuTabTitle',module.id,mt.id,mt.captions,capGen.menu)"
 			>
@@ -196,7 +295,8 @@ let MyMenu = {
 				<span v-if="showTabLabels">{{ getCaption('menuTabTitle',module.id,mt.id,mt.captions,capGen.menu) }}</span>
 			</div>
 			<div class="menu-tab clickable"
-				:class="{ centered:!showTabLabels }"
+				@click="isAtFavorites = true"
+				:class="{ active:isAtFavorites, centered:!showTabLabels }"
 				:style="tabStyles"
 				:title="capGen.favorites"
 			>
@@ -206,7 +306,7 @@ let MyMenu = {
 		</div>
 		<div class="menu-content">
 			<div class="menu-items">
-				<template v-for="(mt,mti) in menuTabsAccess">
+				<template v-if="!isAtFavorites" v-for="(mt,mti) in menuTabsAccess">
 					<my-menu-item
 						v-if="mti === menuTabIndexShown"
 						v-for="m in mt.menus"
@@ -217,6 +317,29 @@ let MyMenu = {
 						:menu="m"
 						:module="module"
 						:recordOpen="recordOpen"
+					/>
+				</template>
+				<template v-if="isAtFavorites">
+					<my-menu-favorite
+						v-if="!isAtFavoritesEdit"
+						v-for="f in favorites"
+						:formId="f.formId"
+						:key="f.id"
+						:moduleId="module.id"
+						:recordId="f.recordId"
+						:title="f.title"
+					/>
+					<my-menu-favoritesEdit
+						v-if="isAtFavoritesEdit"
+						@close="isAtFavoritesEdit = false"
+						:favorites="favorites"
+						:moduleId="module.id"
+					/>
+					<my-button image="edit.png"
+						v-if="!isAtFavoritesEdit && favorites.length !== 0"
+						@trigger="isAtFavoritesEdit = true"
+						:caption="capGen.button.edit"
+						:naked="false"
 					/>
 				</template>
 			</div>
@@ -250,12 +373,14 @@ let MyMenu = {
 		},
 
 		// simple
+		favorites:    (s) => s.loginFavorites.moduleIdMap[s.module.id] === undefined ? [] : s.loginFavorites.moduleIdMap[s.module.id],
 		showTabLabels:(s) => s.menuTabsAccess.length < 3,
 		tabStyles:    (s) => `width:${100 / (s.menuTabsAccess.length + 1)}%;`,
 
 		// stores
 		customLogo:    (s) => s.$store.getters['local/customLogo'],
 		customLogoUrl: (s) => s.$store.getters['local/customLogoUrl'],
+		loginFavorites:(s) => s.$store.getters['local/loginFavorites'],
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		bgStyle:       (s) => s.$store.getters.colorMenuStyle,
@@ -269,6 +394,9 @@ let MyMenu = {
 	},
 	data() {
 		return {
+			// states
+			isAtFavorites:false,
+			isAtFavoritesEdit:false,
 			menuTabIndexShown:0
 		};
 	},

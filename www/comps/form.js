@@ -39,7 +39,8 @@ import {
 	getFormRoute,
 	getFormStateIdMap,
 	getResolvedPlaceholders,
-	getRowsDecrypted
+	getRowsDecrypted,
+	setFormFavorite
 } from './shared/form.js';
 import {
 	fillRelationRecordIds,
@@ -107,9 +108,7 @@ let MyForm = {
 					
 					<!-- form title / message -->
 					<transition name="fade" mode="out-in">
-						<h1 v-if="title !== '' && message === null" class="title">
-							{{ title }}
-						</h1>
+						<h1 v-if="title !== '' && message === null" class="title">{{ title }}</h1>
 						<h1 class="form-message" v-else-if="message !== null">
 							<my-button
 								:active="false"
@@ -148,6 +147,11 @@ let MyForm = {
 						/>
 					</template>
 					
+					<my-button image="star1.png"
+						v-if="!isBulkUpdate"
+						@trigger="makeFavorite"
+						:captionTitle="capApp.button.favorite"
+					/>
 					<my-button image="link.png"
 						v-if="isPopUp && !isBulkUpdate && !isMobile"
 						@trigger="copyFormUrlToClipboard(false)"
@@ -843,6 +847,7 @@ let MyForm = {
 		pemImport,
 		rsaDecrypt,
 		rsaEncrypt,
+		setFormFavorite,
 		srcBase64,
 		
 		// form management
@@ -1096,6 +1101,10 @@ let MyForm = {
 			
 			if(!middleClick) navigator.clipboard.writeText(`${location.protocol}//${location.host}/#${path}`);
 			else             window.open(`${location.protocol}//${location.host}/#${path}`);
+		},
+		makeFavorite() {
+			const recordId = this.recordIds.length === 1 ? this.recordIds[0] : null;
+			this.setFormFavorite(this.moduleId,this.form.id,recordId,this.title);
 		},
 		openBuilder(middle) {
 			if(!middle) {

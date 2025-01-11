@@ -1963,6 +1963,7 @@
 	"form": {
 		"bulkTouched": "Érték frissítése folyamatban",
 		"button": {
+			"favorite": "Save form as favorite",
 			"fullscreenHint": "Váltás teljes képernyős módba",
 			"help": "Súgó",
 			"helpHint": "Súgóoldalak megjelenítése",

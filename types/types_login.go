@@ -27,8 +27,8 @@ type LoginClientEvent struct {
 }
 type LoginFavorite struct {
 	Id       uuid.UUID   `json:"id"`
-	ModuleId uuid.UUID   `json:"moduleId"` // ID of module in which menu favorite is shown (forms from build-on modules could be shown in other module)
 	FormId   uuid.UUID   `json:"formId"`   // ID of form to show
+	RecordId pgtype.Int8 `json:"recordId"` // ID of record to open, NULL if no record to open
 	Title    pgtype.Text `json:"title"`    // user defined title of favorite, empty if not set
 }
 type LoginMeta struct {

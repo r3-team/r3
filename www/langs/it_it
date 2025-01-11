@@ -1963,6 +1963,7 @@
 	"form": {
 		"bulkTouched": "Value will be updated",
 		"button": {
+			"favorite": "Save form as favorite",
 			"fullscreenHint": "Toggle fullscreen mode",
 			"help": "Aiuto",
 			"helpHint": "Mostra pagine aiuto",

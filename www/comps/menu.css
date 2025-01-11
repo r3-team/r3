@@ -179,6 +179,27 @@
 	margin:0px 4px;
 }
 
+.menu-favorites-edit{
+	display:flex;
+	flex-flow:column;
+	padding:12px 9px;
+	gap:8px;
+}
+.menu-favorites-edit-list{
+	display:flex;
+	flex-flow:column;
+	gap:8px;
+}
+.menu-favorites-edit-list .dragAnchor{
+	height:24px;
+	margin-right:3px;
+	filter:var(--image-filter);
+	cursor:move;
+}
+.menu.isDark .menu-favorites-edit-list .dragAnchor{
+	filter:var(--image-filter-bright);
+}
+
 /* mobile overwrites */
 .is-mobile .menu{
 	flex:1 1 auto; /* menu takes entire screen */

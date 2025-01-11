@@ -3,38 +3,42 @@ export {MyStoreLocal as default};
 const MyStoreLocal = {
 	namespaced:true,
 	state:{
-		activated:false,       // application is activated via valid license file
-		appName:'App Name',    
-		appNameShort:'App',    
-		appVersion:'',         // application version, full string (1.2.0.3422)
-		appVersionBuild:0,     // application version, build number (3422)
-		builderOptionMap:{},   // map builder options
-		companyColorHeader:'', // custom color on header
-		companyColorLogin:'',  // custom color on login screen
-		companyLoginImage:'',  // custom login background image
-		companyLogo:'',        // custom company logo
-		companyLogoUrl:'',     // custom company logo, href URL when clicked on
-		companyName:'',        // custom company name on login screen
-		companyWelcome:'',     // custom welcome message on login screen
-		css:'',                // custom CSS, applied to everything
-		loginBackground:0,     // background image for login page
-		loginOptions:{         // field options set by login (might include options besides fields in the future)
-			dateCache:0,       // used to get delta changes since last retrieval
-			favoriteIdMap:{},  // field options for favorite forms (includes options for fields)
-			fieldIdMap:{}      // field options for generic forms
+		activated:false,         // application is activated via valid license file
+		appName:'App Name',      
+		appNameShort:'App',      
+		appVersion:'',           // application version, full string (1.2.0.3422)
+		appVersionBuild:0,       // application version, build number (3422)
+		builderOptionMap:{},     // map builder options
+		companyColorHeader:'',   // custom color on header
+		companyColorLogin:'',    // custom color on login screen
+		companyLoginImage:'',    // custom login background image
+		companyLogo:'',          // custom company logo
+		companyLogoUrl:'',       // custom company logo, href URL when clicked on
+		companyName:'',          // custom company name on login screen
+		companyWelcome:'',       // custom welcome message on login screen
+		css:'',                  // custom CSS, applied to everything
+		loginBackground:0,       // background image for login page
+		loginFavorites:{         // favorites set by login
+			dateCache:0,         // to check if current cached values are up-to-date
+			moduleIdMap:{}       // favorites by module ID
 		},
-		loginOptionsMobile:{   // same as loginOptions (s. above) but for mobile view
-			dateCache:0,
-			favoriteIdMap:{},
-			fieldIdMap:{}
-		},
-		loginKeyAes:null,      // en-/decryption key for login private key
-		loginKeySalt:null,     // salt for login key KDF
-		menuIdMapOpen:{},      // map of menu IDs with open state (true/false)
-		token:'',              // JWT token
-		tokenKeep:false,       // keep JWT token between sessions
-		widgetFlow:'column',   // direction of widget groups (column, row)
-		widgetWidth:1600       // max. width of widget groups
+		loginOptions:{           // field options set by login (might include options besides fields in the future)
+			dateCache:0,         // used to get delta changes since last retrieval
+			favoriteIdMap:{},    // field options for favorite forms (includes options for fields)
+			fieldIdMap:{}        // field options for generic forms
+		},  
+		loginOptionsMobile:{     // same as loginOptions (s. above) but for mobile view
+			dateCache:0,  
+			favoriteIdMap:{},  
+			fieldIdMap:{}  
+		},  
+		loginKeyAes:null,        // en-/decryption key for login private key
+		loginKeySalt:null,       // salt for login key KDF
+		menuIdMapOpen:{},        // map of menu IDs with open state (true/false)
+		token:'',                // JWT token
+		tokenKeep:false,         // keep JWT token between sessions
+		widgetFlow:'column',     // direction of widget groups (column, row)
+		widgetWidth:1600         // max. width of widget groups
 	},
 	mutations:{
 		activated(state,payload) {
@@ -95,6 +99,27 @@ const MyStoreLocal = {
 			state.loginBackground = payload;
 			set('loginBackground',payload);
 		},
+		loginFavorites(state,payload) {
+			if(payload.dateCache === state.loginFavorites.dateCache)
+				return;
+
+			state.loginFavorites.dateCache   = payload.dateCache;
+			state.loginFavorites.moduleIdMap = payload.moduleIdMap;
+			set('loginFavorites',state.loginFavorites);
+		},
+		loginFavoritesModuleIdMapChange(state,payload) {
+			if(JSON.stringify(payload) === JSON.stringify(state.loginFavorites.moduleIdMap))
+				return;
+			
+			ws.send('loginFavorites','set',payload,false).then(() => {
+				// reload all favorites to get created IDs
+				ws.send('loginFavorites','get',{dateCache:0},false).then(res => {
+					state.loginFavorites.dateCache   = res.payload.dateCache;
+					state.loginFavorites.moduleIdMap = res.payload.moduleIdMap;
+					set('loginFavorites',state.loginFavorites);
+				},console.warn);
+			},console.warn);
+		},
 		loginKeyAes(state,payload) {
 			state.loginKeyAes = payload;
 			set('loginKeyAes',payload);
@@ -141,6 +166,7 @@ const MyStoreLocal = {
 				options:JSON.stringify(options)
 			},false).then(() => {},console.warn);
 
+			// change local state regardless of whether backend update succeeded (UI must always react)
 			if(Object.keys(options).length === 0) delete target[fieldId];
 			else                                  target[fieldId] = options;
 
@@ -197,7 +223,7 @@ const MyStoreLocal = {
 			? `background-image:url('../images/backgrounds/${state.loginBackground}.webp');`
 			: `background-image:url(data:image;base64,${state.companyLoginImage});`,
 		
-		// simple getters
+		// simple getters    
 		activated:         (state) => state.activated,
 		appName:           (state) => state.appName,
 		appNameShort:      (state) => state.appNameShort,
@@ -212,6 +238,7 @@ const MyStoreLocal = {
 		companyName:       (state) => state.companyName,
 		companyWelcome:    (state) => state.companyWelcome,
 		css:               (state) => state.css,
+		loginFavorites:    (state) => state.loginFavorites,
 		loginKeyAes:       (state) => state.loginKeyAes,
 		loginKeySalt:      (state) => state.loginKeySalt,
 		loginOptions:      (state) => state.loginOptions,

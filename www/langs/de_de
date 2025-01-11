@@ -1963,6 +1963,7 @@
 	"form": {
 		"bulkTouched": "Wert wird aktualisiert",
 		"button": {
+			"favorite": "Formular als Favorit speichern",
 			"fullscreenHint": "Vollbildmodus wechseln",
 			"help": "Hilfe",
 			"helpHint": "Hilfeseiten anzeigen",

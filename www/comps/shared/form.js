@@ -1,7 +1,10 @@
 import MyStore                        from '../../stores/store.js';
 import {getAttributeValuesFromGetter} from './attribute.js';
 import {consoleError}                 from './error.js';
-import {openLink}                     from './generic.js';
+import {
+	getNilUuid,
+	openLink
+} from './generic.js';
 import {
 	aesGcmDecryptBase64WithPhrase,
 	rsaDecrypt
@@ -227,44 +230,6 @@ export function getFlexStyle(dir,justifyContent,alignItems,alignContent,
 	return out.join(';');
 };
 
-export function getResolvedPlaceholders(value) {
-	switch(value) {
-		case '{CURR_TIME}':      return getUnixNowTime();          break;
-		case '{CURR_DATE}':      return getUnixNowDate();          break;
-		case '{CURR_DATETIME}':  return getUnixNowDatetime();      break;
-		case '{CURR_DATE_YYYY}': return new Date().getFullYear();  break;
-		case '{CURR_DATE_MM}':   return (new Date().getMonth())+1; break;
-		case '{CURR_DATE_DD}':   return new Date().getDate();      break;
-	}
-	return value;
-};
-
-// manipulate form getters
-// example: ['attributes=7b9fecdc-d8c8-43b3-805a-3b276003c81_3,859a48cb-4358-4fd4-be1a-265d86930922_12','month=12','year=2020']
-export function getGetterArg(argsArray,name) {
-	for(let i = 0, j = argsArray.length; i < j; i++) {
-		
-		if(argsArray[i].indexOf(`${name}=`) === 0)
-			return argsArray[i].substr(argsArray[i].indexOf(`=`)+1);
-	}
-	return '';
-};
-export function setGetterArgs(argsArray,name,value) {
-	
-	if(argsArray.length === 0)
-		return [`${name}=${value}`];
-	
-	for(let i = 0, j = argsArray.length; i < j; i++) {
-		
-		if(argsArray[i].indexOf(`${name}=`) === 0) {
-			// argument already exists, add new value to it
-			argsArray[i] = `${argsArray[i]},${value}`;
-			break;
-		}
-	}
-	return argsArray;
-};
-
 export function getFormPopUpConfig(recordIds,openForm,getterArgs,getterName) {
 	let conf = getFormPopUpTemplate();
 	conf.formId    = openForm.formIdOpen;
@@ -285,6 +250,61 @@ export function getFormPopUpConfig(recordIds,openForm,getterArgs,getterName) {
 		conf.attributeIdMapDef = getter === '' ? {} : getAttributeValuesFromGetter(getter);
 	}
 	return conf;
+};
+
+// manipulate form getters
+// example: ['attributes=7b9fecdc-d8c8-43b3-805a-3b276003c81_3,859a48cb-4358-4fd4-be1a-265d86930922_12','month=12','year=2020']
+export function getGetterArg(argsArray,name) {
+	for(let i = 0, j = argsArray.length; i < j; i++) {
+		
+		if(argsArray[i].indexOf(`${name}=`) === 0)
+			return argsArray[i].substr(argsArray[i].indexOf(`=`)+1);
+	}
+	return '';
+};
+
+export function getResolvedPlaceholders(value) {
+	switch(value) {
+		case '{CURR_TIME}':      return getUnixNowTime();          break;
+		case '{CURR_DATE}':      return getUnixNowDate();          break;
+		case '{CURR_DATETIME}':  return getUnixNowDatetime();      break;
+		case '{CURR_DATE_YYYY}': return new Date().getFullYear();  break;
+		case '{CURR_DATE_MM}':   return (new Date().getMonth())+1; break;
+		case '{CURR_DATE_DD}':   return new Date().getDate();      break;
+	}
+	return value;
+};
+
+export function setGetterArgs(argsArray,name,value) {
+	
+	if(argsArray.length === 0)
+		return [`${name}=${value}`];
+	
+	for(let i = 0, j = argsArray.length; i < j; i++) {
+		
+		if(argsArray[i].indexOf(`${name}=`) === 0) {
+			// argument already exists, add new value to it
+			argsArray[i] = `${argsArray[i]},${value}`;
+			break;
+		}
+	}
+	return argsArray;
+};
+
+export function setFormFavorite(moduleId,formId,recordId,title) {
+	let m = JSON.parse(JSON.stringify(MyStore.getters['local/loginFavorites'].moduleIdMap));
+
+	if(m[moduleId] === undefined)
+		m[moduleId] = [];
+
+	m[moduleId].unshift({
+		id:getNilUuid(),
+		moduleId:moduleId,
+		formId:formId,
+		recordId:recordId,
+		title:title
+	});
+	MyStore.commit('local/loginFavoritesModuleIdMapChange',m);
 };
 
 export function formOpen(openForm,newTab) {

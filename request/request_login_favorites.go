@@ -17,15 +17,15 @@ func LoginGetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessag
 			DateCache int64 `json:"dateCache"`
 		}
 		res struct {
-			DateCache int64                               `json:"dateCache"`
-			Favorites map[uuid.UUID][]types.LoginFavorite `json:"favorites"`
+			DateCache   int64                               `json:"dateCache"`
+			ModuleIdMap map[uuid.UUID][]types.LoginFavorite `json:"moduleIdMap"`
 		}
 	)
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
 
-	res.Favorites, res.DateCache, err = login_favorites.Get_tx(ctx, tx, loginId, req.DateCache)
+	res.ModuleIdMap, res.DateCache, err = login_favorites.Get_tx(ctx, tx, loginId, req.DateCache)
 	if err != nil {
 		return nil, err
 	}
@@ -33,12 +33,9 @@ func LoginGetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessag
 }
 
 func LoginSetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
-	var req struct {
-		DateCache            int64                               `json:"dateCache"`
-		ModuleIdMapFavorites map[uuid.UUID][]types.LoginFavorite `json:"moduleIdMapFavorites"`
-	}
+	var req map[uuid.UUID][]types.LoginFavorite
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login_favorites.Set_tx(ctx, tx, loginId, req.DateCache, req.ModuleIdMapFavorites)
+	return nil, login_favorites.Set_tx(ctx, tx, loginId, req)
 }
