@@ -548,6 +548,9 @@ let MyKanban = {
 				this.reloadOutside();
 			}
 		});
+		this.$watch('favoriteId',(val) => {
+			this.reloadOptions();
+		});
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
@@ -560,6 +563,12 @@ let MyKanban = {
 					return this.reloadOutside();
 			}
 		});
+		this.$watch('showCaptions',(val) => {
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'kanbanShowCaptions',val);
+		});
+		this.$watch('zoom',(val) => {
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'kanbanZoom',val);
+		});
 		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
 				if(this.routeChangeFieldReload(newVals,oldVals)) {
@@ -568,25 +577,7 @@ let MyKanban = {
 				}
 			});
 		}
-		
-		if(this.usesPageHistory) {
-			// set initial states via route parameters
-			this.paramsUpdated();     // load existing parameters from route query
-			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-		} else {
-			this.choiceId = this.choiceIdDefault;
-		}
-		
-		// setup watchers for presentation changes
-		this.$watch(() => [this.showCaptions,this.zoom],() => {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'kanbanShowCaptions',this.showCaptions);
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'kanbanZoom',this.zoom);
-		});
-		
-		// initial field options
-		this.showCaptions = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanShowCaptions',this.showCaptions);
-		this.zoom         = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanZoom',this.zoom);
-		
+		this.reloadOptions();
 		this.ready = true;
 		this.$nextTick(() => this.get());
 	},
@@ -718,6 +709,17 @@ let MyKanban = {
 		},
 		
 		// reloads
+		reloadOptions() {
+			if(this.usesPageHistory) {
+				// set initial states via route parameters
+				this.paramsUpdated();     // load existing parameters from route query
+				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
+			} else {
+				this.choiceId = this.choiceIdDefault;
+			}
+			this.showCaptions = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanShowCaptions',this.showCaptions);
+			this.zoom         = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanZoom',this.zoom);
+		},
 		reloadOutside() {
 			this.get();
 		},

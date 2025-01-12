@@ -463,15 +463,15 @@ let MyCalendar = {
 		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
-		this.date = new Date();
-		this.date.setHours(0,0,0);
-		
 		// setup watchers
 		this.$watch('columns',(valOld,valNew) => {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
 				this.rows = [];
 				this.reloadOutside();
 			}
+		});
+		this.$watch('favoriteId',(val) => {
+			this.reloadOptions();
 		});
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
@@ -493,22 +493,7 @@ let MyCalendar = {
 				}
 			});
 		}
-		
-		this.daysShow = this.daysShowDef;
-		
-		// apply field options (before paramsUpdated to apply calendar view)
-		if(this.daysShowToggle)
-			this.daysShow = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'daysShow',this.daysShowDef));
-		
-		this.zoom = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'zoom',this.zoomDefault));
-		
-		if(this.usesPageHistory) {
-			// set initial states via route parameters
-			this.paramsUpdated();     // load existing parameters from route query
-			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-		} else {
-			this.choiceId = this.choiceIdDefault;
-		}
+		this.reloadOptions();
 		this.ready = true;
 	},
 	methods:{
@@ -583,6 +568,25 @@ let MyCalendar = {
 		},
 		
 		// reloads
+		reloadOptions() {
+			this.date = new Date();
+			this.date.setHours(0,0,0);
+			this.daysShow = this.daysShowDef;
+			
+			// apply field options (before paramsUpdated to apply calendar view)
+			if(this.daysShowToggle)
+				this.daysShow = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'daysShow',this.daysShowDef));
+			
+			this.zoom = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'zoom',this.zoomDefault));
+			
+			if(this.usesPageHistory) {
+				// set initial states via route parameters
+				this.paramsUpdated();     // load existing parameters from route query
+				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
+			} else {
+				this.choiceId = this.choiceIdDefault;
+			}
+		},
 		reloadOutside() {
 			this.get();
 		},

@@ -668,8 +668,9 @@ let MyField = {
 		};
 	},
 	watch:{
-		formLoading(val) {
-			if(!val) this.notTouched = true;
+		favoriteId(v) { this.reloadOptions(); },
+		formLoading(v) {
+			if(!v) this.notTouched = true;
 		},
 		isValid:{ // inform parent form about field validity
 			handler(v) { this.$emit('set-valid',v,this.field.id); },
@@ -1163,13 +1164,7 @@ let MyField = {
 		variableIdMapGlobal:(s) => s.$store.getters.variableIdMapGlobal,
 	},
 	mounted() {
-		if(this.isTabs)
-			this.setTabToValid();
-
-		this.columnIdsByUser = this.fieldOptionGet(this.favoriteId,this.field.id,'columnIdsByUser',[]);
-
-		// fill stored collection row indexes
-		this.collectionIdMapIndexes = this.fieldOptionGet(this.favoriteId,this.field.id,'collectionIdMapIndexes',{});
+		this.reloadOptions();
 	},
 	methods:{
 		// externals
@@ -1195,6 +1190,17 @@ let MyField = {
 		openLink,
 		setGetterArgs,
 		srcBase64,
+
+		// reloads
+		reloadOptions() {
+			if(this.isTabs)
+				this.setTabToValid();
+			
+			this.columnIdsByUser = this.fieldOptionGet(this.favoriteId,this.field.id,'columnIdsByUser',[]);
+	
+			// fill stored collection row indexes
+			this.collectionIdMapIndexes = this.fieldOptionGet(this.favoriteId,this.field.id,'collectionIdMapIndexes',{});
+		},
 		
 		// presentation
 		getTabClasses(tabIndex) {

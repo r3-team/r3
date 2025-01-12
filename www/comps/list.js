@@ -971,7 +971,7 @@ let MyList = {
 		}
 		
 		// setup watchers
-		this.$watch('favoriteId',this.initOptions);
+		this.$watch('favoriteId',this.reloadOptions);
 		this.$watch('columns',(valOld,valNew) => {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
 				this.count = 0;
@@ -1019,7 +1019,7 @@ let MyList = {
 		}
 
 		// initialize list options
-		this.initOptions();
+		this.reloadOptions();
 		
 		// set initial auto renew timer
 		if(this.autoRenew !== null)
@@ -1119,6 +1119,27 @@ let MyList = {
 
 			if(nextTick) this.$nextTick(this.$refs.aggregations.get);
 			else         this.$refs.aggregations.get();
+		},
+		reloadOptions() {
+			if(this.usesPageHistory) {
+				// set initial states via route parameters
+				this.paramsUpdated();     // load existing parameters from route query
+				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
+			} else {
+				// sub lists do not have route parameters, get initalized via defaults
+				this.choiceId = this.choiceIdDefault;
+				this.limit    = this.limitDefault;
+				this.orders   = JSON.parse(JSON.stringify(this.query.orders));
+			}
+			this.autoRenewInput  = this.fieldOptionGet(this.favoriteId,this.fieldId,'autoRenew',this.autoRenew);
+			this.cardsCaptions   = this.fieldOptionGet(this.favoriteId,this.fieldId,'cardsCaptions',true);
+			this.columnBatchSort = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnBatchSort',[[],[]]);
+			this.columnIdMapAggr = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnIdMapAggr',{});
+			this.filtersColumn   = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersColumn',[]);
+			this.filtersUser     = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersUser',[]);
+			this.limit           = this.fieldOptionGet(this.favoriteId,this.fieldId,'limit',this.limitDefault);
+			this.layout          = this.fieldOptionGet(this.favoriteId,this.fieldId,'layout',this.layoutDefault);
+			this.showHeader      = this.fieldOptionGet(this.favoriteId,this.fieldId,'header',true);
 		},
 		reloadInside(entity) {
 			// inside state has changed, reload list (not relevant for list input)
@@ -1265,27 +1286,6 @@ let MyList = {
 				this.focused      = true;
 				this.filtersQuick = '';
 			}
-		},
-		initOptions() {
-			if(this.usesPageHistory) {
-				// set initial states via route parameters
-				this.paramsUpdated();     // load existing parameters from route query
-				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-			} else {
-				// sub lists do not have route parameters, get initalized via defaults
-				this.choiceId = this.choiceIdDefault;
-				this.limit    = this.limitDefault;
-				this.orders   = JSON.parse(JSON.stringify(this.query.orders));
-			}
-			this.autoRenewInput  = this.fieldOptionGet(this.favoriteId,this.fieldId,'autoRenew',this.autoRenew);
-			this.cardsCaptions   = this.fieldOptionGet(this.favoriteId,this.fieldId,'cardsCaptions',true);
-			this.columnBatchSort = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnBatchSort',[[],[]]);
-			this.columnIdMapAggr = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnIdMapAggr',{});
-			this.filtersColumn   = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersColumn',[]);
-			this.filtersUser     = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersUser',[]);
-			this.limit           = this.fieldOptionGet(this.favoriteId,this.fieldId,'limit',this.limitDefault);
-			this.layout          = this.fieldOptionGet(this.favoriteId,this.fieldId,'layout',this.layoutDefault);
-			this.showHeader      = this.fieldOptionGet(this.favoriteId,this.fieldId,'header',true);
 		},
 		keyDown(e) {
 			let focusTarget = null;

@@ -87,16 +87,18 @@ let MyMenuFavorite = {
 			@click="click"
 			@click.middle="clickMiddle"
 			@keyup.enter.space="click"
+			:class="{ active:active }"
 		>
 			<div class="caption">{{ title }}</div>
 		</div>
 	</div>`,
 	props:{
-		favoriteId:{ type:String, required:true },
-		formId:    { type:String, required:true },
-		moduleId:  { type:String, required:true },
+		active:    { type:Boolean, required:true },
+		favoriteId:{ type:String,  required:true },
+		formId:    { type:String,  required:true },
+		moduleId:  { type:String,  required:true },
 		recordId:  { required:true },
-		title:     { type:String, required:true }
+		title:     { type:String,  required:true }
 	},
 	computed:{
 		route:(s) => s.getFormRoute(s.favoriteId,s.formId,s.recordId === null ? 0 : s.recordId,true)
@@ -150,6 +152,7 @@ let MyMenuItem = {
 			<my-menu-item class="item sub"
 				v-for="m in menu.menus"
 				:colorParent="menu.color"
+				:favoriteIdActive="favoriteIdActive"
 				:formIdActive="formIdActive"
 				:formOpensPreset="formOpensPreset"
 				:key="m.id"
@@ -160,12 +163,13 @@ let MyMenuItem = {
 		</div>
 	</div>`,
 	props:{
-		colorParent:    { required:true },
-		formIdActive:   { type:String,  required:true },
-		formOpensPreset:{ type:Boolean, required:true },
-		menu:           { type:Object,  required:true },
-		module:         { type:Object,  required:true },
-		recordOpen:     { type:Boolean, required:true }
+		colorParent:     { required:true },
+		favoriteIdActive:{ required:true },
+		formIdActive:    { type:String,  required:true },
+		formOpensPreset: { type:Boolean, required:true },
+		menu:            { type:Object,  required:true },
+		module:          { type:Object,  required:true },
+		recordOpen:      { type:Boolean, required:true }
 	},
 	mounted() {
 		// show children if no preference is recorded and default is true
@@ -212,7 +216,7 @@ let MyMenuItem = {
 		active:      (s) => s.menuAccess[s.menu.id] === 1,
 		color:       (s) => s.menu.color !== null ? s.menu.color : (s.colorParent !== null ? s.colorParent : null),
 		hasChildren: (s) => s.menu.menus.length !== 0,
-		selected:    (s) => (!s.recordOpen || s.formOpensPreset) && s.menu.formId === s.formIdActive,
+		selected:    (s) => (!s.recordOpen || s.formOpensPreset) && s.menu.formId === s.formIdActive && s.favoriteIdActive === null,
 		showChildren:(s) => s.hasChildren && s.menuIdMapOpen[s.menu.id],
 		style:       (s) => s.color === null ? '' : `border-left-color:#${s.color};`,
 		subIcon:     (s) => s.showChildren ? 'images/triangleDown.png' : 'images/triangleLeft.png',
@@ -242,7 +246,7 @@ let MyMenuItem = {
 			if(this.menu.formId === null)
 				return this.clickSubMenus();
 			
-			if(this.menu.formId !== this.formIdActive || (this.recordOpen && !this.formOpensPreset))
+			if(this.menu.formId !== this.formIdActive || this.favoriteIdActive !== null || (this.recordOpen && !this.formOpensPreset))
 				return this.$router.push(this.getFormRoute(null,this.menu.formId,0,true));
 			
 			// form is set and we are already there
@@ -316,6 +320,7 @@ let MyMenu = {
 						v-if="mti === menuTabIndexShown"
 						v-for="m in mt.menus"
 						:colorParent="null"
+						:favoriteIdActive="favoriteIdActive"
 						:formIdActive="formIdActive"
 						:formOpensPreset="formOpensPreset"
 						:key="m.id"
@@ -328,6 +333,7 @@ let MyMenu = {
 					<my-menu-favorite
 						v-if="!isAtFavoritesEdit"
 						v-for="f in favorites"
+						:active="favoriteIdActive === f.id"
 						:favoriteId="f.id"
 						:formId="f.formId"
 						:key="f.id"
@@ -358,11 +364,12 @@ let MyMenu = {
 		</div>
 	</div>`,
 	props:{
-		formIdActive:   { type:String,  required:true },
-		formOpensPreset:{ type:Boolean, required:true },
-		isActiveModule: { type:Boolean, required:true },
-		module:         { type:Object,  required:true },
-		recordOpen:     { type:Boolean, required:true }
+		favoriteIdActive:{ required:true },
+		formIdActive:    { type:String,  required:true },
+		formOpensPreset: { type:Boolean, required:true },
+		isActiveModule:  { type:Boolean, required:true },
+		module:          { type:Object,  required:true },
+		recordOpen:      { type:Boolean, required:true }
 	},
 	computed:{
 		menuTabsAccess:(s) => {
@@ -405,6 +412,9 @@ let MyMenu = {
 			isAtFavoritesEdit:false,
 			menuTabIndexShown:0
 		};
+	},
+	mounted() {
+		this.isAtFavorites = this.favoriteIdActive !== null;
 	},
 	methods:{
 		// externals

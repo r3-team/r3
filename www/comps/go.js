@@ -64,6 +64,7 @@ let MyGoForm = {
 			v-if="!isMobile || isAtMenu"
 			v-for="m in modules.filter(v => v.id === moduleId)"
 			:isActiveModule="m.id === moduleId"
+			:favoriteIdActive="favoriteId"
 			:formIdActive="formId"
 			:formOpensPreset="formIdMap[formId].presetIdOpen !== null"
 			:key="m.id"
