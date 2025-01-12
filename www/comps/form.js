@@ -119,7 +119,7 @@ let MyForm = {
 					</transition>
 				</div>
 
-				<div class="area" v-if="!hasBarLower">
+				<div class="area" :class="{ 'form-actions-left':settings.formActionsAlign === 'left', 'form-actions-right':settings.formActionsAlign === 'right' }" v-if="!hasBarLower">
 					<my-form-actions
 						v-if="hasFormActions"
 						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
@@ -214,7 +214,7 @@ let MyForm = {
 						:captionTitle="capGen.button.saveHint"
 					/>
 				</div>
-				<div class="area">
+				<div class="area" :class="{ 'form-actions-left':settings.formActionsAlign === 'left', 'form-actions-right':settings.formActionsAlign === 'right' }">
 					<my-form-actions
 						v-if="hasFormActions"
 						@execute-function="jsFunctionRun($event,[],exposedFunctions)"

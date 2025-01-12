@@ -961,11 +961,6 @@
 			"openForm": "Ouvrir le formulaire",
 			"openFormBulk": "Ouvrir le formulaire<br />(édition en masse)",
 			"option": {
-				"alignment": {
-					"def": "left",
-					"end": "right",
-					"mid": "center"
-				},
 				"display": {
 					"color": "couleur",
 					"default": "par défaut",
@@ -2008,6 +2003,11 @@
 		"active": "Actif",
 		"after": "Après",
 		"alignment": "Alignment",
+		"alignmentHor": {
+			"center": "center",
+			"left": "left",
+			"right": "right"
+		},
 		"api": "API",
 		"apis": "API",
 		"appName": "REI3",
@@ -2436,6 +2436,7 @@
 		},
 		"fontFamily": "Police",
 		"fontSize": "Taille de la police",
+		"formActionsAlign": "Align form actions",
 		"headerCaptions": "Complet",
 		"headerModules": "Afficher les applications",
 		"languageCode": "Langue",

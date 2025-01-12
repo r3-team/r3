@@ -218,6 +218,16 @@ let MyAdminLoginTemplate = {
 								</select>
 							</td>
 						</tr>
+						<tr class="default-inputs">
+							<td>{{ capAppSet.formActionsAlign }}</td>
+							<td>
+								<select v-model.number="settings.formActionsAlign">
+									<option value="left">{{ capGen.alignmentHor.left }}</option>
+									<option value="center">{{ capGen.alignmentHor.center }}</option>
+									<option value="right">{{ capGen.alignmentHor.right }}</option>
+								</select>
+							</td>
+						</tr>
 						<tr>
 							<td>{{ capAppSet.listRows }}</td>
 							<td>
@@ -368,6 +378,7 @@ let MyAdminLoginTemplate = {
 			dateFormat:'Y-m-d',
 			fontFamily:'helvetica',
 			fontSize:100,
+			formActionsAlign:'center',
 			headerModules:true,
 			headerCaptions:true,
 			hintUpdateVersion:0,

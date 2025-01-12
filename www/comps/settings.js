@@ -1277,6 +1277,16 @@ let MySettings = {
 							</td>
 						</tr>
 						<tr class="default-inputs">
+							<td>{{ capApp.formActionsAlign }}</td>
+							<td>
+								<select v-model.number="settingsInput.formActionsAlign">
+									<option value="left">{{ capGen.alignmentHor.left }}</option>
+									<option value="center">{{ capGen.alignmentHor.center }}</option>
+									<option value="right">{{ capGen.alignmentHor.right }}</option>
+								</select>
+							</td>
+						</tr>
+						<tr class="default-inputs">
 							<td>{{ capApp.pattern }}</td>
 							<td>
 								<select v-model="settingsInput.pattern">

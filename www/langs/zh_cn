@@ -961,11 +961,6 @@
 			"openForm": "打开表单",
 			"openFormBulk": "打开表单<br />(批量编辑)",
 			"option": {
-				"alignment": {
-					"def": "left",
-					"end": "right",
-					"mid": "center"
-				},
 				"display": {
 					"color": "颜色",
 					"default": "默认",
@@ -2008,6 +2003,11 @@
 		"active": "活跃",
 		"after": "之后",
 		"alignment": "Alignment",
+		"alignmentHor": {
+			"center": "center",
+			"left": "left",
+			"right": "right"
+		},
 		"api": "API",
 		"apis": "API接口",
 		"appName": "REI3",
@@ -2436,6 +2436,7 @@
 		},
 		"fontFamily": "字体",
 		"fontSize": "字号",
+		"formActionsAlign": "Align form actions",
 		"headerCaptions": "完整",
 		"headerModules": "显示应用程序",
 		"languageCode": "语言",

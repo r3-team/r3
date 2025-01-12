@@ -961,11 +961,6 @@
 			"openForm": "Űrlap megnyitása",
 			"openFormBulk": "Űrlap megnyitása (Tömeges szerkesztés)",
 			"option": {
-				"alignment": {
-					"def": "left",
-					"end": "right",
-					"mid": "center"
-				},
 				"display": {
 					"color": "Szín",
 					"default": "Alapértelmezett",
@@ -2008,6 +2003,11 @@
 		"active": "Aktív",
 		"after": "After",
 		"alignment": "Alignment",
+		"alignmentHor": {
+			"center": "center",
+			"left": "left",
+			"right": "right"
+		},
 		"api": "API",
 		"apis": "API-k",
 		"appName": "REI3",
@@ -2436,6 +2436,7 @@
 		},
 		"fontFamily": "Betűtípus",
 		"fontSize": "Betűméret",
+		"formActionsAlign": "Align form actions",
 		"headerCaptions": "Full",
 		"headerModules": "Show applications",
 		"languageCode": "Nyelv",

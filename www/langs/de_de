@@ -961,11 +961,6 @@
 			"openForm": "Formular öffnen",
 			"openFormBulk": "Formular öffnen<br />(Massenbearbeitung)",
 			"option": {
-				"alignment": {
-					"def": "links",
-					"end": "rechts",
-					"mid": "mittig"
-				},
 				"display": {
 					"color": "Farbe",
 					"default": "Standard",
@@ -2008,6 +2003,11 @@
 		"active": "Aktiv",
 		"after": "Danach",
 		"alignment": "Ausrichtung",
+		"alignmentHor": {
+			"center": "mittig",
+			"left": "links",
+			"right": "rechts"
+		},
 		"api": "API",
 		"apis": "APIs",
 		"appName": "REI3",
@@ -2436,6 +2436,7 @@
 		},
 		"fontFamily": "Schriftart",
 		"fontSize": "Schriftgröße",
+		"formActionsAlign": "Formularaktionen ausrichten",
 		"headerCaptions": "Voll",
 		"headerModules": "Anwendungen anzeigen",
 		"languageCode": "Sprache",

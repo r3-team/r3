@@ -961,11 +961,6 @@
 			"openForm": "Deschideți formularul",
 			"openFormBulk": "Deschideți formularul<br />(bulk editing)",
 			"option": {
-				"alignment": {
-					"def": "left",
-					"end": "right",
-					"mid": "center"
-				},
 				"display": {
 					"color": "culoare",
 					"default": "implicit",
@@ -2008,6 +2003,11 @@
 		"active": "Activ",
 		"after": "After",
 		"alignment": "Alignment",
+		"alignmentHor": {
+			"center": "center",
+			"left": "left",
+			"right": "right"
+		},
 		"api": "API",
 		"apis": "APIs",
 		"appName": "REI3",
@@ -2436,6 +2436,7 @@
 		},
 		"fontFamily": "Font",
 		"fontSize": "Mărime font",
+		"formActionsAlign": "Align form actions",
 		"headerCaptions": "Full",
 		"headerModules": "Show applications",
 		"languageCode": "Limba",

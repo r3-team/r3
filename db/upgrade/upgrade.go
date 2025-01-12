@@ -97,6 +97,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		ALTER TABLE app.field ALTER COLUMN flags
 			TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
 
+		ALTER TABLE instance.login_setting ALTER COLUMN form_actions_align
+			TYPE instance.align_horizontal USING form_actions_align::TEXT::instance.align_horizontal;
+
 		ALTER TABLE app.menu ALTER COLUMN menu_tab_id SET NOT NULL;
 	*/
 
@@ -300,6 +303,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				field_id ASC NULLS LAST,
 				is_mobile ASC NULLS LAST
 			);
+
+			-- new login setting
+			CREATE TYPE instance.align_horizontal AS ENUM ('left', 'center', 'right');
+			ALTER TABLE instance.login_setting ADD   COLUMN form_actions_align TEXT NOT NULL DEFAULT 'center';
+			ALTER TABLE instance.login_setting ALTER COLUMN form_actions_align DROP DEFAULT;
 		`)
 		return "3.10", err
 	},

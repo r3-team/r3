@@ -29,6 +29,15 @@
 	border-left:1px solid #000;
 }
 
+/* form actions */
+.form-actions-left{
+	flex:1 1 auto;
+}
+.form-actions-right{
+	flex:1 1 auto;
+	justify-content:flex-end;
+}
+
 /* fields */
 .form .fields{
 	overflow:auto;

@@ -14,6 +14,7 @@ type Settings struct {
 	Dark               bool        `json:"dark"`
 	FontFamily         string      `json:"fontFamily"`
 	FontSize           int         `json:"fontSize"`
+	FormActionsAlign   string      `json:"formActionsAlign"`
 	HeaderCaptions     bool        `json:"headerCaptions"`
 	HeaderModules      bool        `json:"headerModules"`
 	HintUpdateVersion  int         `json:"hintUpdateVersion"`

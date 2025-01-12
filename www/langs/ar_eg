@@ -961,11 +961,6 @@
 			"openForm": "فتح النموذج",
 			"openFormBulk": "فتح النموذج<br />(التحرير بالجملة)",
 			"option": {
-				"alignment": {
-					"def": "غادر",
-					"end": "يمين",
-					"mid": "مركز"
-				},
 				"display": {
 					"color": "لون",
 					"default": "تقصير",
@@ -2008,6 +2003,11 @@
 		"active": "نشيط",
 		"after": "بعد",
 		"alignment": "تنسيق",
+		"alignmentHor": {
+			"center": "مركز",
+			"left": "غادر",
+			"right": "يمين"
+		},
 		"api": "واجهة برمجة التطبيقات",
 		"apis": "واجهات برمجة التطبيقات",
 		"appName": "REI3",
@@ -2436,6 +2436,7 @@
 		},
 		"fontFamily": "الخط",
 		"fontSize": "حجم الخط",
+		"formActionsAlign": "Align form actions",
 		"headerCaptions": "ممتلىء",
 		"headerModules": "إظهار التطبيقات",
 		"languageCode": "لغة",

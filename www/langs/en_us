@@ -961,11 +961,6 @@
 			"openForm": "Open form",
 			"openFormBulk": "Open form<br />(bulk editing)",
 			"option": {
-				"alignment": {
-					"def": "left",
-					"end": "right",
-					"mid": "center"
-				},
 				"display": {
 					"color": "color",
 					"default": "default",
@@ -2008,6 +2003,11 @@
 		"active": "Active",
 		"after": "After",
 		"alignment": "Alignment",
+		"alignmentHor": {
+			"center": "center",
+			"left": "left",
+			"right": "right"
+		},
 		"api": "API",
 		"apis": "APIs",
 		"appName": "REI3",
@@ -2436,6 +2436,7 @@
 		},
 		"fontFamily": "Font",
 		"fontSize": "Font size",
+		"formActionsAlign": "Align form actions",
 		"headerCaptions": "Full",
 		"headerModules": "Show applications",
 		"languageCode": "Language",
