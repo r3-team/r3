@@ -579,6 +579,7 @@ let MyApp = {
 				this.logoutInSec = 0;
 		},
 		sessionInvalid(sessionExpired) {
+			this.$store.commit('local/loginCachesClear');
 			this.$store.commit('local/loginKeyAes',null);
 			this.$store.commit('local/loginKeySalt',null);
 			this.$store.commit('loginEncryption',false);

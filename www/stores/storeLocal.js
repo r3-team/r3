@@ -99,6 +99,14 @@ const MyStoreLocal = {
 			state.loginBackground = payload;
 			set('loginBackground',payload);
 		},
+		loginCachesClear(state,payload) {
+			state.loginFavorites     = { dateCache:0, moduleIdMap:{} };
+			state.loginOptions       = { dateCache:0, favoriteIdMap:{}, fieldIdMap:{} };
+			state.loginOptionsMobile = { dateCache:0, favoriteIdMap:{}, fieldIdMap:{} };
+			set('loginFavorites',state.loginFavorites);
+			set('loginOptions',state.loginOptions);
+			set('loginOptionsMobile',state.loginOptionsMobile);
+		},
 		loginFavorites(state,payload) {
 			if(payload.dateCache === state.loginFavorites.dateCache)
 				return;

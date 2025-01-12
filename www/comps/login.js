@@ -398,8 +398,9 @@ let MyLogin = {
 			if(token === '')
 				return this.handleError('authUser','');
 			
-			// store authentication token
+			// store authentication token & clear caches related to login
 			this.$store.commit('local/token',token);
+			this.$store.commit('local/loginCachesClear');
 			
 			if(saltKdf === null || !this.cryptoApiAvailable)
 				return this.appEnable(loginId,loginName);
