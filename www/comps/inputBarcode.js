@@ -180,7 +180,7 @@ let MyInputBarcode = {
 
 			if(format === null || this.inputText === '' || this.$refs.barcodePreview === undefined)
 				return;
-
+			
 			if(format !== 'QRCODE') {
 				JsBarcode(this.$refs.barcodePreview, this.inputText, {
 					format:format,
@@ -205,6 +205,7 @@ let MyInputBarcode = {
 				const src = qr.createDataURL();
 				this.$refs.barcodePreview.src = src;
 				this.update('image',src);
+				this.valueInvalid = false;
 			}
 		},
 
