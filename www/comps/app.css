@@ -58,6 +58,7 @@
 	/* heights */
 	--row-height:40px;
 	--app-header-height:70px;
+	--menu-line-height:36px;
 	
 	/**/
 	/* images */
@@ -191,6 +192,9 @@ h3{
 .column.grow{
 	flex:1 1 auto;
 }
+.column.justify-end{
+	justify-content:flex-end;
+}
 .column.space-between{
 	justify-content:space-between;
 }
@@ -212,6 +216,9 @@ h3{
 }
 .row.grow{
 	flex:1 1 auto;
+}
+.row.justify-end{
+	justify-content:flex-end;
 }
 .row.space-between{
 	justify-content:space-between;

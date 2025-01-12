@@ -2118,6 +2118,7 @@
 		"event": "حدث",
 		"everything": "كل شئ",
 		"favorites": "Favorites",
+		"favoritesEmpty": "No favorites saved",
 		"field": "مجال",
 		"files": "ملفات",
 		"filters": "المرشحات",

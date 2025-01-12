@@ -2118,6 +2118,7 @@
 		"event": "Event",
 		"everything": "Tout",
 		"favorites": "Favorites",
+		"favoritesEmpty": "No favorites saved",
 		"field": "Champ",
 		"files": "Fichiers",
 		"filters": "Filtres",

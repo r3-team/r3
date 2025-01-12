@@ -2118,6 +2118,7 @@
 		"event": "Event",
 		"everything": "全部",
 		"favorites": "Favorites",
+		"favoritesEmpty": "No favorites saved",
 		"field": "字段",
 		"files": "文件",
 		"filters": "过滤器",

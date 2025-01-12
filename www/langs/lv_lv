@@ -2118,6 +2118,7 @@
 		"event": "Event",
 		"everything": "Viss",
 		"favorites": "Favorites",
+		"favoritesEmpty": "No favorites saved",
 		"field": "Lauks",
 		"files": "Faili",
 		"filters": "Filtri",

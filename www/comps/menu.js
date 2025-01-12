@@ -62,9 +62,25 @@ let MyMenuFavoritesEdit = {
 	},
 	mounted() {
 		this.favoritesEdit = JSON.parse(JSON.stringify(this.favorites));
+		window.addEventListener('keydown',this.handleHotkeys);
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
 		// actions
+		handleHotkeys(e) {
+			if(e.key === 'Escape') {
+				this.$emit('close');
+				e.preventDefault();
+			}
+			if(e.ctrlKey && e.key === 's') {
+				if(this.hasChanges)
+					this.set();
+
+				e.preventDefault();
+			}
+		},
 		remove(i) {
 			this.favoritesEdit.splice(i,1);
 		},
@@ -330,6 +346,9 @@ let MyMenu = {
 					/>
 				</template>
 				<template v-if="isAtFavorites">
+					<span class="menu-favorites-empty" v-if="favorites.length === 0">
+						- {{ capGen.favoritesEmpty }} -
+					</span>
 					<my-menu-favorite
 						v-if="!isAtFavoritesEdit"
 						v-for="f in favorites"
@@ -347,12 +366,15 @@ let MyMenu = {
 						:favorites="favorites"
 						:moduleId="module.id"
 					/>
-					<my-button image="edit.png"
-						v-if="!isAtFavoritesEdit && favorites.length !== 0"
-						@trigger="isAtFavoritesEdit = true"
-						:caption="capGen.button.edit"
-						:naked="false"
-					/>
+					<div class="row justify-end">
+						<div class="menu-favorites-edit-action clickable"
+							@click.left="isAtFavoritesEdit = true"
+							v-if="!isAtFavoritesEdit && favorites.length !== 0"
+						>
+							<img src="images/edit.png" />
+							<span>{{ capGen.button.edit }}</span>
+						</div>
+					</div>
 				</template>
 			</div>
 			<div class="menu-footer">
@@ -370,6 +392,23 @@ let MyMenu = {
 		isActiveModule:  { type:Boolean, required:true },
 		module:          { type:Object,  required:true },
 		recordOpen:      { type:Boolean, required:true }
+	},
+	watch:{
+		favorites:{
+			handler(vNew,vOld) {
+				// open new favorite, if one was added
+				if(vNew.length === vOld.length + 1) {
+					const f = vNew[vNew.length-1];
+					this.$router.push(this.getFormRoute(f.id,f.formId,f.recordId === null ? 0 : f.recordId,true));
+				}
+			}
+		},
+		favoriteIdActive:{
+			handler(v) {
+				if(v !== null && !this.isAtFavorites)
+					this.isAtFavorites = true;
+			}
+		}
 	},
 	computed:{
 		menuTabsAccess:(s) => {
@@ -419,6 +458,7 @@ let MyMenu = {
 	methods:{
 		// externals
 		getCaption,
+		getFormRoute,
 		openLink,
 		srcBase64,
 		srcBase64Icon,

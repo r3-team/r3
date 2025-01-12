@@ -2118,6 +2118,7 @@
 		"event": "Ereignis",
 		"everything": "Alles",
 		"favorites": "Favoriten",
+		"favoritesEmpty": "Keine Favoriten gespeichert",
 		"field": "Feld",
 		"files": "Dateien",
 		"filters": "Filter",

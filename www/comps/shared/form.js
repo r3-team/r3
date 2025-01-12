@@ -300,7 +300,7 @@ export function setFormFavorite(moduleId,formId,recordId,title) {
 	if(m[moduleId] === undefined)
 		m[moduleId] = [];
 
-	m[moduleId].unshift({
+	m[moduleId].push({
 		id:getNilUuid(),
 		moduleId:moduleId,
 		formId:formId,
