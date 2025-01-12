@@ -61,5 +61,6 @@ export function fieldOptionGet(favoriteId,fieldId,name,fallbackValue) {
 };
 export function fieldOptionSet(favoriteId,fieldId,name,value) {
 	const isMobile = MyStore.getters.isMobile;
-	MyStore.commit('local/loginOption',{favoriteId,fieldId,isMobile,name,value});
+	const isNoAuth = MyStore.getters.isNoAuth;
+	MyStore.commit('local/loginOption',{favoriteId,fieldId,isMobile,isNoAuth,name,value});
 };

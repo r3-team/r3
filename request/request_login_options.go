@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func LoginOptionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func LoginOptionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, isNoAuth bool) (interface{}, error) {
 	var (
 		err error
 		req struct {
@@ -27,6 +27,14 @@ func LoginOptionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage,
 	)
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
+	}
+
+	if isNoAuth {
+		// public users cannot store options
+		res.DateCache = 0
+		res.IsMobile = req.IsMobile
+		res.Options = make([]types.LoginOptions, 0)
+		return res, nil
 	}
 
 	res.DateCache = tools.GetTimeUnix()

@@ -177,8 +177,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "loginFavorites":
 		switch action {
 		case "get":
-			return LoginGetFavorites_tx(ctx, tx, reqJson, loginId)
+			return LoginGetFavorites_tx(ctx, tx, reqJson, loginId, isNoAuth)
 		case "set":
+			if isNoAuth {
+				return nil, errors.New(handler.ErrUnauthorized)
+			}
 			return LoginSetFavorites_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginKeys":
@@ -195,8 +198,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "loginOptions":
 		switch action {
 		case "get":
-			return LoginOptionsGet_tx(ctx, tx, reqJson, loginId)
+			return LoginOptionsGet_tx(ctx, tx, reqJson, loginId, isNoAuth)
 		case "set":
+			if isNoAuth {
+				return nil, errors.New(handler.ErrUnauthorized)
+			}
 			return LoginOptionsSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginPassword":

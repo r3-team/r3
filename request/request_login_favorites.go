@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func LoginGetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func LoginGetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, isNoAuth bool) (interface{}, error) {
 	var (
 		err error
 		req struct {
@@ -23,6 +23,13 @@ func LoginGetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessag
 	)
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
+	}
+
+	if isNoAuth {
+		// public users cannot store favorites
+		res.DateCache = 0
+		res.ModuleIdMap = make(map[uuid.UUID][]types.LoginFavorite)
+		return res, nil
 	}
 
 	res.ModuleIdMap, res.DateCache, err = login_favorites.Get_tx(ctx, tx, loginId, req.DateCache)

@@ -166,19 +166,21 @@ const MyStoreLocal = {
 
 			if(JSON.stringify(options) === JSON.stringify(getOptions(target,fieldId)))
 				return;
-			
-			ws.send('loginOptions','set',{
-				favoriteId:favoriteId,
-				fieldId:fieldId,
-				isMobile:isMobile,
-				options:JSON.stringify(options)
-			},false).then(() => {},console.warn);
 
 			// change local state regardless of whether backend update succeeded (UI must always react)
 			if(Object.keys(options).length === 0) delete target[fieldId];
 			else                                  target[fieldId] = options;
 
 			set(payload.isMobile ? 'loginOptionsMobile' : 'loginOptions', base);
+			
+			if(!payload.isNoAuth) {
+				ws.send('loginOptions','set',{
+					favoriteId:favoriteId,
+					fieldId:fieldId,
+					isMobile:isMobile,
+					options:JSON.stringify(options)
+				},false).then(() => {},console.warn);
+			}
 		},
 		loginOptions(state,payload) {
 			const base = payload.isMobile ? state.loginOptionsMobile : state.loginOptions;
