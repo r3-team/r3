@@ -311,6 +311,7 @@ let MyMenu = {
 		<div class="menu-tabs">
 			<div class="menu-tab clickable"
 				v-for="(mt,i) in menuTabsAccess"
+				v-if="menuTabsAccess.length > 1 || hasFavorites"
 				@click.left="menuTabIndexShown = i; isAtFavorites = false"
 				:class="{ active:i === menuTabIndexShown && !isAtFavorites, centered:!showTabLabels }"
 				:style="tabStyles"
@@ -320,6 +321,7 @@ let MyMenu = {
 				<span v-if="showTabLabels">{{ getCaption('menuTabTitle',module.id,mt.id,mt.captions,capGen.menu) }}</span>
 			</div>
 			<div class="menu-tab clickable"
+				v-if="hasFavorites"
 				@click="isAtFavorites = true"
 				:class="{ active:isAtFavorites, centered:!showTabLabels }"
 				:style="tabStyles"
@@ -426,6 +428,7 @@ let MyMenu = {
 
 		// simple
 		favorites:    (s) => s.loginFavorites.moduleIdMap[s.module.id] === undefined ? [] : s.loginFavorites.moduleIdMap[s.module.id],
+		hasFavorites: (s) => !s.isNoAuth,
 		showTabLabels:(s) => s.menuTabsAccess.length < 3,
 		tabStyles:    (s) => `width:${100 / (s.menuTabsAccess.length + 1)}%;`,
 
@@ -441,6 +444,7 @@ let MyMenu = {
 		color:         (s) => s.$store.getters.colorMenu,
 		isAdmin:       (s) => s.$store.getters.isAdmin,
 		isMobile:      (s) => s.$store.getters.isMobile,
+		isNoAuth:      (s) => s.$store.getters.isNoAuth,
 		menuAccess:    (s) => s.$store.getters.access.menu,
 		settings:      (s) => s.$store.getters.settings
 	},

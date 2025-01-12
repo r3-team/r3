@@ -60,7 +60,7 @@ const MyStore = Vuex.createStore({
 		isAtMenu:false,                // user navigated to menu (only relevant if isMobile)
 		isAtModule:false,              // app currently shows a module (instead of Builder, admin panel, settings, etc.)
 		isMobile:false,                // app runs on small screen (probably mobile)
-		isNoAuth:false,                // user logged in without authentication
+		isNoAuth:false,                // user logged in without authentication (public user)
 		keyDownHandlers:[],            // global handlers, reacting for key down events (for hotkey events)
 		license:{},                    // license info (admin only)
 		licenseValid:false,            // license is valid (set and within validity period)
