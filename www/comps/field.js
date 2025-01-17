@@ -81,7 +81,7 @@ let MyField = {
 			</div>
 			
 			<div class="field-content"
-				:class="{ data:isData, disabled:isReadonly, isSingleField:isAlone, intent:hasIntent }"
+				:class="{ data:isData, dropdownShow:dropdownShow, disabled:isReadonly, isSingleField:isAlone, intent:hasIntent }"
 		 		v-click-outside="clickOutside"
 			>
 				<!-- data field icon -->
@@ -401,7 +401,7 @@ let MyField = {
 						:style="value !== null ? 'background-color:#'+value : ''"
 					></div>
 				</div>
-				<div class="input-dropdown-wrap" v-if="showColorPickerInput">
+				<div class="input-dropdown-wrap" v-if="isColor && dropdownShow">
 					<chrome-picker class="input-dropdown"
 						@update:modelValue="value = $event.hex.substr(1)"
 						:disable-alpha="true"
@@ -454,6 +454,7 @@ let MyField = {
 				<!-- date / datetime / time input -->
 				<my-input-date
 					v-if="isDateInput"
+					@dropdown-show="dropdownShow = $event"
 					@set-unix-from="value = $event"
 					@set-unix-to="valueAlt = $event"
 					:isDate="isDatetime || isDate"
@@ -511,12 +512,14 @@ let MyField = {
 				<!-- relationship input -->
 				<my-list
 					v-if="isRelationship"
+					@dropdown-show="dropdownShow = $event"
 					@open-form="(...args) => openForm(args[0],[],args[1],null)"
 					@records-selected="relationshipRecordsSelected"
 					@record-removed="relationshipRecordRemoved"
 					@records-selected-init="$emit('set-value-init',fieldAttributeId,$event,true,true)"
 					:choices="choicesProcessed"
 					:columns="columnsProcessed"
+					:dropdownShow="dropdownShow"
 					:fieldId="field.id"
 					:filterQuick="field.filterQuick"
 					:filters="filtersProcessed"
@@ -658,10 +661,10 @@ let MyField = {
 		return {
 			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
 			columnIdsByUser:[],
+			dropdownShow:false,           // for relationship inputs and color picker
 			notTouched:true,              // data field was not touched by user
 			popUpFormInline:null,         // inline form for some field types (list)
 			regconfigInput:'',
-			showColorPickerInput:false,   // for color picker fields
 			showPassword:false,           // for password fields
 			tabIndexFieldIdMapCounter:{}, // tabs only: counter (by tab index + field ID) of child values (like combined list row counts)
 			tabIndexShow:0                // tabs only: which tab is shown
@@ -1240,11 +1243,11 @@ let MyField = {
 		},
 		click() {
 			if(this.isColor && !this.isReadonly)
-				this.showColorPickerInput = !this.showColorPickerInput;
+				this.dropdownShow = !this.dropdownShow;
 		},
 		clickOutside() {
-			if(this.showColorPickerInput)
-				this.showColorPickerInput = false;
+			if(this.dropdownShow)
+				this.dropdownShow = false;
 		},
 		closeInline() {
 			this.popUpFormInline = null;

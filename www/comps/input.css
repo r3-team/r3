@@ -159,11 +159,11 @@
 
 /* input dropdown */
 .input-dropdown-wrap{
+	width:97%;
 	height:0px;
 	position:absolute;
+	left:1.5%;
 	bottom:0px;
-	left:1%;
-	right:1%;
 	overflow:visible !important;
 	z-index:var(--z-index-dropdown);
 }
@@ -215,13 +215,10 @@
 	border-radius:5px;
 }
 .input-barcode-actions{
-	display:flex;
-	flex-flow:row nowrap;
-	padding:2px 0px 0px;
+	padding:2px 8px 0px;
 	border-bottom:1px solid var(--color-border);
 	border-radius:5px 5px 0px 0px;
 	background-color:var(--color-input);
-	gap:6px;
 }
 .input-barcode-format{
 	padding:var(--spacing);
@@ -276,17 +273,14 @@
 	border-radius:5px;
 }
 .input-iframe-actions{
-	display:flex;
-	flex-flow:row nowrap;
-	padding:2px 0px 0px;
+	padding:2px 8px 0px;
 	border-bottom:1px solid var(--color-border);
 	border-radius:5px 5px 0px 0px;
 	background-color:var(--color-input);
-	gap:6px;
 }
 .input-iframe-input{
 	height:24px;
-	padding:4px 8px;
+	padding:4px 0px;
 	font-family:inherit;
 	font-size:inherit;
 	color:inherit;
@@ -357,12 +351,6 @@
 	width:40px;
 	margin:0px 10px 0px 0px;
 	line-height:28px;
-}
-.input-date .content-wrap .actions{
-	display:flex;
-	flex-flow:row nowrap;
-	align-self:center;
-	flex:0 1 auto;
 }
 .input-date-cal-wrap{
 	flex:0 0 auto;
@@ -500,12 +488,15 @@
 	min-width:120px;
 	max-width:300px;
 	height:30px;
+	padding:0px 8px;
 	display:flex;
 	flex-flow:row nowrap;
 	background-color:var(--color-input);
 	justify-content:flex-end;
 	align-items:center;
 	border-radius:4px;
+	box-shadow:var(--shadow-input);
+	outline:var(--outline-input);
 }
 .input-color-preview.isDark img{
 	filter:var(--image-filter-bg);
@@ -551,18 +542,7 @@
 .input-draw canvas.dragMode{
 	cursor:move;
 }
-.input-draw .colors{
-	flex:0 1 auto;
-	display:flex;
-	flex-flow:row nowrap;
-}
-.input-draw .range{
-	flex:0 1 auto;
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-}
-.input-draw .range>input{
+.input-draw-range{
 	width:70px;
 }
 
@@ -614,6 +594,11 @@
 .user-bordersSquared .input-color-preview,
 .user-bordersSquared .input-dropdown-wrap.left-overhang .input-dropdown{
 	border-radius:0px !important;
+}
+.user-shadowNone .bool>.left,
+.user-shadowNone .bool>.right{
+	outline:1px solid var(--color-border);
+	box-shadow:none;
 }
 
 /* mobile overwrites */

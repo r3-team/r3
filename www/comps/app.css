@@ -90,10 +90,9 @@
 	--color-input-dark:    #3b3b3b;
 	--color-input-disabled:#efefef;
 	--color-list-row-even: #e9eeef;
-	--color-shade:         #333333;
+	--color-shade:         #4e4e4e;
 	--color-shade-bright:  #dddddd;
 	--color-shade-input:   #757575;
-	--color-shade-input-sel:hsl(311,57%,20%);
 	--color-hover-underlay:rgba(0,0,0,0.35);
 	
 	--color-accent1:       hsl(311,57%,40%); /* input outlines */
@@ -106,9 +105,11 @@
 	--color-error:         hsl(0,  84%,61%);
 	--color-success:       hsl(113,84%,44%);
 	--color-action:        hsl(196,27%,39%);
+	--color-action-border: hsl(196, 26%, 25%);
 	--color-action-bright: hsl(196,22%,72%);
 	--color-action-disable:hsl(0,   0%,77%);
 	--color-cancel:        hsl(0,  57%,32%);
+	--color-cancel-border: hsl(0, 59%, 19%);
 	
 	--color-form-builder-actions:     hsl(196deg 45% 86%);
 	--color-form-builder-actions-bg:  hsl(200deg 30% 94%);
@@ -121,7 +122,13 @@
 	
 	/**/
 	/* shadows */
-	--shadow-input:1px 1px 4px var(--color-shade);
+	--shadow-input:1px 1px 3px var(--color-shade);
+	--shadow-input-focus:1px 1px 6px var(--color-shade);
+
+	/**/
+	/* outlines */
+	--outline-input:none;
+	--outline-input-focus:2px solid var(--color-accent1);
 }
 
 html,body{
@@ -227,7 +234,7 @@ h3{
 	flex-wrap:wrap;
 }
 .shade{
-	box-shadow:1px 1px 4px var(--color-shade);
+	box-shadow:1px 1px 2px var(--color-shade);
 }
 .noWrap{
 	white-space:nowrap;
@@ -601,6 +608,7 @@ table td.maximum{
 	box-shadow:var(--shadow-input);
 	box-sizing:border-box;
 	flex:1 1 auto;
+	outline:var(--outline-input);
 }
 .default-inputs input[type=range]{
 	background-color:transparent;
@@ -664,9 +672,8 @@ table td.maximum{
 .default-inputs select:focus,
 .default-inputs textarea:focus,
 .default-inputs .input-custom:focus-within{
-	box-shadow:1px 1px 8px var(--color-shade);
-	outline:2px solid var(--color-accent1);
-	transition:box-shadow 0.3s, outline 0.2s;
+	box-shadow:var(--shadow-input-focus);
+	outline:var(--outline-input-focus);
 }
 .default-inputs input[type=range]:focus{
 	box-shadow:none;
@@ -868,7 +875,7 @@ table td.maximum{
 	vertical-align:top;
 	background-color:var(--color-bright);
 	border:1px solid var(--color-border);
-	box-shadow:1px 1px 3px var(--color-shade);
+	box-shadow:var(--shadow-input);
 }
 .generic-table-vertical.tight>tbody>tr>td{
 	padding:4px 6px 4px 15px;
@@ -1417,7 +1424,6 @@ table td.maximum{
 	--color-shade:         #000000;
 	--color-shade-bright:  #222222;
 	--color-shade-input:   #080808;
-	--color-shade-input-sel:hsl(311,57%,20%);
 	
 	--color-accent1:       hsl(316, 7%, 40%);
 	--color-accent2:       hsl(128, 4%,30%);
@@ -1425,9 +1431,11 @@ table td.maximum{
 	--color-accent3-alt:   hsl(199,11%,45%);
 	--color-accent4:       hsl(339, 4%,61%);
 	--color-action:        hsl(195, 27%, 26%);
+	--color-action-border: hsl(197, 20%, 17%);
 	--color-action-bright: hsl(196, 14%, 47%);
 	--color-action-disable:hsl(0, 0%, 21%);
 	--color-cancel:        hsl(0, 42%, 27%);
+	--color-cancel-border: hsl(0, 42%, 17%);
 	--color-error:         hsl(0, 73%, 36%);
 	--color-success:       hsl(113, 53%, 27%);
 	
@@ -1441,7 +1449,8 @@ table td.maximum{
 	--color-form-builder-tabs:        hsl(104deg 15% 32%);
 	--color-form-builder-tabs-active: hsl(104deg 12% 39%);
 	
-	--shadow-input:1px 1px 4px #000000;
+	--shadow-input:1px 1px 3px #000000;
+	--shadow-input-focus:1px 1px 6px #000000;
 	
 	--image-filter:        invert(1) brightness(90%);
 	--image-filter-alt:    invert(1) brightness(40%);
@@ -1459,6 +1468,11 @@ table td.maximum{
 	background-color:var(--color-font-disabled);
 	border:1px solid var(--color-border);
 	border-radius:2px;
+}
+.user-shadowNone{
+	--outline-input:1px solid var(--color-border);
+	--shadow-input:none;
+	--shadow-input-focus:none;
 }
 
 /* mobile overwrites */

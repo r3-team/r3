@@ -525,6 +525,7 @@
 	flex-flow:row nowrap;
 	border-bottom:1px dotted var(--color-border);
 	align-items:center;
+	gap:6px;
 	padding:2px 5px;
 	position:relative;
 }

@@ -90,7 +90,7 @@ let MyAdminMailAccount = {
 						<tr v-if="isOauth">
 							<td>{{ capApp.accountOauth }}*</td>
 							<td>
-								<div class="row centered">
+								<div class="row gap centered">
 									<select
 										@change="inputs.oauthClientId = $event.target.value !== '' ? parseInt($event.target.value) : null"
 										:value="inputs.oauthClientId !== null ? String(inputs.oauthClientId) : ''"

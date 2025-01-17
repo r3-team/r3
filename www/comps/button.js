@@ -71,12 +71,11 @@ let MyButton = {
 		classes:(s) => {
 			return {
 				adjusts:s.adjusts,
+				background:!s.naked,
 				cancel:s.cancel,
 				clickable:s.active,
-				inactive:!s.active,
 				large:s.large,
-				naked:s.naked,
-				noHighlight:!s.active
+				naked:s.naked
 			};
 		}
 	},

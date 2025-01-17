@@ -6,7 +6,7 @@ let MyInputDraw = {
 	components:{ MyInputColor },
 	template:`<div class="input-draw">
 		<div class="actions">
-			<div class="range">
+			<div class="row gap centered">
 				<slot name="input-icon" />
 				<my-button image="drawing.png"
 					v-if="!readonly"
@@ -14,7 +14,7 @@ let MyInputDraw = {
 					:active="strokeWidth !== strokeWidthDef"
 					:naked="true"
 				/>
-				<input type="range"
+				<input type="range" class="input-draw-range"
 					v-if="!readonly"
 					v-model.number="strokeWidth"
 					:max="strokeWidthMax"
@@ -25,13 +25,13 @@ let MyInputDraw = {
 					:active="zoomInput !== zoomInputDef"
 					:naked="true"
 				/>
-				<input type="range"
+				<input type="range" class="input-draw-range"
 					v-model.number="zoomInput"
 					:max="zoomInputMax"
 					:min="zoomInputMin"
 				/>
 			</div>
-			<div class="colors">
+			<div class="row gap centered">
 				<template v-if="isMobile || dragModeForce">
 					<my-button image="drag.png"
 						:active="false"
@@ -52,7 +52,7 @@ let MyInputDraw = {
 					:readonly="readonly"
 				/>
 			</div>
-			<div class="row">
+			<div class="row gap">
 				<my-button image="undo.png"
 					v-if="!readonly"
 					@trigger="undo"

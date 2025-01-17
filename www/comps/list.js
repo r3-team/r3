@@ -204,7 +204,7 @@ let MyList = {
 							
 							<!-- actions -->
 							<td class="minimum">
-								<div class="list-input-row-items nogap nowrap">
+								<div class="list-input-row-items nowrap">
 									<my-button image="open.png"
 										v-if="hasUpdate"
 										@trigger="clickOpen(r,false)"
@@ -253,7 +253,7 @@ let MyList = {
 							</div>
 						</td>
 						<td class="minimum">
-							<div class="list-input-row-items nogap nowrap">
+							<div class="list-input-row-items nowrap">
 								<my-button image="add.png"
 									v-if="!inputIsReadonly && hasCreate"
 									@trigger="$emit('open-form',[],false)"
@@ -274,7 +274,7 @@ let MyList = {
 		</template>
 		
 		<!-- regular list view (either view or input dropdown) -->
-		<template v-if="showTable && !inputAsCategory">
+		<template v-if="!isInput || (dropdownShow && !inputAsCategory)">
 			
 			<!-- list header -->
 			<div class="list-header" v-if="header && showHeader">
@@ -717,6 +717,7 @@ let MyList = {
 		// toggles
 		csvExport:      { type:Boolean, required:false, default:false },
 		csvImport:      { type:Boolean, required:false, default:false },
+		dropdownShow:   { type:Boolean, required:false, default:false },
 		filterQuick:    { type:Boolean, required:false, default:false }, // enable quick filter
 		formLoading:    { type:Boolean, required:false, default:false }, // trigger and control list reloads
 		hasOpenForm:    { type:Boolean, required:false, default:false }, // list can open record in form
@@ -738,7 +739,7 @@ let MyList = {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'clipboard','close-inline','open-form',
+		'clipboard','close-inline','dropdown-show','open-form',
 		'open-form-bulk','record-count-change','record-removed',
 		'records-selected','records-selected-init','set-args',
 		'set-column-ids-by-user','set-collection-indexes'
@@ -764,7 +765,6 @@ let MyList = {
 			showFilters:false,          // show UI for user filters
 			showHeader:true,            // show UI for list header
 			showOptions:false,          // show UI for list options
-			showTable:false,            // show regular list table as view or input dropdown
 			
 			// list constants
 			refTabindex:'input_row_', // prefix for vue references to tabindex elements
@@ -962,8 +962,6 @@ let MyList = {
 		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
-		this.showTable = !this.isInput;
-		
 		// react to field resize
 		if(!this.isInput) {
 			window.addEventListener('resize',this.resized);
@@ -971,6 +969,16 @@ let MyList = {
 		}
 		
 		// setup watchers
+		this.$watch('dropdownShow',(v) => {
+			if(!v) return;
+
+			this.filtersQuick = '';
+			this.reloadInside('dropdown');
+			
+			const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
+			if(inputEl !== null)
+				inputEl.focus();
+		});
 		this.$watch('favoriteId',this.reloadOptions);
 		this.$watch('columns',(valOld,valNew) => {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
@@ -1226,8 +1234,8 @@ let MyList = {
 		
 		// user actions, generic
 		blur() {
-			this.focused   = false;
-			this.showTable = false;
+			this.focused = false;
+			this.$emit('dropdown-show',false);
 		},
 		clickColumn(columnBatchIndex) {
 			this.columnBatchIndexOption = this.columnBatchIndexOption === columnBatchIndex
@@ -1242,11 +1250,11 @@ let MyList = {
 		},
 		clickInputEmpty() {
 			if(!this.inputIsReadonly)
-				this.toggleDropdown();
+				this.$emit('dropdown-show',!this.dropdownShow);
 		},
 		clickInputRow() {
-			if(!this.inputAsCategory && !this.showInputAddLine && !this.inputIsReadonly)
-				this.toggleDropdown();
+			if(!this.inputIsReadonly && !this.inputAsCategory && !this.showInputAddLine)
+				this.$emit('dropdown-show',!this.dropdownShow);
 		},
 		clickRow(row,middleClick) {
 			if(!this.isInput)
@@ -1255,7 +1263,7 @@ let MyList = {
 			if(this.inputMulti) this.rowsInput.push(row);
 			else                this.rowsInput = [row];
 
-			this.showTable    = false;
+			this.$emit('dropdown-show',false);
 			this.filtersQuick = '';
 			this.$emit('records-selected',[row.indexRecordIds['0']]);
 		},
@@ -1264,9 +1272,9 @@ let MyList = {
 			for(const row of this.rows) {
 				ids.push(row.indexRecordIds['0']);
 			}
-			this.rowsInput    = this.rowsInput.concat(this.rows);
-			this.showTable    = false;
+			this.rowsInput = this.rowsInput.concat(this.rows);
 			this.filtersQuick = '';
+			this.$emit('dropdown-show',false);
 			this.$emit('records-selected',ids);
 		},
 		closeHover() {
@@ -1276,13 +1284,11 @@ let MyList = {
 			this.showOptions   = false;
 		},
 		escape() {
-			if(this.isInput) {
+			if(this.isInput)
 				this.blur();
-				this.showTable = false;
-			}
 		},
 		focus() {
-			if(!this.inputIsReadonly && this.isInput && !this.inputAsCategory && !this.showTable) {
+			if(!this.inputIsReadonly && this.isInput && !this.inputAsCategory && !this.dropdownShow) {
 				this.focused      = true;
 				this.filtersQuick = '';
 			}
@@ -1309,13 +1315,13 @@ let MyList = {
 			if(arrow && this.isInput && !this.inputAsCategory) {
 				
 				// show dropdown
-				if(!this.showTable) {
+				if(!this.dropdownShow) {
 					e.preventDefault();
-					return this.toggleDropdown();
+					return this.$emit('dropdown-show',true);
 				}
 				
 				// focus first/last input element
-				if(this.showTable && this.rows.length !== 0) {
+				if(this.dropdownShow && this.rows.length !== 0) {
 					e.preventDefault();
 					
 					if(e.target !== this.$refs[this.refTabindex+'0'][0])
@@ -1418,18 +1424,6 @@ let MyList = {
 			}
 			this.reloadInside('order');
 		},
-		toggleDropdown() {
-			this.showTable = !this.showTable;
-			
-			if(this.showTable) {
-				this.filtersQuick = '';
-				this.reloadInside('dropdown');
-				
-				const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
-				if(inputEl !== null)
-					inputEl.focus();
-			}
-		},
 		toggleHeader() {
 			this.showHeader = !this.showHeader;
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'header',this.showHeader);
@@ -1442,9 +1436,8 @@ let MyList = {
 				return;
 			
 			// any input opens table (dropdown) if not open already
-			if(!this.showTable) {
-				this.showTable = true;
-				this.reloadInside('dropdown');
+			if(!this.dropdownShow) {
+				this.$emit('dropdown-show',true);
 			}
 			else if(event.code === 'Enter') {
 				
@@ -1452,7 +1445,7 @@ let MyList = {
 				if(this.rows.length !== 0)
 					this.clickRow(this.rows[0],false);
 				
-				this.showTable = false;
+				this.$emit('dropdown-show',false);
 			}
 			else if(event.code !== 'Escape') {
 				
@@ -1461,10 +1454,10 @@ let MyList = {
 			}
 		},
 		updatedFilterQuick() {
-			if(this.isInput && !this.showTable)
-				this.showTable = true;
-			
-			this.reloadInside('filtersQuick');
+			if(this.isInput && !this.dropdownShow)
+				this.$emit('dropdown-show',true);
+			else
+				this.reloadInside('filtersQuick');
 		},
 		
 		// user actions, cards layout
@@ -1572,7 +1565,7 @@ let MyList = {
 		},
 		get() {
 			// do nothing if nothing is shown, form is loading or list is in a non-visible tab
-			if(!this.showTable || this.formLoading || (this.isHidden && !this.loadWhileHidden))
+			if(this.formLoading || (this.isInput && !this.dropdownShow) || (this.isHidden && !this.loadWhileHidden))
 				return;
 			
 			// fix invalid offset (can occur when limit is changed)
@@ -1625,8 +1618,8 @@ let MyList = {
 			
 			// reload record representation
 			// must happen even if no GET is executed (clear inputs)
-			this.rowsInput = [];    // clear input rows
-			this.showTable = false; // if list is reloaded, close dropdown
+			this.rowsInput = [];               // clear input rows
+			this.$emit('dropdown-show',false); // if list is reloaded, close dropdown
 			
 			// for inputs we only need data if:
 			// * field is category input (always shows everything)

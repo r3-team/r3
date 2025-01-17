@@ -347,10 +347,7 @@
 	display:flex;
 	flex-flow:row wrap;
 	align-items:center;
-	gap:4px;
-}
-.list-input-row-items.nogap{
-	gap:0px;
+	gap:calc(var(--spacing) / 1.5);
 }
 .list-input-row-items.nowrap{
 	flex-wrap:nowrap;

@@ -367,7 +367,7 @@ let MyInputDate = {
 				/>
 			</div>
 			
-			<div v-if="!isReadonly" class="actions">
+			<div v-if="!isReadonly" class="row gap nowrap centered">
 				<!-- full day selector -->
 				<my-button
 					v-if="isDate && isTime && isRange"
@@ -393,7 +393,7 @@ let MyInputDate = {
 			</div>
 		</div>
 		
-		<div class="input-dropdown-wrap" v-if="showCalendar" :class="{ upwards:showUpwards }">
+		<div class="input-dropdown-wrap" v-if="dropdownShow" :class="{ upwards:showUpwards }">
 			<div class="input-dropdown" :class="{ upwards:showUpwards }">
 				<div class="top lower">
 					<div class="area nowrap"></div>
@@ -451,14 +451,14 @@ let MyInputDate = {
 		unixTo:    { required:false, default:null },
 		useMonth:  { type:Boolean, required:false, default:false },
 	},
-	emits:['set-unix-from','set-unix-to'],
+	emits:['dropdown-show','set-unix-from','set-unix-to'],
 	data() {
 		return {
 			date:new Date(),    // date to control calendar navigation
 			dateSelect0:null,   // for date range selection, start date
 			dateSelect1:null,   // for date range selection, end date
+			dropdownShow:false,
 			showUpwards:false,  // show calendar dropdown above input
-			showCalendar:false,
 			viewMonth:true      // calendar view is either month (true) or days (false)
 		};
 	},
@@ -525,7 +525,7 @@ let MyInputDate = {
 		
 		// events
 		escaped() {
-			this.showCalendar = false;
+			this.dropdownSet(false);
 		},
 		updateDropdownDirection() {
 			let headersPx  = 200; // rough height in px of all headers (menu/form) combined
@@ -534,6 +534,10 @@ let MyInputDate = {
 		},
 		
 		// actions
+		dropdownSet(state) {
+			this.dropdownShow = state;
+			this.$emit('dropdown-show',state);
+		},
 		goToToday() {
 			let now = new Date();
 			
@@ -559,7 +563,7 @@ let MyInputDate = {
 			}
 		},
 		toggleCalendar() {
-			if(!this.showCalendar) {
+			if(!this.dropdownShow) {
 				
 				// reset date range selection
 				if(this.isRange) {
@@ -587,7 +591,7 @@ let MyInputDate = {
 				// decide dropdown direction
 				this.updateDropdownDirection();
 			}
-			this.showCalendar = !this.showCalendar;
+			this.dropdownSet(!this.dropdownShow);
 		},
 		toggleFullDayRange() {
 			// if range is empty, set both dates to a datetime today
@@ -617,7 +621,7 @@ let MyInputDate = {
 				this.dateSelect1 = new Date(unix1 * 1000);
 				this.$emit('set-unix-to',unix1);
 			}
-			this.showCalendar = false;
+			this.dropdownSet(false);
 		},
 		dateSetByMonthView(unix0,unix1,middleClick) {
 			if(this.fullDay)
@@ -638,7 +642,7 @@ let MyInputDate = {
 		setNull() {
 			this.unixFromInput = null;
 			this.unixToInput   = null;
-			this.showCalendar  = false;
+			this.dropdownSet(false);
 		}
 	}
 };

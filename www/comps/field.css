@@ -46,12 +46,13 @@
 	background-color:var(--color-input);
 	box-shadow:var(--shadow-input);
 	box-sizing:border-box;
+	outline:var(--outline-input);
 	overflow:visible;
 }
+.field-content.data.dropdownShow:not(.disabled),
 .field-content.data:focus-within:not(.disabled){
-	transition:box-shadow 0.3s, outline 0.2s;
-	outline:2px solid var(--color-accent1);
-	box-shadow:1px 1px 8px var(--color-shade-input-sel);
+	outline:var(--outline-input-focus);
+	box-shadow:var(--shadow-input-focus);
 }
 .field-content.data.disabled{
 	color:var(--color-font-disabled);
@@ -59,6 +60,7 @@
 }
 .field-content.intent{
 	padding-left:8px;
+	padding-right:8px;
 }
 .field-content.isSingleField{
 	border:none;
@@ -198,7 +200,6 @@
 .field .color-input{
 	display:flex;
 	flex-flow:row nowrap;
-	padding:0px 8px 0px 0px;
 	align-items:stretch;
 	flex:1 1 auto;
 }
@@ -250,7 +251,6 @@
 	flex:0 1 auto;
 	max-width:60px;
 	padding:2px 6px;
-	margin:0px 8px 0px 0px;
 	border-radius:5px;
 	text-align:center;
 	color:var(--color-font);
@@ -285,7 +285,7 @@
 	flex-flow:column nowrap;
 	background-color:var(--color-input);
 	border-radius:3px;
-	box-shadow:1px 1px 4px var(--color-shade);
+	box-shadow:var(--shadow-input);
 }
 .field .chart .actions{
 	flex:0 0 auto;

@@ -5,7 +5,7 @@ export {MyInputBarcode as default};
 let MyInputBarcode = {
 	name:'my-input-barcode',
 	template:`<div class="input-barcode">
-		<div class="input-barcode-actions">
+		<div class="input-barcode-actions row gap">
 			<input class="input-iframe-input" data-is-input="1"
 				v-model="inputText"
 				:disabled="readonly"

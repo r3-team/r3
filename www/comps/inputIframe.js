@@ -3,7 +3,7 @@ export {MyInputIframe as default};
 let MyInputIframe = {
 	name:'my-input-iframe',
 	template:`<div class="input-iframe">
-		<div class="input-iframe-actions" :class="{ readonly:readonly }">
+		<div class="input-iframe-actions row gap" :class="{ readonly:readonly }">
 			<input class="input-iframe-input" data-is-input="1"
 				v-model="srcInput"
 				@keyup.enter="set"

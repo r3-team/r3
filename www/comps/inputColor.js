@@ -5,7 +5,7 @@ let MyInputColor = {
 	name:'my-input-color',
 	components:{ 'chrome-picker':VueColor.Chrome },
 	template:`<div class="input-color" v-click-outside="closePicker">
-		<div class="input-color-preview shade"
+		<div class="input-color-preview row gap"
 			:class="{ isDark:isDark }"
 			:style="'background-color:#'+input"
 		>
