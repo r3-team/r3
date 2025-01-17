@@ -1158,7 +1158,7 @@ let MySettings = {
 							<td>{{ capApp.searchDictionaries }}</td>
 							<td>
 								<div class="column gap">
-									<div class="row gap">
+									<div class="row centered gap">
 										<select v-model="searchDictionaryNew" @change="dictAdd($event.target.value)">
 											<option value="">{{ capApp.searchDictionaryNew }}</option>
 											<option v-for="d in searchDictionaries.filter(v => !settingsInput.searchDictionaries.includes(v) && v !== 'simple')">
@@ -1227,6 +1227,14 @@ let MySettings = {
 								<div class="row gap">
 									<my-button-check v-model="settingsInput.bordersAll"     :caption="capGen.more" />
 									<my-button-check v-model="settingsInput.bordersSquared" :caption="capApp.bordersSquared" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.inputs }}</td>
+							<td>
+								<div class="row gap">
+									<my-button-check v-model="settingsInput.shadowsInputs" :caption="capGen.shadows" />
 								</div>
 							</td>
 						</tr>

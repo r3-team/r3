@@ -31,7 +31,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 			hint_update_version, mobile_scroll_form, form_actions_align,
 			warn_unsaved, pattern, font_family, tab_remember, list_colored,
 			list_spaced, color_classic_mode, color_header, color_header_single,
-			color_menu, number_sep_decimal, number_sep_thousand, bool_as_icon, ARRAY(
+			color_menu, number_sep_decimal, number_sep_thousand, bool_as_icon,
+			shadows_inputs, ARRAY(
 				SELECT name::TEXT
 				FROM instance.login_search_dict
 				WHERE login_id          = ls.login_id
@@ -46,7 +47,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 		&s.WarnUnsaved, &s.Pattern, &s.FontFamily, &s.TabRemember, &s.ListColored,
 		&s.ListSpaced, &s.ColorClassicMode, &s.ColorHeader, &s.ColorHeaderSingle,
 		&s.ColorMenu, &s.NumberSepDecimal, &s.NumberSepThousand, &s.BoolAsIcon,
-		&s.SearchDictionaries)
+		&s.ShadowsInputs, &s.SearchDictionaries)
 
 	return s, err
 }
@@ -72,15 +73,15 @@ func Set_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 				dark, hint_update_version, mobile_scroll_form, form_actions_align, warn_unsaved,
 				pattern, font_family, tab_remember, list_colored, list_spaced, color_classic_mode,
 				color_header, color_header_single,color_menu, number_sep_decimal,
-				number_sep_thousand, bool_as_icon)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,
-				$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27)
+				number_sep_thousand, bool_as_icon, shadows_inputs)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,
+				$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)
 		`, entryName), entryId, s.LanguageCode, s.DateFormat, s.SundayFirstDow, s.FontSize,
 			s.BordersAll, s.BordersSquared, s.HeaderCaptions, s.HeaderModules, s.Spacing, s.Dark,
 			s.HintUpdateVersion, s.MobileScrollForm, s.FormActionsAlign, s.WarnUnsaved, s.Pattern,
 			s.FontFamily, s.TabRemember, s.ListColored, s.ListSpaced, s.ColorClassicMode,
 			s.ColorHeader, s.ColorHeaderSingle, s.ColorMenu, s.NumberSepDecimal,
-			s.NumberSepThousand, s.BoolAsIcon); err != nil {
+			s.NumberSepThousand, s.BoolAsIcon, s.ShadowsInputs); err != nil {
 
 			return err
 		}
@@ -92,15 +93,15 @@ func Set_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 				spacing = $9, dark = $10, hint_update_version = $11, mobile_scroll_form = $12,
 				form_actions_align = $13, warn_unsaved = $14, pattern = $15, font_family = $16,
 				tab_remember = $17, list_colored = $18, list_spaced = $19, color_classic_mode = $20,
-				color_header = $21, color_header_single = $22, color_menu = $23,
-				number_sep_decimal = $24, number_sep_thousand = $25, bool_as_icon = $26
-			WHERE %s = $27
+				color_header = $21, color_header_single = $22, color_menu = $23, number_sep_decimal = $24,
+				number_sep_thousand = $25, bool_as_icon = $26, shadows_inputs = $27
+			WHERE %s = $28
 		`, entryName), s.LanguageCode, s.DateFormat, s.SundayFirstDow, s.FontSize, s.BordersAll,
 			s.BordersSquared, s.HeaderCaptions, s.HeaderModules, s.Spacing, s.Dark,
 			s.HintUpdateVersion, s.MobileScrollForm, s.FormActionsAlign, s.WarnUnsaved, s.Pattern,
 			s.FontFamily, s.TabRemember, s.ListColored, s.ListSpaced, s.ColorClassicMode,
 			s.ColorHeader, s.ColorHeaderSingle, s.ColorMenu, s.NumberSepDecimal,
-			s.NumberSepThousand, s.BoolAsIcon, entryId); err != nil {
+			s.NumberSepThousand, s.BoolAsIcon, s.ShadowsInputs, entryId); err != nil {
 
 			return err
 		}

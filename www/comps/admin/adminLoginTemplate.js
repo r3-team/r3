@@ -173,6 +173,14 @@ let MyAdminLoginTemplate = {
 							</td>
 						</tr>
 						<tr>
+							<td>{{ capGen.inputs }}</td>
+							<td>
+								<div class="row gap">
+									<my-button-check v-model="settings.shadowsInputs" :caption="capGen.shadows" />
+								</div>
+							</td>
+						</tr>
+						<tr>
 							<td>{{ capAppSet.fontFamily }}</td>
 							<td>
 								<div class="row gap">

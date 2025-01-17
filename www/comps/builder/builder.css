@@ -1031,8 +1031,10 @@
 	border:1px solid var(--color-border);
 	border-radius:6px;
 	background-color:var(--color-input);
+	overflow:hidden;
 }
 .builder-function .entity{
+	padding:2px 8px;
 	border-bottom:1px solid var(--color-border);
 }
 .builder-function .entity:last-child{
@@ -1046,13 +1048,14 @@
 	flex-flow:row nowrap;
 	align-items:center;
 	justify-content:space-between;
+	gap:8px;
 }
 .builder-function .entity-children{
 	padding:3px 0px 3px 5px;
 	border-top:1px solid var(--color-border);
 	display:flex;
 	flex-flow:row wrap;
-	gap:3px;
+	gap:8px;
 }
 
 .builder-function .schedule{

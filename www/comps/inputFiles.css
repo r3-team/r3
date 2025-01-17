@@ -7,7 +7,7 @@
 
 .input-files-header{
 	display:flex;
-	padding:8px 6px;
+	padding:8px;
 	border-bottom:1px solid var(--color-border);
 	flex-flow:row nowrap;
 	align-items:center;
@@ -18,7 +18,7 @@
 }
 .input-files-header input{
 	width:100%;
-	max-with:120px;
+	max-width:120px;
 	min-width:30px;
 }
 .input-files-header img.view-toggle{

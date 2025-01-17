@@ -269,6 +269,7 @@ let MyApp = {
 			if(s.settings.dark)             classes.push('user-dark');
 			if(s.settings.mobileScrollForm) classes.push('user-mobileScrollForm');
 			if(s.settings.listSpaced)       classes.push('user-listSpaced');
+			if(s.settings.shadowsInputs)    classes.push('user-shadowsInputs');
 			if(s.isMobile)                  classes.push('is-mobile');
 			
 			return classes.join(' ');

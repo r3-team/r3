@@ -304,10 +304,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				is_mobile ASC NULLS LAST
 			);
 
-			-- new login setting
+			-- new login settings
 			CREATE TYPE instance.align_horizontal AS ENUM ('left', 'center', 'right');
 			ALTER TABLE instance.login_setting ADD   COLUMN form_actions_align TEXT NOT NULL DEFAULT 'center';
 			ALTER TABLE instance.login_setting ALTER COLUMN form_actions_align DROP DEFAULT;
+
+			ALTER TABLE instance.login_setting ADD   COLUMN shadows_inputs BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN shadows_inputs DROP DEFAULT;
 		`)
 		return "3.10", err
 	},

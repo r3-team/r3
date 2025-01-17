@@ -1,5 +1,5 @@
 .button{
-	height:30px;
+	height:32px;
 	margin:0px;
 	padding:4px calc(var(--spacing) / 1.5) 5px;
 	font-size:inherit;
@@ -12,28 +12,35 @@
 	outline:none;
 	box-sizing:border-box;
 	border-radius:5px;
-	transition:height 0.1s, margin 0.1s, padding 0.1s, box-shadow 0.1s, border-bottom 0.1s, filter 0.1s;
+	transition:box-shadow 0.1s, border-bottom 0.1s, filter 0.1s;
 	user-select:none;
 }
 .button.adjusts{
 	flex:1 0 auto;
 }
 .button.background{
-	background-color:var(--color-action-disable);
 	box-shadow:var(--shadow-input);
 	color:var(--color-font-bright);
+	background-color:var(--color-action-disable);
+	border:1px solid var(--color-border);
 }
 .button.background.clickable{
 	background-color:var(--color-action);
+	border:1px solid var(--color-action-border);
 }
 .button.background.clickable.cancel{
 	background-color:var(--color-cancel);
+	border:1px solid var(--color-cancel-border);
 }
 .button.background.clickable:focus,
 .button.background.clickable:hover{
 	filter:brightness(120%);
 	box-shadow:var(--shadow-input-focus);
-	border-bottom:2px solid var(--color-bright);
+	border-bottom:3px solid var(--color-action-border);
+}
+.button.background.clickable.cancel:focus,
+.button.background.clickable.cancel:hover{
+	border-bottom:3px solid var(--color-cancel-border);
 }
 .button.large{
 	height:40px;
@@ -94,18 +101,4 @@
 /* user overwrites */
 .user-dark .button.background.inactive{
 	filter:grayscale(100%) brightness(85%);
-}
-.user-shadowNone .button.background.clickable{
-	border:1px solid var(--color-action-border);
-}
-.user-shadowNone .button.background.clickable.cancel{
-	border:1px solid var(--color-cancel-border);
-}
-.user-shadowNone .button.background.clickable:focus,
-.user-shadowNone .button.background.clickable:hover{
-	border-bottom:3px solid var(--color-action-border);
-}
-.user-shadowNone .button.background.clickable.cancel:focus,
-.user-shadowNone .button.background.clickable.cancel:hover{
-	border-bottom:3px solid var(--color-cancel-border);
 }

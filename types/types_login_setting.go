@@ -27,6 +27,7 @@ type Settings struct {
 	PageLimit          int         `json:"pageLimit"`
 	Pattern            pgtype.Text `json:"pattern"`
 	SearchDictionaries []string    `json:"searchDictionaries"`
+	ShadowsInputs      bool        `json:"shadowsInputs"`
 	Spacing            int         `json:"spacing"`
 	SundayFirstDow     bool        `json:"sundayFirstDow"`
 	TabRemember        bool        `json:"tabRemember"`

@@ -122,13 +122,18 @@
 	
 	/**/
 	/* shadows */
-	--shadow-input:1px 1px 3px var(--color-shade);
-	--shadow-input-focus:1px 1px 6px var(--color-shade);
+	--shadow-input:0px 0px 1px 0px rgba(0,0,0,0.6) inset;
+	--shadow-input-focus:none;
 
 	/**/
 	/* outlines */
-	--outline-input:none;
+	--outline-input:1px solid var(--color-border);
 	--outline-input-focus:2px solid var(--color-accent1);
+}
+@-moz-document url-prefix() {
+	:root{
+		--shadow-input:0px 0px 1px 0px rgba(0,0,0,0.3) inset;
+	}
 }
 
 html,body{
@@ -191,7 +196,7 @@ h3{
 	align-items:center;
 }
 .column.gap{
-	gap:calc(var(--spacing) / 2.5);
+	gap:calc(var(--spacing) / 2.2);
 }
 .column.gap-large{
 	gap:var(--spacing);
@@ -216,7 +221,7 @@ h3{
 	align-items:center;
 }
 .row.gap{
-	gap:calc(var(--spacing) / 2.5);
+	gap:calc(var(--spacing) / 2.2);
 }
 .row.gap-large{
 	gap:var(--spacing);
@@ -1420,7 +1425,7 @@ table td.maximum{
 	--color-font:          #ededed;
 	--color-input:         var(--color-input-dark);
 	--color-input-disabled:#222222;
-	--color-list-row-even: #3a4141;
+	--color-list-row-even: #3e4141;
 	--color-shade:         #000000;
 	--color-shade-bright:  #222222;
 	--color-shade-input:   #080808;
@@ -1449,8 +1454,8 @@ table td.maximum{
 	--color-form-builder-tabs:        hsl(104deg 15% 32%);
 	--color-form-builder-tabs-active: hsl(104deg 12% 39%);
 	
-	--shadow-input:1px 1px 3px #000000;
-	--shadow-input-focus:1px 1px 6px #000000;
+	--outline-input:1px solid var(--color-border);
+	--outline-input-focus:2px solid var(--color-accent1);
 	
 	--image-filter:        invert(1) brightness(90%);
 	--image-filter-alt:    invert(1) brightness(40%);
@@ -1469,10 +1474,10 @@ table td.maximum{
 	border:1px solid var(--color-border);
 	border-radius:2px;
 }
-.user-shadowNone{
-	--outline-input:1px solid var(--color-border);
-	--shadow-input:none;
-	--shadow-input-focus:none;
+.user-shadowsInputs{
+	--outline-input:none;
+	--shadow-input:1px 1px 3px var(--color-shade);
+	--shadow-input-focus:1px 1px 6px var(--color-shade);
 }
 
 /* mobile overwrites */

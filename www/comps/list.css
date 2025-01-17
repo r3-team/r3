@@ -360,6 +360,7 @@
 	background-color:transparent !important;
 }
 .list-input-rows-wrap.multi-line .list-input-rows td{
+	padding:0px 3px 0px 0px;
 	border-bottom:1px dotted var(--color-border);
 }
 

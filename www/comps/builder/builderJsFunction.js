@@ -318,7 +318,7 @@ let MyBuilderJsFunction = {
 									:image="radioIcon('jsFunction',fnc.id)"
 									:naked="true"
 								/>
-								<div class="row centered">
+								<div class="row gap centered">
 									<my-button image="question.png"
 										@trigger="showHelp(fnc.name+'()',getFunctionHelp('js',fnc,builderLanguage))"
 										:active="getFunctionHelp('js',fnc,builderLanguage) !== ''"
@@ -362,7 +362,7 @@ let MyBuilderJsFunction = {
 									:image="radioIcon('pgFunction',fnc.id)"
 									:naked="true"
 								/>
-								<div class="row centered">
+								<div class="row gap centered">
 									<my-button image="question.png"
 										@trigger="showHelp(fnc.name+'()',getFunctionHelp('pg',fnc,builderLanguage))"
 										:active="getFunctionHelp('pg',fnc,builderLanguage) !== ''"

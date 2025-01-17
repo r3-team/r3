@@ -159,10 +159,10 @@
 
 /* input dropdown */
 .input-dropdown-wrap{
-	width:97%;
+	width:calc(100% - 10px);
 	height:0px;
 	position:absolute;
-	left:1.5%;
+	left:5px;
 	bottom:0px;
 	overflow:visible !important;
 	z-index:var(--z-index-dropdown);
@@ -179,7 +179,7 @@
 	position:absolute;
 	margin:0px;
 	background-color:var(--color-input);
-	box-shadow:1px 6px 6px var(--color-shade);
+	box-shadow:1px 3px 3px var(--color-shade);
 	border:2px solid var(--color-accent1);
 	border-radius:0px 0px 5px 5px;
 	border-top:none;
@@ -211,14 +211,12 @@
 	display:flex;
 	flex-flow:column nowrap;
 	flex:1 1 auto;
-	background-color:var(--color-input);
 	border-radius:5px;
 }
 .input-barcode-actions{
 	padding:2px 8px 0px;
 	border-bottom:1px solid var(--color-border);
 	border-radius:5px 5px 0px 0px;
-	background-color:var(--color-input);
 }
 .input-barcode-format{
 	padding:var(--spacing);
@@ -228,9 +226,9 @@
 	overflow:auto;
 }
 .input-barcode-preview>img{
-	max-width:100%;
+	max-width:calc(100% - 6px);
 	max-height:95%;
-	margin:0px auto;
+	margin:0px 3px;
 }
 .input-barcode-preview>img.max-size{
 	min-height:95%;
@@ -269,14 +267,12 @@
 	display:flex;
 	flex-flow:column nowrap;
 	flex:1 1 auto;
-	background-color:var(--color-bg);
 	border-radius:5px;
 }
 .input-iframe-actions{
 	padding:2px 8px 0px;
 	border-bottom:1px solid var(--color-border);
 	border-radius:5px 5px 0px 0px;
-	background-color:var(--color-input);
 }
 .input-iframe-input{
 	height:24px;
@@ -309,6 +305,7 @@
 	flex-direction:row;
 	align-items:center;
 	flex:0 0 auto;
+	gap:4px;
 }
 .input-offset .input-offset-caption{
 	flex:0 0 auto;
@@ -318,7 +315,6 @@
 	width:auto;
 	min-width:unset;
 	max-width:unset;
-	border:1px solid var(--color-border);
 }
 
 
@@ -524,7 +520,7 @@
 	display:flex;
 	flex-flow:row wrap;
 	justify-content:space-between;
-	padding:8px 6px;
+	padding:8px;
 	background-color:var(--color-bg);
 	border-bottom:1px solid var(--color-border);
 	border-radius:5px 5px 0px 0px;
@@ -595,8 +591,8 @@
 .user-bordersSquared .input-dropdown-wrap.left-overhang .input-dropdown{
 	border-radius:0px !important;
 }
-.user-shadowNone .bool>.left,
-.user-shadowNone .bool>.right{
+.user-shadowsInputs .bool>.left,
+.user-shadowsInputs .bool>.right{
 	outline:1px solid var(--color-border);
 	box-shadow:none;
 }
