@@ -436,7 +436,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	margin:0px 0px 6px 0px;
-	gap:3px;
+	gap:6px;
 }
 .builder-query .fixed-limit{
 	display:flex;
@@ -526,7 +526,7 @@
 	margin-bottom:5px;
 	border:1px solid var(--color-border);
 	border-radius:4px;
-	box-shadow:1px 1px 4px var(--color-shade);
+	box-shadow:var(--shadow-input);
 }
 .builder-collection-input td{
 	padding:3px 5px;

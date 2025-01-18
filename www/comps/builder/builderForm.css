@@ -229,8 +229,7 @@
 	flex-flow:row nowrap;
 	align-items:center;
 	gap:5px;
-	padding:2px 4px;
-	margin:0px 3px 0px 0px;
+	padding:2px;
 	font-weight:bold;
 }
 .builder-field-button:hover{

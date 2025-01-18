@@ -1436,11 +1436,11 @@ table td.maximum{
 	--color-accent3-alt:   hsl(199,11%,45%);
 	--color-accent4:       hsl(339, 4%,61%);
 	--color-action:        hsl(195, 27%, 26%);
-	--color-action-border: hsl(197, 20%, 17%);
+	--color-action-border: hsl(195, 13%, 6%);
 	--color-action-bright: hsl(196, 14%, 47%);
 	--color-action-disable:hsl(0, 0%, 21%);
 	--color-cancel:        hsl(0, 42%, 27%);
-	--color-cancel-border: hsl(0, 42%, 17%);
+	--color-cancel-border: hsl(0, 33%, 11%);
 	--color-error:         hsl(0, 73%, 36%);
 	--color-success:       hsl(113, 53%, 27%);
 	

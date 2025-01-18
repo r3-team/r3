@@ -149,7 +149,7 @@ const MyStoreLocal = {
 				typeof value === 'object' && Array.isArray(value)  && value.length === 0 ||
 				typeof value === 'string' && value === '' ||
 				typeof value === 'number' && value === 0 ||
-				typeof value === 'null';
+				value === null;
 
 			// overwrite target if options are set for favorite
 			if(favoriteId !== null && base.favoriteIdMap[favoriteId] === undefined)

@@ -574,22 +574,21 @@ let MyBuilderFieldOptions = {
 						</td>
 					</tr>
 					<tr v-if="!isIFrame">
-						<td>{{ capGen.alignment }}</td>
-						<td>
-							<my-bool
-								@update:modelValue="setFlags('alignEnd',$event)"
-								:caption0="capApp.option.alignment.def"
-								:caption1="capApp.option.alignment.end"
-								:modelValue="field.flags.includes('alignEnd')"
-							/>
-						</td>
-					</tr>
-					<tr v-if="!isIFrame">
 						<td>{{ capGen.monospace }}</td>
 						<td>
 							<my-bool
 								@update:modelValue="setFlags('monospace',$event)"
 								:modelValue="field.flags.includes('monospace')"
+							/>
+						</td>
+					</tr>
+					<tr v-if="!isIFrame">
+						<td>{{ capGen.alignment }}</td>
+						<td>
+							<my-button-check
+								@update:modelValue="setFlags('alignEnd',$event)"
+								:caption="capGen.alignmentHor.right"
+								:modelValue="field.flags.includes('alignEnd')"
 							/>
 						</td>
 					</tr>
