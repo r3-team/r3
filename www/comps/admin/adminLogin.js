@@ -375,7 +375,18 @@ let MyAdminLogin = {
 										</div>
 									</td>
 									<td><my-bool v-model="noAuth" :readonly="isLdap" /></td>
-									<td>{{ capApp.hint.noAuth }}</td>
+									<td>
+										<div class="column gap default-inputs">
+											<span>{{ capApp.hint.noAuth }}</span>
+											<div class="row gap centered" v-if="noAuth">
+												<input disabled :value="noAuthUrl" />
+												<my-button image="copyClipboard.png"
+													@trigger="copyToClipboard"
+													:captionTitle="capGen.button.copyClipboard"
+												/>
+											</div>
+										</div>
+									</td>
 								</tr>
 								<tr>
 									<td>
@@ -500,6 +511,7 @@ let MyAdminLogin = {
 		isLdap:    (s) => s.ldapId !== null,
 		isLimited: (s) => s.activated && s.roleIds.length < 2 && !s.admin && !s.noAuth,
 		isNew:     (s) => s.id === 0,
+		noAuthUrl: (s) => !s.noAuth ? '' : `${location.protocol}//${location.host}/#/?login=${s.name}`,
 		
 		// stores
 		activated:      (s) => s.$store.getters['local/activated'],
@@ -561,6 +573,9 @@ let MyAdminLogin = {
 		},
 		close() {
 			this.$emit('close');
+		},
+		copyToClipboard() {
+			navigator.clipboard.writeText(this.noAuthUrl);
 		},
 		openLoginForm(index) {
 			const frm = this.formIdMap[this.loginForms[index].formId];
