@@ -284,8 +284,12 @@ let MyLogin = {
 				if(params.has('login')) {
 					this.authenticatePublic(params.get('login'));
 					params.delete('login');
-					this.$router.replace(`${window.location.hash.substring(0,pos)}?${params.toString()}`);
-					return;
+					
+					const p = params.size === 0
+						? `${window.location.hash.substring(1,pos)}`
+						: `${window.location.hash.substring(1,pos)}?${params.toString()}`;
+					
+					return this.$router.replace(p);
 				}
 			}
 			
