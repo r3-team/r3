@@ -10,15 +10,17 @@ export {MyAdminLogin as default};
 let MyAdminLoginRole = {
 	name:'my-admin-login-role',
 	template:`<td class="minimum role-content">
-		<my-button
-			v-for="r in module.roles.filter(v => v.assignable && v.content === content)"
-			@trigger="$emit('toggle',r.id)"
-			:active="!readonly"
-			:caption="getCaption('roleTitle',module.id,r.id,r.captions,r.name)"
-			:captionTitle="getCaption('roleDesc',module.id,r.id,r.captions)"
-			:image="roleIds.includes(r.id) ? 'checkbox1.png' : 'checkbox0.png'"
-			:naked="true"
-		/>
+		<div class="row gap">
+			<my-button
+				v-for="r in module.roles.filter(v => v.assignable && v.content === content)"
+				@trigger="$emit('toggle',r.id)"
+				:active="!readonly"
+				:caption="getCaption('roleTitle',module.id,r.id,r.captions,r.name)"
+				:captionTitle="getCaption('roleDesc',module.id,r.id,r.captions)"
+				:image="roleIds.includes(r.id) ? 'checkbox1.png' : 'checkbox0.png'"
+				:naked="true"
+			/>
+		</div>
 	</td>`,
 	props:{
 		content: { type:String,  required:true }, // role content to filter by
