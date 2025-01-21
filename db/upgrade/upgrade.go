@@ -834,6 +834,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			
 			-- remove not needed configuration option
 			DELETE FROM instance.config WHERE name = 'tokenReauthHours';
+
+			-- add monospace column style
+			ALTER TYPE app.column_style ADD VALUE 'monospace';
 		`)
 		return "3.9", err
 	},

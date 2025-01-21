@@ -33,6 +33,9 @@
 .value-rich.italic{
 	font-style:italic;
 }
+.value-rich.monospace{
+	font-family:Consolas,Courier,monospace;
+}
 .value-rich img.boolean{
 	width:24px;
 	height:24px;

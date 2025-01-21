@@ -23,7 +23,7 @@ let MyValueRich = {
 		@focus="$emit('focus')"
 		@click="$emit('trigger')"
 		@keyup.space.enter="$emit('trigger')"
-		:class="{ alignEnd:alignEnd, alignMid:alignMid, bold:bold, color:isColor, files:isFiles, italic:italic, wrap:wrap }"
+		:class="{ alignEnd:alignEnd, alignMid:alignMid, bold:bold, color:isColor, files:isFiles, italic:italic, monospace:monospace, wrap:wrap }"
 		:style="style"
 	>
 		<!-- copy to clipboard action -->
@@ -114,6 +114,7 @@ let MyValueRich = {
 		display:    { type:String,  required:false, default:'default' }, // variant (url, gallery, password ...)
 		italic:     { type:Boolean, required:false, default:false },
 		length:     { type:Number,  required:false, default:0 },         // string length limit
+		monospace:  { type:Boolean, required:false, default:false },
 		value:      { required:true },
 		wrap:       { type:Boolean, required:false, default:false }      // wrap string value
 	},

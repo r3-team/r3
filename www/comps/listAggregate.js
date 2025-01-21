@@ -118,8 +118,9 @@ let MyListAggregate = {
 						const bi = this.columnIdMapColumnBatchIndex[c.id];
 						this.valuesByColumnBatch[bi] = v;
 
-						if(c.flags.alignEnd) this.domClassByColumnBatch[bi].alignEnd = true;
-						if(c.flags.alignMid) this.domClassByColumnBatch[bi].alignMid = true;
+						if(c.flags.alignEnd)  this.domClassByColumnBatch[bi].alignEnd  = true;
+						if(c.flags.alignMid)  this.domClassByColumnBatch[bi].alignMid  = true;
+						if(c.flags.monospace) this.domClassByColumnBatch[bi].monospace = true;
 					}
 				},
 				this.$root.genericError

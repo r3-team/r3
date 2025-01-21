@@ -161,6 +161,7 @@ let MyList = {
 										:basis="columns[0].basis"
 										:display="columns[0].display"
 										:length="columns[0].length"
+										:monospace="columns[0].flags.monospace"
 										:value="r.values[0]"
 										:wrap="columns[0].flags.wrap"
 									/>
@@ -195,6 +196,7 @@ let MyList = {
 											:italic="columns[ci].flags.italic"
 											:key="ci"
 											:length="columns[ci].length"
+											:monospace="columns[ci].flags.monospace"
 											:value="r.values[ci]"
 											:wrap="columns[ci].flags.wrap"
 										/>
@@ -527,6 +529,7 @@ let MyList = {
 											:italic="columns[ind].flags.italic"
 											:key="ind"
 											:length="columns[ind].length"
+											:monospace="columns[ind].flags.monospace"
 											:value="r.values[ind]"
 											:wrap="columns[ind].flags.wrap"
 										/>
@@ -664,6 +667,7 @@ let MyList = {
 														:italic="columns[ind].flags.italic"
 														:key="ind"
 														:length="columns[ind].length"
+														:monospace="columns[ind].flags.monospace"
 														:value="r.values[ind]"
 														:wrap="columns[ind].flags.wrap"
 													/>

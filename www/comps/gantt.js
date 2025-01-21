@@ -57,6 +57,7 @@ let MyGanttLineRecord = {
 					:italic="columns[i].flags.italic"
 					:key="i"
 					:length="columns[i].length"
+					:monospace="columns[i].flags.monospace"
 					:value="v"
 				/>
 			</template>
@@ -294,6 +295,7 @@ let MyGantt = {
 								:italic="columns[c.index].flags.italic"
 								:key="c.index"
 								:length="columns[c.index].length"
+								:monospace="columns[c.index].flags.monospace"
 								:value="c.value"
 							/>
 						</div>

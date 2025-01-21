@@ -57,6 +57,7 @@ let MyCalendarMonth = {
 									:italic="columns[i].flags.italic"
 									:key="i"
 									:length="columns[i].length"
+									:monospace="columns[i].flags.monospace"
 									:value="v"
 								/>
 							</template>
@@ -85,6 +86,7 @@ let MyCalendarMonth = {
 							:italic="columns[i].flags.italic"
 							:key="i"
 							:length="columns[i].length"
+							:monospace="columns[i].flags.monospace"
 							:wrap="true"
 							:value="v"
 						/>

@@ -127,6 +127,9 @@
 .list .layoutTable tfoot tr.aggregation td.alignMid{
 	text-align:center;
 }
+.list .layoutTable tfoot tr.aggregation td.monospace{
+	font-family:Consolas,Courier,monospace;
+}
 .list .layoutTable th{
 	padding:0px;
 	margin-bottom:-1px;
@@ -146,6 +149,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:stretch;
+	gap:6px;
 }
 .list .layoutTable th .columBatchHeaderCaption{
 	flex:1 1 auto;
@@ -292,7 +296,7 @@
 	position:absolute;
 	right:0px;
 	top:0px;
-	padding:2px 3px;
+	padding:4px 9px;
 	display:flex;
 	flex-flow:column wrap;
 }

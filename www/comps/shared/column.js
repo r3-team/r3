@@ -42,6 +42,7 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
 			bold:c.styles.includes('bold'),
 			clipboard:c.styles.includes('clipboard'),
 			italic:c.styles.includes('italic'),
+			monospace:c.styles.includes('monospace'),
 			vertical:c.styles.includes('vertical'),
 			wrap:c.styles.includes('wrap')
 		};

@@ -68,18 +68,31 @@ let MyBuilderColumnOptions = {
 				<tr>
 					<td>{{ capApp.columnStyles }}</td>
 					<td>
-						<div class="row gap">
-							<my-bool
+						<div class="row gap wrap">
+							<my-button-check
 								@update:modelValue="setStyle('bold',$event)"
-								:caption0="capApp.option.style.bold"
-								:caption1="capApp.option.style.bold"
+								:caption="capApp.option.style.bold"
 								:modelValue="column.styles.includes('bold')"
 							/>
-							<my-bool
+							<my-button-check
 								@update:modelValue="setStyle('italic',$event)"
-								:caption0="capApp.option.style.italic"
-								:caption1="capApp.option.style.italic"
+								:caption="capApp.option.style.italic"
 								:modelValue="column.styles.includes('italic')"
+							/>
+							<my-button-check
+								@update:modelValue="setStyle('monospace',$event)"
+								:caption="capGen.monospace"
+								:modelValue="column.styles.includes('monospace')"
+							/>
+							<my-button-check
+								@update:modelValue="setStyle('clipboard',$event)"
+								:caption="capApp.columnClipboard"
+								:modelValue="column.styles.includes('clipboard')"
+							/>
+							<my-button-check
+								@update:modelValue="setStyle('wrap',$event)"
+								:caption="capApp.columnWrap"
+								:modelValue="column.styles.includes('wrap')"
 							/>
 						</div>
 					</td>
@@ -107,24 +120,6 @@ let MyBuilderColumnOptions = {
 							@trigger="setInt('basis',25,false)"
 							:caption="capApp.columnSize0"
 							:naked="true"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.columnWrap }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="setStyle('wrap',$event)"
-							:modelValue="column.styles.includes('wrap')"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.columnClipboard }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="setStyle('clipboard',$event)"
-							:modelValue="column.styles.includes('clipboard')"
 						/>
 					</td>
 				</tr>
