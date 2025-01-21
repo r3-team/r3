@@ -40,6 +40,7 @@ import (
 	"r3/handler/transfer_export"
 	"r3/handler/transfer_import"
 	"r3/handler/websocket"
+	"r3/ldap"
 	"r3/log"
 	"r3/login"
 	"r3/login/login_session"
@@ -392,10 +393,6 @@ func (prg *program) execute(svc service.Service) {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize schema cache, %v", err))
 		return
 	}
-	if err := cache.LoadLdapMap(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to initialize LDAP cache, %v", err))
-		return
-	}
 	if err := cache.LoadMailAccountMap(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize mail account cache, %v", err))
 		return
@@ -411,6 +408,10 @@ func (prg *program) execute(svc service.Service) {
 	if err := cache.LoadSearchDictionaries(); err != nil {
 		// failure is not mission critical (in case of no access to DB system tables)
 		log.Error("server", "failed to read/update text search dictionaries", err)
+	}
+	if err := ldap.UpdateCache(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to initialize LDAP cache, %v", err))
+		return
 	}
 
 	// process token secret for future client authentication from database

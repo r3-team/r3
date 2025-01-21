@@ -10,6 +10,7 @@ import (
 	"r3/config"
 	"r3/db"
 	"r3/handler"
+	"r3/ldap"
 	"r3/log"
 	"r3/types"
 
@@ -360,7 +361,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "import":
 			return LdapImport(reqJson)
 		case "reload":
-			return nil, cache.LoadLdapMap()
+			return nil, ldap.UpdateCache()
 		case "set":
 			return LdapSet_tx(ctx, tx, reqJson)
 		}
