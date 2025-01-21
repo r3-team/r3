@@ -168,7 +168,7 @@
 	left:unset;
 }
 .list .layoutTable th .columnOption{
-	padding:6px;
+	padding:9px;
 	box-sizing:border-box;
 	display:flex;
 	flex-flow:column nowrap;
@@ -180,12 +180,13 @@
 .list .layoutTable th .columnOptionItem{
 	display:flex;
 	flex-flow:row nowrap;
-	padding:1px 0px 5px;
+	gap:9px;
 }
 .list .layoutTable th .columnFilterValues{
 	display:flex;
 	flex-flow:column nowrap;
 	max-height:250px;
+	padding:0px 6px;
 	background-color:var(--color-input);
 	border-radius:4px;
 	box-shadow:1px 1px 4px var(--color-shade-input);
