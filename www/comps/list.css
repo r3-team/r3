@@ -121,6 +121,12 @@
 	border-top:2px solid var(--color-border);
 	padding:2px 8px;
 }
+.list .layoutTable tfoot tr.aggregation td.alignEnd{
+	text-align:right;
+}
+.list .layoutTable tfoot tr.aggregation td.alignMid{
+	text-align:center;
+}
 .list .layoutTable th{
 	padding:0px;
 	margin-bottom:-1px;

@@ -12,8 +12,8 @@ let MyListAggregate = {
 	name:'my-list-aggregate',
 	template:`<tr class="aggregation" v-if="anyValues">
 		<td v-if="leaveOneEmpty"></td>
-		<td v-for="(b,i) in columnBatches">
-			<div class="batch">{{ valuesByColumnBatch[i] !== null ? valuesByColumnBatch[i] : '' }}</div>
+		<td v-for="(b,i) in columnBatches" :class="domClassByColumnBatch[i]">
+			{{ valuesByColumnBatch[i] !== null ? valuesByColumnBatch[i] : '' }}
 		</td>
 	</tr>`,
 	props:{
@@ -27,6 +27,7 @@ let MyListAggregate = {
 	},
 	data() {
 		return {
+			domClassByColumnBatch:[],
 			valuesByColumnBatch:[]
 		};
 	},
@@ -61,7 +62,8 @@ let MyListAggregate = {
 		
 		// calls
 		get() {
-			this.valuesByColumnBatch = [];
+			this.domClassByColumnBatch = [];
+			this.valuesByColumnBatch   = [];
 			
 			let columns = [];
 			for(let columnId in this.columnIdMapAggr) {
@@ -92,6 +94,7 @@ let MyListAggregate = {
 					const row = res.payload.rows[0];
 					
 					for(let b of this.columnBatches) {
+						this.domClassByColumnBatch.push({});
 						this.valuesByColumnBatch.push(null);
 					}
 					
@@ -111,9 +114,12 @@ let MyListAggregate = {
 								default:         v = this.isAttributeDecimal(a.content) ? this.getNumberFormatted(v,a) : parseInt(v); break;
 							}
 						}
-						
+
 						const bi = this.columnIdMapColumnBatchIndex[c.id];
 						this.valuesByColumnBatch[bi] = v;
+
+						if(c.flags.alignEnd) this.domClassByColumnBatch[bi].alignEnd = true;
+						if(c.flags.alignMid) this.domClassByColumnBatch[bi].alignMid = true;
 					}
 				},
 				this.$root.genericError
