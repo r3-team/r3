@@ -74,6 +74,27 @@ export function getLinkMeta(display,value) {
 	return false;
 };
 
+export function getNumberFormatted(v,atr) {
+	let hasFraction = v % 1 !== 0;
+	let strNum      = String(v);
+	let strFraction = '';
+	
+	if(hasFraction)
+		[strNum,strFraction] = strNum.split('.');
+
+	// apply fixed fraction component for numerics
+	if(atr.content === 'numeric' && atr.lengthFract !== 0) {
+		strFraction = strFraction.padEnd(atr.lengthFract,'0');
+		hasFraction = true;
+	}
+	
+	strNum = strNum.replace(/\B(?=(\d{3})+(?!\d))/g,MyStore.getters.settings.numberSepThousand);
+
+	return hasFraction
+		? strNum + MyStore.getters.settings.numberSepDecimal + strFraction
+		: strNum;
+};
+
 export function getNilUuid() {
 	return '00000000-0000-0000-0000-000000000000';
 };

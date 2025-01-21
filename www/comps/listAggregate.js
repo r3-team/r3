@@ -1,4 +1,6 @@
+import {isAttributeDecimal}               from './shared/attribute.js';
 import {getFirstColumnUsableAsAggregator} from './shared/column.js';
+import {getNumberFormatted}               from './shared/generic.js';
 import {getQueryExpressions}              from './shared/query.js';
 import {
 	getUnixFormat,
@@ -41,6 +43,7 @@ let MyListAggregate = {
 			return out;
 		},
 		
+		// simple
 		anyValues: (s) => s.valuesByColumnBatch.length !== 0,
 		dateFormat:(s) => s.$store.getters.settings.dateFormat,
 		
@@ -50,9 +53,11 @@ let MyListAggregate = {
 	methods:{
 		// external
 		getFirstColumnUsableAsAggregator,
+		getNumberFormatted,
 		getQueryExpressions,
 		getUnixFormat,
 		getUtcTimeStringFromUnix,
+		isAttributeDecimal,
 		
 		// calls
 		get() {
@@ -91,15 +96,19 @@ let MyListAggregate = {
 					}
 					
 					for(let i = 0, j = columns.length; i < j; i++) {
-						const c  = columns[i];
-						let   v  = row.values[i];
+						const c = columns[i];
+						const a = this.attributeIdMap[c.attributeId];
+						let   v = row.values[i];
 						
 						// count aggregations can be taken directly
+						// decimal numbers need to be formatted
+						// integer values are parsed as an aggregation can contain fractions
 						if(c.aggregator !== 'count') {
-							switch(this.attributeIdMap[c.attributeId].contentUse) {
+							switch(a.contentUse) {
 								case 'date':     v = this.getUnixFormat(v,this.dateFormat);          break;
 								case 'datetime': v = this.getUnixFormat(v,this.dateFormat + ' H:i'); break;
 								case 'time':     v = this.getUtcTimeStringFromUnix(v);               break;
+								default:         v = this.isAttributeDecimal(a.content) ? this.getNumberFormatted(v,a) : parseInt(v); break;
 							}
 						}
 						
