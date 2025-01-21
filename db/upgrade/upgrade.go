@@ -311,6 +311,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			ALTER TABLE instance.login_setting ADD   COLUMN shadows_inputs BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN shadows_inputs DROP DEFAULT;
+
+			-- fix login foreign key
+			ALTER TABLE instance.login
+				DROP CONSTRAINT login_ldap_id_fkey,
+				ADD  CONSTRAINT login_ldap_id_fkey FOREIGN KEY (ldap_id)
+					REFERENCES instance.ldap (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION;
 		`)
 		return "3.10", err
 	},
