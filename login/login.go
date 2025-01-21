@@ -32,6 +32,37 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id int64) error {
 	return err
 }
 
+// delete all logins for LDAP connector
+func DelByLdap_tx(ctx context.Context, tx pgx.Tx, ldapId int32) error {
+
+	loginIds := make([]int64, 0)
+	rows, err := tx.Query(ctx, `
+		SELECT id
+		FROM instance.login
+		WHERE ldap_id = $1
+	`, ldapId)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return err
+		}
+		loginIds = append(loginIds, id)
+	}
+	rows.Close()
+
+	for _, id := range loginIds {
+		if err := Del_tx(ctx, tx, id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // get logins with meta data and total count
 func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy string, orderAsc bool, limit int, offset int,
 	meta bool, roles bool, recordRequests []types.LoginAdminRecordGet) ([]types.LoginAdmin, int, error) {

@@ -2,7 +2,9 @@ package ldap
 
 import (
 	"context"
+	"r3/cache"
 	"r3/db"
+	"r3/login"
 	"r3/types"
 	"strings"
 
@@ -10,6 +12,11 @@ import (
 )
 
 func Del_tx(ctx context.Context, tx pgx.Tx, id int32) error {
+
+	if err := login.DelByLdap_tx(ctx, tx, id); err != nil {
+		return err
+	}
+
 	_, err := tx.Exec(ctx, `
 		DELETE FROM instance.ldap
 		WHERE id = $1
@@ -141,6 +148,25 @@ func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func UpdateCache() error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Commit(ctx)
+
+	ldaps, err := Get_tx(ctx, tx)
+	if err != nil {
+		return err
+	}
+
+	cache.SetLdaps(ldaps)
 	return nil
 }
 

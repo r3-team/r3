@@ -12,6 +12,7 @@ import {
 	getHtmlStripped,
 	getLinkMeta,
 	openDataImageAsNewTag,
+	getNumberFormatted,
 	openLink
 } from './shared/generic.js';
 export {MyValueRich as default};
@@ -171,6 +172,7 @@ let MyValueRich = {
 		getAttributeFileVersionHref,
 		getHtmlStripped,
 		getLinkMeta,
+		getNumberFormatted,
 		getUnixFormat,
 		getUnixShifted,
 		getUtcTimeStringFromUnix,
@@ -249,24 +251,7 @@ let MyValueRich = {
 				case 'numeric': // fallthrough
 				case 'double precision':
 				case 'real':
-					let hasFraction = this.value % 1 !== 0;
-					let strNum      = String(this.value);
-					let strFraction = '';
-					
-					if(hasFraction)
-						[strNum,strFraction] = strNum.split('.');
-
-					// apply fixed fraction component for numerics
-					if(atr.content === 'numeric' && atr.lengthFract !== 0) {
-						strFraction = strFraction.padEnd(atr.lengthFract,'0');
-						hasFraction = true;
-					}
-					
-					strNum = strNum.replace(/\B(?=(\d{3})+(?!\d))/g,this.settings.numberSepThousand);
-					
-					this.stringValueFull = hasFraction
-						? strNum + this.settings.numberSepDecimal + strFraction
-						: strNum;
+					this.stringValueFull = this.getNumberFormatted(this.value,atr);
 				break;
 				
 				// others (UUID)
