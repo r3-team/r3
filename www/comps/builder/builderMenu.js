@@ -350,7 +350,7 @@ let MyBuilderMenu = {
 				
 				<!-- actions -->
 				<span>{{ capApp.copy }}</span>
-				<div class="row gap">
+				<div class="row gap centered">
 					<select v-model="copyModuleId" :disabled="readonly">
 						<option
 							v-for="mod in getDependentModules(module)"

@@ -2,6 +2,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
+	gap:9px;
 	
 	/* auto cutting text */
 	overflow:hidden;

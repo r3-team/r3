@@ -28,7 +28,7 @@ let MyBuilderQueryFilter = {
 			:naked="true"
 		/>
 		<div class="row centered default-inputs" v-if="visible && joins.length > 1">
-			<div class="row gap">
+			<div class="row gap centered">
 				<my-button image="add.png"
 					@trigger="add(indexTarget)"
 					:active="indexTargets.includes(indexTarget)"

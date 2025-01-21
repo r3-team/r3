@@ -255,7 +255,7 @@ let MyBuilderPgFunction = {
 						<template v-for="mod in modulesData.filter(v => holderRelationModuleId === null || holderRelationModuleId === v.id)">
 							<div class="entity" v-for="rel in mod.relations.filter(v => holderRelationText === '' || v.name.toLowerCase().includes(holderRelationText.toLowerCase()))">
 								<div class="entity-title">
-									<div class="row centered grow">
+									<div class="row gap centered grow">
 										<my-button
 											@trigger="toggleRelationShow(rel.id)"
 											:image="holderRelationIdsOpen.includes(rel.id) ? 'triangleDown.png' : 'triangleRight.png'"
@@ -442,7 +442,7 @@ let MyBuilderPgFunction = {
 							<tr v-if="!isTrigger">
 								<td>{{ capApp.volatility }}</td>
 								<td>
-									<div class="row gap">
+									<div class="row gap centered">
 										<select class="dynamic" v-model="volatility" :disabled="readonly">
 											<option>VOLATILE</option>
 											<option>STABLE</option>

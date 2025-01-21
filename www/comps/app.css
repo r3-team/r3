@@ -923,7 +923,7 @@ table td.maximum{
 	margin:3px 8px 3px 0px;
 	display:flex;
 	flex-flow:row nowrap;
-	gap:calc(var(--spacing) / 2.5);
+	gap:calc(var(--spacing) / 2);
 	align-items:center;
 	justify-content:space-between;
 	font-size:100%;

@@ -849,7 +849,7 @@
 	flex-flow:row nowrap;
 	align-items:center;
 	margin:0px 24px 6px 0px;
-	gap:6px;
+	gap:9px;
 }
 .builder-icons .icons .icon img.preview{
 	width:32px;
