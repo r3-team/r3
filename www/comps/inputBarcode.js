@@ -5,7 +5,7 @@ export {MyInputBarcode as default};
 let MyInputBarcode = {
 	name:'my-input-barcode',
 	template:`<div class="input-barcode">
-		<div class="input-barcode-actions row gap">
+		<div class="input-barcode-actions row gap" v-if="!hideInputs">
 			<input class="input-iframe-input" data-is-input="1"
 				v-model="inputText"
 				:class="{ monospace }"
@@ -99,6 +99,7 @@ let MyInputBarcode = {
 	emits:['copyToClipboard','update:modelValue'],
 	props:{
 		clipboard: { type:Boolean, required:true },
+		hideInputs:{ type:Boolean, required:true },
 		modelValue:{ required:true },
 		monospace: { type:Boolean, required:true },
 		readonly:  { type:Boolean, required:true }

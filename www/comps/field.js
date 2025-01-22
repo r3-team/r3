@@ -337,6 +337,7 @@ let MyField = {
 					@copyToClipboard="copyToClipboard"
 					:clipboard="isClipboard"
 					:formLoading="formLoading"
+					:hideInputs="field.flags.includes('hideInputs')"
 					:isHidden="isHidden"
 					:monospace="isMonospace"
 					:readonly="isReadonly"
@@ -355,6 +356,7 @@ let MyField = {
 					v-model="value"
 					@copyToClipboard="copyToClipboard"
 					:clipboard="isClipboard"
+					:hideInputs="field.flags.includes('hideInputs')"
 					:monospace="isMonospace"
 					:readonly="isReadonly"
 				/>

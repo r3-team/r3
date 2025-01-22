@@ -3,7 +3,7 @@ export {MyInputIframe as default};
 let MyInputIframe = {
 	name:'my-input-iframe',
 	template:`<div class="input-iframe">
-		<div class="input-iframe-actions row gap" :class="{ readonly:readonly }">
+		<div class="input-iframe-actions row gap" v-if="!hideInputs" :class="{ readonly:readonly }">
 			<input class="input-iframe-input" data-is-input="1"
 				v-model="srcInput"
 				@keyup.enter="set"
@@ -41,6 +41,7 @@ let MyInputIframe = {
 	props:{
 		clipboard:  { type:Boolean, required:true },
 		formLoading:{ type:Boolean, required:true },
+		hideInputs: { type:Boolean, required:true },
 		isHidden:   { type:Boolean, required:true },
 		modelValue: { required:true },
 		monospace:  { type:Boolean, required:true },

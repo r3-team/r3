@@ -278,6 +278,7 @@
 	flex-flow:column nowrap;
 	flex:1 1 auto;
 	border-radius:var(--border-input-radius);
+	overflow:hidden;
 }
 .input-iframe-actions{
 	padding:2px 8px 0px;

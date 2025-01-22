@@ -570,10 +570,11 @@ let MyBuilderFieldOptions = {
 					</template>
 				</template>
 
-				<template v-if="(isData && !isFiles && !isDrawing && !isRelationship && !isDate && !isDatetime && !isTime) || isVariable">
-					<tr>
-						<td>{{ capGen.options }}</td>
-						<td>
+				<!-- general field options -->
+				<tr>
+					<td>{{ capGen.options }}</td>
+					<td>
+						<template v-if="(isData && !isFiles && !isDrawing && !isRelationship && !isDate && !isDatetime && !isTime) || isVariable">
 							<div class="row gap wrap">
 								<my-button-check
 									@update:modelValue="set('clipboard',$event)"
@@ -585,27 +586,24 @@ let MyBuilderFieldOptions = {
 									:caption="capGen.monospace"
 									:modelValue="field.flags.includes('monospace')"
 								/>
+								<my-button-check
+									v-if="isIFrame || isBarcode"
+									@update:modelValue="setFlags('hideInputs',$event)"
+									:caption="capApp.hideInputs"
+									:modelValue="field.flags.includes('hideInputs')"
+								/>
 							</div>
-						</td>
-					</tr>
-					<tr v-if="!isIFrame">
-						<td>{{ capGen.alignment }}</td>
-						<td>
-							<select v-model="alignment">
-								<option value="def">{{ capGen.alignmentHor.left }}</option>
-								<option value="end">{{ capGen.alignmentHor.right }}</option>
-							</select>
-						</td>
-					</tr>
-				</template>
+						</template>
+					</td>
+				</tr>
 
-				<tr v-if="isIFrame">
-					<td>{{ capApp.hideInputs }}</td>
+				<tr v-if="(isData && !isFiles && !isDrawing && !isRelationship && !isDate && !isDatetime && !isTime && !isIFrame) || isVariable">
+					<td>{{ capGen.alignment }}</td>
 					<td>
-						<my-bool
-							@update:modelValue="setFlags('hideInputs',$event)"
-							:modelValue="field.flags.includes('hideInputs')"
-						/>
+						<select v-model="alignment">
+							<option value="def">{{ capGen.alignmentHor.left }}</option>
+							<option value="end">{{ capGen.alignmentHor.right }}</option>
+						</select>
 					</td>
 				</tr>
 				
