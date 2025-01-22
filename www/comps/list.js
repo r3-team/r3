@@ -143,7 +143,7 @@ let MyList = {
 					<tbody>
 						<tr v-for="(r,i) in rowsInput">
 							
-							<!-- icons / checkboxes -->
+							<!-- icons -->
 							<td class="minimum">
 								<div class="list-input-row-items nowrap">
 									
@@ -165,10 +165,13 @@ let MyList = {
 										:value="r.values[0]"
 										:wrap="columns[0].flags.wrap"
 									/>
-									
-									<!-- category input check box -->
+								</div>
+							</td>
+							
+							<!-- category input check box -->
+							<td class="minimum" v-if="inputAsCategory">
+								<div class="list-input-row-checkbox">
 									<my-button
-										v-if="inputAsCategory"
 										@trigger="inputTriggerRow(r)"
 										:active="!inputIsReadonly"
 										:image="displayRecordCheck(inputRecordIds.includes(r.indexRecordIds['0']))"

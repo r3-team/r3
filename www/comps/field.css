@@ -2,7 +2,7 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
-	max-height:calc(100% - var(--spacing)); /* for barcode fields, max. full size of parent - margin-bottom */
+	max-height:100%;
 }
 .field.container{
 	display:flex;
@@ -46,7 +46,6 @@
 	border:var(--border-input);
 	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
-	box-sizing:border-box;
 	overflow:visible;
 }
 .field-content.data.dropdownShow:not(.disabled),
@@ -60,25 +59,23 @@
 	background-color:var(--color-input-disabled);
 }
 .field-content.intent{
-	padding-left:8px;
-	padding-right:8px;
+	padding-left:var(--spacing-field-padding);
+	padding-right:var(--spacing-field-padding);
 }
 .field-content.isSingleField{
 	border:none;
 	box-shadow:none;
 	border-radius:0px;
 }
-.field-content .input.textarea{
-	padding:0px 0px 0px 8px;
-}
 .field-content>.input.textarea{
-	padding-left:8px;
+	margin:0px;
+	padding-left:var(--spacing-field-padding);
 }
 .field-content>.button,
 .field-content>.bool{
 	align-self:center;
 }
-.field.dropdown .field-content{
+.field.dropdown{
 	position:relative;
 }
 
@@ -97,12 +94,6 @@
 }
 .field .field-icon.inList{
 	margin-right:8px;
-}
-.field.top-aligned .field-content{
-	padding:5px 0px 3px;
-}
-.field.top-aligned .field-icon{
-	align-self:flex-start;
 }
 .field .disabled .caption{
 	color:var(--color-font);

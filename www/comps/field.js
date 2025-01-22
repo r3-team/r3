@@ -783,15 +783,9 @@ let MyField = {
 			if(s.isReadonly) out.push('readonly');
 			if(s.isRichtext) out.push('richtext');
 
-			for(const flag of s.field.flags) {
-				out.push(`flag-${flag}`);
-			}
-			
-			if(s.isTextarea || s.isRichtext)   out.push('top-aligned');
+			for(const flag of s.field.flags)   out.push(`flag-${flag}`);
 			if(s.isHeader && s.field.richtext) out.push('headerRichtext');
-			
-			if(s.isContainer)
-				out.push('container', s.field.direction);
+			if(s.isContainer)                  out.push('container', s.field.direction);
 			
 			if(s.flexDirParent === 'column' && (s.isHeader || s.isLineSingle))
 				out.push('noGrow');
@@ -1096,7 +1090,7 @@ let MyField = {
 		customErr:  (s) => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
 		hasCaption: (s) => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
-		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode,
+		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
 		inputRegex: (s) => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
 		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),

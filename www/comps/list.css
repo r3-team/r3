@@ -11,6 +11,7 @@
 	border-radius:0px;
 }
 .list.asInput{
+	margin-right:calc(var(--spacing-field-padding) - (var(--spacing-field-padding) * 2));
 	min-height:unset;
 	background-color:transparent;
 }
@@ -347,6 +348,7 @@
 .list-input-rows{
 	width:100%;
 	overflow:hidden;
+	padding-right:var(--spacing-field-padding);
 }
 .list-input-rows tr{
 	height:var(--row-height);
@@ -369,8 +371,10 @@
 .list-input-row-actions td{
 	background-color:transparent !important;
 }
+.list-input-row-checkbox{
+	padding-right:5px;
+}
 .list-input-rows-wrap.multi-line .list-input-rows td{
-	padding:0px 3px 0px 0px;
 	border-bottom:1px dotted var(--color-border);
 }
 

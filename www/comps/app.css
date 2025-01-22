@@ -52,6 +52,7 @@
 	/* spacing */
 	--spacing:16px;
 	--spacing-child:0px var(--spacing) var(--spacing) 0px;
+	--spacing-field-padding:8px;
 	--spacing-parent:var(--spacing) 0px 0px var(--spacing);
 	
 	/**/

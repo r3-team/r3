@@ -502,7 +502,7 @@ let MyForm = {
 		isBulkUpdate:  (s) => s.isData && s.recordIds.length > 1,
 		isData:        (s) => s.relationId !== null,
 		isNew:         (s) => s.recordIds.length === 0,
-		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','kanban','list','tabs'].includes(s.fields[0].content),
+		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','kanban','list','tabs','variable'].includes(s.fields[0].content),
 		menuActive:    (s) => typeof s.formIdMapMenu[s.form.id] === 'undefined' ? null : s.formIdMapMenu[s.form.id],
 		warnUnsaved:   (s) => s.hasChanges && s.settings.warnUnsaved,
 

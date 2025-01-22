@@ -154,10 +154,10 @@
 
 /* input dropdown */
 .input-dropdown-wrap{
-	width:calc(100% - 10px);
 	height:0px;
 	position:absolute;
-	left:5px;
+	left:calc(4px + var(--border-input-radius));
+	right:calc(4px + var(--border-input-radius));
 	bottom:0px;
 	overflow:visible !important;
 	z-index:var(--z-index-dropdown);
@@ -229,6 +229,7 @@
 }
 .input-barcode-format{
 	padding:var(--spacing);
+	overflow:auto;
 }
 .input-barcode-preview{
 	flex:1 1 auto;
