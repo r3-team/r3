@@ -844,7 +844,6 @@
 			"columnShowDefaultOff": "Standardm. nicht angezeigt",
 			"columnSize": "Größe (Pixel)",
 			"columnSize0": "automatisch",
-			"columnStyles": "Style",
 			"columnTitle": "Title",
 			"columnWrap": "Textumbruch",
 			"containerContent": "Container-Inhalt",
@@ -979,8 +978,8 @@
 				"ganttStepsDays": "Tage",
 				"ganttStepsHours": "Stunden",
 				"style": {
-					"bold": "fett",
-					"italic": "kursiv"
+					"bold": "Fett",
+					"italic": "Kursiv"
 				}
 			},
 			"presetOpen": "Vord. Datensatz öffnen",
@@ -2232,6 +2231,7 @@
 		"variable": "Variable",
 		"variables": "Variabeln",
 		"version": "Version",
+		"visibility": "Sichtbarkeit",
 		"warnings": "Warnungen",
 		"widget": "Widget",
 		"widgets": "Widgets",

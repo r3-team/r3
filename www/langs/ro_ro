@@ -844,7 +844,6 @@
 			"columnShowDefaultOff": "Not shown by default",
 			"columnSize": "Mărime (pixel)",
 			"columnSize0": "automatic",
-			"columnStyles": "Styles",
 			"columnTitle": "Titlu",
 			"columnWrap": "Text continuu",
 			"containerContent": "Container content",
@@ -979,8 +978,8 @@
 				"ganttStepsDays": "zile",
 				"ganttStepsHours": "ore",
 				"style": {
-					"bold": "bold",
-					"italic": "italic"
+					"bold": "Bold",
+					"italic": "Italic"
 				}
 			},
 			"presetOpen": "Deschide presetarea",
@@ -2232,6 +2231,7 @@
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "Versiune",
+		"visibility": "Visibility",
 		"warnings": "Warnings",
 		"widget": "Widget",
 		"widgets": "Widgets",

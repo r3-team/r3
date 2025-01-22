@@ -844,7 +844,6 @@
 			"columnShowDefaultOff": "Not shown by default",
 			"columnSize": "Dimensione (pixel)",
 			"columnSize0": "automatico",
-			"columnStyles": "Styles",
 			"columnTitle": "Titolo",
 			"columnWrap": "A capo automatico",
 			"containerContent": "Container content",
@@ -979,8 +978,8 @@
 				"ganttStepsDays": "giorni",
 				"ganttStepsHours": "ore",
 				"style": {
-					"bold": "bold",
-					"italic": "italic"
+					"bold": "Bold",
+					"italic": "Italic"
 				}
 			},
 			"presetOpen": "Preimpostazione apertura",
@@ -2232,6 +2231,7 @@
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "Versione",
+		"visibility": "Visibility",
 		"warnings": "Warnings",
 		"widget": "Widget",
 		"widgets": "Widgets",

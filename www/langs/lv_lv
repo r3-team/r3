@@ -844,7 +844,6 @@
 			"columnShowDefaultOff": "Not shown by default",
 			"columnSize": "Size (pixel)",
 			"columnSize0": "automatic",
-			"columnStyles": "Styles",
 			"columnTitle": "Title",
 			"columnWrap": "Text wrap",
 			"containerContent": "Container content",
@@ -979,8 +978,8 @@
 				"ganttStepsDays": "days",
 				"ganttStepsHours": "hours",
 				"style": {
-					"bold": "bold",
-					"italic": "italic"
+					"bold": "Bold",
+					"italic": "Italic"
 				}
 			},
 			"presetOpen": "Open preset",
@@ -2232,6 +2231,7 @@
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "Versija",
+		"visibility": "Visibility",
 		"warnings": "Brīdinājumi",
 		"widget": "Widget",
 		"widgets": "Widgets",

@@ -30,23 +30,22 @@ let MyBuilderColumnOptions = {
 			</tr>
 			<template v-if="!onlyData">
 				<tr>
-					<td>{{ capApp.columnShowDefault }}</td>
+					<td>{{ capGen.visibility }}</td>
 					<td>
-						<my-bool
-							@update:modelValue="set('hidden',$event)"
-							:modelValue="column.hidden"
-							:reversed="true"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.columnShowDefaultMobile }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('onMobile',$event)"
-							:readonly="column.hidden"
-							:modelValue="column.onMobile && !column.hidden"
-						/>
+						<div class="row gap wrap">
+							<my-button-check
+								@update:modelValue="set('hidden',$event)"
+								:caption="capApp.columnShowDefault"
+								:modelValue="column.hidden"
+								:reversed="true"
+							/>
+							<my-button-check
+								@update:modelValue="set('onMobile',$event)"
+								:caption="capApp.columnShowDefaultMobile"
+								:modelValue="column.onMobile && !column.hidden"
+								:readonly="column.hidden"
+							/>
+						</div>
 					</td>
 				</tr>
 				<tr>
@@ -66,7 +65,7 @@ let MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr>
-					<td>{{ capApp.columnStyles }}</td>
+					<td>{{ capGen.options }}</td>
 					<td>
 						<div class="row gap wrap">
 							<my-button-check
@@ -145,24 +144,6 @@ let MyBuilderColumnOptions = {
 				<td colspan="999"><b>{{ capApp.columnHeaderData }}</b></td>
 			</tr>
 			<tr>
-				<td>{{ capApp.distincted }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('distincted',$event)"
-						:modelValue="column.distincted"
-					/>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capApp.groupBy }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('groupBy',$event)"
-						:modelValue="column.groupBy"
-					/>
-				</td>
-			</tr>
-			<tr>
 				<td>{{ capApp.aggregator }}</td>
 				<td>
 					<select
@@ -179,6 +160,23 @@ let MyBuilderColumnOptions = {
 						<option value="sum">{{ capGen.option.aggSum }}</option>
 						<option value="array">{{ capGen.option.aggArray }}</option>
 					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>{{ capGen.options }}</td>
+				<td>
+					<div class="row gap wrap">
+						<my-button-check
+							@update:modelValue="set('distincted',$event)"
+							:caption="capApp.distincted"
+							:modelValue="column.distincted"
+						/>
+						<my-button-check
+							@update:modelValue="set('groupBy',$event)"
+							:caption="capApp.groupBy"
+							:modelValue="column.groupBy"
+						/>
+					</div>
 				</td>
 			</tr>
 			<tr v-if="isSubQuery">

@@ -336,12 +336,15 @@ let MyBuilderFieldOptions = {
 					</td>
 				</tr>
 				<tr>
-					<td>{{ capApp.onMobile }}</td>
+					<td>{{ capGen.visibility }}</td>
 					<td>
-						<my-bool
-							@update:modelValue="set('onMobile',$event)"
-							:modelValue="field.onMobile"
-						/>
+						<div class="row gap wrap">
+							<my-button-check
+								@update:modelValue="set('onMobile',$event)"
+								:caption="capApp.onMobile"
+								:modelValue="field.onMobile"
+							/>
+						</div>
 					</td>
 				</tr>
 				
@@ -565,31 +568,30 @@ let MyBuilderFieldOptions = {
 
 				<template v-if="(isData && !isFiles && !isDrawing && !isRelationship && !isDate && !isDatetime && !isTime) || isVariable">
 					<tr>
-						<td>{{ capGen.clipboard }}</td>
+						<td>{{ capGen.options }}</td>
 						<td>
-							<my-bool
-								@update:modelValue="set('clipboard',$event)"
-								:modelValue="field.clipboard"
-							/>
-						</td>
-					</tr>
-					<tr v-if="!isIFrame">
-						<td>{{ capGen.monospace }}</td>
-						<td>
-							<my-bool
-								@update:modelValue="setFlags('monospace',$event)"
-								:modelValue="field.flags.includes('monospace')"
-							/>
+							<div class="row gap wrap">
+								<my-button-check
+									@update:modelValue="set('clipboard',$event)"
+									:caption="capGen.clipboard"
+									:modelValue="field.clipboard"
+								/>
+								<my-button-check
+									v-if="!isIFrame"
+									@update:modelValue="setFlags('monospace',$event)"
+									:caption="capGen.monospace"
+									:modelValue="field.flags.includes('monospace')"
+								/>
+							</div>
 						</td>
 					</tr>
 					<tr v-if="!isIFrame">
 						<td>{{ capGen.alignment }}</td>
 						<td>
-							<my-button-check
-								@update:modelValue="setFlags('alignEnd',$event)"
-								:caption="capGen.alignmentHor.right"
-								:modelValue="field.flags.includes('alignEnd')"
-							/>
+							<select v-model="alignment">
+								<option value="def">{{ capGen.alignmentHor.left }}</option>
+								<option value="end">{{ capGen.alignmentHor.right }}</option>
+							</select>
 						</td>
 					</tr>
 				</template>
@@ -1379,6 +1381,20 @@ let MyBuilderFieldOptions = {
 				map[presets[i].id] = presets[i];
 			}
 			return map;
+		},
+
+		// inputs
+		alignment:{
+			get()  {
+				if(this.field.flags.includes('alignEnd')) return 'end';
+				return 'def';
+			},
+			set(v) {
+				let flags = JSON.parse(JSON.stringify(this.field.flags));
+				if(v !== 'end' &&  flags.includes('alignEnd')) flags.splice(flags.indexOf('alignEnd'),1);
+				if(v === 'end' && !flags.includes('alignEnd')) flags.push('alignEnd');
+				this.field.flags = flags;
+			}
 		},
 		
 		// simple states

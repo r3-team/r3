@@ -1441,7 +1441,7 @@ table td.maximum{
 	--color-action-disable:hsl(0, 0%, 21%);
 	--color-cancel:        hsl(0, 42%, 27%);
 	--color-cancel-border: hsl(0, 33%, 11%);
-	--color-error:         hsl(0, 73%, 36%);
+	--color-error:         hsl(0, 44%, 51%);
 	--color-success:       hsl(113, 53%, 27%);
 	
 	--color-hover-underlay:           rgba(0,0,0,0.50);
