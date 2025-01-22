@@ -295,7 +295,7 @@ let MyBuilderAttribute = {
 							<td>
 								<div class="column centered gap">
 									<select v-model="defaultsOption" @change="updateDefaultsOption" :disabled="readonly">
-										<option value="fixed">{{ capApp.option.defaults.fixed }}</option>
+										<option value="fixed">[{{ capApp.option.defaults.fixed }}]</option>
 										<option value="date"     :disabled="!isDate">{{ capApp.option.defaults.date }}</option>
 										<option value="datetime" :disabled="!isDatetime">{{ capApp.option.defaults.datetime }}</option>
 										<option value="uuid"     :disabled="!isUuid">{{ capApp.option.defaults.uuid }}</option>

@@ -1012,6 +1012,7 @@ let MyBuilderForm = {
 				state:'default',
 				flags:[],
 				onMobile:true,
+				clipboard:false,
 				attributeId:attribute.id,
 				attributeIdAlt:null, // altern. attribute (used for date period)
 				index:index,
