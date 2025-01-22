@@ -128,7 +128,7 @@
 	text-align:center;
 }
 .list .layoutTable tfoot tr.aggregation td.monospace{
-	font-family:Consolas,Courier,monospace;
+	font-family:var(--font-family-monospace);
 }
 .list .layoutTable th{
 	padding:0px;

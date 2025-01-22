@@ -59,6 +59,10 @@
 	--row-height:40px;
 	--app-header-height:70px;
 	--menu-line-height:36px;
+
+	/**/
+	/* font families */
+	--font-family-monospace:Consolas,Courier,monospace;
 	
 	/**/
 	/* images */
@@ -1401,7 +1405,7 @@ table td.maximum{
 
 .user-font.calibri        { font-family:Calibri,Arial,sans-serif; }
 .user-font.comic_sans_ms  { font-family:'Comic Sans MS','Comic Sans',cursive; }
-.user-font.consolas       { font-family:Consolas,Courier,monospace,cursive; }
+.user-font.consolas       { font-family:var(--font-family-monospace); }
 .user-font.georgia        { font-family:Georgia,Times,serif; }
 .user-font.helvetica      { font-family:Helvetica,Arial,sans-serif; }
 .user-font.lucida_console { font-family:'Lucida Console',Courier,monospace; }

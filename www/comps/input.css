@@ -209,6 +209,20 @@
 	flex:1 1 auto;
 	border-radius:5px;
 }
+.input-barcode-input{
+	height:24px;
+	padding:4px 0px;
+	font-family:inherit;
+	font-size:inherit;
+	color:inherit;
+	background-color:transparent;
+	border:none;
+	outline:none;
+	flex:1 1 auto;
+}
+.input-barcode-input.monospace{
+	font-family:var(--font-family-monospace);
+}
 .input-barcode-actions{
 	padding:2px 8px 0px;
 	border-bottom:1px solid var(--color-border);
@@ -280,6 +294,9 @@
 	border:none;
 	outline:none;
 	flex:1 1 auto;
+}
+.input-iframe-input.monospace{
+	font-family:var(--font-family-monospace);
 }
 .input-iframe-content{
 	flex:1 1 auto;

@@ -34,7 +34,7 @@
 	font-style:italic;
 }
 .value-rich.monospace{
-	font-family:Consolas,Courier,monospace;
+	font-family:var(--font-family-monospace);
 }
 .value-rich img.boolean{
 	width:24px;

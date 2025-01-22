@@ -338,6 +338,7 @@ let MyField = {
 					:clipboard="isClipboard"
 					:formLoading="formLoading"
 					:isHidden="isHidden"
+					:monospace="isMonospace"
 					:readonly="isReadonly"
 				/>
 				
@@ -354,6 +355,7 @@ let MyField = {
 					v-model="value"
 					@copyToClipboard="copyToClipboard"
 					:clipboard="isClipboard"
+					:monospace="isMonospace"
 					:readonly="isReadonly"
 				/>
 				
@@ -1119,9 +1121,10 @@ let MyField = {
 		isRequired:(s) => s.stateFinal === 'required',
 		
 		// display options
-		isLogin:   (s) => s.isData && s.field.display === 'login',
-		isPassword:(s) => s.isData && s.field.display === 'password',
-		isSlider:  (s) => s.isData && s.field.display === 'slider',
+		isLogin:    (s) => s.isData && s.field.display === 'login',
+		isMonospace:(s) => s.field.flags.includes('monospace'),
+		isPassword: (s) => s.isData && s.field.display === 'password',
+		isSlider:   (s) => s.isData && s.field.display === 'slider',
 		
 		// composite
 		isActive:        (s) => (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),

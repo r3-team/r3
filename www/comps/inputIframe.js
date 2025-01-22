@@ -7,6 +7,7 @@ let MyInputIframe = {
 			<input class="input-iframe-input" data-is-input="1"
 				v-model="srcInput"
 				@keyup.enter="set"
+				:class="{ monospace }"
 				:disabled="readonly"
 				:placeholder="capGen.threeDots"
 			/>
@@ -42,6 +43,7 @@ let MyInputIframe = {
 		formLoading:{ type:Boolean, required:true },
 		isHidden:   { type:Boolean, required:true },
 		modelValue: { required:true },
+		monospace:  { type:Boolean, required:true },
 		readonly:   { type:Boolean, required:true }
 	},
 	watch:{

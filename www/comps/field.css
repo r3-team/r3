@@ -118,7 +118,7 @@
 	text-align:right;
 }
 .field.flag-monospace .input{
-	font-family:Consolas,Courier,monospace;
+	font-family:var(--font-family-monospace);
 }
 .field.flag-hideInputs .input-iframe-actions{
 	display:none;

@@ -577,7 +577,6 @@ let MyBuilderFieldOptions = {
 									:modelValue="field.clipboard"
 								/>
 								<my-button-check
-									v-if="!isIFrame"
 									@update:modelValue="setFlags('monospace',$event)"
 									:caption="capGen.monospace"
 									:modelValue="field.flags.includes('monospace')"

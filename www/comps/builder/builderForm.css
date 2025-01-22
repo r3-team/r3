@@ -295,7 +295,7 @@
 
 .builder-field.column .batch-set{
 	font-weight:bold;
-	font-family:Consolas,Courier,monospace,cursive;
+	font-family:var(--font-family-monospace);
 }
 
 

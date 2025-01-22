@@ -8,6 +8,7 @@ let MyInputBarcode = {
 		<div class="input-barcode-actions row gap">
 			<input class="input-iframe-input" data-is-input="1"
 				v-model="inputText"
+				:class="{ monospace }"
 				:disabled="readonly"
 				:placeholder="capGen.threeDots"
 			/>
@@ -99,6 +100,7 @@ let MyInputBarcode = {
 	props:{
 		clipboard: { type:Boolean, required:true },
 		modelValue:{ required:true },
+		monospace: { type:Boolean, required:true },
 		readonly:  { type:Boolean, required:true }
 	},
 	data() {
