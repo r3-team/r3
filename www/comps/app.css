@@ -130,8 +130,10 @@
 	--shadow-input-focus:none;
 
 	/**/
-	/* outlines */
-	--outline-input:1px solid var(--color-border);
+	/* borders & outlines */
+	--border-input:1px solid var(--color-border);
+	--border-input-focus:1px solid transparent;
+	--border-input-radius:5px;
 	--outline-input-focus:2px solid var(--color-accent1);
 }
 @-moz-document url-prefix() {
@@ -466,7 +468,7 @@ h3{
 	font-size:inherit;
 	padding:0px 5px;
 	box-sizing:border-box;
-	border-radius:4px;
+	border-radius:var(--border-input-radius);
 	color:var(--color-font);
 	background-color:var(--color-input);
 }
@@ -611,13 +613,11 @@ table td.maximum{
 	font-size:inherit;
 	color:var(--color-font);
 	background-color:var(--color-input);
-	border:none;
-	border-color:var(--color-border);
-	border-radius:4px;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
 	box-sizing:border-box;
 	flex:1 1 auto;
-	outline:var(--outline-input);
 }
 .default-inputs input[type=range]{
 	background-color:transparent;
@@ -681,8 +681,9 @@ table td.maximum{
 .default-inputs select:focus,
 .default-inputs textarea:focus,
 .default-inputs .input-custom:focus-within{
-	box-shadow:var(--shadow-input-focus);
+	border:var(--border-input-focus);
 	outline:var(--outline-input-focus);
+	box-shadow:var(--shadow-input-focus);
 }
 .default-inputs input[type=range]:focus{
 	box-shadow:none;
@@ -1362,25 +1363,13 @@ table td.maximum{
 
 
 /* user overwrites */
-.user-bordersAll .contentBox,
-.user-bordersAll .default-inputs input,
-.user-bordersAll .default-inputs select,
-.user-bordersAll .default-inputs textarea,
-.user-bordersAll .default-inputs .input-custom,
-.user-bordersAll .contentBox .contentPart{
-	border-width:1px;
-	border-style:solid;
+.user-bordersSquared{
+	--border-input-radius:0px;
 }
-.user-bordersSquared .contentBox,
-.user-bordersSquared .contentBox .top,
-.user-bordersSquared .contentBox .top .selector,
-.user-bordersSquared .contentBox .content .contentPart,
-.user-bordersSquared .default-inputs input,
-.user-bordersSquared .default-inputs select,
-.user-bordersSquared .default-inputs textarea,
-.user-bordersSquared .default-inputs .input-custom,
-.user-bordersSquared .loading-state{
-	border-radius:0px;
+.user-shadowsInputs{
+	--border-input:1px solid transparent;
+	--shadow-input:1px 1px 3px var(--color-shade);
+	--shadow-input-focus:1px 1px 6px var(--color-shade);
 }
 .user-spacing.spacing-value1{
 	--spacing:10px;
@@ -1414,7 +1403,6 @@ table td.maximum{
 .user-font.times_new_roman{ font-family:'Times New Roman',Times,serif; }
 .user-font.trebuchet_ms   { font-family:'Trebuchet MS',Arial,sans-serif; }
 .user-font.verdana        { font-family:Verdana,Arial,sans-serif; }
-
 
 .user-dark,
 .user-dark *{
@@ -1458,7 +1446,7 @@ table td.maximum{
 	--color-form-builder-tabs:        hsl(104deg 15% 32%);
 	--color-form-builder-tabs-active: hsl(104deg 12% 39%);
 	
-	--outline-input:1px solid var(--color-border);
+	--border-input:1px solid var(--color-border);
 	--outline-input-focus:2px solid var(--color-accent1);
 	
 	--image-filter:        invert(1) brightness(90%);
@@ -1477,11 +1465,6 @@ table td.maximum{
 	background-color:var(--color-font-disabled);
 	border:1px solid var(--color-border);
 	border-radius:2px;
-}
-.user-shadowsInputs{
-	--outline-input:none;
-	--shadow-input:1px 1px 3px var(--color-shade);
-	--shadow-input-focus:1px 1px 6px var(--color-shade);
 }
 
 /* mobile overwrites */

@@ -1,5 +1,5 @@
 .button{
-	height:32px;
+	height:30px;
 	margin:0px;
 	padding:4px calc(var(--spacing) / 1.5) 5px;
 	font-size:inherit;
@@ -11,7 +11,7 @@
 	float:left;
 	outline:none;
 	box-sizing:border-box;
-	border-radius:5px;
+	border-radius:var(--border-input-radius);
 	transition:box-shadow 0.1s, border-bottom 0.1s, filter 0.1s;
 	user-select:none;
 }

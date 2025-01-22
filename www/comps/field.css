@@ -42,15 +42,16 @@
 	flex-flow:row nowrap;
 	align-items:stretch;
 	gap:8px;
-	border-radius:5px;
 	background-color:var(--color-input);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
 	box-sizing:border-box;
-	outline:var(--outline-input);
 	overflow:visible;
 }
 .field-content.data.dropdownShow:not(.disabled),
 .field-content.data:focus-within:not(.disabled){
+	border:var(--border-input-focus);
 	outline:var(--outline-input-focus);
 	box-shadow:var(--shadow-input-focus);
 }
@@ -233,7 +234,7 @@
 	outline:none;
 	background:#a9a5a5;
 	cursor:pointer;
-	border-radius:5px;
+	border-radius:var(--border-input-radius);
 }
 .field .slider-input .range::-moz-range-thumb,
 .field .slider-input .range::-webkit-slider-thumb{
@@ -244,14 +245,14 @@
 	background:var(--color-accent1);
 	cursor:pointer;
 	border:none;
-	border-radius:5px;
+	border-radius:var(--border-input-radius);
 	margin:0px;
 }
 .field .slider-input .value{
 	flex:0 1 auto;
 	max-width:60px;
 	padding:2px 6px;
-	border-radius:5px;
+	border-radius:var(--border-input-radius);
 	text-align:center;
 	color:var(--color-font);
 	background-color:var(--color-input);
@@ -284,7 +285,7 @@
 	display:flex;
 	flex-flow:column nowrap;
 	background-color:var(--color-input);
-	border-radius:3px;
+	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
 }
 .field .chart .actions{
@@ -296,7 +297,7 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
-	border-radius:5px;
+	border-radius:var(--border-input-radius);
 	overflow:auto;
 }
 .field .tabs.isSingleField{
@@ -368,15 +369,4 @@
 .field .tabs.isSingleField .tabs-entry.active{
 	margin-top:2px;
 	border-top:2px solid var(--color-border);
-}
-
-/* user overwrites */
-.user-bordersAll .field-content:not(.isSingleField){
-	border:1px solid var(--color-border);
-}
-.user-bordersSquared .field-content,
-.user-bordersSquared .field .color-input .preview,
-.user-bordersSquared .field .slider input,
-.user-bordersSquared .field .slider .slider-value{
-	border-radius:0px;
 }

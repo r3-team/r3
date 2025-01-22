@@ -106,10 +106,10 @@
 	flex:1 1 auto;
 	margin:2px;
 	padding:3px 5px;
-	border-radius:5px;
 	overflow:hidden;
 	background:yellow;
 	background-color:var(--color-accent3);
+	border-radius:var(--border-input-radius);
 	box-shadow:1px 1px 1px var(--color-shade);
 	display:flex;
 	flex-flow:column nowrap;
@@ -233,11 +233,11 @@
 }
 .calendar-month .day .event.first{
 	margin-left:5px;
-	border-radius:5px 0px 0px 5px;
+	border-radius:var(--border-input-radius) 0px 0px var(--border-input-radius);
 }
 .calendar-month .day .event.last{
 	margin-right:5px;
-	border-radius:0px 5px 5px 0px;
+	border-radius:0px var(--border-input-radius) var(--border-input-radius) 0px;
 }
 .calendar-month .day .event.placeholder{
 	box-shadow:none;
@@ -279,13 +279,6 @@
 .calendar-month .day .part>span{
 	padding:0px 5px;
 	margin-right:4px;
-	border-radius:4px;
+	border-radius:var(--border-input-radius);
 	background-color:var(--color-cal-day-event);
-}
-
-
-/* user overwrites */
-.user-bordersSquared .calendar,
-.user-bordersSquared .calendar-days .event{
-	border-radius:0px !important;
 }

@@ -312,6 +312,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.login_setting ADD   COLUMN shadows_inputs BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN shadows_inputs DROP DEFAULT;
 
+			-- remove login setting
+			ALTER TABLE instance.login_setting DROP COLUMN borders_all;
+
 			-- fix login foreign key
 			ALTER TABLE instance.login
 				DROP CONSTRAINT login_ldap_id_fkey,

@@ -1,7 +1,7 @@
 .list{
 	flex:1 1 auto;
 	min-height:240px;
-	border-radius:5px;
+	border-radius:var(--border-input-radius);
 	display:flex;
 	flex-flow:column nowrap;
 	overflow:auto;
@@ -198,7 +198,7 @@
 	max-height:250px;
 	padding:0px 6px;
 	background-color:var(--color-input);
-	border-radius:4px;
+	border-radius:var(--border-input-radius);
 	box-shadow:1px 1px 4px var(--color-shade-input);
 	overflow-y:scroll;
 }
@@ -288,9 +288,9 @@
 }
 .list .layoutCards .card{
 	position:relative;
+	background-color:var(--color-bright);
 	border-right:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
-	background-color:var(--color-bright);
 }
 .list .layoutCards .card .actions{
 	position:absolute;
@@ -367,7 +367,6 @@
 	background-color:var(--color-bg);
 }
 .list-input-row-actions td{
-	border-top:1px solid var(--color-border);
 	background-color:transparent !important;
 }
 .list-input-rows-wrap.multi-line .list-input-rows td{
@@ -481,35 +480,33 @@
 .user-listSpaced .list .layoutTable table:not(.asInput) tfoot tr,
 .user-listSpaced .list .layoutTable table:not(.asInput) tbody tr{
 	box-shadow:var(--shadow-input);
-	border-radius:6px;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
 }
 .user-listSpaced .list .layoutTable table:not(.asInput) td{
-	border-bottom:none;
+	box-shadow:var(--shadow-input);
+	border-top:var(--border-input);
+	border-bottom:var(--border-input);
 }
 .user-listSpaced .list .layoutTable table:not(.asInput) td:first-child{
-	border-top-left-radius:6px;
-	border-bottom-left-radius:6px;
+	border-left:var(--border-input);
+	border-top-left-radius:var(--border-input-radius);
+	border-bottom-left-radius:var(--border-input-radius);
 }
 .user-listSpaced .list .layoutTable table:not(.asInput) td:last-child{
-	border-top-right-radius:6px;
-	border-bottom-right-radius:6px;
+	border-right:var(--border-input);
+	border-top-right-radius:var(--border-input-radius);
+	border-bottom-right-radius:var(--border-input-radius);
 }
 .user-listSpaced .list .layoutCards .cards{
 	padding:var(--spacing);
 	gap:var(--spacing);
 }
 .user-listSpaced .list .layoutCards .card{
-	border:none;
-	border-radius:5px;
-	box-shadow:1px 1px 4px var(--color-shade);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 }
 .user-listSpaced .list .layoutCards .card.rowSelect:hover{
-	box-shadow:1px 1px 12px #000, inset 0 -3px 0 0 var(--color-accent3-alt);
-}
-.user-bordersSquared .list,
-.user-bordersSquared .list .layoutTable td,
-.user-bordersSquared .list .layoutCards .card,
-.user-bordersSquared .list .layoutCards .card .header,
-.user-bordersSquared .list .layoutCards .card .actions{
-	border-radius:0px !important;
+	box-shadow:1px 1px 6px #000, inset 0 -3px 0 0 var(--color-accent3-alt);
 }

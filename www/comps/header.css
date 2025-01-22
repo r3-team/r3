@@ -59,7 +59,7 @@
 	right:0px;
 	bottom:0px;
 	left:0px;
-	border-radius:5px 5px 0px 0px;
+	border-radius:var(--border-input-radius) var(--border-input-radius) 0px 0px;
 }
 .app-header .entry{
 	height:40px;
@@ -67,7 +67,7 @@
 	flex-direction:row;
 	align-items:center;
 	padding:10px 10px 8px 10px;
-	border-radius:5px 5px 0px 0px;
+	border-radius:var(--border-input-radius) var(--border-input-radius) 0px 0px;
 	font-size:110%;
 	color:inherit;
 	box-sizing:border-box;
@@ -179,13 +179,6 @@
 
 
 /* user overwrites */
-.user-bordersSquared .app-header .entry-bg,
-.user-bordersSquared .app-header .entry{
-	border-radius:0px !important;
-}
-.user-bordersSquared .app-header .entry-wrap .children{
-	border-radius:0px;
-}
 .user-dark .app-header .entry-wrap:focus .entry-bg,
 .user-dark .app-header .entry-wrap:hover .entry-bg{
 	filter:brightness(84%) grayscale(7%);

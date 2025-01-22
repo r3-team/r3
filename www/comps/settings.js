@@ -1222,19 +1222,11 @@ let MySettings = {
 				<table>
 					<tbody>
 						<tr>
-							<td>{{ capApp.borders }}</td>
-							<td>
-								<div class="row gap">
-									<my-button-check v-model="settingsInput.bordersAll"     :caption="capGen.more" />
-									<my-button-check v-model="settingsInput.bordersSquared" :caption="capApp.bordersSquared" />
-								</div>
-							</td>
-						</tr>
-						<tr>
 							<td>{{ capGen.inputs }}</td>
 							<td>
 								<div class="row gap">
-									<my-button-check v-model="settingsInput.shadowsInputs" :caption="capGen.shadows" />
+									<my-button-check v-model="settingsInput.shadowsInputs"  :caption="capGen.shadows" />
+									<my-button-check v-model="settingsInput.bordersSquared" :caption="capApp.bordersSquared" />
 								</div>
 							</td>
 						</tr>

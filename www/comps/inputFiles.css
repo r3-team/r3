@@ -13,7 +13,7 @@
 	align-items:center;
 	justify-content:space-between;
 	background-color:var(--color-bg);
-	border-radius:5px 5px 0px 0px;
+	border-radius:var(--border-input-radius) var(--border-input-radius) 0px 0px;
 	z-index:var(--z-index-field-file-header);
 }
 .input-files-header input{
@@ -42,7 +42,7 @@
 	justify-content:space-between;
 	align-items:center;
 	margin:8px 0px;
-	padding:0px 9px 0px 3px;
+	padding:0px 9px 0px 6px;
 }
 .input-files-content{
 	flex:1 1 auto;
@@ -150,7 +150,7 @@
 	padding:3px 5px 0px 5px;
 	background-color:var(--color-bg);
 	border:1px solid var(--color-border);
-	border-radius:5px;
+	border-radius:var(--border-input-radius);
 	box-shadow:1px 1px 1px var(--color-shade);
 }
 .input-files .listComfort .item:focus,
@@ -191,8 +191,9 @@
 	position:absolute;
 	top:0px;
 	left:0px;
+	padding:0px 6px;
 	background-color:var(--color-bg);
-	border-radius:5px 0px 5px 0px;
+	border-radius:var(--border-input-radius) 0px var(--border-input-radius) 0px;
 	border-right:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
 }
@@ -212,7 +213,7 @@
 	display:flex;
 	flex-flow:column nowrap;
 	align-items:center;
-	border-radius:5px;
+	border-radius:var(--border-input-radius);
 	background-color:var(--color-bg);
 	box-shadow:1px 1px 2px var(--color-shade);
 	overflow:hidden;
@@ -249,16 +250,9 @@
 	position:absolute;
 	top:0px;
 	left:0px;
+	padding:0px 6px;
 	background-color:var(--color-bg);
-	border-radius:5px 0px 5px 0px;
+	border-radius:var(--border-input-radius) 0px var(--border-input-radius) 0px;
 	border-right:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
-}
-
-
-/* user overwrites */
-.user-bordersSquared .input-files-header,
-.user-bordersSquared .input-files .item,
-.user-bordersSquared .input-files .item-actions{
-	border-radius:0px !important;
 }

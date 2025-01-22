@@ -164,19 +164,11 @@ let MyAdminLoginTemplate = {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capAppSet.borders }}</td>
-							<td>
-								<div class="row gap">
-									<my-button-check v-model="settings.bordersAll"     :caption="capGen.more" />
-									<my-button-check v-model="settings.bordersSquared" :caption="capAppSet.bordersSquared" />
-								</div>
-							</td>
-						</tr>
-						<tr>
 							<td>{{ capGen.inputs }}</td>
 							<td>
 								<div class="row gap">
-									<my-button-check v-model="settings.shadowsInputs" :caption="capGen.shadows" />
+									<my-button-check v-model="settings.shadowsInputs"  :caption="capGen.shadows" />
+									<my-button-check v-model="settings.bordersSquared" :caption="capAppSet.bordersSquared" />
 								</div>
 							</td>
 						</tr>
@@ -376,7 +368,6 @@ let MyAdminLoginTemplate = {
 		// new template, apply defaults
 		this.settings = {
 			boolAsIcon:true,
-			bordersAll:false,
 			bordersSquared:false,
 			colorClassicMode:false,
 			colorHeader:null,
@@ -398,6 +389,7 @@ let MyAdminLoginTemplate = {
 			numberSepThousand:',',
 			pattern:'bubbles',
 			searchDictionaries:['english'],
+			shadowsInputs:false,
 			spacing:3,
 			sundayFirstDow:true,
 			tabRemember:true,

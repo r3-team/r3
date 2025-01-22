@@ -477,23 +477,27 @@ let MyBuilderFieldOptions = {
 					<tr v-if="isRelationship">
 						<td>{{ capApp.fieldDefaultPresetIds }}</td>
 						<td>
-							<select @change="presetIdAdd($event.target.value)">
-								<option value="">-</option>
-								<template v-for="p in presetIdMap">
-									<option
-										v-if="!field.defPresetIds.includes(p.id)"
-										:key="p.id"
-										:value="p.id"
-									>{{ p.name }}</option>
-								</template>
-							</select>
-							
-							<my-button image="cancel.png"
-								v-for="presetId in field.defPresetIds"
-								@trigger="presetIdRemove(presetId)"
-								:caption="presetIdMap[presetId].name"
-								:key="presetId"
-							/>
+							<div class="column gap">
+								<select @change="presetIdAdd($event.target.value)">
+									<option value="">-</option>
+									<template v-for="p in presetIdMap">
+										<option
+											v-if="!field.defPresetIds.includes(p.id)"
+											:key="p.id"
+											:value="p.id"
+										>{{ p.name }}</option>
+									</template>
+								</select>
+								
+								<div class="row gap wrap" v-if="field.defPresetIds.length !== 0">
+									<my-button image="cancel.png"
+										v-for="presetId in field.defPresetIds"
+										@trigger="presetIdRemove(presetId)"
+										:caption="presetIdMap[presetId].name"
+										:key="presetId"
+									/>
+								</div>
+							</div>
 						</td>
 					</tr>
 					
