@@ -95,16 +95,10 @@ func ImportFromFiles(filePathsImport []string) error {
 		}
 	}
 
-	// run a full VACUUM before imports
+	// import modules
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutTransfer)
 	defer ctxCanc()
 
-	log.Info("transfer", "import starts full DB vacuum")
-	if _, err := db.Pool.Exec(ctx, `VACUUM FULL`); err != nil {
-		return err
-	}
-
-	// import modules
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
