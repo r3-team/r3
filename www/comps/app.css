@@ -516,10 +516,10 @@ h3{
 	padding:12px;
 	display:flex;
 	flex-flow:column nowrap;
-	box-shadow:1px 1px 3px var(--color-shade);
-	border-radius:6px;
-	border-color:var(--color-border-bright);
 	background-color:var(--color-bg-bright);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 	overflow:auto;
 }
 .contentBox .content .contentPart.short{
@@ -925,7 +925,7 @@ table td.maximum{
 .generic-entry-list .entry{
 	width:380px;
 	height:46px;
-	padding:0px 12px 2px;
+	padding:2px 12px 2px;
 	margin:3px 8px 3px 0px;
 	display:flex;
 	flex-flow:row nowrap;
@@ -935,13 +935,14 @@ table td.maximum{
 	font-size:100%;
 	line-height:100%;
 	color:inherit;
-	border-radius:6px;
-	border-bottom:3px solid var(--color-border);
 	text-decoration:none;
 	background-color:var(--color-input);
-	box-shadow:1px 1px 3px var(--color-shade);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	border-bottom:2px solid var(--color-border);
+	box-shadow:var(--shadow-input);
 	box-sizing:border-box;
-	transition:background-color 0.2s, border-bottom 0.2s, box-shadow 0.2s;
+	transition:border-bottom 0.1s, box-shadow 0.1s;
 }
 .generic-entry-list.singleColumn .entry{
 	width:100%;
@@ -950,14 +951,11 @@ table td.maximum{
 .generic-entry-list.wide .entry{
 	width:500px;
 }
+.generic-entry-list .entry:focus,
 .generic-entry-list .entry:hover{
-	padding:0px 12px 0px;
-	border-bottom:3px solid var(--color-accent1);
-	box-shadow:1px 1px 5px var(--color-shade);
-}
-.generic-entry-list .entry:focus{
-	border-bottom:2px solid var(--color-accent1);
-	box-shadow:1px 1px 7px var(--color-shade);
+	padding:0px 12px 2px;
+	border-bottom:4px solid var(--color-accent1);
+	box-shadow:var(--shadow-input-focus);
 }
 .generic-entry-list .entry img.icon{
 	width:18px;

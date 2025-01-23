@@ -125,13 +125,14 @@
 	width:370px;
 	padding:3px 6px;
 	position:relative;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
-	border-radius:5px;
 }
 .admin-system-msg-date:focus-within{
-	box-shadow:1px 1px 8px var(--color-shade);
-	outline:2px solid var(--color-accent1);
-	transition:box-shadow 0.3s, outline 0.2s;
+	border:var(--border-input-focus);
+	outline:var(--outline-input-focus);
+	box-shadow:var(--shadow-input-focus);
 }
 .admin-system-msg-table{
 	width:1000px;
@@ -304,9 +305,10 @@
 	padding:0px 16px;
 	margin:0px 0px 24px 0px;
 	color:var(--color-font);
-	border:2px solid var(--color-border-bright);
-	border-radius:5px;
 	background-color:var(--color-bright);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 }
 .admin-license .file>img{
 	width:auto;
@@ -413,18 +415,15 @@
 	flex-flow:row nowrap;
 	max-width:1200px;
 	margin:0px 12px 12px 0px;
-	border-radius:5px;
-	box-shadow:1px 1px 3px var(--color-shade);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
+	background-color:var(--color-bright);
 	overflow:hidden;
-}
-.admin-repo .repo-module:hover{
-	box-shadow:1px 1px 8px var(--color-shade);
-	transition:box-shadow 0.3s;
 }
 .admin-repo .repo-module .part{
 	display:flex;
 	flex-flow:column nowrap;
-	background-color:var(--color-bright);
 }
 .admin-repo .repo-module .bad-state{
 	color:var(--color-error);
@@ -601,8 +600,9 @@
 	padding:22px 12px;
 	display:flex;
 	flex-flow:column nowrap;
-	border:1px solid var(--color-border);
-	border-radius:5px;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 	background-color:var(--color-bright);
 	position:relative;
 }
