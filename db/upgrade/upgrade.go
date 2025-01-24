@@ -208,6 +208,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				SELECT gen_random_uuid(), id, 0 FROM app.module;
 
 			-- menu assocation with tabs
+			ALTER TABLE app.menu ALTER COLUMN module_id DROP NOT NULL;
 			ALTER TABLE app.menu ADD COLUMN menu_tab_id UUID;
 			ALTER TABLE app.menu ADD CONSTRAINT menu_menu_tab_id_fkey FOREIGN KEY (menu_tab_id)
 				REFERENCES app.menu_tab (id) MATCH SIMPLE
