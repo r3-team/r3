@@ -101,6 +101,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			TYPE instance.align_horizontal USING form_actions_align::TEXT::instance.align_horizontal;
 
 		ALTER TABLE app.menu ALTER COLUMN menu_tab_id SET NOT NULL;
+		ALTER TABLE app.menu DROP  COLUMN module_id;
 	*/
 
 	"3.9": func(ctx context.Context, tx pgx.Tx) (string, error) {
@@ -220,7 +221,6 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				FROM app.menu_tab
 				WHERE module_id = m.module_id
 			);
-			ALTER TABLE app.menu DROP COLUMN module_id;
 
 			-- form state as form state condition
 			ALTER TABLE app.form_state_condition_side ADD COLUMN form_state_id_result UUID;
