@@ -40,6 +40,12 @@ let MyBuilderVariable = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
+				</div>
+				<div class="area">
+					<my-button image="visible1.png"
+						@trigger="copyValueDialog(values.name,variableId,variableId)"
+						:caption="capGen.id"
+					/>
 					<my-button image="delete.png"
 						@trigger="delAsk"
 						:active="!readonly"
@@ -49,19 +55,13 @@ let MyBuilderVariable = {
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
+			<div class="content no-padding default-inputs">
 				<table class="generic-table-vertical">
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td>
-								<div class="row gap centered">
-									<input v-focus v-model="values.name" :disabled="readonly" />
-									<my-button image="visible1.png"
-										@trigger="copyValueDialog(values.name,variableId,variableId)"
-										:caption="capGen.id"
-									/>
-								</div>
+								<input v-focus v-model="values.name" :disabled="readonly" />
 								<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
 							</td>
 							<td>{{ capGen.internalName }}</td>

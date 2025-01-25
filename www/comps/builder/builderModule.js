@@ -20,16 +20,16 @@ export {MyBuilderModule as default};
 
 let MyBuilderModuleStartForm = {
 	name:'my-builder-module-start-form',
-	template:`<div class="item shade">
+	template:`<div class="item">
 		<img v-if="!readonly" class="dragAnchor" src="images/drag.png" />
 		<select v-model="roleId" :disabled="readonly">
-			<option :value="null"><i>[{{ capGen.role }}]</i></option>
+			<option :value="null">[{{ capGen.role }}]</option>
 			<option v-for="r in module.roles" :value="r.id">
 				{{ r.name }}
 			</option>
 		</select>
 		<select v-model="formId" :disabled="readonly">
-			<option :value="null"><i>[{{ capApp.startFormDefault }}]</i></option>
+			<option :value="null">[{{ capApp.startFormDefault }}]</option>
 			<option v-for="f in module.forms" :value="f.id">
 				{{ f.name }}
 			</option>
@@ -100,6 +100,8 @@ let MyBuilderModule = {
 					:active="hasChanges"
 					:caption="capGen.button.refresh"
 				/>
+			</div>
+			<div class="area nowrap">
 				<my-button image="visible1.png"
 					@trigger="copyValueDialog(module.name,module.id,module.id)"
 					:caption="capGen.id"
@@ -107,8 +109,8 @@ let MyBuilderModule = {
 			</div>
 		</div>
 		
-		<div class="content default-inputs">
-			<table class="generic-table-vertical">
+		<div class="content default-inputs no-padding">
+			<table class="generic-table-vertical w1200">
 				<tbody>
 					<tr>
 						<td>{{ capGen.name }}</td>
@@ -201,22 +203,20 @@ let MyBuilderModule = {
 					<tr>
 						<td>{{ capApp.startFormByRole }}</td>
 						<td>
-							<div class="item-list">
-								<draggable handle=".dragAnchor" group="start-forms" itemKey="id" animation="100"
-									:fallbackOnBody="true"
-									:list="startForms"
-								>
-									<template #item="{element,index}">
-										<my-builder-module-start-form
-											@remove="startForms.splice(index,1)"
-											@update:modelValue="startForms[index] = $event"
-											:modelValue="element"
-											:module="module"
-											:readonly="readonly"
-										/>
-									</template>
-								</draggable>
-							</div>
+							<draggable class="item-list" handle=".dragAnchor" group="start-forms" itemKey="id" animation="100"
+								:fallbackOnBody="true"
+								:list="startForms"
+							>
+								<template #item="{element,index}">
+									<my-builder-module-start-form
+										@remove="startForms.splice(index,1)"
+										@update:modelValue="startForms[index] = $event"
+										:modelValue="element"
+										:module="module"
+										:readonly="readonly"
+									/>
+								</template>
+							</draggable>
 								
 							<my-button image="add.png"
 								@trigger="addStartForm"
@@ -231,7 +231,7 @@ let MyBuilderModule = {
 						<td>
 							<!-- language entry and header title -->
 							<div class="item-list">
-								<div class="item shade" v-for="(l,i) in languages">
+								<div class="item" v-for="(l,i) in languages">
 									<input type="text"
 										v-model="languages[i]"
 										:disabled="readonly"

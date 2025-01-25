@@ -62,14 +62,16 @@ let MyBuilderJsFunction = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
-					<my-button image="visible1.png"
-						@trigger="copyValueDialog(name,id,id)"
-						:caption="capGen.id"
-					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
 						:caption="capGen.preview"
 						:image="showPreview ? 'checkbox1.png' : 'checkbox0.png'"
+					/>
+				</div>
+				<div class="area nowrap">
+					<my-button image="visible1.png"
+						@trigger="copyValueDialog(name,id,id)"
+						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
 						@trigger="delAsk"
@@ -106,7 +108,7 @@ let MyBuilderJsFunction = {
 				:entriesText="[capApp.placeholders,capGen.properties]"
 			/>
 			
-			<div class="content padding default-inputs">
+			<div class="content default-inputs" :class="{ 'no-padding':tabTarget !== 'content' }">
 				
 				<template v-if="tabTarget === 'content'">
 					<div class="message" v-html="capApp.entityInput"></div>
@@ -457,7 +459,7 @@ let MyBuilderJsFunction = {
 				</template>
 				
 				<template v-if="tabTarget === 'properties'">
-					<table class="generic-table-vertical tight fullWidth">
+					<table class="generic-table-vertical">
 						<tbody>
 							<tr>
 								<td>{{ capGen.name }}</td>

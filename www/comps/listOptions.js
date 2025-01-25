@@ -117,11 +117,9 @@ let MyListOptions = {
 							</div>
 						</template>
 					</div>
-
-					<template v-if="csvImport">
-						<br />
-						<span>{{ capApp.message.csvImportWarning }}</span>
-					</template>
+					<div class="list-options-column-warning" v-if="csvImport">
+						{{ capApp.message.csvImportWarning }}
+					</div>
 				</td>
 			</tr>
 			

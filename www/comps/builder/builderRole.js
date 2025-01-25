@@ -359,6 +359,8 @@ let MyBuilderRole = {
 					:active="hasChanges"
 					:caption="capGen.button.refresh"
 				/>
+			</div>
+			<div class="area">
 				<my-button image="visible1.png"
 					@trigger="copyValueDialog(name,id,id)"
 					:caption="capGen.id"
@@ -572,8 +574,8 @@ let MyBuilderRole = {
 			
 			<!-- sidebar -->
 			<div class="contentBox sidebar" v-if="!isEveryone">
-				<div class="content padding default-inputs">
-					<table class="generic-table-vertical fullWidth default-inputs">
+				<div class="content no-padding default-inputs">
+					<table class="generic-table-vertical default-inputs">
 						<tbody>
 							<tr>
 								<td>{{ capGen.name }}</td>

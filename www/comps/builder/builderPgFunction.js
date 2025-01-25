@@ -162,14 +162,16 @@ let MyBuilderPgFunction = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
-					<my-button image="visible1.png"
-						@trigger="copyValueDialog(name,id,id)"
-						:caption="capGen.id"
-					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
 						:caption="capGen.preview"
 						:image="showPreview ? 'checkbox1.png' : 'checkbox0.png'"
+					/>
+				</div>
+				<div class="area nowrap">
+					<my-button image="visible1.png"
+						@trigger="copyValueDialog(name,id,id)"
+						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
 						@trigger="delAsk"
@@ -207,7 +209,7 @@ let MyBuilderPgFunction = {
 				:entriesText="tabs.labels"
 			/>
 			
-			<div class="content padding default-inputs">
+			<div class="content default-inputs" :class="{ 'no-padding':tabTarget !== 'content' }">
 				
 				<template v-if="tabTarget === 'content'">
 					<div class="row gap">
@@ -374,8 +376,8 @@ let MyBuilderPgFunction = {
 					</div>
 				</template>
 				
-				<div class="column gap" v-if="tabTarget === 'exec'">
-					<table class="generic-table-vertical tight fullWidth">
+				<template v-if="tabTarget === 'exec'">
+					<table class="generic-table-vertical">
 						<tbody>
 							<tr v-if="execArgInputs.length > 0">
 								<td>{{ capApp.codeArgs }}</td>
@@ -391,21 +393,24 @@ let MyBuilderPgFunction = {
 								</td>
 							</tr>
 							<tr>
+								<td></td>
+								<td>
+									<my-button image="settingsPlay.png"
+										@trigger="exec"
+										:active="!readonly"
+										:caption="capApp.exec"
+									/>
+								</td>
+							</tr>
+							<tr>
 								<td>{{ capApp.execResponse }}</td>
 								<td><textarea class="dynamic response" v-model="execResponse" disabled></textarea></td>
 							</tr>
 						</tbody>
 					</table>
-					<div class="row">
-						<my-button image="settingsPlay.png"
-							@trigger="exec"
-							:active="!readonly"
-							:caption="capApp.exec"
-						/>
-					</div>
-				</div>
+				</template>
 				
-				<table v-if="tabTarget === 'properties'" class="generic-table-vertical tight fullWidth">
+				<table v-if="tabTarget === 'properties'" class="generic-table-vertical">
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}</td>

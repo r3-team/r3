@@ -16,7 +16,7 @@ let MyBuilderColumnOptions = {
 		MyBuilderCaption,
 		MyBuilderQuery
 	},
-	template:`<table class="builder-column-options-table generic-table-vertical tight fullWidth default-inputs">
+	template:`<table class="generic-table-vertical default-inputs">
 		<tbody>
 			<tr v-if="hasCaptions">
 				<td>{{ capGen.title }}</td>

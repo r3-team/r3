@@ -22,7 +22,7 @@ export {MyBuilderApi as default};
 
 let MyBuilderApiPreview = {
 	name:'my-builder-api-preview',
-	template:`<table class="generic-table-vertical tight fullWidth default-inputs">
+	template:`<table class="generic-table-vertical default-inputs">
 		<tbody>
 			<tr>
 				<td>{{ capApp.call }}</td>
@@ -373,6 +373,8 @@ let MyBuilderApi = {
 						:caption="capApp.button.versionNew"
 						:captionTitle="capApp.button.versionNewHint"
 					/>
+				</div>
+				<div class="area nowrap">
 					<my-button image="visible1.png"
 						@trigger="copyValueDialog(name,id,id)"
 						:caption="capGen.id"
@@ -500,7 +502,7 @@ let MyBuilderApi = {
 			</div>
 			
 			<!-- calls -->
-			<div class="content" v-if="tabTarget === 'calls'">
+			<div class="content no-padding" v-if="tabTarget === 'calls'">
 				<my-builder-api-preview
 					:api="api"
 					:builderLanguage="builderLanguage"
@@ -519,8 +521,8 @@ let MyBuilderApi = {
 			</div>
 			
 			<!-- properties -->
-			<div class="content" v-if="tabTarget === 'properties'">
-				<table class="generic-table-vertical tight fullWidth default-inputs">
+			<div class="content no-padding" v-if="tabTarget === 'properties'">
+				<table class="generic-table-vertical default-inputs">
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}</td>

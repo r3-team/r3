@@ -77,7 +77,7 @@ let MyList = {
 						:cancel="true"
 					/>
 				</div>
-				<div class="content grow default-inputs">
+				<div class="content grow default-inputs" :class="{ 'no-padding':showOptions }">
 					<my-list-csv
 						v-if="showCsv"
 						@reload="get"

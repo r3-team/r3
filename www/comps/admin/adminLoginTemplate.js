@@ -38,6 +38,8 @@ let MyAdminLoginTemplate = {
 						@trigger="id = 0"
 						:caption="capGen.button.new"
 					/>
+				</div>
+				<div class="area">
 					<my-button image="delete.png"
 						v-if="!isNew && !isGlobal"
 						@trigger="delAsk"
@@ -47,7 +49,7 @@ let MyAdminLoginTemplate = {
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
+			<div class="content no-padding default-inputs">
 				<table class="generic-table-vertical fullWidth">
 					<tbody>
 						<tr>

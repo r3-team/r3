@@ -432,6 +432,9 @@
 	flex-flow:column nowrap;
 	gap:5px;
 }
+.list-options-column-warning{
+	width:300px;
+}
 .list-options-batch{
 	width:auto !important;
 	height:unset !important;
@@ -488,7 +491,6 @@
 	border-radius:var(--border-input-radius);
 }
 .user-listSpaced .list .layoutTable table:not(.asInput) td{
-	box-shadow:var(--shadow-input);
 	border-top:var(--border-input);
 	border-bottom:var(--border-input);
 }

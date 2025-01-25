@@ -60,30 +60,29 @@ let MyBuilderAttribute = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
+				</div>
+				<div class="area">
+					<my-button image="visible1.png"
+						@trigger="copyValueDialog(values.name,attributeId,attributeId)"
+						:active="!isNew"
+						:caption="capGen.id"
+					/>
 					<my-button image="delete.png"
-						v-if="!isNew && !isId"
 						@trigger="delCheck"
-						:active="!readonly"
+						:active="!isNew && !isId && !readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
 					/>
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
+			<div class="content default-inputs no-padding">
 				<table class="generic-table-vertical">
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td>
-								<div class="row gap centered">
-									<input v-focus v-model="values.name" :disabled="readonly || isId" />
-									<my-button image="visible1.png"
-										@trigger="copyValueDialog(values.name,attributeId,attributeId)"
-										:active="!isNew"
-										:caption="capGen.id"
-									/>
-								</div>
+								<input v-focus v-model="values.name" :disabled="readonly || isId" />
 								<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
 							</td>
 							<td>{{ capApp.nameHint }}</td>
@@ -293,7 +292,7 @@ let MyBuilderAttribute = {
 						<tr v-if="!isId && !isFiles && !isRelationship">
 							<td>{{ capApp.defaults }}</td>
 							<td>
-								<div class="column centered gap">
+								<div class="column gap">
 									<select v-model="defaultsOption" @change="updateDefaultsOption" :disabled="readonly">
 										<option value="fixed">[{{ capApp.option.defaults.fixed }}]</option>
 										<option value="date"     :disabled="!isDate">{{ capApp.option.defaults.date }}</option>

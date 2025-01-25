@@ -54,14 +54,16 @@ let MyBuilderCollection = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
-					<my-button image="visible1.png"
-						@trigger="copyValueDialog(name,id,id)"
-						:caption="capGen.id"
-					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
 						:caption="capGen.preview"
 						:image="showPreview ? 'checkbox1.png' : 'checkbox0.png'"
+					/>
+				</div>
+				<div class="area nowrap">
+					<my-button image="visible1.png"
+						@trigger="copyValueDialog(name,id,id)"
+						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
 						@trigger="delAsk"
@@ -203,8 +205,8 @@ let MyBuilderCollection = {
 			</div>
 			
 			<!-- collection properties -->
-			<div class="content" v-if="tabTarget === 'properties'">
-				<table class="generic-table-vertical tight fullWidth default-inputs">
+			<div class="content no-padding" v-if="tabTarget === 'properties'">
+				<table class="generic-table-vertical default-inputs">
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}</td>

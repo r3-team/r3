@@ -36,6 +36,8 @@ let MyAdminMailAccount = {
 						@trigger="$emit('makeNew')"
 						:caption="capGen.button.new"
 					/>
+				</div>
+				<div class="area">
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="delAsk"
@@ -45,8 +47,8 @@ let MyAdminMailAccount = {
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
-				<table class="generic-table-vertical fullWidth">
+			<div class="content no-padding default-inputs">
+				<table class="generic-table-vertical">
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}*</td>

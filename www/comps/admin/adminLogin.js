@@ -111,8 +111,8 @@ let MyAdminLogin = {
 				</div>
 			</div>
 			
-			<div class="content">
-				<table class="generic-table-vertical fullWidth">
+			<div class="content no-padding">
+				<table class="generic-table-vertical">
 					<tbody>
 						<tr>
 							<td>
@@ -273,7 +273,7 @@ let MyAdminLogin = {
 						</table>
 						
 						<!-- roles -->
-						<table class="generic-table bright" v-if="tabTarget === 'roles'">
+						<table class="generic-table sticky-top bright" v-if="tabTarget === 'roles'">
 							<thead>
 								<tr>
 									<th v-if="isLdapAssignedRoles" colspan="4"><b>{{ capApp.ldapAssignActive }}</b></th>
@@ -317,7 +317,7 @@ let MyAdminLogin = {
 						</table>
 
 						<!-- properties -->
-						<table class="generic-table-vertical fullWidth" v-if="tabTarget === 'properties'">
+						<table class="generic-table-vertical" v-if="tabTarget === 'properties'">
 							<tbody>
 								<tr>
 									<td>

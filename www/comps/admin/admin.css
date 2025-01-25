@@ -74,7 +74,6 @@
 }
 .admin-login .login-details .login-details-content{
 	flex:1 1 auto;
-	padding:15px;
 	min-height:600px;
 }
 .admin-login .login-details .login-details-content.roles{
@@ -144,15 +143,13 @@
 }
 
 /* customizing */
-.admin-custom table{
-	width:100%;
-	max-width:1300px;
-}
 .admin-custom .cssInput{
 	max-width:unset;
 	width:100%;
 	height:900px;
+	border:var(--border-input);
 	border-radius:var(--border-input-radius-large);
+	box-shadow:var(--shadow-input);
 	overflow:hidden;
 	display:flex;
 	flex-flow:column nowrap;

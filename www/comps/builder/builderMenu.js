@@ -86,7 +86,7 @@ let MyBuilderMenuItems = {
 						</div>
 						
 						<div class="content default-inputs">
-							<table class="generic-table-vertical tight fullWidth default-inputs">
+							<table class="generic-table-vertical default-inputs">
 								<tbody>
 									<tr>
 										<td>{{ capApp.showChildrenHint }}</td>
@@ -220,7 +220,7 @@ let MyBuilderMenuTabOptions = {
 		MyBuilderCaption,
 		MyBuilderIconInput
 	},
-	template:`<table class="generic-table-vertical tight fullWidth default-inputs">
+	template:`<table class="generic-table-vertical default-inputs">
 		<tbody>
 			<tr>
 				<td>{{ capGen.title }}</td>
