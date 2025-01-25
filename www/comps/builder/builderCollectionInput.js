@@ -56,15 +56,36 @@ let MyBuilderCollectionInput = {
 					/>
 				</td>
 			</tr>
-			<tr v-if="collectionSet && showMultiValue">
-				<!-- allow multi-value input -->
-				<td>{{ capApp.multiValue }}</td>
-				<td><my-bool v-model="multiValueInput" :readonly="readonly" /></td>
-			</tr>
-			<tr v-if="collectionSet && showNoDisplayEmpty">
-				<!-- do not display if value is empty input -->
-				<td>{{ capApp.noDisplayEmpty }}</td>
-				<td><my-bool v-model="noDisplayEmptyInput" :readonly="readonly" /></td>
+			<tr v-if="collectionSet">
+				<td>{{ capGen.options }}</td>
+				<td>
+					<div class="row gap wrap">
+						<!-- allow multi-value input -->
+						<my-button-check
+							v-if="flagsEnable.includes('multiValue')"
+							@update:modelValue="setFlag('multiValue',$event)"
+							:caption="capApp.multiValue"
+							:modelValue="consumer.flags.includes('multiValue')"
+							:readonly="readonly"
+						/>
+						<!-- do not display if value is empty input -->
+						<my-button-check
+							v-if="flagsEnable.includes('noDisplayEmpty')"
+							@update:modelValue="setFlag('noDisplayEmpty',$event)"
+							:caption="capApp.noDisplayEmpty"
+							:modelValue="consumer.flags.includes('noDisplayEmpty')"
+							:readonly="readonly"
+						/>
+						<!-- show aggregated row count instead of value -->
+						<my-button-check
+							v-if="flagsEnable.includes('showRowCount')"
+							@update:modelValue="setFlag('showRowCount',$event)"
+							:caption="capApp.showRowCount"
+							:modelValue="consumer.flags.includes('showRowCount')"
+							:readonly="readonly"
+						/>
+					</div>
+				</td>
 			</tr>
 			<tr v-if="collectionSet && showOnMobile">
 				<!-- show on mobile input -->
@@ -88,11 +109,10 @@ let MyBuilderCollectionInput = {
 		allowFormOpen:     { type:Boolean, required:true },
 		allowRemove:       { type:Boolean, required:true },
 		consumer:          { required:true },
+		flagsEnable:       { type:Array,   required:true },
 		fixedCollection:   { type:Boolean, required:true },
 		module:            { type:Object,  required:true },
 		readonly:          { type:Boolean, required:true },
-		showMultiValue:    { type:Boolean, required:true },
-		showNoDisplayEmpty:{ type:Boolean, required:true },
 		showOnMobile:      { type:Boolean, required:true }
 	},
 	emits:['remove','update:consumer'],
@@ -111,14 +131,6 @@ let MyBuilderCollectionInput = {
 		columnIdInput:{
 			get()  { return this.consumerInput.columnIdDisplay },
 			set(v) { this.set('columnIdDisplay',v) }
-		},
-		multiValueInput:{
-			get()  { return this.consumerInput.multiValue },
-			set(v) { this.set('multiValue',v) }
-		},
-		noDisplayEmptyInput:{
-			get()  { return this.consumerInput.noDisplayEmpty },
-			set(v) { this.set('noDisplayEmpty',v) }
 		},
 		onMobileInput:{
 			get()  { return this.consumerInput.onMobile },
@@ -154,6 +166,13 @@ let MyBuilderCollectionInput = {
 				else             v.columnIdDisplay = null;
 			}
 			this.$emit('update:consumer',v);
+		},
+		setFlag(name,state) {
+			let flags = JSON.parse(JSON.stringify(this.consumerInput.flags));
+			const pos = flags.indexOf(name);
+			if(state  && pos === -1) flags.push(name);
+			if(!state && pos !== -1) flags.splice(pos,1);
+			this.set('flags',flags);
 		}
 	}
 };

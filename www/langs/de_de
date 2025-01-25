@@ -792,7 +792,8 @@
 			"formIdOpen": "Formular öffnen",
 			"multiValue": "Mehrfachauswahl",
 			"noDisplayEmpty": "Verstecken wenn leer",
-			"onMobile": "In mobiler Ansicht"
+			"onMobile": "In mobiler Ansicht",
+			"showRowCount": "Stattdessen Ergebnisanzahl zeigen"
 		},
 		"form": {
 			"actions": {

@@ -1054,7 +1054,7 @@ func setData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.Field
 	if f.CollectionIdDef.Valid {
 		f.DefCollection.CollectionId = f.CollectionIdDef.Bytes
 		f.DefCollection.ColumnIdDisplay = f.ColumnIdDef
-		f.DefCollection.MultiValue = false
+		f.DefCollection.Flags = make([]string, 0)
 	}
 
 	// fix imports < 3.3: Migrate display option to attribute content use

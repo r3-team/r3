@@ -1,13 +1,9 @@
-import srcBase64Icon        from './shared/image.js';
-import {srcBase64}          from './shared/image.js';
-import {getColumnTitle}     from './shared/column.js';
-import {getFormRoute}       from './shared/form.js';
-import {openLink}           from './shared/generic.js';
-import {getCaption}         from './shared/language.js';
-import {
-	getCollectionColumn,
-	getCollectionValues
-} from './shared/collection.js';
+import srcBase64Icon         from './shared/image.js';
+import {srcBase64}           from './shared/image.js';
+import {getConsumersEntries} from './shared/collection.js';
+import {getFormRoute}        from './shared/form.js';
+import {openLink}            from './shared/generic.js';
+import {getCaption}          from './shared/language.js';
 
 export {MyMenu as default};
 
@@ -200,43 +196,17 @@ let MyMenuItem = {
 			}
 			return false;
 		},
-		collectionEntries:(s) => {
-			let out = [];
-			for(let consumer of s.menu.collections) {
-				const collection = s.collectionIdMap[consumer.collectionId];
-				
-				if(!consumer.onMobile && s.isMobile)
-					continue;
-				
-				let value = s.getCollectionValues(
-					collection.id,
-					consumer.columnIdDisplay,
-					true
-				);
-				if(consumer.noDisplayEmpty && (value === null || value === 0 || value === ''))
-					continue;
-				
-				out.push({
-					iconId:collection.iconId,
-					title:s.getColumnTitle(s.getCollectionColumn(
-						collection.id,
-						consumer.columnIdDisplay
-					),collection.moduleId),
-					value:value
-				});
-			}
-			return out;
-		},
 		
 		// simple
-		active:      (s) => s.menuAccess[s.menu.id] === 1,
-		color:       (s) => s.menu.color !== null ? s.menu.color : (s.colorParent !== null ? s.colorParent : null),
-		hasChildren: (s) => s.menu.menus.length !== 0,
-		selected:    (s) => (!s.recordOpen || s.formOpensPreset) && s.menu.formId === s.formIdActive && s.favoriteIdActive === null,
-		showChildren:(s) => s.hasChildren && s.menuIdMapOpen[s.menu.id],
-		style:       (s) => s.color === null ? '' : `border-left-color:#${s.color};`,
-		subIcon:     (s) => s.showChildren ? 'images/triangleDown.png' : 'images/triangleLeft.png',
-		title:       (s) => s.getCaption('menuTitle',s.module.id,s.menu.id,s.menu.captions,s.capGen.missingCaption),
+		active:           (s) => s.menuAccess[s.menu.id] === 1,
+		collectionEntries:(s) => s.getConsumersEntries(s.menu.collections),
+		color:            (s) => s.menu.color !== null ? s.menu.color : (s.colorParent !== null ? s.colorParent : null),
+		hasChildren:      (s) => s.menu.menus.length !== 0,
+		selected:         (s) => (!s.recordOpen || s.formOpensPreset) && s.menu.formId === s.formIdActive && s.favoriteIdActive === null,
+		showChildren:     (s) => s.hasChildren && s.menuIdMapOpen[s.menu.id],
+		style:            (s) => s.color === null ? '' : `border-left-color:#${s.color};`,
+		subIcon:          (s) => s.showChildren ? 'images/triangleDown.png' : 'images/triangleLeft.png',
+		title:            (s) => s.getCaption('menuTitle',s.module.id,s.menu.id,s.menu.captions,s.capGen.missingCaption),
 		
 		// stores
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
@@ -248,9 +218,7 @@ let MyMenuItem = {
 	},
 	methods:{
 		// externals
-		getCollectionColumn,
-		getCollectionValues,
-		getColumnTitle,
+		getConsumersEntries,
 		getFormRoute,
 		getCaption,
 		srcBase64,

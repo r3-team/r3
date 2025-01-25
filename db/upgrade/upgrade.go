@@ -97,6 +97,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		ALTER TABLE app.field ALTER COLUMN flags
 			TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
 
+		ALTER TABLE app.collection_consumer ALTER COLUMN flags
+			TYPE app.collection_consumer_flag[] USING flags::CHARACTER VARYING(24)[]::app.collection_consumer_flag[];
+
 		ALTER TABLE instance.login_setting ALTER COLUMN form_actions_align
 			TYPE instance.align_horizontal USING form_actions_align::TEXT::instance.align_horizontal;
 
@@ -145,7 +148,18 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- field flags
 			CREATE TYPE app.field_flag AS ENUM ('alignEnd','hideInputs','monospace');
-			ALTER TABLE app.field ADD COLUMN flags TEXT[] NOT NULL DEFAULT '{}';
+			ALTER TABLE app.field ADD   COLUMN flags TEXT[] NOT NULL DEFAULT '{}';
+			ALTER TABLE app.field ALTER COLUMN flags DROP DEFAULT;
+
+			-- collection consumer flags
+			CREATE TYPE app.collection_consumer_flag AS ENUM ('multiValue','noDisplayEmpty','showRowCount');
+			ALTER TABLE app.collection_consumer ALTER COLUMN multi_value      DROP NOT NULL;
+			ALTER TABLE app.collection_consumer ALTER COLUMN no_display_empty DROP NOT NULL;
+			ALTER TABLE app.collection_consumer ADD   COLUMN flags TEXT[] NOT NULL DEFAULT '{}';
+			ALTER TABLE app.collection_consumer ALTER COLUMN flags DROP DEFAULT;
+			
+			UPDATE app.collection_consumer SET flags = ARRAY_APPEND(flags, 'multiValue')     WHERE multi_value;
+			UPDATE app.collection_consumer SET flags = ARRAY_APPEND(flags, 'noDisplayEmpty') WHERE no_display_empty;
 
 			-- make column styles not nullable
 			UPDATE app.column SET styles = '{}' WHERE styles IS NULL;

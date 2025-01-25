@@ -145,12 +145,6 @@
 	outline:none;
 	filter:var(--image-filter-dark);
 }
-.menu .item .line img:focus,
-.menu .item .line img:hover{
-	height:24px;
-	margin:0px;
-	transition:height 0.2s, margin 0.2s;
-}
 .menu.isDark .line img{
 	filter:var(--image-filter-bright);
 }

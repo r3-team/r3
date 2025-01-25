@@ -115,10 +115,9 @@ let MyBuilderWidget = {
 									:allowRemove="false"
 									:consumer="values.collection"
 									:fixedCollection="false"
+									:flagsEnable="['noDisplayEmpty','showRowCount']"
 									:module="module"
 									:readonly="readonly"
-									:showMultiValue="false"
-									:showNoDisplayEmpty="true"
 									:showOnMobile="true"
 								/>
 							</td>

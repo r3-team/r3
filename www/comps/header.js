@@ -1,12 +1,11 @@
 import srcBase64Icon     from './shared/image.js';
-import {getColumnTitle}  from './shared/column.js';
 import {formOpen}        from './shared/form.js';
 import {getStringFilled} from './shared/generic.js';
 import {getCaption}      from './shared/language.js';
 import {getDateFormat}   from './shared/time.js';
 import {
 	getCollectionColumn,
-	getCollectionValues
+	getConsumersEntries
 } from './shared/collection.js';
 export {MyHeader as default};
 
@@ -276,38 +275,11 @@ let MyHeader = {
 			return cnt;
 		},
 		collectionEntries:(s) => {
-			let out = [];
+			let consumers = [];
 			for(let k in s.collectionIdMap) {
-				for(let i = 0, j = s.collectionIdMap[k].inHeader.length; i < j; i++) {
-					const collection = s.collectionIdMap[k];
-					const consumer   = collection.inHeader[i];
-					
-					if(!consumer.onMobile && s.isMobile)
-						continue;
-					
-					if(s.pwaModuleId !== null && collection.moduleId !== s.pwaModuleId)
-						continue;
-					
-					let value = s.getCollectionValues(
-						collection.id,
-						consumer.columnIdDisplay,
-						true
-					);
-					if(consumer.noDisplayEmpty && (value === null || value === 0 || value === ''))
-						continue;
-					
-					out.push({
-						iconId:collection.iconId,
-						openForm:consumer.openForm,
-						title:s.getColumnTitle(s.getCollectionColumn(
-							collection.id,
-							consumer.columnIdDisplay
-						),collection.moduleId),
-						value:value
-					});
-				}
+				consumers = consumers.concat(s.collectionIdMap[k].inHeader);
 			}
-			return out;
+			return s.getConsumersEntries(consumers);
 		},
 		layoutElementsProcessed:(s) => {
 			let elms   = JSON.parse(JSON.stringify(s.layoutElements));
@@ -411,8 +383,7 @@ let MyHeader = {
 		formOpen,
 		getCaption,
 		getCollectionColumn,
-		getCollectionValues,
-		getColumnTitle,
+		getConsumersEntries,
 		getDateFormat,
 		getStringFilled,
 		srcBase64Icon,

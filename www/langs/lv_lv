@@ -792,7 +792,8 @@
 			"formIdOpen": "Open form",
 			"multiValue": "Multi input",
 			"noDisplayEmpty": "Hide if empty",
-			"onMobile": "Show on mobile"
+			"onMobile": "Show on mobile",
+			"showRowCount": "Show result count instead"
 		},
 		"form": {
 			"actions": {

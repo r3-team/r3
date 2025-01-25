@@ -792,7 +792,8 @@
 			"formIdOpen": "Űrlap Megnyitása",
 			"multiValue": "Többértékű",
 			"noDisplayEmpty": "Elrejtés, ha üres",
-			"onMobile": "Mobil nézetben"
+			"onMobile": "Mobil nézetben",
+			"showRowCount": "Show result count instead"
 		},
 		"form": {
 			"actions": {

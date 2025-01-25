@@ -477,10 +477,9 @@ let MyBuilderFieldOptions = {
 								:allowRemove="false"
 								:consumer="field.defCollection"
 								:fixedCollection="false"
+								:flagsEnable="[]"
 								:module="module"
 								:readonly="false"
-								:showMultiValue="false"
-								:showNoDisplayEmpty="false"
 								:showOnMobile="false"
 							/>
 						</td>
@@ -1325,10 +1324,9 @@ let MyBuilderFieldOptions = {
 									:allowRemove="true"
 									:consumer="c"
 									:fixedCollection="false"
+									:flagsEnable="['multiValue']"
 									:module="module"
 									:readonly="false"
-									:showMultiValue="true"
-									:showNoDisplayEmpty="false"
 									:showOnMobile="false"
 								/>
 								<span v-if="field.collections.length !== 0">{{ capApp.collectionHint }}</span>

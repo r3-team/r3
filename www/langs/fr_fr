@@ -792,7 +792,8 @@
 			"formIdOpen": "Ouvrir le formulaire",
 			"multiValue": "Entrée multiple",
 			"noDisplayEmpty": "Masquer si vide",
-			"onMobile": "Afficher sur mobile"
+			"onMobile": "Afficher sur mobile",
+			"showRowCount": "Show result count instead"
 		},
 		"form": {
 			"actions": {

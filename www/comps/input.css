@@ -124,9 +124,10 @@
 	align-items:flex-start;
 	align-content:flex-start;
 	padding:6px;
-	box-shadow:var(--shadow-input);
 	background-color:var(--color-input);
+	border:var(--border-input);
 	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 	overflow:auto;
 	gap:5px;
 }

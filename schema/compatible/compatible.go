@@ -32,9 +32,18 @@ func FixMissingMenuTab(moduleId uuid.UUID, mts []types.MenuTab, menus []types.Me
 	}
 	return mts, nil
 }
-
-// < 3.10
-// fix nil field flags
+func FixCollectionConsumerFlags(c types.CollectionConsumer) types.CollectionConsumer {
+	if c.Flags == nil {
+		c.Flags = make([]string, 0)
+	}
+	if c.MultiValue {
+		c.Flags = append(c.Flags, "multiValue")
+	}
+	if c.NoDisplayEmpty {
+		c.Flags = append(c.Flags, "noDisplayEmpty")
+	}
+	return c
+}
 func FixNilFieldFlags(flags []string) []string {
 	if flags == nil {
 		return make([]string, 0)

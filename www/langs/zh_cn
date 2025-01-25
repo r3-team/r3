@@ -792,7 +792,8 @@
 			"formIdOpen": "打开表单",
 			"multiValue": "多输入",
 			"noDisplayEmpty": "为空时隐藏",
-			"onMobile": "在移动设备上显示"
+			"onMobile": "在移动设备上显示",
+			"showRowCount": "Show result count instead"
 		},
 		"form": {
 			"actions": {

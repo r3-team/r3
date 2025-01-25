@@ -253,7 +253,7 @@ let MyGantt = {
 					:columnIdDisplay="c.columnIdDisplay"
 					:key="c.collectionId"
 					:modelValue="collectionIdMapIndexes[c.collectionId]"
-					:multiValue="c.multiValue"
+					:multiValue="c.flags.includes('multiValue')"
 					:previewCount="isMobile ? 0 : 2"
 				/>
 				

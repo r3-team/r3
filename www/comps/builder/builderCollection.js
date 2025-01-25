@@ -243,10 +243,9 @@ let MyBuilderCollection = {
 									:allowRemove="true"
 									:consumer="c"
 									:fixedCollection="true"
+									:flagsEnable="['noDisplayEmpty','showRowCount']"
 									:module="module"
 									:readonly="readonly"
-									:showMultiValue="false"
-									:showNoDisplayEmpty="true"
 									:showOnMobile="true"
 								/>
 							</td>

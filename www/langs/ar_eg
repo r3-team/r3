@@ -792,7 +792,8 @@
 			"formIdOpen": "فتح النموذج",
 			"multiValue": "مدخلات متعددة",
 			"noDisplayEmpty": "إخفاء إذا كانت فارغة",
-			"onMobile": "عرض على الجوال"
+			"onMobile": "عرض على الجوال",
+			"showRowCount": "Show result count instead"
 		},
 		"form": {
 			"actions": {

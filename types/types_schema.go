@@ -471,11 +471,16 @@ type Collection struct {
 type CollectionConsumer struct {
 	Id              uuid.UUID   `json:"id"`
 	CollectionId    uuid.UUID   `json:"collectionId"`
-	ColumnIdDisplay pgtype.UUID `json:"columnIdDisplay"` // ID of collection column to display (inputs etc.)
-	MultiValue      bool        `json:"multiValue"`      // if active, values of multiple record rows can be selected
-	NoDisplayEmpty  bool        `json:"noDisplayEmpty"`  // if collection is used for display and value is 'empty' (0, '', null), it is not shown
-	OnMobile        bool        `json:"onMobile"`        // if collection is used for display and mobile view is active, decides whether to show collection
-	OpenForm        OpenForm    `json:"openForm"`
+	ColumnIdDisplay pgtype.UUID `json:"columnIdDisplay"` // ID of collection column to display
+	Flags           []string    `json:"flags"`           // flags for options (showRowCount, multiValue, noDisplayEmpty, ...)
+
+	// presentation options (to show collection in header, menu, etc.)
+	OnMobile bool     `json:"onMobile"` // show on mobile
+	OpenForm OpenForm `json:"openForm"` // open form when clicked on
+
+	// legacy
+	MultiValue     bool `json:"multiValue"`     // moved to flags
+	NoDisplayEmpty bool `json:"noDisplayEmpty"` // moved to flags
 }
 type Column struct {
 	Id          uuid.UUID   `json:"id"`
