@@ -266,7 +266,7 @@ let MyBuilderFormStates = {
 	name:'my-builder-form-states',
 	components:{ MyBuilderFormState },
 	template:`<div class="builder-form-states">
-		<div class="actions">
+		<div class="builder-form-states-actions">
 			<my-button image="add.png"
 				@trigger="add"
 				:caption="capGen.button.add"

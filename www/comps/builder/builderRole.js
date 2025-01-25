@@ -573,8 +573,7 @@ let MyBuilderRole = {
 			<!-- sidebar -->
 			<div class="contentBox sidebar" v-if="!isEveryone">
 				<div class="content padding default-inputs">
-					<h3 class="title">{{ capGen.properties }}</h3>
-					<table class="generic-table-vertical default-inputs">
+					<table class="generic-table-vertical fullWidth default-inputs">
 						<tbody>
 							<tr>
 								<td>{{ capGen.name }}</td>

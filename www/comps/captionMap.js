@@ -441,7 +441,7 @@ let MyCaptionMap = {
 			</div>
 			<div class="area nowrap">
 				<div class="row gap-large" v-if="module">
-					<div class="row centered">
+					<div class="row gap centered">
 						<span>{{ capApp.languagesApp }}</span>
 						<my-button
 							v-for="l in languages.filter(v => !languagesCustom.includes(v))"

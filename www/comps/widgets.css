@@ -87,7 +87,9 @@
 	padding:10px;
 	margin:5px;
 	background-color:var(--color-bg);
-	box-shadow:1px 1px 3px var(--color-shade);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 	gap:10px;
 	overflow:auto;
 }
@@ -144,8 +146,9 @@
 	display:flex;
 	flex-flow:column nowrap;
 	background-color:var(--color-bright);
-	border-radius:6px;
-	box-shadow:1px 1px 4px var(--color-shade);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 	overflow:hidden;
 }
 .widget.placeholder{

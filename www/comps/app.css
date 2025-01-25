@@ -135,6 +135,7 @@
 	--border-input:1px solid var(--color-border);
 	--border-input-focus:1px solid transparent;
 	--border-input-radius:5px;
+	--border-input-radius-large:calc(var(--border-input-radius) * 2);
 	--outline-input-focus:2px solid var(--color-accent1);
 }
 @-moz-document url-prefix() {
@@ -877,16 +878,23 @@ table td.maximum{
 
 /* generic vertical table */
 .generic-table-vertical{
-	border-collapse:separate;
-	border-spacing:0px 6px;
+	border-spacing:0px;
+	box-shadow:var(--shadow-input);
+	border:1px solid var(--color-border);
+	border-radius:var(--border-input-radius-large);
+	overflow:hidden;
+}
+.generic-table-vertical>tbody>tr>td{
+	padding:10px 15px;
+	background-color:var(--color-bright);
+	border-bottom:1px solid var(--color-border);
+}
+.generic-table-vertical>tbody>tr>td.grouping{
+	font-weight:bold;
 }
 .generic-table-vertical>tbody>tr>td:not(.grouping){
 	max-width:420px;
-	padding:10px 15px;
 	vertical-align:top;
-	background-color:var(--color-bright);
-	border:1px solid var(--color-border);
-	box-shadow:var(--shadow-input);
 }
 .generic-table-vertical.tight>tbody>tr>td{
 	padding:4px 6px 4px 15px;
@@ -894,12 +902,6 @@ table td.maximum{
 .generic-table-vertical>tbody>tr>td:first-child{
 	font-size:110%;
 	line-height:150%;
-	border-top-left-radius:10px;
-	border-bottom-left-radius:10px;
-}
-.generic-table-vertical>tbody>tr>td:last-child{
-	border-top-right-radius:10px;
-	border-bottom-right-radius:10px;
 }
 .generic-table-vertical.large>tbody>tr>td{
 	max-width:720px;
@@ -1364,6 +1366,7 @@ table td.maximum{
 /* user overwrites */
 .user-bordersSquared{
 	--border-input-radius:0px;
+	--border-input-radius-large:0px;
 }
 .user-shadowsInputs{
 	--border-input:1px solid transparent;

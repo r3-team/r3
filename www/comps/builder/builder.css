@@ -182,9 +182,11 @@
 .builder-modules .graph{
 	display:flex;
 	height:800px;
-	background-color:var(--color-input);
-	border-radius:12px;
 	margin:10px;
+	background-color:var(--color-input);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 }
 .builder-modules .key-create .key-pair-input{
 	display:flex;
@@ -456,9 +458,10 @@
 /* variable */
 .builder-variable .preview{
 	max-width:unset;
-	width:100%;
 	height:300px;
-	border-radius:10px;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 	overflow:hidden;
 	display:flex;
 	flex-flow:column nowrap;
@@ -528,7 +531,7 @@
 	padding:5px;
 	margin-bottom:5px;
 	border:1px solid var(--color-border);
-	border-radius:4px;
+	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
 }
 .builder-collection-input td{
@@ -815,8 +818,9 @@
 .builder-relation-preview-data{
 	flex:1 1 auto;
 	background-color:var(--color-input);
-	border:1px solid var(--color-border);
-	border-radius:5px;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 	overflow:auto;
 }
 .builder-relation-preview-data table{
@@ -1152,8 +1156,8 @@
 .builder-menu .color-preview{
 	width:10px;
 	height:28px;
-	border:1px solid var(--color-border);
-	border-radius:3px;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
 }
 .builder-menu .nested{
@@ -1162,5 +1166,5 @@
 	flex:8 1 500px;
 	background-color:var(--color-bg);
 	border:2px dotted var(--color-border);
-	border-radius:6px;
+	border-radius:var(--border-input-radius);
 }

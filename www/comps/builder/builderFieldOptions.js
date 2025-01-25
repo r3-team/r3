@@ -885,7 +885,7 @@ let MyBuilderFieldOptions = {
 					<tr>
 						<td>{{ capApp.flexJustifyContent }}</td>
 						<td>
-							<div class="row">
+							<div class="row gap">
 								<select
 									@input="set('justifyContent',$event.target.value)"
 									:value="field.justifyContent"
@@ -909,7 +909,7 @@ let MyBuilderFieldOptions = {
 					<tr>
 						<td>{{ capApp.flexAlignItems }}</td>
 						<td>
-							<div class="row">
+							<div class="row gap">
 								<select
 									@input="set('alignItems',$event.target.value)"
 									:value="field.alignItems"
@@ -932,7 +932,7 @@ let MyBuilderFieldOptions = {
 					<tr>
 						<td>{{ capApp.flexAlignContent }}</td>
 						<td>
-							<div class="row">
+							<div class="row gap">
 								<select
 									@input="set('alignContent',$event.target.value)"
 									:disabled="!field.wrap"

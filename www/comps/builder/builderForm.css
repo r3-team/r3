@@ -354,9 +354,6 @@
 .builder-form-actions table{
 	margin-top:20px;
 }
-.builder-form-actions table td{
-	padding:2px 4px;
-}
 .builder-form-actions table td.color-input{
 	min-width:200px;
 }
@@ -386,10 +383,11 @@
 .builder-form-states select{
 	min-width:unset;
 }
-.builder-form-states .actions{
+.builder-form-states-actions{
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:space-between;
+	gap:6px;
 	margin-bottom:20px;
 }
 .builder-form-state{
@@ -398,9 +396,9 @@
 	align-items:flex-start;
 	margin:2px 2px 4px 2px;
 	padding:2px 4px;
-	box-shadow:1px 1px 4px var(--color-shade);
-	border-bottom:1px solid var(--color-border);
-	border-radius:5px;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 }
 .builder-form-state .description{
 	max-width:400px;
@@ -412,6 +410,7 @@
 	display:flex;
 	flex-flow:column nowrap;
 	margin-top:8px;
+	padding-left:6px;
 }
 .builder-form-state span.title{
 	margin:8px 0px 4px 0px;

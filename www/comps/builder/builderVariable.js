@@ -102,7 +102,7 @@ let MyBuilderVariable = {
 							</td>
 						</tr>
 						<tr>
-							<td class="grouping">{{ capApp.inputOptions }}</td>
+							<td colspan="999" class="grouping">{{ capApp.inputOptions }}</td>
 						</tr>
 						<tr>
 							<td>{{ capAppAtr.usedFor }}</td>
