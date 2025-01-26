@@ -37,6 +37,7 @@ let MyBuilderIconInput = {
 				<div class="contentBox float">
 					<div class="top">
 						<div class="area">
+							<img class="icon" src="images/fileImage.png" />
 							<h1 class="title">{{ capGen.icon }}</h1>
 						</div>
 						<div class="area default-inputs">

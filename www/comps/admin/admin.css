@@ -51,8 +51,9 @@
 	width:200px;
 }
 .admin-login{
-	min-width:1000px;
-	max-width:1200px;
+	width:95%;
+	min-width:600px;
+	max-width:1000px;
 	min-height:600px;
 	overflow:auto;
 }
@@ -62,14 +63,10 @@
 }
 .admin-login .login-details{
 	margin-top:5px;
-	border:var(--border-input);
-	border-radius:var(--border-input-radius-large);
-	box-shadow:var(--shadow-input);
+	border-top:1px solid var(--color-border);
 	overflow:auto;
 }
 .admin-login .login-details-tabs{
-	border-top-right-radius:var(--border-input-radius-large);
-	border-top-left-radius:var(--border-input-radius-large);
 	overflow:hidden;
 }
 .admin-login .login-details .login-details-content{

@@ -878,17 +878,25 @@ table td.maximum{
 
 /* generic vertical table */
 .generic-table-vertical{
-	width:calc(100% - 10px);
+	width:calc(100% - 16px);
 	max-width:900px;
 	border-spacing:0px;
-	margin:5px;
+	margin:8px;
+	border-collapse:collapse;
 }
 .generic-table-vertical.w1200{
 	max-width:1200px;
 }
-.generic-table-vertical>tbody>tr>td{
-	padding:10px 15px;
+.generic-table-vertical>thead>tr,
+.generic-table-vertical>tbody>tr{
 	border-bottom:1px solid var(--color-border);
+}
+.generic-table-vertical>thead>tr:last-child,
+.generic-table-vertical>tbody>tr:last-child{
+	border:none;
+}
+.generic-table-vertical>tbody>tr>td{
+	padding:10px 12px;
 }
 .generic-table-vertical>tbody>tr>td.grouping{
 	font-weight:bold;

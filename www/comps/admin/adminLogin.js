@@ -10,7 +10,7 @@ export {MyAdminLogin as default};
 let MyAdminLoginRole = {
 	name:'my-admin-login-role',
 	template:`<td class="minimum role-content">
-		<div class="row gap">
+		<div class="row wrap gap">
 			<my-button
 				v-for="r in module.roles.filter(v => v.assignable && v.content === content)"
 				@trigger="$emit('toggle',r.id)"
@@ -95,6 +95,8 @@ let MyAdminLogin = {
 						:active="!isLdap"
 						:caption="capGen.button.new"
 					/>
+				</div>
+				<div class="area">
 					<my-button image="warning.png"
 						v-if="!isNew"
 						@trigger="resetTotpAsk"
@@ -175,28 +177,29 @@ let MyAdminLogin = {
 								<tr>
 									<td class="minimum">
 										<div class="title-cell">
-											<img src="images/editBox.png" />
-											<span>{{ capGen.name }}</span>
+											<img src="images/edit.png" />
+											<span>{{ capApp.meta.nameFore }}</span>
 										</div>
 									</td>
-									<td>
-										<table class="fullWidth">
-											<tbody>
-												<tr>
-													<td class="minimum">{{ capApp.meta.nameFore }}</td>
-													<td><input class="dynamic" v-model="meta.nameFore" :disabled="isLdap" /></td>
-												</tr>
-												<tr>
-													<td class="minimum">{{ capApp.meta.nameSur }}</td>
-													<td><input class="dynamic" v-model="meta.nameSur" :disabled="isLdap" /></td>
-												</tr>
-												<tr>
-													<td class="minimum">{{ capApp.meta.nameDisplay }}</td>
-													<td><input class="dynamic" v-model="meta.nameDisplay" :disabled="isLdap" /></td>
-												</tr>
-											</tbody>
-										</table>
+									<td><input class="dynamic" v-model="meta.nameFore" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">
+										<div class="title-cell">
+											<img src="images/edit.png" />
+											<span>{{ capApp.meta.nameSur }}</span>
+										</div>
 									</td>
+									<td><input class="dynamic" v-model="meta.nameSur" :disabled="isLdap" /></td>
+								</tr>
+								<tr>
+									<td class="minimum">
+										<div class="title-cell">
+											<img src="images/edit.png" />
+											<span>{{ capApp.meta.nameDisplay }}</span>
+										</div>
+									</td>
+									<td><input class="dynamic" v-model="meta.nameDisplay" :disabled="isLdap" /></td>
 								</tr>
 								<tr>
 									<td class="minimum">
@@ -285,9 +288,9 @@ let MyAdminLogin = {
 											<input class="short" placeholder="..." v-model="roleFilter" :title="capGen.button.filter" />
 										</div>
 									</th>
-									<th><my-button @trigger="toggleRolesByContent('admin')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentAdmin" :naked="true" /></th>
-									<th><my-button @trigger="toggleRolesByContent('user')"  :active="!isLdapAssignedRoles" :caption="capApp.roleContentUser"  :naked="true" /></th>
-									<th><my-button @trigger="toggleRolesByContent('other')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentOther" :naked="true" /></th>
+									<th><my-button image="ok.png" @trigger="toggleRolesByContent('admin')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentAdmin" :naked="true" /></th>
+									<th><my-button image="ok.png" @trigger="toggleRolesByContent('user')"  :active="!isLdapAssignedRoles" :caption="capApp.roleContentUser"  :naked="true" /></th>
+									<th><my-button image="ok.png" @trigger="toggleRolesByContent('other')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentOther" :naked="true" /></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -317,7 +320,7 @@ let MyAdminLogin = {
 						</table>
 
 						<!-- properties -->
-						<table class="generic-table-vertical" v-if="tabTarget === 'properties'">
+						<table class="generic-table-vertical w1200" v-if="tabTarget === 'properties'">
 							<tbody>
 								<tr>
 									<td>
