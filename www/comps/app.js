@@ -756,7 +756,16 @@ let MyApp = {
 					// load captions, then collections
 					this.captionsReload().then(
 						() => this.updateCollections().then(
-							() => this.appReady = true,
+							() => {
+								this.appReady = true;
+								this.$nextTick(() => {
+									// execute login frontend functions
+									for(const m of this.modules) {
+										if(m.jsFunctionIdOnLogin !== null)
+											this.jsFunctionRun(m.jsFunctionIdOnLogin,[],{});
+									}
+								});
+							},
 							err => {
 								alert(this.capErr.initCollection.replace('{MSG}',this.resolveErrCode(err)));
 								

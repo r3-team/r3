@@ -174,7 +174,7 @@ const exposedFunctionsGlobal = {
 export function jsFunctionRun(jsFunctionId,args,exposedFunctionsContext) {
 	const fnc = MyStore.getters['schema/jsFunctionIdMap'][jsFunctionId];
 	if(fnc === 'undefined')
-		return;
+		return console.warn(`Failed to start frontend function '${jsFunctionId}', function not known.`);
 	
 	// first argument is exposed application functions object 'app'
 	// additional arguments are defined by function

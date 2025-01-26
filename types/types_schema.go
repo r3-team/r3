@@ -14,7 +14,8 @@ type Module struct {
 	IconId                pgtype.UUID       `json:"iconId"`                // module icon in header/menu
 	IconIdPwa1            pgtype.UUID       `json:"iconIdPwa1"`            // PWA icon, 192x192
 	IconIdPwa2            pgtype.UUID       `json:"iconIdPwa2"`            // PWA icon, 512x512
-	PgFunctionIdLoginSync pgtype.UUID       `json:"pgFunctionIdLoginSync"` // function called, when login meta changes
+	JsFunctionIdOnLogin   pgtype.UUID       `json:"jsFunctionIdOnLogin"`   // frontend function called when login happens in frontend
+	PgFunctionIdLoginSync pgtype.UUID       `json:"pgFunctionIdLoginSync"` // backend function called when login meta data changes
 	Name                  string            `json:"name"`                  // name of module, is used for DB schema
 	NamePwa               pgtype.Text       `json:"namePwa"`               // name of module shown for PWA
 	NamePwaShort          pgtype.Text       `json:"namePwaShort"`          // name of module shown for PWA, short version

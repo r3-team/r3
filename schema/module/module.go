@@ -85,8 +85,8 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 
 	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
-			pg_function_id_login_sync, name, name_pwa, name_pwa_short, color1,
-			position, language_main, release_build, release_build_app, release_date,
+			js_function_id_on_login, pg_function_id_login_sync, name, name_pwa, name_pwa_short,
+			color1, position, language_main, release_build, release_build_app, release_date,
 			ARRAY(
 				SELECT module_id_on
 				FROM app.module_depends
@@ -115,8 +115,8 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 
 	for rows.Next() {
 		var m types.Module
-		if err := rows.Scan(&m.Id, &m.ParentId, &m.FormId, &m.IconId,
-			&m.IconIdPwa1, &m.IconIdPwa2, &m.PgFunctionIdLoginSync, &m.Name,
+		if err := rows.Scan(&m.Id, &m.ParentId, &m.FormId, &m.IconId, &m.IconIdPwa1,
+			&m.IconIdPwa2, &m.JsFunctionIdOnLogin, &m.PgFunctionIdLoginSync, &m.Name,
 			&m.NamePwa, &m.NamePwaShort, &m.Color1, &m.Position, &m.LanguageMain,
 			&m.ReleaseBuild, &m.ReleaseBuildApp, &m.ReleaseDate, &m.DependsOn,
 			&m.ArticleIdsHelp, &m.Languages); err != nil {
@@ -179,14 +179,14 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 
 		if _, err := tx.Exec(ctx, `
 			UPDATE app.module SET parent_id = $1, form_id = $2, icon_id = $3,
-				icon_id_pwa1 = $4, icon_id_pwa2 = $5, pg_function_id_login_sync = $6,
-				name = $7, name_pwa = $8, name_pwa_short = $9, color1 = $10, position = $11,
-				language_main = $12, release_build = $13, release_build_app = $14,
-				release_date = $15
-			WHERE id = $16
+				icon_id_pwa1 = $4, icon_id_pwa2 = $5, js_function_id_on_login = $6,
+				pg_function_id_login_sync = $7, name = $8, name_pwa = $9, name_pwa_short = $10,
+				color1 = $11, position = $12, language_main = $13, release_build = $14,
+				release_build_app = $15, release_date = $16
+			WHERE id = $17
 		`, mod.ParentId, mod.FormId, mod.IconId, mod.IconIdPwa1, mod.IconIdPwa2,
-			mod.PgFunctionIdLoginSync, mod.Name, mod.NamePwa, mod.NamePwaShort,
-			mod.Color1, mod.Position, mod.LanguageMain, mod.ReleaseBuild,
+			mod.JsFunctionIdOnLogin, mod.PgFunctionIdLoginSync, mod.Name, mod.NamePwa,
+			mod.NamePwaShort, mod.Color1, mod.Position, mod.LanguageMain, mod.ReleaseBuild,
 			mod.ReleaseBuildApp, mod.ReleaseDate, mod.Id); err != nil {
 
 			return mod.Id, err
@@ -212,12 +212,13 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.module (
 				id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
-				pg_function_id_login_sync, name, name_pwa, name_pwa_short, color1,
-				position, language_main, release_build, release_build_app, release_date
+				js_function_id_on_login, pg_function_id_login_sync, name, name_pwa,
+				name_pwa_short, color1, position, language_main, release_build,
+				release_build_app, release_date
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
-		`, mod.Id, mod.ParentId, mod.FormId, mod.IconId, mod.IconIdPwa1,
-			mod.IconIdPwa2, mod.PgFunctionIdLoginSync, mod.Name, mod.NamePwa,
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+		`, mod.Id, mod.ParentId, mod.FormId, mod.IconId, mod.IconIdPwa1, mod.IconIdPwa2,
+			mod.JsFunctionIdOnLogin, mod.PgFunctionIdLoginSync, mod.Name, mod.NamePwa,
 			mod.NamePwaShort, mod.Color1, mod.Position, mod.LanguageMain,
 			mod.ReleaseBuild, mod.ReleaseBuildApp, mod.ReleaseDate); err != nil {
 

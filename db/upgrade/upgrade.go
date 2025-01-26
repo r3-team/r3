@@ -330,6 +330,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- remove login setting
 			ALTER TABLE instance.login_setting DROP COLUMN borders_all;
 
+			-- new login session function
+			ALTER TABLE app.module
+				ADD COLUMN js_function_id_on_login UUID,
+				ADD CONSTRAINT js_function_id_on_login_fkey FOREIGN KEY (js_function_id_on_login)
+					REFERENCES app.js_function (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_id_on_login_fkey ON app.module USING btree (js_function_id_on_login ASC NULLS LAST);
+
 			-- fix login foreign key
 			ALTER TABLE instance.login
 				DROP CONSTRAINT login_ldap_id_fkey,
