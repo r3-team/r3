@@ -1318,7 +1318,9 @@ let MyField = {
 			this.fieldOptionSet(this.favoriteId,this.field.id,'collectionIdMapIndexes',this.collectionIdMapIndexes);
 		},
 		setTab(tabIndex) {
-			this.fieldOptionSet(this.favoriteId,this.field.id,'tabIndex',tabIndex);
+			if(this.settings.tabRemember)
+				this.fieldOptionSet(this.favoriteId,this.field.id,'tabIndex',tabIndex);
+			
 			this.tabIndexShow = tabIndex;
 		},
 		setTabCounter(tabIndex,fieldId,value) {
