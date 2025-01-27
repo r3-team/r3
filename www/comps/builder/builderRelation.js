@@ -150,24 +150,102 @@ let MyBuilderRelation = {
 				<div class="row gap default-inputs" v-if="['attributes','presets'].includes(tabTarget)">
 					<input v-model="nameFilter" :placeholder="capGen.threeDots" />
 				</div>
-				<my-button image="visible1.png"
-					@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
-					:caption="capGen.id"
+				<my-button image="editBox.png"
+					@trigger="showProperties = true"
+					:caption="capGen.properties"
 				/>
-				<my-button image="delete.png"
-					@trigger="delAsk"
-					:active="!readonly"
-					:cancel="true"
-					:caption="capGen.button.delete"
-					:captionTitle="capGen.button.delete"
-				/>
+			</div>
+		</div>
+
+		<!-- relation properties -->
+		<div class="app-sub-window under-header" v-if="showProperties" @mousedown.self="showProperties = false">
+			<div class="contentBox float">
+				<div class="top">
+					<div class="area nowrap">
+						<img class="icon" src="images/database.png" />
+						<h1 class="title">{{ capGen.properties }}</h1>
+					</div>
+					<div class="area">
+						<my-button image="cancel.png"
+							@trigger="showProperties = false"
+							:cancel="true"
+						/>
+					</div>
+				</div>
+				<div class="top lower">
+					<div class="area">
+						<my-button image="save.png"
+							@trigger="set"
+							:active="canSave"
+							:caption="capGen.button.save"
+							:captionTitle="capGen.button.save"
+						/>
+						<my-button image="refresh.png"
+							@trigger="reset"
+							:active="hasChanges"
+							:caption="capGen.button.refresh"
+						/>
+					</div>
+					<div class="area">
+						<my-button image="visible1.png"
+							@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
+							:caption="capGen.id"
+						/>
+						<my-button image="delete.png"
+							@trigger="delAsk"
+							:active="!readonly"
+							:cancel="true"
+							:caption="capGen.button.delete"
+							:captionTitle="capGen.button.delete"
+						/>
+					</div>
+				</div>
+				
+				<div class="content default-inputs no-padding">
+					<table class="generic-table-vertical default-inputs">
+						<tbody>
+							<tr>
+								<td>{{ capGen.name }}</td>
+								<td><input class="long" v-model="name" :disabled="readonly" /></td>
+								<td>{{ capApp.nameHint }}</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.comments }}</td>
+								<td colspan="2"><textarea class="dynamic" v-model="comment" :disabled="readonly"></textarea></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.encryption }}</td>
+								<td><my-bool v-model="encryption" :readonly="true" /></td>
+								<td>{{ capApp.encryptionHint }}</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.retention }}</td>
+								<td>
+									<table>
+										<tbody>
+											<tr>
+												<td>{{ capApp.retentionCount }}</td>
+												<td><input v-model.number="retentionCount" :disabled="readonly" /></td>
+											</tr>
+											<tr>
+												<td>{{ capApp.retentionDays }}</td>
+												<td><input v-model.number="retentionDays" :disabled="readonly" /></td>
+											</tr>
+										</tbody>
+									</table>
+								</td>
+								<td>{{ capApp.retentionHint }}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 		
 		<div class="content no-padding builder-relation">
 			<my-tabs
 				v-model="tabTarget"
-				:entries="['attributes','indexes','triggers','presets','policies','properties','relationships','data']"
+				:entries="['attributes','indexes','triggers','presets','policies','relationships','data']"
 				:entriesText="tabCaptions"
 			/>
 			
@@ -380,55 +458,6 @@ let MyBuilderRelation = {
 					/>
 				</div>
 			</div>
-			
-			<!-- relation properties -->
-			<div class="tab-content" v-if="tabTarget === 'properties'">
-				<table class="generic-table-vertical default-inputs">
-					<tbody>
-						<tr>
-							<td>{{ capGen.name }}</td>
-							<td><input class="long" v-model="name" :disabled="readonly" /></td>
-							<td>{{ capApp.nameHint }}</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.comments }}</td>
-							<td colspan="2"><textarea class="dynamic" v-model="comment" :disabled="readonly"></textarea></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.encryption }}</td>
-							<td><my-bool v-model="encryption" :readonly="true" /></td>
-							<td>{{ capApp.encryptionHint }}</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.retention }}</td>
-							<td>
-								<table>
-									<tbody>
-										<tr>
-											<td>{{ capApp.retentionCount }}</td>
-											<td><input v-model.number="retentionCount" :disabled="readonly" /></td>
-										</tr>
-										<tr>
-											<td>{{ capApp.retentionDays }}</td>
-											<td><input v-model.number="retentionDays" :disabled="readonly" /></td>
-										</tr>
-									</tbody>
-								</table>
-							</td>
-							<td>{{ capApp.retentionHint }}</td>
-						</tr>
-					</tbody>
-				</table>
-				
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="canSave"
-						:caption="capGen.button.save"
-						:captionTitle="capGen.button.save"
-					/>
-				</div>
-			</div>
 
 			<!-- relationship graph -->
 			<div class="tab-content graph" v-if="tabTarget === 'relationships'">
@@ -519,8 +548,15 @@ let MyBuilderRelation = {
 			previewRows:[],
 			previewRowCount:0,
 			previewValueLength:50,
+			showProperties:false,
 			tabTarget:'attributes'
 		};
+	},
+	mounted() {
+		window.addEventListener('keydown',this.handleHotkeys);
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	computed:{
 		tabCaptions:(s) => {
@@ -535,7 +571,6 @@ let MyBuilderRelation = {
 				s.capApp.triggers.replace('{CNT}',triggerCnt),
 				s.capApp.presets.replace('{CNT}',s.relation.presets.length),
 				s.capApp.policies.replace('{CNT}',s.relation.policies.length),
-				s.capGen.properties,
 				s.capApp.graph,
 				s.capApp.preview
 			];
@@ -684,6 +719,20 @@ let MyBuilderRelation = {
 				actionUpdate:false
 			});
 		},
+		handleHotkeys(e) {
+			if(e.ctrlKey && e.key === 's') {
+				if(this.showProperties && this.canSave)
+					this.set();
+
+				e.preventDefault();
+			}
+			if(e.key === 'Escape') {
+				if(this.showProperties)
+					this.showProperties = false;
+
+				e.preventDefault();
+			}
+		},
 		previewPage(next) {
 			if(next) this.previewOffset += this.previewLimit;
 			else     this.previewOffset -= this.previewLimit;
@@ -754,7 +803,10 @@ let MyBuilderRelation = {
 				retentionDays:this.retentionDays === '' ? null : this.retentionDays,
 				policies:this.policies
 			},true).then(
-				() => this.$root.schemaReload(this.relation.moduleId),
+				() => {
+					this.$root.schemaReload(this.relation.moduleId);
+					this.showProperties = false;
+				},
 				this.$root.genericError
 			);
 		}
