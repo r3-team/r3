@@ -311,7 +311,7 @@ let MyField = {
 							:joinsIndexMap="joinsIndexMap"
 							:key="f.id"
 							:moduleId="moduleId"
-							:parentIsCounting="t.contentCounter"
+							:parentIsCounting="t.contentCounter && !tabIndexesHidden.includes(i)"
 							:parentIsHidden="isHidden || i !== tabIndexShow"
 							:values="values"
 							:variableIdMapLocal="variableIdMapLocal"

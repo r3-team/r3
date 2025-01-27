@@ -1005,6 +1005,12 @@ let MyList = {
 				this.resized();
 			}
 		});
+		this.$watch('loadWhileHidden',(val) => {
+			if(val) {
+				this.reloadOutside();
+				this.resized();
+			}
+		});
 		this.$watch(() => [this.choices,this.filters],(newVals, oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
 				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
