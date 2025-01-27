@@ -10,7 +10,9 @@
 		"user": "app",
 		"pass": "app",
 		"ssl": false,
-		"sslSkipVerify": false
+		"sslSkipVerify": false,
+		"connsMax": 0,
+		"connsMin": 0
 	},
 	"paths": {
 		"certificates": "data/certificates/",

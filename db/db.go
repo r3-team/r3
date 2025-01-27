@@ -61,7 +61,12 @@ func Open(config types.FileTypeDb) error {
 	if err != nil {
 		return err
 	}
-
+	if config.ConnsMax != 0 {
+		poolConfig.MaxConns = config.ConnsMax
+	}
+	if config.ConnsMin != 0 {
+		poolConfig.MinConns = config.ConnsMin
+	}
 	if config.Ssl {
 		poolConfig.ConnConfig.TLSConfig = &tls.Config{
 			InsecureSkipVerify: config.SslSkipVerify,
