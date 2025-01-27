@@ -341,6 +341,26 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			
 			CREATE INDEX IF NOT EXISTS fki_js_function_id_on_login_fkey ON app.module USING btree (js_function_id_on_login ASC NULLS LAST);
 
+			-- file_unlink() instance function
+			CREATE OR REPLACE FUNCTION instance.file_unlink(
+				file_id uuid,
+				attribute_id uuid,
+				record_id bigint)
+				RETURNS void
+				LANGUAGE 'plpgsql'
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+				DECLARE
+				BEGIN
+					EXECUTE FORMAT(
+						'DELETE FROM instance_file.%I
+						WHERE file_id   = $1
+						AND   record_id = $2',
+						CONCAT(attribute_id::TEXT, '_record')
+					) USING file_id, record_id;
+				END;
+			$BODY$;
+
 			-- fix login foreign key
 			ALTER TABLE instance.login
 				DROP CONSTRAINT login_ldap_id_fkey,

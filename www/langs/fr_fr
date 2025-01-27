@@ -1190,6 +1190,7 @@
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID\n\nAbandonne l'opération et envoie un message à l'utilisateur en cours d'exécution, qui s'affiche dans l'interface utilisateur.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID\n\nSupprime les clés de chiffrement de bout en bout pour les enregistrements auxquels un utilisateur n'a plus accès. Cela rend le déchiffrement impossible pour l'utilisateur.",
 				"file_link": "instance.file_link({ARGS}) => VOID\n\nLie un fichier existant à un autre enregistrement (ajouté à l'attribut de fichier choisi). Ce lien est un lien dur, ce qui signifie que le même fichier est utilisé.\n\nLors du renommage ou de la suppression du fichier, le changement n'affecte que le lien vers le fichier. Indépendamment de la suppression, le fichier réel est conservé tant qu'il existe un lien vers le fichier.",
+				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Unlinks an existing file from the files attribute of a specified record. The removed link is a hardlink, meaning that the actual file is kept as long as it is still linked to at least one other records file attribute.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]\n\nRetourne les métadonnées des fichiers de l'attribut de fichier et de l'enregistrement choisis (peut inclure éventuellement des fichiers supprimés).\n\nLe type retourné 'instance.file_meta' se compose de :\n{id UUID, user_id_creator INTEGER, hash TEXT, name TEXT, size_kb INTEGER, version INTEGER, date_change BIGINT, date_delete BIGINT}",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Returns the encrypted data key for the given relation record and the chosen user. Data keys exist for individual records for every user that has access to it. They can be decrypted on the frontend with the associated user private key.",
 				"get_language_code": "instance.get_language_code() => TEXT\n\nRetourne le code de langue à 5 lettres ('en_us', ...) de l'utilisateur qui est utilisé pour accéder à la base de données de données.",
@@ -1224,6 +1225,11 @@
 				"file_link": [
 					"file_id UUID",
 					"file_name TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT"
+				],
+				"file_unlink": [
+					"file_id UUID",
 					"attribute_id UUID",
 					"record_id BIGINT"
 				],

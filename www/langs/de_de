@@ -1190,6 +1190,7 @@
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Löscht Ende-Zu-Ende-Datenschlüssel für Datensätze, auf die ein Benutzer keinen Zugriff mehr hat. Dies macht Entschlüsselung für den Benutzer unmöglich.",
 				"file_link": "instance.file_link({ARGS}) => VOID<br /><br />Verknüpft eine existierende Datei mit einem anderen Datensatz (hinzugefügt zu dem gewählten Dateiattribut). Es handelt sich hierbei um eine harte Verknüpfung, d. h. es wird auf die gleiche Datei zugegriffen.<br /><br />Umbenennen oder Löschen der Datei, betrifft jeweils nur die Dateiverknüpfung. Die Datei selbst wird behalten, solange noch eine Verknüpfung existiert.",
+				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Entfernt Verknüpfung einer existierenden Datei zu einem Datei-Attribut des angegebenen Datensatzes. Es handelt sich hierbei um eine harte Verknüpfung, d. h. die Datei selbst wird behalten, solange noch eine Verknüpfung zu einem Datei-Attribut eines anderen Datensatzes existiert.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]<br /><br />Liefert Metadaten für Dateien vom gewählten Dateiattribut und Datensatz (kann optional gelöschte Dateien inkludieren).<br /><br />Der gelieferte Typ 'instance.file_meta' besteht aus:<blockquote>id UUID,<br />user_id_creator INTEGER,<br />hash TEXT,<br />name TEXT,<br />size_kb INTEGER,<br />version INTEGER,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Liefert den verschlüsselten Datenschlüssel für den gewählten Relationsdatensatz und Benutzer. Datenschlüssel existieren für individuelle Datensätze für jeden Benutzer, der darauf Zugriff hat. Sie können am Frontend mit dem assoziierten privaten Schlüssel des Benutzers entschlüsselt werden.",
 				"get_language_code": "instance.get_language_code() => TEXT<br /><br />Liefert den 5-stelligen Sprach-Code ('en_us', ...) vom Benutzer, der auf das Daten-Backend zugreift.",
@@ -1224,6 +1225,11 @@
 				"file_link": [
 					"file_id UUID",
 					"file_name TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT"
+				],
+				"file_unlink": [
+					"file_id UUID",
 					"attribute_id UUID",
 					"record_id BIGINT"
 				],

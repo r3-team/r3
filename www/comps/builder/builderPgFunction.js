@@ -556,7 +556,7 @@ let MyBuilderPgFunction = {
 			holderRelationIdsOpen:[],    // opened relation placeholders (shows attributes)
 			holderRelationText:'',       // text filter for module relations
 			instanceFunctionIds:[
-				'abort_show_message','clean_up_e2ee_keys','file_link',
+				'abort_show_message','clean_up_e2ee_keys','file_link','file_unlink',
 				'files_get','get_e2ee_data_key_enc','get_language_code','get_name',
 				'get_preset_record_id','get_public_hostname','get_role_ids','get_user_id',
 				'has_role','has_role_any','log_error','log_info','log_warning','mail_delete',

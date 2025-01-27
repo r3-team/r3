@@ -1190,6 +1190,7 @@
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />Aborts the operation and sends a message to the executing user, which is displayed in the user interface.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Deletes end-to-end encryption data keys for records that a login has no longer access to. This makes decryption impossible for the login.",
 				"file_link": "instance.file_link({ARGS}) => VOID<br /><br />Links an existing file to another record (added to the chosen file attribute). This link is a hardlink, meaning that the same file is being accessed.<br /><br />When renaming or deleting the file, the change only affects the file link. Regardless of deletion, the actual file is kept as long as one file link exists.",
+				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Unlinks an existing file from the files attribute of a specified record. The removed link is a hardlink, meaning that the actual file is kept as long as it is still linked to at least one other records file attribute.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]<br /><br />Returns meta data for files from the chosen file attribute and record (can optionally include deleted files).<br /><br />The returned type 'instance.file_meta' consists of:<blockquote>id UUID,<br />user_id_creator INTEGER,<br />hash TEXT,<br />name TEXT,<br />size_kb INTEGER,<br />version INTEGER,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Returns the encrypted data key for the given relation record and the chosen user. Data keys exist for individual records for every user that has access to it. They can be decrypted on the frontend with the associated user private key.",
 				"get_language_code": "instance.get_language_code() => TEXT<br /><br />Returns the 5-letter language code ('en_us', ...) of the user, which is used to access the data backend.",
@@ -1224,6 +1225,11 @@
 				"file_link": [
 					"file_id UUID",
 					"file_name TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT"
+				],
+				"file_unlink": [
+					"file_id UUID",
 					"attribute_id UUID",
 					"record_id BIGINT"
 				],

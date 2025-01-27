@@ -1190,6 +1190,7 @@
 				"abort_show_message": "instance.abort_show_message({ARGS}) => باطل<br /><br />يلغي العملية ويرسل رسالة إلى المستخدم المنفذ، والتي يتم عرضها في واجهة المستخدم.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => باطل<br /><br />يحذف مفاتيح بيانات التشفير الشامل للسجلات التي لم يعد بإمكان تسجيل الدخول الوصول إليها. ",
 				"file_link": "instance.file_link({ARGS}) => باطل<br /><br />ربط ملف موجود بسجل آخر (يضاف إلى سمة الملف المختار). <br /><br />عند إعادة تسمية الملف أو حذفه، يؤثر التغيير فقط على رابط الملف. ",
+				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Unlinks an existing file from the files attribute of a specified record. The removed link is a hardlink, meaning that the actual file is kept as long as it is still linked to at least one other records file attribute.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]<br /><br />إرجاع بيانات التعريف للملفات من سمة الملف المختار وسجله (يمكن أن يتضمن الملفات المحذوفة اختياريًا).<br /><br />يتكون النوع الذي تم إرجاعه \"instance.file_meta\" من:<blockquote>معرف UUID,<br />تسجيل الدخول_id_creator عدد صحيح،<br />نص التجزئة,<br />نص الاسم,<br />size_kb عدد صحيح،<br />الإصدار عدد صحيح،<br />date_change بيجينت،<br />date_delete BIGINT</blockquote>",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => نص<br /><br />إرجاع مفتاح البيانات المشفر لسجل العلاقة المحدد وتسجيل الدخول المختار. ",
 				"get_language_code": "instance.get_language_code() => نص<br /><br />يُرجع رمز اللغة المكون من 5 أحرف (\"en_us\"، ...) لتسجيل الدخول، والذي يُستخدم للوصول إلى الواجهة الخلفية للبيانات.",
@@ -1226,6 +1227,11 @@
 					"نص اسم الملف",
 					"attribute_id UUID",
 					"Record_id BIGINT"
+				],
+				"file_unlink": [
+					"file_id UUID",
+					"attribute_id UUID",
+					"record_id BIGINT"
 				],
 				"files_get": [
 					"attribute_id UUID",
