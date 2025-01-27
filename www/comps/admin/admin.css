@@ -142,8 +142,9 @@
 /* customizing */
 .admin-custom .cssInput{
 	max-width:unset;
-	width:100%;
+	width:calc(100% - 20px);
 	height:900px;
+	margin:10px;
 	border:var(--border-input);
 	border-radius:var(--border-input-radius-large);
 	box-shadow:var(--shadow-input);
