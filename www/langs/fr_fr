@@ -236,6 +236,7 @@
 			},
 			"dialog": {
 				"delete": "Êtes-vous sûr de vouloir supprimer cet utilisateur?<br /><br />Cette action est irréversible.",
+				"emailIsNotUnique": "The same email address has also been assigned to a different user.",
 				"resetTotp": "Cela réinitialisera toutes les méthodes d'authentification multi-facteurs (MFA) pour cet utilisateur. L'accès au système sera ensuite possible uniquement avec le nom d'utilisateur et le mot de passe.<br /><br />La réinitialisation du MFA n'affecte pas le chiffrement de bout en bout.<br /><br />Voulez-vous continuer ?"
 			},
 			"error": {

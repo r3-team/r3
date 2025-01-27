@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"r3/cluster"
 	"r3/login"
+	"r3/login/login_meta"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -102,6 +103,16 @@ func LoginGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (inter
 		req.OrderAsc, req.Limit, req.Offset, req.Meta, req.Roles, req.RecordRequests)
 
 	return res, err
+}
+func LoginGetEmailIsNotUnique_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+	var req struct {
+		LoginId int64  `json:"loginId"`
+		Email   string `json:"email"`
+	}
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	return login_meta.GetEmailIsNotUnique_tx(ctx, tx, req.LoginId, req.Email)
 }
 func LoginGetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 

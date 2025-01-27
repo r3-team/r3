@@ -108,6 +108,9 @@
 	margin-right:6px;
 	filter:var(--image-filter);
 }
+.admin-login .message.error{
+	color:var(--color-error);
+}
 
 /* login sessions */
 .admin-sessions img.line-icon{

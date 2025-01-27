@@ -91,7 +91,7 @@ let MyAdminLogin = {
 					/>
 					<my-button image="add.png"
 						v-if="!isNew"
-						@trigger="id = 0"
+						@trigger="reset"
 						:active="!isLdap"
 						:caption="capGen.button.new"
 					/>
@@ -235,7 +235,14 @@ let MyAdminLogin = {
 											<span>{{ capApp.meta.email }}</span>
 										</div>
 									</td>
-									<td><input class="dynamic" v-model="meta.email" :disabled="isLdap" /></td>
+									<td>
+										<div class="column gap">
+											<input class="dynamic" v-model="meta.email" @keyup="typedEmailField" :disabled="isLdap" />
+											<div v-if="emailIsNotUnique && meta.email !== ''" class="message error">
+												{{ capApp.dialog.emailIsNotUnique }}
+											</div>
+										</div>
+									</td>
 								</tr>
 								<tr>
 									<td class="minimum">
@@ -462,6 +469,7 @@ let MyAdminLogin = {
 			templateId:null,
 			
 			// states
+			emailIsNotUnique:false,
 			inputKeys:['name','active','admin','pass','meta','noAuth','tokenExpiryHours','records','roleIds'],
 			inputsOrg:{},      // map of original input values, key = input key
 			inputsReady:false, // inputs have been loaded
@@ -470,6 +478,7 @@ let MyAdminLogin = {
 			roleFilter:'',     // filter for role selection
 			tabTarget:'meta',
 			templates:[],      // login templates
+			timerEmailCheck:null,
 			
 			// login form
 			loginFormIndexOpen:null,
@@ -590,6 +599,10 @@ let MyAdminLogin = {
 			this.loginFormRecords   = this.records[index].id !== null
 				? [this.records[index].id] : [];
 		},
+		reset() {
+			this.id               = 0;
+			this.emailIsNotUnique = false;
+		},
 		toggleRoleId(roleId) {
 			const pos = this.roleIds.indexOf(roleId);
 			if(pos === -1) this.roleIds.push(roleId);
@@ -619,6 +632,10 @@ let MyAdminLogin = {
 				if(!this.roleIds.includes(roleIdsByContent[i]))
 					this.roleIds.push(roleIdsByContent[i]);
 			}
+		},
+		typedEmailField() {
+			clearInterval(this.timerEmailCheck);
+			this.timerEmailCheck = setTimeout(this.getEmailIsNotUnique,1000);
 		},
 		updateLoginRecord(loginFormIndex,recordId) {
 			this.recordInput = '';
@@ -677,7 +694,20 @@ let MyAdminLogin = {
 					this.roleIds          = login.roleIds;
 					this.pass             = '';
 					this.inputsLoaded();
+					this.getEmailIsNotUnique();
 				},
+				this.$root.genericError
+			);
+		},
+		getEmailIsNotUnique() {
+			if(this.meta.email === '')
+				return;
+
+			ws.send('login','getEmailIsNotUnique',{
+				loginId:this.id,
+				email:this.meta.email.trim()
+			},true).then(
+				res => { this.emailIsNotUnique = res.payload; },
 				this.$root.genericError
 			);
 		},

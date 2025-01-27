@@ -236,6 +236,7 @@
 			},
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف تسجيل الدخول هذا؟<br /><br />هذا الإجراء لا رجعة فيه.</b>",
+				"emailIsNotUnique": "The same email address has also been assigned to a different user.",
 				"resetTotp": "سيؤدي هذا إلى إعادة تعيين كافة أساليب المصادقة متعددة العوامل (MFA) لتسجيل الدخول هذا. <br /><br />ليس لإعادة ضبط MFA أي تأثير على التشفير الشامل.<br /><br />هل تريد الاستمرار؟"
 			},
 			"error": {

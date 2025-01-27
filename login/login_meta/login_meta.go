@@ -8,6 +8,20 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+func GetEmailIsNotUnique_tx(ctx context.Context, tx pgx.Tx, loginId int64, email string) (bool, error) {
+	exists := false
+	err := db.Pool.QueryRow(db.Ctx, `
+		SELECT EXISTS(
+			SELECT login_id
+			FROM instance.login_meta
+			WHERE login_id <> $1
+			AND   email    =  $2
+		)
+	`, loginId, email).Scan(&exists)
+
+	return exists, err
+}
+
 func Get(id int64) (types.LoginMeta, error) {
 	var m types.LoginMeta
 
