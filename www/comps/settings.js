@@ -1331,7 +1331,7 @@ let MySettings = {
 								</select>
 							</td>
 						</tr>
-						<tr v-if="!settingsInput.colorClassicMode">
+						<tr class="default-inputs" v-if="!settingsInput.colorClassicMode">
 							<td>{{ capApp.colorHeader }}</td>
 							<td><my-input-color v-model="settingsInput.colorHeader" :allowNull="true" /></td>
 						</tr>
@@ -1342,7 +1342,7 @@ let MySettings = {
 						<tr>
 							<td colspan="2"><b>{{ capApp.titleSubMenu }}</b></td>
 						</tr>
-						<tr>
+						<tr class="default-inputs">
 							<td>{{ capApp.colorMenu }}</td>
 							<td><my-input-color v-model="settingsInput.colorMenu" :allowNull="true" /></td>
 						</tr>

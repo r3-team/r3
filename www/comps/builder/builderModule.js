@@ -364,6 +364,7 @@ let MyBuilderModule = {
 								<div class="row">
 									<my-button image="add.png"
 										@trigger="setNewLoginSync"
+										:active="!readonly"
 										:caption="capApp.button.loginSyncCreate"
 									/>
 								</div>

@@ -4,23 +4,33 @@ export {MyInputColor as default};
 let MyInputColor = {
 	name:'my-input-color',
 	components:{ 'chrome-picker':VueColor.Chrome },
-	template:`<div class="input-color" v-click-outside="closePicker">
+	template:`<div class="input-color input-custom" v-click-outside="closePicker">
 		<div class="input-color-preview row gap"
-			:class="{ isDark:isDark }"
+			@click.left="togglePicker"
+			:class="{ clickable:!readonly, isDark:isDark }"
 			:style="'background-color:#'+input"
 		>
-			<my-button image="cancel.png"
-				@trigger="input = ''; showPicker = false"
-				v-if="isSet"
-				:active="!readonly"
-				:naked="true"
-			/>
-			<my-button
-				@trigger="togglePicker"
-				:active="!readonly"
-				:image="showPicker ? 'pageUp.png' : 'pageDown.png'"
-				:naked="true"
-			/>
+			<!-- keep div for space-between layout -->
+			<div>
+				<span v-if="modelValue !== null && modelValue !== ''">#{{ modelValue }}</span>
+			</div>
+
+			<div class="row gap">
+				<my-button image="cancel.png"
+					@trigger="input = ''; showPicker = false"
+					v-if="isSet"
+					:active="!readonly"
+					:blockBubble="true"
+					:naked="true"
+				/>
+				<my-button
+					@trigger="togglePicker"
+					:active="!readonly"
+					:blockBubble="true"
+					:image="showPicker ? 'pageUp.png' : 'pageDown.png'"
+					:naked="true"
+				/>
+			</div>
 		</div>
 		
 		<chrome-picker class="input-color-picker"
@@ -82,7 +92,8 @@ let MyInputColor = {
 			this.setValueAfterDelay = null;
 		},
 		togglePicker() {
-			this.showPicker = !this.showPicker;
+			if(!this.readonly)
+				this.showPicker = !this.showPicker;
 		}
 	}
 };
