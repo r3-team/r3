@@ -115,7 +115,7 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 	// process finished batches
 	for(let i = 0, j = batches.length; i < j; i++) {
 		if(batches[i].basis !== 0)
-			batches[i].style = `max-width:${batches[i].basis}px`;
+			batches[i].style = `width:${batches[i].basis}px`;
 		
 		batches[i].orderIndexesUsed     = getOrderIndexesFromColumnBatch(batches[i],columns,orders);
 		batches[i].orderIndexesSmallest = batches[i].orderIndexesUsed.length !== 0 ? Math.min(...batches[i].orderIndexesUsed) : 999;

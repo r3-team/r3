@@ -143,8 +143,11 @@
 	height:var(--row-height);
 	box-sizing:border-box;
 }
-.list .layoutTable th:last-child{
-	padding-right:10px; /* for header toggle */
+.list .layoutTable th .headerToggle{
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:flex-end;
+	margin-right:10px;
 }
 .list .layoutTable th .columnBatchHeader{
 	display:flex;
@@ -199,8 +202,9 @@
 	max-height:250px;
 	padding:0px 6px;
 	background-color:var(--color-input);
+	border:var(--border-input);
 	border-radius:var(--border-input-radius);
-	box-shadow:1px 1px 4px var(--color-shade-input);
+	box-shadow:var(--shadow-input);
 	overflow-y:scroll;
 }
 .list .layoutTable th.checkbox,

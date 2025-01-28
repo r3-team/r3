@@ -424,7 +424,7 @@ let MyList = {
 										:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 									/>
 								</th>
-								<th v-for="(b,i) in columnBatches">
+								<th v-for="(b,i) in columnBatches" :style="b.style">
 									<my-list-column-batch
 										@close="columnBatchIndexOption = -1"
 										@del-aggregator="setAggregators"
@@ -433,7 +433,6 @@ let MyList = {
 										@set-filters="filtersColumn = $event;reloadInside('filtersColumn')"
 										@set-order="setOrder(b,$event)"
 										@toggle="clickColumn(i)"
-										@toggle-header="toggleHeader"
 										:columnBatch="b"
 										:columnIdMapAggr="columnIdMapAggr"
 										:columns="columns"
@@ -446,8 +445,17 @@ let MyList = {
 										:relationId="query.relationId"
 										:rowCount="count"
 										:show="columnBatchIndexOption === i"
-										:showToggle="!showHeader && i === columnBatches.length-1"
 									/>
+								</th>
+								<!-- empty column for taking remaining space & header toggle action -->
+								<th>
+									<div class="headerToggle" v-if="!showHeader">
+										<my-button image="toggleDown.png"
+											@trigger="toggleHeader"
+											:captionTitle="capApp.button.collapseHeader"
+											:naked="true"
+										/>
+									</div>
 								</th>
 							</tr>
 						</thead>
@@ -514,7 +522,7 @@ let MyList = {
 								</td>
 								
 								<!-- row values per column batch -->
-								<td v-for="b in columnBatches" :style="b.style">
+								<td v-for="b in columnBatches">
 									<div class="columnBatch"
 										:class="{ colored:b.columnIndexColor !== -1, vertical:b.vertical }"
 										:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
@@ -538,6 +546,8 @@ let MyList = {
 										/>
 									</div>
 								</td>
+								<!-- empty column for taking remaining space -->
+								<td></td>
 							</tr>
 							
 							<!-- no results message -->

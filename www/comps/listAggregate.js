@@ -15,6 +15,8 @@ let MyListAggregate = {
 		<td v-for="(b,i) in columnBatches" :class="domClassByColumnBatch[i]">
 			{{ valuesByColumnBatch[i] !== null ? valuesByColumnBatch[i] : '' }}
 		</td>
+		<!-- empty column for taking remaining space -->
+		<td></td>
 	</tr>`,
 	props:{
 		columnBatches:  { type:Array,   required:true }, // list column batches
