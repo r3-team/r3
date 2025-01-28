@@ -12,7 +12,7 @@ var (
 	QueryFilterConnectors = []string{"AND", "OR"}
 	QueryFilterOperators  = []string{"=", "<>", "<", ">", "<=", ">=", "IS NULL",
 		"IS NOT NULL", "LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE", "= ANY",
-		"<> ALL", "@>", "<@", "&&", "@@"}
+		"<> ALL", "@>", "<@", "&&", "@@", "~", "~*", "!~", "!~*"}
 )
 
 // a query starts at a relation to retrieve attribute values

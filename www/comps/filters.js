@@ -92,6 +92,13 @@ let MyFilterOperator = {
 				<option value="<> ALL" :title="capApp.option.operator.neAll">&lt;&gt; ALL</option>
 			</optgroup>
 			
+			<optgroup :label="capApp.operatorsRegex">
+				<option value="~"   :title="capApp.option.operator.rxMatch"   >~</option>
+				<option value="~*"  :title="capApp.option.operator.rxMatchI"  >~*</option>
+				<option value="!~"  :title="capApp.option.operator.rxMatchNo" >!~</option>
+				<option value="!~*" :title="capApp.option.operator.rxMatchNoI">!~*</option>
+			</optgroup>
+			
 			<optgroup :label="capApp.operatorsArray">
 				<option value="@>" :title="capApp.option.operator.arrContains" >@&gt;</option>
 				<option value="<@" :title="capApp.option.operator.arrContained">&lt;@</option>

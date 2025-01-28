@@ -1880,6 +1880,7 @@
 		"nowOffsetTitle": "Addiere (positive Nummer) or subtrahiere (negative Nummer) X Tage/Stunden/Minuten/Sekunden von jetzt.",
 		"operatorsArray": "Array",
 		"operatorsNull": "Leerer Wert",
+		"operatorsRegex": "Regulärer Ausdruck",
 		"operatorsSets": "Subset",
 		"operatorsSize": "Nummer",
 		"operatorsText": "Text",
@@ -1959,6 +1960,10 @@
 				"not_like": "enthält nicht (groß/klein)",
 				"not_null": "nicht leer",
 				"null": "leer",
+				"rxMatch": "entspricht (groß/klein)",
+				"rxMatchI": "entspricht",
+				"rxMatchNo": "entspricht nicht (groß/klein)",
+				"rxMatchNoI": "entspricht nicht",
 				"se": "kleiner/gleich",
 				"st": "kleiner"
 			}

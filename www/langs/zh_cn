@@ -1880,6 +1880,7 @@
 		"nowOffsetTitle": "从现在开始添加（正数）或减去（负数） X 天/小时/分钟/秒。",
 		"operatorsArray": "数组",
 		"operatorsNull": "空值",
+		"operatorsRegex": "Regular expression",
 		"operatorsSets": "子集",
 		"operatorsSize": "数量",
 		"operatorsText": "文本",
@@ -1959,6 +1960,10 @@
 				"not_like": "不包含（区分大小写）",
 				"not_null": "非空",
 				"null": "空",
+				"rxMatch": "matches regex (match case)",
+				"rxMatchI": "matches regex",
+				"rxMatchNo": "not matches regex (match case)",
+				"rxMatchNoI": "not matches regex",
 				"se": "小于等于",
 				"st": "小于"
 			}

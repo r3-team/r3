@@ -1880,6 +1880,7 @@
 		"nowOffsetTitle": "Ajouter (nombre positif) ou soustraire (nombre négatif) X jours/heures/minutes/secondes à partir de maintenant.",
 		"operatorsArray": "Tableau",
 		"operatorsNull": "Valeur vide",
+		"operatorsRegex": "Regular expression",
 		"operatorsSets": "Sous-ensemble",
 		"operatorsSize": "Nombre",
 		"operatorsText": "Texte",
@@ -1959,6 +1960,10 @@
 				"not_like": "ne contient pas (respecte la casse)",
 				"not_null": "non vide",
 				"null": "vide",
+				"rxMatch": "matches regex (match case)",
+				"rxMatchI": "matches regex",
+				"rxMatchNo": "not matches regex (match case)",
+				"rxMatchNoI": "not matches regex",
 				"se": "plus petit/égal",
 				"st": "plus petit"
 			}

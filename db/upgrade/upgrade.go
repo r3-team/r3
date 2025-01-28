@@ -361,6 +361,12 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				END;
 			$BODY$;
 
+			-- regex operators
+			ALTER TYPE app.condition_operator ADD VALUE '~';
+			ALTER TYPE app.condition_operator ADD VALUE '~*';
+			ALTER TYPE app.condition_operator ADD VALUE '!~';
+			ALTER TYPE app.condition_operator ADD VALUE '!~*';
+
 			-- fix login foreign key
 			ALTER TABLE instance.login
 				DROP CONSTRAINT login_ldap_id_fkey,

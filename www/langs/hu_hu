@@ -1880,6 +1880,7 @@
 		"nowOffsetTitle": "Adj hozzá (pozitív szám) vagy vonj ki (negatív szám) X nap/óra/perc/másodperc az aktuális időből.",
 		"operatorsArray": "Tömb",
 		"operatorsNull": "Üres érték",
+		"operatorsRegex": "Regular expression",
 		"operatorsSets": "Részlet",
 		"operatorsSize": "Szám",
 		"operatorsText": "Szöveg",
@@ -1959,6 +1960,10 @@
 				"not_like": "nem tartalmazza (nagy- és kisbetűre érzékeny)",
 				"not_null": "nem üres",
 				"null": "üres",
+				"rxMatch": "matches regex (match case)",
+				"rxMatchI": "matches regex",
+				"rxMatchNo": "not matches regex (match case)",
+				"rxMatchNoI": "not matches regex",
 				"se": "nagyobb vagy egyenlő",
 				"st": "nagyobb"
 			}

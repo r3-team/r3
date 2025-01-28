@@ -1880,6 +1880,7 @@
 		"nowOffsetTitle": "إضافة (رقم موجب) أو إزالة (رقم سالب) X أيام/ساعات/دقائق/ثواني من الآن.",
 		"operatorsArray": "صفيف",
 		"operatorsNull": "قيمة فارغة",
+		"operatorsRegex": "Regular expression",
 		"operatorsSets": "مجموعة فرعية",
 		"operatorsSize": "رقم",
 		"operatorsText": "نص",
@@ -1959,6 +1960,10 @@
 				"not_like": "لا يحتوي على (حالة المطابقة)",
 				"not_null": "ليست فارغة",
 				"null": "فارغ",
+				"rxMatch": "matches regex (match case)",
+				"rxMatchI": "matches regex",
+				"rxMatchNo": "not matches regex (match case)",
+				"rxMatchNoI": "not matches regex",
 				"se": "أصغر / متساوي",
 				"st": "الأصغر"
 			}

@@ -1880,6 +1880,7 @@
 		"nowOffsetTitle": "Add (positive number) or remove (negative number) X days/hours/minutes/seconds from now.",
 		"operatorsArray": "Array",
 		"operatorsNull": "Empty value",
+		"operatorsRegex": "Regular expression",
 		"operatorsSets": "Subset",
 		"operatorsSize": "Number",
 		"operatorsText": "Text",
@@ -1959,6 +1960,10 @@
 				"not_like": "not contains (match case)",
 				"not_null": "not empty",
 				"null": "empty",
+				"rxMatch": "matches regex (match case)",
+				"rxMatchI": "matches regex",
+				"rxMatchNo": "not matches regex (match case)",
+				"rxMatchNoI": "not matches regex",
 				"se": "smaller/equal",
 				"st": "smaller"
 			}
