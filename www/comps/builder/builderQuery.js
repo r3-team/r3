@@ -1,6 +1,10 @@
-import MyBuilderCaption       from './builderCaption.js';
-import {getItemTitleRelation} from '../shared/builder.js';
-import {getNilUuid}           from '../shared/generic.js';
+import MyBuilderCaption from './builderCaption.js';
+import {getNilUuid}     from '../shared/generic.js';
+import {
+	builderOptionGet,
+	builderOptionSet,
+	getItemTitleRelation
+} from '../shared/builder.js';
 import {
 	getCaptionByIndexAttributeId,
 	getQueryFilterNew
@@ -27,29 +31,23 @@ let MyBuilderQueryFilter = {
 			:large="true"
 			:naked="true"
 		/>
-		<div class="row centered default-inputs" v-if="visible && joins.length > 1">
-			<div class="row gap centered">
-				<my-button image="add.png"
-					@trigger="add(indexTarget)"
-					:active="indexTargets.includes(indexTarget)"
-					:caption="capApp.filterJoinAdd"
-					:naked="true"
-				/>
-				<select v-model.number="indexTarget" class="dynamic">
+		<div class="row gap centered default-inputs">
+			<template v-if="expertMode && joins.length > 1">
+				<select class="dynamic" v-model.number="indexTarget" :title="capApp.filterJoin">
+					<option value="0">-</option>
 					<option v-for="index in indexTargets" :value="index">
-						{{ relationLabel(index) }}
+						{{ index }}
 					</option>
 				</select>
-				<my-button image="question.png"
-					@trigger="showHelp"
-				/>
-			</div>
+				<my-button image="question.png" @trigger="showHelp" />
+			</template>
+			<my-button image="add.png"
+				@trigger="add(indexTarget)"
+				:active="indexTarget === 0 || indexTargets.includes(indexTarget)"
+				:caption="capGen.button.add"
+				:naked="true"
+			/>
 		</div>
-		<my-button image="add.png"
-			@trigger="add(0)"
-			:caption="capGen.button.add"
-			:naked="true"
-		/>
 	</div>
 	<div class="builder-query-filter" v-show="visible">
 		<template v-for="(filters,index) in filtersByIndexMap">
@@ -76,6 +74,7 @@ let MyBuilderQueryFilter = {
 	</div>`,
 	props:{
 		entityIdMapRef: { type:Object,  required:true },
+		expertMode:     { type:Boolean, required:true },
 		fieldIdMap:     { type:Object,  required:true },
 		filtersDisable: { type:Array,   required:false, default:() => [] },
 		formId:         { type:String,  required:true },
@@ -150,7 +149,8 @@ let MyBuilderQueryFilter = {
 		},
 		showHelp() {
 			this.$store.commit('dialog',{
-				captionBody:this.capApp.filterJoinAddHint
+				captionBody:this.capApp.filterJoinHelp,
+				captionTop:this.capGen.help
 			});
 		},
 	}
@@ -198,6 +198,7 @@ let MyBuilderQueryChoice = {
 		<my-builder-query-filter
 			v-model="filtersInput"
 			:entityIdMapRef="entityIdMapRef"
+			:expertMode="expertMode"
 			:fieldIdMap="fieldIdMap"
 			:formId="formId"
 			:joins="joins"
@@ -207,6 +208,7 @@ let MyBuilderQueryChoice = {
 	</div>`,
 	props:{
 		builderLanguage:{ type:String, required:true },
+		expertMode:     { type:Boolean,required:true },
 		choice:         { type:Object, required:true },
 		entityIdMapRef: { type:Object, required:true },
 		fieldIdMap:     { type:Object, required:true },
@@ -688,6 +690,12 @@ let MyBuilderQuery = {
 					:large="true"
 					:naked="true"
 				/>
+				<my-button-check
+					v-if="joins.length !== 0"
+					@update:modelValue="builderOptionSet('queryExpertMode',$event);expertMode = $event"
+					:caption="capGen.expert"
+					:modelValue="expertMode"
+				/>
 			</div>
 			
 			<select
@@ -759,6 +767,7 @@ let MyBuilderQuery = {
 			<my-builder-query-filter
 				v-model="filtersInput"
 				:entityIdMapRef="entityIdMapRef"
+				:expertMode="expertMode"
 				:fieldIdMap="fieldIdMap"
 				:filtersDisable="filtersDisable"
 				:formId="formId"
@@ -769,7 +778,7 @@ let MyBuilderQuery = {
 		</div>
 		
 		<!-- choice filters -->
-		<div class="query-component" v-if="allowChoices && allowFilters && joins.length !== 0">
+		<div class="query-component" v-if="expertMode && allowChoices && allowFilters && joins.length !== 0">
 			<div class="query-title">
 				<my-button
 					@trigger="showChoices = !showChoices"
@@ -779,11 +788,14 @@ let MyBuilderQuery = {
 					:large="true"
 					:naked="true"
 				/>
-				<my-button image="add.png"
-					@trigger="choiceAdd"
-					:caption="capGen.button.add"
-					:naked="true"
-				/>
+				<div class="row centered gap">
+					<my-button image="question.png" @trigger="showChoicesHelp" />
+					<my-button image="add.png"
+						@trigger="choiceAdd"
+						:caption="capGen.button.add"
+						:naked="true"
+					/>
+				</div>
 			</div>
 			
 			<template v-if="showChoices && choicesInput.length > 0">
@@ -800,6 +812,7 @@ let MyBuilderQuery = {
 				@update="choiceApply(i,$event)"
 				:builderLanguage="builderLanguage"
 				:choice="choicesInput[i]"
+				:expertMode="expertMode"
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
 				:formId="formId"
@@ -823,11 +836,7 @@ let MyBuilderQuery = {
 					:large="true"
 					:naked="true"
 				/>
-				<my-button image="question.png"
-					@trigger="showLookupHelp"
-					:caption="capGen.help"
-					:naked="true"
-				/>
+				<my-button image="question.png" @trigger="showLookupHelp" />
 			</div>
 			<my-builder-query-lookups
 				v-show="showLookups"
@@ -838,7 +847,7 @@ let MyBuilderQuery = {
 		</div>
 		
 		<!-- fixed limit -->
-		<div class="fixed-limit" v-if="allowFixedLimit && joins.length !== 0">
+		<div class="fixed-limit" v-if="expertMode && allowFixedLimit && joins.length !== 0">
 			<my-button
 				:active="false"
 				:caption="capApp.fixedLimit"
@@ -886,6 +895,7 @@ let MyBuilderQuery = {
 	],
 	data() {
 		return {
+			expertMode:false,
 			showChoices:false,
 			showLookups:false,
 			showOrders:false,
@@ -1000,8 +1010,13 @@ let MyBuilderQuery = {
 		capApp:        (s) => s.$store.getters.captions.builder.query,
 		capGen:        (s) => s.$store.getters.captions.generic
 	},
+	mounted() {
+		this.expertMode = this.builderOptionGet('queryExpertMode',false);
+	},
 	methods:{
 		// externals
+		builderOptionGet,
+		builderOptionSet,
 		getDependentModules,
 		getNilUuid,
 		
@@ -1055,6 +1070,13 @@ let MyBuilderQuery = {
 			
 			if(!this.showOrders)
 				this.showOrders = true;
+		},
+		showChoicesHelp() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.filterChoicesHelp,
+				captionTop:this.capGen.help,
+				image:'question.png'
+			});
 		},
 		showLookupHelp() {
 			this.$store.commit('dialog',{

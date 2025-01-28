@@ -1263,7 +1263,10 @@ table td.maximum{
 	font-family:inherit;
 	border:none;
 	color:var(--color-font);
-	background-color:var(--color-bg);
+	background-color:var(--color-input);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 }
 .dialog .dialog-actions{
 	margin:6px 12px 12px 12px;
