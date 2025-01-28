@@ -78,9 +78,10 @@ let MyApp = {
 			</div>
 			
 			<!-- login settings -->
-			<div class="app-sub-window under-header"
+			<div class="app-sub-window"
 				v-if="showSettings"
 				v-show="!loginSessionExpired"
+				:class="{ 'at-top':!isMobile, 'with-margin':!isMobile, 'under-header':!isMobile }"
 				@mousedown.self="showSettings = false"
 			>
 				<my-settings

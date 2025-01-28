@@ -1,7 +1,6 @@
 .settings{
 	width:95%;
 	max-width:1600px;
-	max-height:95%;
 }
 .settings .content{
 	display:flex;
@@ -113,8 +112,6 @@
 /* mobile overwrites */
 .is-mobile .settings{
 	width:100%;
-	height:calc(100% - 10px);
 	max-width:unset;
 	max-height:unset;
-	margin-top:10px;
 }

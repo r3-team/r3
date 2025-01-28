@@ -169,7 +169,7 @@ let MyAdminLogin = {
 					<div class="login-details-content" :class="{ roles:tabTarget === 'roles' }">
 
 						<!-- meta data -->
-						<table class="generic-table-vertical default-inputs admin-login-meta" v-if="tabTarget === 'meta'">
+						<table class="generic-table-vertical default-inputs noRowBorders admin-login-meta" v-if="tabTarget === 'meta'">
 							<tbody>
 								<tr v-if="isLdap">
 									<td colspan="2" class="grouping"><b>{{ capApp.ldapMeta }}</b></td>
@@ -178,28 +178,27 @@ let MyAdminLogin = {
 									<td class="minimum">
 										<div class="title-cell">
 											<img src="images/edit.png" />
-											<span>{{ capApp.meta.nameFore }}</span>
+											<span>{{ capGen.name }}</span>
 										</div>
 									</td>
-									<td><input class="dynamic" v-model="meta.nameFore" :disabled="isLdap" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">
-										<div class="title-cell">
-											<img src="images/edit.png" />
-											<span>{{ capApp.meta.nameSur }}</span>
-										</div>
+									<td>
+										<table class="fullWidth">
+											<tbody>
+												<tr>
+													<td class="minimum">{{ capApp.meta.nameFore }}</td>
+													<td><input class="dynamic" v-model="meta.nameFore" :disabled="isLdap" /></td>
+												</tr>
+												<tr>
+													<td class="minimum">{{ capApp.meta.nameSur }}</td>
+													<td><input class="dynamic" v-model="meta.nameSur" :disabled="isLdap" /></td>
+												</tr>
+												<tr>
+													<td class="minimum">{{ capApp.meta.nameDisplay }}</td>
+													<td><input class="dynamic" v-model="meta.nameDisplay" :disabled="isLdap" /></td>
+												</tr>
+											</tbody>
+										</table>
 									</td>
-									<td><input class="dynamic" v-model="meta.nameSur" :disabled="isLdap" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">
-										<div class="title-cell">
-											<img src="images/edit.png" />
-											<span>{{ capApp.meta.nameDisplay }}</span>
-										</div>
-									</td>
-									<td><input class="dynamic" v-model="meta.nameDisplay" :disabled="isLdap" /></td>
 								</tr>
 								<tr>
 									<td class="minimum">

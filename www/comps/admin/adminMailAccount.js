@@ -5,7 +5,7 @@ let MyAdminMailAccount = {
 	name:'my-admin-mail-account',
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 		
-		<div class="contentBox float">
+		<div class="contentBox scroll float">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/mail2.png" />

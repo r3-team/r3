@@ -7,7 +7,7 @@ let MyAdminOauthClient = {
 	components:{ MyInputDate },
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
 		
-		<div class="contentBox admin-oauth-client float">
+		<div class="contentBox admin-oauth-client scroll float">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/lockCog.png" />

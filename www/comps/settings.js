@@ -1097,7 +1097,7 @@ let MySettings = {
 		MySettingsEncryption,
 		MySettingsFixedTokens
 	},
-	template:`<div class="settings contentBox grow float">
+	template:`<div class="settings contentBox grow scroll float">
 		<div class="top lower">
 			<div class="area">
 				<img class="icon" src="images/person.png" />

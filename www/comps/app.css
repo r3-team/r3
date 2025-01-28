@@ -328,6 +328,7 @@ h3{
 }
 .app-sub-window.under-header{
 	padding-top:var(--app-header-height);
+	padding-bottom:20px;
 }
 
 /* input block overlay */
@@ -910,6 +911,10 @@ table td.maximum{
 }
 .generic-table-vertical.large>tbody>tr>td{
 	max-width:720px;
+}
+.generic-table-vertical.noRowBorders>thead>tr,
+.generic-table-vertical.noRowBorders>tbody>tr{
+	border-bottom:none;
 }
 .generic-table-vertical tr.noPadding,
 .generic-table-vertical td.noPadding{
