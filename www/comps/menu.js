@@ -370,6 +370,7 @@ let MyMenu = {
 				if(vNew.length === vOld.length + 1) {
 					const f = vNew[vNew.length-1];
 					this.$router.push(this.getFormRoute(f.id,f.formId,f.recordId === null ? 0 : f.recordId,true));
+					this.isAtFavorites = true; // pop-up forms might ignore routing, show favorites in any event
 				}
 			}
 		},
