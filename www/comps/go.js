@@ -61,7 +61,7 @@ let MyGoForm = {
 	components:{ MyForm, MyMenu },
 	template:`<div v-if="moduleId !== null">
 		<my-menu class="noPrint"
-			v-if="!isMobile || isAtMenu"
+			v-show="!isMobile || isAtMenu"
 			v-for="m in modules.filter(v => v.id === moduleId)"
 			:isActiveModule="m.id === moduleId"
 			:favoriteIdActive="favoriteId"
