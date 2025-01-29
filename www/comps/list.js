@@ -101,11 +101,13 @@ let MyList = {
 					<my-list-options
 						v-if="showOptions"
 						@reset-columns="resetColumns"
+						@set-auto-renew="setAutoRenewTimer"
 						@set-cards-captions="setCardsCaptions"
 						@set-column-batch-sort="setColumnBatchSort"
 						@set-column-ids-by-user="$emit('set-column-ids-by-user',$event)"
 						@set-layout="setLayout"
 						@set-page-limit="setLimit"
+						:autoRenew="autoRenew"
 						:cardsCaptions="cardsCaptions"
 						:columns="columns"
 						:columnsAll="columnsAll"
@@ -118,17 +120,6 @@ let MyList = {
 						:moduleId="moduleId"
 						:pageLimit="limit"
 					/>
-					<div class="row gap centered default-inputs" v-if="showAutoRenew">
-						<span>{{ capApp.autoRenewInput }}</span>
-						<input class="short"
-							v-model.number="autoRenewInput"
-							:placeholder="capApp.autoRenewInputHint"
-						/>
-						<my-button image="save.png"
-							@trigger="setAutoRenewTimer(false)"
-							:active="autoRenewInput !== '' && autoRenewInput !== autoRenewInputLast"
-						/>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -338,19 +329,11 @@ let MyList = {
 				</div>
 				
 				<div class="row gap nowrap default-inputs">
-					<!-- other actions -->
-					<my-button image="autoRenew.png"
-						v-if="showAutoRenewIcon && autoRenew !== null"
-						@trigger="showAutoRenew = !showAutoRenew"
-						:caption="capApp.button.autoRenew.replace('{VALUE}',autoRenewInput)"
-						:captionTitle="capApp.button.autoRenewHint.replace('{VALUE}',autoRenewInput)"
-						:naked="true"
-					/>
-					
-					<my-button image="refresh.png"
+					<my-button
 						v-if="showRefresh"
 						@trigger="reloadInside('manual')"
 						:captionTitle="capGen.button.refresh"
+						:image="autoRenew === -1 ? 'refresh.png' : 'autoRenew.png'"
 						:naked="true"
 					/>
 					
@@ -715,21 +698,21 @@ let MyList = {
 		</template>
 	</div>`,
 	props:{
-		autoRenew:      { required:false, default:null },                   // refresh list data every x seconds
-		caption:        { type:String,  required:false, default:'' },       // caption to display in list header
-		choices:        { type:Array,   required:false, default:() => [] }, // processed query choices
-		collections:    { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
+		autoRenewDefault:{ required:false, default:null },                   // default for list refresh (number in seconds)
+		caption:         { type:String,  required:false, default:'' },       // caption to display in list header
+		choices:         { type:Array,   required:false, default:() => [] }, // processed query choices
+		collections:     { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
-		columns:        { type:Array,   required:true },                    // list columns, processed
-		columnsAll:     { type:Array,   required:false, default:() => [] }, // list columns, all
-		favoriteId:     { required:false, default:null },
-		fieldId:        { type:String,  required:true },
-		filters:        { type:Array,   required:true },                    // processed query filters
-		layoutDefault:  { type:String,  required:false, default:'table' },  // default list layout: table, cards
-		limitDefault:   { type:Number,  required:false, default:10 },       // default list limit
-		moduleId:       { type:String,  required:true },
-		popUpFormInline:{ required:false, default:null },                   // form to show inside list
-		query:          { type:Object,  required:true },                    // list query
+		columns:         { type:Array,   required:true },                    // list columns, processed
+		columnsAll:      { type:Array,   required:false, default:() => [] }, // list columns, all
+		favoriteId:      { required:false, default:null },
+		fieldId:         { type:String,  required:true },
+		filters:         { type:Array,   required:true },                    // processed query filters
+		layoutDefault:   { type:String,  required:false, default:'table' },  // default list layout: table, cards
+		limitDefault:    { type:Number,  required:false, default:10 },       // default list limit
+		moduleId:        { type:String,  required:true },
+		popUpFormInline: { required:false, default:null },                   // form to show inside list
+		query:           { type:Object,  required:true },                    // list query
 		
 		// toggles
 		csvExport:      { type:Boolean, required:false, default:false },
@@ -764,8 +747,7 @@ let MyList = {
 	data() {
 		return {
 			// list state
-			autoRenewInput:null,        // current auto renew input value
-			autoRenewInputLast:null,    // last set auto renew input value (to compare against)
+			autoRenew:-1,               // auto renew list data every X seconds, -1 if disabled
 			autoRenewTimer:null,        // interval timer for auto renew
 			choiceId:null,              // currently active choice
 			columnBatchIndexOption:-1,  // show options for column batch by index
@@ -777,7 +759,6 @@ let MyList = {
 			orderOverwritten:false,     // sort options were changed by user
 			rowsFetching:false,         // row values are being fetched
 			selectedRows:[],            // bulk selected rows by row index
-			showAutoRenew:false,        // show UI for auto list renew
 			showCsv:false,              // show UI for CSV import/export
 			showFilters:false,          // show UI for user filters
 			showHeader:true,            // show UI for list header
@@ -816,8 +797,7 @@ let MyList = {
 				'refresh',                   // optional
 				'offsetArrows',              // optional
 				'collectionTitles',          // optional, show collection titles
-				'resultsCount',              // not important
-				'autoRenewIcon'              // not important
+				'resultsCount'               // not important
 			]
 		};
 	},
@@ -854,17 +834,15 @@ let MyList = {
 				s.attributeIdMap[s.columns[0].attributeId].content === 'files';
 		},
 		hoverCaption:(s) => {
-			if     (s.showAutoRenew) return s.capApp.autoRenew;
-			else if(s.showCsv)       return s.capApp.button.csv;
-			else if(s.showFilters)   return s.capGen.button.filterHint;
-			else if(s.showOptions)   return s.capGen.options;
+			if     (s.showCsv)     return s.capApp.button.csv;
+			else if(s.showFilters) return s.capGen.button.filterHint;
+			else if(s.showOptions) return s.capGen.options;
 			return '';
 		},
 		hoverIconSrc:(s) => {
-			if     (s.showAutoRenew) return 'images/autoRenew.png';
-			else if(s.showCsv)       return 'images/fileSheet.png';
-			else if(s.showFilters)   return 'images/filterCog.png';
-			else if(s.showOptions)   return 'images/listCog.png';
+			if     (s.showCsv)     return 'images/fileSheet.png';
+			else if(s.showFilters) return 'images/filterCog.png';
+			else if(s.showOptions) return 'images/listCog.png';
 			return '';
 		},
 		inputLinePlaceholder:(s) => {
@@ -949,9 +927,8 @@ let MyList = {
 		rowSelect:           (s) => s.isInput || s.hasUpdate,
 		rowsClear:           (s) => s.rows.filter(v => !s.inputRecordIds.includes(v.indexRecordIds['0'])),
 		showActionTitles:    (s) => s.headerElements.includes('actionTitles'),
-		showAutoRenewIcon:   (s) => s.headerElements.includes('autoRenewIcon'),
 		showCollectionTitles:(s) => s.headerElements.includes('collectionTitles'),
-		showHover:           (s) => s.showAutoRenew || s.showCsv || s.showFilters || s.showOptions,
+		showHover:           (s) => s.showCsv || s.showFilters || s.showOptions,
 		showInputAddLine:    (s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
 		showInputAddAll:     (s) => s.inputMulti && s.hasResults,
 		showInputHeader:     (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
@@ -1051,15 +1028,11 @@ let MyList = {
 
 		// initialize list options
 		this.reloadOptions();
-		
-		// set initial auto renew timer
-		if(this.autoRenew !== null)
-			this.setAutoRenewTimer(false);
-
+		this.setAutoRenewTimer(this.autoRenew);
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
 	beforeUnmount() {
-		this.setAutoRenewTimer(true);
+		this.clearAutoRenewTimer();
 	},
 	unmounted() {
 		if(!this.Input)
@@ -1091,8 +1064,7 @@ let MyList = {
 		routeParseParams,
 
 		handleHotkeys(e) {
-			if(e.key === 'Escape' && (this.showAutoRenew || this.showCsv || this.showFilters || this.showOptions)) {
-				this.showAutoRenew = false;
+			if(e.key === 'Escape' && (this.showCsv || this.showFilters || this.showOptions)) {
 				this.showCsv       = false;
 				this.showFilters   = false;
 				this.showOptions   = false;
@@ -1162,7 +1134,7 @@ let MyList = {
 				this.limit    = this.limitDefault;
 				this.orders   = JSON.parse(JSON.stringify(this.query.orders));
 			}
-			this.autoRenewInput  = this.fieldOptionGet(this.favoriteId,this.fieldId,'autoRenew',this.autoRenew);
+			this.autoRenew       = this.fieldOptionGet(this.favoriteId,this.fieldId,'autoRenew',(this.autoRenewDefault === null ? -1 : this.autoRenewDefault));
 			this.cardsCaptions   = this.fieldOptionGet(this.favoriteId,this.fieldId,'cardsCaptions',true);
 			this.columnBatchSort = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnBatchSort',[[],[]]);
 			this.columnIdMapAggr = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnIdMapAggr',{});
@@ -1260,6 +1232,10 @@ let MyList = {
 			this.focused = false;
 			this.$emit('dropdown-show',false);
 		},
+		clearAutoRenewTimer() {
+			if(this.autoRenewTimer !== null)
+				clearInterval(this.autoRenewTimer);
+		},
 		clickColumn(columnBatchIndex) {
 			this.columnBatchIndexOption = this.columnBatchIndexOption === columnBatchIndex
 				? -1 : columnBatchIndex;
@@ -1301,10 +1277,9 @@ let MyList = {
 			this.$emit('records-selected',ids);
 		},
 		closeHover() {
-			this.showAutoRenew = false;
-			this.showCsv       = false;
-			this.showFilters   = false;
-			this.showOptions   = false;
+			this.showCsv     = false;
+			this.showFilters = false;
+			this.showOptions = false;
 		},
 		escape() {
 			if(this.isInput)
@@ -1369,23 +1344,22 @@ let MyList = {
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnIdMapAggr',this.columnIdMapAggr);
 			this.reloadAggregations(false);
 		},
-		setAutoRenewTimer(justClear) {
-			// clear last timer
-			if(this.autoRenewTimer !== null)
-				clearInterval(this.autoRenewTimer);
-			
-			if(justClear)
-				return;
-			
-			if(!Number.isInteger(this.autoRenewInput) || this.autoRenewInput < 10)
-				this.autoRenewInput = 10;
-			
-			// set new timer
-			this.autoRenewInputLast = this.autoRenewInput;
-			this.autoRenewTimer = setInterval(this.get,this.autoRenewInput * 1000);
-			
-			// store timer option for field
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'autoRenew',this.autoRenewInput);
+		setAutoRenewTimer(v) {
+			this.clearAutoRenewTimer();
+
+			// we use -1 instead of null to define disabled auto renew
+			// NULL is removed as field option, making it impossible to disable the default setting
+			if(v !== -1) {
+				// apply min. interval
+				if(v < 10) v = 10;
+
+				this.autoRenewTimer = setInterval(this.get,v * 1000);
+			}
+
+			if(v !== this.autoRenew) {
+				this.autoRenew = v;
+				this.fieldOptionSet(this.favoriteId,this.fieldId,'autoRenew',v);
+			}
 		},
 		setCardsCaptions(v) {
 			this.cardsCaptions = v;

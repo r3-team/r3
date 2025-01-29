@@ -2063,6 +2063,7 @@
 			"edit": "Editare",
 			"editBulk": "Editare ({COUNT})",
 			"empty": "Empty",
+			"enable": "Enable",
 			"expert": "Avansat",
 			"export": "Exportă",
 			"filter": "Filtru",
@@ -2341,8 +2342,7 @@
 	"list": {
 		"aggregators": "Aggregate results",
 		"autoRenew": "Înnoire automată",
-		"autoRenewInput": "Actualizează datele la fiecare X secunde",
-		"autoRenewInputHint": "min. 10s",
+		"autoRenewInput": "Refresh every X seconds",
 		"button": {
 			"aggregatorsHint": "Aggregate results",
 			"all": "Toate",

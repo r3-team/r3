@@ -2063,6 +2063,7 @@
 			"edit": "يحرر",
 			"editBulk": "تحرير ({COUNT})",
 			"empty": "فارغ",
+			"enable": "Enable",
 			"expert": "متقدم",
 			"export": "يصدّر",
 			"filter": "فلتر",
@@ -2341,8 +2342,7 @@
 	"list": {
 		"aggregators": "النتائج الإجمالية",
 		"autoRenew": "التجديد التلقائي",
-		"autoRenewInput": "قم بتحديث البيانات كل X ثانية",
-		"autoRenewInputHint": "دقيقة. ",
+		"autoRenewInput": "Refresh every X seconds",
 		"button": {
 			"aggregatorsHint": "النتائج الإجمالية",
 			"all": "الجميع",

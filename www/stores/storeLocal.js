@@ -145,11 +145,11 @@ const MyStoreLocal = {
 			const name       = payload.name;
 			const value      = JSON.parse(JSON.stringify(payload.value));
 			const isEmptyValue =
+				value === null ||
 				typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0 ||
 				typeof value === 'object' && Array.isArray(value)  && value.length === 0 ||
 				typeof value === 'string' && value === '' ||
-				typeof value === 'number' && value === 0 ||
-				value === null;
+				typeof value === 'number' && value === 0;
 
 			// overwrite target if options are set for favorite
 			if(favoriteId !== null && base.favoriteIdMap[favoriteId] === undefined)

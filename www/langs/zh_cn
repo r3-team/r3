@@ -2063,6 +2063,7 @@
 			"edit": "编辑",
 			"editBulk": "编辑 ({COUNT})",
 			"empty": "空",
+			"enable": "Enable",
 			"expert": "高级",
 			"export": "导出",
 			"filter": "筛选器",
@@ -2341,8 +2342,7 @@
 	"list": {
 		"aggregators": "汇总结果",
 		"autoRenew": "自动更新",
-		"autoRenewInput": "每隔 X 秒刷新数据",
-		"autoRenewInputHint": "最少 10 秒",
+		"autoRenewInput": "Refresh every X seconds",
 		"button": {
 			"aggregatorsHint": "汇总结果",
 			"all": "全部",

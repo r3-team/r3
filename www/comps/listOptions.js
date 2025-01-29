@@ -44,10 +44,12 @@ let MyListOptions = {
 				<td>
 					<div class="column gap">
 						<span>{{ capGen.columns }}</span>
-						<my-button image="refresh.png"
-							@trigger="$emit('reset-columns')"
-							:caption="capGen.button.reset"
-						/>
+						<div class="row">
+							<my-button image="refresh.png"
+								@trigger="$emit('reset-columns')"
+								:caption="capGen.button.reset"
+							/>
+						</div>
 					</div>
 				</td>
 				<td>
@@ -122,6 +124,24 @@ let MyListOptions = {
 					</div>
 				</td>
 			</tr>
+			<tr>
+				<td>{{ capApp.autoRenewInput }}</td>
+				<td>
+					<div class="row gap" v-if="!autoRenewOff">
+						<input v-model.number="autoRenewInput" />
+						<my-button image="cancel.png"
+							@trigger="$emit('set-auto-renew',-1)"
+							:naked="true"
+						/>
+					</div>
+					<my-button image="ok.png"
+						v-if="autoRenewOff"
+						@trigger="$emit('set-auto-renew',500)"
+						:caption="capGen.button.enable"
+						:naked="true"
+					/>
+				</td>
+			</tr>
 			
 			<tr>
 				<td colspan="2"><b>{{ capApp.globalSettings }}</b></td>
@@ -147,6 +167,7 @@ let MyListOptions = {
 		</tbody>
 	</table>`,
 	props:{
+		autoRenew:      { type:Number,  required:true },
 		cardsCaptions:  { type:Boolean, required:true }, // layout option for 'cards', show captions?
 		columns:        { type:Array,   required:true }, // columns as they are visible to the field
 		columnsAll:     { type:Array,   required:true }, // all columns, regardless of visibility
@@ -159,7 +180,10 @@ let MyListOptions = {
 		moduleId:       { type:String,  required:true },
 		pageLimit:      { type:Number,  required:true }
 	},
-	emits:['reset-columns', 'set-cards-captions', 'set-column-batch-sort', 'set-column-ids-by-user', 'set-layout', 'set-page-limit'],
+	emits:[
+		'reset-columns','set-auto-renew','set-cards-captions','set-column-batch-sort',
+		'set-column-ids-by-user','set-layout','set-page-limit'
+	],
 	computed:{
 		columnBatchSortAll:(s) => {
 			if(s.columnBatchSort[1].length === s.columnBatchesAll.length)
@@ -188,6 +212,10 @@ let MyListOptions = {
 		},
 
 		// inputs
+		autoRenewInput:{
+			get()  { return this.autoRenew; },
+			set(v) { this.$emit('set-auto-renew',(Number.isInteger(v) ? v : -1)); }
+		},
 		columnBatchesAllDrag:{
 			get()  { return this.columnBatchesAll; },
 			set(v) {}
@@ -206,6 +234,7 @@ let MyListOptions = {
 		},
 
 		// simple
+		autoRenewOff:            (s) => s.autoRenew === -1,
 		columnBatchesAll:        (s) => s.getColumnBatches(s.moduleId,s.columnsAll,[],[],s.columnBatchSort[1],true),
 		columnBatchesAllUnsorted:(s) => s.getColumnBatches(s.moduleId,s.columnsAll,[],[],[],true),
 		isCards:                 (s) => s.layoutInput === 'cards',

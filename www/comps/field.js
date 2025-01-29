@@ -220,7 +220,7 @@ let MyField = {
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-column-ids-by-user="setColumnIdsByUser"
 					@set-collection-indexes="setCollectionIndexes"
-					:autoRenew="field.autoRenew"
+					:autoRenewDefault="field.autoRenew"
 					:caption="isAlone ? caption : ''"
 					:choices="choicesProcessed"
 					:collections="field.collections"

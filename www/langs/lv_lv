@@ -2063,6 +2063,7 @@
 			"edit": "Rediģēt",
 			"editBulk": "Rediģēt ({COUNT})",
 			"empty": "Tukšs",
+			"enable": "Enable",
 			"expert": "Eksperts",
 			"export": "Eksportēt",
 			"filter": "Filtrs",
@@ -2341,8 +2342,7 @@
 	"list": {
 		"aggregators": "Aggregate results",
 		"autoRenew": "Automatic renewal",
-		"autoRenewInput": "Refresh data every X seconds",
-		"autoRenewInputHint": "min. 10s",
+		"autoRenewInput": "Refresh every X seconds",
 		"button": {
 			"aggregatorsHint": "Aggregate results",
 			"all": "All",

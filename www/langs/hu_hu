@@ -2063,6 +2063,7 @@
 			"edit": "Szerkesztés",
 			"editBulk": "Szerkesztés ({COUNT})",
 			"empty": "Üres",
+			"enable": "Enable",
 			"expert": "Haladó",
 			"export": "Exportálás",
 			"filter": "Szűrés",
@@ -2341,8 +2342,7 @@
 	"list": {
 		"aggregators": "Eredmények aggregálása",
 		"autoRenew": "Automatikus frissítés",
-		"autoRenewInput": "Minden X másodpercben az adatok automatikus frissítése",
-		"autoRenewInputHint": "min. 10s",
+		"autoRenewInput": "Refresh every X seconds",
 		"button": {
 			"aggregatorsHint": "Eredmények aggregálása",
 			"all": "Minden",

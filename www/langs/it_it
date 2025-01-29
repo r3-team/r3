@@ -2063,6 +2063,7 @@
 			"edit": "Modifica",
 			"editBulk": "Modifica ({COUNT})",
 			"empty": "Empty",
+			"enable": "Enable",
 			"expert": "Avanzato",
 			"export": "Esporta",
 			"filter": "Filtra",
@@ -2341,8 +2342,7 @@
 	"list": {
 		"aggregators": "Aggregate results",
 		"autoRenew": "Rinnovo automatico",
-		"autoRenewInput": "Aggiorna i dati ogni X secondi",
-		"autoRenewInputHint": "min. 10s",
+		"autoRenewInput": "Refresh every X seconds",
 		"button": {
 			"aggregatorsHint": "Aggregate results",
 			"all": "Tutto",
