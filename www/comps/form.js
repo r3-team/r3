@@ -98,13 +98,7 @@ let MyForm = {
 						:active="!updatingRecord"
 						:captionTitle="capGen.button.goBack"
 					/>
-					<img class="icon"
-						v-if="iconId !== null"
-						:src="srcBase64(iconIdMap[iconId].file)"
-					/>
-					<img class="icon" src="images/fileText.png"
-						v-if="iconId === null"
-					/>
+					<img class="icon" :src="iconSrc" />
 					
 					<!-- form title / message -->
 					<transition name="fade" mode="out-in">
@@ -529,20 +523,30 @@ let MyForm = {
 			}
 			return out;
 		},
-		iconId:(s) => {
+		iconSrc:(s) => {
+			if(s.favoriteId !== null)
+				return 'images/star1.png';
+
 			if(s.form.iconId !== null)
-				return s.form.iconId;
+				return s.srcBase64(s.iconIdMap[s.form.iconId].file);
 			
-			if(s.menuActive !== null && s.menuActive.formId === s.form.id)
-				return s.menuActive.iconId;
+			if(s.menuActive !== null && s.menuActive.iconId !== null && s.menuActive.formId === s.form.id)
+				return s.srcBase64(s.iconIdMap[s.menuActive.iconId].file);
 			
-			return null;
+			return 'images/fileText.png';
 		},
 		
 		// presentation
 		title:(s) => {
 			if(s.titleOverwrite !== null)
 				return s.titleOverwrite;
+
+			if(s.favoriteId !== null && s.loginFavorites.moduleIdMap[s.moduleId] !== undefined) {
+				for(const f of s.loginFavorites.moduleIdMap[s.moduleId]) {
+					if(f.id === s.favoriteId)
+						return f.title;
+				}
+			}
 			
 			const formTitle = s.getCaption('formTitle',s.moduleId,s.formId,s.form.captions);
 			if(formTitle !== '')
@@ -795,6 +799,7 @@ let MyForm = {
 		jsFunctionIdMap:    (s) => s.$store.getters['schema/jsFunctionIdMap'],
 		presetIdMapRecordId:(s) => s.$store.getters['schema/presetIdMapRecordId'],
 		variableIdMap:      (s) => s.$store.getters['schema/variableIdMap'],
+		loginFavorites:     (s) => s.$store.getters['local/loginFavorites'],
 		token:              (s) => s.$store.getters['local/token'],
 		access:             (s) => s.$store.getters.access,
 		builderEnabled:     (s) => s.$store.getters.builderEnabled,
