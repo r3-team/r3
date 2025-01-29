@@ -12,7 +12,7 @@
 	outline:none;
 	box-sizing:border-box;
 	border-radius:var(--border-input-radius);
-	transition:box-shadow 0.1s, border-bottom 0.1s, filter 0.1s;
+	transition:box-shadow 0.1s, border-bottom 0.1s, filter 0.1s, padding 0.1s, height 0.1s, margin 0.1s;
 	user-select:none;
 }
 .button.adjusts{
@@ -42,9 +42,17 @@
 .button.background.clickable.cancel:hover{
 	border-bottom:3px solid var(--color-cancel-border);
 }
+.button.background.clickable:active{
+	height:26px;
+	margin:2px;
+	padding:2px calc((var(--spacing) / 1.5) - 2px) 3px;
+}
 .button.large{
 	height:40px;
 	font-size:120%;
+}
+.button.large.background.clickable:active{
+	height:36px;
 }
 .button.naked{
 	color:var(--color-font-disabled);
