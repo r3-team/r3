@@ -772,7 +772,6 @@ let MyField = {
 			}
 			
 			if(s.isDecimal)     return s.capGen.inputDecimal;
-			if(s.isRequired)    return s.capGen.inputRequired;
 			if(!s.isValidValue) return s.capGen.inputInvalid; // generic error
 			return '';
 		},

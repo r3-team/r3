@@ -213,6 +213,12 @@ let MyForm = {
 						:caption="capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length))"
 						:captionTitle="capGen.button.saveHint"
 					/>
+					<my-button image="warning.png"
+						v-if="badSave && fieldIdsInvalid.length !== 0"
+						@trigger="scrollToInvalidField"
+						:caption="capGen.inputRequired"
+						:cancel="true"
+					/>
 				</div>
 				<div class="area" :class="{ 'form-actions-left':settings.formActionsAlign === 'left', 'form-actions-right':settings.formActionsAlign === 'right' }">
 					<my-form-actions
@@ -228,12 +234,6 @@ let MyForm = {
 					<my-button image="warning.png"
 						v-if="badLoad"
 						:caption="capApp.noAccess"
-						:cancel="true"
-					/>
-					<my-button image="warning.png"
-						v-if="badSave && fieldIdsInvalid.length !== 0"
-						@trigger="scrollToInvalidField"
-						:caption="capApp.invalidInputs"
 						:cancel="true"
 					/>
 					<my-button image="shred.png"
