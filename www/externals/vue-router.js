@@ -1,5 +1,5 @@
 /*!
-  * vue-router v4.4.5
+  * vue-router v4.5.0
   * (c) 2024 Eduardo San Martin Morote
   * @license MIT
   */
@@ -1081,7 +1081,7 @@ var VueRouter = (function (exports, vue) {
       if (options.end)
           pattern += '$';
       // allow paths like /dynamic to only match dynamic or dynamic/... but not dynamic_something_else
-      else if (options.strict)
+      else if (options.strict && !pattern.endsWith('/'))
           pattern += '(?:/|$)';
       const re = new RegExp(pattern, options.sensitive ? '' : 'i');
       function parse(path) {
@@ -1487,8 +1487,12 @@ var VueRouter = (function (exports, vue) {
                       originalMatcher.alias.push(matcher);
                   // remove the route if named and only for the top record (avoid in nested calls)
                   // this works because the original record is the first one
-                  if (isRootAdd && record.name && !isAliasRecord(matcher))
+                  if (isRootAdd && record.name && !isAliasRecord(matcher)) {
+                      {
+                          checkSameNameAsAncestor(record, parent);
+                      }
                       removeRoute(record.name);
+                  }
               }
               // Avoid adding a record that doesn't display anything. This allows passing through records without a component to
               // not be reached and pass through the catch all route
@@ -1766,6 +1770,13 @@ var VueRouter = (function (exports, vue) {
           !mainNormalizedRecord.name &&
           !mainNormalizedRecord.path) {
           warn(`The route named "${String(parent.record.name)}" has a child without a name and an empty path. Using that name won't render the empty path child so you probably want to move the name to the child instead. If this is intentional, add a name to the child route to remove the warning.`);
+      }
+  }
+  function checkSameNameAsAncestor(record, parent) {
+      for (let ancestor = parent; ancestor; ancestor = ancestor.parent) {
+          if (ancestor.record.name === record.name) {
+              throw new Error(`A route named "${String(record.name)}" has been added as a ${parent === ancestor ? 'child' : 'descendant'} of a route with the same name. Route names must be unique and a nested route cannot use the same name as an ancestor.`);
+          }
       }
   }
   function checkMissingParamsInAbsolutePath(record, parent) {
@@ -2284,9 +2295,15 @@ var VueRouter = (function (exports, vue) {
           isSameRouteLocationParams(currentRoute.params, route.value.params));
       function navigate(e = {}) {
           if (guardEvent(e)) {
-              return router[vue.unref(props.replace) ? 'replace' : 'push'](vue.unref(props.to)
+              const p = router[vue.unref(props.replace) ? 'replace' : 'push'](vue.unref(props.to)
               // avoid uncaught errors are they are logged anyway
               ).catch(noop);
+              if (props.viewTransition &&
+                  typeof document !== 'undefined' &&
+                  'startViewTransition' in document) {
+                  document.startViewTransition(() => p);
+              }
+              return p;
           }
           return Promise.resolve();
       }
@@ -2325,6 +2342,9 @@ var VueRouter = (function (exports, vue) {
           navigate,
       };
   }
+  function preferSingleVNode(vnodes) {
+      return vnodes.length === 1 ? vnodes[0] : vnodes;
+  }
   const RouterLinkImpl = /*#__PURE__*/ vue.defineComponent({
       name: 'RouterLink',
       compatConfig: { MODE: 3 },
@@ -2357,7 +2377,7 @@ var VueRouter = (function (exports, vue) {
               [getLinkClass(props.exactActiveClass, options.linkExactActiveClass, 'router-link-exact-active')]: link.isExactActive,
           }));
           return () => {
-              const children = slots.default && slots.default(link);
+              const children = slots.default && preferSingleVNode(slots.default(link));
               return props.custom
                   ? children
                   : vue.h('a', {
@@ -3646,7 +3666,7 @@ var VueRouter = (function (exports, vue) {
               // there could be a redirect record in history
               const shouldRedirect = handleRedirectRecord(toLocation);
               if (shouldRedirect) {
-                  pushWithRedirect(assign(shouldRedirect, { replace: true }), toLocation).catch(noop);
+                  pushWithRedirect(assign(shouldRedirect, { replace: true, force: true }), toLocation).catch(noop);
                   return;
               }
               pendingLocation = toLocation;
@@ -3670,7 +3690,9 @@ var VueRouter = (function (exports, vue) {
                       // navigation guard.
                       // the error is already handled by router.push we just want to avoid
                       // logging the error
-                      pushWithRedirect(error.to, toLocation
+                      pushWithRedirect(assign(locationAsObject(error.to), {
+                          force: true,
+                      }), toLocation
                       // avoid an uncaught rejection, let push call triggerError
                       )
                           .then(failure => {
