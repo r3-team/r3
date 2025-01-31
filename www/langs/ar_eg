@@ -972,6 +972,7 @@
 			"openForm": "فتح النموذج",
 			"openFormBulk": "فتح النموذج<br />(التحرير بالجملة)",
 			"option": {
+				"dataOptions": "Overwrite relation settings",
 				"display": {
 					"color": "لون",
 					"default": "تقصير",

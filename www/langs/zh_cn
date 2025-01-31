@@ -972,6 +972,7 @@
 			"openForm": "打开表单",
 			"openFormBulk": "打开表单<br />(批量编辑)",
 			"option": {
+				"dataOptions": "Overwrite relation settings",
 				"display": {
 					"color": "颜色",
 					"default": "默认",

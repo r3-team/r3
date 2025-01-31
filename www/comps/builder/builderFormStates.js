@@ -1,5 +1,6 @@
-import {getNilUuid}    from '../shared/generic.js';
-import {getFieldTitle} from '../shared/field.js';
+import {isAttributeRelationship} from '../shared/attribute.js';
+import {getFieldTitle}           from '../shared/field.js';
+import {getNilUuid}              from '../shared/generic.js';
 export {MyBuilderFormStates as default};
 
 let MyBuilderFormStateEffect = {
@@ -40,16 +41,18 @@ let MyBuilderFormStateEffect = {
 		</select>
 		
 		<!-- new data -->
-		<select class="dynamic" v-model.number="newData" v-if="isCalendar || isForm || isList || isKanban">
+		<select class="dynamic" v-model.number="newData" v-if="isCalendar || isForm || isList || isKanban || isRelationship">
 			<option value="0">{{ capApp.effectData.d0 }}</option>
-			<option value="7">{{ capApp.effectData.d7 }}</option>
-			<option value="6">{{ capApp.effectData.d6 }}</option>
-			<option value="5">{{ capApp.effectData.d5 }}</option>
-			<option value="4">{{ capApp.effectData.d4 }}</option>
-			<option value="3">{{ capApp.effectData.d3 }}</option>
-			<option value="2">{{ capApp.effectData.d2 }}</option>
-			<option value="1">{{ capApp.effectData.d1 }}</option>
-			<option value="-1">{{ capApp.effectData['d-1'] }}</option>
+			<optgroup :label="capApp.option.dataOptions">
+				<option value="7">{{ capApp.effectData.d7 }}</option>
+				<option value="6">{{ capApp.effectData.d6 }}</option>
+				<option value="5">{{ capApp.effectData.d5 }}</option>
+				<option value="4">{{ capApp.effectData.d4 }}</option>
+				<option value="3">{{ capApp.effectData.d3 }}</option>
+				<option value="2">{{ capApp.effectData.d2 }}</option>
+				<option value="1">{{ capApp.effectData.d1 }}</option>
+				<option value="-1">{{ capApp.effectData['d-1'] }}</option>
+			</optgroup>
 		</select>
 		
 		<my-button image="delete.png"
@@ -92,24 +95,27 @@ let MyBuilderFormStateEffect = {
 		},
 
 		// simple
-		effect:    (s) => JSON.parse(JSON.stringify(s.modelValue)),
-		fieldSet:  (s) => s.effect.fieldId      !== null && s.fieldIdMap[s.effect.fieldId] !== undefined,
-		isAction:  (s) => s.effect.formActionId !== null,
-		isButton:  (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'button',
-		isCalendar:(s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'calendar',
-		isKanban:  (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'kanban',
-		isData:    (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'data',
-		isForm:    (s) => s.effect.fieldId === null && s.effect.formActionId === null && s.effect.tabId === null,
-		isList:    (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'list',
-		isVariable:(s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'variable',
+		effect:        (s) => JSON.parse(JSON.stringify(s.modelValue)),
+		fieldSet:      (s) => s.effect.fieldId      !== null && s.fieldIdMap[s.effect.fieldId] !== undefined,
+		isAction:      (s) => s.effect.formActionId !== null,
+		isButton:      (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'button',
+		isCalendar:    (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'calendar',
+		isKanban:      (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'kanban',
+		isData:        (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'data',
+		isForm:        (s) => s.effect.fieldId === null && s.effect.formActionId === null && s.effect.tabId === null,
+		isList:        (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'list',
+		isRelationship:(s) => s.isData && s.isAttributeRelationship(s.attributeIdMap[s.fieldIdMap[s.effect.fieldId].attributeId].content),
+		isVariable:    (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'variable',
 		
 		// store
-		capApp:(s) => s.$store.getters.captions.builder.form,
-		capGen:(s) => s.$store.getters.captions.generic
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.form,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		getFieldTitle,
+		isAttributeRelationship,
 
 		// presentation
 		getTitleEffect(type,ref,id) {

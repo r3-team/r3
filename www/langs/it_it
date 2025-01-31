@@ -972,6 +972,7 @@
 			"openForm": "Apri modulo",
 			"openFormBulk": "Apri modulo<br />(bulk editing)",
 			"option": {
+				"dataOptions": "Overwrite relation settings",
 				"display": {
 					"color": "colore",
 					"default": "predefinito",

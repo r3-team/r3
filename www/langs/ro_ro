@@ -972,6 +972,7 @@
 			"openForm": "Deschideți formularul",
 			"openFormBulk": "Deschideți formularul<br />(bulk editing)",
 			"option": {
+				"dataOptions": "Overwrite relation settings",
 				"display": {
 					"color": "culoare",
 					"default": "implicit",

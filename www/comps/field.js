@@ -527,6 +527,7 @@ let MyField = {
 					@records-selected-init="$emit('set-value-init',fieldAttributeId,$event,true,true)"
 					:choices="choicesProcessed"
 					:columns="columnsProcessed"
+					:dataOptions="dataOptions"
 					:dropdownShow="dropdownShow"
 					:fieldId="field.id"
 					:filterQuick="field.filterQuick"

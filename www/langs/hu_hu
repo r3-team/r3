@@ -972,6 +972,7 @@
 			"openForm": "Űrlap megnyitása",
 			"openFormBulk": "Űrlap megnyitása (Tömeges szerkesztés)",
 			"option": {
+				"dataOptions": "Overwrite relation settings",
 				"display": {
 					"color": "Szín",
 					"default": "Alapértelmezett",

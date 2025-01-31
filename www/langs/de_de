@@ -972,6 +972,7 @@
 			"openForm": "Formular öffnen",
 			"openFormBulk": "Formular öffnen<br />(Massenbearbeitung)",
 			"option": {
+				"dataOptions": "Relationseinstellungen überschreiben",
 				"display": {
 					"color": "Farbe",
 					"default": "Standard",

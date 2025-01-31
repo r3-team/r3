@@ -422,7 +422,7 @@
 }
 .builder-form-state-effect{
 	min-width:300px;
-	margin:0px 4px 2px 0px;
-	padding:2px 3px;
+	margin:0px 0px 2px 0px;
+	padding:2px 0px;
 	background-color:var(--color-bg);
 }

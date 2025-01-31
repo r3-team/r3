@@ -972,6 +972,7 @@
 			"openForm": "Ouvrir le formulaire",
 			"openFormBulk": "Ouvrir le formulaire<br />(édition en masse)",
 			"option": {
+				"dataOptions": "Overwrite relation settings",
 				"display": {
 					"color": "couleur",
 					"default": "par défaut",

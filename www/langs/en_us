@@ -984,6 +984,7 @@
 					"slider": "value slider",
 					"url": "URL"
 				},
+				"dataOptions": "Overwrite relation settings",
 				"effectField": "Field",
 				"effectFormAction": "Action",
 				"effectTab": "Tab",
