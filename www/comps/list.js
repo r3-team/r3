@@ -201,7 +201,7 @@ let MyList = {
 							
 							<!-- actions -->
 							<td class="minimum">
-								<div class="list-input-row-items nowrap">
+								<div class="list-input-row-items nowrap justifyEnd">
 									<my-button image="open.png"
 										v-if="hasUpdate"
 										@trigger="clickOpen(r,false)"

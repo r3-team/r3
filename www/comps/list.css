@@ -366,6 +366,9 @@
 	align-items:center;
 	gap:calc(var(--spacing) / 1.5);
 }
+.list-input-row-items.justifyEnd{
+	justify-content:flex-end;
+}
 .list-input-row-items.nowrap{
 	flex-wrap:nowrap;
 }
