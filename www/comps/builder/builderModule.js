@@ -325,6 +325,7 @@ let MyBuilderModule = {
 							<div class="row gap">
 								<select
 									@input="applyNullString('jsFunctionIdOnLogin',$event.target.value)"
+									:disabled="readonly"
 									:value="jsFunctionIdOnLogin === null ? '' : jsFunctionIdOnLogin"
 								>
 									<option value="">-</option>
@@ -348,6 +349,7 @@ let MyBuilderModule = {
 								<div class="row gap">
 									<select
 										@input="applyNullString('pgFunctionIdLoginSync',$event.target.value)"
+										:disabled="readonly"
 										:value="pgFunctionIdLoginSync === null ? '' : pgFunctionIdLoginSync"
 									>
 										<option value="">-</option>
