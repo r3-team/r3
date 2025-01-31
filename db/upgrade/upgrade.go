@@ -367,6 +367,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TYPE app.condition_operator ADD VALUE '!~';
 			ALTER TYPE app.condition_operator ADD VALUE '!~*';
 
+			-- form state effects for data handling
+			ALTER TABLE app.form_state_effect ADD   COLUMN new_data SMALLINT NOT NULL DEFAULT 0;
+			ALTER TABLE app.form_state_effect ALTER COLUMN new_data DROP DEFAULT;
+
 			-- fix login foreign key
 			ALTER TABLE instance.login
 				DROP CONSTRAINT login_ldap_id_fkey,

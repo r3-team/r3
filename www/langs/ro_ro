@@ -865,6 +865,17 @@
 			"display": "Afișare",
 			"distincted": "Distinct",
 			"dragDrop": "Place fields here via drag & drop from the selection on the right to add them to the form.",
+			"effectData": {
+				"d-1": "nothing",
+				"d0": "default",
+				"d1": "delete",
+				"d2": "update",
+				"d3": "update + delete",
+				"d4": "create",
+				"d5": "create + delete",
+				"d6": "create + update",
+				"d7": "create + update + delete"
+			},
 			"error": {
 				"formStateFieldRemovedCondition": "Câmpul șters este încă referit ca și condiție pentru starea formularului '{NUME}'.",
 				"formStateFieldRemovedEffect": "Câmpul șters este încă referit ca efect al stării formularului '{NAME}'."

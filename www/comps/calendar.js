@@ -3,6 +3,7 @@ import MyCalendarMonth    from './calendarMonth.js';
 import MyForm             from './form.js';
 import MyInputCollection  from './inputCollection.js';
 import {getChoiceFilters} from './shared/form.js';
+import {checkDataOptions} from './shared/generic.js';
 import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
 import {
@@ -374,6 +375,7 @@ let MyCalendar = {
 		columns:         { type:Array,   required:true },
 		collections:     { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
+		dataOptions:     { type:Number,  required:false, default:0 },
 		daysShowDef:     { type:Number,  required:true },
 		daysShowToggle:  { type:Boolean, required:true },
 		favoriteId:      { required:false, default:null },
@@ -436,8 +438,8 @@ let MyCalendar = {
 		// simple
 		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
 		hasChoices:   (s) => s.choices.length > 1,
-		hasCreate:    (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyCreate,
-		hasUpdate:    (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate,
+		hasCreate:    (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate:    (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
 		isDays:       (s) => s.daysShow === 1 || s.daysShow === 3,
 		isMonth:      (s) => s.daysShow === 42,
 		isWeek:       (s) => s.daysShow === 5 || s.daysShow === 7,
@@ -498,6 +500,7 @@ let MyCalendar = {
 	},
 	methods:{
 		// externals
+		checkDataOptions,
 		fieldOptionGet,
 		fieldOptionSet,
 		getCalendarCutOff0,

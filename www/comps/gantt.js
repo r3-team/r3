@@ -9,6 +9,7 @@ import {
 	fieldOptionSet
 } from './shared/field.js';
 import {
+	checkDataOptions,
 	colorAdjustBg,
 	colorMakeContrastFont
 } from './shared/generic.js';
@@ -380,6 +381,7 @@ let MyGantt = {
 		columns:         { type:Array,   required:true }, // processed list columns
 		collections:     { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
+		dataOptions:     { type:Number,  required:false, default:0 },
 		favoriteId:      { required:false, default:null },
 		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true }, // processed query filters
@@ -511,8 +513,8 @@ let MyGantt = {
 		expressions:    (s) => s.getQueryExpressions(s.columns),
 		hasChoices:     (s) => s.choices.length > 1,
 		hasColor:       (s) => s.attributeIdColor !== null,
-		hasCreate:      (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyCreate,
-		hasUpdate:      (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate,
+		hasCreate:      (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate:      (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
 		isDays:         (s) => s.stepType === 'days',
 		isEmpty:        (s) => s.groups.length === 0,
 		isHours:        (s) => s.stepType === 'hours',
@@ -594,6 +596,7 @@ let MyGantt = {
 	},
 	methods:{
 		// external
+		checkDataOptions,
 		fieldOptionGet,
 		fieldOptionSet,
 		fillRelationRecordIds,

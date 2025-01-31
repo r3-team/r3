@@ -865,6 +865,17 @@
 			"display": "Visualizza",
 			"distincted": "Distinto",
 			"dragDrop": "Place fields here via drag & drop from the selection on the right to add them to the form.",
+			"effectData": {
+				"d-1": "nothing",
+				"d0": "default",
+				"d1": "delete",
+				"d2": "update",
+				"d3": "update + delete",
+				"d4": "create",
+				"d5": "create + delete",
+				"d6": "create + update",
+				"d7": "create + update + delete"
+			},
 			"error": {
 				"formStateFieldRemovedCondition": "I campi cancellati sono ancora referenziati come condizione della condizione del modulo '{NAME}'.",
 				"formStateFieldRemovedEffect": "I campi cancellati sono ancora referenziati come campo interessato dalla condizione del modulo '{NAME}'."

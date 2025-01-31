@@ -29,6 +29,7 @@ import {
 	rsaEncrypt
 } from './shared/crypto.js';
 import {
+	checkDataOptions,
 	filterIsCorrect,
 	filterOperatorIsSingleValue,
 	openLink
@@ -117,7 +118,7 @@ let MyForm = {
 					<my-form-actions
 						v-if="hasFormActions"
 						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-						:entityIdMapState="entityIdMapState"
+						:entityIdMapEffect="entityIdMapEffect"
 						:formActions="form.actions"
 						:formId="formId"
 						:moduleId="moduleId"
@@ -183,27 +184,27 @@ let MyForm = {
 			<div class="top lower" v-if="hasBarLower">
 				<div class="area">
 					<my-button image="new.png"
-						v-if="!isBulkUpdate && allowNew"
+						v-if="buttonShownNew"
 						@trigger="openNewAsk(false)"
 						@trigger-middle="openNewAsk(true)"
-						:active="(!isNew || hasChanges) && canCreate && !blockInputs"
+						:active="buttonActiveNew"
 						:caption="capGen.button.new"
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button image="save.png" alt-image="add.png"
-						v-if="!isBulkUpdate"
+						v-if="buttonShownSave"
 						@trigger="set(false)"
 						@trigger-alt="set(true)"
-						:active="hasChanges && canUpdate && !blockInputs"
+						:active="buttonActiveSave"
 						:altAction="!isMobile && allowNew && canCreate"
 						:altCaptionTitle="capGen.button.saveNewHint"
 						:caption="capGen.button.save"
 						:captionTitle="capGen.button.saveHint"
 					/>
 					<my-button image="save.png"
-						v-if="isBulkUpdate"
+						v-if="buttonShownSaveBulk"
 						@trigger="setBulkUpdate"
-						:active="hasChangesBulk && canUpdate && !blockInputs"
+						:active="buttonActiveSaveBulk"
 						:caption="capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length))"
 						:captionTitle="capGen.button.saveHint"
 					/>
@@ -218,7 +219,7 @@ let MyForm = {
 					<my-form-actions
 						v-if="hasFormActions"
 						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-						:entityIdMapState="entityIdMapState"
+						:entityIdMapEffect="entityIdMapEffect"
 						:formActions="form.actions"
 						:formId="formId"
 						:moduleId="moduleId"
@@ -231,9 +232,9 @@ let MyForm = {
 						:cancel="true"
 					/>
 					<my-button image="shred.png"
-						v-if="!isBulkUpdate && allowDel"
+						v-if="buttonShownDel"
 						@trigger="delAsk"
-						:active="canDelete && !blockInputs"
+						:active="buttonActiveDel"
 						:cancel="true"
 						:caption="capGen.button.delete"
 						:captionTitle="capGen.button.deleteHint"
@@ -246,7 +247,7 @@ let MyForm = {
 				<div class="area">
 					<my-form-actions
 						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-						:entityIdMapState="entityIdMapState"
+						:entityIdMapEffect="entityIdMapEffect"
 						:formActions="form.actions"
 						:formId="formId"
 						:moduleId="moduleId"
@@ -272,7 +273,7 @@ let MyForm = {
 					@set-value-init="valueSet"
 					:isBulkUpdate="isBulkUpdate"
 					:dataFieldMap="fieldIdMapData"
-					:entityIdMapState="entityIdMapState"
+					:entityIdMapEffect="entityIdMapEffect"
 					:favoriteId="favoriteId"
 					:field="f"
 					:fieldIdsChanged="fieldIdsChanged"
@@ -281,7 +282,7 @@ let MyForm = {
 					:formBadSave="badSave"
 					:formIsEmbedded="isPopUp || isWidget"
 					:formLoading="loading"
-					:formReadonly="badLoad || blockInputs"
+					:formReadonly="isReadonly || blockInputs"
 					:isAloneInForm="isSingleField"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
@@ -297,7 +298,7 @@ let MyForm = {
 			v-if="showLog"
 			@close-log="showLog = false"
 			:dataFieldMap="fieldIdMapData"
-			:entityIdMapState="entityIdMapState"
+			:entityIdMapEffect="entityIdMapEffect"
 			:form="form"
 			:formLoading="loading"
 			:isPopUp="isPopUp"
@@ -469,38 +470,44 @@ let MyForm = {
 		},
 
 		bgStyle:(s) => s.isPopUp || s.isWidget ? '' : `background-color:${s.colorMenu.toString()};`,
-		canCreate:(s) =>!s.updatingRecord
+		canCreate:(s) => !s.updatingRecord
 			&& s.joins.length !== 0
 			&& s.joins[0].applyCreate
+			&& s.checkDataOptions(4,s.entityIdMapEffect.form.data)
 			&& s.hasAccessToRelation(s.access,s.joins[0].relationId,2),
-		canDelete:(s) => {
-			if(s.updatingRecord || s.isNew || s.badLoad || s.joinsIndexesDel.length === 0)
-				return false;
-			
-			// check for protected preset record
-			let rel = s.relationIdMap[s.joins[0].relationId];
-			for(let p of rel.presets) {
-				if(p.protected && s.recordIds.includes(s.presetIdMapRecordId[p.id]))
-					return false;
-			}
-			return true;
-		},
-		canUpdate:     (s) => !s.badLoad && !s.updatingRecord,
+		canDelete:(s) => !s.updatingRecord
+			&& !s.isNew
+			&& !s.badLoad
+			&& s.joinsIndexesDel.length !== 0
+			&& s.checkDataOptions(1,s.entityIdMapEffect.form.data)
+			&& s.relationIdMap[s.joins[0].relationId].presets.filter(v => v.protected && s.recordIds.includes(s.presetIdMapRecordId[v.id])).length === 0,
+		canUpdate:     (s) => !s.updatingRecord && !s.isReadonly,
 		hasBarLower:   (s) => !s.isWidget && s.isData && !s.form.noDataActions,
 		hasBarWidget:  (s) => s.isWidget && s.hasFormActions,
 		hasChanges:    (s) => !s.form.noDataActions && s.fieldIdsChanged.length !== 0,
 		hasChangesBulk:(s) => s.isBulkUpdate && s.fieldIdsTouched.length !== 0,
-		hasFormActions:(s) => s.form.actions.filter(v => (s.entityIdMapState.formAction[v.id] !== undefined ? s.entityIdMapState.formAction[v.id] : v.state) !== 'hidden').length > 0,
+		hasFormActions:(s) => s.form.actions.filter(v => (s.entityIdMapEffect.formAction[v.id]?.state !== undefined ? s.entityIdMapEffect.formAction[v.id].state : v.state) !== 'hidden').length > 0,
 		hasGoBack:     (s) => s.isData && !s.isMobile && !s.isPopUp,
 		helpAvailable: (s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
 		isBulkUpdate:  (s) => s.isData && s.recordIds.length > 1,
 		isData:        (s) => s.relationId !== null,
 		isNew:         (s) => s.recordIds.length === 0,
+		isReadonly:    (s) => s.badLoad || !s.checkDataOptions((s.isNew ? 4 : 2),s.entityIdMapEffect.form.data),
 		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','kanban','list','tabs','variable'].includes(s.fields[0].content),
-		menuActive:    (s) => typeof s.formIdMapMenu[s.form.id] === 'undefined' ? null : s.formIdMapMenu[s.form.id],
+		menuActive:    (s) => s.formIdMapMenu[s.form.id] === undefined ? null : s.formIdMapMenu[s.form.id],
 		warnUnsaved:   (s) => s.hasChanges && s.settings.warnUnsaved,
 
-		// entities
+		// buttons
+		buttonActiveDel:     (s) => !s.blockInputs  && s.canDelete,
+		buttonActiveNew:     (s) => !s.blockInputs  && s.canCreate && (!s.isNew || s.hasChanges),
+		buttonActiveSave:    (s) => !s.blockInputs  && s.canUpdate && s.hasChanges,
+		buttonActiveSaveBulk:(s) => !s.blockInputs  && s.canUpdate && s.hasChangesBulk,
+		buttonShownNew:      (s) => !s.isBulkUpdate && s.allowNew,
+		buttonShownDel:      (s) => !s.isBulkUpdate && s.allowDel,
+		buttonShownSave:     (s) => !s.isBulkUpdate,
+		buttonShownSaveBulk: (s) => s.isBulkUpdate,
+
+		// general entities
 		formStateIdMap: (s) => s.getFormStateIdMap(s.form.states),
 		fieldIdMapData: (s) => s.getDataFieldMap(s.fields),
 		fields:         (s) => s.form.fields,
@@ -685,8 +692,8 @@ let MyForm = {
 			};
 		},
 		
-		// state overwrite for different entities (fields, formActions, tabs)
-		entityIdMapState:(s) => {
+		// applied form state effects, overwrites for different entities (form, fields, formActions, tabs)
+		entityIdMapEffect:(s) => {
 			const getValueFromConditionSide = (side,operator,recursionLevel) => {
 				switch(side.content) {
 					case 'collection':   return getCollectionValues(side.collectionId,side.columnId,s.filterOperatorIsSingleValue(operator)); break;
@@ -755,16 +762,16 @@ let MyForm = {
 				return Function(line)();
 			};
 			
-			let out = { field:{}, formAction:{}, tab:{} };
+			let out = { form:{ data:0, state:'default' }, field:{}, formAction:{}, tab:{} };
 			for(const state of s.form.states) {
-				if(isFormStateActive(state,0)) {
-
-					// apply effects if conditions are met
-					for(const e of state.effects) {
-						if(e.fieldId      !== null) out.field[e.fieldId]           = e.newState;
-						if(e.formActionId !== null) out.formAction[e.formActionId] = e.newState;
-						if(e.tabId        !== null) out.tab[e.tabId]               = e.newState;
-					}
+				if(!isFormStateActive(state,0)) continue;
+				
+				// apply effects if conditions are met
+				for(const e of state.effects) {
+					     if(e.fieldId      !== null) out.field[e.fieldId]           = { data:e.newData, state:e.newState };
+					else if(e.formActionId !== null) out.formAction[e.formActionId] = { data:e.newData, state:e.newState };
+					else if(e.tabId        !== null) out.tab[e.tabId]               = { data:e.newData, state:e.newState };
+					else                             out.form                       = { data:e.newData, state:e.newState };
 				}
 			}
 			return out;
@@ -821,6 +828,7 @@ let MyForm = {
 		// externals
 		aesGcmDecryptBase64WithPhrase,
 		aesGcmEncryptBase64WithPhrase,
+		checkDataOptions,
 		consoleError,
 		dialogCloseAsk,
 		fillRelationRecordIds,

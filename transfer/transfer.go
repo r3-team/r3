@@ -124,7 +124,7 @@ func GetModuleChangedWithDependencies(moduleId uuid.UUID) (map[uuid.UUID]bool, e
 }
 
 // verifies that the importing module matches the running application build
-func verifyCompatibilityWithApp(moduleId uuid.UUID, releaseBuildApp int) error {
+func verifyCompatibilityWithApp(releaseBuildApp int) error {
 
 	if config.GetAppVersion().Build < releaseBuildApp {
 		return fmt.Errorf("module was released for application version %d (current version %d)",

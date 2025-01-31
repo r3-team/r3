@@ -865,6 +865,17 @@
 			"display": "عرض",
 			"distincted": "متميز",
 			"dragDrop": "ضع الحقول هنا عن طريق السحب والإفلات من التحديد الموجود على اليمين لإضافتها إلى النموذج.",
+			"effectData": {
+				"d-1": "nothing",
+				"d0": "default",
+				"d1": "delete",
+				"d2": "update",
+				"d3": "update + delete",
+				"d4": "create",
+				"d5": "create + delete",
+				"d6": "create + update",
+				"d7": "create + update + delete"
+			},
 			"error": {
 				"formStateFieldRemovedCondition": "لا يزال يُشار إلى الحقل المحذوف كشرط لحالة النموذج \"{NAME}\".",
 				"formStateFieldRemovedEffect": "لا يزال تتم الإشارة إلى الحقل المحذوف كتأثير لحالة النموذج \"{NAME}\"."

@@ -8,7 +8,7 @@ let MyBuilderFormStateEffect = {
 		
 		<!-- target -->
 		<select class="long" v-model="target">
-			<option value="">-</option>
+			<option value="">{{ capGen.form }}</option>
 			<optgroup :label="capApp.option.effectFormAction">
 				<option
 					v-for="(ref,id) in entityIdMapRef.formAction"
@@ -31,12 +31,25 @@ let MyBuilderFormStateEffect = {
 		</select>
 		
 		<!-- new state -->
-		<select class="short" v-model="newState">
+		<select class="short" v-model="newState" v-if="!isForm">
 			<option value="hidden">{{ capApp.stateHidden }}</option>
 			<option value="default">{{ capApp.stateDefault }}</option>
 			<option value="readonly" :disabled="!isData && !isVariable && !isButton && !isAction">{{ capApp.stateReadonly }}</option>
 			<option value="optional" :disabled="!isData && !isVariable">{{ capApp.stateOptional }}</option>
 			<option value="required" :disabled="!isData && !isVariable">{{ capApp.stateRequired }}</option>
+		</select>
+		
+		<!-- new data -->
+		<select class="dynamic" v-model.number="newData" v-if="isCalendar || isForm || isList || isKanban">
+			<option value="0">{{ capApp.effectData.d0 }}</option>
+			<option value="7">{{ capApp.effectData.d7 }}</option>
+			<option value="6">{{ capApp.effectData.d6 }}</option>
+			<option value="5">{{ capApp.effectData.d5 }}</option>
+			<option value="4">{{ capApp.effectData.d4 }}</option>
+			<option value="3">{{ capApp.effectData.d3 }}</option>
+			<option value="2">{{ capApp.effectData.d2 }}</option>
+			<option value="1">{{ capApp.effectData.d1 }}</option>
+			<option value="-1">{{ capApp.effectData['d-1'] }}</option>
 		</select>
 		
 		<my-button image="delete.png"
@@ -52,13 +65,13 @@ let MyBuilderFormStateEffect = {
 	},
 	emits:['remove','update:modelValue'],
 	computed:{
+		newData:{
+			get()  { return this.effect.newData },
+			set(v) { this.set('newData',v); }
+		},
 		newState:{
 			get()  { return this.effect.newState },
-			set(v) {
-				let vOld = JSON.parse(JSON.stringify(this.effect));
-				vOld.newState = v;
-				this.$emit('update:modelValue',vOld);
-			}
+			set(v) { this.set('newState',v); }
 		},
 		target:{
 			get() {
@@ -72,6 +85,7 @@ let MyBuilderFormStateEffect = {
 					fieldId:     (v !== '' && v.charAt(0) === 'F') ? v.substring(1) : null,
 					formActionId:(v !== '' && v.charAt(0) === 'A') ? v.substring(1) : null,
 					tabId:       (v !== '' && v.charAt(0) === 'T') ? v.substring(1) : null,
+					newData:     0,
 					newState:    'default',
 				});
 			}
@@ -79,10 +93,14 @@ let MyBuilderFormStateEffect = {
 
 		// simple
 		effect:    (s) => JSON.parse(JSON.stringify(s.modelValue)),
-		fieldSet:  (s) => s.effect.fieldId      !== null && typeof s.fieldIdMap[s.effect.fieldId] !== 'undefined',
+		fieldSet:  (s) => s.effect.fieldId      !== null && s.fieldIdMap[s.effect.fieldId] !== undefined,
 		isAction:  (s) => s.effect.formActionId !== null,
 		isButton:  (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'button',
+		isCalendar:(s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'calendar',
+		isKanban:  (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'kanban',
 		isData:    (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'data',
+		isForm:    (s) => s.effect.fieldId === null && s.effect.formActionId === null && s.effect.tabId === null,
+		isList:    (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'list',
 		isVariable:(s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'variable',
 		
 		// store
@@ -102,6 +120,13 @@ let MyBuilderFormStateEffect = {
 			if(type === 'F') title = this.getFieldTitle(this.fieldIdMap[id]);
 			
 			return type + ref + ' - ' + title + postfix;
+		},
+
+		// set
+		set(name,value) {
+			let vOld = JSON.parse(JSON.stringify(this.effect));
+			vOld[name] = value;
+			this.$emit('update:modelValue',vOld);
 		}
 	}
 };
@@ -237,6 +262,7 @@ let MyBuilderFormState = {
 				fieldId:null,
 				formActionId:null,
 				tabId:null,
+				newData:0,
 				newState:'default'
 			});
 			this.$emit('update:modelValue',v);

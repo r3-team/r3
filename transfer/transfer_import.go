@@ -637,7 +637,7 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapImportMeta map[uuid.UU
 			fileData.Content.Module.Name, fileData.Content.Module.ReleaseBuild))
 
 		// verify application compatability
-		if err := verifyCompatibilityWithApp(moduleId, fileData.Content.Module.ReleaseBuildApp); err != nil {
+		if err := verifyCompatibilityWithApp(fileData.Content.Module.ReleaseBuildApp); err != nil {
 			return modules, err
 		}
 

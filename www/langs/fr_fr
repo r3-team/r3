@@ -865,6 +865,17 @@
 			"display": "Affichage",
 			"distincted": "Distinct",
 			"dragDrop": "Placez les champs ici via le glisser-déposer depuis la sélection à droite pour les ajouter au formulaire.",
+			"effectData": {
+				"d-1": "nothing",
+				"d0": "default",
+				"d1": "delete",
+				"d2": "update",
+				"d3": "update + delete",
+				"d4": "create",
+				"d5": "create + delete",
+				"d6": "create + update",
+				"d7": "create + update + delete"
+			},
 			"error": {
 				"formStateFieldRemovedCondition": "Le champ supprimé est toujours référencé comme condition de l'état du formulaire '{NAME}'.",
 				"formStateFieldRemovedEffect": "Le champ supprimé est toujours référencé comme effet de l'état du formulaire '{NAME}'."

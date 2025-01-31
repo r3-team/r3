@@ -61,7 +61,7 @@ let MyFormLog = {
 						<my-field flexDirParent="column"
 							v-if="!isFiles(ia)"
 							:dataFieldMap="dataFieldMap"
-							:entityIdMapState="entityIdMapState"
+							:entityIdMapEffect="entityIdMapEffect"
 							:field="indexAttributeIdMapField[ia]"
 							:fieldIdMapOverwrite="fieldIdMapOverwrite"
 							:formBadSave="false"
@@ -124,7 +124,7 @@ let MyFormLog = {
 	</div>`,
 	props:{
 		dataFieldMap:      { type:Object,  required:true },
-		entityIdMapState:  { type:Object,  required:true },
+		entityIdMapEffect: { type:Object,  required:true },
 		form:              { type:Object,  required:true },
 		formLoading:       { type:Boolean, required:true },
 		isPopUp:           { type:Boolean, required:true },

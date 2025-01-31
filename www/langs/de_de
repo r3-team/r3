@@ -865,6 +865,17 @@
 			"display": "Darstellung",
 			"distincted": "Unterscheiden",
 			"dragDrop": "Felder von der Auswahl rechts per Drag&Drop hier ablegen, um sie zum Formular hinzuzufügen.",
+			"effectData": {
+				"d-1": "nichts",
+				"d0": "standard",
+				"d1": "löschen",
+				"d2": "aktualisieren",
+				"d3": "aktualisieren + löschen",
+				"d4": "erstellen",
+				"d5": "erstellen + löschen",
+				"d6": "erstellen + aktualisieren",
+				"d7": "erstellen + aktualisieren + löschen"
+			},
 			"error": {
 				"formStateFieldRemovedCondition": "Gelöschtes Feld wird noch als Kondition im Formularzustand \"{NAME}\" referenziert.",
 				"formStateFieldRemovedEffect": "Gelöschtes Feld wird noch als Effekt im Formularzustand \"{NAME}\" referenziert."
@@ -1595,7 +1606,7 @@
 			"fixedLimit0": "nicht aktiv",
 			"join": "Join: {NAME}",
 			"joinAddHint": "Eine Relation mit dieser verbinden (join)",
-			"joinApplyCreateHint": "Datensatz erzeugen auf dieser Relation",
+			"joinApplyCreateHint": "Datensatz erstellen auf dieser Relation",
 			"joinApplyDeleteHint": "Datensatz löschen auf dieser Relation",
 			"joinApplyUpdateHint": "Datensatz aktualisieren auf dieser Relation",
 			"lookups": "Datensatzerkennung ({COUNT})",

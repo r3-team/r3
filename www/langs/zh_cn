@@ -865,6 +865,17 @@
 			"display": "显示",
 			"distincted": "不重复",
 			"dragDrop": "通过从右侧选择中拖放字段到此处添加到表单中",
+			"effectData": {
+				"d-1": "nothing",
+				"d0": "default",
+				"d1": "delete",
+				"d2": "update",
+				"d3": "update + delete",
+				"d4": "create",
+				"d5": "create + delete",
+				"d6": "create + update",
+				"d7": "create + update + delete"
+			},
 			"error": {
 				"formStateFieldRemovedCondition": "已删除的字段仍被作为表单状态 '{NAME}' 的条件引用。",
 				"formStateFieldRemovedEffect": "已删除的字段仍被作为表单状态 '{NAME}' 的效果引用。"

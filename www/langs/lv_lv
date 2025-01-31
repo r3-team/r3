@@ -865,6 +865,17 @@
 			"display": "Display",
 			"distincted": "Distinct",
 			"dragDrop": "Place fields here via drag & drop from the selection on the right to add them to the form.",
+			"effectData": {
+				"d-1": "nothing",
+				"d0": "default",
+				"d1": "delete",
+				"d2": "update",
+				"d3": "update + delete",
+				"d4": "create",
+				"d5": "create + delete",
+				"d6": "create + update",
+				"d7": "create + update + delete"
+			},
 			"error": {
 				"formStateFieldRemovedCondition": "Deleted field is still referenced as condition of form state '{NAME}'.",
 				"formStateFieldRemovedEffect": "Deleted field is still referenced as effect of form state '{NAME}'."

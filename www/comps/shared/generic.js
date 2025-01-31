@@ -40,6 +40,18 @@ export function colorIsDark(colorRbg) {
 	return tinycolor(colorRbg).isDark();
 };
 
+export function checkDataOptions(requested,options) {
+	if(options ===  0) return true;  //  0 = options are not set, allow all
+	if(options === -1) return false; // -1 = options are set to none, reject all
+
+	switch(requested) {
+		case 1: return [1,3,5,7].includes(options); break; // DELETE
+		case 2: return [2,3,6,7].includes(options); break; // UPDATE
+		case 4: return [4,5,6,7].includes(options); break; // CREATE
+	}
+	return false;
+};
+
 export function copyValueDialog(captionTop,captionBody,copyClipboardValue) {
 	let copy = function() {
 		navigator.clipboard.writeText(copyClipboardValue);

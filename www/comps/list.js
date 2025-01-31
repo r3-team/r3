@@ -26,6 +26,7 @@ import {
 	getRowsDecrypted
 } from './shared/form.js';
 import {
+	checkDataOptions,
 	colorAdjustBg,
 	colorMakeContrastFont
 } from './shared/generic.js';
@@ -705,6 +706,7 @@ let MyList = {
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		columns:         { type:Array,   required:true },                    // list columns, processed
 		columnsAll:      { type:Array,   required:false, default:() => [] }, // list columns, all
+		dataOptions:     { type:Number,  required:false, default:0 },        // data permissions following form states
 		favoriteId:      { required:false, default:null },
 		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true },                    // processed query filters
@@ -820,6 +822,9 @@ let MyList = {
 			return filters;
 		},
 		hasDeleteAny:(s) => {
+			if(!s.checkDataOptions(1,s.dataOptions))
+				return false;
+
 			for(let join of s.joins) {
 				if(join.applyDelete)
 					return true;
@@ -915,11 +920,11 @@ let MyList = {
 		expressions:         (s) => s.getQueryExpressions(s.columns),
 		hasBulkActions:      (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
 		hasChoices:          (s) => s.query.choices.length > 1,
-		hasCreate:           (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
+		hasCreate:           (s) => s.checkDataOptions(4,s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
 		hasPaging:           (s) => s.query.fixedLimit === 0,
 		hasResults:          (s) => s.rowsClear.length !== 0,
-		hasUpdate:           (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
-		hasUpdateBulk:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
+		hasUpdate:           (s) => s.checkDataOptions(2,s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
+		hasUpdateBulk:       (s) => s.checkDataOptions(2,s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
 		isCards:             (s) => s.layout === 'cards',
 		isTable:             (s) => s.layout === 'table',
 		joins:               (s) => s.fillRelationRecordIds(s.query.joins),
@@ -1042,6 +1047,7 @@ let MyList = {
 	},
 	methods:{
 		// externals
+		checkDataOptions,
 		colorAdjustBg,
 		colorMakeContrastFont,
 		consoleError,

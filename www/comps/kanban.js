@@ -14,6 +14,7 @@ import {
 	fieldOptionSet
 } from './shared/field.js';
 import {
+	checkDataOptions,
 	colorAdjustBg,
 	colorMakeContrastFont
 } from './shared/generic.js';
@@ -460,6 +461,7 @@ let MyKanban = {
 		columns:            { type:Array,   required:true }, // processed list columns
 		collections:        { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
+		dataOptions:        { type:Number,  required:false, default:0 },
 		favoriteId:         { required:false, default:null },
 		fieldId:            { type:String,  required:true },
 		filters:            { type:Array,   required:true }, // processed query filters
@@ -509,26 +511,25 @@ let MyKanban = {
 		},
 		
 		// simple
-		attributeIdAxisX:   (s) => s.joinsIndexMap[s.relationIndexAxisX].attributeId,
-		attributeIdAxisY:   (s) => s.relationIndexAxisY !== null && typeof s.joinsIndexMap[s.relationIndexAxisY] !== 'undefined'
+		attributeIdAxisX:  (s) => s.joinsIndexMap[s.relationIndexAxisX].attributeId,
+		attributeIdAxisY:  (s) => s.relationIndexAxisY !== null && typeof s.joinsIndexMap[s.relationIndexAxisY] !== 'undefined'
 			? s.joinsIndexMap[s.relationIndexAxisY].attributeId : null,
-		choiceFilters:      (s) => s.getChoiceFilters(s.choices,s.choiceId),
-		columnBatches:      (s) => s.getColumnBatches(s.moduleId,s.columns,s.columnIndexesAxisX.concat(s.columnIndexesAxisY),[],[],s.showCaptions),
-		columnIndexesAxisX: (s) => s.getAxisColumnIndexes([]),
-		columnIndexesAxisY: (s) => s.relationIndexAxisY === null
-			? [] : s.getAxisColumnIndexes(s.columnIndexesAxisX),
-		columnStyleVars:    (s) => `--kanban-width-min:${s.columnWidthMin}px;--kanban-width-max:${s.columnWidthMax}px;`,
-		columnWidthMin:     (s) => s.zoom * 40,
-		columnWidthMax:     (s) => s.columnWidthMin * 1.5,
-		dataReady:          (s) => typeof s.recordIdMapAxisXY.null !== 'undefined',
-		expressions:        (s) => s.getQueryExpressions(s.columns),
-		hasChoices:         (s) => s.choices.length > 1,
-		hasCreate:          (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyCreate,
-		hasUpdate:          (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate,
-		hasNullsInX:        (s) => s.attributeIdMap[s.attributeIdAxisX].nullable,
-		hasNullsInY:        (s) => s.attributeIdAxisY !== null && s.attributeIdMap[s.attributeIdAxisY].nullable,
-		joins:              (s) => s.fillRelationRecordIds(s.query.joins),
-		joinsIndexMap:      (s) => s.getJoinsIndexMap(s.joins),
+		choiceFilters:     (s) => s.getChoiceFilters(s.choices,s.choiceId),
+		columnBatches:     (s) => s.getColumnBatches(s.moduleId,s.columns,s.columnIndexesAxisX.concat(s.columnIndexesAxisY),[],[],s.showCaptions),
+		columnIndexesAxisX:(s) => s.getAxisColumnIndexes([]),
+		columnIndexesAxisY:(s) => s.relationIndexAxisY === null ? [] : s.getAxisColumnIndexes(s.columnIndexesAxisX),
+		columnStyleVars:   (s) => `--kanban-width-min:${s.columnWidthMin}px;--kanban-width-max:${s.columnWidthMax}px;`,
+		columnWidthMin:    (s) => s.zoom * 40,
+		columnWidthMax:    (s) => s.columnWidthMin * 1.5,
+		dataReady:         (s) => typeof s.recordIdMapAxisXY.null !== 'undefined',
+		expressions:       (s) => s.getQueryExpressions(s.columns),
+		hasChoices:        (s) => s.choices.length > 1,
+		hasCreate:         (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate:         (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
+		hasNullsInX:       (s) => s.attributeIdMap[s.attributeIdAxisX].nullable,
+		hasNullsInY:       (s) => s.attributeIdAxisY !== null && s.attributeIdMap[s.attributeIdAxisY].nullable,
+		joins:             (s) => s.fillRelationRecordIds(s.query.joins),
+		joinsIndexMap:     (s) => s.getJoinsIndexMap(s.joins),
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -586,6 +587,7 @@ let MyKanban = {
 	},
 	methods:{
 		// external
+		checkDataOptions,
 		colorAdjustBg,
 		colorMakeContrastFont,
 		fieldOptionGet,

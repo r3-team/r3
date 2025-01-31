@@ -105,6 +105,7 @@ let MyField = {
 					:columns="columnsProcessed"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
+					:dataOptions="dataOptions"
 					:daysShowDef="field.days"
 					:daysShowToggle="field.daysToggle"
 					:favoriteId="favoriteId"
@@ -140,6 +141,7 @@ let MyField = {
 					:columns="columnsProcessed"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
+					:dataOptions="dataOptions"
 					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:days0="field.dateRange0 / 86400"
@@ -175,6 +177,7 @@ let MyField = {
 					:columns="columnsProcessed"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
+					:dataOptions="dataOptions"
 					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:filters="filtersProcessed"
@@ -229,6 +232,7 @@ let MyField = {
 					:columnsAll="field.columns"
 					:csvExport="field.csvExport"
 					:csvImport="field.csvImport"
+					:dataOptions="dataOptions"
 					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:filterQuick="field.filterQuick"
@@ -295,7 +299,7 @@ let MyField = {
 							@set-value="(...args) => $emit('set-value',...args)"
 							@set-value-init="(...args) => $emit('set-value-init',...args)"
 							:dataFieldMap="dataFieldMap"
-							:entityIdMapState="entityIdMapState"
+							:entityIdMapEffect="entityIdMapEffect"
 							:favoriteId="favoriteId"
 							:field="f"
 							:fieldIdsChanged="fieldIdsChanged"
@@ -612,7 +616,7 @@ let MyField = {
 			@set-value-init="(...args) => $emit('set-value-init',...args)"
 			:isBulkUpdate="isBulkUpdate"
 			:dataFieldMap="dataFieldMap"
-			:entityIdMapState="entityIdMapState"
+			:entityIdMapEffect="entityIdMapEffect"
 			:favoriteId="favoriteId"
 			:field="f"
 			:fieldIdsChanged="fieldIdsChanged"
@@ -635,7 +639,7 @@ let MyField = {
 	</div>`,
 	props:{
 		dataFieldMap:       { type:Object,  required:true },
-		entityIdMapState:   { type:Object,  required:false, default:() => {return {}} }, // overwritten states
+		entityIdMapEffect:  { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		favoriteId:         { required:false, default:null },
 		field:              { type:Object,  required:true },
 		fieldIdsChanged:    { type:Array,   required:false, default:() => {return []} },
@@ -889,8 +893,8 @@ let MyField = {
 			let state = s.field.state;
 			
 			// apply form state if available
-			if(typeof s.entityIdMapState.field[s.field.id] !== 'undefined')
-				state = s.entityIdMapState.field[s.field.id];
+			if(s.entityIdMapEffect.field[s.field.id]?.state !== undefined)
+				state = s.entityIdMapEffect.field[s.field.id].state;
 			
 			// overwrites for 'default' state for data fields
 			if(s.isData && !s.isVariable && state === 'default') {
@@ -920,8 +924,8 @@ let MyField = {
 			let out = [];
 			for(let i = 0, j = s.field.tabs.length; i < j; i++) {
 				let t     = s.field.tabs[i];
-				let state = typeof s.entityIdMapState.tab[t.id] !== 'undefined'
-					? s.entityIdMapState.tab[t.id] : t.state;
+				let state = s.entityIdMapEffect.tab[t.id]?.state !== undefined
+					? s.entityIdMapEffect.tab[t.id].state : t.state;
 				
 				if(state === 'hidden')
 					out.push(i);
@@ -1090,6 +1094,7 @@ let MyField = {
 		contentUse: (s) => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
 		customErr:  (s) => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
+		dataOptions:(s) => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
 		hasCaption: (s) => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
 		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
 		inputRegex: (s) => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),

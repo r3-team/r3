@@ -12,15 +12,15 @@ let MyFormAction = {
 		:imageBase64="formAction.iconId ? srcBase64(iconIdMap[formAction.iconId].file) : ''"
 	/>`,
 	props:{
-		entityIdMapState:{ type:Object, required:true },
-		formAction:      { type:Object, required:true },
-		formId:          { type:String, required:true },
-		moduleId:        { type:String, required:true }
+		entityIdMapEffect:{ type:Object, required:true },
+		formAction:       { type:Object, required:true },
+		formId:           { type:String, required:true },
+		moduleId:         { type:String, required:true }
 	},
 	emits:['execute-function'],
 	computed:{
-		state:(s) => s.entityIdMapState.formAction[s.formAction.id] !== undefined
-			? s.entityIdMapState.formAction[s.formAction.id]
+		state:(s) => s.entityIdMapEffect.formAction[s.formAction.id]?.state !== undefined
+			? s.entityIdMapEffect.formAction[s.formAction.id].state
 			: s.formAction.state,
 		
 		// stores
@@ -39,16 +39,16 @@ let MyFormActions = {
 	template:`<my-form-action
 		v-for="a in formActions"
 		@execute-function="$emit('execute-function',$event)"
-		:entityIdMapState="entityIdMapState"
+		:entityIdMapEffect="entityIdMapEffect"
 		:formAction="a"
 		:formId="formId"
 		:moduleId="moduleId"
 	/>`,
 	props:{
-		entityIdMapState:{ type:Object, required:true },
-		formActions:     { type:Array,  required:true },
-		formId:          { type:String, required:true },
-		moduleId:        { type:String, required:true }
+		entityIdMapEffect:{ type:Object, required:true },
+		formActions:      { type:Array,  required:true },
+		formId:           { type:String, required:true },
+		moduleId:         { type:String, required:true }
 	},
 	emits:['execute-function']
 };

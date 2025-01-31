@@ -241,6 +241,7 @@ type FormStateEffect struct {
 	FormActionId pgtype.UUID `json:"formActionId"` // affected form action
 	FieldId      pgtype.UUID `json:"fieldId"`      // affected field
 	TabId        pgtype.UUID `json:"tabId"`        // affected tab
+	NewData      int32       `json:"newData"`      // defines data handling via number (CREATE=4, UPDATE=2, DELETE=1, NOTHING=0) for form or data fields (lists, calendars, kanban, etc.)
 	NewState     string      `json:"newState"`     // applied state (hidden, default, readonly, optional, required)
 }
 type Field struct {
