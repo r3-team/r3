@@ -982,6 +982,7 @@
 					"login": "user (deprecated)",
 					"password": "Jelszó",
 					"phone": "Telefon",
+					"rating": "rating",
 					"slider": "Értékcsúszka",
 					"url": "URL"
 				},

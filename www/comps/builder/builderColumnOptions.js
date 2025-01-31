@@ -3,6 +3,7 @@ import MyBuilderQuery   from './builderQuery.js';
 import {
 	getIndexAttributeIdsByJoins,
 	isAttributeFiles,
+	isAttributeInteger,
 	isAttributeString
 } from '../shared/attribute.js';
 import {
@@ -130,6 +131,7 @@ let MyBuilderColumnOptions = {
 							:value="column.display"
 						>
 							<option value="default">{{ capApp.option.display.default }}</option>
+							<option v-if="isInteger" value="rating"  >{{ capApp.option.display.rating }}</option>
 							<option v-if="isString"  value="email"   >{{ capApp.option.display.email }}</option>
 							<option v-if="isString"  value="password">{{ capApp.option.display.password }}</option>
 							<option v-if="isString"  value="phone"   >{{ capApp.option.display.phone }}</option>
@@ -229,8 +231,9 @@ let MyBuilderColumnOptions = {
 		},
 		
 		// simple
-		isBarcode: (s) => s.isString && s.attribute.contentUse === 'barcode',
+		isBarcode: (s) => s.isString  && s.attribute.contentUse === 'barcode',
 		isFiles:   (s) => s.isAttributeFiles(s.attribute.content),
+		isInteger: (s) => s.isAttributeInteger(s.attribute.content),
 		isString:  (s) => s.isAttributeString(s.attribute.content),
 		isSubQuery:(s) => s.column.subQuery,
 		
@@ -244,6 +247,7 @@ let MyBuilderColumnOptions = {
 		getCaptionByIndexAttributeId,
 		getIndexAttributeIdsByJoins,
 		isAttributeFiles,
+		isAttributeInteger,
 		isAttributeString,
 		
 		// actions

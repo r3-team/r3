@@ -982,6 +982,7 @@
 					"login": "user (deprecated)",
 					"password": "password",
 					"phone": "telephone",
+					"rating": "rating",
 					"slider": "value slider",
 					"url": "URL"
 				},

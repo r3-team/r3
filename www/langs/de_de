@@ -982,6 +982,7 @@
 					"login": "Benutzer (veraltet)",
 					"password": "Passwort",
 					"phone": "Telefon",
+					"rating": "Bewertung",
 					"slider": "Werteschieber",
 					"url": "URL"
 				},

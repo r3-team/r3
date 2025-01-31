@@ -31,7 +31,7 @@ let MyInputDraw = {
 					:min="zoomInputMin"
 				/>
 			</div>
-			<div class="row gap centered">
+			<div class="row gap centered default-inputs">
 				<template v-if="isMobile || dragModeForce">
 					<my-button image="drag.png"
 						:active="false"

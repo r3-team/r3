@@ -982,6 +982,7 @@
 					"login": "user (deprecated)",
 					"password": "كلمة المرور",
 					"phone": "هاتف",
+					"rating": "rating",
 					"slider": "شريط تمرير القيمة",
 					"url": "عنوان URL"
 				},

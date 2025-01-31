@@ -1,3 +1,4 @@
+import {srcBase64} from './shared/image.js';
 import {
 	getAttributeFileThumbHref,
 	getAttributeFileVersionHref
@@ -45,6 +46,12 @@ let MyValueRich = {
 			:blockBubble="true"
 			:image="link.image"
 			:naked="true"
+		/>
+
+		<!-- rating icon -->
+		<img class="value-rich-rating-icon"
+			v-if="isRating && value !== null"
+			:src="attributeIdMap[attributeId].iconId !== null ? srcBase64(iconIdMap[attributeIdMap[attributeId].iconId].file) : 'images/star1.png'"
 		/>
 		
 		<!-- string value -->
@@ -135,6 +142,7 @@ let MyValueRich = {
 			isGallery:false,
 			isLink:false,
 			isPassword:false,
+			isRating:false,
 			isString:false,
 			stringValue:'',    // processed value, shown directly
 			stringValueFull:'' // processed value, shown as title, no length limit
@@ -162,6 +170,7 @@ let MyValueRich = {
 		
 		// store
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		token:         (s) => s.$store.getters['local/token'],
 		capGen:        (s) => s.$store.getters.captions.generic,
 		settings:      (s) => s.$store.getters.settings
@@ -179,6 +188,7 @@ let MyValueRich = {
 		getUtcTimeStringFromUnix,
 		openDataImageAsNewTag,
 		openLink,
+		srcBase64,
 		
 		copyToClipboard() {
 			let value = !this.isPassword ? this.stringValueFull : this.value;
@@ -246,6 +256,8 @@ let MyValueRich = {
 						case 'time':     this.stringValueFull = this.getUtcTimeStringFromUnix(this.value);                        break;
 						default: directValue = true; break;
 					}
+					if(this.display === 'rating')
+						this.isRating = true;
 				break;
 				
 				// decimals

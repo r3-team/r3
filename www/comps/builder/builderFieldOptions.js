@@ -1352,7 +1352,7 @@ let MyBuilderFieldOptions = {
 			? false : s.attributeIdMap[s.field.attributeId],
 		displayOptions:(s) => {
 			let out = ['default'];
-			if(s.isInteger && s.isDisplayDefault) out.push('slider','login');
+			if(s.isInteger && s.isDisplayDefault) out.push('rating','slider','login');
 			if(s.isString  && s.isDisplayDefault) out.push('password','email','phone','url');
 			if(s.isFiles)                         out.push('gallery');
 			return out;

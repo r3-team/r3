@@ -8,6 +8,7 @@ import MyInputDrawing             from './inputDrawing.js';
 import MyInputFiles               from './inputFiles.js';
 import MyInputIframe              from './inputIframe.js';
 import MyInputLogin               from './inputLogin.js';
+import MyInputRating              from './inputRating.js';
 import MyInputRichtext            from './inputRichtext.js';
 import MyInputSelect              from './inputSelect.js';
 import MyInputUuid                from './inputUuid.js';
@@ -58,6 +59,7 @@ let MyField = {
 		MyInputFiles,
 		MyInputIframe,
 		MyInputLogin,
+		MyInputRating,
 		MyInputRichtext,
 		MyInputSelect,
 		MyInputUuid,
@@ -85,7 +87,7 @@ let MyField = {
 		 		v-click-outside="clickOutside"
 			>
 				<!-- data field icon -->
-				<div class="field-icon" v-if="iconId && isData && !isRelationship && !isDrawing && !isFiles && !isRichtext && !isTextarea">
+				<div class="field-icon" v-if="iconId && isData && !isRelationship && !isDrawing && !isFiles && !isRichtext && !isTextarea && !isRating">
 					<img :src="srcBase64(iconIdMap[iconId].file)" />
 				</div>
 				
@@ -435,6 +437,15 @@ let MyField = {
 					:attributeIdFile="field.attributeIdAlt"
 					:readonly="isReadonly"
 					:valueFiles="valueAlt"
+				/>
+
+				<!-- rating input -->
+				<my-input-rating
+					v-if="isRating"
+					v-model="value"
+					:iconId="iconId"
+					:max="field.max !== null ? field.max : 5"
+					:readonly="isReadonly"
 				/>
 				
 				<!-- slider input -->
@@ -1041,9 +1052,10 @@ let MyField = {
 			&& !s.isLogin        && !s.isSlider
 			&& !s.isTextarea     && !s.isRegconfig
 			&& !s.isRelationship && !s.isRichtext
-			&& !s.isUuid         && !s.isBarcode,
+			&& !s.isUuid         && !s.isBarcode
+			&& !s.isRating,
 		isLineSingle:(s) => s.isData && (
-			s.isLineInput || s.isBoolean || s.isColor || s.isDateInput || s.isSlider ||
+			s.isLineInput || s.isBoolean || s.isColor || s.isDateInput || s.isSlider || s.isRating ||
 			s.isLogin || s.isRegconfig || s.isUuid || (s.isRelationship && !s.isRelationship1N)
 		),
 		isValid:(s) => {
@@ -1125,6 +1137,7 @@ let MyField = {
 		isLogin:    (s) => s.isData && s.field.display === 'login',
 		isMonospace:(s) => s.field.flags.includes('monospace'),
 		isPassword: (s) => s.isData && s.field.display === 'password',
+		isRating:   (s) => s.isData && s.field.display === 'rating',
 		isSlider:   (s) => s.isData && s.field.display === 'slider',
 		
 		// composite

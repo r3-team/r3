@@ -279,6 +279,47 @@
 }
 
 
+/* input rating */
+.input-rating{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:space-between;
+	align-items:center;
+}
+.input-rating-icons{
+	flex-flow:row wrap;
+	justify-content:center;
+	align-items:center;
+	display:flex;
+}
+.input-rating-icon{
+	width:24px;
+	height:24px;
+	padding:3px;
+	margin:2px;
+	transition:width 0.1s, height 0.1s, padding 0.1s;
+	filter:var(--image-filter-alt);
+}
+.input-rating-icon:hover{
+	width:30px;
+	height:30px;
+	padding:0px;
+}
+.input-rating-icon.active{
+	filter:var(--image-filter);
+}
+.input-rating-input{
+	flex:0 1 auto;
+	max-width:60px;
+	padding:2px 6px;
+	border-radius:var(--border-input-radius);
+	text-align:center;
+	color:var(--color-font);
+	background-color:var(--color-input);
+}
+
+
 /* input iframe */
 .input-iframe{
 	display:flex;

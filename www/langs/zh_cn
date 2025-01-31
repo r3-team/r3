@@ -982,6 +982,7 @@
 					"login": "user (deprecated)",
 					"password": "密码",
 					"phone": "电话",
+					"rating": "rating",
 					"slider": "值滑块",
 					"url": "网址"
 				},
