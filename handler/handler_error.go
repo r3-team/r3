@@ -90,40 +90,28 @@ var (
 			matchRx: regexp.MustCompile(`^record on line \d+\: wrong number of fields`),
 		},
 
-		// database messages (postgres)
+		// database messages from postgres, are dependent on locale (lc_messages)
 		{ // custom error message from application, used in instance.abort_show_message()
 			convertFn: func(err error) error {
-				matches := regexp.MustCompile(`^ERROR\: R3_MSG\: (.*)`).FindStringSubmatch(err.Error())
+				matches := regexp.MustCompile(`R3_MSG\: (.*)`).FindStringSubmatch(err.Error())
 				if len(matches) != 2 {
 					return CreateErrCode("DBS", ErrCodeDbsFunctionMessage)
 				}
 				return CreateErrCodeWithArgs("DBS", ErrCodeDbsFunctionMessage,
 					map[string]string{"FNC_MSG": matches[1]})
 			},
-			matchRx: regexp.MustCompile(`^ERROR\: R3_MSG\: `),
-		},
-		{ // unique constraint violation, custom unique index
-			convertFn: func(err error) error {
-				matches := regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \"ind_(.{36})\"`).FindStringSubmatch(err.Error())
-				if len(matches) != 2 {
-					return CreateErrCode("DBS", ErrCodeDbsConstraintUnique)
-				}
-
-				return CreateErrCodeWithArgs("DBS", ErrCodeDbsConstraintUnique,
-					map[string]string{"IND_ID": matches[1]})
-			},
-			matchRx: regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \"ind_.{36}\"`),
+			matchRx: regexp.MustCompile(`R3_MSG\: `),
 		},
 		{ // foreign key constraint violation
 			convertFn: func(err error) error {
-				matches := regexp.MustCompile(`^ERROR\: .+ on table \".+\" violates foreign key constraint \"fk_(.{36})\"`).FindStringSubmatch(err.Error())
+				matches := regexp.MustCompile(`^ERROR\: .+ on table \".+\" violates foreign key constraint \"fk_([0-9a-fA-F\-]{36})\"`).FindStringSubmatch(err.Error())
 				if len(matches) != 2 {
 					return CreateErrCode("DBS", ErrCodeDbsConstraintFk)
 				}
 				return CreateErrCodeWithArgs("DBS", ErrCodeDbsConstraintFk,
 					map[string]string{"ATR_ID": matches[1]})
 			},
-			matchRx: regexp.MustCompile(`^ERROR\: .+ on table \".+\" violates foreign key constraint \"fk_.{36}\"`),
+			matchRx: regexp.MustCompile(`^ERROR\: .+ on table \".+\" violates foreign key constraint \"fk_[0-9a-fA-F\-]{36}\"`),
 		},
 		{ // NOT NULL constraint violation
 			convertFn: func(err error) error {
@@ -147,17 +135,29 @@ var (
 			},
 			matchRx: regexp.MustCompile(`^ERROR\: invalid input syntax for type \w+\: \".+\"`),
 		},
+		{ // unique constraint violation, custom unique index
+			convertFn: func(err error) error {
+				matches := regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \"ind_([0-9a-fA-F\-]{36})\"`).FindStringSubmatch(err.Error())
+				if len(matches) != 2 {
+					return CreateErrCode("DBS", ErrCodeDbsConstraintUnique)
+				}
+
+				return CreateErrCodeWithArgs("DBS", ErrCodeDbsConstraintUnique,
+					map[string]string{"IND_ID": matches[1]})
+			},
+			matchRx: regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \"ind_[0-9a-fA-F\-]{36}\"`),
+		},
 		{ // failed to create unique index due to existing non-unique values
 			convertFn: func(err error) error { return CreateErrCode("DBS", ErrCodeDbsIndexFailUnique) },
-			matchRx:   regexp.MustCompile(`^ERROR\: could not create unique index \"ind_.{36}\" \(SQLSTATE 23505\)`),
+			matchRx:   regexp.MustCompile(`^ERROR\: could not create unique index.*ind_[0-9a-fA-F\-]{36}.*\(SQLSTATE 23505\)`),
 		},
 		{ // duplicate key violation: login name
 			convertFn: func(err error) error { return CreateErrCode("DBS", ErrCodeDbsConstraintUniqueLogin) },
-			matchRx:   regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \"login_name_key\" \(SQLSTATE 23505\)`),
+			matchRx:   regexp.MustCompile(`login_name_key.*\(SQLSTATE 23505\)`),
 		},
 		{ // error in prepared statement cache due to changed schema
 			convertFn: func(err error) error { return CreateErrCode("DBS", ErrCodeDbsChangedCachePlan) },
-			matchRx:   regexp.MustCompile(`^ERROR\: cached plan must not change result type \(SQLSTATE 0A000\)`),
+			matchRx:   regexp.MustCompile(`\(SQLSTATE 0A000\)`),
 		},
 	}
 )

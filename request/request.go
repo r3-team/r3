@@ -403,8 +403,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return LoginDel_tx(ctx, tx, reqJson)
 		case "get":
 			return LoginGet_tx(ctx, tx, reqJson)
-		case "getEmailIsNotUnique":
-			return LoginGetEmailIsNotUnique_tx(ctx, tx, reqJson)
+		case "getIsNotUnique":
+			return LoginGetIsNotUnique_tx(ctx, tx, reqJson)
 		case "getMembers":
 			return LoginGetMembers_tx(ctx, tx, reqJson)
 		case "getRecords":

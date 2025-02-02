@@ -114,7 +114,7 @@ let MyAdminLogin = {
 			</div>
 			
 			<div class="content no-padding">
-				<table class="generic-table-vertical">
+				<table class="generic-table-vertical w1200">
 					<tbody>
 						<tr>
 							<td>
@@ -123,7 +123,14 @@ let MyAdminLogin = {
 									<span>{{ capGen.name }}</span>
 								</div>
 							</td>
-							<td class="default-inputs"><input v-model="name" v-focus :disabled="isLdap" /></td>
+							<td class="default-inputs">
+								<div class="column gap">
+									<input v-model="name" v-focus @keyup="typedUniqueField('name',name)" :disabled="isLdap" />
+									<div v-if="notUniqueName && name !== ''" class="message error">
+										{{ capApp.dialog.notUniqueName }}
+									</div>
+								</div>
+							</td>
 							<td>{{ capApp.hint.name }}</td>
 						</tr>
 						<tr v-if="isNew">
@@ -236,9 +243,9 @@ let MyAdminLogin = {
 									</td>
 									<td>
 										<div class="column gap">
-											<input class="dynamic" v-model="meta.email" @keyup="typedEmailField" :disabled="isLdap" />
-											<div v-if="emailIsNotUnique && meta.email !== ''" class="message error">
-												{{ capApp.dialog.emailIsNotUnique }}
+											<input class="dynamic" v-model="meta.email" @keyup="typedUniqueField('email',meta.email)" :disabled="isLdap" />
+											<div v-if="notUniqueEmail && meta.email !== ''" class="message error">
+												{{ capApp.dialog.notUniqueEmail }}
 											</div>
 										</div>
 									</td>
@@ -468,7 +475,8 @@ let MyAdminLogin = {
 			templateId:null,
 			
 			// states
-			emailIsNotUnique:false,
+			notUniqueEmail:false,
+			notUniqueName:false,
 			inputKeys:['name','active','admin','pass','meta','noAuth','tokenExpiryHours','records','roleIds'],
 			inputsOrg:{},      // map of original input values, key = input key
 			inputsReady:false, // inputs have been loaded
@@ -477,7 +485,7 @@ let MyAdminLogin = {
 			roleFilter:'',     // filter for role selection
 			tabTarget:'meta',
 			templates:[],      // login templates
-			timerEmailCheck:null,
+			timerNotUniqueCheck:null,
 			
 			// login form
 			loginFormIndexOpen:null,
@@ -519,7 +527,7 @@ let MyAdminLogin = {
 		// simple states
 		anyAction: (s) => !s.isLdap,
 		anyInfo:   (s) => s.isLimited,
-		canSave:   (s) => s.hasChanges && s.name !== '',
+		canSave:   (s) => s.hasChanges && !s.notUniqueName && s.name !== '',
 		isFormOpen:(s) => s.loginFormIndexOpen !== null,
 		isLdap:    (s) => s.ldapId !== null,
 		isLimited: (s) => s.activated && s.roleIds.length < 2 && !s.admin && !s.noAuth,
@@ -599,8 +607,11 @@ let MyAdminLogin = {
 				? [this.records[index].id] : [];
 		},
 		reset() {
-			this.id               = 0;
-			this.emailIsNotUnique = false;
+			this.id             = 0;
+			this.name           = '';
+			this.notUniqueEmail = false;
+			this.notUniqueName  = false;
+			this.getIsNotUnique('email',this.meta.email);
 		},
 		toggleRoleId(roleId) {
 			const pos = this.roleIds.indexOf(roleId);
@@ -632,9 +643,9 @@ let MyAdminLogin = {
 					this.roleIds.push(roleIdsByContent[i]);
 			}
 		},
-		typedEmailField() {
-			clearInterval(this.timerEmailCheck);
-			this.timerEmailCheck = setTimeout(this.getEmailIsNotUnique,1000);
+		typedUniqueField(content,value) {
+			clearInterval(this.timerNotUniqueCheck);
+			this.timerNotUniqueCheck = setTimeout(() => this.getIsNotUnique(content,value),750);
 		},
 		updateLoginRecord(loginFormIndex,recordId) {
 			this.recordInput = '';
@@ -693,20 +704,27 @@ let MyAdminLogin = {
 					this.roleIds          = login.roleIds;
 					this.pass             = '';
 					this.inputsLoaded();
-					this.getEmailIsNotUnique();
+					this.getIsNotUnique('email',this.meta.email);
 				},
 				this.$root.genericError
 			);
 		},
-		getEmailIsNotUnique() {
-			if(this.meta.email === '')
+		getIsNotUnique(content,value) {
+			value = value.trim().toLowerCase();
+			if(value === '')
 				return;
 
-			ws.send('login','getEmailIsNotUnique',{
+			ws.send('login','getIsNotUnique',{
 				loginId:this.id,
-				email:this.meta.email.trim()
+				content:content,
+				value:value
 			},true).then(
-				res => { this.emailIsNotUnique = res.payload; },
+				res => {
+					switch(content) {
+						case 'email': this.notUniqueEmail = res.payload; break
+						case 'name':  this.notUniqueName  = res.payload; break;
+					}
+				},
 				this.$root.genericError
 			);
 		},

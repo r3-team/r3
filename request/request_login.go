@@ -104,15 +104,16 @@ func LoginGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (inter
 
 	return res, err
 }
-func LoginGetEmailIsNotUnique_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func LoginGetIsNotUnique_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		LoginId int64  `json:"loginId"`
-		Email   string `json:"email"`
+		Content string `json:"content"`
+		Value   string `json:"value"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return login_meta.GetEmailIsNotUnique_tx(ctx, tx, req.LoginId, req.Email)
+	return login_meta.GetIsNotUnique_tx(ctx, tx, req.LoginId, req.Content, req.Value)
 }
 func LoginGetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
