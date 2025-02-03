@@ -74,6 +74,9 @@ func Open(config types.FileTypeDb) error {
 		}
 	}
 
+	// change language of postgres messages to correctly parse errors (C is default locale)
+	poolConfig.ConnConfig.RuntimeParams["lc_messages"] = "C"
+
 	poolConfig.AfterConnect = func(ctx context.Context, con *pgx.Conn) error {
 		pgxuuid.Register(con.TypeMap())
 		return err
