@@ -581,11 +581,11 @@ let MyForm = {
 				
 				// form functions
 				form_close:s.isPopUp ? s.closeAsk : s.openPrevAsk,
-				form_open:(formId,recordId,newTab,popUp,maxY,maxX) => {
+				form_open:(formId,recordId,newTab,popUp,maxY,maxX,replace) => {
 					s.openForm((recordId === 0 || recordId === null ? [] : [recordId]),{
 						formIdOpen:formId, popUpType:popUp ? 'float' : null,
 						maxHeight:maxY, maxWidth:maxX
-					},[],newTab,null);
+					},[],newTab,null,replace);
 					s.recordActionFree = false;
 				},
 				form_set_title:(v) => s.titleOverwrite = v,
@@ -681,11 +681,11 @@ let MyForm = {
 				},
 				
 				// legacy calls (<3.5)
-				open_form:(formId,recordId,newTab,popUp,maxY,maxX) => {
+				open_form:(formId,recordId,newTab,popUp,maxY,maxX,replace) => {
 					s.openForm((recordId === 0 ? [] : [recordId]),{
 						formIdOpen:formId, popUpType:popUp ? 'float' : null,
 						maxHeight:maxY, maxWidth:maxX
-					},[],newTab,null);
+					},[],newTab,null,replace);
 					s.recordActionFree = false;
 				},
 				show_form_message:s.messageSet
@@ -1160,7 +1160,7 @@ let MyForm = {
 			});
 		},
 		openNew(middleClick) {
-			this.openForm([],null,null,middleClick,null);
+			this.openForm([],null,null,middleClick,null,false);
 		},
 		openPrevAsk() {
 			if(!this.warnUnsaved)
@@ -1267,13 +1267,14 @@ let MyForm = {
 		},
 		
 		// navigation
-		openForm(recordIds,openForm,getterArgs,newTab,fieldIdSrc) {
+		openForm(recordIds,openForm,getterArgs,newTab,fieldIdSrc,replace) {
 			// set defaults
-			if(typeof recordIds  === 'undefined' || recordIds  === null) recordIds  = [];
-			if(typeof openForm   === 'undefined' || openForm   === null) openForm   = { formIdOpen:this.form.id, popUpType:null };
-			if(typeof getterArgs === 'undefined' || getterArgs === null) getterArgs = [];
-			if(typeof newTab     === 'undefined')                        newTab     = false;
-			if(typeof fieldIdSrc === 'undefined')                        fieldIdSrc = null;
+			if(recordIds  === undefined || recordIds  === null) recordIds  = [];
+			if(openForm   === undefined || openForm   === null) openForm   = { formIdOpen:this.form.id, popUpType:null };
+			if(getterArgs === undefined || getterArgs === null) getterArgs = [];
+			if(newTab     === undefined)                        newTab     = false;
+			if(fieldIdSrc === undefined)                        fieldIdSrc = null;
+			if(replace    === undefined)                        replace    = false;
 			
 			const openSameForm  = this.form.id === openForm.formIdOpen;
 			const openPopUpForm = openForm.popUpType !== null;
@@ -1324,15 +1325,20 @@ let MyForm = {
 			if(this.$route.fullPath === path)
 				return this.reset();
 			
-			// different form
-			if(!openSameForm)
-				return this.$router.push(path);
+			// different path, same form
+			if(openSameForm) {
+				// switch from existing to new one or between two existing records
+				if(!this.isNew && recordIdOpen !== this.recordIds[0])
+					return this.$router.push(path);
+				
+				return this.$router.replace(path);
+			}
 			
-			// switch from existing to new one or between two existing records
-			if(!this.isNew && recordIdOpen !== this.recordIds[0])
-				return this.$router.push(path);
+			// new form
+			if(replace)
+				return this.$router.replace(path);
 			
-			return this.$router.replace(path);
+			return this.$router.push(path);
 		},
 		setFormArgs(args,push) {
 			const path = this.getFormRoute(this.favoriteId,this.form.id,

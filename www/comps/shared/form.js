@@ -310,12 +310,12 @@ export function setFormFavorite(moduleId,formId,recordId,title) {
 	MyStore.commit('local/loginFavoritesModuleIdMapChange',m);
 };
 
-export function formOpen(openForm,newTab) {
+export function formOpen(openForm,newTab,replace) {
 	if(openForm === null)
 		return;
 
-	if(newTab === undefined)
-		newTab = false;
+	if(newTab  === undefined) newTab  = false;
+	if(replace === undefined) replace = false;
 	
 	if(openForm.popUpType !== null && !newTab)
 		return MyStore.commit('popUpFormGlobal',getFormPopUpConfig([],openForm,[],null));
@@ -324,6 +324,9 @@ export function formOpen(openForm,newTab) {
 	
 	if(newTab)
 		return openLink('#'+path,true);
+
+	if(replace)
+		return this.$router.replace(path);
 
 	this.$router.push(path);
 };

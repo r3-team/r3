@@ -1085,7 +1085,7 @@
 				"copy_to_clipboard": "app.copy_to_clipboard({ARGS}) => غير محدد<br /><br />نسخ النص إلى حافظة المستخدمين.",
 				"dialog_show": "app.dialog_show({ARGS}) => وعد<br /><br />يعرض مربع حوار بالعنوان والمحتوى المحددين. <br /><br />يتم تعريف الأزرار من خلال قائمة السلاسل. <br /><br />القيمة التي تم إرجاعها هي فهرس الزر الذي تم النقر عليه. <br /><br /><b>مثال</b><br />app.dialog_show(<blockquote>\"يرجى التأكيد\"،<br />\"هل تريد حقًا حذف هذا العنصر؟\"،<br />['نعم'، 'إلغاء الإجراء']</blockquote>).ثم(<blockquote>res => { if(res === 0) { console.log('تم النقر فوق نعم!'); </blockquote>);",
 				"form_close": "app.form_ Close() => غير محدد<br /><br />يغلق النموذج (إذا كان نموذجًا عائمًا أو فرعيًا)، وإلا فسيعود إلى سجل المتصفح.",
-				"form_open": "app.form_open({ARGS}) => غير محدد<br /><br />يفتح نموذجًا مباشرةً، في علامة تبويب متصفح جديدة أو كنافذة منبثقة.",
+				"form_open": "app.form_open({ARGS}) => غير محدد<br /><br />يفتح نموذجًا مباشرةً، في علامة تبويب متصفح جديدة أو كنافذة منبثقة.<br /><br />The new form, if opened directly (not as tab or pop-up), adds to the browser history unless the argument 'replace_history' is set to 'true'.",
 				"form_set_title": "app.form_set_title({ARGS}) => غير محدد<br /><br />الكتابة فوق عنوان النموذج الحالي. <i>باطل</i> لإعادة تعيينه إلى عنوان النموذج الأصلي.",
 				"form_show_message": "app.form_show_message({ARGS}) => غير محدد<br /><br />يستبدل عنوان النموذج مؤقتًا برسالة مخصصة. ",
 				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />يوفر فك تشفير مفتاح البيانات مع المفتاح الخاص لتسجيل الدخول الحالي.",
@@ -1136,7 +1136,8 @@
 					"new_tab منطقية",
 					"pop_up منطقية",
 					"max_height NUMBER",
-					"max_width NUMBER"
+					"max_width NUMBER",
+					"replace_history BOOLEAN"
 				],
 				"form_set_title": [
 					"سلسلة العنوان"

@@ -1085,7 +1085,7 @@
 				"copy_to_clipboard": "app.copy_to_clipboard({ARGS}) => NON DÉFINI<br /><br />Copie le texte dans le presse-papiers de l'utilisateur.",
 				"dialog_show": "app.dialog_show({ARGS}) => PROMISE<br /><br />Shows a dialog with the specified title and content. The title is a simple text string, while the content can be text or HTML.<br /><br />Buttons are defined by a list of strings. If none are defined, a simple OK button is shown.<br /><br />The returned value is the index of the clicked button. So if the first button is clicked, the value will be 0. If the second button is clicked, it´s 1 and so on.<br /><br /><b>Example</b><br />app.dialog_show(<blockquote>'Please confirm',<br />'Do you really want to delete this item?',<br />['Yes', 'Cancel action']</blockquote>).then(<blockquote>res => { if(res === 0) { console.log('clicked Yes!'); } }</blockquote>);",
 				"form_close": "app.form_close() => NON DÉFINI<br /><br />Ferme le formulaire (si flottant ou sous-formulaire), sinon retourne dans l'historique du navigateur.",
-				"form_open": "app.form_open({ARGS}) => NON DÉFINI<br /><br />Ouvre un formulaire directement, dans un nouvel onglet du navigateur ou en tant que fenêtre pop-up.",
+				"form_open": "app.form_open({ARGS}) => NON DÉFINI<br /><br />Ouvre un formulaire directement, dans un nouvel onglet du navigateur ou en tant que fenêtre pop-up.<br /><br />The new form, if opened directly (not as tab or pop-up), adds to the browser history unless the argument 'replace_history' is set to 'true'.",
 				"form_set_title": "app.form_set_title({ARGS}) => NON DÉFINI<br /><br />Écrase le titre actuel du formulaire. Réglez-le à <i>null</i> pour le réinitialiser au titre d'origine du formulaire.",
 				"form_show_message": "app.form_show_message({ARGS}) => NON DÉFINI<br /><br />Remplace temporairement le titre du formulaire par un message personnalisé. Le deuxième argument définit en millisecondes la durée pendant laquelle le message est affiché (3000 par défaut).",
 				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Décrypte la clé de données fournie avec la clé privée de l'utilisateur actuelle.",
@@ -1136,7 +1136,8 @@
 					"new_tab BOOLEAN",
 					"pop_up BOOLEAN",
 					"max_height NUMBER",
-					"max_width NUMBER"
+					"max_width NUMBER",
+					"replace_history BOOLEAN"
 				],
 				"form_set_title": [
 					"title STRING"

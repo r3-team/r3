@@ -58,11 +58,11 @@ const exposedFunctionsGlobal = {
 	client_execute_keystrokes:(keystrokes) => ws.send('event','keystrokesRequested',keystrokes),
 
 	// form open (simple global version)
-	form_open:(formId,recordId,newTab,popUp,maxY,maxX) => {
+	form_open:(formId,recordId,newTab,popUp,maxY,maxX,replace) => {
 		formOpen({
 			formIdOpen:formId, popUpType:popUp ? 'float' : null,
 			maxHeight:maxY, maxWidth:maxX
-		},newTab);
+		},newTab,replace);
 	},
 				
 	// PDF functions

@@ -1085,7 +1085,7 @@
 				"copy_to_clipboard": "app.copy_to_clipboard({ARGS}) => UNDEFINED<br /><br />将文本复制到用户的剪贴板。",
 				"dialog_show": "app.dialog_show({ARGS}) => PROMISE<br /><br />Shows a dialog with the specified title and content. The title is a simple text string, while the content can be text or HTML.<br /><br />Buttons are defined by a list of strings. If none are defined, a simple OK button is shown.<br /><br />The returned value is the index of the clicked button. So if the first button is clicked, the value will be 0. If the second button is clicked, it´s 1 and so on.<br /><br /><b>Example</b><br />app.dialog_show(<blockquote>'Please confirm',<br />'Do you really want to delete this item?',<br />['Yes', 'Cancel action']</blockquote>).then(<blockquote>res => { if(res === 0) { console.log('clicked Yes!'); } }</blockquote>);",
 				"form_close": "app.form_close() => UNDEFINED<br /><br />关闭表单（如果是浮动或子表单），否则返回浏览器历史记录。",
-				"form_open": "app.form_open({ARGS}) => UNDEFINED<br /><br />直接打开一个表单，在新标签页或弹出窗口中。",
+				"form_open": "app.form_open({ARGS}) => UNDEFINED<br /><br />直接打开一个表单，在新标签页或弹出窗口中。<br /><br />The new form, if opened directly (not as tab or pop-up), adds to the browser history unless the argument 'replace_history' is set to 'true'.",
 				"form_set_title": "app.form_set_title({ARGS}) => UNDEFINED<br /><br />覆盖当前表单标题。设置为 <i>null</i> 可将其重置为原始表单标题。",
 				"form_show_message": "app.form_show_message({ARGS}) => UNDEFINED<br /><br />临时替换表单标题为自定义消息。第二个参数定义消息显示时间（默认为3000毫秒）。",
 				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Decrypts provided data key with the private key of the current user.",
@@ -1136,7 +1136,8 @@
 					"new_tab BOOLEAN",
 					"pop_up BOOLEAN",
 					"max_height NUMBER",
-					"max_width NUMBER"
+					"max_width NUMBER",
+					"replace_history BOOLEAN"
 				],
 				"form_set_title": [
 					"title STRING"
