@@ -7,12 +7,11 @@ let MyListFilters = {
 	template:`<div class="list-filters">
 		<div class="list-filters-content">
 			<my-filters class="default-inputs"
-				@apply="apply"
-				@update:modelValue="$emit('update:modelValue',$event)"
+				v-model="values"
+				@apply="set"
 				:columns="columns"
 				:columnBatches="columnBatches"
 				:joins="joins"
-				:modelValue="modelValue"
 			/>
 		</div>
 		<div class="row space-between">
@@ -26,30 +25,41 @@ let MyListFilters = {
 			<div class="row gap">
 				<my-button image="cancel.png"
 					@trigger="removeAll"
-					:active="modelValue.length !== 0"
+					:active="values.length !== 0"
 					:cancel="true"
 					:caption="capGen.button.reset"
 				/>
 				<my-button image="ok.png"
-					@trigger="apply"
-					:active="modelValue.length !== 0 && bracketsEqual"
+					@trigger="set"
+					:active="values.length !== 0 && bracketsEqual"
 					:caption="capGen.button.apply"
 				/>
 			</div>
 		</div>
 	</div>`,
 	props:{
-		columns:      { type:Array,  required:true },
-		columnBatches:{ type:Array,  required:true },
-		joins:        { type:Array,  required:true },
-		modelValue:   { type:Array,  required:true }
+		columns:      { type:Array, required:true },
+		columnBatches:{ type:Array, required:true },
+		filters:      { type:Array, required:true },
+		joins:        { type:Array, required:true }
 	},
-	emits:['apply','update:modelValue'],
+	emits:['set-filters'],
+	data() {
+		return {
+			values:[]
+		};
+	},
+	watch:{
+		filters:{
+			handler(v) { this.values = JSON.parse(JSON.stringify(v)); },
+			immediate:true
+		}
+	},
 	computed:{
 		bracketsEqual:(s) => {
 			let cnt0 = 0;
 			let cnt1 = 0;
-			for(const f of s.modelValue) {
+			for(const f of s.values) {
 				cnt0 += f.side0.brackets;
 				cnt1 += f.side1.brackets;
 			}
@@ -83,17 +93,16 @@ let MyListFilters = {
 				if(f.side0.attributeId !== null)
 					break;
 			}
-			let v = JSON.parse(JSON.stringify(this.modelValue));
+			let v = JSON.parse(JSON.stringify(this.values));
 			v.push(f);
-			this.$emit('update:modelValue',v);
-		},
-		apply() {
-			if(this.bracketsEqual)
-				this.$emit('apply');
+			this.values = v;
 		},
 		removeAll() {
-			this.$emit('update:modelValue',[]);
-			this.$nextTick(this.apply);
+			this.$emit('set-filters',[]);
+		},
+		set() {
+			if(this.bracketsEqual)
+				this.$emit('set-filters',JSON.parse(JSON.stringify(this.values)));
 		}
 	}
 };

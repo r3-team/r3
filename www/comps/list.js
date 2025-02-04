@@ -93,10 +93,10 @@ let MyList = {
 					/>
 					<my-list-filters
 						v-if="showFilters"
-						v-model="filtersUser"
-						@apply="get"
+						@set-filters="setUserFilters"
 						:columns="columns"
 						:columnBatches="columnBatches"
+						:filters="filtersUser"
 						:joins="joins"
 					/>
 					<my-list-options
@@ -340,7 +340,7 @@ let MyList = {
 					
 					<my-button image="filterCog.png"
 						@trigger="toggleUserFilters"
-						@trigger-right="filtersUser = [];reloadInside('filtersUser')"
+						@trigger-right="setUserFilters([])"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
 						:naked="true"
@@ -414,7 +414,7 @@ let MyList = {
 										@del-aggregator="setAggregators"
 										@del-order="setOrder(b,null)"
 										@set-aggregator="setAggregators"
-										@set-filters="filtersColumn = $event;reloadInside('filtersColumn')"
+										@set-filters="setColumnBatchFilters"
 										@set-order="setOrder(b,$event)"
 										@toggle="clickColumn(i)"
 										:columnBatch="b"
@@ -1381,6 +1381,11 @@ let MyList = {
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnBatchSort',v);
 			this.reloadAggregations(true);
 		},
+		setColumnBatchFilters(v) {
+			this.filtersColumn = v;
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersColumn',v);
+			this.reloadInside('filtersColumn');
+		},
 		setLayout(v) {
 			this.layout = v;
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'layout',this.layout);
@@ -1428,6 +1433,11 @@ let MyList = {
 				}
 			}
 			this.reloadInside('order');
+		},
+		setUserFilters(v) {
+			this.filtersUser = v;
+			this.reloadInside('filtersUser');
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersUser',v);
 		},
 		toggleHeader() {
 			this.showHeader = !this.showHeader;
@@ -1602,12 +1612,8 @@ let MyList = {
 							// update aggregations as well
 							this.reloadAggregations(false);
 							
-							if(this.isInput) {
+							if(this.isInput)
 								this.$nextTick(this.updateDropdownDirection);
-							} else {
-								this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersColumn',this.filtersColumn);
-								this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersUser',this.filtersUser);
-							}
 						},
 						this.consoleError
 					);
