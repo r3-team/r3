@@ -1156,7 +1156,7 @@ let MyList = {
 			// inside state has changed, reload list (not relevant for list input)
 			switch(entity) {
 				case 'dropdown':      // fallthrough
-				case 'filterQuick':   // fallthrough
+				case 'filtersQuick':   // fallthrough
 				case 'filtersColumn': // fallthrough
 				case 'filtersUser': this.offset = 0; break;
 				case 'choice':
