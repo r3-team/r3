@@ -680,7 +680,7 @@ let MyField = {
 	data() {
 		return {
 			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
-			columnIdsByUser:[],
+			columnIdsByUser:[],           // column IDs, selected by user to be shown inside field (primarily for list fields)
 			dropdownShow:false,           // for relationship inputs and color picker
 			notTouched:true,              // data field was not touched by user
 			popUpFormInline:null,         // inline form for some field types (list)

@@ -1338,10 +1338,10 @@ let MyList = {
 			}
 		},
 		resetColumns() {
-			this.$emit('set-column-ids-by-user',[]);
 			this.filtersColumn = [];
 			this.setColumnBatchSort([[],[]]);
-			this.reloadInside('filtersColumn');
+			// setting columns will reload data & aggregations
+			this.$nextTick(() => this.$emit('set-column-ids-by-user',[]));
 		},
 		setAggregators(columnId,aggregator) {
 			if(!this.isTable) return;
@@ -1374,9 +1374,6 @@ let MyList = {
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'cardsCaptions',v);
 		},
 		setColumnBatchSort(v) {
-			if(JSON.stringify(v) === JSON.stringify(this.columnBatchSort))
-				return;
-
 			this.columnBatchSort = v;
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnBatchSort',v);
 			this.reloadAggregations(true);
@@ -1606,11 +1603,8 @@ let MyList = {
 							this.rows         = rows;
 							this.rowsFetching = false;
 							this.selectReset();
-							
-							this.$emit('record-count-change',this.count);
-							
-							// update aggregations as well
 							this.reloadAggregations(false);
+							this.$emit('record-count-change',this.count);
 							
 							if(this.isInput)
 								this.$nextTick(this.updateDropdownDirection);
