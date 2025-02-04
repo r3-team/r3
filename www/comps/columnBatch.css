@@ -38,8 +38,3 @@
 .columnBatch.ganttGroup.vertical{
 	gap:0px;
 }
-.columnBatch .barcode,
-.columnBatch .drawing,
-.columnBatch .gallery-item{
-	max-height:var(--row-height);
-}

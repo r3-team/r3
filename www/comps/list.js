@@ -525,6 +525,7 @@ let MyList = {
 											:key="ind"
 											:length="columns[ind].length"
 											:monospace="columns[ind].flags.monospace"
+											:previewLarge="columns[ind].flags.previewLarge"
 											:value="r.values[ind]"
 											:wrap="columns[ind].flags.wrap"
 										/>
@@ -665,6 +666,7 @@ let MyList = {
 														:key="ind"
 														:length="columns[ind].length"
 														:monospace="columns[ind].flags.monospace"
+														:previewLarge="columns[ind].flags.previewLarge"
 														:value="r.values[ind]"
 														:wrap="columns[ind].flags.wrap"
 													/>

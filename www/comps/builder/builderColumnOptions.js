@@ -34,7 +34,7 @@ let MyBuilderColumnOptions = {
 				<tr>
 					<td>{{ capGen.visibility }}</td>
 					<td>
-						<div class="row gap wrap">
+						<div class="row gap wrap" style="max-width:300px;">
 							<my-button-check
 								@update:modelValue="set('hidden',$event)"
 								:caption="capApp.columnShowDefault"
@@ -69,7 +69,7 @@ let MyBuilderColumnOptions = {
 				<tr>
 					<td>{{ capGen.options }}</td>
 					<td>
-						<div class="row gap wrap">
+						<div class="row gap wrap" style="max-width:300px;">
 							<my-button-check
 								@update:modelValue="setStyle('bold',$event)"
 								:caption="capApp.option.style.bold"
@@ -94,6 +94,12 @@ let MyBuilderColumnOptions = {
 								@update:modelValue="setStyle('wrap',$event)"
 								:caption="capApp.columnWrap"
 								:modelValue="column.styles.includes('wrap')"
+							/>
+							<my-button-check
+								v-if="isBarcode || isDrawing || (isFiles && column.display === 'gallery')"
+								@update:modelValue="setStyle('previewLarge',$event)"
+								:caption="capApp.columnPreviewLarge"
+								:modelValue="column.styles.includes('previewLarge')"
 							/>
 						</div>
 					</td>

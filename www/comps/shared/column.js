@@ -43,6 +43,7 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
 			clipboard:c.styles.includes('clipboard'),
 			italic:c.styles.includes('italic'),
 			monospace:c.styles.includes('monospace'),
+			previewLarge:c.styles.includes('previewLarge'),
 			vertical:c.styles.includes('vertical'),
 			wrap:c.styles.includes('wrap')
 		};

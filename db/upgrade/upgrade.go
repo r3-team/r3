@@ -374,6 +374,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- new display type
 			ALTER TYPE app.data_display ADD VALUE 'rating';
 
+			-- new column style
+			ALTER TYPE app.column_style ADD VALUE 'previewLarge';
+
 			-- fix login foreign key
 			ALTER TABLE instance.login
 				DROP CONSTRAINT login_ldap_id_fkey,

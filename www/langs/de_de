@@ -842,6 +842,7 @@
 			"columnLength": "Länge (Charakt.)",
 			"columnLength0": "kein Limit",
 			"columnLengthFiles": "Dateianzahl",
+			"columnPreviewLarge": "Große Vorschau",
 			"columnShowDefault": "Standardm. anzeigen",
 			"columnShowDefaultMobile": "Standardm. anzeigen auf mobil",
 			"columnShowDefaultMobileOff": "Standardm. nicht auf mobil angezeigt",
