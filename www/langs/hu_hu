@@ -841,6 +841,7 @@
 			"columnHeaderData": "Adatlekérdezés",
 			"columnLength": "Hossz (karakterben)",
 			"columnLength0": "Nincs Korlát",
+			"columnLengthFiles": "File count",
 			"columnShowDefault": "Show by default",
 			"columnShowDefaultMobile": "Show by default on mobile",
 			"columnShowDefaultMobileOff": "Not shown by default on mobile",

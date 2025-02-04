@@ -841,6 +841,7 @@
 			"columnHeaderData": "استرجاع البيانات",
 			"columnLength": "الطول (الحرف)",
 			"columnLength0": "لا يوجد حد",
+			"columnLengthFiles": "File count",
 			"columnShowDefault": "تظهر بشكل افتراضي",
 			"columnShowDefaultMobile": "تظهر بشكل افتراضي على الهاتف المحمول",
 			"columnShowDefaultMobileOff": "لا يتم عرضه بشكل افتراضي على الهاتف المحمول",

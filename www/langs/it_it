@@ -841,6 +841,7 @@
 			"columnHeaderData": "Recupero dei dati",
 			"columnLength": "Lunghezza (carat.)",
 			"columnLength0": "senza limite",
+			"columnLengthFiles": "File count",
 			"columnShowDefault": "Show by default",
 			"columnShowDefaultMobile": "Show by default on mobile",
 			"columnShowDefaultMobileOff": "Not shown by default on mobile",

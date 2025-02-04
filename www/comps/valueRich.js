@@ -86,7 +86,7 @@ let MyValueRich = {
 		<!-- files -->
 		<a target="_blank"
 			v-if="isFiles && !isGallery"
-			v-for="f in files"
+			v-for="f in files.filter((v,i) => length === 0 || length > i)"
 			:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 			:key="f.id"
 		>
@@ -99,17 +99,12 @@ let MyValueRich = {
 		</a>
 		
 		<!-- files as gallery -->
-		<template v-if="isFiles && isGallery">
-			<img class="gallery-item"
-				v-for="f in files"
-				:src="getAttributeFileThumbHref(attributeId,f.id,f.name,f.version,token)"
-				:style="styleImage"
-			/>
-			
-			<img class="gallery-item placeholder" src="images/noPic.png"
-				v-if="files.length === 0"
-			/>
-		</template>
+		<img class="gallery-item"
+			v-if="isFiles && isGallery"
+			v-for="f in files.filter((v,i) => length === 0 || length > i)"
+			:src="getAttributeFileThumbHref(attributeId,f.id,f.name,f.version,token)"
+			:style="styleImage"
+		/>
 	</div>`,
 	props:{
 		alignEnd:   { type:Boolean, required:false, default:false },
@@ -120,7 +115,7 @@ let MyValueRich = {
 		clipboard:  { type:Boolean, required:false, default:false },     // copy-to-clipboard action
 		display:    { type:String,  required:false, default:'default' }, // variant (url, gallery, password ...)
 		italic:     { type:Boolean, required:false, default:false },
-		length:     { type:Number,  required:false, default:0 },         // string length limit
+		length:     { type:Number,  required:false, default:0 },         // max. length if string, max. entries shown if files
 		monospace:  { type:Boolean, required:false, default:false },
 		value:      { required:true },
 		wrap:       { type:Boolean, required:false, default:false }      // wrap string value
@@ -166,7 +161,7 @@ let MyValueRich = {
 			
 			return out.join(';');
 		},
-		styleImage:(s) => `width:${100 / s.files.length}%`,
+		styleImage:(s) => `width:${100 / (s.length === 0 || s.files.length < s.length ? s.files.length : s.length)}%`,
 		
 		// store
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],

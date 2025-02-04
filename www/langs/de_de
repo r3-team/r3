@@ -841,6 +841,7 @@
 			"columnHeaderData": "Datenabfrage",
 			"columnLength": "Länge (Charakt.)",
 			"columnLength0": "kein Limit",
+			"columnLengthFiles": "Dateianzahl",
 			"columnShowDefault": "Standardm. anzeigen",
 			"columnShowDefaultMobile": "Standardm. anzeigen auf mobil",
 			"columnShowDefaultMobileOff": "Standardm. nicht auf mobil angezeigt",

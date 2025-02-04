@@ -841,6 +841,7 @@
 			"columnHeaderData": "数据检索",
 			"columnLength": "长度（字符）",
 			"columnLength0": "无限制",
+			"columnLengthFiles": "File count",
 			"columnShowDefault": "Show by default",
 			"columnShowDefaultMobile": "Show by default on mobile",
 			"columnShowDefaultMobileOff": "Not shown by default on mobile",

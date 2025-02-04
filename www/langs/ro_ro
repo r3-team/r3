@@ -841,6 +841,7 @@
 			"columnHeaderData": "Preluarea datelor",
 			"columnLength": "Lungime (caractere)",
 			"columnLength0": "fără limită",
+			"columnLengthFiles": "File count",
 			"columnShowDefault": "Show by default",
 			"columnShowDefaultMobile": "Show by default on mobile",
 			"columnShowDefaultMobileOff": "Not shown by default on mobile",

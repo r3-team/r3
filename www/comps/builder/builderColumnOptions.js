@@ -50,7 +50,7 @@ let MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr>
-					<td>{{ capApp.columnLength }}</td>
+					<td>{{ !isFiles ? capApp.columnLength : capApp.columnLengthFiles }}</td>
 					<td>
 						<input
 							v-if="column.length !== 0"

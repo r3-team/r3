@@ -840,6 +840,7 @@
 			"columnClipboard": "Clipboard",
 			"columnHeaderData": "Data retrieval",
 			"columnLength": "Length (chars.)",
+			"columnLengthFiles": "File count",
 			"columnLength0": "no limit",
 			"columnShowDefault": "Show by default",
 			"columnShowDefaultMobile": "Show by default on mobile",
