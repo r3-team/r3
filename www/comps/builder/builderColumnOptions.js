@@ -4,7 +4,8 @@ import {
 	getIndexAttributeIdsByJoins,
 	isAttributeFiles,
 	isAttributeInteger,
-	isAttributeString
+	isAttributeString,
+	isAttributeUuid
 } from '../shared/attribute.js';
 import {
 	getCaptionByIndexAttributeId
@@ -49,7 +50,7 @@ let MyBuilderColumnOptions = {
 						</div>
 					</td>
 				</tr>
-				<tr>
+				<tr v-if="!isDrawing && !isColor">
 					<td>{{ !isFiles ? capApp.columnLength : capApp.columnLengthFiles }}</td>
 					<td>
 						<input
@@ -123,7 +124,7 @@ let MyBuilderColumnOptions = {
 						/>
 					</td>
 				</tr>
-				<tr>
+				<tr v-if="!isDrawing && !isUuid && !isColor">
 					<td>{{ capApp.display }}</td>
 					<td>
 						<select
@@ -131,13 +132,12 @@ let MyBuilderColumnOptions = {
 							:value="column.display"
 						>
 							<option value="default">{{ capApp.option.display.default }}</option>
-							<option v-if="isInteger" value="rating"  >{{ capApp.option.display.rating }}</option>
-							<option v-if="isString"  value="email"   >{{ capApp.option.display.email }}</option>
-							<option v-if="isString"  value="password">{{ capApp.option.display.password }}</option>
-							<option v-if="isString"  value="phone"   >{{ capApp.option.display.phone }}</option>
-							<option v-if="isString"  value="url"     >{{ capApp.option.display.url }}</option>
-							<option v-if="isFiles"   value="gallery" >{{ capApp.option.display.gallery }}</option>
-							<option v-if="isBarcode" value="gallery" >{{ capApp.option.display.gallery }}</option>
+							<option v-if="isInteger"            value="rating"  >{{ capApp.option.display.rating }}</option>
+							<option v-if="isString"             value="email"   >{{ capApp.option.display.email }}</option>
+							<option v-if="isString"             value="password">{{ capApp.option.display.password }}</option>
+							<option v-if="isString"             value="phone"   >{{ capApp.option.display.phone }}</option>
+							<option v-if="isString"             value="url"     >{{ capApp.option.display.url }}</option>
+							<option v-if="isFiles || isBarcode" value="gallery" >{{ capApp.option.display.gallery }}</option>
 						</select>
 					</td>
 				</tr>
@@ -232,6 +232,9 @@ let MyBuilderColumnOptions = {
 		
 		// simple
 		isBarcode: (s) => s.isString  && s.attribute.contentUse === 'barcode',
+		isColor:   (s) => s.isString  && s.attribute.contentUse === 'color',
+		isDrawing: (s) => s.isString  && s.attribute.contentUse === 'drawing',
+		isUuid:    (s) => s.isAttributeUuid(s.attribute.content),
 		isFiles:   (s) => s.isAttributeFiles(s.attribute.content),
 		isInteger: (s) => s.isAttributeInteger(s.attribute.content),
 		isString:  (s) => s.isAttributeString(s.attribute.content),
@@ -249,6 +252,7 @@ let MyBuilderColumnOptions = {
 		isAttributeFiles,
 		isAttributeInteger,
 		isAttributeString,
+		isAttributeUuid,
 		
 		// actions
 		set(name,val) {
