@@ -355,13 +355,15 @@ let MyAdminLogin = {
 										</div>
 									</td>
 									<td>
-										<div class="field dropdown">
-											<div class="field-content data intent">
+										<div class="field login-details-login-form-input">
+											<div class="field-content data intent" :class="{ dropdown:loginFormIndexesDropdown.includes(lfi) }">
 												<my-input-select
+													@dropdown-show="openLoginFormDropdown(lfi,$event)"
 													@open="openLoginForm(lfi)"
 													@request-data="getRecords(lfi)"
 													@updated-text-input="recordInput = $event"
 													@update:selected="updateLoginRecord(lfi,$event)"
+													:dropdownShow="loginFormIndexesDropdown.includes(lfi)"
 													:nakedIcons="true"
 													:options="recordList"
 													:placeholder="capGen.threeDots"
@@ -488,6 +490,7 @@ let MyAdminLogin = {
 			timerNotUniqueCheck:null,
 			
 			// login form
+			loginFormIndexesDropdown:[],
 			loginFormIndexOpen:null,
 			loginFormRecords:null
 		};
@@ -605,6 +608,11 @@ let MyAdminLogin = {
 			this.loginFormIndexOpen = index;
 			this.loginFormRecords   = this.records[index].id !== null
 				? [this.records[index].id] : [];
+		},
+		openLoginFormDropdown(index,state) {
+			const pos = this.loginFormIndexesDropdown.indexOf(index);
+			if(pos === -1 && state)  this.loginFormIndexesDropdown.push(index);
+			if(pos !== -1 && !state) this.loginFormIndexesDropdown.splice(pos,1);
 		},
 		reset() {
 			this.id             = 0;

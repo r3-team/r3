@@ -35,8 +35,10 @@ let MyAdminRoleItem = {
 			<!-- login assignment input -->
 			<div class="entry">
 				<my-input-login
+					@dropdown-show="showInputDropdown = $event"
 					@update:modelValue="add($event)"
 					:clearInput="true"
+					:dropdownShow="showInputDropdown"
 					:idsExclude="loginIds"
 					:modelValue="loginId"
 					:noLdapAssign="true"
@@ -65,6 +67,7 @@ let MyAdminRoleItem = {
 	data() {
 		return {
 			loginId:null,
+			showInputDropdown:false,
 			showMembers:false
 		};
 	},

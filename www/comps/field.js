@@ -83,11 +83,11 @@ let MyField = {
 			</div>
 			
 			<div class="field-content"
-				:class="{ data:isData, dropdownShow:dropdownShow, disabled:isReadonly, isSingleField:isAlone, intent:hasIntent }"
+				:class="{ data:isData, dropdown:dropdownShow, disabled:isReadonly, isSingleField:isAlone, intent:hasIntent }"
 		 		v-click-outside="clickOutside"
 			>
 				<!-- data field icon -->
-				<div class="field-icon" v-if="iconId && isData && !isRelationship && !isDrawing && !isFiles && !isRichtext && !isTextarea && !isRating">
+				<div class="field-icon" v-if="iconId && isData && !isRelationship && !isDrawing && !isFiles && !isRichtext && !isTextarea && !isRating && !isBarcode && !isIframe">
 					<img :src="srcBase64(iconIdMap[iconId].file)" />
 				</div>
 				
@@ -370,8 +370,10 @@ let MyField = {
 				<!-- regconfig input -->
 				<my-input-select
 					v-if="isRegconfig"
+					@dropdown-show="dropdownShow = $event"
 					@updated-text-input="regconfigInput = $event"
 					@update:selected="value = $event;regconfigInput = ''"
+					:dropdownShow="dropdownShow"
 					:inputTextSet="value"
 					:nakedIcons="true"
 					:options="regconfigOptions"
@@ -464,8 +466,10 @@ let MyField = {
 				
 				<!-- login input -->
 				<my-input-login
+					@dropdown-show="dropdownShow = $event"
 					v-if="isLogin"
 					v-model="value"
+					:dropdownShow="dropdownShow"
 					:readonly="isReadonly"
 					:placeholder="capGen.threeDots"
 				/>
@@ -681,7 +685,7 @@ let MyField = {
 		return {
 			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
 			columnIdsByUser:[],           // column IDs, selected by user to be shown inside field (primarily for list fields)
-			dropdownShow:false,           // for relationship inputs and color picker
+			dropdownShow:false,           // for inputs with dropdowns (relationship, date, color picker)
 			notTouched:true,              // data field was not touched by user
 			popUpFormInline:null,         // inline form for some field types (list)
 			regconfigInput:'',
@@ -794,7 +798,6 @@ let MyField = {
 		captionHelp:(s) => s.getCaption('fieldHelp',s.moduleId,s.field.id,s.field.captions),
 		domClass:(s) => {
 			let out = [];
-			if(s.isDropdown) out.push('dropdown');
 			if(s.isHidden)   out.push('hidden');
 			if(s.isIframe)   out.push('iframe');
 			if(s.isReadonly) out.push('readonly');
@@ -880,7 +883,7 @@ let MyField = {
 		regconfigOptions:(s) => {
 			let out = [];
 			for(let d of s.searchDictionaries) {
-				if((s.regconfigInput === '' || d.startsWith(s.regconfigInput)) && d !== 'simple' && s.value !== d)
+				if((s.regconfigInput === '' || d.includes(s.regconfigInput.toLowerCase())) && d !== 'simple' && s.value !== d && out.length < 10)
 					out.push({id:d,name:d});
 			}
 			return out;
@@ -1155,7 +1158,6 @@ let MyField = {
 		isDateRange:     (s) => s.isDateInput && !s.isVariable && s.field.attributeIdAlt !== null,
 		isDecimal:       (s) => s.isData && s.isAttributeDecimal(s.contentData),
 		isDrawing:       (s) => s.isData && s.contentUse === 'drawing',
-		isDropdown:      (s) => s.isData && (s.isRelationship || s.isDateInput || s.isLogin || s.isColor || s.isRegconfig),
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.contentData),
 		isIframe:        (s) => s.isData && s.contentUse === 'iframe',
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.contentData),

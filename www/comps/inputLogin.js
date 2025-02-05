@@ -7,8 +7,10 @@ let MyInputLogin = {
 	template:`<my-input-select
 		v-if="inputText !== null"
 		v-model:selected="loginId"
+		@dropdown-show="$emit('dropdown-show',$event)"
 		@request-data="get"
 		@updated-text-input="inputText = $event"
+		:dropdownShow="dropdownShow"
 		:inputTextSet="inputTextSet"
 		:options="logins"
 		:placeholder="placeholder"
@@ -16,13 +18,14 @@ let MyInputLogin = {
 	/>`,
 	props:{
 		clearInput:  { type:Boolean, required:false, default:false }, // keep text input clear
+		dropdownShow:{ type:Boolean, required:false, default:false },
 		idsExclude:  { type:Array,   required:false, default:() => [] },
 		modelValue:  { required:true },
 		noLdapAssign:{ type:Boolean, required:false, default:false },
 		placeholder: { type:String,  required:false, default:'' },
 		readonly:    { type:Boolean, required:false, default:false }
 	},
-	emits:['update:modelValue'],
+	emits:['dropdown-show','update:modelValue'],
 	watch:{
 		loginId:{
 			handler(valNew,valOld) {

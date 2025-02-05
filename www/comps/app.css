@@ -1377,48 +1377,6 @@ table td.maximum{
 
 
 /* user overwrites */
-.user-bordersSquared{
-	--border-input-radius:0px;
-	--border-input-radius-large:0px;
-}
-.user-shadowsInputs{
-	--border-input:1px solid transparent;
-	--shadow-input:1px 1px 3px var(--color-shade);
-	--shadow-input-focus:1px 1px 6px var(--color-shade);
-}
-.user-spacing.spacing-value1{
-	--spacing:10px;
-}
-.user-spacing.spacing-value2{
-	--spacing:13px;
-}
-.user-spacing.spacing-value3{
-	--spacing:16px;
-}
-.user-spacing.spacing-value4{
-	--spacing:19px;
-}
-.user-spacing.spacing-value5{
-	--spacing:22px;
-}
-.user-spacing{
-	/* needs to overwrite again, otherwise not recognized */
-	--spacing-child:0px var(--spacing) var(--spacing) 0px;
-	--spacing-parent:var(--spacing) 0px 0px var(--spacing);
-}
-
-.user-font.calibri        { font-family:Calibri,Arial,sans-serif; }
-.user-font.comic_sans_ms  { font-family:'Comic Sans MS','Comic Sans',cursive; }
-.user-font.consolas       { font-family:var(--font-family-monospace); }
-.user-font.georgia        { font-family:Georgia,Times,serif; }
-.user-font.helvetica      { font-family:Helvetica,Arial,sans-serif; }
-.user-font.lucida_console { font-family:'Lucida Console',Courier,monospace; }
-.user-font.segoe_script   { font-family:'Segoe Script',cursive; }
-.user-font.segoe_ui       { font-family:'Segoe UI',SegoeUI,Arial,sans-serif; }
-.user-font.times_new_roman{ font-family:'Times New Roman',Times,serif; }
-.user-font.trebuchet_ms   { font-family:'Trebuchet MS',Arial,sans-serif; }
-.user-font.verdana        { font-family:Verdana,Arial,sans-serif; }
-
 .user-dark,
 .user-dark *{
 	/* color overwites */
@@ -1433,7 +1391,7 @@ table td.maximum{
 	--color-input:         var(--color-input-dark);
 	--color-input-disabled:#222222;
 	--color-list-row-even: #3e4141;
-	--color-shade:         #000000;
+	--color-shade:         #1b1b1b;
 	--color-shade-bright:  #222222;
 	--color-shade-input:   #080808;
 	
@@ -1463,6 +1421,7 @@ table td.maximum{
 	
 	--border-input:1px solid var(--color-border);
 	--outline-input-focus:2px solid var(--color-accent1);
+	--shadow-input:0px 0px 2px 0px rgba(0,0,0,0.7) inset;
 	
 	--image-filter:        invert(1) brightness(90%);
 	--image-filter-alt:    invert(1) brightness(40%);
@@ -1480,6 +1439,52 @@ table td.maximum{
 	background-color:var(--color-font-disabled);
 	border:1px solid var(--color-border);
 	border-radius:2px;
+}
+.user-dark.user-shadowsInputs *{
+	--shadow-input:1px 1px 3px var(--color-shade);
+}
+
+.user-bordersSquared{
+	--border-input-radius:0px;
+	--border-input-radius-large:0px;
+}
+.user-shadowsInputs{
+	--border-input:1px solid transparent;
+	--shadow-input:1px 1px 3px var(--color-shade);
+	--shadow-input-focus:1px 1px 6px var(--color-shade);
+}
+
+.user-font.calibri        { font-family:Calibri,Arial,sans-serif; }
+.user-font.comic_sans_ms  { font-family:'Comic Sans MS','Comic Sans',cursive; }
+.user-font.consolas       { font-family:var(--font-family-monospace); }
+.user-font.georgia        { font-family:Georgia,Times,serif; }
+.user-font.helvetica      { font-family:Helvetica,Arial,sans-serif; }
+.user-font.lucida_console { font-family:'Lucida Console',Courier,monospace; }
+.user-font.segoe_script   { font-family:'Segoe Script',cursive; }
+.user-font.segoe_ui       { font-family:'Segoe UI',SegoeUI,Arial,sans-serif; }
+.user-font.times_new_roman{ font-family:'Times New Roman',Times,serif; }
+.user-font.trebuchet_ms   { font-family:'Trebuchet MS',Arial,sans-serif; }
+.user-font.verdana        { font-family:Verdana,Arial,sans-serif; }
+
+.user-spacing.spacing-value1{
+	--spacing:10px;
+}
+.user-spacing.spacing-value2{
+	--spacing:13px;
+}
+.user-spacing.spacing-value3{
+	--spacing:16px;
+}
+.user-spacing.spacing-value4{
+	--spacing:19px;
+}
+.user-spacing.spacing-value5{
+	--spacing:22px;
+}
+.user-spacing{
+	/* needs to overwrite again, otherwise not recognized */
+	--spacing-child:0px var(--spacing) var(--spacing) 0px;
+	--spacing-parent:var(--spacing) 0px 0px var(--spacing);
 }
 
 /* mobile overwrites */

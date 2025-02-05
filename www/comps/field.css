@@ -48,11 +48,14 @@
 	box-shadow:var(--shadow-input);
 	overflow:visible;
 }
-.field-content.data.dropdownShow:not(.disabled),
+.field-content.data.dropdown:not(.disabled),
 .field-content.data:focus-within:not(.disabled){
 	border:var(--border-input-focus);
 	outline:var(--outline-input-focus);
 	box-shadow:var(--shadow-input-focus);
+}
+.field-content.data.dropdown:not(.disabled){
+	position:relative;
 }
 .field-content.data.disabled{
 	color:var(--color-font-disabled);
@@ -74,9 +77,6 @@
 .field-content>.button,
 .field-content>.bool{
 	align-self:center;
-}
-.field.dropdown{
-	position:relative;
 }
 
 

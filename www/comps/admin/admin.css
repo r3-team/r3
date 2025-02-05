@@ -77,6 +77,9 @@
 	padding:0px;
 	min-height:630px;
 }
+.admin-login .login-details-login-form-input{
+	min-width:300px;
+}
 .admin-login-meta{
 	width:100%;
 	max-width:680px;
@@ -128,6 +131,7 @@
 	border:var(--border-input);
 	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
+	background-color:var(--color-input);
 }
 .admin-system-msg-date:focus-within{
 	border:var(--border-input-focus);
@@ -139,7 +143,12 @@
 }
 .admin-system-msg-text{
 	height:600px;
+	margin:6px 12px;
 	display:flex;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
+	background-color:var(--color-input);
 }
 
 /* customizing */
@@ -205,7 +214,11 @@
 .admin-oauth-client{}
 .admin-oauth-client-date-wrap{
 	min-width:330px !important;
+	min-height:var(--row-height);
 	position:relative;
+	display:flex;
+	gap:9px;
+	flex-flow:row nowrap;
 }
 
 
