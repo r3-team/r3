@@ -190,7 +190,10 @@ func main() {
 
 	// apply portable mode settings if enabled
 	if config.File.Portable {
-		cli.dynamicPort = true
+		// compatability fix: Older portable configs (<3.10) had 443 as default port
+		if config.File.Web.Port == 443 {
+			cli.dynamicPort = true
+		}
 		cli.http = true
 		cli.run = true
 		cli.open = true
@@ -269,8 +272,8 @@ func main() {
 
 	// main executable can be used to open the app in default browser even if its not started (-open without -run)
 	// used for shortcuts in start menu when installed on Windows systems with desktop experience
-	// if dynamic port is used, we cannot open app without starting it (port is not known)
-	if cli.open && !cli.dynamicPort {
+	// if dynamic port (0) is used, we cannot open app without starting it (port is not known)
+	if cli.open && config.File.Web.Port != 0 && !config.File.Portable {
 		protocol := "https"
 		if cli.http {
 			protocol = "http"
@@ -489,8 +492,8 @@ func (prg *program) execute(svc service.Service) {
 	}
 	log.Info("server", fmt.Sprintf("starting web handlers for '%s'", webServerString))
 
-	// if dynamic port is used we can only now open the app in default browser (port is now known)
-	if cli.open && cli.dynamicPort {
+	// if dynamic port (0) is used we can only now open the app in default browser (port is now known)
+	if cli.open && config.File.Web.Port != 0 {
 		protocol := "https"
 		if cli.http {
 			protocol = "http"
