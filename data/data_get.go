@@ -58,8 +58,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 			return results, 0, err
 		}
 
-		indexRecordIds := make(map[int]interface{}) // ID for each relation tupel by index
-		indexRecordEncKeys := make(map[int]string)  // encrypted key for each relation tupel by index
+		indexRecordIds := make(map[int]interface{}) // ID for each relation tuple by index
+		indexRecordEncKeys := make(map[int]string)  // encrypted key for each relation tuple by index
 		values := make([]interface{}, 0)            // final values for selected attributes
 
 		// collect values for expressions
@@ -67,7 +67,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 			values = append(values, valuesAll[i])
 		}
 
-		// collect relation tupel IDs
+		// collect relation tuple IDs
 		// relation ID columns start after expressions
 		for i, j := len(data.Expressions), len(columns); i < j; i++ {
 
@@ -403,7 +403,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		}
 	}
 
-	// add expressions for relation tupel IDs after attributes (on main query)
+	// add expressions for relation tuple IDs after attributes (on main query)
 	if nestingLevel == 0 {
 		for index, _ := range indexRelationIds {
 
@@ -491,7 +491,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 
 	}
 
-	// add intendation for nested sub queries
+	// add indentation for nested sub queries
 	if nestingLevel != 0 {
 		indent := strings.Repeat("\t", nestingLevel)
 		query = indent + regexp.MustCompile(`\r?\n`).ReplaceAllString(query, "\n"+indent)
@@ -500,7 +500,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 }
 
 // add SELECT for attribute in given relation index
-// if attribute is from another relation than given index (relationship), attribute value = tupel IDs in relation with given index via given attribute
+// if attribute is from another relation than given index (relationship), attribute value = tuple IDs in relation with given index via given attribute
 // 'outside in' is important in cases of self reference, where direction cannot be ascertained by attribute
 func addSelect(exprPos int, expr types.DataGetExpression,
 	indexRelationIds map[int]uuid.UUID, inSelect *[]string, nestingLevel int) error {
@@ -550,7 +550,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 	}
 	shipMod := cache.ModuleIdMap[shipRel.ModuleId]
 
-	// get tupel IDs from other relation
+	// get tuple IDs from other relation
 	if !expr.AttributeIdNm.Valid {
 
 		var selectExpr string
@@ -561,7 +561,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 			selectExpr = fmt.Sprintf(`JSON_AGG("%s")`, schema.PkName)
 		}
 
-		// from other relation, collect tupel IDs in relationship with given index tupel
+		// from other relation, collect tuple IDs in relationship with given index tuple
 		*inSelect = append(*inSelect, fmt.Sprintf(`(
 			SELECT %s
 			FROM "%s"."%s"
@@ -578,7 +578,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 			return errors.New("attribute does not exist")
 		}
 
-		// from other relation, collect tupel IDs from n:m relationship attribute
+		// from other relation, collect tuple IDs from n:m relationship attribute
 		*inSelect = append(*inSelect, fmt.Sprintf(`(
 			SELECT JSON_AGG("%s")
 			FROM "%s"."%s"
@@ -884,7 +884,7 @@ func getRelationCode(relationIndex int, nestingLevel int) string {
 	return fmt.Sprintf("_r%d_l%d", relationIndex, nestingLevel)
 }
 
-// tupel IDs are uniquely identified by the relation code + the fixed string 'id'
+// tuple IDs are uniquely identified by the relation code + the fixed string 'id'
 func getTupelIdCode(relationIndex int, nestingLevel int) string {
 	return fmt.Sprintf("%sid", getRelationCode(relationIndex, nestingLevel))
 }

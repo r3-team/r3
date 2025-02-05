@@ -487,7 +487,7 @@ func getNextRunScheduleFromTask(t task) (int64, uuid.UUID) {
 		nextRunSchedule := getNextRunFromSchedule(s)
 
 		// apply schedule if
-		// * next planned run is stoppped (-1)
+		// * next planned run is stopped (-1)
 		// * or this schedule is active and earlier than previous schedule
 		if nextRun == -1 || (nextRunSchedule != -1 && nextRunSchedule < nextRun) {
 			nextRun = nextRunSchedule

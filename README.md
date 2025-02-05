@@ -82,7 +82,7 @@ There are also Docker Compose files ([x64](https://rei3.de/docker_x64)/[arm64](h
 You can visit our [community forum](https://community.rei3.de) for anything related to REI3. The full documentation is available on [rei3.de](https://rei3.de/en/docs), including documentation for [admins](https://rei3.de/en/docs/admin) and [application authors](https://rei3.de/en/docs/builder) as well as [Youtube videos](https://www.youtube.com/channel/UCKb1YPyUV-O4GxcCdHc4Csw).
 
 ## :clap: Thank you
-REI3 would not be possible without the help of our contributors and people using REI3 and providing feedback for continous improvement. So thank you to everybody involved with the REI3 project!
+REI3 would not be possible without the help of our contributors and people using REI3 and providing feedback for continuous improvement. So thank you to everybody involved with the REI3 project!
 
 [![Stargazers repo roster for @r3-team/r3](https://reporoster.com/stars/dark/r3-team/r3)](https://github.com/r3-team/r3/stargazers)
 

@@ -91,7 +91,7 @@ export function generatePdf(filename,format,orientation,marginX,marginY,
 			// create document
 			// bug: if document created from HTML is > 1 page, adobe reader reports page errors starting with page 2
 			// fix: manually add pages that would exist if HTML is rendered (must be added before rendering the HTML)
-			// ugly soluton: render document once, count pages, render again with the required pages added beforehand
+			// ugly solution: render document once, count pages, render again with the required pages added beforehand
 			new jsPDF(docOptions).html(body,{
 				autoPaging:'text',
 				margin:[${marginY},${marginX},${marginY},${marginX}],

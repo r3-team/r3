@@ -265,12 +265,12 @@
 <li>UPDATE: When a record is updated, NEW will contain all values after the update, while OLD contains all values before the update. Just like with INSERT, make sure to end your function with <code>RETURN NEW;</code>.</li>
 <li>DELETE: When a record is deleted, OLD will contain all values before the deletion. Make sure to end your function with <code>RETURN OLD;</code>.</li>
 </ul></li>
-<li>BEFORE/AFTER: Trigger executes function before or after the specified event has occured. BEFORE can be used to simply overwrite record values or log changes elsewhere, while AFTER can be useful to work with changes over multiple relations ('see DEFERRED').</li>
+<li>BEFORE/AFTER: Trigger executes function before or after the specified event has occurred. BEFORE can be used to simply overwrite record values or log changes elsewhere, while AFTER can be useful to work with changes over multiple relations ('see DEFERRED').</li>
 <li>DEFERRED: If enabled, triggers are executed after changes to all relations are done. This means that when multiple relations are updated (like on joined relations on a data form), you can work with the final values of all records inside a <a href="#relationships">relationship</a>. Since each trigger only reacts to events for its own relation, NEW/OLD cannot contain values of connected records; in this case you need to use SELECT/UPDATE/DELETE to lookup or affect other record values.</li>
 <li>Condition: A SQL condition, must return true for the trigger to execute the function.</li>
 <li>Execute: The function to execute. Must be a function that returns 'trigger'.</li>
 </ul>
-<p>You can also execute a single trigger function for multiple events. With the variale <code>TG_OP</code> you can check, which event occurred, such as:</p>
+<p>You can also execute a single trigger function for multiple events. With the variable <code>TG_OP</code> you can check, which event occurred, such as:</p>
 <pre><code>IF TG_OP = &#39;INSERT&#39;
     THEN my_var := 123;
     ELSE my_var := 456;
@@ -393,7 +393,7 @@ END IF;</code></pre>
 <li>Text attributes
 <ul>
 <li>Email / phone / URL: Similar to the default input, a single text line is given for input. A link icon is shown, which can be clicked to 'open' the input value according to its type (browser for URL, mail program for email, etc.). The validity of the input is not checked - if validation is needed, RegEx validation can be used (field option 'Validate with RegEx').</li>
-<li>Password: Field input is shown as a password field, hidding the input by default. A button to make the password visible is offered inside the field. Using this display option does not encrypt any data by itself; to safely store sensitive data, use <a href="#end-to-end-encryption">end-to-end encryption</a>.</li>
+<li>Password: Field input is shown as a password field, hiding the input by default. A button to make the password visible is offered inside the field. Using this display option does not encrypt any data by itself; to safely store sensitive data, use <a href="#end-to-end-encryption">end-to-end encryption</a>.</li>
 </ul></li>
 <li>Integer attributes
 <ul>
@@ -451,7 +451,7 @@ END IF;</code></pre>
 </ul>
 <p>In general, all data display fields can be placed on any form. When placed on a data form, which handles creation of specific records, they can serve to display related data (child or associated records). They can also be used to navigate to other forms/records.</p>
 <p>When placing a single data display field on a form by itself, it becomes a full page field. This not only makes the field more usable (more available space) but also enables full page navigation and hotkeys. Most often, full page fields are used as starting points to access top-level records, with child-records being shown inside data forms with smaller data display fields.</p>
-<p>Data display fields use <a href="#queries">queries</a> to access data - these can be configued in the field content tab. Once the query has been defined with at least one relation, <a href="#columns">columns</a> can be added; column values are then shown as part of the field.</p>
+<p>Data display fields use <a href="#queries">queries</a> to access data - these can be configured in the field content tab. Once the query has been defined with at least one relation, <a href="#columns">columns</a> can be added; column values are then shown as part of the field.</p>
 <p>Depending on the type of data display field, different field options are available:</p>
 <ul>
 <li>Lists

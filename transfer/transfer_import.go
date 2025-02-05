@@ -174,7 +174,7 @@ func ImportFromFiles(filePathsImport []string) error {
 	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
-	log.Info("transfer", "changes were commited successfully")
+	log.Info("transfer", "changes were committed successfully")
 
 	// update schema cache
 	moduleIdsUpdated := make([]uuid.UUID, 0)
@@ -513,10 +513,10 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 	}
 
 	// presets, refer to relations/attributes/other presets
-	// can fail because deletions happen after import and presets depent on the state of relations/attributes
+	// can fail because deletions happen after import and presets depend on the state of relations/attributes
 	//  which might loose constraints (example: attribute with NOT NULL removed)
 	// unprotected presets are optional (can be deleted within instance)
-	//  because of this some preset referals might not work and are ignored
+	//  because of this some preset referrals might not work and are ignored
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Presets {
 			run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
@@ -624,7 +624,7 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapImportMeta map[uuid.UU
 		log.Info("transfer", fmt.Sprintf("import is validating module '%s' v%d",
 			fileData.Content.Module.Name, fileData.Content.Module.ReleaseBuild))
 
-		// verify application compatability
+		// verify application compatibility
 		if err := verifyCompatibilityWithApp(moduleId, fileData.Content.Module.ReleaseBuildApp); err != nil {
 			return modules, err
 		}

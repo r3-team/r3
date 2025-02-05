@@ -86,7 +86,7 @@ const MyStore = Vuex.createStore({
 		routingGuards:[],              // functions to call before routing, abort if any returns falls
 		searchDictionaries:[],         // dictionaries used for full text search for this login, ['english', 'german', ...]
 		settings:{},                   // setting values for logged in user, key: settings name
-		sessionTimerStore:{},          // user session timer store for frontent functions,     { moduleId1:{ timerName1:{ id:jsTimerId, isInterval:true }, ... }, ... }
+		sessionTimerStore:{},          // user session timer store for frontend functions,     { moduleId1:{ timerName1:{ id:jsTimerId, isInterval:true }, ... }, ... }
 		system:{},                     // system details (admin only)
 		systemMsg:{                    // system message
 			date0:0,                   // date from

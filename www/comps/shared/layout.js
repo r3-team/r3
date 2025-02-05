@@ -4,7 +4,7 @@ export default function isDropdownUpwards(el,vertPxDropdown,vertPxOffset) {
 	// vertical position of element
 	let vertPxEl = el.getBoundingClientRect().bottom - vertPxOffset;
 	
-	// usuable vertical space in form
+	// usable vertical space in form
 	let vertPxForm = window.innerHeight-vertPxOffset;
 	
 	// open dropdown upwards, if

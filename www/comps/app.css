@@ -1395,7 +1395,7 @@ table td.maximum{
 
 .user-dark,
 .user-dark *{
-	/* color overwites */
+	/* color overwrites */
 	--color-bg:            #252525;
 	--color-bg-bright:     #313131;
 	--color-bright:        #323232;
