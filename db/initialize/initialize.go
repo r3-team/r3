@@ -253,7 +253,7 @@ func initInstanceValues_tx(ctx context.Context, tx pgx.Tx) error {
 	return err
 }
 
-// app initalized to 3.10
+// app initialized to 3.10
 func initAppSchema_tx(ctx context.Context, tx pgx.Tx) error {
 	_, err := tx.Exec(ctx, `
 --
