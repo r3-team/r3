@@ -99,7 +99,7 @@ func FileMove(src string, dst string, copyModTime bool) error {
 	if err := os.Remove(src); err != nil {
 
 		// source file could not be deleted, delete copied file
-		// this is done to not keep an unconsistent state
+		// this is done to not keep an inconsistent state
 		if err := os.Remove(dst); err != nil {
 			return err
 		}

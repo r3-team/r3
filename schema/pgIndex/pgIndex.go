@@ -66,7 +66,7 @@ func Get(relationId uuid.UUID) ([]types.PgIndex, error) {
 		SELECT id, attribute_id_dict, method, no_duplicates, auto_fki, primary_key
 		FROM app.pg_index
 		WHERE relation_id = $1
-		-- an order is required for hash comparisson (module changes)
+		-- an order is required for hash comparison (module changes)
 		ORDER BY primary_key DESC, auto_fki DESC, id ASC
 	`, relationId)
 	if err != nil {

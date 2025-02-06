@@ -925,7 +925,7 @@ let MyBuilderPgFunction = {
 					moduleId:this.pgFunction.moduleId,
 					isTrigger:this.pgFunction.isTrigger,
 					
-					// changable
+					// changeable
 					name:this.name,
 					codeArgs:this.codeArgs,
 					codeFunction:this.placeholdersUnset(false),

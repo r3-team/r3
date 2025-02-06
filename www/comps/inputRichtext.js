@@ -137,7 +137,7 @@ let MyInputRichtext = {
 				return this.imageList = [];
 			
 			// file input is either array of files (initial value) or object of changes
-			// keep known initial files if changes occured (we only use stored files)
+			// keep known initial files if changes occurred (we only use stored files)
 			if(!Array.isArray(this.valueFiles))
 				return;
 			

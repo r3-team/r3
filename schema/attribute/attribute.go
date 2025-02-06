@@ -638,7 +638,7 @@ func deleteFK_tx(ctx context.Context, tx pgx.Tx, moduleName string, relationName
 	return err
 }
 
-// update all foreign keys refering to specified relation via relationship attribute
+// update all foreign keys referring to specified relation via relationship attribute
 func updateReferingFKs_tx(ctx context.Context, tx pgx.Tx, relationshipId uuid.UUID, content string) error {
 
 	type update struct {

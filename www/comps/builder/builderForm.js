@@ -148,7 +148,7 @@ let MyBuilderForm = {
 					</div>
 				</div>
 				
-				<!-- empty form assistent -->
+				<!-- empty form assistant -->
 				<div class="builder-form-assistant" v-if="fields.length === 0">
 					<h2>{{ capApp.dragDrop }}</h2>
 					<div class="row gap centered">
@@ -563,7 +563,7 @@ let MyBuilderForm = {
 			captions:{},         // form captions
 			fieldIdsRemove:[],   // IDs of fields to remove
 
-			// form sub entites
+			// form sub entities
 			actions:[],          // form actions
 			fields:[],           // form fields (nested within each other)
 			functions:[],        // form functions

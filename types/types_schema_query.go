@@ -17,8 +17,8 @@ var (
 
 // a query starts at a relation to retrieve attribute values
 // it can join other relations via relationship attributes from both sides
-// each relation (original and joined) is refered via an unique index (simple counter)
-// because the same relation can join multiple times, an unique index is required to know which relation is refered to
+// each relation (original and joined) is referred via an unique index (simple counter)
+// because the same relation can join multiple times, an unique index is required to know which relation is referred to
 // via indexes, joins know their source (index from), filters can refer to attributes from specific relations, etc.
 type Query struct {
 	Id         uuid.UUID     `json:"id"`

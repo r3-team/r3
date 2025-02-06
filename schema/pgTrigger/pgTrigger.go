@@ -45,7 +45,7 @@ func Get(moduleId uuid.UUID) ([]types.PgTrigger, error) {
 			code_condition
 		FROM app.pg_trigger
 		WHERE module_id = $1
-		ORDER BY id ASC -- an order is required for hash comparisson (module changes)
+		ORDER BY id ASC -- an order is required for hash comparison (module changes)
 	`, moduleId)
 	if err != nil {
 		return triggers, err

@@ -780,7 +780,7 @@ let MyList = {
 			count:0,            // total result set count
 			limit:0,            // current result limit
 			offset:0,           // current result offset
-			orders:[],          // column orderings, copied on mount, changable by user
+			orders:[],          // column orderings, copied on mount, changeable by user
 			rows:[],            // current result set
 			filtersColumn:[],   // current user column filters
 			filtersQuick:'',    // current user quick text filter

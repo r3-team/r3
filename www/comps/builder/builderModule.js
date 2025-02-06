@@ -597,7 +597,7 @@ let MyBuilderModule = {
 		
 		// backend calls
 		set() {
-			this.languages.sort(); // for change comparissons
+			this.languages.sort(); // for change comparisons
 			
 			let requests = [
 				ws.prepare('module','set',{

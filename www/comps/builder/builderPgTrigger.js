@@ -235,7 +235,7 @@ let MyBuilderPgTrigger = {
 			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
 		setDeferred(state) {
-			// abstract unuseful states into two options
+			// abstract useless states into two options
 			// either trigger is 'constraint+deferrable+initially' deferred or not all
 			this.values.isConstraint = state;
 			this.values.isDeferrable = state;

@@ -42,7 +42,7 @@ func authorizedAttribute(loginId int64, attributeId uuid.UUID, requestedAccess i
 }
 
 // check whether access to relation is authorized
-// cases: creating or deleting relation tupels
+// cases: creating or deleting relation tuples
 func authorizedRelation(loginId int64, relationId uuid.UUID, requestedAccess int) bool {
 
 	access, err := cache.GetAccessById(loginId)

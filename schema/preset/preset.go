@@ -183,7 +183,7 @@ func getValues(presetId uuid.UUID) ([]types.PresetValue, error) {
 		SELECT id, preset_id, preset_id_refer, attribute_id, protected, value
 		FROM app.preset_value
 		WHERE preset_id = $1
-		ORDER BY attribute_id ASC -- an order is required for hash comparisson (module changes)
+		ORDER BY attribute_id ASC -- an order is required for hash comparison (module changes)
 		                          -- we use attribute ID for better value preview in builder UI
 	`, presetId)
 	if err != nil {
@@ -281,13 +281,13 @@ func setRecord_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID, recordId i
 
 		if schema.IsContentRelationship(atrContent) {
 			if value.PresetIdRefer.Valid {
-				// use refered preset record ID as value
+				// use referred preset record ID as value
 				recordIdRefer, exists, err := getRecordIdByReferal_tx(ctx, tx, value.PresetIdRefer.Bytes)
 				if err != nil {
 					return err
 				}
 
-				// if refered record does not exist, do not set record
+				// if referred record does not exist, do not set record
 				// otherwise potential NOT NULL constraint would be breached
 				if !exists {
 					return fmt.Errorf("referenced preset '%s' does not exist",
@@ -355,8 +355,8 @@ func setRecord_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID, recordId i
 	return nil
 }
 
-// get ID of refered preset record
-// returns record ID and whether refered record actually exists
+// get ID of referred preset record
+// returns record ID and whether referred record actually exists
 // (unprotected preset record can get deleted)
 func getRecordIdByReferal_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID) (int64, bool, error) {
 

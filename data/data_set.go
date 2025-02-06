@@ -23,8 +23,8 @@ import (
 // sets data
 // uses indexes (unique integers) to identify specific relations, which can be joined by relationships
 // starting with source relation (index:0), joined relations refer to their partner (indexFrom:0, indexFrom:1, ...)
-// if tupel needs to exist for joined relation to refer to, it will be created
-// each index provides tupel ID (0 if new)
+// if tuple needs to exist for joined relation to refer to, it will be created
+// each index provides tuple ID (0 if new)
 // each index provides values for its relation attributes or partner relation attributes (relationship attributes from other relation)
 func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSet,
 	loginId int64) (map[int]int64, error) {
@@ -55,7 +55,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 			return indexRecordIds, handler.ErrSchemaUnknownRelation(dataSet.RelationId)
 		}
 
-		// check write access for tupel creation
+		// check write access for tuple creation
 		if isNewRecord && !authorizedRelation(loginId, dataSet.RelationId, 2) {
 			return indexRecordIds, errors.New(handler.ErrUnauthorized)
 		}
@@ -151,7 +151,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 }
 
 // set data values for specific relation index
-// recursive call, if relationship tupel must be created first
+// recursive call, if relationship tuple must be created first
 func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 	dataSetsByIndex map[int]types.DataSet, indexRecordIds map[int]int64,
 	indexRecordsCreated map[int]bool, loginId int64) error {
@@ -183,7 +183,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 	params := make([]string, 0)      // value parameters for insert/update statement
 	values := make([]interface{}, 0) // values for insert/update statements
 
-	// values for relationship tupel IDs are dealt with separately
+	// values for relationship tuple IDs are dealt with separately
 	type relationshipValue struct {
 		attributeId   uuid.UUID
 		attributeIdNm pgtype.UUID
@@ -198,10 +198,10 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 		}
 
 		// process relationship values from other relation
-		// (1:n, 1:1 relationships refering to this tupel)
+		// (1:n, 1:1 relationships referring to this tuple)
 		if attribute.OutsideIn && schema.IsContentRelationship(atr.Content) {
 
-			// store relationship values to apply later (tupel might need to be created first)
+			// store relationship values to apply later (tuple might need to be created first)
 			shipValues := relationshipValue{
 				attributeId:   attribute.AttributeId,
 				attributeIdNm: attribute.AttributeIdNm,
@@ -230,7 +230,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 			continue
 		}
 
-		// process attribute values for this relation tupel
+		// process attribute values for this relation tuple
 		values = append(values, attribute.Value)
 
 		if isNewRecord {
@@ -282,11 +282,11 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 					return handler.ErrSchemaUnknownAttribute(dataSetOther.AttributeId)
 				}
 
-				// if attribute is on our side, we need to add its value to this tupel
-				// if its on the other side, its value will be added when the other tupel is being created
+				// if attribute is on our side, we need to add its value to this tuple
+				// if its on the other side, its value will be added when the other tuple is being created
 				if relAtrOther.RelationId == dataSet.RelationId {
 
-					// the other relation has a higher index, so its tupel might not exist yet
+					// the other relation has a higher index, so its tuple might not exist yet
 					if err := setForIndex_tx(ctx, tx, indexOther, dataSetsByIndex,
 						indexRecordIds, indexRecordsCreated, loginId); err != nil {
 
@@ -294,7 +294,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 					}
 					indexRecordsCreated[indexOther] = true
 
-					// if there is no relationship value available yet, we add it to the tupel
+					// if there is no relationship value available yet, we add it to the tuple
 					relValueNotSet := true
 					for _, atr := range dataSet.Attributes {
 						if atr.AttributeId == relAtrOther.Id {
@@ -306,7 +306,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 					}
 
 					if relValueNotSet {
-						// add relationship attribute value for this tupel creation
+						// add relationship attribute value for this tuple creation
 						values = append(values, indexRecordIds[indexOther])
 						names = append(names, fmt.Sprintf(`"%s"`, relAtrOther.Name))
 						params = append(params, fmt.Sprintf(`$%d`, len(values)))
@@ -324,7 +324,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 				}
 
 				// if attribute is on this side, add to this record
-				// other relation tupel exists already as its index is lower
+				// other relation tuple exists already as its index is lower
 				// exclude if both relations are the same, in this case the lower index always wins
 				if relAtr.RelationId == dataSet.RelationId && dataSet.RelationId != dataSetOther.RelationId {
 
@@ -377,7 +377,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 		}
 	}
 
-	// assign relationship references to this tupel via attributes from partner relations
+	// assign relationship references to this tuple via attributes from partner relations
 	for _, shipValues := range relationshipValues {
 
 		shipAtr, exists := cache.AttributeIdMap[shipValues.attributeId]
@@ -421,7 +421,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 
 		if !shipValues.attributeIdNm.Valid {
 
-			// remove old references to this tupel
+			// remove old references to this tuple
 			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				UPDATE "%s"."%s" SET "%s" = NULL
 				WHERE "%s" = $1
@@ -433,7 +433,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 				return err
 			}
 
-			// add new references to this tupel
+			// add new references to this tuple
 			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				UPDATE "%s"."%s" SET "%s" = $1
 				WHERE "%s" = ANY($2)
@@ -448,7 +448,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 				return handler.ErrSchemaUnknownAttribute(shipValues.attributeIdNm.Bytes)
 			}
 
-			// get current references to this tupel
+			// get current references to this tuple
 			valuesCurr := make([]int64, 0)
 			if err := tx.QueryRow(ctx, fmt.Sprintf(`
 				SELECT ARRAY(
@@ -461,7 +461,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 				return err
 			}
 
-			// remove old references to this tupel
+			// remove old references to this tuple
 			for _, value := range valuesCurr {
 				if slices.Contains(shipValues.values, value) {
 					continue
@@ -478,7 +478,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 				}
 			}
 
-			// add new references to this tupel
+			// add new references to this tuple
 			for _, value := range shipValues.values {
 				if slices.Contains(valuesCurr, value) {
 					continue

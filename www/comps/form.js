@@ -386,8 +386,8 @@ let MyForm = {
 			loginIdsEncryptForOutside:[], // login IDs for which data keys are encrypted (e2ee), for outside relation and record IDs
 			                              // [{loginIds:[5,12], recordIds:[1,2], relationId:'A-B-C-D'}, {...}]
 			timers:{},                    // frontend function timers, key = name, value = { id:XY, isInterval:true }
-			valuesNew:{},                 // changed valuse by index attribute ID (for sending changes)
-			valuesOld:{},                 // preexisting values by index attribute ID (for change comparisson)
+			valuesNew:{},                 // changed values by index attribute ID (for sending changes)
+			valuesOld:{},                 // preexisting values by index attribute ID (for change comparison)
 			variableIdMapLocal:{}         // variable values by ID (form assigned variables only)
 		};
 	},
@@ -1476,7 +1476,7 @@ let MyForm = {
 					joins.push(r);
 					joinIndexes.push(r.index);
 					
-					// repeat if join was added (to collect dependend joins)
+					// repeat if join was added (to collect dependent joins)
 					joinAdded = true;
 				}
 			}

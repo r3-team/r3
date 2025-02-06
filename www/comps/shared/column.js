@@ -177,7 +177,7 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 		const a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
 		
 		// anything that can be counted can serve as aggregation
-		// sub queries and already aggregated colums are not supported
+		// sub queries and already aggregated columns are not supported
 		if(!c.subQuery
 			&& c.aggregator === null
 			&& !a.encrypted

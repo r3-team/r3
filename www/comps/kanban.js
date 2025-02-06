@@ -676,7 +676,7 @@ let MyKanban = {
 				if(typeof recordId === 'undefined')
 					return [];
 				
-				// store first occurence of record only
+				// store first occurrence of record only
 				if(recordId === null || typeof recordIdMapValues[recordId] !== 'undefined')
 					continue;
 				
@@ -775,7 +775,7 @@ let MyKanban = {
 					this.axisEntriesY = this.getAxisEntries(
 						this.relationIndexAxisY,this.columnIndexesAxisY,res.payload.rows);
 					
-					// prepate record ID map for both axis (X/Y)
+					// prepare record ID map for both axis (X/Y)
 					this.recordIdMapAxisXY = { null:{ null:[] } };
 					for(const x of this.axisEntriesX) {
 						this.recordIdMapAxisXY[x.id] = { null:[] };
