@@ -40,7 +40,7 @@ func GetPreview(ctx context.Context, tx pgx.Tx, id uuid.UUID, limit int, offset 
 		return nil, err
 	}
 
-	// get total count of tupels from relation
+	// get total count of tuples from relation
 	if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
 		SELECT COUNT(*)
 		FROM "%s"."%s"

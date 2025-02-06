@@ -77,7 +77,7 @@ func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
 	return err
 }
 
-// start with 1 module and check whether it or its dependend upon modules had changed
+// start with 1 module and check whether it or its dependent upon modules had changed
 // returns map of module IDs, changed yes/no
 func GetModuleChangedWithDependencies(moduleId uuid.UUID) (map[uuid.UUID]bool, error) {
 	cache.Schema_mx.RLock()
@@ -134,8 +134,8 @@ func verifyCompatibilityWithApp(moduleId uuid.UUID, releaseBuildApp int) error {
 }
 
 // verifies that the raw content of JSON file matches given signature
-// verifiy raw content, as target JSON might have different structure (new elements due to schema change)
-// returns error if verification failes, also module hash
+// verify raw content, as target JSON might have different structure (new elements due to schema change)
+// returns error if verification fails, also module hash
 func verifyContent(jsonFileData *[]byte) ([32]byte, error) {
 
 	var hashed [32]byte

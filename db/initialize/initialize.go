@@ -117,7 +117,7 @@ func renewDbUserPw_tx(ctx context.Context, tx pgx.Tx) error {
 	Remove 'schemaTimestamp' from instance.config
 */
 
-// instance initalized to 3.0
+// instance initialized to 3.0
 func initInstanceValues_tx(ctx context.Context, tx pgx.Tx) error {
 
 	appName, appNameShort := config.GetAppName()
@@ -228,7 +228,7 @@ func initInstanceValues_tx(ctx context.Context, tx pgx.Tx) error {
 	return err
 }
 
-// app initalized to 3.0
+// app initialized to 3.0
 func initAppSchema_tx(ctx context.Context, tx pgx.Tx) error {
 	_, err := tx.Exec(ctx, `
 --
