@@ -384,6 +384,27 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					REFERENCES instance.ldap (id) MATCH SIMPLE
 					ON UPDATE NO ACTION
 					ON DELETE NO ACTION;
+
+			-- fix wrong data type for function argument
+			DROP   FUNCTION instance.mail_delete_after_attach;
+			CREATE FUNCTION instance.mail_delete_after_attach(
+				mail_id integer,
+				attach_record_id bigint,
+				attach_attribute_id uuid)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					UPDATE instance.mail_spool SET
+						record_id_wofk = attach_record_id,
+						attribute_id = attach_attribute_id
+					WHERE id = mail_id
+					AND outgoing = FALSE;
+					
+					RETURN 0;
+				END;
+			$BODY$;
 		`)
 		return "3.10", err
 	},
