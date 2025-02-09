@@ -212,6 +212,7 @@ export function getAttributeContentsByUse(usedFor,length,largeNumbers) {
 		case 'relationship1N': return { content:'1:n',                                     contentUse:'default' }; break;
 
 		// special uses: strings
+		case 'barcode':  return { content:'text',                            contentUse:'barcode' };  break;
 		case 'color':    return { content:'varchar',                         contentUse:'color' };    break;
 		case 'drawing':  return { content:'text',                            contentUse:'drawing' };  break;
 		case 'iframe':   return { content:'text',                            contentUse:'iframe' };   break;
