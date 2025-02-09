@@ -1826,17 +1826,17 @@
 			"002": "Număr nevalid '{VALUE}' (zecimală așteptată).",
 			"003": "Valoare de timp nevalidă '{VALUE}', format așteptat: {EXPECT}.",
 			"004": "Tip de atribut neacceptat '{VALUE}'.",
-			"005": "Număr greșit de câmpuri în linie '{VALUE}'.",
-			"006": "Encrypted attributes are not supported"
+			"005": "Număr greșit de câmpuri.",
+			"006": "Encrypted attributes are not supported."
 		},
 		"DBS": {
 			"001": "{FNC_MSG}",
 			"002": "Valoarea selectată pentru '{NAMES}' este deja folosită de o altă înregistrare. Este definită ca 'unique' și poate fi folosită doar o singură dată.",
 			"003": "This username is already taken.",
 			"004": "Înregistrarea are încă ca referiță '{ATR}' în '{MOD}'.",
-			"005": "Coloana '{NAME}' nu are valoare sau nu a putut fi soluționată.",
+			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "Nu s-a putut crea index unic, deoarece valorile atributelor existente nu sunt unice.",
-			"007": "Valoare nevalidă '{VALUE}'."
+			"007": "Changes cannot be saved due to an invalid value type."
 		},
 		"SEC": {
 			"001": "Acces neautorizat.",

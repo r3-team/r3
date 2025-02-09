@@ -50,66 +50,48 @@ export function resolveErrCode(message) {
 	if(matches === null || matches.length !== 3)
 		return message;
 	
-	let errContext = matches[1];
-	let errNumber  = matches[2];
+	const errContext = matches[1];
+	const errNumber  = matches[2];
 	
 	// remove error code, as in {ERR_DBS_069}
-	message = message.substr(13);
+	message = message.substring(13);
 	
-	// get proper error message for error code + number
-	if(typeof MyStore.getters.captions.error[errContext] === 'undefined'
-		|| typeof MyStore.getters.captions.error[errContext][errNumber] === 'undefined') {
-		
+	// return message without error code if no error message can be found
+	if(MyStore.getters.captions.error[errContext]?.[errNumber] === undefined)
 		return message;
-	}
-	let cap = MyStore.getters.captions.error[errContext][errNumber];
+
+	// some error codes provide additional data after the code as JSON string
+	const data = message !== '' ? JSON.parse(message) : {};
+	let   cap  = MyStore.getters.captions.error[errContext][errNumber];
 	
-	// handle cases with error arguments
+	// handle cases with error context data
 	if(errContext === 'CSV') {
 		switch(errNumber) {
 			case '001': // fallthrough, invalid number (int)
 			case '002': // fallthrough, invalid number (float)
 			case '004': // fallthrough, unsupported attribute type syntax
 			case '005': // wrong number of fields
-				matches = message.match(/\[VALUE\:([^\]]*)\]/);
-				if(matches === null || matches.length !== 2)
-					return message;
-				
-				return cap.replace('{VALUE}',matches[1]);
+				return cap.replace('{VALUE}',data.value);
 			break;
 			case '003': // invalid date/time format
-				matches = message.match(/\[VALUE\:([^\]]*)\]/);
-				if(matches === null || matches.length !== 2)
-					return message;
-				
-				cap = cap.replace('{VALUE}',matches[1]);
-				
-				matches = message.match(/\[EXPECT\:([^\]]*)\]/);
-				if(matches === null || matches.length !== 2)
-					return message;
-				
-				return cap.replace('{EXPECT}',matches[1]);
+				return cap.replace('{VALUE}',data.value).replace('{EXPECT}',data.expect);
 			break;
 		}
 	}
 	if(errContext === 'DBS') {
-		let atr, name, mod, rel;
+		let atr, mod, rel;
 		
 		switch(errNumber) {
-			case '001': // application abort message from PG function
-				matches = message.match(/\[FNC_MSG\:([^\]]*)\]/);
-				if(matches === null && matches.length !== 2)
-					return message;
-				
-				return cap.replace('{FNC_MSG}',matches[1].replace(/\(SQLSTATE .+\)/,''));
+			case '001': // raised exception as application abort message from PG function
+				return cap.replace('{FNC_MSG}',data.message);
 			break;
 			case '002': // unique index constraint broken
-				matches = message.match(/\[IND_ID\:(.{36})\]/);
-				if(matches === null || matches.length !== 2)
-					return message;
-				
-				let index = MyStore.getters['schema/indexIdMap'][matches[1]];
-				let names = [];
+				const index = MyStore.getters['schema/indexIdMap'][data.pgIndexId];
+				let   names = [];
+
+				// special case: New unique index (ID not known yet) cannot be created
+				if(index === undefined)
+					return MyStore.getters.captions.error.DBS['006'];
 				
 				for(let i = 0, j = index.attributes.length; i < j; i++) {
 					atr = MyStore.getters['schema/attributeIdMap'][index.attributes[i].attributeId];
@@ -119,40 +101,36 @@ export function resolveErrCode(message) {
 				return cap.replace('{NAMES}',names.join('+'));
 			break;
 			case '004': // foreign key constraint broken
-				matches = message.match(/\[ATR_ID\:(.{36})\]/);
-				if(matches === null || matches.length !== 2)
-					return message;
-				
-				atr = MyStore.getters['schema/attributeIdMap'][matches[1]];
+				atr = MyStore.getters['schema/attributeIdMap'][data.attributeId];
 				rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
 				mod = MyStore.getters['schema/moduleIdMap'][rel.moduleId];
 				return cap.replace('{ATR}',getCaption('attributeTitle',mod.id,atr.id,atr.captions,atr.name))
 					.replace('{MOD}',getCaption('moduleTitle',mod.id,mod.id,mod.captions,mod.name));
 			break;
 			case '005': // NOT NULL constraint broken
-				matches = message.match(/\[COLUMN_NAME\:([^\]]*)\]/);
-				if(matches === null || matches.length !== 2)
-					return message;
+				mod = MyStore.getters['schema/moduleNameMap'][data.moduleName];
+				if(mod === undefined) return message;
+
+				for(const r of mod.relations) {
+					if(r.name === data.relationName) {
+						for(const a of r.attributes) {
+							if(a.name === data.attributeName) {
+								atr = a;
+								break;
+							}
+						}
+						break;
+					}
+				}
+				if(atr === undefined) return message;
 				
-				return cap.replace('{NAME}',matches[1]);
-			break;
-			case '007': // invalid syntax for type
-				matches = message.match(/\[VALUE\:([^\]]*)\]/);
-				if(matches === null || matches.length !== 2)
-					return message;
-				
-				return cap.replace('{VALUE}',matches[1]);
+				return cap.replace('{NAME}',getCaption('attributeTitle',mod.id,atr.id,atr.captions,atr.name));
 			break;
 		}
 	}
 	if(errContext === 'SEC') {
 		switch(errNumber) {
-			case '006':
-				matches = message.match(/\[NAMES\:([^\]]*)\]/);
-				return matches === null || matches.length !== 2
-					? message
-					: cap.replace('{NAMES}',matches[1]);
-			break;
+			case '006': return cap.replace('{NAMES}',data.names); break;
 		}
 	}
 	return cap;

@@ -1826,7 +1826,7 @@
 			"002": "Numéro invalide '{VALUE}' (un décimal était attendu).",
 			"003": "Valeur de date/heure invalide '{VALUE}', format attendu : {EXPECT}.",
 			"004": "Type d'attribut non pris en charge '{VALUE}'.",
-			"005": "Nombre incorrect de champs dans la ligne '{VALUE}'.",
+			"005": "Nombre incorrect de champs.",
 			"006": "Les attributs chiffrés ne sont pas pris en charge."
 		},
 		"DBS": {
@@ -1834,9 +1834,9 @@
 			"002": "La valeur sélectionnée pour '{NAMES}' est déjà utilisée par un autre enregistrement. Elle est définie comme 'unique' et ne peut être utilisée qu'une fois.",
 			"003": "Ce nom d'utilisateur est déjà pris.",
 			"004": "L'enregistrement ne peut pas être supprimé - il est toujours référencé en tant que '{ATR}' dans '{MOD}'.",
-			"005": "La colonne '{NAME}' n'a pas de valeur ou n'a pas pu être résolue.",
+			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "Échec de la création de l'index unique, car les valeurs d'attribut existantes ne sont pas uniques.",
-			"007": "Valeur invalide '{VALUE}'."
+			"007": "Changes cannot be saved due to an invalid value type."
 		},
 		"SEC": {
 			"001": "Vous n'êtes pas autorisé à effectuer cette action ou à accéder à cette ressource.",

@@ -1826,17 +1826,17 @@
 			"002": "Numero non valido '{VALUE}' (decimale previsto).",
 			"003": "Valore temporale '{VALUE}' non valido, formato previsto: {EXPECT}.",
 			"004": "Tipo attributo non supportato '{VALUE}'.",
-			"005": "Numero di campi errato in linea '{VALUE}'.",
-			"006": "Encrypted attributes are not supported"
+			"005": "Numero di campi errato.",
+			"006": "Encrypted attributes are not supported."
 		},
 		"DBS": {
 			"001": "{FNC_MSG}",
 			"002": "TIl valore selezionato per '{NAMES}' è già utilizzato da un'altro record. E' definito 'univoco' e può essere utilizzato solo una volta.",
 			"003": "This username is already taken.",
 			"004": "Il record è ancora referenziato come '{ATR}' in '{MOD}'.",
-			"005": "La colonna '{NAME}' non ha valori o non può essere risolto.",
+			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "Creazione indice univoco fallita perchè l'attributo esistente non è univoco.",
-			"007": "Valore non valido '{VALUE}'."
+			"007": "Changes cannot be saved due to an invalid value type."
 		},
 		"SEC": {
 			"001": "Accesso non autorizzato.",

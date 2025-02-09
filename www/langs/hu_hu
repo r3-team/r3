@@ -1826,7 +1826,7 @@
 			"002": "Érvénytelen szám '{VALUE}' (decimális számra számítás szükséges).",
 			"003": "Érvénytelen dátum-/időérték '{VALUE}', a várt formátum: {EXPECT}.",
 			"004": "Nem támogatott attribútumtípus '{VALUE}'.",
-			"005": "Hibás mezők száma a '{VALUE}' sorban.",
+			"005": "Wrong number of fields.",
 			"006": "A titkosított attribútumok nem támogatottak."
 		},
 		"DBS": {
@@ -1834,9 +1834,9 @@
 			"002": "A kiválasztott érték '{NAMES}' már egy másik rekord által használt. Ez egy 'egyedi' érték és csak egyszer használható.",
 			"003": "This username is already taken.",
 			"004": "A rekordot nem lehet törölni - még hivatkoznak rá mint \"{ATR}\" a(z) \"{MOD}\" modulban.",
-			"005": "Az oszlop \"{NAME}\" nem tartalmaz értéket vagy nem oldható fel.",
+			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "Nem lehet egyedi indexet létrehozni, mivel a meglévő attribútumértékek nem egyediek.",
-			"007": "Invalid value '{VALUE}'."
+			"007": "Changes cannot be saved due to an invalid value type."
 		},
 		"SEC": {
 			"001": "Nincs engedélye a művelet végrehajtásához vagy a forráshoz való hozzáféréshez.",

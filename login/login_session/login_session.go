@@ -250,7 +250,7 @@ func CheckConcurrentAccess(limitedLogin bool, loginId int64, isAdmin bool) error
 	}
 	if !config.GetLicenseActive() {
 		// license used, but expired, block login
-		return handler.CreateErrCode("LIC", handler.ErrCodeLicValidityExpired)
+		return handler.CreateErrCode(handler.ErrContextLic, handler.ErrCodeLicValidityExpired)
 	}
 
 	// license used and active, check concurrent access
@@ -261,7 +261,7 @@ func CheckConcurrentAccess(limitedLogin bool, loginId int64, isAdmin bool) error
 
 	if !existed && cnt >= config.GetLicenseLoginCount(limitedLogin) {
 		// login did not have a session and concurrent limit has been exceeded, block login
-		return handler.CreateErrCode("LIC", handler.ErrCodeLicLoginsReached)
+		return handler.CreateErrCode(handler.ErrContextLic, handler.ErrCodeLicLoginsReached)
 	}
 	return nil
 }

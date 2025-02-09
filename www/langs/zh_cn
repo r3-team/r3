@@ -1826,7 +1826,7 @@
 			"002": "无效数字“{VALUE}”（应为小数）。",
 			"003": "无效的日期/时间值“{VALUE}”，期望的格式为：{EXPECT}。",
 			"004": "不支持的属性类型“{VALUE}”.",
-			"005": "行“{VALUE}”中的字段数量错误。",
+			"005": "Wrong number of fields.",
 			"006": "不支持加密属性。"
 		},
 		"DBS": {
@@ -1834,9 +1834,9 @@
 			"002": "所选的“{NAMES}”值已被另一条记录使用。它被定义为“唯一”，只能使用一次。",
 			"003": "This username is already taken.",
 			"004": "记录无法删除 - 它仍然在“{MOD}”中作为“{ATR}”的引用。",
-			"005": "列“{NAME}”没有值或无法解析。",
+			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "无法创建唯一索引，因为现有属性值不是唯一的。",
-			"007": "无效值“{VALUE}”。"
+			"007": "Changes cannot be saved due to an invalid value type."
 		},
 		"SEC": {
 			"001": "您未被授权完成此操作或访问此资源。",

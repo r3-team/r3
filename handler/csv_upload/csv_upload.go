@@ -19,7 +19,6 @@ import (
 	"r3/login/login_auth"
 	"r3/tools"
 	"r3/types"
-	"regexp"
 	"strconv"
 	"time"
 	"unicode/utf8"
@@ -28,43 +27,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-var (
-	expectedErrorRx []*regexp.Regexp
-	handlerContext  = "csv_upload"
-)
-
-func init() {
-	var regex *regexp.Regexp
-
-	// CSV wrong number of fields
-	regex, _ = regexp.Compile(`wrong number of fields`)
-	expectedErrorRx = append(expectedErrorRx, regex)
-
-	// number parse error
-	regex, _ = regexp.Compile(`failed to parse number`)
-	expectedErrorRx = append(expectedErrorRx, regex)
-
-	// date parse error
-	regex, _ = regexp.Compile(`failed to parse date`)
-	expectedErrorRx = append(expectedErrorRx, regex)
-
-	// database, not null violation
-	regex, _ = regexp.Compile(`^ERROR\: null value in column`)
-	expectedErrorRx = append(expectedErrorRx, regex)
-
-	// database, invalid syntax for type
-	regex, _ = regexp.Compile(`^ERROR\: invalid input syntax for type`)
-	expectedErrorRx = append(expectedErrorRx, regex)
-}
-
-func isExpectedError(err error) bool {
-	for _, regex := range expectedErrorRx {
-		if regex.MatchString(err.Error()) {
-			return true
-		}
-	}
-	return false
-}
+var handlerContext = "csv_upload"
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 
@@ -287,10 +250,10 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 		atr, exists := cache.AttributeIdMap[column.AttributeId]
 		if !exists {
-			return handler.CreateErrCode("APP", handler.ErrCodeAppUnknownAttribute)
+			return handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppUnknownAttribute)
 		}
 		if atr.Encrypted {
-			return handler.CreateErrCode("CSV", handler.ErrCodeCsvEncryptedAttribute)
+			return handler.CreateErrCode(handler.ErrContextCsv, handler.ErrCodeCsvEncryptedAttribute)
 		}
 
 		if valuesString[i] == "" {
@@ -330,9 +293,10 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 				t, err := time.ParseInLocation(format, valuesString[i], loc)
 				if err != nil {
-					return handler.CreateErrCodeWithArgs("CSV",
-						handler.ErrCodeCsvParseDateTime,
-						map[string]string{"VALUE": valuesString[i], "EXPECT": format})
+					return handler.CreateErrCodeWithData(handler.ErrContextCsv, handler.ErrCodeCsvParseDateTime, struct {
+						Expect string `json:"expect"`
+						Value  string `json:"value"`
+					}{format, valuesString[i]})
 				}
 				valuesIn[i] = t.Unix()
 
@@ -343,27 +307,27 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 					fmt.Sprintf("1970-01-01 %s UTC", valuesString[i]))
 
 				if err != nil {
-					return handler.CreateErrCodeWithArgs("CSV",
-						handler.ErrCodeCsvParseDateTime,
-						map[string]string{"VALUE": valuesString[i], "EXPECT": "15:04:05"})
+					return handler.CreateErrCodeWithData(handler.ErrContextCsv, handler.ErrCodeCsvParseDateTime, struct {
+						Expect string `json:"expect"`
+						Value  string `json:"value"`
+					}{"15:04:05", valuesString[i]})
 				}
 				valuesIn[i] = t.Unix()
 			default:
 				valuesIn[i], err = strconv.ParseInt(valuesString[i], 10, 64)
 				if err != nil {
-					return handler.CreateErrCodeWithArgs("CSV",
-						handler.ErrCodeCsvParseInt,
-						map[string]string{"VALUE": valuesString[i]})
+					return handler.CreateErrCodeWithData(handler.ErrContextCsv, handler.ErrCodeCsvParseInt, struct {
+						Value string `json:"value"`
+					}{valuesString[i]})
 				}
 			}
 
 		case "real", "double precision":
 			valuesIn[i], err = strconv.ParseFloat(valuesString[i], 64)
 			if err != nil {
-				return handler.CreateErrCodeWithArgs("CSV",
-					handler.ErrCodeCsvParseFloat,
-					map[string]string{"VALUE": valuesString[i]})
-
+				return handler.CreateErrCodeWithData(handler.ErrContextCsv, handler.ErrCodeCsvParseFloat, struct {
+					Value string `json:"value"`
+				}{valuesString[i]})
 			}
 
 		// numeric must be handled as text as conversion to float is not 1:1
@@ -374,9 +338,9 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 			valuesIn[i] = valuesString[i] == boolTrue
 
 		case "default":
-			return handler.CreateErrCodeWithArgs("CSV",
-				handler.ErrCodeCsvBadAttributeType,
-				map[string]string{"TYPE": atr.Content})
+			return handler.CreateErrCodeWithData(handler.ErrContextCsv, handler.ErrCodeCsvBadAttributeType, struct {
+				Value string `json:"value"`
+			}{atr.Content})
 		}
 	}
 

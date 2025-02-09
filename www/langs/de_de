@@ -1826,17 +1826,17 @@
 			"002": "Ungültige Nummer '{VALUE}' (Dezimal wird erwartet).",
 			"003": "Ungültiger Datum-/Zeitwert '{VALUE}', erwartetes Format: {EXPECT}.",
 			"004": "Nicht unterstützter Attributtyp '{VALUE}'.",
-			"005": "Falsche Anzahl an Feldern in Zeile '{VALUE}'.",
-			"006": "Verschlüsselte Attribute werden nicht unterstützt"
+			"005": "Falsche Anzahl an Feldern.",
+			"006": "Verschlüsselte Attribute werden nicht unterstützt."
 		},
 		"DBS": {
 			"001": "{FNC_MSG}",
 			"002": "Der ausgewählte Wert für '{NAMES}' wird bereits von einem anderen Datensatz verwendet. Dieser ist als 'einzigartig' definiert und kann nur einmal verwendet werden.",
 			"003": "Dieser Benutzername wird bereits verwendet.",
 			"004": "Datensatz kann nicht gelöscht werden - er wird noch referenziert als \"{ATR}\" in \"{MOD}\".",
-			"005": "Spalte \"{NAME}\" beinhaltet keinen Wert oder kann nicht aufgelöst werden.",
+			"005": "\"{NAME}\" muss einen Wert haben bevor Änderungen gespeichert werden können.",
 			"006": "Einzigartiger Index kann nicht erstellt werden, weil bestehende Attributwerte nicht einzigartig sind.",
-			"007": "Ungültiger Wert \"{VALUE}\"."
+			"007": "Änderungen können aufgrund eines ungültigen Werttypen nicht gespeichert werden."
 		},
 		"SEC": {
 			"001": "Du bist nicht berechtigt die Aktion auszuführen oder diese Ressource aufzurufen.",

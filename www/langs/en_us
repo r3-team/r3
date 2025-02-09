@@ -1826,17 +1826,17 @@
 			"002": "Invalid number '{VALUE}' (expected a decimal).",
 			"003": "Invalid date/time value '{VALUE}', expected format: {EXPECT}.",
 			"004": "Unsupported attribute type '{VALUE}'.",
-			"005": "Wrong number of fields in line '{VALUE}'.",
-			"006": "Encrypted attributes are not supported"
+			"005": "Wrong number of fields.",
+			"006": "Encrypted attributes are not supported."
 		},
 		"DBS": {
 			"001": "{FNC_MSG}",
 			"002": "The selected value for '{NAMES}' is already used by another record. It is defined as 'unique' and can only be used once.",
 			"003": "This username is already taken.",
 			"004": "Record cannot be deleted - it is still being referenced as '{ATR}' in '{MOD}'.",
-			"005": "Column '{NAME}' has no value or could not be resolved.",
+			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "Failed to create unique index, because existing attribute values are not unique.",
-			"007": "Invalid value '{VALUE}'."
+			"007": "Changes cannot be saved due to an invalid value type."
 		},
 		"SEC": {
 			"001": "You are not authorized to complete this action or access this resource.",

@@ -79,9 +79,9 @@ func GetPublic(ctx context.Context, relationId uuid.UUID,
 	}
 
 	if len(loginNamesNoPublicKey) != 0 {
-		return keys, handler.CreateErrCodeWithArgs("SEC",
-			handler.ErrCodeSecNoPublicKeys,
-			map[string]string{"NAMES": strings.Join(loginNamesNoPublicKey, ", ")})
+		return keys, handler.CreateErrCodeWithData(handler.ErrContextSec, handler.ErrCodeSecNoPublicKeys, struct {
+			Names string `json:"names"`
+		}{strings.Join(loginNamesNoPublicKey, ", ")})
 	}
 	return keys, nil
 }

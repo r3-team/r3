@@ -31,7 +31,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	// check for protected preset record
 	for _, preset := range rel.Presets {
 		if preset.Protected && cache.GetPresetRecordId(preset.Id) == recordId {
-			return handler.CreateErrCode("APP", handler.ErrCodeAppPresetProtected)
+			return handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppPresetProtected)
 		}
 	}
 

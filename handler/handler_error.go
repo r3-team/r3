@@ -1,17 +1,20 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
 	"slices"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type errExpected struct {
-	convertFn func(err error) error // function that translates known error message to error code
-	matchRx   *regexp.Regexp        // regex that matches the expected error message
+	context string
+	matchRx *regexp.Regexp // regex that matches the expected error message
+	number  int
 }
 
 const (
@@ -19,8 +22,15 @@ const (
 	ErrAuthFailed       = "authentication failed"
 	ErrBruteforceBlock  = "blocked assumed bruteforce attempt"
 	ErrGeneral          = "general error"
-	ErrWsClientChanFull = "client channel is full, dropping response"
 	ErrUnauthorized     = "unauthorized"
+	ErrWsClientChanFull = "client channel is full, dropping response"
+
+	// error contexts
+	ErrContextApp = "APP"
+	ErrContextCsv = "CSV"
+	ErrContextDbs = "DBS"
+	ErrContextLic = "LIC"
+	ErrContextSec = "SEC"
 
 	// error codes
 	ErrCodeAppUnknown               int = 1
@@ -43,7 +53,7 @@ const (
 	ErrCodeDbsConstraintUniqueLogin int = 3
 	ErrCodeDbsConstraintFk          int = 4
 	ErrCodeDbsConstraintNotNull     int = 5
-	ErrCodeDbsIndexFailUnique       int = 6
+	ErrCodeDbsIndexFailUnique       int = 6 // special: is applied on frontend only, if ErrCodeDbsConstraintUnique is used but ID is unknown
 	ErrCodeDbsInvalidTypeSyntax     int = 7
 	ErrCodeDbsChangedCachePlan      int = 8
 	ErrCodeLicValidityExpired       int = 1
@@ -55,7 +65,7 @@ const (
 
 var (
 	// errors
-	errContexts     = []string{"APP", "CSV", "DBS", "LIC", "SEC"}
+	errContexts     = []string{ErrContextApp, ErrContextCsv, ErrContextDbs, ErrContextLic, ErrContextSec}
 	errCodeDbsCache = regexp.MustCompile(fmt.Sprintf("^{ERR_DBS_%03d}", ErrCodeDbsChangedCachePlan))
 	errCodeLicRx    = regexp.MustCompile(`^{ERR_LIC_(\d{3})}`)
 	errCodeRx       = regexp.MustCompile(`^{ERR_([A-Z]{3})_(\d{3})}`)
@@ -63,110 +73,36 @@ var (
 
 		// security/access
 		{ // unauthorized
-			convertFn: func(err error) error { return CreateErrCode("SEC", ErrCodeSecUnauthorized) },
-			matchRx:   regexp.MustCompile(fmt.Sprintf(`^%s$`, ErrUnauthorized)),
+			context: ErrContextSec,
+			matchRx: regexp.MustCompile(fmt.Sprintf(`^%s$`, ErrUnauthorized)),
+			number:  ErrCodeSecUnauthorized,
 		},
 
 		// application
 		{ // context deadline reached
-			convertFn: func(err error) error { return CreateErrCode("APP", ErrCodeAppContextExceeded) },
-			matchRx:   regexp.MustCompile(`^timeout\: context deadline exceeded$`),
+			context: ErrContextApp,
+			matchRx: regexp.MustCompile(`^timeout\: context deadline exceeded$`),
+			number:  ErrCodeAppContextExceeded,
 		},
 		{ // context canceled
-			convertFn: func(err error) error { return CreateErrCode("APP", ErrCodeAppContextCanceled) },
-			matchRx:   regexp.MustCompile(`^timeout\: context canceled$`),
+			context: ErrContextApp,
+			matchRx: regexp.MustCompile(`^timeout\: context canceled$`),
+			number:  ErrCodeAppContextCanceled,
 		},
 
 		// CSV handling
-		{ // wrong number of fields
-			convertFn: func(err error) error {
-				matches := regexp.MustCompile(`^record on line (\d+)\: wrong number of fields`).FindStringSubmatch(err.Error())
-				if len(matches) != 2 {
-					return CreateErrCode("CSV", ErrCodeCsvWrongFieldNumber)
-				}
-				return CreateErrCodeWithArgs("CSV", ErrCodeCsvWrongFieldNumber,
-					map[string]string{"VALUE": matches[1]})
-			},
+		{ // wrong number of fields (error originates from encoding/csv package)
+			context: ErrContextCsv,
 			matchRx: regexp.MustCompile(`^record on line \d+\: wrong number of fields`),
-		},
-
-		// database messages from postgres, are dependent on locale (lc_messages)
-		{ // custom error message from application, used in instance.abort_show_message()
-			convertFn: func(err error) error {
-				matches := regexp.MustCompile(`R3_MSG\: (.*)`).FindStringSubmatch(err.Error())
-				if len(matches) != 2 {
-					return CreateErrCode("DBS", ErrCodeDbsFunctionMessage)
-				}
-				return CreateErrCodeWithArgs("DBS", ErrCodeDbsFunctionMessage,
-					map[string]string{"FNC_MSG": matches[1]})
-			},
-			matchRx: regexp.MustCompile(`R3_MSG\: `),
-		},
-		{ // foreign key constraint violation
-			convertFn: func(err error) error {
-				matches := regexp.MustCompile(`^ERROR\: .+ on table \".+\" violates foreign key constraint \"fk_([0-9a-fA-F\-]{36})\"`).FindStringSubmatch(err.Error())
-				if len(matches) != 2 {
-					return CreateErrCode("DBS", ErrCodeDbsConstraintFk)
-				}
-				return CreateErrCodeWithArgs("DBS", ErrCodeDbsConstraintFk,
-					map[string]string{"ATR_ID": matches[1]})
-			},
-			matchRx: regexp.MustCompile(`^ERROR\: .+ on table \".+\" violates foreign key constraint \"fk_[0-9a-fA-F\-]{36}\"`),
-		},
-		{ // NOT NULL constraint violation
-			convertFn: func(err error) error {
-				matches := regexp.MustCompile(`^ERROR\: null value in column \"(.+)\" violates not-null constraint \(SQLSTATE 23502\)`).FindStringSubmatch(err.Error())
-				if len(matches) != 2 {
-					return CreateErrCode("DBS", ErrCodeDbsConstraintNotNull)
-				}
-				return CreateErrCodeWithArgs("DBS", ErrCodeDbsConstraintNotNull,
-					map[string]string{"COLUMN_NAME": matches[1]})
-			},
-			matchRx: regexp.MustCompile(`^ERROR\: null value in column \".+\" violates not-null constraint \(SQLSTATE 23502\)`),
-		},
-		{ // invalid syntax for type
-			convertFn: func(err error) error {
-				matches := regexp.MustCompile(`^ERROR\: invalid input syntax for type \w+\: \"(.+)\"`).FindStringSubmatch(err.Error())
-				if len(matches) != 2 {
-					return CreateErrCode("DBS", ErrCodeDbsInvalidTypeSyntax)
-				}
-				return CreateErrCodeWithArgs("DBS", ErrCodeDbsInvalidTypeSyntax,
-					map[string]string{"VALUE": matches[1]})
-			},
-			matchRx: regexp.MustCompile(`^ERROR\: invalid input syntax for type \w+\: \".+\"`),
-		},
-		{ // unique constraint violation, custom unique index
-			convertFn: func(err error) error {
-				matches := regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \"ind_([0-9a-fA-F\-]{36})\"`).FindStringSubmatch(err.Error())
-				if len(matches) != 2 {
-					return CreateErrCode("DBS", ErrCodeDbsConstraintUnique)
-				}
-
-				return CreateErrCodeWithArgs("DBS", ErrCodeDbsConstraintUnique,
-					map[string]string{"IND_ID": matches[1]})
-			},
-			matchRx: regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \"ind_[0-9a-fA-F\-]{36}\"`),
-		},
-		{ // failed to create unique index due to existing non-unique values
-			convertFn: func(err error) error { return CreateErrCode("DBS", ErrCodeDbsIndexFailUnique) },
-			matchRx:   regexp.MustCompile(`^ERROR\: could not create unique index.*ind_[0-9a-fA-F\-]{36}.*\(SQLSTATE 23505\)`),
-		},
-		{ // duplicate key violation: login name
-			convertFn: func(err error) error { return CreateErrCode("DBS", ErrCodeDbsConstraintUniqueLogin) },
-			matchRx:   regexp.MustCompile(`login_name_key.*\(SQLSTATE 23505\)`),
-		},
-		{ // error in prepared statement cache due to changed schema
-			convertFn: func(err error) error { return CreateErrCode("DBS", ErrCodeDbsChangedCachePlan) },
-			matchRx:   regexp.MustCompile(`\(SQLSTATE 0A000\)`),
+			number:  ErrCodeCsvWrongFieldNumber,
 		},
 	}
 )
 
 // creates standardized error code, to be interpreted and translated on the frontend
-// context is the general error context: APP (application), DBS (database system), SEC (security/access)
+// context is the general error context: APP (application), DBS (database system), SEC (security/access), ...
 // number is the unique error code, used to convert to a translated error message
-// message is the original error message, which is also appended in case error code is not translated
-// example error code: {ERR_DBS_069} My error message
+// example error code: {ERR_DBS_069}
 func CreateErrCode(context string, number int) error {
 	if !slices.Contains(errContexts, context) {
 		return errors.New("{INVALID_ERROR_CONTEXT}")
@@ -174,17 +110,15 @@ func CreateErrCode(context string, number int) error {
 	return fmt.Errorf("{ERR_%s_%03d}", context, number)
 }
 
-// creates standardized error code with arguments to send error related data for error interpretation
-// example error code: {ERR_DBS_069} [name2:value2] [name1:value1] My error message
-func CreateErrCodeWithArgs(context string, number int, argMapValues map[string]string) error {
-	if !slices.Contains(errContexts, context) {
-		return errors.New("{INVALID_ERROR_CONTEXT}")
+// as CreateErrCode, but appends JSON encoded data to the string
+func CreateErrCodeWithData(context string, number int, data interface{}) error {
+	code := CreateErrCode(context, number)
+
+	j, err := json.Marshal(data)
+	if err != nil {
+		return code
 	}
-	var args string
-	for arg, value := range argMapValues {
-		args = fmt.Sprintf("%s[%s:%s]", args, arg, value)
-	}
-	return fmt.Errorf("{ERR_%s_%03d}%s", context, number, args)
+	return fmt.Errorf("%s%s", code, j)
 }
 
 // converts expected errors to error codes to be parsed/translated by requestor
@@ -192,23 +126,79 @@ func CreateErrCodeWithArgs(context string, number int, argMapValues map[string]s
 // returns whether the error was identified
 func ConvertToErrCode(err error, anonymizeIfUnexpected bool) (error, bool) {
 
+	var processUnexpectedErr = func(err error) error {
+		if anonymizeIfUnexpected {
+			return CreateErrCode(ErrContextApp, ErrCodeAppUnknown)
+		}
+		return err
+	}
+
 	// already an error code, return as is
 	if errCodeRx.MatchString(err.Error()) {
 		return err, true
 	}
 
-	// check for match against all expected errors
-	for _, expErr := range errExpectedList {
-		if expErr.matchRx.MatchString(err.Error()) {
-			return expErr.convertFn(err), true
+	// check for PGX error
+	var pgxErr *pgconn.PgError
+	if errors.As(err, &pgxErr) {
+
+		switch pgxErr.Code {
+		case "0A000": // error in prepared statement cache due to changed schema
+			return CreateErrCode(ErrContextDbs, ErrCodeDbsChangedCachePlan), true
+		case "23502": // NOT NULL constraint failure
+			return CreateErrCodeWithData(ErrContextDbs, ErrCodeDbsConstraintNotNull, struct {
+				ModuleName    string `json:"moduleName"`
+				RelationName  string `json:"relationName"`
+				AttributeName string `json:"attributeName"`
+			}{
+				pgxErr.SchemaName,
+				pgxErr.TableName,
+				pgxErr.ColumnName,
+			}), true
+		case "23503": // foreign key constraint failure
+
+			// foreign key constraint names have this format: "fk_[UUID]"
+			if pgxErr.ConstraintName == "" || pgxErr.ConstraintName[0:3] != "fk_" {
+				return processUnexpectedErr(err), false
+			}
+
+			return CreateErrCodeWithData(ErrContextDbs, ErrCodeDbsConstraintFk, struct {
+				AttributeId string `json:"attributeId"`
+			}{pgxErr.ConstraintName[3:]}), true
+		case "23505": // unique index constraint failure
+
+			// special case: login name index
+			if pgxErr.ConstraintName == "login_name_key" {
+				return CreateErrCode(ErrContextDbs, ErrCodeDbsConstraintUniqueLogin), true
+			}
+
+			// unique index constraint names have this format: "ind_[UUID]"
+			if pgxErr.ConstraintName == "" || pgxErr.ConstraintName[0:4] != "ind_" {
+				return processUnexpectedErr(err), false
+			}
+
+			return CreateErrCodeWithData(ErrContextDbs, ErrCodeDbsConstraintUnique, struct {
+				PgIndexId string `json:"pgIndexId"`
+			}{pgxErr.ConstraintName[4:]}), true
+		case "22P02": // invalid type syntax
+			return CreateErrCode(ErrContextDbs, ErrCodeDbsInvalidTypeSyntax), true
+		case "P0001": // exception raised
+			if pgxErr.Message == "" || pgxErr.Message[0:6] != "R3_MSG" {
+				return processUnexpectedErr(err), false
+			}
+			return CreateErrCodeWithData(ErrContextDbs, ErrCodeDbsFunctionMessage, struct {
+				Message string `json:"message"`
+			}{pgxErr.Message[8:]}), true
 		}
 	}
 
-	// unexpected error
-	if anonymizeIfUnexpected {
-		return CreateErrCode("APP", ErrCodeAppUnknown), false
+	// check for match against expected errors
+	for _, expErr := range errExpectedList {
+		if expErr.matchRx.MatchString(err.Error()) {
+			return CreateErrCode(expErr.context, expErr.number), true
+		}
 	}
-	return err, false
+	return processUnexpectedErr(err), false
 }
 
 // error code checker
