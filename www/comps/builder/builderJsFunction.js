@@ -1,11 +1,14 @@
 import MyBuilderCaption   from './builderCaption.js';
 import MyBuilderQuery     from './builderQuery.js';
 import MyCodeEditor       from '../codeEditor.js';
-import {isAttributeFiles} from '../shared/attribute.js';
 import {getFieldMap}      from '../shared/form.js';
 import {copyValueDialog}  from '../shared/generic.js';
 import {getJoinsIndexMap} from '../shared/query.js';
 import MyTabs             from '../tabs.js';
+import {
+	getAttributeIcon,
+	isAttributeFiles
+} from '../shared/attribute.js';
 import {
 	getDependentModules,
 	getFormEntityMapRef,
@@ -429,7 +432,7 @@ let MyBuilderJsFunction = {
 							<div class="entity-title">
 								<my-button
 									@trigger="toggleVariableShow(v.id)"
-									:image="holderVariableIdsOpen.includes(v.id) ? 'triangleDown.png' : 'triangleRight.png'"
+									:images="[holderVariableIdsOpen.includes(v.id) ? 'triangleDown.png' : 'triangleRight.png',v.icon]"
 									:naked="true"
 									:caption="v.formId === null ? '[' + capGen.global + '] ' + v.name : v.name"
 									:captionTitle="v.comment === null ? v.name : v.name + ', ' + v.comment"
@@ -630,6 +633,25 @@ let MyBuilderJsFunction = {
 			}
 			return out.sort((a, b) => a.ref - b.ref);
 		},
+		variablesSorted:(s) => {
+			let out = [];
+			const addVariable = v => {
+				v.icon = getAttributeIcon(v.content,v.contentUse,false,false);
+				out.push(v);
+			};
+
+			// form assigned variables
+			for(const v of s.moduleIdMap[s.module.id].variables) {
+				if(v.formId === s.formId && s.formId !== null)
+					addVariable(v);
+			}
+			// global variables
+			for(const v of s.moduleIdMap[s.module.id].variables) {
+				if(v.formId === null)
+					addVariable(v);
+			}
+			return out;
+		},
 		hasChanges:(s) => s.name     !== s.jsFunction.name
 			|| s.codeArgs            !== s.jsFunction.codeArgs
 			|| s.codeFunction        !== s.placeholdersSet(s.jsFunction.codeFunction)
@@ -711,8 +733,6 @@ let MyBuilderJsFunction = {
 		},
 		jsFunctionsSorted:(s) => s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === s.formId && s.formId !== null).concat(
 			s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === null)),
-		variablesSorted:(s) => s.moduleIdMap[s.module.id].variables.filter(v => v.formId === s.formId && s.formId !== null).concat(
-			s.moduleIdMap[s.module.id].variables.filter(v => v.formId === null)),
 		
 		// simple
 		entityIdMapRef:    (s) => s.formId === null ? {} : s.getFormEntityMapRef(s.form.fields,s.form.actions),
@@ -741,6 +761,7 @@ let MyBuilderJsFunction = {
 	methods:{
 		// externals
 		copyValueDialog,
+		getAttributeIcon,
 		getDependentModules,
 		getFieldIcon,
 		getFieldTitle,
