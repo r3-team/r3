@@ -7,6 +7,7 @@ import (
 	"r3/cluster"
 	"r3/db"
 	"r3/schema"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -59,6 +60,20 @@ func eventFileRequested(ctx context.Context, reqJson json.RawMessage, loginId in
 		req.RecordId, req.FileId).Scan(&hash, &name); err != nil {
 		return nil, err
 	}
+
+	// compatibility fix
+	// we currently allow many special characters in file names, some are invalid in general (? & @), others are valid but must be escaped in URL (like #)
+	// file names are not escaped by r3 client in the download URL, this will cause download to fail
+	name = strings.NewReplacer(
+		"#", "",
+		"=", "",
+		"@", "",
+		"?", "",
+		":", "",
+		";", "",
+		"/", "",
+		"\\", "",
+		"&", "").Replace(name)
 
 	return nil, cluster.FileRequested(true, address, loginId,
 		req.AttributeId, req.FileId, hash.String, name, req.ChooseApp)

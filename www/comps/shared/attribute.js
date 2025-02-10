@@ -1,12 +1,13 @@
 import MyStore from '../../stores/store.js';
 
-let attributeContentNames = {
+const attributeContentNames = {
 	decimal:['numeric','real','double precision'],
 	float:['real','double precision'],
 	integer:['integer','bigint'],
 	relationship:['1:1','n:1','1:n'],
 	text:['varchar','text']
 };
+const removeInvalidHrefChars = s => s.replace(/[#=@?:;\/\\&]/g,'');
 
 export function getIndexAttributeId(index,attributeId,outsideIn,attributeIdNm) {
 	// creates unique attribute ID, based on relation index
@@ -65,14 +66,14 @@ export function getDetailsFromIndexAttributeId(indexAttributeId) {
 };
 
 export function getAttributeFileHref(attributeId,id,name,token) {
-	return `/data/download/${name}?attribute_id=${attributeId}&file_id=${id}&token=${token}`;
+	return `/data/download/${removeInvalidHrefChars(name)}?attribute_id=${attributeId}&file_id=${id}&token=${token}`;
 };
 export function getAttributeFileThumbHref(attributeId,id,name,version,token) {
-	// thumbnails are only available for the latest version, version getter only serves as cache denial
-	return `/data/download/thumb/${name}?attribute_id=${attributeId}&file_id=${id}&version=${version}&token=${token}`;
+	// thumbnails are only available for the latest file version, version getter only serves as cache denial
+	return `/data/download/thumb/${removeInvalidHrefChars(name)}?attribute_id=${attributeId}&file_id=${id}&version=${version}&token=${token}`;
 };
 export function getAttributeFileVersionHref(attributeId,id,name,version,token) {
-	return `/data/download/${name}?attribute_id=${attributeId}&file_id=${id}&version=${version}&token=${token}`;
+	return `/data/download/${removeInvalidHrefChars(name)}?attribute_id=${attributeId}&file_id=${id}&version=${version}&token=${token}`;
 };
 
 export function getValueFromQuery(content,queryValue) {
