@@ -2165,6 +2165,7 @@
 		"files": "Fájlok",
 		"filters": "Szűrők",
 		"form": "Űrlap",
+		"formActions": "Form actions",
 		"forms": "Űrlapok",
 		"functions": "Functions",
 		"global": "Global",

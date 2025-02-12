@@ -1,8 +1,9 @@
-import srcBase64Icon     from './shared/image.js';
-import {formOpen}        from './shared/form.js';
-import {getStringFilled} from './shared/generic.js';
-import {getCaption}      from './shared/language.js';
-import {getDateFormat}   from './shared/time.js';
+import srcBase64Icon       from './shared/image.js';
+import {formOpen}          from './shared/form.js';
+import {getStringFilled}   from './shared/generic.js';
+import {getCaption}        from './shared/language.js';
+import {layoutSettleSpace} from './shared/layout.js';
+import {getDateFormat}     from './shared/time.js';
 import {
 	getCollectionColumn,
 	getConsumersEntries
@@ -366,17 +367,16 @@ let MyHeader = {
 		systemMsgText:       (s) => s.$store.getters.systemMsgText
 	},
 	created() {
-		window.addEventListener('resize',this.windowResized);
+		window.addEventListener('resize',this.resized);
 	},
 	mounted() {
 		this.$watch(() => [this.colorHeaderAccent,this.colorHeaderMain],() => { this.updateMetaThemeColor() },{
 			immediate:true
 		});
-		
-		this.windowResized();
+		this.resized();
 	},
 	unmounted() {
-		window.removeEventListener('resize',this.windowResized);
+		window.removeEventListener('resize',this.resized);
 	},
 	methods:{
 		// externals
@@ -386,19 +386,10 @@ let MyHeader = {
 		getConsumersEntries,
 		getDateFormat,
 		getStringFilled,
+		layoutSettleSpace,
 		srcBase64Icon,
 		
 		// display
-		layoutAdjust() {
-			this.layoutCheckTimer = null;
-			
-			if(typeof this.$refs.empty === 'undefined' || this.$refs.empty.offsetWidth > 10 || this.layoutElements.length === 0)
-				return;
-			
-			// space insufficient and still elements available to reduce
-			this.layoutElements.shift();       // remove next element
-			this.$nextTick(this.layoutAdjust); // recheck after change
-		},
 		keysLockedMsg() {
 			this.$store.commit('dialog',{
 				captionBody:this.capErr.SEC['002'],
@@ -413,14 +404,13 @@ let MyHeader = {
 			// set meta theme color (for PWA window color)
 			document.querySelector('meta[name="theme-color"]').setAttribute('content',color.toString());
 		},
-		windowResized() {
+		resized() {
 			if(this.layoutCheckTimer !== null)
 				clearTimeout(this.layoutCheckTimer);
 			
 			this.layoutCheckTimer = setTimeout(() => {
-				// reset elements, then wait for layout to settle to check
 				this.layoutElements = JSON.parse(JSON.stringify(this.layoutElementsAvailableInOrder));
-				this.$nextTick(this.layoutAdjust);
+				this.$nextTick(() => this.layoutSettleSpace(this.layoutElements,this.$refs.empty));
 			},300);
 		},
 		

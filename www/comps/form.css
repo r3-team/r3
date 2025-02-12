@@ -37,8 +37,22 @@
 	flex:1 1 auto;
 	justify-content:flex-end;
 }
+.form-actions-pop-up{
+	width:100%;
+	max-width:320px;
+	min-width:220px;
+}
+.form-actions-pop-up-entries{
+	display:flex;
+	flex-flow:column nowrap;
+	gap:9px;
+}
 
 /* fields */
+.form-bar-layout-check{
+	max-width:5px;
+	flex:1 1 auto;
+}
 .form .fields{
 	overflow:auto;
 	display:flex;

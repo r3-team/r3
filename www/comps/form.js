@@ -11,6 +11,7 @@ import {getFieldOverwritesDefault}   from './shared/field.js';
 import {jsFunctionRun}               from './shared/jsFunction.js';
 import {srcBase64}                   from './shared/image.js';
 import {getCaption}                  from './shared/language.js';
+import {layoutSettleSpace}           from './shared/layout.js';
 import {
 	isAttributeRelationship,
 	isAttributeRelationshipN1,
@@ -114,17 +115,17 @@ let MyForm = {
 					</transition>
 				</div>
 
-				<div class="area" :class="{ 'form-actions-left':settings.formActionsAlign === 'left', 'form-actions-right':settings.formActionsAlign === 'right' }" v-if="!hasBarLower">
-					<my-form-actions
-						v-if="hasFormActions"
-						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-						:entityIdMapEffect="entityIdMapEffect"
-						:formActions="form.actions"
-						:formId="formId"
-						:moduleId="moduleId"
-					/>
-				</div>
+				<my-form-actions
+					v-if="!hasBarLower && hasFormActions"
+					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
+					:entityIdMapEffect="entityIdMapEffect"
+					:formActions="form.actions"
+					:formId="formId"
+					:moduleId="moduleId"
+					:noSpace="!layoutElements.includes('formActions')"
+				/>
 				
+				<div class="form-bar-layout-check" ref="formBarUpperCheck" />
 				<div class="area nowrap">
 					<template v-if="isData && !isBulkUpdate">
 						<my-button image="refresh.png"
@@ -181,14 +182,14 @@ let MyForm = {
 			</div>
 			
 			<!-- title bar lower -->
-			<div class="top lower" v-if="hasBarLower">
-				<div class="area">
+			<div class="top lower nowrap" v-if="hasBarLower">
+				<div class="area nowrap">
 					<my-button image="new.png"
 						v-if="buttonShownNew"
 						@trigger="openNewAsk(false)"
 						@trigger-middle="openNewAsk(true)"
 						:active="buttonActiveNew"
-						:caption="capGen.button.new"
+						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button image="save.png" alt-image="add.png"
@@ -198,14 +199,14 @@ let MyForm = {
 						:active="buttonActiveSave"
 						:altAction="!isMobile && allowNew && canCreate"
 						:altCaptionTitle="capGen.button.saveNewHint"
-						:caption="capGen.button.save"
+						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.save : ''"
 						:captionTitle="capGen.button.saveHint"
 					/>
 					<my-button image="save.png"
 						v-if="buttonShownSaveBulk"
 						@trigger="setBulkUpdate"
 						:active="buttonActiveSaveBulk"
-						:caption="capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length))"
+						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length)) : ''"
 						:captionTitle="capGen.button.saveHint"
 					/>
 					<my-button image="warning.png"
@@ -214,29 +215,29 @@ let MyForm = {
 						:caption="capGen.inputRequired"
 						:cancel="true"
 					/>
-				</div>
-				<div class="area" :class="{ 'form-actions-left':settings.formActionsAlign === 'left', 'form-actions-right':settings.formActionsAlign === 'right' }">
-					<my-form-actions
-						v-if="hasFormActions"
-						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-						:entityIdMapEffect="entityIdMapEffect"
-						:formActions="form.actions"
-						:formId="formId"
-						:moduleId="moduleId"
-					/>
-				</div>
-				<div class="area">
 					<my-button image="warning.png"
 						v-if="badLoad"
 						:caption="capApp.noAccess"
 						:cancel="true"
 					/>
+				</div>
+				<my-form-actions
+					v-if="hasFormActions"
+					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
+					:entityIdMapEffect="entityIdMapEffect"
+					:formActions="form.actions"
+					:formId="formId"
+					:moduleId="moduleId"
+					:noSpace="!layoutElements.includes('formActions')"
+				/>
+				<div class="form-bar-layout-check" ref="formBarLowerCheck" />
+				<div class="area">
 					<my-button image="shred.png"
 						v-if="buttonShownDel"
 						@trigger="delAsk"
 						:active="buttonActiveDel"
 						:cancel="true"
-						:caption="capGen.button.delete"
+						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.delete : ''"
 						:captionTitle="capGen.button.deleteHint"
 					/>
 				</div>
@@ -244,15 +245,14 @@ let MyForm = {
 			
 			<!-- title bar widget -->
 			<div class="top lower" v-if="hasBarWidget">
-				<div class="area">
-					<my-form-actions
-						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-						:entityIdMapEffect="entityIdMapEffect"
-						:formActions="form.actions"
-						:formId="formId"
-						:moduleId="moduleId"
-					/>
-				</div>
+				<my-form-actions
+					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
+					:entityIdMapEffect="entityIdMapEffect"
+					:formActions="form.actions"
+					:formId="formId"
+					:moduleId="moduleId"
+					:noSpace="false"
+				/>
 			</div>
 			
 			<!-- form fields -->
@@ -344,6 +344,8 @@ let MyForm = {
 		
 		window.addEventListener('keydown',this.handleHotkeys);
 		window.addEventListener('keyup',this.handleHotkeys);
+		window.addEventListener('resize',this.resized);
+		this.resized(null,0);
 	},
 	unmounted() {
 		if(!this.isWidget)
@@ -351,6 +353,7 @@ let MyForm = {
 		
 		window.removeEventListener('keydown',this.handleHotkeys);
 		window.removeEventListener('keyup',this.handleHotkeys);
+		window.removeEventListener('resize',this.resized);
 	},
 	data() {
 		return {
@@ -360,6 +363,13 @@ let MyForm = {
 			blockInputs:false,      // disable all user inputs (used by frontend functions)
 			firstLoad:true,         // form was not used before
 			lastFormId:'',          // when routing occurs: if ID is the same, no need to rebuild form
+			layoutCheckTimer:null,  // layout resize timer
+			layoutElements:[],        // elements that are shown, based on available space
+			layoutElementsAvailable:[ // elements that can be shown, in order of priority
+				'formActions',        // form action as buttons
+				'dataActionLabels',   // data action labels
+				'dataActionReadonly'  // data actions if inactive
+			],
 			loading:false,          // form is currently loading, informs sub components when form is ready
 			message:null,           // form message
 			messageTimeout:null,    // form message expiration timeout
@@ -502,10 +512,10 @@ let MyForm = {
 		buttonActiveNew:     (s) => !s.blockInputs  && s.canCreate && (!s.isNew || s.hasChanges),
 		buttonActiveSave:    (s) => !s.blockInputs  && s.canUpdate && s.hasChanges,
 		buttonActiveSaveBulk:(s) => !s.blockInputs  && s.canUpdate && s.hasChangesBulk,
-		buttonShownNew:      (s) => !s.isBulkUpdate && s.allowNew,
-		buttonShownDel:      (s) => !s.isBulkUpdate && s.allowDel,
-		buttonShownSave:     (s) => !s.isBulkUpdate,
-		buttonShownSaveBulk: (s) => s.isBulkUpdate,
+		buttonShownDel:      (s) => !s.isBulkUpdate && s.allowDel  && (s.buttonActiveDel || s.layoutElements.includes('dataActionReadonly')),
+		buttonShownNew:      (s) => !s.isBulkUpdate && s.allowNew  && (s.buttonActiveNew || s.layoutElements.includes('dataActionReadonly')),
+		buttonShownSave:     (s) => !s.isBulkUpdate && (s.buttonActiveSave     || s.layoutElements.includes('dataActionReadonly')),
+		buttonShownSaveBulk: (s) => s.isBulkUpdate  && (s.buttonActiveSaveBulk || s.layoutElements.includes('dataActionReadonly')),
 
 		// general entities
 		formStateIdMap: (s) => s.getFormStateIdMap(s.form.states),
@@ -858,6 +868,7 @@ let MyForm = {
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		jsFunctionRun,
+		layoutSettleSpace,
 		openLink,
 		pemImport,
 		rsaDecrypt,
@@ -940,6 +951,7 @@ let MyForm = {
 			this.popUpFieldIdSrc = null;
 			this.valuesNew       = {};
 			this.valuesOld       = {};
+			this.$nextTick(this.resized);
 
 			// for new records: apply defaults to update joins
 			// before get() as default values could be overwritten by form function
@@ -969,6 +981,16 @@ let MyForm = {
 		releaseLoadingOnNextTick() {
 			// releases state on next tick for watching components to react to with updated data
 			this.$nextTick(() => this.loading = false);
+		},
+		resized(evt,initialWaitMs) {
+			if(this.layoutCheckTimer !== null)
+				clearTimeout(this.layoutCheckTimer);
+			
+			this.layoutCheckTimer = setTimeout(() => {
+				this.layoutElements = JSON.parse(JSON.stringify(this.layoutElementsAvailable));
+				this.$nextTick(() => this.layoutSettleSpace(this.layoutElements,
+					this.hasBarLower ? this.$refs.formBarLowerCheck : this.$refs.formBarUpperCheck));
+			},initialWaitMs === undefined ? 300 : initialWaitMs);
 		},
 		routingGuard() {
 			const unsavedOk = !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);

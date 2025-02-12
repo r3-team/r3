@@ -1,17 +1,18 @@
-import isDropdownUpwards  from './shared/layout.js';
-import MyFilters          from './filters.js';
-import MyForm             from './form.js';
-import MyInputCollection  from './inputCollection.js';
-import MyInputOffset      from './inputOffset.js';
-import MyListAggregate    from './listAggregate.js';
-import MyListColumnBatch  from './listColumnBatch.js';
-import MyListCsv          from './listCsv.js';
-import MyListFilters      from './listFilters.js';
-import MyListOptions      from './listOptions.js';
-import MyValueRich        from './valueRich.js';
-import {consoleError}     from './shared/error.js';
-import {getCaption}       from './shared/language.js';
-import {isAttributeFiles} from './shared/attribute.js';
+import isDropdownUpwards   from './shared/layout.js';
+import MyFilters           from './filters.js';
+import MyForm              from './form.js';
+import MyInputCollection   from './inputCollection.js';
+import MyInputOffset       from './inputOffset.js';
+import MyListAggregate     from './listAggregate.js';
+import MyListColumnBatch   from './listColumnBatch.js';
+import MyListCsv           from './listCsv.js';
+import MyListFilters       from './listFilters.js';
+import MyListOptions       from './listOptions.js';
+import MyValueRich         from './valueRich.js';
+import {consoleError}      from './shared/error.js';
+import {getCaption}        from './shared/language.js';
+import {layoutSettleSpace} from './shared/layout.js';
+import {isAttributeFiles}  from './shared/attribute.js';
 import {
 	getColumnBatches,
 	getColumnTitle,
@@ -288,7 +289,7 @@ let MyList = {
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button image="edit.png"
-						v-if="hasUpdateBulk"
+						v-if="hasUpdateBulk && (selectedRows.length !== 0 || headerElements.includes('actionsReadonly'))"
 						@trigger="selectRowsBulkEdit(selectedRows)"
 						:active="selectedRows.length !== 0"
 						:caption="showActionTitles ? capGen.button.editBulk.replace('{COUNT}',selectedRows.length) : '(' + String(selectedRows.length) + ')'"
@@ -301,7 +302,7 @@ let MyList = {
 						:captionTitle="capApp.button.csvHint"
 					/>
 					<my-button image="shred.png"
-						v-if="hasDeleteAny"
+						v-if="hasDeleteAny && (selectedRows.length !== 0 || headerElements.includes('actionsReadonly'))"
 						@trigger="delAsk(selectedRows)"
 						:active="selectedRows.length !== 0"
 						:cancel="true"
@@ -382,7 +383,7 @@ let MyList = {
 						:naked="true"
 					/>
 					<my-button image="toggleUp.png"
-						v-if="!isCards"
+						v-if="!isCards && headerElements.includes('headerCollapse')"
 						@trigger="toggleHeader"
 						:captionTitle="capApp.button.collapseHeader"
 						:naked="true"
@@ -801,6 +802,8 @@ let MyList = {
 				'refresh',                   // optional
 				'offsetArrows',              // optional
 				'collectionTitles',          // optional, show collection titles
+				'headerCollapse',            // optional
+				'actionsReadonly',           // optional
 				'resultsCount'               // not important
 			]
 		};
@@ -1068,6 +1071,7 @@ let MyList = {
 		getRowsDecrypted,
 		isAttributeFiles,
 		isDropdownUpwards,
+		layoutSettleSpace,
 		routeChangeFieldReload,
 		routeParseParams,
 
@@ -1094,24 +1098,13 @@ let MyList = {
 			let font = this.colorMakeContrastFont(bg);
 			return `background-color:${bg};color:${font};`;
 		},
-		headerAdjust() {
-			this.headerCheckTimer = null;
-			
-			if(typeof this.$refs.empty === 'undefined' || this.$refs.empty === null || this.$refs.empty.offsetWidth > 10 || this.headerElements.length === 0)
-				return;
-			
-			// space insufficient and still elements available to reduce
-			this.headerElements.shift();       // remove next element
-			this.$nextTick(this.headerAdjust); // recheck after change
-		},
 		resized() {
 			if(this.headerCheckTimer !== null)
 				clearTimeout(this.headerCheckTimer);
 			
 			this.headerCheckTimer = setTimeout(() => {
-				// reset elements, then wait for layout to settle to check
 				this.headerElements = JSON.parse(JSON.stringify(this.headerElementsAvailableInOrder));
-				this.$nextTick(this.headerAdjust);
+				this.$nextTick(() => this.layoutSettleSpace(this.headerElements,this.$refs.empty));
 			},200);
 		},
 		updateDropdownDirection() {
