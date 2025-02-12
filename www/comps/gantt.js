@@ -877,13 +877,14 @@ let MyGantt = {
 					this.groups = [];
 					
 					// parse result rows to gantt groups
-					let color    = null;
-					let date0    = 0;
-					let date1    = 0;
-					let groupBy  = []; // group by criteria (can be identical to label)
-					let groupMap = {}; // map of all groups, key: groupBy
-					let groupColumns = []; // group column values
-					let values   = [];
+					let color            = null;
+					let date0            = 0;
+					let date1            = 0;
+					let groups           = []; // groups 
+					let groupBy          = []; // group by criteria (can be identical to label)
+					let groupColumns     = []; // group column values
+					let groupIndexByName = {}; // map of group indexes, key: group name
+					let values           = [];
 					
 					for(const r of res.payload.rows) {
 						groupBy      = [];
@@ -915,25 +916,26 @@ let MyGantt = {
 								vertical:this.columns[i].flags.vertical
 							});
 						}
-						let groupName = groupBy.join(' ');
+						let name = groupBy.join(' ');
 						
 						// add group if not there yet
-						if(typeof groupMap[groupName] === 'undefined') {
-							groupMap[groupName] = {
+						if(groupIndexByName[name] === undefined) {
+							groupIndexByName[name] = groups.length;
+							groups.push({
 								lines:[[]], // each line is an array of records
 								columns:groupColumns,
 								vertical:groupColumns.length === 0 ? false : groupColumns[0].vertical
-							};
+							});
 						}
 						
 						// check in which line record fits (no overlapping)
-						let lineIndex = this.getFreeLineIndex(groupMap[groupName].lines,date0,date1);
+						let lineIndex = this.getFreeLineIndex(groups[groupIndexByName[name]].lines,date0,date1);
 						if(lineIndex === -1) {
-							lineIndex = groupMap[groupName].lines.length;
-							groupMap[groupName].lines.push([]);
+							lineIndex = groups[groupIndexByName[name]].lines.length;
+							groups[groupIndexByName[name]].lines.push([]);
 						}
 						
-						groupMap[groupName].lines[lineIndex].push({
+						groups[groupIndexByName[name]].lines[lineIndex].push({
 							color:color,
 							date0:date0,
 							date1:date1,
@@ -941,12 +943,7 @@ let MyGantt = {
 							values:values
 						});
 					}
-					
-					// store groups, sorted by group by criteria
-					let keysSorted = Object.keys(groupMap).sort();
-					for(let i = 0, j = keysSorted.length; i < j; i++) {
-						this.groups.push(groupMap[keysSorted[i]]);
-					}
+					this.groups = groups;
 					
 					if(this.notScrolled) {
 						this.notScrolled = false;
