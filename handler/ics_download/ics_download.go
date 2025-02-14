@@ -205,6 +205,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback(ctx)
 
+	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		return
+	}
+
 	var query string
 	results, _, err := data.Get_tx(ctx, tx, dataGet, loginId, &query)
 	if err != nil {
