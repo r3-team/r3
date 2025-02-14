@@ -29,7 +29,8 @@ import {
 import {
 	checkDataOptions,
 	colorAdjustBg,
-	colorMakeContrastFont
+	colorMakeContrastFont,
+	deepIsEqual
 } from './shared/generic.js';
 import {
 	fillRelationRecordIds,
@@ -424,9 +425,9 @@ let MyList = {
 										:dropdownRight="(columnBatches.length > 1 && i === columnBatches.length - 1) || (columnBatches.length > 3 && i === columnBatches.length - 2)"
 										:filters="filtersCombined"
 										:filtersColumn="filtersColumn"
+										:isOrderedOrginal="isOrderedOrginal"
 										:joins="relationsJoined"
 										:orders="orders"
-										:orderOverwritten="orderOverwritten"
 										:relationId="query.relationId"
 										:rowCount="count"
 										:show="columnBatchIndexOption === i"
@@ -761,7 +762,6 @@ let MyList = {
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
 			layout:'table',             // current list layout (table, cards)
-			orderOverwritten:false,     // sort options were changed by user
 			rowsFetching:false,         // row values are being fetched
 			selectedRows:[],            // bulk selected rows by row index
 			showCsv:false,              // show UI for CSV import/export
@@ -781,7 +781,7 @@ let MyList = {
 			count:0,            // total result set count
 			limit:0,            // current result limit
 			offset:0,           // current result offset
-			orders:[],          // column orderings, copied on mount, changeable by user
+			orders:[],          // current column orderings
 			rows:[],            // current result set
 			filtersColumn:[],   // current user column filters
 			filtersQuick:'',    // current user quick text filter
@@ -920,7 +920,6 @@ let MyList = {
 		anyInputRows:        (s) => s.inputRecordIds.length !== 0,
 		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
 		choiceFilters:       (s) => s.getChoiceFilters(s.choices,s.choiceId),
-		choiceIdDefault:     (s) => s.fieldOptionGet(s.favoriteId,s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
 		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,s.columnBatchSort[0],true),
 		expressions:         (s) => s.getQueryExpressions(s.columns),
 		hasBulkActions:      (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
@@ -931,8 +930,10 @@ let MyList = {
 		hasUpdate:           (s) => s.checkDataOptions(2,s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
 		hasUpdateBulk:       (s) => s.checkDataOptions(2,s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
 		isCards:             (s) => s.layout === 'cards',
+		isOrderedOrginal:    (s) => s.deepIsEqual(s.query.orders,s.orders),
 		isTable:             (s) => s.layout === 'table',
 		joins:               (s) => s.fillRelationRecordIds(s.query.joins),
+		ordersOriginal:      (s) => JSON.parse(JSON.stringify(s.query.orders)),
 		relationsJoined:     (s) => s.getRelationsJoined(s.joins),
 		rowSelect:           (s) => s.isInput || s.hasUpdate,
 		rowsClear:           (s) => s.rows.filter(v => !s.inputRecordIds.includes(v.indexRecordIds['0'])),
@@ -1031,7 +1032,6 @@ let MyList = {
 				if(this.routeChangeFieldReload(newVals,oldVals)) {
 					this.paramsUpdated();
 					this.reloadOutside();
-					this.orderOverwritten = true;
 				}
 			});
 		}
@@ -1056,6 +1056,7 @@ let MyList = {
 		colorAdjustBg,
 		colorMakeContrastFont,
 		consoleError,
+		deepIsEqual,
 		fieldOptionGet,
 		fieldOptionSet,
 		fillRelationRecordIds,
@@ -1125,25 +1126,23 @@ let MyList = {
 			else         this.$refs.aggregations.get();
 		},
 		reloadOptions() {
-			if(this.usesPageHistory) {
-				// set initial states via route parameters
-				this.paramsUpdated();     // load existing parameters from route query
-				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-			} else {
-				// sub lists do not have route parameters, get initalized via defaults
-				this.choiceId = this.choiceIdDefault;
-				this.limit    = this.limitDefault;
-				this.orders   = JSON.parse(JSON.stringify(this.query.orders));
-			}
 			this.autoRenew       = this.fieldOptionGet(this.favoriteId,this.fieldId,'autoRenew',(this.autoRenewDefault === null ? -1 : this.autoRenewDefault));
 			this.cardsCaptions   = this.fieldOptionGet(this.favoriteId,this.fieldId,'cardsCaptions',true);
+			this.choiceId        = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
 			this.columnBatchSort = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnBatchSort',[[],[]]);
 			this.columnIdMapAggr = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnIdMapAggr',{});
 			this.filtersColumn   = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersColumn',[]);
 			this.filtersUser     = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersUser',[]);
+			this.showHeader      = this.fieldOptionGet(this.favoriteId,this.fieldId,'header',true);
 			this.limit           = this.fieldOptionGet(this.favoriteId,this.fieldId,'limit',this.limitDefault);
 			this.layout          = this.fieldOptionGet(this.favoriteId,this.fieldId,'layout',this.layoutDefault);
-			this.showHeader      = this.fieldOptionGet(this.favoriteId,this.fieldId,'header',true);
+			this.orders          = this.fieldOptionGet(this.favoriteId,this.fieldId,'orders',this.ordersOriginal);
+
+			if(this.usesPageHistory) {
+				// set initial states via route parameters
+				this.paramsUpdated();     // load existing parameters from route query
+				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
+			}
 		},
 		reloadInside(entity) {
 			// inside state has changed, reload list (not relevant for list input)
@@ -1158,7 +1157,6 @@ let MyList = {
 				break;
 				case 'order':
 					this.offset = 0;
-					this.orderOverwritten = true;
 				break;
 				default: break; // no special treatment
 			}
@@ -1202,21 +1200,18 @@ let MyList = {
 		},
 		paramsUpdated() {
 			// apply query parameters
-			// initial filter choice is set to first available choice (if there are any)
-			// initial order by parameter follows query order
-			//  if user overwrites order, initial order is empty
 			let params = {
-				choice: { parse:'string',   value:this.choiceIdDefault },
+				choice: { parse:'string',   value:this.choiceId },
 				offset: { parse:'int',      value:0 },
-				orderby:{ parse:'listOrder',value:!this.orderOverwritten ? JSON.stringify(this.query.orders) : '[]' }
+				orderby:{ parse:'listOrder',value:JSON.stringify(this.orders) }
 			};
 			this.routeParseParams(params);
 			
-			if(this.choiceId !== params['choice'].value)
-				this.choiceId = params['choice'].value;
+			if(this.choiceId !== params.choice.value)
+				this.choiceId = params.choice.value;
 			
-			this.offset = params['offset'].value;
-			this.orders = JSON.parse(params['orderby'].value);
+			this.offset = params.offset.value;
+			this.orders = JSON.parse(params.orderby.value);
 			
 			// apply first order for card layout selector
 			this.cardsOrderByColumnBatchIndex = -1;
@@ -1387,7 +1382,7 @@ let MyList = {
 		},
 		setOrder(columnBatch,directionAsc) {
 			// remove initial sorting when changing anything
-			if(!this.orderOverwritten)
+			if(this.isOrderedOrginal)
 				this.orders = [];
 			
 			const orderIndexesUsed = this.getOrderIndexesFromColumnBatch(columnBatch,this.columns,this.orders);
@@ -1400,15 +1395,15 @@ let MyList = {
 					const col = this.columns[columnIndexSort];
 					if(col.subQuery) {
 						this.orders.push({
-							expressionPos:columnIndexSort, // equal to expression index
-							ascending:directionAsc
+							ascending:directionAsc,
+							expressionPos:columnIndexSort // equal to expression index
 						});
 					}
 					else {
 						this.orders.push({
+							ascending:directionAsc,
 							attributeId:col.attributeId,
-							index:col.index,
-							ascending:directionAsc
+							index:col.index
 						});
 					}
 				}
@@ -1422,12 +1417,18 @@ let MyList = {
 					}
 				}
 			}
+
+			// when last order is removed, revert to original
+			if(this.orders.length === 0)
+				this.orders = this.ordersOriginal;
+
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'orders',JSON.parse(JSON.stringify(this.orders)));
 			this.reloadInside('order');
 		},
 		setUserFilters(v) {
 			this.filtersUser = v;
-			this.reloadInside('filtersUser');
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersUser',v);
+			this.reloadInside('filtersUser');
 		},
 		toggleHeader() {
 			this.showHeader = !this.showHeader;

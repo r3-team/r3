@@ -68,6 +68,36 @@ export function copyValueDialog(captionTop,captionBody,copyClipboardValue) {
 	});
 };
 
+export function deepIsEqual(o1,o2) {
+	if(o1 === o2)
+		return true;
+
+	if(Array.isArray(o1) && Array.isArray(o2)) {
+		if(o1.length !== o2.length)
+			return false;
+
+		return o1.every((v,i) => deepIsEqual(v,o2[i]));
+	}
+
+	if(typeof o1 === 'object' && typeof o2 === 'object' && o1 !== null && o2 !== null) {
+		if(Array.isArray(o1) || Array.isArray(o2))
+			return false;
+
+		const k1 = Object.keys(o1);
+		const k2 = Object.keys(o2);
+
+		if(k1.length !== k2.length || !k1.every(k => k2.includes(k)))
+			return false;
+
+		for(const k in o1) {
+			if(!deepIsEqual(o1[k], o2[k]))
+				return false;
+		}
+		return true;
+	}
+	return false;
+};
+
 export function getBuildFromVersion(fullVersion) {
 	let m = fullVersion.match(/\d+\.\d+\.\d+\.(\d+)/);
 	

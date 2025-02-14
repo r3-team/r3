@@ -432,9 +432,6 @@ let MyCalendar = {
 			s.attributeIdColor,s.indexColor
 		).concat(s.getQueryExpressions(s.columns)),
 		
-		// default is user field option, fallback is first choice in list
-		choiceIdDefault:(s) => s.fieldOptionGet(s.favoriteId,s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
-		
 		// simple
 		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
 		hasChoices:   (s) => s.choices.length > 1,
@@ -580,14 +577,14 @@ let MyCalendar = {
 			if(this.daysShowToggle)
 				this.daysShow = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'daysShow',this.daysShowDef));
 			
-			this.zoom = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'zoom',this.zoomDefault));
+			
+			this.choiceId = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
+			this.zoom     = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'zoom',this.zoomDefault));
 			
 			if(this.usesPageHistory) {
 				// set initial states via route parameters
 				this.paramsUpdated();     // load existing parameters from route query
 				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-			} else {
-				this.choiceId = this.choiceIdDefault;
 			}
 		},
 		reloadOutside() {
@@ -620,7 +617,7 @@ let MyCalendar = {
 		},
 		paramsUpdated() {
 			let params = {
-				choice:  { parse:'string', value:this.choiceIdDefault },
+				choice:  { parse:'string', value:this.choiceId },
 				daysShow:{ parse:'int',    value:this.daysShow },
 				day:     { parse:'int',    value:this.date.getDate() },
 				month:   { parse:'int',    value:this.date.getMonth() },

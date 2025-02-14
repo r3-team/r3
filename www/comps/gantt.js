@@ -427,12 +427,6 @@ let MyGantt = {
 		};
 	},
 	computed:{
-		// default is user field option, fallback is first choice in list
-		choiceIdDefault:(s) => s.fieldOptionGet(
-			s.favoriteId,s.fieldId,'choiceId',
-			s.choices.length === 0 ? null : s.choices[0].id
-		),
-		
 		// unix date range points, 0=gantt start, 1=gantt end
 		date0:(s) => {
 			let d = new Date(s.dateStart.getTime());
@@ -578,14 +572,6 @@ let MyGantt = {
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'ganttStepZoom',this.stepZoom);
 			this.$nextTick(() => this.setSteps(false));
 		});
-		
-		if(this.usesPageHistory) {
-			// set initial states via route parameters
-			this.paramsUpdated();     // load existing parameters from route query
-			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-		} else {
-			this.choiceId = this.choiceIdDefault;
-		}
 		
 		this.reloadOptions();
 		this.ready = true;
@@ -743,8 +729,15 @@ let MyGantt = {
 		
 		// reloads
 		reloadOptions() {
+			this.choiceId        = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
 			this.showGroupLabels = this.fieldOptionGet(this.favoriteId,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
 			this.stepZoom        = this.fieldOptionGet(this.favoriteId,this.fieldId,'ganttStepZoom',this.stepZoom);
+			
+			if(this.usesPageHistory) {
+				// set initial states via route parameters
+				this.paramsUpdated();     // load existing parameters from route query
+				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
+			}
 		},
 		reloadOutside() {
 			this.createHeaderItems();
@@ -777,17 +770,17 @@ let MyGantt = {
 		},
 		paramsUpdated() {
 			let params = {
-				choice:{ parse:'string', value:this.choiceIdDefault },
+				choice:{ parse:'string', value:this.choiceId },
 				page:  { parse:'int',    value:0 },
 				type:  { parse:'string', value:this.stepTypeDefault }
 			};
 			
 			this.routeParseParams(params);
-			this.page     = params['page'].value;
-			this.stepType = params['type'].value;
+			this.page     = params.page.value;
+			this.stepType = params.type.value;
 			
-			if(this.choiceId !== params['choice'].value)
-				this.choiceId = params['choice'].value;
+			if(this.choiceId !== params.choice.value)
+				this.choiceId = params.choice.value;
 		},
 		
 		// presentation

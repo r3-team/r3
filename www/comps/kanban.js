@@ -496,11 +496,6 @@ let MyKanban = {
 		};
 	},
 	computed:{
-		choiceIdDefault:(s) => s.fieldOptionGet(
-			// default is user field option, fallback is first choice in list
-			s.favoriteId,s.fieldId,'choiceId',
-			s.choices.length === 0 ? null : s.choices[0].id
-		),
 		columnIndexesData:(s) => {
 			let out = [];
 			for(let i = 0, j = s.columns.length; i < j; i++) {
@@ -715,15 +710,15 @@ let MyKanban = {
 		
 		// reloads
 		reloadOptions() {
+			this.choiceId     = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
+			this.showCaptions = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanShowCaptions',this.showCaptions);
+			this.zoom         = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanZoom',this.zoom);
+
 			if(this.usesPageHistory) {
 				// set initial states via route parameters
 				this.paramsUpdated();     // load existing parameters from route query
 				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-			} else {
-				this.choiceId = this.choiceIdDefault;
 			}
-			this.showCaptions = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanShowCaptions',this.showCaptions);
-			this.zoom         = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanZoom',this.zoom);
 		},
 		reloadOutside() {
 			this.get();
@@ -747,14 +742,11 @@ let MyKanban = {
 			this.$emit('set-args',args,pushHistory);
 		},
 		paramsUpdated() {
-			let params = {
-				choice:{ parse:'string', value:this.choiceIdDefault }
-			};
-			
+			let params = { choice:{ parse:'string', value:this.choiceId } };
 			this.routeParseParams(params);
 			
-			if(this.choiceId !== params['choice'].value)
-				this.choiceId = params['choice'].value;
+			if(this.choiceId !== params.choice.value)
+				this.choiceId = params.choice.value;
 		},
 		
 		// backend calls

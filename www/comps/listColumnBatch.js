@@ -148,9 +148,9 @@ let MyListColumnBatch = {
 		dropdownRight:   { type:Boolean, required:true },
 		filters:         { type:Array,   required:true }, // list filters all combined (columns, list, quick, user, choices, ...)
 		filtersColumn:   { type:Array,   required:true }, // list filters from users column batch selections
+		isOrderedOrginal:{ type:Boolean, required:true }, // list orders are the same as original defined
 		joins:           { type:Array,   required:true }, // list joins
 		orders:          { type:Array,   required:true }, // list orders
-		orderOverwritten:{ type:Boolean, required:true }, // list orders were overwritten by user
 		relationId:      { type:String,  required:true }, // list query base relation ID
 		rowCount:        { type:Number,  required:true }, // list total row count
 		show:            { type:Boolean, required:true }
@@ -239,7 +239,7 @@ let MyListColumnBatch = {
 		showFilterItems:  (s) => s.values.length != 0,
 		showFilterText:   (s) => s.values.length >= 5 && !s.isDateOrTime,
 		showIconFilter:   (s) => s.isValidFilter && s.isFiltered,
-		showIconOrder:    (s) => s.isOrdered && s.orderOverwritten,
+		showIconOrder:    (s) => s.isOrdered && !s.isOrderedOrginal,
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
