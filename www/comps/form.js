@@ -105,13 +105,7 @@ let MyForm = {
 					<!-- form title / message -->
 					<transition name="fade" mode="out-in">
 						<h1 v-if="title !== '' && message === null" class="title">{{ title }}</h1>
-						<h1 class="form-message" v-else-if="message !== null">
-							<my-button
-								:active="false"
-								:caption="message"
-								:naked="true"
-							/>
-						</h1>
+						<h1 class="form-message" v-else-if="message !== null">{{ message }}</h1>
 					</transition>
 				</div>
 
