@@ -2,12 +2,15 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
+	/* required for some input fields to take proper size */
 	max-height:100%;
 }
 .field.container{
 	display:flex;
 	flex-flow:column wrap;
 	margin:0px !important;
+	/* to unset max-height:100% on .field for containers */
+	max-height:unset;
 }
 .field.container.row{
 	flex-direction:row;
