@@ -105,6 +105,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 		ALTER TABLE app.menu ALTER COLUMN menu_tab_id SET NOT NULL;
 		ALTER TABLE app.menu DROP  COLUMN module_id;
+
+		ALTER TABLE app.collection_consumer DROP COLUMN multi_value;
+		ALTER TABLE app.collection_consumer DROP COLUMN no_display_empty;
 	*/
 
 	"3.9": func(ctx context.Context, tx pgx.Tx) (string, error) {
