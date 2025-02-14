@@ -305,6 +305,10 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 	}
 	defer tx.Rollback(ctx)
 
+	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+		return 0, err
+	}
+
 	var query string
 	rows, total, err := data.Get_tx(ctx, tx, get, loginId, &query)
 	if err != nil {

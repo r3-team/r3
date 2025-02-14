@@ -183,6 +183,10 @@ func importFromCsv(ctx context.Context, filePath string, loginId int64, boolTrue
 	}
 	defer tx.Rollback(ctx)
 
+	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+		return 0, err
+	}
+
 	// parse CSV file
 	reader := csv.NewReader(file)
 	reader.Comma, _ = utf8.DecodeRuneInString(commaChar)
