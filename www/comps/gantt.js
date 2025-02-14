@@ -547,6 +547,9 @@ let MyGantt = {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew))
 				this.reset();
 		});
+		this.$watch('favoriteId',(val) => {
+			this.reloadOptions();
+		});
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
@@ -584,10 +587,7 @@ let MyGantt = {
 			this.choiceId = this.choiceIdDefault;
 		}
 		
-		// initial field options
-		this.showGroupLabels = this.fieldOptionGet(this.favoriteId,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
-		this.stepZoom        = this.fieldOptionGet(this.favoriteId,this.fieldId,'ganttStepZoom',this.stepZoom);
-		
+		this.reloadOptions();
 		this.ready = true;
 		this.$nextTick(() => this.setSteps(false));
 	},
@@ -742,6 +742,10 @@ let MyGantt = {
 		},
 		
 		// reloads
+		reloadOptions() {
+			this.showGroupLabels = this.fieldOptionGet(this.favoriteId,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
+			this.stepZoom        = this.fieldOptionGet(this.favoriteId,this.fieldId,'ganttStepZoom',this.stepZoom);
+		},
 		reloadOutside() {
 			this.createHeaderItems();
 			this.get();
