@@ -837,6 +837,7 @@
 			"columnBatch": "列批处理（拖放列以展开）",
 			"columnBatchDir": "列对齐方式（左右，上下）",
 			"columnBatchOff": "从批处理中移除列",
+			"columnBoolAtrIcon": "Show attribute icon if TRUE",
 			"columnClipboard": "剪贴板",
 			"columnHeaderData": "数据检索",
 			"columnLength": "长度（字符）",

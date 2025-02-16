@@ -2,6 +2,7 @@ import MyBuilderCaption from './builderCaption.js';
 import MyBuilderQuery   from './builderQuery.js';
 import {
 	getIndexAttributeIdsByJoins,
+	isAttributeBoolean,
 	isAttributeFiles,
 	isAttributeInteger,
 	isAttributeString,
@@ -100,6 +101,12 @@ let MyBuilderColumnOptions = {
 								@update:modelValue="setStyle('previewLarge',$event)"
 								:caption="capApp.columnPreviewLarge"
 								:modelValue="column.styles.includes('previewLarge')"
+							/>
+							<my-button-check
+								v-if="isBoolean"
+								@update:modelValue="setStyle('boolAtrIcon',$event)"
+								:caption="capApp.columnBoolAtrIcon"
+								:modelValue="column.styles.includes('boolAtrIcon')"
 							/>
 						</div>
 					</td>
@@ -238,13 +245,14 @@ let MyBuilderColumnOptions = {
 		
 		// simple
 		isBarcode: (s) => s.isString  && s.attribute.contentUse === 'barcode',
+		isBoolean: (s) => s.isAttributeBoolean(s.attribute.content),
 		isColor:   (s) => s.isString  && s.attribute.contentUse === 'color',
 		isDrawing: (s) => s.isString  && s.attribute.contentUse === 'drawing',
-		isUuid:    (s) => s.isAttributeUuid(s.attribute.content),
 		isFiles:   (s) => s.isAttributeFiles(s.attribute.content),
 		isInteger: (s) => s.isAttributeInteger(s.attribute.content),
 		isString:  (s) => s.isAttributeString(s.attribute.content),
 		isSubQuery:(s) => s.column.subQuery,
+		isUuid:    (s) => s.isAttributeUuid(s.attribute.content),
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -255,6 +263,7 @@ let MyBuilderColumnOptions = {
 		// externals
 		getCaptionByIndexAttributeId,
 		getIndexAttributeIdsByJoins,
+		isAttributeBoolean,
 		isAttributeFiles,
 		isAttributeInteger,
 		isAttributeString,

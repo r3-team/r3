@@ -837,6 +837,7 @@
 			"columnBatch": "Spaltenstapel (Spalten hier ablegen um zu erweitern)",
 			"columnBatchDir": "Spaltenausrichtung (links-rechts, hoch-runter)",
 			"columnBatchOff": "Spalte vom Stapel entfernen",
+			"columnBoolAtrIcon": "Attribut-Icon anzeigen wenn WAHR",
 			"columnClipboard": "Zwischenablage",
 			"columnHeaderData": "Datenabfrage",
 			"columnLength": "Länge (Charakt.)",

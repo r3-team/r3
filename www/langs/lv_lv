@@ -837,6 +837,7 @@
 			"columnBatch": "Column batch (drag&drop columns to expand)",
 			"columnBatchDir": "Column alignment (left-right, up-down)",
 			"columnBatchOff": "Remove column from batch",
+			"columnBoolAtrIcon": "Show attribute icon if TRUE",
 			"columnClipboard": "Clipboard",
 			"columnHeaderData": "Data retrieval",
 			"columnLength": "Length (chars.)",

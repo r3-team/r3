@@ -837,6 +837,7 @@
 			"columnBatch": "Lot de colonnes (glissez-déposez des colonnes pour les développer)",
 			"columnBatchDir": "Alignement des colonnes (gauche-droite, haut-bas)",
 			"columnBatchOff": "Supprimer la colonne du lot",
+			"columnBoolAtrIcon": "Show attribute icon if TRUE",
 			"columnClipboard": "Presse-papiers",
 			"columnHeaderData": "Récupération des données",
 			"columnLength": "Longueur (caractères)",

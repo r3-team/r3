@@ -1,4 +1,4 @@
-import {srcBase64} from './shared/image.js';
+import srcBase64Icon from './shared/image.js';
 import {
 	getAttributeFileThumbHref,
 	getAttributeFileVersionHref
@@ -21,6 +21,7 @@ export {MyValueRich as default};
 let MyValueRich = {
 	name:'my-value-rich',
 	template:`<div class="value-rich"
+		v-if="active"
 		@focus="$emit('focus')"
 		@click="$emit('trigger')"
 		@keyup.space.enter="$emit('trigger')"
@@ -31,7 +32,6 @@ let MyValueRich = {
 		<my-button image="copyClipboard.png"
 			v-if="clipboard && !isFiles"
 			@trigger="copyToClipboard"
-			:active="value !== null"
 			:blockBubble="true"
 			:captionTitle="capGen.button.copyClipboard"
 			:naked="true"
@@ -42,7 +42,6 @@ let MyValueRich = {
 			v-if="isLink"
 			@trigger="openLink(link.href,link.blank)"
 			@trigger-middle="openLink(link.href,link.blank)"
-			:active="value !== null"
 			:blockBubble="true"
 			:image="link.image"
 			:naked="true"
@@ -50,8 +49,8 @@ let MyValueRich = {
 
 		<!-- rating icon -->
 		<img class="value-rich-rating-icon"
-			v-if="isRating && value !== null"
-			:src="attributeIdMap[attributeId].iconId !== null ? srcBase64(iconIdMap[attributeIdMap[attributeId].iconId].file) : 'images/star1.png'"
+			v-if="isRating"
+			:src="srcBase64Icon(attributeIdMap[attributeId].iconId,'images/star1.png')"
 		/>
 		
 		<!-- string value -->
@@ -60,18 +59,18 @@ let MyValueRich = {
 		</span>
 		
 		<!-- boolean value -->
-		<template v-if="isBoolean && value !== null">
+		<template v-if="isBoolean">
 			<img class="boolean"
-				v-if="settings.boolAsIcon"
-				:class="{ ok:value }"
-				:src="value ? 'images/ok.png' : 'images/cancel.png'"
+				v-if="settings.boolAsIcon && iconBoolean !== null"
+				:class="boolAtrIcon ? '' : (value ? 'true' : 'false')"
+				:src="iconBoolean"
 			/>
-			<span v-else>{{ value ? capGen.option.yes : capGen.option.no }}</span>
+			<span v-if="!settings.boolAsIcon">{{ value ? capGen.option.yes : capGen.option.no }}</span>
 		</template>
 
 		<!-- barcode -->
 		<img class="barcode clickable"
-			v-if="isBarcode && isGallery && value !== null"
+			v-if="isBarcode && isGallery"
 			@click.left.stop="openDataImageAsNewTag(JSON.parse(value).image)"
 			:class="{ previewLarge:previewLarge }"
 			:src="JSON.parse(value).image"
@@ -79,7 +78,7 @@ let MyValueRich = {
 		
 		<!-- drawing -->
 		<img class="drawing clickable"
-			v-if="isDrawing && value !== null"
+			v-if="isDrawing"
 			@click.left.stop="openDataImageAsNewTag(JSON.parse(value).image)"
 			:class="{ previewLarge:previewLarge }"
 			:src="JSON.parse(value).image"
@@ -115,6 +114,7 @@ let MyValueRich = {
 		attributeId: { type:String,  required:true },
 		basis:       { type:Number,  required:false, default:0 },         // size basis (usually column width)
 		bold:        { type:Boolean, required:false, default:false },
+		boolAtrIcon: { type:Boolean, required:false, default:false },     // show attribute icon if boolean is true
 		clipboard:   { type:Boolean, required:false, default:false },     // copy-to-clipboard action
 		display:     { type:String,  required:false, default:'default' }, // variant (url, gallery, password ...)
 		italic:      { type:Boolean, required:false, default:false },
@@ -148,14 +148,23 @@ let MyValueRich = {
 		};
 	},
 	computed:{
-		files:(s) => !s.isFiles || s.value === null ? [] : s.value,
-		link: (s) => {
+		active:   (s) => s.value !== null && (!s.boolAtrIcon || s.value !== false),
+		attribute:(s) => s.attributeIdMap[s.attributeId],
+		files:    (s) => !s.isFiles || s.value === null ? [] : s.value,
+		link:     (s) => {
 			if(!s.isLink || s.value === null) return false;
 			
 			return s.getLinkMeta(s.display, s.isBarcode ? JSON.parse(s.value).text : s.value);
 		},
 		
 		// styles
+		iconBoolean:(s) => {
+			if(!s.boolAtrIcon)
+				return s.value ? 'images/ok.png' : 'images/cancel.png';
+			
+			return s.value && s.attribute.iconId !== null
+				? s.srcBase64Icon(s.attribute.iconId,'') : null;
+		},
 		style:(s) => {
 			let out = [];
 			if(s.basis !== 0) out.push(`max-width:${s.basis}px`);
@@ -187,7 +196,7 @@ let MyValueRich = {
 		getUtcTimeStringFromUnix,
 		openDataImageAsNewTag,
 		openLink,
-		srcBase64,
+		srcBase64Icon,
 		
 		copyToClipboard() {
 			let value = !this.isPassword ? this.stringValueFull : this.value;
@@ -200,8 +209,7 @@ let MyValueRich = {
 		},
 		setValue() {
 			let directValue = false;
-			let atr = this.attributeIdMap[this.attributeId];
-			switch(atr.content) {
+			switch(this.attribute.content) {
 				case 'boolean':
 					return this.isBoolean = true;
 				break;
@@ -215,7 +223,7 @@ let MyValueRich = {
 				case 'varchar':
 					
 					// handle different uses and display options
-					switch(atr.contentUse) {
+					switch(this.attribute.contentUse) {
 						case 'barcode':
 							this.isBarcode = true;
 
@@ -246,7 +254,7 @@ let MyValueRich = {
 				// integers
 				case 'integer': // fallthrough
 				case 'bigint':
-					switch(atr.contentUse) {
+					switch(this.attribute.contentUse) {
 						case 'date': // shift to local offset to show correct date
 							this.stringValueFull = this.value === null ? ''
 								: this.getUnixFormat(this.getUnixShifted(this.value,true),this.settings.dateFormat);
@@ -263,7 +271,7 @@ let MyValueRich = {
 				case 'numeric': // fallthrough
 				case 'double precision':
 				case 'real':
-					this.stringValueFull = this.getNumberFormatted(this.value,atr);
+					this.stringValueFull = this.getNumberFormatted(this.value,this.attribute);
 				break;
 				
 				// others (UUID)

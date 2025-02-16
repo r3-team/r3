@@ -377,8 +377,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- new display type
 			ALTER TYPE app.data_display ADD VALUE 'rating';
 
-			-- new column style
+			-- new column styles
 			ALTER TYPE app.column_style ADD VALUE 'previewLarge';
+			ALTER TYPE app.column_style ADD VALUE 'boolAtrIcon';
 
 			-- default values for variables
 			ALTER TABLE app.variable ADD COLUMN def TEXT;

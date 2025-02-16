@@ -837,6 +837,7 @@
 			"columnBatch": "Oszlop Csomagolás (Helyezd az oszlopokat ide a kiterjesztéshez)",
 			"columnBatchDir": "Oszlopos Rendezés (balról-jobbra, fentről-lefelé)",
 			"columnBatchOff": "Oszlop Távolítása a Csomagból",
+			"columnBoolAtrIcon": "Show attribute icon if TRUE",
 			"columnClipboard": "Vágólap",
 			"columnHeaderData": "Adatlekérdezés",
 			"columnLength": "Hossz (karakterben)",

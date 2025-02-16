@@ -39,12 +39,13 @@
 .value-rich img.boolean{
 	width:24px;
 	height:24px;
-	filter:var(--image-filter-error);
+	filter:var(--image-filter);
 }
-.value-rich img.boolean.ok{
-	width:24px;
-	height:24px;
+.value-rich img.boolean.true{
 	filter:var(--image-filter-success);
+}
+.value-rich img.boolean.false{
+	filter:var(--image-filter-error);
 }
 .value-rich .barcode,
 .value-rich .drawing,

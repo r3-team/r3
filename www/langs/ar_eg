@@ -837,6 +837,7 @@
 			"columnBatch": "مجموعة الأعمدة (اسحب الأعمدة وأفلتها للتوسيع)",
 			"columnBatchDir": "محاذاة العمود (من اليسار إلى اليمين، من أعلى إلى أسفل)",
 			"columnBatchOff": "إزالة العمود من الدفعة",
+			"columnBoolAtrIcon": "Show attribute icon if TRUE",
 			"columnClipboard": "الحافظة",
 			"columnHeaderData": "استرجاع البيانات",
 			"columnLength": "الطول (الحرف)",
