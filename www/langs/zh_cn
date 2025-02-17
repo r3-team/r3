@@ -1837,7 +1837,8 @@
 			"004": "记录无法删除 - 它仍然在“{MOD}”中作为“{ATR}”的引用。",
 			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "无法创建唯一索引，因为现有属性值不是唯一的。",
-			"007": "Changes cannot be saved due to an invalid value type."
+			"007": "Changes cannot be saved due to an invalid value type.",
+			"008": "Failed to create attribute with required value, as existing records do not have a value yet and no default is defined."
 		},
 		"SEC": {
 			"001": "您未被授权完成此操作或访问此资源。",

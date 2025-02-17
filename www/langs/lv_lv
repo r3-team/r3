@@ -1837,7 +1837,8 @@
 			"004": "Record cannot be deleted - it is still being referenced as '{ATR}' in '{MOD}'.",
 			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "Failed to create unique index, because existing attribute values are not unique.",
-			"007": "Changes cannot be saved due to an invalid value type."
+			"007": "Changes cannot be saved due to an invalid value type.",
+			"008": "Failed to create attribute with required value, as existing records do not have a value yet and no default is defined."
 		},
 		"SEC": {
 			"001": "You are not authorized to complete this action or access this resource.",

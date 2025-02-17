@@ -1837,7 +1837,8 @@
 			"004": "L'enregistrement ne peut pas être supprimé - il est toujours référencé en tant que '{ATR}' dans '{MOD}'.",
 			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "Échec de la création de l'index unique, car les valeurs d'attribut existantes ne sont pas uniques.",
-			"007": "Changes cannot be saved due to an invalid value type."
+			"007": "Changes cannot be saved due to an invalid value type.",
+			"008": "Failed to create attribute with required value, as existing records do not have a value yet and no default is defined."
 		},
 		"SEC": {
 			"001": "Vous n'êtes pas autorisé à effectuer cette action ou à accéder à cette ressource.",

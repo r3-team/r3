@@ -122,7 +122,10 @@ export function resolveErrCode(message) {
 						break;
 					}
 				}
-				if(atr === undefined) return message;
+
+				// special case: New non-nullable attribute cannot be created
+				if(atr === undefined)
+					return MyStore.getters.captions.error.DBS['008'];
 				
 				return cap.replace('{NAME}',getCaption('attributeTitle',mod.id,atr.id,atr.captions,atr.name));
 			break;

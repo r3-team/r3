@@ -1837,7 +1837,8 @@
 			"004": "Datensatz kann nicht gelöscht werden - er wird noch referenziert als \"{ATR}\" in \"{MOD}\".",
 			"005": "\"{NAME}\" muss einen Wert haben bevor Änderungen gespeichert werden können.",
 			"006": "Einzigartiger Index kann nicht erstellt werden, weil bestehende Attributwerte nicht einzigartig sind.",
-			"007": "Änderungen können aufgrund eines ungültigen Werttypen nicht gespeichert werden."
+			"007": "Änderungen können aufgrund eines ungültigen Werttypen nicht gespeichert werden.",
+			"008": "Attribut mit erforderlichen Wert kann nicht erstellt werden, da bestehende Datensätze noch keinen Wert haben und kein Standardwert definiert ist."
 		},
 		"SEC": {
 			"001": "Du bist nicht berechtigt die Aktion auszuführen oder diese Ressource aufzurufen.",

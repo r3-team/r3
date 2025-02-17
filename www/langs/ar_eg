@@ -1837,7 +1837,8 @@
 			"004": "لا يمكن حذف السجل - لا يزال تتم الإشارة إليه باسم \"{ATR}\" في \"{MOD}\".",
 			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "فشل إنشاء فهرس فريد، لأن قيم السمات الموجودة ليست فريدة.",
-			"007": "Changes cannot be saved due to an invalid value type."
+			"007": "Changes cannot be saved due to an invalid value type.",
+			"008": "Failed to create attribute with required value, as existing records do not have a value yet and no default is defined."
 		},
 		"SEC": {
 			"001": "غير مصرح لك بإكمال هذا الإجراء أو الوصول إلى هذا المورد.",

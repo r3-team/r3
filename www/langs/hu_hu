@@ -1837,7 +1837,8 @@
 			"004": "A rekordot nem lehet törölni - még hivatkoznak rá mint \"{ATR}\" a(z) \"{MOD}\" modulban.",
 			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "Nem lehet egyedi indexet létrehozni, mivel a meglévő attribútumértékek nem egyediek.",
-			"007": "Changes cannot be saved due to an invalid value type."
+			"007": "Changes cannot be saved due to an invalid value type.",
+			"008": "Failed to create attribute with required value, as existing records do not have a value yet and no default is defined."
 		},
 		"SEC": {
 			"001": "Nincs engedélye a művelet végrehajtásához vagy a forráshoz való hozzáféréshez.",

@@ -1837,7 +1837,8 @@
 			"004": "Înregistrarea are încă ca referiță '{ATR}' în '{MOD}'.",
 			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "Nu s-a putut crea index unic, deoarece valorile atributelor existente nu sunt unice.",
-			"007": "Changes cannot be saved due to an invalid value type."
+			"007": "Changes cannot be saved due to an invalid value type.",
+			"008": "Failed to create attribute with required value, as existing records do not have a value yet and no default is defined."
 		},
 		"SEC": {
 			"001": "Acces neautorizat.",
