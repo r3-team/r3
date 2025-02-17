@@ -95,37 +95,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, position int, mt types.MenuTab) erro
 	return caption.Set_tx(ctx, tx, mt.Id, mt.Captions)
 }
 
-// TEMP
-// cleanup
-func Copy_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, moduleIdNew uuid.UUID) error {
-	return nil
-
-	/*menus, err := Get(moduleId, pgtype.UUID{})
-	if err != nil {
-		return err
-	}
-
-	// reset entity IDs
-	menus = NilIds(menus, moduleIdNew)
-
-	return Set_tx(ctx, tx, pgtype.UUID{}, menus)*/
-}
-
-// nil menu IDs and set new module
-func NilIds(menus []types.Menu, moduleIdNew uuid.UUID) []types.Menu {
-
-	/*for i, _ := range menus {
-		menus[i].Id = uuid.Nil
-		menus[i].ModuleId = moduleIdNew
-
-		for j, _ := range menus[i].Collections {
-			menus[i].Collections[j].Id = uuid.Nil
-		}
-		menus[i].Menus = NilIds(menus[i].Menus, moduleIdNew)
-	}*/
-	return menus
-}
-
 // menus
 func getMenus(menuTabId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 
