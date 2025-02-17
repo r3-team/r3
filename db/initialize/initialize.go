@@ -518,7 +518,8 @@ CREATE TYPE app.column_style AS ENUM (
 	'vertical',
 	'wrap',
 	'monospace',
-	'previewLarge'
+	'previewLarge',
+	'boolAtrIcon'
 );
 
 
@@ -1625,7 +1626,7 @@ CREATE FUNCTION instance.mail_delete(mail_id integer) RETURNS integer
 -- Name: mail_delete_after_attach(integer, integer, uuid); Type: FUNCTION; Schema: instance; Owner: -
 --
 
-CREATE FUNCTION instance.mail_delete_after_attach(mail_id integer, attach_record_id integer, attach_attribute_id uuid) RETURNS integer
+CREATE FUNCTION instance.mail_delete_after_attach(mail_id integer, attach_record_id bigint, attach_attribute_id uuid) RETURNS integer
 	LANGUAGE plpgsql
 	AS $$
 	DECLARE
@@ -3112,7 +3113,8 @@ CREATE TABLE app.variable (
 	name character varying(64) NOT NULL,
 	comment text,
 	content app.attribute_content NOT NULL,
-	content_use app.attribute_content_use NOT NULL
+	content_use app.attribute_content_use NOT NULL,
+	def text
 );
 
 
