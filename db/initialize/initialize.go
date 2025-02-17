@@ -1623,7 +1623,7 @@ CREATE FUNCTION instance.mail_delete(mail_id integer) RETURNS integer
 
 --
 -- TOC entry 338 (class 1255 OID 16853)
--- Name: mail_delete_after_attach(integer, integer, uuid); Type: FUNCTION; Schema: instance; Owner: -
+-- Name: mail_delete_after_attach(integer, bigint, uuid); Type: FUNCTION; Schema: instance; Owner: -
 --
 
 CREATE FUNCTION instance.mail_delete_after_attach(mail_id integer, attach_record_id bigint, attach_attribute_id uuid) RETURNS integer
