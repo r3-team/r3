@@ -37,7 +37,7 @@ func Get(moduleId uuid.UUID) ([]types.JsFunction, error) {
 		SELECT id, form_id, name, code_args, code_function, code_returns, is_client_event_exec
 		FROM app.js_function
 		WHERE module_id = $1
-		ORDER BY name ASC
+		ORDER BY form_id ASC, name ASC -- sort by both as name is only in unique in combination
 	`, moduleId)
 	if err != nil {
 		return functions, err
