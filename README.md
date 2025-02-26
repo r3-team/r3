@@ -42,27 +42,29 @@
 
 <p align="center">Free yourself from walled gardens and cloud-only SaaS offerings. REI3 enables powerful low code applications, selfhosted in the cloud or on-premise. Create and then use, share or even sell your REI3 applications.</p>
 
-![DEMO - Orgas](https://github.com/r3-team/r3/assets/91060542/77596cf1-5ea8-4130-999d-bbd4aa782535)
-![DEMO - Gantt](https://github.com/r3-team/r3/assets/91060542/3c103e67-6e48-4fc6-b99a-9dfcde00bba7)
+![DEMO - Orgas](https://github.com/user-attachments/assets/5506d0c1-4bf3-4011-bc3a-2650cb5ec0b9)
+![DEMO - Gantt](https://github.com/user-attachments/assets/1e413540-f9e8-4c2f-bd91-f46f51137d8b)
 
 ## :star: Features
-* **Fast results**: Quickly replace grown, spreadsheet based 'solutions' with proper multi-user applications.
+* **Fast results**: Quickly replace spreadsheet based 'solutions' with proper multi-user applications.
 * **It can count**: Summarize records, do date calculations, apply business rules and much more.
 * **Make things visible**: Show tasks on Gantt charts, generate diagrams or display information-dense lists.
 * **Workflows included**: Adjust forms based on the current state of a record, export to PDF or send notifications.
-* **Compliance tools**: With roles and access policies, REI3 can give and restrict access even on a per-record basis.
+* **Compliance tools**: With roles and access policies, REI3 can give and restrict access globally or for specific records.
 * **End-to-end encryption**: Built-in support for E2EE - easy to use with integrated key management features.
-* **Integration options**: REI3 can serve as and connect to REST endpoints, create or import CSV files and also includes ICS access for regularly updating calendars on devices.
+* **Integration options**: REI3 can serve as and call REST endpoints, create or import CSV files and offer ICS for accessing calendars.
 * **Ready for mobile**: Works well on all devices, with specific mobile settings and PWA features for great-feeling apps.
 * **Fulltext search**: Users can quickly find desired content by using search phrases and language specific lookups.
-* **Blazingly fast**: REI3 is built to take advantage of multi-core processors and communicates with clients over bi-directional data channels.
+* **Many inputs available**: From simple date ranges, to drawing inputs for signatures, to bar- & QR code inputs that can scan codes via camera - REI3 offers a growing list of input types for various needs.
+* **Blazingly fast**: REI3 takes advantage of multi-core processors and communicates with clients over bi-directional data channels.
 * **Security features**: Apply password policies, block brute-force attempts and enable MFA for your users.
 * **Fully transparent**: Directly read and even change data in the REI3 database - everything is human-readable.
 * **Selfhosted**: Run REI3 as you wish, locally or in the cloud - with full control on where your data is located.
 * **Enterprise-ready**: Adjust REI3 to your corporate identity, manage users & access via LDAP and grow with your organization by extending applications and clustering REI3.
 
-![DEMO - Calendar](https://github.com/r3-team/r3/assets/91060542/9aaad47b-fadf-4ed1-a07a-ca9ceb01e548)
-![DEMO - Assets](https://github.com/r3-team/r3/assets/91060542/36ea11cc-7c81-43ad-84c8-4722857e0d01)
+![DEMO - PW-Safe](https://github.com/user-attachments/assets/e9161bf2-027e-409d-a9eb-ed97dfe76f7e)
+![DEMO - IT-Assets](https://github.com/user-attachments/assets/c5273f72-24cb-40cc-a947-c6a42b78f7bb)
+![DEMO - TimeTracker](https://github.com/user-attachments/assets/e6b6e0e9-558a-4bad-ad52-45700e7d229e)
 
 ## :rocket: Quickstart
 ### Linux
