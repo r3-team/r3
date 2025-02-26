@@ -1,4 +1,4 @@
-<p><em>Updated 2024-10-29</em></p>
+<p><em>Updated 2025-02-26</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -106,7 +106,6 @@
 <h1 id="getting-started">Getting started</h1>
 <p>To start, you can either directly <a href="#creating-your-own-applications">create your own application</a>, or <a href="#installing-applications-as-reference">install existing ones</a> from the public repository.</p>
 <p><img src="en_us_builder_pics/start.webp" alt="Installed applications" /></p>
-<p>To get a feel of how the <a href="#the-builder">Builder</a> is used, we recommend looking at finished applications first.</p>
 <h2 id="installing-applications-as-reference">Installing applications as reference</h2>
 <p>To play around and see working examples, you can install applications from the public repository inside the admin interface. In a non-productive instance you can install, change, delete and re-install applications at any time. Installing finished applications can help with understanding how these are built and how specific options are used.</p>
 <p><img src="en_us_builder_pics/repo_install.webp" alt="Install apps from repo" /></p>
@@ -168,21 +167,31 @@
 <li>Number, floating: A number with a floating decimal. Less exact than numeric but faster for complex calculations. Often used for approximations.</li>
 <li>Color: A RGB color value. Frontend elements will present a color picker in inputs and color values in views. Can be used to color calendar entries and list columns.</li>
 <li>Files: References to uploaded files. Frontend elements will present file management interfaces in inputs and either image previews or download links in lists or other views, depending on field options.</li>
-<li>Yes/no: A simple boolean (TRUE/FALSE) value. Presents as a simple toggle in inputs.</li>
+<li>Yes/no: A simple boolean (TRUE/FALSE) value. Presents as a toggle in inputs.</li>
+<li>Barcode/QR code: A bar- or QR code, stored in JSON format, including the code value, format (UPC, EAN, QR, ...) and base64 image. In forms, the corresponding inputs can be used to scan codes via camera. Users can also manually enter codes and choose the desired format to generate previews. In views, like list fields, either the code value or code image can be shown.</li>
+<li>Drawing: A simple drawing, stored in JSON format, including the strokes (length, width, color) and base64 image. Can be used to offer note or signature pad inputs.</li>
 <li>Date + time: A date value with time component. Often used for events or timestamps (when did something happen). Frontend elements will present date/time pickers in inputs and date/time values, formatted according to user settings, in views like lists.</li>
 <li>Date: Like 'date + time' but without the time component. Often used for simple dates, like 'date of purchase' or 'birthday'.</li>
-<li>Time: Just a time component. Stores hours + minutes + seconds without any date context. Can be used for things like time trackers.</li>
+<li>Time: Just a time without any date context. Stores hours + minutes + seconds. Can be used for things like time trackers.</li>
 <li>Relationship (n:1): Stores a reference value to another record, usually on another relation. Used to build relationships like 'student attends class' or 'employee belongs to company'.</li>
 <li>Relationship (1:1): Like 'relationship n:1', but the specific relationship must only exist once inside a relation. This is often used for relationships like 'owner of a car' or 'teacher of a class' - in these cases only a single person can be the owner of a car or teacher of a class.</li>
 <li>Universally unique identifier (UUID): A 128bit label used to identify an entity. UUID values are statistically extremely unlikely to ever exist twice, even if they are created in different, disconnected systems. Useful to create unique keys for data exchange between systems.</li>
 <li>Text search dictionary: A name of a language. Used for <a href="#text-indexing">text indexes</a> to know which language another text attribute on the same <a href="#relations">relation</a> is in. The number of available languages depends on which languages the database system supports.</li>
 </ul></li>
-<li>Max. size in KB: Only for value type 'files'. Limits max. upload size for each file. 0 equals not limited.</li>
-<li>Max. characters: Only for value type 'text'. Limits the amount of characters allowed. 0 equals not limited.</li>
+<li>Max. size in KB: Only for value type 'Files'. Limits max. upload size for each file. 0 equals not limited.</li>
+<li>Max. characters: Only for value type 'Text'. Limits the amount of characters allowed. 0 equals not limited.</li>
+<li>Number of digits: Only for value type 'Number, decimal'. Defines how many digits should be stored before and after the decimal point.
+<ul>
+<li>If both values are set to '0', the numeric value is unconstrained (max. 131072 digits before &amp; 16383 after the decimal point). With an unconstrained decimal value, the system will store and display values as entered, though in many situations setting constraints is more sensible.</li>
+<li>For monetary values, 12 digits before and 2 after are good practice, allowing for numbers up to '999.999.999.999,99' with a precision up to 1 cent.</li>
+<li>If number of digits is defined, inputs and views (like list fields) can fill up empty decimal spaces so numbers become aligned and easier to compare.</li>
+<li>On fields, <a href="#field-settings">settings</a> like 'Alignment' and 'Monospace' can further improve numeric value input.</li>
+<li>When updating the number of digits of an attribute, the system will round values if the new definition for decimal places is smaller. This is permanent and is not reversable without backups.</li>
+</ul></li>
 <li>Must have value: Attribute values must not be empty (NULL). If enabled, records without this attribute value cannot be saved.</li>
 <li>E2E encrypted: Enables <a href="#end-to-end-encryption">end-to-end encryption</a> for this attribute. Only available for new attributes and for <a href="#relations">relations</a> with E2E encryption enabled.</li>
 <li>Default: If no attribute value is given, this default value is applied.</li>
-<li>ON UPDATE/DELETE: Only for value type 'relationship'. These define how records, connected via a relationship, react when their partner is updated or deleted (refer to <a href="#relationships">relationships</a> for more details).</li>
+<li>ON UPDATE/DELETE: Only for value type 'Relationship'. These define how records, connected via a relationship, react when their partner is updated or deleted (refer to <a href="#relationships">relationships</a> for more details).</li>
 </ul>
 <p>By default, an attribute with the name 'id' exists for each relation and cannot be deleted. This is its primary key. A primary key serves to reference each specific record by a unique value - in this case, its an automatically created number (auto-incremented integer).</p>
 <p>Other attributes can also be used as keys, for example when using <a href="#indexing">unique names</a> or reference numbers.</p>
@@ -397,27 +406,19 @@ END IF;</code></pre>
 </ul></li>
 <li>Integer attributes
 <ul>
+<li>Rating: Field input displays a number of icons with the amount of icons being controlled by the max. value setting (up to 10). This presentation option is useful for rating of performance or priority - anything that can be assigned a 1-X scale. If no icon is selected for the attribute and/or overwritten by the field, a star icon is used.</li>
 <li>Value slider: Field input is a slider, movable from min. to max. defined values.</li>
 </ul></li>
 </ul></li>
-<li>Default value: Default value, placed in the field input when a new record is being shown. Must be in the original attribute value state (TRUE/FALSE for boolean, unix time for date inputs, etc.).
-<ul>
-<li>Placeholders exist for some cases, such as:
-<ul>
-<li>{CURR_DATETIME}: Current date &amp; time, should be used with display option 'datetime'.</li>
-<li>{CURR_TIME}: Current time, should be used with display option 'time'.</li>
-<li>{CURR_DATE}: Current date, should be used with display option 'date'.</li>
-<li>{CURR_DATE_YYYY}: Current year as number, example: 1921.</li>
-<li>{CURR_DATE_MM}: Current month as number, example: 12 (January = 1, December = 12).</li>
-<li>{CURR_DATE_DD}: Current day of month as number, example: 31.</li>
-</ul></li>
-</ul></li>
+<li>Default value: Default value, placed in the field input when a new record is being shown.</li>
 <li>Min./max. value/length: Minimum/maximum length/value of data depending on attribute type.
 <ul>
 <li>Text attributes: Count of characters (text length).</li>
 <li>Integer/number attributes: Number value.</li>
 <li>Files: Number of files allowed.</li>
 </ul></li>
+<li>Alignment: Relevant for input fields with a simple text input. Defines whether the input should be aligned to the left or right. Useful for numeric inputs with a fixed length.</li>
+<li>Monospace: Text inside the field input will use a monospace font, which results in all characters having the same length. This, together with defined lengths before and after the decimal point on the <a href="#attributes">attribute</a>, can be useful for numeric inputs.</li>
 <li>Clipboard: Offers a button inside the field to copy the current value to the users clipboard.</li>
 <li>Validate with RegEx: Regular expression that field input must match to be considered valid.</li>
 </ul></li>
@@ -426,7 +427,7 @@ END IF;</code></pre>
 <li>Category selector: Instead of dropdown (default), field input becomes a radio menu (if 1:1/N:1) or checkbox input (1:N/N:M).</li>
 <li>Auto select records: For a new record, automatically select the first x (if positive value) or last x (if negative value) records that would appear in input dropdown. Can be used together with query filters and sorting to pre-select specific records (see <a href="#queries">Queries</a>).</li>
 <li>Default preset(s): If relationship target contains presets, you can select which of these are to be set by default. Can be one or multiple presets (if 1:N/N:M).</li>
-<li>Open record (relation 0): In addition to selection of records, relationship inputs can be used to open existing or create new records with. By choosing a form that handles this kind of record (relation 0 of chosen form must be relation for this record, see <a href="#queries">Queries</a>), a user can quickly look at or create new records.</li>
+<li>Open record: In addition to selection of records, relationship inputs can be used to open existing or create new records with. By choosing a form that handles this kind of record, a user can quickly open or create new records. <a href="#form-states">Form states</a> can be used to control, whether records can be opened/created the relationship input field.</li>
 </ul></li>
 <li>Data fields: All
 <ul>
@@ -664,8 +665,19 @@ END IF;</code></pre>
 <h2 id="menus">Menus</h2>
 <p>Menus serve to navigate between and inside applications in REI3. Two types of menus exist:</p>
 <ul>
-<li>Main menu: Shown at the top of the page and on the start page for each user. Automatically created by resolving accessible applications for the current user. The header menu shows the top level of applications as well as a second level of <a href="#creating-your-own-applications">assigned to</a> applications (child applications). Currently only 2 levels of hierarchy are supported. The display order can be defined in the application overview (Builder start page) with the <a href="#creating-your-own-applications">default position</a>; this option can be overwritten in a target instance inside the admin panel. An application is only shown in the main menu, when a start form has been defined and a user has access to it; this includes admin users.</li>
-<li>Application menu: This can directly be defined in the Builder with unlimited levels of hierarchy; we recommend to keep the menu hierarchy to at most 3 levels for usability reasons. Each menu entry can optionally open a form and/or contain sub menu entries. When sub entries are defined, you can choose whether these entries are shown by default or must be toggled first by opening the parent menu entry. The translatable menu title as well as menu icon are applied to an opened form if the form does not define its own title/icon.</li>
+<li>Main menu: Shown at the top of the page, it serves to navigate between applications.
+<ul>
+<li>The header menu shows the top level of applications as well as a second level of <a href="#creating-your-own-applications">assigned</a> applications. Currently 2 levels are supported.</li>
+<li>It is automatically created by resolving accessible applications for the current user.</li>
+<li>The order can be defined in the application overview (Builder start page) with the <a href="#creating-your-own-applications">default position</a>; this option can be overwritten in a target instance inside the admin panel.</li>
+</ul></li>
+<li>Application menu: Shown on the left, it serves as primary navigation within an application.
+<ul>
+<li>We recommend to keep the menu hierarchy to at most 3 levels for usability reasons.</li>
+<li>Each menu entry can optionally open a form and/or contain sub menu entries. When sub entries are defined, you can choose whether these entries are shown by default or must be toggled first by opening the parent menu entry.</li>
+<li>The translatable menu title as well as menu icon are applied to an opened form if the form does not define its own title/icon.</li>
+<li>Application menus can also be segregated into tabs, with each tab only being visible if the current user has access to at least 1 menu entry within it. Menu tabs are useful to improve navigation by separating concerns by its content or assigned user role.</li>
+</ul></li>
 </ul>
 <p><img src="en_us_builder_pics/menus.webp" alt="Menus" /></p>
 <p>When <a href="#building-on-applications">Building on applications</a>, you can choose to copy the entire menu structure from another application. This is can be useful when you intent to extend another application; you copy the original menu structure, change target forms and add your own, custom menu entries.</p>
