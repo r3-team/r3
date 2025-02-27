@@ -6,6 +6,8 @@ import (
 	"r3/db"
 	"r3/types"
 	"sync"
+
+	"github.com/jackc/pgx/v5"
 )
 
 var (
@@ -54,7 +56,21 @@ func LoadMailAccountMap() error {
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
 	defer ctxCanc()
 
-	rows, err := db.Pool.Query(ctx, `
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if err := LoadMailAccountMap_tx(ctx, tx); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
+func LoadMailAccountMap_tx(ctx context.Context, tx pgx.Tx) error {
+
+	rows, err := tx.Query(ctx, `
 		SELECT id, oauth_client_id, name, mode, auth_method, username,
 			password, start_tls, send_as, host_name, host_port, comment
 		FROM instance.mail_account

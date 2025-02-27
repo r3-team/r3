@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"errors"
+	"fmt"
 	"r3/db"
 	"r3/types"
 	"sync"
@@ -16,29 +17,31 @@ var (
 )
 
 // get effective access for specified login
+// access cache is created when authentication occurs
+// if no access cache exists, authentication did not occur
 func GetAccessById(loginId int64) (types.LoginAccess, error) {
-
 	if loginId == 0 {
 		return types.LoginAccess{}, errors.New("invalid login ID 0")
 	}
 
-	// deliver from cache, if there
-	access_mx.RLock()
-	accessMap, exists := loginIdMapAccess[loginId]
-	access_mx.RUnlock()
-
-	if exists {
-		return accessMap, nil
-	}
-
-	// not in cache, load and then deliver
-	if err := load(loginId); err != nil {
-		return types.LoginAccess{}, err
-	}
-
 	access_mx.RLock()
 	defer access_mx.RUnlock()
-	return loginIdMapAccess[loginId], nil
+
+	if accessMap, exists := loginIdMapAccess[loginId]; exists {
+		return accessMap, nil
+	}
+	return types.LoginAccess{}, fmt.Errorf("missing access cache for login %d", loginId)
+}
+
+// load access cache for one login
+func LoadAccessIfUnknown(loginId int64) error {
+	access_mx.RLock()
+	_, exists := loginIdMapAccess[loginId]
+	access_mx.RUnlock()
+	if exists {
+		return nil
+	}
+	return load(loginId)
 }
 
 // renew permissions for all cached logins
@@ -51,10 +54,8 @@ func RenewAccessAll() error {
 	return nil
 }
 
-// renew permissions for one login
+// renew permissions for one known login
 func RenewAccessById(loginId int64) error {
-
-	// ignore if login access is not cached (nothing to renew)
 	access_mx.RLock()
 	_, exists := loginIdMapAccess[loginId]
 	access_mx.RUnlock()

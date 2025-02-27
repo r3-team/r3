@@ -143,13 +143,13 @@ func SetNodeId(id uuid.UUID) {
 }
 
 func Info(context string, message string) {
-	write(3, context, message, nil)
+	go write(3, context, message, nil)
 }
 func Warning(context string, message string, err error) {
-	write(2, context, message, err)
+	go write(2, context, message, err)
 }
 func Error(context string, message string, err error) {
-	write(1, context, message, err)
+	go write(1, context, message, err)
 }
 
 func write(level int, logContext string, message string, err error) {

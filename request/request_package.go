@@ -1,7 +1,7 @@
 package request
 
 import (
-	"io/ioutil"
+	"os"
 	"r3/cache"
 	"r3/config"
 	"r3/tools"
@@ -16,7 +16,7 @@ func PackageInstall() (interface{}, error) {
 		return nil, err
 	}
 
-	if err := ioutil.WriteFile(filePath, cache.Package_CoreCompany, 0644); err != nil {
+	if err := os.WriteFile(filePath, cache.Package_CoreCompany, 0644); err != nil {
 		return nil, err
 	}
 

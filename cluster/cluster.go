@@ -114,10 +114,10 @@ func DelNode_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	`, id)
 	return err
 }
-func GetNodes(ctx context.Context) ([]types.ClusterNode, error) {
+func GetNodes_tx(ctx context.Context, tx pgx.Tx) ([]types.ClusterNode, error) {
 	nodes := make([]types.ClusterNode, 0)
 
-	rows, err := db.Pool.Query(ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT id, name, hostname, cluster_master, running,
 			date_check_in, date_started, stat_memory
 		FROM instance_cluster.node

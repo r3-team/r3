@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func LoginKeysGetPublic(ctx context.Context, reqJson json.RawMessage) (interface{}, error) {
+func LoginKeysGetPublic_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		LoginIds   []int64   `json:"loginIds"`
@@ -20,7 +20,7 @@ func LoginKeysGetPublic(ctx context.Context, reqJson json.RawMessage) (interface
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return login_keys.GetPublic(ctx, req.RelationId, req.RecordIds, req.LoginIds)
+	return login_keys.GetPublic_tx(ctx, tx, req.RelationId, req.RecordIds, req.LoginIds)
 }
 
 func LoginKeysReset_tx(ctx context.Context, tx pgx.Tx, loginId int64) (interface{}, error) {

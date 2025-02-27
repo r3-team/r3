@@ -59,7 +59,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var loginId int64
 	var admin bool
 	var noAuth bool
-	if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+	_, languageCode, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth)
+	if err != nil {
 		abort(http.StatusUnauthorized, err, handler.ErrUnauthorized)
 		bruteforce.BadAttempt(r)
 		return
@@ -199,17 +200,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				getters.filters[getter] = values[0]
 			}
 		}
-	}
-
-	// get login language code (for filters)
-	var languageCode string
-	if err := db.Pool.QueryRow(ctx, `
-		SELECT language_code
-		FROM instance.login_setting
-		WHERE login_id = $1
-	`, loginId).Scan(&languageCode); err != nil {
-		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
-		return
 	}
 
 	// get valid module language code (for captions)

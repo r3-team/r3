@@ -27,7 +27,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id int32) error {
 func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 	ldaps := make([]types.Ldap, 0)
 
-	rows, err := db.Pool.Query(ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT
 			l.id,
 			l.login_template_id,
@@ -84,7 +84,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 	}
 
 	for i, _ := range ldaps {
-		ldaps[i].Roles, err = getRoles(ctx, tx, ldaps[i].Id)
+		ldaps[i].Roles, err = getRoles_tx(ctx, tx, ldaps[i].Id)
 		if err != nil {
 			return ldaps, err
 		}
@@ -159,13 +159,18 @@ func UpdateCache() error {
 	if err != nil {
 		return err
 	}
-	defer tx.Commit(ctx)
+	defer tx.Rollback(ctx)
 
+	if err := UpdateCache_tx(ctx, tx); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+func UpdateCache_tx(ctx context.Context, tx pgx.Tx) error {
 	ldaps, err := Get_tx(ctx, tx)
 	if err != nil {
 		return err
 	}
-
 	cache.SetLdaps(ldaps)
 	return nil
 }
@@ -221,7 +226,7 @@ func setLoginMetaAttributes_tx(ctx context.Context, tx pgx.Tx, ldapId int32, m t
 	return err
 }
 
-func getRoles(ctx context.Context, tx pgx.Tx, ldapId int32) ([]types.LdapRole, error) {
+func getRoles_tx(ctx context.Context, tx pgx.Tx, ldapId int32) ([]types.LdapRole, error) {
 	roles := make([]types.LdapRole, 0)
 
 	rows, err := tx.Query(ctx, `

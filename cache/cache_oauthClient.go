@@ -6,6 +6,8 @@ import (
 	"r3/db"
 	"r3/types"
 	"sync"
+
+	"github.com/jackc/pgx/v5"
 )
 
 var (
@@ -35,7 +37,21 @@ func LoadOauthClientMap() error {
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
 	defer ctxCanc()
 
-	rows, err := db.Pool.Query(ctx, `
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if err := LoadOauthClientMap_tx(ctx, tx); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
+func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
+
+	rows, err := tx.Query(ctx, `
 		SELECT id, name, client_id, client_secret, date_expiry, scopes, tenant, token_url
 		FROM instance.oauth_client
 	`)

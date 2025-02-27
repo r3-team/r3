@@ -28,8 +28,8 @@ func OauthClientGet() (interface{}, error) {
 	return cache.GetOauthClientMap(), nil
 }
 
-func OauthClientReload() (interface{}, error) {
-	return nil, cache.LoadOauthClientMap()
+func OauthClientReload_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
+	return nil, cache.LoadOauthClientMap_tx(ctx, tx)
 }
 
 func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {

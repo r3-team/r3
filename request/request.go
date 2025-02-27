@@ -188,7 +188,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "loginKeys":
 		switch action {
 		case "getPublic":
-			return LoginKeysGetPublic(ctx, reqJson)
+			return LoginKeysGetPublic_tx(ctx, tx, reqJson)
 		case "reset":
 			return LoginKeysReset_tx(ctx, tx, loginId)
 		case "store":
@@ -319,7 +319,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "delNode":
 			return ClusterNodeDel_tx(ctx, tx, reqJson)
 		case "getNodes":
-			return ClusterNodesGet(ctx)
+			return ClusterNodesGet_tx(ctx, tx)
 		case "setNode":
 			return ClusterNodeSet_tx(ctx, tx, reqJson)
 		case "shutdownNode":
@@ -381,7 +381,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "import":
 			return LdapImport(reqJson)
 		case "reload":
-			return nil, ldap.UpdateCache()
+			return nil, ldap.UpdateCache_tx(ctx, tx)
 		case "set":
 			return LdapSet_tx(ctx, tx, reqJson)
 		}
@@ -452,7 +452,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return MailAccountGet()
 		case "reload":
-			return MailAccountReload()
+			return nil, cache.LoadMailAccountMap_tx(ctx, tx)
 		case "set":
 			return MailAccountSet_tx(ctx, tx, reqJson)
 		case "test":
@@ -502,7 +502,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return OauthClientGet()
 		case "reload":
-			return OauthClientReload()
+			return OauthClientReload_tx(ctx, tx)
 		case "set":
 			return OauthClientSet_tx(ctx, tx, reqJson)
 		}
@@ -544,7 +544,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "pwaDomain":
 		switch action {
 		case "reset":
-			return nil, cache.LoadPwaDomainMap()
+			return nil, cache.LoadPwaDomainMap_tx(ctx, tx)
 		case "set":
 			return PwaDomainSet_tx(ctx, tx, reqJson)
 		}

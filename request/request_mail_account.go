@@ -70,10 +70,6 @@ func MailAccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	return nil, err
 }
 
-func MailAccountReload() (interface{}, error) {
-	return nil, cache.LoadMailAccountMap()
-}
-
 func MailAccountTest_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {

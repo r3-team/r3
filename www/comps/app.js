@@ -890,13 +890,8 @@ let MyApp = {
 			});
 		},
 		schemaReload(moduleId) {
-			let payload = typeof moduleId === 'undefined'
-				? {} : {moduleId:moduleId};
-			
-			ws.send('schema','reload',payload,true).then(
-				() => {},
-				this.genericError
-			);
+			const payload = moduleId === undefined ? {} : {moduleId:moduleId};
+			ws.send('schema','reload',payload,true).then(() => {},this.genericError);
 		}
 	}
 };

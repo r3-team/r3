@@ -2,7 +2,7 @@ let ws = {
 	blockingCount:0, // how many blocking transactions are active?
 	callbacks:{},    // outside callback functions, defined on open()
 	conn:null,       // websocket connection, null if not opened
-	debug:false,     // if true, prints transactions to console.log
+	debug:true,     // if true, prints transactions to console.log
 	transactions:{}, // active transactions: key = transaction number
 	
 	// open websocket connection to defined URL with optional event callbacks
@@ -39,7 +39,7 @@ let ws = {
 	
 	// trigger websocket event, executes registered callback
 	event(name,argument) {
-		if(typeof this.callbacks[name] !== 'undefined')
+		if(this.callbacks[name] !== undefined)
 			this.callbacks[name](argument);
 	},
 	
@@ -60,10 +60,10 @@ let ws = {
 		if(msg.transactionNr === 0)
 			return this.event('unrequested',msg.responses[0]);
 		
-		let trans = this.transactions[msg.transactionNr];
+		const trans = this.transactions[msg.transactionNr];
 		
 		// transaction does not exist, discard
-		if(typeof trans === 'undefined')
+		if(trans === undefined)
 			return false;
 		
 		// unblock, if blocking transaction has been active
@@ -99,16 +99,14 @@ let ws = {
 			if(!Array.isArray(requests) || requests.length === 0)
 				return reject('need non-empty requests array');
 			
-			if(typeof blocking === 'undefined')
-				blocking = false;
-			
-			if(typeof singleResponse === 'undefined')
-				singleResponse = false;
+			// apply default settings
+			if(blocking       === undefined) blocking       = false;
+			if(singleResponse === undefined) singleResponse = false;
 			
 			// get unique transaction number
 			let transactionNr = 0;
 			do{ transactionNr = Math.floor(Math.random() * 399999) + 100000; }
-			while(typeof this.transactions[transactionNr] !== 'undefined');
+			while(this.transactions[transactionNr] !== undefined);
 			
 			// store transaction for response matching
 			this.transactions[transactionNr] = {

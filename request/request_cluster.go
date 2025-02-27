@@ -21,8 +21,8 @@ func ClusterNodeDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	return nil, cluster.DelNode_tx(ctx, tx, req.Id)
 }
 
-func ClusterNodesGet(ctx context.Context) (interface{}, error) {
-	return cluster.GetNodes(ctx)
+func ClusterNodesGet_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
+	return cluster.GetNodes_tx(ctx, tx)
 }
 
 func ClusterNodeSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {

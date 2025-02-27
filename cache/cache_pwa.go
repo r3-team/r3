@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 var (
@@ -49,12 +50,28 @@ func GetPwaDomainMap() map[string]uuid.UUID {
 }
 
 func LoadPwaDomainMap() error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if err := LoadPwaDomainMap_tx(ctx, tx); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
+func LoadPwaDomainMap_tx(ctx context.Context, tx pgx.Tx) error {
 	pwa_mx.Lock()
 	defer pwa_mx.Unlock()
 
 	pwaDomainMap = make(map[string]uuid.UUID)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT module_id, domain
 		FROM instance.pwa_domain
 	`)

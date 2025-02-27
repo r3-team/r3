@@ -65,9 +65,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer ctxCanc()
 
 	// authenticate via fixed token
-	var languageCode string
 	var tokenNotUsed string
-	if err := login_auth.TokenFixed(ctx, loginId, "ics", tokenFixed, &languageCode, &tokenNotUsed); err != nil {
+	languageCode, err := login_auth.TokenFixed(ctx, loginId, "ics", tokenFixed, &tokenNotUsed)
+	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
