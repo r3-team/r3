@@ -79,7 +79,7 @@ func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
 
 // start with 1 module and check whether it or its dependent upon modules had changed
 // returns map of module IDs, changed yes/no
-func GetModuleChangedWithDependencies(moduleId uuid.UUID) (map[uuid.UUID]bool, error) {
+func GetModuleChangedWithDependencies_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) (map[uuid.UUID]bool, error) {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
@@ -102,14 +102,13 @@ func GetModuleChangedWithDependencies(moduleId uuid.UUID) (map[uuid.UUID]bool, e
 		var file types.TransferFile
 		file.Content.Module = module
 
-		moduleIdMapChecked[id], err = hasModuleChanged(file)
+		moduleIdMapChecked[id], err = hasModuleChanged_tx(ctx, tx, file)
 		if err != nil {
 			return err
 		}
 
 		// check dependencies
 		for _, moduleIdDependsOn := range module.DependsOn {
-
 			if err := checkRecursive(moduleIdDependsOn, moduleIdMapChecked); err != nil {
 				return err
 			}
@@ -271,13 +270,13 @@ func writeFilesToZip(zipPath string, filePaths []string) error {
 // returns whether the module inside the given transfer file has changed
 //
 //	checked against the stored module hash from the last module version change
-func hasModuleChanged(file types.TransferFile) (bool, error) {
+func hasModuleChanged_tx(ctx context.Context, tx pgx.Tx, file types.TransferFile) (bool, error) {
 
 	hashedStr, err := getModuleHashFromFile(file)
 	if err != nil {
 		return false, err
 	}
-	hashedStrEx, err := module_meta.GetHash(file.Content.Module.Id)
+	hashedStrEx, err := module_meta.GetHash_tx(ctx, tx, file.Content.Module.Id)
 	if err != nil {
 		return false, err
 	}

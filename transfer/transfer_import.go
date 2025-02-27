@@ -12,7 +12,6 @@ import (
 	"r3/cluster"
 	"r3/config"
 	"r3/config/module_meta"
-	"r3/db"
 	"r3/log"
 	"r3/schema"
 	"r3/schema/api"
@@ -54,12 +53,11 @@ type importMeta struct {
 }
 
 // imports extracted modules from given file paths
-func ImportFromFiles(filePathsImport []string) error {
+func ImportFromFiles_tx(ctx context.Context, tx pgx.Tx, filePathsImport []string) error {
 	Import_mx.Lock()
 	defer Import_mx.Unlock()
 
-	log.Info("transfer", fmt.Sprintf("start import for modules from file(s): '%s'",
-		strings.Join(filePathsImport, "', '")))
+	log.Info("transfer", fmt.Sprintf("start import for modules from file(s): '%s'", strings.Join(filePathsImport, "', '")))
 
 	// extract module packages
 	filePathsModules := make([]string, 0)
@@ -78,7 +76,7 @@ func ImportFromFiles(filePathsImport []string) error {
 
 	// parse modules from file paths, only modules that need to be imported are returned
 	moduleIdMapImportMeta := make(map[uuid.UUID]importMeta)
-	modules, err := parseModulesFromPaths(filePathsModules, moduleIdMapImportMeta)
+	modules, err := parseModulesFromPaths_tx(ctx, tx, filePathsModules, moduleIdMapImportMeta)
 	if err != nil {
 		return err
 	}
@@ -96,15 +94,6 @@ func ImportFromFiles(filePathsImport []string) error {
 	}
 
 	// import modules
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutTransfer)
-	defer ctxCanc()
-
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
 	idMapSkipped := make(map[uuid.UUID]types.Void)
 	loopsToRun := 10
 
@@ -179,16 +168,7 @@ func ImportFromFiles(filePathsImport []string) error {
 	for id, _ := range moduleIdMapImportMeta {
 		moduleIdsUpdated = append(moduleIdsUpdated, id)
 	}
-	if err := cluster.SchemaChanged_tx(ctx, tx, true, moduleIdsUpdated); err != nil {
-		return err
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return err
-	}
-
-	log.Info("transfer", "changes were committed successfully")
-	return nil
+	return cluster.SchemaChanged_tx(ctx, tx, true, moduleIdsUpdated)
 }
 
 func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
@@ -608,7 +588,7 @@ func importCheckResultAndApply(ctx context.Context, tx pgx.Tx, resultErr error, 
 	return nil
 }
 
-func parseModulesFromPaths(filePaths []string, moduleIdMapImportMeta map[uuid.UUID]importMeta) ([]types.Module, error) {
+func parseModulesFromPaths_tx(ctx context.Context, tx pgx.Tx, filePaths []string, moduleIdMapImportMeta map[uuid.UUID]importMeta) ([]types.Module, error) {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
@@ -661,7 +641,7 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapImportMeta map[uuid.UU
 			}
 
 			// check whether installed module hash changed at all
-			hashedStrEx, err := module_meta.GetHash(moduleId)
+			hashedStrEx, err := module_meta.GetHash_tx(ctx, tx, moduleId)
 			if err != nil {
 				return modules, err
 			}

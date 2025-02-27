@@ -2,7 +2,6 @@ package module_meta
 
 import (
 	"context"
-	"r3/db"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -35,15 +34,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) (types.ModuleMet
 	}
 	return m, err
 }
-func GetDateChange(moduleId uuid.UUID) (uint64, error) {
-	var dateChange uint64
-	err := db.Pool.QueryRow(context.Background(), `
-		SELECT date_change
-		FROM instance.module_meta
-		WHERE module_id = $1
-	`, moduleId).Scan(&dateChange)
-	return dateChange, err
-}
 func GetIdMap_tx(ctx context.Context, tx pgx.Tx) (map[uuid.UUID]types.ModuleMeta, error) {
 	moduleIdMap := make(map[uuid.UUID]types.ModuleMeta)
 
@@ -68,18 +58,18 @@ func GetIdMap_tx(ctx context.Context, tx pgx.Tx) (map[uuid.UUID]types.ModuleMeta
 	}
 	return moduleIdMap, nil
 }
-func GetHash(moduleId uuid.UUID) (string, error) {
+func GetHash_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) (string, error) {
 	var hash string
-	err := db.Pool.QueryRow(context.Background(), `
+	err := tx.QueryRow(ctx, `
 		SELECT hash
 		FROM instance.module_meta
 		WHERE module_id = $1
 	`, moduleId).Scan(&hash)
 	return hash, err
 }
-func GetOwner(moduleId uuid.UUID) (bool, error) {
+func GetOwner_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) (bool, error) {
 	var isOwner bool
-	err := db.Pool.QueryRow(context.Background(), `
+	err := tx.QueryRow(ctx, `
 		SELECT owner
 		FROM instance.module_meta
 		WHERE module_id = $1

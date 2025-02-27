@@ -31,7 +31,6 @@ var (
 )
 
 func RunAll() error {
-
 	ldapIdMap := cache.GetLdapIdMap()
 
 	if len(ldapIdMap) != 0 && !config.GetLicenseActive() {

@@ -3,7 +3,6 @@ package login_meta
 import (
 	"context"
 	"fmt"
-	"r3/db"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
@@ -31,14 +30,14 @@ func GetIsNotUnique_tx(ctx context.Context, tx pgx.Tx, loginId int64, content st
 	}
 
 	exists := false
-	err := db.Pool.QueryRow(db.Ctx, query, loginId, value).Scan(&exists)
+	err := tx.QueryRow(ctx, query, loginId, value).Scan(&exists)
 	return exists, err
 }
 
-func Get(id int64) (types.LoginMeta, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, id int64) (types.LoginMeta, error) {
 	var m types.LoginMeta
 
-	err := db.Pool.QueryRow(db.Ctx, `
+	err := tx.QueryRow(ctx, `
 		SELECT email, department, location, name_display, name_fore, name_sur,
 			notes, organization, phone_fax, phone_landline, phone_mobile
 		FROM instance.login_meta

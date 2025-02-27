@@ -189,7 +189,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 	// collect meta data
 	if meta {
 		for i, l := range logins {
-			logins[i].Meta, err = login_meta.Get(l.Id)
+			logins[i].Meta, err = login_meta.Get_tx(ctx, tx, l.Id)
 			if err != nil {
 				return logins, 0, err
 			}
@@ -199,7 +199,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 	// collect role IDs
 	if roles {
 		for i, l := range logins {
-			logins[i].RoleIds, err = getRoleIds(ctx, l.Id)
+			logins[i].RoleIds, err = getRoleIds_tx(ctx, tx, l.Id)
 			if err != nil {
 				return logins, 0, err
 			}

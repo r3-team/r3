@@ -482,7 +482,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "module":
 		switch action {
 		case "checkChange":
-			return ModuleCheckChange(reqJson)
+			return ModuleCheckChange_tx(ctx, tx, reqJson)
 		case "del":
 			return ModuleDel_tx(ctx, tx, reqJson)
 		case "set":
@@ -509,7 +509,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "package":
 		switch action {
 		case "install":
-			return PackageInstall()
+			return PackageInstall_tx(ctx, tx)
 		}
 	case "pgFunction":
 		switch action {
@@ -562,11 +562,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return RepoModuleGet_tx(ctx, tx, reqJson)
 		case "install":
-			return RepoModuleInstall(reqJson)
+			return RepoModuleInstall_tx(ctx, tx, reqJson)
 		case "installAll":
-			return RepoModuleInstallAll()
+			return RepoModuleInstallAll_tx(ctx, tx)
 		case "update":
-			return RepoModuleUpdate()
+			return RepoModuleUpdate_tx(ctx, tx)
 		}
 	case "role":
 		switch action {

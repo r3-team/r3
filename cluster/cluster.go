@@ -108,7 +108,7 @@ func StopNode(ctx context.Context) error {
 	return err
 }
 func DelNode_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
-	_, err := db.Pool.Exec(ctx, `
+	_, err := tx.Exec(ctx, `
 		DELETE FROM instance_cluster.node
 		WHERE id = $1
 	`, id)
@@ -141,7 +141,7 @@ func GetNodes_tx(ctx context.Context, tx pgx.Tx) ([]types.ClusterNode, error) {
 	return nodes, nil
 }
 func SetNode_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, name string) error {
-	_, err := db.Pool.Exec(ctx, `
+	_, err := tx.Exec(ctx, `
 		UPDATE instance_cluster.node
 		SET name = $1
 		WHERE id = $2

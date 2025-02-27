@@ -19,7 +19,7 @@ import (
 
 var (
 	attemptsAllow = 5   // how many attempts for each REST call before quitting
-	callLimit     = 100 // how many REST calls to retrieve per loop
+	callLimit     = 100 // how many REST calls to execute per loop
 )
 
 type restCall struct {
@@ -61,6 +61,7 @@ func DoAll() error {
 			}
 			calls = append(calls, c)
 		}
+		rows.Close()
 
 		for _, c := range calls {
 			if err := callExecute(c); err != nil {

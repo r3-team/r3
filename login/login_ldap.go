@@ -72,7 +72,7 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 	if newLogin {
 		metaEx = meta
 	} else {
-		metaEx, err = login_meta.Get(loginId)
+		metaEx, err = login_meta.Get_tx(ctx, tx, loginId)
 		if err != nil {
 			return err
 		}

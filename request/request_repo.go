@@ -3,7 +3,6 @@ package request
 import (
 	"context"
 	"encoding/json"
-	"r3/db"
 	"r3/repo"
 	"r3/transfer"
 	"r3/types"
@@ -44,8 +43,7 @@ func RepoModuleGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (
 	return res, nil
 }
 
-func RepoModuleInstall(reqJson json.RawMessage) (interface{}, error) {
-
+func RepoModuleInstall_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		FileId uuid.UUID `json:"fileId"`
 	}
@@ -58,16 +56,16 @@ func RepoModuleInstall(reqJson json.RawMessage) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return nil, transfer.ImportFromFiles([]string{filePath})
+	return nil, transfer.ImportFromFiles_tx(ctx, tx, []string{filePath})
 }
 
-func RepoModuleInstallAll() (interface{}, error) {
+func RepoModuleInstallAll_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
 
 	// get all files to be updated from repository
 	fileIds := make([]uuid.UUID, 0)
 	filePaths := make([]string, 0)
 
-	if err := db.Pool.QueryRow(context.Background(), `
+	if err := tx.QueryRow(ctx, `
 		SELECT ARRAY_AGG(rm.file)
 		FROM app.module AS m
 		INNER JOIN instance.repo_module AS rm ON rm.module_id_wofk = m.id
@@ -83,9 +81,9 @@ func RepoModuleInstallAll() (interface{}, error) {
 		}
 		filePaths = append(filePaths, filePath)
 	}
-	return nil, transfer.ImportFromFiles(filePaths)
+	return nil, transfer.ImportFromFiles_tx(ctx, tx, filePaths)
 }
 
-func RepoModuleUpdate() (interface{}, error) {
-	return nil, repo.Update()
+func RepoModuleUpdate_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
+	return nil, repo.Update_tx(ctx, tx)
 }

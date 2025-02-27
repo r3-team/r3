@@ -16,6 +16,21 @@ import (
 
 // update internal module repository from external repository API
 func Update() error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if err := Update_tx(ctx, tx); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+func Update_tx(ctx context.Context, tx pgx.Tx) error {
 	baseUrl := config.GetString("repoUrl")
 	repoModuleMap := make(map[uuid.UUID]types.RepoModule)
 
@@ -34,25 +49,13 @@ func Update() error {
 	}
 
 	// apply changes to local module store
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
-
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
 	if err := removeModules_tx(ctx, tx, repoModuleMap); err != nil {
 		return fmt.Errorf("failed to remove modules, %w", err)
 	}
 	if err := addModules_tx(ctx, tx, repoModuleMap); err != nil {
 		return fmt.Errorf("failed to add modules, %w", err)
 	}
-	if err := config.SetUint64_tx(ctx, tx, "repoChecked", uint64(tools.GetTimeUnix())); err != nil {
-		return err
-	}
-	return tx.Commit(ctx)
+	return config.SetUint64_tx(ctx, tx, "repoChecked", uint64(tools.GetTimeUnix()))
 }
 
 func addModules_tx(ctx context.Context, tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) error {

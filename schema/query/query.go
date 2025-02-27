@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/schema/caption"
 	"r3/types"
 	"slices"
@@ -188,7 +187,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, f
 	var queryIdExisting pgtype.UUID
 
 	if !subQuery {
-		if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
+		if err := tx.QueryRow(ctx, fmt.Sprintf(`
 			SELECT id
 			FROM app.query
 			WHERE %s_id = $1

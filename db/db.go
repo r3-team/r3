@@ -16,7 +16,6 @@ import (
 )
 
 var (
-	Ctx  = context.Background()
 	Pool *pgxpool.Pool
 
 	// default context timeouts

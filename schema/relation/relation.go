@@ -3,7 +3,6 @@ package relation
 import (
 	"context"
 	"fmt"
-	"r3/db"
 	"r3/db/check"
 	"r3/schema"
 	"r3/schema/attribute"
@@ -31,7 +30,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
 	// delete file relations for file attributes
 	atrIdsFile := make([]uuid.UUID, 0)
-	if err := db.Pool.QueryRow(ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT ARRAY_AGG(id)
 		FROM app.attribute
 		WHERE relation_id = $1
