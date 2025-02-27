@@ -2,7 +2,6 @@ package variable
 
 import (
 	"context"
-	"r3/db"
 	"r3/schema"
 	"r3/types"
 
@@ -15,10 +14,10 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(moduleId uuid.UUID) ([]types.Variable, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Variable, error) {
 
 	variables := make([]types.Variable, 0)
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT v.id, v.form_id, v.name, v.comment, v.content, v.content_use
 		FROM      app.variable  AS v
 		LEFT JOIN app.form      AS f ON f.id = v.form_id
@@ -40,7 +39,6 @@ func Get(moduleId uuid.UUID) ([]types.Variable, error) {
 		}
 		variables = append(variables, v)
 	}
-
 	return variables, nil
 }
 

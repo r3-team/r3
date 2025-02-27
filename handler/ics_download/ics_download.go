@@ -73,8 +73,21 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// start DB transaction
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		return
+	}
+	defer tx.Rollback(ctx)
+
+	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		return
+	}
+
 	// get calendar field details from cache
-	f, err := cache.GetCalendarField(fieldId)
+	f, err := cache.GetCalendarField_tx(ctx, tx, fieldId)
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 		return
@@ -198,18 +211,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get data
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
-		return
-	}
-	defer tx.Rollback(ctx)
-
-	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
-		return
-	}
-
 	var query string
 	results, _, err := data.Get_tx(ctx, tx, dataGet, loginId, &query)
 	if err != nil {

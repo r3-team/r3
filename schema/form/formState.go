@@ -2,7 +2,6 @@ package form
 
 import (
 	"context"
-	"r3/db"
 	"r3/schema"
 	"r3/types"
 
@@ -10,11 +9,10 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func getStates(formId uuid.UUID) ([]types.FormState, error) {
-
+func getStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.FormState, error) {
 	states := make([]types.FormState, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, description
 		FROM app.form_state
 		WHERE form_id = $1
@@ -36,11 +34,11 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 	}
 
 	for i, _ := range states {
-		states[i].Conditions, err = getStateConditions(states[i].Id)
+		states[i].Conditions, err = getStateConditions_tx(ctx, tx, states[i].Id)
 		if err != nil {
 			return states, nil
 		}
-		states[i].Effects, err = getStateEffects(states[i].Id)
+		states[i].Effects, err = getStateEffects_tx(ctx, tx, states[i].Id)
 		if err != nil {
 			return states, nil
 		}
@@ -48,10 +46,10 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 	return states, nil
 }
 
-func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, error) {
+func getStateConditions_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID) ([]types.FormStateCondition, error) {
 	conditions := make([]types.FormStateCondition, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT position, connector, operator
 		FROM app.form_state_condition
 		WHERE form_state_id = $1
@@ -71,11 +69,11 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 	}
 
 	for i, c := range conditions {
-		c.Side0, err = getStateConditionSide(formStateId, c.Position, 0)
+		c.Side0, err = getStateConditionSide_tx(ctx, tx, formStateId, c.Position, 0)
 		if err != nil {
 			return conditions, err
 		}
-		c.Side1, err = getStateConditionSide(formStateId, c.Position, 1)
+		c.Side1, err = getStateConditionSide_tx(ctx, tx, formStateId, c.Position, 1)
 		if err != nil {
 			return conditions, err
 		}
@@ -84,10 +82,10 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 
 	return conditions, nil
 }
-func getStateConditionSide(formStateId uuid.UUID, position int, side int) (types.FormStateConditionSide, error) {
+func getStateConditionSide_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID, position int, side int) (types.FormStateConditionSide, error) {
 	var s types.FormStateConditionSide
 
-	err := db.Pool.QueryRow(context.Background(), `
+	err := tx.QueryRow(ctx, `
 		SELECT collection_id, column_id, field_id, form_state_id_result,
 			preset_id, role_id, variable_id, brackets, content, value
 		FROM app.form_state_condition_side
@@ -100,11 +98,10 @@ func getStateConditionSide(formStateId uuid.UUID, position int, side int) (types
 	return s, err
 }
 
-func getStateEffects(formStateId uuid.UUID) ([]types.FormStateEffect, error) {
-
+func getStateEffects_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID) ([]types.FormStateEffect, error) {
 	effects := make([]types.FormStateEffect, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT field_id, form_action_id, tab_id, new_data, new_state
 		FROM app.form_state_effect
 		WHERE form_state_id = $1

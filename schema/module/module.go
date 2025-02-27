@@ -80,10 +80,10 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(ids []uuid.UUID) ([]types.Module, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, error) {
 	modules := make([]types.Module, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
 			js_function_id_on_login, pg_function_id_login_sync, name, name_pwa, name_pwa_short,
 			color1, position, language_main, release_build, release_build_app, release_date,
@@ -129,12 +129,12 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 	// get start forms & captions
 	for i, mod := range modules {
 
-		mod.StartForms, err = getStartForms(mod.Id)
+		mod.StartForms, err = getStartForms_tx(ctx, tx, mod.Id)
 		if err != nil {
 			return modules, err
 		}
 
-		mod.Captions, err = caption.Get("module", mod.Id, []string{"moduleTitle"})
+		mod.Captions, err = caption.Get_tx(ctx, tx, "module", mod.Id, []string{"moduleTitle"})
 		if err != nil {
 			return modules, err
 		}
@@ -263,7 +263,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 	}
 
 	// set dependencies to other modules
-	dependsOnCurrent, err := getDependsOn_tx(tx, mod.Id)
+	dependsOnCurrent, err := getDependsOn_tx(ctx, tx, mod.Id)
 	if err != nil {
 		return mod.Id, err
 	}
@@ -355,10 +355,10 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 	return mod.Id, caption.Set_tx(ctx, tx, mod.Id, mod.Captions)
 }
 
-func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {
+func getStartForms_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) ([]types.ModuleStartForm, error) {
 
 	startForms := make([]types.ModuleStartForm, 0)
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT role_id, form_id
 		FROM app.module_start_form
 		WHERE module_id = $1
@@ -379,10 +379,10 @@ func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {
 	return startForms, nil
 }
 
-func getDependsOn_tx(tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
+func getDependsOn_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
 
 	moduleIdsDependsOn := make([]uuid.UUID, 0)
-	rows, err := tx.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT module_id_on
 		FROM app.module_depends
 		WHERE module_id = $1

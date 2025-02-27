@@ -3,10 +3,10 @@ package cache
 import (
 	"context"
 	"r3/config/captionMap"
-	"r3/db"
 	"r3/types"
 	"sync"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -25,16 +25,7 @@ func GetCaptionMapCustom() types.CaptionMapsAll {
 	return captionMapCustom
 }
 
-func LoadCaptionMapCustom() error {
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
-
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
+func LoadCaptionMapCustom_tx(ctx context.Context, tx pgx.Tx) error {
 	cus, err := captionMap.Get_tx(ctx, tx, pgtype.UUID{}, "instance")
 	if err != nil {
 		return err
@@ -44,5 +35,5 @@ func LoadCaptionMapCustom() error {
 	captionMapCustom = cus
 	caption_mx.Unlock()
 
-	return tx.Commit(ctx)
+	return nil
 }

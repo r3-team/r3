@@ -3,7 +3,6 @@ package cache
 import (
 	"context"
 	"fmt"
-	"r3/db"
 	"r3/types"
 	"sync"
 
@@ -50,22 +49,6 @@ func GetMailAccountsExist() bool {
 	defer mail_mx.RUnlock()
 
 	return len(mailAccountIdMap) != 0
-}
-
-func LoadMailAccountMap() error {
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
-
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	if err := LoadMailAccountMap_tx(ctx, tx); err != nil {
-		return err
-	}
-	return tx.Commit(ctx)
 }
 
 func LoadMailAccountMap_tx(ctx context.Context, tx pgx.Tx) error {

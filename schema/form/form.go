@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/article"
 	"r3/schema/caption"
@@ -22,7 +21,7 @@ import (
 
 func Copy_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error {
 
-	forms, err := Get(uuid.Nil, []uuid.UUID{id})
+	forms, err := Get_tx(ctx, tx, uuid.Nil, []uuid.UUID{id})
 	if err != nil {
 		return err
 	}
@@ -129,7 +128,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 
 	forms := make([]types.Form, 0)
 	sqlWheres := []string{}
@@ -147,7 +146,7 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 		sqlValues = append(sqlValues, ids)
 	}
 
-	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT id, preset_id_open, icon_id, field_id_focus, name, no_data_actions, ARRAY(
 			SELECT article_id
 			FROM app.article_form
@@ -178,27 +177,27 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 
 	// collect form query, fields, functions, states and captions
 	for i, form := range forms {
-		form.Query, err = query.Get("form", form.Id, 0, 0, 0)
+		form.Query, err = query.Get_tx(ctx, tx, "form", form.Id, 0, 0, 0)
 		if err != nil {
 			return forms, err
 		}
-		form.Fields, err = field.Get(form.Id)
+		form.Fields, err = field.Get_tx(ctx, tx, form.Id)
 		if err != nil {
 			return forms, err
 		}
-		form.Actions, err = getActions(form.Id)
+		form.Actions, err = getActions_tx(ctx, tx, form.Id)
 		if err != nil {
 			return forms, err
 		}
-		form.Functions, err = getFunctions(form.Id)
+		form.Functions, err = getFunctions_tx(ctx, tx, form.Id)
 		if err != nil {
 			return forms, err
 		}
-		form.States, err = getStates(form.Id)
+		form.States, err = getStates_tx(ctx, tx, form.Id)
 		if err != nil {
 			return forms, err
 		}
-		form.Captions, err = caption.Get("form", form.Id, []string{"formTitle"})
+		form.Captions, err = caption.Get_tx(ctx, tx, "form", form.Id, []string{"formTitle"})
 		if err != nil {
 			return forms, err
 		}

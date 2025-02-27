@@ -130,6 +130,18 @@ func LoadFromDb() error {
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
 	defer ctxCanc()
 
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if err := LoadFromDb_tx(ctx, tx); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+func LoadFromDb_tx(ctx context.Context, tx pgx.Tx) error {
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
@@ -144,7 +156,7 @@ func LoadFromDb() error {
 		storeUint64Slice[name] = make([]uint64, 0)
 	}
 
-	rows, err := db.Pool.Query(ctx, "SELECT name, value FROM instance.config")
+	rows, err := tx.Query(ctx, "SELECT name, value FROM instance.config")
 	if err != nil {
 		return err
 	}

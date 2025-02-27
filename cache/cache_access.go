@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 var (
@@ -41,13 +42,26 @@ func LoadAccessIfUnknown(loginId int64) error {
 	if exists {
 		return nil
 	}
-	return load(loginId)
+
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if err := load_tx(ctx, tx, loginId); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }
 
-// renew permissions for all cached logins
-func RenewAccessAll() error {
+// renew permissions for all known logins
+func RenewAccessAll_tx(ctx context.Context, tx pgx.Tx) error {
 	for loginId, _ := range loginIdMapAccess {
-		if err := RenewAccessById(loginId); err != nil {
+		if err := RenewAccessById_tx(ctx, tx, loginId); err != nil {
 			return err
 		}
 	}
@@ -55,20 +69,20 @@ func RenewAccessAll() error {
 }
 
 // renew permissions for one known login
-func RenewAccessById(loginId int64) error {
+func RenewAccessById_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 	access_mx.RLock()
 	_, exists := loginIdMapAccess[loginId]
 	access_mx.RUnlock()
 	if !exists {
 		return nil
 	}
-	return load(loginId)
+	return load_tx(ctx, tx, loginId)
 }
 
 // load access permissions for login ID into cache
-func load(loginId int64) error {
+func load_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 
-	roleIds, err := loadRoleIds(loginId)
+	roleIds, err := loadRoleIds_tx(ctx, tx, loginId)
 	if err != nil {
 		return err
 	}
@@ -146,10 +160,10 @@ func load(loginId int64) error {
 	return nil
 }
 
-func loadRoleIds(loginId int64) ([]uuid.UUID, error) {
+func loadRoleIds_tx(ctx context.Context, tx pgx.Tx, loginId int64) ([]uuid.UUID, error) {
 	roleIds := make([]uuid.UUID, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		-- get nested children of assigned roles
 		WITH RECURSIVE child_ids AS (
 			SELECT role_id_child

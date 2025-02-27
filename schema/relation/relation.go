@@ -74,10 +74,10 @@ func delPkSeq_tx(ctx context.Context, tx pgx.Tx, modName string, id uuid.UUID) e
 	return err
 }
 
-func Get(moduleId uuid.UUID) ([]types.Relation, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Relation, error) {
 
 	relations := make([]types.Relation, 0)
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, name, comment, encryption, retention_count, retention_days, (
 			SELECT id
 			FROM app.attribute
@@ -107,7 +107,7 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 	}
 
 	for i, r := range relations {
-		relations[i].Policies, err = getPolicies(r.Id)
+		relations[i].Policies, err = getPolicies_tx(ctx, tx, r.Id)
 		if err != nil {
 			return relations, err
 		}

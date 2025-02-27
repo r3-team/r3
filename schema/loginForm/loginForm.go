@@ -2,7 +2,6 @@ package loginForm
 
 import (
 	"context"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
@@ -16,10 +15,10 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(moduleId uuid.UUID) ([]types.LoginForm, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.LoginForm, error) {
 
 	loginForms := make([]types.LoginForm, 0)
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, attribute_id_login, attribute_id_lookup, form_id, name
 		FROM app.login_form
 		WHERE module_id = $1
@@ -43,7 +42,7 @@ func Get(moduleId uuid.UUID) ([]types.LoginForm, error) {
 
 	// get captions
 	for i, l := range loginForms {
-		loginForms[i].Captions, err = caption.Get("login_form", l.Id, []string{"loginFormTitle"})
+		loginForms[i].Captions, err = caption.Get_tx(ctx, tx, "login_form", l.Id, []string{"loginFormTitle"})
 		if err != nil {
 			return loginForms, err
 		}

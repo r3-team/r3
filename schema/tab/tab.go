@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
@@ -21,14 +20,14 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(entity string, entityId uuid.UUID) ([]types.Tab, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID) ([]types.Tab, error) {
 	tabs := make([]types.Tab, 0)
 
 	if !slices.Contains(allowedEntities, entity) {
 		return tabs, errors.New("bad entity")
 	}
 
-	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT id, content_counter, state
 		FROM app.tab
 		WHERE %s_id = $1
@@ -48,7 +47,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Tab, error) {
 	}
 
 	for i, tab := range tabs {
-		tabs[i].Captions, err = caption.Get("tab", tab.Id, []string{"tabTitle"})
+		tabs[i].Captions, err = caption.Get_tx(ctx, tx, "tab", tab.Id, []string{"tabTitle"})
 		if err != nil {
 			return tabs, err
 		}

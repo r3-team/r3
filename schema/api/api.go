@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/db/check"
 	"r3/schema"
 	"r3/schema/column"
@@ -18,7 +17,7 @@ import (
 
 func Copy_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
-	apis, err := Get(uuid.Nil, id)
+	apis, err := Get_tx(ctx, tx, uuid.Nil, id)
 	if err != nil {
 		return err
 	}
@@ -62,7 +61,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(moduleId uuid.UUID, id uuid.UUID) ([]types.Api, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID) ([]types.Api, error) {
 
 	apis := make([]types.Api, 0)
 	sqlWheres := []string{}
@@ -76,7 +75,7 @@ func Get(moduleId uuid.UUID, id uuid.UUID) ([]types.Api, error) {
 		sqlValues = append(sqlValues, id)
 	}
 
-	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT id, module_id, name, comment, has_delete, has_get,
 			has_post, limit_def, limit_max, verbose_def, version
 		FROM app.api
@@ -102,11 +101,11 @@ func Get(moduleId uuid.UUID, id uuid.UUID) ([]types.Api, error) {
 
 	// collect query and columns
 	for i, a := range apis {
-		a.Query, err = query.Get("api", a.Id, 0, 0, 0)
+		a.Query, err = query.Get_tx(ctx, tx, "api", a.Id, 0, 0, 0)
 		if err != nil {
 			return apis, err
 		}
-		a.Columns, err = column.Get("api", a.Id)
+		a.Columns, err = column.Get_tx(ctx, tx, "api", a.Id)
 		if err != nil {
 			return apis, err
 		}

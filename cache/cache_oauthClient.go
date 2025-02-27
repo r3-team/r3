@@ -3,7 +3,6 @@ package cache
 import (
 	"context"
 	"fmt"
-	"r3/db"
 	"r3/types"
 	"sync"
 
@@ -31,22 +30,6 @@ func GetOauthClient(id int32) (types.OauthClient, error) {
 		return c, fmt.Errorf("OAUTH client with ID %d does not exist", id)
 	}
 	return c, nil
-}
-
-func LoadOauthClientMap() error {
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
-
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	if err := LoadOauthClientMap_tx(ctx, tx); err != nil {
-		return err
-	}
-	return tx.Commit(ctx)
 }
 
 func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {

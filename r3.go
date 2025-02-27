@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"r3/bruteforce"
 	"r3/cache"
 	"r3/cluster"
 	"r3/config"
@@ -332,19 +333,22 @@ func (prg *program) execute(svc service.Service) {
 
 	// check for first database start
 	if err := initialize.PrepareDbIfNew(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to initiate database on first start, %v", err))
+		prg.executeAborted(svc, fmt.Errorf("failed to initialize database on first start, %v", err))
 		return
 	}
 
 	// apply configuration from database
-	if err := cluster.ConfigChanged(false, true, false); err != nil {
+	if err := config.LoadFromDb(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to apply configuration from database, %v", err))
 		return
 	}
+	bruteforce.SetConfig()
+	config.ActivateLicense()
+	config.SetLogLevels()
 
-	// store host details in cache (before cluster node startup)
-	if err := cache.SetHostnameFromOs(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to load host details, %v", err))
+	// run automatic database upgrade if required
+	if err := upgrade.RunIfRequired(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed automatic upgrade of database, %v", err))
 		return
 	}
 
@@ -365,67 +369,9 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
-	// run automatic database upgrade if required
-	if err := upgrade.RunIfRequired(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed automatic upgrade of database, %v", err))
-		return
-	}
-
-	// setup cluster node with shared database
-	if err := cluster.StartNode(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to setup cluster node, %v", err))
-		return
-	}
-
-	// remove login sessions logs for this cluster node (in case they were not removed on shutdown)
-	if err := login_session.LogsRemoveForNode(); err != nil {
-		prg.logger.Error(err)
-	}
-
-	// initialize caches
-	// module meta data must be loaded before module schema (informs about what modules to load)
-	if err := cache.LoadModuleIdMapMeta(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to initialize module meta cache, %v", err))
-		return
-	}
-	if err := cache.LoadCaptionMapCustom(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to initialize custom caption map cache, %v", err))
-		return
-	}
-	if err := cache.LoadSchema(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to initialize schema cache, %v", err))
-		return
-	}
-	if err := cache.LoadMailAccountMap(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to initialize mail account cache, %v", err))
-		return
-	}
-	if err := cache.LoadOauthClientMap(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to initialize oauth client cache, %v", err))
-		return
-	}
-	if err := cache.LoadPwaDomainMap(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to initialize PWA domain cache, %v", err))
-		return
-	}
-	if err := cache.LoadSearchDictionaries(); err != nil {
-		// failure is not mission critical (in case of no access to DB system tables)
-		log.Error("server", "failed to read/update text search dictionaries", err)
-	}
-	if err := ldap.UpdateCache(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to initialize LDAP cache, %v", err))
-		return
-	}
-
-	// process token secret for future client authentication from database
-	if err := config.ProcessTokenSecret(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to process token secret, %v", err))
-		return
-	}
-
-	// set unique instance ID if empty
-	if err := config.SetInstanceIdIfEmpty(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to set instance ID, %v", err))
+	// prepare cluster node & load caches
+	if err := initClusterAndCaches(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to initalize caches during startup, %v", err))
 		return
 	}
 
@@ -437,7 +383,7 @@ func (prg *program) execute(svc service.Service) {
 	// start scheduler (must start after module cache)
 	go scheduler.Start()
 
-	// prepare web server
+	// start web server
 	go websocket.StartBackgroundTasks()
 
 	mux := http.NewServeMux()
@@ -544,6 +490,71 @@ func (prg *program) execute(svc service.Service) {
 	}
 }
 
+func initClusterAndCaches() error {
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysStart)
+	defer ctxCanc()
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	// store host details in cache (before cluster node startup)
+	if err := cache.SetHostnameFromOs(); err != nil {
+		return fmt.Errorf("failed to load host details, %v", err)
+	}
+
+	// setup cluster node with shared database
+	if err := cluster.StartNode_tx(ctx, tx); err != nil {
+		return err
+	}
+
+	// remove login sessions logs for this cluster node (in case they were not removed on shutdown)
+	if err := login_session.LogsRemoveForNode_tx(ctx, tx); err != nil {
+		return err
+	}
+
+	// initialize caches
+	// module meta data must be loaded before module schema (informs about what modules to load)
+	if err := cache.LoadModuleIdMapMeta_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to initialize module meta cache, %v", err)
+	}
+	if err := cache.LoadCaptionMapCustom_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to initialize custom caption map cache, %v", err)
+	}
+	if err := cache.LoadSchema_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to initialize schema cache, %v", err)
+	}
+	if err := cache.LoadMailAccountMap_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to initialize mail account cache, %v", err)
+	}
+	if err := cache.LoadOauthClientMap_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to initialize oauth client cache, %v", err)
+	}
+	if err := cache.LoadPwaDomainMap_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to initialize PWA domain cache, %v", err)
+	}
+	if err := cache.LoadSearchDictionaries_tx(ctx, tx); err != nil {
+		// failure is not mission critical (in case of no access to DB system tables)
+		log.Error("server", "failed to read/update text search dictionaries", err)
+	}
+	if err := ldap.UpdateCache_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to initialize LDAP cache, %v", err)
+	}
+
+	// process token secret for future client authentication from database
+	if err := config.ProcessTokenSecret_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to process token secret, %v", err)
+	}
+
+	// set unique instance ID if empty
+	if err := config.SetInstanceIdIfEmpty_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to set instance ID, %v", err)
+	}
+	return tx.Commit(ctx)
+}
+
 // properly shuts down application, if execution is aborted prematurely
 func (prg *program) executeAborted(svc service.Service, err error) {
 	if err != nil {
@@ -578,8 +589,11 @@ func (prg *program) Stop(svc service.Service) error {
 	}
 	prg.stopping.Store(true)
 
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutShutdown)
+	defer ctxCanc()
+
 	// remove login session logs for this cluster node
-	if err := login_session.LogsRemoveForNode(); err != nil {
+	if err := login_session.LogsRemoveForNode(ctx); err != nil {
 		prg.logger.Error(err)
 	}
 
@@ -588,10 +602,6 @@ func (prg *program) Stop(svc service.Service) error {
 
 	// stop web server if running
 	if prg.webServer != nil {
-
-		ctx, ctxCanc := context.WithTimeout(context.Background(), 5*time.Second)
-		defer ctxCanc()
-
 		if err := prg.webServer.Shutdown(ctx); err != nil {
 			prg.logger.Error(err)
 		}
@@ -600,7 +610,7 @@ func (prg *program) Stop(svc service.Service) error {
 
 	// close database connection and deregister cluster node if DB is open
 	if db.Pool != nil {
-		if err := cluster.StopNode(); err != nil {
+		if err := cluster.StopNode(ctx); err != nil {
 			prg.logger.Error(err)
 		}
 		db.Close()

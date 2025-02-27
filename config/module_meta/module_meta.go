@@ -19,12 +19,12 @@ func Create_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, hidden bool, 
 	return err
 }
 
-func Get(moduleId uuid.UUID) (types.ModuleMeta, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) (types.ModuleMeta, error) {
 	var m = types.ModuleMeta{
 		Id: moduleId,
 	}
 
-	err := db.Pool.QueryRow(context.Background(), `
+	err := tx.QueryRow(ctx, `
 		SELECT hidden, owner, position, date_change, languages_custom
 		FROM instance.module_meta
 		WHERE module_id = $1
@@ -44,10 +44,10 @@ func GetDateChange(moduleId uuid.UUID) (uint64, error) {
 	`, moduleId).Scan(&dateChange)
 	return dateChange, err
 }
-func GetIdMap() (map[uuid.UUID]types.ModuleMeta, error) {
+func GetIdMap_tx(ctx context.Context, tx pgx.Tx) (map[uuid.UUID]types.ModuleMeta, error) {
 	moduleIdMap := make(map[uuid.UUID]types.ModuleMeta)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT module_id, hidden, owner, position, date_change, languages_custom
 		FROM instance.module_meta
 	`)
@@ -58,9 +58,7 @@ func GetIdMap() (map[uuid.UUID]types.ModuleMeta, error) {
 
 	for rows.Next() {
 		var m types.ModuleMeta
-		if err := rows.Scan(&m.Id, &m.Hidden, &m.Owner, &m.Position,
-			&m.DateChange, &m.LanguagesCustom); err != nil {
-
+		if err := rows.Scan(&m.Id, &m.Hidden, &m.Owner, &m.Position, &m.DateChange, &m.LanguagesCustom); err != nil {
 			return moduleIdMap, err
 		}
 		if m.LanguagesCustom == nil {
@@ -89,8 +87,8 @@ func GetOwner(moduleId uuid.UUID) (bool, error) {
 	return isOwner, err
 }
 
-func SetDateChange(moduleIds []uuid.UUID, date int64) error {
-	_, err := db.Pool.Exec(context.Background(), `
+func SetDateChange_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID, date int64) error {
+	_, err := tx.Exec(ctx, `
 		UPDATE instance.module_meta
 		SET date_change = $2
 		WHERE module_id = ANY($1)

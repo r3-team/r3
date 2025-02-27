@@ -94,5 +94,5 @@ func ConfigSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (inte
 			}
 		}
 	}
-	return nil, cluster.ConfigChanged(true, false, productionModeChange)
+	return nil, cluster.ConfigChanged_tx(ctx, tx, true, false, productionModeChange)
 }

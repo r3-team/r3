@@ -3,6 +3,7 @@ package initialize
 import (
 	"context"
 	"fmt"
+	"r3/bruteforce"
 	"r3/config"
 	"r3/db"
 	"r3/db/upgrade"
@@ -68,6 +69,9 @@ func PrepareDbIfNew() error {
 	if err := config.LoadFromDb(); err != nil {
 		return err
 	}
+	bruteforce.SetConfig()
+	config.ActivateLicense()
+	config.SetLogLevels()
 
 	// before doing any more work, upgrade DB if necessary
 	if err := upgrade.RunIfRequired(); err != nil {

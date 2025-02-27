@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/compatible"
@@ -24,10 +23,10 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(moduleId uuid.UUID) ([]types.Role, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Role, error) {
 	roles := make([]types.Role, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT r.id, r.name, r.content, r.assignable, ARRAY(
 			SELECT role_id_child
 			FROM app.role_child
@@ -54,12 +53,12 @@ func Get(moduleId uuid.UUID) ([]types.Role, error) {
 	// get access & captions
 	for i, r := range roles {
 
-		r, err = getAccess(r)
+		r, err = getAccess_tx(ctx, tx, r)
 		if err != nil {
 			return roles, err
 		}
 
-		r.Captions, err = caption.Get("role", r.Id, []string{"roleTitle", "roleDesc"})
+		r.Captions, err = caption.Get_tx(ctx, tx, "role", r.Id, []string{"roleTitle", "roleDesc"})
 		if err != nil {
 			return roles, err
 		}
@@ -68,7 +67,7 @@ func Get(moduleId uuid.UUID) ([]types.Role, error) {
 	return roles, nil
 }
 
-func getAccess(role types.Role) (types.Role, error) {
+func getAccess_tx(ctx context.Context, tx pgx.Tx, role types.Role) (types.Role, error) {
 
 	role.AccessApis = make(map[uuid.UUID]int)
 	role.AccessAttributes = make(map[uuid.UUID]int)
@@ -78,7 +77,7 @@ func getAccess(role types.Role) (types.Role, error) {
 	role.AccessMenus = make(map[uuid.UUID]int)
 	role.AccessWidgets = make(map[uuid.UUID]int)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT api_id, attribute_id, client_event_id, collection_id,
 			menu_id, relation_id, widget_id, access
 		FROM app.role_access

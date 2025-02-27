@@ -3,7 +3,6 @@ package ldap
 import (
 	"context"
 	"r3/cache"
-	"r3/db"
 	"r3/login"
 	"r3/types"
 	"strings"
@@ -149,22 +148,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) error {
 		}
 	}
 	return nil
-}
-
-func UpdateCache() error {
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
-
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	if err := UpdateCache_tx(ctx, tx); err != nil {
-		return err
-	}
-	return tx.Commit(ctx)
 }
 func UpdateCache_tx(ctx context.Context, tx pgx.Tx) error {
 	ldaps, err := Get_tx(ctx, tx)

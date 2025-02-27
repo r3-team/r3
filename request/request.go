@@ -137,13 +137,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "event":
 		switch action {
 		case "clientEventsChanged":
-			return eventClientEventsChanged(loginId, address)
+			return eventClientEventsChanged_tx(ctx, tx, loginId, address)
 		case "filesCopied":
-			return eventFilesCopied(reqJson, loginId, address)
+			return eventFilesCopied_tx(ctx, tx, reqJson, loginId, address)
 		case "fileRequested":
-			return eventFileRequested(ctx, reqJson, loginId, address)
+			return eventFileRequested_tx(ctx, tx, reqJson, loginId, address)
 		case "keystrokesRequested":
-			return eventKeystrokesRequested(reqJson, loginId, address)
+			return eventKeystrokesRequested_tx(ctx, tx, reqJson, loginId, address)
 		}
 	case "feedback":
 		switch action {
@@ -323,7 +323,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "setNode":
 			return ClusterNodeSet_tx(ctx, tx, reqJson)
 		case "shutdownNode":
-			return ClusterNodeShutdown(reqJson)
+			return ClusterNodeShutdown_tx(ctx, tx, reqJson)
 		}
 	case "dataSql":
 		switch action {
@@ -410,11 +410,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "getRecords":
 			return LoginGetRecords_tx(ctx, tx, reqJson)
 		case "kick":
-			return LoginKick(reqJson)
+			return LoginKick(ctx, tx, reqJson)
 		case "reauth":
-			return LoginReauth(reqJson)
+			return LoginReauth_tx(ctx, tx, reqJson)
 		case "reauthAll":
-			return LoginReauthAll()
+			return LoginReauthAll_tx(ctx, tx)
 		case "resetTotp":
 			return LoginResetTotp_tx(ctx, tx, reqJson)
 		case "set":
@@ -585,12 +585,12 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "check":
 			return SchemaCheck_tx(ctx, tx, reqJson)
 		case "reload":
-			return SchemaReload(reqJson)
+			return SchemaReload_tx(ctx, tx, reqJson)
 		}
 	case "task":
 		switch action {
 		case "informChanged":
-			return nil, cluster.TasksChanged(true)
+			return nil, cluster.TasksChanged_tx(ctx, tx, true)
 		case "run":
 			return TaskRun_tx(ctx, tx, reqJson)
 		case "set":

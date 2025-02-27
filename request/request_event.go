@@ -5,16 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"r3/cluster"
-	"r3/db"
 	"r3/schema"
 	"strings"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // requests for browser clients
-func eventFilesCopied(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
+func eventFilesCopied_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
 	// request file(s) to be copied (synchronized across all browser clients)
 	var req struct {
 		AttributeId uuid.UUID   `json:"attributeId"`
@@ -24,14 +24,14 @@ func eventFilesCopied(reqJson json.RawMessage, loginId int64, address string) (i
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, cluster.FilesCopied(true, address, loginId, req.AttributeId, req.FileIds, req.RecordId)
+	return nil, cluster.FilesCopied_tx(ctx, tx, true, address, loginId, req.AttributeId, req.FileIds, req.RecordId)
 }
 
 // requests for fat clients
-func eventClientEventsChanged(loginId int64, address string) (interface{}, error) {
-	return nil, cluster.ClientEventsChanged(true, address, loginId)
+func eventClientEventsChanged_tx(ctx context.Context, tx pgx.Tx, loginId int64, address string) (interface{}, error) {
+	return nil, cluster.ClientEventsChanged_tx(ctx, tx, true, address, loginId)
 }
-func eventFileRequested(ctx context.Context, reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
+func eventFileRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
 	var req struct {
 		AttributeId uuid.UUID `json:"attributeId"`
 		FileId      uuid.UUID `json:"fileId"`
@@ -47,7 +47,7 @@ func eventFileRequested(ctx context.Context, reqJson json.RawMessage, loginId in
 	// files before 3.1 do not have a hash value, empty hash is then compared against new file version hash
 	var hash pgtype.Text
 	var name string
-	if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
+	if err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT v.hash, r.name
 		FROM instance.file_version AS v
 		JOIN instance_file."%s"    AS r
@@ -75,14 +75,14 @@ func eventFileRequested(ctx context.Context, reqJson json.RawMessage, loginId in
 		"\\", "",
 		"&", "").Replace(name)
 
-	return nil, cluster.FileRequested(true, address, loginId,
+	return nil, cluster.FileRequested_tx(ctx, tx, true, address, loginId,
 		req.AttributeId, req.FileId, hash.String, name, req.ChooseApp)
 }
-func eventKeystrokesRequested(reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
+func eventKeystrokesRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
 	var keystrokes string
 
 	if err := json.Unmarshal(reqJson, &keystrokes); err != nil {
 		return nil, err
 	}
-	return nil, cluster.KeystrokesRequested(true, address, loginId, keystrokes)
+	return nil, cluster.KeystrokesRequested_tx(ctx, tx, true, address, loginId, keystrokes)
 }

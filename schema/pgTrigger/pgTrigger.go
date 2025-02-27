@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"r3/types"
 	"slices"
@@ -36,10 +35,10 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return nil
 }
 
-func Get(moduleId uuid.UUID) ([]types.PgTrigger, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgTrigger, error) {
 	triggers := make([]types.PgTrigger, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, relation_id, pg_function_id, on_insert, on_update, on_delete,
 			is_constraint, is_deferrable, is_deferred, per_row, fires,
 			code_condition

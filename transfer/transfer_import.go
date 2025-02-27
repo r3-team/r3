@@ -174,17 +174,21 @@ func ImportFromFiles(filePathsImport []string) error {
 
 	log.Info("transfer", "module files were moved to transfer path if imported")
 
-	if err := tx.Commit(ctx); err != nil {
-		return err
-	}
-	log.Info("transfer", "changes were committed successfully")
-
 	// update schema cache
 	moduleIdsUpdated := make([]uuid.UUID, 0)
 	for id, _ := range moduleIdMapImportMeta {
 		moduleIdsUpdated = append(moduleIdsUpdated, id)
 	}
-	return cluster.SchemaChanged(true, moduleIdsUpdated)
+	if err := cluster.SchemaChanged_tx(ctx, tx, true, moduleIdsUpdated); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return err
+	}
+
+	log.Info("transfer", "changes were committed successfully")
+	return nil
 }
 
 func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,

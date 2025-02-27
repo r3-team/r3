@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/schema/compatible"
 	"r3/schema/openForm"
 	"r3/types"
@@ -17,7 +16,7 @@ import (
 
 var entitiesAllowed = []string{"collection", "field", "menu", "widget"}
 
-func GetOne(entity string, entityId uuid.UUID, content string) (types.CollectionConsumer, error) {
+func GetOne_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, content string) (types.CollectionConsumer, error) {
 
 	var err error
 	var c types.CollectionConsumer
@@ -25,7 +24,7 @@ func GetOne(entity string, entityId uuid.UUID, content string) (types.Collection
 		return c, errors.New("invalid collection consumer entity")
 	}
 
-	if err := db.Pool.QueryRow(context.Background(), fmt.Sprintf(`
+	if err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT id, collection_id, column_id_display, flags, on_mobile
 		FROM app.collection_consumer
 		WHERE %s_id   = $1
@@ -34,20 +33,20 @@ func GetOne(entity string, entityId uuid.UUID, content string) (types.Collection
 		return c, err
 	}
 
-	c.OpenForm, err = openForm.Get("collection_consumer", c.Id, pgtype.Text{})
+	c.OpenForm, err = openForm.Get_tx(ctx, tx, "collection_consumer", c.Id, pgtype.Text{})
 	if err != nil {
 		return c, err
 	}
 	return c, nil
 }
-func Get(entity string, entityId uuid.UUID, content string) ([]types.CollectionConsumer, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, content string) ([]types.CollectionConsumer, error) {
 	var consumers = make([]types.CollectionConsumer, 0)
 
 	if !slices.Contains(entitiesAllowed, entity) {
 		return consumers, errors.New("invalid collection consumer entity")
 	}
 
-	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT id, collection_id, column_id_display, flags, on_mobile
 		FROM app.collection_consumer
 		WHERE %s_id   = $1
@@ -67,7 +66,7 @@ func Get(entity string, entityId uuid.UUID, content string) ([]types.CollectionC
 	}
 
 	for i, c := range consumers {
-		consumers[i].OpenForm, err = openForm.Get("collection_consumer", c.Id, pgtype.Text{})
+		consumers[i].OpenForm, err = openForm.Get_tx(ctx, tx, "collection_consumer", c.Id, pgtype.Text{})
 		if err != nil {
 			return consumers, err
 		}

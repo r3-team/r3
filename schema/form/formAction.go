@@ -2,7 +2,6 @@ package form
 
 import (
 	"context"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
@@ -11,10 +10,10 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func getActions(formId uuid.UUID) ([]types.FormAction, error) {
+func getActions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.FormAction, error) {
 	actions := make([]types.FormAction, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, js_function_id, icon_id, state, color
 		FROM app.form_action
 		WHERE form_id = $1
@@ -34,7 +33,7 @@ func getActions(formId uuid.UUID) ([]types.FormAction, error) {
 	}
 
 	for i, a := range actions {
-		actions[i].Captions, err = caption.Get("form_action", a.Id, []string{"formActionTitle"})
+		actions[i].Captions, err = caption.Get_tx(ctx, tx, "form_action", a.Id, []string{"formActionTitle"})
 		if err != nil {
 			return actions, err
 		}

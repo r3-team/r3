@@ -23,7 +23,7 @@ func SchemaCheck_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (in
 	return nil, schema.ValidateDependency_tx(ctx, tx, req.ModuleId)
 }
 
-func SchemaReload(reqJson json.RawMessage) (interface{}, error) {
+func SchemaReload_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		ModuleId pgtype.UUID `json:"moduleId"`
@@ -37,5 +37,5 @@ func SchemaReload(reqJson json.RawMessage) (interface{}, error) {
 	if req.ModuleId.Valid {
 		modIds = append(modIds, req.ModuleId.Bytes)
 	}
-	return nil, cluster.SchemaChanged(true, modIds)
+	return nil, cluster.SchemaChanged_tx(ctx, tx, true, modIds)
 }

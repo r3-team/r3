@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/collection/consumer"
@@ -29,11 +28,10 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(formId uuid.UUID) ([]interface{}, error) {
-
+func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]interface{}, error) {
 	fields := make([]interface{}, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT f.id, f.parent_id, f.tab_id, f.icon_id, f.content, f.state,
 		f.flags, f.on_mobile, a.content,
 		
@@ -401,11 +399,11 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posButtonLookup {
 		var field = fields[pos].(types.FieldButton)
 
-		field.OpenForm, err = openForm.Get("field", field.Id, pgtype.Text{})
+		field.OpenForm, err = openForm.Get_tx(ctx, tx, "field", field.Id, pgtype.Text{})
 		if err != nil {
 			return fields, err
 		}
-		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle"})
+		field.Captions, err = caption.Get_tx(ctx, tx, "field", field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return fields, err
 		}
@@ -416,19 +414,19 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posCalendarLookup {
 		var field = fields[pos].(types.FieldCalendar)
 
-		field.OpenForm, err = openForm.Get("field", field.Id, pgtype.Text{})
+		field.OpenForm, err = openForm.Get_tx(ctx, tx, "field", field.Id, pgtype.Text{})
 		if err != nil {
 			return fields, err
 		}
-		field.Query, err = query.Get("field", field.Id, 0, 0, 0)
+		field.Query, err = query.Get_tx(ctx, tx, "field", field.Id, 0, 0, 0)
 		if err != nil {
 			return fields, err
 		}
-		field.Columns, err = column.Get("field", field.Id)
+		field.Columns, err = column.Get_tx(ctx, tx, "field", field.Id)
 		if err != nil {
 			return fields, err
 		}
-		field.Collections, err = consumer.Get("field", field.Id, "fieldFilterSelector")
+		field.Collections, err = consumer.Get_tx(ctx, tx, "field", field.Id, "fieldFilterSelector")
 		if err != nil {
 			return fields, err
 		}
@@ -439,15 +437,15 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posChartLookup {
 		var field = fields[pos].(types.FieldChart)
 
-		field.Query, err = query.Get("field", field.Id, 0, 0, 0)
+		field.Query, err = query.Get_tx(ctx, tx, "field", field.Id, 0, 0, 0)
 		if err != nil {
 			return fields, err
 		}
-		field.Columns, err = column.Get("field", field.Id)
+		field.Columns, err = column.Get_tx(ctx, tx, "field", field.Id)
 		if err != nil {
 			return fields, err
 		}
-		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle"})
+		field.Captions, err = caption.Get_tx(ctx, tx, "field", field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return fields, err
 		}
@@ -458,11 +456,11 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posDataLookup {
 		var field = fields[pos].(types.FieldData)
 
-		field.DefCollection, err = consumer.GetOne("field", field.Id, "fieldDataDefault")
+		field.DefCollection, err = consumer.GetOne_tx(ctx, tx, "field", field.Id, "fieldDataDefault")
 		if err != nil {
 			return fields, err
 		}
-		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle", "fieldHelp"})
+		field.Captions, err = caption.Get_tx(ctx, tx, "field", field.Id, []string{"fieldTitle", "fieldHelp"})
 		if err != nil {
 			return fields, err
 		}
@@ -473,23 +471,23 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posDataRelLookup {
 		var field = fields[pos].(types.FieldDataRelationship)
 
-		field.OpenForm, err = openForm.Get("field", field.Id, pgtype.Text{})
+		field.OpenForm, err = openForm.Get_tx(ctx, tx, "field", field.Id, pgtype.Text{})
 		if err != nil {
 			return fields, err
 		}
-		field.Query, err = query.Get("field", field.Id, 0, 0, 0)
+		field.Query, err = query.Get_tx(ctx, tx, "field", field.Id, 0, 0, 0)
 		if err != nil {
 			return fields, err
 		}
-		field.Columns, err = column.Get("field", field.Id)
+		field.Columns, err = column.Get_tx(ctx, tx, "field", field.Id)
 		if err != nil {
 			return fields, err
 		}
-		field.DefCollection, err = consumer.GetOne("field", field.Id, "fieldDataDefault")
+		field.DefCollection, err = consumer.GetOne_tx(ctx, tx, "field", field.Id, "fieldDataDefault")
 		if err != nil {
 			return fields, err
 		}
-		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle", "fieldHelp"})
+		field.Captions, err = caption.Get_tx(ctx, tx, "field", field.Id, []string{"fieldTitle", "fieldHelp"})
 		if err != nil {
 			return fields, err
 		}
@@ -500,7 +498,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posHeaderLookup {
 		var field = fields[pos].(types.FieldHeader)
 
-		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle"})
+		field.Captions, err = caption.Get_tx(ctx, tx, "field", field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return fields, err
 		}
@@ -511,19 +509,19 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posKanbanLookup {
 		var field = fields[pos].(types.FieldKanban)
 
-		field.OpenForm, err = openForm.Get("field", field.Id, pgtype.Text{})
+		field.OpenForm, err = openForm.Get_tx(ctx, tx, "field", field.Id, pgtype.Text{})
 		if err != nil {
 			return fields, err
 		}
-		field.Query, err = query.Get("field", field.Id, 0, 0, 0)
+		field.Query, err = query.Get_tx(ctx, tx, "field", field.Id, 0, 0, 0)
 		if err != nil {
 			return fields, err
 		}
-		field.Columns, err = column.Get("field", field.Id)
+		field.Columns, err = column.Get_tx(ctx, tx, "field", field.Id)
 		if err != nil {
 			return fields, err
 		}
-		field.Collections, err = consumer.Get("field", field.Id, "fieldFilterSelector")
+		field.Collections, err = consumer.Get_tx(ctx, tx, "field", field.Id, "fieldFilterSelector")
 		if err != nil {
 			return fields, err
 		}
@@ -534,27 +532,27 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posListLookup {
 		var field = fields[pos].(types.FieldList)
 
-		field.OpenForm, err = openForm.Get("field", field.Id, pgtype.Text{})
+		field.OpenForm, err = openForm.Get_tx(ctx, tx, "field", field.Id, pgtype.Text{})
 		if err != nil {
 			return fields, err
 		}
-		field.OpenFormBulk, err = openForm.Get("field", field.Id, pgtype.Text{String: "bulk", Valid: true})
+		field.OpenFormBulk, err = openForm.Get_tx(ctx, tx, "field", field.Id, pgtype.Text{String: "bulk", Valid: true})
 		if err != nil {
 			return fields, err
 		}
-		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle"})
+		field.Captions, err = caption.Get_tx(ctx, tx, "field", field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return fields, err
 		}
-		field.Query, err = query.Get("field", field.Id, 0, 0, 0)
+		field.Query, err = query.Get_tx(ctx, tx, "field", field.Id, 0, 0, 0)
 		if err != nil {
 			return fields, err
 		}
-		field.Columns, err = column.Get("field", field.Id)
+		field.Columns, err = column.Get_tx(ctx, tx, "field", field.Id)
 		if err != nil {
 			return fields, err
 		}
-		field.Collections, err = consumer.Get("field", field.Id, "fieldFilterSelector")
+		field.Collections, err = consumer.Get_tx(ctx, tx, "field", field.Id, "fieldFilterSelector")
 		if err != nil {
 			return fields, err
 		}
@@ -564,11 +562,11 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	// lookup tabs fields: get tabs
 	for _, pos := range posTabsLookup {
 		var field = fields[pos].(types.FieldTabs)
-		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle"})
+		field.Captions, err = caption.Get_tx(ctx, tx, "field", field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return fields, err
 		}
-		field.Tabs, err = tab.Get("field", field.Id)
+		field.Tabs, err = tab.Get_tx(ctx, tx, "field", field.Id)
 		if err != nil {
 			return fields, err
 		}
@@ -579,15 +577,15 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posVariableLookup {
 		var field = fields[pos].(types.FieldVariable)
 
-		field.Query, err = query.Get("field", field.Id, 0, 0, 0)
+		field.Query, err = query.Get_tx(ctx, tx, "field", field.Id, 0, 0, 0)
 		if err != nil {
 			return fields, err
 		}
-		field.Columns, err = column.Get("field", field.Id)
+		field.Columns, err = column.Get_tx(ctx, tx, "field", field.Id)
 		if err != nil {
 			return fields, err
 		}
-		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle", "fieldHelp"})
+		field.Captions, err = caption.Get_tx(ctx, tx, "field", field.Id, []string{"fieldTitle", "fieldHelp"})
 		if err != nil {
 			return fields, err
 		}
@@ -640,12 +638,12 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	// recursively resolve all fields with their children
 	return getChildren(uuid.Nil, uuid.Nil), nil
 }
-func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
+func GetCalendar_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID) (types.FieldCalendar, error) {
 
 	var f types.FieldCalendar
 	f.Id = fieldId
 
-	err := db.Pool.QueryRow(context.Background(), `
+	err := tx.QueryRow(ctx, `
 		SELECT attribute_id_date0, attribute_id_date1, index_date0, index_date1,
 			date_range0, date_range1, days, days_toggle
 		FROM app.field_calendar
@@ -659,19 +657,19 @@ func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
 		return f, err
 	}
 
-	f.OpenForm, err = openForm.Get("field", f.Id, pgtype.Text{})
+	f.OpenForm, err = openForm.Get_tx(ctx, tx, "field", f.Id, pgtype.Text{})
 	if err != nil {
 		return f, err
 	}
-	f.Query, err = query.Get("field", f.Id, 0, 0, 0)
+	f.Query, err = query.Get_tx(ctx, tx, "field", f.Id, 0, 0, 0)
 	if err != nil {
 		return f, err
 	}
-	f.Columns, err = column.Get("field", f.Id)
+	f.Columns, err = column.Get_tx(ctx, tx, "field", f.Id)
 	if err != nil {
 		return f, err
 	}
-	f.Collections, err = consumer.Get("field", f.Id, "fieldFilterSelector")
+	f.Collections, err = consumer.Get_tx(ctx, tx, "field", f.Id, "fieldFilterSelector")
 	if err != nil {
 		return f, err
 	}

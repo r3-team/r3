@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/db/check"
 	"r3/schema"
 	"r3/schema/caption"
@@ -63,13 +62,13 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(relationId uuid.UUID) ([]types.Attribute, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Attribute, error) {
 
 	var onUpdateNull pgtype.Text
 	var onDeleteNull pgtype.Text
 
 	attributes := make([]types.Attribute, 0)
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, relationship_id, icon_id, name, content, content_use,
 			length, length_fract, nullable, encrypted, def, on_update, on_delete
 		FROM app.attribute
@@ -96,7 +95,7 @@ func Get(relationId uuid.UUID) ([]types.Attribute, error) {
 	}
 
 	for i, atr := range attributes {
-		attributes[i].Captions, err = caption.Get("attribute", atr.Id, []string{"attributeTitle"})
+		attributes[i].Captions, err = caption.Get_tx(ctx, tx, "attribute", atr.Id, []string{"attributeTitle"})
 		if err != nil {
 			return attributes, err
 		}

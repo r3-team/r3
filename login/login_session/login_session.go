@@ -175,23 +175,25 @@ func LogsGet_tx(ctx context.Context, tx pgx.Tx, byString pgtype.Text, limit int,
 	}, nil
 }
 
-func LogsRemoveForNode() error {
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
-
+func LogsRemoveForNode(ctx context.Context) error {
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM instance.login_session
-		WHERE node_id = $1
-	`, cache.GetNodeId()); err != nil {
+	if err := LogsRemoveForNode_tx(ctx, tx); err != nil {
 		return err
 	}
 	return tx.Commit(ctx)
+}
+func LogsRemoveForNode_tx(ctx context.Context, tx pgx.Tx) error {
+	_, err := tx.Exec(ctx, `
+		DELETE FROM instance.login_session
+		WHERE node_id = $1
+	`, cache.GetNodeId())
+
+	return err
 }
 
 // retrieves concurrent session count for limited or not-limited logins

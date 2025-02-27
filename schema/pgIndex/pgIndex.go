@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/compatible"
 	"r3/types"
@@ -59,10 +58,10 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(relationId uuid.UUID) ([]types.PgIndex, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.PgIndex, error) {
 	pgIndexes := make([]types.PgIndex, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, attribute_id_dict, method, no_duplicates, auto_fki, primary_key
 		FROM app.pg_index
 		WHERE relation_id = $1
@@ -89,7 +88,7 @@ func Get(relationId uuid.UUID) ([]types.PgIndex, error) {
 	// get index attributes
 	for i, pgi := range pgIndexes {
 
-		pgi.Attributes, err = GetAttributes(pgi.Id)
+		pgi.Attributes, err = getAttributes_tx(ctx, tx, pgi.Id)
 		if err != nil {
 			return pgIndexes, err
 		}
@@ -98,10 +97,10 @@ func Get(relationId uuid.UUID) ([]types.PgIndex, error) {
 	return pgIndexes, nil
 }
 
-func GetAttributes(pgIndexId uuid.UUID) ([]types.PgIndexAttribute, error) {
+func getAttributes_tx(ctx context.Context, tx pgx.Tx, pgIndexId uuid.UUID) ([]types.PgIndexAttribute, error) {
 	attributes := make([]types.PgIndexAttribute, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT attribute_id, order_asc
 		FROM app.pg_index_attribute
 		WHERE pg_index_id = $1

@@ -3,7 +3,6 @@ package menuTab
 import (
 	"context"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/collection/consumer"
@@ -22,10 +21,10 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(moduleId uuid.UUID) ([]types.MenuTab, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.MenuTab, error) {
 	menuTabs := make([]types.MenuTab, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, icon_id
 		FROM app.menu_tab
 		WHERE module_id = $1
@@ -48,12 +47,12 @@ func Get(moduleId uuid.UUID) ([]types.MenuTab, error) {
 	// get menus and captions
 	for i, mt := range menuTabs {
 
-		mt.Menus, err = getMenus(mt.Id, pgtype.UUID{})
+		mt.Menus, err = getMenus_tx(ctx, tx, mt.Id, pgtype.UUID{})
 		if err != nil {
 			return menuTabs, err
 		}
 
-		mt.Captions, err = caption.Get("menu_tab", mt.Id, []string{"menuTabTitle"})
+		mt.Captions, err = caption.Get_tx(ctx, tx, "menu_tab", mt.Id, []string{"menuTabTitle"})
 		if err != nil {
 			return menuTabs, err
 		}
@@ -96,7 +95,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, position int, mt types.MenuTab) erro
 }
 
 // menus
-func getMenus(menuTabId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
+func getMenus_tx(ctx context.Context, tx pgx.Tx, menuTabId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 
 	menus := make([]types.Menu, 0)
 
@@ -105,7 +104,7 @@ func getMenus(menuTabId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 		nullCheck = "AND parent_id = $2"
 	}
 
-	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT id, form_id, icon_id, show_children, color
 		FROM app.menu
 		WHERE menu_tab_id = $1
@@ -128,15 +127,15 @@ func getMenus(menuTabId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 
 	// get children & collections & captions
 	for i, m := range menus {
-		m.Menus, err = getMenus(menuTabId, pgtype.UUID{Bytes: m.Id, Valid: true})
+		m.Menus, err = getMenus_tx(ctx, tx, menuTabId, pgtype.UUID{Bytes: m.Id, Valid: true})
 		if err != nil {
 			return menus, err
 		}
-		m.Collections, err = consumer.Get("menu", m.Id, "menuDisplay")
+		m.Collections, err = consumer.Get_tx(ctx, tx, "menu", m.Id, "menuDisplay")
 		if err != nil {
 			return menus, err
 		}
-		m.Captions, err = caption.Get("menu", m.Id, []string{"menuTitle"})
+		m.Captions, err = caption.Get_tx(ctx, tx, "menu", m.Id, []string{"menuTitle"})
 		if err != nil {
 			return menus, err
 		}

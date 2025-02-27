@@ -2,9 +2,10 @@ package cache
 
 import (
 	"context"
-	"r3/db"
 	"slices"
 	"sync"
+
+	"github.com/jackc/pgx/v5"
 )
 
 var (
@@ -24,11 +25,11 @@ func GetSearchDictionaryIsValid(entry string) bool {
 	return slices.Contains(dict, entry)
 }
 
-func LoadSearchDictionaries() error {
+func LoadSearchDictionaries_tx(ctx context.Context, tx pgx.Tx) error {
 	dict_mx.Lock()
 	defer dict_mx.Unlock()
 
-	err := db.Pool.QueryRow(context.Background(), `
+	err := tx.QueryRow(ctx, `
 		SELECT ARRAY_AGG(cfgname::TEXT)
 		FROM pg_catalog.pg_ts_config
 	`).Scan(&dict)

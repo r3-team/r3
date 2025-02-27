@@ -143,16 +143,11 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 		return err
 	}
 
-	// commit before renewing access cache (to apply new permissions)
-	if err := tx.Commit(ctx); err != nil {
-		return err
-	}
-
 	// roles needed to be changed for active login, reauthorize
 	if active && rolesChanged {
 		log.Info("ldap", fmt.Sprintf("user account '%s' received new roles, renewing access permissions", name))
 
-		if err := cluster.LoginReauthorized(true, loginId); err != nil {
+		if err := cluster.LoginReauthorized_tx(ctx, tx, true, loginId); err != nil {
 			log.Warning("ldap", fmt.Sprintf("could not renew access permissions for '%s'", name), err)
 		}
 	}
@@ -161,9 +156,9 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 	if !active && activeEx {
 		log.Info("ldap", fmt.Sprintf("user account '%s' is locked, kicking active sessions", name))
 
-		if err := cluster.LoginDisabled(true, loginId); err != nil {
+		if err := cluster.LoginDisabled_tx(ctx, tx, true, loginId); err != nil {
 			log.Warning("ldap", fmt.Sprintf("could not kick active sessions for '%s'", name), err)
 		}
 	}
-	return nil
+	return tx.Commit(ctx)
 }

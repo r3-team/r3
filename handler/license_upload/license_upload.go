@@ -94,13 +94,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 			return
 		}
-		if err := tx.Commit(ctx); err != nil {
+		if err := cluster.ConfigChanged_tx(ctx, tx, true, false, false); err != nil {
 			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 			return
 		}
-
-		// apply new config
-		if err := cluster.ConfigChanged(true, false, false); err != nil {
+		if err := tx.Commit(ctx); err != nil {
 			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 			return
 		}

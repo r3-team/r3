@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/compatible"
 	"r3/types"
@@ -52,11 +51,11 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return nil
 }
 
-func Get(relationId uuid.UUID) ([]types.Preset, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Preset, error) {
 
 	presets := make([]types.Preset, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, name, protected
 		FROM app.preset
 		WHERE relation_id = $1
@@ -78,8 +77,7 @@ func Get(relationId uuid.UUID) ([]types.Preset, error) {
 
 	// get preset values
 	for i, p := range presets {
-
-		presets[i].Values, err = getValues(p.Id)
+		presets[i].Values, err = getValues_tx(ctx, tx, p.Id)
 		if err != nil {
 			return presets, err
 		}
@@ -176,10 +174,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, 
 }
 
 // preset values
-func getValues(presetId uuid.UUID) ([]types.PresetValue, error) {
+func getValues_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID) ([]types.PresetValue, error) {
 	values := make([]types.PresetValue, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, preset_id, preset_id_refer, attribute_id, protected, value
 		FROM app.preset_value
 		WHERE preset_id = $1
