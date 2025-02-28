@@ -26,7 +26,7 @@ func CheckInNode() error {
 		UPDATE instance_cluster.node
 		SET date_check_in = $1, hostname = $2, stat_memory = $3
 		WHERE id = $4
-	`, tools.GetTimeUnix(), cache.GetHostname(), (m.Sys / 1024 / 1024), cache.GetNodeId()); err != nil {
+	`, tools.GetTimeUnix(), config.GetHostname(), (m.Sys / 1024 / 1024), cache.GetNodeId()); err != nil {
 		return err
 	}
 

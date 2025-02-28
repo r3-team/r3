@@ -71,7 +71,7 @@ func StartNode_tx(ctx context.Context, tx pgx.Tx) error {
 			INSERT INTO instance_cluster.node (id,name,hostname,date_started,
 				date_check_in,stat_memory,cluster_master,running)
 			VALUES ($1,$2,$3,$4,0,-1,false,true)
-		`, nodeId, nodeName, cache.GetHostname(), tools.GetTimeUnix()); err != nil {
+		`, nodeId, nodeName, config.GetHostname(), tools.GetTimeUnix()); err != nil {
 			return err
 		}
 	} else {

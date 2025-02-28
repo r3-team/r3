@@ -369,9 +369,26 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
-	// prepare cluster node & load caches
-	if err := initClusterAndCaches(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to initalize caches during startup, %v", err))
+	// store host details in cache (before cluster node startup)
+	if err := config.SetHostnameFromOs(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to load host details, %v", err))
+		return
+	}
+
+	// prepare system & initalize caches once DB is ready
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysStart)
+	defer ctxCanc()
+
+	if err := initSystem(ctx); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to initalize system during startup, %v", err))
+		return
+	}
+	if err := initCaches(ctx); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to initalize required caches during startup, %v", err))
+		return
+	}
+	if err := initCachesOptional(ctx); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to initalize optional caches during startup, %v", err))
 		return
 	}
 
@@ -490,19 +507,22 @@ func (prg *program) execute(svc service.Service) {
 	}
 }
 
-func initClusterAndCaches() error {
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysStart)
-	defer ctxCanc()
-
+// init system with connected database
+func initSystem(ctx context.Context) error {
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	// store host details in cache (before cluster node startup)
-	if err := cache.SetHostnameFromOs(); err != nil {
-		return fmt.Errorf("failed to load host details, %v", err)
+	// set unique instance ID if empty
+	if err := config.SetInstanceIdIfEmpty_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to set instance ID, %v", err)
+	}
+
+	// process token secret for future client authentication from database
+	if err := config.ProcessTokenSecret_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to process token secret, %v", err)
 	}
 
 	// setup cluster node with shared database
@@ -514,8 +534,17 @@ func initClusterAndCaches() error {
 	if err := login_session.LogsRemoveForNode_tx(ctx, tx); err != nil {
 		return err
 	}
+	return tx.Commit(ctx)
+}
 
-	// initialize caches
+// load required caches from database
+func initCaches(ctx context.Context) error {
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
 	// module meta data must be loaded before module schema (informs about what modules to load)
 	if err := cache.LoadModuleIdMapMeta_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize module meta cache, %v", err)
@@ -535,22 +564,23 @@ func initClusterAndCaches() error {
 	if err := cache.LoadPwaDomainMap_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize PWA domain cache, %v", err)
 	}
-	if err := cache.LoadSearchDictionaries_tx(ctx, tx); err != nil {
-		// failure is not mission critical (in case of no access to DB system tables)
-		log.Error("server", "failed to read/update text search dictionaries", err)
-	}
 	if err := ldap.UpdateCache_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize LDAP cache, %v", err)
 	}
+	return tx.Commit(ctx)
+}
 
-	// process token secret for future client authentication from database
-	if err := config.ProcessTokenSecret_tx(ctx, tx); err != nil {
-		return fmt.Errorf("failed to process token secret, %v", err)
+// load optional cache from database, might fail due to missing permissions
+func initCachesOptional(ctx context.Context) error {
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
 	}
+	defer tx.Rollback(ctx)
 
-	// set unique instance ID if empty
-	if err := config.SetInstanceIdIfEmpty_tx(ctx, tx); err != nil {
-		return fmt.Errorf("failed to set instance ID, %v", err)
+	if err := cache.LoadSearchDictionaries_tx(ctx, tx); err != nil {
+		log.Error("server", "failed to read/update text search dictionaries", err)
+		return tx.Rollback(ctx)
 	}
 	return tx.Commit(ctx)
 }

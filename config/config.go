@@ -36,6 +36,7 @@ var (
 	File types.FileType
 
 	// operation data
+	hostname    string
 	license     = types.License{}
 	tokenSecret *jwt.HMACSHA
 
@@ -68,6 +69,11 @@ func GetConfigFilepath() string {
 }
 func GetDbVersionCut() string {
 	return GetString("dbVersionCut")
+}
+func GetHostname() string {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+	return hostname
 }
 func GetLicense() types.License {
 	access_mx.RLock()
@@ -135,6 +141,13 @@ func SetConfigFilePath(path string) {
 	access_mx.Lock()
 	defer access_mx.Unlock()
 	filePath = path
+}
+func SetHostnameFromOs() error {
+	access_mx.Lock()
+	defer access_mx.Unlock()
+	var err error
+	hostname, err = os.Hostname()
+	return err
 }
 func SetLicense(l types.License) {
 	access_mx.Lock()

@@ -29,10 +29,8 @@ func LoadSearchDictionaries_tx(ctx context.Context, tx pgx.Tx) error {
 	dict_mx.Lock()
 	defer dict_mx.Unlock()
 
-	err := tx.QueryRow(ctx, `
+	return tx.QueryRow(ctx, `
 		SELECT ARRAY_AGG(cfgname::TEXT)
 		FROM pg_catalog.pg_ts_config
 	`).Scan(&dict)
-
-	return err
 }
