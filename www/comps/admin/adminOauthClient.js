@@ -217,7 +217,7 @@ let MyAdminOauthClient = {
 		},
 		reloadAndClose() {
 			ws.send('oauthClient','reload',{},true).then(
-				this.$emit('close'),
+				() => this.$emit('close'),
 				this.$root.genericError
 			);
 		},
