@@ -163,7 +163,7 @@
 			"description": "This LDAP connection imports users and enables authentication with LDAP credentials.<br />LDAP group memberships can be used to automatically assign roles.",
 			"dialog": {
 				"delete": "Ești sigur că vrei să ștergi această conexiune LDAP?",
-				"importDone": "Importul a fost finalizat",
+				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "Testul de conectare a avut succes"
 			},
 			"groupDn": "Grupul DN",

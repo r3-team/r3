@@ -163,7 +163,7 @@
 			"description": "This LDAP connection imports users and enables authentication with LDAP credentials.<br />LDAP group memberships can be used to automatically assign roles.",
 			"dialog": {
 				"delete": "Biztos vagy benne, hogy törölni szeretnéd ezt az LDAP-kapcsolatot?",
-				"importDone": "Az importálás befejeződött",
+				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "A kapcsolat tesztelése sikeres volt"
 			},
 			"groupDn": "Csoport DN",

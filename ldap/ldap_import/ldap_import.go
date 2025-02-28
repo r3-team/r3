@@ -39,14 +39,14 @@ func RunAll() error {
 	}
 
 	for _, ldap := range ldapIdMap {
-		if err := Run(ldap.Id); err != nil {
+		if err := run(ldap.Id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func Run(ldapId int32) error {
+func run(ldapId int32) error {
 
 	ldapConn, ldap, err := ldap_conn.ConnectAndBind(ldapId)
 	if err != nil {

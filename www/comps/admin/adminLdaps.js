@@ -35,7 +35,7 @@ let MyAdminLdaps = {
 							<td>
 								<div class="row gap">
 									<my-button image="download.png"
-										@trigger="runImport(l.id)"
+										@trigger="runImports"
 										:active="licenseValid"
 										:caption="capApp.button.import"
 									/>
@@ -428,11 +428,14 @@ let MyAdminLdaps = {
 		},
 		
 		// backend calls
-		runImport(id) {
-			ws.send('ldap','import',{id:id},true).then(
+		runImports() {
+			ws.send('task','run',{
+				clusterMasterOnly:true,
+				taskName:'importLdapLogins'
+			},true).then(
 				() => {
 					this.$store.commit('dialog',{
-						captionBody:this.capApp.dialog.importDone
+						captionBody:this.capApp.dialog.importPlanned
 					});
 				},
 				this.$root.genericError

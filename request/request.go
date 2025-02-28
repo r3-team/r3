@@ -378,8 +378,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return LdapDel_tx(ctx, tx, reqJson)
 		case "get":
 			return LdapGet_tx(ctx, tx)
-		case "import":
-			return LdapImport(reqJson)
 		case "reload":
 			return nil, ldap.UpdateCache_tx(ctx, tx)
 		case "set":

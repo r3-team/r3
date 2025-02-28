@@ -163,7 +163,7 @@
 			"description": "This LDAP connection imports users and enables authentication with LDAP credentials.<br />LDAP group memberships can be used to automatically assign roles.",
 			"dialog": {
 				"delete": "Sei sicuro di voler eliminare questa connessione LDAP?",
-				"importDone": "L'importazione è stata completata",
+				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "Il test di connessione è andato a buon fine"
 			},
 			"groupDn": "Gruppo DN",

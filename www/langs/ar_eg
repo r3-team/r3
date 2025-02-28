@@ -163,7 +163,7 @@
 			"description": "يقوم اتصال LDAP هذا باستيراد أسماء تسجيل الدخول وتمكين المصادقة باستخدام بيانات اعتماد LDAP.<br />يمكن استخدام عضويات مجموعة LDAP لتعيين الأدوار تلقائيًا.",
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف اتصال LDAP هذا؟",
-				"importDone": "تم الانتهاء من الاستيراد",
+				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "تم اختبار الاتصال بنجاح"
 			},
 			"groupDn": "الاسم المميز للمجموعة",

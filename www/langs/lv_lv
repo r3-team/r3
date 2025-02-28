@@ -163,7 +163,7 @@
 			"description": "This LDAP connection imports users and enables authentication with LDAP credentials.<br />LDAP group memberships can be used to automatically assign roles.",
 			"dialog": {
 				"delete": "Vai tiešām vēlaties dzēst šo LDAP savienojumu?",
-				"importDone": "Imports ir pabeigts",
+				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "Savienojuma pārbaude veiksmīga"
 			},
 			"groupDn": "Grupas DN",

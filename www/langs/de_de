@@ -163,7 +163,7 @@
 			"description": "Diese LDAP-Verbindung importiert Benutzer und ermöglicht die Authentifizierung über LDAP-Zugangsdaten.<br />Gruppenzuweisungen in LDAP können genutzt werden, um automatisch Rollen zuzuweisen.",
 			"dialog": {
 				"delete": "Bist du sicher, dass du diese LDAP-Verbindung löschen möchtest?",
-				"importDone": "Import wurde fertiggestellt",
+				"importPlanned": "Importaufgabe wurde zur sofortigen Ausführung eingeplant",
 				"testDone": "Verbindungstest war erfolgreich"
 			},
 			"groupDn": "Gruppen-DN",
