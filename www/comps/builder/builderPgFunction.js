@@ -633,7 +633,7 @@ let MyBuilderPgFunction = {
 		},
 		
 		// simple
-		execArgInputs:(s) => s.codeArgs.trim() === '' ? [] : s.codeArgs.split(','),
+		execArgInputs:(s) => s.codeArgs.trim() === '' ? [] : s.codeArgs.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/),
 		module:       (s) => s.pgFunction === false ? false : s.moduleIdMap[s.pgFunction.moduleId],
 		modulesData:  (s) => s.getDependentModules(s.module).filter(v => v.relations.length   !== 0),
 		modulesFnc:   (s) => s.getDependentModules(s.module).filter(v => v.pgFunctions.length !== 0),
