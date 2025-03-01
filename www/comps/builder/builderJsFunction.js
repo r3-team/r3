@@ -959,7 +959,7 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace backend function placeholders
-			// stored as: app.call_backend({r3_organizations.get_name_by_id},12...
+			// stored as: app.call_backend({module.function},12...
 			pat = new RegExp(`${prefix}\.call_backend\\(\{(${dbChars})\.(${dbChars})\}`,'g');
 			body = body.replace(pat,(match,modName,fncName) => {
 				if(this.moduleNameMap[modName] === undefined)
@@ -983,8 +983,8 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace global frontend function placeholders
-			// stored as: app.call_frontend({r3_organizations.add_numbers},12...
-			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.(.+)\}`,'g');
+			// stored as: app.call_frontend({module.function},12...
+			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.\}]+)\}`,'g');
 			body = body.replace(pat,(match,modName,fncName) => {
 				if(this.moduleNameMap[modName] === undefined)
 					return match;
@@ -1000,8 +1000,8 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace form assigned frontend function placeholders
-			// stored as: app.call_frontend({r3_organizations.contact.set_defaults},12...
-			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.]+)\.(.+)\}`,'g');
+			// stored as: app.call_frontend({module.form.function},12...
+			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.\}]+)\.([^\.\}]+)\}`,'g');
 			body = body.replace(pat,(match,modName,frmName,fncName) => {
 				if(this.form === false || this.moduleNameMap[modName] === undefined)
 					return match;
@@ -1017,7 +1017,7 @@ let MyBuilderJsFunction = {
 			
 			// replace global variable placeholders
 			// stored as: app.get_variable({module.variable})
-			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.(.+)\}`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.\}]+)\}`,'g');
 			body = body.replace(pat,(match,mode,modName,vaName) => {
 				if(this.moduleNameMap[modName] !== undefined) {
 					const mod = this.moduleNameMap[modName];
@@ -1031,8 +1031,8 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace form assigned variable placeholders
-			// stored as: app.get_variable({module.variable})
-			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.]+)\.(.+)\}`,'g');
+			// stored as: app.get_variable({module.form.variable})
+			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.\}]+)\.([^\.\}]+)\}`,'g');
 			body = body.replace(pat,(match,mode,modName,frmName,vaName) => {
 				if(this.form !== false && this.moduleNameMap[modName] !== undefined) {
 					const mod = this.moduleNameMap[modName];
