@@ -29,15 +29,18 @@ let MyBuilderFormFunction = {
 			<div class="row gap">
 				<select v-model="jsFunctionId">
 					<option value="">-</option>
-					<option v-for="f in module.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+					<option v-for="f in module.jsFunctions.filter(v => v.formId === formId)"
 						:value="f.id"
 					>{{ f.name }}</option>
+					<option v-for="f in module.jsFunctions.filter(v => v.formId === null)"
+						:value="f.id"
+					>{{ '[' + capGen.global + '] ' + f.name }}</option>
 					<optgroup v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.jsFunctions.length !== 0)"
 						:label="mod.name"
 					>
-						<option v-for="f in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+						<option v-for="f in mod.jsFunctions.filter(v => v.formId === null)"
 							:value="f.id"
-						>{{ f.name }}</option>
+						>{{ '[' + capGen.global + '] ' + f.name }}</option>
 					</optgroup>
 				</select>
 				<my-button image="add.png"
