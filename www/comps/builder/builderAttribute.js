@@ -122,14 +122,14 @@ let MyBuilderAttribute = {
 								<div class="row centered gap">
 									<select v-model="usedFor" :disabled="readonly" @change="changedUsedFor">
 										<optgroup :label="capGen.standard">
-											<option value="text"     :disabled="!isNew && !isString">{{ capApp.option.text }}</option>
-											<option value="textarea" :disabled="!isNew && !isString">{{ capApp.option.textarea }}</option>
-											<option value="richtext" :disabled="!isNew && !isString">{{ capApp.option.richtext }}</option>
+											<option value="text"     :disabled="!isNew && (!isString || isDrawing || isBarcode)">{{ capApp.option.text }}</option>
+											<option value="textarea" :disabled="!isNew && (!isString || isDrawing || isBarcode)">{{ capApp.option.textarea }}</option>
+											<option value="richtext" :disabled="!isNew && (!isString || isDrawing || isBarcode)">{{ capApp.option.richtext }}</option>
 											<option value="number"   :disabled="!isNew && !isInteger">{{ capApp.option.number }}</option>
 											<option value="decimal"  :disabled="!isNew && !isNumeric">{{ capApp.option.decimal }}</option>
-											<option value="color"    :disabled="!isNew && !isString">{{ capApp.option.color }}</option>
-											<option value="iframe"   :disabled="!isNew && !isString">{{ capApp.option.iframe }}</option>
-											<option value="drawing"  :disabled="!isNew && !isString">{{ capApp.option.drawing }}</option>
+											<option value="color"    :disabled="!isNew && (!isString || isDrawing || isBarcode)">{{ capApp.option.color }}</option>
+											<option value="iframe"   :disabled="!isNew && (!isString || isDrawing || isBarcode)">{{ capApp.option.iframe }}</option>
+											<option value="drawing"  :disabled="!isNew && !isDrawing">{{ capApp.option.drawing }}</option>
 											<option value="barcode"  :disabled="!isNew && !isBarcode">{{ capApp.option.barcode }}</option>
 											<option value="boolean"  :disabled="!isNew && !isBoolean">{{ capApp.option.boolean }}</option>
 											<option value="files"    :disabled="!isNew && !isFiles">{{ capApp.option.files }}</option>
