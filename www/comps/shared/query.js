@@ -2,6 +2,7 @@ import {getIndexAttributeId}         from './attribute.js';
 import {getItemTitle}                from './builder.js';
 import {getCollectionValues}         from './collection.js';
 import {filterOperatorIsSingleValue} from './generic.js';
+import {variableValueGet}            from './variable.js';
 import MyStore                       from '../../stores/store.js';
 import {
 	getUnixNowDate,
@@ -169,18 +170,8 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 				);
 				s.query.limit = s.query.fixedLimit;
 			break;
-			case 'true': s.value = true; break;
-			case 'variable':
-				if(variableIdMapLocal[s.variableId] !== undefined) {
-					s.value = variableIdMapLocal[s.variableId];
-				}
-				else if(MyStore.getters.variableIdMapGlobal[s.variableId] !== undefined) {
-					s.value = MyStore.getters.variableIdMapGlobal[s.variableId];
-				}
-				else {
-					s.value = null;
-				}
-			break;
+			case 'true':     s.value = true; break;
+			case 'variable': s.value = variableValueGet(s.variableId,variableIdMapLocal); break;
 			
 			// form
 			case 'field':

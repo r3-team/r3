@@ -616,9 +616,10 @@ type Variable struct {
 	ModuleId   uuid.UUID   `json:"moduleId"`
 	FormId     pgtype.UUID `json:"formId"` // if assigned to form, otherwise global
 	Name       string      `json:"name"`
-	Comment    pgtype.Text `json:"comment"` // author comment
-	Content    string      `json:"content"`
-	ContentUse string      `json:"contentUse"`
+	Comment    pgtype.Text `json:"comment"`    // author comment
+	Content    string      `json:"content"`    // for display as field input, no other purpose
+	ContentUse string      `json:"contentUse"` // for display as field input, no other purpose
+	Def        pgtype.Text `json:"def"`        // default value
 }
 type Widget struct {
 	Id         uuid.UUID          `json:"id"`

@@ -51,6 +51,10 @@ import {
 	getQueryFiltersProcessed,
 	getRelationsJoined
 } from './shared/query.js';
+import {
+	variableValueGet,
+	variableValueSet
+} from './shared/variable.js';
 export {MyForm as default};
 
 let MyForm = {
@@ -613,20 +617,8 @@ let MyForm = {
 				},
 
 				// variables
-				get_variable:(k) => {
-					const va = s.variableIdMap[k];
-					if(va.formId !== null && va.formId === s.formId)
-						return s.variableIdMapLocal[k] !== undefined ? s.variableIdMapLocal[k] : null;
-
-					return s.variableIdMapGlobal[k] !== undefined ? s.variableIdMapGlobal[k] : null;
-				},
-				set_variable:(k,v) => {
-					const va = s.variableIdMap[k];
-					if(va.formId !== null && va.formId === s.formId)
-						return s.variableIdMapLocal[k] = v;
-
-					s.$store.commit('variableStoreValueById',{id:k,value:v});
-				},
+				get_variable:(k)   => s.variableValueGet(k,  s.variableIdMapLocal),
+				set_variable:(k,v) => s.variableValueSet(k,v,s.variableIdMapLocal),
 				
 				// e2e encryption
 				set_e2ee_by_user_ids:ids => s.loginIdsEncryptFor = ids,
@@ -713,6 +705,7 @@ let MyForm = {
 					case 'recordNew':    return s.isNew; break;
 					case 'role':         return s.access.roleIds.includes(side.roleId); break;
 					case 'true':         return true; break;
+					case 'variable':     return s.variableValueGet(side.variableId,s.variableIdMapLocal); break;
 					case 'value':
 						// compatibility fix, true value should be used instead
 						if(typeof side.value === 'string') {
@@ -720,13 +713,6 @@ let MyForm = {
 							if(side.value.toLowerCase() === 'false') return false;
 						}
 						return side.value;
-					break;
-					case 'variable':
-						const va = s.variableIdMap[side.variableId];
-						if(va.formId !== null && va.formId === s.formId)
-							return s.variableIdMapLocal[va.id] !== undefined ? s.variableIdMapLocal[va.id] : null;
-	
-						return s.variableIdMapGlobal[va.id] !== undefined ? s.variableIdMapGlobal[va.id] : null;
 					break;
 				}
 				return false;
@@ -809,7 +795,6 @@ let MyForm = {
 		iconIdMap:          (s) => s.$store.getters['schema/iconIdMap'],
 		jsFunctionIdMap:    (s) => s.$store.getters['schema/jsFunctionIdMap'],
 		presetIdMapRecordId:(s) => s.$store.getters['schema/presetIdMapRecordId'],
-		variableIdMap:      (s) => s.$store.getters['schema/variableIdMap'],
 		loginFavorites:     (s) => s.$store.getters['local/loginFavorites'],
 		token:              (s) => s.$store.getters['local/token'],
 		access:             (s) => s.$store.getters.access,
@@ -825,8 +810,7 @@ let MyForm = {
 		loginPublicKey:     (s) => s.$store.getters.loginPublicKey,
 		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
 		patternStyle:       (s) => s.$store.getters.patternStyle,
-		settings:           (s) => s.$store.getters.settings,
-		variableIdMapGlobal:(s) => s.$store.getters.variableIdMapGlobal
+		settings:           (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
@@ -869,6 +853,8 @@ let MyForm = {
 		rsaEncrypt,
 		setFormFavorite,
 		srcBase64,
+		variableValueGet,
+		variableValueSet,
 		
 		// form management
 		handleHotkeys(e) {

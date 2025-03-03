@@ -19,6 +19,17 @@ import {srcBase64}                from './shared/image.js';
 import {getCaption}               from './shared/language.js';
 import {getQueryFiltersProcessed} from './shared/query.js';
 import {
+	getIndexAttributeId,
+	isAttributeBoolean,
+	isAttributeDecimal,
+	isAttributeFiles,
+	isAttributeInteger,
+	isAttributeRelationship,
+	isAttributeRegconfig,
+	isAttributeString,
+	isAttributeUuid
+} from './shared/attribute.js';
+import {
 	getLinkMeta,
 	getNilUuid,
 	openLink
@@ -33,16 +44,9 @@ import {
 	setGetterArgs
 } from './shared/form.js';
 import {
-	getIndexAttributeId,
-	isAttributeBoolean,
-	isAttributeDecimal,
-	isAttributeFiles,
-	isAttributeInteger,
-	isAttributeRelationship,
-	isAttributeRegconfig,
-	isAttributeString,
-	isAttributeUuid
-} from './shared/attribute.js';
+	variableValueGet,
+	variableValueSet
+} from './shared/variable.js';
 export {MyField as default};
 
 let MyField = {
@@ -717,15 +721,8 @@ let MyField = {
 			get() {
 				if(!this.isData) return false;
 
-				if(this.isVariable) {
-					if(this.variable === false)
-						return null;
-
-					if(this.variable.formId !== null)
-						return this.variableIdMapLocal[this.variable.id] !== undefined ? this.variableIdMapLocal[this.variable.id] : null;
-					
-					return this.variableIdMapGlobal[this.variable.id] !== undefined ? this.variableIdMapGlobal[this.variable.id] : null;
-				}
+				if(this.isVariable)
+					return this.variable === false ? null : this.variableValueGet(this.variable.id,this.variableIdMapLocal);
 				
 				// if only alt attribute is set, field still needs primary attribute value (form log)
 				if(this.values[this.fieldAttributeId] === undefined)
@@ -1182,8 +1179,7 @@ let MyField = {
 		capGen:             (s) => s.$store.getters.captions.generic,
 		isMobile:           (s) => s.$store.getters.isMobile,
 		searchDictionaries: (s) => s.$store.getters.searchDictionaries,
-		settings:           (s) => s.$store.getters.settings,
-		variableIdMapGlobal:(s) => s.$store.getters.variableIdMapGlobal,
+		settings:           (s) => s.$store.getters.settings
 	},
 	mounted() {
 		this.reloadOptions();
@@ -1212,6 +1208,8 @@ let MyField = {
 		openLink,
 		setGetterArgs,
 		srcBase64,
+		variableValueGet,
+		variableValueSet,
 
 		// reloads
 		reloadOptions() {
@@ -1389,10 +1387,7 @@ let MyField = {
 				if(this.notTouched)
 					this.notTouched = false;
 
-				if(this.variable.formId !== null)
-					this.variableIdMapLocal[this.variable.id] = val;
-				else
-					this.$store.commit('variableStoreValueById',{id:this.variable.id,value:val});
+				this.variableValueSet(this.variable.id,val,this.variableIdMapLocal);
 			}
 			
 			if(this.field.jsFunctionId !== null)

@@ -2141,6 +2141,8 @@
 		"dateFormat2": "d.m.Y (30.12.2012)",
 		"dateFormat3": "d/m/Y (30/12/2012)",
 		"dateFormat4": "m/d/Y (12/30/2012)",
+		"default": "Standard",
+		"defaultValue": "Standardwert",
 		"description": "Beschreibung",
 		"details": "Details",
 		"dialog": {

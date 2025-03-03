@@ -2141,6 +2141,8 @@
 		"dateFormat2": "n.h.É (30.12.2012)",
 		"dateFormat3": "n/h/É (30/12/2012)",
 		"dateFormat4": "h/n/É (12/30/2012)",
+		"default": "Default",
+		"defaultValue": "Default value",
 		"description": "Leírás",
 		"details": "Részletek",
 		"dialog": {
