@@ -1124,7 +1124,7 @@ let MyList = {
 		
 		// reloads
 		reloadAggregations(nextTick) {
-			if(!this.isTable || typeof this.$refs.aggregations === 'undefined')
+			if(!this.isTable || typeof this.$refs.aggregations === 'undefined' || this.$refs.aggregations === null)
 				return;
 
 			if(nextTick) this.$nextTick(this.$refs.aggregations.get);
