@@ -1,4 +1,4 @@
-<p><em>Aktualisiert 2024-10-29</em></p>
+<p><em>Aktualisiert 2025-03-04</em></p>
 <h1 id="inhaltsverzeichnis">Inhaltsverzeichnis</h1>
 <ol type="1">
 <li><a href="#einführung">Einführung</a></li>
@@ -6,7 +6,7 @@
 <ol type="1">
 <li><a href="#eigenständig">Eigenständig</a></li>
 <li><a href="#dediziert">Dediziert</a></li>
-<li><a href="#portabel">Portabel</a></li>
+<li><a href="#portable">Portable</a></li>
 <li><a href="#docker">Docker</a></li>
 </ol></li>
 <li><a href="#technische-anforderungen">Technische Anforderungen</a>
@@ -24,6 +24,7 @@
 <ol type="1">
 <li><a href="#ssl-zertifikate">SSL-Zertifikate</a></li>
 <li><a href="#proxies">Proxies</a></li>
+<li><a href="#konfigurationsdatei">Konfigurationsdatei</a></li>
 </ol></li>
 <li><a href="#allgemeine-administration">Allgemeine Administration</a>
 <ol type="1">
@@ -41,8 +42,8 @@
 <ol type="1">
 <li><a href="#plattformaktualisierung">Plattformaktualisierung</a></li>
 </ol></li>
-<li><a href="#clusterbetrieb-und-systemleistung">Clusterbetrieb und Systemleistung</a></li>
 <li><a href="#vorbereiten-einer-neuen-postgresql-datenbank">Vorbereiten einer neuen PostgreSQL-Datenbank</a></li>
+<li><a href="#clusterbetrieb-und-systemleistung">Clusterbetrieb und Systemleistung</a></li>
 <li><a href="#cloudbetrieb">Cloudbetrieb</a></li>
 </ol>
 <h1 id="einführung">Einführung</h1>
@@ -61,34 +62,27 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>Verwendungszweck</td>
+<td>Entworfen für</td>
 <td style="text-align: center;">Produktion</td>
 <td style="text-align: center;">Produktion</td>
-<td style="text-align: center;">Testen &amp; Bauen von REI3-Anwendungen</td>
-<td style="text-align: center;">Testen &amp; Bauen von REI3-Anwendungen</td>
+<td style="text-align: center;">Test &amp; Bau von REI3-Anwendungen</td>
+<td style="text-align: center;">Test &amp; Bau von REI3-Anwendungen</td>
 </tr>
 <tr class="even">
-<td>Bringt eine Datenbank mit</td>
-<td style="text-align: center;">eigenes Datenbanksystem erforderlich</td>
+<td>Integrierte Datenbank</td>
+<td style="text-align: center;"></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
 <tr class="odd">
-<td>Alle REI3-Features verfügbar</td>
-<td style="text-align: center;"><strong>X</strong></td>
-<td style="text-align: center;"><strong>X</strong></td>
-<td style="text-align: center;">standardm. keine E2E-Verschlüsselung</td>
-<td style="text-align: center;">standardm. keine E2E-Verschlüsselung</td>
-</tr>
-<tr class="even">
 <td>Läuft unter Windows</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Läuft unter Linux</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"></td>
@@ -97,6 +91,7 @@
 </tr>
 </tbody>
 </table>
+<p>Falls eigene REI3-Anwendungen erstellt werden sollen, ist es ratsam, diese auf einen System zu erstellen und dann auf einen anderen System auszurollen. Hierdurch werden Endbenutzer erst dann betroffen, wenn Anwendungen getestet und bereit sind. Besonders die portablen und Docker-Versionen bieten sich für das Entwickeln von Anwendungen an.</p>
 <h2 id="dediziert">Dediziert</h2>
 <p>Das häufigste Bereitstellungsmodell. REI3 wird auf einem Anwendungsserver (Windows oder Linux) installiert und mit einem separaten Datenbanksystem verbunden.</p>
 <h2 id="eigenständig">Eigenständig</h2>
@@ -154,10 +149,11 @@
 <p>REI3 wird mit einem grafischen Installationsprogramm für Windows Server geliefert. Das Installationsprogramm unterstützt sowohl <a href="#eigenständig">eigenständige</a> als auch <a href="#dediziert">dedizierte</a> Bereitstellungsmodelle.</p>
 <ul>
 <li><a href="#eigenständig">Eigenständig</a>: Nach Ausführung des Installationsprogrammes kann REI3 sofort gestartet werden.</li>
-<li><a href="#dediziert">Dediziert</a>: Nach der Installation müssen Datenbankverbindungsdetails für eine leere, UTF8-enkodierte <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (13.0 oder neuer) in der Konfigurationsdatei <code>config.json</code> eingetragen werden. Die Datei <code>config.json</code> befindet sich im ausgewählten Anwendungsverzeichnis. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
+<li><a href="#dediziert">Dediziert</a>: Nach der Installation müssen Datenbankverbindungsdetails für eine leere, UTF8-enkodierte <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> (13.0 oder neuer) in der Konfigurationsdatei <code>config.json</code> eingetragen werden. Die Datei <code>config.json</code> befindet sich im ausgewählten Anwendungsverzeichnis. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben</li>
 </ul>
+<p>Falls REI3 hinter einem Proxy betrieben werden soll, bitte sicherstellen, dass die Sitzungszeit für Websocket-Clients nicht zeitlich limitiert wird. Mehr details <a href="#proxies">hier</a>.</p>
 <p>Unabhängig vom Bereitstellungsmodell, wird REI3 unter Windows Server als Windows-Dienst behandelt und kann über den Service-Manager gestartet werden (Befehl: <code>services.msc</code>). Falls der Dienst nicht starten kann, schreibt REI3 in das Windows-Applikationslog.</p>
-<p>Aus lizenzrechtlichen Gründen können wir Ghostscript nicht zusammen mit REI3 ausliefern. Wenn Sie PDF-Thumbnails erstellen möchten, müssen Sie eine aktuelle Version von Ghostscript herunterladen und auf dem REI3-Server installieren.</p>
+<p>Aus lizenzrechtlichen Gründen können wir Ghostscript nicht zusammen mit REI3 ausliefern. Wenn PDF-Thumbnails erstellt werden sollen, muss eine aktuelle Version von Ghostscript auf dem REI3-Server installiert werden.</p>
 <h2 id="auf-einem-linux-server">Auf einem Linux-Server</h2>
 <p>Für Linux-Server ist REI3 als komprimiertes Archiv mit vorkompilierten Binärdateien verfügbar. Die Installationsschritte sind:</p>
 <ol type="1">
@@ -170,29 +166,68 @@
 <li>Registrieren Sie REI3 im Service-Manager (<code>sudo ./r3 -install</code>).</li>
 <li>Starten Sie den REI3-Dienst (<code>systemctl start rei3</code> zum Beispiel).</li>
 </ol>
+<p>Falls REI3 hinter einem Proxy betrieben werden soll, bitte sicherstellen, dass die Sitzungszeit für Websocket-Clients nicht zeitlich limitiert wird. Mehr details <a href="#proxies">hier</a>.</p>
 <p>Sollte der Dienst nicht starten, schreibt REI3 ins <code>syslog</code>.</p>
 <h1 id="erster-zugriff-auf-rei3">Erster Zugriff auf REI3</h1>
 <p>Während der Ausführung ist REI3 standardmäßig über Port 443 erreichbar. Sie können jeden modernen Browser verwenden, um lokal auf REI3 unter <code>https://localhost/</code> oder über das Netzwerk mit einer entsprechend konfigurierten Firewall zuzugreifen. Während der Installation wird ein einzelner Administratorbenutzer erstellt. Benutzername und Passwort sind jeweils auf "admin" gesetzt.</p>
 <p>Nach der Anmeldung kann auf die Adminoberfläche zugegriffen werden, um Benutzer zu verwalten, Anwendungen zu installieren, auf Systemprotokolle zuzugreifen usw. Das Standardkennwort sollte sofort nach der ersten Anmeldung geändert werden.</p>
 <h1 id="konfiguration">Konfiguration</h1>
-<p>Die Kernkonfiguration von REI3 kann in der Konfigurationsdatei (<code>config.json</code>) geändert werden, die sich im ausgewählten REI3-Installationsverzeichnis befindet. Das Festlegen von Dateipfaden, Webserver-Port und Datenbankverbindungsdetails ist unkompliziert. Änderungen werden beim Neustart des Anwendungsdienstes angewendet.</p>
+<p>Die Kernkonfiguration von REI3 kann in der Konfigurationsdatei (<code>config.json</code>) geändert werden, die sich im ausgewählten REI3-Installationsverzeichnis befindet. Das Festlegen von Dateipfaden, Webserver-Port und Datenbankverbindungsdetails ist unkompliziert - eine vollständige <a href="#konfigurationsdatei">Referenz</a> kann hier gefunden werden. Änderungen werden beim Neustart des Anwendungsdienstes angewendet.</p>
 <h2 id="ssl-zertifikate">SSL-Zertifikate</h2>
 <p>Während der Installation erstellt REI3 ein selbstsigniertes Zertifikat, um den verschlüsselten Zugriff auf die Anwendung zu ermöglichen. Es wird nicht empfohlen, dieses Zertifikat dauerhaft zu nutzen. Wenn möglich, sollte für REI3 ein ordnungsgemäß signiertes Zertifikat bereitgestellt werden, um eine sichere Kommunikation mit Vertrauen zwischen Endgeräten und Server zu gewährleisten.</p>
 <p>Einige allgemeine Überlegungen / Fallstricke:</p>
 <ul>
 <li>REI3 kann mit verschiedenen Zertifikaten arbeiten. Wenn REI3 ein Zertifikat nicht laden kann, startet es nicht und protokolliert in das Betriebssystem (<code>syslog</code> für Linux, sonst Windows-Applikationslog).</li>
 <li>Stellen Sie sicher, dass der Hostname im Zertifikat, derselbe ist, den die Clients zum Zugriff auf den REI3-Server verwenden. Der Port ist irrelevant.</li>
-<li>Wenn Sie REI3 intern betreiben (nicht über die Cloud erreichbar), müssen die Clients das Zertifikat trotzdem überprüfen können. Stellen Sie sicher, dass Ihre Zertifikatsdatei (*.crt) alle Zertifikate in der Kette bis zu dem Zertifikat enthält, das den Clients bekannt ist - dies ist in der Regel ein vertrauenswürdiges Stammzertifikat oder ein Zwischenzertifikat.</li>
+<li>Wenn Sie REI3 intern betreiben (nicht über die Cloud erreichbar), müssen die Clients das Zertifikat trotzdem überprüfen können. Stellen Sie sicher, dass Ihre Zertifikatsdatei (*.crt) alle Zertifikate in der Kette bis zu dem Zertifikat enthält, das den Clients bekannt ist - dies ist in der Regel ein vertrauenswürdiges Stamm- oder Zwischenzertifikat.</li>
 </ul>
 <h2 id="proxies">Proxies</h2>
-<p>Wenn Clients mit einem REI3-Server kommunizieren, verwenden sie zwei Methoden - beide laufen über den gleichen Port (normalerweise 443) als TCP:</p>
+<p>Wenn Clients mit einem REI3-Server kommunizieren, verwenden sie zwei Methoden - beide laufen über den gleichen Port per TCP:</p>
 <ul>
 <li>HTTP(S)-Anfragen, um Dateien, Bilder und andere Webressourcen zu laden.</li>
-<li>Eine kontinuierliche Websocket-Verbindung für den bidirektionalen Datenaustausch zwischen Server und Client. Wenn diese Verbindung unterbrochen wird, versucht der Client, diese wiederherzustellen.</li>
+<li>Eine kontinuierliche Websocket-Verbindung für den Datenaustausch zwischen Server und Client. Wenn diese Verbindung unterbrochen wird, versucht der Client, diese wiederherzustellen.</li>
 </ul>
 <p>Bei Proxy-Servern (egal ob Forward- oder Reverse-Proxy) können HTTP(s)-Anfragen wie jede andere Webanwendung behandelt werden. Daher sind Good-Practices wie Anfrage-Timeouts sinnvoll.</p>
-<p>Websockets hingegen sollen so lange aktiv bleiben, bis eine der beiden Seiten (Server oder Client) die Verbindung absichtlich schließt. Dies kann aufgrund von Ereignissen wie einem Logout oder einem Server, der in den Wartungsmodus geht, geschehen. Bei der Konfiguration eines Proxys sollte das Anfrage-Timeout für Websocket-Verbindungen deaktiviert oder zumindest auf mehrere Stunden eingestellt werden. Einige Proxys (wie HAProxy) nennen diese Verbindungen "Tunnel" statt "Client" oder "Server". Jedes Mal, wenn eine Websocket-Verbindung von einem Proxy zwangsweise geschlossen wird, muss der Client die Verbindung neu aufbauen und es können ungespeicherte Änderungen verloren gehen.</p>
-<p>Im Falle von <a href="#clusterbetrieb-und-systemleistung">Cluster-Setups</a> muss eine Websocket-Verbindung bei einem bestimmten Server 'hängen bleiben', bis sie geschlossen wird. Auch wenn die ersten Anfragen z.B. über Round-Robin zugewiesen werden, ist ein bestimmter Server für die laufende Websocket-Kommunikation mit einem bestimmten Client zuständig. HTTP(S)-Anfragen können jedoch jederzeit von einem beliebigen Cluster-Server bearbeitet werden.</p>
+<p>Websockets hingegen sollen so lange aktiv bleiben, bis eine der beiden Seiten (Server oder Client) die Verbindung absichtlich schließt. Bei der Konfiguration eines Proxys sollte das Anfrage-Timeout bzw. max. Sitzungszeit für Websocket-Verbindungen deaktiviert oder zumindest auf mehrere Stunden eingestellt werden. Einige Proxys (wie HAProxy) nennen diese Verbindungen "Tunnel". Jedes Mal, wenn eine Websocket-Verbindung von einem Proxy zwangsweise geschlossen wird, muss der Client die Verbindung neu aufbauen und es können ungespeicherte Änderungen verloren gehen.</p>
+<p>Im Falle von <a href="#clusterbetrieb-und-systemleistung">Cluster-Setups</a> muss eine Websocket-Verbindung bei einem bestimmten Server 'hängen bleiben', bis sie geschlossen wird. Auch wenn die ersten Anfragen über Round-Robin zugewiesen werden, ist ein bestimmter Server für die laufende Websocket-Kommunikation mit einem Client zuständig. HTTP(S)-Anfragen können jedoch jederzeit von einem beliebigen Cluster-Server bearbeitet werden.</p>
+<h2 id="konfigurationsdatei">Konfigurationsdatei</h2>
+<p>Dies sind die Einstellungen in der REI3-Konfigurationsdatei <code>config.json</code> zur Referenz:</p>
+<ul>
+<li>db: Einstellungen für die Datenbankverbindung.
+<ul>
+<li>host: Datenbank-Host, zu dem eine Verbindung hergestellt werden soll. Kann ein Hostname oder eine Netzwerkadresse sein.</li>
+<li>port: Port des Datenbank-Hosts, zu dem eine Verbindung aufgebaut werden soll. Postgres läuft standardmäßig auf Port 5432.</li>
+<li>name: Name der Datenbank, zu der eine Verbindung aufgebaut werden soll. REI3 benötigt einen Benutzer mit vollen Rechten für diese Datenbank. Um eine neue Datenbank für REI3 vorzubereiten, <a href="#vorbereiten-einer-neuen-postgresql-datenbank">dieser Anleitung folgen</a>.</li>
+<li>user: Datenbank-Benutzername, mit dem die Verbindung hergestellt werden soll.</li>
+<li>pass: Passwort des Datenbankbenutzers, mit dem die Verbindung hergestellt werden soll.</li>
+<li>ssl: Verbindung zum Datenbank-Host über SSL. Funktioniert nur, wenn der Datenbankhost SSL unterstützt.</li>
+<li>sslSkipVerify: Wenn 'ssl' aktiv ist, wird ignoriert, wenn das angegebene SSL-Zertifikat nicht vom REI3-Hostsystem überprüft werden kann. Dies ermöglicht eine verschlüsselte Datenbankverbindung, auch wenn das angegebene Zertifikat nicht vertrauenswürdig ist.</li>
+<li>connsMin: Mindestanzahl der Datenbankverbindungen, die offen gehalten werden sollen. Wenn auf 0 gesetzt, wählt REI3 eine Anzahl.</li>
+<li>connsMax: Maximalanzahl der Datenbankverbindungen, die verwendet werden können. Eine Begrenzung dieser Zahl kann sinnvoll sein, wenn REI3 auf einem gemeinsam genutzten Datenbanksystem läuft. REI3 sollte mindestens 4 DB-Verbindungen für sich selbst haben. Wenn auf 0 gesetzt, wird REI3 eine Anzahl wählen.</li>
+<li>embedded: Wenn 'true', startet REI3 eine interne Datenbank. Relevant für eigenständige und portable Bereitstellungsmodelle. Wenn auf 'false' gesetzt, verbindet sich REI3 mit einem externen Datenbankserver.</li>
+</ul></li>
+<li>web: Webserver-Einstellungen.
+<ul>
+<li>cert/key: Namen der Zertifikats- und Schlüsseldateien, damit REI3 HTTPS anbieten kann. Wenn keine Dateien vorhanden sind, erstellt REI3 ein selbstsigniertes Zertifikat und Schlüsseldatei, wenn es im HTTPS-Modus gestartet wird.</li>
+<li>listen: Netzwerkadresse, auf der gelauscht werden soll. Wenn auf 0.0.0.0 gesetzt, wird REI3 unabhängig von der Zieladresse auf Anfragen antworten.</li>
+<li>port: Netzwerk-Port, an dem gelauscht werden soll. Wenn dieser Wert auf 0 gesetzt ist, wird beim Start des Dienstes ein freier Port vom Betriebssystem zugewiesen.</li>
+<li>tlsMinVersion: Die minimale TLS-Version, die REI3 von Clients akzeptieren soll. Gültige Werte: "1.1", "1.2", "1.3"</li>
+</ul></li>
+<li>paths: Pfade, in denen sich Dateien/Verzeichnisse befinden, die für den Betrieb von REI3 relevant sind.
+<ul>
+<li>certificates: Zertifikate für die REI3-Webserver-Komponente (siehe 'web'-&gt;'cert' &amp; 'web'-&gt;'key').</li>
+<li>embeddedDbBin: Nur relevant für portable/eigenständige Bereitstellungsmodelle. Binärdateien für das integrierte Postgres-Datenbanksystem.</li>
+<li>embeddedDbData: Nur relevant für portable/eigenständige Bereitstellungsmodelle. Datendateien für das integrierte Postgres-Datenbanksystem.</li>
+<li>files: In REI3 hochgeladene Dateien, die in Attributen vom Typ "files" gespeichert werden. Der Inhalt wird regelmäßig durch geplante Aufgaben bereinigt, wenn Verweise entfernt werden oder die Aufbewahrungsfrist für Dateien erfüllt ist.</li>
+<li>temp: Dateien, die für verschiedene Vorgänge vorübergehend in REI3 hochgeladen werden. CSV-Uploads, Anwendungsimporte, usw. Der Inhalt wird regelmäßig durch geplante Aufgaben bereinigt.</li>
+<li>transfer: Dateien, die zur Installation oder Aktualisierung von Anwendungen in REI3 hochgeladen werden. Die Dateien werden aufbewahrt, um einen zukünftigen Export von Abhängigkeiten zu ermöglichen.</li>
+</ul></li>
+<li>portable: Nur relevant für portable Bereitstellung. Wenn 'true', startet REI3 im HTTP-Modus und öffnet einen Browser zur REI3-Startseite.</li>
+<li>cluster: Cluster-Einstellungen.
+<ul>
+<li>nodeId: Die diesem Clusterknoten zugewiesene ID. Sollte nicht von Hand ausgefüllt werden. REI3 generiert und speichert automatisch eine neue Knoten-ID, wenn sich ein Knoten zum ersten Mal mit einem Cluster verbindet.</li>
+</ul></li>
+</ul>
 <h1 id="allgemeine-administration">Allgemeine Administration</h1>
 <p>Nach der Konfiguration werden grundsätzlich alle administrativen Aufgaben über die Adminoberfläche in der REI3-Hauptwebanwendung ausgeführt. Jeder Benutzer, der als "Administrator" definiert ist, hat vollen Zugriff auf diese Funktionen.</p>
 <h2 id="wartungsmodus">Wartungsmodus</h2>
@@ -266,6 +301,12 @@
 <p>Wenn das grafische Installationsprogramm für Windows verwendet wird, kann durch Ausführen einer neueren Version die Aktualisierung gestartet werden. Der Plattformdienst wird automatisch neu gestartet.</p>
 <p>Bei Linux-Servern ist es erforderlich, den Dienst zu stoppen und Dateien im ausgewählten Anwendungsverzeichnis mit dem neuesten extrahierbaren Paket zu überschreiben. Danach kann der Dienst neu gestartet werden.</p>
 <p>Um die portable Version zu aktualisieren, stoppen Sie alle laufenden REI3-Instanzen und extrahieren Sie den Inhalt einer neueren, portablen Version in das Anwendungsverzeichnis.</p>
+<h1 id="vorbereiten-einer-neuen-postgresql-datenbank">Vorbereiten einer neuen PostgreSQL-Datenbank</h1>
+<p>REI3 im <a href="#dediziert">dedizierten Bereitstellungsmodell</a> benötigt volle Berechtigungen auf eine UTF8 kodierte PostgreSQL Datenbank. Diese Dokumentation behandelt nicht die Installation von PostgreSQL auf dem gewählten Betriebssystem. Sobald der PostgreSQL-Dienst jedoch verfügbar ist, mit einem PostgreSQL-Client (wie <code>psql</code> oder <code>pgAdmin</code>) verbinden und sicherstellen, dass sowohl ein Benutzer als auch eine Datenbank für REI3 existiert. Um beides zu erstellen:</p>
+<ol type="1">
+<li><code>CREATE ROLE my_rei3_user WITH LOGIN PASSWORD 'MY_STRONG_PW!';</code></li>
+<li><code>CREATE DATABASE my_rei3_db WITH OWNER = my_rei3_user TEMPLATE = template0 ENCODING = 'UTF8';</code></li>
+</ol>
 <h1 id="clusterbetrieb-und-systemleistung">Clusterbetrieb und Systemleistung</h1>
 <p>REI3-Server können in Clustern betrieben werden, um mehr Anfragen und Benutzer gleichzeitig zu verarbeiten. Bevor Sie ein Clusterbetrieb in Erwägung ziehen, ist es wichtig zu wissen, woher wahrgenommene Leistungsprobleme kommen. REI3 ist für die gleichzeitige Bearbeitung vieler Benutzer ausgelegt und kann auch mehrere Prozessorkerne sowie mehr Arbeitsspeicher nutzen, um die Leistung zu verbessern. Nur wenn die CPU-Last/Speichernutzung des REI3-Dienstes häufig sehr hoch ist, kann der Clusterbetrieb mehrerer REI3-Server sinnvoll sein.</p>
 <p>In den meisten Fällen sind die Leistungsprobleme auf andere Ursachen zurückzuführen:</p>
@@ -293,12 +334,6 @@
 <li>Sobald sich ein neuer Serverknoten mit der bestehenden REI3-Datenbank verbindet, registriert er sich als neuer Clusterknoten und weist sich selbst eine eindeutige Knoten-ID zu.</li>
 </ol>
 <p>Dies ist die gesamte Einrichtung. Das Cluster konfiguriert sich automatisch und weist auch automatisch die Rolle des Clustermasters und die Aufgaben zu, je nachdem, welche Knoten einchecken.</p>
-<h1 id="vorbereiten-einer-neuen-postgresql-datenbank">Vorbereiten einer neuen PostgreSQL-Datenbank</h1>
-<p>REI3 im <a href="#dediziert">dedizierten Bereitstellungsmodell</a> benötigt volle Berechtigungen auf eine UTF8 kodierte PostgreSQL Datenbank. Diese Dokumentation behandelt nicht die Installation von PostgreSQL auf dem gewählten Betriebssystem. Sobald der PostgreSQL-Dienst jedoch verfügbar ist, mit einem PostgreSQL-Client (wie <code>psql</code> oder <code>pgAdmin</code>) verbinden und sicherstellen, dass sowohl ein Benutzer als auch eine Datenbank für REI3 existiert. Um beides zu erstellen:</p>
-<ol type="1">
-<li><code>CREATE ROLE my_rei3_user WITH LOGIN PASSWORD 'MY_STRONG_PW!';</code></li>
-<li><code>CREATE DATABASE my_rei3_db WITH OWNER = my_rei3_user TEMPLATE = template0 ENCODING = 'UTF8';</code></li>
-</ol>
 <h1 id="cloudbetrieb">Cloudbetrieb</h1>
 <p>REI3 kann im Internet zugänglich gemacht werden, indem entsprechende Firewall-Ports geöffnet werden. Wir, die REI3-Hersteller, sind bestrebt, die Plattform so sicher wie möglich zu gestalten. Wie bei jeder anderen Anwendung ist es immer möglich, dass unentdeckte Sicherheitslücken ausgenutzt und unbefugter Zugriff erreicht wird. Neben der regelmäßigen Aktualisierung von REI3 selbst sind wir der Ansicht, dass zusätzliche Sicherheitsmaßnahmen erforderlich sind, um Webanwendungen in der Cloud sicher auszuführen. Diese sind u. A.:</p>
 <ul>
