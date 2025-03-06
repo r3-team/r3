@@ -41,8 +41,7 @@ import {
 	getFormRoute,
 	getFormStateIdMap,
 	getResolvedPlaceholders,
-	getRowsDecrypted,
-	setFormFavorite
+	getRowsDecrypted
 } from './shared/form.js';
 import {
 	fillRelationRecordIds,
@@ -796,6 +795,8 @@ let MyForm = {
 		jsFunctionIdMap:    (s) => s.$store.getters['schema/jsFunctionIdMap'],
 		presetIdMapRecordId:(s) => s.$store.getters['schema/presetIdMapRecordId'],
 		loginFavorites:     (s) => s.$store.getters['local/loginFavorites'],
+		loginOptions:       (s) => s.$store.getters['local/loginOptions'],
+		loginOptionsMobile: (s) => s.$store.getters['local/loginOptionsMobile'],
 		token:              (s) => s.$store.getters['local/token'],
 		access:             (s) => s.$store.getters.access,
 		builderEnabled:     (s) => s.$store.getters.builderEnabled,
@@ -851,7 +852,6 @@ let MyForm = {
 		pemImport,
 		rsaDecrypt,
 		rsaEncrypt,
-		setFormFavorite,
 		srcBase64,
 		variableValueGet,
 		variableValueSet,
@@ -1120,8 +1120,31 @@ let MyForm = {
 			else             window.open(`${location.protocol}//${location.host}/#${path}`);
 		},
 		makeFavorite() {
-			const recordId = this.recordIds.length === 1 ? this.recordIds[0] : null;
-			this.setFormFavorite(this.moduleId,this.form.id,recordId,this.title);
+			ws.send('loginFavorites','add',{
+				srcFormId:this.form.id,
+				srcFavoriteId:this.favoriteId,
+				moduleId:this.moduleId,
+				recordIdOpen:this.recordIds.length === 1 ? this.recordIds[0] : null,
+				isMobile:this.isMobile,
+				title:this.title
+			},false).then(
+				() => {
+					ws.sendMultiple([
+						ws.prepare('loginFavorites','get',{dateCache:this.loginFavorites.dateCache}),
+						ws.prepare('loginOptions','get',{
+							dateCache:this.isMobile ? this.loginOptionsMobile.dateCache : this.loginOptions.dateCache,
+							isMobile:this.isMobile
+						})
+					],false).then(
+						res => {
+							this.$store.commit('local/loginFavorites',res[0].payload);
+							this.$store.commit('local/loginOptions',res[1].payload);
+						},
+						this.$root.genericError
+					);
+				},
+				console.warn
+			);
 		},
 		openBuilder(middle) {
 			if(!middle) {

@@ -177,6 +177,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		}
 	case "loginFavorites":
 		switch action {
+		case "add":
+			if isNoAuth {
+				return nil, errors.New(handler.ErrUnauthorized)
+			}
+			return LoginAddFavorites_tx(ctx, tx, reqJson, loginId)
 		case "get":
 			return LoginGetFavorites_tx(ctx, tx, reqJson, loginId, isNoAuth)
 		case "set":

@@ -294,22 +294,6 @@ export function setGetterArgs(argsArray,name,value) {
 	return argsArray;
 };
 
-export function setFormFavorite(moduleId,formId,recordId,title) {
-	let m = JSON.parse(JSON.stringify(MyStore.getters['local/loginFavorites'].moduleIdMap));
-
-	if(m[moduleId] === undefined)
-		m[moduleId] = [];
-
-	m[moduleId].push({
-		id:getNilUuid(),
-		moduleId:moduleId,
-		formId:formId,
-		recordId:recordId,
-		title:title
-	});
-	MyStore.commit('local/loginFavoritesModuleIdMapChange',m);
-};
-
 export function formOpen(openForm,newTab,replace) {
 	if(openForm === null)
 		return;

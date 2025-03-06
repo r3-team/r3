@@ -86,14 +86,26 @@ let MyMenuFavoritesEdit = {
 		set() {
 			let m = JSON.parse(JSON.stringify(this.loginFavorites.moduleIdMap));
 			m[this.moduleId] = this.favoritesEdit;
-			this.$store.commit('local/loginFavoritesModuleIdMapChange',m);
+
+			if(JSON.stringify(m) !== JSON.stringify(this.loginFavorites.moduleIdMap)) {
+				ws.send('loginFavorites','set',m,false).then(
+					() => {
+						// reload all favorites to get created IDs
+						ws.send('loginFavorites','get',{dateCache:0},false).then(
+							res => { this.$store.commit('local/loginFavorites',res.payload); },
+							console.warn
+						);
+					},
+					console.warn
+				);
+			}
 			this.$emit('close');
 		}
 	}
 };
 
-let MyMenuFavorite = {
-	name:'my-menu-favorite',
+let MyMenuItemFavorite = {
+	name:'my-menu-item-favorite',
 	template:`<div class="item">
 		<div class="line noHighlight" tabindex="0"
 			@click="click"
@@ -251,9 +263,9 @@ let MyMenuItem = {
 let MyMenu = {
 	name:'my-menu',
 	components:{
-		MyMenuFavorite,
 		MyMenuFavoritesEdit,
-		MyMenuItem
+		MyMenuItem,
+		MyMenuItemFavorite
 	},
 	template:`<div class="menu"
 		:class="{ isDark:color.isDark() }"
@@ -319,7 +331,7 @@ let MyMenu = {
 					<span class="menu-favorites-empty" v-if="favorites.length === 0">
 						- {{ capGen.favoritesEmpty }} -
 					</span>
-					<my-menu-favorite
+					<my-menu-item-favorite
 						v-if="!isAtFavoritesEdit"
 						v-for="f in favorites"
 						:active="favoriteIdActive === f.id"
@@ -330,7 +342,7 @@ let MyMenu = {
 						:recordId="f.recordId"
 						:title="f.title"
 					/>
-					<my-menu-favoritesEdit
+					<my-menu-favorites-edit
 						v-if="isAtFavoritesEdit"
 						@close="isAtFavoritesEdit = false"
 						:favorites="favorites"
@@ -376,7 +388,9 @@ let MyMenu = {
 		},
 		favoriteIdActive:{
 			handler(v) {
-				if(v !== null && !this.isAtFavorites)
+				if(v === null) return;
+					
+				if(!this.isAtFavorites)
 					this.isAtFavorites = true;
 			}
 		}

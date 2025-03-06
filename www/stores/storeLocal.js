@@ -115,19 +115,6 @@ const MyStoreLocal = {
 			state.loginFavorites.moduleIdMap = payload.moduleIdMap;
 			set('loginFavorites',state.loginFavorites);
 		},
-		loginFavoritesModuleIdMapChange(state,payload) {
-			if(JSON.stringify(payload) === JSON.stringify(state.loginFavorites.moduleIdMap))
-				return;
-			
-			ws.send('loginFavorites','set',payload,false).then(() => {
-				// reload all favorites to get created IDs
-				ws.send('loginFavorites','get',{dateCache:0},false).then(res => {
-					state.loginFavorites.dateCache   = res.payload.dateCache;
-					state.loginFavorites.moduleIdMap = res.payload.moduleIdMap;
-					set('loginFavorites',state.loginFavorites);
-				},console.warn);
-			},console.warn);
-		},
 		loginKeyAes(state,payload) {
 			state.loginKeyAes = payload;
 			set('loginKeyAes',payload);

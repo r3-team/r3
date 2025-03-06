@@ -7,7 +7,32 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+func Add_tx(ctx context.Context, tx pgx.Tx, loginId int64, moduleId uuid.UUID, formId uuid.UUID, recordIdOpen pgtype.Int8, title pgtype.Text) (uuid.UUID, error) {
+	title = forceTitleLength(title)
+
+	id, err := uuid.NewV4()
+	if err != nil {
+		return id, err
+	}
+
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO instance.login_favorite (id, login_id, module_id, form_id, record_id, title, position)
+		VALUES ($1,$2,$3,$4,$5,$6,COALESCE((
+			SELECT position + 1
+			FROM instance.login_favorite
+			WHERE login_id  = $7
+			AND   module_id = $8
+			ORDER BY position DESC
+			LIMIT 1
+		),0))
+	`, id, loginId, moduleId, formId, recordIdOpen, title, loginId, moduleId); err != nil {
+		return id, err
+	}
+	return id, updateTimestamp_tx(ctx, tx, loginId)
+}
 
 func Get_tx(ctx context.Context, tx pgx.Tx, loginId int64, dateCache int64) (map[uuid.UUID][]types.LoginFavorite, int64, error) {
 	favorites := make(map[uuid.UUID][]types.LoginFavorite)
@@ -60,11 +85,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, loginId int64, moduleIdMapFavorites 
 	idsKeep := make([]uuid.UUID, 0)
 	for moduleId, favorites := range moduleIdMapFavorites {
 		for position, f := range favorites {
-
-			// apply max title length
-			if len(f.Title.String) > 128 {
-				f.Title.String = f.Title.String[0:128]
-			}
+			f.Title = forceTitleLength(f.Title)
 
 			if f.Id == uuid.Nil {
 				f.Id, err = uuid.NewV4()
@@ -100,14 +121,21 @@ func Set_tx(ctx context.Context, tx pgx.Tx, loginId int64, moduleIdMapFavorites 
 	`, idsKeep, loginId); err != nil {
 		return err
 	}
+	return updateTimestamp_tx(ctx, tx, loginId)
+}
 
-	// update cache timestamp
-	if _, err := tx.Exec(ctx, `
+// helpers
+func forceTitleLength(title pgtype.Text) pgtype.Text {
+	if len(title.String) > 128 {
+		title.String = title.String[0:128]
+	}
+	return title
+}
+func updateTimestamp_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
+	_, err := tx.Exec(ctx, `
 		UPDATE instance.login
 		SET date_favorites = $1
 		WHERE id = $2
-	`, tools.GetTimeUnix(), loginId); err != nil {
-		return err
-	}
-	return nil
+	`, tools.GetTimeUnix(), loginId)
+	return err
 }

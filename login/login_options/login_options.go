@@ -10,6 +10,65 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+func CopyToFavorite_tx(ctx context.Context, tx pgx.Tx, loginId int64, isMobile bool, srcFormId uuid.UUID, srcFavoriteId pgtype.UUID, trgFavoriteId uuid.UUID) error {
+
+	copyFromFavorite := srcFavoriteId.Valid
+	fieldIdMapOptions := make(map[uuid.UUID]string)
+	var query string
+	var args []interface{}
+
+	if copyFromFavorite {
+		query = `
+			SELECT field_id, options
+			FROM instance.login_options
+			WHERE login_id          = $1
+			AND   login_favorite_id = $2
+			AND   is_mobile         = $3
+			AND   field_id IN (
+				SELECT id
+				FROM app.field
+				WHERE form_id = $4
+			)`
+		args = []interface{}{loginId, srcFavoriteId, isMobile, srcFormId}
+	} else {
+		query = `
+			SELECT field_id, options
+			FROM instance.login_options
+			WHERE login_id          =  $1
+			AND   login_favorite_id IS NULL
+			AND   is_mobile         =  $2
+			AND   field_id IN (
+				SELECT id
+				FROM app.field
+				WHERE form_id = $3
+			)`
+		args = []interface{}{loginId, isMobile, srcFormId}
+	}
+
+	rows, err := tx.Query(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var fieldId uuid.UUID
+		var options string
+
+		if err := rows.Scan(&fieldId, &options); err != nil {
+			return err
+		}
+		fieldIdMapOptions[fieldId] = options
+	}
+
+	for fieldId, options := range fieldIdMapOptions {
+		if err := Set_tx(ctx, tx, loginId, pgtype.UUID{Bytes: trgFavoriteId, Valid: true}, fieldId, isMobile, options); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func Get_tx(ctx context.Context, tx pgx.Tx, loginId int64, isMobile bool, dateCache int64) ([]types.LoginOptions, error) {
 	options := make([]types.LoginOptions, 0)
 
