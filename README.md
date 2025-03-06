@@ -78,6 +78,8 @@
 
 Once running, REI3 is available at https://localhost (default port 443) with both username and password being `admin`. For the full documentation, visit [rei3.de](https://rei3.de/en/docs).
 
+If you plan to run REI3 behind a proxy, please make sure to disable client timeouts for websockets. More details [here](https://rei3.de/en/docs/admin#proxies).
+
 There are also Docker Compose files ([x64](https://rei3.de/docker_x64)/[arm64](https://rei3.de/docker_arm64)) and a [portable version](https://rei3.de/latest/x64_portable) for Windows available to quickly setup a test or development system.
 
 ## :bulb: Where to get help
