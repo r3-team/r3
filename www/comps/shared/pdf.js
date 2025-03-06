@@ -4,16 +4,22 @@ import MyStore from '../../stores/store.js';
 export function generatePdf(filename,format,orientation,marginX,marginY,
 	htmlHeader,htmlBody,htmlFooter,cssStyles,callbackResult,closeWhenDone
 ) {
-	const capGen = MyStore.getters.captions.generic;
-	const win    = window.open('');
+	const capGen     = MyStore.getters.captions.generic;
+	const win        = window.open('');
+	const marginYMin = 50;
 	
 	win.r3_callbackResult = callbackResult;
 	win.r3_closeWhenDone  = closeWhenDone;
 
-	const marginLeft   = Array.isArray(marginX) && marginX.length === 2 ? marginX[0] : marginX;
-	const marginRight  = Array.isArray(marginX) && marginX.length === 2 ? marginX[1] : marginX;
-	const marginTop    = Array.isArray(marginY) && marginY.length === 2 ? marginY[0] : marginY;
-	const marginBottom = Array.isArray(marginY) && marginY.length === 2 ? marginY[1] : marginY;
+	let marginLeft   = Array.isArray(marginX) && marginX.length === 2 ? marginX[0] : marginX;
+	let marginRight  = Array.isArray(marginX) && marginX.length === 2 ? marginX[1] : marginX;
+	let marginTop    = Array.isArray(marginY) && marginY.length === 2 ? marginY[0] : marginY;
+	let marginBottom = Array.isArray(marginY) && marginY.length === 2 ? marginY[1] : marginY;
+
+	// apply minimums for vertical margins
+	// jsPDF will not display headers/footers with tiny top/bottom margins
+	if(htmlHeader !== null && htmlHeader !== '' && marginTop    < marginYMin) marginTop    = marginYMin;
+	if(htmlFooter !== null && htmlFooter !== '' && marginBottom < marginYMin) marginBottom = marginYMin;
 
 	win.document.open();
 	win.document.write(`
