@@ -56,6 +56,8 @@ const MyStore = Vuex.createStore({
 		},
 		isAdmin:false,                 // user is admin
 		isAtDialog:false,              // app shows generic dialog
+		isAtFavorites:false,           // is the favorites menu entry active?
+		isAtFavoritesEdit:false,       // is the favorites menu entry active and in edit mode?
 		isAtFeedback:false,            // app shows feedback dialog
 		isAtMenu:false,                // user navigated to menu (only relevant if isMobile)
 		isAtModule:false,              // app currently shows a module (instead of Builder, admin panel, settings, etc.)
@@ -254,6 +256,8 @@ const MyStore = Vuex.createStore({
 		filesCopy:               (state,payload) => state.filesCopy                = payload,
 		isAdmin:                 (state,payload) => state.isAdmin                  = payload,
 		isAtDialog:              (state,payload) => state.isAtDialog               = payload,
+		isAtFavorites:           (state,payload) => state.isAtFavorites            = payload,
+		isAtFavoritesEdit:       (state,payload) => state.isAtFavoritesEdit        = payload,
 		isAtFeedback:            (state,payload) => state.isAtFeedback             = payload,
 		isAtMenu:                (state,payload) => state.isAtMenu                 = payload,
 		isAtModule:              (state,payload) => state.isAtModule               = payload,
@@ -407,6 +411,8 @@ const MyStore = Vuex.createStore({
 		filesCopy:               (state) => state.filesCopy,
 		isAdmin:                 (state) => state.isAdmin,
 		isAtDialog:              (state) => state.isAtDialog,
+		isAtFavorites:           (state) => state.isAtFavorites,
+		isAtFavoritesEdit:       (state) => state.isAtFavoritesEdit,
 		isAtFeedback:            (state) => state.isAtFeedback,
 		isAtMenu:                (state) => state.isAtMenu,
 		isAtModule:              (state) => state.isAtModule && state.moduleIdLast !== null,

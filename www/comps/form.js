@@ -143,6 +143,7 @@ let MyForm = {
 					<my-button image="star1.png"
 						v-if="!isBulkUpdate"
 						@trigger="makeFavorite"
+						:active="!isAtFavoritesEdit"
 						:captionTitle="capApp.button.favorite"
 					/>
 					<my-button image="link.png"
@@ -805,6 +806,7 @@ let MyForm = {
 		capGen:             (s) => s.$store.getters.captions.generic,
 		colorMenu:          (s) => s.$store.getters.colorMenu,
 		isAdmin:            (s) => s.$store.getters.isAdmin,
+		isAtFavoritesEdit:  (s) => s.$store.getters.isAtFavoritesEdit,
 		isMobile:           (s) => s.$store.getters.isMobile,
 		keyLength:          (s) => s.$store.getters.constants.keyLength,
 		loginId:            (s) => s.$store.getters.loginId,
@@ -1120,15 +1122,18 @@ let MyForm = {
 			else             window.open(`${location.protocol}//${location.host}/#${path}`);
 		},
 		makeFavorite() {
+			const recordId = this.recordIds.length === 1 ? this.recordIds[0] : null;
 			ws.send('loginFavorites','add',{
 				srcFormId:this.form.id,
 				srcFavoriteId:this.favoriteId,
 				moduleId:this.moduleId,
-				recordIdOpen:this.recordIds.length === 1 ? this.recordIds[0] : null,
+				recordIdOpen:recordId,
 				isMobile:this.isMobile,
 				title:this.title
 			},false).then(
-				() => {
+				resFav => {
+					// creating a new favorite, copies its field options from the source form
+					// need to retrieve new values to be up to date
 					ws.sendMultiple([
 						ws.prepare('loginFavorites','get',{dateCache:this.loginFavorites.dateCache}),
 						ws.prepare('loginOptions','get',{
@@ -1139,6 +1144,9 @@ let MyForm = {
 						res => {
 							this.$store.commit('local/loginFavorites',res[0].payload);
 							this.$store.commit('local/loginOptions',res[1].payload);
+							this.$store.commit('isAtFavorites',true);
+							this.$store.commit('isAtFavoritesEdit',true);
+							this.$router.push(this.getFormRoute(resFav.payload,this.form.id,(recordId !== null ? recordId : 0),true));
 						},
 						this.$root.genericError
 					);

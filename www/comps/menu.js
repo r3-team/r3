@@ -28,7 +28,6 @@ let MyMenuFavoritesEdit = {
 		<div class="row gap space-between">
 			<my-button image="save.png"
 				@trigger="set"
-				:active="hasChanges"
 				:caption="capGen.button.save"
 			/>
 			<my-button image="cancel.png"
@@ -44,9 +43,6 @@ let MyMenuFavoritesEdit = {
 	},
 	emits:['close'],
 	computed:{
-		// simple
-		hasChanges:(s) => JSON.stringify(s.favorites) !== JSON.stringify(s.favoritesEdit),
-
 		// stores
 		loginFavorites:(s) => s.$store.getters['local/loginFavorites'],
 		capGen:        (s) => s.$store.getters.captions.generic
@@ -71,9 +67,7 @@ let MyMenuFavoritesEdit = {
 				e.preventDefault();
 			}
 			if(e.ctrlKey && e.key === 's') {
-				if(this.hasChanges)
-					this.set();
-
+				this.set();
 				e.preventDefault();
 			}
 		},
@@ -292,7 +286,7 @@ let MyMenu = {
 			<div class="menu-tab clickable"
 				v-for="(mt,i) in menuTabsAccess"
 				v-if="menuTabsAccess.length > 1 || hasFavorites"
-				@click.left="menuTabIndexShown = i; isAtFavorites = false"
+				@click.left="menuTabIndexShown = i; $store.commit('isAtFavorites',false)"
 				:class="{ active:i === menuTabIndexShown && !isAtFavorites, centered:!showTabLabels }"
 				:style="tabStyles"
 				:title="getCaption('menuTabTitle',module.id,mt.id,mt.captions,capGen.menu)"
@@ -302,7 +296,7 @@ let MyMenu = {
 			</div>
 			<div class="menu-tab clickable"
 				v-if="hasFavorites"
-				@click="isAtFavorites = true"
+				@click="$store.commit('isAtFavorites',true)"
 				:class="{ active:isAtFavorites, centered:!showTabLabels }"
 				:style="tabStyles"
 				:title="capGen.favorites"
@@ -344,13 +338,13 @@ let MyMenu = {
 					/>
 					<my-menu-favorites-edit
 						v-if="isAtFavoritesEdit"
-						@close="isAtFavoritesEdit = false"
+						@close="$store.commit('isAtFavoritesEdit',false)"
 						:favorites="favorites"
 						:moduleId="module.id"
 					/>
 					<div class="row justify-end">
 						<div class="menu-favorites-edit-action clickable"
-							@click.left="isAtFavoritesEdit = true"
+							@click.left="$store.commit('isAtFavoritesEdit',true)"
 							v-if="!isAtFavoritesEdit && favorites.length !== 0"
 						>
 							<img src="images/edit.png" />
@@ -375,26 +369,6 @@ let MyMenu = {
 		module:          { type:Object,  required:true },
 		recordOpen:      { type:Boolean, required:true }
 	},
-	watch:{
-		favorites:{
-			handler(vNew,vOld) {
-				// open new favorite, if one was added
-				if(vNew.length === vOld.length + 1) {
-					const f = vNew[vNew.length-1];
-					this.$router.push(this.getFormRoute(f.id,f.formId,f.recordId === null ? 0 : f.recordId,true));
-					this.isAtFavorites = true; // pop-up forms might ignore routing, show favorites in any event
-				}
-			}
-		},
-		favoriteIdActive:{
-			handler(v) {
-				if(v === null) return;
-					
-				if(!this.isAtFavorites)
-					this.isAtFavorites = true;
-			}
-		}
-	},
 	computed:{
 		menuTabsAccess:(s) => {
 			let out = [];
@@ -416,31 +390,30 @@ let MyMenu = {
 		tabStyles:    (s) => `width:${100 / (s.menuTabsAccess.length + 1)}%;`,
 
 		// stores
-		customLogo:    (s) => s.$store.getters['local/customLogo'],
-		customLogoUrl: (s) => s.$store.getters['local/customLogoUrl'],
-		loginFavorites:(s) => s.$store.getters['local/loginFavorites'],
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
-		bgStyle:       (s) => s.$store.getters.colorMenuStyle,
-		builderEnabled:(s) => s.$store.getters.builderEnabled,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		color:         (s) => s.$store.getters.colorMenu,
-		isAdmin:       (s) => s.$store.getters.isAdmin,
-		isMobile:      (s) => s.$store.getters.isMobile,
-		isNoAuth:      (s) => s.$store.getters.isNoAuth,
-		menuAccess:    (s) => s.$store.getters.access.menu,
-		settings:      (s) => s.$store.getters.settings
+		customLogo:       (s) => s.$store.getters['local/customLogo'],
+		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
+		loginFavorites:   (s) => s.$store.getters['local/loginFavorites'],
+		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
+		iconIdMap:        (s) => s.$store.getters['schema/iconIdMap'],
+		bgStyle:          (s) => s.$store.getters.colorMenuStyle,
+		builderEnabled:   (s) => s.$store.getters.builderEnabled,
+		capGen:           (s) => s.$store.getters.captions.generic,
+		color:            (s) => s.$store.getters.colorMenu,
+		isAdmin:          (s) => s.$store.getters.isAdmin,
+		isAtFavorites:    (s) => s.$store.getters.isAtFavorites,
+		isAtFavoritesEdit:(s) => s.$store.getters.isAtFavoritesEdit,
+		isMobile:         (s) => s.$store.getters.isMobile,
+		isNoAuth:         (s) => s.$store.getters.isNoAuth,
+		menuAccess:       (s) => s.$store.getters.access.menu,
+		settings:         (s) => s.$store.getters.settings
 	},
 	data() {
 		return {
-			// states
-			isAtFavorites:false,
-			isAtFavoritesEdit:false,
 			menuTabIndexShown:0
 		};
 	},
 	mounted() {
-		this.isAtFavorites = this.favoriteIdActive !== null;
+		this.$store.commit('isAtFavorites',this.favoriteIdActive !== null);
 	},
 	methods:{
 		// externals
