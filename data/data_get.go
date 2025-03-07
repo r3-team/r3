@@ -35,12 +35,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 	results := make([]types.DataGetResult, 0)   // data GET results
 	queryArgs := make([]interface{}, 0)         // SQL arguments for data query
 	queryCount := ""                            // SQL query to retrieve a total count
-	queryCountArgs := make([]interface{}, 0)    // SQL query arguments for count (potentially less, no expressions besides COUNT)
 
 	// prepare SQL query for data GET request
-	*query, queryCount, err = prepareQuery(data, indexRelationIds,
-		&queryArgs, &queryCountArgs, loginId, 0)
-
+	*query, queryCount, err = prepareQuery(data, indexRelationIds, &queryArgs, loginId, 0)
 	if err != nil {
 		return results, 0, err
 	}
@@ -258,7 +255,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 	if data.Limit != 0 && (count >= data.Limit || data.Offset != 0) {
 		// defined limit has been reached or offset was used, get total count
-		if err := tx.QueryRow(ctx, queryCount, queryCountArgs...).Scan(&count); err != nil {
+		if err := tx.QueryRow(ctx, queryCount, queryArgs...).Scan(&count); err != nil {
 			return results, 0, err
 		}
 	}
@@ -268,8 +265,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 // build SQL call from data GET request
 // also used for sub queries, a nesting level is included for separation (0 = main query)
 // returns data + count SQL query strings
-func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryArgs *[]interface{},
-	queryCountArgs *[]interface{}, loginId int64, nestingLevel int) (string, string, error) {
+func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
+	queryArgs *[]interface{}, loginId int64, nestingLevel int) (string, string, error) {
 
 	// check for authorized access, READ(1) for GET
 	for _, expr := range data.Expressions {
@@ -304,7 +301,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 			continue
 		}
 
-		line, err := getQueryJoin(indexRelationIds, join, getFiltersByIndex(data.Filters, join.Index), queryArgs, queryCountArgs, loginId, nestingLevel)
+		line, err := getQueryJoin(indexRelationIds, join, getFiltersByIndex(data.Filters, join.Index), queryArgs, loginId, nestingLevel)
 		if err != nil {
 			return "", "", err
 		}
@@ -316,7 +313,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 	// SQL arguments are numbered ($1, $2, ...) with no way to skip any (? placeholder is not allowed);
 	//  excluded sub queries arguments from expressions causes missing argument numbers
 	for _, filter := range getFiltersByIndex(data.Filters, 0) {
-		line, err := getQueryWhere(filter, queryArgs, queryCountArgs, loginId, nestingLevel)
+		line, err := getQueryWhere(filter, queryArgs, loginId, nestingLevel)
 		if err != nil {
 			return "", "", err
 		}
@@ -352,18 +349,9 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 
 		// non-attribute expression
 		if !expr.AttributeId.Valid {
-
-			// in expressions of main query, disable SQL arguments for count query
-			//  count query has no sub queries with arguments and only 1 expression: COUNT(*)
-			queryCountArgsOptional := queryCountArgs
-			if nestingLevel == 0 {
-				queryCountArgsOptional = nil
-			}
 			indexRelationIdsSub := make(map[int]uuid.UUID)
 
-			subQuery, _, err := prepareQuery(expr.Query, indexRelationIdsSub,
-				queryArgs, queryCountArgsOptional, loginId, nestingLevel+1)
-
+			subQuery, _, err := prepareQuery(expr.Query, indexRelationIdsSub, queryArgs, loginId, nestingLevel+1)
 			if err != nil {
 				return "", "", err
 			}
@@ -575,7 +563,7 @@ func getQuerySelect(exprPos int, expr types.DataGetExpression, nestingLevel int)
 }
 
 func getQueryJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin, filters []types.DataGetFilter,
-	queryArgs *[]interface{}, queryCountArgs *[]interface{}, loginId int64, nestingLevel int) (string, error) {
+	queryArgs *[]interface{}, loginId int64, nestingLevel int) (string, error) {
 
 	// check join attribute
 	atr, exists := cache.AttributeIdMap[join.AttributeId]
@@ -631,7 +619,7 @@ func getQueryJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin, fi
 	// parse join filters
 	inWhere := make([]string, 0)
 	for _, filter := range filters {
-		line, err := getQueryWhere(filter, queryArgs, queryCountArgs, loginId, nestingLevel)
+		line, err := getQueryWhere(filter, queryArgs, loginId, nestingLevel)
 		if err != nil {
 			return "", err
 		}
@@ -646,8 +634,7 @@ func getQueryJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin, fi
 }
 
 // parses filters to generate query lines and arguments
-func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{},
-	queryCountArgs *[]interface{}, loginId int64, nestingLevel int) (string, error) {
+func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{}, loginId int64, nestingLevel int) (string, error) {
 
 	if !slices.Contains(types.QueryFilterConnectors, filter.Connector) {
 		return "", errors.New("bad filter connector")
@@ -668,9 +655,7 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 		if isQuery {
 			indexRelationIdsSub := make(map[int]uuid.UUID)
 
-			subQuery, _, err := prepareQuery(s.Query, indexRelationIdsSub,
-				queryArgs, queryCountArgs, loginId, nestingLevel+1)
-
+			subQuery, _, err := prepareQuery(s.Query, indexRelationIdsSub, queryArgs, loginId, nestingLevel+1)
 			if err != nil {
 				return err
 			}
@@ -759,9 +744,6 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 		}
 
 		*queryArgs = append(*queryArgs, s.Value)
-		if queryCountArgs != nil {
-			*queryCountArgs = append(*queryCountArgs, s.Value)
-		}
 
 		if s.FtsDict.Valid {
 			if !cache.GetSearchDictionaryIsValid(s.FtsDict.String) {
