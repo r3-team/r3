@@ -469,16 +469,14 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 	// build final total count SQL query (not relevant for sub queries)
 	queryCount := ""
 	if nestingLevel == 0 {
-
-		// distinct to keep count for source relation records correct independent of joins
 		queryCount = fmt.Sprintf(
-			`SELECT COUNT(DISTINCT "%s"."%s")`+"\n"+
-				`FROM "%s"."%s" AS "%s" %s%s`,
-			getRelationCode(data.IndexSource, nestingLevel), schema.PkName, // SELECT
-			mod.Name, rel.Name, relCode, // FROM
+			`SELECT COUNT(*) FROM (SELECT %s`+"\n"+
+				`FROM "%s"."%s" AS "%s" %s%s%s) AS q`,
+			strings.Join(inSelect, `, `), // SELECT
+			mod.Name, rel.Name, relCode,  // FROM
 			strings.Join(inJoin, ""), // JOINS
-			queryWhere)               // WHERE
-
+			queryWhere,               // WHERE
+			queryGroup)               // GROUP BY
 	}
 
 	// add intendation for nested sub queries
