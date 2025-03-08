@@ -108,6 +108,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 		ALTER TABLE app.collection_consumer DROP COLUMN multi_value;
 		ALTER TABLE app.collection_consumer DROP COLUMN no_display_empty;
+
+		-- fix bad upgrade script (column style 'monospace' was wrongly added in '3.8->3.9' script instead of '3.9->3.10' - some 3.10 instances do not have it)
+		-- remove temporary fix in initSystem() (in r3.go) when 3.11 releases
+		ALTER table app.column ALTER COLUMN styles TYPE TEXT[];
+		DROP TYPE app.column_style;
+		CREATE TYPE app.column_style AS ENUM ('bold', 'italic', 'alignEnd', 'alignMid', 'clipboard', 'hide', 'vertical', 'wrap', 'monospace', 'previewLarge', 'boolAtrIcon');
+		ALTER TABLE app.column ALTER COLUMN styles TYPE app.column_style[] USING styles::TEXT[]::app.column_style[];
 	*/
 
 	"3.9": func(ctx context.Context, tx pgx.Tx) (string, error) {
@@ -380,6 +387,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- new column styles
 			ALTER TYPE app.column_style ADD VALUE 'previewLarge';
 			ALTER TYPE app.column_style ADD VALUE 'boolAtrIcon';
+			ALTER TYPE app.column_style ADD VALUE 'monospace';
 
 			-- default values for variables
 			ALTER TABLE app.variable ADD COLUMN def TEXT;
@@ -927,9 +935,6 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			
 			-- remove not needed configuration option
 			DELETE FROM instance.config WHERE name = 'tokenReauthHours';
-
-			-- add monospace column style
-			ALTER TYPE app.column_style ADD VALUE 'monospace';
 		`)
 		return "3.9", err
 	},
