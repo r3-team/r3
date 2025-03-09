@@ -83,15 +83,3 @@
 	filter:var(--image-filter);
 	float:right;
 }
-
-
-/* user overwrites */
-.user-bordersSquared .home .module,
-.user-bordersSquared .home .module .entry:hover{
-	border-radius:0px;
-}
-
-/* mobile overwrites */
-.is-mobile .home .modules{
-	overflow:auto;
-}

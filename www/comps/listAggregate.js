@@ -1,4 +1,6 @@
+import {isAttributeDecimal}               from './shared/attribute.js';
 import {getFirstColumnUsableAsAggregator} from './shared/column.js';
+import {getNumberFormatted}               from './shared/generic.js';
 import {getQueryExpressions}              from './shared/query.js';
 import {
 	getUnixFormat,
@@ -10,9 +12,11 @@ let MyListAggregate = {
 	name:'my-list-aggregate',
 	template:`<tr class="aggregation" v-if="anyValues">
 		<td v-if="leaveOneEmpty"></td>
-		<td v-for="(b,i) in columnBatches">
-			<div class="batch">{{ valuesByColumnBatch[i] !== null ? valuesByColumnBatch[i] : '' }}</div>
+		<td v-for="(b,i) in columnBatches" :class="domClassByColumnBatch[i]">
+			{{ valuesByColumnBatch[i] !== null ? valuesByColumnBatch[i] : '' }}
 		</td>
+		<!-- empty column for taking remaining space -->
+		<td></td>
 	</tr>`,
 	props:{
 		columnBatches:  { type:Array,   required:true }, // list column batches
@@ -25,6 +29,7 @@ let MyListAggregate = {
 	},
 	data() {
 		return {
+			domClassByColumnBatch:[],
 			valuesByColumnBatch:[]
 		};
 	},
@@ -41,6 +46,7 @@ let MyListAggregate = {
 			return out;
 		},
 		
+		// simple
 		anyValues: (s) => s.valuesByColumnBatch.length !== 0,
 		dateFormat:(s) => s.$store.getters.settings.dateFormat,
 		
@@ -50,13 +56,16 @@ let MyListAggregate = {
 	methods:{
 		// external
 		getFirstColumnUsableAsAggregator,
+		getNumberFormatted,
 		getQueryExpressions,
 		getUnixFormat,
 		getUtcTimeStringFromUnix,
+		isAttributeDecimal,
 		
 		// calls
 		get() {
-			this.valuesByColumnBatch = [];
+			this.domClassByColumnBatch = [];
+			this.valuesByColumnBatch   = [];
 			
 			let columns = [];
 			for(let columnId in this.columnIdMapAggr) {
@@ -87,24 +96,33 @@ let MyListAggregate = {
 					const row = res.payload.rows[0];
 					
 					for(let b of this.columnBatches) {
+						this.domClassByColumnBatch.push({});
 						this.valuesByColumnBatch.push(null);
 					}
 					
 					for(let i = 0, j = columns.length; i < j; i++) {
-						const c  = columns[i];
-						let   v  = row.values[i];
+						const c = columns[i];
+						const a = this.attributeIdMap[c.attributeId];
+						let   v = row.values[i];
 						
 						// count aggregations can be taken directly
+						// decimal numbers need to be formatted
+						// integer values are parsed as an aggregation can contain fractions
 						if(c.aggregator !== 'count') {
-							switch(this.attributeIdMap[c.attributeId].contentUse) {
+							switch(a.contentUse) {
 								case 'date':     v = this.getUnixFormat(v,this.dateFormat);          break;
 								case 'datetime': v = this.getUnixFormat(v,this.dateFormat + ' H:i'); break;
 								case 'time':     v = this.getUtcTimeStringFromUnix(v);               break;
+								default:         v = this.isAttributeDecimal(a.content) ? this.getNumberFormatted(v,a) : parseInt(v); break;
 							}
 						}
-						
+
 						const bi = this.columnIdMapColumnBatchIndex[c.id];
 						this.valuesByColumnBatch[bi] = v;
+
+						if(c.flags.alignEnd)  this.domClassByColumnBatch[bi].alignEnd  = true;
+						if(c.flags.alignMid)  this.domClassByColumnBatch[bi].alignMid  = true;
+						if(c.flags.monospace) this.domClassByColumnBatch[bi].monospace = true;
 					}
 				},
 				this.$root.genericError

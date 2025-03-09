@@ -4,21 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
-func Get(entity string, id uuid.UUID, expectedContents []string) (types.CaptionMap, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity string, id uuid.UUID, expectedContents []string) (types.CaptionMap, error) {
 
 	caps := make(types.CaptionMap)
 	for _, content := range expectedContents {
 		caps[content] = make(map[string]string)
 	}
 
-	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT language_code, content, value
 		FROM app.caption
 		WHERE %s_id = $1
@@ -126,6 +125,10 @@ func GetDefaultContent(entity string) types.CaptionMap {
 		return types.CaptionMap{
 			"menuTitle": make(map[string]string),
 		}
+	case "menuTab":
+		return types.CaptionMap{
+			"menuTabTitle": make(map[string]string),
+		}
 	case "module":
 		return types.CaptionMap{
 			"moduleTitle": make(map[string]string),
@@ -188,6 +191,9 @@ func GetEntityName(content string) (string, error) {
 
 	case "menuTitle":
 		return "menu_id", nil
+
+	case "menuTabTitle":
+		return "menu_tab_id", nil
 
 	case "moduleTitle":
 		return "module_id", nil

@@ -2,8 +2,11 @@ import MyBuilderCaption from './builderCaption.js';
 import MyBuilderQuery   from './builderQuery.js';
 import {
 	getIndexAttributeIdsByJoins,
+	isAttributeBoolean,
 	isAttributeFiles,
-	isAttributeString
+	isAttributeInteger,
+	isAttributeString,
+	isAttributeUuid
 } from '../shared/attribute.js';
 import {
 	getCaptionByIndexAttributeId
@@ -16,7 +19,7 @@ let MyBuilderColumnOptions = {
 		MyBuilderCaption,
 		MyBuilderQuery
 	},
-	template:`<table class="generic-table-vertical tight fullWidth default-inputs">
+	template:`<table class="generic-table-vertical default-inputs">
 		<tbody>
 			<tr v-if="hasCaptions">
 				<td>{{ capGen.title }}</td>
@@ -30,27 +33,26 @@ let MyBuilderColumnOptions = {
 			</tr>
 			<template v-if="!onlyData">
 				<tr>
-					<td>{{ capApp.columnShowDefault }}</td>
+					<td>{{ capGen.visibility }}</td>
 					<td>
-						<my-bool
-							@update:modelValue="set('hidden',$event)"
-							:modelValue="column.hidden"
-							:reversed="true"
-						/>
+						<div class="row gap wrap" style="max-width:300px;">
+							<my-button-check
+								@update:modelValue="set('hidden',$event)"
+								:caption="capApp.columnShowDefault"
+								:modelValue="column.hidden"
+								:reversed="true"
+							/>
+							<my-button-check
+								@update:modelValue="set('onMobile',$event)"
+								:caption="capApp.columnShowDefaultMobile"
+								:modelValue="column.onMobile && !column.hidden"
+								:readonly="column.hidden"
+							/>
+						</div>
 					</td>
 				</tr>
-				<tr>
-					<td>{{ capApp.columnShowDefaultMobile }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('onMobile',$event)"
-							:readonly="column.hidden"
-							:modelValue="column.onMobile && !column.hidden"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.columnLength }}</td>
+				<tr v-if="!isDrawing && !isColor">
+					<td>{{ !isFiles ? capApp.columnLength : capApp.columnLengthFiles }}</td>
 					<td>
 						<input
 							v-if="column.length !== 0"
@@ -66,31 +68,56 @@ let MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr>
-					<td>{{ capApp.columnStyles }}</td>
+					<td>{{ capGen.options }}</td>
 					<td>
-						<div class="row gap">
-							<my-bool
+						<div class="row gap wrap" style="max-width:300px;">
+							<my-button-check
 								@update:modelValue="setStyle('bold',$event)"
-								:caption0="capApp.option.style.bold"
-								:caption1="capApp.option.style.bold"
+								:caption="capApp.option.style.bold"
 								:modelValue="column.styles.includes('bold')"
 							/>
-							<my-bool
+							<my-button-check
 								@update:modelValue="setStyle('italic',$event)"
-								:caption0="capApp.option.style.italic"
-								:caption1="capApp.option.style.italic"
+								:caption="capApp.option.style.italic"
 								:modelValue="column.styles.includes('italic')"
+							/>
+							<my-button-check
+								@update:modelValue="setStyle('monospace',$event)"
+								:caption="capGen.monospace"
+								:modelValue="column.styles.includes('monospace')"
+							/>
+							<my-button-check
+								@update:modelValue="setStyle('clipboard',$event)"
+								:caption="capApp.columnClipboard"
+								:modelValue="column.styles.includes('clipboard')"
+							/>
+							<my-button-check
+								@update:modelValue="setStyle('wrap',$event)"
+								:caption="capApp.columnWrap"
+								:modelValue="column.styles.includes('wrap')"
+							/>
+							<my-button-check
+								v-if="isBarcode || isDrawing || (isFiles && column.display === 'gallery')"
+								@update:modelValue="setStyle('previewLarge',$event)"
+								:caption="capApp.columnPreviewLarge"
+								:modelValue="column.styles.includes('previewLarge')"
+							/>
+							<my-button-check
+								v-if="isBoolean"
+								@update:modelValue="setStyle('boolAtrIcon',$event)"
+								:caption="capApp.columnBoolAtrIcon"
+								:modelValue="column.styles.includes('boolAtrIcon')"
 							/>
 						</div>
 					</td>
 				</tr>
 				<tr>
-					<td>{{ capApp.columnAlignment }}</td>
+					<td>{{ capGen.alignment }}</td>
 					<td>
 						<select v-model="alignment">
-							<option value="def">{{ capApp.option.alignment.def }}</option>
-							<option value="mid">{{ capApp.option.alignment.mid }}</option>
-							<option value="end">{{ capApp.option.alignment.end }}</option>
+							<option value="def">{{ capGen.alignmentHor.left }}</option>
+							<option value="mid">{{ capGen.alignmentHor.center }}</option>
+							<option value="end">{{ capGen.alignmentHor.right }}</option>
 						</select>
 					</td>
 				</tr>
@@ -110,25 +137,7 @@ let MyBuilderColumnOptions = {
 						/>
 					</td>
 				</tr>
-				<tr>
-					<td>{{ capApp.columnWrap }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="setStyle('wrap',$event)"
-							:modelValue="column.styles.includes('wrap')"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.columnClipboard }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="setStyle('clipboard',$event)"
-							:modelValue="column.styles.includes('clipboard')"
-						/>
-					</td>
-				</tr>
-				<tr>
+				<tr v-if="!isDrawing && !isUuid && !isColor">
 					<td>{{ capApp.display }}</td>
 					<td>
 						<select
@@ -136,35 +145,18 @@ let MyBuilderColumnOptions = {
 							:value="column.display"
 						>
 							<option value="default">{{ capApp.option.display.default }}</option>
-							<option v-if="isString" value="email"   >{{ capApp.option.display.email }}</option>
-							<option v-if="isString" value="password">{{ capApp.option.display.password }}</option>
-							<option v-if="isString" value="phone"   >{{ capApp.option.display.phone }}</option>
-							<option v-if="isString" value="url"     >{{ capApp.option.display.url }}</option>
-							<option v-if="isFiles"  value="gallery" >{{ capApp.option.display.gallery }}</option>
+							<option v-if="isInteger"            value="rating"  >{{ capApp.option.display.rating }}</option>
+							<option v-if="isString"             value="email"   >{{ capApp.option.display.email }}</option>
+							<option v-if="isString"             value="password">{{ capApp.option.display.password }}</option>
+							<option v-if="isString"             value="phone"   >{{ capApp.option.display.phone }}</option>
+							<option v-if="isString"             value="url"     >{{ capApp.option.display.url }}</option>
+							<option v-if="isFiles || isBarcode" value="gallery" >{{ capApp.option.display.gallery }}</option>
 						</select>
 					</td>
 				</tr>
 			</template>
 			<tr>
 				<td colspan="999"><b>{{ capApp.columnHeaderData }}</b></td>
-			</tr>
-			<tr>
-				<td>{{ capApp.distincted }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('distincted',$event)"
-						:modelValue="column.distincted"
-					/>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capApp.groupBy }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('groupBy',$event)"
-						:modelValue="column.groupBy"
-					/>
-				</td>
 			</tr>
 			<tr>
 				<td>{{ capApp.aggregator }}</td>
@@ -183,6 +175,23 @@ let MyBuilderColumnOptions = {
 						<option value="sum">{{ capGen.option.aggSum }}</option>
 						<option value="array">{{ capGen.option.aggArray }}</option>
 					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>{{ capGen.options }}</td>
+				<td>
+					<div class="row gap wrap">
+						<my-button-check
+							@update:modelValue="set('distincted',$event)"
+							:caption="capApp.distincted"
+							:modelValue="column.distincted"
+						/>
+						<my-button-check
+							@update:modelValue="set('groupBy',$event)"
+							:caption="capApp.groupBy"
+							:modelValue="column.groupBy"
+						/>
+					</div>
 				</td>
 			</tr>
 			<tr v-if="isSubQuery">
@@ -235,9 +244,15 @@ let MyBuilderColumnOptions = {
 		},
 		
 		// simple
+		isBarcode: (s) => s.isString  && s.attribute.contentUse === 'barcode',
+		isBoolean: (s) => s.isAttributeBoolean(s.attribute.content),
+		isColor:   (s) => s.isString  && s.attribute.contentUse === 'color',
+		isDrawing: (s) => s.isString  && s.attribute.contentUse === 'drawing',
 		isFiles:   (s) => s.isAttributeFiles(s.attribute.content),
+		isInteger: (s) => s.isAttributeInteger(s.attribute.content),
 		isString:  (s) => s.isAttributeString(s.attribute.content),
 		isSubQuery:(s) => s.column.subQuery,
+		isUuid:    (s) => s.isAttributeUuid(s.attribute.content),
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -248,8 +263,11 @@ let MyBuilderColumnOptions = {
 		// externals
 		getCaptionByIndexAttributeId,
 		getIndexAttributeIdsByJoins,
+		isAttributeBoolean,
 		isAttributeFiles,
+		isAttributeInteger,
 		isAttributeString,
+		isAttributeUuid,
 		
 		// actions
 		set(name,val) {

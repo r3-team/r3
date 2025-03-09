@@ -8,7 +8,7 @@ type Request struct {
 	Payload   json.RawMessage `json:"payload"`
 }
 type RequestTransaction struct {
-	TransactionNr uint64    `json:"transactionNr"` // for websocket client to match asynchronous reponse to original request
+	TransactionNr uint64    `json:"transactionNr"` // for websocket client to match asynchronous response to original request
 	Requests      []Request `json:"requests"`      // all websocket client requests
 }
 type Response struct {

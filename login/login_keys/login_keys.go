@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"r3/cache"
-	"r3/db"
 	"r3/handler"
 	"r3/schema"
 	"r3/types"
@@ -16,13 +15,13 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func GetPublic(ctx context.Context, relationId uuid.UUID,
+func GetPublic_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	recordIds []int64, loginIds []int64) ([]types.LoginPublicKey, error) {
 
 	keys := make([]types.LoginPublicKey, 0)
 	loginNamesNoPublicKey := make([]string, 0)
 
-	rows, err := db.Pool.Query(ctx, fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT l.id, l.name, lm.name_display, l.key_public, ARRAY(
 			SELECT record_id
 			FROM instance_e2ee."%s"
@@ -79,9 +78,9 @@ func GetPublic(ctx context.Context, relationId uuid.UUID,
 	}
 
 	if len(loginNamesNoPublicKey) != 0 {
-		return keys, handler.CreateErrCodeWithArgs("SEC",
-			handler.ErrCodeSecNoPublicKeys,
-			map[string]string{"NAMES": strings.Join(loginNamesNoPublicKey, ", ")})
+		return keys, handler.CreateErrCodeWithData(handler.ErrContextSec, handler.ErrCodeSecNoPublicKeys, struct {
+			Names string `json:"names"`
+		}{strings.Join(loginNamesNoPublicKey, ", ")})
 	}
 	return keys, nil
 }

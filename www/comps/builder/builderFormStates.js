@@ -1,5 +1,6 @@
-import {getNilUuid}    from '../shared/generic.js';
-import {getFieldTitle} from '../shared/field.js';
+import {isAttributeRelationship} from '../shared/attribute.js';
+import {getFieldTitle}           from '../shared/field.js';
+import {getNilUuid}              from '../shared/generic.js';
 export {MyBuilderFormStates as default};
 
 let MyBuilderFormStateEffect = {
@@ -8,7 +9,7 @@ let MyBuilderFormStateEffect = {
 		
 		<!-- target -->
 		<select class="long" v-model="target">
-			<option value="">-</option>
+			<option value="">{{ capGen.form }}</option>
 			<optgroup :label="capApp.option.effectFormAction">
 				<option
 					v-for="(ref,id) in entityIdMapRef.formAction"
@@ -31,12 +32,27 @@ let MyBuilderFormStateEffect = {
 		</select>
 		
 		<!-- new state -->
-		<select class="short" v-model="newState">
+		<select class="short" v-model="newState" v-if="!isForm">
 			<option value="hidden">{{ capApp.stateHidden }}</option>
 			<option value="default">{{ capApp.stateDefault }}</option>
-			<option value="readonly" :disabled="!isData && !isButton && !isAction && !isVariable">{{ capApp.stateReadonly }}</option>
-			<option value="optional" :disabled="!isData">{{ capApp.stateOptional }}</option>
-			<option value="required" :disabled="!isData">{{ capApp.stateRequired }}</option>
+			<option value="readonly" :disabled="!isData && !isVariable && !isButton && !isAction">{{ capApp.stateReadonly }}</option>
+			<option value="optional" :disabled="!isData && !isVariable">{{ capApp.stateOptional }}</option>
+			<option value="required" :disabled="!isData && !isVariable">{{ capApp.stateRequired }}</option>
+		</select>
+		
+		<!-- new data -->
+		<select class="dynamic" v-model.number="newData" v-if="isCalendar || isForm || isList || isKanban || isRelationship">
+			<option value="0">{{ capApp.effectData.d0 }}</option>
+			<optgroup :label="capApp.option.dataOptions">
+				<option value="7">{{ capApp.effectData.d7 }}</option>
+				<option value="6">{{ capApp.effectData.d6 }}</option>
+				<option value="5">{{ capApp.effectData.d5 }}</option>
+				<option value="4">{{ capApp.effectData.d4 }}</option>
+				<option value="3">{{ capApp.effectData.d3 }}</option>
+				<option value="2">{{ capApp.effectData.d2 }}</option>
+				<option value="1">{{ capApp.effectData.d1 }}</option>
+				<option value="-1">{{ capApp.effectData['d-1'] }}</option>
+			</optgroup>
 		</select>
 		
 		<my-button image="delete.png"
@@ -52,13 +68,13 @@ let MyBuilderFormStateEffect = {
 	},
 	emits:['remove','update:modelValue'],
 	computed:{
+		newData:{
+			get()  { return this.effect.newData },
+			set(v) { this.set('newData',v); }
+		},
 		newState:{
 			get()  { return this.effect.newState },
-			set(v) {
-				let vOld = JSON.parse(JSON.stringify(this.effect));
-				vOld.newState = v;
-				this.$emit('update:modelValue',vOld);
-			}
+			set(v) { this.set('newState',v); }
 		},
 		target:{
 			get() {
@@ -72,26 +88,34 @@ let MyBuilderFormStateEffect = {
 					fieldId:     (v !== '' && v.charAt(0) === 'F') ? v.substring(1) : null,
 					formActionId:(v !== '' && v.charAt(0) === 'A') ? v.substring(1) : null,
 					tabId:       (v !== '' && v.charAt(0) === 'T') ? v.substring(1) : null,
+					newData:     0,
 					newState:    'default',
 				});
 			}
 		},
 
 		// simple
-		effect:    (s) => JSON.parse(JSON.stringify(s.modelValue)),
-		fieldSet:  (s) => s.effect.fieldId      !== null && typeof s.fieldIdMap[s.effect.fieldId] !== 'undefined',
-		isAction:  (s) => s.effect.formActionId !== null,
-		isButton:  (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'button',
-		isData:    (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'data',
-		isVariable:(s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'variable',
+		effect:        (s) => JSON.parse(JSON.stringify(s.modelValue)),
+		fieldSet:      (s) => s.effect.fieldId      !== null && s.fieldIdMap[s.effect.fieldId] !== undefined,
+		isAction:      (s) => s.effect.formActionId !== null,
+		isButton:      (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'button',
+		isCalendar:    (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'calendar',
+		isKanban:      (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'kanban',
+		isData:        (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'data',
+		isForm:        (s) => s.effect.fieldId === null && s.effect.formActionId === null && s.effect.tabId === null,
+		isList:        (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'list',
+		isRelationship:(s) => s.isData && s.isAttributeRelationship(s.attributeIdMap[s.fieldIdMap[s.effect.fieldId].attributeId].content),
+		isVariable:    (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'variable',
 		
 		// store
-		capApp:(s) => s.$store.getters.captions.builder.form,
-		capGen:(s) => s.$store.getters.captions.generic
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.form,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		getFieldTitle,
+		isAttributeRelationship,
 
 		// presentation
 		getTitleEffect(type,ref,id) {
@@ -102,6 +126,13 @@ let MyBuilderFormStateEffect = {
 			if(type === 'F') title = this.getFieldTitle(this.fieldIdMap[id]);
 			
 			return type + ref + ' - ' + title + postfix;
+		},
+
+		// set
+		set(name,value) {
+			let vOld = JSON.parse(JSON.stringify(this.effect));
+			vOld[name] = value;
+			this.$emit('update:modelValue',vOld);
 		}
 	}
 };
@@ -137,14 +168,11 @@ let MyBuilderFormState = {
 			<my-filters
 				v-model="conditions"
 				:builderMode="true"
-				:disableContent="['attribute','javascript','nowDate','nowDatetime','nowTime','subQuery']"
+				:disableContent="['attribute','getter','javascript','nowDate','nowDatetime','nowTime','subQuery']"
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
-				:filterAddCnt="filterAddCnt"
 				:formId="form.id"
 				:moduleId="form.moduleId"
-				:showAdd="true"
-				:showMove="true"
 			/>
 			
 			<my-button image="add.png"
@@ -175,11 +203,6 @@ let MyBuilderFormState = {
 		open:          { type:Boolean, required:true }
 	},
 	emits:['open','remove','update:modelValue'],
-	data() {
-		return {
-			filterAddCnt:0 // ugly hack to add filter
-		};
-	},
 	computed:{
 		effectIndexesOrdered:(s) => {
 			let effects = JSON.parse(JSON.stringify(s.state.effects));
@@ -214,6 +237,7 @@ let MyBuilderFormState = {
 			let v = JSON.parse(JSON.stringify(this.state));
 			v.conditions.push({
 				connector:'AND',
+				index:0,
 				operator:'=',
 				side0:{
 					brackets:0,
@@ -244,6 +268,7 @@ let MyBuilderFormState = {
 				fieldId:null,
 				formActionId:null,
 				tabId:null,
+				newData:0,
 				newState:'default'
 			});
 			this.$emit('update:modelValue',v);
@@ -273,7 +298,7 @@ let MyBuilderFormStates = {
 	name:'my-builder-form-states',
 	components:{ MyBuilderFormState },
 	template:`<div class="builder-form-states">
-		<div class="actions">
+		<div class="builder-form-states-actions">
 			<my-button image="add.png"
 				@trigger="add"
 				:caption="capGen.button.add"

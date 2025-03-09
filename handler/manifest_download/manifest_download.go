@@ -51,10 +51,10 @@ var (
 		BackgroundColor: "#f5f5f5",
 		ThemeColor:      "#444444",
 		Icons: []icon{
-			icon{Purpose: "any", Sizes: "192x192", Src: "/images/icon_fav192.png", Type: "image/png"},
-			icon{Purpose: "any", Sizes: "512x512", Src: "/images/icon_fav512.png", Type: "image/png"},
-			icon{Purpose: "maskable", Sizes: "192x192", Src: "/images/icon_mask192.png", Type: "image/png"},
-			icon{Purpose: "maskable", Sizes: "512x512", Src: "/images/icon_mask512.png", Type: "image/png"},
+			{Purpose: "any", Sizes: "192x192", Src: "/images/icon_fav192.png", Type: "image/png"},
+			{Purpose: "any", Sizes: "512x512", Src: "/images/icon_fav512.png", Type: "image/png"},
+			{Purpose: "maskable", Sizes: "192x192", Src: "/images/icon_mask192.png", Type: "image/png"},
+			{Purpose: "maskable", Sizes: "512x512", Src: "/images/icon_mask512.png", Type: "image/png"},
 		},
 	}
 )
@@ -95,8 +95,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			}
 			if config.GetString("iconPwa1") != "" && config.GetString("iconPwa2") != "" {
 				manifestApp.Icons = []icon{
-					icon{Purpose: "any", Sizes: "192x192", Src: fmt.Sprintf("data:image/png;base64,%s", config.GetString("iconPwa1")), Type: "image/png"},
-					icon{Purpose: "any", Sizes: "512x512", Src: fmt.Sprintf("data:image/png;base64,%s", config.GetString("iconPwa2")), Type: "image/png"},
+					{Purpose: "any", Sizes: "192x192", Src: fmt.Sprintf("data:image/png;base64,%s", config.GetString("iconPwa1")), Type: "image/png"},
+					{Purpose: "any", Sizes: "512x512", Src: fmt.Sprintf("data:image/png;base64,%s", config.GetString("iconPwa2")), Type: "image/png"},
 				}
 			}
 		}
@@ -172,8 +172,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		manifestMod.Icons = []icon{
-			icon{Purpose: "any", Sizes: "192x192", Src: fmt.Sprintf("data:image/png;base64,%s", iconPwa1), Type: "image/png"},
-			icon{Purpose: "any", Sizes: "512x512", Src: fmt.Sprintf("data:image/png;base64,%s", iconPwa2), Type: "image/png"},
+			{Purpose: "any", Sizes: "192x192", Src: fmt.Sprintf("data:image/png;base64,%s", iconPwa1), Type: "image/png"},
+			{Purpose: "any", Sizes: "512x512", Src: fmt.Sprintf("data:image/png;base64,%s", iconPwa2), Type: "image/png"},
 		}
 	}
 

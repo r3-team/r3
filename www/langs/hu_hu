@@ -163,7 +163,7 @@
 			"description": "This LDAP connection imports users and enables authentication with LDAP credentials.<br />LDAP group memberships can be used to automatically assign roles.",
 			"dialog": {
 				"delete": "Biztos vagy benne, hogy törölni szeretnéd ezt az LDAP-kapcsolatot?",
-				"importDone": "Az importálás befejeződött",
+				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "A kapcsolat tesztelése sikeres volt"
 			},
 			"groupDn": "Csoport DN",
@@ -236,6 +236,8 @@
 			},
 			"dialog": {
 				"delete": "Are you sure you want to delete this user?<br /><br />This action is irreversible.</b>",
+				"notUniqueEmail": "The same email address has also been assigned to a different user.",
+				"notUniqueName": "The same username has already been assigned to a different user.",
 				"resetTotp": "This will reset all multi-factor authentication (MFA) methods for this user. System access is then possible with only username & password.<br /><br />Resetting MFA has no effect on end-to-end encryption.<br /><br />Do you want to continue?"
 			},
 			"error": {
@@ -686,6 +688,7 @@
 			"onDelete": "Törlési Művelet",
 			"onUpdate": "Frissítési Művelet",
 			"option": {
+				"barcode": "Barcode/QR code",
 				"boolean": "Igen/Nem",
 				"color": "Szín",
 				"date": "Dátum",
@@ -724,6 +727,7 @@
 			"titleHint": "A címet el lehet fordítani az elérhető alkalmazásnyelvekre. Megjelenik a felhasználóknak, ha nem kerül felülírásra egy mező vagy oszlop címe által.",
 			"usedFor": "Érték Típus",
 			"usedForHint": {
+				"barcode": "A barcode or QR code value. Can store various formats. Corresponding inputs can be used to scan barcodes / QR codes but also generate them based on the current value.",
 				"boolean": "Igaz/Hamis érték. Egyszerű igen/nem értékekhez használják. Ha üres érték engedélyezett, három lehetséges érték van: igaz/hamis/üres.",
 				"color": "Színértékek. Felhasználhatók kilátások tervezéséhez adatok megjelenítésére, például egy rekord jellemzőinek kiemelésére szín alapján. Például prioritás színkódolására egy adott kategória alapján.",
 				"date": "Dátumérték. Tiszta dátumértékekhez használják, mint például a születési vagy vásárlási dátum.",
@@ -790,7 +794,8 @@
 			"formIdOpen": "Űrlap Megnyitása",
 			"multiValue": "Többértékű",
 			"noDisplayEmpty": "Elrejtés, ha üres",
-			"onMobile": "Mobil nézetben"
+			"onMobile": "Mobil nézetben",
+			"showRowCount": "Show result count instead"
 		},
 		"form": {
 			"actions": {
@@ -829,21 +834,22 @@
 			"collectionHint": "*A gyűjtemény csak akkor érintkezik, ha szűrőként van használva az adatlekérdezésben.",
 			"collectionIdDef": "Alapértelmezett Érték(ek) a Gyűjteményből",
 			"collectionTitle": "Gyűjtemény Szűrése",
-			"columnAlignment": "Alignment",
 			"columnBatch": "Oszlop Csomagolás (Helyezd az oszlopokat ide a kiterjesztéshez)",
 			"columnBatchDir": "Oszlopos Rendezés (balról-jobbra, fentről-lefelé)",
 			"columnBatchOff": "Oszlop Távolítása a Csomagból",
+			"columnBoolAtrIcon": "Show attribute icon if TRUE",
 			"columnClipboard": "Vágólap",
 			"columnHeaderData": "Adatlekérdezés",
 			"columnLength": "Hossz (karakterben)",
 			"columnLength0": "Nincs Korlát",
+			"columnLengthFiles": "File count",
+			"columnPreviewLarge": "Large preview",
 			"columnShowDefault": "Show by default",
 			"columnShowDefaultMobile": "Show by default on mobile",
 			"columnShowDefaultMobileOff": "Not shown by default on mobile",
 			"columnShowDefaultOff": "Not shown by default",
 			"columnSize": "Méret (pixelben)",
 			"columnSize0": "Automatikus",
-			"columnStyles": "Stílus",
 			"columnTitle": "Cím",
 			"columnWrap": "Sor tördelés",
 			"containerContent": "Container content",
@@ -863,6 +869,17 @@
 			"display": "Megjelenítés",
 			"distincted": "Különböztetve",
 			"dragDrop": "Jobb oldali kiválasztott mezőket ide húzva hozzáadhatod az űrlaphoz.",
+			"effectData": {
+				"d-1": "nothing",
+				"d0": "default",
+				"d1": "delete",
+				"d2": "update",
+				"d3": "update + delete",
+				"d4": "create",
+				"d5": "create + delete",
+				"d6": "create + update",
+				"d7": "create + update + delete"
+			},
 			"error": {
 				"formStateFieldRemovedCondition": "Törölt mező még mindig hivatkozva van a(z) \"{NAME}\" űrlapállapotban lévő feltételben.",
 				"formStateFieldRemovedEffect": "Törölt mező még mindig hivatkozva van a(z) \"{NAME}\" űrlapállapotban lévő hatásban."
@@ -870,7 +887,6 @@
 			"fieldAttributeIdAltDateTo": "Dátumig (Időszak)",
 			"fieldAttributeIdAltRichtextFiles": "Rich-Text Fájl hozzáférés",
 			"fieldDefault": "Alapértelmezett érték",
-			"fieldDefaultHint": "Helykitöltők olvasása a dokumentációból",
 			"fieldDefaultPresetIds": "Alapértelmezett előre definiált rekordok",
 			"fieldDirection": "Irány",
 			"fieldHelp": "Súgószöveg",
@@ -934,6 +950,7 @@
 			"headerSize": "Fej méret",
 			"helpText": "Segítség szöveg",
 			"hidden": "Mező alapértelmezetten rejtett",
+			"hideInputs": "Hide inputs",
 			"icon": "Űrlap ikon",
 			"ics": "iCAL előfizetések",
 			"jsFunctionButton": "Függvény gombnyomásra",
@@ -959,11 +976,7 @@
 			"openForm": "Űrlap megnyitása",
 			"openFormBulk": "Űrlap megnyitása (Tömeges szerkesztés)",
 			"option": {
-				"alignment": {
-					"def": "left",
-					"end": "right",
-					"mid": "center"
-				},
+				"dataOptions": "Overwrite relation settings",
 				"display": {
 					"color": "Szín",
 					"default": "Alapértelmezett",
@@ -973,6 +986,7 @@
 					"login": "user (deprecated)",
 					"password": "Jelszó",
 					"phone": "Telefon",
+					"rating": "rating",
 					"slider": "Értékcsúszka",
 					"url": "URL"
 				},
@@ -1012,6 +1026,17 @@
 			},
 			"subQuery": "Al-lekérdezés",
 			"subQueryAttribute": "Attribútum",
+			"systemDefaults": {
+				"false": "'No' value",
+				"fixed": "Custom value",
+				"true": "'Yes' value",
+				"{CURR_DATETIME}": "Current date & time",
+				"{CURR_DATE_DD}": "Current day as number, as in 31",
+				"{CURR_DATE_MM}": "Current month as number, as in 12 (January = 1, December = 12)",
+				"{CURR_DATE_YYYY}": "Current year as number, as in 1921",
+				"{CURR_DATE}": "Current date",
+				"{CURR_TIME}": "Current time"
+			},
 			"tabActions": "Actions ({CNT})",
 			"tabContentCounter": "Számláló",
 			"tabContentCounterHint": "Összesített mezőértékeket jelenít meg a lapcímeken (lista sorok, fájlok stb.)",
@@ -1063,7 +1088,7 @@
 				"copy_to_clipboard": "app.copy_to_clipboard({ARGS}) => UNDEFINED<br /><br />Másolja a szöveget a felhasználó vágólapjára.",
 				"dialog_show": "app.dialog_show({ARGS}) => PROMISE<br /><br />Shows a dialog with the specified title and content. The title is a simple text string, while the content can be text or HTML.<br /><br />Buttons are defined by a list of strings. If none are defined, a simple OK button is shown.<br /><br />The returned value is the index of the clicked button. So if the first button is clicked, the value will be 0. If the second button is clicked, it´s 1 and so on.<br /><br /><b>Example</b><br />app.dialog_show(<blockquote>'Please confirm',<br />'Do you really want to delete this item?',<br />['Yes', 'Cancel action']</blockquote>).then(<blockquote>res => { if(res === 0) { console.log('clicked Yes!'); } }</blockquote>);",
 				"form_close": "app.form_close() => UNDEFINED<br /><br />Closes the form (if floating or sub form), otherwise goes back in browser history.",
-				"form_open": "app.form_open({ARGS}) => UNDEFINED<br /><br />Űrlap megnyitása közvetlenül, új böngészőfülön vagy felugró ablakban.",
+				"form_open": "app.form_open({ARGS}) => UNDEFINED<br /><br />Űrlap megnyitása közvetlenül, új böngészőfülön vagy felugró ablakban.<br /><br />The new form, if opened directly (not as tab or pop-up), adds to the browser history unless the argument 'replace_history' is set to 'true'.",
 				"form_set_title": "app.form_set_title({ARGS}) => UNDEFINED<br /><br />Overwrites the current form title. Set to <i>null</i> to reset it to the original form title.",
 				"form_show_message": "app.form_show_message({ARGS}) => UNDEFINED<br /><br />Az űrlap címét egy meghatározott üzenettel helyettesíti rövid időre. A második argumentum meghatározza, hány milliomodpercen keresztül jelenjen meg az üzenet.",
 				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Decrypts provided data key with the private key of the current user.",
@@ -1077,7 +1102,7 @@
 				"go_back": "app.go_back() => UNDEFINED<br /><br />Visszalépés a böngészőben.",
 				"has_role": "app.has_role({ARGS}) => BOOLEAN<br /><br />Returns true if the current user has the assigned role (nested roles are included).",
 				"logoff": "app.logoff() => UNDEFINED<br /><br />Logs off the current user. This results in the login page being shown and the user being forced to re-authenticate to continue.<br /><br />After re-authentication, the previously open form will be shown. If this is not desired, open another form first and then execute the logoff.",
-				"pdf_create": "app.pdf_create({ARGS}) => UNDEFINED<br /><br />PDF-fájl létrehozása HTML sablonok és CSS szabályok felhasználásával. Paraméterek:<ul><li>filename: Bármilyen fájlnév .pdf kiterjesztéssel</li><li>pageFormat: Oldal formátuma, például: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' vagy 'landscape'</li><li>pageMarginX: Bal/jobb margó pixelben</li><li>pageMarginY: Felső/alsó margó pixelben</li><li>htmlHeader: HTML sablon a fejléc minden oldalához</li><li>htmlBody: HTML sablon a dokumentum kitöltéséhez</li><li>htmlFooter: HTML sablon a lábléc minden oldalához</li><li>cssStyles: CSS szabályok az HTML sablonokhoz</li><li>attachAttributeId: Optional, see below.</li><li>attachRecordId: Optional, see below.</li></ul>By default, the PDF document is generated in a new window, in which the user can see a preview and download the file. If both 'attachAttributeId' & 'attachRecordId' are set, the PDF file is instead immediately attached to the chosen files attribute of the chosen record.<br /><br />The placeholders '{PAGE_CUR}' & '{PAGE_END}' can be used in both header & footer HTML templates to display the current and total page numbers.",
+				"pdf_create": "app.pdf_create({ARGS}) => PROMISE<br /><br />Generates a PDF file from given HTML templates and CSS styles. Parameters:<ul><li>filename: Any filename ending in '.pdf'</li><li>pageFormat: Format of page, such as: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' or 'landscape'</li><li>pageMarginX: Horizontal page margins in pixel, either single number (left & right side) or array (first value is left side, second value is right side)</li><li>pageMarginY: Vertical page margins in pixel, either single number (top & bottom) or array (first value is top, second value is bottom)</li><li>htmlHeader: HTML template, applied to top of each page</li><li>htmlBody: HTML template, fills out document</li><li>htmlFooter: HTML template, applied to bottom of each page</li><li>cssStyles: CSS rules, applied to HTML templates</li><li>attachAttributeId: Optional, see below.</li><li>attachRecordId: Optional, see below.</li></ul>By default, the PDF document is generated in a new window, in which the user can see a preview and download the file. If both 'attachAttributeId' & 'attachRecordId' are set, the PDF file is instead immediately attached to the chosen files attribute of the chosen record.<br /><br />The placeholders '{PAGE_CUR}' & '{PAGE_END}' can be used in both header & footer HTML templates to display the current and total page numbers.",
 				"record_delete": "app.record_delete() => UNDEFINED<br /><br />Az aktuális űrlap rekordjának törlése.",
 				"record_new": "app.record_new() => UNDEFINED<br /><br />Új rekord létrehozása.",
 				"record_reload": "app.record_reload() => UNDEFINED<br /><br />Az aktuális űrlap rekordjának újratöltése.",
@@ -1114,7 +1139,8 @@
 					"new_tab BOOLEAN",
 					"pop_up BOOLEAN",
 					"max_height NUMBER",
-					"max_width NUMBER"
+					"max_width NUMBER",
+					"replace_history BOOLEAN"
 				],
 				"form_set_title": [
 					"title STRING"
@@ -1143,8 +1169,8 @@
 					"filename STRING",
 					"page_format STRING",
 					"page_orientation STRING",
-					"page_marginX NUMBER",
-					"page_marginY NUMBER",
+					"page_marginX NUMBER || ARRAY",
+					"page_marginY NUMBER || ARRAY",
 					"html_header STRING",
 					"html_body STRING",
 					"html_footer STRING",
@@ -1183,6 +1209,7 @@
 				"abort_show_message": "instance.abort_show_message({ARGS}) => ÜRES<br /><br />Megszakítja a műveletet, és üzenetet küld a végrehajtó felhasználónak, amelyet a felhasználói felületen jelenít meg.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => ÜRES<br /><br />Törli a végponttól végpontig titkosított adatkulcsokat azoknál az adatrekordoknál, amelyekhez egy felhasználónak nincs már hozzáférése. Ez megakadályozza az adatok visszafejtését a felhasználó számára.",
 				"file_link": "instance.file_link({ARGS}) => ÜRES<br /><br />Összekapcsol egy meglévő fájlt egy másik adatrekorddal (hozzáadva a kiválasztott fájlattribútumhoz). Ez egy szilárd kapcsolat, ami azt jelenti, hogy ugyanarra a fájlra hivatkozik.<br /><br />A fájl átnevezése vagy törlése csak a fájlkapcsolatot érinti. A fájl maga megmarad, amíg még létezik legalább egy kapcsolat hozzá.",
+				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Unlinks an existing file from the files attribute of a specified record. The removed link is a hardlink, meaning that the actual file is kept as long as it is still linked to at least one other records file attribute.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]<br /><br />Returns meta data for files from the chosen file attribute and record (can optionally include deleted files).<br /><br />The returned type 'instance.file_meta' consists of:<blockquote>id UUID,<br />user_id_creator INTEGER,<br />hash TEXT,<br />name TEXT,<br />size_kb INTEGER,<br />version INTEGER,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Returns the encrypted data key for the given relation record and the chosen user. Data keys exist for individual records for every user that has access to it. They can be decrypted on the frontend with the associated user private key.",
 				"get_language_code": "instance.get_language_code() => TEXT<br /><br />Returns the 5-letter language code ('en_us', ...) of the user, which is used to access the data backend.",
@@ -1217,6 +1244,11 @@
 				"file_link": [
 					"file_id UUID",
 					"file_name TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT"
+				],
+				"file_unlink": [
+					"file_id UUID",
 					"attribute_id UUID",
 					"record_id BIGINT"
 				],
@@ -1384,13 +1416,16 @@
 		},
 		"menu": {
 			"button": {
-				"add": "Hozzáadás"
+				"add": "Hozzáadás",
+				"addTab": "Add tab",
+				"delete": "Delete tab"
 			},
 			"collections": "Gyűjtemény értékei megjelenítése a menüben",
 			"copy": "Minden menüelem másolása innen",
 			"formId": "- Űrlap kiválasztása -",
 			"showChildrenHint": "Almenüelemek alapértelmezés szerinti megjelenítése",
-			"title": "Menük"
+			"title": "Menük",
+			"titleMenuTab": "Tab properties"
 		},
 		"module": {
 			"button": {
@@ -1423,6 +1458,8 @@
 			"iconHint": "Ikonok csak akkor érhetők el, ha hozzá vannak adva ehhez az alkalmazáshoz. Azok az ikonok is felhasználhatók, amelyek azon alkalmazásokon alapulnak, amelyekre épít.",
 			"iconPwa": "Alkalmazás ikonok",
 			"iconPwaHint": "Az alkalmazást képviselő ikonok. Mindkét ikon PNG formátumú kell, hogy legyen és meghatározott méretű (lásd a beviteli mezőket) - ha nem tartják be ezeket a méreteket, akkor az alkalmazás telepítése bizonyos operációs rendszereken sikertelen lehet.",
+			"jsFunctionIdOnLogin": "Session start function",
+			"jsFunctionIdOnLoginHint": "This frontend function is called when a user logs into the system. It can be used to initialize variables or update logs.",
 			"keyCreate": "Átvitel - Új hitelesítő kulcspár létrehozása",
 			"keyCreateInfo": "Győződjön meg róla, hogy a privát kulcsot mindig biztonságosan tárolja. A nyilvános kulcsot importálni kell a REI3 cél példányokba, mielőtt az alkalmazásokat telepíteni lehet.",
 			"keyCreateLength": "Kulcshossz kiválasztása",
@@ -1432,8 +1469,6 @@
 			"languageMainHint": "Ezt a nyelvet használjuk, ha az alkalmazás nem kínálja fel a kiválasztott felhasználói nyelvet.",
 			"languages": "Alkalmazás nyelvek",
 			"languagesHint": "Nyelvek, amelyekben az alkalmazás elérhető.",
-			"loginSync": "User sync",
-			"loginSyncHint": "User meta data (user ID, forename, surname, email, organization, etc.) from the admin panel or LDAP connection (if enabled) can be provided to an application to create associated user records. This is done via a user sync function that an application can provide.",
 			"nameHint": "Referencianév ehhez az alkalmazáshoz. Ezt a nevet egyedinek kell lennie egy REI3 rendszerben, ezért érdemes lehet egy szervezeti név alapján előtagot használni.",
 			"nameHolder": "work_scheduler, inventory_planner, ...",
 			"namePwa": "Alkalmazás címe",
@@ -1443,7 +1478,7 @@
 			"parent": "Szülő",
 			"parentHint": "Amikor egy alkalmazás egy másik alkalmazáshoz van hozzárendelve, menükben és áttekintőkben annak lesz az alárendeltje - nincs további funkcionális változás. Alkalmazások csak olyan alkalmazásokhoz rendelhetők, amelyeken alapulnak.",
 			"pgFunctionIdLoginSync": "User sync function",
-			"pgFunctionIdLoginSyncHint": "This backend function is called every time a user is updated or deleted. It can also be triggered for all existing users with the instance function 'instance.user_sync_all()'.",
+			"pgFunctionIdLoginSyncHint": "A user sync function is called every time a user is created or its data updated (username, forename, surname, email, organization, etc.). Useful for applications that require additional records to be created or updated when system users change. It can also be triggered for all existing users with the instance function 'instance.user_sync_all()'.",
 			"position": "Alapértelmezett pozíció",
 			"positionHint": "Az alkalmazás pozíciója a fejlécben (a kisebb először). Rendszergazdák által felülírható.",
 			"pwa": "Progresszív webalkalmazás (PWA)",
@@ -1570,6 +1605,9 @@
 			"choice": "Sor",
 			"choices": "Szűrő sorok ({COUNT})*",
 			"choicesHint": "*Az első sor alapértelmezetten aktív - választás lehetséges, ha 2 vagy több sor van.",
+			"filterChoicesHelp": "A filterset is a set of predefined filters that can be selected by users. They serve to apply different filter criteria based on the current need of the user.<br /><br />The first filterset is enabled by default.<br /><br />Filtersets are only shown if there are at least 2 available.",
+			"filterJoin": "Select relation join to filter. Keep empty to filter entire query.",
+			"filterJoinHelp": "When you select a join number here, the filter is not added to the query but to the relation join instead.<br /><br />This can filter out undesired records from a left-joined relation without removing the entire row.<br /><br />It is also useful for filtering 1:n relationships.",
 			"filters": "Szűrők ({COUNT})",
 			"fixedLimit": "Rögzített eredménykorlát",
 			"fixedLimit0": "nem aktív",
@@ -1789,7 +1827,7 @@
 			"002": "Érvénytelen szám '{VALUE}' (decimális számra számítás szükséges).",
 			"003": "Érvénytelen dátum-/időérték '{VALUE}', a várt formátum: {EXPECT}.",
 			"004": "Nem támogatott attribútumtípus '{VALUE}'.",
-			"005": "Hibás mezők száma a '{VALUE}' sorban.",
+			"005": "Wrong number of fields.",
 			"006": "A titkosított attribútumok nem támogatottak."
 		},
 		"DBS": {
@@ -1797,9 +1835,10 @@
 			"002": "A kiválasztott érték '{NAMES}' már egy másik rekord által használt. Ez egy 'egyedi' érték és csak egyszer használható.",
 			"003": "This username is already taken.",
 			"004": "A rekordot nem lehet törölni - még hivatkoznak rá mint \"{ATR}\" a(z) \"{MOD}\" modulban.",
-			"005": "Az oszlop \"{NAME}\" nem tartalmaz értéket vagy nem oldható fel.",
+			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "Nem lehet egyedi indexet létrehozni, mivel a meglévő attribútumértékek nem egyediek.",
-			"007": "Invalid value '{VALUE}'."
+			"007": "Changes cannot be saved due to an invalid value type.",
+			"008": "Failed to create attribute with required value, as existing records do not have a value yet and no default is defined."
 		},
 		"SEC": {
 			"001": "Nincs engedélye a művelet végrehajtásához vagy a forráshoz való hozzáféréshez.",
@@ -1845,6 +1884,7 @@
 	},
 	"filter": {
 		"add": "Hozzáadás",
+		"contentApi": "API",
 		"contentData": "Adatok",
 		"contentDate": "Jelenlegi dátum/idő",
 		"contentForm": "Jelenlegi űrlap",
@@ -1852,6 +1892,7 @@
 		"dialog": {
 			"ftsHelp": "A teljes szövegkeresés gyorsan talál egyezéseket a szavak vagy kifejezések alapján még hosszú szövegekben is. A teljes szövegkeresés során a szavakat azok gyökereire bontják és egy keresési lekérdezéssel hasonlítják össze, ahelyett, hogy konkrét karaktereket keresnének.<br /><br />Az alábbi keresési lehetőségek állnak rendelkezésre:<ul><li>Konkrét szó</li><ul><li>Keresés: <b>Bejegyzés</b></li><li>A 'Bejegyzés' megtalálja a szövegeket, amelyek hasonló szavakat tartalmaznak, mint 'Bejegyzés', 'Bejegyzések' vagy 'Bejegyzésre'.</li><li>Érvényes eredmény: 'Minden releváns bejegyzést ellenőriztem.'</li></ul><li>Minden szó</li><ul><li>Keresés: <b>Kávé főzés</b></li><li>A 'Kávé főzés' megtalálja a szövegeket, amelyek hasonló szavakat tartalmaznak mind 'Kávé' mind 'főzés' vonatkozásában. Nincs találat például a 'Kávéfőző' szóra, mert az saját szógyökeret használ.</li><li>Érvényes eredmény: 'A gép ki van javítva, de jó kávét még mindig nem főz.'</li></ul><li>Bármely szó</li><ul><li>Keresés: <b>Tee VAGY Kávé</b></li><li>A 'Tee VAGY Kávé' megtalálja a szövegeket, amelyek tartalmazzák a 'Tee' vagy a 'Kávé' szavakat.</li><li>Érvényes eredmény: 'Nincs nálam kávé nélkül.'</li></ul><li>Kizárt szavak</li><ul><li>Keresés: <b>Tee -Kávé</b></li><li>A 'Tee -Kávé' megtalálja a szövegeket, amelyek tartalmazzák a 'Tee' szót, de nem a 'Kávé' szót.</li><li>Érvényes eredmény: 'Szeretem a teát.'</li></ul><li>Követett szavak</li><ul><li>Keresés: <b>\"Kávé főzés\"</b></li><li>A '\"Kávé főzés\"' (idézőjelek között) megtalálja a szövegeket, amelyek tartalmazzák a 'Kávé' szavat, majd a 'főzés' szavat. A sorrend számít, tehát a szavak azonos sorrendben történő megjelenése szükséges - nem találja meg azokat a szövegeket, amelyek ugyanezeket a szavakat fordított sorrendben tartalmazzák.</li><li>Érvényes eredmény: 'A szünetet kávéfőzéssel töltöm.'</li></ul></ul>"
 		},
+		"getterHint": "Parameter name",
 		"javascriptHint": "Példa: return new Date().getFullYear();",
 		"nestingMain": "Fő lekérdezés",
 		"nestingSub": "Al-lekérdezés",
@@ -1859,6 +1900,7 @@
 		"nowOffsetTitle": "Adj hozzá (pozitív szám) vagy vonj ki (negatív szám) X nap/óra/perc/másodperc az aktuális időből.",
 		"operatorsArray": "Tömb",
 		"operatorsNull": "Üres érték",
+		"operatorsRegex": "Regular expression",
 		"operatorsSets": "Részlet",
 		"operatorsSize": "Szám",
 		"operatorsText": "Szöveg",
@@ -1874,6 +1916,8 @@
 				"fieldChanged": "Mező módosult",
 				"fieldValid": "Mező érvényes",
 				"formChanged": "form has unsaved changes",
+				"formState": "form state",
+				"getter": "URL parameter",
 				"javascript": "JavaScript",
 				"languageCode": "user language",
 				"login": "user ID",
@@ -1896,6 +1940,8 @@
 				"fieldChanged": "IGAZ/HAMIS, attól függően, hogy megváltozott-e a mező értéke.",
 				"fieldValid": "IGAZ/HAMIS, attól függően, hogy a mező értéke érvényes-e jelenleg.",
 				"formChanged": "IGAZ/HAMIS, depending on whether form currently has unsaved changes.",
+				"formState": "TRUE/FALSE, depending on whether the chosen form state is currently active.",
+				"getter": "Value of a URL parameter, such as 'https://system?param=123' with 'param' being the name and '123' the value.",
 				"javascript": "A kiválasztott JavaScript kifejezés visszatérési értéke.",
 				"languageCode": "A jelenlegi bejelentkezés által választott nyelv kódja (en_us, hu_hu, ...).",
 				"login": "Az aktuális bejelentkezés azonosítója (Integer).",
@@ -1934,6 +1980,10 @@
 				"not_like": "nem tartalmazza (nagy- és kisbetűre érzékeny)",
 				"not_null": "nem üres",
 				"null": "üres",
+				"rxMatch": "matches regex (match case)",
+				"rxMatchI": "matches regex",
+				"rxMatchNo": "not matches regex (match case)",
+				"rxMatchNoI": "not matches regex",
 				"se": "nagyobb vagy egyenlő",
 				"st": "nagyobb"
 			}
@@ -1950,6 +2000,7 @@
 	"form": {
 		"bulkTouched": "Érték frissítése folyamatban",
 		"button": {
+			"favorite": "Save form as favorite",
 			"fullscreenHint": "Váltás teljes képernyős módba",
 			"help": "Súgó",
 			"helpHint": "Súgóoldalak megjelenítése",
@@ -1993,6 +2044,12 @@
 		"actions": "Műveletek",
 		"active": "Aktív",
 		"after": "After",
+		"alignment": "Alignment",
+		"alignmentHor": {
+			"center": "center",
+			"left": "left",
+			"right": "right"
+		},
 		"api": "API",
 		"apis": "API-k",
 		"appName": "REI3",
@@ -2025,6 +2082,7 @@
 			"edit": "Szerkesztés",
 			"editBulk": "Szerkesztés ({COUNT})",
 			"empty": "Üres",
+			"enable": "Enable",
 			"expert": "Haladó",
 			"export": "Exportálás",
 			"filter": "Szűrés",
@@ -2083,6 +2141,8 @@
 		"dateFormat2": "n.h.É (30.12.2012)",
 		"dateFormat3": "n/h/É (30/12/2012)",
 		"dateFormat4": "h/n/É (12/30/2012)",
+		"default": "Default",
+		"defaultValue": "Default value",
 		"description": "Leírás",
 		"details": "Részletek",
 		"dialog": {
@@ -2102,11 +2162,16 @@
 		"errorTitle": "Hiba",
 		"event": "Event",
 		"everything": "Everything",
+		"expert": "Expert",
+		"favorites": "Favorites",
+		"favoritesEmpty": "No favorites saved",
 		"field": "Field",
 		"files": "Fájlok",
 		"filters": "Szűrők",
 		"form": "Űrlap",
+		"formActions": "Form actions",
 		"forms": "Űrlapok",
+		"functions": "Functions",
 		"global": "Global",
 		"help": "Segítség",
 		"home": "Kezdőlap",
@@ -2126,6 +2191,7 @@
 		"inputSmall": "Az érték túl kicsi (min. {MIN})",
 		"inputTooFewFiles": "Túl kevés fájl",
 		"inputTooManyFiles": "Túl sok fájl",
+		"inputs": "Inputs",
 		"install": "Install",
 		"internalName": "The name serves as internal reference - it is not shown to users.",
 		"interval": "Intervallum",
@@ -2144,6 +2210,7 @@
 		"menusSub": "Sub menus",
 		"missingCaption": "HIÁNYZÓ CÍM",
 		"module": "Alkalmazás",
+		"monospace": "Monospace",
 		"more": "Továbbiak",
 		"name": "Név",
 		"notSaved": "Nem mentett",
@@ -2196,6 +2263,7 @@
 		"selected": "Kiválasztva",
 		"selectedMaxOne": "Kiválasztva (max. 1)",
 		"settings": "Beállítások",
+		"shadows": "Shadows",
 		"size": "Méret",
 		"sqlPreview": "SQL előnézet",
 		"standard": "Szabvány",
@@ -2212,6 +2280,7 @@
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "Verzió",
+		"visibility": "Visibility",
 		"warnings": "Figyelmeztetések",
 		"widget": "Widget",
 		"widgets": "Widgets",
@@ -2242,6 +2311,14 @@
 		}
 	},
 	"input": {
+		"barcode": {
+			"capture": "Capture code from camera image",
+			"deviceMissing": "No input devices of type 'camera' found. Please try again.",
+			"deviceSelect": "Please select an input device",
+			"formatInvalidValue": "Value is not supported by chosen format.",
+			"formatMissing": "Please select a format to display value:",
+			"formatResetHint": "Switch code format to display value in"
+		},
 		"date": {
 			"button": {
 				"todayHint": "Today/now",
@@ -2287,8 +2364,7 @@
 	"list": {
 		"aggregators": "Eredmények aggregálása",
 		"autoRenew": "Automatikus frissítés",
-		"autoRenewInput": "Minden X másodpercben az adatok automatikus frissítése",
-		"autoRenewInputHint": "min. 10s",
+		"autoRenewInput": "Refresh every X seconds",
 		"button": {
 			"aggregatorsHint": "Eredmények aggregálása",
 			"all": "Minden",
@@ -2410,6 +2486,7 @@
 		},
 		"fontFamily": "Betűtípus",
 		"fontSize": "Betűméret",
+		"formActionsAlign": "Align form actions",
 		"headerCaptions": "Full",
 		"headerModules": "Show applications",
 		"languageCode": "Nyelv",

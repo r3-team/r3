@@ -3,7 +3,6 @@ package relation
 import (
 	"context"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"strings"
 
@@ -25,7 +24,7 @@ func GetPreview(ctx context.Context, tx pgx.Tx, id uuid.UUID, limit int, offset 
 	}
 
 	// get relation/attribute/module details
-	if err := db.Pool.QueryRow(ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT r.name, m.name, ARRAY(
 			SELECT name
 			FROM app.attribute
@@ -40,8 +39,8 @@ func GetPreview(ctx context.Context, tx pgx.Tx, id uuid.UUID, limit int, offset 
 		return nil, err
 	}
 
-	// get total count of tupels from relation
-	if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
+	// get total count of tuples from relation
+	if err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT COUNT(*)
 		FROM "%s"."%s"
 	`, modName, relName)).Scan(&res.RowCount); err != nil {
@@ -49,7 +48,7 @@ func GetPreview(ctx context.Context, tx pgx.Tx, id uuid.UUID, limit int, offset 
 	}
 
 	// get records from relation
-	rows, err := db.Pool.Query(ctx, fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT "%s"
 		FROM "%s"."%s"
 		ORDER BY "%s" ASC

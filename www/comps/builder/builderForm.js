@@ -113,21 +113,10 @@ let MyBuilderForm = {
 							@trigger="open"
 							:caption="capGen.button.open"
 						/>
-						<my-button image="visible1.png"
-							@trigger="copyValueDialog(form.name,form.id,form.id)"
-							:caption="capGen.id"
-						/>
 						<my-button
 							@trigger="showColumnsAll = !showColumnsAll"
 							:caption="capApp.button.columnsAll"
 							:image="showColumnsAll ? 'checkbox1.png' : 'checkbox0.png'"
-						/>
-						<my-button image="delete.png"
-							@trigger="delAsk"
-							:active="!readonly"
-							:cancel="true"
-							:caption="capGen.button.delete"
-							:captionTitle="capGen.button.delete"
 						/>
 					</div>
 					<div class="area nowrap">
@@ -144,9 +133,22 @@ let MyBuilderForm = {
 							:title="uiScale + '%'"
 						/>
 					</div>
+					<div class="area nowrap">
+						<my-button image="visible1.png"
+							@trigger="copyValueDialog(form.name,form.id,form.id)"
+							:caption="capGen.id"
+						/>
+						<my-button image="delete.png"
+							@trigger="delAsk"
+							:active="!readonly"
+							:cancel="true"
+							:caption="capGen.button.delete"
+							:captionTitle="capGen.button.delete"
+						/>
+					</div>
 				</div>
 				
-				<!-- empty form assistent -->
+				<!-- empty form assistant -->
 				<div class="builder-form-assistant" v-if="fields.length === 0">
 					<h2>{{ capApp.dragDrop }}</h2>
 					<div class="row gap centered">
@@ -230,100 +232,128 @@ let MyBuilderForm = {
 				/>
 				
 				<!-- form content -->
-				<div class="content grow">
+				<div class="content grow" :class="{ 'no-padding':tabTarget === 'properties' }">
 					
-					<!-- form record query -->
-					<my-builder-query
-						v-if="tabTarget === 'content'"
-						@index-removed="removeDataFields(fields,$event)"
-						@set-filters="filters = $event"
-						@set-joins="joins = $event"
-						@set-relation-id="relationId = $event"
-						:allowChoices="false"
-						:allowFixedLimit="false"
-						:builderLanguage="builderLanguage"
-						:filters="filters"
-						:filtersDisable="['formChanged','field','fieldChanged','fieldValid']"
-						:fixedLimit="0"
-						:formId="id"
-						:joins="joins"
-						:moduleId="form.moduleId"
-						:relationId="relationId"
-					/>
-					
-					<!-- 1:n join warning -->
-					<div v-if="tabTarget === 'content' && hasAny1nJoin" class="warning clickable"
-						@click="showMessage(capApp.warning.joinN1,capApp.warning.joinN1Hint,'link2.png')"
-					>
-						<img src="images/link2.png" />
-						<span>{{ capApp.warning.joinN1Hint }}</span>
-					</div>
-					
-					<!-- template fields -->
-					<div class="templates-wrap" v-if="tabTarget === 'content'">
-						<h2>{{ capApp.fields }}</h2>
-						<div class="row gap default-inputs">
-							<select v-model="fieldsShow" class="dynamic">
-								<option value="add">{{ capGen.button.add }}</option>
-								<option value="edit">{{ capApp.fieldsEditInputs }}</option>
-							</select>
-							<select v-model="templateIndex" class="short">
-								<option value="-1">{{ capGen.option.all }}</option>
-								<option v-for="j in joinsIndexMap" :value="j.index">
-									{{ j.index }})
-								</option>
-							</select>
-							<my-bool caption0="n:1" caption1="n:1" v-model="showTemplateN1" />
-							<my-bool caption0="1:n" caption1="1:n" v-model="showTemplate1n" />
-							<my-bool caption0="n:m" caption1="n:m" v-model="showTemplateNm" />
+					<template v-if="tabTarget === 'content'">
+						<!-- form record query -->
+						<my-builder-query
+							@index-removed="removeDataFields(fields,$event)"
+							@set-filters="filters = $event"
+							@set-joins="joins = $event"
+							@set-relation-id="relationId = $event"
+							:allowChoices="false"
+							:allowFixedLimit="false"
+							:builderLanguage="builderLanguage"
+							:filters="filters"
+							:filtersDisable="['formChanged','formState','field','fieldChanged','fieldValid','getter']"
+							:fixedLimit="0"
+							:formId="id"
+							:joins="joins"
+							:moduleId="form.moduleId"
+							:relationId="relationId"
+						/>
+						
+						<!-- 1:n join warning -->
+						<div v-if="hasAny1nJoin" class="warning clickable"
+							@click="showMessage(capApp.warning.joinN1,capApp.warning.joinN1Hint,'link2.png')"
+						>
+							<img src="images/link2.png" />
+							<span>{{ capApp.warning.joinN1Hint }}</span>
 						</div>
 						
-						<div class="templates">
-							<my-builder-fields flexDirParent="column"
-								v-if="fieldsShow === 'add'"
-								@field-counter-set="fieldCounter = $event"
-								@field-move-store="fieldMoveStore"
-								:builderLanguage="builderLanguage"
-								:fields="fieldsTemplate"
-								:fieldMoveList="fieldMoveList"
-								:fieldMoveIndex="fieldMoveIndex"
-								:fieldCounter="fieldCounter"
-								:filterData="true"
-								:filterData1n="showTemplate1n"
-								:filterDataIndex="parseInt(templateIndex)"
-								:filterDataN1="showTemplateN1"
-								:filterDataNm="showTemplateNm"
-								:formId="id"
-								:isTemplate="true"
-							/>
-							<my-builder-fields flexDirParent="column"
-								v-if="fieldsShow === 'edit'"
-								@column-id-show="(...args) => setFieldShow(args[0],args[1],'content')"
-								@field-id-show="(...args) => setFieldShow(args[0],null,args[1])"
-								@field-remove="removeFieldById($event)"
-								:builderLanguage="builderLanguage"
-								:dataFields="dataFields"
-								:entityIdMapRef="entityIdMapRef"
-								:fields="dataFields"
-								:fieldMoveList="null"
-								:fieldMoveIndex="0"
-								:fieldCounter="fieldCounter"
-								:filterData="true"
-								:filterData1n="showTemplate1n"
-								:filterDataIndex="parseInt(templateIndex)"
-								:filterDataN1="showTemplateN1"
-								:filterDataNm="showTemplateNm"
-								:formId="id"
-								:isTemplate="false"
-								:joinsIndexMap="joinsIndexMap"
-								:moduleId="form.moduleId"
-								:noMovement="true"
-							/>
+						<!-- template fields -->
+						<div class="templates-wrap">
+							<h2>{{ capApp.fields }}</h2>
+							<div class="row gap default-inputs">
+								<select v-model="fieldsShow" class="dynamic">
+									<option value="add">{{ capGen.button.add }}</option>
+									<option value="edit">{{ capApp.fieldsEditInputs }}</option>
+								</select>
+								<select v-model="templateIndex" class="short">
+									<option value="-1">{{ capGen.option.all }}</option>
+									<option v-for="j in joinsIndexMap" :value="j.index">
+										{{ j.index }})
+									</option>
+								</select>
+								<my-bool caption0="n:1" caption1="n:1" v-model="showTemplateN1" />
+								<my-bool caption0="1:n" caption1="1:n" v-model="showTemplate1n" />
+								<my-bool caption0="n:m" caption1="n:m" v-model="showTemplateNm" />
+							</div>
+							
+							<div class="templates">
+								<my-builder-fields flexDirParent="column"
+									v-if="fieldsShow === 'add'"
+									@field-counter-set="fieldCounter = $event"
+									@field-move-store="fieldMoveStore"
+									:builderLanguage="builderLanguage"
+									:fields="fieldsTemplate"
+									:fieldMoveList="fieldMoveList"
+									:fieldMoveIndex="fieldMoveIndex"
+									:fieldCounter="fieldCounter"
+									:filterData="true"
+									:filterData1n="showTemplate1n"
+									:filterDataIndex="parseInt(templateIndex)"
+									:filterDataN1="showTemplateN1"
+									:filterDataNm="showTemplateNm"
+									:formId="id"
+									:isTemplate="true"
+								/>
+								<my-builder-fields flexDirParent="column"
+									v-if="fieldsShow === 'edit'"
+									@column-id-show="(...args) => setFieldShow(args[0],args[1],'content')"
+									@field-id-show="(...args) => setFieldShow(args[0],null,args[1])"
+									@field-remove="removeFieldById($event)"
+									:builderLanguage="builderLanguage"
+									:dataFields="dataFields"
+									:entityIdMapRef="entityIdMapRef"
+									:fields="dataFields"
+									:fieldMoveList="null"
+									:fieldMoveIndex="0"
+									:fieldCounter="fieldCounter"
+									:filterData="true"
+									:filterData1n="showTemplate1n"
+									:filterDataIndex="parseInt(templateIndex)"
+									:filterDataN1="showTemplateN1"
+									:filterDataNm="showTemplateNm"
+									:formId="id"
+									:isTemplate="false"
+									:joinsIndexMap="joinsIndexMap"
+									:moduleId="form.moduleId"
+									:noMovement="true"
+								/>
+							</div>
 						</div>
-					</div>
+					</template>
+
+					<!-- form states -->
+					<my-builder-form-states
+						v-if="tabTarget === 'states'"
+						v-model="states"
+						:dataFields="dataFields"
+						:entityIdMapRef="entityIdMapRef"
+						:fieldIdMap="fieldIdMap"
+						:form="form"
+					/>
+
+					<!-- form actions -->
+					<my-builder-form-actions
+						v-if="tabTarget === 'actions'"
+						v-model="actions"
+						@createNew="(...args) => $emit('createNew',...args)"
+						:builderLanguage="builderLanguage"
+						:formId="form.id"
+					/>
 					
+					<!-- form functions -->
+					<my-builder-form-functions
+						v-if="tabTarget === 'functions'"
+						v-model="functions"
+						@createNew="(...args) => $emit('createNew',...args)"
+						:formId="form.id"
+					/>
+
 					<!-- form properties -->
-					<table class="generic-table-vertical tight fullWidth default-inputs" v-if="tabTarget === 'properties'">
+					<table class="generic-table-vertical default-inputs" v-if="tabTarget === 'properties'">
 						<tbody>
 							<tr>
 								<td>{{ capGen.name }}</td>
@@ -390,33 +420,6 @@ let MyBuilderForm = {
 							</tr>
 						</tbody>
 					</table>
-					
-					<!-- form states -->
-					<my-builder-form-states
-						v-if="tabTarget === 'states'"
-						v-model="states"
-						:dataFields="dataFields"
-						:entityIdMapRef="entityIdMapRef"
-						:fieldIdMap="fieldIdMap"
-						:form="form"
-					/>
-
-					<!-- form actions -->
-					<my-builder-form-actions
-						v-if="tabTarget === 'actions'"
-						v-model="actions"
-						@createNew="(...args) => $emit('createNew',...args)"
-						:builderLanguage="builderLanguage"
-						:formId="form.id"
-					/>
-					
-					<!-- form functions -->
-					<my-builder-form-functions
-						v-if="tabTarget === 'functions'"
-						v-model="functions"
-						@createNew="(...args) => $emit('createNew',...args)"
-						:formId="form.id"
-					/>
 				</div>
 			</template>
 			
@@ -429,7 +432,7 @@ let MyBuilderForm = {
 					:entriesIcon="['images/edit.png','images/database.png']"
 					:entriesText="[capGen.properties,capGen.content]"
 				/>
-				<div class="content grow">
+				<div class="content grow" :class="{ 'no-padding':tabTargetField === 'properties' }">
 					
 					<!-- field options -->
 					<my-builder-field-options
@@ -463,6 +466,7 @@ let MyBuilderForm = {
 							:entityIdMapRef="entityIdMapRef"
 							:fieldIdMap="fieldIdMap"
 							:filters="fieldShow.query.filters"
+							:filtersDisable="['formState','getter']"
 							:fixedLimit="fieldShow.query.fixedLimit"
 							:formId="id"
 							:joins="fieldShow.query.joins"
@@ -499,9 +503,8 @@ let MyBuilderForm = {
 
 			<!-- column settings -->
 			<template v-if="columnShow">
-				<div class="builder-column-options" ref="columnOptions" v-if="columnShow">
+				<div class="content" v-if="columnShow.subQuery">
 					<my-builder-query
-						v-if="columnShow.subQuery"
 						@set-choices="fieldColumnQuerySet('choices',$event)"
 						@set-filters="fieldColumnQuerySet('filters',$event)"
 						@set-fixed-limit="fieldColumnQuerySet('fixedLimit',$event)"
@@ -516,6 +519,7 @@ let MyBuilderForm = {
 						:entityIdMapRef="entityIdMapRef"
 						:fieldIdMap="fieldIdMap"
 						:filters="columnShow.query.filters"
+						:filtersDisable="['formState','getter']"
 						:fixedLimit="columnShow.query.fixedLimit"
 						:formId="id"
 						:joins="columnShow.query.joins"
@@ -525,15 +529,15 @@ let MyBuilderForm = {
 						:moduleId="module.id"
 						:relationId="columnShow.query.relationId"
 					/>
-					<my-builder-column-options
-						@set="(...args) => fieldColumnPropertySet(args[0],args[1])"
-						:builderLanguage="builderLanguage"
-						:column="columnShow"
-						:hasCaptions="fieldShow.content === 'list'"
-						:moduleId="module.id"
-						:onlyData="false"
-					/>
 				</div>
+				<my-builder-column-options
+					@set="(...args) => fieldColumnPropertySet(args[0],args[1])"
+					:builderLanguage="builderLanguage"
+					:column="columnShow"
+					:hasCaptions="fieldShow.content === 'list'"
+					:moduleId="module.id"
+					:onlyData="false"
+				/>
 			</template>
 		</div>
 	</div>`,
@@ -560,7 +564,7 @@ let MyBuilderForm = {
 			captions:{},         // form captions
 			fieldIdsRemove:[],   // IDs of fields to remove
 
-			// form sub entites
+			// form sub entities
 			actions:[],          // form actions
 			fields:[],           // form fields (nested within each other)
 			functions:[],        // form functions
@@ -816,7 +820,7 @@ let MyBuilderForm = {
 			this.fieldMoveIndex = evt.fieldIndex;
 		},
 		open() {
-			this.$router.push(this.getFormRoute(this.form.id,0,false));
+			this.$router.push(this.getFormRoute(null,this.form.id,0,false));
 		},
 		showMessage(msg,top,image) {
 			this.$store.commit('dialog',{
@@ -874,6 +878,7 @@ let MyBuilderForm = {
 				jsFunctionId:null,
 				content:'button',
 				state:'default',
+				flags:[],
 				openForm:null,
 				onMobile:true,
 				captions:{
@@ -887,6 +892,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'calendar',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				attributeIdDate0:null,
 				attributeIdDate1:null,
@@ -913,6 +919,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'calendar',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				attributeIdDate0:null,
 				attributeIdDate1:null,
@@ -939,6 +946,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'chart',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				chartOption:JSON.stringify({
 					dataset:{
@@ -981,6 +989,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'container',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				fields:[],
 				direction:'column',
@@ -1003,7 +1012,9 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'data',
 				state:'default',
+				flags:[],
 				onMobile:true,
+				clipboard:false,
 				attributeId:attribute.id,
 				attributeIdAlt:null, // altern. attribute (used for date period)
 				index:index,
@@ -1045,6 +1056,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'header',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				size:2,
 				captions:{
@@ -1058,6 +1070,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'kanban',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				columns:[],
 				collections:[],
@@ -1075,6 +1088,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'list',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				columns:[],
 				collections:[],
@@ -1098,6 +1112,7 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'tabs',
 				state:'default',
+				flags:[],
 				onMobile:true,
 				captions:{
 					fieldTitle:{}
@@ -1122,6 +1137,7 @@ let MyBuilderForm = {
 				columns:[],
 				query:this.getQueryTemplate(),
 				state:'default',
+				flags:[],
 				onMobile:true,
 				clipboard:false,
 				captions:{
@@ -1313,9 +1329,6 @@ let MyBuilderForm = {
 			this.tabTargetField = tab;
 			this.fieldIdShow    = fieldId;
 			this.columnIdShow   = columnId;
-			
-			if(columnId !== null)
-				this.$nextTick(() => this.$refs.columnOptions.scrollIntoView());
 		},
 		
 		// backend calls

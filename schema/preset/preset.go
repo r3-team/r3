@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/compatible"
 	"r3/types"
@@ -52,11 +51,11 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return nil
 }
 
-func Get(relationId uuid.UUID) ([]types.Preset, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Preset, error) {
 
 	presets := make([]types.Preset, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, name, protected
 		FROM app.preset
 		WHERE relation_id = $1
@@ -78,8 +77,7 @@ func Get(relationId uuid.UUID) ([]types.Preset, error) {
 
 	// get preset values
 	for i, p := range presets {
-
-		presets[i].Values, err = getValues(p.Id)
+		presets[i].Values, err = getValues_tx(ctx, tx, p.Id)
 		if err != nil {
 			return presets, err
 		}
@@ -176,14 +174,14 @@ func Set_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, 
 }
 
 // preset values
-func getValues(presetId uuid.UUID) ([]types.PresetValue, error) {
+func getValues_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID) ([]types.PresetValue, error) {
 	values := make([]types.PresetValue, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, preset_id, preset_id_refer, attribute_id, protected, value
 		FROM app.preset_value
 		WHERE preset_id = $1
-		ORDER BY attribute_id ASC -- an order is required for hash comparisson (module changes)
+		ORDER BY attribute_id ASC -- an order is required for hash comparison (module changes)
 		                          -- we use attribute ID for better value preview in builder UI
 	`, presetId)
 	if err != nil {
@@ -281,13 +279,13 @@ func setRecord_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID, recordId i
 
 		if schema.IsContentRelationship(atrContent) {
 			if value.PresetIdRefer.Valid {
-				// use refered preset record ID as value
+				// use referred preset record ID as value
 				recordIdRefer, exists, err := getRecordIdByReferal_tx(ctx, tx, value.PresetIdRefer.Bytes)
 				if err != nil {
 					return err
 				}
 
-				// if refered record does not exist, do not set record
+				// if referred record does not exist, do not set record
 				// otherwise potential NOT NULL constraint would be breached
 				if !exists {
 					return fmt.Errorf("referenced preset '%s' does not exist",
@@ -355,8 +353,8 @@ func setRecord_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID, recordId i
 	return nil
 }
 
-// get ID of refered preset record
-// returns record ID and whether refered record actually exists
+// get ID of referred preset record
+// returns record ID and whether referred record actually exists
 // (unprotected preset record can get deleted)
 func getRecordIdByReferal_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID) (int64, bool, error) {
 

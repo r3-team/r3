@@ -78,9 +78,10 @@ let MyApp = {
 			</div>
 			
 			<!-- login settings -->
-			<div class="app-sub-window under-header"
+			<div class="app-sub-window"
 				v-if="showSettings"
 				v-show="!loginSessionExpired"
+				:class="{ 'at-top':!isMobile, 'with-margin':!isMobile, 'under-header':!isMobile }"
 				@mousedown.self="showSettings = false"
 			>
 				<my-settings
@@ -264,11 +265,11 @@ let MyApp = {
 				'user-font',s.settings.fontFamily
 			];
 			
-			if(s.settings.bordersAll)       classes.push('user-bordersAll');
 			if(s.settings.bordersSquared)   classes.push('user-bordersSquared');
 			if(s.settings.dark)             classes.push('user-dark');
 			if(s.settings.mobileScrollForm) classes.push('user-mobileScrollForm');
 			if(s.settings.listSpaced)       classes.push('user-listSpaced');
+			if(s.settings.shadowsInputs)    classes.push('user-shadowsInputs');
 			if(s.isMobile)                  classes.push('is-mobile');
 			
 			return classes.join(' ');
@@ -379,7 +380,10 @@ let MyApp = {
 		appVersionBuild:    (s) => s.$store.getters['local/appVersionBuild'],
 		css:                (s) => s.$store.getters['local/css'],
 		loginBackground:    (s) => s.$store.getters['local/loginBackground'],
+		loginFavorites:     (s) => s.$store.getters['local/loginFavorites'],
 		loginKeyAes:        (s) => s.$store.getters['local/loginKeyAes'],
+		loginOptions:       (s) => s.$store.getters['local/loginOptions'],
+		loginOptionsMobile: (s) => s.$store.getters['local/loginOptionsMobile'],
 		languageCodes:      (s) => s.$store.getters['schema/languageCodes'],
 		modules:            (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
@@ -576,6 +580,7 @@ let MyApp = {
 				this.logoutInSec = 0;
 		},
 		sessionInvalid(sessionExpired) {
+			this.$store.commit('local/loginCachesClear');
 			this.$store.commit('local/loginKeyAes',null);
 			this.$store.commit('local/loginKeySalt',null);
 			this.$store.commit('loginEncryption',false);
@@ -700,6 +705,11 @@ let MyApp = {
 		// final app meta retrieval, after authentication
 		initApp() {
 			let requests = [
+				ws.prepare('loginFavorites','get',{dateCache:this.loginFavorites.dateCache}),
+				ws.prepare('loginOptions','get',{
+					dateCache:this.isMobile ? this.loginOptionsMobile.dateCache : this.loginOptions.dateCache,
+					isMobile:this.isMobile
+				}),
 				ws.prepare('loginSetting','get',{}),
 				ws.prepare('loginWidgetGroups','get',{}),
 				ws.prepare('lookup','get',{name:'access'}),
@@ -716,36 +726,47 @@ let MyApp = {
 			
 			ws.sendMultiple(requests,true).then(
 				async res => {
-					this.$store.commit('settings',res[0].payload);
-					this.$store.commit('loginWidgetGroups',res[1].payload);
-					this.$store.commit('access',res[2].payload);
-					this.$store.commit('feedback',res[3].payload.feedback);
-					this.$store.commit('feedbackUrl',res[3].payload.feedbackUrl);
-					this.$store.commit('loginHasClient',res[4].payload);
+					this.$store.commit('local/loginFavorites',res[0].payload);
+					this.$store.commit('local/loginOptions',res[1].payload);
+					this.$store.commit('settings',res[2].payload);
+					this.$store.commit('loginWidgetGroups',res[3].payload);
+					this.$store.commit('access',res[4].payload);
+					this.$store.commit('feedback',res[5].payload.feedback);
+					this.$store.commit('feedbackUrl',res[5].payload.feedbackUrl);
+					this.$store.commit('loginHasClient',res[6].payload);
 					
-					if(this.loginKeyAes !== null && res[5].payload.privateEnc !== null) {
+					if(this.loginKeyAes !== null && res[7].payload.privateEnc !== null) {
 						this.$store.commit('loginEncryption',true);
 						this.$store.commit('loginPrivateKey',null);
-						this.$store.commit('loginPrivateKeyEnc',res[5].payload.privateEnc);
-						this.$store.commit('loginPrivateKeyEncBackup',res[5].payload.privateEncBackup);
+						this.$store.commit('loginPrivateKeyEnc',res[7].payload.privateEnc);
+						this.$store.commit('loginPrivateKeyEncBackup',res[7].payload.privateEncBackup);
 						
-						await this.pemImport(res[5].payload.public,'RSA',true)
+						await this.pemImport(res[7].payload.public,'RSA',true)
 							.then(res => this.$store.commit('loginPublicKey',res))
 							.catch(this.setInitErr);
 						
-						await this.pemImportPrivateEnc(res[5].payload.privateEnc)
+						await this.pemImportPrivateEnc(res[7].payload.privateEnc)
 							.catch(this.setInitErr);
 					}
 					
 					if(this.isAdmin) {
-						this.$store.commit('config',res[6].payload);
-						this.$store.commit('license',res[7].payload);
+						this.$store.commit('config',res[8].payload);
+						this.$store.commit('license',res[9].payload);
 					}
 					
 					// load captions, then collections
 					this.captionsReload().then(
 						() => this.updateCollections().then(
-							() => this.appReady = true,
+							() => {
+								this.appReady = true;
+								this.$nextTick(() => {
+									// execute login frontend functions
+									for(const m of this.modules) {
+										if(m.jsFunctionIdOnLogin !== null)
+											this.jsFunctionRun(m.jsFunctionIdOnLogin,[],{});
+									}
+								});
+							},
 							err => {
 								alert(this.capErr.initCollection.replace('{MSG}',this.resolveErrCode(err)));
 								
@@ -869,13 +890,8 @@ let MyApp = {
 			});
 		},
 		schemaReload(moduleId) {
-			let payload = typeof moduleId === 'undefined'
-				? {} : {moduleId:moduleId};
-			
-			ws.send('schema','reload',payload,true).then(
-				() => {},
-				this.genericError
-			);
+			const payload = moduleId === undefined ? {} : {moduleId:moduleId};
+			ws.send('schema','reload',payload,true).then(() => {},this.genericError);
 		}
 	}
 };

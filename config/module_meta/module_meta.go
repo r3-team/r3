@@ -2,7 +2,6 @@ package module_meta
 
 import (
 	"context"
-	"r3/db"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -19,12 +18,12 @@ func Create_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, hidden bool, 
 	return err
 }
 
-func Get(moduleId uuid.UUID) (types.ModuleMeta, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) (types.ModuleMeta, error) {
 	var m = types.ModuleMeta{
 		Id: moduleId,
 	}
 
-	err := db.Pool.QueryRow(context.Background(), `
+	err := tx.QueryRow(ctx, `
 		SELECT hidden, owner, position, date_change, languages_custom
 		FROM instance.module_meta
 		WHERE module_id = $1
@@ -35,19 +34,10 @@ func Get(moduleId uuid.UUID) (types.ModuleMeta, error) {
 	}
 	return m, err
 }
-func GetDateChange(moduleId uuid.UUID) (uint64, error) {
-	var dateChange uint64
-	err := db.Pool.QueryRow(context.Background(), `
-		SELECT date_change
-		FROM instance.module_meta
-		WHERE module_id = $1
-	`, moduleId).Scan(&dateChange)
-	return dateChange, err
-}
-func GetIdMap() (map[uuid.UUID]types.ModuleMeta, error) {
+func GetIdMap_tx(ctx context.Context, tx pgx.Tx) (map[uuid.UUID]types.ModuleMeta, error) {
 	moduleIdMap := make(map[uuid.UUID]types.ModuleMeta)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT module_id, hidden, owner, position, date_change, languages_custom
 		FROM instance.module_meta
 	`)
@@ -58,9 +48,7 @@ func GetIdMap() (map[uuid.UUID]types.ModuleMeta, error) {
 
 	for rows.Next() {
 		var m types.ModuleMeta
-		if err := rows.Scan(&m.Id, &m.Hidden, &m.Owner, &m.Position,
-			&m.DateChange, &m.LanguagesCustom); err != nil {
-
+		if err := rows.Scan(&m.Id, &m.Hidden, &m.Owner, &m.Position, &m.DateChange, &m.LanguagesCustom); err != nil {
 			return moduleIdMap, err
 		}
 		if m.LanguagesCustom == nil {
@@ -70,18 +58,18 @@ func GetIdMap() (map[uuid.UUID]types.ModuleMeta, error) {
 	}
 	return moduleIdMap, nil
 }
-func GetHash(moduleId uuid.UUID) (string, error) {
+func GetHash_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) (string, error) {
 	var hash string
-	err := db.Pool.QueryRow(context.Background(), `
+	err := tx.QueryRow(ctx, `
 		SELECT hash
 		FROM instance.module_meta
 		WHERE module_id = $1
 	`, moduleId).Scan(&hash)
 	return hash, err
 }
-func GetOwner(moduleId uuid.UUID) (bool, error) {
+func GetOwner_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) (bool, error) {
 	var isOwner bool
-	err := db.Pool.QueryRow(context.Background(), `
+	err := tx.QueryRow(ctx, `
 		SELECT owner
 		FROM instance.module_meta
 		WHERE module_id = $1
@@ -89,8 +77,8 @@ func GetOwner(moduleId uuid.UUID) (bool, error) {
 	return isOwner, err
 }
 
-func SetDateChange(moduleIds []uuid.UUID, date int64) error {
-	_, err := db.Pool.Exec(context.Background(), `
+func SetDateChange_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID, date int64) error {
+	_, err := tx.Exec(ctx, `
 		UPDATE instance.module_meta
 		SET date_change = $2
 		WHERE module_id = ANY($1)

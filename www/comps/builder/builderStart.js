@@ -153,6 +153,13 @@ let MyBuilderStart = {
 		readonly:{ type:Boolean, required:true }
 	},
 	computed:{
+		hasMenu:(s) => {
+			for(const mt of s.module.menuTabs) {
+				if(mt.menus.length !== 0)
+					return true;
+			}
+			return false;
+		},
 		hasMenuInRole:(s) => {
 			for(let r of s.module.roles) {
 				if(Object.keys(r.accessMenus).length !== 0)
@@ -163,7 +170,6 @@ let MyBuilderStart = {
 		
 		// simple
 		hasForms:     (s) => s.module.forms.length !== 0,
-		hasMenu:      (s) => s.module.menus.length !== 0,
 		hasRelations: (s) => s.module.relations.length !== 0,
 		hasRoles:     (s) => s.module.roles.length !== 1,
 		hasStartForm: (s) => s.module.formId !== null,

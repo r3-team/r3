@@ -40,6 +40,18 @@ export function colorIsDark(colorRbg) {
 	return tinycolor(colorRbg).isDark();
 };
 
+export function checkDataOptions(requested,options) {
+	if(options ===  0) return true;  //  0 = options are not set, allow all
+	if(options === -1) return false; // -1 = options are set to none, reject all
+
+	switch(requested) {
+		case 1: return [1,3,5,7].includes(options); break; // DELETE
+		case 2: return [2,3,6,7].includes(options); break; // UPDATE
+		case 4: return [4,5,6,7].includes(options); break; // CREATE
+	}
+	return false;
+};
+
 export function copyValueDialog(captionTop,captionBody,copyClipboardValue) {
 	let copy = function() {
 		navigator.clipboard.writeText(copyClipboardValue);
@@ -54,6 +66,36 @@ export function copyValueDialog(captionTop,captionBody,copyClipboardValue) {
 			image:'copyClipboard.png'
 		}]
 	});
+};
+
+export function deepIsEqual(o1,o2) {
+	if(o1 === o2)
+		return true;
+
+	if(Array.isArray(o1) && Array.isArray(o2)) {
+		if(o1.length !== o2.length)
+			return false;
+
+		return o1.every((v,i) => deepIsEqual(v,o2[i]));
+	}
+
+	if(typeof o1 === 'object' && typeof o2 === 'object' && o1 !== null && o2 !== null) {
+		if(Array.isArray(o1) || Array.isArray(o2))
+			return false;
+
+		const k1 = Object.keys(o1);
+		const k2 = Object.keys(o2);
+
+		if(k1.length !== k2.length || !k1.every(k => k2.includes(k)))
+			return false;
+
+		for(const k in o1) {
+			if(!deepIsEqual(o1[k], o2[k]))
+				return false;
+		}
+		return true;
+	}
+	return false;
 };
 
 export function getBuildFromVersion(fullVersion) {
@@ -72,6 +114,27 @@ export function getLinkMeta(display,value) {
 		case 'url':   return { image:'link.png',  blank:true,  href:value };           break;
 	}
 	return false;
+};
+
+export function getNumberFormatted(v,atr) {
+	let hasFraction = v % 1 !== 0;
+	let strNum      = String(v);
+	let strFraction = '';
+	
+	if(hasFraction)
+		[strNum,strFraction] = strNum.split('.');
+
+	// apply fixed fraction component for numerics
+	if(atr.content === 'numeric' && atr.lengthFract !== 0) {
+		strFraction = strFraction.padEnd(atr.lengthFract,'0');
+		hasFraction = true;
+	}
+	
+	strNum = strNum.replace(/\B(?=(\d{3})+(?!\d))/g,MyStore.getters.settings.numberSepThousand);
+
+	return hasFraction
+		? strNum + MyStore.getters.settings.numberSepDecimal + strFraction
+		: strNum;
 };
 
 export function getNilUuid() {
@@ -146,6 +209,15 @@ export function objectDeepMerge(target,...sources) {
 
 export function openLink(href,blank) {
 	window.open(href,blank ? '_blank' : '_self');
+};
+
+export function openDataImageAsNewTag(data) {
+	if(data === '')
+		return;
+
+	var newTab = window.open();
+	newTab.document.write(`<!DOCTYPE html><body><img src="${data}" style="width:100%;max-width:450px;"></body>`);
+	newTab.document.close();
 };
 
 export function filterIsCorrect(operator,value0,value1) {

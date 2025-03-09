@@ -1,4 +1,4 @@
-<p><em>Updated 2024-10-29</em></p>
+<p><em>Updated 2025-03-04</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -24,6 +24,7 @@
 <ol type="1">
 <li><a href="#ssl-certificates">SSL certificates</a></li>
 <li><a href="#proxies">Proxies</a></li>
+<li><a href="#configuration-file">Configuration file</a></li>
 </ol></li>
 <li><a href="#general-administration">General administration</a>
 <ol type="1">
@@ -41,8 +42,8 @@
 <ol type="1">
 <li><a href="#platform-updates">Platform updates</a></li>
 </ol></li>
-<li><a href="#clustering-and-system-performance">Clustering and system performance</a></li>
 <li><a href="#preparing-a-new-postgresql-database">Preparing a new PostgreSQL database</a></li>
+<li><a href="#clustering-and-system-performance">Clustering and system performance</a></li>
 <li><a href="#cloud-operations">Cloud operations</a></li>
 </ol>
 <h1 id="introduction">Introduction</h1>
@@ -64,31 +65,24 @@
 <td>Designed for</td>
 <td style="text-align: center;">production</td>
 <td style="text-align: center;">production</td>
-<td style="text-align: center;">testing &amp; building REI3 apps</td>
-<td style="text-align: center;">testing &amp; building REI3 apps</td>
+<td style="text-align: center;">test / build REI3 apps</td>
+<td style="text-align: center;">test / build REI3 apps</td>
 </tr>
 <tr class="even">
-<td>Comes with database</td>
-<td style="text-align: center;">separate database system required</td>
+<td>Integrated database</td>
+<td style="text-align: center;"></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
 <tr class="odd">
-<td>All REI3 features available</td>
-<td style="text-align: center;"><strong>X</strong></td>
-<td style="text-align: center;"><strong>X</strong></td>
-<td style="text-align: center;">no end-to-end encryption by default</td>
-<td style="text-align: center;">no end-to-end encryption by default</td>
-</tr>
-<tr class="even">
 <td>Runs on Windows</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Runs on Linux</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"></td>
@@ -97,7 +91,7 @@
 </tr>
 </tbody>
 </table>
-<p>If you intend to build your own REI3 applications, it is a good practice to build REI3 applications with one system and then deploy to another for production. This way, users are only affected once tested applications are deployed. Especially the portable &amp; Docker versions can quickly be installed on PCs for building applications.</p>
+<p>If you intend to build your own REI3 applications, it is good practice to build REI3 applications with one system and then deploy to another for production. This way, users are only affected once applications are tested and ready. Especially the portable &amp; Docker versions can quickly be installed on PCs for building applications.</p>
 <h2 id="dedicated">Dedicated</h2>
 <p>The most common deployment option. REI3 is installed on an application server (Windows or Linux), connecting to a separate database system.</p>
 <h2 id="stand-alone">Stand-alone</h2>
@@ -157,8 +151,9 @@
 <li><a href="#stand-alone">Stand-alone</a>: After following the installer, REI3 can be started immediately.</li>
 <li><a href="#dedicated">Dedicated</a>: After the installation, database connection details for an empty, UTF8 encoded <a href="#preparing-a-new-postgresql-database">PostgreSQL database</a> (13.0 or newer) must be entered into the configuration file <code>config.json</code>. The file <code>config.json</code> is located inside the chosen application directory. The database user must have full permissions for the chosen database.</li>
 </ul>
+<p>If you plan to run REI3 behind a proxy, please make sure to disable client timeouts for websockets. More details <a href="#proxies">here</a>.</p>
 <p>Independent of deployment model, REI3 is handled as a Windows service and can be started with the service manager (command: <code>services.msc</code>). REI3 will write to the Windows application log, should the service not start correctly.</p>
-<p>Because of licensing terms, we cannot distribute Ghostscript with REI3. If you want to create PDF thumbnails, you have to download and install a current version of Ghostscript on the REI3 server.</p>
+<p>Because of licensing terms, we cannot distribute Ghostscript with REI3. If you want to create PDF thumbnails, you have to install a current version of Ghostscript on the REI3 server.</p>
 <h2 id="on-a-linux-server">On a Linux server</h2>
 <p>For Linux servers, REI3 is available as a compressed archive with pre-compiled binaries. The installation steps are:</p>
 <ol type="1">
@@ -171,35 +166,74 @@
 <li>Register REI3 with your service manager (<code>sudo ./r3 -install</code>).</li>
 <li>Start the REI3 service (<code>systemctl start rei3</code> for example).</li>
 </ol>
+<p>If you plan to run REI3 behind a proxy, please make sure to disable client timeouts for websockets. More details <a href="#proxies">here</a>.</p>
 <p>If the service does not start, REI3 writes to <code>syslog</code>.</p>
 <h1 id="first-access-to-rei3">First access to REI3</h1>
 <p>When running, REI3 is by default reachable on port 443. You can use any modern browser to access REI3 locally at <code>https://localhost/</code> or from the network, given a configured firewall. During installation, a single admin user is created; username and password are both 'admin'.</p>
 <p>After login, an admin user can access the admin panel to manage users, install applications, access system logs and so on. The default password should be changed immediately.</p>
 <h1 id="configuration">Configuration</h1>
-<p>REI3s core configuration can be changed within its configuration file (<code>config.json</code>), which is located in the chosen REI3 installation directory. Setting file paths, web server port and database connection details is straightforward. Changes are applied when the application service restarts.</p>
+<p>REI3s core configuration can be changed within its configuration file (<code>config.json</code>), which is located in the chosen REI3 installation directory. Setting file paths, web server port and database connection details is straightforward - for an explanation of all settings <a href="#configuration-file">see here</a>. Changes are applied when the application service restarts.</p>
 <h2 id="ssl-certificates">SSL certificates</h2>
 <p>During installation, REI3 creates a self-signed certificate to allow encrypted access to the application. It is not recommended to keep this certificate. If at all possible, a properly signed certificate should be provided for REI3 to ensure secure communication with trust between clients and server.</p>
 <p>Some common considerations / pitfalls:</p>
 <ul>
 <li>REI3 can work with different certificates. If REI3 cannot load a certificate, it will fail to start and log to the operating system (<code>syslog</code> for Linux, Windows application log otherwise).</li>
 <li>Make sure that the hostname that the certificate is set to, is the same as clients use to connect to the REI3 server. The port is irrelevant.</li>
-<li>When running REI3 internally (not reachable from the cloud), clients still need to be able to verify the certificate. Make sure that your certificate file (*.crt) includes all certificates up the chain until the one that is known to the clients - this is usually a trusted root certificate or intermediary.</li>
+<li>When running REI3 internally (not reachable from the cloud), clients still need to be able to verify the certificate. Make sure that your certificate file (*.crt) includes all certificates up the chain until the one that is known to the clients - this is usually a trusted root or intermediary certificate.</li>
 </ul>
 <h2 id="proxies">Proxies</h2>
-<p>When clients talk to a REI3 server, they use two methods - both are running on the same port (usually 443) as TCP:</p>
+<p>When clients talk to a REI3 server, they use two methods - both are running on the same port via TCP:</p>
 <ul>
 <li>HTTP(S) requests to load files, images and other web resources.</li>
-<li>A continous Websocket connection for exchanging data bidirectionally between server and client. If this connection breaks down, the client tries to re-establish it.</li>
+<li>A continuous Websocket connection for data exchange between server and client. If this connection breaks down, the client tries to re-establish it.</li>
 </ul>
 <p>When it comes to proxy servers (regardless of forward or reverse proxy), HTTP(s) requests can be handled like any other web application. So good-practices such as request timeouts are sensible.</p>
-<p>Websockets however are meant to stay active until either side (server or client) purposefully closes the connection. This can be because of events like a logout or a server going into maintenance mode. When configuring a proxy, request timeouts for Websocket connections should be disabled or at least set to multiple hours. Some proxies (like HAProxy) call these connections 'tunnel' instead of 'client' or 'server'. Every time a Websocket connection is forcefully closed by a proxy, the client must re-connect and can loose unsaved changes.</p>
-<p>In case of <a href="#clustering-and-system-performance">cluster-setups</a>, a Websocket connection must 'stick' with one particular server until its closed. Even if the initial requests are assigned via round-robin for example, a particular server is responsible for ongoing Websocket communication with a specific client. HTTP(S) requests can be handled by any cluster server at any time however.</p>
+<p>Websockets however are meant to stay active until either side (server or client) purposefully closes the connection. When configuring a proxy, request timeouts or max. session time for Websocket connections should be disabled or at least set to multiple hours. Some proxies (like HAProxy) call these connections 'tunnel'. Every time a Websocket connection is forcefully closed by a proxy, the client must re-connect and can loose unsaved changes.</p>
+<p>In case of <a href="#clustering-and-system-performance">cluster-setups</a>, a Websocket connection must 'stick' with one particular server until it´s closed. Even if the initial requests are assigned via round-robin, a particular server is responsible for ongoing Websocket communication with a specific client. HTTP(S) requests can however be handled by any cluster server at any time.</p>
+<h2 id="configuration-file">Configuration file</h2>
+<p>These are the settings inside the REI3 configuration file <code>config.json</code> for reference:</p>
+<ul>
+<li>db: Database connection settings.
+<ul>
+<li>host: Database host to connect to. Can be a hostname or network address.</li>
+<li>port: Database host port to connect to. Postgres runs on 5432 by default.</li>
+<li>name: Database name to connect to. REI3 requires a user with full permissions to this database. To prepare a new database for REI3 <a href="#preparing-a-new-postgresql-database">follow this guide</a>.</li>
+<li>user: Database user name to connect with.</li>
+<li>pass: Database user password to connect with.</li>
+<li>ssl: Connect to database host via SSL. Only works if database host supports SSL.</li>
+<li>sslSkipVerify: If 'ssl' is active, ignore if the provided SSL cannot be verified by the REI3 host system. This allows for an encrypted database connection even if the given certificate is untrustworthy.</li>
+<li>connsMin: Minimum number of database connections to keep open. If set to 0, REI3 will choose a number.</li>
+<li>connsMax: Maximum number of database connections that can be used. Limiting this can be useful if REI3 is running on a shared database system. REI3 should at least have 4 DB connections to itself. If set to 0, REI3 will choose a number.</li>
+<li>embedded: If true, REI3 starts its own internal database. True for stand-alone and portable deployments. When set to false, REI3 connects to an external database server.</li>
+</ul></li>
+<li>web: Webserver settings.
+<ul>
+<li>cert/key: Names of certificate &amp; key files for REI3 to offer HTTPS. If files do not exist, REI3 will create a self-signed certificate &amp; key when started in HTTPS mode.</li>
+<li>listen: Network address to listen on. If set to 0.0.0.0, REI3 will listen for requests regardless of target address.</li>
+<li>port: Network port to listen on. If set to 0, a free port will be assigned by the operating system on service start.</li>
+<li>tlsMinVersion: The minimum TLS version REI3 should accept from clients. Allowed values: "1.1", "1.2", "1.3"</li>
+</ul></li>
+<li>paths: Paths where files/directories relevant to REI3´s operation are located.
+<ul>
+<li>certificates: Certificates for the REI3 webserver component (see 'web'-&gt;'cert' &amp; 'web'-&gt;'key').</li>
+<li>embeddedDbBin: Only relevant for portable/stand-alone deployments. Binary files for embedded Postgres database system.</li>
+<li>embeddedDbData: Only relevant for portable/stand-alone deployments. Data files for embedded Postgres database system.</li>
+<li>files: Files uploaded to REI3 for storage in attributes of the type 'files'. Contents is cleaned regularly by scheduled tasks when references are removed or file retention is satisfied.</li>
+<li>temp: Files uploaded temporarily to REI3 for various operations. CSV uploads, application imports, etc. Contents is cleaned regularly by scheduled tasks.</li>
+<li>transfer: Files uploaded to REI3 for application installation or update. Files are kept to enable future export of dependencies.</li>
+</ul></li>
+<li>portable: Only relevant for portable deployments. If true, REI3 will start in HTTP mode and open a browser to the REI3 start page.</li>
+<li>cluster: Cluster settings.
+<ul>
+<li>nodeId: The ID assigned to this cluster node. Should not be filled by hand. REI3 will auto-generate and store a new node ID when a node first connects to a cluster.</li>
+</ul></li>
+</ul>
 <h1 id="general-administration">General administration</h1>
 <p>After configuration, basically all administrative tasks are executed via the admin user interface inside the main REI3 web application. Any user defined as 'admin' has full access to these features.</p>
 <h2 id="maintenance-mode">Maintenance mode</h2>
 <p>To execute deep system changes safely, a separate operation mode is available, called 'maintenance mode'. When enabled, all non-admin users are automatically logged off from the system; new logins are also rejected from non-admin users.</p>
 <p><img src="en_us_admin_pics/maintenance_mode.webp" alt="Maintenance mode" /></p>
-<p>In maintenance mode, applications may be installed, configured and deleted. Please be aware that deleting applications will permanently delete all corresponding data from the system. This is irreversable without current, functional backups.</p>
+<p>In maintenance mode, applications may be installed, configured and deleted. Please be aware that deleting applications will permanently delete all corresponding data from the system. This is irreversible without current, functional backups.</p>
 <h2 id="builder-mode">Builder mode</h2>
 <p>When the maintenance mode is active, Builder mode can also be enabled. This gives admin users access to the integrated, graphical application builder utility, called 'Builder' for short. The Builder is a powerful tool. All REI3 applications are exclusively created and changed via the Builder.</p>
 <p><img src="en_us_admin_pics/builder_mode.webp" alt="Builder mode" /></p>
@@ -207,7 +241,7 @@
 <h2 id="authentication-and-authorization">Authentication and authorization</h2>
 <p>To let users access the system, they must be created by an REI3 administrator or imported from a <a href="#authentication-and-authorization-via-ldap">directory service</a>. Usernames can be anything from personal names to employee IDs to email addresses - they only need to be unique within a REI3 instance.</p>
 <p>To access any application or data, roles have to be assigned to users. This can be done by an REI3 administrator manually, or they can be assigned automatically according to group memberships within a <a href="#authentication-and-authorization-via-ldap">directory service</a>. Role permissions are cumulative - the more roles a user has, the larger the access.</p>
-<p>To increase account security, REI3 administrators can choose password complexity options in the admin interface. Additionaly, MFA (multi-factor authentication) in the form of TOTP (time-based one-time-passwords) is available to users and can be reset by administrators. MFA can be setup on multiple devices and is supported by most authenticator apps (anything that supports TOTP).</p>
+<p>To increase account security, REI3 administrators can choose password complexity options in the admin interface. Additionally, MFA (multi-factor authentication) in the form of TOTP (time-based one-time-passwords) is available to users and can be reset by administrators. MFA can be setup on multiple devices and is supported by most authenticator apps (anything that supports TOTP).</p>
 <h2 id="authentication-and-authorization-via-ldap">Authentication and authorization via LDAP</h2>
 <p>REI3 hosts its own, internal authentication backend. To integrate into existing infrastructures, REI3 can utilize LDAP services to offer:</p>
 <ul>
@@ -232,7 +266,7 @@
 <li>Local repository: For organizations running multiple REI3 instances and/or needing full control over all releases. A repository can be installed on any REI3 instance as it is a REI3 application as well.</li>
 <li>Manual import of applications: All applications can be imported manually. This is useful for development releases, testing and for applications not released in any repository.</li>
 </ul>
-<p>Organizations starting with REI3 should rely on the official repository, switching to local ones when they scale up or self-developed applications become more prevelant.</p>
+<p>Organizations starting with REI3 should rely on the official repository, switching to local ones when they scale up or self-developed applications become more prevalent.</p>
 <h1 id="backup-and-recovery">Backup and recovery</h1>
 <p>To fully recover a REI3 instance, these components must be backed up:</p>
 <ul>
@@ -267,6 +301,12 @@
 <p>If the graphical installer for Windows is used, an update can be directly started by executing a later version of the installer. The platform service will automatically be restarted.</p>
 <p>For Linux servers, stopping the service and overwriting files in the chosen application directory with the latest extractable package is required. Afterwards the service can be restarted.</p>
 <p>To update the portable version, stop any running REI3 instance and extract the contents of a later portable version into the portable application directory.</p>
+<h1 id="preparing-a-new-postgresql-database">Preparing a new PostgreSQL database</h1>
+<p>REI3 in the <a href="#dedicated">dedicated deployment model</a> requires full permissions to a UTF8 encoded PostgreSQL database. This documentation does not cover installation of PostgreSQL on the operating system of your choice. Once the PostgreSQL service is available however, connect with a PostgreSQL client (like <code>psql</code> or <code>pgAdmin</code>) and make sure that both a user as well as database exists for REI3 to use. To create both:</p>
+<ol type="1">
+<li><code>CREATE ROLE my_rei3_user WITH LOGIN PASSWORD 'MY_STRONG_PW!';</code></li>
+<li><code>CREATE DATABASE my_rei3_db WITH OWNER = my_rei3_user TEMPLATE = template0 ENCODING = 'UTF8';</code></li>
+</ol>
 <h1 id="clustering-and-system-performance">Clustering and system performance</h1>
 <p>REI3 servers can be clustered to enable more requests and users to be handled at the same time. Before considering clustering, it is important to learn where perceived performance issues are coming from. REI3 is built to handle many users concurrently and is also able to use multiple processor cores and more memory to improve performance. Only if the CPU load/memory usage of the REI3 service is often very high, clustering multiple REI3 servers can make sense.</p>
 <p>In most cases, performance issues come from other sources:</p>
@@ -294,12 +334,6 @@
 <li>As soon as a new server node connects to the existing REI3 database, it will register itself as a new cluster node and assigns itself a unique node ID.</li>
 </ol>
 <p>This is the entire setup. The cluster auto-configures and also automatically assigns cluster master role and tasks depending on which nodes are checking in.</p>
-<h1 id="preparing-a-new-postgresql-database">Preparing a new PostgreSQL database</h1>
-<p>REI3 in the <a href="#dedicated">dedicated deployment model</a> requires full permissions to a UTF8 encoded PostgreSQL database. This documentation does not cover installation of PostgreSQL on the operating system of your choice. Once the PostgreSQL service is available however, connect with a PostgreSQL client (like <code>psql</code> or <code>pgAdmin</code>) and make sure that both a user as well as database exists for REI3 to use. To create both:</p>
-<ol type="1">
-<li><code>CREATE ROLE my_rei3_user WITH LOGIN PASSWORD 'MY_STRONG_PW!';</code></li>
-<li><code>CREATE DATABASE my_rei3_db WITH OWNER = my_rei3_user TEMPLATE = template0 ENCODING = 'UTF8';</code></li>
-</ol>
 <h1 id="cloud-operations">Cloud operations</h1>
 <p>REI3 can be made accessible on the internet by opening up corresponding firewall ports. We, the REI3 manufacturers, aim to make the platform as secure as possible. As with any other application, it is always possible that undiscovered security flaws are exploited and unauthorized access achieved. Besides regularly updating REI3 itself, it is our view that additional safety measures are necessary to safely run web applications in the cloud, such as:</p>
 <ul>

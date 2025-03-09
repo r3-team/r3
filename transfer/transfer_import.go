@@ -12,7 +12,6 @@ import (
 	"r3/cluster"
 	"r3/config"
 	"r3/config/module_meta"
-	"r3/db"
 	"r3/log"
 	"r3/schema"
 	"r3/schema/api"
@@ -25,7 +24,7 @@ import (
 	"r3/schema/icon"
 	"r3/schema/jsFunction"
 	"r3/schema/loginForm"
-	"r3/schema/menu"
+	"r3/schema/menuTab"
 	"r3/schema/module"
 	"r3/schema/pgFunction"
 	"r3/schema/pgIndex"
@@ -44,23 +43,21 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type importMeta struct {
 	filePath string       // path of module import file (decompressed JSON file)
 	hash     string       // hash of module content
-	isNew    bool         // module was already in system (upgrade)
+	isNew    bool         // module was not already in system (is installed not upgraded)
 	module   types.Module // module content
 }
 
 // imports extracted modules from given file paths
-func ImportFromFiles(filePathsImport []string) error {
+func ImportFromFiles_tx(ctx context.Context, tx pgx.Tx, filePathsImport []string) error {
 	Import_mx.Lock()
 	defer Import_mx.Unlock()
 
-	log.Info("transfer", fmt.Sprintf("start import for modules from file(s): '%s'",
-		strings.Join(filePathsImport, "', '")))
+	log.Info("transfer", fmt.Sprintf("start import for modules from file(s): '%s'", strings.Join(filePathsImport, "', '")))
 
 	// extract module packages
 	filePathsModules := make([]string, 0)
@@ -79,27 +76,24 @@ func ImportFromFiles(filePathsImport []string) error {
 
 	// parse modules from file paths, only modules that need to be imported are returned
 	moduleIdMapImportMeta := make(map[uuid.UUID]importMeta)
-	modules, err := parseModulesFromPaths(filePathsModules, moduleIdMapImportMeta)
+	modules, err := parseModulesFromPaths_tx(ctx, tx, filePathsModules, moduleIdMapImportMeta)
 	if err != nil {
 		return err
 	}
 
-	// run a full VACUUM before imports
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutTransfer)
-	defer ctxCanc()
+	// apply compatibility fixes
+	for i := range modules {
+		// fix import < 3.7: move triggers from relations to module
+		modules[i].PgTriggers = compatible.FixPgTriggerLocation(modules[i].PgTriggers, modules[i].Relations)
 
-	log.Info("transfer", "import starts full DB vacuum")
-	if _, err := db.Pool.Exec(ctx, `VACUUM FULL`); err != nil {
-		return err
+		// fix import < 3.10: add initial menu tab
+		modules[i].MenuTabs, err = compatible.FixMissingMenuTab(modules[i].Id, modules[i].MenuTabs, modules[i].Menus)
+		if err != nil {
+			return err
+		}
 	}
 
 	// import modules
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
 	idMapSkipped := make(map[uuid.UUID]types.Void)
 	loopsToRun := 10
 
@@ -133,9 +127,7 @@ func ImportFromFiles(filePathsImport []string) error {
 				if other entities rely on deleted states (presets), they are applied on next loop
 			*/
 			if firstRun && !moduleIdMapImportMeta[m.Id].isNew {
-				if err := transfer_delete.NotExistingPgTriggers_tx(ctx, tx, m.Id,
-					compatible.FixPgTriggerLocation(m.PgTriggers, m.Relations)); err != nil {
-
+				if err := transfer_delete.NotExistingPgTriggers_tx(ctx, tx, m.Id, m.PgTriggers); err != nil {
 					return err
 				}
 			}
@@ -171,17 +163,12 @@ func ImportFromFiles(filePathsImport []string) error {
 
 	log.Info("transfer", "module files were moved to transfer path if imported")
 
-	if err := tx.Commit(ctx); err != nil {
-		return err
-	}
-	log.Info("transfer", "changes were commited successfully")
-
 	// update schema cache
 	moduleIdsUpdated := make([]uuid.UUID, 0)
 	for id, _ := range moduleIdMapImportMeta {
 		moduleIdsUpdated = append(moduleIdsUpdated, id)
 	}
-	return cluster.SchemaChanged(true, moduleIdsUpdated)
+	return cluster.SchemaChanged_tx(ctx, tx, true, moduleIdsUpdated)
 }
 
 func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
@@ -388,7 +375,6 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 	}
 
 	// PG triggers, refer to PG functions
-	mod.PgTriggers = compatible.FixPgTriggerLocation(mod.PgTriggers, mod.Relations)
 	for _, e := range mod.PgTriggers {
 		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
@@ -457,10 +443,20 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 	}
 
-	// menus, refer to forms/icons
-	log.Info("transfer", "set menus")
-	if err := menu.Set_tx(ctx, tx, pgtype.UUID{}, mod.Menus); err != nil {
-		return err
+	// menu tabs, refer to icons
+	for i, e := range mod.MenuTabs {
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set menu tab %s", e.Id))
+
+		if err := importCheckResultAndApply(ctx, tx, menuTab.Set_tx(ctx, tx, i, e), e.Id, idMapSkipped); err != nil {
+			return err
+		}
 	}
 
 	// roles, refer to relations/attributes/menu
@@ -513,10 +509,10 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 	}
 
 	// presets, refer to relations/attributes/other presets
-	// can fail because deletions happen after import and presets depent on the state of relations/attributes
+	// can fail because deletions happen after import and presets depend on the state of relations/attributes
 	//  which might loose constraints (example: attribute with NOT NULL removed)
 	// unprotected presets are optional (can be deleted within instance)
-	//  because of this some preset referals might not work and are ignored
+	//  because of this some preset referrals might not work and are ignored
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Presets {
 			run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
@@ -592,7 +588,7 @@ func importCheckResultAndApply(ctx context.Context, tx pgx.Tx, resultErr error, 
 	return nil
 }
 
-func parseModulesFromPaths(filePaths []string, moduleIdMapImportMeta map[uuid.UUID]importMeta) ([]types.Module, error) {
+func parseModulesFromPaths_tx(ctx context.Context, tx pgx.Tx, filePaths []string, moduleIdMapImportMeta map[uuid.UUID]importMeta) ([]types.Module, error) {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
@@ -624,8 +620,8 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapImportMeta map[uuid.UU
 		log.Info("transfer", fmt.Sprintf("import is validating module '%s' v%d",
 			fileData.Content.Module.Name, fileData.Content.Module.ReleaseBuild))
 
-		// verify application compatability
-		if err := verifyCompatibilityWithApp(moduleId, fileData.Content.Module.ReleaseBuildApp); err != nil {
+		// verify application compatibility
+		if err := verifyCompatibilityWithApp(fileData.Content.Module.ReleaseBuildApp); err != nil {
 			return modules, err
 		}
 
@@ -645,7 +641,7 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapImportMeta map[uuid.UU
 			}
 
 			// check whether installed module hash changed at all
-			hashedStrEx, err := module_meta.GetHash(moduleId)
+			hashedStrEx, err := module_meta.GetHash_tx(ctx, tx, moduleId)
 			if err != nil {
 				return modules, err
 			}

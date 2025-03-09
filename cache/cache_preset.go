@@ -2,10 +2,10 @@ package cache
 
 import (
 	"context"
-	"r3/db"
 	"sync"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 var (
@@ -29,13 +29,13 @@ func GetPresetRecordId(presetId uuid.UUID) int64 {
 	return v
 }
 
-func renewPresetRecordIds() error {
+func renewPresetRecordIds_tx(ctx context.Context, tx pgx.Tx) error {
 	preset_mx.Lock()
 	defer preset_mx.Unlock()
 
 	presetIdMapRecordId = make(map[uuid.UUID]int64)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT preset_id, record_id_wofk
 		FROM instance.preset_record
 	`)

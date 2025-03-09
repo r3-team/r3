@@ -73,7 +73,7 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 		var loginId int64
 		var admin bool
 		var noAuth bool
-		if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+		if _, _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
 			finishRequest(err)
 			return
 		}
@@ -104,7 +104,18 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		if err := transfer.ImportFromFiles([]string{filePath}); err != nil {
+		tx, err := db.Pool.Begin(ctx)
+		if err != nil {
+			finishRequest(err)
+			return
+		}
+		defer tx.Rollback(ctx)
+
+		if err := transfer.ImportFromFiles_tx(ctx, tx, []string{filePath}); err != nil {
+			finishRequest(err)
+			return
+		}
+		if err := tx.Commit(ctx); err != nil {
 			finishRequest(err)
 			return
 		}

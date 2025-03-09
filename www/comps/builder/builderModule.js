@@ -20,16 +20,16 @@ export {MyBuilderModule as default};
 
 let MyBuilderModuleStartForm = {
 	name:'my-builder-module-start-form',
-	template:`<div class="item shade">
+	template:`<div class="item">
 		<img v-if="!readonly" class="dragAnchor" src="images/drag.png" />
 		<select v-model="roleId" :disabled="readonly">
-			<option :value="null"><i>[{{ capGen.role }}]</i></option>
+			<option :value="null">[{{ capGen.role }}]</option>
 			<option v-for="r in module.roles" :value="r.id">
 				{{ r.name }}
 			</option>
 		</select>
 		<select v-model="formId" :disabled="readonly">
-			<option :value="null"><i>[{{ capApp.startFormDefault }}]</i></option>
+			<option :value="null">[{{ capApp.startFormDefault }}]</option>
 			<option v-for="f in module.forms" :value="f.id">
 				{{ f.name }}
 			</option>
@@ -100,6 +100,8 @@ let MyBuilderModule = {
 					:active="hasChanges"
 					:caption="capGen.button.refresh"
 				/>
+			</div>
+			<div class="area nowrap">
 				<my-button image="visible1.png"
 					@trigger="copyValueDialog(module.name,module.id,module.id)"
 					:caption="capGen.id"
@@ -107,8 +109,8 @@ let MyBuilderModule = {
 			</div>
 		</div>
 		
-		<div class="content default-inputs">
-			<table class="generic-table-vertical">
+		<div class="content default-inputs no-padding">
+			<table class="generic-table-vertical w1200">
 				<tbody>
 					<tr>
 						<td>{{ capGen.name }}</td>
@@ -201,22 +203,20 @@ let MyBuilderModule = {
 					<tr>
 						<td>{{ capApp.startFormByRole }}</td>
 						<td>
-							<div class="item-list">
-								<draggable handle=".dragAnchor" group="start-forms" itemKey="id" animation="100"
-									:fallbackOnBody="true"
-									:list="startForms"
-								>
-									<template #item="{element,index}">
-										<my-builder-module-start-form
-											@remove="startForms.splice(index,1)"
-											@update:modelValue="startForms[index] = $event"
-											:modelValue="element"
-											:module="module"
-											:readonly="readonly"
-										/>
-									</template>
-								</draggable>
-							</div>
+							<draggable class="item-list" handle=".dragAnchor" group="start-forms" itemKey="id" animation="100"
+								:fallbackOnBody="true"
+								:list="startForms"
+							>
+								<template #item="{element,index}">
+									<my-builder-module-start-form
+										@remove="startForms.splice(index,1)"
+										@update:modelValue="startForms[index] = $event"
+										:modelValue="element"
+										:module="module"
+										:readonly="readonly"
+									/>
+								</template>
+							</draggable>
 								
 							<my-button image="add.png"
 								@trigger="addStartForm"
@@ -231,7 +231,7 @@ let MyBuilderModule = {
 						<td>
 							<!-- language entry and header title -->
 							<div class="item-list">
-								<div class="item shade" v-for="(l,i) in languages">
+								<div class="item" v-for="(l,i) in languages">
 									<input type="text"
 										v-model="languages[i]"
 										:disabled="readonly"
@@ -317,8 +317,30 @@ let MyBuilderModule = {
 					</tr>
 					
 					<tr>
-						<td colspan="2"><b>{{ capApp.loginSync }}</b></td>
-						<td>{{ capApp.loginSyncHint }}</td>
+						<td colspan="3"><b>{{ capGen.functions }}</b></td>
+					</tr>
+					<tr>
+						<td>{{ capApp.jsFunctionIdOnLogin }}</td>
+						<td>
+							<div class="row gap">
+								<select
+									@input="applyNullString('jsFunctionIdOnLogin',$event.target.value)"
+									:disabled="readonly"
+									:value="jsFunctionIdOnLogin === null ? '' : jsFunctionIdOnLogin"
+								>
+									<option value="">-</option>
+									<option v-for="fnc in module.jsFunctions.filter(v => v.formId === null)" :value="fnc.id">
+										{{ fnc.name }}
+									</option>
+								</select>
+								<my-button image="open.png"
+									@trigger="$router.push('/builder/js-function/'+jsFunctionIdOnLogin)"
+									:active="jsFunctionIdOnLogin !== null"
+									:captionTitle="capGen.button.open"
+								/>
+							</div>
+						</td>
+						<td>{{ capApp.jsFunctionIdOnLoginHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.pgFunctionIdLoginSync }}</td>
@@ -327,6 +349,7 @@ let MyBuilderModule = {
 								<div class="row gap">
 									<select
 										@input="applyNullString('pgFunctionIdLoginSync',$event.target.value)"
+										:disabled="readonly"
 										:value="pgFunctionIdLoginSync === null ? '' : pgFunctionIdLoginSync"
 									>
 										<option value="">-</option>
@@ -343,6 +366,7 @@ let MyBuilderModule = {
 								<div class="row">
 									<my-button image="add.png"
 										@trigger="setNewLoginSync"
+										:active="!readonly"
 										:caption="capApp.button.loginSyncCreate"
 									/>
 								</div>
@@ -431,6 +455,7 @@ let MyBuilderModule = {
 			iconId:null,
 			iconIdPwa1:null,
 			iconIdPwa2:null,
+			jsFunctionIdOnLogin:null,
 			pgFunctionIdLoginSync:null,
 			name:'',
 			namePwa:null,
@@ -464,6 +489,7 @@ let MyBuilderModule = {
 			|| s.iconId                !== s.module.iconId
 			|| s.iconIdPwa1            !== s.module.iconIdPwa1
 			|| s.iconIdPwa2            !== s.module.iconIdPwa2
+			|| s.jsFunctionIdOnLogin   !== s.module.jsFunctionIdOnLogin
 			|| s.pgFunctionIdLoginSync !== s.module.pgFunctionIdLoginSync
 			|| s.name                  !== s.module.name
 			|| s.namePwa               !== s.module.namePwa
@@ -518,6 +544,7 @@ let MyBuilderModule = {
 			this.iconId                = this.module.iconId;
 			this.iconIdPwa1            = this.module.iconIdPwa1;
 			this.iconIdPwa2            = this.module.iconIdPwa2;
+			this.jsFunctionIdOnLogin   = this.module.jsFunctionIdOnLogin;
 			this.pgFunctionIdLoginSync = this.module.pgFunctionIdLoginSync;
 			this.name                  = this.module.name;
 			this.namePwa               = this.module.namePwa;
@@ -570,7 +597,7 @@ let MyBuilderModule = {
 		
 		// backend calls
 		set() {
-			this.languages.sort(); // for change comparissons
+			this.languages.sort(); // for change comparisons
 			
 			let requests = [
 				ws.prepare('module','set',{
@@ -580,6 +607,7 @@ let MyBuilderModule = {
 					iconId:this.iconId,
 					iconIdPwa1:this.iconIdPwa1,
 					iconIdPwa2:this.iconIdPwa2,
+					jsFunctionIdOnLogin:this.jsFunctionIdOnLogin,
 					pgFunctionIdLoginSync:this.pgFunctionIdLoginSync,
 					name:this.name,
 					namePwa:this.namePwa,

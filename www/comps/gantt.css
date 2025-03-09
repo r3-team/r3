@@ -2,7 +2,7 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
-    border-radius:5px;
+    border-radius:var(--border-input-radius);
 	box-shadow:1px 1px 4px var(--color-shade);
     overflow:auto;
 }
@@ -160,21 +160,15 @@
 }
 .gantt-line-record .record-values.start{
 	margin-left:1px;
-	border-top-left-radius:7px;
-	border-bottom-left-radius:7px;
+	border-top-left-radius:var(--border-input-radius);
+	border-bottom-left-radius:var(--border-input-radius);
 }
 .gantt-line-record .record-values.end{
 	margin-right:3px;
-	border-top-right-radius:7px;
-	border-bottom-right-radius:7px;
+	border-top-right-radius:var(--border-input-radius);
+	border-bottom-right-radius:var(--border-input-radius);
 }
 .gantt-line-record .record-values:hover{
 	color:var(--color-font-bright) !important;
 	background-color:rgba(0,0,0,0.7) !important;
-}
-
-
-/* user overwrites */
-.user-bordersSquared .gantt{
-	border-radius:0px !important;
 }

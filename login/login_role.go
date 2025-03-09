@@ -2,16 +2,15 @@ package login
 
 import (
 	"context"
-	"r3/db"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
-func getRoleIds(ctx context.Context, loginId int64) ([]uuid.UUID, error) {
+func getRoleIds_tx(ctx context.Context, tx pgx.Tx, loginId int64) ([]uuid.UUID, error) {
 	roleIds := make([]uuid.UUID, 0)
 
-	rows, err := db.Pool.Query(ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT role_id
 		FROM instance.login_role
 		WHERE login_id = $1

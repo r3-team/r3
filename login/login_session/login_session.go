@@ -175,23 +175,25 @@ func LogsGet_tx(ctx context.Context, tx pgx.Tx, byString pgtype.Text, limit int,
 	}, nil
 }
 
-func LogsRemoveForNode() error {
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
-
+func LogsRemoveForNode(ctx context.Context) error {
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM instance.login_session
-		WHERE node_id = $1
-	`, cache.GetNodeId()); err != nil {
+	if err := LogsRemoveForNode_tx(ctx, tx); err != nil {
 		return err
 	}
 	return tx.Commit(ctx)
+}
+func LogsRemoveForNode_tx(ctx context.Context, tx pgx.Tx) error {
+	_, err := tx.Exec(ctx, `
+		DELETE FROM instance.login_session
+		WHERE node_id = $1
+	`, cache.GetNodeId())
+
+	return err
 }
 
 // retrieves concurrent session count for limited or not-limited logins
@@ -200,7 +202,7 @@ func logsGetConcurrentForLogin(limitedLogins bool, loginId int64) (cnt int64, ex
 
 	// get count of login sessions, logged for cluster nodes checked in within the last 24h
 	// get whether current login is included in retrieved login sessions
-	err = db.Pool.QueryRow(db.Ctx, `
+	err = db.Pool.QueryRow(context.Background(), `
 		SELECT COUNT(*), COALESCE($3 = ANY(ARRAY_AGG(id)), FALSE)
 		FROM instance.login
 		WHERE id IN (
@@ -250,7 +252,7 @@ func CheckConcurrentAccess(limitedLogin bool, loginId int64, isAdmin bool) error
 	}
 	if !config.GetLicenseActive() {
 		// license used, but expired, block login
-		return handler.CreateErrCode("LIC", handler.ErrCodeLicValidityExpired)
+		return handler.CreateErrCode(handler.ErrContextLic, handler.ErrCodeLicValidityExpired)
 	}
 
 	// license used and active, check concurrent access
@@ -261,7 +263,7 @@ func CheckConcurrentAccess(limitedLogin bool, loginId int64, isAdmin bool) error
 
 	if !existed && cnt >= config.GetLicenseLoginCount(limitedLogin) {
 		// login did not have a session and concurrent limit has been exceeded, block login
-		return handler.CreateErrCode("LIC", handler.ErrCodeLicLoginsReached)
+		return handler.CreateErrCode(handler.ErrContextLic, handler.ErrCodeLicLoginsReached)
 	}
 	return nil
 }

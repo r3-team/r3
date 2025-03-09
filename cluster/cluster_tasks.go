@@ -26,7 +26,7 @@ func CheckInNode() error {
 		UPDATE instance_cluster.node
 		SET date_check_in = $1, hostname = $2, stat_memory = $3
 		WHERE id = $4
-	`, tools.GetTimeUnix(), cache.GetHostname(), (m.Sys / 1024 / 1024), cache.GetNodeId()); err != nil {
+	`, tools.GetTimeUnix(), config.GetHostname(), (m.Sys / 1024 / 1024), cache.GetNodeId()); err != nil {
 		return err
 	}
 
@@ -54,11 +54,11 @@ func CheckInNode() error {
 }
 
 // events relevant to all cluster nodes
-func ClientEventsChanged(updateNodes bool, address string, loginId int64) error {
+func ClientEventsChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string, loginId int64) error {
 	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceFatClient, LoginId: loginId}
 
 	if updateNodes {
-		if err := createEventsForOtherNodes("clientEventsChanged", nil, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "clientEventsChanged", nil, target); err != nil {
 			return err
 		}
 	}
@@ -120,16 +120,16 @@ func CollectionsUpdated(updates []types.ClusterEventCollectionUpdated) {
 		}
 	}
 }
-func ConfigChanged(updateNodes bool, loadConfigFromDb bool, productionModeChange bool) error {
+func ConfigChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, loadConfigFromDb bool, productionModeChange bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes("configChanged", productionModeChange, types.ClusterEventTarget{}); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "configChanged", productionModeChange, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
 
 	// load all config settings from the database
 	if loadConfigFromDb {
-		config.LoadFromDb()
+		config.LoadFromDb_tx(ctx, tx)
 	}
 
 	// inform clients about changed config
@@ -144,7 +144,7 @@ func ConfigChanged(updateNodes bool, loadConfigFromDb bool, productionModeChange
 	config.SetLogLevels()
 	return nil
 }
-func FilesCopied(updateNodes bool, address string, loginId int64,
+func FilesCopied_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string, loginId int64,
 	attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
 
 	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceBrowser, LoginId: loginId}
@@ -155,7 +155,7 @@ func FilesCopied(updateNodes bool, address string, loginId int64,
 	}
 
 	if updateNodes {
-		if err := createEventsForOtherNodes("filesCopied", payload, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "filesCopied", payload, target); err != nil {
 			return err
 		}
 	}
@@ -166,7 +166,7 @@ func FilesCopied(updateNodes bool, address string, loginId int64,
 	}
 	return nil
 }
-func FileRequested(updateNodes bool, address string, loginId int64, attributeId uuid.UUID,
+func FileRequested_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string, loginId int64, attributeId uuid.UUID,
 	fileId uuid.UUID, fileHash string, fileName string, chooseApp bool) error {
 
 	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceFatClient, LoginId: loginId}
@@ -179,7 +179,7 @@ func FileRequested(updateNodes bool, address string, loginId int64, attributeId 
 	}
 
 	if updateNodes {
-		if err := createEventsForOtherNodes("fileRequested", payload, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "fileRequested", payload, target); err != nil {
 			return err
 		}
 	}
@@ -190,7 +190,7 @@ func FileRequested(updateNodes bool, address string, loginId int64, attributeId 
 	}
 	return nil
 }
-func JsFunctionCalled(updateNodes bool, address string, loginId int64, jsFunctionId uuid.UUID, arguments []interface{}) error {
+func JsFunctionCalled_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string, loginId int64, jsFunctionId uuid.UUID, arguments []interface{}) error {
 
 	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceBrowser, LoginId: loginId}
 	payload := types.ClusterEventJsFunctionCalled{
@@ -199,7 +199,7 @@ func JsFunctionCalled(updateNodes bool, address string, loginId int64, jsFunctio
 	}
 
 	if updateNodes {
-		if err := createEventsForOtherNodes("jsFunctionCalled", payload, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "jsFunctionCalled", payload, target); err != nil {
 			return err
 		}
 	}
@@ -210,10 +210,10 @@ func JsFunctionCalled(updateNodes bool, address string, loginId int64, jsFunctio
 	}
 	return nil
 }
-func KeystrokesRequested(updateNodes bool, address string, loginId int64, keystrokes string) error {
+func KeystrokesRequested_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string, loginId int64, keystrokes string) error {
 	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceFatClient, LoginId: loginId}
 	if updateNodes {
-		if err := createEventsForOtherNodes("keystrokesRequested", keystrokes, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "keystrokesRequested", keystrokes, target); err != nil {
 			return err
 		}
 	}
@@ -224,26 +224,26 @@ func KeystrokesRequested(updateNodes bool, address string, loginId int64, keystr
 	}
 	return nil
 }
-func LoginDisabled(updateNodes bool, loginId int64) error {
+func LoginDisabled_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, loginId int64) error {
 	target := types.ClusterEventTarget{LoginId: loginId}
 	if updateNodes {
-		if err := createEventsForOtherNodes("loginDisabled", nil, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "loginDisabled", nil, target); err != nil {
 			return err
 		}
 	}
 	WebsocketClientEvents <- types.ClusterEvent{Content: "kick", Target: target}
 	return nil
 }
-func LoginReauthorized(updateNodes bool, loginId int64) error {
+func LoginReauthorized_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, loginId int64) error {
 	target := types.ClusterEventTarget{LoginId: loginId}
 	if updateNodes {
-		if err := createEventsForOtherNodes("loginReauthorized", nil, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "loginReauthorized", nil, target); err != nil {
 			return err
 		}
 	}
 
 	// renew access cache
-	if err := cache.RenewAccessById(loginId); err != nil {
+	if err := cache.RenewAccessById_tx(ctx, tx, loginId); err != nil {
 		return err
 	}
 
@@ -251,15 +251,15 @@ func LoginReauthorized(updateNodes bool, loginId int64) error {
 	WebsocketClientEvents <- types.ClusterEvent{Content: "renew", Target: target}
 	return nil
 }
-func LoginReauthorizedAll(updateNodes bool) error {
+func LoginReauthorizedAll_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes("loginReauthorizedAll", nil, types.ClusterEventTarget{}); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "loginReauthorizedAll", nil, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}
 
 	// renew access cache for all logins
-	if err := cache.RenewAccessAll(); err != nil {
+	if err := cache.RenewAccessAll_tx(ctx, tx); err != nil {
 		return err
 	}
 
@@ -275,11 +275,11 @@ func MasterAssigned(state bool) error {
 	SchedulerRestart <- true
 	return nil
 }
-func SchemaChanged(updateNodes bool, moduleIds []uuid.UUID) error {
+func SchemaChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, moduleIds []uuid.UUID) error {
 	target := types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser}
 
 	if updateNodes {
-		if err := createEventsForOtherNodes("schemaChanged", moduleIds, target); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "schemaChanged", moduleIds, target); err != nil {
 			return err
 		}
 	}
@@ -294,10 +294,10 @@ func SchemaChanged(updateNodes bool, moduleIds []uuid.UUID) error {
 
 	if len(moduleIds) != 0 {
 		// modules were changed, update schema & access cache
-		if err := cache.UpdateSchema(moduleIds, false); err != nil {
+		if err := cache.UpdateSchema_tx(ctx, tx, moduleIds, false); err != nil {
 			return err
 		}
-		if err := cache.RenewAccessAll(); err != nil {
+		if err := cache.RenewAccessAll_tx(ctx, tx); err != nil {
 			return err
 		}
 
@@ -305,10 +305,10 @@ func SchemaChanged(updateNodes bool, moduleIds []uuid.UUID) error {
 		WebsocketClientEvents <- types.ClusterEvent{Content: "renew"}
 	} else {
 		// no module IDs are given if modules were deleted, module options were changed, or custom captions were updated
-		if err := cache.LoadModuleIdMapMeta(); err != nil {
+		if err := cache.LoadModuleIdMapMeta_tx(ctx, tx); err != nil {
 			return err
 		}
-		if err := cache.LoadCaptionMapCustom(); err != nil {
+		if err := cache.LoadCaptionMapCustom_tx(ctx, tx); err != nil {
 			return err
 		}
 	}
@@ -317,9 +317,9 @@ func SchemaChanged(updateNodes bool, moduleIds []uuid.UUID) error {
 	SchedulerRestart <- true
 	return nil
 }
-func TasksChanged(updateNodes bool) error {
+func TasksChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
 	if updateNodes {
-		if err := createEventsForOtherNodes("tasksChanged", nil, types.ClusterEventTarget{}); err != nil {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "tasksChanged", nil, types.ClusterEventTarget{}); err != nil {
 			return err
 		}
 	}

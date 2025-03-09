@@ -1,12 +1,12 @@
-import srcBase64Icon     from './shared/image.js';
-import {getColumnTitle}  from './shared/column.js';
-import {formOpen}        from './shared/form.js';
-import {getStringFilled} from './shared/generic.js';
-import {getCaption}      from './shared/language.js';
-import {getDateFormat}   from './shared/time.js';
+import srcBase64Icon       from './shared/image.js';
+import {formOpen}          from './shared/form.js';
+import {getStringFilled}   from './shared/generic.js';
+import {getCaption}        from './shared/language.js';
+import {layoutSettleSpace} from './shared/layout.js';
+import {getDateFormat}     from './shared/time.js';
 import {
 	getCollectionColumn,
-	getCollectionValues
+	getConsumersEntries
 } from './shared/collection.js';
 export {MyHeader as default};
 
@@ -276,38 +276,11 @@ let MyHeader = {
 			return cnt;
 		},
 		collectionEntries:(s) => {
-			let out = [];
+			let consumers = [];
 			for(let k in s.collectionIdMap) {
-				for(let i = 0, j = s.collectionIdMap[k].inHeader.length; i < j; i++) {
-					const collection = s.collectionIdMap[k];
-					const consumer   = collection.inHeader[i];
-					
-					if(!consumer.onMobile && s.isMobile)
-						continue;
-					
-					if(s.pwaModuleId !== null && collection.moduleId !== s.pwaModuleId)
-						continue;
-					
-					let value = s.getCollectionValues(
-						collection.id,
-						consumer.columnIdDisplay,
-						true
-					);
-					if(consumer.noDisplayEmpty && (value === null || value === 0 || value === ''))
-						continue;
-					
-					out.push({
-						iconId:collection.iconId,
-						openForm:consumer.openForm,
-						title:s.getColumnTitle(s.getCollectionColumn(
-							collection.id,
-							consumer.columnIdDisplay
-						),collection.moduleId),
-						value:value
-					});
-				}
+				consumers = consumers.concat(s.collectionIdMap[k].inHeader);
 			}
-			return out;
+			return s.getConsumersEntries(consumers);
 		},
 		layoutElementsProcessed:(s) => {
 			let elms   = JSON.parse(JSON.stringify(s.layoutElements));
@@ -394,40 +367,29 @@ let MyHeader = {
 		systemMsgText:       (s) => s.$store.getters.systemMsgText
 	},
 	created() {
-		window.addEventListener('resize',this.windowResized);
+		window.addEventListener('resize',this.resized);
 	},
 	mounted() {
 		this.$watch(() => [this.colorHeaderAccent,this.colorHeaderMain],() => { this.updateMetaThemeColor() },{
 			immediate:true
 		});
-		
-		this.windowResized();
+		this.resized();
 	},
 	unmounted() {
-		window.removeEventListener('resize',this.windowResized);
+		window.removeEventListener('resize',this.resized);
 	},
 	methods:{
 		// externals
 		formOpen,
 		getCaption,
 		getCollectionColumn,
-		getCollectionValues,
-		getColumnTitle,
+		getConsumersEntries,
 		getDateFormat,
 		getStringFilled,
+		layoutSettleSpace,
 		srcBase64Icon,
 		
 		// display
-		layoutAdjust() {
-			this.layoutCheckTimer = null;
-			
-			if(typeof this.$refs.empty === 'undefined' || this.$refs.empty.offsetWidth > 10 || this.layoutElements.length === 0)
-				return;
-			
-			// space insufficient and still elements available to reduce
-			this.layoutElements.shift();       // remove next element
-			this.$nextTick(this.layoutAdjust); // recheck after change
-		},
 		keysLockedMsg() {
 			this.$store.commit('dialog',{
 				captionBody:this.capErr.SEC['002'],
@@ -442,14 +404,13 @@ let MyHeader = {
 			// set meta theme color (for PWA window color)
 			document.querySelector('meta[name="theme-color"]').setAttribute('content',color.toString());
 		},
-		windowResized() {
+		resized() {
 			if(this.layoutCheckTimer !== null)
 				clearTimeout(this.layoutCheckTimer);
 			
 			this.layoutCheckTimer = setTimeout(() => {
-				// reset elements, then wait for layout to settle to check
 				this.layoutElements = JSON.parse(JSON.stringify(this.layoutElementsAvailableInOrder));
-				this.$nextTick(this.layoutAdjust);
+				this.$nextTick(() => this.layoutSettleSpace(this.layoutElements,this.$refs.empty));
 			},300);
 		},
 		

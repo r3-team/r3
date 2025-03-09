@@ -87,9 +87,16 @@ let MyInputRichtext = {
 			return obj;
 		},
 		language:(s) => {
-			switch(s.settings.languageCode) {
-				case 'en_us': return 'en'; break;
-				case 'de_de': return 'de'; break;
+			switch(s.settings.languageCode.substring(0,2)) {
+				case 'ar': return 'ar';    break;
+				case 'en': return 'en';    break;
+				case 'de': return 'de';    break;
+				case 'fr': return 'fr_FR'; break;
+				case 'hu': return 'hu_HU'; break;
+				case 'it': return 'it';    break;
+				case 'lv': return 'lv';    break;
+				case 'ro': return 'ro';    break;
+				case 'zh': return 'zh_CN'; break;
 			}
 			return 'en';
 		},
@@ -130,7 +137,7 @@ let MyInputRichtext = {
 				return this.imageList = [];
 			
 			// file input is either array of files (initial value) or object of changes
-			// keep known initial files if changes occured (we only use stored files)
+			// keep known initial files if changes occurred (we only use stored files)
 			if(!Array.isArray(this.valueFiles))
 				return;
 			

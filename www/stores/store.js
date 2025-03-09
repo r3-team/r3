@@ -56,11 +56,13 @@ const MyStore = Vuex.createStore({
 		},
 		isAdmin:false,                 // user is admin
 		isAtDialog:false,              // app shows generic dialog
+		isAtFavorites:false,           // is the favorites menu entry active?
+		isAtFavoritesEdit:false,       // is the favorites menu entry active and in edit mode?
 		isAtFeedback:false,            // app shows feedback dialog
 		isAtMenu:false,                // user navigated to menu (only relevant if isMobile)
 		isAtModule:false,              // app currently shows a module (instead of Builder, admin panel, settings, etc.)
 		isMobile:false,                // app runs on small screen (probably mobile)
-		isNoAuth:false,                // user logged in without authentication
+		isNoAuth:false,                // user logged in without authentication (public user)
 		keyDownHandlers:[],            // global handlers, reacting for key down events (for hotkey events)
 		license:{},                    // license info (admin only)
 		licenseValid:false,            // license is valid (set and within validity period)
@@ -86,7 +88,7 @@ const MyStore = Vuex.createStore({
 		routingGuards:[],              // functions to call before routing, abort if any returns falls
 		searchDictionaries:[],         // dictionaries used for full text search for this login, ['english', 'german', ...]
 		settings:{},                   // setting values for logged in user, key: settings name
-		sessionTimerStore:{},          // user session timer store for frontent functions,     { moduleId1:{ timerName1:{ id:jsTimerId, isInterval:true }, ... }, ... }
+		sessionTimerStore:{},          // user session timer store for frontend functions,     { moduleId1:{ timerName1:{ id:jsTimerId, isInterval:true }, ... }, ... }
 		system:{},                     // system details (admin only)
 		systemMsg:{                    // system message
 			date0:0,                   // date from
@@ -254,6 +256,8 @@ const MyStore = Vuex.createStore({
 		filesCopy:               (state,payload) => state.filesCopy                = payload,
 		isAdmin:                 (state,payload) => state.isAdmin                  = payload,
 		isAtDialog:              (state,payload) => state.isAtDialog               = payload,
+		isAtFavorites:           (state,payload) => state.isAtFavorites            = payload,
+		isAtFavoritesEdit:       (state,payload) => state.isAtFavoritesEdit        = payload,
 		isAtFeedback:            (state,payload) => state.isAtFeedback             = payload,
 		isAtMenu:                (state,payload) => state.isAtMenu                 = payload,
 		isAtModule:              (state,payload) => state.isAtModule               = payload,
@@ -407,6 +411,8 @@ const MyStore = Vuex.createStore({
 		filesCopy:               (state) => state.filesCopy,
 		isAdmin:                 (state) => state.isAdmin,
 		isAtDialog:              (state) => state.isAtDialog,
+		isAtFavorites:           (state) => state.isAtFavorites,
+		isAtFavoritesEdit:       (state) => state.isAtFavoritesEdit,
 		isAtFeedback:            (state) => state.isAtFeedback,
 		isAtMenu:                (state) => state.isAtMenu,
 		isAtModule:              (state) => state.isAtModule && state.moduleIdLast !== null,

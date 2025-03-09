@@ -1,6 +1,7 @@
 import MyCodeEditor       from '../codeEditor.js';
 import MyBuilderFormInput from './builderFormInput.js';
 import {copyValueDialog}  from '../shared/generic.js';
+import {variableValueGet} from '../shared/variable.js';
 import {
 	getAttributeContentUse,
 	getAttributeContentsByUse,
@@ -40,6 +41,12 @@ let MyBuilderVariable = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
+				</div>
+				<div class="area">
+					<my-button image="visible1.png"
+						@trigger="copyValueDialog(values.name,variableId,variableId)"
+						:caption="capGen.id"
+					/>
 					<my-button image="delete.png"
 						@trigger="delAsk"
 						:active="!readonly"
@@ -49,19 +56,13 @@ let MyBuilderVariable = {
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
+			<div class="content no-padding default-inputs">
 				<table class="generic-table-vertical">
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td>
-								<div class="row gap centered">
-									<input v-focus v-model="values.name" :disabled="readonly" />
-									<my-button image="visible1.png"
-										@trigger="copyValueDialog(values.name,variableId,variableId)"
-										:caption="capGen.id"
-									/>
-								</div>
+								<input v-focus v-model="values.name" :disabled="readonly" />
 								<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
 							</td>
 							<td>{{ capGen.internalName }}</td>
@@ -80,6 +81,16 @@ let MyBuilderVariable = {
 						</tr>
 						<tr v-if="values.formId === null">
 							<td colspan="3"><i>{{ capApp.global }}</i></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.defaultValue }}</td>
+							<td colspan="2">
+								<input
+									@input="$event.target.value !== '' ? values.def = $event.target.value : values.def = null"
+									:disabled="readonly"
+									:value="values.def !== null ? values.def : ''"
+								/>
+							</td>
 						</tr>
 						<tr>
 							<td>{{ capGen.comments }}</td>
@@ -102,7 +113,7 @@ let MyBuilderVariable = {
 							</td>
 						</tr>
 						<tr>
-							<td class="grouping">{{ capApp.inputOptions }}</td>
+							<td colspan="999" class="grouping">{{ capApp.inputOptions }}</td>
 						</tr>
 						<tr>
 							<td>{{ capAppAtr.usedFor }}</td>
@@ -119,6 +130,7 @@ let MyBuilderVariable = {
 											<option value="iframe"  >{{ capAppAtr.option.iframe }}</option>
 											<option value="drawing" >{{ capAppAtr.option.drawing }}</option>
 											<option value="boolean" >{{ capAppAtr.option.boolean }}</option>
+											<option value="barcode" >{{ capAppAtr.option.barcode }}</option>
 										</optgroup>
 										<optgroup :label="capAppAtr.datetimes">
 											<option value="datetime">{{ capAppAtr.option.datetime }}</option>
@@ -181,14 +193,13 @@ let MyBuilderVariable = {
 		// simple
 		canSave:   (s) => !s.readonly && s.hasChanges && !s.nameTaken,
 		hasChanges:(s) => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
-		preview:   (s) => s.variableIdMapGlobal[s.variableId] !== undefined ? s.variableIdMapGlobal[s.variableId] : null,
+		preview:   (s) => s.variableValueGet(s.variableId),
 		title:     (s) => s.capApp.edit.replace('{NAME}',s.values.name),
 		
 		// stores
 		formIdMap:          (s) => s.$store.getters['schema/formIdMap'],
 		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
 		variableIdMap:      (s) => s.$store.getters['schema/variableIdMap'],
-		variableIdMapGlobal:(s) => s.$store.getters.variableIdMapGlobal,
 		capApp:             (s) => s.$store.getters.captions.builder.variable,
 		capAppAtr:          (s) => s.$store.getters.captions.builder.attribute,
 		capGen:             (s) => s.$store.getters.captions.generic
@@ -206,6 +217,7 @@ let MyBuilderVariable = {
 		getAttributeContentUse,
 		getAttributeContentsByUse,
 		getAttributeIcon,
+		variableValueGet,
 		
 		// actions
 		handleHotkeys(e) {

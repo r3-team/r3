@@ -31,7 +31,6 @@ var (
 )
 
 func RunAll() error {
-
 	ldapIdMap := cache.GetLdapIdMap()
 
 	if len(ldapIdMap) != 0 && !config.GetLicenseActive() {
@@ -40,14 +39,14 @@ func RunAll() error {
 	}
 
 	for _, ldap := range ldapIdMap {
-		if err := Run(ldap.Id); err != nil {
+		if err := run(ldap.Id); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func Run(ldapId int32) error {
+func run(ldapId int32) error {
 
 	ldapConn, ldap, err := ldap_conn.ConnectAndBind(ldapId)
 	if err != nil {
@@ -164,7 +163,7 @@ func Run(ldapId int32) error {
 
 			for _, entry := range response.Entries {
 
-				// key attribute is used to uniquely identifiy an user
+				// key attribute is used to uniquely identify a user
 				// MS AD uses binary for some (like objectGUID), encode base64 if invalid UTF8
 				var key string
 				keyRaw := entry.GetRawAttributeValue(ldap.KeyAttribute)

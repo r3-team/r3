@@ -27,6 +27,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+var (
+	defaultGetters = []string{"limit", "offset", "verbose"}
+)
+
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if blocked := bruteforce.Check(r); blocked {
@@ -55,7 +59,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var loginId int64
 	var admin bool
 	var noAuth bool
-	if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+	_, languageCode, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth)
+	if err != nil {
 		abort(http.StatusUnauthorized, err, handler.ErrUnauthorized)
 		bruteforce.BadAttempt(r)
 		return
@@ -156,20 +161,29 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// parse general getters
+	// parse URL getters
 	var getters struct {
 		limit   int
 		offset  int
 		verbose bool
+
+		filters map[string]string
 	}
+	getters.filters = make(map[string]string)
 	getters.limit = api.LimitDef
 	getters.verbose = api.VerboseDef
 
-	for getter, value := range r.URL.Query() {
-		if len(value) == 1 && getter == "limit" || getter == "offset" || getter == "verbose" {
-			n, err := strconv.Atoi(value[0])
+	for getter, values := range r.URL.Query() {
+		if len(values) != 1 {
+			// https://system?p1=123&p1=456 would result in multiple values for getter 'p1', this is currently not supported
+			continue
+		}
+
+		if slices.Contains(defaultGetters, getter) {
+			// default getters
+			n, err := strconv.Atoi(values[0])
 			if err != nil {
-				abort(http.StatusBadRequest, err, fmt.Sprintf("invalid value '%s' for %s", value[0], getter))
+				abort(http.StatusBadRequest, err, fmt.Sprintf("invalid value '%s' for %s", values[0], getter))
 				return
 			}
 			switch getter {
@@ -180,18 +194,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			case "verbose":
 				getters.verbose = n == 1
 			}
+		} else {
+			if isGet {
+				// filter getters, only relevant for GET calls
+				getters.filters[getter] = values[0]
+			}
 		}
-	}
-
-	// get login language code (for filters)
-	var languageCode string
-	if err := db.Pool.QueryRow(ctx, `
-		SELECT language_code
-		FROM instance.login_setting
-		WHERE login_id = $1
-	`, loginId).Scan(&languageCode); err != nil {
-		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
-		return
 	}
 
 	// get valid module language code (for captions)
@@ -302,6 +310,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Offset:      getters.offset,
 		}
 
+		if api.Query.FixedLimit != 0 && api.Query.FixedLimit < dataGet.Limit {
+			dataGet.Limit = api.Query.FixedLimit
+		}
+
 		// abort if requested limit exceeds max limit
 		// better to abort as smaller than requested result count might suggest the absence of more data
 		if api.LimitMax < dataGet.Limit {
@@ -324,18 +336,19 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		// build expressions from columns
 		for _, column := range api.Columns {
-			dataGet.Expressions = append(dataGet.Expressions,
-				data_query.ConvertColumnToExpression(column, loginId, languageCode))
+			dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertColumnToExpression(
+				column, loginId, languageCode, getters.filters))
 		}
 
-		// apply query filters
+		// apply filters
 		dataGet.Filters = data_query.ConvertQueryToDataFilter(
-			api.Query.Filters, loginId, languageCode)
+			api.Query.Filters, loginId, languageCode, getters.filters)
 
 		// add record filter
 		if recordId != 0 {
 			dataGet.Filters = append(dataGet.Filters, types.DataGetFilter{
 				Connector: "AND",
+				Index:     0,
 				Operator:  "=",
 				Side0: types.DataGetFilterSide{
 					AttributeId: pgtype.UUID{

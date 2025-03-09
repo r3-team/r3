@@ -82,6 +82,11 @@ const MyRouter = VueRouter.createRouter({
 		meta:{ atModule:true },
 		props:true
 	},{
+		path:'/app/:moduleName/:moduleNameChild?/form/:formId/fav/:favoriteIdString/:recordIdString(\\d+)?',
+		component:MyGoForm,
+		meta:{ atModule:true },
+		props:true
+	},{
 		path:'/admin',
 		redirect:'/admin/config',
 		component:MyAdmin,

@@ -2,17 +2,16 @@ package form
 
 import (
 	"context"
-	"r3/db"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
-func getFunctions(formId uuid.UUID) ([]types.FormFunction, error) {
+func getFunctions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.FormFunction, error) {
 	fncs := make([]types.FormFunction, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT js_function_id, event, event_before
 		FROM app.form_function
 		WHERE form_id = $1

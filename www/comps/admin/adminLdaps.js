@@ -35,7 +35,7 @@ let MyAdminLdaps = {
 							<td>
 								<div class="row gap">
 									<my-button image="download.png"
-										@trigger="runImport(l.id)"
+										@trigger="runImports"
 										:active="licenseValid"
 										:caption="capApp.button.import"
 									/>
@@ -60,7 +60,7 @@ let MyAdminLdaps = {
 				<div class="entry-actions">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="hasChanges"
+						:active="canSave"
 						:caption="capGen.button.save"
 					/>
 					<my-button
@@ -120,7 +120,13 @@ let MyAdminLdaps = {
 						</tr>
 						<tr>
 							<td>{{ capApp.searchDn }}</td>
-							<td><input v-model="searchDn" :placeholder="capApp.searchDnHint" /></td>
+							<td>
+								<input
+									v-model="searchDn"
+									:disabled="!isNew"
+									:placeholder="capApp.searchDnHint"
+								/>
+							</td>
 						</tr>
 						<template v-if="showExpert">
 							<tr>
@@ -338,7 +344,8 @@ let MyAdminLdaps = {
 		},
 		
 		// simple
-		isNew:(s) => s.idEdit === 0,
+		canSave:(s) => s.hasChanges && s.searchDn !== '',
+		isNew:  (s) => s.idEdit === 0,
 		
 		// stores
 		modules:     (s) => s.$store.getters['schema/modules'],
@@ -421,11 +428,14 @@ let MyAdminLdaps = {
 		},
 		
 		// backend calls
-		runImport(id) {
-			ws.send('ldap','import',{id:id},true).then(
+		runImports() {
+			ws.send('task','run',{
+				clusterMasterOnly:true,
+				taskName:'importLdapLogins'
+			},true).then(
 				() => {
 					this.$store.commit('dialog',{
-						captionBody:this.capApp.dialog.importDone
+						captionBody:this.capApp.dialog.importPlanned
 					});
 				},
 				this.$root.genericError

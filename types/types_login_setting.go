@@ -4,7 +4,6 @@ import "github.com/jackc/pgx/v5/pgtype"
 
 type Settings struct {
 	BoolAsIcon         bool        `json:"boolAsIcon"`
-	BordersAll         bool        `json:"bordersAll"`
 	BordersSquared     bool        `json:"bordersSquared"`
 	ColorClassicMode   bool        `json:"colorClassicMode"`
 	ColorHeader        pgtype.Text `json:"colorHeader"`
@@ -14,6 +13,7 @@ type Settings struct {
 	Dark               bool        `json:"dark"`
 	FontFamily         string      `json:"fontFamily"`
 	FontSize           int         `json:"fontSize"`
+	FormActionsAlign   string      `json:"formActionsAlign"`
 	HeaderCaptions     bool        `json:"headerCaptions"`
 	HeaderModules      bool        `json:"headerModules"`
 	HintUpdateVersion  int         `json:"hintUpdateVersion"`
@@ -26,6 +26,7 @@ type Settings struct {
 	PageLimit          int         `json:"pageLimit"`
 	Pattern            pgtype.Text `json:"pattern"`
 	SearchDictionaries []string    `json:"searchDictionaries"`
+	ShadowsInputs      bool        `json:"shadowsInputs"`
 	Spacing            int         `json:"spacing"`
 	SundayFirstDow     bool        `json:"sundayFirstDow"`
 	TabRemember        bool        `json:"tabRemember"`

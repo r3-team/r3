@@ -7,7 +7,7 @@ let MyAdminOauthClient = {
 	components:{ MyInputDate },
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
 		
-		<div class="contentBox admin-oauth-client float">
+		<div class="contentBox admin-oauth-client scroll float">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/lockCog.png" />
@@ -39,6 +39,8 @@ let MyAdminOauthClient = {
 						:active="!readonly"
 						:caption="capGen.button.new"
 					/>
+				</div>
+				<div class="area">
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="delAsk"
@@ -49,8 +51,8 @@ let MyAdminOauthClient = {
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
-				<table class="generic-table-vertical fullWidth">
+			<div class="content no-padding default-inputs">
+				<table class="generic-table-vertical">
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}*</td>
@@ -215,7 +217,7 @@ let MyAdminOauthClient = {
 		},
 		reloadAndClose() {
 			ws.send('oauthClient','reload',{},true).then(
-				this.$emit('close'),
+				() => this.$emit('close'),
 				this.$root.genericError
 			);
 		},

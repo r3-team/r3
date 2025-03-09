@@ -3,7 +3,6 @@ package article
 import (
 	"context"
 	"errors"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
@@ -58,11 +57,11 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(moduleId uuid.UUID) ([]types.Article, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Article, error) {
 
 	articles := make([]types.Article, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, name
 		FROM app.article
 		WHERE module_id = $1
@@ -83,7 +82,7 @@ func Get(moduleId uuid.UUID) ([]types.Article, error) {
 	}
 
 	for i, a := range articles {
-		articles[i].Captions, err = caption.Get("article", a.Id, []string{"articleBody", "articleTitle"})
+		articles[i].Captions, err = caption.Get_tx(ctx, tx, "article", a.Id, []string{"articleBody", "articleTitle"})
 		if err != nil {
 			return articles, err
 		}

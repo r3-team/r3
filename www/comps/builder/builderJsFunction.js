@@ -1,11 +1,14 @@
 import MyBuilderCaption   from './builderCaption.js';
 import MyBuilderQuery     from './builderQuery.js';
 import MyCodeEditor       from '../codeEditor.js';
-import {isAttributeFiles} from '../shared/attribute.js';
 import {getFieldMap}      from '../shared/form.js';
 import {copyValueDialog}  from '../shared/generic.js';
 import {getJoinsIndexMap} from '../shared/query.js';
 import MyTabs             from '../tabs.js';
+import {
+	getAttributeIcon,
+	isAttributeFiles
+} from '../shared/attribute.js';
 import {
 	getDependentModules,
 	getFormEntityMapRef,
@@ -62,14 +65,16 @@ let MyBuilderJsFunction = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
-					<my-button image="visible1.png"
-						@trigger="copyValueDialog(name,id,id)"
-						:caption="capGen.id"
-					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
 						:caption="capGen.preview"
 						:image="showPreview ? 'checkbox1.png' : 'checkbox0.png'"
+					/>
+				</div>
+				<div class="area nowrap">
+					<my-button image="visible1.png"
+						@trigger="copyValueDialog(name,id,id)"
+						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
 						@trigger="delAsk"
@@ -106,7 +111,7 @@ let MyBuilderJsFunction = {
 				:entriesText="[capApp.placeholders,capGen.properties]"
 			/>
 			
-			<div class="content padding default-inputs">
+			<div class="content default-inputs" :class="{ 'no-padding':tabTarget !== 'content' }">
 				
 				<template v-if="tabTarget === 'content'">
 					<div class="message" v-html="capApp.entityInput"></div>
@@ -318,7 +323,7 @@ let MyBuilderJsFunction = {
 									:image="radioIcon('jsFunction',fnc.id)"
 									:naked="true"
 								/>
-								<div class="row centered">
+								<div class="row gap centered">
 									<my-button image="question.png"
 										@trigger="showHelp(fnc.name+'()',getFunctionHelp('js',fnc,builderLanguage))"
 										:active="getFunctionHelp('js',fnc,builderLanguage) !== ''"
@@ -362,7 +367,7 @@ let MyBuilderJsFunction = {
 									:image="radioIcon('pgFunction',fnc.id)"
 									:naked="true"
 								/>
-								<div class="row centered">
+								<div class="row gap centered">
 									<my-button image="question.png"
 										@trigger="showHelp(fnc.name+'()',getFunctionHelp('pg',fnc,builderLanguage))"
 										:active="getFunctionHelp('pg',fnc,builderLanguage) !== ''"
@@ -427,7 +432,7 @@ let MyBuilderJsFunction = {
 							<div class="entity-title">
 								<my-button
 									@trigger="toggleVariableShow(v.id)"
-									:image="holderVariableIdsOpen.includes(v.id) ? 'triangleDown.png' : 'triangleRight.png'"
+									:images="[holderVariableIdsOpen.includes(v.id) ? 'triangleDown.png' : 'triangleRight.png',v.icon]"
 									:naked="true"
 									:caption="v.formId === null ? '[' + capGen.global + '] ' + v.name : v.name"
 									:captionTitle="v.comment === null ? v.name : v.name + ', ' + v.comment"
@@ -457,7 +462,7 @@ let MyBuilderJsFunction = {
 				</template>
 				
 				<template v-if="tabTarget === 'properties'">
-					<table class="generic-table-vertical tight fullWidth">
+					<table class="generic-table-vertical">
 						<tbody>
 							<tr>
 								<td>{{ capGen.name }}</td>
@@ -628,6 +633,25 @@ let MyBuilderJsFunction = {
 			}
 			return out.sort((a, b) => a.ref - b.ref);
 		},
+		variablesSorted:(s) => {
+			let out = [];
+			const addVariable = v => {
+				v.icon = getAttributeIcon(v.content,v.contentUse,false,false);
+				out.push(v);
+			};
+
+			// form assigned variables
+			for(const v of s.moduleIdMap[s.module.id].variables) {
+				if(v.formId === s.formId && s.formId !== null)
+					addVariable(v);
+			}
+			// global variables
+			for(const v of s.moduleIdMap[s.module.id].variables) {
+				if(v.formId === null)
+					addVariable(v);
+			}
+			return out;
+		},
 		hasChanges:(s) => s.name     !== s.jsFunction.name
 			|| s.codeArgs            !== s.jsFunction.codeArgs
 			|| s.codeFunction        !== s.placeholdersSet(s.jsFunction.codeFunction)
@@ -709,8 +733,6 @@ let MyBuilderJsFunction = {
 		},
 		jsFunctionsSorted:(s) => s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === s.formId && s.formId !== null).concat(
 			s.moduleIdMap[s.holderFncFrontendModuleId].jsFunctions.filter(v => v.formId === null)),
-		variablesSorted:(s) => s.moduleIdMap[s.module.id].variables.filter(v => v.formId === s.formId && s.formId !== null).concat(
-			s.moduleIdMap[s.module.id].variables.filter(v => v.formId === null)),
 		
 		// simple
 		entityIdMapRef:    (s) => s.formId === null ? {} : s.getFormEntityMapRef(s.form.fields,s.form.actions),
@@ -739,6 +761,7 @@ let MyBuilderJsFunction = {
 	methods:{
 		// externals
 		copyValueDialog,
+		getAttributeIcon,
 		getDependentModules,
 		getFieldIcon,
 		getFieldTitle,
@@ -936,7 +959,7 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace backend function placeholders
-			// stored as: app.call_backend({r3_organizations.get_name_by_id},12...
+			// stored as: app.call_backend({module.function},12...
 			pat = new RegExp(`${prefix}\.call_backend\\(\{(${dbChars})\.(${dbChars})\}`,'g');
 			body = body.replace(pat,(match,modName,fncName) => {
 				if(this.moduleNameMap[modName] === undefined)
@@ -960,8 +983,8 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace global frontend function placeholders
-			// stored as: app.call_frontend({r3_organizations.add_numbers},12...
-			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.(.+)\}`,'g');
+			// stored as: app.call_frontend({module.function},12...
+			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.\}]+)\}`,'g');
 			body = body.replace(pat,(match,modName,fncName) => {
 				if(this.moduleNameMap[modName] === undefined)
 					return match;
@@ -977,8 +1000,8 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace form assigned frontend function placeholders
-			// stored as: app.call_frontend({r3_organizations.contact.set_defaults},12...
-			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.]+)\.(.+)\}`,'g');
+			// stored as: app.call_frontend({module.form.function},12...
+			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.\}]+)\.([^\.\}]+)\}`,'g');
 			body = body.replace(pat,(match,modName,frmName,fncName) => {
 				if(this.form === false || this.moduleNameMap[modName] === undefined)
 					return match;
@@ -994,7 +1017,7 @@ let MyBuilderJsFunction = {
 			
 			// replace global variable placeholders
 			// stored as: app.get_variable({module.variable})
-			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.(.+)\}`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.\}]+)\}`,'g');
 			body = body.replace(pat,(match,mode,modName,vaName) => {
 				if(this.moduleNameMap[modName] !== undefined) {
 					const mod = this.moduleNameMap[modName];
@@ -1008,8 +1031,8 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace form assigned variable placeholders
-			// stored as: app.get_variable({module.variable})
-			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.]+)\.(.+)\}`,'g');
+			// stored as: app.get_variable({module.form.variable})
+			pat = new RegExp(`${prefix}\.(get|set)_variable\\(\{(${dbChars})\.([^\.\}]+)\.([^\.\}]+)\}`,'g');
 			body = body.replace(pat,(match,mode,modName,frmName,vaName) => {
 				if(this.form !== false && this.moduleNameMap[modName] !== undefined) {
 					const mod = this.moduleNameMap[modName];

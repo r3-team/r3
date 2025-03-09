@@ -1097,7 +1097,7 @@ let MySettings = {
 		MySettingsEncryption,
 		MySettingsFixedTokens
 	},
-	template:`<div class="settings contentBox grow float">
+	template:`<div class="settings contentBox grow scroll float">
 		<div class="top lower">
 			<div class="area">
 				<img class="icon" src="images/person.png" />
@@ -1158,7 +1158,7 @@ let MySettings = {
 							<td>{{ capApp.searchDictionaries }}</td>
 							<td>
 								<div class="column gap">
-									<div class="row gap">
+									<div class="row centered gap">
 										<select v-model="searchDictionaryNew" @change="dictAdd($event.target.value)">
 											<option value="">{{ capApp.searchDictionaryNew }}</option>
 											<option v-for="d in searchDictionaries.filter(v => !settingsInput.searchDictionaries.includes(v) && v !== 'simple')">
@@ -1222,10 +1222,10 @@ let MySettings = {
 				<table>
 					<tbody>
 						<tr>
-							<td>{{ capApp.borders }}</td>
+							<td>{{ capGen.inputs }}</td>
 							<td>
 								<div class="row gap">
-									<my-button-check v-model="settingsInput.bordersAll"     :caption="capGen.more" />
+									<my-button-check v-model="settingsInput.shadowsInputs"  :caption="capGen.shadows" />
 									<my-button-check v-model="settingsInput.bordersSquared" :caption="capApp.bordersSquared" />
 								</div>
 							</td>
@@ -1277,6 +1277,16 @@ let MySettings = {
 							</td>
 						</tr>
 						<tr class="default-inputs">
+							<td>{{ capApp.formActionsAlign }}</td>
+							<td>
+								<select v-model.number="settingsInput.formActionsAlign">
+									<option value="left">{{ capGen.alignmentHor.left }}</option>
+									<option value="center">{{ capGen.alignmentHor.center }}</option>
+									<option value="right">{{ capGen.alignmentHor.right }}</option>
+								</select>
+							</td>
+						</tr>
+						<tr class="default-inputs">
 							<td>{{ capApp.pattern }}</td>
 							<td>
 								<select v-model="settingsInput.pattern">
@@ -1321,7 +1331,7 @@ let MySettings = {
 								</select>
 							</td>
 						</tr>
-						<tr v-if="!settingsInput.colorClassicMode">
+						<tr class="default-inputs" v-if="!settingsInput.colorClassicMode">
 							<td>{{ capApp.colorHeader }}</td>
 							<td><my-input-color v-model="settingsInput.colorHeader" :allowNull="true" /></td>
 						</tr>
@@ -1332,7 +1342,7 @@ let MySettings = {
 						<tr>
 							<td colspan="2"><b>{{ capApp.titleSubMenu }}</b></td>
 						</tr>
-						<tr>
+						<tr class="default-inputs">
 							<td>{{ capApp.colorMenu }}</td>
 							<td><my-input-color v-model="settingsInput.colorMenu" :allowNull="true" /></td>
 						</tr>

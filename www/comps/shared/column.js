@@ -40,8 +40,11 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
 			alignEnd:c.styles.includes('alignEnd'),
 			alignMid:c.styles.includes('alignMid'),
 			bold:c.styles.includes('bold'),
+			boolAtrIcon:c.styles.includes('boolAtrIcon'),
 			clipboard:c.styles.includes('clipboard'),
 			italic:c.styles.includes('italic'),
+			monospace:c.styles.includes('monospace'),
+			previewLarge:c.styles.includes('previewLarge'),
 			vertical:c.styles.includes('vertical'),
 			wrap:c.styles.includes('wrap')
 		};
@@ -114,7 +117,7 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 	// process finished batches
 	for(let i = 0, j = batches.length; i < j; i++) {
 		if(batches[i].basis !== 0)
-			batches[i].style = `max-width:${batches[i].basis}px`;
+			batches[i].style = `width:${batches[i].basis}px`;
 		
 		batches[i].orderIndexesUsed     = getOrderIndexesFromColumnBatch(batches[i],columns,orders);
 		batches[i].orderIndexesSmallest = batches[i].orderIndexesUsed.length !== 0 ? Math.min(...batches[i].orderIndexesUsed) : 999;
@@ -175,12 +178,13 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 		const a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
 		
 		// anything that can be counted can serve as aggregation
-		// sub queries and already aggregated colums are not supported
+		// sub queries and already aggregated columns are not supported
 		if(!c.subQuery
 			&& c.aggregator === null
 			&& !a.encrypted
 			&& a.contentUse !== 'color'
 			&& a.contentUse !== 'drawing'
+			&& a.contentUse !== 'barcode'
 			&& !isAttributeFiles(a.content)
 			&& !isAttributeBoolean(a.content)
 			&& !isAttributeString(a.content)

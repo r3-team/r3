@@ -71,12 +71,11 @@ let MyButton = {
 		classes:(s) => {
 			return {
 				adjusts:s.adjusts,
+				background:!s.naked,
 				cancel:s.cancel,
 				clickable:s.active,
-				inactive:!s.active,
 				large:s.large,
-				naked:s.naked,
-				noHighlight:!s.active
+				naked:s.naked
 			};
 		}
 	},
@@ -129,14 +128,21 @@ let MyButtonCheck = {
 		:active="!readonly"
 		:caption="caption"
 		:captionTitle="captionTitle"
-		:image="modelValue ? 'checkbox1.png' : 'checkbox0.png'"
+		:image="image"
 		:naked="true"
 	/>`,
 	props:{
 		caption:     { type:String,  required:true },
 		captionTitle:{ type:String,  required:false, default:'' },
 		modelValue:  { type:Boolean, required:true },
-		readonly:    { type:Boolean, required:false, default:false }
+		readonly:    { type:Boolean, required:false, default:false },
+		reversed:    { type:Boolean, required:false, default:false }
 	},
-	emits:['update:modelValue']
+	emits:['update:modelValue'],
+	computed:{
+		image:(s) => {
+			const v = s.reversed ? !s.modelValue : s.modelValue;
+			return v ? 'checkbox1.png' : 'checkbox0.png';
+		}
+	}
 };

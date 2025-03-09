@@ -163,7 +163,7 @@
 			"description": "Cette connexion LDAP importe les noms d'utilisateur et permet l'authentification avec les identifiants LDAP.<br />Les appartenances à des groupes LDAP peuvent être utilisées pour attribuer automatiquement des rôles.",
 			"dialog": {
 				"delete": "Êtes-vous sûr de vouloir supprimer cette connexion LDAP ?",
-				"importDone": "L'importation a été terminée",
+				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "Le test de connexion a réussi"
 			},
 			"groupDn": "DN du groupe",
@@ -236,6 +236,8 @@
 			},
 			"dialog": {
 				"delete": "Êtes-vous sûr de vouloir supprimer cet utilisateur?<br /><br />Cette action est irréversible.",
+				"notUniqueEmail": "The same email address has also been assigned to a different user.",
+				"notUniqueName": "The same username has already been assigned to a different user.",
 				"resetTotp": "Cela réinitialisera toutes les méthodes d'authentification multi-facteurs (MFA) pour cet utilisateur. L'accès au système sera ensuite possible uniquement avec le nom d'utilisateur et le mot de passe.<br /><br />La réinitialisation du MFA n'affecte pas le chiffrement de bout en bout.<br /><br />Voulez-vous continuer ?"
 			},
 			"error": {
@@ -686,6 +688,7 @@
 			"onDelete": "Action lors de la suppression",
 			"onUpdate": "Action lors de la modification",
 			"option": {
+				"barcode": "Barcode/QR code",
 				"boolean": "Oui/non",
 				"color": "Couleur",
 				"date": "Date",
@@ -724,6 +727,7 @@
 			"titleHint": "Le titre peut être traduit dans les langues d'application disponibles. Il est affiché aux utilisateurs s'il n'est pas écrasé par un titre de champ ou de colonne.",
 			"usedFor": "Type de valeur",
 			"usedForHint": {
+				"barcode": "A barcode or QR code value. Can store various formats. Corresponding inputs can be used to scan barcodes / QR codes but also generate them based on the current value.",
 				"boolean": "Valeur vrai/faux. Utilisé pour les valeurs oui/non simples. Si une valeur vide est autorisée, 3 valeurs possibles existent : vrai/faux/vide.",
 				"color": "Valeurs de couleur. Peut être utilisé dans la plupart des vues pour styliser les sorties pour montrer les caractéristiques d'un enregistrement, comme son importance, basé sur une catégorie attribuée.",
 				"date": "Une valeur de date. Utilisé pour les valeurs de date uniquement, comme la date de naissance ou la date d'achat.",
@@ -790,7 +794,8 @@
 			"formIdOpen": "Ouvrir le formulaire",
 			"multiValue": "Entrée multiple",
 			"noDisplayEmpty": "Masquer si vide",
-			"onMobile": "Afficher sur mobile"
+			"onMobile": "Afficher sur mobile",
+			"showRowCount": "Show result count instead"
 		},
 		"form": {
 			"actions": {
@@ -829,21 +834,22 @@
 			"collectionHint": "* La collection n'est affectée que si elle est sélectionnée comme critère de filtre dans la requête de données.",
 			"collectionIdDef": "Valeur(s) par défaut de la collection",
 			"collectionTitle": "Collection de filtres",
-			"columnAlignment": "Alignment",
 			"columnBatch": "Lot de colonnes (glissez-déposez des colonnes pour les développer)",
 			"columnBatchDir": "Alignement des colonnes (gauche-droite, haut-bas)",
 			"columnBatchOff": "Supprimer la colonne du lot",
+			"columnBoolAtrIcon": "Show attribute icon if TRUE",
 			"columnClipboard": "Presse-papiers",
 			"columnHeaderData": "Récupération des données",
 			"columnLength": "Longueur (caractères)",
 			"columnLength0": "pas de limite",
+			"columnLengthFiles": "File count",
+			"columnPreviewLarge": "Large preview",
 			"columnShowDefault": "Show by default",
 			"columnShowDefaultMobile": "Show by default on mobile",
 			"columnShowDefaultMobileOff": "Not shown by default on mobile",
 			"columnShowDefaultOff": "Not shown by default",
 			"columnSize": "Taille (pixel)",
 			"columnSize0": "automatique",
-			"columnStyles": "Styles",
 			"columnTitle": "Titre",
 			"columnWrap": "Retour à la ligne du texte",
 			"containerContent": "Contenu du conteneur",
@@ -863,6 +869,17 @@
 			"display": "Affichage",
 			"distincted": "Distinct",
 			"dragDrop": "Placez les champs ici via le glisser-déposer depuis la sélection à droite pour les ajouter au formulaire.",
+			"effectData": {
+				"d-1": "nothing",
+				"d0": "default",
+				"d1": "delete",
+				"d2": "update",
+				"d3": "update + delete",
+				"d4": "create",
+				"d5": "create + delete",
+				"d6": "create + update",
+				"d7": "create + update + delete"
+			},
 			"error": {
 				"formStateFieldRemovedCondition": "Le champ supprimé est toujours référencé comme condition de l'état du formulaire '{NAME}'.",
 				"formStateFieldRemovedEffect": "Le champ supprimé est toujours référencé comme effet de l'état du formulaire '{NAME}'."
@@ -870,7 +887,6 @@
 			"fieldAttributeIdAltDateTo": "Date de fin (période)",
 			"fieldAttributeIdAltRichtextFiles": "Accès aux fichiers de texte enrichi",
 			"fieldDefault": "Valeur par défaut",
-			"fieldDefaultHint": "Vérifiez la documentation pour les espaces réservés",
 			"fieldDefaultPresetIds": "Préréglage(s) par défaut",
 			"fieldDirection": "Direction",
 			"fieldHelp": "Texte d'aide",
@@ -934,6 +950,7 @@
 			"headerSize": "Taille de l'en-tête",
 			"helpText": "Texte d'aide",
 			"hidden": "Le champ est caché par défaut",
+			"hideInputs": "Hide inputs",
 			"icon": "Icône du formulaire",
 			"ics": "Abonnements iCAL",
 			"jsFunctionButton": "Fonction au clic",
@@ -959,11 +976,7 @@
 			"openForm": "Ouvrir le formulaire",
 			"openFormBulk": "Ouvrir le formulaire<br />(édition en masse)",
 			"option": {
-				"alignment": {
-					"def": "left",
-					"end": "right",
-					"mid": "center"
-				},
+				"dataOptions": "Overwrite relation settings",
 				"display": {
 					"color": "couleur",
 					"default": "par défaut",
@@ -973,6 +986,7 @@
 					"login": "user (deprecated)",
 					"password": "mot de passe",
 					"phone": "téléphone",
+					"rating": "rating",
 					"slider": "curseur de valeur",
 					"url": "URL"
 				},
@@ -982,8 +996,8 @@
 				"ganttStepsDays": "jours",
 				"ganttStepsHours": "heures",
 				"style": {
-					"bold": "gras",
-					"italic": "italique"
+					"bold": "Gras",
+					"italic": "Italique"
 				}
 			},
 			"presetOpen": "Ouvrir le préréglage",
@@ -1012,6 +1026,17 @@
 			},
 			"subQuery": "Sous-requête",
 			"subQueryAttribute": "Attribut",
+			"systemDefaults": {
+				"false": "'No' value",
+				"fixed": "Custom value",
+				"true": "'Yes' value",
+				"{CURR_DATETIME}": "Current date & time",
+				"{CURR_DATE_DD}": "Current day as number, as in 31",
+				"{CURR_DATE_MM}": "Current month as number, as in 12 (January = 1, December = 12)",
+				"{CURR_DATE_YYYY}": "Current year as number, as in 1921",
+				"{CURR_DATE}": "Current date",
+				"{CURR_TIME}": "Current time"
+			},
 			"tabActions": "Actions ({CNT})",
 			"tabContentCounter": "Compteur",
 			"tabContentCounterHint": "Affiche le nombre total de valeurs de champ dans le titre de l'onglet (nombre de lignes de liste, nombre de fichiers, etc.)",
@@ -1063,7 +1088,7 @@
 				"copy_to_clipboard": "app.copy_to_clipboard({ARGS}) => NON DÉFINI<br /><br />Copie le texte dans le presse-papiers de l'utilisateur.",
 				"dialog_show": "app.dialog_show({ARGS}) => PROMISE<br /><br />Shows a dialog with the specified title and content. The title is a simple text string, while the content can be text or HTML.<br /><br />Buttons are defined by a list of strings. If none are defined, a simple OK button is shown.<br /><br />The returned value is the index of the clicked button. So if the first button is clicked, the value will be 0. If the second button is clicked, it´s 1 and so on.<br /><br /><b>Example</b><br />app.dialog_show(<blockquote>'Please confirm',<br />'Do you really want to delete this item?',<br />['Yes', 'Cancel action']</blockquote>).then(<blockquote>res => { if(res === 0) { console.log('clicked Yes!'); } }</blockquote>);",
 				"form_close": "app.form_close() => NON DÉFINI<br /><br />Ferme le formulaire (si flottant ou sous-formulaire), sinon retourne dans l'historique du navigateur.",
-				"form_open": "app.form_open({ARGS}) => NON DÉFINI<br /><br />Ouvre un formulaire directement, dans un nouvel onglet du navigateur ou en tant que fenêtre pop-up.",
+				"form_open": "app.form_open({ARGS}) => NON DÉFINI<br /><br />Ouvre un formulaire directement, dans un nouvel onglet du navigateur ou en tant que fenêtre pop-up.<br /><br />The new form, if opened directly (not as tab or pop-up), adds to the browser history unless the argument 'replace_history' is set to 'true'.",
 				"form_set_title": "app.form_set_title({ARGS}) => NON DÉFINI<br /><br />Écrase le titre actuel du formulaire. Réglez-le à <i>null</i> pour le réinitialiser au titre d'origine du formulaire.",
 				"form_show_message": "app.form_show_message({ARGS}) => NON DÉFINI<br /><br />Remplace temporairement le titre du formulaire par un message personnalisé. Le deuxième argument définit en millisecondes la durée pendant laquelle le message est affiché (3000 par défaut).",
 				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Décrypte la clé de données fournie avec la clé privée de l'utilisateur actuelle.",
@@ -1077,7 +1102,7 @@
 				"go_back": "app.go_back() => NON DÉFINI<br /><br />Effectue une navigation arrière dans le navigateur.",
 				"has_role": "app.has_role({ARGS}) => BOOLEAN<br /><br />Renvoie true si l'utilisateur actuelle a le rôle attribué (les rôles imbriqués sont inclus).",
 				"logoff": "app.logoff() => UNDEFINED<br /><br />Logs off the current user. This results in the login page being shown and the user being forced to re-authenticate to continue.<br /><br />After re-authentication, the previously open form will be shown. If this is not desired, open another form first and then execute the logoff.",
-				"pdf_create": "app.pdf_create({ARGS}) => NON DÉFINI<br /><br />Génère un fichier PDF à partir de modèles HTML et de styles CSS donnés. Paramètres : <ul><li>filename : Tout nom de fichier se terminant par '.pdf'</li><li>pageFormat : Format de page, tel que 'a4', 'letter', 'legal'</li><li>pageOrientation : 'portrait' ou 'paysage'</li><li>pageMarginX : Marges latérales de la page en pixels</li><li>pageMarginY : Marges supérieure/inferieure de la page en pixels</li><li>htmlHeader : Modèle HTML, appliqué en haut de chaque page</li><li>htmlBody : Modèle HTML, remplit le document</li><li>htmlFooter : Modèle HTML, appliqué en bas de chaque page</li><li>cssStyles : Règles CSS, appliquées aux modèles HTML</li><li>attachAttributeId: Optional, see below.</li><li>attachRecordId: Optional, see below.</li></ul>By default, the PDF document is generated in a new window, in which the user can see a preview and download the file. If both 'attachAttributeId' & 'attachRecordId' are set, the PDF file is instead immediately attached to the chosen files attribute of the chosen record.<br /><br />The placeholders '{PAGE_CUR}' & '{PAGE_END}' can be used in both header & footer HTML templates to display the current and total page numbers.",
+				"pdf_create": "app.pdf_create({ARGS}) => PROMISE<br /><br />Generates a PDF file from given HTML templates and CSS styles. Parameters:<ul><li>filename: Any filename ending in '.pdf'</li><li>pageFormat: Format of page, such as: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' or 'landscape'</li><li>pageMarginX: Horizontal page margins in pixel, either single number (left & right side) or array (first value is left side, second value is right side)</li><li>pageMarginY: Vertical page margins in pixel, either single number (top & bottom) or array (first value is top, second value is bottom)</li><li>htmlHeader: HTML template, applied to top of each page</li><li>htmlBody: HTML template, fills out document</li><li>htmlFooter: HTML template, applied to bottom of each page</li><li>cssStyles: CSS rules, applied to HTML templates</li><li>attachAttributeId: Optional, see below.</li><li>attachRecordId: Optional, see below.</li></ul>By default, the PDF document is generated in a new window, in which the user can see a preview and download the file. If both 'attachAttributeId' & 'attachRecordId' are set, the PDF file is instead immediately attached to the chosen files attribute of the chosen record.<br /><br />The placeholders '{PAGE_CUR}' & '{PAGE_END}' can be used in both header & footer HTML templates to display the current and total page numbers.",
 				"record_delete": "app.record_delete() => NON DÉFINI<br /><br />Supprime l'enregistrement du formulaire actuel.",
 				"record_new": "app.record_new() => NON DÉFINI<br /><br />Ouvre un nouvel enregistrement.",
 				"record_reload": "app.record_reload() => NON DÉFINI<br /><br />Recharge l'enregistrement du formulaire actuel.",
@@ -1114,7 +1139,8 @@
 					"new_tab BOOLEAN",
 					"pop_up BOOLEAN",
 					"max_height NUMBER",
-					"max_width NUMBER"
+					"max_width NUMBER",
+					"replace_history BOOLEAN"
 				],
 				"form_set_title": [
 					"title STRING"
@@ -1143,8 +1169,8 @@
 					"filename STRING",
 					"page_format STRING",
 					"page_orientation STRING",
-					"page_marginX NUMBER",
-					"page_marginY NUMBER",
+					"page_marginX NUMBER || ARRAY",
+					"page_marginY NUMBER || ARRAY",
 					"html_header STRING",
 					"html_body STRING",
 					"html_footer STRING",
@@ -1183,6 +1209,7 @@
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID\n\nAbandonne l'opération et envoie un message à l'utilisateur en cours d'exécution, qui s'affiche dans l'interface utilisateur.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID\n\nSupprime les clés de chiffrement de bout en bout pour les enregistrements auxquels un utilisateur n'a plus accès. Cela rend le déchiffrement impossible pour l'utilisateur.",
 				"file_link": "instance.file_link({ARGS}) => VOID\n\nLie un fichier existant à un autre enregistrement (ajouté à l'attribut de fichier choisi). Ce lien est un lien dur, ce qui signifie que le même fichier est utilisé.\n\nLors du renommage ou de la suppression du fichier, le changement n'affecte que le lien vers le fichier. Indépendamment de la suppression, le fichier réel est conservé tant qu'il existe un lien vers le fichier.",
+				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Unlinks an existing file from the files attribute of a specified record. The removed link is a hardlink, meaning that the actual file is kept as long as it is still linked to at least one other records file attribute.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]\n\nRetourne les métadonnées des fichiers de l'attribut de fichier et de l'enregistrement choisis (peut inclure éventuellement des fichiers supprimés).\n\nLe type retourné 'instance.file_meta' se compose de :\n{id UUID, user_id_creator INTEGER, hash TEXT, name TEXT, size_kb INTEGER, version INTEGER, date_change BIGINT, date_delete BIGINT}",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Returns the encrypted data key for the given relation record and the chosen user. Data keys exist for individual records for every user that has access to it. They can be decrypted on the frontend with the associated user private key.",
 				"get_language_code": "instance.get_language_code() => TEXT\n\nRetourne le code de langue à 5 lettres ('en_us', ...) de l'utilisateur qui est utilisé pour accéder à la base de données de données.",
@@ -1217,6 +1244,11 @@
 				"file_link": [
 					"file_id UUID",
 					"file_name TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT"
+				],
+				"file_unlink": [
+					"file_id UUID",
 					"attribute_id UUID",
 					"record_id BIGINT"
 				],
@@ -1384,13 +1416,16 @@
 		},
 		"menu": {
 			"button": {
-				"add": "Ajouter une entrée"
+				"add": "Ajouter une entrée",
+				"addTab": "Add tab",
+				"delete": "Delete tab"
 			},
 			"collections": "Afficher les valeurs de la collection dans le menu",
 			"copy": "Copier tous les éléments du menu depuis",
 			"formId": "- Sélectionnez le formulaire -",
 			"showChildrenHint": "Afficher les sous-entrées par défaut",
-			"title": "Menus"
+			"title": "Menus",
+			"titleMenuTab": "Tab properties"
 		},
 		"module": {
 			"button": {
@@ -1423,6 +1458,8 @@
 			"iconHint": "Les icônes sont disponibles une fois qu'elles ont été ajoutées à cette application. Les icônes des applications sur lesquelles sont basées peuvent également être utilisées.",
 			"iconPwa": "Icônes de l'application",
 			"iconPwaHint": "Icônes représentant l'application. Les deux icônes doivent être au format PNG et doivent avoir une taille spécifique (voir les entrées d'icônes) - ne pas suivre ces règles peut rendre l'installation de PWA impossible sur certains systèmes d'exploitation ou appareils.",
+			"jsFunctionIdOnLogin": "Session start function",
+			"jsFunctionIdOnLoginHint": "This frontend function is called when a user logs into the system. It can be used to initialize variables or update logs.",
 			"keyCreate": "Transfert - Générer une nouvelle paire de clés de signature",
 			"keyCreateInfo": "Assurez-vous de conserver la clé privée en toute sécurité à tout moment. La clé publique doit être importée dans les instances REI3 cibles pour accepter vos applications.",
 			"keyCreateLength": "Sélectionner la longueur de la clé",
@@ -1432,8 +1469,6 @@
 			"languageMainHint": "Est utilisée si la langue utilisateur choisie n'est pas proposée par votre application.",
 			"languages": "Langues de l'application",
 			"languagesHint": "Langues dans lesquelles l'application est disponible.",
-			"loginSync": "User sync",
-			"loginSyncHint": "User meta data (user ID, forename, surname, email, organization, etc.) from the admin panel or LDAP connection (if enabled) can be provided to an application to create associated user records. This is done via a user sync function that an application can provide.",
 			"nameHint": "Nom de référence pour cette application. Le nom doit être unique au sein d'un système REI3, alors envisagez d'utiliser un préfixe basé sur le nom de votre organisation.",
 			"nameHolder": "planificateur_de_travail, planificateur_d'inventaire, ...",
 			"namePwa": "Titre de l'application",
@@ -1443,7 +1478,7 @@
 			"parent": "Assigné à",
 			"parentHint": "Lorsqu'il est attribué à une autre application, il sera affiché comme son enfant dans les menus et les aperçus - il n'y a aucun autre changement fonctionnel. Les applications ne peuvent être attribuées qu'aux applications sur lesquelles elles sont basées.",
 			"pgFunctionIdLoginSync": "User sync function",
-			"pgFunctionIdLoginSyncHint": "This backend function is called every time a user is updated or deleted. It can also be triggered for all existing users with the instance function 'instance.user_sync_all()'.",
+			"pgFunctionIdLoginSyncHint": "A user sync function is called every time a user is created or its data updated (username, forename, surname, email, organization, etc.). Useful for applications that require additional records to be created or updated when system users change. It can also be triggered for all existing users with the instance function 'instance.user_sync_all()'.",
 			"position": "Position par défaut",
 			"positionHint": "Position de l'application dans l'en-tête (les plus petites d'abord). Peut être remplacé par les administrateurs système.",
 			"pwa": "Application web progressive (PWA)",
@@ -1570,6 +1605,9 @@
 			"choice": "Ensemble",
 			"choices": "Ensembles de filtres ({COUNT})*",
 			"choicesHint": "*Le premier ensemble est actif par défaut - le choix est disponible s'il y en a 2 ou plus.",
+			"filterChoicesHelp": "A filterset is a set of predefined filters that can be selected by users. They serve to apply different filter criteria based on the current need of the user.<br /><br />The first filterset is enabled by default.<br /><br />Filtersets are only shown if there are at least 2 available.",
+			"filterJoin": "Select relation join to filter. Keep empty to filter entire query.",
+			"filterJoinHelp": "When you select a join number here, the filter is not added to the query but to the relation join instead.<br /><br />This can filter out undesired records from a left-joined relation without removing the entire row.<br /><br />It is also useful for filtering 1:n relationships.",
 			"filters": "Filtres ({COUNT})",
 			"fixedLimit": "Limite de résultats fixe",
 			"fixedLimit0": "non actif",
@@ -1789,7 +1827,7 @@
 			"002": "Numéro invalide '{VALUE}' (un décimal était attendu).",
 			"003": "Valeur de date/heure invalide '{VALUE}', format attendu : {EXPECT}.",
 			"004": "Type d'attribut non pris en charge '{VALUE}'.",
-			"005": "Nombre incorrect de champs dans la ligne '{VALUE}'.",
+			"005": "Nombre incorrect de champs.",
 			"006": "Les attributs chiffrés ne sont pas pris en charge."
 		},
 		"DBS": {
@@ -1797,9 +1835,10 @@
 			"002": "La valeur sélectionnée pour '{NAMES}' est déjà utilisée par un autre enregistrement. Elle est définie comme 'unique' et ne peut être utilisée qu'une fois.",
 			"003": "Ce nom d'utilisateur est déjà pris.",
 			"004": "L'enregistrement ne peut pas être supprimé - il est toujours référencé en tant que '{ATR}' dans '{MOD}'.",
-			"005": "La colonne '{NAME}' n'a pas de valeur ou n'a pas pu être résolue.",
+			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "Échec de la création de l'index unique, car les valeurs d'attribut existantes ne sont pas uniques.",
-			"007": "Valeur invalide '{VALUE}'."
+			"007": "Changes cannot be saved due to an invalid value type.",
+			"008": "Failed to create attribute with required value, as existing records do not have a value yet and no default is defined."
 		},
 		"SEC": {
 			"001": "Vous n'êtes pas autorisé à effectuer cette action ou à accéder à cette ressource.",
@@ -1845,6 +1884,7 @@
 	},
 	"filter": {
 		"add": "Ajouter",
+		"contentApi": "API",
 		"contentData": "Données",
 		"contentDate": "Date/heure actuelle",
 		"contentForm": "Formulaire actuel",
@@ -1852,6 +1892,7 @@
 		"dialog": {
 			"ftsHelp": "La recherche en texte intégral peut trouver rapidement des correspondances dans de grands textes en fonction de mots ou de phrases. Au lieu de rechercher des caractères spécifiques, la recherche en texte intégral décompose les mots en racines pour les faire correspondre à une requête de recherche.<br /><br />Les options de recherche suivantes existent:<ul><li>Mot spécifique</li><ul><li>Recherche : <b>entry</b></li><li>'entry' trouvera des textes contenant des mots comme 'entry', 'entries' ou 'list-entries'.</li><li>Correspondance valide : 'I have checked all relevant data entries.'</li></ul><li>Tous les mots</li><ul><li>Recherche : <b>making coffee</b></li><li>'making coffee' trouvera des textes s'ils contiennent à la fois des mots liés à 'make' (comme 'making') et à 'coffee' (comme 'coffee machine'). Il ne trouvera pas 'coffee maker' car 'maker' est sa propre racine de mot.</li><li>Correspondance valide : 'We fixed the machine, still makes terrible coffee.'</li></ul><li>N'importe quel mot</li><ul><li>Recherche : <b>tea or coffee</b></li><li>'tea or coffee' trouvera des textes s'ils contiennent soit des mots liés à 'tea' (comme 'tea drinker') soit à 'coffee' (comme 'coffee machine').</li><li>Correspondance valide : 'Coffee gets me through the day.'</li></ul><li>Sans mots</li><ul><li>Recherche : <b>tea -coffee</b></li><li>'tea -coffee' trouvera des textes s'ils contiennent des mots liés à 'tea' mais pas des mots liés à 'coffee'.</li><li>Correspondance valide : 'I enjoy tea regularly.'</li></ul><li>Mots suivis</li><ul><li>Recherche : <b>\"make coffee\"</b></li><li>'\"make coffee\"' (entre guillemets doubles) trouvera des textes s'ils contiennent des mots liés à 'make' suivis de mots liés à 'coffee'. L'ordre est important - les textes contenant 'coffee making' ne seront pas inclus, car l'ordre des mots est incorrect.</li><li>Correspondance valide : 'I´ll spent the lunch break making coffee for my colleagues.'</li></ul></ul>"
 		},
+		"getterHint": "Parameter name",
 		"javascriptHint": "Ex.: return new Date().getFullYear();",
 		"nestingMain": "Requête principale",
 		"nestingSub": "Sous-requête",
@@ -1859,6 +1900,7 @@
 		"nowOffsetTitle": "Ajouter (nombre positif) ou soustraire (nombre négatif) X jours/heures/minutes/secondes à partir de maintenant.",
 		"operatorsArray": "Tableau",
 		"operatorsNull": "Valeur vide",
+		"operatorsRegex": "Regular expression",
 		"operatorsSets": "Sous-ensemble",
 		"operatorsSize": "Nombre",
 		"operatorsText": "Texte",
@@ -1874,6 +1916,8 @@
 				"fieldChanged": "champ modifié",
 				"fieldValid": "champ valide",
 				"formChanged": "form has unsaved changes",
+				"formState": "form state",
+				"getter": "URL parameter",
 				"javascript": "JavaScript",
 				"languageCode": "langue de l'utilisateur",
 				"login": "ID de l'utilisateur",
@@ -1896,6 +1940,8 @@
 				"fieldChanged": "TRUE/FALSE, en fonction de la modification de la valeur du champ.",
 				"fieldValid": "TRUE/FALSE, en fonction de la validité actuelle de la valeur du champ.",
 				"formChanged": "TRUE/FALSE, depending on whether form currently has unsaved changes.",
+				"formState": "TRUE/FALSE, depending on whether the chosen form state is currently active.",
+				"getter": "Value of a URL parameter, such as 'https://system?param=123' with 'param' being the name and '123' the value.",
 				"javascript": "Valeur de retour de l'expression JavaScript donnée.",
 				"languageCode": "Le code de langue de l'utilisateur choisi (en_us, de_de, ...) de l'utilisateur actuelle.",
 				"login": "ID de l'utilisateur actuelle (entier).",
@@ -1934,6 +1980,10 @@
 				"not_like": "ne contient pas (respecte la casse)",
 				"not_null": "non vide",
 				"null": "vide",
+				"rxMatch": "matches regex (match case)",
+				"rxMatchI": "matches regex",
+				"rxMatchNo": "not matches regex (match case)",
+				"rxMatchNoI": "not matches regex",
 				"se": "plus petit/égal",
 				"st": "plus petit"
 			}
@@ -1950,6 +2000,7 @@
 	"form": {
 		"bulkTouched": "La valeur sera mise à jour",
 		"button": {
+			"favorite": "Save form as favorite",
 			"fullscreenHint": "Basculer en mode plein écran",
 			"help": "Aide",
 			"helpHint": "Afficher les pages d'aide",
@@ -1993,6 +2044,12 @@
 		"actions": "Actions",
 		"active": "Actif",
 		"after": "Après",
+		"alignment": "Alignment",
+		"alignmentHor": {
+			"center": "center",
+			"left": "left",
+			"right": "right"
+		},
 		"api": "API",
 		"apis": "API",
 		"appName": "REI3",
@@ -2025,6 +2082,7 @@
 			"edit": "Modifier",
 			"editBulk": "Modifier ({COUNT})",
 			"empty": "Vide",
+			"enable": "Enable",
 			"expert": "Avancé",
 			"export": "Exporter",
 			"filter": "Filtrer",
@@ -2083,6 +2141,8 @@
 		"dateFormat2": "d.m.Y (30.12.2012)",
 		"dateFormat3": "d/m/Y (30/12/2012)",
 		"dateFormat4": "m/d/Y (12/30/2012)",
+		"default": "Default",
+		"defaultValue": "Default value",
 		"description": "Description",
 		"details": "Détails",
 		"dialog": {
@@ -2102,11 +2162,16 @@
 		"errorTitle": "Erreur",
 		"event": "Event",
 		"everything": "Tout",
+		"expert": "Expert",
+		"favorites": "Favorites",
+		"favoritesEmpty": "No favorites saved",
 		"field": "Champ",
 		"files": "Fichiers",
 		"filters": "Filtres",
 		"form": "Formulaire",
+		"formActions": "Form actions",
 		"forms": "Formulaires",
+		"functions": "Functions",
 		"global": "Global",
 		"help": "Aide",
 		"home": "Accueil",
@@ -2126,6 +2191,7 @@
 		"inputSmall": "La valeur est trop petite (min. {MIN})",
 		"inputTooFewFiles": "Trop peu de fichiers",
 		"inputTooManyFiles": "Trop de fichiers",
+		"inputs": "Inputs",
 		"install": "Install",
 		"internalName": "Le nom sert de référence interne - il n'est pas affiché aux utilisateurs.",
 		"interval": "Intervalle",
@@ -2144,6 +2210,7 @@
 		"menusSub": "Sous-menus",
 		"missingCaption": "LÉGENDE MANQUANTE",
 		"module": "Application",
+		"monospace": "Monospace",
 		"more": "Plus",
 		"name": "Nom",
 		"notSaved": "Non enregistré",
@@ -2196,6 +2263,7 @@
 		"selected": "Sélectionné",
 		"selectedMaxOne": "Sélectionné (max. 1)",
 		"settings": "Paramètres",
+		"shadows": "Shadows",
 		"size": "Taille",
 		"sqlPreview": "Aperçu SQL",
 		"standard": "Standard",
@@ -2212,6 +2280,7 @@
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "Version",
+		"visibility": "Visibility",
 		"warnings": "Avertissements",
 		"widget": "Widget",
 		"widgets": "Widgets",
@@ -2242,6 +2311,14 @@
 		}
 	},
 	"input": {
+		"barcode": {
+			"capture": "Capture code from camera image",
+			"deviceMissing": "No input devices of type 'camera' found. Please try again.",
+			"deviceSelect": "Please select an input device",
+			"formatInvalidValue": "Value is not supported by chosen format.",
+			"formatMissing": "Please select a format to display value:",
+			"formatResetHint": "Switch code format to display value in"
+		},
 		"date": {
 			"button": {
 				"todayHint": "Aujourd'hui/maintenant",
@@ -2287,8 +2364,7 @@
 	"list": {
 		"aggregators": "Agréger les résultats",
 		"autoRenew": "Actualisation automatique",
-		"autoRenewInput": "Actualiser les données toutes les X secondes",
-		"autoRenewInputHint": "min. 10s",
+		"autoRenewInput": "Refresh every X seconds",
 		"button": {
 			"aggregatorsHint": "Agréger les résultats",
 			"all": "Tous",
@@ -2410,6 +2486,7 @@
 		},
 		"fontFamily": "Police",
 		"fontSize": "Taille de la police",
+		"formActionsAlign": "Align form actions",
 		"headerCaptions": "Complet",
 		"headerModules": "Afficher les applications",
 		"languageCode": "Langue",

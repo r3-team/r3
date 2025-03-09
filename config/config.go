@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"math/rand"
 	"os"
-	"r3/db"
 	"r3/log"
 	"r3/tools"
 	"r3/types"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/gbrlsnchs/jwt/v3"
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 var (
@@ -36,6 +36,7 @@ var (
 	File types.FileType
 
 	// operation data
+	hostname    string
 	license     = types.License{}
 	tokenSecret *jwt.HMACSHA
 
@@ -68,6 +69,11 @@ func GetConfigFilepath() string {
 }
 func GetDbVersionCut() string {
 	return GetString("dbVersionCut")
+}
+func GetHostname() string {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+	return hostname
 }
 func GetLicense() types.License {
 	access_mx.RLock()
@@ -136,6 +142,13 @@ func SetConfigFilePath(path string) {
 	defer access_mx.Unlock()
 	filePath = path
 }
+func SetHostnameFromOs() error {
+	access_mx.Lock()
+	defer access_mx.Unlock()
+	var err error
+	hostname, err = os.Hostname()
+	return err
+}
 func SetLicense(l types.License) {
 	access_mx.Lock()
 	defer access_mx.Unlock()
@@ -156,7 +169,7 @@ func SetLogLevels() {
 	log.SetLogLevel("transfer", int(GetUint64("logTransfer")))
 	log.SetLogLevel("websocket", int(GetUint64("logWebsocket")))
 }
-func SetInstanceIdIfEmpty() error {
+func SetInstanceIdIfEmpty_tx(ctx context.Context, tx pgx.Tx) error {
 	if GetString("instanceId") != "" {
 		return nil
 	}
@@ -165,18 +178,7 @@ func SetInstanceIdIfEmpty() error {
 	if err != nil {
 		return err
 	}
-
-	ctx := context.Background()
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	if err := SetString_tx(ctx, tx, "instanceId", id.String()); err != nil {
-		return err
-	}
-	return tx.Commit(ctx)
+	return SetString_tx(ctx, tx, "instanceId", id.String())
 }
 
 // config file
@@ -221,23 +223,13 @@ func WriteFile() error {
 }
 
 // token
-func ProcessTokenSecret() error {
+func ProcessTokenSecret_tx(ctx context.Context, tx pgx.Tx) error {
 	secret := GetString("tokenSecret")
 	if secret == "" {
 		min, max := 32, 48
 		secret = tools.RandStringRunes(rand.Intn(max-min+1) + min)
 
-		ctx := context.Background()
-		tx, err := db.Pool.Begin(ctx)
-		if err != nil {
-			return err
-		}
-
 		if err := SetString_tx(ctx, tx, "tokenSecret", secret); err != nil {
-			tx.Rollback(ctx)
-			return err
-		}
-		if err := tx.Commit(ctx); err != nil {
 			return err
 		}
 	}

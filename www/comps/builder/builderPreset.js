@@ -14,7 +14,7 @@ let MyBuilderPresetValue = {
 	template:`<tr>
 		<td>{{ attribute.name + (attribute.nullable ? '' : '*') }}</td>
 		<td v-if="exists">
-			<div class="row centered">
+			<div class="row gap centered">
 				<my-bool v-model="protectedInput" :readonly="readonly" />
 				<my-button
 					:active="false"
@@ -24,7 +24,7 @@ let MyBuilderPresetValue = {
 			</div>
 		</td>
 		<td v-if="exists">
-			<div class="row gap">
+			<div class="row gap gap">
 				<select class="dynamic" v-if="isRelationship" v-model="presetIdReferInput" :disabled="readonly">
 					<option :value="null">[{{ attribute.content }}]</option>
 					<option v-for="p in relationship.presets" :value="p.id">{{ p.name }}</option>
@@ -117,22 +117,23 @@ let MyBuilderPreset = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
+				</div>
+				<div class="area">
 					<my-button image="visible1.png"
 						@trigger="copyValueDialog(values.name,id,id)"
 						:active="!isNew"
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
-						v-if="!isNew"
 						@trigger="delAsk"
-						:active="!readonly"
+						:active="!isNew && !readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
 					/>
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
+			<div class="content default-inputs builder-preset no-padding">
 				<table class="generic-table-vertical">
 					<tbody>
 						<tr>
@@ -142,7 +143,7 @@ let MyBuilderPreset = {
 						<tr>
 							<td><span>{{ capApp.protected }}</span></td>
 							<td>
-								<div class="row centered">
+								<div class="row gap centered">
 									<my-bool v-model="values.protected" :readonly="readonly" />
 									<my-button
 										:active="false"

@@ -1,6 +1,9 @@
 import MyStore               from '../../stores/store.js';
-import {getColumnsProcessed} from './column.js';
 import {getNilUuid}          from './generic.js';
+import {
+	getColumnsProcessed,
+	getColumnTitle
+} from './column.js';
 import {
 	getJoinIndexMap,
 	getQueryExpressions,
@@ -16,8 +19,7 @@ export function getCollectionConsumerTemplate() {
 		id:getNilUuid(),
 		collectionId:null,
 		columnIdDisplay:null,
-		multiValue:false,
-		noDisplayEmpty:false,
+		flags:[],
 		onMobile:false,
 		openForm:null
 	};
@@ -35,6 +37,46 @@ export function getCollectionColumn(collectionId,columnId) {
 	const i = getCollectionColumnIndex(collectionId,columnId);
 	return i !== -1 ? MyStore.getters['schema/collectionIdMap'][collectionId].columns[i] : false;
 };
+export function getConsumersEntries(consumers) {
+	let out = [];
+	for(const consumer of consumers) {
+		const collection = MyStore.getters['schema/collectionIdMap'][consumer.collectionId];
+		
+		if(!consumer.onMobile && MyStore.getters.isMobile)
+			continue;
+		
+		if(MyStore.getters.pwaModuleId !== null && collection.moduleId !== MyStore.getters.pwaModuleId)
+			continue;
+
+		// get displayed collection value
+		let value;
+		if(consumer.flags.includes('showRowCount')) {
+			// show total row count instead
+			const rows = MyStore.getters['collectionIdMap'][consumer.collectionId];
+			value = rows === undefined ? 0 : rows.length;
+		} else {
+			value = getCollectionValues(
+				collection.id,
+				consumer.columnIdDisplay,
+				true
+			);
+		}
+		
+		if(consumer.flags.includes('noDisplayEmpty') && (value === null || value === 0 || value === ''))
+			continue;
+		
+		out.push({
+			iconId:collection.iconId,
+			openForm:consumer.openForm,
+			title:getColumnTitle(getCollectionColumn(
+				collection.id,
+				consumer.columnIdDisplay
+			),collection.moduleId),
+			value:value
+		});
+	}
+	return out;
+};
 
 // returns an array of column values from all records
 //  or the column value from the first record of the collection (singleValue)
@@ -50,7 +92,7 @@ export function getCollectionValues(collectionId,columnId,singleValue,recordInde
 	const empty = singleValue ? null : [];
 	
 	// collection might not have been retrieved yet or is empty
-	if(typeof colRows === 'undefined' || colRows.length === 0)
+	if(colRows === undefined || colRows.length === 0)
 		return empty;
 	
 	// find requested column index by ID
@@ -77,7 +119,7 @@ export function getCollectionValues(collectionId,columnId,singleValue,recordInde
 		return out;
 	}
 	
-	// return first value only if desired
+	// return first value
 	if(singleValue)
 		return colRows[0].values[columnIndex];
 	

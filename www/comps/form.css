@@ -29,7 +29,30 @@
 	border-left:1px solid #000;
 }
 
+/* form actions */
+.form-actions-left{
+	flex:1 1 auto;
+}
+.form-actions-right{
+	flex:1 1 auto;
+	justify-content:flex-end;
+}
+.form-actions-pop-up{
+	width:100%;
+	max-width:320px;
+	min-width:220px;
+}
+.form-actions-pop-up-entries{
+	display:flex;
+	flex-flow:column nowrap;
+	gap:9px;
+}
+
 /* fields */
+.form-bar-layout-check{
+	max-width:5px;
+	flex:1 1 auto;
+}
 .form .fields{
 	overflow:auto;
 	display:flex;
@@ -110,18 +133,6 @@
 .form-message{
 	font-style:italic;
 	margin:0px 0px 0px 12px;
-}
-
-/* user overwrites */
-.user-bordersSquared .form-wrap.popUp .form,
-.user-bordersSquared .form-wrap.popUp .form-help,
-.user-bordersSquared .form-wrap.popUp .form-log,
-.user-bordersSquared .form-wrap.isMain>.form,
-.user-bordersSquared .calendar-month,
-.user-bordersSquared .calendar-month .day .part>span,
-.user-bordersSquared .gantt,
-.user-bordersSquared .gantt-line-record .record-line{
-	border-radius:0px;
 }
 
 /* mobile overwrites */

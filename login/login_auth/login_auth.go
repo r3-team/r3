@@ -6,6 +6,7 @@ import (
 	"encoding/base32"
 	"errors"
 	"fmt"
+	"r3/cache"
 	"r3/config"
 	"r3/db"
 	"r3/handler"
@@ -186,6 +187,9 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 	}
 
 	// everything in order, auth successful
+	if err := cache.LoadAccessIfUnknown(loginId); err != nil {
+		return "", "", "", mfaTokens, err
+	}
 	if err := login_session.CheckConcurrentAccess(limited, loginId, admin); err != nil {
 		return "", "", "", mfaTokens, err
 	}
@@ -200,80 +204,86 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 }
 
 // performs authentication attempt for user by using existing JWT token, signed by server
-// returns username
-func Token(ctx context.Context, token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *bool) (string, error) {
+// returns login name and language code
+func Token(ctx context.Context, token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *bool) (string, string, error) {
 
 	if token == "" {
-		return "", errors.New("empty token")
+		return "", "", errors.New("empty token")
 	}
 
 	var tp tokenPayload
 	if _, err := jwt.Verify([]byte(token), config.GetTokenSecret(), &tp); err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	// token expiration time reached
 	if tools.GetTimeUnix() > tp.ExpirationTime.Unix() {
-		return "", errors.New("token expired")
+		return "", "", errors.New("token expired")
 	}
 
 	if err := authCheckSystemMode(tp.Admin); err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	// check if login is active
 	var active bool
 	var name string
 	var nameDisplay pgtype.Text
+	var languageCode string
 	var limited bool
 
 	if err := db.Pool.QueryRow(ctx, `
-		SELECT l.name, lm.name_display, l.active, l.limited
-		FROM      instance.login      AS l
-		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
+		SELECT l.name, lm.name_display, l.active, l.limited, s.language_code
+		FROM      instance.login         AS l
+		JOIN      instance.login_setting AS s  ON s.login_id  = l.id
+		LEFT JOIN instance.login_meta    AS lm ON lm.login_id = l.id
 		WHERE l.id = $1
-	`, tp.LoginId).Scan(&name, &nameDisplay, &active, &limited); err != nil {
-		return "", err
+	`, tp.LoginId).Scan(&name, &nameDisplay, &active, &limited, &languageCode); err != nil {
+		return "", "", err
 	}
 	if !active {
-		return "", errors.New("login inactive")
+		return "", "", errors.New("login inactive")
 	}
 	if nameDisplay.Valid && nameDisplay.String != "" {
 		name = nameDisplay.String
 	}
 
 	// everything in order, auth successful
+	if err := cache.LoadAccessIfUnknown(tp.LoginId); err != nil {
+		return "", "", err
+	}
 	if err := login_session.CheckConcurrentAccess(limited, tp.LoginId, tp.Admin); err != nil {
-		return "", err
+		return "", "", err
 	}
 	*grantLoginId = tp.LoginId
 	*grantAdmin = tp.Admin
 	*grantNoAuth = tp.NoAuth
-	return name, nil
+	return name, languageCode, nil
 }
 
 // performs authentication for user by using fixed (permanent) token
 // used for application access (like ICS download or fat-client access)
 // cannot grant admin access
-func TokenFixed(ctx context.Context, loginId int64, context string, tokenFixed string, grantLanguageCode *string, grantToken *string) error {
+// returns login language code
+func TokenFixed(ctx context.Context, loginId int64, context string, tokenFixed string, grantToken *string) (string, error) {
 
 	if tokenFixed == "" {
-		return errors.New("empty token")
+		return "", errors.New("empty token")
 	}
 
 	// only specific contexts may be used for token authentication
 	if !slices.Contains([]string{"client", "ics"}, context) {
-		return fmt.Errorf("invalid token authentication context '%s'", context)
+		return "", fmt.Errorf("invalid token authentication context '%s'", context)
 	}
 
 	// check for existing token
-	languageCode := ""
-	username := ""
+	var languageCode string
+	var username string
 	err := db.Pool.QueryRow(ctx, `
 		SELECT s.language_code, l.name
 		FROM instance.login_token_fixed AS t
-		INNER JOIN instance.login_setting AS s ON s.login_id = t.login_id
-		INNER JOIN instance.login         AS l ON l.id       = t.login_id
+		JOIN instance.login_setting     AS s ON s.login_id = t.login_id
+		JOIN instance.login             AS l ON l.id       = t.login_id
 		WHERE t.login_id = $1
 		AND   t.context  = $2
 		AND   t.token    = $3
@@ -281,14 +291,16 @@ func TokenFixed(ctx context.Context, loginId int64, context string, tokenFixed s
 	`, loginId, context, tokenFixed).Scan(&languageCode, &username)
 
 	if err == pgx.ErrNoRows {
-		return errors.New("login inactive or token invalid")
+		return "", errors.New("login inactive or token invalid")
 	}
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// everything in order, auth successful
-	*grantLanguageCode = languageCode
+	if err := cache.LoadAccessIfUnknown(loginId); err != nil {
+		return "", err
+	}
 	*grantToken, err = createToken(loginId, username, false, false, pgtype.Int4{})
-	return err
+	return languageCode, err
 }

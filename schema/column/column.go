@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/compatible"
@@ -24,14 +23,14 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID) ([]types.Column, error) {
 	columns := make([]types.Column, 0)
 
 	if !slices.Contains(allowedEntities, entity) {
 		return columns, errors.New("bad entity")
 	}
 
-	rows, err := db.Pool.Query(context.Background(), fmt.Sprintf(`
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT id, attribute_id, index, batch, basis, length, display, group_by,
 			aggregator, distincted, hidden, on_mobile, sub_query, styles
 		FROM app.column
@@ -51,15 +50,12 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 
 			return columns, err
 		}
-		if c.Styles == nil {
-			c.Styles = make([]string, 0)
-		}
 		columns = append(columns, c)
 	}
 
 	for i, c := range columns {
 		if c.SubQuery {
-			c.Query, err = query.Get("column", c.Id, 0, 0)
+			c.Query, err = query.Get_tx(ctx, tx, "column", c.Id, 0, 0, 0)
 			if err != nil {
 				return columns, err
 			}
@@ -67,7 +63,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 			c.Query.RelationId = pgtype.UUID{}
 		}
 
-		c.Captions, err = caption.Get("column", c.Id, []string{"columnTitle"})
+		c.Captions, err = caption.Get_tx(ctx, tx, "column", c.Id, []string{"columnTitle"})
 		if err != nil {
 			return columns, err
 		}
@@ -143,7 +139,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, c
 		}
 
 		if c.SubQuery {
-			if err := query.Set_tx(ctx, tx, "column", c.Id, 0, 0, c.Query); err != nil {
+			if err := query.Set_tx(ctx, tx, "column", c.Id, 0, 0, 0, c.Query); err != nil {
 				return err
 			}
 		}

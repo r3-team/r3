@@ -2,7 +2,6 @@ package widget
 
 import (
 	"context"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/collection/consumer"
@@ -17,10 +16,10 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(moduleId uuid.UUID) ([]types.Widget, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Widget, error) {
 
 	widgets := make([]types.Widget, 0)
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, form_id, name, size
 		FROM app.widget
 		WHERE module_id = $1
@@ -42,11 +41,11 @@ func Get(moduleId uuid.UUID) ([]types.Widget, error) {
 
 	// get collections & captions
 	for i, w := range widgets {
-		widgets[i].Captions, err = caption.Get("widget", w.Id, []string{"widgetTitle"})
+		widgets[i].Captions, err = caption.Get_tx(ctx, tx, "widget", w.Id, []string{"widgetTitle"})
 		if err != nil {
 			return widgets, err
 		}
-		widgets[i].Collection, err = consumer.GetOne("widget", w.Id, "widgetDisplay")
+		widgets[i].Collection, err = consumer.GetOne_tx(ctx, tx, "widget", w.Id, "widgetDisplay")
 		if err != nil {
 			return widgets, err
 		}

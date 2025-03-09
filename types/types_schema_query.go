@@ -12,13 +12,13 @@ var (
 	QueryFilterConnectors = []string{"AND", "OR"}
 	QueryFilterOperators  = []string{"=", "<>", "<", ">", "<=", ">=", "IS NULL",
 		"IS NOT NULL", "LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE", "= ANY",
-		"<> ALL", "@>", "<@", "&&", "@@"}
+		"<> ALL", "@>", "<@", "&&", "@@", "~", "~*", "!~", "!~*"}
 )
 
 // a query starts at a relation to retrieve attribute values
 // it can join other relations via relationship attributes from both sides
-// each relation (original and joined) is refered via an unique index (simple counter)
-// because the same relation can join multiple times, an unique index is required to know which relation is refered to
+// each relation (original and joined) is referred via an unique index (simple counter)
+// because the same relation can join multiple times, an unique index is required to know which relation is referred to
 // via indexes, joins know their source (index from), filters can refer to attributes from specific relations, etc.
 type Query struct {
 	Id         uuid.UUID     `json:"id"`
@@ -54,6 +54,7 @@ type QueryJoin struct {
 type QueryFilter struct {
 	Connector string          `json:"connector"` // AND, OR
 	Operator  string          `json:"operator"`  // comparison operator (=, <>, etc.)
+	Index     int             `json:"index"`     // relation index to apply filter to (0 = filter query, 1+ = filter relation join)
 	Side0     QueryFilterSide `json:"side0"`     // comparison: left side
 	Side1     QueryFilterSide `json:"side1"`     // comparison: right side
 }

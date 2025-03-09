@@ -6,7 +6,7 @@ import srcBase64Icon    from './shared/image.js';
 import MyForm           from './form.js';
 import {
 	getCollectionColumn,
-	getCollectionValues
+	getConsumersEntries
 } from './shared/collection.js';
 export {MyWidgets as default};
 
@@ -129,7 +129,7 @@ let MyWidget = {
 				if(s.collectionConsumer && !s.collectionConsumer.onMobile && s.isMobile)
 					return false;
 				
-				if(s.collectionConsumer && s.collectionConsumer.noDisplayEmpty && (
+				if(s.collectionConsumer && s.collectionConsumer.flags.includes('noDisplayEmpty') && (
 					s.collectionValue === null || s.collectionValue === 0 || s.collectionValue === '')) {
 					
 					return false;
@@ -150,6 +150,11 @@ let MyWidget = {
 			
 			return moduleId !== null && s.moduleIdMap[moduleId].color1 !== null
 				? `border-bottom-color:${s.colorAdjustBg(s.moduleIdMap[moduleId].color1)}` : '';
+		},
+		collectionValue:(s) => {
+			if(!s.collectionHasDisplay) return '';
+			const v = s.getConsumersEntries([s.collectionConsumer]);
+			return v.length === 1 ? v[0].value : 0;
 		},
 		cssClasses:(s) => {
 			let out = [];
@@ -178,7 +183,6 @@ let MyWidget = {
 		collectionHasDisplay:(s) => !s.collectionConsumer ? false : s.collectionConsumer.columnIdDisplay !== null,
 		collectionOpenForm:  (s) => !s.collectionConsumer ? false : s.collectionConsumer.openForm,
 		collectionTitle:     (s) => !s.collectionHasDisplay ? '' : s.getColumnTitle(s.getCollectionColumn(s.collection.id,s.collectionConsumer.columnIdDisplay),s.collection.moduleId),
-		collectionValue:     (s) => !s.collectionHasDisplay ? '' : s.getCollectionValues(s.collection.id,s.collectionConsumer.columnIdDisplay,true),
 		form:                (s) => !s.moduleWidget || s.moduleWidget.formId === null ? false : s.formIdMap[s.moduleWidget.formId],
 		moduleSource:        (s) => !s.moduleWidget ? false : s.moduleIdMap[s.moduleWidget.moduleId],
 		moduleWidget:        (s) => s.widget.widgetId === null ? false : s.widgetIdMap[s.widget.widgetId],
@@ -210,7 +214,7 @@ let MyWidget = {
 		formOpen,
 		getCaption,
 		getCollectionColumn,
-		getCollectionValues,
+		getConsumersEntries,
 		getColumnTitle,
 		srcBase64Icon,
 		

@@ -18,7 +18,7 @@ let MyInputSelect = {
 				:tabindex="!readonly ? 0 : -1"
 			/>
 			
-			<div class="row centered">
+			<div class="row centered gap">
 				<my-button
 					v-if="showOpen"
 					@trigger="$emit('open')"
@@ -41,21 +41,26 @@ let MyInputSelect = {
 		</div>
 		
 		<div class="input-dropdown-wrap">
-			<div v-if="showDropdown" class="input-dropdown">
-				<div class="entry clickable" tabindex="0"
+			<div v-if="dropdownShow" class="input-dropdown">
+				<div class="input-dropdown-entry clickable" tabindex="0"
 					v-for="(option,i) in options"
 					@click="apply(i)"
 					@keyup.enter.space="apply(i)"
+					:class="{ rowsColored:settings.listColored }"
 				>
 					{{ option.name }}
 				</div>
-				<div class="entry inactive" v-if="options.length === limit">
+				<div class="input-dropdown-entry inactive" v-if="options.length === 0">
+					{{ capGen.resultsNone }}
+				</div>
+				<div class="input-dropdown-entry inactive" v-if="options.length === limit">
 					{{ capGen.inputSelectMore }}
 				</div>
 			</div>
 		</div>
 	</div>`,
 	props:{
+		dropdownShow:{ type:Boolean, required:false, default:false },
 		inputTextSet:{ type:String,  required:false, default:'' },
 		nakedIcons:  { type:Boolean, required:false, default:true },
 		options:     { type:Array,   required:false, default:() => [] }, // options: [{'id':12,'name':'Hans-Martin'},{...}]
@@ -64,12 +69,11 @@ let MyInputSelect = {
 		selected:    { required:false, default:null },                   // selected option ID (as in: 12)
 		showOpen:    { type:Boolean, required:false, default:false }
 	},
-	emits:['blurred','focused','open','request-data','updated-text-input','update:selected'],
+	emits:['blurred','dropdown-show','focused','open','request-data','updated-text-input','update:selected'],
 	data() {
 		return {
-			limit:10,     // fixed result limit
-			textInput:'', // text line input
-			showDropdown:false
+			limit:10,    // fixed result limit
+			textInput:'' // text line input
 		};
 	},
 	watch:{
@@ -82,18 +86,19 @@ let MyInputSelect = {
 		hasValue:(s) => s.selected !== null,
 		
 		// stores
-		capGen:(s) => s.$store.getters.captions.generic
+		capGen:  (s) => s.$store.getters.captions.generic,
+		settings:(s) => s.$store.getters.settings
 	},
 	methods:{
 		apply(i) {
 			this.$emit('update:selected',this.options[i].id);
-			this.showDropdown  = false;
+			this.$emit('dropdown-show',false);
 		},
 		clear() {
 			this.$emit('update:selected',null);
 		},
 		enter() {
-			if(!this.showDropdown)
+			if(!this.dropdownShow)
 				return this.openDropdown();
 			
 			// if dropdown is shown, apply first result
@@ -102,27 +107,26 @@ let MyInputSelect = {
 		},
 		escape() {
 			this.$emit('blurred');
-			this.showDropdown = false;
+			this.$emit('dropdown-show',false);
 		},
 		inputChange() {
-			if(!this.showDropdown && this.textInput === '')
+			if(!this.dropdownShow && this.textInput === '')
 				return;
 			
 			this.$emit('updated-text-input',this.textInput);
 			this.openDropdown();
 		},
 		openDropdown() {
-			this.showDropdown = true;
+			this.$emit('dropdown-show',true);
 			this.$emit('request-data');
 		},
 		toggle() {
 			if(this.readonly)
 				return;
 			
-			if(this.showDropdown) {
-				this.showDropdown = false;
-				return;
-			}
+			if(this.dropdownShow)
+				return this.$emit('dropdown-show',false);
+			
 			this.openDropdown();
 		}
 	}

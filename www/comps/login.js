@@ -284,8 +284,12 @@ let MyLogin = {
 				if(params.has('login')) {
 					this.authenticatePublic(params.get('login'));
 					params.delete('login');
-					this.$router.replace(`${window.location.hash.substring(0,pos)}?${params.toString()}`);
-					return;
+					
+					const p = params.size === 0
+						? `${window.location.hash.substring(1,pos)}`
+						: `${window.location.hash.substring(1,pos)}?${params.toString()}`;
+					
+					return this.$router.replace(p);
 				}
 			}
 			
@@ -398,8 +402,9 @@ let MyLogin = {
 			if(token === '')
 				return this.handleError('authUser','');
 			
-			// store authentication token
+			// store authentication token & clear caches related to login
 			this.$store.commit('local/token',token);
+			this.$store.commit('local/loginCachesClear');
 			
 			if(saltKdf === null || !this.cryptoApiAvailable)
 				return this.appEnable(loginId,loginName);

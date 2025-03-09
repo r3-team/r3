@@ -77,9 +77,9 @@ func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
 	return err
 }
 
-// start with 1 module and check whether it or its dependend upon modules had changed
+// start with 1 module and check whether it or its dependent upon modules had changed
 // returns map of module IDs, changed yes/no
-func GetModuleChangedWithDependencies(moduleId uuid.UUID) (map[uuid.UUID]bool, error) {
+func GetModuleChangedWithDependencies_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) (map[uuid.UUID]bool, error) {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
@@ -102,14 +102,13 @@ func GetModuleChangedWithDependencies(moduleId uuid.UUID) (map[uuid.UUID]bool, e
 		var file types.TransferFile
 		file.Content.Module = module
 
-		moduleIdMapChecked[id], err = hasModuleChanged(file)
+		moduleIdMapChecked[id], err = hasModuleChanged_tx(ctx, tx, file)
 		if err != nil {
 			return err
 		}
 
 		// check dependencies
 		for _, moduleIdDependsOn := range module.DependsOn {
-
 			if err := checkRecursive(moduleIdDependsOn, moduleIdMapChecked); err != nil {
 				return err
 			}
@@ -124,7 +123,7 @@ func GetModuleChangedWithDependencies(moduleId uuid.UUID) (map[uuid.UUID]bool, e
 }
 
 // verifies that the importing module matches the running application build
-func verifyCompatibilityWithApp(moduleId uuid.UUID, releaseBuildApp int) error {
+func verifyCompatibilityWithApp(releaseBuildApp int) error {
 
 	if config.GetAppVersion().Build < releaseBuildApp {
 		return fmt.Errorf("module was released for application version %d (current version %d)",
@@ -134,8 +133,8 @@ func verifyCompatibilityWithApp(moduleId uuid.UUID, releaseBuildApp int) error {
 }
 
 // verifies that the raw content of JSON file matches given signature
-// verifiy raw content, as target JSON might have different structure (new elements due to schema change)
-// returns error if verification failes, also module hash
+// verify raw content, as target JSON might have different structure (new elements due to schema change)
+// returns error if verification fails, also module hash
 func verifyContent(jsonFileData *[]byte) ([32]byte, error) {
 
 	var hashed [32]byte
@@ -271,13 +270,13 @@ func writeFilesToZip(zipPath string, filePaths []string) error {
 // returns whether the module inside the given transfer file has changed
 //
 //	checked against the stored module hash from the last module version change
-func hasModuleChanged(file types.TransferFile) (bool, error) {
+func hasModuleChanged_tx(ctx context.Context, tx pgx.Tx, file types.TransferFile) (bool, error) {
 
 	hashedStr, err := getModuleHashFromFile(file)
 	if err != nil {
 		return false, err
 	}
-	hashedStrEx, err := module_meta.GetHash(file.Content.Module.Id)
+	hashedStrEx, err := module_meta.GetHash_tx(ctx, tx, file.Content.Module.Id)
 	if err != nil {
 		return false, err
 	}

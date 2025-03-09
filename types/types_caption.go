@@ -13,6 +13,7 @@ type CaptionMapsAll struct {
 	JsFunctionIdMap  map[uuid.UUID]CaptionMap `json:"jsFunctionIdMap"`
 	LoginFormIdMap   map[uuid.UUID]CaptionMap `json:"loginFormIdMap"`
 	MenuIdMap        map[uuid.UUID]CaptionMap `json:"menuIdMap"`
+	MenuTabIdMap     map[uuid.UUID]CaptionMap `json:"menuTabIdMap"`
 	ModuleIdMap      map[uuid.UUID]CaptionMap `json:"moduleIdMap"`
 	PgFunctionIdMap  map[uuid.UUID]CaptionMap `json:"pgFunctionIdMap"`
 	QueryChoiceIdMap map[uuid.UUID]CaptionMap `json:"queryChoiceIdMap"`

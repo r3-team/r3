@@ -62,13 +62,7 @@ func GetFilePathVersion(fileId uuid.UUID, version int64) string {
 }
 
 // attempts to store file upload
-func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
-	part *multipart.Part, isNewFile bool) error {
-
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
-
-	var err error
+func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId uuid.UUID, part *multipart.Part, isNewFile bool) error {
 
 	cache.Schema_mx.RLock()
 	attribute, exists := cache.AttributeIdMap[attributeId]
@@ -206,12 +200,12 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool, attribu
 	}
 
 	logAttributes := []types.DataSetAttribute{
-		types.DataSetAttribute{
+		{
 			AttributeId:   attributeId,
 			AttributeIdNm: pgtype.UUID{},
 			Value: types.DataSetFileChanges{
 				FileIdMapChange: map[uuid.UUID]types.DataSetFileChange{
-					fileId: types.DataSetFileChange{
+					fileId: {
 						Action:  "update",
 						Name:    fileName,
 						Version: fileVersion,

@@ -94,10 +94,335 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		ALTER TABLE app.pg_function ALTER volatility
-			TYPE app.pg_function_volatility USING volatility::TEXT::app.pg_function_volatility;
+		ALTER TABLE app.field ALTER COLUMN flags
+			TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
+
+		ALTER TABLE app.collection_consumer ALTER COLUMN flags
+			TYPE app.collection_consumer_flag[] USING flags::CHARACTER VARYING(24)[]::app.collection_consumer_flag[];
+
+		ALTER TABLE instance.login_setting ALTER COLUMN form_actions_align
+			TYPE instance.align_horizontal USING form_actions_align::TEXT::instance.align_horizontal;
+
+		ALTER TABLE app.menu ALTER COLUMN menu_tab_id SET NOT NULL;
+		ALTER TABLE app.menu DROP  COLUMN module_id;
+
+		ALTER TABLE app.collection_consumer DROP COLUMN multi_value;
+		ALTER TABLE app.collection_consumer DROP COLUMN no_display_empty;
+
+		-- fix bad upgrade script (column style 'monospace' was wrongly added in '3.8->3.9' script instead of '3.9->3.10' - some 3.10 instances do not have it)
+		-- remove temporary fix in initSystem() (in r3.go) when 3.11 releases
+		ALTER table app.column ALTER COLUMN styles TYPE TEXT[];
+		DROP TYPE app.column_style;
+		CREATE TYPE app.column_style AS ENUM ('bold', 'italic', 'alignEnd', 'alignMid', 'clipboard', 'hide', 'vertical', 'wrap', 'monospace', 'previewLarge', 'boolAtrIcon');
+		ALTER TABLE app.column ALTER COLUMN styles TYPE app.column_style[] USING styles::TEXT[]::app.column_style[];
 	*/
 
+	"3.9": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
+			-- cleanup from last release
+			ALTER TABLE app.pg_function ALTER COLUMN volatility DROP DEFAULT;
+
+			ALTER TABLE app.pg_function ALTER volatility
+				TYPE app.pg_function_volatility USING volatility::TEXT::app.pg_function_volatility;
+			
+			-- join query filter
+			ALTER TABLE app.query             ADD   COLUMN     query_filter_index SMALLINT;
+			ALTER TABLE app.query             DROP  CONSTRAINT query_filter_subquery_fkey;
+
+			ALTER TABLE app.query_filter_side ADD   COLUMN     query_filter_index SMALLINT NOT NULL DEFAULT 0;
+			ALTER TABLE app.query_filter_side ALTER COLUMN     query_filter_index DROP DEFAULT;
+			ALTER TABLE app.query_filter_side DROP  CONSTRAINT query_filter_side_query_id_query_filter_position_fkey;
+			ALTER TABLE app.query_filter_side DROP  CONSTRAINT query_filter_side_pkey;
+			ALTER TABLE app.query_filter_side ADD   CONSTRAINT query_filter_side_pkey PRIMARY KEY (query_id, query_filter_index, query_filter_position, side);
+
+			ALTER TABLE app.query_filter      ADD   COLUMN     index SMALLINT NOT NULL DEFAULT 0;
+			ALTER TABLE app.query_filter      ALTER COLUMN     index DROP DEFAULT;
+			ALTER TABLE app.query_filter      DROP  CONSTRAINT query_filter_pkey;
+			ALTER TABLE app.query_filter      ADD   CONSTRAINT query_filter_pkey PRIMARY KEY (query_id, "index", "position");
+
+			ALTER TABLE app.query_filter_side ADD CONSTRAINT query_filter_side_query_filter_fkey FOREIGN KEY (query_id, query_filter_index, query_filter_position)
+				REFERENCES app.query_filter (query_id, "index", "position") MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			ALTER TABLE app.query ADD CONSTRAINT query_filter_subquery_fkey FOREIGN KEY (query_filter_query_id, query_filter_index, query_filter_position, query_filter_side)
+				REFERENCES app.query_filter_side (query_id, query_filter_index, query_filter_position, side) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+
+			UPDATE app.query
+			SET query_filter_index = 0
+			WHERE query_filter_position IS NOT NULL;
+
+			-- field flags
+			CREATE TYPE app.field_flag AS ENUM ('alignEnd','hideInputs','monospace');
+			ALTER TABLE app.field ADD   COLUMN flags TEXT[] NOT NULL DEFAULT '{}';
+			ALTER TABLE app.field ALTER COLUMN flags DROP DEFAULT;
+
+			-- collection consumer flags
+			CREATE TYPE app.collection_consumer_flag AS ENUM ('multiValue','noDisplayEmpty','showRowCount');
+			ALTER TABLE app.collection_consumer ALTER COLUMN multi_value      DROP NOT NULL;
+			ALTER TABLE app.collection_consumer ALTER COLUMN no_display_empty DROP NOT NULL;
+			ALTER TABLE app.collection_consumer ADD   COLUMN flags TEXT[] NOT NULL DEFAULT '{}';
+			ALTER TABLE app.collection_consumer ALTER COLUMN flags DROP DEFAULT;
+			
+			UPDATE app.collection_consumer SET flags = ARRAY_APPEND(flags, 'multiValue')     WHERE multi_value;
+			UPDATE app.collection_consumer SET flags = ARRAY_APPEND(flags, 'noDisplayEmpty') WHERE no_display_empty;
+
+			-- make column styles not nullable
+			UPDATE app.column SET styles = '{}' WHERE styles IS NULL;
+			ALTER TABLE app.column ALTER COLUMN styles SET NOT NULL;
+
+			-- barcode attribute use
+			ALTER TYPE app.attribute_content_use ADD VALUE 'barcode';
+
+			-- new filter side content
+			ALTER TYPE app.filter_side_content ADD VALUE 'getter';
+
+			-- menu tabs
+			CREATE TABLE IF NOT EXISTS app.menu_tab(
+				id uuid NOT NULL,
+				module_id uuid NOT NULL,
+				icon_id uuid,
+				"position" integer NOT NULL,
+				CONSTRAINT menu_tab_pkey PRIMARY KEY (id),
+				CONSTRAINT menu_tab_module_id_fkey FOREIGN KEY (module_id)
+					REFERENCES app.module (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT menu_tab_icon_id_fkey FOREIGN KEY (icon_id)
+					REFERENCES app.icon (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
+
+			CREATE INDEX IF NOT EXISTS fki_menu_tab_icon_id_fkey
+				ON app.menu_tab USING btree (icon_id ASC NULLS LAST);
+
+			CREATE INDEX IF NOT EXISTS fki_menu_tab_module_id_fkey
+				ON app.menu_tab USING btree (module_id ASC NULLS LAST);
+			
+			-- menu tab captions
+			ALTER TYPE app.caption_content ADD VALUE 'menuTabTitle';
+
+			ALTER TABLE app.caption ADD COLUMN menu_tab_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_menu_tab_id_fkey FOREIGN KEY (menu_tab_id)
+				REFERENCES app.menu_tab (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_menu_tab_id_fkey ON app.caption USING BTREE (menu_tab_id ASC NULLS LAST);
+
+			ALTER TABLE instance.caption ADD COLUMN menu_tab_id uuid;
+			ALTER TABLE instance.caption ADD CONSTRAINT caption_menu_tab_id_fkey FOREIGN KEY (menu_tab_id)
+				REFERENCES app.menu_tab (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_menu_tab_id_fkey ON instance.caption USING BTREE (menu_tab_id ASC NULLS LAST);
+
+			-- generate first menu tab
+			INSERT INTO app.menu_tab (id, module_id, position)
+				SELECT gen_random_uuid(), id, 0 FROM app.module;
+
+			-- menu assocation with tabs
+			ALTER TABLE app.menu ALTER COLUMN module_id DROP NOT NULL;
+			ALTER TABLE app.menu ADD COLUMN menu_tab_id UUID;
+			ALTER TABLE app.menu ADD CONSTRAINT menu_menu_tab_id_fkey FOREIGN KEY (menu_tab_id)
+				REFERENCES app.menu_tab (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			UPDATE app.menu AS m
+			SET menu_tab_id = (
+				SELECT id
+				FROM app.menu_tab
+				WHERE module_id = m.module_id
+			);
+
+			-- form state as form state condition
+			ALTER TABLE app.form_state_condition_side ADD COLUMN form_state_id_result UUID;
+			ALTER TABLE app.form_state_condition_side ADD CONSTRAINT form_state_condition_side_form_state_id_result_fkey FOREIGN KEY (form_state_id_result)
+				REFERENCES app.form_state (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_form_state_id_result_fkey
+    			ON app.form_state_condition_side USING btree (form_state_id_result ASC NULLS LAST);
+			
+			ALTER TYPE app.filter_side_content ADD VALUE 'formState';
+
+			-- persistent login config
+			ALTER TABLE instance.login ADD   COLUMN date_favorites BIGINT NOT NULL DEFAULT 0;
+			ALTER TABLE instance.login ALTER COLUMN date_favorites DROP DEFAULT;
+
+			-- login favorites
+			CREATE TABLE instance.login_favorite (
+				id uuid NOT NULL,
+				login_id integer NOT NULL,
+				module_id uuid NOT NULL,
+				form_id uuid NOT NULL,
+				record_id bigint,
+				title character varying(128),
+				"position" smallint NOT NULL,
+				CONSTRAINT login_favorite_pkey PRIMARY KEY (id),
+				CONSTRAINT login_favorite_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_favorite_module_id_fkey FOREIGN KEY (module_id)
+					REFERENCES app.module (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_favorite_form_id_fkey FOREIGN KEY (form_id)
+					REFERENCES app.form (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX fki_login_favorite_login_id_fkey  ON instance.login_favorite USING BTREE (login_id  ASC NULLS LAST);
+			CREATE INDEX fki_login_favorite_module_id_fkey ON instance.login_favorite USING BTREE (module_id ASC NULLS LAST);
+			CREATE INDEX fki_login_favorite_form_id_fkey   ON instance.login_favorite USING BTREE (form_id   ASC NULLS LAST);
+
+			-- login options
+			CREATE TABLE IF NOT EXISTS instance.login_options (
+				login_id integer NOT NULL,
+				login_favorite_id uuid,
+				field_id uuid NOT NULL,
+				is_mobile boolean NOT NULL,
+				date_change bigint NOT NULL,
+				options text COLLATE pg_catalog."default" NOT NULL,
+				CONSTRAINT login_options_field_id_fkey FOREIGN KEY (field_id)
+					REFERENCES app.field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_options_login_favorite_id_fkey FOREIGN KEY (login_favorite_id)
+					REFERENCES instance.login_favorite (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+					NOT VALID,
+				CONSTRAINT login_options_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX fki_login_options_login_id_fkey          ON instance.login_options USING BTREE (login_id          ASC NULLS LAST);
+			CREATE INDEX fki_login_options_login_favorite_id_fkey ON instance.login_options USING BTREE (login_favorite_id ASC NULLS LAST);
+			CREATE INDEX fki_login_options_field_id_fkey          ON instance.login_options USING BTREE (field_id          ASC NULLS LAST);
+			CREATE UNIQUE INDEX ind_login_options_unique          ON instance.login_options USING BTREE (
+				login_id ASC NULLS LAST,
+				COALESCE(login_favorite_id,'00000000-0000-0000-0000-000000000000') ASC NULLS LAST,
+				field_id ASC NULLS LAST,
+				is_mobile ASC NULLS LAST
+			);
+
+			-- new login settings
+			CREATE TYPE instance.align_horizontal AS ENUM ('left', 'center', 'right');
+			ALTER TABLE instance.login_setting ADD   COLUMN form_actions_align TEXT NOT NULL DEFAULT 'center';
+			ALTER TABLE instance.login_setting ALTER COLUMN form_actions_align DROP DEFAULT;
+
+			ALTER TABLE instance.login_setting ADD   COLUMN shadows_inputs BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN shadows_inputs DROP DEFAULT;
+
+			-- remove login setting
+			ALTER TABLE instance.login_setting DROP COLUMN borders_all;
+
+			-- new login session function
+			ALTER TABLE app.module
+				ADD COLUMN js_function_id_on_login UUID,
+				ADD CONSTRAINT js_function_id_on_login_fkey FOREIGN KEY (js_function_id_on_login)
+					REFERENCES app.js_function (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_id_on_login_fkey ON app.module USING btree (js_function_id_on_login ASC NULLS LAST);
+
+			-- file_unlink() instance function
+			CREATE OR REPLACE FUNCTION instance.file_unlink(
+				file_id uuid,
+				attribute_id uuid,
+				record_id bigint)
+				RETURNS void
+				LANGUAGE 'plpgsql'
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+				DECLARE
+				BEGIN
+					EXECUTE FORMAT(
+						'DELETE FROM instance_file.%I
+						WHERE file_id   = $1
+						AND   record_id = $2',
+						CONCAT(attribute_id::TEXT, '_record')
+					) USING file_id, record_id;
+				END;
+			$BODY$;
+
+			-- regex operators
+			ALTER TYPE app.condition_operator ADD VALUE '~';
+			ALTER TYPE app.condition_operator ADD VALUE '~*';
+			ALTER TYPE app.condition_operator ADD VALUE '!~';
+			ALTER TYPE app.condition_operator ADD VALUE '!~*';
+
+			-- form state effects for data handling
+			ALTER TABLE app.form_state_effect ADD   COLUMN new_data SMALLINT NOT NULL DEFAULT 0;
+			ALTER TABLE app.form_state_effect ALTER COLUMN new_data DROP DEFAULT;
+
+			-- new display type
+			ALTER TYPE app.data_display ADD VALUE 'rating';
+
+			-- new column styles
+			ALTER TYPE app.column_style ADD VALUE 'previewLarge';
+			ALTER TYPE app.column_style ADD VALUE 'boolAtrIcon';
+			ALTER TYPE app.column_style ADD VALUE 'monospace';
+
+			-- default values for variables
+			ALTER TABLE app.variable ADD COLUMN def TEXT;
+
+			-- fix login foreign key
+			ALTER TABLE instance.login
+				DROP CONSTRAINT login_ldap_id_fkey,
+				ADD  CONSTRAINT login_ldap_id_fkey FOREIGN KEY (ldap_id)
+					REFERENCES instance.ldap (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION;
+
+			-- fix wrong data type for function argument
+			DROP   FUNCTION instance.mail_delete_after_attach;
+			CREATE FUNCTION instance.mail_delete_after_attach(
+				mail_id integer,
+				attach_record_id bigint,
+				attach_attribute_id uuid)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					UPDATE instance.mail_spool SET
+						record_id_wofk = attach_record_id,
+						attribute_id = attach_attribute_id
+					WHERE id = mail_id
+					AND outgoing = FALSE;
+					
+					RETURN 0;
+				END;
+			$BODY$;
+		`)
+		return "3.10", err
+	},
 	"3.8": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `
 			-- cleanup from last release

@@ -11,7 +11,7 @@ import (
 func DbIdentifier(input string) error {
 
 	if input == "" {
-		return handler.CreateErrCode("APP", handler.ErrCodeAppNameEmpty)
+		return handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppNameEmpty)
 	}
 
 	// must start with [a-z], followed by [a-z0-9\_], max. 60 chars (max. identifier size in PostgreSQL: 63)
@@ -21,7 +21,7 @@ func DbIdentifier(input string) error {
 		return err
 	}
 	if input != rex.FindString(input) {
-		return handler.CreateErrCode("APP", handler.ErrCodeAppNameInvalid)
+		return handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppNameInvalid)
 	}
 	return nil
 }

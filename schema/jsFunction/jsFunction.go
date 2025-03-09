@@ -3,7 +3,6 @@ package jsFunction
 import (
 	"context"
 	"fmt"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
@@ -28,16 +27,16 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(moduleId uuid.UUID) ([]types.JsFunction, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.JsFunction, error) {
 
 	var err error
 	functions := make([]types.JsFunction, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, form_id, name, code_args, code_function, code_returns, is_client_event_exec
 		FROM app.js_function
 		WHERE module_id = $1
-		ORDER BY name ASC
+		ORDER BY form_id ASC, name ASC -- sort by both as name is only in unique in combination
 	`, moduleId)
 	if err != nil {
 		return functions, err
@@ -57,7 +56,7 @@ func Get(moduleId uuid.UUID) ([]types.JsFunction, error) {
 
 	for i, f := range functions {
 		f.ModuleId = moduleId
-		f.Captions, err = caption.Get("js_function", f.Id, []string{"jsFunctionTitle", "jsFunctionDesc"})
+		f.Captions, err = caption.Get_tx(ctx, tx, "js_function", f.Id, []string{"jsFunctionTitle", "jsFunctionDesc"})
 		if err != nil {
 			return functions, err
 		}

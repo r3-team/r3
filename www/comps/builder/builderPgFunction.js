@@ -162,14 +162,16 @@ let MyBuilderPgFunction = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
-					<my-button image="visible1.png"
-						@trigger="copyValueDialog(name,id,id)"
-						:caption="capGen.id"
-					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
 						:caption="capGen.preview"
 						:image="showPreview ? 'checkbox1.png' : 'checkbox0.png'"
+					/>
+				</div>
+				<div class="area nowrap">
+					<my-button image="visible1.png"
+						@trigger="copyValueDialog(name,id,id)"
+						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
 						@trigger="delAsk"
@@ -207,7 +209,7 @@ let MyBuilderPgFunction = {
 				:entriesText="tabs.labels"
 			/>
 			
-			<div class="content padding default-inputs">
+			<div class="content default-inputs" :class="{ 'no-padding':tabTarget !== 'content' }">
 				
 				<template v-if="tabTarget === 'content'">
 					<div class="row gap">
@@ -255,7 +257,7 @@ let MyBuilderPgFunction = {
 						<template v-for="mod in modulesData.filter(v => holderRelationModuleId === null || holderRelationModuleId === v.id)">
 							<div class="entity" v-for="rel in mod.relations.filter(v => holderRelationText === '' || v.name.toLowerCase().includes(holderRelationText.toLowerCase()))">
 								<div class="entity-title">
-									<div class="row centered grow">
+									<div class="row gap centered grow">
 										<my-button
 											@trigger="toggleRelationShow(rel.id)"
 											:image="holderRelationIdsOpen.includes(rel.id) ? 'triangleDown.png' : 'triangleRight.png'"
@@ -324,7 +326,7 @@ let MyBuilderPgFunction = {
 										:naked="true"
 									/>
 									
-									<div class="row centered">
+									<div class="row gap centered">
 										<my-button image="question.png"
 											@trigger="showHelp(fnc.name+'()',getFunctionHelp('pg',fnc,builderLanguage))"
 											:active="getFunctionHelp('pg',fnc,builderLanguage) !== ''"
@@ -375,7 +377,7 @@ let MyBuilderPgFunction = {
 				</template>
 				
 				<template v-if="tabTarget === 'exec'">
-					<table class="generic-table-vertical tight fullWidth">
+					<table class="generic-table-vertical">
 						<tbody>
 							<tr v-if="execArgInputs.length > 0">
 								<td>{{ capApp.codeArgs }}</td>
@@ -391,113 +393,116 @@ let MyBuilderPgFunction = {
 								</td>
 							</tr>
 							<tr>
+								<td></td>
+								<td>
+									<my-button image="settingsPlay.png"
+										@trigger="exec"
+										:active="!readonly"
+										:caption="capApp.exec"
+									/>
+								</td>
+							</tr>
+							<tr>
 								<td>{{ capApp.execResponse }}</td>
 								<td><textarea class="dynamic response" v-model="execResponse" disabled></textarea></td>
 							</tr>
 						</tbody>
 					</table>
-					<my-button image="settingsPlay.png"
-						@trigger="exec"
-						:active="!readonly"
-						:caption="capApp.exec"
-					/>
 				</template>
 				
-				<template v-if="tabTarget === 'properties'">
-					<table class="generic-table-vertical tight fullWidth">
-						<tbody>
-							<tr>
-								<td>{{ capGen.name }}</td>
-								<td><input v-model="name" :disabled="readonly" /></td>
-							</tr>
-							<tr>
-								<td>{{ capGen.title }}</td>
-								<td>
-									<my-builder-caption
-										v-model="captions.pgFunctionTitle"
-										:language="builderLanguage"
-										:readonly="readonly"
+				<table v-if="tabTarget === 'properties'" class="generic-table-vertical">
+					<tbody>
+						<tr>
+							<td>{{ capGen.name }}</td>
+							<td><input v-model="name" :disabled="readonly" /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.title }}</td>
+							<td>
+								<my-builder-caption
+									v-model="captions.pgFunctionTitle"
+									:language="builderLanguage"
+									:readonly="readonly"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.description }}</td>
+							<td>
+								<my-builder-caption
+									v-model="captions.pgFunctionDesc"
+									:language="builderLanguage"
+									:multiLine="true"
+									:readonly="readonly"
+								/>
+							</td>
+						</tr>
+						<tr v-if="!isTrigger">
+							<td>{{ capApp.codeArgs }}</td>
+							<td><textarea v-model="codeArgs" @keyup="resetExec" :disabled="isTrigger || isLoginSync || readonly" placeholder="-"></textarea></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.codeReturns }}</td>
+							<td><input v-model="codeReturns" :disabled="isTrigger || isLoginSync || readonly" placeholder="-" /></td>
+						</tr>
+						<tr v-if="!isTrigger">
+							<td>{{ capApp.volatility }}</td>
+							<td>
+								<div class="row gap centered">
+									<select class="dynamic" v-model="volatility" :disabled="readonly">
+										<option>VOLATILE</option>
+										<option>STABLE</option>
+										<option>IMMUTABLE</option>
+									</select>
+									<my-button image="question.png"
+										@trigger="showHelpVolatility"
 									/>
-								</td>
-							</tr>
-							<tr>
-								<td>{{ capGen.description }}</td>
-								<td>
-									<my-builder-caption
-										v-model="captions.pgFunctionDesc"
-										:language="builderLanguage"
-										:multiLine="true"
-										:readonly="readonly"
+								</div>
+							</td>
+						</tr>
+						<tr v-if="isTrigger">
+							<td>{{ capApp.triggers }}</td>
+							<td>
+								<my-builder-pg-triggers
+									:contextEntity="'pgFunction'"
+									:contextId="id"
+									:readonly="readonly"
+									:singleColumn="true"
+								/>
+							</td>
+						</tr>
+						<tr v-if="isLoginSync">
+							<td>{{ capApp.isLoginSync }}</td>
+							<td><my-bool v-model="isLoginSync" :readonly="true" /></td>
+						</tr>
+						<tr v-if="!isTrigger && !isLoginSync">
+							<td>{{ capApp.isFrontendExec }}</td>
+							<td><my-bool v-model="isFrontendExec" :readonly="isTrigger || readonly" /></td>
+						</tr>
+						<tr v-if="!isTrigger && !isLoginSync">
+							<td>
+								<div class="column">
+									<span>{{ capApp.schedules }}</span>
+									<my-button image="add.png"
+										@trigger="addSchedule"
+										:active="!readonly"
+										:caption="capGen.button.add"
+										:naked="true"
 									/>
-								</td>
-							</tr>
-							<tr v-if="!isTrigger">
-								<td>{{ capApp.codeArgs }}</td>
-								<td><textarea v-model="codeArgs" @keyup="resetExec" :disabled="isTrigger || isLoginSync || readonly" placeholder="-"></textarea></td>
-							</tr>
-							<tr>
-								<td>{{ capApp.codeReturns }}</td>
-								<td><input v-model="codeReturns" :disabled="isTrigger || isLoginSync || readonly" placeholder="-" /></td>
-							</tr>
-							<tr v-if="!isTrigger">
-								<td>{{ capApp.volatility }}</td>
-								<td>
-									<div class="row gap">
-										<select class="dynamic" v-model="volatility" :disabled="readonly">
-											<option>VOLATILE</option>
-											<option>STABLE</option>
-											<option>IMMUTABLE</option>
-										</select>
-										<my-button image="question.png"
-											@trigger="showHelpVolatility"
-										/>
-									</div>
-								</td>
-							</tr>
-							<tr v-if="isTrigger">
-								<td>{{ capApp.triggers }}</td>
-								<td>
-									<my-builder-pg-triggers
-										:contextEntity="'pgFunction'"
-										:contextId="id"
-										:readonly="readonly"
-										:singleColumn="true"
-									/>
-								</td>
-							</tr>
-							<tr v-if="isLoginSync">
-								<td>{{ capApp.isLoginSync }}</td>
-								<td><my-bool v-model="isLoginSync" :readonly="true" /></td>
-							</tr>
-							<tr v-if="!isTrigger && !isLoginSync">
-								<td>{{ capApp.isFrontendExec }}</td>
-								<td><my-bool v-model="isFrontendExec" :readonly="isTrigger || readonly" /></td>
-							</tr>
-							<tr v-if="!isTrigger && !isLoginSync">
-								<td>
-									<div class="column">
-										<span>{{ capApp.schedules }}</span>
-										<my-button image="add.png"
-											@trigger="addSchedule"
-											:active="!readonly"
-											:caption="capGen.button.add"
-											:naked="true"
-										/>
-									</div>
-								</td>
-								<td>
-									<my-builder-pg-function-item-schedule
-										v-for="(s,i) in schedules"
-										v-model="schedules[i]"
-										@remove="schedules.splice(i,1)"
-										:key="i"
-										:readonly="readonly"
-									/>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</template>
+								</div>
+							</td>
+							<td>
+								<my-builder-pg-function-item-schedule
+									v-for="(s,i) in schedules"
+									v-model="schedules[i]"
+									@remove="schedules.splice(i,1)"
+									:key="i"
+									:readonly="readonly"
+								/>
+							</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</div>`,
@@ -551,7 +556,7 @@ let MyBuilderPgFunction = {
 			holderRelationIdsOpen:[],    // opened relation placeholders (shows attributes)
 			holderRelationText:'',       // text filter for module relations
 			instanceFunctionIds:[
-				'abort_show_message','clean_up_e2ee_keys','file_link',
+				'abort_show_message','clean_up_e2ee_keys','file_link','file_unlink',
 				'files_get','get_e2ee_data_key_enc','get_language_code','get_name',
 				'get_preset_record_id','get_public_hostname','get_role_ids','get_user_id',
 				'has_role','has_role_any','log_error','log_info','log_warning','mail_delete',
@@ -628,7 +633,7 @@ let MyBuilderPgFunction = {
 		},
 		
 		// simple
-		execArgInputs:(s) => s.codeArgs.trim() === '' ? [] : s.codeArgs.split(','),
+		execArgInputs:(s) => s.codeArgs.trim() === '' ? [] : s.codeArgs.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/),
 		module:       (s) => s.pgFunction === false ? false : s.moduleIdMap[s.pgFunction.moduleId],
 		modulesData:  (s) => s.getDependentModules(s.module).filter(v => v.relations.length   !== 0),
 		modulesFnc:   (s) => s.getDependentModules(s.module).filter(v => v.pgFunctions.length !== 0),
@@ -920,7 +925,7 @@ let MyBuilderPgFunction = {
 					moduleId:this.pgFunction.moduleId,
 					isTrigger:this.pgFunction.isTrigger,
 					
-					// changable
+					// changeable
 					name:this.name,
 					codeArgs:this.codeArgs,
 					codeFunction:this.placeholdersUnset(false),

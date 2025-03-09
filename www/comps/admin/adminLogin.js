@@ -10,15 +10,17 @@ export {MyAdminLogin as default};
 let MyAdminLoginRole = {
 	name:'my-admin-login-role',
 	template:`<td class="minimum role-content">
-		<my-button
-			v-for="r in module.roles.filter(v => v.assignable && v.content === content)"
-			@trigger="$emit('toggle',r.id)"
-			:active="!readonly"
-			:caption="getCaption('roleTitle',module.id,r.id,r.captions,r.name)"
-			:captionTitle="getCaption('roleDesc',module.id,r.id,r.captions)"
-			:image="roleIds.includes(r.id) ? 'checkbox1.png' : 'checkbox0.png'"
-			:naked="true"
-		/>
+		<div class="row wrap gap">
+			<my-button
+				v-for="r in module.roles.filter(v => v.assignable && v.content === content)"
+				@trigger="$emit('toggle',r.id)"
+				:active="!readonly"
+				:caption="getCaption('roleTitle',module.id,r.id,r.captions,r.name)"
+				:captionTitle="getCaption('roleDesc',module.id,r.id,r.captions)"
+				:image="roleIds.includes(r.id) ? 'checkbox1.png' : 'checkbox0.png'"
+				:naked="true"
+			/>
+		</div>
 	</td>`,
 	props:{
 		content: { type:String,  required:true }, // role content to filter by
@@ -89,10 +91,12 @@ let MyAdminLogin = {
 					/>
 					<my-button image="add.png"
 						v-if="!isNew"
-						@trigger="id = 0"
+						@trigger="reset"
 						:active="!isLdap"
 						:caption="capGen.button.new"
 					/>
+				</div>
+				<div class="area">
 					<my-button image="warning.png"
 						v-if="!isNew"
 						@trigger="resetTotpAsk"
@@ -109,8 +113,8 @@ let MyAdminLogin = {
 				</div>
 			</div>
 			
-			<div class="content">
-				<table class="generic-table-vertical fullWidth">
+			<div class="content no-padding">
+				<table class="generic-table-vertical w1200">
 					<tbody>
 						<tr>
 							<td>
@@ -119,7 +123,14 @@ let MyAdminLogin = {
 									<span>{{ capGen.name }}</span>
 								</div>
 							</td>
-							<td class="default-inputs"><input v-model="name" v-focus :disabled="isLdap" /></td>
+							<td class="default-inputs">
+								<div class="column gap">
+									<input v-model="name" v-focus @keyup="typedUniqueField('name',name)" :disabled="isLdap" />
+									<div v-if="notUniqueName && name !== ''" class="message error">
+										{{ capApp.dialog.notUniqueName }}
+									</div>
+								</div>
+							</td>
 							<td>{{ capApp.hint.name }}</td>
 						</tr>
 						<tr v-if="isNew">
@@ -165,7 +176,7 @@ let MyAdminLogin = {
 					<div class="login-details-content" :class="{ roles:tabTarget === 'roles' }">
 
 						<!-- meta data -->
-						<table class="generic-table-vertical default-inputs admin-login-meta" v-if="tabTarget === 'meta'">
+						<table class="generic-table-vertical default-inputs noRowBorders admin-login-meta" v-if="tabTarget === 'meta'">
 							<tbody>
 								<tr v-if="isLdap">
 									<td colspan="2" class="grouping"><b>{{ capApp.ldapMeta }}</b></td>
@@ -173,7 +184,7 @@ let MyAdminLogin = {
 								<tr>
 									<td class="minimum">
 										<div class="title-cell">
-											<img src="images/editBox.png" />
+											<img src="images/edit.png" />
 											<span>{{ capGen.name }}</span>
 										</div>
 									</td>
@@ -230,7 +241,14 @@ let MyAdminLogin = {
 											<span>{{ capApp.meta.email }}</span>
 										</div>
 									</td>
-									<td><input class="dynamic" v-model="meta.email" :disabled="isLdap" /></td>
+									<td>
+										<div class="column gap">
+											<input class="dynamic" v-model="meta.email" @keyup="typedUniqueField('email',meta.email)" :disabled="isLdap" />
+											<div v-if="notUniqueEmail && meta.email !== ''" class="message error">
+												{{ capApp.dialog.notUniqueEmail }}
+											</div>
+										</div>
+									</td>
 								</tr>
 								<tr>
 									<td class="minimum">
@@ -271,7 +289,7 @@ let MyAdminLogin = {
 						</table>
 						
 						<!-- roles -->
-						<table class="generic-table bright" v-if="tabTarget === 'roles'">
+						<table class="generic-table sticky-top bright" v-if="tabTarget === 'roles'">
 							<thead>
 								<tr>
 									<th v-if="isLdapAssignedRoles" colspan="4"><b>{{ capApp.ldapAssignActive }}</b></th>
@@ -283,9 +301,9 @@ let MyAdminLogin = {
 											<input class="short" placeholder="..." v-model="roleFilter" :title="capGen.button.filter" />
 										</div>
 									</th>
-									<th><my-button @trigger="toggleRolesByContent('admin')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentAdmin" :naked="true" /></th>
-									<th><my-button @trigger="toggleRolesByContent('user')"  :active="!isLdapAssignedRoles" :caption="capApp.roleContentUser"  :naked="true" /></th>
-									<th><my-button @trigger="toggleRolesByContent('other')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentOther" :naked="true" /></th>
+									<th><my-button image="ok.png" @trigger="toggleRolesByContent('admin')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentAdmin" :naked="true" /></th>
+									<th><my-button image="ok.png" @trigger="toggleRolesByContent('user')"  :active="!isLdapAssignedRoles" :caption="capApp.roleContentUser"  :naked="true" /></th>
+									<th><my-button image="ok.png" @trigger="toggleRolesByContent('other')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentOther" :naked="true" /></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -315,7 +333,7 @@ let MyAdminLogin = {
 						</table>
 
 						<!-- properties -->
-						<table class="generic-table-vertical fullWidth" v-if="tabTarget === 'properties'">
+						<table class="generic-table-vertical w1200" v-if="tabTarget === 'properties'">
 							<tbody>
 								<tr>
 									<td>
@@ -337,13 +355,15 @@ let MyAdminLogin = {
 										</div>
 									</td>
 									<td>
-										<div class="field dropdown">
-											<div class="field-content data intent">
+										<div class="field login-details-login-form-input">
+											<div class="field-content data intent" :class="{ dropdown:loginFormIndexesDropdown.includes(lfi) }">
 												<my-input-select
+													@dropdown-show="openLoginFormDropdown(lfi,$event)"
 													@open="openLoginForm(lfi)"
 													@request-data="getRecords(lfi)"
 													@updated-text-input="recordInput = $event"
 													@update:selected="updateLoginRecord(lfi,$event)"
+													:dropdownShow="loginFormIndexesDropdown.includes(lfi)"
 													:nakedIcons="true"
 													:options="recordList"
 													:placeholder="capGen.threeDots"
@@ -375,7 +395,18 @@ let MyAdminLogin = {
 										</div>
 									</td>
 									<td><my-bool v-model="noAuth" :readonly="isLdap" /></td>
-									<td>{{ capApp.hint.noAuth }}</td>
+									<td>
+										<div class="column gap default-inputs">
+											<span>{{ capApp.hint.noAuth }}</span>
+											<div class="row gap centered" v-if="noAuth">
+												<input disabled :value="noAuthUrl" />
+												<my-button image="copyClipboard.png"
+													@trigger="copyToClipboard"
+													:captionTitle="capGen.button.copyClipboard"
+												/>
+											</div>
+										</div>
+									</td>
 								</tr>
 								<tr>
 									<td>
@@ -446,6 +477,8 @@ let MyAdminLogin = {
 			templateId:null,
 			
 			// states
+			notUniqueEmail:false,
+			notUniqueName:false,
 			inputKeys:['name','active','admin','pass','meta','noAuth','tokenExpiryHours','records','roleIds'],
 			inputsOrg:{},      // map of original input values, key = input key
 			inputsReady:false, // inputs have been loaded
@@ -454,8 +487,10 @@ let MyAdminLogin = {
 			roleFilter:'',     // filter for role selection
 			tabTarget:'meta',
 			templates:[],      // login templates
+			timerNotUniqueCheck:null,
 			
 			// login form
+			loginFormIndexesDropdown:[],
 			loginFormIndexOpen:null,
 			loginFormRecords:null
 		};
@@ -495,11 +530,12 @@ let MyAdminLogin = {
 		// simple states
 		anyAction: (s) => !s.isLdap,
 		anyInfo:   (s) => s.isLimited,
-		canSave:   (s) => s.hasChanges && s.name !== '',
+		canSave:   (s) => s.hasChanges && !s.notUniqueName && s.name !== '',
 		isFormOpen:(s) => s.loginFormIndexOpen !== null,
 		isLdap:    (s) => s.ldapId !== null,
 		isLimited: (s) => s.activated && s.roleIds.length < 2 && !s.admin && !s.noAuth,
 		isNew:     (s) => s.id === 0,
+		noAuthUrl: (s) => !s.noAuth ? '' : `${location.protocol}//${location.host}/#/?login=${s.name}`,
 		
 		// stores
 		activated:      (s) => s.$store.getters['local/activated'],
@@ -562,6 +598,9 @@ let MyAdminLogin = {
 		close() {
 			this.$emit('close');
 		},
+		copyToClipboard() {
+			navigator.clipboard.writeText(this.noAuthUrl);
+		},
 		openLoginForm(index) {
 			const frm = this.formIdMap[this.loginForms[index].formId];
 			const mod = this.moduleIdMap[frm.moduleId];
@@ -569,6 +608,18 @@ let MyAdminLogin = {
 			this.loginFormIndexOpen = index;
 			this.loginFormRecords   = this.records[index].id !== null
 				? [this.records[index].id] : [];
+		},
+		openLoginFormDropdown(index,state) {
+			const pos = this.loginFormIndexesDropdown.indexOf(index);
+			if(pos === -1 && state)  this.loginFormIndexesDropdown.push(index);
+			if(pos !== -1 && !state) this.loginFormIndexesDropdown.splice(pos,1);
+		},
+		reset() {
+			this.id             = 0;
+			this.name           = '';
+			this.notUniqueEmail = false;
+			this.notUniqueName  = false;
+			this.getIsNotUnique('email',this.meta.email);
 		},
 		toggleRoleId(roleId) {
 			const pos = this.roleIds.indexOf(roleId);
@@ -599,6 +650,10 @@ let MyAdminLogin = {
 				if(!this.roleIds.includes(roleIdsByContent[i]))
 					this.roleIds.push(roleIdsByContent[i]);
 			}
+		},
+		typedUniqueField(content,value) {
+			clearInterval(this.timerNotUniqueCheck);
+			this.timerNotUniqueCheck = setTimeout(() => this.getIsNotUnique(content,value),750);
 		},
 		updateLoginRecord(loginFormIndex,recordId) {
 			this.recordInput = '';
@@ -657,6 +712,26 @@ let MyAdminLogin = {
 					this.roleIds          = login.roleIds;
 					this.pass             = '';
 					this.inputsLoaded();
+					this.getIsNotUnique('email',this.meta.email);
+				},
+				this.$root.genericError
+			);
+		},
+		getIsNotUnique(content,value) {
+			value = value.trim().toLowerCase();
+			if(value === '')
+				return;
+
+			ws.send('login','getIsNotUnique',{
+				loginId:this.id,
+				content:content,
+				value:value
+			},true).then(
+				res => {
+					switch(content) {
+						case 'email': this.notUniqueEmail = res.payload; break
+						case 'name':  this.notUniqueName  = res.payload; break;
+					}
 				},
 				this.$root.genericError
 			);

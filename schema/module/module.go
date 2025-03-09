@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"r3/config/module_meta"
-	"r3/db"
 	"r3/db/check"
 	"r3/schema"
 	"r3/schema/article"
@@ -49,7 +48,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
 	// drop file attribute relations
 	atrIdsFile := make([]uuid.UUID, 0)
-	if err := db.Pool.QueryRow(ctx, `
+	if err := tx.QueryRow(ctx, `
 		SELECT ARRAY_AGG(id)
 		FROM app.attribute
 		WHERE relation_id IN (
@@ -80,13 +79,13 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(ids []uuid.UUID) ([]types.Module, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, error) {
 	modules := make([]types.Module, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
-			pg_function_id_login_sync, name, name_pwa, name_pwa_short, color1,
-			position, language_main, release_build, release_build_app, release_date,
+			js_function_id_on_login, pg_function_id_login_sync, name, name_pwa, name_pwa_short,
+			color1, position, language_main, release_build, release_build_app, release_date,
 			ARRAY(
 				SELECT module_id_on
 				FROM app.module_depends
@@ -115,8 +114,8 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 
 	for rows.Next() {
 		var m types.Module
-		if err := rows.Scan(&m.Id, &m.ParentId, &m.FormId, &m.IconId,
-			&m.IconIdPwa1, &m.IconIdPwa2, &m.PgFunctionIdLoginSync, &m.Name,
+		if err := rows.Scan(&m.Id, &m.ParentId, &m.FormId, &m.IconId, &m.IconIdPwa1,
+			&m.IconIdPwa2, &m.JsFunctionIdOnLogin, &m.PgFunctionIdLoginSync, &m.Name,
 			&m.NamePwa, &m.NamePwaShort, &m.Color1, &m.Position, &m.LanguageMain,
 			&m.ReleaseBuild, &m.ReleaseBuildApp, &m.ReleaseDate, &m.DependsOn,
 			&m.ArticleIdsHelp, &m.Languages); err != nil {
@@ -129,12 +128,12 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 	// get start forms & captions
 	for i, mod := range modules {
 
-		mod.StartForms, err = getStartForms(mod.Id)
+		mod.StartForms, err = getStartForms_tx(ctx, tx, mod.Id)
 		if err != nil {
 			return modules, err
 		}
 
-		mod.Captions, err = caption.Get("module", mod.Id, []string{"moduleTitle"})
+		mod.Captions, err = caption.Get_tx(ctx, tx, "module", mod.Id, []string{"moduleTitle"})
 		if err != nil {
 			return modules, err
 		}
@@ -179,14 +178,14 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 
 		if _, err := tx.Exec(ctx, `
 			UPDATE app.module SET parent_id = $1, form_id = $2, icon_id = $3,
-				icon_id_pwa1 = $4, icon_id_pwa2 = $5, pg_function_id_login_sync = $6,
-				name = $7, name_pwa = $8, name_pwa_short = $9, color1 = $10, position = $11,
-				language_main = $12, release_build = $13, release_build_app = $14,
-				release_date = $15
-			WHERE id = $16
+				icon_id_pwa1 = $4, icon_id_pwa2 = $5, js_function_id_on_login = $6,
+				pg_function_id_login_sync = $7, name = $8, name_pwa = $9, name_pwa_short = $10,
+				color1 = $11, position = $12, language_main = $13, release_build = $14,
+				release_build_app = $15, release_date = $16
+			WHERE id = $17
 		`, mod.ParentId, mod.FormId, mod.IconId, mod.IconIdPwa1, mod.IconIdPwa2,
-			mod.PgFunctionIdLoginSync, mod.Name, mod.NamePwa, mod.NamePwaShort,
-			mod.Color1, mod.Position, mod.LanguageMain, mod.ReleaseBuild,
+			mod.JsFunctionIdOnLogin, mod.PgFunctionIdLoginSync, mod.Name, mod.NamePwa,
+			mod.NamePwaShort, mod.Color1, mod.Position, mod.LanguageMain, mod.ReleaseBuild,
 			mod.ReleaseBuildApp, mod.ReleaseDate, mod.Id); err != nil {
 
 			return mod.Id, err
@@ -212,12 +211,13 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.module (
 				id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
-				pg_function_id_login_sync, name, name_pwa, name_pwa_short, color1,
-				position, language_main, release_build, release_build_app, release_date
+				js_function_id_on_login, pg_function_id_login_sync, name, name_pwa,
+				name_pwa_short, color1, position, language_main, release_build,
+				release_build_app, release_date
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
-		`, mod.Id, mod.ParentId, mod.FormId, mod.IconId, mod.IconIdPwa1,
-			mod.IconIdPwa2, mod.PgFunctionIdLoginSync, mod.Name, mod.NamePwa,
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+		`, mod.Id, mod.ParentId, mod.FormId, mod.IconId, mod.IconIdPwa1, mod.IconIdPwa2,
+			mod.JsFunctionIdOnLogin, mod.PgFunctionIdLoginSync, mod.Name, mod.NamePwa,
 			mod.NamePwaShort, mod.Color1, mod.Position, mod.LanguageMain,
 			mod.ReleaseBuild, mod.ReleaseBuildApp, mod.ReleaseDate); err != nil {
 
@@ -225,9 +225,10 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 		}
 
 		if create {
-			// insert default 'everyone' role for module
-			// only relevant if module did not exist before
-			// otherwise everyone role with ID (and possible assignments) already exists
+			// generate entities that need to be created if module did not exist before
+			// otherwise they are imported with existing IDs (and foreign key references)
+
+			// generate default 'everyone' role for module
 			roleId, err := uuid.NewV4()
 			if err != nil {
 				return mod.Id, err
@@ -239,6 +240,19 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 			`, roleId, mod.Id); err != nil {
 				return mod.Id, err
 			}
+
+			// generate first menu tab
+			menuTabId, err := uuid.NewV4()
+			if err != nil {
+				return mod.Id, err
+			}
+
+			if _, err := tx.Exec(ctx, `
+				INSERT INTO app.menu_tab (id, module_id, position)
+				VALUES ($1,$2,0)
+			`, menuTabId, mod.Id); err != nil {
+				return mod.Id, err
+			}
 		}
 
 		// create module meta data record for instance
@@ -248,7 +262,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 	}
 
 	// set dependencies to other modules
-	dependsOnCurrent, err := getDependsOn_tx(tx, mod.Id)
+	dependsOnCurrent, err := getDependsOn_tx(ctx, tx, mod.Id)
 	if err != nil {
 		return mod.Id, err
 	}
@@ -340,10 +354,10 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 	return mod.Id, caption.Set_tx(ctx, tx, mod.Id, mod.Captions)
 }
 
-func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {
+func getStartForms_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) ([]types.ModuleStartForm, error) {
 
 	startForms := make([]types.ModuleStartForm, 0)
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT role_id, form_id
 		FROM app.module_start_form
 		WHERE module_id = $1
@@ -364,10 +378,10 @@ func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {
 	return startForms, nil
 }
 
-func getDependsOn_tx(tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
+func getDependsOn_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
 
 	moduleIdsDependsOn := make([]uuid.UUID, 0)
-	rows, err := tx.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT module_id_on
 		FROM app.module_depends
 		WHERE module_id = $1

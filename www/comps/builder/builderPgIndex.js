@@ -28,17 +28,18 @@ let MyBuilderPgIndex = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
+				</div>
+				<div class="area">
 					<my-button image="delete.png"
-						v-if="!isNew && !isSystem"
 						@trigger="delAsk"
-						:active="!readonly"
+						:active="!isNew && !isSystem && !readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
 					/>
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
+			<div class="content default-inputs no-padding">
 				<table class="generic-table-vertical">
 					<tbody>
 						<tr>

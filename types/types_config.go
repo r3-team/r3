@@ -46,4 +46,8 @@ type FileTypeDb struct {
 	// SSL/TLS settings
 	Ssl           bool `json:"ssl"`
 	SslSkipVerify bool `json:"sslSkipVerify"`
+
+	// connection settings
+	ConnsMax int32 `json:"connsMax"` // ignore if 0
+	ConnsMin int32 `json:"connsMin"` // ignore if 0
 }

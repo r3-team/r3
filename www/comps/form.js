@@ -11,6 +11,7 @@ import {getFieldOverwritesDefault}   from './shared/field.js';
 import {jsFunctionRun}               from './shared/jsFunction.js';
 import {srcBase64}                   from './shared/image.js';
 import {getCaption}                  from './shared/language.js';
+import {layoutSettleSpace}           from './shared/layout.js';
 import {
 	isAttributeRelationship,
 	isAttributeRelationshipN1,
@@ -29,6 +30,7 @@ import {
 	rsaEncrypt
 } from './shared/crypto.js';
 import {
+	checkDataOptions,
 	filterIsCorrect,
 	filterOperatorIsSingleValue,
 	openLink
@@ -37,6 +39,7 @@ import {
 	getDataFieldMap,
 	getFormPopUpConfig,
 	getFormRoute,
+	getFormStateIdMap,
 	getResolvedPlaceholders,
 	getRowsDecrypted
 } from './shared/form.js';
@@ -47,6 +50,10 @@ import {
 	getQueryFiltersProcessed,
 	getRelationsJoined
 } from './shared/query.js';
+import {
+	variableValueGet,
+	variableValueSet
+} from './shared/variable.js';
 export {MyForm as default};
 
 let MyForm = {
@@ -96,40 +103,26 @@ let MyForm = {
 						:active="!updatingRecord"
 						:captionTitle="capGen.button.goBack"
 					/>
-					<img class="icon"
-						v-if="iconId !== null"
-						:src="srcBase64(iconIdMap[iconId].file)"
-					/>
-					<img class="icon" src="images/fileText.png"
-						v-if="iconId === null"
-					/>
+					<img class="icon" :src="iconSrc" />
 					
 					<!-- form title / message -->
 					<transition name="fade" mode="out-in">
-						<h1 v-if="title !== '' && message === null" class="title">
-							{{ title }}
-						</h1>
-						<h1 class="form-message" v-else-if="message !== null">
-							<my-button
-								:active="false"
-								:caption="message"
-								:naked="true"
-							/>
-						</h1>
+						<h1 v-if="title !== '' && message === null" class="title">{{ title }}</h1>
+						<h1 class="form-message" v-else-if="message !== null">{{ message }}</h1>
 					</transition>
 				</div>
 
-				<div class="area" v-if="!hasBarLower">
-					<my-form-actions
-						v-if="hasFormActions"
-						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-						:entityIdMapState="entityIdMapState"
-						:formActions="form.actions"
-						:formId="formId"
-						:moduleId="moduleId"
-					/>
-				</div>
+				<my-form-actions
+					v-if="!hasBarLower && hasFormActions"
+					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
+					:entityIdMapEffect="entityIdMapEffect"
+					:formActions="form.actions"
+					:formId="formId"
+					:moduleId="moduleId"
+					:noSpace="!layoutElements.includes('formActions')"
+				/>
 				
+				<div class="form-bar-layout-check" ref="formBarUpperCheck" />
 				<div class="area nowrap">
 					<template v-if="isData && !isBulkUpdate">
 						<my-button image="refresh.png"
@@ -147,6 +140,12 @@ let MyForm = {
 						/>
 					</template>
 					
+					<my-button image="star1.png"
+						v-if="!isBulkUpdate"
+						@trigger="makeFavorite"
+						:active="!isAtFavoritesEdit"
+						:captionTitle="capApp.button.favorite"
+					/>
 					<my-button image="link.png"
 						v-if="isPopUp && !isBulkUpdate && !isMobile"
 						@trigger="copyFormUrlToClipboard(false)"
@@ -181,62 +180,62 @@ let MyForm = {
 			</div>
 			
 			<!-- title bar lower -->
-			<div class="top lower" v-if="hasBarLower">
-				<div class="area">
+			<div class="top lower nowrap" v-if="hasBarLower">
+				<div class="area nowrap">
 					<my-button image="new.png"
-						v-if="!isBulkUpdate && allowNew"
+						v-if="buttonShownNew"
 						@trigger="openNewAsk(false)"
 						@trigger-middle="openNewAsk(true)"
-						:active="(!isNew || hasChanges) && canCreate && !blockInputs"
-						:caption="capGen.button.new"
+						:active="buttonActiveNew"
+						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button image="save.png" alt-image="add.png"
-						v-if="!isBulkUpdate"
+						v-if="buttonShownSave"
 						@trigger="set(false)"
 						@trigger-alt="set(true)"
-						:active="hasChanges && canUpdate && !blockInputs"
+						:active="buttonActiveSave"
 						:altAction="!isMobile && allowNew && canCreate"
 						:altCaptionTitle="capGen.button.saveNewHint"
-						:caption="capGen.button.save"
+						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.save : ''"
 						:captionTitle="capGen.button.saveHint"
 					/>
 					<my-button image="save.png"
-						v-if="isBulkUpdate"
+						v-if="buttonShownSaveBulk"
 						@trigger="setBulkUpdate"
-						:active="hasChangesBulk && canUpdate && !blockInputs"
-						:caption="capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length))"
+						:active="buttonActiveSaveBulk"
+						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length)) : ''"
 						:captionTitle="capGen.button.saveHint"
 					/>
-				</div>
-				<div class="area">
-					<my-form-actions
-						v-if="hasFormActions"
-						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-						:entityIdMapState="entityIdMapState"
-						:formActions="form.actions"
-						:formId="formId"
-						:moduleId="moduleId"
+					<my-button image="warning.png"
+						v-if="badSave && fieldIdsInvalid.length !== 0"
+						@trigger="scrollToInvalidField"
+						:caption="capGen.inputRequired"
+						:cancel="true"
 					/>
-				</div>
-				<div class="area">
 					<my-button image="warning.png"
 						v-if="badLoad"
 						:caption="capApp.noAccess"
 						:cancel="true"
 					/>
-					<my-button image="warning.png"
-						v-if="badSave && fieldIdsInvalid.length !== 0"
-						@trigger="scrollToInvalidField"
-						:caption="capApp.invalidInputs"
-						:cancel="true"
-					/>
+				</div>
+				<my-form-actions
+					v-if="hasFormActions"
+					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
+					:entityIdMapEffect="entityIdMapEffect"
+					:formActions="form.actions"
+					:formId="formId"
+					:moduleId="moduleId"
+					:noSpace="!layoutElements.includes('formActions')"
+				/>
+				<div class="form-bar-layout-check" ref="formBarLowerCheck" />
+				<div class="area">
 					<my-button image="shred.png"
-						v-if="!isBulkUpdate && allowDel"
+						v-if="buttonShownDel"
 						@trigger="delAsk"
-						:active="canDelete && !blockInputs"
+						:active="buttonActiveDel"
 						:cancel="true"
-						:caption="capGen.button.delete"
+						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.delete : ''"
 						:captionTitle="capGen.button.deleteHint"
 					/>
 				</div>
@@ -244,15 +243,14 @@ let MyForm = {
 			
 			<!-- title bar widget -->
 			<div class="top lower" v-if="hasBarWidget">
-				<div class="area">
-					<my-form-actions
-						@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-						:entityIdMapState="entityIdMapState"
-						:formActions="form.actions"
-						:formId="formId"
-						:moduleId="moduleId"
-					/>
-				</div>
+				<my-form-actions
+					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
+					:entityIdMapEffect="entityIdMapEffect"
+					:formActions="form.actions"
+					:formId="formId"
+					:moduleId="moduleId"
+					:noSpace="false"
+				/>
 			</div>
 			
 			<!-- form fields -->
@@ -273,7 +271,8 @@ let MyForm = {
 					@set-value-init="valueSet"
 					:isBulkUpdate="isBulkUpdate"
 					:dataFieldMap="fieldIdMapData"
-					:entityIdMapState="entityIdMapState"
+					:entityIdMapEffect="entityIdMapEffect"
+					:favoriteId="favoriteId"
 					:field="f"
 					:fieldIdsChanged="fieldIdsChanged"
 					:fieldIdsInvalid="fieldIdsInvalid"
@@ -281,7 +280,7 @@ let MyForm = {
 					:formBadSave="badSave"
 					:formIsEmbedded="isPopUp || isWidget"
 					:formLoading="loading"
-					:formReadonly="badLoad || blockInputs"
+					:formReadonly="isReadonly || blockInputs"
 					:isAloneInForm="isSingleField"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
@@ -297,7 +296,7 @@ let MyForm = {
 			v-if="showLog"
 			@close-log="showLog = false"
 			:dataFieldMap="fieldIdMapData"
-			:entityIdMapState="entityIdMapState"
+			:entityIdMapEffect="entityIdMapEffect"
 			:form="form"
 			:formLoading="loading"
 			:isPopUp="isPopUp"
@@ -322,6 +321,7 @@ let MyForm = {
 		allowDel:         { type:Boolean, required:false, default:true },
 		allowNew:         { type:Boolean, required:false, default:true },
 		attributeIdMapDef:{ type:Object,  required:false, default:() => {return {};} }, // map of attribute default values
+		favoriteId:       { required:false, default:null },
 		formId:           { type:String,  required:true },
 		hasHelp:          { type:Boolean, required:false, default:true },
 		hasLog:           { type:Boolean, required:false, default:true },
@@ -333,7 +333,7 @@ let MyForm = {
 	},
 	emits:['close','record-deleted','record-updated','records-open'],
 	mounted() {
-		this.$watch(() => [this.formId,this.recordIds],() => { this.reset() },{
+		this.$watch(() => [this.favoriteId,this.formId,this.recordIds],this.reset,{
 			immediate:true
 		});
 		
@@ -342,6 +342,8 @@ let MyForm = {
 		
 		window.addEventListener('keydown',this.handleHotkeys);
 		window.addEventListener('keyup',this.handleHotkeys);
+		window.addEventListener('resize',this.resized);
+		this.resized(null,0);
 	},
 	unmounted() {
 		if(!this.isWidget)
@@ -349,6 +351,7 @@ let MyForm = {
 		
 		window.removeEventListener('keydown',this.handleHotkeys);
 		window.removeEventListener('keyup',this.handleHotkeys);
+		window.removeEventListener('resize',this.resized);
 	},
 	data() {
 		return {
@@ -358,6 +361,13 @@ let MyForm = {
 			blockInputs:false,      // disable all user inputs (used by frontend functions)
 			firstLoad:true,         // form was not used before
 			lastFormId:'',          // when routing occurs: if ID is the same, no need to rebuild form
+			layoutCheckTimer:null,  // layout resize timer
+			layoutElements:[],        // elements that are shown, based on available space
+			layoutElementsAvailable:[ // elements that can be shown, in order of priority
+				'formActions',        // form action as buttons
+				'dataActionLabels',   // data action labels
+				'dataActionReadonly'  // data actions if inactive
+			],
 			loading:false,          // form is currently loading, informs sub components when form is ready
 			message:null,           // form message
 			messageTimeout:null,    // form message expiration timeout
@@ -384,8 +394,8 @@ let MyForm = {
 			loginIdsEncryptForOutside:[], // login IDs for which data keys are encrypted (e2ee), for outside relation and record IDs
 			                              // [{loginIds:[5,12], recordIds:[1,2], relationId:'A-B-C-D'}, {...}]
 			timers:{},                    // frontend function timers, key = name, value = { id:XY, isInterval:true }
-			valuesNew:{},                 // changed valuse by index attribute ID (for sending changes)
-			valuesOld:{},                 // preexisting values by index attribute ID (for change comparisson)
+			valuesNew:{},                 // changed values by index attribute ID (for sending changes)
+			valuesOld:{},                 // preexisting values by index attribute ID (for change comparison)
 			variableIdMapLocal:{}         // variable values by ID (form assigned variables only)
 		};
 	},
@@ -468,38 +478,45 @@ let MyForm = {
 		},
 
 		bgStyle:(s) => s.isPopUp || s.isWidget ? '' : `background-color:${s.colorMenu.toString()};`,
-		canCreate:(s) =>!s.updatingRecord
+		canCreate:(s) => !s.updatingRecord
 			&& s.joins.length !== 0
 			&& s.joins[0].applyCreate
+			&& s.checkDataOptions(4,s.entityIdMapEffect.form.data)
 			&& s.hasAccessToRelation(s.access,s.joins[0].relationId,2),
-		canDelete:(s) => {
-			if(s.updatingRecord || s.isNew || s.badLoad || s.joinsIndexesDel.length === 0)
-				return false;
-			
-			// check for protected preset record
-			let rel = s.relationIdMap[s.joins[0].relationId];
-			for(let p of rel.presets) {
-				if(p.protected && s.recordIds.includes(s.presetIdMapRecordId[p.id]))
-					return false;
-			}
-			return true;
-		},
-		canUpdate:     (s) => !s.badLoad && !s.updatingRecord,
+		canDelete:(s) => !s.updatingRecord
+			&& !s.isNew
+			&& !s.badLoad
+			&& s.joinsIndexesDel.length !== 0
+			&& s.checkDataOptions(1,s.entityIdMapEffect.form.data)
+			&& s.relationIdMap[s.joins[0].relationId].presets.filter(v => v.protected && s.recordIds.includes(s.presetIdMapRecordId[v.id])).length === 0,
+		canUpdate:     (s) => !s.updatingRecord && !s.isReadonly,
 		hasBarLower:   (s) => !s.isWidget && s.isData && !s.form.noDataActions,
 		hasBarWidget:  (s) => s.isWidget && s.hasFormActions,
 		hasChanges:    (s) => !s.form.noDataActions && s.fieldIdsChanged.length !== 0,
 		hasChangesBulk:(s) => s.isBulkUpdate && s.fieldIdsTouched.length !== 0,
-		hasFormActions:(s) => s.form.actions.filter(v => (s.entityIdMapState.formAction[v.id] !== undefined ? s.entityIdMapState.formAction[v.id] : v.state) !== 'hidden').length > 0,
+		hasFormActions:(s) => s.form.actions.filter(v => (s.entityIdMapEffect.formAction[v.id]?.state !== undefined ? s.entityIdMapEffect.formAction[v.id].state : v.state) !== 'hidden').length > 0,
 		hasGoBack:     (s) => s.isData && !s.isMobile && !s.isPopUp,
 		helpAvailable: (s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
 		isBulkUpdate:  (s) => s.isData && s.recordIds.length > 1,
 		isData:        (s) => s.relationId !== null,
 		isNew:         (s) => s.recordIds.length === 0,
-		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','kanban','list','tabs'].includes(s.fields[0].content),
-		menuActive:    (s) => typeof s.formIdMapMenu[s.form.id] === 'undefined' ? null : s.formIdMapMenu[s.form.id],
+		isReadonly:    (s) => s.badLoad || !s.checkDataOptions((s.isNew ? 4 : 2),s.entityIdMapEffect.form.data),
+		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','kanban','list','tabs','variable'].includes(s.fields[0].content),
+		menuActive:    (s) => s.formIdMapMenu[s.form.id] === undefined ? null : s.formIdMapMenu[s.form.id],
 		warnUnsaved:   (s) => s.hasChanges && s.settings.warnUnsaved,
 
-		// entities
+		// buttons
+		buttonActiveDel:     (s) => !s.blockInputs  && s.canDelete,
+		buttonActiveNew:     (s) => !s.blockInputs  && s.canCreate && (!s.isNew || s.hasChanges),
+		buttonActiveSave:    (s) => !s.blockInputs  && s.canUpdate && s.hasChanges,
+		buttonActiveSaveBulk:(s) => !s.blockInputs  && s.canUpdate && s.hasChangesBulk,
+		buttonShownDel:      (s) => !s.isBulkUpdate && s.allowDel  && (s.buttonActiveDel || s.layoutElements.includes('dataActionReadonly')),
+		buttonShownNew:      (s) => !s.isBulkUpdate && s.allowNew  && (s.buttonActiveNew || s.layoutElements.includes('dataActionReadonly')),
+		buttonShownSave:     (s) => !s.isBulkUpdate && (s.buttonActiveSave     || s.layoutElements.includes('dataActionReadonly')),
+		buttonShownSaveBulk: (s) => s.isBulkUpdate  && (s.buttonActiveSaveBulk || s.layoutElements.includes('dataActionReadonly')),
+
+		// general entities
+		formStateIdMap: (s) => s.getFormStateIdMap(s.form.states),
 		fieldIdMapData: (s) => s.getDataFieldMap(s.fields),
 		fields:         (s) => s.form.fields,
 		filters:        (s) => s.form.query.filters,
@@ -521,20 +538,30 @@ let MyForm = {
 			}
 			return out;
 		},
-		iconId:(s) => {
+		iconSrc:(s) => {
+			if(s.favoriteId !== null)
+				return 'images/star1.png';
+
 			if(s.form.iconId !== null)
-				return s.form.iconId;
+				return s.srcBase64(s.iconIdMap[s.form.iconId].file);
 			
-			if(s.menuActive !== null && s.menuActive.formId === s.form.id)
-				return s.menuActive.iconId;
+			if(s.menuActive !== null && s.menuActive.iconId !== null && s.menuActive.formId === s.form.id)
+				return s.srcBase64(s.iconIdMap[s.menuActive.iconId].file);
 			
-			return null;
+			return 'images/fileText.png';
 		},
 		
 		// presentation
 		title:(s) => {
 			if(s.titleOverwrite !== null)
 				return s.titleOverwrite;
+
+			if(s.favoriteId !== null && s.loginFavorites.moduleIdMap[s.moduleId] !== undefined) {
+				for(const f of s.loginFavorites.moduleIdMap[s.moduleId]) {
+					if(f.id === s.favoriteId)
+						return f.title;
+				}
+			}
 			
 			const formTitle = s.getCaption('formTitle',s.moduleId,s.formId,s.form.captions);
 			if(formTitle !== '')
@@ -562,11 +589,11 @@ let MyForm = {
 				
 				// form functions
 				form_close:s.isPopUp ? s.closeAsk : s.openPrevAsk,
-				form_open:(formId,recordId,newTab,popUp,maxY,maxX) => {
+				form_open:(formId,recordId,newTab,popUp,maxY,maxX,replace) => {
 					s.openForm((recordId === 0 || recordId === null ? [] : [recordId]),{
 						formIdOpen:formId, popUpType:popUp ? 'float' : null,
 						maxHeight:maxY, maxWidth:maxX
-					},[],newTab,null);
+					},[],newTab,null,replace);
 					s.recordActionFree = false;
 				},
 				form_set_title:(v) => s.titleOverwrite = v,
@@ -590,20 +617,8 @@ let MyForm = {
 				},
 
 				// variables
-				get_variable:(k) => {
-					const va = s.variableIdMap[k];
-					if(va.formId !== null && va.formId === s.formId)
-						return s.variableIdMapLocal[k] !== undefined ? s.variableIdMapLocal[k] : null;
-
-					return s.variableIdMapGlobal[k] !== undefined ? s.variableIdMapGlobal[k] : null;
-				},
-				set_variable:(k,v) => {
-					const va = s.variableIdMap[k];
-					if(va.formId !== null && va.formId === s.formId)
-						return s.variableIdMapLocal[k] = v;
-
-					s.$store.commit('variableStoreValueById',{id:k,value:v});
-				},
+				get_variable:(k)   => s.variableValueGet(k,  s.variableIdMapLocal),
+				set_variable:(k,v) => s.variableValueSet(k,v,s.variableIdMapLocal),
 				
 				// e2e encryption
 				set_e2ee_by_user_ids:ids => s.loginIdsEncryptFor = ids,
@@ -662,26 +677,27 @@ let MyForm = {
 				},
 				
 				// legacy calls (<3.5)
-				open_form:(formId,recordId,newTab,popUp,maxY,maxX) => {
+				open_form:(formId,recordId,newTab,popUp,maxY,maxX,replace) => {
 					s.openForm((recordId === 0 ? [] : [recordId]),{
 						formIdOpen:formId, popUpType:popUp ? 'float' : null,
 						maxHeight:maxY, maxWidth:maxX
-					},[],newTab,null);
+					},[],newTab,null,replace);
 					s.recordActionFree = false;
 				},
 				show_form_message:s.messageSet
 			};
 		},
 		
-		// state overwrite for different entities (fields, formActions, tabs)
-		entityIdMapState:(s) => {
-			const getValueFromConditionSide = (side,operator) => {
+		// applied form state effects, overwrites for different entities (form, fields, formActions, tabs)
+		entityIdMapEffect:(s) => {
+			const getValueFromConditionSide = (side,operator,recursionLevel) => {
 				switch(side.content) {
 					case 'collection':   return getCollectionValues(side.collectionId,side.columnId,s.filterOperatorIsSingleValue(operator)); break;
 					case 'field':        return s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[side.fieldId],false)]; break;
 					case 'fieldChanged': return s.fieldIdsChanged.includes(side.fieldId); break;
 					case 'fieldValid':   return !s.fieldIdsInvalid.includes(side.fieldId); break;
 					case 'formChanged':  return s.hasChanges; break;
+					case 'formState':    return isFormStateActive(s.formStateIdMap[side.formStateId],recursionLevel + 1); break;
 					case 'languageCode': return s.settings.languageCode; break;
 					case 'login':        return s.loginId; break;
 					case 'preset':       return s.presetIdMapRecordId[side.presetId]; break;
@@ -689,6 +705,7 @@ let MyForm = {
 					case 'recordNew':    return s.isNew; break;
 					case 'role':         return s.access.roleIds.includes(side.roleId); break;
 					case 'true':         return true; break;
+					case 'variable':     return s.variableValueGet(side.variableId,s.variableIdMapLocal); break;
 					case 'value':
 						// compatibility fix, true value should be used instead
 						if(typeof side.value === 'string') {
@@ -697,26 +714,25 @@ let MyForm = {
 						}
 						return side.value;
 					break;
-					case 'variable':
-						const va = s.variableIdMap[side.variableId];
-						if(va.formId !== null && va.formId === s.formId)
-							return s.variableIdMapLocal[va.id] !== undefined ? s.variableIdMapLocal[va.id] : null;
-	
-						return s.variableIdMapGlobal[va.id] !== undefined ? s.variableIdMapGlobal[va.id] : null;
-					break;
 				}
 				return false;
 			};
-			
-			let out = { field:{}, formAction:{}, tab:{} };
-			for(const state of s.form.states) {
-				if(state.conditions.length === 0 || state.effects.length === 0)
-					continue;
+
+			const isFormStateActive = (state,recursionLevel) => {
+				if(recursionLevel > 10) {
+					console.warn(`Failed to evaluate form state '${state.description}' (${state.id}), max. level of recursion reached (10).`);
+					return false;
+				}
+
+				// form state must have some condition to be evaluated, effects are optional as the state could be used as condition
+				if(state.conditions.length === 0)
+					return false;
 				
-				// parse condition expressions
 				let line = 'return ';
+
+				// parse condition expressions
 				for(let i = 0, j = state.conditions.length; i < j; i++) {
-					let c = state.conditions[i];
+					const c = state.conditions[i];
 					
 					if(i !== 0)
 						line += c.connector === 'AND' ? '&&' : '||';
@@ -726,21 +742,26 @@ let MyForm = {
 					
 					// get boolean expression by checking filter condition
 					line += s.filterIsCorrect(c.operator,
-						getValueFromConditionSide(c.side0,c.operator),
-						getValueFromConditionSide(c.side1,c.operator)
+						getValueFromConditionSide(c.side0,c.operator,recursionLevel),
+						getValueFromConditionSide(c.side1,c.operator,recursionLevel)
 					) ? 'true' : 'false';
 					
 					// brackets close
 					line += ')'.repeat(c.side1.brackets);
 				}
+				return Function(line)();
+			};
+			
+			let out = { form:{ data:0, state:'default' }, field:{}, formAction:{}, tab:{} };
+			for(const state of s.form.states) {
+				if(!isFormStateActive(state,0)) continue;
 				
 				// apply effects if conditions are met
-				if(Function(line)()) {
-					for(const e of state.effects) {
-						if(e.fieldId      !== null) out.field[e.fieldId]           = e.newState;
-						if(e.formActionId !== null) out.formAction[e.formActionId] = e.newState;
-						if(e.tabId        !== null) out.tab[e.tabId]               = e.newState;
-					}
+				for(const e of state.effects) {
+					     if(e.fieldId      !== null) out.field[e.fieldId]           = { data:e.newData, state:e.newState };
+					else if(e.formActionId !== null) out.formAction[e.formActionId] = { data:e.newData, state:e.newState };
+					else if(e.tabId        !== null) out.tab[e.tabId]               = { data:e.newData, state:e.newState };
+					else                             out.form                       = { data:e.newData, state:e.newState };
 				}
 			}
 			return out;
@@ -774,7 +795,9 @@ let MyForm = {
 		iconIdMap:          (s) => s.$store.getters['schema/iconIdMap'],
 		jsFunctionIdMap:    (s) => s.$store.getters['schema/jsFunctionIdMap'],
 		presetIdMapRecordId:(s) => s.$store.getters['schema/presetIdMapRecordId'],
-		variableIdMap:      (s) => s.$store.getters['schema/variableIdMap'],
+		loginFavorites:     (s) => s.$store.getters['local/loginFavorites'],
+		loginOptions:       (s) => s.$store.getters['local/loginOptions'],
+		loginOptionsMobile: (s) => s.$store.getters['local/loginOptionsMobile'],
 		token:              (s) => s.$store.getters['local/token'],
 		access:             (s) => s.$store.getters.access,
 		builderEnabled:     (s) => s.$store.getters.builderEnabled,
@@ -783,19 +806,20 @@ let MyForm = {
 		capGen:             (s) => s.$store.getters.captions.generic,
 		colorMenu:          (s) => s.$store.getters.colorMenu,
 		isAdmin:            (s) => s.$store.getters.isAdmin,
+		isAtFavoritesEdit:  (s) => s.$store.getters.isAtFavoritesEdit,
 		isMobile:           (s) => s.$store.getters.isMobile,
 		keyLength:          (s) => s.$store.getters.constants.keyLength,
 		loginId:            (s) => s.$store.getters.loginId,
 		loginPublicKey:     (s) => s.$store.getters.loginPublicKey,
 		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
 		patternStyle:       (s) => s.$store.getters.patternStyle,
-		settings:           (s) => s.$store.getters.settings,
-		variableIdMapGlobal:(s) => s.$store.getters.variableIdMapGlobal
+		settings:           (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
 		aesGcmDecryptBase64WithPhrase,
 		aesGcmEncryptBase64WithPhrase,
+		checkDataOptions,
 		consoleError,
 		dialogCloseAsk,
 		fillRelationRecordIds,
@@ -810,6 +834,7 @@ let MyForm = {
 		getFieldOverwritesDefault,
 		getFormPopUpConfig,
 		getFormRoute,
+		getFormStateIdMap,
 		getGetterFromAttributeValues,
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
@@ -824,11 +849,14 @@ let MyForm = {
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		jsFunctionRun,
+		layoutSettleSpace,
 		openLink,
 		pemImport,
 		rsaDecrypt,
 		rsaEncrypt,
 		srcBase64,
+		variableValueGet,
+		variableValueSet,
 		
 		// form management
 		handleHotkeys(e) {
@@ -905,6 +933,7 @@ let MyForm = {
 			this.popUpFieldIdSrc = null;
 			this.valuesNew       = {};
 			this.valuesOld       = {};
+			this.$nextTick(this.resized);
 
 			// for new records: apply defaults to update joins
 			// before get() as default values could be overwritten by form function
@@ -934,6 +963,16 @@ let MyForm = {
 		releaseLoadingOnNextTick() {
 			// releases state on next tick for watching components to react to with updated data
 			this.$nextTick(() => this.loading = false);
+		},
+		resized(evt,initialWaitMs) {
+			if(this.layoutCheckTimer !== null)
+				clearTimeout(this.layoutCheckTimer);
+			
+			this.layoutCheckTimer = setTimeout(() => {
+				this.layoutElements = JSON.parse(JSON.stringify(this.layoutElementsAvailable));
+				this.$nextTick(() => this.layoutSettleSpace(this.layoutElements,
+					this.hasBarLower ? this.$refs.formBarLowerCheck : this.$refs.formBarUpperCheck));
+			},initialWaitMs === undefined ? 300 : initialWaitMs);
 		},
 		routingGuard() {
 			const unsavedOk = !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
@@ -1076,11 +1115,44 @@ let MyForm = {
 			this.$store.commit('pageTitle',this.title);
 		},
 		copyFormUrlToClipboard(middleClick) {
-			const path = this.getFormRoute(this.form.id,(this.isNew ? 0 : this.recordIds[0]),
+			const path = this.getFormRoute(this.favoriteId,this.form.id,(this.isNew ? 0 : this.recordIds[0]),
 				true,this.getGetterFromAttributeValues(this.attributeIdMapDef));
 			
 			if(!middleClick) navigator.clipboard.writeText(`${location.protocol}//${location.host}/#${path}`);
 			else             window.open(`${location.protocol}//${location.host}/#${path}`);
+		},
+		makeFavorite() {
+			const recordId = this.recordIds.length === 1 ? this.recordIds[0] : null;
+			ws.send('loginFavorites','add',{
+				srcFormId:this.form.id,
+				srcFavoriteId:this.favoriteId,
+				moduleId:this.moduleId,
+				recordIdOpen:recordId,
+				isMobile:this.isMobile,
+				title:this.title
+			},false).then(
+				resFav => {
+					// creating a new favorite, copies its field options from the source form
+					// need to retrieve new values to be up to date
+					ws.sendMultiple([
+						ws.prepare('loginFavorites','get',{dateCache:this.loginFavorites.dateCache}),
+						ws.prepare('loginOptions','get',{
+							dateCache:this.isMobile ? this.loginOptionsMobile.dateCache : this.loginOptions.dateCache,
+							isMobile:this.isMobile
+						})
+					],false).then(
+						res => {
+							this.$store.commit('local/loginFavorites',res[0].payload);
+							this.$store.commit('local/loginOptions',res[1].payload);
+							this.$store.commit('isAtFavorites',true);
+							this.$store.commit('isAtFavoritesEdit',true);
+							this.$router.push(this.getFormRoute(resFav.payload,this.form.id,(recordId !== null ? recordId : 0),true));
+						},
+						this.$root.genericError
+					);
+				},
+				console.warn
+			);
 		},
 		openBuilder(middle) {
 			if(!middle) {
@@ -1121,7 +1193,7 @@ let MyForm = {
 			});
 		},
 		openNew(middleClick) {
-			this.openForm([],null,null,middleClick,null);
+			this.openForm([],null,null,middleClick,null,false);
 		},
 		openPrevAsk() {
 			if(!this.warnUnsaved)
@@ -1228,13 +1300,14 @@ let MyForm = {
 		},
 		
 		// navigation
-		openForm(recordIds,openForm,getterArgs,newTab,fieldIdSrc) {
+		openForm(recordIds,openForm,getterArgs,newTab,fieldIdSrc,replace) {
 			// set defaults
-			if(typeof recordIds  === 'undefined' || recordIds  === null) recordIds  = [];
-			if(typeof openForm   === 'undefined' || openForm   === null) openForm   = { formIdOpen:this.form.id, popUpType:null };
-			if(typeof getterArgs === 'undefined' || getterArgs === null) getterArgs = [];
-			if(typeof newTab     === 'undefined')                        newTab     = false;
-			if(typeof fieldIdSrc === 'undefined')                        fieldIdSrc = null;
+			if(recordIds  === undefined || recordIds  === null) recordIds  = [];
+			if(openForm   === undefined || openForm   === null) openForm   = { formIdOpen:this.form.id, popUpType:null };
+			if(getterArgs === undefined || getterArgs === null) getterArgs = [];
+			if(newTab     === undefined)                        newTab     = false;
+			if(fieldIdSrc === undefined)                        fieldIdSrc = null;
+			if(replace    === undefined)                        replace    = false;
 			
 			const openSameForm  = this.form.id === openForm.formIdOpen;
 			const openPopUpForm = openForm.popUpType !== null;
@@ -1276,7 +1349,7 @@ let MyForm = {
 			
 			// full form navigation, only single record allowed as target
 			let recordIdOpen = recordIds.length === 1 ? recordIds[0] : 0;
-			const path = this.getFormRoute(openForm.formIdOpen,recordIdOpen,true,getterArgs);
+			const path = this.getFormRoute(null,openForm.formIdOpen,recordIdOpen,true,getterArgs);
 			
 			if(newTab)
 				return this.openLink('#'+path,true);
@@ -1285,18 +1358,23 @@ let MyForm = {
 			if(this.$route.fullPath === path)
 				return this.reset();
 			
-			// different form
-			if(!openSameForm)
-				return this.$router.push(path);
+			// different path, same form
+			if(openSameForm) {
+				// switch from existing to new one or between two existing records
+				if(!this.isNew && recordIdOpen !== this.recordIds[0])
+					return this.$router.push(path);
+				
+				return this.$router.replace(path);
+			}
 			
-			// switch from existing to new one or between two existing records
-			if(!this.isNew && recordIdOpen !== this.recordIds[0])
-				return this.$router.push(path);
+			// new form
+			if(replace)
+				return this.$router.replace(path);
 			
-			return this.$router.replace(path);
+			return this.$router.push(path);
 		},
 		setFormArgs(args,push) {
-			const path = this.getFormRoute(this.form.id,
+			const path = this.getFormRoute(this.favoriteId,this.form.id,
 				(this.isNew ? 0 : this.recordIds[0]),true,args);
 			
 			if(this.$route.fullPath === path || this.isPopUp || this.isWidget)
@@ -1431,7 +1509,7 @@ let MyForm = {
 					joins.push(r);
 					joinIndexes.push(r.index);
 					
-					// repeat if join was added (to collect dependend joins)
+					// repeat if join was added (to collect dependent joins)
 					joinAdded = true;
 				}
 			}

@@ -42,27 +42,29 @@
 
 <p align="center">Free yourself from walled gardens and cloud-only SaaS offerings. REI3 enables powerful low code applications, selfhosted in the cloud or on-premise. Create and then use, share or even sell your REI3 applications.</p>
 
-![DEMO - Orgas](https://github.com/r3-team/r3/assets/91060542/77596cf1-5ea8-4130-999d-bbd4aa782535)
-![DEMO - Gantt](https://github.com/r3-team/r3/assets/91060542/3c103e67-6e48-4fc6-b99a-9dfcde00bba7)
+![DEMO - Orgas](https://github.com/user-attachments/assets/5506d0c1-4bf3-4011-bc3a-2650cb5ec0b9)
+![DEMO - Gantt](https://github.com/user-attachments/assets/1e413540-f9e8-4c2f-bd91-f46f51137d8b)
 
 ## :star: Features
-* **Fast results**: Quickly replace grown, spreadsheet based 'solutions' with proper multi-user applications.
+* **Fast results**: Quickly replace spreadsheet based 'solutions' with proper multi-user applications.
 * **It can count**: Summarize records, do date calculations, apply business rules and much more.
 * **Make things visible**: Show tasks on Gantt charts, generate diagrams or display information-dense lists.
 * **Workflows included**: Adjust forms based on the current state of a record, export to PDF or send notifications.
-* **Compliance tools**: With roles and access policies, REI3 can give and restrict access even on a per-record basis.
+* **Compliance tools**: With roles and access policies, REI3 can give and restrict access globally or for specific records.
 * **End-to-end encryption**: Built-in support for E2EE - easy to use with integrated key management features.
-* **Integration options**: REI3 can serve as and connect to REST endpoints, create or import CSV files and also includes ICS access for regularly updating calendars on devices.
+* **Integration options**: REI3 can serve as and call REST endpoints, create or import CSV files and offer ICS for accessing calendars.
 * **Ready for mobile**: Works well on all devices, with specific mobile settings and PWA features for great-feeling apps.
 * **Fulltext search**: Users can quickly find desired content by using search phrases and language specific lookups.
-* **Blazingly fast**: REI3 is built to take advantage of multi-core processors and communicates with clients over bi-directional data channels.
+* **Many inputs available**: From simple date ranges, to drawing inputs for signatures, to bar- & QR code inputs that can scan codes via camera - REI3 offers a growing list of input types for various needs.
+* **Blazingly fast**: REI3 takes advantage of multi-core processors and communicates with clients over bi-directional data channels.
 * **Security features**: Apply password policies, block brute-force attempts and enable MFA for your users.
 * **Fully transparent**: Directly read and even change data in the REI3 database - everything is human-readable.
 * **Selfhosted**: Run REI3 as you wish, locally or in the cloud - with full control on where your data is located.
 * **Enterprise-ready**: Adjust REI3 to your corporate identity, manage users & access via LDAP and grow with your organization by extending applications and clustering REI3.
 
-![DEMO - Calendar](https://github.com/r3-team/r3/assets/91060542/9aaad47b-fadf-4ed1-a07a-ca9ceb01e548)
-![DEMO - Assets](https://github.com/r3-team/r3/assets/91060542/36ea11cc-7c81-43ad-84c8-4722857e0d01)
+![DEMO - PW-Safe](https://github.com/user-attachments/assets/e9161bf2-027e-409d-a9eb-ed97dfe76f7e)
+![DEMO - IT-Assets](https://github.com/user-attachments/assets/c5273f72-24cb-40cc-a947-c6a42b78f7bb)
+![DEMO - TimeTracker](https://github.com/user-attachments/assets/e6b6e0e9-558a-4bad-ad52-45700e7d229e)
 
 ## :rocket: Quickstart
 ### Linux
@@ -76,13 +78,15 @@
 
 Once running, REI3 is available at https://localhost (default port 443) with both username and password being `admin`. For the full documentation, visit [rei3.de](https://rei3.de/en/docs).
 
+If you plan to run REI3 behind a proxy, please make sure to disable client timeouts for websockets. More details [here](https://rei3.de/en/docs/admin#proxies).
+
 There are also Docker Compose files ([x64](https://rei3.de/docker_x64)/[arm64](https://rei3.de/docker_arm64)) and a [portable version](https://rei3.de/latest/x64_portable) for Windows available to quickly setup a test or development system.
 
 ## :bulb: Where to get help
 You can visit our [community forum](https://community.rei3.de) for anything related to REI3. The full documentation is available on [rei3.de](https://rei3.de/en/docs), including documentation for [admins](https://rei3.de/en/docs/admin) and [application authors](https://rei3.de/en/docs/builder) as well as [Youtube videos](https://www.youtube.com/channel/UCKb1YPyUV-O4GxcCdHc4Csw).
 
 ## :clap: Thank you
-REI3 would not be possible without the help of our contributors and people using REI3 and providing feedback for continous improvement. So thank you to everybody involved with the REI3 project!
+REI3 would not be possible without the help of our contributors and people using REI3 and providing feedback for continuous improvement. So thank you to everybody involved with the REI3 project!
 
 [![Stargazers repo roster for @r3-team/r3](https://reporoster.com/stars/dark/r3-team/r3)](https://github.com/r3-team/r3/stargazers)
 
@@ -111,4 +115,4 @@ If you want to build REI3 itself, you can fork this repo or download the source 
 1. You can now start your own REI3 version. Make sure to clear all browser caches after creating/updating your own version.
 
 ## :page_with_curl: License
-REI3 © 2019-2024 Gabriel Victor Herbert - released under the MIT license.
+REI3 © 2019-2025 Gabriel Victor Herbert - released under the MIT license.

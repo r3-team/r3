@@ -83,15 +83,18 @@ let MyAdminCustom = {
 			</div>
 		</div>
 		
-		<div class="content" v-if="ready">
-			
-			<div class="contentPartHeader">
-				<img class="icon" src="images/languages.png" />
-				<h1>{{ capApp.titleCaptions }}</h1>
-			</div>
-			
-			<table class="generic-table-vertical default-inputs">
+		<div class="content no-padding" v-if="ready">
+			<table class="generic-table-vertical w1200 grouping-gap default-inputs">
 				<tbody>
+					<!-- captions -->
+					<tr>
+						<td colspan="999">
+							<div class="contentPartHeader">
+								<img class="icon" src="images/languages.png" />
+								<h1>{{ capApp.titleCaptions }}</h1>
+							</div>
+						</td>
+					</tr>
 					<tr>
 						<td>{{ capApp.appName }}</td>
 						<td><input class="long" :disabled="!activated" v-model="configInput.appName" /></td>
@@ -117,16 +120,17 @@ let MyAdminCustom = {
 						</td>
 						<td>{{ capApp.companyWelcomeHint }}</td>
 					</tr>
-				</tbody>
-			</table>
-			
-			<br />
-			<div class="contentPartHeader">
-				<img class="icon" src="images/lock.png" />
-				<h1>{{ capApp.titleLoginPage }}</h1>
-			</div>
-			<table class="generic-table-vertical">
-				<tbody>
+
+					<!-- login page -->
+					<tr>
+						<td colspan="999">
+							<br />
+							<div class="contentPartHeader">
+								<img class="icon" src="images/lock.png" />
+								<h1>{{ capApp.titleLoginPage }}</h1>
+							</div>
+						</td>
+					</tr>
 					<tr>
 						<td>{{ capApp.companyLoginImage }}</td>
 						<td>
@@ -143,16 +147,17 @@ let MyAdminCustom = {
 						<td><my-bool-string-number v-model="configInput.tokenKeepEnable" :readonly="!activated" /></td>
 						<td>{{ capApp.tokenKeepEnableHint }}</td>
 					</tr>
-				</tbody>
-			</table>
-			
-			<br />
-			<div class="contentPartHeader">
-				<img class="icon" src="images/colors.png" />
-				<h1>{{ capApp.titleColors }}</h1>
-			</div>
-			<table class="generic-table-vertical">
-				<tbody>
+
+					<!-- colors -->
+					<tr>
+						<td colspan="999">
+							<br />
+							<div class="contentPartHeader">
+								<img class="icon" src="images/colors.png" />
+								<h1>{{ capApp.titleColors }}</h1>
+							</div>
+						</td>
+					</tr>
 					<tr>
 						<td>{{ capApp.companyColorLogin }}</td>
 						<td><my-input-color v-model="configInput.companyColorLogin" :readonly="!activated" /></td>
@@ -163,16 +168,17 @@ let MyAdminCustom = {
 						<td><my-input-color v-model="configInput.companyColorHeader" :readonly="!activated" /></td>
 						<td>{{ capApp.companyColorHeaderHint }}</td>
 					</tr>
-				</tbody>
-			</table>
-			
-			<br />
-			<div class="contentPartHeader">
-				<img class="icon" src="images/fileImage.png" />
-				<h1>{{ capApp.titleLogos }}</h1>
-			</div>
-			<table class="generic-table-vertical default-inputs">
-				<tbody>
+
+					<!-- logos -->
+					<tr>
+						<td colspan="999">
+							<br />
+							<div class="contentPartHeader">
+								<img class="icon" src="images/fileImage.png" />
+								<h1>{{ capApp.titleLogos }}</h1>
+							</div>
+						</td>
+					</tr>
 					<tr>
 						<td>{{ capApp.companyLogo }}</td>
 						<td>
@@ -195,16 +201,17 @@ let MyAdminCustom = {
 						</td>
 						<td>{{ capApp.companyLogoUrlHint }}</td>
 					</tr>
-				</tbody>
-			</table>
-			
-			<br />
-			<div class="contentPartHeader">
-				<img class="icon" src="images/fileImage.png" />
-				<h1>{{ capApp.titlePwas }}</h1>
-			</div>
-			<table class="generic-table-vertical default-inputs">
-				<tbody>
+
+					<!-- PWAs -->
+					<tr>
+						<td colspan="999">
+							<br />
+							<div class="contentPartHeader">
+								<img class="icon" src="images/fileImage.png" />
+								<h1>{{ capApp.titlePwas }}</h1>
+							</div>
+						</td>
+					</tr>
 					<tr>
 						<td>{{ capApp.iconPwa1 }}</td>
 						<td>
@@ -265,16 +272,17 @@ let MyAdminCustom = {
 						</td>
 						<td v-html="capApp.pwaDomainHint1"></td>
 					</tr>
-				</tbody>
-			</table>
-			
-			<br />
-			<div class="contentPartHeader">
-				<img class="icon" src="images/code.png" />
-				<h1>{{ capApp.titleCss }}</h1>
-			</div>
-			<table class="generic-table-vertical large default-inputs">
-				<tbody>
+
+					<!-- CSS -->
+					<tr>
+						<td colspan="999">
+							<br />
+							<div class="contentPartHeader">
+								<img class="icon" src="images/code.png" />
+								<h1>{{ capApp.titleCss }}</h1>
+							</div>
+						</td>
+					</tr>
 					<tr>
 						<td colspan="3" class="noPadding">
 							<div class="cssInput">

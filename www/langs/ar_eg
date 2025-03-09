@@ -163,7 +163,7 @@
 			"description": "يقوم اتصال LDAP هذا باستيراد أسماء تسجيل الدخول وتمكين المصادقة باستخدام بيانات اعتماد LDAP.<br />يمكن استخدام عضويات مجموعة LDAP لتعيين الأدوار تلقائيًا.",
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف اتصال LDAP هذا؟",
-				"importDone": "تم الانتهاء من الاستيراد",
+				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "تم اختبار الاتصال بنجاح"
 			},
 			"groupDn": "الاسم المميز للمجموعة",
@@ -236,6 +236,8 @@
 			},
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف تسجيل الدخول هذا؟<br /><br />هذا الإجراء لا رجعة فيه.</b>",
+				"notUniqueEmail": "The same email address has also been assigned to a different user.",
+				"notUniqueName": "The same username has already been assigned to a different user.",
 				"resetTotp": "سيؤدي هذا إلى إعادة تعيين كافة أساليب المصادقة متعددة العوامل (MFA) لتسجيل الدخول هذا. <br /><br />ليس لإعادة ضبط MFA أي تأثير على التشفير الشامل.<br /><br />هل تريد الاستمرار؟"
 			},
 			"error": {
@@ -686,6 +688,7 @@
 			"onDelete": "الإجراء عند الحذف",
 			"onUpdate": "الإجراء عند التغيير",
 			"option": {
+				"barcode": "Barcode/QR code",
 				"boolean": "نعم/لا",
 				"color": "لون",
 				"date": "تاريخ",
@@ -724,6 +727,7 @@
 			"titleHint": "يمكن ترجمة العنوان بلغات التطبيق المتاحة. ",
 			"usedFor": "نوع القيمة",
 			"usedForHint": {
+				"barcode": "A barcode or QR code value. Can store various formats. Corresponding inputs can be used to scan barcodes / QR codes but also generate them based on the current value.",
 				"boolean": "قيمة صحيحة/خطأ. ",
 				"color": "قيم اللون. ",
 				"date": "قيمة التاريخ. ",
@@ -790,7 +794,8 @@
 			"formIdOpen": "فتح النموذج",
 			"multiValue": "مدخلات متعددة",
 			"noDisplayEmpty": "إخفاء إذا كانت فارغة",
-			"onMobile": "عرض على الجوال"
+			"onMobile": "عرض على الجوال",
+			"showRowCount": "Show result count instead"
 		},
 		"form": {
 			"actions": {
@@ -829,21 +834,22 @@
 			"collectionHint": "*تتأثر المجموعة فقط إذا تم تحديدها كمعايير تصفية في استعلام البيانات.",
 			"collectionIdDef": "القيمة (القيم) الافتراضية من المجموعة",
 			"collectionTitle": "جمع التصفية",
-			"columnAlignment": "تنسيق",
 			"columnBatch": "مجموعة الأعمدة (اسحب الأعمدة وأفلتها للتوسيع)",
 			"columnBatchDir": "محاذاة العمود (من اليسار إلى اليمين، من أعلى إلى أسفل)",
 			"columnBatchOff": "إزالة العمود من الدفعة",
+			"columnBoolAtrIcon": "Show attribute icon if TRUE",
 			"columnClipboard": "الحافظة",
 			"columnHeaderData": "استرجاع البيانات",
 			"columnLength": "الطول (الحرف)",
 			"columnLength0": "لا يوجد حد",
+			"columnLengthFiles": "File count",
+			"columnPreviewLarge": "Large preview",
 			"columnShowDefault": "تظهر بشكل افتراضي",
 			"columnShowDefaultMobile": "تظهر بشكل افتراضي على الهاتف المحمول",
 			"columnShowDefaultMobileOff": "لا يتم عرضه بشكل افتراضي على الهاتف المحمول",
 			"columnShowDefaultOff": "لا تظهر بشكل افتراضي",
 			"columnSize": "الحجم (بكسل)",
 			"columnSize0": "تلقائي",
-			"columnStyles": "الأنماط",
 			"columnTitle": "عنوان",
 			"columnWrap": "التفاف النص",
 			"containerContent": "محتوى الحاوية",
@@ -863,6 +869,17 @@
 			"display": "عرض",
 			"distincted": "متميز",
 			"dragDrop": "ضع الحقول هنا عن طريق السحب والإفلات من التحديد الموجود على اليمين لإضافتها إلى النموذج.",
+			"effectData": {
+				"d-1": "nothing",
+				"d0": "default",
+				"d1": "delete",
+				"d2": "update",
+				"d3": "update + delete",
+				"d4": "create",
+				"d5": "create + delete",
+				"d6": "create + update",
+				"d7": "create + update + delete"
+			},
 			"error": {
 				"formStateFieldRemovedCondition": "لا يزال يُشار إلى الحقل المحذوف كشرط لحالة النموذج \"{NAME}\".",
 				"formStateFieldRemovedEffect": "لا يزال تتم الإشارة إلى الحقل المحذوف كتأثير لحالة النموذج \"{NAME}\"."
@@ -870,7 +887,6 @@
 			"fieldAttributeIdAltDateTo": "التاريخ إلى (الفترة)",
 			"fieldAttributeIdAltRichtextFiles": "الوصول إلى ملف النص المنسق",
 			"fieldDefault": "القيمة الافتراضية",
-			"fieldDefaultHint": "تحقق من المستندات بحثًا عن العناصر النائبة",
 			"fieldDefaultPresetIds": "الإعدادات المسبقة الافتراضية",
 			"fieldDirection": "اتجاه",
 			"fieldHelp": "نص المساعدة",
@@ -934,6 +950,7 @@
 			"headerSize": "مقاس",
 			"helpText": "نص المساعدة",
 			"hidden": "الحقل مخفي بشكل افتراضي",
+			"hideInputs": "Hide inputs",
 			"icon": "رمز النموذج",
 			"ics": "اشتراكات آي كال",
 			"jsFunctionButton": "وظيفة عند النقر",
@@ -959,11 +976,7 @@
 			"openForm": "فتح النموذج",
 			"openFormBulk": "فتح النموذج<br />(التحرير بالجملة)",
 			"option": {
-				"alignment": {
-					"def": "غادر",
-					"end": "يمين",
-					"mid": "مركز"
-				},
+				"dataOptions": "Overwrite relation settings",
 				"display": {
 					"color": "لون",
 					"default": "تقصير",
@@ -973,6 +986,7 @@
 					"login": "user (deprecated)",
 					"password": "كلمة المرور",
 					"phone": "هاتف",
+					"rating": "rating",
 					"slider": "شريط تمرير القيمة",
 					"url": "عنوان URL"
 				},
@@ -1012,6 +1026,17 @@
 			},
 			"subQuery": "الاستعلام الفرعي",
 			"subQueryAttribute": "يصف",
+			"systemDefaults": {
+				"false": "'No' value",
+				"fixed": "Custom value",
+				"true": "'Yes' value",
+				"{CURR_DATETIME}": "Current date & time",
+				"{CURR_DATE_DD}": "Current day as number, as in 31",
+				"{CURR_DATE_MM}": "Current month as number, as in 12 (January = 1, December = 12)",
+				"{CURR_DATE_YYYY}": "Current year as number, as in 1921",
+				"{CURR_DATE}": "Current date",
+				"{CURR_TIME}": "Current time"
+			},
 			"tabActions": "الإجراءات ({CNT})",
 			"tabContentCounter": "عداد",
 			"tabContentCounterHint": "يعرض العدد المجمع لقيم الحقول في عنوان علامة التبويب (صفوف القائمة، أعداد الملفات، وما إلى ذلك)",
@@ -1063,7 +1088,7 @@
 				"copy_to_clipboard": "app.copy_to_clipboard({ARGS}) => غير محدد<br /><br />نسخ النص إلى حافظة المستخدمين.",
 				"dialog_show": "app.dialog_show({ARGS}) => وعد<br /><br />يعرض مربع حوار بالعنوان والمحتوى المحددين. <br /><br />يتم تعريف الأزرار من خلال قائمة السلاسل. <br /><br />القيمة التي تم إرجاعها هي فهرس الزر الذي تم النقر عليه. <br /><br /><b>مثال</b><br />app.dialog_show(<blockquote>\"يرجى التأكيد\"،<br />\"هل تريد حقًا حذف هذا العنصر؟\"،<br />['نعم'، 'إلغاء الإجراء']</blockquote>).ثم(<blockquote>res => { if(res === 0) { console.log('تم النقر فوق نعم!'); </blockquote>);",
 				"form_close": "app.form_ Close() => غير محدد<br /><br />يغلق النموذج (إذا كان نموذجًا عائمًا أو فرعيًا)، وإلا فسيعود إلى سجل المتصفح.",
-				"form_open": "app.form_open({ARGS}) => غير محدد<br /><br />يفتح نموذجًا مباشرةً، في علامة تبويب متصفح جديدة أو كنافذة منبثقة.",
+				"form_open": "app.form_open({ARGS}) => غير محدد<br /><br />يفتح نموذجًا مباشرةً، في علامة تبويب متصفح جديدة أو كنافذة منبثقة.<br /><br />The new form, if opened directly (not as tab or pop-up), adds to the browser history unless the argument 'replace_history' is set to 'true'.",
 				"form_set_title": "app.form_set_title({ARGS}) => غير محدد<br /><br />الكتابة فوق عنوان النموذج الحالي. <i>باطل</i> لإعادة تعيينه إلى عنوان النموذج الأصلي.",
 				"form_show_message": "app.form_show_message({ARGS}) => غير محدد<br /><br />يستبدل عنوان النموذج مؤقتًا برسالة مخصصة. ",
 				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />يوفر فك تشفير مفتاح البيانات مع المفتاح الخاص لتسجيل الدخول الحالي.",
@@ -1077,7 +1102,7 @@
 				"go_back": "app.go_back() => غير محدد<br /><br />ينفذ التنقل الخلفي للمتصفح.",
 				"has_role": "app.has_role({ARGS}) => BOOLEAN<br /><br />يُرجع صحيحًا إذا كان لتسجيل الدخول الحالي الدور المعين (يتم تضمين الأدوار المتداخلة).",
 				"logoff": "app.logoff() => UNDEFINED<br /><br />Logs off the current user. This results in the login page being shown and the user being forced to re-authenticate to continue.<br /><br />After re-authentication, the previously open form will be shown. If this is not desired, open another form first and then execute the logoff.",
-				"pdf_create": "app.pdf_create({ARGS}) => وعد<br /><br />يُنشئ ملف PDF من قوالب HTML وأنماط CSS معينة. <ul><li>اسم الملف: أي اسم ملف ينتهي بـ \".pdf\"</li><li>pageFormat: تنسيق الصفحة، مثل: \"a4\"، \"letter\"، \"legal\"</li><li>اتجاه الصفحة: \"عمودي\" أو \"أفقي\"</li><li>pageMarginX: هوامش الصفحة على الجانب الأيسر/الأيمن بالبكسل</li><li>pageMarginY: هوامش الصفحة العلوية/السفلية بالبكسل</li><li>htmlHeader: قالب HTML، يتم تطبيقه أعلى كل صفحة</li><li>htmlBody: قالب HTML، يملأ المستند</li><li>htmlFooter: قالب HTML، يتم تطبيقه أسفل كل صفحة</li><li>cssStyles: قواعد CSS، يتم تطبيقها على قوالب HTML</li><li>AttachAttributeId: اختياري، انظر أدناه.</li><li>AttachRecordId: اختياري، انظر أدناه.</li></ul>افتراضيًا، يتم إنشاء مستند PDF في نافذة جديدة، حيث يمكن للمستخدم رؤية معاينة وتنزيل الملف. <br /><br />يمكن استخدام العنصرين النائبين '{PAGE_CUR}' و'{PAGE_END}' في كل من قوالب HTML للرأس والتذييل لعرض أرقام الصفحات الحالية والإجمالية.",
+				"pdf_create": "app.pdf_create({ARGS}) => PROMISE<br /><br />Generates a PDF file from given HTML templates and CSS styles. Parameters:<ul><li>filename: Any filename ending in '.pdf'</li><li>pageFormat: Format of page, such as: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' or 'landscape'</li><li>pageMarginX: Horizontal page margins in pixel, either single number (left & right side) or array (first value is left side, second value is right side)</li><li>pageMarginY: Vertical page margins in pixel, either single number (top & bottom) or array (first value is top, second value is bottom)</li><li>htmlHeader: HTML template, applied to top of each page</li><li>htmlBody: HTML template, fills out document</li><li>htmlFooter: HTML template, applied to bottom of each page</li><li>cssStyles: CSS rules, applied to HTML templates</li><li>attachAttributeId: Optional, see below.</li><li>attachRecordId: Optional, see below.</li></ul>By default, the PDF document is generated in a new window, in which the user can see a preview and download the file. If both 'attachAttributeId' & 'attachRecordId' are set, the PDF file is instead immediately attached to the chosen files attribute of the chosen record.<br /><br />The placeholders '{PAGE_CUR}' & '{PAGE_END}' can be used in both header & footer HTML templates to display the current and total page numbers.",
 				"record_delete": "app.record_delete() => غير محدد<br /><br />حذف سجل النموذج الحالي.",
 				"record_new": "app.record_new() => غير محدد<br /><br />يفتح سجلا جديدا.",
 				"record_reload": "app.record_reload() => غير محدد<br /><br />يعيد تحميل سجل النموذج الحالي.",
@@ -1114,7 +1139,8 @@
 					"new_tab منطقية",
 					"pop_up منطقية",
 					"max_height NUMBER",
-					"max_width NUMBER"
+					"max_width NUMBER",
+					"replace_history BOOLEAN"
 				],
 				"form_set_title": [
 					"سلسلة العنوان"
@@ -1140,17 +1166,17 @@
 					"سلسلة معرف الدور"
 				],
 				"pdf_create": [
-					"اسم الملف STRING",
-					"سلسلة_تنسيق الصفحة",
+					"filename STRING",
+					"page_format STRING",
 					"page_orientation STRING",
-					"page_marginX رقم",
-					"page_marginY NUMBER",
+					"page_marginX NUMBER || ARRAY",
+					"page_marginY NUMBER || ARRAY",
 					"html_header STRING",
-					"html_body سلسلة",
-					"html_footer سلسلة",
+					"html_body STRING",
+					"html_footer STRING",
 					"css_styles STRING",
-					"Attach_attribute_id STRING",
-					"Attach_record_id NUMBER"
+					"attach_attribute_id STRING",
+					"attach_record_id NUMBER"
 				],
 				"set_e2ee_by_user_ids": [
 					"صفيف تسجيل الدخول_ids"
@@ -1183,6 +1209,7 @@
 				"abort_show_message": "instance.abort_show_message({ARGS}) => باطل<br /><br />يلغي العملية ويرسل رسالة إلى المستخدم المنفذ، والتي يتم عرضها في واجهة المستخدم.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => باطل<br /><br />يحذف مفاتيح بيانات التشفير الشامل للسجلات التي لم يعد بإمكان تسجيل الدخول الوصول إليها. ",
 				"file_link": "instance.file_link({ARGS}) => باطل<br /><br />ربط ملف موجود بسجل آخر (يضاف إلى سمة الملف المختار). <br /><br />عند إعادة تسمية الملف أو حذفه، يؤثر التغيير فقط على رابط الملف. ",
+				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Unlinks an existing file from the files attribute of a specified record. The removed link is a hardlink, meaning that the actual file is kept as long as it is still linked to at least one other records file attribute.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]<br /><br />إرجاع بيانات التعريف للملفات من سمة الملف المختار وسجله (يمكن أن يتضمن الملفات المحذوفة اختياريًا).<br /><br />يتكون النوع الذي تم إرجاعه \"instance.file_meta\" من:<blockquote>معرف UUID,<br />تسجيل الدخول_id_creator عدد صحيح،<br />نص التجزئة,<br />نص الاسم,<br />size_kb عدد صحيح،<br />الإصدار عدد صحيح،<br />date_change بيجينت،<br />date_delete BIGINT</blockquote>",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => نص<br /><br />إرجاع مفتاح البيانات المشفر لسجل العلاقة المحدد وتسجيل الدخول المختار. ",
 				"get_language_code": "instance.get_language_code() => نص<br /><br />يُرجع رمز اللغة المكون من 5 أحرف (\"en_us\"، ...) لتسجيل الدخول، والذي يُستخدم للوصول إلى الواجهة الخلفية للبيانات.",
@@ -1219,6 +1246,11 @@
 					"نص اسم الملف",
 					"attribute_id UUID",
 					"Record_id BIGINT"
+				],
+				"file_unlink": [
+					"file_id UUID",
+					"attribute_id UUID",
+					"record_id BIGINT"
 				],
 				"files_get": [
 					"attribute_id UUID",
@@ -1384,13 +1416,16 @@
 		},
 		"menu": {
 			"button": {
-				"add": "إضافة إدخال"
+				"add": "إضافة إدخال",
+				"addTab": "Add tab",
+				"delete": "Delete tab"
 			},
 			"collections": "إظهار قيم المجموعة في القائمة",
 			"copy": "انسخ كافة عناصر القائمة من",
 			"formId": "- اختر النموذج -",
 			"showChildrenHint": "إظهار الإدخالات الفرعية بشكل افتراضي",
-			"title": "القوائم"
+			"title": "القوائم",
+			"titleMenuTab": "Tab properties"
 		},
 		"module": {
 			"button": {
@@ -1423,6 +1458,8 @@
 			"iconHint": "تتوفر الرموز بمجرد إضافتها إلى هذا التطبيق. ",
 			"iconPwa": "أيقونات التطبيق",
 			"iconPwaHint": "الأيقونات التي تمثل التطبيق. ",
+			"jsFunctionIdOnLogin": "Session start function",
+			"jsFunctionIdOnLoginHint": "This frontend function is called when a user logs into the system. It can be used to initialize variables or update logs.",
 			"keyCreate": "النقل - إنشاء زوج مفاتيح توقيع جديد",
 			"keyCreateInfo": "تأكد من الحفاظ على المفتاح الخاص آمنًا في جميع الأوقات. ",
 			"keyCreateLength": "حدد طول المفتاح",
@@ -1432,8 +1469,6 @@
 			"languageMainHint": "يتم استخدامه إذا لم يتم توفير لغة المستخدم المختارة بواسطة التطبيق الخاص بك.",
 			"languages": "لغات التطبيق",
 			"languagesHint": "اللغات التي يتوفر بها التطبيق.",
-			"loginSync": "User sync",
-			"loginSyncHint": "User meta data (user ID, forename, surname, email, organization, etc.) from the admin panel or LDAP connection (if enabled) can be provided to an application to create associated user records. This is done via a user sync function that an application can provide.",
 			"nameHint": "الاسم المرجعي لهذا التطبيق ",
 			"nameHolder": "جدولة العمل، مخطط الجرد، ...",
 			"namePwa": "عنوان التطبيق",
@@ -1443,7 +1478,7 @@
 			"parent": "المخصصة ل",
 			"parentHint": "عند تعيينه لتطبيق آخر، سيتم عرضه باعتباره فرعًا له في القوائم والنظرات العامة - ولا يوجد أي تغيير وظيفي آخر. ",
 			"pgFunctionIdLoginSync": "User sync function",
-			"pgFunctionIdLoginSyncHint": "This backend function is called every time a user is updated or deleted. It can also be triggered for all existing users with the instance function 'instance.user_sync_all()'.",
+			"pgFunctionIdLoginSyncHint": "A user sync function is called every time a user is created or its data updated (username, forename, surname, email, organization, etc.). Useful for applications that require additional records to be created or updated when system users change. It can also be triggered for all existing users with the instance function 'instance.user_sync_all()'.",
 			"position": "الموضع الافتراضي",
 			"positionHint": "موضع التطبيق في الرأس (الأصغر منها أولاً). ",
 			"pwa": "تطبيق الويب التقدمي (PWA)",
@@ -1570,6 +1605,9 @@
 			"choice": "تعيين",
 			"choices": "مجموعات التصفية ({COUNT})*",
 			"choicesHint": "*المجموعة الأولى نشطة بشكل افتراضي - الاختيار متاح في حالة وجود 2 أو أكثر.",
+			"filterChoicesHelp": "A filterset is a set of predefined filters that can be selected by users. They serve to apply different filter criteria based on the current need of the user.<br /><br />The first filterset is enabled by default.<br /><br />Filtersets are only shown if there are at least 2 available.",
+			"filterJoin": "Select relation join to filter. Keep empty to filter entire query.",
+			"filterJoinHelp": "When you select a join number here, the filter is not added to the query but to the relation join instead.<br /><br />This can filter out undesired records from a left-joined relation without removing the entire row.<br /><br />It is also useful for filtering 1:n relationships.",
 			"filters": "عوامل التصفية ({COUNT})",
 			"fixedLimit": "حد النتيجة الثابتة",
 			"fixedLimit0": "غير نشط",
@@ -1789,7 +1827,7 @@
 			"002": "رقم غير صالح '{VALUE}' (من المتوقع أن يكون رقمًا عشريًا).",
 			"003": "قيمة التاريخ/الوقت غير صالحة '{VALUE}'، التنسيق المتوقع: {EXPECT}.",
 			"004": "نوع السمة غير مدعوم \"{VALUE}\".",
-			"005": "عدد الحقول غير صحيح في السطر '{VALUE}'.",
+			"005": "Wrong number of fields.",
 			"006": "السمات المشفرة غير مدعومة"
 		},
 		"DBS": {
@@ -1797,9 +1835,10 @@
 			"002": "القيمة المحددة لـ '{NAMES}' مستخدمة بالفعل بواسطة سجل آخر. ",
 			"003": "اسم تسجيل الدخول هذا مأخوذ بالفعل.",
 			"004": "لا يمكن حذف السجل - لا يزال تتم الإشارة إليه باسم \"{ATR}\" في \"{MOD}\".",
-			"005": "العمود '{NAME}' ليس له قيمة أو لا يمكن حله.",
+			"005": "'{NAME}' requires a value before changes can be saved.",
 			"006": "فشل إنشاء فهرس فريد، لأن قيم السمات الموجودة ليست فريدة.",
-			"007": "قيمة غير صالحة '{VALUE}'."
+			"007": "Changes cannot be saved due to an invalid value type.",
+			"008": "Failed to create attribute with required value, as existing records do not have a value yet and no default is defined."
 		},
 		"SEC": {
 			"001": "غير مصرح لك بإكمال هذا الإجراء أو الوصول إلى هذا المورد.",
@@ -1845,6 +1884,7 @@
 	},
 	"filter": {
 		"add": "يضيف",
+		"contentApi": "API",
 		"contentData": "بيانات",
 		"contentDate": "التاريخ/الوقت الحالي",
 		"contentForm": "النموذج الحالي",
@@ -1852,6 +1892,7 @@
 		"dialog": {
 			"ftsHelp": "يمكن للبحث عن النص الكامل العثور بسرعة على التطابقات في النصوص الكبيرة بناءً على الكلمات أو العبارات. <br /><br />خيارات البحث التالية موجودة:<ul><li>كلمة محددة</li><ul><li>يبحث: <b>دخول</b></li><li>سيبحث \"الإدخال\" عن نصوص تحتوي على كلمات مثل \"إدخال\" أو \"إدخالات\" أو \"إدخالات القائمة\".</li><li>تطابق صالح: \"لقد قمت بفحص كافة إدخالات البيانات ذات الصلة.\"</li></ul><li>كل الكلمات</li><ul><li>يبحث: <b>صنع القهوة</b></li><li>سيبحث خيار \"صنع القهوة\" عن نصوص إذا كانت تحتوي على الكلمتين المرتبطتين بكلمة \"صنع\" (مثل \"صنع\") و\"قهوة\" (مثل \"آلة صنع القهوة\"). </li><li>تطابق صالح: \"لقد أصلحنا الآلة، ومازلنا نصنع قهوة سيئة.\"</li></ul><li>أي كلمات</li><ul><li>يبحث: <b>الشاي أو القهوة</b></li><li>سيبحث \"شاي أو قهوة\" عن نصوص إذا كانت تحتوي على كلمات مرتبطة بكلمة \"شاي\" (مثل \"شارب الشاي\") أو \"قهوة\" (مثل \"آلة صنع القهوة\").</li><li>مطابقة صالحة: \"القهوة تساعدني خلال اليوم.\"</li></ul><li>بدون كلمات</li><ul><li>يبحث: <b>شاي - قهوة</b></li><li>سيبحث \"tea -coffee\" عن النصوص إذا كانت تحتوي على كلمات متعلقة بـ \"tea\" ولكن ليس كلمات مرتبطة بـ \"coffee\".</li><li>تطابق صالح: \"أنا أستمتع بالشاي بانتظام.\"</li></ul><li>الكلمات تليها</li><ul><li>يبحث: <b>\"اصنع القهوة\"</b></li><li>ستجد عبارة \"make Coffee\" (بين علامتي الاقتباس المزدوجتين) نصوصًا إذا كانت تحتوي على كلمات مرتبطة بـ \"make\" متبوعة بكلمات مرتبطة بـ \"coffee\". </li><li>تطابق صالح: \"سأقضي استراحة الغداء في إعداد القهوة لزملائي\".</li></ul></ul>"
 		},
+		"getterHint": "Parameter name",
 		"javascriptHint": "على سبيل المثال: إرجاع تاريخ جديد ().getFullYear ()؛",
 		"nestingMain": "الاستعلام الرئيسي",
 		"nestingSub": "الاستعلام الفرعي",
@@ -1859,6 +1900,7 @@
 		"nowOffsetTitle": "إضافة (رقم موجب) أو إزالة (رقم سالب) X أيام/ساعات/دقائق/ثواني من الآن.",
 		"operatorsArray": "صفيف",
 		"operatorsNull": "قيمة فارغة",
+		"operatorsRegex": "Regular expression",
 		"operatorsSets": "مجموعة فرعية",
 		"operatorsSize": "رقم",
 		"operatorsText": "نص",
@@ -1874,6 +1916,8 @@
 				"fieldChanged": "تغير المجال",
 				"fieldValid": "الحقل صالح",
 				"formChanged": "form has unsaved changes",
+				"formState": "form state",
+				"getter": "URL parameter",
 				"javascript": "جافا سكريبت",
 				"languageCode": "لغة تسجيل الدخول",
 				"login": "معرف تسجيل الدخول",
@@ -1896,6 +1940,8 @@
 				"fieldChanged": "TRUE/FALSE، اعتمادًا على ما إذا كانت قيمة الحقل قد تغيرت.",
 				"fieldValid": "TRUE/FALSE، اعتمادًا على ما إذا كانت قيمة الحقل صالحة حاليًا.",
 				"formChanged": "TRUE/FALSE, depending on whether form currently has unsaved changes.",
+				"formState": "TRUE/FALSE, depending on whether the chosen form state is currently active.",
+				"getter": "Value of a URL parameter, such as 'https://system?param=123' with 'param' being the name and '123' the value.",
 				"javascript": "إرجاع قيمة تعبير Javascript المحدد.",
 				"languageCode": "رمز لغة المستخدم الذي تم اختياره (en_us، de_de، ...) لتسجيل الدخول الحالي.",
 				"login": "معرف تسجيل الدخول الحالي (عدد صحيح).",
@@ -1934,6 +1980,10 @@
 				"not_like": "لا يحتوي على (حالة المطابقة)",
 				"not_null": "ليست فارغة",
 				"null": "فارغ",
+				"rxMatch": "matches regex (match case)",
+				"rxMatchI": "matches regex",
+				"rxMatchNo": "not matches regex (match case)",
+				"rxMatchNoI": "not matches regex",
 				"se": "أصغر / متساوي",
 				"st": "الأصغر"
 			}
@@ -1950,6 +2000,7 @@
 	"form": {
 		"bulkTouched": "سيتم تحديث القيمة",
 		"button": {
+			"favorite": "Save form as favorite",
 			"fullscreenHint": "تبديل وضع ملء الشاشة",
 			"help": "يساعد",
 			"helpHint": "عرض صفحات المساعدة",
@@ -1993,6 +2044,12 @@
 		"actions": "الإجراءات",
 		"active": "نشيط",
 		"after": "بعد",
+		"alignment": "تنسيق",
+		"alignmentHor": {
+			"center": "مركز",
+			"left": "غادر",
+			"right": "يمين"
+		},
 		"api": "واجهة برمجة التطبيقات",
 		"apis": "واجهات برمجة التطبيقات",
 		"appName": "REI3",
@@ -2025,6 +2082,7 @@
 			"edit": "يحرر",
 			"editBulk": "تحرير ({COUNT})",
 			"empty": "فارغ",
+			"enable": "Enable",
 			"expert": "متقدم",
 			"export": "يصدّر",
 			"filter": "فلتر",
@@ -2083,6 +2141,8 @@
 		"dateFormat2": "دي إم واي (30.12.2012)",
 		"dateFormat3": "يوم/شهر/سنة (30/12/2012)",
 		"dateFormat4": "ش/ي/س (12/30/2012)",
+		"default": "Default",
+		"defaultValue": "Default value",
 		"description": "وصف",
 		"details": "تفاصيل",
 		"dialog": {
@@ -2102,11 +2162,16 @@
 		"errorTitle": "خطأ",
 		"event": "حدث",
 		"everything": "كل شئ",
+		"expert": "Expert",
+		"favorites": "Favorites",
+		"favoritesEmpty": "No favorites saved",
 		"field": "مجال",
 		"files": "ملفات",
 		"filters": "المرشحات",
 		"form": "استمارة",
+		"formActions": "Form actions",
 		"forms": "النماذج",
+		"functions": "Functions",
 		"global": "Global",
 		"help": "يساعد",
 		"home": "بيت",
@@ -2126,6 +2191,7 @@
 		"inputSmall": "القيمة صغيرة جدًا (الحد الأدنى {MIN})",
 		"inputTooFewFiles": "عدد قليل جدًا من الملفات",
 		"inputTooManyFiles": "عدد كبير جدًا من الملفات",
+		"inputs": "Inputs",
 		"install": "ثَبَّتَ",
 		"internalName": "يعمل الاسم كمرجع داخلي - ولا يظهر للمستخدمين.",
 		"interval": "فاصلة",
@@ -2144,6 +2210,7 @@
 		"menusSub": "القوائم الفرعية",
 		"missingCaption": "تسمية توضيحية مفقودة",
 		"module": "طلب",
+		"monospace": "Monospace",
 		"more": "أكثر",
 		"name": "اسم",
 		"notSaved": "لم يتم حفظها",
@@ -2196,6 +2263,7 @@
 		"selected": "مختارة",
 		"selectedMaxOne": "محدد (الحد الأقصى 1)",
 		"settings": "إعدادات",
+		"shadows": "Shadows",
 		"size": "مقاس",
 		"sqlPreview": "معاينة SQL",
 		"standard": "معيار",
@@ -2212,6 +2280,7 @@
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "إصدار",
+		"visibility": "Visibility",
 		"warnings": "تحذيرات",
 		"widget": "القطعة",
 		"widgets": "الحاجيات",
@@ -2242,6 +2311,14 @@
 		}
 	},
 	"input": {
+		"barcode": {
+			"capture": "Capture code from camera image",
+			"deviceMissing": "No input devices of type 'camera' found. Please try again.",
+			"deviceSelect": "Please select an input device",
+			"formatInvalidValue": "Value is not supported by chosen format.",
+			"formatMissing": "Please select a format to display value:",
+			"formatResetHint": "Switch code format to display value in"
+		},
 		"date": {
 			"button": {
 				"todayHint": "اليوم/الآن",
@@ -2287,8 +2364,7 @@
 	"list": {
 		"aggregators": "النتائج الإجمالية",
 		"autoRenew": "التجديد التلقائي",
-		"autoRenewInput": "قم بتحديث البيانات كل X ثانية",
-		"autoRenewInputHint": "دقيقة. ",
+		"autoRenewInput": "Refresh every X seconds",
 		"button": {
 			"aggregatorsHint": "النتائج الإجمالية",
 			"all": "الجميع",
@@ -2410,6 +2486,7 @@
 		},
 		"fontFamily": "الخط",
 		"fontSize": "حجم الخط",
+		"formActionsAlign": "Align form actions",
 		"headerCaptions": "ممتلىء",
 		"headerModules": "إظهار التطبيقات",
 		"languageCode": "لغة",

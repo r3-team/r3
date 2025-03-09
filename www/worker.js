@@ -5,7 +5,6 @@ const appCacheName = 'REPLACE_BY_BUILD'; // update this name to update worker ca
 const appCacheBase = [
 	'/',
 	'/index.html',
-	'/manifest.json',
 	'/scripts.js?build=REPLACE_BY_BUILD',
 	'/styles.css?build=REPLACE_BY_BUILD',
 	'/websocket.js?build=REPLACE_BY_BUILD'

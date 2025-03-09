@@ -8,10 +8,10 @@ let MyBool = {
 	template:`<div class="bool" tabindex="0"
 		@click="trigger"
 		@keyup.enter.space="trigger"
-		:class="{ active:boolOn, grow:grow, readonly:readonly }"
+		:class="{ active:boolOn, clickable:!readonly, grow:grow }"
 	>
-		<div class="noHighlight left"  :class="{ small:!boolOn }">{{ displayLeft }}</div>
-		<div class="noHighlight right" :class="{ small:boolOn }" >{{ displayRight }}</div>
+		<div class="noHighlight bool-button left"  :class="{ small:!boolOn }">{{ displayLeft }}</div>
+		<div class="noHighlight bool-button right" :class="{ small:boolOn }" >{{ displayRight }}</div>
 	</div>`,
 	props:{
 		caption0:  { type:String,  required:false, default:'0' },

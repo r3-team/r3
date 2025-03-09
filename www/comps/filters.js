@@ -92,6 +92,13 @@ let MyFilterOperator = {
 				<option value="<> ALL" :title="capApp.option.operator.neAll">&lt;&gt; ALL</option>
 			</optgroup>
 			
+			<optgroup :label="capApp.operatorsRegex">
+				<option value="~"   :title="capApp.option.operator.rxMatch"   >~</option>
+				<option value="~*"  :title="capApp.option.operator.rxMatchI"  >~*</option>
+				<option value="!~"  :title="capApp.option.operator.rxMatchNo" >!~</option>
+				<option value="!~*" :title="capApp.option.operator.rxMatchNoI">!~*</option>
+			</optgroup>
+			
 			<optgroup :label="capApp.operatorsArray">
 				<option value="@>" :title="capApp.option.operator.arrContains" >@&gt;</option>
 				<option value="<@" :title="capApp.option.operator.arrContained">&lt;@</option>
@@ -289,6 +296,13 @@ let MyFilterSide = {
 					@input="setContent"
 					:value="content"
 				>
+					<optgroup v-if="contentApi.length !== 0" :label="capApp.contentApi">
+						<option
+							v-for="c in contentApi"
+							:title="capApp.option.contentHint[c]"
+							:value="c"
+						>{{ capApp.option.content[c] }}</option>
+					</optgroup>
 					<optgroup v-if="contentData.length !== 0" :label="capApp.contentData">
 						<option
 							v-for="c in contentData"
@@ -369,6 +383,14 @@ let MyFilterSide = {
 					</template>
 				</select>
 				
+				<!-- form state input -->
+				<select v-model="formStateId" v-if="!columnsMode && isFormState">
+					<option
+						v-for="state in formIdMap[formId].states"
+						:value="state.id"
+					>{{ state.description }}</option>
+				</select>
+				
 				<!-- preset input -->
 				<select v-model="presetId" v-if="!columnsMode && isPreset">
 					<option :value="null"></option>
@@ -432,12 +454,12 @@ let MyFilterSide = {
 				</template>
 				
 				<!-- fixed value input -->
-				<template v-if="isValue || isJavascript">
-					<input placeholder="..."
+				<template v-if="isValue || isJavascript || isGetter">
+					<input
 						v-if="!columnDate && !columnTime"
 						@keyup.enter="$emit('apply-value')"
 						v-model="valueFixText"
-						:placeholder="isValue ? capApp.valueHint : capApp.javascriptHint"
+						:placeholder="fixedValuePlaceholder"
 					/>
 					
 					<div class="input-custom date-wrap" v-if="columnDate || columnTime">
@@ -556,6 +578,14 @@ let MyFilterSide = {
 				false
 			);
 		},
+
+		// presentation
+		fixedValuePlaceholder:(s) => {
+			if(s.isValue)      return s.capApp.valueHint;
+			if(s.isGetter)     return s.capApp.getterHint;
+			if(s.isJavascript) return s.capApp.javascriptHint;
+			return '';
+		},
 		
 		// inputs
 		brackets:{
@@ -576,6 +606,10 @@ let MyFilterSide = {
 		fieldId:{
 			get()  { return this.modelValue.fieldId; },
 			set(v) { this.set('fieldId',v); }
+		},
+		formStateId:{ // form state IDs only exist in context of filters as form state conditions
+			get()  { return this.modelValue.formStateId !== undefined ? this.modelValue.formStateId : null; },
+			set(v) { this.set('formStateId',v); }
 		},
 		nestedIndexAttribute:{
 			get()  {
@@ -654,9 +688,10 @@ let MyFilterSide = {
 		
 		// simple
 		columnsMode: (s) => s.columns.length !== 0,
+		contentApi:  (s) => ['getter'].filter(v => !s.disableContent.includes(v)),
 		contentData: (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
 		contentDate: (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
-		contentForm: (s) => ['formChanged','field','fieldChanged','fieldValid','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
+		contentForm: (s) => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
 		contentLogin:(s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
 		module:      (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
 		
@@ -665,6 +700,8 @@ let MyFilterSide = {
 		isAttribute:  (s) => s.content === 'attribute',
 		isCollection: (s) => s.content === 'collection',
 		isField:      (s) => ['field','fieldChanged','fieldValid'].includes(s.content),
+		isFormState:  (s) => s.content === 'formState',
+		isGetter:     (s) => s.content === 'getter',
 		isJavascript: (s) => s.content === 'javascript',
 		isNullPartner:(s) => !s.leftSide && s.isNullOperator,
 		isPreset:     (s) => s.content === 'preset',
@@ -722,6 +759,9 @@ let MyFilterSide = {
 			}
 			if(!['field','fieldChanged','fieldValid'].includes(v.content))
 				v.fieldId  = null;
+
+			if(!['formState'].includes(v.content))
+				v.formStateId = null;
 			
 			if(v.content !== 'preset')   v.presetId   = null;
 			if(v.content !== 'role')     v.roleId     = null; 
@@ -997,78 +1037,41 @@ let MyFilter = {
 let MyFilters = {
 	name:'my-filters',
 	components:{MyFilter},
-	template:`<div class="filters" :class="{ userFilter:userFilter }">
-		<div class="column">
-			<div class="filter-actions" v-if="nestedIndexAttributeIds.length !== 0 || columnsMode">
-				<slot name="title" />
-				<div>
-					<my-button image="add.png"
-						v-if="showAdd && !userFilter"
-						@trigger="add"
-						:caption="capApp.add"
-						:naked="true"
-					/>
-				</div>
-			</div>
-			
-			<draggable handle=".dragAnchor" group="filters" itemKey="id" animation="100"
-				@change="set"
-				:fallbackOnBody="true"
-				:list="filters"
-			>
-				<template #item="{element,index}">
-					<my-filter
-						@apply-value="apply"
-						@remove="remove"
-						@update="setValue"
-						:builderMode="builderMode"
-						:columns="columns"
-						:columnBatches="columnBatches"
-						:connector="element.connector"
-						:disableContent="disableContent"
-						:entityIdMapRef="entityIdMapRef"
-						:fieldIdMap="fieldIdMap"
-						:formId="formId"
-						:indentation="getIndentation(index)"
-						:joins="joins"
-						:joinsParents="joinsParents"
-						:key="index"
-						:moduleId="moduleId"
-						:multipleFilters="filters.length > 1"
-						:nestedIndexAttributeIds="nestedIndexAttributeIds"
-						:nestingLevels="joinsParents.length+1"
-						:operator="element.operator"
-						:position="index"
-						:side0="element.side0"
-						:side1="element.side1"
-					/>
-				</template>
-			</draggable>
-		</div>
-		
-		<div class="filter-actions end" v-if="userFilter && (nestedIndexAttributeIds.length !== 0 || columnsMode)">
-			<div class="row gap">
-				<my-button image="add.png"
-					v-if="showAdd"
-					@trigger="add"
-					:caption="capApp.add"
-					:naked="false"
+	template:`<div class="filters">
+		<draggable handle=".dragAnchor" itemKey="id" animation="100"
+			@change="set"
+			:fallbackOnBody="true"
+			:group="filters + String(indexTarget)"
+			:list="filters"
+		>
+			<template #item="{element,index}">
+				<my-filter
+					@apply-value="apply"
+					@remove="remove"
+					@update="setValue"
+					:builderMode="builderMode"
+					:columns="columns"
+					:columnBatches="columnBatches"
+					:connector="element.connector"
+					:disableContent="disableContent"
+					:entityIdMapRef="entityIdMapRef"
+					:fieldIdMap="fieldIdMap"
+					:formId="formId"
+					:indentation="getIndentation(index)"
+					:joins="joins"
+					:joinsParents="joinsParents"
+					:key="index"
+					:moduleId="moduleId"
+					:multipleFilters="filters.length > 1"
+					:nestedIndexAttributeIds="nestedIndexAttributeIds"
+					:nestingLevels="joinsParents.length+1"
+					:operator="element.operator"
+					:position="index"
+					:side0="element.side0"
+					:side1="element.side1"
 				/>
-			</div>
-			<div class="row gap">
-				<my-button image="cancel.png"
-					@trigger="removeAll"
-					:active="anyFilters"
-					:cancel="true"
-					:caption="capGen.button.reset"
-				/>
-				<my-button image="ok.png"
-					@trigger="apply"
-					:active="anyFilters && bracketsEqual"
-					:caption="capGen.button.apply"
-				/>
-			</div>
-		</div>
+			</template>
+		</draggable>
 	</div>`,
 	props:{
 		builderMode:   { type:Boolean, required:false, default:false },
@@ -1077,21 +1080,15 @@ let MyFilters = {
 		disableContent:{ type:Array,   required:false, default:() => [] }, // content to disable (attribute, record, field, true, ...)
 		entityIdMapRef:{ type:Object,  required:false, default:() => {return {}} },
 		fieldIdMap:    { type:Object,  required:false, default:() => {return {}} },
-		filterAddCnt:  { type:Number,  required:false, default:0 },
 		formId:        { type:String,  required:false, default:'' },
-		frontendOnly:  { type:Boolean, required:false, default:false },    // filter criteria must not contain backend types (attributes/queries)
+		indexTarget:   { type:Number,  required:false, default:0 },
 		joins:         { type:Array,   required:false, default:() => [] },
 		joinsParents:  { type:Array,   required:false, default:() => [] },
 		modelValue:    { type:Array,   required:true },
-		moduleId:      { type:String,  required:false, default:'' },
-		showAdd:       { type:Boolean, required:false, default:true },
-		showMove:      { type:Boolean, required:false, default:false },
-		showReset:     { type:Boolean, required:false, default:false },
-		userFilter:    { type:Boolean, required:false, default:false }     // filter is for end users
+		moduleId:      { type:String,  required:false, default:'' }
 	},
 	emits:['apply','update:modelValue'],
 	watch:{
-		filterAddCnt() { this.add(); }, // ugly hack to trigger inside this component
 		modelValue:{
 			handler:function() { this.reset(); },
 			immediate:true
@@ -1103,17 +1100,6 @@ let MyFilters = {
 		};
 	},
 	computed:{
-		// states
-		bracketsEqual:(s) => {
-			let cnt0 = 0;
-			let cnt1 = 0;
-			for(const f of s.filters) {
-				cnt0 += f.side0.brackets;
-				cnt1 += f.side1.brackets;
-			}
-			return cnt0 === cnt1;
-		},
-		
 		// composite ID of
 		//  nesting level (0=main query, 1=1st sub query)
 		//  relation join index
@@ -1139,12 +1125,10 @@ let MyFilters = {
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.filter,
 		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
-		getColumnIsFilterable,
 		getNestedIndexAttributeIdsByJoins,
 		
 		getIndentation(filterIndex) {
@@ -1156,74 +1140,8 @@ let MyFilters = {
 		},
 		
 		// actions
-		add() {
-			let v = {
-				connector:'AND',
-				operator:'ILIKE',
-				side0:{
-					attributeId:null,
-					attributeIndex:0,
-					attributeNested:0,
-					brackets:0,
-					collectionId:null,
-					columnId:null,
-					content:'field',
-					fieldId:null,
-					ftsDict:null,
-					query:null,
-					queryAggregator:null,
-					presetId:null,
-					roleId:null,
-					value:''
-				},
-				side1:{
-					attributeId:null,
-					attributeIndex:0,
-					attributeNested:0,
-					brackets:0,
-					collectionId:null,
-					columnId:null,
-					content:'value',
-					fieldId:null,
-					ftsDict:null,
-					query:null,
-					queryAggregator:null,
-					presetId:null,
-					roleId:null,
-					value:''
-				}
-			};
-			
-			if(!this.frontendOnly) {
-				// add first available attribute as left side filter value
-				if(this.columnsMode) {
-					for(const b of this.columnBatches) {
-						for(const ci of b.columnIndexes) {
-							const column = this.columns[ci];
-							if(this.getColumnIsFilterable(column)) {
-								v.side0.attributeId    = column.attributeId;
-								v.side0.attributeIndex = column.index;
-								v.side0.content        = 'attribute';
-								break;
-							}
-						}
-						if(v.side0.attributeId !== null)
-							break;
-					}
-				} else {
-					const p = this.nestedIndexAttributeIds[0].split('_');
-					v.side0.attributeId     = p[2];
-					v.side0.attributeIndex  = parseInt(p[1]);
-					v.side0.attributeNested = parseInt(p[0]);
-					v.side0.content         = 'attribute';
-				}
-			}
-			this.filters.push(v);
-			this.set();
-		},
 		apply() {
-			if(this.bracketsEqual)
-				this.$emit('apply');
+			this.$emit('apply');
 		},
 		remove(position) {
 			this.filters.splice(position,1);
@@ -1232,11 +1150,6 @@ let MyFilters = {
 			// inform parent when filter has been reset
 			if(this.filters.length === 0)
 				this.$emit('apply');
-		},
-		removeAll() {
-			this.filters = [];
-			this.set();
-			this.$emit('apply');
 		},
 		reset() {
 			this.filters = JSON.parse(JSON.stringify(this.modelValue));

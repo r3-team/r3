@@ -1,6 +1,5 @@
 import MyBuilderCaption        from './builderCaption.js';
 import MyBuilderIconInput      from './builderIconInput.js';
-import MyInputColor            from '../inputColor.js';
 import { getDependentModules } from '../shared/builder.js';
 export {MyBuilderFormActions as default};
 
@@ -8,8 +7,7 @@ let MyBuilderFormAction = {
 	name:'my-builder-form-action',
 	components:{
 		MyBuilderCaption,
-		MyBuilderIconInput,
-		MyInputColor
+		MyBuilderIconInput
 	},
 	template:`<tr class="builder-form-action">
 		<td>
@@ -65,9 +63,6 @@ let MyBuilderFormAction = {
 				<option value="default">{{ capApp.stateDefault }}</option>
 				<option value="readonly">{{ capApp.stateReadonly }}</option>
 			</select>
-		</td>
-		<td class="color-input" v-if="false">
-			<my-input-color v-model="color" :allowNull="true" :downwards="true" />
 		</td>
 		<td>
 			<my-button image="delete.png"

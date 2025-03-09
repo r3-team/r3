@@ -35,8 +35,9 @@ let MyBuilderIconInput = {
 		<div class="app-sub-window under-header" v-if="showInput && iconIdMap !== null" @click.self="close">
 			<div class="build-icon-input-window">
 				<div class="contentBox float">
-					<div class="top lower">
+					<div class="top">
 						<div class="area">
+							<img class="icon" src="images/fileImage.png" />
 							<h1 class="title">{{ capGen.icon }}</h1>
 						</div>
 						<div class="area default-inputs">
@@ -45,6 +46,22 @@ let MyBuilderIconInput = {
 						<div class="area">
 							<my-button image="cancel.png"
 								@trigger="close"
+								:cancel="true"
+							/>
+						</div>
+					</div>
+					<div class="top lower">
+						<div class="area">
+							<my-button image="ok.png"
+								@trigger="close"
+								:caption="capGen.button.ok"
+							/>
+						</div>
+						<div class="area">
+							<my-button image="remove.png"
+								@trigger="select(null)"
+								:active="iconSelected !== false"
+								:caption="capGen.button.clear"
 								:cancel="true"
 							/>
 						</div>
@@ -61,19 +78,6 @@ let MyBuilderIconInput = {
 								:class="{ active:iconIdSelected === icon.id }"
 								:src="srcBase64(icon.file)"
 								:title="icon.name"
-							/>
-						</div>
-						<br />
-						<div class="row gap">
-							<my-button image="ok.png"
-								@trigger="close"
-								:caption="capGen.button.ok"
-							/>
-							<my-button image="remove.png"
-								@trigger="select(null)"
-								:active="iconSelected !== false"
-								:caption="capGen.button.clear"
-								:cancel="true"
 							/>
 						</div>
 					</div>

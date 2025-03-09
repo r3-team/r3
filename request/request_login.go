@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"r3/cluster"
 	"r3/login"
+	"r3/login/login_meta"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -103,6 +104,17 @@ func LoginGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (inter
 
 	return res, err
 }
+func LoginGetIsNotUnique_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+	var req struct {
+		LoginId int64  `json:"loginId"`
+		Content string `json:"content"`
+		Value   string `json:"value"`
+	}
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	return login_meta.GetIsNotUnique_tx(ctx, tx, req.LoginId, req.Content, req.Value)
+}
 func LoginGetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var (
@@ -176,7 +188,7 @@ func LoginSetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage)
 	}
 	return nil, login.SetRoleLoginIds_tx(ctx, tx, req.RoleId, req.LoginIds)
 }
-func LoginKick(reqJson json.RawMessage) (interface{}, error) {
+func LoginKick(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id int64 `json:"id"`
@@ -185,9 +197,9 @@ func LoginKick(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, cluster.LoginDisabled(true, req.Id)
+	return nil, cluster.LoginDisabled_tx(ctx, tx, true, req.Id)
 }
-func LoginReauth(reqJson json.RawMessage) (interface{}, error) {
+func LoginReauth_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		Id int64 `json:"id"`
@@ -196,10 +208,10 @@ func LoginReauth(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, cluster.LoginReauthorized(true, req.Id)
+	return nil, cluster.LoginReauthorized_tx(ctx, tx, true, req.Id)
 }
-func LoginReauthAll() (interface{}, error) {
-	return nil, cluster.LoginReauthorizedAll(true)
+func LoginReauthAll_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
+	return nil, cluster.LoginReauthorizedAll_tx(ctx, tx, true)
 }
 func LoginResetTotp_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {

@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func ModuleCheckChange(reqJson json.RawMessage) (interface{}, error) {
+func ModuleCheckChange_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var (
 		err error
 		req struct {
@@ -26,7 +26,7 @@ func ModuleCheckChange(reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	res.ModuleIdMapChanged, err = transfer.GetModuleChangedWithDependencies(req.Id)
+	res.ModuleIdMapChanged, err = transfer.GetModuleChangedWithDependencies_tx(ctx, tx, req.Id)
 	if err != nil {
 		return nil, err
 	}

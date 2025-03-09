@@ -65,16 +65,29 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer ctxCanc()
 
 	// authenticate via fixed token
-	var languageCode string
 	var tokenNotUsed string
-	if err := login_auth.TokenFixed(ctx, loginId, "ics", tokenFixed, &languageCode, &tokenNotUsed); err != nil {
+	languageCode, err := login_auth.TokenFixed(ctx, loginId, "ics", tokenFixed, &tokenNotUsed)
+	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}
 
+	// start DB transaction
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		return
+	}
+	defer tx.Rollback(ctx)
+
+	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		return
+	}
+
 	// get calendar field details from cache
-	f, err := cache.GetCalendarField(fieldId)
+	f, err := cache.GetCalendarField_tx(ctx, tx, fieldId)
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 		return
@@ -102,7 +115,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// apply field filters
 	// some filters are not compatible with backend requests (field value, open form record ID, ...)
-	dataGet.Filters = data_query.ConvertQueryToDataFilter(f.Query.Filters, loginId, languageCode)
+	dataGet.Filters = data_query.ConvertQueryToDataFilter(
+		f.Query.Filters, loginId, languageCode, make(map[string]string))
 
 	// define ICS event range, if defined
 	dateRange0 := f.DateRange0
@@ -122,6 +136,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if dateRange0 != 0 {
 		dataGet.Filters = append(dataGet.Filters, types.DataGetFilter{
 			Connector: "AND",
+			Index:     0,
 			Operator:  ">=",
 			Side0: types.DataGetFilterSide{
 				AttributeId: pgtype.UUID{
@@ -141,6 +156,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if dateRange1 != 0 {
 		dataGet.Filters = append(dataGet.Filters, types.DataGetFilter{
 			Connector: "AND",
+			Index:     0,
 			Operator:  "<=",
 			Side0: types.DataGetFilterSide{
 				AttributeId: pgtype.UUID{
@@ -190,18 +206,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		dataGet.Expressions = append(dataGet.Expressions,
-			data_query.ConvertColumnToExpression(column, loginId, languageCode))
+		dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertColumnToExpression(
+			column, loginId, languageCode, make(map[string]string)))
 	}
 
 	// get data
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
-		return
-	}
-	defer tx.Rollback(ctx)
-
 	var query string
 	results, _, err := data.Get_tx(ctx, tx, dataGet, loginId, &query)
 	if err != nil {

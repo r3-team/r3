@@ -94,7 +94,7 @@ func clientEventExecFatClient_tx(ctx context.Context, tx pgx.Tx, reqJson json.Ra
 
 	// execute valid actions
 	if ce.Action == "callJsFunction" && ce.JsFunctionId.Valid {
-		return nil, cluster.JsFunctionCalled(true, address, loginId, ce.JsFunctionId.Bytes, req.Arguments)
+		return nil, cluster.JsFunctionCalled_tx(ctx, tx, true, address, loginId, ce.JsFunctionId.Bytes, req.Arguments)
 	}
 	if ce.Action == "callPgFunction" && ce.PgFunctionId.Valid {
 

@@ -2,7 +2,6 @@ package attribute
 
 import (
 	"context"
-	"r3/db"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -150,7 +149,7 @@ func DelCheck_tx(ctx context.Context, tx pgx.Tx, attributeId uuid.UUID) (interfa
 	}
 
 	// collect affected fields
-	rows, err := db.Pool.Query(ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT frm.id, fld.id
 		FROM app.field      AS fld
 		INNER JOIN app.form AS frm ON frm.id = fld.form_id

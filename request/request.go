@@ -10,6 +10,7 @@ import (
 	"r3/config"
 	"r3/db"
 	"r3/handler"
+	"r3/ldap"
 	"r3/log"
 	"r3/types"
 
@@ -136,13 +137,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "event":
 		switch action {
 		case "clientEventsChanged":
-			return eventClientEventsChanged(loginId, address)
+			return eventClientEventsChanged_tx(ctx, tx, loginId, address)
 		case "filesCopied":
-			return eventFilesCopied(reqJson, loginId, address)
+			return eventFilesCopied_tx(ctx, tx, reqJson, loginId, address)
 		case "fileRequested":
-			return eventFileRequested(ctx, reqJson, loginId, address)
+			return eventFileRequested_tx(ctx, tx, reqJson, loginId, address)
 		case "keystrokesRequested":
-			return eventKeystrokesRequested(reqJson, loginId, address)
+			return eventKeystrokesRequested_tx(ctx, tx, reqJson, loginId, address)
 		}
 	case "feedback":
 		switch action {
@@ -174,16 +175,41 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "set":
 			return loginClientEventSet_tx(ctx, tx, reqJson, loginId)
 		}
+	case "loginFavorites":
+		switch action {
+		case "add":
+			if isNoAuth {
+				return nil, errors.New(handler.ErrUnauthorized)
+			}
+			return LoginAddFavorites_tx(ctx, tx, reqJson, loginId)
+		case "get":
+			return LoginGetFavorites_tx(ctx, tx, reqJson, loginId, isNoAuth)
+		case "set":
+			if isNoAuth {
+				return nil, errors.New(handler.ErrUnauthorized)
+			}
+			return LoginSetFavorites_tx(ctx, tx, reqJson, loginId)
+		}
 	case "loginKeys":
 		switch action {
 		case "getPublic":
-			return LoginKeysGetPublic(ctx, reqJson)
+			return LoginKeysGetPublic_tx(ctx, tx, reqJson)
 		case "reset":
 			return LoginKeysReset_tx(ctx, tx, loginId)
 		case "store":
 			return LoginKeysStore_tx(ctx, tx, reqJson, loginId)
 		case "storePrivate":
 			return LoginKeysStorePrivate_tx(ctx, tx, reqJson, loginId)
+		}
+	case "loginOptions":
+		switch action {
+		case "get":
+			return LoginOptionsGet_tx(ctx, tx, reqJson, loginId, isNoAuth)
+		case "set":
+			if isNoAuth {
+				return nil, errors.New(handler.ErrUnauthorized)
+			}
+			return LoginOptionsSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginPassword":
 		switch action {
@@ -298,11 +324,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "delNode":
 			return ClusterNodeDel_tx(ctx, tx, reqJson)
 		case "getNodes":
-			return ClusterNodesGet(ctx)
+			return ClusterNodesGet_tx(ctx, tx)
 		case "setNode":
 			return ClusterNodeSet_tx(ctx, tx, reqJson)
 		case "shutdownNode":
-			return ClusterNodeShutdown(reqJson)
+			return ClusterNodeShutdown_tx(ctx, tx, reqJson)
 		}
 	case "dataSql":
 		switch action {
@@ -357,10 +383,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return LdapDel_tx(ctx, tx, reqJson)
 		case "get":
 			return LdapGet_tx(ctx, tx)
-		case "import":
-			return LdapImport(reqJson)
 		case "reload":
-			return nil, cache.LoadLdapMap()
+			return nil, ldap.UpdateCache_tx(ctx, tx)
 		case "set":
 			return LdapSet_tx(ctx, tx, reqJson)
 		}
@@ -382,16 +406,18 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return LoginDel_tx(ctx, tx, reqJson)
 		case "get":
 			return LoginGet_tx(ctx, tx, reqJson)
+		case "getIsNotUnique":
+			return LoginGetIsNotUnique_tx(ctx, tx, reqJson)
 		case "getMembers":
 			return LoginGetMembers_tx(ctx, tx, reqJson)
 		case "getRecords":
 			return LoginGetRecords_tx(ctx, tx, reqJson)
 		case "kick":
-			return LoginKick(reqJson)
+			return LoginKick(ctx, tx, reqJson)
 		case "reauth":
-			return LoginReauth(reqJson)
+			return LoginReauth_tx(ctx, tx, reqJson)
 		case "reauthAll":
-			return LoginReauthAll()
+			return LoginReauthAll_tx(ctx, tx)
 		case "resetTotp":
 			return LoginResetTotp_tx(ctx, tx, reqJson)
 		case "set":
@@ -429,7 +455,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return MailAccountGet()
 		case "reload":
-			return MailAccountReload()
+			return nil, cache.LoadMailAccountMap_tx(ctx, tx)
 		case "set":
 			return MailAccountSet_tx(ctx, tx, reqJson)
 		case "test":
@@ -449,19 +475,17 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return MailTrafficGet_tx(ctx, tx, reqJson)
 		}
-	case "menu":
+	case "menuTab":
 		switch action {
-		case "copy":
-			return MenuCopy_tx(ctx, tx, reqJson)
 		case "del":
-			return MenuDel_tx(ctx, tx, reqJson)
+			return MenuTabDel_tx(ctx, tx, reqJson)
 		case "set":
-			return MenuSet_tx(ctx, tx, reqJson)
+			return MenuTabSet_tx(ctx, tx, reqJson)
 		}
 	case "module":
 		switch action {
 		case "checkChange":
-			return ModuleCheckChange(reqJson)
+			return ModuleCheckChange_tx(ctx, tx, reqJson)
 		case "del":
 			return ModuleDel_tx(ctx, tx, reqJson)
 		case "set":
@@ -481,14 +505,14 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return OauthClientGet()
 		case "reload":
-			return OauthClientReload()
+			return OauthClientReload_tx(ctx, tx)
 		case "set":
 			return OauthClientSet_tx(ctx, tx, reqJson)
 		}
 	case "package":
 		switch action {
 		case "install":
-			return PackageInstall()
+			return PackageInstall_tx(ctx, tx)
 		}
 	case "pgFunction":
 		switch action {
@@ -523,7 +547,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "pwaDomain":
 		switch action {
 		case "reset":
-			return nil, cache.LoadPwaDomainMap()
+			return nil, cache.LoadPwaDomainMap_tx(ctx, tx)
 		case "set":
 			return PwaDomainSet_tx(ctx, tx, reqJson)
 		}
@@ -541,11 +565,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return RepoModuleGet_tx(ctx, tx, reqJson)
 		case "install":
-			return RepoModuleInstall(reqJson)
+			return RepoModuleInstall_tx(ctx, tx, reqJson)
 		case "installAll":
-			return RepoModuleInstallAll()
+			return RepoModuleInstallAll_tx(ctx, tx)
 		case "update":
-			return RepoModuleUpdate()
+			return RepoModuleUpdate_tx(ctx, tx)
 		}
 	case "role":
 		switch action {
@@ -564,12 +588,12 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "check":
 			return SchemaCheck_tx(ctx, tx, reqJson)
 		case "reload":
-			return SchemaReload(reqJson)
+			return SchemaReload_tx(ctx, tx, reqJson)
 		}
 	case "task":
 		switch action {
 		case "informChanged":
-			return nil, cluster.TasksChanged(true)
+			return nil, cluster.TasksChanged_tx(ctx, tx, true)
 		case "run":
 			return TaskRun_tx(ctx, tx, reqJson)
 		case "set":

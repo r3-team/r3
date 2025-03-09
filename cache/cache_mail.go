@@ -3,9 +3,10 @@ package cache
 import (
 	"context"
 	"fmt"
-	"r3/db"
 	"r3/types"
 	"sync"
+
+	"github.com/jackc/pgx/v5"
 )
 
 var (
@@ -50,11 +51,9 @@ func GetMailAccountsExist() bool {
 	return len(mailAccountIdMap) != 0
 }
 
-func LoadMailAccountMap() error {
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
+func LoadMailAccountMap_tx(ctx context.Context, tx pgx.Tx) error {
 
-	rows, err := db.Pool.Query(ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT id, oauth_client_id, name, mode, auth_method, username,
 			password, start_tls, send_as, host_name, host_port, comment
 		FROM instance.mail_account

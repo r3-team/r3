@@ -35,13 +35,6 @@ let MyListColumnBatch = {
 			:class="{ clickable:canOpen, dropdownActive:show, hasIcons:showIconFilter || showIconOrder }"
 			:title="columnBatch.caption"
 		>{{ columnBatch.caption }}</div>
-
-		<my-button image="toggleDown.png"
-			v-if="showToggle"
-			@trigger="$emit('toggle-header')"
-			:captionTitle="capApp.button.collapseHeader"
-			:naked="true"
-		/>
 		
 		<!-- column options dropdown -->
 		<div class="input-dropdown-wrap columnOptionWrap"
@@ -155,17 +148,16 @@ let MyListColumnBatch = {
 		dropdownRight:   { type:Boolean, required:true },
 		filters:         { type:Array,   required:true }, // list filters all combined (columns, list, quick, user, choices, ...)
 		filtersColumn:   { type:Array,   required:true }, // list filters from users column batch selections
+		isOrderedOrginal:{ type:Boolean, required:true }, // list orders are the same as original defined
 		joins:           { type:Array,   required:true }, // list joins
 		orders:          { type:Array,   required:true }, // list orders
-		orderOverwritten:{ type:Boolean, required:true }, // list orders were overwritten by user
 		relationId:      { type:String,  required:true }, // list query base relation ID
 		rowCount:        { type:Number,  required:true }, // list total row count
-		show:            { type:Boolean, required:true },
-		showToggle:      { type:Boolean, required:true }
+		show:            { type:Boolean, required:true }
 	},
 	emits:[
 		'close','del-aggregator','del-order','set-aggregator',
-		'set-filters','set-order','toggle','toggle-header'
+		'set-filters','set-order','toggle'
 	],
 	data() {
 		return {
@@ -247,7 +239,7 @@ let MyListColumnBatch = {
 		showFilterItems:  (s) => s.values.length != 0,
 		showFilterText:   (s) => s.values.length >= 5 && !s.isDateOrTime,
 		showIconFilter:   (s) => s.isValidFilter && s.isFiltered,
-		showIconOrder:    (s) => s.isOrdered && s.orderOverwritten,
+		showIconOrder:    (s) => s.isOrdered && !s.isOrderedOrginal,
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -378,6 +370,7 @@ let MyListColumnBatch = {
 				const hasNull = this.isArrayInput && this.input.includes(null);
 				filters.push({
 					connector:'AND',
+					index:0,
 					operator:typeof this.input === 'string' ? 'ILIKE' : '= ANY',
 					side0:{
 						attributeId:atrId,
@@ -394,6 +387,7 @@ let MyListColumnBatch = {
 				if(hasNull) {
 					filters.push({
 						connector:'OR',
+						index:0,
 						operator:'IS NULL',
 						side0:{
 							attributeId:atrId,

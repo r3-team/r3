@@ -3,6 +3,7 @@ import MyCalendarMonth    from './calendarMonth.js';
 import MyForm             from './form.js';
 import MyInputCollection  from './inputCollection.js';
 import {getChoiceFilters} from './shared/form.js';
+import {checkDataOptions} from './shared/generic.js';
 import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
 import {
@@ -259,7 +260,7 @@ let MyCalendar = {
 					/>
 					<input class="zoomSlider" type="range" min="2" max="8"
 						v-model.number="zoom"
-						@change="fieldOptionSet(fieldId,'zoom',$event.target.value);"
+						@change="fieldOptionSet(favoriteId,fieldId,'zoom',$event.target.value);"
 					>
 				</template>
 				
@@ -276,7 +277,7 @@ let MyCalendar = {
 					:columnIdDisplay="c.columnIdDisplay"
 					:key="c.collectionId"
 					:modelValue="collectionIdMapIndexes[c.collectionId]"
-					:multiValue="c.multiValue"
+					:multiValue="c.flags.includes('multiValue')"
 					:previewCount="isMobile ? 0 : 2"
 				/>
 				
@@ -374,8 +375,10 @@ let MyCalendar = {
 		columns:         { type:Array,   required:true },
 		collections:     { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
+		dataOptions:     { type:Number,  required:false, default:0 },
 		daysShowDef:     { type:Number,  required:true },
 		daysShowToggle:  { type:Boolean, required:true },
+		favoriteId:      { required:false, default:null },
 		fieldId:         { type:String,  required:false, default:'' },
 		filters:         { type:Array,   required:true },
 		formLoading:     { type:Boolean, required:false, default:false },
@@ -429,14 +432,11 @@ let MyCalendar = {
 			s.attributeIdColor,s.indexColor
 		).concat(s.getQueryExpressions(s.columns)),
 		
-		// default is user field option, fallback is first choice in list
-		choiceIdDefault:(s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
-		
 		// simple
 		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
 		hasChoices:   (s) => s.choices.length > 1,
-		hasCreate:    (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyCreate,
-		hasUpdate:    (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate,
+		hasCreate:    (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate:    (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
 		isDays:       (s) => s.daysShow === 1 || s.daysShow === 3,
 		isMonth:      (s) => s.daysShow === 42,
 		isWeek:       (s) => s.daysShow === 5 || s.daysShow === 7,
@@ -462,15 +462,15 @@ let MyCalendar = {
 		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
-		this.date = new Date();
-		this.date.setHours(0,0,0);
-		
 		// setup watchers
 		this.$watch('columns',(valOld,valNew) => {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
 				this.rows = [];
 				this.reloadOutside();
 			}
+		});
+		this.$watch('favoriteId',(val) => {
+			this.reloadOptions();
 		});
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
@@ -492,26 +492,12 @@ let MyCalendar = {
 				}
 			});
 		}
-		
-		this.daysShow = this.daysShowDef;
-		
-		// apply field options (before paramsUpdated to apply calendar view)
-		if(this.daysShowToggle)
-			this.daysShow = parseInt(this.fieldOptionGet(this.fieldId,'daysShow',this.daysShowDef));
-		
-		this.zoom = parseInt(this.fieldOptionGet(this.fieldId,'zoom',this.zoomDefault));
-		
-		if(this.usesPageHistory) {
-			// set initial states via route parameters
-			this.paramsUpdated();     // load existing parameters from route query
-			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-		} else {
-			this.choiceId = this.choiceIdDefault;
-		}
+		this.reloadOptions();
 		this.ready = true;
 	},
 	methods:{
 		// externals
+		checkDataOptions,
 		fieldOptionGet,
 		fieldOptionSet,
 		getCalendarCutOff0,
@@ -534,7 +520,7 @@ let MyCalendar = {
 		choiceIdSet(choiceId) {
 			if(choiceId === this.choiceId) return;
 			
-			this.fieldOptionSet(this.fieldId,'choiceId',choiceId);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',choiceId);
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
@@ -554,7 +540,7 @@ let MyCalendar = {
 		},
 		daysShowSet(v) {
 			this.daysShow = v;
-			this.fieldOptionSet(this.fieldId,'daysShow',v);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'daysShow',v);
 			this.reloadInside();
 		},
 		goToToday() {
@@ -582,6 +568,25 @@ let MyCalendar = {
 		},
 		
 		// reloads
+		reloadOptions() {
+			this.date = new Date();
+			this.date.setHours(0,0,0);
+			this.daysShow = this.daysShowDef;
+			
+			// apply field options (before paramsUpdated to apply calendar view)
+			if(this.daysShowToggle)
+				this.daysShow = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'daysShow',this.daysShowDef));
+			
+			
+			this.choiceId = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
+			this.zoom     = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'zoom',this.zoomDefault));
+			
+			if(this.usesPageHistory) {
+				// set initial states via route parameters
+				this.paramsUpdated();     // load existing parameters from route query
+				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
+			}
+		},
 		reloadOutside() {
 			this.get();
 		},
@@ -612,7 +617,7 @@ let MyCalendar = {
 		},
 		paramsUpdated() {
 			let params = {
-				choice:  { parse:'string', value:this.choiceIdDefault },
+				choice:  { parse:'string', value:this.choiceId },
 				daysShow:{ parse:'int',    value:this.daysShow },
 				day:     { parse:'int',    value:this.date.getDate() },
 				month:   { parse:'int',    value:this.date.getMonth() },

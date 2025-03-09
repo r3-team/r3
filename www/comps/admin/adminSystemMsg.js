@@ -34,7 +34,7 @@ let MyAdminSystemMsg = {
 			</div>
 		</div>
 		
-		<div class="content grow">
+		<div class="content no-padding grow">
 			<table class="generic-table-vertical default-inputs admin-system-msg-table">
 				<tbody>
 					<tr>

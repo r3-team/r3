@@ -32,6 +32,37 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id int64) error {
 	return err
 }
 
+// delete all logins for LDAP connector
+func DelByLdap_tx(ctx context.Context, tx pgx.Tx, ldapId int32) error {
+
+	loginIds := make([]int64, 0)
+	rows, err := tx.Query(ctx, `
+		SELECT id
+		FROM instance.login
+		WHERE ldap_id = $1
+	`, ldapId)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return err
+		}
+		loginIds = append(loginIds, id)
+	}
+	rows.Close()
+
+	for _, id := range loginIds {
+		if err := Del_tx(ctx, tx, id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // get logins with meta data and total count
 func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy string, orderAsc bool, limit int, offset int,
 	meta bool, roles bool, recordRequests []types.LoginAdminRecordGet) ([]types.LoginAdmin, int, error) {
@@ -158,7 +189,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 	// collect meta data
 	if meta {
 		for i, l := range logins {
-			logins[i].Meta, err = login_meta.Get(l.Id)
+			logins[i].Meta, err = login_meta.Get_tx(ctx, tx, l.Id)
 			if err != nil {
 				return logins, 0, err
 			}
@@ -168,7 +199,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 	// collect role IDs
 	if roles {
 		for i, l := range logins {
-			logins[i].RoleIds, err = getRoleIds(ctx, l.Id)
+			logins[i].RoleIds, err = getRoleIds_tx(ctx, tx, l.Id)
 			if err != nil {
 				return logins, 0, err
 			}
@@ -236,10 +267,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	if isNew {
 		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.login (
-				ldap_id, ldap_key, name, salt, hash, salt_kdf,
-				admin, no_auth, limited, active, token_expiry_hours
+				ldap_id, ldap_key, name, salt, hash, salt_kdf, admin,
+				no_auth, limited, active, token_expiry_hours, date_favorites
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,0)
 			RETURNING id
 		`, ldapId, ldapKey, name, &salt, &hash, saltKdf, admin, noAuth,
 			isLimited, active, tokenExpiryHours).Scan(&id); err != nil {

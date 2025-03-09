@@ -3,9 +3,10 @@ package cache
 import (
 	"context"
 	"fmt"
-	"r3/db"
 	"r3/types"
 	"sync"
+
+	"github.com/jackc/pgx/v5"
 )
 
 var (
@@ -31,11 +32,9 @@ func GetOauthClient(id int32) (types.OauthClient, error) {
 	return c, nil
 }
 
-func LoadOauthClientMap() error {
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
+func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 
-	rows, err := db.Pool.Query(ctx, `
+	rows, err := tx.Query(ctx, `
 		SELECT id, name, client_id, client_secret, date_expiry, scopes, tenant, token_url
 		FROM instance.oauth_client
 	`)

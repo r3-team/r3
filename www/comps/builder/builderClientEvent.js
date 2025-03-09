@@ -32,22 +32,23 @@ let MyBuilderClientEvent = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
+				</div>
+				<div class="area">
 					<my-button image="visible1.png"
 						@trigger="copyValueDialog(values.name,id,id)"
 						:active="!isNew"
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
-						v-if="!isNew"
 						@trigger="delAsk"
-						:active="!readonly"
+						:active="!isNew && !readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
 					/>
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
+			<div class="content no-padding default-inputs">
 				<table class="generic-table-vertical">
 					<tbody>
 						<tr>

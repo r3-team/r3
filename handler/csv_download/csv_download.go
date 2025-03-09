@@ -60,11 +60,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 		return
 	}
-	languageCode, err := handler.ReadGetterFromUrl(r, "language_code")
-	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
-		return
-	}
 	boolFalse, err := handler.ReadGetterFromUrl(r, "bool_false")
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
@@ -170,7 +165,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var loginId int64
 	var admin bool
 	var noAuth bool
-	if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+	_, languageCode, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth)
+	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrUnauthorized)
 		bruteforce.BadAttempt(r)
 		return
@@ -243,13 +239,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// configure and execute GET data request
+	get.Limit = 0
 	get.Offset = 0
-	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
-		return
-	}
-	get.Limit = 10000 // at most 10000 lines per request
-	if totalLimit != 0 && totalLimit < get.Limit {
+	if totalLimit != 0 {
 		get.Limit = totalLimit
 	}
 
@@ -308,6 +300,10 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 		return 0, err
 	}
 	defer tx.Rollback(ctx)
+
+	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+		return 0, err
+	}
 
 	var query string
 	rows, total, err := data.Get_tx(ctx, tx, get, loginId, &query)
@@ -371,7 +367,11 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 			case int64:
 				stringValues[pos] = parseIntegerValues(columnAttributeContentUse[pos], v)
 			case pgtype.Numeric:
-				stringValues[pos] = tools.PgxNumericToString(v)
+				b, err := json.Marshal(v)
+				if err != nil {
+					return 0, err
+				}
+				stringValues[pos] = string(b)
 			default:
 				stringValues[pos] = fmt.Sprintf("%v", value)
 			}

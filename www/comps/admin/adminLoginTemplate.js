@@ -38,6 +38,8 @@ let MyAdminLoginTemplate = {
 						@trigger="id = 0"
 						:caption="capGen.button.new"
 					/>
+				</div>
+				<div class="area">
 					<my-button image="delete.png"
 						v-if="!isNew && !isGlobal"
 						@trigger="delAsk"
@@ -47,7 +49,7 @@ let MyAdminLoginTemplate = {
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
+			<div class="content no-padding default-inputs">
 				<table class="generic-table-vertical fullWidth">
 					<tbody>
 						<tr>
@@ -164,10 +166,10 @@ let MyAdminLoginTemplate = {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capAppSet.borders }}</td>
+							<td>{{ capGen.inputs }}</td>
 							<td>
 								<div class="row gap">
-									<my-button-check v-model="settings.bordersAll"     :caption="capGen.more" />
+									<my-button-check v-model="settings.shadowsInputs"  :caption="capGen.shadows" />
 									<my-button-check v-model="settings.bordersSquared" :caption="capAppSet.bordersSquared" />
 								</div>
 							</td>
@@ -215,6 +217,16 @@ let MyAdminLoginTemplate = {
 									<option :value="3">{{ capGen.option.size2 }}</option>
 									<option :value="4">{{ capGen.option.size3 }}</option>
 									<option :value="5">{{ capGen.option.size4 }}</option>
+								</select>
+							</td>
+						</tr>
+						<tr class="default-inputs">
+							<td>{{ capAppSet.formActionsAlign }}</td>
+							<td>
+								<select v-model.number="settings.formActionsAlign">
+									<option value="left">{{ capGen.alignmentHor.left }}</option>
+									<option value="center">{{ capGen.alignmentHor.center }}</option>
+									<option value="right">{{ capGen.alignmentHor.right }}</option>
 								</select>
 							</td>
 						</tr>
@@ -358,7 +370,6 @@ let MyAdminLoginTemplate = {
 		// new template, apply defaults
 		this.settings = {
 			boolAsIcon:true,
-			bordersAll:false,
 			bordersSquared:false,
 			colorClassicMode:false,
 			colorHeader:null,
@@ -368,6 +379,7 @@ let MyAdminLoginTemplate = {
 			dateFormat:'Y-m-d',
 			fontFamily:'helvetica',
 			fontSize:100,
+			formActionsAlign:'center',
 			headerModules:true,
 			headerCaptions:true,
 			hintUpdateVersion:0,
@@ -379,6 +391,7 @@ let MyAdminLoginTemplate = {
 			numberSepThousand:',',
 			pattern:'bubbles',
 			searchDictionaries:['english'],
+			shadowsInputs:false,
 			spacing:3,
 			sundayFirstDow:true,
 			tabRemember:true,

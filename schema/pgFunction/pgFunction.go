@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/db/check"
 	"r3/schema"
 	"r3/schema/caption"
@@ -40,12 +39,12 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return nil
 }
 
-func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunction, error) {
 
 	var err error
 	functions := make([]types.PgFunction, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, name, code_args, code_function, code_returns,
 			is_frontend_exec, is_login_sync, is_trigger, volatility
 		FROM app.pg_function
@@ -70,35 +69,17 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 
 	for i, f := range functions {
 		f.ModuleId = moduleId
-		f.Schedules, err = getSchedules(f.Id)
+		f.Schedules, err = getSchedules_tx(ctx, tx, f.Id)
 		if err != nil {
 			return functions, err
 		}
-		f.Captions, err = caption.Get("pg_function", f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
+		f.Captions, err = caption.Get_tx(ctx, tx, "pg_function", f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
 		if err != nil {
 			return functions, err
 		}
 		functions[i] = f
 	}
 	return functions, nil
-}
-func getSchedules(pgFunctionId uuid.UUID) ([]types.PgFunctionSchedule, error) {
-	schedules := make([]types.PgFunctionSchedule, 0)
-
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
-
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return schedules, err
-	}
-	defer tx.Rollback(ctx)
-
-	schedules, err = getSchedules_tx(ctx, tx, pgFunctionId)
-	if err != nil {
-		return schedules, err
-	}
-	return schedules, tx.Commit(ctx)
 }
 func getSchedules_tx(ctx context.Context, tx pgx.Tx, pgFunctionId uuid.UUID) ([]types.PgFunctionSchedule, error) {
 	schedules := make([]types.PgFunctionSchedule, 0)
@@ -137,9 +118,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 	if err != nil {
 		return err
 	}
-
-	// fix imports < 2.6: New "isTrigger" state
-	fnc = compatible.FixMissingTriggerState(fnc)
 
 	// fix imports < 3.9: Missing volatility setting
 	fnc = compatible.FixMissingVolatility(fnc)
@@ -341,7 +319,7 @@ func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity string, entity
 		if err != nil {
 			return err
 		}
-		f.Captions, err = caption.Get("pg_function", f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
+		f.Captions, err = caption.Get_tx(ctx, tx, "pg_function", f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
 		if err != nil {
 			return err
 		}

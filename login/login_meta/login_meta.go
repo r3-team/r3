@@ -2,16 +2,42 @@ package login_meta
 
 import (
 	"context"
-	"r3/db"
+	"fmt"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func Get(id int64) (types.LoginMeta, error) {
+func GetIsNotUnique_tx(ctx context.Context, tx pgx.Tx, loginId int64, content string, value string) (bool, error) {
+	var query string
+	switch content {
+	case "email":
+		query = `SELECT EXISTS(
+			SELECT login_id
+			FROM instance.login_meta
+			WHERE login_id <> $1
+			AND   email    =  $2
+		)`
+	case "name":
+		query = `SELECT EXISTS(
+			SELECT id
+			FROM instance.login
+			WHERE id   <> $1
+			AND   name =  $2
+		)`
+	default:
+		return false, fmt.Errorf("login unique check is not valid for content '%s'", content)
+	}
+
+	exists := false
+	err := tx.QueryRow(ctx, query, loginId, value).Scan(&exists)
+	return exists, err
+}
+
+func Get_tx(ctx context.Context, tx pgx.Tx, id int64) (types.LoginMeta, error) {
 	var m types.LoginMeta
 
-	err := db.Pool.QueryRow(db.Ctx, `
+	err := tx.QueryRow(ctx, `
 		SELECT email, department, location, name_display, name_fore, name_sur,
 			notes, organization, phone_fax, phone_landline, phone_mobile
 		FROM instance.login_meta

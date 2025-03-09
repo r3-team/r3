@@ -9,6 +9,7 @@ import {
 	fieldOptionSet
 } from './shared/field.js';
 import {
+	checkDataOptions,
 	colorAdjustBg,
 	colorMakeContrastFont
 } from './shared/generic.js';
@@ -53,10 +54,12 @@ let MyGanttLineRecord = {
 					:attribute-id="columns[i].attributeId"
 					:basis="columns[i].basis"
 					:bold="columns[i].flags.bold"
+					:boolAtrIcon="columns[i].flags.boolAtrIcon"
 					:display="columns[i].display"
 					:italic="columns[i].flags.italic"
 					:key="i"
 					:length="columns[i].length"
+					:monospace="columns[i].flags.monospace"
 					:value="v"
 				/>
 			</template>
@@ -252,7 +255,7 @@ let MyGantt = {
 					:columnIdDisplay="c.columnIdDisplay"
 					:key="c.collectionId"
 					:modelValue="collectionIdMapIndexes[c.collectionId]"
-					:multiValue="c.multiValue"
+					:multiValue="c.flags.includes('multiValue')"
 					:previewCount="isMobile ? 0 : 2"
 				/>
 				
@@ -290,10 +293,12 @@ let MyGantt = {
 								v-for="c in g.columns.filter(v => v.value !== null)"
 								:attribute-id="columns[c.index].attributeId"
 								:bold="columns[c.index].flags.bold"
+								:boolAtrIcon="columns[c.index].flags.boolAtrIcon"
 								:display="columns[c.index].display"
 								:italic="columns[c.index].flags.italic"
 								:key="c.index"
 								:length="columns[c.index].length"
+								:monospace="columns[c.index].flags.monospace"
 								:value="c.value"
 							/>
 						</div>
@@ -378,6 +383,8 @@ let MyGantt = {
 		columns:         { type:Array,   required:true }, // processed list columns
 		collections:     { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
+		dataOptions:     { type:Number,  required:false, default:0 },
+		favoriteId:      { required:false, default:null },
 		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true }, // processed query filters
 		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
@@ -422,12 +429,6 @@ let MyGantt = {
 		};
 	},
 	computed:{
-		// default is user field option, fallback is first choice in list
-		choiceIdDefault:(s) => s.fieldOptionGet(
-			s.fieldId,'choiceId',
-			s.choices.length === 0 ? null : s.choices[0].id
-		),
-		
 		// unix date range points, 0=gantt start, 1=gantt end
 		date0:(s) => {
 			let d = new Date(s.dateStart.getTime());
@@ -508,8 +509,8 @@ let MyGantt = {
 		expressions:    (s) => s.getQueryExpressions(s.columns),
 		hasChoices:     (s) => s.choices.length > 1,
 		hasColor:       (s) => s.attributeIdColor !== null,
-		hasCreate:      (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyCreate,
-		hasUpdate:      (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate,
+		hasCreate:      (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate:      (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
 		isDays:         (s) => s.stepType === 'days',
 		isEmpty:        (s) => s.groups.length === 0,
 		isHours:        (s) => s.stepType === 'hours',
@@ -542,6 +543,9 @@ let MyGantt = {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew))
 				this.reset();
 		});
+		this.$watch('favoriteId',(val) => {
+			this.reloadOptions();
+		});
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
@@ -566,23 +570,12 @@ let MyGantt = {
 		
 		// setup watchers for presentation changes
 		this.$watch(() => [this.showGroupLabels,this.stepZoom],() => {
-			this.fieldOptionSet(this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
-			this.fieldOptionSet(this.fieldId,'ganttStepZoom',this.stepZoom);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'ganttStepZoom',this.stepZoom);
 			this.$nextTick(() => this.setSteps(false));
 		});
 		
-		if(this.usesPageHistory) {
-			// set initial states via route parameters
-			this.paramsUpdated();     // load existing parameters from route query
-			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-		} else {
-			this.choiceId = this.choiceIdDefault;
-		}
-		
-		// initial field options
-		this.showGroupLabels = this.fieldOptionGet(this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
-		this.stepZoom        = this.fieldOptionGet(this.fieldId,'ganttStepZoom',this.stepZoom);
-		
+		this.reloadOptions();
 		this.ready = true;
 		this.$nextTick(() => this.setSteps(false));
 	},
@@ -591,6 +584,7 @@ let MyGantt = {
 	},
 	methods:{
 		// external
+		checkDataOptions,
 		fieldOptionGet,
 		fieldOptionSet,
 		fillRelationRecordIds,
@@ -676,7 +670,7 @@ let MyGantt = {
 		
 		// actions
 		choiceIdSet(choiceId) {
-			this.fieldOptionSet(this.fieldId,'choiceId',choiceId);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',choiceId);
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
@@ -736,6 +730,17 @@ let MyGantt = {
 		},
 		
 		// reloads
+		reloadOptions() {
+			this.choiceId        = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
+			this.showGroupLabels = this.fieldOptionGet(this.favoriteId,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
+			this.stepZoom        = this.fieldOptionGet(this.favoriteId,this.fieldId,'ganttStepZoom',this.stepZoom);
+			
+			if(this.usesPageHistory) {
+				// set initial states via route parameters
+				this.paramsUpdated();     // load existing parameters from route query
+				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
+			}
+		},
 		reloadOutside() {
 			this.createHeaderItems();
 			this.get();
@@ -767,17 +772,17 @@ let MyGantt = {
 		},
 		paramsUpdated() {
 			let params = {
-				choice:{ parse:'string', value:this.choiceIdDefault },
+				choice:{ parse:'string', value:this.choiceId },
 				page:  { parse:'int',    value:0 },
 				type:  { parse:'string', value:this.stepTypeDefault }
 			};
 			
 			this.routeParseParams(params);
-			this.page     = params['page'].value;
-			this.stepType = params['type'].value;
+			this.page     = params.page.value;
+			this.stepType = params.type.value;
 			
-			if(this.choiceId !== params['choice'].value)
-				this.choiceId = params['choice'].value;
+			if(this.choiceId !== params.choice.value)
+				this.choiceId = params.choice.value;
 		},
 		
 		// presentation
@@ -871,13 +876,14 @@ let MyGantt = {
 					this.groups = [];
 					
 					// parse result rows to gantt groups
-					let color    = null;
-					let date0    = 0;
-					let date1    = 0;
-					let groupBy  = []; // group by criteria (can be identical to label)
-					let groupMap = {}; // map of all groups, key: groupBy
-					let groupColumns = []; // group column values
-					let values   = [];
+					let color            = null;
+					let date0            = 0;
+					let date1            = 0;
+					let groups           = []; // groups 
+					let groupBy          = []; // group by criteria (can be identical to label)
+					let groupColumns     = []; // group column values
+					let groupIndexByName = {}; // map of group indexes, key: group name
+					let values           = [];
 					
 					for(const r of res.payload.rows) {
 						groupBy      = [];
@@ -909,25 +915,26 @@ let MyGantt = {
 								vertical:this.columns[i].flags.vertical
 							});
 						}
-						let groupName = groupBy.join(' ');
+						let name = groupBy.join(' ');
 						
 						// add group if not there yet
-						if(typeof groupMap[groupName] === 'undefined') {
-							groupMap[groupName] = {
+						if(groupIndexByName[name] === undefined) {
+							groupIndexByName[name] = groups.length;
+							groups.push({
 								lines:[[]], // each line is an array of records
 								columns:groupColumns,
 								vertical:groupColumns.length === 0 ? false : groupColumns[0].vertical
-							};
+							});
 						}
 						
 						// check in which line record fits (no overlapping)
-						let lineIndex = this.getFreeLineIndex(groupMap[groupName].lines,date0,date1);
+						let lineIndex = this.getFreeLineIndex(groups[groupIndexByName[name]].lines,date0,date1);
 						if(lineIndex === -1) {
-							lineIndex = groupMap[groupName].lines.length;
-							groupMap[groupName].lines.push([]);
+							lineIndex = groups[groupIndexByName[name]].lines.length;
+							groups[groupIndexByName[name]].lines.push([]);
 						}
 						
-						groupMap[groupName].lines[lineIndex].push({
+						groups[groupIndexByName[name]].lines[lineIndex].push({
 							color:color,
 							date0:date0,
 							date1:date1,
@@ -935,12 +942,7 @@ let MyGantt = {
 							values:values
 						});
 					}
-					
-					// store groups, sorted by group by criteria
-					let keysSorted = Object.keys(groupMap).sort();
-					for(let i = 0, j = keysSorted.length; i < j; i++) {
-						this.groups.push(groupMap[keysSorted[i]]);
-					}
+					this.groups = groups;
 					
 					if(this.notScrolled) {
 						this.notScrolled = false;

@@ -4,7 +4,7 @@ export default function isDropdownUpwards(el,vertPxDropdown,vertPxOffset) {
 	// vertical position of element
 	let vertPxEl = el.getBoundingClientRect().bottom - vertPxOffset;
 	
-	// usuable vertical space in form
+	// usable vertical space in form
 	let vertPxForm = window.innerHeight-vertPxOffset;
 	
 	// open dropdown upwards, if
@@ -12,4 +12,14 @@ export default function isDropdownUpwards(el,vertPxDropdown,vertPxOffset) {
 	//  dropdown going upwards does fit into vertical space above element
 	// if neither is true, dropdown goes downwards
 	return vertPxEl+vertPxDropdown > vertPxForm && vertPxEl > vertPxDropdown;
+};
+
+export function layoutSettleSpace(shownElements,checkElm) {
+	// abort if size check element is not defined, has sufficient size or there are no more elements to reduce
+	if(checkElm === undefined || checkElm === null || checkElm.offsetWidth > 3 || shownElements.length === 0)
+		return;
+	
+	// space insufficient and still elements available to reduce
+	shownElements.shift();                                         // remove next element
+	Vue.nextTick(() => layoutSettleSpace(shownElements,checkElm)); // resettle after change
 };

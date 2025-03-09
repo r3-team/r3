@@ -2,7 +2,6 @@ package relation
 
 import (
 	"context"
-	"r3/db"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -17,10 +16,10 @@ func delPolicies_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) error 
 	return err
 }
 
-func getPolicies(relationId uuid.UUID) ([]types.RelationPolicy, error) {
+func getPolicies_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.RelationPolicy, error) {
 	policies := make([]types.RelationPolicy, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT role_id, pg_function_id_excl, pg_function_id_incl,
 			action_delete, action_select, action_update
 		FROM app.relation_policy

@@ -5,7 +5,7 @@ let MyAdminMailAccount = {
 	name:'my-admin-mail-account',
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 		
-		<div class="contentBox float">
+		<div class="contentBox scroll float">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/mail2.png" />
@@ -36,6 +36,8 @@ let MyAdminMailAccount = {
 						@trigger="$emit('makeNew')"
 						:caption="capGen.button.new"
 					/>
+				</div>
+				<div class="area">
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="delAsk"
@@ -45,8 +47,8 @@ let MyAdminMailAccount = {
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
-				<table class="generic-table-vertical fullWidth">
+			<div class="content no-padding default-inputs">
+				<table class="generic-table-vertical">
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}*</td>
@@ -90,7 +92,7 @@ let MyAdminMailAccount = {
 						<tr v-if="isOauth">
 							<td>{{ capApp.accountOauth }}*</td>
 							<td>
-								<div class="row centered">
+								<div class="row gap centered">
 									<select
 										@change="inputs.oauthClientId = $event.target.value !== '' ? parseInt($event.target.value) : null"
 										:value="inputs.oauthClientId !== null ? String(inputs.oauthClientId) : ''"
@@ -240,7 +242,7 @@ let MyAdminMailAccount = {
 		},
 		reloadAndClose() {
 			ws.send('mailAccount','reload',{},true).then(
-				() => this.$emit('close'),
+				this.close,
 				this.$root.genericError
 			);
 		},

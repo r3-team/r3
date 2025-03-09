@@ -14,6 +14,7 @@ import {
 	fieldOptionSet
 } from './shared/field.js';
 import {
+	checkDataOptions,
 	colorAdjustBg,
 	colorMakeContrastFont
 } from './shared/generic.js';
@@ -58,11 +59,13 @@ let MyKanbanCard = {
 									:attributeId="columns[ind].attributeId"
 									:basis="columns[ind].basis"
 									:bold="columns[ind].flags.bold"
+									:boolAtrIcon="columns[ind].flags.boolAtrIcon"
 									:clipboard="columns[ind].flags.clipboard"
 									:display="columns[ind].display"
 									:italic="columns[ind].flags.italic"
 									:key="ind"
 									:length="columns[ind].length"
+									:monospace="columns[ind].flags.monospace"
 									:value="values[ind]"
 									:wrap="columns[ind].flags.wrap"
 								/>
@@ -255,7 +258,7 @@ let MyKanban = {
 					:columnIdDisplay="c.columnIdDisplay"
 					:key="c.collectionId"
 					:modelValue="collectionIdMapIndexes[c.collectionId]"
-					:multiValue="c.multiValue"
+					:multiValue="c.flags.includes('multiValue')"
 					:previewCount="isMobile ? 0 : 2"
 				/>
 				<select class="selector"
@@ -299,10 +302,12 @@ let MyKanban = {
 										:attributeId="columns[v.columnIndex].attributeId"
 										:basis="columns[v.columnIndex].basis"
 										:bold="columns[v.columnIndex].flags.bold"
+										:boolAtrIcon="columns[v.columnIndex].flags.boolAtrIcon"
 										:display="columns[v.columnIndex].display"
 										:italic="columns[v.columnIndex].flags.italic"
 										:key="v.columnIndex"
 										:length="columns[v.columnIndex].length"
+										:monospace="columns[v.columnIndex].flags.monospace"
 										:value="v.value"
 										:wrap="columns[v.columnIndex].flags.wrap"
 									/>
@@ -369,10 +374,12 @@ let MyKanban = {
 										:attributeId="columns[v.columnIndex].attributeId"
 										:basis="columns[v.columnIndex].basis"
 										:bold="columns[v.columnIndex].flags.bold"
+										:boolAtrIcon="columns[v.columnIndex].flags.boolAtrIcon"
 										:display="columns[v.columnIndex].display"
 										:italic="columns[v.columnIndex].flags.italic"
 										:key="v.columnIndex"
 										:length="columns[v.columnIndex].length"
+										:monospace="columns[v.columnIndex].flags.monospace"
 										:value="v.value"
 										:wrap="columns[v.columnIndex].flags.wrap"
 									/>
@@ -457,6 +464,8 @@ let MyKanban = {
 		columns:            { type:Array,   required:true }, // processed list columns
 		collections:        { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
+		dataOptions:        { type:Number,  required:false, default:0 },
+		favoriteId:         { required:false, default:null },
 		fieldId:            { type:String,  required:true },
 		filters:            { type:Array,   required:true }, // processed query filters
 		formLoading:        { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
@@ -490,11 +499,6 @@ let MyKanban = {
 		};
 	},
 	computed:{
-		choiceIdDefault:(s) => s.fieldOptionGet(
-			// default is user field option, fallback is first choice in list
-			s.fieldId,'choiceId',
-			s.choices.length === 0 ? null : s.choices[0].id
-		),
 		columnIndexesData:(s) => {
 			let out = [];
 			for(let i = 0, j = s.columns.length; i < j; i++) {
@@ -505,26 +509,25 @@ let MyKanban = {
 		},
 		
 		// simple
-		attributeIdAxisX:   (s) => s.joinsIndexMap[s.relationIndexAxisX].attributeId,
-		attributeIdAxisY:   (s) => s.relationIndexAxisY !== null && typeof s.joinsIndexMap[s.relationIndexAxisY] !== 'undefined'
+		attributeIdAxisX:  (s) => s.joinsIndexMap[s.relationIndexAxisX].attributeId,
+		attributeIdAxisY:  (s) => s.relationIndexAxisY !== null && typeof s.joinsIndexMap[s.relationIndexAxisY] !== 'undefined'
 			? s.joinsIndexMap[s.relationIndexAxisY].attributeId : null,
-		choiceFilters:      (s) => s.getChoiceFilters(s.choices,s.choiceId),
-		columnBatches:      (s) => s.getColumnBatches(s.moduleId,s.columns,s.columnIndexesAxisX.concat(s.columnIndexesAxisY),[],[],s.showCaptions),
-		columnIndexesAxisX: (s) => s.getAxisColumnIndexes([]),
-		columnIndexesAxisY: (s) => s.relationIndexAxisY === null
-			? [] : s.getAxisColumnIndexes(s.columnIndexesAxisX),
-		columnStyleVars:    (s) => `--kanban-width-min:${s.columnWidthMin}px;--kanban-width-max:${s.columnWidthMax}px;`,
-		columnWidthMin:     (s) => s.zoom * 40,
-		columnWidthMax:     (s) => s.columnWidthMin * 1.5,
-		dataReady:          (s) => typeof s.recordIdMapAxisXY.null !== 'undefined',
-		expressions:        (s) => s.getQueryExpressions(s.columns),
-		hasChoices:         (s) => s.choices.length > 1,
-		hasCreate:          (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyCreate,
-		hasUpdate:          (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate,
-		hasNullsInX:        (s) => s.attributeIdMap[s.attributeIdAxisX].nullable,
-		hasNullsInY:        (s) => s.attributeIdAxisY !== null && s.attributeIdMap[s.attributeIdAxisY].nullable,
-		joins:              (s) => s.fillRelationRecordIds(s.query.joins),
-		joinsIndexMap:      (s) => s.getJoinsIndexMap(s.joins),
+		choiceFilters:     (s) => s.getChoiceFilters(s.choices,s.choiceId),
+		columnBatches:     (s) => s.getColumnBatches(s.moduleId,s.columns,s.columnIndexesAxisX.concat(s.columnIndexesAxisY),[],[],s.showCaptions),
+		columnIndexesAxisX:(s) => s.getAxisColumnIndexes([]),
+		columnIndexesAxisY:(s) => s.relationIndexAxisY === null ? [] : s.getAxisColumnIndexes(s.columnIndexesAxisX),
+		columnStyleVars:   (s) => `--kanban-width-min:${s.columnWidthMin}px;--kanban-width-max:${s.columnWidthMax}px;`,
+		columnWidthMin:    (s) => s.zoom * 40,
+		columnWidthMax:    (s) => s.columnWidthMin * 1.5,
+		dataReady:         (s) => typeof s.recordIdMapAxisXY.null !== 'undefined',
+		expressions:       (s) => s.getQueryExpressions(s.columns),
+		hasChoices:        (s) => s.choices.length > 1,
+		hasCreate:         (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate:         (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
+		hasNullsInX:       (s) => s.attributeIdMap[s.attributeIdAxisX].nullable,
+		hasNullsInY:       (s) => s.attributeIdAxisY !== null && s.attributeIdMap[s.attributeIdAxisY].nullable,
+		joins:             (s) => s.fillRelationRecordIds(s.query.joins),
+		joinsIndexMap:     (s) => s.getJoinsIndexMap(s.joins),
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -547,6 +550,9 @@ let MyKanban = {
 				this.reloadOutside();
 			}
 		});
+		this.$watch('favoriteId',(val) => {
+			this.reloadOptions();
+		});
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
@@ -559,6 +565,12 @@ let MyKanban = {
 					return this.reloadOutside();
 			}
 		});
+		this.$watch('showCaptions',(val) => {
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'kanbanShowCaptions',val);
+		});
+		this.$watch('zoom',(val) => {
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'kanbanZoom',val);
+		});
 		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
 				if(this.routeChangeFieldReload(newVals,oldVals)) {
@@ -567,30 +579,13 @@ let MyKanban = {
 				}
 			});
 		}
-		
-		if(this.usesPageHistory) {
-			// set initial states via route parameters
-			this.paramsUpdated();     // load existing parameters from route query
-			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-		} else {
-			this.choiceId = this.choiceIdDefault;
-		}
-		
-		// setup watchers for presentation changes
-		this.$watch(() => [this.showCaptions,this.zoom],() => {
-			this.fieldOptionSet(this.fieldId,'kanbanShowCaptions',this.showCaptions);
-			this.fieldOptionSet(this.fieldId,'kanbanZoom',this.zoom);
-		});
-		
-		// initial field options
-		this.showCaptions = this.fieldOptionGet(this.fieldId,'kanbanShowCaptions',this.showCaptions);
-		this.zoom         = this.fieldOptionGet(this.fieldId,'kanbanZoom',this.zoom);
-		
+		this.reloadOptions();
 		this.ready = true;
 		this.$nextTick(() => this.get());
 	},
 	methods:{
 		// external
+		checkDataOptions,
 		colorAdjustBg,
 		colorMakeContrastFont,
 		fieldOptionGet,
@@ -616,7 +611,7 @@ let MyKanban = {
 			this.$emit('open-form',[],args,middleClick);
 		},
 		choiceIdSet(choiceId) {
-			this.fieldOptionSet(this.fieldId,'choiceId',choiceId);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',choiceId);
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
@@ -679,7 +674,7 @@ let MyKanban = {
 				if(typeof recordId === 'undefined')
 					return [];
 				
-				// store first occurence of record only
+				// store first occurrence of record only
 				if(recordId === null || typeof recordIdMapValues[recordId] !== 'undefined')
 					continue;
 				
@@ -717,6 +712,17 @@ let MyKanban = {
 		},
 		
 		// reloads
+		reloadOptions() {
+			this.choiceId     = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
+			this.showCaptions = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanShowCaptions',this.showCaptions);
+			this.zoom         = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanZoom',this.zoom);
+
+			if(this.usesPageHistory) {
+				// set initial states via route parameters
+				this.paramsUpdated();     // load existing parameters from route query
+				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
+			}
+		},
 		reloadOutside() {
 			this.get();
 		},
@@ -739,14 +745,11 @@ let MyKanban = {
 			this.$emit('set-args',args,pushHistory);
 		},
 		paramsUpdated() {
-			let params = {
-				choice:{ parse:'string', value:this.choiceIdDefault }
-			};
-			
+			let params = { choice:{ parse:'string', value:this.choiceId } };
 			this.routeParseParams(params);
 			
-			if(this.choiceId !== params['choice'].value)
-				this.choiceId = params['choice'].value;
+			if(this.choiceId !== params.choice.value)
+				this.choiceId = params.choice.value;
 		},
 		
 		// backend calls
@@ -767,7 +770,7 @@ let MyKanban = {
 					this.axisEntriesY = this.getAxisEntries(
 						this.relationIndexAxisY,this.columnIndexesAxisY,res.payload.rows);
 					
-					// prepate record ID map for both axis (X/Y)
+					// prepare record ID map for both axis (X/Y)
 					this.recordIdMapAxisXY = { null:{ null:[] } };
 					for(const x of this.axisEntriesX) {
 						this.recordIdMapAxisXY[x.id] = { null:[] };

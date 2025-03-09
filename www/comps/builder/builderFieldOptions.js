@@ -20,6 +20,7 @@ import {
 	getAttributeIcon,
 	getDetailsFromIndexAttributeId,
 	getIndexAttributeId,
+	isAttributeBoolean,
 	isAttributeFiles,
 	isAttributeInteger,
 	isAttributeRegconfig,
@@ -286,7 +287,7 @@ let MyBuilderFieldOptions = {
 		MyBuilderOpenFormInput
 	},
 	template:`<div class="builder-field-options">
-		<table class="generic-table-vertical tight fullWidth default-inputs">
+		<table class="generic-table-vertical default-inputs">
 			<tbody>
 				<tr v-if="isButton || isChart || isData || isList || isTabs || isVariable || (isHeader && !field.richtext)">
 					<td>{{ capGen.title }}</td>
@@ -329,19 +330,22 @@ let MyBuilderFieldOptions = {
 						>
 							<option value="hidden">{{ capApp.stateHidden }}</option>
 							<option value="default">{{ capApp.stateDefault }}</option>
-							<option v-if="isData" value="optional">{{ capApp.stateOptional }}</option>
-							<option v-if="isData" value="required">{{ capApp.stateRequired }}</option>
-							<option v-if="isData || isButton || isVariable" value="readonly">{{ capApp.stateReadonly }}</option>
+							<option v-if="isData || isVariable" value="optional">{{ capApp.stateOptional }}</option>
+							<option v-if="isData || isVariable" value="required">{{ capApp.stateRequired }}</option>
+							<option v-if="isData || isVariable || isButton" value="readonly">{{ capApp.stateReadonly }}</option>
 						</select>
 					</td>
 				</tr>
 				<tr>
-					<td>{{ capApp.onMobile }}</td>
+					<td>{{ capGen.visibility }}</td>
 					<td>
-						<my-bool
-							@update:modelValue="set('onMobile',$event)"
-							:modelValue="field.onMobile"
-						/>
+						<div class="row gap wrap">
+							<my-button-check
+								@update:modelValue="set('onMobile',$event)"
+								:caption="capApp.onMobile"
+								:modelValue="field.onMobile"
+							/>
+						</div>
 					</td>
 				</tr>
 				
@@ -447,11 +451,21 @@ let MyBuilderFieldOptions = {
 					<tr v-if="!isFiles && !isDrawing && !isRelationship">
 						<td>{{ capApp.fieldDefault }}</td>
 						<td>
-							<input
-								@input="set('def',$event.target.value)"
-								:placeholder="capApp.fieldDefaultHint"
-								:value="field.def"
-							/>
+							<div class="column gap">
+								<select
+									v-if="systemDefaults.length !== 0"
+									@input="set('def',$event.target.value)"
+									:value="systemDefaultUsed ? field.def : ''"
+								>
+									<option value="">[{{ capApp.systemDefaults.fixed }}]</option>
+									<option v-for="d in systemDefaults" :value="d">{{ capApp.systemDefaults[d] }}</option>
+								</select>
+								<input
+									v-if="!systemDefaultUsed"
+									@input="set('def',$event.target.value)"
+									:value="field.def"
+								/>
+							</div>
 						</td>
 					</tr>
 					<tr v-if="!isFiles && !isDrawing && field.def === ''">
@@ -463,10 +477,9 @@ let MyBuilderFieldOptions = {
 								:allowRemove="false"
 								:consumer="field.defCollection"
 								:fixedCollection="false"
+								:flagsEnable="[]"
 								:module="module"
 								:readonly="false"
-								:showMultiValue="false"
-								:showNoDisplayEmpty="false"
 								:showOnMobile="false"
 							/>
 						</td>
@@ -474,23 +487,27 @@ let MyBuilderFieldOptions = {
 					<tr v-if="isRelationship">
 						<td>{{ capApp.fieldDefaultPresetIds }}</td>
 						<td>
-							<select @change="presetIdAdd($event.target.value)">
-								<option value="">-</option>
-								<template v-for="p in presetIdMap">
-									<option
-										v-if="!field.defPresetIds.includes(p.id)"
-										:key="p.id"
-										:value="p.id"
-									>{{ p.name }}</option>
-								</template>
-							</select>
-							
-							<my-button image="cancel.png"
-								v-for="presetId in field.defPresetIds"
-								@trigger="presetIdRemove(presetId)"
-								:caption="presetIdMap[presetId].name"
-								:key="presetId"
-							/>
+							<div class="column gap">
+								<select @change="presetIdAdd($event.target.value)">
+									<option value="">-</option>
+									<template v-for="p in presetIdMap">
+										<option
+											v-if="!field.defPresetIds.includes(p.id)"
+											:key="p.id"
+											:value="p.id"
+										>{{ p.name }}</option>
+									</template>
+								</select>
+								
+								<div class="row gap wrap" v-if="field.defPresetIds.length !== 0">
+									<my-button image="cancel.png"
+										v-for="presetId in field.defPresetIds"
+										@trigger="presetIdRemove(presetId)"
+										:caption="presetIdMap[presetId].name"
+										:key="presetId"
+									/>
+								</div>
+							</div>
 						</td>
 					</tr>
 					
@@ -533,24 +550,6 @@ let MyBuilderFieldOptions = {
 					<!-- relationship inputs -->
 					<template v-if="isRelationship">
 						<tr>
-							<td>{{ capApp.category }}</td>
-							<td>
-								<my-bool
-									@update:modelValue="set('category',$event)"
-									:modelValue="field.category"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.filterQuick }}</td>
-							<td>
-								<my-bool
-									@update:modelValue="set('filterQuick',$event)"
-									:modelValue="field.filterQuick"
-								/>
-							</td>
-						</tr>
-						<tr>
 							<td>{{ capApp.autoSelect }}</td>
 							<td>
 							<input
@@ -563,13 +562,52 @@ let MyBuilderFieldOptions = {
 					</template>
 				</template>
 
-				<tr v-if="(isData && !isFiles && !isDrawing && !isRelationship) || isVariable">
-					<td>{{ capGen.clipboard }}</td>
+				<!-- general field options -->
+				<tr v-if="(isData && !isFiles && !isDrawing && !isDate && !isDatetime && !isTime) || isVariable">
+					<td>{{ capGen.options }}</td>
 					<td>
-						<my-bool
-							@update:modelValue="set('clipboard',$event)"
-							:modelValue="field.clipboard"
-						/>
+						<div class="row gap wrap">
+							<template v-if="!isRelationship">
+								<my-button-check
+									@update:modelValue="set('clipboard',$event)"
+									:caption="capGen.clipboard"
+									:modelValue="field.clipboard"
+								/>
+								<my-button-check
+									@update:modelValue="setFlags('monospace',$event)"
+									:caption="capGen.monospace"
+									:modelValue="field.flags.includes('monospace')"
+								/>
+								<my-button-check
+									v-if="isIFrame || isBarcode"
+									@update:modelValue="setFlags('hideInputs',$event)"
+									:caption="capApp.hideInputs"
+									:modelValue="field.flags.includes('hideInputs')"
+								/>
+							</template>
+							<template v-if="isRelationship">
+								<my-button-check
+									@update:modelValue="set('category',$event)"
+									:caption="capApp.category"
+									:modelValue="field.category"
+								/>
+								<my-button-check
+									@update:modelValue="set('filterQuick',$event)"
+									:caption="capApp.filterQuick"
+									:modelValue="field.filterQuick"
+								/>
+							</template>
+						</div>
+					</td>
+				</tr>
+
+				<tr v-if="(isData && !isFiles && !isDrawing && !isRelationship && !isDate && !isDatetime && !isTime && !isIFrame) || isVariable">
+					<td>{{ capGen.alignment }}</td>
+					<td>
+						<select v-model="alignment">
+							<option value="def">{{ capGen.alignmentHor.left }}</option>
+							<option value="end">{{ capGen.alignmentHor.right }}</option>
+						</select>
 					</td>
 				</tr>
 				
@@ -847,7 +885,7 @@ let MyBuilderFieldOptions = {
 					<tr>
 						<td>{{ capApp.flexJustifyContent }}</td>
 						<td>
-							<div class="row">
+							<div class="row gap">
 								<select
 									@input="set('justifyContent',$event.target.value)"
 									:value="field.justifyContent"
@@ -871,7 +909,7 @@ let MyBuilderFieldOptions = {
 					<tr>
 						<td>{{ capApp.flexAlignItems }}</td>
 						<td>
-							<div class="row">
+							<div class="row gap">
 								<select
 									@input="set('alignItems',$event.target.value)"
 									:value="field.alignItems"
@@ -894,7 +932,7 @@ let MyBuilderFieldOptions = {
 					<tr>
 						<td>{{ capApp.flexAlignContent }}</td>
 						<td>
-							<div class="row">
+							<div class="row gap">
 								<select
 									@input="set('alignContent',$event.target.value)"
 									:disabled="!field.wrap"
@@ -1286,10 +1324,9 @@ let MyBuilderFieldOptions = {
 									:allowRemove="true"
 									:consumer="c"
 									:fixedCollection="false"
+									:flagsEnable="['multiValue']"
 									:module="module"
 									:readonly="false"
-									:showMultiValue="true"
-									:showNoDisplayEmpty="false"
 									:showOnMobile="false"
 								/>
 								<span v-if="field.collections.length !== 0">{{ capApp.collectionHint }}</span>
@@ -1315,7 +1352,7 @@ let MyBuilderFieldOptions = {
 			? false : s.attributeIdMap[s.field.attributeId],
 		displayOptions:(s) => {
 			let out = ['default'];
-			if(s.isInteger && s.isDisplayDefault) out.push('slider','login');
+			if(s.isInteger && s.isDisplayDefault) out.push('rating','slider','login');
 			if(s.isString  && s.isDisplayDefault) out.push('password','email','phone','url');
 			if(s.isFiles)                         out.push('gallery');
 			return out;
@@ -1349,30 +1386,59 @@ let MyBuilderFieldOptions = {
 			}
 			return map;
 		},
+		systemDefaults:(s) => {
+			if(s.isRichtext || s.isBarcode || s.isIFrame) return [];
+			if(s.isDate)     return ['{CURR_DATE}'];
+			if(s.isDatetime) return ['{CURR_DATETIME}'];
+			if(s.isTime)     return ['{CURR_TIME}'];
+			if(s.isString)   return ['{CURR_DATE_YYYY}','{CURR_DATE_MM}','{CURR_DATE_DD}'];
+			if(s.isBoolean)  return ['true','false'];
+			return [];
+		},
+
+		// inputs
+		alignment:{
+			get()  {
+				if(this.field.flags.includes('alignEnd')) return 'end';
+				return 'def';
+			},
+			set(v) {
+				let flags = JSON.parse(JSON.stringify(this.field.flags));
+				if(v !== 'end' &&  flags.includes('alignEnd')) flags.splice(flags.indexOf('alignEnd'),1);
+				if(v === 'end' && !flags.includes('alignEnd')) flags.push('alignEnd');
+				this.field.flags = flags;
+			}
+		},
 		
 		// simple states
-		hasCaption:      (s) => s.isData || s.isHeader,
-		hasOpenForm:     (s) => s.isButton || ((s.isList || s.isCalendar || s.isKanban || s.isRelationship) && s.field.query.relationId !== null),
-		isButton:        (s) => s.field.content === 'button',
-		isCalendar:      (s) => s.field.content === 'calendar',
-		isChart:         (s) => s.field.content === 'chart',
-		isContainer:     (s) => s.field.content === 'container',
-		isData:          (s) => s.field.content === 'data',
-		isDate:          (s) => s.isData && s.attribute.contentUse === 'date',
-		isDatetime:      (s) => s.isData && s.attribute.contentUse === 'datetime',
-		isDisplayDefault:(s) => s.isData && s.attribute.contentUse === 'default',
-		isDrawing:       (s) => s.isData && s.attribute.contentUse === 'drawing',
-		isHeader:        (s) => s.field.content === 'header',
-		isList:          (s) => s.field.content === 'list',
-		isKanban:        (s) => s.field.content === 'kanban',
-		isQuery:         (s) => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
-		isTabs:          (s) => s.field.content === 'tabs',
-		isVariable:      (s) => s.field.content === 'variable',
-		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
-		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
-		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.attribute.content),
-		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.attribute.content),
-		isString:        (s) => s.isData && s.isAttributeString(s.attribute.content),
+		hasCaption:       (s) => s.isData || s.isHeader,
+		hasOpenForm:      (s) => s.isButton || ((s.isList || s.isCalendar || s.isKanban || s.isRelationship) && s.field.query.relationId !== null),
+		isBarcode:        (s) => s.isData && s.attribute.contentUse === 'barcode',
+		isBoolean:        (s) => s.isData && s.isAttributeBoolean(s.attribute.content),
+		isButton:         (s) => s.field.content === 'button',
+		isCalendar:       (s) => s.field.content === 'calendar',
+		isChart:          (s) => s.field.content === 'chart',
+		isContainer:      (s) => s.field.content === 'container',
+		isData:           (s) => s.field.content === 'data',
+		isDate:           (s) => s.isData && s.attribute.contentUse === 'date',
+		isDatetime:       (s) => s.isData && s.attribute.contentUse === 'datetime',
+		isDisplayDefault: (s) => s.isData && s.attribute.contentUse === 'default',
+		isDrawing:        (s) => s.isData && s.attribute.contentUse === 'drawing',
+		isFiles:          (s) => s.isData && s.isAttributeFiles(s.attribute.content),
+		isHeader:         (s) => s.field.content === 'header',
+		isIFrame:         (s) => s.isData && s.attribute.contentUse === 'iframe',
+		isInteger:        (s) => s.isData && s.isAttributeInteger(s.attribute.content),
+		isList:           (s) => s.field.content === 'list',
+		isKanban:         (s) => s.field.content === 'kanban',
+		isQuery:          (s) => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
+		isTabs:           (s) => s.field.content === 'tabs',
+		isRegconfig:      (s) => s.isData && s.isAttributeRegconfig(s.attribute.content),
+		isRelationship:   (s) => s.isData && s.isAttributeRelationship(s.attribute.content),
+		isRichtext:       (s) => s.isData && s.attribute.contentUse === 'richtext',
+		isString:         (s) => s.isData && s.isAttributeString(s.attribute.content),
+		isTime:           (s) => s.isData && s.attribute.contentUse === 'time',
+		isVariable:       (s) => s.field.content === 'variable',
+		systemDefaultUsed:(s) => s.systemDefaults.includes(s.field.def),
 		
 		// stores
 		module:        (s) => s.moduleIdMap[s.moduleId],
@@ -1397,6 +1463,7 @@ let MyBuilderFieldOptions = {
 		getJoinsIndexMap,
 		getNilUuid,
 		getRandomInt,
+		isAttributeBoolean,
 		isAttributeFiles,
 		isAttributeInteger,
 		isAttributeRegconfig,
@@ -1455,6 +1522,11 @@ let MyBuilderFieldOptions = {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
 			v[i] = value;
 			this.set('collections',v);
+		},
+		setFlags(name,state) {
+			const pos = this.field.flags.indexOf(name);
+			if(state  && pos === -1) this.field.flags.push(name);
+			if(!state && pos !== -1) this.field.flags.splice(pos,1);
 		},
 		setIndexAttribute(name,indexAttributeId) {
 			let values = this.getDetailsFromIndexAttributeId(indexAttributeId);

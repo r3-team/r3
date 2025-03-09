@@ -32,10 +32,12 @@ func systemMsgMaintenance() error {
 		if err := config.SetUint64_tx(ctx, tx, "productionMode", 0); err != nil {
 			return err
 		}
+		if err := cluster.ConfigChanged_tx(ctx, tx, true, false, true); err != nil {
+			return err
+		}
 		if err := tx.Commit(ctx); err != nil {
 			return err
 		}
-		cluster.ConfigChanged(true, false, true)
 	}
 	return nil
 }

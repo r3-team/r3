@@ -2,7 +2,6 @@ package collection
 
 import (
 	"context"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/collection/consumer"
 	"r3/schema/column"
@@ -19,10 +18,10 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(moduleId uuid.UUID) ([]types.Collection, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Collection, error) {
 	collections := make([]types.Collection, 0)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, icon_id, name
 		FROM app.collection
 		WHERE module_id = $1
@@ -45,15 +44,15 @@ func Get(moduleId uuid.UUID) ([]types.Collection, error) {
 
 	// collect query and columns
 	for i, c := range collections {
-		c.Query, err = query.Get("collection", c.Id, 0, 0)
+		c.Query, err = query.Get_tx(ctx, tx, "collection", c.Id, 0, 0, 0)
 		if err != nil {
 			return collections, err
 		}
-		c.Columns, err = column.Get("collection", c.Id)
+		c.Columns, err = column.Get_tx(ctx, tx, "collection", c.Id)
 		if err != nil {
 			return collections, err
 		}
-		c.InHeader, err = consumer.Get("collection", c.Id, "headerDisplay")
+		c.InHeader, err = consumer.Get_tx(ctx, tx, "collection", c.Id, "headerDisplay")
 		if err != nil {
 			return collections, err
 		}
@@ -86,7 +85,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, ic
 			return err
 		}
 	}
-	if err := query.Set_tx(ctx, tx, "collection", id, 0, 0, queryIn); err != nil {
+	if err := query.Set_tx(ctx, tx, "collection", id, 0, 0, 0, queryIn); err != nil {
 		return err
 	}
 	if err := column.Set_tx(ctx, tx, "collection", id, columns); err != nil {

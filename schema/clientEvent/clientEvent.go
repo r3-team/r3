@@ -2,7 +2,6 @@ package clientEvent
 
 import (
 	"context"
-	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
@@ -17,10 +16,10 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get(moduleId uuid.UUID) ([]types.ClientEvent, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.ClientEvent, error) {
 
 	clientEvents := make([]types.ClientEvent, 0)
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT id, action, arguments, event, hotkey_modifier1,
 			hotkey_modifier2, hotkey_char, js_function_id, pg_function_id
 		FROM app.client_event
@@ -44,7 +43,7 @@ func Get(moduleId uuid.UUID) ([]types.ClientEvent, error) {
 	}
 
 	for i, e := range clientEvents {
-		clientEvents[i].Captions, err = caption.Get("client_event", e.Id, []string{"clientEventTitle"})
+		clientEvents[i].Captions, err = caption.Get_tx(ctx, tx, "client_event", e.Id, []string{"clientEventTitle"})
 		if err != nil {
 			return clientEvents, err
 		}

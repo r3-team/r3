@@ -313,9 +313,10 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(f.name, ', ')
 		FROM app.menu AS h
-		INNER JOIN app.form AS f ON f.id = h.form_id
-		INNER JOIN app.module AS m
-			ON m.id = h.module_id
+		INNER JOIN app.form     AS f  ON f.id  = h.form_id
+		INNER JOIN app.menu_tab AS mt ON mt.id = h.menu_tab_id
+		INNER JOIN app.module   AS m
+			ON  m.id = mt.module_id
 			AND m.id = $1
 		
 		-- dependency

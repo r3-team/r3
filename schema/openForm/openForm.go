@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"r3/db"
 	"r3/schema/compatible"
 	"r3/types"
 	"slices"
@@ -16,7 +15,7 @@ import (
 
 var entitiesAllowed = []string{"column", "collection_consumer", "field"}
 
-func Get(entity string, id uuid.UUID, formContext pgtype.Text) (f types.OpenForm, err error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity string, id uuid.UUID, formContext pgtype.Text) (f types.OpenForm, err error) {
 
 	if !slices.Contains(entitiesAllowed, entity) {
 		return f, errors.New("invalid open form entity")
@@ -31,7 +30,7 @@ func Get(entity string, id uuid.UUID, formContext pgtype.Text) (f types.OpenForm
 		sqlWhere = "AND context = $2"
 	}
 
-	err = db.Pool.QueryRow(context.Background(), fmt.Sprintf(`
+	err = tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT form_id_open, relation_index_open, attribute_id_apply,
 			relation_index_apply, pop_up_type, max_height, max_width
 		FROM app.open_form

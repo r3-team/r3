@@ -158,6 +158,6 @@
 	align-self:flex-end;
 	font-style:italic;
 }
-.login .button img{
+.login .button.clickable img{
 	filter:var(--image-filter-bright-shade);
 }

@@ -30,22 +30,23 @@ let MyBuilderPgTrigger = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
+				</div>
+				<div class="area">
 					<my-button image="visible1.png"
 						@trigger="copyValueDialog(values.name,id,id)"
 						:active="!isNew"
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
-						v-if="!isNew"
 						@trigger="delAsk"
-						:active="!readonly && !isExternal"
+						:active="!isNew && !readonly && !isExternal"
 						:cancel="true"
 						:caption="capGen.button.delete"
 					/>
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
+			<div class="content default-inputs no-padding">
 				<table class="generic-table-vertical">
 					<tbody>
 						<tr>
@@ -234,7 +235,7 @@ let MyBuilderPgTrigger = {
 			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
 		setDeferred(state) {
-			// abstract unuseful states into two options
+			// abstract useless states into two options
 			// either trigger is 'constraint+deferrable+initially' deferred or not all
 			this.values.isConstraint = state;
 			this.values.isDeferrable = state;

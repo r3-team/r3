@@ -4,11 +4,23 @@ import MyStore from '../../stores/store.js';
 export function generatePdf(filename,format,orientation,marginX,marginY,
 	htmlHeader,htmlBody,htmlFooter,cssStyles,callbackResult,closeWhenDone
 ) {
-	const capGen = MyStore.getters.captions.generic;
-	const win    = window.open('');
+	const capGen     = MyStore.getters.captions.generic;
+	const win        = window.open('');
+	const marginYMin = 50;
 	
 	win.r3_callbackResult = callbackResult;
 	win.r3_closeWhenDone  = closeWhenDone;
+
+	let marginLeft   = Array.isArray(marginX) && marginX.length === 2 ? marginX[0] : marginX;
+	let marginRight  = Array.isArray(marginX) && marginX.length === 2 ? marginX[1] : marginX;
+	let marginTop    = Array.isArray(marginY) && marginY.length === 2 ? marginY[0] : marginY;
+	let marginBottom = Array.isArray(marginY) && marginY.length === 2 ? marginY[1] : marginY;
+
+	// apply minimums for vertical margins
+	// jsPDF will not display headers/footers with tiny top/bottom margins
+	if(htmlHeader !== null && htmlHeader !== '' && marginTop    < marginYMin) marginTop    = marginYMin;
+	if(htmlFooter !== null && htmlFooter !== '' && marginBottom < marginYMin) marginBottom = marginYMin;
+
 	win.document.open();
 	win.document.write(`
 		<!DOCTYPE html>
@@ -33,7 +45,7 @@ export function generatePdf(filename,format,orientation,marginX,marginY,
 			</div>
 			
 			<!-- document preview / parsing -->
-			<div style="max-width:1200px;margin-top:30px;padding:${marginY}px ${marginX}px;border:1px solid #555;border-radius:5px;box-shadow:1px 1px 3px #666;">
+			<div style="max-width:1200px;margin-top:30px;padding:${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px;border:1px solid #555;border-radius:5px;box-shadow:1px 1px 3px #666;">
 				<div id="pdf-header">${htmlHeader}</div>
 				<div id="pdf-body">${htmlBody}</div>
 				<div id="pdf-footer">${htmlFooter}</div>
@@ -60,9 +72,9 @@ export function generatePdf(filename,format,orientation,marginX,marginY,
 			
 			// document working variables
 			const headerFooterOffset = 20; // margin from page top if header or from content if footer
-			const pageWidth  = doc.internal.pageSize.width - (${marginX} * 2);
+			const pageWidth  = doc.internal.pageSize.width - ${marginLeft} - ${marginRight};
 			const headerPosY = headerFooterOffset;
-			const footerPosY = doc.internal.pageSize.height - ${marginY} + headerFooterOffset;
+			const footerPosY = (doc.internal.pageSize.height - ${marginBottom}) + headerFooterOffset;
 			
 			const addPageMeta = function(element,elementPosY,pageCur,pageCount) {
 				return new Promise((resolve,reject) => {
@@ -82,7 +94,7 @@ export function generatePdf(filename,format,orientation,marginX,marginY,
 						},
 						width:pageWidth,
 						windowWidth:pageWidth,
-						x:${marginX},
+						x:${marginLeft},
 						y:elementPosY
 					});
 				});
@@ -91,10 +103,10 @@ export function generatePdf(filename,format,orientation,marginX,marginY,
 			// create document
 			// bug: if document created from HTML is > 1 page, adobe reader reports page errors starting with page 2
 			// fix: manually add pages that would exist if HTML is rendered (must be added before rendering the HTML)
-			// ugly soluton: render document once, count pages, render again with the required pages added beforehand
+			// ugly solution: render document once, count pages, render again with the required pages added beforehand
 			new jsPDF(docOptions).html(body,{
 				autoPaging:'text',
-				margin:[${marginY},${marginX},${marginY},${marginX}],
+				margin:[${marginTop},${marginRight},${marginBottom},${marginLeft}],
 				width:pageWidth,
 				windowWidth:pageWidth,
 				callback:res => {
@@ -106,7 +118,7 @@ export function generatePdf(filename,format,orientation,marginX,marginY,
 					// create document proper
 					doc.html(body,{
 						autoPaging:'text',
-						margin:[${marginY},${marginX},${marginY},${marginX}],
+						margin:[${marginTop},${marginRight},${marginBottom},${marginLeft}],
 						width:pageWidth,
 						windowWidth:pageWidth,
 						callback:async () => {

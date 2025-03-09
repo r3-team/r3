@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 var (
@@ -48,13 +49,13 @@ func GetPwaDomainMap() map[string]uuid.UUID {
 	return pwaDomainMap
 }
 
-func LoadPwaDomainMap() error {
+func LoadPwaDomainMap_tx(ctx context.Context, tx pgx.Tx) error {
 	pwa_mx.Lock()
 	defer pwa_mx.Unlock()
 
 	pwaDomainMap = make(map[string]uuid.UUID)
 
-	rows, err := db.Pool.Query(context.Background(), `
+	rows, err := tx.Query(ctx, `
 		SELECT module_id, domain
 		FROM instance.pwa_domain
 	`)

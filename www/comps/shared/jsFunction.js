@@ -10,6 +10,10 @@ import {
 	aesGcmDecryptBase64WithPhrase,
 	rsaDecrypt
 } from './crypto.js';
+import {
+	variableValueGet,
+	variableValueSet
+} from './variable.js';
 
 const errFnc = () => console.warn('Function is not available in this context.');
 
@@ -35,7 +39,7 @@ const exposedFunctionsGlobal = {
 	collection_read:getCollectionMultiValues,
 	collection_update:updateCollections,
 	
-	// call other functions
+	// call functions
 	call_frontend:(id,...args) => jsFunctionRun(id,args,{}),
 	call_backend: (id,...args) => {
 		return new Promise((resolve,reject) => {
@@ -46,9 +50,9 @@ const exposedFunctionsGlobal = {
 		});
 	},
 
-	// variables
-	get_variable:(k)   => MyStore.getters.variableIdMapGlobal[k] !== undefined ? MyStore.getters.variableIdMapGlobal[k] : null,
-	set_variable:(k,v) => MyStore.commit('variableStoreValueById',{id:k,value:v}),
+	// variables (without form context, eg. global)
+	get_variable:(k)   => variableValueGet(k),
+	set_variable:(k,v) => variableValueSet(k,v),
 	
 	// e2e encryption
 	get_e2ee_data_key:  (dataKeyEnc)    => rsaDecrypt(MyStore.getters.loginPrivateKey,dataKeyEnc),
@@ -58,11 +62,11 @@ const exposedFunctionsGlobal = {
 	client_execute_keystrokes:(keystrokes) => ws.send('event','keystrokesRequested',keystrokes),
 
 	// form open (simple global version)
-	form_open:(formId,recordId,newTab,popUp,maxY,maxX) => {
+	form_open:(formId,recordId,newTab,popUp,maxY,maxX,replace) => {
 		formOpen({
 			formIdOpen:formId, popUpType:popUp ? 'float' : null,
 			maxHeight:maxY, maxWidth:maxX
-		},newTab);
+		},newTab,replace);
 	},
 				
 	// PDF functions
@@ -174,7 +178,7 @@ const exposedFunctionsGlobal = {
 export function jsFunctionRun(jsFunctionId,args,exposedFunctionsContext) {
 	const fnc = MyStore.getters['schema/jsFunctionIdMap'][jsFunctionId];
 	if(fnc === 'undefined')
-		return;
+		return console.warn(`Failed to start frontend function '${jsFunctionId}', function not known.`);
 	
 	// first argument is exposed application functions object 'app'
 	// additional arguments are defined by function

@@ -50,7 +50,7 @@ func ExportToFile(ctx context.Context, moduleId uuid.UUID, zipFilePath string) e
 	// export all modules as JSON files
 	var moduleJsonPaths []string
 	var moduleIdsExported []uuid.UUID
-	if err := export_tx(tx, moduleId, &moduleJsonPaths, &moduleIdsExported); err != nil {
+	if err := export_tx(ctx, tx, moduleId, &moduleJsonPaths, &moduleIdsExported); err != nil {
 		return err
 	}
 
@@ -61,7 +61,7 @@ func ExportToFile(ctx context.Context, moduleId uuid.UUID, zipFilePath string) e
 	return tx.Commit(ctx)
 }
 
-func export_tx(tx pgx.Tx, moduleId uuid.UUID, filePaths *[]string, moduleIdsExported *[]uuid.UUID) error {
+func export_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, filePaths *[]string, moduleIdsExported *[]uuid.UUID) error {
 
 	// ignore if already exported (dependent on modules can have similar dependencies)
 	if slices.Contains(*moduleIdsExported, moduleId) {
@@ -79,13 +79,13 @@ func export_tx(tx pgx.Tx, moduleId uuid.UUID, filePaths *[]string, moduleIdsExpo
 
 	// export all modules that this module is dependent on
 	for _, modId := range file.Content.Module.DependsOn {
-		if err := export_tx(tx, modId, filePaths, moduleIdsExported); err != nil {
+		if err := export_tx(ctx, tx, modId, filePaths, moduleIdsExported); err != nil {
 			return err
 		}
 	}
 
 	// check for ownership
-	isOwner, err := module_meta.GetOwner(moduleId)
+	isOwner, err := module_meta.GetOwner_tx(ctx, tx, moduleId)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func export_tx(tx pgx.Tx, moduleId uuid.UUID, filePaths *[]string, moduleIdsExpo
 	}
 	hashed := sha256.Sum256(jsonContent)
 	hashedStr := base64.URLEncoding.EncodeToString(hashed[:])
-	hashedStrEx, err := module_meta.GetHash(moduleId)
+	hashedStrEx, err := module_meta.GetHash_tx(ctx, tx, moduleId)
 	if err != nil {
 		return err
 	}

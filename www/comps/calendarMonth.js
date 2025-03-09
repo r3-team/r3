@@ -53,10 +53,12 @@ let MyCalendarMonth = {
 									:attributeId="columns[i].attributeId"
 									:basis="columns[i].basis"
 									:bold="columns[i].flags.bold"
+									:boolAtrIcon="columns[i].flags.boolAtrIcon"
 									:display="columns[i].display"
 									:italic="columns[i].flags.italic"
 									:key="i"
 									:length="columns[i].length"
+									:monospace="columns[i].flags.monospace"
 									:value="v"
 								/>
 							</template>
@@ -81,10 +83,12 @@ let MyCalendarMonth = {
 							:attributeId="columns[i].attributeId"
 							:basis="columns[i].basis"
 							:bold="columns[i].flags.bold"
+							:boolAtrIcon="columns[i].flags.boolAtrIcon"
 							:display="columns[i].display"
 							:italic="columns[i].flags.italic"
 							:key="i"
 							:length="columns[i].length"
+							:monospace="columns[i].flags.monospace"
 							:wrap="true"
 							:value="v"
 						/>

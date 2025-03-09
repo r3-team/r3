@@ -1,16 +1,18 @@
-import isDropdownUpwards  from './shared/layout.js';
-import MyFilters          from './filters.js';
-import MyForm             from './form.js';
-import MyInputCollection  from './inputCollection.js';
-import MyInputOffset      from './inputOffset.js';
-import MyListAggregate    from './listAggregate.js';
-import MyListColumnBatch  from './listColumnBatch.js';
-import MyListCsv          from './listCsv.js';
-import MyListOptions      from './listOptions.js';
-import MyValueRich        from './valueRich.js';
-import {consoleError}     from './shared/error.js';
-import {getCaption}       from './shared/language.js';
-import {isAttributeFiles} from './shared/attribute.js';
+import isDropdownUpwards   from './shared/layout.js';
+import MyFilters           from './filters.js';
+import MyForm              from './form.js';
+import MyInputCollection   from './inputCollection.js';
+import MyInputOffset       from './inputOffset.js';
+import MyListAggregate     from './listAggregate.js';
+import MyListColumnBatch   from './listColumnBatch.js';
+import MyListCsv           from './listCsv.js';
+import MyListFilters       from './listFilters.js';
+import MyListOptions       from './listOptions.js';
+import MyValueRich         from './valueRich.js';
+import {consoleError}      from './shared/error.js';
+import {getCaption}        from './shared/language.js';
+import {layoutSettleSpace} from './shared/layout.js';
+import {isAttributeFiles}  from './shared/attribute.js';
 import {
 	getColumnBatches,
 	getColumnTitle,
@@ -25,8 +27,10 @@ import {
 	getRowsDecrypted
 } from './shared/form.js';
 import {
+	checkDataOptions,
 	colorAdjustBg,
-	colorMakeContrastFont
+	colorMakeContrastFont,
+	deepIsEqual
 } from './shared/generic.js';
 import {
 	fillRelationRecordIds,
@@ -50,6 +54,7 @@ let MyList = {
 		MyListAggregate,
 		MyListColumnBatch,
 		MyListCsv,
+		MyListFilters,
 		MyListOptions,
 		MyValueRich
 	},
@@ -63,7 +68,7 @@ let MyList = {
 			v-if="showHover"
 			@click.self.stop="closeHover"
 		>
-			<div class="contentBox float scroll" :class="{ 'list-csv':showCsv,'list-filters':showFilters, 'list-options':showOptions }">
+			<div class="contentBox float scroll" :class="{ 'list-csv':showCsv, 'list-filters-wrap':showFilters, 'list-options':showOptions }">
 				<div class="top lower">
 					<div class="area">
 						<img class="icon" :src="hoverIconSrc" />
@@ -75,7 +80,7 @@ let MyList = {
 						:cancel="true"
 					/>
 				</div>
-				<div class="content grow default-inputs">
+				<div class="content grow default-inputs" :class="{ 'no-padding':showOptions }">
 					<my-list-csv
 						v-if="showCsv"
 						@reload="get"
@@ -88,23 +93,24 @@ let MyList = {
 						:orders="orders"
 						:query="query"
 					/>
-					<my-filters class="default-inputs"
+					<my-list-filters
 						v-if="showFilters"
-						v-model="filtersUser"
-						@apply="get"
+						@set-filters="setUserFilters"
 						:columns="columns"
 						:columnBatches="columnBatches"
+						:filters="filtersUser"
 						:joins="joins"
-						:showReset="true"
-						:userFilter="true"
 					/>
 					<my-list-options
 						v-if="showOptions"
+						@reset-columns="resetColumns"
+						@set-auto-renew="setAutoRenewTimer"
 						@set-cards-captions="setCardsCaptions"
 						@set-column-batch-sort="setColumnBatchSort"
 						@set-column-ids-by-user="$emit('set-column-ids-by-user',$event)"
 						@set-layout="setLayout"
 						@set-page-limit="setLimit"
+						:autoRenew="autoRenew"
 						:cardsCaptions="cardsCaptions"
 						:columns="columns"
 						:columnsAll="columnsAll"
@@ -117,17 +123,6 @@ let MyList = {
 						:moduleId="moduleId"
 						:pageLimit="limit"
 					/>
-					<div class="row gap centered default-inputs" v-if="showAutoRenew">
-						<span>{{ capApp.autoRenewInput }}</span>
-						<input class="short"
-							v-model.number="autoRenewInput"
-							:placeholder="capApp.autoRenewInputHint"
-						/>
-						<my-button image="save.png"
-							@trigger="setAutoRenewTimer(false)"
-							:active="autoRenewInput !== '' && autoRenewInput !== autoRenewInputLast"
-						/>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -142,7 +137,7 @@ let MyList = {
 					<tbody>
 						<tr v-for="(r,i) in rowsInput">
 							
-							<!-- icons / checkboxes -->
+							<!-- icons -->
 							<td class="minimum">
 								<div class="list-input-row-items nowrap">
 									
@@ -158,15 +153,21 @@ let MyList = {
 										:attribute-id="columns[0].attributeId"
 										:class="{ clickable:inputAsCategory && !inputIsReadonly }"
 										:basis="columns[0].basis"
+										:bold="columns[0].bold"
+										:boolAtrIcon="columns[0].boolAtrIcon"
 										:display="columns[0].display"
 										:length="columns[0].length"
+										:monospace="columns[0].flags.monospace"
 										:value="r.values[0]"
 										:wrap="columns[0].flags.wrap"
 									/>
-									
-									<!-- category input check box -->
+								</div>
+							</td>
+							
+							<!-- category input check box -->
+							<td class="minimum" v-if="inputAsCategory">
+								<div class="list-input-row-checkbox">
 									<my-button
-										v-if="inputAsCategory"
 										@trigger="inputTriggerRow(r)"
 										:active="!inputIsReadonly"
 										:image="displayRecordCheck(inputRecordIds.includes(r.indexRecordIds['0']))"
@@ -189,11 +190,13 @@ let MyList = {
 											:class="{ clickable:inputAsCategory && !inputIsReadonly }"
 											:basis="columns[ci].basis"
 											:bold="columns[ci].flags.bold"
+											:boolAtrIcon="columns[ci].flags.boolAtrIcon"
 											:clipboard="columns[ci].flags.clipboard"
 											:display="columns[ci].display"
 											:italic="columns[ci].flags.italic"
 											:key="ci"
 											:length="columns[ci].length"
+											:monospace="columns[ci].flags.monospace"
 											:value="r.values[ci]"
 											:wrap="columns[ci].flags.wrap"
 										/>
@@ -203,7 +206,7 @@ let MyList = {
 							
 							<!-- actions -->
 							<td class="minimum">
-								<div class="list-input-row-items nogap nowrap">
+								<div class="list-input-row-items nowrap justifyEnd">
 									<my-button image="open.png"
 										v-if="hasUpdate"
 										@trigger="clickOpen(r,false)"
@@ -252,7 +255,7 @@ let MyList = {
 							</div>
 						</td>
 						<td class="minimum">
-							<div class="list-input-row-items nogap nowrap">
+							<div class="list-input-row-items nowrap">
 								<my-button image="add.png"
 									v-if="!inputIsReadonly && hasCreate"
 									@trigger="$emit('open-form',[],false)"
@@ -273,7 +276,7 @@ let MyList = {
 		</template>
 		
 		<!-- regular list view (either view or input dropdown) -->
-		<template v-if="showTable && !inputAsCategory">
+		<template v-if="!isInput || (dropdownShow && !inputAsCategory)">
 			
 			<!-- list header -->
 			<div class="list-header" v-if="header && showHeader">
@@ -290,7 +293,7 @@ let MyList = {
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button image="edit.png"
-						v-if="hasUpdateBulk"
+						v-if="hasUpdateBulk && (selectedRows.length !== 0 || headerElements.includes('actionsReadonly'))"
 						@trigger="selectRowsBulkEdit(selectedRows)"
 						:active="selectedRows.length !== 0"
 						:caption="showActionTitles ? capGen.button.editBulk.replace('{COUNT}',selectedRows.length) : '(' + String(selectedRows.length) + ')'"
@@ -303,7 +306,7 @@ let MyList = {
 						:captionTitle="capApp.button.csvHint"
 					/>
 					<my-button image="shred.png"
-						v-if="hasDeleteAny"
+						v-if="hasDeleteAny && (selectedRows.length !== 0 || headerElements.includes('actionsReadonly'))"
 						@trigger="delAsk(selectedRows)"
 						:active="selectedRows.length !== 0"
 						:cancel="true"
@@ -332,25 +335,17 @@ let MyList = {
 				</div>
 				
 				<div class="row gap nowrap default-inputs">
-					<!-- other actions -->
-					<my-button image="autoRenew.png"
-						v-if="showAutoRenewIcon && autoRenew !== null"
-						@trigger="showAutoRenew = !showAutoRenew"
-						:caption="capApp.button.autoRenew.replace('{VALUE}',autoRenewInput)"
-						:captionTitle="capApp.button.autoRenewHint.replace('{VALUE}',autoRenewInput)"
-						:naked="true"
-					/>
-					
-					<my-button image="refresh.png"
+					<my-button
 						v-if="showRefresh"
 						@trigger="reloadInside('manual')"
 						:captionTitle="capGen.button.refresh"
+						:image="autoRenew === -1 ? 'refresh.png' : 'autoRenew.png'"
 						:naked="true"
 					/>
 					
 					<my-button image="filterCog.png"
 						@trigger="toggleUserFilters"
-						@trigger-right="filtersUser = [];reloadInside('filtersUser')"
+						@trigger-right="setUserFilters([])"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
 						:naked="true"
@@ -371,7 +366,7 @@ let MyList = {
 						:columnIdDisplay="c.columnIdDisplay"
 						:key="c.collectionId"
 						:modelValue="collectionIdMapIndexes[c.collectionId]"
-						:multiValue="c.multiValue"
+						:multiValue="c.flags.includes('multiValue')"
 						:previewCount="showCollectionCnt"
 						:showTitle="showCollectionTitles"
 					/>
@@ -392,7 +387,7 @@ let MyList = {
 						:naked="true"
 					/>
 					<my-button image="toggleUp.png"
-						v-if="!isCards"
+						v-if="!isCards && headerElements.includes('headerCollapse')"
 						@trigger="toggleHeader"
 						:captionTitle="capApp.button.collapseHeader"
 						:naked="true"
@@ -418,30 +413,38 @@ let MyList = {
 										:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 									/>
 								</th>
-								<th v-for="(b,i) in columnBatches">
+								<th v-for="(b,i) in columnBatches" :style="b.style">
 									<my-list-column-batch
 										@close="columnBatchIndexOption = -1"
 										@del-aggregator="setAggregators"
 										@del-order="setOrder(b,null)"
 										@set-aggregator="setAggregators"
-										@set-filters="filtersColumn = $event;reloadInside('filtersColumn')"
+										@set-filters="setColumnBatchFilters"
 										@set-order="setOrder(b,$event)"
 										@toggle="clickColumn(i)"
-										@toggle-header="toggleHeader"
 										:columnBatch="b"
 										:columnIdMapAggr="columnIdMapAggr"
 										:columns="columns"
 										:dropdownRight="(columnBatches.length > 1 && i === columnBatches.length - 1) || (columnBatches.length > 3 && i === columnBatches.length - 2)"
 										:filters="filtersCombined"
 										:filtersColumn="filtersColumn"
+										:isOrderedOrginal="isOrderedOrginal"
 										:joins="relationsJoined"
 										:orders="orders"
-										:orderOverwritten="orderOverwritten"
 										:relationId="query.relationId"
 										:rowCount="count"
 										:show="columnBatchIndexOption === i"
-										:showToggle="!showHeader && i === columnBatches.length-1"
 									/>
+								</th>
+								<!-- empty column for taking remaining space & header toggle action -->
+								<th>
+									<div class="headerToggle" v-if="!showHeader">
+										<my-button image="toggleDown.png"
+											@trigger="toggleHeader"
+											:captionTitle="capApp.button.collapseHeader"
+											:naked="true"
+										/>
+									</div>
 								</th>
 							</tr>
 						</thead>
@@ -508,7 +511,7 @@ let MyList = {
 								</td>
 								
 								<!-- row values per column batch -->
-								<td v-for="b in columnBatches" :style="b.style">
+								<td v-for="b in columnBatches">
 									<div class="columnBatch"
 										:class="{ colored:b.columnIndexColor !== -1, vertical:b.vertical }"
 										:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
@@ -521,16 +524,21 @@ let MyList = {
 											:attributeId="columns[ind].attributeId"
 											:basis="columns[ind].basis"
 											:bold="columns[ind].flags.bold"
+											:boolAtrIcon="columns[ind].flags.boolAtrIcon"
 											:clipboard="columns[ind].flags.clipboard"
 											:display="columns[ind].display"
 											:italic="columns[ind].flags.italic"
 											:key="ind"
 											:length="columns[ind].length"
+											:monospace="columns[ind].flags.monospace"
+											:previewLarge="columns[ind].flags.previewLarge"
 											:value="r.values[ind]"
 											:wrap="columns[ind].flags.wrap"
 										/>
 									</div>
 								</td>
+								<!-- empty column for taking remaining space -->
+								<td></td>
 							</tr>
 							
 							<!-- no results message -->
@@ -658,11 +666,14 @@ let MyList = {
 														:attributeId="columns[ind].attributeId"
 														:basis="columns[ind].basis"
 														:bold="columns[ind].flags.bold"
+														:boolAtrIcon="columns[ind].flags.boolAtrIcon"
 														:clipboard="columns[ind].flags.clipboard"
 														:display="columns[ind].display"
 														:italic="columns[ind].flags.italic"
 														:key="ind"
 														:length="columns[ind].length"
+														:monospace="columns[ind].flags.monospace"
+														:previewLarge="columns[ind].flags.previewLarge"
 														:value="r.values[ind]"
 														:wrap="columns[ind].flags.wrap"
 													/>
@@ -697,24 +708,27 @@ let MyList = {
 		</template>
 	</div>`,
 	props:{
-		autoRenew:      { required:false, default:null },                   // refresh list data every x seconds
-		caption:        { type:String,  required:false, default:'' },       // caption to display in list header
-		choices:        { type:Array,   required:false, default:() => [] }, // processed query choices
-		collections:    { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
+		autoRenewDefault:{ required:false, default:null },                   // default for list refresh (number in seconds)
+		caption:         { type:String,  required:false, default:'' },       // caption to display in list header
+		choices:         { type:Array,   required:false, default:() => [] }, // processed query choices
+		collections:     { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
-		columns:        { type:Array,   required:true },                    // list columns, processed
-		columnsAll:     { type:Array,   required:false, default:() => [] }, // list columns, all
-		fieldId:        { type:String,  required:true },
-		filters:        { type:Array,   required:true },                    // processed query filters
-		layoutDefault:  { type:String,  required:false, default:'table' },  // default list layout: table, cards
-		limitDefault:   { type:Number,  required:false, default:10 },       // default list limit
-		moduleId:       { type:String,  required:true },
-		popUpFormInline:{ required:false, default:null },                   // form to show inside list
-		query:          { type:Object,  required:true },                    // list query
+		columns:         { type:Array,   required:true },                    // list columns, processed
+		columnsAll:      { type:Array,   required:false, default:() => [] }, // list columns, all
+		dataOptions:     { type:Number,  required:false, default:0 },        // data permissions following form states
+		favoriteId:      { required:false, default:null },
+		fieldId:         { type:String,  required:true },
+		filters:         { type:Array,   required:true },                    // processed query filters
+		layoutDefault:   { type:String,  required:false, default:'table' },  // default list layout: table, cards
+		limitDefault:    { type:Number,  required:false, default:10 },       // default list limit
+		moduleId:        { type:String,  required:true },
+		popUpFormInline: { required:false, default:null },                   // form to show inside list
+		query:           { type:Object,  required:true },                    // list query
 		
 		// toggles
 		csvExport:      { type:Boolean, required:false, default:false },
 		csvImport:      { type:Boolean, required:false, default:false },
+		dropdownShow:   { type:Boolean, required:false, default:false },
 		filterQuick:    { type:Boolean, required:false, default:false }, // enable quick filter
 		formLoading:    { type:Boolean, required:false, default:false }, // trigger and control list reloads
 		hasOpenForm:    { type:Boolean, required:false, default:false }, // list can open record in form
@@ -736,7 +750,7 @@ let MyList = {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'clipboard','close-inline','open-form',
+		'clipboard','close-inline','dropdown-show','open-form',
 		'open-form-bulk','record-count-change','record-removed',
 		'records-selected','records-selected-init','set-args',
 		'set-column-ids-by-user','set-collection-indexes'
@@ -744,8 +758,7 @@ let MyList = {
 	data() {
 		return {
 			// list state
-			autoRenewInput:null,        // current auto renew input value
-			autoRenewInputLast:null,    // last set auto renew input value (to compare against)
+			autoRenew:-1,               // auto renew list data every X seconds, -1 if disabled
 			autoRenewTimer:null,        // interval timer for auto renew
 			choiceId:null,              // currently active choice
 			columnBatchIndexOption:-1,  // show options for column batch by index
@@ -754,15 +767,12 @@ let MyList = {
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
 			layout:'table',             // current list layout (table, cards)
-			orderOverwritten:false,     // sort options were changed by user
 			rowsFetching:false,         // row values are being fetched
 			selectedRows:[],            // bulk selected rows by row index
-			showAutoRenew:false,        // show UI for auto list renew
 			showCsv:false,              // show UI for CSV import/export
 			showFilters:false,          // show UI for user filters
 			showHeader:true,            // show UI for list header
 			showOptions:false,          // show UI for list options
-			showTable:false,            // show regular list table as view or input dropdown
 			
 			// list constants
 			refTabindex:'input_row_', // prefix for vue references to tabindex elements
@@ -776,7 +786,7 @@ let MyList = {
 			count:0,            // total result set count
 			limit:0,            // current result limit
 			offset:0,           // current result offset
-			orders:[],          // column orderings, copied on mount, changable by user
+			orders:[],          // current column orderings
 			rows:[],            // current result set
 			filtersColumn:[],   // current user column filters
 			filtersQuick:'',    // current user quick text filter
@@ -797,8 +807,9 @@ let MyList = {
 				'refresh',                   // optional
 				'offsetArrows',              // optional
 				'collectionTitles',          // optional, show collection titles
-				'resultsCount',              // not important
-				'autoRenewIcon'              // not important
+				'headerCollapse',            // optional
+				'actionsReadonly',           // optional
+				'resultsCount'               // not important
 			]
 		};
 	},
@@ -821,6 +832,9 @@ let MyList = {
 			return filters;
 		},
 		hasDeleteAny:(s) => {
+			if(!s.checkDataOptions(1,s.dataOptions))
+				return false;
+
 			for(let join of s.joins) {
 				if(join.applyDelete)
 					return true;
@@ -835,17 +849,15 @@ let MyList = {
 				s.attributeIdMap[s.columns[0].attributeId].content === 'files';
 		},
 		hoverCaption:(s) => {
-			if     (s.showAutoRenew) return s.capApp.autoRenew;
-			else if(s.showCsv)       return s.capApp.button.csv;
-			else if(s.showFilters)   return s.capGen.button.filterHint;
-			else if(s.showOptions)   return s.capGen.options;
+			if     (s.showCsv)     return s.capApp.button.csv;
+			else if(s.showFilters) return s.capGen.button.filterHint;
+			else if(s.showOptions) return s.capGen.options;
 			return '';
 		},
 		hoverIconSrc:(s) => {
-			if     (s.showAutoRenew) return 'images/autoRenew.png';
-			else if(s.showCsv)       return 'images/fileSheet.png';
-			else if(s.showFilters)   return 'images/filterCog.png';
-			else if(s.showOptions)   return 'images/listCog.png';
+			if     (s.showCsv)     return 'images/fileSheet.png';
+			else if(s.showFilters) return 'images/filterCog.png';
+			else if(s.showOptions) return 'images/listCog.png';
 			return '';
 		},
 		inputLinePlaceholder:(s) => {
@@ -867,6 +879,7 @@ let MyList = {
 			let addFilter = (operator,atrId,atrIndex,dict) => {
 				out.push({
 					connector:out.length === 0 ? 'AND' : 'OR',
+					index:0,
 					operator:operator,
 					side0:{ attributeId:atrId, attributeIndex:atrIndex, brackets:0 },
 					side1:{ brackets:0, ftsDict:dict, value:s.filtersQuick }
@@ -912,26 +925,26 @@ let MyList = {
 		anyInputRows:        (s) => s.inputRecordIds.length !== 0,
 		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
 		choiceFilters:       (s) => s.getChoiceFilters(s.choices,s.choiceId),
-		choiceIdDefault:     (s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
 		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,s.columnBatchSort[0],true),
 		expressions:         (s) => s.getQueryExpressions(s.columns),
 		hasBulkActions:      (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
 		hasChoices:          (s) => s.query.choices.length > 1,
-		hasCreate:           (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
+		hasCreate:           (s) => s.checkDataOptions(4,s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
 		hasPaging:           (s) => s.query.fixedLimit === 0,
 		hasResults:          (s) => s.rowsClear.length !== 0,
-		hasUpdate:           (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
-		hasUpdateBulk:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
+		hasUpdate:           (s) => s.checkDataOptions(2,s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
+		hasUpdateBulk:       (s) => s.checkDataOptions(2,s.dataOptions) && s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
 		isCards:             (s) => s.layout === 'cards',
+		isOrderedOrginal:    (s) => s.deepIsEqual(s.query.orders,s.orders),
 		isTable:             (s) => s.layout === 'table',
 		joins:               (s) => s.fillRelationRecordIds(s.query.joins),
+		ordersOriginal:      (s) => JSON.parse(JSON.stringify(s.query.orders)),
 		relationsJoined:     (s) => s.getRelationsJoined(s.joins),
 		rowSelect:           (s) => s.isInput || s.hasUpdate,
 		rowsClear:           (s) => s.rows.filter(v => !s.inputRecordIds.includes(v.indexRecordIds['0'])),
 		showActionTitles:    (s) => s.headerElements.includes('actionTitles'),
-		showAutoRenewIcon:   (s) => s.headerElements.includes('autoRenewIcon'),
 		showCollectionTitles:(s) => s.headerElements.includes('collectionTitles'),
-		showHover:           (s) => s.showAutoRenew || s.showCsv || s.showFilters || s.showOptions,
+		showHover:           (s) => s.showCsv || s.showFilters || s.showOptions,
 		showInputAddLine:    (s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
 		showInputAddAll:     (s) => s.inputMulti && s.hasResults,
 		showInputHeader:     (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
@@ -959,8 +972,6 @@ let MyList = {
 		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
-		this.showTable = !this.isInput;
-		
 		// react to field resize
 		if(!this.isInput) {
 			window.addEventListener('resize',this.resized);
@@ -968,6 +979,17 @@ let MyList = {
 		}
 		
 		// setup watchers
+		this.$watch('dropdownShow',(v) => {
+			if(!v) return;
+
+			this.filtersQuick = '';
+			this.reloadInside('dropdown');
+			
+			const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
+			if(inputEl !== null)
+				inputEl.focus();
+		});
+		this.$watch('favoriteId',this.reloadOptions);
 		this.$watch('columns',(valOld,valNew) => {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
 				this.count = 0;
@@ -982,6 +1004,12 @@ let MyList = {
 		});
 		this.$watch('isHidden',(val) => {
 			if(!val) {
+				this.reloadOutside();
+				this.resized();
+			}
+		});
+		this.$watch('loadWhileHidden',(val) => {
+			if(val) {
 				this.reloadOutside();
 				this.resized();
 			}
@@ -1009,42 +1037,17 @@ let MyList = {
 				if(this.routeChangeFieldReload(newVals,oldVals)) {
 					this.paramsUpdated();
 					this.reloadOutside();
-					this.orderOverwritten = true;
 				}
 			});
 		}
-		
-		if(this.usesPageHistory) {
-			// set initial states via route parameters
-			this.paramsUpdated();     // load existing parameters from route query
-			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-		} else {
-			// sub lists are initiated once
-			this.choiceId = this.choiceIdDefault;
-			this.limit    = this.limitDefault;
-			this.orders   = JSON.parse(JSON.stringify(this.query.orders));
-		}
-		
-		// set initial auto renew timer
-		if(this.autoRenew !== null) {
-			this.autoRenewInput = this.fieldOptionGet(this.fieldId,'autoRenew',this.autoRenew);
-			this.setAutoRenewTimer(false);
-		}
-		
-		// load cached list options
-		this.cardsCaptions   = this.fieldOptionGet(this.fieldId,'cardsCaptions',true);
-		this.columnBatchSort = this.fieldOptionGet(this.fieldId,'columnBatchSort',[[],[]]);
-		this.columnIdMapAggr = this.fieldOptionGet(this.fieldId,'columnIdMapAggr',{});
-		this.filtersColumn   = this.fieldOptionGet(this.fieldId,'filtersColumn',[]);
-		this.filtersUser     = this.fieldOptionGet(this.fieldId,'filtersUser',[]);
-		this.limit           = this.fieldOptionGet(this.fieldId,'limit',this.limitDefault);
-		this.layout          = this.fieldOptionGet(this.fieldId,'layout',this.layoutDefault);
-		this.showHeader      = this.fieldOptionGet(this.fieldId,'header',true);
 
+		// initialize list options
+		this.reloadOptions();
+		this.setAutoRenewTimer(this.autoRenew);
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
 	beforeUnmount() {
-		this.setAutoRenewTimer(true);
+		this.clearAutoRenewTimer();
 	},
 	unmounted() {
 		if(!this.Input)
@@ -1054,9 +1057,11 @@ let MyList = {
 	},
 	methods:{
 		// externals
+		checkDataOptions,
 		colorAdjustBg,
 		colorMakeContrastFont,
 		consoleError,
+		deepIsEqual,
 		fieldOptionGet,
 		fieldOptionSet,
 		fillRelationRecordIds,
@@ -1072,12 +1077,12 @@ let MyList = {
 		getRowsDecrypted,
 		isAttributeFiles,
 		isDropdownUpwards,
+		layoutSettleSpace,
 		routeChangeFieldReload,
 		routeParseParams,
 
 		handleHotkeys(e) {
-			if(e.key === 'Escape' && (this.showAutoRenew || this.showCsv || this.showFilters || this.showOptions)) {
-				this.showAutoRenew = false;
+			if(e.key === 'Escape' && (this.showCsv || this.showFilters || this.showOptions)) {
 				this.showCsv       = false;
 				this.showFilters   = false;
 				this.showOptions   = false;
@@ -1099,24 +1104,13 @@ let MyList = {
 			let font = this.colorMakeContrastFont(bg);
 			return `background-color:${bg};color:${font};`;
 		},
-		headerAdjust() {
-			this.headerCheckTimer = null;
-			
-			if(typeof this.$refs.empty === 'undefined' || this.$refs.empty === null || this.$refs.empty.offsetWidth > 10 || this.headerElements.length === 0)
-				return;
-			
-			// space insufficient and still elements available to reduce
-			this.headerElements.shift();       // remove next element
-			this.$nextTick(this.headerAdjust); // recheck after change
-		},
 		resized() {
 			if(this.headerCheckTimer !== null)
 				clearTimeout(this.headerCheckTimer);
 			
 			this.headerCheckTimer = setTimeout(() => {
-				// reset elements, then wait for layout to settle to check
 				this.headerElements = JSON.parse(JSON.stringify(this.headerElementsAvailableInOrder));
-				this.$nextTick(this.headerAdjust);
+				this.$nextTick(() => this.layoutSettleSpace(this.headerElements,this.$refs.empty));
 			},200);
 		},
 		updateDropdownDirection() {
@@ -1130,33 +1124,44 @@ let MyList = {
 		
 		// reloads
 		reloadAggregations(nextTick) {
-			if(!this.isTable || typeof this.$refs.aggregations === 'undefined')
+			if(!this.isTable || typeof this.$refs.aggregations === 'undefined' || this.$refs.aggregations === null)
 				return;
 
 			if(nextTick) this.$nextTick(this.$refs.aggregations.get);
 			else         this.$refs.aggregations.get();
 		},
-		reloadOutside() {
-			// outside state has changed, reload list or list input
-			if(!this.isInput)
-				return this.get();
-			
-			this.getInput();
+		reloadOptions() {
+			this.autoRenew       = this.fieldOptionGet(this.favoriteId,this.fieldId,'autoRenew',(this.autoRenewDefault === null ? -1 : this.autoRenewDefault));
+			this.cardsCaptions   = this.fieldOptionGet(this.favoriteId,this.fieldId,'cardsCaptions',true);
+			this.choiceId        = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
+			this.columnBatchSort = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnBatchSort',[[],[]]);
+			this.columnIdMapAggr = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnIdMapAggr',{});
+			this.filtersColumn   = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersColumn',[]);
+			this.filtersUser     = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersUser',[]);
+			this.showHeader      = this.fieldOptionGet(this.favoriteId,this.fieldId,'header',true);
+			this.limit           = this.fieldOptionGet(this.favoriteId,this.fieldId,'limit',this.limitDefault);
+			this.layout          = this.fieldOptionGet(this.favoriteId,this.fieldId,'layout',this.layoutDefault);
+			this.orders          = this.fieldOptionGet(this.favoriteId,this.fieldId,'orders',this.ordersOriginal);
+
+			if(this.usesPageHistory) {
+				// set initial states via route parameters
+				this.paramsUpdated();     // load existing parameters from route query
+				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
+			}
 		},
 		reloadInside(entity) {
 			// inside state has changed, reload list (not relevant for list input)
 			switch(entity) {
 				case 'dropdown':      // fallthrough
-				case 'filterQuick':   // fallthrough
+				case 'filtersQuick':   // fallthrough
 				case 'filtersColumn': // fallthrough
 				case 'filtersUser': this.offset = 0; break;
 				case 'choice':
 					this.offset = 0;
-					this.fieldOptionSet(this.fieldId,'choiceId',this.choiceId);
+					this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',this.choiceId);
 				break;
 				case 'order':
 					this.offset = 0;
-					this.orderOverwritten = true;
 				break;
 				default: break; // no special treatment
 			}
@@ -1168,6 +1173,13 @@ let MyList = {
 				return this.paramsUpdate(true);
 			
 			this.get();
+		},
+		reloadOutside() {
+			// outside state has changed, reload list or list input
+			if(!this.isInput)
+				return this.get();
+			
+			this.getInput();
 		},
 		
 		// parsing
@@ -1193,21 +1205,18 @@ let MyList = {
 		},
 		paramsUpdated() {
 			// apply query parameters
-			// initial filter choice is set to first available choice (if there are any)
-			// initial order by parameter follows query order
-			//  if user overwrites order, initial order is empty
 			let params = {
-				choice: { parse:'string',   value:this.choiceIdDefault },
+				choice: { parse:'string',   value:this.choiceId },
 				offset: { parse:'int',      value:0 },
-				orderby:{ parse:'listOrder',value:!this.orderOverwritten ? JSON.stringify(this.query.orders) : '[]' }
+				orderby:{ parse:'listOrder',value:JSON.stringify(this.orders) }
 			};
 			this.routeParseParams(params);
 			
-			if(this.choiceId !== params['choice'].value)
-				this.choiceId = params['choice'].value;
+			if(this.choiceId !== params.choice.value)
+				this.choiceId = params.choice.value;
 			
-			this.offset = params['offset'].value;
-			this.orders = JSON.parse(params['orderby'].value);
+			this.offset = params.offset.value;
+			this.orders = JSON.parse(params.orderby.value);
 			
 			// apply first order for card layout selector
 			this.cardsOrderByColumnBatchIndex = -1;
@@ -1221,8 +1230,12 @@ let MyList = {
 		
 		// user actions, generic
 		blur() {
-			this.focused   = false;
-			this.showTable = false;
+			this.focused = false;
+			this.$emit('dropdown-show',false);
+		},
+		clearAutoRenewTimer() {
+			if(this.autoRenewTimer !== null)
+				clearInterval(this.autoRenewTimer);
 		},
 		clickColumn(columnBatchIndex) {
 			this.columnBatchIndexOption = this.columnBatchIndexOption === columnBatchIndex
@@ -1237,11 +1250,11 @@ let MyList = {
 		},
 		clickInputEmpty() {
 			if(!this.inputIsReadonly)
-				this.toggleDropdown();
+				this.$emit('dropdown-show',!this.dropdownShow);
 		},
 		clickInputRow() {
-			if(!this.inputAsCategory && !this.showInputAddLine && !this.inputIsReadonly)
-				this.toggleDropdown();
+			if(!this.inputIsReadonly && !this.inputAsCategory && !this.showInputAddLine)
+				this.$emit('dropdown-show',!this.dropdownShow);
 		},
 		clickRow(row,middleClick) {
 			if(!this.isInput)
@@ -1250,7 +1263,7 @@ let MyList = {
 			if(this.inputMulti) this.rowsInput.push(row);
 			else                this.rowsInput = [row];
 
-			this.showTable    = false;
+			this.$emit('dropdown-show',false);
 			this.filtersQuick = '';
 			this.$emit('records-selected',[row.indexRecordIds['0']]);
 		},
@@ -1259,25 +1272,22 @@ let MyList = {
 			for(const row of this.rows) {
 				ids.push(row.indexRecordIds['0']);
 			}
-			this.rowsInput    = this.rowsInput.concat(this.rows);
-			this.showTable    = false;
+			this.rowsInput = this.rowsInput.concat(this.rows);
 			this.filtersQuick = '';
+			this.$emit('dropdown-show',false);
 			this.$emit('records-selected',ids);
 		},
 		closeHover() {
-			this.showAutoRenew = false;
-			this.showCsv       = false;
-			this.showFilters   = false;
-			this.showOptions   = false;
+			this.showCsv     = false;
+			this.showFilters = false;
+			this.showOptions = false;
 		},
 		escape() {
-			if(this.isInput) {
+			if(this.isInput)
 				this.blur();
-				this.showTable = false;
-			}
 		},
 		focus() {
-			if(!this.inputIsReadonly && this.isInput && !this.inputAsCategory && !this.showTable) {
+			if(!this.inputIsReadonly && this.isInput && !this.inputAsCategory && !this.dropdownShow) {
 				this.focused      = true;
 				this.filtersQuick = '';
 			}
@@ -1304,13 +1314,13 @@ let MyList = {
 			if(arrow && this.isInput && !this.inputAsCategory) {
 				
 				// show dropdown
-				if(!this.showTable) {
+				if(!this.dropdownShow) {
 					e.preventDefault();
-					return this.toggleDropdown();
+					return this.$emit('dropdown-show',true);
 				}
 				
 				// focus first/last input element
-				if(this.showTable && this.rows.length !== 0) {
+				if(this.dropdownShow && this.rows.length !== 0) {
 					e.preventDefault();
 					
 					if(e.target !== this.$refs[this.refTabindex+'0'][0])
@@ -1320,54 +1330,64 @@ let MyList = {
 				}
 			}
 		},
+		resetColumns() {
+			this.filtersColumn = [];
+			this.setColumnBatchSort([[],[]]);
+			// setting columns will reload data & aggregations
+			this.$nextTick(() => this.$emit('set-column-ids-by-user',[]));
+		},
 		setAggregators(columnId,aggregator) {
 			if(!this.isTable) return;
 			
 			if(aggregator !== null) this.columnIdMapAggr[columnId] = aggregator;
 			else                    delete(this.columnIdMapAggr[columnId]);
 			
-			this.fieldOptionSet(this.fieldId,'columnIdMapAggr',this.columnIdMapAggr);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnIdMapAggr',this.columnIdMapAggr);
 			this.reloadAggregations(false);
 		},
-		setAutoRenewTimer(justClear) {
-			// clear last timer
-			if(this.autoRenewTimer !== null)
-				clearInterval(this.autoRenewTimer);
-			
-			if(justClear)
-				return;
-			
-			if(!Number.isInteger(this.autoRenewInput) || this.autoRenewInput < 10)
-				this.autoRenewInput = 10;
-			
-			// set new timer
-			this.autoRenewInputLast = this.autoRenewInput;
-			this.autoRenewTimer = setInterval(this.get,this.autoRenewInput * 1000);
-			
-			// store timer option for field
-			this.fieldOptionSet(this.fieldId,'autoRenew',this.autoRenewInput);
+		setAutoRenewTimer(v) {
+			this.clearAutoRenewTimer();
+
+			// we use -1 instead of null to define disabled auto renew
+			// NULL is removed as field option, making it impossible to disable the default setting
+			if(v !== -1) {
+				// apply min. interval
+				if(v < 10) v = 10;
+
+				this.autoRenewTimer = setInterval(this.get,v * 1000);
+			}
+
+			if(v !== this.autoRenew) {
+				this.autoRenew = v;
+				this.fieldOptionSet(this.favoriteId,this.fieldId,'autoRenew',v);
+			}
 		},
 		setCardsCaptions(v) {
 			this.cardsCaptions = v;
-			this.fieldOptionSet(this.fieldId,'cardsCaptions',v);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'cardsCaptions',v);
 		},
 		setColumnBatchSort(v) {
 			this.columnBatchSort = v;
-			this.fieldOptionSet(this.fieldId,'columnBatchSort',v);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnBatchSort',v);
 			this.reloadAggregations(true);
+		},
+		setColumnBatchFilters(v) {
+			this.filtersColumn = v;
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersColumn',v);
+			this.reloadInside('filtersColumn');
 		},
 		setLayout(v) {
 			this.layout = v;
-			this.fieldOptionSet(this.fieldId,'layout',this.layout);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'layout',this.layout);
 		},
 		setLimit(v) {
 			this.limit = v;
-			this.fieldOptionSet(this.fieldId,'limit',this.limit);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'limit',this.limit);
 			this.reloadInside('limit');
 		},
 		setOrder(columnBatch,directionAsc) {
 			// remove initial sorting when changing anything
-			if(!this.orderOverwritten)
+			if(this.isOrderedOrginal)
 				this.orders = [];
 			
 			const orderIndexesUsed = this.getOrderIndexesFromColumnBatch(columnBatch,this.columns,this.orders);
@@ -1380,15 +1400,15 @@ let MyList = {
 					const col = this.columns[columnIndexSort];
 					if(col.subQuery) {
 						this.orders.push({
-							expressionPos:columnIndexSort, // equal to expression index
-							ascending:directionAsc
+							ascending:directionAsc,
+							expressionPos:columnIndexSort // equal to expression index
 						});
 					}
 					else {
 						this.orders.push({
+							ascending:directionAsc,
 							attributeId:col.attributeId,
-							index:col.index,
-							ascending:directionAsc
+							index:col.index
 						});
 					}
 				}
@@ -1402,23 +1422,22 @@ let MyList = {
 					}
 				}
 			}
+
+			// when last order is removed, revert to original
+			if(this.orders.length === 0)
+				this.orders = this.ordersOriginal;
+
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'orders',JSON.parse(JSON.stringify(this.orders)));
 			this.reloadInside('order');
 		},
-		toggleDropdown() {
-			this.showTable = !this.showTable;
-			
-			if(this.showTable) {
-				this.filtersQuick = '';
-				this.reloadInside('dropdown');
-				
-				const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
-				if(inputEl !== null)
-					inputEl.focus();
-			}
+		setUserFilters(v) {
+			this.filtersUser = v;
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersUser',v);
+			this.reloadInside('filtersUser');
 		},
 		toggleHeader() {
 			this.showHeader = !this.showHeader;
-			this.fieldOptionSet(this.fieldId,'header',this.showHeader);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'header',this.showHeader);
 		},
 		toggleUserFilters() {
 			this.showFilters = !this.showFilters;
@@ -1428,9 +1447,8 @@ let MyList = {
 				return;
 			
 			// any input opens table (dropdown) if not open already
-			if(!this.showTable) {
-				this.showTable = true;
-				this.reloadInside('dropdown');
+			if(!this.dropdownShow) {
+				this.$emit('dropdown-show',true);
 			}
 			else if(event.code === 'Enter') {
 				
@@ -1438,7 +1456,7 @@ let MyList = {
 				if(this.rows.length !== 0)
 					this.clickRow(this.rows[0],false);
 				
-				this.showTable = false;
+				this.$emit('dropdown-show',false);
 			}
 			else if(event.code !== 'Escape') {
 				
@@ -1447,10 +1465,10 @@ let MyList = {
 			}
 		},
 		updatedFilterQuick() {
-			if(this.isInput && !this.showTable)
-				this.showTable = true;
-			
-			this.reloadInside('filtersQuick');
+			if(this.isInput && !this.dropdownShow)
+				this.$emit('dropdown-show',true);
+			else
+				this.reloadInside('filtersQuick');
 		},
 		
 		// user actions, cards layout
@@ -1558,7 +1576,7 @@ let MyList = {
 		},
 		get() {
 			// do nothing if nothing is shown, form is loading or list is in a non-visible tab
-			if(!this.showTable || this.formLoading || (this.isHidden && !this.loadWhileHidden))
+			if(this.formLoading || (this.isInput && !this.dropdownShow) || (this.isHidden && !this.loadWhileHidden))
 				return;
 			
 			// fix invalid offset (can occur when limit is changed)
@@ -1584,18 +1602,11 @@ let MyList = {
 							this.rows         = rows;
 							this.rowsFetching = false;
 							this.selectReset();
-							
+							this.reloadAggregations(false);
 							this.$emit('record-count-change',this.count);
 							
-							// update aggregations as well
-							this.reloadAggregations(false);
-							
-							if(this.isInput) {
+							if(this.isInput)
 								this.$nextTick(this.updateDropdownDirection);
-							} else {
-								this.fieldOptionSet(this.fieldId,'filtersColumn',this.filtersColumn);
-								this.fieldOptionSet(this.fieldId,'filtersUser',this.filtersUser);
-							}
 						},
 						this.consoleError
 					);
@@ -1611,8 +1622,8 @@ let MyList = {
 			
 			// reload record representation
 			// must happen even if no GET is executed (clear inputs)
-			this.rowsInput = [];    // clear input rows
-			this.showTable = false; // if list is reloaded, close dropdown
+			this.rowsInput = [];               // clear input rows
+			this.$emit('dropdown-show',false); // if list is reloaded, close dropdown
 			
 			// for inputs we only need data if:
 			// * field is category input (always shows everything)

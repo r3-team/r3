@@ -68,7 +68,7 @@ func LoginAuthToken(ctx context.Context, reqJson json.RawMessage, loginId *int64
 		return nil, err
 	}
 
-	res.LoginName, err = login_auth.Token(ctx, req.Token, loginId, admin, noAuth)
+	res.LoginName, _, err = login_auth.Token(ctx, req.Token, loginId, admin, noAuth)
 	if err != nil {
 		return nil, err
 	}
@@ -81,6 +81,7 @@ func LoginAuthToken(ctx context.Context, reqJson json.RawMessage, loginId *int64
 func LoginAuthTokenFixed(ctx context.Context, reqJson json.RawMessage, loginId *int64) (interface{}, error) {
 
 	var (
+		err error
 		req struct {
 			LoginId    int64  `json:"loginId"`
 			TokenFixed string `json:"tokenFixed"`
@@ -94,9 +95,11 @@ func LoginAuthTokenFixed(ctx context.Context, reqJson json.RawMessage, loginId *
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := login_auth.TokenFixed(ctx, req.LoginId, "client", req.TokenFixed, &res.LanguageCode, &res.Token); err != nil {
+	res.LanguageCode, err = login_auth.TokenFixed(ctx, req.LoginId, "client", req.TokenFixed, &res.Token)
+	if err != nil {
 		return nil, err
 	}
+
 	*loginId = req.LoginId
 	return res, nil
 }
