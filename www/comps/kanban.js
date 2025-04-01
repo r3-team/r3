@@ -185,7 +185,7 @@ let MyKanbanBox = {
 			else return;
 			
 			this.$emit('cards-changed',
-				e[event].element.indexRecordIds['0'],
+				e[event].element.indexRecordIds[this.relationIndexData],
 				event,
 				JSON.parse(JSON.stringify(this.cardsShown))
 			);
@@ -509,9 +509,8 @@ let MyKanban = {
 		},
 		
 		// simple
-		attributeIdAxisX:  (s) => s.joinsIndexMap[s.relationIndexAxisX].attributeId,
-		attributeIdAxisY:  (s) => s.relationIndexAxisY !== null && typeof s.joinsIndexMap[s.relationIndexAxisY] !== 'undefined'
-			? s.joinsIndexMap[s.relationIndexAxisY].attributeId : null,
+		attributeIdAxisX:  (s) => s.getAttributeIdFromAxisJoin(s.relationIndexData,s.relationIndexAxisX),
+		attributeIdAxisY:  (s) => s.getAttributeIdFromAxisJoin(s.relationIndexData,s.relationIndexAxisY),
 		choiceFilters:     (s) => s.getChoiceFilters(s.choices,s.choiceId),
 		columnBatches:     (s) => s.getColumnBatches(s.moduleId,s.columns,s.columnIndexesAxisX.concat(s.columnIndexesAxisY),[],[],s.showCaptions),
 		columnIndexesAxisX:(s) => s.getAxisColumnIndexes([]),
@@ -629,6 +628,14 @@ let MyKanban = {
 		},
 		
 		// processing
+		getAttributeIdFromAxisJoin(relIndexData,relIndexAxis) {
+			if(relIndexAxis === null || typeof this.joinsIndexMap[relIndexAxis] === undefined)
+				return null;
+
+			const joinAxis = this.joinsIndexMap[relIndexAxis];
+			const joinData = this.joinsIndexMap[relIndexData];
+			return joinAxis.indexFrom === joinData.index ? joinAxis.attributeId : joinData.attributeId;
+		},
 		getAxisColumnIndexes(columnIndexesIgnore) {
 			let out = [];
 			let batchIndexUsed = null;
@@ -799,7 +806,7 @@ let MyKanban = {
 						if(r.indexRecordIds[this.relationIndexData] === null)
 							continue;
 						
-						let keyY = this.relationIndexAxisY === null
+						const keyY = this.relationIndexAxisY === null
 							? 'null' : r.indexRecordIds[this.relationIndexAxisY];
 						
 						this.recordIdMapAxisXY[r.indexRecordIds[this.relationIndexAxisX]][keyY].push(r);

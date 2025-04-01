@@ -1363,11 +1363,9 @@ let MyBuilderFieldOptions = {
 		joinsKanbanAxis:(s) => {
 			if(!s.isKanban || s.field.relationIndexData === null)
 				return [];
-			
-			const ind = s.field.relationIndexData;
-			return s.field.query.joins.filter(v =>
-				v.indexFrom === ind &&
-				s.attributeIdMap[v.attributeId].relationId === s.joinsIndexMapField[ind].relationId);
+
+			const joinData = s.joinsIndexMapField[s.field.relationIndexData];
+			return s.field.query.joins.filter(v => v.indexFrom === joinData.index || v.index === joinData.indexFrom);
 		},
 		presetIdMap:(s) => {
 			if(!s.isRelationship)
