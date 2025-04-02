@@ -3,6 +3,7 @@ import MyBuilderPreset       from './builderPreset.js';
 import MyBuilderPgIndex      from './builderPgIndex.js';
 import MyBuilderPgTriggers   from './builderPgTriggers.js';
 import MyBuilderPresets      from './builderPresets.js';
+import MyInputOffset         from '../inputOffset.js';
 import MyTabs                from '../tabs.js';
 import {srcBase64}           from '../shared/image.js';
 import {
@@ -138,6 +139,7 @@ let MyBuilderRelation = {
 		MyBuilderPgTriggers,
 		MyBuilderPresets,
 		MyBuilderRelationsItemPolicy,
+		MyInputOffset,
 		MyTabs
 	},
 	template:`<div class="contentBox grow scroll">
@@ -480,25 +482,18 @@ let MyBuilderRelation = {
 						</select>
 					</div>
 					
-					<div class="row gap centered">
-						<my-button image="pagePrev.png"
-							@trigger="previewPage(false)"
-							:active="previewOffset > 0"
-						/>
-						<input class="short" disabled="true" :title="capApp.previewPage" :value="(previewOffset / previewLimit) + 1" />
-						<my-button image="pageNext.png"
-							@trigger="previewPage(true)"
-							:active="previewRows.length === previewLimit"
-						/>
-					</div>
+					<my-input-offset
+						@input="previewOffset = $event; getPreview()"
+						:caption="true"
+						:limit="previewLimit"
+						:offset="previewOffset"
+						:total="previewRowCount"
+					/>
 					
-					<div class="row gap centered">
-						<span>{{ capApp.previewRowCount }}</span>
-						<input class="short" disabled="true" :value="previewRowCount" />
-						<my-button image="refresh.png"
-							@trigger="getPreview"
-						/>
-					</div>
+					<my-button image="refresh.png"
+						@trigger="getPreview"
+						:caption="capGen.button.refresh"
+					/>
 				</div>
 				
 				<div class="builder-relation-preview-data shade">
@@ -735,12 +730,6 @@ let MyBuilderRelation = {
 
 				e.preventDefault();
 			}
-		},
-		previewPage(next) {
-			if(next) this.previewOffset += this.previewLimit;
-			else     this.previewOffset -= this.previewLimit;
-			
-			this.getPreview();
 		},
 		previewReload() {
 			this.previewOffset = 0;

@@ -1661,8 +1661,6 @@
 			"presets": "Enregistrements prédéfinis ({CNT})",
 			"preview": "Vue des données",
 			"previewLimit": "Enregistrements/page",
-			"previewPage": "Page",
-			"previewRowCount": "Nombre d'enregistrements",
 			"retention": "Journal des modifications",
 			"retentionCount": "Conserver X modifications",
 			"retentionDays": "Conserver pendant X jours",

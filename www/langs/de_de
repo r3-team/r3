@@ -1661,8 +1661,6 @@
 			"presets": "Vordefinierte Datensätze ({CNT})",
 			"preview": "Datenansicht",
 			"previewLimit": "Datensätze/Seite",
-			"previewPage": "Seite",
-			"previewRowCount": "Datensatzanzahl",
 			"retention": "Änderungshistorie",
 			"retentionCount": "X Änderungen behalten",
 			"retentionDays": "Für X Tage behalten",
