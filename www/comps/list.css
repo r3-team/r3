@@ -388,7 +388,7 @@
 /* filters */
 .list-filters-wrap{
 	width:100%;
-	max-width:950px;
+	max-width:1100px;
 	min-height:420px;
 }
 .list-filters{
@@ -399,6 +399,7 @@
 	gap:var(--spacing);
 }
 .list-filters-content{
+	flex:1 1 auto;
 	max-height:450px;
 	padding:5px 10px;
 	overflow:auto;
