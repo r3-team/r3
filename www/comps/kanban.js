@@ -213,28 +213,18 @@ let MyKanban = {
 		
 		<!-- header -->
 		<div class="top lower">
-			<div class="area nowrap">
-				<my-button image="new.png"
-					v-if="hasCreate"
-					@trigger="$emit('open-form',[],[],false)"
-					@trigger-middle="$emit('open-form',[],[],true)"
-					:caption="capGen.button.new"
-					:captionTitle="capGen.button.newHint"
-				/>
-			</div>
+			<div class="area nowrap"></div>
 			<div class="area nowrap">
 				<img class="icon"
 					v-if="iconId !== null"
 					:src="srcBase64Icon(iconId)"
 				/>
-				
 				<my-button image="search.png"
 					v-if="!isMobile"
 					@trigger="zoom = zoomDefault"
 					:captionTitle="capGen.button.zoomReset"
 					:naked="true"
 				/>
-				
 				<input class="zoom-factor clickable" type="range" min="1" max="10"
 					v-if="!isMobile"
 					v-model="zoom"
