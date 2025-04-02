@@ -471,6 +471,16 @@ let MyBuilderRelation = {
 			<div class="tab-content builder-relation-preview default-inputs" v-if="tabTarget === 'data'">
 				<div class="row gap centered space-between">
 					<div class="row gap centered">
+						<span>{{ capApp.previewLimit }}</span>
+						<select class="short"
+							v-model.number="previewLimit"
+							@change="previewReload"
+						>
+							<option v-for="i in 10" :value="i*10">{{ i*10 }}</option>
+						</select>
+					</div>
+					
+					<div class="row gap centered">
 						<my-button image="pagePrev.png"
 							@trigger="previewPage(false)"
 							:active="previewOffset > 0"
@@ -483,18 +493,11 @@ let MyBuilderRelation = {
 					</div>
 					
 					<div class="row gap centered">
-						<span>{{ capApp.previewLimit }}</span>
-						<select class="short"
-							v-model.number="previewLimit"
-							@change="previewReload"
-						>
-							<option v-for="i in 10" :value="i*10">{{ i*10 }}</option>
-						</select>
-					</div>
-					
-					<div class="row gap centered">
 						<span>{{ capApp.previewRowCount }}</span>
 						<input class="short" disabled="true" :value="previewRowCount" />
+						<my-button image="refresh.png"
+							@trigger="getPreview"
+						/>
 					</div>
 				</div>
 				
