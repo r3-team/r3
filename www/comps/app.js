@@ -47,6 +47,7 @@ let MyApp = {
 		<template v-if="appReady">
 			<my-header
 				v-show="!loginSessionExpired"
+				v-if="!isWithoutMenuHeader"
 				@logout="sessionInvalid(false)"
 				@logoutExpire="sessionInvalid(true)"
 				@show-collection-input="collectionEntries = $event"
@@ -401,6 +402,7 @@ let MyApp = {
 		isAtFeedback:       (s) => s.$store.getters.isAtFeedback,
 		isAtModule:         (s) => s.$store.getters.isAtModule,
 		isMobile:           (s) => s.$store.getters.isMobile,
+		isWithoutMenuHeader:(s) => s.$store.getters.isWithoutMenuHeader,
 		keyDownHandlers:    (s) => s.$store.getters.keyDownHandlers,
 		loginEncryption:    (s) => s.$store.getters.loginEncryption,
 		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
@@ -433,6 +435,14 @@ let MyApp = {
 			{name:'initPublic',    fnc:this.initPublic},
 			{name:'sessionInvalid',fnc:this.sessionInvalid}
 		]);
+
+		// check for getter options
+		const pos = window.location.hash.indexOf('?');
+		if(pos !== -1) {
+			const params = new URLSearchParams(window.location.hash.substring(pos));
+			if(params.has('menu-app')    && params.get('menu-app')    === '0') this.$store.commit('isWithoutMenuApp',   true);
+			if(params.has('menu-header') && params.get('menu-header') === '0') this.$store.commit('isWithoutMenuHeader',true);
+		}
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleKeydown);

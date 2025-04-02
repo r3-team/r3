@@ -63,6 +63,8 @@ const MyStore = Vuex.createStore({
 		isAtModule:false,              // app currently shows a module (instead of Builder, admin panel, settings, etc.)
 		isMobile:false,                // app runs on small screen (probably mobile)
 		isNoAuth:false,                // user logged in without authentication (public user)
+		isWithoutMenuApp:false,        // session does not have an app menu, set via getter param (menu-app=0), 
+		isWithoutMenuHeader:false,     // session does not have a header menu, set via getter param (menu-header=0)
 		keyDownHandlers:[],            // global handlers, reacting for key down events (for hotkey events)
 		license:{},                    // license info (admin only)
 		licenseValid:false,            // license is valid (set and within validity period)
@@ -263,6 +265,8 @@ const MyStore = Vuex.createStore({
 		isAtModule:              (state,payload) => state.isAtModule               = payload,
 		isNoAuth:                (state,payload) => state.isNoAuth                 = payload,
 		isMobile:                (state,payload) => state.isMobile                 = payload,
+		isWithoutMenuApp:        (state,payload) => state.isWithoutMenuApp         = payload,
+		isWithoutMenuHeader:     (state,payload) => state.isWithoutMenuHeader      = payload,
 		loginEncryption:         (state,payload) => state.loginEncryption          = payload,
 		loginHasClient:          (state,payload) => state.loginHasClient           = payload,
 		loginId:                 (state,payload) => state.loginId                  = payload,
@@ -418,6 +422,8 @@ const MyStore = Vuex.createStore({
 		isAtModule:              (state) => state.isAtModule && state.moduleIdLast !== null,
 		isMobile:                (state) => state.isMobile,
 		isNoAuth:                (state) => state.isNoAuth,
+		isWithoutMenuApp:        (state) => state.isWithoutMenuApp,
+		isWithoutMenuHeader:     (state) => state.isWithoutMenuHeader,
 		keyDownHandlers:         (state) => state.keyDownHandlers,
 		license:                 (state) => state.license,
 		licenseValid:            (state) => state.licenseValid,
