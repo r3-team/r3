@@ -141,7 +141,7 @@ let MyForm = {
 					</template>
 					
 					<my-button image="star1.png"
-						v-if="!isBulkUpdate"
+						v-if="!isBulkUpdate && !isNoAuth"
 						@trigger="makeFavorite"
 						:active="!isAtFavoritesEdit"
 						:captionTitle="capApp.button.favorite"
@@ -808,6 +808,7 @@ let MyForm = {
 		isAdmin:            (s) => s.$store.getters.isAdmin,
 		isAtFavoritesEdit:  (s) => s.$store.getters.isAtFavoritesEdit,
 		isMobile:           (s) => s.$store.getters.isMobile,
+		isNoAuth:           (s) => s.$store.getters.isNoAuth,
 		keyLength:          (s) => s.$store.getters.constants.keyLength,
 		loginId:            (s) => s.$store.getters.loginId,
 		loginPublicKey:     (s) => s.$store.getters.loginPublicKey,
