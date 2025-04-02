@@ -982,7 +982,6 @@ let MyList = {
 		this.$watch('dropdownShow',(v) => {
 			if(!v) return;
 
-			this.filtersQuick = '';
 			this.reloadInside('dropdown');
 			
 			const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
@@ -1231,7 +1230,8 @@ let MyList = {
 		// user actions, generic
 		blur() {
 			this.focused = false;
-			this.$emit('dropdown-show',false);
+			if(this.dropdownShow)
+				this.$emit('dropdown-show',false);
 		},
 		clearAutoRenewTimer() {
 			if(this.autoRenewTimer !== null)
@@ -1249,8 +1249,8 @@ let MyList = {
 			this.$emit('close-inline');
 		},
 		clickInputEmpty() {
-			if(!this.inputIsReadonly)
-				this.$emit('dropdown-show',!this.dropdownShow);
+			if(!this.inputIsReadonly && !this.dropdownShow)
+				this.$emit('dropdown-show',true);
 		},
 		clickInputRow() {
 			if(!this.inputIsReadonly && !this.inputAsCategory && !this.showInputAddLine)
@@ -1622,8 +1622,11 @@ let MyList = {
 			
 			// reload record representation
 			// must happen even if no GET is executed (clear inputs)
-			this.rowsInput = [];               // clear input rows
-			this.$emit('dropdown-show',false); // if list is reloaded, close dropdown
+			// if list is reloaded, close dropdown
+			this.rowsInput = [];
+
+			if(this.dropdownShow)
+				this.$emit('dropdown-show',false);
 			
 			// for inputs we only need data if:
 			// * field is category input (always shows everything)
