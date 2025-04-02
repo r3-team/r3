@@ -1073,8 +1073,8 @@ let MyField = {
 			if(s.isDecimal || s.isInteger)                    return s.field.max === null || s.value <= s.field.max;
 
 			if(s.isString) {
-				if(s.field.max !== null)  return s.value.length <= s.field.max;        // field max. settings count if set
-				if(s.attribute !== false) return s.value.length <= s.attribute.length; // attribute length as fallback
+				if(s.field.max !== null)                              return s.value.length <= s.field.max;        // field max. settings count if set
+				if(s.attribute !== false && s.attribute.length !== 0) return s.value.length <= s.attribute.length; // attribute length as fallback
 				return true;
 			}
 
