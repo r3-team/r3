@@ -2,7 +2,10 @@ import MyBuilderCaption    from './builderCaption.js';
 import MyBuilderPgTriggers from './builderPgTriggers.js';
 import MyCodeEditor        from '../codeEditor.js';
 import MyTabs              from '../tabs.js';
-import {getAttributeIcon}  from '../shared/attribute.js';
+import {
+	getAttributeIcon,
+	isAttributeFiles
+}  from '../shared/attribute.js';
 import {
 	copyValueDialog,
 	getNilUuid
@@ -280,6 +283,7 @@ let MyBuilderPgFunction = {
 									<div class="entity-title" v-for="atr in rel.attributes">
 										<my-button
 											@trigger="selectEntity('attribute',atr.id)"
+											v-if="!isAttributeFiles(atr.content)"
 											:caption="atr.name + (atr.nullable ? '' : '*')"
 											:captionTitle="titleAttribute(atr)"
 											:image="radioIcon('attribute',atr.id)"
@@ -656,6 +660,7 @@ let MyBuilderPgFunction = {
 		getDependentModules,
 		getFunctionHelp,
 		getNilUuid,
+		isAttributeFiles,
 		
 		// presentation
 		radioIcon(entity,id) {
