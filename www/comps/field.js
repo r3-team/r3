@@ -1078,10 +1078,6 @@ let MyField = {
 				return true;
 			}
 
-			if(s.isFiles) {
-				console.log(s.value);
-			}
-
 			if(s.isFiles)
 				return s.field.max === null || (typeof s.value.fileCount !== 'undefined' ? s.value.fileCount <= s.field.max : s.value.length <= s.field.max);
 			
