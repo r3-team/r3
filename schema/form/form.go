@@ -120,6 +120,22 @@ func Copy_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, n
 			}
 		}
 	}
+
+	// replace state IDs in condition filters
+	for i, state := range form.States {
+		for j, c := range state.Conditions {
+			if c.Side0.FormStateId.Valid {
+				if id, exists := idMapReplaced[c.Side0.FormStateId.Bytes]; exists {
+					form.States[i].Conditions[j].Side0.FormStateId.Bytes = id
+				}
+			}
+			if c.Side1.FormStateId.Valid {
+				if id, exists := idMapReplaced[c.Side1.FormStateId.Bytes]; exists {
+					form.States[i].Conditions[j].Side1.FormStateId.Bytes = id
+				}
+			}
+		}
+	}
 	return Set_tx(ctx, tx, form)
 }
 
