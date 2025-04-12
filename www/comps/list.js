@@ -961,6 +961,7 @@ let MyList = {
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		appResized:    (s) => s.$store.getters.appResized,
 		capApp:        (s) => s.$store.getters.captions.list,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		isMobile:      (s) => s.$store.getters.isMobile,
@@ -972,13 +973,12 @@ let MyList = {
 		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
-		// react to field resize
-		if(!this.isInput) {
-			window.addEventListener('resize',this.resized);
+		if(!this.isInput)
 			this.resized();
-		}
 		
 		// setup watchers
+		this.$watch('appResized',this.resized);
+		this.$watch('favoriteId',this.reloadOptions);
 		this.$watch('dropdownShow',(v) => {
 			if(!v) return;
 
@@ -988,7 +988,6 @@ let MyList = {
 			if(inputEl !== null)
 				inputEl.focus();
 		});
-		this.$watch('favoriteId',this.reloadOptions);
 		this.$watch('columns',(valOld,valNew) => {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
 				this.count = 0;
@@ -1049,9 +1048,6 @@ let MyList = {
 		this.clearAutoRenewTimer();
 	},
 	unmounted() {
-		if(!this.Input)
-			window.removeEventListener('resize',this.resized);
-
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{

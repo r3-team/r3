@@ -8,6 +8,9 @@
 	color:var(--color-font-dark);
 	overflow:hidden;
 }
+.menu.collapsed{
+	flex:0 0 auto;
+}
 .menu.isDark{
 	color:var(--color-font-bright);
 }

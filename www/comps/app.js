@@ -421,13 +421,13 @@ let MyApp = {
 	},
 	created() {
 		window.addEventListener('keydown',this.handleKeydown);
-		window.addEventListener('resize',this.setMobileView);
+		window.addEventListener('resize',this.resized);
 	},
 	mounted() {
 		setInterval(this.wsReconnect,2000);        // websocket reconnect loop
 		setInterval(this.sessionExpireCheck,1000); // session expiration check
 		this.wsConnect();                          // connect to backend via websocket
-		this.setMobileView();                      // initial state, mobile view: yes/no
+		this.resized();
 
 		// register globally accessible functions
 		this.$store.commit('appFunctionsRegister',[
@@ -446,7 +446,7 @@ let MyApp = {
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleKeydown);
-		window.removeEventListener('resize',this.setMobileView);
+		window.removeEventListener('resize',this.resized);
 	},
 	methods:{
 		// externals
@@ -466,6 +466,12 @@ let MyApp = {
 		updateCollections,
 		
 		// general app states
+		resized() {
+			this.$store.commit('appResized');
+
+			// set mobile view
+			this.$store.commit('isMobile',window.innerWidth <= 800 || window.innerHeight <= 400);
+		},
 		stateChange() {
 			// create app states required for basic function
 			// order is required, earlier ones must be satisfied first
@@ -480,9 +486,6 @@ let MyApp = {
 			// log to console and release login routine
 			this.consoleError(err);
 			this.$refs.login.parentError();
-		},
-		setMobileView() {
-			this.$store.commit('isMobile',window.innerWidth <= 800 || window.innerHeight <= 400);
 		},
 		
 		// web socket control

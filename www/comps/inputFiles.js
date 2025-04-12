@@ -370,11 +370,9 @@ let MyInputFiles = {
 			viewMode:'listCompact' // active view mode
 		};
 	},
-	created() {
-		window.addEventListener('resize',this.resized);
-	},
 	mounted() {
 		// setup watchers
+		this.$watch('appResized',this.resized);
 		this.$watch('formLoading',v => { if(!v) this.reset(); });
 		this.$watch('isHidden',   v => { if(!v) this.$nextTick(this.resized); });
 		this.$watch('modelValue', v => this.reset());
@@ -388,9 +386,6 @@ let MyInputFiles = {
 		
 		// apply last chosen view mode
 		this.setViewMode(this.fieldOptionGet(this.favoriteId,this.fieldId,'fileViewMode',this.viewMode));
-	},
-	unmounted() {
-		window.removeEventListener('resize',this.resized);
 	},
 	computed:{
 		filesProcessed:{
@@ -454,6 +449,7 @@ let MyInputFiles = {
 		
 		// store
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		appResized:    (s) => s.$store.getters.appResized,
 		capApp:        (s) => s.$store.getters.captions.input.files,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		filesCopy:     (s) => s.$store.getters.filesCopy,

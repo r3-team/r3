@@ -212,6 +212,9 @@ h3{
 .column.grow{
 	flex:1 1 auto;
 }
+.column.overflow-hidden{
+	overflow:hidden;
+}
 .column.justify-end{
 	justify-content:flex-end;
 }
@@ -239,6 +242,9 @@ h3{
 }
 .row.justify-end{
 	justify-content:flex-end;
+}
+.row.overflow-hidden{
+	overflow:hidden;
 }
 .row.space-between{
 	justify-content:space-between;
@@ -828,6 +834,15 @@ table td.maximum{
 .navigation.isDark .entry:not(.isTitle):focus,
 .navigation.isDark .entry:not(.isTitle):hover{
 	background-color:rgba(0,0,0,0.22);
+}
+
+/* generic spans */
+.generic-span-ellipsis{
+	min-width:0px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
+	line-height:normal; /* FF fix */
 }
 
 /* generic table */

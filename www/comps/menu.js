@@ -262,27 +262,34 @@ let MyMenu = {
 		MyMenuItemFavorite
 	},
 	template:`<div class="menu"
-		:class="{ isDark:color.isDark() }"
+		:class="{ collapsed:isCollapsed, isDark:color.isDark() }"
 		:style="bgStyle"
 		v-if="menuTabsAccess.length !== 0"
 	>
 		<div class="menu-header row space-between gap">
-			<div class="row centered gap">
+			<div class="row centered gap overflow-hidden" v-if="!isCollapsed">
 				<img class="icon"
 					v-if="module.iconId !== null"
 					:src="srcBase64(iconIdMap[module.iconId].file)"
 				/>
-				<span>{{ getCaption('moduleTitle',module.id,module.id,module.captions,module.name) }}</span>
+				<span class="generic-span-ellipsis" :title="mainTitle">{{ mainTitle }}</span>
 			</div>
 			
-			<my-button image="builder.png"
-				v-if="isAdmin && builderEnabled && !isMobile"
-				@trigger="openBuilder(false)"
-				@trigger-middle="openBuilder(true)"
-				:captionTitle="capGen.button.openBuilder"
-			/>
+			<div class="row centered gap">
+				<my-button
+					v-if="!isMobile"
+					@trigger="$store.commit('isCollapsedMenuApp',!isCollapsed);$store.commit('appResized')"
+					:image="isCollapsed ? 'toggleRight.png' : 'toggleLeft.png'"
+				/>
+				<my-button image="builder.png"
+					v-if="!isCollapsed & isAdmin && builderEnabled && !isMobile"
+					@trigger="openBuilder(false)"
+					@trigger-middle="openBuilder(true)"
+					:captionTitle="capGen.button.openBuilder"
+				/>
+			</div>
 		</div>
-		<div class="menu-tabs">
+		<div class="menu-tabs" v-if="!isCollapsed">
 			<div class="menu-tab clickable"
 				v-for="(mt,i) in menuTabsAccess"
 				v-if="menuTabsAccess.length > 1 || hasFavorites"
@@ -305,7 +312,7 @@ let MyMenu = {
 				<span v-if="showTabLabels">{{ capGen.favorites }}</span>
 			</div>
 		</div>
-		<div class="menu-content">
+		<div class="menu-content" v-if="!isCollapsed">
 			<div class="menu-items">
 				<template v-if="!isAtFavorites" v-for="(mt,mti) in menuTabsAccess">
 					<my-menu-item
@@ -386,6 +393,7 @@ let MyMenu = {
 		// simple
 		favorites:    (s) => s.loginFavorites.moduleIdMap[s.module.id] === undefined ? [] : s.loginFavorites.moduleIdMap[s.module.id],
 		hasFavorites: (s) => !s.isNoAuth,
+		mainTitle:    (s) => s.getCaption('moduleTitle',s.module.id,s.module.id,s.module.captions,s.module.name),
 		showTabLabels:(s) => s.menuTabsAccess.length < 3,
 		tabStyles:    (s) => `width:${100 / (s.menuTabsAccess.length + 1)}%;`,
 
@@ -402,6 +410,7 @@ let MyMenu = {
 		isAdmin:          (s) => s.$store.getters.isAdmin,
 		isAtFavorites:    (s) => s.$store.getters.isAtFavorites,
 		isAtFavoritesEdit:(s) => s.$store.getters.isAtFavoritesEdit,
+		isCollapsed:      (s) => s.$store.getters.isCollapsedMenuApp,
 		isMobile:         (s) => s.$store.getters.isMobile,
 		isNoAuth:         (s) => s.$store.getters.isNoAuth,
 		menuAccess:       (s) => s.$store.getters.access.menu,

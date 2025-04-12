@@ -333,6 +333,7 @@ let MyForm = {
 	},
 	emits:['close','record-deleted','record-updated','records-open'],
 	mounted() {
+		this.$watch('appResized',() => this.resized());
 		this.$watch(() => [this.favoriteId,this.formId,this.recordIds],this.reset,{
 			immediate:true
 		});
@@ -342,7 +343,6 @@ let MyForm = {
 		
 		window.addEventListener('keydown',this.handleHotkeys);
 		window.addEventListener('keyup',this.handleHotkeys);
-		window.addEventListener('resize',this.resized);
 		this.resized(null,0);
 	},
 	unmounted() {
@@ -351,7 +351,6 @@ let MyForm = {
 		
 		window.removeEventListener('keydown',this.handleHotkeys);
 		window.removeEventListener('keyup',this.handleHotkeys);
-		window.removeEventListener('resize',this.resized);
 	},
 	data() {
 		return {
@@ -800,6 +799,7 @@ let MyForm = {
 		loginOptionsMobile: (s) => s.$store.getters['local/loginOptionsMobile'],
 		token:              (s) => s.$store.getters['local/token'],
 		access:             (s) => s.$store.getters.access,
+		appResized:         (s) => s.$store.getters.appResized,
 		builderEnabled:     (s) => s.$store.getters.builderEnabled,
 		capApp:             (s) => s.$store.getters.captions.form,
 		capErr:             (s) => s.$store.getters.captions.error,

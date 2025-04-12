@@ -521,24 +521,23 @@ let MyGantt = {
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
-		isMobile:      (s) => s.$store.getters.isMobile,
+		appResized:    (s) => s.$store.getters.appResized,
 		capApp:        (s) => s.$store.getters.captions.calendar,
 		capGen:        (s) => s.$store.getters.captions.generic,
+		isMobile:      (s) => s.$store.getters.isMobile,
 		settings:      (s) => s.$store.getters.settings
 	},
 	beforeCreate() {
 		// import at runtime due to circular dependencies
 		this.$options.components.MyForm = MyForm;
 	},
-	created() {
-		window.addEventListener('resize',this.resize);
-	},
 	mounted() {
 		this.stepType  = this.stepTypeDefault;
 		this.dateStart = this.getDateNowRounded();
 		
 		// setup watchers
-		this.$watch('popUpFormInline',this.resize);
+		this.$watch('appResized',this.resized);
+		this.$watch('popUpFormInline',this.resized);
 		this.$watch('columns',(valOld,valNew) => {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew))
 				this.reset();
@@ -578,9 +577,6 @@ let MyGantt = {
 		this.reloadOptions();
 		this.ready = true;
 		this.$nextTick(() => this.setSteps(false));
-	},
-	unmounted() {
-		window.removeEventListener('resize',this.resize);
 	},
 	methods:{
 		// external
@@ -704,7 +700,7 @@ let MyGantt = {
 			this.page += factor;
 			this.reloadInside();
 		},
-		resize() {
+		resized() {
 			clearTimeout(this.resizeTimer);
 			this.resizeTimer = setTimeout(() => this.setSteps(false),150);
 		},

@@ -76,18 +76,17 @@ let MyChart = {
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		appResized:    (s) => s.$store.getters.appResized,
 		settings:      (s) => s.$store.getters.settings
-	},
-	created() {
-		window.addEventListener('resize',this.resize);
 	},
 	mounted() {
 		// setup watchers
+		this.$watch('appResized',this.resized);
 		this.$watch('formLoading',val => {
 			if(!val) this.get();
 		});
 		this.$watch('isHidden',val => {
-			if(!val) this.$nextTick(this.resize);
+			if(!val) this.$nextTick(this.resized);
 		});
 		this.$watch('optionOverwrite',val => {
 			if(val !== null) {
@@ -105,9 +104,6 @@ let MyChart = {
 		// set default choice
 		this.choiceId = this.choices.length > 0 ? this.choices[0].id : null;
 	},
-	unmounted() {
-		window.removeEventListener('resize',this.resize);
-	},
 	methods:{
 		// externals
 		getCaption,
@@ -121,7 +117,7 @@ let MyChart = {
 		choiceIdSet() {
 			this.get();
 		},
-		resize() {
+		resized() {
 			if(typeof this.$refs.chart !== 'undefined')
 				this.$refs.chart.resize();
 		},
