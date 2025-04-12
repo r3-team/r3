@@ -976,7 +976,7 @@ let MyForm = {
 			},initialWaitMs === undefined ? 300 : initialWaitMs);
 		},
 		routingGuard() {
-			const unsavedOk = !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
+			const unsavedOk = this.blockInputs || !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
 			if(!this.isPopUp)
 				return unsavedOk;
 
