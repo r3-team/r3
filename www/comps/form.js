@@ -502,7 +502,7 @@ let MyForm = {
 		isReadonly:    (s) => s.badLoad || !s.checkDataOptions((s.isNew ? 4 : 2),s.entityIdMapEffect.form.data),
 		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','kanban','list','tabs','variable'].includes(s.fields[0].content),
 		menuActive:    (s) => s.formIdMapMenu[s.form.id] === undefined ? null : s.formIdMapMenu[s.form.id],
-		warnUnsaved:   (s) => s.hasChanges && s.settings.warnUnsaved,
+		warnUnsaved:   (s) => s.hasChanges && !s.blockInputs && s.settings.warnUnsaved,
 
 		// buttons
 		buttonActiveDel:     (s) => !s.blockInputs  && s.canDelete,
@@ -976,7 +976,7 @@ let MyForm = {
 			},initialWaitMs === undefined ? 300 : initialWaitMs);
 		},
 		routingGuard() {
-			const unsavedOk = this.blockInputs || !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
+			const unsavedOk = !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
 			if(!this.isPopUp)
 				return unsavedOk;
 
@@ -1156,15 +1156,14 @@ let MyForm = {
 			);
 		},
 		openBuilder(middle) {
-			if(!middle) {
-				this.$router.push('/builder/form/'+this.form.id);
-				this.$store.commit('popUpFormGlobal',null);
-				return;
-			}
-			window.open('#/builder/form/'+this.form.id,'_blank');
+			if(middle)
+				return window.open('#/builder/form/'+this.form.id,'_blank');
+			
+			this.blockInputs = true;
+			this.$router.push('/builder/form/'+this.form.id);
+			this.$store.commit('popUpFormGlobal',null);
 		},
 		openNewAsk(middleClick) {
-			// middle click does not kill form inputs, no confirmation required
 			if(middleClick || !this.warnUnsaved)
 				return this.openNew(middleClick);
 			
@@ -1194,6 +1193,9 @@ let MyForm = {
 			});
 		},
 		openNew(middleClick) {
+			if(!middleClick)
+				this.blockInputs = true;
+
 			this.openForm([],null,null,middleClick,null,false);
 		},
 		openPrevAsk() {
@@ -1216,6 +1218,7 @@ let MyForm = {
 			});
 		},
 		openPrev() {
+			this.blockInputs = true;
 			window.history.back();
 		},
 		popUpRecordChanged(change,recordId) {
