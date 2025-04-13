@@ -433,7 +433,8 @@
 
 /* options */
 .list-options{
-	min-width:420px;
+	width:100%;
+	max-width:600px;
 }
 .list-options-column-config{
 	display:flex;
@@ -465,7 +466,7 @@
 	border-radius:9px;
 	box-shadow:inset 0px 0px 2px var(--color-shade);
 	display:flex;
-	flex-flow:row nowrap;
+	flex-flow:row wrap;
 }
 .list-options-batch-column{
 	color:var(--color-font);

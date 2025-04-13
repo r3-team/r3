@@ -64,9 +64,10 @@ let MyList = {
 		:class="{ asInput:isInput, readonly:inputIsReadonly, isSingleField:isSingleField }"
 	>
 		<!-- hover menus -->
-		<div class="app-sub-window under-header"
+		<div class="app-sub-window"
 			v-if="showHover"
 			@click.self.stop="closeHover"
+			:class="{'under-header':!isMobile}"
 		>
 			<div class="contentBox float scroll" :class="{ 'list-csv':showCsv, 'list-filters-wrap':showFilters, 'list-options':showOptions }">
 				<div class="top lower">
@@ -371,7 +372,7 @@ let MyList = {
 						:showTitle="showCollectionTitles"
 					/>
 					
-					<select class="auto"
+					<select class="dynamic"
 						v-if="hasChoices"
 						@change="reloadInside('choice')"
 						v-model="choiceId"
@@ -1333,7 +1334,6 @@ let MyList = {
 			}
 		},
 		resetColumns() {
-			this.filtersColumn = [];
 			this.setColumnBatchSort([[],[]]);
 			// setting columns will reload data & aggregations
 			this.$nextTick(() => this.$emit('set-column-ids-by-user',[]));
@@ -1439,6 +1439,7 @@ let MyList = {
 		},
 		toggleHeader() {
 			this.showHeader = !this.showHeader;
+			this.$store.commit('appResized');
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'header',this.showHeader);
 		},
 		toggleUserFilters() {
