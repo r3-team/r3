@@ -713,7 +713,7 @@ let MyList = {
 		choices:         { type:Array,   required:false, default:() => [] }, // processed query choices
 		collections:     { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
-		columns:         { type:Array,   required:true },                    // list columns, processed
+		columns:         { type:Array,   required:true },                    // list columns, processed (applied filter values, only columns shown by user choice)
 		columnsAll:      { type:Array,   required:false, default:() => [] }, // list columns, all
 		dataOptions:     { type:Number,  required:false, default:0 },        // data permissions following form states
 		favoriteId:      { required:false, default:null },
@@ -992,6 +992,7 @@ let MyList = {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
 				this.count = 0;
 				this.rows  = [];
+				this.removeInvalidFiltersColumn();
 				this.reloadOutside();
 			}
 		});
@@ -1042,6 +1043,11 @@ let MyList = {
 		// initialize list options
 		this.reloadOptions();
 		this.setAutoRenewTimer(this.autoRenew);
+
+		// remove invalid column filters in case module schema changed
+		this.removeInvalidFiltersColumn();
+		
+		// setup handlers
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
 	beforeUnmount() {
@@ -1148,7 +1154,7 @@ let MyList = {
 			// inside state has changed, reload list (not relevant for list input)
 			switch(entity) {
 				case 'dropdown':      // fallthrough
-				case 'filtersQuick':   // fallthrough
+				case 'filtersQuick':  // fallthrough
 				case 'filtersColumn': // fallthrough
 				case 'filtersUser': this.offset = 0; break;
 				case 'choice':
@@ -1499,6 +1505,22 @@ let MyList = {
 			this.$emit('record-removed',this.rowsInput[i].indexRecordIds['0']);
 			this.rowsInput.splice(i,1);
 			this.blur();
+		},
+
+		// cleanup
+		removeInvalidFiltersColumn() {
+			// only allow column filters based on active columns
+			let out = [];
+			for(const f of this.filtersColumn) {
+				for(const c of this.columns) {
+					if(c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) {
+						out.push(f)
+						break;
+					}
+				}
+			}
+			if(out.length !== this.filtersColumn.length)
+				this.setColumnBatchFilters(out);
 		},
 		
 		// bulk selection
