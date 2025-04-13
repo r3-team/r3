@@ -57,7 +57,8 @@
 	
 	/**/
 	/* heights */
-	--row-height:40px;
+	--row-height:38px;
+	--row-height-icon:27px;
 	--app-header-height:70px;
 	--menu-line-height:36px;
 
@@ -276,6 +277,10 @@ h3{
 	display:flex;
 	flex-flow:column nowrap;
 	background-color:var(--color-bg);
+
+	/* app wide variable overwrites */
+	--row-height:calc(22px + var(--spacing));
+	--row-height-icon:calc(11px + var(--spacing));
 }
 #app.login-visible{
 	height:auto;

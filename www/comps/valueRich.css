@@ -78,8 +78,7 @@
 	white-space:normal;
 }
 .value-rich-rating-icon{
-	width:24px;
-	height:24px;
+	height:var(--row-height-icon);
 	filter:var(--image-filter);
 }
 

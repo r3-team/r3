@@ -213,10 +213,18 @@
 }
 .list .layoutTable th.checkbox img,
 .list .layoutTable td.checkbox img{
-	height:26px;
-	margin:3px;
-	outline:none;
+	--margin:2px;
+	height:var(--row-height-icon);
+	margin:var(--margin);
 	filter:var(--image-filter);
+	outline:none;
+}
+.list .layoutTable th.checkbox img:focus,
+.list .layoutTable th.checkbox img:hover,
+.list .layoutTable td.checkbox img:focus,
+.list .layoutTable td.checkbox img:hover{
+	height:calc(var(--row-height-icon) + (var(--margin) * 2));
+	margin:0px;
 }
 .list .layoutTable td{
 	padding:0px;
@@ -231,18 +239,6 @@
 }
 .list .layoutTable tr.rowSelect.active td{
 	filter:brightness(80%);
-}
-.list .layoutTable th.checkbox img:focus,
-.list .layoutTable th.checkbox img:hover,
-.list .layoutTable td.checkbox img:focus,
-.list .layoutTable td.checkbox img:hover{
-	height:32px;
-	margin:0px;
-}
-.list .layoutTable th.checkbox img:active,
-.list .layoutTable td.checkbox img:active{
-	height:24px;
-	margin:4px;
 }
 .list .layoutTable .sub-actions{
 	display:flex;

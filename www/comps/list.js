@@ -1117,7 +1117,7 @@ let MyList = {
 		},
 		updateDropdownDirection() {
 			let headersPx  = 200; // rough height in px of all headers (menu/form) combined
-			let rowPx      = 40;  // rough height in px of one dropdown list row
+			let rowPx      = 38;  // rough height in px of one dropdown list row
 			let dropdownPx = rowPx * (this.rows.length+1); // +1 for action row
 			
 			this.inputDropdownUpwards =
