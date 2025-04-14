@@ -13,7 +13,7 @@ let MyListOptions = {
 			<tr v-if="hasPaging">
 				<td>{{ capApp.pageLimit }}</td>
 				<td>
-					<select v-model="pageLimitInput">
+					<select v-model="pageLimitInput" class="dynamic">
 						<option v-for="o in pageLimitOptions" :value="o">{{ o }}</option>
 					</select>
 				</td>
@@ -22,7 +22,7 @@ let MyListOptions = {
 				<td>{{ capApp.displayMode }}</td>
 				<td>
 					<div class="row nowrap gap">
-						<select v-model="layoutInput">
+						<select v-model="layoutInput" class="dynamic">
 							<option value="table">{{ capApp.option.layoutTable }}</option>
 							<option value="cards">{{ capApp.option.layoutCards }}</option>
 						</select>
@@ -65,16 +65,14 @@ let MyListOptions = {
 								<img class="dragAnchor" src="images/drag.png" v-if="!isMobile" />
 
 								<!-- batch sort for mobile -->
-								<div class="row nowrap" v-if="isMobile">
+								<div class="row nowrap gap" v-if="isMobile">
 									<my-button image="arrowUp.png"
 										@trigger="clickBatchSort(element,true)"
 										:active="columnBatchSortAll.indexOf(element.batchOrderIndex) !== 0"
-										:naked="true"
 									/>
 									<my-button image="arrowDown.png"
 										@trigger="clickBatchSort(element,false)"
 										:active="columnBatchSortAll.indexOf(element.batchOrderIndex) !== columnBatches.length - 1"
-										:naked="true"
 									/>
 								</div>
 

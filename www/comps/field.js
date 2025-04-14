@@ -783,8 +783,12 @@ let MyField = {
 				return s.capGen.inputSmall.replace('{MIN}',s.field.min);
 			}
 			if(!s.isValidMax) {
-				if(s.isString) return s.capGen.inputLong.replace('{MAX}',s.field.max);
-				if(s.isFiles)  return s.capGen.inputTooManyFiles;
+				if(s.isString) {
+					if(s.field.max !== null)  return s.capGen.inputLong.replace('{MAX}',s.field.max);
+					if(s.attribute !== false) return s.capGen.inputLong.replace('{MAX}',s.attribute.length);
+					return s.capGen.inputInvalid;
+				}
+				if(s.isFiles) return s.capGen.inputTooManyFiles;
 				return s.capGen.inputLarge.replace('{MAX}',s.field.max);
 			}
 			
@@ -1065,19 +1069,24 @@ let MyField = {
 			return true;
 		},
 		isValidMax:(s) => {
-			if(!s.isData || s.isVariable || s.value === null || s.field.max === null) return true;
-			if((s.isDecimal || s.isInteger) && s.value > s.field.max)                 return false;
-			if(s.isString && s.value.length > s.field.max)                            return false;
-			
-			if(s.isFiles) return typeof s.value.fileCount !== 'undefined'
-				? s.value.fileCount <= s.field.max : s.value.length <= s.field.max;
+			if(!s.isData || s.isVariable || s.value === null) return true;
+			if(s.isDecimal || s.isInteger)                    return s.field.max === null || s.value <= s.field.max;
+
+			if(s.isString) {
+				if(s.field.max !== null)                              return s.value.length <= s.field.max;        // field max. settings count if set
+				if(s.attribute !== false && s.attribute.length !== 0) return s.value.length <= s.attribute.length; // attribute length as fallback
+				return true;
+			}
+
+			if(s.isFiles)
+				return s.field.max === null || (typeof s.value.fileCount !== 'undefined' ? s.value.fileCount <= s.field.max : s.value.length <= s.field.max);
 			
 			return true;
 		},
 		isValidMin:(s) => {
 			if(!s.isData || s.isVariable || s.value === null || s.field.min === null) return true;
-			if((s.isDecimal || s.isInteger) && s.value < s.field.min)                 return false;
-			if(s.isString && s.value.length < s.field.min)                            return false;
+			if(s.isDecimal || s.isInteger)                                            return s.value        >= s.field.min;
+			if(s.isString)                                                            return s.value.length >= s.field.min;
 			
 			if(s.isFiles) return typeof s.value.fileCount !== 'undefined'
 				? s.value.fileCount >= s.field.min : s.value.length >= s.field.min;

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"slices"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -136,6 +137,13 @@ func ConvertToErrCode(err error, anonymizeIfUnexpected bool) (error, bool) {
 	// already an error code, return as is
 	if errCodeRx.MatchString(err.Error()) {
 		return err, true
+	}
+
+	// check for "cached plan must not change result" type error
+	// for some reason this error type is not recognized as PGX error
+	// quick fix until we can figure out why this occurs
+	if strings.Contains(err.Error(), "(SQLSTATE 0A000)") {
+		return CreateErrCode(ErrContextDbs, ErrCodeDbsChangedCachePlan), true
 	}
 
 	// check for PGX error

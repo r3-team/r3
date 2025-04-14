@@ -64,9 +64,10 @@ let MyList = {
 		:class="{ asInput:isInput, readonly:inputIsReadonly, isSingleField:isSingleField }"
 	>
 		<!-- hover menus -->
-		<div class="app-sub-window under-header"
+		<div class="app-sub-window"
 			v-if="showHover"
 			@click.self.stop="closeHover"
+			:class="{'under-header':!isMobile}"
 		>
 			<div class="contentBox float scroll" :class="{ 'list-csv':showCsv, 'list-filters-wrap':showFilters, 'list-options':showOptions }">
 				<div class="top lower">
@@ -371,7 +372,7 @@ let MyList = {
 						:showTitle="showCollectionTitles"
 					/>
 					
-					<select class="auto"
+					<select class="dynamic"
 						v-if="hasChoices"
 						@change="reloadInside('choice')"
 						v-model="choiceId"
@@ -713,7 +714,7 @@ let MyList = {
 		choices:         { type:Array,   required:false, default:() => [] }, // processed query choices
 		collections:     { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
-		columns:         { type:Array,   required:true },                    // list columns, processed
+		columns:         { type:Array,   required:true },                    // list columns, processed (applied filter values, only columns shown by user choice)
 		columnsAll:      { type:Array,   required:false, default:() => [] }, // list columns, all
 		dataOptions:     { type:Number,  required:false, default:0 },        // data permissions following form states
 		favoriteId:      { required:false, default:null },
@@ -961,6 +962,7 @@ let MyList = {
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		appResized:    (s) => s.$store.getters.appResized,
 		capApp:        (s) => s.$store.getters.captions.list,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		isMobile:      (s) => s.$store.getters.isMobile,
@@ -972,28 +974,26 @@ let MyList = {
 		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
-		// react to field resize
-		if(!this.isInput) {
-			window.addEventListener('resize',this.resized);
+		if(!this.isInput)
 			this.resized();
-		}
 		
 		// setup watchers
+		this.$watch('appResized',this.resized);
+		this.$watch('favoriteId',this.reloadOptions);
 		this.$watch('dropdownShow',(v) => {
 			if(!v) return;
 
-			this.filtersQuick = '';
 			this.reloadInside('dropdown');
 			
 			const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
 			if(inputEl !== null)
 				inputEl.focus();
 		});
-		this.$watch('favoriteId',this.reloadOptions);
 		this.$watch('columns',(valOld,valNew) => {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
 				this.count = 0;
 				this.rows  = [];
+				this.removeInvalidFiltersColumn();
 				this.reloadOutside();
 			}
 		});
@@ -1044,15 +1044,17 @@ let MyList = {
 		// initialize list options
 		this.reloadOptions();
 		this.setAutoRenewTimer(this.autoRenew);
+
+		// remove invalid column filters in case module schema changed
+		this.removeInvalidFiltersColumn();
+		
+		// setup handlers
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
 	beforeUnmount() {
 		this.clearAutoRenewTimer();
 	},
 	unmounted() {
-		if(!this.Input)
-			window.removeEventListener('resize',this.resized);
-
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
@@ -1115,7 +1117,7 @@ let MyList = {
 		},
 		updateDropdownDirection() {
 			let headersPx  = 200; // rough height in px of all headers (menu/form) combined
-			let rowPx      = 40;  // rough height in px of one dropdown list row
+			let rowPx      = 38;  // rough height in px of one dropdown list row
 			let dropdownPx = rowPx * (this.rows.length+1); // +1 for action row
 			
 			this.inputDropdownUpwards =
@@ -1153,7 +1155,7 @@ let MyList = {
 			// inside state has changed, reload list (not relevant for list input)
 			switch(entity) {
 				case 'dropdown':      // fallthrough
-				case 'filtersQuick':   // fallthrough
+				case 'filtersQuick':  // fallthrough
 				case 'filtersColumn': // fallthrough
 				case 'filtersUser': this.offset = 0; break;
 				case 'choice':
@@ -1231,7 +1233,8 @@ let MyList = {
 		// user actions, generic
 		blur() {
 			this.focused = false;
-			this.$emit('dropdown-show',false);
+			if(this.dropdownShow)
+				this.$emit('dropdown-show',false);
 		},
 		clearAutoRenewTimer() {
 			if(this.autoRenewTimer !== null)
@@ -1249,8 +1252,8 @@ let MyList = {
 			this.$emit('close-inline');
 		},
 		clickInputEmpty() {
-			if(!this.inputIsReadonly)
-				this.$emit('dropdown-show',!this.dropdownShow);
+			if(!this.inputIsReadonly && !this.dropdownShow)
+				this.$emit('dropdown-show',true);
 		},
 		clickInputRow() {
 			if(!this.inputIsReadonly && !this.inputAsCategory && !this.showInputAddLine)
@@ -1331,7 +1334,6 @@ let MyList = {
 			}
 		},
 		resetColumns() {
-			this.filtersColumn = [];
 			this.setColumnBatchSort([[],[]]);
 			// setting columns will reload data & aggregations
 			this.$nextTick(() => this.$emit('set-column-ids-by-user',[]));
@@ -1437,6 +1439,7 @@ let MyList = {
 		},
 		toggleHeader() {
 			this.showHeader = !this.showHeader;
+			this.$store.commit('appResized');
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'header',this.showHeader);
 		},
 		toggleUserFilters() {
@@ -1503,6 +1506,22 @@ let MyList = {
 			this.$emit('record-removed',this.rowsInput[i].indexRecordIds['0']);
 			this.rowsInput.splice(i,1);
 			this.blur();
+		},
+
+		// cleanup
+		removeInvalidFiltersColumn() {
+			// only allow column filters based on active columns
+			let out = [];
+			for(const f of this.filtersColumn) {
+				for(const c of this.columns) {
+					if(c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) {
+						out.push(f)
+						break;
+					}
+				}
+			}
+			if(out.length !== this.filtersColumn.length)
+				this.setColumnBatchFilters(out);
 		},
 		
 		// bulk selection
@@ -1622,8 +1641,11 @@ let MyList = {
 			
 			// reload record representation
 			// must happen even if no GET is executed (clear inputs)
-			this.rowsInput = [];               // clear input rows
-			this.$emit('dropdown-show',false); // if list is reloaded, close dropdown
+			// if list is reloaded, close dropdown
+			this.rowsInput = [];
+
+			if(this.dropdownShow)
+				this.$emit('dropdown-show',false);
 			
 			// for inputs we only need data if:
 			// * field is category input (always shows everything)

@@ -486,7 +486,11 @@ let MyBuilderMenu = {
 				// replace existing UUIDs with temporary counter IDs (for menu copy)
 				if(!newToNilUuid && !Number.isInteger(menus[i].id))
 					menus[i].id = this.newCntEntry++;
-				
+
+				// replace collection consumer IDs with NULL UUIDs to create new ones
+				for(let ci = 0, cj = menus[i].collections.length; ci < cj; ci++) {
+					menus[i].collections[ci].id = this.getNilUuid();
+				}
 				menus[i].menus = this.replaceMenuIdsNested(menus[i].menus,newToNilUuid);
 			}
 			return menus;

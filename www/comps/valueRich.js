@@ -261,7 +261,7 @@ let MyValueRich = {
 						break;
 						case 'datetime': this.stringValueFull = this.getUnixFormat(this.value,this.settings.dateFormat + ' H:i'); break;
 						case 'time':     this.stringValueFull = this.getUtcTimeStringFromUnix(this.value);                        break;
-						default: directValue = true; break;
+						default:         this.stringValueFull = this.getNumberFormatted(this.value,this.attribute);               break;
 					}
 					if(this.display === 'rating')
 						this.isRating = true;

@@ -1,0 +1,2593 @@
+{
+	"admin": {
+		"backups": {
+			"count": "Mantener versiones",
+			"daily": "Diario",
+			"dir": "Directorio de destino*",
+			"dirNote": "*Asegúrate de que esta ruta apunte a una ubicación de red separada o que su contenido se copie regularmente a un segundo sistema. Esto es necesario para la recuperación en caso de fallo completo del sistema.",
+			"full": "Copia de seguridad completa",
+			"list": "Conjuntos de copias de seguridad",
+			"monthly": "Cada 30 días",
+			"title": "Copias de seguridad completas integradas",
+			"weekly": "Semanal"
+		},
+		"cluster": {
+			"button": {
+				"shutdown": "Apagar"
+			},
+			"configNodeMissing": "Nodo del clúster asumido como perdido después de X segundos",
+			"dateCheckIn": "Último registro",
+			"dateStarted": "Nodo iniciado",
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar este nodo del clúster?<br /><br />Si un nodo eliminado se reinicia y aún tiene acceso a la base de datos del clúster, se volverá a registrar como un nodo del clúster.",
+				"shutdown": "¿Estás seguro de que deseas apagar este nodo del clúster?<br /><br />Un nodo del clúster no se puede iniciar de nuevo desde esta interfaz."
+			},
+			"hostname": "Nombre del host",
+			"statMemory": "Uso de memoria",
+			"title": {
+				"config": "Configuración global",
+				"connected": "conectado",
+				"master": "Maestro del clúster",
+				"missing": "perdido",
+				"nodes": "Nodos del clúster",
+				"offline": "desconectado"
+			}
+		},
+		"config": {
+			"adminMailsDesc": "Si hay una cuenta de correo electrónico funcional disponible, el sistema enviará notificaciones sobre eventos importantes. Actualmente son:",
+			"adminMailsHint": "Agregar dirección de correo electrónico del receptor",
+			"adminMailsList": [
+				"Próxima expiración de clientes OAuth registrados.",
+				"Próxima expiración de una licencia activa de REI3 Professional."
+			],
+			"adminMailsTitle": "Notificaciones de administrador",
+			"appVersion": "Versión de la plataforma",
+			"bruteforceAttempts": "Bloquear hosts después de intentos",
+			"bruteforceCountBlocked": "Hosts bloqueados",
+			"bruteforceCountTracked": "Hosts rastreados",
+			"bruteforceProtection": "Habilitar protección contra fuerza bruta",
+			"bruteforceTitle": "Protección contra fuerza bruta",
+			"builderMode": "Modo de constructor",
+			"button": {
+				"apply": "Aplicar cambios"
+			},
+			"dbTimeoutCsv": "Tiempo de espera de la base de datos: Procesamiento por lotes (CSV)",
+			"dbTimeoutDataRest": "Tiempo de espera de la base de datos: Solicitudes de datos (REST)",
+			"dbTimeoutDataWs": "Tiempo de espera de la base de datos: Solicitudes de datos (HTTP/WS)",
+			"dbTimeoutHint": "En segundos",
+			"dbTimeoutIcs": "Tiempo de espera de la base de datos: Descargas de calendario (ICS)",
+			"dialog": {
+				"builderMode": "El Constructor se utiliza para crear o cambiar aplicaciones.<br /><br />Cambiar aplicaciones puede resultar en pérdida de datos y <b>NUNCA</b> debe hacerse en entornos de producción.<br /><br />Para usar el Constructor de manera segura, utiliza una instancia dedicada de REI3; las aplicaciones listas y probadas pueden transferirse a un sistema de producción.<br /><br />Consulta la <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank\">documentación del Constructor</a> para obtener más información.",
+				"pleaseRead": "Por favor, lee antes de guardar",
+				"productionMode": "El modo de mantenimiento se utiliza para actualizar, instalar o eliminar aplicaciones del sistema.<br /><br />Cambiar al modo de mantenimiento <b>cerrará la sesión de todos los usuarios sin permisos de administrador</b>."
+			},
+			"icsDaysPost": "Excluir eventos después de la fecha actual (en días)",
+			"icsDaysPre": "Excluir eventos antes de la fecha actual (en días)",
+			"icsDownload": "Habilitar suscripciones de calendario",
+			"licenseState": "Estado de la licencia",
+			"licenseStateNok": "No hay licencia activa",
+			"licenseStateOk": "Válido por {COUNT} día(s) más",
+			"productionMode": "Modo de mantenimiento",
+			"proxyUrl": "URL del proxy",
+			"proxyUrlDesc": "Una URL de proxy, como 'http://mi-proxy.intern:8080' o 'https://usuario:contraseña@mi-proxy:8080'.",
+			"publicHostName": "Nombre del host público",
+			"publicHostNameDesc": "Se utiliza para enlazar de vuelta al sistema en cosas como notificaciones por correo electrónico. Debe ser la dirección completa sin protocolo, como 'sistema-interno.local' o 'sistema-publico.com'.",
+			"pwForceDigit": "Requerir dígitos",
+			"pwForceLower": "Requerir letras minúsculas",
+			"pwForceSpecial": "Requerir caracteres especiales",
+			"pwForceUpper": "Requerir letras mayúsculas",
+			"pwLengthMin": "Longitud mínima",
+			"pwTitle": "Configuración de contraseñas",
+			"repoFeedback": "Permitir comentarios de usuarios anónimos",
+			"repoKeyManagement": "Gestión de claves de confianza",
+			"repoPublicKeyAdd": "Agregar clave pública",
+			"repoPublicKeyInputNameHint": "Nombre de la clave",
+			"repoPublicKeyInputValueHint": "Ejemplo:\n-----BEGIN RSA PUBLIC KEY-----\nCLAVE\n-----END RSA PUBLIC KEY-----",
+			"repoPublicKeys": "Claves públicas",
+			"repoSkipVerify": "Permitir certificados no confiables",
+			"repoUrl": "URL del repositorio",
+			"title": "Configuración del sistema",
+			"titleGeneral": "General",
+			"titleIcs": "Suscripciones de calendario",
+			"titleLoginBackgrounds": "Fondos de inicio de sesión",
+			"titleLogins": "Usuarios",
+			"titleMail": "Enviar correos",
+			"titlePerformance": "Rendimiento",
+			"titleRepo": "Repositorio de aplicaciones",
+			"tokenExpiryHours": "Tiempo máximo de sesión en horas",
+			"updateCheck": "Estado de la versión",
+			"updateCheckCurrent": "Actual",
+			"updateCheckNewer": "Última versión",
+			"updateCheckOlder": "Actualización disponible",
+			"updateCheckUnknown": "Desconocido"
+		},
+		"customizing": {
+			"appName": "Nombre de la instancia",
+			"appNameHint": "Nombre de la instancia de REI3, mostrado en la página de inicio de sesión.",
+			"appNameShort": "Nombre corto",
+			"appNameShortHint": "Versión corta del nombre de la instancia, mostrada en el título de la página y como etiqueta si se instala como aplicación web progresiva (PWA).",
+			"companyColorHeader": "Color del título (encabezado)",
+			"companyColorHeaderHint": "Establece un color fijo para el encabezado, se ignoran los colores de la aplicación.",
+			"companyColorLogin": "Color del título (inicio de sesión)",
+			"companyColorLoginHint": "Sobrescribe el color predeterminado en la pantalla de inicio de sesión.",
+			"companyLoginImage": "Imagen de fondo",
+			"companyLoginImageHint": "Archivo JPG o PNG, máx. 256kb. Usado como imagen de fondo en la página de inicio de sesión.",
+			"companyLogo": "Logotipo de la empresa",
+			"companyLogoHint": "Archivo JPG o PNG, máx. 64kb. Mostrado en la página de inicio de sesión y de inicio.",
+			"companyLogoUrl": "Enlace del logotipo de la empresa",
+			"companyLogoUrlDesc": "Cualquier URL válida",
+			"companyLogoUrlHint": "Enlace que se abre al hacer clic en el logotipo de la empresa.",
+			"companyName": "Nombre de la empresa",
+			"companyNameHint": "Nombre de la empresa, mostrado en la página de inicio de sesión.",
+			"companyWelcome": "Texto de bienvenida",
+			"companyWelcomeHint": "Un breve texto de bienvenida, mostrado en la página de inicio de sesión. Se puede usar HTML para el formato del texto y enlaces.",
+			"error": {
+				"fileTooLarge": "El archivo es demasiado grande, tamaño máximo permitido: {SIZE} kb."
+			},
+			"iconPwa1": "Icono, pequeño",
+			"iconPwa1Hint": "Imagen utilizada para los iconos de la aplicación web progresiva. Debe ser un archivo PNG, máx. 128kb y precisamente 192x192 píxeles de tamaño.",
+			"iconPwa2": "Icono, grande",
+			"iconPwa2Hint": "Imagen utilizada para los iconos de la aplicación web progresiva. Debe ser un archivo PNG, máx. 128kb y precisamente 512x512 píxeles de tamaño.",
+			"pwaDomain": "Acceso directo a la aplicación",
+			"pwaDomainHint": "Solo el subdominio (como 'mi-app' de 'mi-app.mi-dominio.com')",
+			"pwaDomainHint1": "Las aplicaciones individuales pueden accederse directamente e instalarse por separado en dispositivos como PWAs. Luego tienen su propia página de inicio, iconos y navegación exclusiva. Esto requiere un registro de DNS de subdominio para cada aplicación para que el sistema REI3 sea accesible a través de diferentes dominios. También requiere un certificado comodín en el servidor REI3 para responder correctamente a las solicitudes HTTPS.<br /><br />Una vez que ambos registros DNS y el certificado comodín estén listos, ingresa un subdominio para cada aplicación deseada.",
+			"pwaDomainHint2": "Asegúrate de tener un subdominio disponible que no esté en esta lista, para acceder al sistema general de REI3. De lo contrario, no tendrás acceso a la interfaz de usuario de administración, ya que cada subdominio de aplicación solo da acceso a la aplicación específica.",
+			"titleCaptions": "Títulos",
+			"titleColors": "Colores",
+			"titleCss": "Reglas CSS personalizadas",
+			"titleLoginPage": "Página de inicio de sesión",
+			"titleLogos": "Logotipos",
+			"titlePwas": "Aplicaciones web progresivas (PWAs)",
+			"tokenKeepEnable": "Permitir a los usuarios mantenerse conectados",
+			"tokenKeepEnableHint": "Si se desactiva, se elimina la opción 'mantenerse conectado' en la página de inicio de sesión. Sin esta opción, los usuarios deben autenticarse cada vez que acceden al sistema. Esta configuración no afecta el acceso a dispositivos, como suscripciones de calendario o clientes de REI3."
+		},
+		"files": {
+			"deleteDate": "Archivo eliminado",
+			"fileVersionsKeepCount": "Mantener al menos X versiones de archivos",
+			"fileVersionsKeepDays": "Mantener versiones de archivos durante al menos X días",
+			"filesKeepDaysDeleted": "Mantener archivos eliminados durante X días",
+			"titleConfig": "Configuración global",
+			"titleDeleted": "Archivos eliminados"
+		},
+		"ldaps": {
+			"assignRoles": "Asignar roles por membresía de grupo<br />(desactiva la asignación manual de roles)",
+			"bindUserDn": "DN del usuario de enlace",
+			"bindUserDnHint": "Ejemplo: CN=readonly,OU=User,DC=mycompany,DC=local",
+			"bindUserPw": "Contraseña del usuario de enlace",
+			"button": {
+				"expert": "Configuraciones avanzadas",
+				"import": "Importar usuarios ahora",
+				"new": "Agregar conexión",
+				"test": "Probar conexión"
+			},
+			"description": "Esta conexión LDAP importa usuarios y permite la autenticación con credenciales LDAP.<br />Las membresías de grupo LDAP pueden usarse para asignar roles automáticamente.",
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar esta conexión LDAP?",
+				"importPlanned": "El trabajo de importación se ha programado para ejecución inmediata",
+				"testDone": "La prueba de conexión fue exitosa"
+			},
+			"groupDn": "DN del grupo",
+			"groupDnHint": "Ejemplo: CN=Admin_User,OU=Group,DC=mycompany,DC=local",
+			"host": "Host",
+			"hostHint": "Nombre del host LDAP",
+			"keyAttribute": "Atributo de clave única",
+			"keyAttributeHint": "Ejemplo: objectGUID",
+			"loginAttribute": "Atributo de nombre de usuario",
+			"loginAttributeHint": "Ejemplo: sAMAccountName",
+			"memberAttribute": "Atributo de miembro",
+			"memberAttributeHint": "Ejemplo: memberOf",
+			"metaHint": {
+				"department": "Ejemplo: department",
+				"email": "Ejemplo: mail",
+				"location": "Ejemplo: physicalDeliveryOfficeName",
+				"nameDisplay": "Ejemplo: displayName",
+				"nameFore": "Ejemplo: givenName",
+				"nameSur": "Ejemplo: sn",
+				"notes": "Ejemplo: description",
+				"organization": "Ejemplo: company",
+				"phoneFax": "Ejemplo: facsimileTelephoneNumber",
+				"phoneLandline": "Ejemplo: telephoneNumber",
+				"phoneMobile": "Ejemplo: mobile"
+			},
+			"msAdExt": "Extensiones de Microsoft AD",
+			"msAdExtHint": "Membresías de grupo anidadas, control de cuentas de usuario",
+			"nameHint": "Nombre único",
+			"port": "Puerto",
+			"portHint": "Por defecto 389, 636 para SSL/TLS",
+			"role": "Rol",
+			"searchClass": "Clase de objeto",
+			"searchClassHint": "Ejemplo: user",
+			"searchDn": "DN de búsqueda",
+			"searchDnHint": "Ejemplo: OU=User,DC=mycompany,DC=local",
+			"starttls": "Usar StartTLS",
+			"template": "Plantilla de usuario",
+			"title": "Crear/editar conexión",
+			"titleRoles": "Roles por membresía de grupo",
+			"tls": "Usar SSL/TLS",
+			"tlsVerify": "Verificar TLS"
+		},
+		"license": {
+			"active": "Licencia instalada",
+			"button": {
+				"delete": "Eliminar archivo de licencia"
+			},
+			"clientId": "ID del cliente",
+			"currentState": "Valores actuales",
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar el archivo de licencia? Para reactivar REI3 Professional, se debe cargar un archivo de licencia válido."
+			},
+			"extCommunity": "Foro de la comunidad REI3",
+			"extLicense": "REI3 Professional",
+			"intro": "REI3 es completamente <a href=\"https://github.com/r3-team/r3\" target=\"_blank\">código abierto</a> y se puede usar de forma gratuita.<br /><br />Para aquellos que necesitan características empresariales o soporte, existe <b>REI3 Professional</b>. Está diseñado para ser asequible para organizaciones de cualquier tamaño, a menudo costando mucho menos que otras ofertas de bajo código comparables.<br /><br />Mientras apoyan el desarrollo continuo, los clientes de REI3 Professional también pueden activar la gama completa de características y obtener soporte de Lean Softworks, el desarrollador principal de REI3.",
+			"introMore": "Más información:",
+			"licenseExpired": "La licencia ha expirado",
+			"licenseId": "ID de la licencia",
+			"loginCount": "Usuarios concurrentes",
+			"loginCountLimited": "Usuarios concurrentes (limitados)",
+			"registeredFor": "Registrado para",
+			"untilDays": "Válido por días",
+			"upload": "Cargar archivo de licencia:",
+			"validUntil": "Válido hasta"
+		},
+		"login": {
+			"admin": "Admin",
+			"button": {
+				"resetMfa": "Restablecer MFA"
+			},
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar este usuario?<br /><br />Esta acción es irreversible.</b>",
+				"notUniqueEmail": "La misma dirección de correo electrónico también ha sido asignada a un usuario diferente.",
+				"notUniqueName": "El mismo nombre de usuario ya ha sido asignado a un usuario diferente.",
+				"resetTotp": "Esto restablecerá todos los métodos de autenticación multifactor (MFA) para este usuario. El acceso al sistema será posible solo con nombre de usuario y contraseña.<br /><br />Restablecer MFA no afecta el cifrado de extremo a extremo.<br /><br />¿Deseas continuar?"
+			},
+			"error": {
+				"uniqueConstraint": "El nombre de usuario debe ser único"
+			},
+			"hint": {
+				"active": "Cuando se desactiva, las sesiones activas se terminarán.",
+				"admin": "Los privilegios de administrador incluyen la gestión de aplicaciones y usuarios. Los administradores también pueden habilitar los modos de mantenimiento y constructor.",
+				"name": "Nombre de usuario - debe ser único dentro del sistema.",
+				"noAuth": "Los usuarios públicos no requieren autenticación. El acceso al sistema es posible solo con una URL.",
+				"password": "Esto sobrescribirá la contraseña actual de este usuario. La autenticación multifactor no se ve afectada por este cambio. El cifrado de extremo a extremo (E2EE) no estará disponible hasta que el usuario proporcione el código de respaldo asociado.",
+				"template": "Se aplican configuraciones predefinidas (opciones de visualización y tema) de la plantilla elegida.",
+				"tokenExpiryHours": "Sobrescribe la configuración global para el tiempo máximo de sesión."
+			},
+			"ldap": "Asignado por LDAP",
+			"ldapAssignActive": "Los roles se asignan por membresías de grupo LDAP",
+			"ldapMeta": "Los detalles se importan a través de LDAP",
+			"limited": "Usuario limitado",
+			"limitedDesc": "Cuando un usuario tiene como máximo un solo rol asignado, se cuenta como un usuario 'limitado'. Útil cuando solo se necesita acceso a partes de una aplicación para cosas como manejo de solicitudes o envío de formularios.<br /><br />Los usuarios limitados no pueden tener acceso de administrador o público y se toman de un grupo de licencias separado.",
+			"meta": {
+				"department": "Departamento",
+				"email": "Correo electrónico",
+				"location": "Ubicación",
+				"nameDisplay": "Nombre para mostrar",
+				"nameFore": "Nombre",
+				"nameSur": "Apellido",
+				"notes": "Descripción",
+				"organization": "Organización",
+				"phone": "Teléfono",
+				"phoneFax": "Fax",
+				"phoneLandline": "Teléfono fijo",
+				"phoneMobile": "Teléfono móvil"
+			},
+			"noAuth": "Acceso público",
+			"password": "Establecer nueva contraseña",
+			"roleContentAdmin": "Admin",
+			"roleContentOther": "Especial",
+			"roleContentUser": "Usuario",
+			"roles": "Roles ({COUNT})",
+			"template": "Plantilla de usuario",
+			"title": "Usuario '{NAME}'",
+			"titleLimited": "Usuario limitado '{NAME}'",
+			"titleNew": "Nuevo usuario",
+			"titles": {
+				"active": "Activo",
+				"admin": "Admin",
+				"ldap": "LDAP",
+				"limited": "Limitado",
+				"name": "Nombre",
+				"noAuth": "Público"
+			},
+			"tokenExpiryHours": "Tiempo máximo de sesión en horas"
+		},
+		"loginSessions": {
+			"noData": "No hay sesiones disponibles",
+			"option": {
+				"browser": "Sesión de navegador",
+				"fatClient": "Cliente REI3"
+			},
+			"titles": {
+				"address": "Dirección",
+				"admin": "Admin",
+				"date": "Iniciado",
+				"device": "Dispositivo",
+				"limited": "Limitado",
+				"loginDepartment": "Departamento",
+				"loginDisplay": "Nombre para mostrar",
+				"loginName": "Nombre de usuario",
+				"noAuth": "Público",
+				"nodeName": "Nodo del clúster"
+			}
+		},
+		"loginTemplate": {
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar esta plantilla de usuario?<br /><br />Esta acción es irreversible.</b>"
+			},
+			"global": "Plantilla de usuario global. Las configuraciones de esta plantilla se aplican a los nuevos usuarios si no se elige otra.",
+			"title": "Plantilla de usuario '{NAME}'",
+			"titleNew": "Nueva plantilla de usuario"
+		},
+		"logs": {
+			"context": "Contexto",
+			"contextLabel": {
+				"api": "API",
+				"backup": "Copia de seguridad",
+				"cache": "Caché",
+				"cluster": "Clúster",
+				"csv": "Importación/exportación CSV",
+				"imager": "Procesamiento de imágenes",
+				"ldap": "LDAP",
+				"mail": "Correo",
+				"module": "Aplicaciones",
+				"scheduler": "Programador",
+				"server": "Servidor",
+				"transfer": "Transferencia",
+				"websocket": "Clientes WebSocket"
+			},
+			"date": "Marca de tiempo",
+			"keepDays": "Mantener registros (en días)",
+			"level": "Nivel",
+			"level1": "Error",
+			"level2": "Advertencia",
+			"level3": "Información",
+			"logLevel": "Nivel de registro",
+			"logLevel1": "Solo errores",
+			"logLevel2": "Errores y advertencias",
+			"logLevel3": "Todo",
+			"message": "Mensaje",
+			"module": "Aplicación",
+			"node": "Nodo del clúster"
+		},
+		"mails": {
+			"account": "Cuenta de correo",
+			"accountAuthMethod": "Método de autenticación",
+			"accountAuthMethodHintLogin": "Autenticación básica mediante nombre de usuario y contraseña. Opción de compatibilidad para la autenticación SMTP heredada de Office 365.",
+			"accountAuthMethodHintPlain": "Autenticación básica mediante nombre de usuario y contraseña.",
+			"accountAuthMethodHintXOAuth2": "Autenticación mediante OAuth 2.0, a veces llamada 'Autenticación moderna'. Requerida por algunos proveedores para acceder a sus servicios.",
+			"accountHost": "Nombre del host",
+			"accountMode": "Conector",
+			"accountModeHintImap": "El conector IMAP carga y luego <b>elimina mensajes</b> del buzón elegido. Solo debe usarse con un buzón dedicado y no para acceder a cuentas de correo personales.",
+			"accountModeHintSmtp": "El conector SMTP envía mensajes de correo electrónico.",
+			"accountOauth": "Cliente OAuth",
+			"accountOauthHint": "Se debe crear un cliente OAuth antes de poder seleccionarlo aquí. Consulta la entrada del menú 'Clientes OAuth'.",
+			"accountPass": "Contraseña",
+			"accountPort": "Puerto",
+			"accountSendAs": "Dirección de envío",
+			"accountSendAsHint": "Por defecto, la dirección del remitente debe ser la misma que la dirección de correo del buzón. Sin embargo, algunos sistemas de correo permiten múltiples direcciones de remitente para cuentas.",
+			"accountTest": "Correo de prueba",
+			"accountUser": "Nombre de usuario",
+			"accounts": "Cuentas de correo",
+			"attachmentsNoPreview": "solo visible para entrantes",
+			"attempts": "Intentos de envío",
+			"bccList": "CCO",
+			"body": "Cuerpo",
+			"button": {
+				"attemptsReset": "Restablecer intentos de envío"
+			},
+			"ccList": "CC",
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar esta cuenta de correo?<br /><br />Esta acción es irreversible.</b>"
+			},
+			"dir": "Dirección",
+			"dirIn": "ENTRANTE",
+			"dirOut": "SALIENTE",
+			"files": "Adjuntos",
+			"noMailsInSpool": "El spooler de correo está vacío.",
+			"noMailsInTraffic": "No hay tráfico de correo registrado.",
+			"option": {
+				"authMethod": {
+					"login": "LOGIN (SMTP heredado de O365)",
+					"plain": "PLAIN",
+					"xoauth2": "OAUTH 2.0"
+				},
+				"encryption": {
+					"ssl": "SSL/TLS",
+					"starttls": "STARTTLS"
+				}
+			},
+			"subject": "Asunto",
+			"testAccount": "Seleccionar cuenta",
+			"testOk": "El correo de prueba se agregó correctamente al spooler.",
+			"testRecipient": "Dirección del destinatario",
+			"testSubject": "Asunto",
+			"title": "Cuenta de correo '{NAME}'",
+			"titleNew": "Nueva cuenta de correo",
+			"toList": "Para",
+			"trafficKeepDays": "Mantener datos (en días)"
+		},
+		"modules": {
+			"button": {
+				"repository": "Agregar desde el repositorio",
+				"repositoryRefresh": "Comprobar actualizaciones en el repositorio",
+				"update": "Actualizar a v{VERSION}",
+				"updateAll": "Actualizar todo ({COUNT})"
+			},
+			"changeLog": "Registro de cambios",
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar esta aplicación? Esto también eliminará todos los datos incluidos de tu sistema.<br /><br /><b>Esta acción es irreversible sin copias de seguridad actuales.</b>{APPS}",
+				"deleteApps": "<br /><br />Las siguientes aplicaciones dependen de esta y también se eliminarán:<ul>{LIST}</ul>",
+				"deleteMulti": "Esta acción <b>eliminará permanentemente</b> <b>{COUNT} aplicación(es)</b> y los datos correspondientes.<br /><br />¿Realmente deseas continuar?",
+				"deleteTitle": "Eliminación permanente de la aplicación '{APP}'",
+				"owner": "Si no eres el autor original, todos los cambios se PERDERÁN cuando se instale una nueva versión del autor. Esto también puede resultar en PÉRDIDA DE DATOS.<br /><br />Si tienes la intención de cambiar/extender aplicaciones de otros autores, puedes hacerlo de manera segura 'construyendo sobre ellas' - consulta la documentación del Constructor para obtener más detalles.",
+				"ownerTitle": "Advertencia - ¡por favor lee cuidadosamente!"
+			},
+			"error": {
+				"installFailed": "La actualización de la aplicación ha fallado. Al actualizar una sola aplicación, las dependencias faltantes pueden causar problemas - intenta actualizar todas las aplicaciones juntas para resolver esto.<br /><br />Mensaje de error: {ERROR}",
+				"uploadFailed": "No se pudo agregar la aplicación desde el archivo cargado. Aumenta el nivel de registro para transferencias a 'Todo' e inténtalo de nuevo - los detalles serán visibles en los registros del sistema."
+			},
+			"hidden": "Oculto",
+			"import": "Agregar desde archivo",
+			"position": "Orden en el menú",
+			"productionMode": "Las aplicaciones solo se pueden cambiar cuando el modo de mantenimiento está activo.",
+			"releaseDate": "Fecha de lanzamiento",
+			"repoNotIncluded": "no disponible",
+			"repoOutdatedApp": "se requiere actualización de la plataforma",
+			"repoUpToDate": "última versión",
+			"update": "Actualizar",
+			"updateDone": "La actualización se ha aplicado correctamente"
+		},
+		"navigationActivation": "Activación",
+		"navigationBackups": "Copias de seguridad",
+		"navigationCaptionMap": "Traducciones",
+		"navigationCluster": "Clúster",
+		"navigationConfig": "Sistema",
+		"navigationCustom": "Personalización",
+		"navigationFiles": "Archivos",
+		"navigationLdaps": "Conectores LDAP",
+		"navigationLicense": "Profesional",
+		"navigationLoginSessions": "Sesiones de usuario",
+		"navigationLoginTemplates": "Plantillas de usuario",
+		"navigationLogins": "Usuarios",
+		"navigationLogs": "Registros",
+		"navigationMailAccounts": "Cuentas de correo",
+		"navigationMailSpooler": "Spooler de correo",
+		"navigationMailTraffic": "Tráfico de correo",
+		"navigationModules": "Aplicaciones",
+		"navigationOauthClients": "Clientes OAuth",
+		"navigationRepo": "Repositorio",
+		"navigationRoles": "Membresías",
+		"navigationScheduler": "Programador",
+		"navigationSystemMsg": "Mensaje del sistema",
+		"oauthClient": {
+			"clientId": "ID del cliente",
+			"clientIdHint": "Generado en el lado del proveedor al crear un cliente OAuth2.",
+			"clientSecret": "Secreto del cliente",
+			"clientSecretHint": "Generado en el lado del proveedor al crear o después de crear un cliente OAuth2. Debe ser un secreto, no se admiten certificados de cliente.",
+			"dateExpiry": "Fecha de expiración",
+			"dateExpiryHint": "Para notificar a los contactos de administración cuando se acerque la fecha de expiración.",
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar este cliente OAuth?<br /><br />Esta acción es irreversible.</b>"
+			},
+			"intro": "Un cliente OAuth se autentica contra un proveedor de identidad para ejecutar acciones o acceder a recursos.<br /><br />REI3 implementa el 'flujo de credenciales del cliente OAuth 2.0', que requiere que el cliente OAuth esté registrado con el proveedor antes de poder configurarse aquí.",
+			"nameHint": "Un nombre interno para referenciar este cliente OAuth dentro de REI3.",
+			"option": {
+				"template": {
+					"custom": "-",
+					"ms365_mail": "Correo O365"
+				}
+			},
+			"scopes": "Ámbitos",
+			"scopesHint": "Los ámbitos le dicen al proveedor qué desea hacer o acceder un cliente OAuth. Son definidos por el proveedor y deben asignarse al cliente para ser utilizables - consulta la documentación del proveedor para obtener una lista de ámbitos disponibles.",
+			"template": "Plantilla",
+			"templateHint": "Selecciona una plantilla para aplicar configuraciones predeterminadas para proveedores conocidos.",
+			"tenant": "Inquilino",
+			"tenantHint": "Requerido por algunos proveedores. Un inquilino es un nombre o ID que identifica de manera única a tu organización en el sistema en la nube de tu proveedor.",
+			"title": "Cliente OAuth '{NAME}'",
+			"titleNew": "Nuevo cliente OAuth",
+			"tokenUrl": "URL del token",
+			"tokenUrlHint": "URL donde se generan los tokens OAuth2. Estos están documentados por tu proveedor."
+		},
+		"repo": {
+			"author": "por {NAME}",
+			"button": {
+				"install": "Instalar",
+				"installed": "Instalado",
+				"showInstalled": "Mostrar instalados"
+			},
+			"fetchDone": "La aplicación se ha instalado correctamente.<br /><br />Para obtener acceso, se deben asignar roles.",
+			"maintenanceBlock": "Instalación solo en modo de mantenimiento",
+			"notCompatible": "Se requiere actualización de la plataforma",
+			"supportPage": "Sitio web"
+		},
+		"roles": {
+			"addLogin": "Agregar usuario",
+			"button": {
+				"all": "Mostrar todo",
+				"descriptions": "Descripciones"
+			},
+			"descriptionEmpty": "No hay descripción disponible"
+		},
+		"scheduler": {
+			"button": {
+				"runNow": "Programar ejecución inmediata",
+				"runNowHint": "La tarea se ejecutará lo antes posible."
+			},
+			"dateAttempt": "Último inicio",
+			"dateSuccess": "Última finalización exitosa",
+			"functions": "Tareas de la aplicación",
+			"interval": "Intervalo de ejecución",
+			"intervalSeconds": "Intervalo de ejecución (en segundos)",
+			"intervalTypeDays": "día(s)",
+			"intervalTypeHours": "hora(s)",
+			"intervalTypeMinutes": "minuto(s)",
+			"intervalTypeMonths": "mes(es)",
+			"intervalTypeSeconds": "segundo(s)",
+			"intervalTypeWeeks": "semana(s)",
+			"intervalTypeYears": "año(s)",
+			"names": {
+				"adminMails": "Correos de notificación de administrador",
+				"backupRun": "Gestionar copias de seguridad integradas",
+				"cleanupBruteforce": "Limpiar caché de fuerza bruta",
+				"cleanupDataLogs": "Limpiar registros de cambios expirados",
+				"cleanupFiles": "Limpiar archivos subidos expirados",
+				"cleanupLogs": "Limpiar registros del sistema expirados",
+				"cleanupMailTraffic": "Limpiar entradas de tráfico de correo expiradas",
+				"cleanupTempDir": "Limpiar directorio temporal",
+				"clusterCheckIn": "Registro del clúster",
+				"clusterProcessEvents": "Procesamiento de eventos del clúster",
+				"dbOptimize": "Optimización de la base de datos",
+				"httpCertRenew": "Recargar certificado SSL si se actualiza",
+				"importLdapLogins": "Importar usuarios a través de LDAP",
+				"mailAttach": "Transferencia de archivos adjuntos de correo",
+				"mailRetrieve": "Recuperación de correo",
+				"mailSend": "Envío de correo",
+				"repoCheck": "Ejecutar actualización del repositorio",
+				"restExecute": "Ejecutar llamadas REST",
+				"systemMsgMaintenance": "Habilitar modo de mantenimiento después del mensaje del sistema",
+				"updateCheck": "Comprobar actualizaciones de la plataforma"
+			},
+			"scheduleLine": "Cada {VALUE} {TYPE}",
+			"scheduleLineDayMonths": "el {DAY}.",
+			"scheduleLineDayWeeks": "el {DAY}. día de la semana",
+			"scheduleLineDayYears": "el {DAY}. del año",
+			"scheduleLineTime": "a las {HH}:{MM}:{SS}",
+			"systemTasks": "Tareas del sistema (global)",
+			"systemTasksNode": "Tareas del sistema (nodos del clúster)"
+		},
+		"systemMsg": {
+			"date0": "Mostrar desde",
+			"date1": "Mostrar hasta",
+			"description": "Los administradores pueden usar esta función para informar a los usuarios sobre eventos como tiempos de inactividad planificados. Tanto los usuarios que ya han iniciado sesión como los que inicien nuevas sesiones recibirán el mensaje.<br /><br />Si el mensaje se cambia mientras el período de tiempo está activo, la versión actualizada se mostrará nuevamente a los usuarios.",
+			"maintenance": "Cambiar a mantenimiento",
+			"maintenanceHint": "Si está habilitado, el sistema cambiará al modo de mantenimiento una vez que se alcance 'mostrar hasta'. 30 minutos antes de que ocurra el cambio al modo de mantenimiento, se mostrará un temporizador de cuenta regresiva a los usuarios.",
+			"state": {
+				"date0Set": "El mensaje se mostrará a partir del <b>{DATE}</b>.",
+				"date1Set": "El mensaje se mostrará hasta el <b>{DATE}</b>.",
+				"datesSet": "El mensaje se mostrará entre el <b>{DATE0}</b> y el <b>{DATE1}</b>.",
+				"unset": "<b>El mensaje no está activo</b>"
+			},
+			"text": "Mensaje"
+		},
+		"title": "Admin",
+		"titleDocs": "Documentación de administración"
+	},
+	"articles": {
+		"button": {
+			"pdf": "PDF"
+		},
+		"form": "Ayuda del formulario",
+		"module": "Ayuda de la aplicación",
+		"title": "Páginas de ayuda",
+		"toc": "Tabla de contenidos"
+	},
+	"builder": {
+		"api": {
+			"button": {
+				"versionNew": "Nueva versión",
+				"versionNewHint": "Duplica esta API con un nuevo número de versión."
+			},
+			"calls": "Llamadas",
+			"columnSettings": "Configuración de columnas",
+			"columnsAvailable": "Columnas disponibles",
+			"columnsTarget": "Columnas activas",
+			"content": "Tipo de API",
+			"contentValue": "REST",
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar esta API?"
+			},
+			"hint": {
+				"auth": "Se requiere una llamada de autenticación para obtener un token de acceso válido para solicitudes posteriores. El token es válido según el tiempo máximo de sesión, establecido en la configuración del sistema.",
+				"delete": "Elimina un registro existente, además de los registros conectados si se unen otras relaciones. Las relaciones necesitan la opción 'DELETE' habilitada para ser afectadas.",
+				"get": "Devuelve valores de un registro existente (si se proporciona el ID del registro) o de todos los registros disponibles de una o varias relaciones unidas.",
+				"post": "Crea o actualiza un registro, además de los registros conectados si se unen otras relaciones. Las relaciones necesitan las opciones 'CREATE'/'UPDATE' habilitadas para ser afectadas."
+			},
+			"httpMethods": "Métodos HTTP",
+			"limitDef": "Cantidad de resultados predeterminada para GET",
+			"limitDefHint": "Cantidad de resultados predeterminada si no se sobrescribe con el parámetro 'limit' (como 'limit=1000').",
+			"limitMax": "Cantidad máxima de resultados para GET",
+			"limitMaxHint": "Cantidad máxima de resultados que se devuelve con una llamada GET.",
+			"nameHint": "El nombre de la API se usa en la llamada REST. La llamada debe actualizarse si se cambia.",
+			"preview": {
+				"call": "Llamada",
+				"empty": "<vacío>",
+				"headers": "Encabezados",
+				"httpMethod": "Método HTTP",
+				"limitHint": "Cantidad de resultados solicitada.",
+				"offsetHint": "Desplazamiento de resultados solicitado: muestra los resultados que vienen después de la cantidad especificada.",
+				"params": "Parámetros",
+				"recordId": "ID del registro",
+				"recordIdHintDelete": "Requerido. El registro correspondiente se elimina.",
+				"recordIdHintGet": "Opcional. Si se usa, solo se devuelve un registro.",
+				"request": "Ejemplo de solicitud (cuerpo)",
+				"requestHintPost": "Si el modo detallado está deshabilitado, el orden de los valores debe ser idéntico al de las columnas activas.",
+				"response": "Ejemplo de respuesta (cuerpo)",
+				"responseHintPost": "Las respuestas POST devuelven los ID de registro para cada relación afectada (por índice de unión de relación). El ID de registro será uno existente (si se actualiza) o uno nuevo (si se crea).<br /><br />Asegúrate de definir búsquedas de registros (pestaña 'Contenido') si deseas actualizar registros.",
+				"verboseHint": "Si está habilitado, las solicitudes POST y las respuestas GET usan nombres de entidades en lugar de listas de valores ordenadas. Habilita esta opción para ver una vista previa a continuación."
+			},
+			"title": "APIs",
+			"titleOne": "API '{NAME}'",
+			"verboseDef": "Modo detallado",
+			"verboseDefHint": "Configuración predeterminada para el modo detallado, si no se establece como parámetro.",
+			"versionHint": "Número de versión para esta API. Las versiones a menudo se usan para ofrecer nuevas funciones sin romper llamadas anteriores. No pueden existir dos APIs con el mismo nombre y número de versión.",
+			"warning": {
+				"noData": "Para que la API funcione, se debe seleccionar al menos 1 relación (pestaña 'Contenido') y al menos 1 columna debe estar activa.",
+				"postNoUpdate": "Las llamadas POST fallan al actualizar registros sin búsquedas de registros (pestaña 'Contenido'). Al menos 1 relación está configurada en 'UPDATE' sin una búsqueda de registros.",
+				"postSubQuery": "Las llamadas POST fallan si se incluyen subconsultas. Al menos 1 columna es una subconsulta."
+			},
+			"warnings": "Advertencias"
+		},
+		"articles": {
+			"addArticle": "Agregar artículo",
+			"assignTo": "Asignar a",
+			"body": "Contenido",
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar este artículo?"
+			},
+			"new": "Nuevo artículo",
+			"option": {
+				"assignForm": "Ayuda contextual del formulario",
+				"assignModule": "Página de ayuda de la aplicación"
+			},
+			"title": "Artículos de ayuda",
+			"titleAssign": "Asignar artículos",
+			"titleAssigned": "Asignado"
+		},
+		"attribute": {
+			"bigint": "Valores grandes",
+			"bigintDates": "Soportar fechas después de 2038",
+			"bigintDatesHint": "Necesita más espacio de almacenamiento, pero permite valores de fecha después de enero de 2038.",
+			"bigintHint": "Necesita más espacio de almacenamiento, pero soporta valores superiores a 2.14 mil millones.",
+			"content": "Tipo de base de datos",
+			"contentHint": "Información para expertos.",
+			"datetimes": "Fecha y hora",
+			"defaults": "Valor predeterminado",
+			"defaultsHint": "Se usará un valor predeterminado si no se proporciona otro valor.",
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar este atributo? Esto también eliminará todos los datos incluidos de tu sistema.<br /><br /><b>Esta acción es irreversible sin copias de seguridad actuales.</b>",
+				"deleteCheckFailed": "El atributo no se puede eliminar: todavía existen referencias a él"
+			},
+			"doublePrecision": "Alta precisión",
+			"doublePrecisionHint": "Necesita más espacio de almacenamiento, pero soporta más de 6 dígitos decimales de precisión (al menos hasta 15).",
+			"edit": "Atributo '{NAME}'",
+			"encrypted": "Cifrado",
+			"encryptedHint": "Cifra los valores de los atributos para los usuarios actuales u otros definidos. Utiliza cifrado de extremo a extremo: nadie puede recuperar los datos si los usuarios pierden acceso a sus credenciales y claves de respaldo. Por favor, lee la documentación antes de usar esta función. Solo disponible para atributos de texto.",
+			"expert": "Opciones para expertos",
+			"iconHint": "Se muestra dentro de los campos de entrada si no se sobrescribe.",
+			"lengthFiles": "Tamaño máximo en KB",
+			"lengthFract0": "Antes del punto decimal",
+			"lengthFract1": "Lugares decimales",
+			"lengthFractHint": "Valor máximo: {C0}.{C1}",
+			"lengthFractHintMax": "Si el número de dígitos se establece en 0, los valores numéricos no están restringidos y no se redondearán a un lugar decimal definido.",
+			"lengthNumeric": "Número de dígitos",
+			"lengthText": "Máx. caracteres",
+			"nameHint": "El nombre sirve como referencia interna: no se muestra a los usuarios.",
+			"new": "Nuevo atributo",
+			"nullable": "Debe tener valor",
+			"nullableHint": "Si está habilitado, este valor nunca debe estar vacío. Las entradas para este atributo son obligatorias por defecto.",
+			"onDelete": "Acción al eliminar",
+			"onUpdate": "Acción al cambiar",
+			"option": {
+				"barcode": "Código de barras/código QR",
+				"boolean": "Sí/no",
+				"color": "Color",
+				"date": "Fecha",
+				"datetime": "Fecha y hora",
+				"decimal": "Número, decimal",
+				"defaults": {
+					"date": "Fecha actual (hora del servidor)",
+					"datetime": "Fecha y hora actuales",
+					"fixed": "Valor personalizado",
+					"uuid": "Nuevo UUID"
+				},
+				"drawing": "Dibujo",
+				"files": "Archivos",
+				"float": "Número, flotante",
+				"iframe": "iframe",
+				"number": "Número, entero",
+				"regconfig": "Diccionario de búsqueda de texto",
+				"relationship1": "Relación, valor único",
+				"relationship11": "Relación, uno a uno (1:1)",
+				"relationshipActionsHints": {
+					"CASCADE": "Cascada la eliminación, si se elimina un registro referenciado por este atributo de relación. Esto significa que todos los registros que están en una relación a través de este atributo se eliminan automáticamente cuando se elimina el registro referenciado. Muy útil para relaciones padre-hijo, eliminando los elementos secundarios junto con el elemento principal.",
+					"NO ACTION": "Bloquea la eliminación, si se elimina un registro referenciado por este atributo de relación. El registro referenciado solo se puede eliminar después de que se haya eliminado de la relación.",
+					"RESTRICT": "Similar a NO ACTION pero generalmente solo relevante para casos de uso especiales. Al igual que NO ACTION, bloquea la acción si se elimina un registro referenciado. Pero a diferencia de NO ACTION, esto se hace inmediatamente y no al final de una transacción de base de datos.",
+					"SET NULL": "Elimina la referencia, si se elimina un registro referenciado por este atributo de relación. Esto solo es posible si este atributo puede estar vacío (no configurado como 'debe tener un valor')."
+				},
+				"relationshipActionsHintsOnUpdate": "Funciona de manera idéntica a la configuración para 'Acción al eliminar'. A diferencia de la eliminación, esta configuración afecta lo que sucede cuando se cambia la clave primaria ('id') de un registro que es referenciado por este atributo de relación. Rara vez se usa, ya que hay pocas razones para actualizar claves primarias.",
+				"relationshipN": "Relación, valor múltiple",
+				"relationshipN1": "Relación, muchos a uno (n:1)",
+				"richtext": "Texto, con formato",
+				"text": "Texto",
+				"textarea": "Texto, varias líneas",
+				"time": "Hora",
+				"uuid": "Identificador único universal"
+			},
+			"relationshipId": "Relación con",
+			"titleHint": "El título se puede traducir en los idiomas disponibles de la aplicación. Se muestra a los usuarios si no se sobrescribe por un título de campo o columna.",
+			"usedFor": "Tipo de valor",
+			"usedForHint": {
+				"barcode": "Un valor de código de barras o código QR. Puede almacenar varios formatos. Las entradas correspondientes se pueden usar para escanear códigos de barras/códigos QR, pero también para generarlos en función del valor actual.",
+				"boolean": "Valor verdadero/falso. Se usa para valores simples de sí/no. Si se permite un valor vacío, existen 3 valores posibles: verdadero/falso/vacío.",
+				"color": "Valores de color. Se pueden usar en la mayoría de las vistas para estilizar salidas para mostrar características de un registro, como su importancia, en función de una categoría asignada.",
+				"date": "Un valor de fecha. Se usa para valores solo de fecha, como fecha de nacimiento o fecha de compra.",
+				"datetime": "Un valor de fecha con componente de hora. Se usa para eventos, citas, etc. Si se usa en calendarios, se pueden gestionar eventos de día completo o parcial.",
+				"decimal": "Valores decimales, a menudo utilizados para montos de moneda.",
+				"drawing": "Un dibujo simple, creado mediante entrada de mouse o táctil. A menudo se usa para firmas.",
+				"files": "Uno o varios archivos. Dependiendo de la configuración de cantidad/tamaño máximo de archivos, los usuarios pueden almacenar archivos de forma permanente. Con la aplicación cliente, los archivos se pueden abrir localmente para edición directa.",
+				"float": "Valores numéricos con decimal flotante. Principalmente utilizados para cálculos costosos.",
+				"iframe": "Un valor de URL, que se usa para mostrar un recurso externo como un sitio web.",
+				"number": "Valores numéricos completos, como contadores, prioridades, números de referencia, etc.",
+				"regconfig": "Diccionario para un índice de búsqueda de texto completo. Los diccionarios disponibles dependen del sistema de base de datos (ver diccionarios de Postgres). Ejemplos: inglés, alemán, francés, español, rumano. El valor 'simple' se puede usar para una búsqueda menos útil pero independiente del idioma.",
+				"relationship11": "Conecta una relación con otra. Las relaciones uno a uno (1:1) solo permiten que un registro de una relación haga referencia al mismo registro en otra. Ejemplos: El profesor de una clase o el propietario de un coche.",
+				"relationshipN1": "Conecta una relación con otra. Las relaciones muchos a uno (n:1) permiten que varios registros de una relación hagan referencia al mismo registro en otra. Ejemplos: Estudiantes que asisten a una clase o empleados de una organización.",
+				"richtext": "Varias líneas de texto con formato. Útil para artículos más largos, así como para plantillas de documentos para la generación de PDF o correos electrónicos. Puede incluir encabezados, enlaces, tablas, imágenes y más.",
+				"text": "Una sola línea de texto. Se puede usar para nombres, direcciones de correo electrónico, números de teléfono, direcciones, etc.",
+				"textarea": "Varias líneas de texto. Para grandes cantidades de texto. Útil para descripciones o notas.",
+				"time": "Un valor de tiempo. Se usa cuando solo se necesitan horas/minutos/segundos, independientemente de la fecha.",
+				"uuid": "Valor de identificador único universal (UUIDv4). Es extremadamente improbable que los UUID existan dos veces, independientemente del sistema en el que se originaron. Se utilizan principalmente para identificar o referenciar registros de manera única en sistemas desconectados."
+			}
+		},
+		"backHint": "Volver a la vista general de la aplicación",
+		"clientEvent": {
+			"action": {
+				"callJsFunction": "Ejecutar función de frontend",
+				"callPgFunction": "Ejecutar función de backend"
+			},
+			"arguments": {
+				"clipboard": "Contenido del portapapeles, nulo si está vacío",
+				"hostname": "Nombre del host del ordenador que ejecuta el cliente",
+				"username": "Nombre de usuario del usuario actualmente conectado",
+				"windowTitle": "Título de la ventana actualmente abierta"
+			},
+			"argumentsHint": "Los argumentos son proporcionados por la aplicación cliente a la función elegida, en el orden definido aquí.",
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar este evento del cliente?"
+			},
+			"event": {
+				"onConnect": "El cliente se conecta",
+				"onDisconnect": "El cliente se desconecta",
+				"onHotkey": "El cliente reacciona a la tecla de acceso rápido"
+			},
+			"hotkeyHint": "Tecla de acceso rápido predeterminada a la que escucha este evento del cliente. Puede ser sobrescrita por los usuarios en sus configuraciones personales.",
+			"title": "Evento del cliente",
+			"titleHint": "Visible para los usuarios en sus configuraciones personales.",
+			"titleNew": "Nuevo evento del cliente"
+		},
+		"collection": {
+			"columnSettings": "Configuración de columnas",
+			"columnsAvailable": "Columnas disponibles",
+			"columnsTarget": "Columnas activas",
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar esta colección?"
+			},
+			"inHeader": "Mostrar en el encabezado",
+			"new": "Nueva colección",
+			"previewHint": "Valores de la colección para el usuario conectado. Las colecciones se recuperan al cargar la página (F5 para recargar) si están habilitadas dentro de los roles asignados.",
+			"query": "Consulta",
+			"title": "Colecciones",
+			"titleOne": "Colección '{NAME}'"
+		},
+		"collectionInput": {
+			"collection": "Colección",
+			"column": "Valor(es) de la columna",
+			"formIdOpen": "Abrir formulario",
+			"multiValue": "Entrada múltiple",
+			"noDisplayEmpty": "Ocultar si está vacío",
+			"onMobile": "Mostrar en móvil",
+			"showRowCount": "Mostrar recuento de resultados en su lugar"
+		},
+		"form": {
+			"actions": {
+				"jsFunctionId": "Execute frontend function",
+				"warning": {
+					"noJsFunction": "At least one action has no frontend function assigned."
+				}
+			},
+			"aggregator": "Aggregate",
+			"autoRenew": "Auto refresh",
+			"autoRenew0": "not active",
+			"autoRenewHint": "in seconds",
+			"autoSelect": "Auto select records",
+			"autoSelectHint": "0=off, 2=first two, -3=last three",
+			"button": {
+				"columnsAll": "All columns",
+				"layoutColumns": "{CNT} columns"
+			},
+			"category": "Category selector",
+			"chart": {
+				"axisType": "Axis type",
+				"axisTypeCategory": "Category",
+				"axisTypeLog": "Log",
+				"axisTypeTime": "Time",
+				"axisTypeValue": "Value",
+				"help": "Charts are created with <a href=\"https://echarts.apache.org/en/index.html\" target=\"_blank\">Apache ECharts</a>. A dataset source is filled by the field data query; values are referenced by column index (0 is the first column). Other series types (besides bar, line, ...) can be used (see <a href=\"https://echarts.apache.org/en/option.html\" target=\"_blank\">ECharts options</a>).",
+				"serieColumnTooltip": "Column for tooltip",
+				"serieColumnX": "Column for X axis",
+				"serieColumnY": "Column for Y axis",
+				"serieTypeBar": "Bar",
+				"serieTypeLine": "Line",
+				"serieTypePie": "Pie",
+				"serieTypeScatter": "Scatter",
+				"series": "Series"
+			},
+			"collectionHint": "*Collection is only affected if selected as filter criteria in data query.",
+			"collectionIdDef": "Default value(s) from collection",
+			"collectionTitle": "Filter collection",
+			"columnBatch": "Column batch (drag&drop columns to expand)",
+			"columnBatchDir": "Column alignment (left-right, up-down)",
+			"columnBatchOff": "Remove column from batch",
+			"columnBoolAtrIcon": "Show attribute icon if TRUE",
+			"columnClipboard": "Clipboard",
+			"columnHeaderData": "Data retrieval",
+			"columnLength": "Length (chars.)",
+			"columnLength0": "no limit",
+			"columnLengthFiles": "File count",
+			"columnPreviewLarge": "Large preview",
+			"columnShowDefault": "Show by default",
+			"columnShowDefaultMobile": "Show by default on mobile",
+			"columnShowDefaultMobileOff": "Not shown by default on mobile",
+			"columnShowDefaultOff": "Not shown by default",
+			"columnSize": "Size (pixel)",
+			"columnSize0": "automatic",
+			"columnTitle": "Title",
+			"columnWrap": "Text wrap",
+			"containerContent": "Container content",
+			"csvExport": "CSV export",
+			"csvImport": "CSV import",
+			"date0": "Date from",
+			"date1": "Date to",
+			"dateColor": "Color",
+			"dateRange0": "Events days before",
+			"dateRange1": "Events days after",
+			"dateRangeHint": "relative to current date",
+			"days": "Default view",
+			"daysToggle": "User can change view",
+			"dialog": {
+				"delete": "Are you sure you want to delete this form?"
+			},
+			"display": "Display",
+			"distincted": "Distinct",
+			"dragDrop": "Place fields here via drag & drop from the selection on the right to add them to the form.",
+			"effectData": {
+				"d-1": "nothing",
+				"d0": "default",
+				"d1": "delete",
+				"d2": "update",
+				"d3": "update + delete",
+				"d4": "create",
+				"d5": "create + delete",
+				"d6": "create + update",
+				"d7": "create + update + delete"
+			},
+			"error": {
+				"formStateFieldRemovedCondition": "Deleted field is still referenced as condition of form state '{NAME}'.",
+				"formStateFieldRemovedEffect": "Deleted field is still referenced as effect of form state '{NAME}'."
+			},
+			"fieldAttributeIdAltDateTo": "Date to (period)",
+			"fieldAttributeIdAltRichtextFiles": "Richtext file access",
+			"fieldDefault": "Default value",
+			"fieldDefaultPresetIds": "Default preset(s)",
+			"fieldDirection": "Direction",
+			"fieldHelp": "Help text",
+			"fieldIcon": "Field icon",
+			"fieldIdFocus": "Set field focus on load",
+			"fieldMax": "Max. value/length",
+			"fieldMin": "Min. value/length",
+			"fieldMoveInside": "Move selected field inside this field",
+			"fieldMoveSource": "Move this field",
+			"fieldMoveTarget": "Move selected field after this field",
+			"fieldOptions": "Field options",
+			"fieldRegexCheck": "Validate with RegEx",
+			"fieldSize": "Base size (pixel)",
+			"fieldSize0": "automatic",
+			"fields": "Fields",
+			"fieldsEditInputs": "Edit inputs",
+			"fileExt": "File extension",
+			"fileName": "File name",
+			"fileSize": "File size",
+			"filterExpert": "Expert filter",
+			"filterQuick": "Quick filter",
+			"flexAlignContent": "Align content",
+			"flexAlignContentHint": "Place lines within cross axis (if container can wrap & content has multiple lines)",
+			"flexAlignItems": "Align items",
+			"flexAlignItemsHint": "Place container content on the cross axis",
+			"flexJustifyContent": "Justify content",
+			"flexJustifyContentHint": "Place container content on the main axis",
+			"flexSizeGrow": "Grow factor",
+			"flexSizeMax": "Grows to (percent)",
+			"flexSizeMin": "Shrinks to (percent)",
+			"flexSizeShrink": "Shrink factor",
+			"flexWrap": "Wrap content",
+			"formTitle": "Form title",
+			"functions": {
+				"event": "Event",
+				"help": {
+					"formLoadedAfter": "This event is executed after a form is opened and the current form record has been loaded. It´s also executed when no form record exists (if new record or form does not handle records at all).<br /><br />This event is also executed after a record is saved or deleted, as the form reloads after these actions; in these cases, first the 'record saved/deleted' events are handled and then the event 'form loaded'.<br /><br />This event can be used to overwrite values of existing records or set default values for new records.",
+					"formLoadedBefore": "This event is executed when a form is opened, but before the current form record is being loaded. It´s also executed when no form record exists (if new record or form does not handle records at all).<br /><br />This event is also executed after a record is saved or deleted, as the form reloads after these actions; in these cases, first the 'record saved/deleted' events are handled and then the event 'form loaded'.<br /><br />Be aware that field values, changed by this event, are immediately overwritten when the form loads its record. To overwrite values of an existing record, use the 'after form loaded' event.",
+					"recordDeletedAfter": "This event is executed after a user successfully deleted the current form record.",
+					"recordDeletedBefore": "This event is executed when a user attempts to delete the current form record, but before the deletion is being executed on the server.",
+					"recordSavedAfter": "This event is executed after a user successfully executes a save of the form record. This works for both new & existing records.<br /><br />Because a record is reloaded after a successful save, the event 'form loaded' is also executed after this event is finished.",
+					"recordSavedBefore": "This event is executed when a user attempts to save the current form record, but before changes are being sent to the server. This works for both new & existing records.<br /><br />This event is useful if record values need to be overwritten before being sent to the server.<br /><br />If a change log is used, overwritten values will still be shown as applied by the current user."
+				},
+				"jsFunctionId": "Execute frontend function",
+				"option": {
+					"delete": "Form record deleted",
+					"open": "Form loaded",
+					"save": "Form record saved"
+				},
+				"warning": {
+					"noJsFunction": "At least one event has no frontend function assigned."
+				}
+			},
+			"gantt": "Gantt",
+			"ganttBatch": "Gantt group",
+			"ganttNotes": "First column batch groups results.",
+			"ganttSteps": "Gantt interval",
+			"ganttStepsToggle": "Gantt interval toggle",
+			"groupBy": "Group by",
+			"headerRichtext": "Richtext",
+			"headerSize": "Size",
+			"helpText": "Help text",
+			"hidden": "Field is hidden by default",
+			"hideInputs": "Hide inputs",
+			"icon": "Form icon",
+			"ics": "iCAL subscriptions",
+			"jsFunctionButton": "Function on click",
+			"jsFunctionData": "Function on value change",
+			"kanban": {
+				"attributeIdSort": "Card sort attribute (optional)",
+				"attributeIdSortHelp": "If used, this attribute value will be updated for the Kanban card record according to the position of the card within the Kanban column. This enables users to keep card orders inside Kanbans.<br /><br />To make use of this feature, the field content should be sorted by this attribute in ascending order; it is valid to first order by a Kanban column/row value and then by the card sort attribute.<br /><br />If the same records are accessed in multiple Kanbans with other columns/rows, a different sort attribute is required - otherwise card sorting will be incorrect as its context-dependent on the Kanban layout.",
+				"columnBatchX": "Kanban column (relation: '{REL}')",
+				"columnBatchY": "Kanban row (relation: '{REL}')",
+				"relationIndexAxisX": "Kanban columns",
+				"relationIndexAxisXHelp": "Relation from which every available record is used as a Kanban column. This relation needs to be joined n:1 to the Kanban cards relation.<br /><br />By moving cards between Kanban columns, the relationship value is being updated.<br /><br />Within the field data selection, values from the first batched column are used as Kanban column labels.",
+				"relationIndexAxisY": "Kanban rows (optional)",
+				"relationIndexAxisYHelp": "Relation from which every available record is used as a Kanban row. If used, the Kanban becomes two-dimensional (columns & rows). This relation needs to be joined n:1 to the Kanban cards relation.<br /><br />By moving cards between Kanban rows, the relationship value is being updated.<br /><br />Within the field data selection, values from the second batched column are used as Kanban row labels.",
+				"relationIndexData": "Kanban cards",
+				"relationIndexDataHelp": "Relation from which every available record is displayed as a Kanban card. The card can show values from other, joined relations - but for the card itself, there must be a record from the chosen relation.<br /><br />Within the field data selection, values from column batches (not assigned to Kanban column/row) are displayed on the Kanban card."
+			},
+			"layout": "List layout",
+			"layoutCreate": "Create simple layout:",
+			"limit": "Result count",
+			"new": "New form",
+			"noDataActions": "No data actions",
+			"onMobile": "In mobile view",
+			"openForm": "Open form",
+			"openFormBulk": "Open form<br />(bulk editing)",
+			"option": {
+				"dataOptions": "Overwrite relation settings",
+				"display": {
+					"color": "color",
+					"default": "default",
+					"email": "email",
+					"gallery": "gallery",
+					"hidden": "hidden",
+					"login": "user (deprecated)",
+					"password": "password",
+					"phone": "telephone",
+					"rating": "rating",
+					"slider": "value slider",
+					"url": "URL"
+				},
+				"effectField": "Field",
+				"effectFormAction": "Action",
+				"effectTab": "Tab",
+				"ganttStepsDays": "days",
+				"ganttStepsHours": "hours",
+				"style": {
+					"bold": "Bold",
+					"italic": "Italic"
+				}
+			},
+			"presetOpen": "Open preset",
+			"readonly": "Read only",
+			"required": "Required",
+			"scale": "UI scale",
+			"sidebarField": "Field: {NAME}",
+			"sidebarFieldColumn": "Column: {NAME}",
+			"sidebarFieldColumns": "Available columns",
+			"sidebarForm": "Form",
+			"state": "State",
+			"stateDefault": "default",
+			"stateHidden": "hidden",
+			"stateOptional": "optional",
+			"stateReadonly": "readonly",
+			"stateRequired": "required",
+			"states": {
+				"conditions": "Conditions",
+				"descriptionHint": "Description",
+				"effects": "Effects",
+				"option": {
+					"filterFieldIdHint": "By field",
+					"filterFormActionIdHint": "By action",
+					"filterTabIdHint": "By tab"
+				}
+			},
+			"subQuery": "Sub query",
+			"subQueryAttribute": "Attribute",
+			"systemDefaults": {
+				"false": "'No' value",
+				"fixed": "Custom value",
+				"true": "'Yes' value",
+				"{CURR_DATETIME}": "Current date & time",
+				"{CURR_DATE_DD}": "Current day as number, as in 31",
+				"{CURR_DATE_MM}": "Current month as number, as in 12 (January = 1, December = 12)",
+				"{CURR_DATE_YYYY}": "Current year as number, as in 1921",
+				"{CURR_DATE}": "Current date",
+				"{CURR_TIME}": "Current time"
+			},
+			"tabActions": "Actions ({CNT})",
+			"tabContentCounter": "Counter",
+			"tabContentCounterHint": "Shows aggregated count of field values in tab title (list rows, file counts, etc.)",
+			"tabFunctions": "Functions ({CNT})",
+			"tabStates": "States ({CNT})",
+			"tabs": "Tabs",
+			"title": "Forms",
+			"titleOne": "Form '{NAME}'",
+			"warning": {
+				"calendarNoDateFromTo": "No attribute selected for 'date from' or 'date to'. Both are required for a calendar field to work.",
+				"columnNoSubQueryAttribute": "No relation & attribute chosen for a sub query column.",
+				"joinN1": "Joining relations on a form serves to update multiple, connected records at the same time. However, a form can only handle a single record per relation.<br /><br />Using a 1:n relationship for a join can lead to multiple records being available on a single relation. If this happens, the form will show an error.<br /><br />Using 1:n relationships for joins is valid, if the form content is being filtered so that each relation can never have more than 1 record.",
+				"joinN1Hint": "Warning! 1:n join detected in form content",
+				"queryColumnsNotSet": "No displayed columns. Add any column to show data.",
+				"queryRelationNotSet": "No relation selected. Field has no access to data."
+			}
+		},
+		"function": {
+			"attributeNotNull": "{ATR} (debe tener valor)",
+			"button": {
+				"addNew": "Prefijo NUEVO",
+				"addOld": "Prefijo ANTIGUO",
+				"clear": "Borrar selección",
+				"details": "Detalles",
+				"template": "Plantilla"
+			},
+			"code": "Cuerpo de la función",
+			"codeArgs": "Argumentos",
+			"codeArgsHintJs": "opcional, 'var1, var2, ...'",
+			"codeArgsHintPg": "opcional, 'var1 integer, var2 bool, ...'",
+			"codeReturns": "Devuelve",
+			"codeReturnsHintJs": "opcional, 'number', 'array',...",
+			"codeReturnsHintPg": "'text', 'integer',...",
+			"collectionId": "[Seleccionar colección]",
+			"dialog": {
+				"delete": "¿Estás seguro de que deseas eliminar esta función?"
+			},
+			"entityInput": "Selecciona un marcador de posición y haz clic en el cuerpo de la función para usar la sintaxis <b>segura para actualizaciones</b>.",
+			"exec": "Ejecutar",
+			"execResponse": "Respuesta",
+			"fieldsOnlyData": "Solo datos",
+			"form": "Asignado al formulario",
+			"functionsBackend": "Funciones de backend",
+			"functionsFrontend": "Funciones de frontend",
+			"helpJs": {
+				"block_inputs": "app.block_inputs({ARGS}) => UNDEFINED<br /><br />Bloquea o desbloquea todas las entradas en el formulario actual.",
+				"client_execute_keystrokes": "app.client_execute_keystrokes({ARGS}) => UNDEFINED<br /><br />Envía una solicitud a un cliente REI3, instalado y ejecutándose en el mismo ordenador que la sesión del navegador REI3, para ejecutar una lista de pulsaciones de teclas. Estas pulsaciones se definen mediante una cadena, como 'Hola Mundo!'.<br /><br />Algunas teclas especiales (ALT-TAB, TAB, ENTER, ESCAPE) también son compatibles y se pueden usar de la siguiente manera:<br />'Hola,{ENTER}¿Cómo estás?'",
+				"collection_update": "app.collection_update({ARGS}) => UNDEFINED<br /><br />Actualiza los valores para la colección especificada.",
+				"copy_to_clipboard": "app.copy_to_clipboard({ARGS}) => UNDEFINED<br /><br />Copia texto al portapapeles del usuario.",
+				"dialog_show": "app.dialog_show({ARGS}) => PROMISE<br /><br />Muestra un cuadro de diálogo con el título y contenido especificados. El título es una cadena de texto simple, mientras que el contenido puede ser texto o HTML.<br /><br />Los botones se definen mediante una lista de cadenas. Si no se definen, se muestra un simple botón de OK.<br /><br />El valor devuelto es el índice del botón clicado. Así que si se hace clic en el primer botón, el valor será 0. Si se hace clic en el segundo botón, será 1 y así sucesivamente.<br /><br /><b>Ejemplo</b><br />app.dialog_show(<blockquote>'Por favor confirma',<br />'¿Realmente deseas eliminar este elemento?',<br />['Sí', 'Cancelar acción']</blockquote>).then(<blockquote>res => { if(res === 0) { console.log('¡clic en Sí!'); } }</blockquote>);",
+				"form_close": "app.form_close() => UNDEFINED<br /><br />Cierra el formulario (si es flotante o subformulario), de lo contrario, retrocede en el historial del navegador.",
+				"form_open": "app.form_open({ARGS}) => UNDEFINED<br /><br />Abre un formulario directamente, en una nueva pestaña del navegador o como ventana emergente.<br /><br />El nuevo formulario, si se abre directamente (no como pestaña o ventana emergente), se añade al historial del navegador a menos que el argumento 'replace_history' esté configurado en 'true'.",
+				"form_set_title": "app.form_set_title({ARGS}) => UNDEFINED<br /><br />Sobrescribe el título actual del formulario. Establecer en <i>null</i> para restablecerlo al título original del formulario.",
+				"form_show_message": "app.form_show_message({ARGS}) => UNDEFINED<br /><br />Reemplaza temporalmente el título del formulario con un mensaje personalizado. El segundo argumento define en milisegundos cuánto tiempo se muestra el mensaje (3000 por defecto).",
+				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Descifra la clave de datos proporcionada con la clave privada del usuario actual.",
+				"get_e2ee_data_value": "app.get_e2ee_data_value({ARGS}) => STRING<br /><br />Descifra el valor de los datos con la clave de datos proporcionada.",
+				"get_language_code": "app.get_language_code() => STRING<br /><br />Devuelve el código de idioma de 5 letras ('en_us', ...) del usuario actual.",
+				"get_preset_record_id": "app.get_preset_record_id({ARGS}) => INTEGER<br /><br />Devuelve el ID del registro que está asociado con el preajuste dado.",
+				"get_record_id": "app.get_record_id({ARGS}) => NUMBER|ARRAY<br /><br />Devuelve el ID del registro del formulario abierto para el índice de relación especificado (0 es el predeterminado).<br /><br />Si el formulario se usa en modo de edición masiva, solo están disponibles los IDs de registro del índice de relación 0; en este caso, se devuelve una matriz con todos los IDs de registro utilizados.",
+				"get_role_ids": "app.get_role_ids() => ARRAY<br /><br />Devuelve todos los IDs de roles asignados al usuario actual (se incluyen roles anidados).",
+				"get_url_query_string": "app.get_url_query_string() => STRING<br /><br />Devuelve los parámetros de consulta actuales, como:<br />'?arg1=hola&arg2=mundo'",
+				"get_user_id": "app.get_user_id() => NUMBER<br /><br />Devuelve el ID del usuario actual.",
+				"go_back": "app.go_back() => UNDEFINED<br /><br />Ejecuta una navegación hacia atrás en el navegador.",
+				"has_role": "app.has_role({ARGS}) => BOOLEAN<br /><br />Devuelve verdadero si el usuario actual tiene el rol asignado (se incluyen roles anidados).",
+				"logoff": "app.logoff() => UNDEFINED<br /><br />Cierra la sesión del usuario actual. Esto resulta en que se muestre la página de inicio de sesión y el usuario se vea obligado a autenticarse nuevamente para continuar.<br /><br />Después de la reautenticación, se mostrará el formulario previamente abierto. Si esto no es deseado, abre otro formulario primero y luego ejecuta el cierre de sesión.",
+				"pdf_create": "app.pdf_create({ARGS}) => PROMISE<br /><br />Genera un archivo PDF a partir de las plantillas HTML y estilos CSS dados. Parámetros:<ul><li>filename: Cualquier nombre de archivo que termine en '.pdf'</li><li>pageFormat: Formato de página, como: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' o 'landscape'</li><li>pageMarginX: Márgenes horizontales de la página en píxeles, ya sea un solo número (lado izquierdo y derecho) o una matriz (el primer valor es el lado izquierdo, el segundo valor es el lado derecho)</li><li>pageMarginY: Márgenes verticales de la página en píxeles, ya sea un solo número (parte superior e inferior) o una matriz (el primer valor es la parte superior, el segundo valor es la parte inferior)</li><li>htmlHeader: Plantilla HTML, aplicada en la parte superior de cada página</li><li>htmlBody: Plantilla HTML, llena el documento</li><li>htmlFooter: Plantilla HTML, aplicada en la parte inferior de cada página</li><li>cssStyles: Reglas CSS, aplicadas a las plantillas HTML</li><li>attachAttributeId: Opcional, ver abajo.</li><li>attachRecordId: Opcional, ver abajo.</li></ul>Por defecto, el documento PDF se genera en una nueva ventana, en la que el usuario puede ver una vista previa y descargar el archivo. Si se establecen tanto 'attachAttributeId' como 'attachRecordId', el archivo PDF se adjunta inmediatamente al atributo de archivos elegido del registro elegido.<br /><br />Los marcadores de posición '{PAGE_CUR}' y '{PAGE_END}' se pueden usar tanto en las plantillas HTML de encabezado como de pie de página para mostrar los números de página actuales y totales.",
+				"record_delete": "app.record_delete() => UNDEFINED<br /><br />Elimina el registro actual del formulario.",
+				"record_new": "app.record_new() => UNDEFINED<br /><br />Abre un nuevo registro.",
+				"record_reload": "app.record_reload() => UNDEFINED<br /><br />Recarga el registro actual del formulario.",
+				"record_save": "app.record_save() => UNDEFINED<br /><br />Guarda el registro actual del formulario.",
+				"record_save_new": "app.record_save_new() => UNDEFINED<br /><br />Guarda el registro actual del formulario y luego abre un nuevo registro.",
+				"set_e2ee_by_user_ids": "app.set_e2ee_by_user_ids({ARGS}) => UNDEFINED<br /><br />Cuando se llama, el cifrado de extremo a extremo se actualiza en el próximo guardado del formulario. Las claves de datos para las relaciones en el formulario con cifrado habilitado se cifrarán con la clave pública de cada usuario definido. Esto permite la posterior descifrado de estos registros para los usuarios.<br /><br />Si no se usa esta función, el descifrado solo es posible para el creador.",
+				"set_e2ee_by_user_ids_and_relation": "app.set_e2ee_by_user_ids_and_relation({ARGS}) => UNDEFINED<br /><br />Cuando se llama, el cifrado de extremo a extremo se actualiza para la relación y los registros especificados en el próximo guardado del formulario. Las claves de datos para los registros de la relación se cifrarán con la clave pública de cada usuario definido. Esto permite la posterior descifrado de estos registros para los usuarios.",
+				"timer_clear": "app.timer_clear({ARGS}) => UNDEFINED<br /><br />Aborta un temporizador con el nombre dado, previamente creado con 'app.timer_set()'.",
+				"timer_clear_global": "app.timer_clear_global({ARGS}) => UNDEFINED<br /><br />Aborta un temporizador global con el nombre dado, previamente creado con 'app.timer_set_global()'.",
+				"timer_set": "app.timer_set({ARGS}) => UNDEFINED<br /><br />Ejecuta una función dada después de un tiempo especificado en milisegundos. Si 'isInterval' está configurado en TRUE, la función se llama repetidamente.<br /><br />Un temporizador siempre está vinculado al formulario actual. Al restablecer o salir del formulario, los temporizadores también se restablecen.<br /><br />Cada temporizador debe tener un nombre único, que se puede usar para abortar el temporizador más tarde con 'timer_clear()'; los temporizadores con el mismo nombre se sobrescriben entre sí.",
+				"timer_set_global": "app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Ejecuta una función dada después de un tiempo especificado en milisegundos. Si 'isInterval' está configurado en TRUE, la función se llama repetidamente.<br /><br />Un temporizador global continúa incluso si el contexto actual (como un formulario desde el cual se inició) se cierra.<br /><br />Cada temporizador debe tener un nombre único, que se puede usar para abortar el temporizador más tarde con 'timer_clear_global()'; los temporizadores globales con el mismo nombre, de la misma aplicación, se sobrescriben entre sí."
+			},
+			"helpJsArgs": {
+				"block_inputs": [
+					"block_input BOOLEAN"
+				],
+				"client_execute_keystrokes": [
+					"keystrokes STRING"
+				],
+				"collection_update": [
+					"collection_id NUMBER"
+				],
+				"copy_to_clipboard": [
+					"value STRING"
+				],
+				"dialog_show": [
+					"title STRING",
+					"content STRING",
+					"buttons ARRAY"
+				],
+				"form_open": [
+					"form_id STRING",
+					"record_id NUMBER",
+					"new_tab BOOLEAN",
+					"pop_up BOOLEAN",
+					"max_height NUMBER",
+					"max_width NUMBER",
+					"replace_history BOOLEAN"
+				],
+				"form_set_title": [
+					"title STRING"
+				],
+				"form_show_message": [
+					"message STRING",
+					"milliseconds NUMBER"
+				],
+				"get_e2ee_data_key": [
+					"data_key_encrypted STRING"
+				],
+				"get_e2ee_data_value": [
+					"data_key STRING",
+					"data_value_encrypted STRING"
+				],
+				"get_preset_record_id": [
+					"preset_id STRING"
+				],
+				"get_record_id": [
+					"relation_index NUMBER"
+				],
+				"has_role": [
+					"role_id STRING"
+				],
+				"pdf_create": [
+					"filename STRING",
+					"page_format STRING",
+					"page_orientation STRING",
+					"page_marginX NUMBER || ARRAY",
+					"page_marginY NUMBER || ARRAY",
+					"html_header STRING",
+					"html_body STRING",
+					"html_footer STRING",
+					"css_styles STRING",
+					"attach_attribute_id STRING",
+					"attach_record_id NUMBER"
+				],
+				"set_e2ee_by_user_ids": [
+					"user_ids ARRAY"
+				],
+				"set_e2ee_by_user_ids_and_relation": [
+					"user_ids ARRAY",
+					"relation_id STRING",
+					"record_ids ARRAY"
+				],
+				"timer_clear": [
+					"name STRING"
+				],
+				"timer_clear_global": [
+					"name STRING"
+				],
+				"timer_set": [
+					"name STRING",
+					"is_interval BOOLEAN",
+					"function FUNCTION",
+					"milliseconds NUMBER"
+				],
+				"timer_set_global": [
+					"name STRING",
+					"is_interval BOOLEAN",
+					"function FUNCTION",
+					"milliseconds NUMBER"
+				]
+			},
+			"helpPg": {
+				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />Aborta la operación y envía un mensaje al usuario que se muestra en la interfaz de usuario.",
+				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Elimina las claves de datos de cifrado de extremo a extremo para los registros a los que un usuario ya no tiene acceso. Esto hace que el descifrado sea imposible para el usuario.",
+				"file_link": "instance.file_link({ARGS}) => VOID<br /><br />Vincula un archivo existente a otro registro (agregado al atributo de archivo elegido). Este enlace es un enlace físico, lo que significa que se accede al mismo archivo.<br /><br />Al renombrar o eliminar el archivo, el cambio solo afecta al enlace del archivo. Independientemente de la eliminación, el archivo real se mantiene mientras exista al menos un enlace de archivo.",
+				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Desvincula un archivo existente del atributo de archivos de un registro especificado. El enlace eliminado es un enlace físico, lo que significa que el archivo real se mantiene mientras esté vinculado al menos a otro atributo de archivos de registros.",
+				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]<br /><br />Devuelve metadatos para archivos del atributo de archivo elegido y del registro (puede incluir archivos eliminados opcionalmente).<br /><br />El tipo devuelto 'instance.file_meta' consiste en:<blockquote>id UUID,<br />user_id_creator INTEGER,<br />hash TEXT,<br />name TEXT,<br />size_kb INTEGER,<br />version INTEGER,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
+				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Devuelve la clave de datos cifrada para el registro de relación dado y el usuario elegido. Las claves de datos existen para registros individuales para cada usuario que tiene acceso a ellos. Se pueden descifrar en el frontend con la clave privada del usuario asociado.",
+				"get_language_code": "instance.get_language_code() => TEXT<br /><br />Devuelve el código de idioma de 5 letras ('en_us', ...) del usuario, que se utiliza para acceder al backend de datos.",
+				"get_name": "instance.get_name() => TEXT<br /><br />Devuelve el nombre de la instancia, definido en la ventana de personalización del panel de administración.",
+				"get_preset_record_id": "instance.get_preset_record_id({ARGS}) => INTEGER<br /><br />Devuelve el ID del registro que está asociado con el preajuste dado.",
+				"get_public_hostname": "instance.get_public_hostname() => TEXT<br /><br />Devuelve el nombre del host público de la instancia, definido en la configuración del sistema.",
+				"get_role_ids": "instance.get_role_ids({ARGS}) => UUID[]<br /><br />Obtiene una matriz de IDs de roles asignados al usuario especificado.<br /><br />Si 'inherited' está configurado en TRUE, se incluyen los roles principales. Las membresías anidadas se resuelven completamente.",
+				"get_user_id": "instance.get_user_id() => INTEGER<br /><br />Devuelve el ID del usuario que está ejecutando la operación.",
+				"has_role": "instance.has_role({ARGS}) => BOOLEAN<br /><br />Devuelve si el usuario especificado tiene asignado el ID de rol especificado. <br /><br />Si 'inherited' está configurado en TRUE, se incluyen los roles principales. Las membresías anidadas se resuelven completamente.<br /><br />Ejemplo: SELECT instance.has_role(1,'00000000-0000-0000-0000-000000000001',FALSE)",
+				"has_role_any": "instance.has_role_any({ARGS}) => BOOLEAN<br /><br />Devuelve si el usuario especificado tiene asignado alguno de los IDs de rol especificados. <br /><br />Si 'inherited' está configurado en TRUE, se incluyen los roles principales. Las membresías anidadas se resuelven completamente.<br /><br />Ejemplo: SELECT instance.has_role_any(1,ARRAY['00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002']::UUID[],FALSE)",
+				"log_error": "instance.log_error({ARGS}) => VOID<br /><br />Registra un mensaje de error. Si se puede resolver el nombre de la aplicación, el registro se asocia con ella.",
+				"log_info": "instance.log_info({ARGS}) => VOID<br /><br />Registra un mensaje informativo. Si se puede resolver el nombre de la aplicación, el registro se asocia con ella.",
+				"log_warning": "instance.log_warning({ARGS}) => VOID<br /><br />Registra un mensaje de advertencia. Si se puede resolver el nombre de la aplicación, el registro se asocia con ella.",
+				"mail_delete": "instance.mail_delete({ARGS}) => INTEGER<br /><br />Elimina el correo electrónico especificado, incluidos los archivos adjuntos.",
+				"mail_delete_after_attach": "instance.mail_delete_after_attach({ARGS}) => INTEGER<br /><br />Marca los archivos adjuntos del correo electrónico para que se agreguen a un atributo de archivo del registro especificado; el correo electrónico y sus archivos adjuntos se eliminan posteriormente.",
+				"mail_get_next": "instance.mail_get_next({ARGS}) => instance.mail<br /><br />Devuelve el siguiente correo electrónico entrante del spooler de correo; devuelve NULL si no hay correos electrónicos disponibles. Cuando se especifica un nombre de cuenta, devuelve solo los correos recibidos con la cuenta dada.<br /><br />El tipo devuelto 'instance.mail' consiste en:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>Después de procesar un correo electrónico, debe eliminarse; ya sea directamente (mail_delete) o después de almacenar sus archivos adjuntos (mail_delete_after_attach).",
+				"mail_send": "instance.mail_send({ARGS}) => INTEGER<br /><br />Genera un correo electrónico saliente para el spooler de correo. Parámetros opcionales:<ul><li>Lista separada por comas de destinatarios TO/CC/BCC (se debe establecer uno de estos)</li><li>Nombre de la cuenta de correo desde la cual enviar (se usa una cuenta aleatoria si no se especifica)</li><li>Atributo de archivo y registro desde los cuales adjuntar archivos</li></ul>",
+				"rest_call": "instance.rest_call({ARGS}) => INTEGER<br /><br />Agrega una llamada HTTP REST al spooler interno para su ejecución inmediata. Los métodos compatibles son: DELETE, GET, PATCH, POST, PUT.<br /><br />La URL puede incluir parámetros de consulta si es necesario.<br /><br />Los encabezados deben proporcionarse como JSONB: cada par clave-valor resultará en un encabezado.<br /><br />La verificación de validez para TLS/SSL se puede desactivar si es necesario.<br /><br />Si la respuesta REST necesita ser procesada, se puede establecer otra función de backend para la devolución de llamada. Esta función de devolución de llamada debe tener tres argumentos: INTEGER (para el código de estado HTTP), TEXT (cuerpo de la respuesta HTTP), TEXT (valor de devolución de llamada).<br /><br />Si se establece un 'valor de devolución de llamada' en instance.rest_call(...), se pasará a la función de devolución de llamada; esto es útil cuando se deben ejecutar múltiples llamadas en orden (como autenticación antes de una llamada de datos).",
+				"update_collection": "instance.update_collection({ARGS}) => INTEGER<br /><br />Informa a los clientes conectados para actualizar la colección especificada. Si se dan IDs de usuario, solo los clientes que pertenecen a estos usuarios se ven afectados.",
+				"user_meta_set": "instance.user_meta_set({ARGS}) => INTEGER<br /><br />Establece metadatos para el usuario elegido.",
+				"user_sync_all": "instance.user_sync_all({ARGS}) => INTEGER<br /><br />Ejecuta una sincronización de todos los metadatos de usuario con la función de backend definida.<br /><br />Útil para sincronizar usuarios preexistentes con una aplicación después de que se haya instalado.<br /><br />Para que funcione, se debe establecer una función de sincronización de usuarios en la página de configuración de la aplicación en el Constructor; el ID de la aplicación requerido también se puede encontrar allí."
+			},
+			"helpPgArgs": {
+				"abort_show_message": [
+					"message TEXT"
+				],
+				"clean_up_e2ee_keys": [
+					"user_id INTEGER",
+					"relation_id UUID",
+					"record_ids_access INTEGER[]"
+				],
+				"file_link": [
+					"file_id UUID",
+					"file_name TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT"
+				],
+				"file_unlink": [
+					"file_id UUID",
+					"attribute_id UUID",
+					"record_id BIGINT"
+				],
+				"files_get": [
+					"attribute_id UUID",
+					"record_id BIGINT",
+					"include_deleted BOOLEAN DEFAULT FALSE"
+				],
+				"get_e2ee_data_key_enc": [
+					"user_id INTEGER",
+					"relation_id UUID",
+					"record_id BIGINT"
+				],
+				"get_preset_record_id": [
+					"preset_id UUID"
+				],
+				"get_role_ids": [
+					"user_id INTEGER",
+					"inherited BOOLEAN DEFAULT FALSE"
+				],
+				"has_role": [
+					"user_id INTEGER",
+					"role_id UUID",
+					"inherited BOOLEAN DEFAULT FALSE"
+				],
+				"has_role_any": [
+					"user_id INTEGER",
+					"role_ids UUID[]",
+					"inherited BOOLEAN DEFAULT FALSE"
+				],
+				"log_error": [
+					"message TEXT",
+					"app_name TEXT DEFAULT NULL"
+				],
+				"log_info": [
+					"message TEXT",
+					"app_name TEXT DEFAULT NULL"
+				],
+				"log_warning": [
+					"message TEXT",
+					"app_name TEXT DEFAULT NULL"
+				],
+				"mail_delete": [
+					"mail_id INTEGER"
+				],
+				"mail_delete_after_attach": [
+					"mail_id INTEGER",
+					"attach_record_id INTEGER",
+					"attach_attribute_id UUID"
+				],
+				"mail_get_next": [
+					"account_name TEXT DEFAULT NULL"
+				],
+				"mail_send": [
+					"subject TEXT",
+					"body TEXT",
+					"to_list TEXT DEFAULT ''",
+					"cc_list TEXT DEFAULT ''",
+					"bcc_list TEXT DEFAULT ''",
+					"account_name TEXT DEFAULT NULL",
+					"attach_record_id INTEGER DEFAULT NULL",
+					"attach_attribute_id UUID DEFAULT NULL"
+				],
+				"rest_call": [
+					"method TEXT",
+					"url TEXT",
+					"body TEXT",
+					"headers JSONB DEFAULT NULL",
+					"tls_skip_verify BOOLEAN DEFAULT FALSE",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
+				"update_collection": [
+					"collection_id",
+					"user_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]"
+				],
+				"user_meta_set": [
+					"user_id INTEGER",
+					"department TEXT",
+					"email TEXT",
+					"location TEXT",
+					"name_display TEXT",
+					"name_fore TEXT",
+					"name_sur TEXT",
+					"notes TEXT",
+					"organization TEXT",
+					"phone_fax TEXT",
+					"phone_landline TEXT",
+					"phone_mobile TEXT"
+				],
+				"user_sync_all": [
+					"application_id UUID"
+				]
+			},
+			"intervalAtDayForMonths": "en el día",
+			"intervalAtDayForWeeks": "en el día de la semana",
+			"intervalAtDayForYears": "en el día",
+			"intervalAtTime": "a la hora",
+			"intervalEvery": "Cada",
+			"isFrontendExec": "Llamada frontend",
+			"isLoginSync": "Sincronización de usuario",
+			"isTrigger": "Disparador",
+			"language": "Traducción",
+			"languageJs": "JavaScript",
+			"languagePg": "PL/pgSQL",
+			"new": "New function",
+			"option": {
+				"fieldGetFileLinks": "Leer enlaces de archivos",
+				"fieldGetFileLinksHint": "Devuelve una matriz de URLs de descarga para archivos subidos, solo válido para la sesión de usuario actual.",
+				"fieldGetValueChanged": "¿Valor cambiado?",
+				"fieldSetCaption": "Escribir título",
+				"fieldSetChart": "Escribir objeto de opciones de ECharts",
+				"fieldSetError": "Escribir mensaje de error",
+				"fieldSetFocus": "Saltar a la entrada del campo",
+				"fieldSetOrder": "Establecer orden del campo en el padre",
+				"intervalDays": "Días",
+				"intervalHours": "Horas",
+				"intervalMinutes": "Minutos",
+				"intervalMonths": "Meses",
+				"intervalSeconds": "Segundos",
+				"intervalWeeks": "Semanas",
+				"intervalYears": "Años"
+			},
+			"placeholderFncBackend": "Funciones (backend)",
+			"placeholderFncBackendHelp": "Marcadores de posición para funciones de backend: se usan como expresión ('SELECT function_abc()') o directamente ('PERFORM function_abc()').",
+			"placeholderFncFrontend": "Funciones (frontend)",
+			"placeholderFncInstance": "Funciones (instancia)",
+			"placeholderFncInstanceHelp": "Marcadores de posición para funciones de la instancia REI3: dan acceso a funciones del sistema como manejo de archivos o correos.",
+			"placeholderRelations": "Relaciones",
+			"placeholderRelationsHelp": "Marcadores de posición para relaciones y atributos: se usan para solicitudes SQL (SELECT/INSERT/UPDATE/DELETE).",
+			"placeholders": "Marcadores de posición",
+			"placeholdersCollections": "Colecciones",
+			"placeholdersFormFields": "Campos del formulario",
+			"placeholdersVariables": "Variables",
+			"runOnce": "Una vez",
+			"runRegular": "Regularmente",
+			"runType": "Ejecución",
+			"schedules": "Horarios",
+			"title": "Funciones",
+			"titleJs": "Funciones frontend",
+			"titleJsOne": "Función frontend '{NAME}'",
+			"titlePg": "Funciones backend",
+			"titlePgOne": "Función backend '{NAME}'",
+			"triggers": "Disparadores",
+			"value": "VALOR",
+			"valueInit": "IS_CHANGED_TRUE_FALSE",
+			"volatility": "Volatilidad",
+			"volatilityHelp": "<b>Configuración experta</b><p>La volatilidad se usa para definir cómo/si los resultados de la función pueden ser almacenados en caché.</p><ul><li>'VOLATILE' es la opción más segura, indicando que la función puede hacer cambios en la base de datos, deshabilitando el almacenamiento en caché.</li><li>Las funciones 'STABLE' pueden ser almacenadas en caché dentro de una transacción ya que no hacen cambios en la base de datos. Esto resulta en un mejor rendimiento, especialmente para políticas de relaciones.</li><li>Las funciones 'IMMUTABLE' deben entregar el mismo resultado para la misma entrada. No se les permite hacer cambios en la base de datos y no deberían ni siquiera leer de ella, para asegurar que el retorno para cualquier entrada dada sea idéntico, independientemente del estado de la base de datos.</li></ul><p>Más información en la <a target=\"_blank\" href=\"https://www.postgresql.org/docs/current/xfunc-volatility.html\">documentación oficial</a>.</p>"
+		},
+		"icon": {
+			"add": "Add/edit icon file",
+			"addHelp": "Only PNG files with max. 64kb are supported. Icons should always be squared.",
+			"nameHint": "Optional icon name",
+			"title": "Icons"
+		},
+		"language": "Idioma",
+		"languageNextHint": "Switch to next language (hotkey: CTRL + q)",
+		"loginForm": {
+			"attributeLogin": "Login attribute",
+			"attributeLookup": "Lookup attribute",
+			"formOpen": "Form to open",
+			"newLoginForm": "New login form",
+			"title": "Login forms",
+			"titleDepr": "Login forms are deprecated as of REI3.9. Though they will continue to work for a while, please consider switching to the user sync mechanism (s. Builder documentation)."
+		},
+		"menu": {
+			"button": {
+				"add": "Add entry",
+				"addTab": "Add tab",
+				"delete": "Delete tab"
+			},
+			"collections": "Show collection values in menu",
+			"copy": "Copy all menu items from",
+			"formId": "- Select form -",
+			"showChildrenHint": "Show sub entries by default",
+			"title": "Menus",
+			"titleMenuTab": "Tab properties"
+		},
+		"module": {
+			"button": {
+				"check": "Check export",
+				"export": "Export",
+				"exportKeySet": "Store key in memory",
+				"graph": "Dependency graph",
+				"keyCreate": "Generate",
+				"loginSyncCreate": "New user sync function",
+				"manageApps": "Manage applications",
+				"repo": "Install from repository",
+				"versionCreate": "Create new version"
+			},
+			"clientEventsHint": "REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
+			"color": "Color",
+			"colorHint": "Primary application color - shown in the header and menu if not overwritten by customizing and/or user settings. The system styles are optimized for washed out, darkish colors (dark pastel).",
+			"dependsOn": "Builds on",
+			"dependsOnAdd": "Add application",
+			"dependsOnHint": "Use other applications as foundation for your own. This enables reuse or extension of existing relations, forms and so on.",
+			"export": "Transfer - Export application to file",
+			"exportKeyBad": "Signing key seems invalid. Make sure to use the private key for exporting applications.",
+			"exportKeyEmpty": "Signing key is required for export",
+			"exportKeySet": "Key stored in memory",
+			"exportOwner": "Export changes",
+			"exportPrivateKeyHint": "Example:\n-----BEGIN RSA PRIVATE KEY-----\nKEY\n-----END RSA PRIVATE KEY-----",
+			"exportState": "Export state",
+			"exportStateNok": "Changes to current version",
+			"exportStateOk": "Ready",
+			"graphDependsOn": "Dependent on: {COUNT}",
+			"iconHint": "Icons are available, once they have been added to this application. Icons from applications that are being built on, can also be used.",
+			"iconPwa": "Application icons",
+			"iconPwaHint": "Icons that represent the application. Both icons must be PNG and must have a specific size (s. icon inputs) - not following these rules can cause the PWA to be not installable on some operating systems or devices.",
+			"jsFunctionIdOnLogin": "Session start function",
+			"jsFunctionIdOnLoginHint": "This frontend function is called when a user logs into the system. It can be used to initialize variables or update logs.",
+			"keyCreate": "Transfer - Generate new signing key pair",
+			"keyCreateInfo": "Make sure to keep the private key safe at all times. The public key must be imported in target REI3 instances to accept your applications.",
+			"keyCreateLength": "Select key length",
+			"languageCode": "Language code",
+			"languageCodeHint": "en_us, zh_cn, de_de, ...",
+			"languageMain": "Fallback language",
+			"languageMainHint": "Is used if the chosen user language is not offered by your application.",
+			"languages": "Application languages",
+			"languagesHint": "Languages that the application is available in.",
+			"nameHint": "Reference name for this application. The name must be unique within a REI3 system, so consider using a prefix based on your organization name.",
+			"nameHolder": "work_scheduler, inventory_planner, ...",
+			"namePwa": "Application title",
+			"namePwaHint": "The full application title shown in the list of installed applications. Can be up to 60 characters long. No translation possible.",
+			"namePwaShort": "Short title",
+			"namePwaShortHint": "A shorter version of the application title, usually shown on homescreens of mobile devices and as label for icons. Can be up to 12 characters long. No translation possible.",
+			"parent": "Assigned to",
+			"parentHint": "When assigned to another application, it will be displayed as its child in menus and overviews - there is no other functional change. Applications can only be assigned to applications that they build on.",
+			"pgFunctionIdLoginSync": "User sync function",
+			"pgFunctionIdLoginSyncHint": "A user sync function is called every time a user is created or its data updated (username, forename, surname, email, organization, etc.). Useful for applications that require additional records to be created or updated when system users change. It can also be triggered for all existing users with the instance function 'instance.user_sync_all()'.",
+			"position": "Default position",
+			"positionHint": "Position of the application in the header (smaller ones first). Can be overwritten by system administrators.",
+			"pwa": "Progressive web app (PWA)",
+			"pwaHint": "REI3 applications can be installed on desktop computers and mobile devices as progressive web apps (PWA) from inside modern browsers. They are then listed as installed applications, get their own icons and shortcuts and behave similar to native applications.",
+			"release": "Deployment",
+			"releaseBuild": "Application version",
+			"releaseBuildApp": "Platform version",
+			"releaseDate": "Release date",
+			"startFormByRole": "Start form by role",
+			"startFormByRoleHint": "The first start form is used that matches a role of the current user. Overwrites the default start form.",
+			"startFormDefault": "Start form",
+			"startFormDefaultHint": "Form that is shown, when user opens the application.",
+			"title": "Application '{NAME}'",
+			"titleAll": "Applications",
+			"titleHint": "The application title, visible to users when working with your application."
+		},
+		"navigationCaptionMap": "Captions",
+		"navigationFilterHint": "Filter by text",
+		"navigationStart": "First steps",
+		"new": {
+			"api": "New API",
+			"collection": "New collection",
+			"form": "New form",
+			"formIdDuplicate": "Copy form",
+			"jsFunction": "New Frontend function",
+			"jsFunctionFormId": "Assigned to form",
+			"jsFunctionFormIdHint": "Assigned functions can interact with a form to do things like read or write to form fields. If assigned, the function can only be used on the chosen form and cannot be reused in other frontend functions. This setting cannot be changed later.",
+			"message": {
+				"api": "<p>The API name will be used as part of the API call. It can be changed later.</p>",
+				"module": "<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
+				"relation": "<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
+			},
+			"module": "New application",
+			"options": "Additional options",
+			"pgFunction": "New backend function",
+			"pgFunctionTemplate": "Use template",
+			"pgFunctionTrigger": "Trigger",
+			"pgFunctionTriggerHint": "Makes this backend function a trigger. A trigger can be referenced inside a relation to react to events in the database, like when records are created, updated or deleted. This setting cannot be changed later.",
+			"relation": "New relation",
+			"relationEncryption": "End-to-end Encryption",
+			"relationEncryptionHint": "Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later.",
+			"role": "New role",
+			"template": {
+				"loginSync": "User sync function",
+				"mailsFromSpooler": "Email processing (incoming)",
+				"restAuthRequest": "REST authentication (via JSON)",
+				"restAuthResponse": "REST authentication response callback",
+				"restDataResponse": "REST data response callback"
+			},
+			"variable": "New variable",
+			"variableFormId": "Assigned to form",
+			"variableFormIdHint": "Assigning a variable to a form binds it to the particular form. It can then only be used on that form and its values will be reset once the form closes.<br /><br />Not assigning a variable to a form makes it 'global' and therefore persistent in the current user session.",
+			"widget": "New widget"
+		},
+		"noOwner": "Application is in read-only mode",
+		"openFormInput": {
+			"attributeApply": "Use as default on opened form",
+			"formIdOpen": "Form",
+			"maxHeight": "Max. height (px)",
+			"maxWidth": "Max. width (px)",
+			"newRecord": "Establish relationship with new records",
+			"newRecordHelp": "When creating a new record with this field, a record ID of the current form can be used as default value for a field on the opened form. This is often used to establish a parent-child relationship.<br /><br />Example: The current form manages a department. A list field on this form shows employees of this department. It is desired that from the list field, new employees for the department can be created. To make this convenient, the department record (from the current form) can be applied as input for a relationship input field on the employee form (the opened form). For this example, the input field on the opened form would be a 'employee.department' 1:n relationship attribute.",
+			"option": {
+				"float": "Floating window",
+				"inline": "Sub form inside field",
+				"none": "Full page form"
+			},
+			"popUpType": "Open as",
+			"relationIndexApply": "Record on current form",
+			"relationIndexOpen": "From relation"
+		},
+		"pageTitle": "Builder",
+		"pageTitleDocs": "Builder documentation",
+		"pgIndex": {
+			"attributes": "Attribute(s)",
+			"attributesHint": "Attribute(s) that the index covers. If multiple are given, the order decides on whether a particular index is used for a query. Text indexes currently only support a single attribute.",
+			"description": {
+				"BTREE": "Default index for fast lookups. Suitable for most all attribute value types but not for texts larger than a few paragraphs.",
+				"GIN": "Text index for enabling fast lookups on even very large texts. Can use a dictionary attribute to support language specific features like related words, synonyms and more; as an example, a lookup for 'computer' would also find results for 'computation' or 'to compute'."
+			},
+			"dialog": {
+				"delete": "Are you sure you want to delete this index?"
+			},
+			"dictionary": "Dictionary attribute (optional)",
+			"dictionaryHint": "If used, a text index will be able to use advanced language features to improve text lookups. Must be an attribute of the value type 'Text search dictionary'.",
+			"method": {
+				"BTREE": "Default index",
+				"GIN": "Text index"
+			},
+			"noUpdate": "Existing indexes cannot be changed but safely recreated at any time. Depending on the data size, index creation can take a while.",
+			"system": "This index is managed by the system and cannot be deleted directly.",
+			"title": "View index",
+			"titleNew": "Create index",
+			"unique": "Unique",
+			"uniqueHint": "If enabled, the same value cannot exist twice for the given attribute. If multiple attributes are given, the combined value can only exist once."
+		},
+		"pgTrigger": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this trigger?"
+			},
+			"execute": "Execute",
+			"fires": "Fires",
+			"isDeferred": "DEFERRED",
+			"onDelete": "DELETE",
+			"onInsert": "INSERT",
+			"onUpdate": "UPDATE",
+			"perRow": "EACH ROW",
+			"title": "Trigger",
+			"titleNew": "New trigger"
+		},
+		"preset": {
+			"addMissing": "Set all values",
+			"dialog": {
+				"delete": "Are you sure you want to delete this preset record?<br /><br /><b>WARNING!</b><br /><br />Depending on foreign key definition (ON UPDATE/DELETE), deletion of preset records may cause loss of customer data (CASCADED) or application upgrade issues (NO ACTION)."
+			},
+			"protected": "Protected",
+			"protectedHint": "After creation, a protected preset record can only be deleted in the Builder. Protected presets are often used for data that is required for the application to work, such as workflow states or configuration options.<br /><br />Unprotected presets can be deleted at any time; these are often used for example data.<br /><br />Regardless of the protection setting of the preset record, its values can be edited, unless they are also protected (see below).",
+			"title": "Preset '{NAME}'",
+			"titleNew": "New preset",
+			"valueNotSet": "Click here to set a value for this attribute.",
+			"values": "Attribute values"
+		},
+		"query": {
+			"choice": "Set",
+			"choices": "Filter sets ({COUNT})*",
+			"choicesHint": "*First set is active by default - choice available if 2 or more exist.",
+			"filterChoicesHelp": "A filterset is a set of predefined filters that can be selected by users. They serve to apply different filter criteria based on the current need of the user.<br /><br />The first filterset is enabled by default.<br /><br />Filtersets are only shown if there are at least 2 available.",
+			"filterJoin": "Select relation join to filter. Keep empty to filter entire query.",
+			"filterJoinHelp": "When you select a join number here, the filter is not added to the query but to the relation join instead.<br /><br />This can filter out undesired records from a left-joined relation without removing the entire row.<br /><br />It is also useful for filtering 1:n relationships.",
+			"filters": "Filters ({COUNT})",
+			"fixedLimit": "Fixed result limit",
+			"fixedLimit0": "not active",
+			"join": "Join: {NAME}",
+			"joinAddHint": "Join another relation to this one",
+			"joinApplyCreateHint": "Create record on this relation",
+			"joinApplyDeleteHint": "Delete record on this relation",
+			"joinApplyUpdateHint": "Update record on this relation",
+			"lookups": "Record lookups ({COUNT})",
+			"lookupsHelp": "Lookups identify records during data imports (CSV/API POST).<ul><li>Any unique index can be used as lookup (often a unique name) - unique indexes are defined on the corresponding relation.</li><li>Lookups only work if their values are included in the imported data.</li><li>To create/update records during data import, 'CREATE'/'UPDATE' options must be enabled for the desired relations (tab 'content').</li><li>If relationship attributes (n:1/1:1) are used as lookups, their relations must be joined and lookups defined for their records.</li></ul>",
+			"orders": "Sorting ({COUNT})",
+			"relations": "Relations ({COUNT})",
+			"select": "Select relation to join"
+		},
+		"relation": {
+			"attributeContent": "Value type",
+			"attributeEncrypted": "Value is end-to-end encrypted",
+			"attributeLength": "Max. length/size",
+			"attributeNoIcon": "No icon defined",
+			"attributeNotNullable": "Must have value",
+			"attributes": "Attributes ({CNT})",
+			"codeCondition": "Condition",
+			"dialog": {
+				"delete": "Are you sure you want to delete this relation? This will also delete all included data from your system.<br /><br /><b>This action is irreversible without current backups.</b>"
+			},
+			"encryption": "E2E encryption",
+			"encryptionHint": "Relation supports end-to-end encrypted attribute values.",
+			"external": "Refering relationships ({CNT})",
+			"graph": "Relationship graph",
+			"graphBase": "Base relation",
+			"indexAutoFki": "Relationship index",
+			"indexPrimaryKey": "Primary key index",
+			"indexSystem": "System index (managed by the system)",
+			"indexText": "Text index",
+			"indexUnique": "Unique",
+			"indexes": "Indexes ({CNT})",
+			"nameHint": "Reference name for this relation. Must be unique within this application.",
+			"policies": "Policies ({CNT})",
+			"policyActionDelete": "Delete",
+			"policyActionSelect": "Select",
+			"policyActionUpdate": "Update",
+			"policyActions": "Action",
+			"policyExplanation": "The first policy that matches a role of the current user is applied, if the attempted action is enabled for this policy. To give full access to a role for example, a policy with all actions enabled and no filters can be placed at the top.",
+			"policyFunctionExcl": "Block record IDs",
+			"policyFunctionIncl": "Allow record IDs",
+			"policyFunctions": "Filter functions",
+			"policyNotSet": "unfiltered",
+			"presetProtected": "Protected",
+			"presetValues": "Values",
+			"presetValuesPreview": "Values preview",
+			"presets": "Preset records ({CNT})",
+			"preview": "Data view",
+			"previewLimit": "Records/page",
+			"retention": "Change log",
+			"retentionCount": "Keep X changes",
+			"retentionDays": "Keep for X days",
+			"retentionHint": "How many (count) or how long (in days) change logs are retained for.",
+			"title": "Relations",
+			"titleOne": "Relation '{NAME}'",
+			"triggers": "Triggers ({CNT})"
+		},
+		"role": {
+			"access": "Access",
+			"accessDelete": "Delete",
+			"accessInherit": "[inherit]",
+			"accessRead": "Read",
+			"accessWrite": "Write",
+			"assignable": "Assignable",
+			"children": "Member of",
+			"content": "Type",
+			"dialog": {
+				"delete": "Are you sure you want to delete this role?"
+			},
+			"newRole": "New role",
+			"option": {
+				"contentAdmin": "Administrative user",
+				"contentEveryone": "[Assigned to all]",
+				"contentOther": "Special user",
+				"contentUser": "Regular user"
+			},
+			"title": "Roles",
+			"titleOne": "Role '{NAME}'"
+		},
+		"start": {
+			"appVisible": "Application is visible to users with assigned roles",
+			"appVisibleOff": "Application is not visible to users",
+			"button": {
+				"fix": "Fix"
+			},
+			"checkMenu": "At least one menu entry exists",
+			"checkMenuInRole": "At least one menu access is assigned to a role",
+			"checkMenuInRoleOff": "No menu access is assigned to a role",
+			"checkMenuOff": "No menu entry exists",
+			"checkNotHidden": "Application has not been hidden",
+			"checkNotHiddenOff": "Application has been hidden by an admin",
+			"checkNotReadonly": "Application is writable",
+			"checkNotReadonlyOff": "Application is readonly",
+			"checkStartForm": "Start form is defined",
+			"checkStartFormOff": "Start form is not defined",
+			"checks": "System checks",
+			"extCommunity": "REI3 forum",
+			"extDocs": "REI3 documentation",
+			"needHelp": "Need help?",
+			"title": "First steps",
+			"titleForms": "Create forms",
+			"titleFormsHint": "Build user interfaces to work with records.",
+			"titleMenu": "Setup a menu",
+			"titleMenuHint": "Guide users through your application.",
+			"titleRelations": "Define relations",
+			"titleRelationsHint": "To store and add data to records.",
+			"titleRoles": "Prepare roles",
+			"titleRolesHint": "Define what everyone can do or see."
+		},
+		"variable": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this variable?"
+			},
+			"edit": "Variable '{NAME}'",
+			"formIdHint": "Variable is only available in the context of the assigned form.",
+			"global": "Global variable",
+			"inputOptions": "Settings for use as input field",
+			"noPreview": "No preview is available for form assigned variables. They only exist in the context of the open form.",
+			"title": "Variables"
+		},
+		"widget": {
+			"collectionHint": "Widget will display content of a chosen collection.",
+			"dialog": {
+				"delete": "Are you sure you want to delete this widget?"
+			},
+			"edit": "Widget '{NAME}'",
+			"formHint": "Widget will display content of a chosen form.",
+			"new": "New widget",
+			"sizeHint": "Widgets are displayed as tiles, with each taking up space of 1 or 2 tiles.",
+			"title": "Widgets",
+			"titleHint": "The title can be translated in available application languages. It is displayed at the top of the widget."
+		}
+	},
+	"calendar": {
+		"button": {
+			"ganttShowLabels": "Groups",
+			"ganttShowLabelsHint": "Show/hide groups",
+			"ganttToggleHint": "Toggle between day & hour mode",
+			"ics": "Access",
+			"icsHint": "Access calendar from external application",
+			"icsPublish": "Publish for personal use"
+		},
+		"fullDay": "Full day",
+		"icsDesc": "Use this URL to subscribe to this calendar (iCalendar, ICS).",
+		"icsTokenNameHint": "Device name (optional)",
+		"month0": "January",
+		"month1": "February",
+		"month10": "November",
+		"month11": "December",
+		"month2": "March",
+		"month3": "April",
+		"month4": "May",
+		"month5": "June",
+		"month6": "July",
+		"month7": "August",
+		"month8": "September",
+		"month9": "October",
+		"now": "Now",
+		"nowHint": "Show current time/date",
+		"option": {
+			"calendarWeek": "CW",
+			"days1": "1 day",
+			"days3": "3 days",
+			"days42": "Month",
+			"days5": "Mo-Fr",
+			"days7": "Week"
+		},
+		"today": "Today",
+		"todayHint": "Show/select today",
+		"weekDay0": "Sunday",
+		"weekDay1": "Monday",
+		"weekDay2": "Tuesday",
+		"weekDay3": "Wednesday",
+		"weekDay4": "Thursday",
+		"weekDay5": "Friday",
+		"weekDay6": "Saturday",
+		"weekDayShort0": "Sun",
+		"weekDayShort1": "Mon",
+		"weekDayShort2": "Tue",
+		"weekDayShort3": "Wed",
+		"weekDayShort4": "Thu",
+		"weekDayShort5": "Fri",
+		"weekDayShort6": "Sat"
+	},
+	"captionMap": {
+		"export": "Export content",
+		"import": "Import content",
+		"languagesApp": "Application",
+		"languagesInstance": "Custom",
+		"newDesc": [
+			"To add a custom translation, choose its five-letter language code, such as: en_us, de_de, ch_ch, it_it...",
+			"If you want to overwrite an existing translation, you can also add an already existing language code."
+		],
+		"title": "Caption map",
+		"titleNew": "Add custom translation"
+	},
+	"error": {
+		"APP": {
+			"001": "An unexpected error occurred. Please try again.",
+			"002": "Action could not be completed within the allowed time frame. If this happens often, please contact your system administrator.",
+			"003": "Action was aborted. Please try again.",
+			"004": "The record you attempted to delete is protected - it cannot be deleted.",
+			"005": "Failed to create entity because there was no name given. Please specify a name.",
+			"006": "The chosen name is invalid. Please make sure that the name...<ul><li>... starts with a letter <b>(a-z)</b>.</li><li>... is at most <b>60</b> characters long.</li><li>... contains only lower case letters <b>(a-z)</b>, underscores <b>(_)</b> or numbers <b>(0-9)</b>.</li></ul>Examples: storage_inventory_post21, facility_address, contact_book",
+			"007": "A referenced module is not known.",
+			"008": "A referenced relation is not known.",
+			"009": "A referenced attribute is not known."
+		},
+		"CSV": {
+			"001": "Invalid number '{VALUE}' (expected an integer).",
+			"002": "Invalid number '{VALUE}' (expected a decimal).",
+			"003": "Invalid date/time value '{VALUE}', expected format: {EXPECT}.",
+			"004": "Unsupported attribute type '{VALUE}'.",
+			"005": "Wrong number of fields.",
+			"006": "Encrypted attributes are not supported."
+		},
+		"DBS": {
+			"001": "{FNC_MSG}",
+			"002": "The selected value for '{NAMES}' is already used by another record. It is defined as 'unique' and can only be used once.",
+			"003": "This username is already taken.",
+			"004": "Record cannot be deleted - it is still being referenced as '{ATR}' in '{MOD}'.",
+			"005": "'{NAME}' requires a value before changes can be saved.",
+			"006": "Failed to create unique index, because existing attribute values are not unique.",
+			"007": "Changes cannot be saved due to an invalid value type.",
+			"008": "Failed to create attribute with required value, as existing records do not have a value yet and no default is defined."
+		},
+		"SEC": {
+			"001": "You are not authorized to complete this action or access this resource.",
+			"002": "The system failed to unlock your personal key for end-to-end encryption. This can happen if someone changed your password for you or you have changed it outside this application.<br /><br />Please open the user settings and follow the instructions to regain access to your personal key.",
+			"003": "The system failed to encrypt the record values. Please try again.",
+			"004": "The system failed to decrypt the record values. Please try again.",
+			"005": "The system failed to retrieve decryption keys for the selected records.",
+			"006": "Not all selected users have end-to-end encryption enabled - these are: {NAMES}"
+		},
+		"initCollection": "Failed to load collections during login: {MSG}"
+	},
+	"feedback": {
+		"button": {
+			"moreInfo": "More information"
+		},
+		"info": {
+			"admin": "<b>Info for admins:</b> The feedback function can be disabled in the admin panel. If enabled, feedback is sent to the currently chosen repository. Organizations can run their own repository (with the <a href=\"https://store.rei3.de/#/app/lsw_repo/form/31231ad0-71c6-4396-9685-102b414a6bfb/11?login=public\" target=\"_blank\">REI3 Repository</a> application) to manage application releases and receive internal feedback.",
+			"data": [
+				"Feedback category (general, bug/issue, suggestion, praise)",
+				"Feedback text",
+				"Smiley that was selected",
+				"Application that is currently open",
+				"Application and system version numbers",
+				"Whether the user giving feedback is an administrator",
+				"A random identifier to bundle feedback from the same system"
+			],
+			"personal": "No personal information is being sent. If you want to receive a response, you can add contact details to your feedback text.",
+			"repoUrl": "Feedback will be sent to",
+			"repoUrlDefault": "<i>(this system is operated by the <a href=\"https://rei3.de/\" target=\"_blank\">REI3</a> developers)</i>",
+			"what": "What is being sent?"
+		},
+		"moduleRelated": "Is this feedback for the open application? ({NAME})",
+		"option": {
+			"codeBug": "Bug / Issue",
+			"codeGeneric": "General",
+			"codePraise": "Praise",
+			"codeSuggestion": "Suggestion"
+		},
+		"sendNok": "Feedback could not be send. Please try again later.",
+		"sendOk": "Feedback was sent successfully. Thank you!",
+		"textHint": "Your feedback",
+		"title": "Send anonymous feedback"
+	},
+	"filter": {
+		"add": "Add",
+		"contentApi": "API",
+		"contentData": "Data",
+		"contentDate": "Current date/time",
+		"contentForm": "Current form",
+		"contentLogin": "Logged in user",
+		"dialog": {
+			"ftsHelp": "Full-text search can quickly find matches in large texts based on words or phrases. Instead of searching for specific characters, full-text search breaks down words to their roots to match against a search query.<br /><br />The following search options exist:<ul><li>Specific word</li><ul><li>Search: <b>entry</b></li><li>'entry' will find texts containing words like 'entry', 'entries' or 'list-entries'.</li><li>Valid match: 'I have checked all relevant data entries.'</li></ul><li>All words</li><ul><li>Search: <b>making coffee</b></li><li>'making coffee' will find texts if they contain both words related to 'make' (like 'making') and 'coffee' (like 'coffee machine'). It will not find 'coffee maker' as 'maker' is its own word-stem.</li><li>Valid match: 'We fixed the machine, still makes terrible coffee.'</li></ul><li>Any words</li><ul><li>Search: <b>tea or coffee</b></li><li>'tea or coffee' will find texts if they contain either words related to 'tea' (like 'tea drinker') or 'coffee' (like 'coffee machine').</li><li>Valid match: 'Coffee gets me through the day.'</li></ul><li>Without words</li><ul><li>Search: <b>tea -coffee</b></li><li>'tea -coffee' will find texts if they contain words related to 'tea' but not words related to 'coffee'.</li><li>Valid match: 'I enjoy tea regularly.'</li></ul><li>Followed words</li><ul><li>Search: <b>\"make coffee\"</b></li><li>'\"make coffee\"' (in double-quotes) will find texts if they contain words related to 'make' being followed by words related to 'coffee'. The order is important - texts containing 'coffee making' will not be included, as the word order is wrong.</li><li>Valid match: 'I´ll spent the lunch break making coffee for my colleagues.'</li></ul></ul>"
+		},
+		"getterHint": "Parameter name",
+		"javascriptHint": "Ex.: return new Date().getFullYear();",
+		"nestingMain": "Main query",
+		"nestingSub": "Sub query",
+		"nowOffsetHint": "+/- X {MODE}",
+		"nowOffsetTitle": "Add (positive number) or remove (negative number) X days/hours/minutes/seconds from now.",
+		"operatorsArray": "Array",
+		"operatorsNull": "Empty value",
+		"operatorsRegex": "Regular expression",
+		"operatorsSets": "Subset",
+		"operatorsSize": "Number",
+		"operatorsText": "Text",
+		"option": {
+			"connector": {
+				"AND": "AND",
+				"OR": "OR"
+			},
+			"content": {
+				"attribute": "attribute",
+				"collection": "collection",
+				"field": "field value",
+				"fieldChanged": "field changed",
+				"fieldValid": "field valid",
+				"formChanged": "form has unsaved changes",
+				"formState": "form state",
+				"getter": "URL parameter",
+				"javascript": "JavaScript",
+				"languageCode": "user language",
+				"login": "user ID",
+				"nowDate": "date",
+				"nowDatetime": "date + time",
+				"nowTime": "time",
+				"preset": "preset record",
+				"record": "record ID",
+				"recordNew": "record is new",
+				"role": "user has role",
+				"subQuery": "sub query",
+				"true": "true value",
+				"value": "fixed value",
+				"variable": "variable value"
+			},
+			"contentHint": {
+				"attribute": "Attribute value from the current query.",
+				"collection": "One or many values from the chosen collection column. Use '@>', '<@' or '&&' operators when comparing multiple values.",
+				"field": "Current field value.",
+				"fieldChanged": "TRUE/FALSE, depending on whether field value has changed.",
+				"fieldValid": "TRUE/FALSE, depending on whether field value is currently valid.",
+				"formChanged": "TRUE/FALSE, depending on whether form currently has unsaved changes.",
+				"formState": "TRUE/FALSE, depending on whether the chosen form state is currently active.",
+				"getter": "Value of a URL parameter, such as 'https://system?param=123' with 'param' being the name and '123' the value.",
+				"javascript": "Return value of the given Javascript expression.",
+				"languageCode": "The chosen user language code (en_us, de_de, ...) of the current user.",
+				"login": "ID of the current user (integer).",
+				"nowDate": "The current date (today), to compare against date values.",
+				"nowDatetime": "The current date + time (today at this second), to compare against date + time values.",
+				"nowTime": "The current time (this hour/minute/second), to compare against time values.",
+				"preset": "ID of the given preset record (integer).",
+				"record": "ID of the current record on this form (integer, relation 0).",
+				"recordNew": "TRUE/FALSE, depending on whether the current record is new on this form.",
+				"role": "TRUE/FALSE, depending on the whether the current user has the given role assigned.",
+				"subQuery": "Return value of the given sub query.",
+				"true": "TRUE value to compare other TRUE values against.",
+				"value": "A static value to compare against.",
+				"variable": "Current variable value."
+			},
+			"nowMode": {
+				"days": "days",
+				"hours": "hours",
+				"minutes": "min.",
+				"seconds": "sec."
+			},
+			"operator": {
+				"arrContained": "contained by",
+				"arrContains": "contains",
+				"arrOverlap": "has overlap with",
+				"eq": "equal",
+				"eqAny": "is included in",
+				"fts": "contains (full-text search)",
+				"ilike": "contains",
+				"le": "larger/equal",
+				"like": "contains (match case)",
+				"lt": "larger",
+				"ne": "unequal",
+				"neAll": "is not included in",
+				"not_ilike": "not contains",
+				"not_like": "not contains (match case)",
+				"not_null": "not empty",
+				"null": "empty",
+				"rxMatch": "matches regex (match case)",
+				"rxMatchI": "matches regex",
+				"rxMatchNo": "not matches regex (match case)",
+				"rxMatchNoI": "not matches regex",
+				"se": "smaller/equal",
+				"st": "smaller"
+			}
+		},
+		"queryAggregatorNull": "no aggregation",
+		"queryShow": "Show sub query",
+		"searchDictionaryHint": "Used dictionary - should reflect the search input and the expected result texts. Additional dictionaries can be added in the user settings.",
+		"searchDictionarySimple": "[No dictionary]",
+		"searchDictionarySimpleHint": "This is option is for when expected result texts do not have a dictionary assigned.",
+		"subQueryAggregator": "Aggregate",
+		"subQueryAttribute": "Attribute",
+		"valueHint": "Text or number value"
+	},
+	"form": {
+		"bulkTouched": "Value will be updated",
+		"button": {
+			"favorite": "Save form as favorite",
+			"fullscreenHint": "Toggle fullscreen mode",
+			"help": "Help",
+			"helpHint": "Show help pages",
+			"log": "Logs",
+			"logHint": "Open change logs",
+			"urlHint": "Copy URL to clipboard"
+		},
+		"dialog": {
+			"bulkEncrypted": "Bulk update for encrypted data is currently not supported.",
+			"bulkMultiple": "Bulk update with multiple relations is currently not supported.",
+			"delete": "Are you sure that you want to <b>permanently</b> delete this record?",
+			"encrypted": "The field content will be encrypted on your system before it is being sent to the server.",
+			"new": "There are unsaved changes.<br /><br />Do you still want to open a new record?",
+			"newReset": "This will reset all your inputs.<br /><br />Do you want to continue?",
+			"prev": "There are unsaved changes.<br /><br />Do you still want to go back?",
+			"prevBrowser": "There are unsaved changes - if you continue these will be lost. Do you still want to continue?"
+		},
+		"invalidInputs": "Check inputs!",
+		"message": {
+			"recordCreated": "Record created",
+			"recordDeleted": "Record deleted",
+			"recordEncrypting": "Encrypting record...",
+			"recordUpdated": "Record updated",
+			"recordValueCopied": "Copied to clipboard"
+		},
+		"noAccess": "No access"
+	},
+	"formLog": {
+		"button": {
+			"showAll": "Show all ({CNT})"
+		},
+		"deletedUser": "deleted User",
+		"fileCreated": "File added",
+		"fileDeleted": "File deleted",
+		"fileRenamed": "File renamed",
+		"fileUpdated": "File updated",
+		"title": "Change logs"
+	},
+	"generic": {
+		"action": "Action",
+		"actions": "Actions",
+		"active": "Active",
+		"after": "After",
+		"alignment": "Alignment",
+		"alignmentHor": {
+			"center": "center",
+			"left": "left",
+			"right": "right"
+		},
+		"api": "API",
+		"apis": "APIs",
+		"appName": "REI3",
+		"appWebsite": "https://rei3.de",
+		"application": "Application",
+		"applications": "Applications",
+		"arguments": "Arguments",
+		"articles": "Help articles",
+		"attribute": "Attribute",
+		"attributes": "Attributes",
+		"available": "Available",
+		"before": "Before",
+		"bright": "Bright",
+		"busy": "Working - Click here to abort",
+		"button": {
+			"add": "Add",
+			"all": "All",
+			"apply": "Apply",
+			"cancel": "Cancel",
+			"clear": "Clear",
+			"close": "Close",
+			"copy": "Copy",
+			"copyClipboard": "Copy to clipboard",
+			"create": "Create",
+			"createNew": "Create+New",
+			"delete": "Delete",
+			"deleteHint": "Permanently delete record",
+			"deleteSelected": "Delete selected",
+			"download": "Download",
+			"edit": "Edit",
+			"editBulk": "Edit ({COUNT})",
+			"empty": "Empty",
+			"enable": "Enable",
+			"expert": "Advanced",
+			"export": "Export",
+			"filter": "Filter",
+			"filterHint": "Filter results",
+			"goBack": "Go back",
+			"hide": "Hide",
+			"import": "Import",
+			"new": "New",
+			"newHint": "Create new record",
+			"ok": "Ok",
+			"open": "Open",
+			"openBuilder": "Open Builder",
+			"paste": "Paste",
+			"read": "Read",
+			"refresh": "Reload",
+			"refreshHint": "Reload record",
+			"relog0": "Re-login later",
+			"relog1": "Re-login now",
+			"remove": "Remove",
+			"reset": "Reset",
+			"restore": "Restore",
+			"retrieve": "Retrieve",
+			"save": "Save",
+			"saveBulk": "Save ({COUNT})",
+			"saveHint": "Save changes",
+			"saveNew": "Save+New",
+			"saveNewHint": "Save changes and open new record",
+			"selectAll": "Select all",
+			"selectAllShort": "All",
+			"send": "Send",
+			"show": "Show",
+			"tryAnyway": "Try anyway",
+			"undo": "Undo",
+			"unlock": "Unlock",
+			"update": "Update",
+			"valueRead": "Read value",
+			"valueWrite": "Write value",
+			"zoomReset": "Reset zoom level"
+		},
+		"category": "Category",
+		"clientEvent": "Client event",
+		"clientEvents": "Client events",
+		"clipboard": "Clipboard",
+		"collection": "Collection",
+		"collections": "Collections",
+		"color": "Color",
+		"columns": "Columns",
+		"comments": "Comments",
+		"content": "Content",
+		"contextHelp": "Context help",
+		"dark": "Dark",
+		"data": "Data",
+		"date": "Date",
+		"dateFormat0": "Y-m-d (2012-12-30)",
+		"dateFormat1": "Y/m/d (2012/12/30)",
+		"dateFormat2": "d.m.Y (30.12.2012)",
+		"dateFormat3": "d/m/Y (30/12/2012)",
+		"dateFormat4": "m/d/Y (12/30/2012)",
+		"default": "Default",
+		"defaultValue": "Default value",
+		"description": "Description",
+		"details": "Details",
+		"dialog": {
+			"close": "There are unsaved changes. If you continue, your changes will be lost.<br /><br />Do you want to continue?",
+			"confirm": "Please confirm",
+			"logoutComing": "For security reasons, you need to re-enter your login credentials every now and then.<br /><br />You will be automatically logged off at <b>{DATE}</b>.<br /><br />Please save your changes before then.<br /><br />",
+			"logoutComingTitle": "You are about to be logged off",
+			"maintenanceComing": "The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your changes before then.",
+			"systemMsg": "System message"
+		},
+		"displayed": "Displayed",
+		"encryption": "Encryption",
+		"error": {
+			"nameTaken": "Name is already taken, please choose another.",
+			"nameTooLong": "Name is too long, max. allowed length is {LEN} characters."
+		},
+		"errorTitle": "Error",
+		"event": "Event",
+		"everything": "Everything",
+		"expert": "Expert",
+		"favorites": "Favorites",
+		"favoritesEmpty": "No favorites saved",
+		"field": "Field",
+		"files": "Files",
+		"filters": "Filters",
+		"form": "Form",
+		"formActions": "Form actions",
+		"forms": "Forms",
+		"functions": "Functions",
+		"global": "Global",
+		"help": "Help",
+		"home": "Home",
+		"hotkey": "Hotkey",
+		"icon": "Icon",
+		"icons": "Icons",
+		"id": "ID",
+		"index": "Index",
+		"information": "Information",
+		"inputDecimal": "Value must be decimal",
+		"inputInvalid": "Value is invalid",
+		"inputLarge": "Value is too large (max. {MAX})",
+		"inputLong": "Value is too long (max. {MAX})",
+		"inputRequired": "Required input",
+		"inputSelectMore": "...enter text to filter results",
+		"inputShort": "Value is too short (min. {MIN})",
+		"inputSmall": "Value is too small (min. {MIN})",
+		"inputTooFewFiles": "Too few files",
+		"inputTooManyFiles": "Too many files",
+		"inputs": "Inputs",
+		"install": "Install",
+		"internalName": "The name serves as internal reference - it is not shown to users.",
+		"interval": "Interval",
+		"jsFunction": "Function (front)",
+		"jsFunctions": "Functions (front)",
+		"label": "Label",
+		"language": "Language",
+		"less": "Less",
+		"licenseRequired": "Requires license",
+		"limit": "Limit",
+		"login": "Login",
+		"loginForm": "Login form",
+		"loginForms": "Login forms",
+		"menu": "Menu",
+		"menus": "Menus",
+		"menusSub": "Sub menus",
+		"missingCaption": "MISSING CAPTION",
+		"module": "Application",
+		"monospace": "Monospace",
+		"more": "More",
+		"name": "Name",
+		"notSaved": "Not saved",
+		"notShown": "Not shown",
+		"nothingInstalled": "No applications are installed.",
+		"nothingSelected": "Nothing selected",
+		"nothingThere": "No results available",
+		"notice": "Notice",
+		"option": {
+			"aggArray": "array",
+			"aggAvg": "average",
+			"aggCount": "count",
+			"aggJson": "JSON",
+			"aggList": "comma list",
+			"aggMax": "maximum",
+			"aggMin": "minimum",
+			"aggRecord": "[single record]",
+			"aggSum": "sum",
+			"all": "all",
+			"no": "no",
+			"size0": "smallest",
+			"size1": "small",
+			"size2": "default",
+			"size3": "large",
+			"size4": "largest",
+			"sortAsc": "ascending",
+			"sortDesc": "descending",
+			"yes": "yes"
+		},
+		"options": "Options",
+		"order": "Order",
+		"password": "Password",
+		"pgFunction": "Function (back)",
+		"pgFunctions": "Functions (back)",
+		"preview": "Preview",
+		"properties": "Properties",
+		"queryChoices": "Filter sets",
+		"readonly": "Readonly",
+		"record": "Record",
+		"relation": "Relation",
+		"relations": "Relations",
+		"relationship": "Relationship",
+		"relationships": "Relationships",
+		"results": "{CNT} results",
+		"resultsNone": "- no results -",
+		"resultsOf": "/ {CNT}",
+		"returns": "Returns",
+		"role": "Role",
+		"roles": "Roles",
+		"selected": "Selected",
+		"selectedMaxOne": "Selected (max. 1)",
+		"settings": "Settings",
+		"shadows": "Shadows",
+		"size": "Size",
+		"sqlPreview": "SQL preview",
+		"standard": "Standard",
+		"status": "Status",
+		"textSearch": "Text search",
+		"threeDots": "...",
+		"title": "Title",
+		"token": "Token",
+		"type": "Type",
+		"unassigned": "Unassigned",
+		"uninstall": "Uninstall",
+		"update": "Update",
+		"username": "Username",
+		"variable": "Variable",
+		"variables": "Variables",
+		"version": "Version",
+		"visibility": "Visibility",
+		"warnings": "Warnings",
+		"widget": "Widget",
+		"widgets": "Widgets",
+		"wrap": "Wrap"
+	},
+	"home": {
+		"button": {
+			"goToApps": "Abrir importación de archivos",
+			"goToLogins": "Asignar roles",
+			"goToRepo": "Abrir repositorio",
+			"installBundle": "Instalar Core Company"
+		},
+		"newVersion": "Notificación de actualización",
+		"newVersionText": "Hay una nueva versión de REI3 disponible.<br /><br /><a href=\"https://rei3.de/en/downloads\" target=\"_blank\">Descargar REI3 v{VERSION}</a>",
+		"noAccess": "Aún no se ha concedido acceso.<br />Por favor, contacta a tu administrador del sistema.",
+		"noAccessAdmin": "Para obtener acceso, asigna roles a tu usuario.",
+		"noAccessTitle": "Sin acceso a aplicaciones",
+		"title": "Página de inicio",
+		"wizard": {
+			"installBundle": "Core Company",
+			"installBundleDesc": "Instala un conjunto preempaquetado de aplicaciones básicas, útiles para cualquier organización. El conjunto 'Core Company' incluye:<ul><li>Gestión de ausencias</li><li>Seguimiento de tiempo</li><li>Gestión de proyectos y tareas</li><li>Manejo de solicitudes</li><li>Un gestor de contraseñas</li><li>Gestión de activos de TI</li></ul>Después de la instalación, consulta las páginas de ayuda de cada aplicación individual para obtener más información sobre la configuración inicial de cada una.",
+			"installFile": "Desde archivo",
+			"installFileDesc": "Instala aplicaciones desde archivos locales de REI3. Para sistemas sin conexión o aplicaciones autogeneradas.<br /><br />Los archivos de las aplicaciones públicas de REI3 se pueden descargar desde el <a href=\"https://rei3.de/en/downloads\" target=\"_blank\">repositorio oficial</a>.",
+			"installRepo": "Desde repositorio",
+			"installRepoDesc": "<b>Se requiere acceso a Internet</b><br /><br />Instala aplicaciones desde el repositorio oficial de REI3. El repositorio contiene versiones actuales de las aplicaciones públicas de REI3.<br /><br />Todas las aplicaciones son revisadas y firmadas digitalmente.",
+			"intro": "Bienvenido a REI3<br /><br />Actualmente no hay aplicaciones instaladas. Para comenzar a usar REI3, elige una de las opciones de instalación a continuación.",
+			"title": "Configuración"
+		}
+	},
+	"input": {
+		"barcode": {
+			"capture": "Capturar código desde imagen de cámara",
+			"deviceMissing": "No se encontraron dispositivos de entrada del tipo 'cámara'. Por favor, inténtalo de nuevo.",
+			"deviceSelect": "Por favor, selecciona un dispositivo de entrada",
+			"formatInvalidValue": "El valor no es compatible con el formato elegido.",
+			"formatMissing": "Por favor, selecciona un formato para mostrar el valor:",
+			"formatResetHint": "Cambiar formato de código para mostrar el valor en"
+		},
+		"date": {
+			"button": {
+				"todayHint": "Hoy/ahora",
+				"viewHint": "Cambiar vista"
+			},
+			"dateFrom": "Desde",
+			"dateTo": "Hasta",
+			"fullDayHint": "Selección de todo el día",
+			"inputDay": "dd",
+			"inputHour": "--",
+			"inputMinute": "--",
+			"inputMonth": "mm",
+			"inputSecond": "--",
+			"inputYear": "aaaa"
+		},
+		"files": {
+			"button": {
+				"copyHint": "Copiar archivos seleccionados para pegarlos en otra entrada de archivos.",
+				"downloadHint": "Descargar archivo",
+				"fileRequestHint": "Editar archivo localmente en tu ordenador. Requiere la aplicación cliente R3 (instalable desde la configuración del usuario). No funciona si el sistema está en modo de mantenimiento.",
+				"pasteHint": "Pegar archivos copiados en esta entrada de archivos."
+			},
+			"dropTarget": "Suelta los archivos aquí para subirlos",
+			"fileChanged": "Cambiado",
+			"fileName": "Nombre del archivo",
+			"fileSize": "Tamaño del archivo",
+			"tooLarge": "No se puede subir el archivo '{NAME}', el tamaño máximo permitido es {SIZE}.",
+			"unsaved": "(no guardado)"
+		},
+		"hotkey": {
+			"charHint": "1 carácter (a-z, 0-9)",
+			"modifier": {
+				"ALT": "alt",
+				"CMD": "win/cmd",
+				"CTRL": "ctrl",
+				"SHIFT": "shift"
+			}
+		},
+		"iframe": {
+			"empty": "No se ha establecido URL - nada que mostrar"
+		}
+	},
+	"list": {
+		"aggregators": "Agregar resultados",
+		"autoRenew": "Renovación automática",
+		"autoRenewInput": "Actualizar cada X segundos",
+		"button": {
+			"aggregatorsHint": "Agregar resultados",
+			"all": "Todo",
+			"allHint": "Seleccionar todos los resultados",
+			"autoRenew": "{VALUE}s",
+			"autoRenewHint": "Actualizar datos cada {VALUE} segundos",
+			"collapseHeader": "Mostrar/ocultar encabezado de lista",
+			"columnFilters": "Mostrar filtros de columna (clic derecho para eliminar)",
+			"columnOrderFlip": "Invertir orden (clic derecho para eliminar)",
+			"csv": "CSV",
+			"csvHint": "Importar/exportar registros mediante archivo de valores separados por comas"
+		},
+		"cardsCaptions": "Mostrar etiquetas",
+		"columnFilter": {
+			"contains": "Contiene"
+		},
+		"csvAction": "Acción",
+		"csvBool": "Cadenas booleanas",
+		"csvCommaChar": "Delimitador de campo",
+		"csvDate": "Formato de fecha",
+		"csvDatetime": "Formato de fecha y hora",
+		"csvFile": "Archivo CSV",
+		"csvHasHeader": "Línea de encabezado",
+		"csvLineError": "Error en la línea {COUNT}: ",
+		"csvLoadError": "No se pudo subir el archivo CSV. Por favor, inténtalo de nuevo.",
+		"csvTime": "Formato de hora",
+		"csvTimeHint": "15:04:05",
+		"csvTimezone": "Zona horaria",
+		"csvTotalLimit": "Recuento de filas (0 = todas)",
+		"dialog": {
+			"delete": "¿Estás seguro de que deseas <b>eliminar permanentemente</b> los registros seleccionados?"
+		},
+		"displayMode": "Modo de visualización",
+		"fetching": "Recuperando datos...",
+		"globalSettings": "Configuraciones globales",
+		"inputHintCreate": "Crear nuevo registro",
+		"inputHintOpen": "Abrir registro",
+		"inputHintRemove": "Eliminar registro",
+		"inputHintSelect": "Agregar registro existente",
+		"inputPlaceholderAdd": "...agregar más",
+		"message": {
+			"csvExport": "La exportación CSV utiliza filtros y ordenación de la lista actual.",
+			"csvImport": "La importación CSV requiere el/los campo(s) {COUNT} de la lista mostrada a continuación, en el mismo orden para cada fila.",
+			"csvImportSuccess": "Se importaron {COUNT} líneas",
+			"csvImportWarning": "¡Advertencia! Esta lista puede importar datos mediante archivos CSV. Algunas columnas pueden ser obligatorias; cambiar el orden está bien, pero eliminar columnas puede causar fallos en las importaciones."
+		},
+		"option": {
+			"csvExport": "exportar",
+			"csvImport": "importar",
+			"layoutCards": "Tarjetas",
+			"layoutTable": "Tabla"
+		},
+		"orderBy": "Ordenar por",
+		"pageLimit": "Resultados por página",
+		"quick": "Filtrar resultados en todas las columnas"
+	},
+	"settings": {
+		"account": {
+			"messagePwCurrentWrong": "La contraseña actual es inválida",
+			"messagePwDiff": "Las contraseñas no coinciden",
+			"messagePwRequiresDigit": "La contraseña debe contener un dígito",
+			"messagePwRequiresLower": "La contraseña debe contener una letra minúscula",
+			"messagePwRequiresSpecial": "La contraseña debe contener un carácter especial (!, ?, #, etc.)",
+			"messagePwRequiresUpper": "La contraseña debe contener una letra mayúscula",
+			"messagePwShort": "La contraseña es demasiado corta",
+			"nodeName": "Conectado con: {NAME}",
+			"pwNew0": "Nueva contraseña",
+			"pwNew1": "Nueva contraseña (repetida)",
+			"pwOld": "Contraseña actual",
+			"titlePwChange": "Cambiar contraseña"
+		},
+		"boolAsIcon": "Valores booleanos como iconos",
+		"borders": "Bordes",
+		"bordersSquared": "Cuadrados",
+		"button": {
+			"logout": "Cerrar sesión"
+		},
+		"clientEvents": {
+			"intro": "Si la aplicación cliente de REI3 (ver 'Dispositivos') está instalada, puedes configurar teclas de acceso rápido globales. Estas se utilizan para interactuar con REI3 mientras se ejecuta en segundo plano.",
+			"noEvents": "Actualmente no hay aplicaciones REI3 accesibles que ofrezcan teclas de acceso rápido."
+		},
+		"colorClassicMode": "Esquema de color",
+		"colorClassicMode0": "Moderno",
+		"colorClassicMode1": "Clásico",
+		"colorHeader": "Sobrescribir color",
+		"colorHeaderSingle": "Color de acento",
+		"colorMenu": "Sobrescribir color",
+		"dark": "Modo oscuro",
+		"dateFormat": "Formato de fecha",
+		"dialog": {
+			"searchDictionary": "Este sistema ofrece capacidades de búsqueda de texto completo. Donde se utiliza la búsqueda de texto completo, incluso textos muy largos se pueden buscar rápidamente con funciones de búsqueda avanzadas como la comparación de sinónimos y raíces de palabras.<br /><br />'Diccionarios para búsqueda de texto completo' informa al sistema de qué idiomas utiliza un usuario, para usar funciones de búsqueda específicas del idioma."
+		},
+		"encryption": {
+			"backupCode": "Código de respaldo",
+			"backupCodeDesc": "El código de respaldo es <b>muy importante</b>; sirve para restablecer el acceso si olvidas tu contraseña.",
+			"button": {
+				"createKeys": "Crear claves",
+				"resetKeys": "Restablecer claves personales",
+				"storeKeys": "Habilitar cifrado"
+			},
+			"confirmBackupCode": "He copiado el código de respaldo en un lugar seguro.",
+			"confirmEncryption": "Entiendo que si pierdo el acceso tanto a mi contraseña como a mi código de respaldo, los datos cifrados se volverán permanentemente inaccesibles.",
+			"description": "Las aplicaciones pueden cifrar datos sensibles para acceso exclusivo de individuos específicos. Antes de que los datos puedan ser cifrados, cada usuario debe crear claves personales.",
+			"modulesEnc": "Aplicaciones que usan cifrado",
+			"newKeys": "Claves creadas con éxito",
+			"newKeysDesc": "Para completar la configuración, copia tu código de respaldo personal en un lugar seguro.",
+			"prevPassword": "Contraseña anterior",
+			"regainAccess": "Recuperar acceso a claves personales",
+			"regainAccessDesc": "Puedes recuperar el acceso a tus claves personales ingresando tu contraseña anterior. Si no conoces tu contraseña anterior, necesitas usar tu código de respaldo personal.",
+			"resetAccess": "Restablecer claves personales",
+			"resetAccessDesc": "Si no tienes acceso ni a tu contraseña anterior ni a tu código de respaldo, has perdido permanentemente el acceso a tus datos cifrados.<br /><br />Si este es el caso, puedes decidir restablecer tus claves personales para cifrar nuevos datos - esto <b>NO</b> restablecerá el acceso a los datos cifrados previamente.",
+			"resetAccessHint": "¿Estás seguro de que deseas restablecer tus claves personales? Si haces esto, no habrá vuelta atrás, incluso si encuentras tu antiguo código de respaldo más tarde.",
+			"status": {
+				"inactive": "No habilitado",
+				"locked": "Claves bloqueadas",
+				"noCryptoApi": "Esta función está actualmente deshabilitada: requiere una conexión cifrada (HTTPS) así como un navegador moderno",
+				"unlocked": "Listo para usar"
+			}
+		},
+		"fontFamily": "Fuente",
+		"fontSize": "Tamaño de fuente",
+		"formActionsAlign": "Alinear acciones del formulario",
+		"headerCaptions": "Completo",
+		"headerModules": "Mostrar aplicaciones",
+		"languageCode": "Idioma",
+		"listColored": "Contraste",
+		"listRows": "Filas de la lista",
+		"listSpaced": "Más grande",
+		"mobileScrollForm": "Móvil: Desplazar todo el formulario",
+		"numberSepDecimal": "Separador decimal",
+		"numberSepThousand": "Separador de miles",
+		"option": {
+			"numberSeparator": {
+				"apos": "Apóstrofo (')",
+				"comma": "Coma (,)",
+				"dot": "Punto (.)",
+				"mdot": "Punto medio (·)"
+			}
+		},
+		"pageTitle": "Configuraciones",
+		"pattern": "Patrón de fondo",
+		"searchDictionaries": "Diccionarios para búsqueda de texto completo",
+		"searchDictionaryNew": "Agregar diccionario",
+		"spacing": "Espaciado",
+		"sundayFirstDow": "El domingo es el primer día de la semana",
+		"tabRemember": "Abrir la última pestaña usada",
+		"titleAccount": "Cuenta",
+		"titleClientEvents": "Teclas de acceso rápido globales",
+		"titleEncryption": "Cifrado de extremo a extremo",
+		"titleFixedTokens": "Dispositivos",
+		"titleGeneral": "General",
+		"titleSubHeader": "Menú de encabezado",
+		"titleSubMenu": "Menú de la aplicación",
+		"titleSubMisc": "Varios",
+		"titleSubNumbers": "Números",
+		"titleTheme": "Tema",
+		"tokensFixed": {
+			"button": {
+				"loadApp": "Aplicación",
+				"loadCnf": "Archivo de configuración"
+			},
+			"context": {
+				"client": "Cliente REI3",
+				"ics": "Aplicación de calendario",
+				"totp": "Multifactor"
+			},
+			"device": {
+				"adminInfo": "<b>Información para administradores:</b> La aplicación cliente de REI3 no funciona mientras REI3 está en modo de mantenimiento.",
+				"installStep1": "Elige un nombre para el dispositivo:",
+				"installStep2": "Descarga la aplicación y el archivo de configuración en la misma carpeta:",
+				"installStep3": "Inicia la aplicación. Se instalará y luego aparecerá en la bandeja del sistema.",
+				"installStep4": "Ahora puedes eliminar los archivos de la aplicación y de configuración descargados.",
+				"intro0": "La aplicación cliente de REI3 es una pieza opcional de software que ofrece funcionalidades adicionales. Una vez instalada, las siguientes características están disponibles:",
+				"intro1": "Los archivos subidos a REI3 se pueden editar directamente con software local. Asegúrate de tener una aplicación predeterminada seleccionada para la extensión de archivo dada. En Windows, puedes hacer clic con la tecla Shift para elegir la aplicación a usar.",
+				"intro2": "Las teclas de acceso rápido globales se pueden usar para ejecutar acciones en aplicaciones REI3, mientras REI3 se ejecuta en segundo plano.",
+				"nameHint": "'Mi PC de trabajo'",
+				"os": "Sistema operativo:",
+				"uninstallStep1": "Haz clic derecho en el icono de la bandeja del cliente REI3 y elige la opción 'desinstalar'.",
+				"uninstallStep2": "La aplicación cliente de REI3 ahora está desinstalada.",
+				"updateStep1": "Descarga el nuevo archivo de la aplicación:",
+				"updateStep2": "Inicia la aplicación. Ejecutará la actualización y luego aparecerá en la bandeja del sistema.",
+				"updateStep3": "Ahora puedes eliminar el archivo de la aplicación descargado."
+			},
+			"message": {
+				"delete": "¿Estás seguro de que deseas eliminar esta entrada? Esto no se puede deshacer."
+			},
+			"mfa": {
+				"apps": [
+					"Google Authenticator",
+					"Microsoft Authenticator",
+					"Aegis Authenticator",
+					"...o cualquier aplicación que soporte TOTP"
+				],
+				"appsExample": "Algunos ejemplos:",
+				"intro": "Puedes aumentar la seguridad de tu cuenta habilitando la autenticación multifactor (MFA). Para habilitar MFA, utiliza una aplicación de autenticación en un dispositivo separado (como un smartphone).",
+				"name": "Elige un nombre para tu dispositivo",
+				"nameHint": "'Mi smartphone'",
+				"outro": "Usa el código QR para agregar esta cuenta a tu aplicación de autenticación. Cuando termines, cierra esta ventana. Puedes repetir este proceso para habilitar MFA con múltiples dispositivos."
+			},
+			"titleAdd": "Gestionar aplicación cliente REI3",
+			"titleContext": "Uso",
+			"titleDateCreate": "Creado",
+			"titleMfa": "Configurar autenticación multifactor",
+			"titleName": "Nombre del dispositivo"
+		},
+		"translation": {
+			"community": "Traducción comunitaria",
+			"official": "Oficial",
+			"other": "Solo aplicación"
+		},
+		"warnUnsaved": "Advertencias para cambios no guardados"
+	},
+	"widgets": {
+		"button": {
+			"groupAdd": "Agregar grupo"
+		},
+		"flow": "Dirección",
+		"groupNameNew": "Nuevo grupo de widgets",
+		"option": {
+			"filterModule": "Widgets de la aplicación",
+			"filterSystem": "Widgets del sistema",
+			"flowColumn": "de arriba a abajo",
+			"flowRow": "de izquierda a derecha"
+		},
+		"placeholder": "Arrastra y suelta widgets para agregar a este grupo",
+		"width": "Ancho"
+	}
+}

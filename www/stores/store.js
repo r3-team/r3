@@ -22,6 +22,7 @@ const MyStore = Vuex.createStore({
 			initPublic:    () => {},
 			sessionInvalid:() => {}
 		},
+		appResized:0,                  // unix timestamp of last app resize
 		builderMode:false,             // builder mode active
 		busyCounter:0,                 // counter of calls making the app busy (WS requests, uploads, etc.)
 		captions:{},                   // all application captions in the user interface language
@@ -61,8 +62,11 @@ const MyStore = Vuex.createStore({
 		isAtFeedback:false,            // app shows feedback dialog
 		isAtMenu:false,                // user navigated to menu (only relevant if isMobile)
 		isAtModule:false,              // app currently shows a module (instead of Builder, admin panel, settings, etc.)
+		isCollapsedMenuApp:false,      // app menu is collapsed
 		isMobile:false,                // app runs on small screen (probably mobile)
 		isNoAuth:false,                // user logged in without authentication (public user)
+		isWithoutMenuApp:false,        // session does not have an app menu, set via getter param (menu-app=0), 
+		isWithoutMenuHeader:false,     // session does not have a header menu, set via getter param (menu-header=0)
 		keyDownHandlers:[],            // global handlers, reacting for key down events (for hotkey events)
 		license:{},                    // license info (admin only)
 		licenseValid:false,            // license is valid (set and within validity period)
@@ -109,6 +113,9 @@ const MyStore = Vuex.createStore({
 			for(const v of payload) {
 				state.appFunctions[v.name] = v.fnc;
 			}
+		},
+		appResized:(state,payload) => {
+			state.appResized = new Date().getTime();
 		},
 		config:(state,payload) => {
 			state.builderMode = payload.builderMode === '1';
@@ -261,8 +268,11 @@ const MyStore = Vuex.createStore({
 		isAtFeedback:            (state,payload) => state.isAtFeedback             = payload,
 		isAtMenu:                (state,payload) => state.isAtMenu                 = payload,
 		isAtModule:              (state,payload) => state.isAtModule               = payload,
+		isCollapsedMenuApp:      (state,payload) => state.isCollapsedMenuApp       = payload,
 		isNoAuth:                (state,payload) => state.isNoAuth                 = payload,
 		isMobile:                (state,payload) => state.isMobile                 = payload,
+		isWithoutMenuApp:        (state,payload) => state.isWithoutMenuApp         = payload,
+		isWithoutMenuHeader:     (state,payload) => state.isWithoutMenuHeader      = payload,
 		loginEncryption:         (state,payload) => state.loginEncryption          = payload,
 		loginHasClient:          (state,payload) => state.loginHasClient           = payload,
 		loginId:                 (state,payload) => state.loginId                  = payload,
@@ -390,6 +400,7 @@ const MyStore = Vuex.createStore({
 		// simple
 		access:                  (state) => state.access,
 		appFunctions:            (state) => state.appFunctions,
+		appResized:              (state) => state.appResized,
 		blockInput:              (state) => state.busyCounter > 0,
 		builderEnabled:          (state) => state.builderMode && !state.productionMode,
 		busyCounter:             (state) => state.busyCounter,
@@ -416,8 +427,11 @@ const MyStore = Vuex.createStore({
 		isAtFeedback:            (state) => state.isAtFeedback,
 		isAtMenu:                (state) => state.isAtMenu,
 		isAtModule:              (state) => state.isAtModule && state.moduleIdLast !== null,
+		isCollapsedMenuApp:      (state) => state.isCollapsedMenuApp,
 		isMobile:                (state) => state.isMobile,
 		isNoAuth:                (state) => state.isNoAuth,
+		isWithoutMenuApp:        (state) => state.isWithoutMenuApp,
+		isWithoutMenuHeader:     (state) => state.isWithoutMenuHeader,
 		keyDownHandlers:         (state) => state.keyDownHandlers,
 		license:                 (state) => state.license,
 		licenseValid:            (state) => state.licenseValid,

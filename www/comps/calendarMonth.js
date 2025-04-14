@@ -37,11 +37,11 @@ let MyCalendarMonth = {
 				
 				<!-- full day events -->
 				<div class="event"
-					@click.ctrl.exact="clickRecord($event,e.row,true)"
-					@click.left.exact="clickRecord($event,e.row,false)"
-					@click.middle.exact="clickRecord($event,e.row,true)"
-					@mouseup.left="stopBubbleIfRecord($event,!e.placeholder)"
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => v.fullDay || v.placeholder)"
+					@click.ctrl.exact="clickRecord(e,true)"
+					@click.left.exact="clickRecord(e,false)"
+					@click.middle.exact="clickRecord(e,true)"
+					@mouseup.left="stopBubbleIfRecord($event,!e.placeholder)"
 					:class="{ first:e.entryFirst, last:e.entryLast, placeholder:e.placeholder, clickable:hasUpdate }"
 					:style="e.style"
 				>
@@ -68,9 +68,9 @@ let MyCalendarMonth = {
 				
 				<!-- partial day events -->
 				<div class="part"
-					@click.ctrl.exact="clickRecord($event,e.row,true)"
-					@click.left.exact="clickRecord($event,e.row,false)"
-					@click.middle.exact="clickRecord($event,e.row,true)"
+					@click.ctrl.exact="clickRecord(e,true)"
+					@click.left.exact="clickRecord(e,false)"
+					@click.middle.exact="clickRecord(e,true)"
 					@mouseup.left="stopBubbleIfRecord($event,true)"
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => !v.fullDay && !v.placeholder)"
 					:class="{ clickable:hasUpdate }"
@@ -286,9 +286,11 @@ let MyCalendarMonth = {
 			this.unixInput0 = null;
 			this.unixInput1 = null;
 		},
-		clickRecord(event,row,middleClick) {
+		clickRecord(event,middleClick) {
+			if(event.placeholder) return;
+
 			if(this.hasUpdate)
-				this.$emit('open-form',[row],[],middleClick);
+				this.$emit('open-form',[event.row],[],middleClick);
 		},
 		hoverDay(unix) {
 			if(!this.isRange || !this.unixInputActive) return;

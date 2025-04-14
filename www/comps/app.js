@@ -47,6 +47,7 @@ let MyApp = {
 		<template v-if="appReady">
 			<my-header
 				v-show="!loginSessionExpired"
+				v-if="!isWithoutMenuHeader"
 				@logout="sessionInvalid(false)"
 				@logoutExpire="sessionInvalid(true)"
 				@show-collection-input="collectionEntries = $event"
@@ -401,6 +402,7 @@ let MyApp = {
 		isAtFeedback:       (s) => s.$store.getters.isAtFeedback,
 		isAtModule:         (s) => s.$store.getters.isAtModule,
 		isMobile:           (s) => s.$store.getters.isMobile,
+		isWithoutMenuHeader:(s) => s.$store.getters.isWithoutMenuHeader,
 		keyDownHandlers:    (s) => s.$store.getters.keyDownHandlers,
 		loginEncryption:    (s) => s.$store.getters.loginEncryption,
 		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
@@ -419,13 +421,13 @@ let MyApp = {
 	},
 	created() {
 		window.addEventListener('keydown',this.handleKeydown);
-		window.addEventListener('resize',this.setMobileView);
+		window.addEventListener('resize',this.resized);
 	},
 	mounted() {
 		setInterval(this.wsReconnect,2000);        // websocket reconnect loop
 		setInterval(this.sessionExpireCheck,1000); // session expiration check
 		this.wsConnect();                          // connect to backend via websocket
-		this.setMobileView();                      // initial state, mobile view: yes/no
+		this.resized();
 
 		// register globally accessible functions
 		this.$store.commit('appFunctionsRegister',[
@@ -433,10 +435,18 @@ let MyApp = {
 			{name:'initPublic',    fnc:this.initPublic},
 			{name:'sessionInvalid',fnc:this.sessionInvalid}
 		]);
+
+		// check for getter options
+		const pos = window.location.hash.indexOf('?');
+		if(pos !== -1) {
+			const params = new URLSearchParams(window.location.hash.substring(pos));
+			if(params.has('menu-app')    && params.get('menu-app')    === '0') this.$store.commit('isWithoutMenuApp',   true);
+			if(params.has('menu-header') && params.get('menu-header') === '0') this.$store.commit('isWithoutMenuHeader',true);
+		}
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleKeydown);
-		window.removeEventListener('resize',this.setMobileView);
+		window.removeEventListener('resize',this.resized);
 	},
 	methods:{
 		// externals
@@ -456,6 +466,12 @@ let MyApp = {
 		updateCollections,
 		
 		// general app states
+		resized() {
+			this.$store.commit('appResized');
+
+			// set mobile view
+			this.$store.commit('isMobile',window.innerWidth <= 800 || window.innerHeight <= 400);
+		},
 		stateChange() {
 			// create app states required for basic function
 			// order is required, earlier ones must be satisfied first
@@ -470,9 +486,6 @@ let MyApp = {
 			// log to console and release login routine
 			this.consoleError(err);
 			this.$refs.login.parentError();
-		},
-		setMobileView() {
-			this.$store.commit('isMobile',window.innerWidth <= 800 || window.innerHeight <= 400);
 		},
 		
 		// web socket control

@@ -491,6 +491,7 @@ let MyFilterSide = {
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
 				:filters="query.filters"
+				:filtersDisable="disableContent"
 				:fixedLimit="query.fixedLimit"
 				:formId="formId"
 				:joins="query.joins"

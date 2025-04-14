@@ -1661,8 +1661,6 @@
 			"presets": "Record preimpostati ({CNT})",
 			"preview": "Visualizzazione dati",
 			"previewLimit": "Record/pagina",
-			"previewPage": "Pagina",
-			"previewRowCount": "Numero record",
 			"retention": "Log cambiamenti",
 			"retentionCount": "Mantieni X modifiche",
 			"retentionDays": "Mantieni X giorni",

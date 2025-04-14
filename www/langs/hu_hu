@@ -1661,8 +1661,6 @@
 			"presets": "Előre definiált adatrekordok ({CNT})",
 			"preview": "Adatnézet",
 			"previewLimit": "Rekordok oldalanként",
-			"previewPage": "Oldal",
-			"previewRowCount": "Rekordok száma",
 			"retention": "Változások története",
 			"retentionCount": "Tartson meg X változást",
 			"retentionDays": "Tartson meg X napig",

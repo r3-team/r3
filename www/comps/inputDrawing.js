@@ -86,6 +86,9 @@ let MyInputDraw = {
 		readonly:   { type:Boolean, required:true }
 	},
 	watch:{
+		appResized() {
+			this.resized();
+		},
 		formLoading(val) {
 			if(!val) this.reset();
 		},
@@ -126,18 +129,14 @@ let MyInputDraw = {
 		zoom:(s) => 1 + (s.zoomInput / 10),
 		
 		// stores
-		capGen:  (s) => s.$store.getters.captions.generic,
-		isMobile:(s) => s.$store.getters.isMobile
+		appResized:(s) => s.$store.getters.appResized,
+		capGen:    (s) => s.$store.getters.captions.generic,
+		isMobile:  (s) => s.$store.getters.isMobile
 	},
 	mounted() {
 		this.canvasCtx = this.$refs.canvas.getContext('2d');
 		this.canvasCtx.lineCap  = 'round';
 		this.canvasCtx.lineJoin = 'round';
-		
-		window.addEventListener('resize',this.resized);
-	},
-	unmounted() {
-		window.removeEventListener('resize',this.resized);
 	},
 	methods:{
 		reset() {

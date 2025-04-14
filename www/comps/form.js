@@ -141,7 +141,7 @@ let MyForm = {
 					</template>
 					
 					<my-button image="star1.png"
-						v-if="!isBulkUpdate"
+						v-if="!isBulkUpdate && !isNoAuth"
 						@trigger="makeFavorite"
 						:active="!isAtFavoritesEdit"
 						:captionTitle="capApp.button.favorite"
@@ -333,6 +333,7 @@ let MyForm = {
 	},
 	emits:['close','record-deleted','record-updated','records-open'],
 	mounted() {
+		this.$watch('appResized',() => this.resized());
 		this.$watch(() => [this.favoriteId,this.formId,this.recordIds],this.reset,{
 			immediate:true
 		});
@@ -342,7 +343,6 @@ let MyForm = {
 		
 		window.addEventListener('keydown',this.handleHotkeys);
 		window.addEventListener('keyup',this.handleHotkeys);
-		window.addEventListener('resize',this.resized);
 		this.resized(null,0);
 	},
 	unmounted() {
@@ -351,7 +351,6 @@ let MyForm = {
 		
 		window.removeEventListener('keydown',this.handleHotkeys);
 		window.removeEventListener('keyup',this.handleHotkeys);
-		window.removeEventListener('resize',this.resized);
 	},
 	data() {
 		return {
@@ -503,7 +502,7 @@ let MyForm = {
 		isReadonly:    (s) => s.badLoad || !s.checkDataOptions((s.isNew ? 4 : 2),s.entityIdMapEffect.form.data),
 		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','kanban','list','tabs','variable'].includes(s.fields[0].content),
 		menuActive:    (s) => s.formIdMapMenu[s.form.id] === undefined ? null : s.formIdMapMenu[s.form.id],
-		warnUnsaved:   (s) => s.hasChanges && s.settings.warnUnsaved,
+		warnUnsaved:   (s) => s.hasChanges && !s.blockInputs && s.settings.warnUnsaved,
 
 		// buttons
 		buttonActiveDel:     (s) => !s.blockInputs  && s.canDelete,
@@ -800,6 +799,7 @@ let MyForm = {
 		loginOptionsMobile: (s) => s.$store.getters['local/loginOptionsMobile'],
 		token:              (s) => s.$store.getters['local/token'],
 		access:             (s) => s.$store.getters.access,
+		appResized:         (s) => s.$store.getters.appResized,
 		builderEnabled:     (s) => s.$store.getters.builderEnabled,
 		capApp:             (s) => s.$store.getters.captions.form,
 		capErr:             (s) => s.$store.getters.captions.error,
@@ -808,6 +808,7 @@ let MyForm = {
 		isAdmin:            (s) => s.$store.getters.isAdmin,
 		isAtFavoritesEdit:  (s) => s.$store.getters.isAtFavoritesEdit,
 		isMobile:           (s) => s.$store.getters.isMobile,
+		isNoAuth:           (s) => s.$store.getters.isNoAuth,
 		keyLength:          (s) => s.$store.getters.constants.keyLength,
 		loginId:            (s) => s.$store.getters.loginId,
 		loginPublicKey:     (s) => s.$store.getters.loginPublicKey,
@@ -1155,15 +1156,14 @@ let MyForm = {
 			);
 		},
 		openBuilder(middle) {
-			if(!middle) {
-				this.$router.push('/builder/form/'+this.form.id);
-				this.$store.commit('popUpFormGlobal',null);
-				return;
-			}
-			window.open('#/builder/form/'+this.form.id,'_blank');
+			if(middle)
+				return window.open('#/builder/form/'+this.form.id,'_blank');
+			
+			this.blockInputs = true;
+			this.$router.push('/builder/form/'+this.form.id);
+			this.$store.commit('popUpFormGlobal',null);
 		},
 		openNewAsk(middleClick) {
-			// middle click does not kill form inputs, no confirmation required
 			if(middleClick || !this.warnUnsaved)
 				return this.openNew(middleClick);
 			
@@ -1193,6 +1193,9 @@ let MyForm = {
 			});
 		},
 		openNew(middleClick) {
+			if(!middleClick)
+				this.blockInputs = true;
+
 			this.openForm([],null,null,middleClick,null,false);
 		},
 		openPrevAsk() {
@@ -1215,6 +1218,7 @@ let MyForm = {
 			});
 		},
 		openPrev() {
+			this.blockInputs = true;
 			window.history.back();
 		},
 		popUpRecordChanged(change,recordId) {

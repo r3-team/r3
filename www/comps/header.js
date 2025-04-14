@@ -343,6 +343,7 @@ let MyHeader = {
 		moduleNameMap:       (s) => s.$store.getters['schema/moduleNameMap'],
 		formIdMap:           (s) => s.$store.getters['schema/formIdMap'],
 		collectionIdMap:     (s) => s.$store.getters['schema/collectionIdMap'],
+		appResized:          (s) => s.$store.getters.appResized,
 		builderEnabled:      (s) => s.$store.getters.builderEnabled,
 		busyCounter:         (s) => s.$store.getters.busyCounter,
 		capErr:              (s) => s.$store.getters.captions.error,
@@ -366,17 +367,12 @@ let MyHeader = {
 		systemMsgMaintenance:(s) => s.$store.getters.systemMsgMaintenance,
 		systemMsgText:       (s) => s.$store.getters.systemMsgText
 	},
-	created() {
-		window.addEventListener('resize',this.resized);
-	},
 	mounted() {
+		this.$watch('appResized',this.resized);
 		this.$watch(() => [this.colorHeaderAccent,this.colorHeaderMain],() => { this.updateMetaThemeColor() },{
 			immediate:true
 		});
 		this.resized();
-	},
-	unmounted() {
-		window.removeEventListener('resize',this.resized);
 	},
 	methods:{
 		// externals

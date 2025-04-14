@@ -61,6 +61,7 @@ let MyGoForm = {
 	components:{ MyForm, MyMenu },
 	template:`<div v-if="moduleId !== null">
 		<my-menu class="noPrint"
+			v-if="!isWithoutMenuApp"
 			v-show="!isMobile || isAtMenu"
 			v-for="m in modules.filter(v => v.id === moduleId)"
 			:isActiveModule="m.id === moduleId"
@@ -117,11 +118,12 @@ let MyGoForm = {
 			? [] : [parseInt(s.recordIdString)],
 		
 		// stores
-		modules:      (s) => s.$store.getters['schema/modules'],
-		moduleNameMap:(s) => s.$store.getters['schema/moduleNameMap'],
-		formIdMap:    (s) => s.$store.getters['schema/formIdMap'],
-		isAtMenu:     (s) => s.$store.getters.isAtMenu,
-		isMobile:     (s) => s.$store.getters.isMobile
+		modules:         (s) => s.$store.getters['schema/modules'],
+		moduleNameMap:   (s) => s.$store.getters['schema/moduleNameMap'],
+		formIdMap:       (s) => s.$store.getters['schema/formIdMap'],
+		isAtMenu:        (s) => s.$store.getters.isAtMenu,
+		isMobile:        (s) => s.$store.getters.isMobile,
+		isWithoutMenuApp:(s) => s.$store.getters.isWithoutMenuApp
 	},
 	methods:{
 		// externals

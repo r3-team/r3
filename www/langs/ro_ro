@@ -1661,8 +1661,6 @@
 			"presets": "Înregistrări prestabilite ({CNT})",
 			"preview": "Vizualizare date",
 			"previewLimit": "Înregistrări/pagină",
-			"previewPage": "Pagină",
-			"previewRowCount": "Număr de înregistrări",
 			"retention": "Jurnalul de modificări",
 			"retentionCount": "Păstrați X modificări",
 			"retentionDays": "Păstrați timp de X zile",

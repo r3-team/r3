@@ -13,7 +13,7 @@ let MyListColumnBatch = {
 		<my-button image="filter.png"
 			v-if="showIconFilter"
 			@trigger="click"
-			@trigger-right="input = ''; set()"
+			@trigger-right="clear"
 			:blockBubble="true"
 			:captionTitle="capApp.button.columnFilters"
 			:naked="true"
@@ -85,20 +85,19 @@ let MyListColumnBatch = {
 				<!-- filter by text -->
 				<div class="columnOptionItem" v-if="showFilterText">
 					<my-button image="filter.png"
-						@trigger="input = ''; set()"
-						:active="isFiltered"
+						@trigger="clear"
+						:active="isFiltered && inputTxt !== ''"
 						:captionTitle="capGen.button.filter"
 						:naked="true"
 					/>
 					<input
-						v-model="input"
-						:disabled="isArrayInput"
+						v-model="inputTxt"
 						:placeholder="capApp.columnFilter.contains"
-						@keyup.enter="set"
+						@keyup.enter="useTextInput"
 					/>
 					<my-button image="ok.png"
-						@trigger="set"
-						:active="!isArrayInput && input !== ''"
+						@trigger="useTextInput"
+						:active="inputTxt !== ''"
 						:naked="true"
 					/>
 				</div>
@@ -108,7 +107,7 @@ let MyListColumnBatch = {
 					<my-button
 						@trigger="valueToggleAll"
 						:caption="'['+capGen.button.selectAll+']'"
-						:image="(isInputEmpty || input.length === values.length) && !zeroSelection ? 'checkbox1.png' : 'checkbox0.png'"
+						:image="(inputSel.length === 0 || inputSel.length === values.length) && !zeroSelection ? 'checkbox1.png' : 'checkbox0.png'"
 						:naked="true"
 					/>
 					<div class="columnFilterValues">
@@ -117,7 +116,7 @@ let MyListColumnBatch = {
 							@trigger="valueToggle(v)"
 							:adjusts="true"
 							:caption="displayValue(v)"
-							:image="(isInputEmpty || input.includes(v)) && !zeroSelection ? 'checkbox1.png' : 'checkbox0.png'"
+							:image="(inputSel.length === 0 || !inputSel.includes(v)) && !zeroSelection ? 'checkbox1.png' : 'checkbox0.png'"
 							:naked="true"
 						/>
 					</div>
@@ -128,7 +127,7 @@ let MyListColumnBatch = {
 					<my-button image="remove.png"
 						v-if="showFilterAny"
 						@trigger="clear"
-						:active="input !== ''"
+						:active="isFiltered"
 						:cancel="true"
 						:caption="capGen.button.clear"
 					/>
@@ -161,21 +160,31 @@ let MyListColumnBatch = {
 	],
 	data() {
 		return {
-			input:'',           // value input (either string if text, or array if selected from values)
-			values:[],          // values available to filter with (all values a list could have for column)
+			inputTxt:'', // value input for text filter
+			inputSel:[], // value input for selection filter
+			values:[],   // values available to filter with (all values a list could have for column)
 			zeroSelection:false
 		};
 	},
+	watch:{
+		columnFilterIndexes(v) {
+			if(v.length < 1)
+				return;
+
+			// apply input values from column filter (must be first index)
+			const f = this.filtersColumn[v[0]];
+			if(f.side1.content === 'value') {
+				switch(f.operator) {
+					case 'ILIKE':  this.inputTxt = f.side1.value;     break;
+					case '<> ALL': this.inputSel = f.side1.value;     break;
+					case '= ANY':  this.migrateFilter(f.side1.value); break;
+				}
+			}
+		}
+	},
 	mounted() {
 		if(this.isValidFilter)
-			this.$watch('show',v => this.loadValues());
-		
-		// apply input values from column filter (must be first index)
-		if(this.columnFilterIndexes.length !== 0) {
-			const f = this.filtersColumn[this.columnFilterIndexes[0]];
-			if(f.side1.content === 'value')
-				this.input = f.side1.value;
-		}
+			this.$watch('show',v => this.loadSelectionValues());
 	},
 	computed:{
 		aggregatorInput:{
@@ -228,16 +237,14 @@ let MyListColumnBatch = {
 		canOpen:          (s) => s.rowCount > 1 || s.isFiltered,
 		canOrder:         (s) => s.columnBatch.columnIndexesSortBy.length !== 0,
 		filtersColumnThis:(s) => s.filtersColumn.filter((v,i) => s.columnFilterIndexes.includes(i)),
-		isArrayInput:     (s) => typeof s.input === 'object',
 		isDateOrTime:     (s) => s.isValidFilter && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
 		isFiltered:       (s) => s.columnFilterIndexes.length !== 0,
-		isInputEmpty:     (s) => (s.isArrayInput && s.input.length === 0) || !s.isArrayInput && s.input === '',
 		isOrdered:        (s) => s.columnBatch.orderIndexesUsed.length !== 0,
 		isOrderedAsc:     (s) => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
 		isValidFilter:    (s) => s.columnUsedFilter !== null,
 		showFilterAny:    (s) => s.showFilterItems || s.showFilterText,
 		showFilterItems:  (s) => s.values.length != 0,
-		showFilterText:   (s) => s.values.length >= 5 && !s.isDateOrTime,
+		showFilterText:   (s) => !s.isDateOrTime,
 		showIconFilter:   (s) => s.isValidFilter && s.isFiltered,
 		showIconOrder:    (s) => s.isOrdered && !s.isOrderedOrginal,
 		
@@ -257,7 +264,7 @@ let MyListColumnBatch = {
 		
 		// presentation
 		displayValue(v) {
-			if(v === null)
+			if(v === '-1')
 				return '[' + this.capGen.button.empty + ']';
 			
 			const atr = this.attributeIdMap[this.columnUsedFilter.attributeId];
@@ -272,55 +279,10 @@ let MyListColumnBatch = {
 				default: return String(v); break;
 			}
 		},
-		
-		// actions
-		clear() {
-			this.input = '';
-			this.set();
-			this.loadValues();
-		},
-		click() {
-			if(this.canOpen)
-				this.$emit('toggle');
-		},
-		escaped() {
-			this.$emit('close');
-		},
-		valueToggle(v) {
-			if(this.isInputEmpty && !this.zeroSelection)
-				this.input = JSON.parse(JSON.stringify(this.values));
 
-			if(typeof this.input !== 'object')
-				this.input = [];
-			
-			const p = this.input.indexOf(v);
-			if(p !== -1) this.input.splice(p,1);
-			else         this.input.push(v);
-			
-			if(this.input.length === 0 || this.input.length === this.values.length)
-				this.input = '';
-
-			this.zeroSelection = false;
-			this.set();
-		},
-		valueToggleAll() {
-			if(!this.isInputEmpty || this.zeroSelection) {
-				this.zeroSelection = false;
-				this.input = '';
-			}
-			else {
-				this.zeroSelection = true;
-			}
-			this.set();
-		},
-		
-		// retrieval
-		loadValues() {
-			if(!this.show || !this.isValidFilter)
-				return;
-			
-			this.values = [];
-			ws.send('data','get',{
+		// helper
+		prepareDataGet() {
+			return {
 				relationId:this.relationId,
 				joins:this.joins,
 				expressions:[{
@@ -337,12 +299,81 @@ let MyListColumnBatch = {
 					}
 					return true;
 				}),
-				orders:[{ascending:true,expressionPos:0}],
 				limit:1000
-			},false).then(
+			};
+		},
+		
+		// actions
+		clear() {
+			this.inputTxt = '';
+			this.inputSel = [];
+			this.set();
+			this.loadSelectionValues();
+		},
+		click() {
+			if(this.canOpen)
+				this.$emit('toggle');
+		},
+		escaped() {
+			this.$emit('close');
+		},
+		useTextInput() {
+			this.inputSel = [];
+			this.zeroSelection = false;
+			this.set();
+		},
+		valueToggle(v) {
+			this.inputTxt = '';
+
+			if(this.zeroSelection && this.inputSel.length === 0)
+				this.inputSel = JSON.parse(JSON.stringify(this.values));
+			
+			const p = this.inputSel.indexOf(v);
+			if(p !== -1) this.inputSel.splice(p,1);
+			else         this.inputSel.push(v);
+
+			this.zeroSelection = false;
+			this.set();
+		},
+		valueToggleAll() {
+			this.inputTxt = '';
+			if(this.inputSel.length !== 0 || this.zeroSelection) {
+				this.zeroSelection = false;
+				this.inputSel = [];
+			}
+			else {
+				this.zeroSelection = true;
+			}
+			this.set();
+		},
+
+		// migrate filter (< r3.10.3) from outdated '= ANY' filter to current '<> ALL' filter
+		migrateFilter(valuesIncl) {
+			ws.send('data','get',this.prepareDataGet(),false).then(
 				res => {
+					// exclude any value that is not in outdated inclusion filter
+					this.inputSel  = [];
 					for(const row of res.payload.rows) {
-						this.values.push(row.values[0]);
+						if(!valuesIncl.includes(row.values[0]))
+							this.inputSel.push(row.values[0] !== null ? row.values[0] : '-1');
+					}
+					this.set();
+				},
+				this.$root.genericError
+			);
+		},
+		
+		// retrieval
+		loadSelectionValues() {
+			if(!this.show || !this.isValidFilter)
+				return;
+			
+			ws.send('data','get',this.prepareDataGet(),false).then(
+				res => {
+					this.values = [];
+					for(const row of res.payload.rows) {
+						// replace NULL with '-1' as <> ALL comparisson does not allow NULL inclusion
+						this.values.push(row.values[0] !== null ? row.values[0] : '-1');
 					}
 				},
 				this.$root.genericError
@@ -354,41 +385,39 @@ let MyListColumnBatch = {
 			if(!this.isValidFilter)
 				return;
 			
-			const atrId    = this.columnUsedFilter.attributeId;
-			const atrIndex = this.columnUsedFilter.index;
-			let filters    = JSON.parse(JSON.stringify(this.filtersColumn));
-			let filterUsed = (
-				!this.isArrayInput && this.input !== '' ||
-				this.isArrayInput  && this.input.length !== 0
-			);
+			const atrId     = this.columnUsedFilter.attributeId;
+			const atrIndex  = this.columnUsedFilter.index;
+			const filterTxt = this.inputTxt !== '';
 			
 			// remove existing filters for this column
+			let filters = JSON.parse(JSON.stringify(this.filtersColumn));
 			filters = filters.filter((v,i) => !this.columnFilterIndexes.includes(i));
 
-			if(filterUsed) {
+			if(this.inputTxt !== '' || this.inputSel.length !== 0) {
 				// add new filters for this column, if active
-				const hasNull = this.isArrayInput && this.input.includes(null);
+				// a NULL value is represented by '-1' (<> ALL comparisson does not allow NULL inclusion in ARRAY)
+				const exclNull = !filterTxt && this.inputSel.includes('-1');
 				filters.push({
 					connector:'AND',
 					index:0,
-					operator:typeof this.input === 'string' ? 'ILIKE' : '= ANY',
+					operator:filterTxt ? 'ILIKE' : '<> ALL',
 					side0:{
 						attributeId:atrId,
 						attributeIndex:atrIndex,
 						brackets:1
 					},
 					side1:{
-						brackets:hasNull ? 0 : 1,
+						brackets:filterTxt ? 1 : 0,
 						content:'value',
-						value:this.input
+						value:filterTxt ? this.inputTxt : this.inputSel
 					}
 				});
 				
-				if(hasNull) {
+				if(!filterTxt) {
 					filters.push({
-						connector:'OR',
+						connector:exclNull ? 'AND' : 'OR',
 						index:0,
-						operator:'IS NULL',
+						operator:exclNull ? 'IS NOT NULL' : 'IS NULL',
 						side0:{
 							attributeId:atrId,
 							attributeIndex:atrIndex,

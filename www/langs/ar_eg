@@ -1661,8 +1661,6 @@
 			"presets": "السجلات المعدة مسبقًا ({CNT})",
 			"preview": "عرض البيانات",
 			"previewLimit": "السجلات/الصفحة",
-			"previewPage": "صفحة",
-			"previewRowCount": "عدد السجلات",
 			"retention": "تغيير السجل",
 			"retentionCount": "احتفظ بتغييرات X",
 			"retentionDays": "احتفظ به لمدة X أيام",
