@@ -1377,6 +1377,8 @@
 			"placeholderFncFrontend": "Fonctions (côté client)",
 			"placeholderFncInstance": "Fonctions (instance)",
 			"placeholderFncInstanceHelp": "Espaces réservés pour les fonctions de l'instance REI3 - ceux-ci donnent accès aux fonctionnalités système telles que la manipulation de fichiers ou de courriels.",
+			"placeholderPresets": "Preset record IDs",
+			"placeholderPresetsHelp": "Placeholders for the ID (as BIGINT) of the record that exists for the selected preset.<br /><br />If the preset is not protected, it could have been deleted by users. In this case 'null' is returned.",
 			"placeholderRelations": "Relations",
 			"placeholderRelationsHelp": "Espaces réservés pour les relations et les attributs - utilisés pour les requêtes SQL (SELECT/INSERT/UPDATE/DELETE).",
 			"placeholders": "Espaces réservés",

@@ -1377,6 +1377,8 @@
 			"placeholderFncFrontend": "Funcții (front-end)",
 			"placeholderFncInstance": "Funcții (instanță)",
 			"placeholderFncInstanceHelp": "Placeholders for functions from the REI3 instance - these give access to system features like file or mail handling.",
+			"placeholderPresets": "Preset record IDs",
+			"placeholderPresetsHelp": "Placeholders for the ID (as BIGINT) of the record that exists for the selected preset.<br /><br />If the preset is not protected, it could have been deleted by users. In this case 'null' is returned.",
 			"placeholderRelations": "Relations",
 			"placeholderRelationsHelp": "Placeholders for relations & attributes - used for SQL requests (SELECT/INSERT/UPDATE/DELETE).",
 			"placeholders": "Înlocuitori",

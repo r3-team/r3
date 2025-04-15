@@ -1377,6 +1377,8 @@
 			"placeholderFncFrontend": "Funciones (frontend)",
 			"placeholderFncInstance": "Funciones (instancia)",
 			"placeholderFncInstanceHelp": "Marcadores de posición para funciones de la instancia REI3: dan acceso a funciones del sistema como manejo de archivos o correos.",
+			"placeholderPresets": "Preset record IDs",
+			"placeholderPresetsHelp": "Placeholders for the ID (as BIGINT) of the record that exists for the selected preset.<br /><br />If the preset is not protected, it could have been deleted by users. In this case 'null' is returned.",
 			"placeholderRelations": "Relaciones",
 			"placeholderRelationsHelp": "Marcadores de posición para relaciones y atributos: se usan para solicitudes SQL (SELECT/INSERT/UPDATE/DELETE).",
 			"placeholders": "Marcadores de posición",

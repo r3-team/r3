@@ -14,7 +14,8 @@ import {
 	getFormEntityMapRef,
 	getFunctionHelp,
 	getItemTitle,
-	getItemTitlePath
+	getItemTitlePath,
+	getValidDbCharsForRx
 } from '../shared/builder.js';
 import {
 	getFieldIcon,
@@ -771,6 +772,7 @@ let MyBuilderJsFunction = {
 		getItemTitle,
 		getItemTitlePath,
 		getJoinsIndexMap,
+		getValidDbCharsForRx,
 		isAttributeFiles,
 		
 		// presentation
@@ -909,8 +911,8 @@ let MyBuilderJsFunction = {
 		},
 		placeholdersUnset() {
 			let body    = this.codeFunction;
+			let dbChars = this.getValidDbCharsForRx();
 			let prefix  = 'app';
-			let dbChars = '[a-z0-9_]+'; // valid chars, DB entities (PG functions, modules, attributes, ...)
 			let pat;
 			
 			// replace collection & column placeholders
@@ -996,7 +998,6 @@ let MyBuilderJsFunction = {
 						return `${prefix}\.call_frontend('${f.id}'`;
 				}
 				return match;
-				
 			});
 			
 			// replace form assigned frontend function placeholders

@@ -1377,6 +1377,8 @@
 			"placeholderFncFrontend": "Funkciók (frontend)",
 			"placeholderFncInstance": "Funkciók (példány)",
 			"placeholderFncInstanceHelp": "Helyőrzők a REI3 példány függvényeihez - ezek lehetővé teszik a rendszerfunkciókhoz való hozzáférést, például fájl- vagy e-mailkezeléshez.",
+			"placeholderPresets": "Preset record IDs",
+			"placeholderPresetsHelp": "Placeholders for the ID (as BIGINT) of the record that exists for the selected preset.<br /><br />If the preset is not protected, it could have been deleted by users. In this case 'null' is returned.",
 			"placeholderRelations": "Kapcsolatok",
 			"placeholderRelationsHelp": "Helyőrzők a kapcsolatokhoz és attribútumokhoz - SQL utasításokhoz használva (SELECT/INSERT/UPDATE/DELETE).",
 			"placeholders": "Helyőrzők",

@@ -1377,6 +1377,8 @@
 			"placeholderFncFrontend": "الوظائف (الواجهة الأمامية)",
 			"placeholderFncInstance": "وظائف (مثال)",
 			"placeholderFncInstanceHelp": "العناصر النائبة للوظائف من مثيل REI3 - تتيح الوصول إلى ميزات النظام مثل معالجة الملفات أو البريد.",
+			"placeholderPresets": "Preset record IDs",
+			"placeholderPresetsHelp": "Placeholders for the ID (as BIGINT) of the record that exists for the selected preset.<br /><br />If the preset is not protected, it could have been deleted by users. In this case 'null' is returned.",
 			"placeholderRelations": "العلاقات",
 			"placeholderRelationsHelp": "العناصر النائبة للعلاقات والسمات - تستخدم لطلبات SQL (SELECT/INSERT/UPDATE/DELETE).",
 			"placeholders": "العناصر النائبة",

@@ -1377,6 +1377,8 @@
 			"placeholderFncFrontend": "函数（前端）",
 			"placeholderFncInstance": "函数（实例）",
 			"placeholderFncInstanceHelp": "REI3 实例中函数的占位符 - 这些函数可以访问文件处理或邮件处理等系统功能。",
+			"placeholderPresets": "Preset record IDs",
+			"placeholderPresetsHelp": "Placeholders for the ID (as BIGINT) of the record that exists for the selected preset.<br /><br />If the preset is not protected, it could have been deleted by users. In this case 'null' is returned.",
 			"placeholderRelations": "关系",
 			"placeholderRelationsHelp": "关系和属性的占位符 - 用于 SQL 请求（SELECT/INSERT/UPDATE/DELETE）。",
 			"placeholders": "占位符",

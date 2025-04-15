@@ -12,7 +12,8 @@ import {
 } from '../shared/generic.js';
 import {
 	getDependentModules,
-	getFunctionHelp
+	getFunctionHelp,
+	getValidDbCharsForRx
 } from '../shared/builder.js';
 export {MyBuilderPgFunction as default};
 
@@ -296,6 +297,58 @@ let MyBuilderPgFunction = {
 						</template>
 					</div>
 					
+					<!-- presets -->
+					<div class="entities-title">
+						<my-button
+							@trigger="showHolderPreset = !showHolderPreset"
+							:caption="capApp.placeholderPresets"
+							:images="[showHolderPreset ? 'triangleDown.png' : 'triangleRight.png','databaseCircle.png']"
+							:large="true"
+							:naked="true"
+						/>
+						<div class="row centered gap">
+							<template v-if="showHolderPreset">
+								<input class="short" v-model="holderPresetText" :placeholder="capGen.threeDots" :title="capGen.button.filter" />
+								<select class="dynamic" v-model="holderPresetModuleId">
+									<option v-for="m in modulesData" :value="m.id">{{ m.name }}</option>
+								</select>
+							</template>
+							<my-button image="question.png"
+								@trigger="showHelp(capApp.placeholderPresets,capApp.placeholderPresetsHelp)"
+							/>
+						</div>
+					</div>
+					<div class="entities" v-if="showHolderPreset">
+						<template v-for="mod in modulesData.filter(v => holderPresetModuleId === null || holderPresetModuleId === v.id)">
+							<div class="entity" v-for="rel in mod.relations.filter(v => v.presets.length !== 0 && (holderPresetText === '' || v.name.toLowerCase().includes(holderPresetText.toLowerCase())))">
+								<div class="entity-title">
+									<div class="row gap centered grow">
+										<my-button
+											@trigger="toggleRelationShow(rel.id)"
+											:image="holderRelationIdsOpen.includes(rel.id) ? 'triangleDown.png' : 'triangleRight.png'"
+											:naked="true"
+										/>
+										<span>{{ rel.name }}</span>
+									</div>
+									<router-link :key="rel.id" :to="'/builder/relation/'+rel.id">
+										<my-button image="open.png" :captionTitle="capGen.button.open" :naked="true" />
+									</router-link>
+								</div>
+								<div class="entity-children" v-if="holderRelationIdsOpen.includes(rel.id)">
+									<div class="entity-title" v-for="prs in rel.presets">
+										<my-button
+											@trigger="selectEntity('preset',prs.id)"
+											:caption="prs.name"
+											:image="radioIcon('preset',prs.id)"
+											:images="[prs.protected ? 'lock.png' : 'lockOpen.png']"
+											:naked="true"
+										/>
+									</div>
+								</div>
+							</div>
+						</template>
+					</div>
+					
 					<!-- module functions -->
 					<div class="entities-title">
 						<my-button
@@ -525,8 +578,9 @@ let MyBuilderPgFunction = {
 		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
 		
 		// set defaults
-		this.holderRelationModuleId = this.module.id;
 		this.holderFunctionModuleId = this.module.id;
+		this.holderPresetModuleId   = this.module.id;
+		this.holderRelationModuleId = this.module.id;
 	},
 	unmounted() {
 		this.$store.commit('keyDownHandlerDel',this.set);
@@ -556,19 +610,22 @@ let MyBuilderPgFunction = {
 			entityId:null,
 			holderFunctionModuleId:null, // module filter for backend functions
 			holderFunctionText:'',       // text filter for backend functions
+			holderPresetModuleId:null,   // module filter for presets
+			holderPresetText:''      ,   // text filter for presets
 			holderRelationModuleId:null, // module filter for relations
 			holderRelationIdsOpen:[],    // opened relation placeholders (shows attributes)
 			holderRelationText:'',       // text filter for module relations
 			instanceFunctionIds:[
 				'abort_show_message','clean_up_e2ee_keys','file_link','file_unlink',
 				'files_get','get_e2ee_data_key_enc','get_language_code','get_name',
-				'get_preset_record_id','get_public_hostname','get_role_ids','get_user_id',
-				'has_role','has_role_any','log_error','log_info','log_warning','mail_delete',
-				'mail_delete_after_attach','mail_get_next','mail_send','rest_call',
-				'update_collection','user_meta_set','user_sync_all',
+				'get_public_hostname','get_role_ids','get_user_id','has_role','has_role_any',
+				'log_error','log_info','log_warning','mail_delete','mail_delete_after_attach',
+				'mail_get_next','mail_send','rest_call','update_collection','user_meta_set',
+				'user_sync_all'
 			],
 			showHolderFncInstance:false,
 			showHolderFncModule:false,
+			showHolderPreset:false,
 			showHolderRelation:false,
 			showPreview:false,
 			showSidebar:true,
@@ -589,17 +646,28 @@ let MyBuilderPgFunction = {
 				return null;
 			
 			let text = null;
-			let mod, rel, atr, fnc, args;
+			let mod, rel, prs, atr, fnc, args, pat;
 			
 			// build unique placeholder name
 			// relation:    {module_name}.[relation_name]
 			// pg function: {module_name}.[function_name]()
 			// attribute:   (module_name.relation_name.attribute_name)
+			// preset:      {PRESET::module_name.relation_name.preset_name}
 			switch(s.entity) {
 				case 'relation':
 					rel  = s.relationIdMap[s.entityId];
 					mod  = s.moduleIdMap[rel.moduleId];
 					text = `{${mod.name}}.[${rel.name}]`;
+				break;
+				case 'preset':
+					prs  = s.presetIdMap[s.entityId];
+					rel  = s.relationIdMap[prs.relationId];
+					mod  = s.moduleIdMap[rel.moduleId];
+					pat = new RegExp(`[\{\}]`,'g');
+
+					text = !pat.test(prs.name)
+						? `{PRESET::${mod.name}.${rel.name}.${prs.name}}`
+						: `instance.get_preset_record_id('${s.entityId}')`;
 				break;
 				case 'pgFunction':
 					fnc  = s.pgFunctionIdMap[s.entityId];
@@ -648,6 +716,7 @@ let MyBuilderPgFunction = {
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:  (s) => s.$store.getters['schema/moduleNameMap'],
 		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
+		presetIdMap:    (s) => s.$store.getters['schema/presetIdMap'],
 		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
 		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
 		capApp:         (s) => s.$store.getters.captions.builder.function,
@@ -660,6 +729,7 @@ let MyBuilderPgFunction = {
 		getDependentModules,
 		getFunctionHelp,
 		getNilUuid,
+		getValidDbCharsForRx,
 		isAttributeFiles,
 		
 		// presentation
@@ -745,50 +815,63 @@ let MyBuilderPgFunction = {
 		// relation  reference: {module}[relation]          <-> {MOD_ID}[REL_ID]
 		// function  reference: {module}[function](...      <-> {MOD_ID}[FNC_IC](...
 		placeholdersSet(body) {
-			let that = this;
-			
 			// replace attributes with placeholders
 			// stored in function text as: (ATR_ID)
-			body = body.replace(/\(([a-z0-9\-]{36})\)/g,function(match,id) {
-				let atr = that.attributeIdMap[id];
-				let rel = that.relationIdMap[atr.relationId];
-				let mod = that.moduleIdMap[rel.moduleId];
+			body = body.replace(/\(([a-z0-9\-]{36})\)/g,(match,id) => {
+				const atr = this.attributeIdMap[id];
+				const rel = this.relationIdMap[atr.relationId];
+				const mod = this.moduleIdMap[rel.moduleId];
 				return `(${mod.name}.${rel.name}.${atr.name})`;
 			});
 			
 			// replace functions with placeholders
 			// stored in function text as: [FNC_ID](...
-			body = body.replace(/\[([a-z0-9\-]{36})\]\(/g,function(match,id) {
-				return `[${that.pgFunctionIdMap[id].name}](`;
+			body = body.replace(/\[([a-z0-9\-]{36})\]\(/g,(match,id) => {
+				return `[${this.pgFunctionIdMap[id].name}](`;
 			});
 			
 			// replace relations with placeholders
 			// stored in function text as: [REL_ID]
-			body = body.replace(/\[([a-z0-9\-]{36})\]/g,function(match,id) {
-				return `[${that.relationIdMap[id].name}]`;
+			body = body.replace(/\[([a-z0-9\-]{36})\]/g,(match,id) => {
+				return `[${this.relationIdMap[id].name}]`;
 			});
 			
 			// replace modules with placeholders
 			// stored in function text as: {MOD_ID}
-			body = body.replace(/\{([a-z0-9\-]{36})\}/g,function(match,id) {
-				return `{${that.moduleIdMap[id].name}}`;
+			body = body.replace(/\{([a-z0-9\-]{36})\}/g,(match,id) => {
+				return `{${this.moduleIdMap[id].name}}`;
+			});
+
+			// replace presets with placeholders
+			// stored in function text as: {PRESET::MOD_NAME.REL_NAME.PRESET_NAME}
+			// preset name may not include closed curly bracket '}'
+			body = body.replace(/instance\.get_preset_record_id\(\'([a-z0-9\-]{36})\'\)/g,(match,presetId) => {
+				const prs = this.presetIdMap[presetId];
+				const rel = this.relationIdMap[prs.relationId];
+				const mod = this.moduleIdMap[rel.moduleId];
+				const pat = new RegExp(`[\{\}]`,'g');
+
+				if(prs !== undefined && !pat.test(prs.name))
+					return `{PRESET::${mod.name}.${rel.name}.${prs.name}}`;
+				
+				return match;
 			});
 			return body;
 		},
 		placeholdersUnset(previewMode) {
-			let that = this;
-			let body = this.codeFunction;
+			let body    = this.codeFunction;
+			let dbChars = this.getValidDbCharsForRx();
 			
 			// replace attribute placeholders
 			// stored as: (module.relation.attribute)
 			let pat = /\(([a-z][a-z0-9\_]+)\.([a-z][a-z0-9\_]+)\.([a-z][a-z0-9\_]+)\)/g;
-			body = body.replace(pat,function(match,modName,relName,atrName) {
+			body = body.replace(pat,(match,modName,relName,atrName) => {
 				
 				// resolve module by name
-				if(typeof that.moduleNameMap[modName] === 'undefined')
+				if(this.moduleNameMap[modName] === undefined)
 					return match;
 				
-				let mod = that.moduleNameMap[modName];
+				const mod = this.moduleNameMap[modName];
 				
 				// resolve relation by name
 				let rel = false;
@@ -824,13 +907,13 @@ let MyBuilderPgFunction = {
 			// replace function placeholders
 			// stored as: {module}[function](...
 			pat = /\{([a-z][a-z0-9\_]+)\}\.\[([a-z][a-z0-9\_]+)\]\(/g;
-			body = body.replace(pat,function(match,modName,fncName) {
+			body = body.replace(pat,(match,modName,fncName) => {
 				
 				// resolve module by name
-				if(typeof that.moduleNameMap[modName] === 'undefined')
+				if(this.moduleNameMap[modName] === undefined)
 					return match;
 				
-				let mod = that.moduleNameMap[modName];
+				const mod = this.moduleNameMap[modName];
 				
 				// resolve function by name
 				let fnc = false;
@@ -854,13 +937,13 @@ let MyBuilderPgFunction = {
 			// replace relation placeholders
 			// stored as: {module}[relation]
 			pat = /\{([a-z][a-z0-9\_]+)\}\.\[([a-z][a-z0-9\_]+)\]/g;
-			body = body.replace(pat,function(match,modName,relName) {
+			body = body.replace(pat,(match,modName,relName) => {
 				
 				// resolve module by name
-				if(typeof that.moduleNameMap[modName] === 'undefined')
+				if(this.moduleNameMap[modName] === undefined)
 					return match;
 				
-				let mod = that.moduleNameMap[modName];
+				const mod = this.moduleNameMap[modName];
 				
 				// resolve relation by name
 				let rel = false;
@@ -879,6 +962,25 @@ let MyBuilderPgFunction = {
 					return `${mod.name}.${rel.name}`;
 				
 				return `{${mod.id}}.[${rel.id}]`;
+			});
+
+			// replace preset placeholders
+			// stored as: {PRESET::MOD_NAME.REL_NAME.PRESET_NAME})
+			pat = new RegExp(`\\{PRESET\\:\\:(${dbChars})\\.(${dbChars})\\.([^\}]*)\\}`,'g');
+			body = body.replace(pat,(match,modName,relName,presetName) => {
+				const mod = this.moduleNameMap[modName];
+				if(mod !== undefined) {
+					for(let r of mod.relations) {
+						if(r.name !== relName)
+							continue;
+	
+						for(let p of r.presets) {
+							if(p.name === presetName)
+								return `instance\.get_preset_record_id('${p.id}')`;
+						}
+					}
+				}
+				return match;
 			});
 			return body;
 		},
