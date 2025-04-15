@@ -327,8 +327,8 @@ let MyBuilderPgFunction = {
 											@trigger="toggleRelationShow(rel.id)"
 											:image="holderRelationIdsOpen.includes(rel.id) ? 'triangleDown.png' : 'triangleRight.png'"
 											:naked="true"
+											:caption="rel.name"
 										/>
-										<span>{{ rel.name }}</span>
 									</div>
 									<router-link :key="rel.id" :to="'/builder/relation/'+rel.id">
 										<my-button image="open.png" :captionTitle="capGen.button.open" :naked="true" />
