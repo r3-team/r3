@@ -94,42 +94,40 @@ let MyKanbanCard = {
 let MyKanbanBox = {
 	name:'my-kanban-box',
 	components:{ MyKanbanCard },
-	template:`<div class="kanban-box-wrap">
-		<draggable class="kanban-box" handle=".dragAnchor" group="cards" itemKey="id" animation="150" direction="vertical"
-			@change="changed"
-			@end="$emit('drag-active',false)"
-			@start="$emit('drag-active',true)"
-			:class="{ dragActive:dragActive, hasCreate:hasCreate }"
-			:list="cardsShown"
-		>
-			<template #item="{element,index}">
-				<my-kanban-card
-					@click="click(element,false,false)"
-					@click-middle="click(element,false,true)"
-					@clipboard="$emit('clipboard')"
-					:clickable="hasUpdate"
-					:columns="columns"
-					:columnBatches="columnBatches"
-					:headerStyle="headerStyle"
-					:isTemplate="false"
-					:values="element.values"
-				/>
-			</template>
-			<template #footer>
-				<my-kanban-card
-					v-if="hasCreate && !dragActive"
-					@click="click(null,true,false)"
-					@click-middle="click(null,true,true)"
-					:clickable="hasCreate"
-					:columns="columns"
-					:columnBatches="columnBatches"
-					:headerStyle="headerStyle"
-					:isTemplate="true"
-					:values="[]"
-				/>
-			</template>
-		</draggable>
-	</div>`,
+	template:`<draggable class="kanban-box" handle=".dragAnchor" group="cards" itemKey="id" animation="150" direction="vertical"
+		@change="changed"
+		@end="$emit('drag-active',false)"
+		@start="$emit('drag-active',true)"
+		:class="{ dragActive:dragActive, hasCreate:hasCreate }"
+		:list="cardsShown"
+	>
+		<template #item="{element,index}">
+			<my-kanban-card
+				@click="click(element,false,false)"
+				@click-middle="click(element,false,true)"
+				@clipboard="$emit('clipboard')"
+				:clickable="hasUpdate"
+				:columns="columns"
+				:columnBatches="columnBatches"
+				:headerStyle="headerStyle"
+				:isTemplate="false"
+				:values="element.values"
+			/>
+		</template>
+		<template #footer>
+			<my-kanban-card
+				v-if="hasCreate && !dragActive"
+				@click="click(null,true,false)"
+				@click-middle="click(null,true,true)"
+				:clickable="hasCreate"
+				:columns="columns"
+				:columnBatches="columnBatches"
+				:headerStyle="headerStyle"
+				:isTemplate="true"
+				:values="[]"
+			/>
+		</template>
+	</draggable>`,
 	emits:['card-create','cards-changed','clipboard','drag-active','open-form'],
 	props:{
 		cards:            { type:Array,   required:true },
