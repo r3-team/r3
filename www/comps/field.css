@@ -187,7 +187,7 @@
 .field .input.textarea{
 	font-size:inherit;
 	font-family:inherit;
-	resize:vertical;
+	resize:none;
 }
 .field .color-input{
 	display:flex;
