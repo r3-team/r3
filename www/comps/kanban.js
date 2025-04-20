@@ -35,6 +35,7 @@ let MyKanbanCard = {
 	components:{ MyValueRich },
 	template:`<div class="kanban-card" :class="{ template:isTemplate }">
 		<div class="kanban-card-header"
+			v-if="!isTemplate"
 			:class="{ dragAnchor:!isTemplate }"
 			:style="headerStyle"
 		></div>
@@ -52,7 +53,7 @@ let MyKanbanCard = {
 					<tr v-for="b in columnBatches">
 						<td v-if="b.caption !== null" class="kanban-label">{{ b.caption }}</td>
 						<td>
-							<div class="columnBatch" :class="{ vertical:b.vertical }">
+							<div class="columnBatch kanbanCards" :class="{ vertical:b.vertical }">
 								<my-value-rich
 									v-for="ind in b.columnIndexes.filter(v => values[v] !== null || columns[v].display === 'gallery')"
 									@clipboard="$emit('clipboard')"
@@ -285,7 +286,11 @@ let MyKanban = {
 							</th>
 							
 							<!-- labels for X assignment -->
-							<th class="label" v-for="x in axisEntriesX" :style="x.style">
+							<th class="label" v-for="x in axisEntriesX"
+								:class="{ clickable: hasCreate }"
+								:style="x.style"
+								@click.left="cardCreate(x.id,null,null)"
+							>
 								<div class="label-line">
 									<my-value-rich
 										v-for="v in x.values.filter(v => v.value !== null)"
@@ -357,7 +362,11 @@ let MyKanban = {
 						<!-- lines for XY assignment -->
 						<tr v-for="y in axisEntriesY">
 							<!-- label for Y assignment -->
-							<td class="label" :style="y.style">
+							<td class="label"
+								:class="{ clickable: hasCreate }"
+								:style="y.style"
+								@click.left="cardCreate(null,y.id,null)"
+							>
 								<div class="label-line">
 									<my-value-rich
 										v-for="v in y.values.filter(v => v.value !== null)"
@@ -592,6 +601,9 @@ let MyKanban = {
 		
 		// actions
 		cardCreate(recordIdX,recordIdY,middleClick) {
+			if(!this.hasCreate)
+				return;
+
 			let attributes = [];
 			if(recordIdX !== null) attributes.push(`${this.attributeIdAxisX}_${recordIdX}`);
 			if(recordIdY !== null) attributes.push(`${this.attributeIdAxisY}_${recordIdY}`);
