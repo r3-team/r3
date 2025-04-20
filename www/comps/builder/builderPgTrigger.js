@@ -50,7 +50,12 @@ let MyBuilderPgTrigger = {
 				<table class="generic-table-vertical">
 					<tbody>
 						<tr>
-							<td>{{ capApp.execute }}*</td>
+							<td>
+								<div class="row gap centered">
+									<my-button image="codeDatabase.png" :active="false" :naked="true" />
+									<span>{{ capApp.execute }}*</span>
+								</div>
+							</td>
 							<td>
 								<div class="row gap centered">
 									<select
@@ -77,7 +82,12 @@ let MyBuilderPgTrigger = {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capGen.relation }}*</td>
+							<td>
+								<div class="row gap centered">
+									<my-button image="database.png" :active="false" :naked="true" />
+									<span>{{ capGen.relation }}*</span>
+								</div>
+							</td>
 							<td>
 								<div class="row gap centered">
 									<select
@@ -106,7 +116,12 @@ let MyBuilderPgTrigger = {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capApp.fires }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-button image="clock.png" :active="false" :naked="true" />
+									<span>{{ capApp.fires }}</span>
+								</div>
+							</td>
 							<td>
 								<div class="row gap centered">
 									<select v-model="values.fires" :disabled="readonly || isExternal">
@@ -117,23 +132,48 @@ let MyBuilderPgTrigger = {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capApp.onInsert }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-button image="recordCreate.png" :active="false" :naked="true" />
+									<span>{{ capApp.onInsert }}</span>
+								</div>
+							</td>
 							<td><my-bool v-model="values.onInsert" :readonly="readonly || isExternal" /></td>
 						</tr>
 						<tr>
-							<td>{{ capApp.onUpdate }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-button image="recordUpdate.png" :active="false" :naked="true" />
+									<span>{{ capApp.onUpdate }}</span>
+								</div>
+							</td>
 							<td><my-bool v-model="values.onUpdate" :readonly="readonly || isExternal" /></td>
 						</tr>
 						<tr>
-							<td>{{ capApp.onDelete }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-button image="recordDelete.png" :active="false" :naked="true" />
+									<span>{{ capApp.onDelete }}</span>
+								</div>
+							</td>
 							<td><my-bool v-model="values.onDelete" :readonly="readonly || isExternal" /></td>
 						</tr>
 						<tr>
-							<td>{{ capApp.perRow }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-button image="databaseCircle.png" :active="false" :naked="true" />
+									<span>{{ capApp.perRow }}</span>
+								</div>
+							</td>
 							<td><my-bool v-model="values.perRow" :readonly="readonly || isExternal" /></td>
 						</tr>
 						<tr>
-							<td>{{ capApp.isDeferred }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-button image="lettersZzz.png" :active="false" :naked="true" />
+									<span>{{ capApp.isDeferred }}</span>
+								</div>
+							</td>
 							<td>
 								<my-bool
 									@update:modelValue="setDeferred($event)"
