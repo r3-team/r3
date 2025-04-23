@@ -268,7 +268,6 @@ let MyForm = {
 					@set-touched="fieldSetTouched"
 					@set-valid="fieldSetValid"
 					@set-value="valueSetByField"
-					@set-value-init="valueSet"
 					:isBulkUpdate="isBulkUpdate"
 					:dataFieldMap="fieldIdMapData"
 					:entityIdMapEffect="entityIdMapEffect"
@@ -276,6 +275,7 @@ let MyForm = {
 					:field="f"
 					:fieldIdsChanged="fieldIdsChanged"
 					:fieldIdsInvalid="fieldIdsInvalid"
+					:fieldIdsTouched="fieldIdsTouched"
 					:fieldIdMapOverwrite="fieldIdMapOverwrite"
 					:formBadSave="badSave"
 					:formIsEmbedded="isPopUp || isWidget"
@@ -659,8 +659,8 @@ let MyForm = {
 					if(s.fieldIdMapData[fieldId] === undefined) return 1;
 					if(isChg                     === undefined) isChg = true;
 					
-					s.valueSet(s.getIndexAttributeIdByField(
-						s.fieldIdMapData[fieldId],false),value,!isChg,true);
+					s.valueSetByField(s.getIndexAttributeIdByField(
+						s.fieldIdMapData[fieldId],false),value,!isChg,true,fieldId);
 					
 					return 0;
 				},
@@ -909,12 +909,10 @@ let MyForm = {
 				this.lastFormId         = this.form.id;
 				this.variableIdMapLocal = {};
 
-				if(!this.firstLoad) {
-					// on first load, field states do not need to be reset
-					// addresses issue in which field valid states are set before reset() is executed
+				// on first load, field valid states do not need to be reset
+				// addresses issue in which field valid states are set before reset() is executed
+				if(!this.firstLoad) 
 					this.fieldIdsInvalid = [];
-					this.fieldIdsTouched = [];
-				}
 				
 				// set preset record to open, if defined
 				if(this.form.presetIdOpen !== null && this.relationId !== null) {
@@ -960,6 +958,7 @@ let MyForm = {
 			this.indexesNoSet              = [];
 			this.indexMapRecordId          = {};
 			this.indexMapRecordKey         = {};
+			this.fieldIdsTouched           = [];
 		},
 		releaseLoadingOnNextTick() {
 			// releases state on next tick for watching components to react to with updated data
@@ -1019,11 +1018,11 @@ let MyForm = {
 				}
 			}
 		},
-		valueSetByField(indexAttributeId,value) {
-			// block updates during form load
-			//  some fields (richtext) updated their values after form was already unloaded
-			if(!this.loading)
-				this.valueSet(indexAttributeId,value,false,true);
+		valueSetByField(indexAttributeId,value,isOriginal,updateJoin,fieldId) {
+			if(!isOriginal && !this.fieldIdsTouched.includes(fieldId))
+				this.fieldIdsTouched.push(fieldId);
+
+			this.valueSet(indexAttributeId,value,isOriginal,updateJoin);
 		},
 		valueSetByRows:async function(rows,expressions) {
 			if(rows.length !== 1)
@@ -1826,7 +1825,7 @@ let MyForm = {
 			
 			let attributes = [];
 			for(let fieldId of this.fieldIdsTouched) {
-				if(typeof this.fieldIdMapData[fieldId] === 'undefined')
+				if(this.fieldIdMapData[fieldId] === undefined)
 					continue;
 				
 				let f   = this.fieldIdMapData[fieldId];

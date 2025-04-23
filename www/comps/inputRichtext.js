@@ -110,8 +110,7 @@ let MyInputRichtext = {
 				
 				// add authentication tokens to file download link
 				return this.modelValue.replace(
-					new RegExp(this.tokenPlaceholder,'g'),this.token
-				);
+					new RegExp(this.tokenPlaceholder,'g'),this.token);
 			},
 			set(v) {
 				if(this.readonly)
