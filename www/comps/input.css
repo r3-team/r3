@@ -315,7 +315,7 @@
 	transition:width 0.1s, height 0.1s, padding 0.1s;
 	filter:var(--image-filter-alt);
 }
-.input-rating-icon:hover{
+.input-rating-icon.clickable:hover{
 	width:30px;
 	height:30px;
 	padding:0px;
