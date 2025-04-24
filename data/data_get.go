@@ -704,8 +704,8 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{}, loginId
 			return nil
 		}
 
-		// user value filter
-		// can be anything, text, numbers, floats, boolean, NULL values
+		// fixed value filter
+		// can be anything, text, floats, boolean, NULL values
 		// create placeholders and add to query arguments
 
 		if isNullOp {
@@ -733,16 +733,6 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{}, loginId
 			}
 		}
 
-		// PGX fix: cannot use proper true/false values in SQL parameters
-		// no good solution found so far, error: 'cannot convert (true|false) to Text'
-		if fmt.Sprintf("%T", s.Value) == "bool" {
-			if s.Value.(bool) == true {
-				s.Value = "true"
-			} else {
-				s.Value = "false"
-			}
-		}
-
 		*queryArgs = append(*queryArgs, s.Value)
 
 		if s.FtsDict.Valid {
@@ -758,7 +748,19 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{}, loginId
 			// https://www.postgresql.org/docs/current/textsearch-controls.html
 			*comp = fmt.Sprintf("websearch_to_tsquery('%s',$%d)", s.FtsDict.String, len(*queryArgs))
 		} else {
-			*comp = fmt.Sprintf("$%d", len(*queryArgs))
+			// cast args for certain data types, known issues:
+			// * uncast bool args cannot be compared to another uncast bool arg via equal operator (=)
+			// * uncast real/double args cannot be compared to another uncast real/double arg via equal operator (=)
+			argCast := ""
+			if s.Value != nil {
+				switch fmt.Sprintf("%T", s.Value) {
+				case "bool":
+					argCast = "::BOOL"
+				case "float64":
+					argCast = "::FLOAT8" // short alias to double precision, float64 is default coming from JSON decode of JS number values
+				}
+			}
+			*comp = fmt.Sprintf("$%d%s", len(*queryArgs), argCast)
 		}
 		return nil
 	}
