@@ -531,21 +531,18 @@
 .input-uuid{
 	flex:1 1 auto;
 	display:flex;
-	flex-flow:row wrap;
-	padding:3px 0px;
-	gap:2px;
+	flex-flow:row nowrap;
+	justify-content:space-between;
 	align-items:center;
 }
 .input-uuid input{
-	font-size:105%;
-	padding:4px 5px 1px;
 	color:inherit;
 	border:none;
-	border-bottom:2px solid var(--color-border);
-	border-radius:3px;
+	border-bottom:1px solid var(--color-border);
+	margin:1px 2px;
 	outline:none;
 	background-color:transparent;
-	font-family:'Lucida Console',Courier,monospace;
+	font-family:var(--font-family-monospace);
 }
 
 /* color input */
