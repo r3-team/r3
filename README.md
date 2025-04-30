@@ -114,9 +114,9 @@ If you want to build REI3 itself, you can fork this repo or download the source 
 1. Use your new, compiled binary of REI3 to replace an already installed one.
 1. You can now start your own REI3 version. Make sure to clear all browser caches after creating/updating your own version.
 
-## :page_with_curl: Copyright, license & trademark.
+## :page_with_curl: Copyright, license & trademark
 REI3<sup>©</sup> 2019-2025 Gabriel Victor Herbert
 
 The REI3 source code is released under the [MIT license](https://opensource.org/license/mit).
 
-REI3<sup>®</sup> is a registered trademark (class 42, number 30 2024 242 850). While the source code is open, we protect the name to differentiate our release and services around REI3. If you intend to release third party extensions or versions of REI3 itself, please get [in contact](https://leansw.de/en/contact) with us to avoid issues with the REI3 trademark.
+REI3<sup>®</sup> is a registered trademark (class 42, number 30 2024 242 850). While the source code is open, we protect the name to differentiate our releases and services around REI3. If you intend to release third party extensions or versions of REI3 itself, please [get in contact](https://leansw.de/en/contact) with us to avoid issues with the REI3 trademark.
