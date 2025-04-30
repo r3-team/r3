@@ -29,6 +29,11 @@ let MyAdminScheduler = {
 		</div>
 		
 		<div class="content no-padding">
+
+			<!-- mirror mode notice -->
+			<p class="message error" v-if="mirrorMode">
+				{{ capApp.mirrorMode }}
+			</p>
 		
 			<!-- cluster master schedules -->
 			<div class="content">
@@ -57,13 +62,15 @@ let MyAdminScheduler = {
 								<td>
 									<my-bool
 										v-if="!schedulersInput[i].activeOnly"
-										v-model="schedulersInput[i].active"
+										@update:modelValue="schedulersInput[i].active = $event"
+										:modelValue="!mirrorMode || !tasksDisabledMirrorMode.includes(s.taskName) ? schedulersInput[i].active : false"
+										:readonly="mirrorMode && tasksDisabledMirrorMode.includes(s.taskName)"
 									/>
 								</td>
 								<td>
 									<my-button image="clock.png"
 										@trigger="runSystemTask(s.taskName)"
-										:active="schedulers[i].active"
+										:active="!mirrorMode || !tasksDisabledMirrorMode.includes(s.taskName) ? schedulersInput[i].active : false"
 										:caption="capApp.button.runNow"
 									/>
 								</td>
@@ -181,8 +188,9 @@ let MyAdminScheduler = {
 	data() {
 		return {
 			schedulers:[],
-			schedulersInput:[],
-			schedulersExpanded:[] // indexes of schedules that show all nodes
+			schedulersInput:[],    // changes to schedulers
+			schedulersExpanded:[], // indexes of schedules that show all nodes
+			tasksDisabledMirrorMode:['adminMails','backupRun','mailAttach','mailRetrieve','mailSend','restExecute']
 		};
 	},
 	mounted() {
@@ -211,6 +219,7 @@ let MyAdminScheduler = {
 		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
 		capApp:         (s) => s.$store.getters.captions.admin.scheduler,
 		capGen:         (s) => s.$store.getters.captions.generic,
+		mirrorMode:     (s) => s.$store.getters.mirrorMode,
 		settings:       (s) => s.$store.getters.settings
 	},
 	methods:{

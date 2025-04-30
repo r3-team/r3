@@ -525,6 +525,7 @@
 			"intervalTypeSeconds": "ثانية (ثواني)",
 			"intervalTypeWeeks": "الأسبوع (الأسابيع)",
 			"intervalTypeYears": "سنين)",
+			"mirrorMode": "Mirror mode is active for this instance. Selected system tasks are disabled.",
 			"names": {
 				"adminMails": "رسائل إشعارات المشرف",
 				"backupRun": "إدارة النسخ الاحتياطية المتكاملة",

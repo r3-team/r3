@@ -525,6 +525,7 @@
 			"intervalTypeSeconds": "sekunde(s)",
 			"intervalTypeWeeks": "nedēļa(s)",
 			"intervalTypeYears": "gads(i)",
+			"mirrorMode": "Mirror mode is active for this instance. Selected system tasks are disabled.",
 			"names": {
 				"adminMails": "Admin notification mails",
 				"backupRun": "Pārvaldīt integrētās rezerves kopijas",

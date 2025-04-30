@@ -525,6 +525,7 @@
 			"intervalTypeSeconds": "秒",
 			"intervalTypeWeeks": "周",
 			"intervalTypeYears": "年",
+			"mirrorMode": "Mirror mode is active for this instance. Selected system tasks are disabled.",
 			"names": {
 				"adminMails": "管理员通知邮件",
 				"backupRun": "管理集成备份",

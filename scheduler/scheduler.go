@@ -22,6 +22,7 @@ import (
 	"r3/spooler/rest_send"
 	"r3/tools"
 	"r3/transfer"
+	"slices"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -64,13 +65,14 @@ type taskSchedule struct {
 }
 
 var (
-	change_mx                        = &sync.Mutex{}
-	loadTasks                        = true // if true, tasks are reloaded from the database on next run
-	loadCounter       int            = 0    // number of times tasks were loaded - used to check whether tasks were reloaded during execution
-	nextExecutionUnix int64          = 0    // unix time of next (earliest) task to run
-	oneDayInSeconds   int64          = 60 * 60 * 24
-	tasks             []task         // all tasks
-	OsExit            chan os.Signal = make(chan os.Signal)
+	change_mx                              = &sync.Mutex{}
+	loadTasks                              = true // if true, tasks are reloaded from the database on next run
+	loadCounter             int            = 0    // number of times tasks were loaded - used to check whether tasks were reloaded during execution
+	nextExecutionUnix       int64          = 0    // unix time of next (earliest) task to run
+	oneDayInSeconds         int64          = 60 * 60 * 24
+	tasks                   []task         // all tasks
+	tasksDisabledMirrorMode []string       = []string{"adminMails", "backupRun", "mailAttach", "mailRetrieve", "mailSend", "restExecute"}
+	OsExit                  chan os.Signal = make(chan os.Signal)
 
 	// main loop
 	loopInterval                      = time.Second * time.Duration(1)  // loop interval
@@ -307,6 +309,9 @@ func load() error {
 			continue
 		}
 		if embeddedOnly && !config.File.Db.Embedded {
+			continue
+		}
+		if config.File.Mirror && slices.Contains(tasksDisabledMirrorMode, t.name) {
 			continue
 		}
 

@@ -525,6 +525,7 @@
 			"intervalTypeSeconds": "secundă(e)",
 			"intervalTypeWeeks": "saptamână(i)",
 			"intervalTypeYears": "an(i)",
+			"mirrorMode": "Mirror mode is active for this instance. Selected system tasks are disabled.",
 			"names": {
 				"adminMails": "Admin notification mails",
 				"backupRun": "Gestionați copiile de siguranță integrate",

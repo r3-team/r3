@@ -525,6 +525,7 @@
 			"intervalTypeSeconds": "Sekunde(n)",
 			"intervalTypeWeeks": "Woche(n)",
 			"intervalTypeYears": "Jahr(e)",
+			"mirrorMode": "Mirror-Modus ist aktiv für diese Instanz. Ausgewählte Systemaufgaben wurden deaktiviert.",
 			"names": {
 				"adminMails": "Admin-Benachrichtigungen",
 				"backupRun": "Integrierte Sicherungen steuern",

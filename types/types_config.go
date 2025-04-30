@@ -13,6 +13,10 @@ type FileType struct {
 
 	Db FileTypeDb `json:"db"`
 
+	// mirror mode, eg. system mirrors other, likely productive instance
+	// disables write connectors (currently: email retrieve/send, REST call) & backups
+	Mirror bool `json:"mirror"`
+
 	Paths struct {
 		Certificates   string `json:"certificates"`
 		EmbeddedDbBin  string `json:"embeddedDbBin"`

@@ -81,6 +81,7 @@ const MyStore = Vuex.createStore({
 		loginSessionExpired:false,     // set to true, when session expires
 		loginSessionExpires:null,      // unix timestamp of session expiration date
 		loginWidgetGroups:[],          // user widgets, starting with widget groups
+		mirrorMode:false,              // instance runs in mirror mode (eg. mirrors another, likely production instance)
 		moduleEntries:[],              // module entries for header/home page
 		moduleIdLast:null,             // module ID of last active module
 		moduleIdMapMeta:{},            // module ID map of module meta data (is owner, hidden, position, date change, custom languages)
@@ -269,8 +270,9 @@ const MyStore = Vuex.createStore({
 		isAtMenu:                (state,payload) => state.isAtMenu                 = payload,
 		isAtModule:              (state,payload) => state.isAtModule               = payload,
 		isCollapsedMenuApp:      (state,payload) => state.isCollapsedMenuApp       = payload,
-		isNoAuth:                (state,payload) => state.isNoAuth                 = payload,
+		mirrorMode:              (state,payload) => state.mirrorMode               = payload,
 		isMobile:                (state,payload) => state.isMobile                 = payload,
+		isNoAuth:                (state,payload) => state.isNoAuth                 = payload,
 		isWithoutMenuApp:        (state,payload) => state.isWithoutMenuApp         = payload,
 		isWithoutMenuHeader:     (state,payload) => state.isWithoutMenuHeader      = payload,
 		loginEncryption:         (state,payload) => state.loginEncryption          = payload,
@@ -428,6 +430,7 @@ const MyStore = Vuex.createStore({
 		isAtMenu:                (state) => state.isAtMenu,
 		isAtModule:              (state) => state.isAtModule && state.moduleIdLast !== null,
 		isCollapsedMenuApp:      (state) => state.isCollapsedMenuApp,
+		mirrorMode:              (state) => state.mirrorMode,
 		isMobile:                (state) => state.isMobile,
 		isNoAuth:                (state) => state.isNoAuth,
 		isWithoutMenuApp:        (state) => state.isWithoutMenuApp,

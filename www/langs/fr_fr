@@ -525,6 +525,7 @@
 			"intervalTypeSeconds": "seconde(s)",
 			"intervalTypeWeeks": "semaine(s)",
 			"intervalTypeYears": "année(s)",
+			"mirrorMode": "Mirror mode is active for this instance. Selected system tasks are disabled.",
 			"names": {
 				"adminMails": "Admin notification mails",
 				"backupRun": "Gérer les sauvegardes intégrées",
