@@ -207,8 +207,7 @@ func (hub *hubType) start() {
 			}
 
 			if err != nil {
-				// run DB calls in async func as they must not block hub operations during heavy DB load
-				go log.Error(handlerContext, "could not prepare unrequested transaction", err)
+				log.Error(handlerContext, "could not prepare unrequested transaction", err)
 				continue
 			}
 
