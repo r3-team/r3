@@ -491,8 +491,8 @@ let MyForm = {
 		canUpdate:     (s) => !s.updatingRecord && !s.isReadonly,
 		hasBarLower:   (s) => !s.isWidget && s.isData && !s.form.noDataActions,
 		hasBarWidget:  (s) => s.isWidget && s.hasFormActions,
-		hasChanges:    (s) => !s.form.noDataActions && s.fieldIdsChanged.length !== 0,
-		hasChangesBulk:(s) => s.isBulkUpdate && s.fieldIdsTouched.length !== 0,
+		hasChanges:    (s) => s.fieldIdsChanged.length !== 0,
+		hasChangesBulk:(s) => s.fieldIdsTouched.length !== 0 && s.isBulkUpdate,
 		hasFormActions:(s) => s.form.actions.filter(v => (s.entityIdMapEffect.formAction[v.id]?.state !== undefined ? s.entityIdMapEffect.formAction[v.id].state : v.state) !== 'hidden').length > 0,
 		hasGoBack:     (s) => s.isData && !s.isMobile && !s.isPopUp,
 		helpAvailable: (s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
@@ -502,7 +502,7 @@ let MyForm = {
 		isReadonly:    (s) => s.badLoad || !s.checkDataOptions((s.isNew ? 4 : 2),s.entityIdMapEffect.form.data),
 		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','kanban','list','tabs','variable'].includes(s.fields[0].content),
 		menuActive:    (s) => s.formIdMapMenu[s.form.id] === undefined ? null : s.formIdMapMenu[s.form.id],
-		warnUnsaved:   (s) => s.hasChanges && !s.blockInputs && s.settings.warnUnsaved,
+		warnUnsaved:   (s) => s.hasChanges && !s.form.noDataActions && !s.blockInputs && s.settings.warnUnsaved,
 
 		// buttons
 		buttonActiveDel:     (s) => !s.blockInputs  && s.canDelete,
@@ -872,7 +872,7 @@ let MyForm = {
 				if(this.isData && e.ctrlKey && e.key === 's') {
 					e.preventDefault();
 
-					if(!this.blockInputs && this.canUpdate) {
+					if(!s.form.noDataActions && !this.blockInputs && this.canUpdate) {
 						if(!this.isBulkUpdate && this.hasChanges)     this.set(false);
 						if(this.isBulkUpdate  && this.hasChangesBulk) this.setBulkUpdate();
 					}
