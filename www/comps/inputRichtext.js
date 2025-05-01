@@ -70,7 +70,11 @@ let MyInputRichtext = {
 						items:'hr emoticons link image table'
 					}
 				},
-				toolbar_mode:'floating'
+				toolbar_mode:'floating',
+
+				// adds more elements that tiny does not convert (adds to default valid_elements)
+				// known issues: auto converts <b> to <strong>
+				extended_valid_elements:'b'
 			};
 			
 			if(s.settings.dark) {
@@ -105,11 +109,8 @@ let MyInputRichtext = {
 		input:{
 			get() {
 				// tinyMCE cannot deal with null, set empty string instead
-				if(this.modelValue === null)
-					return '';
-				
 				// add authentication tokens to file download link
-				return this.modelValue.replace(
+				return this.modelValue === null ? '' : this.modelValue.replace(
 					new RegExp(this.tokenPlaceholder,'g'),this.token);
 			},
 			set(v) {
@@ -117,8 +118,9 @@ let MyInputRichtext = {
 					return;
 				
 				// remove authentication tokens from file download link
-				this.$emit('update:modelValue',v.replace(
-					new RegExp(this.token,'g'),this.tokenPlaceholder));
+				const n = v.replace(new RegExp(this.token,'g'),this.tokenPlaceholder);
+				if(n !== this.modelValue)
+					this.$emit('update:modelValue',n);
 			}
 		},
 		
