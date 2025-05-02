@@ -490,7 +490,7 @@ let MyApp = {
 		
 		// web socket control
 		wsConnect() {
-			let protocol = this.httpMode ? 'ws:' : 'wss:';
+			const protocol = this.httpMode ? 'ws:' : 'wss:';
 			ws.open(
 				`${protocol}//${window.location.host}/websocket`,
 				this.wsConnectOk,

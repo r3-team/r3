@@ -125,7 +125,7 @@ func clusterProcessEvent(ctx context.Context, tx pgx.Tx, e types.ClusterEvent, c
 			return err
 		}
 		err = cluster.JsFunctionCalled_tx(ctx, tx, false, e.Target.Address,
-			e.Target.LoginId, p.JsFunctionId, p.Arguments)
+			e.Target.LoginId, p.ModuleId, p.JsFunctionId, p.Arguments)
 	case "keystrokesRequested":
 		var keystrokes string
 		if err := json.Unmarshal(jsonPayload, &keystrokes); err != nil {

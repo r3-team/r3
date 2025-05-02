@@ -15,6 +15,7 @@ import (
 	"r3/login/login_session"
 	"r3/request"
 	"r3/types"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -25,18 +26,19 @@ import (
 
 // a websocket client
 type clientType struct {
-	id        uuid.UUID                   // unique ID for client (for registering/de-registering login sessions)
-	address   string                      // IP address, no port
-	admin     bool                        // belongs to admin login?
-	ctx       context.Context             // context for requests from this client
-	ctxCancel context.CancelFunc          // to abort requests in case of disconnect
-	device    types.WebsocketClientDevice // client device type (browser, fatClient)
-	ioFailure atomic.Bool                 // client failed to read/write
-	local     bool                        // client is local (::1, 127.0.0.1)
-	loginId   int64                       // client login ID, 0 = not logged in yet
-	noAuth    bool                        // logged in without authentication (public auth, username only)
-	write_mx  sync.Mutex                  // to force sequential writes
-	ws        *websocket.Conn             // websocket connection
+	id          uuid.UUID                   // unique ID for client (for registering/de-registering login sessions)
+	address     string                      // IP address, no port
+	admin       bool                        // belongs to admin login?
+	ctx         context.Context             // context for requests from this client
+	ctxCancel   context.CancelFunc          // to abort requests in case of disconnect
+	device      types.WebsocketClientDevice // client device type (browser, fatClient)
+	ioFailure   atomic.Bool                 // client failed to read/write
+	local       bool                        // client is local (::1, 127.0.0.1)
+	loginId     int64                       // client login ID, 0 = not logged in yet
+	noAuth      bool                        // logged in without authentication (public auth, username only)
+	pwaModuleId uuid.UUID                   // ID of module for direct app access via subdomain, nil UUID if not used
+	write_mx    sync.Mutex                  // to force sequential writes
+	ws          *websocket.Conn             // websocket connection
 }
 
 // a hub for all active websocket clients
@@ -106,17 +108,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// create global request context with abort function
 	ctx, ctxCancel := context.WithCancel(context.Background())
 	client := &clientType{
-		id:        clientId,
-		address:   host,
-		admin:     false,
-		ctx:       ctx,
-		ctxCancel: ctxCancel,
-		device:    types.WebsocketClientDeviceBrowser,
-		local:     host == "::1" || host == "127.0.0.1",
-		loginId:   0,
-		noAuth:    false,
-		write_mx:  sync.Mutex{},
-		ws:        ws,
+		id:          clientId,
+		address:     host,
+		admin:       false,
+		ctx:         ctx,
+		ctxCancel:   ctxCancel,
+		device:      types.WebsocketClientDeviceBrowser,
+		local:       host == "::1" || host == "127.0.0.1",
+		loginId:     0,
+		noAuth:      false,
+		pwaModuleId: cache.GetPwaModuleId(strings.Split(r.Host, ".")[0]), // assign PWA module ID if host matches any defined PWA direct app access rule
+		write_mx:    sync.Mutex{},
+		ws:          ws,
 	}
 
 	if r.Header.Get("User-Agent") == "r3-client-fat" {
@@ -129,7 +132,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 func (hub *hubType) start() {
 
-	var removeClient = func(client *clientType, wasKicked bool) {
+	var clientRemove = func(client *clientType, wasKicked bool) {
 		if _, exists := hub.clients[client]; !exists {
 			return
 		}
@@ -143,17 +146,27 @@ func (hub *hubType) start() {
 		client.ctxCancel()
 		delete(hub.clients, client)
 
-		// run DB calls in async func as they must not block hub operations during heavy DB load
+		if wasKicked {
+			log.Info(handlerContext, fmt.Sprintf("kicked client (login ID %d) at %s", client.loginId, client.address))
+		} else {
+			log.Info(handlerContext, fmt.Sprintf("disconnected client (login ID %d) at %s", client.loginId, client.address))
+		}
+
 		go func() {
-			if wasKicked {
-				log.Info(handlerContext, fmt.Sprintf("kicked client (login ID %d) at %s", client.loginId, client.address))
-			} else {
-				log.Info(handlerContext, fmt.Sprintf("disconnected client (login ID %d) at %s", client.loginId, client.address))
-			}
+			// run DB calls in async func as they must not block hub operations during heavy DB load
 			if err := login_session.LogRemove(client.id); err != nil {
 				log.Error(handlerContext, "failed to remove login session log", err)
 			}
 		}()
+	}
+
+	var clientSend = func(event types.ClusterEvent, client *clientType, jsonMsg []byte) {
+		// disconnect and do not send message if kicked
+		if event.Content == "kick" || (event.Content == "kickNonAdmin" && !client.admin) {
+			clientRemove(client, true)
+			return
+		}
+		go client.write(jsonMsg)
 	}
 
 	for {
@@ -163,7 +176,7 @@ func (hub *hubType) start() {
 			hub.clients[client] = true
 
 		case client := <-hub.clientDel:
-			removeClient(client, false)
+			clientRemove(client, false)
 
 		case event := <-cluster.WebsocketClientEvents:
 
@@ -211,26 +224,45 @@ func (hub *hubType) start() {
 				continue
 			}
 
+			clientsPreferredFallback := make([]*clientType, 0)
+			clientsPreferredFound := false
 			eventLocal := event.Target.Address == "::1" || event.Target.Address == "127.0.0.1"
 
-			for client, _ := range hub.clients {
+			for client := range hub.clients {
 				bothLocal := eventLocal && client.local
 
-				// skip if target filter does not apply to client
+				// skip if strict target filter does not apply to client
 				if (event.Target.Address != "" && event.Target.Address != client.address && !bothLocal) ||
 					(event.Target.Device != 0 && event.Target.Device != client.device) ||
 					(event.Target.LoginId != 0 && event.Target.LoginId != client.loginId) {
 					continue
 				}
 
-				// disconnect and do not send message if kicked
-				if event.Content == "kick" || (event.Content == "kickNonAdmin" && !client.admin) {
-					removeClient(client, true)
-					continue
+				// check for preferred target filter
+				// tries to match clients with the correct filter - if it does not find any, use other clients as fallbacks
+				if event.Target.PwaModuleIdPreferred != uuid.Nil {
+					if event.Target.PwaModuleIdPreferred == client.pwaModuleId {
+						// preferred client found, use it and clear fallback clients
+						clientsPreferredFallback = make([]*clientType, 0)
+						clientsPreferredFound = true
+					} else {
+						// non-preferred client, store as fallbacks if no preferred clients are found
+						if !clientsPreferredFound {
+							clientsPreferredFallback = append(clientsPreferredFallback, client)
+						}
+						continue
+					}
 				}
 
-				go client.write(jsonMsg)
+				// filters match, send msg to client
+				clientSend(event, client, jsonMsg)
+				if singleRecipient {
+					break
+				}
+			}
 
+			for _, c := range clientsPreferredFallback {
+				clientSend(event, c, jsonMsg)
 				if singleRecipient {
 					break
 				}

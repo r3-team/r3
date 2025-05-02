@@ -190,10 +190,12 @@ func FileRequested_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address 
 	}
 	return nil
 }
-func JsFunctionCalled_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string, loginId int64, jsFunctionId uuid.UUID, arguments []interface{}) error {
+func JsFunctionCalled_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, address string,
+	loginId int64, moduleId uuid.UUID, jsFunctionId uuid.UUID, arguments []interface{}) error {
 
-	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceBrowser, LoginId: loginId}
+	target := types.ClusterEventTarget{Address: address, Device: types.WebsocketClientDeviceBrowser, LoginId: loginId, PwaModuleIdPreferred: moduleId}
 	payload := types.ClusterEventJsFunctionCalled{
+		ModuleId:     moduleId,
 		JsFunctionId: jsFunctionId,
 		Arguments:    arguments,
 	}

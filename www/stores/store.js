@@ -394,7 +394,7 @@ const MyStore = Vuex.createStore({
 			if(!MyStoreLocal.state.activated)
 				return null;
 			
-			let subDomain = window.location.host.split('.')[0];
+			const subDomain = window.location.host.split('.')[0];
 			return typeof state.pwaDomainMap[subDomain] !== 'undefined'
 				? state.pwaDomainMap[subDomain] : null;
 		},
