@@ -160,15 +160,6 @@ func (hub *hubType) start() {
 		}()
 	}
 
-	var clientSend = func(event types.ClusterEvent, client *clientType, jsonMsg []byte) {
-		// disconnect and do not send message if kicked
-		if event.Content == "kick" || (event.Content == "kickNonAdmin" && !client.admin) {
-			clientRemove(client, true)
-			return
-		}
-		go client.write(jsonMsg)
-	}
-
 	for {
 		// hub is only handled here, no locking is required
 		select {
@@ -224,8 +215,8 @@ func (hub *hubType) start() {
 				continue
 			}
 
-			clientsPreferredFallback := make([]*clientType, 0)
-			clientsPreferredFound := false
+			clientsSend := make([]*clientType, 0)
+			clientsSendFallback := make([]*clientType, 0)
 			eventLocal := event.Target.Address == "::1" || event.Target.Address == "127.0.0.1"
 
 			for client := range hub.clients {
@@ -238,31 +229,28 @@ func (hub *hubType) start() {
 					continue
 				}
 
-				// check for preferred target filter
-				// tries to match clients with the correct filter - if it does not find any, use other clients as fallbacks
-				if event.Target.PwaModuleIdPreferred != uuid.Nil {
-					if event.Target.PwaModuleIdPreferred == client.pwaModuleId {
-						// preferred client found, use it and clear fallback clients
-						clientsPreferredFallback = make([]*clientType, 0)
-						clientsPreferredFound = true
-					} else {
-						// non-preferred client, store as fallbacks if no preferred clients are found
-						if !clientsPreferredFound {
-							clientsPreferredFallback = append(clientsPreferredFallback, client)
-						}
-						continue
-					}
+				// store as fallback if preferred target filter does apply to client
+				// fallback clients are only used if no other clients match the target filters
+				if event.Target.PwaModuleIdPreferred != uuid.Nil && event.Target.PwaModuleIdPreferred != client.pwaModuleId {
+					clientsSendFallback = append(clientsSendFallback, client)
+					continue
 				}
-
-				// filters match, send msg to client
-				clientSend(event, client, jsonMsg)
-				if singleRecipient {
-					break
-				}
+				clientsSend = append(clientsSend, client)
 			}
 
-			for _, c := range clientsPreferredFallback {
-				clientSend(event, c, jsonMsg)
+			if len(clientsSend) == 0 && len(clientsSendFallback) != 0 {
+				clientsSend = clientsSendFallback
+			}
+
+			for _, client := range clientsSend {
+
+				// disconnect and do not send message if kicked
+				if event.Content == "kick" || (event.Content == "kickNonAdmin" && !client.admin) {
+					clientRemove(client, true)
+					continue
+				}
+				go client.write(jsonMsg)
+
 				if singleRecipient {
 					break
 				}
