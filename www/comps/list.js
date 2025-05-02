@@ -989,7 +989,7 @@ let MyList = {
 			if(inputEl !== null)
 				inputEl.focus();
 		});
-		this.$watch('columns',(valOld,valNew) => {
+		this.$watch('columns',(valNew,valOld) => {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
 				this.count = 0;
 				this.rows  = [];

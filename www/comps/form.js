@@ -872,7 +872,7 @@ let MyForm = {
 				if(this.isData && e.ctrlKey && e.key === 's') {
 					e.preventDefault();
 
-					if(!s.form.noDataActions && !this.blockInputs && this.canUpdate) {
+					if(!this.form.noDataActions && !this.blockInputs && this.canUpdate) {
 						if(!this.isBulkUpdate && this.hasChanges)     this.set(false);
 						if(this.isBulkUpdate  && this.hasChangesBulk) this.setBulkUpdate();
 					}

@@ -691,6 +691,7 @@ let MyField = {
 			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
 			columnIdsByUser:[],           // column IDs, selected by user to be shown inside field (primarily for list fields)
 			dropdownShow:false,           // for inputs with dropdowns (relationship, date, color picker)
+			loaded:false,
 			popUpFormInline:null,         // inline form for some field types (list)
 			regconfigInput:'',
 			showPassword:false,           // for password fields
@@ -1148,7 +1149,7 @@ let MyField = {
 		isSlider:   (s) => s.isData && s.field.display === 'slider',
 		
 		// composite
-		isActive:        (s) => (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
+		isActive:        (s) => s.loaded && (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
 		isBarcode:       (s) => s.isData && s.contentUse === 'barcode',
 		isEncrypted:     (s) => s.isData && s.attribute.encrypted,
 		isNew:           (s) => s.isData && !s.isVariable && s.joinsIndexMap[s.field.index].recordId === 0,
@@ -1190,6 +1191,7 @@ let MyField = {
 	},
 	mounted() {
 		this.reloadOptions();
+		this.loaded = true;
 	},
 	methods:{
 		// externals
