@@ -55,13 +55,11 @@ func do(mail types.Mail) error {
 	// check validity of record and attributes to attach files to
 	atr, exists := cache.AttributeIdMap[mail.AttributeId.Bytes]
 	if !exists {
-		return fmt.Errorf("cannot attach file(s) to unknown attribute %s",
-			mail.AttributeId.Bytes)
+		return fmt.Errorf("cannot attach file(s) to unknown attribute %s", mail.AttributeId.String())
 	}
 
 	if !schema.IsContentFiles(atr.Content) {
-		return fmt.Errorf("cannot attach file(s) to non-file attribute %s",
-			mail.AttributeId.Bytes)
+		return fmt.Errorf("cannot attach file(s) to non-file attribute %s", mail.AttributeId.String())
 	}
 
 	// get files from spooler

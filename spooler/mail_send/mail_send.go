@@ -161,13 +161,11 @@ func do(m types.Mail) error {
 
 		atr, exists := cache.AttributeIdMap[m.AttributeId.Bytes]
 		if !exists {
-			return fmt.Errorf("cannot attach file(s) from unknown attribute %s",
-				m.AttributeId.Bytes)
+			return fmt.Errorf("cannot attach file(s) from unknown attribute %s", m.AttributeId.String())
 		}
 
 		if !schema.IsContentFiles(atr.Content) {
-			return fmt.Errorf("cannot attach file(s) from non-file attribute %s",
-				m.AttributeId.Bytes)
+			return fmt.Errorf("cannot attach file(s) from non-file attribute %s", m.AttributeId.String())
 		}
 		files := make([]types.DataGetValueFile, 0)
 
