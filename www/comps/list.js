@@ -990,14 +990,6 @@ let MyList = {
 			if(inputEl !== null)
 				inputEl.focus();
 		});
-		this.$watch('columns',(valNew,valOld) => {
-			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
-				this.count = 0;
-				this.rows  = [];
-				this.removeInvalidFiltersColumn();
-				this.reloadOutside();
-			}
-		});
 		this.$watch('formLoading',(val) => {
 			if(val) return;
 			this.inputAutoSelectDone = false;
@@ -1015,10 +1007,15 @@ let MyList = {
 				this.resized();
 			}
 		});
-		this.$watch(() => [this.choices,this.filters],(newVals, oldVals) => {
+		this.$watch(() => [this.choices,this.columns,this.columnsAll,this.filters],(newVals,oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
-				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
-					return this.reloadOutside();
+				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
+					this.count = 0;
+					this.rows  = [];
+					this.removeInvalidFilters();
+					this.reloadOutside();
+					return;
+				}
 			}
 		});
 		if(this.isInput && !this.inputAsCategory) {
@@ -1046,9 +1043,10 @@ let MyList = {
 		this.reloadOptions();
 		this.setAutoRenewTimer(this.autoRenew);
 
-		// remove invalid column filters in case module schema changed
-		this.removeInvalidFiltersColumn();
-		
+		// remove invalid filters in case module schema changed
+		// must occur after reloadOptions()
+		this.removeInvalidFilters();
+
 		// setup handlers
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
@@ -1510,19 +1508,31 @@ let MyList = {
 		},
 
 		// cleanup
-		removeInvalidFiltersColumn() {
-			// only allow column filters based on active columns
-			let out = [];
-			for(const f of this.filtersColumn) {
-				for(const c of this.columns) {
-					if(c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) {
-						out.push(f)
-						break;
+		removeInvalidFilters() {
+			const f = (filters,columns,fncUpdate) => {
+				let out = [];
+				let br0 = 0;
+				let br1 = 0;
+				for(const f of filters) {
+					br0 += f.side0.brackets;
+					br1 += f.side1.brackets;
+	
+					// only allow filters based on available columns
+					for(const c of columns) {
+						if(c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) {
+							out.push(f)
+							break;
+						}
 					}
 				}
-			}
-			if(out.length !== this.filtersColumn.length)
-				this.setColumnBatchFilters(out);
+				if(br0 !== br1) // brackets do not match, remove all filters
+					return fncUpdate([]);
+
+				if(out.length !== filters.length) // some filters were removed, update
+					fncUpdate(out);
+			};
+			f(this.filtersColumn,this.columns,this.setColumnBatchFilters);
+			f(this.filtersUser,this.columnsAll,this.setUserFilters);
 		},
 		
 		// bulk selection
