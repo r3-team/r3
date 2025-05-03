@@ -97,8 +97,8 @@ let MyList = {
 					<my-list-filters
 						v-if="showFilters"
 						@set-filters="setUserFilters"
-						:columns="columns"
-						:columnBatches="columnBatches"
+						:columns="columnsAll"
+						:columnBatches="columnBatchesAll"
 						:filters="filtersUser"
 						:joins="joins"
 					/>
@@ -927,6 +927,7 @@ let MyList = {
 		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
 		choiceFilters:       (s) => s.getChoiceFilters(s.choices,s.choiceId),
 		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,s.columnBatchSort[0],true),
+		columnBatchesAll:    (s) => s.getColumnBatches(s.moduleId,s.columnsAll,[],s.orders,[],true),
 		expressions:         (s) => s.getQueryExpressions(s.columns),
 		hasBulkActions:      (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
 		hasChoices:          (s) => s.query.choices.length > 1,
