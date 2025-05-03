@@ -299,6 +299,7 @@ let MyListColumnBatch = {
 					}
 					return true;
 				}),
+				orders:[{ascending:true,expressionPos:0}],
 				limit:1000
 			};
 		},
