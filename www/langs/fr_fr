@@ -1095,7 +1095,7 @@
 				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Décrypte la clé de données fournie avec la clé privée de l'utilisateur actuelle.",
 				"get_e2ee_data_value": "app.get_e2ee_data_value({ARGS}) => STRING<br /><br />Décrypte la valeur de données avec la clé de données fournie.",
 				"get_language_code": "app.get_language_code() => STRING<br /><br />Renvoie le code de langue à 5 lettres ('en_us', ...) de l'utilisateur actuelle.",
-				"get_preset_record_id": "app.get_preset_record_id({ARGS}) => INTEGER<br /><br />Renvoie l'ID de l'enregistrement associé au préréglage donné.",
+				"get_preset_record_id": "app.get_preset_record_id({ARGS}) => NUMBER<br /><br />Renvoie l'ID de l'enregistrement associé au préréglage donné.",
 				"get_record_id": "app.get_record_id({ARGS}) => NUMBER|ARRAY<br /><br />Renvoie l'ID de l'enregistrement du formulaire ouvert pour l'index de relation spécifié (0 est par défaut).<br /><br />Si le formulaire est utilisé en mode d'édition en masse, seuls les ID d'enregistrement de l'index de relation 0 sont disponibles - dans ce cas, un tableau de tous les ID d'enregistrement utilisés est renvoyé.",
 				"get_role_ids": "app.get_role_ids() => ARRAY<br /><br />Renvoie tous les ID de rôle attribués à l'utilisateur actuelle (les rôles imbriqués sont inclus).",
 				"get_url_query_string": "app.get_url_query_string() => STRING<br /><br />Returns the current query parameters, such as:<br />'?arg1=hello&arg2=world'",
@@ -1215,7 +1215,7 @@
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Returns the encrypted data key for the given relation record and the chosen user. Data keys exist for individual records for every user that has access to it. They can be decrypted on the frontend with the associated user private key.",
 				"get_language_code": "instance.get_language_code() => TEXT\n\nRetourne le code de langue à 5 lettres ('en_us', ...) de l'utilisateur qui est utilisé pour accéder à la base de données de données.",
 				"get_name": "instance.get_name() => TEXT\n\nRetourne le nom de l'instance, défini dans la fenêtre de personnalisation du panneau d'administration.",
-				"get_preset_record_id": "instance.get_preset_record_id({ARGS}) => INTEGER\n\nRetourne l'ID de l'enregistrement associé au preset donné.",
+				"get_preset_record_id": "instance.get_preset_record_id({ARGS}) => BIGINT\n\nRetourne l'ID de l'enregistrement associé au preset donné.",
 				"get_public_hostname": "instance.get_public_hostname() => TEXT\n\nRetourne le nom d'hôte public de l'instance, défini dans la configuration système.",
 				"get_role_ids": "instance.get_role_ids({ARGS}) => UUID[]\n\nObtient un tableau d'IDs de rôle assignés à l'utilisateur spécifié.\n\nSi 'inherited' est défini sur TRUE, les rôles parent sont inclus. Les adhésions imbriquées sont entièrement résolues.",
 				"get_user_id": "instance.get_user_id() => INTEGER\n\nRetourne l'ID de l'utilisateur qui exécute l'opération.",
@@ -1297,7 +1297,7 @@
 				],
 				"mail_delete_after_attach": [
 					"mail_id INTEGER",
-					"attach_record_id INTEGER",
+					"attach_record_id BIGINT",
 					"attach_attribute_id UUID"
 				],
 				"mail_get_next": [

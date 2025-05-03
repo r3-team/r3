@@ -1095,7 +1095,7 @@
 				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Descifra la clave de datos proporcionada con la clave privada del usuario actual.",
 				"get_e2ee_data_value": "app.get_e2ee_data_value({ARGS}) => STRING<br /><br />Descifra el valor de los datos con la clave de datos proporcionada.",
 				"get_language_code": "app.get_language_code() => STRING<br /><br />Devuelve el código de idioma de 5 letras ('en_us', ...) del usuario actual.",
-				"get_preset_record_id": "app.get_preset_record_id({ARGS}) => INTEGER<br /><br />Devuelve el ID del registro que está asociado con el preajuste dado.",
+				"get_preset_record_id": "app.get_preset_record_id({ARGS}) => NUMBER<br /><br />Devuelve el ID del registro que está asociado con el preajuste dado.",
 				"get_record_id": "app.get_record_id({ARGS}) => NUMBER|ARRAY<br /><br />Devuelve el ID del registro del formulario abierto para el índice de relación especificado (0 es el predeterminado).<br /><br />Si el formulario se usa en modo de edición masiva, solo están disponibles los IDs de registro del índice de relación 0; en este caso, se devuelve una matriz con todos los IDs de registro utilizados.",
 				"get_role_ids": "app.get_role_ids() => ARRAY<br /><br />Devuelve todos los IDs de roles asignados al usuario actual (se incluyen roles anidados).",
 				"get_url_query_string": "app.get_url_query_string() => STRING<br /><br />Devuelve los parámetros de consulta actuales, como:<br />'?arg1=hola&arg2=mundo'",
@@ -1215,7 +1215,7 @@
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Devuelve la clave de datos cifrada para el registro de relación dado y el usuario elegido. Las claves de datos existen para registros individuales para cada usuario que tiene acceso a ellos. Se pueden descifrar en el frontend con la clave privada del usuario asociado.",
 				"get_language_code": "instance.get_language_code() => TEXT<br /><br />Devuelve el código de idioma de 5 letras ('en_us', ...) del usuario, que se utiliza para acceder al backend de datos.",
 				"get_name": "instance.get_name() => TEXT<br /><br />Devuelve el nombre de la instancia, definido en la ventana de personalización del panel de administración.",
-				"get_preset_record_id": "instance.get_preset_record_id({ARGS}) => INTEGER<br /><br />Devuelve el ID del registro que está asociado con el preajuste dado.",
+				"get_preset_record_id": "instance.get_preset_record_id({ARGS}) => BIGINT<br /><br />Devuelve el ID del registro que está asociado con el preajuste dado.",
 				"get_public_hostname": "instance.get_public_hostname() => TEXT<br /><br />Devuelve el nombre del host público de la instancia, definido en la configuración del sistema.",
 				"get_role_ids": "instance.get_role_ids({ARGS}) => UUID[]<br /><br />Obtiene una matriz de IDs de roles asignados al usuario especificado.<br /><br />Si 'inherited' está configurado en TRUE, se incluyen los roles principales. Las membresías anidadas se resuelven completamente.",
 				"get_user_id": "instance.get_user_id() => INTEGER<br /><br />Devuelve el ID del usuario que está ejecutando la operación.",
@@ -1297,7 +1297,7 @@
 				],
 				"mail_delete_after_attach": [
 					"mail_id INTEGER",
-					"attach_record_id INTEGER",
+					"attach_record_id BIGINT",
 					"attach_attribute_id UUID"
 				],
 				"mail_get_next": [
