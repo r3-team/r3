@@ -431,6 +431,7 @@ let MyList = {
 										:filtersColumn="filtersColumn"
 										:isOrderedOrginal="isOrderedOrginal"
 										:joins="relationsJoined"
+										:key="b.key"
 										:orders="orders"
 										:relationId="query.relationId"
 										:rowCount="count"

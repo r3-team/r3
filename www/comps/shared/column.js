@@ -101,6 +101,7 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 			columnIndexes:[index],
 			columnIndexesSortBy:noSort ? [] : [index],
 			columnIndexColor:!isColor ? -1 : index,
+			key:column.id,          // key is used to redo column batch components on change
 			orderIndexesSmallest:0, // smallest order index used to sort this column batch by
 			orderIndexesUsed:[],    // which order indexes were used to sort this column batch by, empty if batch was not sorted by
 			orderPosition:0,        // position of this column batch sort compared to other column batches (smallest sorted by first)

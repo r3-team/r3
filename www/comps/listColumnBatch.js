@@ -180,11 +180,10 @@ let MyListColumnBatch = {
 					case '= ANY':  this.migrateFilter(f.side1.value); break;
 				}
 			}
+		},
+		show(v) {
+			if(v) this.loadSelectionValues();
 		}
-	},
-	mounted() {
-		if(this.isValidFilter)
-			this.$watch('show',v => this.loadSelectionValues());
 	},
 	computed:{
 		aggregatorInput:{
