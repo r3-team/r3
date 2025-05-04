@@ -282,6 +282,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writer.Flush()
+	if err := writer.Error(); err != nil {
+		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		return
+	}
 	if err := file.Close(); err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 		return
