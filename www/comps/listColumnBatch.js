@@ -243,7 +243,7 @@ let MyListColumnBatch = {
 		isValidFilter:    (s) => s.columnUsedFilter !== null,
 		showFilterAny:    (s) => s.showFilterItems || s.showFilterText,
 		showFilterItems:  (s) => s.values.length != 0,
-		showFilterText:   (s) => !s.isDateOrTime,
+		showFilterText:   (s) => !s.isDateOrTime && s.isValidFilter,
 		showIconFilter:   (s) => s.isValidFilter && s.isFiltered,
 		showIconOrder:    (s) => s.isOrdered && !s.isOrderedOrginal,
 		
