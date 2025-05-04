@@ -48,6 +48,7 @@ let MyListColumnBatch = {
 				<div class="columnOptionItem" v-if="canOrder">
 					<my-button image="sort.png"
 						@trigger="$emit('del-order')"
+						@trigger-right="$emit('del-order')"
 						:active="isOrdered"
 						:captionTitle="capApp.orderBy"
 						:naked="true"
@@ -68,6 +69,7 @@ let MyListColumnBatch = {
 				<div class="columnOptionItem" v-if="aggrColumn !== null">
 					<my-button image="sum.png"
 						@trigger="aggregatorInput = ''"
+						@trigger-right="aggregatorInput = ''"
 						:active="aggregatorInput !== ''"
 						:captionTitle="capApp.button.aggregatorsHint"
 						:naked="true"
@@ -86,6 +88,7 @@ let MyListColumnBatch = {
 				<div class="columnOptionItem" v-if="showFilterText">
 					<my-button image="filter.png"
 						@trigger="clear"
+						@trigger-right="clear"
 						:active="isFiltered && inputTxt !== ''"
 						:captionTitle="capGen.button.filter"
 						:naked="true"
@@ -238,7 +241,7 @@ let MyListColumnBatch = {
 		filtersColumnThis:(s) => s.filtersColumn.filter((v,i) => s.columnFilterIndexes.includes(i)),
 		isDateOrTime:     (s) => s.isValidFilter && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
 		isFiltered:       (s) => s.columnFilterIndexes.length !== 0,
-		isOrdered:        (s) => s.columnBatch.orderIndexesUsed.length !== 0,
+		isOrdered:        (s) => s.columnBatch.orderIndexesUsed.length !== 0 && !s.isOrderedOrginal,
 		isOrderedAsc:     (s) => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
 		isValidFilter:    (s) => s.columnUsedFilter !== null,
 		showFilterAny:    (s) => s.showFilterItems || s.showFilterText,
