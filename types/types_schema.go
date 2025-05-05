@@ -536,6 +536,7 @@ type PgFunction struct {
 	IsLoginSync    bool                 `json:"isLoginSync"`    // special login sync function
 	IsTrigger      bool                 `json:"isTrigger"`      // is relation TRIGGER function
 	Volatility     string               `json:"volatility"`     // VOLATILE, STABLE, IMMUTABLE
+	Cost           int                  `json:"cost"`           // estimated execution cost
 	Schedules      []PgFunctionSchedule `json:"schedules"`
 	Captions       CaptionMap           `json:"captions"`
 }

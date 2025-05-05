@@ -14,6 +14,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// < 3.11
+// fix missing cost setting
+func FixMissingCost(fnc types.PgFunction) types.PgFunction {
+	if fnc.Cost == 0 {
+		fnc.Cost = 100
+	}
+	return fnc
+}
+
 // < 3.10
 // fix missing menu tab (at least 1 must exist)
 func FixMissingMenuTab(moduleId uuid.UUID, mts []types.MenuTab, menus []types.Menu) ([]types.MenuTab, error) {

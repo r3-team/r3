@@ -1072,6 +1072,8 @@
 			"codeReturnsHintJs": "opțional, 'number', 'array',...",
 			"codeReturnsHintPg": "'text', 'integer',...",
 			"collectionId": "[Select collection]",
+			"cost": "Cost",
+			"costHelp": "<b>Expert setting</b><p>Cost is an estimated value that serves to optimize query planning. Changing this value can help optimize performance by letting the query planner know, if this function is expected to run long (expensive / high cost) or short (cheap / low cost).</p><p>Higher values can be sensible for complex functions (such as relation policies), as the query planner will then avoid unnecessary executions by evaluating other things first.</p>",
 			"dialog": {
 				"delete": "Sigur doriți să ștergeți această funcție?"
 			},

@@ -1072,6 +1072,8 @@
 			"codeReturnsHintJs": "optional, \"number\", \"array\",...",
 			"codeReturnsHintPg": "\"text\", \"integer\",...",
 			"collectionId": "[Sammlung auswählen]",
+			"cost": "Kosten",
+			"costHelp": "<b>Experteneinstellung</b><p>Kosten ist ein geschätzter Wert, der hilft, den Query-Planer zu optimieren. Diesen Wert zu ändern kann die Leistung verbessern, indem dem Query-Planer mitgeteilt wird, ob eine Funktion erwartungsgemäß lang (teuer, hohe Kosten) oder kurz (günstig, niedrige Kosten) läuft.</p><p>Höhere Werte können für komplexe Funktionen (wie z. B. Relationsrichtlinien) sinnvoll sein, da der Query-Planer dann die Ausführung dieser Funktion, wo möglich, zugunsten anderer Evaluierungen vermeidet.</p>",
 			"dialog": {
 				"delete": "Bist du sicher, dass du diese Funktion löschen möchtest?"
 			},

@@ -502,6 +502,21 @@ let MyBuilderPgFunction = {
 							<td>{{ capApp.codeReturns }}</td>
 							<td><input v-model="codeReturns" :disabled="isTrigger || isLoginSync || readonly" placeholder="-" /></td>
 						</tr>
+						<tr>
+							<td>{{ capApp.cost }}</td>
+							<td>
+								<div class="row gap centered">
+									<input type="number"
+										@keyup="updateCost($event.target.value)"
+										:disabled="readonly"
+										:value="cost"
+									/>
+									<my-button image="question.png"
+										@trigger="showHelp(capApp.cost,capApp.costHelp)"
+									/>
+								</div>
+							</td>
+						</tr>
 						<tr v-if="!isTrigger">
 							<td>{{ capApp.volatility }}</td>
 							<td>
@@ -593,6 +608,7 @@ let MyBuilderPgFunction = {
 			codeArgs:'',
 			codeFunction:'',
 			codeReturns:'',
+			cost:100,
 			isFrontendExec:false,
 			isLoginSync:false,
 			isTrigger:false,
@@ -638,6 +654,7 @@ let MyBuilderPgFunction = {
 			|| s.codeFunction    !== s.placeholdersSet(s.pgFunction.codeFunction)
 			|| s.codeReturns     !== s.pgFunction.codeReturns
 			|| s.isFrontendExec  !== s.pgFunction.isFrontendExec
+			|| s.cost            !== s.pgFunction.cost
 			|| s.volatility      !== s.pgFunction.volatility
 			|| JSON.stringify(s.schedules) !== JSON.stringify(s.pgFunction.schedules)
 			|| JSON.stringify(s.captions)  !== JSON.stringify(s.pgFunction.captions),
@@ -762,6 +779,7 @@ let MyBuilderPgFunction = {
 			this.isFrontendExec = this.pgFunction.isFrontendExec;
 			this.isLoginSync    = this.pgFunction.isLoginSync;
 			this.isTrigger      = this.pgFunction.isTrigger;
+			this.cost           = this.pgFunction.cost;
 			this.volatility     = this.pgFunction.volatility;
 			this.schedules      = JSON.parse(JSON.stringify(this.pgFunction.schedules));
 			this.addNew         = false;
@@ -808,6 +826,9 @@ let MyBuilderPgFunction = {
 			let pos = this.holderRelationIdsOpen.indexOf(relationId);
 			if(pos === -1) this.holderRelationIdsOpen.push(relationId);
 			else           this.holderRelationIdsOpen.splice(pos,1);
+		},
+		updateCost(value) {
+			this.cost = value === '' ? 0 : parseInt(value);
 		},
 		
 		// placeholders are used for storing entities via ID instead of name (which can change)
@@ -1038,6 +1059,7 @@ let MyBuilderPgFunction = {
 					codeFunction:this.placeholdersUnset(false),
 					codeReturns:this.codeReturns,
 					isFrontendExec:this.isFrontendExec,
+					cost:this.cost,
 					volatility:this.volatility,
 					schedules:this.schedules,
 					captions:this.captions

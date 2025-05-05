@@ -120,6 +120,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			DROP TYPE app.column_style;
 			CREATE TYPE app.column_style AS ENUM ('bold', 'italic', 'alignEnd', 'alignMid', 'clipboard', 'hide', 'vertical', 'wrap', 'monospace', 'previewLarge', 'boolAtrIcon');
 			ALTER TABLE app.column ALTER COLUMN styles TYPE app.column_style[] USING styles::TEXT[]::app.column_style[];
+
+			-- PG function cost
+			ALTER TABLE app.pg_function ADD COLUMN cost INTEGER NOT NULL DEFAULT 100;
 		`)
 		return "3.11", err
 	},

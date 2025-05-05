@@ -46,7 +46,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunct
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, name, code_args, code_function, code_returns,
-			is_frontend_exec, is_login_sync, is_trigger, volatility
+			is_frontend_exec, is_login_sync, is_trigger, volatility, cost
 		FROM app.pg_function
 		WHERE module_id = $1
 		ORDER BY name ASC
@@ -60,7 +60,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunct
 		var f types.PgFunction
 
 		if err := rows.Scan(&f.Id, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns,
-			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility); err != nil {
+			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility, &f.Cost); err != nil {
 
 			return functions, err
 		}
@@ -122,6 +122,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 	// fix imports < 3.9: Missing volatility setting
 	fnc = compatible.FixMissingVolatility(fnc)
 
+	// fix imports < 3.11: Missing cost setting
+	fnc = compatible.FixMissingCost(fnc)
+
 	// enforce valid function configuration
 	if fnc.IsLoginSync {
 		fnc.CodeReturns = "INTEGER"
@@ -155,10 +158,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 
 		if _, err := tx.Exec(ctx, `
 			UPDATE app.pg_function
-			SET name = $1, code_args = $2, code_function = $3,
-				code_returns = $4, is_frontend_exec = $5, volatility = $6
-			WHERE id = $7
-		`, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsFrontendExec, fnc.Volatility, fnc.Id); err != nil {
+			SET name = $1, code_args = $2, code_function = $3, code_returns = $4,
+				is_frontend_exec = $5, volatility = $6, cost = $7
+			WHERE id = $8
+		`, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsFrontendExec, fnc.Volatility, fnc.Cost, fnc.Id); err != nil {
 			return err
 		}
 
@@ -190,10 +193,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 	} else {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.pg_function (id, module_id, name, code_args, code_function,
-				code_returns, is_frontend_exec, is_login_sync, is_trigger, volatility)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-		`, fnc.Id, fnc.ModuleId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction,
-			fnc.CodeReturns, fnc.IsFrontendExec, fnc.IsLoginSync, fnc.IsTrigger, fnc.Volatility); err != nil {
+				code_returns, is_frontend_exec, is_login_sync, is_trigger, volatility, cost)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		`, fnc.Id, fnc.ModuleId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns,
+			fnc.IsFrontendExec, fnc.IsLoginSync, fnc.IsTrigger, fnc.Volatility, fnc.Cost); err != nil {
 
 			return err
 		}
@@ -267,8 +270,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 
 	_, err = tx.Exec(ctx, fmt.Sprintf(`
 		CREATE OR REPLACE FUNCTION "%s"."%s"(%s)
-		RETURNS %s LANGUAGE plpgsql %s AS %s
-	`, nameMod, fnc.Name, fnc.CodeArgs, fnc.CodeReturns, fnc.Volatility, fnc.CodeFunction))
+		RETURNS %s LANGUAGE plpgsql COST %d %s AS %s
+	`, nameMod, fnc.Name, fnc.CodeArgs, fnc.CodeReturns, fnc.Cost, fnc.Volatility, fnc.CodeFunction))
 	return err
 }
 
