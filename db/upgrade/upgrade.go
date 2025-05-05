@@ -94,29 +94,35 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		ALTER TABLE app.field ALTER COLUMN flags
-			TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
-
-		ALTER TABLE app.collection_consumer ALTER COLUMN flags
-			TYPE app.collection_consumer_flag[] USING flags::CHARACTER VARYING(24)[]::app.collection_consumer_flag[];
-
-		ALTER TABLE instance.login_setting ALTER COLUMN form_actions_align
-			TYPE instance.align_horizontal USING form_actions_align::TEXT::instance.align_horizontal;
-
-		ALTER TABLE app.menu ALTER COLUMN menu_tab_id SET NOT NULL;
-		ALTER TABLE app.menu DROP  COLUMN module_id;
-
-		ALTER TABLE app.collection_consumer DROP COLUMN multi_value;
-		ALTER TABLE app.collection_consumer DROP COLUMN no_display_empty;
-
-		-- fix bad upgrade script (column style 'monospace' was wrongly added in '3.8->3.9' script instead of '3.9->3.10' - some 3.10 instances do not have it)
-		-- remove temporary fix in initSystem() (in r3.go) when 3.11 releases
-		ALTER table app.column ALTER COLUMN styles TYPE TEXT[];
-		DROP TYPE app.column_style;
-		CREATE TYPE app.column_style AS ENUM ('bold', 'italic', 'alignEnd', 'alignMid', 'clipboard', 'hide', 'vertical', 'wrap', 'monospace', 'previewLarge', 'boolAtrIcon');
-		ALTER TABLE app.column ALTER COLUMN styles TYPE app.column_style[] USING styles::TEXT[]::app.column_style[];
+		nothing yet
 	*/
 
+	"3.10": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
+			// cleanup from last release
+			ALTER TABLE app.field ALTER COLUMN flags
+				TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
+
+			ALTER TABLE app.collection_consumer ALTER COLUMN flags
+				TYPE app.collection_consumer_flag[] USING flags::CHARACTER VARYING(24)[]::app.collection_consumer_flag[];
+
+			ALTER TABLE instance.login_setting ALTER COLUMN form_actions_align
+				TYPE instance.align_horizontal USING form_actions_align::TEXT::instance.align_horizontal;
+
+			ALTER TABLE app.menu ALTER COLUMN menu_tab_id SET NOT NULL;
+			ALTER TABLE app.menu DROP  COLUMN module_id;
+
+			ALTER TABLE app.collection_consumer DROP COLUMN multi_value;
+			ALTER TABLE app.collection_consumer DROP COLUMN no_display_empty;
+
+			-- fix bad upgrade script (column style 'monospace' was wrongly added in '3.8->3.9' script instead of '3.9->3.10' - some 3.10 instances do not have it)
+			ALTER table app.column ALTER COLUMN styles TYPE TEXT[];
+			DROP TYPE app.column_style;
+			CREATE TYPE app.column_style AS ENUM ('bold', 'italic', 'alignEnd', 'alignMid', 'clipboard', 'hide', 'vertical', 'wrap', 'monospace', 'previewLarge', 'boolAtrIcon');
+			ALTER TABLE app.column ALTER COLUMN styles TYPE app.column_style[] USING styles::TEXT[]::app.column_style[];
+		`)
+		return "3.11", err
+	},
 	"3.9": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `
 			-- cleanup from last release

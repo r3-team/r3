@@ -534,18 +534,6 @@ func initSystem(ctx context.Context) error {
 	if err := login_session.LogsRemoveForNode_tx(ctx, tx); err != nil {
 		return err
 	}
-
-	// temporary fix introduced in 3.10.1
-	// instances that were upgraded from 3.9 to 3.10 did not receive 'monospace' column style (because DB change was wrongly added to upgrade script '3.8->3.9' instead of '3.9->3.10')
-	// when 3.11 is released, we permanently fix this issue by addressing it in '3.10->3.11' script, in the meantime we fix it on every boot up
-	if _, err := tx.Exec(ctx, `
-		ALTER table app.column ALTER COLUMN styles TYPE TEXT[];
-		DROP TYPE app.column_style;
-		CREATE TYPE app.column_style AS ENUM ('bold', 'italic', 'alignEnd', 'alignMid', 'clipboard', 'hide', 'vertical', 'wrap', 'monospace', 'previewLarge', 'boolAtrIcon');
-		ALTER TABLE app.column ALTER COLUMN styles TYPE app.column_style[] USING styles::TEXT[]::app.column_style[];
-	`); err != nil {
-		return err
-	}
 	return tx.Commit(ctx)
 }
 
