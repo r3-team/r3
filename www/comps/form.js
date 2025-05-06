@@ -195,7 +195,7 @@ let MyForm = {
 						@trigger="set(false)"
 						@trigger-alt="set(true)"
 						:active="buttonActiveSave"
-						:altAction="!isMobile && allowNew && canCreate"
+						:altAction="buttonShownSaveAlt"
 						:altCaptionTitle="capGen.button.saveNewHint"
 						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.save : ''"
 						:captionTitle="capGen.button.saveHint"
@@ -513,6 +513,7 @@ let MyForm = {
 		buttonShownDel:      (s) => !s.isBulkUpdate && s.allowDel  && (s.buttonActiveDel || s.layoutElements.includes('dataActionReadonly')),
 		buttonShownNew:      (s) => !s.isBulkUpdate && s.allowNew  && (s.buttonActiveNew || s.layoutElements.includes('dataActionReadonly')),
 		buttonShownSave:     (s) => !s.isBulkUpdate && (s.buttonActiveSave     || s.layoutElements.includes('dataActionReadonly')),
+		buttonShownSaveAlt:  (s) => s.buttonShownSave && s.buttonShownNew && !s.isMobile && s.canCreate,
 		buttonShownSaveBulk: (s) => s.isBulkUpdate  && (s.buttonActiveSaveBulk || s.layoutElements.includes('dataActionReadonly')),
 
 		// general entities
