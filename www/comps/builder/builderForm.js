@@ -503,7 +503,7 @@ let MyBuilderForm = {
 
 			<!-- column settings -->
 			<template v-if="columnShow">
-				<div class="content" v-if="columnShow.subQuery">
+				<div class="content no-shrink" v-if="columnShow.subQuery">
 					<my-builder-query
 						@set-choices="fieldColumnQuerySet('choices',$event)"
 						@set-filters="fieldColumnQuerySet('filters',$event)"
