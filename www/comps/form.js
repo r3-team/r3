@@ -351,6 +351,7 @@ let MyForm = {
 		
 		window.removeEventListener('keydown',this.handleHotkeys);
 		window.removeEventListener('keyup',this.handleHotkeys);
+		this.timerClearAll();
 	},
 	data() {
 		return {
@@ -1277,7 +1278,7 @@ let MyForm = {
 		
 		// timer
 		timerClear(name) {
-			if(typeof this.timers[name] !== 'undefined') {
+			if(this.timers[name] !== undefined) {
 				if(this.timers[name].isInterval)
 					clearInterval(this.timers[name].id);
 				else
