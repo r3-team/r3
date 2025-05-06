@@ -141,12 +141,12 @@ export function getSubQueryFilterExpressions(subQuery) {
 export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 	fieldIdsChanged,fieldIdsInvalid,fieldValues,collectionIdMapIndexFilter,variableIdMapLocal) {
 	
-	if(typeof dataFieldIdMap             === 'undefined') dataFieldIdMap             = {};
-	if(typeof fieldIdsChanged            === 'undefined') fieldIdsChanged            = [];
-	if(typeof fieldIdsInvalid            === 'undefined') fieldIdsInvalid            = [];
-	if(typeof fieldValues                === 'undefined') fieldValues                = {};
-	if(typeof collectionIdMapIndexFilter === 'undefined') collectionIdMapIndexFilter = {};
-	if(typeof variableIdMapLocal         === 'undefined') variableIdMapLocal         = {};
+	if(dataFieldIdMap             === undefined) dataFieldIdMap             = {};
+	if(fieldIdsChanged            === undefined) fieldIdsChanged            = [];
+	if(fieldIdsInvalid            === undefined) fieldIdsInvalid            = [];
+	if(fieldValues                === undefined) fieldValues                = {};
+	if(collectionIdMapIndexFilter === undefined) collectionIdMapIndexFilter = {};
+	if(variableIdMapLocal         === undefined) variableIdMapLocal         = {};
 	
 	const getFilterSideProcessed = function(s,operator) {
 		switch(s.content) {

@@ -14,10 +14,8 @@ import MyInputSelect              from './inputSelect.js';
 import MyInputUuid                from './inputUuid.js';
 import MyList                     from './list.js';
 import {hasAccessToAttribute}     from './shared/access.js';
-import {getColumnsProcessed}      from './shared/column.js';
 import {srcBase64}                from './shared/image.js';
 import {getCaption}               from './shared/language.js';
-import {getQueryFiltersProcessed} from './shared/query.js';
 import {
 	getIndexAttributeId,
 	isAttributeBoolean,
@@ -144,6 +142,7 @@ let MyField = {
 					:attributeIdDate0="field.attributeIdDate0"
 					:attributeIdDate1="field.attributeIdDate1"
 					:choices="choicesProcessed"
+					:choiceId="choiceId"
 					:columns="columnsProcessed"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
@@ -163,8 +162,10 @@ let MyField = {
 					:isSingleField="isAlone"
 					:moduleId="moduleId"
 					:popUpFormInline="popUpFormInline"
+					:showGroupLabels="fieldIdMapOptions[field.id]['ganttShowGroupLabels']"
 					:stepTypeDefault="field.ganttSteps"
 					:stepTypeToggle="field.ganttStepsToggle"
+					:stepZoom="fieldIdMapOptions[field.id]['ganttStepZoom']"
 					:query="field.query"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				/>
@@ -311,6 +312,8 @@ let MyField = {
 							:fieldIdsInvalid="fieldIdsInvalid"
 							:fieldIdsTouched="fieldIdsTouched"
 							:fieldIdMapOverwrite="fieldIdMapOverwrite"
+							:fieldIdMapOptions="fieldIdMapOptions"
+							:fieldIdMapProcessed="fieldIdMapProcessed"
 							:formBadSave="formBadSave"
 							:formIsEmbedded="formIsEmbedded"
 							:formLoading="formLoading"
@@ -642,6 +645,8 @@ let MyField = {
 			:fieldIdsInvalid="fieldIdsInvalid"
 			:fieldIdsTouched="fieldIdsTouched"
 			:fieldIdMapOverwrite="fieldIdMapOverwrite"
+			:fieldIdMapOptions="fieldIdMapOptions"
+			:fieldIdMapProcessed="fieldIdMapProcessed"
 			:formBadSave="formBadSave"
 			:formIsEmbedded="formIsEmbedded"
 			:formLoading="formLoading"
@@ -665,7 +670,9 @@ let MyField = {
 		fieldIdsChanged:    { type:Array,   required:false, default:() => {return []} },
 		fieldIdsInvalid:    { type:Array,   required:false, default:() => {return []} },
 		fieldIdsTouched:    { type:Array,   required:false, default:() => {return []} },
-		fieldIdMapOverwrite:{ type:Object,  required:true },
+		fieldIdMapOverwrite:{ type:Object,  required:true },                 // overwrites for field meta (title, order in parent, error message, ...)
+		fieldIdMapOptions:  { type:Object,  required:true },                 // field options
+		fieldIdMapProcessed:{ type:Object,  required:true },                 // processed data (choices, columns, filters)
 		formBadSave:        { type:Boolean, required:true },                 // attempted save with invalid inputs
 		formIsEmbedded:     { type:Boolean, required:true },                 // parent form is embedded (pop-up, inline, widget)
 		formLoading:        { type:Boolean, required:true },
@@ -688,10 +695,7 @@ let MyField = {
 	],
 	data() {
 		return {
-			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
-			columnIdsByUser:[],           // column IDs, selected by user to be shown inside field (primarily for list fields)
 			dropdownShow:false,           // for inputs with dropdowns (relationship, date, color picker)
-			loaded:false,
 			popUpFormInline:null,         // inline form for some field types (list)
 			regconfigInput:'',
 			showPassword:false,           // for password fields
@@ -700,7 +704,6 @@ let MyField = {
 		};
 	},
 	watch:{
-		favoriteId(v) { this.reloadOptions(); },
 		isValid:{ // inform parent form about field validity
 			handler(v) { this.$emit('set-valid',v,this.field.id); },
 			immediate:true
@@ -833,27 +836,6 @@ let MyField = {
 		},
 		fieldAttributeIdAlt:(s) => !s.isData || s.isVariable || s.field.attributeIdAlt === null ? false
 			: s.getIndexAttributeId(s.field.index,s.field.attributeIdAlt,false,null),
-		columnsProcessed:(s) => !s.isQuery ? [] : s.getColumnsProcessed(
-			s.field.columns,s.columnIdsByUser,s.joinsIndexMap,s.dataFieldMap,
-			s.fieldIdsChanged,s.fieldIdsInvalid,s.values),
-		choicesProcessed:(s) => {
-			if(!s.isQuery) return [];
-			
-			let choices = JSON.parse(JSON.stringify(s.field.query.choices));
-			for(let i = 0, j = choices.length; i < j; i++) {
-				choices[i].filters = s.getQueryFiltersProcessed(
-					choices[i].filters,s.joinsIndexMap,s.dataFieldMap,
-					s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
-					s.collectionIdMapIndexes,s.variableIdMapLocal
-				);
-			}
-			return choices;
-		},
-		filtersProcessed:(s) => !s.isQuery ? [] : s.getQueryFiltersProcessed(
-			s.field.query.filters,s.joinsIndexMap,s.dataFieldMap,
-			s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
-			s.collectionIdMapIndexes,s.variableIdMapLocal
-		),
 		iconId:(s) => {
 			if(s.field.iconId !== null) return s.field.iconId;
 
@@ -1133,6 +1115,12 @@ let MyField = {
 		isList:     (s) => s.content === 'list',
 		isTabs:     (s) => s.content === 'tabs',
 		isVariable: (s) => s.field.content === 'variable',
+
+		// processed states
+		choiceId:        (s) => s.fieldIdMapProcessed.choiceId[s.field.id] === undefined ? null : s.fieldIdMapProcessed.choiceId[s.field.id],
+		choicesProcessed:(s) => s.fieldIdMapProcessed.choices[s.field.id]  === undefined ? []   : s.fieldIdMapProcessed.choices[s.field.id],
+		columnsProcessed:(s) => s.fieldIdMapProcessed.columns[s.field.id]  === undefined ? []   : s.fieldIdMapProcessed.columns[s.field.id],
+		filtersProcessed:(s) => s.fieldIdMapProcessed.filters[s.field.id]  === undefined ? []   : s.fieldIdMapProcessed.filters[s.field.id],
 		
 		// states
 		isAlone:   (s) => s.isAloneInForm || s.isAloneInTab,
@@ -1149,7 +1137,7 @@ let MyField = {
 		isSlider:   (s) => s.isData && s.field.display === 'slider',
 		
 		// composite
-		isActive:        (s) => s.loaded && (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
+		isActive:        (s) => (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
 		isBarcode:       (s) => s.isData && s.contentUse === 'barcode',
 		isEncrypted:     (s) => s.isData && s.attribute.encrypted,
 		isNew:           (s) => s.isData && !s.isVariable && s.joinsIndexMap[s.field.index].recordId === 0,
@@ -1166,7 +1154,6 @@ let MyField = {
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.contentData),
 		isIframe:        (s) => s.isData && s.contentUse === 'iframe',
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.contentData),
-		isQuery:         (s) => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
 		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.contentData),
 		isRichtext:      (s) => s.isData && s.contentUse === 'richtext',
 		isString:        (s) => s.isData && s.isAttributeString(s.contentData),
@@ -1177,6 +1164,7 @@ let MyField = {
 		isRelationship1N:(s) => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
 		
 		// stores
+		collectionIdMapIndexes:(s) => s.fieldOptionGet(s.favoriteId,s.field.id,'collectionIdMapIndexes',{}),
 		relationIdMap:      (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:     (s) => s.$store.getters['schema/attributeIdMap'],
 		iconIdMap:          (s) => s.$store.getters['schema/iconIdMap'],
@@ -1190,21 +1178,19 @@ let MyField = {
 		settings:           (s) => s.$store.getters.settings
 	},
 	mounted() {
-		this.reloadOptions();
-		this.loaded = true;
+		if(this.isTabs)
+			this.setTabToValid();
 	},
 	methods:{
 		// externals
 		fieldOptionGet,
 		fieldOptionSet,
 		getCaption,
-		getColumnsProcessed,
 		getFlexStyle,
 		getFormPopUpConfig,
 		getIndexAttributeId,
 		getLinkMeta,
 		getNilUuid,
-		getQueryFiltersProcessed,
 		hasAccessToAttribute,
 		isAttributeBoolean,
 		isAttributeDecimal,
@@ -1219,17 +1205,6 @@ let MyField = {
 		srcBase64,
 		variableValueGet,
 		variableValueSet,
-
-		// reloads
-		reloadOptions() {
-			if(this.isTabs)
-				this.setTabToValid();
-			
-			this.columnIdsByUser = this.fieldOptionGet(this.favoriteId,this.field.id,'columnIdsByUser',[]);
-	
-			// fill stored collection row indexes
-			this.collectionIdMapIndexes = this.fieldOptionGet(this.favoriteId,this.field.id,'collectionIdMapIndexes',{});
-		},
 		
 		// presentation
 		getTabClasses(tabIndex) {
@@ -1337,12 +1312,12 @@ let MyField = {
 			this.value = valueNew.length !== 0 ? valueNew : null;
 		},
 		setColumnIdsByUser(ids) {
-			this.columnIdsByUser = ids;
 			this.fieldOptionSet(this.favoriteId,this.field.id,'columnIdsByUser',ids);
 		},
 		setCollectionIndexes(collectionId,indexes) {
-			this.collectionIdMapIndexes[collectionId] = indexes;
-			this.fieldOptionSet(this.favoriteId,this.field.id,'collectionIdMapIndexes',this.collectionIdMapIndexes);
+			let v = JSON.parse(JSON.stringify(this.collectionIdMapIndexes));
+			v[collectionId] = indexes;
+			this.fieldOptionSet(this.favoriteId,this.field.id,'collectionIdMapIndexes',v);
 		},
 		setTab(tabIndex) {
 			if(this.settings.tabRemember)

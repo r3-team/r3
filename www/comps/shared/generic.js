@@ -141,6 +141,10 @@ export function getNilUuid() {
 	return '00000000-0000-0000-0000-000000000000';
 };
 
+export function getOrFallback(obj,name,fallbackValue) {
+	return obj?.[name] !== undefined ? JSON.parse(JSON.stringify(obj[name])) : fallbackValue;
+};
+
 export function isIdNilUuid(id) {
 	return id === getNilUuid();
 };

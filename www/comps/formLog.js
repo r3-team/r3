@@ -1,7 +1,6 @@
 import MyField                         from './field.js';
 import {aesGcmDecryptBase64WithPhrase} from './shared/crypto.js';
 import {consoleError}                  from './shared/error.js';
-import {getFieldOverwritesDefault}     from './shared/field.js';
 import {getCaption}                    from './shared/language.js';
 import {getUnixFormat}                 from './shared/time.js';
 import {
@@ -12,6 +11,10 @@ import {
 	getIndexAttributeIdByField,
 	isAttributeFiles
 } from './shared/attribute.js';
+import {
+	getFieldOverwriteDefault,
+	getFieldProcessedDefault
+} from './shared/field.js';
 export {MyFormLog as default};
 
 let MyFormLog = {
@@ -64,6 +67,8 @@ let MyFormLog = {
 							:entityIdMapEffect="entityIdMapEffect"
 							:field="indexAttributeIdMapField[ia]"
 							:fieldIdMapOverwrite="fieldIdMapOverwrite"
+							:fieldIdMapOptions="fieldIdMapOptions"
+							:fieldIdMapProcessed="fieldIdMapProcessed"
 							:formBadSave="false"
 							:formIsEmbedded="true"
 							:formLoading="loading"
@@ -144,6 +149,8 @@ let MyFormLog = {
 	data() {
 		return {
 			fieldIdMapOverwrite:{},
+			fieldIdMapOptions:{},
+			fieldIdMapProcessed:{},
 			loading:false,
 			logs:[],
 			logsShown:[]
@@ -181,7 +188,8 @@ let MyFormLog = {
 		token:         (s) => s.$store.getters['local/token']
 	},
 	mounted() {
-		this.fieldIdMapOverwrite = this.getFieldOverwritesDefault();
+		this.fieldIdMapOverwrite = this.getFieldOverwriteDefault();
+		this.fieldIdMapProcessed = this.getFieldProcessedDefault();
 		this.get();
 	},
 	methods:{
@@ -192,7 +200,8 @@ let MyFormLog = {
 		getAttributeFileVersionHref,
 		getCaption,
 		getDetailsFromIndexAttributeId,
-		getFieldOverwritesDefault,
+		getFieldOverwriteDefault,
+		getFieldProcessedDefault,
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
 		getUnixFormat,

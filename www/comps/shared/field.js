@@ -41,8 +41,12 @@ export function getFieldTitle(field) {
 	return '';
 };
 
-export function getFieldOverwritesDefault() {
+export function getFieldOverwriteDefault() {
 	return { caption:{}, chart:{}, error:{}, order:{} };
+};
+
+export function getFieldProcessedDefault() {
+	return { choices:{}, choiceId:{}, columns:{}, filters:{} };
 };
 
 // locally stored field options

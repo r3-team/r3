@@ -5,9 +5,9 @@ import MyFormLog                     from './formLog.js';
 import {hasAccessToRelation}         from './shared/access.js';
 import {getAttributeFileVersionHref} from './shared/attribute.js';
 import {getCollectionValues}         from './shared/collection.js';
+import {getColumnsProcessed}         from './shared/column.js';
 import {dialogCloseAsk}              from './shared/dialog.js';
 import {consoleError}                from './shared/error.js';
-import {getFieldOverwritesDefault}   from './shared/field.js';
 import {jsFunctionRun}               from './shared/jsFunction.js';
 import {srcBase64}                   from './shared/image.js';
 import {getCaption}                  from './shared/language.js';
@@ -29,6 +29,10 @@ import {
 	rsaDecrypt,
 	rsaEncrypt
 } from './shared/crypto.js';
+import {
+	getFieldOverwriteDefault,
+	getFieldProcessedDefault
+} from './shared/field.js';
 import {
 	checkDataOptions,
 	filterIsCorrect,
@@ -277,6 +281,8 @@ let MyForm = {
 					:fieldIdsInvalid="fieldIdsInvalid"
 					:fieldIdsTouched="fieldIdsTouched"
 					:fieldIdMapOverwrite="fieldIdMapOverwrite"
+					:fieldIdMapOptions="fieldIdMapOptions"
+					:fieldIdMapProcessed="fieldIdMapProcessed"
 					:formBadSave="badSave"
 					:formIsEmbedded="isPopUp || isWidget"
 					:formLoading="loading"
@@ -551,6 +557,13 @@ let MyForm = {
 			
 			return 'images/fileText.png';
 		},
+		fieldIdMapOptions:(s) => {
+			const base = s.isMobile ? s.loginOptionsMobile : s.loginOptions;
+			if(s.favoriteId === null)
+				return base.fieldIdMap;
+
+			return base.favoriteIdMap[s.favoriteId]?.fieldIdMap === undefined ? {} : base.favoriteIdMap[s.favoriteId].fieldIdMap;
+		},
 		
 		// presentation
 		title:(s) => {
@@ -786,6 +799,55 @@ let MyForm = {
 			}
 			return out;
 		},
+		fieldIdMapProcessed:(s) => {
+			let out = s.getFieldProcessedDefault();
+			const getChoiceFilters = (choices,choiceId) => {
+				if(choiceId !== null) {
+					for(const c of choices) {
+						if(c.id === choiceId) return c.filters;
+					}
+				}
+				return [];
+			};
+			const parseFields = (fields) => {
+				for(const f of fields) {
+					if(f.content === 'container') {
+						parseFields(f.fields);
+						continue;
+					}
+					if(f.content === 'tabs') {
+						for(let t of f.tabs) {
+							parseFields(t.fields);
+						}
+						continue;
+					}
+					
+					if(f.query !== undefined) {
+						let choices           = JSON.parse(JSON.stringify(f.query.choices));
+						const choiceId        = s.$root.getOrFallback(s.fieldIdMapOptions[f.id],'choiceId',choices.length === 0 ? null : choices[0].id);
+						const columnIdsByUser = s.$root.getOrFallback(s.fieldIdMapOptions[f.id],'columnIdsByUser',[]);
+						const collectionIdMap = s.$root.getOrFallback(s.fieldIdMapOptions[f.id],'collectionIdMapIndexes',{});
+
+						for(let i = 0, j = choices.length; i < j; i++) {
+							choices[i].filters = s.getQueryFiltersProcessed(
+								choices[i].filters,s.joinsIndexMap,s.fieldIdMapData,s.fieldIdsChanged,
+								s.fieldIdsInvalid,s.values,collectionIdMap,s.variableIdMapLocal
+							);
+						}
+						out.choices[f.id]  = choices;
+						out.choiceId[f.id] = choiceId;
+						out.columns[f.id]  = s.getColumnsProcessed(f.columns,columnIdsByUser,s.joinsIndexMap,
+							s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values);
+						out.filters[f.id]  = s.getQueryFiltersProcessed(
+							f.query.filters,s.joinsIndexMap,s.fieldIdMapData,s.fieldIdsChanged,
+							s.fieldIdsInvalid,s.values,collectionIdMap,s.variableIdMapLocal
+						).concat(getChoiceFilters(choices,choiceId));
+					}
+				}
+			};
+			parseFields(s.fields);
+			return out;
+		},
 		
 		// stores
 		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
@@ -832,9 +894,11 @@ let MyForm = {
 		getAttributeValueFromString,
 		getCaption,
 		getCollectionValues,
+		getColumnsProcessed,
 		getDataFieldMap,
 		getDetailsFromIndexAttributeId,
-		getFieldOverwritesDefault,
+		getFieldOverwriteDefault,
+		getFieldProcessedDefault,
 		getFormPopUpConfig,
 		getFormRoute,
 		getFormStateIdMap,
@@ -928,7 +992,7 @@ let MyForm = {
 			// reset form behaviour and load record
 			this.blockInputs = false;
 			this.firstLoad   = false;
-			this.fieldIdMapOverwrite = this.getFieldOverwritesDefault();
+			this.fieldIdMapOverwrite = this.getFieldOverwriteDefault();
 			this.timerClearAll();
 			this.closePopUp();
 			this.popUpFieldIdSrc = null;
