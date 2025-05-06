@@ -515,6 +515,9 @@ h3{
 .contentBox .content.grow{
 	flex:1 1 auto;
 }
+.contentBox .content.no-shrink{
+	flex:0 0 auto;
+}
 .contentBox .content.no-padding{
 	padding:0px;
 }
