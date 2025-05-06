@@ -1013,7 +1013,9 @@ let MyList = {
 				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
 					this.count = 0;
 					this.rows  = [];
+					// column filters & orders can become invalid, if a user hides a column in list options
 					this.removeInvalidFilters();
+					this.removeInvalidOrders();
 					this.reloadOutside();
 					return;
 				}
@@ -1044,9 +1046,10 @@ let MyList = {
 		this.reloadOptions();
 		this.setAutoRenewTimer(this.autoRenew);
 
-		// remove invalid filters in case module schema changed
-		// must occur after reloadOptions()
+		// remove invalid filters & orders in case module schema changed
+		// must occur after reloadOptions() as user field options are loaded there
 		this.removeInvalidFilters();
+		this.removeInvalidOrders();
 
 		// setup handlers
 		window.addEventListener('keydown',this.handleHotkeys);
@@ -1388,11 +1391,10 @@ let MyList = {
 			this.reloadInside('limit');
 		},
 		setOrder(columnBatch,directionAsc) {
-			// remove initial sorting when changing anything
-			if(this.isOrderedOrginal)
-				this.orders = [];
+			// remove initial sorting (if active) when changing anything
+			let orders = this.isOrderedOrginal ? [] : JSON.parse(JSON.stringify(this.orders));
 			
-			const orderIndexesUsed = this.getOrderIndexesFromColumnBatch(columnBatch,this.columns,this.orders);
+			const orderIndexesUsed = this.getOrderIndexesFromColumnBatch(columnBatch,this.columns,orders);
 			const notOrdered       = orderIndexesUsed.length === 0;
 			if(notOrdered) {
 				if(directionAsc === null)
@@ -1401,13 +1403,13 @@ let MyList = {
 				for(const columnIndexSort of columnBatch.columnIndexesSortBy) {
 					const col = this.columns[columnIndexSort];
 					if(col.subQuery) {
-						this.orders.push({
+						orders.push({
 							ascending:directionAsc,
 							expressionPos:columnIndexSort // equal to expression index
 						});
 					}
 					else {
-						this.orders.push({
+						orders.push({
 							ascending:directionAsc,
 							attributeId:col.attributeId,
 							index:col.index
@@ -1416,20 +1418,20 @@ let MyList = {
 				}
 			} else {
 				if(directionAsc === null) {
-					this.orders = this.orders.filter((v,i) => !orderIndexesUsed.includes(i));
+					orders = orders.filter((v,i) => !orderIndexesUsed.includes(i));
 				} else {
 					for(const orderIndex of orderIndexesUsed) {
-						if(this.orders[orderIndex].ascending !== directionAsc)
-							this.orders[orderIndex].ascending = directionAsc;
+						if(orders[orderIndex].ascending !== directionAsc)
+							orders[orderIndex].ascending = directionAsc;
 					}
 				}
 			}
-
 			// when last order is removed, revert to original
-			if(this.orders.length === 0)
-				this.orders = this.ordersOriginal;
-
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'orders',JSON.parse(JSON.stringify(this.orders)));
+			this.setOrders(orders.length === 0 ? this.ordersOriginal : orders);
+		},
+		setOrders(v) {
+			this.orders = JSON.parse(JSON.stringify(v));
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'orders',this.orders);
 			this.reloadInside('order');
 		},
 		setUserFilters(v) {
@@ -1534,6 +1536,35 @@ let MyList = {
 			};
 			f(this.filtersColumn,this.columns,this.setColumnBatchFilters);
 			f(this.filtersUser,this.columnsAll,this.setUserFilters);
+		},
+		removeInvalidOrders() {
+			if(this.isOrderedOrginal) return;
+
+			for(const o of this.orders) {
+				// order by expression position (= index of retrieved columns), is only used for sub query columns
+				if(typeof o.expressionPos !== 'undefined') {
+
+					// order is invalid, if column index does not exist or column is not a sub query
+					if(o.expressionPos > this.columns.length - 1 || !this.columns[o.expressionPos].subQuery)
+						return this.setOrders(this.ordersOriginal);
+					
+					continue;
+				}
+
+				// order by attribute ID + relation index, check if corresponding column is displayed
+				// only displayed columns are retrieved, any user-defined order must be visible to be removable by the user
+				let columnFound = false;
+				for(const c of this.columns) {
+					if(o.index === c.index && o.attributeId === c.attributeId) {
+						columnFound = true;
+						break;
+					}
+				}
+
+				// order is invalid if corresponding column is not displayed
+				if(!columnFound)
+					return this.setOrders(this.ordersOriginal);
+			}
 		},
 		
 		// bulk selection
