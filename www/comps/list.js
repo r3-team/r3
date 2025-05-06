@@ -1485,13 +1485,11 @@ let MyList = {
 			if(columnBatchIndex === -1) return;
 			
 			this.setOrder(this.columnBatches[columnBatchIndex],true);
-			this.reloadInside('order');
 		},
 		cardsToggleOrderBy() {
 			const wasAsc = this.orders[0].ascending;
 			this.orders = [];
 			this.setOrder(this.columnBatches[this.cardsOrderByColumnBatchIndex],!wasAsc);
-			this.reloadInside('order');
 		},
 		
 		// user actions, inputs
