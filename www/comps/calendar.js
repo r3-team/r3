@@ -2,7 +2,6 @@ import MyCalendarDays     from './calendarDays.js';
 import MyCalendarMonth    from './calendarMonth.js';
 import MyForm             from './form.js';
 import MyInputCollection  from './inputCollection.js';
-import {getChoiceFilters} from './shared/form.js';
 import {checkDataOptions} from './shared/generic.js';
 import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
@@ -17,10 +16,6 @@ import {
 	getCalendarCutOff0,
 	getCalendarCutOff1
 } from './shared/calendar.js';
-import {
-	fieldOptionGet,
-	fieldOptionSet
-} from './shared/field.js';
 import {
 	getQueryExpressions,
 	getQueryExpressionsDateRange,
@@ -253,15 +248,15 @@ let MyCalendar = {
 				
 				<template v-if="!isMobile && !isMonth">
 					<my-button image="search.png"
-						@trigger="zoom = zoomDefault"
+						@trigger="$emit('set-login-option','zoom',zoomDefault)"
 						:active="zoom !== zoomDefault"
 						:captionTitle="capGen.button.zoomReset"
 						:naked="true"
 					/>
 					<input class="zoomSlider" type="range" min="2" max="8"
-						v-model.number="zoom"
-						@change="fieldOptionSet(favoriteId,fieldId,'zoom',$event.target.value);"
-					>
+						@change="$emit('set-login-option','zoom',parseInt($event.target.value))"
+						:value="zoom"
+					/>
 				</template>
 				
 				<my-button image="refresh.png"
@@ -281,7 +276,7 @@ let MyCalendar = {
 					:previewCount="isMobile ? 0 : 2"
 				/>
 				
-				<select class="selector" v-if="hasChoices" v-model="choiceIdInput">
+				<select class="selector" v-if="hasChoices" :value="choiceId" @change="$emit('set-login-option','choiceId',$event.target.value)">
 					<option v-for="c in choices" :value="c.id">
 						{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 					</option>
@@ -289,7 +284,7 @@ let MyCalendar = {
 				
 				<select
 					v-if="daysShowToggle"
-					@change="daysShowSet(parseInt($event.target.value))"
+					@change="$emit('set-login-option','daysShow',parseInt($event.target.value))"
 					:value="daysShow"
 				>
 					<option :value="1">{{ capApp.option.days1 }}</option>
@@ -352,8 +347,8 @@ let MyCalendar = {
 			<my-form class="inline"
 				v-if="popUpFormInline !== null"
 				@close="$emit('close-inline')"
-				@record-deleted="reloadOutside"
-				@record-updated="reloadOutside"
+				@record-deleted="get"
+				@record-updated="get"
 				@records-open="popUpFormInline.recordIds = $event"
 				:attributeIdMapDef="popUpFormInline.attributeIdMapDef"
 				:formId="popUpFormInline.formId"
@@ -378,7 +373,6 @@ let MyCalendar = {
 		dataOptions:     { type:Number,  required:false, default:0 },
 		daysShowDef:     { type:Number,  required:true },
 		daysShowToggle:  { type:Boolean, required:true },
-		favoriteId:      { required:false, default:null },
 		fieldId:         { type:String,  required:false, default:'' },
 		filters:         { type:Array,   required:true },
 		formLoading:     { type:Boolean, required:false, default:false },
@@ -391,23 +385,21 @@ let MyCalendar = {
 		isHidden:        { type:Boolean, required:false, default:false },
 		isSingleField:   { type:Boolean, required:false, default:false },
 		loadWhileHidden: { type:Boolean, required:false, default:false },
+		loginOptions:    { type:Object,  required:true },
 		moduleId:        { type:String,  required:true },
 		popUpFormInline: { required:true },
 		query:           { type:Object,  required:true },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['close-inline','open-form','record-count-change','set-args','set-collection-indexes'],
+	emits:['close-inline','open-form','record-count-change','set-args','set-collection-indexes','set-login-option'],
 	data() {
 		return {
 			// calendar state
-			choiceId:null,
 			date:null,        // date base that the calendar moves around (by default now(), at 00:00:00)
 			dateSelect0:null, // for date range selection, start date
 			dateSelect1:null, // for date range selection, end date
-			daysShow:42,
 			ready:false,
 			showIcs:false,
-			zoom:5,
 			zoomDefault:5,
 			
 			// ICS access
@@ -419,12 +411,6 @@ let MyCalendar = {
 		};
 	},
 	computed:{
-		// inputs
-		choiceIdInput:{
-			get()  { return this.choiceId; },
-			set(v) { this.choiceIdSet(v); }
-		},
-		
 		// special date range expressions + regular column expressions
 		expressions:(s) => s.getQueryExpressionsDateRange(
 			s.attributeIdDate0,s.indexDate0,
@@ -433,19 +419,22 @@ let MyCalendar = {
 		).concat(s.getQueryExpressions(s.columns)),
 		
 		// simple
-		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
-		hasChoices:   (s) => s.choices.length > 1,
-		hasCreate:    (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
-		hasUpdate:    (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
-		isDays:       (s) => s.daysShow === 1 || s.daysShow === 3,
-		isMonth:      (s) => s.daysShow === 42,
-		isWeek:       (s) => s.daysShow === 5 || s.daysShow === 7,
-		icsUrl:       (s) => `${location.protocol}//${location.host}/ics/download/cal.ics`
-			+ `?field_id=${s.fieldId}&login_id=${s.loginId}&token_fixed=${s.icsToken}`,
+		hasChoices:(s) => s.choices.length > 1,
+		hasCreate: (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate: (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
+		isDays:    (s) => s.daysShow === 1 || s.daysShow === 3,
+		isMonth:   (s) => s.daysShow === 42,
+		isWeek:    (s) => s.daysShow === 5 || s.daysShow === 7,
+		icsUrl:    (s) => `${location.protocol}//${location.host}/ics/download/cal.ics?field_id=${s.fieldId}&login_id=${s.loginId}&token_fixed=${s.icsToken}`,
 		
 		// start/end date of calendar
 		date0:(s) => s.getCalendarCutOff0(s.daysShow,new Date(s.date.valueOf())),
 		date1:(s) => s.getCalendarCutOff1(s.daysShow,new Date(s.date.valueOf()),s.date0),
+
+		// login options
+		choiceId:(s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		daysShow:(s) => !s.daysShowToggle ? s.daysShowDef : s.$root.getOrFallback(s.loginOptions,'daysShow',s.daysShowDef),
+		zoom:    (s) => s.$root.getOrFallback(s.loginOptions,'zoom',s.zoomDefault),
 		
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
@@ -462,48 +451,42 @@ let MyCalendar = {
 		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
+		// initialize dates (most occur before initial paramsUpdated())
+		this.date = new Date();
+		this.date.setHours(0,0,0);
+
 		// setup watchers
+		this.$watch('formLoading',v => { if(!v) this.get(); });
+		this.$watch('isHidden',v => { if(!v) this.get(); });
 		this.$watch('columns',(valOld,valNew) => {
 			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
 				this.rows = [];
-				this.reloadOutside();
+				this.get();
 			}
 		});
-		this.$watch('favoriteId',(val) => {
-			this.reloadOptions();
-		});
-		this.$watch('formLoading',(val) => {
-			if(!val) this.reloadOutside();
-		});
-		this.$watch('isHidden',(val) => {
-			if(!val) this.reloadOutside();
-		});
-		this.$watch(() => [this.choices,this.filters],(newVals, oldVals) => {
+		this.$watch(() => [this.choices,this.daysShow,this.filters],(newVals, oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
 				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
-					return this.reloadOutside();
+					return this.get();
 			}
 		});
 		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
-				if(this.routeChangeFieldReload(newVals,oldVals)) {
-					this.paramsUpdated();
-					this.reloadOutside();
-				}
+				if(this.routeChangeFieldReload(newVals,oldVals))
+					this.paramsUpdated(true);
 			});
+
+			// load initial route parameters
+			this.paramsUpdated(false);
 		}
-		this.reloadOptions();
 		this.ready = true;
 	},
 	methods:{
 		// externals
 		checkDataOptions,
-		fieldOptionGet,
-		fieldOptionSet,
 		getCalendarCutOff0,
 		getCalendarCutOff1,
 		getCaption,
-		getChoiceFilters,
 		getDateAtUtcZero,
 		getDateFromWeek,
 		getQueryExpressions,
@@ -517,18 +500,12 @@ let MyCalendar = {
 		srcBase64,
 		
 		// actions
-		choiceIdSet(choiceId) {
-			if(choiceId === this.choiceId) return;
-			
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',choiceId);
-			this.choiceId = choiceId;
-			this.reloadInside();
-		},
 		dateSet(d) {
 			if(d !== this.date) {
 				d.setHours(0,0,0);
 				this.date = d;
-				this.reloadInside();
+				this.paramsUpdate(true);
+				this.get();
 			}
 		},
 		dateSelected(unix0,unix1,middleClick) {
@@ -537,11 +514,6 @@ let MyCalendar = {
 				`${this.attributeIdDate1}_${unix1}`
 			];
 			this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],middleClick);
-		},
-		daysShowSet(v) {
-			this.daysShow = v;
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'daysShow',v);
-			this.reloadInside();
 		},
 		goToToday() {
 			let now = new Date();
@@ -567,67 +539,26 @@ let MyCalendar = {
 			navigator.clipboard.writeText(this.icsUrl);
 		},
 		
-		// reloads
-		reloadOptions() {
-			this.date = new Date();
-			this.date.setHours(0,0,0);
-			this.daysShow = this.daysShowDef;
-			
-			// apply field options (before paramsUpdated to apply calendar view)
-			if(this.daysShowToggle)
-				this.daysShow = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'daysShow',this.daysShowDef));
-			
-			
-			this.choiceId = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
-			this.zoom     = parseInt(this.fieldOptionGet(this.favoriteId,this.fieldId,'zoom',this.zoomDefault));
-			
-			if(this.usesPageHistory) {
-				// set initial states via route parameters
-				this.paramsUpdated();     // load existing parameters from route query
-				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-			}
-		},
-		reloadOutside() {
-			this.get();
-		},
-		reloadInside() {
-			// reload full page calendar by updating route parameters
-			// enables browser history for fullpage navigation
-			if(this.usesPageHistory)
-				return this.paramsUpdate(true);
-			
-			this.get();
-		},
-		
 		// page routing
 		paramsUpdate(pushHistory) {
-			let args = [
-				`daysShow=${this.daysShow}`,
-				`year=${this.date.getFullYear()}`
-			];
+			if(!this.usesPageHistory) return;
+
+			let args = [ `daysShow=${this.daysShow}`, `year=${this.date.getFullYear()}` ];
 			
 			if(this.isMonth || this.isDays) args.push(`month=${this.date.getMonth()}`);
 			if(this.isWeek)                 args.push(`week=${this.getWeek(this.date)}`);
 			if(this.isDays)                 args.push(`day=${this.date.getDate()}`);
 			
-			if(this.choiceId !== null)
-				args.push(`choice=${this.choiceId}`);
-			
 			this.$emit('set-args',args,pushHistory);
 		},
-		paramsUpdated() {
+		paramsUpdated(reload) {
 			let params = {
-				choice:  { parse:'string', value:this.choiceId },
-				daysShow:{ parse:'int',    value:this.daysShow },
-				day:     { parse:'int',    value:this.date.getDate() },
-				month:   { parse:'int',    value:this.date.getMonth() },
-				week:    { parse:'int',    value:this.getWeek(this.date) },
-				year:    { parse:'int',    value:this.date.getFullYear() }
+				day:  { parse:'int', value:this.date.getDate() },
+				month:{ parse:'int', value:this.date.getMonth() },
+				week: { parse:'int', value:this.getWeek(this.date) },
+				year: { parse:'int', value:this.date.getFullYear() }
 			};
 			this.routeParseParams(params);
-			
-			if(this.choiceId !== params.choice.value)   this.choiceId = params.choice.value;
-			if(this.daysShow !== params.daysShow.value) this.daysShow = params.daysShow.value;
 			
 			let d = new Date(this.date.getTime());
 			d.setFullYear(params.year.value);
@@ -635,8 +566,11 @@ let MyCalendar = {
 			if(this.isDays || this.isMonth) d.setMonth(params.month.value);
 			if(this.isDays)                 d.setDate(params.day.value);
 			if(this.isWeek)                 d = this.getDateFromWeek(params.week.value,d.getFullYear());
-			
+
 			this.date = d;
+			
+			if(reload)
+				this.get();
 		},
 		
 		// backend calls
@@ -678,7 +612,7 @@ let MyCalendar = {
 				filters:this.filters.concat(this.getQueryFiltersDateRange(
 					this.attributeIdDate0,this.indexDate0,dateStart,
 					this.attributeIdDate1,this.indexDate1,dateEnd
-				)).concat(this.choiceFilters),
+				)),
 				orders:orders
 			},true).then(
 				res => {

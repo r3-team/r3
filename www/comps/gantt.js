@@ -1,9 +1,8 @@
-import MyInputCollection  from './inputCollection.js';
-import MyForm             from './form.js';
-import MyValueRich        from './valueRich.js';
-import srcBase64Icon      from './shared/image.js';
-import {getCaption}       from './shared/language.js';
-import {fieldOptionSet}   from './shared/field.js';
+import MyInputCollection from './inputCollection.js';
+import MyForm            from './form.js';
+import MyValueRich       from './valueRich.js';
+import srcBase64Icon     from './shared/image.js';
+import {getCaption}      from './shared/language.js';
 import {
 	checkDataOptions,
 	colorAdjustBg,
@@ -196,7 +195,7 @@ let MyGantt = {
 					:captionTitle="capGen.button.newHint"
 				/>
 				<my-button
-					@trigger="setFieldOption('ganttShowGroupLabels',!showGroupLabels)"
+					@trigger="$emit('set-login-option','ganttShowGroupLabels',!showGroupLabels)"
 					:caption="!isMobile ? capApp.button.ganttShowLabels : ''"
 					:captionTitle="capApp.button.ganttShowLabelsHint"
 					:image="showGroupLabels ? 'visible1.png' : 'visible0.png'"
@@ -226,7 +225,7 @@ let MyGantt = {
 			<div class="area nowrap default-inputs">
 				<my-button
 					v-if="!isMobile && stepTypeToggle"
-					@trigger="setFieldOption('ganttStepType', stepType === 'days' ? 'hours' : 'days')"
+					@trigger="$emit('set-login-option','ganttStepType', stepType === 'days' ? 'hours' : 'days')"
 					:captionTitle="capApp.button.ganttToggleHint"
 					:image="isDays ? 'clock.png' : 'clock24.png'"
 					:naked="true"
@@ -234,14 +233,15 @@ let MyGantt = {
 				
 				<my-button image="search.png"
 					v-if="!isMobile"
-					@trigger="setFieldOption('ganttStepZoom',stepZoomDefault)"
+					@trigger="$emit('set-login-option','ganttStepZoom',stepZoomDefault)"
+					:active="stepZoom !== stepZoomDefault"
 					:captionTitle="capGen.button.zoomReset"
 					:naked="true"
 				/>
 				
 				<input class="zoom-factor clickable" type="range" min="3" max="12"
 					v-if="!isMobile"
-					@change="setFieldOption('ganttStepZoom',parseInt($event.target.value))"
+					@change="$emit('set-login-option','ganttStepZoom',parseInt($event.target.value))"
 					:value="stepZoom"
 				/>
 				
@@ -259,7 +259,7 @@ let MyGantt = {
 				<select class="selector"
 					v-if="hasChoices"
 					:value="choiceId"
-					@change="setFieldOption('choiceId',$event.target.value)"
+					@change="$emit('set-login-option','choiceId',$event.target.value)"
 				>
 					<option v-for="c in choices" :value="c.id">
 						{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
@@ -381,7 +381,6 @@ let MyGantt = {
 		collections:     { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		dataOptions:     { type:Number,  required:false, default:0 },
-		favoriteId:      { required:false, default:null },
 		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true }, // processed query filters
 		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
@@ -400,7 +399,7 @@ let MyGantt = {
 		stepTypeToggle:  { type:Boolean, required:true },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['close-inline','open-form','set-args','set-collection-indexes'],
+	emits:['close-inline','open-form','set-args','set-collection-indexes','set-login-option'],
 	data() {
 		return {
 			dateStart:null,
@@ -568,7 +567,6 @@ let MyGantt = {
 	methods:{
 		// external
 		checkDataOptions,
-		fieldOptionSet,
 		fillRelationRecordIds,
 		getCaption,
 		getDateFormat,
@@ -722,9 +720,6 @@ let MyGantt = {
 			
 			if(this.isDays) // add month as: January, ...
 				return this.capApp['month'+value];
-		},
-		setFieldOption(name,v) {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,name,v);
 		},
 		setSteps(forceReload) {
 			// get count of steps that fit within Gantt content

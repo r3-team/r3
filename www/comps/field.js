@@ -14,6 +14,7 @@ import MyInputSelect              from './inputSelect.js';
 import MyInputUuid                from './inputUuid.js';
 import MyList                     from './list.js';
 import {hasAccessToAttribute}     from './shared/access.js';
+import {fieldOptionSet}           from './shared/field.js';
 import {srcBase64}                from './shared/image.js';
 import {getCaption}               from './shared/language.js';
 import {
@@ -32,10 +33,6 @@ import {
 	getNilUuid,
 	openLink
 } from './shared/generic.js';
-import {
-	fieldOptionGet,
-	fieldOptionSet
-} from './shared/field.js';
 import {
 	getFlexStyle,
 	getFormPopUpConfig,
@@ -102,6 +99,7 @@ let MyField = {
 					@record-count-change="$emit('set-counter',field.id,$event)"
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-collection-indexes="setCollectionIndexes"
+					@set-login-option="setLoginOption"
 					:attributeIdColor="field.attributeIdColor"
 					:attributeIdDate0="field.attributeIdDate0"
 					:attributeIdDate1="field.attributeIdDate1"
@@ -112,7 +110,6 @@ let MyField = {
 					:dataOptions="dataOptions"
 					:daysShowDef="field.days"
 					:daysShowToggle="field.daysToggle"
-					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:filters="filtersProcessed"
 					:formLoading="formLoading"
@@ -125,6 +122,7 @@ let MyField = {
 					:isHidden="isHidden"
 					:isSingleField="isAlone"
 					:loadWhileHidden="parentIsCounting"
+					:loginOptions="loginOptions"
 					:moduleId="moduleId"
 					:popUpFormInline="popUpFormInline"
 					:query="field.query"
@@ -138,6 +136,7 @@ let MyField = {
 					@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-collection-indexes="setCollectionIndexes"
+					@set-login-option="setLoginOption"
 					:attributeIdColor="field.attributeIdColor"
 					:attributeIdDate0="field.attributeIdDate0"
 					:attributeIdDate1="field.attributeIdDate1"
@@ -146,7 +145,6 @@ let MyField = {
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
 					:dataOptions="dataOptions"
-					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:days0="field.dateRange0 / 86400"
 					:days1="field.dateRange1 / 86400"
@@ -228,6 +226,7 @@ let MyField = {
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-column-ids-by-user="setColumnIdsByUser"
 					@set-collection-indexes="setCollectionIndexes"
+					@set-login-option="setLoginOption"
 					:autoRenewDefault="field.autoRenew"
 					:caption="isAlone ? caption : ''"
 					:choices="choicesProcessed"
@@ -238,7 +237,6 @@ let MyField = {
 					:csvExport="field.csvExport"
 					:csvImport="field.csvImport"
 					:dataOptions="dataOptions"
-					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:filterQuick="field.filterQuick"
 					:filters="filtersProcessed"
@@ -546,6 +544,7 @@ let MyField = {
 					@records-selected="relationshipRecordsSelected"
 					@record-removed="relationshipRecordRemoved"
 					@records-selected-init="$emit('set-value',fieldAttributeId,$event,true,true,field.id)"
+					@set-login-option="setLoginOption"
 					:choices="choicesProcessed"
 					:columns="columnsProcessed"
 					:dataOptions="dataOptions"
@@ -1162,9 +1161,11 @@ let MyField = {
 		isUuid:          (s) => s.isData && s.isAttributeUuid(s.contentData),
 		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.contentData),
 		isRelationship1N:(s) => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
+
+		// login options
+		collectionIdMapIndexes:(s) => s.$root.getOrFallback(s.loginOptions,'collectionIdMapIndexes',{}),
 		
 		// stores
-		collectionIdMapIndexes:(s) => s.fieldOptionGet(s.favoriteId,s.field.id,'collectionIdMapIndexes',{}),
 		relationIdMap:      (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:     (s) => s.$store.getters['schema/attributeIdMap'],
 		iconIdMap:          (s) => s.$store.getters['schema/iconIdMap'],
@@ -1183,7 +1184,6 @@ let MyField = {
 	},
 	methods:{
 		// externals
-		fieldOptionGet,
 		fieldOptionSet,
 		getCaption,
 		getFlexStyle,
@@ -1319,6 +1319,9 @@ let MyField = {
 			v[collectionId] = indexes;
 			this.fieldOptionSet(this.favoriteId,this.field.id,'collectionIdMapIndexes',v);
 		},
+		setLoginOption(name,value) {
+			this.fieldOptionSet(this.favoriteId,this.field.id,name,value);
+		},
 		setTab(tabIndex) {
 			if(this.settings.tabRemember)
 				this.fieldOptionSet(this.favoriteId,this.field.id,'tabIndex',tabIndex);
@@ -1337,7 +1340,7 @@ let MyField = {
 		setTabToValid() {
 			// set tab to valid one, either last remembered or first valid
 			if(this.settings.tabRemember) {
-				const tabIndex = this.fieldOptionGet(this.favoriteId,this.field.id,'tabIndex',0);
+				const tabIndex = this.$root.getOrFallback(this.loginOptions,'tabIndex',0);
 				if(this.field.tabs.length > tabIndex && !this.tabIndexesHidden.includes(tabIndex))
 					return this.tabIndexShow = tabIndex;
 			}

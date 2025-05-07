@@ -20,10 +20,6 @@ import {
 	getOrderIndexesFromColumnBatch
 } from './shared/column.js';
 import {
-	fieldOptionGet,
-	fieldOptionSet
-} from './shared/field.js';
-import {
 	checkDataOptions,
 	colorAdjustBg,
 	colorMakeContrastFont,
@@ -323,7 +319,7 @@ let MyList = {
 				<div class="row gap nowrap">
 					<my-input-offset
 						v-if="hasPaging"
-						@input="setOffsetParamAndReload($event)"
+						@input="setOffsetParamAndReload($event,true)"
 						:arrows="showOffsetArrows"
 						:caption="showResultsCount && count > 1"
 						:limit="limit"
@@ -463,7 +459,7 @@ let MyList = {
 										</select>
 										
 										<my-input-offset
-											@input="setOffsetParamAndReload($event)"
+											@input="setOffsetParamAndReload($event,true)"
 											:caption="false"
 											:limit="limit"
 											:offset="offset"
@@ -715,7 +711,6 @@ let MyList = {
 		columns:         { type:Array,   required:true },                    // list columns, processed (applied filter values, only columns shown by user choice)
 		columnsAll:      { type:Array,   required:false, default:() => [] }, // list columns, all
 		dataOptions:     { type:Number,  required:false, default:0 },        // data permissions following form states
-		favoriteId:      { required:false, default:null },
 		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true },                    // processed query filters
 		layoutDefault:   { type:String,  required:false, default:'table' },  // default list layout: table, cards
@@ -750,10 +745,9 @@ let MyList = {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'clipboard','close-inline','dropdown-show','open-form',
-		'open-form-bulk','record-count-change','record-removed',
-		'records-selected','records-selected-init','set-args',
-		'set-column-ids-by-user','set-collection-indexes'
+		'clipboard','close-inline','dropdown-show','open-form','open-form-bulk',
+		'record-count-change','record-removed','records-selected','records-selected-init',
+		'set-args','set-column-ids-by-user','set-collection-indexes','set-login-option'
 	],
 	data() {
 		return {
@@ -1062,8 +1056,6 @@ let MyList = {
 		colorMakeContrastFont,
 		consoleError,
 		deepIsEqual,
-		fieldOptionGet,
-		fieldOptionSet,
 		fillRelationRecordIds,
 		getCaption,
 		getColumnBatches,
@@ -1267,7 +1259,7 @@ let MyList = {
 			if(aggregator !== null) v[columnId] = aggregator;
 			else                    delete(v[columnId]);
 			
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnIdMapAggr',v);
+			this.$emit('set-login-option','columnIdMapAggr',v);
 			this.reloadAggregations(false);
 		},
 		setAutoRenewTimer(v) {
@@ -1283,25 +1275,25 @@ let MyList = {
 			}
 
 			if(v !== this.autoRenew)
-				this.fieldOptionSet(this.favoriteId,this.fieldId,'autoRenew',v);
+				this.$emit('set-login-option','autoRenew',v);
 		},
 		setColumnBatchSort(v) {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnBatchSort',v);
+			this.$emit('set-login-option','columnBatchSort',v);
 			this.reloadAggregations(true);
 		},
 		setColumnFilters(v) {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersColumn',v);
+			this.$emit('set-login-option','filtersColumn',v);
 		},
 		setLoginOption(name,v) {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,name,v);
+			this.$emit('set-login-option',name,v);
 		},
 		setOffsetAndReload(v) {
 			this.offset = v;
 			this.get();
 		},
-		setOffsetParamAndReload(v) {
+		setOffsetParamAndReload(v,pushHistory) {
 			this.setOffsetAndReload(v);
-			this.paramsUpdate(true);
+			this.paramsUpdate(pushHistory);
 		},
 		setOrder(columnBatch,directionAsc,clearAllBefore) {
 			// remove initial sorting (if active) when changing anything
@@ -1346,13 +1338,13 @@ let MyList = {
 			this.setOrders(orders.length === 0 ? this.ordersOriginal : orders);
 		},
 		setOrders(v) {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'orders',v);
+			this.$emit('set-login-option','orders',v);
 		},
 		setUserFilters(v) {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersUser',v);
+			this.$emit('set-login-option','filtersUser',v);
 		},
 		toggleHeader() {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'header',!this.showHeader);
+			this.$emit('set-login-option','header',!this.showHeader);
 			this.$store.commit('appResized');
 		},
 		updatedTextInput(event) {
@@ -1546,7 +1538,7 @@ let MyList = {
 			
 			// fix invalid offset (can occur when limit is changed)
 			if(this.offset !== 0 && this.offset % this.limit !== 0)
-				return this.setOffsetParamAndReload(this.offset -= this.offset % this.limit);
+				return this.setOffsetParamAndReload(this.offset -= this.offset % this.limit,false);
 			
 			ws.send('data','get',{
 				relationId:this.query.relationId,
