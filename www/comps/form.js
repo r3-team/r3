@@ -835,7 +835,6 @@ let MyForm = {
 							);
 						}
 						out.choices[f.id]  = choices;
-						out.choiceId[f.id] = choiceId;
 						out.columns[f.id]  = s.getColumnsProcessed(f.columns,columnIdsByUser,s.joinsIndexMap,
 							s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values);
 						out.filters[f.id]  = s.getQueryFiltersProcessed(

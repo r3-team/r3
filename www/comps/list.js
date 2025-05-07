@@ -10,6 +10,7 @@ import MyListFilters       from './listFilters.js';
 import MyListOptions       from './listOptions.js';
 import MyValueRich         from './valueRich.js';
 import {consoleError}      from './shared/error.js';
+import {getRowsDecrypted}  from './shared/form.js';
 import {getCaption}        from './shared/language.js';
 import {layoutSettleSpace} from './shared/layout.js';
 import {isAttributeFiles}  from './shared/attribute.js';
@@ -22,10 +23,6 @@ import {
 	fieldOptionGet,
 	fieldOptionSet
 } from './shared/field.js';
-import {
-	getChoiceFilters,
-	getRowsDecrypted
-} from './shared/form.js';
 import {
 	checkDataOptions,
 	colorAdjustBg,
@@ -106,11 +103,11 @@ let MyList = {
 						v-if="showOptions"
 						@reset-columns="resetColumns"
 						@set-auto-renew="setAutoRenewTimer"
-						@set-cards-captions="setCardsCaptions"
+						@set-cards-captions="setLoginOption('cardsCaptions',$event)"
 						@set-column-batch-sort="setColumnBatchSort"
 						@set-column-ids-by-user="$emit('set-column-ids-by-user',$event)"
-						@set-layout="setLayout"
-						@set-page-limit="setLimit"
+						@set-layout="setLoginOption('layout',$event)"
+						@set-page-limit="setLoginOption('limit',$event)"
 						:autoRenew="autoRenew"
 						:cardsCaptions="cardsCaptions"
 						:columns="columns"
@@ -326,7 +323,7 @@ let MyList = {
 				<div class="row gap nowrap">
 					<my-input-offset
 						v-if="hasPaging"
-						@input="offset = $event;reloadInside()"
+						@input="setOffsetParamAndReload($event)"
 						:arrows="showOffsetArrows"
 						:caption="showResultsCount && count > 1"
 						:limit="limit"
@@ -338,14 +335,14 @@ let MyList = {
 				<div class="row gap nowrap default-inputs">
 					<my-button
 						v-if="showRefresh"
-						@trigger="reloadInside('manual')"
+						@trigger="get"
 						:captionTitle="capGen.button.refresh"
 						:image="autoRenew === -1 ? 'refresh.png' : 'autoRenew.png'"
 						:naked="true"
 					/>
 					
 					<my-button image="filterCog.png"
-						@trigger="toggleUserFilters"
+						@trigger="showFilters = !showFilters"
 						@trigger-right="setUserFilters([])"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
@@ -374,8 +371,8 @@ let MyList = {
 					
 					<select class="dynamic"
 						v-if="hasChoices"
-						@change="reloadInside('choice')"
-						v-model="choiceId"
+						@change="setLoginOption('choiceId',$event.target.value)"
+						:value="choiceId"
 					>
 						<option v-for="c in query.choices" :value="c.id">
 							{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
@@ -418,10 +415,10 @@ let MyList = {
 									<my-list-column-batch
 										@close="columnBatchIndexOption = -1"
 										@del-aggregator="setAggregators"
-										@del-order="setOrder(b,null)"
+										@del-order="setOrder(b,null,false)"
 										@set-aggregator="setAggregators"
-										@set-filters="setColumnBatchFilters"
-										@set-order="setOrder(b,$event)"
+										@set-filters="setLoginOption('filtersColumn',$event)"
+										@set-order="setOrder(b,$event,false)"
 										@toggle="clickColumn(i)"
 										:columnBatch="b"
 										:columnIdMapAggr="columnIdMapAggr"
@@ -457,8 +454,8 @@ let MyList = {
 									<div class="sub-actions default-inputs">
 										<select
 											v-if="hasChoices"
-											@change="reloadInside('choice')"
-											v-model="choiceId"
+											@change="setLoginOption('choiceId',$event.target.value)"
+											:value="choiceId"
 										>
 											<option v-for="c in query.choices" :value="c.id">
 												{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
@@ -466,7 +463,7 @@ let MyList = {
 										</select>
 										
 										<my-input-offset
-											@input="offset = $event;reloadInside()"
+											@input="setOffsetParamAndReload($event)"
 											:caption="false"
 											:limit="limit"
 											:offset="offset"
@@ -723,6 +720,7 @@ let MyList = {
 		filters:         { type:Array,   required:true },                    // processed query filters
 		layoutDefault:   { type:String,  required:false, default:'table' },  // default list layout: table, cards
 		limitDefault:    { type:Number,  required:false, default:10 },       // default list limit
+		loginOptions:    { type:Object,  required:true },
 		moduleId:        { type:String,  required:true },
 		popUpFormInline: { required:false, default:null },                   // form to show inside list
 		query:           { type:Object,  required:true },                    // list query
@@ -759,46 +757,24 @@ let MyList = {
 	],
 	data() {
 		return {
-			// list state
-			autoRenew:-1,               // auto renew list data every X seconds, -1 if disabled
+			// state
 			autoRenewTimer:null,        // interval timer for auto renew
-			choiceId:null,              // currently active choice
+			cardsOrderByColumnBatchIndex:-1,
 			columnBatchIndexOption:-1,  // show options for column batch by index
-			columnBatchSort:[[],[]],
+			filtersQuick:'',            // current user quick text filter
 			focused:false,
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
-			layout:'table',             // current list layout (table, cards)
 			rowsFetching:false,         // row values are being fetched
 			selectedRows:[],            // bulk selected rows by row index
 			showCsv:false,              // show UI for CSV import/export
 			showFilters:false,          // show UI for user filters
-			showHeader:true,            // show UI for list header
 			showOptions:false,          // show UI for list options
 			
-			// list constants
+			// constants
 			refTabindex:'input_row_', // prefix for vue references to tabindex elements
 			
-			// list card layout state
-			cardsOrderByColumnBatchIndex:-1,
-			cardsCaptions:true,
-			
-			// list data
-			columnIdMapAggr:{}, // aggregators by column ID
-			count:0,            // total result set count
-			limit:0,            // current result limit
-			offset:0,           // current result offset
-			orders:[],          // current column orderings
-			rows:[],            // current result set
-			filtersColumn:[],   // current user column filters
-			filtersQuick:'',    // current user quick text filter
-			filtersUser:[],     // current user filters
-			
-			// list input data
-			rowsInput:[], // rows that reflect current input (following active record IDs)
-			              // as opposed to list rows which show lookup data (regular list or input dropdown)
-			
-			// list header
+			// header
 			headerCheckTimer:null,
 			headerElements:[],               // elements that are shown, based on available space
 			headerElementsAvailableInOrder:[ // elements that can be shown, in order of priority
@@ -812,7 +788,14 @@ let MyList = {
 				'headerCollapse',            // optional
 				'actionsReadonly',           // optional
 				'resultsCount'               // not important
-			]
+			],
+			
+			// data
+			count:0,     // total result set count
+			offset:0,    // result offset
+			rows:[],     // result set
+			rowsInput:[] // rows that reflect current input (following active record IDs)
+			             // as opposed to list rows which show lookup data (regular list or input dropdown)
 		};
 	},
 	computed:{
@@ -823,8 +806,7 @@ let MyList = {
 				.concat(s.filtersParsedQuick)
 				.concat(s.getFiltersEncapsulated(
 					JSON.parse(JSON.stringify(s.filtersUser))
-				))
-				.concat(s.choiceFilters);
+				));
 			
 			if(s.anyInputRows)
 				filters.push(s.getQueryAttributesPkFilter(
@@ -926,7 +908,6 @@ let MyList = {
 		// simple
 		anyInputRows:        (s) => s.inputRecordIds.length !== 0,
 		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
-		choiceFilters:       (s) => s.getChoiceFilters(s.choices,s.choiceId),
 		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,s.columnBatchSort[0],true),
 		columnBatchesAll:    (s) => s.getColumnBatches(s.moduleId,s.columnsAll,[],s.orders,[],true),
 		expressions:         (s) => s.getQueryExpressions(s.columns),
@@ -960,6 +941,19 @@ let MyList = {
 			if(s.headerElements.includes('collectionValuesFew')) return 2;
 			return 0;
 		},
+
+		// login options
+		autoRenew:      (s) => s.$root.getOrFallback(s.loginOptions,'autoRenew',(s.autoRenewDefault === null ? -1 : s.autoRenewDefault)), // refresh list data every X seconds, -1 if disabled
+		cardsCaptions:  (s) => s.$root.getOrFallback(s.loginOptions,'cardsCaptions',true),
+		choiceId:       (s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		columnBatchSort:(s) => s.$root.getOrFallback(s.loginOptions,'columnBatchSort',[[],[]]),
+		columnIdMapAggr:(s) => s.$root.getOrFallback(s.loginOptions,'columnIdMapAggr',{}),      // aggregators by column ID
+		filtersColumn:  (s) => s.$root.getOrFallback(s.loginOptions,'filtersColumn',[]),        // column filters
+		filtersUser:    (s) => s.$root.getOrFallback(s.loginOptions,'filtersUser',[]),          // user filters
+		showHeader:     (s) => s.$root.getOrFallback(s.loginOptions,'header',true),             // show UI for list header
+		limit:          (s) => s.$root.getOrFallback(s.loginOptions,'limit',s.limitDefault),    // result limit
+		layout:         (s) => s.$root.getOrFallback(s.loginOptions,'layout',s.layoutDefault),  // list layout (table, cards)
+		orders:         (s) => s.$root.getOrFallback(s.loginOptions,'orders',s.ordersOriginal), // order by definitions for query
 		
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
@@ -981,43 +975,48 @@ let MyList = {
 		
 		// setup watchers
 		this.$watch('appResized',this.resized);
-		this.$watch('favoriteId',this.reloadOptions);
-		this.$watch('dropdownShow',(v) => {
+		this.$watch('limit',this.get);
+		this.$watch('dropdownShow',v => {
 			if(!v) return;
-
-			this.reloadInside('dropdown');
+			this.setOffsetAndReload(0);
 			
 			const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
 			if(inputEl !== null)
 				inputEl.focus();
 		});
-		this.$watch('formLoading',(val) => {
-			if(val) return;
+		this.$watch('formLoading',v => {
+			if(v) return;
 			this.inputAutoSelectDone = false;
 			this.reloadOutside();
 		});
-		this.$watch('isHidden',(val) => {
-			if(!val) {
-				this.reloadOutside();
-				this.resized();
-			}
+		this.$watch('isHidden',v => {
+			if(v) return;
+			this.reloadOutside();
+			this.resized();
 		});
-		this.$watch('loadWhileHidden',(val) => {
-			if(val) {
-				this.reloadOutside();
-				this.resized();
-			}
+		this.$watch('loadWhileHidden',v => {
+			if(!v) return;
+			this.reloadOutside();
+			this.resized();
 		});
-		this.$watch(() => [this.choices,this.columns,this.columnsAll,this.filters],(newVals,oldVals) => {
+		this.$watch(() => [this.filters,this.filtersColumn,this.filtersUser],(newVals,oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
 				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
+					this.offset = 0;
+					this.removeInvalidFilters();
+					return this.reloadOutside();
+				}
+			}
+		});
+		this.$watch(() => [this.columns,this.columnsAll,this.orders],(newVals,oldVals) => {
+			for(let i = 0, j = newVals.length; i < j; i++) {
+				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
+					// if columns change, kill row data, otherwise content does not match columns
 					this.count = 0;
 					this.rows  = [];
-					// column filters & orders can become invalid, if a user hides a column in list options
-					this.removeInvalidFilters();
+					this.removeInvalidFilters(); // if columns change, column filters can become invalid
 					this.removeInvalidOrders();
-					this.reloadOutside();
-					return;
+					return this.reloadOutside();
 				}
 			}
 		});
@@ -1035,19 +1034,15 @@ let MyList = {
 		}
 		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
-				if(this.routeChangeFieldReload(newVals,oldVals)) {
-					this.paramsUpdated();
-					this.reloadOutside();
-				}
+				if(this.routeChangeFieldReload(newVals,oldVals))
+					this.paramsUpdated(true);
 			});
+
+			// load initial route parameters
+			this.paramsUpdated(false);
 		}
 
-		// initialize list options
-		this.reloadOptions();
 		this.setAutoRenewTimer(this.autoRenew);
-
-		// remove invalid filters & orders in case module schema changed
-		// must occur after reloadOptions() as user field options are loaded there
 		this.removeInvalidFilters();
 		this.removeInvalidOrders();
 
@@ -1071,7 +1066,6 @@ let MyList = {
 		fieldOptionSet,
 		fillRelationRecordIds,
 		getCaption,
-		getChoiceFilters,
 		getColumnBatches,
 		getColumnTitle,
 		getFiltersEncapsulated,
@@ -1135,101 +1129,26 @@ let MyList = {
 			if(nextTick) this.$nextTick(this.$refs.aggregations.get);
 			else         this.$refs.aggregations.get();
 		},
-		reloadOptions() {
-			this.autoRenew       = this.fieldOptionGet(this.favoriteId,this.fieldId,'autoRenew',(this.autoRenewDefault === null ? -1 : this.autoRenewDefault));
-			this.cardsCaptions   = this.fieldOptionGet(this.favoriteId,this.fieldId,'cardsCaptions',true);
-			this.choiceId        = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
-			this.columnBatchSort = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnBatchSort',[[],[]]);
-			this.columnIdMapAggr = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnIdMapAggr',{});
-			this.filtersColumn   = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersColumn',[]);
-			this.filtersUser     = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersUser',[]);
-			this.showHeader      = this.fieldOptionGet(this.favoriteId,this.fieldId,'header',true);
-			this.limit           = this.fieldOptionGet(this.favoriteId,this.fieldId,'limit',this.limitDefault);
-			this.layout          = this.fieldOptionGet(this.favoriteId,this.fieldId,'layout',this.layoutDefault);
-			this.orders          = this.fieldOptionGet(this.favoriteId,this.fieldId,'orders',this.ordersOriginal);
-
-			if(this.usesPageHistory) {
-				// set initial states via route parameters
-				this.paramsUpdated();     // load existing parameters from route query
-				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-			}
-		},
-		reloadInside(entity) {
-			// inside state has changed, reload list (not relevant for list input)
-			switch(entity) {
-				case 'dropdown':      // fallthrough
-				case 'filtersQuick':  // fallthrough
-				case 'filtersColumn': // fallthrough
-				case 'filtersUser': this.offset = 0; break;
-				case 'choice':
-					this.offset = 0;
-					this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',this.choiceId);
-				break;
-				case 'order':
-					this.offset = 0;
-				break;
-				default: break; // no special treatment
-			}
-			
-			// update route parameters, reloads list via watcher
-			// enables browser history for fullpage list navigation
-			//  special cases: column/quick/user filters & manuel reloads (no page param change)
-			if(this.usesPageHistory && !['filtersColumn','filtersQuick','filtersUser','limit','manual'].includes(entity))
-				return this.paramsUpdate(true);
-			
-			this.get();
-		},
 		reloadOutside() {
 			// outside state has changed, reload list or list input
-			if(!this.isInput)
-				return this.get();
-			
-			this.getInput();
+			if(this.isInput) this.getInput();
+			else             this.get();
 		},
 		
 		// parsing
 		paramsUpdate(pushHistory) {
-			// fullpage lists update their form arguments, this results in history change
-			// history change then triggers form load
-			let orders = [];
-			for(let o of this.orders) {
-				if(typeof o.expressionPos !== 'undefined')
-					// sort by expression position
-					orders.push(`expr_${o.expressionPos}_${o.ascending ? 'asc' : 'desc'}`);
-				else
-					// sort by attribute
-					orders.push(`${o.index}_${o.attributeId}_${o.ascending ? 'asc' : 'desc'}`);
-			}
-			
-			let args = [];
-			if(this.choiceId !== null) args.push(`choice=${this.choiceId}`);
-			if(this.offset   !== 0)    args.push(`offset=${this.offset}`);
-			if(orders.length !== 0)    args.push(`orderby=${orders.join(',')}`);
-			
-			this.$emit('set-args',args,pushHistory);
+			if(this.usesPageHistory)
+				this.$emit('set-args',this.offset !== 0 ? [`offset=${this.offset}`] : [],pushHistory);
 		},
-		paramsUpdated() {
-			// apply query parameters
-			let params = {
-				choice: { parse:'string',   value:this.choiceId },
-				offset: { parse:'int',      value:0 },
-				orderby:{ parse:'listOrder',value:JSON.stringify(this.orders) }
-			};
+		paramsUpdated(reloadIfChanged) {
+			let params = { offset:{ parse:'int', value:0 } };
 			this.routeParseParams(params);
 			
-			if(this.choiceId !== params.choice.value)
-				this.choiceId = params.choice.value;
-			
-			this.offset = params.offset.value;
-			this.orders = JSON.parse(params.orderby.value);
-			
-			// apply first order for card layout selector
-			this.cardsOrderByColumnBatchIndex = -1;
-			for(let i = 0, j = this.columnBatches.length; i < j; i++) {
-				if(this.columnBatches[i].orderIndexesUsed.length !== 0) {
-					this.cardsOrderByColumnBatchIndex = i;
-					break;
-				}
+			if(this.offset !== params.offset.value) {
+				this.offset = params.offset.value;
+
+				if(reloadIfChanged)
+					this.get();
 			}
 		},
 		
@@ -1343,11 +1262,12 @@ let MyList = {
 		},
 		setAggregators(columnId,aggregator) {
 			if(!this.isTable) return;
+			let v = JSON.parse(JSON.stringify(this.columnIdMapAggr));
 			
-			if(aggregator !== null) this.columnIdMapAggr[columnId] = aggregator;
-			else                    delete(this.columnIdMapAggr[columnId]);
+			if(aggregator !== null) v[columnId] = aggregator;
+			else                    delete(v[columnId]);
 			
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnIdMapAggr',this.columnIdMapAggr);
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnIdMapAggr',v);
 			this.reloadAggregations(false);
 		},
 		setAutoRenewTimer(v) {
@@ -1362,37 +1282,33 @@ let MyList = {
 				this.autoRenewTimer = setInterval(this.get,v * 1000);
 			}
 
-			if(v !== this.autoRenew) {
-				this.autoRenew = v;
+			if(v !== this.autoRenew)
 				this.fieldOptionSet(this.favoriteId,this.fieldId,'autoRenew',v);
-			}
-		},
-		setCardsCaptions(v) {
-			this.cardsCaptions = v;
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'cardsCaptions',v);
 		},
 		setColumnBatchSort(v) {
-			this.columnBatchSort = v;
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnBatchSort',v);
 			this.reloadAggregations(true);
 		},
-		setColumnBatchFilters(v) {
-			this.filtersColumn = v;
+		setColumnFilters(v) {
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersColumn',v);
-			this.reloadInside('filtersColumn');
 		},
-		setLayout(v) {
-			this.layout = v;
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'layout',this.layout);
+		setLoginOption(name,v) {
+			this.fieldOptionSet(this.favoriteId,this.fieldId,name,v);
 		},
-		setLimit(v) {
-			this.limit = v;
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'limit',this.limit);
-			this.reloadInside('limit');
+		setOffsetAndReload(v) {
+			this.offset = v;
+			this.get();
 		},
-		setOrder(columnBatch,directionAsc) {
+		setOffsetParamAndReload(v) {
+			this.setOffsetAndReload(v);
+			this.paramsUpdate(true);
+		},
+		setOrder(columnBatch,directionAsc,clearAllBefore) {
 			// remove initial sorting (if active) when changing anything
 			let orders = this.isOrderedOrginal ? [] : JSON.parse(JSON.stringify(this.orders));
+
+			if(clearAllBefore)
+				orders = [];
 			
 			const orderIndexesUsed = this.getOrderIndexesFromColumnBatch(columnBatch,this.columns,orders);
 			const notOrdered       = orderIndexesUsed.length === 0;
@@ -1430,22 +1346,14 @@ let MyList = {
 			this.setOrders(orders.length === 0 ? this.ordersOriginal : orders);
 		},
 		setOrders(v) {
-			this.orders = JSON.parse(JSON.stringify(v));
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'orders',this.orders);
-			this.reloadInside('order');
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'orders',v);
 		},
 		setUserFilters(v) {
-			this.filtersUser = v;
 			this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersUser',v);
-			this.reloadInside('filtersUser');
 		},
 		toggleHeader() {
-			this.showHeader = !this.showHeader;
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'header',!this.showHeader);
 			this.$store.commit('appResized');
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'header',this.showHeader);
-		},
-		toggleUserFilters() {
-			this.showFilters = !this.showFilters;
 		},
 		updatedTextInput(event) {
 			if(event.code === 'Tab' || event.code === 'Escape')
@@ -1466,30 +1374,27 @@ let MyList = {
 			else if(event.code !== 'Escape') {
 				
 				// table already open, no enter/escape -> reload
-				this.reloadInside('dropdown');
+				this.setOffsetAndReload(0);
 			}
 		},
 		updatedFilterQuick() {
 			if(this.isInput && !this.dropdownShow)
-				this.$emit('dropdown-show',true);
-			else
-				this.reloadInside('filtersQuick');
+				return this.$emit('dropdown-show',true);
+			
+			this.offset = 0;
+			this.get();
 		},
 		
 		// user actions, cards layout
 		cardsSetOrderBy(columnBatchIndexStr) {
 			const columnBatchIndex = parseInt(columnBatchIndexStr);
 			this.cardsOrderByColumnBatchIndex = columnBatchIndex;
-			this.orders = [];
-			
-			if(columnBatchIndex === -1) return;
-			
-			this.setOrder(this.columnBatches[columnBatchIndex],true);
+			if(columnBatchIndex !== -1)
+				this.setOrder(this.columnBatches[columnBatchIndex],true,true);
 		},
 		cardsToggleOrderBy() {
 			const wasAsc = this.orders[0].ascending;
-			this.orders = [];
-			this.setOrder(this.columnBatches[this.cardsOrderByColumnBatchIndex],!wasAsc);
+			this.setOrder(this.columnBatches[this.cardsOrderByColumnBatchIndex],!wasAsc,true);
 		},
 		
 		// user actions, inputs
@@ -1532,7 +1437,7 @@ let MyList = {
 				if(out.length !== filters.length) // some filters were removed, update
 					fncUpdate(out);
 			};
-			f(this.filtersColumn,this.columns,this.setColumnBatchFilters);
+			f(this.filtersColumn,this.columns,this.setColumnFilters);
 			f(this.filtersUser,this.columnsAll,this.setUserFilters);
 		},
 		removeInvalidOrders() {
@@ -1641,7 +1546,7 @@ let MyList = {
 			
 			// fix invalid offset (can occur when limit is changed)
 			if(this.offset !== 0 && this.offset % this.limit !== 0)
-				this.offset -= this.offset % this.limit;
+				return this.setOffsetParamAndReload(this.offset -= this.offset % this.limit);
 			
 			ws.send('data','get',{
 				relationId:this.query.relationId,

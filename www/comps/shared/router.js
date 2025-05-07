@@ -4,12 +4,9 @@ export function routeChangeFieldReload(newVals,oldVals) {
 	
 	if(newVals[0] !== oldVals[0])
 		return false; // route has changed, form will reload on its own
-	
+
 	if(newVals[1] === oldVals[1])
 		return false; // same route, query has not changed, nothing to do
-	
-	if(Object.keys(oldVals[1]).length === 0)
-		return false; // query is empty nothing to do
 	
 	return true;
 };

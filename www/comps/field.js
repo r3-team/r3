@@ -142,7 +142,6 @@ let MyField = {
 					:attributeIdDate0="field.attributeIdDate0"
 					:attributeIdDate1="field.attributeIdDate1"
 					:choices="choicesProcessed"
-					:choiceId="choiceId"
 					:columns="columnsProcessed"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
@@ -160,12 +159,11 @@ let MyField = {
 					:indexDate1="field.indexDate1"
 					:isHidden="isHidden"
 					:isSingleField="isAlone"
+					:loginOptions="loginOptions"
 					:moduleId="moduleId"
 					:popUpFormInline="popUpFormInline"
-					:showGroupLabels="fieldIdMapOptions[field.id]['ganttShowGroupLabels']"
 					:stepTypeDefault="field.ganttSteps"
 					:stepTypeToggle="field.ganttStepsToggle"
-					:stepZoom="fieldIdMapOptions[field.id]['ganttStepZoom']"
 					:query="field.query"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				/>
@@ -252,6 +250,7 @@ let MyField = {
 					:layoutDefault="field.layout"
 					:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 					:loadWhileHidden="parentIsCounting"
+					:loginOptions="loginOptions"
 					:moduleId="moduleId"
 					:popUpFormInline="popUpFormInline"
 					:query="field.query"
@@ -565,6 +564,7 @@ let MyField = {
 					:inputRecordIds="relationshipRecordIds"
 					:inputValid="!showInvalid"
 					:isInput="true"
+					:loginOptions="loginOptions"
 					:moduleId="moduleId"
 					:query="field.query"
 				>
@@ -1090,19 +1090,20 @@ let MyField = {
 		},
 		
 		// simple
-		attribute:  (s) => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false ,
-		content:    (s) => s.isVariable ? 'data' : s.field.content,
-		contentData:(s) => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
-		contentUse: (s) => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
-		customErr:  (s) => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
+		attribute:   (s) => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false ,
+		content:     (s) => s.isVariable ? 'data' : s.field.content,
+		contentData: (s) => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
+		contentUse:  (s) => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
+		customErr:   (s) => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
-		dataOptions:(s) => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
-		hasCaption: (s) => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
-		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
-		inputRegex: (s) => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
-		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
-		showInvalid:(s) => !s.isValid && (s.formBadSave || s.isTouched),
-		variable:   (s) => (!s.isVariable || s.field.variableId === null) ? false : s.variableIdMap[s.field.variableId],
+		dataOptions: (s) => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
+		hasCaption:  (s) => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
+		hasIntent:   (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
+		inputRegex:  (s) => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
+		link:        (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
+		loginOptions:(s) => s.fieldIdMapOptions[s.field.id] === undefined ? {} : s.fieldIdMapOptions[s.field.id],
+		showInvalid: (s) => !s.isValid && (s.formBadSave || s.isTouched),
+		variable:    (s) => (!s.isVariable || s.field.variableId === null) ? false : s.variableIdMap[s.field.variableId],
 		
 		// content types
 		isButton:   (s) => s.content === 'button',
@@ -1117,7 +1118,6 @@ let MyField = {
 		isVariable: (s) => s.field.content === 'variable',
 
 		// processed states
-		choiceId:        (s) => s.fieldIdMapProcessed.choiceId[s.field.id] === undefined ? null : s.fieldIdMapProcessed.choiceId[s.field.id],
 		choicesProcessed:(s) => s.fieldIdMapProcessed.choices[s.field.id]  === undefined ? []   : s.fieldIdMapProcessed.choices[s.field.id],
 		columnsProcessed:(s) => s.fieldIdMapProcessed.columns[s.field.id]  === undefined ? []   : s.fieldIdMapProcessed.columns[s.field.id],
 		filtersProcessed:(s) => s.fieldIdMapProcessed.filters[s.field.id]  === undefined ? []   : s.fieldIdMapProcessed.filters[s.field.id],

@@ -46,7 +46,7 @@ export function getFieldOverwriteDefault() {
 };
 
 export function getFieldProcessedDefault() {
-	return { choices:{}, choiceId:{}, columns:{}, filters:{} };
+	return { choices:{}, columns:{}, filters:{} };
 };
 
 // locally stored field options
