@@ -5,10 +5,6 @@ import {
 	getAttributeFileVersionHref
 } from './shared/attribute.js';
 import {
-	fieldOptionGet,
-	fieldOptionSet
-} from './shared/field.js';
-import {
 	getNilUuid,
 	getSizeReadable
 } from './shared/generic.js';
@@ -334,16 +330,16 @@ let MyInputFiles = {
 	props:{
 		attributeId: { type:String,  required:true },
 		countAllowed:{ type:Number,  required:true }, // number of allowed files
-		favoriteId:  { required:false, default:null },
 		fieldId:     { type:String,  required:true },
 		formLoading: { type:Boolean, required:true }, // to react to form load events
 		isHidden:    { type:Boolean, required:false, default:false },
+		loginOptions:{ type:Object,  required:true },
 		modelValue:  { required:true },
 		readonly:    { type:Boolean, required:false, default:false },
 		recordId:    { type:Number,  required:true },
 		showGallery: { type:Boolean, required:false, default:false }
 	},
-	emits:['file-count-change','update:modelValue'],
+	emits:['file-count-change','set-login-option','update:modelValue'],
 	data() {
 		return {
 			extPreview:[
@@ -360,14 +356,13 @@ let MyInputFiles = {
 			// states
 			dragActive:false,
 			dragTarget:{},
-			files:[],              // files from value
-			fileIdMapChange:{},    // map of file changes done inside this component, key: file ID
-			fileIdsSelected:[],    // file IDs selected by checkbox
-			filterName:'',         // filter files by name
-			galleryMeta:false,     // show file meta data in gallery view
+			files:[],           // files from value
+			fileIdMapChange:{}, // map of file changes done inside this component, key: file ID
+			fileIdsSelected:[], // file IDs selected by checkbox
+			filterName:'',      // filter files by name
+			galleryMeta:false,  // show file meta data in gallery view
 			sortDirAsc:true,
-			sortMode:'name',       // name, size, changed
-			viewMode:'listCompact' // active view mode
+			sortMode:'name'     // name, size, changed
 		};
 	},
 	mounted() {
@@ -375,17 +370,9 @@ let MyInputFiles = {
 		this.$watch('appResized',this.resized);
 		this.$watch('formLoading',v => { if(!v) this.reset(); });
 		this.$watch('isHidden',   v => { if(!v) this.$nextTick(this.resized); });
-		this.$watch('modelValue', v => this.reset());
+		this.$watch('modelValue',this.reset);
 		
-		// apply initial view size
 		this.resized();
-		
-		// apply defaults
-		if(this.showGallery)
-			this.viewMode = 'gallery';
-		
-		// apply last chosen view mode
-		this.setViewMode(this.fieldOptionGet(this.favoriteId,this.fieldId,'fileViewMode',this.viewMode));
 	},
 	computed:{
 		filesProcessed:{
@@ -446,6 +433,9 @@ let MyInputFiles = {
 		viewListComfort:(s) => s.viewMode === 'listComfort',
 		viewListCompact:(s) => s.viewMode === 'listCompact',
 		viewGallery:    (s) => s.viewMode === 'gallery',
+
+		// login options
+		viewMode:(s) => s.$root.getOrFallback(s.loginOptions,'fileViewMode',(s.showGallery ? 'gallery' : 'listCompact')),
 		
 		// store
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -458,8 +448,6 @@ let MyInputFiles = {
 	},
 	methods:{
 		// externals
-		fieldOptionGet,
-		fieldOptionSet,
 		getAttributeFileThumbHref,
 		getAttributeFileVersionHref,
 		getFilesFromDataItems,
@@ -621,15 +609,6 @@ let MyInputFiles = {
 			if(this.sortMode === mode)
 				this.setSortMode('');
 		},
-		setViewMode(mode) {
-			if(!this.viewModes.includes(mode))
-				return this.viewMode = 'listCompact';
-			
-			if(mode !== this.viewMode) {
-				this.viewMode = mode;
-				this.fieldOptionSet(this.favoriteId,this.fieldId,'fileViewMode',mode);
-			}
-		},
 		toggle(fileId) {
 			let pos = this.fileIdsSelected.indexOf(fileId);
 			if(pos === -1) this.fileIdsSelected.push(fileId);
@@ -649,9 +628,9 @@ let MyInputFiles = {
 		},
 		toggleViewMode() {
 			switch(this.viewMode) {
-				case 'listCompact': this.setViewMode('listComfort'); break;
-				case 'listComfort': this.setViewMode('gallery');     break;
-				case 'gallery':     this.setViewMode('listCompact'); break;
+				case 'listCompact': this.$emit('set-login-option','fileViewMode','listComfort'); break;
+				case 'listComfort': this.$emit('set-login-option','fileViewMode','gallery');     break;
+				case 'gallery':     this.$emit('set-login-option','fileViewMode','listCompact'); break;
 			}
 		},
 		update(fileId,action,name) {

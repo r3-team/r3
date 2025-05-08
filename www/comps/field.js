@@ -14,7 +14,6 @@ import MyInputSelect              from './inputSelect.js';
 import MyInputUuid                from './inputUuid.js';
 import MyList                     from './list.js';
 import {hasAccessToAttribute}     from './shared/access.js';
-import {fieldOptionSet}           from './shared/field.js';
 import {srcBase64}                from './shared/image.js';
 import {getCaption}               from './shared/language.js';
 import {
@@ -519,12 +518,13 @@ let MyField = {
 					v-if="isFiles"
 					v-model="value"
 					@file-count-change="$emit('set-counter',field.id,$event)"
+					@set-login-option="setLoginOption"
 					:attributeId="field.attributeId"
 					:countAllowed="field.max !== null ? field.max : 0"
-					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:formLoading="formLoading"
 					:isHidden="isHidden"
+					:loginOptions="loginOptions"
 					:readonly="isReadonly"
 					:recordId="joinsIndexMap[field.index].recordId"
 					:showGallery="field.display === 'gallery'"
@@ -1175,6 +1175,7 @@ let MyField = {
 		capApp:             (s) => s.$store.getters.captions.form,
 		capGen:             (s) => s.$store.getters.captions.generic,
 		isMobile:           (s) => s.$store.getters.isMobile,
+		isNoAuth:           (s) => s.$store.getters.isNoAuth,
 		searchDictionaries: (s) => s.$store.getters.searchDictionaries,
 		settings:           (s) => s.$store.getters.settings
 	},
@@ -1184,7 +1185,6 @@ let MyField = {
 	},
 	methods:{
 		// externals
-		fieldOptionSet,
 		getCaption,
 		getFlexStyle,
 		getFormPopUpConfig,
@@ -1312,19 +1312,26 @@ let MyField = {
 			this.value = valueNew.length !== 0 ? valueNew : null;
 		},
 		setColumnIdsByUser(ids) {
-			this.fieldOptionSet(this.favoriteId,this.field.id,'columnIdsByUser',ids);
+			this.setLoginOption('columnIdsByUser',ids);
 		},
 		setCollectionIndexes(collectionId,indexes) {
 			let v = JSON.parse(JSON.stringify(this.collectionIdMapIndexes));
 			v[collectionId] = indexes;
-			this.fieldOptionSet(this.favoriteId,this.field.id,'collectionIdMapIndexes',v);
+			this.setLoginOption('collectionIdMapIndexes',v);
 		},
 		setLoginOption(name,value) {
-			this.fieldOptionSet(this.favoriteId,this.field.id,name,value);
+			this.$store.commit('local/loginOption',{
+				favoriteId:this.favoriteId,
+				fieldId:this.field.id,
+				isMobile:this.isMobile,
+				isNoAuth:this.isNoAuth,
+				name:name,
+				value:value
+			});
 		},
 		setTab(tabIndex) {
 			if(this.settings.tabRemember)
-				this.fieldOptionSet(this.favoriteId,this.field.id,'tabIndex',tabIndex);
+				this.setLoginOption('tabIndex',tabIndex);
 			
 			this.tabIndexShow = tabIndex;
 		},

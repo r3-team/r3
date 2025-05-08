@@ -10,10 +10,6 @@ import {
 	isAttributeFiles
 } from './shared/attribute.js';
 import {
-	fieldOptionGet,
-	fieldOptionSet
-} from './shared/field.js';
-import {
 	checkDataOptions,
 	colorAdjustBg,
 	colorMakeContrastFont
@@ -567,8 +563,6 @@ let MyKanban = {
 		checkDataOptions,
 		colorAdjustBg,
 		colorMakeContrastFont,
-		fieldOptionGet,
-		fieldOptionSet,
 		fillRelationRecordIds,
 		getCaption,
 		getChoiceFilters,
