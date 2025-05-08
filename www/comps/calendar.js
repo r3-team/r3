@@ -551,7 +551,7 @@ let MyCalendar = {
 			
 			this.$emit('set-args',args,pushHistory);
 		},
-		paramsUpdated(reload) {
+		paramsUpdated(reloadIfChanged) {
 			let params = {
 				day:  { parse:'int', value:this.date.getDate() },
 				month:{ parse:'int', value:this.date.getMonth() },
@@ -567,10 +567,12 @@ let MyCalendar = {
 			if(this.isDays)                 d.setDate(params.day.value);
 			if(this.isWeek)                 d = this.getDateFromWeek(params.week.value,d.getFullYear());
 
-			this.date = d;
-			
-			if(reload)
-				this.get();
+			if(d.getTime() !== this.date.getTime()) {
+				this.date = d;
+				
+				if(reloadIfChanged)
+					this.get();
+			}
 		},
 		
 		// backend calls

@@ -208,7 +208,7 @@ let MyKanban = {
 		MyKanbanBox,
 		MyValueRich
 	},
-	template:`<div class="kanban" :class="{ isSingleField:isSingleField }" v-if="ready">
+	template:`<div class="kanban" :class="{ isSingleField:isSingleField }">
 		
 		<!-- header -->
 		<div class="top lower">
@@ -220,13 +220,15 @@ let MyKanban = {
 				/>
 				<my-button image="search.png"
 					v-if="!isMobile"
-					@trigger="zoom = zoomDefault"
+					@trigger="$emit('set-login-option','kanbanZoom',zoomDefault)"
+					:active="zoom !== zoomDefault"
 					:captionTitle="capGen.button.zoomReset"
 					:naked="true"
 				/>
 				<input class="zoom-factor clickable" type="range" min="1" max="10"
 					v-if="!isMobile"
-					v-model="zoom"
+					@change="$emit('set-login-option','kanbanZoom',parseInt($event.target.value))"
+					:value="zoom"
 				/>
 			</div>
 			<div class="area nowrap default-inputs">
@@ -252,15 +254,15 @@ let MyKanban = {
 				/>
 				<select class="selector"
 					v-if="hasChoices"
-					v-model="choiceId"
-					@change="choiceIdSet($event.target.value)"
+					@change="$emit('set-login-option','choiceId',$event.target.value)"
+					:value="choiceId"
 				>
 					<option v-for="c in choices" :value="c.id">
 						{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 					</option>
 				</select>
 				<my-button
-					@trigger="showCaptions = !showCaptions"
+					@trigger="$emit('set-login-option','kanbanShowCaptions',!showCaptions)"
 					:caption="capGen.label"
 					:image="showCaptions ? 'visible1.png' : 'visible0.png'"
 				/>
@@ -462,7 +464,6 @@ let MyKanban = {
 		collections:        { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		dataOptions:        { type:Number,  required:false, default:0 },
-		favoriteId:         { required:false, default:null },
 		fieldId:            { type:String,  required:true },
 		filters:            { type:Array,   required:true }, // processed query filters
 		formLoading:        { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
@@ -471,27 +472,23 @@ let MyKanban = {
 		isHidden:           { type:Boolean, required:false, default:false },
 		isSingleField:      { type:Boolean, required:false, default:false },
 		loadWhileHidden:    { type:Boolean, required:false, default:false },
+		loginOptions:       { type:Object,  required:true },
 		moduleId:           { type:String,  required:true },
 		popUpFormInline:    { required:false, default:null },
 		query:              { type:Object,  required:true },
-		relationIndexData:  { type:Number,  required:true },                // relation by index, serving as base for data (cards)
-		relationIndexAxisX: { type:Number,  required:true },                // relation by index, serving as base for X axis (columns)
-		relationIndexAxisY: { type:Number,  required:false, default:null }, // relation by index, serving as base for Y axis (rows), multi-axis kanban
-		usesPageHistory:    { type:Boolean, required:true }
+		relationIndexData:  { type:Number,  required:true },               // relation by index, serving as base for data (cards)
+		relationIndexAxisX: { type:Number,  required:true },               // relation by index, serving as base for X axis (columns)
+		relationIndexAxisY: { type:Number,  required:false, default:null } // relation by index, serving as base for Y axis (rows), multi-axis kanban
 	},
-	emits:['clipboard','close-inline','open-form','record-count-change','set-args','set-collection-indexes'],
+	emits:['clipboard','close-inline','open-form','record-count-change','set-args','set-collection-indexes','set-login-option'],
 	data() {
 		return {
 			axisEntriesX:[],      // entries for the X axis (columns)
 			axisEntriesY:[],      // entries for the Y axis (rows)
 			dragActive:false,
-			choiceId:null,
-			ready:false,
 			recordIdMapAxisXY:[], // 2-level map of axis data (cards), keys: record ID of X axis entry, record ID of Y axis entry
 			search:'',
 			searchInput:'',
-			showCaptions:false,
-			zoom:5, // 1-10
 			zoomDefault:5
 		};
 	},
@@ -524,6 +521,11 @@ let MyKanban = {
 		hasNullsInY:       (s) => s.attributeIdAxisY !== null && s.attributeIdMap[s.attributeIdAxisY].nullable,
 		joins:             (s) => s.fillRelationRecordIds(s.query.joins),
 		joinsIndexMap:     (s) => s.getJoinsIndexMap(s.joins),
+
+		// login options
+		choiceId:    (s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		showCaptions:(s) => s.$root.getOrFallback(s.loginOptions,'kanbanShowCaptions',false),
+		zoom:        (s) => s.$root.getOrFallback(s.loginOptions,'kanbanZoom',s.zoomDefault),
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -543,41 +545,22 @@ let MyKanban = {
 				this.axisEntriesX      = [];
 				this.axisEntriesY      = [];
 				this.recordIdMapAxisXY = [];
-				this.reloadOutside();
+				this.get();
 			}
 		});
-		this.$watch('favoriteId',(val) => {
-			this.reloadOptions();
+		this.$watch('formLoading',v => {
+			if(!v) this.get();
 		});
-		this.$watch('formLoading',(val) => {
-			if(!val) this.reloadOutside();
-		});
-		this.$watch('isHidden',(val) => {
-			if(!val) this.$nextTick(() => this.get());
+		this.$watch('isHidden',v => {
+			if(!v) this.$nextTick(() => this.get());
 		});
 		this.$watch(() => [this.choices,this.filters],(newVals, oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
 				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
-					return this.reloadOutside();
+					return this.get();
 			}
 		});
-		this.$watch('showCaptions',(val) => {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'kanbanShowCaptions',val);
-		});
-		this.$watch('zoom',(val) => {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'kanbanZoom',val);
-		});
-		if(this.usesPageHistory) {
-			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
-				if(this.routeChangeFieldReload(newVals,oldVals)) {
-					this.paramsUpdated();
-					this.reloadOutside();
-				}
-			});
-		}
-		this.reloadOptions();
-		this.ready = true;
-		this.$nextTick(() => this.get());
+		this.get();
 	},
 	methods:{
 		// external
@@ -608,11 +591,6 @@ let MyKanban = {
 			
 			const args = attributes.length === 0 ? [] : [`attributes=${attributes.join(',')}`];
 			this.$emit('open-form',[],args,middleClick);
-		},
-		choiceIdSet(choiceId) {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',choiceId);
-			this.choiceId = choiceId;
-			this.reloadInside();
 		},
 		openForm(row,middleClick) {
 			this.$emit('open-form',[row],[],middleClick);
@@ -716,47 +694,6 @@ let MyKanban = {
 				});
 			}
 			return out;
-		},
-		
-		// reloads
-		reloadOptions() {
-			this.choiceId     = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
-			this.showCaptions = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanShowCaptions',this.showCaptions);
-			this.zoom         = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanZoom',this.zoom);
-
-			if(this.usesPageHistory) {
-				// set initial states via route parameters
-				this.paramsUpdated();     // load existing parameters from route query
-				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-			}
-		},
-		reloadOutside() {
-			this.get();
-		},
-		reloadInside() {
-			// reload full page kanban by updating route parameters
-			// enables browser history for fullpage list navigation
-			if(this.usesPageHistory)
-				return this.paramsUpdate(true);
-			
-			this.get();
-		},
-		
-		// page routing
-		paramsUpdate(pushHistory) {
-			let args = [];
-			
-			if(this.choiceId !== null)
-				args.push(`choice=${this.choiceId}`);
-			
-			this.$emit('set-args',args,pushHistory);
-		},
-		paramsUpdated() {
-			let params = { choice:{ parse:'string', value:this.choiceId } };
-			this.routeParseParams(params);
-			
-			if(this.choiceId !== params.choice.value)
-				this.choiceId = params.choice.value;
 		},
 		
 		// backend calls
