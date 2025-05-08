@@ -11,8 +11,8 @@ import {
 	getCaptionForLang
 } from './language.js';
 
-export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
-	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,fieldValues) {
+export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,dataFieldIdMap,
+	fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,recordMayUpdate) {
 
 	columns = JSON.parse(JSON.stringify(columns));
 
@@ -51,10 +51,8 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
 
 		// resolve sub query filters
 		if(c.subQuery) {
-			c.query.filters = getQueryFiltersProcessed(
-				c.query.filters,joinsIndexMap,dataFieldIdMap,
-				fieldIdsChanged,fieldIdsInvalid,fieldValues
-			);
+			c.query.filters = getQueryFiltersProcessed(c.query.filters,joinsIndexMap,dataFieldIdMap,
+				fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,recordMayUpdate);
 		}
 		out.push(c);
 	}

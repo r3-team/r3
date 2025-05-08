@@ -138,13 +138,16 @@ export function getSubQueryFilterExpressions(subQuery) {
 	}];
 };
 
-export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
-	fieldIdsChanged,fieldIdsInvalid,fieldValues,collectionIdMapIndexFilter,variableIdMapLocal) {
+export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,
+	fieldValues,recordMayCreate,recordMayDelete,recordMayUpdate,collectionIdMapIndexFilter,variableIdMapLocal) {
 	
 	if(dataFieldIdMap             === undefined) dataFieldIdMap             = {};
 	if(fieldIdsChanged            === undefined) fieldIdsChanged            = [];
 	if(fieldIdsInvalid            === undefined) fieldIdsInvalid            = [];
 	if(fieldValues                === undefined) fieldValues                = {};
+	if(recordMayCreate            === undefined) recordMayCreate            = false;
+	if(recordMayDelete            === undefined) recordMayDelete            = false;
+	if(recordMayUpdate            === undefined) recordMayUpdate            = false;
 	if(collectionIdMapIndexFilter === undefined) collectionIdMapIndexFilter = {};
 	if(variableIdMapLocal         === undefined) variableIdMapLocal         = {};
 	
@@ -164,9 +167,9 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 			case 'subQuery':
 				s.query.expressions = getSubQueryFilterExpressions(s);
 				s.query.filters     = getQueryFiltersProcessed(
-					s.query.filters,joinsIndexMap,dataFieldIdMap,
-					fieldIdsChanged,fieldIdsInvalid,fieldValues,
-					collectionIdMapIndexFilter,variableIdMapLocal
+					s.query.filters,joinsIndexMap,dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,
+					fieldValues,recordMayCreate,recordMayDelete,recordMayUpdate,collectionIdMapIndexFilter,
+					variableIdMapLocal
 				);
 				s.query.limit = s.query.fixedLimit;
 			break;
@@ -185,12 +188,15 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 					)]));
 				}
 			break;
-			case 'fieldChanged': s.value = fieldIdsChanged.includes(s.fieldId);  break;
-			case 'fieldValid':   s.value = !fieldIdsInvalid.includes(s.fieldId); break;
-			case 'formChanged':  s.value = fieldIdsChanged.length !== 0;         break;
-			case 'javascript':   s.value = Function(s.value)();                  break;
-			case 'record':       if(typeof joinsIndexMap['0'] !== 'undefined') s.value = joinsIndexMap['0'].recordId;       break;
-			case 'recordNew':    if(typeof joinsIndexMap['0'] !== 'undefined') s.value = joinsIndexMap['0'].recordId === 0; break;
+			case 'fieldChanged':    s.value = fieldIdsChanged.includes(s.fieldId);  break;
+			case 'fieldValid':      s.value = !fieldIdsInvalid.includes(s.fieldId); break;
+			case 'formChanged':     s.value = fieldIdsChanged.length !== 0;         break;
+			case 'javascript':      s.value = Function(s.value)();                  break;
+			case 'record':          if(joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId; break;
+			case 'recordMayCreate': s.value = recordMayCreate;                      break;
+			case 'recordMayDelete': s.value = recordMayDelete;                      break;
+			case 'recordMayUpdate': s.value = recordMayUpdate;                      break;
+			case 'recordNew':       if(joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId === 0; break;
 			
 			// login
 			case 'languageCode': s.value = MyStore.getters.settings.languageCode;             break;

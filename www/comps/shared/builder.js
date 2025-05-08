@@ -130,8 +130,7 @@ export function getSqlPreview(query,columns) {
 		relationId:query.relationId,
 		joins:getRelationsJoined(query.joins),
 		expressions:getQueryExpressions(columns),
-		filters:getQueryFiltersProcessed(query.filters,
-			getJoinsIndexMap(query.joins)),
+		filters:getQueryFiltersProcessed(query.filters,getJoinsIndexMap(query.joins)),
 		orders:query.orders,
 		limit:query.fixedLimit !== 0 ? query.fixedLimit : 0
 	},true).then(

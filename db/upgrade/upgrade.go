@@ -123,6 +123,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- PG function cost
 			ALTER TABLE app.pg_function ADD COLUMN cost INTEGER NOT NULL DEFAULT 100;
+
+			-- form record conditions
+			ALTER TYPE app.filter_side_content ADD VALUE 'recordCanCreate';
+			ALTER TYPE app.filter_side_content ADD VALUE 'recordCanDelete';
+			ALTER TYPE app.filter_side_content ADD VALUE 'recordCanUpdate';
 		`)
 		return "3.11", err
 	},

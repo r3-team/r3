@@ -830,8 +830,7 @@ let MyField = {
 			if(!s.isData || s.isVariable) return false;
 			
 			const atrIdNm = s.field.attributeIdNm !== undefined ? s.field.attributeIdNm : null;
-			return s.getIndexAttributeId(s.field.index,
-				s.field.attributeId,s.field.outsideIn === true,atrIdNm);
+			return s.getIndexAttributeId(s.field.index,s.field.attributeId,s.field.outsideIn === true,atrIdNm);
 		},
 		fieldAttributeIdAlt:(s) => !s.isData || s.isVariable || s.field.attributeIdAlt === null ? false
 			: s.getIndexAttributeId(s.field.index,s.field.attributeIdAlt,false,null),
@@ -880,11 +879,11 @@ let MyField = {
 		},
 		stateFinal:(s) => {
 			// field state has a default value, which can be overwritten by form states
-			// hidden: field is not shown
-			// default: field is shown, data field state is overwritten depending on circumstance
+			// hidden:   field is not shown
+			// default:  field is shown, data field state is overwritten depending on circumstance
 			// optional: data field only, input is optional
 			// required: data field only, input is required
-			// readonly: data or button field, input is readonly
+			// readonly: data, button or variable field, input is readonly
 			let state = s.field.state;
 			
 			// apply form state if available
@@ -994,7 +993,7 @@ let MyField = {
 			}
 			
 			// check join of field attribute
-			let join = s.joinsIndexMap[s.field.index];
+			const join = s.joinsIndexMap[s.field.index];
 			
 			// SET denied on join due to relation policy
 			if(join.recordNoSet)

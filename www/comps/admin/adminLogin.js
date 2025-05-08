@@ -52,13 +52,13 @@ let MyAdminLogin = {
 			<my-form ref="popUpForm"
 				@close="loginFormIndexOpen = null"
 				@record-updated="updateLoginRecord(loginFormIndexOpen,$event);loginFormIndexOpen = null"
-				:allowDel="false"
-				:allowNew="false"
 				:formId="loginForms[loginFormIndexOpen].formId"
 				:isPopUp="true"
 				:isPopUpFloating="true"
 				:moduleId="formIdMap[loginForms[loginFormIndexOpen].formId].moduleId"
 				:recordIds="loginFormRecords"
+				:showButtonDel="false"
+				:showButtonNew="false"
 			/>
 		</div>
 		

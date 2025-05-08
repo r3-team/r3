@@ -692,7 +692,7 @@ let MyFilterSide = {
 		contentApi:  (s) => ['getter'].filter(v => !s.disableContent.includes(v)),
 		contentData: (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
 		contentDate: (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
-		contentForm: (s) => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
+		contentForm: (s) => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew'].filter(v => !s.disableContent.includes(v)),
 		contentLogin:(s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
 		module:      (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
 		
