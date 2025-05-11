@@ -1,4 +1,6 @@
-import {consoleError} from './shared/error.js';
+import * as oauth        from '../externals/oauth4webapi.js';
+import {getRandomString} from './shared/crypto.js';
+import {consoleError}    from './shared/error.js';
 import {
 	aesGcmExportBase64,
 	pbkdf2PassToAesGcmKey
@@ -69,9 +71,27 @@ let MyLogin = {
 				<img src="images/warning.png" />
 				<span>{{ message.license[licenseErrCode][language] }}</span>
 			</div>
+
+			<!-- Open ID Connect OAUTH2 clients -->
+			<template v-if="!showMfa && hasOpenIdClients">
+				<div class="message">
+					<img src="images/globe.png" />
+					<span>{{ message.authExt[language] }}</span>
+				</div>
+				<div class="open-id-clients">
+					<div class="open-id-client clickable"
+						v-for="c in oauthClientIdMapOpenId"
+						@click="authenticateExternalOpenId(c)"
+					>{{ c.name }}</div>
+				</div>
+			</template>
 			
 			<!-- credentials input -->
 			<div class="credentials" v-if="!showMfa">
+				<div class="message" v-if="hasOpenIdClients">
+					<img src="images/server.png" />
+					<span>{{ message.authInt[language] }}</span>
+				</div>
 				<input autocomplete="username" type="text" spellcheck="false"
 					@keyup="badAuth = false"
 					@keyup.enter="authenticate"
@@ -169,6 +189,14 @@ let MyLogin = {
 			language:'en_US',
 			languages:['de','en_US'],
 			message:{
+				authExt:{
+					de:'Externe Anmeldung',
+					en_US:'External login'
+				},
+				authInt:{
+					de:'Interne Anmeldung',
+					en_US:'Internal login'
+				},
 				clusterNode:{
 					de:'Verbunden mit: ',
 					en_US:'Connected with: '
@@ -204,8 +232,8 @@ let MyLogin = {
 					en_US:'Maintenance mode is active'
 				},
 				mfa:{
-					de:'Multi-Faktor-Authentifizierung',
-					en_US:'Multi-factor authentication'
+					de:'Multi-Faktor-Anmeldung',
+					en_US:'Multi-factor login'
 				},
 				mfaHint:{
 					de:'6-stelliger Validierungs-Code',
@@ -246,32 +274,35 @@ let MyLogin = {
 			background-color:${s.colorLogin.setAlpha(0.8).toString()};
 			border-color:${s.colorLogin.darken(30).toString()};
 		`,
-		isValid: (s) => {
+		isValid:(s) => {
 			if(!s.showMfa)
 				return !s.badAuth && s.username !== '' && s.password !== '';
 			
 			return !s.badAuth && s.mfaTokenId !== null && s.mfaTokenPin !== null;
 		},
-		showCustom:(s) => s.activated && (s.companyName !== '' || s.companyWelcome !== ''),
-		showMfa:   (s) => s.mfaTokens.length !== 0,
+		hasOpenIdClients:(s) => Object.keys(s.oauthClientIdMapOpenId).length !== 0,
+		showCustom:      (s) => s.activated && (s.companyName !== '' || s.companyWelcome !== ''),
+		showMfa:         (s) => s.mfaTokens.length !== 0,
 		
 		// stores
-		activated:          (s) => s.$store.getters['local/activated'],
-		appName:            (s) => s.$store.getters['local/appName'],
-		appVersion:         (s) => s.$store.getters['local/appVersion'],
-		companyName:        (s) => s.$store.getters['local/companyName'],
-		companyWelcome:     (s) => s.$store.getters['local/companyWelcome'],
-		customLogo:         (s) => s.$store.getters['local/customLogo'],
-		customLogoUrl:      (s) => s.$store.getters['local/customLogoUrl'],
-		token:              (s) => s.$store.getters['local/token'],
-		tokenKeep:          (s) => s.$store.getters['local/tokenKeep'],
-		clusterNodeName:    (s) => s.$store.getters.clusterNodeName,
-		colorLogin:         (s) => s.$store.getters.colorLogin,
-		cryptoApiAvailable: (s) => s.$store.getters.cryptoApiAvailable,
-		kdfIterations:      (s) => s.$store.getters.constants.kdfIterations,
-		loginSessionExpired:(s) => s.$store.getters.loginSessionExpired,
-		productionMode:     (s) => s.$store.getters.productionMode,
-		tokenKeepEnable:    (s) => s.$store.getters.tokenKeepEnable
+		activated:             (s) => s.$store.getters['local/activated'],
+		appName:               (s) => s.$store.getters['local/appName'],
+		appVersion:            (s) => s.$store.getters['local/appVersion'],
+		companyName:           (s) => s.$store.getters['local/companyName'],
+		companyWelcome:        (s) => s.$store.getters['local/companyWelcome'],
+		customLogo:            (s) => s.$store.getters['local/customLogo'],
+		customLogoUrl:         (s) => s.$store.getters['local/customLogoUrl'],
+		openIdAuthDetails:     (s) => s.$store.getters['local/openIdAuthDetails'],
+		token:                 (s) => s.$store.getters['local/token'],
+		tokenKeep:             (s) => s.$store.getters['local/tokenKeep'],
+		clusterNodeName:       (s) => s.$store.getters.clusterNodeName,
+		colorLogin:            (s) => s.$store.getters.colorLogin,
+		cryptoApiAvailable:    (s) => s.$store.getters.cryptoApiAvailable,
+		kdfIterations:         (s) => s.$store.getters.constants.kdfIterations,
+		loginSessionExpired:   (s) => s.$store.getters.loginSessionExpired,
+		oauthClientIdMapOpenId:(s) => s.$store.getters.oauthClientIdMapOpenId,
+		productionMode:        (s) => s.$store.getters.productionMode,
+		tokenKeepEnable:       (s) => s.$store.getters.tokenKeepEnable
 	},
 	watch:{
 		loginReady(v) {
@@ -291,6 +322,22 @@ let MyLogin = {
 					
 					return this.$router.replace(p);
 				}
+			}
+
+			// check for Open ID authentication redirect
+			const params = new URLSearchParams(window.location.search);
+			if(params.has('state') && params.has('code')) {
+				// attempt Open ID authentication against r3 backend, if local state matches
+				if(this.openIdAuthDetails.state === params.get('state'))
+					this.authenticateByOpenId(
+						this.openIdAuthDetails.oauthClientId,
+						params.get('code'),
+						this.openIdAuthDetails.codeVerifier
+					);
+
+				// reset authentication details and URL
+				this.$store.commit('local/openIdAuthDetailsReset');
+				window.history.pushState({},'','/');
 			}
 			
 			// attempt authentication if token is available
@@ -318,6 +365,7 @@ let MyLogin = {
 		aesGcmExportBase64,
 		consoleError,
 		getLineBreaksParsedToHtml,
+		getRandomString,
 		pbkdf2PassToAesGcmKey,
 		openLink,
 		
@@ -341,8 +389,42 @@ let MyLogin = {
 			this.loading    = false;
 			this.appInitErr = true;
 		},
+
+		// authentication against external identity provider
+		authenticateExternalOpenId:async function(c) {
+			this.loading = true;
+			const url = new URL(c.providerUrl);
+			const as  = await oauth.discoveryRequest(url,{algorithm:'oidc'}).then(
+				res => oauth.processDiscoveryResponse(url,res),
+				console.warn
+			);
+
+			if(as === undefined)
+				return this.loading = false;
+			
+			const verifier  = oauth.generateRandomCodeVerifier();
+			const challenge = await oauth.calculatePKCECodeChallenge(verifier);
+			const state     = this.getRandomString(64);
+
+			this.$store.commit('local/openIdAuthDetails',{
+				codeVerifier:verifier,
+				oauthClientId:c.id,
+				state:state
+			});
+
+			const urlEndpoint = new URL(as.authorization_endpoint);
+			urlEndpoint.searchParams.set('client_id',c.clientId);
+			urlEndpoint.searchParams.set('redirect_uri',c.redirectUrl);
+			urlEndpoint.searchParams.set('response_type','code');
+			urlEndpoint.searchParams.set('scope','openid');
+			urlEndpoint.searchParams.set('code_challenge',challenge);
+			urlEndpoint.searchParams.set('code_challenge_method','S256');
+			urlEndpoint.searchParams.set('state',state);
+			window.location.replace(urlEndpoint.href);
+			this.loading = false;
+		},
 		
-		// authenticate by username/password with/without MFA
+		// authentication against backend
 		authenticate() {
 			if(!this.isValid) return;
 			
@@ -387,6 +469,25 @@ let MyLogin = {
 				err => this.handleError('authUser',err)
 			);
 			this.loading = true;
+		},
+		authenticateByOpenId(oauthClientId,code,codeVerifier) {
+			ws.send('auth','openId',{
+				code:code,
+				codeVerifier:codeVerifier,
+				oauthClientId:oauthClientId
+			},true).then(
+				res => {
+					this.authenticatedByUser(
+						res.payload.loginId,
+						res.payload.loginName,
+						res.payload.token,
+						res.payload.saltKdf
+					);
+				},
+				err => this.handleError('authUser',err)
+			);
+			this.loading = true;
+
 		},
 		authenticateByToken() {
 			ws.send('auth','token',{token:this.token},true).then(

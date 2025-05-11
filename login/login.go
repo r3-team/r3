@@ -236,8 +236,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 
 // set login with meta data
 // returns created login ID if new login
-func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4,
-	ldapKey pgtype.Text, name string, pass string, admin bool, noAuth bool, active bool,
+func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4, ldapKey pgtype.Text,
+	oauthClientId pgtype.Int4, name string, pass string, admin bool, noAuth bool, active bool,
 	tokenExpiryHours pgtype.Int4, meta types.LoginMeta, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
 
 	if name == "" {
@@ -267,12 +267,12 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	if isNew {
 		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.login (
-				ldap_id, ldap_key, name, salt, hash, salt_kdf, admin,
+				ldap_id, ldap_key, oauth_client_id, name, salt, hash, salt_kdf, admin,
 				no_auth, limited, active, token_expiry_hours, date_favorites
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,0)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,0)
 			RETURNING id
-		`, ldapId, ldapKey, name, &salt, &hash, saltKdf, admin, noAuth,
+		`, ldapId, ldapKey, oauthClientId, name, &salt, &hash, saltKdf, admin, noAuth,
 			isLimited, active, tokenExpiryHours).Scan(&id); err != nil {
 
 			return 0, err
@@ -514,7 +514,7 @@ func CreateAdmin(username string, password string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{},
+	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{},
 		username, password, true, false, true, pgtype.Int4{},
 		types.LoginMeta{NameFore: "Admin", NameSur: "User", NameDisplay: username},
 		[]uuid.UUID{}, []types.LoginAdminRecordSet{}); err != nil {

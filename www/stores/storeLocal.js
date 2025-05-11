@@ -35,6 +35,11 @@ const MyStoreLocal = {
 		loginKeyAes:null,        // en-/decryption key for login private key
 		loginKeySalt:null,       // salt for login key KDF
 		menuIdMapOpen:{},        // map of menu IDs with open state (true/false)
+		openIdAuthDetails:{      // details of last Open ID Connect authentication attempt
+			codeVerifier:null,   // verifier code for PKCE
+			oauthClientId:null,  // local ID of OAUTH2 client
+			state:null           // random state generated before auth call, to verify request came from this frontend
+		},
 		token:'',                // JWT token
 		tokenKeep:false,         // keep JWT token between sessions
 		widgetFlow:'column',     // direction of widget groups (column, row)
@@ -192,6 +197,18 @@ const MyStoreLocal = {
 			
 			set('menuIdMapOpen',state.menuIdMapOpen);
 		},
+		openIdAuthDetails(state,payload) {
+			state.openIdAuthDetails = payload;
+			set('openIdAuthDetails',payload);
+		},
+		openIdAuthDetailsReset(state,payload) {
+			state.openIdAuthDetails = {
+				codeVerifier:null,
+				oauthClientId:null,
+				state:null
+			};
+			set('openIdAuthDetails',state.openIdAuthDetails);
+		},
 		token(state,payload) {
 			state.token = payload;
 			set('token',payload);
@@ -241,6 +258,7 @@ const MyStoreLocal = {
 		loginOptions:      (state) => state.loginOptions,
 		loginOptionsMobile:(state) => state.loginOptionsMobile,
 		menuIdMapOpen:     (state) => state.menuIdMapOpen,
+		openIdAuthDetails: (state) => state.openIdAuthDetails,
 		token:             (state) => state.token,
 		tokenKeep:         (state) => state.tokenKeep,
 		widgetFlow:        (state) => state.widgetFlow,

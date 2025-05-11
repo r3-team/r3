@@ -4,10 +4,11 @@ import (
 	"context"
 	"r3/cache"
 	"r3/login"
+	"r3/login/login_meta_map"
 	"r3/types"
-	"strings"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Del_tx(ctx context.Context, tx pgx.Tx, id int32) error {
@@ -56,8 +57,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 			COALESCE(m.phone_fax, ''),
 			COALESCE(m.phone_landline, ''),
 			COALESCE(m.phone_mobile, '')
-		FROM      instance.ldap                      AS l
-		LEFT JOIN instance.ldap_attribute_login_meta AS m ON m.ldap_id = l.id
+		FROM      instance.ldap           AS l
+		LEFT JOIN instance.login_meta_map AS m ON m.ldap_id = l.id
 		ORDER BY l.name ASC
 	`)
 	if err != nil {
@@ -78,7 +79,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 
 			return ldaps, err
 		}
-		l.LoginMetaAttributes = m
+		l.LoginMetaMap = m
 		ldaps = append(ldaps, l)
 	}
 
@@ -127,7 +128,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) error {
 		}
 	}
 
-	if err := setLoginMetaAttributes_tx(ctx, tx, l.Id, l.LoginMetaAttributes); err != nil {
+	if err := login_meta_map.Set_tx(ctx, tx, pgtype.Int4{Int32: l.Id, Valid: true}, pgtype.Int4{}, l.LoginMetaMap); err != nil {
 		return err
 	}
 
@@ -156,57 +157,6 @@ func UpdateCache_tx(ctx context.Context, tx pgx.Tx) error {
 	}
 	cache.SetLdaps(ldaps)
 	return nil
-}
-
-func setLoginMetaAttributes_tx(ctx context.Context, tx pgx.Tx, ldapId int32, m types.LoginMeta) error {
-	var exists bool
-	if err := tx.QueryRow(ctx, `
-		SELECT EXISTS(
-			SELECT ldap_id
-			FROM instance.ldap_attribute_login_meta
-			WHERE ldap_id = $1
-		)
-	`, ldapId).Scan(&exists); err != nil {
-		return err
-	}
-
-	// trim whitespaces from attributes
-	m.Department = strings.TrimSpace(m.Department)
-	m.Email = strings.TrimSpace(m.Email)
-	m.Location = strings.TrimSpace(m.Location)
-	m.NameDisplay = strings.TrimSpace(m.NameDisplay)
-	m.NameFore = strings.TrimSpace(m.NameFore)
-	m.NameSur = strings.TrimSpace(m.NameSur)
-	m.Notes = strings.TrimSpace(m.Notes)
-	m.Organization = strings.TrimSpace(m.Organization)
-	m.PhoneFax = strings.TrimSpace(m.PhoneFax)
-	m.PhoneLandline = strings.TrimSpace(m.PhoneLandline)
-	m.PhoneMobile = strings.TrimSpace(m.PhoneMobile)
-
-	var err error
-	if !exists {
-		_, err = tx.Exec(ctx, `
-			INSERT INTO instance.ldap_attribute_login_meta (
-				ldap_id, department, email, location, name_display,
-				name_fore, name_sur, notes, organization, phone_fax,
-				phone_landline, phone_mobile
-			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-		`, ldapId, m.Department, m.Email, m.Location, m.NameDisplay,
-			m.NameFore, m.NameSur, m.Notes, m.Organization, m.PhoneFax,
-			m.PhoneLandline, m.PhoneMobile)
-	} else {
-		_, err = tx.Exec(ctx, `
-			UPDATE instance.ldap_attribute_login_meta
-			SET department = $1, email = $2, location = $3, name_display = $4,
-				name_fore = $5, name_sur = $6, notes = $7, organization = $8,
-				phone_fax = $9, phone_landline = $10, phone_mobile = $11
-			WHERE ldap_id = $12
-		`, m.Department, m.Email, m.Location, m.NameDisplay, m.NameFore,
-			m.NameSur, m.Notes, m.Organization, m.PhoneFax, m.PhoneLandline,
-			m.PhoneMobile, ldapId)
-	}
-	return err
 }
 
 func getRoles_tx(ctx context.Context, tx pgx.Tx, ldapId int32) ([]types.LdapRole, error) {

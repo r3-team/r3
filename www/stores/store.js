@@ -85,6 +85,7 @@ const MyStore = Vuex.createStore({
 		moduleEntries:[],              // module entries for header/home page
 		moduleIdLast:null,             // module ID of last active module
 		moduleIdMapMeta:{},            // module ID map of module meta data (is owner, hidden, position, date change, custom languages)
+		oauthClientIdMapOpenId:[],     // OAUTH2 clients for Open ID Connect authentication
 		pageTitle:'',                  // web page title, set by app/form depending on navigation
 		pageTitleFull:'',              // web page title + instance name
 		popUpFormGlobal:null,          // configuration of global pop-up form
@@ -289,6 +290,7 @@ const MyStore = Vuex.createStore({
 		moduleEntries:           (state,payload) => state.moduleEntries            = payload,
 		moduleIdLast:            (state,payload) => state.moduleIdLast             = payload,
 		moduleIdMapMeta:         (state,payload) => state.moduleIdMapMeta          = payload,
+		oauthClientIdMapOpenId:  (state,payload) => state.oauthClientIdMapOpenId   = payload,
 		popUpFormGlobal:         (state,payload) => state.popUpFormGlobal          = payload,
 		productionMode:          (state,payload) => state.productionMode           = payload,
 		pwaDomainMap:            (state,payload) => state.pwaDomainMap             = payload,
@@ -452,6 +454,7 @@ const MyStore = Vuex.createStore({
 		moduleEntries:           (state) => state.moduleEntries,
 		moduleIdLast:            (state) => state.moduleIdLast,
 		moduleIdMapMeta:         (state) => state.moduleIdMapMeta,
+		oauthClientIdMapOpenId:  (state) => state.oauthClientIdMapOpenId,
 		pageTitleFull:           (state) => state.pageTitleFull,
 		popUpFormGlobal:         (state) => state.popUpFormGlobal,
 		productionMode:          (state) => state.productionMode,

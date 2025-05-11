@@ -11,6 +11,7 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/ldap/ldap_auth"
+	"r3/login"
 	"r3/login/login_session"
 	"r3/tools"
 	"r3/types"
@@ -18,10 +19,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gbrlsnchs/jwt/v3"
+	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/xlzd/gotp"
+	"golang.org/x/oauth2"
 )
 
 type tokenPayload struct {
@@ -29,39 +33,6 @@ type tokenPayload struct {
 	Admin   bool  `json:"admin"`   // login belongs to admin user
 	LoginId int64 `json:"loginId"` // login ID
 	NoAuth  bool  `json:"noAuth"`  // login without authentication (username only)
-}
-
-// blocks authentication by non-admins if system is not in production mode
-func authCheckSystemMode(admin bool) error {
-	if config.GetUint64("productionMode") == 0 && !admin {
-		return errors.New("maintenance mode is active, only admins may login")
-	}
-	return nil
-}
-
-func createToken(loginId int64, username string, admin bool, noAuth bool, tokenExpiryHours pgtype.Int4) (string, error) {
-
-	// token is valid for multiple days, if user decides to stay logged in
-	now := time.Now()
-	var expiryHoursTime time.Duration
-	if tokenExpiryHours.Valid {
-		expiryHoursTime = time.Duration(int64(tokenExpiryHours.Int32))
-	} else {
-		expiryHoursTime = time.Duration(int64(config.GetUint64("tokenExpiryHours")))
-	}
-
-	token, err := jwt.Sign(tokenPayload{
-		Payload: jwt.Payload{
-			Issuer:         "r3 application",
-			Subject:        username,
-			ExpirationTime: jwt.NumericDate(now.Add(expiryHoursTime * time.Hour)),
-			IssuedAt:       jwt.NumericDate(now),
-		},
-		LoginId: loginId,
-		Admin:   admin,
-		NoAuth:  noAuth,
-	}, config.GetTokenSecret())
-	return string(token), err
 }
 
 // performs authentication attempt for user by using username, password and MFA PINs (if used)
@@ -203,6 +174,128 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 	return username, token, saltKdf, mfaTokens, nil
 }
 
+// performs authentication for user by using Open ID Connect
+// returns login name, JWT, KDF salt (MFA is handled by external identity provider)
+func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier string, grantLoginId *int64, grantAdmin *bool) (string, string, string, error) {
+
+	c, err := cache.GetOauthClient(oauthClientId)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	if !c.ProviderUrl.Valid || !c.RedirectUrl.Valid {
+		return "", "", "", errors.New("missing provider or redirect URL for OAUTH client")
+	}
+
+	provider, err := oidc.NewProvider(ctx, c.ProviderUrl.String)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	oauth2Config := oauth2.Config{
+		ClientID:    c.ClientId,
+		RedirectURL: c.RedirectUrl.String,
+		Endpoint:    provider.Endpoint(),
+		Scopes:      []string{oidc.ScopeOpenID, "profile", "email"},
+	}
+
+	// exchange authentication code for tokens
+	tokens, err := oauth2Config.Exchange(ctx, code, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
+	if err != nil {
+		return "", "", "", err
+	}
+
+	// get & verify ID Token
+	tokenIdRaw, exists := tokens.Extra("id_token").(string)
+	if !exists {
+		return "", "", "", err
+	}
+	idToken, err := provider.Verifier(&oidc.Config{ClientID: c.ClientId}).Verify(ctx, tokenIdRaw)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	// authentication successful, retrieve login details
+	var active bool
+	var loginId int64
+	var saltKdf string
+	var admin bool = false
+	var limited bool
+	var nameDisplay pgtype.Text
+	var tokenExpiryHours pgtype.Int4
+	var username string = fmt.Sprintf("%s::%s", idToken.Issuer, idToken.Subject)
+
+	err = db.Pool.QueryRow(ctx, `
+		SELECT l.id, l.salt_kdf, l.admin, l.limited, l.token_expiry_hours, lm.name_display, l.active
+		FROM      instance.login      AS l
+		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
+		WHERE l.name            = $1
+		AND   l.oauth_client_id = $2
+	`, username, oauthClientId).Scan(&loginId, &saltKdf,
+		&admin, &limited, &tokenExpiryHours, &nameDisplay, &active)
+
+	if err != nil && err != pgx.ErrNoRows {
+		return "", "", "", err
+	}
+
+	if err == pgx.ErrNoRows {
+		// login does not exist yet, create
+		tx, err := db.Pool.Begin(ctx)
+		if err != nil {
+			return "", "", "", err
+		}
+		defer tx.Rollback(ctx)
+
+		// TEMP TODO
+		// assign admin via claim
+		// assign login meta via claim
+
+		loginId, err = login.Set_tx(ctx, tx, 0, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{Int32: c.Id, Valid: true},
+			username, "", admin, false, true, pgtype.Int4{}, types.LoginMeta{}, []uuid.UUID{}, []types.LoginAdminRecordSet{})
+
+		if err != nil {
+			return "", "", "", err
+		}
+
+		if err := tx.Commit(ctx); err != nil {
+			return "", "", "", err
+		}
+	} else {
+		if !active {
+			return "", "", "", errors.New("login is inactive")
+		}
+
+		// TEMP TODO
+		// update admin via claim
+		// update login meta via claim
+	}
+
+	if err := authCheckSystemMode(admin); err != nil {
+		return "", "", "", err
+	}
+
+	// everything in order, auth successful
+	username = idToken.Subject
+	if nameDisplay.Valid && nameDisplay.String != "" {
+		username = nameDisplay.String
+	}
+
+	token, err := createToken(loginId, username, admin, false, tokenExpiryHours)
+	if err != nil {
+		return "", "", "", err
+	}
+	if err := cache.LoadAccessIfUnknown(loginId); err != nil {
+		return "", "", "", err
+	}
+	if err := login_session.CheckConcurrentAccess(limited, loginId, admin); err != nil {
+		return "", "", "", err
+	}
+	*grantLoginId = loginId
+	*grantAdmin = admin
+
+	return username, token, "", nil
+}
+
 // performs authentication attempt for user by using existing JWT token, signed by server
 // returns login name and language code
 func Token(ctx context.Context, token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *bool) (string, string, error) {
@@ -303,4 +396,39 @@ func TokenFixed(ctx context.Context, loginId int64, context string, tokenFixed s
 	}
 	*grantToken, err = createToken(loginId, username, false, false, pgtype.Int4{})
 	return languageCode, err
+}
+
+// helpers
+
+// blocks authentication by non-admins if system is not in production mode
+func authCheckSystemMode(admin bool) error {
+	if config.GetUint64("productionMode") == 0 && !admin {
+		return errors.New("maintenance mode is active, only admins may login")
+	}
+	return nil
+}
+
+func createToken(loginId int64, username string, admin bool, noAuth bool, tokenExpiryHours pgtype.Int4) (string, error) {
+
+	// token is valid for multiple days, if user decides to stay logged in
+	now := time.Now()
+	var expiryHoursTime time.Duration
+	if tokenExpiryHours.Valid {
+		expiryHoursTime = time.Duration(int64(tokenExpiryHours.Int32))
+	} else {
+		expiryHoursTime = time.Duration(int64(config.GetUint64("tokenExpiryHours")))
+	}
+
+	token, err := jwt.Sign(tokenPayload{
+		Payload: jwt.Payload{
+			Issuer:         "r3 application",
+			Subject:        username,
+			ExpirationTime: jwt.NumericDate(now.Add(expiryHoursTime * time.Hour)),
+			IssuedAt:       jwt.NumericDate(now),
+		},
+		LoginId: loginId,
+		Admin:   admin,
+		NoAuth:  noAuth,
+	}, config.GetTokenSecret())
+	return string(token), err
 }

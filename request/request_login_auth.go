@@ -103,3 +103,34 @@ func LoginAuthTokenFixed(ctx context.Context, reqJson json.RawMessage, loginId *
 	*loginId = req.LoginId
 	return res, nil
 }
+
+// attempt login via Open ID Connect
+// applies login ID, admin to provided parameters if successful
+func LoginAuthOpenId(ctx context.Context, reqJson json.RawMessage, loginId *int64, admin *bool) (interface{}, error) {
+
+	var (
+		err error
+		req struct {
+			Code          string `json:"code"`
+			CodeVerifier  string `json:"codeVerifier"`
+			OauthClientId int32  `json:"oauthClientId"`
+		}
+		res struct {
+			LoginId   int64  `json:"loginId"`
+			LoginName string `json:"loginName"`
+			SaltKdf   string `json:"saltKdf"`
+			Token     string `json:"token"`
+		}
+	)
+
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+
+	res.LoginName, res.Token, res.SaltKdf, err = login_auth.OpenId(ctx, req.OauthClientId, req.Code, req.CodeVerifier, loginId, admin)
+	if err != nil {
+		return nil, err
+	}
+	res.LoginId = *loginId
+	return res, nil
+}

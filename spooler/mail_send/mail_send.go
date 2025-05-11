@@ -118,7 +118,10 @@ func do(m types.Mail) error {
 		if err != nil {
 			return err
 		}
-		ma.Password, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret, c.Tenant, c.TokenUrl, c.Scopes)
+		if !c.ClientSecret.Valid || !c.Tenant.Valid || !c.TokenUrl.Valid {
+			return errors.New("missing client secret, tenant or token URL in OAUTH client")
+		}
+		ma.Password, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret.String, c.Tenant.String, c.TokenUrl.String, c.Scopes)
 		if err != nil {
 			return err
 		}

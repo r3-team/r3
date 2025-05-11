@@ -648,6 +648,7 @@ let MyApp = {
 					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
 					this.$store.commit('mirrorMode',res.payload.mirror);
 					this.$store.commit('moduleIdMapMeta',res.payload.moduleIdMapMeta);
+					this.$store.commit('oauthClientIdMapOpenId',res.payload.oauthClientIdMapOpenId);
 					this.$store.commit('productionMode',res.payload.productionMode === 1);
 					this.$store.commit('pageTitleRefresh'); // update page title with new app name
 					this.$store.commit('pwaDomainMap',res.payload.pwaDomainMap);

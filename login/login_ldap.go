@@ -76,47 +76,47 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 		if err != nil {
 			return err
 		}
-		if ldap.LoginMetaAttributes.Department != "" && meta.Department != metaEx.Department {
+		if ldap.LoginMetaMap.Department != "" && meta.Department != metaEx.Department {
 			metaEx.Department = meta.Department
 			metaChanged = true
 		}
-		if ldap.LoginMetaAttributes.Email != "" && meta.Email != metaEx.Email {
+		if ldap.LoginMetaMap.Email != "" && meta.Email != metaEx.Email {
 			metaEx.Email = meta.Email
 			metaChanged = true
 		}
-		if ldap.LoginMetaAttributes.Location != "" && meta.Location != metaEx.Location {
+		if ldap.LoginMetaMap.Location != "" && meta.Location != metaEx.Location {
 			metaEx.Location = meta.Location
 			metaChanged = true
 		}
-		if ldap.LoginMetaAttributes.NameDisplay != "" && meta.NameDisplay != metaEx.NameDisplay {
+		if ldap.LoginMetaMap.NameDisplay != "" && meta.NameDisplay != metaEx.NameDisplay {
 			metaEx.NameDisplay = meta.NameDisplay
 			metaChanged = true
 		}
-		if ldap.LoginMetaAttributes.NameFore != "" && meta.NameFore != metaEx.NameFore {
+		if ldap.LoginMetaMap.NameFore != "" && meta.NameFore != metaEx.NameFore {
 			metaEx.NameFore = meta.NameFore
 			metaChanged = true
 		}
-		if ldap.LoginMetaAttributes.NameSur != "" && meta.NameSur != metaEx.NameSur {
+		if ldap.LoginMetaMap.NameSur != "" && meta.NameSur != metaEx.NameSur {
 			metaEx.NameSur = meta.NameSur
 			metaChanged = true
 		}
-		if ldap.LoginMetaAttributes.Notes != "" && meta.Notes != metaEx.Notes {
+		if ldap.LoginMetaMap.Notes != "" && meta.Notes != metaEx.Notes {
 			metaEx.Notes = meta.Notes
 			metaChanged = true
 		}
-		if ldap.LoginMetaAttributes.Organization != "" && meta.Organization != metaEx.Organization {
+		if ldap.LoginMetaMap.Organization != "" && meta.Organization != metaEx.Organization {
 			metaEx.Organization = meta.Organization
 			metaChanged = true
 		}
-		if ldap.LoginMetaAttributes.PhoneFax != "" && meta.PhoneFax != metaEx.PhoneFax {
+		if ldap.LoginMetaMap.PhoneFax != "" && meta.PhoneFax != metaEx.PhoneFax {
 			metaEx.PhoneFax = meta.PhoneFax
 			metaChanged = true
 		}
-		if ldap.LoginMetaAttributes.PhoneLandline != "" && meta.PhoneLandline != metaEx.PhoneLandline {
+		if ldap.LoginMetaMap.PhoneLandline != "" && meta.PhoneLandline != metaEx.PhoneLandline {
 			metaEx.PhoneLandline = meta.PhoneLandline
 			metaChanged = true
 		}
-		if ldap.LoginMetaAttributes.PhoneMobile != "" && meta.PhoneMobile != metaEx.PhoneMobile {
+		if ldap.LoginMetaMap.PhoneMobile != "" && meta.PhoneMobile != metaEx.PhoneMobile {
 			metaEx.PhoneMobile = meta.PhoneMobile
 			metaChanged = true
 		}
@@ -137,7 +137,7 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 
 	log.Info("ldap", fmt.Sprintf("user account '%s' is new or has been changed, updating login", name))
 
-	if _, err := Set_tx(ctx, tx, loginId, ldap.LoginTemplateId, ldapIdSql, ldapKeySql, name, "",
+	if _, err := Set_tx(ctx, tx, loginId, ldap.LoginTemplateId, ldapIdSql, ldapKeySql, pgtype.Int4{}, name, "",
 		adminEx, false, active, pgtype.Int4{}, metaEx, roleIdsEx, []types.LoginAdminRecordSet{}); err != nil {
 
 		return err

@@ -43,19 +43,19 @@ func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 
 	if newRecord {
 		_, err = tx.Exec(ctx, `
-			INSERT INTO instance.oauth_client (name, client_id, client_secret,
-				date_expiry, scopes, tenant, token_url)
-			VALUES ($1,$2,$3,$4,$5,$6,$7)
-		`, req.Name, req.ClientId, req.ClientSecret, req.DateExpiry,
-			req.Scopes, req.Tenant, req.TokenUrl)
+			INSERT INTO instance.oauth_client (login_template_id, name, flow, client_id, client_secret,
+				date_expiry, scopes, tenant, provider_url, redirect_url, token_url)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		`, req.LoginTemplateId, req.Name, req.Flow, req.ClientId, req.ClientSecret, req.DateExpiry,
+			req.Scopes, req.Tenant, req.ProviderUrl, req.RedirectUrl, req.TokenUrl)
 	} else {
 		_, err = tx.Exec(ctx, `
 			UPDATE instance.oauth_client
-			SET name = $1, client_id = $2, client_secret = $3, date_expiry = $4,
-				scopes = $5, tenant = $6, token_url = $7
-			WHERE id = $8
-		`, req.Name, req.ClientId, req.ClientSecret, req.DateExpiry,
-			req.Scopes, req.Tenant, req.TokenUrl, req.Id)
+			SET login_template_id = $1, name = $2, client_id = $3, client_secret = $4, date_expiry = $5,
+				scopes = $6, tenant = $7, provider_url = $8, redirect_url = $9, token_url = $10
+			WHERE id = $11
+		`, req.LoginTemplateId, req.Name, req.ClientId, req.ClientSecret, req.DateExpiry,
+			req.Scopes, req.Tenant, req.ProviderUrl, req.RedirectUrl, req.TokenUrl, req.Id)
 	}
 	return nil, err
 }

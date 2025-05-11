@@ -147,47 +147,47 @@ let MyAdminLdaps = {
 							</tr>
 							<tr>
 								<td>{{ capAppLogin.meta.department }}</td>
-								<td><input v-model="loginMetaAttributes.department" :placeholder="capApp.metaHint.department" /></td>
+								<td><input v-model="loginMetaMap.department" :placeholder="capApp.metaHint.department" /></td>
 							</tr>
 							<tr>
 								<td>{{ capAppLogin.meta.email }}</td>
-								<td><input v-model="loginMetaAttributes.email" :placeholder="capApp.metaHint.email" /></td>
+								<td><input v-model="loginMetaMap.email" :placeholder="capApp.metaHint.email" /></td>
 							</tr>
 							<tr>
 								<td>{{ capAppLogin.meta.location }}</td>
-								<td><input v-model="loginMetaAttributes.location" :placeholder="capApp.metaHint.location" /></td>
+								<td><input v-model="loginMetaMap.location" :placeholder="capApp.metaHint.location" /></td>
 							</tr>
 							<tr>
 								<td>{{ capAppLogin.meta.nameDisplay }}</td>
-								<td><input v-model="loginMetaAttributes.nameDisplay" :placeholder="capApp.metaHint.nameDisplay" /></td>
+								<td><input v-model="loginMetaMap.nameDisplay" :placeholder="capApp.metaHint.nameDisplay" /></td>
 							</tr>
 							<tr>
 								<td>{{ capAppLogin.meta.nameFore }}</td>
-								<td><input v-model="loginMetaAttributes.nameFore" :placeholder="capApp.metaHint.nameFore" /></td>
+								<td><input v-model="loginMetaMap.nameFore" :placeholder="capApp.metaHint.nameFore" /></td>
 							</tr>
 							<tr>
 								<td>{{ capAppLogin.meta.nameSur }}</td>
-								<td><input v-model="loginMetaAttributes.nameSur" :placeholder="capApp.metaHint.nameSur" /></td>
+								<td><input v-model="loginMetaMap.nameSur" :placeholder="capApp.metaHint.nameSur" /></td>
 							</tr>
 							<tr>
 								<td>{{ capAppLogin.meta.notes }}</td>
-								<td><input v-model="loginMetaAttributes.notes" :placeholder="capApp.metaHint.notes" /></td>
+								<td><input v-model="loginMetaMap.notes" :placeholder="capApp.metaHint.notes" /></td>
 							</tr>
 							<tr>
 								<td>{{ capAppLogin.meta.organization }}</td>
-								<td><input v-model="loginMetaAttributes.organization" :placeholder="capApp.metaHint.organization" /></td>
+								<td><input v-model="loginMetaMap.organization" :placeholder="capApp.metaHint.organization" /></td>
 							</tr>
 							<tr>
 								<td>{{ capAppLogin.meta.phoneFax }}</td>
-								<td><input v-model="loginMetaAttributes.phoneFax" :placeholder="capApp.metaHint.phoneFax" /></td>
+								<td><input v-model="loginMetaMap.phoneFax" :placeholder="capApp.metaHint.phoneFax" /></td>
 							</tr>
 							<tr>
 								<td>{{ capAppLogin.meta.phoneLandline }}</td>
-								<td><input v-model="loginMetaAttributes.phoneLandline" :placeholder="capApp.metaHint.phoneLandline" /></td>
+								<td><input v-model="loginMetaMap.phoneLandline" :placeholder="capApp.metaHint.phoneLandline" /></td>
 							</tr>
 							<tr>
 								<td>{{ capAppLogin.meta.phoneMobile }}</td>
-								<td><input v-model="loginMetaAttributes.phoneMobile" :placeholder="capApp.metaHint.phoneMobile" /></td>
+								<td><input v-model="loginMetaMap.phoneMobile" :placeholder="capApp.metaHint.phoneMobile" /></td>
 							</tr>
 						</template>
 						<tr>
@@ -286,7 +286,7 @@ let MyAdminLdaps = {
 			bindUserPw:'',
 			keyAttribute:'',
 			loginAttribute:'',
-			loginMetaAttributes:{
+			loginMetaMap:{
 				department:'department',
 				email:'mail',
 				location:'physicalDeliveryOfficeName',
@@ -314,7 +314,7 @@ let MyAdminLdaps = {
 			idEdit:-1,         // ID of LDAP connection being edited (0 = new)
 			inputKeys:[
 				'name','host','port','bindUserDn','bindUserPw',
-				'keyAttribute','loginAttribute','loginMetaAttributes',
+				'keyAttribute','loginAttribute','loginMetaMap',
 				'loginTemplateId','memberAttribute','searchClass','searchDn',
 				'assignRoles','msAdExt','starttls','tls','tlsVerify','roles'
 			],
@@ -369,7 +369,7 @@ let MyAdminLdaps = {
 				bindUserDn:'',
 				bindUserPw:'',
 				keyAttribute:'objectGUID',
-				loginMetaAttributes:{
+				loginMetaMap:{
 					department:'department',
 					email:'mail',
 					location:'physicalDeliveryOfficeName',
@@ -501,7 +501,7 @@ let MyAdminLdaps = {
 				bindUserPw:this.bindUserPw,
 				keyAttribute:this.keyAttribute,
 				loginAttribute:this.loginAttribute,
-				loginMetaAttributes:this.loginMetaAttributes,
+				loginMetaMap:this.loginMetaMap,
 				loginTemplateId:this.loginTemplateId,
 				memberAttribute:this.memberAttribute,
 				searchClass:this.searchClass,

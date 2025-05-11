@@ -354,6 +354,9 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		var resPayload interface{}
 
 		switch req.Action {
+		case "openId": // authentication via Open ID Connect
+			resPayload, err = request.LoginAuthOpenId(ctx, req.Payload, &client.loginId, &client.admin)
+
 		case "token": // authentication via JSON web token
 			resPayload, err = request.LoginAuthToken(ctx, req.Payload, &client.loginId, &client.admin, &client.noAuth)
 

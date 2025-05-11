@@ -63,38 +63,38 @@ func run(ldapId int32) error {
 	}
 
 	// add login meta attributes if set
-	if ldap.LoginMetaAttributes.Department != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.Department)
+	if ldap.LoginMetaMap.Department != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.Department)
 	}
-	if ldap.LoginMetaAttributes.Email != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.Email)
+	if ldap.LoginMetaMap.Email != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.Email)
 	}
-	if ldap.LoginMetaAttributes.Location != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.Location)
+	if ldap.LoginMetaMap.Location != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.Location)
 	}
-	if ldap.LoginMetaAttributes.NameDisplay != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.NameDisplay)
+	if ldap.LoginMetaMap.NameDisplay != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.NameDisplay)
 	}
-	if ldap.LoginMetaAttributes.NameFore != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.NameFore)
+	if ldap.LoginMetaMap.NameFore != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.NameFore)
 	}
-	if ldap.LoginMetaAttributes.NameSur != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.NameSur)
+	if ldap.LoginMetaMap.NameSur != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.NameSur)
 	}
-	if ldap.LoginMetaAttributes.Notes != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.Notes)
+	if ldap.LoginMetaMap.Notes != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.Notes)
 	}
-	if ldap.LoginMetaAttributes.Organization != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.Organization)
+	if ldap.LoginMetaMap.Organization != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.Organization)
 	}
-	if ldap.LoginMetaAttributes.PhoneFax != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.PhoneFax)
+	if ldap.LoginMetaMap.PhoneFax != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.PhoneFax)
 	}
-	if ldap.LoginMetaAttributes.PhoneLandline != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.PhoneLandline)
+	if ldap.LoginMetaMap.PhoneLandline != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.PhoneLandline)
 	}
-	if ldap.LoginMetaAttributes.PhoneMobile != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.PhoneMobile)
+	if ldap.LoginMetaMap.PhoneMobile != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.PhoneMobile)
 	}
 
 	// MS AD: we have two choices to lookup nested groups
@@ -189,38 +189,38 @@ func run(ldapId int32) error {
 					}
 				}
 
-				if ldap.LoginMetaAttributes.Department != "" {
-					l.meta.Department = entry.GetAttributeValue(ldap.LoginMetaAttributes.Department)
+				if ldap.LoginMetaMap.Department != "" {
+					l.meta.Department = entry.GetAttributeValue(ldap.LoginMetaMap.Department)
 				}
-				if ldap.LoginMetaAttributes.Email != "" {
-					l.meta.Email = entry.GetAttributeValue(ldap.LoginMetaAttributes.Email)
+				if ldap.LoginMetaMap.Email != "" {
+					l.meta.Email = entry.GetAttributeValue(ldap.LoginMetaMap.Email)
 				}
-				if ldap.LoginMetaAttributes.Location != "" {
-					l.meta.Location = entry.GetAttributeValue(ldap.LoginMetaAttributes.Location)
+				if ldap.LoginMetaMap.Location != "" {
+					l.meta.Location = entry.GetAttributeValue(ldap.LoginMetaMap.Location)
 				}
-				if ldap.LoginMetaAttributes.NameDisplay != "" {
-					l.meta.NameDisplay = entry.GetAttributeValue(ldap.LoginMetaAttributes.NameDisplay)
+				if ldap.LoginMetaMap.NameDisplay != "" {
+					l.meta.NameDisplay = entry.GetAttributeValue(ldap.LoginMetaMap.NameDisplay)
 				}
-				if ldap.LoginMetaAttributes.NameFore != "" {
-					l.meta.NameFore = entry.GetAttributeValue(ldap.LoginMetaAttributes.NameFore)
+				if ldap.LoginMetaMap.NameFore != "" {
+					l.meta.NameFore = entry.GetAttributeValue(ldap.LoginMetaMap.NameFore)
 				}
-				if ldap.LoginMetaAttributes.NameSur != "" {
-					l.meta.NameSur = entry.GetAttributeValue(ldap.LoginMetaAttributes.NameSur)
+				if ldap.LoginMetaMap.NameSur != "" {
+					l.meta.NameSur = entry.GetAttributeValue(ldap.LoginMetaMap.NameSur)
 				}
-				if ldap.LoginMetaAttributes.Notes != "" {
-					l.meta.Notes = entry.GetAttributeValue(ldap.LoginMetaAttributes.Notes)
+				if ldap.LoginMetaMap.Notes != "" {
+					l.meta.Notes = entry.GetAttributeValue(ldap.LoginMetaMap.Notes)
 				}
-				if ldap.LoginMetaAttributes.Organization != "" {
-					l.meta.Organization = entry.GetAttributeValue(ldap.LoginMetaAttributes.Organization)
+				if ldap.LoginMetaMap.Organization != "" {
+					l.meta.Organization = entry.GetAttributeValue(ldap.LoginMetaMap.Organization)
 				}
-				if ldap.LoginMetaAttributes.PhoneFax != "" {
-					l.meta.PhoneFax = entry.GetAttributeValue(ldap.LoginMetaAttributes.PhoneFax)
+				if ldap.LoginMetaMap.PhoneFax != "" {
+					l.meta.PhoneFax = entry.GetAttributeValue(ldap.LoginMetaMap.PhoneFax)
 				}
-				if ldap.LoginMetaAttributes.PhoneLandline != "" {
-					l.meta.PhoneLandline = entry.GetAttributeValue(ldap.LoginMetaAttributes.PhoneLandline)
+				if ldap.LoginMetaMap.PhoneLandline != "" {
+					l.meta.PhoneLandline = entry.GetAttributeValue(ldap.LoginMetaMap.PhoneLandline)
 				}
-				if ldap.LoginMetaAttributes.PhoneMobile != "" {
-					l.meta.PhoneMobile = entry.GetAttributeValue(ldap.LoginMetaAttributes.PhoneMobile)
+				if ldap.LoginMetaMap.PhoneMobile != "" {
+					l.meta.PhoneMobile = entry.GetAttributeValue(ldap.LoginMetaMap.PhoneMobile)
 				}
 
 				// role ID is empty if just users are queried
