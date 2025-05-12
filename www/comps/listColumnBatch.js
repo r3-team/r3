@@ -157,10 +157,7 @@ let MyListColumnBatch = {
 		rowCount:        { type:Number,  required:true }, // list total row count
 		show:            { type:Boolean, required:true }
 	},
-	emits:[
-		'close','del-aggregator','del-order','set-aggregator',
-		'set-filters','set-order','toggle'
-	],
+	emits:['close','del-aggregator','del-order','set-aggregator','set-filters','set-order','toggle'],
 	data() {
 		return {
 			inputSel:[], // value input for selection filter
@@ -170,23 +167,26 @@ let MyListColumnBatch = {
 		};
 	},
 	watch:{
-		columnFilterIndexes(v) {
-			if(v.length < 1)
-				return;
+		columnFilterIndexes:{
+			handler(v) {
+				if(v.length < 1)
+					return;
 
-			// apply input selection from column filter (must be first index)
-			let f = this.filtersColumn[v[0]];
-			if(f.side1.content === 'value') {
-				switch(f.operator) {
-					case 'ILIKE':  this.inputTxt = f.side1.value;     break;
-					case '<> ALL': this.inputSel = f.side1.value;     break;
-					case '= ANY':  this.migrateFilter(f.side1.value); break;
+				// apply input selection from column filter (must be first index)
+				const f = this.filtersColumn[v[0]];
+				if(f.side1.content === 'value') {
+					switch(f.operator) {
+						case 'ILIKE':  this.inputTxt = f.side1.value;                             break;
+						case '<> ALL': this.inputSel = JSON.parse(JSON.stringify(f.side1.value)); break;
+						case '= ANY':  this.migrateFilter(f.side1.value);                         break;
+					}
 				}
-			}
 
-			// apply NULL from filter to selection input
-			if(f.operator === '<> ALL' && v.length > 1 && this.filtersColumn[v[1]].operator === 'IS NOT NULL')
-				this.inputSel.push(null);
+				// apply NULL from filter to selection input
+				if(f.operator === '<> ALL' && v.length > 1 && this.filtersColumn[v[1]].operator === 'IS NOT NULL')
+					this.inputSel.push(null);
+			},
+			immediate:true
 		},
 		show(v) {
 			if(v) this.loadSelectionValues();
@@ -359,7 +359,7 @@ let MyListColumnBatch = {
 			ws.send('data','get',this.prepareDataGet(),false).then(
 				res => {
 					// exclude any value that is not in outdated inclusion filter
-					this.inputSel  = [];
+					this.inputSel = [];
 					for(const row of res.payload.rows) {
 						if(!valuesIncl.includes(row.values[0]))
 							this.inputSel.push(row.values[0]);
@@ -396,8 +396,8 @@ let MyListColumnBatch = {
 			const filterTxt = this.inputTxt !== '';
 			
 			// remove existing filters for this column
-			let filters = JSON.parse(JSON.stringify(this.filtersColumn));
-			filters = filters.filter((v,i) => !this.columnFilterIndexes.includes(i));
+			let filters = JSON.parse(JSON.stringify(this.filtersColumn))
+				.filter((v,i) => !this.columnFilterIndexes.includes(i));
 
 			if(this.inputTxt !== '' || this.inputSel.length !== 0) {
 				// add new filters for this column, if active
