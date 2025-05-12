@@ -163,8 +163,8 @@ let MyListColumnBatch = {
 	],
 	data() {
 		return {
-			inputTxt:'', // value input for text filter
 			inputSel:[], // value input for selection filter
+			inputTxt:'', // value input for text filter
 			values:[],   // values available to filter with (all values a list could have for column)
 			zeroSelection:false
 		};
@@ -174,8 +174,8 @@ let MyListColumnBatch = {
 			if(v.length < 1)
 				return;
 
-			// apply input values from column filter (must be first index)
-			const f = this.filtersColumn[v[0]];
+			// apply input selection from column filter (must be first index)
+			let f = this.filtersColumn[v[0]];
 			if(f.side1.content === 'value') {
 				switch(f.operator) {
 					case 'ILIKE':  this.inputTxt = f.side1.value;     break;
@@ -183,6 +183,10 @@ let MyListColumnBatch = {
 					case '= ANY':  this.migrateFilter(f.side1.value); break;
 				}
 			}
+
+			// apply NULL from filter to selection input
+			if(f.operator === '<> ALL' && v.length > 1 && this.filtersColumn[v[1]].operator === 'IS NOT NULL')
+				this.inputSel.push(null);
 		},
 		show(v) {
 			if(v) this.loadSelectionValues();
@@ -266,7 +270,7 @@ let MyListColumnBatch = {
 		
 		// presentation
 		displayValue(v) {
-			if(v === '-1')
+			if(v === null)
 				return '[' + this.capGen.button.empty + ']';
 			
 			const atr = this.attributeIdMap[this.columnUsedFilter.attributeId];
@@ -358,7 +362,7 @@ let MyListColumnBatch = {
 					this.inputSel  = [];
 					for(const row of res.payload.rows) {
 						if(!valuesIncl.includes(row.values[0]))
-							this.inputSel.push(row.values[0] !== null ? row.values[0] : '-1');
+							this.inputSel.push(row.values[0]);
 					}
 					this.set();
 				},
@@ -375,8 +379,7 @@ let MyListColumnBatch = {
 				res => {
 					this.values = [];
 					for(const row of res.payload.rows) {
-						// replace NULL with '-1' as <> ALL comparisson does not allow NULL inclusion
-						this.values.push(row.values[0] !== null ? row.values[0] : '-1');
+						this.values.push(row.values[0]);
 					}
 				},
 				this.$root.genericError
@@ -398,8 +401,9 @@ let MyListColumnBatch = {
 
 			if(this.inputTxt !== '' || this.inputSel.length !== 0) {
 				// add new filters for this column, if active
-				// a NULL value is represented by '-1' (<> ALL comparisson does not allow NULL inclusion in ARRAY)
-				const exclNull = !filterTxt && this.inputSel.includes('-1');
+				// NULL values are not allowed in '<> ALL' operator, will make entire set NULL if included
+				// remove NULL from original filter condition but add second NULL/NOT NULL condition to filter with it
+				const exclNull = !filterTxt && this.inputSel.includes(null);
 				filters.push({
 					connector:'AND',
 					index:0,
@@ -412,7 +416,7 @@ let MyListColumnBatch = {
 					side1:{
 						brackets:filterTxt ? 1 : 0,
 						content:'value',
-						value:filterTxt ? this.inputTxt : this.inputSel
+						value:filterTxt ? this.inputTxt : this.inputSel.filter(v => v !== null)
 					}
 				});
 				
