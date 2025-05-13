@@ -4,10 +4,11 @@ export {MyInputRichtext as default};
 let MyInputRichtext = {
 	name:'my-input-richtext',
 	components:{'editor':Editor},
-	template:`<div class="input-richtext" :key="key">
+	template:`<div class="input-richtext" v-if="ready && !loading">
 		<editor api-key="API_KEY"
 			v-model="input"
 			@keyDown="handleHotkeys"
+			@init="editorRegister"
 			:disabled="readonly"
 			:init="init"
 		/>
@@ -19,16 +20,13 @@ let MyInputRichtext = {
 		readonly:       { type:Boolean, required:false, default:false },
 		valueFiles:     { required:false, default:null }
 	},
-	watch:{
-		isMobile  () { this.key++; }, // update menu bar
-		readonly  () { this.key++; }, // update menu bar
-		valueFiles() { this.key++; }  // update image list
-	},
 	data() {
 		return {
-			imageList:[], // list of available images
-			key:0,        // key is used to force update richtext editor
+			editor:null,
+			init:{},
 			knownCtrlKeys:['q','s'],
+			loading:false,
+			ready:false,
 			
 			// tokens are used to authenticate with the current user session
 			// we cannot store sensitive tokens inside richtext, but tokens are required for accessing files
@@ -37,58 +35,28 @@ let MyInputRichtext = {
 		};
 	},
 	computed:{
-		init:(s) => {
-			s.parseImages();
+		images:(s) => {
+			if(s.valueFiles === null)
+				return [];
 			
-			let obj = {
-				branding:true, // https://www.tiny.cloud/docs/general-configuration-guide/attribution-requirements/
-				content_style:`
-					.mce-content-body{ background-color:transparent; }
-				`,
-				contextmenu:'copy cut paste | undo | link | inserttable table',
-				document_base_url:`${location.protocol}//${location.host}/`, // required when disabling 'relative_urls'
-				entity_encoding:'raw', // disable encoding of things like umlaute, not required for UTF8 storage and makes searches easier
-				height:'100%',
-				image_advtab:true,
-				image_list:s.imageList,
-				language:s.language,
-				menubar:false,
-				min_height:200,
-				paste_data_images:true,
-				plugins:'code emoticons image link lists searchreplace table',
-				relative_urls:false, // if URL to internal path is used in link, Tiny cuts of base URL ('https://system/#/app/...' -> '#/app/...'), Tiny then fails to open relative URL
-				resize:false,
-				selector:'textarea',
-				toolbar:`bold italic forecolor paragraphgroup numlist bullist alignleft aligncenter alignright alignjustify`,
-				toolbar_groups:{
-					paragraphgroup: {
-						icon:'change-case',
-						items:'styles fontsize fontfamily'
-					},
-					insertgroup:{
-						icon:'duplicate',
-						items:'hr emoticons link image table'
-					}
-				},
-				toolbar_mode:'floating',
-
-				// adds more elements that tiny does not convert (adds to default valid_elements)
-				// known issues: auto converts <b> to <strong>
-				extended_valid_elements:'b'
-			};
+			// file input is either array of files (initial value) or object of changes
+			// keep known initial files if changes occurred (we only use stored files)
+			if(!Array.isArray(s.valueFiles))
+				return [];
 			
-			if(s.settings.dark) {
-				obj.skin        = 'oxide-dark';
-				obj.content_css = 'dark';
+			let out = [];
+			for(const f of s.valueFiles) {
+				if(!f.name.match(/\.(bmp|jpg|jpeg|png|gif|svg|webp)$/i))
+					continue;
+				
+				// token is added to file HREF so that tiny can download image aspect ratios
+				// token is replaced in model value
+				out.push({
+					title:f.name,
+					value:s.getAttributeFileHref(s.attributeIdFile,f.id,f.name,s.token)
+				});
 			}
-			
-			if(!s.isMobile)
-				obj.toolbar = `undo redo ${obj.toolbar} outdent indent insertgroup code print searchreplace`;
-			
-			if(s.readonly)
-				obj.toolbar = false;
-			
-			return obj;
+			return out;
 		},
 		language:(s) => {
 			switch(s.settings.languageCode.substring(0,2)) {
@@ -126,34 +94,91 @@ let MyInputRichtext = {
 		
 		// stores
 		token:   (s) => s.$store.getters['local/token'],
+		isDark:  (s) => s.$store.getters.settings.dark,
 		isMobile:(s) => s.$store.getters.isMobile,
 		settings:(s) => s.$store.getters.settings
+	},
+	mounted() {
+		// refresh editor if menu bar or file values changes
+		this.$watch(() => [this.images,this.isDark,this.isMobile,this.readonly],this.editorLoad);
+		this.editorLoad();
+	},
+	unmounted() {
+		this.editorRemove();
 	},
 	methods:{
 		// externals
 		getAttributeFileHref,
 		
-		parseImages() {
-			if(this.valueFiles === null)
-				return this.imageList = [];
-			
-			// file input is either array of files (initial value) or object of changes
-			// keep known initial files if changes occurred (we only use stored files)
-			if(!Array.isArray(this.valueFiles))
+		editorLoad() {
+			if(this.loading)
 				return;
+
+			this.editorRemove();
+			this.loading = true;
 			
-			this.imageList = [];
-			for(let f of this.valueFiles) {
-				if(!f.name.match(/\.(bmp|jpg|jpeg|png|gif|svg|webp)$/i))
-					continue;
-				
-				// token is added to file HREF so that tiny can download image aspect ratios
-				// token is replaced in model value
-				this.imageList.push({
-					title:f.name,
-					value:this.getAttributeFileHref(
-						this.attributeIdFile,f.id,f.name,this.token)
-				});
+			let obj = {
+				branding:true, // https://www.tiny.cloud/docs/general-configuration-guide/attribution-requirements/
+				content_style:`
+					.mce-content-body{ background-color:transparent; }
+				`,
+				contextmenu:'copy cut paste | undo | link | inserttable table',
+				document_base_url:`${location.protocol}//${location.host}/`, // required when disabling 'relative_urls'
+				entity_encoding:'raw', // disable encoding of things like umlaute, not required for UTF8 storage and makes searches easier
+				height:'100%',
+				image_advtab:true,
+				image_list:JSON.parse(JSON.stringify(this.images)),
+				language:this.language,
+				menubar:false,
+				min_height:200,
+				paste_data_images:true,
+				plugins:'code emoticons image link lists searchreplace table',
+				relative_urls:false, // if URL to internal path is used in link, Tiny cuts of base URL ('https://system/#/app/...' -> '#/app/...'), Tiny then fails to open relative URL
+				resize:false,
+				selector:'textarea',
+				toolbar:`bold italic forecolor paragraphgroup numlist bullist alignleft aligncenter alignright alignjustify`,
+				toolbar_groups:{
+					paragraphgroup: {
+						icon:'change-case',
+						items:'styles fontsize fontfamily'
+					},
+					insertgroup:{
+						icon:'duplicate',
+						items:'hr emoticons link image table'
+					}
+				},
+				toolbar_mode:'floating',
+
+				// adds more elements that tiny does not convert (adds to default valid_elements)
+				// known issues: auto converts <b> to <strong>
+				extended_valid_elements:'b'
+			};
+			
+			if(this.settings.dark) {
+				obj.skin        = 'oxide-dark';
+				obj.content_css = 'dark';
+			}
+			
+			if(!this.isMobile)
+				obj.toolbar = `undo redo ${obj.toolbar} outdent indent insertgroup code print searchreplace`;
+			
+			if(this.readonly)
+				obj.toolbar = false;
+			
+			this.init = JSON.parse(JSON.stringify(obj));
+
+			this.$nextTick(() => {
+				this.loading = false;
+				this.ready   = true;
+			});
+		},
+		editorRegister(ev,editor) {
+			this.editor = editor;
+		},
+		editorRemove() {
+			if(this.editor !== null) {
+				this.editor.remove();
+				this.editor = null;
 			}
 		},
 		
