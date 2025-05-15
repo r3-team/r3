@@ -99,6 +99,7 @@ type OauthClient struct {
 
 	// authCodePkce
 	LoginTemplateId pgtype.Int8 `json:"loginTemplateId"` // template for new logins (applies login settings)
+	LoginMetaMap    LoginMeta   `json:"loginMetaMap"`    // map claim key <-> login meta data key
 	ProviderUrl     pgtype.Text `json:"providerUrl"`
 	RedirectUrl     pgtype.Text `json:"redirectUrl"`
 }

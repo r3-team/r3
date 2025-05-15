@@ -12,6 +12,7 @@ import (
 	"r3/handler"
 	"r3/ldap/ldap_auth"
 	"r3/login"
+	"r3/login/login_meta_map"
 	"r3/login/login_session"
 	"r3/tools"
 	"r3/types"
@@ -66,7 +67,8 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 		FROM      instance.login      AS l
 		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
 		WHERE l.active
-		AND   l.name = $1
+		AND   l.name         = $1
+		AND   l.oauth_client IS NULL
 	`, username).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin,
 		&noAuth, &limited, &tokenExpiryHours, &nameDisplay)
 
@@ -217,41 +219,75 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 
 	// authentication successful, retrieve login details
 	var active bool
-	var loginId int64
+	var loginId int64 = 0
 	var saltKdf string
 	var admin bool = false
 	var limited bool
-	var nameDisplay pgtype.Text
 	var tokenExpiryHours pgtype.Int4
+	var metaEx types.LoginMeta
 	var username string = fmt.Sprintf("%s::%s", idToken.Issuer, idToken.Subject)
+	var newLogin bool = false
 
-	err = db.Pool.QueryRow(ctx, `
-		SELECT l.id, l.salt_kdf, l.admin, l.limited, l.token_expiry_hours, lm.name_display, l.active
+	if err := db.Pool.QueryRow(ctx, `
+		SELECT l.id, l.salt_kdf, l.admin, l.limited, l.token_expiry_hours, l.active,
+			COALESCE(m.department, ''),
+			COALESCE(m.email, ''),
+			COALESCE(m.location, ''),
+			COALESCE(m.name_display, ''),
+			COALESCE(m.name_fore, ''),
+			COALESCE(m.name_sur, ''),
+			COALESCE(m.notes, ''),
+			COALESCE(m.organization, ''),
+			COALESCE(m.phone_fax, ''),
+			COALESCE(m.phone_landline, ''),
+			COALESCE(m.phone_mobile, '')
 		FROM      instance.login      AS l
-		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
+		LEFT JOIN instance.login_meta AS m ON m.login_id = l.id
 		WHERE l.name            = $1
 		AND   l.oauth_client_id = $2
-	`, username, oauthClientId).Scan(&loginId, &saltKdf,
-		&admin, &limited, &tokenExpiryHours, &nameDisplay, &active)
+	`, username, oauthClientId).Scan(&loginId, &saltKdf, &admin, &limited, &tokenExpiryHours, &active,
+		&metaEx.Department, &metaEx.Email, &metaEx.Location, &metaEx.NameDisplay, &metaEx.NameFore, &metaEx.NameSur,
+		&metaEx.Notes, &metaEx.Organization, &metaEx.PhoneFax, &metaEx.PhoneLandline, &metaEx.PhoneMobile); err != nil {
 
-	if err != nil && err != pgx.ErrNoRows {
-		return "", "", "", err
+		if err == pgx.ErrNoRows {
+			newLogin = true
+		} else {
+			return "", "", "", err
+		}
 	}
 
-	if err == pgx.ErrNoRows {
-		// login does not exist yet, create
+	// block known but inactive logins
+	if !newLogin && !active {
+		return "", "", "", errors.New("login is inactive")
+	}
+
+	// read mapped login meta data from ID token claims
+	var claimsIf interface{}
+	if err := idToken.Claims(&claimsIf); err != nil {
+		return "", "", "", err
+	}
+	claims, ok := claimsIf.(map[string]interface{})
+	if !ok {
+		return "", "", "", errors.New("ID token is not a key/value JSON object")
+	}
+	meta := login_meta_map.ReadMetaFromMapIf(c.LoginMetaMap, claims)
+	metaChanged := false
+
+	if newLogin {
+		metaEx = meta
+	} else {
+		metaEx, metaChanged = login_meta_map.UpdateChangedMeta(c.LoginMetaMap, metaEx, meta)
+	}
+
+	if newLogin || metaChanged {
 		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
 			return "", "", "", err
 		}
 		defer tx.Rollback(ctx)
 
-		// TEMP TODO
-		// assign admin via claim
-		// assign login meta via claim
-
-		loginId, err = login.Set_tx(ctx, tx, 0, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{Int32: c.Id, Valid: true},
-			username, "", admin, false, true, pgtype.Int4{}, types.LoginMeta{}, []uuid.UUID{}, []types.LoginAdminRecordSet{})
+		loginId, err = login.Set_tx(ctx, tx, loginId, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{Int32: c.Id, Valid: true},
+			username, "", admin, false, true, tokenExpiryHours, metaEx, []uuid.UUID{}, []types.LoginAdminRecordSet{})
 
 		if err != nil {
 			return "", "", "", err
@@ -260,14 +296,6 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		if err := tx.Commit(ctx); err != nil {
 			return "", "", "", err
 		}
-	} else {
-		if !active {
-			return "", "", "", errors.New("login is inactive")
-		}
-
-		// TEMP TODO
-		// update admin via claim
-		// update login meta via claim
 	}
 
 	if err := authCheckSystemMode(admin); err != nil {
@@ -276,8 +304,8 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 
 	// everything in order, auth successful
 	username = idToken.Subject
-	if nameDisplay.Valid && nameDisplay.String != "" {
-		username = nameDisplay.String
+	if meta.NameDisplay != "" {
+		username = meta.NameDisplay
 	}
 
 	token, err := createToken(loginId, username, admin, false, tokenExpiryHours)

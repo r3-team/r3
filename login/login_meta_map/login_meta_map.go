@@ -10,6 +10,40 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+func Get_tx(ctx context.Context, tx pgx.Tx, ldapId pgtype.Int4, oauthClientId pgtype.Int4) (types.LoginMeta, error) {
+
+	entity := "ldap_id"
+	entityId := ldapId
+	if oauthClientId.Valid {
+		entity = "oauth_client_id"
+		entityId = oauthClientId
+	}
+	var m types.LoginMeta
+
+	err := tx.QueryRow(ctx, fmt.Sprintf(`
+		SELECT
+			COALESCE(department, ''),
+			COALESCE(email, ''),
+			COALESCE(location, ''),
+			COALESCE(name_display, ''),
+			COALESCE(name_fore, ''),
+			COALESCE(name_sur, ''),
+			COALESCE(notes, ''),
+			COALESCE(organization, ''),
+			COALESCE(phone_fax, ''),
+			COALESCE(phone_landline, ''),
+			COALESCE(phone_mobile, '')
+		FROM instance.login_meta_map
+		WHERE %s = $1
+	`, entity), entityId).Scan(&m.Department, &m.Email, &m.Location, &m.NameDisplay, &m.NameFore,
+		&m.NameSur, &m.Notes, &m.Organization, &m.PhoneFax, &m.PhoneLandline, &m.PhoneMobile)
+
+	if err != nil && err != pgx.ErrNoRows {
+		return m, err
+	}
+	return m, nil
+}
+
 func Set_tx(ctx context.Context, tx pgx.Tx, ldapId pgtype.Int4, oauthClientId pgtype.Int4, m types.LoginMeta) error {
 
 	entity := "ldap_id"
@@ -66,4 +100,138 @@ func Set_tx(ctx context.Context, tx pgx.Tx, ldapId pgtype.Int4, oauthClientId pg
 			m.PhoneMobile, entityId)
 	}
 	return err
+}
+
+// for every meta field mapped, check if there is any difference between old and new login meta data
+// returns updated login meta data and TRUE if a change occured
+func UpdateChangedMeta(metaMap types.LoginMeta, metaOld types.LoginMeta, metaNew types.LoginMeta) (types.LoginMeta, bool) {
+	updated := false
+	if metaMap.Department != "" && metaNew.Department != metaOld.Department {
+		metaOld.Department = metaNew.Department
+		updated = true
+	}
+	if metaMap.Email != "" && metaNew.Email != metaOld.Email {
+		metaOld.Email = metaNew.Email
+		updated = true
+	}
+	if metaMap.Location != "" && metaNew.Location != metaOld.Location {
+		metaOld.Location = metaNew.Location
+		updated = true
+	}
+	if metaMap.NameDisplay != "" && metaNew.NameDisplay != metaOld.NameDisplay {
+		metaOld.NameDisplay = metaNew.NameDisplay
+		updated = true
+	}
+	if metaMap.NameFore != "" && metaNew.NameFore != metaOld.NameFore {
+		metaOld.NameFore = metaNew.NameFore
+		updated = true
+	}
+	if metaMap.NameSur != "" && metaNew.NameSur != metaOld.NameSur {
+		metaOld.NameSur = metaNew.NameSur
+		updated = true
+	}
+	if metaMap.Notes != "" && metaNew.Notes != metaOld.Notes {
+		metaOld.Notes = metaNew.Notes
+		updated = true
+	}
+	if metaMap.Organization != "" && metaNew.Organization != metaOld.Organization {
+		metaOld.Organization = metaNew.Organization
+		updated = true
+	}
+	if metaMap.PhoneFax != "" && metaNew.PhoneFax != metaOld.PhoneFax {
+		metaOld.PhoneFax = metaNew.PhoneFax
+		updated = true
+	}
+	if metaMap.PhoneLandline != "" && metaNew.PhoneLandline != metaOld.PhoneLandline {
+		metaOld.PhoneLandline = metaNew.PhoneLandline
+		updated = true
+	}
+	if metaMap.PhoneMobile != "" && metaNew.PhoneMobile != metaOld.PhoneMobile {
+		metaOld.PhoneMobile = metaNew.PhoneMobile
+		updated = true
+	}
+	return metaOld, updated
+}
+
+func ReadMetaFromMapIf(metaMap types.LoginMeta, dataIf map[string]interface{}) types.LoginMeta {
+	var metaNew types.LoginMeta
+
+	if metaMap.Department != "" {
+		if v, ok := dataIf[metaMap.Department]; ok {
+			if s, ok := v.(string); ok {
+				metaNew.Department = s
+			}
+		}
+	}
+	if metaMap.Email != "" {
+		if v, ok := dataIf[metaMap.Email]; ok {
+			if s, ok := v.(string); ok {
+				metaNew.Email = s
+			}
+		}
+	}
+	if metaMap.Location != "" {
+		if v, ok := dataIf[metaMap.Location]; ok {
+			if s, ok := v.(string); ok {
+				metaNew.Location = s
+			}
+		}
+	}
+	if metaMap.NameDisplay != "" {
+		if v, ok := dataIf[metaMap.NameDisplay]; ok {
+			if s, ok := v.(string); ok {
+				metaNew.NameDisplay = s
+			}
+		}
+	}
+	if metaMap.NameFore != "" {
+		if v, ok := dataIf[metaMap.NameFore]; ok {
+			if s, ok := v.(string); ok {
+				metaNew.NameFore = s
+			}
+		}
+	}
+	if metaMap.NameSur != "" {
+		if v, ok := dataIf[metaMap.NameSur]; ok {
+			if s, ok := v.(string); ok {
+				metaNew.NameSur = s
+			}
+		}
+	}
+	if metaMap.Notes != "" {
+		if v, ok := dataIf[metaMap.Notes]; ok {
+			if s, ok := v.(string); ok {
+				metaNew.Notes = s
+			}
+		}
+	}
+	if metaMap.Organization != "" {
+		if v, ok := dataIf[metaMap.Organization]; ok {
+			if s, ok := v.(string); ok {
+				metaNew.Organization = s
+			}
+		}
+	}
+	if metaMap.PhoneFax != "" {
+		if v, ok := dataIf[metaMap.PhoneFax]; ok {
+			if s, ok := v.(string); ok {
+				metaNew.PhoneFax = s
+			}
+		}
+	}
+	if metaMap.PhoneLandline != "" {
+		if v, ok := dataIf[metaMap.PhoneLandline]; ok {
+			if s, ok := v.(string); ok {
+				metaNew.PhoneLandline = s
+			}
+		}
+	}
+	if metaMap.PhoneMobile != "" {
+		if v, ok := dataIf[metaMap.PhoneMobile]; ok {
+			if s, ok := v.(string); ok {
+				metaNew.PhoneMobile = s
+			}
+		}
+	}
+	return metaNew
 }

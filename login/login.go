@@ -237,8 +237,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 // set login with meta data
 // returns created login ID if new login
 func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4, ldapKey pgtype.Text,
-	oauthClientId pgtype.Int4, name string, pass string, admin bool, noAuth bool, active bool,
-	tokenExpiryHours pgtype.Int4, meta types.LoginMeta, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
+	oauthClientId pgtype.Int4, name string, pass string, admin bool, noAuth bool, active bool, tokenExpiryHours pgtype.Int4,
+	meta types.LoginMeta, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
 
 	if name == "" {
 		return 0, errors.New("name must not be empty")

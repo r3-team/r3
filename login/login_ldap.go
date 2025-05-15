@@ -7,6 +7,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/login/login_meta"
+	"r3/login/login_meta_map"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -76,50 +77,7 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 		if err != nil {
 			return err
 		}
-		if ldap.LoginMetaMap.Department != "" && meta.Department != metaEx.Department {
-			metaEx.Department = meta.Department
-			metaChanged = true
-		}
-		if ldap.LoginMetaMap.Email != "" && meta.Email != metaEx.Email {
-			metaEx.Email = meta.Email
-			metaChanged = true
-		}
-		if ldap.LoginMetaMap.Location != "" && meta.Location != metaEx.Location {
-			metaEx.Location = meta.Location
-			metaChanged = true
-		}
-		if ldap.LoginMetaMap.NameDisplay != "" && meta.NameDisplay != metaEx.NameDisplay {
-			metaEx.NameDisplay = meta.NameDisplay
-			metaChanged = true
-		}
-		if ldap.LoginMetaMap.NameFore != "" && meta.NameFore != metaEx.NameFore {
-			metaEx.NameFore = meta.NameFore
-			metaChanged = true
-		}
-		if ldap.LoginMetaMap.NameSur != "" && meta.NameSur != metaEx.NameSur {
-			metaEx.NameSur = meta.NameSur
-			metaChanged = true
-		}
-		if ldap.LoginMetaMap.Notes != "" && meta.Notes != metaEx.Notes {
-			metaEx.Notes = meta.Notes
-			metaChanged = true
-		}
-		if ldap.LoginMetaMap.Organization != "" && meta.Organization != metaEx.Organization {
-			metaEx.Organization = meta.Organization
-			metaChanged = true
-		}
-		if ldap.LoginMetaMap.PhoneFax != "" && meta.PhoneFax != metaEx.PhoneFax {
-			metaEx.PhoneFax = meta.PhoneFax
-			metaChanged = true
-		}
-		if ldap.LoginMetaMap.PhoneLandline != "" && meta.PhoneLandline != metaEx.PhoneLandline {
-			metaEx.PhoneLandline = meta.PhoneLandline
-			metaChanged = true
-		}
-		if ldap.LoginMetaMap.PhoneMobile != "" && meta.PhoneMobile != metaEx.PhoneMobile {
-			metaEx.PhoneMobile = meta.PhoneMobile
-			metaChanged = true
-		}
+		metaEx, metaChanged = login_meta_map.UpdateChangedMeta(ldap.LoginMetaMap, metaEx, meta)
 	}
 
 	// abort if no changes are there to apply

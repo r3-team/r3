@@ -3,10 +3,12 @@ package cache
 import (
 	"context"
 	"fmt"
+	"r3/login/login_meta_map"
 	"r3/types"
 	"sync"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const (
@@ -62,14 +64,14 @@ func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 
 	for rows.Next() {
 		var c types.OauthClient
-
 		if err := rows.Scan(&c.Id, &c.Name, &c.Flow, &c.ClientId, &c.ClientSecret, &c.DateExpiry,
 			&c.Scopes, &c.Tenant, &c.ProviderUrl, &c.RedirectUrl, &c.TokenUrl); err != nil {
 
 			return err
 		}
-
 		oauthClientIdMap[c.Id] = c
+
+		// store open ID clients in reference map
 		if c.Flow == oauthFlowAuthCodePkce {
 			oauthClientIdMapOpenId[c.Id] = types.OauthClientOpenId{
 				Id:          c.Id,
@@ -80,6 +82,18 @@ func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 				Scopes:      c.Scopes,
 			}
 		}
+	}
+	rows.Close()
+
+	// retrieve login meta mapping
+	for k, c := range oauthClientIdMap {
+		if c.Flow == oauthFlowAuthCodePkce {
+			c.LoginMetaMap, err = login_meta_map.Get_tx(ctx, tx, pgtype.Int4{}, pgtype.Int4{Int32: c.Id, Valid: true})
+			if err != nil {
+				return err
+			}
+		}
+		oauthClientIdMap[k] = c
 	}
 	return nil
 }
