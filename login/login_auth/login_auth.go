@@ -12,11 +12,13 @@ import (
 	"r3/handler"
 	"r3/ldap/ldap_auth"
 	"r3/login"
-	"r3/login/login_meta_map"
+	"r3/login/login_clusterEvent"
+	"r3/login/login_metaMap"
 	"r3/login/login_session"
 	"r3/tools"
 	"r3/types"
 	"slices"
+	"sort"
 	"strings"
 	"time"
 
@@ -67,8 +69,8 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 		FROM      instance.login      AS l
 		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
 		WHERE l.active
-		AND   l.name         = $1
-		AND   l.oauth_client IS NULL
+		AND   l.name            = $1
+		AND   l.oauth_client_id IS NULL
 	`, username).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin,
 		&noAuth, &limited, &tokenExpiryHours, &nameDisplay)
 
@@ -221,15 +223,24 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	var active bool
 	var loginId int64 = 0
 	var saltKdf string
-	var admin bool = false
-	var limited bool
 	var tokenExpiryHours pgtype.Int4
+	var roleIds []uuid.UUID
+	var roleIdsEx []uuid.UUID
 	var metaEx types.LoginMeta
-	var username string = fmt.Sprintf("%s::%s", idToken.Issuer, idToken.Subject)
-	var newLogin bool = false
+	var username = fmt.Sprintf("%s::%s", idToken.Issuer, idToken.Subject)
+	var admin = false
+	var limited = false
+	var newLogin = false
+	var metaChanged = false
+	var rolesChanged = false
 
 	if err := db.Pool.QueryRow(ctx, `
-		SELECT l.id, l.salt_kdf, l.admin, l.limited, l.token_expiry_hours, l.active,
+		SELECT l.id, l.salt_kdf, l.admin, l.limited, l.token_expiry_hours, l.active, ARRAY(
+				SELECT role_id
+				FROM instance.login_role
+				WHERE login_id = l.id
+				ORDER BY role_id
+			)::UUID[],
 			COALESCE(m.department, ''),
 			COALESCE(m.email, ''),
 			COALESCE(m.location, ''),
@@ -245,7 +256,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		LEFT JOIN instance.login_meta AS m ON m.login_id = l.id
 		WHERE l.name            = $1
 		AND   l.oauth_client_id = $2
-	`, username, oauthClientId).Scan(&loginId, &saltKdf, &admin, &limited, &tokenExpiryHours, &active,
+	`, username, oauthClientId).Scan(&loginId, &saltKdf, &admin, &limited, &tokenExpiryHours, &active, &roleIdsEx,
 		&metaEx.Department, &metaEx.Email, &metaEx.Location, &metaEx.NameDisplay, &metaEx.NameFore, &metaEx.NameSur,
 		&metaEx.Notes, &metaEx.Organization, &metaEx.PhoneFax, &metaEx.PhoneLandline, &metaEx.PhoneMobile); err != nil {
 
@@ -254,11 +265,6 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		} else {
 			return "", "", "", err
 		}
-	}
-
-	// block known but inactive logins
-	if !newLogin && !active {
-		return "", "", "", errors.New("login is inactive")
 	}
 
 	// read mapped login meta data from ID token claims
@@ -270,16 +276,46 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	if !ok {
 		return "", "", "", errors.New("ID token is not a key/value JSON object")
 	}
-	meta := login_meta_map.ReadMetaFromMapIf(c.LoginMetaMap, claims)
-	metaChanged := false
-
+	meta := login_metaMap.ReadMetaFromMapIf(c.LoginMetaMap, claims)
 	if newLogin {
 		metaEx = meta
 	} else {
-		metaEx, metaChanged = login_meta_map.UpdateChangedMeta(c.LoginMetaMap, metaEx, meta)
+		metaEx, metaChanged = login_metaMap.UpdateChangedMeta(c.LoginMetaMap, metaEx, meta)
 	}
 
-	if newLogin || metaChanged {
+	// role assignment via claim
+	if c.ClaimRoles.Valid && c.ClaimRoles.String != "" {
+		if roleClaim, ok := claims[c.ClaimRoles.String]; ok {
+			if roles, ok := roleClaim.([]interface{}); ok {
+
+				// collect names in roles claim
+				nameMap := make(map[string]bool)
+				for _, roleIf := range roles {
+					if role, ok := roleIf.(string); ok {
+						nameMap[role] = true
+					}
+				}
+				// if name is used in any role assignment, assign role
+				for _, assign := range c.LoginRoleAssign {
+					if _, ok := nameMap[assign.SearchString]; ok {
+						roleIds = append(roleIds, assign.RoleId)
+					}
+				}
+			}
+		}
+		sort.Slice(roleIds, func(i, j int) bool {
+			return roleIds[i].String() < roleIds[j].String()
+		})
+		if !slices.Equal(roleIdsEx, roleIds) {
+			roleIdsEx = roleIds
+			rolesChanged = true
+		}
+	}
+
+	// set login if new or anything changed
+	// inactive users cannot authenticate via Open ID, so there is no way to disable users this way
+	//  but if the current active state is disabled, it must re-enable the user
+	if newLogin || metaChanged || rolesChanged || !active {
 		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
 			return "", "", "", err
@@ -287,12 +323,14 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		defer tx.Rollback(ctx)
 
 		loginId, err = login.Set_tx(ctx, tx, loginId, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{Int32: c.Id, Valid: true},
-			username, "", admin, false, true, tokenExpiryHours, metaEx, []uuid.UUID{}, []types.LoginAdminRecordSet{})
+			username, "", admin, false, true, tokenExpiryHours, metaEx, roleIdsEx, []types.LoginAdminRecordSet{})
 
 		if err != nil {
 			return "", "", "", err
 		}
-
+		if active && rolesChanged {
+			login_clusterEvent.Reauth_tx(ctx, tx, "ldap", loginId, username)
+		}
 		if err := tx.Commit(ctx); err != nil {
 			return "", "", "", err
 		}
@@ -321,7 +359,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	*grantLoginId = loginId
 	*grantAdmin = admin
 
-	return username, token, "", nil
+	return username, token, saltKdf, nil
 }
 
 // performs authentication attempt for user by using existing JWT token, signed by server

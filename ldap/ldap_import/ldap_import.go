@@ -111,34 +111,34 @@ func run(ldapId int32) error {
 	logins := make(map[string]loginType) // key: key LDAP attribute
 
 	// LDAP auto role assignment removes existing roles from user, defining no roles here would remove all access
-	if ldap.AssignRoles && len(ldap.Roles) == 0 {
+	if ldap.AssignRoles && len(ldap.LoginRoleAssign) == 0 {
 		return errors.New("no roles are defined for assignment by LDAP group")
 	}
 
 	// if LDAP auto role assignment is disabled, remove defined role assignments (do not need to be queried)
-	if !ldap.AssignRoles && len(ldap.Roles) != 0 {
-		ldap.Roles = make([]types.LdapRole, 0)
+	if !ldap.AssignRoles && len(ldap.LoginRoleAssign) != 0 {
+		ldap.LoginRoleAssign = make([]types.LoginRoleAssign, 0)
 	}
 
 	// to get users with and without roles, we need multiple queries
 	// * query of users in membership of each defined group DN (for role assignment)
 	// * query of just users (without we´d loose users that have no defined group DN assigned)
-	ldap.Roles = append(ldap.Roles, types.LdapRole{}) // empty group DN
+	ldap.LoginRoleAssign = append(ldap.LoginRoleAssign, types.LoginRoleAssign{}) // empty group DN
 
-	for _, role := range ldap.Roles {
+	for _, role := range ldap.LoginRoleAssign {
 
 		filters := fmt.Sprintf("(&(objectClass=%s))", ldap.SearchClass)
 
 		// set filters to search for group DN if role assignment is active
 		// group DN is empty if just users are queried
-		if ldap.AssignRoles && role.GroupDn != "" {
+		if ldap.AssignRoles && role.SearchString != "" {
 
 			if ldap.MsAdExt {
 				filters = fmt.Sprintf("(&(objectClass=%s)(%s:1.2.840.113556.1.4.1941:=%s))",
-					ldap.SearchClass, ldap.MemberAttribute, role.GroupDn)
+					ldap.SearchClass, ldap.MemberAttribute, role.SearchString)
 			} else {
 				filters = fmt.Sprintf("(&(objectClass=%s)(%s=%s))",
-					ldap.SearchClass, ldap.MemberAttribute, role.GroupDn)
+					ldap.SearchClass, ldap.MemberAttribute, role.SearchString)
 			}
 		}
 

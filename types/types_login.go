@@ -62,6 +62,10 @@ type LoginRecord struct {
 	Id   int64  `json:"id"`   // ID of relation record
 	Name string `json:"name"` // name for relation record (based on lookup attribute)
 }
+type LoginRoleAssign struct {
+	RoleId       uuid.UUID `json:"roleId"`
+	SearchString string    `json:"searchString"` // if value matches this string, role is assigned
+}
 type LoginTokenFixed struct {
 	Id         int64  `json:"id"`
 	Name       string `json:"name"`    // to identify token user/device

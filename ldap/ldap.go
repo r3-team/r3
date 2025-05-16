@@ -4,11 +4,11 @@ import (
 	"context"
 	"r3/cache"
 	"r3/login"
-	"r3/login/login_meta_map"
+	"r3/login/login_metaMap"
+	"r3/login/login_roleAssign"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Del_tx(ctx context.Context, tx pgx.Tx, id int32) error {
@@ -84,7 +84,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 	}
 
 	for i, _ := range ldaps {
-		ldaps[i].Roles, err = getRoles_tx(ctx, tx, ldaps[i].Id)
+		ldaps[i].LoginRoleAssign, err = login_roleAssign.Get_tx(ctx, tx, "ldap", ldaps[i].Id)
 		if err != nil {
 			return ldaps, err
 		}
@@ -128,25 +128,11 @@ func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) error {
 		}
 	}
 
-	if err := login_meta_map.Set_tx(ctx, tx, pgtype.Int4{Int32: l.Id, Valid: true}, pgtype.Int4{}, l.LoginMetaMap); err != nil {
+	if err := login_metaMap.Set_tx(ctx, tx, "ldap", l.Id, l.LoginMetaMap); err != nil {
 		return err
 	}
-
-	// update LDAP role assignment
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM instance.ldap_role
-		WHERE ldap_id = $1
-	`, l.Id); err != nil {
+	if err := login_roleAssign.Set_tx(ctx, tx, "ldap", l.Id, l.LoginRoleAssign); err != nil {
 		return err
-	}
-
-	for _, role := range l.Roles {
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO instance.ldap_role (ldap_id, role_id, group_dn)
-			VALUES ($1,$2,$3)
-		`, l.Id, role.RoleId, role.GroupDn); err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -157,29 +143,4 @@ func UpdateCache_tx(ctx context.Context, tx pgx.Tx) error {
 	}
 	cache.SetLdaps(ldaps)
 	return nil
-}
-
-func getRoles_tx(ctx context.Context, tx pgx.Tx, ldapId int32) ([]types.LdapRole, error) {
-	roles := make([]types.LdapRole, 0)
-
-	rows, err := tx.Query(ctx, `
-		SELECT role_id, group_dn
-		FROM instance.ldap_role
-		WHERE ldap_id = $1
-		ORDER BY group_dn
-	`, ldapId)
-	if err != nil {
-		return roles, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var r types.LdapRole
-		if err := rows.Scan(&r.RoleId, &r.GroupDn); err != nil {
-			return roles, err
-		}
-		r.LdapId = ldapId
-		roles = append(roles, r)
-	}
-	return roles, nil
 }

@@ -3,11 +3,11 @@ package login
 import (
 	"context"
 	"fmt"
-	"r3/cluster"
 	"r3/db"
 	"r3/log"
+	"r3/login/login_clusterEvent"
 	"r3/login/login_meta"
-	"r3/login/login_meta_map"
+	"r3/login/login_metaMap"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -77,7 +77,7 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 		if err != nil {
 			return err
 		}
-		metaEx, metaChanged = login_meta_map.UpdateChangedMeta(ldap.LoginMetaMap, metaEx, meta)
+		metaEx, metaChanged = login_metaMap.UpdateChangedMeta(ldap.LoginMetaMap, metaEx, meta)
 	}
 
 	// abort if no changes are there to apply
@@ -101,22 +101,11 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 		return err
 	}
 
-	// roles needed to be changed for active login, reauthorize
 	if active && rolesChanged {
-		log.Info("ldap", fmt.Sprintf("user account '%s' received new roles, renewing access permissions", name))
-
-		if err := cluster.LoginReauthorized_tx(ctx, tx, true, loginId); err != nil {
-			log.Warning("ldap", fmt.Sprintf("could not renew access permissions for '%s'", name), err)
-		}
+		login_clusterEvent.Reauth_tx(ctx, tx, "ldap", loginId, name)
 	}
-
-	// login was disabled, kick
 	if !active && activeEx {
-		log.Info("ldap", fmt.Sprintf("user account '%s' is locked, kicking active sessions", name))
-
-		if err := cluster.LoginDisabled_tx(ctx, tx, true, loginId); err != nil {
-			log.Warning("ldap", fmt.Sprintf("could not kick active sessions for '%s'", name), err)
-		}
+		login_clusterEvent.Kick_tx(ctx, tx, "ldap", loginId, name)
 	}
 	return tx.Commit(ctx)
 }

@@ -130,8 +130,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayDelete';
 			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayUpdate';
 
+			--
 			-- Open ID Connect authentication
 			CREATE TYPE instance.oauth_client_flow AS ENUM ('clientCreds', 'authCodePkce');
+			ALTER TABLE instance.oauth_client ADD   COLUMN claim_roles TEXT;
 			ALTER TABLE instance.oauth_client ADD   COLUMN provider_url TEXT;
 			ALTER TABLE instance.oauth_client ADD   COLUMN redirect_url TEXT;
 			ALTER TABLE instance.oauth_client ADD   COLUMN flow TEXT NOT NULL DEFAULT 'clientCreds';
@@ -141,6 +143,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.oauth_client ALTER COLUMN token_url     DROP NOT NULL;
 			ALTER TABLE instance.oauth_client ALTER COLUMN date_expiry   DROP NOT NULL;
 
+			-- login OAUTH details
 			ALTER TABLE instance.login ADD COLUMN     oauth_client_id INTEGER;
 			ALTER TABLE instance.login ADD CONSTRAINT login_oauth_client_id_fkey
 				FOREIGN KEY (oauth_client_id)
@@ -151,6 +154,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX IF NOT EXISTS fki_login_oauth_client_id_fkey
 				ON instance.login USING btree (oauth_client_id ASC NULLS LAST);
 
+			-- migrating LDAP attribute mapping to generalized login meta data mapping
 			ALTER TABLE instance.ldap_attribute_login_meta RENAME TO login_meta_map;
 			ALTER TABLE instance.login_meta_map DROP  CONSTRAINT ldap_attribute_login_meta_pkey;
 			ALTER TABLE instance.login_meta_map ALTER COLUMN     ldap_id DROP NOT NULL;
@@ -166,6 +170,39 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			CREATE INDEX IF NOT EXISTS fki_login_meta_map_ldap_id_fkey
 				ON instance.login_meta_map USING btree (ldap_id ASC NULLS LAST);
+			
+			-- migrating LDAP group mapping to generalized login role mapping
+			ALTER TABLE instance.ldap_role RENAME COLUMN  group_dn TO search_string;
+			ALTER TABLE instance.ldap_role ALTER  COLUMN  ldap_id  DROP NOT NULL;
+			ALTER TABLE instance.ldap_role ADD COLUMN     oauth_client_id INTEGER;
+			ALTER TABLE instance.ldap_role ADD CONSTRAINT login_role_assign_oauth_client_id_fkey
+				FOREIGN KEY (oauth_client_id)
+				REFERENCES instance.oauth_client (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE;
+
+			CREATE INDEX IF NOT EXISTS fki_login_role_assign_oauth_client_id_fkey
+				ON instance.ldap_role USING btree (oauth_client_id ASC NULLS LAST);
+
+			ALTER TABLE instance.ldap_role DROP CONSTRAINT ldap_role_ldap_id_fkey;
+			ALTER TABLE instance.ldap_role ADD  CONSTRAINT login_role_assign_ldap_id_fkey FOREIGN KEY (ldap_id)
+				REFERENCES instance.ldap (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE;
+
+			ALTER TABLE instance.ldap_role DROP CONSTRAINT ldap_role_role_id_fkey;
+			ALTER TABLE instance.ldap_role ADD  CONSTRAINT login_role_assign_role_id_fkey FOREIGN KEY (role_id)
+				REFERENCES app.role (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE;
+
+			DROP INDEX instance.fki_ldap_role_ldap_id_fkey;
+			DROP INDEX instance.fki_ldap_role_role_id_fkey;
+
+			CREATE INDEX IF NOT EXISTS fki_login_role_assign_role_id_fkey ON instance.ldap_role USING btree (role_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_login_role_assign_ldap_id_fkey ON instance.ldap_role USING btree (ldap_id ASC NULLS LAST);
+
+			ALTER TABLE instance.ldap_role RENAME TO login_role_assign;
 		`)
 		return "3.11", err
 	},

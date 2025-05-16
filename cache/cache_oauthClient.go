@@ -3,12 +3,12 @@ package cache
 import (
 	"context"
 	"fmt"
-	"r3/login/login_meta_map"
+	"r3/login/login_metaMap"
+	"r3/login/login_roleAssign"
 	"r3/types"
 	"sync"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const (
@@ -49,7 +49,7 @@ func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, name, flow, client_id, client_secret, date_expiry,
-			scopes, tenant, provider_url, redirect_url, token_url
+			scopes, tenant, claim_roles, provider_url, redirect_url, token_url
 		FROM instance.oauth_client
 	`)
 	if err != nil {
@@ -65,7 +65,7 @@ func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 	for rows.Next() {
 		var c types.OauthClient
 		if err := rows.Scan(&c.Id, &c.Name, &c.Flow, &c.ClientId, &c.ClientSecret, &c.DateExpiry,
-			&c.Scopes, &c.Tenant, &c.ProviderUrl, &c.RedirectUrl, &c.TokenUrl); err != nil {
+			&c.Scopes, &c.Tenant, &c.ClaimRoles, &c.ProviderUrl, &c.RedirectUrl, &c.TokenUrl); err != nil {
 
 			return err
 		}
@@ -88,7 +88,11 @@ func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 	// retrieve login meta mapping
 	for k, c := range oauthClientIdMap {
 		if c.Flow == oauthFlowAuthCodePkce {
-			c.LoginMetaMap, err = login_meta_map.Get_tx(ctx, tx, pgtype.Int4{}, pgtype.Int4{Int32: c.Id, Valid: true})
+			c.LoginMetaMap, err = login_metaMap.Get_tx(ctx, tx, "oauth_client", c.Id)
+			if err != nil {
+				return err
+			}
+			c.LoginRoleAssign, err = login_roleAssign.Get_tx(ctx, tx, "oauth_client", c.Id)
 			if err != nil {
 				return err
 			}
