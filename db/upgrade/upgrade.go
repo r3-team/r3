@@ -100,7 +100,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	"3.10": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `
-			// cleanup from last release
+			-- cleanup from last release
 			ALTER TABLE app.field ALTER COLUMN flags
 				TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
 
