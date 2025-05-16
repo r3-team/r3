@@ -445,8 +445,8 @@ let MyLogin = {
 					}
 					
 					this.authenticatedByUser(
-						res.payload.loginId,
-						res.payload.loginName,
+						res.payload.id,
+						res.payload.name,
 						res.payload.token,
 						res.payload.saltKdf
 					);
@@ -461,8 +461,8 @@ let MyLogin = {
 			
 			ws.send('auth','user',{username:username},true).then(
 				res => this.authenticatedByUser(
-					res.payload.loginId,
-					res.payload.loginName,
+					res.payload.id,
+					res.payload.name,
 					res.payload.token,
 					null
 				),
@@ -478,8 +478,8 @@ let MyLogin = {
 			},true).then(
 				res => {
 					this.authenticatedByUser(
-						res.payload.loginId,
-						res.payload.loginName,
+						res.payload.id,
+						res.payload.name,
 						res.payload.token,
 						res.payload.saltKdf
 					);
@@ -490,11 +490,8 @@ let MyLogin = {
 
 		},
 		authenticateByToken() {
-			ws.send('auth','token',{token:this.token},true).then(
-				res => this.appEnable(
-					res.payload.loginId,
-					res.payload.loginName
-				),
+			ws.send('auth','token',this.token,true).then(
+				res => this.appEnable(res.payload.id,res.payload.name),
 				err => this.handleError('authToken',err)
 			);
 			this.loading = true;

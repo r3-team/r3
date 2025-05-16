@@ -19,6 +19,18 @@ type LoginAccess struct {
 	Relation    map[uuid.UUID]int `json:"relation"`    // effective access to specific relations
 	Widget      map[uuid.UUID]int `json:"widget"`      // effective access to specific widgets
 }
+type LoginAuthResult struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+
+	// user auth only
+	MfaTokens []LoginMfaToken `json:"mfaTokens"` // MFA details, filled if login was ok but MFA not satisfied yet
+	SaltKdf   string          `json:"saltKdf"`
+	Token     string          `json:"token"`
+
+	// token auth only
+	LanguageCode string `json:"languageCode"`
+}
 type LoginClientEvent struct {
 	// login client events exist if a login has enabled a hotkey client event
 	HotkeyChar      string      `json:"hotkeyChar"`

@@ -35,23 +35,22 @@ type tokenPayload struct {
 	jwt.Payload
 	Admin   bool  `json:"admin"`   // login belongs to admin user
 	LoginId int64 `json:"loginId"` // login ID
-	NoAuth  bool  `json:"noAuth"`  // login without authentication (username only)
+	NoAuth  bool  `json:"noAuth"`  // login without authentication (name only)
 }
 
-// performs authentication attempt for user by using username, password and MFA PINs (if used)
-// returns login name, JWT, KDF salt, MFA token list (if MFA is required)
-func User(ctx context.Context, username string, password string, mfaTokenId pgtype.Int4,
-	mfaTokenPin pgtype.Text, grantLoginId *int64, grantAdmin *bool,
-	grantNoAuth *bool) (string, string, string, []types.LoginMfaToken, error) {
+// performs authentication attempt for known login via username + password + MFA PINs (if used)
+// if MFA is enabled but MFA PIN not given, returns list of available MFAs
+func User(ctx context.Context, name string, password string, mfaTokenId pgtype.Int4,
+	mfaTokenPin pgtype.Text, grantLoginId *int64, grantAdmin *bool, grantNoAuth *bool) (types.LoginAuthResult, error) {
 
-	mfaTokens := make([]types.LoginMfaToken, 0)
-	if username == "" {
-		return "", "", "", mfaTokens, errors.New("username not given")
+	if name == "" {
+		return types.LoginAuthResult{}, errors.New("username not given")
 	}
 
 	// usernames are case insensitive
-	username = strings.ToLower(username)
+	name = strings.ToLower(name)
 
+	// get known login details
 	var loginId int64
 	var ldapId pgtype.Int4
 	var salt sql.NullString
@@ -63,7 +62,7 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 	var nameDisplay pgtype.Text
 	var tokenExpiryHours pgtype.Int4
 
-	err := db.Pool.QueryRow(ctx, `
+	if err := db.Pool.QueryRow(ctx, `
 		SELECT l.id, l.ldap_id, l.salt, l.hash, l.salt_kdf, l.admin,
 			l.no_auth, l.limited, l.token_expiry_hours, lm.name_display
 		FROM      instance.login      AS l
@@ -71,43 +70,40 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 		WHERE l.active
 		AND   l.name            = $1
 		AND   l.oauth_client_id IS NULL
-	`, username).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin,
-		&noAuth, &limited, &tokenExpiryHours, &nameDisplay)
+	`, name).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin, &noAuth, &limited, &tokenExpiryHours, &nameDisplay); err != nil {
 
-	if err != nil && err != pgx.ErrNoRows {
-		return "", "", "", mfaTokens, err
-	}
-
-	// username not found / user inactive must result in same response as authentication failed
-	// otherwise we can probe the system for valid user names
-	if err == pgx.ErrNoRows {
-		return "", "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
+		if err == pgx.ErrNoRows {
+			// name not found / login inactive must result in same response as authentication failed
+			// otherwise we can probe the system for valid user names
+			return types.LoginAuthResult{}, errors.New(handler.ErrAuthFailed)
+		} else {
+			return types.LoginAuthResult{}, err
+		}
 	}
 
 	if !noAuth && password == "" {
-		return "", "", "", mfaTokens, errors.New("password not given")
+		return types.LoginAuthResult{}, errors.New("password not given")
+	}
+
+	if err := preAuthChecks(loginId, admin, limited, true); err != nil {
+		return types.LoginAuthResult{}, err
 	}
 
 	if !noAuth {
 		if ldapId.Valid {
 			// authentication against LDAP
-			if err := ldap_auth.Check(ldapId.Int32, username, password); err != nil {
-				return "", "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
+			if err := ldap_auth.Check(ldapId.Int32, name, password); err != nil {
+				return types.LoginAuthResult{}, errors.New(handler.ErrAuthFailed)
 			}
 		} else {
 			// authentication against stored hash
 			if !hash.Valid || !salt.Valid || hash.String != tools.Hash(salt.String+password) {
-				return "", "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
+				return types.LoginAuthResult{}, errors.New(handler.ErrAuthFailed)
 			}
 		}
 	}
 
-	if err := authCheckSystemMode(admin); err != nil {
-		return "", "", "", mfaTokens, err
-	}
-
-	// login ok
-
+	// authentication ok so far, check MFA
 	if mfaTokenId.Valid && mfaTokenPin.Valid {
 
 		// validate provided MFA token
@@ -119,17 +115,17 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 			AND   id       = $2
 			AND   context  = 'totp'
 		`, loginId, mfaTokenId.Int32).Scan(&mfaToken); err != nil {
-			return "", "", "", mfaTokens, err
+			return types.LoginAuthResult{}, err
 		}
 
 		if mfaTokenPin.String != gotp.NewDefaultTOTP(base32.StdEncoding.WithPadding(
 			base32.NoPadding).EncodeToString(mfaToken)).Now() {
 
-			return "", "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
+			return types.LoginAuthResult{}, errors.New(handler.ErrAuthFailed)
 		}
 
 	} else {
-		// get available MFA tokens
+		// check for active MFAs, ignore if not used
 		rows, err := db.Pool.Query(ctx, `
 			SELECT id, name
 			FROM instance.login_token_fixed
@@ -137,89 +133,96 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 			AND   context  = 'totp'
 		`, loginId)
 		if err != nil {
-			return "", "", "", mfaTokens, err
+			return types.LoginAuthResult{}, err
 		}
 
+		mfaTokens := make([]types.LoginMfaToken, 0)
 		for rows.Next() {
 			var m types.LoginMfaToken
 			if err := rows.Scan(&m.Id, &m.Name); err != nil {
-				return "", "", "", mfaTokens, err
+				return types.LoginAuthResult{}, err
 			}
 			mfaTokens = append(mfaTokens, m)
 		}
 		rows.Close()
 
-		// MFA tokens available, return with list
+		// if MFA tokens available, return with list, continue otherwise
 		if len(mfaTokens) != 0 {
-			return "", "", "", mfaTokens, nil
+			return types.LoginAuthResult{MfaTokens: mfaTokens}, nil
 		}
 	}
 
-	// create session token
-	token, err := createToken(loginId, username, admin, noAuth, tokenExpiryHours)
-	if err != nil {
-		return "", "", "", mfaTokens, err
-	}
-
 	// everything in order, auth successful
-	if err := cache.LoadAccessIfUnknown(loginId); err != nil {
-		return "", "", "", mfaTokens, err
+	token, err := createToken(loginId, name, admin, noAuth, tokenExpiryHours)
+	if err != nil {
+		return types.LoginAuthResult{}, err
 	}
-	if err := login_session.CheckConcurrentAccess(limited, loginId, admin); err != nil {
-		return "", "", "", mfaTokens, err
+	if err := cache.LoadAccessIfUnknown(loginId); err != nil {
+		return types.LoginAuthResult{}, err
 	}
 	*grantLoginId = loginId
 	*grantAdmin = admin
 	*grantNoAuth = noAuth
 
 	if nameDisplay.Valid && nameDisplay.String != "" {
-		return nameDisplay.String, token, saltKdf, mfaTokens, nil
+		name = nameDisplay.String
 	}
-	return username, token, saltKdf, mfaTokens, nil
+	return types.LoginAuthResult{
+		Id:        loginId,
+		MfaTokens: make([]types.LoginMfaToken, 0),
+		Name:      name,
+		Token:     token,
+		SaltKdf:   saltKdf,
+	}, nil
 }
 
-// performs authentication for user by using Open ID Connect
-// returns login name, JWT, KDF salt (MFA is handled by external identity provider)
-func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier string, grantLoginId *int64, grantAdmin *bool) (string, string, string, error) {
+// performs authentication for login by using Open ID Connect
+// if login is not known but authentication succeeds, login is created
+func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier string, grantLoginId *int64, grantAdmin *bool) (types.LoginAuthResult, error) {
 
 	c, err := cache.GetOauthClient(oauthClientId)
 	if err != nil {
-		return "", "", "", err
+		return types.LoginAuthResult{}, err
 	}
 
 	if !c.ProviderUrl.Valid || !c.RedirectUrl.Valid {
-		return "", "", "", errors.New("missing provider or redirect URL for OAUTH client")
+		return types.LoginAuthResult{}, errors.New("missing provider or redirect URL for OAUTH client")
 	}
 
 	provider, err := oidc.NewProvider(ctx, c.ProviderUrl.String)
 	if err != nil {
-		return "", "", "", err
+		return types.LoginAuthResult{}, err
+	}
+
+	// force at least open ID connect scope
+	if !slices.Contains(c.Scopes, oidc.ScopeOpenID) {
+		c.Scopes = append(c.Scopes, oidc.ScopeOpenID)
 	}
 
 	oauth2Config := oauth2.Config{
 		ClientID:    c.ClientId,
 		RedirectURL: c.RedirectUrl.String,
 		Endpoint:    provider.Endpoint(),
-		Scopes:      []string{oidc.ScopeOpenID, "profile", "email"},
+		Scopes:      c.Scopes,
 	}
 
 	// exchange authentication code for tokens
 	tokens, err := oauth2Config.Exchange(ctx, code, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
 	if err != nil {
-		return "", "", "", err
+		return types.LoginAuthResult{}, err
 	}
 
-	// get & verify ID Token
-	tokenIdRaw, exists := tokens.Extra("id_token").(string)
-	if !exists {
-		return "", "", "", err
+	// get & verify ID token
+	tokenIdRaw, ok := tokens.Extra("id_token").(string)
+	if !ok {
+		return types.LoginAuthResult{}, err
 	}
 	idToken, err := provider.Verifier(&oidc.Config{ClientID: c.ClientId}).Verify(ctx, tokenIdRaw)
 	if err != nil {
-		return "", "", "", err
+		return types.LoginAuthResult{}, err
 	}
 
-	// authentication successful, retrieve login details
+	// get known login details, unknown login is created
 	var active bool
 	var loginId int64 = 0
 	var saltKdf string
@@ -227,7 +230,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	var roleIds []uuid.UUID
 	var roleIdsEx []uuid.UUID
 	var metaEx types.LoginMeta
-	var username = fmt.Sprintf("%s::%s", idToken.Issuer, idToken.Subject)
+	var name = fmt.Sprintf("%s::%s", idToken.Issuer, idToken.Subject)
 	var admin = false
 	var limited = false
 	var newLogin = false
@@ -256,25 +259,29 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		LEFT JOIN instance.login_meta AS m ON m.login_id = l.id
 		WHERE l.name            = $1
 		AND   l.oauth_client_id = $2
-	`, username, oauthClientId).Scan(&loginId, &saltKdf, &admin, &limited, &tokenExpiryHours, &active, &roleIdsEx,
+	`, name, oauthClientId).Scan(&loginId, &saltKdf, &admin, &limited, &tokenExpiryHours, &active, &roleIdsEx,
 		&metaEx.Department, &metaEx.Email, &metaEx.Location, &metaEx.NameDisplay, &metaEx.NameFore, &metaEx.NameSur,
 		&metaEx.Notes, &metaEx.Organization, &metaEx.PhoneFax, &metaEx.PhoneLandline, &metaEx.PhoneMobile); err != nil {
 
 		if err == pgx.ErrNoRows {
 			newLogin = true
 		} else {
-			return "", "", "", err
+			return types.LoginAuthResult{}, err
 		}
+	}
+
+	if err := preAuthChecks(loginId, admin, limited, !newLogin); err != nil {
+		return types.LoginAuthResult{}, err
 	}
 
 	// read mapped login meta data from ID token claims
 	var claimsIf interface{}
 	if err := idToken.Claims(&claimsIf); err != nil {
-		return "", "", "", err
+		return types.LoginAuthResult{}, err
 	}
 	claims, ok := claimsIf.(map[string]interface{})
 	if !ok {
-		return "", "", "", errors.New("ID token is not a key/value JSON object")
+		return types.LoginAuthResult{}, errors.New("ID token is not a key/value JSON object")
 	}
 	meta := login_metaMap.ReadMetaFromMapIf(c.LoginMetaMap, claims)
 	if newLogin {
@@ -318,78 +325,72 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	if newLogin || metaChanged || rolesChanged || !active {
 		tx, err := db.Pool.Begin(ctx)
 		if err != nil {
-			return "", "", "", err
+			return types.LoginAuthResult{}, err
 		}
 		defer tx.Rollback(ctx)
 
 		loginId, err = login.Set_tx(ctx, tx, loginId, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{Int32: c.Id, Valid: true},
-			username, "", admin, false, true, tokenExpiryHours, metaEx, roleIdsEx, []types.LoginAdminRecordSet{})
+			name, "", admin, false, true, tokenExpiryHours, metaEx, roleIdsEx, []types.LoginAdminRecordSet{})
 
 		if err != nil {
-			return "", "", "", err
+			return types.LoginAuthResult{}, err
 		}
 		if active && rolesChanged {
-			login_clusterEvent.Reauth_tx(ctx, tx, "ldap", loginId, username)
+			login_clusterEvent.Reauth_tx(ctx, tx, "ldap", loginId, name)
 		}
 		if err := tx.Commit(ctx); err != nil {
-			return "", "", "", err
+			return types.LoginAuthResult{}, err
 		}
-	}
-
-	if err := authCheckSystemMode(admin); err != nil {
-		return "", "", "", err
 	}
 
 	// everything in order, auth successful
-	username = idToken.Subject
-	if meta.NameDisplay != "" {
-		username = meta.NameDisplay
-	}
-
-	token, err := createToken(loginId, username, admin, false, tokenExpiryHours)
+	token, err := createToken(loginId, name, admin, false, tokenExpiryHours)
 	if err != nil {
-		return "", "", "", err
+		return types.LoginAuthResult{}, err
 	}
 	if err := cache.LoadAccessIfUnknown(loginId); err != nil {
-		return "", "", "", err
-	}
-	if err := login_session.CheckConcurrentAccess(limited, loginId, admin); err != nil {
-		return "", "", "", err
+		return types.LoginAuthResult{}, err
 	}
 	*grantLoginId = loginId
 	*grantAdmin = admin
 
-	return username, token, saltKdf, nil
+	name = idToken.Subject
+	if meta.NameDisplay != "" {
+		name = meta.NameDisplay
+	}
+	return types.LoginAuthResult{
+		Id:        loginId,
+		MfaTokens: make([]types.LoginMfaToken, 0),
+		Name:      name,
+		Token:     token,
+		SaltKdf:   saltKdf,
+	}, nil
 }
 
 // performs authentication attempt for user by using existing JWT token, signed by server
 // returns login name and language code
-func Token(ctx context.Context, token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *bool) (string, string, error) {
+func Token(ctx context.Context, token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *bool) (types.LoginAuthResult, error) {
 
 	if token == "" {
-		return "", "", errors.New("empty token")
+		return types.LoginAuthResult{}, errors.New("empty token")
 	}
 
 	var tp tokenPayload
 	if _, err := jwt.Verify([]byte(token), config.GetTokenSecret(), &tp); err != nil {
-		return "", "", err
+		return types.LoginAuthResult{}, err
 	}
 
 	// token expiration time reached
 	if tools.GetTimeUnix() > tp.ExpirationTime.Unix() {
-		return "", "", errors.New("token expired")
-	}
-
-	if err := authCheckSystemMode(tp.Admin); err != nil {
-		return "", "", err
+		return types.LoginAuthResult{}, errors.New("token expired")
 	}
 
 	// check if login is active
 	var active bool
-	var name string
-	var nameDisplay pgtype.Text
 	var languageCode string
 	var limited bool
+	var name string
+	var nameDisplay pgtype.Text
 
 	if err := db.Pool.QueryRow(ctx, `
 		SELECT l.name, lm.name_display, l.active, l.limited, s.language_code
@@ -398,26 +399,33 @@ func Token(ctx context.Context, token string, grantLoginId *int64, grantAdmin *b
 		LEFT JOIN instance.login_meta    AS lm ON lm.login_id = l.id
 		WHERE l.id = $1
 	`, tp.LoginId).Scan(&name, &nameDisplay, &active, &limited, &languageCode); err != nil {
-		return "", "", err
+		return types.LoginAuthResult{}, err
 	}
 	if !active {
-		return "", "", errors.New("login inactive")
+		return types.LoginAuthResult{}, errors.New("login inactive")
 	}
-	if nameDisplay.Valid && nameDisplay.String != "" {
-		name = nameDisplay.String
+
+	if err := preAuthChecks(tp.LoginId, tp.Admin, limited, true); err != nil {
+		return types.LoginAuthResult{}, err
 	}
 
 	// everything in order, auth successful
 	if err := cache.LoadAccessIfUnknown(tp.LoginId); err != nil {
-		return "", "", err
-	}
-	if err := login_session.CheckConcurrentAccess(limited, tp.LoginId, tp.Admin); err != nil {
-		return "", "", err
+		return types.LoginAuthResult{}, err
 	}
 	*grantLoginId = tp.LoginId
 	*grantAdmin = tp.Admin
 	*grantNoAuth = tp.NoAuth
-	return name, languageCode, nil
+
+	if nameDisplay.Valid && nameDisplay.String != "" {
+		name = nameDisplay.String
+	}
+	return types.LoginAuthResult{
+		Id:           tp.LoginId,
+		MfaTokens:    make([]types.LoginMfaToken, 0),
+		Name:         name,
+		LanguageCode: languageCode,
+	}, nil
 }
 
 // performs authentication for user by using fixed (permanent) token
@@ -432,13 +440,14 @@ func TokenFixed(ctx context.Context, loginId int64, context string, tokenFixed s
 
 	// only specific contexts may be used for token authentication
 	if !slices.Contains([]string{"client", "ics"}, context) {
-		return "", fmt.Errorf("invalid token authentication context '%s'", context)
+		return "", fmt.Errorf("invalid fixed token authentication context '%s'", context)
 	}
 
 	// check for existing token
+	var err error
 	var languageCode string
-	var username string
-	err := db.Pool.QueryRow(ctx, `
+	var name string
+	if err := db.Pool.QueryRow(ctx, `
 		SELECT s.language_code, l.name
 		FROM instance.login_token_fixed AS t
 		JOIN instance.login_setting     AS s ON s.login_id = t.login_id
@@ -447,34 +456,24 @@ func TokenFixed(ctx context.Context, loginId int64, context string, tokenFixed s
 		AND   t.context  = $2
 		AND   t.token    = $3
 		AND   l.active
-	`, loginId, context, tokenFixed).Scan(&languageCode, &username)
-
-	if err == pgx.ErrNoRows {
-		return "", errors.New("login inactive or token invalid")
-	}
-	if err != nil {
-		return "", err
+	`, loginId, context, tokenFixed).Scan(&languageCode, &name); err != nil {
+		if err == pgx.ErrNoRows {
+			return "", errors.New("login inactive or token invalid")
+		} else {
+			return "", err
+		}
 	}
 
 	// everything in order, auth successful
 	if err := cache.LoadAccessIfUnknown(loginId); err != nil {
 		return "", err
 	}
-	*grantToken, err = createToken(loginId, username, false, false, pgtype.Int4{})
+	*grantToken, err = createToken(loginId, name, false, false, pgtype.Int4{})
 	return languageCode, err
 }
 
 // helpers
-
-// blocks authentication by non-admins if system is not in production mode
-func authCheckSystemMode(admin bool) error {
-	if config.GetUint64("productionMode") == 0 && !admin {
-		return errors.New("maintenance mode is active, only admins may login")
-	}
-	return nil
-}
-
-func createToken(loginId int64, username string, admin bool, noAuth bool, tokenExpiryHours pgtype.Int4) (string, error) {
+func createToken(loginId int64, name string, admin bool, noAuth bool, tokenExpiryHours pgtype.Int4) (string, error) {
 
 	// token is valid for multiple days, if user decides to stay logged in
 	now := time.Now()
@@ -488,7 +487,7 @@ func createToken(loginId int64, username string, admin bool, noAuth bool, tokenE
 	token, err := jwt.Sign(tokenPayload{
 		Payload: jwt.Payload{
 			Issuer:         "r3 application",
-			Subject:        username,
+			Subject:        name,
 			ExpirationTime: jwt.NumericDate(now.Add(expiryHoursTime * time.Hour)),
 			IssuedAt:       jwt.NumericDate(now),
 		},
@@ -497,4 +496,18 @@ func createToken(loginId int64, username string, admin bool, noAuth bool, tokenE
 		NoAuth:  noAuth,
 	}, config.GetTokenSecret())
 	return string(token), err
+}
+
+func preAuthChecks(loginId int64, admin bool, limited bool, checkConcurrent bool) error {
+
+	// blocks authentication by non-admins if system is not in production mode
+	if config.GetUint64("productionMode") == 0 && !admin {
+		return errors.New("maintenance mode is active, only admins may login")
+	}
+	if checkConcurrent {
+		if err := login_session.CheckConcurrentAccess(limited, loginId, admin); err != nil {
+			return err
+		}
+	}
+	return nil
 }

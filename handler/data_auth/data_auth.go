@@ -52,16 +52,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var loginId int64
 	var isAdmin bool
 	var noAuth bool
-	var mfaTokenId = pgtype.Int4{}
-	var mfaTokenPin = pgtype.Text{}
 
-	_, token, _, _, err := login_auth.User(ctx, req.Username, req.Password,
-		mfaTokenId, mfaTokenPin, &loginId, &isAdmin, &noAuth)
-
+	res, err := login_auth.User(ctx, req.Username, req.Password, pgtype.Int4{}, pgtype.Text{}, &loginId, &isAdmin, &noAuth)
 	if err != nil {
 		handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}
-	w.Write([]byte(fmt.Sprintf(`{"token": "%s"}`, token)))
+	w.Write([]byte(fmt.Sprintf(`{"token": "%s"}`, res.Token)))
 }

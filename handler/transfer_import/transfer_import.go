@@ -73,7 +73,7 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 		var loginId int64
 		var admin bool
 		var noAuth bool
-		if _, _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+		if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
 			finishRequest(err)
 			return
 		}

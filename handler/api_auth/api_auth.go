@@ -55,9 +55,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var isAdmin bool
 	var noAuth bool
 
-	_, token, _, mfaTokens, err := login_auth.User(ctx, req.Username, req.Password,
-		pgtype.Int4{}, pgtype.Text{}, &loginId, &isAdmin, &noAuth)
-
+	res, err := login_auth.User(ctx, req.Username, req.Password, pgtype.Int4{}, pgtype.Text{}, &loginId, &isAdmin, &noAuth)
 	if err != nil {
 		handler.AbortRequestWithCode(w, logContext, http.StatusUnauthorized,
 			err, handler.ErrAuthFailed)
@@ -66,12 +64,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(mfaTokens) != 0 {
+	if len(res.MfaTokens) != 0 {
 		handler.AbortRequestWithCode(w, logContext, http.StatusBadRequest,
 			nil, "failed to authenticate, MFA is currently not supported")
 
 		return
 
 	}
-	w.Write([]byte(fmt.Sprintf(`{"token": "%s"}`, token)))
+	w.Write([]byte(fmt.Sprintf(`{"token": "%s"}`, res.Token)))
 }

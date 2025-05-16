@@ -165,12 +165,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var loginId int64
 	var admin bool
 	var noAuth bool
-	_, languageCode, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth)
+	authRes, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth)
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrUnauthorized)
 		bruteforce.BadAttempt(r)
 		return
 	}
+	var languageCode = authRes.LanguageCode
 
 	// start work
 	cache.Schema_mx.RLock()
