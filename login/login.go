@@ -10,6 +10,7 @@ import (
 	"r3/handler"
 	"r3/log"
 	"r3/login/login_meta"
+	"r3/login/login_role"
 	"r3/login/login_setting"
 	"r3/schema"
 	"r3/tools"
@@ -199,7 +200,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 	// collect role IDs
 	if roles {
 		for i, l := range logins {
-			logins[i].RoleIds, err = getRoleIds_tx(ctx, tx, l.Id)
+			logins[i].RoleIds, err = login_role.Get_tx(ctx, tx, l.Id)
 			if err != nil {
 				return logins, 0, err
 			}
@@ -352,7 +353,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	}
 
 	// set roles
-	return id, setRoleIds_tx(ctx, tx, id, roleIds)
+	return id, login_role.Set_tx(ctx, tx, id, roleIds)
 }
 
 func SetSaltHash_tx(ctx context.Context, tx pgx.Tx, salt pgtype.Text, hash pgtype.Text, id int64) error {

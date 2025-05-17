@@ -7,6 +7,7 @@ import (
 	"r3/cluster"
 	"r3/login"
 	"r3/login/login_meta"
+	"r3/login/login_role"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -187,7 +188,7 @@ func LoginSetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage)
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login.SetRoleLoginIds_tx(ctx, tx, req.RoleId, req.LoginIds)
+	return nil, login_role.SetRoleLogins_tx(ctx, tx, req.RoleId, req.LoginIds)
 }
 func LoginKick(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
