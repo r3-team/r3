@@ -6,31 +6,34 @@ import (
 	"fmt"
 	"r3/cache"
 	"r3/db"
+	"r3/types"
 	"slices"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// performs authentication for user by using fixed (permanent) token
-// used for application access (like ICS download or fat-client access)
+// performs authentication by using fixed (permanent) token
+// used for application access (ICS download or fat-client access)
 // cannot grant admin access
-// returns login language code
-func TokenFixed(ctx context.Context, loginId int64, context string, tokenFixed string, grantToken *string) (string, error) {
+func TokenFixed(ctx context.Context, loginId int64, context string, tokenFixed string) (types.LoginAuthResult, error) {
 
 	if tokenFixed == "" {
-		return "", errors.New("empty token")
+		return types.LoginAuthResult{}, errors.New("empty token")
 	}
 
 	// only specific contexts may be used for token authentication
 	if !slices.Contains([]string{"client", "ics"}, context) {
-		return "", fmt.Errorf("invalid fixed token authentication context '%s'", context)
+		return types.LoginAuthResult{}, fmt.Errorf("invalid fixed token authentication context '%s'", context)
 	}
 
 	// check for existing token
 	var err error
-	var languageCode string
-	var name string
+	var l = types.LoginAuthResult{
+		Admin:  false,
+		Id:     loginId,
+		NoAuth: false,
+	}
 	if err := db.Pool.QueryRow(ctx, `
 		SELECT s.language_code, l.name
 		FROM instance.login_token_fixed AS t
@@ -40,18 +43,21 @@ func TokenFixed(ctx context.Context, loginId int64, context string, tokenFixed s
 		AND   t.context  = $2
 		AND   t.token    = $3
 		AND   l.active
-	`, loginId, context, tokenFixed).Scan(&languageCode, &name); err != nil {
+	`, loginId, context, tokenFixed).Scan(&l.LanguageCode, &l.Name); err != nil {
 		if err == pgx.ErrNoRows {
-			return "", errors.New("login inactive or token invalid")
+			return types.LoginAuthResult{}, errors.New("login inactive or token invalid")
 		} else {
-			return "", err
+			return types.LoginAuthResult{}, err
 		}
 	}
 
 	// everything in order, auth successful
 	if err := cache.LoadAccessIfUnknown(loginId); err != nil {
-		return "", err
+		return types.LoginAuthResult{}, err
 	}
-	*grantToken, err = createToken(loginId, name, false, false, pgtype.Int4{})
-	return languageCode, err
+	l.Token, err = createToken(l.Id, l.Name, false, false, pgtype.Int4{})
+	if err != nil {
+		return types.LoginAuthResult{}, nil
+	}
+	return l, nil
 }

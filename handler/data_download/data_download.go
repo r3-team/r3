@@ -35,11 +35,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	defer ctxCanc()
 
-	// check token, any login is generally allowed to attempt a download
-	var loginId int64
-	var admin bool
-	var noAuth bool
-	if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+	// authenticate via token
+	login, err := login_auth.Token(ctx, token)
+	if err != nil {
 		handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
@@ -58,7 +56,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check file access privilege
-	if err := data.MayAccessFile(loginId, attributeId); err != nil {
+	if err := data.MayAccessFile(login.Id, attributeId); err != nil {
 		handler.AbortRequest(w, logContext, err, handler.ErrUnauthorized)
 		return
 	}

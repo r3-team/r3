@@ -496,6 +496,8 @@ let MyLogin = {
 			);
 			this.loading = true;
 		},
+
+		// authentication results
 		authenticatedByUser(loginId,loginName,token,saltKdf) {
 			if(token === '')
 				return this.handleError('authUser','');

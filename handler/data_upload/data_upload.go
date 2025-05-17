@@ -71,11 +71,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		defer ctxCanc()
 
-		// check token, any login is allowed to attempt upload
-		var loginId int64
-		var admin bool
-		var noAuth bool
-		if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+		// authenticate via token
+		login, err := login_auth.Token(ctx, token)
+		if err != nil {
 			handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
 			bruteforce.BadAttempt(r)
 			return
@@ -105,7 +103,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if err := data.SetFile(ctx, loginId, attributeId, fileId, part, isNewFile); err != nil {
+		if err := data.SetFile(ctx, login.Id, attributeId, fileId, part, isNewFile); err != nil {
 			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
 			return
 		}

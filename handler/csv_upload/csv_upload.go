@@ -107,11 +107,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		defer ctxCanc()
 
-		// check token
-		var loginId int64
-		var admin bool
-		var noAuth bool
-		if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+		// authenticate via token
+		login, err := login_auth.Token(ctx, token)
+		if err != nil {
 			handler.AbortRequest(w, handlerContext, err, handler.ErrUnauthorized)
 			bruteforce.BadAttempt(r)
 			return
@@ -142,11 +140,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// read file
-		res.Count, err = importFromCsv(ctx, filePath, loginId, boolTrue, dateFormat,
+		res.Count, err = importFromCsv(ctx, filePath, login.Id, boolTrue, dateFormat,
 			timezone, commaChar, ignoreHeader, columns, joins, lookups)
 
 		if err != nil {
-			err, expectedErr := handler.ConvertToErrCode(err, !admin)
+			err, expectedErr := handler.ConvertToErrCode(err, !login.Admin)
 			res.Error = err.Error()
 
 			if !expectedErr {

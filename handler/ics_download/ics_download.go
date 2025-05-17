@@ -48,7 +48,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 		return
 	}
-	loginId, err := handler.ReadInt64GetterFromUrl(r, "login_id")
+	loginIdRequested, err := handler.ReadInt64GetterFromUrl(r, "login_id")
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 		return
@@ -65,8 +65,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer ctxCanc()
 
 	// authenticate via fixed token
-	var tokenNotUsed string
-	languageCode, err := login_auth.TokenFixed(ctx, loginId, "ics", tokenFixed, &tokenNotUsed)
+	login, err := login_auth.TokenFixed(ctx, loginIdRequested, "ics", tokenFixed)
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
@@ -81,7 +80,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback(ctx)
 
-	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+	if err := db.SetSessionConfig_tx(ctx, tx, login.Id); err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 		return
 	}
@@ -116,7 +115,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// apply field filters
 	// some filters are not compatible with backend requests (field value, open form record ID, ...)
 	dataGet.Filters = data_query.ConvertQueryToDataFilter(
-		f.Query.Filters, loginId, languageCode, make(map[string]string))
+		f.Query.Filters, login.Id, login.LanguageCode, make(map[string]string))
 
 	// define ICS event range, if defined
 	dateRange0 := f.DateRange0
@@ -207,12 +206,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertColumnToExpression(
-			column, loginId, languageCode, make(map[string]string)))
+			column, login.Id, login.LanguageCode, make(map[string]string)))
 	}
 
 	// get data
 	var query string
-	results, _, err := data.Get_tx(ctx, tx, dataGet, loginId, &query)
+	results, _, err := data.Get_tx(ctx, tx, dataGet, login.Id, &query)
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 		return

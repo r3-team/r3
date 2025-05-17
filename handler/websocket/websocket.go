@@ -341,31 +341,30 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		}
 
 	} else {
-		// execute authentication request
-		var req = reqTrans.Requests[0]
-		resTrans.Responses = make([]types.Response, 0)
-
 		if blocked := bruteforce.CheckByHost(client.address); blocked {
 			hub.clientDel <- client
 			return []byte("{}")
 		}
 
+		// execute authentication request
 		var err error
-		var resPayload interface{}
+		var login types.LoginAuthResult
+		var req = reqTrans.Requests[0]
+		resTrans.Responses = make([]types.Response, 0)
 
 		switch req.Action {
 		case "openId": // authentication via Open ID Connect
-			resPayload, err = request.LoginAuthOpenId(ctx, req.Payload, &client.loginId, &client.admin)
+			login, err = request.LoginAuthOpenId(ctx, req.Payload)
 
 		case "token": // authentication via JSON web token
-			resPayload, err = request.LoginAuthToken(ctx, req.Payload, &client.loginId, &client.admin, &client.noAuth)
+			login, err = request.LoginAuthToken(ctx, req.Payload)
 
 		case "tokenFixed": // authentication via fixed token (fat-client only)
-			resPayload, err = request.LoginAuthTokenFixed(ctx, req.Payload, &client.loginId)
+			login, err = request.LoginAuthTokenFixed(ctx, req.Payload)
 			client.device = types.WebsocketClientDeviceFatClient
 
-		case "user": // authentication via credentials
-			resPayload, err = request.LoginAuthUser(ctx, req.Payload, &client.loginId, &client.admin, &client.noAuth)
+		case "user": // authentication via username + password (+ MFA if used)
+			login, err = request.LoginAuthUser(ctx, req.Payload)
 		}
 
 		if err != nil {
@@ -381,10 +380,15 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 			}
 		} else {
 			var res types.Response
-			res.Payload, err = json.Marshal(resPayload)
+			res.Payload, err = json.Marshal(login)
 			if err != nil {
 				resTrans.Error = handler.ErrGeneral
 			} else {
+				// everything in order, grant login ID, admin & noAuth states
+				client.loginId = login.Id
+				client.admin = login.Admin
+				client.noAuth = login.NoAuth
+
 				resTrans.Responses = append(resTrans.Responses, res)
 			}
 		}

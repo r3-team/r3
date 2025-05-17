@@ -22,7 +22,7 @@ import (
 
 // performs authentication for login by using Open ID Connect
 // if login is not known but authentication succeeds, login is created
-func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier string, grantLoginId *int64, grantAdmin *bool) (types.LoginAuthResult, error) {
+func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier string) (types.LoginAuthResult, error) {
 
 	c, err := cache.GetOauthClient(oauthClientId)
 	if err != nil {
@@ -43,14 +43,13 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		c.Scopes = append(c.Scopes, oidc.ScopeOpenID)
 	}
 
+	// exchange authentication code for tokens
 	oauth2Config := oauth2.Config{
 		ClientID:    c.ClientId,
 		RedirectURL: c.RedirectUrl.String,
 		Endpoint:    provider.Endpoint(),
 		Scopes:      c.Scopes,
 	}
-
-	// exchange authentication code for tokens
 	tokens, err := oauth2Config.Exchange(ctx, code, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
 	if err != nil {
 		return types.LoginAuthResult{}, err
@@ -67,15 +66,16 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	}
 
 	// get known login details, unknown login is created
+	var l = types.LoginAuthResult{
+		Admin:     false,
+		MfaTokens: make([]types.LoginMfaToken, 0),
+		Name:      fmt.Sprintf("%s::%s", idToken.Issuer, idToken.Subject),
+	}
 	var active bool
-	var loginId int64 = 0
-	var saltKdf string
 	var tokenExpiryHours pgtype.Int4
 	var roleIds []uuid.UUID
 	var roleIdsEx []uuid.UUID
 	var metaEx types.LoginMeta
-	var name = fmt.Sprintf("%s::%s", idToken.Issuer, idToken.Subject)
-	var admin = false
 	var limited = false
 	var newLogin = false
 	var metaChanged = false
@@ -103,7 +103,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		LEFT JOIN instance.login_meta AS m ON m.login_id = l.id
 		WHERE l.name            = $1
 		AND   l.oauth_client_id = $2
-	`, name, oauthClientId).Scan(&loginId, &saltKdf, &admin, &limited, &tokenExpiryHours, &active, &roleIdsEx,
+	`, l.Name, oauthClientId).Scan(&l.Id, &l.SaltKdf, &l.Admin, &limited, &tokenExpiryHours, &active, &roleIdsEx,
 		&metaEx.Department, &metaEx.Email, &metaEx.Location, &metaEx.NameDisplay, &metaEx.NameFore, &metaEx.NameSur,
 		&metaEx.Notes, &metaEx.Organization, &metaEx.PhoneFax, &metaEx.PhoneLandline, &metaEx.PhoneMobile); err != nil {
 
@@ -114,7 +114,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		}
 	}
 
-	if err := preAuthChecks(loginId, admin, limited, !newLogin); err != nil {
+	if err := preAuthChecks(l.Id, l.Admin, limited, !newLogin); err != nil {
 		return types.LoginAuthResult{}, err
 	}
 
@@ -173,14 +173,14 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		}
 		defer tx.Rollback(ctx)
 
-		loginId, err = login.Set_tx(ctx, tx, loginId, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{Int32: c.Id, Valid: true},
-			name, "", admin, false, true, tokenExpiryHours, metaEx, roleIdsEx, []types.LoginAdminRecordSet{})
+		l.Id, err = login.Set_tx(ctx, tx, l.Id, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{Int32: c.Id, Valid: true},
+			l.Name, "", l.Admin, false, true, tokenExpiryHours, metaEx, roleIdsEx, []types.LoginAdminRecordSet{})
 
 		if err != nil {
 			return types.LoginAuthResult{}, err
 		}
 		if active && rolesChanged {
-			login_clusterEvent.Reauth_tx(ctx, tx, "ldap", loginId, name)
+			login_clusterEvent.Reauth_tx(ctx, tx, "ldap", l.Id, l.Name)
 		}
 		if err := tx.Commit(ctx); err != nil {
 			return types.LoginAuthResult{}, err
@@ -188,25 +188,17 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	}
 
 	// everything in order, auth successful
-	token, err := createToken(loginId, name, admin, false, tokenExpiryHours)
+	l.Token, err = createToken(l.Id, l.Name, l.Admin, false, tokenExpiryHours)
 	if err != nil {
 		return types.LoginAuthResult{}, err
 	}
-	if err := cache.LoadAccessIfUnknown(loginId); err != nil {
+	if err := cache.LoadAccessIfUnknown(l.Id); err != nil {
 		return types.LoginAuthResult{}, err
 	}
-	*grantLoginId = loginId
-	*grantAdmin = admin
 
-	name = idToken.Subject
+	l.Name = idToken.Subject
 	if meta.NameDisplay != "" {
-		name = meta.NameDisplay
+		l.Name = meta.NameDisplay
 	}
-	return types.LoginAuthResult{
-		Id:        loginId,
-		MfaTokens: make([]types.LoginMfaToken, 0),
-		Name:      name,
-		Token:     token,
-		SaltKdf:   saltKdf,
-	}, nil
+	return l, nil
 }

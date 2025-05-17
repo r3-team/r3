@@ -33,10 +33,8 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 	defer ctxCanc()
 
 	// check token
-	var loginId int64
-	var admin bool
-	var noAuth bool
-	if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+	login, err := login_auth.Token(ctx, token)
+	if err != nil {
 		handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
@@ -90,7 +88,7 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 		DarkIcon     bool                   `json:"darkIcon"`
 		Debug        bool                   `json:"debug"`
 		Instances    map[uuid.UUID]instance `json:"instances"`
-		KeepFilesSec int64                  `json:"keepFilesSec`
+		KeepFilesSec int64                  `json:"keepFilesSec"`
 		LanguageCode string                 `json:"languageCode"`
 		Ssl          bool                   `json:"ssl"`
 		SslVerify    bool                   `json:"sslVerify"`
@@ -104,7 +102,7 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 				DeviceName: deviceName,
 				HostName:   hostName,
 				HostPort:   int(hostPort),
-				LoginId:    loginId,
+				LoginId:    login.Id,
 				TokenFixed: tokenFixed,
 			},
 		},

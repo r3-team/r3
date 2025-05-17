@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"r3/login/login_auth"
+	"r3/types"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // attempt login via user credentials
 // applies login ID, admin and no auth state to provided parameters if successful
-func LoginAuthUser(ctx context.Context, reqJson json.RawMessage, loginId *int64, admin *bool, noAuth *bool) (interface{}, error) {
+func LoginAuthUser(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
 
 	var req struct {
 		Username string `json:"username"`
@@ -21,14 +22,14 @@ func LoginAuthUser(ctx context.Context, reqJson json.RawMessage, loginId *int64,
 		MfaTokenPin pgtype.Text `json:"mfaTokenPin"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return types.LoginAuthResult{}, err
 	}
-	return login_auth.User(ctx, req.Username, req.Password, req.MfaTokenId, req.MfaTokenPin, loginId, admin, noAuth)
+	return login_auth.User(ctx, req.Username, req.Password, req.MfaTokenId, req.MfaTokenPin)
 }
 
 // attempt login via Open ID Connect
 // applies login ID, admin to provided parameters if successful
-func LoginAuthOpenId(ctx context.Context, reqJson json.RawMessage, loginId *int64, admin *bool) (interface{}, error) {
+func LoginAuthOpenId(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
 
 	var req struct {
 		Code          string `json:"code"`
@@ -36,45 +37,31 @@ func LoginAuthOpenId(ctx context.Context, reqJson json.RawMessage, loginId *int6
 		OauthClientId int32  `json:"oauthClientId"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return types.LoginAuthResult{}, err
 	}
-	return login_auth.OpenId(ctx, req.OauthClientId, req.Code, req.CodeVerifier, loginId, admin)
+	return login_auth.OpenId(ctx, req.OauthClientId, req.Code, req.CodeVerifier)
 }
 
 // attempt login via JWT
 // applies login ID, admin and no auth state to provided parameters if successful
-func LoginAuthToken(ctx context.Context, reqJson json.RawMessage, loginId *int64, admin *bool, noAuth *bool) (interface{}, error) {
+func LoginAuthToken(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
 	var req string
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return types.LoginAuthResult{}, err
 	}
-	return login_auth.Token(ctx, req, loginId, admin, noAuth)
+	return login_auth.Token(ctx, req)
 }
 
 // attempt login via fixed token
 // applies login ID to provided parameters if successful
-func LoginAuthTokenFixed(ctx context.Context, reqJson json.RawMessage, loginId *int64) (interface{}, error) {
+func LoginAuthTokenFixed(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
 
-	var (
-		err error
-		req struct {
-			LoginId    int64  `json:"loginId"`
-			TokenFixed string `json:"tokenFixed"`
-		}
-		res struct {
-			LanguageCode string `json:"languageCode"`
-			Token        string `json:"token"`
-		}
-	)
-
+	var req struct {
+		LoginId    int64  `json:"loginId"`
+		TokenFixed string `json:"tokenFixed"`
+	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+		return types.LoginAuthResult{}, err
 	}
-	res.LanguageCode, err = login_auth.TokenFixed(ctx, req.LoginId, "client", req.TokenFixed, &res.Token)
-	if err != nil {
-		return nil, err
-	}
-
-	*loginId = req.LoginId
-	return res, nil
+	return login_auth.TokenFixed(ctx, req.LoginId, "client", req.TokenFixed)
 }

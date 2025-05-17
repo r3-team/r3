@@ -54,17 +54,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		defer ctxCanc()
 
-		// check token
-		var loginId int64
-		var admin bool
-		var noAuth bool
-		if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+		// authenticate via token
+		login, err := login_auth.Token(ctx, token)
+		if err != nil {
 			handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
 			bruteforce.BadAttempt(r)
 			return
 		}
 
-		if !admin {
+		if !login.Admin {
 			handler.AbortRequest(w, logContext, err, handler.ErrUnauthorized)
 			return
 		}

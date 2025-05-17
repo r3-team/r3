@@ -28,16 +28,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutTransfer)
 	defer ctxCanc()
 
-	// check token
-	var loginId int64
-	var admin bool
-	var noAuth bool
-	if _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+	// authenticate via token
+	login, err := login_auth.Token(ctx, token)
+	if err != nil {
 		log.Error("server", genErr, err)
 		return
 	}
 
-	if !admin {
+	if !login.Admin {
 		log.Error("server", genErr, errors.New(handler.ErrUnauthorized))
 		return
 	}

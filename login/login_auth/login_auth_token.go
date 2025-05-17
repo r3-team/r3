@@ -15,7 +15,7 @@ import (
 
 // performs authentication attempt for user by using existing JWT token, signed by server
 // returns login name and language code
-func Token(ctx context.Context, token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *bool) (types.LoginAuthResult, error) {
+func Token(ctx context.Context, token string) (types.LoginAuthResult, error) {
 
 	if token == "" {
 		return types.LoginAuthResult{}, errors.New("empty token")
@@ -32,10 +32,15 @@ func Token(ctx context.Context, token string, grantLoginId *int64, grantAdmin *b
 	}
 
 	// get known login details
+	var l = types.LoginAuthResult{
+		Admin:     tp.Admin,
+		Id:        tp.LoginId,
+		MfaTokens: make([]types.LoginMfaToken, 0),
+		NoAuth:    tp.NoAuth,
+		Token:     token,
+	}
 	var active bool
-	var languageCode string
 	var limited bool
-	var name string
 	var nameDisplay pgtype.Text
 
 	if err := db.Pool.QueryRow(ctx, `
@@ -44,7 +49,7 @@ func Token(ctx context.Context, token string, grantLoginId *int64, grantAdmin *b
 		JOIN      instance.login_setting AS s  ON s.login_id  = l.id
 		LEFT JOIN instance.login_meta    AS lm ON lm.login_id = l.id
 		WHERE l.id = $1
-	`, tp.LoginId).Scan(&name, &nameDisplay, &active, &limited, &languageCode); err != nil {
+	`, tp.LoginId).Scan(&l.Name, &nameDisplay, &active, &limited, &l.LanguageCode); err != nil {
 		return types.LoginAuthResult{}, err
 	}
 	if !active {
@@ -59,17 +64,9 @@ func Token(ctx context.Context, token string, grantLoginId *int64, grantAdmin *b
 	if err := cache.LoadAccessIfUnknown(tp.LoginId); err != nil {
 		return types.LoginAuthResult{}, err
 	}
-	*grantLoginId = tp.LoginId
-	*grantAdmin = tp.Admin
-	*grantNoAuth = tp.NoAuth
 
 	if nameDisplay.Valid && nameDisplay.String != "" {
-		name = nameDisplay.String
+		l.Name = nameDisplay.String
 	}
-	return types.LoginAuthResult{
-		Id:           tp.LoginId,
-		MfaTokens:    make([]types.LoginMfaToken, 0),
-		Name:         name,
-		LanguageCode: languageCode,
-	}, nil
+	return l, nil
 }

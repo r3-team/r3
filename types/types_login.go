@@ -20,15 +20,20 @@ type LoginAccess struct {
 	Widget      map[uuid.UUID]int `json:"widget"`      // effective access to specific widgets
 }
 type LoginAuthResult struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
+	// auth types: user, token, fixed token, openId
+	Admin bool   `json:"admin"` // login has instance admin permissions
+	Id    int64  `json:"id"`    // login ID
+	Name  string `json:"name"`  // login name (unique in instance)
+	Token string `json:"token"` // login token
 
-	// user auth only
-	MfaTokens []LoginMfaToken `json:"mfaTokens"` // MFA details, filled if login was ok but MFA not satisfied yet
-	SaltKdf   string          `json:"saltKdf"`
-	Token     string          `json:"token"`
+	// auth types: user
+	MfaTokens []LoginMfaToken `json:"mfaTokens"` // available MFAs, filled if user auth ok, but MFA not satisfied
+	NoAuth    bool            `json:"noAuth"`    // login is without authentication (public auth with only name)
 
-	// token auth only
+	// auth types: user, openId
+	SaltKdf string `json:"saltKdf"`
+
+	// auth types: token, fixed token
 	LanguageCode string `json:"languageCode"`
 }
 type LoginClientEvent struct {

@@ -161,17 +161,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	defer ctxCanc()
 
-	// check token
-	var loginId int64
-	var admin bool
-	var noAuth bool
-	authRes, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth)
+	// authenticate via token
+	login, err := login_auth.Token(ctx, token)
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrUnauthorized)
 		bruteforce.BadAttempt(r)
 		return
 	}
-	var languageCode = authRes.LanguageCode
 
 	// start work
 	cache.Schema_mx.RLock()
@@ -208,7 +204,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// choose best caption for header
-			columnNames[i] = getCaption(columns[i].Captions, "columnTitle", languageCode)
+			columnNames[i] = getCaption(columns[i].Captions, "columnTitle", login.LanguageCode)
 			if columnNames[i] != "" {
 				continue
 			}
@@ -220,7 +216,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			columnNames[i] = getCaption(atr.Captions, "attributeTitle", languageCode)
+			columnNames[i] = getCaption(atr.Captions, "attributeTitle", login.LanguageCode)
 			if columnNames[i] != "" {
 				continue
 			}
@@ -268,7 +264,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		total, err := dataToCsv(ctx, writer, get, locUser, boolTrue, boolFalse,
-			dateFormat, columnAttributeContentUse, loginId)
+			dateFormat, columnAttributeContentUse, login.Id)
 
 		if err != nil {
 			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)

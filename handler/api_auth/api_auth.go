@@ -51,11 +51,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer ctxCanc()
 
 	// authenticate requestor
-	var loginId int64
-	var isAdmin bool
-	var noAuth bool
-
-	res, err := login_auth.User(ctx, req.Username, req.Password, pgtype.Int4{}, pgtype.Text{}, &loginId, &isAdmin, &noAuth)
+	res, err := login_auth.User(ctx, req.Username, req.Password, pgtype.Int4{}, pgtype.Text{})
 	if err != nil {
 		handler.AbortRequestWithCode(w, logContext, http.StatusUnauthorized,
 			err, handler.ErrAuthFailed)

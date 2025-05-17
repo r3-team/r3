@@ -20,25 +20,22 @@ import (
 
 // performs authentication attempt for known login via username + password + MFA PINs (if used)
 // if MFA is enabled but MFA PIN not given, returns list of available MFAs
-func User(ctx context.Context, name string, password string, mfaTokenId pgtype.Int4,
-	mfaTokenPin pgtype.Text, grantLoginId *int64, grantAdmin *bool, grantNoAuth *bool) (types.LoginAuthResult, error) {
+func User(ctx context.Context, username string, password string, mfaTokenId pgtype.Int4, mfaTokenPin pgtype.Text) (types.LoginAuthResult, error) {
 
-	if name == "" {
+	if username == "" {
 		return types.LoginAuthResult{}, errors.New("username not given")
 	}
 
-	// usernames are case insensitive
-	name = strings.ToLower(name)
-
 	// get known login details
-	var loginId int64
+	var err error
+	var l = types.LoginAuthResult{
+		MfaTokens: make([]types.LoginMfaToken, 0),
+		Name:      strings.ToLower(username), // usernames are case insensitive
+	}
 	var ldapId pgtype.Int4
 	var salt sql.NullString
 	var hash sql.NullString
-	var saltKdf string
-	var admin bool
 	var limited bool
-	var noAuth bool
 	var nameDisplay pgtype.Text
 	var tokenExpiryHours pgtype.Int4
 
@@ -50,7 +47,7 @@ func User(ctx context.Context, name string, password string, mfaTokenId pgtype.I
 		WHERE l.active
 		AND   l.name            = $1
 		AND   l.oauth_client_id IS NULL
-	`, name).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin, &noAuth, &limited, &tokenExpiryHours, &nameDisplay); err != nil {
+	`, l.Name).Scan(&l.Id, &ldapId, &salt, &hash, &l.SaltKdf, &l.Admin, &l.NoAuth, &limited, &tokenExpiryHours, &nameDisplay); err != nil {
 
 		if err == pgx.ErrNoRows {
 			// name not found / login inactive must result in same response as authentication failed
@@ -61,18 +58,18 @@ func User(ctx context.Context, name string, password string, mfaTokenId pgtype.I
 		}
 	}
 
-	if !noAuth && password == "" {
+	if !l.NoAuth && password == "" {
 		return types.LoginAuthResult{}, errors.New("password not given")
 	}
 
-	if err := preAuthChecks(loginId, admin, limited, true); err != nil {
+	if err := preAuthChecks(l.Id, l.Admin, limited, true); err != nil {
 		return types.LoginAuthResult{}, err
 	}
 
-	if !noAuth {
+	if !l.NoAuth {
 		if ldapId.Valid {
 			// authentication against LDAP
-			if err := ldap_auth.Check(ldapId.Int32, name, password); err != nil {
+			if err := ldap_auth.Check(ldapId.Int32, l.Name, password); err != nil {
 				return types.LoginAuthResult{}, errors.New(handler.ErrAuthFailed)
 			}
 		} else {
@@ -94,7 +91,7 @@ func User(ctx context.Context, name string, password string, mfaTokenId pgtype.I
 			WHERE login_id = $1
 			AND   id       = $2
 			AND   context  = 'totp'
-		`, loginId, mfaTokenId.Int32).Scan(&mfaToken); err != nil {
+		`, l.Id, mfaTokenId.Int32).Scan(&mfaToken); err != nil {
 			return types.LoginAuthResult{}, err
 		}
 
@@ -111,7 +108,7 @@ func User(ctx context.Context, name string, password string, mfaTokenId pgtype.I
 			FROM instance.login_token_fixed
 			WHERE login_id = $1
 			AND   context  = 'totp'
-		`, loginId)
+		`, l.Id)
 		if err != nil {
 			return types.LoginAuthResult{}, err
 		}
@@ -133,25 +130,16 @@ func User(ctx context.Context, name string, password string, mfaTokenId pgtype.I
 	}
 
 	// everything in order, auth successful
-	token, err := createToken(loginId, name, admin, noAuth, tokenExpiryHours)
+	l.Token, err = createToken(l.Id, l.Name, l.Admin, l.NoAuth, tokenExpiryHours)
 	if err != nil {
 		return types.LoginAuthResult{}, err
 	}
-	if err := cache.LoadAccessIfUnknown(loginId); err != nil {
+	if err := cache.LoadAccessIfUnknown(l.Id); err != nil {
 		return types.LoginAuthResult{}, err
 	}
-	*grantLoginId = loginId
-	*grantAdmin = admin
-	*grantNoAuth = noAuth
 
 	if nameDisplay.Valid && nameDisplay.String != "" {
-		name = nameDisplay.String
+		l.Name = nameDisplay.String
 	}
-	return types.LoginAuthResult{
-		Id:        loginId,
-		MfaTokens: make([]types.LoginMfaToken, 0),
-		Name:      name,
-		Token:     token,
-		SaltKdf:   saltKdf,
-	}, nil
+	return l, nil
 }
