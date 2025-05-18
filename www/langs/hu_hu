@@ -272,6 +272,9 @@
 				"phoneMobile": "Mobile"
 			},
 			"noAuth": "Nyilvános hozzáférés",
+			"oauth": "OAuth client",
+			"oauthAssignActive": "Roles are assigned by ID token claim",
+			"oauthMeta": "Details are set by ID token claims",
 			"password": "Új jelszó beállítása",
 			"roleContentAdmin": "Adminisztrátor",
 			"roleContentOther": "Különleges",
@@ -287,7 +290,8 @@
 				"ldap": "LDAP",
 				"limited": "Limited",
 				"name": "Name",
-				"noAuth": "Public"
+				"noAuth": "Public",
+				"oauth": "OAuth client"
 			},
 			"tokenExpiryHours": "Makszimális munkamenet-idő órában"
 		},

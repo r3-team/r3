@@ -272,6 +272,9 @@
 				"phoneMobile": "Mobile"
 			},
 			"noAuth": "Accès public",
+			"oauth": "OAuth client",
+			"oauthAssignActive": "Roles are assigned by ID token claim",
+			"oauthMeta": "Details are set by ID token claims",
 			"password": "Définir un nouveau mot de passe",
 			"roleContentAdmin": "Admin",
 			"roleContentOther": "Spécial",
@@ -287,7 +290,8 @@
 				"ldap": "LDAP",
 				"limited": "Limited",
 				"name": "Name",
-				"noAuth": "Public"
+				"noAuth": "Public",
+				"oauth": "OAuth client"
 			},
 			"tokenExpiryHours": "Durée maximale de session en heures"
 		},

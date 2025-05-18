@@ -272,6 +272,9 @@
 				"phoneMobile": "Mobile"
 			},
 			"noAuth": "公共访问",
+			"oauth": "OAuth client",
+			"oauthAssignActive": "Roles are assigned by ID token claim",
+			"oauthMeta": "Details are set by ID token claims",
 			"password": "设置新密码",
 			"roleContentAdmin": "管理员",
 			"roleContentOther": "特殊",
@@ -287,7 +290,8 @@
 				"ldap": "LDAP",
 				"limited": "Limited",
 				"name": "Name",
-				"noAuth": "Public"
+				"noAuth": "Public",
+				"oauth": "OAuth client"
 			},
 			"tokenExpiryHours": "会话最长时间（小时）"
 		},

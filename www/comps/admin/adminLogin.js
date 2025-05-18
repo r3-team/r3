@@ -92,7 +92,7 @@ let MyAdminLogin = {
 					<my-button image="add.png"
 						v-if="!isNew"
 						@trigger="reset"
-						:active="!isLdap"
+						:active="!isExtAuth"
 						:caption="capGen.button.new"
 					/>
 				</div>
@@ -100,7 +100,7 @@ let MyAdminLogin = {
 					<my-button image="warning.png"
 						v-if="!isNew"
 						@trigger="resetTotpAsk"
-						:active="!noAuth"
+						:active="!noAuth && !isOauth"
 						:cancel="true"
 						:caption="capApp.button.resetMfa"
 					/>
@@ -125,7 +125,7 @@ let MyAdminLogin = {
 							</td>
 							<td class="default-inputs">
 								<div class="column gap">
-									<input v-model="name" v-focus @keyup="typedUniqueField('name',name)" :disabled="isLdap" />
+									<input v-model="name" v-focus @keyup="typedUniqueField('name',name)" :disabled="isExtAuth" />
 									<div v-if="notUniqueName && name !== ''" class="message error">
 										{{ capApp.dialog.notUniqueName }}
 									</div>
@@ -149,16 +149,23 @@ let MyAdminLogin = {
 							</td>
 							<td>{{ capApp.hint.template }}</td>
 						</tr>
-						<tr v-if="isLdap">
+						<tr v-if="isExtAuth">
 							<td>
-								<div class="title-cell">
+								<div v-if="isLdap" class="title-cell">
 									<img src="images/hierarchy.png" />
 									<span>{{ capApp.ldap }}</span>
 								</div>
+								<div v-if="isOauth" class="title-cell">
+									<img src="images/lockCog.png" />
+									<span>{{ capApp.oauth }}</span>
+								</div>
 							</td>
 							<td class="default-inputs">
-								<select v-model="ldapId" disabled="disabled">
+								<select v-if="isLdap" v-model="ldapId" disabled="disabled">
 									<option :value="l.id" v-for="l in ldaps">{{ l.name }}</option>
+								</select>
+								<select v-if="isOauth" v-model="oauthClientId" disabled="disabled">
+									<option :value="c.id" v-for="c in oauthClients">{{ c.name }}</option>
 								</select>
 							</td>
 							<td></td>
@@ -178,8 +185,9 @@ let MyAdminLogin = {
 						<!-- meta data -->
 						<table class="generic-table-vertical default-inputs noRowBorders admin-login-meta" v-if="tabTarget === 'meta'">
 							<tbody>
-								<tr v-if="isLdap">
-									<td colspan="2" class="grouping"><b>{{ capApp.ldapMeta }}</b></td>
+								<tr v-if="isExtAuth">
+									<td v-if="isLdap"  colspan="2" class="grouping"><b>{{ capApp.ldapMeta }}</b></td>
+									<td v-if="isOauth" colspan="2" class="grouping"><b>{{ capApp.oauthMeta }}</b></td>
 								</tr>
 								<tr>
 									<td class="minimum">
@@ -193,15 +201,15 @@ let MyAdminLogin = {
 											<tbody>
 												<tr>
 													<td class="minimum">{{ capApp.meta.nameFore }}</td>
-													<td><input class="dynamic" v-model="meta.nameFore" :disabled="isLdap" /></td>
+													<td><input class="dynamic" v-model="meta.nameFore" :disabled="isExtAuth" /></td>
 												</tr>
 												<tr>
 													<td class="minimum">{{ capApp.meta.nameSur }}</td>
-													<td><input class="dynamic" v-model="meta.nameSur" :disabled="isLdap" /></td>
+													<td><input class="dynamic" v-model="meta.nameSur" :disabled="isExtAuth" /></td>
 												</tr>
 												<tr>
 													<td class="minimum">{{ capApp.meta.nameDisplay }}</td>
-													<td><input class="dynamic" v-model="meta.nameDisplay" :disabled="isLdap" /></td>
+													<td><input class="dynamic" v-model="meta.nameDisplay" :disabled="isExtAuth" /></td>
 												</tr>
 											</tbody>
 										</table>
@@ -214,7 +222,7 @@ let MyAdminLogin = {
 											<span>{{ capApp.meta.organization }}</span>
 										</div>
 									</td>
-									<td><input class="dynamic" v-model="meta.organization" :disabled="isLdap" /></td>
+									<td><input class="dynamic" v-model="meta.organization" :disabled="isExtAuth" /></td>
 								</tr>
 								<tr>
 									<td class="minimum">
@@ -223,7 +231,7 @@ let MyAdminLogin = {
 											<span>{{ capApp.meta.location }}</span>
 										</div>
 									</td>
-									<td><input class="dynamic" v-model="meta.location" :disabled="isLdap" /></td>
+									<td><input class="dynamic" v-model="meta.location" :disabled="isExtAuth" /></td>
 								</tr>
 								<tr>
 									<td class="minimum">
@@ -232,7 +240,7 @@ let MyAdminLogin = {
 											<span>{{ capApp.meta.department }}</span>
 										</div>
 									</td>
-									<td><input class="dynamic" v-model="meta.department" :disabled="isLdap" /></td>
+									<td><input class="dynamic" v-model="meta.department" :disabled="isExtAuth" /></td>
 								</tr>
 								<tr>
 									<td class="minimum">
@@ -243,7 +251,7 @@ let MyAdminLogin = {
 									</td>
 									<td>
 										<div class="column gap">
-											<input class="dynamic" v-model="meta.email" @keyup="typedUniqueField('email',meta.email)" :disabled="isLdap" />
+											<input class="dynamic" v-model="meta.email" @keyup="typedUniqueField('email',meta.email)" :disabled="isExtAuth" />
 											<div v-if="notUniqueEmail && meta.email !== ''" class="message error">
 												{{ capApp.dialog.notUniqueEmail }}
 											</div>
@@ -262,15 +270,15 @@ let MyAdminLogin = {
 											<tbody>
 												<tr>
 													<td class="minimum">{{ capApp.meta.phoneMobile }}</td>
-													<td><input class="dynamic" v-model="meta.phoneMobile" :disabled="isLdap" /></td>
+													<td><input class="dynamic" v-model="meta.phoneMobile" :disabled="isExtAuth" /></td>
 												</tr>
 												<tr>
 													<td class="minimum">{{ capApp.meta.phoneLandline }}</td>
-													<td><input class="dynamic" v-model="meta.phoneLandline" :disabled="isLdap" /></td>
+													<td><input class="dynamic" v-model="meta.phoneLandline" :disabled="isExtAuth" /></td>
 												</tr>
 												<tr>
 													<td class="minimum">{{ capApp.meta.phoneFax }}</td>
-													<td><input class="dynamic" v-model="meta.phoneFax" :disabled="isLdap" /></td>
+													<td><input class="dynamic" v-model="meta.phoneFax" :disabled="isExtAuth" /></td>
 												</tr>
 											</tbody>
 										</table>
@@ -283,7 +291,7 @@ let MyAdminLogin = {
 											<span>{{ capApp.meta.notes }}</span>
 										</div>
 									</td>
-									<td><textarea class="dynamic" v-model="meta.notes" :disabled="isLdap"></textarea></td>
+									<td><textarea class="dynamic" v-model="meta.notes" :disabled="isExtAuth"></textarea></td>
 								</tr>
 							</tbody>
 						</table>
@@ -291,8 +299,11 @@ let MyAdminLogin = {
 						<!-- roles -->
 						<table class="generic-table sticky-top bright" v-if="tabTarget === 'roles'">
 							<thead>
-								<tr>
-									<th v-if="isLdapAssignedRoles" colspan="4"><b>{{ capApp.ldapAssignActive }}</b></th>
+								<tr v-if="isLdapAssignedRoles">
+									<th colspan="4"><b>{{ capApp.ldapAssignActive }}</b></th>
+								</tr>
+								<tr v-if="isOauthClientAssignedRoles">
+									<th colspan="4"><b>{{ capApp.oauthAssignActive }}</b></th>
 								</tr>
 								<tr>
 									<th class="minimum">
@@ -301,9 +312,9 @@ let MyAdminLogin = {
 											<input class="short" placeholder="..." v-model="roleFilter" :title="capGen.button.filter" />
 										</div>
 									</th>
-									<th><my-button image="ok.png" @trigger="toggleRolesByContent('admin')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentAdmin" :naked="true" /></th>
-									<th><my-button image="ok.png" @trigger="toggleRolesByContent('user')"  :active="!isLdapAssignedRoles" :caption="capApp.roleContentUser"  :naked="true" /></th>
-									<th><my-button image="ok.png" @trigger="toggleRolesByContent('other')" :active="!isLdapAssignedRoles" :caption="capApp.roleContentOther" :naked="true" /></th>
+									<th><my-button image="ok.png" @trigger="toggleRolesByContent('admin')" :active="!isExtRole" :caption="capApp.roleContentAdmin" :naked="true" /></th>
+									<th><my-button image="ok.png" @trigger="toggleRolesByContent('user')"  :active="!isExtRole" :caption="capApp.roleContentUser"  :naked="true" /></th>
+									<th><my-button image="ok.png" @trigger="toggleRolesByContent('other')" :active="!isExtRole" :caption="capApp.roleContentOther" :naked="true" /></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -325,9 +336,9 @@ let MyAdminLogin = {
 									</td>
 									
 									<!-- roles to toggle -->
-									<my-admin-login-role content="admin" @toggle="toggleRoleId($event)" :module="m" :readonly="isLdapAssignedRoles" :roleIds="roleIds" />
-									<my-admin-login-role content="user"  @toggle="toggleRoleId($event)" :module="m" :readonly="isLdapAssignedRoles" :roleIds="roleIds" />
-									<my-admin-login-role content="other" @toggle="toggleRoleId($event)" :module="m" :readonly="isLdapAssignedRoles" :roleIds="roleIds" />
+									<my-admin-login-role content="admin" @toggle="toggleRoleId($event)" :module="m" :readonly="isExtRole" :roleIds="roleIds" />
+									<my-admin-login-role content="user"  @toggle="toggleRoleId($event)" :module="m" :readonly="isExtRole" :roleIds="roleIds" />
+									<my-admin-login-role content="other" @toggle="toggleRoleId($event)" :module="m" :readonly="isExtRole" :roleIds="roleIds" />
 								</tr>
 							</tbody>
 						</table>
@@ -394,7 +405,7 @@ let MyAdminLogin = {
 											<span>{{ capApp.noAuth }}</span>
 										</div>
 									</td>
-									<td><my-bool v-model="noAuth" :readonly="isLdap" /></td>
+									<td><my-bool v-model="noAuth" :readonly="isExtAuth" /></td>
 									<td>
 										<div class="column gap default-inputs">
 											<span>{{ capApp.hint.noAuth }}</span>
@@ -422,7 +433,7 @@ let MyAdminLogin = {
 								</tr>
 
 								<tr v-if="anyAction"><td colspan="3" class="grouping">{{ capGen.actions }}</td></tr>
-								<tr v-if="!isLdap">
+								<tr v-if="!isExtAuth">
 									<td>
 										<div class="title-cell">
 											<img src="images/lock.png" />
@@ -456,7 +467,8 @@ let MyAdminLogin = {
 		ldaps:           { type:Array,  required:true },
 		loginId:         { type:Number, required:true }, // login ID from parent, 0 if new
 		loginForms:      { type:Array,  required:true },
-		loginFormLookups:{ type:Array,  required:true }
+		loginFormLookups:{ type:Array,  required:true },
+		oauthClients:    { type:Array,  required:true }
 	},
 	emits:['close'],
 	data() {
@@ -464,7 +476,7 @@ let MyAdminLogin = {
 			// inputs
 			id:0,
 			ldapId:null,
-			ldapKey:null,
+			oauthClientId:null,
 			active:true,
 			admin:false,
 			meta:{},
@@ -506,19 +518,9 @@ let MyAdminLogin = {
 			}
 			return false;
 		},
-		isLdapAssignedRoles:(s) => {
-			if(s.ldapId === null)
-				return false;
-			
-			for(let l of s.ldaps) {
-				if(l.id === s.ldapId)
-					return l.assignRoles;
-			}
-			return false;
-		},
 		roleTotalNonHidden:(s) => {
 			let cnt = 0;
-			for(let roleId of s.roleIds) {
+			for(const roleId of s.roleIds) {
 				if(!s.moduleIdMapMeta[s.roleIdMap[roleId].moduleId].hidden)
 					cnt++
 			}
@@ -528,14 +530,20 @@ let MyAdminLogin = {
 			(s.roleFilter === '' || s.getCaption('moduleTitle',v.id,v.id,v.captions,v.name).toLowerCase().includes(s.roleFilter.toLowerCase()))),
 		
 		// simple states
-		anyAction: (s) => !s.isLdap,
+		anyAction: (s) => !s.isExtAuth,
 		anyInfo:   (s) => s.isLimited,
 		canSave:   (s) => s.hasChanges && !s.notUniqueName && s.name !== '',
+		isExtAuth: (s) => s.isLdap || s.isOauth,
+		isExtRole: (s) => s.isLdapAssignedRoles || s.isOauthClientAssignedRoles,
 		isFormOpen:(s) => s.loginFormIndexOpen !== null,
 		isLdap:    (s) => s.ldapId !== null,
 		isLimited: (s) => s.activated && s.roleIds.length < 2 && !s.admin && !s.noAuth,
 		isNew:     (s) => s.id === 0,
+		isOauth:   (s) => s.oauthClientId !== null,
 		noAuthUrl: (s) => !s.noAuth ? '' : `${location.protocol}//${location.host}/#/?login=${s.name}`,
+
+		isLdapAssignedRoles:       (s) => s.ldaps.filter(v => v.assignRoles && v.id === s.ldapId).length !== 0,
+		isOauthClientAssignedRoles:(s) => s.oauthClients.filter(v => v.claimRoles !== null && v.claimRoles !== '' && v.id === s.oauthClientId).length !== 0,
 		
 		// stores
 		activated:      (s) => s.$store.getters['local/activated'],
@@ -701,7 +709,7 @@ let MyAdminLogin = {
 					
 					let login = res.payload.logins[0];
 					this.ldapId           = login.ldapId;
-					this.ldapKey          = login.ldapKey;
+					this.oauthClientId    = login.oauthClientId;
 					this.name             = login.name;
 					this.active           = login.active;
 					this.admin            = login.admin;

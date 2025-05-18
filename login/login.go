@@ -75,7 +75,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
-	qb.AddList("SELECT", []string{"l.id", "l.ldap_id", "l.ldap_key", "l.name",
+	qb.AddList("SELECT", []string{"l.id", "l.ldap_id", "l.oauth_client_id", "l.name",
 		"l.admin", "l.limited", "l.no_auth", "l.active", "l.token_expiry_hours"})
 
 	qb.SetFrom("instance.login AS l")
@@ -123,6 +123,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 			orderAscSql = "DESC"
 		}
 		switch orderBy {
+		case "active":
+			qb.Add("ORDER", fmt.Sprintf("l.active %s, l.name ASC", orderAscSql))
 		case "admin":
 			qb.Add("ORDER", fmt.Sprintf("l.admin %s, l.name ASC", orderAscSql))
 		case "ldap":
@@ -131,8 +133,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 			qb.Add("ORDER", fmt.Sprintf("l.no_auth %s, l.name ASC", orderAscSql))
 		case "limited":
 			qb.Add("ORDER", fmt.Sprintf("l.limited %s, l.name ASC", orderAscSql))
-		case "active":
-			qb.Add("ORDER", fmt.Sprintf("l.active %s, l.name ASC", orderAscSql))
+		case "oauth":
+			qb.Add("ORDER", fmt.Sprintf("l.oauth_client_id %s, l.name ASC", orderAscSql))
 		default:
 			qb.Add("ORDER", fmt.Sprintf("l.name %s", orderAscSql))
 		}
@@ -155,7 +157,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 		var l types.LoginAdmin
 		var records []string
 
-		if err := rows.Scan(&l.Id, &l.LdapId, &l.LdapKey, &l.Name, &l.Admin, &l.Limited,
+		if err := rows.Scan(&l.Id, &l.LdapId, &l.OauthClientId, &l.Name, &l.Admin, &l.Limited,
 			&l.NoAuth, &l.Active, &l.TokenExpiryHours, &records); err != nil {
 
 			return logins, 0, err

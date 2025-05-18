@@ -26,7 +26,7 @@ type Log struct {
 type LoginAdmin struct {
 	Id               int64              `json:"id"`
 	LdapId           pgtype.Int4        `json:"ldapId"`
-	LdapKey          pgtype.Text        `json:"ldapKey"`
+	OauthClientId    pgtype.Int4        `json:"oauthClientId"`
 	Name             string             `json:"name"`
 	Active           bool               `json:"active"`
 	Admin            bool               `json:"admin"`
