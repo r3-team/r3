@@ -267,8 +267,8 @@ const MyStoreLocal = {
 };
 
 // read values from local storage on init
-let init = function() {
-	for(let k in MyStoreLocal.state) {
+const init = function() {
+	for(const k in MyStoreLocal.state) {
 		const value = localStorage.getItem(k);
 		
 		if(value !== undefined && value !== null)
@@ -276,7 +276,7 @@ let init = function() {
 	}
 }();
 
-let set = function(name,value) {
+const set = function(name,value) {
 	if(value !== undefined)
 		localStorage.setItem(name,JSON.stringify(value));
 };

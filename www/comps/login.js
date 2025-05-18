@@ -328,16 +328,16 @@ let MyLogin = {
 			const params = new URLSearchParams(window.location.search);
 			if(params.has('state') && params.has('code')) {
 				// attempt Open ID authentication against r3 backend, if local state matches
-				if(this.openIdAuthDetails.state === params.get('state'))
+				if(this.openIdAuthDetails.state === atob(params.get('state'))) {
 					this.authenticateByOpenId(
 						this.openIdAuthDetails.oauthClientId,
 						params.get('code'),
 						this.openIdAuthDetails.codeVerifier
 					);
-
-				// reset authentication details and URL
-				this.$store.commit('local/openIdAuthDetailsReset');
+				}
+				// clear URL parameters regardless
 				window.history.pushState({},'','/');
+				this.$store.commit('local/openIdAuthDetailsReset');
 			}
 			
 			// attempt authentication if token is available
@@ -419,8 +419,10 @@ let MyLogin = {
 			urlEndpoint.searchParams.set('scope','openid');
 			urlEndpoint.searchParams.set('code_challenge',challenge);
 			urlEndpoint.searchParams.set('code_challenge_method','S256');
-			urlEndpoint.searchParams.set('state',state);
-			window.location.replace(urlEndpoint.href);
+			// encode state with base64, some characters are not correctly returned in redirect URL (example: Azure AD '§')
+			urlEndpoint.searchParams.set('state',btoa(state));
+
+			window.location.replace(urlEndpoint.toString());
 			this.loading = false;
 		},
 		
