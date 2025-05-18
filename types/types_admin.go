@@ -97,6 +97,7 @@ type OauthClient struct {
 	LoginMetaMap    LoginMeta         `json:"loginMetaMap"`    // map claim key <-> login meta data key
 	LoginRoleAssign []LoginRoleAssign `json:"loginRoleAssign"` // assign login roles based on claim content
 	ClaimRoles      pgtype.Text       `json:"claimRoles"`      // name of claim that contains JSON array values for role mapping, such as { "roles":["my_role1", "my_role2", ...], ... }
+	ClaimUsername   pgtype.Text       `json:"claimUsername"`
 	ProviderUrl     pgtype.Text       `json:"providerUrl"`
 	RedirectUrl     pgtype.Text       `json:"redirectUrl"`
 }

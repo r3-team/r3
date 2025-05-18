@@ -133,9 +133,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			--
 			-- Open ID Connect authentication
 			CREATE TYPE instance.oauth_client_flow AS ENUM ('clientCreds', 'authCodePkce');
-			ALTER TABLE instance.oauth_client ADD   COLUMN claim_roles TEXT;
-			ALTER TABLE instance.oauth_client ADD   COLUMN provider_url TEXT;
-			ALTER TABLE instance.oauth_client ADD   COLUMN redirect_url TEXT;
+			ALTER TABLE instance.oauth_client ADD   COLUMN claim_roles    TEXT;
+			ALTER TABLE instance.oauth_client ADD   COLUMN claim_username TEXT;
+			ALTER TABLE instance.oauth_client ADD   COLUMN provider_url   TEXT;
+			ALTER TABLE instance.oauth_client ADD   COLUMN redirect_url   TEXT;
 			ALTER TABLE instance.oauth_client ADD   COLUMN flow TEXT NOT NULL DEFAULT 'clientCreds';
 			ALTER TABLE instance.oauth_client ALTER COLUMN flow DROP DEFAULT;
 			ALTER TABLE instance.oauth_client ALTER COLUMN client_secret DROP NOT NULL;
@@ -144,12 +145,17 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.oauth_client ALTER COLUMN date_expiry   DROP NOT NULL;
 
 			-- login OAUTH details
+			ALTER TABLE instance.login ADD COLUMN     oauth_iss       TEXT;
+			ALTER TABLE instance.login ADD COLUMN     oauth_sub       TEXT;
 			ALTER TABLE instance.login ADD COLUMN     oauth_client_id INTEGER;
 			ALTER TABLE instance.login ADD CONSTRAINT login_oauth_client_id_fkey
 				FOREIGN KEY (oauth_client_id)
 				REFERENCES instance.oauth_client (id) MATCH SIMPLE
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION;
+			
+			ALTER TABLE instance.login DROP CONSTRAINT login_name_key;
+			ALTER TABLE instance.login ADD  CONSTRAINT login_name_key UNIQUE (name, oauth_client_id);
 
 			CREATE INDEX IF NOT EXISTS fki_login_oauth_client_id_fkey
 				ON instance.login USING btree (oauth_client_id ASC NULLS LAST);

@@ -95,8 +95,9 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 
 	log.Info("ldap", fmt.Sprintf("user account '%s' is new or has been changed, updating login", name))
 
-	if _, err := Set_tx(ctx, tx, loginId, ldap.LoginTemplateId, ldapIdSql, ldapKeySql, pgtype.Int4{}, name, "",
-		adminEx, false, active, pgtype.Int4{}, metaEx, roleIdsEx, []types.LoginAdminRecordSet{}); err != nil {
+	if _, err := Set_tx(ctx, tx, loginId, ldap.LoginTemplateId, ldapIdSql, ldapKeySql, pgtype.Int4{},
+		pgtype.Text{}, pgtype.Text{}, name, "", adminEx, false, active, pgtype.Int4{}, metaEx, roleIdsEx,
+		[]types.LoginAdminRecordSet{}); err != nil {
 
 		return err
 	}

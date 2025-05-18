@@ -111,7 +111,8 @@ func adminMails() error {
 	if err := db.Pool.QueryRow(ctx, `
 		SELECT date_expiry
 		FROM instance.oauth_client
-		WHERE date_expiry > DATE_PART('EPOCH',CURRENT_DATE)
+		WHERE date_expiry IS NOT NULL
+		AND   date_expiry > DATE_PART('EPOCH',CURRENT_DATE)
 		ORDER BY date_expiry ASC
 		LIMIT 1
 	`).Scan(&dateExpirationOauth); err != nil && err != pgx.ErrNoRows {

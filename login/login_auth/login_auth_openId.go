@@ -29,6 +29,10 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		return types.LoginAuthResult{}, err
 	}
 
+	if !c.ClaimUsername.Valid {
+		return types.LoginAuthResult{}, errors.New("missing username claim definition for OAUTH client")
+	}
+
 	if !c.ProviderUrl.Valid || !c.RedirectUrl.Valid {
 		return types.LoginAuthResult{}, errors.New("missing provider or redirect URL for OAUTH client")
 	}
@@ -45,10 +49,11 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 
 	// exchange authentication code for tokens
 	oauth2Config := oauth2.Config{
-		ClientID:    c.ClientId,
-		RedirectURL: c.RedirectUrl.String,
-		Endpoint:    provider.Endpoint(),
-		Scopes:      c.Scopes,
+		ClientID:     c.ClientId,
+		ClientSecret: c.ClientSecret.String,
+		RedirectURL:  c.RedirectUrl.String,
+		Endpoint:     provider.Endpoint(),
+		Scopes:       c.Scopes,
 	}
 	tokens, err := oauth2Config.Exchange(ctx, code, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
 	if err != nil {
@@ -68,8 +73,8 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	// get known login details, unknown login is created
 	var l = types.LoginAuthResult{
 		Admin:     false,
+		Id:        0,
 		MfaTokens: make([]types.LoginMfaToken, 0),
-		Name:      fmt.Sprintf("%s::%s", idToken.Issuer, idToken.Subject),
 	}
 	var active bool
 	var tokenExpiryHours pgtype.Int4
@@ -101,9 +106,10 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 			COALESCE(m.phone_mobile, '')
 		FROM      instance.login      AS l
 		LEFT JOIN instance.login_meta AS m ON m.login_id = l.id
-		WHERE l.name            = $1
-		AND   l.oauth_client_id = $2
-	`, l.Name, oauthClientId).Scan(&l.Id, &l.SaltKdf, &l.Admin, &limited, &tokenExpiryHours, &active, &roleIdsEx,
+		WHERE l.oauth_client_id = $1
+		AND   l.oauth_iss       = $2
+		AND   l.oauth_sub       = $3
+	`, oauthClientId, idToken.Issuer, idToken.Subject).Scan(&l.Id, &l.SaltKdf, &l.Admin, &limited, &tokenExpiryHours, &active, &roleIdsEx,
 		&metaEx.Department, &metaEx.Email, &metaEx.Location, &metaEx.NameDisplay, &metaEx.NameFore, &metaEx.NameSur,
 		&metaEx.Notes, &metaEx.Organization, &metaEx.PhoneFax, &metaEx.PhoneLandline, &metaEx.PhoneMobile); err != nil {
 
@@ -117,7 +123,6 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	if err := preAuthChecks(l.Id, l.Admin, limited, !newLogin); err != nil {
 		return types.LoginAuthResult{}, err
 	}
-
 	// read mapped login meta data from ID token claims
 	var claimsIf interface{}
 	if err := idToken.Claims(&claimsIf); err != nil {
@@ -132,6 +137,20 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		metaEx = meta
 	} else {
 		metaEx, metaChanged = login_metaMap.UpdateChangedMeta(c.LoginMetaMap, metaEx, meta)
+	}
+
+	for k, claim := range claims {
+		fmt.Printf("claim %v, value %v\n", k, claim)
+	}
+
+	// read username from ID token claim
+	usernameIf, ok := claims[c.ClaimUsername.String]
+	if !ok {
+		return types.LoginAuthResult{}, fmt.Errorf("ID token does not contain username claim '%s'", c.ClaimUsername.String)
+	}
+	l.Name, ok = usernameIf.(string)
+	if !ok {
+		return types.LoginAuthResult{}, fmt.Errorf("username claim '%s' cannot be read as string", c.ClaimUsername.String)
 	}
 
 	// role assignment via claim
@@ -174,6 +193,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		defer tx.Rollback(ctx)
 
 		l.Id, err = login.Set_tx(ctx, tx, l.Id, c.LoginTemplateId, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{Int32: c.Id, Valid: true},
+			pgtype.Text{String: idToken.Issuer, Valid: true}, pgtype.Text{String: idToken.Subject, Valid: true},
 			l.Name, "", l.Admin, false, true, tokenExpiryHours, metaEx, roleIdsEx, []types.LoginAdminRecordSet{})
 
 		if err != nil {
@@ -196,7 +216,6 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		return types.LoginAuthResult{}, err
 	}
 
-	l.Name = idToken.Subject
 	if meta.NameDisplay != "" {
 		l.Name = meta.NameDisplay
 	}

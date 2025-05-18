@@ -238,8 +238,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 // set login with meta data
 // returns created login ID if new login
 func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4, ldapKey pgtype.Text,
-	oauthClientId pgtype.Int4, name string, pass string, admin bool, noAuth bool, active bool, tokenExpiryHours pgtype.Int4,
-	meta types.LoginMeta, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
+	oauthClientId pgtype.Int4, oauthIss pgtype.Text, oauthSub pgtype.Text, name string, pass string, admin bool, noAuth bool,
+	active bool, tokenExpiryHours pgtype.Int4, meta types.LoginMeta, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
 
 	if name == "" {
 		return 0, errors.New("name must not be empty")
@@ -268,13 +268,13 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	if isNew {
 		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.login (
-				ldap_id, ldap_key, oauth_client_id, name, salt, hash, salt_kdf, admin,
-				no_auth, limited, active, token_expiry_hours, date_favorites
+				ldap_id, ldap_key, oauth_client_id, oauth_iss, oauth_sub, name, salt, hash,
+				salt_kdf, admin, no_auth, limited, active, token_expiry_hours, date_favorites
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,0)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,0)
 			RETURNING id
-		`, ldapId, ldapKey, oauthClientId, name, &salt, &hash, saltKdf, admin, noAuth,
-			isLimited, active, tokenExpiryHours).Scan(&id); err != nil {
+		`, ldapId, ldapKey, oauthClientId, oauthIss, oauthSub, name, &salt, &hash,
+			saltKdf, admin, noAuth, isLimited, active, tokenExpiryHours).Scan(&id); err != nil {
 
 			return 0, err
 		}
@@ -300,10 +300,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	} else {
 		if _, err := tx.Exec(ctx, `
 			UPDATE instance.login
-			SET ldap_id = $1, ldap_key = $2, name = $3, admin = $4,
-				no_auth = $5, limited = $6, active = $7, token_expiry_hours = $8
-			WHERE id = $9
-		`, ldapId, ldapKey, name, admin, noAuth, isLimited, active, tokenExpiryHours, id); err != nil {
+			SET name = $1, admin = $2, no_auth = $3, limited = $4, active = $5, token_expiry_hours = $6
+			WHERE id = $7
+		`, name, admin, noAuth, isLimited, active, tokenExpiryHours, id); err != nil {
 			return 0, err
 		}
 
@@ -515,9 +514,8 @@ func CreateAdmin(username string, password string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{},
-		username, password, true, false, true, pgtype.Int4{},
-		types.LoginMeta{NameFore: "Admin", NameSur: "User", NameDisplay: username},
+	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Text{},
+		username, password, true, false, true, pgtype.Int4{}, types.LoginMeta{NameFore: "Admin", NameSur: "User", NameDisplay: username},
 		[]uuid.UUID{}, []types.LoginAdminRecordSet{}); err != nil {
 
 		return err

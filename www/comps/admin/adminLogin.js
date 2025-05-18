@@ -778,8 +778,6 @@ let MyAdminLogin = {
 			
 			ws.send('login','set',{
 				id:this.id,
-				ldapId:this.ldapId,
-				ldapKey:this.ldapKey,
 				name:this.name,
 				pass:this.pass,
 				active:this.active,

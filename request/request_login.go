@@ -156,9 +156,6 @@ func LoginSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (inter
 
 	var req struct {
 		Id               int64                       `json:"id"`
-		LdapId           pgtype.Int4                 `json:"ldapId"`
-		LdapKey          pgtype.Text                 `json:"ldapKey"`
-		OauthClientId    pgtype.Int4                 `json:"oauthClientId"`
 		Name             string                      `json:"name"`
 		Pass             string                      `json:"pass"`
 		Active           bool                        `json:"active"`
@@ -174,9 +171,10 @@ func LoginSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (inter
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return login.Set_tx(ctx, tx, req.Id, req.TemplateId, req.LdapId, req.LdapKey, req.OauthClientId,
-		req.Name, req.Pass, req.Admin, req.NoAuth, req.Active, req.TokenExpiryHours, req.Meta,
-		req.RoleIds, req.Records)
+	// LDAP / OAUTH details are only used during login creation, which happens during LDAP import or OAUTH authentication
+	return login.Set_tx(ctx, tx, req.Id, req.TemplateId, pgtype.Int4{}, pgtype.Text{},
+		pgtype.Int4{}, pgtype.Text{}, pgtype.Text{}, req.Name, req.Pass, req.Admin,
+		req.NoAuth, req.Active, req.TokenExpiryHours, req.Meta, req.RoleIds, req.Records)
 }
 func LoginSetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
