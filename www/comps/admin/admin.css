@@ -77,6 +77,11 @@
 	padding:0px;
 	min-height:630px;
 }
+.admin-login .login-details .login-details-content-message{
+	display:flex;
+	font-size:105%;
+	margin:10px 12px;
+}
 .admin-login .login-details-login-form-input{
 	min-width:300px;
 }

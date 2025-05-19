@@ -99,6 +99,7 @@ let MyAdminLogins = {
 			<my-admin-login
 				v-if="loginIdOpen !== null"
 				@close="loginIdOpen = null;get()"
+				@set-login-id="loginIdOpen = $event"
 				:ldaps="ldaps"
 				:loginId="loginIdOpen"
 				:loginForms="loginForms"

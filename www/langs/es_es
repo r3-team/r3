@@ -221,7 +221,6 @@
 			},
 			"dialog": {
 				"delete": "¿Estás seguro de que deseas eliminar este usuario?<br /><br />Esta acción es irreversible.</b>",
-				"notUniqueEmail": "La misma dirección de correo electrónico también ha sido asignada a un usuario diferente.",
 				"notUniqueName": "El mismo nombre de usuario ya ha sido asignado a un usuario diferente.",
 				"resetTotp": "Esto restablecerá todos los métodos de autenticación multifactor (MFA) para este usuario. El acceso al sistema será posible solo con nombre de usuario y contraseña.<br /><br />Restablecer MFA no afecta el cifrado de extremo a extremo.<br /><br />¿Deseas continuar?"
 			},
@@ -266,6 +265,9 @@
 		},
 		"loginMeta": {
 			"department": "Department",
+			"dialog": {
+				"notUniqueEmail": "La misma dirección de correo electrónico también ha sido asignada a un usuario diferente."
+			},
 			"email": "Email",
 			"location": "Location",
 			"nameDisplay": "Display name",

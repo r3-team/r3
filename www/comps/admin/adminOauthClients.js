@@ -29,14 +29,14 @@ let MyAdminOauthClients = {
 		<div class="content grow">
 			<div class="generic-entry-list wide">
 				<div class="entry clickable"
-					v-for="(e,k) in oauthClientIdMap"
-					@click="idOpen = e.id"
-					:key="e.id"
-					:title="e.name"
+					v-for="(c,k) in oauthClientIdMap"
+					@click="idOpen = c.id"
+					:key="c.id"
+					:title="c.name"
 				>
 					<div class="lines">
-						<span>{{ e.name }}</span>
-						<span class="subtitle">{{ capApp.dateExpiry + ': ' + getUnixFormat(e.dateExpiry,settings.dateFormat) }}</span>
+						<span>{{ c.name }}</span>
+						<span class="subtitle">{{ subtitle(c) }}</span>
 					</div>
 				</div>
 			</div>
@@ -76,6 +76,16 @@ let MyAdminOauthClients = {
 	methods:{
 		// externals
 		getUnixFormat,
+
+		// presentation
+		subtitle(c) {
+			let parts = [`${this.capApp.option.flow[c.flow]}`];
+			
+			if(c.dateExpiry !== null)
+				parts.push(`${this.capApp.dateExpiry}: ${getUnixFormat(c.dateExpiry,this.settings.dateFormat)}`);
+
+			return parts.join(', ');
+		},
 		
 		// backend calls
 		get() {
