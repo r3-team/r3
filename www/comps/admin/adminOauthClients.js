@@ -46,6 +46,7 @@ let MyAdminOauthClients = {
 				@close="idOpen = null;get()"
 				@makeNew="idOpen = 0"
 				:id="idOpen"
+				:loginTemplates="loginTemplates"
 				:oauthClientIdMap="oauthClientIdMap"
 				:readonly="!licenseValid"
 			/>
@@ -56,6 +57,7 @@ let MyAdminOauthClients = {
 	},
 	data() {
 		return {
+			loginTemplates:[],
 			oauthClientIdMap:[],
 			idOpen:null
 		};
@@ -77,8 +79,14 @@ let MyAdminOauthClients = {
 		
 		// backend calls
 		get() {
-			ws.send('oauthClient','get',true).then(
-				res => this.oauthClientIdMap = res.payload,
+			ws.sendMultiple([
+				ws.prepare('oauthClient','get',{}),
+				ws.prepare('loginTemplate','get',{byId:0})
+			],true).then(
+				res => {
+					this.oauthClientIdMap = res[0].payload;
+					this.loginTemplates   = res[1].payload;
+				},
 				this.$root.genericError
 			);
 		}

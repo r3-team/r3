@@ -155,7 +155,6 @@
 			"bindUserDnHint": "示例：CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "绑定用户密码",
 			"button": {
-				"expert": "专家设置",
 				"import": "Import users now",
 				"new": "添加连接",
 				"test": "测试连接"
@@ -174,21 +173,9 @@
 			"keyAttributeHint": "示例：objectGUID",
 			"loginAttribute": "Username attribute",
 			"loginAttributeHint": "示例：sAMAccountName",
+			"loginMetaMap": "Map user details to LDAP attributes",
 			"memberAttribute": "成员属性",
 			"memberAttributeHint": "示例：memberOf",
-			"metaHint": {
-				"department": "Example: department",
-				"email": "Example: mail",
-				"location": "Example: physicalDeliveryOfficeName",
-				"nameDisplay": "Example: displayName",
-				"nameFore": "Example: givenName",
-				"nameSur": "Example: sn",
-				"notes": "Example: description",
-				"organization": "Example: company",
-				"phoneFax": "Example: facsimileTelephoneNumber",
-				"phoneLandline": "Example: telephoneNumber",
-				"phoneMobile": "Example: mobile"
-			},
 			"msAdExt": "Microsoft AD 扩展",
 			"msAdExtHint": "嵌套组成员身份、用户账户控制",
 			"nameHint": "唯一名称",
@@ -249,7 +236,6 @@
 				"name": "Username - must be unique within the system.",
 				"noAuth": "Public users do not require authentication. System access is possible with only a URL.",
 				"password": "This will overwrite the current password for this user. Multi-factor-authentication is not affected by this change. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
-				"template": "预定义设置（显示和主题选项）将从所选模板应用。",
 				"tokenExpiryHours": "Overwrites the global setting for max. session time."
 			},
 			"ldap": "已分配 LDAP",
@@ -257,20 +243,6 @@
 			"ldapMeta": "Details are imported via LDAP",
 			"limited": "Limited user",
 			"limitedDesc": "When a user has at most a single role assigned, it counts as a 'limited' user. Useful for when only access to parts of an application is needed for things like request handling or form submission.<br /><br />Limited users cannot have admin or public access and take from a separate license pool.",
-			"meta": {
-				"department": "Department",
-				"email": "Email",
-				"location": "Location",
-				"nameDisplay": "Display name",
-				"nameFore": "Forename",
-				"nameSur": "Surname",
-				"notes": "Description",
-				"organization": "Organization",
-				"phone": "Phone",
-				"phoneFax": "Fax",
-				"phoneLandline": "Landline",
-				"phoneMobile": "Mobile"
-			},
 			"noAuth": "公共访问",
 			"oauth": "OAuth client",
 			"oauthAssignActive": "Roles are assigned by ID token claim",
@@ -280,7 +252,6 @@
 			"roleContentOther": "特殊",
 			"roleContentUser": "用户",
 			"roles": "已分配的角色 ({COUNT}）",
-			"template": "User template",
 			"title": "User '{NAME}'",
 			"titleLimited": "Limited user '{NAME}'",
 			"titleNew": "New user",
@@ -294,6 +265,20 @@
 				"oauth": "OAuth client"
 			},
 			"tokenExpiryHours": "会话最长时间（小时）"
+		},
+		"loginMeta": {
+			"department": "Department",
+			"email": "Email",
+			"location": "Location",
+			"nameDisplay": "Display name",
+			"nameFore": "Forename",
+			"nameSur": "Surname",
+			"notes": "Description",
+			"organization": "Organization",
+			"phone": "Phone",
+			"phoneFax": "Fax",
+			"phoneLandline": "Landline",
+			"phoneMobile": "Mobile"
 		},
 		"loginSessions": {
 			"noData": "No sessions available",
@@ -464,6 +449,14 @@
 		"navigationScheduler": "调度器",
 		"navigationSystemMsg": "System message",
 		"oauthClient": {
+			"button": {
+				"defaultO365": "Defaults: Exchange Online",
+				"defaultOpenId": "Defaults: Open ID Connect"
+			},
+			"claimRoles": "Roles claim",
+			"claimRolesHint": "Name of the claim field, which contains user roles or groups. If set, REI3 roles can be mapped to values in this claim. Value must be a JSON string array, such as: [\"all-users\", \"department-it\"]",
+			"claimUsername": "Username claim",
+			"claimUsernameHint": "Name of the claim field, which contains the username. Must be filled. Usernames must be unique for an OAuth client.",
 			"clientId": "客户端 ID",
 			"clientIdHint": "在创建 OAuth2 客户端时由提供商生成。",
 			"clientSecret": "客户端密钥",
@@ -473,23 +466,28 @@
 			"dialog": {
 				"delete": "您确定要删除此 OAuth 客户端吗？<br /><br />此操作不可逆。</b>"
 			},
-			"intro": "OAuth 客户端用于对标识提供商进行身份验证以执行操作或访问资源。<br /><br />REI3 实现了“OAuth 2.0 客户端凭据授予流”，在设置此处之前要求将 OAuth 客户端注册到提供商。",
+			"flow": "OAuth flow",
 			"nameHint": "用于在 REI3 中引用此 OAuth 客户端的内部名称。",
 			"option": {
-				"template": {
-					"custom": "-",
-					"ms365_mail": "O365 邮件"
+				"flow": {
+					"authCodePkce": "Authentication Code with PKCE",
+					"clientCreds": "Client credentials"
+				},
+				"flowHint": {
+					"authCodePkce": "<p>This flow is used in REI3 to authenticate users via external identity providers, such as Keycloak or Microsoft Entra ID.</p><p>'Authentication Code with Proof Key for Code Exchange' is an Open ID Connect flow. Users are forwarded to authenticate with an identity provider. After authentication, a user is redirected back to REI3 with verification of identity and user meta data.</p>",
+					"clientCreds": "<p>This flow is used in REI3 to authenticate itself against a service, such as Exchange Online.</p><p>'Client Credentials' is an OAuth 2.0 flow, with which REI3 authenticates against a service provider, to receive access to protected resources such as a mailbox. Any resource accessed via the 'Client Credentials' flow should belong to the client (in this case REI3) - it is not designed to access user resources directly or on behalf.</p><p>This flow is currently only used for access to mail resources.</p>"
 				}
 			},
+			"providerUrl": "Provider URL",
+			"providerUrlHint": "URL for OAuth service discovery.",
+			"redirectUrl": "Redirect URL",
+			"redirectUrlHint": "Users are redirected here after authentication. Should be the login URL of REI3. Must also be registered at the service provider.",
 			"scopes": "范围",
 			"scopesHint": "范围告诉提供商 OAuth 客户端希望执行或访问什么。它们由提供商定义，必须分配给客户端才能使用-请参考提供商的文档以获取可用范围的列表。",
-			"template": "模板",
-			"templateHint": "选择一个模板以应用已知提供商的默认设置。",
-			"tenant": "租户",
-			"tenantHint": "对于某些提供商是必需的。租户是在提供商的云系统上唯一标识您的组织的名称或 ID。",
 			"title": "OAuth 客户端 '{NAME}'",
 			"titleNew": "新的 OAuth 客户端",
 			"tokenUrl": "令牌 URL",
+			"tokenUrlExample": "Example for Exchange Online: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
 			"tokenUrlHint": "OAuth2 令牌生成的 URL。这些将由您的提供商进行文档化。"
 		},
 		"repo": {
@@ -2218,6 +2216,8 @@
 		"login": "Login",
 		"loginForm": "登录表单",
 		"loginForms": "登录表单",
+		"loginTemplate": "User template",
+		"loginTemplateHint": "Predefined settings are applied once from the selected template when a new user is created. If nothing is selected here, the global template is used.",
 		"menu": "菜单",
 		"menus": "菜单",
 		"menusSub": "子菜单",

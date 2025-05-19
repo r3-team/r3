@@ -38,25 +38,35 @@ func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 		return nil, err
 	}
 
-	var err error
 	newRecord := req.Id == 0
-
 	if newRecord {
-		_, err = tx.Exec(ctx, `
+		// flow can only be defined during insert, as a flow used for Open ID Connect is unusable for something else and vice-versa
+		if _, err := tx.Exec(ctx, `
 			INSERT INTO instance.oauth_client (login_template_id, name, flow, client_id, client_secret,
-				date_expiry, scopes, tenant, provider_url, redirect_url, token_url, claim_roles, claim_username)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+				date_expiry, scopes, provider_url, redirect_url, token_url, claim_roles, claim_username)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
 		`, req.LoginTemplateId, req.Name, req.Flow, req.ClientId, req.ClientSecret, req.DateExpiry, req.Scopes,
-			req.Tenant, req.ProviderUrl, req.RedirectUrl, req.TokenUrl, req.ClaimRoles, req.ClaimUsername)
+			req.ProviderUrl, req.RedirectUrl, req.TokenUrl, req.ClaimRoles, req.ClaimUsername); err != nil {
+
+			return nil, err
+		}
 	} else {
-		_, err = tx.Exec(ctx, `
+		if _, err := tx.Exec(ctx, `
 			UPDATE instance.oauth_client
 			SET login_template_id = $1, name = $2, client_id = $3, client_secret = $4, date_expiry = $5,
-				scopes = $6, tenant = $7, provider_url = $8, redirect_url = $9, token_url = $10,
-				claim_roles = $11, claim_username = $12
-			WHERE id = $13
+				scopes = $6, provider_url = $7, redirect_url = $8, token_url = $9,
+				claim_roles = $10, claim_username = $11
+			WHERE id = $12
 		`, req.LoginTemplateId, req.Name, req.ClientId, req.ClientSecret, req.DateExpiry, req.Scopes,
-			req.Tenant, req.ProviderUrl, req.RedirectUrl, req.TokenUrl, req.ClaimRoles, req.ClaimUsername, req.Id)
+			req.ProviderUrl, req.RedirectUrl, req.TokenUrl, req.ClaimRoles, req.ClaimUsername, req.Id); err != nil {
+
+			return nil, err
+		}
 	}
-	return nil, err
+
+	// login meta via claims
+
+	// login role via claim
+
+	return nil, nil
 }

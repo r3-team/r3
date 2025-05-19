@@ -155,7 +155,6 @@
 			"bindUserDnHint": "Beispiel: CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "Benutzer-Passwort für Verbindung",
 			"button": {
-				"expert": "Experteneinstellungen",
 				"import": "Benutzer jetzt importieren",
 				"new": "Verbindung hinzufügen",
 				"test": "Verbindung testen"
@@ -174,21 +173,9 @@
 			"keyAttributeHint": "Beispiel: objectGUID",
 			"loginAttribute": "Benutzernameattribut",
 			"loginAttributeHint": "Beispiel: sAMAccountName",
+			"loginMetaMap": "Benutzer-Details zu LDAP-Attribute zuordnen",
 			"memberAttribute": "Mitgliedschaftsattribut",
 			"memberAttributeHint": "Beispiel: memberOf",
-			"metaHint": {
-				"department": "Beispiel: department",
-				"email": "Beispiel: mail",
-				"location": "Beispiel: physicalDeliveryOfficeName",
-				"nameDisplay": "Beispiel: displayName",
-				"nameFore": "Beispiel: givenName",
-				"nameSur": "Beispiel: sn",
-				"notes": "Beispiel: description",
-				"organization": "Beispiel: company",
-				"phoneFax": "Beispiel: facsimileTelephoneNumber",
-				"phoneLandline": "Beispiel: telephoneNumber",
-				"phoneMobile": "Beispiel: mobile"
-			},
 			"msAdExt": "Microsoft AD-Erweiterungen",
 			"msAdExtHint": "Verschachtelte Gruppenzugehör., Benutzer-Account-Kontrolle",
 			"nameHint": "Einzigartiger Name",
@@ -249,7 +236,6 @@
 				"name": "Benutzername - muss im System einzigartig sein.",
 				"noAuth": "Öffentliche Benutzer brauchen keine Authentifizierung. Systemzugriff ist nur mit einer URL möglich.",
 				"password": "Hiermit wird das aktuelle Password für den Benutzer überschrieben. Multi-Faktor-Authentifizierung ist davon nicht betroffen. Ende-zu-Ende-Verschlüsselung (E2EE) wird erst wieder verfügbar sein, wenn der Benutzer seinen Backup-Code eingibt.",
-				"template": "Vorausgewählte Einstellungen (Anzeige- & Darstellungsoptionen) der gewählten Vorlage werden angewendet.",
 				"tokenExpiryHours": "Überschreibt die globale Einstellung für die max. Sitzungszeit."
 			},
 			"ldap": "LDAP zugewiesen",
@@ -257,20 +243,6 @@
 			"ldapMeta": "Details werden über LDAP importiert",
 			"limited": "Limitierter Benutzer",
 			"limitedDesc": "Wenn einem Benutzer nicht mehr als eine Rolle zugewiesen ist, zählt dieser als \"limitiert\". Praktisch für Benutzer, die nur Zugriff auf Teile einer Anwendung brauchen, für Dinge wie Anfragen oder Abschicken von Formularen.<br /><br />Limitierte Benutzer können keine Admins oder öffentliche Benutzer sein und bedienen sich von einem separaten Lizenz-Vorrat.",
-			"meta": {
-				"department": "Abteilung",
-				"email": "E-Mail",
-				"location": "Standort",
-				"nameDisplay": "Anzeigename",
-				"nameFore": "Vorname",
-				"nameSur": "Nachname",
-				"notes": "Beschreibung",
-				"organization": "Organisation",
-				"phone": "Telefon",
-				"phoneFax": "Fax",
-				"phoneLandline": "Festnetz",
-				"phoneMobile": "Mobil"
-			},
 			"noAuth": "Öffentlicher Zugriff",
 			"oauth": "OAuth-Client",
 			"oauthAssignActive": "Rollen werden über Claims im ID-Token zugewiesen",
@@ -280,7 +252,6 @@
 			"roleContentOther": "Besonders",
 			"roleContentUser": "Benutzer",
 			"roles": "Rollen ({COUNT}）",
-			"template": "Benutzervorlage",
 			"title": "Benutzer \"{NAME}\"",
 			"titleLimited": "Limitierter Benutzer \"{NAME}\"",
 			"titleNew": "Neuer Benutzer",
@@ -294,6 +265,20 @@
 				"oauth": "OAuth-Client"
 			},
 			"tokenExpiryHours": "Max. Sitzungszeit in Stunden"
+		},
+		"loginMeta": {
+			"department": "Abteilung",
+			"email": "E-Mail",
+			"location": "Standort",
+			"nameDisplay": "Anzeigename",
+			"nameFore": "Vorname",
+			"nameSur": "Nachname",
+			"notes": "Beschreibung",
+			"organization": "Organisation",
+			"phone": "Telefon",
+			"phoneFax": "Fax",
+			"phoneLandline": "Festnetz",
+			"phoneMobile": "Mobil"
 		},
 		"loginSessions": {
 			"noData": "Keine Sitzungen verfügbar",
@@ -464,6 +449,14 @@
 		"navigationScheduler": "Aufgabenplaner",
 		"navigationSystemMsg": "Systemnachricht",
 		"oauthClient": {
+			"button": {
+				"defaultO365": "Standardwerte: Exchange Online",
+				"defaultOpenId": "Standardwerte: Open ID Connect"
+			},
+			"claimRoles": "Rollen-Claim",
+			"claimRolesHint": "Name des Claim-Feldes, welches Benutzerrollen oder -gruppen beinhaltet. Wenn gesetzt, können REI3-Rollen zu Werten in diesem Claim zugeordnet werden. Wert muss ein JSON-String-Array sein, wie z. B.: [\"alle-benutzer\", \"abteilung-it\"]",
+			"claimUsername": "Benutzer-Claim",
+			"claimUsernameHint": "Name des Claim-Feldes, welches den Benutzernamen beinhaltet. Muss gesetzt sein. Benutzernamen im jeweiligen OAuth-Client müssen einzigartig sein.",
 			"clientId": "Client-ID",
 			"clientIdHint": "Wird auf der Anbieterseite bei der Erstellung eines OAuth2-Clients erzeugt.",
 			"clientSecret": "Client-Secret",
@@ -473,23 +466,28 @@
 			"dialog": {
 				"delete": "Bist du sicher, dass du diesen OAuth-Client löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>"
 			},
-			"intro": "Ein OAuth-Client authentifiziert sich gegenüber einem Identitätsanbieter, um Aktionen auszuführen oder auf Ressourcen zuzugreifen.<br /><br />REI3 implementiert den \"OAuth 2.0 client credentials grant flow\"; dieser erfordert, dass der OAuth-Client beim Anbieter registriert ist, bevor er hier eingerichtet werden kann.",
+			"flow": "OAuth-Flow",
 			"nameHint": "Ein interner Name, um auf diesen OAuth-Client innerhalb von REI3 zu referenzieren.",
 			"option": {
-				"template": {
-					"custom": "-",
-					"ms365_mail": "O365-Mailing"
+				"flow": {
+					"authCodePkce": "Authentication Code with PKCE",
+					"clientCreds": "Client credentials"
+				},
+				"flowHint": {
+					"authCodePkce": "<p>Dieser Flow wird in REI3 verwendet, um Benutzer über einen externen Identitätsanbieter anzumelden, wie z. B. Keycloak oder Microsoft Entra ID.</p><p>'Authentication Code with Proof Key for Code Exchange' ist ein Open ID Connect-Flow. Benutzer werden zur Authentifizierung zu einem Identitätsanbieter weitergeleitet. Nach Authentifizierung wird der Benutzer zurück zu REI3 geschickt, wobei seine Identität verifiziert und Metadaten aktualisiert werden.</p>",
+					"clientCreds": "<p>Dieser Flow wird in REI3 verwendet, damit sich das System gegen einen Dienst, wie z. B. Exchange Online, authentifizieren kann.</p><p>'Client Credentials' ist ein OAuth 2.0-Flow, mit welcher sich ein Client gegen Diensteanbieter authentifzieren kann, um auf geschützte Ressourcen wie z. B. Postfächer zuzugreifen. Ressourcen, die über den 'Client Credentials'-Flow zugegriffen werden, sollten zum Client (in diesem Fall REI3) gehören; dieser Flow ist nicht dafür gedacht, auf Benutzer-Ressourcen direkt oder in Namen dessen zuzugreifen.</p><p>Dieser Flow wird aktuell nur für Zugriff auf E-Mail-Ressourcen verwendet.</p>"
 				}
 			},
+			"providerUrl": "Anbieter-URL",
+			"providerUrlHint": "URL für OAuth-Service-Discovery.",
+			"redirectUrl": "Weiterleitungs-URL",
+			"redirectUrlHint": "Benutzer werden hierhin weitergeleitet, nachdem sie sich authentifiziert haben. Sollte die URL der Anmeldeseite von REI3 sein. Muss ebenfalls beim Anbieter registriert sein.",
 			"scopes": "Scopes",
 			"scopesHint": "Scopes teilen dem Anbieter mit, was ein OAuth-Client tun oder worauf er zugreifen möchte. Sie werden vom Anbieter definiert und müssen dem Client zugewiesen werden, um nutzbar zu sein - eine Liste der verfügbaren Scopes sollte in der Dokumentation vom Anbieter zu finden sein.",
-			"template": "Vorlage",
-			"templateHint": "Eine Vorlage kann ausgewählt werden, um Standardeinstellungen für bekannte Anbieter anzuwenden.",
-			"tenant": "Mandant",
-			"tenantHint": "Bei einigen Anbietern erforderlich. Ein Mandant (oder \"Tenant\") ist ein Name oder eine ID, die eine Organisation im Cloud-System eines Anbieters eindeutig identifiziert.",
 			"title": "OAuth-Client '{NAME}'",
 			"titleNew": "Neuer OAuth-Client",
 			"tokenUrl": "Token-URL",
+			"tokenUrlExample": "Beispiel für Exchange Online: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
 			"tokenUrlHint": "URL, unter der OAuth2-Tokens generiert werden. Die Token-URL wird vom Anbieter definiert."
 		},
 		"repo": {
@@ -2218,6 +2216,8 @@
 		"login": "Anmeldung",
 		"loginForm": "Anmeldeformular",
 		"loginForms": "Anmeldeformulare",
+		"loginTemplate": "Benutzervorlage",
+		"loginTemplateHint": "Vordefinierte Einstellungen werden einmalig von gewählter Vorlage angewendet, wenn neuer Benutzer erstellt wird. Wenn nichts ausgewählt wurde, wird die globale Vorlage angewendet.",
 		"menu": "Menü",
 		"menus": "Menüs",
 		"menusSub": "Untermenüs",

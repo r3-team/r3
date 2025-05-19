@@ -155,7 +155,6 @@
 			"bindUserDnHint": "على سبيل المثال: CN=للقراءة فقط،OU=المستخدم،DC=mycompany،DC=محلي",
 			"bindUserPw": "ربط كلمة مرور المستخدم",
 			"button": {
-				"expert": "إعدادات الخبراء",
 				"import": "استيراد تسجيلات الدخول الآن",
 				"new": "إضافة اتصال",
 				"test": "اتصال الاختبار"
@@ -174,21 +173,9 @@
 			"keyAttributeHint": "على سبيل المثال: objectGUID",
 			"loginAttribute": "سمة تسجيل الدخول",
 			"loginAttributeHint": "على سبيل المثال: sAMAccountName",
+			"loginMetaMap": "Map user details to LDAP attributes",
 			"memberAttribute": "صفة العضو",
 			"memberAttributeHint": "مثال: عضو",
-			"metaHint": {
-				"department": "Example: department",
-				"email": "Example: mail",
-				"location": "Example: physicalDeliveryOfficeName",
-				"nameDisplay": "Example: displayName",
-				"nameFore": "Example: givenName",
-				"nameSur": "Example: sn",
-				"notes": "Example: description",
-				"organization": "Example: company",
-				"phoneFax": "Example: facsimileTelephoneNumber",
-				"phoneLandline": "Example: telephoneNumber",
-				"phoneMobile": "Example: mobile"
-			},
 			"msAdExt": "ملحقات إعلان مايكروسوفت",
 			"msAdExtHint": "عضويات المجموعة المتداخلة، والتحكم في حساب المستخدم",
 			"nameHint": "اسم فريد",
@@ -249,7 +236,6 @@
 				"name": "اسم مستخدم تسجيل الدخول - يجب أن يكون فريدًا داخل النظام.",
 				"noAuth": "تسجيلات الدخول العامة لا تتطلب المصادقة. ",
 				"password": "سيؤدي هذا إلى استبدال كلمة المرور الحالية لتسجيل الدخول هذا. ",
-				"template": "يتم تطبيق الإعدادات المحددة مسبقًا (خيارات العرض والموضوع) من القالب المختار.",
 				"tokenExpiryHours": "يقوم بالكتابة فوق الإعداد العام للحد الأقصى. "
 			},
 			"ldap": "تم تعيين LDAP",
@@ -257,20 +243,6 @@
 			"ldapMeta": "Details are imported via LDAP",
 			"limited": "Limited user",
 			"limitedDesc": "When a user has at most a single role assigned, it counts as a 'limited' user. Useful for when only access to parts of an application is needed for things like request handling or form submission.<br /><br />Limited users cannot have admin or public access and take from a separate license pool.",
-			"meta": {
-				"department": "Department",
-				"email": "Email",
-				"location": "Location",
-				"nameDisplay": "Display name",
-				"nameFore": "Forename",
-				"nameSur": "Surname",
-				"notes": "Description",
-				"organization": "Organization",
-				"phone": "Phone",
-				"phoneFax": "Fax",
-				"phoneLandline": "Landline",
-				"phoneMobile": "Mobile"
-			},
 			"noAuth": "الوصول العام",
 			"oauth": "OAuth client",
 			"oauthAssignActive": "Roles are assigned by ID token claim",
@@ -280,7 +252,6 @@
 			"roleContentOther": "خاص",
 			"roleContentUser": "مستخدم",
 			"roles": "الأدوار المعينة ({COUNT})",
-			"template": "قالب تسجيل الدخول",
 			"title": "تسجيل الدخول '{NAME}'",
 			"titleLimited": "Limited user '{NAME}'",
 			"titleNew": "تسجيل دخول جديد",
@@ -294,6 +265,20 @@
 				"oauth": "OAuth client"
 			},
 			"tokenExpiryHours": "الأعلى. "
+		},
+		"loginMeta": {
+			"department": "Department",
+			"email": "Email",
+			"location": "Location",
+			"nameDisplay": "Display name",
+			"nameFore": "Forename",
+			"nameSur": "Surname",
+			"notes": "Description",
+			"organization": "Organization",
+			"phone": "Phone",
+			"phoneFax": "Fax",
+			"phoneLandline": "Landline",
+			"phoneMobile": "Mobile"
 		},
 		"loginSessions": {
 			"noData": "No sessions available",
@@ -464,6 +449,14 @@
 		"navigationScheduler": "مجدول",
 		"navigationSystemMsg": "System message",
 		"oauthClient": {
+			"button": {
+				"defaultO365": "Defaults: Exchange Online",
+				"defaultOpenId": "Defaults: Open ID Connect"
+			},
+			"claimRoles": "Roles claim",
+			"claimRolesHint": "Name of the claim field, which contains user roles or groups. If set, REI3 roles can be mapped to values in this claim. Value must be a JSON string array, such as: [\"all-users\", \"department-it\"]",
+			"claimUsername": "Username claim",
+			"claimUsernameHint": "Name of the claim field, which contains the username. Must be filled. Usernames must be unique for an OAuth client.",
 			"clientId": "معرف العميل",
 			"clientIdHint": "تم إنشاؤه من جانب الموفر عند إنشاء عميل OAuth2.",
 			"clientSecret": "سر العميل",
@@ -473,23 +466,28 @@
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف عميل OAuth هذا؟<br /><br />هذا الإجراء لا رجعة فيه.</b>"
 			},
-			"intro": "يقوم عميل OAuth بالمصادقة ضد موفر الهوية لتنفيذ الإجراءات أو الوصول إلى الموارد.<br /><br />ينفذ REI3 \"تدفق منح بيانات اعتماد عميل OAuth 2.0\"، والذي يتطلب تسجيل عميل OAuth لدى الموفر قبل أن يتم إعداده هنا.",
+			"flow": "OAuth flow",
 			"nameHint": "اسم داخلي للإشارة إلى عميل OAuth داخل REI3.",
 			"option": {
-				"template": {
-					"custom": "-",
-					"ms365_mail": "بريد O365"
+				"flow": {
+					"authCodePkce": "Authentication Code with PKCE",
+					"clientCreds": "Client credentials"
+				},
+				"flowHint": {
+					"authCodePkce": "<p>This flow is used in REI3 to authenticate users via external identity providers, such as Keycloak or Microsoft Entra ID.</p><p>'Authentication Code with Proof Key for Code Exchange' is an Open ID Connect flow. Users are forwarded to authenticate with an identity provider. After authentication, a user is redirected back to REI3 with verification of identity and user meta data.</p>",
+					"clientCreds": "<p>This flow is used in REI3 to authenticate itself against a service, such as Exchange Online.</p><p>'Client Credentials' is an OAuth 2.0 flow, with which REI3 authenticates against a service provider, to receive access to protected resources such as a mailbox. Any resource accessed via the 'Client Credentials' flow should belong to the client (in this case REI3) - it is not designed to access user resources directly or on behalf.</p><p>This flow is currently only used for access to mail resources.</p>"
 				}
 			},
+			"providerUrl": "Provider URL",
+			"providerUrlHint": "URL for OAuth service discovery.",
+			"redirectUrl": "Redirect URL",
+			"redirectUrlHint": "Users are redirected here after authentication. Should be the login URL of REI3. Must also be registered at the service provider.",
 			"scopes": "النطاقات",
 			"scopesHint": "تخبر النطاقات الموفر بما يرغب عميل OAuth في فعله أو الوصول إليه. ",
-			"template": "نموذج",
-			"templateHint": "حدد قالبًا لتطبيق الإعدادات الافتراضية على الموفرين المعروفين.",
-			"tenant": "مستأجر",
-			"tenantHint": "مطلوب لبعض مقدمي الخدمات. ",
 			"title": "عميل OAuth '{NAME}'",
 			"titleNew": "عميل OAuth الجديد",
 			"tokenUrl": "عنوان URL للرمز المميز",
+			"tokenUrlExample": "Example for Exchange Online: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
 			"tokenUrlHint": "عنوان URL الخاص بمكان إنشاء رموز OAuth2. "
 		},
 		"repo": {
@@ -2218,6 +2216,8 @@
 		"login": "Login",
 		"loginForm": "نموذج تسجيل الدخول",
 		"loginForms": "نماذج تسجيل الدخول",
+		"loginTemplate": "User template",
+		"loginTemplateHint": "Predefined settings are applied once from the selected template when a new user is created. If nothing is selected here, the global template is used.",
 		"menu": "قائمة طعام",
 		"menus": "القوائم",
 		"menusSub": "القوائم الفرعية",

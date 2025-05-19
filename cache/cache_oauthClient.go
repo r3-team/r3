@@ -48,8 +48,8 @@ func GetOauthClientMapOpenId() map[int32]types.OauthClientOpenId {
 func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 
 	rows, err := tx.Query(ctx, `
-		SELECT id, name, flow, client_id, client_secret, date_expiry, scopes, tenant,
-			claim_roles, provider_url, redirect_url, token_url, claim_roles, claim_username
+		SELECT id, login_template_id, name, flow, client_id, client_secret, date_expiry,
+			scopes, provider_url, redirect_url, token_url, claim_roles, claim_username
 		FROM instance.oauth_client
 	`)
 	if err != nil {
@@ -64,8 +64,8 @@ func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 
 	for rows.Next() {
 		var c types.OauthClient
-		if err := rows.Scan(&c.Id, &c.Name, &c.Flow, &c.ClientId, &c.ClientSecret, &c.DateExpiry, &c.Scopes, &c.Tenant,
-			&c.ClaimRoles, &c.ProviderUrl, &c.RedirectUrl, &c.TokenUrl, &c.ClaimRoles, &c.ClaimUsername); err != nil {
+		if err := rows.Scan(&c.Id, &c.LoginTemplateId, &c.Name, &c.Flow, &c.ClientId, &c.ClientSecret, &c.DateExpiry,
+			&c.Scopes, &c.ProviderUrl, &c.RedirectUrl, &c.TokenUrl, &c.ClaimRoles, &c.ClaimUsername); err != nil {
 
 			return err
 		}

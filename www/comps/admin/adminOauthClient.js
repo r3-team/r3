@@ -5,7 +5,7 @@ export {MyAdminOauthClient as default};
 let MyAdminOauthClient = {
 	name:'my-admin-oauth-client',
 	components:{ MyInputDate },
-	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
+	template:`<div v-if="isReady" class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
 		
 		<div class="contentBox admin-oauth-client scroll float">
 			<div class="top">
@@ -60,9 +60,16 @@ let MyAdminOauthClient = {
 							<td>{{ capApp.nameHint }}</td>
 						</tr>
 						<tr>
-							<td>{{ capApp.tenant }}</td>
-							<td><input v-model="inputs.tenant" :disabled="readonly" /></td>
-							<td>{{ capApp.tenantHint }}</td>
+							<td>{{ capApp.flow }}*</td>
+							<td colspan="2">
+								<div class="column">
+									<select v-model="inputs.flow" :disabled="readonly || !isNew">
+										<option value="authCodePkce">{{ capApp.option.flow.authCodePkce }}</option>
+										<option value="clientCreds">{{ capApp.option.flow.clientCreds }}</option>
+									</select>
+									<span v-html="capApp.option.flowHint[inputs.flow]" />
+								</div>
+							</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.clientId }}*</td>
@@ -89,19 +96,9 @@ let MyAdminOauthClient = {
 							</td>
 							<td>{{ capApp.dateExpiryHint }}</td>
 						</tr>
-						<tr v-if="isNew">
-							<td>{{ capApp.template }}</td>
-							<td>
-								<select @change="applyTemplate($event.target.value)" :disabled="readonly">
-									<option value="custom">{{ capApp.option.template.custom }}</option>
-									<option value="ms365_mail">{{ capApp.option.template.ms365_mail }}</option>
-								</select>
-							</td>
-							<td>{{ capApp.templateHint }}</td>
-						</tr>
 						<tr>
 							<td>{{ capApp.scopes }}*</td>
-							<td>
+							<td colspan="2">
 								<div class="column gap">
 									<my-button image="cancel.png"
 										v-for="(s,i) in inputs.scopes"
@@ -117,17 +114,60 @@ let MyAdminOauthClient = {
 											:active="scopeLine !== ''"
 										/>
 									</div>
+									<span v-html="capApp.scopesHint" />
+									<div class="row gap">
+										<my-button image="add.png"
+											@trigger="applyTemplate('o365')"
+											:caption="capApp.button.defaultO365"
+										/>
+										<my-button image="add.png"
+											@trigger="applyTemplate('openId')"
+											:caption="capApp.button.defaultOpenId"
+										/>
+									</div>
 								</div>
 							</td>
-							<td>{{ capApp.scopesHint }}</td>
 						</tr>
-						<tr>
+						<template v-if="isFlowAuthCodePkce">
+							<tr>
+								<td>{{ capApp.providerUrl }}*</td>
+								<td><input v-model="inputs.providerUrl" :disabled="readonly" /></td>
+								<td>{{ capApp.providerUrlHint }}</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.redirectUrl }}*</td>
+								<td><input v-model="inputs.redirectUrl" :disabled="readonly" /></td>
+								<td>{{ capApp.redirectUrlHint }}</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.loginTemplate }}</td>
+								<td>
+									<select v-model="inputs.loginTemplateId">
+										<option v-for="t in loginTemplates" :title="t.comment" :value="t.id">{{ t.name }}</option>
+									</select>
+								</td>
+								<td>{{ capGen.loginTemplateHint }}</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.claimUsername }}*</td>
+								<td><input v-model="inputs.claimUsername" :disabled="readonly" /></td>
+								<td>{{ capApp.claimUsernameHint }}</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.claimRoles }}</td>
+								<td><input v-model="inputs.claimRoles" :disabled="readonly" /></td>
+								<td>{{ capApp.claimRolesHint }}</td>
+							</tr>
+						</template>
+						<tr v-if="isFlowClientCreds">
 							<td>{{ capApp.tokenUrl }}*</td>
-							<td><input v-model="inputs.tokenUrl" :disabled="readonly" /></td>
-							<td>{{ capApp.tokenUrlHint }}</td>
-						</tr>
-						<tr>
-							<td colspan="3"><span v-html="capApp.intro"></span></td>
+							<td colspan="2">
+								<div class="column gap">
+									<input v-model="inputs.tokenUrl" :disabled="readonly" />
+									<span>{{ capApp.tokenUrlHint }}</span>
+									<span>{{ capApp.tokenUrlExample }}</span>
+								</div>
+							</td>
 						</tr>
 					</tbody>
 				</table>
@@ -136,6 +176,7 @@ let MyAdminOauthClient = {
 	</div>`,
 	props:{
 		id:              { type:Number,  required:true },
+		loginTemplates:  { type:Array,   required:true },
 		oauthClientIdMap:{ type:Object,  required:true },
 		readonly:        { type:Boolean, required:true }
 	},
@@ -154,6 +195,19 @@ let MyAdminOauthClient = {
 		};
 	},
 	computed:{
+		canSave:(s) =>
+			s.isReady &&
+			!s.readonly &&
+			s.hasChanges &&
+			s.inputs.name          !== '' &&
+			s.inputs.clientId      !== '' &&
+			s.inputs.clientSecret  !== '' &&
+			s.inputs.dateExpiry    !== null &&
+			s.inputs.scopes.length !== 0 &&
+			(!s.isFlowAuthCodePkce || s.inputs.claimUsername !== '') &&
+			(!s.isFlowAuthCodePkce || s.inputs.providerUrl !== '') &&
+			(!s.isFlowAuthCodePkce || s.inputs.redirectUrl !== '') &&
+			(!s.isFlowClientCreds  || s.inputs.tokenUrl !== ''),
 		hasChanges:(s) => {
 			for(let k in s.inputsOrg) {
 				if(JSON.stringify(s.inputsOrg[k]) !== JSON.stringify(s.inputs[k]))
@@ -164,26 +218,25 @@ let MyAdminOauthClient = {
 		inputsOrg:(s) => s.isNew ? {
 			id:0,
 			name:'',
+			flow:'authCodePkce',
 			clientId:'',
 			clientSecret:'',
 			dateExpiry:s.getUnixNowDate(),
 			scopes:[],
-			tenant:'',
-			tokenUrl:''
+			loginTemplateId:null,
+			loginMetaMap:{},
+			loginRoleAssign:[],
+			claimRoles:null,
+			claimUsername:null,
+			providerUrl:null,
+			redirectUrl:null,
+			tokenUrl:null
 		} : s.oauthClientIdMap[s.id],
 		
 		// simple states
-		canSave:(s) =>
-			s.isReady &&
-			!s.readonly &&
-			s.hasChanges &&
-			s.inputs.name          !== '' &&
-			s.inputs.clientId      !== '' &&
-			s.inputs.clientSecret  !== '' &&
-			s.inputs.dateExpiry    !== null &&
-			s.inputs.scopes.length !== 0 &&
-			s.inputs.tokenUrl      !== '',
-		isNew:(s) => s.id === 0,
+		isFlowAuthCodePkce:(s) => s.inputs.flow === 'authCodePkce',
+		isFlowClientCreds: (s) => s.inputs.flow === 'clientCreds',
+		isNew:             (s) => s.id === 0,
 		
 		// stores
 		capApp:(s) => s.$store.getters.captions.admin.oauthClient,
@@ -206,10 +259,8 @@ let MyAdminOauthClient = {
 		// actions
 		applyTemplate(value) {
 			switch(value) {
-				case 'ms365_mail':
-					this.inputs.scopes   = ['https://outlook.office.com/.default'];
-					this.inputs.tokenUrl = 'https://login.microsoftonline.com/{TENANT}/oauth2/v2.0/token';
-				break;
+				case 'o365':   this.inputs.scopes = ['https://outlook.office.com/.default']; break;
+				case 'openId': this.inputs.scopes = ['openid'];                              break;
 			}
 		},
 		close() {
@@ -222,7 +273,11 @@ let MyAdminOauthClient = {
 			);
 		},
 		reset() {
-			this.inputs  = JSON.parse(JSON.stringify(this.inputsOrg));
+			this.inputs = JSON.parse(JSON.stringify(this.inputsOrg));
+
+			if(this.isNew && this.loginTemplates.length > 0)
+				this.inputs.loginTemplateId = this.loginTemplates[0].id;
+
 			this.isReady = true;
 		},
 		
@@ -257,8 +312,14 @@ let MyAdminOauthClient = {
 				clientSecret:this.inputs.clientSecret,
 				dateExpiry:this.inputs.dateExpiry,
 				scopes:this.inputs.scopes,
-				tenant:this.inputs.tenant,
-				tokenUrl:this.inputs.tokenUrl.replace('{TENANT}',this.inputs.tenant)
+				loginMetaMap:this.inputs.loginMetaMap,
+				loginRoleAssign:this.inputs.loginRoleAssign,
+				loginTemplateId:this.inputs.loginTemplateId,
+				claimRoles:   this.inputs.claimRoles    !== '' ? this.inputs.claimRoles    : null,
+				claimUsername:this.inputs.claimUsername !== '' ? this.inputs.claimUsername : null,
+				providerUrl:  this.inputs.providerUrl   !== '' ? this.inputs.providerUrl   : null,
+				redirectUrl:  this.inputs.redirectUrl   !== '' ? this.inputs.redirectUrl   : null,
+				tokenUrl:     this.inputs.tokenUrl      !== '' ? this.inputs.tokenUrl      : null
 			},true).then(
 				this.reloadAndClose,
 				this.$root.genericError

@@ -138,11 +138,20 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.oauth_client ADD   COLUMN provider_url   TEXT;
 			ALTER TABLE instance.oauth_client ADD   COLUMN redirect_url   TEXT;
 			ALTER TABLE instance.oauth_client ADD   COLUMN flow TEXT NOT NULL DEFAULT 'clientCreds';
+			ALTER TABLE instance.oauth_client DROP  COLUMN tenant;
 			ALTER TABLE instance.oauth_client ALTER COLUMN flow DROP DEFAULT;
 			ALTER TABLE instance.oauth_client ALTER COLUMN client_secret DROP NOT NULL;
-			ALTER TABLE instance.oauth_client ALTER COLUMN tenant        DROP NOT NULL;
 			ALTER TABLE instance.oauth_client ALTER COLUMN token_url     DROP NOT NULL;
 			ALTER TABLE instance.oauth_client ALTER COLUMN date_expiry   DROP NOT NULL;
+			ALTER TABLE instance.oauth_client ADD   COLUMN login_template_id INTEGER;
+			ALTER TABLE instance.oauth_client ADD   CONSTRAINT oauth_client_login_template_id_fkey
+				FOREIGN KEY (login_template_id)
+				REFERENCES instance.login_template (id) MATCH SIMPLE
+				ON UPDATE SET NULL
+				ON DELETE SET NULL;
+			
+			CREATE INDEX IF NOT EXISTS fki_oauth_client_login_template_id_fkey
+				ON instance.oauth_client USING btree (login_template_id ASC NULLS LAST);
 
 			-- login OAUTH details
 			ALTER TABLE instance.login ADD COLUMN     oauth_iss       TEXT;

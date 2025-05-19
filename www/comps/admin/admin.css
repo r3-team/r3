@@ -115,6 +115,14 @@
 	color:var(--color-error);
 }
 
+/* login meta */
+.admin-login-meta .title-cell>img{
+	width:16px;
+	height:16px;
+	margin-right:6px;
+	filter:var(--image-filter);
+}
+
 /* login sessions */
 .admin-sessions img.line-icon{
 	width:24px;

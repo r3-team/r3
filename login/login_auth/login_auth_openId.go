@@ -139,10 +139,6 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		metaEx, metaChanged = login_metaMap.UpdateChangedMeta(c.LoginMetaMap, metaEx, meta)
 	}
 
-	for k, claim := range claims {
-		fmt.Printf("claim %v, value %v\n", k, claim)
-	}
-
 	// read username from ID token claim
 	usernameIf, ok := claims[c.ClaimUsername.String]
 	if !ok {

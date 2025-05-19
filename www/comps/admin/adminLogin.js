@@ -1,3 +1,4 @@
+import MyAdminLoginMeta from './adminLoginMeta.js';
 import MyForm           from '../form.js';
 import MyTabs           from '../tabs.js';
 import MyInputSelect    from '../inputSelect.js';
@@ -37,6 +38,7 @@ let MyAdminLoginRole = {
 let MyAdminLogin = {
 	name:'my-admin-login',
 	components:{
+		MyAdminLoginMeta,
 		MyAdminLoginRole,
 		MyForm,
 		MyInputSelect,
@@ -137,7 +139,7 @@ let MyAdminLogin = {
 							<td>
 								<div class="title-cell">
 									<img src="images/personTemplate.png" />
-									<span>{{ capApp.template }}</span>
+									<span>{{ capGen.loginTemplate }}</span>
 								</div>
 							</td>
 							<td class="default-inputs">
@@ -147,7 +149,7 @@ let MyAdminLogin = {
 									</option>
 								</select>
 							</td>
-							<td>{{ capApp.hint.template }}</td>
+							<td>{{ capGen.loginTemplateHint }}</td>
 						</tr>
 						<tr v-if="isExtAuth">
 							<td>
@@ -183,118 +185,16 @@ let MyAdminLogin = {
 					<div class="login-details-content" :class="{ roles:tabTarget === 'roles' }">
 
 						<!-- meta data -->
-						<table class="generic-table-vertical default-inputs noRowBorders admin-login-meta" v-if="tabTarget === 'meta'">
-							<tbody>
-								<tr v-if="isExtAuth">
-									<td v-if="isLdap"  colspan="2" class="grouping"><b>{{ capApp.ldapMeta }}</b></td>
-									<td v-if="isOauth" colspan="2" class="grouping"><b>{{ capApp.oauthMeta }}</b></td>
-								</tr>
-								<tr>
-									<td class="minimum">
-										<div class="title-cell">
-											<img src="images/edit.png" />
-											<span>{{ capGen.name }}</span>
-										</div>
-									</td>
-									<td>
-										<table class="fullWidth">
-											<tbody>
-												<tr>
-													<td class="minimum">{{ capApp.meta.nameFore }}</td>
-													<td><input class="dynamic" v-model="meta.nameFore" :disabled="isExtAuth" /></td>
-												</tr>
-												<tr>
-													<td class="minimum">{{ capApp.meta.nameSur }}</td>
-													<td><input class="dynamic" v-model="meta.nameSur" :disabled="isExtAuth" /></td>
-												</tr>
-												<tr>
-													<td class="minimum">{{ capApp.meta.nameDisplay }}</td>
-													<td><input class="dynamic" v-model="meta.nameDisplay" :disabled="isExtAuth" /></td>
-												</tr>
-											</tbody>
-										</table>
-									</td>
-								</tr>
-								<tr>
-									<td class="minimum">
-										<div class="title-cell">
-											<img src="images/building1.png" />
-											<span>{{ capApp.meta.organization }}</span>
-										</div>
-									</td>
-									<td><input class="dynamic" v-model="meta.organization" :disabled="isExtAuth" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">
-										<div class="title-cell">
-											<img src="images/building2.png" />
-											<span>{{ capApp.meta.location }}</span>
-										</div>
-									</td>
-									<td><input class="dynamic" v-model="meta.location" :disabled="isExtAuth" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">
-										<div class="title-cell">
-											<img src="images/department.png" />
-											<span>{{ capApp.meta.department }}</span>
-										</div>
-									</td>
-									<td><input class="dynamic" v-model="meta.department" :disabled="isExtAuth" /></td>
-								</tr>
-								<tr>
-									<td class="minimum">
-										<div class="title-cell">
-											<img src="images/mail2.png" />
-											<span>{{ capApp.meta.email }}</span>
-										</div>
-									</td>
-									<td>
-										<div class="column gap">
-											<input class="dynamic" v-model="meta.email" @keyup="typedUniqueField('email',meta.email)" :disabled="isExtAuth" />
-											<div v-if="notUniqueEmail && meta.email !== ''" class="message error">
-												{{ capApp.dialog.notUniqueEmail }}
-											</div>
-										</div>
-									</td>
-								</tr>
-								<tr>
-									<td class="minimum">
-										<div class="title-cell">
-											<img src="images/phone.png" />
-											<span>{{ capApp.meta.phone }}</span>
-										</div>
-									</td>
-									<td>
-										<table class="fullWidth">
-											<tbody>
-												<tr>
-													<td class="minimum">{{ capApp.meta.phoneMobile }}</td>
-													<td><input class="dynamic" v-model="meta.phoneMobile" :disabled="isExtAuth" /></td>
-												</tr>
-												<tr>
-													<td class="minimum">{{ capApp.meta.phoneLandline }}</td>
-													<td><input class="dynamic" v-model="meta.phoneLandline" :disabled="isExtAuth" /></td>
-												</tr>
-												<tr>
-													<td class="minimum">{{ capApp.meta.phoneFax }}</td>
-													<td><input class="dynamic" v-model="meta.phoneFax" :disabled="isExtAuth" /></td>
-												</tr>
-											</tbody>
-										</table>
-									</td>
-								</tr>
-								<tr>
-									<td class="minimum">
-										<div class="title-cell">
-											<img src="images/text_lines.png" />
-											<span>{{ capApp.meta.notes }}</span>
-										</div>
-									</td>
-									<td><textarea class="dynamic" v-model="meta.notes" :disabled="isExtAuth"></textarea></td>
-								</tr>
-							</tbody>
-						</table>
+						<template v-if="tabTarget === 'meta'">
+							<span v-if="isLdap"><b>{{ capApp.ldapMeta }}</b></span>
+							<span v-if="isOauth"><b>{{ capApp.oauthMeta }}</b></span>
+							<my-admin-login-meta
+								@input-in-unique-field="typedUniqueField"
+								v-model="meta"
+								:notUniqueEmail="notUniqueEmail"
+								:readonly="isExtAuth"
+							/>
+						</template>
 						
 						<!-- roles -->
 						<table class="generic-table sticky-top bright" v-if="tabTarget === 'roles'">

@@ -58,39 +58,38 @@ type LoginTemplateAdmin struct {
 }
 
 type Ldap struct {
-	Id              int32             `json:"id"`
-	LoginTemplateId pgtype.Int8       `json:"loginTemplateId"` // template for new logins (applies login settings)
-	Name            string            `json:"name"`
-	Host            string            `json:"host"`
-	Port            int               `json:"port"`
-	BindUserDn      string            `json:"bindUserDn"`      // DN of bind user, example: 'CN=readonly,OU=User,DC=test,DC=local'
-	BindUserPw      string            `json:"bindUserPw"`      // password of bind user in clear text
-	SearchClass     string            `json:"searchClass"`     // object class to filter to, example: '(&(objectClass=user))'
-	SearchDn        string            `json:"searchDn"`        // root search DN, example: 'OU=User,DC=test,DC=local'
-	KeyAttribute    string            `json:"keyAttribute"`    // name of attribute used as key, example: 'objectGUID'
-	LoginAttribute  string            `json:"loginAttribute"`  // name of attribute used as login, example: 'sAMAccountName'
-	MemberAttribute string            `json:"memberAttribute"` // name of attribute used as membership, example: 'memberOf'
-	LoginMetaMap    LoginMeta         `json:"loginMetaMap"`    // names of LDAP attributes to map to login meta data
-	LoginRoleAssign []LoginRoleAssign `json:"loginRoleAssign"` // assign login roles based on LDAP group membership
-	AssignRoles     bool              `json:"assignRoles"`     // assign login roles from group membership (see member attribute)
-	MsAdExt         bool              `json:"msAdExt"`         // Microsoft AD extensions (nested group memberships, user account control)
-	Starttls        bool              `json:"starttls"`        // upgrade unencrypted LDAP connection with TLS (STARTTLS)
-	Tls             bool              `json:"tls"`             // connect to LDAP via SSL/TLS (LDAPS)
-	TlsVerify       bool              `json:"tlsVerify"`       // verify TLS connection, can be used to allow non-trusted certificates
+	Id               int32             `json:"id"`
+	LoginTemplateId  pgtype.Int8       `json:"loginTemplateId"` // template for new logins (applies login settings)
+	Name             string            `json:"name"`
+	Host             string            `json:"host"`
+	Port             int               `json:"port"`
+	BindUserDn       string            `json:"bindUserDn"`       // DN of bind user, example: 'CN=readonly,OU=User,DC=test,DC=local'
+	BindUserPw       string            `json:"bindUserPw"`       // password of bind user in clear text
+	SearchClass      string            `json:"searchClass"`      // object class to filter to, example: '(&(objectClass=user))'
+	SearchDn         string            `json:"searchDn"`         // root search DN, example: 'OU=User,DC=test,DC=local'
+	KeyAttribute     string            `json:"keyAttribute"`     // name of attribute used as key, example: 'objectGUID'
+	LoginAttribute   string            `json:"loginAttribute"`   // name of attribute used as login, example: 'sAMAccountName'
+	MemberAttribute  string            `json:"memberAttribute"`  // name of attribute used as membership, example: 'memberOf'
+	LoginMetaMap     LoginMeta         `json:"loginMetaMap"`     // names of LDAP attributes to map to login meta data
+	LoginRolesAssign []LoginRoleAssign `json:"loginRolesAssign"` // assign login roles based on LDAP group membership
+	AssignRoles      bool              `json:"assignRoles"`      // assign login roles from group membership (see member attribute)
+	MsAdExt          bool              `json:"msAdExt"`          // Microsoft AD extensions (nested group memberships, user account control)
+	Starttls         bool              `json:"starttls"`         // upgrade unencrypted LDAP connection with TLS (STARTTLS)
+	Tls              bool              `json:"tls"`              // connect to LDAP via SSL/TLS (LDAPS)
+	TlsVerify        bool              `json:"tlsVerify"`        // verify TLS connection, can be used to allow non-trusted certificates
 }
 
 type OauthClient struct {
-	Id         int32       `json:"id"`
-	Name       string      `json:"name"`       // reference name, also shown on login page if authCodePkce
-	Flow       string      `json:"flow"`       // clientCreds, authCodePkce
-	ClientId   string      `json:"clientId"`   // client ID, as registered at the identity provider
-	DateExpiry pgtype.Int8 `json:"dateExpiry"` // for admin notification mails
-	Scopes     []string    `json:"scopes"`
+	Id           int32       `json:"id"`
+	Name         string      `json:"name"`         // reference name, also shown on login page if authCodePkce
+	Flow         string      `json:"flow"`         // clientCreds, authCodePkce
+	ClientId     string      `json:"clientId"`     // client ID, as registered at the identity provider
+	ClientSecret pgtype.Text `json:"clientSecret"` // client secret, as registered at the identity provider
+	DateExpiry   pgtype.Int8 `json:"dateExpiry"`   // for admin notification mails
+	Scopes       []string    `json:"scopes"`
 
 	// clientCreds
-	ClientSecret pgtype.Text `json:"clientSecret"`
-	Tenant       pgtype.Text `json:"tenant"`
-	TokenUrl     pgtype.Text `json:"tokenUrl"`
+	TokenUrl pgtype.Text `json:"tokenUrl"`
 
 	// authCodePkce
 	LoginTemplateId pgtype.Int8       `json:"loginTemplateId"` // template for new logins (applies login settings)

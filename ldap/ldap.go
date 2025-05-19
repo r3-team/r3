@@ -84,7 +84,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 	}
 
 	for i, _ := range ldaps {
-		ldaps[i].LoginRoleAssign, err = login_roleAssign.Get_tx(ctx, tx, "ldap", ldaps[i].Id)
+		ldaps[i].LoginRolesAssign, err = login_roleAssign.Get_tx(ctx, tx, "ldap", ldaps[i].Id)
 		if err != nil {
 			return ldaps, err
 		}
@@ -131,7 +131,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) error {
 	if err := login_metaMap.Set_tx(ctx, tx, "ldap", l.Id, l.LoginMetaMap); err != nil {
 		return err
 	}
-	if err := login_roleAssign.Set_tx(ctx, tx, "ldap", l.Id, l.LoginRoleAssign); err != nil {
+	if err := login_roleAssign.Set_tx(ctx, tx, "ldap", l.Id, l.LoginRolesAssign); err != nil {
 		return err
 	}
 	return nil
