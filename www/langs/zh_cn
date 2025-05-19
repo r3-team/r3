@@ -165,7 +165,6 @@
 				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "连接测试成功"
 			},
-			"groupDn": "组 DN",
 			"groupDnHint": "示例：CN=Admin_User,OU=Group,DC=mycompany,DC=local",
 			"host": "主机",
 			"hostHint": "LDAP 主机名",
@@ -181,7 +180,6 @@
 			"nameHint": "唯一名称",
 			"port": "端口",
 			"portHint": "默认为 389，SSL/TLS 为 636",
-			"role": "角色",
 			"searchClass": "对象类",
 			"searchClassHint": "示例：user",
 			"searchDn": "搜索 DN",
@@ -467,6 +465,7 @@
 				"delete": "您确定要删除此 OAuth 客户端吗？<br /><br />此操作不可逆。</b>"
 			},
 			"flow": "OAuth flow",
+			"loginMetaMap": "Update user details via claims",
 			"nameHint": "用于在 REI3 中引用此 OAuth 客户端的内部名称。",
 			"option": {
 				"flow": {
@@ -2290,6 +2289,7 @@
 		"uninstall": "Uninstall",
 		"update": "Update",
 		"username": "用户名",
+		"value": "Value",
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "版本",

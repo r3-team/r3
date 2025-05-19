@@ -92,7 +92,7 @@ func LoadOauthClientMap_tx(ctx context.Context, tx pgx.Tx) error {
 			if err != nil {
 				return err
 			}
-			c.LoginRoleAssign, err = login_roleAssign.Get_tx(ctx, tx, "oauth_client", c.Id)
+			c.LoginRolesAssign, err = login_roleAssign.Get_tx(ctx, tx, "oauth_client", c.Id)
 			if err != nil {
 				return err
 			}

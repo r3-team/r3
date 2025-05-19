@@ -111,11 +111,25 @@ let MyAdminLoginMeta = {
 						<span>{{ capApp.notes }}</span>
 					</div>
 				</td>
-				<td><textarea class="dynamic" @input="set('notes',$event.target.value)" :disabled="readonly" :value="inputs.notes"></textarea></td>
+				<td>
+					<input class="dynamic"
+						v-if="isMapper"
+						@input="set('notes',$event.target.value)"
+						:disabled="readonly"
+						:value="inputs.notes"
+					/>
+					<textarea class="dynamic"
+						v-if="!isMapper"
+						@input="set('notes',$event.target.value)"
+						:disabled="readonly"
+						:value="inputs.notes"
+					></textarea>
+				</td>
 			</tr>
 		</tbody>
 	</table>`,
 	props:{
+		isMapper:      { type:Boolean, required:false, default:false },
 		modelValue:    { type:Object,  required:true },
 		notUniqueEmail:{ type:Boolean, required:false, default:false },
 		readonly:      { type:Boolean, required:true }

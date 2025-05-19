@@ -165,7 +165,6 @@
 				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "Testul de conectare a avut succes"
 			},
-			"groupDn": "Grupul DN",
 			"groupDnHint": "Exemplu: CN=Admin_User,OU=Group,DC=mycompany,DC=local",
 			"host": "Gazda",
 			"hostHint": "Numele gazdei LDAP",
@@ -181,7 +180,6 @@
 			"nameHint": "Nume unic",
 			"port": "Portul",
 			"portHint": "În mod implicit, 389 sau 636 pentru SSL/TLS",
-			"role": "Rol",
 			"searchClass": "Clasa de obiecte",
 			"searchClassHint": "Exemplu: user",
 			"searchDn": "Cauta DN",
@@ -467,6 +465,7 @@
 				"delete": "Are you sure you want to delete this OAuth client?<br /><br />This action is irreversible.</b>"
 			},
 			"flow": "OAuth flow",
+			"loginMetaMap": "Update user details via claims",
 			"nameHint": "An internal name to reference this OAuth client inside of REI3.",
 			"option": {
 				"flow": {
@@ -2290,6 +2289,7 @@
 		"uninstall": "Uninstall",
 		"update": "Update",
 		"username": "Nume utilizator",
+		"value": "Value",
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "Versiune",

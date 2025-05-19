@@ -1,11 +1,18 @@
-import MyInputDate      from '../inputDate.js';
-import {getUnixNowDate} from '../shared/time.js';
+import MyAdminLoginMeta        from './adminLoginMeta.js';
+import MyAdminLoginRolesAssign from './adminLoginRolesAssign.js';
+import MyInputDate             from '../inputDate.js';
+import {deepIsEqual}           from '../shared/generic.js';
+import {getUnixNowDate}        from '../shared/time.js';
 export {MyAdminOauthClient as default};
 
 let MyAdminOauthClient = {
 	name:'my-admin-oauth-client',
-	components:{ MyInputDate },
-	template:`<div v-if="isReady" class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
+	components:{
+		MyAdminLoginMeta,
+		MyAdminLoginRolesAssign,
+		MyInputDate
+	},
+	template:`<div v-if="ready" class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
 		
 		<div class="contentBox admin-oauth-client scroll float">
 			<div class="top">
@@ -155,8 +162,26 @@ let MyAdminOauthClient = {
 							</tr>
 							<tr>
 								<td>{{ capApp.claimRoles }}</td>
-								<td><input v-model="inputs.claimRoles" :disabled="readonly" /></td>
-								<td>{{ capApp.claimRolesHint }}</td>
+								<td colspan="2">
+									<div class="column gap">
+										<input v-model="inputs.claimRoles" :disabled="readonly" />
+										<span>{{ capApp.claimRolesHint }}</span>
+										<my-admin-login-roles-assign
+											v-model="inputs.loginRolesAssign"
+											:readonly="readonly || inputs.claimRoles === ''"
+										/>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">
+									<span>{{ capApp.loginMetaMap }}</span>
+									<my-admin-login-meta
+										v-model="inputs.loginMetaMap"
+										:is-mapper="true"
+										:readonly="readonly"
+									/>
+								</td>
 							</tr>
 						</template>
 						<tr v-if="isFlowClientCreds">
@@ -190,31 +215,23 @@ let MyAdminOauthClient = {
 	data() {
 		return {
 			inputs:{},
-			isReady:false,
+			ready:false,
 			scopeLine:''
 		};
 	},
 	computed:{
 		canSave:(s) =>
-			s.isReady &&
+			s.ready &&
 			!s.readonly &&
 			s.hasChanges &&
 			s.inputs.name          !== '' &&
 			s.inputs.clientId      !== '' &&
 			s.inputs.clientSecret  !== '' &&
-			s.inputs.dateExpiry    !== null &&
 			s.inputs.scopes.length !== 0 &&
 			(!s.isFlowAuthCodePkce || s.inputs.claimUsername !== '') &&
 			(!s.isFlowAuthCodePkce || s.inputs.providerUrl !== '') &&
 			(!s.isFlowAuthCodePkce || s.inputs.redirectUrl !== '') &&
 			(!s.isFlowClientCreds  || s.inputs.tokenUrl !== ''),
-		hasChanges:(s) => {
-			for(let k in s.inputsOrg) {
-				if(JSON.stringify(s.inputsOrg[k]) !== JSON.stringify(s.inputs[k]))
-					return true;
-			}
-			return false;
-		},
 		inputsOrg:(s) => s.isNew ? {
 			id:0,
 			name:'',
@@ -225,7 +242,7 @@ let MyAdminOauthClient = {
 			scopes:[],
 			loginTemplateId:null,
 			loginMetaMap:{},
-			loginRoleAssign:[],
+			loginRolesAssign:[],
 			claimRoles:null,
 			claimUsername:null,
 			providerUrl:null,
@@ -234,6 +251,7 @@ let MyAdminOauthClient = {
 		} : s.oauthClientIdMap[s.id],
 		
 		// simple states
+		hasChanges:        (s) => !s.deepIsEqual(s.inputsOrg,s.inputs),
 		isFlowAuthCodePkce:(s) => s.inputs.flow === 'authCodePkce',
 		isFlowClientCreds: (s) => s.inputs.flow === 'clientCreds',
 		isNew:             (s) => s.id === 0,
@@ -254,6 +272,7 @@ let MyAdminOauthClient = {
 	},
 	methods:{
 		// external
+		deepIsEqual,
 		getUnixNowDate,
 		
 		// actions
@@ -278,7 +297,7 @@ let MyAdminOauthClient = {
 			if(this.isNew && this.loginTemplates.length > 0)
 				this.inputs.loginTemplateId = this.loginTemplates[0].id;
 
-			this.isReady = true;
+			this.ready = true;
 		},
 		
 		// backend calls
@@ -313,7 +332,7 @@ let MyAdminOauthClient = {
 				dateExpiry:this.inputs.dateExpiry,
 				scopes:this.inputs.scopes,
 				loginMetaMap:this.inputs.loginMetaMap,
-				loginRoleAssign:this.inputs.loginRoleAssign,
+				loginRolesAssign:this.inputs.loginRolesAssign,
 				loginTemplateId:this.inputs.loginTemplateId,
 				claimRoles:   this.inputs.claimRoles    !== '' ? this.inputs.claimRoles    : null,
 				claimUsername:this.inputs.claimUsername !== '' ? this.inputs.claimUsername : null,

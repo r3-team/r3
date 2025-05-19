@@ -92,13 +92,13 @@ type OauthClient struct {
 	TokenUrl pgtype.Text `json:"tokenUrl"`
 
 	// authCodePkce
-	LoginTemplateId pgtype.Int8       `json:"loginTemplateId"` // template for new logins (applies login settings)
-	LoginMetaMap    LoginMeta         `json:"loginMetaMap"`    // map claim key <-> login meta data key
-	LoginRoleAssign []LoginRoleAssign `json:"loginRoleAssign"` // assign login roles based on claim content
-	ClaimRoles      pgtype.Text       `json:"claimRoles"`      // name of claim that contains JSON array values for role mapping, such as { "roles":["my_role1", "my_role2", ...], ... }
-	ClaimUsername   pgtype.Text       `json:"claimUsername"`
-	ProviderUrl     pgtype.Text       `json:"providerUrl"`
-	RedirectUrl     pgtype.Text       `json:"redirectUrl"`
+	LoginTemplateId  pgtype.Int8       `json:"loginTemplateId"`  // template for new logins (applies login settings)
+	LoginMetaMap     LoginMeta         `json:"loginMetaMap"`     // map claim key <-> login meta data key
+	LoginRolesAssign []LoginRoleAssign `json:"loginRolesAssign"` // assign login roles based on claim content
+	ClaimRoles       pgtype.Text       `json:"claimRoles"`       // name of claim that contains JSON array values for role mapping, such as { "roles":["my_role1", "my_role2", ...], ... }
+	ClaimUsername    pgtype.Text       `json:"claimUsername"`
+	ProviderUrl      pgtype.Text       `json:"providerUrl"`
+	RedirectUrl      pgtype.Text       `json:"redirectUrl"`
 }
 
 // public reference for OAUTH client for Open ID Connect authentication

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"r3/cache"
+	"r3/login/login_metaMap"
+	"r3/login/login_roleAssign"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
@@ -41,12 +43,13 @@ func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	newRecord := req.Id == 0
 	if newRecord {
 		// flow can only be defined during insert, as a flow used for Open ID Connect is unusable for something else and vice-versa
-		if _, err := tx.Exec(ctx, `
+		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.oauth_client (login_template_id, name, flow, client_id, client_secret,
 				date_expiry, scopes, provider_url, redirect_url, token_url, claim_roles, claim_username)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+			RETURNING id
 		`, req.LoginTemplateId, req.Name, req.Flow, req.ClientId, req.ClientSecret, req.DateExpiry, req.Scopes,
-			req.ProviderUrl, req.RedirectUrl, req.TokenUrl, req.ClaimRoles, req.ClaimUsername); err != nil {
+			req.ProviderUrl, req.RedirectUrl, req.TokenUrl, req.ClaimRoles, req.ClaimUsername).Scan(&req.Id); err != nil {
 
 			return nil, err
 		}
@@ -63,10 +66,11 @@ func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 			return nil, err
 		}
 	}
-
-	// login meta via claims
-
-	// login role via claim
-
+	if err := login_metaMap.Set_tx(ctx, tx, "oauth_client", req.Id, req.LoginMetaMap); err != nil {
+		return nil, err
+	}
+	if err := login_roleAssign.Set_tx(ctx, tx, "oauth_client", req.Id, req.LoginRolesAssign); err != nil {
+		return nil, err
+	}
 	return nil, nil
 }

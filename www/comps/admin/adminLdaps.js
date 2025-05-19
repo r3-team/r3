@@ -1,12 +1,14 @@
-import MyAdminLoginMeta       from './adminLoginMeta.js';
-import {hasAnyAssignableRole} from '../shared/access.js';
-import {deepIsEqual}          from '../shared/generic.js';
-import {getCaption}           from '../shared/language.js';
+import MyAdminLoginMeta        from './adminLoginMeta.js';
+import MyAdminLoginRolesAssign from './adminLoginRolesAssign.js';
+import {deepIsEqual}           from '../shared/generic.js';
 export {MyAdminLdaps as default};
 
 let MyAdminLdaps = {
 	name:'my-admin-ldaps',
-	components:{MyAdminLoginMeta},
+	components:{
+		MyAdminLoginMeta,
+		MyAdminLoginRolesAssign
+	},
 	template:`<div class="admin-ldaps contentBox grow">
 		
 		<div class="top">
@@ -165,6 +167,7 @@ let MyAdminLdaps = {
 							<td colspan="2">
 								<my-admin-login-meta
 									v-model="inputs.loginMetaMap"
+									:is-mapper="true"
 									:readonly="!licenseValid"
 								/>
 							</td>
@@ -176,7 +179,8 @@ let MyAdminLdaps = {
 						<tr v-if="inputs.assignRoles">
 							<td>{{ capApp.memberAttribute }}</td>
 							<td>
-								<input v-model="inputs.memberAttribute"
+								<input
+									v-model="inputs.memberAttribute"
 									:placeholder="capApp.memberAttributeHint"
 								/>
 							</td>
@@ -185,50 +189,12 @@ let MyAdminLdaps = {
 				</table>
 				
 				<template v-if="inputs.assignRoles">
-				
 					<h2 class="roles-title">{{ capApp.titleRoles }}</h2>
-					<div>
-						<my-button image="add.png"
-							@trigger="roleAdd()"
-							:caption="capGen.button.add"
-						/>
-					</div>
-					<br />
-					
-					<table v-if="inputs.loginRolesAssign.length !== 0">
-						<thead>
-							<tr>
-								<th>{{ capApp.groupDn }}</th>
-								<th>{{ capApp.role }}</th>
-								<th></th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="(r,i) in inputs.loginRolesAssign" class="default-inputs">
-								<td><input v-model="r.searchString" :placeholder="capApp.groupDnHint" /></td>
-								<td>
-									<select v-model="r.roleId">
-										<option :value="null">-</option>
-										<optgroup
-											v-for="m in modules.filter(v => !v.hidden && hasAnyAssignableRole(v.roles))"
-											:label="m.name"
-										>
-											<option
-												v-for="rr in m.roles.filter(v => v.assignable && v.name !== 'everyone')"
-												:value="rr.id"
-											>{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) + ': ' + getCaption('roleTitle',m.id,rr.id,rr.captions,rr.name) }}</option>
-										</optgroup>
-									</select>
-								</td>
-								<td>
-									<my-button image="delete.png"
-										@trigger="roleRemove(i)"
-										:cancel="true"
-									/>
-								</td>
-							</tr>
-						</tbody>
-					</table>
+					<my-admin-login-roles-assign
+						v-model="inputs.loginRolesAssign"
+						:placeholder="capApp.groupDnHint"
+						:readonly="!licenseValid"
+					/>
 				</template>
 			</div>
 		</div>
@@ -256,7 +222,6 @@ let MyAdminLdaps = {
 		hasChanges:(s) => s.idEdit === -1 ? false : !s.deepIsEqual(s.inputsOrg,s.inputs),
 		
 		// stores
-		modules:     (s) => s.$store.getters['schema/modules'],
 		roleIdMap:   (s) => s.$store.getters['schema/roleIdMap'],
 		capApp:      (s) => s.$store.getters.captions.admin.ldaps,
 		capAppLogin: (s) => s.$store.getters.captions.admin.login,
@@ -266,8 +231,6 @@ let MyAdminLdaps = {
 	methods:{
 		// externals
 		deepIsEqual,
-		getCaption,
-		hasAnyAssignableRole,
 		
 		// actions
 		close() {
@@ -324,16 +287,6 @@ let MyAdminLdaps = {
 			this.inputs    = JSON.parse(JSON.stringify(ldap));
 			this.inputsOrg = JSON.parse(JSON.stringify(ldap));
 			this.idEdit    = id;
-		},
-		roleAdd() {
-			this.inputs.loginRolesAssign.push({
-				ldapId:this.idEdit,
-				roleId:null,
-				searchString:''
-			});
-		},
-		roleRemove(i) {
-			this.inputs.loginRolesAssign.splice(i,1);
 		},
 		
 		// backend calls

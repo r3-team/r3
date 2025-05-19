@@ -165,7 +165,6 @@
 				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "تم اختبار الاتصال بنجاح"
 			},
-			"groupDn": "الاسم المميز للمجموعة",
 			"groupDnHint": "مثال: CN=Admin_User،OU=Group،DC=mycompany،DC=local",
 			"host": "يستضيف",
 			"hostHint": "اسم مضيف LDAP",
@@ -181,7 +180,6 @@
 			"nameHint": "اسم فريد",
 			"port": "ميناء",
 			"portHint": "بشكل افتراضي 389، 636 لـ SSL/TLS",
-			"role": "دور",
 			"searchClass": "فئة الكائن",
 			"searchClassHint": "مثال: مستخدم",
 			"searchDn": "البحث في الاسم المميز",
@@ -467,6 +465,7 @@
 				"delete": "هل أنت متأكد أنك تريد حذف عميل OAuth هذا؟<br /><br />هذا الإجراء لا رجعة فيه.</b>"
 			},
 			"flow": "OAuth flow",
+			"loginMetaMap": "Update user details via claims",
 			"nameHint": "اسم داخلي للإشارة إلى عميل OAuth داخل REI3.",
 			"option": {
 				"flow": {
@@ -2290,6 +2289,7 @@
 		"uninstall": "إلغاء التثبيت",
 		"update": "تحديث",
 		"username": "اسم المستخدم",
+		"value": "Value",
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "إصدار",

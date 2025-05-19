@@ -165,7 +165,6 @@
 				"importPlanned": "El trabajo de importación se ha programado para ejecución inmediata",
 				"testDone": "La prueba de conexión fue exitosa"
 			},
-			"groupDn": "DN del grupo",
 			"groupDnHint": "Ejemplo: CN=Admin_User,OU=Group,DC=mycompany,DC=local",
 			"host": "Host",
 			"hostHint": "Nombre del host LDAP",
@@ -181,7 +180,6 @@
 			"nameHint": "Nombre único",
 			"port": "Puerto",
 			"portHint": "Por defecto 389, 636 para SSL/TLS",
-			"role": "Rol",
 			"searchClass": "Clase de objeto",
 			"searchClassHint": "Ejemplo: user",
 			"searchDn": "DN de búsqueda",
@@ -467,6 +465,7 @@
 				"delete": "¿Estás seguro de que deseas eliminar este cliente OAuth?<br /><br />Esta acción es irreversible.</b>"
 			},
 			"flow": "OAuth flow",
+			"loginMetaMap": "Update user details via claims",
 			"nameHint": "Un nombre interno para referenciar este cliente OAuth dentro de REI3.",
 			"option": {
 				"flow": {
@@ -2290,6 +2289,7 @@
 		"uninstall": "Uninstall",
 		"update": "Update",
 		"username": "Username",
+		"value": "Value",
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "Version",
