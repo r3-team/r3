@@ -319,6 +319,7 @@
 				"ldap": "LDAP",
 				"mail": "Mail",
 				"module": "Anwendungen",
+				"oauth": "OAuth-Client",
 				"scheduler": "Aufgabenplaner",
 				"server": "Server",
 				"transfer": "Transfer",

@@ -319,6 +319,7 @@
 				"ldap": "LDAP",
 				"mail": "邮件",
 				"module": "应用程序",
+				"oauth": "OAuth client",
 				"scheduler": "调度器",
 				"server": "服务器",
 				"transfer": "传输",

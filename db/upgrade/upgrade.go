@@ -152,6 +152,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			
 			CREATE INDEX IF NOT EXISTS fki_oauth_client_login_template_id_fkey
 				ON instance.oauth_client USING btree (login_template_id ASC NULLS LAST);
+			
+			INSERT INTO instance.config (name,value) VALUES ('logOauth',2);
+			ALTER TYPE instance.log_context ADD VALUE 'oauth';
 
 			-- login OAUTH details
 			ALTER TABLE instance.login ADD COLUMN     oauth_iss       TEXT;

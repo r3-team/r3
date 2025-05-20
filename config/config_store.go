@@ -33,12 +33,12 @@ var (
 		"fileVersionsKeepCount", "fileVersionsKeepDays", "icsDaysPost",
 		"icsDaysPre", "icsDownload", "imagerThumbWidth", "logApi", "logBackup",
 		"logCache", "logCluster", "logCsv", "logImager", "logLdap", "logMail",
-		"logModule", "logServer", "logScheduler", "logTransfer", "logWebsocket",
-		"logsKeepDays", "mailTrafficKeepDays", "productionMode", "pwForceDigit",
-		"pwForceLower", "pwForceSpecial", "pwForceUpper", "pwLengthMin",
-		"repoChecked", "repoFeedback", "repoSkipVerify", "systemMsgDate0",
-		"systemMsgDate1", "systemMsgMaintenance", "tokenExpiryHours",
-		"tokenKeepEnable"}
+		"logModule", "logOauth", "logServer", "logScheduler", "logTransfer",
+		"logWebsocket", "logsKeepDays", "mailTrafficKeepDays", "productionMode",
+		"pwForceDigit", "pwForceLower", "pwForceSpecial", "pwForceUpper",
+		"pwLengthMin", "repoChecked", "repoFeedback", "repoSkipVerify",
+		"systemMsgDate0", "systemMsgDate1", "systemMsgMaintenance",
+		"tokenExpiryHours", "tokenKeepEnable"}
 
 	NamesUint64Slice = []string{"loginBackgrounds"}
 )

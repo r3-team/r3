@@ -319,6 +319,7 @@
 				"ldap": "لداب",
 				"mail": "بريد",
 				"module": "التطبيقات",
+				"oauth": "OAuth client",
 				"scheduler": "مجدول",
 				"server": "الخادم",
 				"transfer": "تحويل",

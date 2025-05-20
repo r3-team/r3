@@ -1,7 +1,6 @@
-import MyInputDate                 from '../inputDate.js';
-import MyInputOffset               from '../inputOffset.js';
-import {getLineBreaksParsedToHtml} from '../shared/generic.js';
-import {getUnixFormat}             from '../shared/time.js';
+import MyInputDate     from '../inputDate.js';
+import MyInputOffset   from '../inputOffset.js';
+import {getUnixFormat} from '../shared/time.js';
 export {MyAdminLogs as default};
 
 let MyAdminLogs = {
@@ -16,17 +15,23 @@ let MyAdminLogs = {
 			</div>
 		</div>
 		<div class="top lower">
-			<div class="area admin-logs-date-wrap">
-				<my-input-date
-					@set-unix-from="setDate($event,true)"
-					@set-unix-to="setDate($event,false)"
-					:isDate="true"
-					:isTime="true"
-					:isRange="true"
-					:isValid="true"
-					:unixFrom="unixFrom"
-					:unixTo="unixTo"
+			<div class="area">
+				<my-button image="refresh.png"
+					@trigger="get"
+					:caption="capGen.button.refresh"
 				/>
+				<div class="admin-logs-date-wrap">
+					<my-input-date
+						@set-unix-from="setDate($event,true)"
+						@set-unix-to="setDate($event,false)"
+						:isDate="true"
+						:isTime="true"
+						:isRange="true"
+						:isValid="true"
+						:unixFrom="unixFrom"
+						:unixTo="unixTo"
+					/>
+				</div>
 			</div>
 			<div class="area">
 				<my-input-offset
@@ -38,11 +43,6 @@ let MyAdminLogs = {
 				/>
 			</div>
 			<div class="area gap default-inputs">
-				<my-button image="refresh.png"
-					@trigger="get"
-					:captionTitle="capGen.button.refresh"
-					:naked="true"
-				/>
 				<input class="short"
 					v-model="byString"
 					@keyup.enter="offset = 0;get()"
@@ -167,7 +167,7 @@ let MyAdminLogs = {
 		return {
 			contextsValid:[
 				'module','api','backup','cache','cluster','csv','imager',
-				'ldap','mail','scheduler','server','transfer','websocket'
+				'ldap','oauth','mail','scheduler','server','transfer','websocket'
 			],
 			messageLengthShow:200,
 			
@@ -208,7 +208,6 @@ let MyAdminLogs = {
 	},
 	methods:{
 		// externals
-		getLineBreaksParsedToHtml,
 		getUnixFormat,
 		
 		getConfigLogContextName(context) {
@@ -248,7 +247,7 @@ let MyAdminLogs = {
 		},
 		showMessage(index) {
 			this.$store.commit('dialog',{
-				captionBody:this.getLineBreaksParsedToHtml(this.logs[index].message),
+				captionBody:this.logs[index].message,
 				textDisplay:'textarea',
 				width:800
 			});

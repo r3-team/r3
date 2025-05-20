@@ -27,10 +27,11 @@ const (
 	ContextLdap      logContext = 70
 	ContextMail      logContext = 80
 	ContextModule    logContext = 90 // only used via instance logging functions
-	ContextScheduler logContext = 100
-	ContextServer    logContext = 110
-	ContextTransfer  logContext = 120
-	ContextWebsocket logContext = 130
+	ContextOauth     logContext = 100
+	ContextScheduler logContext = 110
+	ContextServer    logContext = 120
+	ContextTransfer  logContext = 130
+	ContextWebsocket logContext = 140
 )
 
 var (
@@ -51,6 +52,7 @@ var (
 		ContextLdap:      1,
 		ContextMail:      1,
 		ContextModule:    1,
+		ContextOauth:     1,
 		ContextScheduler: 1,
 		ContextServer:    1,
 		ContextTransfer:  1,
@@ -66,6 +68,7 @@ var (
 		ContextLdap:      "ldap",
 		ContextMail:      "mail",
 		ContextModule:    "module",
+		ContextOauth:     "oauth",
 		ContextScheduler: "scheduler",
 		ContextServer:    "server",
 		ContextTransfer:  "transfer",

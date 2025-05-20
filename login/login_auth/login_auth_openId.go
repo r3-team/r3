@@ -2,10 +2,12 @@ package login_auth
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"r3/cache"
 	"r3/db"
+	"r3/log"
 	"r3/login"
 	"r3/login/login_clusterEvent"
 	"r3/login/login_metaMap"
@@ -138,6 +140,13 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	} else {
 		metaEx, metaChanged = login_metaMap.UpdateChangedMeta(c.LoginMetaMap, metaEx, meta)
 	}
+
+	// log returned claims for troubleshooting
+	claimsReadable, err := json.MarshalIndent(claims, "", "\t")
+	if err != nil {
+		return types.LoginAuthResult{}, err
+	}
+	log.Info(log.ContextOauth, fmt.Sprintf("Open ID Connect authentication successful, received claims:\n%s", claimsReadable))
 
 	// read username from ID token claim
 	usernameIf, ok := claims[c.ClaimUsername.String]

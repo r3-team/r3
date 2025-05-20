@@ -319,6 +319,7 @@
 				"ldap": "LDAP",
 				"mail": "E-pasts",
 				"module": "Lietojumprogrammas",
+				"oauth": "OAuth client",
 				"scheduler": "Plānotājs",
 				"server": "Serveris",
 				"transfer": "Pārsūtīšana",

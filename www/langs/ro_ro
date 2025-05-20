@@ -319,6 +319,7 @@
 				"ldap": "LDAP",
 				"mail": "Mail",
 				"module": "Aplicații",
+				"oauth": "OAuth client",
 				"scheduler": "Programare",
 				"server": "Server",
 				"transfer": "Transfer",

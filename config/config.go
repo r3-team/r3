@@ -164,6 +164,7 @@ func SetLogLevels() {
 	log.SetLogLevel(log.ContextLdap, int(GetUint64("logLdap")))
 	log.SetLogLevel(log.ContextMail, int(GetUint64("logMail")))
 	log.SetLogLevel(log.ContextModule, int(GetUint64("logModule")))
+	log.SetLogLevel(log.ContextOauth, int(GetUint64("logOauth")))
 	log.SetLogLevel(log.ContextScheduler, int(GetUint64("logScheduler")))
 	log.SetLogLevel(log.ContextServer, int(GetUint64("logServer")))
 	log.SetLogLevel(log.ContextTransfer, int(GetUint64("logTransfer")))

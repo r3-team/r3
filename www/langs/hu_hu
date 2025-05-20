@@ -319,6 +319,7 @@
 				"ldap": "LDAP",
 				"mail": "E-mail",
 				"module": "Alkalmazások",
+				"oauth": "OAuth client",
 				"scheduler": "Feladatütemező",
 				"server": "Szerver",
 				"transfer": "Átvitel",
