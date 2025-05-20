@@ -12,7 +12,46 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+type handlerContext int
+
+const (
+	ContextApi               handlerContext = 10
+	ContextApiAuth           handlerContext = 20
+	ContextCacheDownload     handlerContext = 30
+	ContextClientDownload    handlerContext = 40
+	ContextCsvDownload       handlerContext = 50
+	ContextCsvUpload         handlerContext = 60
+	ContextDataAccess        handlerContext = 70
+	ContextDataAuth          handlerContext = 80
+	ContextDataDownload      handlerContext = 90
+	ContextDataDownloadThumb handlerContext = 100
+	ContextDataUpload        handlerContext = 110
+	ContextIconUpload        handlerContext = 120
+	ContextIcsUpload         handlerContext = 130
+	ContextLicenseUpload     handlerContext = 140
+	ContextManifestDownload  handlerContext = 150
+	ContextWebsocket         handlerContext = 160
+)
+
 var (
+	ContextNameMap = map[handlerContext]string{
+		ContextApi:               "api",
+		ContextApiAuth:           "api_auth",
+		ContextCacheDownload:     "cache_download",
+		ContextClientDownload:    "client_download",
+		ContextCsvDownload:       "csv_download",
+		ContextCsvUpload:         "csv_upload",
+		ContextDataAccess:        "data_access",
+		ContextDataAuth:          "data_auth",
+		ContextDataDownload:      "data_download",
+		ContextDataDownloadThumb: "data_download_thumb",
+		ContextDataUpload:        "data_upload",
+		ContextIconUpload:        "icon_upload",
+		ContextIcsUpload:         "ics_download",
+		ContextLicenseUpload:     "license_upload",
+		ContextManifestDownload:  "manifest_download",
+		ContextWebsocket:         "websocket",
+	}
 	NoImage []byte
 )
 
@@ -53,14 +92,12 @@ func SetNoImage(v []byte) {
 	NoImage = v
 }
 
-func AbortRequest(w http.ResponseWriter, context string, errToLog error, errMessageUser string) {
+func AbortRequest(w http.ResponseWriter, context handlerContext, errToLog error, errMessageUser string) {
 	AbortRequestWithCode(w, context, http.StatusBadRequest, errToLog, errMessageUser)
 }
 
-func AbortRequestWithCode(w http.ResponseWriter, context string,
-	httpCode int, errToLog error, errMessageUser string) {
-
-	log.Error("server", fmt.Sprintf("aborted %s request", context), errToLog)
+func AbortRequestWithCode(w http.ResponseWriter, context handlerContext, httpCode int, errToLog error, errMessageUser string) {
+	log.Error(log.ContextServer, fmt.Sprintf("aborted %s request", ContextNameMap[context]), errToLog)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(httpCode)

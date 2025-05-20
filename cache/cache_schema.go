@@ -152,14 +152,14 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 	Schema_mx.Lock()
 	defer Schema_mx.Unlock()
 
-	log.Info("cache", fmt.Sprintf("starting schema processing for %d module(s)", len(moduleIds)))
+	log.Info(log.ContextCache, fmt.Sprintf("starting schema processing for %d module(s)", len(moduleIds)))
 
 	mods, err := module.Get_tx(ctx, tx, moduleIds)
 	if err != nil {
 		return err
 	}
 	for _, mod := range mods {
-		log.Info("cache", fmt.Sprintf("parsing module '%s'", mod.Name))
+		log.Info(log.ContextCache, fmt.Sprintf("parsing module '%s'", mod.Name))
 		mod.Relations = make([]types.Relation, 0)
 		mod.Forms = make([]types.Form, 0)
 		mod.MenuTabs = make([]types.MenuTab, 0)
@@ -177,7 +177,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		ModuleApiNameMapId[mod.Name] = make(map[string]uuid.UUID)
 
 		// get articles
-		log.Info("cache", "load articles")
+		log.Info(log.ContextCache, "load articles")
 
 		mod.Articles, err = article.Get_tx(ctx, tx, mod.Id)
 		if err != nil {
@@ -185,7 +185,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// get relations
-		log.Info("cache", "load relations")
+		log.Info(log.ContextCache, "load relations")
 
 		rels, err := relation.Get_tx(ctx, tx, mod.Id)
 		if err != nil {
@@ -224,7 +224,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// get forms
-		log.Info("cache", "load forms")
+		log.Info(log.ContextCache, "load forms")
 
 		mod.Forms, err = form.Get_tx(ctx, tx, mod.Id, []uuid.UUID{})
 		if err != nil {
@@ -232,7 +232,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// get menu tabs
-		log.Info("cache", "load menu tabs")
+		log.Info(log.ContextCache, "load menu tabs")
 
 		mod.MenuTabs, err = menuTab.Get_tx(ctx, tx, mod.Id)
 		if err != nil {
@@ -240,7 +240,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// get icons
-		log.Info("cache", "load icons")
+		log.Info(log.ContextCache, "load icons")
 
 		mod.Icons, err = icon.Get_tx(ctx, tx, mod.Id)
 		if err != nil {
@@ -248,7 +248,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// get roles
-		log.Info("cache", "load roles")
+		log.Info(log.ContextCache, "load roles")
 
 		mod.Roles, err = role.Get_tx(ctx, tx, mod.Id)
 		if err != nil {
@@ -261,7 +261,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// get login forms
-		log.Info("cache", "load login forms")
+		log.Info(log.ContextCache, "load login forms")
 
 		mod.LoginForms, err = loginForm.Get_tx(ctx, tx, mod.Id)
 		if err != nil {
@@ -275,7 +275,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// store & backfill PG functions
-		log.Info("cache", "load PG functions")
+		log.Info(log.ContextCache, "load PG functions")
 
 		mod.PgFunctions, err = pgFunction.Get_tx(ctx, tx, mod.Id)
 		if err != nil {
@@ -286,7 +286,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// get JS functions
-		log.Info("cache", "load JS functions")
+		log.Info(log.ContextCache, "load JS functions")
 
 		mod.JsFunctions, err = jsFunction.Get_tx(ctx, tx, mod.Id)
 		if err != nil {
@@ -294,7 +294,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// get collections
-		log.Info("cache", "load collections")
+		log.Info(log.ContextCache, "load collections")
 
 		mod.Collections, err = collection.Get_tx(ctx, tx, mod.Id)
 		if err != nil {
@@ -302,7 +302,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// get APIs
-		log.Info("cache", "load APIs")
+		log.Info(log.ContextCache, "load APIs")
 
 		mod.Apis, err = api.Get_tx(ctx, tx, mod.Id, uuid.Nil)
 		if err != nil {
@@ -314,7 +314,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// get client events
-		log.Info("cache", "load client events")
+		log.Info(log.ContextCache, "load client events")
 
 		mod.ClientEvents, err = clientEvent.Get_tx(ctx, tx, mod.Id)
 		if err != nil {
@@ -325,7 +325,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// get variables
-		log.Info("cache", "load variables")
+		log.Info(log.ContextCache, "load variables")
 
 		mod.Variables, err = variable.Get_tx(ctx, tx, mod.Id)
 		if err != nil {
@@ -333,7 +333,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		}
 
 		// get widgets
-		log.Info("cache", "load widgets")
+		log.Info(log.ContextCache, "load widgets")
 
 		mod.Widgets, err = widget.Get_tx(ctx, tx, mod.Id)
 		if err != nil {

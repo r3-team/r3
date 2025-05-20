@@ -196,7 +196,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 			return types.LoginAuthResult{}, err
 		}
 		if active && rolesChanged {
-			login_clusterEvent.Reauth_tx(ctx, tx, "ldap", l.Id, l.Name)
+			login_clusterEvent.Reauth_tx(ctx, tx, l.Id, l.Name)
 		}
 		if err := tx.Commit(ctx); err != nil {
 			return types.LoginAuthResult{}, err

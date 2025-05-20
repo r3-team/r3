@@ -21,7 +21,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// get authentication token
 	token, err := handler.ReadGetterFromUrl(r, "token")
 	if err != nil {
-		log.Error("server", genErr, err)
+		log.Error(log.ContextServer, genErr, err)
 		return
 	}
 
@@ -31,34 +31,34 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// authenticate via token
 	login, err := login_auth.Token(ctx, token)
 	if err != nil {
-		log.Error("server", genErr, err)
+		log.Error(log.ContextServer, genErr, err)
 		return
 	}
 
 	if !login.Admin {
-		log.Error("server", genErr, errors.New(handler.ErrUnauthorized))
+		log.Error(log.ContextServer, genErr, errors.New(handler.ErrUnauthorized))
 		return
 	}
 
 	// get module ID
 	moduleId, err := handler.ReadUuidGetterFromUrl(r, "module_id")
 	if err != nil {
-		log.Error("server", genErr, err)
+		log.Error(log.ContextServer, genErr, err)
 		return
 	}
 
 	filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)
 	if err != nil {
-		log.Error("server", genErr, err)
+		log.Error(log.ContextServer, genErr, err)
 		return
 	}
 
 	if err := transfer.ExportToFile(ctx, moduleId, filePath); err != nil {
-		log.Error("server", genErr, err)
+		log.Error(log.ContextServer, genErr, err)
 		return
 	}
 	http.ServeFile(w, r, filePath)
 	if err := os.Remove(filePath); err != nil {
-		log.Warning("server", "could not delete temporary export file", err)
+		log.Warning(log.ContextServer, "could not delete temporary export file", err)
 	}
 }

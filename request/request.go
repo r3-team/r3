@@ -25,14 +25,14 @@ func ExecTransaction(ctx context.Context, address string, loginId int64, isAdmin
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
-		log.Error("websocket", "cannot begin transaction", err)
+		log.Error(log.ContextWebsocket, "cannot begin transaction", err)
 		return responses, errors.New(handler.ErrGeneral)
 	}
 	defer tx.Rollback(ctx)
 
 	if clearDbCache {
 		if err := tx.Conn().DeallocateAll(ctx); err != nil {
-			log.Error("websocket", "failed to deallocate DB connection", err)
+			log.Error(log.ContextWebsocket, "failed to deallocate DB connection", err)
 			return responses, err
 		}
 	}
@@ -40,7 +40,7 @@ func ExecTransaction(ctx context.Context, address string, loginId int64, isAdmin
 	// set session parameters, used by system functions such as instance.get_user_id()
 	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
 
-		log.Error("websocket", fmt.Sprintf("TRANSACTION %d, transaction config failure (login ID %d)",
+		log.Error(log.ContextWebsocket, fmt.Sprintf("TRANSACTION %d, transaction config failure (login ID %d)",
 			reqTrans.TransactionNr, loginId), err)
 
 		return responses, err
@@ -49,14 +49,14 @@ func ExecTransaction(ctx context.Context, address string, loginId int64, isAdmin
 	// work through requests
 	for _, req := range reqTrans.Requests {
 
-		log.Info("websocket", fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s",
+		log.Info(log.ContextWebsocket, fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s",
 			reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
 
 		payload, err := Exec_tx(ctx, tx, address, loginId, isAdmin, device, isNoAuth, req.Ressource, req.Action, req.Payload)
 		if err != nil {
 			returnErr, isExpected := handler.ConvertToErrCode(err, !isAdmin)
 			if !isExpected {
-				log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, request %s %s failure (login ID %d)",
+				log.Warning(log.ContextWebsocket, fmt.Sprintf("TRANSACTION %d, request %s %s failure (login ID %d)",
 					reqTrans.TransactionNr, req.Ressource, req.Action, loginId), err)
 			}
 			return responses, returnErr
@@ -73,7 +73,7 @@ func ExecTransaction(ctx context.Context, address string, loginId int64, isAdmin
 	if err := tx.Commit(ctx); err != nil {
 		returnErr, isExpected := handler.ConvertToErrCode(err, !isAdmin)
 		if !isExpected {
-			log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, commit failure (login ID %d)",
+			log.Warning(log.ContextWebsocket, fmt.Sprintf("TRANSACTION %d, commit failure (login ID %d)",
 				reqTrans.TransactionNr, loginId), err)
 		}
 		return responses, returnErr

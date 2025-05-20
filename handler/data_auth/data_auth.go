@@ -15,8 +15,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var logContext = "data_auth"
-
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if blocked := bruteforce.Check(r); blocked {
@@ -27,7 +25,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "POST" {
-		handler.AbortRequest(w, logContext, errors.New("invalid HTTP method"),
+		handler.AbortRequest(w, handler.ContextDataAuth, errors.New("invalid HTTP method"),
 			"invalid HTTP method, allowed: POST")
 
 		return
@@ -39,7 +37,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		handler.AbortRequest(w, logContext, err, "request body malformed")
+		handler.AbortRequest(w, handler.ContextDataAuth, err, "request body malformed")
 		return
 	}
 
@@ -51,7 +49,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// authenticate requestor
 	res, err := login_auth.User(ctx, req.Username, req.Password, pgtype.Int4{}, pgtype.Text{})
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
+		handler.AbortRequest(w, handler.ContextDataAuth, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}

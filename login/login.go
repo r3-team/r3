@@ -9,6 +9,7 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/log"
+	"r3/login/login_external"
 	"r3/login/login_meta"
 	"r3/login/login_role"
 	"r3/login/login_setting"
@@ -33,15 +34,19 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id int64) error {
 	return err
 }
 
-// delete all logins for LDAP connector
-func DelByLdap_tx(ctx context.Context, tx pgx.Tx, ldapId int32) error {
+// delete all logins for external login provider
+func DelByExternalProvider_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32) error {
+
+	if err := login_external.ValidateEntity(entity); err != nil {
+		return err
+	}
 
 	loginIds := make([]int64, 0)
-	rows, err := tx.Query(ctx, `
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT id
 		FROM instance.login
-		WHERE ldap_id = $1
-	`, ldapId)
+		WHERE %s_id = $1
+	`, entity), entityId)
 	if err != nil {
 		return err
 	}
@@ -547,11 +552,10 @@ func GenerateSaltHash(pw string) (salt pgtype.Text, hash pgtype.Text) {
 
 // call login sync function for every module that has one to inform about changed login meta data
 func syncLogin_tx(ctx context.Context, tx pgx.Tx, action string, id int64) {
-	logContext := "server"
 	logErr := "failed to execute user sync"
 
 	if !slices.Contains([]string{"DELETED", "UPDATED"}, action) {
-		log.Error(logContext, logErr, fmt.Errorf("unknown action '%s'", action))
+		log.Error(log.ContextServer, logErr, fmt.Errorf("unknown action '%s'", action))
 		return
 	}
 
@@ -567,7 +571,7 @@ func syncLogin_tx(ctx context.Context, tx pgx.Tx, action string, id int64) {
 		}
 
 		if _, err := tx.Exec(ctx, `SELECT instance.user_sync($1,$2,$3,$4)`, mod.Name, fnc.Name, id, action); err != nil {
-			log.Error(logContext, logErr, err)
+			log.Error(log.ContextServer, logErr, err)
 		}
 	}
 	cache.Schema_mx.RUnlock()

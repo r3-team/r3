@@ -47,7 +47,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		if errToLog == nil {
 			errToLog = errors.New(errMsgUser)
 		}
-		handler.AbortRequestWithCode(w, "api", httpCode, errToLog, errMsgUser)
+		handler.AbortRequestWithCode(w, handler.ContextApi, httpCode, errToLog, errMsgUser)
 	}
 
 	ctx, ctxCanc := context.WithTimeout(context.Background(),
@@ -120,7 +120,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// URL processing complete, actually use API
-	log.Info("api", fmt.Sprintf("'%s.%s' (v%d) is called with %s (record ID: %d)",
+	log.Info(log.ContextApi, fmt.Sprintf("'%s.%s' (v%d) is called with %s (record ID: %d)",
 		modName, apiName, version, r.Method, recordId))
 
 	// resolve API by module+API names

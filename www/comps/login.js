@@ -391,39 +391,49 @@ let MyLogin = {
 		},
 
 		// authentication against external identity provider
-		authenticateExternalOpenId:async function(c) {
+		authenticateExternalOpenId(c) {
 			this.loading = true;
-			const url = new URL(c.providerUrl);
-			const as  = await oauth.discoveryRequest(url,{algorithm:'oidc'}).then(
-				res => oauth.processDiscoveryResponse(url,res),
-				console.warn
+			const url    = new URL(c.providerUrl);
+			const errFnc = msg => {
+				console.warn(msg);
+				this.loading = false;
+			};
+			oauth.discoveryRequest(url,{algorithm:'oidc'}).then(
+				res => {
+					oauth.processDiscoveryResponse(url,res).then(
+						as => {
+							const state    = this.getRandomString(64);
+							const verifier = oauth.generateRandomCodeVerifier();
+		
+							oauth.calculatePKCECodeChallenge(verifier).then(
+								challenge => {
+									this.$store.commit('local/openIdAuthDetails',{
+										codeVerifier:verifier,
+										oauthClientId:c.id,
+										state:state
+									});
+									
+									const urlEndpoint = new URL(as.authorization_endpoint);
+									urlEndpoint.searchParams.set('client_id',c.clientId);
+									urlEndpoint.searchParams.set('redirect_uri',c.redirectUrl);
+									urlEndpoint.searchParams.set('response_type','code');
+									urlEndpoint.searchParams.set('scope','openid');
+									urlEndpoint.searchParams.set('code_challenge',challenge);
+									urlEndpoint.searchParams.set('code_challenge_method','S256');
+									// encode state with base64, some characters are not correctly returned in redirect URL (example: Azure AD '§')
+									urlEndpoint.searchParams.set('state',btoa(state));
+									
+									window.location.replace(urlEndpoint.toString());
+									this.loading = false;
+								},
+								errFnc
+							);
+						},
+						errFnc
+					);
+				},
+				errFnc
 			);
-
-			if(as === undefined)
-				return this.loading = false;
-			
-			const verifier  = oauth.generateRandomCodeVerifier();
-			const challenge = await oauth.calculatePKCECodeChallenge(verifier);
-			const state     = this.getRandomString(64);
-
-			this.$store.commit('local/openIdAuthDetails',{
-				codeVerifier:verifier,
-				oauthClientId:c.id,
-				state:state
-			});
-
-			const urlEndpoint = new URL(as.authorization_endpoint);
-			urlEndpoint.searchParams.set('client_id',c.clientId);
-			urlEndpoint.searchParams.set('redirect_uri',c.redirectUrl);
-			urlEndpoint.searchParams.set('response_type','code');
-			urlEndpoint.searchParams.set('scope','openid');
-			urlEndpoint.searchParams.set('code_challenge',challenge);
-			urlEndpoint.searchParams.set('code_challenge_method','S256');
-			// encode state with base64, some characters are not correctly returned in redirect URL (example: Azure AD '§')
-			urlEndpoint.searchParams.set('state',btoa(state));
-
-			window.location.replace(urlEndpoint.toString());
-			this.loading = false;
 		},
 		
 		// authentication against backend

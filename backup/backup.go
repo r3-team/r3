@@ -33,14 +33,14 @@ func Run() error {
 		config.GetUint64("backupWeekly") == 0 &&
 		config.GetUint64("backupMonthly") == 0 {
 
-		log.Info("backup", "no backup jobs active, do nothing")
+		log.Info(log.ContextBackup, "no backup jobs active, do nothing")
 		return nil
 	}
 
 	// initialize state
 	if config.GetString("backupDir") == "" {
 		err := errors.New("backup directory not defined")
-		log.Error("backup", "could not start", err)
+		log.Error(log.ContextBackup, "could not start", err)
 		return err
 	}
 
@@ -55,7 +55,7 @@ func Run() error {
 	jobRan := false // limit to one job per run
 
 	var runOne = func(jobName string, keepVersions uint64, interval int64) error {
-		log.Info("backup", fmt.Sprintf("is considering job '%s' for execution", jobName))
+		log.Info(log.ContextBackup, fmt.Sprintf("is considering job '%s' for execution", jobName))
 
 		var timestampLatest int64
 		for _, backup := range tocFile.Backups {
@@ -65,16 +65,16 @@ func Run() error {
 		}
 
 		if timestampLatest > (now - interval) {
-			log.Info("backup", fmt.Sprintf("does not need to execute '%s', latest backup is still valid", jobName))
+			log.Info(log.ContextBackup, fmt.Sprintf("does not need to execute '%s', latest backup is still valid", jobName))
 			return nil
 		}
 
 		if err := jobCleanup(&tocFile, jobName, keepVersions); err != nil {
-			log.Error("backup", fmt.Sprintf("could not delete old versions of job '%s'", jobName), err)
+			log.Error(log.ContextBackup, fmt.Sprintf("could not delete old versions of job '%s'", jobName), err)
 			return err
 		}
 		if err := jobBackup(&tocFile, jobName); err != nil {
-			log.Error("backup", fmt.Sprintf("could not execute job '%s'", jobName), err)
+			log.Error(log.ContextBackup, fmt.Sprintf("could not execute job '%s'", jobName), err)
 			return err
 		}
 		jobRan = true
@@ -101,10 +101,10 @@ func Run() error {
 
 func jobCleanup(tocFile *types.BackupTocFile, jobName string, countKeep uint64) error {
 
-	log.Info("backup", fmt.Sprintf("starting cleanup for job '%s', keep %d versions",
+	log.Info(log.ContextBackup, fmt.Sprintf("starting cleanup for job '%s', keep %d versions",
 		jobName, countKeep))
 
-	defer log.Info("backup", fmt.Sprintf("finished cleanup for job '%s'", jobName))
+	defer log.Info(log.ContextBackup, fmt.Sprintf("finished cleanup for job '%s'", jobName))
 
 	// get current count
 	var countCurrent int
@@ -114,7 +114,7 @@ func jobCleanup(tocFile *types.BackupTocFile, jobName string, countKeep uint64) 
 		}
 	}
 
-	log.Info("backup", fmt.Sprintf("found %d versions for job '%s'", countCurrent, jobName))
+	log.Info(log.ContextBackup, fmt.Sprintf("found %d versions for job '%s'", countCurrent, jobName))
 
 	// delete not-kept versions
 	// if 3 are to be kept, delete all but 2 (to make room for next backup)
@@ -131,7 +131,7 @@ func jobCleanup(tocFile *types.BackupTocFile, jobName string, countKeep uint64) 
 		}
 		pathToDelete := getBackupJobDir(timestampToDelete, jobName)
 
-		log.Info("backup", fmt.Sprintf("is attempting to delete '%s'", pathToDelete))
+		log.Info(log.ContextBackup, fmt.Sprintf("is attempting to delete '%s'", pathToDelete))
 
 		exists, err := tools.Exists(pathToDelete)
 		if err != nil {
@@ -151,12 +151,12 @@ func jobCleanup(tocFile *types.BackupTocFile, jobName string, countKeep uint64) 
 		if err := tocFileWrite(*tocFile); err != nil {
 			return err
 		}
-		log.Info("backup", fmt.Sprintf("has successfully deleted '%s'", pathToDelete))
+		log.Info(log.ContextBackup, fmt.Sprintf("has successfully deleted '%s'", pathToDelete))
 	}
 	return nil
 }
 func jobBackup(tocFile *types.BackupTocFile, jobName string) error {
-	log.Info("backup", fmt.Sprintf("started for job '%s'", jobName))
+	log.Info(log.ContextBackup, fmt.Sprintf("started for job '%s'", jobName))
 
 	newTimestamp := tools.GetTimeUnix()
 	jobDir := getBackupJobDir(newTimestamp, jobName)
@@ -203,7 +203,7 @@ func jobBackup(tocFile *types.BackupTocFile, jobName string) error {
 	if err := tocFileWrite(*tocFile); err != nil {
 		return err
 	}
-	log.Info("backup", fmt.Sprintf("successfully completed job '%s'", jobName))
+	log.Info(log.ContextBackup, fmt.Sprintf("successfully completed job '%s'", jobName))
 	return nil
 }
 
@@ -230,7 +230,7 @@ func TocFileReadCreate() (types.BackupTocFile, error) {
 
 	exists, err := tools.Exists(path)
 	if err != nil {
-		log.Error("backup", "could not check existence of TOC file", err)
+		log.Error(log.ContextBackup, "could not check existence of TOC file", err)
 		return tocFile, err
 	}
 	if !exists {

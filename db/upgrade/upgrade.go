@@ -38,19 +38,19 @@ func RunIfRequired() error {
 
 // loop upgrade procedure until DB version matches application version
 func startLoop() error {
-	log.Info("server", "version discrepancy (platform<->database) recognized, starting automatic upgrade")
+	log.Info(log.ContextServer, "version discrepancy (platform<->database) recognized, starting automatic upgrade")
 
 	for {
 		// abort when versions match
 		if config.GetAppVersion().Cut == config.GetDbVersionCut() {
-			log.Info("server", "version discrepancy has been resolved")
+			log.Info(log.ContextServer, "version discrepancy has been resolved")
 			return nil
 		}
 
 		if err := oneIteration(config.GetDbVersionCut()); err != nil {
 			return err
 		}
-		log.Info("server", "upgrade successful")
+		log.Info(log.ContextServer, "upgrade successful")
 	}
 	return nil
 }
@@ -67,7 +67,7 @@ func oneIteration(dbVersionCut string) error {
 
 	// log before upgrade because changes to log table index
 	//  caused infinite lock when trying to log to DB afterwards
-	log.Info("server", fmt.Sprintf("DB version '%s' recognized, starting upgrade",
+	log.Info(log.ContextServer, fmt.Sprintf("DB version '%s' recognized, starting upgrade",
 		dbVersionCut))
 
 	// execute known DB upgrades
@@ -77,7 +77,7 @@ func oneIteration(dbVersionCut string) error {
 	}
 	dbVersionCutNew, err := upgradeFunctions[dbVersionCut](ctx, tx)
 	if err != nil {
-		log.Error("server", "upgrade NOT successful", err)
+		log.Error(log.ContextServer, "upgrade NOT successful", err)
 		return err
 	}
 
@@ -177,8 +177,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.login_meta_map ADD   CONSTRAINT login_meta_map_oauth_client_id_fkey
 				FOREIGN KEY (oauth_client_id)
 				REFERENCES instance.oauth_client (id) MATCH SIMPLE
-				ON UPDATE NO ACTION
-				ON DELETE NO ACTION;
+				ON UPDATE CASCADE
+				ON DELETE CASCADE;
 
 			CREATE INDEX IF NOT EXISTS fki_login_meta_map_oauth_client_id_fkey
 				ON instance.login_meta_map USING btree (oauth_client_id ASC NULLS LAST);
@@ -3084,7 +3084,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					filepath.Join(config.File.Paths.Files,
 						fileId.String()[:3], fmt.Sprintf("%s_0", fileId))); err != nil {
 
-					log.Warning("server", fmt.Sprintf("failed to move file '%s/%s' during platform upgrade",
+					log.Warning(log.ContextServer, fmt.Sprintf("failed to move file '%s/%s' during platform upgrade",
 						fa.attributeId, fileId), err)
 				}
 			}

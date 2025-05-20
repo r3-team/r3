@@ -53,8 +53,8 @@ let MyAdminLoginRolesAssign = {
 		</table>
 		<div>
 			<my-button image="add.png"
-				v-if="!readonly"
 				@trigger="add"
+				:active="!readonly"
 				:caption="capGen.button.add"
 			/>
 		</div>

@@ -15,8 +15,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var logContext = "api_auth"
-
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if blocked := bruteforce.Check(r); blocked {
@@ -27,7 +25,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "POST" {
-		handler.AbortRequestWithCode(w, logContext, http.StatusBadRequest,
+		handler.AbortRequestWithCode(w, handler.ContextApiAuth, http.StatusBadRequest,
 			errors.New("invalid HTTP method"), "invalid HTTP method, allowed: POST")
 
 		return
@@ -39,7 +37,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		handler.AbortRequestWithCode(w, logContext, http.StatusBadRequest,
+		handler.AbortRequestWithCode(w, handler.ContextApiAuth, http.StatusBadRequest,
 			err, "request body malformed")
 
 		return
@@ -53,7 +51,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// authenticate requestor
 	res, err := login_auth.User(ctx, req.Username, req.Password, pgtype.Int4{}, pgtype.Text{})
 	if err != nil {
-		handler.AbortRequestWithCode(w, logContext, http.StatusUnauthorized,
+		handler.AbortRequestWithCode(w, handler.ContextApiAuth, http.StatusUnauthorized,
 			err, handler.ErrAuthFailed)
 
 		bruteforce.BadAttempt(r)
@@ -61,7 +59,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(res.MfaTokens) != 0 {
-		handler.AbortRequestWithCode(w, logContext, http.StatusBadRequest,
+		handler.AbortRequestWithCode(w, handler.ContextApiAuth, http.StatusBadRequest,
 			nil, "failed to authenticate, MFA is currently not supported")
 
 		return

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"r3/cache"
+	"r3/login"
+	"r3/login/login_external"
 	"r3/login/login_metaMap"
 	"r3/login/login_roleAssign"
 	"r3/types"
@@ -12,17 +14,19 @@ import (
 )
 
 func OauthClientDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-	var req struct {
-		Id int64 `json:"id"`
+	var id int32
+	if err := json.Unmarshal(reqJson, &id); err != nil {
+		return nil, err
 	}
-	if err := json.Unmarshal(reqJson, &req); err != nil {
+
+	if err := login.DelByExternalProvider_tx(ctx, tx, login_external.EntityOauthClient, id); err != nil {
 		return nil, err
 	}
 
 	_, err := tx.Exec(ctx, `
 		DELETE FROM instance.oauth_client
 		WHERE id = $1
-	`, req.Id)
+	`, id)
 	return nil, err
 }
 
@@ -66,10 +70,10 @@ func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 			return nil, err
 		}
 	}
-	if err := login_metaMap.Set_tx(ctx, tx, "oauth_client", req.Id, req.LoginMetaMap); err != nil {
+	if err := login_metaMap.Set_tx(ctx, tx, login_external.EntityOauthClient, req.Id, req.LoginMetaMap); err != nil {
 		return nil, err
 	}
-	if err := login_roleAssign.Set_tx(ctx, tx, "oauth_client", req.Id, req.LoginRolesAssign); err != nil {
+	if err := login_roleAssign.Set_tx(ctx, tx, login_external.EntityOauthClient, req.Id, req.LoginRolesAssign); err != nil {
 		return nil, err
 	}
 	return nil, nil

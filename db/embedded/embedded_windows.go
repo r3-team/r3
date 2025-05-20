@@ -58,7 +58,7 @@ func Stop() error {
 	}
 
 	if !state {
-		log.Info("server", "embedded database already stopped")
+		log.Info(log.ContextServer, "embedded database already stopped")
 		return nil
 	}
 
@@ -126,7 +126,7 @@ func execWaitFor(call string, args []string, waitFor []string, waitTime int) (st
 			if err != nil {
 				if err != io.EOF {
 					// log error if not end-of-file
-					log.Error("server", "failed to read from std out", err)
+					log.Error(log.ContextServer, "failed to read from std out", err)
 				}
 				break
 			}

@@ -93,7 +93,7 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 		roleIdsEx = roleIds
 	}
 
-	log.Info("ldap", fmt.Sprintf("user account '%s' is new or has been changed, updating login", name))
+	log.Info(log.ContextLdap, fmt.Sprintf("user account '%s' is new or has been changed, updating login", name))
 
 	if _, err := Set_tx(ctx, tx, loginId, ldap.LoginTemplateId, ldapIdSql, ldapKeySql, pgtype.Int4{},
 		pgtype.Text{}, pgtype.Text{}, name, "", adminEx, false, active, pgtype.Int4{}, metaEx, roleIdsEx,
@@ -103,10 +103,10 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 	}
 
 	if active && rolesChanged {
-		login_clusterEvent.Reauth_tx(ctx, tx, "ldap", loginId, name)
+		login_clusterEvent.Reauth_tx(ctx, tx, loginId, name)
 	}
 	if !active && activeEx {
-		login_clusterEvent.Kick_tx(ctx, tx, "ldap", loginId, name)
+		login_clusterEvent.Kick_tx(ctx, tx, loginId, name)
 	}
 	return tx.Commit(ctx)
 }

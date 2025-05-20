@@ -38,7 +38,7 @@ func adminMails() error {
 	var sendMail = func(subject string, body string, dateExpiration int64, reason string) error {
 		// get mail receivers
 		if config.GetString("adminMails") == "" {
-			log.Warning("server", "cannot send admin notification mails", fmt.Errorf("no mail receivers defined"))
+			log.Warning(log.ContextServer, "cannot send admin notification mails", fmt.Errorf("no mail receivers defined"))
 			return nil
 		}
 
@@ -48,7 +48,7 @@ func adminMails() error {
 		}
 
 		if len(toList) == 0 {
-			log.Warning("server", "cannot send admin notification mails", fmt.Errorf("no mail receivers defined"))
+			log.Warning(log.ContextServer, "cannot send admin notification mails", fmt.Errorf("no mail receivers defined"))
 			return nil
 		}
 

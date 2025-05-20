@@ -137,7 +137,7 @@ func deleteLoginForms_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, log
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del login form %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del login form %s", id.String()))
 		if err := loginForm.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -154,7 +154,7 @@ func deletePgTriggers_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, pgT
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del PG trigger %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del PG trigger %s", id.String()))
 		if err := pgTrigger.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -171,7 +171,7 @@ func deleteRelations_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, rela
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del relation %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del relation %s", id.String()))
 		if err := relation.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -190,7 +190,7 @@ func deleteRelationPgIndexes_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UU
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del PG index %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del PG index %s", id.String()))
 		if err := pgIndex.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -209,7 +209,7 @@ func deleteRelationAttributes_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.U
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del attribute %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del attribute %s", id.String()))
 		if err := attribute.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -228,7 +228,7 @@ func deleteRelationPresets_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del preset %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del preset %s", id.String()))
 		if err := preset.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -245,7 +245,7 @@ func deleteCollections_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, co
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del collection %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del collection %s", id.String()))
 		if err := collection.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -262,7 +262,7 @@ func deleteRoles_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, roles []
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del role %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del role %s", id.String()))
 		if err := role.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -279,7 +279,7 @@ func deleteMenuTabs_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, menuT
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del menu tab %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del menu tab %s", id.String()))
 		if err := menuTab.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -296,7 +296,7 @@ func deleteForms_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, forms []
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del form %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del form %s", id.String()))
 		if err := form.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -427,7 +427,7 @@ func deleteFormFields_tx(ctx context.Context, tx pgx.Tx, form types.Form) error 
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del field %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del field %s", id.String()))
 		if err := field.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -439,7 +439,7 @@ func deleteFormFields_tx(ctx context.Context, tx pgx.Tx, form types.Form) error 
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del tab %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del tab %s", id.String()))
 		if err := tab.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -451,7 +451,7 @@ func deleteFormFields_tx(ctx context.Context, tx pgx.Tx, form types.Form) error 
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del column %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del column %s", id.String()))
 		if err := column.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -468,7 +468,7 @@ func deleteIcons_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, icons []
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del icon %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del icon %s", id.String()))
 		if err := icon.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -485,7 +485,7 @@ func deleteArticles_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, artic
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del article %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del article %s", id.String()))
 		if err := article.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -502,7 +502,7 @@ func deleteApis_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, apis []ty
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del API %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del API %s", id.String()))
 		if err := api.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -519,7 +519,7 @@ func deleteClientEvents_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, c
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del client event %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del client event %s", id.String()))
 		if err := clientEvent.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -536,7 +536,7 @@ func deleteVariables_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, vari
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del variable %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del variable %s", id.String()))
 		if err := variable.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -553,7 +553,7 @@ func deleteWidgets_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, widget
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del widget %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del widget %s", id.String()))
 		if err := widget.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -570,7 +570,7 @@ func deletePgFunctions_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, pg
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del PG function %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del PG function %s", id.String()))
 		if err := pgFunction.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
@@ -587,7 +587,7 @@ func deleteJsFunctions_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, js
 		return err
 	}
 	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del JS function %s", id.String()))
+		log.Info(log.ContextTransfer, fmt.Sprintf("del JS function %s", id.String()))
 		if err := jsFunction.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}

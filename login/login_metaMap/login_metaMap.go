@@ -3,24 +3,17 @@ package login_metaMap
 import (
 	"context"
 	"fmt"
+	"r3/login/login_external"
 	"r3/types"
-	"slices"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func validateEntity(entity string) error {
-	if !slices.Contains([]string{"ldap", "oauth_client"}, entity) {
-		return fmt.Errorf("invalid login meta map entity '%s'", entity)
-	}
-	return nil
-}
-
 func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32) (types.LoginMeta, error) {
 
 	var m types.LoginMeta
-	if err := validateEntity(entity); err != nil {
+	if err := login_external.ValidateEntity(entity); err != nil {
 		return m, err
 	}
 
@@ -50,7 +43,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32) (type
 
 func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32, m types.LoginMeta) error {
 
-	if err := validateEntity(entity); err != nil {
+	if err := login_external.ValidateEntity(entity); err != nil {
 		return err
 	}
 

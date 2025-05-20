@@ -16,8 +16,6 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-var logContext = "data_upload"
-
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if blocked := bruteforce.Check(r); blocked {
@@ -29,7 +27,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	reader, err := r.MultipartReader()
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -74,7 +72,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		// authenticate via token
 		login, err := login_auth.Token(ctx, token)
 		if err != nil {
-			handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
+			handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrAuthFailed)
 			bruteforce.BadAttempt(r)
 			return
 		}
@@ -82,14 +80,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		// parse attribute ID
 		attributeId, err := uuid.FromString(attributeIdString)
 		if err != nil {
-			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 			return
 		}
 
 		// parse file ID
 		fileId, err := uuid.FromString(fileIdString)
 		if err != nil {
-			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 			return
 		}
 
@@ -98,13 +96,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		if isNewFile {
 			fileId, err = uuid.NewV4()
 			if err != nil {
-				handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+				handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 				return
 			}
 		}
 
 		if err := data.SetFile(ctx, login.Id, attributeId, fileId, part, isNewFile); err != nil {
-			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 			return
 		}
 		response.Id = fileId
@@ -112,7 +110,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	responseJson, err := json.Marshal(response)
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 		return
 	}
 	w.Write(responseJson)

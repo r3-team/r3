@@ -34,7 +34,7 @@ func RunAll() error {
 	ldapIdMap := cache.GetLdapIdMap()
 
 	if len(ldapIdMap) != 0 && !config.GetLicenseActive() {
-		log.Warning("ldap", "skipping run", errors.New("no valid license"))
+		log.Warning(log.ContextLdap, "skipping run", errors.New("no valid license"))
 		return nil
 	}
 
@@ -146,7 +146,7 @@ func run(ldapId int32) error {
 		pagingControl := goldap.NewControlPaging(pageSize)
 		controls := []goldap.Control{pagingControl}
 		for {
-			log.Info("ldap", fmt.Sprintf("querying '%s': '%s' in '%s'",
+			log.Info(log.ContextLdap, fmt.Sprintf("querying '%s': '%s' in '%s'",
 				ldap.Name, filters, ldap.SearchDn))
 
 			response, err := ldapConn.Search(goldap.NewSearchRequest(
@@ -246,14 +246,14 @@ func run(ldapId int32) error {
 
 	// import logins
 	for key, l := range logins {
-		log.Info("ldap", fmt.Sprintf("processing login '%s' (key: %s, roles: %d)", l.name, key, len(l.roleIds)))
+		log.Info(log.ContextLdap, fmt.Sprintf("processing login '%s' (key: %s, roles: %d)", l.name, key, len(l.roleIds)))
 
 		if err := login.SetLdapLogin(ldap, key, l.name, l.active, l.meta, l.roleIds); err != nil {
-			log.Warning("ldap", fmt.Sprintf("failed to import login '%s'", l.name), err)
+			log.Warning(log.ContextLdap, fmt.Sprintf("failed to import login '%s'", l.name), err)
 			continue
 		}
 	}
 
-	log.Info("ldap", fmt.Sprintf("finished login import for '%s'", ldap.Name))
+	log.Info(log.ContextLdap, fmt.Sprintf("finished login import for '%s'", ldap.Name))
 	return nil
 }

@@ -168,7 +168,7 @@ let MyAdminOauthClient = {
 										<span>{{ capApp.claimRolesHint }}</span>
 										<my-admin-login-roles-assign
 											v-model="inputs.loginRolesAssign"
-											:readonly="readonly || inputs.claimRoles === ''"
+											:readonly="readonly || !isClaimRolesSet"
 										/>
 									</div>
 								</td>
@@ -231,7 +231,7 @@ let MyAdminOauthClient = {
 			(!s.isFlowAuthCodePkce || s.inputs.claimUsername !== '') &&
 			(!s.isFlowAuthCodePkce || s.inputs.providerUrl !== '') &&
 			(!s.isFlowAuthCodePkce || s.inputs.redirectUrl !== '') &&
-			(!s.isFlowClientCreds  || s.inputs.tokenUrl !== ''),
+			(!s.isFlowClientCreds  || s.isTokenUrlSet),
 		inputsOrg:(s) => s.isNew ? {
 			id:0,
 			name:'',
@@ -252,8 +252,10 @@ let MyAdminOauthClient = {
 		
 		// simple states
 		hasChanges:        (s) => !s.deepIsEqual(s.inputsOrg,s.inputs),
+		isClaimRolesSet:   (s) => s.inputs.claimRoles !== null && s.inputs.claimRoles !== '',
 		isFlowAuthCodePkce:(s) => s.inputs.flow === 'authCodePkce',
 		isFlowClientCreds: (s) => s.inputs.flow === 'clientCreds',
+		isTokenUrlSet:     (s) => s.inputs.tokenUrl   !== null && s.inputs.tokenUrl   !== '',
 		isNew:             (s) => s.id === 0,
 		
 		// stores
@@ -316,7 +318,7 @@ let MyAdminOauthClient = {
 			});
 		},
 		del() {
-			ws.send('oauthClient','del',{id:this.id},true).then(
+			ws.send('oauthClient','del',this.id,true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);
@@ -327,6 +329,7 @@ let MyAdminOauthClient = {
 			ws.send('oauthClient','set',{
 				id:this.id,
 				name:this.inputs.name,
+				flow:this.inputs.flow,
 				clientId:this.inputs.clientId,
 				clientSecret:this.inputs.clientSecret,
 				dateExpiry:this.inputs.dateExpiry,

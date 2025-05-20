@@ -30,7 +30,7 @@ var (
 func PrepareProcessing(filePathOverwrite string) {
 	canProcess = setCheckConvertPath(filePathOverwrite)
 
-	log.Info("imager", fmt.Sprintf("started, processing capabilities: %v", canProcess))
+	log.Info(log.ContextImager, fmt.Sprintf("started, processing capabilities: %v", canProcess))
 }
 
 func GetCanProcess() bool {
@@ -86,7 +86,7 @@ func processFile(fileId uuid.UUID, ext string, src string, dst string) {
 	// clean extension
 	ext = strings.ToLower(strings.Replace(ext, ".", "", -1))
 
-	log.Info("imager", fmt.Sprintf("is working on file '%s' (%s)", fileId, ext))
+	log.Info(log.ContextImager, fmt.Sprintf("is working on file '%s' (%s)", fileId, ext))
 
 	defer func() {
 		fileIdMapQueue_mx.Lock()
@@ -107,7 +107,7 @@ func processFile(fileId uuid.UUID, ext string, src string, dst string) {
 			fileIdMapFailed[fileId] = true
 			fileIdMapFailed_mx.Unlock()
 
-			log.Warning("imager", "failed to create thumbnail", returnErr)
+			log.Warning(log.ContextImager, "failed to create thumbnail", returnErr)
 		}
 
 		// free up worker
@@ -181,7 +181,7 @@ func processFile(fileId uuid.UUID, ext string, src string, dst string) {
 			"-annotate", "+10+40", fmt.Sprintf("%s", textThumb), dst}
 
 	default:
-		log.Info("imager", fmt.Sprintf("skipped unsupported file extension '%s'", ext))
+		log.Info(log.ContextImager, fmt.Sprintf("skipped unsupported file extension '%s'", ext))
 		return
 	}
 

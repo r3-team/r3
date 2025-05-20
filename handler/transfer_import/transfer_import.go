@@ -25,7 +25,7 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 
 		if err != nil {
 			res.WriteHeader(http.StatusBadRequest)
-			log.Error("server", "could not finish module import", err)
+			log.Error(log.ContextServer, "could not finish module import", err)
 		}
 
 		var response struct {
@@ -35,7 +35,7 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 
 		responseJson, err := json.Marshal(response)
 		if err != nil {
-			log.Error("server", "could not finish module import", err)
+			log.Error(log.ContextServer, "could not finish module import", err)
 			res.Write([]byte{})
 			return
 		}

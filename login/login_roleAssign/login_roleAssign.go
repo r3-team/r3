@@ -3,23 +3,16 @@ package login_roleAssign
 import (
 	"context"
 	"fmt"
+	"r3/login/login_external"
 	"r3/types"
-	"slices"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func validateEntity(entity string) error {
-	if !slices.Contains([]string{"ldap", "oauth_client"}, entity) {
-		return fmt.Errorf("invalid login meta map entity '%s'", entity)
-	}
-	return nil
-}
-
 func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32) ([]types.LoginRoleAssign, error) {
 
 	roles := make([]types.LoginRoleAssign, 0)
-	if err := validateEntity(entity); err != nil {
+	if err := login_external.ValidateEntity(entity); err != nil {
 		return roles, err
 	}
 
@@ -46,7 +39,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32) ([]ty
 
 func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32, assigns []types.LoginRoleAssign) error {
 
-	if err := validateEntity(entity); err != nil {
+	if err := login_external.ValidateEntity(entity); err != nil {
 		return err
 	}
 

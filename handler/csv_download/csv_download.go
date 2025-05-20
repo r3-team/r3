@@ -26,10 +26,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var (
-	handlerContext = "csv_download"
-)
-
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if blocked := bruteforce.Check(r); blocked {
@@ -42,77 +38,77 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// read getters from URL
 	token, err := handler.ReadGetterFromUrl(r, "token")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	commaChar, err := handler.ReadGetterFromUrl(r, "comma_char")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	dateFormat, err := handler.ReadGetterFromUrl(r, "date_format")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	timezone, err := handler.ReadGetterFromUrl(r, "timezone")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	boolFalse, err := handler.ReadGetterFromUrl(r, "bool_false")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	boolTrue, err := handler.ReadGetterFromUrl(r, "bool_true")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	ignoreHeaderString, err := handler.ReadGetterFromUrl(r, "ignore_header")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	relationIdString, err := handler.ReadGetterFromUrl(r, "relation_id")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	joinsString, err := handler.ReadGetterFromUrl(r, "joins")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	expressionsString, err := handler.ReadGetterFromUrl(r, "expressions")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	filtersString, err := handler.ReadGetterFromUrl(r, "filters")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	ordersString, err := handler.ReadGetterFromUrl(r, "orders")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	totalLimitString, err := handler.ReadGetterFromUrl(r, "total_limit")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	columnsString, err := handler.ReadGetterFromUrl(r, "columns")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	var columns []types.Column
 	if err := json.Unmarshal([]byte(columnsString), &columns); err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -121,36 +117,36 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	get.RelationId, err = uuid.FromString(relationIdString)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	if err := json.Unmarshal([]byte(joinsString), &get.Joins); err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	if err := json.Unmarshal([]byte(expressionsString), &get.Expressions); err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	if err := json.Unmarshal([]byte(filtersString), &get.Filters); err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	if err := json.Unmarshal([]byte(ordersString), &get.Orders); err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 
 	totalLimit, err := strconv.Atoi(totalLimitString)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	ignoreHeader := ignoreHeaderString == "true"
 
 	// check invalid parameters
 	if len(get.Expressions) != len(columns) {
-		handler.AbortRequest(w, handlerContext, errors.New("expression count != column count"),
+		handler.AbortRequest(w, handler.ContextCsvDownload, errors.New("expression count != column count"),
 			handler.ErrGeneral)
 
 		return
@@ -164,7 +160,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// authenticate via token
 	login, err := login_auth.Token(ctx, token)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrUnauthorized)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrUnauthorized)
 		bruteforce.BadAttempt(r)
 		return
 	}
@@ -176,15 +172,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// prepare CSV file
 	filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 
-	log.Info("csv", fmt.Sprintf("starts export to file '%s' for download", filePath))
+	log.Info(log.ContextCsv, fmt.Sprintf("starts export to file '%s' for download", filePath))
 
 	file, err := os.Create(filePath)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	defer file.Close()
@@ -212,7 +208,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			// fallback to attribute title
 			atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
 			if !exists {
-				handler.AbortRequest(w, handlerContext, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes), handler.ErrGeneral)
+				handler.AbortRequest(w, handler.ContextCsvDownload, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes), handler.ErrGeneral)
 				return
 			}
 
@@ -224,13 +220,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			// fallback to attribute + relation name
 			rel, exists := cache.RelationIdMap[atr.RelationId]
 			if !exists {
-				handler.AbortRequest(w, handlerContext, handler.ErrSchemaUnknownRelation(atr.RelationId), handler.ErrGeneral)
+				handler.AbortRequest(w, handler.ContextCsvDownload, handler.ErrSchemaUnknownRelation(atr.RelationId), handler.ErrGeneral)
 				return
 			}
 			columnNames[i] = rel.Name + "." + atr.Name
 		}
 		if err := writer.Write(columnNames); err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 			return
 		}
 	}
@@ -245,7 +241,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// load user location based on timezone for datetime values
 	locUser, err := time.LoadLocation(timezone)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -254,7 +250,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	for i, column := range columns {
 		atr, exists := cache.AttributeIdMap[column.AttributeId]
 		if !exists {
-			handler.AbortRequest(w, handlerContext, nil,
+			handler.AbortRequest(w, handler.ContextCsvDownload, nil,
 				handler.ErrSchemaUnknownAttribute(column.AttributeId).Error())
 
 			return
@@ -267,7 +263,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			dateFormat, columnAttributeContentUse, login.Id)
 
 		if err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 			return
 		}
 
@@ -280,11 +276,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	writer.Flush()
 	if err := writer.Error(); err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 	if err := file.Close(); err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
 

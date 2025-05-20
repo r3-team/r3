@@ -395,7 +395,7 @@ func (prg *program) execute(svc service.Service) {
 	// prepare image processing
 	data_image.PrepareProcessing(cli.imageMagick)
 
-	log.Info("server", fmt.Sprintf("is ready to start application (%s)", appVersion))
+	log.Info(log.ContextServer, fmt.Sprintf("is ready to start application (%s)", appVersion))
 
 	// start scheduler (must start after module cache)
 	go scheduler.Start()
@@ -453,7 +453,7 @@ func (prg *program) execute(svc service.Service) {
 		IdleTimeout:       120 * time.Second,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
-	log.Info("server", fmt.Sprintf("starting web handlers for '%s'", webServerString))
+	log.Info(log.ContextServer, fmt.Sprintf("starting web handlers for '%s'", webServerString))
 
 	// if dynamic port (0) is used we can only now open the app in default browser (port is now known)
 	if cli.open && config.File.Web.Port != 0 {
@@ -498,7 +498,7 @@ func (prg *program) execute(svc service.Service) {
 		case "1.3":
 			prg.webServer.TLSConfig.MinVersion = tls.VersionTLS13
 		default:
-			log.Warning("server", "failed to apply min. TLS version",
+			log.Warning(log.ContextServer, "failed to apply min. TLS version",
 				fmt.Errorf("version '%s' is not supported (valid: 1.1, 1.2 or 1.3)", config.File.Web.TlsMinVersion))
 		}
 		if err := prg.webServer.ServeTLS(webListener, "", ""); err != nil && err != http.ErrServerClosed {
@@ -579,7 +579,7 @@ func initCachesOptional(ctx context.Context) error {
 	defer tx.Rollback(ctx)
 
 	if err := cache.LoadSearchDictionaries_tx(ctx, tx); err != nil {
-		log.Error("server", "failed to read/update text search dictionaries", err)
+		log.Error(log.ContextServer, "failed to read/update text search dictionaries", err)
 		return tx.Rollback(ctx)
 	}
 	return tx.Commit(ctx)
@@ -635,7 +635,7 @@ func (prg *program) Stop(svc service.Service) error {
 		if err := prg.webServer.Shutdown(ctx); err != nil {
 			prg.logger.Error(err)
 		}
-		log.Info("server", "stopped web handlers")
+		log.Info(log.ContextServer, "stopped web handlers")
 	}
 
 	// close database connection and deregister cluster node if DB is open
@@ -644,7 +644,7 @@ func (prg *program) Stop(svc service.Service) error {
 			prg.logger.Error(err)
 		}
 		db.Close()
-		log.Info("server", "stopped database handler")
+		log.Info(log.ContextServer, "stopped database handler")
 	}
 
 	// stop embedded database if owned
@@ -652,7 +652,7 @@ func (prg *program) Stop(svc service.Service) error {
 		if err := embedded.Stop(); err != nil {
 			prg.logger.Error(err)
 		}
-		log.Info("server", "stopped embedded database")
+		log.Info(log.ContextServer, "stopped embedded database")
 	}
 	return nil
 }

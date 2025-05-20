@@ -82,22 +82,22 @@ var (
 
 func Start() {
 	time.Sleep(loopIntervalStartWait)
-	log.Info("scheduler", "started")
+	log.Info(log.ContextScheduler, "started")
 
 	for {
 		time.Sleep(loopInterval)
 		if loopStopping.Load() {
-			log.Info("scheduler", "stopped")
+			log.Info(log.ContextScheduler, "stopped")
 			return
 		}
 		if err := runTasksBySchedule(); err != nil {
-			log.Error("scheduler", "failed to start tasks", err)
+			log.Error(log.ContextScheduler, "failed to start tasks", err)
 		}
 	}
 }
 func Stop() {
 	loopStopping.Store(true)
-	log.Info("scheduler", "stopping")
+	log.Info(log.ContextScheduler, "stopping")
 }
 
 func init() {
@@ -154,7 +154,7 @@ func runTasksBySchedule() error {
 				taskNameNext = t.nameLog
 			}
 		}
-		log.Info("scheduler", fmt.Sprintf("will start next task at %s ('%s')",
+		log.Info(log.ContextScheduler, fmt.Sprintf("will start next task at %s ('%s')",
 			time.Unix(nextExecutionUnix, 0), taskNameNext))
 	}
 
@@ -229,11 +229,11 @@ func runTaskByIndex(taskIndex int) {
 	// run task and store schedule meta data
 	var err error
 
-	log.Info("scheduler", fmt.Sprintf("task '%s' started (scheduled for: %s)",
+	log.Info(log.ContextScheduler, fmt.Sprintf("task '%s' started (scheduled for: %s)",
 		t.nameLog, time.Unix(t.runNextUnix, 0)))
 
 	if err := storeTaskDate(t, "attempt"); err != nil {
-		log.Error("scheduler", fmt.Sprintf("task '%s' failed to update its meta data",
+		log.Error(log.ContextScheduler, fmt.Sprintf("task '%s' failed to update its meta data",
 			t.nameLog), err)
 	}
 
@@ -245,12 +245,12 @@ func runTaskByIndex(taskIndex int) {
 
 	if err == nil {
 		if err := storeTaskDate(t, "success"); err != nil {
-			log.Error("scheduler", fmt.Sprintf("task '%s' failed to update its meta data", t.nameLog), err)
+			log.Error(log.ContextScheduler, fmt.Sprintf("task '%s' failed to update its meta data", t.nameLog), err)
 		} else {
-			log.Info("scheduler", fmt.Sprintf("task '%s' executed successfully", t.nameLog))
+			log.Info(log.ContextScheduler, fmt.Sprintf("task '%s' executed successfully", t.nameLog))
 		}
 	} else {
-		log.Error("scheduler", fmt.Sprintf("task '%s' failed to execute", t.nameLog), err)
+		log.Error(log.ContextScheduler, fmt.Sprintf("task '%s' failed to execute", t.nameLog), err)
 	}
 
 	// store last successful run time for schedule and set next run time
@@ -274,7 +274,7 @@ func runTaskByIndex(taskIndex int) {
 }
 
 func load() error {
-	log.Info("scheduler", "is updating its configuration")
+	log.Info(log.ContextScheduler, "is updating its configuration")
 	tasks = nil
 
 	// get system tasks and their states

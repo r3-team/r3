@@ -65,7 +65,7 @@ func DoAll() error {
 
 		for _, c := range calls {
 			if err := callExecute(c); err != nil {
-				log.Error("api", fmt.Sprintf("failed to execute REST call %s '%s'", c.method, c.url), err)
+				log.Error(log.ContextApi, fmt.Sprintf("failed to execute REST call %s '%s'", c.method, c.url), err)
 
 				_, err := db.Pool.Exec(context.Background(), `
 					UPDATE instance.rest_spool
@@ -74,7 +74,7 @@ func DoAll() error {
 				`, c.id)
 
 				if err != nil {
-					log.Error("api", "failed to update call attempt count", err)
+					log.Error(log.ContextApi, "failed to update call attempt count", err)
 				}
 				continue
 			}
@@ -90,7 +90,7 @@ func DoAll() error {
 }
 
 func callExecute(c restCall) error {
-	log.Info("api", fmt.Sprintf("is calling %s '%s'", c.method, c.url))
+	log.Info(log.ContextApi, fmt.Sprintf("is calling %s '%s'", c.method, c.url))
 
 	httpReq, err := http.NewRequest(c.method, c.url, strings.NewReader(c.body.String))
 	if err != nil {

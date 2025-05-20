@@ -80,7 +80,7 @@ func clusterProcessEvents() error {
 
 func clusterProcessEvent(ctx context.Context, tx pgx.Tx, e types.ClusterEvent, collectionUpdates *[]types.ClusterEventCollectionUpdated) error {
 
-	log.Info("cluster", fmt.Sprintf("node is reacting to event '%s'", e.Content))
+	log.Info(log.ContextCluster, fmt.Sprintf("node is reacting to event '%s'", e.Content))
 	var err error
 	var jsonPayload []byte
 

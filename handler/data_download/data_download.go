@@ -14,8 +14,6 @@ import (
 	"time"
 )
 
-var logContext = "data_download"
-
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if blocked := bruteforce.Check(r); blocked {
@@ -26,7 +24,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// get authentication token
 	token, err := handler.ReadGetterFromUrl(r, "token")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataDownload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -38,7 +36,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// authenticate via token
 	login, err := login_auth.Token(ctx, token)
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
+		handler.AbortRequest(w, handler.ContextDataDownload, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}
@@ -46,18 +44,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// parse other getters
 	attributeId, err := handler.ReadUuidGetterFromUrl(r, "attribute_id")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataDownload, err, handler.ErrGeneral)
 		return
 	}
 	fileId, err := handler.ReadUuidGetterFromUrl(r, "file_id")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataDownload, err, handler.ErrGeneral)
 		return
 	}
 
 	// check file access privilege
 	if err := data.MayAccessFile(login.Id, attributeId); err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrUnauthorized)
+		handler.AbortRequest(w, handler.ContextDataDownload, err, handler.ErrUnauthorized)
 		return
 	}
 
@@ -70,7 +68,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if version == -1 {
 		version, err = data.FileGetLatestVersion(fileId)
 		if err != nil {
-			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextDataDownload, err, handler.ErrGeneral)
 			return
 		}
 	}

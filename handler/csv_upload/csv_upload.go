@@ -27,8 +27,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-var handlerContext = "csv_upload"
-
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if blocked := bruteforce.Check(r); blocked {
@@ -40,7 +38,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	reader, err := r.MultipartReader()
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvUpload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -73,17 +71,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			token = handler.GetStringFromPart(part)
 		case "columns":
 			if err := json.Unmarshal(handler.GetBytesFromPart(part), &columns); err != nil {
-				handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+				handler.AbortRequest(w, handler.ContextCsvUpload, err, handler.ErrGeneral)
 				return
 			}
 		case "joins":
 			if err := json.Unmarshal(handler.GetBytesFromPart(part), &joins); err != nil {
-				handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+				handler.AbortRequest(w, handler.ContextCsvUpload, err, handler.ErrGeneral)
 				return
 			}
 		case "lookups":
 			if err := json.Unmarshal(handler.GetBytesFromPart(part), &lookups); err != nil {
-				handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+				handler.AbortRequest(w, handler.ContextCsvUpload, err, handler.ErrGeneral)
 				return
 			}
 		case "boolTrue":
@@ -110,7 +108,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		// authenticate via token
 		login, err := login_auth.Token(ctx, token)
 		if err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrUnauthorized)
+			handler.AbortRequest(w, handler.ContextCsvUpload, err, handler.ErrUnauthorized)
 			bruteforce.BadAttempt(r)
 			return
 		}
@@ -122,20 +120,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		// store file in temporary directory
 		filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)
 		if err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextCsvUpload, err, handler.ErrGeneral)
 			return
 		}
 
 		dest, err := os.Create(filePath)
 		if err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextCsvUpload, err, handler.ErrGeneral)
 			return
 		}
 		defer os.Remove(filePath)
 		defer dest.Close()
 
 		if _, err := io.Copy(dest, part); err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextCsvUpload, err, handler.ErrGeneral)
 			return
 		}
 
@@ -148,14 +146,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			res.Error = err.Error()
 
 			if !expectedErr {
-				log.Error("server", fmt.Sprintf("aborted %s request", handlerContext), err)
+				handler.AbortRequest(w, handler.ContextCsvUpload, err, handler.ErrGeneral)
+				return
 			}
 		}
 	}
 
 	resJson, err := json.Marshal(res)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCsvUpload, err, handler.ErrGeneral)
 		return
 	}
 	w.Write(resJson)
@@ -167,7 +166,7 @@ func importFromCsv(ctx context.Context, filePath string, loginId int64, boolTrue
 	dateFormat string, timezone string, commaChar string, ignoreHeader bool, columns []types.Column,
 	joins []types.QueryJoin, lookups []types.QueryLookup) (int, error) {
 
-	log.Info("csv", fmt.Sprintf("starts import from file '%s' via upload", filePath))
+	log.Info(log.ContextCsv, fmt.Sprintf("starts import from file '%s' via upload", filePath))
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -217,7 +216,7 @@ func importFromCsv(ctx context.Context, filePath string, loginId int64, boolTrue
 			continue
 		}
 
-		log.Info("csv", fmt.Sprintf("is importing line %d", importedCnt+1))
+		log.Info(log.ContextCsv, fmt.Sprintf("is importing line %d", importedCnt+1))
 
 		if err := importLine_tx(ctx, tx, loginId, boolTrue, dateFormat, locUser,
 			values, columns, joins, lookups, indexMapPgIndexAttributeIds); err != nil {
