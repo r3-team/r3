@@ -15,6 +15,7 @@ import {
 	pbkdf2PassToAesGcmKey,
 	pemExport,
 	pemImport,
+	pemImportPrivateEnc,
 	rsaGenerateKeys
 } from './shared/crypto.js';
 export {MySettings as default};
@@ -35,7 +36,7 @@ let MySettingsEncryption = {
 		<br />
 		
 		<!-- list of modules with encryption enabled -->
-		<template v-if="anyEnc && !locked">
+		<template v-if="anyEnc && !loginEncLocked">
 			<h2>{{ capApp.modulesEnc }}</h2>
 			<ul>
 				<li v-for="mei in moduleEntriesIndexesEnc">
@@ -45,9 +46,22 @@ let MySettingsEncryption = {
 		</template>
 		
 		<div class="message-error" v-if="!cryptoApiAvailable">{{ capApp.status.noCryptoApi }}</div>
+
+		<!-- login without credentials, offer master key input -->
+		<template v-if="loginNoCred && (!loginEncEnabled || loginEncLocked)">
+			<h2>{{ capApp.noCredMasterKey }}</h2>
+			<div class="row gap default-inputs">
+				<input v-model="noCredMasterKey" />
+				<my-button image="ok.png"
+					@trigger="noCredMasterKeyApply(noCredMasterKey,true)"
+					:active="noCredMasterKey !== ''"
+				/>
+			</div>
+			<br />
+		</template>
 		
 		<!-- create new key pair -->
-		<template v-if="loginKeyAes !== null && !loginEncryption">
+		<template v-if="!loginEncEnabled">
 			<my-button
 				v-if="!newKeys"
 				@trigger="createKeys"
@@ -89,13 +103,13 @@ let MySettingsEncryption = {
 		</template>
 		
 		<!-- recover access -->
-		<template v-if="locked">
+		<template v-if="loginEncLocked && (!loginNoCred || noCredMasterKeyBadInput)">
 			<h2>{{ capApp.regainAccess }}</h2>
 			<p>{{ capApp.regainAccessDesc }}</p>
 			
 			<table class="default-inputs">
 				<tbody>
-					<tr>
+					<tr v-if="!loginNoCred">
 						<td>{{ capApp.prevPassword }}</td>
 						<td><input v-model="regainPassword" /></td>
 						<td>
@@ -106,23 +120,26 @@ let MySettingsEncryption = {
 							/>
 						</td>
 					</tr>
+					<tr v-if="loginNoCred">
+						<td>{{ capApp.noCredMasterKeyNew }}</td>
+						<td><input v-model="noCredMasterKeyNew" /></td>
+						<td></td>
+					</tr>
 					<tr>
 						<td>{{ capApp.backupCode }}</td>
 						<td><textarea v-model="regainBackupCode"></textarea></td>
 						<td>
 							<my-button image="key.png"
 								@trigger="unlockWithBackupCode"
-								:active="regainBackupCode !== ''"
+								:active="regainBackupCode !== '' && (!loginNoCred || noCredMasterKeyNew !== '')"
 								:caption="capGen.button.unlock"
 							/>
 						</td>
 					</tr>
 				</tbody>
 			</table>
-		</template>
 		
-		<!-- reset access -->
-		<template v-if="locked">
+			<!-- reset access -->
 			<br />
 			<h2>{{ capApp.resetAccess }}</h2>
 			<p v-html="capApp.resetAccessDesc"></p>
@@ -147,6 +164,11 @@ let MySettingsEncryption = {
 			newKeyPair:null,
 			newKeyPrivateEnc:null,
 			newKeyPrivateEncBackup:null,
+
+			// no credentials, master key input
+			noCredMasterKey:'',            // input for current master key, to decrypt private key in case of no-credentials login
+			noCredMasterKeyBadInput:false, // input for current master key has failed at least once
+			noCredMasterKeyNew:'',         // input for new master key, in case of recovery via backup codes
 			
 			// regain access
 			regainBackupCode:'',
@@ -170,32 +192,33 @@ let MySettingsEncryption = {
 		
 		// e2e encryption status
 		statusCaption:(s) => {
-			if(!s.active) return s.capApp.status.inactive;
-			if(s.locked)  return s.capApp.status.locked;
+			if(!s.active)         return s.capApp.status.inactive;
+			if(s.loginEncLocked)  return s.capApp.status.locked;
 			return s.capApp.status.unlocked;
 		},
 		
 		// states
-		active: (s) => s.loginEncryption,
+		active: (s) => s.loginEncEnabled,
 		anyEnc: (s) => s.moduleEntriesIndexesEnc.length !== 0,
-		locked: (s) => s.active && s.loginPrivateKey === null,
 		newKeys:(s) => s.newKeyPrivateEnc !== null,
 		
 		// stores
-		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
-		loginKeyAes:       (s) => s.$store.getters['local/loginKeyAes'],
-		loginKeySalt:      (s) => s.$store.getters['local/loginKeySalt'],
-		cryptoApiAvailable:(s) => s.$store.getters.cryptoApiAvailable,
-		loginEncryption:   (s) => s.$store.getters.loginEncryption,
-		loginPrivateKey:   (s) => s.$store.getters.loginPrivateKey,
-		loginPrivateKeyEnc:(s) => s.$store.getters.loginPrivateKeyEnc,
+		moduleIdMap:         (s) => s.$store.getters['schema/moduleIdMap'],
+		loginKeyAes:         (s) => s.$store.getters['local/loginKeyAes'],
+		loginKeySalt:        (s) => s.$store.getters['local/loginKeySalt'],
+		loginNoCred:         (s) => s.$store.getters['local/loginNoCred'],
+		cryptoApiAvailable:  (s) => s.$store.getters.cryptoApiAvailable,
+		loginEncEnabled:     (s) => s.$store.getters.loginEncEnabled,
+		loginEncLocked:      (s) => s.$store.getters.loginEncLocked,
+		loginPrivateKey:     (s) => s.$store.getters.loginPrivateKey,
+		loginPrivateKeyEnc:  (s) => s.$store.getters.loginPrivateKeyEnc,
 		loginPrivateKeyEncBackup:(s) => s.$store.getters.loginPrivateKeyEncBackup,
-		loginPublicKey:    (s) => s.$store.getters.loginPublicKey,
-		moduleEntries:     (s) => s.$store.getters.moduleEntries,
-		kdfIterations:     (s) => s.$store.getters.constants.kdfIterations,
-		capApp:            (s) => s.$store.getters.captions.settings.encryption,
-		capErr:            (s) => s.$store.getters.captions.error,
-		capGen:            (s) => s.$store.getters.captions.generic
+		loginPublicKey:      (s) => s.$store.getters.loginPublicKey,
+		moduleEntries:       (s) => s.$store.getters.moduleEntries,
+		kdfIterations:       (s) => s.$store.getters.constants.kdfIterations,
+		capApp:              (s) => s.$store.getters.captions.settings.encryption,
+		capErr:              (s) => s.$store.getters.captions.error,
+		capGen:              (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -203,23 +226,14 @@ let MySettingsEncryption = {
 		aesGcmDecryptBase64WithPhrase,
 		aesGcmEncryptBase64,
 		aesGcmEncryptBase64WithPhrase,
+		aesGcmExportBase64,
 		aesGcmImportBase64,
 		pbkdf2PassToAesGcmKey,
 		pemExport,
 		pemImport,
+		pemImportPrivateEnc,
 		rsaGenerateKeys,
 		
-		generateBackupCode() {
-			let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-			let len   = 128;
-			let arr   = new Uint32Array(len);
-			let out   = '';
-			crypto.getRandomValues(arr);
-			for(let i = 0; i < len; i++) {
-				out += chars[arr[i] % chars.length];
-			}
-			return out;
-		},
 		createKeys() {
 			this.running = true;
 			const backupCode     = this.generateBackupCode();
@@ -264,6 +278,50 @@ let MySettingsEncryption = {
 				this.$root.genericError
 			);
 		},
+		generateBackupCode() {
+			let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+			let len   = 128;
+			let arr   = new Uint32Array(len);
+			let out   = '';
+			crypto.getRandomValues(arr);
+			for(let i = 0; i < len; i++) {
+				out += chars[arr[i] % chars.length];
+			}
+			return out;
+		},
+		noCredMasterKeyApply(password,attemptDecryption) {
+			// generate AES key from credentials and login private key salt
+			return this.pbkdf2PassToAesGcmKey(password,this.loginKeySalt,this.kdfIterations,true).then(
+				key => {
+					this.aesGcmExportBase64(key).then(
+						keyBase64 => {
+							// if no private key is available, store login AES to allow creation of one
+							if(!attemptDecryption || this.loginPrivateKeyEnc === null)
+								return this.$store.commit('local/loginKeyAes',keyBase64);
+
+							// attempt to decrypt private key
+							this.pemImportPrivateEnc(this.loginPrivateKeyEnc,keyBase64).then(
+								keyPem => {
+									this.$store.commit('local/loginKeyAes',keyBase64);
+									this.$store.commit('loginPrivateKey',keyPem);
+								},
+								() => {
+									// if decryption fails, reset both AES and master key input
+									this.noCredMasterKeyBadInput = true;
+									this.$store.commit('local/loginKeyAes',null);
+									this.$store.commit('dialog',{
+										captionBody:this.capApp.noCredMasterKeyFailed,
+										image:'warning.png'
+									});
+								}
+							);
+						},
+						this.$root.genericError
+					);
+				},
+				this.$root.genericError
+			);
+		},
 		resetAsk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.resetAccessHint,
@@ -287,13 +345,19 @@ let MySettingsEncryption = {
 			});
 		},
 		unlockWithBackupCode() {
-			// remove spaces from backup code input
-			const backupCode = this.regainBackupCode.replace(/\s/g,'');
+			let promises = [];
 			
-			// attempt to decrypt private key with backup code
-			this.aesGcmDecryptBase64WithPhrase(this.loginPrivateKeyEncBackup,backupCode).then(
-				res => this.reencrypt(res),
-				()  => this.unlockError()
+			// if no-cred login, apply new master key to login AES key
+			if(this.loginNoCred)
+				promises.push(this.noCredMasterKeyApply(this.noCredMasterKeyNew,false));
+
+			// attempt to decrypt private key with backup code (remove spaces beforehand)
+			const backupCode = this.regainBackupCode.replace(/\s/g,'');
+			promises.push(this.aesGcmDecryptBase64WithPhrase(this.loginPrivateKeyEncBackup,backupCode));
+
+			Promise.all(promises).then(
+				res => this.reencrypt(res[1]),
+				err => this.unlockError(err[1])
 			);
 		},
 		unlockWithPassphrase() {
@@ -301,8 +365,7 @@ let MySettingsEncryption = {
 				loginKeyOld => {
 					// attempt to decrypt private key with login key based on previous password
 					this.aesGcmDecryptBase64(this.loginPrivateKeyEnc,loginKeyOld).then(
-						res => this.reencrypt(res),
-						()  => this.unlockError()
+						this.reencrypt,this.unlockError
 					);
 				},
 				this.$root.genericError
@@ -324,7 +387,6 @@ let MySettingsEncryption = {
 						res => {
 							ws.send('loginKeys','storePrivate',{privateKeyEnc:res},true).then(
 								res => {
-									this.$store.commit('loginEncryption',true);
 									this.$store.commit('loginPrivateKey',privateKey);
 									this.$store.commit('loginPrivateKeyEnc',res);
 								}
@@ -338,7 +400,6 @@ let MySettingsEncryption = {
 		reset() {
 			ws.send('loginKeys','reset',{},true).then(
 				res => {
-					this.$store.commit('loginEncryption',false);
 					this.$store.commit('loginPrivateKey',null);
 					this.$store.commit('loginPrivateKeyEnc',null);
 					this.$store.commit('loginPrivateKeyEncBackup',null);
@@ -355,7 +416,6 @@ let MySettingsEncryption = {
 						publicKey:publicKeyPem
 					},true).then(
 						() => {
-							this.$store.commit('loginEncryption',true);
 							this.$store.commit('loginPrivateKey',this.newKeyPair.privateKey);
 							this.$store.commit('loginPrivateKeyEnc',this.newKeyPrivateEnc);
 							this.$store.commit('loginPrivateKeyEncBackup',this.newKeyPrivateEncBackup);
@@ -451,7 +511,7 @@ let MySettingsAccount = {
 		},
 		
 		// simple
-		e2eeInactive:(s) => !s.loginEncryption || s.loginPrivateKey === null, // encryption not enabled (or private key locked)
+		e2eeInactive:(s) => !s.loginEncEnabled || s.loginEncLocked, // encryption not enabled or private key locked
 		pwMatch:     (s) => s.pwNew0.length !== 0 && s.pwNew0 === s.pwNew1,
 		pwMetLength: (s) => s.pwSettings.length <= s.pwNew0.length,
 		pwOldValid:  (s) => s.loginKeyAes === s.pwOldKey || s.e2eeInactive,   // without login key, we cannot check old PW (backend still checks)
@@ -463,7 +523,8 @@ let MySettingsAccount = {
 		// stores
 		loginKeyAes:       (s) => s.$store.getters['local/loginKeyAes'],
 		loginKeySalt:      (s) => s.$store.getters['local/loginKeySalt'],
-		loginEncryption:   (s) => s.$store.getters.loginEncryption,
+		loginEncEnabled:   (s) => s.$store.getters.loginEncEnabled,
+		loginEncLocked:    (s) => s.$store.getters.loginEncLocked,
 		loginName:         (s) => s.$store.getters.loginName,
 		loginPrivateKey:   (s) => s.$store.getters.loginPrivateKey,
 		loginPrivateKeyEnc:(s) => s.$store.getters.loginPrivateKeyEnc,

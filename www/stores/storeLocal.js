@@ -22,16 +22,17 @@ const MyStoreLocal = {
 			dateCache:0,         // to check if current cached values are up-to-date
 			moduleIdMap:{}       // favorites by module ID
 		},
+		loginNoCred:false,       // login is without locally known credentials (as in public or external auth such as Open ID Connect)
 		loginOptions:{           // field options set by login (might include options besides fields in the future)
 			dateCache:0,         // used to get delta changes since last retrieval
 			favoriteIdMap:{},    // field options for favorite forms (includes options for fields)
 			fieldIdMap:{}        // field options for generic forms
-		},  
+		},
 		loginOptionsMobile:{     // same as loginOptions (s. above) but for mobile view
-			dateCache:0,  
-			favoriteIdMap:{},  
-			fieldIdMap:{}  
-		},  
+			dateCache:0,
+			favoriteIdMap:{},
+			fieldIdMap:{}
+		},
 		loginKeyAes:null,        // en-/decryption key for login private key
 		loginKeySalt:null,       // salt for login key KDF
 		menuIdMapOpen:{},        // map of menu IDs with open state (true/false)
@@ -127,6 +128,10 @@ const MyStoreLocal = {
 		loginKeySalt(state,payload) {
 			state.loginKeySalt = payload;
 			set('loginKeySalt',payload);
+		},
+		loginNoCred(state,payload) {
+			state.loginNoCred = payload;
+			set('loginNoCred',payload);
 		},
 		loginOption(state,payload) {
 			const getOptions = (obj,fieldId) => obj[fieldId] === undefined ? {} : JSON.parse(JSON.stringify(obj[fieldId]));
@@ -255,6 +260,7 @@ const MyStoreLocal = {
 		loginFavorites:    (state) => state.loginFavorites,
 		loginKeyAes:       (state) => state.loginKeyAes,
 		loginKeySalt:      (state) => state.loginKeySalt,
+		loginNoCred:       (state) => state.loginNoCred,
 		loginOptions:      (state) => state.loginOptions,
 		loginOptionsMobile:(state) => state.loginOptionsMobile,
 		menuIdMapOpen:     (state) => state.menuIdMapOpen,

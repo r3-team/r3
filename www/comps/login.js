@@ -460,7 +460,8 @@ let MyLogin = {
 						res.payload.id,
 						res.payload.name,
 						res.payload.token,
-						res.payload.saltKdf
+						res.payload.saltKdf,
+						false
 					);
 				},
 				err => this.handleError('authUser',err)
@@ -476,7 +477,8 @@ let MyLogin = {
 					res.payload.id,
 					res.payload.name,
 					res.payload.token,
-					null
+					null,
+					true
 				),
 				err => this.handleError('authUser',err)
 			);
@@ -493,7 +495,8 @@ let MyLogin = {
 						res.payload.id,
 						res.payload.name,
 						res.payload.token,
-						res.payload.saltKdf
+						res.payload.saltKdf,
+						true
 					);
 				},
 				err => this.handleError('authUser',err)
@@ -510,7 +513,7 @@ let MyLogin = {
 		},
 
 		// authentication results
-		authenticatedByUser(loginId,loginName,token,saltKdf) {
+		authenticatedByUser(loginId,loginName,token,saltKdf,noCredentials) {
 			if(token === '')
 				return this.handleError('authUser','');
 			
@@ -520,6 +523,12 @@ let MyLogin = {
 			
 			if(saltKdf === null || !this.cryptoApiAvailable)
 				return this.appEnable(loginId,loginName);
+
+			// store login private key salt and whether credentials were used
+			this.$store.commit('local/loginNoCred',noCredentials);
+			this.$store.commit('local/loginKeySalt',saltKdf);
+			if(noCredentials)
+				return this.appEnable(loginId,loginName);
 			
 			// generate AES key from credentials and login private key salt
 			this.pbkdf2PassToAesGcmKey(this.password,saltKdf,this.kdfIterations,true).then(
@@ -528,7 +537,6 @@ let MyLogin = {
 						keyBase64 => {
 							// export AES key to local storage
 							this.$store.commit('local/loginKeyAes',keyBase64);
-							this.$store.commit('local/loginKeySalt',saltKdf);
 							this.appEnable(loginId,loginName);
 						},
 						() => this.handleError('aesExport','')

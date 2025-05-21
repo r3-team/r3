@@ -20,7 +20,7 @@ export function pemExport(key) {
 				
 				resolve(`-----BEGIN ${keyName} KEY-----\n${keyBase64}\n-----END ${keyName} KEY-----`);
 			},
-			err => reject(err)
+			reject
 		);
 	});
 };
@@ -55,6 +55,27 @@ export function pemImport(pem,mode,exportable) {
 		uses
 	);
 };
+export function pemImportPrivateEnc(privateKeyPemEnc,loginKeyAes) {
+	// attempt to decrypt private key with personal login key
+	return new Promise((resolve,reject) => {
+		// prepare login AES key
+		aesGcmImportBase64(loginKeyAes).then(
+			loginKey => {
+				// decrypt login private key PEM
+				aesGcmDecryptBase64(privateKeyPemEnc,loginKey).then(
+					privateKeyPem => {
+						// return key PEM
+						pemImport(privateKeyPem,'RSA',false).then(
+							resolve,reject
+						);
+					},
+					reject
+				);
+			},
+			reject
+		);
+	});
+};
 
 // AES
 export function aesGcmDecryptBase64(ciphertext,key) {
@@ -68,7 +89,7 @@ export function aesGcmDecryptBase64(ciphertext,key) {
 			stringToUint8Array(ctStr)
 		).then(
 			res => resolve(new TextDecoder().decode(res)),
-			err => reject(err)
+			reject
 		);
 	});
 };
@@ -101,12 +122,12 @@ export async function aesGcmDecryptBase64WithPhrase(ciphertext,passphrase) {
 							stringToUint8Array(ctStr)
 						).then(
 							res => resolve(new TextDecoder().decode(res)),
-							err => reject(err)
+							reject
 						);
 					}
 				);
 			},
-			err => reject(err)
+			reject
 		);
 	});
 };
@@ -121,7 +142,7 @@ export function aesGcmEncryptBase64(plaintext,key) {
 			pt
 		).then(
 			res => resolve(btoa(ivToString(iv)+arrayBufferToString(res))), // encode iv+ciphertext as base64
-			err => reject(err)
+			reject
 		);
 	});
 };
@@ -160,7 +181,7 @@ export function aesGcmEncryptBase64WithPhrase(plaintext,passphrase) {
 					}
 				);
 			},
-			err => reject(err)
+			reject
 		);
 	});
 };
@@ -168,7 +189,7 @@ export function aesGcmExportBase64(key) {
 	return new Promise((resolve,reject) => {
 		crypto.subtle.exportKey('raw',key).then(
 			res => resolve(btoa(arrayBufferToString(res))),
-			err => reject(err)
+			reject
 		);
 	});
 };
@@ -203,7 +224,7 @@ export function rsaEncrypt(publicKey,plaintext) {
 			(new TextEncoder().encode(plaintext))
 		).then(
 			res => resolve(btoa(arrayBufferToString(res))),
-			err => reject(err)
+			reject
 		);
 	});
 };
@@ -215,7 +236,7 @@ export function rsaDecrypt(privateKey,cipherBase64) {
 			stringToUint8Array(atob(cipherBase64))
 		).then(
 			res => resolve(new TextDecoder().decode(res)),
-			err => reject(err)
+			reject
 		);
 	});
 };
@@ -252,7 +273,7 @@ export function pbkdf2PassToAesGcmKey(passphrase,salt,iterations,exportable) {
 	return new Promise((resolve,reject) => {
 		pbkdf2ImportKey(passphrase).then(
 			res => resolve(pbkdf2DeriveAesGcmKey(salt,res,iterations,exportable)),
-			err => reject(err)
+			reject
 		);
 	});
 };
