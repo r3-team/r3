@@ -339,6 +339,7 @@ let MyHeader = {
 		showNavPrev:     (s) => s.layoutElementsProcessed.includes('navigationPrev'),
 		
 		// stores
+		loginNoCred:         (s) => s.$store.getters['local/loginNoCred'],
 		moduleIdMap:         (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:       (s) => s.$store.getters['schema/moduleNameMap'],
 		formIdMap:           (s) => s.$store.getters['schema/formIdMap'],
@@ -388,7 +389,7 @@ let MyHeader = {
 		// display
 		keysLockedMsg() {
 			this.$store.commit('dialog',{
-				captionBody:this.capErr.SEC['002'],
+				captionBody:this.loginNoCred ? this.capErr.SEC['007'] : this.capErr.SEC['002'],
 				image:'key_locked.png'
 			});
 		},

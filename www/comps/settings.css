@@ -14,6 +14,10 @@
 .settings th{
 	padding:4px 8px 4px 0px;
 }
+.settings .module-icon{
+	width:24px;
+	filter:var(--image-filter);
+}
 .settings .encryption .backup-code{
 	font-family:monospace;
 	margin:20px 10px;
@@ -102,11 +106,6 @@
 	display:flex;
 	flex-flow:column nowrap;
 	gap:9px;
-}
-.settings-client-events .module-icon{
-	width:24px;
-	margin-right:8px;
-	filter:var(--image-filter);
 }
 
 /* mobile overwrites */

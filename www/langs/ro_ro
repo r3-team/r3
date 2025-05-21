@@ -1853,7 +1853,8 @@
 			"003": "The system failed to encrypt the record values. Please try again.",
 			"004": "The system failed to decrypt the record values. Please try again.",
 			"005": "The system failed to retrieve decryption keys for the selected records.",
-			"006": "Not all selected users have end-to-end encryption enabled - these are: {NAMES}"
+			"006": "Not all selected users have end-to-end encryption enabled - these are: {NAMES}",
+			"007": "End-to-end encryption is waiting for your personal encryption password to be entered in the user settings."
 		},
 		"initCollection": "Nu s-au putut încărca colecțiile în timpul autentificarii: {MSG}"
 	},
@@ -2488,6 +2489,8 @@
 			"newKeys": "Keys created successfully",
 			"newKeysDesc": "To complete the setup, copy your personal backup code to a secure location.",
 			"noCredMasterKey": "Encryption password",
+			"noCredMasterKeyChoose": "Your user is authenticated via an external provider. To enable end-to-end-encryption, you must choose a personal encryption password.",
+			"noCredMasterKeyEnter": "End-to-end-encryption is protected by your personal encryption password.",
 			"noCredMasterKeyFailed": "The encryption password was not accepted. Please try again.<br /><br />If you forgot your encryption password, please see below for recovery options.",
 			"noCredMasterKeyNew": "New encryption password",
 			"prevPassword": "Previous password",

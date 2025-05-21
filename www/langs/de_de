@@ -1853,7 +1853,8 @@
 			"003": "Das System konnte die Datensatzwerte nicht verschlüsseln. Bitte erneut versuchen.",
 			"004": "Das System konnte die Datensatzwerte nicht entschlüsseln. Bitte erneut versuchen.",
 			"005": "Das System konnte Entschlüsselungs-Codes für die ausgewählten Datensätze nicht laden.",
-			"006": "Nicht alle ausgewählten Benutzer haben Ende-Zu-Ende-Verschlüsselung aktiviert - diese sind: {NAMES}"
+			"006": "Nicht alle ausgewählten Benutzer haben Ende-Zu-Ende-Verschlüsselung aktiviert - diese sind: {NAMES}",
+			"007": "Ende-Zu-Ende-Verschlüsselung wartet auf Eingabe des persönlichen Verschlüsselungspassworts in den Benutzereinstellungen."
 		},
 		"initCollection": "Fehler beim Laden von Sammlungen während der Anmeldung: {MSG}"
 	},
@@ -2488,6 +2489,8 @@
 			"newKeys": "Schlüssel erfolgreich erzeugt",
 			"newKeysDesc": "Um die Einrichtung abzuschließen, kopiere deinen persönlichen Backup-Code an einen sicheren Ort.",
 			"noCredMasterKey": "Verschlüsselungspasswort",
+			"noCredMasterKeyChoose": "Dieser Benutzer wurde über einen externen Anbieter authentifiziert. Um Ende-Zu-Ende-Verschlüsselung zu aktivieren, muss ein persönliches Verschlüsselungspasswort gewählt werden.",
+			"noCredMasterKeyEnter": "Die Ende-Zu-Ende-Verschlüsselung wird durch das persönliche Verschlüsselungspasswort geschützt.",
 			"noCredMasterKeyFailed": "Das Verschlüsselungspasswort wurde nicht angenommen. Bitte erneut versuchen.<br /><br />Falls das Passwort vergessen wurde, werden Wiederherstellungsoptionen weiter unten angezeigt.",
 			"noCredMasterKeyNew": "Neues Verschlüsselungspasswort",
 			"prevPassword": "Vorheriges Passwort",

@@ -24,7 +24,7 @@ let MySettingsEncryption = {
 	name:'my-settings-encryption',
 	template:`<div class="encryption">
 	
-		<p>{{ capApp.description }}</p>
+		<p v-if="!loginEncEnabled">{{ capApp.description }}</p>
 		<table>
 			<tbody>
 				<tr>
@@ -36,36 +36,45 @@ let MySettingsEncryption = {
 		<br />
 		
 		<!-- list of modules with encryption enabled -->
-		<template v-if="anyEnc && !loginEncLocked">
+		<template v-if="modulesEnc.length !== 0 && loginEncEnabled && !loginEncLocked">
 			<h2>{{ capApp.modulesEnc }}</h2>
-			<ul>
-				<li v-for="mei in moduleEntriesIndexesEnc">
-					{{ moduleEntries[mei].caption }}
-				</li>
-			</ul>
+			<div class="column gap">
+				<div class="row gap centered" v-for="m in modulesEnc">
+					<img class="module-icon" :src="srcBase64Icon(m.iconId,'images/module.png')" />
+					<span>{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) }}</span>
+				</div>
+			</div>
 		</template>
 		
 		<div class="message-error" v-if="!cryptoApiAvailable">{{ capApp.status.noCryptoApi }}</div>
 
-		<!-- login without credentials, offer master key input -->
-		<template v-if="loginNoCred && (!loginEncEnabled || loginEncLocked)">
-			<h2>{{ capApp.noCredMasterKey }}</h2>
-			<div class="row gap default-inputs">
-				<input v-model="noCredMasterKey" />
-				<my-button image="ok.png"
-					@trigger="noCredMasterKeyApply(noCredMasterKey,true)"
-					:active="noCredMasterKey !== ''"
-				/>
-			</div>
-			<br />
+		<!-- login without credentials -->
+		<template v-if="loginNoCred && !newKeys">
+			<p v-if="!loginEncEnabled">{{ capApp.noCredMasterKeyChoose }}</p>
+			<p v-if="loginEncLocked">{{ capApp.noCredMasterKeyEnter }}</p>
+
+			<template v-if="!loginEncEnabled || loginEncLocked">
+				<h2>{{ capApp.noCredMasterKey }}</h2>
+				<div class="row gap default-inputs">
+					<input type="password"
+						v-model="noCredMasterKey"
+						@keyup.enter="noCredMasterKeyApply(noCredMasterKey,true)"
+					/>
+					<my-button image="ok.png"
+						@trigger="noCredMasterKeyApply(noCredMasterKey,true)"
+						:active="noCredMasterKey !== '' && noCredMasterKeyChanged"
+					/>
+				</div>
+				<br />
+			</template>
 		</template>
 		
 		<!-- create new key pair -->
-		<template v-if="!loginEncEnabled">
+		<template v-if="!loginEncEnabled && loginKeyAes !== null">
 			<my-button
 				v-if="!newKeys"
 				@trigger="createKeys"
-				:active="!running"
+				:active="!running && !noCredMasterKeyChanged"
 				:caption="capApp.button.createKeys"
 				:image="!running ? 'add.png' : 'load.gif'"
 			/>
@@ -120,11 +129,6 @@ let MySettingsEncryption = {
 							/>
 						</td>
 					</tr>
-					<tr v-if="loginNoCred">
-						<td>{{ capApp.noCredMasterKeyNew }}</td>
-						<td><input v-model="noCredMasterKeyNew" /></td>
-						<td></td>
-					</tr>
 					<tr>
 						<td>{{ capApp.backupCode }}</td>
 						<td><textarea v-model="regainBackupCode"></textarea></td>
@@ -135,6 +139,11 @@ let MySettingsEncryption = {
 								:caption="capGen.button.unlock"
 							/>
 						</td>
+					</tr>
+					<tr v-if="loginNoCred">
+						<td>{{ capApp.noCredMasterKeyNew }}</td>
+						<td><input v-model="noCredMasterKeyNew" /></td>
+						<td></td>
 					</tr>
 				</tbody>
 			</table>
@@ -166,8 +175,9 @@ let MySettingsEncryption = {
 			newKeyPrivateEncBackup:null,
 
 			// no credentials, master key input
-			noCredMasterKey:'',            // input for current master key, to decrypt private key in case of no-credentials login
-			noCredMasterKeyBadInput:false, // input for current master key has failed at least once
+			noCredMasterKey:'',            // input for master key, to decrypt private key in case of no-credentials login
+			noCredMasterKeyLast:'',        // last submitted version of master key input
+			noCredMasterKeyBadInput:false, // input for master key has failed at least once
 			noCredMasterKeyNew:'',         // input for new master key, in case of recovery via backup codes
 			
 			// regain access
@@ -177,12 +187,12 @@ let MySettingsEncryption = {
 	},
 	computed:{
 		// indexes of module entries with any relation with enabled encryption
-		moduleEntriesIndexesEnc:(s) => {
+		modulesEnc:(s) => {
 			let out = [];
-			for(let i = 0, j = s.moduleEntries.length; i < j; i++) {
-				for(const r of s.moduleIdMap[s.moduleEntries[i].id].relations) {
+			for(const k in s.moduleIdMap) {
+				for(const r of s.moduleIdMap[k].relations) {
 					if(r.encryption) {
-						out.push(i);
+						out.push(s.moduleIdMap[k]);
 						break;
 					}
 				}
@@ -192,15 +202,14 @@ let MySettingsEncryption = {
 		
 		// e2e encryption status
 		statusCaption:(s) => {
-			if(!s.active)         return s.capApp.status.inactive;
-			if(s.loginEncLocked)  return s.capApp.status.locked;
+			if(!s.loginEncEnabled) return s.capApp.status.inactive;
+			if(s.loginEncLocked)   return s.capApp.status.locked;
 			return s.capApp.status.unlocked;
 		},
 		
-		// states
-		active: (s) => s.loginEncEnabled,
-		anyEnc: (s) => s.moduleEntriesIndexesEnc.length !== 0,
-		newKeys:(s) => s.newKeyPrivateEnc !== null,
+		// simple
+		newKeys:               (s) => s.newKeyPrivateEnc !== null,
+		noCredMasterKeyChanged:(s) => s.noCredMasterKey !== s.noCredMasterKeyLast,
 		
 		// stores
 		moduleIdMap:         (s) => s.$store.getters['schema/moduleIdMap'],
@@ -228,11 +237,13 @@ let MySettingsEncryption = {
 		aesGcmEncryptBase64WithPhrase,
 		aesGcmExportBase64,
 		aesGcmImportBase64,
+		getCaption,
 		pbkdf2PassToAesGcmKey,
 		pemExport,
 		pemImport,
 		pemImportPrivateEnc,
 		rsaGenerateKeys,
+		srcBase64Icon,
 		
 		createKeys() {
 			this.running = true;
@@ -290,25 +301,28 @@ let MySettingsEncryption = {
 			return out;
 		},
 		noCredMasterKeyApply(password,attemptDecryption) {
+			if(password === '')
+				return;
+
+			this.noCredMasterKeyLast = password;
+
 			// generate AES key from credentials and login private key salt
 			return this.pbkdf2PassToAesGcmKey(password,this.loginKeySalt,this.kdfIterations,true).then(
 				key => {
 					this.aesGcmExportBase64(key).then(
 						keyBase64 => {
-							// if no private key is available, store login AES to allow creation of one
-							if(!attemptDecryption || this.loginPrivateKeyEnc === null)
-								return this.$store.commit('local/loginKeyAes',keyBase64);
+							this.$store.commit('local/loginKeyAes',keyBase64);
+
+							if(!attemptDecryption || !this.loginEncEnabled)
+								return;
 
 							// attempt to decrypt private key
 							this.pemImportPrivateEnc(this.loginPrivateKeyEnc,keyBase64).then(
 								keyPem => {
-									this.$store.commit('local/loginKeyAes',keyBase64);
 									this.$store.commit('loginPrivateKey',keyPem);
 								},
 								() => {
-									// if decryption fails, reset both AES and master key input
 									this.noCredMasterKeyBadInput = true;
-									this.$store.commit('local/loginKeyAes',null);
 									this.$store.commit('dialog',{
 										captionBody:this.capApp.noCredMasterKeyFailed,
 										image:'warning.png'

@@ -1853,7 +1853,8 @@
 			"003": "فشل النظام في تشفير قيم السجل. ",
 			"004": "فشل النظام في فك تشفير قيم السجل. ",
 			"005": "فشل النظام في استرداد مفاتيح فك التشفير للسجلات المحددة.",
-			"006": "لم يتم تمكين التشفير الشامل لجميع المستخدمين المحددين - وهؤلاء هم: {NAMES}"
+			"006": "لم يتم تمكين التشفير الشامل لجميع المستخدمين المحددين - وهؤلاء هم: {NAMES}",
+			"007": "End-to-end encryption is waiting for your personal encryption password to be entered in the user settings."
 		},
 		"initCollection": "فشل تحميل المجموعات أثناء تسجيل الدخول: {MSG}"
 	},
@@ -2488,6 +2489,8 @@
 			"newKeys": "تم إنشاء المفاتيح بنجاح",
 			"newKeysDesc": "لإكمال الإعداد، انسخ الرمز الاحتياطي الشخصي الخاص بك إلى مكان آمن.",
 			"noCredMasterKey": "Encryption password",
+			"noCredMasterKeyChoose": "Your user is authenticated via an external provider. To enable end-to-end-encryption, you must choose a personal encryption password.",
+			"noCredMasterKeyEnter": "End-to-end-encryption is protected by your personal encryption password.",
 			"noCredMasterKeyFailed": "The encryption password was not accepted. Please try again.<br /><br />If you forgot your encryption password, please see below for recovery options.",
 			"noCredMasterKeyNew": "New encryption password",
 			"prevPassword": "كلمة المرور السابقة",

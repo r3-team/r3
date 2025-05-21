@@ -1853,7 +1853,8 @@
 			"003": "系统无法加密记录值。请重试。",
 			"004": "系统无法解密记录值。请重试。",
 			"005": "系统无法检索所选记录的解密密钥。",
-			"006": "并非所有选择的用户都启用了端到端加密 - 这些用户是：{NAMES}"
+			"006": "并非所有选择的用户都启用了端到端加密 - 这些用户是：{NAMES}",
+			"007": "End-to-end encryption is waiting for your personal encryption password to be entered in the user settings."
 		},
 		"initCollection": "登录期间加载集合失败：{MSG}"
 	},
@@ -2488,6 +2489,8 @@
 			"newKeys": "密钥创建成功",
 			"newKeysDesc": "为完成设置，请将您的个人备份代码复制到安全位置。",
 			"noCredMasterKey": "Encryption password",
+			"noCredMasterKeyChoose": "Your user is authenticated via an external provider. To enable end-to-end-encryption, you must choose a personal encryption password.",
+			"noCredMasterKeyEnter": "End-to-end-encryption is protected by your personal encryption password.",
 			"noCredMasterKeyFailed": "The encryption password was not accepted. Please try again.<br /><br />If you forgot your encryption password, please see below for recovery options.",
 			"noCredMasterKeyNew": "New encryption password",
 			"prevPassword": "先前的密码",

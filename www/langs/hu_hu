@@ -1853,7 +1853,8 @@
 			"003": "A rendszer nem tudta titkosítani a rekordértékeket. Kérjük, próbálja újra.",
 			"004": "A rendszer nem tudta visszafejteni a rekordértékeket. Kérjük, próbálja újra.",
 			"005": "A rendszer nem tudta betölteni a kiválasztott rekordértékek visszafejtési kódjait.",
-			"006": "Nem minden kiválasztott felhasználó aktív végponti titkosítással rendelkezik - ők: {NAMES}"
+			"006": "Nem minden kiválasztott felhasználó aktív végponti titkosítással rendelkezik - ők: {NAMES}",
+			"007": "End-to-end encryption is waiting for your personal encryption password to be entered in the user settings."
 		},
 		"initCollection": "Hiba a gyűjtemények betöltése közben a bejelentkezés során: {MSG}"
 	},
@@ -2488,6 +2489,8 @@
 			"newKeys": "Kulcsok sikeresen létrehozva",
 			"newKeysDesc": "Az beállítás befejezéséhez másold le a személyes biztonsági kódodat egy biztonságos helyre.",
 			"noCredMasterKey": "Encryption password",
+			"noCredMasterKeyChoose": "Your user is authenticated via an external provider. To enable end-to-end-encryption, you must choose a personal encryption password.",
+			"noCredMasterKeyEnter": "End-to-end-encryption is protected by your personal encryption password.",
 			"noCredMasterKeyFailed": "The encryption password was not accepted. Please try again.<br /><br />If you forgot your encryption password, please see below for recovery options.",
 			"noCredMasterKeyNew": "New encryption password",
 			"prevPassword": "Korábbi jelszó",
