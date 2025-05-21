@@ -42,10 +42,10 @@ let MyAdminLoginRolesAssign = {
 						</select>
 					</td>
 					<td>
-						<my-button image="delete.png"
+						<my-button image="cancel.png"
 							v-if="!readonly"
 							@trigger="remove(i)"
-							:cancel="true"
+							:naked="true"
 						/>
 					</td>
 				</tr>

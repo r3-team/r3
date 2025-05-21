@@ -165,9 +165,6 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				REFERENCES instance.oauth_client (id) MATCH SIMPLE
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION;
-			
-			ALTER TABLE instance.login DROP CONSTRAINT login_name_key;
-			ALTER TABLE instance.login ADD  CONSTRAINT login_name_key UNIQUE (name, oauth_client_id);
 
 			CREATE INDEX IF NOT EXISTS fki_login_oauth_client_id_fkey
 				ON instance.login USING btree (oauth_client_id ASC NULLS LAST);

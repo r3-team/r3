@@ -481,7 +481,7 @@
 				}
 			},
 			"providerUrl": "Anbieter-URL",
-			"providerUrlHint": "URL für OAuth-Service-Discovery.",
+			"providerUrlHint": "URL des gewählten Anbieters für OAuth-Service-Discovery, oft auch \"Issuer URL\" genannt.",
 			"redirectUrl": "Weiterleitungs-URL",
 			"redirectUrlHint": "Benutzer werden hierhin weitergeleitet, nachdem sie sich authentifiziert haben. Sollte die URL der Anmeldeseite von REI3 sein. Muss ebenfalls beim Anbieter registriert sein.",
 			"scopes": "Scopes",

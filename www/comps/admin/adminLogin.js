@@ -127,7 +127,7 @@ let MyAdminLogin = {
 							</td>
 							<td class="default-inputs">
 								<div class="column gap">
-									<input v-model="inputs.name" v-focus @keyup="typedUniqueField('name',inputs.name)" :disabled="isExtAuth" />
+									<input v-model="inputs.name" v-focus @keyup="typedUniqueField('name',inputs.name)" :disabled="!isAuthR3" />
 									<div v-if="notUniqueName && inputs.name !== ''" class="message error">
 										{{ capApp.dialog.notUniqueName }}
 									</div>
@@ -151,7 +151,7 @@ let MyAdminLogin = {
 							</td>
 							<td>{{ capGen.loginTemplateHint }}</td>
 						</tr>
-						<tr v-if="isExtAuth">
+						<tr v-if="!isAuthR3">
 							<td>
 								<div v-if="isLdap" class="title-cell">
 									<img src="images/hierarchy.png" />
@@ -192,7 +192,7 @@ let MyAdminLogin = {
 								@input-in-unique-field="typedUniqueField"
 								v-model="inputs.meta"
 								:notUniqueEmail="notUniqueEmail"
-								:readonly="isExtAuth"
+								:readonly="!isAuthR3"
 							/>
 						</template>
 						
@@ -305,7 +305,7 @@ let MyAdminLogin = {
 											<span>{{ capApp.noAuth }}</span>
 										</div>
 									</td>
-									<td><my-bool v-model="inputs.noAuth" :readonly="isExtAuth" /></td>
+									<td><my-bool v-model="inputs.noAuth" :readonly="!isAuthR3" /></td>
 									<td>
 										<div class="column gap default-inputs">
 											<span>{{ capApp.hint.noAuth }}</span>
@@ -333,7 +333,7 @@ let MyAdminLogin = {
 								</tr>
 
 								<tr v-if="anyAction"><td colspan="3" class="grouping">{{ capGen.actions }}</td></tr>
-								<tr v-if="!isExtAuth">
+								<tr v-if="isAuthR3">
 									<td>
 										<div class="title-cell">
 											<img src="images/lock.png" />
@@ -406,11 +406,11 @@ let MyAdminLogin = {
 			(s.roleFilter === '' || s.getCaption('moduleTitle',v.id,v.id,v.captions,v.name).toLowerCase().includes(s.roleFilter.toLowerCase()))),
 		
 		// simple states
-		anyAction: (s) => !s.isExtAuth,
+		anyAction: (s) => s.isAuthR3,
 		anyInfo:   (s) => s.isLimited,
 		canSave:   (s) => s.isChanged && !s.notUniqueName && s.inputs.name !== '',
+		isAuthR3:  (s) => !s.isLdap && !s.isOauth,
 		isChanged: (s) => s.ready && !s.deepIsEqual(s.inputsOrg,s.inputs),
-		isExtAuth: (s) => s.isLdap || s.isOauth,
 		isExtRole: (s) => s.isLdapAssignedRoles || s.isOauthClientAssignedRoles,
 		isFormOpen:(s) => s.loginFormIndexOpen !== null,
 		isLdap:    (s) => s.inputs.ldapId !== null,

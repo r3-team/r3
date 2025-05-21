@@ -481,7 +481,7 @@
 				}
 			},
 			"providerUrl": "Provider URL",
-			"providerUrlHint": "URL for OAuth service discovery.",
+			"providerUrlHint": "URL of the chosen provider for its OAuth service discovery, often called 'Issuer URL'.",
 			"redirectUrl": "Redirect URL",
 			"redirectUrlHint": "Users are redirected here after authentication. Should be the login URL of REI3. Must also be registered at the service provider.",
 			"scopes": "范围",
