@@ -2448,6 +2448,7 @@
 			"messagePwRequiresUpper": "La contraseña debe contener una letra mayúscula",
 			"messagePwShort": "La contraseña es demasiado corta",
 			"nodeName": "Conectado con: {NAME}",
+			"pwChangeNotAllowed": "Login data is managed externally",
 			"pwNew0": "Nueva contraseña",
 			"pwNew1": "Nueva contraseña (repetida)",
 			"pwOld": "Contraseña actual",

@@ -2448,6 +2448,7 @@
 			"messagePwRequiresUpper": "يجب أن تحتوي كلمة المرور على حرف كبير",
 			"messagePwShort": "كلمة المرور قصيرة جدًا",
 			"nodeName": "متصل بـ: {NAME}",
+			"pwChangeNotAllowed": "Login data is managed externally",
 			"pwNew0": "كلمة المرور الجديدة",
 			"pwNew1": "كلمة المرور الجديدة (متكررة)",
 			"pwOld": "كلمة المرور الحالية",

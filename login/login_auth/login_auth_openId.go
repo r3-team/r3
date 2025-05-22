@@ -213,7 +213,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	}
 
 	// everything in order, auth successful
-	l.Token, err = createToken(l.Id, l.Name, l.Admin, false, tokenExpiryHours)
+	l.Token, err = createToken(l.Id, l.Name, l.Admin, loginTypeOauth, tokenExpiryHours)
 	if err != nil {
 		return types.LoginAuthResult{}, err
 	}

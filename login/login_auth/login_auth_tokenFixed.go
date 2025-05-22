@@ -55,7 +55,7 @@ func TokenFixed(ctx context.Context, loginId int64, context string, tokenFixed s
 	if err := cache.LoadAccessIfUnknown(loginId); err != nil {
 		return types.LoginAuthResult{}, err
 	}
-	l.Token, err = createToken(l.Id, l.Name, false, false, pgtype.Int4{})
+	l.Token, err = createToken(l.Id, l.Name, false, loginTypeFixed, pgtype.Int4{})
 	if err != nil {
 		return types.LoginAuthResult{}, nil
 	}

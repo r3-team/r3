@@ -40,6 +40,13 @@ const MyStore = Vuex.createStore({
 				'en_us','de_de'
 			],
 			loginLimitedFactor:3,      // factor, how many limited logins are enabled for each full login
+			loginType:{                // all login types, as defined in the backend
+				fixed:'fixed',
+				ldap:'ldap',
+				local:'local',
+				noAuth:'noAuth',
+				oauth:'oauth'
+			},
 			keyLength:64,              // length of new symmetric keys for data encryption
 			scrollFormId:'form-scroll' // ID of form page element (to recover scroll position during routing)
 		},
@@ -64,7 +71,6 @@ const MyStore = Vuex.createStore({
 		isAtModule:false,              // app currently shows a module (instead of Builder, admin panel, settings, etc.)
 		isCollapsedMenuApp:false,      // app menu is collapsed
 		isMobile:false,                // app runs on small screen (probably mobile)
-		isNoAuth:false,                // user logged in without authentication (public user)
 		isWithoutMenuApp:false,        // session does not have an app menu, set via getter param (menu-app=0), 
 		isWithoutMenuHeader:false,     // session does not have a header menu, set via getter param (menu-header=0)
 		keyDownHandlers:[],            // global handlers, reacting for key down events (for hotkey events)
@@ -79,6 +85,7 @@ const MyStore = Vuex.createStore({
 		loginPublicKey:null,           // user login public key for encryption (exportable key)
 		loginSessionExpired:false,     // set to true, when session expires
 		loginSessionExpires:null,      // unix timestamp of session expiration date
+		loginType:null,                // user login type (local, oauth, ldap, noAuth, fixed)
 		loginWidgetGroups:[],          // user widgets, starting with widget groups
 		mirrorMode:false,              // instance runs in mirror mode (eg. mirrors another, likely production instance)
 		moduleEntries:[],              // module entries for header/home page
@@ -188,6 +195,12 @@ const MyStore = Vuex.createStore({
 				return state.licenseValid = false;
 			
 			state.licenseValid = payload.validUntil > Math.floor(new Date().getTime() / 1000);
+		},
+		loginType:(state,payload) => {
+			if(state.constants.loginType[payload] === undefined)
+				return console.warn(`attempting to store invalid login type '${payload}'`);
+
+			state.loginType = payload;
 		},
 		pageTitle:(state,payload) => {
 			state.pageTitle = payload;
@@ -423,6 +436,8 @@ const MyStore = Vuex.createStore({
 		feedbackUrl:             (state) => state.feedbackUrl,
 		filesCopy:               (state) => state.filesCopy,
 		isAdmin:                 (state) => state.isAdmin,
+		isAllowedMfa:            (state) => state.loginType === state.constants.loginType.local || state.loginType === state.constants.loginType.ldap,
+		isAllowedPwChange:       (state) => state.loginType === state.constants.loginType.local,
 		isAtDialog:              (state) => state.isAtDialog,
 		isAtFavorites:           (state) => state.isAtFavorites,
 		isAtFavoritesEdit:       (state) => state.isAtFavoritesEdit,
@@ -432,7 +447,7 @@ const MyStore = Vuex.createStore({
 		isCollapsedMenuApp:      (state) => state.isCollapsedMenuApp,
 		mirrorMode:              (state) => state.mirrorMode,
 		isMobile:                (state) => state.isMobile,
-		isNoAuth:                (state) => state.isNoAuth,
+		isNoAuth:                (state) => state.loginType === state.constants.loginType.noAuth,
 		isWithoutMenuApp:        (state) => state.isWithoutMenuApp,
 		isWithoutMenuHeader:     (state) => state.isWithoutMenuHeader,
 		keyDownHandlers:         (state) => state.keyDownHandlers,

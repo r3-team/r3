@@ -2448,6 +2448,7 @@
 			"messagePwRequiresUpper": "Password must contain an upper case letter",
 			"messagePwShort": "Password is too short",
 			"nodeName": "Connected with: {NAME}",
+			"pwChangeNotAllowed": "Login data is managed externally",
 			"pwNew0": "New password",
 			"pwNew1": "New password (repeated)",
 			"pwOld": "Current password",

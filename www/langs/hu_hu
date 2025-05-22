@@ -2448,6 +2448,7 @@
 			"messagePwRequiresUpper": "A jelszónak tartalmaznia kell nagybetűt",
 			"messagePwShort": "A jelszó túl rövid",
 			"nodeName": "Kapcsolódva: {NAME}",
+			"pwChangeNotAllowed": "Login data is managed externally",
 			"pwNew0": "Új jelszó",
 			"pwNew1": "Új jelszó (újra)",
 			"pwOld": "Jelenlegi jelszó",

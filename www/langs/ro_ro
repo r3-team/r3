@@ -2448,6 +2448,7 @@
 			"messagePwRequiresUpper": "Parola trebuie să conțină o literă mare",
 			"messagePwShort": "Parola este prea scurtă",
 			"nodeName": "Connected with: {NAME}",
+			"pwChangeNotAllowed": "Login data is managed externally",
 			"pwNew0": "Parola nouă",
 			"pwNew1": "Parola nouă (repetată)",
 			"pwOld": "Parola curentă",

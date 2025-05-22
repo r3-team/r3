@@ -130,7 +130,14 @@ func User(ctx context.Context, username string, password string, mfaTokenId pgty
 	}
 
 	// everything in order, auth successful
-	l.Token, err = createToken(l.Id, l.Name, l.Admin, l.NoAuth, tokenExpiryHours)
+	loginType := loginTypeLocal
+	if l.NoAuth {
+		loginType = loginTypeNoAuth
+	} else if ldapId.Valid {
+		loginType = loginTypeLdap
+	}
+
+	l.Token, err = createToken(l.Id, l.Name, l.Admin, loginType, tokenExpiryHours)
 	if err != nil {
 		return types.LoginAuthResult{}, err
 	}

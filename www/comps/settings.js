@@ -53,6 +53,7 @@ let MySettingsEncryption = {
 			<p v-if="!loginEncEnabled">{{ capApp.noCredMasterKeyChoose }}</p>
 			<p v-if="loginEncLocked">{{ capApp.noCredMasterKeyEnter }}</p>
 
+			<!-- master key input -->
 			<template v-if="!loginEncEnabled || loginEncLocked">
 				<h2>{{ capApp.noCredMasterKey }}</h2>
 				<div class="row gap default-inputs">
@@ -456,25 +457,33 @@ let MySettingsAccount = {
 				<td>{{ capGen.name }}</td>
 				<td><input disabled="disabled" :value="loginName" /></td>
 			</tr>
-			<tr><td colspan="2"></td></tr>
-			<tr><td colspan="2"><b>{{ capApp.titlePwChange }}</b></td></tr>
-			<tr>
-				<td>{{ capApp.pwOld }}</td>
-				<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
-			</tr>
-			<tr>
-				<td>{{ capApp.pwNew0 }}</td>
-				<td><input autocomplete="new-password" type="password" v-model="pwNew0" @input="newInput = true" /></td>
-			</tr>
-			<tr>
-				<td>{{ capApp.pwNew1 }}</td>
-				<td><input autocomplete="new-password" type="password" v-model="pwNew1" @input="newInput = true" /></td>
-			</tr>
+			<template v-if="isAllowedPwChange">
+				<tr><td colspan="2"></td></tr>
+				<tr><td colspan="2"><b>{{ capApp.titlePwChange }}</b></td></tr>
+				<tr>
+					<td>{{ capApp.pwOld }}</td>
+					<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.pwNew0 }}</td>
+					<td><input autocomplete="new-password" type="password" v-model="pwNew0" @input="newInput = true" /></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.pwNew1 }}</td>
+					<td><input autocomplete="new-password" type="password" v-model="pwNew1" @input="newInput = true" /></td>
+				</tr>
+			</template>
+
+			<template v-if="!isAllowedPwChange">
+				<tr><td colspan="2"></td></tr>
+				<tr><td colspan="2"><b>{{ capApp.pwChangeNotAllowed }}</b></td></tr>
+			</template>
 		</tbody>
 	</table>
 	
 	<div class="settings-account-action">
 		<my-button image="save.png"
+			v-if="isAllowedPwChange"
 			@trigger="setCheck"
 			:active="canSave"
 			:caption="capGen.button.save"
@@ -537,6 +546,7 @@ let MySettingsAccount = {
 		// stores
 		loginKeyAes:       (s) => s.$store.getters['local/loginKeyAes'],
 		loginKeySalt:      (s) => s.$store.getters['local/loginKeySalt'],
+		isAllowedPwChange: (s) => s.$store.getters.isAllowedPwChange,
 		loginEncEnabled:   (s) => s.$store.getters.loginEncEnabled,
 		loginEncLocked:    (s) => s.$store.getters.loginEncLocked,
 		loginName:         (s) => s.$store.getters.loginName,
@@ -820,6 +830,7 @@ let MySettingsFixedTokens = {
 			/>
 			<my-button image="smartphone.png"
 				@trigger="showSubWindow('mfa')"
+				:active="isAllowedMfa"
 				:caption="capApp.titleMfa"
 			/>
 		</div>
@@ -1033,6 +1044,7 @@ let MySettingsFixedTokens = {
 		capApp:               (s) => s.$store.getters.captions.settings.tokensFixed,
 		capGen:               (s) => s.$store.getters.captions.generic,
 		isAdmin:              (s) => s.$store.getters.isAdmin,
+		isAllowedMfa:         (s) => s.$store.getters.isAllowedMfa,
 		languageCode:         (s) => s.$store.getters.settings.languageCode,
 		languageCodesOfficial:(s) => s.$store.getters.constants.languageCodesOfficial,
 		loginName:            (s) => s.$store.getters.loginName

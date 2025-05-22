@@ -10,14 +10,24 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type loginType string
 type tokenPayload struct {
 	jwt.Payload
-	Admin   bool  `json:"admin"`   // login belongs to admin user
-	LoginId int64 `json:"loginId"` // login ID
-	NoAuth  bool  `json:"noAuth"`  // login without authentication (name only)
+	Admin   bool      `json:"admin"`   // login belongs to admin user
+	LoginId int64     `json:"loginId"` // login ID
+	Type    loginType `json:"type"`    // login type
+	NoAuth  bool      `json:"noAuth"`  // login without authentication (name only)
 }
 
-func createToken(loginId int64, name string, admin bool, noAuth bool, tokenExpiryHours pgtype.Int4) (string, error) {
+const (
+	loginTypeFixed  loginType = "fixed"  // auth via fixed token, used for ICS & fat client
+	loginTypeLdap   loginType = "ldap"   // auth via credentials, credentials managed in ext. directory
+	loginTypeLocal  loginType = "local"  // auth via credentials, credentials managed in internal login backend
+	loginTypeNoAuth loginType = "noAuth" // auth via login name (public user)
+	loginTypeOauth  loginType = "oauth"  // auth via ext. provider (Open ID connect)
+)
+
+func createToken(loginId int64, name string, admin bool, loginType loginType, tokenExpiryHours pgtype.Int4) (string, error) {
 
 	// token is valid for multiple days, if user decides to stay logged in
 	now := time.Now()
@@ -35,9 +45,9 @@ func createToken(loginId int64, name string, admin bool, noAuth bool, tokenExpir
 			ExpirationTime: jwt.NumericDate(now.Add(expiryHoursTime * time.Hour)),
 			IssuedAt:       jwt.NumericDate(now),
 		},
-		LoginId: loginId,
 		Admin:   admin,
-		NoAuth:  noAuth,
+		LoginId: loginId,
+		Type:    loginType,
 	}, config.GetTokenSecret())
 	return string(token), err
 }

@@ -2448,6 +2448,7 @@
 			"messagePwRequiresUpper": "密码必须包含大写字母",
 			"messagePwShort": "密码过短",
 			"nodeName": "已连接到：{NAME}",
+			"pwChangeNotAllowed": "Login data is managed externally",
 			"pwNew0": "新密码",
 			"pwNew1": "重复新密码",
 			"pwOld": "当前密码",

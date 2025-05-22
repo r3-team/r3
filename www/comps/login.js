@@ -550,9 +550,9 @@ let MyLogin = {
 		appEnable(loginId,loginName) {
 			const token = JSON.parse(atob(this.token.split('.')[1]));
 			this.$store.commit('isAdmin',token.admin);
-			this.$store.commit('isNoAuth',token.noAuth);
 			this.$store.commit('loginId',loginId);
 			this.$store.commit('loginName',loginName);
+			this.$store.commit('loginType',token.type);
 			this.$store.commit('loginSessionExpired',false);
 			this.$store.commit('loginSessionExpires',token.exp);
 			this.$store.commit('sessionValueStoreReset');
