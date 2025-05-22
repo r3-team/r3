@@ -2440,6 +2440,12 @@
 	},
 	"settings": {
 		"account": {
+			"button": {
+				"loginOptionsDel": "Alle Feldeinstellungen zurücksetzen"
+			},
+			"dialog": {
+				"loginOptionsDel": "<p>Hiermit werden alle Feldeinstellungen, wie Sortierungen in Listen, sichtbare Spalten, Filter und so weiter, auf ihre Standardwerte zurückgesetzt.</p><p>Fortfahren?</p>"
+			},
 			"messagePwCurrentWrong": "Aktuelles Passwort ist inkorrekt",
 			"messagePwDiff": "Passwörter stimmen nicht überein",
 			"messagePwRequiresDigit": "Passwort muss eine Zahl beinhalten",

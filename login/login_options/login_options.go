@@ -69,6 +69,15 @@ func CopyToFavorite_tx(ctx context.Context, tx pgx.Tx, loginId int64, isMobile b
 	return nil
 }
 
+func Del_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
+	_, err := tx.Exec(ctx, `
+		DELETE FROM instance.login_options
+		WHERE login_id = $1
+	`, loginId)
+
+	return err
+}
+
 func Get_tx(ctx context.Context, tx pgx.Tx, loginId int64, isMobile bool, dateCache int64) ([]types.LoginOptions, error) {
 	options := make([]types.LoginOptions, 0)
 

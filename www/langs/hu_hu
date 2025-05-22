@@ -2440,6 +2440,12 @@
 	},
 	"settings": {
 		"account": {
+			"button": {
+				"loginOptionsDel": "Reset all field settings"
+			},
+			"dialog": {
+				"loginOptionsDel": "<p>This will reset all field settings, such as list sorting, visible columns, filters, and so on, to their default values.</p><p>Do you want to continue?</p>"
+			},
 			"messagePwCurrentWrong": "A jelenlegi jelszó helytelen",
 			"messagePwDiff": "A jelszavak nem egyeznek meg",
 			"messagePwRequiresDigit": "A jelszónak tartalmaznia kell számot",

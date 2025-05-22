@@ -459,7 +459,7 @@ let MySettingsAccount = {
 			</tr>
 			<template v-if="isAllowedPwChange">
 				<tr><td colspan="2"></td></tr>
-				<tr><td colspan="2"><b>{{ capApp.titlePwChange }}</b></td></tr>
+				<tr><td colspan="2"><h2>{{ capApp.titlePwChange }}</h2></td></tr>
 				<tr>
 					<td>{{ capApp.pwOld }}</td>
 					<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
@@ -481,7 +481,7 @@ let MySettingsAccount = {
 		</tbody>
 	</table>
 	
-	<div class="settings-account-action">
+	<div class="settings-account-pw-change-action">
 		<my-button image="save.png"
 			v-if="isAllowedPwChange"
 			@trigger="setCheck"
@@ -489,6 +489,17 @@ let MySettingsAccount = {
 			:caption="capGen.button.save"
 		/>
 	</div>
+
+	<div class="settings-account-actions">
+		<h2>{{ capGen.actions }}</h2>
+		<div class="row">
+			<my-button image="refresh.png"
+				@trigger="delOptionsAsk"
+				:caption="capApp.button.loginOptionsDel"
+			/>
+		</div>
+	</div>
+
 	<div class="message-error" v-if="message !== ''">{{ message }}</div>
 	
 	<div class="column grow"></div>
@@ -616,6 +627,29 @@ let MySettingsAccount = {
 		},
 		
 		// backend calls
+		delOptionsAsk() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.loginOptionsDel,
+				image:'warning.png',
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.reset,
+					exec:this.delOptions,
+					keyEnter:true,
+					image:'refresh.png'
+				},{
+					caption:this.capGen.button.cancel,
+					keyEscape:true,
+					image:'cancel.png'
+				}]
+			});
+		},
+		delOptions() {
+			ws.send('loginOptions','del',null,true).then(
+				() => { this.$store.commit('local/loginOptionsClear'); },
+				this.$root.genericError
+			);
+		},
 		set(newPrivateKeyEnc,newLoginKey) {
 			let requests = [
 				ws.prepare('loginPassword','set',{

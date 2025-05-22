@@ -194,6 +194,12 @@ const MyStoreLocal = {
 			base.dateCache = payload.dateCache;
 			set(payload.isMobile ? 'loginOptionsMobile' : 'loginOptions', base);
 		},
+		loginOptionsClear(state,payload) {
+			state.loginOptions       = { dateCache:0, favoriteIdMap:{}, fieldIdMap:{} };
+			state.loginOptionsMobile = { dateCache:0, favoriteIdMap:{}, fieldIdMap:{} };
+			set('loginOptions',state.loginOptions);
+			set('loginOptionsMobile',state.loginOptionsMobile);
+		},
 		menuIdMapOpenToggle(state,payload) {
 			if(typeof state.menuIdMapOpen[payload] === 'undefined')
 				state.menuIdMapOpen[payload] = true;

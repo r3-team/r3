@@ -2440,6 +2440,12 @@
 	},
 	"settings": {
 		"account": {
+			"button":{
+				"loginOptionsDel": "Reset all field settings"
+			},
+			"dialog":{
+				"loginOptionsDel": "<p>This will reset all field settings, such as list sorting, visible columns, filters, and so on, to their default values.</p><p>Do you want to continue?</p>"
+			},
 			"messagePwCurrentWrong": "Current password is invalid",
 			"messagePwDiff": "Passwords do not match",
 			"messagePwRequiresDigit": "Password must contain a digit",
