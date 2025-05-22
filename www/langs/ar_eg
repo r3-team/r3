@@ -2420,7 +2420,6 @@
 		"inputHintCreate": "إنشاء سجل جديد",
 		"inputHintOpen": "سجل مفتوح",
 		"inputHintRemove": "إزالة السجل",
-		"inputHintSelect": "إضافة السجل الموجود",
 		"inputPlaceholderAdd": "...أضف المزيد",
 		"message": {
 			"csvExport": "يستخدم تصدير CSV عوامل التصفية والترتيب من القائمة الحالية.",

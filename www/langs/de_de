@@ -2420,7 +2420,6 @@
 		"inputHintCreate": "Neuen Datensatz anlegen",
 		"inputHintOpen": "Datensatz öffnen",
 		"inputHintRemove": "Datensatz entfernen",
-		"inputHintSelect": "Bestehenden Datensatz hinzufügen",
 		"inputPlaceholderAdd": "...weitere hinzufügen",
 		"message": {
 			"csvExport": "Der CSV-Export verwendet Filter und Sortierung der aktuellen Liste.",

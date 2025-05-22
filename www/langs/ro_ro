@@ -2420,7 +2420,6 @@
 		"inputHintCreate": "Creați o înregistrare nouă",
 		"inputHintOpen": "Deschideți înregistrarea",
 		"inputHintRemove": "Ștergeți înregistrarea",
-		"inputHintSelect": "Adăugați înregistrarea existentă",
 		"inputPlaceholderAdd": "...adăuga mai mult",
 		"message": {
 			"csvExport": "Exportul CSV folosește filtre și ordonarea din lista curentă.",

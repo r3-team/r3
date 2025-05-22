@@ -1,6 +1,5 @@
 import MyInputCollection from './inputCollection.js';
 import MyForm            from './form.js';
-import MyValueRich       from './valueRich.js';
 import srcBase64Icon     from './shared/image.js';
 import {getCaption}      from './shared/language.js';
 import {
@@ -31,7 +30,6 @@ export {MyGantt as default};
 
 let MyGanttLineRecord = {
 	name:'my-gantt-line-record',
-	components:{MyValueRich},
 	template:
 	`<div class="gantt-line-record"
 		@click.ctrl.exact="clickRecord(true)"
@@ -177,8 +175,7 @@ let MyGantt = {
 	name:'my-gantt',
 	components:{
 		MyGanttLine,
-		MyInputCollection,
-		MyValueRich
+		MyInputCollection
 	},
 	template:`<div class="gantt" :class="{ isSingleField:isSingleField }" v-if="ready">
 		

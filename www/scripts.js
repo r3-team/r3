@@ -1,8 +1,9 @@
-import MyApp     from './comps/app.js';
-import MyButton  from './comps/button.js';
-import MyFilters from './comps/filters.js';
-import MyHome    from './comps/home.js';
-import MyStore   from './stores/store.js';
+import MyApp       from './comps/app.js';
+import MyButton    from './comps/button.js';
+import MyFilters   from './comps/filters.js';
+import MyHome      from './comps/home.js';
+import MyValueRich from './comps/valueRich.js';
+import MyStore     from './stores/store.js';
 import {MyButtonCheck} from './comps/button.js';
 import {
 	MyGoForm,
@@ -293,7 +294,8 @@ const app = Vue.createApp(MyApp)
 	.component('my-bool-string-number',MyBoolStringNumber)
 	.component('my-button',MyButton)
 	.component('my-button-check',MyButtonCheck)
-	.component('my-filters',MyFilters);
+	.component('my-filters',MyFilters)
+	.component('my-value-rich',MyValueRich);
 
 app.directive('click-outside',{
 	beforeMount(el,binding,vnode) {

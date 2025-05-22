@@ -2420,7 +2420,6 @@
 		"inputHintCreate": "创建新记录",
 		"inputHintOpen": "打开记录",
 		"inputHintRemove": "移除记录",
-		"inputHintSelect": "添加现有记录",
 		"inputPlaceholderAdd": "…添加更多",
 		"message": {
 			"csvExport": "CSV 导出使用当前列表的过滤器和排序。",

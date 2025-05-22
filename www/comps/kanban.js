@@ -1,6 +1,5 @@
 import MyInputCollection  from './inputCollection.js';
 import MyForm             from './form.js';
-import MyValueRich        from './valueRich.js';
 import srcBase64Icon      from './shared/image.js';
 import {getColumnBatches} from './shared/column.js';
 import {getChoiceFilters} from './shared/form.js';
@@ -28,7 +27,6 @@ export {MyKanban as default};
 
 let MyKanbanCard = {
 	name:'my-kanban-card',
-	components:{ MyValueRich },
 	template:`<div class="kanban-card" :class="{ template:isTemplate }">
 		<div class="kanban-card-header"
 			v-if="!isTemplate"
@@ -201,8 +199,7 @@ let MyKanban = {
 	name:'my-kanban',
 	components:{
 		MyInputCollection,
-		MyKanbanBox,
-		MyValueRich
+		MyKanbanBox
 	},
 	template:`<div class="kanban" :class="{ isSingleField:isSingleField }">
 		

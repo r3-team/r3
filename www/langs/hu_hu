@@ -2420,7 +2420,6 @@
 		"inputHintCreate": "Új adatsor létrehozása",
 		"inputHintOpen": "Adatsor megnyitása",
 		"inputHintRemove": "Adatsor eltávolítása",
-		"inputHintSelect": "Meglévő adatsor hozzáadása",
 		"inputPlaceholderAdd": "...további hozzáadása",
 		"message": {
 			"csvExport": "A CSV export a jelenlegi lista szűrését és rendezését használja.",

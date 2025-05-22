@@ -2420,7 +2420,6 @@
 		"inputHintCreate": "Crear nuevo registro",
 		"inputHintOpen": "Abrir registro",
 		"inputHintRemove": "Eliminar registro",
-		"inputHintSelect": "Agregar registro existente",
 		"inputPlaceholderAdd": "...agregar más",
 		"message": {
 			"csvExport": "La exportación CSV utiliza filtros y ordenación de la lista actual.",

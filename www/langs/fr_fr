@@ -2420,7 +2420,6 @@
 		"inputHintCreate": "Créer un nouvel enregistrement",
 		"inputHintOpen": "Ouvrir un enregistrement",
 		"inputHintRemove": "Supprimer un enregistrement",
-		"inputHintSelect": "Ajouter un enregistrement existant",
 		"inputPlaceholderAdd": "...ajouter plus",
 		"message": {
 			"csvExport": "L'export CSV utilise les filtres et l'ordre de la liste actuelle.",

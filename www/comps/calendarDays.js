@@ -1,4 +1,3 @@
-import MyValueRich        from './valueRich.js';
 import {getColumnBatches} from './shared/column.js';
 import {
 	colorAdjustBg,
@@ -14,7 +13,6 @@ export {MyCalendarDays as default};
 
 let MyCalendarDaysEvent = {
 	name:'my-calendar-days-event',
-	components:{ MyValueRich },
 	template:`<div class="eventWrap"
 		@click.ctrl.exact="$emit('click-middle')"
 		@click.left.exact="$emit('click')"

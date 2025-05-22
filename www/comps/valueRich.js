@@ -18,7 +18,7 @@ import {
 } from './shared/generic.js';
 export {MyValueRich as default};
 
-let MyValueRich = {
+const MyValueRich = {
 	name:'my-value-rich',
 	template:`<div class="value-rich"
 		v-if="active"

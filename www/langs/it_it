@@ -2420,7 +2420,6 @@
 		"inputHintCreate": "Crea nuovo record",
 		"inputHintOpen": "Apri record",
 		"inputHintRemove": "Rimuovi record",
-		"inputHintSelect": "Aggiungi record esistente",
 		"inputPlaceholderAdd": "...aggiungi di più",
 		"message": {
 			"csvExport": "L'esportazione CSV utilizza filtri e ordini dall'elenco corrente.",

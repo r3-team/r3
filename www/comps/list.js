@@ -1,19 +1,20 @@
-import isDropdownUpwards   from './shared/layout.js';
-import MyFilters           from './filters.js';
-import MyForm              from './form.js';
-import MyInputCollection   from './inputCollection.js';
-import MyInputOffset       from './inputOffset.js';
-import MyListAggregate     from './listAggregate.js';
-import MyListColumnBatch   from './listColumnBatch.js';
-import MyListCsv           from './listCsv.js';
-import MyListFilters       from './listFilters.js';
-import MyListOptions       from './listOptions.js';
-import MyValueRich         from './valueRich.js';
-import {consoleError}      from './shared/error.js';
-import {getRowsDecrypted}  from './shared/form.js';
-import {getCaption}        from './shared/language.js';
-import {layoutSettleSpace} from './shared/layout.js';
-import {isAttributeFiles}  from './shared/attribute.js';
+import isDropdownUpwards    from './shared/layout.js';
+import MyFilters            from './filters.js';
+import MyForm               from './form.js';
+import MyInputCollection    from './inputCollection.js';
+import MyInputOffset        from './inputOffset.js';
+import MyListAggregate      from './listAggregate.js';
+import MyListColumnBatch    from './listColumnBatch.js';
+import MyListCsv            from './listCsv.js';
+import MyListFilters        from './listFilters.js';
+import MyListInputRows      from './listInputRows.js';
+import MyListInputRowsEmpty from './listInputRowsEmpty.js';
+import MyListOptions        from './listOptions.js';
+import {consoleError}       from './shared/error.js';
+import {getRowsDecrypted}   from './shared/form.js';
+import {getCaption}         from './shared/language.js';
+import {layoutSettleSpace}  from './shared/layout.js';
+import {isAttributeFiles}   from './shared/attribute.js';
 import {
 	getColumnBatches,
 	getColumnTitle,
@@ -48,8 +49,9 @@ let MyList = {
 		MyListColumnBatch,
 		MyListCsv,
 		MyListFilters,
-		MyListOptions,
-		MyValueRich
+		MyListInputRows,
+		MyListInputRowsEmpty,
+		MyListOptions
 	},
 	template:`<div class="list" ref="content"
 		v-click-outside="escape"
@@ -122,152 +124,39 @@ let MyList = {
 		</div>
 		
 		<!-- list as input field (showing record(s) from active field value) -->
-		<template v-if="isInput">
-			<div class="list-input-rows-wrap"
-				@click="clickInputRow"
-				:class="{ clickable:!inputMulti && !inputIsReadonly, 'multi-line':inputMulti }"
-			>
-				<table class="list-input-rows">
-					<tbody>
-						<tr v-for="(r,i) in rowsInput">
-							
-							<!-- icons -->
-							<td class="minimum">
-								<div class="list-input-row-items nowrap">
-									
-									<!-- either field/attribute icon or gallery file from first column -->
-									<slot name="input-icon"
-										v-if="!hasGalleryIcon || r.values[0] === null"
-									/>
-									<my-value-rich class="context-list-input"
-										v-else
-										@focus="focus"
-										:alignEnd="columns[0].flags.alignEnd"
-										:alignMid="columns[0].flags.alignMid"
-										:attribute-id="columns[0].attributeId"
-										:class="{ clickable:inputAsCategory && !inputIsReadonly }"
-										:basis="columns[0].basis"
-										:bold="columns[0].bold"
-										:boolAtrIcon="columns[0].boolAtrIcon"
-										:display="columns[0].display"
-										:length="columns[0].length"
-										:monospace="columns[0].flags.monospace"
-										:value="r.values[0]"
-										:wrap="columns[0].flags.wrap"
-									/>
-								</div>
-							</td>
-							
-							<!-- category input check box -->
-							<td class="minimum" v-if="inputAsCategory">
-								<div class="list-input-row-checkbox">
-									<my-button
-										@trigger="inputTriggerRow(r)"
-										:active="!inputIsReadonly"
-										:image="displayRecordCheck(inputRecordIds.includes(r.indexRecordIds['0']))"
-										:naked="true"
-									/>
-								</div>
-							</td>
-							
-							<!-- values -->
-							<td v-for="(b,bi) in columnBatches" :style="b.style">
-								<div class="list-input-row-items">
-									<template v-for="(ci,cii) in b.columnIndexes">
-										<my-value-rich class="context-list-input"
-											v-if="r.values[ci] !== null && (!hasGalleryIcon || bi !== 0 || cii !== 0)"
-											@focus="focus"
-											@trigger="inputTriggerRow(r)"
-											:alignEnd="columns[ci].flags.alignEnd"
-											:alignMid="columns[ci].flags.alignMid"
-											:attribute-id="columns[ci].attributeId"
-											:class="{ clickable:inputAsCategory && !inputIsReadonly }"
-											:basis="columns[ci].basis"
-											:bold="columns[ci].flags.bold"
-											:boolAtrIcon="columns[ci].flags.boolAtrIcon"
-											:clipboard="columns[ci].flags.clipboard"
-											:display="columns[ci].display"
-											:italic="columns[ci].flags.italic"
-											:key="ci"
-											:length="columns[ci].length"
-											:monospace="columns[ci].flags.monospace"
-											:value="r.values[ci]"
-											:wrap="columns[ci].flags.wrap"
-										/>
-									</template>
-								</div>
-							</td>
-							
-							<!-- actions -->
-							<td class="minimum">
-								<div class="list-input-row-items nowrap justifyEnd">
-									<my-button image="open.png"
-										v-if="hasUpdate"
-										@trigger="clickOpen(r,false)"
-										@trigger-middle="clickOpen(r,true)"
-										:blockBubble="true"
-										:captionTitle="capApp.inputHintOpen"
-										:naked="true"
-									/>
-									<my-button image="cancel.png"
-										v-if="!inputAsCategory"
-										@trigger="inputTriggerRowRemove(i)"
-										:active="!inputIsReadonly"
-										:captionTitle="capApp.inputHintRemove"
-										:naked="true"
-									/>
-								</div>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			
-			<!-- empty record input field -->
-			<table class="list-input-rows"
-				v-if="showInputAddLine"
-				@click="clickInputEmpty"
-				:class="{ clickable:!inputIsReadonly }"
-			>
-				<tbody>
-					<tr>
-						<td class="minimum">
-							<slot name="input-icon" />
-						</td>
-						<td>
-							<div class="list-input-row-items">
-								<input class="input" data-is-input="1" data-is-input-empty="1" enterkeyhint="send"
-									@click="focus"
-									@focus="focus"
-									@keyup="updatedTextInput"
-									v-model="filtersQuick"
-									:class="{ invalid:!inputValid }"
-									:disabled="inputIsReadonly"
-									:placeholder="inputLinePlaceholder"
-									:tabindex="!inputIsReadonly ? 0 : -1"
-								/>
-							</div>
-						</td>
-						<td class="minimum">
-							<div class="list-input-row-items nowrap">
-								<my-button image="add.png"
-									v-if="!inputIsReadonly && hasCreate"
-									@trigger="$emit('open-form',[],false)"
-									@trigger-middle="$emit('open-form',[],true)"
-									:blockBubble="true"
-									:captionTitle="capApp.inputHintCreate"
-									:naked="true"
-								/>
-								<my-button image="pageDown.png"
-									:active="!inputIsReadonly"
-									:naked="true"
-								/>
-							</div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</template>
+		<my-list-input-rows
+			v-if="isInput"
+			@clicked="clickInputRow"
+			@clicked-open="clickOpen($event,false)"
+			@clicked-open-middle="clickOpen($event,true)"
+			@clicked-row="inputTriggerRow($event)"
+			@clicked-row-remove="inputTriggerRowRemove($event)"
+			@focus="focus"
+			:columns="columns"
+			:columnBatches="columnBatches"
+			:hasGalleryIcon="hasGalleryIcon"
+			:multiInput="inputMulti"
+			:readonly="inputIsReadonly"
+			:recordIdsSelected="inputRecordIds"
+			:rows="rowsInput"
+			:showAllValues="inputAsCategory"
+			:showOpen="hasUpdate"
+		/>
+		<my-list-input-rows-empty
+			v-if="isInput && showInputAddLine"
+			@clicked="clickInputEmpty"
+			@clicked-open="$emit('open-form',[],false)"
+			@clicked-open-middle="$emit('open-form',[],true)"
+			@focus="focus"
+			@key-pressed="updatedTextInput"
+			@text-updated="filtersQuick = $event"
+			:anyRows="anyInputRows"
+			:focused="focused"
+			:readonly="inputIsReadonly"
+			:showCreate="hasCreate"
+			:text="filtersQuick"
+			:valid="inputValid"
+		/>
 		
 		<!-- regular list view (either view or input dropdown) -->
 		<template v-if="!isInput || (dropdownShow && !inputAsCategory)">
@@ -838,10 +727,6 @@ let MyList = {
 			else if(s.showOptions) return 'images/listCog.png';
 			return '';
 		},
-		inputLinePlaceholder:(s) => {
-			if(s.focused) return '';
-			return s.anyInputRows ? s.capApp.inputPlaceholderAdd : s.capGen.threeDots;
-		},
 		pageCount:(s) => {
 			if(s.count === 0) return 0;
 			
@@ -1082,12 +967,6 @@ let MyList = {
 		},
 		
 		// presentation
-		displayRecordCheck(state) {
-			if(this.inputMulti)
-				return state ? 'checkbox1.png' : 'checkbox0.png';
-			
-			return state ? 'radio1.png' : 'radio0.png';
-		},
 		displayColorColumn(color) {
 			if(color === null) return '';
 			

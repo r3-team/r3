@@ -1,4 +1,3 @@
-import MyValueRich              from './valueRich.js';
 import {
 	colorAdjustBg,
 	colorMakeContrastFont,
@@ -14,7 +13,6 @@ export {MyCalendarMonth as default};
 
 let MyCalendarMonth = {
 	name:'my-calendar-month',
-	components:{MyValueRich},
 	template:`<div class="calendar-month">
 		
 		<!-- week day header -->
