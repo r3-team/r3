@@ -581,17 +581,26 @@ let MyBuilderFieldOptions = {
 								<my-button-check
 									v-if="isIFrame || isBarcode"
 									@update:modelValue="setFlags('hideInputs',$event)"
-									:caption="capApp.hideInputs"
+									:caption="capApp.fieldFlags.hideInputs"
 									:modelValue="field.flags.includes('hideInputs')"
 								/>
 							</template>
 							<template v-if="isRelationship">
 								<my-button-check
+									v-if="!isVariable"
 									@update:modelValue="set('category',$event)"
+									:active="!field.flags.includes('relFlow')"
 									:caption="capApp.category"
 									:modelValue="field.category"
 								/>
 								<my-button-check
+									@update:modelValue="setFlags('relFlow',$event)"
+									:active="!isRelationship1N && !field.category"
+									:caption="capApp.fieldFlags.relFlow"
+									:modelValue="field.flags.includes('relFlow')"
+								/>
+								<my-button-check
+									v-if="!isVariable"
 									@update:modelValue="set('filterQuick',$event)"
 									:caption="capApp.filterQuick"
 									:modelValue="field.filterQuick"
@@ -1409,6 +1418,7 @@ let MyBuilderFieldOptions = {
 		},
 		
 		// simple states
+		contentData:      (s) => s.isData && !s.isVariable ? s.attribute.content : s.variable.content,
 		hasCaption:       (s) => s.isData || s.isHeader,
 		hasOpenForm:      (s) => s.isButton || ((s.isList || s.isCalendar || s.isKanban || s.isRelationship) && s.field.query.relationId !== null),
 		isBarcode:        (s) => s.isData && s.attribute.contentUse === 'barcode',
@@ -1431,7 +1441,8 @@ let MyBuilderFieldOptions = {
 		isQuery:          (s) => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
 		isTabs:           (s) => s.field.content === 'tabs',
 		isRegconfig:      (s) => s.isData && s.isAttributeRegconfig(s.attribute.content),
-		isRelationship:   (s) => s.isData && s.isAttributeRelationship(s.attribute.content),
+		isRelationship:   (s) => s.isData && s.isAttributeRelationship(s.contentData),
+		isRelationship1N: (s) => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
 		isRichtext:       (s) => s.isData && s.attribute.contentUse === 'richtext',
 		isString:         (s) => s.isData && s.isAttributeString(s.attribute.content),
 		isTime:           (s) => s.isData && s.attribute.contentUse === 'time',

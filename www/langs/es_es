@@ -894,6 +894,10 @@
 			"fieldDefault": "Default value",
 			"fieldDefaultPresetIds": "Default preset(s)",
 			"fieldDirection": "Direction",
+			"fieldFlags": {
+				"hideInputs": "Hide inputs",
+				"relFlow": "Progress flow display"
+			},
 			"fieldHelp": "Help text",
 			"fieldIcon": "Field icon",
 			"fieldIdFocus": "Set field focus on load",
@@ -955,7 +959,6 @@
 			"headerSize": "Size",
 			"helpText": "Help text",
 			"hidden": "Field is hidden by default",
-			"hideInputs": "Hide inputs",
 			"icon": "Form icon",
 			"ics": "iCAL subscriptions",
 			"jsFunctionButton": "Function on click",

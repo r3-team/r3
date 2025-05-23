@@ -908,6 +908,10 @@
 			"fieldSize0": "automatic",
 			"fields": "Fields",
 			"fieldsEditInputs": "Edit inputs",
+			"fieldFlags":{
+				"hideInputs": "Hide inputs",
+				"relFlow": "Progress flow display"
+			},
 			"fileExt": "File extension",
 			"fileName": "File name",
 			"fileSize": "File size",
@@ -955,7 +959,6 @@
 			"headerSize": "Size",
 			"helpText": "Help text",
 			"hidden": "Field is hidden by default",
-			"hideInputs": "Hide inputs",
 			"icon": "Form icon",
 			"ics": "iCAL subscriptions",
 			"jsFunctionButton": "Function on click",

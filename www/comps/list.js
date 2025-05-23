@@ -7,6 +7,7 @@ import MyListAggregate      from './listAggregate.js';
 import MyListColumnBatch    from './listColumnBatch.js';
 import MyListCsv            from './listCsv.js';
 import MyListFilters        from './listFilters.js';
+import MyListInputFlow      from './listInputFlow.js';
 import MyListInputRows      from './listInputRows.js';
 import MyListInputRowsEmpty from './listInputRowsEmpty.js';
 import MyListOptions        from './listOptions.js';
@@ -39,7 +40,7 @@ import {
 } from './shared/router.js';
 export {MyList as default};
 
-let MyList = {
+const MyList = {
 	name:'my-list',
 	components:{
 		MyFilters,
@@ -49,6 +50,7 @@ let MyList = {
 		MyListColumnBatch,
 		MyListCsv,
 		MyListFilters,
+		MyListInputFlow,
 		MyListInputRows,
 		MyListInputRowsEmpty,
 		MyListOptions
@@ -124,8 +126,20 @@ let MyList = {
 		</div>
 		
 		<!-- list as input field (showing record(s) from active field value) -->
+		<my-list-input-flow
+			v-if="isInput && inputAsFlow"
+			@clicked-open="clickOpen($event,false)"
+			@clicked-open-middle="clickOpen($event,true)"
+			@clicked-row="inputTriggerRow($event)"
+			:columns="columns"
+			:columnBatches="columnBatches"
+			:readonly="inputIsReadonly"
+			:recordIdsSelected="inputRecordIds"
+			:rows="rowsInput"
+			:showOpen="hasUpdate"
+		/>
 		<my-list-input-rows
-			v-if="isInput"
+			v-if="isInput && !inputAsFlow"
 			@clicked="clickInputRow"
 			@clicked-open="clickOpen($event,false)"
 			@clicked-open-middle="clickOpen($event,true)"
@@ -139,7 +153,7 @@ let MyList = {
 			:readonly="inputIsReadonly"
 			:recordIdsSelected="inputRecordIds"
 			:rows="rowsInput"
-			:showAllValues="inputAsCategory"
+			:showAllValues="showAllValues"
 			:showOpen="hasUpdate"
 		/>
 		<my-list-input-rows-empty
@@ -159,7 +173,7 @@ let MyList = {
 		/>
 		
 		<!-- regular list view (either view or input dropdown) -->
-		<template v-if="!isInput || (dropdownShow && !inputAsCategory)">
+		<template v-if="!isInput || (dropdownShow && !showAllValues)">
 			
 			<!-- list header -->
 			<div class="list-header" v-if="header && showHeader">
@@ -626,6 +640,7 @@ let MyList = {
 		
 		// list as input field
 		inputAsCategory:{ type:Boolean, required:false, default:false },    // input is category selector (all records are shown, active ones are checked off)
+		inputAsFlow:    { type:Boolean, required:false, default:false },    // input is a flow selector (all records are shown, all records up to, and incl. the selected one, are marked)
 		inputAutoSelect:{ type:Number,  required:false, default:0 },        // # of records to auto select (2 = first two, -3 = last three, 0 = none)
 		inputIsNew:     { type:Boolean, required:false, default:false },    // input field belongs to new record
 		inputIsReadonly:{ type:Boolean, required:false, default:false },    // input field is readonly
@@ -806,10 +821,11 @@ let MyList = {
 		rowSelect:           (s) => s.isInput || s.hasUpdate,
 		rowsClear:           (s) => s.rows.filter(v => !s.inputRecordIds.includes(v.indexRecordIds['0'])),
 		showActionTitles:    (s) => s.headerElements.includes('actionTitles'),
+		showAllValues:       (s) => s.inputAsFlow || s.inputAsCategory,
 		showCollectionTitles:(s) => s.headerElements.includes('collectionTitles'),
 		showHover:           (s) => s.showCsv || s.showFilters || s.showOptions,
-		showInputAddLine:    (s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
 		showInputAddAll:     (s) => s.inputMulti && s.hasResults,
+		showInputAddLine:    (s) => !s.showAllValues && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
 		showInputHeader:     (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
 		showOffsetArrows:    (s) => s.headerElements.includes('offsetArrows'),
 		showRefresh:         (s) => s.headerElements.includes('refresh'),
@@ -899,7 +915,7 @@ let MyList = {
 				}
 			}
 		});
-		if(this.isInput && !this.inputAsCategory) {
+		if(this.isInput && !this.showAllValues) {
 			this.$watch('inputRecordIds',(val) => {
 				// update input if record IDs are different (different count or IDs)
 				if(val.length !== this.rowsInput.length)
@@ -1049,7 +1065,7 @@ let MyList = {
 				this.$emit('dropdown-show',true);
 		},
 		clickInputRow() {
-			if(!this.inputIsReadonly && !this.inputAsCategory && !this.showInputAddLine)
+			if(!this.inputIsReadonly && !this.showAllValues && !this.showInputAddLine)
 				this.$emit('dropdown-show',!this.dropdownShow);
 		},
 		clickRow(row,middleClick) {
@@ -1083,7 +1099,7 @@ let MyList = {
 				this.blur();
 		},
 		focus() {
-			if(!this.inputIsReadonly && this.isInput && !this.inputAsCategory && !this.dropdownShow) {
+			if(!this.inputIsReadonly && this.isInput && !this.showAllValues && !this.dropdownShow) {
 				this.focused      = true;
 				this.filtersQuick = '';
 			}
@@ -1107,7 +1123,7 @@ let MyList = {
 			}
 			
 			// arrow key used in regular list input
-			if(arrow && this.isInput && !this.inputAsCategory) {
+			if(arrow && this.isInput && !this.showAllValues) {
 				
 				// show dropdown
 				if(!this.dropdownShow) {
@@ -1270,7 +1286,7 @@ let MyList = {
 		
 		// user actions, inputs
 		inputTriggerRow(row) {
-			if(this.inputAsCategory && !this.inputIsReadonly) {
+			if(this.showAllValues && !this.inputIsReadonly) {
 				const id = row.indexRecordIds['0'];
 
 				if(this.inputRecordIds.includes(id)) this.$emit('record-removed', id);
@@ -1465,15 +1481,15 @@ let MyList = {
 				this.$emit('dropdown-show',false);
 			
 			// for inputs we only need data if:
-			// * field is category input (always shows everything)
+			// * field shows all values
 			// * auto select is active
 			// * input has records to get data for
-			if(!this.inputAsCategory && !this.autoSelect && !this.anyInputRows)
+			if(!this.showAllValues && !this.autoSelect && !this.anyInputRows)
 				return;
 			
 			// apply existing filters, except user filters (not relevant here)
 			let filters = JSON.parse(JSON.stringify(this.filters));
-			if(!this.inputAsCategory && this.anyInputRows)
+			if(!this.showAllValues && this.anyInputRows)
 				filters.push(this.getQueryAttributesPkFilter(
 					this.query.relationId,this.inputRecordIds,0,false
 				));
@@ -1486,8 +1502,8 @@ let MyList = {
 				orders:this.orders
 			},false).then(
 				res => {
-					// apply results to input rows if input is category or specific record IDs were retrieved
-					if(this.inputAsCategory || this.anyInputRows)
+					// apply results to input rows if all values are shown or specific record IDs were retrieved
+					if(this.showAllValues || this.anyInputRows)
 						this.getRowsDecrypted(res.payload.rows,this.expressions).then(
 							rows => this.rowsInput = rows,
 							this.consoleError

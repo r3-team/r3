@@ -894,6 +894,10 @@
 			"fieldDefault": "Valeur par défaut",
 			"fieldDefaultPresetIds": "Préréglage(s) par défaut",
 			"fieldDirection": "Direction",
+			"fieldFlags": {
+				"hideInputs": "Hide inputs",
+				"relFlow": "Progress flow display"
+			},
 			"fieldHelp": "Texte d'aide",
 			"fieldIcon": "Icône de champ",
 			"fieldIdFocus": "Définir le focus du champ au chargement",
@@ -955,7 +959,6 @@
 			"headerSize": "Taille de l'en-tête",
 			"helpText": "Texte d'aide",
 			"hidden": "Le champ est caché par défaut",
-			"hideInputs": "Hide inputs",
 			"icon": "Icône du formulaire",
 			"ics": "Abonnements iCAL",
 			"jsFunctionButton": "Fonction au clic",

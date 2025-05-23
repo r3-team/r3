@@ -340,7 +340,7 @@
 }
 
 
-/* list as input field */
+/* list as input field, rows */
 .list-input-rows-wrap{
 	flex:1 1 auto;
 	overflow:auto;
@@ -379,6 +379,64 @@
 }
 .list-input-rows-wrap.multi-line .list-input-rows td{
 	border-bottom:1px dotted var(--color-border);
+}
+
+/* list as input field, flow */
+.list-input-flow{
+	flex:1 1 auto;
+	padding:calc(var(--spacing) / 4);
+	display:flex;
+	flex-flow:row wrap;
+	gap:calc(var(--spacing) / 4);
+}
+.list-input-flow-entry-wrap{
+	/* required, as clip-path on child element would but of shadow */
+	filter:drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.7));
+}
+.list-input-flow-entry{
+	/*
+		clip element to chevron shape
+		each value pair is one point in polygon as coordinates x, y
+		we go through points clock wise, starting from top-left
+		as a chevron has 6 points, we need 6 value pairs
+	*/
+	--arrow-length:12px;
+	clip-path:polygon(
+		0% 0%,
+		calc(100% - var(--arrow-length)) 0%,
+		100% 50%,
+		calc(100% - var(--arrow-length)) 100%,
+		0% 100%,
+		calc(0% + var(--arrow-length)) 50%
+	);
+
+	flex:0 0 auto;
+	border-radius:var(--border-input-radius);
+	padding:calc(var(--spacing) / 3) calc((var(--spacing) / 2) + var(--arrow-length));
+	margin:0px calc(0px - calc(var(--arrow-length) / 2));
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:calc(var(--spacing) / 2);
+	background-color:var(--color-flow);
+	opacity:0.7;
+}
+
+.list-input-flow-entry:hover,
+.list-input-flow-entry.active{
+	background-color:var(--color-flow-active);
+	color:var(--color-font-bright);
+}
+.list-input-flow-entry:hover{
+	opacity:0.85;
+}
+.list-input-flow-entry.active{
+	opacity:1;
+}
+.list-input-flow-entry-actions{}
+.list-input-flow-entry-values{
+	display:flex;
+	flex-flow:row nowrap;
 }
 
 /* filters */

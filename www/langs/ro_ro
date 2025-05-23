@@ -894,6 +894,10 @@
 			"fieldDefault": "Valoarea implicită",
 			"fieldDefaultPresetIds": "Presetare implicit(e)",
 			"fieldDirection": "Direcția",
+			"fieldFlags": {
+				"hideInputs": "Hide inputs",
+				"relFlow": "Progress flow display"
+			},
 			"fieldHelp": "Textul pentru ajutor",
 			"fieldIcon": "Pictograma câmpului",
 			"fieldIdFocus": "Set field focus on load",
@@ -955,7 +959,6 @@
 			"headerSize": "Mărime",
 			"helpText": "Text de ajutor",
 			"hidden": "Câmpul este implicit ascuns",
-			"hideInputs": "Hide inputs",
 			"icon": "Pictograma formularului",
 			"ics": "Abonament la iCAL",
 			"jsFunctionButton": "Function on click",

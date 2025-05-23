@@ -894,6 +894,10 @@
 			"fieldDefault": "القيمة الافتراضية",
 			"fieldDefaultPresetIds": "الإعدادات المسبقة الافتراضية",
 			"fieldDirection": "اتجاه",
+			"fieldFlags": {
+				"hideInputs": "Hide inputs",
+				"relFlow": "Progress flow display"
+			},
 			"fieldHelp": "نص المساعدة",
 			"fieldIcon": "أيقونة الحقل",
 			"fieldIdFocus": "ضبط التركيز الميداني على التحميل",
@@ -955,7 +959,6 @@
 			"headerSize": "مقاس",
 			"helpText": "نص المساعدة",
 			"hidden": "الحقل مخفي بشكل افتراضي",
-			"hideInputs": "Hide inputs",
 			"icon": "رمز النموذج",
 			"ics": "اشتراكات آي كال",
 			"jsFunctionButton": "وظيفة عند النقر",

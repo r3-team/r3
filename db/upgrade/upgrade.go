@@ -130,6 +130,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayDelete';
 			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayUpdate';
 
+			-- field flags
+			ALTER TYPE app.field_flag ADD VALUE 'relFlow';
+
 			--
 			-- Open ID Connect authentication
 			CREATE TYPE instance.oauth_client_flow AS ENUM ('clientCreds', 'authCodePkce');

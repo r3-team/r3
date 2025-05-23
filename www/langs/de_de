@@ -894,6 +894,10 @@
 			"fieldDefault": "Standardwert",
 			"fieldDefaultPresetIds": "Standard vord. Datensätze",
 			"fieldDirection": "Ausrichtung",
+			"fieldFlags": {
+				"hideInputs": "Eingaben verstecken",
+				"relFlow": "Progress flow display"
+			},
 			"fieldHelp": "Hilfetext",
 			"fieldIcon": "Feld-Icon",
 			"fieldIdFocus": "Feldfokus setzen beim Öffnen",
@@ -955,7 +959,6 @@
 			"headerSize": "Größe",
 			"helpText": "Hilfetext",
 			"hidden": "Feld ist standardmäßig versteckt",
-			"hideInputs": "Eingaben verstecken",
 			"icon": "Formular-Icon",
 			"ics": "iCAL-Abonnements",
 			"jsFunctionButton": "Funktion nack Klick",

@@ -556,6 +556,7 @@ let MyField = {
 					:hasOpenForm="!isVariable && field.openForm !== null"
 					:header="false"
 					:inputAsCategory="field.category"
+					:inputAsFlow="field.flags.includes('relFlow')"
 					:inputAutoSelect="field.autoSelect"
 					:inputIsNew="isNew"
 					:inputIsReadonly="isReadonly"

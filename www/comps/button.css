@@ -89,6 +89,9 @@
 .button.naked.clickable img{
 	filter:var(--image-filter);
 }
+.button.naked.darkBg.clickable img{
+	filter:var(--image-filter-bg);
+}
 .button.naked.clickable:focus img,
 .button.naked.clickable:hover img{
 	width:24px;

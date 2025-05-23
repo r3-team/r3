@@ -894,6 +894,10 @@
 			"fieldDefault": "Alapértelmezett érték",
 			"fieldDefaultPresetIds": "Alapértelmezett előre definiált rekordok",
 			"fieldDirection": "Irány",
+			"fieldFlags": {
+				"hideInputs": "Hide inputs",
+				"relFlow": "Progress flow display"
+			},
 			"fieldHelp": "Súgószöveg",
 			"fieldIcon": "Mező ikon",
 			"fieldIdFocus": "Set field focus on load",
@@ -955,7 +959,6 @@
 			"headerSize": "Fej méret",
 			"helpText": "Segítség szöveg",
 			"hidden": "Mező alapértelmezetten rejtett",
-			"hideInputs": "Hide inputs",
 			"icon": "Űrlap ikon",
 			"ics": "iCAL előfizetések",
 			"jsFunctionButton": "Függvény gombnyomásra",

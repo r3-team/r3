@@ -894,6 +894,10 @@
 			"fieldDefault": "默认值",
 			"fieldDefaultPresetIds": "默认预设值",
 			"fieldDirection": "方向",
+			"fieldFlags": {
+				"hideInputs": "Hide inputs",
+				"relFlow": "Progress flow display"
+			},
 			"fieldHelp": "帮助文本",
 			"fieldIcon": "字段图标",
 			"fieldIdFocus": "加载时设置字段焦点",
@@ -955,7 +959,6 @@
 			"headerSize": "大小",
 			"helpText": "帮助文本",
 			"hidden": "字段默认隐藏",
-			"hideInputs": "Hide inputs",
 			"icon": "表单图标",
 			"ics": "iCal订阅",
 			"jsFunctionButton": "点击时执行的函数",

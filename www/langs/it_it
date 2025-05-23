@@ -894,6 +894,10 @@
 			"fieldDefault": "Valore predefinito",
 			"fieldDefaultPresetIds": "Preimpostazioni predefinite",
 			"fieldDirection": "Direzione",
+			"fieldFlags": {
+				"hideInputs": "Hide inputs",
+				"relFlow": "Progress flow display"
+			},
 			"fieldHelp": "Testo aiuto",
 			"fieldIcon": "Icona campo",
 			"fieldIdFocus": "Set field focus on load",
@@ -955,7 +959,6 @@
 			"headerSize": "Dimensione",
 			"helpText": "testo aiuto",
 			"hidden": "Il campo è nascosto per impostazione predefinita",
-			"hideInputs": "Hide inputs",
 			"icon": "Icona modulo",
 			"ics": "Abbonamenti iCAL",
 			"jsFunctionButton": "Funzione on click",
