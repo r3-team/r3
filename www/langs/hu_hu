@@ -45,6 +45,7 @@
 			"bruteforceAttempts": "Host blokkolása próbálkozások után",
 			"bruteforceCountBlocked": "Blokkolt hosztok",
 			"bruteforceCountTracked": "Nyomon követett hosztok",
+			"bruteforceDesc": "<p>This feature blocks clients, if they attempt to access the system repeatedly with invalid authentication. It is sensible for operation in the cloud, where public access is possible.</p><p>It does not make sense for local deployments or if the system is operated with a reverse proxy.</p>",
 			"bruteforceProtection": "Bruteforce védelem bekapcsolása",
 			"bruteforceTitle": "Bruteforce védelem",
 			"builderMode": "Builder mód",

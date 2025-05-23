@@ -45,6 +45,7 @@
 			"bruteforceAttempts": "Bloquer les hôtes après tentatives",
 			"bruteforceCountBlocked": "Hôtes bloqués",
 			"bruteforceCountTracked": "Hôtes suivis",
+			"bruteforceDesc": "<p>This feature blocks clients, if they attempt to access the system repeatedly with invalid authentication. It is sensible for operation in the cloud, where public access is possible.</p><p>It does not make sense for local deployments or if the system is operated with a reverse proxy.</p>",
 			"bruteforceProtection": "Activer la protection contre les attaques par force brute",
 			"bruteforceTitle": "Protection contre les attaques par force brute",
 			"builderMode": "Mode Builder",

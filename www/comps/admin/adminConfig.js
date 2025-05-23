@@ -345,6 +345,8 @@ let MyAdminConfig = {
 						</tr>
 					</tbody>
 				</table>
+
+				<span v-html="capApp.bruteforceDesc"></span>
 			</div>
 			
 			<!-- admin mails -->

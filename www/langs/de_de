@@ -45,6 +45,7 @@
 			"bruteforceAttempts": "Host blocken nach Versuchen",
 			"bruteforceCountBlocked": "Blockierte Hosts",
 			"bruteforceCountTracked": "Verfolgte Hosts",
+			"bruteforceDesc": "<p>Diese Funktion blockt Clients, wenn sie versuchen, wiederholt mit ungültigen Zugangsdaten auf das System zuzugreifen. Es macht Sinn für Betrieb in der Cloud, wo Zugriff öffentlicher Clients möglich ist.</p><p>Es macht wenig Sinn für lokalen Betrieb oder wenn das System mit einem Reverse-Proxy betrieben wird.</p>",
 			"bruteforceProtection": "Bruteforce-Schutz aktivieren",
 			"bruteforceTitle": "Bruteforce-Schutz",
 			"builderMode": "Builder-Modus",
