@@ -902,6 +902,7 @@
 			"fieldHelp": "帮助文本",
 			"fieldIcon": "字段图标",
 			"fieldIdFocus": "加载时设置字段焦点",
+			"fieldIdFocusEmpty": "[First input field]",
 			"fieldMax": "最大值/长度",
 			"fieldMin": "最小值/长度",
 			"fieldMoveInside": "将选定字段移动到此字段内部",

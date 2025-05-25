@@ -902,6 +902,7 @@
 			"fieldHelp": "Testo aiuto",
 			"fieldIcon": "Icona campo",
 			"fieldIdFocus": "Set field focus on load",
+			"fieldIdFocusEmpty": "[First input field]",
 			"fieldMax": "Massimo valore/lunghezza",
 			"fieldMin": "Minimo valore/lunghezza",
 			"fieldMoveInside": "Sposta il campo selezionato all'interno di questo campo",

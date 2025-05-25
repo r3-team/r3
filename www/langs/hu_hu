@@ -902,6 +902,7 @@
 			"fieldHelp": "Súgószöveg",
 			"fieldIcon": "Mező ikon",
 			"fieldIdFocus": "Set field focus on load",
+			"fieldIdFocusEmpty": "[First input field]",
 			"fieldMax": "Max. érték/Hossz",
 			"fieldMin": "Min. érték/Hossz",
 			"fieldMoveInside": "Kiválasztott mezőt helyezd e mezőbe",

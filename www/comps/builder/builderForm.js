@@ -407,7 +407,7 @@ let MyBuilderForm = {
 								<td>{{ capApp.fieldIdFocus }}</td>
 								<td>
 									<select v-model="fieldIdFocus" :disabled="readonly">
-										<option :value="null">-</option>
+										<option :value="null">{{ capApp.fieldIdFocusEmpty }}</option>
 										<template v-for="(ref,fieldId) in entityIdMapRef.field">
 											<option
 												v-if="fieldContentFocus.includes(fieldIdMap[fieldId].content)"

@@ -902,6 +902,7 @@
 			"fieldHelp": "Textul pentru ajutor",
 			"fieldIcon": "Pictograma câmpului",
 			"fieldIdFocus": "Set field focus on load",
+			"fieldIdFocusEmpty": "[First input field]",
 			"fieldMax": "Valoare/lungime maximă",
 			"fieldMin": "Valoare/lungime minimă",
 			"fieldMoveInside": "Mutați câmpul selectat în interiorul acestui câmp",

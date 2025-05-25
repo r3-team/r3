@@ -440,6 +440,7 @@ let MyField = {
 					v-model="value"
 					@hotkey="$emit('hotkey',$event)"
 					:attributeIdFile="field.attributeIdAlt"
+					:formLoading="formLoading"
 					:readonly="isReadonly"
 					:valueFiles="valueAlt"
 				/>

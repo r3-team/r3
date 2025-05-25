@@ -902,6 +902,7 @@
 			"fieldHelp": "Texte d'aide",
 			"fieldIcon": "Icône de champ",
 			"fieldIdFocus": "Définir le focus du champ au chargement",
+			"fieldIdFocusEmpty": "[First input field]",
 			"fieldMax": "Valeur/longueur max.",
 			"fieldMin": "Valeur/longueur min.",
 			"fieldMoveInside": "Déplacer le champ sélectionné à l'intérieur de ce champ",
