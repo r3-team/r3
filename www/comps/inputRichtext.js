@@ -4,29 +4,29 @@ export {MyInputRichtext as default};
 let MyInputRichtext = {
 	name:'my-input-richtext',
 	components:{'editor':Editor},
-	template:`<div class="input-richtext" v-if="ready && !loading">
+	template:`<div class="input-richtext" :key="key">
 		<editor api-key="API_KEY"
 			v-model="input"
 			@keyDown="handleHotkeys"
-			@init="editorRegister"
-			:disabled="readonly"
+			@init="register"
 			:init="init"
 		/>
 	</div>`,
 	emits:['hotkey','update:modelValue'],
 	props:{
 		attributeIdFile:{ type:String,  required:false, default:'' },
+		formLoading:    { type:Boolean, required:false, default:false },
 		modelValue:     { required:true },
 		readonly:       { type:Boolean, required:false, default:false },
 		valueFiles:     { required:false, default:null }
 	},
 	data() {
 		return {
-			editor:null,
-			init:{},
-			knownCtrlKeys:['q','s'],
-			loading:false,
-			ready:false,
+			allowChanges:false,      // to block changes before a user action happened (TinyMCE cleans up content immediately, causing changes w/o user interaction)
+			editor:null,             // reference to editor object for cleanup
+			key:0,                   // to force recreation of the editor on init change, 0 = not yet initialized
+			knownCtrlKeys:['q','s'], // for handling supported hot keys
+			loading:false,           // to block parallel reloading of the editor
 			
 			// tokens are used to authenticate with the current user session
 			// we cannot store sensitive tokens inside richtext, but tokens are required for accessing files
@@ -35,6 +35,50 @@ let MyInputRichtext = {
 		};
 	},
 	computed:{
+		init:(s) => {
+			let toolbar = `bold italic forecolor paragraphgroup numlist bullist alignleft aligncenter alignright alignjustify`;
+			if(!s.isMobile) toolbar = `undo redo ${toolbar} outdent indent insertgroup code print searchreplace`;
+			if(s.readonly)  toolbar = false;
+
+			return {
+				branding:true, // https://www.tiny.cloud/docs/general-configuration-guide/attribution-requirements/
+				cleanup_on_startup:false,
+				content_style:`.mce-content-body{ background-color:transparent; }`,
+				contextmenu:'copy cut paste | undo | link | inserttable table',
+				document_base_url:`${location.protocol}//${location.host}/`, // required when disabling 'relative_urls'
+				content_css:s.settings.dark ? 'dark' : 'default',
+				entity_encoding:'raw', // disable encoding of things like umlaute, not required for UTF8 storage and makes searches easier
+				height:'100%',
+				image_advtab:true,
+				image_list:JSON.parse(JSON.stringify(s.images)),
+				language:s.language,
+				menubar:false,
+				min_height:200,
+				paste_data_images:true,
+				plugins:'code emoticons image link lists searchreplace table',
+				readonly:s.readonly, // in init instead of as :disabled on editor component as we need to rebuild the toolbars too
+				relative_urls:false,    // if URL to internal path is used in link, Tiny cuts of base URL ('https://system/#/app/...' -> '#/app/...'), Tiny then fails to open relative URL
+				resize:false,
+				selector:'textarea',
+				skin:s.settings.dark ? 'oxide-dark' : 'oxide',
+				toolbar:toolbar,
+				toolbar_groups:{
+					paragraphgroup: {
+						icon:'change-case',
+						items:'styles fontsize fontfamily'
+					},
+					insertgroup:{
+						icon:'duplicate',
+						items:'hr emoticons link image table'
+					}
+				},
+				toolbar_mode:'floating',
+
+				// adds more elements that tiny does not convert (adds to default valid_elements)
+				// known issues: auto converts <b> to <strong>
+				extended_valid_elements:'b'
+			};
+		},
 		images:(s) => {
 			if(s.valueFiles === null)
 				return [];
@@ -82,7 +126,7 @@ let MyInputRichtext = {
 					new RegExp(this.tokenPlaceholder,'g'),this.token);
 			},
 			set(v) {
-				if(this.readonly)
+				if(this.readonly || !this.allowChanges)
 					return;
 				
 				// remove authentication tokens from file download link
@@ -99,94 +143,42 @@ let MyInputRichtext = {
 		settings:(s) => s.$store.getters.settings
 	},
 	mounted() {
-		// refresh editor if menu bar or file values changes
-		this.$watch(() => [this.images,this.isDark,this.isMobile,this.readonly],this.editorLoad);
-		this.editorLoad();
+		// refresh editor if any relevant input changes
+		this.$watch(() => [this.formLoading,this.images,this.isDark,this.isMobile,this.language,this.readonly],() => {
+			if(!this.formLoading) {
+				this.allowChanges = false;
+				this.remove(); // cleanup editor before reinit
+				this.key++;    // reinit editor
+
+				// wait until the editor fully loads before allowing changes
+				this.$nextTick(() => this.allowChanges = true);
+			}
+		});
 	},
 	unmounted() {
-		this.editorRemove();
+		this.remove();
 	},
 	methods:{
 		// externals
 		getAttributeFileHref,
-		
-		editorLoad() {
-			if(this.loading)
-				return;
-
-			this.editorRemove();
-			this.loading = true;
-			
-			let obj = {
-				branding:true, // https://www.tiny.cloud/docs/general-configuration-guide/attribution-requirements/
-				content_style:`
-					.mce-content-body{ background-color:transparent; }
-				`,
-				contextmenu:'copy cut paste | undo | link | inserttable table',
-				document_base_url:`${location.protocol}//${location.host}/`, // required when disabling 'relative_urls'
-				entity_encoding:'raw', // disable encoding of things like umlaute, not required for UTF8 storage and makes searches easier
-				height:'100%',
-				image_advtab:true,
-				image_list:JSON.parse(JSON.stringify(this.images)),
-				language:this.language,
-				menubar:false,
-				min_height:200,
-				paste_data_images:true,
-				plugins:'code emoticons image link lists searchreplace table',
-				relative_urls:false, // if URL to internal path is used in link, Tiny cuts of base URL ('https://system/#/app/...' -> '#/app/...'), Tiny then fails to open relative URL
-				resize:false,
-				selector:'textarea',
-				toolbar:`bold italic forecolor paragraphgroup numlist bullist alignleft aligncenter alignright alignjustify`,
-				toolbar_groups:{
-					paragraphgroup: {
-						icon:'change-case',
-						items:'styles fontsize fontfamily'
-					},
-					insertgroup:{
-						icon:'duplicate',
-						items:'hr emoticons link image table'
-					}
-				},
-				toolbar_mode:'floating',
-
-				// adds more elements that tiny does not convert (adds to default valid_elements)
-				// known issues: auto converts <b> to <strong>
-				extended_valid_elements:'b'
-			};
-			
-			if(this.settings.dark) {
-				obj.skin        = 'oxide-dark';
-				obj.content_css = 'dark';
-			}
-			
-			if(!this.isMobile)
-				obj.toolbar = `undo redo ${obj.toolbar} outdent indent insertgroup code print searchreplace`;
-			
-			if(this.readonly)
-				obj.toolbar = false;
-			
-			this.init = JSON.parse(JSON.stringify(obj));
-
-			this.$nextTick(() => {
-				this.loading = false;
-				this.ready   = true;
-			});
-		},
-		editorRegister(ev,editor) {
-			this.editor = editor;
-		},
-		editorRemove() {
-			if(this.editor !== null) {
-				this.editor.remove();
-				this.editor = null;
-			}
-		},
 		
 		// actions
 		handleHotkeys(e) {
 			if(e.key === 'Escape' || (e.ctrlKey && this.knownCtrlKeys.includes(e.key))) {
 				this.$emit('hotkey',e);
 				e.preventDefault();
+			}
+		},
+		
+		// editor handling
+		register(ev,editor) {
+			this.editor = editor;
+
+		},
+		remove() {
+			if(this.editor !== null) {
+				this.editor.remove();
+				this.editor = null;
 			}
 		}
 	}
