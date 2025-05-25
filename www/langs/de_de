@@ -893,6 +893,7 @@
 			"fieldHelp": "Hilfetext",
 			"fieldIcon": "Feld-Icon",
 			"fieldIdFocus": "Feldfokus setzen beim Öffnen",
+			"fieldIdFocusEmpty": "[Erstes Eingabefeld]",
 			"fieldMax": "Max. Wert/Länge",
 			"fieldMin": "Min. Wert/Länge",
 			"fieldMoveInside": "Selektiertes Feld in dieses Feld bewegen",

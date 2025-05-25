@@ -893,6 +893,7 @@
 			"fieldHelp": "نص المساعدة",
 			"fieldIcon": "أيقونة الحقل",
 			"fieldIdFocus": "ضبط التركيز الميداني على التحميل",
+			"fieldIdFocusEmpty": "[First input field]",
 			"fieldMax": "الأعلى. ",
 			"fieldMin": "دقيقة. ",
 			"fieldMoveInside": "انقل الحقل المحدد داخل هذا الحقل",

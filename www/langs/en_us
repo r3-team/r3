@@ -893,6 +893,7 @@
 			"fieldHelp": "Help text",
 			"fieldIcon": "Field icon",
 			"fieldIdFocus": "Set field focus on load",
+			"fieldIdFocusEmpty": "[First input field]",
 			"fieldMax": "Max. value/length",
 			"fieldMin": "Min. value/length",
 			"fieldMoveInside": "Move selected field inside this field",
