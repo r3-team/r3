@@ -16,6 +16,7 @@ import (
 	"r3/log"
 	"r3/repo"
 	"r3/schema"
+	"r3/spooler/file_process"
 	"r3/spooler/mail_attach"
 	"r3/spooler/mail_receive"
 	"r3/spooler/mail_send"
@@ -365,12 +366,15 @@ func load() error {
 		case "clusterCheckIn":
 			t.nameLog = "Cluster node check-in to database"
 			t.fn = cluster.CheckInNode
-		case "dbOptimize":
-			t.nameLog = "Database optimization"
-			t.fn = dbOptimize
 		case "clusterProcessEvents":
 			t.nameLog = "Cluster event processing"
 			t.fn = clusterProcessEvents
+		case "dbOptimize":
+			t.nameLog = "Database optimization"
+			t.fn = dbOptimize
+		case "filesProcess":
+			t.nameLog = "File processing"
+			t.fn = file_process.DoAll
 		case "httpCertRenew":
 			t.nameLog = "Reload of updated HTTP certificate"
 			t.fn = cache.CheckRenewCert

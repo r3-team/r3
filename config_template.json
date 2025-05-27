@@ -20,6 +20,8 @@
 		"embeddedDbBin": "pgsql16/bin/",
 		"embeddedDbData": "data/database/",
 		"files": "data/files/",
+		"fileExport": "",
+		"fileImport": "",
 		"temp": "data/temp/",
 		"transfer": "data/transfer"
 	},

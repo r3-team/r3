@@ -23,15 +23,16 @@ const (
 	ContextCache     logContext = 30
 	ContextCluster   logContext = 40
 	ContextCsv       logContext = 50
-	ContextImager    logContext = 60
-	ContextLdap      logContext = 70
-	ContextMail      logContext = 80
-	ContextModule    logContext = 90 // only used via instance logging functions
-	ContextOauth     logContext = 100
-	ContextScheduler logContext = 110
-	ContextServer    logContext = 120
-	ContextTransfer  logContext = 130
-	ContextWebsocket logContext = 140
+	ContextFile      logContext = 60
+	ContextImager    logContext = 70
+	ContextLdap      logContext = 80
+	ContextMail      logContext = 90
+	ContextModule    logContext = 100 // only used via instance logging functions
+	ContextOauth     logContext = 110
+	ContextScheduler logContext = 120
+	ContextServer    logContext = 130
+	ContextTransfer  logContext = 140
+	ContextWebsocket logContext = 150
 )
 
 var (
@@ -42,12 +43,14 @@ var (
 	debug     atomic.Bool
 	outputCli atomic.Bool // write logs also to command line
 
+	// log levels: 1 = errors, 2 = errors + warning, 3 = everything
 	logContextLevel = map[logContext]int{
 		ContextApi:       1,
 		ContextBackup:    1,
 		ContextCache:     1,
 		ContextCluster:   1,
 		ContextCsv:       1,
+		ContextFile:      1,
 		ContextImager:    1,
 		ContextLdap:      1,
 		ContextMail:      1,
@@ -64,6 +67,7 @@ var (
 		ContextCache:     "cache",
 		ContextCluster:   "cluster",
 		ContextCsv:       "csv",
+		ContextFile:      "file",
 		ContextImager:    "imager",
 		ContextLdap:      "ldap",
 		ContextMail:      "mail",

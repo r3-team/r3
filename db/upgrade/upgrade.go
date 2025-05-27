@@ -125,6 +125,82 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- PG function cost
 			ALTER TABLE app.pg_function ADD COLUMN cost INTEGER NOT NULL DEFAULT 100;
 
+			-- file hander
+			CREATE TYPE instance.file_spool_content AS ENUM ('export', 'import', 'textCreate', 'textRead');
+			CREATE TABLE IF NOT EXISTS instance.file_spool (
+				id SERIAL,
+				attribute_id UUID,
+				file_id UUID,
+				pg_function_id UUID,
+				record_id_wofk BIGINT,
+				content instance.file_spool_content NOT NULL,
+				file_path TEXT,
+				file_version INTEGER,
+				text_write TEXT,
+				date BIGINT,
+				CONSTRAINT file_spool_pkey PRIMARY KEY (id),
+				CONSTRAINT file_spool_attribute_id_fkey FOREIGN KEY (attribute_id)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT file_spool_file_id_fkey FOREIGN KEY (file_id)
+					REFERENCES instance.file (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT file_spool_pg_function_id_fkey FOREIGN KEY (pg_function_id)
+					REFERENCES app.pg_function (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX fki_file_spool_attribute_id_fkey
+				ON instance.file_spool USING BTREE (attribute_id ASC NULLS LAST);
+			CREATE INDEX fki_file_spool_file_id_fkey
+				ON instance.file_spool USING BTREE (file_id ASC NULLS LAST);
+			CREATE INDEX fki_file_spool_pg_function_id_fkey
+				ON instance.file_spool USING BTREE (pg_function_id ASC NULLS LAST);
+			
+			INSERT INTO instance.config (name,value) VALUES ('logFile',2);
+			ALTER TYPE instance.log_context ADD VALUE 'file';
+
+			INSERT INTO instance.task (
+				name,interval_seconds,cluster_master_only,
+				embedded_only,active_only,active
+			) VALUES ('filesProcess',10,true,false,false,true);
+			
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('filesProcess',0,0);
+
+			CREATE FUNCTION instance.file_export(
+				file_id uuid,
+				file_path text,
+				file_version integer DEFAULT NULL)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						file_id,
+						file_path,
+						file_version
+					)
+					VALUES(
+						'export',
+						EXTRACT(EPOCH FROM NOW()),
+						file_id,
+						file_path,
+						file_version
+					);
+					
+					RETURN 0;
+				END;
+			$BODY$;
+			
 			-- form record conditions
 			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayCreate';
 			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayDelete';
