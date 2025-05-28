@@ -39,8 +39,7 @@ func GetCanProcess() bool {
 
 // create a thumbnail for given file
 // optionally waits for result to use it directly
-func CreateThumbnail(fileId uuid.UUID, ext string, src string,
-	dst string, waitForResult bool) error {
+func CreateThumbnail(fileId uuid.UUID, ext string, src string, dst string, waitForResult bool) error {
 
 	// abort if it cannot process images
 	if !canProcess {

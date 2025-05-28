@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -101,7 +102,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if err := data.SetFile(ctx, login.Id, attributeId, fileId, part, isNewFile); err != nil {
+		if err := data.SetFile(ctx, login.Id, attributeId, fileId, part, pgtype.Text{}, isNewFile); err != nil {
 			handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 			return
 		}

@@ -128,7 +128,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- file hander
 			CREATE TYPE instance.file_spool_content AS ENUM ('export', 'import', 'textCreate', 'textRead');
 			CREATE TABLE IF NOT EXISTS instance.file_spool (
-				id SERIAL,
+			    id UUID NOT NULL DEFAULT gen_random_uuid(),
 				attribute_id UUID,
 				file_id UUID,
 				pg_function_id UUID,
@@ -138,6 +138,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				file_version INTEGER,
 				text_write TEXT,
 				date BIGINT,
+				overwrite bool,
 				CONSTRAINT file_spool_pkey PRIMARY KEY (id),
 				CONSTRAINT file_spool_attribute_id_fkey FOREIGN KEY (attribute_id)
 					REFERENCES app.attribute (id) MATCH SIMPLE
@@ -176,7 +177,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE FUNCTION instance.file_export(
 				file_id uuid,
 				file_path text,
-				file_version integer DEFAULT NULL)
+				file_version integer DEFAULT NULL,
+				overwrite boolean DEFAULT FALSE)
 				RETURNS integer
 				LANGUAGE 'plpgsql'
 			AS $BODY$
@@ -187,16 +189,44 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 						date,
 						file_id,
 						file_path,
-						file_version
+						file_version,
+						overwrite
 					)
 					VALUES(
 						'export',
 						EXTRACT(EPOCH FROM NOW()),
 						file_id,
 						file_path,
-						file_version
+						file_version,
+						overwrite
 					);
-					
+					RETURN 0;
+				END;
+			$BODY$;
+
+			CREATE FUNCTION instance.file_import(
+				file_path text,
+				attribute_id uuid,
+				record_id bigint DEFAULT 0)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						file_path,
+						attribute_id,
+						record_id_wofk
+					)
+					VALUES(
+						'import',
+						EXTRACT(EPOCH FROM NOW()),
+						file_path,
+						attribute_id,
+						record_id
+					);
 					RETURN 0;
 				END;
 			$BODY$;

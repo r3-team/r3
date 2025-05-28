@@ -6,11 +6,12 @@ import (
 	"r3/db"
 	"r3/log"
 
+	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type run struct {
-	Id           int64
+	Id           uuid.UUID
 	AttributeId  pgtype.UUID
 	FileId       pgtype.UUID
 	PgFunctionId pgtype.UUID
@@ -19,6 +20,7 @@ type run struct {
 	FilePath     pgtype.Text
 	FileVersion  pgtype.Int8
 	TextWrite    pgtype.Text
+	Overwrite    pgtype.Bool
 }
 
 func DoAll() error {
@@ -26,7 +28,7 @@ func DoAll() error {
 
 	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, attribute_id, file_id, pg_function_id, record_id_wofk,
-			content, file_path, file_version, text_write
+			content, file_path, file_version, text_write, overwrite
 		FROM instance.file_spool
 		ORDER BY date DESC
 	`)
@@ -38,7 +40,7 @@ func DoAll() error {
 	for rows.Next() {
 		var r run
 		if err := rows.Scan(&r.Id, &r.AttributeId, &r.FileId, &r.PgFunctionId, &r.RecordIdWofk,
-			&r.Content, &r.FilePath, &r.FileVersion, &r.TextWrite); err != nil {
+			&r.Content, &r.FilePath, &r.FileVersion, &r.TextWrite, &r.Overwrite); err != nil {
 
 			return err
 		}
@@ -47,13 +49,14 @@ func DoAll() error {
 	rows.Close()
 
 	for _, r := range runs {
-		log.Info(log.ContextFile, fmt.Sprintf("starting job '%s'", r.Content))
+		log.Info(log.ContextFile, fmt.Sprintf("starting job, type: '%s'", r.Content))
 
 		var resErr error
 		switch r.Content {
 		case "export":
-			resErr = export(r.FileId.Bytes, r.FilePath.String, r.FileVersion)
+			resErr = doExport(r.FileId.Bytes, r.FilePath.String, r.FileVersion, r.Overwrite.Bool)
 		case "import":
+			resErr = doImport(r.AttributeId.Bytes, r.RecordIdWofk.Int64, r.FilePath.String)
 		case "textCreate":
 		case "textRead":
 		}

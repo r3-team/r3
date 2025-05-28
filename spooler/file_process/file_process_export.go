@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
+	"os"
 	"path/filepath"
 	"r3/config"
 	"r3/data"
@@ -15,7 +17,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func export(fileId uuid.UUID, filePath string, fileVersion pgtype.Int8) error {
+func doExport(fileId uuid.UUID, filePath string, fileVersion pgtype.Int8, overwrite bool) error {
 
 	// invalid configuration
 	if config.File.Paths.FileExport == "" {
@@ -23,7 +25,7 @@ func export(fileId uuid.UUID, filePath string, fileVersion pgtype.Int8) error {
 	}
 
 	// invalid parameters, log and then disregard
-	if fileId == uuid.Nil {
+	if fileId.IsNil() {
 		log.Error(log.ContextFile, "ignoring task", errors.New("file ID is nil"))
 		return nil
 	}
@@ -34,7 +36,7 @@ func export(fileId uuid.UUID, filePath string, fileVersion pgtype.Int8) error {
 
 	// get latest file version if not defined
 	if !fileVersion.Valid {
-		// no rows is also an error, file version must exist
+		// no rows is also an error, requested file version must exist
 		if err := db.Pool.QueryRow(context.Background(), `
 			SELECT MAX(version)
 			FROM instance.file_version
@@ -43,8 +45,36 @@ func export(fileId uuid.UUID, filePath string, fileVersion pgtype.Int8) error {
 			return err
 		}
 	}
-
 	filePathSource := data.GetFilePathVersion(fileId, fileVersion.Int64)
 	filePathTarget := filepath.Join(config.File.Paths.FileExport, filePath)
+
+	log.Info(log.ContextFile, fmt.Sprintf("exporting file '%s' v%d to path '%s'",
+		fileId.String(), fileVersion.Int64, filePathTarget))
+
+	// check for target file existence
+	fileExistsTarget := true
+	fileStatTarget, err := os.Stat(filePathTarget)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			fileExistsTarget = false
+		} else {
+			return err
+		}
+	}
+
+	// clean up existing file if there
+	if fileExistsTarget {
+		if fileStatTarget.IsDir() {
+			log.Error(log.ContextFile, "ignoring task", fmt.Errorf("target path '%s' already exists and is a directory", filePathTarget))
+			return nil
+		}
+		if !overwrite {
+			log.Error(log.ContextFile, "ignoring task", fmt.Errorf("target path '%s' already exists and overwrite is disabled", filePathTarget))
+			return nil
+		}
+		if err := os.Remove(filePathTarget); err != nil {
+			return err
+		}
+	}
 	return tools.FileCopy(filePathSource, filePathTarget, false)
 }
