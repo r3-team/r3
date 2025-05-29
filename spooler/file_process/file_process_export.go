@@ -2,7 +2,6 @@ package file_process
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path/filepath"
 	"r3/config"
@@ -17,19 +16,14 @@ import (
 
 func doExport(filePath string, fileId uuid.UUID, fileVersion pgtype.Int8, overwrite bool) error {
 
-	// invalid configuration
 	if config.File.Paths.FileExport == "" {
-		return errConfigNoExportPath
+		return errConfigNoPathExport
 	}
-
-	// invalid parameters, log and then disregard
 	if fileId.IsNil() {
-		log.Error(log.ContextFile, "ignoring task", errors.New("file ID is nil"))
-		return nil
+		return errFileIdNil
 	}
 	if filePath == "" {
-		log.Error(log.ContextFile, "ignoring task", errPathEmpty)
-		return nil
+		return errPathEmpty
 	}
 
 	// get latest file version if not defined
@@ -48,16 +42,10 @@ func doExport(filePath string, fileId uuid.UUID, fileVersion pgtype.Int8, overwr
 	filePathSource := data.GetFilePathVersion(fileId, fileVersion.Int64)
 	filePathTarget := filepath.Join(config.File.Paths.FileExport, filePath)
 
-	log.Info(log.ContextFile, fmt.Sprintf("exporting file '%s' v%d to path '%s'",
-		fileId.String(), fileVersion.Int64, filePathTarget))
+	log.Info(log.ContextFile, fmt.Sprintf("exporting file '%s' v%d to path '%s'", fileId.String(), fileVersion.Int64, filePathTarget))
 
-	if err := checkClearFilePath(filePathTarget, overwrite); err != nil {
-		if errors.Is(err, errPathExists) || errors.Is(err, errPathIsDir) {
-			log.Error(log.ContextFile, "ignoring task", err)
-			return nil
-		}
+	if err := checkExportPath(filePathTarget, overwrite); err != nil {
 		return err
 	}
-
 	return tools.FileCopy(filePathSource, filePathTarget, false)
 }

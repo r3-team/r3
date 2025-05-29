@@ -14,10 +14,14 @@ import (
 )
 
 var (
-	errConfigNoExportPath = errors.New("no defined file export path in configuration file")
+	errConfigNoPathExport = errors.New("no defined file export path in configuration file")
+	errConfigNoPathImport = errors.New("no defined file import path in configuration file")
+	errFileIdNil          = errors.New("file ID is nil")
 	errPathEmpty          = errors.New("path is empty")
 	errPathExists         = errors.New("path already exists")
+	errPathExistsNot      = errors.New("path does not exist")
 	errPathIsDir          = errors.New("path is a directory")
+	errPathSizeLimit      = errors.New("path is a file exceeding the max. file size")
 )
 
 type run struct {
@@ -61,24 +65,34 @@ func DoAll() error {
 	for _, r := range runs {
 		log.Info(log.ContextFile, fmt.Sprintf("starting job, type: '%s'", r.Content))
 
-		var resErr error
+		var runErr error
 		switch r.Content {
 		case "export":
-			resErr = doExport(r.FilePath.String, r.FileId.Bytes, r.FileVersion, r.Overwrite.Bool)
+			runErr = doExport(r.FilePath.String, r.FileId.Bytes, r.FileVersion, r.Overwrite.Bool)
 		case "exportText":
-			resErr = doExportText(r.FilePath.String, r.FileTextContent.String, r.Overwrite.Bool)
+			runErr = doExportText(r.FilePath.String, r.FileTextContent.String, r.Overwrite.Bool)
 		case "import":
-			resErr = doImport(r.FilePath.String, r.AttributeId.Bytes, r.RecordIdWofk.Int64)
+			runErr = doImport(r.FilePath.String, r.AttributeId.Bytes, r.RecordIdWofk.Int64)
 		case "importText":
+			runErr = doImportText(r.FilePath.String, r.PgFunctionId.Bytes)
 		case "readText":
 		case "writeText":
 		}
 
-		if resErr != nil {
-			log.Error(log.ContextFile, "failed to execute task", resErr)
-			continue
+		if runErr != nil {
+			isImport := r.Content == "import" || r.Content == "importText"
+
+			if isImport && errors.Is(runErr, errPathExistsNot) {
+				// import runs can be regular, if source path is empty we just inform, but do not log an error
+				log.Info(log.ContextFile, runErr.Error())
+			} else {
+				log.Error(log.ContextFile, "failed to execute task", runErr)
+			}
 		}
 
+		// file processing always deletes spool entry, regardless of error
+		// file import/export/read/write can be repeated after error cause was addressed
+		// if we keep spooler entries, we need to enable identifying and manually clearing them, which can be difficult
 		if _, err := db.Pool.Exec(context.Background(), `
 			DELETE FROM instance.file_spool
 			WHERE id = $1
@@ -93,7 +107,7 @@ func DoAll() error {
 // can optionally remove already existing file
 // returns error if file is already there and should not be removed
 // returns error if file path is a directory
-func checkClearFilePath(path string, removeIfExists bool) error {
+func checkExportPath(path string, removeIfExists bool) error {
 	stat, err := os.Stat(path)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
@@ -109,4 +123,25 @@ func checkClearFilePath(path string, removeIfExists bool) error {
 		return errPathExists
 	}
 	return os.Remove(path)
+}
+
+// checks if file path is available for import
+// returns error if file path cannot be scanned
+// returns error if file path is a directory
+// returns error if file size exceeds given limit in Kilobytes
+func checkImportPath(path string, fileSizeLimitKb int64) error {
+	stat, err := os.Stat(path)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return errPathExistsNot
+		}
+		return err
+	}
+	if stat.IsDir() {
+		return errPathIsDir
+	}
+	if fileSizeLimitKb != 0 && stat.Size()/1024 > fileSizeLimitKb {
+		return errPathSizeLimit
+	}
+	return nil
 }

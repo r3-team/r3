@@ -257,6 +257,30 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					RETURN 0;
 				END;
 			$BODY$;
+
+			CREATE FUNCTION instance.file_import_text(
+				file_path text,
+				pg_function_id uuid)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						file_path,
+						pg_function_id
+					)
+					VALUES(
+						'importText',
+						EXTRACT(EPOCH FROM NOW()),
+						file_path,
+						pg_function_id
+					);
+					RETURN 0;
+				END;
+			$BODY$;
 			
 			-- form record conditions
 			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayCreate';

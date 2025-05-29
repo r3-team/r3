@@ -2,7 +2,6 @@ package file_process
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,15 +11,11 @@ import (
 
 func doExportText(filePath string, fileContentText string, overwrite bool) error {
 
-	// invalid configuration
 	if config.File.Paths.FileExport == "" {
-		return errConfigNoExportPath
+		return errConfigNoPathExport
 	}
-
-	// invalid parameters, log and then disregard
 	if filePath == "" {
-		log.Error(log.ContextFile, "ignoring task", errPathEmpty)
-		return nil
+		return errPathEmpty
 	}
 
 	// define paths
@@ -28,11 +23,7 @@ func doExportText(filePath string, fileContentText string, overwrite bool) error
 
 	log.Info(log.ContextFile, fmt.Sprintf("exporting text file to path '%s'", filePathTarget))
 
-	if err := checkClearFilePath(filePathTarget, overwrite); err != nil {
-		if errors.Is(err, errPathExists) || errors.Is(err, errPathIsDir) {
-			log.Error(log.ContextFile, "ignoring task", err)
-			return nil
-		}
+	if err := checkExportPath(filePathTarget, overwrite); err != nil {
 		return err
 	}
 

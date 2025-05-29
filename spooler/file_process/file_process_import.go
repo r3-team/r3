@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/fs"
-	"os"
 	"path/filepath"
 	"r3/cache"
 	"r3/config"
@@ -22,19 +20,14 @@ import (
 
 func doImport(filePath string, attributeIdFiles uuid.UUID, recordId int64) error {
 
-	// invalid configuration
-	if config.File.Paths.FileExport == "" {
-		return fmt.Errorf("cannot execute task without defined file import path in configuration file")
+	if config.File.Paths.FileImport == "" {
+		return errConfigNoPathImport
 	}
-
-	// invalid parameters, log and then disregard
 	if attributeIdFiles.IsNil() {
-		log.Error(log.ContextFile, "ignoring task", errors.New("attribute ID is nil"))
-		return nil
+		return errors.New("attribute ID is nil")
 	}
 	if filePath == "" {
-		log.Error(log.ContextFile, "ignoring task", errors.New("file path is empty"))
-		return nil
+		return errPathEmpty
 	}
 
 	createRecord := recordId == 0
@@ -62,22 +55,8 @@ func doImport(filePath string, attributeIdFiles uuid.UUID, recordId int64) error
 	}
 	cache.Schema_mx.RUnlock()
 
-	// check if file exists and is valid
-	fileStatSource, err := os.Stat(filePathSource)
-	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			log.Warning(log.ContextFile, "ignoring task", fmt.Errorf("path '%s' does not exist", filePathSource))
-			return nil
-		}
+	if err := checkImportPath(filePathSource, int64(attribute.Length)); err != nil {
 		return err
-	}
-	if fileStatSource.IsDir() {
-		log.Error(log.ContextFile, "ignoring task", fmt.Errorf("path '%s' is a directory", filePathSource))
-		return nil
-	}
-	if attribute.Length != 0 && int64(fileStatSource.Size()/1024) > int64(attribute.Length) {
-		log.Error(log.ContextFile, "ignoring task", fmt.Errorf("file size limit reached (%d kb)", attribute.Length))
-		return nil
 	}
 
 	// set file
@@ -93,7 +72,7 @@ func doImport(filePath string, attributeIdFiles uuid.UUID, recordId int64) error
 		return err
 	}
 
-	// attach file to record
+	// save file attribute for record
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -117,7 +96,7 @@ func doImport(filePath string, attributeIdFiles uuid.UUID, recordId int64) error
 			Version: -1,
 		},
 	}); err != nil {
-		return err
+		return fmt.Errorf("failed to save file attribute for record, %s", err)
 	}
 	return tx.Commit(ctx)
 }
