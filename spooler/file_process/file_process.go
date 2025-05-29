@@ -2,7 +2,10 @@ package file_process
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io/fs"
+	"os"
 	"r3/db"
 	"r3/log"
 
@@ -10,17 +13,24 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+var (
+	errConfigNoExportPath = errors.New("no defined file export path in configuration file")
+	errPathEmpty          = errors.New("path is empty")
+	errPathExists         = errors.New("path already exists")
+	errPathIsDir          = errors.New("path is a directory")
+)
+
 type run struct {
-	Id           uuid.UUID
-	AttributeId  pgtype.UUID
-	FileId       pgtype.UUID
-	PgFunctionId pgtype.UUID
-	RecordIdWofk pgtype.Int8
-	Content      string
-	FilePath     pgtype.Text
-	FileVersion  pgtype.Int8
-	TextWrite    pgtype.Text
-	Overwrite    pgtype.Bool
+	Id              uuid.UUID
+	AttributeId     pgtype.UUID
+	FileId          pgtype.UUID
+	PgFunctionId    pgtype.UUID
+	RecordIdWofk    pgtype.Int8
+	Content         string
+	FilePath        pgtype.Text
+	FileVersion     pgtype.Int8
+	FileTextContent pgtype.Text
+	Overwrite       pgtype.Bool
 }
 
 func DoAll() error {
@@ -28,7 +38,7 @@ func DoAll() error {
 
 	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, attribute_id, file_id, pg_function_id, record_id_wofk,
-			content, file_path, file_version, text_write, overwrite
+			content, file_path, file_text_content, file_version, overwrite
 		FROM instance.file_spool
 		ORDER BY date DESC
 	`)
@@ -40,7 +50,7 @@ func DoAll() error {
 	for rows.Next() {
 		var r run
 		if err := rows.Scan(&r.Id, &r.AttributeId, &r.FileId, &r.PgFunctionId, &r.RecordIdWofk,
-			&r.Content, &r.FilePath, &r.FileVersion, &r.TextWrite, &r.Overwrite); err != nil {
+			&r.Content, &r.FilePath, &r.FileTextContent, &r.FileVersion, &r.Overwrite); err != nil {
 
 			return err
 		}
@@ -54,11 +64,14 @@ func DoAll() error {
 		var resErr error
 		switch r.Content {
 		case "export":
-			resErr = doExport(r.FileId.Bytes, r.FilePath.String, r.FileVersion, r.Overwrite.Bool)
+			resErr = doExport(r.FilePath.String, r.FileId.Bytes, r.FileVersion, r.Overwrite.Bool)
+		case "exportText":
+			resErr = doExportText(r.FilePath.String, r.FileTextContent.String, r.Overwrite.Bool)
 		case "import":
-			resErr = doImport(r.AttributeId.Bytes, r.RecordIdWofk.Int64, r.FilePath.String)
-		case "textCreate":
-		case "textRead":
+			resErr = doImport(r.FilePath.String, r.AttributeId.Bytes, r.RecordIdWofk.Int64)
+		case "importText":
+		case "readText":
+		case "writeText":
 		}
 
 		if resErr != nil {
@@ -74,4 +87,26 @@ func DoAll() error {
 		}
 	}
 	return nil
+}
+
+// checks if file path is free to use
+// can optionally remove already existing file
+// returns error if file is already there and should not be removed
+// returns error if file path is a directory
+func checkClearFilePath(path string, removeIfExists bool) error {
+	stat, err := os.Stat(path)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil
+		}
+		return err
+	}
+
+	if stat.IsDir() {
+		return errPathIsDir
+	}
+	if !removeIfExists {
+		return errPathExists
+	}
+	return os.Remove(path)
 }

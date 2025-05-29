@@ -135,8 +135,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				record_id_wofk BIGINT,
 				content instance.file_spool_content NOT NULL,
 				file_path TEXT,
+				file_text_content TEXT,
 				file_version INTEGER,
-				text_write TEXT,
 				date BIGINT,
 				overwrite bool,
 				CONSTRAINT file_spool_pkey PRIMARY KEY (id),
@@ -198,6 +198,33 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 						file_id,
 						file_path,
 						file_version,
+						overwrite
+					);
+					RETURN 0;
+				END;
+			$BODY$;
+			
+			CREATE FUNCTION instance.file_export_text(
+				file_path text,
+				file_text_content text,
+				overwrite boolean DEFAULT FALSE)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						file_path,
+						file_text_content,
+						overwrite
+					)
+					VALUES(
+						'exportText',
+						EXTRACT(EPOCH FROM NOW()),
+						file_path,
+						file_text_content,
 						overwrite
 					);
 					RETURN 0;

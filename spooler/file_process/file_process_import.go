@@ -20,7 +20,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func doImport(attributeIdFiles uuid.UUID, recordId int64, filePath string) error {
+func doImport(filePath string, attributeIdFiles uuid.UUID, recordId int64) error {
 
 	// invalid configuration
 	if config.File.Paths.FileExport == "" {

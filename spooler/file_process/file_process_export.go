@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/fs"
-	"os"
 	"path/filepath"
 	"r3/config"
 	"r3/data"
@@ -17,11 +15,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func doExport(fileId uuid.UUID, filePath string, fileVersion pgtype.Int8, overwrite bool) error {
+func doExport(filePath string, fileId uuid.UUID, fileVersion pgtype.Int8, overwrite bool) error {
 
 	// invalid configuration
 	if config.File.Paths.FileExport == "" {
-		return fmt.Errorf("cannot execute task without defined file export path in configuration file")
+		return errConfigNoExportPath
 	}
 
 	// invalid parameters, log and then disregard
@@ -30,7 +28,7 @@ func doExport(fileId uuid.UUID, filePath string, fileVersion pgtype.Int8, overwr
 		return nil
 	}
 	if filePath == "" {
-		log.Error(log.ContextFile, "ignoring task", errors.New("file path is empty"))
+		log.Error(log.ContextFile, "ignoring task", errPathEmpty)
 		return nil
 	}
 
@@ -45,36 +43,21 @@ func doExport(fileId uuid.UUID, filePath string, fileVersion pgtype.Int8, overwr
 			return err
 		}
 	}
+
+	// define paths
 	filePathSource := data.GetFilePathVersion(fileId, fileVersion.Int64)
 	filePathTarget := filepath.Join(config.File.Paths.FileExport, filePath)
 
 	log.Info(log.ContextFile, fmt.Sprintf("exporting file '%s' v%d to path '%s'",
 		fileId.String(), fileVersion.Int64, filePathTarget))
 
-	// check for target file existence
-	fileExistsTarget := true
-	fileStatTarget, err := os.Stat(filePathTarget)
-	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			fileExistsTarget = false
-		} else {
-			return err
+	if err := checkClearFilePath(filePathTarget, overwrite); err != nil {
+		if errors.Is(err, errPathExists) || errors.Is(err, errPathIsDir) {
+			log.Error(log.ContextFile, "ignoring task", err)
+			return nil
 		}
+		return err
 	}
 
-	// clean up existing file if there
-	if fileExistsTarget {
-		if fileStatTarget.IsDir() {
-			log.Error(log.ContextFile, "ignoring task", fmt.Errorf("target path '%s' already exists and is a directory", filePathTarget))
-			return nil
-		}
-		if !overwrite {
-			log.Error(log.ContextFile, "ignoring task", fmt.Errorf("target path '%s' already exists and overwrite is disabled", filePathTarget))
-			return nil
-		}
-		if err := os.Remove(filePathTarget); err != nil {
-			return err
-		}
-	}
 	return tools.FileCopy(filePathSource, filePathTarget, false)
 }
