@@ -75,13 +75,13 @@ func DoAll() error {
 		case "exportText": // string -> disk (text file)
 			runErr = doExportText(r.FilePath.String, r.FileTextContent.String, r.Overwrite.Bool)
 		case "import": // disk (any file) -> attribute (any file)
-			runErr = doImport(r.FilePath.String, r.AttributeId.Bytes, r.RecordIdWofk.Int64)
+			runErr = doImport(r.FilePath.String, r.AttributeId.Bytes, r.RecordIdWofk)
 		case "importText": // disk (text file) -> string
 			runErr = doImportText(r.FilePath.String, r.PgFunctionId.Bytes)
 		case "textRead": // attribute (text file) -> string
 			runErr = doTextRead(r.FileId.Bytes, r.FileVersion, r.PgFunctionId.Bytes)
 		case "textWrite": // string -> attribute (text file)
-			runErr = doTextWrite(r.FilePath.String, r.FileTextContent.String, r.AttributeId.Bytes, r.RecordIdWofk.Int64)
+			runErr = doTextWrite(r.FilePath.String, r.FileTextContent.String, r.AttributeId.Bytes, r.RecordIdWofk)
 		}
 
 		if runErr != nil {
@@ -151,7 +151,7 @@ func checkImportPath(path string, fileSizeLimitKb int64) error {
 	return nil
 }
 
-func applyFileToRecord(ctx context.Context, recordId int64, moduleName string,
+func applyFileToRecord(ctx context.Context, recordId pgtype.Int8, moduleName string,
 	relationName string, attributeId uuid.UUID, fileId uuid.UUID, fileName string) error {
 
 	tx, err := db.Pool.Begin(ctx)
@@ -160,16 +160,16 @@ func applyFileToRecord(ctx context.Context, recordId int64, moduleName string,
 	}
 	defer tx.Rollback(ctx)
 
-	if recordId == 0 {
+	if !recordId.Valid {
 		if err := tx.QueryRow(ctx, fmt.Sprintf(`
 			INSERT INTO %s.%s
 			DEFAULT VALUES
 			RETURNING %s
-		`, moduleName, relationName, schema.PkName)).Scan(&recordId); err != nil {
+		`, moduleName, relationName, schema.PkName)).Scan(&recordId.Int64); err != nil {
 			return fmt.Errorf("failed to create record, %s", err)
 		}
 	}
-	if err := data.FilesApplyAttributChanges_tx(ctx, tx, recordId, attributeId, map[uuid.UUID]types.DataSetFileChange{
+	if err := data.FilesApplyAttributChanges_tx(ctx, tx, recordId.Int64, attributeId, map[uuid.UUID]types.DataSetFileChange{
 		fileId: {
 			Action:  "create",
 			Name:    fileName,

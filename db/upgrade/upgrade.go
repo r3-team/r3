@@ -234,7 +234,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE FUNCTION instance.file_import(
 				file_path text,
 				attribute_id uuid,
-				record_id bigint DEFAULT 0)
+				record_id bigint DEFAULT NULL)
 				RETURNS integer
 				LANGUAGE 'plpgsql'
 			AS $BODY$
@@ -313,7 +313,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				file_name text,
 				file_text_content text,
 				attribute_id uuid,
-				record_id bigint DEFAULT 0)
+				record_id bigint DEFAULT NULL)
 				RETURNS integer
 				LANGUAGE 'plpgsql'
 			AS $BODY$

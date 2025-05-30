@@ -17,7 +17,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func doImport(filePath string, attributeIdFiles uuid.UUID, recordId int64) error {
+func doImport(filePath string, attributeIdFiles uuid.UUID, recordId pgtype.Int8) error {
 
 	if config.File.Paths.FileImport == "" {
 		return errConfigNoPathImport

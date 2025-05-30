@@ -1222,7 +1222,13 @@
 			"helpPg": {
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID\n\nAbandonne l'opération et envoie un message à l'utilisateur en cours d'exécution, qui s'affiche dans l'interface utilisateur.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID\n\nSupprime les clés de chiffrement de bout en bout pour les enregistrements auxquels un utilisateur n'a plus accès. Cela rend le déchiffrement impossible pour l'utilisateur.",
+				"file_export": "instance.file_export({ARGS}) => INTEGER<br /><br />Creates a file processing job to export a given file to disk. Relevant parameters:<ul><li>file_id: File to export, file ID can be retrieved via instance.files_get()</li><li>file_path: Where to export the file to (must end in a filename)</li><li>file_version: Version of the file to export (NULL = latest version)</li><li>overwrite: Overwrite file if one already exists at the defined filepath</li></ul><p>The filepath is always relative to the export path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
+				"file_export_text": "instance.file_export_text({ARGS}) => INTEGER<br /><br />Creates a file processing job to export a given text as a UTF8 text file to disk. Relevant parameters:<ul><li>file_path: Where to export the file to (must end in a filename)</li><li>file_text_content: UTF8 text content</li><li>overwrite: Overwrite file if one already exists at the defined filepath</li></ul><p>The filepath is always relative to the export path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
+				"file_import": "instance.file_import({ARGS}) => INTEGER<br /><br />Creates a file processing job to import a file from disk. Relevant parameters:<ul><li>file_path: Where to import the file from (must end in a filename)</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul><p>The source file is deleted, if the import is successful.</p><p>The filepath is always relative to the import path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
+				"file_import_text": "instance.file_import_text({ARGS}) => INTEGER<br /><br />Creates a file processing job to import a text from a UTF8 text file on disk. Relevant parameters:<ul><li>file_path: Where to import the text file from (must end in a filename)</li><li>callback_function_id: ID of backend function that is called with the imported text, it must have two parameters: file_name TEXT, file_content TEXT</li></ul><p>The source file is deleted, if the import is successful.</p><p>The filepath is always relative to the import path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
 				"file_link": "instance.file_link({ARGS}) => VOID\n\nLie un fichier existant à un autre enregistrement (ajouté à l'attribut de fichier choisi). Ce lien est un lien dur, ce qui signifie que le même fichier est utilisé.\n\nLors du renommage ou de la suppression du fichier, le changement n'affecte que le lien vers le fichier. Indépendamment de la suppression, le fichier réel est conservé tant qu'il existe un lien vers le fichier.",
+				"file_text_read": "instance.file_text_read({ARGS}) => INTEGER<br /><br />Creates a file processing job to send the content of a UTF8 text file to a callback function. Relevant parameters:<ul><li>callback_function_id: ID of backend function that is called, it must have one parameter: file_content TEXT</li><li>file_id: File to read content from, file ID can be retrieved via instance.files_get()</li><li>file_version: Version of the file to read from (NULL = latest version)</li></ul>",
+				"file_text_write": "instance.file_text_write({ARGS}) => INTEGER<br /><br />Creates a file processing job to create a new UTF8 text file. Relevant parameters:<ul><li>file_name: Name of the file to be created</li><li>file_text_content: UTF8 text content</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul>",
 				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Unlinks an existing file from the files attribute of a specified record. The removed link is a hardlink, meaning that the actual file is kept as long as it is still linked to at least one other records file attribute.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]\n\nRetourne les métadonnées des fichiers de l'attribut de fichier et de l'enregistrement choisis (peut inclure éventuellement des fichiers supprimés).\n\nLe type retourné 'instance.file_meta' se compose de :\n{id UUID, user_id_creator INTEGER, hash TEXT, name TEXT, size_kb INTEGER, version INTEGER, date_change BIGINT, date_delete BIGINT}",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Returns the encrypted data key for the given relation record and the chosen user. Data keys exist for individual records for every user that has access to it. They can be decrypted on the frontend with the associated user private key.",
@@ -1255,11 +1261,42 @@
 					"relation_id UUID",
 					"record_ids_access INTEGER[]"
 				],
+				"file_export": [
+					"file_id UUID",
+					"file_path TEXT",
+					"file_version INTEGER DEFAULT NULL",
+					"overwrite BOOLEAN DEFAULT FALSE"
+				],
+				"file_export_text": [
+					"file_path TEXT",
+					"file_text_content TEXT",
+					"overwrite BOOLEAN DEFAULT FALSE"
+				],
+				"file_import": [
+					"file_path TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL"
+				],
+				"file_import_text": [
+					"file_path TEXT",
+					"callback_function_id UUID"
+				],
 				"file_link": [
 					"file_id UUID",
 					"file_name TEXT",
 					"attribute_id UUID",
 					"record_id BIGINT"
+				],
+				"file_text_read": [
+					"callback_function_id UUID",
+					"file_id UUID",
+					"file_version INTEGER DEFAULT NULL"
+				],
+				"file_text_write": [
+					"file_name TEXT",
+					"file_text_content TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL"
 				],
 				"file_unlink": [
 					"file_id UUID",

@@ -16,7 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func doTextWrite(fileName string, fileTextContent string, attributeIdFiles uuid.UUID, recordId int64) error {
+func doTextWrite(fileName string, fileTextContent string, attributeIdFiles uuid.UUID, recordId pgtype.Int8) error {
 
 	if attributeIdFiles.IsNil() {
 		return errors.New("attribute ID is nil")

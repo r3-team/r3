@@ -1222,7 +1222,13 @@
 			"helpPg": {
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Löscht Ende-Zu-Ende-Datenschlüssel für Datensätze, auf die ein Benutzer keinen Zugriff mehr hat. Dies macht Entschlüsselung für den Benutzer unmöglich.",
+				"file_export": "instance.file_export({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Export einer Datei auf Festplatte. Relevante Parameter:<ul><li>file_id: Datei zu exportieren - die Datei-ID kann via instance.files_get() gefunden werden</li><li>file_path: Wohin die Datei exportiert werden soll (muss in einen Dateinamen enden)</li><li>file_version: Version der Datei, die exportiert werden soll (NULL = aktuellste Version)</li><li>overwrite: Überschreiben, wenn am definierten Dateipfad bereits eine Datei existiert</li></ul><p>Der Dateipfad ist immer relativ zum Exportpfad, der in der Serverkonfigurationsdatei definiert ist. Aus Sicherheitsgründen werden absolute Pfade nicht unterstützt.</p>",
+				"file_export_text": "instance.file_export_text({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Export eines UTF8-Textes als Datei auf Festplatte. Relevante Parameter:<ul><li>file_path: Wohin die Datei exportiert werden soll (muss in einen Dateinamen enden)</li><li>file_text_content: UTF8 Textinhalt</li><li>overwrite: Überschreiben, wenn am definierten Dateipfad bereits eine Datei existiert</li></ul><p>Der Dateipfad ist immer relativ zum Exportpfad, der in der Serverkonfigurationsdatei definiert ist. Aus Sicherheitsgründen werden absolute Pfade nicht unterstützt.</p>",
+				"file_import": "instance.file_import({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Import einer Datei von Festplatte. Relevante Parameter:<ul><li>file_path: Von wo die Datei importiert werden soll (muss in einen Dateinamen enden)</li><li>attribute_id: ID des Dateien-Attributes, dass die Datei empfängt</li><li>record_id: ID des Datensatzes, dessen Dateien-Attributwert aktualisiert wird (NULL = neuer Datensatz)</li></ul><p>Die Quelldatei wird nach erfolgreichen Import gelöscht.</p><p>Der Dateipfad ist immer relativ zum Importpfad, der in der Serverkonfigurationsdatei definiert ist. Aus Sicherheitsgründen werden absolute Pfade nicht unterstützt.</p>",
+				"file_import_text": "instance.file_import_text({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Import eines Textes aus einer UTF8-Textdatei von Festplatte. Relevante Parameter:<ul><li>file_path: Von wo die Datei importiert werden soll (muss in einen Dateinamen enden)</li><li>callback_function_id: ID der Backendfunktion, die mit dem importierten Text aufgerufen wird - sie muss zwei Parameter haben: TEXT (Dateiname), TEXT (Dateiinhalt)</li></ul><p>Die Quelldatei wird nach erfolgreichen Import gelöscht.</p><p>Der Dateipfad ist immer relativ zum Importpfad, der in der Serverkonfigurationsdatei definiert ist. Aus Sicherheitsgründen werden absolute Pfade nicht unterstützt.</p>",
 				"file_link": "instance.file_link({ARGS}) => VOID<br /><br />Verknüpft eine existierende Datei mit einem anderen Datensatz (hinzugefügt zu dem gewählten Dateiattribut). Es handelt sich hierbei um eine harte Verknüpfung, d. h. es wird auf die gleiche Datei zugegriffen.<br /><br />Umbenennen oder Löschen der Datei, betrifft jeweils nur die Dateiverknüpfung. Die Datei selbst wird behalten, solange noch eine Verknüpfung existiert.",
+				"file_text_read": "instance.file_text_read({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Senden des Inhaltes einer UTF8-Textdatei zu einer Backendfunktion. Relevante Parameter:<ul><li>callback_function_id: ID der Backendfunktion, die aufgerufen wird - sie muss einen Parameter haben: TEXT (Dateiinhalt)</li><li>file_id: Datei zu lesen - die Datei-ID kann via instance.files_get() gefunden werden</li><li>file_version: Version der Datei, die gelesen werden soll (NULL = aktuellste Version)</li></ul>",
+				"file_text_write": "instance.file_text_write({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Erstellen einer UTF8-Textdatei. Relevante Parameter:<ul><li>file_name: Name der zu erstellenden Datei</li><li>file_text_content: UTF8-Textinhalt</li><li>attribute_id: ID des Dateien-Attributes, dass die Datei empfängt</li><li>record_id: ID des Datensatzes, dessen Dateien-Attributwert aktualisiert wird (NULL = neuer Datensatz)</li></ul>",
 				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Entfernt Verknüpfung einer existierenden Datei zu einem Datei-Attribut des angegebenen Datensatzes. Es handelt sich hierbei um eine harte Verknüpfung, d. h. die Datei selbst wird behalten, solange noch eine Verknüpfung zu einem Datei-Attribut eines anderen Datensatzes existiert.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]<br /><br />Liefert Metadaten für Dateien vom gewählten Dateiattribut und Datensatz (kann optional gelöschte Dateien inkludieren).<br /><br />Der gelieferte Typ 'instance.file_meta' besteht aus:<blockquote>id UUID,<br />user_id_creator INTEGER,<br />hash TEXT,<br />name TEXT,<br />size_kb INTEGER,<br />version INTEGER,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Liefert den verschlüsselten Datenschlüssel für den gewählten Relationsdatensatz und Benutzer. Datenschlüssel existieren für individuelle Datensätze für jeden Benutzer, der darauf Zugriff hat. Sie können am Frontend mit dem assoziierten privaten Schlüssel des Benutzers entschlüsselt werden.",
@@ -1255,11 +1261,42 @@
 					"relation_id UUID",
 					"record_ids_access INTEGER[]"
 				],
+				"file_export": [
+					"file_id UUID",
+					"file_path TEXT",
+					"file_version INTEGER DEFAULT NULL",
+					"overwrite BOOLEAN DEFAULT FALSE"
+				],
+				"file_export_text": [
+					"file_path TEXT",
+					"file_text_content TEXT",
+					"overwrite BOOLEAN DEFAULT FALSE"
+				],
+				"file_import": [
+					"file_path TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL"
+				],
+				"file_import_text": [
+					"file_path TEXT",
+					"callback_function_id UUID"
+				],
 				"file_link": [
 					"file_id UUID",
 					"file_name TEXT",
 					"attribute_id UUID",
 					"record_id BIGINT"
+				],
+				"file_text_read": [
+					"callback_function_id UUID",
+					"file_id UUID",
+					"file_version INTEGER DEFAULT NULL"
+				],
+				"file_text_write": [
+					"file_name TEXT",
+					"file_text_content TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL"
 				],
 				"file_unlink": [
 					"file_id UUID",
