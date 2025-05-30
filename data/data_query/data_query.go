@@ -109,6 +109,10 @@ func ConvertQueryToDataFilter(filters []types.QueryFilter, loginId int64,
 			} else {
 				sideOut.Value = false
 			}
+
+		//  value
+		case "value":
+			sideOut.Value = side.Value.String
 		}
 		return sideOut
 	}
