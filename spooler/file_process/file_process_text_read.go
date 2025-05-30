@@ -2,34 +2,31 @@ package file_process
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"r3/cache"
-	"r3/config"
+	"r3/data"
 	"r3/db"
 	"r3/handler"
 	"r3/log"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func doImportText(filePath string, pgFunctionId uuid.UUID) error {
+func doTextRead(fileId uuid.UUID, fileVersion pgtype.Int8, pgFunctionId uuid.UUID) error {
 
-	if config.File.Paths.FileImport == "" {
-		return errConfigNoPathImport
-	}
-	if pgFunctionId.IsNil() {
-		return errors.New("backend function ID is nil")
-	}
-	if filePath == "" {
-		return errPathEmpty
+	if fileId.IsNil() {
+		return errFileIdNil
 	}
 
-	filePathSource := filepath.Join(config.File.Paths.FileImport, filePath)
-
-	log.Info(log.ContextFile, fmt.Sprintf("importing text from file '%s'", filePathSource))
+	if !fileVersion.Valid {
+		var err error
+		fileVersion.Int64, err = getLatestFileVersion(fileId)
+		if err != nil {
+			return err
+		}
+	}
 
 	// access schema cache
 	cache.Schema_mx.RLock()
@@ -45,11 +42,11 @@ func doImportText(filePath string, pgFunctionId uuid.UUID) error {
 	}
 	cache.Schema_mx.RUnlock()
 
-	if err := checkImportPath(filePathSource, 0); err != nil {
-		return err
-	}
+	// define paths
+	filePathSource := data.GetFilePathVersion(fileId, fileVersion.Int64)
 
-	fileName := filepath.Base(filePathSource)
+	log.Info(log.ContextFile, fmt.Sprintf("reading text from file '%s'", fileId))
+
 	fileContent, err := os.ReadFile(filePathSource)
 	if err != nil {
 		return err
@@ -65,11 +62,8 @@ func doImportText(filePath string, pgFunctionId uuid.UUID) error {
 	}
 	defer tx.Rollback(ctx)
 
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1,$2)`, mod.Name, fnc.Name), fileName, string(fileContent)); err != nil {
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1)`, mod.Name, fnc.Name), string(fileContent)); err != nil {
 		return err
 	}
-	if err := tx.Commit(ctx); err != nil {
-		return err
-	}
-	return os.Remove(filePathSource)
+	return tx.Commit(ctx)
 }

@@ -126,7 +126,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE app.pg_function ADD COLUMN cost INTEGER NOT NULL DEFAULT 100;
 
 			-- file hander
-			CREATE TYPE instance.file_spool_content AS ENUM ('export', 'import', 'textCreate', 'textRead');
+			CREATE TYPE instance.file_spool_content AS ENUM ('export', 'exportText', 'import', 'importText','textRead', 'textWrite');
 			CREATE TABLE IF NOT EXISTS instance.file_spool (
 			    id UUID NOT NULL DEFAULT gen_random_uuid(),
 				attribute_id UUID,
@@ -277,6 +277,63 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 						EXTRACT(EPOCH FROM NOW()),
 						file_path,
 						pg_function_id
+					);
+					RETURN 0;
+				END;
+			$BODY$;
+
+			CREATE FUNCTION instance.file_text_read(
+				pg_function_id uuid,
+				file_id uuid,
+				file_version integer DEFAULT NULL)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						pg_function_id,
+						file_id,
+						file_version
+					)
+					VALUES(
+						'textRead',
+						EXTRACT(EPOCH FROM NOW()),
+						pg_function_id,
+						file_id,
+						file_version
+					);
+					RETURN 0;
+				END;
+			$BODY$;
+
+			CREATE FUNCTION instance.file_text_write(
+				file_name text,
+				file_text_content text,
+				attribute_id uuid,
+				record_id bigint DEFAULT 0)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						file_path,
+						file_text_content,
+						attribute_id,
+						record_id_wofk
+					)
+					VALUES(
+						'textWrite',
+						EXTRACT(EPOCH FROM NOW()),
+						file_name,
+						file_text_content,
+						attribute_id,
+						record_id
 					);
 					RETURN 0;
 				END;

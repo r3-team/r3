@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"r3/data"
 	"r3/db"
 	"r3/log"
+	"r3/schema"
+	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -67,16 +70,18 @@ func DoAll() error {
 
 		var runErr error
 		switch r.Content {
-		case "export":
+		case "export": // attribute (any file) -> disk (any file)
 			runErr = doExport(r.FilePath.String, r.FileId.Bytes, r.FileVersion, r.Overwrite.Bool)
-		case "exportText":
+		case "exportText": // string -> disk (text file)
 			runErr = doExportText(r.FilePath.String, r.FileTextContent.String, r.Overwrite.Bool)
-		case "import":
+		case "import": // disk (any file) -> attribute (any file)
 			runErr = doImport(r.FilePath.String, r.AttributeId.Bytes, r.RecordIdWofk.Int64)
-		case "importText":
+		case "importText": // disk (text file) -> string
 			runErr = doImportText(r.FilePath.String, r.PgFunctionId.Bytes)
-		case "readText":
-		case "writeText":
+		case "textRead": // attribute (text file) -> string
+			runErr = doTextRead(r.FileId.Bytes, r.FileVersion, r.PgFunctionId.Bytes)
+		case "textWrite": // string -> attribute (text file)
+			runErr = doTextWrite(r.FilePath.String, r.FileTextContent.String, r.AttributeId.Bytes, r.RecordIdWofk.Int64)
 		}
 
 		if runErr != nil {
@@ -144,4 +149,47 @@ func checkImportPath(path string, fileSizeLimitKb int64) error {
 		return errPathSizeLimit
 	}
 	return nil
+}
+
+func applyFileToRecord(ctx context.Context, recordId int64, moduleName string,
+	relationName string, attributeId uuid.UUID, fileId uuid.UUID, fileName string) error {
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if recordId == 0 {
+		if err := tx.QueryRow(ctx, fmt.Sprintf(`
+			INSERT INTO %s.%s
+			DEFAULT VALUES
+			RETURNING %s
+		`, moduleName, relationName, schema.PkName)).Scan(&recordId); err != nil {
+			return fmt.Errorf("failed to create record, %s", err)
+		}
+	}
+	if err := data.FilesApplyAttributChanges_tx(ctx, tx, recordId, attributeId, map[uuid.UUID]types.DataSetFileChange{
+		fileId: {
+			Action:  "create",
+			Name:    fileName,
+			Version: -1,
+		},
+	}); err != nil {
+		return fmt.Errorf("failed to save file attribute for record, %s", err)
+	}
+	return tx.Commit(ctx)
+}
+
+// get latest file version
+// returns error if no version exists for given file ID
+func getLatestFileVersion(fileId uuid.UUID) (int64, error) {
+	var version int64
+	err := db.Pool.QueryRow(context.Background(), `
+		SELECT MAX(version)
+		FROM instance.file_version
+		WHERE file_id = $1
+	`, fileId).Scan(&version)
+
+	return version, err
 }

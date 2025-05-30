@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"r3/cache"
-	"r3/config"
 	"r3/data"
 	"r3/db"
 	"r3/handler"
@@ -17,21 +16,13 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func doImport(filePath string, attributeIdFiles uuid.UUID, recordId int64) error {
+func doTextWrite(fileName string, fileTextContent string, attributeIdFiles uuid.UUID, recordId int64) error {
 
-	if config.File.Paths.FileImport == "" {
-		return errConfigNoPathImport
-	}
 	if attributeIdFiles.IsNil() {
 		return errors.New("attribute ID is nil")
 	}
-	if filePath == "" {
-		return errPathEmpty
-	}
 
-	filePathSource := filepath.Join(config.File.Paths.FileImport, filePath)
-
-	log.Info(log.ContextFile, fmt.Sprintf("importing file '%s'", filePathSource))
+	log.Info(log.ContextFile, fmt.Sprintf("writing text file to attribute '%s'", attributeIdFiles))
 
 	// access schema cache
 	cache.Schema_mx.RLock()
@@ -53,10 +44,6 @@ func doImport(filePath string, attributeIdFiles uuid.UUID, recordId int64) error
 	}
 	cache.Schema_mx.RUnlock()
 
-	if err := checkImportPath(filePathSource, int64(atr.Length)); err != nil {
-		return err
-	}
-
 	// set file
 	fileId, err := uuid.NewV4()
 	if err != nil {
@@ -66,8 +53,8 @@ func doImport(filePath string, attributeIdFiles uuid.UUID, recordId int64) error
 	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
 	defer ctxCanc()
 
-	if err := data.SetFile(ctx, -1, attributeIdFiles, fileId, nil, pgtype.Text{String: filePathSource, Valid: true}, pgtype.Text{}, true); err != nil {
+	if err := data.SetFile(ctx, -1, attributeIdFiles, fileId, nil, pgtype.Text{}, pgtype.Text{String: fileTextContent, Valid: true}, true); err != nil {
 		return err
 	}
-	return applyFileToRecord(ctx, recordId, mod.Name, rel.Name, attributeIdFiles, fileId, filepath.Base(filePathSource))
+	return applyFileToRecord(ctx, recordId, mod.Name, rel.Name, attributeIdFiles, fileId, filepath.Base(fileName))
 }

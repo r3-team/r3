@@ -1,6 +1,7 @@
 package data
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -63,7 +64,7 @@ func GetFilePathVersion(fileId uuid.UUID, version int64) string {
 
 // attempts to store file upload
 func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
-	fileSourcePart *multipart.Part, fileSourcePath pgtype.Text, isNewFile bool) error {
+	fileSourcePart *multipart.Part, fileSourcePath pgtype.Text, fileSourceString pgtype.Text, isNewFile bool) error {
 
 	cache.Schema_mx.RLock()
 	attribute, exists := cache.AttributeIdMap[attributeId]
@@ -111,15 +112,16 @@ func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId u
 	if fileSourcePart != nil {
 
 		// write file from multipart form
-		dest, err := os.Create(filePath)
+		file, err := os.Create(filePath)
 		if err != nil {
 			return err
 		}
-		if _, err := io.Copy(dest, fileSourcePart); err != nil {
-			dest.Close()
+		defer file.Close()
+
+		if _, err := io.Copy(file, fileSourcePart); err != nil {
 			return err
 		}
-		if err := dest.Close(); err != nil {
+		if err := file.Close(); err != nil {
 			return err
 		}
 		fileName = fileSourcePart.FileName()
@@ -139,6 +141,25 @@ func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId u
 		}
 		fileName = filepath.Base(fileSourcePath.String)
 
+	} else if fileSourceString.Valid {
+
+		// write file from string
+		file, err := os.Create(filePath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		bufWriter := bufio.NewWriter(file)
+		if _, err := bufWriter.WriteString(fileSourceString.String); err != nil {
+			return err
+		}
+		if err := bufWriter.Flush(); err != nil {
+			return err
+		}
+		if err := file.Close(); err != nil {
+			return err
+		}
 	} else {
 		return fmt.Errorf("failed to set file, no file source defined")
 	}

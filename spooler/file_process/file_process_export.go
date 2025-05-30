@@ -1,12 +1,10 @@
 package file_process
 
 import (
-	"context"
 	"fmt"
 	"path/filepath"
 	"r3/config"
 	"r3/data"
-	"r3/db"
 	"r3/log"
 	"r3/tools"
 
@@ -26,14 +24,10 @@ func doExport(filePath string, fileId uuid.UUID, fileVersion pgtype.Int8, overwr
 		return errPathEmpty
 	}
 
-	// get latest file version if not defined
 	if !fileVersion.Valid {
-		// no rows is also an error, requested file version must exist
-		if err := db.Pool.QueryRow(context.Background(), `
-			SELECT MAX(version)
-			FROM instance.file_version
-			WHERE file_id = $1
-		`, fileId).Scan(&fileVersion.Int64); err != nil {
+		var err error
+		fileVersion.Int64, err = getLatestFileVersion(fileId)
+		if err != nil {
 			return err
 		}
 	}

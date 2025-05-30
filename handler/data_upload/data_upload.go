@@ -102,7 +102,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if err := data.SetFile(ctx, login.Id, attributeId, fileId, part, pgtype.Text{}, isNewFile); err != nil {
+		if err := data.SetFile(ctx, login.Id, attributeId, fileId, part, pgtype.Text{}, pgtype.Text{}, isNewFile); err != nil {
 			handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 			return
 		}
