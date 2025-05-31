@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"r3/schema"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
-func Get_tx(ctx context.Context, tx pgx.Tx, entity string, id uuid.UUID, expectedContents []string) (types.CaptionMap, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID, expectedContents []string) (types.CaptionMap, error) {
 
 	caps := make(types.CaptionMap)
 	for _, content := range expectedContents {

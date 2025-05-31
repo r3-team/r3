@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"r3/schema"
 	"r3/schema/compatible"
 	"r3/types"
 	"slices"
@@ -13,11 +14,9 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var entitiesAllowed = []string{"column", "collection_consumer", "field"}
+func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID, formContext pgtype.Text) (f types.OpenForm, err error) {
 
-func Get_tx(ctx context.Context, tx pgx.Tx, entity string, id uuid.UUID, formContext pgtype.Text) (f types.OpenForm, err error) {
-
-	if !slices.Contains(entitiesAllowed, entity) {
+	if !slices.Contains(schema.DbAssignedOpenForm, entity) {
 		return f, errors.New("invalid open form entity")
 	}
 
@@ -51,9 +50,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity string, id uuid.UUID, formCon
 	return f, err
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity string, id uuid.UUID, f types.OpenForm, context pgtype.Text) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID, f types.OpenForm, context pgtype.Text) error {
 
-	if !slices.Contains(entitiesAllowed, entity) {
+	if !slices.Contains(schema.DbAssignedOpenForm, entity) {
 		return errors.New("invalid open form entity")
 	}
 

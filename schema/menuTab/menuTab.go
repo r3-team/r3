@@ -52,7 +52,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.MenuTab
 			return menuTabs, err
 		}
 
-		mt.Captions, err = caption.Get_tx(ctx, tx, "menu_tab", mt.Id, []string{"menuTabTitle"})
+		mt.Captions, err = caption.Get_tx(ctx, tx, schema.DbMenuTab, mt.Id, []string{"menuTabTitle"})
 		if err != nil {
 			return menuTabs, err
 		}
@@ -63,7 +63,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.MenuTab
 
 func Set_tx(ctx context.Context, tx pgx.Tx, position int, mt types.MenuTab) error {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &mt.Id, "menu_tab", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &mt.Id, schema.DbMenuTab, "id")
 	if err != nil {
 		return err
 	}
@@ -178,7 +178,7 @@ func setMenus_tx(ctx context.Context, tx pgx.Tx, menuTabId uuid.UUID, parentId p
 		}
 
 		// set collections
-		if err := consumer.Set_tx(ctx, tx, "menu", m.Id, "menuDisplay", m.Collections); err != nil {
+		if err := consumer.Set_tx(ctx, tx, schema.DbMenu, m.Id, "menuDisplay", m.Collections); err != nil {
 			return err
 		}
 

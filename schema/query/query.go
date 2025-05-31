@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
 	"slices"
@@ -13,9 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var allowedEntities = []string{"api", "form", "field", "collection", "column", "query_filter_query"}
-
-func Get_tx(ctx context.Context, tx pgx.Tx, entity string, id uuid.UUID, filterIndex int, filterPosition int, filterSide int) (types.Query, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID, filterIndex int, filterPosition int, filterSide int) (types.Query, error) {
 
 	var q types.Query
 	q.Joins = make([]types.QueryJoin, 0)
@@ -24,8 +23,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity string, id uuid.UUID, filterI
 	q.Lookups = make([]types.QueryLookup, 0)
 	q.Choices = make([]types.QueryChoice, 0)
 
-	if !slices.Contains(allowedEntities, entity) {
-		return q, errors.New("bad entity")
+	if !slices.Contains(schema.DbAssignedQuery, entity) {
+		return q, errors.New("unknown query parent entity")
 	}
 
 	// sub query (via query filter) requires composite key
@@ -162,10 +161,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity string, id uuid.UUID, filterI
 	return q, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, filterIndex int,
+func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, filterIndex int,
 	filterPosition int, filterSide int, query types.Query) error {
 
-	if !slices.Contains(allowedEntities, entity) {
+	if !slices.Contains(schema.DbAssignedQuery, entity) {
 		return fmt.Errorf("unknown query parent entity '%s'", entity)
 	}
 
@@ -514,9 +513,7 @@ func SetFilterSide_tx(ctx context.Context, tx pgx.Tx, queryId uuid.UUID, filterI
 	}
 
 	if s.Content == "subQuery" {
-		if err := Set_tx(ctx, tx, "query_filter_query", queryId, filterIndex,
-			filterPosition, side, s.Query); err != nil {
-
+		if err := Set_tx(ctx, tx, schema.DbQueryFilterQuery, queryId, filterIndex, filterPosition, side, s.Query); err != nil {
 			return err
 		}
 	}

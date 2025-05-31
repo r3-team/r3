@@ -126,7 +126,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation) error {
 	}
 
 	isNew := rel.Id == uuid.Nil
-	known, err := schema.CheckCreateId_tx(ctx, tx, &rel.Id, "relation", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &rel.Id, schema.DbRelation, "id")
 	if err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation) error {
 				return err
 			}
 
-			if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, "relation", rel.Id); err != nil {
+			if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, schema.DbRelation, rel.Id); err != nil {
 				return fmt.Errorf("failed to recreate affected PG functions, %s", err)
 			}
 		}

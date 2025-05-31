@@ -43,7 +43,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Icon, e
 
 func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string, file []byte, setName bool) error {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &id, "icon", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &id, schema.DbIcon, "id")
 	if err != nil {
 		return err
 	}

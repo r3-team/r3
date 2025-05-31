@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"r3/log"
+	"r3/schema"
 	"r3/schema/api"
 	"r3/schema/article"
 	"r3/schema/attribute"
@@ -132,7 +133,7 @@ func deleteLoginForms_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, log
 	for _, entity := range loginForms {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "login_form", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbLoginForm, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -149,7 +150,7 @@ func deletePgTriggers_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, pgT
 	for _, trg := range pgTriggers {
 		idsKeep = append(idsKeep, trg.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "pg_trigger", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbPgTrigger, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -166,7 +167,7 @@ func deleteRelations_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, rela
 	for _, entity := range relations {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "relation", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbRelation, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -185,7 +186,7 @@ func deleteRelationPgIndexes_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UU
 			idsKeep = append(idsKeep, ind.Id)
 		}
 	}
-	idsDelete, err := importGetIdsToDeleteFromRelation_tx(ctx, tx, "pg_index", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromRelation_tx(ctx, tx, schema.DbPgIndex, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -204,7 +205,7 @@ func deleteRelationAttributes_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.U
 			idsKeep = append(idsKeep, atr.Id)
 		}
 	}
-	idsDelete, err := importGetIdsToDeleteFromRelation_tx(ctx, tx, "attribute", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromRelation_tx(ctx, tx, schema.DbAttribute, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -223,7 +224,7 @@ func deleteRelationPresets_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID
 			idsKeep = append(idsKeep, pre.Id)
 		}
 	}
-	idsDelete, err := importGetIdsToDeleteFromRelation_tx(ctx, tx, "preset", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromRelation_tx(ctx, tx, schema.DbPreset, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -240,7 +241,7 @@ func deleteCollections_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, co
 	for _, col := range collections {
 		idsKeep = append(idsKeep, col.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "collection", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbCollection, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -257,7 +258,7 @@ func deleteRoles_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, roles []
 	for _, entity := range roles {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "role", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbRole, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -274,7 +275,7 @@ func deleteMenuTabs_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, menuT
 	for _, mt := range menuTabs {
 		idsKeep = append(idsKeep, mt.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "menu_tab", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbMenuTab, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -291,7 +292,7 @@ func deleteForms_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, forms []
 	for _, entity := range forms {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "form", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbForm, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -422,7 +423,7 @@ func deleteFormFields_tx(ctx context.Context, tx pgx.Tx, form types.Form) error 
 	}
 
 	// delete fields
-	idsDelete, err = importGetIdsToDeleteFromForm_tx(ctx, tx, "field", form.Id, idsKeepFields)
+	idsDelete, err = importGetIdsToDeleteFromForm_tx(ctx, tx, schema.DbField, form.Id, idsKeepFields)
 	if err != nil {
 		return err
 	}
@@ -434,7 +435,7 @@ func deleteFormFields_tx(ctx context.Context, tx pgx.Tx, form types.Form) error 
 	}
 
 	// delete tabs
-	idsDelete, err = importGetIdsToDeleteFromField_tx(ctx, tx, "tab", form.Id, idsKeepTabs)
+	idsDelete, err = importGetIdsToDeleteFromField_tx(ctx, tx, schema.DbTab, form.Id, idsKeepTabs)
 	if err != nil {
 		return err
 	}
@@ -446,7 +447,7 @@ func deleteFormFields_tx(ctx context.Context, tx pgx.Tx, form types.Form) error 
 	}
 
 	// delete columns
-	idsDelete, err = importGetIdsToDeleteFromField_tx(ctx, tx, "column", form.Id, idsKeepColumns)
+	idsDelete, err = importGetIdsToDeleteFromField_tx(ctx, tx, schema.DbColumn, form.Id, idsKeepColumns)
 	if err != nil {
 		return err
 	}
@@ -463,7 +464,7 @@ func deleteIcons_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, icons []
 	for _, entity := range icons {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "icon", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbIcon, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -480,7 +481,7 @@ func deleteArticles_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, artic
 	for _, entity := range articles {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "article", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbArticle, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -497,7 +498,7 @@ func deleteApis_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, apis []ty
 	for _, entity := range apis {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "api", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbApi, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -514,7 +515,7 @@ func deleteClientEvents_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, c
 	for _, entity := range clientEvents {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "client_event", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbClientEvent, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -531,7 +532,7 @@ func deleteVariables_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, vari
 	for _, entity := range variables {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "variable", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbVariable, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -548,7 +549,7 @@ func deleteWidgets_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, widget
 	for _, entity := range widgets {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "widget", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbWidget, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -565,7 +566,7 @@ func deletePgFunctions_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, pg
 	for _, entity := range pgFunctions {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "pg_function", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbPgFunction, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -582,7 +583,7 @@ func deleteJsFunctions_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, js
 	for _, entity := range jsFunctions {
 		idsKeep = append(idsKeep, entity.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, "js_function", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbJsFunction, moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -596,15 +597,11 @@ func deleteJsFunctions_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, js
 }
 
 // lookups
-func importGetIdsToDeleteFromModule_tx(ctx context.Context, tx pgx.Tx, entity string,
-	moduleId uuid.UUID, idsKeep []uuid.UUID) ([]uuid.UUID, error) {
+func importGetIdsToDeleteFromModule_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, moduleId uuid.UUID, idsKeep []uuid.UUID) ([]uuid.UUID, error) {
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !slices.Contains([]string{"api", "article", "client_event", "collection",
-		"form", "icon", "js_function", "login_form", "menu", "menu_tab", "pg_function",
-		"pg_trigger", "relation", "role", "variable", "widget"}, entity) {
-
+	if !slices.Contains(schema.DbTransferDeleteModule, entity) {
 		return idsDelete, errors.New("unsupported type for delete check")
 	}
 
@@ -620,12 +617,11 @@ func importGetIdsToDeleteFromModule_tx(ctx context.Context, tx pgx.Tx, entity st
 	}
 	return idsDelete, nil
 }
-func importGetIdsToDeleteFromRelation_tx(ctx context.Context, tx pgx.Tx, entity string,
-	moduleId uuid.UUID, idsKeep []uuid.UUID) ([]uuid.UUID, error) {
+func importGetIdsToDeleteFromRelation_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, moduleId uuid.UUID, idsKeep []uuid.UUID) ([]uuid.UUID, error) {
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !slices.Contains([]string{"attribute", "pg_index", "preset"}, entity) {
+	if !slices.Contains(schema.DbTransferDeleteRelation, entity) {
 		return idsDelete, errors.New("unsupport type for delete check")
 	}
 
@@ -645,12 +641,11 @@ func importGetIdsToDeleteFromRelation_tx(ctx context.Context, tx pgx.Tx, entity 
 	}
 	return idsDelete, nil
 }
-func importGetIdsToDeleteFromForm_tx(ctx context.Context, tx pgx.Tx, entity string,
-	formId uuid.UUID, idsKeep []uuid.UUID) ([]uuid.UUID, error) {
+func importGetIdsToDeleteFromForm_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, formId uuid.UUID, idsKeep []uuid.UUID) ([]uuid.UUID, error) {
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !slices.Contains([]string{"field"}, entity) {
+	if !slices.Contains(schema.DbTransferDeleteForm, entity) {
 		return idsDelete, errors.New("unsupport type for delete check")
 	}
 
@@ -666,12 +661,11 @@ func importGetIdsToDeleteFromForm_tx(ctx context.Context, tx pgx.Tx, entity stri
 	}
 	return idsDelete, nil
 }
-func importGetIdsToDeleteFromField_tx(ctx context.Context, tx pgx.Tx, entity string,
-	formId uuid.UUID, idsKeep []uuid.UUID) ([]uuid.UUID, error) {
+func importGetIdsToDeleteFromField_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, formId uuid.UUID, idsKeep []uuid.UUID) ([]uuid.UUID, error) {
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !slices.Contains([]string{"column", "tab"}, entity) {
+	if !slices.Contains(schema.DbTransferDeleteField, entity) {
 		return idsDelete, errors.New("unsupport type for delete check")
 	}
 

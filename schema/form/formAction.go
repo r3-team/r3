@@ -33,7 +33,7 @@ func getActions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.Fo
 	}
 
 	for i, a := range actions {
-		actions[i].Captions, err = caption.Get_tx(ctx, tx, "form_action", a.Id, []string{"formActionTitle"})
+		actions[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbFormAction, a.Id, []string{"formActionTitle"})
 		if err != nil {
 			return actions, err
 		}
@@ -65,7 +65,7 @@ func setActions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, actions []t
 
 func setAction_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, a types.FormAction, position int) (uuid.UUID, error) {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &a.Id, "form_action", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &a.Id, schema.DbFormAction, "id")
 	if err != nil {
 		return a.Id, err
 	}

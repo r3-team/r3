@@ -3,6 +3,7 @@ package schema
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -171,9 +172,9 @@ func GetPgIndexNamesById_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (strin
 	return moduleName, relationName, nil
 }
 
-func GetIsFormBound_tx(ctx context.Context, tx pgx.Tx, entity string, id uuid.UUID) (bool, error) {
+func GetIsFormBound_tx(ctx context.Context, tx pgx.Tx, entity DbEntity, id uuid.UUID) (bool, error) {
 
-	if entity != "js_function" && entity != "variable" {
+	if !slices.Contains(DbBoundForm, entity) {
 		return false, fmt.Errorf("invalid entity '%s'", entity)
 	}
 

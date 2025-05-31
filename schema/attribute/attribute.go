@@ -95,7 +95,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Attri
 	}
 
 	for i, atr := range attributes {
-		attributes[i].Captions, err = caption.Get_tx(ctx, tx, "attribute", atr.Id, []string{"attributeTitle"})
+		attributes[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbAttribute, atr.Id, []string{"attributeTitle"})
 		if err != nil {
 			return attributes, err
 		}
@@ -134,7 +134,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute) error {
 	isNew := atr.Id == uuid.Nil
 	isRel := schema.IsContentRelationship(atr.Content)
 	isFiles := schema.IsContentFiles(atr.Content)
-	known, err := schema.CheckCreateId_tx(ctx, tx, &atr.Id, "attribute", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &atr.Id, schema.DbAttribute, "id")
 	if err != nil {
 		return err
 	}
@@ -488,7 +488,7 @@ func setName_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, name string, ignor
 		}
 	}
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &id, "attribute", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &id, schema.DbAttribute, "id")
 	if err != nil || !known {
 		return err
 	}
@@ -516,7 +516,7 @@ func setName_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, name string, ignor
 			return err
 		}
 
-		if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, "attribute", id); err != nil {
+		if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, schema.DbAttribute, id); err != nil {
 			return err
 		}
 	}

@@ -44,15 +44,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Collect
 
 	// collect query and columns
 	for i, c := range collections {
-		c.Query, err = query.Get_tx(ctx, tx, "collection", c.Id, 0, 0, 0)
+		c.Query, err = query.Get_tx(ctx, tx, schema.DbCollection, c.Id, 0, 0, 0)
 		if err != nil {
 			return collections, err
 		}
-		c.Columns, err = column.Get_tx(ctx, tx, "collection", c.Id)
+		c.Columns, err = column.Get_tx(ctx, tx, schema.DbCollection, c.Id)
 		if err != nil {
 			return collections, err
 		}
-		c.InHeader, err = consumer.Get_tx(ctx, tx, "collection", c.Id, "headerDisplay")
+		c.InHeader, err = consumer.Get_tx(ctx, tx, schema.DbCollection, c.Id, "headerDisplay")
 		if err != nil {
 			return collections, err
 		}
@@ -64,7 +64,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Collect
 func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, iconId pgtype.UUID, name string,
 	columns []types.Column, queryIn types.Query, inHeader []types.CollectionConsumer) error {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &id, "collection", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &id, schema.DbCollection, "id")
 	if err != nil {
 		return err
 	}
@@ -85,11 +85,11 @@ func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, ic
 			return err
 		}
 	}
-	if err := query.Set_tx(ctx, tx, "collection", id, 0, 0, 0, queryIn); err != nil {
+	if err := query.Set_tx(ctx, tx, schema.DbCollection, id, 0, 0, 0, queryIn); err != nil {
 		return err
 	}
-	if err := column.Set_tx(ctx, tx, "collection", id, columns); err != nil {
+	if err := column.Set_tx(ctx, tx, schema.DbCollection, id, columns); err != nil {
 		return err
 	}
-	return consumer.Set_tx(ctx, tx, "collection", id, "headerDisplay", inHeader)
+	return consumer.Set_tx(ctx, tx, schema.DbCollection, id, "headerDisplay", inHeader)
 }

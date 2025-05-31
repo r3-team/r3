@@ -133,7 +133,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, er
 			return modules, err
 		}
 
-		mod.Captions, err = caption.Get_tx(ctx, tx, "module", mod.Id, []string{"moduleTitle"})
+		mod.Captions, err = caption.Get_tx(ctx, tx, schema.DbModule, mod.Id, []string{"moduleTitle"})
 		if err != nil {
 			return modules, err
 		}
@@ -157,7 +157,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 	}
 
 	create := mod.Id == uuid.Nil
-	known, err := schema.CheckCreateId_tx(ctx, tx, &mod.Id, "module", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &mod.Id, schema.DbModule, "id")
 	if err != nil {
 		return mod.Id, err
 	}
@@ -198,7 +198,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 				return mod.Id, err
 			}
 
-			if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, "module", mod.Id); err != nil {
+			if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, schema.DbModule, mod.Id); err != nil {
 				return mod.Id, fmt.Errorf("failed to recreate affected PG functions, %s", err)
 			}
 		}
@@ -341,7 +341,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 	}
 
 	// set help articles
-	if err := article.Assign_tx(ctx, tx, "module", mod.Id, mod.ArticleIdsHelp); err != nil {
+	if err := article.Assign_tx(ctx, tx, schema.DbModule, mod.Id, mod.ArticleIdsHelp); err != nil {
 		return mod.Id, err
 	}
 

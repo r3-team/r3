@@ -44,7 +44,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Variabl
 
 func Set_tx(ctx context.Context, tx pgx.Tx, v types.Variable) error {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &v.Id, "variable", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &v.Id, schema.DbVariable, "id")
 	if err != nil {
 		return err
 	}

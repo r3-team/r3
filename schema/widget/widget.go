@@ -41,11 +41,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Widget,
 
 	// get collections & captions
 	for i, w := range widgets {
-		widgets[i].Captions, err = caption.Get_tx(ctx, tx, "widget", w.Id, []string{"widgetTitle"})
+		widgets[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbWidget, w.Id, []string{"widgetTitle"})
 		if err != nil {
 			return widgets, err
 		}
-		widgets[i].Collection, err = consumer.GetOne_tx(ctx, tx, "widget", w.Id, "widgetDisplay")
+		widgets[i].Collection, err = consumer.GetOne_tx(ctx, tx, schema.DbWidget, w.Id, "widgetDisplay")
 		if err != nil {
 			return widgets, err
 		}
@@ -55,7 +55,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Widget,
 
 func Set_tx(ctx context.Context, tx pgx.Tx, widget types.Widget) error {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &widget.Id, "widget", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &widget.Id, schema.DbWidget, "id")
 	if err != nil {
 		return err
 	}
@@ -78,9 +78,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, widget types.Widget) error {
 	}
 
 	// set collection
-	if err := consumer.Set_tx(ctx, tx, "widget", widget.Id, "widgetDisplay",
-		[]types.CollectionConsumer{widget.Collection}); err != nil {
-
+	if err := consumer.Set_tx(ctx, tx, schema.DbWidget, widget.Id, "widgetDisplay", []types.CollectionConsumer{widget.Collection}); err != nil {
 		return err
 	}
 

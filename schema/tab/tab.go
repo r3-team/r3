@@ -13,17 +13,15 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-var allowedEntities = []string{"field"}
-
 func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	_, err := tx.Exec(ctx, `DELETE FROM app.tab WHERE id = $1`, id)
 	return err
 }
 
-func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID) ([]types.Tab, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID) ([]types.Tab, error) {
 	tabs := make([]types.Tab, 0)
 
-	if !slices.Contains(allowedEntities, entity) {
+	if !slices.Contains(schema.DbAssignedTab, entity) {
 		return tabs, errors.New("bad entity")
 	}
 
@@ -47,7 +45,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID) (
 	}
 
 	for i, tab := range tabs {
-		tabs[i].Captions, err = caption.Get_tx(ctx, tx, "tab", tab.Id, []string{"tabTitle"})
+		tabs[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbTab, tab.Id, []string{"tabTitle"})
 		if err != nil {
 			return tabs, err
 		}
@@ -55,12 +53,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID) (
 	return tabs, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, position int, tab types.Tab) (uuid.UUID, error) {
-	if !slices.Contains(allowedEntities, entity) {
+func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, position int, tab types.Tab) (uuid.UUID, error) {
+	if !slices.Contains(schema.DbAssignedTab, entity) {
 		return tab.Id, errors.New("bad entity")
 	}
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &tab.Id, "tab", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &tab.Id, schema.DbTab, "id")
 	if err != nil {
 		return tab.Id, err
 	}

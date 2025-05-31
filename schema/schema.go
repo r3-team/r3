@@ -9,11 +9,144 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+type (
+	DbEntity string
+)
+
+const (
+	// DB entities accessed throughout the schema (for safe, central reference for dynamic queries)
+	DbApi                   DbEntity = "api"
+	DbArticle               DbEntity = "article"
+	DbAttribute             DbEntity = "attribute"
+	DbClientEvent           DbEntity = "client_event"
+	DbCollection            DbEntity = "collection"
+	DbCollectionConsumer    DbEntity = "collection_consumer"
+	DbColumn                DbEntity = "column"
+	DbField                 DbEntity = "field"
+	DbFieldButton           DbEntity = "field_button"
+	DbFieldCalendar         DbEntity = "field_calendar"
+	DbFieldChart            DbEntity = "field_chart"
+	DbFieldContainer        DbEntity = "field_container"
+	DbFieldData             DbEntity = "field_data"
+	DbFieldDataRelationship DbEntity = "field_data_relationship"
+	DbFieldHeader           DbEntity = "field_header"
+	DbFieldKanban           DbEntity = "field_kanban"
+	DbFieldList             DbEntity = "field_list"
+	DbFieldVariable         DbEntity = "field_variable"
+	DbForm                  DbEntity = "form"
+	DbFormAction            DbEntity = "form_action"
+	DbFormState             DbEntity = "form_state"
+	DbIcon                  DbEntity = "icon"
+	DbJsFunction            DbEntity = "js_function"
+	DbLoginForm             DbEntity = "login_form"
+	DbMenu                  DbEntity = "menu"
+	DbMenuTab               DbEntity = "menu_tab"
+	DbModule                DbEntity = "module"
+	DbPgFunction            DbEntity = "pg_function"
+	DbPgFunctionSchedule    DbEntity = "pg_function_schedule"
+	DbPgIndex               DbEntity = "pg_index"
+	DbPgTrigger             DbEntity = "pg_trigger"
+	DbPreset                DbEntity = "preset"
+	DbQueryFilterQuery      DbEntity = "query_filter_query"
+	DbRelation              DbEntity = "relation"
+	DbRole                  DbEntity = "role"
+	DbSearchBar             DbEntity = "search_bar"
+	DbTab                   DbEntity = "tab"
+	DbVariable              DbEntity = "variable"
+	DbWidget                DbEntity = "widget"
+)
+
+var (
+	// elements assigned to DB entities
+	DbAssignedCollectionConsumers = []DbEntity{
+		DbCollection,
+		DbField,
+		DbMenu,
+		DbWidget,
+	}
+	DbAssignedColumn = []DbEntity{
+		DbApi,
+		DbCollection,
+		DbField,
+	}
+	DbAssignedOpenForm = []DbEntity{
+		DbColumn,
+		DbCollectionConsumer,
+		DbField,
+	}
+	DbAssignedQuery = []DbEntity{
+		DbApi,
+		DbCollection,
+		DbColumn,
+		DbField,
+		DbForm,
+		DbQueryFilterQuery,
+	}
+	DbAssignedTab = []DbEntity{
+		DbField,
+	}
+
+	// elements optionally bound to DB entities
+	DbBoundForm = []DbEntity{
+		DbJsFunction,
+		DbVariable,
+	}
+
+	// elements with dependencies to DB entities
+	DbDependsJsFunction = []DbEntity{
+		DbCollection,
+		DbField,
+		DbForm,
+		DbJsFunction,
+		DbPgFunction,
+		DbRole,
+		DbVariable,
+	}
+	DbDependsPgFunction = []DbEntity{
+		DbAttribute,
+		DbModule,
+		DbPgFunction,
+		DbRelation,
+	}
+
+	// element transfer delete check
+	DbTransferDeleteField = []DbEntity{
+		DbColumn,
+		DbTab,
+	}
+	DbTransferDeleteForm = []DbEntity{
+		DbField,
+	}
+	DbTransferDeleteModule = []DbEntity{
+		DbApi,
+		DbArticle,
+		DbClientEvent,
+		DbCollection,
+		DbForm,
+		DbIcon,
+		DbJsFunction,
+		DbLoginForm,
+		DbMenu,
+		DbMenuTab,
+		DbPgFunction,
+		DbPgTrigger,
+		DbRelation,
+		DbRole,
+		DbVariable,
+		DbWidget,
+	}
+	DbTransferDeleteRelation = []DbEntity{
+		DbAttribute,
+		DbPgIndex,
+		DbPreset,
+	}
+)
+
 // checks the given ID
 // if nil, it is overwritten with a new one
 // if not nil, it is checked whether the ID is known already
 // returns whether the ID was already known
-func CheckCreateId_tx(ctx context.Context, tx pgx.Tx, id *uuid.UUID, relName string, pkName string) (bool, error) {
+func CheckCreateId_tx(ctx context.Context, tx pgx.Tx, id *uuid.UUID, entity DbEntity, pkName string) (bool, error) {
 
 	var err error
 	if *id == uuid.Nil {
@@ -24,7 +157,7 @@ func CheckCreateId_tx(ctx context.Context, tx pgx.Tx, id *uuid.UUID, relName str
 	var known bool
 	err = tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT EXISTS(SELECT * FROM app.%s WHERE "%s" = $1)
-	`, relName, pkName), id).Scan(&known)
+	`, entity, pkName), id).Scan(&known)
 
 	return known, err
 }

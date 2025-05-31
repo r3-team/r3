@@ -58,7 +58,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Role, e
 			return roles, err
 		}
 
-		r.Captions, err = caption.Get_tx(ctx, tx, "role", r.Id, []string{"roleTitle", "roleDesc"})
+		r.Captions, err = caption.Get_tx(ctx, tx, schema.DbRole, r.Id, []string{"roleTitle", "roleDesc"})
 		if err != nil {
 			return roles, err
 		}
@@ -131,7 +131,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, role types.Role) error {
 	// compatibility fix: missing role content <3.0
 	role = compatible.FixMissingRoleContent(role)
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &role.Id, "role", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &role.Id, schema.DbRole, "id")
 	if err != nil {
 		return err
 	}
