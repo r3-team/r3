@@ -14,7 +14,7 @@ type (
 )
 
 const (
-	// DB entities accessed throughout the schema (for safe, central reference for dynamic queries)
+	// DB relations accessed throughout the schema (central reference for dynamic queries)
 	DbApi                   DbEntity = "api"
 	DbArticle               DbEntity = "article"
 	DbAttribute             DbEntity = "attribute"
@@ -68,6 +68,7 @@ var (
 		DbApi,
 		DbCollection,
 		DbField,
+		DbSearchBar,
 	}
 	DbAssignedOpenForm = []DbEntity{
 		DbColumn,
@@ -81,6 +82,7 @@ var (
 		DbField,
 		DbForm,
 		DbQueryFilterQuery,
+		DbSearchBar,
 	}
 	DbAssignedTab = []DbEntity{
 		DbField,
@@ -132,6 +134,7 @@ var (
 		DbPgTrigger,
 		DbRelation,
 		DbRole,
+		DbSearchBar,
 		DbVariable,
 		DbWidget,
 	}

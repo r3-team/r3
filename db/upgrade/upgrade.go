@@ -125,7 +125,103 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- PG function cost
 			ALTER TABLE app.pg_function ADD COLUMN cost INTEGER NOT NULL DEFAULT 100;
 
-			-- file hander
+			-- search bar
+			CREATE TABLE IF NOT EXISTS app.search_bar (
+			    id uuid NOT NULL,
+				module_id uuid NOT NULL,
+				icon_id uuid,
+			    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+			    CONSTRAINT search_bar_pkey PRIMARY KEY (id),
+			    CONSTRAINT search_bar_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT search_bar_icon_id_fkey FOREIGN KEY (icon_id)
+					REFERENCES app.icon (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_search_bar_module_id_fkey ON app.search_bar USING btree (module_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_search_bar_icon_id_fkey   ON app.search_bar USING btree (icon_id   ASC NULLS LAST);
+			
+			ALTER TABLE app.column ADD COLUMN     search_bar_id uuid;
+			ALTER TABLE app.column ADD CONSTRAINT column_search_bar_id_fkey FOREIGN KEY (search_bar_id)
+				REFERENCES app.search_bar (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_column_search_bar_id_fkey
+			    ON app.column USING btree (search_bar_id ASC NULLS LAST);
+			
+			ALTER TABLE app.column DROP CONSTRAINT column_single_parent;
+			ALTER TABLE app.column ADD  CONSTRAINT column_single_parent CHECK (1 = (
+				CASE WHEN api_id        IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN collection_id IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN field_id      IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN search_bar_id IS NULL THEN 0 ELSE 1
+				END
+			));
+			
+			ALTER TABLE app.query ADD COLUMN     search_bar_id uuid;
+			ALTER TABLE app.query ADD CONSTRAINT query_search_bar_id_fkey FOREIGN KEY (search_bar_id)
+				REFERENCES app.search_bar (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_query_search_bar_id_fkey
+			    ON app.query USING btree (search_bar_id ASC NULLS LAST);
+			
+			ALTER TABLE app.query DROP CONSTRAINT query_single_parent;
+			ALTER TABLE app.query ADD  CONSTRAINT query_single_parent CHECK (1 = (
+				CASE WHEN api_id                IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN collection_id         IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN column_id             IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN field_id              IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN form_id               IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN query_filter_query_id IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN search_bar_id         IS NULL THEN 0 ELSE 1
+				END
+			));
+			
+			ALTER TABLE app.role_access ADD COLUMN     search_bar_id uuid;
+			ALTER TABLE app.role_access ADD CONSTRAINT role_access_search_bar_id_fkey
+				FOREIGN KEY (search_bar_id)
+				REFERENCES app.search_bar (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_role_access_search_bar_id_fkey
+   				ON app.role_access USING btree(search_bar_id ASC NULLS LAST);
+			
+			ALTER TYPE app.caption_content ADD VALUE 'searchBarTitle';
+			
+			ALTER TABLE app.caption ADD COLUMN     search_bar_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_search_bar_id_fkey FOREIGN KEY (search_bar_id)
+				REFERENCES app.search_bar (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_search_bar_id_fkey
+				ON app.caption USING BTREE (search_bar_id ASC NULLS LAST);
+
+			ALTER TABLE instance.caption ADD COLUMN search_bar_id uuid;
+			ALTER TABLE instance.caption ADD CONSTRAINT caption_search_bar_id_fkey FOREIGN KEY (search_bar_id)
+				REFERENCES app.search_bar (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_search_bar_id_fkey
+				ON instance.caption USING BTREE (search_bar_id ASC NULLS LAST);
+
+			-- file processing
 			CREATE TYPE instance.file_spool_content AS ENUM ('export', 'exportText', 'import', 'importText','textRead', 'textWrite');
 			CREATE TABLE IF NOT EXISTS instance.file_spool (
 			    id UUID NOT NULL DEFAULT gen_random_uuid(),

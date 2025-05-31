@@ -41,6 +41,7 @@ type Module struct {
 	Collections           []Collection      `json:"collections"`
 	Apis                  []Api             `json:"apis"`
 	ClientEvents          []ClientEvent     `json:"clientEvents"`
+	SearchBars            []SearchBar       `json:"searchBars"`
 	Variables             []Variable        `json:"variables"`
 	Widgets               []Widget          `json:"widgets"`
 	ArticleIdsHelp        []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
@@ -522,6 +523,7 @@ type Role struct {
 	AccessCollections  map[uuid.UUID]int `json:"accessCollections"`
 	AccessMenus        map[uuid.UUID]int `json:"accessMenus"`
 	AccessRelations    map[uuid.UUID]int `json:"accessRelations"`
+	AccessSearchBars   map[uuid.UUID]int `json:"accessSearchBars"`
 	AccessWidgets      map[uuid.UUID]int `json:"accessWidgets"`
 	Captions           CaptionMap        `json:"captions"`
 }
@@ -611,6 +613,14 @@ type ClientEvent struct {
 	JsFunctionId    pgtype.UUID `json:"jsFunctionId"`
 	PgFunctionId    pgtype.UUID `json:"pgFunctionId"`
 	Captions        CaptionMap  `json:"captions"`
+}
+type SearchBar struct {
+	Id       uuid.UUID   `json:"id"`
+	ModuleId uuid.UUID   `json:"moduleId"`
+	IconId   pgtype.UUID `json:"iconId"`
+	Name     string      `json:"name"`
+	Columns  []Column    `json:"columns"`
+	Query    Query       `json:"query"`
 }
 type Variable struct {
 	Id         uuid.UUID   `json:"id"`

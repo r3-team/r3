@@ -100,6 +100,7 @@ func load_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 		Collection:  make(map[uuid.UUID]int),
 		Menu:        make(map[uuid.UUID]int),
 		Relation:    make(map[uuid.UUID]int),
+		SearchBar:   make(map[uuid.UUID]int),
 		Widget:      make(map[uuid.UUID]int),
 	}
 
@@ -147,6 +148,13 @@ func load_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 				loginIdMapAccess[loginId].Relation[id] < access {
 
 				loginIdMapAccess[loginId].Relation[id] = access
+			}
+		}
+		for id, access := range role.AccessSearchBars {
+			if _, exists := loginIdMapAccess[loginId].SearchBar[id]; !exists ||
+				loginIdMapAccess[loginId].SearchBar[id] < access {
+
+				loginIdMapAccess[loginId].SearchBar[id] = access
 			}
 		}
 		for id, access := range role.AccessWidgets {

@@ -17,6 +17,7 @@ type LoginAccess struct {
 	Collection  map[uuid.UUID]int `json:"collection"`  // effective access to specific collection
 	Menu        map[uuid.UUID]int `json:"menu"`        // effective access to specific menus
 	Relation    map[uuid.UUID]int `json:"relation"`    // effective access to specific relations
+	SearchBar   map[uuid.UUID]int `json:"searchBar"`   // effective access to specific search bars
 	Widget      map[uuid.UUID]int `json:"widget"`      // effective access to specific widgets
 }
 type LoginAuthResult struct {

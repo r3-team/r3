@@ -25,6 +25,7 @@ import (
 	"r3/schema/preset"
 	"r3/schema/relation"
 	"r3/schema/role"
+	"r3/schema/searchBar"
 	"r3/schema/tab"
 	"r3/schema/variable"
 	"r3/schema/widget"
@@ -104,6 +105,11 @@ func NotExisting_tx(ctx context.Context, tx pgx.Tx, module types.Module) error {
 
 	// client events
 	if err := deleteClientEvents_tx(ctx, tx, module.Id, module.ClientEvents); err != nil {
+		return err
+	}
+
+	// search bars
+	if err := deleteSearchBars_tx(ctx, tx, module.Id, module.SearchBars); err != nil {
 		return err
 	}
 
@@ -522,6 +528,23 @@ func deleteClientEvents_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, c
 	for _, id := range idsDelete {
 		log.Info(log.ContextTransfer, fmt.Sprintf("del client event %s", id.String()))
 		if err := clientEvent.Del_tx(ctx, tx, id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func deleteSearchBars_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, bars []types.SearchBar) error {
+	idsKeep := make([]uuid.UUID, 0)
+	for _, entity := range bars {
+		idsKeep = append(idsKeep, entity.Id)
+	}
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbSearchBar, moduleId, idsKeep)
+	if err != nil {
+		return err
+	}
+	for _, id := range idsDelete {
+		log.Info(log.ContextTransfer, fmt.Sprintf("del search bar %s", id.String()))
+		if err := searchBar.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}

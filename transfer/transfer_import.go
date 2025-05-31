@@ -32,6 +32,7 @@ import (
 	"r3/schema/preset"
 	"r3/schema/relation"
 	"r3/schema/role"
+	"r3/schema/searchBar"
 	"r3/schema/variable"
 	"r3/schema/widget"
 	"r3/tools"
@@ -322,6 +323,22 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		log.Info(log.ContextTransfer, fmt.Sprintf("set API %s", e.Id))
 
 		if err := importCheckResultAndApply(ctx, tx, api.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+			return err
+		}
+	}
+
+	// search bars
+	for _, e := range mod.SearchBars {
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info(log.ContextTransfer, fmt.Sprintf("set search bar %s", e.Id))
+
+		if err := importCheckResultAndApply(ctx, tx, searchBar.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
