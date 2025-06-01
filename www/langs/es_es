@@ -596,9 +596,6 @@
 				"versionNewHint": "Duplica esta API con un nuevo número de versión."
 			},
 			"calls": "Llamadas",
-			"columnSettings": "Configuración de columnas",
-			"columnsAvailable": "Columnas disponibles",
-			"columnsTarget": "Columnas activas",
 			"content": "Tipo de API",
 			"contentValue": "REST",
 			"dialog": {
@@ -783,23 +780,17 @@
 			"titleNew": "Nuevo evento del cliente"
 		},
 		"collection": {
-			"columnSettings": "Configuración de columnas",
-			"columnsAvailable": "Columnas disponibles",
-			"columnsTarget": "Columnas activas",
 			"dialog": {
 				"delete": "¿Estás seguro de que deseas eliminar esta colección?"
 			},
 			"inHeader": "Mostrar en el encabezado",
-			"new": "Nueva colección",
 			"previewHint": "Valores de la colección para el usuario conectado. Las colecciones se recuperan al cargar la página (F5 para recargar) si están habilitadas dentro de los roles asignados.",
-			"query": "Consulta",
 			"title": "Colecciones",
 			"titleOne": "Colección '{NAME}'"
 		},
 		"collectionInput": {
 			"collection": "Colección",
 			"column": "Valor(es) de la columna",
-			"formIdOpen": "Abrir formulario",
 			"multiValue": "Entrada múltiple",
 			"noDisplayEmpty": "Ocultar si está vacío",
 			"onMobile": "Mostrar en móvil",
@@ -1574,6 +1565,7 @@
 			"relationEncryption": "Cifrado de extremo a extremo",
 			"relationEncryptionHint": "Habilita el cifrado de extremo a extremo (E2EE) para atributos en esta relación. E2EE tiene beneficios y desventajas - por favor, lee cuidadosamente la documentación del Constructor antes de usarlo. Este ajuste no puede cambiarse más tarde.",
 			"role": "Nuevo rol",
+			"searchBar": "New search bar",
 			"template": {
 				"loginSync": "Función de sincronización de usuario",
 				"mailsFromSpooler": "Procesamiento de correo electrónico (entrante)",
@@ -1743,6 +1735,13 @@
 			},
 			"title": "Roles",
 			"titleOne": "Rol '{NAME}'"
+		},
+		"searchBar": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this search bar?"
+			},
+			"title": "Search bars",
+			"titleOne": "Search bar '{NAME}'"
 		},
 		"start": {
 			"appVisible": "La aplicación es visible para usuarios con roles asignados",
@@ -2187,7 +2186,10 @@
 		"collection": "Colección",
 		"collections": "Colecciones",
 		"color": "Color",
+		"columnSettings": "Configuración de columnas",
 		"columns": "Columnas",
+		"columnsActive": "Columnas activas",
+		"columnsAvailable": "Columnas disponibles",
 		"comments": "Comentarios",
 		"content": "Contenido",
 		"contextHelp": "Ayuda contextual",
@@ -2228,6 +2230,7 @@
 		"filters": "Filtros",
 		"form": "Formulario",
 		"formActions": "Acciones de formulario",
+		"formOpen": "Abrir formulario",
 		"forms": "Formularios",
 		"functions": "Funciones",
 		"global": "Global",
@@ -2320,6 +2323,8 @@
 		"returns": "Devuelve",
 		"role": "Rol",
 		"roles": "Roles",
+		"searchBar": "Search bar",
+		"searchBars": "Search bars",
 		"selected": "Seleccionado",
 		"selectedMaxOne": "Seleccionado (máx. 1)",
 		"settings": "Configuración",

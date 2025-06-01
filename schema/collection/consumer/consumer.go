@@ -32,7 +32,7 @@ func GetOne_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId 
 		return c, err
 	}
 
-	c.OpenForm, err = openForm.Get_tx(ctx, tx, "collection_consumer", c.Id, pgtype.Text{})
+	c.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbCollectionConsumer, c.Id, pgtype.Text{})
 	if err != nil {
 		return c, err
 	}
@@ -65,7 +65,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 	}
 
 	for i, c := range consumers {
-		consumers[i].OpenForm, err = openForm.Get_tx(ctx, tx, "collection_consumer", c.Id, pgtype.Text{})
+		consumers[i].OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbCollectionConsumer, c.Id, pgtype.Text{})
 		if err != nil {
 			return consumers, err
 		}

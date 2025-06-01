@@ -621,6 +621,8 @@ type SearchBar struct {
 	Name     string      `json:"name"`
 	Columns  []Column    `json:"columns"`
 	Query    Query       `json:"query"`
+	OpenForm OpenForm    `json:"openForm"`
+	Captions CaptionMap  `json:"captions"`
 }
 type Variable struct {
 	Id         uuid.UUID   `json:"id"`

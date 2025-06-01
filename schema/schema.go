@@ -47,6 +47,7 @@ const (
 	DbPgIndex               DbEntity = "pg_index"
 	DbPgTrigger             DbEntity = "pg_trigger"
 	DbPreset                DbEntity = "preset"
+	DbQueryChoice           DbEntity = "query_choice"
 	DbQueryFilterQuery      DbEntity = "query_filter_query"
 	DbRelation              DbEntity = "relation"
 	DbRole                  DbEntity = "role"
@@ -74,6 +75,7 @@ var (
 		DbColumn,
 		DbCollectionConsumer,
 		DbField,
+		DbSearchBar,
 	}
 	DbAssignedQuery = []DbEntity{
 		DbApi,

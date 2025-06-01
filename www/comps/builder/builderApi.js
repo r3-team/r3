@@ -395,7 +395,7 @@ let MyBuilderApi = {
 				
 					<!-- columns -->
 					<div class="builder-api-columns-active">
-						<h2>{{ capApp.columnsTarget }}</h2>
+						<h2>{{ capGen.columnsActive }}</h2>
 						<my-builder-columns groupName="columns"
 							@columns-set="columns = $event"
 							@column-id-show="toggleColumnOptions($event)"
@@ -410,7 +410,7 @@ let MyBuilderApi = {
 					</div>
 					
 					<div class="builder-api-columns-available">
-						<h2>{{ capApp.columnsAvailable }}</h2>
+						<h2>{{ capGen.columnsAvailable }}</h2>
 						<div class="builder-api-column-templates">
 							<my-builder-column-templates groupName="batches_columns"
 								@column-add="columns.push($event)"
@@ -465,7 +465,7 @@ let MyBuilderApi = {
 				<!-- column settings -->
 				<template v-if="columnShow !== false">
 					<br />
-					<h3 class="selected-ref">{{ capApp.columnSettings }}</h3>
+					<h3 class="selected-ref">{{ capGen.columnSettings }}</h3>
 					
 					<my-builder-query
 						v-if="columnShow.subQuery"

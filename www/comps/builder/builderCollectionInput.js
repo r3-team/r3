@@ -45,7 +45,7 @@ let MyBuilderCollectionInput = {
 			</tr>
 			<tr v-if="collectionSet && allowFormOpen">
 				<!-- form open input -->
-				<td>{{ capApp.formIdOpen }}</td>
+				<td>{{ capGen.formOpen }}</td>
 				<td>
 					<my-builder-open-form-input
 						@update:openForm="openFormInput = $event"

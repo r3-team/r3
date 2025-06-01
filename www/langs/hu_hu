@@ -596,9 +596,6 @@
 				"versionNewHint": "Ezzel a gombbal másolhat egy API-t egy új verzióval."
 			},
 			"calls": "Hívások",
-			"columnSettings": "Oszlopbeállítások",
-			"columnsAvailable": "Elérhető oszlopok",
-			"columnsTarget": "Aktív oszlopok",
 			"content": "API típus",
 			"contentValue": "REST",
 			"dialog": {
@@ -783,23 +780,17 @@
 			"titleNew": "New client event"
 		},
 		"collection": {
-			"columnSettings": "Oszlop Beállítások",
-			"columnsAvailable": "Elérhető Oszlopok",
-			"columnsTarget": "Aktív Oszlopok",
 			"dialog": {
 				"delete": "Biztos vagy benne, hogy törölni szeretnéd ezt a gyűjteményt?"
 			},
 			"inHeader": "Megjelenítés a Fejlécben",
-			"new": "Új Gyűjtemény",
 			"previewHint": "A gyűjtemény értékei a bejelentkezett felhasználó számára. A gyűjtemények betöltődnek a lap frissítésekor (F5), ha hozzá vannak rendelve szerepkörökhöz.",
-			"query": "Lekérdezés",
 			"title": "Gyűjtemények",
 			"titleOne": "Gyűjtemény \"{NAME}\""
 		},
 		"collectionInput": {
 			"collection": "Gyűjtemény",
 			"column": "Oszlop(ok) Értéke",
-			"formIdOpen": "Űrlap Megnyitása",
 			"multiValue": "Többértékű",
 			"noDisplayEmpty": "Elrejtés, ha üres",
 			"onMobile": "Mobil nézetben",
@@ -1574,6 +1565,7 @@
 			"relationEncryption": "Vége-ponttól-vége-pontig titkosítás",
 			"relationEncryptionHint": "Lehetővé teszi a vége-ponttól-vége-pontig titkosítást (E2EE) ennek az összefüggésnek az attribútumaira. Az E2EE-nek előnyei és hátrányai vannak - erről a Builder dokumentációban olvashat. Ezt a beállítást később nem lehet megváltoztatni.",
 			"role": "Új szerep",
+			"searchBar": "New search bar",
 			"template": {
 				"loginSync": "Login sync function",
 				"mailsFromSpooler": "E-mail feldolgozás (bejövő)",
@@ -1743,6 +1735,13 @@
 			},
 			"title": "Szerepek",
 			"titleOne": "Szerep \"{NAME}\""
+		},
+		"searchBar": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this search bar?"
+			},
+			"title": "Search bars",
+			"titleOne": "Search bar '{NAME}'"
 		},
 		"start": {
 			"appVisible": "Az alkalmazás látható a hozzárendelt szerepekkel rendelkező felhasználók számára",
@@ -2187,7 +2186,10 @@
 		"collection": "Gyűjtemény",
 		"collections": "Gyűjtemények",
 		"color": "Color",
+		"columnSettings": "Oszlopbeállítások",
 		"columns": "Columns",
+		"columnsActive": "Aktív oszlopok",
+		"columnsAvailable": "Elérhető oszlopok",
 		"comments": "Megjegyzések",
 		"content": "Tartalom",
 		"contextHelp": "Kontextussegítség",
@@ -2228,6 +2230,7 @@
 		"filters": "Szűrők",
 		"form": "Űrlap",
 		"formActions": "Form actions",
+		"formOpen": "Űrlap Megnyitása",
 		"forms": "Űrlapok",
 		"functions": "Functions",
 		"global": "Global",
@@ -2320,6 +2323,8 @@
 		"returns": "Returns",
 		"role": "Szerep",
 		"roles": "Szerepek",
+		"searchBar": "Search bar",
+		"searchBars": "Search bars",
 		"selected": "Kiválasztva",
 		"selectedMaxOne": "Kiválasztva (max. 1)",
 		"settings": "Beállítások",

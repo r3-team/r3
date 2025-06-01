@@ -596,9 +596,6 @@
 				"versionNewHint": "Duplique cette API avec un nouveau numéro de version."
 			},
 			"calls": "Appels",
-			"columnSettings": "Paramètres de colonne",
-			"columnsAvailable": "Colonnes disponibles",
-			"columnsTarget": "Colonnes actives",
 			"content": "Type d'API",
 			"contentValue": "REST",
 			"dialog": {
@@ -783,23 +780,17 @@
 			"titleNew": "New client event"
 		},
 		"collection": {
-			"columnSettings": "Paramètres de colonne",
-			"columnsAvailable": "Colonnes disponibles",
-			"columnsTarget": "Colonnes actives",
 			"dialog": {
 				"delete": "Êtes-vous sûr de vouloir supprimer cette collection ?"
 			},
 			"inHeader": "Afficher dans l'en-tête",
-			"new": "Nouvelle collection",
 			"previewHint": "Valeurs de collection pour l'utilisateur connecté. Les collections sont récupérées lors du chargement de la page (appuyez sur F5 pour recharger) si elles sont activées dans les rôles attribués.",
-			"query": "Requête",
 			"title": "Collections",
 			"titleOne": "Collection '{NAME}'"
 		},
 		"collectionInput": {
 			"collection": "Collection",
 			"column": "Valeur(s) de la colonne",
-			"formIdOpen": "Ouvrir le formulaire",
 			"multiValue": "Entrée multiple",
 			"noDisplayEmpty": "Masquer si vide",
 			"onMobile": "Afficher sur mobile",
@@ -1574,6 +1565,7 @@
 			"relationEncryption": "Chiffrement de bout en bout",
 			"relationEncryptionHint": "Active le chiffrement de bout en bout (E2EE) pour les attributs de cette relation. E2EE a des avantages et des inconvénients - veuillez lire attentivement la documentation du Builder avant de l'utiliser. Ce paramètre ne peut pas être modifié ultérieurement.",
 			"role": "Nouveau rôle",
+			"searchBar": "New search bar",
 			"template": {
 				"loginSync": "User sync function",
 				"mailsFromSpooler": "Traitement des e-mails (entrants)",
@@ -1743,6 +1735,13 @@
 			},
 			"title": "Rôles",
 			"titleOne": "Rôle '{NAME}'"
+		},
+		"searchBar": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this search bar?"
+			},
+			"title": "Search bars",
+			"titleOne": "Search bar '{NAME}'"
 		},
 		"start": {
 			"appVisible": "L'application est visible aux utilisateurs ayant des rôles assignés",
@@ -2187,7 +2186,10 @@
 		"collection": "Collection",
 		"collections": "Collections",
 		"color": "Couleur",
+		"columnSettings": "Paramètres de colonn",
 		"columns": "Columns",
+		"columnsActive": "Colonnes actives",
+		"columnsAvailable": "Colonnes disponibles",
 		"comments": "Commentaires",
 		"content": "Contenu",
 		"contextHelp": "Aide contextuelle",
@@ -2228,6 +2230,7 @@
 		"filters": "Filtres",
 		"form": "Formulaire",
 		"formActions": "Form actions",
+		"formOpen": "Ouvrir le formulaire",
 		"forms": "Formulaires",
 		"functions": "Functions",
 		"global": "Global",
@@ -2320,6 +2323,8 @@
 		"returns": "Returns",
 		"role": "Rôle",
 		"roles": "Rôles",
+		"searchBar": "Search bar",
+		"searchBars": "Search bars",
 		"selected": "Sélectionné",
 		"selectedMaxOne": "Sélectionné (max. 1)",
 		"settings": "Paramètres",

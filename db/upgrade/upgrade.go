@@ -220,6 +220,16 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			
 			CREATE INDEX fki_caption_search_bar_id_fkey
 				ON instance.caption USING BTREE (search_bar_id ASC NULLS LAST);
+			
+			ALTER TABLE app.open_form ADD COLUMN     search_bar_id UUID;
+			ALTER TABLE app.open_form ADD CONSTRAINT open_form_search_bar_id_fkey FOREIGN KEY (search_bar_id)
+				REFERENCES app.search_bar (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_open_form_search_bar_id_fkey ON app.open_form
+				USING BTREE (search_bar_id ASC NULLS LAST);
 
 			-- file processing
 			CREATE TYPE instance.file_spool_content AS ENUM ('export', 'exportText', 'import', 'importText','textRead', 'textWrite');

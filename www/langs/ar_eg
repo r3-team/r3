@@ -596,9 +596,6 @@
 				"versionNewHint": "يكرر واجهة برمجة التطبيقات هذه برقم إصدار جديد."
 			},
 			"calls": "المكالمات",
-			"columnSettings": "إعدادات العمود",
-			"columnsAvailable": "الأعمدة المتاحة",
-			"columnsTarget": "الأعمدة النشطة",
 			"content": "نوع واجهة برمجة التطبيقات",
 			"contentValue": "استراحة",
 			"dialog": {
@@ -783,23 +780,17 @@
 			"titleNew": "حدث العميل الجديد"
 		},
 		"collection": {
-			"columnSettings": "إعدادات العمود",
-			"columnsAvailable": "الأعمدة المتاحة",
-			"columnsTarget": "الأعمدة النشطة",
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف هذه المجموعة؟"
 			},
 			"inHeader": "تظهر في الرأس",
-			"new": "مجموعة جديدة",
 			"previewHint": "قيم المجموعة للمستخدم الذي قام بتسجيل الدخول. ",
-			"query": "استفسار",
 			"title": "المجموعات",
 			"titleOne": "المجموعة \"{NAME}\""
 		},
 		"collectionInput": {
 			"collection": "مجموعة",
 			"column": "القيمة (القيم) من العمود",
-			"formIdOpen": "فتح النموذج",
 			"multiValue": "مدخلات متعددة",
 			"noDisplayEmpty": "إخفاء إذا كانت فارغة",
 			"onMobile": "عرض على الجوال",
@@ -1574,6 +1565,7 @@
 			"relationEncryption": "التشفير من النهاية إلى النهاية",
 			"relationEncryptionHint": "لتمكين التشفير من طرف إلى طرف (E2EE) للسمات الموجودة في هذه العلاقة. ",
 			"role": "دور جديد",
+			"searchBar": "New search bar",
 			"template": {
 				"loginSync": "User sync function",
 				"mailsFromSpooler": "معالجة البريد الإلكتروني (الوارد)",
@@ -1743,6 +1735,13 @@
 			},
 			"title": "الأدوار",
 			"titleOne": "الدور \"{NAME}\""
+		},
+		"searchBar": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this search bar?"
+			},
+			"title": "Search bars",
+			"titleOne": "Search bar '{NAME}'"
 		},
 		"start": {
 			"appVisible": "التطبيق مرئي للمستخدمين الذين لديهم أدوار معينة",
@@ -2187,7 +2186,10 @@
 		"collection": "مجموعة",
 		"collections": "المجموعات",
 		"color": "لون",
+		"columnSettings": "إعدادات العمود",
 		"columns": "أعمدة",
+		"columnsActive": "الأعمدة النشطة",
+		"columnsAvailable": "الأعمدة المتاحة",
 		"comments": "تعليقات",
 		"content": "محتوى",
 		"contextHelp": "مساعدة السياق",
@@ -2228,6 +2230,7 @@
 		"filters": "المرشحات",
 		"form": "استمارة",
 		"formActions": "Form actions",
+		"formOpen": "فتح النموذج",
 		"forms": "النماذج",
 		"functions": "Functions",
 		"global": "Global",
@@ -2320,6 +2323,8 @@
 		"returns": "المرتجعات",
 		"role": "دور",
 		"roles": "الأدوار",
+		"searchBar": "Search bar",
+		"searchBars": "Search bars",
 		"selected": "مختارة",
 		"selectedMaxOne": "محدد (الحد الأقصى 1)",
 		"settings": "إعدادات",

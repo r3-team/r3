@@ -596,9 +596,6 @@
 				"versionNewHint": "Dupliziert diese API mit einer neuen Versionsnummer."
 			},
 			"calls": "Aufrufe",
-			"columnSettings": "Spalteneinstellungen",
-			"columnsAvailable": "Verfügbare Spalten",
-			"columnsTarget": "Aktive Spalten",
 			"content": "API-Typ",
 			"contentValue": "REST",
 			"dialog": {
@@ -783,23 +780,17 @@
 			"titleNew": "Neues Client-Ereignis"
 		},
 		"collection": {
-			"columnSettings": "Spalteneinstellungen",
-			"columnsAvailable": "Verfügbare Spalten",
-			"columnsTarget": "Aktive Spalten",
 			"dialog": {
 				"delete": "Bist du sicher, dass du diese Sammlung löschen möchtest?"
 			},
 			"inHeader": "In Titelzeile anzeigen",
-			"new": "Neue Sammlung",
 			"previewHint": "Sammlungswerte für den eingeloggten Benutzer. Sammlungen werden beim Seitenaufruf geladen (F5 zum neu laden) wenn sie in zugewiesenen Rollen aktiviert sind.",
-			"query": "Query",
 			"title": "Sammlungen",
 			"titleOne": "Sammlung \"{NAME}\""
 		},
 		"collectionInput": {
 			"collection": "Sammlung",
 			"column": "Wert(e) aus Spalte",
-			"formIdOpen": "Formular öffnen",
 			"multiValue": "Mehrfachauswahl",
 			"noDisplayEmpty": "Verstecken wenn leer",
 			"onMobile": "In mobiler Ansicht",
@@ -1574,6 +1565,7 @@
 			"relationEncryption": "Ende-zu-Ende-Verschlüsselung",
 			"relationEncryptionHint": "Erlaubt Ende-zu-Ende-Verschlüsselung (E2EE) für Attribute auf dieser Relation. E2EE hat Vor- und Nachteile - die Builder-Dokumentation sollte hierzu gelesen werden. Diese Einstellung kann nachträglich nicht geändert werden.",
 			"role": "Neue Rolle",
+			"searchBar": "Neue Suchleiste",
 			"template": {
 				"loginSync": "Benutzer-Sync-Funktion",
 				"mailsFromSpooler": "E-Mail-Verarbeitung (eingehend)",
@@ -1743,6 +1735,13 @@
 			},
 			"title": "Rollen",
 			"titleOne": "Role \"{NAME}\""
+		},
+		"searchBar": {
+			"dialog": {
+				"delete": "Bist du sicher, dass du diese Suchleiste löschen möchtest?"
+			},
+			"title": "Suchleisten",
+			"titleOne": "Suchleiste '{NAME}'"
 		},
 		"start": {
 			"appVisible": "Anwendung ist sichtbar für Benutzer mit zugewiesenen Rollen",
@@ -2187,7 +2186,10 @@
 		"collection": "Sammlung",
 		"collections": "Sammlungen",
 		"color": "Farbe",
+		"columnSettings": "Spalteneinstellungen",
 		"columns": "Spalten",
+		"columnsActive": "Aktive Spalten",
+		"columnsAvailable": "Verfügbare Spalten",
 		"comments": "Kommentare",
 		"content": "Inhalt",
 		"contextHelp": "Kontexthilfe",
@@ -2228,6 +2230,7 @@
 		"filters": "Filter",
 		"form": "Formular",
 		"formActions": "Formularaktionen",
+		"formOpen": "Formular öffnen",
 		"forms": "Formulare",
 		"functions": "Funktionen",
 		"global": "Global",
@@ -2320,6 +2323,8 @@
 		"returns": "Gibt zurück",
 		"role": "Rolle",
 		"roles": "Rollen",
+		"searchBar": "Suchleiste",
+		"searchBars": "Suchleisten",
 		"selected": "Ausgewählt",
 		"selectedMaxOne": "Ausgewählt (max. 1)",
 		"settings": "Einstellungen",

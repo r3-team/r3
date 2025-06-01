@@ -3,12 +3,15 @@ package searchBar
 import (
 	"context"
 	"r3/schema"
+	"r3/schema/caption"
 	"r3/schema/column"
+	"r3/schema/openForm"
 	"r3/schema/query"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
@@ -40,8 +43,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.SearchB
 	}
 	rows.Close()
 
-	// collect query and columns
 	for i, b := range bars {
+		b.Captions, err = caption.Get_tx(ctx, tx, schema.DbSearchBar, b.Id, []string{"searchBarTitle"})
+		if err != nil {
+			return bars, err
+		}
+		b.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbSearchBar, b.Id, pgtype.Text{})
+		if err != nil {
+			return bars, err
+		}
 		b.Query, err = query.Get_tx(ctx, tx, schema.DbSearchBar, b.Id, 0, 0, 0)
 		if err != nil {
 			return bars, err
@@ -65,9 +75,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, bar types.SearchBar) error {
 	if known {
 		if _, err := tx.Exec(ctx, `
 			UPDATE app.search_bar
-			SET icon_id = $1, name = $2
-			WHERE id = $3
-		`, bar.IconId, bar.IconId, bar.Id); err != nil {
+			SET icon_id = $1
+			WHERE id = $2
+		`, bar.IconId, bar.Id); err != nil {
 			return err
 		}
 	} else {
@@ -77,6 +87,12 @@ func Set_tx(ctx context.Context, tx pgx.Tx, bar types.SearchBar) error {
 		`, bar.Id, bar.IconId, bar.ModuleId, bar.Name); err != nil {
 			return err
 		}
+	}
+	if err := caption.Set_tx(ctx, tx, bar.Id, bar.Captions); err != nil {
+		return err
+	}
+	if err := openForm.Set_tx(ctx, tx, schema.DbSearchBar, bar.Id, bar.OpenForm, pgtype.Text{}); err != nil {
+		return err
 	}
 	if err := query.Set_tx(ctx, tx, schema.DbSearchBar, bar.Id, 0, 0, 0, bar.Query); err != nil {
 		return err

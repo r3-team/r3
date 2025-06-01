@@ -1,10 +1,10 @@
-import MyBuilderQuery                  from './builderQuery.js';
-import MyBuilderCollectionInput        from './builderCollectionInput.js';
-import MyBuilderColumnOptions          from './builderColumnOptions.js';
-import MyBuilderIconInput              from './builderIconInput.js';
-import {getItemTitleColumn}            from '../shared/builder.js';
-import {getCollectionConsumerTemplate} from '../shared/collection.js';
-import MyTabs                          from '../tabs.js';
+import MyBuilderCaption       from './builderCaption.js';
+import MyBuilderColumnOptions from './builderColumnOptions.js';
+import MyBuilderIconInput     from './builderIconInput.js';
+import MyBuilderOpenFormInput from './builderOpenFormInput.js';
+import MyBuilderQuery         from './builderQuery.js';
+import {getItemTitleColumn}   from '../shared/builder.js';
+import MyTabs                 from '../tabs.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
@@ -13,20 +13,21 @@ import {
 	copyValueDialog,
 	getNilUuid
 } from '../shared/generic.js';
-export {MyBuilderCollection as default};
+export {MyBuilderSearchBar as default};
 
-let MyBuilderCollection = {
-	name:'my-builder-collection',
+let MyBuilderSearchBar = {
+	name:'my-builder-search-bar',
 	components:{
+		MyBuilderCaption,
 		MyBuilderColumnOptions,
-		MyBuilderCollectionInput,
 		MyBuilderColumns,
 		MyBuilderColumnTemplates,
 		MyBuilderIconInput,
+		MyBuilderOpenFormInput,
 		MyBuilderQuery,
 		MyTabs
 	},
-	template:`<div class="builder-collection" v-if="collection">
+	template:`<div class="builder-search-bar" v-if="searchBar">
 		<div class="contentBox grow">
 			<div class="top">
 				<div class="area nowrap">
@@ -54,11 +55,6 @@ let MyBuilderCollection = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
-					<my-button
-						@trigger="showPreview = !showPreview"
-						:caption="capGen.preview"
-						:image="showPreview ? 'checkbox1.png' : 'checkbox0.png'"
-					/>
 				</div>
 				<div class="area nowrap">
 					<my-button image="visible1.png"
@@ -77,29 +73,10 @@ let MyBuilderCollection = {
 			
 			<div class="content no-padding">
 				
-				<!-- collection value preview -->
-				<div class="preview" v-if="showPreview">
-					<table>
-						<thead>
-							<tr>
-								<th v-for="c in collection.columns">
-									{{ getItemTitleColumn(c,true) }}
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="r in collectionRows">
-								<td v-for="v in r">{{ v }}</td>
-							</tr>
-						</tbody>
-					</table>
-					<p>{{ capApp.previewHint }}</p>
-				</div>
+				<div class="builder-search-bar-columns">
 				
-				<div class="builder-collection-columns">
-				
-					<!-- collection query columns -->
-					<div class="builder-collection-columns-active">
+					<!-- query columns -->
+					<div class="builder-search-bar-columns-active">
 						<h2>{{ capGen.columnsActive }}</h2>
 						<my-builder-columns groupName="columns"
 							@columns-set="columns = $event"
@@ -114,9 +91,9 @@ let MyBuilderCollection = {
 						/>
 					</div>
 					
-					<div class="builder-collection-columns-available">
+					<div class="builder-search-bar-columns-available">
 						<h2>{{ capGen.columnsAvailable }}</h2>
-						<div class="builder-collection-column-templates">
+						<div class="builder-search-bar-column-templates">
 							<my-builder-column-templates groupName="batches_columns"
 								@column-add="columns.push($event)"
 								:allowRelationships="true"
@@ -143,7 +120,7 @@ let MyBuilderCollection = {
 				:entriesText="[capGen.content,capGen.properties]"
 			/>
 			
-			<!-- collection content -->
+			<!-- content -->
 			<div class="content grow" v-if="tabTarget === 'content'">
 				<my-builder-query
 					@index-removed="removeIndex($event)"
@@ -204,13 +181,31 @@ let MyBuilderCollection = {
 				</template>
 			</div>
 			
-			<!-- collection properties -->
+			<!-- properties -->
 			<div class="content no-padding" v-if="tabTarget === 'properties'">
 				<table class="generic-table-vertical default-inputs">
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td><input v-model="name" :disabled="readonly" /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.title }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-builder-caption
+										v-model="captions.searchBarTitle"
+										:dynamicSize="true"
+										:language="builderLanguage"
+										:readonly="readonly"
+									/>
+									<my-button image="languages.png"
+										@trigger="$emit('next-language')"
+										:active="module.languages.length > 1"
+									/>
+								</div>
+							</td>
+							<td>{{ capApp.titleHint }}</td>
 						</tr>
 						<tr>
 							<td>{{ capGen.icon }}</td>
@@ -225,30 +220,14 @@ let MyBuilderCollection = {
 							</td>
 						</tr>
 						<tr>
+							<td>{{ capGen.formOpen }}</td>
 							<td>
-								<div class="column gap">
-									<span>{{ capApp.inHeader }}</span>
-									<my-button image="add.png"
-										@trigger="collectionAdd"
-										:active="!readonly"
-										:caption="capGen.button.add"
-										:naked="true"
-									/>
-								</div>
-							</td>
-							<td>
-								<my-builder-collection-input
-									v-for="(c,i) in inHeader"
-									@remove="collectionRemove(i)"
-									@update:consumer="collectionSet(i,$event)"
-									:allowFormOpen="true"
-									:allowRemove="true"
-									:consumer="c"
-									:fixedCollection="true"
-									:flagsEnable="['noDisplayEmpty','showRowCount']"
+								<my-builder-open-form-input
+									@update:openForm="openForm = $event"
+									:allowAllForms="true"
 									:module="module"
+									:openForm="openForm"
 									:readonly="readonly"
-									:showOnMobile="true"
 								/>
 							</td>
 						</tr>
@@ -280,32 +259,21 @@ let MyBuilderCollection = {
 			// inputs
 			columns:[],
 			iconId:null,
-			inHeader:[],
 			name:'',
+			openForm:null,
+			captions:{},
 			
 			// state
 			columnIdShow:null,
 			filtersDisable:[
-				'collection','field','fieldChanged','fieldValid','formChanged','formState','getter','javascript',
-				'record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew','variable'
+				'field','fieldChanged','fieldValid','formChanged','formState','getter','javascript',
+				'record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew'
 			],
-			showPreview:false,
 			showSidebar:true,
 			tabTarget:'content'
 		};
 	},
 	computed:{
-		collectionRows:(s) => {
-			const col = s.$store.getters.collectionIdMap[s.collection.id];
-			if(typeof col === 'undefined')
-				return [];
-			
-			let out = [];
-			for(const r of col) {
-				out.push(r.values);
-			}
-			return out;
-		},
 		columnShow:(s) => {
 			if(s.columnIdShow === null) return false;
 			
@@ -315,29 +283,29 @@ let MyBuilderCollection = {
 			}
 			return false;
 		},
-		hasChanges:(s) => s.name          !== s.collection.name
-			|| s.iconId                   !== s.collection.iconId
-			|| s.relationId               !== s.collection.query.relationId
-			|| s.fixedLimit               !== s.collection.query.fixedLimit
-			|| JSON.stringify(s.joins)    !== JSON.stringify(s.collection.query.joins)
-			|| JSON.stringify(s.filters)  !== JSON.stringify(s.collection.query.filters)
-			|| JSON.stringify(s.orders)   !== JSON.stringify(s.collection.query.orders)
-			|| JSON.stringify(s.columns)  !== JSON.stringify(s.collection.columns)
-			|| JSON.stringify(s.inHeader) !== JSON.stringify(s.collection.inHeader),
+		hasChanges:(s) => s.name          !== s.searchBar.name
+			|| s.iconId                   !== s.searchBar.iconId
+			|| s.relationId               !== s.searchBar.query.relationId
+			|| s.fixedLimit               !== s.searchBar.query.fixedLimit
+			|| JSON.stringify(s.joins)    !== JSON.stringify(s.searchBar.query.joins)
+			|| JSON.stringify(s.filters)  !== JSON.stringify(s.searchBar.query.filters)
+			|| JSON.stringify(s.orders)   !== JSON.stringify(s.searchBar.query.orders)
+			|| JSON.stringify(s.columns)  !== JSON.stringify(s.searchBar.columns)
+			|| JSON.stringify(s.captions) !== JSON.stringify(s.searchBar.captions)
+			|| JSON.stringify(s.openForm) !== JSON.stringify(s.searchBar.openForm),
 		
 		// simple
-		collection:(s) => typeof s.collectionIdMap[s.id] === 'undefined' ? false : s.collectionIdMap[s.id],
-		module:    (s) => s.moduleIdMap[s.collection.moduleId],
+		searchBar:(s) => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
+		module:   (s) => s.moduleIdMap[s.searchBar.moduleId],
 		
 		// stores
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
-		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
-		capApp:         (s) => s.$store.getters.captions.builder.collection,
-		capGen:         (s) => s.$store.getters.captions.generic
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		searchBarIdMap:(s) => s.$store.getters['schema/searchBarIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.searchBar,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	watch:{
-		collection:{
+		searchBar:{
 			handler() { this.reset(); },
 			immediate:true
 		}
@@ -345,24 +313,10 @@ let MyBuilderCollection = {
 	methods:{
 		// externals
 		copyValueDialog,
-		getCollectionConsumerTemplate,
 		getItemTitleColumn,
 		getNilUuid,
 		
 		// actions
-		collectionAdd() {
-			let v = JSON.parse(JSON.stringify(this.inHeader));
-			let c = this.getCollectionConsumerTemplate();
-			c.collectionId = this.collection.id;
-			v.push(c);
-			this.inHeader = v;
-		},
-		collectionRemove(i) {
-			this.inHeader.splice(i,1);
-		},
-		collectionSet(i,value) {
-			this.inHeader[i] = value;
-		},
 		columnSet(name,value) {
 			this.columnShow[name] = value;
 		},
@@ -380,17 +334,18 @@ let MyBuilderCollection = {
 			}
 		},
 		reset() {
-			if(!this.collection) return;
+			if(!this.searchBar) return;
 			
-			this.name       = this.collection.name;
-			this.iconId     = this.collection.iconId;
-			this.relationId = this.collection.query.relationId;
-			this.fixedLimit = this.collection.query.fixedLimit;
-			this.joins      = JSON.parse(JSON.stringify(this.collection.query.joins));
-			this.filters    = JSON.parse(JSON.stringify(this.collection.query.filters));
-			this.orders     = JSON.parse(JSON.stringify(this.collection.query.orders));
-			this.columns    = JSON.parse(JSON.stringify(this.collection.columns));
-			this.inHeader   = JSON.parse(JSON.stringify(this.collection.inHeader));
+			this.name       = this.searchBar.name;
+			this.iconId     = this.searchBar.iconId;
+			this.relationId = this.searchBar.query.relationId;
+			this.fixedLimit = this.searchBar.query.fixedLimit;
+			this.joins      = JSON.parse(JSON.stringify(this.searchBar.query.joins));
+			this.filters    = JSON.parse(JSON.stringify(this.searchBar.query.filters));
+			this.orders     = JSON.parse(JSON.stringify(this.searchBar.query.orders));
+			this.columns    = JSON.parse(JSON.stringify(this.searchBar.columns));
+			this.captions   = JSON.parse(JSON.stringify(this.searchBar.captions));
+			this.openForm   = JSON.parse(JSON.stringify(this.searchBar.openForm));
 			this.columnIdShow = null;
 		},
 		toggleColumnOptions(id) {
@@ -426,33 +381,34 @@ let MyBuilderCollection = {
 			});
 		},
 		del() {
-			ws.send('collection','del',{id:this.collection.id},true).then(
+			ws.send('searchBar','del',this.searchBar.id,true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
-					this.$router.push('/builder/collections/'+this.collection.moduleId);
+					this.$router.push('/builder/search-bars/'+this.searchBar.moduleId);
 				},
 				this.$root.genericError
 			);
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('collection','set',{
-					id:this.collection.id,
-					moduleId:this.collection.moduleId,
+				ws.prepare('searchBar','set',{
+					id:this.searchBar.id,
+					moduleId:this.searchBar.moduleId,
 					iconId:this.iconId,
 					name:this.name,
 					columns:this.replaceBuilderId(
 						JSON.parse(JSON.stringify(this.columns))
 					),
 					query:{
-						id:this.collection.query.id,
+						id:this.searchBar.query.id,
 						relationId:this.relationId,
 						joins:this.joins,
 						filters:this.filters,
 						orders:this.orders,
 						fixedLimit:this.fixedLimit
 					},
-					inHeader:this.inHeader
+					captions:this.captions,
+					openForm:this.openForm
 				}),
 				ws.prepare('schema','check',{moduleId:this.module.id})
 			],true).then(

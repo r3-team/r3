@@ -48,7 +48,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, captions types.Caption
 
 	for content, codes := range captions {
 
-		entityName, err := GetEntityName(content)
+		entity, err := GetEntityName(content)
 		if err != nil {
 			return err
 		}
@@ -56,9 +56,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, captions types.Caption
 		// delete captions for this content
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			DELETE FROM app.caption
-			WHERE %s = $1
+			WHERE %s_id = $1
 			AND content = $2
-		`, entityName), id, content); err != nil {
+		`, entity), id, content); err != nil {
 			return err
 		}
 
@@ -70,9 +70,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, captions types.Caption
 			}
 
 			if _, err := tx.Exec(ctx, fmt.Sprintf(`
-				INSERT INTO app.caption (language_code, %s, value, content)
+				INSERT INTO app.caption (language_code, %s_id, value, content)
 				VALUES ($1,$2,$3,$4)
-			`, entityName), code, id, value, content); err != nil {
+			`, entity), code, id, value, content); err != nil {
 				return err
 			}
 		}
@@ -143,6 +143,10 @@ func GetDefaultContent(entity string) types.CaptionMap {
 		return types.CaptionMap{
 			"queryChoiceTitle": make(map[string]string),
 		}
+	case "searchBar":
+		return types.CaptionMap{
+			"searchBarTitle": make(map[string]string),
+		}
 	case "role":
 		return types.CaptionMap{
 			"roleTitle": make(map[string]string),
@@ -159,60 +163,63 @@ func GetDefaultContent(entity string) types.CaptionMap {
 	}
 	return types.CaptionMap{}
 }
-func GetEntityName(content string) (string, error) {
+func GetEntityName(content string) (schema.DbEntity, error) {
 
 	switch content {
 
 	case "articleTitle", "articleBody":
-		return "article_id", nil
+		return schema.DbArticle, nil
 
 	case "attributeTitle":
-		return "attribute_id", nil
+		return schema.DbAttribute, nil
 
 	case "clientEventTitle":
-		return "client_event_id", nil
+		return schema.DbClientEvent, nil
 
 	case "columnTitle":
-		return "column_id", nil
+		return schema.DbColumn, nil
 
 	case "fieldTitle", "fieldHelp":
-		return "field_id", nil
+		return schema.DbField, nil
 
 	case "formActionTitle":
-		return "form_action_id", nil
+		return schema.DbFormAction, nil
 
 	case "formTitle", "formHelp":
-		return "form_id", nil
+		return schema.DbForm, nil
 
 	case "jsFunctionTitle", "jsFunctionDesc":
-		return "js_function_id", nil
+		return schema.DbJsFunction, nil
 
 	case "loginFormTitle":
-		return "login_form_id", nil
+		return schema.DbLoginForm, nil
 
 	case "menuTitle":
-		return "menu_id", nil
+		return schema.DbMenu, nil
 
 	case "menuTabTitle":
-		return "menu_tab_id", nil
+		return schema.DbMenuTab, nil
 
 	case "moduleTitle":
-		return "module_id", nil
+		return schema.DbModule, nil
 
 	case "pgFunctionTitle", "pgFunctionDesc":
-		return "pg_function_id", nil
+		return schema.DbPgFunction, nil
 
 	case "queryChoiceTitle":
-		return "query_choice_id", nil
+		return schema.DbQueryChoice, nil
 
 	case "roleTitle", "roleDesc":
-		return "role_id", nil
+		return schema.DbRole, nil
+
+	case "searchBarTitle":
+		return schema.DbSearchBar, nil
 
 	case "tabTitle":
-		return "tab_id", nil
+		return schema.DbTab, nil
 
 	case "widgetTitle":
-		return "widget_id", nil
+		return schema.DbWidget, nil
 	}
 	return "", errors.New("bad caption content name")
 }

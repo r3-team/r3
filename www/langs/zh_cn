@@ -596,9 +596,6 @@
 				"versionNewHint": "使用新版本号复制此 API。"
 			},
 			"calls": "调用",
-			"columnSettings": "列设置",
-			"columnsAvailable": "可用列",
-			"columnsTarget": "活动列",
 			"content": "API类型",
 			"contentValue": "REST",
 			"dialog": {
@@ -783,23 +780,17 @@
 			"titleNew": "New client event"
 		},
 		"collection": {
-			"columnSettings": "列设置",
-			"columnsAvailable": "可用列",
-			"columnsTarget": "活动列",
 			"dialog": {
 				"delete": "您确定要删除此集合吗？"
 			},
 			"inHeader": "在标题中显示",
-			"new": "新集合",
 			"previewHint": "已登录用户的集合数值。如果在分配的角色中启用了集合，则在页面加载时检索集合（按F5重新加载）。",
-			"query": "查询",
 			"title": "集合",
 			"titleOne": "集合 '{NAME}'"
 		},
 		"collectionInput": {
 			"collection": "集合",
 			"column": "列中的数值",
-			"formIdOpen": "打开表单",
 			"multiValue": "多输入",
 			"noDisplayEmpty": "为空时隐藏",
 			"onMobile": "在移动设备上显示",
@@ -1574,6 +1565,7 @@
 			"relationEncryption": "端到端加密",
 			"relationEncryptionHint": "为该关系上的属性启用端到端加密（E2EE）。E2EE具有利弊，请在使用前仔细阅读构建者文档。此设置稍后无法更改。",
 			"role": "新角色",
+			"searchBar": "New search bar",
 			"template": {
 				"loginSync": "Login sync function",
 				"mailsFromSpooler": "电子邮件处理（传入）",
@@ -1743,6 +1735,13 @@
 			},
 			"title": "角色",
 			"titleOne": "角色 '{NAME}'"
+		},
+		"searchBar": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this search bar?"
+			},
+			"title": "Search bars",
+			"titleOne": "Search bar '{NAME}'"
 		},
 		"start": {
 			"appVisible": "应用对分配了角色的用户可见",
@@ -2187,7 +2186,10 @@
 		"collection": "收藏",
 		"collections": "收藏",
 		"color": "颜色",
+		"columnSettings": "列设置",
 		"columns": "Columns",
+		"columnsActive": "活动列",
+		"columnsAvailable": "可用列",
 		"comments": "评论",
 		"content": "内容",
 		"contextHelp": "上下文帮助",
@@ -2228,6 +2230,7 @@
 		"filters": "过滤器",
 		"form": "表单",
 		"formActions": "Form actions",
+		"formOpen": "打开表单",
 		"forms": "表单",
 		"functions": "Functions",
 		"global": "Global",
@@ -2320,6 +2323,8 @@
 		"returns": "Returns",
 		"role": "角色",
 		"roles": "角色",
+		"searchBar": "Search bar",
+		"searchBars": "Search bars",
 		"selected": "已选",
 		"selectedMaxOne": "已选（最多1个）",
 		"settings": "设置",

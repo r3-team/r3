@@ -36,6 +36,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 	caps.PgFunctionIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.QueryChoiceIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.RoleIdMap = make(map[uuid.UUID]types.CaptionMap)
+	caps.SearchBarIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.TabIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.WidgetIdMap = make(map[uuid.UUID]types.CaptionMap)
 
@@ -55,6 +56,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 		WHEN pg_function_id  IS NOT NULL THEN 'pgFunction'
 		WHEN query_choice_id IS NOT NULL THEN 'queryChoice'
 		WHEN role_id         IS NOT NULL THEN 'role'
+		WHEN search_bar_id   IS NOT NULL THEN 'searchBar'
 		WHEN tab_id          IS NOT NULL THEN 'tab'
 		WHEN widget_id       IS NOT NULL THEN 'widget'
 	END AS entity,
@@ -74,6 +76,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 		pg_function_id,
 		query_choice_id,
 		role_id,
+		search_bar_id,
 		tab_id,
 		widget_id
 	) AS entity_id,
@@ -151,8 +154,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			OR menu_tab_id     IN (SELECT id FROM app.menu_tab     WHERE module_id = $16)
 			OR pg_function_id  IN (SELECT id FROM app.pg_function  WHERE module_id = $17)
 			OR role_id         IN (SELECT id FROM app.role         WHERE module_id = $18)
-			OR widget_id       IN (SELECT id FROM app.widget       WHERE module_id = $19)
-		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
+			OR search_bar_id   IN (SELECT id FROM app.search_bar   WHERE module_id = $19)
+			OR widget_id       IN (SELECT id FROM app.widget       WHERE module_id = $20)
+		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
 	}
 
 	if err != nil {
@@ -204,6 +208,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			captionMap, exists = caps.QueryChoiceIdMap[entityId]
 		case "role":
 			captionMap, exists = caps.RoleIdMap[entityId]
+		case "searchBar":
+			captionMap, exists = caps.SearchBarIdMap[entityId]
 		case "tab":
 			captionMap, exists = caps.TabIdMap[entityId]
 		case "widget":
@@ -246,6 +252,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			caps.QueryChoiceIdMap[entityId] = captionMap
 		case "role":
 			caps.RoleIdMap[entityId] = captionMap
+		case "searchBar":
+			caps.SearchBarIdMap[entityId] = captionMap
 		case "tab":
 			caps.TabIdMap[entityId] = captionMap
 		case "widget":
@@ -271,7 +279,7 @@ func SetOne_tx(ctx context.Context, tx pgx.Tx, target string, entityId uuid.UUID
 	if value == "" {
 		_, err := tx.Exec(ctx, fmt.Sprintf(`
 			DELETE FROM %s.caption
-			WHERE %s            = $1
+			WHERE %s_id         = $1
 			AND   content       = $2
 			AND   language_code = $3
 		`, target, entity), entityId, content, languageCode)
@@ -285,7 +293,7 @@ func SetOne_tx(ctx context.Context, tx pgx.Tx, target string, entityId uuid.UUID
 		SELECT EXISTS (
 			SELECT 1
 			FROM %s.caption
-			WHERE %s            = $1
+			WHERE %s_id         = $1
 			AND   content       = $2
 			AND   language_code = $3
 		)
@@ -295,7 +303,7 @@ func SetOne_tx(ctx context.Context, tx pgx.Tx, target string, entityId uuid.UUID
 
 	if !exists {
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			INSERT INTO %s.caption (%s, content, language_code, value)
+			INSERT INTO %s.caption (%s_id, content, language_code, value)
 			VALUES ($1,$2,$3,$4)
 		`, target, entity), entityId, content, languageCode, value); err != nil {
 			return err
@@ -304,7 +312,7 @@ func SetOne_tx(ctx context.Context, tx pgx.Tx, target string, entityId uuid.UUID
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			UPDATE %s.caption
 			SET value = $1
-			WHERE %s            = $2
+			WHERE %s_id         = $2
 			AND   content       = $3
 			AND   language_code = $4
 		`, target, entity), value, entityId, content, languageCode); err != nil {

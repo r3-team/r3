@@ -61,6 +61,8 @@ import MyBuilderRelation    from './comps/builder/builderRelation.js';
 import MyBuilderRelations   from './comps/builder/builderRelations.js';
 import MyBuilderRole        from './comps/builder/builderRole.js';
 import MyBuilderRoles       from './comps/builder/builderRoles.js';
+import MyBuilderSearchBar   from './comps/builder/builderSearchBar.js';
+import MyBuilderSearchBars  from './comps/builder/builderSearchBars.js';
 import MyBuilderStart       from './comps/builder/builderStart.js';
 import MyBuilderVariables   from './comps/builder/builderVariables.js';
 import MyBuilderWidgets     from './comps/builder/builderWidgets.js';
@@ -201,6 +203,16 @@ const MyRouter = VueRouter.createRouter({
 				path:'collection/:id',
 				meta:{ nav:'collections', target:'collection' },
 				component:MyBuilderCollection,
+				props:true
+			},{
+				path:'search-bars/:id',
+				meta:{ nav:'search-bars', target:'module' },
+				component:MyBuilderSearchBars,
+				props:true
+			},{
+				path:'search-bar/:id',
+				meta:{ nav:'search-bars', target:'search-bar' },
+				component:MyBuilderSearchBar,
 				props:true
 			},{
 				path:'login-forms/:id',
