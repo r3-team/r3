@@ -255,6 +255,10 @@ func setAccess_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, id uuid.UUID
 		if access < -1 || access > 3 {
 			return errors.New("invalid access level")
 		}
+	case schema.DbSearchBar: // 1 access search bar
+		if access < -1 || access > 1 {
+			return errors.New("invalid access level")
+		}
 	case schema.DbWidget: // 1 access widget
 		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
