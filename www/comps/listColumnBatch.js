@@ -155,9 +155,10 @@ let MyListColumnBatch = {
 		orders:          { type:Array,   required:true }, // list orders
 		relationId:      { type:String,  required:true }, // list query base relation ID
 		rowCount:        { type:Number,  required:true }, // list total row count
-		show:            { type:Boolean, required:true }
+		show:            { type:Boolean, required:true },
+		simpleSortOnly:  { type:Boolean, required:true }  // list column can only sort, does not dropdown or offer any other option
 	},
-	emits:['close','del-aggregator','del-order','set-aggregator','set-filters','set-order','toggle'],
+	emits:['close','del-aggregator','del-order','set-aggregator','set-filters','set-order','set-order-only','toggle'],
 	data() {
 		return {
 			inputSel:[], // value input for selection filter
@@ -318,6 +319,13 @@ let MyListColumnBatch = {
 			this.loadSelectionValues();
 		},
 		click() {
+			if(this.simpleSortOnly) {
+				if(this.isOrdered)
+					return this.$emit('set-order',!this.isOrderedAsc);
+
+				return this.$emit('set-order-only',true);
+			}
+
 			if(this.canOpen)
 				this.$emit('toggle');
 		},

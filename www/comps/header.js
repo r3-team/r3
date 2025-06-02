@@ -148,6 +148,15 @@ let MyHeader = {
 				<img src="images/pageNext.png" />
 			</div>
 			
+			<!-- search bars -->
+			<div class="entry no-wrap clickable" tabindex="0"
+				v-if="globalSearchModules.length !== 0"
+				@click="$emit('show-global-search')"
+				@keyup.enter="$emit('show-global-search')"
+			>
+				<img src="images/search.png" />
+			</div>
+			
 			<!-- keys locked -->
 			<div class="entry no-wrap clickable" tabindex="0"
 				v-if="keysLocked"
@@ -228,7 +237,7 @@ let MyHeader = {
 			}, 1000);
 		}
 	},
-	emits:['logout','logoutExpire','show-collection-input','show-module-hover-menu','show-settings'],
+	emits:['logout','logoutExpire','show-collection-input','show-global-search','show-module-hover-menu','show-settings'],
 	data() {
 		return {
 			maintenanceInSec:0,
@@ -361,6 +370,7 @@ let MyHeader = {
 		moduleEntries:       (s) => s.$store.getters.moduleEntries,
 		pwaModuleId:         (s) => s.$store.getters.pwaModuleId,
 		moduleIdLast:        (s) => s.$store.getters.moduleIdLast,
+		globalSearchModules: (s) => s.$store.getters.globalSearchModules,
 		settings:            (s) => s.$store.getters.settings,
 		systemMsgActive:     (s) => s.$store.getters.systemMsgActive,
 		systemMsgDate0:      (s) => s.$store.getters.systemMsgDate0,

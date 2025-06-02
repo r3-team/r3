@@ -2,7 +2,7 @@ import MyBuilderCaption   from './builderCaption.js';
 import MyBuilderFields    from './builderFields.js';
 import {MyBuilderColumns} from './builderColumns.js';
 import {getFlexBasis}     from '../shared/form.js';
-import {getJoinsIndexMap} from '../shared/query.js';
+import {getJoinIndexMap}  from '../shared/query.js';
 import {
 	getFieldHasQuery,
 	getItemTitle
@@ -274,7 +274,7 @@ let MyBuilderField = {
 		columnBatchIndexTitle:(s) => {
 			if(s.isGantt) return [s.capApp.ganttBatch];
 			if(s.isKanban) {
-				const joinsIndexMap = s.getJoinsIndexMap(s.field.query.joins);
+				const joinsIndexMap = s.getJoinIndexMap(s.field.query.joins);
 				const getCaption = function(relationIndex) {
 					const j = joinsIndexMap[relationIndex];
 					return `${relationIndex} ${s.relationIdMap[j.relationId].name}`;
@@ -421,7 +421,7 @@ let MyBuilderField = {
 		getFieldTitle,
 		getFlexBasis,
 		getItemTitle,
-		getJoinsIndexMap,
+		getJoinIndexMap,
 		isAttributeFiles,
 		isAttributeRelationship,
 		

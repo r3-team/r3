@@ -635,8 +635,9 @@ let MyBuilderApi = {
 			// state
 			columnIdShow:null,
 			filtersDisable:[
-				'collection','field','fieldChanged','fieldValid','formChanged','formState','javascript',
-				'record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew','variable'
+				'collection','field','fieldChanged','fieldValid','formChanged',
+				'formState','globalSearch','javascript','record','recordMayCreate',
+				'recordMayDelete','recordMayUpdate','recordNew','variable'
 			],
 			showPreview:false,
 			showSidebar:true,

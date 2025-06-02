@@ -1,6 +1,7 @@
 import MyDialog              from './dialog.js';
 import MyFeedback            from './feedback.js';
 import MyForm                from './form.js';
+import MyGlobalSearch        from './globalSearch.js';
 import MyHeader              from './header.js';
 import MyLogin               from './login.js';
 import MySettings            from './settings.js';
@@ -33,6 +34,7 @@ let MyApp = {
 		MyDialog,
 		MyFeedback,
 		MyForm,
+		MyGlobalSearch,
 		MyHeader,
 		MyLogin,
 		MySettings
@@ -53,6 +55,7 @@ let MyApp = {
 				@logout="sessionInvalid(false)"
 				@logoutExpire="sessionInvalid(true)"
 				@show-collection-input="collectionEntries = $event"
+				@show-global-search="showGlobalSearch = true"
 				@show-module-hover-menu="showHoverNav = true"
 				@show-settings="showSettings = !showSettings"
 				:keysLocked="loginEncLocked"
@@ -79,6 +82,9 @@ let MyApp = {
 					:style="popUpFormGlobal.style"
 				/>
 			</div>
+			
+			<!-- global search -->
+			<my-global-search v-if="showGlobalSearch" @close="showGlobalSearch = false" />
 			
 			<!-- login settings -->
 			<div class="app-sub-window"
@@ -201,16 +207,17 @@ let MyApp = {
 	</div>`,
 	data() {
 		return {
-			appReady:false,       // app is loaded and user authenticated
-			collectionEntries:[], // collection entries shown in pop-up window (for mobile use)
-			loginReady:false,     // app is ready for authentication
-			logoutInSec:0,        // for timer in header, when session is to be logged out due to expiration
-			publicLoaded:false,   // public data has been loaded
-			schemaLoaded:false,   // app schema has been loaded
-			showHoverNav:false,   // alternative hover menu for module navigation
-			showSettings:false,   // login settings
-			timerSystemMsg:null,  // timer checking for system message start/stop
-			wsConnected:false     // connection to backend has been established (websocket)
+			appReady:false,         // app is loaded and user authenticated
+			collectionEntries:[],   // collection entries shown in pop-up window (for mobile use)
+			loginReady:false,       // app is ready for authentication
+			logoutInSec:0,          // for timer in header, when session is to be logged out due to expiration
+			publicLoaded:false,     // public data has been loaded
+			schemaLoaded:false,     // app schema has been loaded
+			showHoverNav:false,     // alternative hover menu for module navigation
+			showGlobalSearch:false, // global search
+			showSettings:false,     // login settings
+			timerSystemMsg:null,    // timer checking for system message start/stop
+			wsConnected:false       // connection to backend has been established (websocket)
 		};
 	},
 	watch:{

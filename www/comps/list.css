@@ -7,6 +7,9 @@
 	overflow:auto;
 	--list-header-height:46px;
 }
+.list.isDynamicSize{
+	min-height:unset;
+}
 .list.isSingleField{
 	border-radius:0px;
 }
@@ -42,6 +45,7 @@
 .list-content .empty-space{
 	flex:1 1 auto;
 }
+.list.isDynamicSize .list-content,
 .list.asInput .list-content{
 	flex:0 0 auto;
 }
@@ -542,9 +546,10 @@
 
 /* user overwrites */
 .user-listSpaced .list .layoutTable table:not(.asInput){
-	border-spacing:0px 8px;
-	border-left:8px solid transparent;
-	border-right:8px solid transparent;
+	--row-spacing:calc(var(--spacing) / 2);
+	border-spacing:0px var(--row-spacing);
+	border-left:var(--row-spacing) solid transparent;
+	border-right:var(--row-spacing) solid transparent;
 	box-sizing:border-box;
 }
 .user-listSpaced .list .layoutTable table:not(.asInput) tfoot tr,

@@ -450,6 +450,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayDelete';
 			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayUpdate';
 
+			-- global search filter condition
+			ALTER TYPE app.filter_side_content ADD VALUE 'globalSearch';
+
 			-- field flags
 			ALTER TYPE app.field_flag ADD VALUE 'relFlow';
 

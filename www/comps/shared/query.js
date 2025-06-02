@@ -21,7 +21,7 @@ let getQueryExpressionAttribute = function(column) {
 };
 
 // map of joins keyed by relation index
-export function getJoinsIndexMap(joins) {
+export function getJoinIndexMap(joins) {
 	let map = {};
 	for(const j of joins) {
 		map[j.index] = j;
@@ -138,9 +138,10 @@ export function getSubQueryFilterExpressions(subQuery) {
 	}];
 };
 
-export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,
+export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,
 	fieldValues,recordMayCreate,recordMayDelete,recordMayUpdate,collectionIdMapIndexFilter,variableIdMapLocal) {
 	
+	if(globalSearch               === undefined) globalSearch               = null;
 	if(dataFieldIdMap             === undefined) dataFieldIdMap             = {};
 	if(fieldIdsChanged            === undefined) fieldIdsChanged            = [];
 	if(fieldIdsInvalid            === undefined) fieldIdsInvalid            = [];
@@ -161,13 +162,10 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,fi
 					filterOperatorIsSingleValue(operator),
 					collectionIdMapIndexFilter[s.collectionId]);
 			break;
-			case 'preset':
-				s.value = MyStore.getters['schema/presetIdMapRecordId'][s.presetId];
-			break;
 			case 'subQuery':
 				s.query.expressions = getSubQueryFilterExpressions(s);
 				s.query.filters     = getQueryFiltersProcessed(
-					s.query.filters,joinsIndexMap,dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,
+					s.query.filters,joinsIndexMap,globalSearch,dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,
 					fieldValues,recordMayCreate,recordMayDelete,recordMayUpdate,collectionIdMapIndexFilter,
 					variableIdMapLocal
 				);
@@ -188,14 +186,16 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,fi
 					)]));
 				}
 			break;
-			case 'fieldChanged':    s.value = fieldIdsChanged.includes(s.fieldId);  break;
-			case 'fieldValid':      s.value = !fieldIdsInvalid.includes(s.fieldId); break;
-			case 'formChanged':     s.value = fieldIdsChanged.length !== 0;         break;
-			case 'javascript':      s.value = Function(s.value)();                  break;
-			case 'record':          if(joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId; break;
-			case 'recordMayCreate': s.value = recordMayCreate;                      break;
-			case 'recordMayDelete': s.value = recordMayDelete;                      break;
-			case 'recordMayUpdate': s.value = recordMayUpdate;                      break;
+			case 'fieldChanged':    s.value = fieldIdsChanged.includes(s.fieldId);                                    break;
+			case 'fieldValid':      s.value = !fieldIdsInvalid.includes(s.fieldId);                                   break;
+			case 'formChanged':     s.value = fieldIdsChanged.length !== 0;                                           break;
+			case 'globalSearch':    s.value = globalSearch;                                                           break;
+			case 'javascript':      s.value = Function(s.value)();                                                    break;
+			case 'preset':          s.value = MyStore.getters['schema/presetIdMapRecordId'][s.presetId];              break;
+			case 'record':          if(joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId;       break;
+			case 'recordMayCreate': s.value = recordMayCreate;                                                        break;
+			case 'recordMayDelete': s.value = recordMayDelete;                                                        break;
+			case 'recordMayUpdate': s.value = recordMayUpdate;                                                        break;
 			case 'recordNew':       if(joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId === 0; break;
 			
 			// login
@@ -237,14 +237,6 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,fi
 		out.push(f);
 	}
 	return getFiltersEncapsulated(out);
-};
-
-export function getJoinIndexMap(joins) {
-	let map = {};
-	for(let i = 0, j = joins.length; i < j; i++) {
-		map[joins[i].index] = joins[i];
-	}
-	return map;
 };
 
 export function getQueryAttributePkFilter(relationId,recordId,index,not) {

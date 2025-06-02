@@ -1969,6 +1969,7 @@
 				"formChanged": "form has unsaved changes",
 				"formState": "form state",
 				"getter": "URL parameter",
+				"globalSearch": "user search input",
 				"javascript": "JavaScript",
 				"languageCode": "user language",
 				"login": "user ID",
@@ -1996,6 +1997,7 @@
 				"formChanged": "TRUE/FALSE, depending on whether form currently has unsaved changes.",
 				"formState": "TRUE/FALSE, depending on whether the chosen form state is currently active.",
 				"getter": "Value of a URL parameter, such as 'https://system?param=123' with 'param' being the name and '123' the value.",
+				"globalSearch": "Text value of the global search input field.",
 				"javascript": "返回给定 JavaScript 表达式的值。",
 				"languageCode": "当前登录的所选用户语言代码（en_us、de_de 等）。",
 				"login": "当前登录的 ID（整数）。",
@@ -2213,6 +2215,7 @@
 			"maintenanceComing": "The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your changes before then.",
 			"systemMsg": "System message"
 		},
+		"disabled": "Disabled",
 		"displayed": "显示的",
 		"encryption": "Encryption",
 		"error": {
@@ -2234,6 +2237,7 @@
 		"forms": "表单",
 		"functions": "Functions",
 		"global": "Global",
+		"globalSearch": "Global search",
 		"help": "帮助",
 		"home": "主页",
 		"hotkey": "Hotkey",
@@ -2325,6 +2329,7 @@
 		"roles": "角色",
 		"searchBar": "Search bar",
 		"searchBars": "Search bars",
+		"searchResults": "Search results",
 		"selected": "已选",
 		"selectedMaxOne": "已选（最多1个）",
 		"settings": "设置",
@@ -2351,6 +2356,11 @@
 		"widget": "新微件",
 		"widgets": "小部件",
 		"wrap": "Wrap"
+	},
+	"globalSearch": {
+		"button": {
+			"showHeader": "Column titles"
+		}
 	},
 	"home": {
 		"button": {

@@ -4,7 +4,7 @@ import MyBuilderIconInput              from './builderIconInput.js';
 import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
 import MyCodeEditor                    from '../codeEditor.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
-import {getJoinsIndexMap}              from '../shared/query.js';
+import {getJoinIndexMap}               from '../shared/query.js';
 import {
 	getNilUuid,
 	getRandomInt
@@ -1367,7 +1367,7 @@ let MyBuilderFieldOptions = {
 			return out;
 		},
 		joinsIndexMapField:(s) => {
-			return s.isQuery ? s.getJoinsIndexMap(s.field.query.joins) : {};
+			return s.isQuery ? s.getJoinIndexMap(s.field.query.joins) : {};
 		},
 		joinsKanbanAxis:(s) => {
 			if(!s.isKanban || s.field.relationIndexData === null)
@@ -1469,7 +1469,7 @@ let MyBuilderFieldOptions = {
 		getIndexAttributeId,
 		getItemTitle,
 		getItemTitlePath,
-		getJoinsIndexMap,
+		getJoinIndexMap,
 		getNilUuid,
 		getRandomInt,
 		isAttributeBoolean,

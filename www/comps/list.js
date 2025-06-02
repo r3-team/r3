@@ -58,7 +58,7 @@ const MyList = {
 	template:`<div class="list" ref="content"
 		v-click-outside="escape"
 		@keydown="keyDown"
-		:class="{ asInput:isInput, readonly:inputIsReadonly, isSingleField:isSingleField }"
+		:class="{ asInput:isInput, readonly:inputIsReadonly, isDynamicSize:isDynamicSize, isSingleField:isSingleField }"
 	>
 		<!-- hover menus -->
 		<div class="app-sub-window"
@@ -241,6 +241,7 @@ const MyList = {
 					/>
 					
 					<my-button image="filterCog.png"
+						v-if="headerActions"
 						@trigger="showFilters = !showFilters"
 						@trigger-right="setUserFilters([])"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
@@ -279,12 +280,13 @@ const MyList = {
 					</select>
 					
 					<my-button image="listCog.png"
+						v-if="headerActions"
 						@trigger="showOptions = !showOptions"
 						:captionTitle="capGen.options"
 						:naked="true"
 					/>
 					<my-button image="toggleUp.png"
-						v-if="!isCards && headerElements.includes('headerCollapse')"
+						v-if="!isCards && headerActions && headerElements.includes('headerCollapse')"
 						@trigger="toggleHeader"
 						:captionTitle="capApp.button.collapseHeader"
 						:naked="true"
@@ -301,7 +303,7 @@ const MyList = {
 					:id="usesPageHistory ? scrollFormId : null"
 				>
 					<table v-if="isTable" :class="{ asInput:isInput, 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
-						<thead v-if="header">
+						<thead v-if="header && headerColumns">
 							<tr :class="{ atTop:!showHeader }">
 								<th v-if="hasBulkActions" class="minimum checkbox">
 									<img class="clickable" tabindex="0"
@@ -318,6 +320,7 @@ const MyList = {
 										@set-aggregator="setAggregators"
 										@set-filters="setLoginOption('filtersColumn',$event)"
 										@set-order="setOrder(b,$event,false)"
+										@set-order-only="setOrder(b,$event,true)"
 										@toggle="clickColumn(i)"
 										:columnBatch="b"
 										:columnIdMapAggr="columnIdMapAggr"
@@ -332,6 +335,7 @@ const MyList = {
 										:relationId="query.relationId"
 										:rowCount="count"
 										:show="columnBatchIndexOption === i"
+										:simpleSortOnly="columnsSortOnly"
 									/>
 								</th>
 								<!-- empty column for taking remaining space & header toggle action -->
@@ -614,7 +618,6 @@ const MyList = {
 		columns:         { type:Array,   required:true },                    // list columns, processed (applied filter values, only columns shown by user choice)
 		columnsAll:      { type:Array,   required:false, default:() => [] }, // list columns, all
 		dataOptions:     { type:Number,  required:false, default:0 },        // data permissions following form states
-		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true },                    // processed query filters
 		layoutDefault:   { type:String,  required:false, default:'table' },  // default list layout: table, cards
 		limitDefault:    { type:Number,  required:false, default:10 },       // default list limit
@@ -624,15 +627,19 @@ const MyList = {
 		query:           { type:Object,  required:true },                    // list query
 		
 		// toggles
+		columnsSortOnly:{ type:Boolean, required:false, default:false }, // list columns can only be sorted, not filtered or aggregated
 		csvExport:      { type:Boolean, required:false, default:false },
 		csvImport:      { type:Boolean, required:false, default:false },
 		dropdownShow:   { type:Boolean, required:false, default:false },
 		filterQuick:    { type:Boolean, required:false, default:false }, // enable quick filter
-		formLoading:    { type:Boolean, required:false, default:false }, // trigger and control list reloads
+		formLoading:    { type:Boolean, required:false, default:false }, // control list reloads
 		hasOpenForm:    { type:Boolean, required:false, default:false }, // list can open record in form
 		hasOpenFormBulk:{ type:Boolean, required:false, default:false }, // list can open records in bulk form
 		header:         { type:Boolean, required:false, default:true  }, // show list header
-		isInput:        { type:Boolean, required:false, default:false }, // use list as input
+		headerActions:  { type:Boolean, required:false, default:true  }, // show list header actions (complex filters, list options, header collapse)
+		headerColumns:  { type:Boolean, required:false, default:true  }, // show list column headers
+		isDynamicSize:  { type:Boolean, required:false, default:false }, // list does not have minimum fixed height
+		isInput:        { type:Boolean, required:false, default:false }, // list is used as input
 		isHidden:       { type:Boolean, required:false, default:false }, // list is not visible and therefore not loaded/updated
 		isSingleField:  { type:Boolean, required:false, default:false }, // list is single field within a parent (form/tab - not container!)
 		loadWhileHidden:{ type:Boolean, required:false, default:false },

@@ -10,7 +10,7 @@ const MyStore = Vuex.createStore({
 		schema:MyStoreSchema
 	},
 	state:{
-		access:{},                     // access permissions for each entity (attribute, clientEvent, collection, menu, relation, widget), key: entity ID
+		access:{},                     // access permissions for each entity (attribute, clientEvent, collection, menu, relation, searchBar, widget), key: entity ID
 		appFunctions:{                 // globally accessible functions, additional ones can be registered via appFunctionRegister mutation
 			genericError:genericError,
 			loginReauthAll:(blocking) => {
@@ -372,6 +372,18 @@ const MyStore = Vuex.createStore({
 				: (state.settings.dark ? state.colorMenuDefaultDark : state.colorMenuDefault);
 			const color = tinycolor(colorRgb).lighten(4);
 			return `background:radial-gradient(at right bottom, ${color.toString()} 20%, #${colorRgb} 60%);`;
+		},
+		globalSearchModules:(s) => {
+			let out = [];
+			for(const k in MyStoreSchema.state.moduleIdMap) {
+				for(const b of MyStoreSchema.state.moduleIdMap[k].searchBars) {
+					if(s.access.searchBar[b.id] !== undefined && s.access.searchBar[b.id] === 1) {
+						out.push(MyStoreSchema.state.moduleIdMap[k]);
+						break;
+					}
+				}
+			}
+			return out;
 		},
 		licenseDays:(state) => {
 			if(!state.licenseValid)

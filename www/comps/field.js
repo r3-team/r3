@@ -1,21 +1,21 @@
-import MyCalendar                 from './calendar.js';
-import MyChart                    from './chart.js';
-import MyGantt                    from './gantt.js';
-import MyKanban                   from './kanban.js';
-import MyInputBarcode             from './inputBarcode.js';
-import MyInputDate                from './inputDate.js';
-import MyInputDrawing             from './inputDrawing.js';
-import MyInputFiles               from './inputFiles.js';
-import MyInputIframe              from './inputIframe.js';
-import MyInputLogin               from './inputLogin.js';
-import MyInputRating              from './inputRating.js';
-import MyInputRichtext            from './inputRichtext.js';
-import MyInputSelect              from './inputSelect.js';
-import MyInputUuid                from './inputUuid.js';
-import MyList                     from './list.js';
-import {hasAccessToAttribute}     from './shared/access.js';
-import {srcBase64}                from './shared/image.js';
-import {getCaption}               from './shared/language.js';
+import MyCalendar             from './calendar.js';
+import MyChart                from './chart.js';
+import MyGantt                from './gantt.js';
+import MyKanban               from './kanban.js';
+import MyInputBarcode         from './inputBarcode.js';
+import MyInputDate            from './inputDate.js';
+import MyInputDrawing         from './inputDrawing.js';
+import MyInputFiles           from './inputFiles.js';
+import MyInputIframe          from './inputIframe.js';
+import MyInputLogin           from './inputLogin.js';
+import MyInputRating          from './inputRating.js';
+import MyInputRichtext        from './inputRichtext.js';
+import MyInputSelect          from './inputSelect.js';
+import MyInputUuid            from './inputUuid.js';
+import MyList                 from './list.js';
+import {hasAccessToAttribute} from './shared/access.js';
+import {srcBase64}            from './shared/image.js';
+import {getCaption}           from './shared/language.js';
 import {
 	getIndexAttributeId,
 	isAttributeBoolean,
@@ -236,7 +236,6 @@ let MyField = {
 					:csvExport="field.csvExport"
 					:csvImport="field.csvImport"
 					:dataOptions="dataOptions"
-					:fieldId="field.id"
 					:filterQuick="field.filterQuick"
 					:filters="filtersProcessed"
 					:formLoading="formLoading"
@@ -550,7 +549,6 @@ let MyField = {
 					:columns="columnsProcessed"
 					:dataOptions="dataOptions"
 					:dropdownShow="dropdownShow"
-					:fieldId="field.id"
 					:filterQuick="field.filterQuick"
 					:filters="filtersProcessed"
 					:formLoading="formLoading"
@@ -1118,9 +1116,9 @@ let MyField = {
 		isVariable: (s) => s.field.content === 'variable',
 
 		// processed states
-		choicesProcessed:(s) => s.fieldIdMapProcessed.choices[s.field.id]  === undefined ? []   : s.fieldIdMapProcessed.choices[s.field.id],
-		columnsProcessed:(s) => s.fieldIdMapProcessed.columns[s.field.id]  === undefined ? []   : s.fieldIdMapProcessed.columns[s.field.id],
-		filtersProcessed:(s) => s.fieldIdMapProcessed.filters[s.field.id]  === undefined ? []   : s.fieldIdMapProcessed.filters[s.field.id],
+		choicesProcessed:(s) => s.fieldIdMapProcessed.choices[s.field.id] === undefined ? [] : s.fieldIdMapProcessed.choices[s.field.id],
+		columnsProcessed:(s) => s.fieldIdMapProcessed.columns[s.field.id] === undefined ? [] : s.fieldIdMapProcessed.columns[s.field.id],
+		filtersProcessed:(s) => s.fieldIdMapProcessed.filters[s.field.id] === undefined ? [] : s.fieldIdMapProcessed.filters[s.field.id],
 		
 		// states
 		isAlone:   (s) => s.isAloneInForm || s.isAloneInTab,

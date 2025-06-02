@@ -1969,6 +1969,7 @@
 				"formChanged": "form has unsaved changes",
 				"formState": "form state",
 				"getter": "URL parameter",
+				"globalSearch": "user search input",
 				"javascript": "JavaScript",
 				"languageCode": "user language",
 				"login": "user ID",
@@ -1996,6 +1997,7 @@
 				"formChanged": "TRUE/FALSE, depending on whether form currently has unsaved changes.",
 				"formState": "TRUE/FALSE, depending on whether the chosen form state is currently active.",
 				"getter": "Value of a URL parameter, such as 'https://system?param=123' with 'param' being the name and '123' the value.",
+				"globalSearch": "Text value of the global search input field.",
 				"javascript": "Return value of the given Javascript expression.",
 				"languageCode": "The chosen user language code (en_us, de_de, ...) of the current user.",
 				"login": "ID of the current user (integer).",
@@ -2213,6 +2215,7 @@
 			"maintenanceComing": "The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your changes before then.",
 			"systemMsg": "System message"
 		},
+		"disabled": "Disabled",
 		"displayed": "Displayed",
 		"encryption": "Encryption",
 		"error": {
@@ -2234,6 +2237,7 @@
 		"formOpen": "Open form",
 		"functions": "Functions",
 		"global": "Global",
+		"globalSearch": "Global search",
 		"help": "Help",
 		"home": "Home",
 		"hotkey": "Hotkey",
@@ -2325,6 +2329,7 @@
 		"roles": "Roles",
 		"searchBar": "Search bar",
 		"searchBars": "Search bars",
+		"searchResults": "Search results",
 		"selected": "Selected",
 		"selectedMaxOne": "Selected (max. 1)",
 		"settings": "Settings",
@@ -2351,6 +2356,11 @@
 		"widget": "Widget",
 		"widgets": "Widgets",
 		"wrap": "Wrap"
+	},
+	"globalSearch": {
+		"button": {
+			"showHeader": "Column titles"
+		}
 	},
 	"home": {
 		"button": {

@@ -1969,6 +1969,7 @@
 				"formChanged": "formulario tiene cambios sin guardar",
 				"formState": "estado del formulario",
 				"getter": "parámetro URL",
+				"globalSearch": "user search input",
 				"javascript": "JavaScript",
 				"languageCode": "idioma del usuario",
 				"login": "ID de usuario",
@@ -1996,6 +1997,7 @@
 				"formChanged": "VERDADERO/FALSO, dependiendo de si el formulario actualmente tiene cambios sin guardar.",
 				"formState": "VERDADERO/FALSO, dependiendo de si el estado de formulario elegido está actualmente activo.",
 				"getter": "Valor de un parámetro URL, como 'https://system?param=123' con 'param' siendo el nombre y '123' el valor.",
+				"globalSearch": "Text value of the global search input field.",
 				"javascript": "Valor de retorno de la expresión Javascript dada.",
 				"languageCode": "El código de idioma de usuario elegido (en_us, de_de, ...) del usuario actual.",
 				"login": "ID del usuario actual (entero).",
@@ -2213,6 +2215,7 @@
 			"maintenanceComing": "El sistema entrará en modo de mantenimiento a las <b>{DATE}</b>. Por favor guarde sus cambios antes de entonces.",
 			"systemMsg": "Mensaje del sistema"
 		},
+		"disabled": "Disabled",
 		"displayed": "Mostrado",
 		"encryption": "Encriptación",
 		"error": {
@@ -2234,6 +2237,7 @@
 		"forms": "Formularios",
 		"functions": "Funciones",
 		"global": "Global",
+		"globalSearch": "Global search",
 		"help": "Ayuda",
 		"home": "Inicio",
 		"hotkey": "Tecla rápida",
@@ -2325,6 +2329,7 @@
 		"roles": "Roles",
 		"searchBar": "Search bar",
 		"searchBars": "Search bars",
+		"searchResults": "Search results",
 		"selected": "Seleccionado",
 		"selectedMaxOne": "Seleccionado (máx. 1)",
 		"settings": "Configuración",
@@ -2351,6 +2356,11 @@
 		"widget": "Widget",
 		"widgets": "Widgets",
 		"wrap": "Ajustar"
+	},
+	"globalSearch": {
+		"button": {
+			"showHeader": "Column titles"
+		}
 	},
 	"home": {
 		"button": {

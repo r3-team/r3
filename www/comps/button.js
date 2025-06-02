@@ -130,7 +130,7 @@ const MyButtonCheck = {
 		:active="!readonly"
 		:caption="caption"
 		:captionTitle="captionTitle"
-		:image="image"
+		:image="(reversed ? !modelValue : modelValue) ? 'checkbox1.png' : 'checkbox0.png'"
 		:naked="true"
 	/>`,
 	props:{
@@ -140,11 +140,5 @@ const MyButtonCheck = {
 		readonly:    { type:Boolean, required:false, default:false },
 		reversed:    { type:Boolean, required:false, default:false }
 	},
-	emits:['update:modelValue'],
-	computed:{
-		image:(s) => {
-			const v = s.reversed ? !s.modelValue : s.modelValue;
-			return v ? 'checkbox1.png' : 'checkbox0.png';
-		}
-	}
+	emits:['update:modelValue']
 };

@@ -815,15 +815,15 @@ let MyForm = {
 
 						for(let i = 0, j = choices.length; i < j; i++) {
 							choices[i].filters = s.getQueryFiltersProcessed(
-								choices[i].filters,s.joinsIndexMap,s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
+								choices[i].filters,s.joinsIndexMap,null,s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
 								s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord,collectionIdMap,s.variableIdMapLocal);
 						}
 						out.choices[f.id] = choices;
 						out.columns[f.id] = s.getColumnsProcessed(
-							f.columns,columnIdsByUser,s.joinsIndexMap,s.fieldIdMapData,s.fieldIdsChanged,
+							f.columns,columnIdsByUser,s.joinsIndexMap,null,s.fieldIdMapData,s.fieldIdsChanged,
 							s.fieldIdsInvalid,s.values,s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord);
 						out.filters[f.id] = s.getQueryFiltersProcessed(
-							f.query.filters,s.joinsIndexMap,s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
+							f.query.filters,s.joinsIndexMap,null,s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
 							s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord,collectionIdMap,s.variableIdMapLocal
 						).concat(getChoiceFilters(choices,choiceId));
 					}

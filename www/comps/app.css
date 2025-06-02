@@ -82,6 +82,7 @@
 	/* colors */
 	--color-bg:            #f7f7f7;
 	--color-bg-bright:     #fcfcfc;
+	--color-bg-dark:       #474747;
 	--color-bright:        #ffffff;
 	--color-border:        #9b9b9b;
 	--color-border-bright: #9f9f9f;
@@ -93,7 +94,6 @@
 	--color-font-dark:     #101010;
 	--color-font-disabled: #797979;
 	--color-input:         #ffffff;
-	--color-input-dark:    #3b3b3b;
 	--color-input-disabled:#efefef;
 	--color-list-row-even: #e9eeef;
 	--color-shade:         #4e4e4e;
@@ -510,6 +510,9 @@ h3{
 .contentBox .content{
 	padding:var(--spacing);
 	overflow:auto;
+}
+.contentBox .content.flex{
+	display:flex;
 }
 .contentBox .content.gap{
 	gap:var(--spacing);
@@ -1407,13 +1410,13 @@ table td.maximum{
 	/* color overwites */
 	--color-bg:            #252525;
 	--color-bg-bright:     #313131;
+	--color-bg-dark:       #181818;
 	--color-bright:        #323232;
 	--color-border:        #111111;
 	--color-border-bright: #8f8f8f;
 	--color-cal-day-event: #444c51;
 	--color-cal-outside:   #525455;
 	--color-font:          #ededed;
-	--color-input:         var(--color-input-dark);
 	--color-input-disabled:#222222;
 	--color-list-row-even: #3e4141;
 	--color-shade:         #1b1b1b;
@@ -1432,6 +1435,7 @@ table td.maximum{
 	--color-cancel:        hsl(0, 42%, 27%);
 	--color-cancel-border: hsl(0, 33%, 11%);
 	--color-error:         hsl(0, 44%, 51%);
+	--color-input:         #3b3b3b;
 	--color-success:       hsl(113, 53%, 27%);
 	--color-flow:          hsl(0, 1%, 37%);
 	--color-flow-active:   hsl(105, 13%, 32%);

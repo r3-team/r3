@@ -11,7 +11,7 @@ type Login struct {
 }
 type LoginAccess struct {
 	RoleIds     []uuid.UUID       `json:"roleIds"`     // all assigned roles (incl. inherited)
-	Api         map[uuid.UUID]int `json:"api"`         // effective access to specific API
+	Api         map[uuid.UUID]int `json:"api"`         // effective access to specific APIs
 	Attribute   map[uuid.UUID]int `json:"attribute"`   // effective access to specific attributes
 	ClientEvent map[uuid.UUID]int `json:"clientEvent"` // effective access to specific client events
 	Collection  map[uuid.UUID]int `json:"collection"`  // effective access to specific collection

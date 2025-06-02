@@ -303,6 +303,13 @@ let MyFilterSide = {
 							:value="c"
 						>{{ capApp.option.content[c] }}</option>
 					</optgroup>
+					<optgroup v-if="contentSearch.length !== 0" :label="capGen.globalSearch">
+						<option
+							v-for="c in contentSearch"
+							:title="capApp.option.contentHint[c]"
+							:value="c"
+						>{{ capApp.option.content[c] }}</option>
+					</optgroup>
 					<optgroup v-if="contentData.length !== 0" :label="capApp.contentData">
 						<option
 							v-for="c in contentData"
@@ -688,13 +695,14 @@ let MyFilterSide = {
 		},
 		
 		// simple
-		columnsMode: (s) => s.columns.length !== 0,
-		contentApi:  (s) => ['getter'].filter(v => !s.disableContent.includes(v)),
-		contentData: (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
-		contentDate: (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
-		contentForm: (s) => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew'].filter(v => !s.disableContent.includes(v)),
-		contentLogin:(s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
-		module:      (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
+		columnsMode:  (s) => s.columns.length !== 0,
+		contentApi:   (s) => ['getter'].filter(v => !s.disableContent.includes(v)),
+		contentData:  (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
+		contentDate:  (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
+		contentForm:  (s) => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew'].filter(v => !s.disableContent.includes(v)),
+		contentLogin: (s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
+		contentSearch:(s) => ['globalSearch'].filter(v => !s.disableContent.includes(v)),
+		module:       (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
 		
 		// states
 		isAnyDate:    (s) => ['nowDate','nowDatetime','nowTime'].includes(s.content),

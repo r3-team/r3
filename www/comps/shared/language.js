@@ -35,6 +35,7 @@ export function getCaptionMapName(content) {
 		case 'queryChoiceTitle': return 'queryChoiceIdMap'; break;
 		case 'roleDesc':         // fallthrough
 		case 'roleTitle':        return 'roleIdMap';        break;
+		case 'searchBarTitle':   return 'searchBarIdMap';   break;
 		case 'tabTitle':         return 'tabIdMap';         break;
 		case 'widgetTitle':      return 'widgetIdMap';      break;
 	}

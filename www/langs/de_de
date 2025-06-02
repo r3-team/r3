@@ -1969,6 +1969,7 @@
 				"formChanged": "Formular hat ungesp. Änder.",
 				"formState": "Formularzustand",
 				"getter": "URL-Parameter",
+				"globalSearch": "Benutzereingabe",
 				"javascript": "JavaScript",
 				"languageCode": "Benutzersprache",
 				"login": "Benutzer-ID",
@@ -1996,6 +1997,7 @@
 				"formChanged": "WAHR/FALSCH, abhängig davon, ob das Formular aktuell ungespeicherte Änderungen hat.",
 				"formState": "WAHR/FALSCH, abhängig davon, ob der ausgewählte Formularzustand aktuell aktiv ist.",
 				"getter": "Wert eines URL-Parameters, wie z. B. 'https://system?param=123', wobei 'param' den Namen und '123' den Wert darstellt.",
+				"globalSearch": "Textwert des Eingabefeldes der globalen Suche.",
 				"javascript": "Rückgabewert des gewählten Javascript-Ausdrucks.",
 				"languageCode": "Der gewählte Sprach-Code vom aktuellen Benutzer (en_us, de_de, ...).",
 				"login": "ID des aktuellen Benutzers (Integer).",
@@ -2213,6 +2215,7 @@
 			"maintenanceComing": "Das System wird in einen geplanten Wartungsmodus gesetzt: <b>{DATE}</b>. Änderungen sollten vorher gespeichert werden.",
 			"systemMsg": "Systemnachricht"
 		},
+		"disabled": "Deaktiviert",
 		"displayed": "Angezeigt",
 		"encryption": "Verschlüsselung",
 		"error": {
@@ -2234,6 +2237,7 @@
 		"forms": "Formulare",
 		"functions": "Funktionen",
 		"global": "Global",
+		"globalSearch": "Globale Suche",
 		"help": "Hilfe",
 		"home": "Start",
 		"hotkey": "Hotkey",
@@ -2325,6 +2329,7 @@
 		"roles": "Rollen",
 		"searchBar": "Suchleiste",
 		"searchBars": "Suchleisten",
+		"searchResults": "Suchergebnisse",
 		"selected": "Ausgewählt",
 		"selectedMaxOne": "Ausgewählt (max. 1)",
 		"settings": "Einstellungen",
@@ -2351,6 +2356,11 @@
 		"widget": "Widget",
 		"widgets": "Widgets",
 		"wrap": "Umbrechen"
+	},
+	"globalSearch": {
+		"button": {
+			"showHeader": "Spaltentitel"
+		}
 	},
 	"home": {
 		"button": {
