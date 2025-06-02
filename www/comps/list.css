@@ -61,6 +61,9 @@
     justify-content:space-between;
     align-items:center;
 }
+.list-header.no-column-titles{
+	border-bottom:1px solid var(--color-border);
+}
 .list-header .empty{
 	flex:1 1 auto;
 	max-width:11px;

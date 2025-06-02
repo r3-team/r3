@@ -176,7 +176,7 @@ const MyList = {
 		<template v-if="!isInput || (dropdownShow && !showAllValues)">
 			
 			<!-- list header -->
-			<div class="list-header" v-if="header && showHeader">
+			<div class="list-header" v-if="header && showHeader" :class="{ 'no-column-titles':!headerColumns }">
 				
 				<div class="row gap nowrap">
 					<slot name="input-icon" />

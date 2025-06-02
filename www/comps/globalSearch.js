@@ -15,7 +15,7 @@ const MyGlobalSearchModuleSearchBar = {
 	template:`<div class="global-search-bar" v-show="resultCount !== 0">
 		<my-list
 			@open-form=""
-			@record-count-change="resultCount = $event;$emit('result-count-update',$event)"
+			@record-count-change="resultCountUpdate"
 			@set-login-option="setOption"
 			:columns="columnsProcessed"
 			:columnsAll="columns"
@@ -52,7 +52,8 @@ const MyGlobalSearchModuleSearchBar = {
 	watch:{
 		input:{
 			handler() {
-				this.ready = false;
+				this.resultCount = 0;
+				this.ready       = false;
 				this.$nextTick(() => this.ready = true);
 			},
 			immediate:true
@@ -76,7 +77,6 @@ const MyGlobalSearchModuleSearchBar = {
 		joinIndexMap:    (s) => s.getJoinIndexMap(s.query.joins),
 
 		// stores
-		capApp:(s) => s.$store.getters.captions.searchBar,
 		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
@@ -86,6 +86,12 @@ const MyGlobalSearchModuleSearchBar = {
 		getQueryFiltersProcessed,
 		getJoinIndexMap,
 		srcBase64Icon,
+
+		// data
+		resultCountUpdate(count) {
+			this.resultCount = count;
+			this.$emit('result-count-update',count);
+		},
 
 		// actions
 		setOption(name,value) {
@@ -97,13 +103,12 @@ const MyGlobalSearchModuleSearchBar = {
 const MyGlobalSearchModule = {
 	name:'my-global-search-module',
 	components:{ MyGlobalSearchModuleSearchBar },
-	template:`<div class="global-search-module column clickable">
-		<div class="global-search-module-title row gap centered" @click="toggle">
+	template:`<div class="global-search-module column">
+		<div class="global-search-module-title row gap centered clickable" @click="$emit('toggle',module.id)">
 			<div class="row gap">
 				<my-label
 					:darkBg="true"
-					:image="!moduleIdsDisabled.includes(module.id) ? 'checkBox1.png' : 'checkBox0.png'"
-					:large="true"
+					:image="disabled ? 'checkBox0.png' : 'checkBox1.png'"
 				/>
 				<my-label
 					:caption="getCaption('moduleTitle',module.id,module.id,module.captions,module.name)"
@@ -115,13 +120,14 @@ const MyGlobalSearchModule = {
 			<my-label
 				:caption="resultLabel"
 				:darkBg="true"
+				:image="active && anyRunning ? 'load.gif' : ''"
 				:large="true"
 			/>
 		</div>
 		<div class="global-search-bars column gap" v-if="active">
 			<my-global-search-module-search-bar
 				@result-count-update="resultCountUpdate(b.id,$event)"
-				v-for="b in module.searchBars.filter(v => access[v.id] !== undefined && access[v.id] === 1)"
+				v-for="b in searchBars"
 				:input="input"
 				:limit="limit"
 				:searchBar="b"
@@ -129,19 +135,32 @@ const MyGlobalSearchModule = {
 			/>
 		</div>
 	</div>`,
+	emits:['result-count-update','toggle'],
 	props:{
+		disabled:  { type:Boolean, required:true },
 		input:     { type:String,  required:true },
 		limit:     { type:Number,  required:true },
 		module:    { type:Object,  required:true },
 		showHeader:{ type:Boolean, required:true }
 	},
+	watch:{
+		input() {
+			this.searchBarIdMapResultCount = {};
+		}
+	},
 	data() {
 		return {
-			moduleIdsDisabled:[], // TEMP: MOCKUP
 			searchBarIdMapResultCount:{}
 		};
 	},
 	computed:{
+		anyRunning:(s) => {
+			for(const b of s.searchBars) {
+				if(s.searchBarIdMapResultCount[b.id] === undefined)
+					return true;
+			}
+			return false;
+		},
 		resultCount:(s) => {
 			let cnt = 0;
 			for(const k in s.searchBarIdMapResultCount) {
@@ -150,14 +169,15 @@ const MyGlobalSearchModule = {
 			return cnt;
 		},
 		resultLabel:(s) => {
-			if(s.disabled) return s.capGen.disabled;
-			if(!s.active)  return '-';
+			if(s.disabled)   return s.capGen.disabled;
+			if(!s.active)    return '-';
+			if(s.anyRunning) return s.capGen.searchRunning;
 			return s.capGen.results.replace('{CNT}',s.resultCount);
 		},
 
 		// simple
-		active:  (s) => s.input !== '' && !s.disabled,
-		disabled:(s) => s.moduleIdsDisabled.includes(s.module.id),
+		active:    (s) => s.input !== '' && !s.disabled,
+		searchBars:(s) => s.module.searchBars.filter(v => s.access[v.id] !== undefined && s.access[v.id] === 1),
 
 		// stores
 		access:(s) => s.$store.getters.access.searchBar,
@@ -171,13 +191,7 @@ const MyGlobalSearchModule = {
 		// data
 		resultCountUpdate(searchBarId,count) {
 			this.searchBarIdMapResultCount[searchBarId] = count;
-		},
-		
-		// actions
-		toggle() {
-			const pos = this.moduleIdsDisabled.indexOf(this.module.id);
-			if(pos === -1) this.moduleIdsDisabled.push(this.module.id);
-			else           this.moduleIdsDisabled.splice(pos,1);
+			this.$nextTick(() => this.$emit('result-count-update',this.resultCount));
 		}
 	}
 };
@@ -185,16 +199,25 @@ const MyGlobalSearchModule = {
 const MyGlobalSearch = {
 	name:'my-global-search',
 	components:{ MyGlobalSearchModule },
-	template:`<div class="app-sub-window under-header"
+	template:`<div class="app-sub-window"
 		@mousedown.self="$emit('close')"
+		:class="{ 'under-header':!isMobile }"
 	>
-		<div class="contentBox global-search grow scroll float">
+		<div class="contentBox global-search grow scroll float" :class="{ larger }">
 			<div class="top lower">
 				<div class="area">
-					<img class="icon" src="images/search.png" />
-					<h1>{{ capGen.globalSearch }}</h1>
+					<my-label
+						:caption="statusLabel"
+						:image="statusImage"
+						:large="true"
+					/>
 				</div>
 				<div class="area">
+					<my-button
+						v-if="!isMobile"
+						@trigger="larger = !larger"
+						:image="larger ? 'shrink.png' : 'expand.png'"
+					/>
 					<my-button image="cancel.png"
 						@trigger="$emit('close')"
 						:cancel="true"
@@ -202,10 +225,10 @@ const MyGlobalSearch = {
 					/>
 				</div>
 			</div>
-			<div class="content flex column grow">
-				<div class="global-search-input-line default-inputs row gap centered">
-					<div class="row gap">
-						<input class="long"
+			<div class="content column no-shrink">
+				<div class="global-search-input-line default-inputs row wrap gap centered">
+					<div class="global-search-input-line-main row gap">
+						<input class="dynamic"
 							v-model="input"
 							v-focus
 							@keyup.enter="submit"
@@ -230,10 +253,14 @@ const MyGlobalSearch = {
 						/>
 					</div>
 				</div>
-				<h2>{{ capGen.searchResults }}</h2>
+			</div>
+			<div class="content column grow no-padding" :style="patternStyle">
 				<div class="global-search-modules column gap">
 					<my-global-search-module
+						@result-count-update="resultCountUpdate(m.id,$event)"
+						@toggle="toggle"
 						v-for="m in globalSearchModules"
+						:disabled="moduleIdsDisabled.includes(m.id)"
 						:input="inputActive"
 						:key="m.id"
 						:limit="limit"
@@ -248,22 +275,85 @@ const MyGlobalSearch = {
 		return {
 			inputActive:'', // submitted input
 			input:'',       // input text from input element
+			larger:false,
 			limit:5,
+			moduleIdMapResultCount:{}, // result count per module ID
+			moduleIdsDisabled:[],      // module IDs disabled for global search
 			showHeader:true
 		};
 	},
 	emits:['close'],
 	computed:{
+		anySearchRunning:(s) => {
+			for(const m of s.globalSearchModules) {
+				if(!s.moduleIdsDisabled.includes(m.id) && s.moduleIdMapResultCount[m.id] === undefined)
+					return true;
+			}
+			return false;
+		},
+		resultCount:(s) => {
+			let cnt = 0;
+			for(const k in s.moduleIdMapResultCount) {
+				if(!s.moduleIdsDisabled.includes(k))
+					cnt += s.moduleIdMapResultCount[k];
+			}
+			return cnt;
+		},
+
+		// status message
+		statusImage:(s) => {
+			if(s.empty)            return 'search.png';
+			if(s.anySearchRunning) return 'load.gif';
+			return 'ok.png';
+		},
+		statusLabel:(s) => {
+			if(s.empty)            return s.capGen.globalSearch;
+			if(s.anySearchRunning) return s.capGen.searchRunning;
+			return s.capGen.results.replace('{CNT}',s.resultCount);
+		},
+
 		// simple
+		empty:              (s) => s.inputActive === '',
 		globalSearchModules:(s) => s.$store.getters.globalSearchModules,
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.globalSearch,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:      (s) => s.$store.getters.captions.globalSearch,
+		capGen:      (s) => s.$store.getters.captions.generic,
+		isMobile:    (s) => s.$store.getters.isMobile,
+		patternStyle:(s) => s.$store.getters.patternStyle
+	},
+	mounted() {
+		window.addEventListener('keydown',this.handleHotkeys);
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
+		resultCountUpdate(id,v) {
+			this.moduleIdMapResultCount[id] = v;
+		},
+		
+		// general
+		handleHotkeys(e) {
+			if(e.key === 'Escape') {
+				this.$emit('close');
+				e.preventDefault();
+			}
+		},
+
+		// actions
 		submit() {
-			this.inputActive = this.input;
+			if(this.inputActive !== this.input) {
+				this.inputActive            = this.input;
+				this.moduleIdMapResultCount = {};
+			}
+		},
+		toggle(id) {
+			const pos = this.moduleIdsDisabled.indexOf(id);
+			if(pos === -1)
+				return this.moduleIdsDisabled.push(id);
+
+			this.moduleIdsDisabled.splice(pos,1);
 		}
 	}
 };
