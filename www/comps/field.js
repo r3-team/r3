@@ -1254,10 +1254,10 @@ let MyField = {
 		},
 		openForm(rows,getterArgs,newTab,openFormContext) {
 			// set defaults
-			if(typeof rows            === 'undefined') rows            = [];
-			if(typeof getterArgs      === 'undefined') getterArgs      = [];
-			if(typeof newTab          === 'undefined') newTab          = false;
-			if(typeof openFormContext === 'undefined') openFormContext = null;
+			if(rows            === undefined) rows            = [];
+			if(getterArgs      === undefined) getterArgs      = [];
+			if(newTab          === undefined) newTab          = false;
+			if(openFormContext === undefined) openFormContext = null;
 			
 			// form open context
 			let openForm = JSON.parse(JSON.stringify(
@@ -1268,7 +1268,7 @@ let MyField = {
 			for(let row of rows) {
 				const id = row.indexRecordIds[openForm.relationIndexOpen];
 				
-				if(typeof id !== 'undefined' && id !== null)
+				if(id !== undefined && id !== null)
 					recordIds.push(id);
 			}
 			

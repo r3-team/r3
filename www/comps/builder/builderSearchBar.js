@@ -4,6 +4,7 @@ import MyBuilderIconInput     from './builderIconInput.js';
 import MyBuilderOpenFormInput from './builderOpenFormInput.js';
 import MyBuilderQuery         from './builderQuery.js';
 import {getItemTitleColumn}   from '../shared/builder.js';
+import {getJoinIndexMap}      from '../shared/query.js';
 import MyTabs                 from '../tabs.js';
 import {
 	MyBuilderColumns,
@@ -224,7 +225,8 @@ let MyBuilderSearchBar = {
 							<td>
 								<my-builder-open-form-input
 									@update:openForm="openForm = $event"
-									:allowAllForms="true"
+									:allowAllForms="false"
+									:joinsIndexMapField="joinIndexMap"
 									:module="module"
 									:openForm="openForm"
 									:readonly="readonly"
@@ -295,8 +297,9 @@ let MyBuilderSearchBar = {
 			|| JSON.stringify(s.openForm) !== JSON.stringify(s.searchBar.openForm),
 		
 		// simple
-		searchBar:(s) => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
-		module:   (s) => s.moduleIdMap[s.searchBar.moduleId],
+		joinIndexMap:(s) => s.getJoinIndexMap(s.joins),
+		searchBar:   (s) => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
+		module:      (s) => s.moduleIdMap[s.searchBar.moduleId],
 		
 		// stores
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
@@ -314,6 +317,7 @@ let MyBuilderSearchBar = {
 		// externals
 		copyValueDialog,
 		getItemTitleColumn,
+		getJoinIndexMap,
 		getNilUuid,
 		
 		// actions

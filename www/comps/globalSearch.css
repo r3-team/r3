@@ -33,7 +33,7 @@
 	flex:0 0 auto;
 	display:flex;
 	flex-flow:column nowrap;
-	margin:3px 2px 0px 2px;
+	margin:0px 2px;
 }
 .global-search-bar{
 	flex:0 0 auto;

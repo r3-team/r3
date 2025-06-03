@@ -17,6 +17,11 @@ const MyStoreLocal = {
 		companyName:'',          // custom company name on login screen
 		companyWelcome:'',       // custom welcome message on login screen
 		css:'',                  // custom CSS, applied to everything
+		globalSearchOptions:{    // global search options
+			moduleIdsDisabled:[],
+			openAsPopUp:true,
+			showHeader:false
+		},
 		loginBackground:0,       // background image for login page
 		loginFavorites:{         // favorites set by login
 			dateCache:0,         // to check if current cached values are up-to-date
@@ -100,6 +105,10 @@ const MyStoreLocal = {
 		css(state,payload) {
 			state.css = payload;
 			set('css',payload);
+		},
+		globalSearchOptions(state,payload) {
+			state.globalSearchOptions = payload;
+			set('globalSearchOptions',payload);
 		},
 		loginBackground(state,payload) {
 			state.loginBackground = payload;
@@ -249,32 +258,33 @@ const MyStoreLocal = {
 			: `background-image:url(data:image;base64,${state.companyLoginImage});`,
 		
 		// simple getters    
-		activated:         (state) => state.activated,
-		appName:           (state) => state.appName,
-		appNameShort:      (state) => state.appNameShort,
-		appVersion:        (state) => state.appVersion,
-		appVersionBuild:   (state) => state.appVersionBuild,
-		builderOptionMap:  (state) => state.builderOptionMap,
-		companyColorHeader:(state) => state.companyColorHeader,
-		companyColorLogin: (state) => state.companyColorLogin,
-		companyLoginImage: (state) => state.companyLoginImage,
-		companyLogo:       (state) => state.companyLogo,
-		companyLogoUrl:    (state) => state.companyLogoUrl,
-		companyName:       (state) => state.companyName,
-		companyWelcome:    (state) => state.companyWelcome,
-		css:               (state) => state.css,
-		loginFavorites:    (state) => state.loginFavorites,
-		loginKeyAes:       (state) => state.loginKeyAes,
-		loginKeySalt:      (state) => state.loginKeySalt,
-		loginNoCred:       (state) => state.loginNoCred,
-		loginOptions:      (state) => state.loginOptions,
-		loginOptionsMobile:(state) => state.loginOptionsMobile,
-		menuIdMapOpen:     (state) => state.menuIdMapOpen,
-		openIdAuthDetails: (state) => state.openIdAuthDetails,
-		token:             (state) => state.token,
-		tokenKeep:         (state) => state.tokenKeep,
-		widgetFlow:        (state) => state.widgetFlow,
-		widgetWidth:       (state) => state.widgetWidth
+		activated:          (state) => state.activated,
+		appName:            (state) => state.appName,
+		appNameShort:       (state) => state.appNameShort,
+		appVersion:         (state) => state.appVersion,
+		appVersionBuild:    (state) => state.appVersionBuild,
+		builderOptionMap:   (state) => state.builderOptionMap,
+		companyColorHeader: (state) => state.companyColorHeader,
+		companyColorLogin:  (state) => state.companyColorLogin,
+		companyLoginImage:  (state) => state.companyLoginImage,
+		companyLogo:        (state) => state.companyLogo,
+		companyLogoUrl:     (state) => state.companyLogoUrl,
+		companyName:        (state) => state.companyName,
+		companyWelcome:     (state) => state.companyWelcome,
+		css:                (state) => state.css,
+		globalSearchOptions:(state) => state.globalSearchOptions,
+		loginFavorites:     (state) => state.loginFavorites,
+		loginKeyAes:        (state) => state.loginKeyAes,
+		loginKeySalt:       (state) => state.loginKeySalt,
+		loginNoCred:        (state) => state.loginNoCred,
+		loginOptions:       (state) => state.loginOptions,
+		loginOptionsMobile: (state) => state.loginOptionsMobile,
+		menuIdMapOpen:      (state) => state.menuIdMapOpen,
+		openIdAuthDetails:  (state) => state.openIdAuthDetails,
+		token:              (state) => state.token,
+		tokenKeep:          (state) => state.tokenKeep,
+		widgetFlow:         (state) => state.widgetFlow,
+		widgetWidth:        (state) => state.widgetWidth
 	}
 };
 

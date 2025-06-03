@@ -1,10 +1,7 @@
 import MyStore                        from '../../stores/store.js';
 import {getAttributeValuesFromGetter} from './attribute.js';
 import {consoleError}                 from './error.js';
-import {
-	getNilUuid,
-	openLink
-} from './generic.js';
+import {openLink}                     from './generic.js';
 import {
 	aesGcmDecryptBase64WithPhrase,
 	rsaDecrypt
