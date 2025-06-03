@@ -7,8 +7,8 @@ let MyInputRichtext = {
 	template:`<div class="input-richtext" :key="key">
 		<editor api-key="API_KEY"
 			v-model="input"
-			@keyDown="handleHotkeys"
 			@init="register"
+			@keyDown="handleHotkeys"
 			:init="init"
 		/>
 	</div>`,
@@ -22,11 +22,10 @@ let MyInputRichtext = {
 	},
 	data() {
 		return {
-			allowChanges:false,      // to block changes before a user action happened (TinyMCE cleans up content immediately, causing changes w/o user interaction)
 			editor:null,             // reference to editor object for cleanup
-			key:0,                   // to force recreation of the editor on init change, 0 = not yet initialized
+			key:0,                   // forces recreation of the editor on init change, 0 = not yet initialized
 			knownCtrlKeys:['q','s'], // for handling supported hot keys
-			loading:false,           // to block parallel reloading of the editor
+			loading:false,           // blocks parallel reload of editor and changes before user action (TinyMCE cleans up content on load w/o user interaction)
 			
 			// tokens are used to authenticate with the current user session
 			// we cannot store sensitive tokens inside richtext, but tokens are required for accessing files
@@ -57,7 +56,7 @@ let MyInputRichtext = {
 				paste_data_images:true,
 				plugins:'code emoticons image link lists searchreplace table',
 				readonly:s.readonly, // in init instead of as :disabled on editor component as we need to rebuild the toolbars too
-				relative_urls:false,    // if URL to internal path is used in link, Tiny cuts of base URL ('https://system/#/app/...' -> '#/app/...'), Tiny then fails to open relative URL
+				relative_urls:false, // if URL to internal path is used in link, Tiny cuts of base URL ('https://system/#/app/...' -> '#/app/...'), Tiny then fails to open relative URL
 				resize:false,
 				selector:'textarea',
 				skin:s.settings.dark ? 'oxide-dark' : 'oxide',
@@ -126,7 +125,7 @@ let MyInputRichtext = {
 					new RegExp(this.tokenPlaceholder,'g'),this.token);
 			},
 			set(v) {
-				if(this.readonly || !this.allowChanges)
+				if(this.readonly || this.loading)
 					return;
 				
 				// remove authentication tokens from file download link
@@ -144,16 +143,7 @@ let MyInputRichtext = {
 	},
 	mounted() {
 		// refresh editor if any relevant input changes
-		this.$watch(() => [this.formLoading,this.images,this.isDark,this.isMobile,this.language,this.readonly],() => {
-			if(!this.formLoading) {
-				this.allowChanges = false;
-				this.remove(); // cleanup editor before reinit
-				this.key++;    // reinit editor
-
-				// wait until the editor fully loads before allowing changes
-				this.$nextTick(() => this.allowChanges = true);
-			}
-		});
+		this.$watch(() => [this.formLoading,this.images,this.isDark,this.isMobile,this.language,this.readonly],this.reinit);
 	},
 	unmounted() {
 		this.remove();
@@ -173,7 +163,17 @@ let MyInputRichtext = {
 		// editor handling
 		register(ev,editor) {
 			this.editor = editor;
+		},
+		reinit() {
+			if(this.formLoading || this.loading)
+				return;
 
+			this.loading = true; // block parallel editor load
+			this.remove();       // cleanup editor
+			this.key++;          // reinit editor
+
+			// remove loading state after editor is fully ready
+			this.$nextTick(() => { this.loading = false; });
 		},
 		remove() {
 			if(this.editor !== null) {
