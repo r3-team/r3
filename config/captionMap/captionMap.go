@@ -111,26 +111,29 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 				OR api_id IN (
 					SELECT id FROM app.api WHERE module_id = $5
 				)
+				OR search_bar_id IN (
+					SELECT id FROM app.search_bar WHERE module_id = $6
+				)
 			)
 			OR field_id IN (
 				SELECT id FROM app.field WHERE form_id IN (
-					SELECT id FROM app.form WHERE module_id = $6
+					SELECT id FROM app.form WHERE module_id = $7
 				)
 			)
 			OR form_action_id IN (
 				SELECT id FROM app.form_action WHERE form_id IN (
-					SELECT id FROM app.form WHERE module_id = $7
+					SELECT id FROM app.form WHERE module_id = $8
 				)
 			)
 			OR menu_id IN (
 				SELECT id FROM app.menu WHERE menu_tab_id IN (
-					SELECT id FROM app.menu_tab WHERE module_id = $8
+					SELECT id FROM app.menu_tab WHERE module_id = $9
 				)
 			)
 			OR tab_id IN (
 				SELECT id FROM app.tab WHERE field_id IN (
 					SELECT id FROM app.field WHERE form_id IN (
-						SELECT id FROM app.form WHERE module_id = $9
+						SELECT id FROM app.form WHERE module_id = $10
 					)
 				)
 			)
@@ -139,24 +142,24 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 					SELECT id FROM app.query
 					WHERE field_id IN (
 						SELECT id FROM app.field WHERE form_id IN (
-							SELECT id FROM app.form WHERE module_id = $10
+							SELECT id FROM app.form WHERE module_id = $11
 						)
 					)
 					-- only direct field queries have filter choices and therefore captions
 					-- most queries do not: form query, collection query, column sub query, filter sub query
 				)
 			)
-			OR article_id      IN (SELECT id FROM app.article      WHERE module_id = $11)
-			OR client_event_id IN (SELECT id FROM app.client_event WHERE module_id = $12)
-			OR form_id         IN (SELECT id FROM app.form         WHERE module_id = $13)
-			OR js_function_id  IN (SELECT id FROM app.js_function  WHERE module_id = $14)
-			OR login_form_id   IN (SELECT id FROM app.login_form   WHERE module_id = $15)
-			OR menu_tab_id     IN (SELECT id FROM app.menu_tab     WHERE module_id = $16)
-			OR pg_function_id  IN (SELECT id FROM app.pg_function  WHERE module_id = $17)
-			OR role_id         IN (SELECT id FROM app.role         WHERE module_id = $18)
-			OR search_bar_id   IN (SELECT id FROM app.search_bar   WHERE module_id = $19)
-			OR widget_id       IN (SELECT id FROM app.widget       WHERE module_id = $20)
-		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
+			OR article_id      IN (SELECT id FROM app.article      WHERE module_id = $12)
+			OR client_event_id IN (SELECT id FROM app.client_event WHERE module_id = $13)
+			OR form_id         IN (SELECT id FROM app.form         WHERE module_id = $14)
+			OR js_function_id  IN (SELECT id FROM app.js_function  WHERE module_id = $15)
+			OR login_form_id   IN (SELECT id FROM app.login_form   WHERE module_id = $16)
+			OR menu_tab_id     IN (SELECT id FROM app.menu_tab     WHERE module_id = $17)
+			OR pg_function_id  IN (SELECT id FROM app.pg_function  WHERE module_id = $18)
+			OR role_id         IN (SELECT id FROM app.role         WHERE module_id = $19)
+			OR search_bar_id   IN (SELECT id FROM app.search_bar   WHERE module_id = $20)
+			OR widget_id       IN (SELECT id FROM app.widget       WHERE module_id = $21)
+		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
 	}
 
 	if err != nil {

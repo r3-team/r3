@@ -584,6 +584,17 @@ let MyCaptionMap = {
 							:name="capGen.jsFunctions"
 							:readonly="readonly"
 						/>
+						<!-- search bars -->
+						<my-caption-map-items icon="search.png"
+							@update="storeChange"
+							:isCustom="isCustom"
+							:items="captionsSearchBars"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
+							:levelMax="1"
+							:name="capGen.searchBars"
+							:readonly="readonly"
+						/>
 						<!-- collections -->
 						<my-caption-map-items icon="tray.png"
 							@update="storeChange"
@@ -637,7 +648,7 @@ let MyCaptionMap = {
 							:readonly="readonly"
 						/>
 						<!-- query choices -->
-						<my-caption-map-items icon="search.png"
+						<my-caption-map-items icon="filter.png"
 							@update="storeChange"
 							:isCustom="isCustom"
 							:items="captionsQueryChoices"
@@ -842,6 +853,24 @@ let MyCaptionMap = {
 			}
 			return out;
 		},
+		captionsSearchBars:(s) => {
+			let searchBarIdMap = {};
+			for(const bar of s.module.searchBars) {
+				let childCaptions = [];
+				for(const col of bar.columns) {
+					if(s.captionMap.columnIdMap[col.id] !== undefined)
+						childCaptions.push(s.makeItem(col.id,s.getColumnTitle(col,s.moduleId),s.captionMap.columnIdMap[col.id],[]));
+				}
+				
+				if(childCaptions.length !== 0 || s.captionMap.searchBarIdMap[bar.id] !== undefined)
+					searchBarIdMap[bar.id] = childCaptions;
+			}
+			let out = [];
+			for(const id in searchBarIdMap) {
+				out.push(s.makeItem(id,s.searchBarIdMap[id].name,s.captionMap.searchBarIdMap[id],searchBarIdMap[id]));
+			}
+			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
+		},
 		
 		// simple
 		captionsArticles:   (s) => s.makeSortedItemList(s.captionMap.articleIdMap,s.articleIdMap),
@@ -869,6 +898,7 @@ let MyCaptionMap = {
 		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
 		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
 		roleIdMap:      (s) => s.$store.getters['schema/roleIdMap'],
+		searchBarIdMap: (s) => s.$store.getters['schema/searchBarIdMap'],
 		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
 		capApp:         (s) => s.$store.getters.captions.captionMap,
 		capGen:         (s) => s.$store.getters.captions.generic,
