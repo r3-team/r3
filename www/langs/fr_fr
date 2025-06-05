@@ -1950,6 +1950,7 @@
 		"nowOffsetHint": "+/- X {MODE}",
 		"nowOffsetTitle": "Ajouter (nombre positif) ou soustraire (nombre négatif) X jours/heures/minutes/secondes à partir de maintenant.",
 		"operatorsArray": "Tableau",
+		"operatorsFts": "Full-text search",
 		"operatorsNull": "Valeur vide",
 		"operatorsRegex": "Regular expression",
 		"operatorsSets": "Sous-ensemble",
@@ -2537,9 +2538,6 @@
 		"colorMenu": "Couleur écrasée",
 		"dark": "Mode sombre",
 		"dateFormat": "Format de date",
-		"dialog": {
-			"searchDictionary": "Ce système offre des capacités de recherche en texte intégral. Là où la recherche en texte intégral est utilisée, même de très grands textes peuvent être recherchés rapidement avec des fonctionnalités de recherche avancées telles que la comparaison de synonymes et de radicaux de mots.<br /><br />'Dictionnaires pour la recherche en texte intégral' informe le système des langues avec lesquelles un utilisateur travaille pour utiliser des fonctionnalités de recherche spécifiques à la langue."
-		},
 		"encryption": {
 			"backupCode": "Code de sauvegarde",
 			"backupCodeDesc": "Le code de sauvegarde est <b>très important</b> ; il sert à rétablir l'accès si vous oubliez votre mot de passe.",
@@ -2594,8 +2592,6 @@
 		},
 		"pageTitle": "Paramètres",
 		"pattern": "Motif de fond",
-		"searchDictionaries": "Dictionnaires pour la recherche en texte intégral",
-		"searchDictionaryNew": "Ajouter un dictionnaire",
 		"spacing": "Espacement",
 		"sundayFirstDow": "Dimanche est le 1er jour de la semaine",
 		"tabRemember": "Ouvrir le dernier onglet utilisé",

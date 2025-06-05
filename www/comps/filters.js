@@ -1,13 +1,17 @@
 import MyBuilderQuery          from './builder/builderQuery.js';
 import MyInputDate             from './inputDate.js';
+import MyInputDictionary       from './inputDictionary.js';
 import {isAttributeString}     from './shared/attribute.js';
 import {getColumnIsFilterable} from './shared/column.js';
-import {getCaption}            from './shared/language.js';
 import {
 	getDependentModules,
 	getItemTitleColumn,
 	getItemTitleNoRelationship
 } from './shared/builder.js';
+import {
+	getCaption,
+	getDictByLang
+} from './shared/language.js';
 import {
 	getNestedIndexAttributeIdsByJoins,
 	getQueryTemplate
@@ -103,6 +107,10 @@ let MyFilterOperator = {
 				<option value="@>" :title="capApp.option.operator.arrContains" >@&gt;</option>
 				<option value="<@" :title="capApp.option.operator.arrContained">&lt;@</option>
 				<option value="&&" :title="capApp.option.operator.arrOverlap"  >&&</option>
+			</optgroup>
+			
+			<optgroup :label="capApp.operatorsFts">
+				<option value="@@" :title="capApp.option.operator.fts">@@</option>
 			</optgroup>
 		</template>
 		
@@ -805,7 +813,8 @@ let MyFilter = {
 		MyFilterBrackets,
 		MyFilterConnector,
 		MyFilterOperator,
-		MyFilterSide
+		MyFilterSide,
+		MyInputDictionary
 	},
 	template:`<div class="filter">
 		<img v-if="multipleFilters" class="dragAnchor" src="images/drag.png" />
@@ -847,7 +856,7 @@ let MyFilter = {
 			:onlyString="isStringInput"
 		/>
 		<my-button image="question.png"
-			v-if="operator === '@@'"
+			v-if="operator === '@@' && !builderMode"
 			@trigger="showFtsHelp"
 		/>
 		<my-filter-side
@@ -872,16 +881,11 @@ let MyFilter = {
 		/>
 		
 		<!-- full text search, dictionary input (only with dictionary attribute) -->
-		<select class="short"
+		<my-input-dictionary
 			v-if="side0ColumFtsMode === 'dict'"
 			v-model="searchDictionaryInput"
 			:title="capApp.searchDictionaryHint"
-		>
-			<option v-for="d in settings.searchDictionaries">{{ d }}</option>
-			<option value="simple" :title="capApp.searchDictionarySimpleHint">
-				{{ capApp.searchDictionarySimple }}
-			</option>
-		</select>
+		/>
 		
 		<my-filter-brackets class="brackets"
 			v-if="multipleFilters || isAnyBracketsSet"
@@ -926,7 +930,7 @@ let MyFilter = {
 				if(ftsMode === null && this.operator === '@@')
 					return this.operatorInput = '=';
 			},
-			immediate:true
+			immediate:false
 		}
 	},
 	computed:{
@@ -959,11 +963,8 @@ let MyFilter = {
 				if(v !== '@@') {
 					this.side1Input.ftsDict = null;
 				}
-				else if(this.side1Input.ftsDict === null) {
-					if(this.settings.searchDictionaries.length === 0)
-						this.side1Input.ftsDict = 'simple';
-					else
-						this.side1Input.ftsDict = this.settings.searchDictionaries[0];
+				if(v === '@@' && this.side1Input.ftsDict === null) {
+					this.side1Input.ftsDict = this.getDictByLang();
 				}
 				this.$emit('update',this.position,'side1',this.side1Input);
 			}
@@ -995,9 +996,9 @@ let MyFilter = {
 		side0ColumFtsMode:(s) => {
 			if(!s.side0Column) return null;
 			
-			let atr = s.attributeIdMap[s.side0Column.attributeId];
-			let rel = s.relationIdMap[atr.relationId];
-			for(let ind of rel.indexes) {
+			const atr = s.attributeIdMap[s.side0Column.attributeId];
+			const rel = s.relationIdMap[atr.relationId];
+			for(const ind of rel.indexes) {
 				if(ind.method === 'GIN' && ind.attributes.length === 1
 					&& ind.attributes[0].attributeId === s.side0Column.attributeId) {
 					
@@ -1024,11 +1025,11 @@ let MyFilter = {
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		capApp:        (s) => s.$store.getters.captions.filter,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		settings:      (s) => s.$store.getters.settings
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
+		getDictByLang,
 		isAttributeString,
 		
 		// actions

@@ -82,7 +82,6 @@ let MyBuilderSearchBar = {
 						<my-builder-columns groupName="columns"
 							@columns-set="columns = $event"
 							@column-id-show="toggleColumnOptions($event)"
-							@column-remove=""
 							:builderLanguage="builderLanguage"
 							:columnIdShow="columnIdShow"
 							:columns="columns"

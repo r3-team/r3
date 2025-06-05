@@ -1950,6 +1950,7 @@
 		"nowOffsetHint": "+/- X {MODE}",
 		"nowOffsetTitle": "从现在开始添加（正数）或减去（负数） X 天/小时/分钟/秒。",
 		"operatorsArray": "数组",
+		"operatorsFts": "Full-text search",
 		"operatorsNull": "空值",
 		"operatorsRegex": "Regular expression",
 		"operatorsSets": "子集",
@@ -2537,9 +2538,6 @@
 		"colorMenu": "覆盖颜色",
 		"dark": "夜间模式",
 		"dateFormat": "日期格式",
-		"dialog": {
-			"searchDictionary": "该系统提供全文搜索功能。在使用全文搜索时，即使是非常大的文本也可以通过高级搜索功能（例如比较同义词和词干）快速查找。<br /><br />'用于全文搜索的词典' 通知系统用户使用特定语言的搜索功能，并指示系统哪些语言可以使用语言特定的搜索功能。"
-		},
 		"encryption": {
 			"backupCode": "备份代码",
 			"backupCodeDesc": "备份代码非常重要；如果忘记密码，它用于重新获得访问权限。",
@@ -2594,8 +2592,6 @@
 		},
 		"pageTitle": "设置",
 		"pattern": "背景图案",
-		"searchDictionaries": "全文搜索词典",
-		"searchDictionaryNew": "添加词典",
 		"spacing": "间距",
 		"sundayFirstDow": "将星期天设为第一天",
 		"tabRemember": "打开上次使用的选项卡",

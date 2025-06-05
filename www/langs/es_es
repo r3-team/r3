@@ -1950,6 +1950,7 @@
 		"nowOffsetHint": "+/- X {MODE}",
 		"nowOffsetTitle": "Añadir (número positivo) o eliminar (número negativo) X días/horas/minutos/segundos desde ahora.",
 		"operatorsArray": "Array",
+		"operatorsFts": "Full-text search",
 		"operatorsNull": "Valor vacío",
 		"operatorsRegex": "Expresión regular",
 		"operatorsSets": "Subconjunto",
@@ -2537,9 +2538,6 @@
 		"colorMenu": "Sobrescribir color",
 		"dark": "Modo oscuro",
 		"dateFormat": "Formato de fecha",
-		"dialog": {
-			"searchDictionary": "Este sistema ofrece capacidades de búsqueda de texto completo. Donde se utiliza la búsqueda de texto completo, incluso textos muy largos se pueden buscar rápidamente con funciones de búsqueda avanzadas como la comparación de sinónimos y raíces de palabras.<br /><br />'Diccionarios para búsqueda de texto completo' informa al sistema de qué idiomas utiliza un usuario, para usar funciones de búsqueda específicas del idioma."
-		},
 		"encryption": {
 			"backupCode": "Código de respaldo",
 			"backupCodeDesc": "El código de respaldo es <b>muy importante</b>; sirve para restablecer el acceso si olvidas tu contraseña.",
@@ -2594,8 +2592,6 @@
 		},
 		"pageTitle": "Configuraciones",
 		"pattern": "Patrón de fondo",
-		"searchDictionaries": "Diccionarios para búsqueda de texto completo",
-		"searchDictionaryNew": "Agregar diccionario",
 		"spacing": "Espaciado",
 		"sundayFirstDow": "El domingo es el primer día de la semana",
 		"tabRemember": "Abrir la última pestaña usada",

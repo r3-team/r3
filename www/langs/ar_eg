@@ -1950,6 +1950,7 @@
 		"nowOffsetHint": "+/- X {الوضع}",
 		"nowOffsetTitle": "إضافة (رقم موجب) أو إزالة (رقم سالب) X أيام/ساعات/دقائق/ثواني من الآن.",
 		"operatorsArray": "صفيف",
+		"operatorsFts": "Full-text search",
 		"operatorsNull": "قيمة فارغة",
 		"operatorsRegex": "Regular expression",
 		"operatorsSets": "مجموعة فرعية",
@@ -2537,9 +2538,6 @@
 		"colorMenu": "الكتابة فوق اللون",
 		"dark": "الوضع المظلم",
 		"dateFormat": "تنسيق التاريخ",
-		"dialog": {
-			"searchDictionary": "يوفر هذا النظام إمكانيات البحث عن النص الكامل. <br /><br />تقوم \"قواميس البحث عن النص الكامل\" بإعلام النظام باللغات التي يعمل بها المستخدم لاستخدام ميزات البحث الخاصة باللغة."
-		},
 		"encryption": {
 			"backupCode": "رمز النسخ الاحتياطي",
 			"backupCodeDesc": "الرمز الاحتياطي هو <b>مهم جدا</b>; ",
@@ -2594,8 +2592,6 @@
 		},
 		"pageTitle": "إعدادات",
 		"pattern": "نمط الخلفية",
-		"searchDictionaries": "قواميس للبحث عن النص الكامل",
-		"searchDictionaryNew": "إضافة القاموس",
 		"spacing": "تباعد",
 		"sundayFirstDow": "الأحد هو أول أيام الأسبوع",
 		"tabRemember": "فتح علامة التبويب الأخيرة المستخدمة",

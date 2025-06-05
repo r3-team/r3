@@ -41,3 +41,18 @@ export function getCaptionMapName(content) {
 	}
 	return '';
 };
+export function getDictByLang() {
+	let dict = 'simple';
+	switch(MyStore.getters.settings.languageCode.substring(0,2)) {
+		case 'ar': dict = 'arabic';    break;
+		case 'de': dict = 'german';    break;
+		case 'en': dict = 'english';   break;
+		case 'es': dict = 'spanish';   break;
+		case 'fr': dict = 'french';    break;
+		case 'hu': dict = 'hungarian'; break;
+		case 'it': dict = 'italian';   break;
+		case 'ro': dict = 'romanian';  break;
+	}
+	// apply dictionary if supported by the system
+	return MyStore.getters.searchDictionaries.includes(dict) ? dict : 'simple';
+};

@@ -1,14 +1,18 @@
 
 import {getColumnsProcessed} from './shared/column.js';
-import srcBase64Icon         from './shared/image.js';
 import {openLink}            from './shared/generic.js';
-import {getCaption}          from './shared/language.js';
+import srcBase64Icon         from './shared/image.js';
 import MyForm                from './form.js';
+import MyInputDictionary     from './inputDictionary.js';
 import MyList                from './list.js';
 import {
 	getFormPopUpConfig,
 	getFormRoute
 }  from './shared/form.js';
+import {
+	getCaption,
+	getDictByLang
+} from './shared/language.js';
 import {
 	getQueryFiltersProcessed,
 	getJoinIndexMap
@@ -42,6 +46,7 @@ const MyGlobalSearchModuleSearchBar = {
 			@open-form="openForm"
 			@record-count-change="resultCountUpdate"
 			@set-login-option="setListOption"
+			:blockDuringLoad="false"
 			:columns="columnsProcessed"
 			:columnsAll="columns"
 			:columnsSortOnly="true"
@@ -71,7 +76,6 @@ const MyGlobalSearchModuleSearchBar = {
 	props:{
 		input:    { type:String, required:true },
 		limit:    { type:Number, required:true },
-		options:  { type:Object, required:true },
 		searchBar:{ type:Object, required:true }
 	},
 	watch:{
@@ -95,15 +99,16 @@ const MyGlobalSearchModuleSearchBar = {
 	computed:{
 		// simple
 		columns:         (s) => s.searchBar.columns,
-		columnsProcessed:(s) => s.getColumnsProcessed(s.columns,[],s.joinIndexMap,s.input),
+		columnsProcessed:(s) => s.getColumnsProcessed(s.columns,[],s.joinIndexMap,s.input,s.options.dictionary),
 		dataOptions:     (s) => s.searchBar.openForm !== null ? 2 : -1,
 		query:           (s) => s.searchBar.query,
 		filters:         (s) => s.query.filters,
-		filtersProcessed:(s) => s.getQueryFiltersProcessed(s.filters,s.joinIndexMap,s.input),
+		filtersProcessed:(s) => s.getQueryFiltersProcessed(s.filters,s.joinIndexMap,s.input,s.options.dictionary),
 		joinIndexMap:    (s) => s.getJoinIndexMap(s.query.joins),
 
 		// stores
-		capGen:(s) => s.$store.getters.captions.generic
+		capGen: (s) => s.$store.getters.captions.generic,
+		options:(s) => s.$store.getters['local/globalSearchOptions']
 	},
 	methods:{
 		// externals
@@ -157,15 +162,15 @@ const MyGlobalSearchModule = {
 	name:'my-global-search-module',
 	components:{ MyGlobalSearchModuleSearchBar },
 	template:`<div class="global-search-module column">
-		<div class="global-search-module-title row gap centered clickable" @click="$emit('toggle',module.id)">
+		<div class="global-search-module-title row gap centered clickable" @click="$emit('toggle',module.id)" :class="{ disabled }">
 			<div class="row gap">
 				<my-label
-					:darkBg="true"
+					:darkBg="!disabled"
 					:image="disabled ? 'checkBox0.png' : 'checkBox1.png'"
 				/>
 				<my-label
 					:caption="getCaption('moduleTitle',module.id,module.id,module.captions,module.name)"
-					:darkBg="true"
+					:darkBg="!disabled"
 					:imageBase64="srcBase64Icon(module.iconId,'images/module.png')"
 					:large="true"
 				/>
@@ -173,7 +178,7 @@ const MyGlobalSearchModule = {
 			<div class="row gap">
 				<my-label
 					:caption="resultLabel"
-					:darkBg="true"
+					:darkBg="!disabled"
 					:image="active && anyRunning ? 'load.gif' : ''"
 					:large="true"
 				/>
@@ -193,7 +198,6 @@ const MyGlobalSearchModule = {
 				v-for="b in searchBars"
 				:input="input"
 				:limit="limit"
-				:options="options"
 				:searchBar="b"
 			/>
 		</div>
@@ -203,8 +207,7 @@ const MyGlobalSearchModule = {
 		disabled:{ type:Boolean, required:true },
 		input:   { type:String,  required:true },
 		limit:   { type:Number,  required:true },
-		module:  { type:Object,  required:true },
-		options: { type:Object,  required:true }
+		module:  { type:Object,  required:true }
 	},
 	watch:{
 		input() {
@@ -273,7 +276,7 @@ const MyGlobalSearchModule = {
 
 const MyGlobalSearch = {
 	name:'my-global-search',
-	components:{ MyGlobalSearchModule },
+	components:{ MyGlobalSearchModule, MyInputDictionary },
 	template:`<div class="app-sub-window"
 		@mousedown.self="$emit('close')"
 		:class="{ 'under-header':!isMobile }"
@@ -321,7 +324,7 @@ const MyGlobalSearch = {
 							:cancel="true"
 						/>
 					</div>
-					<div class="row gap">
+					<div class="row gap-large">
 						<my-button-check
 							@update:modelValue="setOption('openAsPopUp',$event)"
 							:caption="capApp.button.openAsPopUp"
@@ -332,6 +335,17 @@ const MyGlobalSearch = {
 							:caption="capApp.button.showHeader"
 							:modelValue="options.showHeader"
 						/>
+						<div class="row gap">
+							<my-button image="languages.png"
+								@trigger="resetDict"
+								:naked="true"
+							/>
+							<my-input-dictionary
+								@update:modelValue="setOption('dictionary',$event)"
+								:title="capApp.searchDictionaryHint"
+								:modelValue="options.dictionary"
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -347,7 +361,6 @@ const MyGlobalSearch = {
 						:key="m.id"
 						:limit="limit"
 						:module="m"
-						:options="options"
 					/>
 				</div>
 			</div>
@@ -406,14 +419,16 @@ const MyGlobalSearch = {
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);
+
+		if(this.options.dictionary === null)
+			this.resetDict();
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
-		resultCountUpdate(id,v) {
-			this.moduleIdMapResultCount[id] = v;
-		},
+		// externals
+		getDictByLang,
 		
 		// general
 		handleHotkeys(e) {
@@ -422,8 +437,14 @@ const MyGlobalSearch = {
 				e.preventDefault();
 			}
 		},
+		resultCountUpdate(id,v) {
+			this.moduleIdMapResultCount[id] = v;
+		},
 
 		// actions
+		resetDict() {
+			this.setOption('dictionary',this.getDictByLang());
+		},
 		setOption(name,value) {
 			let o = JSON.parse(JSON.stringify(this.options));
 			o[name] = value;

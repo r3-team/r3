@@ -17,9 +17,16 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var regexRelId = regexp.MustCompile(`^\_r(\d+)id`) // finds: _r3id
+const (
+	exprRegconfigSimple = "'simple'::REGCONFIG"
+)
+
+var (
+	regexRelId = regexp.MustCompile(`^\_r(\d+)id`) // finds: _r3id
+)
 
 // get data
 // updates SQL query pointer value (for error logging), returns data rows + total count
@@ -643,87 +650,87 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{}, loginId
 		return "", errors.New("bad filter operator")
 	}
 
-	// check for full text search
-	ftsActive := filter.Side0.FtsDict.Valid || filter.Side1.FtsDict.Valid
-	isNullOp := isNullOperator(filter.Operator)
+	isOpFts := isFtsOperator(filter.Operator)
+	isOpLike := isLikeOperator(filter.Operator)
+	isOpNull := isNullOperator(filter.Operator)
+	var opFtsDictAtrId pgtype.UUID
+
+	if isOpFts {
+		// handle fulltext search (FTS)
+		// in FTS comparisons, side0 is TSVECTOR (side0), side1 is TSQUERY
+		s := filter.Side0
+		if s.AttributeId.Valid {
+			atr, exists := cache.AttributeIdMap[s.AttributeId.Bytes]
+			if !exists {
+				return "", handler.ErrSchemaUnknownAttribute(s.AttributeId.Bytes)
+			}
+
+			// we can apply a dictionary attribute (eg. regconfig) from an text index (GIN) if available
+			rel := cache.RelationIdMap[atr.RelationId]
+			for _, ind := range rel.Indexes {
+				if ind.Method == "GIN" && len(ind.Attributes) == 1 && ind.Attributes[0].AttributeId == atr.Id && ind.AttributeIdDict.Valid {
+					opFtsDictAtrId = ind.AttributeIdDict
+					break
+				}
+			}
+		}
+	}
 
 	// define comparisons
-	var getComp = func(s types.DataGetFilterSide, comp *string) error {
-		var isQuery = s.Query.RelationId != uuid.Nil
+	var getComp = func(s types.DataGetFilterSide, isSide0 bool) (string, error) {
 
 		// sub query filter
-		if isQuery {
+		if s.Query.RelationId != uuid.Nil {
 			indexRelationIdsSub := make(map[int]uuid.UUID)
 
 			subQuery, _, err := prepareQuery(s.Query, indexRelationIdsSub, queryArgs, loginId, nestingLevel+1)
 			if err != nil {
-				return err
+				return "", err
 			}
-			*comp = fmt.Sprintf("(\n%s\n)", subQuery)
-			return nil
+			return fmt.Sprintf("(\n%s\n)", subQuery), nil
 		}
 
 		// attribute filter
 		if s.AttributeId.Valid {
-
 			atr, exists := cache.AttributeIdMap[s.AttributeId.Bytes]
 			if !exists {
-				return handler.ErrSchemaUnknownAttribute(s.AttributeId.Bytes)
+				return "", handler.ErrSchemaUnknownAttribute(s.AttributeId.Bytes)
 			}
-			*comp = getAttributeCode(getRelationCode(s.AttributeIndex, s.AttributeNested), atr.Name)
+			atrExpr := getAttributeCode(getRelationCode(s.AttributeIndex, s.AttributeNested), atr.Name)
 
-			if ftsActive {
-				ftsDict := "'simple'"
-
-				// use dictionary attribute on corresponding text index, if there is one
-				rel := cache.RelationIdMap[atr.RelationId]
-				for _, ind := range rel.Indexes {
-					if ind.Method == "GIN" &&
-						len(ind.Attributes) == 1 &&
-						ind.Attributes[0].AttributeId == s.AttributeId.Bytes &&
-						ind.AttributeIdDict.Valid {
-
-						// use dictionary attribute name without quotes as its a column
-						atrDict := cache.AttributeIdMap[ind.AttributeIdDict.Bytes]
-						ftsDict = atrDict.Name
-						break
-					}
+			if isOpFts {
+				exprRegconfig := exprRegconfigSimple
+				if opFtsDictAtrId.Valid {
+					expr := getAttributeCode(getRelationCode(s.AttributeIndex, s.AttributeNested), cache.AttributeIdMap[opFtsDictAtrId.Bytes].Name)
+					exprRegconfig = fmt.Sprintf("CASE WHEN %s IS NULL THEN %s ELSE %s END", expr, exprRegconfigSimple, expr)
 				}
-
-				// apply ts_vector operation with or without dictionary definition
-				*comp = fmt.Sprintf("to_tsvector(CASE WHEN %s IS NULL THEN 'simple'::REGCONFIG ELSE %s END,%s)",
-					ftsDict, ftsDict, *comp)
-			} else {
-				// special cases
-				// (I)LIKE comparison needs attribute cast as TEXT (relevant for integers/floats/etc.)
-				// REGCONFIG attributes must be cast as TEXT
-				if isLikeOperator(filter.Operator) || atr.Content == "regconfig" {
-					*comp = fmt.Sprintf("%s::TEXT", *comp)
-				}
+				return getFtsExpression(exprRegconfig, atrExpr, isSide0), nil
 			}
-			return nil
+
+			// (I)LIKE comparison needs attribute cast as TEXT (relevant for integers/floats/etc.)
+			// REGCONFIG attributes must be cast as TEXT
+			if isOpLike || atr.Content == "regconfig" {
+				return fmt.Sprintf("%s::TEXT", atrExpr), nil
+			}
+			return atrExpr, nil
 		}
 
 		// fixed value filter
-		// can be anything, text, floats, boolean, NULL values
-		// create placeholders and add to query arguments
-
-		if isNullOp {
+		// can be anything (text, floats, boolean, NULL values, ...)
+		if isOpNull {
 			// do not add user value as argument if NULL operator is used
 			// to use NULL operator the data type must be known ahead of time (prepared statement)
 			//  "pg: could not determine data type"
 			// because user can add anything we would check the type ourselves
 			//  or just check for NIL because that´s all we care about in this case
 			if s.Value == nil {
-				*comp = "NULL"
-				return nil
+				return "NULL", nil
 			} else {
-				*comp = "NOT NULL"
-				return nil
+				return "NOT NULL", nil
 			}
 		}
 
-		if isLikeOperator(filter.Operator) {
+		if isOpLike && s.Value != nil {
 			// add wildcard characters before/after for (I)LIKE comparison unless input includes them
 			v := fmt.Sprintf("%s", s.Value)
 			if strings.Contains(v, "%") {
@@ -733,45 +740,39 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{}, loginId
 			}
 		}
 
+		// add value to query arguments and refer to it via placeholder
 		*queryArgs = append(*queryArgs, s.Value)
 
-		if s.FtsDict.Valid {
-			if !cache.GetSearchDictionaryIsValid(s.FtsDict.String) {
-				s.FtsDict.String = "simple"
+		if isOpFts {
+			exprRegconfig := exprRegconfigSimple
+			if opFtsDictAtrId.Valid && s.FtsDict.Valid && cache.GetSearchDictionaryIsValid(s.FtsDict.String) {
+				exprRegconfig = fmt.Sprintf("'%s'", s.FtsDict.String)
 			}
-
-			// websearch_to_tsquery supports
-			// AND logic: 'coffee tea'    results in: 'coffe' & 'tea'
-			// OR  logic: 'coffee or tea' results in: 'coffe' | 'tea'
-			// negation:  'coffee -tea'   results in: 'coffe' & !'tea'
-			// followed:  '"coffe tea"'   results in: 'coffe' <-> 'tea'
-			// https://www.postgresql.org/docs/current/textsearch-controls.html
-			*comp = fmt.Sprintf("websearch_to_tsquery('%s',$%d)", s.FtsDict.String, len(*queryArgs))
-		} else {
-			// cast args for certain data types, known issues:
-			// * uncast bool args cannot be compared to another uncast bool arg via equal operator (=)
-			// * uncast real/double args cannot be compared to another uncast real/double arg via equal operator (=)
-			argCast := ""
-			if s.Value != nil {
-				switch fmt.Sprintf("%T", s.Value) {
-				case "bool":
-					argCast = "::BOOL"
-				case "float64":
-					argCast = "::FLOAT8" // short alias to double precision, float64 is default coming from JSON decode of JS number values
-				}
-			}
-			*comp = fmt.Sprintf("$%d%s", len(*queryArgs), argCast)
+			return getFtsExpression(exprRegconfig, fmt.Sprintf("$%d", (len(*queryArgs))), isSide0), nil
 		}
-		return nil
+
+		// cast args for certain data types, known issues:
+		// * uncast bool args cannot be compared to another uncast bool arg via equal operator (=)
+		// * uncast real/double args cannot be compared to another uncast real/double arg via equal operator (=)
+		switch s.Value.(type) {
+		case bool:
+			return fmt.Sprintf("$%d::BOOL", len(*queryArgs)), nil
+		case float64: // short alias to double precision, float64 is default coming from JSON decode of JS number values
+			return fmt.Sprintf("$%d::FLOAT8", len(*queryArgs)), nil
+		}
+		return fmt.Sprintf("$%d", len(*queryArgs)), nil
 	}
 
 	// build left/right comparison sides (ignore right side, if NULL operator)
-	comp0, comp1 := "", ""
-	if err := getComp(filter.Side0, &comp0); err != nil {
+	comp0, err := getComp(filter.Side0, true)
+	if err != nil {
 		return "", err
 	}
-	if !isNullOp {
-		if err := getComp(filter.Side1, &comp1); err != nil {
+	comp1 := ""
+
+	if !isOpNull {
+		comp1, err = getComp(filter.Side1, false)
+		if err != nil {
 			return "", err
 		}
 
@@ -902,10 +903,27 @@ func getFiltersByIndex(filters []types.DataGetFilter, index int) []types.DataGet
 	}
 	return out
 }
+func getFtsExpression(exprRegconfig string, exprValue string, isSide0 bool) string {
+	// when using FTS operator, we assume vectorized text to be left (side0) and query to be right (side1)
+	if isSide0 {
+		return fmt.Sprintf("TO_TSVECTOR(%s,%s)", exprRegconfig, exprValue)
+	}
+
+	// websearch_to_tsquery supports
+	// AND logic: 'coffee tea'    results in: 'coffe' & 'tea'
+	// OR  logic: 'coffee or tea' results in: 'coffe' | 'tea'
+	// negation:  'coffee -tea'   results in: 'coffe' & !'tea'
+	// followed:  '"coffe tea"'   results in: 'coffe' <-> 'tea'
+	// https://www.postgresql.org/docs/current/textsearch-controls.html
+	return fmt.Sprintf("WEBSEARCH_TO_TSQUERY(%s,%s)", exprRegconfig, exprValue)
+}
 
 // operator types
 func isArrayOperator(operator string) bool {
 	return slices.Contains([]string{"= ANY", "<> ALL"}, operator)
+}
+func isFtsOperator(operator string) bool {
+	return operator == "@@"
 }
 func isLikeOperator(operator string) bool {
 	return slices.Contains([]string{"LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE"}, operator)

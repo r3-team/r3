@@ -18,6 +18,7 @@ const MyStoreLocal = {
 		companyWelcome:'',       // custom welcome message on login screen
 		css:'',                  // custom CSS, applied to everything
 		globalSearchOptions:{    // global search options
+			dictionary:null,
 			moduleIdsDisabled:[],
 			openAsPopUp:true,
 			showHeader:false

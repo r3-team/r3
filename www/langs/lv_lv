@@ -1950,6 +1950,7 @@
 		"nowOffsetHint": "+/- X {MODE}",
 		"nowOffsetTitle": "Add (positive number) or remove (negative number) X days/hours/minutes/seconds from now.",
 		"operatorsArray": "Array",
+		"operatorsFts": "Full-text search",
 		"operatorsNull": "Empty value",
 		"operatorsRegex": "Regular expression",
 		"operatorsSets": "Subset",
@@ -2537,9 +2538,6 @@
 		"colorMenu": "Pārrakstīt krāsu",
 		"dark": "Tumšais režīms",
 		"dateFormat": "Datuma formāts",
-		"dialog": {
-			"searchDictionary": "This system offers full-text search capabilities. Where full-text search is used, even very large texts can be looked up quickly with advanced search features such as comparing synonyms and word stems.<br /><br />'Dictionaries for full-text search' informs the system of which languages a user works with, to use language specific search features."
-		},
 		"encryption": {
 			"backupCode": "Backup code",
 			"backupCodeDesc": "The backup code is <b>very important</b>; it serves to re-establish access if you forget your password.",
@@ -2594,8 +2592,6 @@
 		},
 		"pageTitle": "Iestatījumi",
 		"pattern": "Fona raksts",
-		"searchDictionaries": "Pilnteksta meklēšanai vārdnīcas",
-		"searchDictionaryNew": "Pievienot vārdnīcu",
 		"spacing": "Atstarpe",
 		"sundayFirstDow": "Svētdiena ir 1. darbadiena",
 		"tabRemember": "Atveriet pēdējo lietoto cilni",

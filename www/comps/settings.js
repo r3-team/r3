@@ -1275,28 +1275,6 @@ let MySettings = {
 								</select>
 							</td>
 						</tr>
-						<tr class="default-inputs">
-							<td>{{ capApp.searchDictionaries }}</td>
-							<td>
-								<div class="column gap">
-									<div class="row centered gap">
-										<select v-model="searchDictionaryNew" @change="dictAdd($event.target.value)">
-											<option value="">{{ capApp.searchDictionaryNew }}</option>
-											<option v-for="d in searchDictionaries.filter(v => !settingsInput.searchDictionaries.includes(v) && v !== 'simple')">
-												{{ d }}
-											</option>
-										</select>
-										<my-button image="question.png" @trigger="dictMsg(d)" />
-									</div>
-									<div class="row wrap gap">
-										<div v-for="d in settingsInput.searchDictionaries" class="row centered gap">
-											<span>{{ d }}</span>
-											<my-button image="delete.png" @trigger="dictDel(d)" :cancel="true" />
-										</div>
-									</div>
-								</div>
-							</td>
-						</tr>
 						<tr>
 							<td colspan="2"><b>{{ capApp.titleSubNumbers }}</b></td>
 						</tr>
@@ -1511,9 +1489,8 @@ let MySettings = {
 	emits:['close','logout'],
 	data() {
 		return {
-			searchDictionaryNew:'', // input for new search dictionary
-			settingsInput:{},       // copy of the settings object to work on
-			settingsLoaded:false    // once settings have been loaded, each change triggers DB update
+			settingsInput:{},    // copy of the settings object to work on
+			settingsLoaded:false // once settings have been loaded, each change triggers DB update
 		};
 	},
 	watch:{
@@ -1540,7 +1517,6 @@ let MySettings = {
 		// stores
 		languageCodes:        (s) => s.$store.getters['schema/languageCodes'],
 		languageCodesModules: (s) => s.$store.getters['schema/languageCodesModules'],
-		searchDictionaries:   (s) => s.$store.getters['searchDictionaries'],
 		capGen:               (s) => s.$store.getters.captions.generic,
 		capApp:               (s) => s.$store.getters.captions.settings,
 		languageCodesOfficial:(s) => s.$store.getters.constants.languageCodesOfficial,
@@ -1556,22 +1532,6 @@ let MySettings = {
 	},
 	methods:{
 		// externals
-		setSetting,
-
-		// actions
-		dictAdd(entry) {
-			this.settingsInput.searchDictionaries.push(entry);
-			this.searchDictionaryNew = '';
-		},
-		dictDel(entry) {
-			let pos = this.settingsInput.searchDictionaries.indexOf(entry);
-			if(pos !== -1)
-				this.settingsInput.searchDictionaries.splice(pos,1);
-		},
-		dictMsg() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.searchDictionary
-			});
-		}
+		setSetting
 	}
 };

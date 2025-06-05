@@ -125,6 +125,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- PG function cost
 			ALTER TABLE app.pg_function ADD COLUMN cost INTEGER NOT NULL DEFAULT 100;
 
+			-- cleanup fulltext search settings
+			DROP TABLE instance.login_search_dict;
+			ALTER TYPE app.condition_operator ADD VALUE '@@';
+
 			-- search bar
 			CREATE TABLE IF NOT EXISTS app.search_bar (
 			    id uuid NOT NULL,

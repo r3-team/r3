@@ -138,10 +138,12 @@ export function getSubQueryFilterExpressions(subQuery) {
 	}];
 };
 
-export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,
-	fieldValues,recordMayCreate,recordMayDelete,recordMayUpdate,collectionIdMapIndexFilter,variableIdMapLocal) {
+export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,globalSearchDict,
+	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,
+	recordMayUpdate,collectionIdMapIndexFilter,variableIdMapLocal) {
 	
 	if(globalSearch               === undefined) globalSearch               = null;
+	if(globalSearchDict           === undefined) globalSearchDict           = null;
 	if(dataFieldIdMap             === undefined) dataFieldIdMap             = {};
 	if(fieldIdsChanged            === undefined) fieldIdsChanged            = [];
 	if(fieldIdsInvalid            === undefined) fieldIdsInvalid            = [];
@@ -165,14 +167,20 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,data
 			case 'subQuery':
 				s.query.expressions = getSubQueryFilterExpressions(s);
 				s.query.filters     = getQueryFiltersProcessed(
-					s.query.filters,joinsIndexMap,globalSearch,dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,
-					fieldValues,recordMayCreate,recordMayDelete,recordMayUpdate,collectionIdMapIndexFilter,
-					variableIdMapLocal
+					s.query.filters,joinsIndexMap,globalSearch,globalSearchDict,dataFieldIdMap,
+					fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,
+					recordMayUpdate,collectionIdMapIndexFilter,variableIdMapLocal
 				);
 				s.query.limit = s.query.fixedLimit;
 			break;
 			case 'true':     s.value = true; break;
 			case 'variable': s.value = variableValueGet(s.variableId,variableIdMapLocal); break;
+
+			// global search
+			case 'globalSearch':
+				s.ftsDict = globalSearchDict;
+				s.value   = globalSearch;
+			break;
 			
 			// form
 			case 'field':
@@ -189,7 +197,6 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,data
 			case 'fieldChanged':    s.value = fieldIdsChanged.includes(s.fieldId);                                    break;
 			case 'fieldValid':      s.value = !fieldIdsInvalid.includes(s.fieldId);                                   break;
 			case 'formChanged':     s.value = fieldIdsChanged.length !== 0;                                           break;
-			case 'globalSearch':    s.value = globalSearch;                                                           break;
 			case 'javascript':      s.value = Function(s.value)();                                                    break;
 			case 'preset':          s.value = MyStore.getters['schema/presetIdMapRecordId'][s.presetId];              break;
 			case 'record':          if(joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId;       break;

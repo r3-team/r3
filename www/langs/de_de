@@ -1950,6 +1950,7 @@
 		"nowOffsetHint": "+/- X {MODE}",
 		"nowOffsetTitle": "Addiere (positive Nummer) or subtrahiere (negative Nummer) X Tage/Stunden/Minuten/Sekunden von jetzt.",
 		"operatorsArray": "Array",
+		"operatorsFts": "Volltextsuche",
 		"operatorsNull": "Leerer Wert",
 		"operatorsRegex": "Regulärer Ausdruck",
 		"operatorsSets": "Subset",
@@ -2537,9 +2538,6 @@
 		"colorMenu": "Farbe überschreiben",
 		"dark": "Dunkle Ansicht",
 		"dateFormat": "Datumsformat",
-		"dialog": {
-			"searchDictionary": "Dieses System bietet eine Volltextsuche. Wo Volltextsuchen verfügbar sind, können selbst sehr große Texte schnell gefunden werden, mit erweiterten Suchfunktionen wie der Vergleich mit Synonymen oder Wortstämmen.<br /><br />\"Wörterbücher für Volltextsuchen\" lassen das System wissen, in welchen Sprachen ein Benutzer arbeitet, damit sprachspezifische Funktionen genutzt werden können."
-		},
 		"encryption": {
 			"backupCode": "Backup-Code",
 			"backupCodeDesc": "Der Backup-Code ist <b>sehr wichtig</b>; er stellt Zugriff wieder her, falls du dein Passwort vergessen hast.",
@@ -2594,8 +2592,6 @@
 		},
 		"pageTitle": "Einstellungen",
 		"pattern": "Hintergrundmuster",
-		"searchDictionaries": "Wörterbücher für Volltextsuche",
-		"searchDictionaryNew": "Wörterbuch hinzufügen",
 		"spacing": "Abstände",
 		"sundayFirstDow": "Sonntag ist 1. Wochentag",
 		"tabRemember": "Zuletzt genutzten Tab öffnen",

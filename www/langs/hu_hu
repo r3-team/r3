@@ -1950,6 +1950,7 @@
 		"nowOffsetHint": "+/- X {MODE}",
 		"nowOffsetTitle": "Adj hozzá (pozitív szám) vagy vonj ki (negatív szám) X nap/óra/perc/másodperc az aktuális időből.",
 		"operatorsArray": "Tömb",
+		"operatorsFts": "Full-text search",
 		"operatorsNull": "Üres érték",
 		"operatorsRegex": "Regular expression",
 		"operatorsSets": "Részlet",
@@ -2537,9 +2538,6 @@
 		"colorMenu": "Overwrite color",
 		"dark": "Sötét nézet",
 		"dateFormat": "Dátumformátum",
-		"dialog": {
-			"searchDictionary": "Ez a rendszer teljes szöveges keresést kínál. Ahol elérhető a teljes szöveges keresés, még nagyobb szövegek is gyorsan megtalálhatók, kibővített keresési funkciók, például szinonimák vagy szógyökök hasonlításával.<br /><br />A \"Teljes szövegkeresés szótárai\" lehetővé teszik a rendszer számára, hogy megtudja, milyen nyelveken dolgozik egy felhasználó, így nyelvspecifikus funkciókat lehet használni."
-		},
 		"encryption": {
 			"backupCode": "Biztonsági kód",
 			"backupCodeDesc": "A biztonsági kód <b>nagyon fontos</b>; visszaállítja a hozzáférést, ha elfelejted a jelszavad.",
@@ -2594,8 +2592,6 @@
 		},
 		"pageTitle": "Beállítások",
 		"pattern": "Háttérminta",
-		"searchDictionaries": "Teljes szövegkeresés szótárai",
-		"searchDictionaryNew": "Szótár hozzáadása",
 		"spacing": "Térköz",
 		"sundayFirstDow": "A hét első napja Vasárnap",
 		"tabRemember": "Utolsó használt lap megnyitása",

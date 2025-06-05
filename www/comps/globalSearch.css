@@ -29,6 +29,9 @@
 	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
 }
+.global-search-module-title.disabled{
+	background-color:var(--color-bg);
+}
 .global-search-bars{
 	flex:0 0 auto;
 	display:flex;

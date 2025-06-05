@@ -627,6 +627,7 @@ const MyList = {
 		query:           { type:Object,  required:true },                    // list query
 		
 		// toggles
+		blockDuringLoad:{ type:Boolean, required:false, default:true },  // list blocks user input during data retrieval
 		columnsSortOnly:{ type:Boolean, required:false, default:false }, // list columns can only be sorted, not filtered or aggregated
 		csvExport:      { type:Boolean, required:false, default:false },
 		csvImport:      { type:Boolean, required:false, default:false },
@@ -761,47 +762,18 @@ const MyList = {
 			if(s.filtersQuick === '') return [];
 			
 			let out = [];
-			let addFilter = (operator,atrId,atrIndex,dict) => {
+			for(const c of s.columns) {
+				const a = s.attributeIdMap[c.attributeId];
+				if(c.subQuery || s.isAttributeFiles(a.content) || (c.aggregator !== null && c.aggregator !== 'record'))
+					continue;
+				
 				out.push({
 					connector:out.length === 0 ? 'AND' : 'OR',
 					index:0,
-					operator:operator,
-					side0:{ attributeId:atrId, attributeIndex:atrIndex, brackets:0 },
-					side1:{ brackets:0, ftsDict:dict, value:s.filtersQuick }
+					operator:'ILIKE',
+					side0:{ attributeId:c.attributeId, attributeIndex:c.index, brackets:0 },
+					side1:{ brackets:0, value:s.filtersQuick }
 				});
-			};
-			
-			for(let c of s.columns) {
-				let a = s.attributeIdMap[c.attributeId];
-				if(c.subQuery || s.isAttributeFiles(a.content) ||
-					(c.aggregator !== null && c.aggregator !== 'record')) {
-					
-					continue;
-				}
-				
-				// check for available full text search
-				let ftsAvailable = false;
-				let r = s.relationIdMap[a.relationId];
-				for(let ind of r.indexes) {
-					if(ind.method === 'GIN' && ind.attributes.length === 1
-						&& ind.attributes[0].attributeId === a.id) {
-						
-						ftsAvailable = true;
-						break;
-					}
-				}
-				
-				if(!ftsAvailable) {
-					addFilter('ILIKE',c.attributeId,c.index,null);
-				}
-				else {
-					// add FTS filter for each active dictionary, use 'simple' otherwise
-					for(let dict of s.settings.searchDictionaries) {
-						addFilter('@@',c.attributeId,c.index,dict);
-					}
-					if(s.settings.searchDictionaries.length === 0)
-						addFilter('@@',c.attributeId,c.index,'simple');
-				}
 			}
 			return s.getFiltersEncapsulated(out);
 		},
@@ -858,7 +830,6 @@ const MyList = {
 		orders:         (s) => s.$root.getOrFallback(s.loginOptions,'orders',s.ordersOriginal), // order by definitions for query
 		
 		// stores
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		appResized:    (s) => s.$store.getters.appResized,
 		capApp:        (s) => s.$store.getters.captions.list,
@@ -1450,7 +1421,7 @@ const MyList = {
 				orders:this.orders,
 				limit:this.limit,
 				offset:this.offset
-			},true).then(
+			},this.blockDuringLoad).then(
 				res => {
 					const count = res.payload.count;
 					this.rowsFetching = true;

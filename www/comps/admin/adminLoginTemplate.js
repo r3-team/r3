@@ -103,25 +103,6 @@ let MyAdminLoginTemplate = {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capAppSet.searchDictionaries }}</td>
-							<td>
-								<div class="column gap">
-									<select v-model="searchDictionaryNew" @change="dictAdd($event.target.value)">
-										<option value="">{{ capAppSet.searchDictionaryNew }}</option>
-										<option v-for="d in searchDictionaries.filter(v => !settings.searchDictionaries.includes(v) && v !== 'simple')">
-											{{ d }}
-										</option>
-									</select>
-									<div class="row wrap gap">
-										<div v-for="d in settings.searchDictionaries" class="row centered gap">
-											<span>{{ d }}</span>
-											<my-button image="delete.png" @trigger="dictDel(d)" :cancel="true" />
-										</div>
-									</div>
-								</div>
-							</td>
-						</tr>
-						<tr>
 							<td colspan="2"><b>{{ capAppSet.titleSubNumbers }}</b></td>
 						</tr>
 						<tr class="default-inputs">
@@ -314,7 +295,6 @@ let MyAdminLoginTemplate = {
 			id:0,
 			name:'',
 			comment:'',
-			searchDictionaryNew:'',
 			settings:{},
 			
 			// states
@@ -353,7 +333,6 @@ let MyAdminLoginTemplate = {
 		// stores
 		languageCodes:        (s) => s.$store.getters['schema/languageCodes'],
 		languageCodesModules: (s) => s.$store.getters['schema/languageCodesModules'],
-		searchDictionaries:   (s) => s.$store.getters['searchDictionaries'],
 		capApp:               (s) => s.$store.getters.captions.admin.loginTemplate,
 		capAppSet:            (s) => s.$store.getters.captions.settings,
 		capGen:               (s) => s.$store.getters.captions.generic,
@@ -390,7 +369,6 @@ let MyAdminLoginTemplate = {
 			numberSepDecimal:'.',
 			numberSepThousand:',',
 			pattern:'bubbles',
-			searchDictionaries:['english'],
 			shadowsInputs:false,
 			spacing:3,
 			sundayFirstDow:true,
@@ -431,15 +409,6 @@ let MyAdminLoginTemplate = {
 		},
 		close() {
 			this.$emit('close');
-		},
-		dictAdd(entry) {
-			this.settings.searchDictionaries.push(entry);
-			this.searchDictionaryNew = '';
-		},
-		dictDel(entry) {
-			let pos = this.settings.searchDictionaries.indexOf(entry);
-			if(pos !== -1)
-				this.settings.searchDictionaries.splice(pos,1);
 		},
 		
 		// backend calls
