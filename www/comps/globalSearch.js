@@ -1,6 +1,5 @@
 
 import {getColumnsProcessed} from './shared/column.js';
-import {openLink}            from './shared/generic.js';
 import srcBase64Icon         from './shared/image.js';
 import MyForm                from './form.js';
 import MyInputDictionary     from './inputDictionary.js';
@@ -9,6 +8,10 @@ import {
 	getFormPopUpConfig,
 	getFormRoute
 }  from './shared/form.js';
+import {
+	colorAdjustBg,
+	openLink
+} from './shared/generic.js';
 import {
 	getCaption,
 	getDictByLang
@@ -21,27 +24,8 @@ export {MyGlobalSearch as default};
 
 const MyGlobalSearchModuleSearchBar = {
 	name:'my-global-search-module-search-bar',
-	components: { MyForm, MyList },
+	components: { MyList },
 	template:`<div class="global-search-bar" v-show="resultCount !== 0">
-
-		<!-- pop-up form -->
-		<div class="app-sub-window under-header"
-			v-if="popUp !== null"
-			@mousedown.left.self="$refs.popUpForm.closeAsk()"
-		>
-			<my-form ref="popUpForm"
-				@close="popUp = null"
-				@records-open="popUp.recordIds = $event"
-				:formId="popUp.formId"
-				:isPopUp="true"
-				:isPopUpFloating="true"
-				:moduleId="popUp.moduleId"
-				:recordIds="popUp.recordIds"
-				:style="popUp.style"
-			/>
-		</div>
-
-		<!-- results -->
 		<my-list
 			@open-form="openForm"
 			@record-count-change="resultCountUpdate"
@@ -72,7 +56,7 @@ const MyGlobalSearchModuleSearchBar = {
 			</template>
 		</my-list>
 	</div>`,
-	emits:['close','result-count-update'],
+	emits:['close','pop-up-open','result-count-update'],
 	props:{
 		input:    { type:String, required:true },
 		limit:    { type:Number, required:true },
@@ -91,7 +75,6 @@ const MyGlobalSearchModuleSearchBar = {
 	data() {
 		return {
 			listOptions:{},
-			popUp:null,
 			resultCount:0,
 			ready:false
 		}
@@ -140,7 +123,7 @@ const MyGlobalSearchModuleSearchBar = {
 
 			// open pop-up form unless new tab is requested
 			if(this.options.openAsPopUp && !newTab)
-				return this.popUp = this.getFormPopUpConfig(recordIds,openForm,[],null);
+				return this.$emit('pop-up-open',this.getFormPopUpConfig(recordIds,openForm,[],null));
 
 			// full form navigation, only single record allowed as target
 			const recordIdOpen = recordIds.length === 1 ? recordIds[0] : 0;
@@ -164,9 +147,10 @@ const MyGlobalSearchModule = {
 	template:`<div class="global-search-module column">
 		<div class="global-search-module-title row gap centered clickable" @click="$emit('toggle',module.id)" :class="{ disabled }">
 			<div class="row gap">
-				<my-label
+				<my-button
 					:darkBg="!disabled"
 					:image="disabled ? 'checkBox0.png' : 'checkBox1.png'"
+					:naked="true"
 				/>
 				<my-label
 					:caption="getCaption('moduleTitle',module.id,module.id,module.captions,module.name)"
@@ -175,7 +159,7 @@ const MyGlobalSearchModule = {
 					:large="true"
 				/>
 			</div>
-			<div class="row gap">
+			<div class="row gap centered">
 				<my-label
 					:caption="resultLabel"
 					:darkBg="!disabled"
@@ -188,12 +172,16 @@ const MyGlobalSearchModule = {
 					@trigger-middle="openBuilder(true)"
 					:blockBubble="true"
 					:captionTitle="capGen.button.openBuilder"
+					:darkBg="!disabled"
+					:naked="true"
 				/>
+				<div class="global-search-module-title-result" :style="bobbleStyle"></div>
 			</div>
 		</div>
 		<div class="global-search-bars column gap" v-if="active">
 			<my-global-search-module-search-bar
 				@close="$emit('close')"
+				@pop-up-open="$emit('pop-up-open',$event)"
 				@result-count-update="resultCountUpdate(b.id,$event)"
 				v-for="b in searchBars"
 				:input="input"
@@ -202,11 +190,11 @@ const MyGlobalSearchModule = {
 			/>
 		</div>
 	</div>`,
-	emits:['close','result-count-update','toggle'],
+	emits:['close','pop-up-open','result-count-update','toggle'],
 	props:{
-		disabled:{ type:Boolean, required:true },
-		input:   { type:String,  required:true },
-		limit:   { type:Number,  required:true },
+		disabled:{ type:Boolean, required:false, default:false },
+		input:   { type:String,  required:false, default:'' },
+		limit:   { type:Number,  required:false, default:10 },
 		module:  { type:Object,  required:true }
 	},
 	watch:{
@@ -242,8 +230,9 @@ const MyGlobalSearchModule = {
 		},
 
 		// simple
-		active:    (s) => s.input !== '' && !s.disabled,
-		searchBars:(s) => s.module.searchBars.filter(v => s.access[v.id] !== undefined && s.access[v.id] === 1),
+		active:     (s) => s.input !== '' && !s.disabled,
+		bobbleStyle:(s) => s.module.color1 !== null ? `border-bottom-color:${s.colorAdjustBg(s.module.color1)}` : '',
+		searchBars: (s) => s.module.searchBars.filter(v => s.access[v.id] !== undefined && s.access[v.id] === 1),
 
 		// stores
 		builderEnabled:(s) => s.$store.getters.builderEnabled,
@@ -254,6 +243,7 @@ const MyGlobalSearchModule = {
 	},
 	methods:{
 		// externals
+		colorAdjustBg,
 		getCaption,
 		srcBase64Icon,
 
@@ -276,7 +266,7 @@ const MyGlobalSearchModule = {
 
 const MyGlobalSearch = {
 	name:'my-global-search',
-	components:{ MyGlobalSearchModule, MyInputDictionary },
+	components:{ MyForm, MyGlobalSearchModule, MyInputDictionary },
 	template:`<div class="app-sub-window"
 		@mousedown.self="$emit('close')"
 		:class="{ 'under-header':!isMobile }"
@@ -304,6 +294,24 @@ const MyGlobalSearch = {
 				</div>
 			</div>
 			<div class="content column no-shrink">
+
+				<!-- pop-up form -->
+				<div class="app-sub-window under-header"
+					v-if="popUp !== null"
+					@mousedown.left.self="$refs.popUpForm.closeAsk()"
+				>
+					<my-form ref="popUpForm"
+						@close="popUp = null"
+						@records-open="popUp.recordIds = $event"
+						:formId="popUp.formId"
+						:isPopUp="true"
+						:isPopUpFloating="true"
+						:moduleId="popUp.moduleId"
+						:recordIds="popUp.recordIds"
+						:style="popUp.style"
+					/>
+				</div>
+
 				<div class="global-search-input-line default-inputs row wrap gap centered">
 					<div class="global-search-input-line-main row gap">
 						<input class="dynamic"
@@ -349,46 +357,76 @@ const MyGlobalSearch = {
 					</div>
 				</div>
 			</div>
-			<div class="content column grow no-padding" :style="patternStyle">
+			<div class="content column grow no-padding global-search-results" :style="patternStyle">
 				<div class="global-search-modules column gap">
 					<my-global-search-module
 						@close="$emit('close')"
+						@pop-up-open="popUp = $event"
 						@result-count-update="resultCountUpdate(m.id,$event)"
 						@toggle="toggle"
-						v-for="m in globalSearchModules"
-						:disabled="moduleIdsDisabled.includes(m.id)"
+						v-for="m in modulesActive"
 						:input="inputActive"
 						:key="m.id"
 						:limit="limit"
+						:module="m"
+					/>
+					<my-label class="global-search-header" image="search.png"
+						v-if="modulesInactive.length !== 0"
+						:caption="capApp.modulesInactive"
+						:large="true"
+					/>
+					<my-global-search-module
+						@toggle="toggle"
+						v-for="m in modulesInactive"
+						:disabled="true"
+						:key="m.id"
 						:module="m"
 					/>
 				</div>
 			</div>
 		</div>
 	</div>`,
+	props:{
+		inputStart:{ type:String, required:true}
+	},
 	data() {
 		return {
 			inputActive:'', // submitted input
 			input:'',       // input text from input element
 			larger:false,
 			limit:5,
-			moduleIdMapResultCount:{} // result count per module ID
+			moduleIdMapResultCount:{}, // result count per module ID
+			moduleIdsActive:[],
+			popUp:null
 		};
 	},
 	emits:['close'],
 	computed:{
 		anySearchRunning:(s) => {
-			for(const m of s.globalSearchModules) {
-				if(!s.moduleIdsDisabled.includes(m.id) && s.moduleIdMapResultCount[m.id] === undefined)
+			for(const m of s.modulesActive) {
+				if(s.moduleIdMapResultCount[m.id] === undefined)
 					return true;
 			}
 			return false;
 		},
+		modulesActive:(s) => {
+			let out = [];
+			for(const id of s.moduleIdsActive) {
+				out.push(s.moduleIdMap[id]);
+			}
+			return out;
+		},
+		modulesInactive:(s) => {
+			let out = [];
+			for(const id of s.modulesIdsInactive) {
+				out.push(s.moduleIdMap[id]);
+			}
+			return out;
+		},
 		resultCount:(s) => {
 			let cnt = 0;
 			for(const k in s.moduleIdMapResultCount) {
-				if(!s.moduleIdsDisabled.includes(k))
-					cnt += s.moduleIdMapResultCount[k];
+				cnt += s.moduleIdMapResultCount[k];
 			}
 			return cnt;
 		},
@@ -406,22 +444,30 @@ const MyGlobalSearch = {
 		},
 
 		// simple
-		empty:              (s) => s.inputActive === '',
-		globalSearchModules:(s) => s.$store.getters.globalSearchModules.sort((a,b) => s.moduleIdsDisabled.includes(a.id) ? 1 : -1),
-		moduleIdsDisabled:  (s) => s.options.moduleIdsDisabled,
+		empty:             (s) => s.inputActive === '',
+		modulesIdsInactive:(s) => s.searchModuleIds.filter(v => !s.moduleIdsActive.includes(v)),
 		
 		// stores
-		options:     (s) => s.$store.getters['local/globalSearchOptions'],
-		capApp:      (s) => s.$store.getters.captions.globalSearch,
-		capGen:      (s) => s.$store.getters.captions.generic,
-		isMobile:    (s) => s.$store.getters.isMobile,
-		patternStyle:(s) => s.$store.getters.patternStyle
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		options:        (s) => s.$store.getters['local/globalSearchOptions'],
+		capApp:         (s) => s.$store.getters.captions.globalSearch,
+		capGen:         (s) => s.$store.getters.captions.generic,
+		isMobile:       (s) => s.$store.getters.isMobile,
+		moduleIdLast:   (s) => s.$store.getters.moduleIdLast,
+		patternStyle:   (s) => s.$store.getters.patternStyle,
+		searchModuleIds:(s) => s.$store.getters.searchModuleIds
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);
 
 		if(this.options.dictionary === null)
 			this.resetDict();
+
+		this.moduleIdsActive = this.moduleIdLast !== null
+			? [this.moduleIdLast] : JSON.parse(JSON.stringify(this.searchModuleIds));
+
+		this.input = this.inputStart;
+		this.submit();
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleHotkeys);
@@ -433,8 +479,10 @@ const MyGlobalSearch = {
 		// general
 		handleHotkeys(e) {
 			if(e.key === 'Escape') {
-				this.$emit('close');
-				e.preventDefault();
+				if(this.popUp === null) {
+					this.$emit('close');
+					e.preventDefault();
+				}
 			}
 		},
 		resultCountUpdate(id,v) {
@@ -457,13 +505,12 @@ const MyGlobalSearch = {
 			}
 		},
 		toggle(id) {
-			let v = JSON.parse(JSON.stringify(this.moduleIdsDisabled));
+			const p = this.moduleIdsActive.indexOf(id);
+			if(p === -1)
+				return this.moduleIdsActive.push(id);
 
-			const p = v.indexOf(id);
-			if(p === -1) v.push(id);
-			else         v.splice(p,1);
-
-			this.setOption('moduleIdsDisabled',v);
+			this.moduleIdsActive.splice(p,1);
+			delete this.moduleIdMapResultCount[id];
 		}
 	}
 };

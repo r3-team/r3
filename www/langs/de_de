@@ -2328,6 +2328,7 @@
 		"returns": "Gibt zurück",
 		"role": "Rolle",
 		"roles": "Rollen",
+		"search": "Suche",
 		"searchBar": "Suchleiste",
 		"searchBars": "Suchleisten",
 		"searchRunning": "Suche läuft",
@@ -2362,7 +2363,8 @@
 		"button": {
 			"openAsPopUp": "Als Pop-Up öffnen",
 			"showHeader": "Spaltentitel"
-		}
+		},
+		"modulesInactive": "Weitere Suchoptionen"
 	},
 	"home": {
 		"button": {

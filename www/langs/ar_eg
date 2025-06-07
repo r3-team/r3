@@ -2328,6 +2328,7 @@
 		"returns": "المرتجعات",
 		"role": "دور",
 		"roles": "الأدوار",
+		"search": "Search",
 		"searchBar": "Search bar",
 		"searchBars": "Search bars",
 		"searchRunning": "Search is running",
@@ -2362,7 +2363,8 @@
 		"button": {
 			"openAsPopUp": "Open as pop-up",
 			"showHeader": "Column titles"
-		}
+		},
+		"modulesInactive": "Additional search options"
 	},
 	"home": {
 		"button": {

@@ -83,10 +83,13 @@
 	--color-bg:            #f7f7f7;
 	--color-bg-bright:     #fcfcfc;
 	--color-bg-dark:       #474747;
+	--color-bg-module:     #555555;
 	--color-bright:        #ffffff;
 	--color-border:        #9b9b9b;
+	--color-border-black:  #222222;
 	--color-border-bright: #9f9f9f;
 	--color-border-dark:   #2f2f2f;
+	--color-border-white:  #f7f7f7;
 	--color-cal-day-event: #d6e2e9;
 	--color-cal-outside:   #e9eeef;
 	--color-font:          #101010;
@@ -1411,6 +1414,7 @@ table td.maximum{
 	--color-bg:            #252525;
 	--color-bg-bright:     #313131;
 	--color-bg-dark:       #181818;
+	--color-bg-module:     #232323;
 	--color-bright:        #323232;
 	--color-border:        #111111;
 	--color-border-bright: #8f8f8f;

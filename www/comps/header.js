@@ -12,7 +12,7 @@ export {MyHeader as default};
 
 let MyHeader = {
 	name:'my-header',
-	template:`<div class="app-header shade noPrint" :class="{ isDark:colorHeaderMain.isDark() }" :style="bgStyle">
+	template:`<div class="app-header shade noPrint" :class="{ isDark:isDark }" :style="bgStyle">
 		
 		<div ref="content" class="entries">
 			
@@ -148,15 +148,6 @@ let MyHeader = {
 				<img src="images/pageNext.png" />
 			</div>
 			
-			<!-- search bars -->
-			<div class="entry no-wrap clickable" tabindex="0"
-				v-if="globalSearchModules.length !== 0"
-				@click="$emit('show-global-search')"
-				@keyup.enter="$emit('show-global-search')"
-			>
-				<img src="images/search.png" />
-			</div>
-			
 			<!-- keys locked -->
 			<div class="entry no-wrap clickable" tabindex="0"
 				v-if="keysLocked"
@@ -196,6 +187,15 @@ let MyHeader = {
 					{{ getStringFilled(Math.floor(maintenanceInSec / 60),2,'0') + ':' + getStringFilled(maintenanceInSec % 60,2,'0') }}
 				</span>
 			</div>
+			
+			<!-- search bars -->
+			<input class="app-header-search-input"
+				v-if="searchModuleIds.length !== 0"
+				v-model="globalSearchInput"
+				@keyup.enter="$emit('start-global-search',$event.target.value); globalSearchInput = ''"
+				:class="{ isDark }"
+				:placeholder="capGen.search + '...'"
+			/>
 			
 			<!-- settings -->
 			<div class="entry no-wrap clickable" tabindex="0"
@@ -237,9 +237,10 @@ let MyHeader = {
 			}, 1000);
 		}
 	},
-	emits:['logout','logoutExpire','show-collection-input','show-global-search','show-module-hover-menu','show-settings'],
+	emits:['logout','logoutExpire','show-collection-input','show-module-hover-menu','show-settings','start-global-search'],
 	data() {
 		return {
+			globalSearchInput:'',
 			maintenanceInSec:0,
 			layoutCheckTimer:null,
 			layoutElements:[],               // elements that are shown, based on available space
@@ -337,6 +338,7 @@ let MyHeader = {
 		},
 		
 		// simple
+		isDark:          (s) => s.colorHeaderMain.isDark(),
 		pwaSingle:       (s) => s.pwaModuleId !== null,
 		showCollections: (s) => s.layoutElementsProcessed.includes('collections'),
 		showFeedback:    (s) => s.layoutElementsProcessed.includes('feedback') && s.feedback && !s.isNoAuth,
@@ -370,7 +372,7 @@ let MyHeader = {
 		moduleEntries:       (s) => s.$store.getters.moduleEntries,
 		pwaModuleId:         (s) => s.$store.getters.pwaModuleId,
 		moduleIdLast:        (s) => s.$store.getters.moduleIdLast,
-		globalSearchModules: (s) => s.$store.getters.globalSearchModules,
+		searchModuleIds:     (s) => s.$store.getters.searchModuleIds,
 		settings:            (s) => s.$store.getters.settings,
 		systemMsgActive:     (s) => s.$store.getters.systemMsgActive,
 		systemMsgDate0:      (s) => s.$store.getters.systemMsgDate0,

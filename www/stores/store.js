@@ -373,18 +373,6 @@ const MyStore = Vuex.createStore({
 			const color = tinycolor(colorRgb).lighten(4);
 			return `background:radial-gradient(at right bottom, ${color.toString()} 20%, #${colorRgb} 60%);`;
 		},
-		globalSearchModules:(s) => {
-			let out = [];
-			for(const k in MyStoreSchema.state.moduleIdMap) {
-				for(const b of MyStoreSchema.state.moduleIdMap[k].searchBars) {
-					if(s.access.searchBar[b.id] !== undefined && s.access.searchBar[b.id] === 1) {
-						out.push(MyStoreSchema.state.moduleIdMap[k]);
-						break;
-					}
-				}
-			}
-			return out;
-		},
 		licenseDays:(state) => {
 			if(!state.licenseValid)
 				return 0;
@@ -423,6 +411,18 @@ const MyStore = Vuex.createStore({
 			return typeof state.pwaDomainMap[subDomain] !== 'undefined'
 				? state.pwaDomainMap[subDomain] : null;
 		},
+		searchModuleIds:(s) => {
+			let out = [];
+			for(const k in MyStoreSchema.state.moduleIdMap) {
+				for(const b of MyStoreSchema.state.moduleIdMap[k].searchBars) {
+					if(s.access.searchBar[b.id] !== undefined && s.access.searchBar[b.id] === 1) {
+						out.push(k);
+						break;
+					}
+				}
+			}
+			return out;
+		},
 		
 		// simple
 		access:                  (state) => state.access,
@@ -457,7 +457,6 @@ const MyStore = Vuex.createStore({
 		isAtMenu:                (state) => state.isAtMenu,
 		isAtModule:              (state) => state.isAtModule && state.moduleIdLast !== null,
 		isCollapsedMenuApp:      (state) => state.isCollapsedMenuApp,
-		mirrorMode:              (state) => state.mirrorMode,
 		isMobile:                (state) => state.isMobile,
 		isNoAuth:                (state) => state.loginType === state.constants.loginType.noAuth,
 		isWithoutMenuApp:        (state) => state.isWithoutMenuApp,
@@ -477,6 +476,7 @@ const MyStore = Vuex.createStore({
 		loginSessionExpired:     (state) => state.loginSessionExpired,
 		loginSessionExpires:     (state) => state.loginSessionExpires,
 		loginWidgetGroups:       (state) => state.loginWidgetGroups,
+		mirrorMode:              (state) => state.mirrorMode,
 		moduleEntries:           (state) => state.moduleEntries,
 		moduleIdLast:            (state) => state.moduleIdLast,
 		moduleIdMapMeta:         (state) => state.moduleIdMapMeta,

@@ -55,9 +55,9 @@ let MyApp = {
 				@logout="sessionInvalid(false)"
 				@logoutExpire="sessionInvalid(true)"
 				@show-collection-input="collectionEntries = $event"
-				@show-global-search="showGlobalSearch = true"
 				@show-module-hover-menu="showHoverNav = true"
 				@show-settings="showSettings = !showSettings"
+				@start-global-search="globalSearchInput = $event"
 				:keysLocked="loginEncLocked"
 				:logoutInSec="logoutInSec"
 			/>
@@ -84,7 +84,11 @@ let MyApp = {
 			</div>
 			
 			<!-- global search -->
-			<my-global-search v-if="showGlobalSearch" @close="showGlobalSearch = false" />
+			<my-global-search
+				v-if="globalSearchInput !== null"
+				@close="globalSearchInput = null"
+				:inputStart="globalSearchInput"
+			/>
 			
 			<!-- login settings -->
 			<div class="app-sub-window"
@@ -209,12 +213,12 @@ let MyApp = {
 		return {
 			appReady:false,         // app is loaded and user authenticated
 			collectionEntries:[],   // collection entries shown in pop-up window (for mobile use)
+			globalSearchInput:null, // text input to start global search with
 			loginReady:false,       // app is ready for authentication
 			logoutInSec:0,          // for timer in header, when session is to be logged out due to expiration
 			publicLoaded:false,     // public data has been loaded
 			schemaLoaded:false,     // app schema has been loaded
 			showHoverNav:false,     // alternative hover menu for module navigation
-			showGlobalSearch:false, // global search
 			showSettings:false,     // login settings
 			timerSystemMsg:null,    // timer checking for system message start/stop
 			wsConnected:false       // connection to backend has been established (websocket)
