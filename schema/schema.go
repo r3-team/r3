@@ -265,16 +265,30 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 
 	// check query relation access
 	if err := tx.QueryRow(ctx, `
-		SELECT COUNT(*), STRING_AGG(COALESCE(f.name,lf.name), ', ')
+		SELECT COUNT(*), STRING_AGG(
+			CASE
+				WHEN q.api_id        IS NOT NULL THEN FORMAT('API "%s"', a.name)
+				WHEN q.collection_id IS NOT NULL THEN FORMAT('collection "%s"', c.name)
+				WHEN q.field_id      IS NOT NULL THEN FORMAT('field in form "%s"', lf.name)
+				WHEN q.form_id       IS NOT NULL THEN FORMAT('form "%s"', f.name)
+				WHEN q.search_bar_id IS NOT NULL THEN FORMAT('search bar "%s"', s.name)
+			END, ' & '
+		)
 		FROM app.query AS q
-		LEFT JOIN app.form  AS f  ON f.id  = q.form_id  -- query for form
-		LEFT JOIN app.field AS l  ON l.id  = q.field_id -- query for list/data field
-		LEFT JOIN app.form  AS lf ON lf.id = l.form_id  -- form of list/data field
+		LEFT JOIN app.api        AS a  ON a.id  = q.api_id        -- query for API
+		LEFT JOIN app.collection AS c  ON c.id  = q.collection_id -- query for collection
+		LEFT JOIN app.form       AS f  ON f.id  = q.form_id       -- query for form
+		LEFT JOIN app.field      AS l  ON l.id  = q.field_id      -- query for list/data field
+		LEFT JOIN app.form       AS lf ON lf.id = l.form_id       -- form of list/data field
+		LEFT JOIN app.search_bar AS s  ON s.id  = q.search_bar_id -- query for search bar
 		INNER JOIN app.module AS m
 			ON m.id = $1
 			AND (
-				f.module_id = m.id
+				f.module_id     = m.id
 				OR lf.module_id = m.id
+				OR a.module_id  = m.id
+				OR c.module_id  = m.id
+				OR s.module_id  = m.id
 			)
 		
 		-- dependency
@@ -296,7 +310,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 	}
 
 	if cnt != 0 {
-		return fmt.Errorf("dependency check failed, form(s) '%s' with relations to independent module(s)",
+		return fmt.Errorf("dependency check failed, %s have queries that access relations from independent module(s)",
 			name1.String)
 	}
 
