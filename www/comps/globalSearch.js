@@ -226,13 +226,8 @@ const MyGlobalSearchModule = {
 		},
 		anyFtsOperator:(s) => {
 			for(const b of s.module.searchBars) {
-				if(s.getIsOperatorInAnyFilter(b.query,'@@'))
+				if(s.getIsOperatorInAnyFilter(b.query.filters,b.columns,'@@'))
 					return true;
-
-				for(const c of b.columns) {
-					if(c.subQuery && s.getIsOperatorInAnyFilter(c.query,'@@'))
-						return true;
-				}
 			}
 			return false;
 		},

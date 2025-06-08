@@ -1741,7 +1741,10 @@
 				"delete": "Are you sure you want to delete this search bar?"
 			},
 			"title": "Search bars",
-			"titleOne": "Search bar '{NAME}'"
+			"titleOne": "Search bar '{NAME}'",
+			"warning": {
+				"noSearchInput": "Add at least one 'Global search: User input' filter to apply search query"
+			}
 		},
 		"start": {
 			"appVisible": "应用对分配了角色的用户可见",

@@ -4,7 +4,6 @@ import MyBuilderIconInput     from './builderIconInput.js';
 import MyBuilderOpenFormInput from './builderOpenFormInput.js';
 import MyBuilderQuery         from './builderQuery.js';
 import {getItemTitleColumn}   from '../shared/builder.js';
-import {getJoinIndexMap}      from '../shared/query.js';
 import MyTabs                 from '../tabs.js';
 import {
 	MyBuilderColumns,
@@ -14,6 +13,10 @@ import {
 	copyValueDialog,
 	getNilUuid
 } from '../shared/generic.js';
+import {
+	getIsContentInAnyFilter,
+	getJoinIndexMap
+} from '../shared/query.js';
 export {MyBuilderSearchBar as default};
 
 let MyBuilderSearchBar = {
@@ -142,6 +145,15 @@ let MyBuilderSearchBar = {
 					:relationId="relationId"
 				/>
 				
+				<!-- no global search input warning -->
+				<template v-if="!anySearchInput">
+					<br />
+					<my-label image="warning.png"
+						:caption="capApp.warning.noSearchInput"
+						:error="true"
+					/>
+				</template>
+				
 				<!-- column settings -->
 				<template v-if="columnShow !== false">
 					<br />
@@ -170,6 +182,7 @@ let MyBuilderSearchBar = {
 						:moduleId="module.id"
 						:relationId="columnShow.query.relationId"
 					/>
+					
 					<my-builder-column-options
 						@set="(...args) => columnSet(args[0],args[1])"
 						:builderLanguage="builderLanguage"
@@ -296,9 +309,10 @@ let MyBuilderSearchBar = {
 			|| JSON.stringify(s.openForm) !== JSON.stringify(s.searchBar.openForm),
 		
 		// simple
-		joinIndexMap:(s) => s.getJoinIndexMap(s.joins),
-		searchBar:   (s) => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
-		module:      (s) => s.moduleIdMap[s.searchBar.moduleId],
+		anySearchInput:(s) => s.getIsContentInAnyFilter(s.filters,s.columns,'globalSearch'),
+		joinIndexMap:  (s) => s.getJoinIndexMap(s.joins),
+		searchBar:     (s) => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
+		module:        (s) => s.moduleIdMap[s.searchBar.moduleId],
 		
 		// stores
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
@@ -315,6 +329,7 @@ let MyBuilderSearchBar = {
 	methods:{
 		// externals
 		copyValueDialog,
+		getIsContentInAnyFilter,
 		getItemTitleColumn,
 		getJoinIndexMap,
 		getNilUuid,

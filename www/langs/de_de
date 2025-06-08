@@ -1741,7 +1741,10 @@
 				"delete": "Bist du sicher, dass du diese Suchleiste löschen möchtest?"
 			},
 			"title": "Suchleisten",
-			"titleOne": "Suchleiste '{NAME}'"
+			"titleOne": "Suchleiste '{NAME}'",
+			"warning": {
+				"noSearchInput": "Min. einen \"Globale-Suche: Benutzereingabe\"-Filter setzen, um Suchabfrage anzuwenden"
+			}
 		},
 		"start": {
 			"appVisible": "Anwendung ist sichtbar für Benutzer mit zugewiesenen Rollen",

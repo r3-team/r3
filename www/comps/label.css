@@ -19,6 +19,14 @@
 	filter:var(--image-filter-bright);
 }
 
+/* error */
+.label.error{
+	color:var(--color-error);
+}
+.label.error img{
+	filter:var(--image-filter-error);
+}
+
 /* large */
 .label.large{
 	font-size:120%;

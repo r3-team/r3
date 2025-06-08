@@ -376,15 +376,37 @@ export function getFiltersEncapsulated(filters) {
 	return filtersBase.concat(filtersJoin);
 };
 
-export function getIsOperatorInAnyFilter(query,operator) {
-	for(const f of query.filters) {
-		if(f.operator == operator)
+export function getIsContentInAnyFilter(filters,columns,content) {
+	for(const f of filters) {
+		if(f.side0.content === content || f.side1.content === content)
 			return true;
 
-		if(f.side0.content === 'subQuery' && getIsOperatorInAnyFilter(f.side0.query,operator))
+		if(f.side0.content === 'subQuery' && getIsContentInAnyFilter(f.side0.query.filters,[],content))
 			return true;
 
-		if(f.side1.content === 'subQuery' && getIsOperatorInAnyFilter(f.side1.query,operator))
+		if(f.side1.content === 'subQuery' && getIsContentInAnyFilter(f.side1.query.filters,[],content))
+			return true;
+	}
+	for(const c of columns) {
+		if(c.subQuery && getIsContentInAnyFilter(c.query.filters,[],content))
+			return true;
+	}
+	return false;
+};
+
+export function getIsOperatorInAnyFilter(filters,columns,operator) {
+	for(const f of filters) {
+		if(f.operator === operator)
+			return true;
+
+		if(f.side0.content === 'subQuery' && getIsOperatorInAnyFilter(f.side0.query.filters,[],operator))
+			return true;
+
+		if(f.side1.content === 'subQuery' && getIsOperatorInAnyFilter(f.side1.query.filters,[],operator))
+			return true;
+	}
+	for(const c of columns) {
+		if(c.subQuery && getIsOperatorInAnyFilter(c.query.filters,[],operator))
 			return true;
 	}
 	return false;

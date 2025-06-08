@@ -1740,6 +1740,9 @@
 			"dialog": {
 				"delete": "Are you sure you want to delete this search bar?"
 			},
+			"warning": {
+				"noSearchInput": "Add at least one 'Global search: User input' filter to apply search query"
+			},
 			"title": "Search bars",
 			"titleOne": "Search bar '{NAME}'"
 		},
