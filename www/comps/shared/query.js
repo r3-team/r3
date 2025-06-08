@@ -375,3 +375,17 @@ export function getFiltersEncapsulated(filters) {
 	}
 	return filtersBase.concat(filtersJoin);
 };
+
+export function getIsOperatorInAnyFilter(query,operator) {
+	for(const f of query.filters) {
+		if(f.operator == operator)
+			return true;
+
+		if(f.side0.content === 'subQuery' && getIsOperatorInAnyFilter(f.side0.query,operator))
+			return true;
+
+		if(f.side1.content === 'subQuery' && getIsOperatorInAnyFilter(f.side1.query,operator))
+			return true;
+	}
+	return false;
+};

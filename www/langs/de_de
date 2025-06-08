@@ -2099,6 +2099,33 @@
 		"fileUpdated": "Datei verändert",
 		"title": "Veränderungen"
 	},
+	"fullTextSearch": {
+		"dictionary": {
+			"arabic": "Arabisch",
+			"danish": "Dänisch",
+			"dutch": "Niederländisch",
+			"english": "Englisch",
+			"finnish": "Finnisch",
+			"french": "Französisch",
+			"german": "Deutsch",
+			"greek": "Griechisch",
+			"hungarian": "Ungarisch",
+			"indonesian": "Indonesisch",
+			"irish": "Irisch",
+			"italian": "Italienisch",
+			"lithuanian": "Litauisch",
+			"nepali": "Nepalesisch",
+			"norwegian": "Norwegisch",
+			"portuguese": "Portugiesisch",
+			"romanian": "Rumänisch",
+			"russian": "Russisch",
+			"simple": "[Nicht ausgewählt]",
+			"spanish": "Spanisch",
+			"swedish": "Schwedisch",
+			"tamil": "Tamilisch",
+			"turkish": "Türkisch"
+		}
+	},
 	"generic": {
 		"action": "Aktion",
 		"actions": "Aktionen",
@@ -2361,8 +2388,18 @@
 	},
 	"globalSearch": {
 		"button": {
+			"dictReset": "Auf Benutzersprache zurücksetzen",
+			"fullTextSearch": "Unterstützt Volltextsuche",
 			"openAsPopUp": "Als Pop-Up öffnen",
 			"showHeader": "Spaltentitel"
+		},
+		"help": {
+			"ftsDict": [
+				"Definiert welche Sprache die Sucheingabe hat.",
+				"Dies hilft nicht beim Finden von Wörtern oder Namen, die ein paar Buchstaben beinhalten; mit Festlegen der Suchsprache kann das System jedoch Funktionen der Volltextsuche nutzen.",
+				"Sollte eine Volltextsuche unterstützt sein, wird eine entsprechende Nachricht im Suchleistentitel angezeigt; für mehr Details zu Suchoptionen diese anklicken."
+			],
+			"ftsDictTitle": "Sprache der Sucheingabe"
 		},
 		"modulesInactive": "Weitere Suchoptionen"
 	},

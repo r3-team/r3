@@ -17,6 +17,7 @@ import {
 	getDictByLang
 } from './shared/language.js';
 import {
+	getIsOperatorInAnyFilter,
 	getQueryFiltersProcessed,
 	getJoinIndexMap
 } from './shared/query.js';
@@ -159,6 +160,14 @@ const MyGlobalSearchModule = {
 					:large="true"
 				/>
 			</div>
+			<my-button image="languages.png"
+				v-if="anyFtsOperator"
+				@trigger="showFtsHelp"
+				:blockBubble="true"
+				:caption="isMobile ? '' : capApp.button.fullTextSearch"
+				:darkBg="!disabled"
+				:naked="true"
+			/>
 			<div class="row gap centered">
 				<my-label
 					:caption="resultLabel"
@@ -215,6 +224,18 @@ const MyGlobalSearchModule = {
 			}
 			return false;
 		},
+		anyFtsOperator:(s) => {
+			for(const b of s.module.searchBars) {
+				if(s.getIsOperatorInAnyFilter(b.query,'@@'))
+					return true;
+
+				for(const c of b.columns) {
+					if(c.subQuery && s.getIsOperatorInAnyFilter(c.query,'@@'))
+						return true;
+				}
+			}
+			return false;
+		},
 		resultCount:(s) => {
 			let cnt = 0;
 			for(const k in s.searchBarIdMapResultCount) {
@@ -237,6 +258,8 @@ const MyGlobalSearchModule = {
 		// stores
 		builderEnabled:(s) => s.$store.getters.builderEnabled,
 		access:        (s) => s.$store.getters.access.searchBar,
+		capApp:        (s) => s.$store.getters.captions.globalSearch,
+		capAppFilter:  (s) => s.$store.getters.captions.filter,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		isAdmin:       (s) => s.$store.getters.isAdmin,
 		isMobile:      (s) => s.$store.getters.isMobile
@@ -245,6 +268,7 @@ const MyGlobalSearchModule = {
 		// externals
 		colorAdjustBg,
 		getCaption,
+		getIsOperatorInAnyFilter,
 		srcBase64Icon,
 
 		// data
@@ -260,6 +284,14 @@ const MyGlobalSearchModule = {
 			
 			this.$router.push('/builder/search-bars/'+this.module.id);
 			this.$emit('close');
+		},
+		showFtsHelp() {
+			this.$store.commit('dialog',{
+				captionTop:this.capGen.contextHelp,
+				captionBody:this.capAppFilter.dialog.ftsHelp,
+				image:'languages.png',
+				width:1000
+			});
 		}
 	}
 };
@@ -332,7 +364,7 @@ const MyGlobalSearch = {
 							:cancel="true"
 						/>
 					</div>
-					<div class="row gap-large">
+					<div class="row wrap gap-large">
 						<my-button-check
 							@update:modelValue="setOption('openAsPopUp',$event)"
 							:caption="capApp.button.openAsPopUp"
@@ -346,12 +378,16 @@ const MyGlobalSearch = {
 						<div class="row gap">
 							<my-button image="languages.png"
 								@trigger="resetDict"
+								:captionTitle="capApp.button.dictReset"
 								:naked="true"
 							/>
 							<my-input-dictionary
 								@update:modelValue="setOption('dictionary',$event)"
 								:title="capApp.searchDictionaryHint"
 								:modelValue="options.dictionary"
+							/>
+							<my-button image="question.png"
+								@trigger="showFtsHelp"
 							/>
 						</div>
 					</div>
@@ -463,7 +499,7 @@ const MyGlobalSearch = {
 		if(this.options.dictionary === null)
 			this.resetDict();
 
-		this.moduleIdsActive = this.moduleIdLast !== null
+		this.moduleIdsActive = this.moduleIdLast !== null && this.searchModuleIds.includes(this.moduleIdLast)
 			? [this.moduleIdLast] : JSON.parse(JSON.stringify(this.searchModuleIds));
 
 		this.input = this.inputStart;
@@ -497,6 +533,13 @@ const MyGlobalSearch = {
 			let o = JSON.parse(JSON.stringify(this.options));
 			o[name] = value;
 			this.$store.commit('local/globalSearchOptions',o);
+		},
+		showFtsHelp() {
+			this.$store.commit('dialog',{
+				captionTop:this.capApp.help.ftsDictTitle,
+				captionBody:`<p>${this.capApp.help.ftsDict.join('</p><p>')}</p>`,
+				image:'languages.png'
+			});
 		},
 		submit() {
 			if(this.inputActive !== this.input) {

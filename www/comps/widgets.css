@@ -278,11 +278,6 @@
 	filter:var(--image-filter);
 }
 
-/* user overwrites */
-.user-dark .widget>.header{
-	background-color:#232323;
-}
-
 /* mobile overwrites */
 .is-mobile .widget{
 	width:100%;

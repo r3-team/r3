@@ -2099,6 +2099,33 @@
 		"fileUpdated": "File updated",
 		"title": "Registri delle modifiche"
 	},
+	"fullTextSearch": {
+		"dictionary": {
+			"arabic": "Arabic",
+			"danish": "Danish",
+			"dutch": "Dutch",
+			"english": "English",
+			"finnish": "Finnish",
+			"french": "French",
+			"german": "German",
+			"greek": "Greek",
+			"hungarian": "Hungarian",
+			"indonesian": "Indonesian",
+			"irish": "Irish",
+			"italian": "Italian",
+			"lithuanian": "Lithuanian",
+			"nepali": "Nepali",
+			"norwegian": "Norwegian",
+			"portuguese": "Portuguese",
+			"romanian": "Romanian",
+			"russian": "Russian",
+			"simple": "[Not selected]",
+			"spanish": "Spanish",
+			"swedish": "Swedish",
+			"tamil": "Tamil",
+			"turkish": "Turkish"
+		}
+	},
 	"generic": {
 		"action": "Action",
 		"actions": "Actions",
@@ -2361,8 +2388,18 @@
 	},
 	"globalSearch": {
 		"button": {
+			"dictReset": "Reset to user language",
+			"fullTextSearch": "Supports full-text search",
 			"openAsPopUp": "Open as pop-up",
 			"showHeader": "Column titles"
+		},
+		"help": {
+			"ftsDict": [
+				"Defines which language the search query is written in.",
+				"This does not help find words or names containing a few characters; but by knowing the language of the search query, the system can make use of full-text search features.",
+				"When full-text search is supported, a corresponding message is displayed in the search title bar - click on it to get more details about search options."
+			],
+			"ftsDictTitle": "Search input language"
 		},
 		"modulesInactive": "Additional search options"
 	},
