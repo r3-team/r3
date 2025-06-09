@@ -364,7 +364,7 @@
 			"accountPass": "Mot de passe",
 			"accountPort": "Port",
 			"accountSendAs": "Adresse d'envoi",
-			"accountSendAsHint": "By default, the sender address should be the same as the email address of the mailbox. Some email systems however allow multiple sender addresses for accounts.",
+			"accountSendAsHint": "This defines with which email address messages are being sent. This is most often the primary email address of the mailbox, though some allow different send addresses.<br /><br />You can optionally set a display name for the sender, by setting the send address as such:<br /><code><b>\"My Display Name\" &lt;my-email@my-host.com&gt;</b></code>",
 			"accountTest": "Test d'email",
 			"accountUser": "Nom d'utilisateur",
 			"accounts": "Comptes de messagerie",

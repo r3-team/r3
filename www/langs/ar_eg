@@ -364,7 +364,7 @@
 			"accountPass": "كلمة المرور",
 			"accountPort": "ميناء",
 			"accountSendAs": "إرسال العنوان",
-			"accountSendAsHint": "بشكل افتراضي، يجب أن يكون عنوان المرسل هو نفس عنوان البريد الإلكتروني لصندوق البريد. ",
+			"accountSendAsHint": "This defines with which email address messages are being sent. This is most often the primary email address of the mailbox, though some allow different send addresses.<br /><br />You can optionally set a display name for the sender, by setting the send address as such:<br /><code><b>\"My Display Name\" &lt;my-email@my-host.com&gt;</b></code>",
 			"accountTest": "اختبار البريد الإلكتروني",
 			"accountUser": "اسم المستخدم",
 			"accounts": "حسابات البريد الإلكتروني",
