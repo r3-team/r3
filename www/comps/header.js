@@ -35,6 +35,7 @@ let MyHeader = {
 				
 				<router-link class="entry no-wrap clickable" to="/admin">
 					<img src="images/serverCog.png" />
+					<span v-if="!productionMode">{{ capGen.maintenance }}</span>
 				</router-link>
 			</template>
 			
@@ -154,7 +155,7 @@ let MyHeader = {
 				@click="keysLockedMsg"
 				@keyup.enter="keysLockedMsg"
 			>
-				<img src="images/key_locked.png" />
+				<img src="images/keyLocked.png" />
 			</div>
 			
 			<!-- feedback -->
@@ -370,6 +371,7 @@ let MyHeader = {
 		loginName:           (s) => s.$store.getters.loginName,
 		loginSessionExpires: (s) => s.$store.getters.loginSessionExpires,
 		moduleEntries:       (s) => s.$store.getters.moduleEntries,
+		productionMode:      (s) => s.$store.getters.productionMode,
 		pwaModuleId:         (s) => s.$store.getters.pwaModuleId,
 		moduleIdLast:        (s) => s.$store.getters.moduleIdLast,
 		searchModuleIds:     (s) => s.$store.getters.searchModuleIds,
@@ -402,7 +404,7 @@ let MyHeader = {
 		keysLockedMsg() {
 			this.$store.commit('dialog',{
 				captionBody:this.loginNoCred ? this.capErr.SEC['007'] : this.capErr.SEC['002'],
-				image:'key_locked.png'
+				image:'keyLocked.png'
 			});
 		},
 		updateMetaThemeColor() {

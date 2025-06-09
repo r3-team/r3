@@ -111,7 +111,7 @@ let MyAdminMailAccount = {
 						<tr v-if="isSmtp">
 							<td>{{ capApp.accountSendAs }}*</td>
 							<td><input v-model="inputs.sendAs" /></td>
-							<td>{{ capApp.accountSendAsHint }}</td>
+							<td><span v-html="capApp.accountSendAsHint" /></td>
 						</tr>
 						<tr>
 							<td>{{ capGen.encryption }}*</td>
