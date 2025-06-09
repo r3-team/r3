@@ -612,6 +612,7 @@ let MyCalendar = {
 				joins:this.getRelationsJoined(this.query.joins),
 				expressions:this.expressions,
 				filters:this.filters.concat(this.getQueryFiltersDateRange(
+					false,
 					this.attributeIdDate0,this.indexDate0,dateStart,
 					this.attributeIdDate1,this.indexDate1,dateEnd
 				)),

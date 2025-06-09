@@ -789,12 +789,9 @@ let MyGantt = {
 					this.attributeIdColor,this.indexColor
 				).concat(this.expressions),
 				filters:this.filters.concat(this.getQueryFiltersDateRange(
-					this.attributeIdDate0,
-					this.indexDate0,
-					this.getUnixFromDate(this.date0),
-					this.attributeIdDate1,
-					this.indexDate1,
-					this.getUnixFromDate(this.date1)
+					true,
+					this.attributeIdDate0,this.indexDate0,this.getUnixFromDate(this.date0),
+					this.attributeIdDate1,this.indexDate1,this.getUnixFromDate(this.date1)
 				)),
 				orders:this.query.orders
 			},true).then(

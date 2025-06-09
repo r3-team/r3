@@ -331,34 +331,31 @@ export function getQueryFilterNew() {
 	};
 };
 
-export function getQueryFiltersDateRange(attributeId0,index0,date0,attributeId1,index1,date1) {
-	// set query filters for records which attribute value range (attribute 0 to 1)
-	//  occur within defined date range (date 0 to 1)
+export function getQueryFiltersDateRange(subJoinFilter,attributeId0,index0,date0,attributeId1,index1,date1) {
+	// set query filters for attribute date values (attribute 0 to 1) occuring in date range (date 0 to 1)
+	// if sub join filter is used, we apply filter to relation joins, allowing for other relation data to be retrieved
+	//  useful for queries where grouping data is to be received even if date dependent records are not there (like in Gantts)
 	return [{
 		connector:'AND',
-		index:0,
+		index:subJoinFilter ? index0 : 0,
 		operator:'<=',
 		side0:{
 			attributeId:attributeId0,
-			attributeIndex:index0,
-			brackets:1
+			attributeIndex:index0
 		},
 		side1:{
-			brackets:0,
 			value:date1
 		}
 	},{
 		connector:'AND',
-		index:0,
+		index:subJoinFilter ? index1 : 0,
 		operator:'<=',
 		side0:{
-			brackets:0,
 			value:date0
 		},
 		side1:{
 			attributeId:attributeId1,
-			attributeIndex:index1,
-			brackets:1
+			attributeIndex:index1
 		}
 	}];
 };
