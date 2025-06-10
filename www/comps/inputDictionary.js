@@ -2,7 +2,7 @@ export {MyInputDictionary as default};
 
 const MyInputDictionary = {
 	name:'my-input-dictionary',
-	template:`<select class="dynamic"
+	template:`<select class="auto"
 		@input="$emit('update:modelValue',$event.target.value)"
 		:value="modelValue"
 	>

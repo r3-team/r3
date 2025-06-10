@@ -258,6 +258,7 @@ let MyApp = {
 		$route:{
 			handler(v) {
 				this.$store.commit('isAtModule',typeof v.meta.atModule !== 'undefined');
+				this.$store.commit('appResized');
 			},
 			immediate:true
 		}

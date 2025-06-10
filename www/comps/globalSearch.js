@@ -501,6 +501,7 @@ const MyGlobalSearch = {
 		capApp:           (s) => s.$store.getters.captions.globalSearch,
 		capGen:           (s) => s.$store.getters.captions.generic,
 		globalSearchInput:(s) => s.$store.getters.globalSearchInput,
+		isAtModule:       (s) => s.$store.getters.isAtModule,
 		isMobile:         (s) => s.$store.getters.isMobile,
 		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
 		patternStyle:     (s) => s.$store.getters.patternStyle,
@@ -512,7 +513,7 @@ const MyGlobalSearch = {
 		if(this.options.dictionary === null)
 			this.resetDict();
 
-		this.moduleIdsActive = this.moduleIdLast !== null && this.searchModuleIds.includes(this.moduleIdLast)
+		this.moduleIdsActive = this.isAtModule && this.searchModuleIds.includes(this.moduleIdLast)
 			? [this.moduleIdLast] : JSON.parse(JSON.stringify(this.searchModuleIds));
 
 		this.input = this.globalSearchInput;
