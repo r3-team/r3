@@ -19,7 +19,7 @@ const MyStoreLocal = {
 		css:'',                  // custom CSS, applied to everything
 		globalSearchOptions:{    // global search options
 			dictionary:null,
-			moduleIdsDisabled:[],
+			limit:5,
 			openAsPopUp:true,
 			showHeader:false
 		},

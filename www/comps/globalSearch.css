@@ -12,7 +12,7 @@
 }
 .global-search-input-line-main{
 	width:100%;
-	max-width:500px;
+	max-width:650px;
 }
 .global-search-results{
 	border-top:1px solid var(--color-border);

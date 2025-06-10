@@ -44,7 +44,7 @@ const MyGlobalSearchModuleSearchBar = {
 			:headerColumns="options.showHeader"
 			:isDynamicSize="true"
 			:isSingleField="true"
-			:limitDefault="limit"
+			:limitDefault="options.limit"
 			:loginOptions="listOptions"
 			:moduleId="searchBar.moduleId"
 			:query="query"
@@ -60,7 +60,6 @@ const MyGlobalSearchModuleSearchBar = {
 	emits:['close','pop-up-open','result-count-update'],
 	props:{
 		input:    { type:String, required:true },
-		limit:    { type:Number, required:true },
 		searchBar:{ type:Object, required:true }
 	},
 	watch:{
@@ -109,6 +108,7 @@ const MyGlobalSearchModuleSearchBar = {
 		resultCountUpdate(count) {
 			this.resultCount = count;
 			this.$emit('result-count-update',count);
+			this.$store.commit('appResized');
 		},
 
 		// actions
@@ -172,7 +172,7 @@ const MyGlobalSearchModule = {
 				<my-label
 					:caption="resultLabel"
 					:darkBg="!disabled"
-					:image="active && anyRunning ? 'load.gif' : ''"
+					:image="resultImage"
 					:large="true"
 				/>
 				<my-button image="builder.png"
@@ -194,7 +194,6 @@ const MyGlobalSearchModule = {
 				@result-count-update="resultCountUpdate(b.id,$event)"
 				v-for="b in searchBars"
 				:input="input"
-				:limit="limit"
 				:searchBar="b"
 			/>
 		</div>
@@ -203,7 +202,6 @@ const MyGlobalSearchModule = {
 	props:{
 		disabled:{ type:Boolean, required:false, default:false },
 		input:   { type:String,  required:false, default:'' },
-		limit:   { type:Number,  required:false, default:10 },
 		module:  { type:Object,  required:true }
 	},
 	watch:{
@@ -238,11 +236,18 @@ const MyGlobalSearchModule = {
 			}
 			return cnt;
 		},
+		resultImage:(s) => {
+			if(!s.active)    return '';
+			if(s.anyRunning) return 'load.gif';
+			return 'ok.png';
+		},
 		resultLabel:(s) => {
 			if(s.disabled)   return s.capGen.disabled;
 			if(!s.active)    return '-';
 			if(s.anyRunning) return s.capGen.searchRunning;
-			return s.capGen.results.replace('{CNT}',s.resultCount);
+			return s.isMobile
+				? `${s.capGen.results.replace('{CNT}',s.resultCount)}`
+				: `${s.capGen.searchCompleted}: ${s.capGen.results.replace('{CNT}',s.resultCount)}`;
 		},
 
 		// simple
@@ -359,7 +364,7 @@ const MyGlobalSearch = {
 							:cancel="true"
 						/>
 					</div>
-					<div class="row wrap gap-large">
+					<div class="row wrap gap-large centered">
 						<my-button-check
 							@update:modelValue="setOption('openAsPopUp',$event)"
 							:caption="capApp.button.openAsPopUp"
@@ -370,7 +375,20 @@ const MyGlobalSearch = {
 							:caption="capApp.button.showHeader"
 							:modelValue="options.showHeader"
 						/>
-						<div class="row gap">
+						<div class="row gap centered">
+							<span>{{ capGen.limit }}</span>
+							<select class="auto"
+								@input="setOption('limit',parseInt($event.target.value))"
+								:value="options.limit"
+							>
+								<option>5</option>
+								<option>10</option>
+								<option>25</option>
+								<option>50</option>
+								<option>100</option>
+							</select>
+						</div>
+						<div class="row gap centered">
 							<my-button image="languages.png"
 								@trigger="resetDict"
 								:captionTitle="capApp.button.dictReset"
@@ -398,7 +416,6 @@ const MyGlobalSearch = {
 						v-for="m in modulesActive"
 						:input="inputActive"
 						:key="m.id"
-						:limit="limit"
 						:module="m"
 					/>
 					<my-label class="global-search-header" image="search.png"
@@ -425,7 +442,6 @@ const MyGlobalSearch = {
 			inputActive:'', // submitted input
 			input:'',       // input text from input element
 			larger:false,
-			limit:5,
 			moduleIdMapResultCount:{}, // result count per module ID
 			moduleIdsActive:[],
 			popUp:null
@@ -471,7 +487,7 @@ const MyGlobalSearch = {
 		statusLabel:(s) => {
 			if(s.empty)            return s.capGen.globalSearch;
 			if(s.anySearchRunning) return s.capGen.searchRunning;
-			return s.capGen.results.replace('{CNT}',s.resultCount);
+			return `${s.capGen.searchCompleted}: ${s.capGen.results.replace('{CNT}',s.resultCount)}`;
 		},
 
 		// simple
