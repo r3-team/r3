@@ -193,7 +193,7 @@ let MyHeader = {
 			<input class="app-header-search-input"
 				v-if="searchModuleIds.length !== 0"
 				v-model="globalSearchInput"
-				@keyup.enter="$emit('start-global-search',$event.target.value); globalSearchInput = ''"
+				@keyup.enter="globalSearchStart($event.target.value); globalSearchInput = ''"
 				:class="{ isDark }"
 				:placeholder="capGen.search + '...'"
 			/>
@@ -238,7 +238,7 @@ let MyHeader = {
 			}, 1000);
 		}
 	},
-	emits:['logout','logoutExpire','show-collection-input','show-module-hover-menu','show-settings','start-global-search'],
+	emits:['logout','logoutExpire','show-collection-input','show-module-hover-menu','show-settings'],
 	data() {
 		return {
 			globalSearchInput:'',
@@ -388,6 +388,11 @@ let MyHeader = {
 			immediate:true
 		});
 		this.resized();
+
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.globalSearchStart,key:'F',keyCtrl:true,keyShift:true});
+	},
+	unmounted() {
+		this.$store.commit('keyDownHandlerDel',this.globalSearchStart);
 	},
 	methods:{
 		// externals
@@ -453,6 +458,9 @@ let MyHeader = {
 			// no active module in mobile mode: navigate to module
 			if(!this.moduleSingleActive && this.isMobile)
 				return this.$router.push(`/app/${this.moduleSingle.name}/${this.moduleSingle.name}`);
+		},
+		globalSearchStart(value) {
+			this.$store.commit('globalSearchInput',value !== undefined ? value : window.getSelection().toString());
 		},
 		openSystemMsg() {
 			const d = this.getDateFormat(new Date(this.systemMsgDate1*1000),'H:i');

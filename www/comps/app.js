@@ -57,7 +57,6 @@ let MyApp = {
 				@show-collection-input="collectionEntries = $event"
 				@show-module-hover-menu="showHoverNav = true"
 				@show-settings="showSettings = !showSettings"
-				@start-global-search="globalSearchInput = $event"
 				:keysLocked="loginEncLocked"
 				:logoutInSec="logoutInSec"
 			/>
@@ -84,11 +83,7 @@ let MyApp = {
 			</div>
 			
 			<!-- global search -->
-			<my-global-search
-				v-if="globalSearchInput !== null"
-				@close="globalSearchInput = null"
-				:inputStart="globalSearchInput"
-			/>
+			<my-global-search v-if="globalSearchInput !== null" />
 			
 			<!-- login settings -->
 			<div class="app-sub-window"
@@ -211,17 +206,16 @@ let MyApp = {
 	</div>`,
 	data() {
 		return {
-			appReady:false,         // app is loaded and user authenticated
-			collectionEntries:[],   // collection entries shown in pop-up window (for mobile use)
-			globalSearchInput:null, // text input to start global search with
-			loginReady:false,       // app is ready for authentication
-			logoutInSec:0,          // for timer in header, when session is to be logged out due to expiration
-			publicLoaded:false,     // public data has been loaded
-			schemaLoaded:false,     // app schema has been loaded
-			showHoverNav:false,     // alternative hover menu for module navigation
-			showSettings:false,     // login settings
-			timerSystemMsg:null,    // timer checking for system message start/stop
-			wsConnected:false       // connection to backend has been established (websocket)
+			appReady:false,       // app is loaded and user authenticated
+			collectionEntries:[], // collection entries shown in pop-up window (for mobile use)
+			loginReady:false,     // app is ready for authentication
+			logoutInSec:0,        // for timer in header, when session is to be logged out due to expiration
+			publicLoaded:false,   // public data has been loaded
+			schemaLoaded:false,   // app schema has been loaded
+			showHoverNav:false,   // alternative hover menu for module navigation
+			showSettings:false,   // login settings
+			timerSystemMsg:null,  // timer checking for system message start/stop
+			wsConnected:false     // connection to backend has been established (websocket)
 		};
 	},
 	watch:{
@@ -410,6 +404,7 @@ let MyApp = {
 		captionMapCustom:   (s) => s.$store.getters.captionMapCustom,
 		colorHeaderAccent:  (s) => s.$store.getters.colorHeaderAccent,
 		colorHeaderMain:    (s) => s.$store.getters.colorHeaderMain,
+		globalSearchInput:  (s) => s.$store.getters.globalSearchInput,
 		isAdmin:            (s) => s.$store.getters.isAdmin,
 		isAtDialog:         (s) => s.$store.getters.isAtDialog,
 		isAtFeedback:       (s) => s.$store.getters.isAtFeedback,
@@ -819,7 +814,7 @@ let MyApp = {
 		// hotkeys
 		handleKeydown(e) {
 			for(let k of this.keyDownHandlers) {
-				if(k.sleep !== undefined || (k.keyCtrl && !e.ctrlKey))
+				if(k.sleep || (k.keyCtrl && !e.ctrlKey) || (k.keyShift && !e.shiftKey))
 					continue;
 				
 				if(k.key === e.key) {

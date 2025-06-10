@@ -265,7 +265,7 @@ let MyAdminOauthClient = {
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
 		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape',keyCtrl:false});
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape'});
 	},
 	unmounted() {
 		this.$store.commit('keyDownHandlerDel',this.set);

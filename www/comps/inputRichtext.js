@@ -53,7 +53,6 @@ const MyInputRichtext = {
 				min_height:200,
 				paste_data_images:true,
 				plugins:'code emoticons image link lists searchreplace table',
-				readonly:s.readonly, // in init instead of as :disabled on editor component as we need to rebuild the toolbars too
 				relative_urls:false, // if URL to internal path is used in link, Tiny cuts of base URL ('https://system/#/app/...' -> '#/app/...'), Tiny then fails to open relative URL
 				resize:false,
 				selector:'textarea',
@@ -132,6 +131,10 @@ const MyInputRichtext = {
 		
 		// actions
 		handleHotkeys(e) {
+			if(e.key === 'F' && e.ctrlKey && e.shiftKey) {
+				this.$store.commit('globalSearchInput',e.view.getSelection().toString());
+				e.preventDefault();
+			}
 			if(e.key === 'Escape' || (e.ctrlKey && this.knownCtrlKeys.includes(e.key))) {
 				this.$emit('hotkey',e);
 				e.preventDefault();

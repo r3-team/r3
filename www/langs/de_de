@@ -2406,6 +2406,7 @@
 			],
 			"ftsDictTitle": "Sprache der Sucheingabe"
 		},
+		"hotkey": "Text auswählen & STRG + SHIFT + F drücken, um Suche zu öffnen",
 		"modulesInactive": "Weitere Suchoptionen"
 	},
 	"home": {

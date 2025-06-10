@@ -57,7 +57,7 @@ const MyGlobalSearchModuleSearchBar = {
 			</template>
 		</my-list>
 	</div>`,
-	emits:['close','pop-up-open','result-count-update'],
+	emits:['pop-up-open','result-count-update'],
 	props:{
 		input:    { type:String, required:true },
 		searchBar:{ type:Object, required:true }
@@ -300,7 +300,7 @@ const MyGlobalSearch = {
 	name:'my-global-search',
 	components:{ MyForm, MyGlobalSearchModule, MyInputDictionary },
 	template:`<div class="app-sub-window"
-		@mousedown.self="$emit('close')"
+		@mousedown.self="close"
 		:class="{ 'under-header':!isMobile }"
 	>
 		<div class="contentBox global-search grow scroll float" :class="{ larger }">
@@ -319,7 +319,7 @@ const MyGlobalSearch = {
 						:image="larger ? 'shrink.png' : 'expand.png'"
 					/>
 					<my-button image="cancel.png"
-						@trigger="$emit('close')"
+						@trigger="close"
 						:cancel="true"
 						:caption="capGen.button.close"
 					/>
@@ -409,7 +409,7 @@ const MyGlobalSearch = {
 			<div class="content column grow no-padding global-search-results" :style="patternStyle">
 				<div class="global-search-modules column gap">
 					<my-global-search-module
-						@close="$emit('close')"
+						@close="close"
 						@pop-up-open="popUp = $event"
 						@result-count-update="resultCountUpdate(m.id,$event)"
 						@toggle="toggle"
@@ -431,12 +431,12 @@ const MyGlobalSearch = {
 						:module="m"
 					/>
 				</div>
+				<div class="global-search-message-bottom row" v-if="!isMobile">
+					<my-label image="keyboard.png" :caption="capApp.hotkey" />
+				</div>
 			</div>
 		</div>
 	</div>`,
-	props:{
-		inputStart:{ type:String, required:true}
-	},
 	data() {
 		return {
 			inputActive:'', // submitted input
@@ -444,7 +444,8 @@ const MyGlobalSearch = {
 			larger:false,
 			moduleIdMapResultCount:{}, // result count per module ID
 			moduleIdsActive:[],
-			popUp:null
+			popUp:null,
+			ready:false
 		};
 	},
 	emits:['close'],
@@ -495,14 +496,15 @@ const MyGlobalSearch = {
 		modulesIdsInactive:(s) => s.searchModuleIds.filter(v => !s.moduleIdsActive.includes(v)),
 		
 		// stores
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		options:        (s) => s.$store.getters['local/globalSearchOptions'],
-		capApp:         (s) => s.$store.getters.captions.globalSearch,
-		capGen:         (s) => s.$store.getters.captions.generic,
-		isMobile:       (s) => s.$store.getters.isMobile,
-		moduleIdLast:   (s) => s.$store.getters.moduleIdLast,
-		patternStyle:   (s) => s.$store.getters.patternStyle,
-		searchModuleIds:(s) => s.$store.getters.searchModuleIds
+		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
+		options:          (s) => s.$store.getters['local/globalSearchOptions'],
+		capApp:           (s) => s.$store.getters.captions.globalSearch,
+		capGen:           (s) => s.$store.getters.captions.generic,
+		globalSearchInput:(s) => s.$store.getters.globalSearchInput,
+		isMobile:         (s) => s.$store.getters.isMobile,
+		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
+		patternStyle:     (s) => s.$store.getters.patternStyle,
+		searchModuleIds:  (s) => s.$store.getters.searchModuleIds
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);
@@ -513,7 +515,7 @@ const MyGlobalSearch = {
 		this.moduleIdsActive = this.moduleIdLast !== null && this.searchModuleIds.includes(this.moduleIdLast)
 			? [this.moduleIdLast] : JSON.parse(JSON.stringify(this.searchModuleIds));
 
-		this.input = this.inputStart;
+		this.input = this.globalSearchInput;
 		this.submit();
 	},
 	unmounted() {
@@ -527,7 +529,7 @@ const MyGlobalSearch = {
 		handleHotkeys(e) {
 			if(e.key === 'Escape') {
 				if(this.popUp === null) {
-					this.$emit('close');
+					this.close();
 					e.preventDefault();
 				}
 			}
@@ -537,6 +539,9 @@ const MyGlobalSearch = {
 		},
 
 		// actions
+		close() {
+			this.$store.commit('globalSearchInput',null);
+		},
 		resetDict() {
 			this.setOption('dictionary',this.getDictByLang());
 		},

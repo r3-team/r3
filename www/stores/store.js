@@ -62,6 +62,7 @@ const MyStore = Vuex.createStore({
 			attributeId:null,
 			fileIds:[]
 		},
+		globalSearchInput:null,
 		isAdmin:false,                 // user is admin
 		isAtDialog:false,              // app shows generic dialog
 		isAtFavorites:false,           // is the favorites menu entry active?
@@ -167,6 +168,9 @@ const MyStore = Vuex.createStore({
 		},
 		keyDownHandlerAdd:(state,payload) => {
 			// expected payload: { fnc:handlerFnc, key:'s', keyCtrl:true }
+			if(payload.keyCtrl  === undefined) payload.keyCtrl  = false;
+			if(payload.keyShift === undefined) payload.keyShift = false;
+			if(payload.sleep    === undefined) payload.sleep    = false;
 			state.keyDownHandlers.unshift(payload);
 		},
 		keyDownHandlerDel:(state,payload) => {
@@ -185,7 +189,7 @@ const MyStore = Vuex.createStore({
 		},
 		keyDownHandlerWake:(state,payload) => {
 			for(let i = 0, j = state.keyDownHandlers.length; i < j; i++) {
-				delete state.keyDownHandlers[i].sleep;
+				state.keyDownHandlers[i].sleep = false;
 			}
 		},
 		license:(state,payload) => {
@@ -275,6 +279,7 @@ const MyStore = Vuex.createStore({
 		feedback:                (state,payload) => state.feedback                 = payload,
 		feedbackUrl:             (state,payload) => state.feedbackUrl              = payload,
 		filesCopy:               (state,payload) => state.filesCopy                = payload,
+		globalSearchInput:       (state,payload) => state.globalSearchInput        = payload,
 		isAdmin:                 (state,payload) => state.isAdmin                  = payload,
 		isAtDialog:              (state,payload) => state.isAtDialog               = payload,
 		isAtFavorites:           (state,payload) => state.isAtFavorites            = payload,
@@ -447,6 +452,7 @@ const MyStore = Vuex.createStore({
 		feedback:                (state) => state.feedback,
 		feedbackUrl:             (state) => state.feedbackUrl,
 		filesCopy:               (state) => state.filesCopy,
+		globalSearchInput:       (state) => state.globalSearchInput,
 		isAdmin:                 (state) => state.isAdmin,
 		isAllowedMfa:            (state) => state.loginType === state.constants.loginType.local || state.loginType === state.constants.loginType.ldap,
 		isAllowedPwChange:       (state) => state.loginType === state.constants.loginType.local,
