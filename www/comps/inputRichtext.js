@@ -5,26 +5,44 @@ export {MyInputRichtext as default};
 const MyInputRichtext = {
 	name:'my-input-richtext',
 	components:{'editor':Editor},
-	template:`<div class="input-richtext" :key="key">
-		<editor api-key="API_KEY"
-			v-model="input"
-			@keyDown="handleHotkeys"
-			:disabled="readonly"
-			:init="init"
-		/>
+	template:`<div class="input-richtext">
+		<div class="input-richtext-toolbar">
+			<div class="input-richtext-toolbar-content" ref="toolbar" v-show="!readonly"></div>
+			<div></div>
+			<a
+				class="input-richtext-toolbar-link clickable"
+				target="_blank"
+				href="https://www.tiny.cloud/powered-by-tiny?utm_campaign=poweredby&utm_source=tiny&utm_medium=referral&utm_content=v6"
+			>
+				<img class="input-richtext-toolbar-logo" src="images/externals/tinymce.svg" />
+			</a>
+		</div>
+		<div class="input-richtext-content" :key="key">
+			<editor api-key="no-api-key"
+				v-if="active"
+				v-model="input"
+				@init="register"
+				:disabled="readonly"
+				:init="init"
+			/>
+		</div>
 	</div>`,
 	emits:['hotkey','update:modelValue'],
 	props:{
 		attributeIdFile:{ type:String,  required:false, default:'' },
+		isHidden:       { type:Boolean, required:false, default:false },
 		modelValue:     { required:true },
 		readonly:       { type:Boolean, required:false, default:false },
 		valueFiles:     { required:false, default:null }
 	},
 	data() {
 		return {
+			debug:true,
+			editor:null,             // registered tinymce editor instance
 			images:[],               // image links to offer in editor
 			key:0,                   // forces recreation of the editor on init change, 0 = not yet initialized
-			knownCtrlKeys:['q','s'], // for handling supported hot keys
+			mountDone:false,
+			toolbarBase:'bold italic forecolor paragraphgroup numlist bullist alignleft aligncenter alignright alignjustify',
 			
 			// tokens are used to authenticate with the current user session
 			// we cannot store sensitive tokens inside richtext, but tokens are required for accessing files
@@ -34,31 +52,25 @@ const MyInputRichtext = {
 	},
 	computed:{
 		init:(s) => {
-			let toolbar = `bold italic forecolor paragraphgroup numlist bullist alignleft aligncenter alignright alignjustify`;
-			if(!s.isMobile) toolbar = `undo redo ${toolbar} outdent indent insertgroup code print searchreplace`;
-
-			return {
+			return !s.mountDone ? {} : {
 				branding:true, // https://www.tiny.cloud/docs/general-configuration-guide/attribution-requirements/
 				cleanup_on_startup:false,
-				content_style:`.mce-content-body{ background-color:transparent; }`,
 				contextmenu:'copy cut paste | undo | link | inserttable table',
 				document_base_url:`${location.protocol}//${location.host}/`, // required when disabling 'relative_urls'
-				content_css:s.settings.dark ? 'dark' : 'default',
 				entity_encoding:'raw', // disable encoding of things like umlaute, not required for UTF8 storage and makes searches easier
-				height:'100%',
+				fixed_toolbar_container_target:s.$refs.toolbar,
+				highlight_on_focus:false,
 				image_advtab:true,
 				image_list:s.images,
+				inline:true,
 				language:s.language,
 				menubar:false,
-				min_height:200,
 				paste_data_images:true,
 				plugins:'code emoticons image link lists searchreplace table',
-				readonly:s.readonly, // in init instead of as :disabled on editor component as we need to rebuild the toolbars too
 				relative_urls:false, // if URL to internal path is used in link, Tiny cuts of base URL ('https://system/#/app/...' -> '#/app/...'), Tiny then fails to open relative URL
 				resize:false,
-				selector:'textarea',
 				skin:s.settings.dark ? 'oxide-dark' : 'oxide',
-				toolbar:s.readonly ? false : toolbar,
+				toolbar:s.toolbar,
 				toolbar_groups:{
 					paragraphgroup: {
 						icon:'change-case',
@@ -70,10 +82,25 @@ const MyInputRichtext = {
 					}
 				},
 				toolbar_mode:'floating',
+				toolbar_persist:true,
 
 				// adds more elements that tiny does not convert (adds to default valid_elements)
 				// known issues: auto converts <b> to <strong>
-				extended_valid_elements:'b'
+				extended_valid_elements:'b',
+
+				// debug events
+				setup:(e) => {
+					if(!s.debug) return;
+					
+					e.on('remove', () => s.debugEvent('remove') );
+					e.on('error', (err) => s.debugEvent('error',err) );
+					e.on('SkinLoadError', (err) => s.debugEvent('SkinLoadError',err) );
+					e.on('ThemeLoadError', (err) => s.debugEvent('ThemeLoadError',err) );
+					e.on('ModelLoadError', (err) => s.debugEvent('ModelLoadError',err) );
+					e.on('PluginLoadError', (err) => s.debugEvent('PluginLoadError',err) );
+					e.on('IconsLoadError', (err) => s.debugEvent('IconsLoadError',err) );
+					e.on('LanguageLoadError', (err) => s.debugEvent('LanguageLoadError',err) );
+				}
 			};
 		},
 		language:(s) => {
@@ -109,7 +136,16 @@ const MyInputRichtext = {
 			}
 		},
 
+		// component is expensive, do not load if hidden
+		// unless it was already loaded once, keep it to avoid expensive reload and keep editor state
+		active:(s) => s.mountDone && (!s.isHidden || s.editor !== null),
+		toolbar:(s) => {
+			if(s.readonly) return false;
+			return s.isMobile ? s.toolbarBase : `undo redo ${s.toolbarBase} outdent indent insertgroup code print searchreplace`;
+		},
+
 		// simple
+		editorId:   (s) => s.editor === null ? 'NOT REGISTERED' : s.editor.id,
 		rxTokensAdd:(s) => new RegExp(s.tokenPlaceholder,'g'),
 		rxTokensDel:(s) => new RegExp(s.token,'g'),
 		
@@ -119,26 +155,40 @@ const MyInputRichtext = {
 		settings:(s) => s.$store.getters.settings
 	},
 	watch:{
-		init(v) { this.key++; },
+		active(v) {
+			this.debugEvent('WATCH: ACTIVE CHANGE');
+		},
+		init(v) {
+			this.debugEvent('WATCH: INIT CHANGE, key++');
+			this.key++;
+		},
+		readonly(v) { 
+			this.debugEvent('WATCH: READONLY CHANGE');
+		},
 		valueFiles(v0,v1) {
-			if(!this.deepIsEqual(v0,v1))
+			if(!this.deepIsEqual(v0,v1)) {
 				this.parseImages(v0);
+				this.debugEvent('WATCH: FILES CHANGE');
+			}
 		}
+	},
+	mounted() {
+		console.log('mount done');
+		this.mountDone = true;
 	},
 	methods:{
 		// externals
 		deepIsEqual,
 		getAttributeFileHref,
 		
-		// actions
-		handleHotkeys(e) {
-			if(e.key === 'Escape' || (e.ctrlKey && this.knownCtrlKeys.includes(e.key))) {
-				this.$emit('hotkey',e);
-				e.preventDefault();
+		// editor
+		debugEvent(ev,err) {
+			if(this.debug) {
+				console.log(`TINY [${this.editorId}] ${new Date().toLocaleTimeString()} '${ev}'`);
+				if(err !== undefined)
+					console.error(`TINY [${this.editorId}] error`, err);
 			}
 		},
-		
-		// editor
 		parseImages(files) {
 			// file input is either null (empty), array of files (initial value) or object of changes
 			// keep known initial files if changes occurred (we only use stored files)
@@ -158,6 +208,10 @@ const MyInputRichtext = {
 				});
 			}
 			this.images = out;
+		},
+		register(ev,editor) {
+			this.editor = editor;
+			this.debugEvent('REGISTERED');
 		}
 	}
 };

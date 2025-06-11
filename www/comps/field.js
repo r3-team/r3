@@ -296,7 +296,6 @@ let MyField = {
 							v-for="f in t.fields"
 							@clipboard="$emit('clipboard')"
 							@execute-function="$emit('execute-function',$event)"
-							@hotkey="$emit('hotkey',$event)"
 							@open-form="(...args) => $emit('open-form',...args)"
 							@set-counter="(...args) => setTabCounter(i,args[0],args[1])"
 							@set-form-args="(...args) => $emit('set-form-args',...args)"
@@ -439,8 +438,8 @@ let MyField = {
 				<my-input-richtext
 					v-if="isRichtext"
 					v-model="value"
-					@hotkey="$emit('hotkey',$event)"
 					:attributeIdFile="field.attributeIdAlt"
+					:isHidden="isHidden"
 					:readonly="isReadonly"
 					:valueFiles="valueAlt"
 				/>
@@ -626,7 +625,6 @@ let MyField = {
 			v-for="f in field.fields"
 			@clipboard="$emit('clipboard')"
 			@execute-function="$emit('execute-function',$event)"
-			@hotkey="$emit('hotkey',$event)"
 			@open-form="(...args) => $emit('open-form',...args)"
 			@set-counter="(...args) => $emit('set-counter',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
@@ -683,7 +681,7 @@ let MyField = {
 		variableIdMapLocal: { type:Object,  required:true }                  // variable values by ID (variables assigned to form)
 	},
 	emits:[
-		'clipboard','execute-function','hotkey','open-form','set-form-args',
+		'clipboard','execute-function','open-form','set-form-args',
 		'set-counter','set-touched','set-valid','set-value'
 	],
 	data() {
@@ -1240,20 +1238,22 @@ let MyField = {
 			let   readonly = false;
 			let   drawing  = false;
 			let   files    = false;
+			let   richtext = false;
 			
 			if(oneField && typeof this.$refs['tabField_'+oneField.id] !== 'undefined')
 				readonly = this.$refs['tabField_'+oneField.id]['0'].isReadonly;
 			
 			if(oneField && oneField.content === 'data') {
 				const atr = this.attributeIdMap[oneField.attributeId];
-				drawing = atr.contentUse === 'drawing';
-				files   = atr.content    === 'files';
+				drawing  = atr.contentUse === 'drawing';
+				richtext = atr.contentUse === 'richtext';
+				files    = atr.content    === 'files';
 			}
 			
 			return {
 				active:  tabIndex === this.tabIndexShow,
 				error:   this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
-				inputBg: active && oneField && !files && !drawing && oneField.content === 'data',
+				inputBg: active && oneField && !files && !drawing && !richtext && oneField.content === 'data',
 				readonly:active && oneField && readonly
 			};
 		},

@@ -67,6 +67,7 @@
 }
 .form .fields.onlyOne>.field{
 	margin:0px;
+	max-width:100%;
 	overflow:auto;
 }
 .form .form-title-wrap{
