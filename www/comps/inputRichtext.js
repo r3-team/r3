@@ -38,10 +38,10 @@ const MyInputRichtext = {
 	data() {
 		return {
 			debug:true,
-			editor:null,             // registered tinymce editor instance
-			images:[],               // image links to offer in editor
-			key:0,                   // forces recreation of the editor on init change, 0 = not yet initialized
-			mountDone:false,
+			editor:null,     // registered tinymce editor instance
+			isMounted:false, // wait for mount as toolbar ref must exist for tinymce init object to target it
+			images:[],       // image links to offer in editor
+			key:0,           // forces recreation of the editor on init change, 0 = not yet initialized
 			toolbarBase:'bold italic forecolor paragraphgroup numlist bullist alignleft aligncenter alignright alignjustify',
 			
 			// tokens are used to authenticate with the current user session
@@ -52,7 +52,7 @@ const MyInputRichtext = {
 	},
 	computed:{
 		init:(s) => {
-			return !s.mountDone ? {} : {
+			return !s.isMounted ? {} : {
 				branding:true, // https://www.tiny.cloud/docs/general-configuration-guide/attribution-requirements/
 				cleanup_on_startup:false,
 				contextmenu:'copy cut paste | undo | link | inserttable table',
@@ -67,6 +67,7 @@ const MyInputRichtext = {
 				menubar:false,
 				paste_data_images:true,
 				plugins:'code emoticons image link lists searchreplace table',
+				readonly:s.readonly,
 				relative_urls:false, // if URL to internal path is used in link, Tiny cuts of base URL ('https://system/#/app/...' -> '#/app/...'), Tiny then fails to open relative URL
 				resize:false,
 				skin:s.settings.dark ? 'oxide-dark' : 'oxide',
@@ -92,14 +93,8 @@ const MyInputRichtext = {
 				setup:(e) => {
 					if(!s.debug) return;
 					
-					e.on('remove', () => s.debugEvent('remove') );
-					e.on('error', (err) => s.debugEvent('error',err) );
-					e.on('SkinLoadError', (err) => s.debugEvent('SkinLoadError',err) );
-					e.on('ThemeLoadError', (err) => s.debugEvent('ThemeLoadError',err) );
-					e.on('ModelLoadError', (err) => s.debugEvent('ModelLoadError',err) );
-					e.on('PluginLoadError', (err) => s.debugEvent('PluginLoadError',err) );
-					e.on('IconsLoadError', (err) => s.debugEvent('IconsLoadError',err) );
-					e.on('LanguageLoadError', (err) => s.debugEvent('LanguageLoadError',err) );
+					e.on('remove', ()    => s.debugEvent('remove') );
+					e.on('error',  (err) => s.debugEvent('error',err) );
 				}
 			};
 		},
@@ -138,7 +133,7 @@ const MyInputRichtext = {
 
 		// component is expensive, do not load if hidden
 		// unless it was already loaded once, keep it to avoid expensive reload and keep editor state
-		active:(s) => s.mountDone && (!s.isHidden || s.editor !== null),
+		active:(s) => s.isMounted && (!s.isHidden || s.editor !== null),
 		toolbar:(s) => {
 			if(s.readonly) return false;
 			return s.isMobile ? s.toolbarBase : `undo redo ${s.toolbarBase} outdent indent insertgroup code print searchreplace`;
@@ -155,26 +150,18 @@ const MyInputRichtext = {
 		settings:(s) => s.$store.getters.settings
 	},
 	watch:{
-		active(v) {
-			this.debugEvent('WATCH: ACTIVE CHANGE');
-		},
 		init(v) {
-			this.debugEvent('WATCH: INIT CHANGE, key++');
-			this.key++;
-		},
-		readonly(v) { 
-			this.debugEvent('WATCH: READONLY CHANGE');
+			// wait for next tick as readonly change (eg. disabled state) must be applied first
+			// otherwise v-model is not updated correctly
+			this.$nextTick(() => this.key++);
 		},
 		valueFiles(v0,v1) {
-			if(!this.deepIsEqual(v0,v1)) {
+			if(!this.deepIsEqual(v0,v1))
 				this.parseImages(v0);
-				this.debugEvent('WATCH: FILES CHANGE');
-			}
 		}
 	},
 	mounted() {
-		console.log('mount done');
-		this.mountDone = true;
+		this.isMounted = true;
 	},
 	methods:{
 		// externals
@@ -184,9 +171,9 @@ const MyInputRichtext = {
 		// editor
 		debugEvent(ev,err) {
 			if(this.debug) {
-				console.log(`TINY [${this.editorId}] ${new Date().toLocaleTimeString()} '${ev}'`);
+				console.log(`Editor [${this.editorId}] ${new Date().toLocaleTimeString()} '${ev}'`);
 				if(err !== undefined)
-					console.error(`TINY [${this.editorId}] error`, err);
+					console.error(`Editor [${this.editorId}] error`, err);
 			}
 		},
 		parseImages(files) {
@@ -200,8 +187,7 @@ const MyInputRichtext = {
 				if(!f.name.match(/\.(bmp|jpg|jpeg|png|gif|svg|webp)$/i))
 					continue;
 				
-				// token is added to file HREF so that tiny can download image aspect ratios
-				// token is replaced in model value
+				// token is added to file HREF so that tiny can download image aspect ratios (token is replaced in model value)
 				out.push({
 					title:f.name,
 					value:this.getAttributeFileHref(this.attributeIdFile,f.id,f.name,this.token)
