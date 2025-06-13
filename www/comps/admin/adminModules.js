@@ -556,14 +556,14 @@ let MyAdminModules = {
 			);
 		},
 		install(fileId) {
-			ws.send('repoModule','install',{fileId:fileId},true).then(
+			ws.send('repoModule','install',{fileId:fileId},true,true).then(
 				() => this.installOk(),
 				this.installError
 			);
 			this.installStarted = true;
 		},
 		installAll() {
-			ws.send('repoModule','installAll',{},true).then(
+			ws.send('repoModule','installAll',{},true,true).then(
 				() => this.installOk(),
 				this.installError
 			);

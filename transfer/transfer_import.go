@@ -12,6 +12,7 @@ import (
 	"r3/cluster"
 	"r3/config"
 	"r3/config/module_meta"
+	"r3/db"
 	"r3/log"
 	"r3/schema"
 	"r3/schema/api"
@@ -53,7 +54,7 @@ type importMeta struct {
 }
 
 // imports extracted modules from given file paths
-func ImportFromFiles_tx(ctx context.Context, tx pgx.Tx, filePathsImport []string) error {
+func ImportFromFiles(ctx context.Context, filePathsImport []string) error {
 	Import_mx.Lock()
 	defer Import_mx.Unlock()
 
@@ -73,6 +74,12 @@ func ImportFromFiles_tx(ctx context.Context, tx pgx.Tx, filePathsImport []string
 		}
 		filePathsModules = append(filePathsModules, filePaths...)
 	}
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
 
 	// parse modules from file paths, only modules that need to be imported are returned
 	moduleIdMapImportMeta := make(map[uuid.UUID]importMeta)
@@ -161,6 +168,10 @@ func ImportFromFiles_tx(ctx context.Context, tx pgx.Tx, filePathsImport []string
 		}
 	}
 
+	if err := tx.Commit(ctx); err != nil {
+		return err
+	}
+
 	log.Info("transfer", "module files were moved to transfer path if imported")
 
 	// update schema cache
@@ -168,7 +179,17 @@ func ImportFromFiles_tx(ctx context.Context, tx pgx.Tx, filePathsImport []string
 	for id, _ := range moduleIdMapImportMeta {
 		moduleIdsUpdated = append(moduleIdsUpdated, id)
 	}
-	return cluster.SchemaChanged_tx(ctx, tx, true, moduleIdsUpdated)
+
+	tx, err = db.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if err := cluster.SchemaChanged_tx(ctx, tx, true, moduleIdsUpdated); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }
 
 func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,

@@ -103,6 +103,12 @@ let MyChart = {
 		
 		// set default choice
 		this.choiceId = this.choices.length > 0 ? this.choices[0].id : null;
+
+		// set option overwrite, if enabled
+		if(this.optionOverwrite !== null) {
+			this.option = this.optionOverwrite;
+			this.ready  = true;
+		}
 	},
 	methods:{
 		// externals
