@@ -7,6 +7,7 @@ import (
 	"r3/cache"
 	"r3/handler"
 	"r3/schema"
+	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -15,8 +16,7 @@ import (
 func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	recordId int64, loginId int64) error {
 
-	// check for authorized access, DELETE(3) for DEL
-	if !authorizedRelation(loginId, relationId, 3) {
+	if !authorizedRelation(loginId, relationId, types.AccessDelete) {
 		return errors.New(handler.ErrUnauthorized)
 	}
 

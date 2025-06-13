@@ -266,7 +266,6 @@ let MyForm = {
 					v-for="(f,i) in fields"
 					@clipboard="messageSet('[CLIPBOARD]')"
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-					@hotkey="handleHotkeys"
 					@open-form="openForm"
 					@set-form-args="setFormArgs"
 					@set-touched="fieldSetTouched"

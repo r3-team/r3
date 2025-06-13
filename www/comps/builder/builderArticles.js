@@ -86,7 +86,6 @@ let MyBuilderArticlesItem = {
 						<div class="content grow no-padding builder-articles-body-richtext">
 							<my-builder-caption
 								v-model="captions.articleBody"
-								@hotkey="handleHotkeys"
 								:contentName="''"
 								:language="builderLanguage"
 								:readonly="readonly"

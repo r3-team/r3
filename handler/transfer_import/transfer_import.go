@@ -103,18 +103,7 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		tx, err := db.Pool.Begin(ctx)
-		if err != nil {
-			finishRequest(err)
-			return
-		}
-		defer tx.Rollback(ctx)
-
-		if err := transfer.ImportFromFiles_tx(ctx, tx, []string{filePath}); err != nil {
-			finishRequest(err)
-			return
-		}
-		if err := tx.Commit(ctx); err != nil {
+		if err := transfer.ImportFromFiles(ctx, []string{filePath}); err != nil {
 			finishRequest(err)
 			return
 		}
