@@ -325,18 +325,20 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 			client.admin, client.device, client.noAuth, reqTrans, false)
 
 		if err != nil {
-			if handler.CheckForDbsCacheErrCode(err) {
+			returnErr := processReturnErr(err, client.admin, client.loginId, reqTrans.TransactionNr)
+
+			if handler.CheckForDbsCacheErrCode(returnErr) {
 				// known PGX cache error, repeat with cleared DB statement/description cache
 				resTrans.Responses, err = request.ExecTransaction(ctx, client.address, client.loginId,
 					client.admin, client.device, client.noAuth, reqTrans, true)
 
 				if err != nil {
 					resTrans.Responses = make([]types.Response, 0)
-					resTrans.Error = err.Error()
+					resTrans.Error = processReturnErr(err, client.admin, client.loginId, reqTrans.TransactionNr).Error()
 				}
 			} else {
 				resTrans.Responses = make([]types.Response, 0)
-				resTrans.Error = err.Error()
+				resTrans.Error = returnErr.Error()
 			}
 		}
 
@@ -404,6 +406,14 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		return []byte("{}")
 	}
 	return resTransJson
+}
+
+func processReturnErr(err error, isAdmin bool, loginId int64, transNr uint64) error {
+	returnErr, isExpected := handler.ConvertToErrCode(err, !isAdmin)
+	if !isExpected {
+		log.Warning(handlerContext, fmt.Sprintf("TRANSACTION %d failure (login ID %d)", transNr, loginId), err)
+	}
+	return returnErr
 }
 
 func prepareUnrequested(ressource string, payload interface{}) ([]byte, error) {

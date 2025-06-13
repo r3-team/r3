@@ -21,62 +21,47 @@ import (
 func ExecTransaction(ctx context.Context, address string, loginId int64, isAdmin bool, device types.WebsocketClientDevice,
 	isNoAuth bool, reqTrans types.RequestTransaction, clearDbCache bool) ([]types.Response, error) {
 
-	responses := make([]types.Response, 0)
+	var tx pgx.Tx
+	var err error
 
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		log.Error("websocket", "cannot begin transaction", err)
-		return responses, errors.New(handler.ErrGeneral)
-	}
-	defer tx.Rollback(ctx)
+	if !reqTrans.NoDbTx {
+		tx, err = db.Pool.Begin(ctx)
+		if err != nil {
+			return nil, err
+		}
+		defer tx.Rollback(ctx)
 
-	if clearDbCache {
-		if err := tx.Conn().DeallocateAll(ctx); err != nil {
-			log.Error("websocket", "failed to deallocate DB connection", err)
-			return responses, err
+		if clearDbCache {
+			if err := tx.Conn().DeallocateAll(ctx); err != nil {
+				return nil, err
+			}
+		}
+
+		if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+			return nil, err
 		}
 	}
 
-	// set session parameters, used by system functions such as instance.get_user_id()
-	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
-
-		log.Error("websocket", fmt.Sprintf("TRANSACTION %d, transaction config failure (login ID %d)",
-			reqTrans.TransactionNr, loginId), err)
-
-		return responses, err
-	}
-
-	// work through requests
+	// execute and create response for each request
+	responses := make([]types.Response, 0)
 	for _, req := range reqTrans.Requests {
-
-		log.Info("websocket", fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s",
-			reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
+		log.Info("websocket", fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s", reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
 
 		payload, err := Exec_tx(ctx, tx, address, loginId, isAdmin, device, isNoAuth, req.Ressource, req.Action, req.Payload)
 		if err != nil {
-			returnErr, isExpected := handler.ConvertToErrCode(err, !isAdmin)
-			if !isExpected {
-				log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, request %s %s failure (login ID %d)",
-					reqTrans.TransactionNr, req.Ressource, req.Action, loginId), err)
-			}
-			return responses, returnErr
+			return nil, err
 		}
 
 		var res types.Response
 		res.Payload, err = json.Marshal(payload)
 		if err != nil {
-			return responses, err
+			return nil, err
 		}
 		responses = append(responses, res)
 	}
 
-	if err := tx.Commit(ctx); err != nil {
-		returnErr, isExpected := handler.ConvertToErrCode(err, !isAdmin)
-		if !isExpected {
-			log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, commit failure (login ID %d)",
-				reqTrans.TransactionNr, loginId), err)
-		}
-		return responses, returnErr
+	if !reqTrans.NoDbTx {
+		return responses, tx.Commit(ctx)
 	}
 	return responses, nil
 }
@@ -512,7 +497,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "package":
 		switch action {
 		case "install":
-			return PackageInstall_tx(ctx, tx)
+			return PackageInstall(ctx)
 		}
 	case "pgFunction":
 		switch action {
@@ -565,9 +550,9 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "get":
 			return RepoModuleGet_tx(ctx, tx, reqJson)
 		case "install":
-			return RepoModuleInstall_tx(ctx, tx, reqJson)
+			return RepoModuleInstall(ctx, reqJson)
 		case "installAll":
-			return RepoModuleInstallAll_tx(ctx, tx)
+			return RepoModuleInstallAll(ctx)
 		case "update":
 			return RepoModuleUpdate_tx(ctx, tx)
 		}

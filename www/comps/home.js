@@ -176,7 +176,7 @@ let MyHome = {
 		
 		// actions
 		installPackage() {
-			ws.send('package','install',{},true).then(
+			ws.send('package','install',{},true,true).then(
 				() => {},
 				this.$root.genericError
 			);

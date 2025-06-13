@@ -88,7 +88,7 @@ let MyAdminRepoModule = {
 		
 		// backend calls
 		install(fileId) {
-			ws.send('repoModule','install',{fileId:fileId},true).then(
+			ws.send('repoModule','install',{fileId:fileId},true,true).then(
 				() => {
 					this.$store.commit('dialog',{
 						captionBody:this.capApp.fetchDone
