@@ -416,7 +416,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 func processReturnErr(err error, isAdmin bool, loginId int64, transNr uint64) error {
 	returnErr, isExpected := handler.ConvertToErrCode(err, !isAdmin)
 	if !isExpected {
-		log.Warning(handlerContext, fmt.Sprintf("TRANSACTION %d failure (login ID %d)", transNr, loginId), err)
+		log.Warning(log.ContextWebsocket, fmt.Sprintf("TRANSACTION %d failure (login ID %d)", transNr, loginId), err)
 	}
 	return returnErr
 }

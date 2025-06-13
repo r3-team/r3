@@ -37,7 +37,7 @@ const MyInputRichtext = {
 	},
 	data() {
 		return {
-			debug:true,
+			debug:false,
 			editor:null,     // registered tinymce editor instance
 			isMounted:false, // wait for mount as toolbar ref must exist for tinymce init object to target it
 			images:[],       // image links to offer in editor

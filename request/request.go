@@ -45,7 +45,7 @@ func ExecTransaction(ctx context.Context, address string, loginId int64, isAdmin
 	// execute and create response for each request
 	responses := make([]types.Response, 0)
 	for _, req := range reqTrans.Requests {
-		log.Info("websocket", fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s", reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
+		log.Info(log.ContextWebsocket, fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s", reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
 
 		payload, err := Exec_tx(ctx, tx, address, loginId, isAdmin, device, isNoAuth, req.Ressource, req.Action, req.Payload)
 		if err != nil {
