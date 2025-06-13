@@ -86,7 +86,7 @@ func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordId int64,
 
 	// check for authorized access, READ(1) for GET
 	for _, attributeId := range attributeIds {
-		if !authorizedAttribute(loginId, attributeId, 1) {
+		if !authorizedAttribute(loginId, attributeId, types.AccessRead) {
 			return logs, errors.New(handler.ErrUnauthorized)
 		}
 	}

@@ -268,11 +268,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 	queryArgs *[]interface{}, loginId int64, nestingLevel int) (string, string, error) {
 
-	// check for authorized access, READ(1) for GET
 	for _, expr := range data.Expressions {
-		if expr.AttributeId.Valid &&
-			!authorizedAttribute(loginId, expr.AttributeId.Bytes, 1) {
-
+		if expr.AttributeId.Valid && !authorizedAttribute(loginId, expr.AttributeId.Bytes, types.AccessRead) {
 			return "", "", errors.New(handler.ErrUnauthorized)
 		}
 	}

@@ -41,8 +41,7 @@ func MayAccessFile(loginId int64, attributeId uuid.UUID) error {
 		return errors.New("not a file attribute")
 	}
 
-	// check for authorized access, READ(1) for GET
-	if !authorizedAttribute(loginId, attributeId, 1) {
+	if !authorizedAttribute(loginId, attributeId, types.AccessRead) {
 		return errors.New(handler.ErrUnauthorized)
 	}
 	return nil
@@ -72,8 +71,7 @@ func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId u
 	}
 	cache.Schema_mx.RUnlock()
 
-	// check for authorized access, WRITE(2) for SET
-	if !authorizedAttribute(loginId, attributeId, 2) {
+	if !authorizedAttribute(loginId, attributeId, types.AccessWrite) {
 		return errors.New(handler.ErrUnauthorized)
 	}
 
