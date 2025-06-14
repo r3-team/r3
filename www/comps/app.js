@@ -1,4 +1,5 @@
 import MyDialog              from './dialog.js';
+import MyDropdown            from './dropdown.js';
 import MyFeedback            from './feedback.js';
 import MyForm                from './form.js';
 import MyGlobalSearch        from './globalSearch.js';
@@ -32,6 +33,7 @@ let MyApp = {
 	name:'app',
 	components:{
 		MyDialog,
+		MyDropdown,
 		MyFeedback,
 		MyForm,
 		MyGlobalSearch,
@@ -47,6 +49,8 @@ let MyApp = {
 			:httpMode="httpMode"
 			:loginReady="loginReady"
 		/>
+
+		<my-dropdown />
 		
 		<template v-if="appReady">
 			<my-header

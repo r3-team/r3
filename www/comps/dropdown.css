@@ -1,0 +1,17 @@
+#dropdown{
+	position:absolute;
+	background-color:var(--color-input);
+	border:2px solid var(--color-accent1);
+	overflow:auto;
+	z-index:var(--z-index-dropdown);
+}
+#dropdown.downwards{
+	box-shadow:1px 3px 3px var(--color-shade);
+	border-radius:0px 0px var(--border-input-radius) var(--border-input-radius);
+	border-top:none;
+}
+#dropdown.upwards{
+	box-shadow:1px -3px 3px var(--color-shade);
+	border-radius:var(--border-input-radius) var(--border-input-radius) 0px 0px;
+	border-bottom:none;
+}

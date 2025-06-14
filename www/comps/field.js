@@ -80,7 +80,7 @@ let MyField = {
 				<span>{{ caption }}</span>
 			</div>
 			
-			<div class="field-content"
+			<div class="field-content" ref="content"
 				:class="{ data:isData, dropdown:dropdownShow, disabled:isReadonly, isSingleField:isAlone, intent:hasIntent }"
 		 		v-click-outside="clickOutside"
 			>
@@ -371,7 +371,7 @@ let MyField = {
 				<!-- regconfig input -->
 				<my-input-select
 					v-if="isRegconfig"
-					@dropdown-show="dropdownShow = $event"
+					@dropdown-show="dropdownSet($event)"
 					@updated-text-input="regconfigInput = $event"
 					@update:selected="value = $event;regconfigInput = ''"
 					:dropdownShow="dropdownShow"
@@ -467,7 +467,7 @@ let MyField = {
 				
 				<!-- login input -->
 				<my-input-login
-					@dropdown-show="dropdownShow = $event"
+					@dropdown-show="dropdownSet($event)"
 					v-if="isLogin"
 					v-model="value"
 					:dropdownShow="dropdownShow"
@@ -478,7 +478,7 @@ let MyField = {
 				<!-- date / datetime / time input -->
 				<my-input-date
 					v-if="isDateInput"
-					@dropdown-show="dropdownShow = $event"
+					@dropdown-show="dropdownSet($event)"
 					@set-unix-from="value = $event"
 					@set-unix-to="valueAlt = $event"
 					:isDate="isDatetime || isDate"
@@ -537,7 +537,7 @@ let MyField = {
 				<!-- relationship input -->
 				<my-list
 					v-if="isRelationship"
-					@dropdown-show="dropdownShow = $event"
+					@dropdown-show="dropdownSet($event)"
 					@open-form="(...args) => openForm(args[0],[],args[1],null)"
 					@records-selected="relationshipRecordsSelected"
 					@record-removed="relationshipRecordRemoved"
@@ -561,6 +561,7 @@ let MyField = {
 					:inputRecordIds="relationshipRecordIds"
 					:inputValid="!showInvalid"
 					:isInput="true"
+					:limitDefault="100"
 					:loginOptions="loginOptions"
 					:moduleId="moduleId"
 					:query="field.query"
@@ -859,7 +860,7 @@ let MyField = {
 		regconfigOptions:(s) => {
 			let out = [];
 			for(let d of s.searchDictionaries) {
-				if((s.regconfigInput === '' || d.includes(s.regconfigInput.toLowerCase())) && d !== 'simple' && s.value !== d && out.length < 10)
+				if((s.regconfigInput === null || s.regconfigInput === '' || d.includes(s.regconfigInput.toLowerCase())) && d !== 'simple' && s.value !== d && out.length < 10)
 					out.push({id:d,name:d});
 			}
 			return out;
@@ -1179,6 +1180,10 @@ let MyField = {
 		if(this.isTabs)
 			this.setTabToValid();
 	},
+	beforeUnmount() {
+		if(this.dropdownShow)
+			this.dropdownSet(false);
+	},
 	methods:{
 		// externals
 		getCaption,
@@ -1242,14 +1247,20 @@ let MyField = {
 		},
 		click() {
 			if(this.isColor && !this.isReadonly)
-				this.dropdownShow = !this.dropdownShow;
+				this.dropdownSet(!this.dropdownShow);
 		},
 		clickOutside() {
 			if(this.dropdownShow)
-				this.dropdownShow = false;
+				this.dropdownSet(false);
 		},
 		closeInline() {
 			this.popUpFormInline = null;
+		},
+		dropdownSet(state) {
+			if(state && !this.dropdownShow) this.$store.commit('dropdownElmSet',this.$refs.content);
+			if(!state && this.dropdownShow) this.$store.commit('dropdownElmRem',this.$refs.content);
+
+			this.dropdownShow = state;
 		},
 		openForm(rows,getterArgs,newTab,openFormContext) {
 			// set defaults

@@ -2,14 +2,12 @@
 :root{
 	/**/
 	/* z-indexes */
-	--z-index-block-full-page:200;     /* input block, full page, for sub window/messages */
+	--z-index-block-full-page:300;     /* input block, full page, for sub window/messages */
+	--z-index-dropdown:200;
 	--z-index-dialog-wrap:100;         /* dialog wrap */
 	--z-index-header-entry:60;
 	--z-index-header:50;               /* header, main menu, top of the page */
 	--z-index-form-pop-up:40;
-	
-	/* form dropdowns */
-	--z-index-dropdown:20;
 	--z-index-input-date-month:19;
 	
 	/* builder / admin */

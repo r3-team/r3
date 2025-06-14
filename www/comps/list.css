@@ -38,12 +38,12 @@
 .list-content.showsInlineForm{
 	border-top:1px solid var(--color-border);
 }
-.list-content .form-wrap.popUp{
-	flex:1 1 auto;
-	width:100%;
-}
 .list-content .empty-space{
 	flex:1 1 auto;
+}
+.list-inline-form{
+	flex:1 1 auto;
+	width:100%;
 }
 .list.isDynamicSize .list-content,
 .list.asInput .list-content{
@@ -78,91 +78,89 @@
 	text-wrap:nowrap;
 }
 
-/* list as lookup or dropdown */
-/* HTML table view */
-.list .layoutTable{
+/* list as table, used for default table view + dropdown input selector */
+.list-table{
 	display:flex;
 	flex-flow:column nowrap;
 	flex:1 1 auto;
 	background-color:var(--color-bg);
-	overflow:auto;
 }
-.list .layoutTable.formInline{
+.list-table.formInline{
 	border-right:1px solid var(--color-border);
 }
-.list .layoutTable table{
+.list-table table{
 	width:100%;
 }
-.list .layoutTable.scrolls{
+.list-table.scrolls{
 	position:relative;
 }
-.list .layoutTable thead tr{
+.list-table thead tr{
 	position:sticky;
 	top:0px;
 	z-index:var(--z-index-list-header);
 }
-.list .layoutTable thead tr.atTop{
+.list-table thead tr.atTop{
 	top:0px;
 }
-.list .layoutTable tfoot tr{
+.list-table tfoot tr{
 	position:sticky;
 	bottom:0px;
 	z-index:var(--z-index-list-footer);
 }
-.list .layoutTable tbody tr{
+.list-table tbody tr{
 	color:var(--color-font);
 }
-.list .layoutTable tbody tr.rowSelect:hover,
-.list .layoutTable tbody tr.rowSelect:focus{
+.list-table tbody tr.rowSelect:hover,
+.list-table tbody tr.rowSelect:focus{
 	cursor:pointer;
 	outline:none;
 	filter:brightness(90%);
 	transition:filter 0.2s;
 }
-.list .layoutTable tbody tr.rowSelect:hover td,
-.list .layoutTable tbody tr.rowSelect:focus td{
+.list-table tbody tr.rowSelect:hover td,
+.list-table tbody tr.rowSelect:focus td{
 	box-shadow:inset 0 -2px 0 0 var(--color-accent3-alt);
 	transition:box-shadow 0.5s;
 }
-.list .layoutTable tfoot tr.aggregation td{
+.list-table tfoot tr.aggregation td{
 	font-weight:bold;
 	border-top:2px solid var(--color-border);
 	padding:2px 8px;
 }
-.list .layoutTable tfoot tr.aggregation td.alignEnd{
+.list-table tfoot tr.aggregation td.alignEnd{
 	text-align:right;
 }
-.list .layoutTable tfoot tr.aggregation td.alignMid{
+.list-table tfoot tr.aggregation td.alignMid{
 	text-align:center;
 }
-.list .layoutTable tfoot tr.aggregation td.monospace{
+.list-table tfoot tr.aggregation td.monospace{
 	font-family:var(--font-family-monospace);
 }
-.list .layoutTable th{
+.list-table th{
 	padding:0px;
 	margin-bottom:-1px;
 	background-color:var(--color-bg);
 	position:relative;
 	border-bottom:1px solid var(--color-border);
 }
-.list .layoutTable th,
-.list .layoutTable td{
+.list-table th,
+.list-table td{
 	height:var(--row-height);
 	box-sizing:border-box;
 }
-.list .layoutTable th .headerToggle{
+.list-table th .headerToggle{
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:flex-end;
 	margin-right:10px;
 }
-.list .layoutTable th .columnBatchHeader{
+.list-table th .columnBatchHeader{
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:stretch;
 	gap:6px;
 }
-.list .layoutTable th .columBatchHeaderCaption{
+.list-table th .columBatchHeaderCaption{
 	flex:1 1 auto;
 	padding:6px 2px 6px 6px;
 	/* text ellipsis */
@@ -171,24 +169,24 @@
 	white-space:nowrap;
 	overflow:hidden;
 }
-.list .layoutTable th .columBatchHeaderCaption.dropdownActive{
+.list-table th .columBatchHeaderCaption.dropdownActive{
 	font-weight:bold;
 }
-.list .layoutTable th .columBatchHeaderCaption.hasIcons{
+.list-table th .columBatchHeaderCaption.hasIcons{
 	padding:6px 2px 6px 0px;
 }
-.list .layoutTable th .columnOptionWrap{
+.list-table th .columnOptionWrap{
 	width:100%;
 	min-width:240px;
 	max-width:360px;
 	right:unset;
 	left:-1px;
 }
-.list .layoutTable th .columnOptionWrap.dropdownRight{
+.list-table th .columnOptionWrap.dropdownRight{
 	right:0px;
 	left:unset;
 }
-.list .layoutTable th .columnOption{
+.list-table th .columnOption{
 	padding:9px;
 	box-sizing:border-box;
 	display:flex;
@@ -198,12 +196,12 @@
 	border-top:none;
 	background-color:var(--color-bg);
 }
-.list .layoutTable th .columnOptionItem{
+.list-table th .columnOptionItem{
 	display:flex;
 	flex-flow:row nowrap;
 	gap:9px;
 }
-.list .layoutTable th .columnFilterValues{
+.list-table th .columnFilterValues{
 	display:flex;
 	flex-flow:column nowrap;
 	max-height:250px;
@@ -214,57 +212,64 @@
 	box-shadow:var(--shadow-input);
 	overflow-y:scroll;
 }
-.list .layoutTable th.checkbox,
-.list .layoutTable td.checkbox{
+.list-table th.checkbox,
+.list-table td.checkbox{
 	padding:3px 4px 0px 4px;
 }
-.list .layoutTable th.checkbox img,
-.list .layoutTable td.checkbox img{
+.list-table th.checkbox img,
+.list-table td.checkbox img{
 	--margin:2px;
 	height:var(--row-height-icon);
 	margin:var(--margin);
 	filter:var(--image-filter);
 	outline:none;
 }
-.list .layoutTable th.checkbox img:focus,
-.list .layoutTable th.checkbox img:hover,
-.list .layoutTable td.checkbox img:focus,
-.list .layoutTable td.checkbox img:hover{
+.list-table th.checkbox img:focus,
+.list-table th.checkbox img:hover,
+.list-table td.checkbox img:focus,
+.list-table td.checkbox img:hover{
 	height:calc(var(--row-height-icon) + (var(--margin) * 2));
 	margin:0px;
 }
-.list .layoutTable td{
+.list-table td{
 	padding:0px;
 	border-bottom:1px solid var(--color-border);
 	background-color:var(--color-bright);
 }
-.list .layoutTable td:last-child{
+.list-table td:last-child{
 	border-right:none;
 }
-.list .layoutTable.rowsColored tr:nth-child(even) td{
+.list-table.rowsColored tr:nth-child(even) td{
 	background-color:var(--color-list-row-even);
 }
-.list .layoutTable tr.rowSelect.active td{
+.list-table tr.rowSelect.active td{
 	filter:brightness(80%);
 }
-.list .layoutTable .sub-actions{
+.list-table .sub-actions-wrap{
+	position:sticky;
+	top:0px;
+	z-index:var(--z-index-admin-table-sticky-top);
+}
+.list-table .sub-actions{
+	height:var(--row-height);
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
 	justify-content:space-between;
 	padding:0px 10px;
 	gap:10px;
+	background-color:var(--color-bg);
 }
 
 
-/* box layout view */
-.list .layoutCards{
+/* list as cards */
+.list-cards{
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
 	background-color:var(--color-bg);
 }
-.list .layoutCards .card-actions{
+.list-cards-actions{
 	position:sticky;
 	top:0px;
 	padding:8px 10px;
@@ -276,31 +281,31 @@
 	border-bottom:1px solid var(--color-border);
 	z-index:var(--z-index-list-header);
 }
-.list .layoutCards .card-actions.atTop{
+.list-cards-actions.atTop{
 	top:0px;
 }
-.list .layoutCards .card-actions span.select{
+.list-cards-actions span.select{
 	margin:0px 9px 0px 18px;
 }
-.list .layoutCards .card-actions select{
+.list-cards-actions select{
 	width:auto;
 	min-width:unset;
 	flex:0 1 auto;
 	margin:0px 9px 0px 0px;
 	padding:3px;
 }
-.list .layoutCards .cards{
+.list-cards-entries{
 	display:grid;
 	grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
 	overflow:auto;
 }
-.list .layoutCards .card{
+.list-cards-entry{
 	position:relative;
 	background-color:var(--color-bright);
 	border-right:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
 }
-.list .layoutCards .card .actions{
+.list-cards-entry .actions{
 	position:absolute;
 	right:0px;
 	top:0px;
@@ -308,41 +313,41 @@
 	display:flex;
 	flex-flow:column wrap;
 }
-.list .layoutCards .card.rowSelect:hover{
+.list-cards-entry.rowSelect:hover{
 	cursor:pointer;
 	outline:none;
 	filter:brightness(98%);
 	box-shadow:inset 0 -3px 0 0 var(--color-accent3-alt), filter 0.2s;
 	transition:box-shadow 0.2s, filter 0.2s;
 }
-.list .layoutCards .card.no-results{
+.list-cards-entry.no-results{
 	font-style:italic;
 	font-size:120%;
 	padding:var(--spacing);
 	border-top:1px solid var(--color-border);
 }
-.list .layoutCards .card img.checkbox{
+.list-cards-entry img.checkbox{
 	height:26px;
 	margin:3px;
 	outline:none;
 }
-.list .layoutCards .card img.checkbox:focus,
-.list .layoutCards .card img.checkbox:hover{
+.list-cards-entry img.checkbox:focus,
+.list-cards-entry img.checkbox:hover{
 	height:32px;
 	margin:0px;
 }
-.list .layoutCards .card img.checkbox:active{
+.list-cards-entry img.checkbox:active{
 	height:22px;
 	margin:5px;
 }
-.list .layoutCards .card table{
+.list-cards-entry table{
 	max-width:100%;
 	margin:var(--spacing) 50px 8px var(--spacing);
 }
-.list .layoutCards .card td{
+.list-cards-entry td{
 	vertical-align:bottom;
 }
-.list .layoutCards .card td.caption{
+.list-cards-entry td.caption{
 	color:var(--color-font-disabled);
 }
 
@@ -548,42 +553,42 @@
 
 
 /* user overwrites */
-.user-listSpaced .list .layoutTable table:not(.asInput){
+.user-listSpaced .list-table table:not(.asInput){
 	--row-spacing:calc(var(--spacing) / 2);
 	border-spacing:0px var(--row-spacing);
 	border-left:var(--row-spacing) solid transparent;
 	border-right:var(--row-spacing) solid transparent;
 	box-sizing:border-box;
 }
-.user-listSpaced .list .layoutTable table:not(.asInput) tfoot tr,
-.user-listSpaced .list .layoutTable table:not(.asInput) tbody tr{
+.user-listSpaced .list-table table:not(.asInput) tfoot tr,
+.user-listSpaced .list-table table:not(.asInput) tbody tr{
 	box-shadow:var(--shadow-input);
 	border:var(--border-input);
 	border-radius:var(--border-input-radius);
 }
-.user-listSpaced .list .layoutTable table:not(.asInput) td{
+.user-listSpaced .list-table table:not(.asInput) td{
 	border-top:var(--border-input);
 	border-bottom:var(--border-input);
 }
-.user-listSpaced .list .layoutTable table:not(.asInput) td:first-child{
+.user-listSpaced .list-table table:not(.asInput) td:first-child{
 	border-left:var(--border-input);
 	border-top-left-radius:var(--border-input-radius);
 	border-bottom-left-radius:var(--border-input-radius);
 }
-.user-listSpaced .list .layoutTable table:not(.asInput) td:last-child{
+.user-listSpaced .list-table table:not(.asInput) td:last-child{
 	border-right:var(--border-input);
 	border-top-right-radius:var(--border-input-radius);
 	border-bottom-right-radius:var(--border-input-radius);
 }
-.user-listSpaced .list .layoutCards .cards{
+.user-listSpaced .list-cards-entries{
 	padding:var(--spacing);
 	gap:var(--spacing);
 }
-.user-listSpaced .list .layoutCards .card{
+.user-listSpaced .list-cards-entry{
 	border:var(--border-input);
 	border-radius:var(--border-input-radius);
 	box-shadow:var(--shadow-input);
 }
-.user-listSpaced .list .layoutCards .card.rowSelect:hover{
+.user-listSpaced .list-cards-entry.rowSelect:hover{
 	box-shadow:1px 1px 6px #000, inset 0 -3px 0 0 var(--color-accent3-alt);
 }

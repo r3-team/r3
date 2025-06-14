@@ -56,6 +56,7 @@ const MyStore = Vuex.createStore({
 		dialogImage:null,
 		dialogStyles:'',
 		dialogTextDisplay:'',          // display option (html, textarea, richtext)
+		dropdownElm:null,
 		feedback:false,                // feedback function is enabled
 		feedbackUrl:'',                // feedback receiver, URL of current repository
 		filesCopy:{                    // meta data for file copy (filled on copy, emptied on paste)
@@ -276,6 +277,8 @@ const MyStore = Vuex.createStore({
 		captions:                (state,payload) => state.captions                 = payload,
 		captionMapCustom:        (state,payload) => state.captionMapCustom         = payload,
 		clusterNodeName:         (state,payload) => state.clusterNodeName          = payload,
+		dropdownElmRem:          (state,payload) => { if(state.dropdownElm === payload) state.dropdownElm = null; },
+		dropdownElmSet:          (state,payload) => state.dropdownElm              = payload,
 		feedback:                (state,payload) => state.feedback                 = payload,
 		feedbackUrl:             (state,payload) => state.feedbackUrl              = payload,
 		filesCopy:               (state,payload) => state.filesCopy                = payload,
@@ -449,6 +452,7 @@ const MyStore = Vuex.createStore({
 		dialogImage:             (state) => state.dialogImage,
 		dialogStyles:            (state) => state.dialogStyles,
 		dialogTextDisplay:       (state) => state.dialogTextDisplay,
+		dropdownElm:             (state) => state.dropdownElm,
 		feedback:                (state) => state.feedback,
 		feedbackUrl:             (state) => state.feedbackUrl,
 		filesCopy:               (state) => state.filesCopy,
