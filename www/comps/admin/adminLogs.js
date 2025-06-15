@@ -15,15 +15,17 @@ let MyAdminLogs = {
 			</div>
 		</div>
 		<div class="top lower">
-			<div class="area">
+			<div class="area default-inputs">
 				<my-button image="refresh.png"
 					@trigger="get"
 					:caption="capGen.button.refresh"
 				/>
-				<div class="admin-logs-date-wrap">
+				<div class="admin-logs-date-wrap input-custom auto" ref="dateInput" :class="{ focus:dateDropdownShow }">
 					<my-input-date
+						@dropdown-show="dateDropdownSet($event)"
 						@set-unix-from="setDate($event,true)"
 						@set-unix-to="setDate($event,false)"
+						:dropdownShow="dateDropdownShow"
 						:isDate="true"
 						:isTime="true"
 						:isRange="true"
@@ -200,11 +202,14 @@ let MyAdminLogs = {
 		this.setDate(Math.floor(d.getTime() / 1000),true);
 	},
 	computed:{
+		dateDropdownShow:(s) => s.dropdownElm === s.$refs.dateInput,
+
 		// stores
-		settings:(s) => s.$store.getters.settings,
-		capApp:  (s) => s.$store.getters.captions.admin.logs,
-		capGen:  (s) => s.$store.getters.captions.generic,
-		config:  (s) => s.$store.getters.config
+		settings:   (s) => s.$store.getters.settings,
+		capApp:     (s) => s.$store.getters.captions.admin.logs,
+		capGen:     (s) => s.$store.getters.captions.generic,
+		config:     (s) => s.$store.getters.config,
+		dropdownElm:(s) => s.$store.getters.dropdownElm
 	},
 	methods:{
 		// externals
@@ -230,6 +235,12 @@ let MyAdminLogs = {
 		displayMessage(msg) {
 			return msg.length > this.messageLengthShow
 				? msg.substr(0,this.messageLengthShow)+'...' : msg;
+		},
+
+		// actions
+		dateDropdownSet(state) {
+			if(state && !this.dateDropdownShow) this.$store.commit('dropdownElm',this.$refs.dateInput);
+			if(!state && this.dateDropdownShow) this.$store.commit('dropdownElm',null);
 		},
 		setDate(unix,from) {
 			if(from) {

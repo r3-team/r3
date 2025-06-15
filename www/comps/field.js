@@ -81,8 +81,8 @@ let MyField = {
 			</div>
 			
 			<div class="field-content" ref="content"
+				v-click-outside="clickOutside"
 				:class="{ data:isData, dropdown:dropdownShow, disabled:isReadonly, isSingleField:isAlone, intent:hasIntent }"
-		 		v-click-outside="clickOutside"
 			>
 				<!-- data field icon -->
 				<div class="field-icon" v-if="iconId && isData && !isRelationship && !isDrawing && !isFiles && !isRichtext && !isTextarea && !isRating && !isBarcode && !isIframe">
@@ -481,6 +481,7 @@ let MyField = {
 					@dropdown-show="dropdownSet($event)"
 					@set-unix-from="value = $event"
 					@set-unix-to="valueAlt = $event"
+					:dropdownShow="dropdownShow"
 					:isDate="isDatetime || isDate"
 					:isTime="isDatetime || isTime"
 					:isRange="isDateRange"
@@ -692,7 +693,6 @@ let MyField = {
 	],
 	data() {
 		return {
-			dropdownShow:false,           // for inputs with dropdowns (relationship, date, color picker)
 			popUpFormInline:null,         // inline form for some field types (list)
 			regconfigInput:'',
 			showPassword:false,           // for password fields
@@ -1093,6 +1093,7 @@ let MyField = {
 		customErr:   (s) => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
 		dataOptions: (s) => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
+		dropdownShow:(s) => s.dropdownElm === s.$refs.content,
 		hasCaption:  (s) => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
 		hasIntent:   (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
 		inputRegex:  (s) => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
@@ -1171,6 +1172,7 @@ let MyField = {
 		access:             (s) => s.$store.getters.access,
 		capApp:             (s) => s.$store.getters.captions.form,
 		capGen:             (s) => s.$store.getters.captions.generic,
+		dropdownElm:        (s) => s.$store.getters.dropdownElm,
 		isMobile:           (s) => s.$store.getters.isMobile,
 		isNoAuth:           (s) => s.$store.getters.isNoAuth,
 		searchDictionaries: (s) => s.$store.getters.searchDictionaries,
@@ -1250,17 +1252,14 @@ let MyField = {
 				this.dropdownSet(!this.dropdownShow);
 		},
 		clickOutside() {
-			if(this.dropdownShow)
-				this.dropdownSet(false);
+			this.dropdownSet(false);
 		},
 		closeInline() {
 			this.popUpFormInline = null;
 		},
 		dropdownSet(state) {
-			if(state && !this.dropdownShow) this.$store.commit('dropdownElmSet',this.$refs.content);
-			if(!state && this.dropdownShow) this.$store.commit('dropdownElmRem',this.$refs.content);
-
-			this.dropdownShow = state;
+			if(state && !this.dropdownShow) this.$store.commit('dropdownElm',this.$refs.content);
+			if(!state && this.dropdownShow) this.$store.commit('dropdownElm',null);
 		},
 		openForm(rows,getterArgs,newTab,openFormContext) {
 			// set defaults

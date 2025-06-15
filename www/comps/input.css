@@ -457,18 +457,26 @@
 	border-top:2px solid var(--color-border);
 	border-bottom:none;
 }
+.input-date-dropdown-actions{
+	height:var(--row-height);
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:space-between;
+	background-color:var(--color-bg);
+	border-bottom:1px solid var(--color-border);
+}
 
 /* date time inputs */
-.input-date .date-inputs{
+.input-date-inputs{
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
 	font-family:'Lucida Console',Monaco,monospace;
 }
-.input-date .date-inputs .time-separator{
+.input-date-inputs .time-separator{
 	margin:0px 8px 0px 0px;
 }
-.input-date .date-inputs input{
+.input-date-inputs input{
 	min-width:unset;
 	max-width:unset;
 	line-height:28px;
@@ -480,18 +488,18 @@
 	background-color:transparent;
 	box-shadow:none;
 }
-.input-date .date-inputs input:disabled{
+.input-date-inputs input:disabled{
 	color:var(--color-font-disabled);
 	background-color:var(--color-input-disabled);
 	-webkit-text-fill-color:var(--color-font-disabled); /* fix for Safari < 18.0 */
 }
-.input-date .date-inputs input::placeholder{
+.input-date-inputs input::placeholder{
 	font-family:monospace;
 }
-.input-date .date-inputs .mobile-inputs{
+.input-date-inputs .mobile-inputs{
 	flex:1 1 auto;
 }
-.input-date .date-inputs .mobile-inputs input{
+.input-date-inputs .mobile-inputs input{
 	min-width:100px;
 	height:28px;
 	text-align:left;

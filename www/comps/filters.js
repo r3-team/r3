@@ -294,7 +294,7 @@ let MyFilterSide = {
 		MyFilterAttribute,
 		MyInputDate
 	},
-	template:`<div class="filter-side">
+	template:`<div class="filter-side" ref="content">
 		<div class="filter-side-inputs default-inputs">
 			<template v-if="!isNullPartner">
 				
@@ -477,9 +477,11 @@ let MyFilterSide = {
 						:placeholder="fixedValuePlaceholder"
 					/>
 					
-					<div class="input-custom date-wrap" v-if="columnDate || columnTime">
+					<div class="input-custom date-wrap" v-if="columnDate || columnTime" :class="{ focus:dateDropdownShow }">
 						<my-input-date
+							@dropdown-show="dateDropdownSet($event)"
 							@set-unix-from="valueFixTextDate = $event"
+							:dropdownShow="dateDropdownShow"
 							:isDate="columnDate"
 							:isTime="columnTime"
 							:unixFrom="valueFixTextDate"
@@ -703,14 +705,15 @@ let MyFilterSide = {
 		},
 		
 		// simple
-		columnsMode:  (s) => s.columns.length !== 0,
-		contentApi:   (s) => ['getter'].filter(v => !s.disableContent.includes(v)),
-		contentData:  (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
-		contentDate:  (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
-		contentForm:  (s) => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew'].filter(v => !s.disableContent.includes(v)),
-		contentLogin: (s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
-		contentSearch:(s) => ['globalSearch'].filter(v => !s.disableContent.includes(v)),
-		module:       (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
+		columnsMode:     (s) => s.columns.length !== 0,
+		contentApi:      (s) => ['getter'].filter(v => !s.disableContent.includes(v)),
+		contentData:     (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
+		contentDate:     (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
+		contentForm:     (s) => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew'].filter(v => !s.disableContent.includes(v)),
+		contentLogin:    (s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
+		contentSearch:   (s) => ['globalSearch'].filter(v => !s.disableContent.includes(v)),
+		dateDropdownShow:(s) => s.dropdownElm === s.$refs.content,
+		module:          (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
 		
 		// states
 		isAnyDate:    (s) => ['nowDate','nowDatetime','nowTime'].includes(s.content),
@@ -732,7 +735,8 @@ let MyFilterSide = {
 		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
 		capApp:         (s) => s.$store.getters.captions.filter,
-		capGen:         (s) => s.$store.getters.captions.generic
+		capGen:         (s) => s.$store.getters.captions.generic,
+		dropdownElm:    (s) => s.$store.getters.dropdownElm
 	},
 	methods:{
 		// externals
@@ -742,6 +746,10 @@ let MyFilterSide = {
 		getQueryTemplate,
 		
 		// actions
+		dateDropdownSet(state) {
+			if(state && !this.dateDropdownShow) this.$store.commit('dropdownElm',this.$refs.content);
+			if(!state && this.dateDropdownShow) this.$store.commit('dropdownElm',null);
+		},
 		set(name,newValue) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = newValue;

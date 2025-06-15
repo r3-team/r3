@@ -55,7 +55,6 @@ const MyList = {
 		MyListOptions
 	},
 	template:`<div class="list" ref="content"
-		v-click-outside="escape"
 		@keydown="handleKeydownLocal"
 		:class="{ asInput:isInput, readonly:inputIsReadonly, isDynamicSize:isDynamicSize, isSingleField:isSingleField }"
 	>

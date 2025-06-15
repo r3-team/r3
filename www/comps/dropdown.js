@@ -57,6 +57,10 @@ let MyDropdown = {
 		window.addEventListener('scroll', this.updatePos, true);
 
 		this.observer = new MutationObserver(m => {
+
+			if(this.$refs.self.children.length === 0 && this.sourceElm !== null)
+				return this.$store.commit('dropdownElm',null);
+
 			if(this.active && this.rectSelf !== null) {
 				const rectSelfNew = this.$refs.self.getBoundingClientRect();
 				if(this.rectSelf.height !== rectSelfNew.height)

@@ -150,7 +150,6 @@
 	display:flex;
 	flex-flow:column nowrap;
 	border-radius:3px;
-	overflow:auto;
 }
 .calendar-month.scroll{
 	overflow:auto;

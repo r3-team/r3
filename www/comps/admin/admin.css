@@ -30,6 +30,7 @@
 .admin-logs-date-wrap{
 	position:relative;
 	margin-left:10px;
+	height:unset !important;
 }
 
 
@@ -139,18 +140,7 @@
 /* system message */
 .admin-system-msg{}
 .admin-system-msg-date{
-	width:370px;
-	padding:3px 6px;
-	position:relative;
-	border:var(--border-input);
-	border-radius:var(--border-input-radius);
-	box-shadow:var(--shadow-input);
-	background-color:var(--color-input);
-}
-.admin-system-msg-date:focus-within{
-	border:var(--border-input-focus);
-	outline:var(--outline-input-focus);
-	box-shadow:var(--shadow-input-focus);
+	width:370px !important;
 }
 .admin-system-msg-table{
 	width:1000px;

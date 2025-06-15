@@ -701,7 +701,8 @@ table td.maximum{
 .default-inputs input:focus,
 .default-inputs select:focus,
 .default-inputs textarea:focus,
-.default-inputs .input-custom:focus-within{
+.default-inputs .input-custom:focus-within,
+.default-inputs .input-custom.focus{
 	border:var(--border-input-focus);
 	outline:var(--outline-input-focus);
 	box-shadow:var(--shadow-input-focus);
