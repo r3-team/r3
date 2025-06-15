@@ -459,6 +459,7 @@
 }
 .input-date-dropdown-actions{
 	height:var(--row-height);
+	padding:3px calc(var(--spacing) / 1.5);
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:space-between;
@@ -510,28 +511,28 @@
 }
 
 /* calendar overwrites (month/days views) */
-.input-date .calendar-month .day{
+.input-date-dropdown.calendar-month .day{
 	min-height:unset !important;
 	line-height:16px;
 }
-.input-date .calendar-month .days .item{
+.input-date-dropdown.calendar-month .days .item{
 	padding:0px;
 	text-align:center;
 }
-.input-date .calendar-month .day h1{
+.input-date-dropdown.calendar-month .day h1{
 	margin:4px 6px;
 	text-align:center;
 	font-size:100%;
 	color:var(--color-font) !important;
 }
 
-.input-date .calendar-days .header,
-.input-date .calendar-days .labels span{
+.input-date-dropdown.calendar-days .header,
+.input-date-dropdown.calendar-days .labels span{
 	padding:0px 3px;
 	font-size:80%;
 	line-height:100%;
 }
-.input-date .calendar-days .header{
+.input-date-dropdown.calendar-days .header{
 	font-size:90%;
 }
 
@@ -555,42 +556,30 @@
 
 /* color input */
 .input-color{
+	flex:1 1 auto;
+	color:var(--color-font);
 	display:flex;
 	flex-flow:row nowrap;
-	padding:0px !important;
-	position:relative;
-}
-.input-color-preview{
-	width:calc(100% - 4px);
-	padding:0px 4px 0px 8px;
-	display:flex;
-	flex-flow:row nowrap;
-	color:var(--color-font-dark);
-	border-radius:var(--border-input-radius);
-	background-color:var(--color-input);
 	justify-content:space-between;
-	align-items:center;
-}
-.input-color-preview.isDark{
-	color:var(--color-font-bright);
-}
-.input-color-preview img{
-	filter:var(--image-filter-dark) !important;
-}
-.input-color-preview.isDark img{
-	filter:var(--image-filter-bright) !important;
+	gap:12px;
 }
 .input-color-picker{
 	width:100% !important;
-	position:absolute;
-	left:0px;
-	right:0px;
-	bottom:30px;
-	z-index:var(--z-index-dropdown);
 }
-.input-color-picker.downwards{
-	bottom:unset;
-	top:30px;
+.input-color-preview{
+	width:60px;
+	margin:4px 0px;
+	flex:0 0 auto;
+	border-radius:var(--border-input-radius);
+	background-color:var(--color-input);
+}
+.input-color-text{
+	height:100%;
+	flex:1 1 auto;
+	outline:none;
+	border:none;
+	color:inherit;
+	background-color:transparent;
 }
 
 /* draw input */

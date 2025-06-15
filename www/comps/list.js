@@ -299,7 +299,7 @@ const MyList = {
 				<teleport to="#dropdown" :disabled="!dropdownShow">
 					<div
 						@keydown="handleKeydownLocal"
-						:class="{ 'list-cards':isCards, 'list-table':isTable, rowsColored:settings.listColored, scrolls:isSingleField}"
+						:class="{ 'list-cards':isCards, 'list-table':isTable, 'list-dropdown':dropdownShow, rowsColored:settings.listColored, scrolls:isSingleField}"
 						:id="usesPageHistory ? scrollFormId : null"
 					>
 						<table v-if="isTable" :class="{ asInput:isInput }">

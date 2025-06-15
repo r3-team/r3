@@ -48,7 +48,6 @@ let MyInputDraw = {
 				<my-input-color
 					v-if="!readonly"
 					v-model="strokeColor"
-					:downwards="true"
 					:readonly="readonly"
 				/>
 			</div>

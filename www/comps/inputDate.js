@@ -411,7 +411,7 @@ let MyInputDate = {
 				</div>
 			</div>
 			
-			<my-calendar-days
+			<my-calendar-days class="input-date-dropdown"
 				v-if="!viewMonth"
 				@set-date="date = $event"
 				@date-selected="dateSet"
@@ -424,7 +424,7 @@ let MyInputDate = {
 				:isInput="true"
 				:isRange="isRange"
 			/>
-			<my-calendar-month
+			<my-calendar-month class="input-date-dropdown"
 				v-if="viewMonth"
 				@set-date="date = $event"
 				@date-selected="dateSetByMonthView"

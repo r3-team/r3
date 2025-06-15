@@ -191,22 +191,6 @@
 	font-family:inherit;
 	resize:none;
 }
-.field .color-input{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:stretch;
-	flex:1 1 auto;
-}
-.field .color-input input{
-	flex:1 1 auto;
-}
-.field .color-input .preview{
-	flex:0 1 50px;
-	height:20px;
-	border:1px solid var(--color-border);
-	border-radius:9px;
-	align-self:center;
-}
 
 /* slider input */
 .field .slider-input{

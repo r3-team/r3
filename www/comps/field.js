@@ -3,6 +3,7 @@ import MyChart                from './chart.js';
 import MyGantt                from './gantt.js';
 import MyKanban               from './kanban.js';
 import MyInputBarcode         from './inputBarcode.js';
+import MyInputColor           from './inputColor.js';
 import MyInputDate            from './inputDate.js';
 import MyInputDrawing         from './inputDrawing.js';
 import MyInputFiles           from './inputFiles.js';
@@ -52,6 +53,7 @@ let MyField = {
 		MyGantt,
 		MyKanban,
 		MyInputBarcode,
+		MyInputColor,
 		MyInputDate,
 		MyInputDrawing,
 		MyInputFiles,
@@ -400,28 +402,14 @@ let MyField = {
 				/>
 				
 				<!-- color input -->
-				<div class="color-input" v-if="isColor">
-					<input class="input" data-is-input="1" type="text"
-						v-model="value"
-						:class="{ invalid:showInvalid }"
-						:disabled="isReadonly"
-					/>
-					
-					<!-- preview -->
-					<div class="preview"
-						@click="click"
-						:class="{ clickable:!isReadonly }"
-						:style="value !== null ? 'background-color:#'+value : ''"
-					></div>
-				</div>
-				<div class="input-dropdown-wrap" v-if="isColor && dropdownShow">
-					<chrome-picker class="input-dropdown"
-						@update:modelValue="value = $event.hex.substr(1)"
-						:disable-alpha="true"
-						:disable-fields="true"
-						:modelValue="value !== null ? value : '000000'"
-					/>
-				</div>
+				<my-input-color
+					v-if="isColor"
+					v-model="value"
+					@dropdown-show="dropdownSet($event)"
+					:allowNull="true"
+					:dropdownShow="dropdownShow"
+					:readonly="isReadonly"
+				/>
 				
 				<!-- textarea input -->
 				<textarea class="input textarea" data-is-input="1"

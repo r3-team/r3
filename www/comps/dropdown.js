@@ -41,8 +41,7 @@ let MyDropdown = {
 			return [
 				top,
 				`left:calc(${s.rectTarget.left + window.scrollX}px + ${s.cssMarginX} + var(--border-input-radius))`,
-				`width:calc(${s.rectTarget.width}px - ((${s.cssMarginX} + var(--border-input-radius)) * 2) )`,
-				`max-height:calc(var(--row-height) * 10)`
+				`width:calc(${s.rectTarget.width}px - ((${s.cssMarginX} + var(--border-input-radius)) * 2) )`
 			].join(';');
 		},
 

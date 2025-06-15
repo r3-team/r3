@@ -77,6 +77,9 @@
 	font-size:120%;
 	text-wrap:nowrap;
 }
+.list-dropdown{
+	max-height:calc(var(--row-height) * 11);
+}
 
 /* list as table, used for default table view + dropdown input selector */
 .list-table{
