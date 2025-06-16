@@ -53,8 +53,7 @@ export default {
 	},
 	data() {
 		return {
-			setValueAfterDelay:null,
-			showPicker:false
+			setValueAfterDelay:null
 		};
 	},
 	emits:['dropdown-show','update:modelValue'],

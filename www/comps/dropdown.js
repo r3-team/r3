@@ -11,11 +11,11 @@ let MyDropdown = {
 	watch:{
 		appResized() {
 			if(this.sourceElm !== null)
-				this.updatePos();
+				this.updateExisting();
 		},
 		sourceElm(vNew,vOld) {
-			if(vNew !== vOld) this.isNewElm = true;
-			if(vNew !== null) this.updatePos();
+			if(vNew !== null)
+				this.updatePos(vNew !== vOld);
 		}
 	},
 	data() {
@@ -26,9 +26,8 @@ let MyDropdown = {
 				width:null
 			},
 			isDownwards:true,        // dropdown goes down
-			isNewElm:false,          // dropdown elm is new, needs to be calculated again after placement
 			isWaitingForFrame:false, // placement waits for browser frame paint
-			marginX:'4px',
+			marginXDef:'4px',
 			observer:null,           // for reacting to changes to dropdown element content
 			rectDrop:null,           // bounding rect of dropdown element
 			style:'',
@@ -44,13 +43,13 @@ let MyDropdown = {
 		sourceElm: (s) => s.$store.getters.dropdownElm
 	},
 	mounted() {
-		window.addEventListener('scroll', this.updatePos, true);
+		window.addEventListener('scroll', this.updateExisting, true);
 
 		this.observer = new MutationObserver(m => {
 			if(this.active && this.rectDrop !== null) {
 				const rectDropNew = this.$refs.self.getBoundingClientRect();
 				if(this.rectDrop.height !== rectDropNew.height)
-					this.updatePos();
+					this.updateExisting();
 			}
 		});
 		this.observer.observe(this.$refs.self, {
@@ -63,24 +62,27 @@ let MyDropdown = {
 			this.observer.disconnect();
 	},
 	unmounted() {
-		window.removeEventListener('scroll', this.updatePos, true);
+		window.removeEventListener('scroll', this.updateExisting, true);
 	},
 	methods:{
 		click(ev) {
 			// stops v-click-outside from triggering when clicking inside dropdown
 			ev.stopPropagation();
 		},
-		updatePos() {
+		updateExisting() {
+			this.updatePos(false);
+		},
+		updatePos(isNewElm) {
 			if(!this.active || this.isWaitingForFrame)
 				return;
 
+			// synchronizes refreshes with browser refreshes and avoids unnecessary execution between refreshes
 			this.isWaitingForFrame = true;
 
-			// synchronizes refreshes with browser refreshes and avoids unnecessary execution between refreshes
 			window.requestAnimationFrame(() => {
 				// source element can return to null, depending on timing
 				if(this.sourceElm === null)
-					return;
+					return this.isWaitingForFrame = false;
 
 				const rectDrop   = this.$refs.self.getBoundingClientRect();
 				const rectTarget = this.sourceElm.getBoundingClientRect();
@@ -92,24 +94,23 @@ let MyDropdown = {
 				const dropLeavesWinRight  = rectTarget.left   + rectDrop.width > window.innerWidth;
 
 				this.isDownwards = !dropLeavesWinBottom || dropLeavesWinTop;
-				this.isWaitingForFrame = false;
 				
 				// check for dropdown configuration options in first child
 				const child = this.$refs.self.firstElementChild;
-				this.config.borderSimple = child !== null && child.dataset['dropdownBorderSimple']  !== undefined;
-				this.config.marginX      = child !== null && child.dataset['dropdownMarginX']       !== undefined ? parseInt(child.dataset['dropdownMarginX']) : null;
-				this.config.width        = child !== null && child.dataset['dropdownWidth']         !== undefined ? parseInt(child.dataset['dropdownWidth'])   : null;
+				this.config.borderSimple = child !== null && child.dataset['dropdownBorderSimple'] !== undefined;
+				this.config.marginX      = child !== null && child.dataset['dropdownMarginX']      !== undefined ? parseInt(child.dataset['dropdownMarginX']) : null;
+				this.config.width        = child !== null && child.dataset['dropdownWidth']        !== undefined ? parseInt(child.dataset['dropdownWidth'])   : null;
 
-				const cssMarginX = this.config.marginX !== null ? `${this.config.marginX}px` : this.marginX;
+				const cssMarginX = this.config.marginX !== null ? `${this.config.marginX}px` : this.marginXDef;
 				const cssPos     = dropLeavesWinRight           ? `right:0px` : `left:calc(${rectTarget.left + window.scrollX}px + ${cssMarginX} + var(--border-input-radius))`;
 				const cssTop     = this.isDownwards             ? `top:${rectTarget.bottom}px` : `top:${rectTarget.top - rectDrop.height}px`;
 				const cssWidth   = this.config.width   !== null ? `width:${this.config.width}px` : `width:calc(${rectTarget.width}px - ((${cssMarginX} + var(--border-input-radius)) * 2) )`;
 				this.style = [cssPos,cssTop,cssWidth].join(';');
 				
-				if(this.isNewElm) {
-					this.isNewElm = false;
-					this.updatePos();
-				}
+				this.isWaitingForFrame = false;
+				
+				if(isNewElm)
+					this.updateExisting();
 			});
 		}
 	}
