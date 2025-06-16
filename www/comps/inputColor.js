@@ -17,8 +17,7 @@ export default {
 			/>
 		</div>
 
-		<div class="input-color-preview" :style="'background-color:#'+input">
-		</div>
+		<div class="input-color-preview" :style="'background-color:#'+input"></div>
 
 		<div class="row gap">
 			<my-button image="cancel.png"

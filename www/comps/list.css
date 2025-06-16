@@ -157,64 +157,6 @@
 	justify-content:flex-end;
 	margin-right:10px;
 }
-.list-table th .columnBatchHeader{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:stretch;
-	gap:6px;
-}
-.list-table th .columBatchHeaderCaption{
-	flex:1 1 auto;
-	padding:6px 2px 6px 6px;
-	/* text ellipsis */
-	width:50px;
-	text-overflow:ellipsis;
-	white-space:nowrap;
-	overflow:hidden;
-}
-.list-table th .columBatchHeaderCaption.dropdownActive{
-	font-weight:bold;
-}
-.list-table th .columBatchHeaderCaption.hasIcons{
-	padding:6px 2px 6px 0px;
-}
-.list-table th .columnOptionWrap{
-	width:100%;
-	min-width:240px;
-	max-width:360px;
-	right:unset;
-	left:-1px;
-}
-.list-table th .columnOptionWrap.dropdownRight{
-	right:0px;
-	left:unset;
-}
-.list-table th .columnOption{
-	padding:9px;
-	box-sizing:border-box;
-	display:flex;
-	flex-flow:column nowrap;
-	gap:6px;
-	border:1px solid var(--color-border);
-	border-top:none;
-	background-color:var(--color-bg);
-}
-.list-table th .columnOptionItem{
-	display:flex;
-	flex-flow:row nowrap;
-	gap:9px;
-}
-.list-table th .columnFilterValues{
-	display:flex;
-	flex-flow:column nowrap;
-	max-height:250px;
-	padding:0px 6px;
-	background-color:var(--color-input);
-	border:var(--border-input);
-	border-radius:var(--border-input-radius);
-	box-shadow:var(--shadow-input);
-	overflow-y:scroll;
-}
 .list-table th.checkbox,
 .list-table td.checkbox{
 	padding:3px 4px 0px 4px;

@@ -314,18 +314,15 @@ const MyList = {
 									</th>
 									<th v-for="(b,i) in columnBatches" :style="b.style">
 										<my-list-column-batch
-											@close="columnBatchIndexOption = -1"
 											@del-aggregator="setAggregators"
 											@del-order="setOrder(b,null,false)"
 											@set-aggregator="setAggregators"
 											@set-filters="setLoginOption('filtersColumn',$event)"
 											@set-order="setOrder(b,$event,false)"
 											@set-order-only="setOrder(b,$event,true)"
-											@toggle="clickColumn(i)"
 											:columnBatch="b"
 											:columnIdMapAggr="columnIdMapAggr"
 											:columns="columns"
-											:dropdownRight="(columnBatches.length > 1 && i === columnBatches.length - 1) || (columnBatches.length > 3 && i === columnBatches.length - 2)"
 											:filters="filtersCombined"
 											:filtersColumn="filtersColumn"
 											:isOrderedOrginal="isOrderedOrginal"
@@ -334,7 +331,6 @@ const MyList = {
 											:orders="orders"
 											:relationId="query.relationId"
 											:rowCount="count"
-											:show="columnBatchIndexOption === i"
 											:simpleSortOnly="columnsSortOnly"
 										/>
 									</th>
@@ -667,7 +663,6 @@ const MyList = {
 			// state
 			autoRenewTimer:null,        // interval timer for auto renew
 			cardsOrderByColumnBatchIndex:-1,
-			columnBatchIndexOption:-1,  // show options for column batch by index
 			filtersQuick:'',            // current user quick text filter
 			focused:false,
 			inputAutoSelectDone:false,
@@ -1041,10 +1036,6 @@ const MyList = {
 		clearAutoRenewTimer() {
 			if(this.autoRenewTimer !== null)
 				clearInterval(this.autoRenewTimer);
-		},
-		clickColumn(columnBatchIndex) {
-			this.columnBatchIndexOption = this.columnBatchIndexOption === columnBatchIndex
-				? -1 : columnBatchIndex;
 		},
 		clickOpen(row,middleClick) {
 			if(this.hasUpdate) {

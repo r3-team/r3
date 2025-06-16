@@ -11,7 +11,16 @@
 	border-top:1px solid var(--color-border);
 }
 #dropdown.upwards{
-	box-shadow:1px -3px 3px var(--color-shade);
+	box-shadow:1px -2px 2px var(--color-shade);
 	border-radius:var(--border-input-radius) var(--border-input-radius) 0px 0px;
 	border-bottom:1px solid var(--color-border);
+}
+#dropdown.borderSimple{
+	border:1px solid var(--color-border);
+}
+#dropdown.borderSimple.downwards{
+	border-top:none;
+}
+#dropdown.borderSimple.upwards{
+	border-bottom:none;
 }

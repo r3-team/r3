@@ -41,7 +41,7 @@ let MyInputSelect = {
 		</div>
 
 		<teleport to="#dropdown" v-if="dropdownShow">
-			<div class="input-dropdown-entry clickable" tabindex="0"
+			<div class="input-select-entry clickable" tabindex="0"
 				v-for="(option,i) in options"
 				@click="apply(i)"
 				@keydown.enter.space="apply(i)"
@@ -49,10 +49,10 @@ let MyInputSelect = {
 			>
 				{{ option.name }}
 			</div>
-			<div class="input-dropdown-entry inactive" v-if="options.length === 0">
+			<div class="input-select-entry inactive" v-if="options.length === 0">
 				{{ capGen.resultsNone }}
 			</div>
-			<div class="input-dropdown-entry inactive" v-if="options.length === limit">
+			<div class="input-select-entry inactive" v-if="options.length === limit">
 				{{ capGen.inputSelectMore }}
 			</div>
 		</teleport>
