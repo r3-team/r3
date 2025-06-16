@@ -373,7 +373,7 @@ let MyField = {
 				<!-- regconfig input -->
 				<my-input-select
 					v-if="isRegconfig"
-					@dropdown-show="dropdownSet($event)"
+					@dropdown-show="dropdownSet"
 					@updated-text-input="regconfigInput = $event"
 					@update:selected="value = $event;regconfigInput = ''"
 					:dropdownShow="dropdownShow"
@@ -405,7 +405,7 @@ let MyField = {
 				<my-input-color
 					v-if="isColor"
 					v-model="value"
-					@dropdown-show="dropdownSet($event)"
+					@dropdown-show="dropdownSet"
 					:allowNull="true"
 					:dropdownShow="dropdownShow"
 					:readonly="isReadonly"
@@ -455,7 +455,7 @@ let MyField = {
 				
 				<!-- login input -->
 				<my-input-login
-					@dropdown-show="dropdownSet($event)"
+					@dropdown-show="dropdownSet"
 					v-if="isLogin"
 					v-model="value"
 					:dropdownShow="dropdownShow"
@@ -466,7 +466,7 @@ let MyField = {
 				<!-- date / datetime / time input -->
 				<my-input-date
 					v-if="isDateInput"
-					@dropdown-show="dropdownSet($event)"
+					@dropdown-show="dropdownSet"
 					@set-unix-from="value = $event"
 					@set-unix-to="valueAlt = $event"
 					:dropdownShow="dropdownShow"
@@ -526,7 +526,7 @@ let MyField = {
 				<!-- relationship input -->
 				<my-list
 					v-if="isRelationship"
-					@dropdown-show="dropdownSet($event)"
+					@dropdown-show="dropdownSet"
 					@open-form="(...args) => openForm(args[0],[],args[1],null)"
 					@records-selected="relationshipRecordsSelected"
 					@record-removed="relationshipRecordRemoved"

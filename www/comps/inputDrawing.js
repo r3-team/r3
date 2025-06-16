@@ -1,9 +1,9 @@
-import MyInputColor from './inputColor.js';
+import MyInputColorWrap from './inputColorWrap.js';
 export {MyInputDraw as default};
 
-let MyInputDraw = {
+const MyInputDraw = {
 	name:'my-input-draw',
-	components:{ MyInputColor },
+	components:{ MyInputColorWrap },
 	template:`<div class="input-draw">
 		<div class="actions">
 			<div class="row gap centered">
@@ -39,16 +39,11 @@ let MyInputDraw = {
 					/>
 					<my-bool v-model="dragModeForce" :grow="false" />
 				</template>
-				<my-button image="colors.png"
-					v-if="!readonly"
-					@trigger="strokeColor = strokeColorDef"
-					:active="strokeColor !== strokeColorDef"
-					:naked="true"
-				/>
-				<my-input-color
+				<my-input-color-wrap image="colors.png"
 					v-if="!readonly"
 					v-model="strokeColor"
 					:readonly="readonly"
+					:showInput="false"
 				/>
 			</div>
 			<div class="row gap">

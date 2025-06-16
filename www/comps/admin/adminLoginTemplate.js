@@ -1,10 +1,10 @@
 import {dialogCloseAsk} from '../shared/dialog.js';
-import MyInputColor     from '../inputColor.js';
+import MyInputColorWrap from '../inputColorWrap.js';
 export {MyAdminLoginTemplate as default};
 
 let MyAdminLoginTemplate = {
 	name:'my-admin-login-template',
-	components:{ MyInputColor },
+	components:{ MyInputColorWrap },
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 		
 		<div class="contentBox admin-login-template float" v-if="inputsReady">
@@ -267,7 +267,7 @@ let MyAdminLoginTemplate = {
 						</tr>
 						<tr v-if="!settings.colorClassicMode">
 							<td>{{ capAppSet.colorHeader }}</td>
-							<td><my-input-color v-model="settings.colorHeader" :allowNull="true" /></td>
+							<td><my-input-color-wrap v-model="settings.colorHeader" :allowNull="true" /></td>
 						</tr>
 						<tr v-if="!settings.colorClassicMode">
 							<td>{{ capAppSet.colorHeaderSingle }}</td>
@@ -278,7 +278,7 @@ let MyAdminLoginTemplate = {
 						</tr>
 						<tr>
 							<td>{{ capAppSet.colorMenu }}</td>
-							<td><my-input-color v-model="settings.colorMenu" :allowNull="true" /></td>
+							<td><my-input-color-wrap v-model="settings.colorMenu" :allowNull="true" /></td>
 						</tr>
 					</tbody>
 				</table>

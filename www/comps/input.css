@@ -567,19 +567,21 @@
 	width:100% !important;
 }
 .input-color-preview{
-	width:60px;
 	margin:4px 0px;
-	flex:0 0 auto;
+	flex:1 1 auto;
+	width:80px;
+	min-width:30px;
 	border-radius:var(--border-input-radius);
 	background-color:var(--color-input);
 }
 .input-color-text{
-	height:100%;
-	flex:1 1 auto;
-	outline:none;
-	border:none;
+	width:100%;
+	flex:2 2 auto;
 	color:inherit;
-	background-color:transparent;
+	outline:none !important;
+	border:none !important;
+	box-shadow:none !important;
+	background-color:transparent !important;
 }
 
 /* draw input */

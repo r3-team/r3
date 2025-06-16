@@ -2,7 +2,7 @@ import srcBase64Icon       from './shared/image.js';
 import {getCaption}        from './shared/language.js';
 import {set as setSetting} from './shared/settings.js';
 import {getUnixFormat}     from './shared/time.js';
-import MyInputColor        from './inputColor.js';
+import MyInputColorWrap    from './inputColorWrap.js';
 import MyInputHotkey       from './inputHotkey.js';
 import MyTabs              from './tabs.js';
 import {
@@ -1212,7 +1212,7 @@ let MySettingsFixedTokens = {
 let MySettings = {
 	name:'my-settings',
 	components:{
-		MyInputColor,
+		MyInputColorWrap,
 		MySettingsAccount,
 		MySettingsClientEvents,
 		MySettingsEncryption,
@@ -1432,7 +1432,7 @@ let MySettings = {
 						</tr>
 						<tr class="default-inputs" v-if="!settingsInput.colorClassicMode">
 							<td>{{ capApp.colorHeader }}</td>
-							<td><my-input-color v-model="settingsInput.colorHeader" :allowNull="true" /></td>
+							<td><my-input-color-wrap v-model="settingsInput.colorHeader" :allowNull="true" /></td>
 						</tr>
 						<tr v-if="!settingsInput.colorClassicMode">
 							<td>{{ capApp.colorHeaderSingle }}</td>
@@ -1443,7 +1443,7 @@ let MySettings = {
 						</tr>
 						<tr class="default-inputs">
 							<td>{{ capApp.colorMenu }}</td>
-							<td><my-input-color v-model="settingsInput.colorMenu" :allowNull="true" /></td>
+							<td><my-input-color-wrap v-model="settingsInput.colorMenu" :allowNull="true" /></td>
 						</tr>
 					</tbody>
 				</table>

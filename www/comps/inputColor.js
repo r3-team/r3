@@ -1,16 +1,14 @@
 import {colorIsDark} from './shared/generic.js';
-export {MyInputColor as default};
 
-let MyInputColor = {
+export default {
 	name:'my-input-color',
 	components:{ 'chrome-picker':VueColor.Chrome },
 	template:`<div class="input-color"
 		v-click-outside="closePicker"
 		@click.left="togglePicker"
-		:class="{ clickable:!readonly, isDark:isDark }"
-		:style="colorBg ? 'background-color:#'+input : ''"
+		:class="{ clickable:!readonly }"
 	>
-		<div class="row gap grow centered">
+		<div class="row gap grow centered" v-if="showInput">
 			<span>#</span>
 			<input class="input-color-text" data-is-input="1" type="text"
 				v-model="input"
@@ -49,10 +47,10 @@ let MyInputColor = {
 	</div>`,
 	props:{
 		allowNull:   { type:Boolean, required:false, default:false },
-		colorBg:     { type:Boolean, required:false, default:false },
 		dropdownShow:{ type:Boolean, required:false, default:false },
 		modelValue:  { required:true },
-		readonly:    { type:Boolean, required:false, default:false }
+		readonly:    { type:Boolean, required:false, default:false },
+		showInput:   { type:Boolean, required:false, default:true }
 	},
 	data() {
 		return {
@@ -74,8 +72,7 @@ let MyInputColor = {
 		},
 		
 		// simple
-		isDark:(s) => s.colorBg && s.isSet && s.colorIsDark(s.modelValue),
-		isSet: (s) => (s.allowNull && s.modelValue !== null) || (!s.allowNull && s.modelValue !== ''),
+		isSet:(s) => (s.allowNull && s.modelValue !== null) || (!s.allowNull && s.modelValue !== ''),
 		
 		// stores
 		capApp:(s) => s.$store.getters.captions.input.color,

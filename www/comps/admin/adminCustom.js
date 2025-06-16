@@ -1,5 +1,5 @@
 import MyCodeEditor     from '../codeEditor.js';
-import MyInputColor     from '../inputColor.js';
+import MyInputColorWrap from '../inputColorWrap.js';
 import {srcBase64}      from '../shared/image.js';
 import {MyModuleSelect} from '../input.js';
 export {MyAdminCustom as default};
@@ -59,7 +59,7 @@ let MyAdminCustom = {
 	components:{
 		MyAdminCustomLogo,
 		MyCodeEditor,
-		MyInputColor,
+		MyInputColorWrap,
 		MyModuleSelect
 	},
 	template:`<div class="admin-custom contentBox grow">
@@ -160,12 +160,12 @@ let MyAdminCustom = {
 					</tr>
 					<tr>
 						<td>{{ capApp.companyColorLogin }}</td>
-						<td><my-input-color v-model="configInput.companyColorLogin" :readonly="!activated" /></td>
+						<td><my-input-color-wrap v-model="configInput.companyColorLogin" :readonly="!activated" /></td>
 						<td>{{ capApp.companyColorLoginHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.companyColorHeader }}</td>
-						<td><my-input-color v-model="configInput.companyColorHeader" :readonly="!activated" /></td>
+						<td><my-input-color-wrap v-model="configInput.companyColorHeader" :readonly="!activated" /></td>
 						<td>{{ capApp.companyColorHeaderHint }}</td>
 					</tr>
 

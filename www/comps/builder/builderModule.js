@@ -5,7 +5,7 @@ import srcBase64Icon         from '../shared/image.js';
 import {getDependentModules} from '../shared/builder.js';
 import {getUnixFormat}       from '../shared/time.js';
 import {MyModuleSelect}      from '../input.js';
-import MyInputColor          from '../inputColor.js';
+import MyInputColorWrap      from '../inputColorWrap.js';
 import {
 	copyValueDialog,
 	getNilUuid,
@@ -18,7 +18,7 @@ import {
 } from '../shared/templates.js';
 export {MyBuilderModule as default};
 
-let MyBuilderModuleStartForm = {
+const MyBuilderModuleStartForm = {
 	name:'my-builder-module-start-form',
 	template:`<div class="item">
 		<img v-if="!readonly" class="dragAnchor" src="images/drag.png" />
@@ -78,7 +78,7 @@ let MyBuilderModule = {
 		MyBuilderClientEvent,
 		MyBuilderIconInput,
 		MyBuilderModuleStartForm,
-		MyInputColor,
+		MyInputColorWrap,
 		MyModuleSelect
 	},
 	template:`<div class="builder-module contentBox grow" v-if="module">
@@ -165,7 +165,7 @@ let MyBuilderModule = {
 					</tr>
 					<tr>
 						<td>{{ capApp.color }}</td>
-						<td><my-input-color v-model="color1" :allowNull="true" :readonly="readonly" /></td>
+						<td><my-input-color-wrap v-model="color1" :allowNull="true" :readonly /></td>
 						<td>{{ capApp.colorHint }}</td>
 					</tr>
 					<tr>
