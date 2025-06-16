@@ -3,7 +3,7 @@ export {MyDropdown as default};
 let MyDropdown = {
 	name:'my-dropdown',
 	template:`<div id="dropdown" ref="self"
-		v-show="active"
+		v-show="active && !targetLeftWindow"
 		@click="click"
 		:class="{ downwards:isDownwards, upwards:!isDownwards }"
 		:style="style"
@@ -26,25 +26,11 @@ let MyDropdown = {
 			isWaitingForFrame:false, // placement waits for browser frame paint
 			observer:null,           // for reacting to changes to dropdown element content
 			rectSelf:null,           // bounding rect of dropdown element
-			rectTarget:null          // bounding rect of where dropdown is to be placed
+			style:'',
+			targetLeftWindow:false
 		};
 	},
 	computed:{
-		style:(s) => {
-			if(s.sourceElm === null || s.rectTarget === null || s.rectSelf === null)
-				return '';
-
-			const top = s.isDownwards
-				? `top:${s.rectTarget.bottom + window.scrollY}px`
-				: `top:${s.rectTarget.top    + window.scrollY - s.rectSelf.height}px`;
-
-			return [
-				top,
-				`left:calc(${s.rectTarget.left + window.scrollX}px + ${s.cssMarginX} + var(--border-input-radius))`,
-				`width:calc(${s.rectTarget.width}px - ((${s.cssMarginX} + var(--border-input-radius)) * 2) )`
-			].join(';');
-		},
-
 		// simple
 		active:(s) => s.sourceElm !== null,
 
@@ -56,10 +42,6 @@ let MyDropdown = {
 		window.addEventListener('scroll', this.updatePos, true);
 
 		this.observer = new MutationObserver(m => {
-
-			if(this.$refs.self.children.length === 0 && this.sourceElm !== null)
-				return this.$store.commit('dropdownElm',null);
-
 			if(this.active && this.rectSelf !== null) {
 				const rectSelfNew = this.$refs.self.getBoundingClientRect();
 				if(this.rectSelf.height !== rectSelfNew.height)
@@ -91,14 +73,30 @@ let MyDropdown = {
 
 			// synchronizes refreshes with browser refreshes and avoids unnecessary execution between refreshes
 			window.requestAnimationFrame(() => {
-				this.rectSelf   = this.$refs.self.getBoundingClientRect();
-				this.rectTarget = this.sourceElm.getBoundingClientRect();
+				// source element can return to null, depending on timing
+				if(this.sourceElm === null)
+					return;
+
+				const rectSelf   = this.$refs.self.getBoundingClientRect();
+				const rectTarget = this.sourceElm.getBoundingClientRect();
+				this.rectSelf = rectSelf;
 	
-				const leavesWindowBottom = this.rectTarget.bottom + this.rectSelf.height > window.innerHeight;
-				const leavesWindowTop    = this.rectTarget.top    - this.rectSelf.height < 0;
-	
-				this.isDownwards = !leavesWindowBottom || leavesWindowTop;
+				this.targetLeftWindow     = rectTarget.bottom < 0 || rectTarget.top > window.innerHeight;
+				const selfLeavesWinBottom = rectTarget.bottom + rectSelf.height > window.innerHeight;
+				const selfLeavesWinTop    = rectTarget.top    - rectSelf.height < 0;
+
+				this.isDownwards = !selfLeavesWinBottom || selfLeavesWinTop;
 				this.isWaitingForFrame = false;
+
+				const top = this.isDownwards
+					? `top:${rectTarget.bottom}px`
+					: `top:${rectTarget.top - rectSelf.height}px`;
+
+				this.style = [
+					top,
+					`left:calc(${rectTarget.left + window.scrollX}px + ${this.cssMarginX} + var(--border-input-radius))`,
+					`width:calc(${rectTarget.width}px - ((${this.cssMarginX} + var(--border-input-radius)) * 2) )`
+				].join(';');
 
 				if(this.isNewElm) {
 					this.isNewElm = false;

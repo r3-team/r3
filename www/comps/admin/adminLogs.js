@@ -20,7 +20,7 @@ let MyAdminLogs = {
 					@trigger="get"
 					:caption="capGen.button.refresh"
 				/>
-				<my-input-date-wrap
+				<my-input-date-wrap class="long"
 					@set-unix-from="setDate($event,true)"
 					@set-unix-to="setDate($event,false)"
 					:isDate="true"

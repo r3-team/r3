@@ -2,7 +2,7 @@ import MyInputDate from './inputDate.js';
 
 export default {
 	components:{ MyInputDate },
-	template: `<div class="input-date-wrap input-custom long row nowrap gap" ref="content"
+	template: `<div class="input-date-wrap input-custom row nowrap gap" ref="content"
 		:class="{ dropdown:dropdownShow, focus:dropdownShow }"
 	>
 		<my-input-date
