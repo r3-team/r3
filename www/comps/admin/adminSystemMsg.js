@@ -1,4 +1,4 @@
-import MyInputDate     from '../inputDate.js';
+import MyInputDateWrap from '../inputDateWrap.js';
 import MyInputRichtext from '../inputRichtext.js';
 import {getDateFormat} from '../shared/time.js';
 export {MyAdminSystemMsg as default};
@@ -6,7 +6,7 @@ export {MyAdminSystemMsg as default};
 let MyAdminSystemMsg = {
 	name:'my-admin-system-msg',
 	components:{
-		MyInputDate,
+		MyInputDateWrap,
 		MyInputRichtext
 	},
 	template:`<div class="admin-system-msg contentBox grow">
@@ -55,37 +55,29 @@ let MyAdminSystemMsg = {
 					<tr>
 						<td>{{ capApp.date0 }}</td>
 						<td colspan="2">
-							<div class="admin-system-msg-date input-custom dynamic" ref="dateInput0" :class="{ focus:dropdownShowDate0 }">
-								<my-input-date
-									@dropdown-show="dateDropdownSet('dateInput0','dropdownShowDate0',$event)"
-									@set-unix-from="date0 = $event"
-									:dropdownShow="dropdownShowDate0"
-									:isDate="true"
-									:isReadonly="!activated"
-									:isTime="true"
-									:isValid="true"
-									:unixFrom="date0"
-									:useMonth="true"
-								/>
-							</div>
+							<my-input-date-wrap
+								@set-unix-from="date0 = $event"
+								:isDate="true"
+								:isReadonly="!activated"
+								:isTime="true"
+								:isValid="true"
+								:unixFrom="date0"
+								:useMonth="true"
+							/>
 						</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.date1 }}</td>
 						<td colspan="2">
-							<div class="admin-system-msg-date input-custom dynamic" ref="dateInput1" :class="{ focus:dropdownShowDate1 }">
-								<my-input-date
-									@dropdown-show="dateDropdownSet('dateInput1','dropdownShowDate1',$event)"
-									@set-unix-from="date1 = $event"
-									:dropdownShow="dropdownShowDate1"
-									:isDate="true"
-									:isReadonly="!activated"
-									:isTime="true"
-									:isValid="true"
-									:unixFrom="date1"
-									:useMonth="true"
-								/>
-							</div>
+							<my-input-date-wrap
+								@set-unix-from="date1 = $event"
+								:isDate="true"
+								:isReadonly="!activated"
+								:isTime="true"
+								:isValid="true"
+								:unixFrom="date1"
+								:useMonth="true"
+							/>
 						</td>
 					</tr>
 					<tr>
@@ -125,16 +117,11 @@ let MyAdminSystemMsg = {
 				.replace('{DATE1}',s.getDateFormat(new Date(s.date1*1000),'Y-m-d H:i'));
 		},
 
-		// simple
-		dropdownShowDate0:(s) => s.dropdownElm === s.$refs.dateInput0,
-		dropdownShowDate1:(s) => s.dropdownElm === s.$refs.dateInput1,
-
 		// stores
 		activated:     (s) => s.$store.getters['local/activated'],
 		capApp:        (s) => s.$store.getters.captions.admin.systemMsg,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		config:        (s) => s.$store.getters.config,
-		dropdownElm:   (s) => s.$store.getters.dropdownElm,
 		systemMsgMaint:(s) => s.$store.getters.config.systemMsgMaintenance === '1',
 		systemMsgText: (s) => s.$store.getters.config.systemMsgText
 	},
@@ -160,10 +147,6 @@ let MyAdminSystemMsg = {
 		getDateFormat,
 
 		// actions
-		dateDropdownSet(refName,stateName,state) {
-			if(state && !this[stateName]) this.$store.commit('dropdownElm',this.$refs[refName]);
-			if(!state && this[stateName]) this.$store.commit('dropdownElm',null);
-		},
 		preview() {
 			this.$store.commit('dialog',{
 				captionTop:this.capGen.dialog.systemMsg,

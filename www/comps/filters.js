@@ -1,5 +1,5 @@
 import MyBuilderQuery          from './builder/builderQuery.js';
-import MyInputDate             from './inputDate.js';
+import MyInputDateWrap         from './inputDateWrap.js';
 import MyInputDictionary       from './inputDictionary.js';
 import {isAttributeString}     from './shared/attribute.js';
 import {getColumnIsFilterable} from './shared/column.js';
@@ -21,7 +21,7 @@ export {MyFilterBrackets};
 export {MyFilterConnector};
 export {MyFilterOperator};
 
-let MyFilterBrackets = {
+const MyFilterBrackets = {
 	name:'my-filter-brackets',
 	template:`<my-button
 		@trigger="add(true)"
@@ -63,7 +63,7 @@ let MyFilterBrackets = {
 	}
 };
 
-let MyFilterOperator = {
+const MyFilterOperator = {
 	name:'my-filter-operator',
 	template:`<select v-model="value">
 		
@@ -164,7 +164,7 @@ let MyFilterOperator = {
 	}
 };
 
-let MyFilterConnector = {
+const MyFilterConnector = {
 	name:'my-filter-connector',
 	template:`<select class="and" :disabled="readonly" v-model="value">
 		<option value="AND">{{ capApp.option.connector.AND }}</option>
@@ -184,7 +184,7 @@ let MyFilterConnector = {
 	}
 };
 
-let MyFilterAttribute = {
+const MyFilterAttribute = {
 	name:'my-filter-attribute',
 	template:`<select v-model="value">
 		<template v-if="columnsMode" v-for="b in columnBatches">
@@ -287,14 +287,14 @@ let MyFilterAttribute = {
 	}
 };
 
-let MyFilterSide = {
+const MyFilterSide = {
 	name:'my-filter-side',
 	components:{
 		MyBuilderQuery,
 		MyFilterAttribute,
-		MyInputDate
+		MyInputDateWrap
 	},
-	template:`<div class="filter-side" ref="content">
+	template:`<div class="filter-side">
 		<div class="filter-side-inputs default-inputs">
 			<template v-if="!isNullPartner">
 				
@@ -476,17 +476,13 @@ let MyFilterSide = {
 						v-model="valueFixText"
 						:placeholder="fixedValuePlaceholder"
 					/>
-					
-					<div class="input-custom date-wrap" v-if="columnDate || columnTime" :class="{ focus:dateDropdownShow }">
-						<my-input-date
-							@dropdown-show="dateDropdownSet($event)"
-							@set-unix-from="valueFixTextDate = $event"
-							:dropdownShow="dateDropdownShow"
-							:isDate="columnDate"
-							:isTime="columnTime"
-							:unixFrom="valueFixTextDate"
-						/>
-					</div>
+					<my-input-date-wrap
+						v-if="columnDate || columnTime"
+						@set-unix-from="valueFixTextDate = $event"
+						:isDate="columnDate"
+						:isTime="columnTime"
+						:unixFrom="valueFixTextDate"
+					/>
 				</template>
 			</template>
 		</div>
@@ -705,15 +701,14 @@ let MyFilterSide = {
 		},
 		
 		// simple
-		columnsMode:     (s) => s.columns.length !== 0,
-		contentApi:      (s) => ['getter'].filter(v => !s.disableContent.includes(v)),
-		contentData:     (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
-		contentDate:     (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
-		contentForm:     (s) => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew'].filter(v => !s.disableContent.includes(v)),
-		contentLogin:    (s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
-		contentSearch:   (s) => ['globalSearch'].filter(v => !s.disableContent.includes(v)),
-		dateDropdownShow:(s) => s.dropdownElm === s.$refs.content,
-		module:          (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
+		columnsMode:  (s) => s.columns.length !== 0,
+		contentApi:   (s) => ['getter'].filter(v => !s.disableContent.includes(v)),
+		contentData:  (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
+		contentDate:  (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
+		contentForm:  (s) => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew'].filter(v => !s.disableContent.includes(v)),
+		contentLogin: (s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
+		contentSearch:(s) => ['globalSearch'].filter(v => !s.disableContent.includes(v)),
+		module:       (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
 		
 		// states
 		isAnyDate:    (s) => ['nowDate','nowDatetime','nowTime'].includes(s.content),
@@ -735,8 +730,7 @@ let MyFilterSide = {
 		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
 		capApp:         (s) => s.$store.getters.captions.filter,
-		capGen:         (s) => s.$store.getters.captions.generic,
-		dropdownElm:    (s) => s.$store.getters.dropdownElm
+		capGen:         (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -746,10 +740,6 @@ let MyFilterSide = {
 		getQueryTemplate,
 		
 		// actions
-		dateDropdownSet(state) {
-			if(state && !this.dateDropdownShow) this.$store.commit('dropdownElm',this.$refs.content);
-			if(!state && this.dateDropdownShow) this.$store.commit('dropdownElm',null);
-		},
 		set(name,newValue) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = newValue;
@@ -815,7 +805,7 @@ let MyFilterSide = {
 	}
 };
 
-let MyFilter = {
+const MyFilter = {
 	name:'my-filter',
 	components:{
 		MyFilterBrackets,
@@ -1052,7 +1042,7 @@ let MyFilter = {
 	}
 };
 
-let MyFilters = {
+const MyFilters = {
 	name:'my-filters',
 	components:{MyFilter},
 	template:`<div class="filters">

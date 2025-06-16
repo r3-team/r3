@@ -27,11 +27,6 @@
 	border:1px solid var(--color-border);
 	border-radius:2px;
 }
-.admin-logs-date-wrap{
-	position:relative;
-	margin-left:10px;
-	height:unset !important;
-}
 
 
 /* logins */
@@ -139,9 +134,6 @@
 
 /* system message */
 .admin-system-msg{}
-.admin-system-msg-date{
-	width:370px !important;
-}
 .admin-system-msg-table{
 	width:1000px;
 }

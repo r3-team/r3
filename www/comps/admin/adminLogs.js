@@ -1,11 +1,11 @@
-import MyInputDate     from '../inputDate.js';
+import MyInputDateWrap from '../inputDateWrap.js';
 import MyInputOffset   from '../inputOffset.js';
 import {getUnixFormat} from '../shared/time.js';
 export {MyAdminLogs as default};
 
 let MyAdminLogs = {
 	name:'my-admin-logs',
-	components:{MyInputDate,MyInputOffset},
+	components:{MyInputDateWrap,MyInputOffset},
 	template:`<div class="contentBox admin-logs grow">
 		
 		<div class="top">
@@ -15,25 +15,21 @@ let MyAdminLogs = {
 			</div>
 		</div>
 		<div class="top lower">
-			<div class="area default-inputs">
+			<div class="area nowrap default-inputs">
 				<my-button image="refresh.png"
 					@trigger="get"
 					:caption="capGen.button.refresh"
 				/>
-				<div class="admin-logs-date-wrap input-custom auto" ref="dateInput" :class="{ focus:dateDropdownShow }">
-					<my-input-date
-						@dropdown-show="dateDropdownSet($event)"
-						@set-unix-from="setDate($event,true)"
-						@set-unix-to="setDate($event,false)"
-						:dropdownShow="dateDropdownShow"
-						:isDate="true"
-						:isTime="true"
-						:isRange="true"
-						:isValid="true"
-						:unixFrom="unixFrom"
-						:unixTo="unixTo"
-					/>
-				</div>
+				<my-input-date-wrap
+					@set-unix-from="setDate($event,true)"
+					@set-unix-to="setDate($event,false)"
+					:isDate="true"
+					:isTime="true"
+					:isRange="true"
+					:isValid="true"
+					:unixFrom="unixFrom"
+					:unixTo="unixTo"
+				/>
 			</div>
 			<div class="area">
 				<my-input-offset
@@ -202,14 +198,11 @@ let MyAdminLogs = {
 		this.setDate(Math.floor(d.getTime() / 1000),true);
 	},
 	computed:{
-		dateDropdownShow:(s) => s.dropdownElm === s.$refs.dateInput,
-
 		// stores
-		settings:   (s) => s.$store.getters.settings,
-		capApp:     (s) => s.$store.getters.captions.admin.logs,
-		capGen:     (s) => s.$store.getters.captions.generic,
-		config:     (s) => s.$store.getters.config,
-		dropdownElm:(s) => s.$store.getters.dropdownElm
+		settings:(s) => s.$store.getters.settings,
+		capApp:  (s) => s.$store.getters.captions.admin.logs,
+		capGen:  (s) => s.$store.getters.captions.generic,
+		config:  (s) => s.$store.getters.config
 	},
 	methods:{
 		// externals
@@ -238,10 +231,6 @@ let MyAdminLogs = {
 		},
 
 		// actions
-		dateDropdownSet(state) {
-			if(state && !this.dateDropdownShow) this.$store.commit('dropdownElm',this.$refs.dateInput);
-			if(!state && this.dateDropdownShow) this.$store.commit('dropdownElm',null);
-		},
 		setDate(unix,from) {
 			if(from) {
 				this.unixFrom = unix;

@@ -395,6 +395,9 @@
 
 
 /* input date */
+.input-date-wrap.dropdown{
+	min-width:420px;
+}
 .input-date{
 	display:flex;
 	flex-flow:column wrap;
@@ -404,11 +407,12 @@
 	display:flex;
 	flex-flow:row nowrap;
 	flex:1 1 auto;
+	justify-content:space-between;
 }
 .input-date .content-wrap .entries{
 	display:flex;
 	flex-flow:row wrap;
-	flex:1 1 auto;
+	flex:0 1 auto;
 }
 .input-date .content-wrap .entries .entry{
 	flex:1 1 auto;

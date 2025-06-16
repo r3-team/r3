@@ -1,6 +1,6 @@
 import MyAdminLoginMeta        from './adminLoginMeta.js';
 import MyAdminLoginRolesAssign from './adminLoginRolesAssign.js';
-import MyInputDate             from '../inputDate.js';
+import MyInputDateWrap         from '../inputDateWrap.js';
 import {deepIsEqual}           from '../shared/generic.js';
 import {getUnixNowDate}        from '../shared/time.js';
 export {MyAdminOauthClient as default};
@@ -10,7 +10,7 @@ let MyAdminOauthClient = {
 	components:{
 		MyAdminLoginMeta,
 		MyAdminLoginRolesAssign,
-		MyInputDate
+		MyInputDateWrap
 	},
 	template:`<div v-if="ready" class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
 		
@@ -91,17 +91,13 @@ let MyAdminOauthClient = {
 						<tr>
 							<td>{{ capApp.dateExpiry }}</td>
 							<td>
-								<div class="input-custom admin-oauth-client-date-wrap" ref="dateInput" :class="{ focus:dateDropdownShow }">
-									<my-input-date
-										@dropdown-show="dateDropdownSet($event)"
-										@set-unix-from="inputs.dateExpiry = $event"
-										:dropdownShow="dateDropdownShow"
-										:isDate="true"
-										:isTime="false"
-										:isValid="true"
-										:unixFrom="inputs.dateExpiry"
-									/>
-								</div>
+								<my-input-date-wrap
+									@set-unix-from="inputs.dateExpiry = $event"
+									:isDate="true"
+									:isTime="false"
+									:isValid="true"
+									:unixFrom="inputs.dateExpiry"
+								/>
 							</td>
 							<td>{{ capApp.dateExpiryHint }}</td>
 						</tr>
@@ -253,7 +249,6 @@ let MyAdminOauthClient = {
 		} : s.oauthClientIdMap[s.id],
 		
 		// simple states
-		dateDropdownShow:  (s) => s.dropdownElm === s.$refs.dateInput,
 		hasChanges:        (s) => !s.deepIsEqual(s.inputsOrg,s.inputs),
 		isClaimRolesSet:   (s) => s.inputs.claimRoles !== null && s.inputs.claimRoles !== '',
 		isFlowAuthCodePkce:(s) => s.inputs.flow === 'authCodePkce',
@@ -262,9 +257,8 @@ let MyAdminOauthClient = {
 		isNew:             (s) => s.id === 0,
 		
 		// stores
-		capApp:     (s) => s.$store.getters.captions.admin.oauthClient,
-		capGen:     (s) => s.$store.getters.captions.generic,
-		dropdownElm:(s) => s.$store.getters.dropdownElm
+		capApp:(s) => s.$store.getters.captions.admin.oauthClient,
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
@@ -290,10 +284,6 @@ let MyAdminOauthClient = {
 		},
 		close() {
 			this.$emit('close');
-		},
-		dateDropdownSet(state) {
-			if(state && !this.dateDropdownShow) this.$store.commit('dropdownElm',this.$refs.dateInput);
-			if(!state && this.dateDropdownShow) this.$store.commit('dropdownElm',null);
 		},
 		reloadAndClose() {
 			ws.send('oauthClient','reload',{},true).then(

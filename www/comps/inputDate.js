@@ -447,7 +447,7 @@ let MyInputDate = {
 		isReadonly:  { type:Boolean, required:false, default:false },
 		unixFrom:    { required:true },
 		unixTo:      { required:false, default:null },
-		useMonth:    { type:Boolean, required:false, default:false },
+		useMonth:    { type:Boolean, required:false, default:false }
 	},
 	emits:['dropdown-show','set-unix-from','set-unix-to'],
 	data() {
@@ -598,6 +598,9 @@ let MyInputDate = {
 			if(this.unixTo !== null)
 				this.$emit('set-unix-to',this.getUnixFromDate(this.getDateFullDayToggled(
 					new Date(this.unixTo*1000),this.fullDay)));
+
+			// trigger app resize, as full day toggle can wrap if date range is used
+			this.$nextTick(() => this.$store.commit('appResized'));
 		},
 		dateSet(unix0,unix1) {
 			this.dateSelect0 = new Date(unix0 * 1000);
