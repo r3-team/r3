@@ -61,6 +61,7 @@ let MyKanbanCard = {
 									:key="ind"
 									:length="columns[ind].length"
 									:monospace="columns[ind].flags.monospace"
+									:noThousandsSep="columns[ind].flags.noThousandsSep"
 									:value="values[ind]"
 									:wrap="columns[ind].flags.wrap"
 								/>
@@ -296,6 +297,7 @@ let MyKanban = {
 										:key="v.columnIndex"
 										:length="columns[v.columnIndex].length"
 										:monospace="columns[v.columnIndex].flags.monospace"
+										:noThousandsSep="columns[v.columnIndex].flags.noThousandsSep"
 										:value="v.value"
 										:wrap="columns[v.columnIndex].flags.wrap"
 									/>
@@ -372,6 +374,7 @@ let MyKanban = {
 										:key="v.columnIndex"
 										:length="columns[v.columnIndex].length"
 										:monospace="columns[v.columnIndex].flags.monospace"
+										:noThousandsSep="columns[v.columnIndex].flags.noThousandsSep"
 										:value="v.value"
 										:wrap="columns[v.columnIndex].flags.wrap"
 									/>

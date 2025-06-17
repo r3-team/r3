@@ -108,6 +108,12 @@ let MyBuilderColumnOptions = {
 								:caption="capApp.columnBoolAtrIcon"
 								:modelValue="column.styles.includes('boolAtrIcon')"
 							/>
+							<my-button-check
+								v-if="isInteger"
+								@update:modelValue="setStyle('noThousandsSep',$event)"
+								:caption="capApp.columnNoThousandsSep"
+								:modelValue="column.styles.includes('noThousandsSep')"
+							/>
 						</div>
 					</td>
 				</tr>

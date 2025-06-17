@@ -114,20 +114,21 @@ const MyValueRich = {
 		</template>
 	</div>`,
 	props:{
-		alignEnd:    { type:Boolean, required:false, default:false },
-		alignMid:    { type:Boolean, required:false, default:false },
-		attributeId: { type:String,  required:true },
-		basis:       { type:Number,  required:false, default:0 },         // size basis (usually column width)
-		bold:        { type:Boolean, required:false, default:false },
-		boolAtrIcon: { type:Boolean, required:false, default:false },     // show attribute icon if boolean is true
-		clipboard:   { type:Boolean, required:false, default:false },     // copy-to-clipboard action
-		display:     { type:String,  required:false, default:'default' }, // variant (url, gallery, password ...)
-		italic:      { type:Boolean, required:false, default:false },
-		length:      { type:Number,  required:false, default:0 },         // max. length if string, max. entries shown if files
-		monospace:   { type:Boolean, required:false, default:false },
-		previewLarge:{ type:Boolean, required:false, default:false },
-		value:       { required:true },
-		wrap:        { type:Boolean, required:false, default:false }      // wrap string value
+		alignEnd:      { type:Boolean, required:false, default:false },
+		alignMid:      { type:Boolean, required:false, default:false },
+		attributeId:   { type:String,  required:true },
+		basis:         { type:Number,  required:false, default:0 },         // size basis (usually column width)
+		bold:          { type:Boolean, required:false, default:false },
+		boolAtrIcon:   { type:Boolean, required:false, default:false },     // show attribute icon if boolean is true
+		clipboard:     { type:Boolean, required:false, default:false },     // copy-to-clipboard action
+		display:       { type:String,  required:false, default:'default' }, // variant (url, gallery, password ...)
+		italic:        { type:Boolean, required:false, default:false },
+		length:        { type:Number,  required:false, default:0 },         // max. length if string, max. entries shown if files
+		monospace:     { type:Boolean, required:false, default:false },
+		noThousandsSep:{ type:Boolean, required:false, default:false },
+		previewLarge:  { type:Boolean, required:false, default:false },
+		value:         { required:true },
+		wrap:          { type:Boolean, required:false, default:false }      // wrap string value
 	},
 	emits:['clipboard','focus','trigger'],
 	watch:{
@@ -266,7 +267,9 @@ const MyValueRich = {
 						break;
 						case 'datetime': this.stringValueFull = this.getUnixFormat(this.value,this.settings.dateFormat + ' H:i'); break;
 						case 'time':     this.stringValueFull = this.getUtcTimeStringFromUnix(this.value);                        break;
-						default:         this.stringValueFull = this.getNumberFormatted(this.value,this.attribute);               break;
+						default:
+							this.stringValueFull = this.noThousandsSep ? this.value : this.getNumberFormatted(this.value,this.attribute);
+						break;
 					}
 					if(this.display === 'rating')
 						this.isRating = true;

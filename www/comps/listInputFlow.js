@@ -26,6 +26,7 @@ const MyListInputFlow = {
 								:key="ci"
 								:length="columns[ci].length"
 								:monospace="columns[ci].flags.monospace"
+								:noThousandsSep="columns[ci].flags.noThousandsSep"
 								:value="r.values[ci]"
 								:wrap="columns[ci].flags.wrap"
 							/>

@@ -842,6 +842,7 @@
 			"columnLength": "Longitud (caracteres)",
 			"columnLength0": "sin límite",
 			"columnLengthFiles": "Recuento de archivos",
+			"columnNoThousandsSep": "No thousands separator",
 			"columnPreviewLarge": "Vista previa grande",
 			"columnShowDefault": "Mostrar por defecto",
 			"columnShowDefaultMobile": "Mostrar por defecto en móvil",

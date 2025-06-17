@@ -31,6 +31,7 @@ const MyListInputRows = {
 									:display="columns[0].display"
 									:length="columns[0].length"
 									:monospace="columns[0].flags.monospace"
+									:noThousandsSep="columns[0].flags.noThousandsSep"
 									:value="r.values[0]"
 									:wrap="columns[0].flags.wrap"
 								/>
@@ -70,6 +71,7 @@ const MyListInputRows = {
 										:key="ci"
 										:length="columns[ci].length"
 										:monospace="columns[ci].flags.monospace"
+										:noThousandsSep="columns[ci].flags.noThousandsSep"
 										:value="r.values[ci]"
 										:wrap="columns[ci].flags.wrap"
 									/>

@@ -44,6 +44,7 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,global
 			clipboard:c.styles.includes('clipboard'),
 			italic:c.styles.includes('italic'),
 			monospace:c.styles.includes('monospace'),
+			noThousandsSep:c.styles.includes('noThousandsSep'),
 			previewLarge:c.styles.includes('previewLarge'),
 			vertical:c.styles.includes('vertical'),
 			wrap:c.styles.includes('wrap')

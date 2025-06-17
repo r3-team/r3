@@ -57,6 +57,7 @@ let MyCalendarMonth = {
 									:key="i"
 									:length="columns[i].length"
 									:monospace="columns[i].flags.monospace"
+									:noThousandsSep="columns[i].flags.noThousandsSep"
 									:value="v"
 								/>
 							</template>
@@ -87,6 +88,7 @@ let MyCalendarMonth = {
 							:key="i"
 							:length="columns[i].length"
 							:monospace="columns[i].flags.monospace"
+							:noThousandsSep="columns[i].flags.noThousandsSep"
 							:wrap="true"
 							:value="v"
 						/>

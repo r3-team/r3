@@ -119,7 +119,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- fix bad upgrade script (column style 'monospace' was wrongly added in '3.8->3.9' script instead of '3.9->3.10' - some 3.10 instances do not have it)
 			ALTER table app.column ALTER COLUMN styles TYPE TEXT[];
 			DROP TYPE app.column_style;
-			CREATE TYPE app.column_style AS ENUM ('bold', 'italic', 'alignEnd', 'alignMid', 'clipboard', 'hide', 'vertical', 'wrap', 'monospace', 'previewLarge', 'boolAtrIcon');
+			CREATE TYPE app.column_style AS ENUM ('alignEnd', 'alignMid', 'bold', 'boolAtrIcon', 'clipboard', 'hide', 'italic', 'monospace', 'noThousandsSep', 'previewLarge', 'vertical', 'wrap');
 			ALTER TABLE app.column ALTER COLUMN styles TYPE app.column_style[] USING styles::TEXT[]::app.column_style[];
 
 			-- PG function cost

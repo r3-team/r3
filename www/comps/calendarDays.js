@@ -38,6 +38,7 @@ let MyCalendarDaysEvent = {
 					:key="ind"
 					:length="columns[ind].length"
 					:monospace="columns[ind].flags.monospace"
+					:noThousandsSep="columns[ind].flags.noThousandsSep"
 					:value="values[ind]"
 					:wrap="columns[ind].flags.wrap"
 				/>

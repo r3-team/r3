@@ -842,6 +842,7 @@
 			"columnLength": "Length (chars.)",
 			"columnLengthFiles": "File count",
 			"columnLength0": "no limit",
+			"columnNoThousandsSep": "No thousands separator",
 			"columnPreviewLarge": "Large preview",
 			"columnShowDefault": "Show by default",
 			"columnShowDefaultMobile": "Show by default on mobile",
