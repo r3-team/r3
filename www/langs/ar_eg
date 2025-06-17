@@ -813,7 +813,6 @@
 				"columnsAll": "جميع الأعمدة",
 				"layoutColumns": "أعمدة {CNT}."
 			},
-			"category": "محدد الفئة",
 			"chart": {
 				"axisType": "نوع المحور",
 				"axisTypeCategory": "فئة",
@@ -891,6 +890,7 @@
 			"fieldDirection": "اتجاه",
 			"fieldFlags": {
 				"hideInputs": "Hide inputs",
+				"relCategory": "Category display",
 				"relFlow": "Progress flow display"
 			},
 			"fieldHelp": "نص المساعدة",

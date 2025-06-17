@@ -813,7 +813,6 @@
 				"columnsAll": "Toutes les colonnes",
 				"layoutColumns": "{CNT} colonnes"
 			},
-			"category": "Sélecteur de catégorie",
 			"chart": {
 				"axisType": "Type d'axe",
 				"axisTypeCategory": "Catégorie",
@@ -891,6 +890,7 @@
 			"fieldDirection": "Direction",
 			"fieldFlags": {
 				"hideInputs": "Hide inputs",
+				"relCategory": "Category display",
 				"relFlow": "Progress flow display"
 			},
 			"fieldHelp": "Texte d'aide",

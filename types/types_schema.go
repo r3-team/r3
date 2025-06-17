@@ -334,7 +334,6 @@ type FieldData struct {
 	State          string             `json:"state"`
 	Flags          []string           `json:"flags"`
 	OnMobile       bool               `json:"onMobile"`
-	Clipboard      bool               `json:"clipboard"`      // enable copy-to-clipboard action
 	AttributeId    uuid.UUID          `json:"attributeId"`    // data attribute
 	AttributeIdAlt pgtype.UUID        `json:"attributeIdAlt"` // altern. data attribute (currently used for date period only)
 	Index          int                `json:"index"`          // data attribute index
@@ -348,6 +347,7 @@ type FieldData struct {
 	Captions       CaptionMap         `json:"captions"`
 
 	// legacy
+	Clipboard       bool        `json:"clipboard"`       // enable copy-to-clipboard action
 	CollectionIdDef pgtype.UUID `json:"collectionIdDef"` // collection to fill default values with
 	ColumnIdDef     pgtype.UUID `json:"columnIdDef"`     // collection column to fill default values with
 }
@@ -359,7 +359,6 @@ type FieldDataRelationship struct {
 	State          string      `json:"state"`
 	Flags          []string    `json:"flags"`
 	OnMobile       bool        `json:"onMobile"`
-	Clipboard      bool        `json:"clipboard"`
 	AttributeId    uuid.UUID   `json:"attributeId"`
 	AttributeIdAlt pgtype.UUID `json:"attributeIdAlt"`
 	AttributeIdNm  pgtype.UUID `json:"attributeIdNm"`
@@ -376,7 +375,6 @@ type FieldDataRelationship struct {
 	RegexCheck    pgtype.Text        `json:"regexCheck"` // not used for relationships
 	JsFunctionId  pgtype.UUID        `json:"jsFunctionId"`
 	Columns       []Column           `json:"columns"`
-	Category      bool               `json:"category"`
 	FilterQuick   bool               `json:"filterQuick"`
 	OutsideIn     bool               `json:"outsideIn"`
 	Query         Query              `json:"query"`
@@ -384,6 +382,8 @@ type FieldDataRelationship struct {
 	Captions      CaptionMap         `json:"captions"`
 
 	// legacy
+	Category        bool        `json:"category"`
+	Clipboard       bool        `json:"clipboard"`
 	CollectionIdDef pgtype.UUID `json:"collectionIdDef"`
 	ColumnIdDef     pgtype.UUID `json:"columnIdDef"`
 }
@@ -457,10 +457,12 @@ type FieldVariable struct {
 	State        string      `json:"state"`
 	Flags        []string    `json:"flags"`
 	OnMobile     bool        `json:"onMobile"`
-	Clipboard    bool        `json:"clipboard"`
 	Columns      []Column    `json:"columns"`
 	Query        Query       `json:"query"`
 	Captions     CaptionMap  `json:"captions"`
+
+	// legacy
+	Clipboard bool `json:"clipboard"`
 }
 type Collection struct {
 	Id       uuid.UUID            `json:"id"`

@@ -96,14 +96,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 	/*
 		ALTER TABLE instance.oauth_client ALTER COLUMN flow
 			TYPE instance.oauth_client_flow USING flow::TEXT::instance.oauth_client_flow;
+
+		ALTER TABLE app.field ALTER COLUMN flags
+			TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
 	*/
 
 	"3.10": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `
 			-- cleanup from last release
-			ALTER TABLE app.field ALTER COLUMN flags
-				TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
-
 			ALTER TABLE app.collection_consumer ALTER COLUMN flags
 				TYPE app.collection_consumer_flag[] USING flags::CHARACTER VARYING(24)[]::app.collection_consumer_flag[];
 
@@ -457,8 +457,22 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- global search filter condition
 			ALTER TYPE app.filter_side_content ADD VALUE 'globalSearch';
 
-			-- field flags
+			-- new, migrated field flags
 			ALTER TYPE app.field_flag ADD VALUE 'relFlow';
+			ALTER TYPE app.field_flag ADD VALUE 'relCategory';
+			ALTER TYPE app.field_flag ADD VALUE 'clipboard';
+
+			UPDATE app.field SET flags = ARRAY_APPEND(flags, 'relCategory') WHERE id IN (
+				SELECT field_id FROM app.field_data_relationship WHERE category
+			);
+			UPDATE app.field SET flags = ARRAY_APPEND(flags, 'clipboard') WHERE id IN (
+				SELECT field_id FROM app.field_data WHERE clipboard
+				UNION
+				SELECT field_id FROM app.field_variable WHERE clipboard
+			);
+			ALTER TABLE app.field_data_relationship ALTER COLUMN category  DROP NOT NULL;
+			ALTER TABLE app.field_data              ALTER COLUMN clipboard DROP NOT NULL;
+			ALTER TABLE app.field_variable          ALTER COLUMN clipboard DROP NOT NULL;
 
 			--
 			-- Open ID Connect authentication

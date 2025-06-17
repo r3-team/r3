@@ -813,7 +813,6 @@
 				"columnsAll": "所有列",
 				"layoutColumns": "{CNT} 列"
 			},
-			"category": "类别选择器",
 			"chart": {
 				"axisType": "轴类型",
 				"axisTypeCategory": "分类",
@@ -891,6 +890,7 @@
 			"fieldDirection": "方向",
 			"fieldFlags": {
 				"hideInputs": "Hide inputs",
+				"relCategory": "Category display",
 				"relFlow": "Progress flow display"
 			},
 			"fieldHelp": "帮助文本",

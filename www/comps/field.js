@@ -541,7 +541,7 @@ let MyField = {
 					:formLoading="formLoading"
 					:hasOpenForm="!isVariable && field.openForm !== null"
 					:header="false"
-					:inputAsCategory="field.category"
+					:inputAsCategory="field.flags.includes('relCategory')"
 					:inputAsFlow="field.flags.includes('relFlow')"
 					:inputAutoSelect="field.autoSelect"
 					:inputIsNew="isNew"
@@ -1127,8 +1127,7 @@ let MyField = {
 		isEncrypted:     (s) => s.isData && s.attribute.encrypted,
 		isNew:           (s) => s.isData && !s.isVariable && s.joinsIndexMap[s.field.index].recordId === 0,
 		isBoolean:       (s) => s.isData && s.isAttributeBoolean(s.contentData),
-		isCategory:      (s) => s.isData && s.isRelationship && s.field.category,
-		isClipboard:     (s) => s.isData && s.field.clipboard && !s.isFiles && !s.isRelationship,
+		isClipboard:     (s) => s.isData && !s.isFiles && !s.isRelationship && s.field.flags.includes('clipboard'),
 		isColor:         (s) => s.isData && s.contentUse === 'color',
 		isDate:          (s) => s.isData && s.contentUse === 'date',
 		isDatetime:      (s) => s.isData && s.contentUse === 'datetime',
@@ -1139,14 +1138,14 @@ let MyField = {
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.contentData),
 		isIframe:        (s) => s.isData && s.contentUse === 'iframe',
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.contentData),
+		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.contentData),
+		isRelationship1N:(s) => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
 		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.contentData),
 		isRichtext:      (s) => s.isData && s.contentUse === 'richtext',
 		isString:        (s) => s.isData && s.isAttributeString(s.contentData),
 		isTextarea:      (s) => s.isData && s.contentUse === 'textarea',
 		isTime:          (s) => s.isData && s.contentUse === 'time',
 		isUuid:          (s) => s.isData && s.isAttributeUuid(s.contentData),
-		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.contentData),
-		isRelationship1N:(s) => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
 
 		// login options
 		collectionIdMapIndexes:(s) => s.$root.getOrFallback(s.loginOptions,'collectionIdMapIndexes',{}),

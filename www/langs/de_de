@@ -813,7 +813,6 @@
 				"columnsAll": "Alle Spalten",
 				"layoutColumns": "{CNT} Spalten"
 			},
-			"category": "Kategorieauswahl",
 			"chart": {
 				"axisType": "Achsentyp",
 				"axisTypeCategory": "Kategorie",
@@ -891,7 +890,8 @@
 			"fieldDirection": "Ausrichtung",
 			"fieldFlags": {
 				"hideInputs": "Eingaben verstecken",
-				"relFlow": "Progress flow display"
+				"relCategory": "Kategorieanzeige",
+				"relFlow": "Fortschrittsanzeige"
 			},
 			"fieldHelp": "Hilfetext",
 			"fieldIcon": "Feld-Icon",

@@ -813,7 +813,6 @@
 				"columnsAll": "Minden Oszlop",
 				"layoutColumns": "{CNT} Oszlop"
 			},
-			"category": "Kategória Kiválasztása",
 			"chart": {
 				"axisType": "Tengely Típusa",
 				"axisTypeCategory": "Kategória",
@@ -891,6 +890,7 @@
 			"fieldDirection": "Irány",
 			"fieldFlags": {
 				"hideInputs": "Hide inputs",
+				"relCategory": "Category display",
 				"relFlow": "Progress flow display"
 			},
 			"fieldHelp": "Súgószöveg",

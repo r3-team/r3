@@ -1014,7 +1014,6 @@ let MyBuilderForm = {
 				state:'default',
 				flags:[],
 				onMobile:true,
-				clipboard:false,
 				attributeId:attribute.id,
 				attributeIdAlt:null, // altern. attribute (used for date period)
 				index:index,
@@ -1042,7 +1041,6 @@ let MyBuilderForm = {
 				field.attributeIdNm = attributeIdNm;
 				field.columns       = [];
 				field.query         = this.getQueryTemplate();
-				field.category      = false;
 				field.filterQuick   = false;
 				field.outsideIn     = outsideIn;
 				field.defPresetIds  = [];
@@ -1139,7 +1137,6 @@ let MyBuilderForm = {
 				state:'default',
 				flags:[],
 				onMobile:true,
-				clipboard:false,
 				captions:{
 					fieldTitle:{},
 					fieldHelp:{}

@@ -813,7 +813,6 @@
 				"columnsAll": "All columns",
 				"layoutColumns": "{CNT} columns"
 			},
-			"category": "Category selector",
 			"chart": {
 				"axisType": "Axis type",
 				"axisTypeCategory": "Category",
@@ -906,6 +905,7 @@
 			"fieldsEditInputs": "Edit inputs",
 			"fieldFlags":{
 				"hideInputs": "Hide inputs",
+				"relCategory": "Category display",
 				"relFlow": "Progress flow display"
 			},
 			"fileExt": "File extension",
