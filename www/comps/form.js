@@ -122,8 +122,8 @@ let MyForm = {
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
 					:entityIdMapEffect="entityIdMapEffect"
 					:formActions="form.actions"
-					:formId="formId"
-					:moduleId="moduleId"
+					:formId
+					:moduleId
 					:noSpace="!layoutElements.includes('formActions')"
 				/>
 				
@@ -229,8 +229,8 @@ let MyForm = {
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
 					:entityIdMapEffect="entityIdMapEffect"
 					:formActions="form.actions"
-					:formId="formId"
-					:moduleId="moduleId"
+					:formId
+					:moduleId
 					:noSpace="!layoutElements.includes('formActions')"
 				/>
 				<div class="form-bar-layout-check" ref="formBarLowerCheck" />
@@ -252,8 +252,8 @@ let MyForm = {
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
 					:entityIdMapEffect="entityIdMapEffect"
 					:formActions="form.actions"
-					:formId="formId"
-					:moduleId="moduleId"
+					:formId
+					:moduleId
 					:noSpace="false"
 				/>
 			</div>
@@ -272,27 +272,27 @@ let MyForm = {
 					@set-touched="fieldSetTouched"
 					@set-valid="fieldSetValid"
 					@set-value="valueSetByField"
-					:isBulkUpdate="isBulkUpdate"
-					:dataFieldMap="fieldIdMapData"
-					:entityIdMapEffect="entityIdMapEffect"
+					:isBulkUpdate
+					:entityIdMapEffect
 					:favoriteId="favoriteId"
 					:field="f"
-					:fieldIdsChanged="fieldIdsChanged"
-					:fieldIdsInvalid="fieldIdsInvalid"
-					:fieldIdsTouched="fieldIdsTouched"
-					:fieldIdMapOverwrite="fieldIdMapOverwrite"
-					:fieldIdMapOptions="fieldIdMapOptions"
-					:fieldIdMapProcessed="fieldIdMapProcessed"
+					:fieldIdsChanged
+					:fieldIdsInvalid
+					:fieldIdsTouched
+					:fieldIdMapOverwrite
+					:fieldIdMapOptions
+					:fieldIdMapProcessed
 					:formBadSave="badSave"
+					:formBlockInputs="blockInputs"
 					:formIsEmbedded="isPopUp || isWidget"
 					:formLoading="loading"
-					:formReadonly="(isNew && !mayCreate) || (!isNew && !mayUpdate) || blockInputs"
+					:formNoDataPerm="(isNew && !mayCreate) || (!isNew && !mayUpdate)"
 					:isAloneInForm="isSingleField"
-					:joinsIndexMap="joinsIndexMap"
+					:joinsIndexMap
 					:key="f.id"
 					:moduleId="moduleId"
 					:values="values"
-					:variableIdMapLocal="variableIdMapLocal"
+					:variableIdMapLocal
 				/>
 			</div>
 		</div>
@@ -301,17 +301,15 @@ let MyForm = {
 		<my-form-log
 			v-if="showLog"
 			@close-log="toggleLog"
-			:dataFieldMap="fieldIdMapData"
-			:entityIdMapEffect="entityIdMapEffect"
-			:form="form"
+			:entityIdMapEffect
+			:fieldIdMapData
 			:formLoading="loading"
-			:isPopUp="isPopUp"
-			:isPopUpFloating="isPopUpFloating"
-			:indexMapRecordKey="indexMapRecordKey"
-			:joinsIndexMap="joinsIndexMap"
-			:moduleId="moduleId"
-			:values="values"
-			:variableIdMapLocal="variableIdMapLocal"
+			:isPopUpFloating
+			:indexMapRecordKey
+			:joinsIndexMap
+			:moduleId
+			:values
+			:variableIdMapLocal
 		/>
 		
 		<!-- form help articles -->

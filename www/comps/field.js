@@ -300,30 +300,30 @@ let MyField = {
 							@set-touched="(...args) => $emit('set-touched',...args)"
 							@set-valid="(...args) => $emit('set-valid',...args)"
 							@set-value="(...args) => $emit('set-value',...args)"
-							:dataFieldMap="dataFieldMap"
-							:entityIdMapEffect="entityIdMapEffect"
-							:favoriteId="favoriteId"
+							:entityIdMapEffect
+							:favoriteId
 							:field="f"
-							:fieldIdsChanged="fieldIdsChanged"
-							:fieldIdsInvalid="fieldIdsInvalid"
-							:fieldIdsTouched="fieldIdsTouched"
-							:fieldIdMapOverwrite="fieldIdMapOverwrite"
-							:fieldIdMapOptions="fieldIdMapOptions"
-							:fieldIdMapProcessed="fieldIdMapProcessed"
-							:formBadSave="formBadSave"
-							:formIsEmbedded="formIsEmbedded"
-							:formLoading="formLoading"
-							:formReadonly="formReadonly"
+							:fieldIdsChanged
+							:fieldIdsInvalid
+							:fieldIdsTouched
+							:fieldIdMapOverwrite
+							:fieldIdMapOptions
+							:fieldIdMapProcessed
+							:formBadSave
+							:formBlockInputs
+							:formIsEmbedded
+							:formLoading
+							:formNoDataPerm
 							:isAloneInTab="t.fields.length === 1"
 							:isAloneInForm="false"
-							:isBulkUpdate="isBulkUpdate"
-							:joinsIndexMap="joinsIndexMap"
+							:isBulkUpdate
+							:joinsIndexMap
 							:key="f.id"
-							:moduleId="moduleId"
+							:moduleId
 							:parentIsCounting="t.contentCounter && !tabIndexesHidden.includes(i)"
 							:parentIsHidden="isHidden || i !== tabIndexShow"
 							:values="values"
-							:variableIdMapLocal="variableIdMapLocal"
+							:variableIdMapLocal
 						/>
 					</div>
 				</div>
@@ -622,34 +622,33 @@ let MyField = {
 			@set-touched="(...args) => $emit('set-touched',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
 			@set-value="(...args) => $emit('set-value',...args)"
-			:isBulkUpdate="isBulkUpdate"
-			:dataFieldMap="dataFieldMap"
+			:isBulkUpdate
 			:entityIdMapEffect="entityIdMapEffect"
-			:favoriteId="favoriteId"
+			:favoriteId
 			:field="f"
-			:fieldIdsChanged="fieldIdsChanged"
-			:fieldIdsInvalid="fieldIdsInvalid"
-			:fieldIdsTouched="fieldIdsTouched"
-			:fieldIdMapOverwrite="fieldIdMapOverwrite"
-			:fieldIdMapOptions="fieldIdMapOptions"
-			:fieldIdMapProcessed="fieldIdMapProcessed"
-			:formBadSave="formBadSave"
-			:formIsEmbedded="formIsEmbedded"
-			:formLoading="formLoading"
-			:formReadonly="formReadonly"
+			:fieldIdsChanged
+			:fieldIdsInvalid
+			:fieldIdsTouched
+			:fieldIdMapOverwrite
+			:fieldIdMapOptions
+			:fieldIdMapProcessed
+			:formBadSave
+			:formBlockInputs
+			:formIsEmbedded
+			:formLoading
+			:formNoDataPerm
 			:flexDirParent="field.direction"
-			:isAloneInForm="isAloneInForm"
-			:joinsIndexMap="joinsIndexMap"
+			:isAloneInForm
+			:joinsIndexMap
 			:key="f.id"
-			:moduleId="moduleId"
-			:parentIsCounting="parentIsCounting"
+			:moduleId
+			:parentIsCounting
 			:parentIsHidden="isHidden"
-			:values="values"
-			:variableIdMapLocal="variableIdMapLocal"
+			:values
+			:variableIdMapLocal
 		/>
 	</div>`,
 	props:{
-		dataFieldMap:       { type:Object,  required:true },
 		entityIdMapEffect:  { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		favoriteId:         { required:false, default:null },
 		field:              { type:Object,  required:true },
@@ -660,9 +659,10 @@ let MyField = {
 		fieldIdMapOptions:  { type:Object,  required:true },                 // field options
 		fieldIdMapProcessed:{ type:Object,  required:true },                 // processed data (choices, columns, filters)
 		formBadSave:        { type:Boolean, required:true },                 // attempted save with invalid inputs
+		formBlockInputs:    { type:Boolean, required:true },
 		formIsEmbedded:     { type:Boolean, required:true },                 // parent form is embedded (pop-up, inline, widget)
 		formLoading:        { type:Boolean, required:true },
-		formReadonly:       { type:Boolean, required:true },                 // form is read only
+		formNoDataPerm:     { type:Boolean, required:true },                 // no permissions to edit record on data form
 		flexDirParent:      { type:String,  required:true },                 // flex direction (row/column) of parent
 		isAloneInForm:      { type:Boolean, required:true },                 // parent form contains only this field
 		isAloneInTab:       { type:Boolean, required:false, default:false }, // parent tab only contains this field
@@ -867,8 +867,8 @@ let MyField = {
 			// field state has a default value, which can be overwritten by form states
 			// hidden:   field is not shown
 			// default:  field is shown, data field state is overwritten depending on circumstance
-			// optional: data field only, input is optional
-			// required: data field only, input is required
+			// optional: data or variable field, input is optional
+			// required: data or variable field, input is required
 			// readonly: data, button or variable field, input is readonly
 			let state = s.field.state;
 			
@@ -888,15 +888,13 @@ let MyField = {
 				) state = 'required';
 			}
 
-			if(state !== 'hidden') {
-				// overwrite in log viewer context, only hidden or readonly allowed
-				if(s.logViewer)
-					state = 'readonly';
+			// overwrites for 'visible' states
+			if(state !== 'hidden' && (
+				s.logViewer ||
+				(s.formNoDataPerm && s.isData && !s.isVariable) ||
+				(s.formBlockInputs && (s.isData || s.isButton || s.isVariable))
+			)) state = 'readonly';
 
-				// overwrite visible data/button/variable field to readonly if form is readonly
-				if(s.formReadonly && (s.isData || s.isButton || s.isVariable))
-					state = 'readonly';
-			}
 			return state;
 		},
 		tabIndexesHidden:(s) => {

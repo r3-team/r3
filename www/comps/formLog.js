@@ -63,23 +63,23 @@ let MyFormLog = {
 						<!-- regular attribute logs -->
 						<my-field flexDirParent="column"
 							v-if="!isFiles(ia)"
-							:dataFieldMap="dataFieldMap"
-							:entityIdMapEffect="entityIdMapEffect"
+							:entityIdMapEffect
 							:field="indexAttributeIdMapField[ia]"
-							:fieldIdMapOverwrite="fieldIdMapOverwrite"
-							:fieldIdMapOptions="fieldIdMapOptions"
-							:fieldIdMapProcessed="fieldIdMapProcessed"
+							:fieldIdMapOverwrite
+							:fieldIdMapOptions
+							:fieldIdMapProcessed
 							:formBadSave="false"
+							:formBlockInputs="false"
 							:formIsEmbedded="true"
 							:formLoading="loading"
-							:formReadonly="false"
+							:formNoDataPerm="false"
 							:logViewer="true"
 							:isAloneInForm="false"
-							:joinsIndexMap="joinsIndexMap"
+							:joinsIndexMap
 							:key="indexAttributeIdMapField[ia].id"
 							:moduleId="moduleId"
 							:values="{ ...values, ...l.values }"
-							:variableIdMapLocal="variableIdMapLocal"
+							:variableIdMapLocal
 						/>
 						
 						<!-- file attribute logs -->
@@ -128,11 +128,9 @@ let MyFormLog = {
 		</div>
 	</div>`,
 	props:{
-		dataFieldMap:      { type:Object,  required:true },
 		entityIdMapEffect: { type:Object,  required:true },
-		form:              { type:Object,  required:true },
+		fieldIdMapData:    { type:Object,  required:true },
 		formLoading:       { type:Boolean, required:true },
-		isPopUp:           { type:Boolean, required:true },
 		isPopUpFloating:   { type:Boolean, required:true },
 		indexMapRecordKey: { type:Object,  required:true },
 		joinsIndexMap:     { type:Object,  required:true },
@@ -148,29 +146,19 @@ let MyFormLog = {
 	},
 	data() {
 		return {
-			fieldIdMapOverwrite:{},
-			fieldIdMapOptions:{},
 			fieldIdMapProcessed:{},
+			fieldIdMapOptions:{},
+			fieldIdMapOverwrite:{},
 			loading:false,
 			logs:[],
 			logsShown:[]
 		};
 	},
 	computed:{
-		attributeIdsFiles:(s) => {
-			let out = [];
-			for(let k in s.dataFieldMap) {
-				let atr = s.attributeIdMap[s.dataFieldMap[k].attributeId];
-				
-				if(s.isAttributeFiles(atr.content))
-					out.push(atr.id);
-			}
-			return out;
-		},
 		indexAttributeIdMapField:(s) => {
 			let out = {};
-			for(let k in s.dataFieldMap) {
-				let f   = s.dataFieldMap[k];
+			for(let k in s.fieldIdMapData) {
+				let f   = s.fieldIdMapData[k];
 				let ia1 = s.getIndexAttributeIdByField(f,false);
 				let ia2 = s.getIndexAttributeIdByField(f,true);
 				
