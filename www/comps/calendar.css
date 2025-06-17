@@ -90,6 +90,10 @@
 	background-color:var(--color-bg);
 	border-bottom:1px solid var(--color-border);
 }
+.calendar-days .header.today{
+	font-weight:bold;
+	text-decoration:underline;
+}
 .calendar-days .events-full{
 	flex:0 0 auto;
 	position:relative;
@@ -210,12 +214,8 @@
 }
 .calendar-month .day.today h1{
 	color:var(--color-font);
-}
-.calendar-month .day.today h1::before{
-	content:"[";
-}
-.calendar-month .day.today h1::after{
-	content:"]";
+	font-weight:bold;
+	text-decoration:underline;
 }
 
 /* full day event */

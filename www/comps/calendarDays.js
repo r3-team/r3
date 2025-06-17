@@ -7,6 +7,7 @@ import {
 import {
 	getDateFormatNoYear,
 	getDaysBetween,
+	getUnixNowDate,
 	isUnixUtcZero
 } from './shared/time.js';
 export {MyCalendarDays as default};
@@ -67,7 +68,7 @@ let MyCalendarDays = {
 				>{{ capApp.fullDay }}</span>
 			</div>
 			<div v-for="d in events.fullDays" class="day" :class="{ weekend:d.weekend }">
-				<div class="header" v-html="d.caption"></div>
+				<div class="header" v-html="d.caption" :class="{ today:d.today }"></div>
 				<div class="events-full" :style="events.fullDaysHeight">
 					
 					<!-- date input (days) -->
@@ -175,6 +176,7 @@ let MyCalendarDays = {
 				events.fullDays.push({
 					caption:`${s.capApp[dayLabel+d.getDay()]},${dayLabelBr + s.getDateFormatNoYear(d,s.settings.dateFormat)}`,
 					eventIndexes:[],
+					today:s.getUnixNowDate() === unix0CalDay + (i * 86400),
 					unix:unix0CalDay + (i * 86400),
 					weekend:[0,6].includes(d.getDay())
 				});
@@ -379,6 +381,7 @@ let MyCalendarDays = {
 		getDateFormatNoYear,
 		getDaysBetween,
 		getStringFilled,
+		getUnixNowDate,
 		isUnixUtcZero,
 		
 		// actions
