@@ -56,8 +56,8 @@ let MyApp = {
 			<my-header
 				v-show="!loginSessionExpired"
 				v-if="!isWithoutMenuHeader"
-				@logout="sessionInvalid(false)"
-				@logoutExpire="sessionInvalid(true)"
+				@logout="sessionInvalid(false,true)"
+				@logoutExpire="sessionInvalid(true,false)"
 				@show-collection-input="collectionEntries = $event"
 				@show-module-hover-menu="showHoverNav = true"
 				@show-settings="showSettings = !showSettings"
@@ -98,7 +98,7 @@ let MyApp = {
 			>
 				<my-settings
 					@close="showSettings = false"
-					@logout="showSettings = false;sessionInvalid(false)"
+					@logout="showSettings = false;sessionInvalid(false,true)"
 				/>
 			</div>
 			
@@ -598,34 +598,35 @@ let MyApp = {
 			const now = Math.floor(new Date().getTime() / 1000);
 
 			if(this.loginSessionExpires < now)
-				return this.sessionInvalid(true);
+				return this.sessionInvalid(true,false);
 
 			if(this.loginSessionExpires - 1800 < now)
 				this.logoutInSec = this.loginSessionExpires - now;
 			else
 				this.logoutInSec = 0;
 		},
-		sessionInvalid(sessionExpired) {
+		sessionInvalid(sessionExpired,returnToHome) {
 			this.$store.commit('local/loginCachesClear');
 			this.$store.commit('local/loginKeyAes',null);
 			this.$store.commit('local/loginKeySalt',null);
 			this.$store.commit('local/loginNoCred',false);
+			this.$store.commit('local/token','');
 			this.$store.commit('loginPrivateKey',null);
 			this.$store.commit('loginPrivateKeyEnc',null);
 			this.$store.commit('loginPrivateKeyEncBackup',null);
 			this.$store.commit('loginPublicKey',null);
 			this.$store.commit('loginSessionExpires',null);
-			this.$store.commit('pageTitle','Login');
 			
 			if(sessionExpired) {
 				this.$store.commit('loginSessionExpired',true);
 			} else {
-				// proper logout, reset websocket connection, clear tokens, reset frontend
-				this.$store.commit('local/token','');
+				// logout: reset websocket connection, clear token keep setting, reset frontend
 				this.$store.commit('local/tokenKeep',false);
 				this.wsReconnect(true);
 				this.appReady = false;
 			}
+			if(returnToHome)
+				this.$router.push('/');
 		},
 		
 		// public info retrieval

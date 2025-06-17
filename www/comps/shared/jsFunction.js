@@ -33,7 +33,7 @@ const exposedFunctionsGlobal = {
 	get_role_ids:     ()  => MyStore.getters.access.roleIds,
 	go_back:          ()  => window.history.back(),
 	has_role:         (v) => MyStore.getters.access.roleIds.includes(v),
-	logoff:           ()  => MyStore.getters.appFunctions.sessionInvalid(false),
+	logoff:           ()  => MyStore.getters.appFunctions.sessionInvalid(false,true),
 
 	// collection functions
 	collection_read:getCollectionMultiValues,
