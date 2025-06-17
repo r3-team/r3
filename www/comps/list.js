@@ -590,6 +590,7 @@ const MyList = {
 				<my-form class="inline list-inline-form"
 					v-if="popUpFormInline !== null"
 					@close="$emit('close-inline')"
+					@refresh-parent="get"
 					@record-deleted="get"
 					@record-updated="get"
 					@records-open="popUpFormInline.recordIds = $event"

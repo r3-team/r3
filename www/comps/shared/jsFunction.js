@@ -72,7 +72,7 @@ const exposedFunctionsGlobal = {
 	// PDF functions
 	pdf_create:(filename,format,orientation,marginX,marginY,header,body,footer,css,attributeId,recordId) => {
 		return new Promise((resolve,reject) => {
-			const uploadFile = typeof attributeId !== 'undefined' && typeof recordId !== 'undefined';
+			const uploadFile = attributeId !== undefined && recordId !== undefined;
 			const callbackResult = (blob) => {
 				if(!uploadFile)
 					return resolve();
@@ -117,7 +117,7 @@ const exposedFunctionsGlobal = {
 
 			let btns = [];
 			for(let i = 0, j = buttons.length; i < j; i++) {
-				if(typeof buttons[i] == 'string')
+				if(typeof buttons[i] === 'string')
 					btns.push({
 						caption:buttons[i],
 						exec:() => resolve(i)
@@ -145,6 +145,7 @@ const exposedFunctionsGlobal = {
 	// not available as default
 	block_inputs:                     errFnc,
 	form_close:                       errFnc,
+	form_parent_refresh:              errFnc,
 	form_set_title:                   errFnc,
 	form_show_message:                errFnc,
 	get_field_file_links:             errFnc,
@@ -177,7 +178,7 @@ const exposedFunctionsGlobal = {
 
 export function jsFunctionRun(jsFunctionId,args,exposedFunctionsContext) {
 	const fnc = MyStore.getters['schema/jsFunctionIdMap'][jsFunctionId];
-	if(fnc === 'undefined')
+	if(fnc === undefined)
 		return console.warn(`Failed to start frontend function '${jsFunctionId}', function not known.`);
 	
 	// first argument is exposed application functions object 'app'

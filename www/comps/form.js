@@ -80,8 +80,9 @@ let MyForm = {
 		>
 			<my-form ref="popUpForm"
 				@close="closePopUp"
-				@record-deleted="popUpRecordChanged('deleted',$event)"
-				@record-updated="popUpRecordChanged('updated',$event)"
+				@refresh-parent="popUpFormUpdate('nothing',null)"
+				@record-deleted="popUpFormUpdate('deleted',$event)"
+				@record-updated="popUpFormUpdate('updated',$event)"
 				@records-open="popUp.recordIds = $event"
 				:attributeIdMapDef="popUp.attributeIdMapDef"
 				:formId="popUp.formId"
@@ -336,7 +337,7 @@ let MyForm = {
 		showButtonDel:    { type:Boolean, required:false, default:true },
 		showButtonNew:    { type:Boolean, required:false, default:true }
 	},
-	emits:['close','record-deleted','record-updated','records-open'],
+	emits:['close','record-deleted','record-updated','records-open','refresh-parent'],
 	mounted() {
 		this.$watch('appResized',() => this.resized());
 		this.$watch(() => [this.favoriteId,this.formId,this.recordIds],this.reset,{
@@ -590,6 +591,7 @@ let MyForm = {
 					},[],newTab,null,replace);
 					s.recordActionFree = false;
 				},
+				form_parent_refresh:() => s.$emit('refresh-parent'),
 				form_set_title:(v) => s.titleOverwrite = v,
 				form_show_message:s.messageSet,
 				
@@ -1268,7 +1270,7 @@ let MyForm = {
 			this.blockInputs = true;
 			window.history.back();
 		},
-		popUpRecordChanged(change,recordId) {
+		popUpFormUpdate(change,recordId) {
 			const isDeleted = change === 'deleted';
 			const isUpdated = change === 'updated';
 
@@ -1310,12 +1312,10 @@ let MyForm = {
 				}
 			}
 
-			// reload form to update fields (incl. non-data field like lists)
+			// reload form to update fields (incl. non-data field like lists), as well as its parent
 			this.loading = true;
 			this.releaseLoadingOnNextTick();
-
-			// inform parent form about sub form record change as well
-			this.$emit(isUpdated ? 'record-updated' : 'record-deleted', null);
+			this.$emit('refresh-parent');
 		},
 		scrollToInvalidField() {
 			const el = this.$refs.fields.querySelector(`[data-field-is-valid="0"]`);
