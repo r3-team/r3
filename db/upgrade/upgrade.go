@@ -548,6 +548,65 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX IF NOT EXISTS fki_login_role_assign_ldap_id_fkey ON instance.ldap_role USING btree (ldap_id ASC NULLS LAST);
 
 			ALTER TABLE instance.ldap_role RENAME TO login_role_assign;
+
+			-- fix mismatch in record ID integer type in some instance functions
+			DROP FUNCTION instance.clean_up_e2ee_keys;
+			CREATE OR REPLACE FUNCTION instance.clean_up_e2ee_keys(
+				login_id INTEGER,
+				relation_id UUID,
+				record_ids_access BIGINT[])
+				RETURNS void
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+			DECLARE
+			BEGIN
+				EXECUTE '
+					DELETE FROM instance_e2ee."keys_' || relation_id || '"
+					WHERE login_id = $1
+					AND (
+						ARRAY_LENGTH($2,1) IS NULL -- empty array
+						OR record_id <> ALL($3)
+					)
+				' USING login_id, record_ids_access, record_ids_access;
+			END;
+			$BODY$;
+
+			DROP FUNCTION instance.mail_send;
+			CREATE OR REPLACE FUNCTION instance.mail_send(
+				subject TEXT,
+				body TEXT,
+				to_list TEXT DEFAULT ''::TEXT,
+				cc_list TEXT DEFAULT ''::TEXT,
+				bcc_list TEXT DEFAULT ''::TEXT,
+				account_name TEXT DEFAULT NULL::TEXT,
+				attach_record_id BIGINT DEFAULT NULL::BIGINT,
+				attach_attribute_id UUID DEFAULT NULL::UUID)
+				RETURNS INTEGER
+				LANGUAGE 'plpgsql'
+				COST 100
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+				account_id INTEGER;
+			BEGIN
+				IF account_name IS NOT NULL THEN
+					SELECT id INTO account_id
+					FROM instance.mail_account
+					WHERE name = account_name;
+				END IF;
+				
+				IF to_list  IS NULL THEN to_list  := ''; END IF; 
+				IF cc_list  IS NULL THEN cc_list  := ''; END IF; 
+				IF bcc_list IS NULL THEN bcc_list := ''; END IF;
+				
+				INSERT INTO instance.mail_spool (to_list,cc_list,bcc_list,
+					subject,body,outgoing,date,mail_account_id,record_id_wofk,attribute_id)
+				VALUES (to_list,cc_list,bcc_list,subject,body,TRUE,EXTRACT(epoch from now()),
+					account_id,attach_record_id,attach_attribute_id);
+
+				RETURN 0;
+			END;
+			$BODY$;
 		`)
 		return "3.11", err
 	},
