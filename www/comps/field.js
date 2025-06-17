@@ -381,6 +381,7 @@ let MyField = {
 					:nakedIcons="true"
 					:options="regconfigOptions"
 					:placeholder="capGen.threeDots"
+					:readonly="isReadonly"
 					:selected="value"
 				/>
 				
