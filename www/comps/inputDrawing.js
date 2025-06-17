@@ -5,7 +5,7 @@ const MyInputDraw = {
 	name:'my-input-draw',
 	components:{ MyInputColorWrap },
 	template:`<div class="input-draw">
-		<div class="actions">
+		<div class="input-draw-toolbar">
 			<div class="row gap centered">
 				<slot name="input-icon" />
 				<my-button image="drawing.png"

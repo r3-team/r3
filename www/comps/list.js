@@ -517,10 +517,10 @@ const MyList = {
 								
 								<!-- no results message -->
 								<template v-if="!hasResults">
-									<div class="card no-results" v-if="!rowsFetching">
+									<div class="list-cards-entry no-results" v-if="!rowsFetching">
 										{{ capGen.resultsNone }}
 									</div>
-									<div class="card no-results fetching" v-if="rowsFetching">
+									<div class="list-cards-entry no-results fetching" v-if="rowsFetching">
 										<img src="images/load.gif">
 										<span>{{ capApp.fetching }}</span>
 									</div>

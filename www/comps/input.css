@@ -558,14 +558,17 @@
 	display:flex;
 	flex-flow:column nowrap;
 }
-.input-draw>.actions{
-	display:flex;
-	flex-flow:row wrap;
-	justify-content:space-between;
-	padding:8px;
+.input-draw-toolbar{
+	min-height:var(--field-header-height);
+	padding:var(--spacing-field-header-padding);
+	box-sizing:border-box;
 	background-color:var(--color-bg);
 	border-bottom:1px solid var(--color-border);
 	border-radius:5px 5px 0px 0px;
+	display:flex;
+	flex-flow:row wrap;
+	justify-content:space-between;
+	align-items:center;
 	gap:12px;
 }
 .input-draw .canvasWrap{
@@ -593,6 +596,9 @@
 }
 .input-richtext-toolbar{
 	flex:0 0 auto;
+	min-height:var(--field-header-height);
+	padding:var(--spacing-field-header-padding);
+	box-sizing:border-box;
 	border-bottom:1px solid var(--color-border);
 	background-color:var(--color-bg);
 	padding:0px calc(var(--spacing) / 2);

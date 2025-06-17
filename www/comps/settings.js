@@ -458,8 +458,8 @@ let MySettingsAccount = {
 				<td><input disabled="disabled" :value="loginName" /></td>
 			</tr>
 			<template v-if="isAllowedPwChange">
-				<tr><td colspan="2"></td></tr>
-				<tr><td colspan="2"><h2>{{ capApp.titlePwChange }}</h2></td></tr>
+				<tr><td colspan="2"><hr /></td></tr>
+				<tr><td colspan="2"><b>{{ capApp.titlePwChange }}</b></td></tr>
 				<tr>
 					<td>{{ capApp.pwOld }}</td>
 					<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
@@ -1240,7 +1240,7 @@ let MySettings = {
 		<div class="content" :style="patternStyle" v-if="settingsLoaded">
 		
 			<!-- general -->
-			<div class="contentPart short">
+			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/settings.png" />
 					<h1>{{ capApp.titleGeneral }}</h1>
@@ -1275,9 +1275,8 @@ let MySettings = {
 								</select>
 							</td>
 						</tr>
-						<tr>
-							<td colspan="2"><b>{{ capApp.titleSubNumbers }}</b></td>
-						</tr>
+						<tr><td colspan="2"><hr /></td></tr>
+						<tr><td colspan="2"><b>{{ capApp.titleSubNumbers }}</b></td></tr>
 						<tr class="default-inputs">
 							<td>{{ capApp.numberSepThousand }}</td>
 							<td>
@@ -1300,9 +1299,8 @@ let MySettings = {
 								</select>
 							</td>
 						</tr>
-						<tr>
-							<td colspan="2"><b>{{ capApp.titleSubMisc }}</b></td>
-						</tr>
+						<tr><td colspan="2"><hr /></td></tr>
+						<tr><td colspan="2"><b>{{ capApp.titleSubMisc }}</b></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.sundayFirstDow"   :caption="capApp.sundayFirstDow"   /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.tabRemember"      :caption="capApp.tabRemember"      /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.warnUnsaved"      :caption="capApp.warnUnsaved"      /></td></tr>
@@ -1313,7 +1311,7 @@ let MySettings = {
 			</div>
 			
 			<!-- theme -->
-			<div class="contentPart short">
+			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/visible1.png" />
 					<h1>{{ capApp.titleTheme }}</h1>
@@ -1321,7 +1319,7 @@ let MySettings = {
 				<table>
 					<tbody>
 						<tr>
-							<td>{{ capGen.inputs }}</td>
+							<td class="maximum">{{ capGen.inputs }}</td>
 							<td>
 								<div class="row gap">
 									<my-button-check v-model="settingsInput.shadowsInputs"  :caption="capGen.shadows" />
@@ -1402,9 +1400,8 @@ let MySettings = {
 							<td>{{ capApp.dark }}</td>
 							<td><div class="row"><my-bool v-model="settingsInput.dark" :grow="false" /></div></td>
 						</tr>
-						<tr>
-							<td colspan="2"><b>{{ capApp.titleSubHeader }}</b></td>
-						</tr>
+						<tr><td colspan="2"><hr /></td></tr>
+						<tr><td colspan="2"><b>{{ capApp.titleSubHeader }}</b></td></tr>
 						<tr>
 							<td>{{ capGen.applications }}</td>
 							<td>
@@ -1438,9 +1435,8 @@ let MySettings = {
 							<td>{{ capApp.colorHeaderSingle }}</td>
 							<td><div class="row"><my-bool v-model="settingsInput.colorHeaderSingle" :grow="false" :reversed="true" /></div></td>
 						</tr>
-						<tr>
-							<td colspan="2"><b>{{ capApp.titleSubMenu }}</b></td>
-						</tr>
+						<tr><td colspan="2"><hr /></td></tr>
+						<tr><td colspan="2"><b>{{ capApp.titleSubMenu }}</b></td></tr>
 						<tr class="default-inputs">
 							<td>{{ capApp.colorMenu }}</td>
 							<td><my-input-color-wrap v-model="settingsInput.colorMenu" :allowNull="true" /></td>
@@ -1450,7 +1446,7 @@ let MySettings = {
 			</div>
 			
 			<!-- account -->
-			<div class="contentPart short">
+			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/lock.png" />
 					<h1>{{ capApp.titleAccount }}</h1>
@@ -1459,7 +1455,7 @@ let MySettings = {
 			</div>
 			
 			<!-- fixed tokens (device access) -->
-			<div class="contentPart short">
+			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/screen.png" />
 					<h1>{{ capApp.titleFixedTokens }}</h1>
@@ -1468,7 +1464,7 @@ let MySettings = {
 			</div>
 			
 			<!-- client events (global hotkeys) -->
-			<div class="contentPart short">
+			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/screen.png" />
 					<h1>{{ capApp.titleClientEvents }}</h1>
@@ -1477,7 +1473,7 @@ let MySettings = {
 			</div>
 			
 			<!-- encryption -->
-			<div class="contentPart short">
+			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/key.png" />
 					<h1>{{ capApp.titleEncryption }}</h1>

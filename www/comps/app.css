@@ -51,13 +51,15 @@
 	--spacing:16px;
 	--spacing-child:0px var(--spacing) var(--spacing) 0px;
 	--spacing-field-padding:8px;
+	--spacing-field-header-padding:3px 8px;
 	--spacing-parent:var(--spacing) 0px 0px var(--spacing);
 	
 	/**/
 	/* heights */
 	--row-height:38px;
 	--row-height-icon:27px;
-	--app-header-height:70px;
+	--app-header-height:65px;
+	--field-header-height:46px;
 	--menu-line-height:36px;
 
 	/**/
