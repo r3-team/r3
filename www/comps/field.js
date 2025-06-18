@@ -531,8 +531,8 @@ let MyField = {
 					v-if="isRelationship"
 					@dropdown-show="dropdownSet"
 					@open-form="(...args) => openForm(args[0],[],args[1],null)"
-					@records-selected="relationshipRecordsSelected"
 					@record-removed="relationshipRecordRemoved"
+					@records-selected="relationshipRecordsSelected"
 					@records-selected-init="$emit('set-value',fieldAttributeId,$event,true,true,field.id)"
 					@set-login-option="setLoginOption"
 					:choices="choicesProcessed"
@@ -1335,7 +1335,7 @@ let MyField = {
 			if(!this.field.tabs[tabIndex].contentCounter)
 				return;
 			
-			if(typeof this.tabIndexFieldIdMapCounter[String(tabIndex)] === 'undefined')
+			if(this.tabIndexFieldIdMapCounter[String(tabIndex)] === undefined)
 				this.tabIndexFieldIdMapCounter[String(tabIndex)] = {};
 			
 			this.tabIndexFieldIdMapCounter[String(tabIndex)][fieldId] = value;

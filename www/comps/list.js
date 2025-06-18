@@ -893,18 +893,6 @@ const MyList = {
 				}
 			}
 		});
-		if(this.isInput && !this.showAllValues) {
-			this.$watch('inputRecordIds',(val) => {
-				// update input if record IDs are different (different count or IDs)
-				if(val.length !== this.rowsInput.length)
-					return this.reloadOutside();
-				
-				for(let i = 0, j = this.rowsInput.length; i < j; i++) {
-					if(!val.includes(this.rowsInput[i].indexRecordIds[0]))
-						return this.reloadOutside();
-				}
-			});
-		}
 		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
 				if(this.routeChangeFieldReload(newVals,oldVals))
@@ -918,15 +906,9 @@ const MyList = {
 		this.setAutoRenewTimer(this.autoRenew);
 		this.removeInvalidFilters();
 		this.removeInvalidOrders();
-
-		// setup handlers
-		//window.addEventListener('keydown',this.handleHotkeys);
 	},
 	beforeUnmount() {
 		this.clearAutoRenewTimer();
-	},
-	unmounted() {
-		//window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
 		// externals
@@ -1475,13 +1457,13 @@ const MyList = {
 					// remove invalid records (due to field filters)
 					let recordIdsValid = [];
 					let recordsRemoved = 0;
-					for(let i = 0, j = res.payload.rows.length; i < j; i++) {
-						recordIdsValid.push(res.payload.rows[i].indexRecordIds['0']);
+					for(const row of res.payload.rows) {
+						recordIdsValid.push(row.indexRecordIds['0']);
 					}
 					
-					for(let i = 0, j = this.inputRecordIds.length; i < j; i++) {
-						if(!recordIdsValid.includes(this.inputRecordIds[i])) {
-							this.$emit('record-removed',this.inputRecordIds[i]);
+					for(const recordId of this.inputRecordIds) {
+						if(!recordIdsValid.includes(recordId)) {
+							this.$emit('record-removed',recordId);
 							recordsRemoved++;
 						}
 					}
