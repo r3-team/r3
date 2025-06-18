@@ -893,6 +893,19 @@ const MyList = {
 				}
 			}
 		});
+		if(this.isInput && !this.showAllValues) {
+			this.$watch('inputRecordIds',(val) => {
+				// update input if record IDs are different (different count or IDs)
+				// input rows are usually taken from selection, but record IDs can also be set by functions, requiring reload of these record rows
+				if(val.length !== this.rowsInput.length)
+					return this.reloadOutside();
+				
+				for(let i = 0, j = this.rowsInput.length; i < j; i++) {
+					if(!val.includes(this.rowsInput[i].indexRecordIds[0]))
+						return this.reloadOutside();
+				}
+			});
+		}
 		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
 				if(this.routeChangeFieldReload(newVals,oldVals))
