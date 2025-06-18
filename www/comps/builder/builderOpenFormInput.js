@@ -1,13 +1,14 @@
 import {isAttributeRelationship} from '../shared/attribute.js';
 import {
-	getDependentModules,
 	getDependentRelations,
 	getItemTitleRelation
 } from '../shared/builder.js';
+import MyBuilderSelectForm from './builderSelectForm.js';
 export {MyBuilderOpenFormInput as default};
 
-let MyBuilderOpenFormInput = {
+const MyBuilderOpenFormInput = {
 	name:'my-builder-open-form-input',
+	components:{ MyBuilderSelectForm },
 	template:`<table>
 		<tbody>
 			<tr v-if="!allowAllForms">
@@ -29,26 +30,14 @@ let MyBuilderOpenFormInput = {
 			<tr v-if="allowAllForms || (isActive && openForm.relationIndexOpen !== -1)">
 				<td>{{ capApp.formIdOpen }}</td>
 				<td>
-					<select
-						@input="set('formIdOpen',$event.target.value)"
-						:disabled="readonly"
-						:value="isActive ? openForm.formIdOpen : null"
-					>
-						<option value="">-</option>
-						<option
-							v-for="f in module.forms.filter(v => allowAllForms || v.query.relationId === relationIdSource)" 
-							:value="f.id"
-						>{{ f.name }}</option>
-						<optgroup
-							v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.forms.length !== 0)"
-							:label="mod.name"
-						>
-							<option
-								v-for="f in mod.forms.filter(v => allowAllForms || v.query.relationId === relationIdSource)" 
-								:value="f.id"
-							>{{ f.name }}</option>
-						</optgroup>
-					</select>
+					<my-builder-select-form
+						@update:modelValue="set('formIdOpen',$event)"
+						:allowAllForms
+						:modelValue="isActive ? openForm.formIdOpen : null"
+						:module
+						:readonly
+						:relationIdFilter="relationIdSource"
+					/>
 				</td>
 			</tr>
 			
@@ -243,14 +232,13 @@ let MyBuilderOpenFormInput = {
 	},
 	methods:{
 		// externals
-		getDependentModules,
 		getDependentRelations,
 		getItemTitleRelation,
 		isAttributeRelationship,
 		
 		set(name,val) {
 			// clear if no form is opened
-			if(name === 'formIdOpen' && val === '')
+			if(name === 'formIdOpen' && val === null)
 				return this.$emit('update:openForm',null);
 			
 			let v = JSON.parse(JSON.stringify(this.openForm));

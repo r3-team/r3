@@ -474,6 +474,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE app.field_data              DROP COLUMN clipboard;
 			ALTER TABLE app.field_variable          DROP COLUMN clipboard;
 
+			-- change foreign key to CASCADE for forms referenced as role dependent start form
+			ALTER TABLE app.module_start_form DROP CONSTRAINT module_start_form_form_id_fkey;
+			ALTER TABLE app.module_start_form ADD  CONSTRAINT module_start_form_form_id_fkey FOREIGN KEY (form_id)
+				REFERENCES app.form (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+
 			--
 			-- Open ID Connect authentication
 			CREATE TYPE instance.oauth_client_flow AS ENUM ('clientCreds', 'authCodePkce');

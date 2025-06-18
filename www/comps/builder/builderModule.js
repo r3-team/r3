@@ -1,6 +1,7 @@
 import MyBuilderCaption      from './builderCaption.js';
 import MyBuilderClientEvent  from './builderClientEvent.js';
 import MyBuilderIconInput    from './builderIconInput.js';
+import MyBuilderSelectForm   from './builderSelectForm.js';
 import srcBase64Icon         from '../shared/image.js';
 import {getDependentModules} from '../shared/builder.js';
 import {getUnixFormat}       from '../shared/time.js';
@@ -20,6 +21,7 @@ export {MyBuilderModule as default};
 
 const MyBuilderModuleStartForm = {
 	name:'my-builder-module-start-form',
+	components:{ MyBuilderSelectForm },
 	template:`<div class="item">
 		<img v-if="!readonly" class="dragAnchor" src="images/drag.png" />
 		<select v-model="roleId" :disabled="readonly">
@@ -28,12 +30,13 @@ const MyBuilderModuleStartForm = {
 				{{ r.name }}
 			</option>
 		</select>
-		<select v-model="formId" :disabled="readonly">
-			<option :value="null">[{{ capApp.startFormDefault }}]</option>
-			<option v-for="f in module.forms" :value="f.id">
-				{{ f.name }}
-			</option>
-		</select>
+		<my-builder-select-form
+			v-model="formId"
+			:allowAllForms="true"
+			:captionEmpty="'[' + capApp.startFormDefault + ']'"
+			:module
+			:readonly
+		/>
 		<my-button image="delete.png"
 			@trigger="$emit('remove')"
 			:active="!readonly"
@@ -47,7 +50,6 @@ const MyBuilderModuleStartForm = {
 	},
 	emits:['remove','update:modelValue'],
 	computed:{
-		// inputs
 		formId:{
 			get()  { return this.modelValue.formId; },
 			set(v) { this.update('formId',v); }
@@ -78,6 +80,7 @@ let MyBuilderModule = {
 		MyBuilderClientEvent,
 		MyBuilderIconInput,
 		MyBuilderModuleStartForm,
+		MyBuilderSelectForm,
 		MyInputColorWrap,
 		MyModuleSelect
 	},
@@ -191,12 +194,12 @@ let MyBuilderModule = {
 					<tr>
 						<td>{{ capApp.startFormDefault }}</td>
 						<td>
-							<select v-model="formId" :disabled="readonly">
-								<option :value="null">-</option>
-								<option v-for="f in module.forms" :value="f.id">
-									{{ f.name }}
-								</option>
-							</select>
+							<my-builder-select-form
+								v-model="formId"
+								:allowAllForms="true"
+								:module
+								:readonly
+							/>
 						</td>
 						<td>{{ capApp.startFormDefaultHint }}</td>
 					</tr>
@@ -212,8 +215,8 @@ let MyBuilderModule = {
 										@remove="startForms.splice(index,1)"
 										@update:modelValue="startForms[index] = $event"
 										:modelValue="element"
-										:module="module"
-										:readonly="readonly"
+										:module
+										:readonly
 									/>
 								</template>
 							</draggable>
