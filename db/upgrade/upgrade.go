@@ -470,9 +470,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				UNION
 				SELECT field_id FROM app.field_variable WHERE clipboard
 			);
-			ALTER TABLE app.field_data_relationship ALTER COLUMN category  DROP NOT NULL;
-			ALTER TABLE app.field_data              ALTER COLUMN clipboard DROP NOT NULL;
-			ALTER TABLE app.field_variable          ALTER COLUMN clipboard DROP NOT NULL;
+			ALTER TABLE app.field_data_relationship DROP COLUMN category;
+			ALTER TABLE app.field_data              DROP COLUMN clipboard;
+			ALTER TABLE app.field_variable          DROP COLUMN clipboard;
 
 			--
 			-- Open ID Connect authentication
