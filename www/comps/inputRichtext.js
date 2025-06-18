@@ -9,13 +9,22 @@ const MyInputRichtext = {
 		<div class="input-richtext-toolbar">
 			<div class="input-richtext-toolbar-content" ref="toolbar" v-show="!readonly"></div>
 			<div></div>
-			<a
-				class="input-richtext-toolbar-link clickable"
-				target="_blank"
-				href="https://www.tiny.cloud/powered-by-tiny?utm_campaign=poweredby&utm_source=tiny&utm_medium=referral&utm_content=v6"
-			>
-				<img class="input-richtext-toolbar-logo" src="images/externals/tinymce.svg" />
-			</a>
+			<div class="row gap">
+				<a
+					class="input-richtext-toolbar-link clickable"
+					target="_blank"
+					href="https://www.tiny.cloud/powered-by-tiny?utm_campaign=poweredby&utm_source=tiny&utm_medium=referral&utm_content=v6"
+				>
+					<img class="input-richtext-toolbar-logo" src="images/externals/tinymce.svg" />
+				</a>
+				<my-button image="copyClipboard.png"
+					v-if="clipboard"
+					@trigger="$emit('copyToClipboard')"
+					:active="modelValue !== null"
+					:captionTitle="capGen.button.copyClipboard"
+					:naked="true"
+				/>
+			</div>
 		</div>
 		<div class="input-richtext-content" :key="key">
 			<editor api-key="no-api-key"
@@ -27,9 +36,10 @@ const MyInputRichtext = {
 			/>
 		</div>
 	</div>`,
-	emits:['hotkey','update:modelValue'],
+	emits:['copyToClipboard','hotkey','update:modelValue'],
 	props:{
 		attributeIdFile:{ type:String,  required:false, default:'' },
+		clipboard:      { type:Boolean, required:false, default:false },
 		isHidden:       { type:Boolean, required:false, default:false },
 		modelValue:     { required:true },
 		readonly:       { type:Boolean, required:false, default:false },
@@ -146,6 +156,7 @@ const MyInputRichtext = {
 		
 		// stores
 		token:   (s) => s.$store.getters['local/token'],
+		capGen:  (s) => s.$store.getters.captions.generic,
 		isMobile:(s) => s.$store.getters.isMobile,
 		settings:(s) => s.$store.getters.settings
 	},

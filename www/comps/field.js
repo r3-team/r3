@@ -425,7 +425,9 @@ let MyField = {
 				<my-input-richtext
 					v-if="isRichtext"
 					v-model="value"
+					@copyToClipboard="copyToClipboard"
 					:attributeIdFile="field.attributeIdAlt"
+					:clipboard="isClipboard"
 					:isHidden="isHidden"
 					:readonly="isReadonly"
 					:valueFiles="valueAlt"
@@ -565,7 +567,7 @@ let MyField = {
 				
 				<!-- copy to clipboard action -->
 				<my-button image="copyClipboard.png"
-					v-if="isClipboard && !isFiles && !isIframe && !isBarcode"
+					v-if="isClipboard && !isFiles && !isIframe && !isBarcode && !isRichtext"
 					@trigger="copyToClipboard"
 					:active="value !== null"
 					:captionTitle="capGen.button.copyClipboard"
