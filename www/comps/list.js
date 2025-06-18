@@ -1120,7 +1120,7 @@ const MyList = {
 			else                    delete(v[columnId]);
 			
 			this.$emit('set-login-option','columnIdMapAggr',v);
-			this.reloadAggregations(false);
+			this.reloadAggregations(true);
 		},
 		setAutoRenewTimer(v) {
 			this.clearAutoRenewTimer();
