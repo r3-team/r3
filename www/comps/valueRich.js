@@ -25,7 +25,7 @@ const MyValueRich = {
 		@focus="$emit('focus')"
 		@click="$emit('trigger')"
 		@keyup.space.enter="$emit('trigger')"
-		:class="{ alignEnd:alignEnd, alignMid:alignMid, bold:bold, color:isColor, files:isFiles, gallery:isGallery, italic:italic, monospace:monospace, wrap:wrap }"
+		:class="{ alignEnd, alignMid, bold, color:isColor, files:isFiles, gallery:isGallery, italic, monospace, noShrink, wrap }"
 		:style="style"
 	>
 		<!-- copy to clipboard action -->
@@ -125,6 +125,7 @@ const MyValueRich = {
 		italic:        { type:Boolean, required:false, default:false },
 		length:        { type:Number,  required:false, default:0 },         // max. length if string, max. entries shown if files
 		monospace:     { type:Boolean, required:false, default:false },
+		noShrink:      { type:Boolean, required:false, default:false },
 		noThousandsSep:{ type:Boolean, required:false, default:false },
 		previewLarge:  { type:Boolean, required:false, default:false },
 		value:         { required:true },

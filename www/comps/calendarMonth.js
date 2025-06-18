@@ -57,6 +57,7 @@ let MyCalendarMonth = {
 									:key="i"
 									:length="columns[i].length"
 									:monospace="columns[i].flags.monospace"
+									:noShrink="columns[i].flags.noShrink"
 									:noThousandsSep="columns[i].flags.noThousandsSep"
 									:value="v"
 								/>
@@ -88,6 +89,7 @@ let MyCalendarMonth = {
 							:key="i"
 							:length="columns[i].length"
 							:monospace="columns[i].flags.monospace"
+							:noShrink="columns[i].flags.noShrink"
 							:noThousandsSep="columns[i].flags.noThousandsSep"
 							:wrap="true"
 							:value="v"

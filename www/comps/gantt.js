@@ -53,6 +53,7 @@ let MyGanttLineRecord = {
 					:key="i"
 					:length="columns[i].length"
 					:monospace="columns[i].flags.monospace"
+					:noShrink="columns[i].flags.noShrink"
 					:noThousandsSep="columns[i].flags.noThousandsSep"
 					:value="v"
 				/>
@@ -294,6 +295,7 @@ let MyGantt = {
 								:key="c.index"
 								:length="columns[c.index].length"
 								:monospace="columns[c.index].flags.monospace"
+								:noShrink="columns[c.index].flags.noShrink"
 								:noThousandsSep="columns[c.index].flags.noThousandsSep"
 								:value="c.value"
 							/>

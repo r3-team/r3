@@ -841,6 +841,7 @@
 			"columnLength": "长度（字符）",
 			"columnLength0": "无限制",
 			"columnLengthFiles": "File count",
+			"columnNoShrink": "Does not shrink",
 			"columnNoThousandsSep": "No thousands separator",
 			"columnPreviewLarge": "Large preview",
 			"columnShowDefault": "Show by default",

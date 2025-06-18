@@ -841,6 +841,7 @@
 			"columnLength": "Länge (Charakt.)",
 			"columnLength0": "kein Limit",
 			"columnLengthFiles": "Dateianzahl",
+			"columnNoShrink": "Schrumpft nicht",
 			"columnNoThousandsSep": "Kein Tausendertrennzeichen",
 			"columnPreviewLarge": "Große Vorschau",
 			"columnShowDefault": "Standardm. anzeigen",

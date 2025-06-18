@@ -841,6 +841,7 @@
 			"columnLength": "Lungime (caractere)",
 			"columnLength0": "fără limită",
 			"columnLengthFiles": "File count",
+			"columnNoShrink": "Does not shrink",
 			"columnNoThousandsSep": "No thousands separator",
 			"columnPreviewLarge": "Large preview",
 			"columnShowDefault": "Show by default",
