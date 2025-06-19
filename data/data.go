@@ -17,16 +17,16 @@ import (
 
 // check whether access to attribute is authorized
 // cases: getting or setting attribute values
-func authorizedAttribute(loginId int64, attributeId uuid.UUID, requestedAccess types.Access) bool {
+func authorizedAttribute(loginId int64, attributeId uuid.UUID, accessRequested types.Access) bool {
 
-	access, err := cache.GetAccessById(loginId)
+	m, err := cache.GetAccessById(loginId)
 	if err != nil {
 		return false
 	}
 
 	// use attribute access first if specified (more specific access wins)
-	if _, exists := access.Attribute[attributeId]; exists {
-		return access.Attribute[attributeId] >= requestedAccess
+	if access, exists := m.Attribute[attributeId]; exists {
+		return access >= accessRequested
 	}
 
 	// use relation access otherwise (inherited access)
@@ -35,23 +35,23 @@ func authorizedAttribute(loginId int64, attributeId uuid.UUID, requestedAccess t
 		return false
 	}
 
-	if _, exists := access.Relation[atr.RelationId]; exists {
-		return access.Relation[atr.RelationId] >= requestedAccess
+	if access, exists := m.Relation[atr.RelationId]; exists {
+		return access >= accessRequested
 	}
 	return false
 }
 
 // check whether access to relation is authorized
 // cases: creating or deleting relation tuples
-func authorizedRelation(loginId int64, relationId uuid.UUID, requestedAccess types.Access) bool {
+func authorizedRelation(loginId int64, relationId uuid.UUID, accessRequested types.Access) bool {
 
-	access, err := cache.GetAccessById(loginId)
+	m, err := cache.GetAccessById(loginId)
 	if err != nil {
 		return false
 	}
 
-	if _, exists := access.Relation[relationId]; exists {
-		return access.Relation[relationId] >= requestedAccess
+	if access, exists := m.Relation[relationId]; exists {
+		return access >= accessRequested
 	}
 	return false
 }

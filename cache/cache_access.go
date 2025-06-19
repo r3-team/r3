@@ -165,6 +165,26 @@ func load_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 			}
 		}
 	}
+
+	// resolve inherited attribute access from parent relation
+	// all roles were parsed and applied their cumulative attribute access
+	for _, roleId := range roleIds {
+		role := RoleIdMap[roleId]
+
+		for id, accessRel := range role.AccessRelations {
+			for _, atr := range RelationIdMap[id].Attributes {
+				if _, exists := role.AccessAttributes[atr.Id]; exists {
+					// role sets access for this attribute, nothing to inherit from relation
+					continue
+				}
+				// role does not set access for this attribute (access is inherited from relation)
+				// delete cumulated attribute access if less/equal than inherited access
+				if accessAtr, exists := loginIdMapAccess[loginId].Attribute[atr.Id]; exists && accessAtr <= accessRel {
+					delete(loginIdMapAccess[loginId].Attribute, atr.Id)
+				}
+			}
+		}
+	}
 	return nil
 }
 

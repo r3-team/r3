@@ -166,7 +166,7 @@ const MyBuilderRoleAccessRelation = {
 	},
 	emits:['apply-attribute','apply-relation','relation-selected'],
 	computed:{
-		access:(s) => typeof s.relationIdMapAccess[s.relation.id] === 'undefined'
+		access:(s) => s.relationIdMapAccess[s.relation.id] === undefined
 			? -1 : s.relationIdMapAccess[s.relation.id],
 		attributeIdMapAccessParsed:(s) => {
 			let out = {};
@@ -197,6 +197,9 @@ const MyBuilderRoleAccessRelation = {
 			this.$emit('apply-attribute',attributeId,this.attributeIdMapAccessParsed[attributeId] >= access ? access - 1 : access);
 		},
 		setRelation(access) {
+			if(access === 1 && this.access !== -1)
+				return this.$emit('apply-relation',this.relation.id,-1);
+
 			this.$emit('apply-relation',this.relation.id,this.access >= access ? access - 1 : access);
 		}
 	}
