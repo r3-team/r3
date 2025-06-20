@@ -180,6 +180,10 @@ h3{
 	margin:0px 0px 8px 0px;
 	font-size:115%;
 }
+hr{
+	border-top:1px solid var(--color-border);
+	border-bottom:none;
+}
 
 /* generics */
 .clickable{
