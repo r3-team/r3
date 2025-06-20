@@ -256,19 +256,6 @@
 	overflow:auto;
 }
 
-/* chart field */
-.field .chart{
-	flex:1 1 auto;
-	display:flex;
-	flex-flow:column nowrap;
-	background-color:var(--color-input);
-	border-radius:var(--border-input-radius);
-	box-shadow:var(--shadow-input);
-}
-.field .chart .actions{
-	flex:0 0 auto;
-}
-
 /* tabs field */
 .field .tabs{
 	flex:1 1 auto;

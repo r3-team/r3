@@ -9,28 +9,19 @@ import {
 	getUtcTimeStringFromUnix
 } from './shared/time.js';
 
-export {MyChart as default};
-
-let MyChart = {
+export default {
 	name:'my-chart',
-	components:{
-		echarts:VueECharts
-	},
+	components:{ echarts:VueECharts },
 	template:`<div class="chart">
-		<div class="top lower" v-if="needsHeader || hasChoices">
-			<template v-if="hasChoices">
-				<div class="area" />
-				<div class="area">
-					<select class="selector"
-						v-model="choiceId"
-						@change="choiceIdSet($event.target.value)"
-					>
-						<option v-for="c in choices" :value="c.id">
-							{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
-						</option>
-					</select>
-				</div>
-			</template>
+		<div class="chart-toolbar default-inputs" v-if="needsHeader || hasChoices">
+			<select class="auto"
+				v-model="choiceId"
+				@change="choiceIdSet($event.target.value)"
+			>
+				<option v-for="c in choices" :value="c.id">
+					{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
+				</option>
+			</select>
 		</div>
 		<echarts ref="chart"
 			v-if="ready"
