@@ -188,6 +188,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		}
 	case "loginOptions":
 		switch action {
+		case "del":
+			if isNoAuth {
+				return nil, errors.New(handler.ErrUnauthorized)
+			}
+			return LoginOptionsDel_tx(ctx, tx, loginId)
 		case "get":
 			return LoginOptionsGet_tx(ctx, tx, reqJson, loginId, isNoAuth)
 		case "set":
