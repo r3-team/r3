@@ -549,6 +549,11 @@ let MyLogin = {
 		// authentication successful, prepare application load
 		appEnable(loginId,loginName) {
 			const token = JSON.parse(atob(this.token.split('.')[1]));
+
+			// compatibility fix: Token type is not defined in tokens before upgrade to REI3.11
+			if(token.type === undefined)
+				token.type = token.noAuth !== undefined && token.noAuth ? 'noAuth' : 'local';
+
 			this.$store.commit('isAdmin',token.admin);
 			this.$store.commit('loginId',loginId);
 			this.$store.commit('loginName',loginName);
