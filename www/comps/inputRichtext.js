@@ -7,7 +7,10 @@ const MyInputRichtext = {
 	components:{'editor':Editor},
 	template:`<div class="input-richtext">
 		<div class="input-richtext-toolbar">
-			<div class="input-richtext-toolbar-content" ref="toolbar" v-show="!readonly"></div>
+			<div class="row">
+				<slot name="input-icon" />
+				<div class="input-richtext-toolbar-content" ref="toolbar" v-show="!readonly"></div>
+			</div>
 			<div></div>
 			<div class="row gap">
 				<a

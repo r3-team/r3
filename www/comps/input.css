@@ -604,7 +604,7 @@
 	background-color:var(--color-bg);
 	padding:0px calc(var(--spacing) / 2);
 	display:flex;
-	flex-flow:row wrap;
+	flex-flow:row nowrap;
 	justify-content:space-between;
 	align-items:center;
 }

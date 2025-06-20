@@ -433,7 +433,13 @@ let MyField = {
 					:isHidden="isHidden"
 					:readonly="isReadonly"
 					:valueFiles="valueAlt"
-				/>
+				>
+					<template #input-icon>
+						<div class="field-icon inList" v-if="iconId">
+							<img :src="srcBase64(iconIdMap[iconId].file)" />
+						</div>
+					</template>
+				</my-input-richtext>
 
 				<!-- rating input -->
 				<my-input-rating
