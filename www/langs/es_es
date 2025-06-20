@@ -2378,6 +2378,7 @@
 		"systemModes": "System modes",
 		"textSearch": "Búsqueda de texto",
 		"threeDots": "...",
+		"tip": "Tip",
 		"title": "Título",
 		"token": "Token",
 		"type": "Tipo",
@@ -2410,8 +2411,12 @@
 			],
 			"ftsDictTitle": "Search input language"
 		},
-		"hotkey": "Select text & press CTRL + SHIFT + F to open search",
-		"modulesInactive": "Additional search options"
+		"modulesInactive": "Additional search options",
+		"tips": [
+			"A new search can be started from anywhere in REI3 by pressing <b>CTRL + SHIFT + F</b>. If text is selected, it will be used as search input.",
+			"Names or words should be written out in full to find results in large texts, such as descriptions or articles.",
+			"If multilingual content is searched, it is important to define the search input language (top right corner of the search interface); this helps the full-text search match word stems."
+		]
 	},
 	"home": {
 		"button": {

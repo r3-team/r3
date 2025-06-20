@@ -10,6 +10,7 @@ import {
 }  from './shared/form.js';
 import {
 	colorAdjustBg,
+	getRandomInt,
 	openLink
 } from './shared/generic.js';
 import {
@@ -431,8 +432,9 @@ const MyGlobalSearch = {
 						:module="m"
 					/>
 				</div>
-				<div class="global-search-message-bottom row" v-if="!isMobile">
-					<my-label image="keyboard.png" :caption="capApp.hotkey" />
+				<div class="global-search-message-bottom row gap-large" v-if="!isMobile">
+					<my-button image="arrowsSwitch.png" @trigger="nextTip" />
+					<my-label :caption="capGen.tip + ': ' + capApp.tips[tipIndex]" />
 				</div>
 			</div>
 		</div>
@@ -445,7 +447,8 @@ const MyGlobalSearch = {
 			moduleIdMapResultCount:{}, // result count per module ID
 			moduleIdsActive:[],
 			popUp:null,
-			ready:false
+			ready:false,
+			tipIndex:0      // index of tip entries that is currently shown
 		};
 	},
 	emits:['close'],
@@ -516,6 +519,8 @@ const MyGlobalSearch = {
 		this.moduleIdsActive = this.isAtModule && this.searchModuleIds.includes(this.moduleIdLast)
 			? [this.moduleIdLast] : JSON.parse(JSON.stringify(this.searchModuleIds));
 
+		this.tipIndex = this.getRandomInt(0,this.capApp.tips.length -1);
+
 		this.input = this.globalSearchInput;
 		this.submit();
 	},
@@ -525,6 +530,7 @@ const MyGlobalSearch = {
 	methods:{
 		// externals
 		getDictByLang,
+		getRandomInt,
 		
 		// general
 		handleHotkeys(e) {
@@ -545,6 +551,9 @@ const MyGlobalSearch = {
 		},
 		resetDict() {
 			this.setOption('dictionary',this.getDictByLang());
+		},
+		nextTip() {
+			this.tipIndex = this.tipIndex < this.capApp.tips.length - 1 ? this.tipIndex + 1 : 0;
 		},
 		setOption(name,value) {
 			let o = JSON.parse(JSON.stringify(this.options));

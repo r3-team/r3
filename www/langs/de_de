@@ -2378,6 +2378,7 @@
 		"systemModes": "Betriebsarten",
 		"textSearch": "Textsuche",
 		"threeDots": "...",
+		"tip": "Tipp",
 		"title": "Titel",
 		"token": "Token",
 		"type": "Typ",
@@ -2410,8 +2411,12 @@
 			],
 			"ftsDictTitle": "Sprache der Sucheingabe"
 		},
-		"hotkey": "Text auswählen & STRG + SHIFT + F drücken, um Suche zu öffnen",
-		"modulesInactive": "Weitere Suchoptionen"
+		"modulesInactive": "Weitere Suchoptionen",
+		"tips": [
+			"Eine neue Suche kann von überall in REI3 durch Drücken von <b>STRG + SHIFT + F</b> gestartet werden. Falls Text ausgewählt ist, wird dieser als Sucheingabe genutzt.",
+			"Namen oder Wörter sollten vollständig ausgeschrieben werden, damit Ergebnisse in größeren Texten wie Beschreibungen oder Artikel gefunden werden können.",
+			"Wenn mehrsprachiger Inhalt durchsucht wird, ist es wichtig die Sprache der Sucheingabe zu definieren (rechts-oben in der Suchoberfläche); dies hilft der Volltextsuche beim Auflösen von Wordstämmen."
+		]
 	},
 	"home": {
 		"button": {

@@ -7,7 +7,7 @@ const MyLabel = {
 			v-if="image !== '' || imageBase64 !== ''"
 			:src="image !== '' ? 'images/'+image : imageBase64"
 		/>
-		<span v-if="caption !== ''">{{ caption }}</span>
+		<span v-if="caption !== ''" v-html="caption" />
 	</div>`,
 	props:{
 		// content props
