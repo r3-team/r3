@@ -178,10 +178,8 @@ let MyAdminCluster = {
 		</div>
 		
 		<div class="content">
-			<div class="contentPartHeader">
-				<img class="icon" src="images/settings.png" />
-				<h1>{{ capApp.title.config }}</h1>
-			</div>
+			<my-label image="settings.png" :caption="capApp.title.config" :large="true" />
+			<br />
 			<table>
 				<tbody>
 					<tr class="default-inputs">

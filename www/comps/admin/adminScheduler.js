@@ -37,10 +37,8 @@ let MyAdminScheduler = {
 		
 			<!-- cluster master schedules -->
 			<div class="content">
-				<div class="contentPartHeader">
-					<img class="icon" src="images/cluster.png" />
-					<h1>{{ capApp.systemTasks }}</h1>
-				</div>
+				<my-label image="cluster.png" :caption="capApp.systemTasks" :large="true" />
+				<br />
 				
 				<table class="generic-table bright default-inputs shade">
 					<thead>
@@ -82,10 +80,8 @@ let MyAdminScheduler = {
 			
 			<!-- cluster node schedules -->
 			<div class="content">
-				<div class="contentPartHeader">
-					<img class="icon" src="images/server.png" />
-					<h1>{{ capApp.systemTasksNode }}</h1>
-				</div>
+				<my-label image="server.png" :caption="capApp.systemTasksNode" :large="true" />
+				<br />
 				
 				<table class="generic-table bright default-inputs shade">
 					<thead>
@@ -142,10 +138,8 @@ let MyAdminScheduler = {
 			
 			<!-- module schedules -->
 			<div class="content" v-if="hasAppSchedules">
-				<div class="contentPartHeader">
-					<img class="icon" src="images/builder.png" />
-					<h1>{{ capApp.functions }}</h1>
-				</div>
+				<my-label image="builder.png" :caption="capApp.functions" :large="true" />
+				<br />
 				
 				<table class="generic-table bright shade">
 					<thead>

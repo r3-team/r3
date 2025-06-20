@@ -68,10 +68,7 @@ let MyAdminLoginTemplate = {
 						<tr>
 							<td class="grouping" colspan="2">
 								<br />
-								<div class="contentPartHeader">
-									<img class="icon" src="images/settings.png" />
-									<h1>{{ capAppSet.titleGeneral }}</h1>
-								</div>
+								<my-label image="settings.png" :caption="capAppSet.titleGeneral" :large="true" />
 							</td>
 						</tr>
 						<tr>
@@ -140,10 +137,7 @@ let MyAdminLoginTemplate = {
 						<tr>
 							<td class="grouping" colspan="2">
 								<br />
-								<div class="contentPartHeader">
-									<img class="icon" src="images/visible1.png" />
-									<h1>{{ capAppSet.titleTheme }}</h1>
-								</div>
+								<my-label image="visible1.png" :caption="capAppSet.titleTheme" :large="true" />
 							</td>
 						</tr>
 						<tr>

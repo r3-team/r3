@@ -26,10 +26,8 @@ let MyAdminBackups = {
 		</div>
 		
 		<div class="content" v-if="ready">
-			<div class="contentPartHeader">
-				<img class="icon" src="images/settings.png" />
-				<h1>{{ capApp.title }}</h1>
-			</div>
+			<my-label image="settings.png" :caption="capApp.title" :large="true" />
+			<br />
 			
 			<table class="default-inputs">
 				<tbody>
@@ -75,10 +73,8 @@ let MyAdminBackups = {
 			<div class="note">{{ capApp.dirNote }}</div>
 			<br />
 			
-			<div class="contentPartHeader">
-				<img class="icon" src="images/backup.png" />
-				<h1>{{ capApp.list }}</h1>
-			</div>
+			<my-label image="backup.png" :caption="capApp.list" :large="true" />
+			<br />
 			
 			<table class="generic-table bright default-inputs shade sets">
 				<thead>

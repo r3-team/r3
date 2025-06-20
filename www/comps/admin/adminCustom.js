@@ -89,10 +89,7 @@ let MyAdminCustom = {
 					<!-- captions -->
 					<tr>
 						<td colspan="999">
-							<div class="contentPartHeader">
-								<img class="icon" src="images/languages.png" />
-								<h1>{{ capApp.titleCaptions }}</h1>
-							</div>
+							<my-label image="languages.png" :caption="capApp.titleCaptions" :large="true" />
 						</td>
 					</tr>
 					<tr>
@@ -125,10 +122,7 @@ let MyAdminCustom = {
 					<tr>
 						<td colspan="999">
 							<br />
-							<div class="contentPartHeader">
-								<img class="icon" src="images/lock.png" />
-								<h1>{{ capApp.titleLoginPage }}</h1>
-							</div>
+							<my-label image="lock.png" :caption="capApp.titleLoginPage" :large="true" />
 						</td>
 					</tr>
 					<tr>
@@ -152,10 +146,7 @@ let MyAdminCustom = {
 					<tr>
 						<td colspan="999">
 							<br />
-							<div class="contentPartHeader">
-								<img class="icon" src="images/colors.png" />
-								<h1>{{ capApp.titleColors }}</h1>
-							</div>
+							<my-label image="colors.png" :caption="capApp.titleColors" :large="true" />
 						</td>
 					</tr>
 					<tr>
@@ -173,10 +164,7 @@ let MyAdminCustom = {
 					<tr>
 						<td colspan="999">
 							<br />
-							<div class="contentPartHeader">
-								<img class="icon" src="images/fileImage.png" />
-								<h1>{{ capApp.titleLogos }}</h1>
-							</div>
+							<my-label image="fileImage.png" :caption="capApp.titleLogos" :large="true" />
 						</td>
 					</tr>
 					<tr>
@@ -206,10 +194,7 @@ let MyAdminCustom = {
 					<tr>
 						<td colspan="999">
 							<br />
-							<div class="contentPartHeader">
-								<img class="icon" src="images/fileImage.png" />
-								<h1>{{ capApp.titlePwas }}</h1>
-							</div>
+							<my-label image="fileImage.png" :caption="capApp.titlePwas" :large="true" />
 						</td>
 					</tr>
 					<tr>
@@ -277,10 +262,7 @@ let MyAdminCustom = {
 					<tr>
 						<td colspan="999">
 							<br />
-							<div class="contentPartHeader">
-								<img class="icon" src="images/code.png" />
-								<h1>{{ capApp.titleCss }}</h1>
-							</div>
+							<my-label image="code.png" :caption="capApp.titleCss" :large="true" />
 						</td>
 					</tr>
 					<tr>

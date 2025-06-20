@@ -532,10 +532,11 @@ h3{
 }
 
 .contentBox .content .contentPart{
+	--content-part-spacing:12px;
 	flex:1 1 500px;
 	max-width:550px;
 	margin:calc(var(--spacing) / 2.5);
-	padding:12px;
+	padding:var(--content-part-spacing);
 	display:flex;
 	flex-flow:column nowrap;
 	background-color:var(--color-bg-bright);
@@ -567,7 +568,10 @@ h3{
 	position:relative;
 }
 .contentBox .content .contentPartHeader{
-	margin:0px 0px 12px;
+	margin:calc(0px - var(--content-part-spacing)) calc(0px - var(--content-part-spacing)) var(--content-part-spacing);
+	padding:var(--content-part-spacing);
+	background-color:var(--color-bg);
+	border-bottom:1px solid var(--color-border);
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;

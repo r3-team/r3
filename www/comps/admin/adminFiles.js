@@ -27,10 +27,8 @@ let MyAdminFiles = {
 		</div>
 		
 		<div class="content">
-			<div class="contentPartHeader">
-				<img class="icon" src="images/settings.png" />
-				<h1>{{ capApp.titleConfig }}</h1>
-			</div>
+			<my-label image="settings.png" :caption="capApp.titleConfig" :large="true" />
+			<br />
 			<table class="default-inputs">
 				<tbody>
 					<tr>
@@ -51,11 +49,8 @@ let MyAdminFiles = {
 			<br />
 			
 			<!-- deleted files -->
-			<div class="contentPartHeader">
-				<img class="icon" src="images/delete.png" />
-				<h1>{{ capApp.titleDeleted }}</h1>
-			</div>
-			
+			<my-label image="delete.png" :caption="capApp.titleDeleted" :large="true" />
+			<br />
 			<table class="generic-table bright sticky-top default-inputs shade">
 				<thead>
 					<tr>
