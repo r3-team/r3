@@ -135,7 +135,10 @@ const MyList = {
 			:recordIdsSelected="inputRecordIds"
 			:rows="rowsInput"
 			:showOpen="hasUpdate"
-		/>
+		>
+			<template #input-icon><slot name="input-icon" /></template>
+		</my-list-input-flow>
+
 		<my-list-input-rows
 			v-if="isInput && !inputAsFlow"
 			@clicked="clickInputRow"
@@ -153,7 +156,10 @@ const MyList = {
 			:rows="rowsInput"
 			:showAllValues="showAllValues"
 			:showOpen="hasUpdate"
-		/>
+		>
+			<template #input-icon><slot name="input-icon" /></template>
+		</my-list-input-rows>
+
 		<my-list-input-rows-empty
 			v-if="isInput && showInputAddLine"
 			@clicked="clickInputEmpty"
@@ -168,7 +174,9 @@ const MyList = {
 			:showCreate="hasCreate"
 			:text="filtersQuick"
 			:valid="inputValid"
-		/>
+		>
+			<template #input-icon><slot name="input-icon" /></template>
+		</my-list-input-rows-empty>
 		
 		<!-- regular list view (either view or input dropdown) -->
 		<template v-if="!isInput || (dropdownShow && !showAllValues)">
