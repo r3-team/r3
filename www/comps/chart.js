@@ -1,5 +1,4 @@
-import {getChoiceFilters} from './shared/form.js';
-import {getCaption}       from './shared/language.js';
+import {getCaption} from './shared/language.js';
 import {
 	getQueryExpressions,
 	getRelationsJoined
@@ -15,8 +14,8 @@ export default {
 	template:`<div class="chart">
 		<div class="chart-toolbar default-inputs" v-if="needsHeader || hasChoices">
 			<select class="auto"
-				v-model="choiceId"
-				@change="choiceIdSet($event.target.value)"
+				@change="$emit('set-login-option','choiceId',$event.target.value)"
+				:value="choiceId"
 			>
 				<option v-for="c in choices" :value="c.id">
 					{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
@@ -36,15 +35,16 @@ export default {
 		formLoading:    { type:Boolean, required:true },
 		isHidden:       { type:Boolean, required:true },
 		limit:          { type:Number,  required:true },
+		loginOptions:   { type:Object,  required:true },
 		moduleId:       { type:String,  required:true },
 		needsHeader:    { type:Boolean, required:true },
 		optionJson:     { type:String,  required:true },  // general chart options object, as JSON
 		optionOverwrite:{ required:false, default:null }, // overwrite entire echarts option object (incl. data)
 		query:          { type:Object,  required:true }
 	},
+	emits:['set-login-option'],
 	data() {
 		return {
-			choiceId:null,
 			option:{},
 			ready:false
 		};
@@ -61,9 +61,11 @@ export default {
 		},
 		
 		// simple
-		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
-		hasChoices:   (s) => s.choices.length > 1 && !s.hasOverwrite,
-		hasOverwrite: (s) => s.optionOverwrite !== null,
+		hasChoices:  (s) => s.choices.length > 1 && !s.hasOverwrite,
+		hasOverwrite:(s) => s.optionOverwrite !== null,
+
+		// login options
+		choiceId:(s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -91,9 +93,6 @@ export default {
 					return this.get();
 			}
 		});
-		
-		// set default choice
-		this.choiceId = this.choices.length > 0 ? this.choices[0].id : null;
 
 		// set option overwrite, if enabled
 		if(this.optionOverwrite !== null) {
@@ -104,16 +103,12 @@ export default {
 	methods:{
 		// externals
 		getCaption,
-		getChoiceFilters,
 		getQueryExpressions,
 		getRelationsJoined,
 		getUnixFormat,
 		getUtcTimeStringFromUnix,
 		
 		// actions
-		choiceIdSet() {
-			this.get();
-		},
 		resized() {
 			if(typeof this.$refs.chart !== 'undefined')
 				this.$refs.chart.resize();
@@ -129,7 +124,7 @@ export default {
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.query.joins),
 				expressions:this.getQueryExpressions(this.columns),
-				filters:this.filters.concat(this.choiceFilters),
+				filters:this.filters,
 				orders:this.query.orders,
 				limit:this.limit
 			},true).then(

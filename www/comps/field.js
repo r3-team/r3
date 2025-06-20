@@ -203,12 +203,14 @@ let MyField = {
 				<!-- chart -->
 				<my-chart
 					v-if="isChart"
+					@set-login-option="setLoginOption"
 					:choices="choicesProcessed"
 					:columns="columnsProcessed"
 					:filters="filtersProcessed"
 					:formLoading="formLoading"
 					:isHidden="isHidden"
 					:limit="field.query.fixedLimit"
+					:loginOptions="loginOptions"
 					:moduleId="moduleId"
 					:needsHeader="isAlone"
 					:optionJson="field.chartOption"
