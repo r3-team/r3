@@ -191,7 +191,7 @@ let MyHeader = {
 			
 			<!-- search bars -->
 			<input class="app-header-search-input"
-				v-if="searchModuleIds.length !== 0"
+				v-if="isGlobalSearchOn"
 				v-model="globalSearchInput"
 				@keyup.enter="globalSearchStart($event.target.value); globalSearchInput = ''"
 				:class="{ isDark }"
@@ -340,6 +340,7 @@ let MyHeader = {
 		
 		// simple
 		isDark:          (s) => s.colorHeaderMain.isDark(),
+		isGlobalSearchOn:(s) => s.searchModuleIds.length !== 0,
 		pwaSingle:       (s) => s.pwaModuleId !== null,
 		showCollections: (s) => s.layoutElementsProcessed.includes('collections'),
 		showFeedback:    (s) => s.layoutElementsProcessed.includes('feedback') && s.feedback && !s.isNoAuth,
@@ -459,8 +460,9 @@ let MyHeader = {
 			if(!this.moduleSingleActive && this.isMobile)
 				return this.$router.push(`/app/${this.moduleSingle.name}/${this.moduleSingle.name}`);
 		},
-		globalSearchStart(value) {
-			this.$store.commit('globalSearchInput',value !== undefined ? value : window.getSelection().toString());
+		globalSearchStart(v) {
+			if(this.isGlobalSearchOn)
+				this.$store.commit('globalSearchInput',v !== undefined ? v : window.getSelection().toString());
 		},
 		openSystemMsg() {
 			const d = this.getDateFormat(new Date(this.systemMsgDate1*1000),'H:i');

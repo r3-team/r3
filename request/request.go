@@ -575,6 +575,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "reload":
 			return SchemaReload_tx(ctx, tx, reqJson)
 		}
+	case "searchBar":
+		switch action {
+		case "del":
+			return SearchBarDel_tx(ctx, tx, reqJson)
+		case "set":
+			return SearchBarSet_tx(ctx, tx, reqJson)
+		}
 	case "task":
 		switch action {
 		case "informChanged":
