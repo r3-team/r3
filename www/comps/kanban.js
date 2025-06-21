@@ -271,22 +271,22 @@ let MyKanban = {
 					<thead>
 						<!-- X axis labels -->
 						<tr>
-							<th class="label top-left" v-if="relationIndexAxisY !== null"></th>
+							<th class="kanban-table-label top-left" v-if="relationIndexAxisY !== null"></th>
 							
 							<!-- label for NULL assignment -->
-							<th class="label" v-if="hasNullsInX">
-								<div class="label-line unassigned">
+							<th class="kanban-table-label" v-if="hasNullsInX">
+								<div class="kanban-table-label-line unassigned">
 									{{ capGen.unassigned }}
 								</div>
 							</th>
 							
 							<!-- labels for X assignment -->
-							<th class="label" v-for="x in axisEntriesX"
+							<th class="kanban-table-label" v-for="x in axisEntriesX"
 								:class="{ clickable: hasCreate }"
 								:style="x.style"
 								@click.left="cardCreate(x.id,null,null)"
 							>
-								<div class="label-line">
+								<div class="kanban-table-label-line">
 									<my-value-rich
 										v-for="v in x.values.filter(v => v.value !== null)"
 										:attributeId="columns[v.columnIndex].attributeId"
@@ -312,8 +312,8 @@ let MyKanban = {
 						
 						<!-- line for NULL Y assignment / or no Y axis at all -->
 						<tr v-if="hasNullsInY || relationIndexAxisY === null">
-							<td class="label" v-if="relationIndexAxisY !== null">
-								<div class="label-line unassigned">
+							<td class="kanban-table-label" v-if="relationIndexAxisY !== null">
+								<div class="kanban-table-label-line unassigned">
 									{{ capGen.unassigned }}
 								</div>
 							</td>
@@ -359,12 +359,12 @@ let MyKanban = {
 						<!-- lines for XY assignment -->
 						<tr v-for="y in axisEntriesY">
 							<!-- label for Y assignment -->
-							<td class="label"
+							<td class="kanban-table-label"
 								:class="{ clickable: hasCreate }"
 								:style="y.style"
 								@click.left="cardCreate(null,y.id,null)"
 							>
-								<div class="label-line">
+								<div class="kanban-table-label-line">
 									<my-value-rich
 										v-for="v in y.values.filter(v => v.value !== null)"
 										:attributeId="columns[v.columnIndex].attributeId"
@@ -429,9 +429,9 @@ let MyKanban = {
 					</tbody>
 					<tfoot>
 						<tr>
-							<td class="label" v-if="relationIndexAxisY !== null"></td>
-							<td class="label" v-if="hasNullsInX"></td>
-							<td class="label" v-for="x in axisEntriesX"></td>
+							<td class="kanban-table-label" v-if="relationIndexAxisY !== null"></td>
+							<td class="kanban-table-label" v-if="hasNullsInX"></td>
+							<td class="kanban-table-label" v-for="x in axisEntriesX"></td>
 						</tr>
 					</tfoot>
 				</table>
