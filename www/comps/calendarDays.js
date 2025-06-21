@@ -63,7 +63,7 @@ let MyCalendarDays = {
 	components:{ MyCalendarDaysEvent },
 	template:`<div class="calendar-days">
 		<div class="days full">
-			<div class="labels fullDay">
+			<div class="calendar-days-labels fullDay">
 				<div class="header"></div>
 				<span v-if="!isInput && events.fullDays.length !== 0"
 					:style="events.fullDaysHeight"
@@ -98,7 +98,7 @@ let MyCalendarDays = {
 			</div>
 		</div>
 		<div class="days">
-			<div class="labels">
+			<div class="calendar-days-labels">
 				<span v-for="i in 24" :style="heightHourStyle" :ref="refHourLabel + i">
 					{{ getStringFilled(i-1,2,'0')+':00' }}
 				</span>

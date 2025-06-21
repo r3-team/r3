@@ -41,12 +41,12 @@
 .calendar-days.scroll{
 	overflow:auto;
 }
-.calendar-days .labels{
+.calendar-days-labels{
 	width:60px;
 	display:flex;
 	flex-flow:column nowrap;
 }
-.calendar-days .labels span{
+.calendar-days-labels span{
 	padding:2px 6px;
 	box-sizing:border-box;
 	text-align:right;
@@ -54,7 +54,7 @@
 	background-color:var(--color-bg);
 	border-bottom:1px dotted var(--color-border);
 }
-.calendar-days .labels.fullDay span{
+.calendar-days-labels.fullDay span{
 	overflow:hidden;
 	border-bottom:none;
 }
