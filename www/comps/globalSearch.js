@@ -151,7 +151,7 @@ const MyGlobalSearchModule = {
 			<div class="row gap">
 				<my-button
 					:darkBg="!disabled"
-					:image="disabled ? 'checkBox0.png' : 'checkBox1.png'"
+					:image="disabled ? 'checkbox0.png' : 'checkbox1.png'"
 					:naked="true"
 				/>
 				<my-label
