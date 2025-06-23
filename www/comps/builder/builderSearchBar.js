@@ -88,9 +88,7 @@ let MyBuilderSearchBar = {
 							:builderLanguage="builderLanguage"
 							:columnIdShow="columnIdShow"
 							:columns="columns"
-							:hasBatches="false"
 							:hasCaptions="true"
-							:hasStyling="false"
 						/>
 					</div>
 					
@@ -99,7 +97,6 @@ let MyBuilderSearchBar = {
 						<div class="builder-search-bar-column-templates">
 							<my-builder-column-templates groupName="batches_columns"
 								@column-add="columns.push($event)"
-								:allowRelationships="true"
 								:columns="columns"
 								:joins="joins"
 							/>
@@ -189,7 +186,7 @@ let MyBuilderSearchBar = {
 						:column="columnShow"
 						:hasCaptions="true"
 						:moduleId="module.id"
-						:onlyData="true"
+						:onlyData="false"
 					/>
 				</template>
 			</div>
