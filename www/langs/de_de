@@ -2641,7 +2641,9 @@
 				"apos": "Apostroph (')",
 				"comma": "Komma (,)",
 				"dot": "Punkt (.)",
-				"mdot": "Punkt, mittig (·)"
+				"mdot": "Punkt, mittig (·)",
+				"none": "[kein Trennzeichen]",
+				"space": "Leerzeichen ( )"
 			}
 		},
 		"pageTitle": "Einstellungen",

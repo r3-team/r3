@@ -1285,6 +1285,8 @@ let MySettings = {
 									<option value=",">{{ capApp.option.numberSeparator.comma }}</option>
 									<option value="'">{{ capApp.option.numberSeparator.apos }}</option>
 									<option value="·">{{ capApp.option.numberSeparator.mdot }}</option>
+									<option value=" ">{{ capApp.option.numberSeparator.space }}</option>
+									<option value="0">{{ capApp.option.numberSeparator.none }}</option>
 								</select>
 							</td>
 						</tr>
@@ -1296,6 +1298,7 @@ let MySettings = {
 									<option value=",">{{ capApp.option.numberSeparator.comma }}</option>
 									<option value="'">{{ capApp.option.numberSeparator.apos }}</option>
 									<option value="·">{{ capApp.option.numberSeparator.mdot }}</option>
+									<option value=" ">{{ capApp.option.numberSeparator.space }}</option>
 								</select>
 							</td>
 						</tr>

@@ -489,6 +489,8 @@ const MyStore = Vuex.createStore({
 		moduleEntries:           (state) => state.moduleEntries,
 		moduleIdLast:            (state) => state.moduleIdLast,
 		moduleIdMapMeta:         (state) => state.moduleIdMapMeta,
+		numberSepDecimal:        (state) => state.settings.numberSepDecimal  !== '0' ? state.settings.numberSepDecimal  : '',
+		numberSepThousand:       (state) => state.settings.numberSepThousand !== '0' ? state.settings.numberSepThousand : '',
 		oauthClientIdMapOpenId:  (state) => state.oauthClientIdMapOpenId,
 		pageTitleFull:           (state) => state.pageTitleFull,
 		popUpFormGlobal:         (state) => state.popUpFormGlobal,

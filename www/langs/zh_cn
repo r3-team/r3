@@ -2641,7 +2641,9 @@
 				"apos": "撇号（'）",
 				"comma": "逗号（,）",
 				"dot": "点号（.）",
-				"mdot": "中间点（·）"
+				"mdot": "中间点（·）",
+				"none": "[no separator]",
+				"space": "Space ( )"
 			}
 		},
 		"pageTitle": "设置",

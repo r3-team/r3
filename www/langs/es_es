@@ -2641,7 +2641,9 @@
 				"apos": "Apóstrofo (')",
 				"comma": "Coma (,)",
 				"dot": "Punto (.)",
-				"mdot": "Punto medio (·)"
+				"mdot": "Punto medio (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
 			}
 		},
 		"pageTitle": "Configuraciones",

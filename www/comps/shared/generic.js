@@ -130,10 +130,10 @@ export function getNumberFormatted(v,atr) {
 		hasFraction = true;
 	}
 	
-	strNum = strNum.replace(/\B(?=(\d{3})+(?!\d))/g,MyStore.getters.settings.numberSepThousand);
+	strNum = strNum.replace(/\B(?=(\d{3})+(?!\d))/g,MyStore.getters.numberSepThousand);
 
 	return hasFraction
-		? strNum + MyStore.getters.settings.numberSepDecimal + strFraction
+		? strNum + MyStore.getters.numberSepDecimal + strFraction
 		: strNum;
 };
 

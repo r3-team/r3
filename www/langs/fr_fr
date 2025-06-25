@@ -2641,7 +2641,9 @@
 				"apos": "Apostrophe (')",
 				"comma": "Virgule (,)",
 				"dot": "Point (.)",
-				"mdot": "Point médian (·)"
+				"mdot": "Point médian (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
 			}
 		},
 		"pageTitle": "Paramètres",

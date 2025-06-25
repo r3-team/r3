@@ -2641,7 +2641,9 @@
 				"apos": "Apostrophe (')",
 				"comma": "Comma (,)",
 				"dot": "Dot (.)",
-				"mdot": "Middle dot (·)"
+				"mdot": "Middle dot (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
 			}
 		},
 		"pageTitle": "Impostazioni",

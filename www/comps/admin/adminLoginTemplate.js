@@ -110,6 +110,8 @@ let MyAdminLoginTemplate = {
 									<option value=",">{{ capAppSet.option.numberSeparator.comma }}</option>
 									<option value="'">{{ capAppSet.option.numberSeparator.apos }}</option>
 									<option value="·">{{ capAppSet.option.numberSeparator.mdot }}</option>
+									<option value=" ">{{ capAppSet.option.numberSeparator.space }}</option>
+									<option value="0">{{ capAppSet.option.numberSeparator.none }}</option>
 								</select>
 							</td>
 						</tr>
@@ -121,6 +123,7 @@ let MyAdminLoginTemplate = {
 									<option value=",">{{ capAppSet.option.numberSeparator.comma }}</option>
 									<option value="'">{{ capAppSet.option.numberSeparator.apos }}</option>
 									<option value="·">{{ capAppSet.option.numberSeparator.mdot }}</option>
+									<option value=" ">{{ capAppSet.option.numberSeparator.space }}</option>
 								</select>
 							</td>
 						</tr>
