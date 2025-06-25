@@ -247,7 +247,7 @@ const MyGlobalSearchModule = {
 			if(!s.active)    return '-';
 			if(s.anyRunning) return s.capGen.searchRunning;
 			return s.isMobile
-				? `${s.capGen.results.replace('{CNT}',s.resultCount)}`
+				? `${s.resultCount}`
 				: `${s.capGen.searchCompleted}: ${s.capGen.results.replace('{CNT}',s.resultCount)}`;
 		},
 
@@ -322,7 +322,7 @@ const MyGlobalSearch = {
 					<my-button image="cancel.png"
 						@trigger="close"
 						:cancel="true"
-						:caption="capGen.button.close"
+						:caption="isMobile ? '' : capGen.button.close"
 					/>
 				</div>
 			</div>
@@ -361,23 +361,23 @@ const MyGlobalSearch = {
 						<my-button image="cancel.png"
 							@trigger="input = ''; submit()"
 							:active="inputActive !== ''"
-							:caption="capGen.button.clear"
+							:caption="isMobile ? '' : capGen.button.clear"
 							:cancel="true"
 						/>
 					</div>
 					<div class="row wrap gap-large centered">
 						<my-button-check
 							@update:modelValue="setOption('openAsPopUp',$event)"
-							:caption="capApp.button.openAsPopUp"
+							:caption="isMobile ? capApp.button.openAsPopUpMobile : capApp.button.openAsPopUp"
 							:modelValue="options.openAsPopUp"
 						/>
 						<my-button-check
 							@update:modelValue="setOption('showHeader',$event)"
-							:caption="capApp.button.showHeader"
+							:caption="isMobile ? capApp.button.showHeaderMobile : capApp.button.showHeader"
 							:modelValue="options.showHeader"
 						/>
 						<div class="row gap centered">
-							<span>{{ capGen.limit }}</span>
+							<span v-if="!isMobile">{{ capGen.limit }}</span>
 							<select class="auto"
 								@input="setOption('limit',parseInt($event.target.value))"
 								:value="options.limit"
@@ -491,7 +491,9 @@ const MyGlobalSearch = {
 		statusLabel:(s) => {
 			if(s.empty)            return s.capGen.globalSearch;
 			if(s.anySearchRunning) return s.capGen.searchRunning;
-			return `${s.capGen.searchCompleted}: ${s.capGen.results.replace('{CNT}',s.resultCount)}`;
+			return s.isMobile
+				? `${s.capGen.results.replace('{CNT}',s.resultCount)}`
+				: `${s.capGen.searchCompleted}: ${s.capGen.results.replace('{CNT}',s.resultCount)}`;
 		},
 
 		// simple

@@ -2401,7 +2401,9 @@
 			"dictReset": "Auf Benutzersprache zurücksetzen",
 			"fullTextSearch": "Unterstützt Volltextsuche",
 			"openAsPopUp": "Als Pop-Up öffnen",
-			"showHeader": "Spaltentitel"
+			"openAsPopUpMobile": "Pop-Up",
+			"showHeader": "Spaltentitel",
+			"showHeaderMobile": "Spalten"
 		},
 		"help": {
 			"ftsDict": [

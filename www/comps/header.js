@@ -190,7 +190,7 @@ let MyHeader = {
 			</div>
 			
 			<!-- search bars -->
-			<input class="app-header-search-input"
+			<input class="app-header-search-input" enterkeyhint="send" type="text"
 				v-if="isGlobalSearchOn"
 				v-model="globalSearchInput"
 				@keyup.enter="globalSearchStart($event.target.value); globalSearchInput = ''"
