@@ -242,7 +242,7 @@ const MyList = {
 						v-if="showRefresh"
 						@trigger="get"
 						:captionTitle="capGen.button.refresh"
-						:image="autoRenew === -1 ? 'refresh.png' : 'autoRenew.png'"
+						:image="rowsFetching ? 'load.gif' : (autoRenew === -1 ? 'refresh.png' : 'autoRenew.png')"
 						:naked="true"
 					/>
 					
@@ -1404,6 +1404,7 @@ const MyList = {
 			if(this.offset !== 0 && this.offset % this.limit !== 0)
 				return this.setOffsetParamAndReload(this.offset -= this.offset % this.limit,false);
 			
+			this.rowsFetching = true;
 			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.relationsJoined,
@@ -1415,8 +1416,6 @@ const MyList = {
 			},this.blockDuringLoad).then(
 				res => {
 					const count = res.payload.count;
-					this.rowsFetching = true;
-					
 					this.getRowsDecrypted(res.payload.rows,this.expressions).then(
 						rows => {
 							this.count        = count;
