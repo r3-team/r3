@@ -2413,11 +2413,13 @@
 			],
 			"ftsDictTitle": "Sprache der Sucheingabe"
 		},
+		"inputPlaceholder": "Namen, Wörter & E-Mail-Adressen immer ausschreiben",
 		"modulesInactive": "Weitere Suchoptionen",
 		"tips": [
 			"Eine neue Suche kann von überall in REI3 durch Drücken von <b>STRG + SHIFT + F</b> gestartet werden. Falls Text ausgewählt ist, wird dieser als Sucheingabe genutzt.",
-			"Namen oder Wörter sollten vollständig ausgeschrieben werden, damit Ergebnisse in größeren Texten wie Beschreibungen oder Artikel gefunden werden können.",
-			"Wenn mehrsprachiger Inhalt durchsucht wird, ist es wichtig die Sprache der Sucheingabe zu definieren (rechts-oben in der Suchoberfläche); dies hilft der Volltextsuche beim Auflösen von Wordstämmen."
+			"Bei der Suche nach Namen, Wörtern oder E-Mail-Adressen, diese immer ausschreiben.",
+			"Wenn mehrsprachige Inhalte durchsucht werden, ist es wichtig, die Sprache der Sucheingabe festzulegen (rechts-oben).",
+			"Sprachabhängige Suchen, wie z. B. das Finden von \"Einträgen\" mit der Suche nach \"Eintrag\", sind möglich, wenn die Sprache des Inhaltes definiert ist. Dies macht oft für Artikel oder Dokumentationen Sinn, wird aber meist für E-Mails nicht gemacht."
 		]
 	},
 	"home": {

@@ -2413,12 +2413,14 @@
 			],
 			"ftsDictTitle": "Search input language"
 		},
+		"inputPlaceholder":"Write out names, words or email addresses",
+		"modulesInactive": "Additional search options",
 		"tips": [
 			"A new search can be started from anywhere in REI3 by pressing <b>CTRL + SHIFT + F</b>. If text is selected, it will be used as search input.",
-			"Names or words should be written out in full to find results in large texts, such as descriptions or articles.",
-			"If multilingual content is searched, it is important to define the search input language (top right corner of the search interface); this helps the full-text search match word stems."
-		],
-		"modulesInactive": "Additional search options"
+			"When searching for names, words or email addresses, write them out in full.",
+			"If multilingual content is searched, it is important to set the language of your search query (top right corner).",
+			"Language specific searches, like matching 'making' with 'make', work if the content has a defined language. This often makes sense for articles, but is usually not done for emails."
+		]
 	},
 	"home": {
 		"button": {

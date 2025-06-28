@@ -351,7 +351,7 @@ const MyGlobalSearch = {
 							v-model="input"
 							v-focus
 							@keyup.enter="submit"
-							:placeholder="capGen.threeDots"
+							:placeholder="capApp.inputPlaceholder"
 						/>
 						<my-button image="ok.png"
 							@trigger="submit"
