@@ -3,8 +3,11 @@ import MyBuilderColumnOptions from './builderColumnOptions.js';
 import MyBuilderIconInput     from './builderIconInput.js';
 import MyBuilderOpenFormInput from './builderOpenFormInput.js';
 import MyBuilderQuery         from './builderQuery.js';
-import {getItemTitleColumn}   from '../shared/builder.js';
 import MyTabs                 from '../tabs.js';
+import {
+	getItemTitleColumn,
+	getSqlPreview
+} from '../shared/builder.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
@@ -141,6 +144,14 @@ let MyBuilderSearchBar = {
 					:orders="orders"
 					:relationId="relationId"
 				/>
+
+				<!-- SQL preview -->
+				<div class="row">
+					<my-button image="code.png"
+						@trigger="getSqlPreview(searchBar.query,searchBar.columns)"
+						:caption="capGen.sqlPreview"
+					/>
+				</div>
 				
 				<!-- no global search input warning -->
 				<template v-if="!anySearchInput">
@@ -330,6 +341,7 @@ let MyBuilderSearchBar = {
 		getItemTitleColumn,
 		getJoinIndexMap,
 		getNilUuid,
+		getSqlPreview,
 		
 		// actions
 		columnSet(name,value) {
