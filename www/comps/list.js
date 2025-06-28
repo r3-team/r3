@@ -241,6 +241,7 @@ const MyList = {
 					<my-button
 						v-if="showRefresh"
 						@trigger="get"
+						:active="!rowsFetching"
 						:captionTitle="capGen.button.refresh"
 						:image="rowsFetching ? 'load.gif' : (autoRenew === -1 ? 'refresh.png' : 'autoRenew.png')"
 						:naked="true"
@@ -259,6 +260,7 @@ const MyList = {
 						v-if="filterQuick"
 						@keyup.enter="updatedFilterQuick"
 						v-model="filtersQuick"
+						:disabled="rowsFetching"
 						:placeholder="capGen.threeDots"
 						:title="capApp.quick"
 					/>
@@ -278,6 +280,7 @@ const MyList = {
 					<select class="dynamic"
 						v-if="hasChoices"
 						@change="setLoginOption('choiceId',$event.target.value)"
+						:disabled="rowsFetching"
 						:value="choiceId"
 					>
 						<option v-for="c in query.choices" :value="c.id">
@@ -452,10 +455,7 @@ const MyList = {
 								<!-- no results message -->
 								<tr v-if="rows.length === 0">
 									<td v-if="rowsFetching" colspan="999">
-										<div class="fetching">
-											<img src="images/load.gif">
-											<span>{{ capApp.fetching }}</span>
-										</div>
+										<my-label image="load.gif" :caption="capApp.fetching" />
 									</td>
 									<td v-if="!rowsFetching" colspan="999">
 										<div class="columnBatch">{{ capGen.resultsNone }}</div>
@@ -530,9 +530,8 @@ const MyList = {
 									<div class="list-cards-entry no-results" v-if="!rowsFetching">
 										{{ capGen.resultsNone }}
 									</div>
-									<div class="list-cards-entry no-results fetching" v-if="rowsFetching">
-										<img src="images/load.gif">
-										<span>{{ capApp.fetching }}</span>
+									<div class="list-cards-entry no-results" v-if="rowsFetching">
+										<my-label image="load.gif" :caption="capApp.fetching" />
 									</div>
 								</template>
 								

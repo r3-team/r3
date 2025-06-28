@@ -21,7 +21,8 @@ import (
 )
 
 const (
-	exprRegconfigSimple = "'simple'::REGCONFIG"
+	exprRegconfigSimple   = "'simple'::REGCONFIG"
+	sqlAliasTotalRowCount = "_cnt"
 )
 
 var (
@@ -37,11 +38,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64, q
 
 	var err error
 	indexRelationIds := make(map[int]uuid.UUID) // map of accessed relation IDs, key: relation index
-	relationIndexesEnc := make([]int, 0)        // indexes of relations from encrypted attributes within expressions
-	queryArgs := make([]interface{}, 0)         // SQL arguments for data query
+	isDoingRowCount := data.Limit != 0
+	relationIndexesEnc := make([]int, 0) // indexes of relations from encrypted attributes within expressions
+	queryArgs := make([]interface{}, 0)  // SQL arguments for data query
 
 	// prepare SQL query for data GET request
-	*query, err = prepareQuery(data, indexRelationIds, &queryArgs, loginId, 0)
+	*query, err = prepareQuery(data, indexRelationIds, &queryArgs, loginId, isDoingRowCount, 0)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -53,22 +55,21 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64, q
 	}
 
 	rowColumns := rows.FieldDescriptions()
-	rowColumnCnt := len(rowColumns) - 1 // -1 to account for cut off row count value
-
-	var resultCountTotal int64
 	results := make([]types.DataGetResult, 0)
+	var resultCountTotal int64
+
 	for rows.Next() {
 		valuesAll, err := rows.Values()
 		if err != nil {
 			return nil, 0, err
 		}
 
-		// get total count from first value
-		if len(results) == 0 && len(valuesAll) > 0 {
+		if isDoingRowCount && len(results) == 0 && len(valuesAll) > 0 && rowColumns[len(rowColumns)-1].Name == sqlAliasTotalRowCount {
+			// get total count from last row value
 			var valid bool
 			resultCountTotal, valid = valuesAll[len(valuesAll)-1].(int64)
 			if !valid {
-				return nil, 0, fmt.Errorf("row count is not int64")
+				return nil, 0, fmt.Errorf("row count is invalid data type")
 			}
 		}
 
@@ -83,7 +84,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64, q
 
 		// collect relation tuple IDs
 		// relation ID columns start after expressions
-		for i, j := len(data.Expressions), rowColumnCnt; i < j; i++ {
+		for i, j := len(data.Expressions), len(rowColumns); i < j; i++ {
 
 			matches := regexRelId.FindStringSubmatch(string(rowColumns[i].Name))
 			if len(matches) == 2 {
@@ -107,6 +108,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64, q
 		return nil, 0, err
 	}
 	rows.Close()
+
+	if !isDoingRowCount {
+		resultCountTotal = int64(len(results))
+	}
 
 	// resolve relation policy access permissions for retrieved result records
 	// DEL/SET actions only; records not allowed to GET are not retrieved as results
@@ -267,7 +272,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64, q
 }
 
 // returns SQL query from data GET request (sub query if nesting level != 0)
-func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryArgs *[]interface{}, loginId int64, nestingLevel int) (string, error) {
+func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryArgs *[]interface{}, loginId int64, addRowCount bool, nestingLevel int) (string, error) {
 
 	for _, expr := range data.Expressions {
 		if expr.AttributeId.Valid && !authorizedAttribute(loginId, expr.AttributeId.Bytes, types.AccessRead) {
@@ -350,7 +355,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 		if !expr.AttributeId.Valid {
 			indexRelationIdsSub := make(map[int]uuid.UUID)
 
-			subQuery, err := prepareQuery(expr.Query, indexRelationIdsSub, queryArgs, loginId, nestingLevel+1)
+			subQuery, err := prepareQuery(expr.Query, indexRelationIdsSub, queryArgs, loginId, false, nestingLevel+1)
 			if err != nil {
 				return "", err
 			}
@@ -376,7 +381,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 		}
 	}
 
-	// add expressions for relation tuple IDs & total row count after data GET expressions
+	// add expressions for relation tuple IDs after data GET expressions
 	if !isSubQuery {
 		for index, _ := range indexRelationIds {
 
@@ -392,7 +397,11 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 				schema.PkName,
 				getTupleIdCode(index, nestingLevel)))
 		}
-		inSelect = append(inSelect, "COUNT(*) OVER() AS _count")
+	}
+
+	// add expression for total row count
+	if addRowCount {
+		inSelect = append(inSelect, fmt.Sprintf("COUNT(*) OVER() AS %s", sqlAliasTotalRowCount))
 	}
 
 	// build GROUP BY line
@@ -663,7 +672,7 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{}, loginId
 		if s.Query.RelationId != uuid.Nil {
 			indexRelationIdsSub := make(map[int]uuid.UUID)
 
-			subQuery, err := prepareQuery(s.Query, indexRelationIdsSub, queryArgs, loginId, nestingLevel+1)
+			subQuery, err := prepareQuery(s.Query, indexRelationIdsSub, queryArgs, loginId, false, nestingLevel+1)
 			if err != nil {
 				return "", err
 			}

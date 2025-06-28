@@ -18,16 +18,6 @@
 	min-height:unset;
 	background-color:transparent;
 }
-.list .fetching{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-}
-.list .fetching img{
-	height:24px;
-	margin-right:8px;
-	filter:var(--image-filter);
-}
 .list-content{
 	flex:1 1 0px; /* important for list content to overflow */
 	display:flex;
