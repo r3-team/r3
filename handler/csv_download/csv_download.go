@@ -268,7 +268,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// finished if results >= as total available results or >= as total requested results
-		if get.Offset+get.Limit >= total || get.Offset+get.Limit >= totalLimit {
+		if int64(get.Offset+get.Limit) >= total || get.Offset+get.Limit >= totalLimit {
 			break
 		}
 		get.Offset += get.Limit
@@ -290,7 +290,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUser *time.Location, boolTrue string,
-	boolFalse string, dateFormat string, columnAttributeContentUse []string, loginId int64) (int, error) {
+	boolFalse string, dateFormat string, columnAttributeContentUse []string, loginId int64) (int64, error) {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {

@@ -30,8 +30,7 @@ var (
 
 // get data
 // updates SQL query pointer value (for error logging), returns data rows + total count
-func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
-	query *string) ([]types.DataGetResult, int, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64, query *string) ([]types.DataGetResult, int64, error) {
 
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
@@ -39,27 +38,38 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 	var err error
 	indexRelationIds := make(map[int]uuid.UUID) // map of accessed relation IDs, key: relation index
 	relationIndexesEnc := make([]int, 0)        // indexes of relations from encrypted attributes within expressions
-	results := make([]types.DataGetResult, 0)   // data GET results
 	queryArgs := make([]interface{}, 0)         // SQL arguments for data query
-	queryCount := ""                            // SQL query to retrieve a total count
 
 	// prepare SQL query for data GET request
-	*query, queryCount, err = prepareQuery(data, indexRelationIds, &queryArgs, loginId, 0)
+	*query, err = prepareQuery(data, indexRelationIds, &queryArgs, loginId, 0)
 	if err != nil {
-		return results, 0, err
+		return nil, 0, err
 	}
 
 	// execute SQL query
 	rows, err := tx.Query(ctx, *query, queryArgs...)
 	if err != nil {
-		return results, 0, err
+		return nil, 0, err
 	}
-	columns := rows.FieldDescriptions()
 
+	rowColumns := rows.FieldDescriptions()
+	rowColumnCnt := len(rowColumns) - 1 // -1 to account for cut off row count value
+
+	var resultCountTotal int64
+	results := make([]types.DataGetResult, 0)
 	for rows.Next() {
 		valuesAll, err := rows.Values()
 		if err != nil {
-			return results, 0, err
+			return nil, 0, err
+		}
+
+		// get total count from first value
+		if len(results) == 0 && len(valuesAll) > 0 {
+			var valid bool
+			resultCountTotal, valid = valuesAll[len(valuesAll)-1].(int64)
+			if !valid {
+				return nil, 0, fmt.Errorf("row count is not int64")
+			}
 		}
 
 		indexRecordIds := make(map[int]interface{}) // ID for each relation tuple by index
@@ -73,16 +83,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 		// collect relation tuple IDs
 		// relation ID columns start after expressions
-		for i, j := len(data.Expressions), len(columns); i < j; i++ {
+		for i, j := len(data.Expressions), rowColumnCnt; i < j; i++ {
 
-			matches := regexRelId.FindStringSubmatch(string(columns[i].Name))
-
+			matches := regexRelId.FindStringSubmatch(string(rowColumns[i].Name))
 			if len(matches) == 2 {
-
-				// column provides relation ID
 				relIndex, err := strconv.Atoi(matches[1])
 				if err != nil {
-					return results, 0, err
+					return nil, 0, err
 				}
 				indexRecordIds[relIndex] = valuesAll[i]
 			}
@@ -97,7 +104,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 		})
 	}
 	if err := rows.Err(); err != nil {
-		return results, 0, err
+		return nil, 0, err
 	}
 	rows.Close()
 
@@ -137,14 +144,14 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 		// get record ID black-/whitelists for all relations (base & joined)
 		if err := getPolicyLists(data.RelationId, 0); err != nil {
-			return results, 0, err
+			return nil, 0, err
 		}
 
 		for _, j := range data.Joins {
 
 			atr, exists := cache.AttributeIdMap[j.AttributeId]
 			if !exists {
-				return results, 0, handler.ErrSchemaUnknownAttribute(j.AttributeId)
+				return nil, 0, handler.ErrSchemaUnknownAttribute(j.AttributeId)
 			}
 
 			// join attribute is from other relation, use relationship partner
@@ -154,7 +161,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 			}
 
 			if err := getPolicyLists(relId, j.Index); err != nil {
-				return results, 0, err
+				return nil, 0, err
 			}
 		}
 
@@ -171,7 +178,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 				case int64:
 					recordId = v
 				default:
-					return results, 0, fmt.Errorf("record ID has invalid type")
+					return nil, 0, fmt.Errorf("record ID has invalid type")
 				}
 
 				if recordId == 0 {
@@ -208,7 +215,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 		atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
 		if !exists {
-			return results, 0, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes)
+			return nil, 0, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes)
 		}
 
 		if !atr.Encrypted || slices.Contains(relationIndexesEnc, expr.Index) {
@@ -231,7 +238,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 				case int64:
 					recordIds = append(recordIds, v)
 				default:
-					return results, 0, handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecDataKeysNotAvailable)
+					return nil, 0, handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecDataKeysNotAvailable)
 				}
 			}
 		}
@@ -240,11 +247,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 			indexRelationIds[relIndex], recordIds, loginId)
 
 		if err != nil {
-			return results, 0, err
+			return nil, 0, err
 		}
 
 		if len(encKeys) != len(recordIds) {
-			return results, 0, handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecDataKeysNotAvailable)
+			return nil, 0, handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecDataKeysNotAvailable)
 		}
 
 		// assign record keys in order
@@ -256,46 +263,34 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 			}
 		}
 	}
-
-	// work out result count
-	count := len(results)
-
-	if data.Limit != 0 && (count >= data.Limit || data.Offset != 0) {
-		// defined limit has been reached or offset was used, get total count
-		if err := tx.QueryRow(ctx, queryCount, queryArgs...).Scan(&count); err != nil {
-			return results, 0, err
-		}
-	}
-	return results, count, nil
+	return results, resultCountTotal, nil
 }
 
-// build SQL call from data GET request
-// also used for sub queries, a nesting level is included for separation (0 = main query)
-// returns data + count SQL query strings
-func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
-	queryArgs *[]interface{}, loginId int64, nestingLevel int) (string, string, error) {
+// returns SQL query from data GET request (sub query if nesting level != 0)
+func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryArgs *[]interface{}, loginId int64, nestingLevel int) (string, error) {
 
 	for _, expr := range data.Expressions {
 		if expr.AttributeId.Valid && !authorizedAttribute(loginId, expr.AttributeId.Bytes, types.AccessRead) {
-			return "", "", errors.New(handler.ErrUnauthorized)
+			return "", errors.New(handler.ErrUnauthorized)
 		}
 	}
 
 	var (
-		inJoin   []string // relation joins
-		inSelect []string // select expressions
-		inWhere  []string // filters
+		inJoin     []string // relation joins
+		inSelect   []string // select expressions
+		inWhere    []string // filters
+		isSubQuery = nestingLevel != 0
 	)
 
 	// check source relation and module
 	rel, exists := cache.RelationIdMap[data.RelationId]
 	if !exists {
-		return "", "", handler.ErrSchemaUnknownRelation(data.RelationId)
+		return "", handler.ErrSchemaUnknownRelation(data.RelationId)
 	}
 
 	mod, exists := cache.ModuleIdMap[rel.ModuleId]
 	if !exists {
-		return "", "", handler.ErrSchemaUnknownModule(rel.ModuleId)
+		return "", handler.ErrSchemaUnknownModule(rel.ModuleId)
 	}
 
 	// add relations as joins via relationship attributes
@@ -307,7 +302,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 
 		line, err := getQueryJoin(indexRelationIds, join, getFiltersByIndex(data.Filters, join.Index), queryArgs, loginId, nestingLevel)
 		if err != nil {
-			return "", "", err
+			return "", err
 		}
 		inJoin = append(inJoin, line)
 	}
@@ -319,7 +314,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 	for _, filter := range getFiltersByIndex(data.Filters, 0) {
 		line, err := getQueryWhere(filter, queryArgs, loginId, nestingLevel)
 		if err != nil {
-			return "", "", err
+			return "", err
 		}
 		inWhere = append(inWhere, line)
 	}
@@ -329,7 +324,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		getRelationCode(data.IndexSource, nestingLevel), rel.Policies)
 
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 	if policyFilter != "" {
 		inWhere = append(inWhere, policyFilter)
@@ -355,9 +350,9 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		if !expr.AttributeId.Valid {
 			indexRelationIdsSub := make(map[int]uuid.UUID)
 
-			subQuery, _, err := prepareQuery(expr.Query, indexRelationIdsSub, queryArgs, loginId, nestingLevel+1)
+			subQuery, err := prepareQuery(expr.Query, indexRelationIdsSub, queryArgs, loginId, nestingLevel+1)
 			if err != nil {
-				return "", "", err
+				return "", err
 			}
 
 			inSelect = append(inSelect, data_sql.GetExpression(
@@ -369,7 +364,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		// attribute expression
 		line, err := getQuerySelect(pos, expr, nestingLevel)
 		if err != nil {
-			return "", "", err
+			return "", err
 		}
 		inSelect = append(inSelect, line)
 
@@ -381,8 +376,8 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		}
 	}
 
-	// add expressions for relation tuple IDs after attributes (on main query)
-	if nestingLevel == 0 {
+	// add expressions for relation tuple IDs & total row count after data GET expressions
+	if !isSubQuery {
 		for index, _ := range indexRelationIds {
 
 			// if an aggregation function is used on any index, we cannot deliver record IDs
@@ -397,6 +392,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 				schema.PkName,
 				getTupleIdCode(index, nestingLevel)))
 		}
+		inSelect = append(inSelect, "COUNT(*) OVER() AS _count")
 	}
 
 	// build GROUP BY line
@@ -429,7 +425,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 	// build ORDER BY
 	queryOrder, err := getQueryLineOrderBy(data, nestingLevel)
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 
 	// build LIMIT/OFFSET
@@ -458,25 +454,12 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		queryLimit,               // LIMIT
 		queryOffset)              // OFFSET
 
-	// build final total count SQL query (not relevant for sub queries)
-	queryCount := ""
-	if nestingLevel == 0 {
-		queryCount = fmt.Sprintf(
-			`SELECT COUNT(*) FROM (SELECT %s`+"\n"+
-				`FROM "%s"."%s" AS "%s" %s%s%s) AS q`,
-			strings.Join(inSelect, `, `), // SELECT
-			mod.Name, rel.Name, relCode,  // FROM
-			strings.Join(inJoin, ""), // JOINS
-			queryWhere,               // WHERE
-			queryGroup)               // GROUP BY
-	}
-
 	// add intendation for nested sub queries
-	if nestingLevel != 0 {
+	if isSubQuery {
 		indent := strings.Repeat("\t", nestingLevel)
 		query = indent + regexp.MustCompile(`\r?\n`).ReplaceAllString(query, "\n"+indent)
 	}
-	return query, queryCount, nil
+	return query, nil
 }
 
 // add SELECT for attribute in given relation index
@@ -680,7 +663,7 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{}, loginId
 		if s.Query.RelationId != uuid.Nil {
 			indexRelationIdsSub := make(map[int]uuid.UUID)
 
-			subQuery, _, err := prepareQuery(s.Query, indexRelationIdsSub, queryArgs, loginId, nestingLevel+1)
+			subQuery, err := prepareQuery(s.Query, indexRelationIdsSub, queryArgs, loginId, nestingLevel+1)
 			if err != nil {
 				return "", err
 			}
@@ -831,7 +814,7 @@ func getQueryLineOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 			return "", errors.New("unknown data GET order parameter")
 		}
 
-		if ord.Ascending == true {
+		if ord.Ascending {
 			orderItems[i] = fmt.Sprintf("%s ASC", alias)
 		} else {
 			orderItems[i] = fmt.Sprintf("%s DESC NULLS LAST", alias)
