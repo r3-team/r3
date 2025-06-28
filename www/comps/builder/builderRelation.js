@@ -465,6 +465,7 @@ const MyBuilderRelation = {
 			<div class="tab-content graph" v-if="tabTarget === 'relationships'">
 				<echarts
 					@click="graphClicked"
+					:autoresize="true"
 					:option="graphOption"
 					:theme="settings.dark ? 'dark' : ''"
 				/>
