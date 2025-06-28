@@ -262,7 +262,7 @@ let MyBuilder = {
 						:title="capApp.navigationFilterHint"
 					/>
 					<my-button image="add.png"
-						v-if="['apis','collections','forms','js-functions','pg-functions','relations','roles'].includes(navigation)"
+						v-if="['apis','collections','forms','js-functions','pg-functions','relations','roles','search-bars'].includes(navigation)"
 						@trigger="add"
 						:active="moduleOwner"
 						:captionTitle="capGen.button.add"
@@ -539,7 +539,7 @@ let MyBuilder = {
 				case 'pg-functions': entity = 'pgFunction'; break;
 				case 'relations':    entity = 'relation';   break;
 				case 'roles':        entity = 'role';       break;
-				case 'search-bars':  entity = 'searchBars'; break;
+				case 'search-bars':  entity = 'searchBar';  break;
 				case 'variables':    entity = 'variable';   break;
 				case 'widgets':      entity = 'widget';     break;
 			}
