@@ -888,28 +888,30 @@ const MyList = {
 				}
 			}
 		});
-		this.$watch(() => [this.columns,this.columnsAll,this.orders],(newVals,oldVals) => {
-			for(let i = 0, j = newVals.length; i < j; i++) {
-				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
-					// if columns change, kill row data, otherwise content does not match columns
-					this.count = 0;
-					this.rows  = [];
-					this.removeInvalidFilters(); // if columns change, column filters can become invalid
-					this.removeInvalidOrders();
-					return this.reloadOutside();
+		if(!this.isInput) {
+			this.$watch(() => [this.columns,this.columnsAll,this.orders],(newVals,oldVals) => {
+				for(let i = 0, j = newVals.length; i < j; i++) {
+					if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
+						// if columns change, kill row data, otherwise content does not match columns
+						this.count = 0;
+						this.rows  = [];
+						this.removeInvalidFilters(); // if columns change, column filters can become invalid
+						this.removeInvalidOrders();
+						return this.get();
+					}
 				}
-			}
-		});
+			});
+		}
 		if(this.isInput && !this.showAllValues) {
-			this.$watch('inputRecordIds',(val) => {
+			this.$watch('inputRecordIds',v => {
 				// update input if record IDs are different (different count or IDs)
 				// input rows are usually taken from selection, but record IDs can also be set by functions, requiring reload of these record rows
-				if(val.length !== this.rowsInput.length)
-					return this.reloadOutside();
+				if(v.length !== this.rowsInput.length)
+					return this.getInput();
 				
-				for(let i = 0, j = this.rowsInput.length; i < j; i++) {
-					if(!val.includes(this.rowsInput[i].indexRecordIds[0]))
-						return this.reloadOutside();
+				for(const r of this.rowsInput) {
+					if(!v.includes(r.indexRecordIds[0]))
+						return this.getInput();
 				}
 			});
 		}
@@ -1017,7 +1019,6 @@ const MyList = {
 			else         this.$refs.aggregations.get();
 		},
 		reloadOutside() {
-			// outside state has changed, reload list or list input
 			if(this.isInput) this.getInput();
 			else             this.get();
 		},
@@ -1442,7 +1443,7 @@ const MyList = {
 			this.rowsInput = [];
 
 			if(this.dropdownShow)
-				this.$emit('dropdown-show',false);
+				this.get();
 			
 			// for inputs we only need data if:
 			// * field shows all values
