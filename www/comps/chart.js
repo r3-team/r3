@@ -12,9 +12,11 @@ export default {
 	name:'my-chart',
 	components:{ echarts:VueECharts },
 	template:`<div class="chart">
-		<div class="chart-toolbar default-inputs" v-if="needsHeader || hasChoices">
+		<div class="input-toolbar default-inputs" v-if="needsHeader || hasChoices">
+			<div></div>
 			<select class="auto"
 				@change="$emit('set-login-option','choiceId',$event.target.value)"
+				v-if="hasChoices"
 				:value="choiceId"
 			>
 				<option v-for="c in choices" :value="c.id">
