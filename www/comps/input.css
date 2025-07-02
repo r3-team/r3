@@ -76,6 +76,23 @@
 	border-bottom:2px solid var(--color-action-border);
 }
 
+/* generic input toolbar */
+.input-toolbar{
+	flex:0 0 auto;
+	min-height:var(--field-header-height);
+	padding:var(--spacing-field-header-padding);
+	box-sizing:border-box;
+	border-bottom:1px solid var(--color-border);
+	border-radius:var(--border-input-radius) var(--border-input-radius) 0px 0px;
+	background-color:var(--color-bg);
+	padding:0px calc(var(--spacing) / 2);
+	gap:12px;
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:space-between;
+	align-items:center;
+	z-index:var(--z-index-field-input-toolbar);
+}
 
 /* select input */
 .input-select{
@@ -301,11 +318,6 @@
 	flex:1 1 auto;
 	border-radius:var(--border-input-radius);
 	overflow:hidden;
-}
-.input-iframe-actions{
-	padding:2px 8px 0px;
-	border-bottom:1px solid var(--color-border);
-	border-radius:var(--border-input-radius) var(--border-input-radius) 0px 0px;
 }
 .input-iframe-input{
 	height:24px;
@@ -555,19 +567,6 @@
 	display:flex;
 	flex-flow:column nowrap;
 }
-.input-draw-toolbar{
-	min-height:var(--field-header-height);
-	padding:var(--spacing-field-header-padding);
-	box-sizing:border-box;
-	background-color:var(--color-bg);
-	border-bottom:1px solid var(--color-border);
-	border-radius:var(--border-input-radius) var(--border-input-radius) 0px 0px;
-	display:flex;
-	flex-flow:row wrap;
-	justify-content:space-between;
-	align-items:center;
-	gap:12px;
-}
 .input-draw .canvasWrap{
 	flex:1 1 0px; /* required to apply real height to canvas child*/
 	overflow:hidden;
@@ -590,20 +589,6 @@
 	flex-flow:column nowrap;
 	max-width:100%;
 	display:flex;
-}
-.input-richtext-toolbar{
-	flex:0 0 auto;
-	min-height:var(--field-header-height);
-	padding:var(--spacing-field-header-padding);
-	box-sizing:border-box;
-	border-bottom:1px solid var(--color-border);
-	border-radius:var(--border-input-radius) var(--border-input-radius) 0px 0px;
-	background-color:var(--color-bg);
-	padding:0px calc(var(--spacing) / 2);
-	display:flex;
-	flex-flow:row nowrap;
-	justify-content:space-between;
-	align-items:center;
 }
 .input-richtext-toolbar-link{
 	height:var(--row-height);

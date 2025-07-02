@@ -71,7 +71,7 @@ let MyInputFiles = {
 			v-on:drop.stop.prevent="drop"
 		>
 		<!-- header -->
-		<div v-if="!dragActive" class="input-files-header default-inputs">
+		<div v-if="!dragActive" class="input-files-header input-toolbar default-inputs">
 			<div class="row gap centered">
 				<slot name="input-icon" />
 				

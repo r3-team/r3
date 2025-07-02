@@ -5,19 +5,6 @@
 	flex:1 1 auto;
 }
 
-.input-files-header{
-	min-height:var(--field-header-height);
-	padding:var(--spacing-field-header-padding);
-	background-color:var(--color-bg);
-	border-bottom:1px solid var(--color-border);
-	border-radius:var(--border-input-radius) var(--border-input-radius) 0px 0px;
-	box-sizing:border-box;
-	z-index:var(--z-index-field-file-header);
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	justify-content:space-between;
-}
 .input-files-header input{
 	width:100%;
 	max-width:120px;
@@ -35,7 +22,7 @@
 	width:28px;
 	height:28px;
 	margin:0px 1px;
-	transition:width:0.3s, height:0.3s, margin:0.3s;
+	transition:width 0.3s, height 0.3s, margin 0.3s;
 }
 .input-files-actions{
 	display:flex;

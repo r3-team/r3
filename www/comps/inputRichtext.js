@@ -6,7 +6,7 @@ const MyInputRichtext = {
 	name:'my-input-richtext',
 	components:{'editor':Editor},
 	template:`<div class="input-richtext">
-		<div class="input-richtext-toolbar">
+		<div class="input-toolbar">
 			<div class="row">
 				<slot name="input-icon" />
 				<div class="input-richtext-toolbar-content" ref="toolbar" v-show="!readonly"></div>

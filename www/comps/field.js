@@ -352,7 +352,13 @@ let MyField = {
 					:isHidden="isHidden"
 					:monospace="isMonospace"
 					:readonly="isReadonly"
-				/>
+				>
+					<template #input-icon>
+						<div class="field-icon inList" v-if="iconId">
+							<img :src="srcBase64(iconIdMap[iconId].file)" />
+						</div>
+					</template>
+				</my-input-iframe>
 				
 				<!-- UUID input -->
 				<my-input-uuid

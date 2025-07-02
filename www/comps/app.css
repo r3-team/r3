@@ -30,7 +30,7 @@
 	--z-index-calendar-days-full-day:2;
 	
 	/* input field elements */
-	--z-index-field-file-header:3;
+	--z-index-field-input-toolbar:3;
 	--z-index-field-file-list:2;
 	--z-index-field-toggle-bool-first:3;
 	--z-index-field-toggle-bool-last:2;
