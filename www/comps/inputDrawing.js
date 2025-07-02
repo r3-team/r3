@@ -5,7 +5,7 @@ const MyInputDraw = {
 	name:'my-input-draw',
 	components:{ MyInputColorWrap },
 	template:`<div class="input-draw">
-		<div class="input-toolbar">
+		<div class="input-toolbar" v-if="!hideInputs">
 			<div class="row gap centered">
 				<slot name="input-icon" />
 				<my-button image="drawing.png"
@@ -75,6 +75,7 @@ const MyInputDraw = {
 	</div>`,
 	props:{
 		formLoading:{ type:Boolean, required:true },
+		hideInputs: { type:Boolean, required:true },
 		isHidden:   { type:Boolean, required:true },
 		modelValue: { required:true },
 		readonly:   { type:Boolean, required:true }

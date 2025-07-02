@@ -506,6 +506,7 @@ let MyField = {
 					v-if="isDrawing"
 					v-model="value"
 					:formLoading="formLoading"
+					:hideInputs="field.flags.includes('hideInputs')"
 					:isHidden="isHidden"
 					:readonly="isReadonly"
 				>

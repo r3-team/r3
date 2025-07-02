@@ -563,23 +563,25 @@ let MyBuilderFieldOptions = {
 				</template>
 
 				<!-- general field options -->
-				<tr v-if="isData && !isFiles && !isDrawing && !isDate && !isDatetime && !isTime">
+				<tr v-if="isData && !isFiles && !isDate && !isDatetime && !isTime">
 					<td>{{ capGen.options }}</td>
 					<td>
 						<div class="row gap wrap">
 							<template v-if="!isRelationship">
 								<my-button-check
+									v-if="!isDrawing"
 									@update:modelValue="setFlags('clipboard',$event)"
 									:caption="capGen.clipboard"
 									:modelValue="field.flags.includes('clipboard')"
 								/>
 								<my-button-check
+									v-if="!isDrawing"
 									@update:modelValue="setFlags('monospace',$event)"
 									:caption="capGen.monospace"
 									:modelValue="field.flags.includes('monospace')"
 								/>
 								<my-button-check
-									v-if="isIFrame || isBarcode"
+									v-if="isIFrame || isBarcode || isDrawing"
 									@update:modelValue="setFlags('hideInputs',$event)"
 									:caption="capApp.fieldFlags.hideInputs"
 									:modelValue="field.flags.includes('hideInputs')"
