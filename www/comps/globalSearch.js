@@ -335,6 +335,7 @@ const MyGlobalSearch = {
 				>
 					<my-form ref="popUpForm"
 						@close="popUp = null"
+						@pop-up-replace="popUpReplace"
 						@records-open="popUp.recordIds = $event"
 						:formId="popUp.formId"
 						:isPopUp="true"
@@ -532,6 +533,7 @@ const MyGlobalSearch = {
 	methods:{
 		// externals
 		getDictByLang,
+		getFormPopUpConfig,
 		getRandomInt,
 		
 		// general
@@ -550,6 +552,11 @@ const MyGlobalSearch = {
 		// actions
 		close() {
 			this.$store.commit('globalSearchInput',null);
+		},
+		popUpReplace(recordIds,openForm) {
+			this.popUp = null;
+			openForm.popUpType === 'float';
+			this.$nextTick(() => this.popUp = this.getFormPopUpConfig(recordIds,openForm,[],null));
 		},
 		resetDict() {
 			this.setOption('dictionary',this.getDictByLang());
