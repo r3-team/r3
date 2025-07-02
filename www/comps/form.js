@@ -80,6 +80,7 @@ let MyForm = {
 		>
 			<my-form ref="popUpForm"
 				@close="closePopUp"
+				@pop-up-replace="popUpReplace"
 				@refresh-parent="popUpFormUpdate('nothing',null)"
 				@record-deleted="popUpFormUpdate('deleted',$event)"
 				@record-updated="popUpFormUpdate('updated',$event)"
@@ -335,7 +336,7 @@ let MyForm = {
 		showButtonDel:    { type:Boolean, required:false, default:true },
 		showButtonNew:    { type:Boolean, required:false, default:true }
 	},
-	emits:['close','record-deleted','record-updated','records-open','refresh-parent'],
+	emits:['close','pop-up-replace','record-deleted','record-updated','records-open','refresh-parent'],
 	mounted() {
 		this.$watch('appResized',() => this.resized());
 		this.$watch(() => [this.favoriteId,this.formId,this.recordIds],this.reset,{
@@ -1315,6 +1316,10 @@ let MyForm = {
 			this.releaseLoadingOnNextTick();
 			this.$emit('refresh-parent');
 		},
+		popUpReplace() {
+			this.popUp = null;
+			this.$nextTick(() => this.openForm(...arguments));
+		},
 		scrollToInvalidField() {
 			const el = this.$refs.fields.querySelector(`[data-field-is-valid="0"]`);
 			if(el !== null)
@@ -1368,6 +1373,12 @@ let MyForm = {
 			
 			const openSameForm  = this.form.id === openForm.formIdOpen;
 			const openPopUpForm = openForm.popUpType !== null;
+
+			if(this.isPopUp && replace) {
+				// a floating pop-up can be replaced by closing and reopening it on its parent
+				openForm.popUpType === 'float';
+				return this.$emit('pop-up-replace',recordIds,openForm,getterArgs,newTab,null,false);
+			}
 			
 			if(this.isPopUp || this.isWidget) {
 				// a pop-up/widget form can be reloaded by using itself as target (the same as regular forms)
@@ -1425,10 +1436,8 @@ let MyForm = {
 			}
 			
 			// new form
-			if(replace)
-				return this.$router.replace(path);
-			
-			return this.$router.push(path);
+			if(replace) this.$router.replace(path);
+			else        this.$router.push(path);
 		},
 		setFormArgs(args,push) {
 			const path = this.getFormRoute(this.favoriteId,this.form.id,
