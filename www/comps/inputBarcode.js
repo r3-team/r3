@@ -5,13 +5,16 @@ export {MyInputBarcode as default};
 let MyInputBarcode = {
 	name:'my-input-barcode',
 	template:`<div class="input-barcode">
-		<div class="input-barcode-actions row gap" v-if="!hideInputs">
-			<input class="input-iframe-input" data-is-input="1"
-				v-model="inputText"
-				:class="{ monospace }"
-				:disabled="readonly"
-				:placeholder="capGen.threeDots"
-			/>
+		<div class="input-toolbar row gap" v-if="!hideInputs">
+			<div class="row grow default-inputs">
+				<slot name="input-icon" />
+				<input class="dynamic" data-is-input="1"
+					v-model="inputText"
+					:class="{ monospace }"
+					:disabled="readonly"
+					:placeholder="capGen.threeDots"
+				/>
+			</div>
 			<my-button image="barcode.png"
 				v-if="inputFormat !== null && !readonly"
 				@trigger="update('format',null)"

@@ -376,7 +376,13 @@ let MyField = {
 					:hideInputs="field.flags.includes('hideInputs')"
 					:monospace="isMonospace"
 					:readonly="isReadonly"
-				/>
+				>
+					<template #input-icon>
+						<div class="field-icon inList" v-if="iconId">
+							<img :src="srcBase64(iconIdMap[iconId].file)" />
+						</div>
+					</template>
+				</my-input-barcode>
 				
 				<!-- regconfig input -->
 				<my-input-select

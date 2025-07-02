@@ -220,11 +220,6 @@
 .input-barcode-input.monospace{
 	font-family:var(--font-family-monospace);
 }
-.input-barcode-actions{
-	padding:2px 8px 0px;
-	border-bottom:1px solid var(--color-border);
-	border-radius:var(--border-input-radius) var(--border-input-radius) 0px 0px;
-}
 .input-barcode-format{
 	padding:var(--spacing);
 	overflow:auto;
@@ -318,20 +313,6 @@
 	flex:1 1 auto;
 	border-radius:var(--border-input-radius);
 	overflow:hidden;
-}
-.input-iframe-input{
-	height:24px;
-	padding:4px 0px;
-	font-family:inherit;
-	font-size:inherit;
-	color:inherit;
-	background-color:transparent;
-	border:none;
-	outline:none;
-	flex:1 1 auto;
-}
-.input-iframe-input.monospace{
-	font-family:var(--font-family-monospace);
 }
 .input-iframe-content{
 	flex:1 1 auto;
@@ -538,6 +519,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:space-between;
+	align-items:center;
 	gap:12px;
 }
 .input-color-picker{

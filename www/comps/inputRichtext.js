@@ -12,7 +12,7 @@ const MyInputRichtext = {
 				<div class="input-richtext-toolbar-content" ref="toolbar" v-show="!readonly"></div>
 			</div>
 			<div></div>
-			<div class="row gap">
+			<div class="row gap centered">
 				<a
 					class="input-richtext-toolbar-link clickable"
 					target="_blank"

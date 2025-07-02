@@ -332,6 +332,7 @@
 .list-input-flow{
 	flex:1 1 auto;
 	padding:calc(var(--spacing) / 4);
+	padding-left:0px; /* field icon */
 	display:flex;
 	flex-flow:row wrap;
 	gap:calc(var(--spacing) / 4);

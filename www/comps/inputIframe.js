@@ -3,8 +3,8 @@ export {MyInputIframe as default};
 let MyInputIframe = {
 	name:'my-input-iframe',
 	template:`<div class="input-iframe">
-		<div class="input-toolbar default-inputs" v-if="!hideInputs" :class="{ readonly:readonly }">
-			<div class="row grow">
+		<div class="input-toolbar" v-if="!hideInputs" :class="{ readonly:readonly }">
+			<div class="row grow default-inputs">
 				<slot name="input-icon" />
 				<input class="dynamic" data-is-input="1"
 					v-model="srcInput"
