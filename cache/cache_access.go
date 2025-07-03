@@ -178,8 +178,9 @@ func load_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 					continue
 				}
 				// role does not set access for this attribute (access is inherited from relation)
-				// delete cumulated attribute access if less/equal than inherited access
-				if accessAtr, exists := loginIdMapAccess[loginId].Attribute[atr.Id]; exists && accessAtr <= accessRel {
+				// delete cumulated attribute access if less than inherited access on this relation (not if access is equal!)
+				//  if removed due to equal access, when looking at the next relation access, inheritance can also be asumed
+				if accessAtr, exists := loginIdMapAccess[loginId].Attribute[atr.Id]; exists && accessAtr < accessRel {
 					delete(loginIdMapAccess[loginId].Attribute, atr.Id)
 				}
 			}
