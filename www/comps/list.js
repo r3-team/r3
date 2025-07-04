@@ -1418,9 +1418,8 @@ const MyList = {
 					const count = res.payload.count;
 					this.getRowsDecrypted(res.payload.rows,this.expressions).then(
 						rows => {
-							this.count        = count;
-							this.rows         = rows;
-							this.rowsFetching = false;
+							this.count = count;
+							this.rows  = rows;
 							this.selectReset();
 							this.reloadAggregations(false);
 							this.$emit('record-count-change',this.count);
@@ -1430,7 +1429,7 @@ const MyList = {
 					
 				},
 				this.$root.genericError
-			);
+			).finally(() => this.rowsFetching = false);
 		},
 		getInput() {
 			// nothing to get if form is currently loading
