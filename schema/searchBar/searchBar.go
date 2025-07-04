@@ -75,9 +75,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, bar types.SearchBar) error {
 	if known {
 		if _, err := tx.Exec(ctx, `
 			UPDATE app.search_bar
-			SET icon_id = $1
-			WHERE id = $2
-		`, bar.IconId, bar.Id); err != nil {
+			SET icon_id = $1, name = $2
+			WHERE id = $3
+		`, bar.IconId, bar.Name, bar.Id); err != nil {
 			return err
 		}
 	} else {
