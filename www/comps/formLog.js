@@ -1,6 +1,7 @@
 import MyField                         from './field.js';
 import {aesGcmDecryptBase64WithPhrase} from './shared/crypto.js';
 import {consoleError}                  from './shared/error.js';
+import {getFieldOverwriteDefault}      from './shared/field.js';
 import {getCaption}                    from './shared/language.js';
 import {getUnixFormat}                 from './shared/time.js';
 import {
@@ -11,10 +12,6 @@ import {
 	getIndexAttributeIdByField,
 	isAttributeFiles
 } from './shared/attribute.js';
-import {
-	getFieldOverwriteDefault,
-	getFieldProcessedDefault
-} from './shared/field.js';
 export {MyFormLog as default};
 
 let MyFormLog = {
@@ -65,8 +62,8 @@ let MyFormLog = {
 							v-if="!isFiles(ia)"
 							:entityIdMapEffect
 							:field="indexAttributeIdMapField[ia]"
-							:fieldIdMapOverwrite
 							:fieldIdMapOptions
+							:fieldIdMapOverwrite
 							:fieldIdMapProcessed
 							:formBadSave="false"
 							:formBlockInputs="false"
@@ -77,7 +74,7 @@ let MyFormLog = {
 							:isAloneInForm="false"
 							:joinsIndexMap
 							:key="indexAttributeIdMapField[ia].id"
-							:moduleId="moduleId"
+							:moduleId
 							:values="{ ...values, ...l.values }"
 							:variableIdMapLocal
 						/>
@@ -128,15 +125,16 @@ let MyFormLog = {
 		</div>
 	</div>`,
 	props:{
-		entityIdMapEffect: { type:Object,  required:true },
-		fieldIdMapData:    { type:Object,  required:true },
-		formLoading:       { type:Boolean, required:true },
-		isPopUpFloating:   { type:Boolean, required:true },
-		indexMapRecordKey: { type:Object,  required:true },
-		joinsIndexMap:     { type:Object,  required:true },
-		moduleId:          { type:String,  required:true },
-		values:            { type:Object,  required:true },
-		variableIdMapLocal:{ type:Object,  required:true }
+		entityIdMapEffect:  { type:Object,  required:true },
+		fieldIdMapData:     { type:Object,  required:true },
+		fieldIdMapProcessed:{ type:Object,  required:true },
+		formLoading:        { type:Boolean, required:true },
+		isPopUpFloating:    { type:Boolean, required:true },
+		indexMapRecordKey:  { type:Object,  required:true },
+		joinsIndexMap:      { type:Object,  required:true },
+		moduleId:           { type:String,  required:true },
+		values:             { type:Object,  required:true },
+		variableIdMapLocal: { type:Object,  required:true }
 	},
 	emits:['close-log'],
 	watch:{
@@ -146,7 +144,6 @@ let MyFormLog = {
 	},
 	data() {
 		return {
-			fieldIdMapProcessed:{},
 			fieldIdMapOptions:{},
 			fieldIdMapOverwrite:{},
 			loading:false,
@@ -177,7 +174,6 @@ let MyFormLog = {
 	},
 	mounted() {
 		this.fieldIdMapOverwrite = this.getFieldOverwriteDefault();
-		this.fieldIdMapProcessed = this.getFieldProcessedDefault();
 		this.get();
 	},
 	methods:{
@@ -189,7 +185,6 @@ let MyFormLog = {
 		getCaption,
 		getDetailsFromIndexAttributeId,
 		getFieldOverwriteDefault,
-		getFieldProcessedDefault,
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
 		getUnixFormat,

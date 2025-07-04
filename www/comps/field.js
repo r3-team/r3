@@ -1127,10 +1127,10 @@ let MyField = {
 		isVariable: (s) => s.field.content === 'variable',
 
 		// processed states
-		choices:     (s) => s.fieldIdMapProcessed.choices[s.field.id]      ?? [],
-		columns:     (s) => s.fieldIdMapProcessed.columns[s.field.id]      ?? [],
-		filters:     (s) => s.fieldIdMapProcessed.filters[s.field.id]      ?? [],
-		filtersInput:(s) => s.fieldIdMapProcessed.filtersInput[s.field.id] ?? [],
+		choices:     (s) => s.fieldIdMapProcessed.choices[s.field.id] ?? [],
+		columns:     (s) => s.fieldIdMapProcessed.columns[s.field.id] ?? [],
+		filters:     (s) => s.fieldIdMapProcessed.filters[s.field.id] ?? [],
+		filtersInput:(s) => s.logViewer ? [] : (s.fieldIdMapProcessed.filtersInput[s.field.id] ?? []),
 		
 		// states
 		isAlone:   (s) => s.isAloneInForm || s.isAloneInTab,

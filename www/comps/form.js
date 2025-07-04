@@ -304,6 +304,7 @@ let MyForm = {
 			@close-log="toggleLog"
 			:entityIdMapEffect
 			:fieldIdMapData
+			:fieldIdMapProcessed
 			:formLoading="loading"
 			:isPopUpFloating
 			:indexMapRecordKey
