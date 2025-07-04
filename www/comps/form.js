@@ -811,20 +811,23 @@ let MyForm = {
 						const choiceId        = s.$root.getOrFallback(s.fieldIdMapOptions[f.id],'choiceId',choices.length === 0 ? null : choices[0].id);
 						const columnIdsByUser = s.$root.getOrFallback(s.fieldIdMapOptions[f.id],'columnIdsByUser',[]);
 						const collectionIdMap = s.$root.getOrFallback(s.fieldIdMapOptions[f.id],'collectionIdMapIndexes',{});
+						const filters         = s.getQueryFiltersProcessed(
+							f.query.filters,s.joinsIndexMap,null,null,s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
+							s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord,collectionIdMap,s.variableIdMapLocal
+						);
 
 						for(let i = 0, j = choices.length; i < j; i++) {
 							choices[i].filters = s.getQueryFiltersProcessed(
 								choices[i].filters,s.joinsIndexMap,null,null,s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
 								s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord,collectionIdMap,s.variableIdMapLocal);
 						}
+
 						out.choices[f.id] = choices;
 						out.columns[f.id] = s.getColumnsProcessed(
 							f.columns,columnIdsByUser,s.joinsIndexMap,null,null,s.fieldIdMapData,s.fieldIdsChanged,
 							s.fieldIdsInvalid,s.values,s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord);
-						out.filters[f.id] = s.getQueryFiltersProcessed(
-							f.query.filters,s.joinsIndexMap,null,null,s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
-							s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord,collectionIdMap,s.variableIdMapLocal
-						).concat(getChoiceFilters(choices,choiceId));
+						out.filters[f.id] = filters.concat(getChoiceFilters(choices,choiceId));
+						out.filtersInput[f.id] = filters;
 					}
 				}
 			};

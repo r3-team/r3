@@ -628,6 +628,7 @@ const MyList = {
 		columnsAll:      { type:Array,   required:false, default:() => [] }, // list columns, all
 		dataOptions:     { type:Number,  required:false, default:0 },        // data permissions following form states
 		filters:         { type:Array,   required:true },                    // processed query filters
+		filtersInput:    { type:Array,   required:false, default:() => [] }, // processed query filters relevant for input lookup
 		layoutDefault:   { type:String,  required:false, default:'table' },  // default list layout: table, cards
 		limitDefault:    { type:Number,  required:false, default:10 },       // default list limit
 		loginOptions:    { type:Object,  required:true },
@@ -721,6 +722,7 @@ const MyList = {
 					JSON.parse(JSON.stringify(s.filtersUser))
 				));
 			
+			// remove IDs from input in result set if it´s an input
 			if(s.anyInputRows)
 				filters.push(s.getQueryAttributesPkFilter(
 					s.query.relationId,s.inputRecordIds,0,true
@@ -1451,8 +1453,8 @@ const MyList = {
 			if(!this.showAllValues && !this.autoSelect && !this.anyInputRows)
 				return;
 			
-			// apply existing filters, except user filters (not relevant here)
-			let filters = JSON.parse(JSON.stringify(this.filters));
+			// apply relevant filters, without choice filters as these should not affect the input
+			let filters = JSON.parse(JSON.stringify(this.filtersInput));
 			if(!this.showAllValues && this.anyInputRows)
 				filters.push(this.getQueryAttributesPkFilter(
 					this.query.relationId,this.inputRecordIds,0,false

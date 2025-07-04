@@ -104,15 +104,15 @@ let MyField = {
 					:attributeIdColor="field.attributeIdColor"
 					:attributeIdDate0="field.attributeIdDate0"
 					:attributeIdDate1="field.attributeIdDate1"
-					:choices="choicesProcessed"
-					:columns="columnsProcessed"
+					:choices="choices"
+					:columns="columns"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
 					:dataOptions="dataOptions"
 					:daysShowDef="field.days"
 					:daysShowToggle="field.daysToggle"
 					:fieldId="field.id"
-					:filters="filtersProcessed"
+					:filters="filters"
 					:formLoading="formLoading"
 					:hasOpenForm="field.openForm !== null"
 					:iconId="iconId ? iconId : null"
@@ -141,15 +141,15 @@ let MyField = {
 					:attributeIdColor="field.attributeIdColor"
 					:attributeIdDate0="field.attributeIdDate0"
 					:attributeIdDate1="field.attributeIdDate1"
-					:choices="choicesProcessed"
-					:columns="columnsProcessed"
+					:choices="choices"
+					:columns="columns"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
 					:dataOptions="dataOptions"
 					:fieldId="field.id"
 					:days0="field.dateRange0 / 86400"
 					:days1="field.dateRange1 / 86400"
-					:filters="filtersProcessed"
+					:filters="filters"
 					:formLoading="formLoading"
 					:hasOpenForm="field.openForm !== null"
 					:iconId="iconId ? iconId : null"
@@ -178,13 +178,13 @@ let MyField = {
 					@set-collection-indexes="setCollectionIndexes"
 					@set-login-option="setLoginOption"
 					:attributeIdSort="field.attributeIdSort"
-					:choices="choicesProcessed"
-					:columns="columnsProcessed"
+					:choices="choices"
+					:columns="columns"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
 					:dataOptions="dataOptions"
 					:fieldId="field.id"
-					:filters="filtersProcessed"
+					:filters="filters"
 					:formLoading="formLoading"
 					:hasOpenForm="field.openForm !== null"
 					:iconId="iconId ? iconId : null"
@@ -204,9 +204,9 @@ let MyField = {
 				<my-chart
 					v-if="isChart"
 					@set-login-option="setLoginOption"
-					:choices="choicesProcessed"
-					:columns="columnsProcessed"
-					:filters="filtersProcessed"
+					:choices="choices"
+					:columns="columns"
+					:filters="filters"
 					:formLoading="formLoading"
 					:isHidden="isHidden"
 					:limit="field.query.fixedLimit"
@@ -232,27 +232,28 @@ let MyField = {
 					@set-login-option="setLoginOption"
 					:autoRenewDefault="field.autoRenew"
 					:caption="isAlone ? caption : ''"
-					:choices="choicesProcessed"
+					:choices
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
-					:columns="columnsProcessed"
+					:columns
 					:columnsAll="field.columns"
 					:csvExport="field.csvExport"
 					:csvImport="field.csvImport"
 					:dataOptions="dataOptions"
 					:filterQuick="field.filterQuick"
-					:filters="filtersProcessed"
-					:formLoading="formLoading"
+					:filters
+					:filtersInput
+					:formLoading
 					:hasOpenForm="field.openForm !== null"
 					:hasOpenFormBulk="field.openFormBulk !== null"
-					:isHidden="isHidden"
+					:isHidden
 					:isSingleField="isAlone"
 					:layoutDefault="field.layout"
 					:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 					:loadWhileHidden="parentIsCounting"
-					:loginOptions="loginOptions"
-					:moduleId="moduleId"
-					:popUpFormInline="popUpFormInline"
+					:loginOptions
+					:moduleId
+					:popUpFormInline
 					:query="field.query"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				>
@@ -556,13 +557,14 @@ let MyField = {
 					@records-selected="relationshipRecordsSelected"
 					@records-selected-init="$emit('set-value',fieldAttributeId,$event,true,true,field.id)"
 					@set-login-option="setLoginOption"
-					:choices="choicesProcessed"
-					:columns="columnsProcessed"
+					:choices
+					:columns
 					:dataOptions="dataOptions"
-					:dropdownShow="dropdownShow"
+					:dropdownShow
 					:filterQuick="field.filterQuick"
-					:filters="filtersProcessed"
-					:formLoading="formLoading"
+					:filters
+					:filtersInput
+					:formLoading
 					:hasOpenForm="!isVariable && field.openForm !== null"
 					:header="false"
 					:inputAsCategory="field.flags.includes('relCategory')"
@@ -575,8 +577,8 @@ let MyField = {
 					:inputValid="!showInvalid"
 					:isInput="true"
 					:limitDefault="100"
-					:loginOptions="loginOptions"
-					:moduleId="moduleId"
+					:loginOptions
+					:moduleId
 					:query="field.query"
 				>
 					<template #input-icon>
@@ -1125,9 +1127,10 @@ let MyField = {
 		isVariable: (s) => s.field.content === 'variable',
 
 		// processed states
-		choicesProcessed:(s) => s.fieldIdMapProcessed.choices[s.field.id] === undefined ? [] : s.fieldIdMapProcessed.choices[s.field.id],
-		columnsProcessed:(s) => s.fieldIdMapProcessed.columns[s.field.id] === undefined ? [] : s.fieldIdMapProcessed.columns[s.field.id],
-		filtersProcessed:(s) => s.fieldIdMapProcessed.filters[s.field.id] === undefined ? [] : s.fieldIdMapProcessed.filters[s.field.id],
+		choices:     (s) => s.fieldIdMapProcessed.choices[s.field.id]      ?? [],
+		columns:     (s) => s.fieldIdMapProcessed.columns[s.field.id]      ?? [],
+		filters:     (s) => s.fieldIdMapProcessed.filters[s.field.id]      ?? [],
+		filtersInput:(s) => s.fieldIdMapProcessed.filtersInput[s.field.id] ?? [],
 		
 		// states
 		isAlone:   (s) => s.isAloneInForm || s.isAloneInTab,
