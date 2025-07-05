@@ -212,7 +212,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, f
 		createNew = true
 	} else {
 		// query exists - delete if it was remade (different ID) or is not required anymore (query without a base relation)
-		if query.Id.String() != string(queryIdExisting.Bytes[:]) || noBaseRelation {
+		if query.Id.String() != queryIdExisting.String() || noBaseRelation {
 			if _, err := tx.Exec(ctx, `
 				DELETE FROM app.query
 				WHERE id = $1

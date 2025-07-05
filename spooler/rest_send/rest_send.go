@@ -132,7 +132,7 @@ func callExecute(c restCall) error {
 
 		fnc, exists := cache.PgFunctionIdMap[c.pgFunctionIdCallback.Bytes]
 		if !exists {
-			return fmt.Errorf("unknown function '%s'", c.pgFunctionIdCallback.Bytes)
+			return fmt.Errorf("unknown function '%s'", c.pgFunctionIdCallback.String())
 		}
 		mod, exists := cache.ModuleIdMap[fnc.ModuleId]
 		if !exists {

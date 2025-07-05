@@ -4,6 +4,7 @@
 	flex-flow:column nowrap;
 	/* required for some input fields to take proper size */
 	max-height:100%;
+	max-width:calc(100% - var(--spacing));
 }
 .field.container{
 	display:flex;
@@ -11,6 +12,7 @@
 	margin:0px !important;
 	/* to unset max-height:100% on .field for containers */
 	max-height:unset;
+	max-width:100%;
 }
 .field.container.row{
 	flex-direction:row;
@@ -69,9 +71,9 @@
 	padding-right:var(--spacing-field-padding);
 }
 .field-content.isSingleField{
-	border:none;
-	box-shadow:none;
-	border-radius:0px;
+	border:none !important;
+	box-shadow:none !important;
+	border-radius:0px !important;
 }
 .field-content>.input.textarea{
 	margin:0px;
@@ -187,7 +189,7 @@
 .field .input.textarea{
 	font-size:inherit;
 	font-family:inherit;
-	resize:vertical;
+	resize:none;
 }
 .field .color-input{
 	display:flex;

@@ -22,6 +22,7 @@ const MyStoreSchema = {
 		moduleNameMap:{},
 		pgFunctionIdMap:{},
 		pgTriggerIdMap:{},
+		presetIdMap:{},
 		relationIdMap:{},
 		roleIdMap:{},
 		variableIdMap:{},
@@ -83,6 +84,11 @@ const MyStoreSchema = {
 					// process indexes
 					for(const ind of rel.indexes) {
 						state.indexIdMap[ind.id] = ind;
+					}
+
+					// process presets
+					for(const pre of rel.presets) {
+						state.presetIdMap[pre.id] = pre;
 					}
 				}
 				
@@ -178,6 +184,7 @@ const MyStoreSchema = {
 		moduleNameMap:      (state) => state.moduleNameMap,
 		pgFunctionIdMap:    (state) => state.pgFunctionIdMap,
 		pgTriggerIdMap:     (state) => state.pgTriggerIdMap,
+		presetIdMap:        (state) => state.presetIdMap,
 		presetIdMapRecordId:(state) => state.presetIdMapRecordId,
 		relationIdMap:      (state) => state.relationIdMap,
 		roleIdMap:          (state) => state.roleIdMap,

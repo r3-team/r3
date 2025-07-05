@@ -7,6 +7,11 @@ import {
 } from './query.js';
 import MyStore from '../../stores/store.js';
 
+export function getValidDbCharsForRx() {
+	// valid characters for DB entity names (PG functions, modules, relations, attributes, ...)
+	return '[a-z0-9_]+';
+};
+
 export function getFieldHasQuery(field) {
 	if(field.content === 'variable' && field.variableId !== null)
 		return isAttributeRelationship(MyStore.getters['schema/variableIdMap'][field.variableId].content);

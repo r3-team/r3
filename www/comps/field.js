@@ -296,20 +296,19 @@ let MyField = {
 							v-for="f in t.fields"
 							@clipboard="$emit('clipboard')"
 							@execute-function="$emit('execute-function',$event)"
-							@hotkey="$emit('hotkey',$event)"
 							@open-form="(...args) => $emit('open-form',...args)"
 							@set-counter="(...args) => setTabCounter(i,args[0],args[1])"
 							@set-form-args="(...args) => $emit('set-form-args',...args)"
 							@set-touched="(...args) => $emit('set-touched',...args)"
 							@set-valid="(...args) => $emit('set-valid',...args)"
 							@set-value="(...args) => $emit('set-value',...args)"
-							@set-value-init="(...args) => $emit('set-value-init',...args)"
 							:dataFieldMap="dataFieldMap"
 							:entityIdMapEffect="entityIdMapEffect"
 							:favoriteId="favoriteId"
 							:field="f"
 							:fieldIdsChanged="fieldIdsChanged"
 							:fieldIdsInvalid="fieldIdsInvalid"
+							:fieldIdsTouched="fieldIdsTouched"
 							:fieldIdMapOverwrite="fieldIdMapOverwrite"
 							:formBadSave="formBadSave"
 							:formIsEmbedded="formIsEmbedded"
@@ -439,8 +438,8 @@ let MyField = {
 				<my-input-richtext
 					v-if="isRichtext"
 					v-model="value"
-					@hotkey="$emit('hotkey',$event)"
 					:attributeIdFile="field.attributeIdAlt"
+					:isHidden="isHidden"
 					:readonly="isReadonly"
 					:valueFiles="valueAlt"
 				/>
@@ -543,7 +542,7 @@ let MyField = {
 					@open-form="(...args) => openForm(args[0],[],args[1],null)"
 					@records-selected="relationshipRecordsSelected"
 					@record-removed="relationshipRecordRemoved"
-					@records-selected-init="$emit('set-value-init',fieldAttributeId,$event,true,true)"
+					@records-selected-init="$emit('set-value',fieldAttributeId,$event,true,true,field.id)"
 					:choices="choicesProcessed"
 					:columns="columnsProcessed"
 					:dataOptions="dataOptions"
@@ -588,7 +587,7 @@ let MyField = {
 			</div>
 			
 			<!-- bulk notice -->
-			<div class="captionSub" v-if="isBulkUpdate && !notTouched">
+			<div class="captionSub" v-if="isBulkUpdate && isTouched">
 				{{ capApp.bulkTouched }}
 			</div>
 			
@@ -626,14 +625,12 @@ let MyField = {
 			v-for="f in field.fields"
 			@clipboard="$emit('clipboard')"
 			@execute-function="$emit('execute-function',$event)"
-			@hotkey="$emit('hotkey',$event)"
 			@open-form="(...args) => $emit('open-form',...args)"
 			@set-counter="(...args) => $emit('set-counter',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
 			@set-touched="(...args) => $emit('set-touched',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
 			@set-value="(...args) => $emit('set-value',...args)"
-			@set-value-init="(...args) => $emit('set-value-init',...args)"
 			:isBulkUpdate="isBulkUpdate"
 			:dataFieldMap="dataFieldMap"
 			:entityIdMapEffect="entityIdMapEffect"
@@ -641,6 +638,7 @@ let MyField = {
 			:field="f"
 			:fieldIdsChanged="fieldIdsChanged"
 			:fieldIdsInvalid="fieldIdsInvalid"
+			:fieldIdsTouched="fieldIdsTouched"
 			:fieldIdMapOverwrite="fieldIdMapOverwrite"
 			:formBadSave="formBadSave"
 			:formIsEmbedded="formIsEmbedded"
@@ -664,6 +662,7 @@ let MyField = {
 		field:              { type:Object,  required:true },
 		fieldIdsChanged:    { type:Array,   required:false, default:() => {return []} },
 		fieldIdsInvalid:    { type:Array,   required:false, default:() => {return []} },
+		fieldIdsTouched:    { type:Array,   required:false, default:() => {return []} },
 		fieldIdMapOverwrite:{ type:Object,  required:true },
 		formBadSave:        { type:Boolean, required:true },                 // attempted save with invalid inputs
 		formIsEmbedded:     { type:Boolean, required:true },                 // parent form is embedded (pop-up, inline, widget)
@@ -682,15 +681,15 @@ let MyField = {
 		variableIdMapLocal: { type:Object,  required:true }                  // variable values by ID (variables assigned to form)
 	},
 	emits:[
-		'clipboard','execute-function','hotkey','open-form','set-form-args',
-		'set-counter','set-touched','set-valid','set-value','set-value-init'
+		'clipboard','execute-function','open-form','set-form-args',
+		'set-counter','set-touched','set-valid','set-value'
 	],
 	data() {
 		return {
 			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
 			columnIdsByUser:[],           // column IDs, selected by user to be shown inside field (primarily for list fields)
 			dropdownShow:false,           // for inputs with dropdowns (relationship, date, color picker)
-			notTouched:true,              // data field was not touched by user
+			loaded:false,
 			popUpFormInline:null,         // inline form for some field types (list)
 			regconfigInput:'',
 			showPassword:false,           // for password fields
@@ -700,9 +699,6 @@ let MyField = {
 	},
 	watch:{
 		favoriteId(v) { this.reloadOptions(); },
-		formLoading(v) {
-			if(!v) this.notTouched = true;
-		},
 		isValid:{ // inform parent form about field validity
 			handler(v) { this.$emit('set-valid',v,this.field.id); },
 			immediate:true
@@ -729,7 +725,7 @@ let MyField = {
 					return null;
 				
 				// apply fixed decimal length to newly loaded decimal numbers
-				if(this.notTouched && this.isDecimal && typeof this.values[this.fieldAttributeId] === 'number' && (
+				if(!this.isTouched && this.isDecimal && typeof this.values[this.fieldAttributeId] === 'number' && (
 					this.attribute.length !== 0 || this.attribute.lengthFract !== 0
 				)) {
 					return this.values[this.fieldAttributeId].toFixed(this.attribute.lengthFract);
@@ -1121,7 +1117,7 @@ let MyField = {
 		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
 		inputRegex: (s) => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
-		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),
+		showInvalid:(s) => !s.isValid && (s.formBadSave || s.isTouched),
 		variable:   (s) => (!s.isVariable || s.field.variableId === null) ? false : s.variableIdMap[s.field.variableId],
 		
 		// content types
@@ -1139,6 +1135,7 @@ let MyField = {
 		// states
 		isAlone:   (s) => s.isAloneInForm || s.isAloneInTab,
 		isHidden:  (s) => s.stateFinal === 'hidden' || s.parentIsHidden,
+		isTouched: (s) => s.fieldIdsTouched.includes(s.field.id),
 		isReadonly:(s) => s.stateFinal === 'readonly',
 		isRequired:(s) => s.stateFinal === 'required',
 		
@@ -1150,7 +1147,7 @@ let MyField = {
 		isSlider:   (s) => s.isData && s.field.display === 'slider',
 		
 		// composite
-		isActive:        (s) => (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
+		isActive:        (s) => s.loaded && (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
 		isBarcode:       (s) => s.isData && s.contentUse === 'barcode',
 		isEncrypted:     (s) => s.isData && s.attribute.encrypted,
 		isNew:           (s) => s.isData && !s.isVariable && s.joinsIndexMap[s.field.index].recordId === 0,
@@ -1192,6 +1189,7 @@ let MyField = {
 	},
 	mounted() {
 		this.reloadOptions();
+		this.loaded = true;
 	},
 	methods:{
 		// externals
@@ -1240,20 +1238,22 @@ let MyField = {
 			let   readonly = false;
 			let   drawing  = false;
 			let   files    = false;
+			let   richtext = false;
 			
 			if(oneField && typeof this.$refs['tabField_'+oneField.id] !== 'undefined')
 				readonly = this.$refs['tabField_'+oneField.id]['0'].isReadonly;
 			
 			if(oneField && oneField.content === 'data') {
 				const atr = this.attributeIdMap[oneField.attributeId];
-				drawing = atr.contentUse === 'drawing';
-				files   = atr.content    === 'files';
+				drawing  = atr.contentUse === 'drawing';
+				richtext = atr.contentUse === 'richtext';
+				files    = atr.content    === 'files';
 			}
 			
 			return {
 				active:  tabIndex === this.tabIndexShow,
 				error:   this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
-				inputBg: active && oneField && !files && !drawing && oneField.content === 'data',
+				inputBg: active && oneField && !files && !drawing && !richtext && oneField.content === 'data',
 				readonly:active && oneField && readonly
 			};
 		},
@@ -1386,15 +1386,11 @@ let MyField = {
 			
 			if(!this.isVariable) {
 				// regular field, send changes up to the form
-				if(this.notTouched && val !== valOld) {
-					this.notTouched = false;
-					this.$emit('set-touched',this.field.id);
-				}
-				this.$emit('set-value',indexAttributeId,val);
+				this.$emit('set-value',indexAttributeId,val,false,true,this.field.id);
 			} else {
 				// variable field, send changes to the variable
-				if(this.notTouched)
-					this.notTouched = false;
+				if(!this.isTouched && val !== valOld)
+					this.$emit('set-touched',this.field.id);
 
 				this.variableValueSet(this.variable.id,val,this.variableIdMapLocal);
 			}

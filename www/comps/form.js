@@ -134,7 +134,7 @@ let MyForm = {
 						/>
 						<my-button image="time.png"
 							v-if="hasLog"
-							@trigger="showLog = !showLog"
+							@trigger="toggleLog"
 							:active="!isNew"
 							:captionTitle="capApp.button.logHint"
 						/>
@@ -154,7 +154,7 @@ let MyForm = {
 					/>
 					<my-button image="question.png"
 						v-if="hasHelp"
-						@trigger="showHelp = !showHelp"
+						@trigger="toggleHelp"
 						:active="helpAvailable"
 						:captionTitle="capApp.button.helpHint"
 					/>
@@ -262,13 +262,11 @@ let MyForm = {
 					v-for="(f,i) in fields"
 					@clipboard="messageSet('[CLIPBOARD]')"
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
-					@hotkey="handleHotkeys"
 					@open-form="openForm"
 					@set-form-args="setFormArgs"
 					@set-touched="fieldSetTouched"
 					@set-valid="fieldSetValid"
 					@set-value="valueSetByField"
-					@set-value-init="valueSet"
 					:isBulkUpdate="isBulkUpdate"
 					:dataFieldMap="fieldIdMapData"
 					:entityIdMapEffect="entityIdMapEffect"
@@ -276,6 +274,7 @@ let MyForm = {
 					:field="f"
 					:fieldIdsChanged="fieldIdsChanged"
 					:fieldIdsInvalid="fieldIdsInvalid"
+					:fieldIdsTouched="fieldIdsTouched"
 					:fieldIdMapOverwrite="fieldIdMapOverwrite"
 					:formBadSave="badSave"
 					:formIsEmbedded="isPopUp || isWidget"
@@ -294,7 +293,7 @@ let MyForm = {
 		<!-- form change logs -->
 		<my-form-log
 			v-if="showLog"
-			@close-log="showLog = false"
+			@close-log="toggleLog"
 			:dataFieldMap="fieldIdMapData"
 			:entityIdMapEffect="entityIdMapEffect"
 			:form="form"
@@ -311,7 +310,7 @@ let MyForm = {
 		<!-- form help articles -->
 		<my-articles class="form-help"
 			v-if="showHelp"
-			@close="showHelp = false"
+			@close="toggleHelp"
 			:form="form"
 			:isFloat="isPopUpFloating"
 			:moduleId="moduleId"
@@ -351,6 +350,7 @@ let MyForm = {
 		
 		window.removeEventListener('keydown',this.handleHotkeys);
 		window.removeEventListener('keyup',this.handleHotkeys);
+		this.timerClearAll();
 	},
 	data() {
 		return {
@@ -491,8 +491,8 @@ let MyForm = {
 		canUpdate:     (s) => !s.updatingRecord && !s.isReadonly,
 		hasBarLower:   (s) => !s.isWidget && s.isData && !s.form.noDataActions,
 		hasBarWidget:  (s) => s.isWidget && s.hasFormActions,
-		hasChanges:    (s) => !s.form.noDataActions && s.fieldIdsChanged.length !== 0,
-		hasChangesBulk:(s) => s.isBulkUpdate && s.fieldIdsTouched.length !== 0,
+		hasChanges:    (s) => s.fieldIdsChanged.length !== 0,
+		hasChangesBulk:(s) => s.fieldIdsTouched.length !== 0 && s.isBulkUpdate,
 		hasFormActions:(s) => s.form.actions.filter(v => (s.entityIdMapEffect.formAction[v.id]?.state !== undefined ? s.entityIdMapEffect.formAction[v.id].state : v.state) !== 'hidden').length > 0,
 		hasGoBack:     (s) => s.isData && !s.isMobile && !s.isPopUp,
 		helpAvailable: (s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
@@ -502,7 +502,7 @@ let MyForm = {
 		isReadonly:    (s) => s.badLoad || !s.checkDataOptions((s.isNew ? 4 : 2),s.entityIdMapEffect.form.data),
 		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','kanban','list','tabs','variable'].includes(s.fields[0].content),
 		menuActive:    (s) => s.formIdMapMenu[s.form.id] === undefined ? null : s.formIdMapMenu[s.form.id],
-		warnUnsaved:   (s) => s.hasChanges && !s.blockInputs && s.settings.warnUnsaved,
+		warnUnsaved:   (s) => s.hasChanges && !s.form.noDataActions && !s.blockInputs && s.settings.warnUnsaved,
 
 		// buttons
 		buttonActiveDel:     (s) => !s.blockInputs  && s.canDelete,
@@ -659,8 +659,8 @@ let MyForm = {
 					if(s.fieldIdMapData[fieldId] === undefined) return 1;
 					if(isChg                     === undefined) isChg = true;
 					
-					s.valueSet(s.getIndexAttributeIdByField(
-						s.fieldIdMapData[fieldId],false),value,!isChg,true);
+					s.valueSetByField(s.getIndexAttributeIdByField(
+						s.fieldIdMapData[fieldId],false),value,!isChg,true,fieldId);
 					
 					return 0;
 				},
@@ -872,7 +872,7 @@ let MyForm = {
 				if(this.isData && e.ctrlKey && e.key === 's') {
 					e.preventDefault();
 
-					if(!this.blockInputs && this.canUpdate) {
+					if(!this.form.noDataActions && !this.blockInputs && this.canUpdate) {
 						if(!this.isBulkUpdate && this.hasChanges)     this.set(false);
 						if(this.isBulkUpdate  && this.hasChangesBulk) this.setBulkUpdate();
 					}
@@ -909,12 +909,10 @@ let MyForm = {
 				this.lastFormId         = this.form.id;
 				this.variableIdMapLocal = {};
 
-				if(!this.firstLoad) {
-					// on first load, field states do not need to be reset
-					// addresses issue in which field valid states are set before reset() is executed
+				// on first load, field valid states do not need to be reset
+				// addresses issue in which field valid states are set before reset() is executed
+				if(!this.firstLoad) 
 					this.fieldIdsInvalid = [];
-					this.fieldIdsTouched = [];
-				}
 				
 				// set preset record to open, if defined
 				if(this.form.presetIdOpen !== null && this.relationId !== null) {
@@ -960,6 +958,7 @@ let MyForm = {
 			this.indexesNoSet              = [];
 			this.indexMapRecordId          = {};
 			this.indexMapRecordKey         = {};
+			this.fieldIdsTouched           = [];
 		},
 		releaseLoadingOnNextTick() {
 			// releases state on next tick for watching components to react to with updated data
@@ -1019,11 +1018,11 @@ let MyForm = {
 				}
 			}
 		},
-		valueSetByField(indexAttributeId,value) {
-			// block updates during form load
-			//  some fields (richtext) updated their values after form was already unloaded
-			if(!this.loading)
-				this.valueSet(indexAttributeId,value,false,true);
+		valueSetByField(indexAttributeId,value,isOriginal,updateJoin,fieldId) {
+			if(!isOriginal && !this.fieldIdsTouched.includes(fieldId))
+				this.fieldIdsTouched.push(fieldId);
+
+			this.valueSet(indexAttributeId,value,isOriginal,updateJoin);
 		},
 		valueSetByRows:async function(rows,expressions) {
 			if(rows.length !== 1)
@@ -1275,10 +1274,18 @@ let MyForm = {
 			if(el !== null)
 				el.scrollIntoView();
 		},
+		toggleHelp() {
+			this.showHelp = !this.showHelp;
+			this.resized();
+		},
+		toggleLog() {
+			this.showLog = !this.showLog;
+			this.resized();
+		},
 		
 		// timer
 		timerClear(name) {
-			if(typeof this.timers[name] !== 'undefined') {
+			if(this.timers[name] !== undefined) {
 				if(this.timers[name].isInterval)
 					clearInterval(this.timers[name].id);
 				else
@@ -1826,7 +1833,7 @@ let MyForm = {
 			
 			let attributes = [];
 			for(let fieldId of this.fieldIdsTouched) {
-				if(typeof this.fieldIdMapData[fieldId] === 'undefined')
+				if(this.fieldIdMapData[fieldId] === undefined)
 					continue;
 				
 				let f   = this.fieldIdMapData[fieldId];

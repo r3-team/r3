@@ -14,7 +14,8 @@ import {
 	getFormEntityMapRef,
 	getFunctionHelp,
 	getItemTitle,
-	getItemTitlePath
+	getItemTitlePath,
+	getValidDbCharsForRx
 } from '../shared/builder.js';
 import {
 	getFieldIcon,
@@ -294,6 +295,55 @@ let MyBuilderJsFunction = {
 						</div>
 					</div>
 					
+					<!-- presets -->
+					<div class="entities-title">
+						<my-button
+							@trigger="showHolderPreset = !showHolderPreset"
+							:caption="capApp.placeholderPresets"
+							:images="[showHolderPreset ? 'triangleDown.png' : 'triangleRight.png','databaseCircle.png']"
+							:large="true"
+							:naked="true"
+						/>
+						<div class="row centered gap">
+							<template v-if="showHolderPreset">
+								<input class="short" v-model="holderPresetFilter" :placeholder="capGen.threeDots" :title="capGen.button.filter" />
+								<select class="dynamic" v-model="holderPresetModuleId">
+									<option v-for="m in modulesData" :value="m.id">{{ m.name }}</option>
+								</select>
+							</template>
+						</div>
+					</div>
+					<div class="entities" v-if="showHolderPreset">
+						<template v-for="mod in modulesData.filter(v => holderPresetModuleId === null || holderPresetModuleId === v.id)">
+							<div class="entity" v-for="rel in mod.relations.filter(v => v.presets.length !== 0 && (holderPresetFilter === '' || v.name.toLowerCase().includes(holderPresetFilter.toLowerCase())))">
+								<div class="entity-title">
+									<div class="row gap centered grow">
+										<my-button
+											@trigger="toggleRelationShow(rel.id)"
+											:image="holderRelationIdsOpen.includes(rel.id) ? 'triangleDown.png' : 'triangleRight.png'"
+											:naked="true"
+											:caption="rel.name"
+										/>
+									</div>
+									<router-link :key="rel.id" :to="'/builder/relation/'+rel.id">
+										<my-button image="open.png" :captionTitle="capGen.button.open" :naked="true" />
+									</router-link>
+								</div>
+								<div class="entity-children" v-if="holderRelationIdsOpen.includes(rel.id)">
+									<div class="entity-title" v-for="prs in rel.presets">
+										<my-button
+											@trigger="selectEntity('preset',prs.id)"
+											:caption="prs.name"
+											:image="radioIcon('preset',prs.id)"
+											:images="[prs.protected ? 'lock.png' : 'lockOpen.png']"
+											:naked="true"
+										/>
+									</div>
+								</div>
+							</div>
+						</template>
+					</div>
+					
 					<!-- frontend functions -->
 					<div class="entities-title">
 						<my-button
@@ -554,6 +604,7 @@ let MyBuilderJsFunction = {
 		this.holderCollectionModuleId  = this.module.id;
 		this.holderFncBackendModuleId  = this.module.id;
 		this.holderFncFrontendModuleId = this.module.id;
+		this.holderPresetModuleId      = this.module.id;
 	},
 	unmounted() {
 		this.$store.commit('keyDownHandlerDel',this.set);
@@ -569,22 +620,20 @@ let MyBuilderJsFunction = {
 			isClientEventExec:false,
 			appFunctions:[
 				'block_inputs','client_execute_keystrokes','copy_to_clipboard','dialog_show',
-				'form_close','form_open','form_set_title','form_show_message',
-				'get_e2ee_data_key','get_e2ee_data_value','get_language_code',
-				'get_preset_record_id','get_record_id','get_role_ids',
-				'get_url_query_string','get_user_id','go_back','has_role','logoff',
-				'pdf_create','record_delete','record_new','record_reload','record_save',
-				'record_save_new','set_e2ee_by_user_ids','set_e2ee_by_user_ids_and_relation',
-				'timer_clear','timer_clear_global','timer_set','timer_set_global'
+				'form_close','form_open','form_set_title','form_show_message','get_e2ee_data_key',
+				'get_e2ee_data_value','get_language_code','get_record_id','get_role_ids',
+				'get_url_query_string','get_user_id','go_back','has_role','logoff','pdf_create',
+				'record_delete','record_new','record_reload','record_save','record_save_new',
+				'set_e2ee_by_user_ids','set_e2ee_by_user_ids_and_relation','timer_clear',
+				'timer_clear_global','timer_set','timer_set_global'
 			],
 			appFunctionsAsync:[
 				'dialog_show','get_e2ee_data_key','get_e2ee_data_value','pdf_create'
 			],
 			appFunctionsClientEvent:[
 				'client_execute_keystrokes','copy_to_clipboard','form_open',
-				'get_preset_record_id','get_url_query_string','get_language_code',
-				'get_role_ids','get_user_id','go_back','has_role','pdf_create',
-				'timer_clear_global','timer_set_global'
+				'get_url_query_string','get_language_code','get_role_ids','get_user_id',
+				'go_back','has_role','pdf_create','timer_clear_global','timer_set_global'
 			],
 			
 			// states
@@ -595,20 +644,24 @@ let MyBuilderJsFunction = {
 			holderCollectionFilter:'',
 			holderCollectionIdsOpen:[],
 			holderCollectionModuleId:null,
-			holderVariableFilter:'',
 			holderFieldFilter:'',
 			holderFieldIdsOpen:[],
 			holderFieldOnlyData:true,
-			holderVariableIdsOpen:[],
+			holderPresetFilter:'',
+			holderPresetModuleId:null,
 			holderFncBackendFilter:'',
 			holderFncBackendModuleId:null,
 			holderFncFrontendFilter:'',
 			holderFncFrontendModuleId:null,
+			holderRelationIdsOpen:[],
+			holderVariableFilter:'',
+			holderVariableIdsOpen:[],
 			showHolderCollection:false,
 			showHolderFields:false,
 			showHolderFncBackend:false,
 			showHolderFncFrontend:false,
 			showHolderFncInstance:false,
+			showHolderPreset:false,
 			showHolderVariable:false,
 			showPreview:false,
 			showSidebar:true,
@@ -670,7 +723,7 @@ let MyBuilderJsFunction = {
 				+ '\n\tres => { }, // if success: return value in \'res\''
 				+ '\n\terr => { }  // if error: error message in \'err\'\n)'
 			;
-			let mod, rel, atr, col, fnc, frm, fld, opt, args;
+			let mod, rel, col, fnc, frm, opt, args, prs, pat;
 			
 			// build unique placeholder name
 			switch(s.entity) {
@@ -720,6 +773,16 @@ let MyBuilderJsFunction = {
 					args = fnc.codeArgs === '' ? '' : ', ' + fnc.codeArgs;
 					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${args})${postfixAsync}`;
 				break;
+				case 'preset':
+					prs  = s.presetIdMap[s.entityId];
+					rel  = s.relationIdMap[prs.relationId];
+					mod  = s.moduleIdMap[rel.moduleId];
+					pat = new RegExp(`[\{\}]`,'g');
+
+					text = !pat.test(prs.name)
+						? `${prefix}.get_preset_record_id({${mod.name}.${rel.name}.${prs.name}})`
+						: `${prefix}.get_preset_record_id('${s.entityId}')`;
+				break;
 				case 'variable_get': // fallthrough
 				case 'variable_set':
 					const va     = s.variableIdMap[s.entityId];
@@ -741,6 +804,7 @@ let MyBuilderJsFunction = {
 		joinsIndexMap:     (s) => s.form !== false ? s.getJoinsIndexMap(s.form.query.joins) : {},
 		jsFunction:        (s) => s.jsFunctionIdMap[s.id] === undefined ? false : s.jsFunctionIdMap[s.id],
 		module:            (s) => s.jsFunction === false ? false : s.moduleIdMap[s.jsFunction.moduleId],
+		modulesData:       (s) => s.getDependentModules(s.module).filter(v => v.relations.length !== 0),
 		modulesFncBackend: (s) => s.getDependentModules(s.module).filter(v => v.id === s.module.id || v.pgFunctions.filter(v => v.isFrontendExec).length !== 0),
 		modulesFncFrontend:(s) => s.getDependentModules(s.module).filter(v => v.id === s.module.id || v.jsFunctions.length !== 0),
 		preview:           (s) => !s.showPreview ? '' : s.placeholdersUnset(),
@@ -749,6 +813,7 @@ let MyBuilderJsFunction = {
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:  (s) => s.$store.getters['schema/moduleNameMap'],
 		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
+		presetIdMap:    (s) => s.$store.getters['schema/presetIdMap'],
 		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
 		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
@@ -771,12 +836,13 @@ let MyBuilderJsFunction = {
 		getItemTitle,
 		getItemTitlePath,
 		getJoinsIndexMap,
+		getValidDbCharsForRx,
 		isAttributeFiles,
 		
 		// presentation
 		displayFieldName(fieldId) {
 			const f = this.fieldIdMap[fieldId];
-			return f === undefined ? '-' : `F${this.entityIdMapRef.field[f.id]}: ${this.getFieldTitle(f)}`;
+			return f === undefined ? '-' : `F${this.entityIdMapRef.field[f.id]}::${this.getFieldTitle(f)}`;
 		},
 		radioIcon(entity,id) {
 			return this.entity === entity && this.entityId === id ? 'radio1.png' : 'radio0.png';
@@ -811,6 +877,11 @@ let MyBuilderJsFunction = {
 			const pos = this.holderFieldIdsOpen.indexOf(id);
 			if(pos === -1) this.holderFieldIdsOpen.push(id);
 			else           this.holderFieldIdsOpen.splice(pos,1);
+		},
+		toggleRelationShow(id) {
+			const pos = this.holderRelationIdsOpen.indexOf(id);
+			if(pos === -1) this.holderRelationIdsOpen.push(id);
+			else           this.holderRelationIdsOpen.splice(pos,1);
 		},
 		toggleVariableShow(id) {
 			const pos = this.holderVariableIdsOpen.indexOf(id);
@@ -905,12 +976,27 @@ let MyBuilderJsFunction = {
 
 				return `${prefix}.${mode}_variable({${module.name}${frmOpt}.${variable.name}}`;
 			});
+
+			// replace presets with placeholders
+			// preset name may not include closed curly bracket '}'
+			pat = new RegExp(`${prefix}\\.get_preset_record_id\\(\\'([a-z0-9\\-]{36})\\'\\)`,'g');
+			body = body.replace(pat,(match,presetId) => {
+				const prs = this.presetIdMap[presetId];
+				const rel = this.relationIdMap[prs.relationId];
+				const mod = this.moduleIdMap[rel.moduleId];
+				const pat = new RegExp(`[\{\}]`,'g');
+
+				if(prs !== undefined && !pat.test(prs.name))
+					return `${prefix}.get_preset_record_id({${mod.name}.${rel.name}.${prs.name}})`;
+				
+				return match;
+			});
 			return body;
 		},
 		placeholdersUnset() {
 			let body    = this.codeFunction;
+			let dbChars = this.getValidDbCharsForRx();
 			let prefix  = 'app';
-			let dbChars = '[a-z0-9_]+'; // valid chars, DB entities (PG functions, modules, attributes, ...)
 			let pat;
 			
 			// replace collection & column placeholders
@@ -948,8 +1034,8 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace field get/set value/caption/error/focus/etc. placeholders
-			// stored as: app.get_field_value({F12: 0 display_name... or app.get_field_value({F13: Container...
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\\(\{F(\\d+)\:.*?\}`,'g');
+			// stored as: app.get_field_value({F12::0 display_name... or app.get_field_value({F13: Container...
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\\(\{F(\\d+)\\:\\:.*?\}`,'g');
 			body = body.replace(pat,(match,mode,part,ref) => {
 				for(let fieldId in this.entityIdMapRef.field) {
 					if(this.entityIdMapRef.field[fieldId] === parseInt(ref))
@@ -996,7 +1082,6 @@ let MyBuilderJsFunction = {
 						return `${prefix}\.call_frontend('${f.id}'`;
 				}
 				return match;
-				
 			});
 			
 			// replace form assigned frontend function placeholders
@@ -1040,6 +1125,25 @@ let MyBuilderJsFunction = {
 						const va = this.variableIdMap[k];
 						if(va.formId !== null && va.formId === this.form.id && frmName === this.form.name && va.moduleId === mod.id && va.name === vaName) {
 							return `${prefix}\.${mode}_variable('${k}'`;
+						}
+					}
+				}
+				return match;
+			});
+
+			// replace preset placeholders
+			// stored as: app.get_preset_record_id({MOD_NAME.REL_NAME.PRESET_NAME})
+			pat = new RegExp(`${prefix}\.get_preset_record_id\\(\\{(${dbChars})\\.(${dbChars})\\.([^\}]*)\\}\\)`,'g');
+			body = body.replace(pat,(match,modName,relName,presetName) => {
+				const mod = this.moduleNameMap[modName];
+				if(mod !== undefined) {
+					for(let r of mod.relations) {
+						if(r.name !== relName)
+							continue;
+	
+						for(let p of r.presets) {
+							if(p.name === presetName)
+								return `${prefix}\.get_preset_record_id('${p.id}')`;
 						}
 					}
 				}

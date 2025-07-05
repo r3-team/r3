@@ -14,6 +14,7 @@
 		"connsMax": 0,
 		"connsMin": 0
 	},
+	"mirror": false,
 	"paths": {
 		"certificates": "data/certificates/",
 		"embeddedDbBin": "pgsql16/bin/",

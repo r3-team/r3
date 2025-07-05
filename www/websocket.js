@@ -55,7 +55,7 @@ let ws = {
 	// receives messages from websocket channel
 	received(msg) {
 		if(this.debug)
-			console.log('WebSocket <-', msg);
+			console.log(`WS [${msg.transactionNr}] RES ${msg.responses.length} ${msg.error !== undefined && msg.error !== '' ? 'ERROR:' + msg.error : ''}`, msg.responses);
 		
 		if(msg.transactionNr === 0)
 			return this.event('unrequested',msg.responses[0]);
@@ -88,10 +88,10 @@ let ws = {
 	
 	// send requests message over websocket channel
 	// can optionally trigger block event
-	send(ressource,action,payload,blocking) {
-		return this.sendMultiple([this.prepare(ressource,action,payload)],blocking,true);
+	send(ressource,action,payload,blocking,noDbTx) {
+		return this.sendMultiple([this.prepare(ressource,action,payload)],blocking,noDbTx,true);
 	},
-	sendMultiple(requests,blocking,singleResponse) {
+	sendMultiple(requests,blocking,noDbTx,singleResponse) {
 		return new Promise((resolve,reject) => {
 			if(this.conn === null)
 				return reject('websocket connection not open');
@@ -99,8 +99,9 @@ let ws = {
 			if(!Array.isArray(requests) || requests.length === 0)
 				return reject('need non-empty requests array');
 			
-			// apply default settings
+			// apply defaults
 			if(blocking       === undefined) blocking       = false;
+			if(noDbTx         === undefined) noDbTx         = false;
 			if(singleResponse === undefined) singleResponse = false;
 			
 			// get unique transaction number
@@ -117,14 +118,12 @@ let ws = {
 			};
 			
 			if(this.debug)
-				console.log('WebSocket ->', {
-					transactionNr:transactionNr,
-					requests:requests
-				});
+				console.log(`WS [${transactionNr}] REQ ${requests.length} ${noDbTx ? 'NO_DB_TX' : ''}`, requests);
 			
 			this.conn.send(JSON.stringify({
 				transactionNr:transactionNr,
-				requests:requests
+				requests:requests,
+				noDbTx:noDbTx
 			}));
 			
 			// block entire websocket connection, if transaction is blocking

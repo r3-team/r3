@@ -69,13 +69,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Role, e
 
 func getAccess_tx(ctx context.Context, tx pgx.Tx, role types.Role) (types.Role, error) {
 
-	role.AccessApis = make(map[uuid.UUID]int)
-	role.AccessAttributes = make(map[uuid.UUID]int)
-	role.AccessClientEvents = make(map[uuid.UUID]int)
-	role.AccessCollections = make(map[uuid.UUID]int)
-	role.AccessRelations = make(map[uuid.UUID]int)
-	role.AccessMenus = make(map[uuid.UUID]int)
-	role.AccessWidgets = make(map[uuid.UUID]int)
+	role.AccessApis = make(map[uuid.UUID]types.Access)
+	role.AccessAttributes = make(map[uuid.UUID]types.Access)
+	role.AccessClientEvents = make(map[uuid.UUID]types.Access)
+	role.AccessCollections = make(map[uuid.UUID]types.Access)
+	role.AccessRelations = make(map[uuid.UUID]types.Access)
+	role.AccessMenus = make(map[uuid.UUID]types.Access)
+	role.AccessWidgets = make(map[uuid.UUID]types.Access)
 
 	rows, err := tx.Query(ctx, `
 		SELECT api_id, attribute_id, client_event_id, collection_id,
@@ -90,7 +90,7 @@ func getAccess_tx(ctx context.Context, tx pgx.Tx, role types.Role) (types.Role, 
 
 	for rows.Next() {
 		var apiId, attributeId, clientEventId, collectionId, menuId, relationId, widgetId pgtype.UUID
-		var access int
+		var access types.Access
 
 		if err := rows.Scan(&apiId, &attributeId, &clientEventId, &collectionId,
 			&menuId, &relationId, &widgetId, &access); err != nil {
@@ -218,7 +218,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, role types.Role) error {
 	return caption.Set_tx(ctx, tx, role.Id, role.Captions)
 }
 
-func setAccess_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity string, access int) error {
+func setAccess_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity string, access types.Access) error {
 
 	// check valid access levels
 	switch entity {

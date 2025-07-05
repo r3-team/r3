@@ -23,6 +23,9 @@
 	margin:0px;
 	overflow:initial;
 }
+.columnBatch.kanbanCards{
+	margin:0px 0px;
+}
 .columnBatch.listCards{
 	max-width:250px;
 }

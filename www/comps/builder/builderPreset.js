@@ -95,6 +95,7 @@ let MyBuilderPreset = {
 		<div class="contentBox scroll float" v-if="values !== null">
 			<div class="top">
 				<div class="area nowrap">
+					<img class="icon" src="images/databaseCircle.png" />
 					<img class="icon" :src="values.protected ? 'images/lock.png' : 'images/lockOpen.png'" />
 					<h1 class="title">{{ isNew ? capApp.titleNew : capApp.title.replace('{NAME}',values.name) }}</h1>
 				</div>

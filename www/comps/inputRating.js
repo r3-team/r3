@@ -6,11 +6,11 @@ let MyInputRating = {
 	name:'my-input-rating',
 	template:`<div class="input-rating">
 		<div class="input-rating-icons">
-			<img class="input-rating-icon clickable"
+			<img class="input-rating-icon"
 				v-for="n in maxValid"
-				@click.left="$emit('update:modelValue',n)"
-				@click.right.prevent="$emit('update:modelValue',null)"
-				:class="{ active:n <= value }"
+				@click.left="click(n)"
+				@click.right.prevent="click(null)"
+				:class="{ active:n <= value, clickable:!readonly }"
 				:src="iconSrc"
 			/>
 		</div>
@@ -35,6 +35,12 @@ let MyInputRating = {
 	emits:['update:modelValue'],
 	methods:{
 		// externals
-		srcBase64
+		srcBase64,
+
+		// actions
+		click(value) {
+			if(!this.readonly)
+				this.$emit('update:modelValue',value);
+		}
 	}
 };

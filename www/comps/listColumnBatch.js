@@ -48,6 +48,7 @@ let MyListColumnBatch = {
 				<div class="columnOptionItem" v-if="canOrder">
 					<my-button image="sort.png"
 						@trigger="$emit('del-order')"
+						@trigger-right="$emit('del-order')"
 						:active="isOrdered"
 						:captionTitle="capApp.orderBy"
 						:naked="true"
@@ -68,6 +69,7 @@ let MyListColumnBatch = {
 				<div class="columnOptionItem" v-if="aggrColumn !== null">
 					<my-button image="sum.png"
 						@trigger="aggregatorInput = ''"
+						@trigger-right="aggregatorInput = ''"
 						:active="aggregatorInput !== ''"
 						:captionTitle="capApp.button.aggregatorsHint"
 						:naked="true"
@@ -86,6 +88,7 @@ let MyListColumnBatch = {
 				<div class="columnOptionItem" v-if="showFilterText">
 					<my-button image="filter.png"
 						@trigger="clear"
+						@trigger-right="clear"
 						:active="isFiltered && inputTxt !== ''"
 						:captionTitle="capGen.button.filter"
 						:naked="true"
@@ -154,37 +157,40 @@ let MyListColumnBatch = {
 		rowCount:        { type:Number,  required:true }, // list total row count
 		show:            { type:Boolean, required:true }
 	},
-	emits:[
-		'close','del-aggregator','del-order','set-aggregator',
-		'set-filters','set-order','toggle'
-	],
+	emits:['close','del-aggregator','del-order','set-aggregator','set-filters','set-order','toggle'],
 	data() {
 		return {
-			inputTxt:'', // value input for text filter
 			inputSel:[], // value input for selection filter
+			inputTxt:'', // value input for text filter
 			values:[],   // values available to filter with (all values a list could have for column)
 			zeroSelection:false
 		};
 	},
 	watch:{
-		columnFilterIndexes(v) {
-			if(v.length < 1)
-				return;
+		columnFilterIndexes:{
+			handler(v) {
+				if(v.length < 1)
+					return;
 
-			// apply input values from column filter (must be first index)
-			const f = this.filtersColumn[v[0]];
-			if(f.side1.content === 'value') {
-				switch(f.operator) {
-					case 'ILIKE':  this.inputTxt = f.side1.value;     break;
-					case '<> ALL': this.inputSel = f.side1.value;     break;
-					case '= ANY':  this.migrateFilter(f.side1.value); break;
+				// apply input selection from column filter (must be first index)
+				const f = this.filtersColumn[v[0]];
+				if(f.side1.content === 'value') {
+					switch(f.operator) {
+						case 'ILIKE':  this.inputTxt = f.side1.value;                             break;
+						case '<> ALL': this.inputSel = JSON.parse(JSON.stringify(f.side1.value)); break;
+						case '= ANY':  this.migrateFilter(f.side1.value);                         break;
+					}
 				}
-			}
+
+				// apply NULL from filter to selection input
+				if(f.operator === '<> ALL' && v.length > 1 && this.filtersColumn[v[1]].operator === 'IS NOT NULL')
+					this.inputSel.push(null);
+			},
+			immediate:true
+		},
+		show(v) {
+			if(v) this.loadSelectionValues();
 		}
-	},
-	mounted() {
-		if(this.isValidFilter)
-			this.$watch('show',v => this.loadSelectionValues());
 	},
 	computed:{
 		aggregatorInput:{
@@ -239,12 +245,12 @@ let MyListColumnBatch = {
 		filtersColumnThis:(s) => s.filtersColumn.filter((v,i) => s.columnFilterIndexes.includes(i)),
 		isDateOrTime:     (s) => s.isValidFilter && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
 		isFiltered:       (s) => s.columnFilterIndexes.length !== 0,
-		isOrdered:        (s) => s.columnBatch.orderIndexesUsed.length !== 0,
+		isOrdered:        (s) => s.columnBatch.orderIndexesUsed.length !== 0 && !s.isOrderedOrginal,
 		isOrderedAsc:     (s) => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
 		isValidFilter:    (s) => s.columnUsedFilter !== null,
 		showFilterAny:    (s) => s.showFilterItems || s.showFilterText,
 		showFilterItems:  (s) => s.values.length != 0,
-		showFilterText:   (s) => !s.isDateOrTime,
+		showFilterText:   (s) => !s.isDateOrTime && s.isValidFilter,
 		showIconFilter:   (s) => s.isValidFilter && s.isFiltered,
 		showIconOrder:    (s) => s.isOrdered && !s.isOrderedOrginal,
 		
@@ -264,7 +270,7 @@ let MyListColumnBatch = {
 		
 		// presentation
 		displayValue(v) {
-			if(v === '-1')
+			if(v === null)
 				return '[' + this.capGen.button.empty + ']';
 			
 			const atr = this.attributeIdMap[this.columnUsedFilter.attributeId];
@@ -299,6 +305,7 @@ let MyListColumnBatch = {
 					}
 					return true;
 				}),
+				orders:[{ascending:true,expressionPos:0}],
 				limit:1000
 			};
 		},
@@ -352,10 +359,10 @@ let MyListColumnBatch = {
 			ws.send('data','get',this.prepareDataGet(),false).then(
 				res => {
 					// exclude any value that is not in outdated inclusion filter
-					this.inputSel  = [];
+					this.inputSel = [];
 					for(const row of res.payload.rows) {
 						if(!valuesIncl.includes(row.values[0]))
-							this.inputSel.push(row.values[0] !== null ? row.values[0] : '-1');
+							this.inputSel.push(row.values[0]);
 					}
 					this.set();
 				},
@@ -372,8 +379,7 @@ let MyListColumnBatch = {
 				res => {
 					this.values = [];
 					for(const row of res.payload.rows) {
-						// replace NULL with '-1' as <> ALL comparisson does not allow NULL inclusion
-						this.values.push(row.values[0] !== null ? row.values[0] : '-1');
+						this.values.push(row.values[0]);
 					}
 				},
 				this.$root.genericError
@@ -390,13 +396,14 @@ let MyListColumnBatch = {
 			const filterTxt = this.inputTxt !== '';
 			
 			// remove existing filters for this column
-			let filters = JSON.parse(JSON.stringify(this.filtersColumn));
-			filters = filters.filter((v,i) => !this.columnFilterIndexes.includes(i));
+			let filters = JSON.parse(JSON.stringify(this.filtersColumn))
+				.filter((v,i) => !this.columnFilterIndexes.includes(i));
 
 			if(this.inputTxt !== '' || this.inputSel.length !== 0) {
 				// add new filters for this column, if active
-				// a NULL value is represented by '-1' (<> ALL comparisson does not allow NULL inclusion in ARRAY)
-				const exclNull = !filterTxt && this.inputSel.includes('-1');
+				// NULL values are not allowed in '<> ALL' operator, will make entire set NULL if included
+				// remove NULL from original filter condition but add second NULL/NOT NULL condition to filter with it
+				const exclNull = !filterTxt && this.inputSel.includes(null);
 				filters.push({
 					connector:'AND',
 					index:0,
@@ -409,7 +416,7 @@ let MyListColumnBatch = {
 					side1:{
 						brackets:filterTxt ? 1 : 0,
 						content:'value',
-						value:filterTxt ? this.inputTxt : this.inputSel
+						value:filterTxt ? this.inputTxt : this.inputSel.filter(v => v !== null)
 					}
 				});
 				

@@ -407,7 +407,7 @@ let MyBuilderForm = {
 								<td>{{ capApp.fieldIdFocus }}</td>
 								<td>
 									<select v-model="fieldIdFocus" :disabled="readonly">
-										<option :value="null">-</option>
+										<option :value="null">{{ capApp.fieldIdFocusEmpty }}</option>
 										<template v-for="(ref,fieldId) in entityIdMapRef.field">
 											<option
 												v-if="fieldContentFocus.includes(fieldIdMap[fieldId].content)"
@@ -503,7 +503,7 @@ let MyBuilderForm = {
 
 			<!-- column settings -->
 			<template v-if="columnShow">
-				<div class="content" v-if="columnShow.subQuery">
+				<div class="content no-shrink" v-if="columnShow.subQuery">
 					<my-builder-query
 						@set-choices="fieldColumnQuerySet('choices',$event)"
 						@set-filters="fieldColumnQuerySet('filters',$event)"

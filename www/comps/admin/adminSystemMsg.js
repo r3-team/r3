@@ -47,7 +47,6 @@ let MyAdminSystemMsg = {
 							<div class="admin-system-msg-text">
 								<my-input-richtext
 									v-model="text"
-									@hotkey="handleHotkeys($event)"
 									:readonly="!activated"
 								/>
 							</div>
@@ -148,12 +147,6 @@ let MyAdminSystemMsg = {
 		getDateFormat,
 
 		// actions
-		handleHotkeys(e) {
-			if(e.ctrlKey && e.key === 's') {
-				e.preventDefault();
-				this.set();
-			}
-		},
 		preview() {
 			this.$store.commit('dialog',{
 				captionTop:this.capGen.dialog.systemMsg,

@@ -17,7 +17,7 @@ import (
 
 // check whether access to attribute is authorized
 // cases: getting or setting attribute values
-func authorizedAttribute(loginId int64, attributeId uuid.UUID, requestedAccess int) bool {
+func authorizedAttribute(loginId int64, attributeId uuid.UUID, requestedAccess types.Access) bool {
 
 	access, err := cache.GetAccessById(loginId)
 	if err != nil {
@@ -43,7 +43,7 @@ func authorizedAttribute(loginId int64, attributeId uuid.UUID, requestedAccess i
 
 // check whether access to relation is authorized
 // cases: creating or deleting relation tuples
-func authorizedRelation(loginId int64, relationId uuid.UUID, requestedAccess int) bool {
+func authorizedRelation(loginId int64, relationId uuid.UUID, requestedAccess types.Access) bool {
 
 	access, err := cache.GetAccessById(loginId)
 	if err != nil {

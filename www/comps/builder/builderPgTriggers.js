@@ -49,6 +49,12 @@ let MyBuilderPgTriggers = {
 				:captionTitle="capApp.onDelete"
 				:naked="true"
 			/>
+			<my-button image="databaseCircle.png"
+				v-if="trg.perRow"
+				:active="false"
+				:captionTitle="capApp.perRow"
+				:naked="true"
+			/>
 			<my-button image="lettersZzz.png"
 				v-if="trg.isDeferred"
 				:active="false"

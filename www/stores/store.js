@@ -81,6 +81,7 @@ const MyStore = Vuex.createStore({
 		loginSessionExpired:false,     // set to true, when session expires
 		loginSessionExpires:null,      // unix timestamp of session expiration date
 		loginWidgetGroups:[],          // user widgets, starting with widget groups
+		mirrorMode:false,              // instance runs in mirror mode (eg. mirrors another, likely production instance)
 		moduleEntries:[],              // module entries for header/home page
 		moduleIdLast:null,             // module ID of last active module
 		moduleIdMapMeta:{},            // module ID map of module meta data (is owner, hidden, position, date change, custom languages)
@@ -269,8 +270,8 @@ const MyStore = Vuex.createStore({
 		isAtMenu:                (state,payload) => state.isAtMenu                 = payload,
 		isAtModule:              (state,payload) => state.isAtModule               = payload,
 		isCollapsedMenuApp:      (state,payload) => state.isCollapsedMenuApp       = payload,
-		isNoAuth:                (state,payload) => state.isNoAuth                 = payload,
 		isMobile:                (state,payload) => state.isMobile                 = payload,
+		isNoAuth:                (state,payload) => state.isNoAuth                 = payload,
 		isWithoutMenuApp:        (state,payload) => state.isWithoutMenuApp         = payload,
 		isWithoutMenuHeader:     (state,payload) => state.isWithoutMenuHeader      = payload,
 		loginEncryption:         (state,payload) => state.loginEncryption          = payload,
@@ -284,6 +285,7 @@ const MyStore = Vuex.createStore({
 		loginSessionExpired:     (state,payload) => state.loginSessionExpired      = payload,
 		loginSessionExpires:     (state,payload) => state.loginSessionExpires      = payload,
 		loginWidgetGroups:       (state,payload) => state.loginWidgetGroups        = payload,
+		mirrorMode:              (state,payload) => state.mirrorMode               = payload,
 		moduleEntries:           (state,payload) => state.moduleEntries            = payload,
 		moduleIdLast:            (state,payload) => state.moduleIdLast             = payload,
 		moduleIdMapMeta:         (state,payload) => state.moduleIdMapMeta          = payload,
@@ -392,7 +394,7 @@ const MyStore = Vuex.createStore({
 			if(!MyStoreLocal.state.activated)
 				return null;
 			
-			let subDomain = window.location.host.split('.')[0];
+			const subDomain = window.location.host.split('.')[0];
 			return typeof state.pwaDomainMap[subDomain] !== 'undefined'
 				? state.pwaDomainMap[subDomain] : null;
 		},
@@ -446,6 +448,7 @@ const MyStore = Vuex.createStore({
 		loginSessionExpired:     (state) => state.loginSessionExpired,
 		loginSessionExpires:     (state) => state.loginSessionExpires,
 		loginWidgetGroups:       (state) => state.loginWidgetGroups,
+		mirrorMode:              (state) => state.mirrorMode,
 		moduleEntries:           (state) => state.moduleEntries,
 		moduleIdLast:            (state) => state.moduleIdLast,
 		moduleIdMapMeta:         (state) => state.moduleIdMapMeta,

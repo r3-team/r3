@@ -25,7 +25,7 @@ let MyValueRich = {
 		@focus="$emit('focus')"
 		@click="$emit('trigger')"
 		@keyup.space.enter="$emit('trigger')"
-		:class="{ alignEnd:alignEnd, alignMid:alignMid, bold:bold, color:isColor, files:isFiles, italic:italic, monospace:monospace, wrap:wrap }"
+		:class="{ alignEnd:alignEnd, alignMid:alignMid, bold:bold, color:isColor, files:isFiles, gallery:isGallery, italic:italic, monospace:monospace, wrap:wrap }"
 		:style="style"
 	>
 		<!-- copy to clipboard action -->
@@ -85,28 +85,33 @@ let MyValueRich = {
 		/>
 		
 		<!-- files -->
-		<a target="_blank"
-			v-if="isFiles && !isGallery"
-			v-for="f in files.filter((v,i) => length === 0 || length > i)"
-			:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
-			:key="f.id"
-		>
-			<my-button image="download.png"
-				:blockBubble="true"
-				:caption="f.name.length < 18 ? f.name : f.name.substr(0,14)+'...'"
-				:captionTitle="f.name"
-				:naked="true"
+		<template v-if="isFiles">
+			<a target="_blank"
+				v-if="!isGallery"
+				v-for="f in files.filter((v,i) => length === 0 || length > i)"
+				:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
+				:key="f.id"
+			>
+				<my-button image="download.png"
+					:blockBubble="true"
+					:caption="f.name.length < 18 ? f.name : f.name.substr(0,14)+'...'"
+					:captionTitle="f.name"
+					:naked="true"
+				/>
+			</a>
+			<img class="gallery-item"
+				v-if="isGallery"
+				v-for="f in files.filter((v,i) => length === 0 || length > i)"
+				:class="{ previewLarge:previewLarge }"
+				:src="getAttributeFileThumbHref(attributeId,f.id,f.name,f.version,token)"
+				:style="styleImage"
 			/>
-		</a>
-		
-		<!-- files as gallery -->
-		<img class="gallery-item"
-			v-if="isFiles && isGallery"
-			v-for="f in files.filter((v,i) => length === 0 || length > i)"
-			:class="{ previewLarge:previewLarge }"
-			:src="getAttributeFileThumbHref(attributeId,f.id,f.name,f.version,token)"
-			:style="styleImage"
-		/>
+
+			<!-- to many files counter -->
+			<div v-if="length !== 0 && files.length > length" class="files-overflow-counter">
+				[+{{ files.length - length }}]
+			</div>
+		</template>
 	</div>`,
 	props:{
 		alignEnd:    { type:Boolean, required:false, default:false },

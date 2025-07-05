@@ -25,10 +25,12 @@
 	border-radius:var(--border-input-radius);
 }
 .value-rich.files{
-	max-width:700px;
-	display:flex;
+	flex-flow:row wrap;
+	gap:0px 9px; /* 3px row, 9px column gaps */
+}
+.value-rich.files.gallery{
 	flex-flow:row nowrap;
-	gap:3px;
+	gap:0px;
 }
 .value-rich.italic{
 	font-style:italic;
@@ -56,6 +58,7 @@
 	border:1px solid var(--color-border);
 	overflow:auto;
 	max-height:var(--row-height);
+	margin:0px 2px;
 }
 .value-rich .barcode.previewLarge,
 .value-rich .drawing.previewLarge,
@@ -66,6 +69,10 @@
 	width:98%;
 	opacity:0.6;
 	background-color:var(--color-bg);
+}
+.value-rich .files-overflow-counter{
+	font-weight:bold;
+	margin:0px 3px;
 }
 .value-rich span{
 	/* auto cutting text */
@@ -83,13 +90,18 @@
 }
 
 /* list input context */
+.value-rich.context-list-input .barcode,
+.value-rich.context-list-input .drawing,
 .value-rich.context-list-input .gallery-item{
-	min-width:32px;
-	max-height:32px;
+	/* default row height - 2px for vert. margins */
+	min-width:calc(var(--row-height) - 2px);
+	max-height:calc(var(--row-height) - 2px);
 	margin:1px 5px 1px 0px;
 }
 
 /* calendar context */
+.value-rich.context-calendar .barcode,
+.value-rich.context-calendar .drawing,
 .value-rich.context-calendar .gallery-item{
 	height:22px;
 	margin:2px 5px 2px 0px;
@@ -100,6 +112,8 @@
 .value-rich.files.context-calendar-gantt{
 	flex-shrink:0;
 }
+.value-rich.context-calendar-gantt .barcode,
+.value-rich.context-calendar-gantt .drawing,
 .value-rich.context-calendar-gantt .gallery-item{
 	height:24px;
 	margin:0px 5px 0px 0px;

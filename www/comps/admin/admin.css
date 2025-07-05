@@ -569,6 +569,14 @@
 .admin-scheduler table{
 	max-width:1300px;
 }
+.admin-scheduler .message{
+	margin:0px;
+	padding:15px 20px;
+	background-color:var(--color-bg);
+}
+.admin-scheduler .message.error{
+	color:var(--color-error);
+}
 
 
 /* mail spooler */

@@ -37,6 +37,7 @@ func PublicGet() (interface{}, error) {
 		Css                 string                         `json:"css"`
 		LanguageCodes       []string                       `json:"languageCodes"`
 		LoginBackground     uint64                         `json:"loginBackground"`
+		Mirror              bool                           `json:"mirror"`
 		ModuleIdMapMeta     map[uuid.UUID]types.ModuleMeta `json:"moduleIdMapMeta"`
 		PresetIdMapRecordId map[uuid.UUID]int64            `json:"presetIdMapRecordId"`
 		ProductionMode      uint64                         `json:"productionMode"`
@@ -61,6 +62,7 @@ func PublicGet() (interface{}, error) {
 		Css:                 config.GetString("css"),
 		LanguageCodes:       cache.GetCaptionLanguageCodes(),
 		LoginBackground:     loginBackground,
+		Mirror:              config.File.Mirror,
 		ModuleIdMapMeta:     cache.GetModuleIdMapMeta(),
 		PresetIdMapRecordId: cache.GetPresetRecordIds(),
 		ProductionMode:      config.GetUint64("productionMode"),

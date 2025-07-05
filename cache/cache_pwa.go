@@ -13,7 +13,7 @@ import (
 var (
 	pwa_mx       sync.RWMutex
 	pwaIconIdMap = make(map[uuid.UUID]string)
-	pwaDomainMap = make(map[string]uuid.UUID)
+	pwaDomainMap = make(map[string]uuid.UUID) // key = sub domain name, value = module ID (for direct app acess)
 )
 
 func GetPwaIcon(id uuid.UUID) (string, error) {
@@ -47,6 +47,17 @@ func GetPwaDomainMap() map[string]uuid.UUID {
 	defer pwa_mx.RUnlock()
 
 	return pwaDomainMap
+}
+
+func GetPwaModuleId(subdomain string) uuid.UUID {
+	pwa_mx.RLock()
+	defer pwa_mx.RUnlock()
+
+	id, exists := pwaDomainMap[subdomain]
+	if !exists {
+		return uuid.Nil
+	}
+	return id
 }
 
 func LoadPwaDomainMap_tx(ctx context.Context, tx pgx.Tx) error {

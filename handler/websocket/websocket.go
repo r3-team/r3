@@ -15,6 +15,7 @@ import (
 	"r3/login/login_session"
 	"r3/request"
 	"r3/types"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -25,18 +26,19 @@ import (
 
 // a websocket client
 type clientType struct {
-	id        uuid.UUID                   // unique ID for client (for registering/de-registering login sessions)
-	address   string                      // IP address, no port
-	admin     bool                        // belongs to admin login?
-	ctx       context.Context             // context for requests from this client
-	ctxCancel context.CancelFunc          // to abort requests in case of disconnect
-	device    types.WebsocketClientDevice // client device type (browser, fatClient)
-	ioFailure atomic.Bool                 // client failed to read/write
-	local     bool                        // client is local (::1, 127.0.0.1)
-	loginId   int64                       // client login ID, 0 = not logged in yet
-	noAuth    bool                        // logged in without authentication (public auth, username only)
-	write_mx  sync.Mutex                  // to force sequential writes
-	ws        *websocket.Conn             // websocket connection
+	id          uuid.UUID                   // unique ID for client (for registering/de-registering login sessions)
+	address     string                      // IP address, no port
+	admin       bool                        // belongs to admin login?
+	ctx         context.Context             // context for requests from this client
+	ctxCancel   context.CancelFunc          // to abort requests in case of disconnect
+	device      types.WebsocketClientDevice // client device type (browser, fatClient)
+	ioFailure   atomic.Bool                 // client failed to read/write
+	local       bool                        // client is local (::1, 127.0.0.1)
+	loginId     int64                       // client login ID, 0 = not logged in yet
+	noAuth      bool                        // logged in without authentication (public auth, username only)
+	pwaModuleId uuid.UUID                   // ID of module for direct app access via subdomain, nil UUID if not used
+	write_mx    sync.Mutex                  // to force sequential writes
+	ws          *websocket.Conn             // websocket connection
 }
 
 // a hub for all active websocket clients
@@ -106,17 +108,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// create global request context with abort function
 	ctx, ctxCancel := context.WithCancel(context.Background())
 	client := &clientType{
-		id:        clientId,
-		address:   host,
-		admin:     false,
-		ctx:       ctx,
-		ctxCancel: ctxCancel,
-		device:    types.WebsocketClientDeviceBrowser,
-		local:     host == "::1" || host == "127.0.0.1",
-		loginId:   0,
-		noAuth:    false,
-		write_mx:  sync.Mutex{},
-		ws:        ws,
+		id:          clientId,
+		address:     host,
+		admin:       false,
+		ctx:         ctx,
+		ctxCancel:   ctxCancel,
+		device:      types.WebsocketClientDeviceBrowser,
+		local:       host == "::1" || host == "127.0.0.1",
+		loginId:     0,
+		noAuth:      false,
+		pwaModuleId: cache.GetPwaModuleId(strings.Split(r.Host, ".")[0]), // assign PWA module ID if host matches any defined PWA direct app access rule
+		write_mx:    sync.Mutex{},
+		ws:          ws,
 	}
 
 	if r.Header.Get("User-Agent") == "r3-client-fat" {
@@ -129,7 +132,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 func (hub *hubType) start() {
 
-	var removeClient = func(client *clientType, wasKicked bool) {
+	var clientRemove = func(client *clientType, wasKicked bool) {
 		if _, exists := hub.clients[client]; !exists {
 			return
 		}
@@ -143,13 +146,14 @@ func (hub *hubType) start() {
 		client.ctxCancel()
 		delete(hub.clients, client)
 
-		// run DB calls in async func as they must not block hub operations during heavy DB load
+		if wasKicked {
+			log.Info(handlerContext, fmt.Sprintf("kicked client (login ID %d) at %s", client.loginId, client.address))
+		} else {
+			log.Info(handlerContext, fmt.Sprintf("disconnected client (login ID %d) at %s", client.loginId, client.address))
+		}
+
 		go func() {
-			if wasKicked {
-				log.Info(handlerContext, fmt.Sprintf("kicked client (login ID %d) at %s", client.loginId, client.address))
-			} else {
-				log.Info(handlerContext, fmt.Sprintf("disconnected client (login ID %d) at %s", client.loginId, client.address))
-			}
+			// run DB calls in async func as they must not block hub operations during heavy DB load
 			if err := login_session.LogRemove(client.id); err != nil {
 				log.Error(handlerContext, "failed to remove login session log", err)
 			}
@@ -163,7 +167,7 @@ func (hub *hubType) start() {
 			hub.clients[client] = true
 
 		case client := <-hub.clientDel:
-			removeClient(client, false)
+			clientRemove(client, false)
 
 		case event := <-cluster.WebsocketClientEvents:
 
@@ -207,29 +211,44 @@ func (hub *hubType) start() {
 			}
 
 			if err != nil {
-				// run DB calls in async func as they must not block hub operations during heavy DB load
-				go log.Error(handlerContext, "could not prepare unrequested transaction", err)
+				log.Error(handlerContext, "could not prepare unrequested transaction", err)
 				continue
 			}
 
+			clientsSend := make([]*clientType, 0)
+			clientsSendFallback := make([]*clientType, 0)
 			eventLocal := event.Target.Address == "::1" || event.Target.Address == "127.0.0.1"
 
-			for client, _ := range hub.clients {
+			for client := range hub.clients {
 				bothLocal := eventLocal && client.local
 
-				// skip if target filter does not apply to client
+				// skip if strict target filter does not apply to client
 				if (event.Target.Address != "" && event.Target.Address != client.address && !bothLocal) ||
 					(event.Target.Device != 0 && event.Target.Device != client.device) ||
 					(event.Target.LoginId != 0 && event.Target.LoginId != client.loginId) {
 					continue
 				}
 
-				// disconnect and do not send message if kicked
-				if event.Content == "kick" || (event.Content == "kickNonAdmin" && !client.admin) {
-					removeClient(client, true)
+				// store as fallback if preferred target filter does apply to client
+				// fallback clients are only used if no other clients match the target filters
+				if event.Target.PwaModuleIdPreferred != uuid.Nil && event.Target.PwaModuleIdPreferred != client.pwaModuleId {
+					clientsSendFallback = append(clientsSendFallback, client)
 					continue
 				}
+				clientsSend = append(clientsSend, client)
+			}
 
+			if len(clientsSend) == 0 && len(clientsSendFallback) != 0 {
+				clientsSend = clientsSendFallback
+			}
+
+			for _, client := range clientsSend {
+
+				// disconnect and do not send message if kicked
+				if event.Content == "kick" || (event.Content == "kickNonAdmin" && !client.admin) {
+					clientRemove(client, true)
+					continue
+				}
 				go client.write(jsonMsg)
 
 				if singleRecipient {
@@ -306,18 +325,20 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 			client.admin, client.device, client.noAuth, reqTrans, false)
 
 		if err != nil {
-			if handler.CheckForDbsCacheErrCode(err) {
+			returnErr := processReturnErr(err, client.admin, client.loginId, reqTrans.TransactionNr)
+
+			if handler.CheckForDbsCacheErrCode(returnErr) {
 				// known PGX cache error, repeat with cleared DB statement/description cache
 				resTrans.Responses, err = request.ExecTransaction(ctx, client.address, client.loginId,
 					client.admin, client.device, client.noAuth, reqTrans, true)
 
 				if err != nil {
 					resTrans.Responses = make([]types.Response, 0)
-					resTrans.Error = err.Error()
+					resTrans.Error = processReturnErr(err, client.admin, client.loginId, reqTrans.TransactionNr).Error()
 				}
 			} else {
 				resTrans.Responses = make([]types.Response, 0)
-				resTrans.Error = err.Error()
+				resTrans.Error = returnErr.Error()
 			}
 		}
 
@@ -385,6 +406,14 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		return []byte("{}")
 	}
 	return resTransJson
+}
+
+func processReturnErr(err error, isAdmin bool, loginId int64, transNr uint64) error {
+	returnErr, isExpected := handler.ConvertToErrCode(err, !isAdmin)
+	if !isExpected {
+		log.Warning(handlerContext, fmt.Sprintf("TRANSACTION %d failure (login ID %d)", transNr, loginId), err)
+	}
+	return returnErr
 }
 
 func prepareUnrequested(ressource string, payload interface{}) ([]byte, error) {

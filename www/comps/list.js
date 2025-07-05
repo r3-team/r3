@@ -97,8 +97,8 @@ let MyList = {
 					<my-list-filters
 						v-if="showFilters"
 						@set-filters="setUserFilters"
-						:columns="columns"
-						:columnBatches="columnBatches"
+						:columns="columnsAll"
+						:columnBatches="columnBatchesAll"
 						:filters="filtersUser"
 						:joins="joins"
 					/>
@@ -431,6 +431,7 @@ let MyList = {
 										:filtersColumn="filtersColumn"
 										:isOrderedOrginal="isOrderedOrginal"
 										:joins="relationsJoined"
+										:key="b.key"
 										:orders="orders"
 										:relationId="query.relationId"
 										:rowCount="count"
@@ -927,6 +928,7 @@ let MyList = {
 		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
 		choiceFilters:       (s) => s.getChoiceFilters(s.choices,s.choiceId),
 		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,s.columnBatchSort[0],true),
+		columnBatchesAll:    (s) => s.getColumnBatches(s.moduleId,s.columnsAll,[],s.orders,[],true),
 		expressions:         (s) => s.getQueryExpressions(s.columns),
 		hasBulkActions:      (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
 		hasChoices:          (s) => s.query.choices.length > 1,
@@ -989,14 +991,6 @@ let MyList = {
 			if(inputEl !== null)
 				inputEl.focus();
 		});
-		this.$watch('columns',(valOld,valNew) => {
-			if(JSON.stringify(valOld) !== JSON.stringify(valNew)) {
-				this.count = 0;
-				this.rows  = [];
-				this.removeInvalidFiltersColumn();
-				this.reloadOutside();
-			}
-		});
 		this.$watch('formLoading',(val) => {
 			if(val) return;
 			this.inputAutoSelectDone = false;
@@ -1014,10 +1008,17 @@ let MyList = {
 				this.resized();
 			}
 		});
-		this.$watch(() => [this.choices,this.filters],(newVals, oldVals) => {
+		this.$watch(() => [this.choices,this.columns,this.columnsAll,this.filters],(newVals,oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
-				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
-					return this.reloadOutside();
+				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
+					this.count = 0;
+					this.rows  = [];
+					// column filters & orders can become invalid, if a user hides a column in list options
+					this.removeInvalidFilters();
+					this.removeInvalidOrders();
+					this.reloadOutside();
+					return;
+				}
 			}
 		});
 		if(this.isInput && !this.inputAsCategory) {
@@ -1045,9 +1046,11 @@ let MyList = {
 		this.reloadOptions();
 		this.setAutoRenewTimer(this.autoRenew);
 
-		// remove invalid column filters in case module schema changed
-		this.removeInvalidFiltersColumn();
-		
+		// remove invalid filters & orders in case module schema changed
+		// must occur after reloadOptions() as user field options are loaded there
+		this.removeInvalidFilters();
+		this.removeInvalidOrders();
+
 		// setup handlers
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
@@ -1388,11 +1391,10 @@ let MyList = {
 			this.reloadInside('limit');
 		},
 		setOrder(columnBatch,directionAsc) {
-			// remove initial sorting when changing anything
-			if(this.isOrderedOrginal)
-				this.orders = [];
+			// remove initial sorting (if active) when changing anything
+			let orders = this.isOrderedOrginal ? [] : JSON.parse(JSON.stringify(this.orders));
 			
-			const orderIndexesUsed = this.getOrderIndexesFromColumnBatch(columnBatch,this.columns,this.orders);
+			const orderIndexesUsed = this.getOrderIndexesFromColumnBatch(columnBatch,this.columns,orders);
 			const notOrdered       = orderIndexesUsed.length === 0;
 			if(notOrdered) {
 				if(directionAsc === null)
@@ -1401,13 +1403,13 @@ let MyList = {
 				for(const columnIndexSort of columnBatch.columnIndexesSortBy) {
 					const col = this.columns[columnIndexSort];
 					if(col.subQuery) {
-						this.orders.push({
+						orders.push({
 							ascending:directionAsc,
 							expressionPos:columnIndexSort // equal to expression index
 						});
 					}
 					else {
-						this.orders.push({
+						orders.push({
 							ascending:directionAsc,
 							attributeId:col.attributeId,
 							index:col.index
@@ -1416,20 +1418,20 @@ let MyList = {
 				}
 			} else {
 				if(directionAsc === null) {
-					this.orders = this.orders.filter((v,i) => !orderIndexesUsed.includes(i));
+					orders = orders.filter((v,i) => !orderIndexesUsed.includes(i));
 				} else {
 					for(const orderIndex of orderIndexesUsed) {
-						if(this.orders[orderIndex].ascending !== directionAsc)
-							this.orders[orderIndex].ascending = directionAsc;
+						if(orders[orderIndex].ascending !== directionAsc)
+							orders[orderIndex].ascending = directionAsc;
 					}
 				}
 			}
-
 			// when last order is removed, revert to original
-			if(this.orders.length === 0)
-				this.orders = this.ordersOriginal;
-
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'orders',JSON.parse(JSON.stringify(this.orders)));
+			this.setOrders(orders.length === 0 ? this.ordersOriginal : orders);
+		},
+		setOrders(v) {
+			this.orders = JSON.parse(JSON.stringify(v));
+			this.fieldOptionSet(this.favoriteId,this.fieldId,'orders',this.orders);
 			this.reloadInside('order');
 		},
 		setUserFilters(v) {
@@ -1483,13 +1485,11 @@ let MyList = {
 			if(columnBatchIndex === -1) return;
 			
 			this.setOrder(this.columnBatches[columnBatchIndex],true);
-			this.reloadInside('order');
 		},
 		cardsToggleOrderBy() {
 			const wasAsc = this.orders[0].ascending;
 			this.orders = [];
 			this.setOrder(this.columnBatches[this.cardsOrderByColumnBatchIndex],!wasAsc);
-			this.reloadInside('order');
 		},
 		
 		// user actions, inputs
@@ -1509,19 +1509,60 @@ let MyList = {
 		},
 
 		// cleanup
-		removeInvalidFiltersColumn() {
-			// only allow column filters based on active columns
-			let out = [];
-			for(const f of this.filtersColumn) {
+		removeInvalidFilters() {
+			const f = (filters,columns,fncUpdate) => {
+				let out = [];
+				let br0 = 0;
+				let br1 = 0;
+				for(const f of filters) {
+					br0 += f.side0.brackets;
+					br1 += f.side1.brackets;
+	
+					// only allow filters based on available columns
+					for(const c of columns) {
+						if(c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) {
+							out.push(f)
+							break;
+						}
+					}
+				}
+				if(br0 !== br1) // brackets do not match, remove all filters
+					return fncUpdate([]);
+
+				if(out.length !== filters.length) // some filters were removed, update
+					fncUpdate(out);
+			};
+			f(this.filtersColumn,this.columns,this.setColumnBatchFilters);
+			f(this.filtersUser,this.columnsAll,this.setUserFilters);
+		},
+		removeInvalidOrders() {
+			if(this.isOrderedOrginal) return;
+
+			for(const o of this.orders) {
+				// order by expression position (= index of retrieved columns), is only used for sub query columns
+				if(typeof o.expressionPos !== 'undefined') {
+
+					// order is invalid, if column index does not exist or column is not a sub query
+					if(o.expressionPos > this.columns.length - 1 || !this.columns[o.expressionPos].subQuery)
+						return this.setOrders(this.ordersOriginal);
+					
+					continue;
+				}
+
+				// order by attribute ID + relation index, check if corresponding column is displayed
+				// only displayed columns are retrieved, any user-defined order must be visible to be removable by the user
+				let columnFound = false;
 				for(const c of this.columns) {
-					if(c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) {
-						out.push(f)
+					if(o.index === c.index && o.attributeId === c.attributeId) {
+						columnFound = true;
 						break;
 					}
 				}
+
+				// order is invalid if corresponding column is not displayed
+				if(!columnFound)
+					return this.setOrders(this.ordersOriginal);
 			}
-			if(out.length !== this.filtersColumn.length)
-				this.setColumnBatchFilters(out);
 		},
 		
 		// bulk selection

@@ -30,6 +30,7 @@ type ClusterEventFileRequested struct {
 	FileName    string    `json:"fileName"`
 }
 type ClusterEventJsFunctionCalled struct {
+	ModuleId     uuid.UUID     `json:"moduleId"` // module ID that JS function belongs to, relevant for filtering to direct app access
 	JsFunctionId uuid.UUID     `json:"jsFunctionId"`
 	Arguments    []interface{} `json:"arguments"`
 }
@@ -53,9 +54,13 @@ type ClusterEventTaskTriggered struct {
 
 // cluster event client target filter
 type ClusterEventTarget struct {
-	Address string                `json:"address"` // address used to connect via websocket, "" = address is irrelevant
-	Device  WebsocketClientDevice `json:"device"`  // device to affect ("browser", "fatClient"), 0 = device is irrelevant
-	LoginId int64                 `json:"loginId"` // login ID to affect, 0 = all logins
+	// strict filters, target must match if filter is defined
+	Address string                `json:"address"` // address used to connect via websocket, "" = undefined
+	Device  WebsocketClientDevice `json:"device"`  // device to affect ("browser", "fatClient"), 0 = undefined
+	LoginId int64                 `json:"loginId"` // login ID to affect, 0 = undefined
+
+	// preferred filters, prioritize target if it matches filter, otherwise send it to others
+	PwaModuleIdPreferred uuid.UUID `json:"pwaModuleIdPreferred"` // client connecting via PWA sub host (direct app access), nil UUID = undefined
 }
 
 // cluster event to be processed by nodes and, in most cases, to be distributed to clients of cluster nodes

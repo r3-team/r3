@@ -55,15 +55,14 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 			return indexRecordIds, handler.ErrSchemaUnknownRelation(dataSet.RelationId)
 		}
 
-		// check write access for tuple creation
-		if isNewRecord && !authorizedRelation(loginId, dataSet.RelationId, 2) {
+		if isNewRecord && !authorizedRelation(loginId, dataSet.RelationId, types.AccessWrite) {
 			return indexRecordIds, errors.New(handler.ErrUnauthorized)
 		}
 
 		// check write access for updating attribute values
 		for _, attribute := range dataSet.Attributes {
 
-			if !authorizedAttribute(loginId, attribute.AttributeId, 2) {
+			if !authorizedAttribute(loginId, attribute.AttributeId, types.AccessWrite) {
 				return indexRecordIds, errors.New(handler.ErrUnauthorized)
 			}
 

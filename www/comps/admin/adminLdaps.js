@@ -1,4 +1,5 @@
 import {hasAnyAssignableRole} from '../shared/access.js';
+import {getCaption}           from '../shared/language.js';
 export {MyAdminLdaps as default};
 
 let MyAdminLdaps = {
@@ -244,11 +245,7 @@ let MyAdminLdaps = {
 						</thead>
 						<tbody>
 							<tr v-for="(r,i) in roles" class="default-inputs">
-								<td>
-									<input v-model="r.groupDn"
-										:placeholder="capApp.groupDnHint"
-									/>
-								</td>
+								<td><input v-model="r.groupDn" :placeholder="capApp.groupDnHint" /></td>
 								<td>
 									<select v-model="r.roleId">
 										<option :value="null">-</option>
@@ -259,7 +256,7 @@ let MyAdminLdaps = {
 											<option
 												v-for="rr in m.roles.filter(v => v.assignable && v.name !== 'everyone')"
 												:value="rr.id"
-											>{{ rr.name }}</option>
+											>{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) + ': ' + getCaption('roleTitle',m.id,rr.id,rr.captions,rr.name) }}</option>
 										</optgroup>
 									</select>
 								</td>
@@ -357,6 +354,7 @@ let MyAdminLdaps = {
 	},
 	methods:{
 		// externals
+		getCaption,
 		hasAnyAssignableRole,
 		
 		// actions

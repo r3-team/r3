@@ -94,13 +94,13 @@ func load_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 
 	loginIdMapAccess[loginId] = types.LoginAccess{
 		RoleIds:     roleIds,
-		Api:         make(map[uuid.UUID]int),
-		Attribute:   make(map[uuid.UUID]int),
-		ClientEvent: make(map[uuid.UUID]int),
-		Collection:  make(map[uuid.UUID]int),
-		Menu:        make(map[uuid.UUID]int),
-		Relation:    make(map[uuid.UUID]int),
-		Widget:      make(map[uuid.UUID]int),
+		Api:         make(map[uuid.UUID]types.Access),
+		Attribute:   make(map[uuid.UUID]types.Access),
+		ClientEvent: make(map[uuid.UUID]types.Access),
+		Collection:  make(map[uuid.UUID]types.Access),
+		Menu:        make(map[uuid.UUID]types.Access),
+		Relation:    make(map[uuid.UUID]types.Access),
+		Widget:      make(map[uuid.UUID]types.Access),
 	}
 
 	for _, roleId := range roleIds {
