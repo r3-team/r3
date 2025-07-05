@@ -1,4 +1,4 @@
-<p><em>Updated 2025-04-30</em></p>
+<p><em>Updated 2025-0-07</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -31,7 +31,6 @@
 <li><a href="#maintenance-mode">Maintenance mode</a></li>
 <li><a href="#builder-mode">Builder mode</a></li>
 <li><a href="#authentication-and-authorization">Authentication and authorization</a></li>
-<li><a href="#authentication-and-authorization-via-ldap">Authentication and authorization via LDAP</a></li>
 </ol></li>
 <li><a href="#manage-applications">Manage applications</a></li>
 <li><a href="#backup-and-recovery">Backup and recovery</a>
@@ -52,7 +51,7 @@
 <p>Depending on the available IT infrastructure and how REI3 is to be used, different deployment models exist:</p>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th></th>
 <th style="text-align: center;">Dedicated</th>
 <th style="text-align: center;">Stand-alone</th>
@@ -61,28 +60,28 @@
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Designed for</td>
 <td style="text-align: center;">production</td>
 <td style="text-align: center;">production</td>
 <td style="text-align: center;">test / build REI3 apps</td>
 <td style="text-align: center;">test / build REI3 apps</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Integrated database</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Runs on Windows</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Runs on Linux</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"></td>
@@ -219,6 +218,7 @@
 <li>embeddedDbBin: Only relevant for portable/stand-alone deployments. Binary files for embedded Postgres database system.</li>
 <li>embeddedDbData: Only relevant for portable/stand-alone deployments. Data files for embedded Postgres database system.</li>
 <li>files: Files uploaded to REI3 for storage in attributes of the type 'files'. Contents is cleaned regularly by scheduled tasks when references are removed or file retention is satisfied.</li>
+<li>fileExport / fileImport: Only relevant if file export/import functions are needed by REI3 applications. Directories from which REI3 can export/import files to/from. Must be accessible to the REI3 server (or nodes if cluster setup). For security reasons, the REI3 server can only use these directories for export/import tasks.</li>
 <li>temp: Files uploaded temporarily to REI3 for various operations. CSV uploads, application imports, etc. Contents is cleaned regularly by scheduled tasks.</li>
 <li>transfer: Files uploaded to REI3 for application installation or update. Files are kept to enable future export of dependencies.</li>
 </ul></li>
@@ -240,24 +240,24 @@
 <p><img src="en_us_admin_pics/builder_mode.webp" alt="Builder mode" /></p>
 <p>Please be aware that changing applications has permanent consequences up to and including data loss. Do not attempt to use the Builder in any productive instance. For testing or developing applications, a separated instance should be used. The portable version makes this easy on Windows clients. On Linux a separated application service, accessing a separate database, serves the same purpose.</p>
 <h2 id="authentication-and-authorization">Authentication and authorization</h2>
-<p>To let users access the system, they must be created by an REI3 administrator or imported from a <a href="#authentication-and-authorization-via-ldap">directory service</a>. Usernames can be anything from personal names to employee IDs to email addresses - they only need to be unique within a REI3 instance.</p>
-<p>To access any application or data, roles have to be assigned to users. This can be done by an REI3 administrator manually, or they can be assigned automatically according to group memberships within a <a href="#authentication-and-authorization-via-ldap">directory service</a>. Role permissions are cumulative - the more roles a user has, the larger the access.</p>
-<p>To increase account security, REI3 administrators can choose password complexity options in the admin interface. Additionally, MFA (multi-factor authentication) in the form of TOTP (time-based one-time-passwords) is available to users and can be reset by administrators. MFA can be setup on multiple devices and is supported by most authenticator apps (anything that supports TOTP).</p>
-<h2 id="authentication-and-authorization-via-ldap">Authentication and authorization via LDAP</h2>
-<p>REI3 hosts its own, internal authentication backend. To integrate into existing infrastructures, REI3 can utilize LDAP services to offer:</p>
+<p>To manage user access and permissions, the REI3 admin panel includes a user management interface. Here any user with the admin flag can create, edit and update permissions for users.</p>
+<p>REI3 currently supports four authentication options:</p>
+<ol type="1">
+<li>Local: Users are created inside the REI3 admin panel and log in with their credentials.</li>
+<li>OAuth2: Users are forwarded to an OAuth2 identity provider, authenticate with it and are returned to REI3 to log in via OpenID Connect.</li>
+<li>LDAP: Users are regularly imported from an LDAP source (often Active Directory). During login, their credentials are checked live against the LDAP.</li>
+<li>Public: Users log into REI3 with a pre-defined URL.</li>
+</ol>
+<p>Regardless of authentication, each user requires a unique name. This can be anything from names to email addresses to personnel numbers.</p>
+<p>To manage access to applications, roles are assigned to users. Role permissions are cumulative - the more roles the more access a user has.</p>
+<p>Role assignment can be done manually by admin users in the internal user management - or automatically via role mapping when users are originating from outside REI3:</p>
 <ul>
-<li>LDAP-Authentication: Users are imported from LDAP regularly. Credentials are then checked live during login against the LDAP.
-<ul>
-<li>Using multiple LDAD connections (or mixing local with LDAP users), can cause username duplications to occur. The LDAP connection can be configured to use email addresses or other attributes for usernames instead.</li>
-<li>Microsoft AD only: When a user account is disabled, active sessions are automatically closed during the next LDAP import.</li>
-</ul></li>
-<li>LDAP-Authorization: By reading group memberships, application roles can automatically be assigned to users.
-<ul>
-<li>Microsoft AD only: Nested group memberships are automatically resolved.</li>
-</ul></li>
+<li>OAuth2: Roles can be mapped based on the contents of a claim in the users´ ID token.</li>
+<li>LDAP: Roles can be mapped to group memberships of the authenticating user. In Microsoft Active directory, nested groups are supported as well as automatic user deactivation in REI3 when the LDAP user account is disabled.</li>
 </ul>
+<p>MFA (multi-factor authentication) in the form of TOTP (time-based one-time-passwords) is available to users for local &amp; LDAP authentication. MFA can be setup on multiple devices and is supported by most authenticator apps (anything that supports TOTP). Admin users can reset MFA for users if necessary.</p>
 <h1 id="manage-applications">Manage applications</h1>
-<p>To get use out of REI3, applications need to be installed. To manage applications, the maintenance mode must be enabled first.</p>
+<p>To get use out of REI3, applications need to be installed; for this the <a href="#maintenance-mode">maintenance mode</a> must be enabled.</p>
 <p>Applications are installed via the admin user interface. They can be retrieved from multiple sources:</p>
 <ul>
 <li>Official repository: Pre-installed repository for official REI3 applications. Internet access is required to access this online service.
