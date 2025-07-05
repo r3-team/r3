@@ -62,6 +62,10 @@ let MyInputIframe = {
 				}
 			},
 			immediate:true
+		},
+		modelValue(v) {
+			if(v === null && this.srcInput !== '') return this.srcInput = '';
+			if(v !== this.srcInput)                return this.srcInput = v;
 		}
 	},
 	data() {
