@@ -121,7 +121,8 @@ const MyInputDraw = {
 	},
 	emits:['update:modelValue'],
 	computed:{
-		zoom:(s) => 1 + (s.zoomInput / 10),
+		strokeColorClean:(s) => s.strokeColor !== '' ? s.strokeColor : '000000',
+		zoom:            (s) => 1 + (s.zoomInput / 10),
 		
 		// stores
 		appResized:(s) => s.$store.getters.appResized,
@@ -253,14 +254,14 @@ const MyInputDraw = {
 						1,
 						posXStart - this.dragOffsetX,
 						posYStart - this.dragOffsetY,
-						this.strokeColor,
+						this.strokeColorClean,
 						this.strokeWidth
 					);
 					this.strokes.push([
 						'b',
 						(posXStart - this.dragOffsetX) / this.zoom,
 						(posYStart - this.dragOffsetY) / this.zoom,
-						this.strokeColor,
+						this.strokeColorClean,
 						this.strokeWidth
 					]);
 					this.pointerStartCords = null;
