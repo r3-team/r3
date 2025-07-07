@@ -1,4 +1,4 @@
-<p><em>Updated 2025-02-26</em></p>
+<p><em>Updated 2025-07-07</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -53,7 +53,9 @@
 <ol type="1">
 <li><a href="#calling-apis">Calling APIs</a></li>
 </ol></li>
+<li><a href="#search-bars">Search bars</a></li>
 <li><a href="#collections">Collections</a></li>
+<li><a href="#widgets">Widgets</a></li>
 <li><a href="#client-events">Client-Events</a></li>
 <li><a href="#end-to-end-encryption">End-to-end encryption</a>
 <ol type="1">
@@ -256,10 +258,11 @@
 <li>Unique indexes can be used to enforce unique values in all kinds of attributes (unique names/numbers/dates/...). This is one use-case for indexing besides performance.</li>
 <li>Indexes can be used to enforce unique, composite keys by using multiple attributes to form a unique index.</li>
 </ul>
+<p>Indexes become very important when executing application wide searches, such as when using <a href="#search-bars">search bars</a>.</p>
 <h3 id="text-indexing">Text indexing</h3>
 <p>REI3 offers a default index, which works on almost all <a href="#attributes">attribute</a> types, like numbers, dates or names, to quickly find specific data. It is however limited when it comes to larger text values, such as articles.</p>
-<p>When text attribute values become too large (more than a few paragraphs) the default index does not work anymore as its not designed to work with large texts. Its also very inefficient to scan for specific characters in a growing number of large texts.</p>
-<p>For this situation, REI3 offers a dedicated text index option. A text index does not index every character, but instead breaks down the text content to its components. This gives us full-text search capabilities, which offer very fast, mult-word lookups. To use a text index, just select the option when adding a new index on a <a href="#relations">relation</a>.</p>
+<p>When text attribute values become too large (more than a few paragraphs), the default index does not work anymore as its not designed to work with large texts. Its also very inefficient to scan for specific characters in a growing number of large texts.</p>
+<p>For this situation, REI3 offers a dedicated text index option. A text index does not index every character, but instead breaks down the text content to its components. This gives us full-text search capabilities, which offer very fast, multi-word lookups. To use a text index, just select the option when adding a new index on a <a href="#relations">relation</a>.</p>
 <p>There is however another benefit with text indexes: Language specific lookups. If its possible to know the language of a text, full-text search can also break down words to their stems and remove stop-words. This enables lookups for words of the same stem as well as further improve performance. To enable this option, the relation on which the text attribute is stored, requires a dictionary attribute. This attribute is used to store the language of a text. If a dictionary attribute is used and given a value, lookups take into account specifics of the defined language to better find results.</p>
 <h2 id="triggers">Triggers</h2>
 <p>Triggers are an advanced feature, reacting to changed records inside your <a href="#relations">relations</a> (on creation, update or deletion). They are usually used for complex or event driven business logic.</p>
@@ -308,19 +311,23 @@ END IF;</code></pre>
 <h1 id="roles-and-access-management">Roles and access management</h1>
 <p>Roles are used to control what a user can see and do in an application. Roles control:</p>
 <ul>
-<li>Data access: Access control for data structures, e. g. <a href="#relations">relations</a> and <a href="#attributes">attributes</a>.</li>
-<li>Visible menus: Which menus are shown for a role member.</li>
-<li>Available collections: Which <a href="#collections">collections</a> are retrieved for a role member.</li>
-<li>Applied policies: Access control for specific records, which is defined via <a href="#policies">relation policies</a>.</li>
-<li>Start form: Which form is shown when a user opens an application. Defined for the <a href="#creating-your-own-applications">application</a>.</li>
+<li>Data access: What access to data structures, e. g. <a href="#relations">relations</a> and <a href="#attributes">attributes</a>, a role member has.</li>
+<li>Menus: Which menus are visible to a role member.</li>
+<li>Collections: Which <a href="#collections">collections</a> are retrieved for a role member.</li>
+<li>Search bars: Which <a href="#search-bars">search bars</a> are available to a role member.</li>
+<li>Widgets: Which <a href="#widgets">widgets</a> are available to a role member.</li>
+<li>APIs: Which <a href="#apis">APIs</a> are available to a role member.</li>
+<li>Client events: Which <a href="#client-events">client events</a> are available to a role member.</li>
+<li>Policies: What access a role member has to specific records. Defined in <a href="#policies">relation policies</a>.</li>
+<li>Start form: Which form is shown when a role members opens an application. Defined for the <a href="#creating-your-own-applications">application</a>.</li>
 </ul>
 <p><img src="en_us_builder_pics/role.webp" alt="Role settings" /></p>
 <p>Roles in REI3 are cumulative; the more roles a user has, the more access is available. There is no 'deny' option; when you need to deny a group of users access, you remove the corresponding access from the role and create a second one, granting this specific access.</p>
 <p>When creating a role, you need to choose a unique role name within your application. Titles, descriptions and role types serve to explain the role to administrators of REI3 instances as they will be shown in the admin UI. The role type is purely descriptive and only serves to make role assignment quicker.</p>
 <p>Roles can be members of other roles. This enables access inheritance with no fixed limit on how many levels of inheritance are allowed. A user logging in, receives access following assigned roles and the memberships of these roles (and the memberships of those roles, and so on).</p>
 <p>The role 'everyone' is pre-defined and available in all applications. Anything assigned to this role is assigned to all users that can login into REI3, regardless of what other roles they might have. This role should primarily be used during development or when access does not need to be limited at all. Before an application is released into production, assigned permissions to 'everyone' should be moved to other roles, based on required access.</p>
-<p>When applications <a href="#building-on-applications">build on other applications</a> usually some access to the other application´s data is necessary. This is solved by making your roles members of roles from other applications. In many cases data access is desired but users from one application should not see user interfaces from the other; this is addressed by creating 'data only' roles with no assigned menu entries.</p>
-<p>Lastly, the option 'assignable' controls whether a role is directly assignable to a user. If set to 'false' the specific role is hidden in the admin UI and can only be assigned indirectly via membership of other roles. This can be useful for 'data only' roles or for complex role hierarchies.</p>
+<p>When applications <a href="#building-on-applications">build on other applications</a> usually some access to the other application´s data is necessary. This is solved by making your roles members of roles from other applications. In many cases data access is desired but users from one application should not see user interfaces from the other; this is addressed by creating 'data only' roles with no assigned menus, widgets or search bars.</p>
+<p>Lastly, the option 'assignable' controls whether a role is directly assignable to a user. If set to 'false' the role is hidden in the admin UI and can only be assigned indirectly via membership of other roles. This can be useful for 'data only' roles or for complex role hierarchies.</p>
 <h1 id="presentation-and-user-interfaces">Presentation and user interfaces</h1>
 <p>Besides managing data, most systems require some kind of frontend. For this purpose, REI3 includes <a href="#forms">forms</a> to display and manipulate data and <a href="#menus">menus</a> to navigate your application.</p>
 <h2 id="forms">Forms</h2>
@@ -747,6 +754,13 @@ END IF;</code></pre>
 <li>Calling REST APIs on the backend is done by the REI3 server. When creating new backend functions you can select from a list of templates, which includes examples of REST calls for authentication, sending data with authentication headers and how to handle JSON responses. REST calls are executed asynchronously so a callback function (e. g. another backend function) is used to handle REST responses if needed.</li>
 </ul>
 <p>REI3 instances can exchange data, with one instance offering APIs as server with the other calling these APIs as client to receive or update records.</p>
+<h1 id="search-bars">Search bars</h1>
+<p>With a growing number of <a href="#relations">relations</a> and applications in a REI3 instance, finding relevant records can take a while. To help users quickly reach relevant records, application authors can define one or more search bars, which are presented to users in a global search interface.</p>
+<p>Every search bar has its own <a href="#queries">query</a> and corresponding filters, to represent a different view on one or many relations in the application. To execute the search, a user provides a single text search input. To apply this input to the search bar query, at least one filter of the type <code>Global search -&gt; User search input</code> should be added; though in many cases, multiple attributes, such as titles, names, descriptions &amp; translations exist, which can be searched through simultaneously via <code>OR</code> condition.</p>
+<p>Important: As with all filters, searching through larger data sets requires more time. To speed this up, <a href="#indexing">indexing</a> is recommended. Every attribute used in search bar filters should ideally be indexed. Most attributes, such as short names or numbers can be indexed with the default index option; large texts, such as articles, descriptions, comments and so on, however need a <a href="#text-indexing">text index</a>. Searching through a text index requires the fulltext search operator; instead of comparing values via <code>=</code>, <code>LIKE</code> or <code>ILIKE</code>, the <code>@@</code> operator is used (<code>Full-text search -&gt; @@</code> in the operator dropdown).</p>
+<p>Full-text search works differently to regular lookups. They do not compare individual characters, but words or names instead. If the language of a text is defined, they can even break words down to their roots to match words of the same stem - for example, <code>baking</code> as search input would also find results for <code>baked</code>. To define a language, a dictionary attribute is needed on the same relation as the text. It is then filled by either your application or users on a form - it also needs to be included in the <a href="#text-indexing">text index definition</a>. If the language is not defined, a 'simple' full-text search is executed, which still works the same way but can only work with direct matches - ie. the names or words must match the search input exactly.</p>
+<p>Large texts make full-text search a requirement - they allow for fast enough lookups even in very large data sets with large texts. They also enable advanced search features, such as excluding certain words, making sure that words follow each other and so on. More details can be found in all user interfaces that offer full-text search in REI3.</p>
+<p>For a search bar to be available to users, it must be assigned to a <a href="#roles-and-access-management">role</a>.</p>
 <h1 id="collections">Collections</h1>
 <p>A collection is a data store that is available on the frontend, which can be accessed by other frontend elements (like <a href="#field-settings">form fields</a> or <a href="#frontend-functions">frontend-functions</a>). It contains data based on a defined <a href="#queries">query</a>. Depending on the selected <a href="#columns">columns</a> and <a href="#query-filters">filters</a>, a collection will retrieve records and their values.</p>
 <p>Collections are retrieved when a user logs into the system and updated when user permissions change; collections can also be updated directly by executing a <a href="#functions">function</a>. When updating a collection via a frontend function, only the current user will be affected - updating from a backend function can however affect one, many or all users.</p>
@@ -760,6 +774,9 @@ END IF;</code></pre>
 <li>As a notification, shown within a menu entry: Menu entries can reference collection values to show context-relevant data, like counters reflecting the total number of items on a list that the menu entry would show.</li>
 </ul>
 <p>Collections can offer any data from the database, to be used on the frontend, regardless of context. They have downsides however. As they are not regularly updated during a user´s session, their values might be outdated. When manipulating data affecting a collection, the user would need to refresh the page or a function would need to trigger a collection update. Depending on the contents of the collection, this limitation may not be relevant or might be easily addressable by rare, event-driven updates.</p>
+<h1 id="widgets">Widgets</h1>
+<p>A widget is a small form that application authors can offer to users, which they can then place on their home screens. Widgets are limited in size, with two size settings being available at the moment. They are often used to display important or time sensitive information for users. They can also be used for quick record creation, such as for creating short notes, tasks or starting a shift or timer.</p>
+<p>As widgets are just small forms, they offer most of the features of regular <a href="#forms">forms</a> and can even execute complex <a href="#functions">functions</a> if required.</p>
 <h1 id="client-events">Client events</h1>
 <p>REI3 includes the optional REI3 client software, which can be installed by users from their personal settings. This piece of software runs on Windows, Linux (X11 only) and MacOS. It was created to enable interactions between the REI3 web application (running in a browser or via progressive web app) and the user´s computer.</p>
 <p>A client event is a definition of what should occur, when the REI3 client recognizes a specific event. It´s defined in the Builder, in the application setting page and can react to:</p>
