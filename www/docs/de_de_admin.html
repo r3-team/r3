@@ -1,4 +1,4 @@
-<p><em>Aktualisiert 2025-04-30</em></p>
+<p><em>Aktualisiert 2025-07-07</em></p>
 <h1 id="inhaltsverzeichnis">Inhaltsverzeichnis</h1>
 <ol type="1">
 <li><a href="#einführung">Einführung</a></li>
@@ -31,7 +31,6 @@
 <li><a href="#wartungsmodus">Wartungsmodus</a></li>
 <li><a href="#builder-modus">Builder-Modus</a></li>
 <li><a href="#authentifizierung-und-autorisierung">Authentifizierung und Autorisierung</a></li>
-<li><a href="#authentifizierung-und-autorisierung-über-ldap">Authentifizierung und Autorisierung über LDAP</a></li>
 </ol></li>
 <li><a href="#anwendungen-verwalten">Anwendungen verwalten</a></li>
 <li><a href="#sicherung-und-wiederherstellung">Sicherung und Wiederherstellung</a>
@@ -52,7 +51,7 @@
 <p>Abhängig von der verfügbaren IT-Infrastruktur und wie REI3 eingesetzt werden soll, existieren verschiedene Bereitstellungsmodelle:</p>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th></th>
 <th style="text-align: center;">Dediziert</th>
 <th style="text-align: center;">Eigenständig</th>
@@ -61,28 +60,28 @@
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Entworfen für</td>
 <td style="text-align: center;">Produktion</td>
 <td style="text-align: center;">Produktion</td>
 <td style="text-align: center;">Test &amp; Bau von REI3-Anwendungen</td>
 <td style="text-align: center;">Test &amp; Bau von REI3-Anwendungen</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Integrierte Datenbank</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Läuft unter Windows</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"><strong>X</strong></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Läuft unter Linux</td>
 <td style="text-align: center;"><strong>X</strong></td>
 <td style="text-align: center;"></td>
@@ -219,6 +218,7 @@
 <li>embeddedDbBin: Nur relevant für portable/eigenständige Bereitstellungsmodelle. Binärdateien für das integrierte Postgres-Datenbanksystem.</li>
 <li>embeddedDbData: Nur relevant für portable/eigenständige Bereitstellungsmodelle. Datendateien für das integrierte Postgres-Datenbanksystem.</li>
 <li>files: In REI3 hochgeladene Dateien, die in Attributen vom Typ "files" gespeichert werden. Der Inhalt wird regelmäßig durch geplante Aufgaben bereinigt, wenn Verweise entfernt werden oder die Aufbewahrungsfrist für Dateien erfüllt ist.</li>
+<li>fileExport / fileImport: Nur relevant, wenn REI3-Anwendungen Export-/Import-Funktionen benötigen. Verzeichnisse von/in denen REI3 Dateien exportieren bzw. importieren kann. Müssen für den REI3-Server erreichbar sein (oder für die Knoten im Cluster-Betrieb). Aus Sicherheitsgründen kann der REI3-Server nur diese Verzeichnisse für Exporte/Importe nutzen.</li>
 <li>temp: Dateien, die für verschiedene Vorgänge vorübergehend in REI3 hochgeladen werden. CSV-Uploads, Anwendungsimporte, usw. Der Inhalt wird regelmäßig durch geplante Aufgaben bereinigt.</li>
 <li>transfer: Dateien, die zur Installation oder Aktualisierung von Anwendungen in REI3 hochgeladen werden. Die Dateien werden aufbewahrt, um einen zukünftigen Export von Abhängigkeiten zu ermöglichen.</li>
 </ul></li>
@@ -240,24 +240,24 @@
 <p><img src="de_de_admin_pics/builder_mode.webp" alt="Builder-Modus" /></p>
 <p>Der Builder ist ein umfangreiches Werkzeug. Alle REI3-Anwendungen werden ausschließlich über den Builder erstellt und geändert. Bitte beachten Sie, dass das Ändern von Anwendungen dauerhafte Konsequenzen bis hin zum Datenverlust hat. Versuchen Sie nicht, den Builder in einer produktiven Instanz zu verwenden. Zum Testen oder Entwickeln von Anwendungen sollte eine separate Instanz verwendet werden. Die portable Version macht dies für Windows-Endgeräte einfach. Unter Linux dient ein separater Anwendungsdienst, der auf eine separate Datenbank zugreift, demselben Zweck.</p>
 <h2 id="authentifizierung-und-autorisierung">Authentifizierung und Autorisierung</h2>
-<p>Um Benutzern den Zugang zum System zu ermöglichen, müssen diese von einem REI3-Administrator erstellt oder von einem <a href="#authentifizierung-und-autorisierung-über-ldap">Verzeichnisdienst</a> importiert werden. Benutzernamen können alles sein, von persönlichen Namen über Mitarbeiter-IDs bis hin zu E-Mail-Adressen - sie müssen nur eindeutig innerhalb einer REI3-Instanz sein.</p>
-<p>Um auf eine Anwendung oder Daten zugreifen zu können, müssen Benutzern Rollen zugewiesen werden. Dies kann durch einen REI3-Administrator manuell geschehen oder sie können automatisch anhand von Gruppenmitgliedschaften innerhalb eines <a href="#authentifizierung-und-autorisierung-über-ldap">Verzeichnisdienstes</a> zugewiesen werden. Rollenberechtigungen sind kumulativ - je mehr Rollen ein Benutzer hat, desto umfangreicher ist der Zugriff.</p>
-<p>Um die Kontosicherheit zu erhöhen, können REI3-Administratoren in der Admin-Oberfläche Optionen für die Passwortkomplexität auswählen. Darüber hinaus steht den Benutzern MFA (Multi-Faktor-Authentifizierung) in Form von TOTP (zeitbasierte Einmal-Passwörter) zur Verfügung, die von den Administratoren zurückgesetzt werden können. MFA kann auf mehreren Geräten eingerichtet werden und wird von den meisten Authenticator-Apps unterstützt (alles, was TOTP unterstützt).</p>
-<h2 id="authentifizierung-und-autorisierung-über-ldap">Authentifizierung und Autorisierung über LDAP</h2>
-<p>REI3 hostet ein internes Authentifizierungs-Backend. Zur Integration in vorhandene Infrastrukturen kann REI3 LDAP-Dienste nutzen, um folgendes anzubieten:</p>
+<p>Zur Verwaltung von Zugriffen und Berechtigungen enthält das REI3-Adminpanel eine Benutzerverwaltungsoberfläche. Hier kann jeder Benutzer mit dem Admin-Flag andere Benutzer anlegen, bearbeiten und deren Berechtigungen aktualisieren.</p>
+<p>REI3 unterstützt aktuell vier Authentifizierungsoptionen:</p>
+<ol type="1">
+<li>Lokal: Benutzer werden im REI3-Adminpanel erstellt und melden sich mit ihren Zugangsdaten an.</li>
+<li>OAuth2: Benutzer werden an einen OAuth2-Identitätsanbieter weitergeleitet, authentifizieren sich dort und melden sich über OpenID Connect bei REI3 an.</li>
+<li>LDAP: Benutzer werden regelmäßig aus einer LDAP-Quelle (oft Active Directory) importiert. Beim Login werden ihre Zugangsdaten live gegen das LDAP geprüft.</li>
+<li>Öffentlich: Benutzer melden sich über eine vordefinierte URL bei REI3 an.</li>
+</ol>
+<p>Unabhängig von der Authentifizierung benötigt jeder Benutzer einen eindeutigen Namen. Dies kann alles sein – von Namen über E-Mail-Adressen bis hin zu Personalnummern.</p>
+<p>Um den Zugriff auf Anwendungen zu steuern, werden Benutzern Rollen zugewiesen. Rollenberechtigungen sind kumulativ – je mehr Rollen ein Benutzer hat, desto mehr Zugriff erhält er.</p>
+<p>Die Rollenzuweisung kann manuell durch Admins in der internen Benutzerverwaltung erfolgen – oder automatisch über Rollen-Mapping, wenn Benutzer von außerhalb REI3 stammen:</p>
 <ul>
-<li>LDAP-Authentifizierung: Benutzerkonten werden regelmäßig von LDAP importiert. Anmeldedaten werden dann live während des Anmeldeversuches gegen das LDAP geprüft.
-<ul>
-<li>Bei der Verwendung mehrfacher LDAP-Verbindungen (oder beim Mischen lokaler Benutzer mit Benutzern aus LDAP) können duplikate Benutzernamen existieren. LDAP-Verbindungen können konfiguriert werden, um E-Mail-Adressen oder andere Attribute für Benutzernamen zu nutzen.</li>
-<li>Nur Microsoft-AD: Wenn ein Benutzerkonto deaktiviert wird, werden Sitzungen dieses Benutzers während des nächsten LDAP-Imports automatisch geschlossen.</li>
-</ul></li>
-<li>LDAP-Autorisierung: Durch das Auslesen von Gruppenmitgliedschaften können Anwendungsrollen automatisch Benutzern zugewiesen werden.
-<ul>
-<li>Nur Microsoft-AD: Verschachtelte Gruppenmitgliedschaften werden automatisch aufgelöst.</li>
-</ul></li>
+<li>OAuth2: Rollen können basierend auf dem Inhalt eines Claims im ID-Token des Benutzers zugewiesen werden.</li>
+<li>LDAP: Rollen können auf Gruppenmitgliedschaften des authentifizierten Benutzers abgebildet werden. In Microsoft Active Directory werden verschachtelte Gruppen ebenso unterstützt wie die automatische Deaktivierung von Benutzern in REI3, wenn das zugehörige LDAP-Benutzerkonto deaktiviert wird.</li>
 </ul>
+<p>MFA (Multi-Faktor-Authentifizierung) in Form von TOTP (zeitbasierte Einmalpasswörter) steht Benutzern für die lokale und LDAP-Authentifizierung zur Verfügung. MFA kann auf mehreren Geräten eingerichtet werden und wird von den meisten Authenticator-Apps unterstützt (alle, die TOTP unterstützen). Admins können MFA für Benutzer bei Bedarf zurücksetzen.</p>
 <h1 id="anwendungen-verwalten">Anwendungen verwalten</h1>
-<p>Um REI3 nutzen zu können, müssen Anwendungen installiert werden. Um Anwendungen zu verwalten, muss zuerst der Wartungsmodus aktiviert werden.</p>
+<p>Um REI3 nutzen zu können, müssen Anwendungen installiert werden; hierzu ist die Aktivierung des <a href="#wartungsmodus">Wartungsmodus</a> erforderlich.</p>
 <p>Anwendungen werden über die Adminoberfläche installiert. Sie können aus mehreren Quellen abgerufen werden:</p>
 <ul>
 <li>Offizielles Repository: Vorinstalliertes Repository für offizielle REI3-Anwendungen. Für den Zugriff auf diesen Onlinedienst ist ein Internetzugang erforderlich.

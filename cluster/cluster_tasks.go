@@ -41,7 +41,7 @@ func CheckInNode() error {
 	}
 
 	if tools.GetTimeUnix() > masterLastCheckIn+(int64(config.GetUint64("clusterNodeMissingAfter"))) {
-		log.Info("cluster", "node has recognized an absent master, requesting role for itself")
+		log.Info(log.ContextCluster, "node has recognized an absent master, requesting role for itself")
 
 		// cluster master missing, request cluster master role for this node
 		if _, err := db.Pool.Exec(context.Background(), `
@@ -270,7 +270,7 @@ func LoginReauthorizedAll_tx(ctx context.Context, tx pgx.Tx, updateNodes bool) e
 	return nil
 }
 func MasterAssigned(state bool) error {
-	log.Info("cluster", fmt.Sprintf("node has changed its master state to '%v'", state))
+	log.Info(log.ContextCluster, fmt.Sprintf("node has changed its master state to '%v'", state))
 	cache.SetIsClusterMaster(state)
 
 	// reload scheduler as most events should only be executed by the cluster master

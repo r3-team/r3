@@ -31,7 +31,7 @@ func ConnectAndBind(ldapId int32) (*goldap.Conn, types.Ldap, error) {
 		ServerName:         ldap.Host,
 	}
 
-	log.Info("ldap", fmt.Sprintf("connecting to '%s'", bind))
+	log.Info(log.ContextLdap, fmt.Sprintf("connecting to '%s'", bind))
 
 	var ldapConn *goldap.Conn
 	if ldap.Tls {

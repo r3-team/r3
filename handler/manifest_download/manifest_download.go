@@ -38,26 +38,23 @@ type manifest struct {
 	StartUrl string `json:"start_url"`
 }
 
-var (
-	handlerContext  = "manifest_download"
-	manifestDefault = manifest{
-		Id:              "platform",
-		Name:            "REI3",
-		ShortName:       "REI3",
-		Scope:           "/",
-		StartUrl:        "/",
-		Display:         "standalone",
-		Orientation:     "any",
-		BackgroundColor: "#f5f5f5",
-		ThemeColor:      "#444444",
-		Icons: []icon{
-			{Purpose: "any", Sizes: "192x192", Src: "/images/icon_fav192.png", Type: "image/png"},
-			{Purpose: "any", Sizes: "512x512", Src: "/images/icon_fav512.png", Type: "image/png"},
-			{Purpose: "maskable", Sizes: "192x192", Src: "/images/icon_mask192.png", Type: "image/png"},
-			{Purpose: "maskable", Sizes: "512x512", Src: "/images/icon_mask512.png", Type: "image/png"},
-		},
-	}
-)
+var manifestDefault = manifest{
+	Id:              "platform",
+	Name:            "REI3",
+	ShortName:       "REI3",
+	Scope:           "/",
+	StartUrl:        "/",
+	Display:         "standalone",
+	Orientation:     "any",
+	BackgroundColor: "#f5f5f5",
+	ThemeColor:      "#444444",
+	Icons: []icon{
+		{Purpose: "any", Sizes: "192x192", Src: "/images/icon_fav192.png", Type: "image/png"},
+		{Purpose: "any", Sizes: "512x512", Src: "/images/icon_fav512.png", Type: "image/png"},
+		{Purpose: "maskable", Sizes: "192x192", Src: "/images/icon_mask192.png", Type: "image/png"},
+		{Purpose: "maskable", Sizes: "512x512", Src: "/images/icon_mask512.png", Type: "image/png"},
+	},
+}
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 
@@ -103,7 +100,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		payloadJson, err := json.Marshal(manifestApp)
 		if err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextManifestDownload, err, handler.ErrGeneral)
 			return
 		}
 
@@ -120,13 +117,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	moduleId, err := uuid.FromString(elements[2])
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextManifestDownload, err, handler.ErrGeneral)
 		return
 	}
 
 	module, exists := cache.ModuleIdMap[moduleId]
 	if !exists {
-		handler.AbortRequest(w, handlerContext, handler.ErrSchemaUnknownModule(moduleId), handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextManifestDownload, handler.ErrSchemaUnknownModule(moduleId), handler.ErrGeneral)
 		return
 	}
 
@@ -135,7 +132,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if module.ParentId.Valid {
 		parent, exists := cache.ModuleIdMap[module.ParentId.Bytes]
 		if !exists {
-			handler.AbortRequest(w, handlerContext, handler.ErrSchemaUnknownModule(module.ParentId.Bytes), handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextManifestDownload, handler.ErrSchemaUnknownModule(module.ParentId.Bytes), handler.ErrGeneral)
 			return
 		}
 		parentName = parent.Name
@@ -162,12 +159,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if module.IconIdPwa1.Valid && module.IconIdPwa2.Valid {
 		iconPwa1, err := cache.GetPwaIcon(module.IconIdPwa1.Bytes)
 		if err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextManifestDownload, err, handler.ErrGeneral)
 			return
 		}
 		iconPwa2, err := cache.GetPwaIcon(module.IconIdPwa2.Bytes)
 		if err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextManifestDownload, err, handler.ErrGeneral)
 			return
 		}
 
@@ -179,7 +176,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	payloadJson, err := json.Marshal(manifestMod)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextManifestDownload, err, handler.ErrGeneral)
 		return
 	}
 

@@ -3,7 +3,7 @@ export {MyInputSelect as default};
 let MyInputSelect = {
 	name:'my-input-select',
 	template:`<div class="input-select"
-		@keyup.esc="escape"
+		@keydown.esc="escape"
 		v-click-outside="escape"
 	>
 		<div class="part row gap" @click="toggle" :class="{ clickable:!readonly }">
@@ -11,8 +11,8 @@ let MyInputSelect = {
 				v-model="textInput"
 				@focus="$emit('focused')"
 				@keyup="inputChange"
-				@keyup.enter="enter"
-				@keyup.esc="escape"
+				@keydown.enter="enter"
+				@keydown.esc="escape"
 				:disabled="readonly"
 				:placeholder="placeholder"
 				:tabindex="!readonly ? 0 : -1"
@@ -39,25 +39,23 @@ let MyInputSelect = {
 				/>
 			</div>
 		</div>
-		
-		<div class="input-dropdown-wrap">
-			<div v-if="dropdownShow" class="input-dropdown">
-				<div class="input-dropdown-entry clickable" tabindex="0"
-					v-for="(option,i) in options"
-					@click="apply(i)"
-					@keyup.enter.space="apply(i)"
-					:class="{ rowsColored:settings.listColored }"
-				>
-					{{ option.name }}
-				</div>
-				<div class="input-dropdown-entry inactive" v-if="options.length === 0">
-					{{ capGen.resultsNone }}
-				</div>
-				<div class="input-dropdown-entry inactive" v-if="options.length === limit">
-					{{ capGen.inputSelectMore }}
-				</div>
+
+		<teleport to="#dropdown" v-if="dropdownShow">
+			<div class="input-select-entry clickable" tabindex="0"
+				v-for="(option,i) in options"
+				@click="apply(i)"
+				@keydown.enter.space="apply(i)"
+				:class="{ rowsColored:settings.listColored }"
+			>
+				{{ option.name }}
 			</div>
-		</div>
+			<div class="input-select-entry inactive" v-if="options.length === 0">
+				{{ capGen.resultsNone }}
+			</div>
+			<div class="input-select-entry inactive" v-if="options.length === limit">
+				{{ capGen.inputSelectMore }}
+			</div>
+		</teleport>
 	</div>`,
 	props:{
 		dropdownShow:{ type:Boolean, required:false, default:false },
@@ -105,9 +103,17 @@ let MyInputSelect = {
 			if(this.options.length > 0)
 				this.apply(0);
 		},
-		escape() {
+		escape(ev) {
 			this.$emit('blurred');
-			this.$emit('dropdown-show',false);
+
+			if(this.dropdownShow) {
+				this.$emit('dropdown-show',false);
+
+				if(ev !== undefined) {
+					ev.preventDefault();
+					ev.stopPropagation();
+				}
+			}
 		},
 		inputChange() {
 			if(!this.dropdownShow && this.textInput === '')

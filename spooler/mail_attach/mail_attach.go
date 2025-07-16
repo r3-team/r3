@@ -149,8 +149,7 @@ func do(mail types.Mail) error {
 			Version: -1,
 		}
 	}
-	if err := data.FilesApplyAttributChanges_tx(ctx, tx, mail.RecordId.Int64,
-		atr.Id, fileIdMapChange); err != nil {
+	if err := data.FilesApplyAttributChanges_tx(ctx, tx, mail.RecordId.Int64, atr.Id, fileIdMapChange); err != nil {
 		return err
 	}
 

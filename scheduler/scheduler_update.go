@@ -18,7 +18,7 @@ func updateCheck() error {
 	}
 	url := fmt.Sprintf("%s?old=%s", config.GetString("updateCheckUrl"), config.GetAppVersion().Full)
 
-	log.Info("server", fmt.Sprintf("starting update check at '%s'", url))
+	log.Info(log.ContextServer, fmt.Sprintf("starting update check at '%s'", url))
 
 	httpClient, err := config.GetHttpClient(false, 10)
 	if err != nil {
@@ -61,6 +61,6 @@ func updateCheck() error {
 		return err
 	}
 
-	log.Info("server", fmt.Sprintf("update check returned version '%s'", check.Version))
+	log.Info(log.ContextServer, fmt.Sprintf("update check returned version '%s'", check.Version))
 	return nil
 }

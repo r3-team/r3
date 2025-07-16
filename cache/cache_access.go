@@ -100,6 +100,7 @@ func load_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 		Collection:  make(map[uuid.UUID]types.Access),
 		Menu:        make(map[uuid.UUID]types.Access),
 		Relation:    make(map[uuid.UUID]types.Access),
+		SearchBar:   make(map[uuid.UUID]types.Access),
 		Widget:      make(map[uuid.UUID]types.Access),
 	}
 
@@ -149,11 +150,39 @@ func load_tx(ctx context.Context, tx pgx.Tx, loginId int64) error {
 				loginIdMapAccess[loginId].Relation[id] = access
 			}
 		}
+		for id, access := range role.AccessSearchBars {
+			if _, exists := loginIdMapAccess[loginId].SearchBar[id]; !exists ||
+				loginIdMapAccess[loginId].SearchBar[id] < access {
+
+				loginIdMapAccess[loginId].SearchBar[id] = access
+			}
+		}
 		for id, access := range role.AccessWidgets {
 			if _, exists := loginIdMapAccess[loginId].Widget[id]; !exists ||
 				loginIdMapAccess[loginId].Widget[id] < access {
 
 				loginIdMapAccess[loginId].Widget[id] = access
+			}
+		}
+	}
+
+	// resolve inherited attribute access from parent relation
+	// all roles were parsed and applied their cumulative attribute access
+	for _, roleId := range roleIds {
+		role := RoleIdMap[roleId]
+
+		for id, accessRel := range role.AccessRelations {
+			for _, atr := range RelationIdMap[id].Attributes {
+				if _, exists := role.AccessAttributes[atr.Id]; exists {
+					// role sets access for this attribute, nothing to inherit from relation
+					continue
+				}
+				// role does not set access for this attribute (access is inherited from relation)
+				// delete cumulated attribute access if less than inherited access on this relation (not if access is equal!)
+				//  if removed due to equal access, when looking at the next relation access, inheritance can also be assumed
+				if accessAtr, exists := loginIdMapAccess[loginId].Attribute[atr.Id]; exists && accessAtr < accessRel {
+					delete(loginIdMapAccess[loginId].Attribute, atr.Id)
+				}
 			}
 		}
 	}

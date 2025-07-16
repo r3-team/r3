@@ -9,7 +9,7 @@ export {MyListColumnBatch as default};
 
 let MyListColumnBatch = {
 	name:'my-list-column-batch',
-	template:`<div class="columnBatchHeader">
+	template:`<div class="columnBatchHeader" ref="content">
 		<my-button image="filter.png"
 			v-if="showIconFilter"
 			@trigger="click"
@@ -31,21 +31,16 @@ let MyListColumnBatch = {
 		/>
 		
 		<div class="columBatchHeaderCaption"
+			v-click-outside="clickOutside"
 			@click.stop="click"
-			:class="{ clickable:canOpen, dropdownActive:show, hasIcons:showIconFilter || showIconOrder }"
+			:class="{ clickable:canOpen, dropdownActive:dropdownShow, hasIcons:showIconFilter || showIconOrder }"
 			:title="columnBatch.caption"
 		>{{ columnBatch.caption }}</div>
 		
-		<!-- column options dropdown -->
-		<div class="input-dropdown-wrap columnOptionWrap"
-			v-if="show"
-			v-click-outside="escaped"
-			:class="{ dropdownRight:dropdownRight }"
-		>
-			<div class="input-dropdown default-inputs columnOption">
-				
+		<teleport to="#dropdown" v-if="dropdownShow">
+			<div class="columnBatchOption default-inputs" data-dropdown-border-simple data-dropdown-margin-x="-4" data-dropdown-width="320">
 				<!-- sorting -->
-				<div class="columnOptionItem" v-if="canOrder">
+				<div class="columnBatchOptionItem" v-if="canOrder">
 					<my-button image="sort.png"
 						@trigger="$emit('del-order')"
 						@trigger-right="$emit('del-order')"
@@ -66,7 +61,7 @@ let MyListColumnBatch = {
 				</div>
 				
 				<!-- aggregation -->
-				<div class="columnOptionItem" v-if="aggrColumn !== null">
+				<div class="columnBatchOptionItem" v-if="aggrColumn !== null">
 					<my-button image="sum.png"
 						@trigger="aggregatorInput = ''"
 						@trigger-right="aggregatorInput = ''"
@@ -85,7 +80,7 @@ let MyListColumnBatch = {
 				</div>
 				
 				<!-- filter by text -->
-				<div class="columnOptionItem" v-if="showFilterText">
+				<div class="columnBatchOptionItem" v-if="showFilterText">
 					<my-button image="filter.png"
 						@trigger="clear"
 						@trigger-right="clear"
@@ -113,7 +108,7 @@ let MyListColumnBatch = {
 						:image="(inputSel.length === 0 || inputSel.length === values.length) && !zeroSelection ? 'checkbox1.png' : 'checkbox0.png'"
 						:naked="true"
 					/>
-					<div class="columnFilterValues">
+					<div class="columnBatchOptionFilterValues">
 						<my-button
 							v-for="v of values"
 							@trigger="valueToggle(v)"
@@ -135,19 +130,18 @@ let MyListColumnBatch = {
 						:caption="capGen.button.clear"
 					/>
 					<my-button image="cancel.png"
-						@trigger="$emit('close')"
+						@trigger="dropdownSet(false)"
 						:cancel="true"
 						:captionTitle="capGen.button.close"
 					/>
 				</div>
 			</div>
-		</div>
+		</teleport>
 	</div>`,
 	props:{
 		columnBatch:     { type:Object,  required:true }, // column batch to show options for
 		columnIdMapAggr: { type:Object,  required:true },
 		columns:         { type:Array,   required:true }, // list columns
-		dropdownRight:   { type:Boolean, required:true },
 		filters:         { type:Array,   required:true }, // list filters all combined (columns, list, quick, user, choices, ...)
 		filtersColumn:   { type:Array,   required:true }, // list filters from users column batch selections
 		isOrderedOrginal:{ type:Boolean, required:true }, // list orders are the same as original defined
@@ -155,9 +149,9 @@ let MyListColumnBatch = {
 		orders:          { type:Array,   required:true }, // list orders
 		relationId:      { type:String,  required:true }, // list query base relation ID
 		rowCount:        { type:Number,  required:true }, // list total row count
-		show:            { type:Boolean, required:true }
+		simpleSortOnly:  { type:Boolean, required:true }  // list column can only sort, does not dropdown or offer any other option
 	},
-	emits:['close','del-aggregator','del-order','set-aggregator','set-filters','set-order','toggle'],
+	emits:['del-aggregator','del-order','set-aggregator','set-filters','set-order','set-order-only'],
 	data() {
 		return {
 			inputSel:[], // value input for selection filter
@@ -188,7 +182,7 @@ let MyListColumnBatch = {
 			},
 			immediate:true
 		},
-		show(v) {
+		dropdownShow(v) {
 			if(v) this.loadSelectionValues();
 		}
 	},
@@ -242,6 +236,7 @@ let MyListColumnBatch = {
 		aggrColumn:       (s) => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns),
 		canOpen:          (s) => s.rowCount > 1 || s.isFiltered,
 		canOrder:         (s) => s.columnBatch.columnIndexesSortBy.length !== 0,
+		dropdownShow:     (s) => s.dropdownElm === s.$refs.content,
 		filtersColumnThis:(s) => s.filtersColumn.filter((v,i) => s.columnFilterIndexes.includes(i)),
 		isDateOrTime:     (s) => s.isValidFilter && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
 		isFiltered:       (s) => s.columnFilterIndexes.length !== 0,
@@ -258,7 +253,8 @@ let MyListColumnBatch = {
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		capApp:        (s) => s.$store.getters.captions.list,
 		capGen:        (s) => s.$store.getters.captions.generic,
-		dateFormat:    (s) => s.$store.getters.settings.dateFormat
+		dateFormat:    (s) => s.$store.getters.settings.dateFormat,
+		dropdownElm:   (s) => s.$store.getters.dropdownElm
 	},
 	methods:{
 		// externals
@@ -318,11 +314,22 @@ let MyListColumnBatch = {
 			this.loadSelectionValues();
 		},
 		click() {
+			if(this.simpleSortOnly) {
+				if(this.isOrdered)
+					return this.$emit('set-order',!this.isOrderedAsc);
+
+				return this.$emit('set-order-only',true);
+			}
+
 			if(this.canOpen)
-				this.$emit('toggle');
+				this.dropdownSet(!this.dropdownShow);
 		},
-		escaped() {
-			this.$emit('close');
+		clickOutside() {
+			this.dropdownSet(false);	
+		},
+		dropdownSet(state) {
+			if(state && !this.dropdownShow) this.$store.commit('dropdownElm',this.$refs.content);
+			if(!state && this.dropdownShow) this.$store.commit('dropdownElm',null);
 		},
 		useTextInput() {
 			this.inputSel = [];
@@ -372,7 +379,7 @@ let MyListColumnBatch = {
 		
 		// retrieval
 		loadSelectionValues() {
-			if(!this.show || !this.isValidFilter)
+			if(!this.dropdownShow || !this.isValidFilter)
 				return;
 			
 			ws.send('data','get',this.prepareDataGet(),false).then(

@@ -14,9 +14,8 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
-
-var logContext = "data_upload"
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 
@@ -29,7 +28,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	reader, err := r.MultipartReader()
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -71,12 +70,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		defer ctxCanc()
 
-		// check token, any login is allowed to attempt upload
-		var loginId int64
-		var admin bool
-		var noAuth bool
-		if _, _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
-			handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
+		// authenticate via token
+		login, err := login_auth.Token(ctx, token)
+		if err != nil {
+			handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrAuthFailed)
 			bruteforce.BadAttempt(r)
 			return
 		}
@@ -84,14 +81,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		// parse attribute ID
 		attributeId, err := uuid.FromString(attributeIdString)
 		if err != nil {
-			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 			return
 		}
 
 		// parse file ID
 		fileId, err := uuid.FromString(fileIdString)
 		if err != nil {
-			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 			return
 		}
 
@@ -100,13 +97,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		if isNewFile {
 			fileId, err = uuid.NewV4()
 			if err != nil {
-				handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+				handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 				return
 			}
 		}
 
-		if err := data.SetFile(ctx, loginId, attributeId, fileId, part, isNewFile); err != nil {
-			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		if err := data.SetFile(ctx, login.Id, attributeId, fileId, part, pgtype.Text{}, pgtype.Text{}, isNewFile); err != nil {
+			handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 			return
 		}
 		response.Id = fileId
@@ -114,7 +111,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	responseJson, err := json.Marshal(response)
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
 		return
 	}
 	w.Write(responseJson)

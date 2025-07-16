@@ -1,6 +1,5 @@
 import MyInputCollection  from './inputCollection.js';
 import MyForm             from './form.js';
-import MyValueRich        from './valueRich.js';
 import srcBase64Icon      from './shared/image.js';
 import {getColumnBatches} from './shared/column.js';
 import {getChoiceFilters} from './shared/form.js';
@@ -10,17 +9,13 @@ import {
 	isAttributeFiles
 } from './shared/attribute.js';
 import {
-	fieldOptionGet,
-	fieldOptionSet
-} from './shared/field.js';
-import {
 	checkDataOptions,
 	colorAdjustBg,
 	colorMakeContrastFont
 } from './shared/generic.js';
 import {
 	fillRelationRecordIds,
-	getJoinsIndexMap,
+	getJoinIndexMap,
 	getQueryExpressions,
 	getRelationsJoined
 } from './shared/query.js';
@@ -32,7 +27,6 @@ export {MyKanban as default};
 
 let MyKanbanCard = {
 	name:'my-kanban-card',
-	components:{ MyValueRich },
 	template:`<div class="kanban-card" :class="{ template:isTemplate }">
 		<div class="kanban-card-header"
 			v-if="!isTemplate"
@@ -67,6 +61,8 @@ let MyKanbanCard = {
 									:key="ind"
 									:length="columns[ind].length"
 									:monospace="columns[ind].flags.monospace"
+									:noShrink="columns[ind].flags.noShrink"
+									:noThousandsSep="columns[ind].flags.noThousandsSep"
 									:value="values[ind]"
 									:wrap="columns[ind].flags.wrap"
 								/>
@@ -205,10 +201,9 @@ let MyKanban = {
 	name:'my-kanban',
 	components:{
 		MyInputCollection,
-		MyKanbanBox,
-		MyValueRich
+		MyKanbanBox
 	},
-	template:`<div class="kanban" :class="{ isSingleField:isSingleField }" v-if="ready">
+	template:`<div class="kanban" :class="{ isSingleField:isSingleField }">
 		
 		<!-- header -->
 		<div class="top lower">
@@ -220,13 +215,15 @@ let MyKanban = {
 				/>
 				<my-button image="search.png"
 					v-if="!isMobile"
-					@trigger="zoom = zoomDefault"
+					@trigger="$emit('set-login-option','kanbanZoom',zoomDefault)"
+					:active="zoom !== zoomDefault"
 					:captionTitle="capGen.button.zoomReset"
 					:naked="true"
 				/>
 				<input class="zoom-factor clickable" type="range" min="1" max="10"
 					v-if="!isMobile"
-					v-model="zoom"
+					@change="$emit('set-login-option','kanbanZoom',parseInt($event.target.value))"
+					:value="zoom"
 				/>
 			</div>
 			<div class="area nowrap default-inputs">
@@ -252,15 +249,15 @@ let MyKanban = {
 				/>
 				<select class="selector"
 					v-if="hasChoices"
-					v-model="choiceId"
-					@change="choiceIdSet($event.target.value)"
+					@change="$emit('set-login-option','choiceId',$event.target.value)"
+					:value="choiceId"
 				>
 					<option v-for="c in choices" :value="c.id">
 						{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 					</option>
 				</select>
 				<my-button
-					@trigger="showCaptions = !showCaptions"
+					@trigger="$emit('set-login-option','kanbanShowCaptions',!showCaptions)"
 					:caption="capGen.label"
 					:image="showCaptions ? 'visible1.png' : 'visible0.png'"
 				/>
@@ -274,22 +271,22 @@ let MyKanban = {
 					<thead>
 						<!-- X axis labels -->
 						<tr>
-							<th class="label top-left" v-if="relationIndexAxisY !== null"></th>
+							<th class="kanban-table-label top-left" v-if="relationIndexAxisY !== null"></th>
 							
 							<!-- label for NULL assignment -->
-							<th class="label" v-if="hasNullsInX">
-								<div class="label-line unassigned">
+							<th class="kanban-table-label" v-if="hasNullsInX">
+								<div class="kanban-table-label-line unassigned">
 									{{ capGen.unassigned }}
 								</div>
 							</th>
 							
 							<!-- labels for X assignment -->
-							<th class="label" v-for="x in axisEntriesX"
+							<th class="kanban-table-label" v-for="x in axisEntriesX"
 								:class="{ clickable: hasCreate }"
 								:style="x.style"
 								@click.left="cardCreate(x.id,null,null)"
 							>
-								<div class="label-line">
+								<div class="kanban-table-label-line">
 									<my-value-rich
 										v-for="v in x.values.filter(v => v.value !== null)"
 										:attributeId="columns[v.columnIndex].attributeId"
@@ -301,6 +298,8 @@ let MyKanban = {
 										:key="v.columnIndex"
 										:length="columns[v.columnIndex].length"
 										:monospace="columns[v.columnIndex].flags.monospace"
+										:noShrink="columns[v.columnIndex].flags.noShrink"
+										:noThousandsSep="columns[v.columnIndex].flags.noThousandsSep"
 										:value="v.value"
 										:wrap="columns[v.columnIndex].flags.wrap"
 									/>
@@ -313,8 +312,8 @@ let MyKanban = {
 						
 						<!-- line for NULL Y assignment / or no Y axis at all -->
 						<tr v-if="hasNullsInY || relationIndexAxisY === null">
-							<td class="label" v-if="relationIndexAxisY !== null">
-								<div class="label-line unassigned">
+							<td class="kanban-table-label" v-if="relationIndexAxisY !== null">
+								<div class="kanban-table-label-line unassigned">
 									{{ capGen.unassigned }}
 								</div>
 							</td>
@@ -360,12 +359,12 @@ let MyKanban = {
 						<!-- lines for XY assignment -->
 						<tr v-for="y in axisEntriesY">
 							<!-- label for Y assignment -->
-							<td class="label"
+							<td class="kanban-table-label"
 								:class="{ clickable: hasCreate }"
 								:style="y.style"
 								@click.left="cardCreate(null,y.id,null)"
 							>
-								<div class="label-line">
+								<div class="kanban-table-label-line">
 									<my-value-rich
 										v-for="v in y.values.filter(v => v.value !== null)"
 										:attributeId="columns[v.columnIndex].attributeId"
@@ -377,6 +376,8 @@ let MyKanban = {
 										:key="v.columnIndex"
 										:length="columns[v.columnIndex].length"
 										:monospace="columns[v.columnIndex].flags.monospace"
+										:noShrink="columns[v.columnIndex].flags.noShrink"
+										:noThousandsSep="columns[v.columnIndex].flags.noThousandsSep"
 										:value="v.value"
 										:wrap="columns[v.columnIndex].flags.wrap"
 									/>
@@ -428,9 +429,9 @@ let MyKanban = {
 					</tbody>
 					<tfoot>
 						<tr>
-							<td class="label" v-if="relationIndexAxisY !== null"></td>
-							<td class="label" v-if="hasNullsInX"></td>
-							<td class="label" v-for="x in axisEntriesX"></td>
+							<td class="kanban-table-label" v-if="relationIndexAxisY !== null"></td>
+							<td class="kanban-table-label" v-if="hasNullsInX"></td>
+							<td class="kanban-table-label" v-for="x in axisEntriesX"></td>
 						</tr>
 					</tfoot>
 				</table>
@@ -462,7 +463,6 @@ let MyKanban = {
 		collections:        { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		dataOptions:        { type:Number,  required:false, default:0 },
-		favoriteId:         { required:false, default:null },
 		fieldId:            { type:String,  required:true },
 		filters:            { type:Array,   required:true }, // processed query filters
 		formLoading:        { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
@@ -471,27 +471,23 @@ let MyKanban = {
 		isHidden:           { type:Boolean, required:false, default:false },
 		isSingleField:      { type:Boolean, required:false, default:false },
 		loadWhileHidden:    { type:Boolean, required:false, default:false },
+		loginOptions:       { type:Object,  required:true },
 		moduleId:           { type:String,  required:true },
 		popUpFormInline:    { required:false, default:null },
 		query:              { type:Object,  required:true },
-		relationIndexData:  { type:Number,  required:true },                // relation by index, serving as base for data (cards)
-		relationIndexAxisX: { type:Number,  required:true },                // relation by index, serving as base for X axis (columns)
-		relationIndexAxisY: { type:Number,  required:false, default:null }, // relation by index, serving as base for Y axis (rows), multi-axis kanban
-		usesPageHistory:    { type:Boolean, required:true }
+		relationIndexData:  { type:Number,  required:true },               // relation by index, serving as base for data (cards)
+		relationIndexAxisX: { type:Number,  required:true },               // relation by index, serving as base for X axis (columns)
+		relationIndexAxisY: { type:Number,  required:false, default:null } // relation by index, serving as base for Y axis (rows), multi-axis kanban
 	},
-	emits:['clipboard','close-inline','open-form','record-count-change','set-args','set-collection-indexes'],
+	emits:['clipboard','close-inline','open-form','record-count-change','set-args','set-collection-indexes','set-login-option'],
 	data() {
 		return {
 			axisEntriesX:[],      // entries for the X axis (columns)
 			axisEntriesY:[],      // entries for the Y axis (rows)
 			dragActive:false,
-			choiceId:null,
-			ready:false,
 			recordIdMapAxisXY:[], // 2-level map of axis data (cards), keys: record ID of X axis entry, record ID of Y axis entry
 			search:'',
 			searchInput:'',
-			showCaptions:false,
-			zoom:5, // 1-10
 			zoomDefault:5
 		};
 	},
@@ -523,7 +519,12 @@ let MyKanban = {
 		hasNullsInX:       (s) => s.attributeIdMap[s.attributeIdAxisX].nullable,
 		hasNullsInY:       (s) => s.attributeIdAxisY !== null && s.attributeIdMap[s.attributeIdAxisY].nullable,
 		joins:             (s) => s.fillRelationRecordIds(s.query.joins),
-		joinsIndexMap:     (s) => s.getJoinsIndexMap(s.joins),
+		joinsIndexMap:     (s) => s.getJoinIndexMap(s.joins),
+
+		// login options
+		choiceId:    (s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		showCaptions:(s) => s.$root.getOrFallback(s.loginOptions,'kanbanShowCaptions',false),
+		zoom:        (s) => s.$root.getOrFallback(s.loginOptions,'kanbanZoom',s.zoomDefault),
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -543,54 +544,33 @@ let MyKanban = {
 				this.axisEntriesX      = [];
 				this.axisEntriesY      = [];
 				this.recordIdMapAxisXY = [];
-				this.reloadOutside();
+				this.get();
 			}
 		});
-		this.$watch('favoriteId',(val) => {
-			this.reloadOptions();
+		this.$watch('formLoading',v => {
+			if(!v) this.get();
 		});
-		this.$watch('formLoading',(val) => {
-			if(!val) this.reloadOutside();
-		});
-		this.$watch('isHidden',(val) => {
-			if(!val) this.$nextTick(() => this.get());
+		this.$watch('isHidden',v => {
+			if(!v) this.$nextTick(() => this.get());
 		});
 		this.$watch(() => [this.choices,this.filters],(newVals, oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
 				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
-					return this.reloadOutside();
+					return this.get();
 			}
 		});
-		this.$watch('showCaptions',(val) => {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'kanbanShowCaptions',val);
-		});
-		this.$watch('zoom',(val) => {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'kanbanZoom',val);
-		});
-		if(this.usesPageHistory) {
-			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
-				if(this.routeChangeFieldReload(newVals,oldVals)) {
-					this.paramsUpdated();
-					this.reloadOutside();
-				}
-			});
-		}
-		this.reloadOptions();
-		this.ready = true;
-		this.$nextTick(() => this.get());
+		this.get();
 	},
 	methods:{
 		// external
 		checkDataOptions,
 		colorAdjustBg,
 		colorMakeContrastFont,
-		fieldOptionGet,
-		fieldOptionSet,
 		fillRelationRecordIds,
 		getCaption,
 		getChoiceFilters,
 		getColumnBatches,
-		getJoinsIndexMap,
+		getJoinIndexMap,
 		getQueryExpressions,
 		getRelationsJoined,
 		routeChangeFieldReload,
@@ -608,11 +588,6 @@ let MyKanban = {
 			
 			const args = attributes.length === 0 ? [] : [`attributes=${attributes.join(',')}`];
 			this.$emit('open-form',[],args,middleClick);
-		},
-		choiceIdSet(choiceId) {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',choiceId);
-			this.choiceId = choiceId;
-			this.reloadInside();
 		},
 		openForm(row,middleClick) {
 			this.$emit('open-form',[row],[],middleClick);
@@ -716,47 +691,6 @@ let MyKanban = {
 				});
 			}
 			return out;
-		},
-		
-		// reloads
-		reloadOptions() {
-			this.choiceId     = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
-			this.showCaptions = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanShowCaptions',this.showCaptions);
-			this.zoom         = this.fieldOptionGet(this.favoriteId,this.fieldId,'kanbanZoom',this.zoom);
-
-			if(this.usesPageHistory) {
-				// set initial states via route parameters
-				this.paramsUpdated();     // load existing parameters from route query
-				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-			}
-		},
-		reloadOutside() {
-			this.get();
-		},
-		reloadInside() {
-			// reload full page kanban by updating route parameters
-			// enables browser history for fullpage list navigation
-			if(this.usesPageHistory)
-				return this.paramsUpdate(true);
-			
-			this.get();
-		},
-		
-		// page routing
-		paramsUpdate(pushHistory) {
-			let args = [];
-			
-			if(this.choiceId !== null)
-				args.push(`choice=${this.choiceId}`);
-			
-			this.$emit('set-args',args,pushHistory);
-		},
-		paramsUpdated() {
-			let params = { choice:{ parse:'string', value:this.choiceId } };
-			this.routeParseParams(params);
-			
-			if(this.choiceId !== params.choice.value)
-				this.choiceId = params.choice.value;
 		},
 		
 		// backend calls

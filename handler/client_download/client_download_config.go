@@ -23,7 +23,7 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 	// get authentication token
 	token, err := handler.ReadGetterFromUrl(r, "token")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -33,11 +33,9 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 	defer ctxCanc()
 
 	// check token
-	var loginId int64
-	var admin bool
-	var noAuth bool
-	if _, _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
+	login, err := login_auth.Token(ctx, token)
+	if err != nil {
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}
@@ -45,32 +43,32 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 	// parse getters
 	tokenFixed, err := handler.ReadGetterFromUrl(r, "tokenFixed")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 	hostName, err := handler.ReadGetterFromUrl(r, "hostName")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 	hostPort, err := handler.ReadInt64GetterFromUrl(r, "hostPort")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 	languageCode, err := handler.ReadGetterFromUrl(r, "languageCode")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 	deviceName, err := handler.ReadGetterFromUrl(r, "deviceName")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 	ssl, err := handler.ReadInt64GetterFromUrl(r, "ssl")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -90,7 +88,7 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 		DarkIcon     bool                   `json:"darkIcon"`
 		Debug        bool                   `json:"debug"`
 		Instances    map[uuid.UUID]instance `json:"instances"`
-		KeepFilesSec int64                  `json:"keepFilesSec`
+		KeepFilesSec int64                  `json:"keepFilesSec"`
 		LanguageCode string                 `json:"languageCode"`
 		Ssl          bool                   `json:"ssl"`
 		SslVerify    bool                   `json:"sslVerify"`
@@ -104,7 +102,7 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 				DeviceName: deviceName,
 				HostName:   hostName,
 				HostPort:   int(hostPort),
-				LoginId:    loginId,
+				LoginId:    login.Id,
 				TokenFixed: tokenFixed,
 			},
 		},
@@ -116,12 +114,12 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 
 	fJson, err := json.MarshalIndent(f, "", "\t")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 
 	if _, err := w.Write(fJson); err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 }

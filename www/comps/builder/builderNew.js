@@ -159,6 +159,7 @@ let MyBuilderNew = {
 				case 'pgFunction': return 60; break;
 				case 'relation':   return 60; break;
 				case 'role':       return 64; break;
+				case 'searchBar':  return 64; break;
 				case 'variable':   return 64; break;
 				case 'widget':     return 64; break;
 			}
@@ -178,6 +179,7 @@ let MyBuilderNew = {
 				case 'pgFunction': searchList = s.module.pgFunctions; break;
 				case 'relation':   searchList = s.module.relations;   break;
 				case 'role':       searchList = s.module.roles;       break;
+				case 'searchBar':  searchList = s.module.searchBars;  break;
 				case 'variable':   searchList = s.module.variables;   break;
 				case 'widget':     searchList = s.module.widgets;     break;
 			}
@@ -207,6 +209,7 @@ let MyBuilderNew = {
 				case 'pgFunction': return s.capApp.pgFunction; break;
 				case 'relation':   return s.capApp.relation;   break;
 				case 'role':       return s.capApp.role;       break;
+				case 'searchBar':  return s.capApp.searchBar;  break;
 				case 'variable':   return s.capApp.variable;   break;
 				case 'widget':     return s.capApp.widget;     break;
 			}
@@ -222,6 +225,7 @@ let MyBuilderNew = {
 				case 'pgFunction': return 'images/codeDatabase.png';   break;
 				case 'relation':   return 'images/database.png';       break;
 				case 'role':       return 'images/personMultiple.png'; break;
+				case 'searchBar':  return 'images/search.png';         break;
 				case 'variable':   return 'images/variable.png';       break;
 				case 'widget':     return 'images/tiles.png';          break;
 			}
@@ -249,7 +253,7 @@ let MyBuilderNew = {
 		
 		this.$store.commit('keyDownHandlerSleep');
 		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape',keyCtrl:false});
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape'});
 	},
 	unmounted() {
 		this.$store.commit('keyDownHandlerDel',this.set);
@@ -417,6 +421,20 @@ let MyBuilderNew = {
 						accessCollections:{},
 						accessMenus:{},
 						accessRelations:{}
+					};
+				break;
+				case 'searchBar':
+					request = {
+						id:this.getNilUuid(),
+						moduleId:this.moduleId,
+						iconId:null,
+						name:this.inputs.name,
+						columns:[],
+						query:this.getQueryTemplate(),
+						openForm:null,
+						captions:{
+							searchBarTitle:{}
+						}
 					};
 				break;
 				case 'variable':

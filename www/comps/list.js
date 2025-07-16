@@ -1,31 +1,25 @@
-import isDropdownUpwards   from './shared/layout.js';
-import MyFilters           from './filters.js';
-import MyForm              from './form.js';
-import MyInputCollection   from './inputCollection.js';
-import MyInputOffset       from './inputOffset.js';
-import MyListAggregate     from './listAggregate.js';
-import MyListColumnBatch   from './listColumnBatch.js';
-import MyListCsv           from './listCsv.js';
-import MyListFilters       from './listFilters.js';
-import MyListOptions       from './listOptions.js';
-import MyValueRich         from './valueRich.js';
-import {consoleError}      from './shared/error.js';
-import {getCaption}        from './shared/language.js';
-import {layoutSettleSpace} from './shared/layout.js';
-import {isAttributeFiles}  from './shared/attribute.js';
+import MyFilters            from './filters.js';
+import MyForm               from './form.js';
+import MyInputCollection    from './inputCollection.js';
+import MyInputOffset        from './inputOffset.js';
+import MyListAggregate      from './listAggregate.js';
+import MyListColumnBatch    from './listColumnBatch.js';
+import MyListCsv            from './listCsv.js';
+import MyListFilters        from './listFilters.js';
+import MyListInputFlow      from './listInputFlow.js';
+import MyListInputRows      from './listInputRows.js';
+import MyListInputRowsEmpty from './listInputRowsEmpty.js';
+import MyListOptions        from './listOptions.js';
+import {consoleError}       from './shared/error.js';
+import {getRowsDecrypted}   from './shared/form.js';
+import {getCaption}         from './shared/language.js';
+import {layoutSettleSpace}  from './shared/layout.js';
+import {isAttributeFiles}   from './shared/attribute.js';
 import {
 	getColumnBatches,
 	getColumnTitle,
 	getOrderIndexesFromColumnBatch
 } from './shared/column.js';
-import {
-	fieldOptionGet,
-	fieldOptionSet
-} from './shared/field.js';
-import {
-	getChoiceFilters,
-	getRowsDecrypted
-} from './shared/form.js';
 import {
 	checkDataOptions,
 	colorAdjustBg,
@@ -45,7 +39,7 @@ import {
 } from './shared/router.js';
 export {MyList as default};
 
-let MyList = {
+const MyList = {
 	name:'my-list',
 	components:{
 		MyFilters,
@@ -55,13 +49,14 @@ let MyList = {
 		MyListColumnBatch,
 		MyListCsv,
 		MyListFilters,
-		MyListOptions,
-		MyValueRich
+		MyListInputFlow,
+		MyListInputRows,
+		MyListInputRowsEmpty,
+		MyListOptions
 	},
 	template:`<div class="list" ref="content"
-		v-click-outside="escape"
-		@keydown="keyDown"
-		:class="{ asInput:isInput, readonly:inputIsReadonly, isSingleField:isSingleField }"
+		@keydown="handleKeydownLocal"
+		:class="{ asInput:isInput, readonly:inputIsReadonly, isDynamicSize:isDynamicSize, isSingleField:isSingleField }"
 	>
 		<!-- hover menus -->
 		<div class="app-sub-window"
@@ -106,11 +101,11 @@ let MyList = {
 						v-if="showOptions"
 						@reset-columns="resetColumns"
 						@set-auto-renew="setAutoRenewTimer"
-						@set-cards-captions="setCardsCaptions"
+						@set-cards-captions="setLoginOption('cardsCaptions',$event)"
 						@set-column-batch-sort="setColumnBatchSort"
 						@set-column-ids-by-user="$emit('set-column-ids-by-user',$event)"
-						@set-layout="setLayout"
-						@set-page-limit="setLimit"
+						@set-layout="setLoginOption('layout',$event)"
+						@set-page-limit="setLoginOption('limit',$event)"
 						:autoRenew="autoRenew"
 						:cardsCaptions="cardsCaptions"
 						:columns="columns"
@@ -129,158 +124,65 @@ let MyList = {
 		</div>
 		
 		<!-- list as input field (showing record(s) from active field value) -->
-		<template v-if="isInput">
-			<div class="list-input-rows-wrap"
-				@click="clickInputRow"
-				:class="{ clickable:!inputMulti && !inputIsReadonly, 'multi-line':inputMulti }"
-			>
-				<table class="list-input-rows">
-					<tbody>
-						<tr v-for="(r,i) in rowsInput">
-							
-							<!-- icons -->
-							<td class="minimum">
-								<div class="list-input-row-items nowrap">
-									
-									<!-- either field/attribute icon or gallery file from first column -->
-									<slot name="input-icon"
-										v-if="!hasGalleryIcon || r.values[0] === null"
-									/>
-									<my-value-rich class="context-list-input"
-										v-else
-										@focus="focus"
-										:alignEnd="columns[0].flags.alignEnd"
-										:alignMid="columns[0].flags.alignMid"
-										:attribute-id="columns[0].attributeId"
-										:class="{ clickable:inputAsCategory && !inputIsReadonly }"
-										:basis="columns[0].basis"
-										:bold="columns[0].bold"
-										:boolAtrIcon="columns[0].boolAtrIcon"
-										:display="columns[0].display"
-										:length="columns[0].length"
-										:monospace="columns[0].flags.monospace"
-										:value="r.values[0]"
-										:wrap="columns[0].flags.wrap"
-									/>
-								</div>
-							</td>
-							
-							<!-- category input check box -->
-							<td class="minimum" v-if="inputAsCategory">
-								<div class="list-input-row-checkbox">
-									<my-button
-										@trigger="inputTriggerRow(r)"
-										:active="!inputIsReadonly"
-										:image="displayRecordCheck(inputRecordIds.includes(r.indexRecordIds['0']))"
-										:naked="true"
-									/>
-								</div>
-							</td>
-							
-							<!-- values -->
-							<td v-for="(b,bi) in columnBatches" :style="b.style">
-								<div class="list-input-row-items">
-									<template v-for="(ci,cii) in b.columnIndexes">
-										<my-value-rich class="context-list-input"
-											v-if="r.values[ci] !== null && (!hasGalleryIcon || bi !== 0 || cii !== 0)"
-											@focus="focus"
-											@trigger="inputTriggerRow(r)"
-											:alignEnd="columns[ci].flags.alignEnd"
-											:alignMid="columns[ci].flags.alignMid"
-											:attribute-id="columns[ci].attributeId"
-											:class="{ clickable:inputAsCategory && !inputIsReadonly }"
-											:basis="columns[ci].basis"
-											:bold="columns[ci].flags.bold"
-											:boolAtrIcon="columns[ci].flags.boolAtrIcon"
-											:clipboard="columns[ci].flags.clipboard"
-											:display="columns[ci].display"
-											:italic="columns[ci].flags.italic"
-											:key="ci"
-											:length="columns[ci].length"
-											:monospace="columns[ci].flags.monospace"
-											:value="r.values[ci]"
-											:wrap="columns[ci].flags.wrap"
-										/>
-									</template>
-								</div>
-							</td>
-							
-							<!-- actions -->
-							<td class="minimum">
-								<div class="list-input-row-items nowrap justifyEnd">
-									<my-button image="open.png"
-										v-if="hasUpdate"
-										@trigger="clickOpen(r,false)"
-										@trigger-middle="clickOpen(r,true)"
-										:blockBubble="true"
-										:captionTitle="capApp.inputHintOpen"
-										:naked="true"
-									/>
-									<my-button image="cancel.png"
-										v-if="!inputAsCategory"
-										@trigger="inputTriggerRowRemove(i)"
-										:active="!inputIsReadonly"
-										:captionTitle="capApp.inputHintRemove"
-										:naked="true"
-									/>
-								</div>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			
-			<!-- empty record input field -->
-			<table class="list-input-rows"
-				v-if="showInputAddLine"
-				@click="clickInputEmpty"
-				:class="{ clickable:!inputIsReadonly }"
-			>
-				<tbody>
-					<tr>
-						<td class="minimum">
-							<slot name="input-icon" />
-						</td>
-						<td>
-							<div class="list-input-row-items">
-								<input class="input" data-is-input="1" data-is-input-empty="1" enterkeyhint="send"
-									@click="focus"
-									@focus="focus"
-									@keyup="updatedTextInput"
-									v-model="filtersQuick"
-									:class="{ invalid:!inputValid }"
-									:disabled="inputIsReadonly"
-									:placeholder="inputLinePlaceholder"
-									:tabindex="!inputIsReadonly ? 0 : -1"
-								/>
-							</div>
-						</td>
-						<td class="minimum">
-							<div class="list-input-row-items nowrap">
-								<my-button image="add.png"
-									v-if="!inputIsReadonly && hasCreate"
-									@trigger="$emit('open-form',[],false)"
-									@trigger-middle="$emit('open-form',[],true)"
-									:blockBubble="true"
-									:captionTitle="capApp.inputHintCreate"
-									:naked="true"
-								/>
-								<my-button image="pageDown.png"
-									:active="!inputIsReadonly"
-									:naked="true"
-								/>
-							</div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</template>
+		<my-list-input-flow
+			v-if="isInput && inputAsFlow"
+			@clicked-open="clickOpen($event,false)"
+			@clicked-open-middle="clickOpen($event,true)"
+			@clicked-row="inputTriggerRow($event)"
+			:columns="columns"
+			:columnBatches="columnBatches"
+			:readonly="inputIsReadonly"
+			:recordIdsSelected="inputRecordIds"
+			:rows="rowsInput"
+			:showOpen="hasUpdate"
+		>
+			<template #input-icon><slot name="input-icon" /></template>
+		</my-list-input-flow>
+
+		<my-list-input-rows
+			v-if="isInput && !inputAsFlow"
+			@clicked="clickInputRow"
+			@clicked-open="clickOpen($event,false)"
+			@clicked-open-middle="clickOpen($event,true)"
+			@clicked-row="inputTriggerRow($event)"
+			@clicked-row-remove="inputTriggerRowRemove($event)"
+			@focus="focus"
+			:columns="columns"
+			:columnBatches="columnBatches"
+			:hasGalleryIcon="hasGalleryIcon"
+			:multiInput="inputMulti"
+			:readonly="inputIsReadonly"
+			:recordIdsSelected="inputRecordIds"
+			:rows="rowsInput"
+			:showAllValues="showAllValues"
+			:showOpen="hasUpdate"
+		>
+			<template #input-icon><slot name="input-icon" /></template>
+		</my-list-input-rows>
+
+		<my-list-input-rows-empty
+			v-if="isInput && showInputAddLine"
+			@clicked="clickInputEmpty"
+			@clicked-open="escape();$emit('open-form',[],false)"
+			@clicked-open-middle="escape();$emit('open-form',[],true)"
+			@focus="focus"
+			@key-pressed="updatedTextInput"
+			@text-updated="filtersQuick = $event"
+			:anyRows="anyInputRows"
+			:focused="focused"
+			:readonly="inputIsReadonly"
+			:showCreate="hasCreate"
+			:text="filtersQuick"
+			:valid="inputValid"
+		>
+			<template #input-icon><slot name="input-icon" /></template>
+		</my-list-input-rows-empty>
 		
 		<!-- regular list view (either view or input dropdown) -->
-		<template v-if="!isInput || (dropdownShow && !inputAsCategory)">
+		<template v-if="!isInput || (dropdownShow && !showAllValues)">
 			
 			<!-- list header -->
-			<div class="list-header" v-if="header && showHeader">
+			<div class="list-header" v-if="header && showHeader" :class="{ 'no-column-titles':!headerColumns }">
 				
 				<div class="row gap nowrap">
 					<slot name="input-icon" />
@@ -326,7 +228,7 @@ let MyList = {
 				<div class="row gap nowrap">
 					<my-input-offset
 						v-if="hasPaging"
-						@input="offset = $event;reloadInside()"
+						@input="setOffsetParamAndReload($event,true)"
 						:arrows="showOffsetArrows"
 						:caption="showResultsCount && count > 1"
 						:limit="limit"
@@ -338,14 +240,16 @@ let MyList = {
 				<div class="row gap nowrap default-inputs">
 					<my-button
 						v-if="showRefresh"
-						@trigger="reloadInside('manual')"
+						@trigger="get"
+						:active="!rowsFetching"
 						:captionTitle="capGen.button.refresh"
-						:image="autoRenew === -1 ? 'refresh.png' : 'autoRenew.png'"
+						:image="rowsFetching ? 'load.gif' : (autoRenew === -1 ? 'refresh.png' : 'autoRenew.png')"
 						:naked="true"
 					/>
 					
 					<my-button image="filterCog.png"
-						@trigger="toggleUserFilters"
+						v-if="headerActions"
+						@trigger="showFilters = !showFilters"
 						@trigger-right="setUserFilters([])"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
@@ -356,6 +260,7 @@ let MyList = {
 						v-if="filterQuick"
 						@keyup.enter="updatedFilterQuick"
 						v-model="filtersQuick"
+						:disabled="rowsFetching"
 						:placeholder="capGen.threeDots"
 						:title="capApp.quick"
 					/>
@@ -374,8 +279,9 @@ let MyList = {
 					
 					<select class="dynamic"
 						v-if="hasChoices"
-						@change="reloadInside('choice')"
-						v-model="choiceId"
+						@change="setLoginOption('choiceId',$event.target.value)"
+						:disabled="rowsFetching"
+						:value="choiceId"
 					>
 						<option v-for="c in query.choices" :value="c.id">
 							{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
@@ -383,12 +289,13 @@ let MyList = {
 					</select>
 					
 					<my-button image="listCog.png"
+						v-if="headerActions"
 						@trigger="showOptions = !showOptions"
 						:captionTitle="capGen.options"
 						:naked="true"
 					/>
 					<my-button image="toggleUp.png"
-						v-if="!isCards && headerElements.includes('headerCollapse')"
+						v-if="!isCards && headerActions && headerElements.includes('headerCollapse')"
 						@trigger="toggleHeader"
 						:captionTitle="capApp.button.collapseHeader"
 						:naked="true"
@@ -400,299 +307,301 @@ let MyList = {
 			<div class="list-content" :class="{ showsInlineForm:popUpFormInline !== null }">
 			
 				<!-- list results as table or card layout -->
-				<div
-					:class="{ layoutCards:isCards, layoutTable:isTable, rowsColored:settings.listColored, scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
-					:id="usesPageHistory ? scrollFormId : null"
-				>
-					<table v-if="isTable" :class="{ asInput:isInput, 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
-						<thead v-if="header">
-							<tr :class="{ atTop:!showHeader }">
-								<th v-if="hasBulkActions" class="minimum checkbox">
-									<img class="clickable" tabindex="0"
-										@click="selectRowsAllToggle"
-										@keyup.enter.space.stop="selectRowsAllToggle"
-										:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
-									/>
-								</th>
-								<th v-for="(b,i) in columnBatches" :style="b.style">
-									<my-list-column-batch
-										@close="columnBatchIndexOption = -1"
-										@del-aggregator="setAggregators"
-										@del-order="setOrder(b,null)"
-										@set-aggregator="setAggregators"
-										@set-filters="setColumnBatchFilters"
-										@set-order="setOrder(b,$event)"
-										@toggle="clickColumn(i)"
-										:columnBatch="b"
-										:columnIdMapAggr="columnIdMapAggr"
-										:columns="columns"
-										:dropdownRight="(columnBatches.length > 1 && i === columnBatches.length - 1) || (columnBatches.length > 3 && i === columnBatches.length - 2)"
-										:filters="filtersCombined"
-										:filtersColumn="filtersColumn"
-										:isOrderedOrginal="isOrderedOrginal"
-										:joins="relationsJoined"
-										:key="b.key"
-										:orders="orders"
-										:relationId="query.relationId"
-										:rowCount="count"
-										:show="columnBatchIndexOption === i"
-									/>
-								</th>
-								<!-- empty column for taking remaining space & header toggle action -->
-								<th>
-									<div class="headerToggle" v-if="!showHeader">
-										<my-button image="toggleDown.png"
-											@trigger="toggleHeader"
-											:captionTitle="capApp.button.collapseHeader"
-											:naked="true"
+				<teleport to="#dropdown" :disabled="!dropdownShow">
+					<div
+						@keydown="handleKeydownLocal"
+						:class="{ 'list-cards':isCards, 'list-table':isTable, 'list-dropdown':dropdownShow, rowsColored:settings.listColored, scrolls:isSingleField}"
+						:id="usesPageHistory ? scrollFormId : null"
+					>
+						<table v-if="isTable" :class="{ asInput:isInput }">
+							<thead v-if="header && headerColumns">
+								<tr :class="{ atTop:!showHeader }">
+									<th v-if="hasBulkActions" class="minimum checkbox">
+										<img class="clickable" tabindex="0"
+											@click="selectRowsAllToggle"
+											@keyup.enter.space.stop="selectRowsAllToggle"
+											:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 										/>
-									</div>
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							<!-- result row actions (only available if list is input) -->
-							<tr v-if="showInputHeader" class="list-input-row-actions">
-								<td colspan="999">
-									<div class="sub-actions default-inputs">
-										<select
-											v-if="hasChoices"
-											@change="reloadInside('choice')"
-											v-model="choiceId"
+									</th>
+									<th v-for="(b,i) in columnBatches" :style="b.style">
+										<my-list-column-batch
+											@del-aggregator="setAggregators"
+											@del-order="setOrder(b,null,false)"
+											@set-aggregator="setAggregators"
+											@set-filters="setLoginOption('filtersColumn',$event)"
+											@set-order="setOrder(b,$event,false)"
+											@set-order-only="setOrder(b,$event,true)"
+											:columnBatch="b"
+											:columnIdMapAggr="columnIdMapAggr"
+											:columns="columns"
+											:filters="filtersCombined"
+											:filtersColumn="filtersColumn"
+											:isOrderedOrginal="isOrderedOrginal"
+											:joins="relationsJoined"
+											:key="b.key"
+											:orders="orders"
+											:relationId="query.relationId"
+											:rowCount="count"
+											:simpleSortOnly="columnsSortOnly"
+										/>
+									</th>
+									<!-- empty column for taking remaining space & header toggle action -->
+									<th>
+										<div class="headerToggle" v-if="!showHeader">
+											<my-button image="toggleDown.png"
+												@trigger="toggleHeader"
+												:captionTitle="capApp.button.collapseHeader"
+												:naked="true"
+											/>
+										</div>
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								<!-- result row actions (only available if list is input) -->
+								<tr v-if="showInputHeader" class="list-input-row-actions">
+									<td colspan="999" class="sub-actions-wrap">
+										<div class="sub-actions default-inputs">
+											<select
+												v-if="hasChoices"
+												@change="setLoginOption('choiceId',$event.target.value)"
+												:value="choiceId"
+											>
+												<option v-for="c in query.choices" :value="c.id">
+													{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
+												</option>
+											</select>
+											
+											<my-input-offset
+												@input="setOffsetParamAndReload($event,true)"
+												:caption="false"
+												:limit="limit"
+												:offset="offset"
+												:total="count"
+											/>
+											
+											<input autocomplete="off" class="short" enterkeyhint="send" type="text"
+												v-if="filterQuick"
+												@keyup.enter="updatedFilterQuick"
+												v-model="filtersQuick"
+												:placeholder="capGen.threeDots"
+												:title="capApp.quick"
+											/>
+											
+											<my-button image="checkbox1.png"
+												v-if="showInputAddAll"
+												@trigger="clickRowAll"
+												:caption="capApp.button.all"
+												:captionTitle="capApp.button.allHint"
+												:naked="true"
+											/>
+										</div>
+									</td>
+								</tr>
+								
+								<!-- result rows -->
+								<tr
+									v-for="(r,ri) in rowsClear"
+									@click.ctrl.exact="clickRow(r,true)"
+									@click.left.exact="clickRow(r,false)"
+									@click.middle.exact="clickRow(r,true)"
+									@keyup.enter.space="clickRow(r,false)"
+									:class="{ rowSelect:rowSelect && !inputIsReadonly, active:popUpFormInline !== null && popUpFormInline.recordIds.includes(r.indexRecordIds['0']) }"
+									:key="ri + '_' + r.indexRecordIds['0']"
+									:ref="refTabindex+String(ri)"
+									:tabindex="isInput ? '0' : '-1'"
+								>
+									<td v-if="hasBulkActions" @click.stop="" class="minimum checkbox">
+										<img class="clickable" tabindex="0"
+											@click="selectRow(ri)"
+											@keyup.enter.space.stop="selectRow(ri)"
+											:src="selectedRows.includes(ri) ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
+										/>
+									</td>
+									
+									<!-- row values per column batch -->
+									<td v-for="b in columnBatches">
+										<div class="columnBatch"
+											:class="{ colored:b.columnIndexColor !== -1, vertical:b.vertical }"
+											:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
 										>
-											<option v-for="c in query.choices" :value="c.id">
-												{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
-											</option>
-										</select>
-										
-										<my-input-offset
-											@input="offset = $event;reloadInside()"
-											:caption="false"
-											:limit="limit"
-											:offset="offset"
-											:total="count"
+											<my-value-rich
+												v-for="ind in b.columnIndexes.filter(v => v !== b.columnIndexColor && r.values[v] !== null)"
+												@clipboard="$emit('clipboard')"
+												:alignEnd="columns[ind].flags.alignEnd"
+												:alignMid="columns[ind].flags.alignMid"
+												:attributeId="columns[ind].attributeId"
+												:basis="columns[ind].basis"
+												:bold="columns[ind].flags.bold"
+												:boolAtrIcon="columns[ind].flags.boolAtrIcon"
+												:clipboard="columns[ind].flags.clipboard"
+												:display="columns[ind].display"
+												:italic="columns[ind].flags.italic"
+												:key="ind"
+												:length="columns[ind].length"
+												:monospace="columns[ind].flags.monospace"
+												:noShrink="columns[ind].flags.noShrink"
+												:noThousandsSep="columns[ind].flags.noThousandsSep"
+												:previewLarge="columns[ind].flags.previewLarge"
+												:value="r.values[ind]"
+												:wrap="columns[ind].flags.wrap"
+											/>
+										</div>
+									</td>
+									<!-- empty column for taking remaining space -->
+									<td></td>
+								</tr>
+								
+								<!-- no results message -->
+								<tr v-if="rows.length === 0">
+									<td v-if="rowsFetching" colspan="999">
+										<my-label image="load.gif" :caption="capApp.fetching" />
+									</td>
+									<td v-if="!rowsFetching" colspan="999">
+										<div class="columnBatch">{{ capGen.resultsNone }}</div>
+									</td>
+								</tr>
+							</tbody>
+							<tfoot>
+								<!-- result aggregations -->
+								<my-list-aggregate ref="aggregations"
+									:columnBatches="columnBatches"
+									:columnIdMapAggr="columnIdMapAggr"
+									:columns="columns"
+									:filters="filtersCombined"
+									:leaveOneEmpty="hasBulkActions"
+									:joins="relationsJoined"
+									:relationId="query.relationId"
+								/>
+							</tfoot>
+						</table>
+					
+						<div class="empty-space"
+							v-if="isTable"
+							@click="clickOnEmpty"
+						></div>
+						
+						<!-- list results as cards -->
+						<template v-if="isCards">
+						
+							<!-- actions -->
+							<div class="list-cards-actions default-inputs" v-if="hasResults" :class="{ atTop:!showHeader }">
+								<div class="row centered">
+									<my-button
+										v-if="hasBulkActions"
+										@trigger="selectRowsAllToggle"
+										:caption="capApp.button.all"
+										:captionTitle="capApp.button.allHint"
+										:image="rows.length !== 0 && selectedRows.length === rows.length ? 'checkbox1.png' : 'checkbox0.png'"
+										:naked="true"
+									/>
+								</div>
+								
+								<div class="row centered">
+									<!-- sorting -->
+									<template v-if="hasResults">
+										<span class="select">{{ capApp.orderBy }}</span>
+										<select @change="cardsSetOrderBy($event.target.value)" :value="cardsOrderByColumnBatchIndex">
+											<option value="-1">-</option>
+											<option v-for="(b,i) in columnBatches" :value="i">{{ b.caption }}</option>
+										</select>	
+										<my-button
+											v-if="cardsOrderByColumnBatchIndex !== -1"
+											@trigger="cardsToggleOrderBy"
+											:image="orders[0].ascending ? 'triangleUp.png' : 'triangleDown.png'"
+											:naked="true"
 										/>
-										
-										<input autocomplete="off" class="short" enterkeyhint="send" type="text"
-											v-if="filterQuick"
-											@keyup.enter="updatedFilterQuick"
-											v-model="filtersQuick"
-											:placeholder="capGen.threeDots"
-											:title="capApp.quick"
+									</template>
+								</div>
+								
+								<div class="row centered">
+									<my-button image="toggleDown.png"
+										v-if="!showHeader"
+										@trigger="toggleHeader"
+										:naked="true"
+									/>
+								</div>
+							</div>
+							
+							<div class="list-cards-entries" @click="clickOnEmpty" :id="usesPageHistory ? scrollFormId : null">
+								
+								<!-- no results message -->
+								<template v-if="!hasResults">
+									<div class="list-cards-entry no-results" v-if="!rowsFetching">
+										{{ capGen.resultsNone }}
+									</div>
+									<div class="list-cards-entry no-results" v-if="rowsFetching">
+										<my-label image="load.gif" :caption="capApp.fetching" />
+									</div>
+								</template>
+								
+								<div class="list-cards-entry"
+									v-for="(r,ri) in rowsClear"
+									@click.ctrl.exact.stop="clickRow(r,true)"
+									@click.left.stop.exact="clickRow(r,false)"
+									@click.middle.exact.stop="clickRow(r,true)"
+									@keyup.enter.space.stop="clickRow(r,false)"
+									:class="{ rowSelect:rowSelect && !inputIsReadonly }"
+									:key="ri + '_' + r.indexRecordIds['0']"
+									:ref="refTabindex+String(ri)"
+									:tabindex="isInput ? '0' : '-1'"
+								>
+									<div class="actions" v-if="hasBulkActions" @click.stop="">
+										<my-button
+											@trigger="selectRow(ri)"
+											:image="selectedRows.includes(ri) ? 'checkbox1.png' : 'checkbox0.png'"
+											:naked="true"
 										/>
-										
-										<my-button image="checkbox1.png"
-											v-if="showInputAddAll"
-											@trigger="clickRowAll"
-											:caption="capApp.button.all"
-											:captionTitle="capApp.button.allHint"
+										<my-button image="delete.png"
+											@trigger="delAsk([ri])"
 											:naked="true"
 										/>
 									</div>
-								</td>
-							</tr>
-							
-							<!-- result rows -->
-							<tr
-								v-for="(r,ri) in rowsClear"
-								@click.ctrl.exact="clickRow(r,true)"
-								@click.left.exact="clickRow(r,false)"
-								@click.middle.exact="clickRow(r,true)"
-								@keyup.enter.space="clickRow(r,false)"
-								:class="{ rowSelect:rowSelect && !inputIsReadonly, active:popUpFormInline !== null && popUpFormInline.recordIds.includes(r.indexRecordIds['0']) }"
-								:key="ri + '_' + r.indexRecordIds['0']"
-								:ref="refTabindex+String(ri)"
-								:tabindex="isInput ? '0' : '-1'"
-							>
-								<td v-if="hasBulkActions" @click.stop="" class="minimum checkbox">
-									<img class="clickable" tabindex="0"
-										@click="selectRow(ri)"
-										@keyup.enter.space.stop="selectRow(ri)"
-										:src="selectedRows.includes(ri) ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
-									/>
-								</td>
-								
-								<!-- row values per column batch -->
-								<td v-for="b in columnBatches">
-									<div class="columnBatch"
-										:class="{ colored:b.columnIndexColor !== -1, vertical:b.vertical }"
-										:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
-									>
-										<my-value-rich
-											v-for="ind in b.columnIndexes.filter(v => v !== b.columnIndexColor && r.values[v] !== null)"
-											@clipboard="$emit('clipboard')"
-											:alignEnd="columns[ind].flags.alignEnd"
-											:alignMid="columns[ind].flags.alignMid"
-											:attributeId="columns[ind].attributeId"
-											:basis="columns[ind].basis"
-											:bold="columns[ind].flags.bold"
-											:boolAtrIcon="columns[ind].flags.boolAtrIcon"
-											:clipboard="columns[ind].flags.clipboard"
-											:display="columns[ind].display"
-											:italic="columns[ind].flags.italic"
-											:key="ind"
-											:length="columns[ind].length"
-											:monospace="columns[ind].flags.monospace"
-											:previewLarge="columns[ind].flags.previewLarge"
-											:value="r.values[ind]"
-											:wrap="columns[ind].flags.wrap"
-										/>
-									</div>
-								</td>
-								<!-- empty column for taking remaining space -->
-								<td></td>
-							</tr>
-							
-							<!-- no results message -->
-							<tr v-if="rows.length === 0">
-								<td v-if="rowsFetching" colspan="999">
-									<div class="fetching">
-										<img src="images/load.gif">
-										<span>{{ capApp.fetching }}</span>
-									</div>
-								</td>
-								<td v-if="!rowsFetching" colspan="999">
-									<div class="columnBatch">{{ capGen.resultsNone }}</div>
-								</td>
-							</tr>
-						</tbody>
-						<tfoot>
-							<!-- result aggregations -->
-							<my-list-aggregate ref="aggregations"
-								:columnBatches="columnBatches"
-								:columnIdMapAggr="columnIdMapAggr"
-								:columns="columns"
-								:filters="filtersCombined"
-								:leaveOneEmpty="hasBulkActions"
-								:joins="relationsJoined"
-								:relationId="query.relationId"
-							/>
-						</tfoot>
-					</table>
-					
-					<div class="empty-space"
-						v-if="isTable"
-						@click="clickOnEmpty"
-					></div>
-					
-					<!-- list results as cards -->
-					<template v-if="isCards">
-					
-						<!-- actions -->
-						<div class="card-actions default-inputs" v-if="hasResults" :class="{ atTop:!showHeader }">
-							<div class="row centered">
-								<my-button
-									v-if="hasBulkActions"
-									@trigger="selectRowsAllToggle"
-									:caption="capApp.button.all"
-									:captionTitle="capApp.button.allHint"
-									:image="rows.length !== 0 && selectedRows.length === rows.length ? 'checkbox1.png' : 'checkbox0.png'"
-									:naked="true"
-								/>
-							</div>
-							
-							<div class="row centered">
-								<!-- sorting -->
-								<template v-if="hasResults">
-									<span class="select">{{ capApp.orderBy }}</span>
-									<select @change="cardsSetOrderBy($event.target.value)" :value="cardsOrderByColumnBatchIndex">
-										<option value="-1">-</option>
-										<option v-for="(b,i) in columnBatches" :value="i">{{ b.caption }}</option>
-									</select>	
-									<my-button
-										v-if="cardsOrderByColumnBatchIndex !== -1"
-										@trigger="cardsToggleOrderBy"
-										:image="orders[0].ascending ? 'triangleUp.png' : 'triangleDown.png'"
-										:naked="true"
-									/>
-								</template>
-							</div>
-							
-							<div class="row centered">
-								<my-button image="toggleDown.png"
-									v-if="!showHeader"
-									@trigger="toggleHeader"
-									:naked="true"
-								/>
-							</div>
-						</div>
-						
-						<div class="cards" @click="clickOnEmpty" :id="usesPageHistory ? scrollFormId : null">
-							
-							<!-- no results message -->
-							<template v-if="!hasResults">
-								<div class="card no-results" v-if="!rowsFetching">
-									{{ capGen.resultsNone }}
+									
+									<!-- row values per column batch -->
+									<table>
+										<tbody>
+											<tr v-for="b in columnBatches">
+												<td class="caption" v-if="cardsCaptions">{{ b.caption }}</td>
+												<td>
+													<div class="columnBatch listCards" :class="{ vertical:b.vertical }">
+														<my-value-rich
+															v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
+															@clipboard="$emit('clipboard')"
+															:alignEnd="columns[ind].flags.alignEnd"
+															:alignMid="columns[ind].flags.alignMid"
+															:attributeId="columns[ind].attributeId"
+															:basis="columns[ind].basis"
+															:bold="columns[ind].flags.bold"
+															:boolAtrIcon="columns[ind].flags.boolAtrIcon"
+															:clipboard="columns[ind].flags.clipboard"
+															:display="columns[ind].display"
+															:italic="columns[ind].flags.italic"
+															:key="ind"
+															:length="columns[ind].length"
+															:monospace="columns[ind].flags.monospace"
+															:noShrink="columns[ind].flags.noShrink"
+															:noThousandsSep="columns[ind].flags.noThousandsSep"
+															:previewLarge="columns[ind].flags.previewLarge"
+															:value="r.values[ind]"
+															:wrap="columns[ind].flags.wrap"
+														/>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
 								</div>
-								<div class="card no-results fetching" v-if="rowsFetching">
-									<img src="images/load.gif">
-									<span>{{ capApp.fetching }}</span>
-								</div>
-							</template>
-							
-							<div class="card"
-								v-for="(r,ri) in rowsClear"
-								@click.ctrl.exact.stop="clickRow(r,true)"
-								@click.left.stop.exact="clickRow(r,false)"
-								@click.middle.exact.stop="clickRow(r,true)"
-								@keyup.enter.space.stop="clickRow(r,false)"
-								:class="{ rowSelect:rowSelect && !inputIsReadonly }"
-								:key="ri + '_' + r.indexRecordIds['0']"
-								:ref="refTabindex+String(ri)"
-								:tabindex="isInput ? '0' : '-1'"
-							>
-								<div class="actions" v-if="hasBulkActions" @click.stop="">
-									<my-button
-										@trigger="selectRow(ri)"
-										:image="selectedRows.includes(ri) ? 'checkbox1.png' : 'checkbox0.png'"
-										:naked="true"
-									/>
-									<my-button image="delete.png"
-										@trigger="delAsk([ri])"
-										:naked="true"
-									/>
-								</div>
-								
-								<!-- row values per column batch -->
-								<table>
-									<tbody>
-										<tr v-for="b in columnBatches">
-											<td class="caption" v-if="cardsCaptions">{{ b.caption }}</td>
-											<td>
-												<div class="columnBatch listCards" :class="{ vertical:b.vertical }">
-													<my-value-rich
-														v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
-														@clipboard="$emit('clipboard')"
-														:alignEnd="columns[ind].flags.alignEnd"
-														:alignMid="columns[ind].flags.alignMid"
-														:attributeId="columns[ind].attributeId"
-														:basis="columns[ind].basis"
-														:bold="columns[ind].flags.bold"
-														:boolAtrIcon="columns[ind].flags.boolAtrIcon"
-														:clipboard="columns[ind].flags.clipboard"
-														:display="columns[ind].display"
-														:italic="columns[ind].flags.italic"
-														:key="ind"
-														:length="columns[ind].length"
-														:monospace="columns[ind].flags.monospace"
-														:previewLarge="columns[ind].flags.previewLarge"
-														:value="r.values[ind]"
-														:wrap="columns[ind].flags.wrap"
-													/>
-												</div>
-											</td>
-										</tr>
-									</tbody>
-								</table>
 							</div>
-						</div>
-					</template>
-				</div>
+						</template>
+					</div>
+				</teleport>
 				
 				<!-- inline form -->
-				<my-form class="inline"
+				<my-form class="inline list-inline-form"
 					v-if="popUpFormInline !== null"
 					@close="$emit('close-inline')"
+					@refresh-parent="get"
 					@record-deleted="get"
 					@record-updated="get"
 					@records-open="popUpFormInline.recordIds = $event"
@@ -718,25 +627,30 @@ let MyList = {
 		columns:         { type:Array,   required:true },                    // list columns, processed (applied filter values, only columns shown by user choice)
 		columnsAll:      { type:Array,   required:false, default:() => [] }, // list columns, all
 		dataOptions:     { type:Number,  required:false, default:0 },        // data permissions following form states
-		favoriteId:      { required:false, default:null },
-		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true },                    // processed query filters
+		filtersInput:    { type:Array,   required:false, default:() => [] }, // processed query filters relevant for input lookup
 		layoutDefault:   { type:String,  required:false, default:'table' },  // default list layout: table, cards
 		limitDefault:    { type:Number,  required:false, default:10 },       // default list limit
+		loginOptions:    { type:Object,  required:true },
 		moduleId:        { type:String,  required:true },
 		popUpFormInline: { required:false, default:null },                   // form to show inside list
 		query:           { type:Object,  required:true },                    // list query
 		
 		// toggles
+		blockDuringLoad:{ type:Boolean, required:false, default:true },  // list blocks user input during data retrieval
+		columnsSortOnly:{ type:Boolean, required:false, default:false }, // list columns can only be sorted, not filtered or aggregated
 		csvExport:      { type:Boolean, required:false, default:false },
 		csvImport:      { type:Boolean, required:false, default:false },
 		dropdownShow:   { type:Boolean, required:false, default:false },
 		filterQuick:    { type:Boolean, required:false, default:false }, // enable quick filter
-		formLoading:    { type:Boolean, required:false, default:false }, // trigger and control list reloads
+		formLoading:    { type:Boolean, required:false, default:false }, // control list reloads
 		hasOpenForm:    { type:Boolean, required:false, default:false }, // list can open record in form
 		hasOpenFormBulk:{ type:Boolean, required:false, default:false }, // list can open records in bulk form
 		header:         { type:Boolean, required:false, default:true  }, // show list header
-		isInput:        { type:Boolean, required:false, default:false }, // use list as input
+		headerActions:  { type:Boolean, required:false, default:true  }, // show list header actions (complex filters, list options, header collapse)
+		headerColumns:  { type:Boolean, required:false, default:true  }, // show list column headers
+		isDynamicSize:  { type:Boolean, required:false, default:false }, // list does not have minimum fixed height
+		isInput:        { type:Boolean, required:false, default:false }, // list is used as input
 		isHidden:       { type:Boolean, required:false, default:false }, // list is not visible and therefore not loaded/updated
 		isSingleField:  { type:Boolean, required:false, default:false }, // list is single field within a parent (form/tab - not container!)
 		loadWhileHidden:{ type:Boolean, required:false, default:false },
@@ -744,6 +658,7 @@ let MyList = {
 		
 		// list as input field
 		inputAsCategory:{ type:Boolean, required:false, default:false },    // input is category selector (all records are shown, active ones are checked off)
+		inputAsFlow:    { type:Boolean, required:false, default:false },    // input is a flow selector (all records are shown, all records up to, and incl. the selected one, are marked)
 		inputAutoSelect:{ type:Number,  required:false, default:0 },        // # of records to auto select (2 = first two, -3 = last three, 0 = none)
 		inputIsNew:     { type:Boolean, required:false, default:false },    // input field belongs to new record
 		inputIsReadonly:{ type:Boolean, required:false, default:false },    // input field is readonly
@@ -752,53 +667,28 @@ let MyList = {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'clipboard','close-inline','dropdown-show','open-form',
-		'open-form-bulk','record-count-change','record-removed',
-		'records-selected','records-selected-init','set-args',
-		'set-column-ids-by-user','set-collection-indexes'
+		'clipboard','close-inline','dropdown-show','open-form','open-form-bulk',
+		'record-count-change','record-removed','records-selected','records-selected-init',
+		'set-args','set-column-ids-by-user','set-collection-indexes','set-login-option'
 	],
 	data() {
 		return {
-			// list state
-			autoRenew:-1,               // auto renew list data every X seconds, -1 if disabled
+			// state
 			autoRenewTimer:null,        // interval timer for auto renew
-			choiceId:null,              // currently active choice
-			columnBatchIndexOption:-1,  // show options for column batch by index
-			columnBatchSort:[[],[]],
+			cardsOrderByColumnBatchIndex:-1,
+			filtersQuick:'',            // current user quick text filter
 			focused:false,
 			inputAutoSelectDone:false,
-			inputDropdownUpwards:false, // show dropdown above input
-			layout:'table',             // current list layout (table, cards)
 			rowsFetching:false,         // row values are being fetched
 			selectedRows:[],            // bulk selected rows by row index
 			showCsv:false,              // show UI for CSV import/export
 			showFilters:false,          // show UI for user filters
-			showHeader:true,            // show UI for list header
 			showOptions:false,          // show UI for list options
 			
-			// list constants
+			// constants
 			refTabindex:'input_row_', // prefix for vue references to tabindex elements
 			
-			// list card layout state
-			cardsOrderByColumnBatchIndex:-1,
-			cardsCaptions:true,
-			
-			// list data
-			columnIdMapAggr:{}, // aggregators by column ID
-			count:0,            // total result set count
-			limit:0,            // current result limit
-			offset:0,           // current result offset
-			orders:[],          // current column orderings
-			rows:[],            // current result set
-			filtersColumn:[],   // current user column filters
-			filtersQuick:'',    // current user quick text filter
-			filtersUser:[],     // current user filters
-			
-			// list input data
-			rowsInput:[], // rows that reflect current input (following active record IDs)
-			              // as opposed to list rows which show lookup data (regular list or input dropdown)
-			
-			// list header
+			// header
 			headerCheckTimer:null,
 			headerElements:[],               // elements that are shown, based on available space
 			headerElementsAvailableInOrder:[ // elements that can be shown, in order of priority
@@ -812,7 +702,14 @@ let MyList = {
 				'headerCollapse',            // optional
 				'actionsReadonly',           // optional
 				'resultsCount'               // not important
-			]
+			],
+			
+			// data
+			count:0,     // total result set count
+			offset:0,    // result offset
+			rows:[],     // result set
+			rowsInput:[] // rows that reflect current input (following active record IDs)
+			             // as opposed to list rows which show lookup data (regular list or input dropdown)
 		};
 	},
 	computed:{
@@ -823,9 +720,9 @@ let MyList = {
 				.concat(s.filtersParsedQuick)
 				.concat(s.getFiltersEncapsulated(
 					JSON.parse(JSON.stringify(s.filtersUser))
-				))
-				.concat(s.choiceFilters);
+				));
 			
+			// remove IDs from input in result set if it´s an input
 			if(s.anyInputRows)
 				filters.push(s.getQueryAttributesPkFilter(
 					s.query.relationId,s.inputRecordIds,0,true
@@ -862,10 +759,6 @@ let MyList = {
 			else if(s.showOptions) return 'images/listCog.png';
 			return '';
 		},
-		inputLinePlaceholder:(s) => {
-			if(s.focused) return '';
-			return s.anyInputRows ? s.capApp.inputPlaceholderAdd : s.capGen.threeDots;
-		},
 		pageCount:(s) => {
 			if(s.count === 0) return 0;
 			
@@ -878,47 +771,18 @@ let MyList = {
 			if(s.filtersQuick === '') return [];
 			
 			let out = [];
-			let addFilter = (operator,atrId,atrIndex,dict) => {
+			for(const c of s.columns) {
+				const a = s.attributeIdMap[c.attributeId];
+				if(c.subQuery || s.isAttributeFiles(a.content) || (c.aggregator !== null && c.aggregator !== 'record'))
+					continue;
+				
 				out.push({
 					connector:out.length === 0 ? 'AND' : 'OR',
 					index:0,
-					operator:operator,
-					side0:{ attributeId:atrId, attributeIndex:atrIndex, brackets:0 },
-					side1:{ brackets:0, ftsDict:dict, value:s.filtersQuick }
+					operator:'ILIKE',
+					side0:{ attributeId:c.attributeId, attributeIndex:c.index, brackets:0 },
+					side1:{ brackets:0, value:s.filtersQuick }
 				});
-			};
-			
-			for(let c of s.columns) {
-				let a = s.attributeIdMap[c.attributeId];
-				if(c.subQuery || s.isAttributeFiles(a.content) ||
-					(c.aggregator !== null && c.aggregator !== 'record')) {
-					
-					continue;
-				}
-				
-				// check for available full text search
-				let ftsAvailable = false;
-				let r = s.relationIdMap[a.relationId];
-				for(let ind of r.indexes) {
-					if(ind.method === 'GIN' && ind.attributes.length === 1
-						&& ind.attributes[0].attributeId === a.id) {
-						
-						ftsAvailable = true;
-						break;
-					}
-				}
-				
-				if(!ftsAvailable) {
-					addFilter('ILIKE',c.attributeId,c.index,null);
-				}
-				else {
-					// add FTS filter for each active dictionary, use 'simple' otherwise
-					for(let dict of s.settings.searchDictionaries) {
-						addFilter('@@',c.attributeId,c.index,dict);
-					}
-					if(s.settings.searchDictionaries.length === 0)
-						addFilter('@@',c.attributeId,c.index,'simple');
-				}
 			}
 			return s.getFiltersEncapsulated(out);
 		},
@@ -926,7 +790,6 @@ let MyList = {
 		// simple
 		anyInputRows:        (s) => s.inputRecordIds.length !== 0,
 		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
-		choiceFilters:       (s) => s.getChoiceFilters(s.choices,s.choiceId),
 		columnBatches:       (s) => s.getColumnBatches(s.moduleId,s.columns,[],s.orders,s.columnBatchSort[0],true),
 		columnBatchesAll:    (s) => s.getColumnBatches(s.moduleId,s.columnsAll,[],s.orders,[],true),
 		expressions:         (s) => s.getQueryExpressions(s.columns),
@@ -946,10 +809,11 @@ let MyList = {
 		rowSelect:           (s) => s.isInput || s.hasUpdate,
 		rowsClear:           (s) => s.rows.filter(v => !s.inputRecordIds.includes(v.indexRecordIds['0'])),
 		showActionTitles:    (s) => s.headerElements.includes('actionTitles'),
+		showAllValues:       (s) => s.inputAsFlow || s.inputAsCategory,
 		showCollectionTitles:(s) => s.headerElements.includes('collectionTitles'),
 		showHover:           (s) => s.showCsv || s.showFilters || s.showOptions,
-		showInputAddLine:    (s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
 		showInputAddAll:     (s) => s.inputMulti && s.hasResults,
+		showInputAddLine:    (s) => !s.showAllValues && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
 		showInputHeader:     (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
 		showOffsetArrows:    (s) => s.headerElements.includes('offsetArrows'),
 		showRefresh:         (s) => s.headerElements.includes('refresh'),
@@ -960,9 +824,21 @@ let MyList = {
 			if(s.headerElements.includes('collectionValuesFew')) return 2;
 			return 0;
 		},
+
+		// login options
+		autoRenew:      (s) => s.$root.getOrFallback(s.loginOptions,'autoRenew',(s.autoRenewDefault === null ? -1 : s.autoRenewDefault)), // refresh list data every X seconds, -1 if disabled
+		cardsCaptions:  (s) => s.$root.getOrFallback(s.loginOptions,'cardsCaptions',true),
+		choiceId:       (s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		columnBatchSort:(s) => s.$root.getOrFallback(s.loginOptions,'columnBatchSort',[[],[]]),
+		columnIdMapAggr:(s) => s.$root.getOrFallback(s.loginOptions,'columnIdMapAggr',{}),      // aggregators by column ID
+		filtersColumn:  (s) => s.$root.getOrFallback(s.loginOptions,'filtersColumn',[]),        // column filters
+		filtersUser:    (s) => s.$root.getOrFallback(s.loginOptions,'filtersUser',[]),          // user filters
+		showHeader:     (s) => s.$root.getOrFallback(s.loginOptions,'header',true),             // show UI for list header
+		limit:          (s) => s.$root.getOrFallback(s.loginOptions,'limit',s.limitDefault),    // result limit
+		layout:         (s) => s.$root.getOrFallback(s.loginOptions,'layout',s.layoutDefault),  // list layout (table, cards)
+		orders:         (s) => s.$root.getOrFallback(s.loginOptions,'orders',s.ordersOriginal), // order by definitions for query
 		
 		// stores
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		appResized:    (s) => s.$store.getters.appResized,
 		capApp:        (s) => s.$store.getters.captions.list,
@@ -981,84 +857,82 @@ let MyList = {
 		
 		// setup watchers
 		this.$watch('appResized',this.resized);
-		this.$watch('favoriteId',this.reloadOptions);
-		this.$watch('dropdownShow',(v) => {
+		this.$watch('limit',this.get);
+		this.$watch('dropdownShow',v => {
 			if(!v) return;
-
-			this.reloadInside('dropdown');
+			this.setOffsetAndReload(0);
 			
 			const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
 			if(inputEl !== null)
 				inputEl.focus();
 		});
-		this.$watch('formLoading',(val) => {
-			if(val) return;
+		this.$watch('formLoading',v => {
+			if(v) return;
 			this.inputAutoSelectDone = false;
 			this.reloadOutside();
 		});
-		this.$watch('isHidden',(val) => {
-			if(!val) {
-				this.reloadOutside();
-				this.resized();
-			}
+		this.$watch('isHidden',v => {
+			if(v) return;
+			this.reloadOutside();
+			this.resized();
 		});
-		this.$watch('loadWhileHidden',(val) => {
-			if(val) {
-				this.reloadOutside();
-				this.resized();
-			}
+		this.$watch('loadWhileHidden',v => {
+			if(!v) return;
+			this.reloadOutside();
+			this.resized();
 		});
-		this.$watch(() => [this.choices,this.columns,this.columnsAll,this.filters],(newVals,oldVals) => {
+		this.$watch(() => [this.filters,this.filtersColumn,this.filtersUser],(newVals,oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
 				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
-					this.count = 0;
-					this.rows  = [];
-					// column filters & orders can become invalid, if a user hides a column in list options
+					this.offset = 0;
 					this.removeInvalidFilters();
-					this.removeInvalidOrders();
-					this.reloadOutside();
-					return;
+					return this.reloadOutside();
 				}
 			}
 		});
-		if(this.isInput && !this.inputAsCategory) {
-			this.$watch('inputRecordIds',(val) => {
+		if(!this.isInput) {
+			this.$watch(() => [this.columns,this.columnsAll,this.orders],(newVals,oldVals) => {
+				for(let i = 0, j = newVals.length; i < j; i++) {
+					if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i])) {
+						// if columns change, kill row data, otherwise content does not match columns
+						this.count = 0;
+						this.rows  = [];
+						this.removeInvalidFilters(); // if columns change, column filters can become invalid
+						this.removeInvalidOrders();
+						return this.get();
+					}
+				}
+			});
+		}
+		if(this.isInput && !this.showAllValues) {
+			this.$watch('inputRecordIds',v => {
 				// update input if record IDs are different (different count or IDs)
-				if(val.length !== this.rowsInput.length)
-					return this.reloadOutside();
+				// input rows are usually taken from selection, but record IDs can also be set by functions, requiring reload of these record rows
+				if(v.length !== this.rowsInput.length)
+					return this.getInput();
 				
-				for(let i = 0, j = this.rowsInput.length; i < j; i++) {
-					if(!val.includes(this.rowsInput[i].indexRecordIds[0]))
-						return this.reloadOutside();
+				for(const r of this.rowsInput) {
+					if(!v.includes(r.indexRecordIds[0]))
+						return this.getInput();
 				}
 			});
 		}
 		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
-				if(this.routeChangeFieldReload(newVals,oldVals)) {
-					this.paramsUpdated();
-					this.reloadOutside();
-				}
+				if(this.routeChangeFieldReload(newVals,oldVals))
+					this.paramsUpdated(true);
 			});
+
+			// load initial route parameters
+			this.paramsUpdated(false);
 		}
 
-		// initialize list options
-		this.reloadOptions();
 		this.setAutoRenewTimer(this.autoRenew);
-
-		// remove invalid filters & orders in case module schema changed
-		// must occur after reloadOptions() as user field options are loaded there
 		this.removeInvalidFilters();
 		this.removeInvalidOrders();
-
-		// setup handlers
-		window.addEventListener('keydown',this.handleHotkeys);
 	},
 	beforeUnmount() {
 		this.clearAutoRenewTimer();
-	},
-	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
 		// externals
@@ -1067,11 +941,8 @@ let MyList = {
 		colorMakeContrastFont,
 		consoleError,
 		deepIsEqual,
-		fieldOptionGet,
-		fieldOptionSet,
 		fillRelationRecordIds,
 		getCaption,
-		getChoiceFilters,
 		getColumnBatches,
 		getColumnTitle,
 		getFiltersEncapsulated,
@@ -1081,27 +952,49 @@ let MyList = {
 		getRelationsJoined,
 		getRowsDecrypted,
 		isAttributeFiles,
-		isDropdownUpwards,
 		layoutSettleSpace,
 		routeChangeFieldReload,
 		routeParseParams,
 
-		handleHotkeys(e) {
-			if(e.key === 'Escape' && (this.showCsv || this.showFilters || this.showOptions)) {
-				this.showCsv       = false;
-				this.showFilters   = false;
-				this.showOptions   = false;
-				e.preventDefault();
+		handleKeydownLocal(ev) {
+			let focusTarget = null;
+			let arrow       = false;
+			
+			switch(ev.code) {
+				case 'ArrowDown':  arrow = true; focusTarget = ev.target.nextElementSibling;     break;
+				case 'ArrowLeft':  arrow = true; focusTarget = ev.target.previousElementSibling; break;
+				case 'ArrowRight': arrow = true; focusTarget = ev.target.nextElementSibling;     break;
+				case 'ArrowUp':    arrow = true; focusTarget = ev.target.previousElementSibling; break;
+				case 'Escape':     this.escape(ev); break;
+			}
+
+			// arrow key used and tab focus target is available
+			if(arrow && focusTarget !== null && focusTarget.tabIndex !== -1) {
+				ev.preventDefault();
+				return focusTarget.focus();
+			}
+			
+			// arrow key used in regular list input
+			if(arrow && this.isInput && !this.showAllValues) {
+				
+				// show dropdown
+				if(!this.dropdownShow) {
+					ev.preventDefault();
+					return this.$emit('dropdown-show',true);
+				}
+				
+				// focus first/last input element
+				if(this.dropdownShow && this.rows.length !== 0) {
+					ev.preventDefault();
+
+					return ev.target !== this.$refs[this.refTabindex+'0'][0]
+						? this.$refs[this.refTabindex+'0'][0].focus()
+						: this.$refs[this.refTabindex+String(this.rows.length-1)][0].focus();
+				}
 			}
 		},
 		
 		// presentation
-		displayRecordCheck(state) {
-			if(this.inputMulti)
-				return state ? 'checkbox1.png' : 'checkbox0.png';
-			
-			return state ? 'radio1.png' : 'radio0.png';
-		},
 		displayColorColumn(color) {
 			if(color === null) return '';
 			
@@ -1118,14 +1011,6 @@ let MyList = {
 				this.$nextTick(() => this.layoutSettleSpace(this.headerElements,this.$refs.empty));
 			},200);
 		},
-		updateDropdownDirection() {
-			let headersPx  = 200; // rough height in px of all headers (menu/form) combined
-			let rowPx      = 38;  // rough height in px of one dropdown list row
-			let dropdownPx = rowPx * (this.rows.length+1); // +1 for action row
-			
-			this.inputDropdownUpwards =
-				this.isDropdownUpwards(this.$el,dropdownPx,headersPx);
-		},
 		
 		// reloads
 		reloadAggregations(nextTick) {
@@ -1135,121 +1020,38 @@ let MyList = {
 			if(nextTick) this.$nextTick(this.$refs.aggregations.get);
 			else         this.$refs.aggregations.get();
 		},
-		reloadOptions() {
-			this.autoRenew       = this.fieldOptionGet(this.favoriteId,this.fieldId,'autoRenew',(this.autoRenewDefault === null ? -1 : this.autoRenewDefault));
-			this.cardsCaptions   = this.fieldOptionGet(this.favoriteId,this.fieldId,'cardsCaptions',true);
-			this.choiceId        = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
-			this.columnBatchSort = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnBatchSort',[[],[]]);
-			this.columnIdMapAggr = this.fieldOptionGet(this.favoriteId,this.fieldId,'columnIdMapAggr',{});
-			this.filtersColumn   = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersColumn',[]);
-			this.filtersUser     = this.fieldOptionGet(this.favoriteId,this.fieldId,'filtersUser',[]);
-			this.showHeader      = this.fieldOptionGet(this.favoriteId,this.fieldId,'header',true);
-			this.limit           = this.fieldOptionGet(this.favoriteId,this.fieldId,'limit',this.limitDefault);
-			this.layout          = this.fieldOptionGet(this.favoriteId,this.fieldId,'layout',this.layoutDefault);
-			this.orders          = this.fieldOptionGet(this.favoriteId,this.fieldId,'orders',this.ordersOriginal);
-
-			if(this.usesPageHistory) {
-				// set initial states via route parameters
-				this.paramsUpdated();     // load existing parameters from route query
-				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-			}
-		},
-		reloadInside(entity) {
-			// inside state has changed, reload list (not relevant for list input)
-			switch(entity) {
-				case 'dropdown':      // fallthrough
-				case 'filtersQuick':  // fallthrough
-				case 'filtersColumn': // fallthrough
-				case 'filtersUser': this.offset = 0; break;
-				case 'choice':
-					this.offset = 0;
-					this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',this.choiceId);
-				break;
-				case 'order':
-					this.offset = 0;
-				break;
-				default: break; // no special treatment
-			}
-			
-			// update route parameters, reloads list via watcher
-			// enables browser history for fullpage list navigation
-			//  special cases: column/quick/user filters & manuel reloads (no page param change)
-			if(this.usesPageHistory && !['filtersColumn','filtersQuick','filtersUser','limit','manual'].includes(entity))
-				return this.paramsUpdate(true);
-			
-			this.get();
-		},
 		reloadOutside() {
-			// outside state has changed, reload list or list input
-			if(!this.isInput)
-				return this.get();
-			
-			this.getInput();
+			if(this.isInput) this.getInput();
+			else             this.get();
 		},
 		
 		// parsing
 		paramsUpdate(pushHistory) {
-			// fullpage lists update their form arguments, this results in history change
-			// history change then triggers form load
-			let orders = [];
-			for(let o of this.orders) {
-				if(typeof o.expressionPos !== 'undefined')
-					// sort by expression position
-					orders.push(`expr_${o.expressionPos}_${o.ascending ? 'asc' : 'desc'}`);
-				else
-					// sort by attribute
-					orders.push(`${o.index}_${o.attributeId}_${o.ascending ? 'asc' : 'desc'}`);
-			}
-			
-			let args = [];
-			if(this.choiceId !== null) args.push(`choice=${this.choiceId}`);
-			if(this.offset   !== 0)    args.push(`offset=${this.offset}`);
-			if(orders.length !== 0)    args.push(`orderby=${orders.join(',')}`);
-			
-			this.$emit('set-args',args,pushHistory);
+			if(this.usesPageHistory)
+				this.$emit('set-args',this.offset !== 0 ? [`offset=${this.offset}`] : [],pushHistory);
 		},
-		paramsUpdated() {
-			// apply query parameters
-			let params = {
-				choice: { parse:'string',   value:this.choiceId },
-				offset: { parse:'int',      value:0 },
-				orderby:{ parse:'listOrder',value:JSON.stringify(this.orders) }
-			};
+		paramsUpdated(reloadIfChanged) {
+			let params = { offset:{ parse:'int', value:0 } };
 			this.routeParseParams(params);
 			
-			if(this.choiceId !== params.choice.value)
-				this.choiceId = params.choice.value;
-			
-			this.offset = params.offset.value;
-			this.orders = JSON.parse(params.orderby.value);
-			
-			// apply first order for card layout selector
-			this.cardsOrderByColumnBatchIndex = -1;
-			for(let i = 0, j = this.columnBatches.length; i < j; i++) {
-				if(this.columnBatches[i].orderIndexesUsed.length !== 0) {
-					this.cardsOrderByColumnBatchIndex = i;
-					break;
-				}
+			if(this.offset !== params.offset.value) {
+				this.offset = params.offset.value;
+
+				if(reloadIfChanged)
+					this.get();
 			}
 		},
 		
 		// user actions, generic
-		blur() {
-			this.focused = false;
-			if(this.dropdownShow)
-				this.$emit('dropdown-show',false);
-		},
 		clearAutoRenewTimer() {
 			if(this.autoRenewTimer !== null)
 				clearInterval(this.autoRenewTimer);
 		},
-		clickColumn(columnBatchIndex) {
-			this.columnBatchIndexOption = this.columnBatchIndexOption === columnBatchIndex
-				? -1 : columnBatchIndex;
-		},
 		clickOpen(row,middleClick) {
-			if(this.hasUpdate)
+			if(this.hasUpdate) {
 				this.$emit('open-form',[row],middleClick);
+				this.escape();
+			}
 		},
 		clickOnEmpty() {
 			this.$emit('close-inline');
@@ -1259,7 +1061,7 @@ let MyList = {
 				this.$emit('dropdown-show',true);
 		},
 		clickInputRow() {
-			if(!this.inputIsReadonly && !this.inputAsCategory && !this.showInputAddLine)
+			if(!this.inputIsReadonly && !this.showAllValues && !this.showInputAddLine)
 				this.$emit('dropdown-show',!this.dropdownShow);
 		},
 		clickRow(row,middleClick) {
@@ -1288,52 +1090,28 @@ let MyList = {
 			this.showFilters = false;
 			this.showOptions = false;
 		},
-		escape() {
-			if(this.isInput)
-				this.blur();
+		escape(ev) {
+			const somethingToClose = (this.isInput && this.dropdownShow) || this.showHover;
+
+			if(this.isInput) {
+				this.focused = false;
+				if(this.dropdownShow)
+					this.$emit('dropdown-show',false);
+			}
+			if(this.showHover) {
+				this.showCsv     = false;
+				this.showFilters = false;
+				this.showOptions = false;
+			}
+			if(somethingToClose && ev !== undefined) {
+				ev.stopPropagation();
+				ev.preventDefault();
+			}
 		},
 		focus() {
-			if(!this.inputIsReadonly && this.isInput && !this.inputAsCategory && !this.dropdownShow) {
+			if(!this.inputIsReadonly && this.isInput && !this.showAllValues && !this.dropdownShow) {
 				this.focused      = true;
 				this.filtersQuick = '';
-			}
-		},
-		keyDown(e) {
-			let focusTarget = null;
-			let arrow       = false;
-			
-			switch(e.code) {
-				case 'ArrowDown':  arrow = true; focusTarget = e.target.nextElementSibling;     break;
-				case 'ArrowLeft':  arrow = true; focusTarget = e.target.previousElementSibling; break;
-				case 'ArrowRight': arrow = true; focusTarget = e.target.nextElementSibling;     break;
-				case 'ArrowUp':    arrow = true; focusTarget = e.target.previousElementSibling; break;
-				case 'Escape':     e.preventDefault(); this.escape(); break;
-			}
-			
-			// arrow key used and tab focus target is available
-			if(arrow && focusTarget !== null && focusTarget.tabIndex !== -1) {
-				e.preventDefault();
-				return focusTarget.focus();
-			}
-			
-			// arrow key used in regular list input
-			if(arrow && this.isInput && !this.inputAsCategory) {
-				
-				// show dropdown
-				if(!this.dropdownShow) {
-					e.preventDefault();
-					return this.$emit('dropdown-show',true);
-				}
-				
-				// focus first/last input element
-				if(this.dropdownShow && this.rows.length !== 0) {
-					e.preventDefault();
-					
-					if(e.target !== this.$refs[this.refTabindex+'0'][0])
-						return this.$refs[this.refTabindex+'0'][0].focus();
-					
-					return this.$refs[this.refTabindex+String(this.rows.length-1)][0].focus();
-				}
 			}
 		},
 		resetColumns() {
@@ -1343,12 +1121,13 @@ let MyList = {
 		},
 		setAggregators(columnId,aggregator) {
 			if(!this.isTable) return;
+			let v = JSON.parse(JSON.stringify(this.columnIdMapAggr));
 			
-			if(aggregator !== null) this.columnIdMapAggr[columnId] = aggregator;
-			else                    delete(this.columnIdMapAggr[columnId]);
+			if(aggregator !== null) v[columnId] = aggregator;
+			else                    delete(v[columnId]);
 			
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnIdMapAggr',this.columnIdMapAggr);
-			this.reloadAggregations(false);
+			this.$emit('set-login-option','columnIdMapAggr',v);
+			this.reloadAggregations(true);
 		},
 		setAutoRenewTimer(v) {
 			this.clearAutoRenewTimer();
@@ -1362,37 +1141,33 @@ let MyList = {
 				this.autoRenewTimer = setInterval(this.get,v * 1000);
 			}
 
-			if(v !== this.autoRenew) {
-				this.autoRenew = v;
-				this.fieldOptionSet(this.favoriteId,this.fieldId,'autoRenew',v);
-			}
-		},
-		setCardsCaptions(v) {
-			this.cardsCaptions = v;
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'cardsCaptions',v);
+			if(v !== this.autoRenew)
+				this.$emit('set-login-option','autoRenew',v);
 		},
 		setColumnBatchSort(v) {
-			this.columnBatchSort = v;
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'columnBatchSort',v);
+			this.$emit('set-login-option','columnBatchSort',v);
 			this.reloadAggregations(true);
 		},
-		setColumnBatchFilters(v) {
-			this.filtersColumn = v;
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersColumn',v);
-			this.reloadInside('filtersColumn');
+		setColumnFilters(v) {
+			this.$emit('set-login-option','filtersColumn',v);
 		},
-		setLayout(v) {
-			this.layout = v;
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'layout',this.layout);
+		setLoginOption(name,v) {
+			this.$emit('set-login-option',name,v);
 		},
-		setLimit(v) {
-			this.limit = v;
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'limit',this.limit);
-			this.reloadInside('limit');
+		setOffsetAndReload(v) {
+			this.offset = v;
+			this.get();
 		},
-		setOrder(columnBatch,directionAsc) {
+		setOffsetParamAndReload(v,pushHistory) {
+			this.setOffsetAndReload(v);
+			this.paramsUpdate(pushHistory);
+		},
+		setOrder(columnBatch,directionAsc,clearAllBefore) {
 			// remove initial sorting (if active) when changing anything
 			let orders = this.isOrderedOrginal ? [] : JSON.parse(JSON.stringify(this.orders));
+
+			if(clearAllBefore)
+				orders = [];
 			
 			const orderIndexesUsed = this.getOrderIndexesFromColumnBatch(columnBatch,this.columns,orders);
 			const notOrdered       = orderIndexesUsed.length === 0;
@@ -1430,22 +1205,14 @@ let MyList = {
 			this.setOrders(orders.length === 0 ? this.ordersOriginal : orders);
 		},
 		setOrders(v) {
-			this.orders = JSON.parse(JSON.stringify(v));
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'orders',this.orders);
-			this.reloadInside('order');
+			this.$emit('set-login-option','orders',v);
 		},
 		setUserFilters(v) {
-			this.filtersUser = v;
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'filtersUser',v);
-			this.reloadInside('filtersUser');
+			this.$emit('set-login-option','filtersUser',v);
 		},
 		toggleHeader() {
-			this.showHeader = !this.showHeader;
+			this.$emit('set-login-option','header',!this.showHeader);
 			this.$store.commit('appResized');
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'header',this.showHeader);
-		},
-		toggleUserFilters() {
-			this.showFilters = !this.showFilters;
 		},
 		updatedTextInput(event) {
 			if(event.code === 'Tab' || event.code === 'Escape')
@@ -1463,38 +1230,34 @@ let MyList = {
 				
 				this.$emit('dropdown-show',false);
 			}
-			else if(event.code !== 'Escape') {
-				
-				// table already open, no enter/escape -> reload
-				this.reloadInside('dropdown');
+			else {
+				// table already open -> reload
+				this.setOffsetAndReload(0);
 			}
 		},
 		updatedFilterQuick() {
 			if(this.isInput && !this.dropdownShow)
-				this.$emit('dropdown-show',true);
-			else
-				this.reloadInside('filtersQuick');
+				return this.$emit('dropdown-show',true);
+			
+			this.offset = 0;
+			this.get();
 		},
 		
 		// user actions, cards layout
 		cardsSetOrderBy(columnBatchIndexStr) {
 			const columnBatchIndex = parseInt(columnBatchIndexStr);
 			this.cardsOrderByColumnBatchIndex = columnBatchIndex;
-			this.orders = [];
-			
-			if(columnBatchIndex === -1) return;
-			
-			this.setOrder(this.columnBatches[columnBatchIndex],true);
+			if(columnBatchIndex !== -1)
+				this.setOrder(this.columnBatches[columnBatchIndex],true,true);
 		},
 		cardsToggleOrderBy() {
 			const wasAsc = this.orders[0].ascending;
-			this.orders = [];
-			this.setOrder(this.columnBatches[this.cardsOrderByColumnBatchIndex],!wasAsc);
+			this.setOrder(this.columnBatches[this.cardsOrderByColumnBatchIndex],!wasAsc,true);
 		},
 		
 		// user actions, inputs
 		inputTriggerRow(row) {
-			if(this.inputAsCategory && !this.inputIsReadonly) {
+			if(this.showAllValues && !this.inputIsReadonly) {
 				const id = row.indexRecordIds['0'];
 
 				if(this.inputRecordIds.includes(id)) this.$emit('record-removed', id);
@@ -1505,7 +1268,7 @@ let MyList = {
 		inputTriggerRowRemove(i) {
 			this.$emit('record-removed',this.rowsInput[i].indexRecordIds['0']);
 			this.rowsInput.splice(i,1);
-			this.blur();
+			this.escape();
 		},
 
 		// cleanup
@@ -1532,7 +1295,7 @@ let MyList = {
 				if(out.length !== filters.length) // some filters were removed, update
 					fncUpdate(out);
 			};
-			f(this.filtersColumn,this.columns,this.setColumnBatchFilters);
+			f(this.filtersColumn,this.columns,this.setColumnFilters);
 			f(this.filtersUser,this.columnsAll,this.setUserFilters);
 		},
 		removeInvalidOrders() {
@@ -1641,8 +1404,9 @@ let MyList = {
 			
 			// fix invalid offset (can occur when limit is changed)
 			if(this.offset !== 0 && this.offset % this.limit !== 0)
-				this.offset -= this.offset % this.limit;
+				return this.setOffsetParamAndReload(this.offset -= this.offset % this.limit,false);
 			
+			this.rowsFetching = true;
 			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.relationsJoined,
@@ -1651,29 +1415,23 @@ let MyList = {
 				orders:this.orders,
 				limit:this.limit,
 				offset:this.offset
-			},true).then(
+			},this.blockDuringLoad).then(
 				res => {
 					const count = res.payload.count;
-					this.rowsFetching = true;
-					
 					this.getRowsDecrypted(res.payload.rows,this.expressions).then(
 						rows => {
-							this.count        = count;
-							this.rows         = rows;
-							this.rowsFetching = false;
+							this.count = count;
+							this.rows  = rows;
 							this.selectReset();
 							this.reloadAggregations(false);
 							this.$emit('record-count-change',this.count);
-							
-							if(this.isInput)
-								this.$nextTick(this.updateDropdownDirection);
 						},
 						this.consoleError
 					);
 					
 				},
 				this.$root.genericError
-			);
+			).finally(() => this.rowsFetching = false);
 		},
 		getInput() {
 			// nothing to get if form is currently loading
@@ -1686,18 +1444,18 @@ let MyList = {
 			this.rowsInput = [];
 
 			if(this.dropdownShow)
-				this.$emit('dropdown-show',false);
+				this.get();
 			
 			// for inputs we only need data if:
-			// * field is category input (always shows everything)
+			// * field shows all values
 			// * auto select is active
 			// * input has records to get data for
-			if(!this.inputAsCategory && !this.autoSelect && !this.anyInputRows)
+			if(!this.showAllValues && !this.autoSelect && !this.anyInputRows)
 				return;
 			
-			// apply existing filters, except user filters (not relevant here)
-			let filters = JSON.parse(JSON.stringify(this.filters));
-			if(!this.inputAsCategory && this.anyInputRows)
+			// apply relevant filters, without choice filters as these should not affect the input
+			let filters = JSON.parse(JSON.stringify(this.filtersInput));
+			if(!this.showAllValues && this.anyInputRows)
 				filters.push(this.getQueryAttributesPkFilter(
 					this.query.relationId,this.inputRecordIds,0,false
 				));
@@ -1710,8 +1468,8 @@ let MyList = {
 				orders:this.orders
 			},false).then(
 				res => {
-					// apply results to input rows if input is category or specific record IDs were retrieved
-					if(this.inputAsCategory || this.anyInputRows)
+					// apply results to input rows if all values are shown or specific record IDs were retrieved
+					if(this.showAllValues || this.anyInputRows)
 						this.getRowsDecrypted(res.payload.rows,this.expressions).then(
 							rows => this.rowsInput = rows,
 							this.consoleError
@@ -1720,13 +1478,13 @@ let MyList = {
 					// remove invalid records (due to field filters)
 					let recordIdsValid = [];
 					let recordsRemoved = 0;
-					for(let i = 0, j = res.payload.rows.length; i < j; i++) {
-						recordIdsValid.push(res.payload.rows[i].indexRecordIds['0']);
+					for(const row of res.payload.rows) {
+						recordIdsValid.push(row.indexRecordIds['0']);
 					}
 					
-					for(let i = 0, j = this.inputRecordIds.length; i < j; i++) {
-						if(!recordIdsValid.includes(this.inputRecordIds[i])) {
-							this.$emit('record-removed',this.inputRecordIds[i]);
+					for(const recordId of this.inputRecordIds) {
+						if(!recordIdsValid.includes(recordId)) {
+							this.$emit('record-removed',recordId);
 							recordsRemoved++;
 						}
 					}

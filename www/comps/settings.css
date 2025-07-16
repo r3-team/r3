@@ -1,6 +1,6 @@
 .settings{
 	width:95%;
-	max-width:1600px;
+	max-width:1800px;
 }
 .settings .content{
 	display:flex;
@@ -13,6 +13,10 @@
 .settings td,
 .settings th{
 	padding:4px 8px 4px 0px;
+}
+.settings .module-icon{
+	width:24px;
+	filter:var(--image-filter);
 }
 .settings .encryption .backup-code{
 	font-family:monospace;
@@ -36,7 +40,10 @@
 .settings .settings-page-limit div{
 	margin-right:16px;
 }
-.settings .settings-account-action{
+.settings-account-actions{
+	margin:20px 0px;
+}
+.settings-account-pw-change-action{
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:flex-end;
@@ -102,11 +109,6 @@
 	display:flex;
 	flex-flow:column nowrap;
 	gap:9px;
-}
-.settings-client-events .module-icon{
-	width:24px;
-	margin-right:8px;
-	filter:var(--image-filter);
 }
 
 /* mobile overwrites */

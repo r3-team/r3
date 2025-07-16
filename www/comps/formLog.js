@@ -1,7 +1,7 @@
 import MyField                         from './field.js';
 import {aesGcmDecryptBase64WithPhrase} from './shared/crypto.js';
 import {consoleError}                  from './shared/error.js';
-import {getFieldOverwritesDefault}     from './shared/field.js';
+import {getFieldOverwriteDefault}      from './shared/field.js';
 import {getCaption}                    from './shared/language.js';
 import {getUnixFormat}                 from './shared/time.js';
 import {
@@ -60,21 +60,23 @@ let MyFormLog = {
 						<!-- regular attribute logs -->
 						<my-field flexDirParent="column"
 							v-if="!isFiles(ia)"
-							:dataFieldMap="dataFieldMap"
-							:entityIdMapEffect="entityIdMapEffect"
+							:entityIdMapEffect
 							:field="indexAttributeIdMapField[ia]"
-							:fieldIdMapOverwrite="fieldIdMapOverwrite"
+							:fieldIdMapOptions
+							:fieldIdMapOverwrite
+							:fieldIdMapProcessed
 							:formBadSave="false"
+							:formBlockInputs="false"
 							:formIsEmbedded="true"
 							:formLoading="loading"
-							:formReadonly="false"
+							:formNoDataPerm="false"
 							:logViewer="true"
 							:isAloneInForm="false"
-							:joinsIndexMap="joinsIndexMap"
+							:joinsIndexMap
 							:key="indexAttributeIdMapField[ia].id"
-							:moduleId="moduleId"
+							:moduleId
 							:values="{ ...values, ...l.values }"
-							:variableIdMapLocal="variableIdMapLocal"
+							:variableIdMapLocal
 						/>
 						
 						<!-- file attribute logs -->
@@ -123,17 +125,16 @@ let MyFormLog = {
 		</div>
 	</div>`,
 	props:{
-		dataFieldMap:      { type:Object,  required:true },
-		entityIdMapEffect: { type:Object,  required:true },
-		form:              { type:Object,  required:true },
-		formLoading:       { type:Boolean, required:true },
-		isPopUp:           { type:Boolean, required:true },
-		isPopUpFloating:   { type:Boolean, required:true },
-		indexMapRecordKey: { type:Object,  required:true },
-		joinsIndexMap:     { type:Object,  required:true },
-		moduleId:          { type:String,  required:true },
-		values:            { type:Object,  required:true },
-		variableIdMapLocal:{ type:Object,  required:true }
+		entityIdMapEffect:  { type:Object,  required:true },
+		fieldIdMapData:     { type:Object,  required:true },
+		fieldIdMapProcessed:{ type:Object,  required:true },
+		formLoading:        { type:Boolean, required:true },
+		isPopUpFloating:    { type:Boolean, required:true },
+		indexMapRecordKey:  { type:Object,  required:true },
+		joinsIndexMap:      { type:Object,  required:true },
+		moduleId:           { type:String,  required:true },
+		values:             { type:Object,  required:true },
+		variableIdMapLocal: { type:Object,  required:true }
 	},
 	emits:['close-log'],
 	watch:{
@@ -143,6 +144,7 @@ let MyFormLog = {
 	},
 	data() {
 		return {
+			fieldIdMapOptions:{},
 			fieldIdMapOverwrite:{},
 			loading:false,
 			logs:[],
@@ -150,20 +152,10 @@ let MyFormLog = {
 		};
 	},
 	computed:{
-		attributeIdsFiles:(s) => {
-			let out = [];
-			for(let k in s.dataFieldMap) {
-				let atr = s.attributeIdMap[s.dataFieldMap[k].attributeId];
-				
-				if(s.isAttributeFiles(atr.content))
-					out.push(atr.id);
-			}
-			return out;
-		},
 		indexAttributeIdMapField:(s) => {
 			let out = {};
-			for(let k in s.dataFieldMap) {
-				let f   = s.dataFieldMap[k];
+			for(let k in s.fieldIdMapData) {
+				let f   = s.fieldIdMapData[k];
 				let ia1 = s.getIndexAttributeIdByField(f,false);
 				let ia2 = s.getIndexAttributeIdByField(f,true);
 				
@@ -181,7 +173,7 @@ let MyFormLog = {
 		token:         (s) => s.$store.getters['local/token']
 	},
 	mounted() {
-		this.fieldIdMapOverwrite = this.getFieldOverwritesDefault();
+		this.fieldIdMapOverwrite = this.getFieldOverwriteDefault();
 		this.get();
 	},
 	methods:{
@@ -192,7 +184,7 @@ let MyFormLog = {
 		getAttributeFileVersionHref,
 		getCaption,
 		getDetailsFromIndexAttributeId,
-		getFieldOverwritesDefault,
+		getFieldOverwriteDefault,
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
 		getUnixFormat,

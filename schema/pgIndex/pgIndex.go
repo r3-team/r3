@@ -164,7 +164,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, pgi types.PgIndex) error {
 	}
 
 	var err error
-	known, err := schema.CheckCreateId_tx(ctx, tx, &pgi.Id, "pg_index", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &pgi.Id, schema.DbPgIndex, "id")
 	if err != nil {
 		return err
 	}

@@ -2,14 +2,12 @@
 :root{
 	/**/
 	/* z-indexes */
-	--z-index-block-full-page:200;     /* input block, full page, for sub window/messages */
+	--z-index-block-full-page:300;     /* input block, full page, for sub window/messages */
+	--z-index-dropdown:200;
 	--z-index-dialog-wrap:100;         /* dialog wrap */
 	--z-index-header-entry:60;
 	--z-index-header:50;               /* header, main menu, top of the page */
 	--z-index-form-pop-up:40;
-	
-	/* form dropdowns */
-	--z-index-dropdown:20;
 	--z-index-input-date-month:19;
 	
 	/* builder / admin */
@@ -32,7 +30,7 @@
 	--z-index-calendar-days-full-day:2;
 	
 	/* input field elements */
-	--z-index-field-file-header:3;
+	--z-index-field-input-toolbar:3;
 	--z-index-field-file-list:2;
 	--z-index-field-toggle-bool-first:3;
 	--z-index-field-toggle-bool-last:2;
@@ -53,13 +51,15 @@
 	--spacing:16px;
 	--spacing-child:0px var(--spacing) var(--spacing) 0px;
 	--spacing-field-padding:8px;
+	--spacing-field-header-padding:3px 8px;
 	--spacing-parent:var(--spacing) 0px 0px var(--spacing);
 	
 	/**/
 	/* heights */
 	--row-height:38px;
 	--row-height-icon:27px;
-	--app-header-height:70px;
+	--app-header-height:65px;
+	--field-header-height:46px;
 	--menu-line-height:36px;
 
 	/**/
@@ -82,6 +82,8 @@
 	/* colors */
 	--color-bg:            #f7f7f7;
 	--color-bg-bright:     #fcfcfc;
+	--color-bg-dark:       #474747;
+	--color-bg-module:     #555555;
 	--color-bright:        #ffffff;
 	--color-border:        #9b9b9b;
 	--color-border-bright: #9f9f9f;
@@ -93,7 +95,6 @@
 	--color-font-dark:     #101010;
 	--color-font-disabled: #797979;
 	--color-input:         #ffffff;
-	--color-input-dark:    #3b3b3b;
 	--color-input-disabled:#efefef;
 	--color-list-row-even: #e9eeef;
 	--color-shade:         #4e4e4e;
@@ -116,6 +117,8 @@
 	--color-action-disable:hsl(0,   0%,77%);
 	--color-cancel:        hsl(0,  57%,32%);
 	--color-cancel-border: hsl(0, 59%, 19%);
+	--color-flow:          hsl(0, 0%, 97%);
+	--color-flow-active:   hsl(106, 18%, 51%);
 	
 	--color-form-builder-actions:     hsl(196deg 45% 86%);
 	--color-form-builder-actions-bg:  hsl(200deg 30% 94%);
@@ -176,6 +179,10 @@ h3{
 	font-weight:normal;
 	margin:0px 0px 8px 0px;
 	font-size:115%;
+}
+hr{
+	border-top:1px solid var(--color-border);
+	border-bottom:none;
 }
 
 /* generics */
@@ -509,6 +516,9 @@ h3{
 	padding:var(--spacing);
 	overflow:auto;
 }
+.contentBox .content.flex{
+	display:flex;
+}
 .contentBox .content.gap{
 	gap:var(--spacing);
 }
@@ -526,10 +536,11 @@ h3{
 }
 
 .contentBox .content .contentPart{
+	--content-part-spacing:12px;
 	flex:1 1 500px;
 	max-width:550px;
 	margin:calc(var(--spacing) / 2.5);
-	padding:12px;
+	padding:var(--content-part-spacing);
 	display:flex;
 	flex-flow:column nowrap;
 	background-color:var(--color-bg-bright);
@@ -561,7 +572,10 @@ h3{
 	position:relative;
 }
 .contentBox .content .contentPartHeader{
-	margin:0px 0px 12px;
+	margin:calc(0px - var(--content-part-spacing)) calc(0px - var(--content-part-spacing)) var(--content-part-spacing);
+	padding:var(--content-part-spacing);
+	background-color:var(--color-bg);
+	border-bottom:1px solid var(--color-border);
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
@@ -697,7 +711,8 @@ table td.maximum{
 .default-inputs input:focus,
 .default-inputs select:focus,
 .default-inputs textarea:focus,
-.default-inputs .input-custom:focus-within{
+.default-inputs .input-custom:focus-within,
+.default-inputs .input-custom.focus{
 	border:var(--border-input-focus);
 	outline:var(--outline-input-focus);
 	box-shadow:var(--shadow-input-focus);
@@ -1405,13 +1420,14 @@ table td.maximum{
 	/* color overwites */
 	--color-bg:            #252525;
 	--color-bg-bright:     #313131;
+	--color-bg-dark:       #181818;
+	--color-bg-module:     #191919;
 	--color-bright:        #323232;
 	--color-border:        #111111;
 	--color-border-bright: #8f8f8f;
 	--color-cal-day-event: #444c51;
 	--color-cal-outside:   #525455;
 	--color-font:          #ededed;
-	--color-input:         var(--color-input-dark);
 	--color-input-disabled:#222222;
 	--color-list-row-even: #3e4141;
 	--color-shade:         #1b1b1b;
@@ -1430,7 +1446,10 @@ table td.maximum{
 	--color-cancel:        hsl(0, 42%, 27%);
 	--color-cancel-border: hsl(0, 33%, 11%);
 	--color-error:         hsl(0, 44%, 51%);
+	--color-input:         #3b3b3b;
 	--color-success:       hsl(113, 53%, 27%);
+	--color-flow:          hsl(0, 1%, 37%);
+	--color-flow-active:   hsl(105, 13%, 32%);
 	
 	--color-hover-underlay:           rgba(0,0,0,0.50);
 	--color-form-builder-actions:     hsl(195,17%,29%,1.00);

@@ -45,7 +45,7 @@ func ExecTransaction(ctx context.Context, address string, loginId int64, isAdmin
 	// execute and create response for each request
 	responses := make([]types.Response, 0)
 	for _, req := range reqTrans.Requests {
-		log.Info("websocket", fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s", reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
+		log.Info(log.ContextWebsocket, fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s", reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
 
 		payload, err := Exec_tx(ctx, tx, address, loginId, isAdmin, device, isNoAuth, req.Ressource, req.Action, req.Payload)
 		if err != nil {
@@ -188,6 +188,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		}
 	case "loginOptions":
 		switch action {
+		case "del":
+			if isNoAuth {
+				return nil, errors.New(handler.ErrUnauthorized)
+			}
+			return LoginOptionsDel_tx(ctx, tx, loginId)
 		case "get":
 			return LoginOptionsGet_tx(ctx, tx, reqJson, loginId, isNoAuth)
 		case "set":
@@ -574,6 +579,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return SchemaCheck_tx(ctx, tx, reqJson)
 		case "reload":
 			return SchemaReload_tx(ctx, tx, reqJson)
+		}
+	case "searchBar":
+		switch action {
+		case "del":
+			return SearchBarDel_tx(ctx, tx, reqJson)
+		case "set":
+			return SearchBarSet_tx(ctx, tx, reqJson)
 		}
 	case "task":
 		switch action {

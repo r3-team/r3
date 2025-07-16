@@ -38,19 +38,19 @@ func RunIfRequired() error {
 
 // loop upgrade procedure until DB version matches application version
 func startLoop() error {
-	log.Info("server", "version discrepancy (platform<->database) recognized, starting automatic upgrade")
+	log.Info(log.ContextServer, "version discrepancy (platform<->database) recognized, starting automatic upgrade")
 
 	for {
 		// abort when versions match
 		if config.GetAppVersion().Cut == config.GetDbVersionCut() {
-			log.Info("server", "version discrepancy has been resolved")
+			log.Info(log.ContextServer, "version discrepancy has been resolved")
 			return nil
 		}
 
 		if err := oneIteration(config.GetDbVersionCut()); err != nil {
 			return err
 		}
-		log.Info("server", "upgrade successful")
+		log.Info(log.ContextServer, "upgrade successful")
 	}
 	return nil
 }
@@ -67,7 +67,7 @@ func oneIteration(dbVersionCut string) error {
 
 	// log before upgrade because changes to log table index
 	//  caused infinite lock when trying to log to DB afterwards
-	log.Info("server", fmt.Sprintf("DB version '%s' recognized, starting upgrade",
+	log.Info(log.ContextServer, fmt.Sprintf("DB version '%s' recognized, starting upgrade",
 		dbVersionCut))
 
 	// execute known DB upgrades
@@ -77,7 +77,7 @@ func oneIteration(dbVersionCut string) error {
 	}
 	dbVersionCutNew, err := upgradeFunctions[dbVersionCut](ctx, tx)
 	if err != nil {
-		log.Error("server", "upgrade NOT successful", err)
+		log.Error(log.ContextServer, "upgrade NOT successful", err)
 		return err
 	}
 
@@ -94,29 +94,544 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
+		ALTER TABLE instance.oauth_client ALTER COLUMN flow
+			TYPE instance.oauth_client_flow USING flow::TEXT::instance.oauth_client_flow;
+
 		ALTER TABLE app.field ALTER COLUMN flags
 			TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
-
-		ALTER TABLE app.collection_consumer ALTER COLUMN flags
-			TYPE app.collection_consumer_flag[] USING flags::CHARACTER VARYING(24)[]::app.collection_consumer_flag[];
-
-		ALTER TABLE instance.login_setting ALTER COLUMN form_actions_align
-			TYPE instance.align_horizontal USING form_actions_align::TEXT::instance.align_horizontal;
-
-		ALTER TABLE app.menu ALTER COLUMN menu_tab_id SET NOT NULL;
-		ALTER TABLE app.menu DROP  COLUMN module_id;
-
-		ALTER TABLE app.collection_consumer DROP COLUMN multi_value;
-		ALTER TABLE app.collection_consumer DROP COLUMN no_display_empty;
-
-		-- fix bad upgrade script (column style 'monospace' was wrongly added in '3.8->3.9' script instead of '3.9->3.10' - some 3.10 instances do not have it)
-		-- remove temporary fix in initSystem() (in r3.go) when 3.11 releases
-		ALTER table app.column ALTER COLUMN styles TYPE TEXT[];
-		DROP TYPE app.column_style;
-		CREATE TYPE app.column_style AS ENUM ('bold', 'italic', 'alignEnd', 'alignMid', 'clipboard', 'hide', 'vertical', 'wrap', 'monospace', 'previewLarge', 'boolAtrIcon');
-		ALTER TABLE app.column ALTER COLUMN styles TYPE app.column_style[] USING styles::TEXT[]::app.column_style[];
 	*/
 
+	"3.10": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
+			-- cleanup from last release
+			ALTER TABLE app.collection_consumer ALTER COLUMN flags
+				TYPE app.collection_consumer_flag[] USING flags::CHARACTER VARYING(24)[]::app.collection_consumer_flag[];
+
+			ALTER TABLE instance.login_setting ALTER COLUMN form_actions_align
+				TYPE instance.align_horizontal USING form_actions_align::TEXT::instance.align_horizontal;
+
+			ALTER TABLE app.menu ALTER COLUMN menu_tab_id SET NOT NULL;
+			ALTER TABLE app.menu DROP  COLUMN module_id;
+
+			ALTER TABLE app.collection_consumer DROP COLUMN multi_value;
+			ALTER TABLE app.collection_consumer DROP COLUMN no_display_empty;
+
+			-- fix bad upgrade script (column style 'monospace' was wrongly added in '3.8->3.9' script instead of '3.9->3.10' - some 3.10 instances do not have it)
+			ALTER table app.column ALTER COLUMN styles TYPE TEXT[];
+			DROP TYPE app.column_style;
+			CREATE TYPE app.column_style AS ENUM ('alignEnd', 'alignMid', 'bold', 'boolAtrIcon', 'clipboard', 'hide', 'italic', 'monospace', 'noShrink', 'noThousandsSep', 'previewLarge', 'vertical', 'wrap');
+			ALTER TABLE app.column ALTER COLUMN styles TYPE app.column_style[] USING styles::TEXT[]::app.column_style[];
+
+			-- PG function cost
+			ALTER TABLE app.pg_function ADD COLUMN cost INTEGER NOT NULL DEFAULT 100;
+
+			-- cleanup fulltext search settings
+			DROP TABLE instance.login_search_dict;
+			ALTER TYPE app.condition_operator ADD VALUE '@@';
+
+			-- search bar
+			CREATE TABLE IF NOT EXISTS app.search_bar (
+			    id uuid NOT NULL,
+				module_id uuid NOT NULL,
+				icon_id uuid,
+			    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+			    CONSTRAINT search_bar_pkey PRIMARY KEY (id),
+			    CONSTRAINT search_bar_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT search_bar_icon_id_fkey FOREIGN KEY (icon_id)
+					REFERENCES app.icon (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_search_bar_module_id_fkey ON app.search_bar USING btree (module_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_search_bar_icon_id_fkey   ON app.search_bar USING btree (icon_id   ASC NULLS LAST);
+			
+			ALTER TABLE app.column ADD COLUMN     search_bar_id uuid;
+			ALTER TABLE app.column ADD CONSTRAINT column_search_bar_id_fkey FOREIGN KEY (search_bar_id)
+				REFERENCES app.search_bar (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_column_search_bar_id_fkey
+			    ON app.column USING btree (search_bar_id ASC NULLS LAST);
+			
+			ALTER TABLE app.column DROP CONSTRAINT column_single_parent;
+			ALTER TABLE app.column ADD  CONSTRAINT column_single_parent CHECK (1 = (
+				CASE WHEN api_id        IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN collection_id IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN field_id      IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN search_bar_id IS NULL THEN 0 ELSE 1
+				END
+			));
+			
+			ALTER TABLE app.query ADD COLUMN     search_bar_id uuid;
+			ALTER TABLE app.query ADD CONSTRAINT query_search_bar_id_fkey FOREIGN KEY (search_bar_id)
+				REFERENCES app.search_bar (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_query_search_bar_id_fkey
+			    ON app.query USING btree (search_bar_id ASC NULLS LAST);
+			
+			ALTER TABLE app.query DROP CONSTRAINT query_single_parent;
+			ALTER TABLE app.query ADD  CONSTRAINT query_single_parent CHECK (1 = (
+				CASE WHEN api_id                IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN collection_id         IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN column_id             IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN field_id              IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN form_id               IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN query_filter_query_id IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN search_bar_id         IS NULL THEN 0 ELSE 1
+				END
+			));
+			
+			ALTER TABLE app.role_access ADD COLUMN     search_bar_id uuid;
+			ALTER TABLE app.role_access ADD CONSTRAINT role_access_search_bar_id_fkey
+				FOREIGN KEY (search_bar_id)
+				REFERENCES app.search_bar (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_role_access_search_bar_id_fkey
+   				ON app.role_access USING btree(search_bar_id ASC NULLS LAST);
+			
+			ALTER TYPE app.caption_content ADD VALUE 'searchBarTitle';
+			
+			ALTER TABLE app.caption ADD COLUMN     search_bar_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_search_bar_id_fkey FOREIGN KEY (search_bar_id)
+				REFERENCES app.search_bar (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_search_bar_id_fkey
+				ON app.caption USING BTREE (search_bar_id ASC NULLS LAST);
+
+			ALTER TABLE instance.caption ADD COLUMN search_bar_id uuid;
+			ALTER TABLE instance.caption ADD CONSTRAINT caption_search_bar_id_fkey FOREIGN KEY (search_bar_id)
+				REFERENCES app.search_bar (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_search_bar_id_fkey
+				ON instance.caption USING BTREE (search_bar_id ASC NULLS LAST);
+			
+			ALTER TABLE app.open_form ADD COLUMN     search_bar_id UUID;
+			ALTER TABLE app.open_form ADD CONSTRAINT open_form_search_bar_id_fkey FOREIGN KEY (search_bar_id)
+				REFERENCES app.search_bar (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_open_form_search_bar_id_fkey ON app.open_form
+				USING BTREE (search_bar_id ASC NULLS LAST);
+
+			-- file processing
+			CREATE TYPE instance.file_spool_content AS ENUM ('export', 'exportText', 'import', 'importText','textRead', 'textWrite');
+			CREATE TABLE IF NOT EXISTS instance.file_spool (
+			    id UUID NOT NULL DEFAULT gen_random_uuid(),
+				attribute_id UUID,
+				file_id UUID,
+				pg_function_id UUID,
+				record_id_wofk BIGINT,
+				content instance.file_spool_content NOT NULL,
+				file_path TEXT,
+				file_text_content TEXT,
+				file_version INTEGER,
+				date BIGINT,
+				overwrite bool,
+				CONSTRAINT file_spool_pkey PRIMARY KEY (id),
+				CONSTRAINT file_spool_attribute_id_fkey FOREIGN KEY (attribute_id)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT file_spool_file_id_fkey FOREIGN KEY (file_id)
+					REFERENCES instance.file (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT file_spool_pg_function_id_fkey FOREIGN KEY (pg_function_id)
+					REFERENCES app.pg_function (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX fki_file_spool_attribute_id_fkey
+				ON instance.file_spool USING BTREE (attribute_id ASC NULLS LAST);
+			CREATE INDEX fki_file_spool_file_id_fkey
+				ON instance.file_spool USING BTREE (file_id ASC NULLS LAST);
+			CREATE INDEX fki_file_spool_pg_function_id_fkey
+				ON instance.file_spool USING BTREE (pg_function_id ASC NULLS LAST);
+			
+			INSERT INTO instance.config (name,value) VALUES ('logFile',2);
+			ALTER TYPE instance.log_context ADD VALUE 'file';
+
+			INSERT INTO instance.task (
+				name,interval_seconds,cluster_master_only,
+				embedded_only,active_only,active
+			) VALUES ('filesProcess',10,true,false,false,true);
+			
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('filesProcess',0,0);
+
+			CREATE FUNCTION instance.file_export(
+				file_id uuid,
+				file_path text,
+				file_version integer DEFAULT NULL,
+				overwrite boolean DEFAULT FALSE)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						file_id,
+						file_path,
+						file_version,
+						overwrite
+					)
+					VALUES(
+						'export',
+						EXTRACT(EPOCH FROM NOW()),
+						file_id,
+						file_path,
+						file_version,
+						overwrite
+					);
+					RETURN 0;
+				END;
+			$BODY$;
+			
+			CREATE FUNCTION instance.file_export_text(
+				file_path text,
+				file_text_content text,
+				overwrite boolean DEFAULT FALSE)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						file_path,
+						file_text_content,
+						overwrite
+					)
+					VALUES(
+						'exportText',
+						EXTRACT(EPOCH FROM NOW()),
+						file_path,
+						file_text_content,
+						overwrite
+					);
+					RETURN 0;
+				END;
+			$BODY$;
+
+			CREATE FUNCTION instance.file_import(
+				file_path text,
+				attribute_id uuid,
+				record_id bigint DEFAULT NULL)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						file_path,
+						attribute_id,
+						record_id_wofk
+					)
+					VALUES(
+						'import',
+						EXTRACT(EPOCH FROM NOW()),
+						file_path,
+						attribute_id,
+						record_id
+					);
+					RETURN 0;
+				END;
+			$BODY$;
+
+			CREATE FUNCTION instance.file_import_text(
+				file_path text,
+				pg_function_id uuid)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						file_path,
+						pg_function_id
+					)
+					VALUES(
+						'importText',
+						EXTRACT(EPOCH FROM NOW()),
+						file_path,
+						pg_function_id
+					);
+					RETURN 0;
+				END;
+			$BODY$;
+
+			CREATE FUNCTION instance.file_text_read(
+				pg_function_id uuid,
+				file_id uuid,
+				file_version integer DEFAULT NULL)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						pg_function_id,
+						file_id,
+						file_version
+					)
+					VALUES(
+						'textRead',
+						EXTRACT(EPOCH FROM NOW()),
+						pg_function_id,
+						file_id,
+						file_version
+					);
+					RETURN 0;
+				END;
+			$BODY$;
+
+			CREATE FUNCTION instance.file_text_write(
+				file_name text,
+				file_text_content text,
+				attribute_id uuid,
+				record_id bigint DEFAULT NULL)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						file_path,
+						file_text_content,
+						attribute_id,
+						record_id_wofk
+					)
+					VALUES(
+						'textWrite',
+						EXTRACT(EPOCH FROM NOW()),
+						file_name,
+						file_text_content,
+						attribute_id,
+						record_id
+					);
+					RETURN 0;
+				END;
+			$BODY$;
+			
+			-- form record conditions
+			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayCreate';
+			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayDelete';
+			ALTER TYPE app.filter_side_content ADD VALUE 'recordMayUpdate';
+
+			-- global search filter condition
+			ALTER TYPE app.filter_side_content ADD VALUE 'globalSearch';
+
+			-- new, migrated field flags
+			ALTER TYPE app.field_flag ADD VALUE 'relFlow';
+			ALTER TYPE app.field_flag ADD VALUE 'relCategory';
+			ALTER TYPE app.field_flag ADD VALUE 'clipboard';
+
+			UPDATE app.field SET flags = ARRAY_APPEND(flags, 'relCategory') WHERE id IN (
+				SELECT field_id FROM app.field_data_relationship WHERE category
+			);
+			UPDATE app.field SET flags = ARRAY_APPEND(flags, 'clipboard') WHERE id IN (
+				SELECT field_id FROM app.field_data WHERE clipboard
+				UNION
+				SELECT field_id FROM app.field_variable WHERE clipboard
+			);
+			ALTER TABLE app.field_data_relationship DROP COLUMN category;
+			ALTER TABLE app.field_data              DROP COLUMN clipboard;
+			ALTER TABLE app.field_variable          DROP COLUMN clipboard;
+
+			-- change foreign key to CASCADE for forms referenced as role dependent start form
+			ALTER TABLE app.module_start_form DROP CONSTRAINT module_start_form_form_id_fkey;
+			ALTER TABLE app.module_start_form ADD  CONSTRAINT module_start_form_form_id_fkey FOREIGN KEY (form_id)
+				REFERENCES app.form (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+
+			--
+			-- Open ID Connect authentication
+			CREATE TYPE instance.oauth_client_flow AS ENUM ('clientCreds', 'authCodePkce');
+			ALTER TABLE instance.oauth_client ADD   COLUMN claim_roles    TEXT;
+			ALTER TABLE instance.oauth_client ADD   COLUMN claim_username TEXT;
+			ALTER TABLE instance.oauth_client ADD   COLUMN provider_url   TEXT;
+			ALTER TABLE instance.oauth_client ADD   COLUMN redirect_url   TEXT;
+			ALTER TABLE instance.oauth_client ADD   COLUMN flow TEXT NOT NULL DEFAULT 'clientCreds';
+			ALTER TABLE instance.oauth_client DROP  COLUMN tenant;
+			ALTER TABLE instance.oauth_client ALTER COLUMN flow DROP DEFAULT;
+			ALTER TABLE instance.oauth_client ALTER COLUMN client_secret DROP NOT NULL;
+			ALTER TABLE instance.oauth_client ALTER COLUMN token_url     DROP NOT NULL;
+			ALTER TABLE instance.oauth_client ALTER COLUMN date_expiry   DROP NOT NULL;
+			ALTER TABLE instance.oauth_client ADD   COLUMN login_template_id INTEGER;
+			ALTER TABLE instance.oauth_client ADD   CONSTRAINT oauth_client_login_template_id_fkey
+				FOREIGN KEY (login_template_id)
+				REFERENCES instance.login_template (id) MATCH SIMPLE
+				ON UPDATE SET NULL
+				ON DELETE SET NULL;
+			
+			CREATE INDEX IF NOT EXISTS fki_oauth_client_login_template_id_fkey
+				ON instance.oauth_client USING btree (login_template_id ASC NULLS LAST);
+			
+			INSERT INTO instance.config (name,value) VALUES ('logOauth',2);
+			ALTER TYPE instance.log_context ADD VALUE 'oauth';
+
+			-- login OAUTH details
+			ALTER TABLE instance.login ADD COLUMN     oauth_iss       TEXT;
+			ALTER TABLE instance.login ADD COLUMN     oauth_sub       TEXT;
+			ALTER TABLE instance.login ADD COLUMN     oauth_client_id INTEGER;
+			ALTER TABLE instance.login ADD CONSTRAINT login_oauth_client_id_fkey
+				FOREIGN KEY (oauth_client_id)
+				REFERENCES instance.oauth_client (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION;
+
+			CREATE INDEX IF NOT EXISTS fki_login_oauth_client_id_fkey
+				ON instance.login USING btree (oauth_client_id ASC NULLS LAST);
+
+			-- migrating LDAP attribute mapping to generalized login meta data mapping
+			ALTER TABLE instance.ldap_attribute_login_meta RENAME TO login_meta_map;
+			ALTER TABLE instance.login_meta_map DROP  CONSTRAINT ldap_attribute_login_meta_pkey;
+			ALTER TABLE instance.login_meta_map ALTER COLUMN     ldap_id DROP NOT NULL;
+			ALTER TABLE instance.login_meta_map ADD   COLUMN     oauth_client_id INTEGER;
+			ALTER TABLE instance.login_meta_map ADD   CONSTRAINT login_meta_map_oauth_client_id_fkey
+				FOREIGN KEY (oauth_client_id)
+				REFERENCES instance.oauth_client (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE;
+
+			CREATE INDEX IF NOT EXISTS fki_login_meta_map_oauth_client_id_fkey
+				ON instance.login_meta_map USING btree (oauth_client_id ASC NULLS LAST);
+
+			CREATE INDEX IF NOT EXISTS fki_login_meta_map_ldap_id_fkey
+				ON instance.login_meta_map USING btree (ldap_id ASC NULLS LAST);
+			
+			-- migrating LDAP group mapping to generalized login role mapping
+			ALTER TABLE instance.ldap_role RENAME COLUMN  group_dn TO search_string;
+			ALTER TABLE instance.ldap_role ALTER  COLUMN  ldap_id  DROP NOT NULL;
+			ALTER TABLE instance.ldap_role ADD COLUMN     oauth_client_id INTEGER;
+			ALTER TABLE instance.ldap_role ADD CONSTRAINT login_role_assign_oauth_client_id_fkey
+				FOREIGN KEY (oauth_client_id)
+				REFERENCES instance.oauth_client (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE;
+
+			CREATE INDEX IF NOT EXISTS fki_login_role_assign_oauth_client_id_fkey
+				ON instance.ldap_role USING btree (oauth_client_id ASC NULLS LAST);
+
+			ALTER TABLE instance.ldap_role DROP CONSTRAINT ldap_role_ldap_id_fkey;
+			ALTER TABLE instance.ldap_role ADD  CONSTRAINT login_role_assign_ldap_id_fkey FOREIGN KEY (ldap_id)
+				REFERENCES instance.ldap (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE;
+
+			ALTER TABLE instance.ldap_role DROP CONSTRAINT ldap_role_role_id_fkey;
+			ALTER TABLE instance.ldap_role ADD  CONSTRAINT login_role_assign_role_id_fkey FOREIGN KEY (role_id)
+				REFERENCES app.role (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE;
+
+			DROP INDEX instance.fki_ldap_role_ldap_id_fkey;
+			DROP INDEX instance.fki_ldap_role_role_id_fkey;
+
+			CREATE INDEX IF NOT EXISTS fki_login_role_assign_role_id_fkey ON instance.ldap_role USING btree (role_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_login_role_assign_ldap_id_fkey ON instance.ldap_role USING btree (ldap_id ASC NULLS LAST);
+
+			ALTER TABLE instance.ldap_role RENAME TO login_role_assign;
+
+			-- fix mismatch in record ID integer type in some instance functions
+			DROP FUNCTION instance.clean_up_e2ee_keys;
+			CREATE OR REPLACE FUNCTION instance.clean_up_e2ee_keys(
+				login_id INTEGER,
+				relation_id UUID,
+				record_ids_access BIGINT[])
+				RETURNS void
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+			DECLARE
+			BEGIN
+				EXECUTE '
+					DELETE FROM instance_e2ee."keys_' || relation_id || '"
+					WHERE login_id = $1
+					AND (
+						ARRAY_LENGTH($2,1) IS NULL -- empty array
+						OR record_id <> ALL($3)
+					)
+				' USING login_id, record_ids_access, record_ids_access;
+			END;
+			$BODY$;
+
+			DROP FUNCTION instance.mail_send;
+			CREATE OR REPLACE FUNCTION instance.mail_send(
+				subject TEXT,
+				body TEXT,
+				to_list TEXT DEFAULT ''::TEXT,
+				cc_list TEXT DEFAULT ''::TEXT,
+				bcc_list TEXT DEFAULT ''::TEXT,
+				account_name TEXT DEFAULT NULL::TEXT,
+				attach_record_id BIGINT DEFAULT NULL::BIGINT,
+				attach_attribute_id UUID DEFAULT NULL::UUID)
+				RETURNS INTEGER
+				LANGUAGE 'plpgsql'
+				COST 100
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+				account_id INTEGER;
+			BEGIN
+				IF account_name IS NOT NULL THEN
+					SELECT id INTO account_id
+					FROM instance.mail_account
+					WHERE name = account_name;
+				END IF;
+				
+				IF to_list  IS NULL THEN to_list  := ''; END IF; 
+				IF cc_list  IS NULL THEN cc_list  := ''; END IF; 
+				IF bcc_list IS NULL THEN bcc_list := ''; END IF;
+				
+				INSERT INTO instance.mail_spool (to_list,cc_list,bcc_list,
+					subject,body,outgoing,date,mail_account_id,record_id_wofk,attribute_id)
+				VALUES (to_list,cc_list,bcc_list,subject,body,TRUE,EXTRACT(epoch from now()),
+					account_id,attach_record_id,attach_attribute_id);
+
+				RETURN 0;
+			END;
+			$BODY$;
+		`)
+		return "3.11", err
+	},
 	"3.9": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `
 			-- cleanup from last release
@@ -2980,7 +3495,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					filepath.Join(config.File.Paths.Files,
 						fileId.String()[:3], fmt.Sprintf("%s_0", fileId))); err != nil {
 
-					log.Warning("server", fmt.Sprintf("failed to move file '%s/%s' during platform upgrade",
+					log.Warning(log.ContextServer, fmt.Sprintf("failed to move file '%s/%s' during platform upgrade",
 						fa.attributeId, fileId), err)
 				}
 			}

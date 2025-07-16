@@ -9,11 +9,149 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+type (
+	DbEntity string
+)
+
+const (
+	// DB relations accessed throughout the schema (central reference for dynamic queries)
+	DbApi                   DbEntity = "api"
+	DbArticle               DbEntity = "article"
+	DbAttribute             DbEntity = "attribute"
+	DbClientEvent           DbEntity = "client_event"
+	DbCollection            DbEntity = "collection"
+	DbCollectionConsumer    DbEntity = "collection_consumer"
+	DbColumn                DbEntity = "column"
+	DbField                 DbEntity = "field"
+	DbFieldButton           DbEntity = "field_button"
+	DbFieldCalendar         DbEntity = "field_calendar"
+	DbFieldChart            DbEntity = "field_chart"
+	DbFieldContainer        DbEntity = "field_container"
+	DbFieldData             DbEntity = "field_data"
+	DbFieldDataRelationship DbEntity = "field_data_relationship"
+	DbFieldHeader           DbEntity = "field_header"
+	DbFieldKanban           DbEntity = "field_kanban"
+	DbFieldList             DbEntity = "field_list"
+	DbFieldVariable         DbEntity = "field_variable"
+	DbForm                  DbEntity = "form"
+	DbFormAction            DbEntity = "form_action"
+	DbFormState             DbEntity = "form_state"
+	DbIcon                  DbEntity = "icon"
+	DbJsFunction            DbEntity = "js_function"
+	DbLoginForm             DbEntity = "login_form"
+	DbMenu                  DbEntity = "menu"
+	DbMenuTab               DbEntity = "menu_tab"
+	DbModule                DbEntity = "module"
+	DbPgFunction            DbEntity = "pg_function"
+	DbPgFunctionSchedule    DbEntity = "pg_function_schedule"
+	DbPgIndex               DbEntity = "pg_index"
+	DbPgTrigger             DbEntity = "pg_trigger"
+	DbPreset                DbEntity = "preset"
+	DbQueryChoice           DbEntity = "query_choice"
+	DbQueryFilterQuery      DbEntity = "query_filter_query"
+	DbRelation              DbEntity = "relation"
+	DbRole                  DbEntity = "role"
+	DbSearchBar             DbEntity = "search_bar"
+	DbTab                   DbEntity = "tab"
+	DbVariable              DbEntity = "variable"
+	DbWidget                DbEntity = "widget"
+)
+
+var (
+	// elements assigned to DB entities
+	DbAssignedCollectionConsumers = []DbEntity{
+		DbCollection,
+		DbField,
+		DbMenu,
+		DbWidget,
+	}
+	DbAssignedColumn = []DbEntity{
+		DbApi,
+		DbCollection,
+		DbField,
+		DbSearchBar,
+	}
+	DbAssignedOpenForm = []DbEntity{
+		DbColumn,
+		DbCollectionConsumer,
+		DbField,
+		DbSearchBar,
+	}
+	DbAssignedQuery = []DbEntity{
+		DbApi,
+		DbCollection,
+		DbColumn,
+		DbField,
+		DbForm,
+		DbQueryFilterQuery,
+		DbSearchBar,
+	}
+	DbAssignedTab = []DbEntity{
+		DbField,
+	}
+
+	// elements optionally bound to DB entities
+	DbBoundForm = []DbEntity{
+		DbJsFunction,
+		DbVariable,
+	}
+
+	// elements with dependencies to DB entities
+	DbDependsJsFunction = []DbEntity{
+		DbCollection,
+		DbField,
+		DbForm,
+		DbJsFunction,
+		DbPgFunction,
+		DbRole,
+		DbVariable,
+	}
+	DbDependsPgFunction = []DbEntity{
+		DbAttribute,
+		DbModule,
+		DbPgFunction,
+		DbRelation,
+	}
+
+	// element transfer delete check
+	DbTransferDeleteField = []DbEntity{
+		DbColumn,
+		DbTab,
+	}
+	DbTransferDeleteForm = []DbEntity{
+		DbField,
+	}
+	DbTransferDeleteModule = []DbEntity{
+		DbApi,
+		DbArticle,
+		DbClientEvent,
+		DbCollection,
+		DbForm,
+		DbIcon,
+		DbJsFunction,
+		DbLoginForm,
+		DbMenu,
+		DbMenuTab,
+		DbPgFunction,
+		DbPgTrigger,
+		DbRelation,
+		DbRole,
+		DbSearchBar,
+		DbVariable,
+		DbWidget,
+	}
+	DbTransferDeleteRelation = []DbEntity{
+		DbAttribute,
+		DbPgIndex,
+		DbPreset,
+	}
+)
+
 // checks the given ID
 // if nil, it is overwritten with a new one
 // if not nil, it is checked whether the ID is known already
 // returns whether the ID was already known
-func CheckCreateId_tx(ctx context.Context, tx pgx.Tx, id *uuid.UUID, relName string, pkName string) (bool, error) {
+func CheckCreateId_tx(ctx context.Context, tx pgx.Tx, id *uuid.UUID, entity DbEntity, pkName string) (bool, error) {
 
 	var err error
 	if *id == uuid.Nil {
@@ -24,7 +162,7 @@ func CheckCreateId_tx(ctx context.Context, tx pgx.Tx, id *uuid.UUID, relName str
 	var known bool
 	err = tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT EXISTS(SELECT * FROM app.%s WHERE "%s" = $1)
-	`, relName, pkName), id).Scan(&known)
+	`, entity, pkName), id).Scan(&known)
 
 	return known, err
 }
@@ -127,16 +265,30 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 
 	// check query relation access
 	if err := tx.QueryRow(ctx, `
-		SELECT COUNT(*), STRING_AGG(COALESCE(f.name,lf.name), ', ')
+		SELECT COUNT(*), STRING_AGG(
+			CASE
+				WHEN q.api_id        IS NOT NULL THEN FORMAT('API "%s"', a.name)
+				WHEN q.collection_id IS NOT NULL THEN FORMAT('collection "%s"', c.name)
+				WHEN q.field_id      IS NOT NULL THEN FORMAT('field in form "%s"', lf.name)
+				WHEN q.form_id       IS NOT NULL THEN FORMAT('form "%s"', f.name)
+				WHEN q.search_bar_id IS NOT NULL THEN FORMAT('search bar "%s"', s.name)
+			END, ' & '
+		)
 		FROM app.query AS q
-		LEFT JOIN app.form  AS f  ON f.id  = q.form_id  -- query for form
-		LEFT JOIN app.field AS l  ON l.id  = q.field_id -- query for list/data field
-		LEFT JOIN app.form  AS lf ON lf.id = l.form_id  -- form of list/data field
+		LEFT JOIN app.api        AS a  ON a.id  = q.api_id        -- query for API
+		LEFT JOIN app.collection AS c  ON c.id  = q.collection_id -- query for collection
+		LEFT JOIN app.form       AS f  ON f.id  = q.form_id       -- query for form
+		LEFT JOIN app.field      AS l  ON l.id  = q.field_id      -- query for list/data field
+		LEFT JOIN app.form       AS lf ON lf.id = l.form_id       -- form of list/data field
+		LEFT JOIN app.search_bar AS s  ON s.id  = q.search_bar_id -- query for search bar
 		INNER JOIN app.module AS m
 			ON m.id = $1
 			AND (
-				f.module_id = m.id
+				f.module_id     = m.id
 				OR lf.module_id = m.id
+				OR a.module_id  = m.id
+				OR c.module_id  = m.id
+				OR s.module_id  = m.id
 			)
 		
 		-- dependency
@@ -158,7 +310,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 	}
 
 	if cnt != 0 {
-		return fmt.Errorf("dependency check failed, form(s) '%s' with relations to independent module(s)",
+		return fmt.Errorf("dependency check failed, %s have queries that access relations from independent module(s)",
 			name1.String)
 	}
 
@@ -373,25 +525,39 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 			SELECT icon_id
 			FROM app.menu
 			WHERE module_id = $4
+
+			UNION
+
+			-- collection icons
+			SELECT icon_id
+			FROM app.collection
+			WHERE module_id = $5
+
+			UNION
+
+			-- search bar icons
+			SELECT icon_id
+			FROM app.search_bar
+			WHERE module_id = $6
 		)
 		
 		-- dependency
 		AND id NOT IN (
 			SELECT id
 			FROM app.icon
-			WHERE module_id = $5
+			WHERE module_id = $7
 			OR module_id IN (
 				SELECT module_id_on
 				FROM app.module_depends
-				WHERE module_id = $6
+				WHERE module_id = $8
 			)
 		)
-	`, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId).Scan(&cnt); err != nil {
+	`, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId).Scan(&cnt); err != nil {
 		return err
 	}
 
 	if cnt != 0 {
-		return fmt.Errorf("dependency check failed, accessing %d icons(s) from independent module(s), check module, menu & button field icons", cnt)
+		return fmt.Errorf("dependency check failed, accessing %d icons(s) from independent module(s), check application, collection, search bar, menu & field icons", cnt)
 	}
 
 	// check PG function access to external pgFunctions/modules/relations/attributes

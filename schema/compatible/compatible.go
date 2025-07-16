@@ -14,6 +14,47 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// < 3.11
+// fix missing cost setting
+func FixMissingCost(fnc types.PgFunction) types.PgFunction {
+	if fnc.Cost == 0 {
+		fnc.Cost = 100
+	}
+	return fnc
+}
+func FixFieldOptionsToFlags(f types.Field, isDataRel bool, fieldJson []byte) ([]string, error) {
+	if f.Content == "data" {
+		var fData types.FieldData
+		if err := json.Unmarshal(fieldJson, &fData); err != nil {
+			return []string{}, err
+		}
+		if fData.Clipboard {
+			f.Flags = append(f.Flags, "clipboard")
+		}
+
+		if isDataRel {
+			var fDataRel types.FieldDataRelationship
+			if err := json.Unmarshal(fieldJson, &fDataRel); err != nil {
+				return []string{}, err
+			}
+			if fDataRel.Category {
+				f.Flags = append(f.Flags, "relCategory")
+			}
+		}
+	}
+	if f.Content == "variable" {
+		var fVar types.FieldVariable
+		if err := json.Unmarshal(fieldJson, &fVar); err != nil {
+			return []string{}, err
+		}
+
+		if fVar.Clipboard {
+			f.Flags = append(f.Flags, "clipboard")
+		}
+	}
+	return f.Flags, nil
+}
+
 // < 3.10
 // fix missing menu tab (at least 1 must exist)
 func FixMissingMenuTab(moduleId uuid.UUID, mts []types.MenuTab, menus []types.Menu) ([]types.MenuTab, error) {

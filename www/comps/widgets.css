@@ -168,7 +168,7 @@
 	flex:0 0 auto;
 	height:var(--widget-size-header);
 	padding-left:12px;
-	background-color:#555;
+	background-color:var(--color-bg-module);
 	border-bottom:1px solid var(--color-border);
 	color:var(--color-font-bright);
 	font-size:130%;
@@ -276,11 +276,6 @@
 	opacity:0.08;
 	z-index:var(--z-index-widget-watermark);
 	filter:var(--image-filter);
-}
-
-/* user overwrites */
-.user-dark .widget>.header{
-	background-color:#232323;
 }
 
 /* mobile overwrites */

@@ -11,8 +11,8 @@ import {
 	getCaptionForLang
 } from './language.js';
 
-export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
-	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,fieldValues) {
+export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,globalSearch,globalSearchDict,
+	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,recordMayUpdate) {
 
 	columns = JSON.parse(JSON.stringify(columns));
 
@@ -44,6 +44,8 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
 			clipboard:c.styles.includes('clipboard'),
 			italic:c.styles.includes('italic'),
 			monospace:c.styles.includes('monospace'),
+			noShrink:c.styles.includes('noShrink'),
+			noThousandsSep:c.styles.includes('noThousandsSep'),
 			previewLarge:c.styles.includes('previewLarge'),
 			vertical:c.styles.includes('vertical'),
 			wrap:c.styles.includes('wrap')
@@ -51,10 +53,9 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,
 
 		// resolve sub query filters
 		if(c.subQuery) {
-			c.query.filters = getQueryFiltersProcessed(
-				c.query.filters,joinsIndexMap,dataFieldIdMap,
-				fieldIdsChanged,fieldIdsInvalid,fieldValues
-			);
+			c.query.filters = getQueryFiltersProcessed(c.query.filters,joinsIndexMap,globalSearch,
+				globalSearchDict,dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,fieldValues,
+				recordMayCreate,recordMayDelete,recordMayUpdate);
 		}
 		out.push(c);
 	}

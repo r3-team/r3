@@ -17,42 +17,60 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var regexRelId = regexp.MustCompile(`^\_r(\d+)id`) // finds: _r3id
+const (
+	exprRegconfigSimple   = "'simple'::REGCONFIG"
+	sqlAliasTotalRowCount = "_cnt"
+)
+
+var (
+	regexRelId = regexp.MustCompile(`^\_r(\d+)id`) // finds: _r3id
+)
 
 // get data
 // updates SQL query pointer value (for error logging), returns data rows + total count
-func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
-	query *string) ([]types.DataGetResult, int, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64, query *string) ([]types.DataGetResult, int64, error) {
 
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
 	var err error
 	indexRelationIds := make(map[int]uuid.UUID) // map of accessed relation IDs, key: relation index
-	relationIndexesEnc := make([]int, 0)        // indexes of relations from encrypted attributes within expressions
-	results := make([]types.DataGetResult, 0)   // data GET results
-	queryArgs := make([]interface{}, 0)         // SQL arguments for data query
-	queryCount := ""                            // SQL query to retrieve a total count
+	isDoingRowCount := data.Limit != 0
+	relationIndexesEnc := make([]int, 0) // indexes of relations from encrypted attributes within expressions
+	queryArgs := make([]interface{}, 0)  // SQL arguments for data query
 
 	// prepare SQL query for data GET request
-	*query, queryCount, err = prepareQuery(data, indexRelationIds, &queryArgs, loginId, 0)
+	*query, err = prepareQuery(data, indexRelationIds, &queryArgs, loginId, isDoingRowCount, 0)
 	if err != nil {
-		return results, 0, err
+		return nil, 0, err
 	}
 
 	// execute SQL query
 	rows, err := tx.Query(ctx, *query, queryArgs...)
 	if err != nil {
-		return results, 0, err
+		return nil, 0, err
 	}
-	columns := rows.FieldDescriptions()
+
+	rowColumns := rows.FieldDescriptions()
+	results := make([]types.DataGetResult, 0)
+	var resultCountTotal int64
 
 	for rows.Next() {
 		valuesAll, err := rows.Values()
 		if err != nil {
-			return results, 0, err
+			return nil, 0, err
+		}
+
+		if isDoingRowCount && len(results) == 0 && len(valuesAll) > 0 && rowColumns[len(rowColumns)-1].Name == sqlAliasTotalRowCount {
+			// get total count from last row value
+			var valid bool
+			resultCountTotal, valid = valuesAll[len(valuesAll)-1].(int64)
+			if !valid {
+				return nil, 0, fmt.Errorf("row count is invalid data type")
+			}
 		}
 
 		indexRecordIds := make(map[int]interface{}) // ID for each relation tuple by index
@@ -66,16 +84,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 		// collect relation tuple IDs
 		// relation ID columns start after expressions
-		for i, j := len(data.Expressions), len(columns); i < j; i++ {
+		for i, j := len(data.Expressions), len(rowColumns); i < j; i++ {
 
-			matches := regexRelId.FindStringSubmatch(string(columns[i].Name))
-
+			matches := regexRelId.FindStringSubmatch(string(rowColumns[i].Name))
 			if len(matches) == 2 {
-
-				// column provides relation ID
 				relIndex, err := strconv.Atoi(matches[1])
 				if err != nil {
-					return results, 0, err
+					return nil, 0, err
 				}
 				indexRecordIds[relIndex] = valuesAll[i]
 			}
@@ -90,9 +105,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 		})
 	}
 	if err := rows.Err(); err != nil {
-		return results, 0, err
+		return nil, 0, err
 	}
 	rows.Close()
+
+	if !isDoingRowCount {
+		resultCountTotal = int64(len(results))
+	}
 
 	// resolve relation policy access permissions for retrieved result records
 	// DEL/SET actions only; records not allowed to GET are not retrieved as results
@@ -130,14 +149,14 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 		// get record ID black-/whitelists for all relations (base & joined)
 		if err := getPolicyLists(data.RelationId, 0); err != nil {
-			return results, 0, err
+			return nil, 0, err
 		}
 
 		for _, j := range data.Joins {
 
 			atr, exists := cache.AttributeIdMap[j.AttributeId]
 			if !exists {
-				return results, 0, handler.ErrSchemaUnknownAttribute(j.AttributeId)
+				return nil, 0, handler.ErrSchemaUnknownAttribute(j.AttributeId)
 			}
 
 			// join attribute is from other relation, use relationship partner
@@ -147,7 +166,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 			}
 
 			if err := getPolicyLists(relId, j.Index); err != nil {
-				return results, 0, err
+				return nil, 0, err
 			}
 		}
 
@@ -164,7 +183,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 				case int64:
 					recordId = v
 				default:
-					return results, 0, fmt.Errorf("record ID has invalid type")
+					return nil, 0, fmt.Errorf("record ID has invalid type")
 				}
 
 				if recordId == 0 {
@@ -201,7 +220,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 		atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
 		if !exists {
-			return results, 0, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes)
+			return nil, 0, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes)
 		}
 
 		if !atr.Encrypted || slices.Contains(relationIndexesEnc, expr.Index) {
@@ -224,7 +243,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 				case int64:
 					recordIds = append(recordIds, v)
 				default:
-					return results, 0, handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecDataKeysNotAvailable)
+					return nil, 0, handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecDataKeysNotAvailable)
 				}
 			}
 		}
@@ -233,11 +252,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 			indexRelationIds[relIndex], recordIds, loginId)
 
 		if err != nil {
-			return results, 0, err
+			return nil, 0, err
 		}
 
 		if len(encKeys) != len(recordIds) {
-			return results, 0, handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecDataKeysNotAvailable)
+			return nil, 0, handler.CreateErrCode(handler.ErrContextSec, handler.ErrCodeSecDataKeysNotAvailable)
 		}
 
 		// assign record keys in order
@@ -249,46 +268,34 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 			}
 		}
 	}
-
-	// work out result count
-	count := len(results)
-
-	if data.Limit != 0 && (count >= data.Limit || data.Offset != 0) {
-		// defined limit has been reached or offset was used, get total count
-		if err := tx.QueryRow(ctx, queryCount, queryArgs...).Scan(&count); err != nil {
-			return results, 0, err
-		}
-	}
-	return results, count, nil
+	return results, resultCountTotal, nil
 }
 
-// build SQL call from data GET request
-// also used for sub queries, a nesting level is included for separation (0 = main query)
-// returns data + count SQL query strings
-func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
-	queryArgs *[]interface{}, loginId int64, nestingLevel int) (string, string, error) {
+// returns SQL query from data GET request (sub query if nesting level != 0)
+func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryArgs *[]interface{}, loginId int64, addRowCount bool, nestingLevel int) (string, error) {
 
 	for _, expr := range data.Expressions {
 		if expr.AttributeId.Valid && !authorizedAttribute(loginId, expr.AttributeId.Bytes, types.AccessRead) {
-			return "", "", errors.New(handler.ErrUnauthorized)
+			return "", errors.New(handler.ErrUnauthorized)
 		}
 	}
 
 	var (
-		inJoin   []string // relation joins
-		inSelect []string // select expressions
-		inWhere  []string // filters
+		inJoin     []string // relation joins
+		inSelect   []string // select expressions
+		inWhere    []string // filters
+		isSubQuery = nestingLevel != 0
 	)
 
 	// check source relation and module
 	rel, exists := cache.RelationIdMap[data.RelationId]
 	if !exists {
-		return "", "", handler.ErrSchemaUnknownRelation(data.RelationId)
+		return "", handler.ErrSchemaUnknownRelation(data.RelationId)
 	}
 
 	mod, exists := cache.ModuleIdMap[rel.ModuleId]
 	if !exists {
-		return "", "", handler.ErrSchemaUnknownModule(rel.ModuleId)
+		return "", handler.ErrSchemaUnknownModule(rel.ModuleId)
 	}
 
 	// add relations as joins via relationship attributes
@@ -300,7 +307,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 
 		line, err := getQueryJoin(indexRelationIds, join, getFiltersByIndex(data.Filters, join.Index), queryArgs, loginId, nestingLevel)
 		if err != nil {
-			return "", "", err
+			return "", err
 		}
 		inJoin = append(inJoin, line)
 	}
@@ -312,7 +319,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 	for _, filter := range getFiltersByIndex(data.Filters, 0) {
 		line, err := getQueryWhere(filter, queryArgs, loginId, nestingLevel)
 		if err != nil {
-			return "", "", err
+			return "", err
 		}
 		inWhere = append(inWhere, line)
 	}
@@ -322,7 +329,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		getRelationCode(data.IndexSource, nestingLevel), rel.Policies)
 
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 	if policyFilter != "" {
 		inWhere = append(inWhere, policyFilter)
@@ -348,9 +355,9 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		if !expr.AttributeId.Valid {
 			indexRelationIdsSub := make(map[int]uuid.UUID)
 
-			subQuery, _, err := prepareQuery(expr.Query, indexRelationIdsSub, queryArgs, loginId, nestingLevel+1)
+			subQuery, err := prepareQuery(expr.Query, indexRelationIdsSub, queryArgs, loginId, false, nestingLevel+1)
 			if err != nil {
-				return "", "", err
+				return "", err
 			}
 
 			inSelect = append(inSelect, data_sql.GetExpression(
@@ -362,7 +369,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		// attribute expression
 		line, err := getQuerySelect(pos, expr, nestingLevel)
 		if err != nil {
-			return "", "", err
+			return "", err
 		}
 		inSelect = append(inSelect, line)
 
@@ -374,8 +381,8 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		}
 	}
 
-	// add expressions for relation tuple IDs after attributes (on main query)
-	if nestingLevel == 0 {
+	// add expressions for relation tuple IDs after data GET expressions
+	if !isSubQuery {
 		for index, _ := range indexRelationIds {
 
 			// if an aggregation function is used on any index, we cannot deliver record IDs
@@ -390,6 +397,11 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 				schema.PkName,
 				getTupleIdCode(index, nestingLevel)))
 		}
+	}
+
+	// add expression for total row count
+	if addRowCount {
+		inSelect = append(inSelect, fmt.Sprintf("COUNT(*) OVER() AS %s", sqlAliasTotalRowCount))
 	}
 
 	// build GROUP BY line
@@ -422,7 +434,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 	// build ORDER BY
 	queryOrder, err := getQueryLineOrderBy(data, nestingLevel)
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 
 	// build LIMIT/OFFSET
@@ -451,25 +463,12 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		queryLimit,               // LIMIT
 		queryOffset)              // OFFSET
 
-	// build final total count SQL query (not relevant for sub queries)
-	queryCount := ""
-	if nestingLevel == 0 {
-		queryCount = fmt.Sprintf(
-			`SELECT COUNT(*) FROM (SELECT %s`+"\n"+
-				`FROM "%s"."%s" AS "%s" %s%s%s) AS q`,
-			strings.Join(inSelect, `, `), // SELECT
-			mod.Name, rel.Name, relCode,  // FROM
-			strings.Join(inJoin, ""), // JOINS
-			queryWhere,               // WHERE
-			queryGroup)               // GROUP BY
-	}
-
 	// add intendation for nested sub queries
-	if nestingLevel != 0 {
+	if isSubQuery {
 		indent := strings.Repeat("\t", nestingLevel)
 		query = indent + regexp.MustCompile(`\r?\n`).ReplaceAllString(query, "\n"+indent)
 	}
-	return query, queryCount, nil
+	return query, nil
 }
 
 // add SELECT for attribute in given relation index
@@ -640,87 +639,87 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{}, loginId
 		return "", errors.New("bad filter operator")
 	}
 
-	// check for full text search
-	ftsActive := filter.Side0.FtsDict.Valid || filter.Side1.FtsDict.Valid
-	isNullOp := isNullOperator(filter.Operator)
+	isOpFts := isFtsOperator(filter.Operator)
+	isOpLike := isLikeOperator(filter.Operator)
+	isOpNull := isNullOperator(filter.Operator)
+	var opFtsDictAtrId pgtype.UUID
+
+	if isOpFts {
+		// handle fulltext search (FTS)
+		// in FTS comparisons, side0 is TSVECTOR (side0), side1 is TSQUERY
+		s := filter.Side0
+		if s.AttributeId.Valid {
+			atr, exists := cache.AttributeIdMap[s.AttributeId.Bytes]
+			if !exists {
+				return "", handler.ErrSchemaUnknownAttribute(s.AttributeId.Bytes)
+			}
+
+			// we can apply a dictionary attribute (eg. regconfig) from an text index (GIN) if available
+			rel := cache.RelationIdMap[atr.RelationId]
+			for _, ind := range rel.Indexes {
+				if ind.Method == "GIN" && len(ind.Attributes) == 1 && ind.Attributes[0].AttributeId == atr.Id && ind.AttributeIdDict.Valid {
+					opFtsDictAtrId = ind.AttributeIdDict
+					break
+				}
+			}
+		}
+	}
 
 	// define comparisons
-	var getComp = func(s types.DataGetFilterSide, comp *string) error {
-		var isQuery = s.Query.RelationId != uuid.Nil
+	var getComp = func(s types.DataGetFilterSide, isSide0 bool) (string, error) {
 
 		// sub query filter
-		if isQuery {
+		if s.Query.RelationId != uuid.Nil {
 			indexRelationIdsSub := make(map[int]uuid.UUID)
 
-			subQuery, _, err := prepareQuery(s.Query, indexRelationIdsSub, queryArgs, loginId, nestingLevel+1)
+			subQuery, err := prepareQuery(s.Query, indexRelationIdsSub, queryArgs, loginId, false, nestingLevel+1)
 			if err != nil {
-				return err
+				return "", err
 			}
-			*comp = fmt.Sprintf("(\n%s\n)", subQuery)
-			return nil
+			return fmt.Sprintf("(\n%s\n)", subQuery), nil
 		}
 
 		// attribute filter
 		if s.AttributeId.Valid {
-
 			atr, exists := cache.AttributeIdMap[s.AttributeId.Bytes]
 			if !exists {
-				return handler.ErrSchemaUnknownAttribute(s.AttributeId.Bytes)
+				return "", handler.ErrSchemaUnknownAttribute(s.AttributeId.Bytes)
 			}
-			*comp = getAttributeCode(getRelationCode(s.AttributeIndex, s.AttributeNested), atr.Name)
+			atrExpr := getAttributeCode(getRelationCode(s.AttributeIndex, s.AttributeNested), atr.Name)
 
-			if ftsActive {
-				ftsDict := "'simple'"
-
-				// use dictionary attribute on corresponding text index, if there is one
-				rel := cache.RelationIdMap[atr.RelationId]
-				for _, ind := range rel.Indexes {
-					if ind.Method == "GIN" &&
-						len(ind.Attributes) == 1 &&
-						ind.Attributes[0].AttributeId == s.AttributeId.Bytes &&
-						ind.AttributeIdDict.Valid {
-
-						// use dictionary attribute name without quotes as its a column
-						atrDict := cache.AttributeIdMap[ind.AttributeIdDict.Bytes]
-						ftsDict = atrDict.Name
-						break
-					}
+			if isOpFts {
+				exprRegconfig := exprRegconfigSimple
+				if opFtsDictAtrId.Valid {
+					expr := getAttributeCode(getRelationCode(s.AttributeIndex, s.AttributeNested), cache.AttributeIdMap[opFtsDictAtrId.Bytes].Name)
+					exprRegconfig = fmt.Sprintf("CASE WHEN %s IS NULL THEN %s ELSE %s END", expr, exprRegconfigSimple, expr)
 				}
-
-				// apply ts_vector operation with or without dictionary definition
-				*comp = fmt.Sprintf("to_tsvector(CASE WHEN %s IS NULL THEN 'simple'::REGCONFIG ELSE %s END,%s)",
-					ftsDict, ftsDict, *comp)
-			} else {
-				// special cases
-				// (I)LIKE comparison needs attribute cast as TEXT (relevant for integers/floats/etc.)
-				// REGCONFIG attributes must be cast as TEXT
-				if isLikeOperator(filter.Operator) || atr.Content == "regconfig" {
-					*comp = fmt.Sprintf("%s::TEXT", *comp)
-				}
+				return getFtsExpression(exprRegconfig, atrExpr, isSide0), nil
 			}
-			return nil
+
+			// (I)LIKE comparison needs attribute cast as TEXT (relevant for integers/floats/etc.)
+			// REGCONFIG attributes must be cast as TEXT
+			if isOpLike || atr.Content == "regconfig" {
+				return fmt.Sprintf("%s::TEXT", atrExpr), nil
+			}
+			return atrExpr, nil
 		}
 
 		// fixed value filter
-		// can be anything, text, floats, boolean, NULL values
-		// create placeholders and add to query arguments
-
-		if isNullOp {
+		// can be anything (text, floats, boolean, NULL values, ...)
+		if isOpNull {
 			// do not add user value as argument if NULL operator is used
 			// to use NULL operator the data type must be known ahead of time (prepared statement)
 			//  "pg: could not determine data type"
 			// because user can add anything we would check the type ourselves
 			//  or just check for NIL because that´s all we care about in this case
 			if s.Value == nil {
-				*comp = "NULL"
-				return nil
+				return "NULL", nil
 			} else {
-				*comp = "NOT NULL"
-				return nil
+				return "NOT NULL", nil
 			}
 		}
 
-		if isLikeOperator(filter.Operator) {
+		if isOpLike && s.Value != nil {
 			// add wildcard characters before/after for (I)LIKE comparison unless input includes them
 			v := fmt.Sprintf("%s", s.Value)
 			if strings.Contains(v, "%") {
@@ -730,45 +729,39 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{}, loginId
 			}
 		}
 
+		// add value to query arguments and refer to it via placeholder
 		*queryArgs = append(*queryArgs, s.Value)
 
-		if s.FtsDict.Valid {
-			if !cache.GetSearchDictionaryIsValid(s.FtsDict.String) {
-				s.FtsDict.String = "simple"
+		if isOpFts {
+			exprRegconfig := exprRegconfigSimple
+			if opFtsDictAtrId.Valid && s.FtsDict.Valid && cache.GetSearchDictionaryIsValid(s.FtsDict.String) {
+				exprRegconfig = fmt.Sprintf("'%s'", s.FtsDict.String)
 			}
-
-			// websearch_to_tsquery supports
-			// AND logic: 'coffee tea'    results in: 'coffe' & 'tea'
-			// OR  logic: 'coffee or tea' results in: 'coffe' | 'tea'
-			// negation:  'coffee -tea'   results in: 'coffe' & !'tea'
-			// followed:  '"coffe tea"'   results in: 'coffe' <-> 'tea'
-			// https://www.postgresql.org/docs/current/textsearch-controls.html
-			*comp = fmt.Sprintf("websearch_to_tsquery('%s',$%d)", s.FtsDict.String, len(*queryArgs))
-		} else {
-			// cast args for certain data types, known issues:
-			// * uncast bool args cannot be compared to another uncast bool arg via equal operator (=)
-			// * uncast real/double args cannot be compared to another uncast real/double arg via equal operator (=)
-			argCast := ""
-			if s.Value != nil {
-				switch fmt.Sprintf("%T", s.Value) {
-				case "bool":
-					argCast = "::BOOL"
-				case "float64":
-					argCast = "::FLOAT8" // short alias to double precision, float64 is default coming from JSON decode of JS number values
-				}
-			}
-			*comp = fmt.Sprintf("$%d%s", len(*queryArgs), argCast)
+			return getFtsExpression(exprRegconfig, fmt.Sprintf("$%d", (len(*queryArgs))), isSide0), nil
 		}
-		return nil
+
+		// cast args for certain data types, known issues:
+		// * uncast bool args cannot be compared to another uncast bool arg via equal operator (=)
+		// * uncast real/double args cannot be compared to another uncast real/double arg via equal operator (=)
+		switch s.Value.(type) {
+		case bool:
+			return fmt.Sprintf("$%d::BOOL", len(*queryArgs)), nil
+		case float64: // short alias to double precision, float64 is default coming from JSON decode of JS number values
+			return fmt.Sprintf("$%d::FLOAT8", len(*queryArgs)), nil
+		}
+		return fmt.Sprintf("$%d", len(*queryArgs)), nil
 	}
 
 	// build left/right comparison sides (ignore right side, if NULL operator)
-	comp0, comp1 := "", ""
-	if err := getComp(filter.Side0, &comp0); err != nil {
+	comp0, err := getComp(filter.Side0, true)
+	if err != nil {
 		return "", err
 	}
-	if !isNullOp {
-		if err := getComp(filter.Side1, &comp1); err != nil {
+	comp1 := ""
+
+	if !isOpNull {
+		comp1, err = getComp(filter.Side1, false)
+		if err != nil {
 			return "", err
 		}
 
@@ -830,7 +823,7 @@ func getQueryLineOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 			return "", errors.New("unknown data GET order parameter")
 		}
 
-		if ord.Ascending == true {
+		if ord.Ascending {
 			orderItems[i] = fmt.Sprintf("%s ASC", alias)
 		} else {
 			orderItems[i] = fmt.Sprintf("%s DESC NULLS LAST", alias)
@@ -899,10 +892,27 @@ func getFiltersByIndex(filters []types.DataGetFilter, index int) []types.DataGet
 	}
 	return out
 }
+func getFtsExpression(exprRegconfig string, exprValue string, isSide0 bool) string {
+	// when using FTS operator, we assume vectorized text to be left (side0) and query to be right (side1)
+	if isSide0 {
+		return fmt.Sprintf("TO_TSVECTOR(%s,%s)", exprRegconfig, exprValue)
+	}
+
+	// websearch_to_tsquery supports
+	// AND logic: 'coffee tea'    results in: 'coffe' & 'tea'
+	// OR  logic: 'coffee or tea' results in: 'coffe' | 'tea'
+	// negation:  'coffee -tea'   results in: 'coffe' & !'tea'
+	// followed:  '"coffe tea"'   results in: 'coffe' <-> 'tea'
+	// https://www.postgresql.org/docs/current/textsearch-controls.html
+	return fmt.Sprintf("WEBSEARCH_TO_TSQUERY(%s,%s)", exprRegconfig, exprValue)
+}
 
 // operator types
 func isArrayOperator(operator string) bool {
 	return slices.Contains([]string{"= ANY", "<> ALL"}, operator)
+}
+func isFtsOperator(operator string) bool {
+	return operator == "@@"
 }
 func isLikeOperator(operator string) bool {
 	return slices.Contains([]string{"LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE"}, operator)

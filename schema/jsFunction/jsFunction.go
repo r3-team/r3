@@ -56,7 +56,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.JsFunct
 
 	for i, f := range functions {
 		f.ModuleId = moduleId
-		f.Captions, err = caption.Get_tx(ctx, tx, "js_function", f.Id, []string{"jsFunctionTitle", "jsFunctionDesc"})
+		f.Captions, err = caption.Get_tx(ctx, tx, schema.DbJsFunction, f.Id, []string{"jsFunctionTitle", "jsFunctionDesc"})
 		if err != nil {
 			return functions, err
 		}
@@ -73,7 +73,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.JsFunction) error {
 		return fmt.Errorf("function name must not be empty")
 	}
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &fnc.Id, "js_function", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fnc.Id, schema.DbJsFunction, "id")
 	if err != nil {
 		return err
 	}
@@ -109,34 +109,33 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.JsFunction) error {
 		return err
 	}
 
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, "collection", fmt.Sprintf(`%s\.collection_(read|update)\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbCollection, fmt.Sprintf(`%s\.collection_(read|update)\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, "field", fmt.Sprintf(`%s\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\('(%s)'`, rxPrefix, rxUuid), 3, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbField, fmt.Sprintf(`%s\.(get|set)_field_(value|value_changed|caption|chart|error|focus|order|file_links)\('(%s)'`, rxPrefix, rxUuid), 3, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, "js_function", fmt.Sprintf(`%s\.call_frontend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbForm, fmt.Sprintf(`%s\.open_form\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, "pg_function", fmt.Sprintf(`%s\.call_backend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbJsFunction, fmt.Sprintf(`%s\.call_frontend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, "form", fmt.Sprintf(`%s\.open_form\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbPgFunction, fmt.Sprintf(`%s\.call_backend\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, "role", fmt.Sprintf(`%s\.has_role\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbRole, fmt.Sprintf(`%s\.has_role\('(%s)'`, rxPrefix, rxUuid), 1, fnc.CodeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(ctx, tx, fnc.Id, "variable", fmt.Sprintf(`%s\.(get|set)_variable\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
+	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbVariable, fmt.Sprintf(`%s\.(get|set)_variable\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
 		return err
 	}
 	return nil
 }
 
-func storeDependencies_tx(ctx context.Context, tx pgx.Tx, functionId uuid.UUID, entity string,
-	regex string, submatchIndexId int, body string) error {
+func storeDependencies_tx(ctx context.Context, tx pgx.Tx, functionId uuid.UUID, entity schema.DbEntity, regex string, submatchIndexId int, body string) error {
 
-	if !slices.Contains([]string{"collection", "field", "form", "js_function", "pg_function", "role", "variable"}, entity) {
+	if !slices.Contains(schema.DbDependsJsFunction, entity) {
 		return fmt.Errorf("unknown JS function dependency '%s'", entity)
 	}
 

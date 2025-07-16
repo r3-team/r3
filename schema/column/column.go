@@ -16,17 +16,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var allowedEntities = []string{"api", "collection", "field"}
-
 func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	_, err := tx.Exec(ctx, `DELETE FROM app.column WHERE id = $1`, id)
 	return err
 }
 
-func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID) ([]types.Column, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID) ([]types.Column, error) {
 	columns := make([]types.Column, 0)
 
-	if !slices.Contains(allowedEntities, entity) {
+	if !slices.Contains(schema.DbAssignedColumn, entity) {
 		return columns, errors.New("bad entity")
 	}
 
@@ -55,7 +53,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID) (
 
 	for i, c := range columns {
 		if c.SubQuery {
-			c.Query, err = query.Get_tx(ctx, tx, "column", c.Id, 0, 0, 0)
+			c.Query, err = query.Get_tx(ctx, tx, schema.DbColumn, c.Id, 0, 0, 0)
 			if err != nil {
 				return columns, err
 			}
@@ -63,7 +61,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID) (
 			c.Query.RelationId = pgtype.UUID{}
 		}
 
-		c.Captions, err = caption.Get_tx(ctx, tx, "column", c.Id, []string{"columnTitle"})
+		c.Captions, err = caption.Get_tx(ctx, tx, schema.DbColumn, c.Id, []string{"columnTitle"})
 		if err != nil {
 			return columns, err
 		}
@@ -72,9 +70,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID) (
 	return columns, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, columns []types.Column) error {
 
-	if !slices.Contains(allowedEntities, entity) {
+	if !slices.Contains(schema.DbAssignedColumn, entity) {
 		return errors.New("bad entity")
 	}
 
@@ -95,7 +93,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, c
 	// insert new/update existing columns
 	for position, c := range columns {
 
-		known, err := schema.CheckCreateId_tx(ctx, tx, &c.Id, "column", "id")
+		known, err := schema.CheckCreateId_tx(ctx, tx, &c.Id, schema.DbColumn, "id")
 		if err != nil {
 			return err
 		}
@@ -139,7 +137,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID, c
 		}
 
 		if c.SubQuery {
-			if err := query.Set_tx(ctx, tx, "column", c.Id, 0, 0, 0, c.Query); err != nil {
+			if err := query.Set_tx(ctx, tx, schema.DbColumn, c.Id, 0, 0, 0, c.Query); err != nil {
 				return err
 			}
 		}

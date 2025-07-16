@@ -193,7 +193,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 
 	// collect form query, fields, functions, states and captions
 	for i, form := range forms {
-		form.Query, err = query.Get_tx(ctx, tx, "form", form.Id, 0, 0, 0)
+		form.Query, err = query.Get_tx(ctx, tx, schema.DbForm, form.Id, 0, 0, 0)
 		if err != nil {
 			return forms, err
 		}
@@ -213,7 +213,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 		if err != nil {
 			return forms, err
 		}
-		form.Captions, err = caption.Get_tx(ctx, tx, "form", form.Id, []string{"formTitle"})
+		form.Captions, err = caption.Get_tx(ctx, tx, schema.DbForm, form.Id, []string{"formTitle"})
 		if err != nil {
 			return forms, err
 		}
@@ -227,7 +227,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 	// remove only invalid character (dot), used for form function references
 	frm.Name = strings.Replace(frm.Name, ".", "", -1)
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &frm.Id, "form", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &frm.Id, schema.DbForm, "id")
 	if err != nil {
 		return err
 	}
@@ -256,7 +256,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 	}
 
 	// set form query
-	if err := query.Set_tx(ctx, tx, "form", frm.Id, 0, 0, 0, frm.Query); err != nil {
+	if err := query.Set_tx(ctx, tx, schema.DbForm, frm.Id, 0, 0, 0, frm.Query); err != nil {
 		return err
 	}
 
@@ -271,7 +271,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 	// set field queries after fields themselves
 	// query filters can reference fields so they must all exist
 	for fieldId, queryIn := range fieldIdMapQuery {
-		if err := query.Set_tx(ctx, tx, "field", fieldId, 0, 0, 0, queryIn); err != nil {
+		if err := query.Set_tx(ctx, tx, schema.DbField, fieldId, 0, 0, 0, queryIn); err != nil {
 			return err
 		}
 	}
@@ -285,7 +285,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 	if err := setStates_tx(ctx, tx, frm.Id, frm.States); err != nil {
 		return err
 	}
-	if err := article.Assign_tx(ctx, tx, "form", frm.Id, frm.ArticleIdsHelp); err != nil {
+	if err := article.Assign_tx(ctx, tx, schema.DbForm, frm.Id, frm.ArticleIdsHelp); err != nil {
 		return err
 	}
 	// fix imports < 3.2: Migration from help captions to help articles
@@ -334,7 +334,7 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf interface{},
 
 		// remove references to form bound entities that do not exist after form copy
 		if field.JsFunctionId.Valid {
-			isBound, err := schema.GetIsFormBound_tx(ctx, tx, "js_function", field.JsFunctionId.Bytes)
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, schema.DbJsFunction, field.JsFunctionId.Bytes)
 			if err != nil {
 				return nil, err
 			}
@@ -411,7 +411,7 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf interface{},
 
 		// remove references to form bound entities that do not exist after form copy
 		if field.JsFunctionId.Valid {
-			isBound, err := schema.GetIsFormBound_tx(ctx, tx, "js_function", field.JsFunctionId.Bytes)
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, schema.DbJsFunction, field.JsFunctionId.Bytes)
 			if err != nil {
 				return nil, err
 			}
@@ -442,7 +442,7 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf interface{},
 
 		// remove references to form bound entities that do not exist after form copy
 		if field.JsFunctionId.Valid {
-			isBound, err := schema.GetIsFormBound_tx(ctx, tx, "js_function", field.JsFunctionId.Bytes)
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, schema.DbJsFunction, field.JsFunctionId.Bytes)
 			if err != nil {
 				return nil, err
 			}
@@ -551,7 +551,7 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf interface{},
 
 		// remove references to form bound entities that do not exist after form copy
 		if field.JsFunctionId.Valid {
-			isBound, err := schema.GetIsFormBound_tx(ctx, tx, "js_function", field.JsFunctionId.Bytes)
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, schema.DbJsFunction, field.JsFunctionId.Bytes)
 			if err != nil {
 				return nil, err
 			}
@@ -560,7 +560,7 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf interface{},
 			}
 		}
 		if field.VariableId.Valid {
-			isBound, err := schema.GetIsFormBound_tx(ctx, tx, "variable", field.VariableId.Bytes)
+			isBound, err := schema.GetIsFormBound_tx(ctx, tx, schema.DbVariable, field.VariableId.Bytes)
 			if err != nil {
 				return nil, err
 			}

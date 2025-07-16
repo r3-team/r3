@@ -47,44 +47,43 @@
 	height:1px;
 	overflow:hidden;
 }
+.kanban-table td{
+	border-bottom:1px dotted var(--color-border);
+	position:relative;
+}
 @-moz-document url-prefix() {
 	.kanban-table th,
 	.kanban-table td{
 		height:100%;
 	}
 }
-.kanban-table td{
-	border-bottom:1px dotted var(--color-border);
-	position:relative;
-}
-.kanban-table .label{
-	position:sticky;
-	padding:6px;
-	z-index:var(--z-index-kanban-header);
-}
-.kanban-table .label .label-line.unassigned{
-	font-style:italic;
-	color:var(--color-font-disabled);
-}
-.kanban-table .label .label-line{
+.kanban-table-label-line{
 	gap:9px;
 	display:flex;
 	flex-flow:row nowrap;
 }
-.kanban-table th.label{
+.kanban-table-label-line.unassigned{
+	font-style:italic;
+	color:var(--color-font-disabled);
+}
+th.kanban-table-label{
 	top:0px;
 	padding:9px 12px;
 	border-radius:var(--border-input-radius) var(--border-input-radius) 0px 0px;
 	border-bottom:1px solid var(--color-border);
 }
-.kanban-table th.label.top-left{
+th.kanban-table-label.top-left{
 	left:0px;
 	z-index:var(--z-index-kanban-header-top-left);
 }
-.kanban-table td.label{
+td.kanban-table-label,
+th.kanban-table-label{
+	position:sticky;
+	padding:6px;
 	left:0px;
+	z-index:var(--z-index-kanban-header);
 }
-.kanban-table th.label .label-line{
+th.kanban-table-label-line{
 	height:100%;
 	align-items:center;
 }

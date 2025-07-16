@@ -20,7 +20,7 @@ func DataGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage,
 		query string
 		req   types.DataGet
 		res   struct {
-			Count int                   `json:"count"`
+			Count int64                 `json:"count"`
 			Rows  []types.DataGetResult `json:"rows"`
 		}
 	)

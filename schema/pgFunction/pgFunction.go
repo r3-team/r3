@@ -46,7 +46,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunct
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, name, code_args, code_function, code_returns,
-			is_frontend_exec, is_login_sync, is_trigger, volatility
+			is_frontend_exec, is_login_sync, is_trigger, volatility, cost
 		FROM app.pg_function
 		WHERE module_id = $1
 		ORDER BY name ASC
@@ -60,7 +60,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunct
 		var f types.PgFunction
 
 		if err := rows.Scan(&f.Id, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns,
-			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility); err != nil {
+			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility, &f.Cost); err != nil {
 
 			return functions, err
 		}
@@ -73,7 +73,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunct
 		if err != nil {
 			return functions, err
 		}
-		f.Captions, err = caption.Get_tx(ctx, tx, "pg_function", f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
+		f.Captions, err = caption.Get_tx(ctx, tx, schema.DbPgFunction, f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
 		if err != nil {
 			return functions, err
 		}
@@ -122,6 +122,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 	// fix imports < 3.9: Missing volatility setting
 	fnc = compatible.FixMissingVolatility(fnc)
 
+	// fix imports < 3.11: Missing cost setting
+	fnc = compatible.FixMissingCost(fnc)
+
 	// enforce valid function configuration
 	if fnc.IsLoginSync {
 		fnc.CodeReturns = "INTEGER"
@@ -138,7 +141,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 		return errors.New("empty function body or missing returns")
 	}
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &fnc.Id, "pg_function", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &fnc.Id, schema.DbPgFunction, "id")
 	if err != nil {
 		return err
 	}
@@ -155,15 +158,15 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 
 		if _, err := tx.Exec(ctx, `
 			UPDATE app.pg_function
-			SET name = $1, code_args = $2, code_function = $3,
-				code_returns = $4, is_frontend_exec = $5, volatility = $6
-			WHERE id = $7
-		`, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsFrontendExec, fnc.Volatility, fnc.Id); err != nil {
+			SET name = $1, code_args = $2, code_function = $3, code_returns = $4,
+				is_frontend_exec = $5, volatility = $6, cost = $7
+			WHERE id = $8
+		`, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsFrontendExec, fnc.Volatility, fnc.Cost, fnc.Id); err != nil {
 			return err
 		}
 
 		if fnc.Name != nameEx {
-			if err := RecreateAffectedBy_tx(ctx, tx, "pg_function", fnc.Id); err != nil {
+			if err := RecreateAffectedBy_tx(ctx, tx, schema.DbPgFunction, fnc.Id); err != nil {
 				return fmt.Errorf("failed to recreate affected PG functions, %s", err)
 			}
 		}
@@ -190,10 +193,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 	} else {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.pg_function (id, module_id, name, code_args, code_function,
-				code_returns, is_frontend_exec, is_login_sync, is_trigger, volatility)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-		`, fnc.Id, fnc.ModuleId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction,
-			fnc.CodeReturns, fnc.IsFrontendExec, fnc.IsLoginSync, fnc.IsTrigger, fnc.Volatility); err != nil {
+				code_returns, is_frontend_exec, is_login_sync, is_trigger, volatility, cost)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		`, fnc.Id, fnc.ModuleId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns,
+			fnc.IsFrontendExec, fnc.IsLoginSync, fnc.IsTrigger, fnc.Volatility, fnc.Cost); err != nil {
 
 			return err
 		}
@@ -203,7 +206,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 	scheduleIds := make([]uuid.UUID, 0)
 	for _, s := range fnc.Schedules {
 
-		known, err = schema.CheckCreateId_tx(ctx, tx, &s.Id, "pg_function_schedule", "id")
+		known, err = schema.CheckCreateId_tx(ctx, tx, &s.Id, schema.DbPgFunctionSchedule, "id")
 		if err != nil {
 			return err
 		}
@@ -267,18 +270,18 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 
 	_, err = tx.Exec(ctx, fmt.Sprintf(`
 		CREATE OR REPLACE FUNCTION "%s"."%s"(%s)
-		RETURNS %s LANGUAGE plpgsql %s AS %s
-	`, nameMod, fnc.Name, fnc.CodeArgs, fnc.CodeReturns, fnc.Volatility, fnc.CodeFunction))
+		RETURNS %s LANGUAGE plpgsql COST %d %s AS %s
+	`, nameMod, fnc.Name, fnc.CodeArgs, fnc.CodeReturns, fnc.Cost, fnc.Volatility, fnc.CodeFunction))
 	return err
 }
 
 // recreate all PG functions, affected by a changed entity for which a dependency exists
 // relevant entities: modules, relations, attributes, pg functions
-func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity string, entityId uuid.UUID) error {
+func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID) error {
 
 	pgFunctionIds := make([]uuid.UUID, 0)
 
-	if !slices.Contains([]string{"module", "relation", "attribute", "pg_function"}, entity) {
+	if !slices.Contains(schema.DbDependsPgFunction, entity) {
 		return errors.New("unknown dependent on entity for pg function")
 	}
 
@@ -319,7 +322,7 @@ func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity string, entity
 		if err != nil {
 			return err
 		}
-		f.Captions, err = caption.Get_tx(ctx, tx, "pg_function", f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
+		f.Captions, err = caption.Get_tx(ctx, tx, schema.DbPgFunction, f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
 		if err != nil {
 			return err
 		}

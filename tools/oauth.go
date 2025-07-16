@@ -6,7 +6,7 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 )
 
-func GetOAuthToken(clientId string, clientSecret string, tenant string, tokenUrl string, scopes []string) (string, error) {
+func GetOAuthToken(clientId string, clientSecret string, tokenUrl string, scopes []string) (string, error) {
 	conf := clientcredentials.Config{
 		ClientID:     clientId,
 		ClientSecret: clientSecret,

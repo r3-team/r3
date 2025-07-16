@@ -40,7 +40,7 @@ import {
 	getFormRoute
 } from '../shared/form.js';
 import {
-	getJoinsIndexMap,
+	getJoinIndexMap,
 	getQueryTemplate
 } from '../shared/query.js';
 export {MyBuilderForm as default};
@@ -245,7 +245,7 @@ let MyBuilderForm = {
 							:allowFixedLimit="false"
 							:builderLanguage="builderLanguage"
 							:filters="filters"
-							:filtersDisable="['formChanged','formState','field','fieldChanged','fieldValid','getter']"
+							:filtersDisable="['formChanged','formState','field','fieldChanged','fieldValid','getter','globalSearch','recordMayCreate','recordMayDelete','recordMayUpdate']"
 							:fixedLimit="0"
 							:formId="id"
 							:joins="joins"
@@ -466,7 +466,7 @@ let MyBuilderForm = {
 							:entityIdMapRef="entityIdMapRef"
 							:fieldIdMap="fieldIdMap"
 							:filters="fieldShow.query.filters"
-							:filtersDisable="['formState','getter']"
+							:filtersDisable="['formState','getter','globalSearch']"
 							:fixedLimit="fieldShow.query.fixedLimit"
 							:formId="id"
 							:joins="fieldShow.query.joins"
@@ -519,7 +519,7 @@ let MyBuilderForm = {
 						:entityIdMapRef="entityIdMapRef"
 						:fieldIdMap="fieldIdMap"
 						:filters="columnShow.query.filters"
-						:filtersDisable="['formState','getter']"
+						:filtersDisable="['formState','getter','globalSearch']"
 						:fixedLimit="columnShow.query.fixedLimit"
 						:formId="id"
 						:joins="columnShow.query.joins"
@@ -753,7 +753,7 @@ let MyBuilderForm = {
 		fieldShow:        (s) => s.fieldIdShow === null || s.fieldIdMap[s.fieldIdShow] === undefined ? false : s.fieldIdMap[s.fieldIdShow],
 		fieldShowHasQuery:(s) => s.fieldShow !== false && s.getFieldHasQuery(s.fieldShow),
 		form:             (s) => s.formIdMap[s.id] === undefined ? false : s.formIdMap[s.id],
-		joinsIndexMap:    (s) => s.getJoinsIndexMap(s.joins),
+		joinsIndexMap:    (s) => s.getJoinIndexMap(s.joins),
 		presetCandidates: (s) => s.relation === false ? [] : s.relationIdMap[s.relationId].presets,
 		relation:         (s) => s.relationIdMap[s.relationId] === undefined ? false : s.relationIdMap[s.relationId],
 		
@@ -791,7 +791,7 @@ let MyBuilderForm = {
 		getFormRoute,
 		getIndexAttributeId,
 		getItemTitleColumn,
-		getJoinsIndexMap,
+		getJoinIndexMap,
 		getNilUuid,
 		getQueryTemplate,
 		getSqlPreview,
@@ -1014,7 +1014,6 @@ let MyBuilderForm = {
 				state:'default',
 				flags:[],
 				onMobile:true,
-				clipboard:false,
 				attributeId:attribute.id,
 				attributeIdAlt:null, // altern. attribute (used for date period)
 				index:index,
@@ -1042,7 +1041,6 @@ let MyBuilderForm = {
 				field.attributeIdNm = attributeIdNm;
 				field.columns       = [];
 				field.query         = this.getQueryTemplate();
-				field.category      = false;
 				field.filterQuick   = false;
 				field.outsideIn     = outsideIn;
 				field.defPresetIds  = [];
@@ -1139,7 +1137,6 @@ let MyBuilderForm = {
 				state:'default',
 				flags:[],
 				onMobile:true,
-				clipboard:false,
 				captions:{
 					fieldTitle:{},
 					fieldHelp:{}

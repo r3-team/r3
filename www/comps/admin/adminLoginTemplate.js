@@ -1,10 +1,10 @@
 import {dialogCloseAsk} from '../shared/dialog.js';
-import MyInputColor     from '../inputColor.js';
+import MyInputColorWrap from '../inputColorWrap.js';
 export {MyAdminLoginTemplate as default};
 
 let MyAdminLoginTemplate = {
 	name:'my-admin-login-template',
-	components:{ MyInputColor },
+	components:{ MyInputColorWrap },
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 		
 		<div class="contentBox admin-login-template float" v-if="inputsReady">
@@ -68,10 +68,7 @@ let MyAdminLoginTemplate = {
 						<tr>
 							<td class="grouping" colspan="2">
 								<br />
-								<div class="contentPartHeader">
-									<img class="icon" src="images/settings.png" />
-									<h1>{{ capAppSet.titleGeneral }}</h1>
-								</div>
+								<my-label image="settings.png" :caption="capAppSet.titleGeneral" :large="true" />
 							</td>
 						</tr>
 						<tr>
@@ -103,25 +100,6 @@ let MyAdminLoginTemplate = {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capAppSet.searchDictionaries }}</td>
-							<td>
-								<div class="column gap">
-									<select v-model="searchDictionaryNew" @change="dictAdd($event.target.value)">
-										<option value="">{{ capAppSet.searchDictionaryNew }}</option>
-										<option v-for="d in searchDictionaries.filter(v => !settings.searchDictionaries.includes(v) && v !== 'simple')">
-											{{ d }}
-										</option>
-									</select>
-									<div class="row wrap gap">
-										<div v-for="d in settings.searchDictionaries" class="row centered gap">
-											<span>{{ d }}</span>
-											<my-button image="delete.png" @trigger="dictDel(d)" :cancel="true" />
-										</div>
-									</div>
-								</div>
-							</td>
-						</tr>
-						<tr>
 							<td colspan="2"><b>{{ capAppSet.titleSubNumbers }}</b></td>
 						</tr>
 						<tr class="default-inputs">
@@ -132,6 +110,8 @@ let MyAdminLoginTemplate = {
 									<option value=",">{{ capAppSet.option.numberSeparator.comma }}</option>
 									<option value="'">{{ capAppSet.option.numberSeparator.apos }}</option>
 									<option value="·">{{ capAppSet.option.numberSeparator.mdot }}</option>
+									<option value=" ">{{ capAppSet.option.numberSeparator.space }}</option>
+									<option value="0">{{ capAppSet.option.numberSeparator.none }}</option>
 								</select>
 							</td>
 						</tr>
@@ -143,6 +123,7 @@ let MyAdminLoginTemplate = {
 									<option value=",">{{ capAppSet.option.numberSeparator.comma }}</option>
 									<option value="'">{{ capAppSet.option.numberSeparator.apos }}</option>
 									<option value="·">{{ capAppSet.option.numberSeparator.mdot }}</option>
+									<option value=" ">{{ capAppSet.option.numberSeparator.space }}</option>
 								</select>
 							</td>
 						</tr>
@@ -159,10 +140,7 @@ let MyAdminLoginTemplate = {
 						<tr>
 							<td class="grouping" colspan="2">
 								<br />
-								<div class="contentPartHeader">
-									<img class="icon" src="images/visible1.png" />
-									<h1>{{ capAppSet.titleTheme }}</h1>
-								</div>
+								<my-label image="visible1.png" :caption="capAppSet.titleTheme" :large="true" />
 							</td>
 						</tr>
 						<tr>
@@ -286,7 +264,7 @@ let MyAdminLoginTemplate = {
 						</tr>
 						<tr v-if="!settings.colorClassicMode">
 							<td>{{ capAppSet.colorHeader }}</td>
-							<td><my-input-color v-model="settings.colorHeader" :allowNull="true" /></td>
+							<td><my-input-color-wrap v-model="settings.colorHeader" :allowNull="true" /></td>
 						</tr>
 						<tr v-if="!settings.colorClassicMode">
 							<td>{{ capAppSet.colorHeaderSingle }}</td>
@@ -297,7 +275,7 @@ let MyAdminLoginTemplate = {
 						</tr>
 						<tr>
 							<td>{{ capAppSet.colorMenu }}</td>
-							<td><my-input-color v-model="settings.colorMenu" :allowNull="true" /></td>
+							<td><my-input-color-wrap v-model="settings.colorMenu" :allowNull="true" /></td>
 						</tr>
 					</tbody>
 				</table>
@@ -314,7 +292,6 @@ let MyAdminLoginTemplate = {
 			id:0,
 			name:'',
 			comment:'',
-			searchDictionaryNew:'',
 			settings:{},
 			
 			// states
@@ -353,7 +330,6 @@ let MyAdminLoginTemplate = {
 		// stores
 		languageCodes:        (s) => s.$store.getters['schema/languageCodes'],
 		languageCodesModules: (s) => s.$store.getters['schema/languageCodesModules'],
-		searchDictionaries:   (s) => s.$store.getters['searchDictionaries'],
 		capApp:               (s) => s.$store.getters.captions.admin.loginTemplate,
 		capAppSet:            (s) => s.$store.getters.captions.settings,
 		capGen:               (s) => s.$store.getters.captions.generic,
@@ -390,7 +366,6 @@ let MyAdminLoginTemplate = {
 			numberSepDecimal:'.',
 			numberSepThousand:',',
 			pattern:'bubbles',
-			searchDictionaries:['english'],
 			shadowsInputs:false,
 			spacing:3,
 			sundayFirstDow:true,
@@ -431,15 +406,6 @@ let MyAdminLoginTemplate = {
 		},
 		close() {
 			this.$emit('close');
-		},
-		dictAdd(entry) {
-			this.settings.searchDictionaries.push(entry);
-			this.searchDictionaryNew = '';
-		},
-		dictDel(entry) {
-			let pos = this.settings.searchDictionaries.indexOf(entry);
-			if(pos !== -1)
-				this.settings.searchDictionaries.splice(pos,1);
 		},
 		
 		// backend calls

@@ -41,3 +41,49 @@
 .columnBatch.ganttGroup.vertical{
 	gap:0px;
 }
+.columnBatchHeader{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:stretch;
+	gap:6px;
+}
+.columBatchHeaderCaption{
+	flex:1 1 auto;
+	padding:6px 2px 6px 6px;
+	/* text ellipsis */
+	width:50px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
+}
+.columBatchHeaderCaption.dropdownActive{
+	font-weight:bold;
+}
+.columBatchHeaderCaption.hasIcons{
+	padding:6px 2px 6px 0px;
+}
+.columnBatchOption{
+	padding:9px;
+	box-sizing:border-box;
+	display:flex;
+	flex-flow:column nowrap;
+	gap:6px;
+	background-color:var(--color-bg);
+	color:var(--color-font);
+}
+.columnBatchOptionItem{
+	display:flex;
+	flex-flow:row nowrap;
+	gap:9px;
+}
+.columnBatchOptionFilterValues{
+	display:flex;
+	flex-flow:column nowrap;
+	max-height:250px;
+	padding:0px 6px;
+	background-color:var(--color-input);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
+	overflow-y:scroll;
+}

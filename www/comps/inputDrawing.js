@@ -1,11 +1,11 @@
-import MyInputColor from './inputColor.js';
+import MyInputColorWrap from './inputColorWrap.js';
 export {MyInputDraw as default};
 
-let MyInputDraw = {
+const MyInputDraw = {
 	name:'my-input-draw',
-	components:{ MyInputColor },
+	components:{ MyInputColorWrap },
 	template:`<div class="input-draw">
-		<div class="actions">
+		<div class="input-toolbar" v-if="!hideInputs">
 			<div class="row gap centered">
 				<slot name="input-icon" />
 				<my-button image="drawing.png"
@@ -39,17 +39,11 @@ let MyInputDraw = {
 					/>
 					<my-bool v-model="dragModeForce" :grow="false" />
 				</template>
-				<my-button image="colors.png"
-					v-if="!readonly"
-					@trigger="strokeColor = strokeColorDef"
-					:active="strokeColor !== strokeColorDef"
-					:naked="true"
-				/>
-				<my-input-color
+				<my-input-color-wrap image="colors.png"
 					v-if="!readonly"
 					v-model="strokeColor"
-					:downwards="true"
 					:readonly="readonly"
+					:showInput="false"
 				/>
 			</div>
 			<div class="row gap">
@@ -81,6 +75,7 @@ let MyInputDraw = {
 	</div>`,
 	props:{
 		formLoading:{ type:Boolean, required:true },
+		hideInputs: { type:Boolean, required:true },
 		isHidden:   { type:Boolean, required:true },
 		modelValue: { required:true },
 		readonly:   { type:Boolean, required:true }
@@ -126,7 +121,8 @@ let MyInputDraw = {
 	},
 	emits:['update:modelValue'],
 	computed:{
-		zoom:(s) => 1 + (s.zoomInput / 10),
+		strokeColorClean:(s) => s.strokeColor !== '' ? s.strokeColor : '000000',
+		zoom:            (s) => 1 + (s.zoomInput / 10),
 		
 		// stores
 		appResized:(s) => s.$store.getters.appResized,
@@ -258,14 +254,14 @@ let MyInputDraw = {
 						1,
 						posXStart - this.dragOffsetX,
 						posYStart - this.dragOffsetY,
-						this.strokeColor,
+						this.strokeColorClean,
 						this.strokeWidth
 					);
 					this.strokes.push([
 						'b',
 						(posXStart - this.dragOffsetX) / this.zoom,
 						(posYStart - this.dragOffsetY) / this.zoom,
-						this.strokeColor,
+						this.strokeColorClean,
 						this.strokeWidth
 					]);
 					this.pointerStartCords = null;

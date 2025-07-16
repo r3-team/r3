@@ -1,4 +1,3 @@
-import MyValueRich              from './valueRich.js';
 import {
 	colorAdjustBg,
 	colorMakeContrastFont,
@@ -14,7 +13,6 @@ export {MyCalendarMonth as default};
 
 let MyCalendarMonth = {
 	name:'my-calendar-month',
-	components:{MyValueRich},
 	template:`<div class="calendar-month">
 		
 		<!-- week day header -->
@@ -59,6 +57,8 @@ let MyCalendarMonth = {
 									:key="i"
 									:length="columns[i].length"
 									:monospace="columns[i].flags.monospace"
+									:noShrink="columns[i].flags.noShrink"
+									:noThousandsSep="columns[i].flags.noThousandsSep"
 									:value="v"
 								/>
 							</template>
@@ -89,6 +89,8 @@ let MyCalendarMonth = {
 							:key="i"
 							:length="columns[i].length"
 							:monospace="columns[i].flags.monospace"
+							:noShrink="columns[i].flags.noShrink"
+							:noThousandsSep="columns[i].flags.noThousandsSep"
 							:wrap="true"
 							:value="v"
 						/>

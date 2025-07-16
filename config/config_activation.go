@@ -67,7 +67,7 @@ vCPF8QXc4V/wgJZtn6vdSXGR5W0dByItU5TLOlk6kLX4Aj6G8T+J//7NX5InD5Q/
 
 func ActivateLicense() {
 	if GetString("licenseFile") == "" {
-		log.Info("server", "skipping activation check, no license installed")
+		log.Info(log.ContextServer, "skipping activation check, no license installed")
 
 		// set empty in case license was removed
 		SetLicense(types.License{})
@@ -77,13 +77,13 @@ func ActivateLicense() {
 	var licFile types.LicenseFile
 
 	if err := json.Unmarshal([]byte(GetString("licenseFile")), &licFile); err != nil {
-		log.Error("server", "could not unmarshal license from config", err)
+		log.Error(log.ContextServer, "could not unmarshal license from config", err)
 		return
 	}
 
 	licenseJson, err := json.Marshal(licFile.License)
 	if err != nil {
-		log.Error("server", "could not marshal license data", err)
+		log.Error(log.ContextServer, "could not marshal license data", err)
 		return
 	}
 	hashed := sha256.Sum256(licenseJson)
@@ -91,34 +91,34 @@ func ActivateLicense() {
 	// get license signature
 	signature, err := base64.URLEncoding.DecodeString(licFile.Signature)
 	if err != nil {
-		log.Error("server", "could not decode license signature", err)
+		log.Error(log.ContextServer, "could not decode license signature", err)
 		return
 	}
 
 	// verify signature
 	data, _ := pem.Decode([]byte(publicKey))
 	if data == nil {
-		log.Error("server", "could not decode public key", errors.New(""))
+		log.Error(log.ContextServer, "could not decode public key", errors.New(""))
 		return
 	}
 	key, err := x509.ParsePKCS1PublicKey(data.Bytes)
 	if err != nil {
-		log.Error("server", "could not parse public key", errors.New(""))
+		log.Error(log.ContextServer, "could not parse public key", errors.New(""))
 		return
 	}
 
 	if err := rsa.VerifyPKCS1v15(key, crypto.SHA256, hashed[:], signature); err != nil {
-		log.Error("server", "failed to verify license", err)
+		log.Error(log.ContextServer, "failed to verify license", err)
 		return
 	}
 
 	// check if license has been revoked
 	if slices.Contains(revocations, licFile.License.LicenseId) {
-		log.Error("server", "failed to enable license", fmt.Errorf("license ID '%s' has been revoked", licFile.License.LicenseId))
+		log.Error(log.ContextServer, "failed to enable license", fmt.Errorf("license ID '%s' has been revoked", licFile.License.LicenseId))
 		return
 	}
 
 	// set license
-	log.Info("server", "setting license")
+	log.Info(log.ContextServer, "setting license")
 	SetLicense(licFile.License)
 }

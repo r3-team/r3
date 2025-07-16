@@ -27,7 +27,7 @@ var (
 
 func DoAll() error {
 	if !cache.GetMailAccountsExist() {
-		log.Info("mail", "cannot start sending, no accounts defined")
+		log.Info(log.ContextMail, "cannot start sending, no accounts defined")
 		return nil
 	}
 
@@ -59,14 +59,14 @@ func DoAll() error {
 		mails = append(mails, m)
 	}
 
-	log.Info("mail", fmt.Sprintf("found %d messages to be sent", len(mails)))
+	log.Info(log.ContextMail, fmt.Sprintf("found %d messages to be sent", len(mails)))
 
 	for _, m := range mails {
 
 		if err := do(m); err != nil {
 
 			// unable to send, update attempt counter and date for later attempt
-			log.Error("mail", fmt.Sprintf("is unable to send (attempt %d)",
+			log.Error(log.ContextMail, fmt.Sprintf("is unable to send (attempt %d)",
 				m.AttemptCount+1), err)
 
 			if _, err := db.Pool.Exec(context.Background(), `
@@ -80,7 +80,7 @@ func DoAll() error {
 		}
 
 		// everything went well, delete spool entry
-		log.Info("mail", "successfully sent message")
+		log.Info(log.ContextMail, "successfully sent message")
 
 		if _, err := db.Pool.Exec(context.Background(), `
 			DELETE FROM instance.mail_spool
@@ -118,7 +118,10 @@ func do(m types.Mail) error {
 		if err != nil {
 			return err
 		}
-		ma.Password, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret, c.Tenant, c.TokenUrl, c.Scopes)
+		if !c.ClientSecret.Valid || !c.TokenUrl.Valid {
+			return errors.New("missing client secret or token URL in OAUTH client")
+		}
+		ma.Password, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret.String, c.TokenUrl.String, c.Scopes)
 		if err != nil {
 			return err
 		}
@@ -198,7 +201,7 @@ func do(m types.Mail) error {
 			fileInfo, err := os.Stat(filePath)
 			if err != nil {
 				if os.IsNotExist(err) {
-					log.Error("mail", "could not attach file to message",
+					log.Error(log.ContextMail, "could not attach file to message",
 						fmt.Errorf("'%s' does not exist, ignoring it", filePath))
 
 					continue
@@ -213,7 +216,7 @@ func do(m types.Mail) error {
 	}
 
 	// send mail
-	log.Info("mail", fmt.Sprintf("sending message (%d attachments)",
+	log.Info(log.ContextMail, fmt.Sprintf("sending message (%d attachments)",
 		len(msg.GetAttachments())))
 
 	client, err := mail.NewClient(ma.HostName, mail.WithPort(int(ma.HostPort)),
@@ -250,7 +253,7 @@ func do(m types.Mail) error {
 	if err := client.Close(); err != nil {
 		// some mail services do not cleanly close their connections
 		// we should not care too much if the email was successfully sent - still warn as this is not correct behavior
-		log.Warning("mail", "failed to disconnect from SMTP server", err)
+		log.Warning(log.ContextMail, "failed to disconnect from SMTP server", err)
 	}
 
 	// add to mail traffic log

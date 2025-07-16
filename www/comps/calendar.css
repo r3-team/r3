@@ -41,12 +41,12 @@
 .calendar-days.scroll{
 	overflow:auto;
 }
-.calendar-days .labels{
+.calendar-days-labels{
 	width:60px;
 	display:flex;
 	flex-flow:column nowrap;
 }
-.calendar-days .labels span{
+.calendar-days-labels span{
 	padding:2px 6px;
 	box-sizing:border-box;
 	text-align:right;
@@ -54,7 +54,7 @@
 	background-color:var(--color-bg);
 	border-bottom:1px dotted var(--color-border);
 }
-.calendar-days .labels.fullDay span{
+.calendar-days-labels.fullDay span{
 	overflow:hidden;
 	border-bottom:none;
 }
@@ -89,6 +89,10 @@
 	line-height:30px;
 	background-color:var(--color-bg);
 	border-bottom:1px solid var(--color-border);
+}
+.calendar-days .header.today{
+	font-weight:bold;
+	text-decoration:underline;
 }
 .calendar-days .events-full{
 	flex:0 0 auto;
@@ -150,7 +154,6 @@
 	display:flex;
 	flex-flow:column nowrap;
 	border-radius:3px;
-	overflow:auto;
 }
 .calendar-month.scroll{
 	overflow:auto;
@@ -211,12 +214,8 @@
 }
 .calendar-month .day.today h1{
 	color:var(--color-font);
-}
-.calendar-month .day.today h1::before{
-	content:"[";
-}
-.calendar-month .day.today h1::after{
-	content:"]";
+	font-weight:bold;
+	text-decoration:underline;
 }
 
 /* full day event */

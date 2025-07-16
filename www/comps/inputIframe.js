@@ -3,14 +3,17 @@ export {MyInputIframe as default};
 let MyInputIframe = {
 	name:'my-input-iframe',
 	template:`<div class="input-iframe">
-		<div class="input-iframe-actions row gap" v-if="!hideInputs" :class="{ readonly:readonly }">
-			<input class="input-iframe-input" data-is-input="1"
-				v-model="srcInput"
-				@keyup.enter="set"
-				:class="{ monospace }"
-				:disabled="readonly"
-				:placeholder="capGen.threeDots"
-			/>
+		<div class="input-toolbar" v-if="!hideInputs" :class="{ readonly:readonly }">
+			<div class="row grow default-inputs">
+				<slot name="input-icon" />
+				<input class="dynamic" data-is-input="1"
+					v-model="srcInput"
+					@keyup.enter="set"
+					:class="{ monospace }"
+					:disabled="readonly"
+					:placeholder="capGen.threeDots"
+				/>
+			</div>
 			<my-button image="ok.png"
 				v-if="!readonly"
 				@trigger="set"
@@ -59,6 +62,10 @@ let MyInputIframe = {
 				}
 			},
 			immediate:true
+		},
+		modelValue(v) {
+			if(v === null && this.srcInput !== '') return this.srcInput = '';
+			if(v !== this.srcInput)                return this.srcInput = v;
 		}
 	},
 	data() {

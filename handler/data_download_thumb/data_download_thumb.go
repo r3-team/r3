@@ -15,8 +15,6 @@ import (
 	"time"
 )
 
-var logContext = "data_download_thumb"
-
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if blocked := bruteforce.Check(r); blocked {
@@ -33,7 +31,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// get authentication token
 	token, err := handler.ReadGetterFromUrl(r, "token")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataDownloadThumb, err, handler.ErrGeneral)
 		return
 	}
 
@@ -42,12 +40,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	defer ctxCanc()
 
-	// check token, any login is generally allowed to attempt a download
-	var loginId int64
-	var admin bool
-	var noAuth bool
-	if _, _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
+	// authenticate via token
+	login, err := login_auth.Token(ctx, token)
+	if err != nil {
+		handler.AbortRequest(w, handler.ContextDataDownloadThumb, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}
@@ -55,18 +51,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// parse other getters
 	attributeId, err := handler.ReadUuidGetterFromUrl(r, "attribute_id")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataDownloadThumb, err, handler.ErrGeneral)
 		return
 	}
 	fileId, err := handler.ReadUuidGetterFromUrl(r, "file_id")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataDownloadThumb, err, handler.ErrGeneral)
 		return
 	}
 
 	// check file access privilege
-	if err := data.MayAccessFile(loginId, attributeId); err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrUnauthorized)
+	if err := data.MayAccessFile(login.Id, attributeId); err != nil {
+		handler.AbortRequest(w, handler.ContextDataDownloadThumb, err, handler.ErrUnauthorized)
 		return
 	}
 
@@ -75,7 +71,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = os.Stat(filePath)
 	if err != nil && !os.IsNotExist(err) {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataDownloadThumb, err, handler.ErrGeneral)
 		return
 	}
 
@@ -86,7 +82,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		version, err := data.FileGetLatestVersion(fileId)
 		if err != nil {
-			handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextDataDownloadThumb, err, handler.ErrGeneral)
 			return
 		}
 		filePathSrc := data.GetFilePathVersion(fileId, version)

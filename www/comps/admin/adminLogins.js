@@ -87,6 +87,7 @@ let MyAdminLogins = {
 						</td>
 						<td class="bools">{{ l.admin ? capGen.option.yes : capGen.option.no }}</td>
 						<td class="bools">{{ l.ldapId !== null ? capGen.option.yes : capGen.option.no }}</td>
+						<td class="bools">{{ l.oauthClientId !== null ? capGen.option.yes : capGen.option.no }}</td>
 						<td class="bools">{{ l.noAuth ? capGen.option.yes : capGen.option.no }}</td>
 						<td class="bools">{{ l.limited ? capGen.option.yes : capGen.option.no }}</td>
 						<td class="bools">{{ l.active ? capGen.option.yes : capGen.option.no }}</td>
@@ -98,10 +99,12 @@ let MyAdminLogins = {
 			<my-admin-login
 				v-if="loginIdOpen !== null"
 				@close="loginIdOpen = null;get()"
+				@set-login-id="loginIdOpen = $event"
 				:ldaps="ldaps"
 				:loginId="loginIdOpen"
 				:loginForms="loginForms"
 				:loginFormLookups="loginFormLookups"
+				:oauthClients="oauthClients"
 			/>
 		</div>
 	</div>`,
@@ -113,6 +116,7 @@ let MyAdminLogins = {
 			// data
 			ldaps:[],
 			logins:[],
+			oauthClientIdMap:{},
 			
 			// state
 			byString:'',
@@ -122,10 +126,17 @@ let MyAdminLogins = {
 			orderAsc:true,
 			orderBy:'name',
 			total:0,
-			titles:['name','admin','ldap','noAuth','limited','active']
+			titles:['name','admin','ldap','oauth','noAuth','limited','active']
 		};
 	},
 	computed:{
+		oauthClients:(s) => {
+			let out = [];
+			for(const k in s.oauthClientIdMap) {
+				out.push(s.oauthClientIdMap[k]);
+			}
+			return out;
+		},
 		loginForms:(s) => {
 			let out = [];
 			for(let m of s.modules) {
@@ -154,6 +165,7 @@ let MyAdminLogins = {
 	mounted() {
 		this.get();
 		this.getLdaps();
+		this.getOauthClients();
 		this.$store.commit('pageTitle',this.menuTitle);
 	},
 	methods:{
@@ -211,6 +223,12 @@ let MyAdminLogins = {
 		getLdaps() {
 			ws.send('ldap','get',{},true).then(
 				res => this.ldaps = res.payload,
+				this.$root.genericError
+			);
+		},
+		getOauthClients() {
+			ws.send('oauthClient','get',{},true).then(
+				res => this.oauthClientIdMap = res.payload,
 				this.$root.genericError
 			);
 		}

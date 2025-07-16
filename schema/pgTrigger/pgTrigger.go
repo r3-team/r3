@@ -73,7 +73,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, trg types.PgTrigger) error {
 		return err
 	}
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &trg.Id, "pg_trigger", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &trg.Id, schema.DbPgTrigger, "id")
 	if err != nil {
 		return err
 	}

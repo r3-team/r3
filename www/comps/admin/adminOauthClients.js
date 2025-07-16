@@ -29,14 +29,14 @@ let MyAdminOauthClients = {
 		<div class="content grow">
 			<div class="generic-entry-list wide">
 				<div class="entry clickable"
-					v-for="(e,k) in oauthClientIdMap"
-					@click="idOpen = e.id"
-					:key="e.id"
-					:title="e.name"
+					v-for="(c,k) in oauthClientIdMap"
+					@click="idOpen = c.id"
+					:key="c.id"
+					:title="c.name"
 				>
 					<div class="lines">
-						<span>{{ e.name }}</span>
-						<span class="subtitle">{{ capApp.dateExpiry + ': ' + getUnixFormat(e.dateExpiry,settings.dateFormat) }}</span>
+						<span>{{ c.name }}</span>
+						<span class="subtitle">{{ subtitle(c) }}</span>
 					</div>
 				</div>
 			</div>
@@ -46,6 +46,7 @@ let MyAdminOauthClients = {
 				@close="idOpen = null;get()"
 				@makeNew="idOpen = 0"
 				:id="idOpen"
+				:loginTemplates="loginTemplates"
 				:oauthClientIdMap="oauthClientIdMap"
 				:readonly="!licenseValid"
 			/>
@@ -56,6 +57,7 @@ let MyAdminOauthClients = {
 	},
 	data() {
 		return {
+			loginTemplates:[],
 			oauthClientIdMap:[],
 			idOpen:null
 		};
@@ -74,11 +76,27 @@ let MyAdminOauthClients = {
 	methods:{
 		// externals
 		getUnixFormat,
+
+		// presentation
+		subtitle(c) {
+			let parts = [`${this.capApp.option.flow[c.flow]}`];
+			
+			if(c.dateExpiry !== null)
+				parts.push(`${this.capApp.dateExpiry}: ${getUnixFormat(c.dateExpiry,this.settings.dateFormat)}`);
+
+			return parts.join(', ');
+		},
 		
 		// backend calls
 		get() {
-			ws.send('oauthClient','get',true).then(
-				res => this.oauthClientIdMap = res.payload,
+			ws.sendMultiple([
+				ws.prepare('oauthClient','get',{}),
+				ws.prepare('loginTemplate','get',{byId:0})
+			],true).then(
+				res => {
+					this.oauthClientIdMap = res[0].payload;
+					this.loginTemplates   = res[1].payload;
+				},
 				this.$root.genericError
 			);
 		}

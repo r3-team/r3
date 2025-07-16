@@ -32,7 +32,7 @@ import (
 //	dependent app version, release date) will be updated
 func ExportToFile(ctx context.Context, moduleId uuid.UUID, zipFilePath string) error {
 
-	log.Info("transfer", fmt.Sprintf("start export for module %s", moduleId))
+	log.Info(log.ContextTransfer, fmt.Sprintf("start export for module %s", moduleId))
 
 	if exportKey == "" {
 		return errors.New("no export key for module signing set")
@@ -90,7 +90,7 @@ func export_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, filePaths *[]
 		return err
 	}
 
-	log.Info("transfer", fmt.Sprintf("exporting module '%s' (owner: %v)",
+	log.Info(log.ContextTransfer, fmt.Sprintf("exporting module '%s' (owner: %v)",
 		file.Content.Module.Name, isOwner))
 
 	// user is not owner, export original version

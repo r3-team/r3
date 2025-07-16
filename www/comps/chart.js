@@ -1,5 +1,4 @@
-import {getChoiceFilters} from './shared/form.js';
-import {getCaption}       from './shared/language.js';
+import {getCaption} from './shared/language.js';
 import {
 	getQueryExpressions,
 	getRelationsJoined
@@ -9,28 +8,21 @@ import {
 	getUtcTimeStringFromUnix
 } from './shared/time.js';
 
-export {MyChart as default};
-
-let MyChart = {
+export default {
 	name:'my-chart',
-	components:{
-		echarts:VueECharts
-	},
+	components:{ echarts:VueECharts },
 	template:`<div class="chart">
-		<div class="top lower" v-if="needsHeader || hasChoices">
-			<template v-if="hasChoices">
-				<div class="area" />
-				<div class="area">
-					<select class="selector"
-						v-model="choiceId"
-						@change="choiceIdSet($event.target.value)"
-					>
-						<option v-for="c in choices" :value="c.id">
-							{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
-						</option>
-					</select>
-				</div>
-			</template>
+		<div class="input-toolbar default-inputs" v-if="needsHeader || hasChoices">
+			<div></div>
+			<select class="auto"
+				@change="$emit('set-login-option','choiceId',$event.target.value)"
+				v-if="hasChoices"
+				:value="choiceId"
+			>
+				<option v-for="c in choices" :value="c.id">
+					{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
+				</option>
+			</select>
 		</div>
 		<echarts ref="chart"
 			v-if="ready"
@@ -45,15 +37,16 @@ let MyChart = {
 		formLoading:    { type:Boolean, required:true },
 		isHidden:       { type:Boolean, required:true },
 		limit:          { type:Number,  required:true },
+		loginOptions:   { type:Object,  required:true },
 		moduleId:       { type:String,  required:true },
 		needsHeader:    { type:Boolean, required:true },
 		optionJson:     { type:String,  required:true },  // general chart options object, as JSON
 		optionOverwrite:{ required:false, default:null }, // overwrite entire echarts option object (incl. data)
 		query:          { type:Object,  required:true }
 	},
+	emits:['set-login-option'],
 	data() {
 		return {
-			choiceId:null,
 			option:{},
 			ready:false
 		};
@@ -70,9 +63,11 @@ let MyChart = {
 		},
 		
 		// simple
-		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
-		hasChoices:   (s) => s.choices.length > 1 && !s.hasOverwrite,
-		hasOverwrite: (s) => s.optionOverwrite !== null,
+		hasChoices:  (s) => s.choices.length > 1 && !s.hasOverwrite,
+		hasOverwrite:(s) => s.optionOverwrite !== null,
+
+		// login options
+		choiceId:(s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -100,9 +95,6 @@ let MyChart = {
 					return this.get();
 			}
 		});
-		
-		// set default choice
-		this.choiceId = this.choices.length > 0 ? this.choices[0].id : null;
 
 		// set option overwrite, if enabled
 		if(this.optionOverwrite !== null) {
@@ -113,16 +105,12 @@ let MyChart = {
 	methods:{
 		// externals
 		getCaption,
-		getChoiceFilters,
 		getQueryExpressions,
 		getRelationsJoined,
 		getUnixFormat,
 		getUtcTimeStringFromUnix,
 		
 		// actions
-		choiceIdSet() {
-			this.get();
-		},
 		resized() {
 			if(typeof this.$refs.chart !== 'undefined')
 				this.$refs.chart.resize();
@@ -138,7 +126,7 @@ let MyChart = {
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.query.joins),
 				expressions:this.getQueryExpressions(this.columns),
-				filters:this.filters.concat(this.choiceFilters),
+				filters:this.filters,
 				orders:this.query.orders,
 				limit:this.limit
 			},true).then(

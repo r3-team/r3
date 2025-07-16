@@ -100,11 +100,10 @@ let MyBuilderCollection = {
 				
 					<!-- collection query columns -->
 					<div class="builder-collection-columns-active">
-						<h2>{{ capApp.columnsTarget }}</h2>
+						<h2>{{ capGen.columnsActive }}</h2>
 						<my-builder-columns groupName="columns"
 							@columns-set="columns = $event"
 							@column-id-show="toggleColumnOptions($event)"
-							@column-remove=""
 							:builderLanguage="builderLanguage"
 							:columnIdShow="columnIdShow"
 							:columns="columns"
@@ -115,7 +114,7 @@ let MyBuilderCollection = {
 					</div>
 					
 					<div class="builder-collection-columns-available">
-						<h2>{{ capApp.columnsAvailable }}</h2>
+						<h2>{{ capGen.columnsAvailable }}</h2>
 						<div class="builder-collection-column-templates">
 							<my-builder-column-templates groupName="batches_columns"
 								@column-add="columns.push($event)"
@@ -168,7 +167,7 @@ let MyBuilderCollection = {
 				<!-- column settings -->
 				<template v-if="columnShow !== false">
 					<br />
-					<h3 class="selected-ref">{{ capApp.columnSettings }}</h3>
+					<h3 class="selected-ref">{{ capGen.columnSettings }}</h3>
 					
 					<my-builder-query
 						v-if="columnShow.subQuery"
@@ -286,8 +285,9 @@ let MyBuilderCollection = {
 			// state
 			columnIdShow:null,
 			filtersDisable:[
-				'collection','formChanged','field','fieldChanged','fieldValid',
-				'formState','getter','javascript','record','recordNew','variable'
+				'collection','field','fieldChanged','fieldValid','formChanged',
+				'formState','getter','globalSearch','javascript','record','recordMayCreate',
+				'recordMayDelete','recordMayUpdate','recordNew','variable'
 			],
 			showPreview:false,
 			showSidebar:true,
@@ -333,7 +333,6 @@ let MyBuilderCollection = {
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
-		settings:       (s) => s.$store.getters.settings,
 		capApp:         (s) => s.$store.getters.captions.builder.collection,
 		capGen:         (s) => s.$store.getters.captions.generic
 	},

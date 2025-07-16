@@ -3,10 +3,11 @@ package login
 import (
 	"context"
 	"fmt"
-	"r3/cluster"
 	"r3/db"
 	"r3/log"
+	"r3/login/login_clusterEvent"
 	"r3/login/login_meta"
+	"r3/login/login_metaMap"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -76,50 +77,7 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 		if err != nil {
 			return err
 		}
-		if ldap.LoginMetaAttributes.Department != "" && meta.Department != metaEx.Department {
-			metaEx.Department = meta.Department
-			metaChanged = true
-		}
-		if ldap.LoginMetaAttributes.Email != "" && meta.Email != metaEx.Email {
-			metaEx.Email = meta.Email
-			metaChanged = true
-		}
-		if ldap.LoginMetaAttributes.Location != "" && meta.Location != metaEx.Location {
-			metaEx.Location = meta.Location
-			metaChanged = true
-		}
-		if ldap.LoginMetaAttributes.NameDisplay != "" && meta.NameDisplay != metaEx.NameDisplay {
-			metaEx.NameDisplay = meta.NameDisplay
-			metaChanged = true
-		}
-		if ldap.LoginMetaAttributes.NameFore != "" && meta.NameFore != metaEx.NameFore {
-			metaEx.NameFore = meta.NameFore
-			metaChanged = true
-		}
-		if ldap.LoginMetaAttributes.NameSur != "" && meta.NameSur != metaEx.NameSur {
-			metaEx.NameSur = meta.NameSur
-			metaChanged = true
-		}
-		if ldap.LoginMetaAttributes.Notes != "" && meta.Notes != metaEx.Notes {
-			metaEx.Notes = meta.Notes
-			metaChanged = true
-		}
-		if ldap.LoginMetaAttributes.Organization != "" && meta.Organization != metaEx.Organization {
-			metaEx.Organization = meta.Organization
-			metaChanged = true
-		}
-		if ldap.LoginMetaAttributes.PhoneFax != "" && meta.PhoneFax != metaEx.PhoneFax {
-			metaEx.PhoneFax = meta.PhoneFax
-			metaChanged = true
-		}
-		if ldap.LoginMetaAttributes.PhoneLandline != "" && meta.PhoneLandline != metaEx.PhoneLandline {
-			metaEx.PhoneLandline = meta.PhoneLandline
-			metaChanged = true
-		}
-		if ldap.LoginMetaAttributes.PhoneMobile != "" && meta.PhoneMobile != metaEx.PhoneMobile {
-			metaEx.PhoneMobile = meta.PhoneMobile
-			metaChanged = true
-		}
+		metaEx, metaChanged = login_metaMap.UpdateChangedMeta(ldap.LoginMetaMap, metaEx, meta)
 	}
 
 	// abort if no changes are there to apply
@@ -135,30 +93,20 @@ func SetLdapLogin(ldap types.Ldap, ldapKey string, name string,
 		roleIdsEx = roleIds
 	}
 
-	log.Info("ldap", fmt.Sprintf("user account '%s' is new or has been changed, updating login", name))
+	log.Info(log.ContextLdap, fmt.Sprintf("user account '%s' is new or has been changed, updating login", name))
 
-	if _, err := Set_tx(ctx, tx, loginId, ldap.LoginTemplateId, ldapIdSql, ldapKeySql, name, "",
-		adminEx, false, active, pgtype.Int4{}, metaEx, roleIdsEx, []types.LoginAdminRecordSet{}); err != nil {
+	if _, err := Set_tx(ctx, tx, loginId, ldap.LoginTemplateId, ldapIdSql, ldapKeySql, pgtype.Int4{},
+		pgtype.Text{}, pgtype.Text{}, name, "", adminEx, false, active, pgtype.Int4{}, metaEx, roleIdsEx,
+		[]types.LoginAdminRecordSet{}); err != nil {
 
 		return err
 	}
 
-	// roles needed to be changed for active login, reauthorize
 	if active && rolesChanged {
-		log.Info("ldap", fmt.Sprintf("user account '%s' received new roles, renewing access permissions", name))
-
-		if err := cluster.LoginReauthorized_tx(ctx, tx, true, loginId); err != nil {
-			log.Warning("ldap", fmt.Sprintf("could not renew access permissions for '%s'", name), err)
-		}
+		login_clusterEvent.Reauth_tx(ctx, tx, loginId, name)
 	}
-
-	// login was disabled, kick
 	if !active && activeEx {
-		log.Info("ldap", fmt.Sprintf("user account '%s' is locked, kicking active sessions", name))
-
-		if err := cluster.LoginDisabled_tx(ctx, tx, true, loginId); err != nil {
-			log.Warning("ldap", fmt.Sprintf("could not kick active sessions for '%s'", name), err)
-		}
+		login_clusterEvent.Kick_tx(ctx, tx, loginId, name)
 	}
 	return tx.Commit(ctx)
 }

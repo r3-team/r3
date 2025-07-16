@@ -170,7 +170,7 @@ func cleanUpFiles() error {
 
 				// if deletion fails, abort and keep its reference as file might be in access
 				if err := os.Remove(filePath); err != nil {
-					log.Warning("server", "failed to remove old file version", err)
+					log.Warning(log.ContextServer, "failed to remove old file version", err)
 					continue
 				}
 			}
@@ -190,7 +190,7 @@ func cleanUpFiles() error {
 			break
 		}
 
-		log.Info("server", fmt.Sprintf("successfully cleaned up %d file versions (no retention)",
+		log.Info(log.ContextServer, fmt.Sprintf("successfully cleaned up %d file versions (no retention)",
 			removeCnt))
 
 		// limit not reached this loop, we are done
@@ -240,7 +240,7 @@ func cleanUpFiles() error {
 				// referenced file version exists, attempt to delete it
 				// if deletion fails, abort and keep its reference as file might be in access
 				if err := os.Remove(filePath); err != nil {
-					log.Warning("server", "failed to remove old file version", err)
+					log.Warning(log.ContextServer, "failed to remove old file version", err)
 					continue
 				}
 
@@ -259,7 +259,7 @@ func cleanUpFiles() error {
 			filePathThumb := data.GetFilePathThumb(fileId)
 			if exists, _ := tools.Exists(filePathThumb); exists {
 				if err := os.Remove(filePathThumb); err != nil {
-					log.Warning("server", "failed to remove old file thumbnail", err)
+					log.Warning(log.ContextServer, "failed to remove old file thumbnail", err)
 					continue
 				}
 			}
@@ -282,7 +282,7 @@ func cleanUpFiles() error {
 		if tag.RowsAffected() == 0 {
 			break
 		}
-		log.Info("server", fmt.Sprintf("successfully cleaned up %d files (deleted/unassigned)",
+		log.Info(log.ContextServer, fmt.Sprintf("successfully cleaned up %d files (deleted/unassigned)",
 			tag.RowsAffected()))
 
 		// limit not reached this loop, we are done

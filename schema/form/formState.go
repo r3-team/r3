@@ -150,7 +150,7 @@ func setStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, states []typ
 // sets new/existing form state, returns form state ID
 func setState_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID, error) {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &state.Id, "form_state", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &state.Id, schema.DbFormState, "id")
 	if err != nil {
 		return state.Id, err
 	}

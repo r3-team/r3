@@ -45,6 +45,7 @@
 			"bruteforceAttempts": "حظر المضيفين بعد المحاولات",
 			"bruteforceCountBlocked": "المضيفين المحظورين",
 			"bruteforceCountTracked": "المضيفين المتعقبين",
+			"bruteforceDesc": "<p>This feature blocks clients, if they attempt to access the system repeatedly with invalid authentication. It is sensible for operation in the cloud, where public access is possible.</p><p>It does not make sense for local deployments or if the system is operated with a reverse proxy.</p>",
 			"bruteforceProtection": "تمكين الحماية من القوة الغاشمة",
 			"bruteforceTitle": "حماية القوة الغاشمة",
 			"builderMode": "وضع البناء",
@@ -155,7 +156,6 @@
 			"bindUserDnHint": "على سبيل المثال: CN=للقراءة فقط،OU=المستخدم،DC=mycompany،DC=محلي",
 			"bindUserPw": "ربط كلمة مرور المستخدم",
 			"button": {
-				"expert": "إعدادات الخبراء",
 				"import": "استيراد تسجيلات الدخول الآن",
 				"new": "إضافة اتصال",
 				"test": "اتصال الاختبار"
@@ -166,7 +166,6 @@
 				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "تم اختبار الاتصال بنجاح"
 			},
-			"groupDn": "الاسم المميز للمجموعة",
 			"groupDnHint": "مثال: CN=Admin_User،OU=Group،DC=mycompany،DC=local",
 			"host": "يستضيف",
 			"hostHint": "اسم مضيف LDAP",
@@ -174,27 +173,14 @@
 			"keyAttributeHint": "على سبيل المثال: objectGUID",
 			"loginAttribute": "سمة تسجيل الدخول",
 			"loginAttributeHint": "على سبيل المثال: sAMAccountName",
+			"loginMetaMap": "Map user details to LDAP attributes",
 			"memberAttribute": "صفة العضو",
 			"memberAttributeHint": "مثال: عضو",
-			"metaHint": {
-				"department": "Example: department",
-				"email": "Example: mail",
-				"location": "Example: physicalDeliveryOfficeName",
-				"nameDisplay": "Example: displayName",
-				"nameFore": "Example: givenName",
-				"nameSur": "Example: sn",
-				"notes": "Example: description",
-				"organization": "Example: company",
-				"phoneFax": "Example: facsimileTelephoneNumber",
-				"phoneLandline": "Example: telephoneNumber",
-				"phoneMobile": "Example: mobile"
-			},
 			"msAdExt": "ملحقات إعلان مايكروسوفت",
 			"msAdExtHint": "عضويات المجموعة المتداخلة، والتحكم في حساب المستخدم",
 			"nameHint": "اسم فريد",
 			"port": "ميناء",
 			"portHint": "بشكل افتراضي 389، 636 لـ SSL/TLS",
-			"role": "دور",
 			"searchClass": "فئة الكائن",
 			"searchClassHint": "مثال: مستخدم",
 			"searchDn": "البحث في الاسم المميز",
@@ -236,7 +222,6 @@
 			},
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف تسجيل الدخول هذا؟<br /><br />هذا الإجراء لا رجعة فيه.</b>",
-				"notUniqueEmail": "The same email address has also been assigned to a different user.",
 				"notUniqueName": "The same username has already been assigned to a different user.",
 				"resetTotp": "سيؤدي هذا إلى إعادة تعيين كافة أساليب المصادقة متعددة العوامل (MFA) لتسجيل الدخول هذا. <br /><br />ليس لإعادة ضبط MFA أي تأثير على التشفير الشامل.<br /><br />هل تريد الاستمرار؟"
 			},
@@ -249,7 +234,6 @@
 				"name": "اسم مستخدم تسجيل الدخول - يجب أن يكون فريدًا داخل النظام.",
 				"noAuth": "تسجيلات الدخول العامة لا تتطلب المصادقة. ",
 				"password": "سيؤدي هذا إلى استبدال كلمة المرور الحالية لتسجيل الدخول هذا. ",
-				"template": "يتم تطبيق الإعدادات المحددة مسبقًا (خيارات العرض والموضوع) من القالب المختار.",
 				"tokenExpiryHours": "يقوم بالكتابة فوق الإعداد العام للحد الأقصى. "
 			},
 			"ldap": "تم تعيين LDAP",
@@ -257,27 +241,15 @@
 			"ldapMeta": "Details are imported via LDAP",
 			"limited": "Limited user",
 			"limitedDesc": "When a user has at most a single role assigned, it counts as a 'limited' user. Useful for when only access to parts of an application is needed for things like request handling or form submission.<br /><br />Limited users cannot have admin or public access and take from a separate license pool.",
-			"meta": {
-				"department": "Department",
-				"email": "Email",
-				"location": "Location",
-				"nameDisplay": "Display name",
-				"nameFore": "Forename",
-				"nameSur": "Surname",
-				"notes": "Description",
-				"organization": "Organization",
-				"phone": "Phone",
-				"phoneFax": "Fax",
-				"phoneLandline": "Landline",
-				"phoneMobile": "Mobile"
-			},
 			"noAuth": "الوصول العام",
+			"oauth": "OAuth client",
+			"oauthAssignActive": "Roles are assigned by ID token claim",
+			"oauthMeta": "Details are set by ID token claims",
 			"password": "تعيين كلمة مرور جديدة",
 			"roleContentAdmin": "مسؤل",
 			"roleContentOther": "خاص",
 			"roleContentUser": "مستخدم",
 			"roles": "الأدوار المعينة ({COUNT})",
-			"template": "قالب تسجيل الدخول",
 			"title": "تسجيل الدخول '{NAME}'",
 			"titleLimited": "Limited user '{NAME}'",
 			"titleNew": "تسجيل دخول جديد",
@@ -287,9 +259,27 @@
 				"ldap": "LDAP",
 				"limited": "Limited",
 				"name": "Name",
-				"noAuth": "Public"
+				"noAuth": "Public",
+				"oauth": "OAuth client"
 			},
 			"tokenExpiryHours": "الأعلى. "
+		},
+		"loginMeta": {
+			"department": "Department",
+			"dialog": {
+				"notUniqueEmail": "The same email address has also been assigned to a different user."
+			},
+			"email": "Email",
+			"location": "Location",
+			"nameDisplay": "Display name",
+			"nameFore": "Forename",
+			"nameSur": "Surname",
+			"notes": "Description",
+			"organization": "Organization",
+			"phone": "Phone",
+			"phoneFax": "Fax",
+			"phoneLandline": "Landline",
+			"phoneMobile": "Mobile"
 		},
 		"loginSessions": {
 			"noData": "No sessions available",
@@ -326,10 +316,12 @@
 				"cache": "مخبأ",
 				"cluster": "تَجَمَّع",
 				"csv": "استيراد/تصدير ملف CSV",
+				"file": "File processing",
 				"imager": "معالجة الصور",
 				"ldap": "لداب",
 				"mail": "بريد",
 				"module": "التطبيقات",
+				"oauth": "OAuth client",
 				"scheduler": "مجدول",
 				"server": "الخادم",
 				"transfer": "تحويل",
@@ -460,6 +452,14 @@
 		"navigationScheduler": "مجدول",
 		"navigationSystemMsg": "System message",
 		"oauthClient": {
+			"button": {
+				"defaultO365": "Defaults: Exchange Online",
+				"defaultOpenId": "Defaults: Open ID Connect"
+			},
+			"claimRoles": "Roles claim",
+			"claimRolesHint": "Name of the claim field, which contains user roles or groups. If set, REI3 roles can be mapped to values in this claim. Value must be a JSON string array, such as: [\"all-users\", \"department-it\"]",
+			"claimUsername": "Username claim",
+			"claimUsernameHint": "Name of the claim field, which contains the username. Must be filled. Usernames must be unique for an OAuth client.",
 			"clientId": "معرف العميل",
 			"clientIdHint": "تم إنشاؤه من جانب الموفر عند إنشاء عميل OAuth2.",
 			"clientSecret": "سر العميل",
@@ -469,23 +469,29 @@
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف عميل OAuth هذا؟<br /><br />هذا الإجراء لا رجعة فيه.</b>"
 			},
-			"intro": "يقوم عميل OAuth بالمصادقة ضد موفر الهوية لتنفيذ الإجراءات أو الوصول إلى الموارد.<br /><br />ينفذ REI3 \"تدفق منح بيانات اعتماد عميل OAuth 2.0\"، والذي يتطلب تسجيل عميل OAuth لدى الموفر قبل أن يتم إعداده هنا.",
+			"flow": "OAuth flow",
+			"loginMetaMap": "Update user details via claims",
 			"nameHint": "اسم داخلي للإشارة إلى عميل OAuth داخل REI3.",
 			"option": {
-				"template": {
-					"custom": "-",
-					"ms365_mail": "بريد O365"
+				"flow": {
+					"authCodePkce": "Authentication Code with PKCE",
+					"clientCreds": "Client credentials"
+				},
+				"flowHint": {
+					"authCodePkce": "<p>This flow is used in REI3 to authenticate users via external identity providers, such as Keycloak or Microsoft Entra ID.</p><p>'Authentication Code with Proof Key for Code Exchange' is an Open ID Connect flow. Users are forwarded to authenticate with an identity provider. After authentication, a user is redirected back to REI3 with verification of identity and user meta data.</p>",
+					"clientCreds": "<p>This flow is used in REI3 to authenticate itself against a service, such as Exchange Online.</p><p>'Client Credentials' is an OAuth 2.0 flow, with which REI3 authenticates against a service provider, to receive access to protected resources such as a mailbox. Any resource accessed via the 'Client Credentials' flow should belong to the client (in this case REI3) - it is not designed to access user resources directly or on behalf.</p><p>This flow is currently only used for access to mail resources.</p>"
 				}
 			},
+			"providerUrl": "Provider URL",
+			"providerUrlHint": "URL of the chosen provider for its OAuth service discovery, often called 'Issuer URL'.",
+			"redirectUrl": "Redirect URL",
+			"redirectUrlHint": "Users are redirected here after authentication. Should be the login URL of REI3. Must also be registered at the service provider.",
 			"scopes": "النطاقات",
 			"scopesHint": "تخبر النطاقات الموفر بما يرغب عميل OAuth في فعله أو الوصول إليه. ",
-			"template": "نموذج",
-			"templateHint": "حدد قالبًا لتطبيق الإعدادات الافتراضية على الموفرين المعروفين.",
-			"tenant": "مستأجر",
-			"tenantHint": "مطلوب لبعض مقدمي الخدمات. ",
 			"title": "عميل OAuth '{NAME}'",
 			"titleNew": "عميل OAuth الجديد",
 			"tokenUrl": "عنوان URL للرمز المميز",
+			"tokenUrlExample": "Example for Exchange Online: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
 			"tokenUrlHint": "عنوان URL الخاص بمكان إنشاء رموز OAuth2. "
 		},
 		"repo": {
@@ -538,6 +544,7 @@
 				"clusterCheckIn": "تسجيل الدخول الجماعي",
 				"clusterProcessEvents": "معالجة الأحداث الجماعية",
 				"dbOptimize": "تحسين قاعدة البيانات",
+				"filesProcess": "File job processing",
 				"httpCertRenew": "أعد تحميل شهادة SSL إذا تم تحديثها",
 				"importLdapLogins": "استيراد تسجيلات الدخول والأدوار عبر LDAP",
 				"mailAttach": "نقل مرفق البريد الإلكتروني",
@@ -589,9 +596,6 @@
 				"versionNewHint": "يكرر واجهة برمجة التطبيقات هذه برقم إصدار جديد."
 			},
 			"calls": "المكالمات",
-			"columnSettings": "إعدادات العمود",
-			"columnsAvailable": "الأعمدة المتاحة",
-			"columnsTarget": "الأعمدة النشطة",
 			"content": "نوع واجهة برمجة التطبيقات",
 			"contentValue": "استراحة",
 			"dialog": {
@@ -776,23 +780,17 @@
 			"titleNew": "حدث العميل الجديد"
 		},
 		"collection": {
-			"columnSettings": "إعدادات العمود",
-			"columnsAvailable": "الأعمدة المتاحة",
-			"columnsTarget": "الأعمدة النشطة",
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف هذه المجموعة؟"
 			},
 			"inHeader": "تظهر في الرأس",
-			"new": "مجموعة جديدة",
 			"previewHint": "قيم المجموعة للمستخدم الذي قام بتسجيل الدخول. ",
-			"query": "استفسار",
 			"title": "المجموعات",
 			"titleOne": "المجموعة \"{NAME}\""
 		},
 		"collectionInput": {
 			"collection": "مجموعة",
 			"column": "القيمة (القيم) من العمود",
-			"formIdOpen": "فتح النموذج",
 			"multiValue": "مدخلات متعددة",
 			"noDisplayEmpty": "إخفاء إذا كانت فارغة",
 			"onMobile": "عرض على الجوال",
@@ -815,7 +813,6 @@
 				"columnsAll": "جميع الأعمدة",
 				"layoutColumns": "أعمدة {CNT}."
 			},
-			"category": "محدد الفئة",
 			"chart": {
 				"axisType": "نوع المحور",
 				"axisTypeCategory": "فئة",
@@ -844,6 +841,8 @@
 			"columnLength": "الطول (الحرف)",
 			"columnLength0": "لا يوجد حد",
 			"columnLengthFiles": "File count",
+			"columnNoShrink": "Does not shrink",
+			"columnNoThousandsSep": "No thousands separator",
 			"columnPreviewLarge": "Large preview",
 			"columnShowDefault": "تظهر بشكل افتراضي",
 			"columnShowDefaultMobile": "تظهر بشكل افتراضي على الهاتف المحمول",
@@ -890,6 +889,11 @@
 			"fieldDefault": "القيمة الافتراضية",
 			"fieldDefaultPresetIds": "الإعدادات المسبقة الافتراضية",
 			"fieldDirection": "اتجاه",
+			"fieldFlags": {
+				"hideInputs": "Hide inputs",
+				"relCategory": "Category display",
+				"relFlow": "Progress flow display"
+			},
 			"fieldHelp": "نص المساعدة",
 			"fieldIcon": "أيقونة الحقل",
 			"fieldIdFocus": "ضبط التركيز الميداني على التحميل",
@@ -952,7 +956,6 @@
 			"headerSize": "مقاس",
 			"helpText": "نص المساعدة",
 			"hidden": "الحقل مخفي بشكل افتراضي",
-			"hideInputs": "Hide inputs",
 			"icon": "رمز النموذج",
 			"ics": "اشتراكات آي كال",
 			"jsFunctionButton": "وظيفة عند النقر",
@@ -1073,6 +1076,8 @@
 			"codeReturnsHintJs": "اختياري، \"رقم\"، \"مصفوفة\"،...",
 			"codeReturnsHintPg": "\"نص\"، \"عدد صحيح\"،...",
 			"collectionId": "[اختر المجموعة]",
+			"cost": "Cost",
+			"costHelp": "<b>Expert setting</b><p>Cost is an estimated value that serves to optimize query planning. Changing this value can help optimize performance by letting the query planner know, if this function is expected to run long (expensive / high cost) or short (cheap / low cost).</p><p>Higher values can be sensible for complex functions (such as relation policies), as the query planner will then avoid unnecessary executions by evaluating other things first.</p>",
 			"dialog": {
 				"delete": "هل أنت متأكد أنك تريد حذف هذه الوظيفة؟"
 			},
@@ -1091,6 +1096,7 @@
 				"dialog_show": "app.dialog_show({ARGS}) => وعد<br /><br />يعرض مربع حوار بالعنوان والمحتوى المحددين. <br /><br />يتم تعريف الأزرار من خلال قائمة السلاسل. <br /><br />القيمة التي تم إرجاعها هي فهرس الزر الذي تم النقر عليه. <br /><br /><b>مثال</b><br />app.dialog_show(<blockquote>\"يرجى التأكيد\"،<br />\"هل تريد حقًا حذف هذا العنصر؟\"،<br />['نعم'، 'إلغاء الإجراء']</blockquote>).ثم(<blockquote>res => { if(res === 0) { console.log('تم النقر فوق نعم!'); </blockquote>);",
 				"form_close": "app.form_ Close() => غير محدد<br /><br />يغلق النموذج (إذا كان نموذجًا عائمًا أو فرعيًا)، وإلا فسيعود إلى سجل المتصفح.",
 				"form_open": "app.form_open({ARGS}) => غير محدد<br /><br />يفتح نموذجًا مباشرةً، في علامة تبويب متصفح جديدة أو كنافذة منبثقة.<br /><br />The new form, if opened directly (not as tab or pop-up), adds to the browser history unless the argument 'replace_history' is set to 'true'.",
+				"form_parent_refresh": "app.form_parent_refresh() => UNDEFINED<br /><br />Only relevant when used in child forms (ie. floating window or sub form).<br /><br />When a record is changed on a child form, the parent form refreshes itself automatically; this can be a relationship input showing a newly created record or a list field updating itself to show changed data.<br /><br />In some cases, like when executing changes via a backend function, this cannot be done automatically as the system does not know what or if something changed at all. This function informs the parent form to refresh itself to show changed data. This updates relationship input and data fields like lists or calendars; it does not reload the form record as there might be unsaved changes.",
 				"form_set_title": "app.form_set_title({ARGS}) => غير محدد<br /><br />الكتابة فوق عنوان النموذج الحالي. <i>باطل</i> لإعادة تعيينه إلى عنوان النموذج الأصلي.",
 				"form_show_message": "app.form_show_message({ARGS}) => غير محدد<br /><br />يستبدل عنوان النموذج مؤقتًا برسالة مخصصة. ",
 				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />يوفر فك تشفير مفتاح البيانات مع المفتاح الخاص لتسجيل الدخول الحالي.",
@@ -1210,7 +1216,13 @@
 			"helpPg": {
 				"abort_show_message": "instance.abort_show_message({ARGS}) => باطل<br /><br />يلغي العملية ويرسل رسالة إلى المستخدم المنفذ، والتي يتم عرضها في واجهة المستخدم.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => باطل<br /><br />يحذف مفاتيح بيانات التشفير الشامل للسجلات التي لم يعد بإمكان تسجيل الدخول الوصول إليها. ",
+				"file_export": "instance.file_export({ARGS}) => INTEGER<br /><br />Creates a file processing job to export a given file to disk. Relevant parameters:<ul><li>file_id: File to export, file ID can be retrieved via instance.files_get()</li><li>file_path: Where to export the file to (must end in a filename)</li><li>file_version: Version of the file to export (NULL = latest version)</li><li>overwrite: Overwrite file if one already exists at the defined filepath</li></ul><p>The filepath is always relative to the export path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
+				"file_export_text": "instance.file_export_text({ARGS}) => INTEGER<br /><br />Creates a file processing job to export a given text as a UTF8 text file to disk. Relevant parameters:<ul><li>file_path: Where to export the file to (must end in a filename)</li><li>file_text_content: UTF8 text content</li><li>overwrite: Overwrite file if one already exists at the defined filepath</li></ul><p>The filepath is always relative to the export path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
+				"file_import": "instance.file_import({ARGS}) => INTEGER<br /><br />Creates a file processing job to import a file from disk. Relevant parameters:<ul><li>file_path: Where to import the file from (must end in a filename)</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul><p>The source file is deleted, if the import is successful.</p><p>The filepath is always relative to the import path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
+				"file_import_text": "instance.file_import_text({ARGS}) => INTEGER<br /><br />Creates a file processing job to import a text from a UTF8 text file on disk. Relevant parameters:<ul><li>file_path: Where to import the text file from (must end in a filename)</li><li>callback_function_id: ID of backend function that is called with the imported text, it must have two parameters: file_name TEXT, file_content TEXT</li></ul><p>The source file is deleted, if the import is successful.</p><p>The filepath is always relative to the import path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
 				"file_link": "instance.file_link({ARGS}) => باطل<br /><br />ربط ملف موجود بسجل آخر (يضاف إلى سمة الملف المختار). <br /><br />عند إعادة تسمية الملف أو حذفه، يؤثر التغيير فقط على رابط الملف. ",
+				"file_text_read": "instance.file_text_read({ARGS}) => INTEGER<br /><br />Creates a file processing job to send the content of a UTF8 text file to a callback function. Relevant parameters:<ul><li>callback_function_id: ID of backend function that is called, it must have one parameter: file_content TEXT</li><li>file_id: File to read content from, file ID can be retrieved via instance.files_get()</li><li>file_version: Version of the file to read from (NULL = latest version)</li></ul>",
+				"file_text_write": "instance.file_text_write({ARGS}) => INTEGER<br /><br />Creates a file processing job to create a new UTF8 text file. Relevant parameters:<ul><li>file_name: Name of the file to be created</li><li>file_text_content: UTF8 text content</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul>",
 				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Unlinks an existing file from the files attribute of a specified record. The removed link is a hardlink, meaning that the actual file is kept as long as it is still linked to at least one other records file attribute.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]<br /><br />إرجاع بيانات التعريف للملفات من سمة الملف المختار وسجله (يمكن أن يتضمن الملفات المحذوفة اختياريًا).<br /><br />يتكون النوع الذي تم إرجاعه \"instance.file_meta\" من:<blockquote>معرف UUID,<br />تسجيل الدخول_id_creator عدد صحيح،<br />نص التجزئة,<br />نص الاسم,<br />size_kb عدد صحيح،<br />الإصدار عدد صحيح،<br />date_change بيجينت،<br />date_delete BIGINT</blockquote>",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => نص<br /><br />إرجاع مفتاح البيانات المشفر لسجل العلاقة المحدد وتسجيل الدخول المختار. ",
@@ -1243,11 +1255,42 @@
 					"العلاقة_معرف UUID",
 					"Record_ids_access عدد صحيح[]"
 				],
+				"file_export": [
+					"file_id UUID",
+					"file_path TEXT",
+					"file_version INTEGER DEFAULT NULL",
+					"overwrite BOOLEAN DEFAULT FALSE"
+				],
+				"file_export_text": [
+					"file_path TEXT",
+					"file_text_content TEXT",
+					"overwrite BOOLEAN DEFAULT FALSE"
+				],
+				"file_import": [
+					"file_path TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL"
+				],
+				"file_import_text": [
+					"file_path TEXT",
+					"callback_function_id UUID"
+				],
 				"file_link": [
 					"file_id UUID",
 					"نص اسم الملف",
 					"attribute_id UUID",
 					"Record_id BIGINT"
+				],
+				"file_text_read": [
+					"callback_function_id UUID",
+					"file_id UUID",
+					"file_version INTEGER DEFAULT NULL"
+				],
+				"file_text_write": [
+					"file_name TEXT",
+					"file_text_content TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL"
 				],
 				"file_unlink": [
 					"file_id UUID",
@@ -1525,6 +1568,7 @@
 			"relationEncryption": "التشفير من النهاية إلى النهاية",
 			"relationEncryptionHint": "لتمكين التشفير من طرف إلى طرف (E2EE) للسمات الموجودة في هذه العلاقة. ",
 			"role": "دور جديد",
+			"searchBar": "New search bar",
 			"template": {
 				"loginSync": "User sync function",
 				"mailsFromSpooler": "معالجة البريد الإلكتروني (الوارد)",
@@ -1695,6 +1739,16 @@
 			"title": "الأدوار",
 			"titleOne": "الدور \"{NAME}\""
 		},
+		"searchBar": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this search bar?"
+			},
+			"title": "Search bars",
+			"titleOne": "Search bar '{NAME}'",
+			"warning": {
+				"noSearchInput": "Add at least one 'Global search: User input' filter to apply search query"
+			}
+		},
 		"start": {
 			"appVisible": "التطبيق مرئي للمستخدمين الذين لديهم أدوار معينة",
 			"appVisibleOff": "التطبيق غير مرئي للمستخدمين",
@@ -1848,7 +1902,8 @@
 			"003": "فشل النظام في تشفير قيم السجل. ",
 			"004": "فشل النظام في فك تشفير قيم السجل. ",
 			"005": "فشل النظام في استرداد مفاتيح فك التشفير للسجلات المحددة.",
-			"006": "لم يتم تمكين التشفير الشامل لجميع المستخدمين المحددين - وهؤلاء هم: {NAMES}"
+			"006": "لم يتم تمكين التشفير الشامل لجميع المستخدمين المحددين - وهؤلاء هم: {NAMES}",
+			"007": "End-to-end encryption is waiting for your personal encryption password to be entered in the user settings."
 		},
 		"initCollection": "فشل تحميل المجموعات أثناء تسجيل الدخول: {MSG}"
 	},
@@ -1901,6 +1956,7 @@
 		"nowOffsetHint": "+/- X {الوضع}",
 		"nowOffsetTitle": "إضافة (رقم موجب) أو إزالة (رقم سالب) X أيام/ساعات/دقائق/ثواني من الآن.",
 		"operatorsArray": "صفيف",
+		"operatorsFts": "Full-text search",
 		"operatorsNull": "قيمة فارغة",
 		"operatorsRegex": "Regular expression",
 		"operatorsSets": "مجموعة فرعية",
@@ -1920,6 +1976,7 @@
 				"formChanged": "form has unsaved changes",
 				"formState": "form state",
 				"getter": "URL parameter",
+				"globalSearch": "user search input",
 				"javascript": "جافا سكريبت",
 				"languageCode": "لغة تسجيل الدخول",
 				"login": "معرف تسجيل الدخول",
@@ -1928,6 +1985,9 @@
 				"nowTime": "وقت",
 				"preset": "سجل محدد مسبقا",
 				"record": "معرف السجل",
+				"recordMayCreate": "record may be created",
+				"recordMayDelete": "record may be deleted",
+				"recordMayUpdate": "record may be updated",
 				"recordNew": "السجل جديد",
 				"role": "تسجيل الدخول له دور",
 				"subQuery": "استعلام فرعي",
@@ -1944,6 +2004,7 @@
 				"formChanged": "TRUE/FALSE, depending on whether form currently has unsaved changes.",
 				"formState": "TRUE/FALSE, depending on whether the chosen form state is currently active.",
 				"getter": "Value of a URL parameter, such as 'https://system?param=123' with 'param' being the name and '123' the value.",
+				"globalSearch": "Text value of the global search input field.",
 				"javascript": "إرجاع قيمة تعبير Javascript المحدد.",
 				"languageCode": "رمز لغة المستخدم الذي تم اختياره (en_us، de_de، ...) لتسجيل الدخول الحالي.",
 				"login": "معرف تسجيل الدخول الحالي (عدد صحيح).",
@@ -1952,6 +2013,9 @@
 				"nowTime": "الوقت الحالي (هذه الساعة/الدقيقة/الثانية)، للمقارنة مع قيم الوقت.",
 				"preset": "معرف السجل المحدد مسبقًا (عدد صحيح).",
 				"record": "معرف السجل الحالي في هذا النموذج (عدد صحيح، العلاقة 0).",
+				"recordMayCreate": "TRUE if a new record may be created, based on relation permissions & join settings.",
+				"recordMayDelete": "TRUE if current record my be deleted, based on relation permissions & policies & join settings.",
+				"recordMayUpdate": "TRUE if current record my be updated, based on relation permissions & policies & join settings.",
 				"recordNew": "صواب/خطأ، اعتمادًا على ما إذا كان السجل الحالي جديدًا في هذا النموذج.",
 				"role": "TRUE/FALSE، اعتمادًا على ما إذا كان تسجيل الدخول الحالي قد تم تعيين الدور المحدد له.",
 				"subQuery": "القيمة المرجعة للاستعلام الفرعي المحدد.",
@@ -2040,6 +2104,33 @@
 		"fileRenamed": "تمت إعادة تسمية الملف",
 		"fileUpdated": "تم تحديث الملف",
 		"title": "تغيير السجلات"
+	},
+	"fullTextSearch": {
+		"dictionary": {
+			"arabic": "Arabic",
+			"danish": "Danish",
+			"dutch": "Dutch",
+			"english": "English",
+			"finnish": "Finnish",
+			"french": "French",
+			"german": "German",
+			"greek": "Greek",
+			"hungarian": "Hungarian",
+			"indonesian": "Indonesian",
+			"irish": "Irish",
+			"italian": "Italian",
+			"lithuanian": "Lithuanian",
+			"nepali": "Nepali",
+			"norwegian": "Norwegian",
+			"portuguese": "Portuguese",
+			"romanian": "Romanian",
+			"russian": "Russian",
+			"simple": "[Not selected]",
+			"spanish": "Spanish",
+			"swedish": "Swedish",
+			"tamil": "Tamil",
+			"turkish": "Turkish"
+		}
 	},
 	"generic": {
 		"action": "فعل",
@@ -2131,7 +2222,10 @@
 		"collection": "مجموعة",
 		"collections": "المجموعات",
 		"color": "لون",
+		"columnSettings": "إعدادات العمود",
 		"columns": "أعمدة",
+		"columnsActive": "الأعمدة النشطة",
+		"columnsAvailable": "الأعمدة المتاحة",
 		"comments": "تعليقات",
 		"content": "محتوى",
 		"contextHelp": "مساعدة السياق",
@@ -2155,6 +2249,7 @@
 			"maintenanceComing": "The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your changes before then.",
 			"systemMsg": "System message"
 		},
+		"disabled": "Disabled",
 		"displayed": "معروض",
 		"encryption": "التشفير",
 		"error": {
@@ -2172,9 +2267,11 @@
 		"filters": "المرشحات",
 		"form": "استمارة",
 		"formActions": "Form actions",
+		"formOpen": "فتح النموذج",
 		"forms": "النماذج",
 		"functions": "Functions",
 		"global": "Global",
+		"globalSearch": "Global search",
 		"help": "يساعد",
 		"home": "بيت",
 		"hotkey": "مفتاح الاختصار",
@@ -2207,6 +2304,8 @@
 		"login": "Login",
 		"loginForm": "نموذج تسجيل الدخول",
 		"loginForms": "نماذج تسجيل الدخول",
+		"loginTemplate": "User template",
+		"loginTemplateHint": "Predefined settings are applied once from the selected template when a new user is created. If nothing is selected here, the global template is used.",
 		"maintenance": "Maintenance",
 		"menu": "قائمة طعام",
 		"menus": "القوائم",
@@ -2263,6 +2362,11 @@
 		"returns": "المرتجعات",
 		"role": "دور",
 		"roles": "الأدوار",
+		"search": "Search",
+		"searchBar": "Search bar",
+		"searchBars": "Search bars",
+		"searchCompleted": "Search completed",
+		"searchRunning": "Search is running",
 		"selected": "مختارة",
 		"selectedMaxOne": "محدد (الحد الأقصى 1)",
 		"settings": "إعدادات",
@@ -2271,8 +2375,10 @@
 		"sqlPreview": "معاينة SQL",
 		"standard": "معيار",
 		"status": "حالة",
+		"systemModes": "System modes",
 		"textSearch": "البحث عن النص",
 		"threeDots": "...",
+		"tip": "Tip",
 		"title": "عنوان",
 		"token": "رمز مميز",
 		"type": "يكتب",
@@ -2280,6 +2386,7 @@
 		"uninstall": "إلغاء التثبيت",
 		"update": "تحديث",
 		"username": "اسم المستخدم",
+		"value": "Value",
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "إصدار",
@@ -2288,6 +2395,32 @@
 		"widget": "القطعة",
 		"widgets": "الحاجيات",
 		"wrap": "طَوّق"
+	},
+	"globalSearch": {
+		"button": {
+			"dictReset": "Reset to user language",
+			"fullTextSearch": "Supports full-text search",
+			"openAsPopUp": "Open as pop-up",
+			"openAsPopUpMobile": "Pop-up",
+			"showHeader": "Column titles",
+			"showHeaderMobile": "Columns"
+		},
+		"help": {
+			"ftsDict": [
+				"Defines which language the search query is written in.",
+				"This does not help find words or names containing a few characters; but by knowing the language of the search query, the system can make use of full-text search features.",
+				"When full-text search is supported, a corresponding message is displayed in the search title bar - click on it to get more details about search options."
+			],
+			"ftsDictTitle": "Search input language"
+		},
+		"inputPlaceholder": "Write out names, words or email addresses",
+		"modulesInactive": "Additional search options",
+		"tips": [
+			"A new search can be started from anywhere in REI3 by pressing <b>CTRL + SHIFT + F</b>. If text is selected, it will be used as search input.",
+			"When searching for names, words or email addresses, write them out in full.",
+			"If multilingual content is searched, it is important to set the language of your search query (top right corner).",
+			"Language specific searches, like matching 'making' with 'make', work if the content has a defined language. This often makes sense for articles, but is usually not done for emails."
+		]
 	},
 	"home": {
 		"button": {
@@ -2406,7 +2539,6 @@
 		"inputHintCreate": "إنشاء سجل جديد",
 		"inputHintOpen": "سجل مفتوح",
 		"inputHintRemove": "إزالة السجل",
-		"inputHintSelect": "إضافة السجل الموجود",
 		"inputPlaceholderAdd": "...أضف المزيد",
 		"message": {
 			"csvExport": "يستخدم تصدير CSV عوامل التصفية والترتيب من القائمة الحالية.",
@@ -2426,6 +2558,12 @@
 	},
 	"settings": {
 		"account": {
+			"button": {
+				"loginOptionsDel": "Reset all field settings"
+			},
+			"dialog": {
+				"loginOptionsDel": "<p>This will reset all field settings, such as list sorting, visible columns, filters, and so on, to their default values.</p><p>Do you want to continue?</p>"
+			},
 			"messagePwCurrentWrong": "كلمة المرور الحالية غير صالحة",
 			"messagePwDiff": "كلمات المرور غير متطابقة",
 			"messagePwRequiresDigit": "كلمة المرور يجب أن تحتوي على رقم",
@@ -2434,6 +2572,7 @@
 			"messagePwRequiresUpper": "يجب أن تحتوي كلمة المرور على حرف كبير",
 			"messagePwShort": "كلمة المرور قصيرة جدًا",
 			"nodeName": "متصل بـ: {NAME}",
+			"pwChangeNotAllowed": "Login data is managed externally",
 			"pwNew0": "كلمة المرور الجديدة",
 			"pwNew1": "كلمة المرور الجديدة (متكررة)",
 			"pwOld": "كلمة المرور الحالية",
@@ -2457,9 +2596,6 @@
 		"colorMenu": "الكتابة فوق اللون",
 		"dark": "الوضع المظلم",
 		"dateFormat": "تنسيق التاريخ",
-		"dialog": {
-			"searchDictionary": "يوفر هذا النظام إمكانيات البحث عن النص الكامل. <br /><br />تقوم \"قواميس البحث عن النص الكامل\" بإعلام النظام باللغات التي يعمل بها المستخدم لاستخدام ميزات البحث الخاصة باللغة."
-		},
 		"encryption": {
 			"backupCode": "رمز النسخ الاحتياطي",
 			"backupCodeDesc": "الرمز الاحتياطي هو <b>مهم جدا</b>; ",
@@ -2474,6 +2610,11 @@
 			"modulesEnc": "التطبيقات التي تستخدم التشفير",
 			"newKeys": "تم إنشاء المفاتيح بنجاح",
 			"newKeysDesc": "لإكمال الإعداد، انسخ الرمز الاحتياطي الشخصي الخاص بك إلى مكان آمن.",
+			"noCredMasterKey": "Encryption password",
+			"noCredMasterKeyChoose": "Your user is authenticated via an external provider. To enable end-to-end-encryption, you must choose a personal encryption password.",
+			"noCredMasterKeyEnter": "End-to-end-encryption is protected by your personal encryption password.",
+			"noCredMasterKeyFailed": "The encryption password was not accepted. Please try again.<br /><br />If you forgot your encryption password, please see below for recovery options.",
+			"noCredMasterKeyNew": "New encryption password",
 			"prevPassword": "كلمة المرور السابقة",
 			"regainAccess": "استعادة الوصول إلى المفاتيح الشخصية",
 			"regainAccessDesc": "يمكنك استعادة الوصول إلى مفاتيحك الشخصية عن طريق إدخال كلمة المرور السابقة. ",
@@ -2504,13 +2645,13 @@
 				"apos": "الفاصلة العليا (')",
 				"comma": "فاصلة (،)",
 				"dot": "نقطة (.)",
-				"mdot": "النقطة الوسطى (·)"
+				"mdot": "النقطة الوسطى (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
 			}
 		},
 		"pageTitle": "إعدادات",
 		"pattern": "نمط الخلفية",
-		"searchDictionaries": "قواميس للبحث عن النص الكامل",
-		"searchDictionaryNew": "إضافة القاموس",
 		"spacing": "تباعد",
 		"sundayFirstDow": "الأحد هو أول أيام الأسبوع",
 		"tabRemember": "فتح علامة التبويب الأخيرة المستخدمة",

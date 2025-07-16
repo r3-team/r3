@@ -34,7 +34,7 @@ func RunAll() error {
 	ldapIdMap := cache.GetLdapIdMap()
 
 	if len(ldapIdMap) != 0 && !config.GetLicenseActive() {
-		log.Warning("ldap", "skipping run", errors.New("no valid license"))
+		log.Warning(log.ContextLdap, "skipping run", errors.New("no valid license"))
 		return nil
 	}
 
@@ -63,38 +63,38 @@ func run(ldapId int32) error {
 	}
 
 	// add login meta attributes if set
-	if ldap.LoginMetaAttributes.Department != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.Department)
+	if ldap.LoginMetaMap.Department != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.Department)
 	}
-	if ldap.LoginMetaAttributes.Email != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.Email)
+	if ldap.LoginMetaMap.Email != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.Email)
 	}
-	if ldap.LoginMetaAttributes.Location != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.Location)
+	if ldap.LoginMetaMap.Location != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.Location)
 	}
-	if ldap.LoginMetaAttributes.NameDisplay != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.NameDisplay)
+	if ldap.LoginMetaMap.NameDisplay != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.NameDisplay)
 	}
-	if ldap.LoginMetaAttributes.NameFore != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.NameFore)
+	if ldap.LoginMetaMap.NameFore != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.NameFore)
 	}
-	if ldap.LoginMetaAttributes.NameSur != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.NameSur)
+	if ldap.LoginMetaMap.NameSur != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.NameSur)
 	}
-	if ldap.LoginMetaAttributes.Notes != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.Notes)
+	if ldap.LoginMetaMap.Notes != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.Notes)
 	}
-	if ldap.LoginMetaAttributes.Organization != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.Organization)
+	if ldap.LoginMetaMap.Organization != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.Organization)
 	}
-	if ldap.LoginMetaAttributes.PhoneFax != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.PhoneFax)
+	if ldap.LoginMetaMap.PhoneFax != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.PhoneFax)
 	}
-	if ldap.LoginMetaAttributes.PhoneLandline != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.PhoneLandline)
+	if ldap.LoginMetaMap.PhoneLandline != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.PhoneLandline)
 	}
-	if ldap.LoginMetaAttributes.PhoneMobile != "" {
-		attributes = append(attributes, ldap.LoginMetaAttributes.PhoneMobile)
+	if ldap.LoginMetaMap.PhoneMobile != "" {
+		attributes = append(attributes, ldap.LoginMetaMap.PhoneMobile)
 	}
 
 	// MS AD: we have two choices to lookup nested groups
@@ -111,34 +111,34 @@ func run(ldapId int32) error {
 	logins := make(map[string]loginType) // key: key LDAP attribute
 
 	// LDAP auto role assignment removes existing roles from user, defining no roles here would remove all access
-	if ldap.AssignRoles && len(ldap.Roles) == 0 {
+	if ldap.AssignRoles && len(ldap.LoginRolesAssign) == 0 {
 		return errors.New("no roles are defined for assignment by LDAP group")
 	}
 
 	// if LDAP auto role assignment is disabled, remove defined role assignments (do not need to be queried)
-	if !ldap.AssignRoles && len(ldap.Roles) != 0 {
-		ldap.Roles = make([]types.LdapRole, 0)
+	if !ldap.AssignRoles && len(ldap.LoginRolesAssign) != 0 {
+		ldap.LoginRolesAssign = make([]types.LoginRoleAssign, 0)
 	}
 
 	// to get users with and without roles, we need multiple queries
 	// * query of users in membership of each defined group DN (for role assignment)
 	// * query of just users (without we´d loose users that have no defined group DN assigned)
-	ldap.Roles = append(ldap.Roles, types.LdapRole{}) // empty group DN
+	ldap.LoginRolesAssign = append(ldap.LoginRolesAssign, types.LoginRoleAssign{}) // empty group DN
 
-	for _, role := range ldap.Roles {
+	for _, role := range ldap.LoginRolesAssign {
 
 		filters := fmt.Sprintf("(&(objectClass=%s))", ldap.SearchClass)
 
 		// set filters to search for group DN if role assignment is active
 		// group DN is empty if just users are queried
-		if ldap.AssignRoles && role.GroupDn != "" {
+		if ldap.AssignRoles && role.SearchString != "" {
 
 			if ldap.MsAdExt {
 				filters = fmt.Sprintf("(&(objectClass=%s)(%s:1.2.840.113556.1.4.1941:=%s))",
-					ldap.SearchClass, ldap.MemberAttribute, role.GroupDn)
+					ldap.SearchClass, ldap.MemberAttribute, role.SearchString)
 			} else {
 				filters = fmt.Sprintf("(&(objectClass=%s)(%s=%s))",
-					ldap.SearchClass, ldap.MemberAttribute, role.GroupDn)
+					ldap.SearchClass, ldap.MemberAttribute, role.SearchString)
 			}
 		}
 
@@ -146,7 +146,7 @@ func run(ldapId int32) error {
 		pagingControl := goldap.NewControlPaging(pageSize)
 		controls := []goldap.Control{pagingControl}
 		for {
-			log.Info("ldap", fmt.Sprintf("querying '%s': '%s' in '%s'",
+			log.Info(log.ContextLdap, fmt.Sprintf("querying '%s': '%s' in '%s'",
 				ldap.Name, filters, ldap.SearchDn))
 
 			response, err := ldapConn.Search(goldap.NewSearchRequest(
@@ -189,38 +189,38 @@ func run(ldapId int32) error {
 					}
 				}
 
-				if ldap.LoginMetaAttributes.Department != "" {
-					l.meta.Department = entry.GetAttributeValue(ldap.LoginMetaAttributes.Department)
+				if ldap.LoginMetaMap.Department != "" {
+					l.meta.Department = entry.GetAttributeValue(ldap.LoginMetaMap.Department)
 				}
-				if ldap.LoginMetaAttributes.Email != "" {
-					l.meta.Email = entry.GetAttributeValue(ldap.LoginMetaAttributes.Email)
+				if ldap.LoginMetaMap.Email != "" {
+					l.meta.Email = entry.GetAttributeValue(ldap.LoginMetaMap.Email)
 				}
-				if ldap.LoginMetaAttributes.Location != "" {
-					l.meta.Location = entry.GetAttributeValue(ldap.LoginMetaAttributes.Location)
+				if ldap.LoginMetaMap.Location != "" {
+					l.meta.Location = entry.GetAttributeValue(ldap.LoginMetaMap.Location)
 				}
-				if ldap.LoginMetaAttributes.NameDisplay != "" {
-					l.meta.NameDisplay = entry.GetAttributeValue(ldap.LoginMetaAttributes.NameDisplay)
+				if ldap.LoginMetaMap.NameDisplay != "" {
+					l.meta.NameDisplay = entry.GetAttributeValue(ldap.LoginMetaMap.NameDisplay)
 				}
-				if ldap.LoginMetaAttributes.NameFore != "" {
-					l.meta.NameFore = entry.GetAttributeValue(ldap.LoginMetaAttributes.NameFore)
+				if ldap.LoginMetaMap.NameFore != "" {
+					l.meta.NameFore = entry.GetAttributeValue(ldap.LoginMetaMap.NameFore)
 				}
-				if ldap.LoginMetaAttributes.NameSur != "" {
-					l.meta.NameSur = entry.GetAttributeValue(ldap.LoginMetaAttributes.NameSur)
+				if ldap.LoginMetaMap.NameSur != "" {
+					l.meta.NameSur = entry.GetAttributeValue(ldap.LoginMetaMap.NameSur)
 				}
-				if ldap.LoginMetaAttributes.Notes != "" {
-					l.meta.Notes = entry.GetAttributeValue(ldap.LoginMetaAttributes.Notes)
+				if ldap.LoginMetaMap.Notes != "" {
+					l.meta.Notes = entry.GetAttributeValue(ldap.LoginMetaMap.Notes)
 				}
-				if ldap.LoginMetaAttributes.Organization != "" {
-					l.meta.Organization = entry.GetAttributeValue(ldap.LoginMetaAttributes.Organization)
+				if ldap.LoginMetaMap.Organization != "" {
+					l.meta.Organization = entry.GetAttributeValue(ldap.LoginMetaMap.Organization)
 				}
-				if ldap.LoginMetaAttributes.PhoneFax != "" {
-					l.meta.PhoneFax = entry.GetAttributeValue(ldap.LoginMetaAttributes.PhoneFax)
+				if ldap.LoginMetaMap.PhoneFax != "" {
+					l.meta.PhoneFax = entry.GetAttributeValue(ldap.LoginMetaMap.PhoneFax)
 				}
-				if ldap.LoginMetaAttributes.PhoneLandline != "" {
-					l.meta.PhoneLandline = entry.GetAttributeValue(ldap.LoginMetaAttributes.PhoneLandline)
+				if ldap.LoginMetaMap.PhoneLandline != "" {
+					l.meta.PhoneLandline = entry.GetAttributeValue(ldap.LoginMetaMap.PhoneLandline)
 				}
-				if ldap.LoginMetaAttributes.PhoneMobile != "" {
-					l.meta.PhoneMobile = entry.GetAttributeValue(ldap.LoginMetaAttributes.PhoneMobile)
+				if ldap.LoginMetaMap.PhoneMobile != "" {
+					l.meta.PhoneMobile = entry.GetAttributeValue(ldap.LoginMetaMap.PhoneMobile)
 				}
 
 				// role ID is empty if just users are queried
@@ -246,14 +246,14 @@ func run(ldapId int32) error {
 
 	// import logins
 	for key, l := range logins {
-		log.Info("ldap", fmt.Sprintf("processing login '%s' (key: %s, roles: %d)", l.name, key, len(l.roleIds)))
+		log.Info(log.ContextLdap, fmt.Sprintf("processing login '%s' (key: %s, roles: %d)", l.name, key, len(l.roleIds)))
 
 		if err := login.SetLdapLogin(ldap, key, l.name, l.active, l.meta, l.roleIds); err != nil {
-			log.Warning("ldap", fmt.Sprintf("failed to import login '%s'", l.name), err)
+			log.Warning(log.ContextLdap, fmt.Sprintf("failed to import login '%s'", l.name), err)
 			continue
 		}
 	}
 
-	log.Info("ldap", fmt.Sprintf("finished login import for '%s'", ldap.Name))
+	log.Info(log.ContextLdap, fmt.Sprintf("finished login import for '%s'", ldap.Name))
 	return nil
 }

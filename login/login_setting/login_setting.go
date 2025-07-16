@@ -32,13 +32,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 			warn_unsaved, pattern, font_family, tab_remember, list_colored,
 			list_spaced, color_classic_mode, color_header, color_header_single,
 			color_menu, number_sep_decimal, number_sep_thousand, bool_as_icon,
-			shadows_inputs, ARRAY(
-				SELECT name::TEXT
-				FROM instance.login_search_dict
-				WHERE login_id          = ls.login_id
-				OR    login_template_id = ls.login_template_id
-				ORDER BY position ASC
-			)
+			shadows_inputs
 		FROM instance.login_setting AS ls
 		WHERE %s = $1
 	`, entryName), entryId).Scan(&s.LanguageCode, &s.DateFormat, &s.SundayFirstDow,
@@ -47,7 +41,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 		&s.WarnUnsaved, &s.Pattern, &s.FontFamily, &s.TabRemember, &s.ListColored,
 		&s.ListSpaced, &s.ColorClassicMode, &s.ColorHeader, &s.ColorHeaderSingle,
 		&s.ColorMenu, &s.NumberSepDecimal, &s.NumberSepThousand, &s.BoolAsIcon,
-		&s.ShadowsInputs, &s.SearchDictionaries)
+		&s.ShadowsInputs)
 
 	return s, err
 }
@@ -103,25 +97,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, loginId pgtype.Int8, loginTemplateId
 			s.ColorHeader, s.ColorHeaderSingle, s.ColorMenu, s.NumberSepDecimal,
 			s.NumberSepThousand, s.BoolAsIcon, s.ShadowsInputs, entryId); err != nil {
 
-			return err
-		}
-	}
-
-	// update full text search dictionaries
-	if !isNew {
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			DELETE FROM instance.login_search_dict
-			WHERE %s = $1
-		`, entryName), entryId); err != nil {
-			return err
-		}
-	}
-
-	for i, dictName := range s.SearchDictionaries {
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			INSERT INTO instance.login_search_dict (%s, position, name)
-			VALUES ($1, $2, $3)
-		`, entryName), entryId, i, dictName); err != nil {
 			return err
 		}
 	}

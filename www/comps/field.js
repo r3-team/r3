@@ -1,23 +1,22 @@
-import MyCalendar                 from './calendar.js';
-import MyChart                    from './chart.js';
-import MyGantt                    from './gantt.js';
-import MyKanban                   from './kanban.js';
-import MyInputBarcode             from './inputBarcode.js';
-import MyInputDate                from './inputDate.js';
-import MyInputDrawing             from './inputDrawing.js';
-import MyInputFiles               from './inputFiles.js';
-import MyInputIframe              from './inputIframe.js';
-import MyInputLogin               from './inputLogin.js';
-import MyInputRating              from './inputRating.js';
-import MyInputRichtext            from './inputRichtext.js';
-import MyInputSelect              from './inputSelect.js';
-import MyInputUuid                from './inputUuid.js';
-import MyList                     from './list.js';
-import {hasAccessToAttribute}     from './shared/access.js';
-import {getColumnsProcessed}      from './shared/column.js';
-import {srcBase64}                from './shared/image.js';
-import {getCaption}               from './shared/language.js';
-import {getQueryFiltersProcessed} from './shared/query.js';
+import MyCalendar             from './calendar.js';
+import MyChart                from './chart.js';
+import MyGantt                from './gantt.js';
+import MyKanban               from './kanban.js';
+import MyInputBarcode         from './inputBarcode.js';
+import MyInputColor           from './inputColor.js';
+import MyInputDate            from './inputDate.js';
+import MyInputDrawing         from './inputDrawing.js';
+import MyInputFiles           from './inputFiles.js';
+import MyInputIframe          from './inputIframe.js';
+import MyInputLogin           from './inputLogin.js';
+import MyInputRating          from './inputRating.js';
+import MyInputRichtext        from './inputRichtext.js';
+import MyInputSelect          from './inputSelect.js';
+import MyInputUuid            from './inputUuid.js';
+import MyList                 from './list.js';
+import {hasAccessToAttribute} from './shared/access.js';
+import {srcBase64}            from './shared/image.js';
+import {getCaption}           from './shared/language.js';
 import {
 	getIndexAttributeId,
 	isAttributeBoolean,
@@ -34,10 +33,6 @@ import {
 	getNilUuid,
 	openLink
 } from './shared/generic.js';
-import {
-	fieldOptionGet,
-	fieldOptionSet
-} from './shared/field.js';
 import {
 	getFlexStyle,
 	getFormPopUpConfig,
@@ -58,6 +53,7 @@ let MyField = {
 		MyGantt,
 		MyKanban,
 		MyInputBarcode,
+		MyInputColor,
 		MyInputDate,
 		MyInputDrawing,
 		MyInputFiles,
@@ -86,9 +82,9 @@ let MyField = {
 				<span>{{ caption }}</span>
 			</div>
 			
-			<div class="field-content"
+			<div class="field-content" ref="content"
+				v-click-outside="clickOutside"
 				:class="{ data:isData, dropdown:dropdownShow, disabled:isReadonly, isSingleField:isAlone, intent:hasIntent }"
-		 		v-click-outside="clickOutside"
 			>
 				<!-- data field icon -->
 				<div class="field-icon" v-if="iconId && isData && !isRelationship && !isDrawing && !isFiles && !isRichtext && !isTextarea && !isRating && !isBarcode && !isIframe">
@@ -104,19 +100,19 @@ let MyField = {
 					@record-count-change="$emit('set-counter',field.id,$event)"
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-collection-indexes="setCollectionIndexes"
+					@set-login-option="setLoginOption"
 					:attributeIdColor="field.attributeIdColor"
 					:attributeIdDate0="field.attributeIdDate0"
 					:attributeIdDate1="field.attributeIdDate1"
-					:choices="choicesProcessed"
-					:columns="columnsProcessed"
+					:choices="choices"
+					:columns="columns"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
 					:dataOptions="dataOptions"
 					:daysShowDef="field.days"
 					:daysShowToggle="field.daysToggle"
-					:favoriteId="favoriteId"
 					:fieldId="field.id"
-					:filters="filtersProcessed"
+					:filters="filters"
 					:formLoading="formLoading"
 					:hasOpenForm="field.openForm !== null"
 					:iconId="iconId ? iconId : null"
@@ -127,6 +123,7 @@ let MyField = {
 					:isHidden="isHidden"
 					:isSingleField="isAlone"
 					:loadWhileHidden="parentIsCounting"
+					:loginOptions="loginOptions"
 					:moduleId="moduleId"
 					:popUpFormInline="popUpFormInline"
 					:query="field.query"
@@ -140,19 +137,19 @@ let MyField = {
 					@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-collection-indexes="setCollectionIndexes"
+					@set-login-option="setLoginOption"
 					:attributeIdColor="field.attributeIdColor"
 					:attributeIdDate0="field.attributeIdDate0"
 					:attributeIdDate1="field.attributeIdDate1"
-					:choices="choicesProcessed"
-					:columns="columnsProcessed"
+					:choices="choices"
+					:columns="columns"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
 					:dataOptions="dataOptions"
-					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:days0="field.dateRange0 / 86400"
 					:days1="field.dateRange1 / 86400"
-					:filters="filtersProcessed"
+					:filters="filters"
 					:formLoading="formLoading"
 					:hasOpenForm="field.openForm !== null"
 					:iconId="iconId ? iconId : null"
@@ -161,6 +158,7 @@ let MyField = {
 					:indexDate1="field.indexDate1"
 					:isHidden="isHidden"
 					:isSingleField="isAlone"
+					:loginOptions="loginOptions"
 					:moduleId="moduleId"
 					:popUpFormInline="popUpFormInline"
 					:stepTypeDefault="field.ganttSteps"
@@ -178,39 +176,41 @@ let MyField = {
 					@record-count-change="$emit('set-counter',field.id,$event)"
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-collection-indexes="setCollectionIndexes"
+					@set-login-option="setLoginOption"
 					:attributeIdSort="field.attributeIdSort"
-					:choices="choicesProcessed"
-					:columns="columnsProcessed"
+					:choices="choices"
+					:columns="columns"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
 					:dataOptions="dataOptions"
-					:favoriteId="favoriteId"
 					:fieldId="field.id"
-					:filters="filtersProcessed"
+					:filters="filters"
 					:formLoading="formLoading"
 					:hasOpenForm="field.openForm !== null"
 					:iconId="iconId ? iconId : null"
 					:isHidden="isHidden"
 					:isSingleField="isAlone"
 					:loadWhileHidden="parentIsCounting"
+					:loginOptions="loginOptions"
 					:moduleId="moduleId"
 					:popUpFormInline="popUpFormInline"
 					:relationIndexData="field.relationIndexData"
 					:relationIndexAxisX="field.relationIndexAxisX"
 					:relationIndexAxisY="field.relationIndexAxisY"
 					:query="field.query"
-					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				/>
 				
 				<!-- chart -->
 				<my-chart
 					v-if="isChart"
-					:choices="choicesProcessed"
-					:columns="columnsProcessed"
-					:filters="filtersProcessed"
+					@set-login-option="setLoginOption"
+					:choices="choices"
+					:columns="columns"
+					:filters="filters"
 					:formLoading="formLoading"
 					:isHidden="isHidden"
 					:limit="field.query.fixedLimit"
+					:loginOptions="loginOptions"
 					:moduleId="moduleId"
 					:needsHeader="isAlone"
 					:optionJson="field.chartOption"
@@ -229,30 +229,31 @@ let MyField = {
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-column-ids-by-user="setColumnIdsByUser"
 					@set-collection-indexes="setCollectionIndexes"
+					@set-login-option="setLoginOption"
 					:autoRenewDefault="field.autoRenew"
 					:caption="isAlone ? caption : ''"
-					:choices="choicesProcessed"
+					:choices
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
-					:columns="columnsProcessed"
+					:columns
 					:columnsAll="field.columns"
 					:csvExport="field.csvExport"
 					:csvImport="field.csvImport"
 					:dataOptions="dataOptions"
-					:favoriteId="favoriteId"
-					:fieldId="field.id"
 					:filterQuick="field.filterQuick"
-					:filters="filtersProcessed"
-					:formLoading="formLoading"
+					:filters
+					:filtersInput
+					:formLoading
 					:hasOpenForm="field.openForm !== null"
 					:hasOpenFormBulk="field.openFormBulk !== null"
-					:isHidden="isHidden"
+					:isHidden
 					:isSingleField="isAlone"
 					:layoutDefault="field.layout"
 					:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 					:loadWhileHidden="parentIsCounting"
-					:moduleId="moduleId"
-					:popUpFormInline="popUpFormInline"
+					:loginOptions
+					:moduleId
+					:popUpFormInline
 					:query="field.query"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				>
@@ -302,28 +303,30 @@ let MyField = {
 							@set-touched="(...args) => $emit('set-touched',...args)"
 							@set-valid="(...args) => $emit('set-valid',...args)"
 							@set-value="(...args) => $emit('set-value',...args)"
-							:dataFieldMap="dataFieldMap"
-							:entityIdMapEffect="entityIdMapEffect"
-							:favoriteId="favoriteId"
+							:entityIdMapEffect
+							:favoriteId
 							:field="f"
-							:fieldIdsChanged="fieldIdsChanged"
-							:fieldIdsInvalid="fieldIdsInvalid"
-							:fieldIdsTouched="fieldIdsTouched"
-							:fieldIdMapOverwrite="fieldIdMapOverwrite"
-							:formBadSave="formBadSave"
-							:formIsEmbedded="formIsEmbedded"
-							:formLoading="formLoading"
-							:formReadonly="formReadonly"
+							:fieldIdsChanged
+							:fieldIdsInvalid
+							:fieldIdsTouched
+							:fieldIdMapOverwrite
+							:fieldIdMapOptions
+							:fieldIdMapProcessed
+							:formBadSave
+							:formBlockInputs
+							:formIsEmbedded
+							:formLoading
+							:formNoDataPerm
 							:isAloneInTab="t.fields.length === 1"
 							:isAloneInForm="false"
-							:isBulkUpdate="isBulkUpdate"
-							:joinsIndexMap="joinsIndexMap"
+							:isBulkUpdate
+							:joinsIndexMap
 							:key="f.id"
-							:moduleId="moduleId"
+							:moduleId
 							:parentIsCounting="t.contentCounter && !tabIndexesHidden.includes(i)"
 							:parentIsHidden="isHidden || i !== tabIndexShow"
 							:values="values"
-							:variableIdMapLocal="variableIdMapLocal"
+							:variableIdMapLocal
 						/>
 					</div>
 				</div>
@@ -350,7 +353,13 @@ let MyField = {
 					:isHidden="isHidden"
 					:monospace="isMonospace"
 					:readonly="isReadonly"
-				/>
+				>
+					<template #input-icon>
+						<div class="field-icon inList" v-if="iconId">
+							<img :src="srcBase64(iconIdMap[iconId].file)" />
+						</div>
+					</template>
+				</my-input-iframe>
 				
 				<!-- UUID input -->
 				<my-input-uuid
@@ -368,12 +377,18 @@ let MyField = {
 					:hideInputs="field.flags.includes('hideInputs')"
 					:monospace="isMonospace"
 					:readonly="isReadonly"
-				/>
+				>
+					<template #input-icon>
+						<div class="field-icon inList" v-if="iconId">
+							<img :src="srcBase64(iconIdMap[iconId].file)" />
+						</div>
+					</template>
+				</my-input-barcode>
 				
 				<!-- regconfig input -->
 				<my-input-select
 					v-if="isRegconfig"
-					@dropdown-show="dropdownShow = $event"
+					@dropdown-show="dropdownSet"
 					@updated-text-input="regconfigInput = $event"
 					@update:selected="value = $event;regconfigInput = ''"
 					:dropdownShow="dropdownShow"
@@ -381,6 +396,7 @@ let MyField = {
 					:nakedIcons="true"
 					:options="regconfigOptions"
 					:placeholder="capGen.threeDots"
+					:readonly="isReadonly"
 					:selected="value"
 				/>
 				
@@ -402,28 +418,14 @@ let MyField = {
 				/>
 				
 				<!-- color input -->
-				<div class="color-input" v-if="isColor">
-					<input class="input" data-is-input="1" type="text"
-						v-model="value"
-						:class="{ invalid:showInvalid }"
-						:disabled="isReadonly"
-					/>
-					
-					<!-- preview -->
-					<div class="preview"
-						@click="click"
-						:class="{ clickable:!isReadonly }"
-						:style="value !== null ? 'background-color:#'+value : ''"
-					></div>
-				</div>
-				<div class="input-dropdown-wrap" v-if="isColor && dropdownShow">
-					<chrome-picker class="input-dropdown"
-						@update:modelValue="value = $event.hex.substr(1)"
-						:disable-alpha="true"
-						:disable-fields="true"
-						:modelValue="value !== null ? value : '000000'"
-					/>
-				</div>
+				<my-input-color
+					v-if="isColor"
+					v-model="value"
+					@dropdown-show="dropdownSet"
+					:allowNull="true"
+					:dropdownShow="dropdownShow"
+					:readonly="isReadonly"
+				/>
 				
 				<!-- textarea input -->
 				<textarea class="input textarea" data-is-input="1"
@@ -438,11 +440,19 @@ let MyField = {
 				<my-input-richtext
 					v-if="isRichtext"
 					v-model="value"
+					@copyToClipboard="copyToClipboard"
 					:attributeIdFile="field.attributeIdAlt"
+					:clipboard="isClipboard"
 					:isHidden="isHidden"
 					:readonly="isReadonly"
 					:valueFiles="valueAlt"
-				/>
+				>
+					<template #input-icon>
+						<div class="field-icon inList" v-if="iconId">
+							<img :src="srcBase64(iconIdMap[iconId].file)" />
+						</div>
+					</template>
+				</my-input-richtext>
 
 				<!-- rating input -->
 				<my-input-rating
@@ -469,7 +479,7 @@ let MyField = {
 				
 				<!-- login input -->
 				<my-input-login
-					@dropdown-show="dropdownShow = $event"
+					@dropdown-show="dropdownSet"
 					v-if="isLogin"
 					v-model="value"
 					:dropdownShow="dropdownShow"
@@ -480,9 +490,10 @@ let MyField = {
 				<!-- date / datetime / time input -->
 				<my-input-date
 					v-if="isDateInput"
-					@dropdown-show="dropdownShow = $event"
+					@dropdown-show="dropdownSet"
 					@set-unix-from="value = $event"
 					@set-unix-to="valueAlt = $event"
+					:dropdownShow="dropdownShow"
 					:isDate="isDatetime || isDate"
 					:isTime="isDatetime || isTime"
 					:isRange="isDateRange"
@@ -496,6 +507,7 @@ let MyField = {
 					v-if="isDrawing"
 					v-model="value"
 					:formLoading="formLoading"
+					:hideInputs="field.flags.includes('hideInputs')"
 					:isHidden="isHidden"
 					:readonly="isReadonly"
 				>
@@ -518,12 +530,13 @@ let MyField = {
 					v-if="isFiles"
 					v-model="value"
 					@file-count-change="$emit('set-counter',field.id,$event)"
+					@set-login-option="setLoginOption"
 					:attributeId="field.attributeId"
 					:countAllowed="field.max !== null ? field.max : 0"
-					:favoriteId="favoriteId"
 					:fieldId="field.id"
 					:formLoading="formLoading"
 					:isHidden="isHidden"
+					:loginOptions="loginOptions"
 					:readonly="isReadonly"
 					:recordId="joinsIndexMap[field.index].recordId"
 					:showGallery="field.display === 'gallery'"
@@ -538,22 +551,24 @@ let MyField = {
 				<!-- relationship input -->
 				<my-list
 					v-if="isRelationship"
-					@dropdown-show="dropdownShow = $event"
+					@dropdown-show="dropdownSet"
 					@open-form="(...args) => openForm(args[0],[],args[1],null)"
-					@records-selected="relationshipRecordsSelected"
 					@record-removed="relationshipRecordRemoved"
+					@records-selected="relationshipRecordsSelected"
 					@records-selected-init="$emit('set-value',fieldAttributeId,$event,true,true,field.id)"
-					:choices="choicesProcessed"
-					:columns="columnsProcessed"
+					@set-login-option="setLoginOption"
+					:choices
+					:columns
 					:dataOptions="dataOptions"
-					:dropdownShow="dropdownShow"
-					:fieldId="field.id"
+					:dropdownShow
 					:filterQuick="field.filterQuick"
-					:filters="filtersProcessed"
-					:formLoading="formLoading"
+					:filters
+					:filtersInput
+					:formLoading
 					:hasOpenForm="!isVariable && field.openForm !== null"
 					:header="false"
-					:inputAsCategory="field.category"
+					:inputAsCategory="field.flags.includes('relCategory')"
+					:inputAsFlow="field.flags.includes('relFlow')"
 					:inputAutoSelect="field.autoSelect"
 					:inputIsNew="isNew"
 					:inputIsReadonly="isReadonly"
@@ -561,7 +576,9 @@ let MyField = {
 					:inputRecordIds="relationshipRecordIds"
 					:inputValid="!showInvalid"
 					:isInput="true"
-					:moduleId="moduleId"
+					:limitDefault="100"
+					:loginOptions
+					:moduleId
 					:query="field.query"
 				>
 					<template #input-icon>
@@ -573,7 +590,7 @@ let MyField = {
 				
 				<!-- copy to clipboard action -->
 				<my-button image="copyClipboard.png"
-					v-if="isClipboard && !isFiles && !isIframe && !isBarcode"
+					v-if="isClipboard && !isFiles && !isIframe && !isBarcode && !isRichtext"
 					@trigger="copyToClipboard"
 					:active="value !== null"
 					:captionTitle="capGen.button.copyClipboard"
@@ -631,43 +648,47 @@ let MyField = {
 			@set-touched="(...args) => $emit('set-touched',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
 			@set-value="(...args) => $emit('set-value',...args)"
-			:isBulkUpdate="isBulkUpdate"
-			:dataFieldMap="dataFieldMap"
+			:isBulkUpdate
 			:entityIdMapEffect="entityIdMapEffect"
-			:favoriteId="favoriteId"
+			:favoriteId
 			:field="f"
-			:fieldIdsChanged="fieldIdsChanged"
-			:fieldIdsInvalid="fieldIdsInvalid"
-			:fieldIdsTouched="fieldIdsTouched"
-			:fieldIdMapOverwrite="fieldIdMapOverwrite"
-			:formBadSave="formBadSave"
-			:formIsEmbedded="formIsEmbedded"
-			:formLoading="formLoading"
-			:formReadonly="formReadonly"
+			:fieldIdsChanged
+			:fieldIdsInvalid
+			:fieldIdsTouched
+			:fieldIdMapOverwrite
+			:fieldIdMapOptions
+			:fieldIdMapProcessed
+			:formBadSave
+			:formBlockInputs
+			:formIsEmbedded
+			:formLoading
+			:formNoDataPerm
 			:flexDirParent="field.direction"
-			:isAloneInForm="isAloneInForm"
-			:joinsIndexMap="joinsIndexMap"
+			:isAloneInForm
+			:joinsIndexMap
 			:key="f.id"
-			:moduleId="moduleId"
-			:parentIsCounting="parentIsCounting"
+			:moduleId
+			:parentIsCounting
 			:parentIsHidden="isHidden"
-			:values="values"
-			:variableIdMapLocal="variableIdMapLocal"
+			:values
+			:variableIdMapLocal
 		/>
 	</div>`,
 	props:{
-		dataFieldMap:       { type:Object,  required:true },
 		entityIdMapEffect:  { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		favoriteId:         { required:false, default:null },
 		field:              { type:Object,  required:true },
 		fieldIdsChanged:    { type:Array,   required:false, default:() => {return []} },
 		fieldIdsInvalid:    { type:Array,   required:false, default:() => {return []} },
 		fieldIdsTouched:    { type:Array,   required:false, default:() => {return []} },
-		fieldIdMapOverwrite:{ type:Object,  required:true },
+		fieldIdMapOverwrite:{ type:Object,  required:true },                 // overwrites for field meta (title, order in parent, error message, ...)
+		fieldIdMapOptions:  { type:Object,  required:true },                 // field options
+		fieldIdMapProcessed:{ type:Object,  required:true },                 // processed data (choices, columns, filters)
 		formBadSave:        { type:Boolean, required:true },                 // attempted save with invalid inputs
+		formBlockInputs:    { type:Boolean, required:true },
 		formIsEmbedded:     { type:Boolean, required:true },                 // parent form is embedded (pop-up, inline, widget)
 		formLoading:        { type:Boolean, required:true },
-		formReadonly:       { type:Boolean, required:true },                 // form is read only
+		formNoDataPerm:     { type:Boolean, required:true },                 // no permissions to edit record on data form
 		flexDirParent:      { type:String,  required:true },                 // flex direction (row/column) of parent
 		isAloneInForm:      { type:Boolean, required:true },                 // parent form contains only this field
 		isAloneInTab:       { type:Boolean, required:false, default:false }, // parent tab only contains this field
@@ -686,10 +707,6 @@ let MyField = {
 	],
 	data() {
 		return {
-			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
-			columnIdsByUser:[],           // column IDs, selected by user to be shown inside field (primarily for list fields)
-			dropdownShow:false,           // for inputs with dropdowns (relationship, date, color picker)
-			loaded:false,
 			popUpFormInline:null,         // inline form for some field types (list)
 			regconfigInput:'',
 			showPassword:false,           // for password fields
@@ -698,7 +715,6 @@ let MyField = {
 		};
 	},
 	watch:{
-		favoriteId(v) { this.reloadOptions(); },
 		isValid:{ // inform parent form about field validity
 			handler(v) { this.$emit('set-valid',v,this.field.id); },
 			immediate:true
@@ -826,32 +842,10 @@ let MyField = {
 			if(!s.isData || s.isVariable) return false;
 			
 			const atrIdNm = s.field.attributeIdNm !== undefined ? s.field.attributeIdNm : null;
-			return s.getIndexAttributeId(s.field.index,
-				s.field.attributeId,s.field.outsideIn === true,atrIdNm);
+			return s.getIndexAttributeId(s.field.index,s.field.attributeId,s.field.outsideIn === true,atrIdNm);
 		},
 		fieldAttributeIdAlt:(s) => !s.isData || s.isVariable || s.field.attributeIdAlt === null ? false
 			: s.getIndexAttributeId(s.field.index,s.field.attributeIdAlt,false,null),
-		columnsProcessed:(s) => !s.isQuery ? [] : s.getColumnsProcessed(
-			s.field.columns,s.columnIdsByUser,s.joinsIndexMap,s.dataFieldMap,
-			s.fieldIdsChanged,s.fieldIdsInvalid,s.values),
-		choicesProcessed:(s) => {
-			if(!s.isQuery) return [];
-			
-			let choices = JSON.parse(JSON.stringify(s.field.query.choices));
-			for(let i = 0, j = choices.length; i < j; i++) {
-				choices[i].filters = s.getQueryFiltersProcessed(
-					choices[i].filters,s.joinsIndexMap,s.dataFieldMap,
-					s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
-					s.collectionIdMapIndexes,s.variableIdMapLocal
-				);
-			}
-			return choices;
-		},
-		filtersProcessed:(s) => !s.isQuery ? [] : s.getQueryFiltersProcessed(
-			s.field.query.filters,s.joinsIndexMap,s.dataFieldMap,
-			s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
-			s.collectionIdMapIndexes,s.variableIdMapLocal
-		),
 		iconId:(s) => {
 			if(s.field.iconId !== null) return s.field.iconId;
 
@@ -880,7 +874,7 @@ let MyField = {
 		regconfigOptions:(s) => {
 			let out = [];
 			for(let d of s.searchDictionaries) {
-				if((s.regconfigInput === '' || d.includes(s.regconfigInput.toLowerCase())) && d !== 'simple' && s.value !== d && out.length < 10)
+				if((s.regconfigInput === null || s.regconfigInput === '' || d.includes(s.regconfigInput.toLowerCase())) && d !== 'simple' && s.value !== d && out.length < 10)
 					out.push({id:d,name:d});
 			}
 			return out;
@@ -897,11 +891,11 @@ let MyField = {
 		},
 		stateFinal:(s) => {
 			// field state has a default value, which can be overwritten by form states
-			// hidden: field is not shown
-			// default: field is shown, data field state is overwritten depending on circumstance
-			// optional: data field only, input is optional
-			// required: data field only, input is required
-			// readonly: data or button field, input is readonly
+			// hidden:   field is not shown
+			// default:  field is shown, data field state is overwritten depending on circumstance
+			// optional: data or variable field, input is optional
+			// required: data or variable field, input is required
+			// readonly: data, button or variable field, input is readonly
 			let state = s.field.state;
 			
 			// apply form state if available
@@ -920,15 +914,13 @@ let MyField = {
 				) state = 'required';
 			}
 
-			if(state !== 'hidden') {
-				// overwrite in log viewer context, only hidden or readonly allowed
-				if(s.logViewer)
-					state = 'readonly';
+			// overwrites for 'visible' states
+			if(state !== 'hidden' && (
+				s.logViewer ||
+				(s.formNoDataPerm && s.isData && !s.isVariable) ||
+				(s.formBlockInputs && (s.isData || s.isButton || s.isVariable))
+			)) state = 'readonly';
 
-				// overwrite visible data/button/variable field to readonly if form is readonly
-				if(s.formReadonly && (s.isData || s.isButton || s.isVariable))
-					state = 'readonly';
-			}
 			return state;
 		},
 		tabIndexesHidden:(s) => {
@@ -1011,7 +1003,7 @@ let MyField = {
 			}
 			
 			// check join of field attribute
-			let join = s.joinsIndexMap[s.field.index];
+			const join = s.joinsIndexMap[s.field.index];
 			
 			// SET denied on join due to relation policy
 			if(join.recordNoSet)
@@ -1106,19 +1098,21 @@ let MyField = {
 		},
 		
 		// simple
-		attribute:  (s) => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false ,
-		content:    (s) => s.isVariable ? 'data' : s.field.content,
-		contentData:(s) => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
-		contentUse: (s) => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
-		customErr:  (s) => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
+		attribute:   (s) => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false ,
+		content:     (s) => s.isVariable ? 'data' : s.field.content,
+		contentData: (s) => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
+		contentUse:  (s) => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
+		customErr:   (s) => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
-		dataOptions:(s) => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
-		hasCaption: (s) => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
-		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
-		inputRegex: (s) => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
-		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
-		showInvalid:(s) => !s.isValid && (s.formBadSave || s.isTouched),
-		variable:   (s) => (!s.isVariable || s.field.variableId === null) ? false : s.variableIdMap[s.field.variableId],
+		dataOptions: (s) => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
+		dropdownShow:(s) => s.dropdownElm === s.$refs.content,
+		hasCaption:  (s) => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
+		hasIntent:   (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
+		inputRegex:  (s) => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
+		link:        (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
+		loginOptions:(s) => s.fieldIdMapOptions[s.field.id] === undefined ? {} : s.fieldIdMapOptions[s.field.id],
+		showInvalid: (s) => !s.isValid && (s.formBadSave || s.isTouched),
+		variable:    (s) => (!s.isVariable || s.field.variableId === null) ? false : s.variableIdMap[s.field.variableId],
 		
 		// content types
 		isButton:   (s) => s.content === 'button',
@@ -1131,6 +1125,12 @@ let MyField = {
 		isList:     (s) => s.content === 'list',
 		isTabs:     (s) => s.content === 'tabs',
 		isVariable: (s) => s.field.content === 'variable',
+
+		// processed states
+		choices:     (s) => s.fieldIdMapProcessed.choices[s.field.id] ?? [],
+		columns:     (s) => s.fieldIdMapProcessed.columns[s.field.id] ?? [],
+		filters:     (s) => s.fieldIdMapProcessed.filters[s.field.id] ?? [],
+		filtersInput:(s) => s.logViewer ? [] : (s.fieldIdMapProcessed.filtersInput[s.field.id] ?? []),
 		
 		// states
 		isAlone:   (s) => s.isAloneInForm || s.isAloneInTab,
@@ -1147,13 +1147,12 @@ let MyField = {
 		isSlider:   (s) => s.isData && s.field.display === 'slider',
 		
 		// composite
-		isActive:        (s) => s.loaded && (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
+		isActive:        (s) => (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
 		isBarcode:       (s) => s.isData && s.contentUse === 'barcode',
 		isEncrypted:     (s) => s.isData && s.attribute.encrypted,
 		isNew:           (s) => s.isData && !s.isVariable && s.joinsIndexMap[s.field.index].recordId === 0,
 		isBoolean:       (s) => s.isData && s.isAttributeBoolean(s.contentData),
-		isCategory:      (s) => s.isData && s.isRelationship && s.field.category,
-		isClipboard:     (s) => s.isData && s.field.clipboard && !s.isFiles && !s.isRelationship,
+		isClipboard:     (s) => s.isData && !s.isFiles && !s.isRelationship && s.field.flags.includes('clipboard'),
 		isColor:         (s) => s.isData && s.contentUse === 'color',
 		isDate:          (s) => s.isData && s.contentUse === 'date',
 		isDatetime:      (s) => s.isData && s.contentUse === 'datetime',
@@ -1164,15 +1163,17 @@ let MyField = {
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.contentData),
 		isIframe:        (s) => s.isData && s.contentUse === 'iframe',
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.contentData),
-		isQuery:         (s) => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
+		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.contentData),
+		isRelationship1N:(s) => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
 		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.contentData),
 		isRichtext:      (s) => s.isData && s.contentUse === 'richtext',
 		isString:        (s) => s.isData && s.isAttributeString(s.contentData),
 		isTextarea:      (s) => s.isData && s.contentUse === 'textarea',
 		isTime:          (s) => s.isData && s.contentUse === 'time',
 		isUuid:          (s) => s.isData && s.isAttributeUuid(s.contentData),
-		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.contentData),
-		isRelationship1N:(s) => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
+
+		// login options
+		collectionIdMapIndexes:(s) => s.$root.getOrFallback(s.loginOptions,'collectionIdMapIndexes',{}),
 		
 		// stores
 		relationIdMap:      (s) => s.$store.getters['schema/relationIdMap'],
@@ -1183,26 +1184,28 @@ let MyField = {
 		access:             (s) => s.$store.getters.access,
 		capApp:             (s) => s.$store.getters.captions.form,
 		capGen:             (s) => s.$store.getters.captions.generic,
+		dropdownElm:        (s) => s.$store.getters.dropdownElm,
 		isMobile:           (s) => s.$store.getters.isMobile,
+		isNoAuth:           (s) => s.$store.getters.isNoAuth,
 		searchDictionaries: (s) => s.$store.getters.searchDictionaries,
 		settings:           (s) => s.$store.getters.settings
 	},
 	mounted() {
-		this.reloadOptions();
-		this.loaded = true;
+		if(this.isTabs)
+			this.setTabToValid();
+	},
+	beforeUnmount() {
+		if(this.dropdownShow)
+			this.dropdownSet(false);
 	},
 	methods:{
 		// externals
-		fieldOptionGet,
-		fieldOptionSet,
 		getCaption,
-		getColumnsProcessed,
 		getFlexStyle,
 		getFormPopUpConfig,
 		getIndexAttributeId,
 		getLinkMeta,
 		getNilUuid,
-		getQueryFiltersProcessed,
 		hasAccessToAttribute,
 		isAttributeBoolean,
 		isAttributeDecimal,
@@ -1217,17 +1220,6 @@ let MyField = {
 		srcBase64,
 		variableValueGet,
 		variableValueSet,
-
-		// reloads
-		reloadOptions() {
-			if(this.isTabs)
-				this.setTabToValid();
-			
-			this.columnIdsByUser = this.fieldOptionGet(this.favoriteId,this.field.id,'columnIdsByUser',[]);
-	
-			// fill stored collection row indexes
-			this.collectionIdMapIndexes = this.fieldOptionGet(this.favoriteId,this.field.id,'collectionIdMapIndexes',{});
-		},
 		
 		// presentation
 		getTabClasses(tabIndex) {
@@ -1269,21 +1261,24 @@ let MyField = {
 		},
 		click() {
 			if(this.isColor && !this.isReadonly)
-				this.dropdownShow = !this.dropdownShow;
+				this.dropdownSet(!this.dropdownShow);
 		},
 		clickOutside() {
-			if(this.dropdownShow)
-				this.dropdownShow = false;
+			this.dropdownSet(false);
 		},
 		closeInline() {
 			this.popUpFormInline = null;
 		},
+		dropdownSet(state) {
+			if(state && !this.dropdownShow) this.$store.commit('dropdownElm',this.$refs.content);
+			if(!state && this.dropdownShow) this.$store.commit('dropdownElm',null);
+		},
 		openForm(rows,getterArgs,newTab,openFormContext) {
 			// set defaults
-			if(typeof rows            === 'undefined') rows            = [];
-			if(typeof getterArgs      === 'undefined') getterArgs      = [];
-			if(typeof newTab          === 'undefined') newTab          = false;
-			if(typeof openFormContext === 'undefined') openFormContext = null;
+			if(rows            === undefined) rows            = [];
+			if(getterArgs      === undefined) getterArgs      = [];
+			if(newTab          === undefined) newTab          = false;
+			if(openFormContext === undefined) openFormContext = null;
 			
 			// form open context
 			let openForm = JSON.parse(JSON.stringify(
@@ -1294,7 +1289,7 @@ let MyField = {
 			for(let row of rows) {
 				const id = row.indexRecordIds[openForm.relationIndexOpen];
 				
-				if(typeof id !== 'undefined' && id !== null)
+				if(id !== undefined && id !== null)
 					recordIds.push(id);
 			}
 			
@@ -1337,16 +1332,26 @@ let MyField = {
 			this.value = valueNew.length !== 0 ? valueNew : null;
 		},
 		setColumnIdsByUser(ids) {
-			this.columnIdsByUser = ids;
-			this.fieldOptionSet(this.favoriteId,this.field.id,'columnIdsByUser',ids);
+			this.setLoginOption('columnIdsByUser',ids);
 		},
 		setCollectionIndexes(collectionId,indexes) {
-			this.collectionIdMapIndexes[collectionId] = indexes;
-			this.fieldOptionSet(this.favoriteId,this.field.id,'collectionIdMapIndexes',this.collectionIdMapIndexes);
+			let v = JSON.parse(JSON.stringify(this.collectionIdMapIndexes));
+			v[collectionId] = indexes;
+			this.setLoginOption('collectionIdMapIndexes',v);
+		},
+		setLoginOption(name,value) {
+			this.$store.commit('local/loginOption',{
+				favoriteId:this.favoriteId,
+				fieldId:this.field.id,
+				isMobile:this.isMobile,
+				isNoAuth:this.isNoAuth,
+				name:name,
+				value:value
+			});
 		},
 		setTab(tabIndex) {
 			if(this.settings.tabRemember)
-				this.fieldOptionSet(this.favoriteId,this.field.id,'tabIndex',tabIndex);
+				this.setLoginOption('tabIndex',tabIndex);
 			
 			this.tabIndexShow = tabIndex;
 		},
@@ -1354,7 +1359,7 @@ let MyField = {
 			if(!this.field.tabs[tabIndex].contentCounter)
 				return;
 			
-			if(typeof this.tabIndexFieldIdMapCounter[String(tabIndex)] === 'undefined')
+			if(this.tabIndexFieldIdMapCounter[String(tabIndex)] === undefined)
 				this.tabIndexFieldIdMapCounter[String(tabIndex)] = {};
 			
 			this.tabIndexFieldIdMapCounter[String(tabIndex)][fieldId] = value;
@@ -1362,7 +1367,7 @@ let MyField = {
 		setTabToValid() {
 			// set tab to valid one, either last remembered or first valid
 			if(this.settings.tabRemember) {
-				const tabIndex = this.fieldOptionGet(this.favoriteId,this.field.id,'tabIndex',0);
+				const tabIndex = this.$root.getOrFallback(this.loginOptions,'tabIndex',0);
 				if(this.field.tabs.length > tabIndex && !this.tabIndexesHidden.includes(tabIndex))
 					return this.tabIndexShow = tabIndex;
 			}

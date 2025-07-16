@@ -1,0 +1,37 @@
+.label{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:calc(var(--spacing) / 2);
+	color:var(--color-font);
+}
+.label img{
+	width:20px;
+	height:20px;
+	filter:var(--image-filter);
+}
+
+/* on dark background */
+.label.darkBg{
+	color:var(--color-font-bright);
+}
+.label.darkBg img{
+	filter:var(--image-filter-bright);
+}
+
+/* error */
+.label.error{
+	color:var(--color-error);
+}
+.label.error img{
+	filter:var(--image-filter-error);
+}
+
+/* large */
+.label.large{
+	font-size:120%;
+}
+.label.large img{
+	width:24px;
+	height:24px;
+}

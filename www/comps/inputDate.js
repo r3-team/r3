@@ -1,7 +1,6 @@
 import MyCalendarDays         from './calendarDays.js';
 import MyCalendarMonth        from './calendarMonth.js';
 import {MyCalendarDateSelect} from './calendar.js';
-import isDropdownUpwards      from './shared/layout.js';
 import {getStringFilled}      from './shared/generic.js';
 import {
 	getCalendarCutOff0,
@@ -64,7 +63,7 @@ let MyInputDateEntryInput = {
 let MyInputDateEntry = {
 	name:'my-input-date-entry',
 	components:{MyInputDateEntryInput},
-	template:`<div class="entry date-inputs">
+	template:`<div class="input-date-inputs entry">
 		
 		<span v-if="captionPrefix !== ''" class="prefix">
 			{{ captionPrefix }}
@@ -392,74 +391,71 @@ let MyInputDate = {
 				/>
 			</div>
 		</div>
-		
-		<div class="input-dropdown-wrap" v-if="dropdownShow" :class="{ upwards:showUpwards }">
-			<div class="input-dropdown" :class="{ upwards:showUpwards }">
-				<div class="top lower">
-					<div class="area nowrap"></div>
-					<div class="area nowrap default-inputs">
-						<my-calendar-date-select v-model="date" :daysShow="viewMonth ? 42 : 7" />
-					</div>
-					<div class="area nowrap">
-						<my-button image="arrowsSwitch.png"
-							v-if="isDateTime"
-							@trigger="viewMonth = !viewMonth"
-							:captionTitle="capApp.button.viewHint"
-						/>
-						<my-button image="calendarDot.png"
-							@trigger="goToToday"
-							:captionTitle="capApp.button.todayHint"
-						/>
-					</div>
+
+		<teleport to="#dropdown" v-if="dropdownShow">
+			<div class="input-date-dropdown-actions">
+				<div></div>
+				<div class="default-inputs">
+					<my-calendar-date-select v-model="date" :daysShow="viewMonth ? 42 : 7" />
 				</div>
-				
-				<my-calendar-days
-					v-if="!viewMonth"
-					@set-date="date = $event"
-					@date-selected="dateSet"
-					:date="date"
-					:date0="date0"
-					:date1="date1"
-					:dateSelect0="dateSelect0"
-					:dateSelect1="dateSelect1"
-					:daysShow="7"
-					:isInput="true"
-					:isRange="isRange"
-				/>
-				<my-calendar-month
-					v-if="viewMonth"
-					@set-date="date = $event"
-					@date-selected="dateSetByMonthView"
-					:date="date"
-					:date0="date0"
-					:date1="date1"
-					:dateSelect0="dateSelect0"
-					:dateSelect1="dateSelect1"
-					:inputTime="isTime"
-					:isInput="true"
-					:isRange="isRange"
-				/>
+				<div class="row gap">
+					<my-button image="arrowsSwitch.png"
+						v-if="isDateTime"
+						@trigger="viewMonth = !viewMonth"
+						:captionTitle="capApp.button.viewHint"
+					/>
+					<my-button image="calendarDot.png"
+						@trigger="goToToday"
+						:captionTitle="capApp.button.todayHint"
+					/>
+				</div>
 			</div>
-		</div>
+			
+			<my-calendar-days class="input-date-dropdown"
+				v-if="!viewMonth"
+				@set-date="date = $event"
+				@date-selected="dateSet"
+				:date="date"
+				:date0="date0"
+				:date1="date1"
+				:dateSelect0="dateSelect0"
+				:dateSelect1="dateSelect1"
+				:daysShow="7"
+				:isInput="true"
+				:isRange="isRange"
+			/>
+			<my-calendar-month class="input-date-dropdown"
+				v-if="viewMonth"
+				@set-date="date = $event"
+				@date-selected="dateSetByMonthView"
+				:date="date"
+				:date0="date0"
+				:date1="date1"
+				:dateSelect0="dateSelect0"
+				:dateSelect1="dateSelect1"
+				:inputTime="isTime"
+				:isInput="true"
+				:isRange="isRange"
+			/>
+		</teleport>
 	</div>`,
 	props:{
-		isDate:    { type:Boolean, required:true },
-		isTime:    { type:Boolean, required:true },
-		isRange:   { type:Boolean, required:false, default:false },
-		isReadonly:{ type:Boolean, required:false, default:false },
-		unixFrom:  { required:true },
-		unixTo:    { required:false, default:null },
-		useMonth:  { type:Boolean, required:false, default:false },
+		dropdownShow:{ type:Boolean, required:false, default:false },
+		isDate:      { type:Boolean, required:true },
+		isTime:      { type:Boolean, required:true },
+		isRange:     { type:Boolean, required:false, default:false },
+		isReadonly:  { type:Boolean, required:false, default:false },
+		unixFrom:    { required:true },
+		unixTo:      { required:false, default:null },
+		useMonth:    { type:Boolean, required:false, default:false }
 	},
 	emits:['dropdown-show','set-unix-from','set-unix-to'],
 	data() {
 		return {
-			date:new Date(),    // date to control calendar navigation
-			dateSelect0:null,   // for date range selection, start date
-			dateSelect1:null,   // for date range selection, end date
-			dropdownShow:false,
-			showUpwards:false,  // show calendar dropdown above input
-			viewMonth:true      // calendar view is either month (true) or days (false)
+			date:new Date(),  // date to control calendar navigation
+			dateSelect0:null, // for date range selection, start date
+			dateSelect1:null, // for date range selection, end date
+			viewMonth:true    // calendar view is either month (true) or days (false)
 		};
 	},
 	mounted() {
@@ -520,22 +516,15 @@ let MyInputDate = {
 		getDateShifted,
 		getUnixFromDate,
 		getUnixNowDatetime,
-		isDropdownUpwards,
 		isUnixUtcZero,
 		
 		// events
 		escaped() {
 			this.dropdownSet(false);
 		},
-		updateDropdownDirection() {
-			let headersPx  = 200; // rough height in px of all headers (menu/form) combined
-			let calPx      = 320; // rough height in px of calendar input
-			this.showUpwards = this.isDropdownUpwards(this.$el,calPx,headersPx);
-		},
 		
 		// actions
 		dropdownSet(state) {
-			this.dropdownShow = state;
 			this.$emit('dropdown-show',state);
 		},
 		goToToday() {
@@ -587,9 +576,6 @@ let MyInputDate = {
 					if(this.fullDay)
 						this.date = this.getDateAtUtcZero(this.date);
 				}
-				
-				// decide dropdown direction
-				this.updateDropdownDirection();
 			}
 			this.dropdownSet(!this.dropdownShow);
 		},
@@ -612,6 +598,9 @@ let MyInputDate = {
 			if(this.unixTo !== null)
 				this.$emit('set-unix-to',this.getUnixFromDate(this.getDateFullDayToggled(
 					new Date(this.unixTo*1000),this.fullDay)));
+
+			// trigger app resize, as full day toggle can wrap if date range is used
+			this.$nextTick(() => this.$store.commit('appResized'));
 		},
 		dateSet(unix0,unix1) {
 			this.dateSelect0 = new Date(unix0 * 1000);

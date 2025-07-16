@@ -25,6 +25,7 @@ const MyStoreSchema = {
 		presetIdMap:{},
 		relationIdMap:{},
 		roleIdMap:{},
+		searchBarIdMap:{},
 		variableIdMap:{},
 		widgetIdMap:{},
 		
@@ -119,6 +120,12 @@ const MyStoreSchema = {
 					state.roleIdMap[role.id] = role;
 				}
 				
+				// process search bars
+				for(const bar of mod.searchBars) {
+					bar.query  = getQueryTemplateIfNull(bar.query);
+					state.searchBarIdMap[bar.id] = bar;
+				}
+				
 				// process collections
 				for(let collection of mod.collections) {
 					collection.query = getQueryTemplateIfNull(collection.query);
@@ -188,6 +195,7 @@ const MyStoreSchema = {
 		presetIdMapRecordId:(state) => state.presetIdMapRecordId,
 		relationIdMap:      (state) => state.relationIdMap,
 		roleIdMap:          (state) => state.roleIdMap,
+		searchBarIdMap:     (state) => state.searchBarIdMap,
 		variableIdMap:      (state) => state.variableIdMap,
 		widgetIdMap:        (state) => state.widgetIdMap,
 		

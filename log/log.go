@@ -14,28 +14,69 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type logContext int
+
+const (
+	// log contexts
+	ContextApi       logContext = 10
+	ContextBackup    logContext = 20
+	ContextCache     logContext = 30
+	ContextCluster   logContext = 40
+	ContextCsv       logContext = 50
+	ContextFile      logContext = 60
+	ContextImager    logContext = 70
+	ContextLdap      logContext = 80
+	ContextMail      logContext = 90
+	ContextModule    logContext = 100 // only used via instance logging functions
+	ContextOauth     logContext = 110
+	ContextScheduler logContext = 120
+	ContextServer    logContext = 130
+	ContextTransfer  logContext = 140
+	ContextWebsocket logContext = 150
+)
+
 var (
+	access_mx = sync.RWMutex{}
+	nodeId    = pgtype.UUID{} // ID of the current node
+
 	// simple options, accessible without lock
 	debug     atomic.Bool
 	outputCli atomic.Bool // write logs also to command line
 
-	// log levels
-	access_mx    = sync.RWMutex{}
-	nodeId       = pgtype.UUID{} // ID of the current node
-	contextLevel = map[string]int{
-		"api":       1,
-		"backup":    1,
-		"cache":     1,
-		"cluster":   1,
-		"csv":       1,
-		"imager":    1,
-		"mail":      1,
-		"module":    1,
-		"ldap":      1,
-		"scheduler": 1,
-		"server":    1,
-		"transfer":  1,
-		"websocket": 1,
+	// log levels: 1 = errors, 2 = errors + warning, 3 = everything
+	logContextLevel = map[logContext]int{
+		ContextApi:       1,
+		ContextBackup:    1,
+		ContextCache:     1,
+		ContextCluster:   1,
+		ContextCsv:       1,
+		ContextFile:      1,
+		ContextImager:    1,
+		ContextLdap:      1,
+		ContextMail:      1,
+		ContextModule:    1,
+		ContextOauth:     1,
+		ContextScheduler: 1,
+		ContextServer:    1,
+		ContextTransfer:  1,
+		ContextWebsocket: 1,
+	}
+	logContextName = map[logContext]string{
+		ContextApi:       "api",
+		ContextBackup:    "backup",
+		ContextCache:     "cache",
+		ContextCluster:   "cluster",
+		ContextCsv:       "csv",
+		ContextFile:      "file",
+		ContextImager:    "imager",
+		ContextLdap:      "ldap",
+		ContextMail:      "mail",
+		ContextModule:    "module",
+		ContextOauth:     "oauth",
+		ContextScheduler: "scheduler",
+		ContextServer:    "server",
+		ContextTransfer:  "transfer",
+		ContextWebsocket: "websocket",
 	}
 )
 
@@ -126,14 +167,13 @@ func SetDebug(state bool) {
 func SetOutputCli(state bool) {
 	outputCli.Store(state)
 }
-func SetLogLevel(context string, level int) {
+func SetLogLevel(context logContext, level int) {
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
-	if _, exists := contextLevel[context]; !exists {
-		return
+	if _, exists := logContextLevel[context]; exists {
+		logContextLevel[context] = level
 	}
-	contextLevel[context] = level
 }
 func SetNodeId(id uuid.UUID) {
 	access_mx.Lock()
@@ -142,20 +182,20 @@ func SetNodeId(id uuid.UUID) {
 	access_mx.Unlock()
 }
 
-func Info(context string, message string) {
+func Info(context logContext, message string) {
 	go write(3, context, message, nil)
 }
-func Warning(context string, message string, err error) {
+func Warning(context logContext, message string, err error) {
 	go write(2, context, message, err)
 }
-func Error(context string, message string, err error) {
+func Error(context logContext, message string, err error) {
 	go write(1, context, message, err)
 }
 
-func write(level int, logContext string, message string, err error) {
+func write(level int, logContext logContext, message string, err error) {
 	access_mx.RLock()
 	nodeIdLocal := nodeId
-	levelActive, exists := contextLevel[logContext]
+	levelActive, exists := logContextLevel[logContext]
 	access_mx.RUnlock()
 
 	if !exists {
@@ -177,7 +217,7 @@ func write(level int, logContext string, message string, err error) {
 
 	// log to CLI if available
 	if outputCli.Load() {
-		fmt.Printf("%s %s %s\n", tools.GetTimeSql(), logContext, message)
+		fmt.Printf("%s %s %s\n", tools.GetTimeSql(), logContextName[logContext], message)
 	}
 
 	// log to database if available
@@ -195,7 +235,7 @@ func write(level int, logContext string, message string, err error) {
 		if _, err := db.Pool.Exec(ctx, `
 			INSERT INTO instance.log (level, context, message, date_milli, node_id)
 			VALUES ($1,$2,$3,$4,$5)
-		`, level, logContext, message, tools.GetTimeUnixMilli(), nodeIdLocal); err != nil {
+		`, level, logContextName[logContext], message, tools.GetTimeUnixMilli(), nodeIdLocal); err != nil {
 
 			// if database logging fails, output error to CLI if available
 			if outputCli.Load() {

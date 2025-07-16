@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-var logContext = "client_download"
-
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if blocked := bruteforce.Check(r); blocked {
@@ -23,7 +21,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// get authentication token
 	token, err := handler.ReadGetterFromUrl(r, "token")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -32,12 +30,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	defer ctxCanc()
 
-	// check token
-	var loginId int64
-	var admin bool
-	var noAuth bool
-	if _, _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrAuthFailed)
+	// authenticate via token
+	if _, err := login_auth.Token(ctx, token); err != nil {
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}
@@ -45,7 +40,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// parse getters
 	requestedOs, err := handler.ReadGetterFromUrl(r, "os")
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -65,12 +60,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Disposition", "attachment; filename=r3_client.dmg")
 		_, err = w.Write(cache.Client_amd64_mac)
 	default:
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 
 	if err != nil {
-		handler.AbortRequest(w, logContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextClientDownload, err, handler.ErrGeneral)
 		return
 	}
 }

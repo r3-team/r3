@@ -25,8 +25,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var handlerContext = "ics_download"
-
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if config.GetUint64("icsDownload") != 1 {
@@ -45,17 +43,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// parse getters
 	fieldId, err := handler.ReadUuidGetterFromUrl(r, "field_id")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
 		return
 	}
-	loginId, err := handler.ReadInt64GetterFromUrl(r, "login_id")
+	loginIdRequested, err := handler.ReadInt64GetterFromUrl(r, "login_id")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
 		return
 	}
 	tokenFixed, err := handler.ReadGetterFromUrl(r, "token_fixed")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -65,10 +63,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer ctxCanc()
 
 	// authenticate via fixed token
-	var tokenNotUsed string
-	languageCode, err := login_auth.TokenFixed(ctx, loginId, "ics", tokenFixed, &tokenNotUsed)
+	login, err := login_auth.TokenFixed(ctx, loginIdRequested, "ics", tokenFixed)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrAuthFailed)
+		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}
@@ -76,20 +73,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// start DB transaction
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
 		return
 	}
 	defer tx.Rollback(ctx)
 
-	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+	if err := db.SetSessionConfig_tx(ctx, tx, login.Id); err != nil {
+		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
 		return
 	}
 
 	// get calendar field details from cache
 	f, err := cache.GetCalendarField_tx(ctx, tx, fieldId)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -116,7 +113,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// apply field filters
 	// some filters are not compatible with backend requests (field value, open form record ID, ...)
 	dataGet.Filters = data_query.ConvertQueryToDataFilter(
-		f.Query.Filters, loginId, languageCode, make(map[string]string))
+		f.Query.Filters, login.Id, login.LanguageCode, make(map[string]string))
 
 	// define ICS event range, if defined
 	dateRange0 := f.DateRange0
@@ -199,7 +196,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		atr, exists := cache.AttributeIdMap[column.AttributeId]
 		if !exists {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
 			return
 		}
 		if schema.IsContentFiles(atr.Content) {
@@ -207,18 +204,18 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertColumnToExpression(
-			column, loginId, languageCode, make(map[string]string)))
+			column, login.Id, login.LanguageCode, make(map[string]string)))
 	}
 
 	// get data
 	var query string
-	results, _, err := data.Get_tx(ctx, tx, dataGet, loginId, &query)
+	results, _, err := data.Get_tx(ctx, tx, dataGet, login.Id, &query)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
 		return
 	}
 	if err := tx.Commit(ctx); err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -241,7 +238,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				WHERE id = $1
 			)
 		`, f.OpenForm.FormIdOpen).Scan(&modName, &modNameParent); err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
 			return
 		}
 
@@ -271,7 +268,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		recordId, exists := result.IndexRecordIds[f.IndexDate0]
 		if !exists {
-			handler.AbortRequest(w, handlerContext, errors.New("record ID not found on date relation"),
+			handler.AbortRequest(w, handler.ContextIcsUpload, errors.New("record ID not found on date relation"),
 				handler.ErrGeneral)
 
 			return
@@ -291,7 +288,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			reflect.TypeOf(result.Values[0]).String() != "int64" ||
 			reflect.TypeOf(result.Values[1]).String() != "int64" {
 
-			handler.AbortRequest(w, handlerContext, errors.New("invalid values for date"),
+			handler.AbortRequest(w, handler.ContextIcsUpload, errors.New("invalid values for date"),
 				handler.ErrGeneral)
 
 			return

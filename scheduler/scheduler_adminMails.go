@@ -38,7 +38,7 @@ func adminMails() error {
 	var sendMail = func(subject string, body string, dateExpiration int64, reason string) error {
 		// get mail receivers
 		if config.GetString("adminMails") == "" {
-			log.Warning("server", "cannot send admin notification mails", fmt.Errorf("no mail receivers defined"))
+			log.Warning(log.ContextServer, "cannot send admin notification mails", fmt.Errorf("no mail receivers defined"))
 			return nil
 		}
 
@@ -48,7 +48,7 @@ func adminMails() error {
 		}
 
 		if len(toList) == 0 {
-			log.Warning("server", "cannot send admin notification mails", fmt.Errorf("no mail receivers defined"))
+			log.Warning(log.ContextServer, "cannot send admin notification mails", fmt.Errorf("no mail receivers defined"))
 			return nil
 		}
 
@@ -111,7 +111,8 @@ func adminMails() error {
 	if err := db.Pool.QueryRow(ctx, `
 		SELECT date_expiry
 		FROM instance.oauth_client
-		WHERE date_expiry > DATE_PART('EPOCH',CURRENT_DATE)
+		WHERE date_expiry IS NOT NULL
+		AND   date_expiry > DATE_PART('EPOCH',CURRENT_DATE)
 		ORDER BY date_expiry ASC
 		LIMIT 1
 	`).Scan(&dateExpirationOauth); err != nil && err != pgx.ErrNoRows {

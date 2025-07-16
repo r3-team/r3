@@ -1,4 +1,3 @@
-import MyValueRich        from './valueRich.js';
 import {getColumnBatches} from './shared/column.js';
 import {
 	colorAdjustBg,
@@ -8,13 +7,13 @@ import {
 import {
 	getDateFormatNoYear,
 	getDaysBetween,
+	getUnixNowDate,
 	isUnixUtcZero
 } from './shared/time.js';
 export {MyCalendarDays as default};
 
 let MyCalendarDaysEvent = {
 	name:'my-calendar-days-event',
-	components:{ MyValueRich },
 	template:`<div class="eventWrap"
 		@click.ctrl.exact="$emit('click-middle')"
 		@click.left.exact="$emit('click')"
@@ -39,6 +38,8 @@ let MyCalendarDaysEvent = {
 					:key="ind"
 					:length="columns[ind].length"
 					:monospace="columns[ind].flags.monospace"
+					:noShrink="columns[ind].flags.noShrink"
+					:noThousandsSep="columns[ind].flags.noThousandsSep"
 					:value="values[ind]"
 					:wrap="columns[ind].flags.wrap"
 				/>
@@ -62,14 +63,14 @@ let MyCalendarDays = {
 	components:{ MyCalendarDaysEvent },
 	template:`<div class="calendar-days">
 		<div class="days full">
-			<div class="labels fullDay">
+			<div class="calendar-days-labels fullDay">
 				<div class="header"></div>
 				<span v-if="!isInput && events.fullDays.length !== 0"
 					:style="events.fullDaysHeight"
 				>{{ capApp.fullDay }}</span>
 			</div>
 			<div v-for="d in events.fullDays" class="day" :class="{ weekend:d.weekend }">
-				<div class="header" v-html="d.caption"></div>
+				<div class="header" v-html="d.caption" :class="{ today:d.today }"></div>
 				<div class="events-full" :style="events.fullDaysHeight">
 					
 					<!-- date input (days) -->
@@ -97,7 +98,7 @@ let MyCalendarDays = {
 			</div>
 		</div>
 		<div class="days">
-			<div class="labels">
+			<div class="calendar-days-labels">
 				<span v-for="i in 24" :style="heightHourStyle" :ref="refHourLabel + i">
 					{{ getStringFilled(i-1,2,'0')+':00' }}
 				</span>
@@ -177,6 +178,7 @@ let MyCalendarDays = {
 				events.fullDays.push({
 					caption:`${s.capApp[dayLabel+d.getDay()]},${dayLabelBr + s.getDateFormatNoYear(d,s.settings.dateFormat)}`,
 					eventIndexes:[],
+					today:s.getUnixNowDate() === unix0CalDay + (i * 86400),
 					unix:unix0CalDay + (i * 86400),
 					weekend:[0,6].includes(d.getDay())
 				});
@@ -381,6 +383,7 @@ let MyCalendarDays = {
 		getDateFormatNoYear,
 		getDaysBetween,
 		getStringFilled,
+		getUnixNowDate,
 		isUnixUtcZero,
 		
 		// actions

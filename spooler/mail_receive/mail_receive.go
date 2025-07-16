@@ -32,7 +32,7 @@ var (
 
 func DoAll() error {
 	if !cache.GetMailAccountsExist() {
-		log.Info("mail", "cannot start retrieval, no accounts defined")
+		log.Info(log.ContextMail, "cannot start retrieval, no accounts defined")
 		return nil
 	}
 
@@ -43,10 +43,10 @@ func DoAll() error {
 			continue
 		}
 
-		log.Info("mail", fmt.Sprintf("is retrieving from '%s'", ma.Name))
+		log.Info(log.ContextMail, fmt.Sprintf("is retrieving from '%s'", ma.Name))
 
 		if err := do(ma); err != nil {
-			log.Error("mail", fmt.Sprintf("failed to retrieve from '%s'", ma.Name), err)
+			log.Error(log.ContextMail, fmt.Sprintf("failed to retrieve from '%s'", ma.Name), err)
 			continue
 		}
 	}
@@ -65,7 +65,10 @@ func do(ma types.MailAccount) error {
 		if err != nil {
 			return err
 		}
-		ma.Password, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret, c.Tenant, c.TokenUrl, c.Scopes)
+		if !c.ClientSecret.Valid || !c.TokenUrl.Valid {
+			return errors.New("missing client secret or token URL in OAUTH client")
+		}
+		ma.Password, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret.String, c.TokenUrl.String, c.Scopes)
 		if err != nil {
 			return err
 		}
@@ -109,14 +112,14 @@ func do(ma types.MailAccount) error {
 		return err
 	}
 
-	log.Info("mail", fmt.Sprintf("found %d messages inside %s for account '%s'",
+	log.Info(log.ContextMail, fmt.Sprintf("found %d messages inside %s for account '%s'",
 		mbox.Messages, imapFolder, ma.Name))
 
 	if mbox.Messages == 0 {
 		return nil
 	}
 
-	log.Info("mail", fmt.Sprintf("is now fetching messages (at most %d per run)", collectPerRun))
+	log.Info(log.ContextMail, fmt.Sprintf("is now fetching messages (at most %d per run)", collectPerRun))
 
 	// fetch mails from mailbox
 	seqDel := new(imap.SeqSet) // messages to delete
@@ -142,7 +145,7 @@ func do(ma types.MailAccount) error {
 	for msg := range messages {
 		if err := processMessage(ma.Id, msg, &section); err != nil {
 			// mail processing can fail because of many reasons, warn and move on
-			log.Warning("mail", "failed to process message - its not being deleted from the mailbox", err)
+			log.Warning(log.ContextMail, "failed to process message - its not being deleted from the mailbox", err)
 
 		} else {
 			// add to deletion sequence if processed successfully
@@ -155,7 +158,7 @@ func do(ma types.MailAccount) error {
 		return err
 	}
 
-	log.Info("mail", fmt.Sprintf("processed %d messages successfully, marking them for deletion",
+	log.Info(log.ContextMail, fmt.Sprintf("processed %d messages successfully, marking them for deletion",
 		len(seqDel.Set)))
 
 	// if database update was successful, execute mail deletion

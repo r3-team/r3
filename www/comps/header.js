@@ -12,7 +12,7 @@ export {MyHeader as default};
 
 let MyHeader = {
 	name:'my-header',
-	template:`<div class="app-header shade noPrint" :class="{ isDark:colorHeaderMain.isDark() }" :style="bgStyle">
+	template:`<div class="app-header shade noPrint" :class="{ isDark:isDark }" :style="bgStyle">
 		
 		<div ref="content" class="entries">
 			
@@ -189,6 +189,15 @@ let MyHeader = {
 				</span>
 			</div>
 			
+			<!-- search bars -->
+			<input class="app-header-search-input" enterkeyhint="send" type="text"
+				v-if="isGlobalSearchOn"
+				v-model="globalSearchInput"
+				@keyup.enter="globalSearchStart($event.target.value); globalSearchInput = ''"
+				:class="{ isDark }"
+				:placeholder="capGen.search + '...'"
+			/>
+			
 			<!-- settings -->
 			<div class="entry no-wrap clickable" tabindex="0"
 				v-if="!isNoAuth"
@@ -232,6 +241,7 @@ let MyHeader = {
 	emits:['logout','logoutExpire','show-collection-input','show-module-hover-menu','show-settings'],
 	data() {
 		return {
+			globalSearchInput:'',
 			maintenanceInSec:0,
 			layoutCheckTimer:null,
 			layoutElements:[],               // elements that are shown, based on available space
@@ -329,6 +339,8 @@ let MyHeader = {
 		},
 		
 		// simple
+		isDark:          (s) => s.colorHeaderMain.isDark(),
+		isGlobalSearchOn:(s) => s.searchModuleIds.length !== 0,
 		pwaSingle:       (s) => s.pwaModuleId !== null,
 		showCollections: (s) => s.layoutElementsProcessed.includes('collections'),
 		showFeedback:    (s) => s.layoutElementsProcessed.includes('feedback') && s.feedback && !s.isNoAuth,
@@ -340,6 +352,7 @@ let MyHeader = {
 		showNavPrev:     (s) => s.layoutElementsProcessed.includes('navigationPrev'),
 		
 		// stores
+		loginNoCred:         (s) => s.$store.getters['local/loginNoCred'],
 		moduleIdMap:         (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:       (s) => s.$store.getters['schema/moduleNameMap'],
 		formIdMap:           (s) => s.$store.getters['schema/formIdMap'],
@@ -362,6 +375,7 @@ let MyHeader = {
 		productionMode:      (s) => s.$store.getters.productionMode,
 		pwaModuleId:         (s) => s.$store.getters.pwaModuleId,
 		moduleIdLast:        (s) => s.$store.getters.moduleIdLast,
+		searchModuleIds:     (s) => s.$store.getters.searchModuleIds,
 		settings:            (s) => s.$store.getters.settings,
 		systemMsgActive:     (s) => s.$store.getters.systemMsgActive,
 		systemMsgDate0:      (s) => s.$store.getters.systemMsgDate0,
@@ -375,6 +389,11 @@ let MyHeader = {
 			immediate:true
 		});
 		this.resized();
+
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.globalSearchStart,key:'F',keyCtrl:true,keyShift:true});
+	},
+	unmounted() {
+		this.$store.commit('keyDownHandlerDel',this.globalSearchStart);
 	},
 	methods:{
 		// externals
@@ -390,7 +409,7 @@ let MyHeader = {
 		// display
 		keysLockedMsg() {
 			this.$store.commit('dialog',{
-				captionBody:this.capErr.SEC['002'],
+				captionBody:this.loginNoCred ? this.capErr.SEC['007'] : this.capErr.SEC['002'],
 				image:'keyLocked.png'
 			});
 		},
@@ -440,6 +459,10 @@ let MyHeader = {
 			// no active module in mobile mode: navigate to module
 			if(!this.moduleSingleActive && this.isMobile)
 				return this.$router.push(`/app/${this.moduleSingle.name}/${this.moduleSingle.name}`);
+		},
+		globalSearchStart(v) {
+			if(this.isGlobalSearchOn)
+				this.$store.commit('globalSearchInput',v !== undefined ? v : window.getSelection().toString());
 		},
 		openSystemMsg() {
 			const d = this.getDateFormat(new Date(this.systemMsgDate1*1000),'H:i');

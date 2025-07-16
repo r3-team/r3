@@ -1,13 +1,17 @@
 import MyBuilderQuery          from './builder/builderQuery.js';
-import MyInputDate             from './inputDate.js';
+import MyInputDateWrap         from './inputDateWrap.js';
+import MyInputDictionary       from './inputDictionary.js';
 import {isAttributeString}     from './shared/attribute.js';
 import {getColumnIsFilterable} from './shared/column.js';
-import {getCaption}            from './shared/language.js';
 import {
 	getDependentModules,
 	getItemTitleColumn,
 	getItemTitleNoRelationship
 } from './shared/builder.js';
+import {
+	getCaption,
+	getDictByLang
+} from './shared/language.js';
 import {
 	getNestedIndexAttributeIdsByJoins,
 	getQueryTemplate
@@ -17,7 +21,7 @@ export {MyFilterBrackets};
 export {MyFilterConnector};
 export {MyFilterOperator};
 
-let MyFilterBrackets = {
+const MyFilterBrackets = {
 	name:'my-filter-brackets',
 	template:`<my-button
 		@trigger="add(true)"
@@ -59,7 +63,7 @@ let MyFilterBrackets = {
 	}
 };
 
-let MyFilterOperator = {
+const MyFilterOperator = {
 	name:'my-filter-operator',
 	template:`<select v-model="value">
 		
@@ -103,6 +107,10 @@ let MyFilterOperator = {
 				<option value="@>" :title="capApp.option.operator.arrContains" >@&gt;</option>
 				<option value="<@" :title="capApp.option.operator.arrContained">&lt;@</option>
 				<option value="&&" :title="capApp.option.operator.arrOverlap"  >&&</option>
+			</optgroup>
+			
+			<optgroup :label="capApp.operatorsFts">
+				<option value="@@" :title="capApp.option.operator.fts">@@</option>
 			</optgroup>
 		</template>
 		
@@ -156,7 +164,7 @@ let MyFilterOperator = {
 	}
 };
 
-let MyFilterConnector = {
+const MyFilterConnector = {
 	name:'my-filter-connector',
 	template:`<select class="and" :disabled="readonly" v-model="value">
 		<option value="AND">{{ capApp.option.connector.AND }}</option>
@@ -176,7 +184,7 @@ let MyFilterConnector = {
 	}
 };
 
-let MyFilterAttribute = {
+const MyFilterAttribute = {
 	name:'my-filter-attribute',
 	template:`<select v-model="value">
 		<template v-if="columnsMode" v-for="b in columnBatches">
@@ -279,12 +287,12 @@ let MyFilterAttribute = {
 	}
 };
 
-let MyFilterSide = {
+const MyFilterSide = {
 	name:'my-filter-side',
 	components:{
 		MyBuilderQuery,
 		MyFilterAttribute,
-		MyInputDate
+		MyInputDateWrap
 	},
 	template:`<div class="filter-side">
 		<div class="filter-side-inputs default-inputs">
@@ -299,6 +307,13 @@ let MyFilterSide = {
 					<optgroup v-if="contentApi.length !== 0" :label="capApp.contentApi">
 						<option
 							v-for="c in contentApi"
+							:title="capApp.option.contentHint[c]"
+							:value="c"
+						>{{ capApp.option.content[c] }}</option>
+					</optgroup>
+					<optgroup v-if="contentSearch.length !== 0" :label="capGen.globalSearch">
+						<option
+							v-for="c in contentSearch"
 							:title="capApp.option.contentHint[c]"
 							:value="c"
 						>{{ capApp.option.content[c] }}</option>
@@ -461,15 +476,13 @@ let MyFilterSide = {
 						v-model="valueFixText"
 						:placeholder="fixedValuePlaceholder"
 					/>
-					
-					<div class="input-custom date-wrap" v-if="columnDate || columnTime">
-						<my-input-date
-							@set-unix-from="valueFixTextDate = $event"
-							:isDate="columnDate"
-							:isTime="columnTime"
-							:unixFrom="valueFixTextDate"
-						/>
-					</div>
+					<my-input-date-wrap
+						v-if="columnDate || columnTime"
+						@set-unix-from="valueFixTextDate = $event"
+						:isDate="columnDate"
+						:isTime="columnTime"
+						:unixFrom="valueFixTextDate"
+					/>
 				</template>
 			</template>
 		</div>
@@ -688,13 +701,14 @@ let MyFilterSide = {
 		},
 		
 		// simple
-		columnsMode: (s) => s.columns.length !== 0,
-		contentApi:  (s) => ['getter'].filter(v => !s.disableContent.includes(v)),
-		contentData: (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
-		contentDate: (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
-		contentForm: (s) => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
-		contentLogin:(s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
-		module:      (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
+		columnsMode:  (s) => s.columns.length !== 0,
+		contentApi:   (s) => ['getter'].filter(v => !s.disableContent.includes(v)),
+		contentData:  (s) => ['attribute','collection','preset','subQuery','value','true','variable'].filter(v => !s.disableContent.includes(v)),
+		contentDate:  (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
+		contentForm:  (s) => ['formChanged','formState','field','fieldChanged','fieldValid','javascript','record','recordMayCreate','recordMayDelete','recordMayUpdate','recordNew'].filter(v => !s.disableContent.includes(v)),
+		contentLogin: (s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
+		contentSearch:(s) => ['globalSearch'].filter(v => !s.disableContent.includes(v)),
+		module:       (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
 		
 		// states
 		isAnyDate:    (s) => ['nowDate','nowDatetime','nowTime'].includes(s.content),
@@ -791,13 +805,14 @@ let MyFilterSide = {
 	}
 };
 
-let MyFilter = {
+const MyFilter = {
 	name:'my-filter',
 	components:{
 		MyFilterBrackets,
 		MyFilterConnector,
 		MyFilterOperator,
-		MyFilterSide
+		MyFilterSide,
+		MyInputDictionary
 	},
 	template:`<div class="filter">
 		<img v-if="multipleFilters" class="dragAnchor" src="images/drag.png" />
@@ -839,7 +854,7 @@ let MyFilter = {
 			:onlyString="isStringInput"
 		/>
 		<my-button image="question.png"
-			v-if="operator === '@@'"
+			v-if="operator === '@@' && !builderMode"
 			@trigger="showFtsHelp"
 		/>
 		<my-filter-side
@@ -864,16 +879,11 @@ let MyFilter = {
 		/>
 		
 		<!-- full text search, dictionary input (only with dictionary attribute) -->
-		<select class="short"
+		<my-input-dictionary
 			v-if="side0ColumFtsMode === 'dict'"
 			v-model="searchDictionaryInput"
 			:title="capApp.searchDictionaryHint"
-		>
-			<option v-for="d in settings.searchDictionaries">{{ d }}</option>
-			<option value="simple" :title="capApp.searchDictionarySimpleHint">
-				{{ capApp.searchDictionarySimple }}
-			</option>
-		</select>
+		/>
 		
 		<my-filter-brackets class="brackets"
 			v-if="multipleFilters || isAnyBracketsSet"
@@ -918,7 +928,7 @@ let MyFilter = {
 				if(ftsMode === null && this.operator === '@@')
 					return this.operatorInput = '=';
 			},
-			immediate:true
+			immediate:false
 		}
 	},
 	computed:{
@@ -951,11 +961,8 @@ let MyFilter = {
 				if(v !== '@@') {
 					this.side1Input.ftsDict = null;
 				}
-				else if(this.side1Input.ftsDict === null) {
-					if(this.settings.searchDictionaries.length === 0)
-						this.side1Input.ftsDict = 'simple';
-					else
-						this.side1Input.ftsDict = this.settings.searchDictionaries[0];
+				if(v === '@@' && this.side1Input.ftsDict === null) {
+					this.side1Input.ftsDict = this.getDictByLang();
 				}
 				this.$emit('update',this.position,'side1',this.side1Input);
 			}
@@ -987,9 +994,9 @@ let MyFilter = {
 		side0ColumFtsMode:(s) => {
 			if(!s.side0Column) return null;
 			
-			let atr = s.attributeIdMap[s.side0Column.attributeId];
-			let rel = s.relationIdMap[atr.relationId];
-			for(let ind of rel.indexes) {
+			const atr = s.attributeIdMap[s.side0Column.attributeId];
+			const rel = s.relationIdMap[atr.relationId];
+			for(const ind of rel.indexes) {
 				if(ind.method === 'GIN' && ind.attributes.length === 1
 					&& ind.attributes[0].attributeId === s.side0Column.attributeId) {
 					
@@ -1016,11 +1023,11 @@ let MyFilter = {
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		capApp:        (s) => s.$store.getters.captions.filter,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		settings:      (s) => s.$store.getters.settings
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
+		getDictByLang,
 		isAttributeString,
 		
 		// actions
@@ -1035,7 +1042,7 @@ let MyFilter = {
 	}
 };
 
-let MyFilters = {
+const MyFilters = {
 	name:'my-filters',
 	components:{MyFilter},
 	template:`<div class="filters">

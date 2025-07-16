@@ -100,7 +100,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, 
 		return err
 	}
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &id, "preset", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &id, schema.DbPreset, "id")
 	if err != nil {
 		return err
 	}

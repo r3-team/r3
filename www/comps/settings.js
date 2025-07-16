@@ -2,7 +2,7 @@ import srcBase64Icon       from './shared/image.js';
 import {getCaption}        from './shared/language.js';
 import {set as setSetting} from './shared/settings.js';
 import {getUnixFormat}     from './shared/time.js';
-import MyInputColor        from './inputColor.js';
+import MyInputColorWrap    from './inputColorWrap.js';
 import MyInputHotkey       from './inputHotkey.js';
 import MyTabs              from './tabs.js';
 import {
@@ -15,6 +15,7 @@ import {
 	pbkdf2PassToAesGcmKey,
 	pemExport,
 	pemImport,
+	pemImportPrivateEnc,
 	rsaGenerateKeys
 } from './shared/crypto.js';
 export {MySettings as default};
@@ -23,7 +24,7 @@ let MySettingsEncryption = {
 	name:'my-settings-encryption',
 	template:`<div class="encryption">
 	
-		<p>{{ capApp.description }}</p>
+		<p v-if="!loginEncEnabled">{{ capApp.description }}</p>
 		<table>
 			<tbody>
 				<tr>
@@ -35,23 +36,46 @@ let MySettingsEncryption = {
 		<br />
 		
 		<!-- list of modules with encryption enabled -->
-		<template v-if="anyEnc && !locked">
+		<template v-if="modulesEnc.length !== 0 && loginEncEnabled && !loginEncLocked">
 			<h2>{{ capApp.modulesEnc }}</h2>
-			<ul>
-				<li v-for="mei in moduleEntriesIndexesEnc">
-					{{ moduleEntries[mei].caption }}
-				</li>
-			</ul>
+			<div class="column gap">
+				<div class="row gap centered" v-for="m in modulesEnc">
+					<img class="module-icon" :src="srcBase64Icon(m.iconId,'images/module.png')" />
+					<span>{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) }}</span>
+				</div>
+			</div>
 		</template>
 		
 		<div class="message-error" v-if="!cryptoApiAvailable">{{ capApp.status.noCryptoApi }}</div>
+
+		<!-- login without credentials -->
+		<template v-if="loginNoCred && !newKeys">
+			<p v-if="!loginEncEnabled">{{ capApp.noCredMasterKeyChoose }}</p>
+			<p v-if="loginEncLocked">{{ capApp.noCredMasterKeyEnter }}</p>
+
+			<!-- master key input -->
+			<template v-if="!loginEncEnabled || loginEncLocked">
+				<h2>{{ capApp.noCredMasterKey }}</h2>
+				<div class="row gap default-inputs">
+					<input type="password"
+						v-model="noCredMasterKey"
+						@keyup.enter="noCredMasterKeyApply(noCredMasterKey,true)"
+					/>
+					<my-button image="ok.png"
+						@trigger="noCredMasterKeyApply(noCredMasterKey,true)"
+						:active="noCredMasterKey !== '' && noCredMasterKeyChanged"
+					/>
+				</div>
+				<br />
+			</template>
+		</template>
 		
 		<!-- create new key pair -->
-		<template v-if="loginKeyAes !== null && !loginEncryption">
+		<template v-if="!loginEncEnabled && loginKeyAes !== null">
 			<my-button
 				v-if="!newKeys"
 				@trigger="createKeys"
-				:active="!running"
+				:active="!running && !noCredMasterKeyChanged"
 				:caption="capApp.button.createKeys"
 				:image="!running ? 'add.png' : 'load.gif'"
 			/>
@@ -89,13 +113,13 @@ let MySettingsEncryption = {
 		</template>
 		
 		<!-- recover access -->
-		<template v-if="locked">
+		<template v-if="loginEncLocked && (!loginNoCred || noCredMasterKeyBadInput)">
 			<h2>{{ capApp.regainAccess }}</h2>
 			<p>{{ capApp.regainAccessDesc }}</p>
 			
 			<table class="default-inputs">
 				<tbody>
-					<tr>
+					<tr v-if="!loginNoCred">
 						<td>{{ capApp.prevPassword }}</td>
 						<td><input v-model="regainPassword" /></td>
 						<td>
@@ -112,17 +136,20 @@ let MySettingsEncryption = {
 						<td>
 							<my-button image="key.png"
 								@trigger="unlockWithBackupCode"
-								:active="regainBackupCode !== ''"
+								:active="regainBackupCode !== '' && (!loginNoCred || noCredMasterKeyNew !== '')"
 								:caption="capGen.button.unlock"
 							/>
 						</td>
 					</tr>
+					<tr v-if="loginNoCred">
+						<td>{{ capApp.noCredMasterKeyNew }}</td>
+						<td><input v-model="noCredMasterKeyNew" /></td>
+						<td></td>
+					</tr>
 				</tbody>
 			</table>
-		</template>
 		
-		<!-- reset access -->
-		<template v-if="locked">
+			<!-- reset access -->
 			<br />
 			<h2>{{ capApp.resetAccess }}</h2>
 			<p v-html="capApp.resetAccessDesc"></p>
@@ -147,6 +174,12 @@ let MySettingsEncryption = {
 			newKeyPair:null,
 			newKeyPrivateEnc:null,
 			newKeyPrivateEncBackup:null,
+
+			// no credentials, master key input
+			noCredMasterKey:'',            // input for master key, to decrypt private key in case of no-credentials login
+			noCredMasterKeyLast:'',        // last submitted version of master key input
+			noCredMasterKeyBadInput:false, // input for master key has failed at least once
+			noCredMasterKeyNew:'',         // input for new master key, in case of recovery via backup codes
 			
 			// regain access
 			regainBackupCode:'',
@@ -155,12 +188,12 @@ let MySettingsEncryption = {
 	},
 	computed:{
 		// indexes of module entries with any relation with enabled encryption
-		moduleEntriesIndexesEnc:(s) => {
+		modulesEnc:(s) => {
 			let out = [];
-			for(let i = 0, j = s.moduleEntries.length; i < j; i++) {
-				for(const r of s.moduleIdMap[s.moduleEntries[i].id].relations) {
+			for(const k in s.moduleIdMap) {
+				for(const r of s.moduleIdMap[k].relations) {
 					if(r.encryption) {
-						out.push(i);
+						out.push(s.moduleIdMap[k]);
 						break;
 					}
 				}
@@ -170,32 +203,32 @@ let MySettingsEncryption = {
 		
 		// e2e encryption status
 		statusCaption:(s) => {
-			if(!s.active) return s.capApp.status.inactive;
-			if(s.locked)  return s.capApp.status.locked;
+			if(!s.loginEncEnabled) return s.capApp.status.inactive;
+			if(s.loginEncLocked)   return s.capApp.status.locked;
 			return s.capApp.status.unlocked;
 		},
 		
-		// states
-		active: (s) => s.loginEncryption,
-		anyEnc: (s) => s.moduleEntriesIndexesEnc.length !== 0,
-		locked: (s) => s.active && s.loginPrivateKey === null,
-		newKeys:(s) => s.newKeyPrivateEnc !== null,
+		// simple
+		newKeys:               (s) => s.newKeyPrivateEnc !== null,
+		noCredMasterKeyChanged:(s) => s.noCredMasterKey !== s.noCredMasterKeyLast,
 		
 		// stores
-		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
-		loginKeyAes:       (s) => s.$store.getters['local/loginKeyAes'],
-		loginKeySalt:      (s) => s.$store.getters['local/loginKeySalt'],
-		cryptoApiAvailable:(s) => s.$store.getters.cryptoApiAvailable,
-		loginEncryption:   (s) => s.$store.getters.loginEncryption,
-		loginPrivateKey:   (s) => s.$store.getters.loginPrivateKey,
-		loginPrivateKeyEnc:(s) => s.$store.getters.loginPrivateKeyEnc,
+		moduleIdMap:         (s) => s.$store.getters['schema/moduleIdMap'],
+		loginKeyAes:         (s) => s.$store.getters['local/loginKeyAes'],
+		loginKeySalt:        (s) => s.$store.getters['local/loginKeySalt'],
+		loginNoCred:         (s) => s.$store.getters['local/loginNoCred'],
+		cryptoApiAvailable:  (s) => s.$store.getters.cryptoApiAvailable,
+		loginEncEnabled:     (s) => s.$store.getters.loginEncEnabled,
+		loginEncLocked:      (s) => s.$store.getters.loginEncLocked,
+		loginPrivateKey:     (s) => s.$store.getters.loginPrivateKey,
+		loginPrivateKeyEnc:  (s) => s.$store.getters.loginPrivateKeyEnc,
 		loginPrivateKeyEncBackup:(s) => s.$store.getters.loginPrivateKeyEncBackup,
-		loginPublicKey:    (s) => s.$store.getters.loginPublicKey,
-		moduleEntries:     (s) => s.$store.getters.moduleEntries,
-		kdfIterations:     (s) => s.$store.getters.constants.kdfIterations,
-		capApp:            (s) => s.$store.getters.captions.settings.encryption,
-		capErr:            (s) => s.$store.getters.captions.error,
-		capGen:            (s) => s.$store.getters.captions.generic
+		loginPublicKey:      (s) => s.$store.getters.loginPublicKey,
+		moduleEntries:       (s) => s.$store.getters.moduleEntries,
+		kdfIterations:       (s) => s.$store.getters.constants.kdfIterations,
+		capApp:              (s) => s.$store.getters.captions.settings.encryption,
+		capErr:              (s) => s.$store.getters.captions.error,
+		capGen:              (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -203,23 +236,16 @@ let MySettingsEncryption = {
 		aesGcmDecryptBase64WithPhrase,
 		aesGcmEncryptBase64,
 		aesGcmEncryptBase64WithPhrase,
+		aesGcmExportBase64,
 		aesGcmImportBase64,
+		getCaption,
 		pbkdf2PassToAesGcmKey,
 		pemExport,
 		pemImport,
+		pemImportPrivateEnc,
 		rsaGenerateKeys,
+		srcBase64Icon,
 		
-		generateBackupCode() {
-			let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-			let len   = 128;
-			let arr   = new Uint32Array(len);
-			let out   = '';
-			crypto.getRandomValues(arr);
-			for(let i = 0; i < len; i++) {
-				out += chars[arr[i] % chars.length];
-			}
-			return out;
-		},
 		createKeys() {
 			this.running = true;
 			const backupCode     = this.generateBackupCode();
@@ -264,6 +290,53 @@ let MySettingsEncryption = {
 				this.$root.genericError
 			);
 		},
+		generateBackupCode() {
+			let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+			let len   = 128;
+			let arr   = new Uint32Array(len);
+			let out   = '';
+			crypto.getRandomValues(arr);
+			for(let i = 0; i < len; i++) {
+				out += chars[arr[i] % chars.length];
+			}
+			return out;
+		},
+		noCredMasterKeyApply(password,attemptDecryption) {
+			if(password === '')
+				return;
+
+			this.noCredMasterKeyLast = password;
+
+			// generate AES key from credentials and login private key salt
+			return this.pbkdf2PassToAesGcmKey(password,this.loginKeySalt,this.kdfIterations,true).then(
+				key => {
+					this.aesGcmExportBase64(key).then(
+						keyBase64 => {
+							this.$store.commit('local/loginKeyAes',keyBase64);
+
+							if(!attemptDecryption || !this.loginEncEnabled)
+								return;
+
+							// attempt to decrypt private key
+							this.pemImportPrivateEnc(this.loginPrivateKeyEnc,keyBase64).then(
+								keyPem => {
+									this.$store.commit('loginPrivateKey',keyPem);
+								},
+								() => {
+									this.noCredMasterKeyBadInput = true;
+									this.$store.commit('dialog',{
+										captionBody:this.capApp.noCredMasterKeyFailed,
+										image:'warning.png'
+									});
+								}
+							);
+						},
+						this.$root.genericError
+					);
+				},
+				this.$root.genericError
+			);
+		},
 		resetAsk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.resetAccessHint,
@@ -287,13 +360,19 @@ let MySettingsEncryption = {
 			});
 		},
 		unlockWithBackupCode() {
-			// remove spaces from backup code input
-			const backupCode = this.regainBackupCode.replace(/\s/g,'');
+			let promises = [];
 			
-			// attempt to decrypt private key with backup code
-			this.aesGcmDecryptBase64WithPhrase(this.loginPrivateKeyEncBackup,backupCode).then(
-				res => this.reencrypt(res),
-				()  => this.unlockError()
+			// if no-cred login, apply new master key to login AES key
+			if(this.loginNoCred)
+				promises.push(this.noCredMasterKeyApply(this.noCredMasterKeyNew,false));
+
+			// attempt to decrypt private key with backup code (remove spaces beforehand)
+			const backupCode = this.regainBackupCode.replace(/\s/g,'');
+			promises.push(this.aesGcmDecryptBase64WithPhrase(this.loginPrivateKeyEncBackup,backupCode));
+
+			Promise.all(promises).then(
+				res => this.reencrypt(res[1]),
+				err => this.unlockError(err[1])
 			);
 		},
 		unlockWithPassphrase() {
@@ -301,8 +380,7 @@ let MySettingsEncryption = {
 				loginKeyOld => {
 					// attempt to decrypt private key with login key based on previous password
 					this.aesGcmDecryptBase64(this.loginPrivateKeyEnc,loginKeyOld).then(
-						res => this.reencrypt(res),
-						()  => this.unlockError()
+						this.reencrypt,this.unlockError
 					);
 				},
 				this.$root.genericError
@@ -324,7 +402,6 @@ let MySettingsEncryption = {
 						res => {
 							ws.send('loginKeys','storePrivate',{privateKeyEnc:res},true).then(
 								res => {
-									this.$store.commit('loginEncryption',true);
 									this.$store.commit('loginPrivateKey',privateKey);
 									this.$store.commit('loginPrivateKeyEnc',res);
 								}
@@ -338,7 +415,6 @@ let MySettingsEncryption = {
 		reset() {
 			ws.send('loginKeys','reset',{},true).then(
 				res => {
-					this.$store.commit('loginEncryption',false);
 					this.$store.commit('loginPrivateKey',null);
 					this.$store.commit('loginPrivateKeyEnc',null);
 					this.$store.commit('loginPrivateKeyEncBackup',null);
@@ -355,7 +431,6 @@ let MySettingsEncryption = {
 						publicKey:publicKeyPem
 					},true).then(
 						() => {
-							this.$store.commit('loginEncryption',true);
 							this.$store.commit('loginPrivateKey',this.newKeyPair.privateKey);
 							this.$store.commit('loginPrivateKeyEnc',this.newKeyPrivateEnc);
 							this.$store.commit('loginPrivateKeyEncBackup',this.newKeyPrivateEncBackup);
@@ -382,30 +457,49 @@ let MySettingsAccount = {
 				<td>{{ capGen.name }}</td>
 				<td><input disabled="disabled" :value="loginName" /></td>
 			</tr>
-			<tr><td colspan="2"></td></tr>
-			<tr><td colspan="2"><b>{{ capApp.titlePwChange }}</b></td></tr>
-			<tr>
-				<td>{{ capApp.pwOld }}</td>
-				<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
-			</tr>
-			<tr>
-				<td>{{ capApp.pwNew0 }}</td>
-				<td><input autocomplete="new-password" type="password" v-model="pwNew0" @input="newInput = true" /></td>
-			</tr>
-			<tr>
-				<td>{{ capApp.pwNew1 }}</td>
-				<td><input autocomplete="new-password" type="password" v-model="pwNew1" @input="newInput = true" /></td>
-			</tr>
+			<template v-if="isAllowedPwChange">
+				<tr><td colspan="2"><hr /></td></tr>
+				<tr><td colspan="2"><b>{{ capApp.titlePwChange }}</b></td></tr>
+				<tr>
+					<td>{{ capApp.pwOld }}</td>
+					<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.pwNew0 }}</td>
+					<td><input autocomplete="new-password" type="password" v-model="pwNew0" @input="newInput = true" /></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.pwNew1 }}</td>
+					<td><input autocomplete="new-password" type="password" v-model="pwNew1" @input="newInput = true" /></td>
+				</tr>
+			</template>
+
+			<template v-if="!isAllowedPwChange">
+				<tr><td colspan="2"></td></tr>
+				<tr><td colspan="2"><b>{{ capApp.pwChangeNotAllowed }}</b></td></tr>
+			</template>
 		</tbody>
 	</table>
 	
-	<div class="settings-account-action">
+	<div class="settings-account-pw-change-action">
 		<my-button image="save.png"
+			v-if="isAllowedPwChange"
 			@trigger="setCheck"
 			:active="canSave"
 			:caption="capGen.button.save"
 		/>
 	</div>
+
+	<div class="settings-account-actions">
+		<h2>{{ capGen.actions }}</h2>
+		<div class="row">
+			<my-button image="refresh.png"
+				@trigger="delOptionsAsk"
+				:caption="capApp.button.loginOptionsDel"
+			/>
+		</div>
+	</div>
+
 	<div class="message-error" v-if="message !== ''">{{ message }}</div>
 	
 	<div class="column grow"></div>
@@ -451,7 +545,7 @@ let MySettingsAccount = {
 		},
 		
 		// simple
-		e2eeInactive:(s) => !s.loginEncryption || s.loginPrivateKey === null, // encryption not enabled (or private key locked)
+		e2eeInactive:(s) => !s.loginEncEnabled || s.loginEncLocked, // encryption not enabled or private key locked
 		pwMatch:     (s) => s.pwNew0.length !== 0 && s.pwNew0 === s.pwNew1,
 		pwMetLength: (s) => s.pwSettings.length <= s.pwNew0.length,
 		pwOldValid:  (s) => s.loginKeyAes === s.pwOldKey || s.e2eeInactive,   // without login key, we cannot check old PW (backend still checks)
@@ -463,7 +557,9 @@ let MySettingsAccount = {
 		// stores
 		loginKeyAes:       (s) => s.$store.getters['local/loginKeyAes'],
 		loginKeySalt:      (s) => s.$store.getters['local/loginKeySalt'],
-		loginEncryption:   (s) => s.$store.getters.loginEncryption,
+		isAllowedPwChange: (s) => s.$store.getters.isAllowedPwChange,
+		loginEncEnabled:   (s) => s.$store.getters.loginEncEnabled,
+		loginEncLocked:    (s) => s.$store.getters.loginEncLocked,
 		loginName:         (s) => s.$store.getters.loginName,
 		loginPrivateKey:   (s) => s.$store.getters.loginPrivateKey,
 		loginPrivateKeyEnc:(s) => s.$store.getters.loginPrivateKeyEnc,
@@ -531,6 +627,29 @@ let MySettingsAccount = {
 		},
 		
 		// backend calls
+		delOptionsAsk() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.loginOptionsDel,
+				image:'warning.png',
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.reset,
+					exec:this.delOptions,
+					keyEnter:true,
+					image:'refresh.png'
+				},{
+					caption:this.capGen.button.cancel,
+					keyEscape:true,
+					image:'cancel.png'
+				}]
+			});
+		},
+		delOptions() {
+			ws.send('loginOptions','del',null,true).then(
+				() => { this.$store.commit('local/loginOptionsClear'); },
+				this.$root.genericError
+			);
+		},
 		set(newPrivateKeyEnc,newLoginKey) {
 			let requests = [
 				ws.prepare('loginPassword','set',{
@@ -745,6 +864,7 @@ let MySettingsFixedTokens = {
 			/>
 			<my-button image="smartphone.png"
 				@trigger="showSubWindow('mfa')"
+				:active="isAllowedMfa"
 				:caption="capApp.titleMfa"
 			/>
 		</div>
@@ -958,6 +1078,7 @@ let MySettingsFixedTokens = {
 		capApp:               (s) => s.$store.getters.captions.settings.tokensFixed,
 		capGen:               (s) => s.$store.getters.captions.generic,
 		isAdmin:              (s) => s.$store.getters.isAdmin,
+		isAllowedMfa:         (s) => s.$store.getters.isAllowedMfa,
 		languageCode:         (s) => s.$store.getters.settings.languageCode,
 		languageCodesOfficial:(s) => s.$store.getters.constants.languageCodesOfficial,
 		loginName:            (s) => s.$store.getters.loginName
@@ -1091,7 +1212,7 @@ let MySettingsFixedTokens = {
 let MySettings = {
 	name:'my-settings',
 	components:{
-		MyInputColor,
+		MyInputColorWrap,
 		MySettingsAccount,
 		MySettingsClientEvents,
 		MySettingsEncryption,
@@ -1119,7 +1240,7 @@ let MySettings = {
 		<div class="content" :style="patternStyle" v-if="settingsLoaded">
 		
 			<!-- general -->
-			<div class="contentPart short">
+			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/settings.png" />
 					<h1>{{ capApp.titleGeneral }}</h1>
@@ -1154,31 +1275,8 @@ let MySettings = {
 								</select>
 							</td>
 						</tr>
-						<tr class="default-inputs">
-							<td>{{ capApp.searchDictionaries }}</td>
-							<td>
-								<div class="column gap">
-									<div class="row centered gap">
-										<select v-model="searchDictionaryNew" @change="dictAdd($event.target.value)">
-											<option value="">{{ capApp.searchDictionaryNew }}</option>
-											<option v-for="d in searchDictionaries.filter(v => !settingsInput.searchDictionaries.includes(v) && v !== 'simple')">
-												{{ d }}
-											</option>
-										</select>
-										<my-button image="question.png" @trigger="dictMsg(d)" />
-									</div>
-									<div class="row wrap gap">
-										<div v-for="d in settingsInput.searchDictionaries" class="row centered gap">
-											<span>{{ d }}</span>
-											<my-button image="delete.png" @trigger="dictDel(d)" :cancel="true" />
-										</div>
-									</div>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<td colspan="2"><b>{{ capApp.titleSubNumbers }}</b></td>
-						</tr>
+						<tr><td colspan="2"><hr /></td></tr>
+						<tr><td colspan="2"><b>{{ capApp.titleSubNumbers }}</b></td></tr>
 						<tr class="default-inputs">
 							<td>{{ capApp.numberSepThousand }}</td>
 							<td>
@@ -1187,6 +1285,8 @@ let MySettings = {
 									<option value=",">{{ capApp.option.numberSeparator.comma }}</option>
 									<option value="'">{{ capApp.option.numberSeparator.apos }}</option>
 									<option value="·">{{ capApp.option.numberSeparator.mdot }}</option>
+									<option value=" ">{{ capApp.option.numberSeparator.space }}</option>
+									<option value="0">{{ capApp.option.numberSeparator.none }}</option>
 								</select>
 							</td>
 						</tr>
@@ -1198,12 +1298,12 @@ let MySettings = {
 									<option value=",">{{ capApp.option.numberSeparator.comma }}</option>
 									<option value="'">{{ capApp.option.numberSeparator.apos }}</option>
 									<option value="·">{{ capApp.option.numberSeparator.mdot }}</option>
+									<option value=" ">{{ capApp.option.numberSeparator.space }}</option>
 								</select>
 							</td>
 						</tr>
-						<tr>
-							<td colspan="2"><b>{{ capApp.titleSubMisc }}</b></td>
-						</tr>
+						<tr><td colspan="2"><hr /></td></tr>
+						<tr><td colspan="2"><b>{{ capApp.titleSubMisc }}</b></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.sundayFirstDow"   :caption="capApp.sundayFirstDow"   /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.tabRemember"      :caption="capApp.tabRemember"      /></td></tr>
 						<tr><td colspan="2"><my-button-check v-model="settingsInput.warnUnsaved"      :caption="capApp.warnUnsaved"      /></td></tr>
@@ -1214,7 +1314,7 @@ let MySettings = {
 			</div>
 			
 			<!-- theme -->
-			<div class="contentPart short">
+			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/visible1.png" />
 					<h1>{{ capApp.titleTheme }}</h1>
@@ -1222,7 +1322,7 @@ let MySettings = {
 				<table>
 					<tbody>
 						<tr>
-							<td>{{ capGen.inputs }}</td>
+							<td class="maximum">{{ capGen.inputs }}</td>
 							<td>
 								<div class="row gap">
 									<my-button-check v-model="settingsInput.shadowsInputs"  :caption="capGen.shadows" />
@@ -1303,9 +1403,8 @@ let MySettings = {
 							<td>{{ capApp.dark }}</td>
 							<td><div class="row"><my-bool v-model="settingsInput.dark" :grow="false" /></div></td>
 						</tr>
-						<tr>
-							<td colspan="2"><b>{{ capApp.titleSubHeader }}</b></td>
-						</tr>
+						<tr><td colspan="2"><hr /></td></tr>
+						<tr><td colspan="2"><b>{{ capApp.titleSubHeader }}</b></td></tr>
 						<tr>
 							<td>{{ capGen.applications }}</td>
 							<td>
@@ -1333,25 +1432,24 @@ let MySettings = {
 						</tr>
 						<tr class="default-inputs" v-if="!settingsInput.colorClassicMode">
 							<td>{{ capApp.colorHeader }}</td>
-							<td><my-input-color v-model="settingsInput.colorHeader" :allowNull="true" /></td>
+							<td><my-input-color-wrap v-model="settingsInput.colorHeader" :allowNull="true" /></td>
 						</tr>
 						<tr v-if="!settingsInput.colorClassicMode">
 							<td>{{ capApp.colorHeaderSingle }}</td>
 							<td><div class="row"><my-bool v-model="settingsInput.colorHeaderSingle" :grow="false" :reversed="true" /></div></td>
 						</tr>
-						<tr>
-							<td colspan="2"><b>{{ capApp.titleSubMenu }}</b></td>
-						</tr>
+						<tr><td colspan="2"><hr /></td></tr>
+						<tr><td colspan="2"><b>{{ capApp.titleSubMenu }}</b></td></tr>
 						<tr class="default-inputs">
 							<td>{{ capApp.colorMenu }}</td>
-							<td><my-input-color v-model="settingsInput.colorMenu" :allowNull="true" /></td>
+							<td><my-input-color-wrap v-model="settingsInput.colorMenu" :allowNull="true" /></td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
 			
 			<!-- account -->
-			<div class="contentPart short">
+			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/lock.png" />
 					<h1>{{ capApp.titleAccount }}</h1>
@@ -1360,7 +1458,7 @@ let MySettings = {
 			</div>
 			
 			<!-- fixed tokens (device access) -->
-			<div class="contentPart short">
+			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/screen.png" />
 					<h1>{{ capApp.titleFixedTokens }}</h1>
@@ -1369,7 +1467,7 @@ let MySettings = {
 			</div>
 			
 			<!-- client events (global hotkeys) -->
-			<div class="contentPart short">
+			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/screen.png" />
 					<h1>{{ capApp.titleClientEvents }}</h1>
@@ -1378,7 +1476,7 @@ let MySettings = {
 			</div>
 			
 			<!-- encryption -->
-			<div class="contentPart short">
+			<div class="contentPart">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/key.png" />
 					<h1>{{ capApp.titleEncryption }}</h1>
@@ -1390,9 +1488,8 @@ let MySettings = {
 	emits:['close','logout'],
 	data() {
 		return {
-			searchDictionaryNew:'', // input for new search dictionary
-			settingsInput:{},       // copy of the settings object to work on
-			settingsLoaded:false    // once settings have been loaded, each change triggers DB update
+			settingsInput:{},    // copy of the settings object to work on
+			settingsLoaded:false // once settings have been loaded, each change triggers DB update
 		};
 	},
 	watch:{
@@ -1419,7 +1516,6 @@ let MySettings = {
 		// stores
 		languageCodes:        (s) => s.$store.getters['schema/languageCodes'],
 		languageCodesModules: (s) => s.$store.getters['schema/languageCodesModules'],
-		searchDictionaries:   (s) => s.$store.getters['searchDictionaries'],
 		capGen:               (s) => s.$store.getters.captions.generic,
 		capApp:               (s) => s.$store.getters.captions.settings,
 		languageCodesOfficial:(s) => s.$store.getters.constants.languageCodesOfficial,
@@ -1435,22 +1531,6 @@ let MySettings = {
 	},
 	methods:{
 		// externals
-		setSetting,
-
-		// actions
-		dictAdd(entry) {
-			this.settingsInput.searchDictionaries.push(entry);
-			this.searchDictionaryNew = '';
-		},
-		dictDel(entry) {
-			let pos = this.settingsInput.searchDictionaries.indexOf(entry);
-			if(pos !== -1)
-				this.settingsInput.searchDictionaries.splice(pos,1);
-		},
-		dictMsg() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.searchDictionary
-			});
-		}
+		setSetting
 	}
 };

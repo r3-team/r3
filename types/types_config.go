@@ -22,6 +22,8 @@ type FileType struct {
 		EmbeddedDbBin  string `json:"embeddedDbBin"`
 		EmbeddedDbData string `json:"embeddedDbData"`
 		Files          string `json:"files"`
+		FileExport     string `json:"fileExport"`
+		FileImport     string `json:"fileImport"`
 		Temp           string `json:"temp"`
 		Transfer       string `json:"transfer"`
 	} `json:"paths"`

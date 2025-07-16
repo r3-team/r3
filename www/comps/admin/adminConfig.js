@@ -54,7 +54,7 @@ let MyAdminConfig = {
 							<td v-if="licenseValid">{{ capApp.licenseStateOk.replace('{COUNT}',this.licenseDays) }}</td>
 							<td v-if="!licenseValid">{{ capApp.licenseStateNok }}</td>
 						</tr>
-						<tr><td colspan="2"></td></tr>
+						<tr><td colspan="2"><hr /></td></tr>
 						<tr>
 							<td>{{ capApp.publicHostName }}</td>
 							<td>
@@ -77,8 +77,10 @@ let MyAdminConfig = {
 								</div>
 							</td>
 						</tr>
+						<tr><td colspan="2"><hr /></td></tr>
+						<tr><td colspan="2"><b>{{ capGen.systemModes }}</b></td></tr>
 						<tr>
-							<td>{{ capApp.productionMode }}</td>
+							<td><my-label image="serverCog.png" :caption="capApp.productionMode" /></td>
 							<td>
 								<my-bool-string-number
 									v-model="configInput.productionMode"
@@ -89,7 +91,7 @@ let MyAdminConfig = {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capApp.builderMode }}</td>
+							<td><my-label image="builder.png" :caption="capApp.builderMode" /></td>
 							<td>
 								<my-bool-string-number
 									v-model="configInput.builderMode"
@@ -115,9 +117,8 @@ let MyAdminConfig = {
 							<td>{{ capApp.tokenExpiryHours }}</td>
 							<td><input v-model="configInput.tokenExpiryHours" /></td>
 						</tr>
-						<tr>
-							<td colspan="2"><br /><h3>{{ capApp.pwTitle }}</h3></td>
-						</tr>
+						<tr><td colspan="2"><hr /></td></tr>
+						<tr><td colspan="2"><br /><b>{{ capApp.pwTitle }}</b></td></tr>
 						<tr>
 							<td>{{ capApp.pwLengthMin }}</td>
 							<td><input v-model="configInput.pwLengthMin" /></td>
@@ -196,9 +197,8 @@ let MyAdminConfig = {
 								/>
 							</td>
 						</tr>
-						<tr>
-							<td colspan="2"><br /><h3>{{ capApp.repoKeyManagement }}</h3></td>
-						</tr>
+						<tr><td colspan="2"><hr /></td></tr>
+						<tr><td colspan="2"><b>{{ capApp.repoKeyManagement }}</b></td></tr>
 						<tr>
 							<td>{{ capApp.repoPublicKeys }}</td>
 							<td>
@@ -345,6 +345,8 @@ let MyAdminConfig = {
 						</tr>
 					</tbody>
 				</table>
+
+				<span v-html="capApp.bruteforceDesc"></span>
 			</div>
 			
 			<!-- admin mails -->

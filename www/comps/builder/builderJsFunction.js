@@ -1,10 +1,10 @@
-import MyBuilderCaption   from './builderCaption.js';
-import MyBuilderQuery     from './builderQuery.js';
-import MyCodeEditor       from '../codeEditor.js';
-import {getFieldMap}      from '../shared/form.js';
-import {copyValueDialog}  from '../shared/generic.js';
-import {getJoinsIndexMap} from '../shared/query.js';
-import MyTabs             from '../tabs.js';
+import MyBuilderCaption  from './builderCaption.js';
+import MyBuilderQuery    from './builderQuery.js';
+import MyCodeEditor      from '../codeEditor.js';
+import {getFieldMap}     from '../shared/form.js';
+import {copyValueDialog} from '../shared/generic.js';
+import {getJoinIndexMap} from '../shared/query.js';
+import MyTabs            from '../tabs.js';
 import {
 	getAttributeIcon,
 	isAttributeFiles
@@ -620,10 +620,10 @@ let MyBuilderJsFunction = {
 			isClientEventExec:false,
 			appFunctions:[
 				'block_inputs','client_execute_keystrokes','copy_to_clipboard','dialog_show',
-				'form_close','form_open','form_set_title','form_show_message','get_e2ee_data_key',
-				'get_e2ee_data_value','get_language_code','get_record_id','get_role_ids',
-				'get_url_query_string','get_user_id','go_back','has_role','logoff','pdf_create',
-				'record_delete','record_new','record_reload','record_save','record_save_new',
+				'form_close','form_parent_refresh','form_open','form_set_title','form_show_message',
+				'get_e2ee_data_key','get_e2ee_data_value','get_language_code','get_record_id',
+				'get_role_ids','get_url_query_string','get_user_id','go_back','has_role','logoff',
+				'pdf_create','record_delete','record_new','record_reload','record_save','record_save_new',
 				'set_e2ee_by_user_ids','set_e2ee_by_user_ids_and_relation','timer_clear',
 				'timer_clear_global','timer_set','timer_set_global'
 			],
@@ -801,7 +801,7 @@ let MyBuilderJsFunction = {
 		entityIdMapRef:    (s) => s.formId === null ? {} : s.getFormEntityMapRef(s.form.fields,s.form.actions),
 		fieldIdMap:        (s) => s.formId === null ? {} : s.getFieldMap(s.formIdMap[s.formId].fields),
 		form:              (s) => s.formId === null ? false : s.formIdMap[s.formId],
-		joinsIndexMap:     (s) => s.form !== false ? s.getJoinsIndexMap(s.form.query.joins) : {},
+		joinsIndexMap:     (s) => s.form !== false ? s.getJoinIndexMap(s.form.query.joins) : {},
 		jsFunction:        (s) => s.jsFunctionIdMap[s.id] === undefined ? false : s.jsFunctionIdMap[s.id],
 		module:            (s) => s.jsFunction === false ? false : s.moduleIdMap[s.jsFunction.moduleId],
 		modulesData:       (s) => s.getDependentModules(s.module).filter(v => v.relations.length !== 0),
@@ -835,7 +835,7 @@ let MyBuilderJsFunction = {
 		getFunctionHelp,
 		getItemTitle,
 		getItemTitlePath,
-		getJoinsIndexMap,
+		getJoinIndexMap,
 		getValidDbCharsForRx,
 		isAttributeFiles,
 		

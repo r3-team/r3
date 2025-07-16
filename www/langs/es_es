@@ -45,6 +45,7 @@
 			"bruteforceAttempts": "Bloquear hosts después de intentos",
 			"bruteforceCountBlocked": "Hosts bloqueados",
 			"bruteforceCountTracked": "Hosts rastreados",
+			"bruteforceDesc": "<p>This feature blocks clients, if they attempt to access the system repeatedly with invalid authentication. It is sensible for operation in the cloud, where public access is possible.</p><p>It does not make sense for local deployments or if the system is operated with a reverse proxy.</p>",
 			"bruteforceProtection": "Habilitar protección contra fuerza bruta",
 			"bruteforceTitle": "Protección contra fuerza bruta",
 			"builderMode": "Modo de constructor",
@@ -155,7 +156,6 @@
 			"bindUserDnHint": "Ejemplo: CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "Contraseña del usuario de enlace",
 			"button": {
-				"expert": "Configuraciones avanzadas",
 				"import": "Importar usuarios ahora",
 				"new": "Agregar conexión",
 				"test": "Probar conexión"
@@ -166,7 +166,6 @@
 				"importPlanned": "El trabajo de importación se ha programado para ejecución inmediata",
 				"testDone": "La prueba de conexión fue exitosa"
 			},
-			"groupDn": "DN del grupo",
 			"groupDnHint": "Ejemplo: CN=Admin_User,OU=Group,DC=mycompany,DC=local",
 			"host": "Host",
 			"hostHint": "Nombre del host LDAP",
@@ -174,27 +173,14 @@
 			"keyAttributeHint": "Ejemplo: objectGUID",
 			"loginAttribute": "Atributo de nombre de usuario",
 			"loginAttributeHint": "Ejemplo: sAMAccountName",
+			"loginMetaMap": "Map user details to LDAP attributes",
 			"memberAttribute": "Atributo de miembro",
 			"memberAttributeHint": "Ejemplo: memberOf",
-			"metaHint": {
-				"department": "Ejemplo: department",
-				"email": "Ejemplo: mail",
-				"location": "Ejemplo: physicalDeliveryOfficeName",
-				"nameDisplay": "Ejemplo: displayName",
-				"nameFore": "Ejemplo: givenName",
-				"nameSur": "Ejemplo: sn",
-				"notes": "Ejemplo: description",
-				"organization": "Ejemplo: company",
-				"phoneFax": "Ejemplo: facsimileTelephoneNumber",
-				"phoneLandline": "Ejemplo: telephoneNumber",
-				"phoneMobile": "Ejemplo: mobile"
-			},
 			"msAdExt": "Extensiones de Microsoft AD",
 			"msAdExtHint": "Membresías de grupo anidadas, control de cuentas de usuario",
 			"nameHint": "Nombre único",
 			"port": "Puerto",
 			"portHint": "Por defecto 389, 636 para SSL/TLS",
-			"role": "Rol",
 			"searchClass": "Clase de objeto",
 			"searchClassHint": "Ejemplo: user",
 			"searchDn": "DN de búsqueda",
@@ -236,7 +222,6 @@
 			},
 			"dialog": {
 				"delete": "¿Estás seguro de que deseas eliminar este usuario?<br /><br />Esta acción es irreversible.</b>",
-				"notUniqueEmail": "La misma dirección de correo electrónico también ha sido asignada a un usuario diferente.",
 				"notUniqueName": "El mismo nombre de usuario ya ha sido asignado a un usuario diferente.",
 				"resetTotp": "Esto restablecerá todos los métodos de autenticación multifactor (MFA) para este usuario. El acceso al sistema será posible solo con nombre de usuario y contraseña.<br /><br />Restablecer MFA no afecta el cifrado de extremo a extremo.<br /><br />¿Deseas continuar?"
 			},
@@ -249,7 +234,6 @@
 				"name": "Nombre de usuario - debe ser único dentro del sistema.",
 				"noAuth": "Los usuarios públicos no requieren autenticación. El acceso al sistema es posible solo con una URL.",
 				"password": "Esto sobrescribirá la contraseña actual de este usuario. La autenticación multifactor no se ve afectada por este cambio. El cifrado de extremo a extremo (E2EE) no estará disponible hasta que el usuario proporcione el código de respaldo asociado.",
-				"template": "Se aplican configuraciones predefinidas (opciones de visualización y tema) de la plantilla elegida.",
 				"tokenExpiryHours": "Sobrescribe la configuración global para el tiempo máximo de sesión."
 			},
 			"ldap": "Asignado por LDAP",
@@ -257,27 +241,15 @@
 			"ldapMeta": "Los detalles se importan a través de LDAP",
 			"limited": "Usuario limitado",
 			"limitedDesc": "Cuando un usuario tiene como máximo un solo rol asignado, se cuenta como un usuario 'limitado'. Útil cuando solo se necesita acceso a partes de una aplicación para cosas como manejo de solicitudes o envío de formularios.<br /><br />Los usuarios limitados no pueden tener acceso de administrador o público y se toman de un grupo de licencias separado.",
-			"meta": {
-				"department": "Departamento",
-				"email": "Correo electrónico",
-				"location": "Ubicación",
-				"nameDisplay": "Nombre para mostrar",
-				"nameFore": "Nombre",
-				"nameSur": "Apellido",
-				"notes": "Descripción",
-				"organization": "Organización",
-				"phone": "Teléfono",
-				"phoneFax": "Fax",
-				"phoneLandline": "Teléfono fijo",
-				"phoneMobile": "Teléfono móvil"
-			},
 			"noAuth": "Acceso público",
+			"oauth": "OAuth client",
+			"oauthAssignActive": "Roles are assigned by ID token claim",
+			"oauthMeta": "Details are set by ID token claims",
 			"password": "Establecer nueva contraseña",
 			"roleContentAdmin": "Admin",
 			"roleContentOther": "Especial",
 			"roleContentUser": "Usuario",
 			"roles": "Roles ({COUNT})",
-			"template": "Plantilla de usuario",
 			"title": "Usuario '{NAME}'",
 			"titleLimited": "Usuario limitado '{NAME}'",
 			"titleNew": "Nuevo usuario",
@@ -287,9 +259,27 @@
 				"ldap": "LDAP",
 				"limited": "Limitado",
 				"name": "Nombre",
-				"noAuth": "Público"
+				"noAuth": "Público",
+				"oauth": "OAuth client"
 			},
 			"tokenExpiryHours": "Tiempo máximo de sesión en horas"
+		},
+		"loginMeta": {
+			"department": "Department",
+			"dialog": {
+				"notUniqueEmail": "La misma dirección de correo electrónico también ha sido asignada a un usuario diferente."
+			},
+			"email": "Email",
+			"location": "Location",
+			"nameDisplay": "Display name",
+			"nameFore": "Forename",
+			"nameSur": "Surname",
+			"notes": "Description",
+			"organization": "Organization",
+			"phone": "Phone",
+			"phoneFax": "Fax",
+			"phoneLandline": "Landline",
+			"phoneMobile": "Mobile"
 		},
 		"loginSessions": {
 			"noData": "No hay sesiones disponibles",
@@ -326,10 +316,12 @@
 				"cache": "Caché",
 				"cluster": "Clúster",
 				"csv": "Importación/exportación CSV",
+				"file": "File processing",
 				"imager": "Procesamiento de imágenes",
 				"ldap": "LDAP",
 				"mail": "Correo",
 				"module": "Aplicaciones",
+				"oauth": "OAuth client",
 				"scheduler": "Programador",
 				"server": "Servidor",
 				"transfer": "Transferencia",
@@ -460,6 +452,14 @@
 		"navigationScheduler": "Programador",
 		"navigationSystemMsg": "Mensaje del sistema",
 		"oauthClient": {
+			"button": {
+				"defaultO365": "Defaults: Exchange Online",
+				"defaultOpenId": "Defaults: Open ID Connect"
+			},
+			"claimRoles": "Roles claim",
+			"claimRolesHint": "Name of the claim field, which contains user roles or groups. If set, REI3 roles can be mapped to values in this claim. Value must be a JSON string array, such as: [\"all-users\", \"department-it\"]",
+			"claimUsername": "Username claim",
+			"claimUsernameHint": "Name of the claim field, which contains the username. Must be filled. Usernames must be unique for an OAuth client.",
 			"clientId": "ID del cliente",
 			"clientIdHint": "Generado en el lado del proveedor al crear un cliente OAuth2.",
 			"clientSecret": "Secreto del cliente",
@@ -469,23 +469,29 @@
 			"dialog": {
 				"delete": "¿Estás seguro de que deseas eliminar este cliente OAuth?<br /><br />Esta acción es irreversible.</b>"
 			},
-			"intro": "Un cliente OAuth se autentica contra un proveedor de identidad para ejecutar acciones o acceder a recursos.<br /><br />REI3 implementa el 'flujo de credenciales del cliente OAuth 2.0', que requiere que el cliente OAuth esté registrado con el proveedor antes de poder configurarse aquí.",
+			"flow": "OAuth flow",
+			"loginMetaMap": "Update user details via claims",
 			"nameHint": "Un nombre interno para referenciar este cliente OAuth dentro de REI3.",
 			"option": {
-				"template": {
-					"custom": "-",
-					"ms365_mail": "Correo O365"
+				"flow": {
+					"authCodePkce": "Authentication Code with PKCE",
+					"clientCreds": "Client credentials"
+				},
+				"flowHint": {
+					"authCodePkce": "<p>This flow is used in REI3 to authenticate users via external identity providers, such as Keycloak or Microsoft Entra ID.</p><p>'Authentication Code with Proof Key for Code Exchange' is an Open ID Connect flow. Users are forwarded to authenticate with an identity provider. After authentication, a user is redirected back to REI3 with verification of identity and user meta data.</p>",
+					"clientCreds": "<p>This flow is used in REI3 to authenticate itself against a service, such as Exchange Online.</p><p>'Client Credentials' is an OAuth 2.0 flow, with which REI3 authenticates against a service provider, to receive access to protected resources such as a mailbox. Any resource accessed via the 'Client Credentials' flow should belong to the client (in this case REI3) - it is not designed to access user resources directly or on behalf.</p><p>This flow is currently only used for access to mail resources.</p>"
 				}
 			},
+			"providerUrl": "Provider URL",
+			"providerUrlHint": "URL of the chosen provider for its OAuth service discovery, often called 'Issuer URL'.",
+			"redirectUrl": "Redirect URL",
+			"redirectUrlHint": "Users are redirected here after authentication. Should be the login URL of REI3. Must also be registered at the service provider.",
 			"scopes": "Ámbitos",
 			"scopesHint": "Los ámbitos le dicen al proveedor qué desea hacer o acceder un cliente OAuth. Son definidos por el proveedor y deben asignarse al cliente para ser utilizables - consulta la documentación del proveedor para obtener una lista de ámbitos disponibles.",
-			"template": "Plantilla",
-			"templateHint": "Selecciona una plantilla para aplicar configuraciones predeterminadas para proveedores conocidos.",
-			"tenant": "Inquilino",
-			"tenantHint": "Requerido por algunos proveedores. Un inquilino es un nombre o ID que identifica de manera única a tu organización en el sistema en la nube de tu proveedor.",
 			"title": "Cliente OAuth '{NAME}'",
 			"titleNew": "Nuevo cliente OAuth",
 			"tokenUrl": "URL del token",
+			"tokenUrlExample": "Example for Exchange Online: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
 			"tokenUrlHint": "URL donde se generan los tokens OAuth2. Estos están documentados por tu proveedor."
 		},
 		"repo": {
@@ -538,6 +544,7 @@
 				"clusterCheckIn": "Registro del clúster",
 				"clusterProcessEvents": "Procesamiento de eventos del clúster",
 				"dbOptimize": "Optimización de la base de datos",
+				"filesProcess": "File job processing",
 				"httpCertRenew": "Recargar certificado SSL si se actualiza",
 				"importLdapLogins": "Importar usuarios a través de LDAP",
 				"mailAttach": "Transferencia de archivos adjuntos de correo",
@@ -589,9 +596,6 @@
 				"versionNewHint": "Duplica esta API con un nuevo número de versión."
 			},
 			"calls": "Llamadas",
-			"columnSettings": "Configuración de columnas",
-			"columnsAvailable": "Columnas disponibles",
-			"columnsTarget": "Columnas activas",
 			"content": "Tipo de API",
 			"contentValue": "REST",
 			"dialog": {
@@ -776,23 +780,17 @@
 			"titleNew": "Nuevo evento del cliente"
 		},
 		"collection": {
-			"columnSettings": "Configuración de columnas",
-			"columnsAvailable": "Columnas disponibles",
-			"columnsTarget": "Columnas activas",
 			"dialog": {
 				"delete": "¿Estás seguro de que deseas eliminar esta colección?"
 			},
 			"inHeader": "Mostrar en el encabezado",
-			"new": "Nueva colección",
 			"previewHint": "Valores de la colección para el usuario conectado. Las colecciones se recuperan al cargar la página (F5 para recargar) si están habilitadas dentro de los roles asignados.",
-			"query": "Consulta",
 			"title": "Colecciones",
 			"titleOne": "Colección '{NAME}'"
 		},
 		"collectionInput": {
 			"collection": "Colección",
 			"column": "Valor(es) de la columna",
-			"formIdOpen": "Abrir formulario",
 			"multiValue": "Entrada múltiple",
 			"noDisplayEmpty": "Ocultar si está vacío",
 			"onMobile": "Mostrar en móvil",
@@ -815,7 +813,6 @@
 				"columnsAll": "Todas las columnas",
 				"layoutColumns": "{CNT} columnas"
 			},
-			"category": "Selector de categoría",
 			"chart": {
 				"axisType": "Tipo de eje",
 				"axisTypeCategory": "Categoría",
@@ -844,6 +841,8 @@
 			"columnLength": "Longitud (caracteres)",
 			"columnLength0": "sin límite",
 			"columnLengthFiles": "Recuento de archivos",
+			"columnNoShrink": "Does not shrink",
+			"columnNoThousandsSep": "No thousands separator",
 			"columnPreviewLarge": "Vista previa grande",
 			"columnShowDefault": "Mostrar por defecto",
 			"columnShowDefaultMobile": "Mostrar por defecto en móvil",
@@ -890,6 +889,11 @@
 			"fieldDefault": "Valor predeterminado",
 			"fieldDefaultPresetIds": "Preset(s) predeterminado(s)",
 			"fieldDirection": "Dirección",
+			"fieldFlags": {
+				"hideInputs": "Ocultar entradas",
+				"relCategory": "Category display",
+				"relFlow": "Progress flow display"
+			},
 			"fieldHelp": "Texto de ayuda",
 			"fieldIcon": "Icono de campo",
 			"fieldIdFocus": "Establecer foco en el campo al cargar",
@@ -952,7 +956,6 @@
 			"headerSize": "Tamaño",
 			"helpText": "Texto de ayuda",
 			"hidden": "El campo está oculto por defecto",
-			"hideInputs": "Ocultar entradas",
 			"icon": "Icono del formulario",
 			"ics": "Suscripciones iCAL",
 			"jsFunctionButton": "Función al hacer clic",
@@ -1073,6 +1076,8 @@
 			"codeReturnsHintJs": "opcional, 'number', 'array',...",
 			"codeReturnsHintPg": "'text', 'integer',...",
 			"collectionId": "[Seleccionar colección]",
+			"cost": "Cost",
+			"costHelp": "<b>Expert setting</b><p>Cost is an estimated value that serves to optimize query planning. Changing this value can help optimize performance by letting the query planner know, if this function is expected to run long (expensive / high cost) or short (cheap / low cost).</p><p>Higher values can be sensible for complex functions (such as relation policies), as the query planner will then avoid unnecessary executions by evaluating other things first.</p>",
 			"dialog": {
 				"delete": "¿Estás seguro de que deseas eliminar esta función?"
 			},
@@ -1091,6 +1096,7 @@
 				"dialog_show": "app.dialog_show({ARGS}) => PROMISE<br /><br />Muestra un cuadro de diálogo con el título y contenido especificados. El título es una cadena de texto simple, mientras que el contenido puede ser texto o HTML.<br /><br />Los botones se definen mediante una lista de cadenas. Si no se definen, se muestra un simple botón de OK.<br /><br />El valor devuelto es el índice del botón clicado. Así que si se hace clic en el primer botón, el valor será 0. Si se hace clic en el segundo botón, será 1 y así sucesivamente.<br /><br /><b>Ejemplo</b><br />app.dialog_show(<blockquote>'Por favor confirma',<br />'¿Realmente deseas eliminar este elemento?',<br />['Sí', 'Cancelar acción']</blockquote>).then(<blockquote>res => { if(res === 0) { console.log('¡clic en Sí!'); } }</blockquote>);",
 				"form_close": "app.form_close() => UNDEFINED<br /><br />Cierra el formulario (si es flotante o subformulario), de lo contrario, retrocede en el historial del navegador.",
 				"form_open": "app.form_open({ARGS}) => UNDEFINED<br /><br />Abre un formulario directamente, en una nueva pestaña del navegador o como ventana emergente.<br /><br />El nuevo formulario, si se abre directamente (no como pestaña o ventana emergente), se añade al historial del navegador a menos que el argumento 'replace_history' esté configurado en 'true'.",
+				"form_parent_refresh": "app.form_parent_refresh() => UNDEFINED<br /><br />Only relevant when used in child forms (ie. floating window or sub form).<br /><br />When a record is changed on a child form, the parent form refreshes itself automatically; this can be a relationship input showing a newly created record or a list field updating itself to show changed data.<br /><br />In some cases, like when executing changes via a backend function, this cannot be done automatically as the system does not know what or if something changed at all. This function informs the parent form to refresh itself to show changed data. This updates relationship input and data fields like lists or calendars; it does not reload the form record as there might be unsaved changes.",
 				"form_set_title": "app.form_set_title({ARGS}) => UNDEFINED<br /><br />Sobrescribe el título actual del formulario. Establecer en <i>null</i> para restablecerlo al título original del formulario.",
 				"form_show_message": "app.form_show_message({ARGS}) => UNDEFINED<br /><br />Reemplaza temporalmente el título del formulario con un mensaje personalizado. El segundo argumento define en milisegundos cuánto tiempo se muestra el mensaje (3000 por defecto).",
 				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Descifra la clave de datos proporcionada con la clave privada del usuario actual.",
@@ -1210,7 +1216,13 @@
 			"helpPg": {
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />Aborta la operación y envía un mensaje al usuario que se muestra en la interfaz de usuario.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Elimina las claves de datos de cifrado de extremo a extremo para los registros a los que un usuario ya no tiene acceso. Esto hace que el descifrado sea imposible para el usuario.",
+				"file_export": "instance.file_export({ARGS}) => INTEGER<br /><br />Creates a file processing job to export a given file to disk. Relevant parameters:<ul><li>file_id: File to export, file ID can be retrieved via instance.files_get()</li><li>file_path: Where to export the file to (must end in a filename)</li><li>file_version: Version of the file to export (NULL = latest version)</li><li>overwrite: Overwrite file if one already exists at the defined filepath</li></ul><p>The filepath is always relative to the export path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
+				"file_export_text": "instance.file_export_text({ARGS}) => INTEGER<br /><br />Creates a file processing job to export a given text as a UTF8 text file to disk. Relevant parameters:<ul><li>file_path: Where to export the file to (must end in a filename)</li><li>file_text_content: UTF8 text content</li><li>overwrite: Overwrite file if one already exists at the defined filepath</li></ul><p>The filepath is always relative to the export path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
+				"file_import": "instance.file_import({ARGS}) => INTEGER<br /><br />Creates a file processing job to import a file from disk. Relevant parameters:<ul><li>file_path: Where to import the file from (must end in a filename)</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul><p>The source file is deleted, if the import is successful.</p><p>The filepath is always relative to the import path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
+				"file_import_text": "instance.file_import_text({ARGS}) => INTEGER<br /><br />Creates a file processing job to import a text from a UTF8 text file on disk. Relevant parameters:<ul><li>file_path: Where to import the text file from (must end in a filename)</li><li>callback_function_id: ID of backend function that is called with the imported text, it must have two parameters: file_name TEXT, file_content TEXT</li></ul><p>The source file is deleted, if the import is successful.</p><p>The filepath is always relative to the import path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
 				"file_link": "instance.file_link({ARGS}) => VOID<br /><br />Vincula un archivo existente a otro registro (agregado al atributo de archivo elegido). Este enlace es un enlace físico, lo que significa que se accede al mismo archivo.<br /><br />Al renombrar o eliminar el archivo, el cambio solo afecta al enlace del archivo. Independientemente de la eliminación, el archivo real se mantiene mientras exista al menos un enlace de archivo.",
+				"file_text_read": "instance.file_text_read({ARGS}) => INTEGER<br /><br />Creates a file processing job to send the content of a UTF8 text file to a callback function. Relevant parameters:<ul><li>callback_function_id: ID of backend function that is called, it must have one parameter: file_content TEXT</li><li>file_id: File to read content from, file ID can be retrieved via instance.files_get()</li><li>file_version: Version of the file to read from (NULL = latest version)</li></ul>",
+				"file_text_write": "instance.file_text_write({ARGS}) => INTEGER<br /><br />Creates a file processing job to create a new UTF8 text file. Relevant parameters:<ul><li>file_name: Name of the file to be created</li><li>file_text_content: UTF8 text content</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul>",
 				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Desvincula un archivo existente del atributo de archivos de un registro especificado. El enlace eliminado es un enlace físico, lo que significa que el archivo real se mantiene mientras esté vinculado al menos a otro atributo de archivos de registros.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]<br /><br />Devuelve metadatos para archivos del atributo de archivo elegido y del registro (puede incluir archivos eliminados opcionalmente).<br /><br />El tipo devuelto 'instance.file_meta' consiste en:<blockquote>id UUID,<br />user_id_creator INTEGER,<br />hash TEXT,<br />name TEXT,<br />size_kb INTEGER,<br />version INTEGER,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Devuelve la clave de datos cifrada para el registro de relación dado y el usuario elegido. Las claves de datos existen para registros individuales para cada usuario que tiene acceso a ellos. Se pueden descifrar en el frontend con la clave privada del usuario asociado.",
@@ -1243,11 +1255,42 @@
 					"relation_id UUID",
 					"record_ids_access INTEGER[]"
 				],
+				"file_export": [
+					"file_id UUID",
+					"file_path TEXT",
+					"file_version INTEGER DEFAULT NULL",
+					"overwrite BOOLEAN DEFAULT FALSE"
+				],
+				"file_export_text": [
+					"file_path TEXT",
+					"file_text_content TEXT",
+					"overwrite BOOLEAN DEFAULT FALSE"
+				],
+				"file_import": [
+					"file_path TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL"
+				],
+				"file_import_text": [
+					"file_path TEXT",
+					"callback_function_id UUID"
+				],
 				"file_link": [
 					"file_id UUID",
 					"file_name TEXT",
 					"attribute_id UUID",
 					"record_id BIGINT"
+				],
+				"file_text_read": [
+					"callback_function_id UUID",
+					"file_id UUID",
+					"file_version INTEGER DEFAULT NULL"
+				],
+				"file_text_write": [
+					"file_name TEXT",
+					"file_text_content TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL"
 				],
 				"file_unlink": [
 					"file_id UUID",
@@ -1525,6 +1568,7 @@
 			"relationEncryption": "Cifrado de extremo a extremo",
 			"relationEncryptionHint": "Habilita el cifrado de extremo a extremo (E2EE) para atributos en esta relación. E2EE tiene beneficios y desventajas - por favor, lee cuidadosamente la documentación del Constructor antes de usarlo. Este ajuste no puede cambiarse más tarde.",
 			"role": "Nuevo rol",
+			"searchBar": "New search bar",
 			"template": {
 				"loginSync": "Función de sincronización de usuario",
 				"mailsFromSpooler": "Procesamiento de correo electrónico (entrante)",
@@ -1695,6 +1739,16 @@
 			"title": "Roles",
 			"titleOne": "Rol '{NAME}'"
 		},
+		"searchBar": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this search bar?"
+			},
+			"title": "Search bars",
+			"titleOne": "Search bar '{NAME}'",
+			"warning": {
+				"noSearchInput": "Add at least one 'Global search: User input' filter to apply search query"
+			}
+		},
 		"start": {
 			"appVisible": "La aplicación es visible para usuarios con roles asignados",
 			"appVisibleOff": "La aplicación no es visible para usuarios",
@@ -1848,7 +1902,8 @@
 			"003": "El sistema no pudo cifrar los valores del registro. Por favor, inténtelo de nuevo.",
 			"004": "El sistema no pudo descifrar los valores del registro. Por favor, inténtelo de nuevo.",
 			"005": "El sistema no pudo recuperar las claves de descifrado para los registros seleccionados.",
-			"006": "No todos los usuarios seleccionados tienen habilitado el cifrado de extremo a extremo - estos son: {NAMES}"
+			"006": "No todos los usuarios seleccionados tienen habilitado el cifrado de extremo a extremo - estos son: {NAMES}",
+			"007": "End-to-end encryption is waiting for your personal encryption password to be entered in the user settings."
 		},
 		"initCollection": "Error al cargar colecciones durante el inicio de sesión: {MSG}"
 	},
@@ -1901,6 +1956,7 @@
 		"nowOffsetHint": "+/- X {MODE}",
 		"nowOffsetTitle": "Añadir (número positivo) o eliminar (número negativo) X días/horas/minutos/segundos desde ahora.",
 		"operatorsArray": "Array",
+		"operatorsFts": "Full-text search",
 		"operatorsNull": "Valor vacío",
 		"operatorsRegex": "Expresión regular",
 		"operatorsSets": "Subconjunto",
@@ -1920,6 +1976,7 @@
 				"formChanged": "formulario tiene cambios sin guardar",
 				"formState": "estado del formulario",
 				"getter": "parámetro URL",
+				"globalSearch": "user search input",
 				"javascript": "JavaScript",
 				"languageCode": "idioma del usuario",
 				"login": "ID de usuario",
@@ -1928,6 +1985,9 @@
 				"nowTime": "hora",
 				"preset": "registro preestablecido",
 				"record": "ID de registro",
+				"recordMayCreate": "record may be created",
+				"recordMayDelete": "record may be deleted",
+				"recordMayUpdate": "record may be updated",
 				"recordNew": "registro es nuevo",
 				"role": "usuario tiene rol",
 				"subQuery": "subconsulta",
@@ -1944,6 +2004,7 @@
 				"formChanged": "VERDADERO/FALSO, dependiendo de si el formulario actualmente tiene cambios sin guardar.",
 				"formState": "VERDADERO/FALSO, dependiendo de si el estado de formulario elegido está actualmente activo.",
 				"getter": "Valor de un parámetro URL, como 'https://system?param=123' con 'param' siendo el nombre y '123' el valor.",
+				"globalSearch": "Text value of the global search input field.",
 				"javascript": "Valor de retorno de la expresión Javascript dada.",
 				"languageCode": "El código de idioma de usuario elegido (en_us, de_de, ...) del usuario actual.",
 				"login": "ID del usuario actual (entero).",
@@ -1952,6 +2013,9 @@
 				"nowTime": "La hora actual (esta hora/minuto/segundo), para comparar con valores de hora.",
 				"preset": "ID del registro preestablecido dado (entero).",
 				"record": "ID del registro actual en este formulario (entero, relación 0).",
+				"recordMayCreate": "TRUE if a new record may be created, based on relation permissions & join settings.",
+				"recordMayDelete": "TRUE if current record my be deleted, based on relation permissions & policies & join settings.",
+				"recordMayUpdate": "TRUE if current record my be updated, based on relation permissions & policies & join settings.",
 				"recordNew": "VERDADERO/FALSO, dependiendo de si el registro actual es nuevo en este formulario.",
 				"role": "VERDADERO/FALSO, dependiendo de si el usuario actual tiene asignado el rol dado.",
 				"subQuery": "Valor de retorno de la subconsulta dada.",
@@ -2040,6 +2104,33 @@
 		"fileRenamed": "Archivo renombrado",
 		"fileUpdated": "Archivo actualizado",
 		"title": "Registros de cambios"
+	},
+	"fullTextSearch": {
+		"dictionary": {
+			"arabic": "Arabic",
+			"danish": "Danish",
+			"dutch": "Dutch",
+			"english": "English",
+			"finnish": "Finnish",
+			"french": "French",
+			"german": "German",
+			"greek": "Greek",
+			"hungarian": "Hungarian",
+			"indonesian": "Indonesian",
+			"irish": "Irish",
+			"italian": "Italian",
+			"lithuanian": "Lithuanian",
+			"nepali": "Nepali",
+			"norwegian": "Norwegian",
+			"portuguese": "Portuguese",
+			"romanian": "Romanian",
+			"russian": "Russian",
+			"simple": "[Not selected]",
+			"spanish": "Spanish",
+			"swedish": "Swedish",
+			"tamil": "Tamil",
+			"turkish": "Turkish"
+		}
 	},
 	"generic": {
 		"action": "Acción",
@@ -2131,7 +2222,10 @@
 		"collection": "Colección",
 		"collections": "Colecciones",
 		"color": "Color",
+		"columnSettings": "Configuración de columnas",
 		"columns": "Columnas",
+		"columnsActive": "Columnas activas",
+		"columnsAvailable": "Columnas disponibles",
 		"comments": "Comentarios",
 		"content": "Contenido",
 		"contextHelp": "Ayuda contextual",
@@ -2155,6 +2249,7 @@
 			"maintenanceComing": "El sistema entrará en modo de mantenimiento a las <b>{DATE}</b>. Por favor guarde sus cambios antes de entonces.",
 			"systemMsg": "Mensaje del sistema"
 		},
+		"disabled": "Disabled",
 		"displayed": "Mostrado",
 		"encryption": "Encriptación",
 		"error": {
@@ -2172,9 +2267,11 @@
 		"filters": "Filtros",
 		"form": "Formulario",
 		"formActions": "Acciones de formulario",
+		"formOpen": "Abrir formulario",
 		"forms": "Formularios",
 		"functions": "Funciones",
 		"global": "Global",
+		"globalSearch": "Global search",
 		"help": "Ayuda",
 		"home": "Inicio",
 		"hotkey": "Tecla rápida",
@@ -2207,6 +2304,8 @@
 		"login": "Iniciar sesión",
 		"loginForm": "Formulario de inicio de sesión",
 		"loginForms": "Formularios de inicio de sesión",
+		"loginTemplate": "User template",
+		"loginTemplateHint": "Predefined settings are applied once from the selected template when a new user is created. If nothing is selected here, the global template is used.",
 		"maintenance": "Maintenance",
 		"menu": "Menú",
 		"menus": "Menús",
@@ -2263,6 +2362,11 @@
 		"returns": "Devuelve",
 		"role": "Rol",
 		"roles": "Roles",
+		"search": "Search",
+		"searchBar": "Search bar",
+		"searchBars": "Search bars",
+		"searchCompleted": "Search completed",
+		"searchRunning": "Search is running",
 		"selected": "Seleccionado",
 		"selectedMaxOne": "Seleccionado (máx. 1)",
 		"settings": "Configuración",
@@ -2271,8 +2375,10 @@
 		"sqlPreview": "Vista previa SQL",
 		"standard": "Estándar",
 		"status": "Estado",
+		"systemModes": "System modes",
 		"textSearch": "Búsqueda de texto",
 		"threeDots": "...",
+		"tip": "Tip",
 		"title": "Título",
 		"token": "Token",
 		"type": "Tipo",
@@ -2280,6 +2386,7 @@
 		"uninstall": "Desinstalar",
 		"update": "Actualizar",
 		"username": "Nombre de usuario",
+		"value": "Value",
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "Versión",
@@ -2288,6 +2395,32 @@
 		"widget": "Widget",
 		"widgets": "Widgets",
 		"wrap": "Ajustar"
+	},
+	"globalSearch": {
+		"button": {
+			"dictReset": "Reset to user language",
+			"fullTextSearch": "Supports full-text search",
+			"openAsPopUp": "Open as pop-up",
+			"openAsPopUpMobile": "Pop-up",
+			"showHeader": "Column titles",
+			"showHeaderMobile": "Columns"
+		},
+		"help": {
+			"ftsDict": [
+				"Defines which language the search query is written in.",
+				"This does not help find words or names containing a few characters; but by knowing the language of the search query, the system can make use of full-text search features.",
+				"When full-text search is supported, a corresponding message is displayed in the search title bar - click on it to get more details about search options."
+			],
+			"ftsDictTitle": "Search input language"
+		},
+		"inputPlaceholder": "Write out names, words or email addresses",
+		"modulesInactive": "Additional search options",
+		"tips": [
+			"A new search can be started from anywhere in REI3 by pressing <b>CTRL + SHIFT + F</b>. If text is selected, it will be used as search input.",
+			"When searching for names, words or email addresses, write them out in full.",
+			"If multilingual content is searched, it is important to set the language of your search query (top right corner).",
+			"Language specific searches, like matching 'making' with 'make', work if the content has a defined language. This often makes sense for articles, but is usually not done for emails."
+		]
 	},
 	"home": {
 		"button": {
@@ -2406,7 +2539,6 @@
 		"inputHintCreate": "Crear nuevo registro",
 		"inputHintOpen": "Abrir registro",
 		"inputHintRemove": "Eliminar registro",
-		"inputHintSelect": "Agregar registro existente",
 		"inputPlaceholderAdd": "...agregar más",
 		"message": {
 			"csvExport": "La exportación CSV utiliza filtros y ordenación de la lista actual.",
@@ -2426,6 +2558,12 @@
 	},
 	"settings": {
 		"account": {
+			"button": {
+				"loginOptionsDel": "Reset all field settings"
+			},
+			"dialog": {
+				"loginOptionsDel": "<p>This will reset all field settings, such as list sorting, visible columns, filters, and so on, to their default values.</p><p>Do you want to continue?</p>"
+			},
 			"messagePwCurrentWrong": "La contraseña actual es inválida",
 			"messagePwDiff": "Las contraseñas no coinciden",
 			"messagePwRequiresDigit": "La contraseña debe contener un dígito",
@@ -2434,6 +2572,7 @@
 			"messagePwRequiresUpper": "La contraseña debe contener una letra mayúscula",
 			"messagePwShort": "La contraseña es demasiado corta",
 			"nodeName": "Conectado con: {NAME}",
+			"pwChangeNotAllowed": "Login data is managed externally",
 			"pwNew0": "Nueva contraseña",
 			"pwNew1": "Nueva contraseña (repetida)",
 			"pwOld": "Contraseña actual",
@@ -2457,9 +2596,6 @@
 		"colorMenu": "Sobrescribir color",
 		"dark": "Modo oscuro",
 		"dateFormat": "Formato de fecha",
-		"dialog": {
-			"searchDictionary": "Este sistema ofrece capacidades de búsqueda de texto completo. Donde se utiliza la búsqueda de texto completo, incluso textos muy largos se pueden buscar rápidamente con funciones de búsqueda avanzadas como la comparación de sinónimos y raíces de palabras.<br /><br />'Diccionarios para búsqueda de texto completo' informa al sistema de qué idiomas utiliza un usuario, para usar funciones de búsqueda específicas del idioma."
-		},
 		"encryption": {
 			"backupCode": "Código de respaldo",
 			"backupCodeDesc": "El código de respaldo es <b>muy importante</b>; sirve para restablecer el acceso si olvidas tu contraseña.",
@@ -2474,6 +2610,11 @@
 			"modulesEnc": "Aplicaciones que usan cifrado",
 			"newKeys": "Claves creadas con éxito",
 			"newKeysDesc": "Para completar la configuración, copia tu código de respaldo personal en un lugar seguro.",
+			"noCredMasterKey": "Encryption password",
+			"noCredMasterKeyChoose": "Your user is authenticated via an external provider. To enable end-to-end-encryption, you must choose a personal encryption password.",
+			"noCredMasterKeyEnter": "End-to-end-encryption is protected by your personal encryption password.",
+			"noCredMasterKeyFailed": "The encryption password was not accepted. Please try again.<br /><br />If you forgot your encryption password, please see below for recovery options.",
+			"noCredMasterKeyNew": "New encryption password",
 			"prevPassword": "Contraseña anterior",
 			"regainAccess": "Recuperar acceso a claves personales",
 			"regainAccessDesc": "Puedes recuperar el acceso a tus claves personales ingresando tu contraseña anterior. Si no conoces tu contraseña anterior, necesitas usar tu código de respaldo personal.",
@@ -2504,13 +2645,13 @@
 				"apos": "Apóstrofo (')",
 				"comma": "Coma (,)",
 				"dot": "Punto (.)",
-				"mdot": "Punto medio (·)"
+				"mdot": "Punto medio (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
 			}
 		},
 		"pageTitle": "Configuraciones",
 		"pattern": "Patrón de fondo",
-		"searchDictionaries": "Diccionarios para búsqueda de texto completo",
-		"searchDictionaryNew": "Agregar diccionario",
 		"spacing": "Espaciado",
 		"sundayFirstDow": "El domingo es el primer día de la semana",
 		"tabRemember": "Abrir la última pestaña usada",

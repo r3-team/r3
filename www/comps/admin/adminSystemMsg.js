@@ -1,4 +1,4 @@
-import MyInputDate     from '../inputDate.js';
+import MyInputDateWrap from '../inputDateWrap.js';
 import MyInputRichtext from '../inputRichtext.js';
 import {getDateFormat} from '../shared/time.js';
 export {MyAdminSystemMsg as default};
@@ -6,7 +6,7 @@ export {MyAdminSystemMsg as default};
 let MyAdminSystemMsg = {
 	name:'my-admin-system-msg',
 	components:{
-		MyInputDate,
+		MyInputDateWrap,
 		MyInputRichtext
 	},
 	template:`<div class="admin-system-msg contentBox grow">
@@ -55,7 +55,7 @@ let MyAdminSystemMsg = {
 					<tr>
 						<td>{{ capApp.date0 }}</td>
 						<td colspan="2">
-							<my-input-date class="admin-system-msg-date"
+							<my-input-date-wrap
 								@set-unix-from="date0 = $event"
 								:isDate="true"
 								:isReadonly="!activated"
@@ -69,7 +69,7 @@ let MyAdminSystemMsg = {
 					<tr>
 						<td>{{ capApp.date1 }}</td>
 						<td colspan="2">
-							<my-input-date class="admin-system-msg-date"
+							<my-input-date-wrap
 								@set-unix-from="date1 = $event"
 								:isDate="true"
 								:isReadonly="!activated"

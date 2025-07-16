@@ -27,9 +27,6 @@
 	border:1px solid var(--color-border);
 	border-radius:2px;
 }
-.admin-logs-date-wrap{
-	position:relative;
-}
 
 
 /* logins */
@@ -77,6 +74,11 @@
 	padding:0px;
 	min-height:630px;
 }
+.admin-login .login-details .login-details-content-message{
+	display:flex;
+	font-size:105%;
+	margin:10px 12px;
+}
 .admin-login .login-details-login-form-input{
 	min-width:300px;
 }
@@ -115,6 +117,14 @@
 	color:var(--color-error);
 }
 
+/* login meta */
+.admin-login-meta .title-cell>img{
+	width:16px;
+	height:16px;
+	margin-right:6px;
+	filter:var(--image-filter);
+}
+
 /* login sessions */
 .admin-sessions img.line-icon{
 	width:24px;
@@ -124,20 +134,6 @@
 
 /* system message */
 .admin-system-msg{}
-.admin-system-msg-date{
-	width:370px;
-	padding:3px 6px;
-	position:relative;
-	border:var(--border-input);
-	border-radius:var(--border-input-radius);
-	box-shadow:var(--shadow-input);
-	background-color:var(--color-input);
-}
-.admin-system-msg-date:focus-within{
-	border:var(--border-input-focus);
-	outline:var(--outline-input-focus);
-	box-shadow:var(--shadow-input-focus);
-}
 .admin-system-msg-table{
 	width:1000px;
 }

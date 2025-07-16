@@ -115,6 +115,27 @@
 	margin:2px;
 	padding:3px 22px 5px 22px;
 }
+.login .open-id-clients{
+	display:flex;
+	flex-flow:column nowrap;
+	gap:6px;
+}
+.login .open-id-client{
+	padding:12px 10px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:12px;
+	color:#fff;
+	font-size:110%;
+	background-color:rgba(53, 54, 59, 0.8);
+    border:1px solid rgba(0,0,0,0.3);
+	border-radius:var(--login-border-radius);
+}
+.login .open-id-client:focus,
+.login .open-id-client:hover{
+	outline:1px solid rgba(0,0,0,0.3);
+}
 .login .message{
 	padding:6px 10px;
 	display:flex;

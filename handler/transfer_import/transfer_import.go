@@ -25,7 +25,7 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 
 		if err != nil {
 			res.WriteHeader(http.StatusBadRequest)
-			log.Error("server", "could not finish module import", err)
+			log.Error(log.ContextServer, "could not finish module import", err)
 		}
 
 		var response struct {
@@ -35,7 +35,7 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 
 		responseJson, err := json.Marshal(response)
 		if err != nil {
-			log.Error("server", "could not finish module import", err)
+			log.Error(log.ContextServer, "could not finish module import", err)
 			res.Write([]byte{})
 			return
 		}
@@ -69,16 +69,15 @@ func Handler(res http.ResponseWriter, req *http.Request) {
 		ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutTransfer)
 		defer ctxCanc()
 
+		// authenticate via token
 		// check token
-		var loginId int64
-		var admin bool
-		var noAuth bool
-		if _, _, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth); err != nil {
+		login, err := login_auth.Token(ctx, token)
+		if err != nil {
 			finishRequest(err)
 			return
 		}
 
-		if !admin {
+		if !login.Admin {
 			finishRequest(errors.New(handler.ErrUnauthorized))
 			return
 		}

@@ -38,6 +38,9 @@
 .value-rich.monospace{
 	font-family:var(--font-family-monospace);
 }
+.value-rich.noShrink{
+	flex-shrink:0;
+}
 .value-rich img.boolean{
 	width:24px;
 	height:24px;

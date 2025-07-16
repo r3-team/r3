@@ -1,4 +1,4 @@
-package login
+package login_role
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func getRoleIds_tx(ctx context.Context, tx pgx.Tx, loginId int64) ([]uuid.UUID, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, loginId int64) ([]uuid.UUID, error) {
 	roleIds := make([]uuid.UUID, 0)
 
 	rows, err := tx.Query(ctx, `
@@ -30,16 +30,16 @@ func getRoleIds_tx(ctx context.Context, tx pgx.Tx, loginId int64) ([]uuid.UUID, 
 	return roleIds, nil
 }
 
-func SetRoleLoginIds_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, loginIds []int64) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, loginId int64, roleIds []uuid.UUID) error {
 
 	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.login_role
-		WHERE role_id = $1
-	`, roleId); err != nil {
+		WHERE login_id = $1
+	`, loginId); err != nil {
 		return err
 	}
 
-	for _, loginId := range loginIds {
+	for _, roleId := range roleIds {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO instance.login_role (login_id, role_id)
 			VALUES ($1,$2)
@@ -50,16 +50,16 @@ func SetRoleLoginIds_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, loginI
 	return nil
 }
 
-func setRoleIds_tx(ctx context.Context, tx pgx.Tx, loginId int64, roleIds []uuid.UUID) error {
+func SetRoleLogins_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, loginIds []int64) error {
 
 	if _, err := tx.Exec(ctx, `
 		DELETE FROM instance.login_role
-		WHERE login_id = $1
-	`, loginId); err != nil {
+		WHERE role_id = $1
+	`, roleId); err != nil {
 		return err
 	}
 
-	for _, roleId := range roleIds {
+	for _, loginId := range loginIds {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO instance.login_role (login_id, role_id)
 			VALUES ($1,$2)

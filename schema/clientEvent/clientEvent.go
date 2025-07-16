@@ -43,7 +43,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.ClientE
 	}
 
 	for i, e := range clientEvents {
-		clientEvents[i].Captions, err = caption.Get_tx(ctx, tx, "client_event", e.Id, []string{"clientEventTitle"})
+		clientEvents[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbClientEvent, e.Id, []string{"clientEventTitle"})
 		if err != nil {
 			return clientEvents, err
 		}
@@ -53,7 +53,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.ClientE
 
 func Set_tx(ctx context.Context, tx pgx.Tx, ce types.ClientEvent) error {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &ce.Id, "client_event", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &ce.Id, schema.DbClientEvent, "id")
 	if err != nil {
 		return err
 	}

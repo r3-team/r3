@@ -9,7 +9,9 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/log"
+	"r3/login/login_external"
 	"r3/login/login_meta"
+	"r3/login/login_role"
 	"r3/login/login_setting"
 	"r3/schema"
 	"r3/tools"
@@ -32,15 +34,19 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id int64) error {
 	return err
 }
 
-// delete all logins for LDAP connector
-func DelByLdap_tx(ctx context.Context, tx pgx.Tx, ldapId int32) error {
+// delete all logins for external login provider
+func DelByExternalProvider_tx(ctx context.Context, tx pgx.Tx, entity string, entityId int32) error {
+
+	if err := login_external.ValidateEntity(entity); err != nil {
+		return err
+	}
 
 	loginIds := make([]int64, 0)
-	rows, err := tx.Query(ctx, `
+	rows, err := tx.Query(ctx, fmt.Sprintf(`
 		SELECT id
 		FROM instance.login
-		WHERE ldap_id = $1
-	`, ldapId)
+		WHERE %s_id = $1
+	`, entity), entityId)
 	if err != nil {
 		return err
 	}
@@ -74,7 +80,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
-	qb.AddList("SELECT", []string{"l.id", "l.ldap_id", "l.ldap_key", "l.name",
+	qb.AddList("SELECT", []string{"l.id", "l.ldap_id", "l.oauth_client_id", "l.name",
 		"l.admin", "l.limited", "l.no_auth", "l.active", "l.token_expiry_hours"})
 
 	qb.SetFrom("instance.login AS l")
@@ -122,6 +128,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 			orderAscSql = "DESC"
 		}
 		switch orderBy {
+		case "active":
+			qb.Add("ORDER", fmt.Sprintf("l.active %s, l.name ASC", orderAscSql))
 		case "admin":
 			qb.Add("ORDER", fmt.Sprintf("l.admin %s, l.name ASC", orderAscSql))
 		case "ldap":
@@ -130,8 +138,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 			qb.Add("ORDER", fmt.Sprintf("l.no_auth %s, l.name ASC", orderAscSql))
 		case "limited":
 			qb.Add("ORDER", fmt.Sprintf("l.limited %s, l.name ASC", orderAscSql))
-		case "active":
-			qb.Add("ORDER", fmt.Sprintf("l.active %s, l.name ASC", orderAscSql))
+		case "oauth":
+			qb.Add("ORDER", fmt.Sprintf("l.oauth_client_id %s, l.name ASC", orderAscSql))
 		default:
 			qb.Add("ORDER", fmt.Sprintf("l.name %s", orderAscSql))
 		}
@@ -154,7 +162,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 		var l types.LoginAdmin
 		var records []string
 
-		if err := rows.Scan(&l.Id, &l.LdapId, &l.LdapKey, &l.Name, &l.Admin, &l.Limited,
+		if err := rows.Scan(&l.Id, &l.LdapId, &l.OauthClientId, &l.Name, &l.Admin, &l.Limited,
 			&l.NoAuth, &l.Active, &l.TokenExpiryHours, &records); err != nil {
 
 			return logins, 0, err
@@ -199,7 +207,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 	// collect role IDs
 	if roles {
 		for i, l := range logins {
-			logins[i].RoleIds, err = getRoleIds_tx(ctx, tx, l.Id)
+			logins[i].RoleIds, err = login_role.Get_tx(ctx, tx, l.Id)
 			if err != nil {
 				return logins, 0, err
 			}
@@ -236,9 +244,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, byId int64, byString string, orderBy
 
 // set login with meta data
 // returns created login ID if new login
-func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4,
-	ldapKey pgtype.Text, name string, pass string, admin bool, noAuth bool, active bool,
-	tokenExpiryHours pgtype.Int4, meta types.LoginMeta, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
+func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4, ldapKey pgtype.Text,
+	oauthClientId pgtype.Int4, oauthIss pgtype.Text, oauthSub pgtype.Text, name string, pass string, admin bool, noAuth bool,
+	active bool, tokenExpiryHours pgtype.Int4, meta types.LoginMeta, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
 
 	if name == "" {
 		return 0, errors.New("name must not be empty")
@@ -267,13 +275,13 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	if isNew {
 		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.login (
-				ldap_id, ldap_key, name, salt, hash, salt_kdf, admin,
-				no_auth, limited, active, token_expiry_hours, date_favorites
+				ldap_id, ldap_key, oauth_client_id, oauth_iss, oauth_sub, name, salt, hash,
+				salt_kdf, admin, no_auth, limited, active, token_expiry_hours, date_favorites
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,0)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,0)
 			RETURNING id
-		`, ldapId, ldapKey, name, &salt, &hash, saltKdf, admin, noAuth,
-			isLimited, active, tokenExpiryHours).Scan(&id); err != nil {
+		`, ldapId, ldapKey, oauthClientId, oauthIss, oauthSub, name, &salt, &hash,
+			saltKdf, admin, noAuth, isLimited, active, tokenExpiryHours).Scan(&id); err != nil {
 
 			return 0, err
 		}
@@ -299,10 +307,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	} else {
 		if _, err := tx.Exec(ctx, `
 			UPDATE instance.login
-			SET ldap_id = $1, ldap_key = $2, name = $3, admin = $4,
-				no_auth = $5, limited = $6, active = $7, token_expiry_hours = $8
-			WHERE id = $9
-		`, ldapId, ldapKey, name, admin, noAuth, isLimited, active, tokenExpiryHours, id); err != nil {
+			SET name = $1, admin = $2, no_auth = $3, limited = $4, active = $5, token_expiry_hours = $6
+			WHERE id = $7
+		`, name, admin, noAuth, isLimited, active, tokenExpiryHours, id); err != nil {
 			return 0, err
 		}
 
@@ -352,7 +359,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	}
 
 	// set roles
-	return id, setRoleIds_tx(ctx, tx, id, roleIds)
+	return id, login_role.Set_tx(ctx, tx, id, roleIds)
 }
 
 func SetSaltHash_tx(ctx context.Context, tx pgx.Tx, salt pgtype.Text, hash pgtype.Text, id int64) error {
@@ -514,9 +521,8 @@ func CreateAdmin(username string, password string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{},
-		username, password, true, false, true, pgtype.Int4{},
-		types.LoginMeta{NameFore: "Admin", NameSur: "User", NameDisplay: username},
+	if _, err := Set_tx(ctx, tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Int4{}, pgtype.Text{}, pgtype.Text{},
+		username, password, true, false, true, pgtype.Int4{}, types.LoginMeta{NameFore: "Admin", NameSur: "User", NameDisplay: username},
 		[]uuid.UUID{}, []types.LoginAdminRecordSet{}); err != nil {
 
 		return err
@@ -546,11 +552,10 @@ func GenerateSaltHash(pw string) (salt pgtype.Text, hash pgtype.Text) {
 
 // call login sync function for every module that has one to inform about changed login meta data
 func syncLogin_tx(ctx context.Context, tx pgx.Tx, action string, id int64) {
-	logContext := "server"
 	logErr := "failed to execute user sync"
 
 	if !slices.Contains([]string{"DELETED", "UPDATED"}, action) {
-		log.Error(logContext, logErr, fmt.Errorf("unknown action '%s'", action))
+		log.Error(log.ContextServer, logErr, fmt.Errorf("unknown action '%s'", action))
 		return
 	}
 
@@ -566,7 +571,7 @@ func syncLogin_tx(ctx context.Context, tx pgx.Tx, action string, id int64) {
 		}
 
 		if _, err := tx.Exec(ctx, `SELECT instance.user_sync($1,$2,$3,$4)`, mod.Name, fnc.Name, id, action); err != nil {
-			log.Error(logContext, logErr, err)
+			log.Error(log.ContextServer, logErr, err)
 		}
 	}
 	cache.Schema_mx.RUnlock()

@@ -36,6 +36,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 	caps.PgFunctionIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.QueryChoiceIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.RoleIdMap = make(map[uuid.UUID]types.CaptionMap)
+	caps.SearchBarIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.TabIdMap = make(map[uuid.UUID]types.CaptionMap)
 	caps.WidgetIdMap = make(map[uuid.UUID]types.CaptionMap)
 
@@ -55,6 +56,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 		WHEN pg_function_id  IS NOT NULL THEN 'pgFunction'
 		WHEN query_choice_id IS NOT NULL THEN 'queryChoice'
 		WHEN role_id         IS NOT NULL THEN 'role'
+		WHEN search_bar_id   IS NOT NULL THEN 'searchBar'
 		WHEN tab_id          IS NOT NULL THEN 'tab'
 		WHEN widget_id       IS NOT NULL THEN 'widget'
 	END AS entity,
@@ -74,6 +76,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 		pg_function_id,
 		query_choice_id,
 		role_id,
+		search_bar_id,
 		tab_id,
 		widget_id
 	) AS entity_id,
@@ -108,26 +111,29 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 				OR api_id IN (
 					SELECT id FROM app.api WHERE module_id = $5
 				)
+				OR search_bar_id IN (
+					SELECT id FROM app.search_bar WHERE module_id = $6
+				)
 			)
 			OR field_id IN (
 				SELECT id FROM app.field WHERE form_id IN (
-					SELECT id FROM app.form WHERE module_id = $6
+					SELECT id FROM app.form WHERE module_id = $7
 				)
 			)
 			OR form_action_id IN (
 				SELECT id FROM app.form_action WHERE form_id IN (
-					SELECT id FROM app.form WHERE module_id = $7
+					SELECT id FROM app.form WHERE module_id = $8
 				)
 			)
 			OR menu_id IN (
 				SELECT id FROM app.menu WHERE menu_tab_id IN (
-					SELECT id FROM app.menu_tab WHERE module_id = $8
+					SELECT id FROM app.menu_tab WHERE module_id = $9
 				)
 			)
 			OR tab_id IN (
 				SELECT id FROM app.tab WHERE field_id IN (
 					SELECT id FROM app.field WHERE form_id IN (
-						SELECT id FROM app.form WHERE module_id = $9
+						SELECT id FROM app.form WHERE module_id = $10
 					)
 				)
 			)
@@ -136,23 +142,24 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 					SELECT id FROM app.query
 					WHERE field_id IN (
 						SELECT id FROM app.field WHERE form_id IN (
-							SELECT id FROM app.form WHERE module_id = $10
+							SELECT id FROM app.form WHERE module_id = $11
 						)
 					)
 					-- only direct field queries have filter choices and therefore captions
 					-- most queries do not: form query, collection query, column sub query, filter sub query
 				)
 			)
-			OR article_id      IN (SELECT id FROM app.article      WHERE module_id = $11)
-			OR client_event_id IN (SELECT id FROM app.client_event WHERE module_id = $12)
-			OR form_id         IN (SELECT id FROM app.form         WHERE module_id = $13)
-			OR js_function_id  IN (SELECT id FROM app.js_function  WHERE module_id = $14)
-			OR login_form_id   IN (SELECT id FROM app.login_form   WHERE module_id = $15)
-			OR menu_tab_id     IN (SELECT id FROM app.menu_tab     WHERE module_id = $16)
-			OR pg_function_id  IN (SELECT id FROM app.pg_function  WHERE module_id = $17)
-			OR role_id         IN (SELECT id FROM app.role         WHERE module_id = $18)
-			OR widget_id       IN (SELECT id FROM app.widget       WHERE module_id = $19)
-		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
+			OR article_id      IN (SELECT id FROM app.article      WHERE module_id = $12)
+			OR client_event_id IN (SELECT id FROM app.client_event WHERE module_id = $13)
+			OR form_id         IN (SELECT id FROM app.form         WHERE module_id = $14)
+			OR js_function_id  IN (SELECT id FROM app.js_function  WHERE module_id = $15)
+			OR login_form_id   IN (SELECT id FROM app.login_form   WHERE module_id = $16)
+			OR menu_tab_id     IN (SELECT id FROM app.menu_tab     WHERE module_id = $17)
+			OR pg_function_id  IN (SELECT id FROM app.pg_function  WHERE module_id = $18)
+			OR role_id         IN (SELECT id FROM app.role         WHERE module_id = $19)
+			OR search_bar_id   IN (SELECT id FROM app.search_bar   WHERE module_id = $20)
+			OR widget_id       IN (SELECT id FROM app.widget       WHERE module_id = $21)
+		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
 	}
 
 	if err != nil {
@@ -204,6 +211,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			captionMap, exists = caps.QueryChoiceIdMap[entityId]
 		case "role":
 			captionMap, exists = caps.RoleIdMap[entityId]
+		case "searchBar":
+			captionMap, exists = caps.SearchBarIdMap[entityId]
 		case "tab":
 			captionMap, exists = caps.TabIdMap[entityId]
 		case "widget":
@@ -246,6 +255,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 			caps.QueryChoiceIdMap[entityId] = captionMap
 		case "role":
 			caps.RoleIdMap[entityId] = captionMap
+		case "searchBar":
+			caps.SearchBarIdMap[entityId] = captionMap
 		case "tab":
 			caps.TabIdMap[entityId] = captionMap
 		case "widget":
@@ -271,7 +282,7 @@ func SetOne_tx(ctx context.Context, tx pgx.Tx, target string, entityId uuid.UUID
 	if value == "" {
 		_, err := tx.Exec(ctx, fmt.Sprintf(`
 			DELETE FROM %s.caption
-			WHERE %s            = $1
+			WHERE %s_id         = $1
 			AND   content       = $2
 			AND   language_code = $3
 		`, target, entity), entityId, content, languageCode)
@@ -285,7 +296,7 @@ func SetOne_tx(ctx context.Context, tx pgx.Tx, target string, entityId uuid.UUID
 		SELECT EXISTS (
 			SELECT 1
 			FROM %s.caption
-			WHERE %s            = $1
+			WHERE %s_id         = $1
 			AND   content       = $2
 			AND   language_code = $3
 		)
@@ -295,7 +306,7 @@ func SetOne_tx(ctx context.Context, tx pgx.Tx, target string, entityId uuid.UUID
 
 	if !exists {
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			INSERT INTO %s.caption (%s, content, language_code, value)
+			INSERT INTO %s.caption (%s_id, content, language_code, value)
 			VALUES ($1,$2,$3,$4)
 		`, target, entity), entityId, content, languageCode, value); err != nil {
 			return err
@@ -304,7 +315,7 @@ func SetOne_tx(ctx context.Context, tx pgx.Tx, target string, entityId uuid.UUID
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			UPDATE %s.caption
 			SET value = $1
-			WHERE %s            = $2
+			WHERE %s_id         = $2
 			AND   content       = $3
 			AND   language_code = $4
 		`, target, entity), value, entityId, content, languageCode); err != nil {

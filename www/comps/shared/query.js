@@ -21,7 +21,7 @@ let getQueryExpressionAttribute = function(column) {
 };
 
 // map of joins keyed by relation index
-export function getJoinsIndexMap(joins) {
+export function getJoinIndexMap(joins) {
 	let map = {};
 	for(const j of joins) {
 		map[j.index] = j;
@@ -138,15 +138,21 @@ export function getSubQueryFilterExpressions(subQuery) {
 	}];
 };
 
-export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
-	fieldIdsChanged,fieldIdsInvalid,fieldValues,collectionIdMapIndexFilter,variableIdMapLocal) {
+export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,globalSearchDict,
+	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,
+	recordMayUpdate,collectionIdMapIndexFilter,variableIdMapLocal) {
 	
-	if(typeof dataFieldIdMap             === 'undefined') dataFieldIdMap             = {};
-	if(typeof fieldIdsChanged            === 'undefined') fieldIdsChanged            = [];
-	if(typeof fieldIdsInvalid            === 'undefined') fieldIdsInvalid            = [];
-	if(typeof fieldValues                === 'undefined') fieldValues                = {};
-	if(typeof collectionIdMapIndexFilter === 'undefined') collectionIdMapIndexFilter = {};
-	if(typeof variableIdMapLocal         === 'undefined') variableIdMapLocal         = {};
+	if(globalSearch               === undefined) globalSearch               = null;
+	if(globalSearchDict           === undefined) globalSearchDict           = null;
+	if(dataFieldIdMap             === undefined) dataFieldIdMap             = {};
+	if(fieldIdsChanged            === undefined) fieldIdsChanged            = [];
+	if(fieldIdsInvalid            === undefined) fieldIdsInvalid            = [];
+	if(fieldValues                === undefined) fieldValues                = {};
+	if(recordMayCreate            === undefined) recordMayCreate            = false;
+	if(recordMayDelete            === undefined) recordMayDelete            = false;
+	if(recordMayUpdate            === undefined) recordMayUpdate            = false;
+	if(collectionIdMapIndexFilter === undefined) collectionIdMapIndexFilter = {};
+	if(variableIdMapLocal         === undefined) variableIdMapLocal         = {};
 	
 	const getFilterSideProcessed = function(s,operator) {
 		switch(s.content) {
@@ -158,20 +164,23 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 					filterOperatorIsSingleValue(operator),
 					collectionIdMapIndexFilter[s.collectionId]);
 			break;
-			case 'preset':
-				s.value = MyStore.getters['schema/presetIdMapRecordId'][s.presetId];
-			break;
 			case 'subQuery':
 				s.query.expressions = getSubQueryFilterExpressions(s);
 				s.query.filters     = getQueryFiltersProcessed(
-					s.query.filters,joinsIndexMap,dataFieldIdMap,
-					fieldIdsChanged,fieldIdsInvalid,fieldValues,
-					collectionIdMapIndexFilter,variableIdMapLocal
+					s.query.filters,joinsIndexMap,globalSearch,globalSearchDict,dataFieldIdMap,
+					fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,
+					recordMayUpdate,collectionIdMapIndexFilter,variableIdMapLocal
 				);
 				s.query.limit = s.query.fixedLimit;
 			break;
 			case 'true':     s.value = true; break;
 			case 'variable': s.value = variableValueGet(s.variableId,variableIdMapLocal); break;
+
+			// global search
+			case 'globalSearch':
+				s.ftsDict = globalSearchDict;
+				s.value   = globalSearch;
+			break;
 			
 			// form
 			case 'field':
@@ -185,12 +194,16 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 					)]));
 				}
 			break;
-			case 'fieldChanged': s.value = fieldIdsChanged.includes(s.fieldId);  break;
-			case 'fieldValid':   s.value = !fieldIdsInvalid.includes(s.fieldId); break;
-			case 'formChanged':  s.value = fieldIdsChanged.length !== 0;         break;
-			case 'javascript':   s.value = Function(s.value)();                  break;
-			case 'record':       if(typeof joinsIndexMap['0'] !== 'undefined') s.value = joinsIndexMap['0'].recordId;       break;
-			case 'recordNew':    if(typeof joinsIndexMap['0'] !== 'undefined') s.value = joinsIndexMap['0'].recordId === 0; break;
+			case 'fieldChanged':    s.value = fieldIdsChanged.includes(s.fieldId);                                    break;
+			case 'fieldValid':      s.value = !fieldIdsInvalid.includes(s.fieldId);                                   break;
+			case 'formChanged':     s.value = fieldIdsChanged.length !== 0;                                           break;
+			case 'javascript':      s.value = Function(s.value)();                                                    break;
+			case 'preset':          s.value = MyStore.getters['schema/presetIdMapRecordId'][s.presetId];              break;
+			case 'record':          if(joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId;       break;
+			case 'recordMayCreate': s.value = recordMayCreate;                                                        break;
+			case 'recordMayDelete': s.value = recordMayDelete;                                                        break;
+			case 'recordMayUpdate': s.value = recordMayUpdate;                                                        break;
+			case 'recordNew':       if(joinsIndexMap['0'] !== undefined) s.value = joinsIndexMap['0'].recordId === 0; break;
 			
 			// login
 			case 'languageCode': s.value = MyStore.getters.settings.languageCode;             break;
@@ -231,14 +244,6 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 		out.push(f);
 	}
 	return getFiltersEncapsulated(out);
-};
-
-export function getJoinIndexMap(joins) {
-	let map = {};
-	for(let i = 0, j = joins.length; i < j; i++) {
-		map[joins[i].index] = joins[i];
-	}
-	return map;
 };
 
 export function getQueryAttributePkFilter(relationId,recordId,index,not) {
@@ -326,34 +331,31 @@ export function getQueryFilterNew() {
 	};
 };
 
-export function getQueryFiltersDateRange(attributeId0,index0,date0,attributeId1,index1,date1) {
-	// set query filters for records which attribute value range (attribute 0 to 1)
-	//  occur within defined date range (date 0 to 1)
+export function getQueryFiltersDateRange(subJoinFilter,attributeId0,index0,date0,attributeId1,index1,date1) {
+	// set query filters for attribute date values (attribute 0 to 1) occuring in date range (date 0 to 1)
+	// if sub join filter is used, we apply filter to relation joins, allowing for other relation data to be retrieved
+	//  useful for queries where grouping data is to be received even if date dependent records are not there (like in Gantts)
 	return [{
 		connector:'AND',
-		index:0,
+		index:subJoinFilter ? index0 : 0,
 		operator:'<=',
 		side0:{
 			attributeId:attributeId0,
-			attributeIndex:index0,
-			brackets:1
+			attributeIndex:index0
 		},
 		side1:{
-			brackets:0,
 			value:date1
 		}
 	},{
 		connector:'AND',
-		index:0,
+		index:subJoinFilter ? index1 : 0,
 		operator:'<=',
 		side0:{
-			brackets:0,
 			value:date0
 		},
 		side1:{
 			attributeId:attributeId1,
-			attributeIndex:index1,
-			brackets:1
+			attributeIndex:index1
 		}
 	}];
 };
@@ -369,4 +371,40 @@ export function getFiltersEncapsulated(filters) {
 		filtersBase[filtersBase.length-1].side1.brackets++;
 	}
 	return filtersBase.concat(filtersJoin);
+};
+
+export function getIsContentInAnyFilter(filters,columns,content) {
+	for(const f of filters) {
+		if(f.side0.content === content || f.side1.content === content)
+			return true;
+
+		if(f.side0.content === 'subQuery' && getIsContentInAnyFilter(f.side0.query.filters,[],content))
+			return true;
+
+		if(f.side1.content === 'subQuery' && getIsContentInAnyFilter(f.side1.query.filters,[],content))
+			return true;
+	}
+	for(const c of columns) {
+		if(c.subQuery && getIsContentInAnyFilter(c.query.filters,[],content))
+			return true;
+	}
+	return false;
+};
+
+export function getIsOperatorInAnyFilter(filters,columns,operator) {
+	for(const f of filters) {
+		if(f.operator === operator)
+			return true;
+
+		if(f.side0.content === 'subQuery' && getIsOperatorInAnyFilter(f.side0.query.filters,[],operator))
+			return true;
+
+		if(f.side1.content === 'subQuery' && getIsOperatorInAnyFilter(f.side1.query.filters,[],operator))
+			return true;
+	}
+	for(const c of columns) {
+		if(c.subQuery && getIsOperatorInAnyFilter(c.query.filters,[],operator))
+			return true;
+	}
+	return false;
 };

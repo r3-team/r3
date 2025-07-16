@@ -1,20 +1,20 @@
 import MyDialog              from './dialog.js';
+import MyDropdown            from './dropdown.js';
 import MyFeedback            from './feedback.js';
 import MyForm                from './form.js';
+import MyGlobalSearch        from './globalSearch.js';
 import MyHeader              from './header.js';
 import MyLogin               from './login.js';
 import MySettings            from './settings.js';
 import {getStartFormId}      from './shared/access.js';
 import {updateCollections}   from './shared/collection.js';
 import {formOpen}            from './shared/form.js';
-import {colorAdjustBgHeader} from './shared/generic.js';
 import {jsFunctionRun}       from './shared/jsFunction.js';
 import {getCaption}          from './shared/language.js';
 import srcBase64Icon         from './shared/image.js';
 import {
-	aesGcmDecryptBase64,
-	aesGcmImportBase64,
 	pemImport,
+	pemImportPrivateEnc
 } from './shared/crypto.js';
 import {
 	consoleError,
@@ -22,6 +22,10 @@ import {
 	genericErrorWithFallback,
 	resolveErrCode
 } from './shared/error.js';
+import {
+	colorAdjustBgHeader,
+	getOrFallback
+} from './shared/generic.js';
 
 export {MyApp as default};
 
@@ -29,8 +33,10 @@ let MyApp = {
 	name:'app',
 	components:{
 		MyDialog,
+		MyDropdown,
 		MyFeedback,
 		MyForm,
+		MyGlobalSearch,
 		MyHeader,
 		MyLogin,
 		MySettings
@@ -43,17 +49,19 @@ let MyApp = {
 			:httpMode="httpMode"
 			:loginReady="loginReady"
 		/>
+
+		<my-dropdown />
 		
 		<template v-if="appReady">
 			<my-header
 				v-show="!loginSessionExpired"
 				v-if="!isWithoutMenuHeader"
-				@logout="sessionInvalid(false)"
-				@logoutExpire="sessionInvalid(true)"
+				@logout="sessionInvalid(false,true)"
+				@logoutExpire="sessionInvalid(true,false)"
 				@show-collection-input="collectionEntries = $event"
 				@show-module-hover-menu="showHoverNav = true"
 				@show-settings="showSettings = !showSettings"
-				:keysLocked="loginEncryption && loginPrivateKey === null"
+				:keysLocked="loginEncLocked"
 				:logoutInSec="logoutInSec"
 			/>
 			
@@ -78,6 +86,9 @@ let MyApp = {
 				/>
 			</div>
 			
+			<!-- global search -->
+			<my-global-search v-if="globalSearchInput !== null" />
+			
 			<!-- login settings -->
 			<div class="app-sub-window"
 				v-if="showSettings"
@@ -87,7 +98,7 @@ let MyApp = {
 			>
 				<my-settings
 					@close="showSettings = false"
-					@logout="showSettings = false;sessionInvalid(false)"
+					@logout="showSettings = false;sessionInvalid(false,true)"
 				/>
 			</div>
 			
@@ -251,6 +262,7 @@ let MyApp = {
 		$route:{
 			handler(v) {
 				this.$store.commit('isAtModule',typeof v.meta.atModule !== 'undefined');
+				this.$store.commit('appResized');
 			},
 			immediate:true
 		}
@@ -397,6 +409,7 @@ let MyApp = {
 		captionMapCustom:   (s) => s.$store.getters.captionMapCustom,
 		colorHeaderAccent:  (s) => s.$store.getters.colorHeaderAccent,
 		colorHeaderMain:    (s) => s.$store.getters.colorHeaderMain,
+		globalSearchInput:  (s) => s.$store.getters.globalSearchInput,
 		isAdmin:            (s) => s.$store.getters.isAdmin,
 		isAtDialog:         (s) => s.$store.getters.isAtDialog,
 		isAtFeedback:       (s) => s.$store.getters.isAtFeedback,
@@ -404,7 +417,7 @@ let MyApp = {
 		isMobile:           (s) => s.$store.getters.isMobile,
 		isWithoutMenuHeader:(s) => s.$store.getters.isWithoutMenuHeader,
 		keyDownHandlers:    (s) => s.$store.getters.keyDownHandlers,
-		loginEncryption:    (s) => s.$store.getters.loginEncryption,
+		loginEncLocked:     (s) => s.$store.getters.loginEncLocked,
 		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
 		loginSessionExpired:(s) => s.$store.getters.loginSessionExpired,
 		loginSessionExpires:(s) => s.$store.getters.loginSessionExpires,
@@ -450,17 +463,17 @@ let MyApp = {
 	},
 	methods:{
 		// externals
-		aesGcmDecryptBase64,
-		aesGcmImportBase64,
 		colorAdjustBgHeader,
 		consoleError,
 		formOpen,
 		genericError,
 		genericErrorWithFallback,
 		getCaption,
+		getOrFallback,
 		getStartFormId,
 		jsFunctionRun,
 		pemImport,
+		pemImportPrivateEnc,
 		resolveErrCode,
 		srcBase64Icon,
 		updateCollections,
@@ -585,34 +598,35 @@ let MyApp = {
 			const now = Math.floor(new Date().getTime() / 1000);
 
 			if(this.loginSessionExpires < now)
-				return this.sessionInvalid(true);
+				return this.sessionInvalid(true,false);
 
 			if(this.loginSessionExpires - 1800 < now)
 				this.logoutInSec = this.loginSessionExpires - now;
 			else
 				this.logoutInSec = 0;
 		},
-		sessionInvalid(sessionExpired) {
+		sessionInvalid(sessionExpired,returnToHome) {
 			this.$store.commit('local/loginCachesClear');
 			this.$store.commit('local/loginKeyAes',null);
 			this.$store.commit('local/loginKeySalt',null);
-			this.$store.commit('loginEncryption',false);
+			this.$store.commit('local/loginNoCred',false);
+			this.$store.commit('local/token','');
 			this.$store.commit('loginPrivateKey',null);
 			this.$store.commit('loginPrivateKeyEnc',null);
 			this.$store.commit('loginPrivateKeyEncBackup',null);
 			this.$store.commit('loginPublicKey',null);
 			this.$store.commit('loginSessionExpires',null);
-			this.$store.commit('pageTitle','Login');
 			
 			if(sessionExpired) {
 				this.$store.commit('loginSessionExpired',true);
 			} else {
-				// proper logout, reset websocket connection, clear tokens, reset frontend
-				this.$store.commit('local/token','');
+				// logout: reset websocket connection, clear token keep setting, reset frontend
 				this.$store.commit('local/tokenKeep',false);
 				this.wsReconnect(true);
 				this.appReady = false;
 			}
+			if(returnToHome)
+				this.$router.push('/');
 		},
 		
 		// public info retrieval
@@ -644,6 +658,7 @@ let MyApp = {
 					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
 					this.$store.commit('mirrorMode',res.payload.mirror);
 					this.$store.commit('moduleIdMapMeta',res.payload.moduleIdMapMeta);
+					this.$store.commit('oauthClientIdMapOpenId',res.payload.oauthClientIdMapOpenId);
 					this.$store.commit('productionMode',res.payload.productionMode === 1);
 					this.$store.commit('pageTitleRefresh'); // update page title with new app name
 					this.$store.commit('pwaDomainMap',res.payload.pwaDomainMap);
@@ -749,8 +764,7 @@ let MyApp = {
 					this.$store.commit('feedbackUrl',res[5].payload.feedbackUrl);
 					this.$store.commit('loginHasClient',res[6].payload);
 					
-					if(this.loginKeyAes !== null && res[7].payload.privateEnc !== null) {
-						this.$store.commit('loginEncryption',true);
+					if(res[7].payload.privateEnc !== null && res[7].payload.privateEncBackup !== null) {
 						this.$store.commit('loginPrivateKey',null);
 						this.$store.commit('loginPrivateKeyEnc',res[7].payload.privateEnc);
 						this.$store.commit('loginPrivateKeyEncBackup',res[7].payload.privateEncBackup);
@@ -759,8 +773,12 @@ let MyApp = {
 							.then(res => this.$store.commit('loginPublicKey',res))
 							.catch(this.setInitErr);
 						
-						await this.pemImportPrivateEnc(res[7].payload.privateEnc)
+						const keyPem = await this.pemImportPrivateEnc(res[7].payload.privateEnc,this.loginKeyAes)
 							.catch(this.setInitErr);
+						
+						// error is shown in header if private key cannot be decrypted
+						if(keyPem !== undefined)
+							this.$store.commit('loginPrivateKey',keyPem);
 					}
 					
 					if(this.isAdmin) {
@@ -799,33 +817,10 @@ let MyApp = {
 			)
 		},
 		
-		// crypto
-		pemImportPrivateEnc(privateKeyPemEnc) {
-			// attempt to decrypt private key with personal login key
-			// prepare login AES key
-			return this.aesGcmImportBase64(this.loginKeyAes).then(
-				loginKey => {
-					
-					// decrypt login private key PEM
-					this.aesGcmDecryptBase64(privateKeyPemEnc,loginKey).then(
-						privateKeyPem => {
-							
-							// import key PEM to store
-							this.pemImport(privateKeyPem,'RSA',false).then(
-								res => this.$store.commit('loginPrivateKey',res)
-							);
-						},
-						// error is shown in header if private key cannot be decrypted
-						err => {}
-					);
-				}
-			);
-		},
-		
 		// hotkeys
 		handleKeydown(e) {
 			for(let k of this.keyDownHandlers) {
-				if(k.sleep !== undefined || (k.keyCtrl && !e.ctrlKey))
+				if(k.sleep || (k.keyCtrl && !e.ctrlKey) || (k.keyShift && !e.shiftKey))
 					continue;
 				
 				if(k.key === e.key) {

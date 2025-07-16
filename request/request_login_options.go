@@ -12,6 +12,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+func LoginOptionsDel_tx(ctx context.Context, tx pgx.Tx, loginId int64) (interface{}, error) {
+	return nil, login_options.Del_tx(ctx, tx, loginId)
+}
+
 func LoginOptionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, isNoAuth bool) (interface{}, error) {
 	var (
 		err error

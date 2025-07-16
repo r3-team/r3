@@ -42,7 +42,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.LoginFo
 
 	// get captions
 	for i, l := range loginForms {
-		loginForms[i].Captions, err = caption.Get_tx(ctx, tx, "login_form", l.Id, []string{"loginFormTitle"})
+		loginForms[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbLoginForm, l.Id, []string{"loginFormTitle"})
 		if err != nil {
 			return loginForms, err
 		}
@@ -54,7 +54,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID,
 	attributeIdLogin uuid.UUID, attributeIdLookup uuid.UUID, formId uuid.UUID,
 	name string, captions types.CaptionMap) error {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &id, "login_form", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &id, schema.DbLoginForm, "id")
 	if err != nil {
 		return err
 	}

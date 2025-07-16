@@ -41,6 +41,7 @@ type Module struct {
 	Collections           []Collection      `json:"collections"`
 	Apis                  []Api             `json:"apis"`
 	ClientEvents          []ClientEvent     `json:"clientEvents"`
+	SearchBars            []SearchBar       `json:"searchBars"`
 	Variables             []Variable        `json:"variables"`
 	Widgets               []Widget          `json:"widgets"`
 	ArticleIdsHelp        []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
@@ -333,7 +334,6 @@ type FieldData struct {
 	State          string             `json:"state"`
 	Flags          []string           `json:"flags"`
 	OnMobile       bool               `json:"onMobile"`
-	Clipboard      bool               `json:"clipboard"`      // enable copy-to-clipboard action
 	AttributeId    uuid.UUID          `json:"attributeId"`    // data attribute
 	AttributeIdAlt pgtype.UUID        `json:"attributeIdAlt"` // altern. data attribute (currently used for date period only)
 	Index          int                `json:"index"`          // data attribute index
@@ -347,6 +347,7 @@ type FieldData struct {
 	Captions       CaptionMap         `json:"captions"`
 
 	// legacy
+	Clipboard       bool        `json:"clipboard"`       // enable copy-to-clipboard action
 	CollectionIdDef pgtype.UUID `json:"collectionIdDef"` // collection to fill default values with
 	ColumnIdDef     pgtype.UUID `json:"columnIdDef"`     // collection column to fill default values with
 }
@@ -358,7 +359,6 @@ type FieldDataRelationship struct {
 	State          string      `json:"state"`
 	Flags          []string    `json:"flags"`
 	OnMobile       bool        `json:"onMobile"`
-	Clipboard      bool        `json:"clipboard"`
 	AttributeId    uuid.UUID   `json:"attributeId"`
 	AttributeIdAlt pgtype.UUID `json:"attributeIdAlt"`
 	AttributeIdNm  pgtype.UUID `json:"attributeIdNm"`
@@ -375,7 +375,6 @@ type FieldDataRelationship struct {
 	RegexCheck    pgtype.Text        `json:"regexCheck"` // not used for relationships
 	JsFunctionId  pgtype.UUID        `json:"jsFunctionId"`
 	Columns       []Column           `json:"columns"`
-	Category      bool               `json:"category"`
 	FilterQuick   bool               `json:"filterQuick"`
 	OutsideIn     bool               `json:"outsideIn"`
 	Query         Query              `json:"query"`
@@ -383,6 +382,8 @@ type FieldDataRelationship struct {
 	Captions      CaptionMap         `json:"captions"`
 
 	// legacy
+	Category        bool        `json:"category"`
+	Clipboard       bool        `json:"clipboard"`
 	CollectionIdDef pgtype.UUID `json:"collectionIdDef"`
 	ColumnIdDef     pgtype.UUID `json:"columnIdDef"`
 }
@@ -456,10 +457,12 @@ type FieldVariable struct {
 	State        string      `json:"state"`
 	Flags        []string    `json:"flags"`
 	OnMobile     bool        `json:"onMobile"`
-	Clipboard    bool        `json:"clipboard"`
 	Columns      []Column    `json:"columns"`
 	Query        Query       `json:"query"`
 	Captions     CaptionMap  `json:"captions"`
+
+	// legacy
+	Clipboard bool `json:"clipboard"`
 }
 type Collection struct {
 	Id       uuid.UUID            `json:"id"`
@@ -522,6 +525,7 @@ type Role struct {
 	AccessCollections  map[uuid.UUID]Access `json:"accessCollections"`
 	AccessMenus        map[uuid.UUID]Access `json:"accessMenus"`
 	AccessRelations    map[uuid.UUID]Access `json:"accessRelations"`
+	AccessSearchBars   map[uuid.UUID]Access `json:"accessSearchBars"`
 	AccessWidgets      map[uuid.UUID]Access `json:"accessWidgets"`
 	Captions           CaptionMap           `json:"captions"`
 }
@@ -536,6 +540,7 @@ type PgFunction struct {
 	IsLoginSync    bool                 `json:"isLoginSync"`    // special login sync function
 	IsTrigger      bool                 `json:"isTrigger"`      // is relation TRIGGER function
 	Volatility     string               `json:"volatility"`     // VOLATILE, STABLE, IMMUTABLE
+	Cost           int                  `json:"cost"`           // estimated execution cost
 	Schedules      []PgFunctionSchedule `json:"schedules"`
 	Captions       CaptionMap           `json:"captions"`
 }
@@ -610,6 +615,16 @@ type ClientEvent struct {
 	JsFunctionId    pgtype.UUID `json:"jsFunctionId"`
 	PgFunctionId    pgtype.UUID `json:"pgFunctionId"`
 	Captions        CaptionMap  `json:"captions"`
+}
+type SearchBar struct {
+	Id       uuid.UUID   `json:"id"`
+	ModuleId uuid.UUID   `json:"moduleId"`
+	IconId   pgtype.UUID `json:"iconId"`
+	Name     string      `json:"name"`
+	Columns  []Column    `json:"columns"`
+	Query    Query       `json:"query"`
+	OpenForm OpenForm    `json:"openForm"`
+	Captions CaptionMap  `json:"captions"`
 }
 type Variable struct {
 	Id         uuid.UUID   `json:"id"`

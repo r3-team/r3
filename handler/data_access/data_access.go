@@ -24,10 +24,7 @@ type accessRequest struct {
 	Request json.RawMessage `json:"request"`
 }
 
-var (
-	allowedActions = []string{"del", "get", "set"}
-	handlerContext = "data_access"
-)
+var allowedActions = []string{"del", "get", "set"}
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 
@@ -39,7 +36,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "POST" {
-		handler.AbortRequest(w, handlerContext, errors.New("invalid HTTP method"),
+		handler.AbortRequest(w, handler.ContextDataAccess, errors.New("invalid HTTP method"),
 			"invalid HTTP method, allowed: POST")
 
 		return
@@ -48,12 +45,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// parse body
 	var req accessRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		handler.AbortRequest(w, handlerContext, err, "request body malformed")
+		handler.AbortRequest(w, handler.ContextDataAccess, err, "request body malformed")
 		return
 	}
 
 	if !slices.Contains(allowedActions, req.Action) {
-		handler.AbortRequest(w, handlerContext, errors.New("invalid action"),
+		handler.AbortRequest(w, handler.ContextDataAccess, errors.New("invalid action"),
 			"invalid action, allowed: del, get, set")
 
 		return
@@ -65,11 +62,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer ctxCanc()
 
 	// authenticate requestor
-	var loginId int64
-	var isAdmin bool
-	var noAuth bool
-	if _, _, err := login_auth.Token(ctx, req.Token, &loginId, &isAdmin, &noAuth); err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrAuthFailed)
+	login, err := login_auth.Token(ctx, req.Token)
+	if err != nil {
+		handler.AbortRequest(w, handler.ContextDataAccess, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}
@@ -77,29 +72,29 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// execute request
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataAccess, err, handler.ErrGeneral)
 		return
 	}
 	defer tx.Rollback(ctx)
 
-	log.Info("server", fmt.Sprintf("DIRECT ACCESS, %s data, payload: %s", req.Action, req.Request))
+	log.Info(log.ContextServer, fmt.Sprintf("DIRECT ACCESS, %s data, payload: %s", req.Action, req.Request))
 
-	res, err := request.Exec_tx(ctx, tx, "", loginId, isAdmin,
-		types.WebsocketClientDeviceBrowser, noAuth, "data", req.Action, req.Request)
+	res, err := request.Exec_tx(ctx, tx, "", login.Id, login.Admin,
+		types.WebsocketClientDeviceBrowser, login.NoAuth, "data", req.Action, req.Request)
 
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataAccess, err, handler.ErrGeneral)
 		return
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataAccess, err, handler.ErrGeneral)
 		return
 	}
 
 	resJson, err := json.Marshal(res)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextDataAccess, err, handler.ErrGeneral)
 		return
 	}
 	w.Write(resJson)

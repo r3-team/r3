@@ -45,6 +45,7 @@
 			"bruteforceAttempts": "尝试次数后阻止主机",
 			"bruteforceCountBlocked": "被阻止的主机",
 			"bruteforceCountTracked": "已跟踪的主机",
+			"bruteforceDesc": "<p>This feature blocks clients, if they attempt to access the system repeatedly with invalid authentication. It is sensible for operation in the cloud, where public access is possible.</p><p>It does not make sense for local deployments or if the system is operated with a reverse proxy.</p>",
 			"bruteforceProtection": "启用暴力破解保护",
 			"bruteforceTitle": "暴力破解保护",
 			"builderMode": "构建器模式",
@@ -155,7 +156,6 @@
 			"bindUserDnHint": "示例：CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "绑定用户密码",
 			"button": {
-				"expert": "专家设置",
 				"import": "Import users now",
 				"new": "添加连接",
 				"test": "测试连接"
@@ -166,7 +166,6 @@
 				"importPlanned": "Import job has been scheduled for immediate execution",
 				"testDone": "连接测试成功"
 			},
-			"groupDn": "组 DN",
 			"groupDnHint": "示例：CN=Admin_User,OU=Group,DC=mycompany,DC=local",
 			"host": "主机",
 			"hostHint": "LDAP 主机名",
@@ -174,27 +173,14 @@
 			"keyAttributeHint": "示例：objectGUID",
 			"loginAttribute": "Username attribute",
 			"loginAttributeHint": "示例：sAMAccountName",
+			"loginMetaMap": "Map user details to LDAP attributes",
 			"memberAttribute": "成员属性",
 			"memberAttributeHint": "示例：memberOf",
-			"metaHint": {
-				"department": "Example: department",
-				"email": "Example: mail",
-				"location": "Example: physicalDeliveryOfficeName",
-				"nameDisplay": "Example: displayName",
-				"nameFore": "Example: givenName",
-				"nameSur": "Example: sn",
-				"notes": "Example: description",
-				"organization": "Example: company",
-				"phoneFax": "Example: facsimileTelephoneNumber",
-				"phoneLandline": "Example: telephoneNumber",
-				"phoneMobile": "Example: mobile"
-			},
 			"msAdExt": "Microsoft AD 扩展",
 			"msAdExtHint": "嵌套组成员身份、用户账户控制",
 			"nameHint": "唯一名称",
 			"port": "端口",
 			"portHint": "默认为 389，SSL/TLS 为 636",
-			"role": "角色",
 			"searchClass": "对象类",
 			"searchClassHint": "示例：user",
 			"searchDn": "搜索 DN",
@@ -236,7 +222,6 @@
 			},
 			"dialog": {
 				"delete": "Are you sure you want to delete this user?<br /><br />This action is irreversible.</b>",
-				"notUniqueEmail": "The same email address has also been assigned to a different user.",
 				"notUniqueName": "The same username has already been assigned to a different user.",
 				"resetTotp": "This will reset all multi-factor authentication (MFA) methods for this user. System access is then possible with only username & password.<br /><br />Resetting MFA has no effect on end-to-end encryption.<br /><br />Do you want to continue?"
 			},
@@ -249,7 +234,6 @@
 				"name": "Username - must be unique within the system.",
 				"noAuth": "Public users do not require authentication. System access is possible with only a URL.",
 				"password": "This will overwrite the current password for this user. Multi-factor-authentication is not affected by this change. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
-				"template": "预定义设置（显示和主题选项）将从所选模板应用。",
 				"tokenExpiryHours": "Overwrites the global setting for max. session time."
 			},
 			"ldap": "已分配 LDAP",
@@ -257,27 +241,15 @@
 			"ldapMeta": "Details are imported via LDAP",
 			"limited": "Limited user",
 			"limitedDesc": "When a user has at most a single role assigned, it counts as a 'limited' user. Useful for when only access to parts of an application is needed for things like request handling or form submission.<br /><br />Limited users cannot have admin or public access and take from a separate license pool.",
-			"meta": {
-				"department": "Department",
-				"email": "Email",
-				"location": "Location",
-				"nameDisplay": "Display name",
-				"nameFore": "Forename",
-				"nameSur": "Surname",
-				"notes": "Description",
-				"organization": "Organization",
-				"phone": "Phone",
-				"phoneFax": "Fax",
-				"phoneLandline": "Landline",
-				"phoneMobile": "Mobile"
-			},
 			"noAuth": "公共访问",
+			"oauth": "OAuth client",
+			"oauthAssignActive": "Roles are assigned by ID token claim",
+			"oauthMeta": "Details are set by ID token claims",
 			"password": "设置新密码",
 			"roleContentAdmin": "管理员",
 			"roleContentOther": "特殊",
 			"roleContentUser": "用户",
 			"roles": "已分配的角色 ({COUNT}）",
-			"template": "User template",
 			"title": "User '{NAME}'",
 			"titleLimited": "Limited user '{NAME}'",
 			"titleNew": "New user",
@@ -287,9 +259,27 @@
 				"ldap": "LDAP",
 				"limited": "Limited",
 				"name": "Name",
-				"noAuth": "Public"
+				"noAuth": "Public",
+				"oauth": "OAuth client"
 			},
 			"tokenExpiryHours": "会话最长时间（小时）"
+		},
+		"loginMeta": {
+			"department": "Department",
+			"dialog": {
+				"notUniqueEmail": "The same email address has also been assigned to a different user."
+			},
+			"email": "Email",
+			"location": "Location",
+			"nameDisplay": "Display name",
+			"nameFore": "Forename",
+			"nameSur": "Surname",
+			"notes": "Description",
+			"organization": "Organization",
+			"phone": "Phone",
+			"phoneFax": "Fax",
+			"phoneLandline": "Landline",
+			"phoneMobile": "Mobile"
 		},
 		"loginSessions": {
 			"noData": "No sessions available",
@@ -326,10 +316,12 @@
 				"cache": "缓存",
 				"cluster": "集群",
 				"csv": "CSV 导入/导出",
+				"file": "File processing",
 				"imager": "图像处理",
 				"ldap": "LDAP",
 				"mail": "邮件",
 				"module": "应用程序",
+				"oauth": "OAuth client",
 				"scheduler": "调度器",
 				"server": "服务器",
 				"transfer": "传输",
@@ -460,6 +452,14 @@
 		"navigationScheduler": "调度器",
 		"navigationSystemMsg": "System message",
 		"oauthClient": {
+			"button": {
+				"defaultO365": "Defaults: Exchange Online",
+				"defaultOpenId": "Defaults: Open ID Connect"
+			},
+			"claimRoles": "Roles claim",
+			"claimRolesHint": "Name of the claim field, which contains user roles or groups. If set, REI3 roles can be mapped to values in this claim. Value must be a JSON string array, such as: [\"all-users\", \"department-it\"]",
+			"claimUsername": "Username claim",
+			"claimUsernameHint": "Name of the claim field, which contains the username. Must be filled. Usernames must be unique for an OAuth client.",
 			"clientId": "客户端 ID",
 			"clientIdHint": "在创建 OAuth2 客户端时由提供商生成。",
 			"clientSecret": "客户端密钥",
@@ -469,23 +469,29 @@
 			"dialog": {
 				"delete": "您确定要删除此 OAuth 客户端吗？<br /><br />此操作不可逆。</b>"
 			},
-			"intro": "OAuth 客户端用于对标识提供商进行身份验证以执行操作或访问资源。<br /><br />REI3 实现了“OAuth 2.0 客户端凭据授予流”，在设置此处之前要求将 OAuth 客户端注册到提供商。",
+			"flow": "OAuth flow",
+			"loginMetaMap": "Update user details via claims",
 			"nameHint": "用于在 REI3 中引用此 OAuth 客户端的内部名称。",
 			"option": {
-				"template": {
-					"custom": "-",
-					"ms365_mail": "O365 邮件"
+				"flow": {
+					"authCodePkce": "Authentication Code with PKCE",
+					"clientCreds": "Client credentials"
+				},
+				"flowHint": {
+					"authCodePkce": "<p>This flow is used in REI3 to authenticate users via external identity providers, such as Keycloak or Microsoft Entra ID.</p><p>'Authentication Code with Proof Key for Code Exchange' is an Open ID Connect flow. Users are forwarded to authenticate with an identity provider. After authentication, a user is redirected back to REI3 with verification of identity and user meta data.</p>",
+					"clientCreds": "<p>This flow is used in REI3 to authenticate itself against a service, such as Exchange Online.</p><p>'Client Credentials' is an OAuth 2.0 flow, with which REI3 authenticates against a service provider, to receive access to protected resources such as a mailbox. Any resource accessed via the 'Client Credentials' flow should belong to the client (in this case REI3) - it is not designed to access user resources directly or on behalf.</p><p>This flow is currently only used for access to mail resources.</p>"
 				}
 			},
+			"providerUrl": "Provider URL",
+			"providerUrlHint": "URL of the chosen provider for its OAuth service discovery, often called 'Issuer URL'.",
+			"redirectUrl": "Redirect URL",
+			"redirectUrlHint": "Users are redirected here after authentication. Should be the login URL of REI3. Must also be registered at the service provider.",
 			"scopes": "范围",
 			"scopesHint": "范围告诉提供商 OAuth 客户端希望执行或访问什么。它们由提供商定义，必须分配给客户端才能使用-请参考提供商的文档以获取可用范围的列表。",
-			"template": "模板",
-			"templateHint": "选择一个模板以应用已知提供商的默认设置。",
-			"tenant": "租户",
-			"tenantHint": "对于某些提供商是必需的。租户是在提供商的云系统上唯一标识您的组织的名称或 ID。",
 			"title": "OAuth 客户端 '{NAME}'",
 			"titleNew": "新的 OAuth 客户端",
 			"tokenUrl": "令牌 URL",
+			"tokenUrlExample": "Example for Exchange Online: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
 			"tokenUrlHint": "OAuth2 令牌生成的 URL。这些将由您的提供商进行文档化。"
 		},
 		"repo": {
@@ -538,6 +544,7 @@
 				"clusterCheckIn": "集群签入",
 				"clusterProcessEvents": "集群事件处理",
 				"dbOptimize": "数据库优化",
+				"filesProcess": "File job processing",
 				"httpCertRenew": "如果已更新，则重新加载 SSL 证书",
 				"importLdapLogins": "Import users via LDAP",
 				"mailAttach": "电子邮件附件传输",
@@ -589,9 +596,6 @@
 				"versionNewHint": "使用新版本号复制此 API。"
 			},
 			"calls": "调用",
-			"columnSettings": "列设置",
-			"columnsAvailable": "可用列",
-			"columnsTarget": "活动列",
 			"content": "API类型",
 			"contentValue": "REST",
 			"dialog": {
@@ -776,23 +780,17 @@
 			"titleNew": "New client event"
 		},
 		"collection": {
-			"columnSettings": "列设置",
-			"columnsAvailable": "可用列",
-			"columnsTarget": "活动列",
 			"dialog": {
 				"delete": "您确定要删除此集合吗？"
 			},
 			"inHeader": "在标题中显示",
-			"new": "新集合",
 			"previewHint": "已登录用户的集合数值。如果在分配的角色中启用了集合，则在页面加载时检索集合（按F5重新加载）。",
-			"query": "查询",
 			"title": "集合",
 			"titleOne": "集合 '{NAME}'"
 		},
 		"collectionInput": {
 			"collection": "集合",
 			"column": "列中的数值",
-			"formIdOpen": "打开表单",
 			"multiValue": "多输入",
 			"noDisplayEmpty": "为空时隐藏",
 			"onMobile": "在移动设备上显示",
@@ -815,7 +813,6 @@
 				"columnsAll": "所有列",
 				"layoutColumns": "{CNT} 列"
 			},
-			"category": "类别选择器",
 			"chart": {
 				"axisType": "轴类型",
 				"axisTypeCategory": "分类",
@@ -844,6 +841,8 @@
 			"columnLength": "长度（字符）",
 			"columnLength0": "无限制",
 			"columnLengthFiles": "File count",
+			"columnNoShrink": "Does not shrink",
+			"columnNoThousandsSep": "No thousands separator",
 			"columnPreviewLarge": "Large preview",
 			"columnShowDefault": "Show by default",
 			"columnShowDefaultMobile": "Show by default on mobile",
@@ -890,6 +889,11 @@
 			"fieldDefault": "默认值",
 			"fieldDefaultPresetIds": "默认预设值",
 			"fieldDirection": "方向",
+			"fieldFlags": {
+				"hideInputs": "Hide inputs",
+				"relCategory": "Category display",
+				"relFlow": "Progress flow display"
+			},
 			"fieldHelp": "帮助文本",
 			"fieldIcon": "字段图标",
 			"fieldIdFocus": "加载时设置字段焦点",
@@ -952,7 +956,6 @@
 			"headerSize": "大小",
 			"helpText": "帮助文本",
 			"hidden": "字段默认隐藏",
-			"hideInputs": "Hide inputs",
 			"icon": "表单图标",
 			"ics": "iCal订阅",
 			"jsFunctionButton": "点击时执行的函数",
@@ -1073,6 +1076,8 @@
 			"codeReturnsHintJs": "可选，'number', 'array',...",
 			"codeReturnsHintPg": "'text', 'integer',...",
 			"collectionId": "[选择集合]",
+			"cost": "Cost",
+			"costHelp": "<b>Expert setting</b><p>Cost is an estimated value that serves to optimize query planning. Changing this value can help optimize performance by letting the query planner know, if this function is expected to run long (expensive / high cost) or short (cheap / low cost).</p><p>Higher values can be sensible for complex functions (such as relation policies), as the query planner will then avoid unnecessary executions by evaluating other things first.</p>",
 			"dialog": {
 				"delete": "Are you sure you want to delete this function?"
 			},
@@ -1091,6 +1096,7 @@
 				"dialog_show": "app.dialog_show({ARGS}) => PROMISE<br /><br />Shows a dialog with the specified title and content. The title is a simple text string, while the content can be text or HTML.<br /><br />Buttons are defined by a list of strings. If none are defined, a simple OK button is shown.<br /><br />The returned value is the index of the clicked button. So if the first button is clicked, the value will be 0. If the second button is clicked, it´s 1 and so on.<br /><br /><b>Example</b><br />app.dialog_show(<blockquote>'Please confirm',<br />'Do you really want to delete this item?',<br />['Yes', 'Cancel action']</blockquote>).then(<blockquote>res => { if(res === 0) { console.log('clicked Yes!'); } }</blockquote>);",
 				"form_close": "app.form_close() => UNDEFINED<br /><br />关闭表单（如果是浮动或子表单），否则返回浏览器历史记录。",
 				"form_open": "app.form_open({ARGS}) => UNDEFINED<br /><br />直接打开一个表单，在新标签页或弹出窗口中。<br /><br />The new form, if opened directly (not as tab or pop-up), adds to the browser history unless the argument 'replace_history' is set to 'true'.",
+				"form_parent_refresh": "app.form_parent_refresh() => UNDEFINED<br /><br />Only relevant when used in child forms (ie. floating window or sub form).<br /><br />When a record is changed on a child form, the parent form refreshes itself automatically; this can be a relationship input showing a newly created record or a list field updating itself to show changed data.<br /><br />In some cases, like when executing changes via a backend function, this cannot be done automatically as the system does not know what or if something changed at all. This function informs the parent form to refresh itself to show changed data. This updates relationship input and data fields like lists or calendars; it does not reload the form record as there might be unsaved changes.",
 				"form_set_title": "app.form_set_title({ARGS}) => UNDEFINED<br /><br />覆盖当前表单标题。设置为 <i>null</i> 可将其重置为原始表单标题。",
 				"form_show_message": "app.form_show_message({ARGS}) => UNDEFINED<br /><br />临时替换表单标题为自定义消息。第二个参数定义消息显示时间（默认为3000毫秒）。",
 				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Decrypts provided data key with the private key of the current user.",
@@ -1210,7 +1216,13 @@
 			"helpPg": {
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />中止操作并向执行用户发送消息，该消息将显示在用户界面上。",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />删除登录用户不再访问的记录的端到端加密数据密钥。这将使登录用户无法解密。",
+				"file_export": "instance.file_export({ARGS}) => INTEGER<br /><br />Creates a file processing job to export a given file to disk. Relevant parameters:<ul><li>file_id: File to export, file ID can be retrieved via instance.files_get()</li><li>file_path: Where to export the file to (must end in a filename)</li><li>file_version: Version of the file to export (NULL = latest version)</li><li>overwrite: Overwrite file if one already exists at the defined filepath</li></ul><p>The filepath is always relative to the export path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
+				"file_export_text": "instance.file_export_text({ARGS}) => INTEGER<br /><br />Creates a file processing job to export a given text as a UTF8 text file to disk. Relevant parameters:<ul><li>file_path: Where to export the file to (must end in a filename)</li><li>file_text_content: UTF8 text content</li><li>overwrite: Overwrite file if one already exists at the defined filepath</li></ul><p>The filepath is always relative to the export path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
+				"file_import": "instance.file_import({ARGS}) => INTEGER<br /><br />Creates a file processing job to import a file from disk. Relevant parameters:<ul><li>file_path: Where to import the file from (must end in a filename)</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul><p>The source file is deleted, if the import is successful.</p><p>The filepath is always relative to the import path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
+				"file_import_text": "instance.file_import_text({ARGS}) => INTEGER<br /><br />Creates a file processing job to import a text from a UTF8 text file on disk. Relevant parameters:<ul><li>file_path: Where to import the text file from (must end in a filename)</li><li>callback_function_id: ID of backend function that is called with the imported text, it must have two parameters: file_name TEXT, file_content TEXT</li></ul><p>The source file is deleted, if the import is successful.</p><p>The filepath is always relative to the import path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
 				"file_link": "instance.file_link({ARGS}) => VOID<br /><br />将现有文件链接到另一个记录（添加到所选文件属性）。此链接是硬链接，意味着访问的是同一个文件。<br /><br />重命名或删除文件时，更改仅影响文件链接。无论是否删除，实际文件都会保留，只要存在一个文件链接。",
+				"file_text_read": "instance.file_text_read({ARGS}) => INTEGER<br /><br />Creates a file processing job to send the content of a UTF8 text file to a callback function. Relevant parameters:<ul><li>callback_function_id: ID of backend function that is called, it must have one parameter: file_content TEXT</li><li>file_id: File to read content from, file ID can be retrieved via instance.files_get()</li><li>file_version: Version of the file to read from (NULL = latest version)</li></ul>",
+				"file_text_write": "instance.file_text_write({ARGS}) => INTEGER<br /><br />Creates a file processing job to create a new UTF8 text file. Relevant parameters:<ul><li>file_name: Name of the file to be created</li><li>file_text_content: UTF8 text content</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul>",
 				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Unlinks an existing file from the files attribute of a specified record. The removed link is a hardlink, meaning that the actual file is kept as long as it is still linked to at least one other records file attribute.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]<br /><br />Returns meta data for files from the chosen file attribute and record (can optionally include deleted files).<br /><br />The returned type 'instance.file_meta' consists of:<blockquote>id UUID,<br />user_id_creator INTEGER,<br />hash TEXT,<br />name TEXT,<br />size_kb INTEGER,<br />version INTEGER,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Returns the encrypted data key for the given relation record and the chosen user. Data keys exist for individual records for every user that has access to it. They can be decrypted on the frontend with the associated user private key.",
@@ -1243,11 +1255,42 @@
 					"relation_id UUID",
 					"record_ids_access INTEGER[]"
 				],
+				"file_export": [
+					"file_id UUID",
+					"file_path TEXT",
+					"file_version INTEGER DEFAULT NULL",
+					"overwrite BOOLEAN DEFAULT FALSE"
+				],
+				"file_export_text": [
+					"file_path TEXT",
+					"file_text_content TEXT",
+					"overwrite BOOLEAN DEFAULT FALSE"
+				],
+				"file_import": [
+					"file_path TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL"
+				],
+				"file_import_text": [
+					"file_path TEXT",
+					"callback_function_id UUID"
+				],
 				"file_link": [
 					"file_id UUID",
 					"file_name TEXT",
 					"attribute_id UUID",
 					"record_id BIGINT"
+				],
+				"file_text_read": [
+					"callback_function_id UUID",
+					"file_id UUID",
+					"file_version INTEGER DEFAULT NULL"
+				],
+				"file_text_write": [
+					"file_name TEXT",
+					"file_text_content TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL"
 				],
 				"file_unlink": [
 					"file_id UUID",
@@ -1525,6 +1568,7 @@
 			"relationEncryption": "端到端加密",
 			"relationEncryptionHint": "为该关系上的属性启用端到端加密（E2EE）。E2EE具有利弊，请在使用前仔细阅读构建者文档。此设置稍后无法更改。",
 			"role": "新角色",
+			"searchBar": "New search bar",
 			"template": {
 				"loginSync": "Login sync function",
 				"mailsFromSpooler": "电子邮件处理（传入）",
@@ -1695,6 +1739,16 @@
 			"title": "角色",
 			"titleOne": "角色 '{NAME}'"
 		},
+		"searchBar": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this search bar?"
+			},
+			"title": "Search bars",
+			"titleOne": "Search bar '{NAME}'",
+			"warning": {
+				"noSearchInput": "Add at least one 'Global search: User input' filter to apply search query"
+			}
+		},
 		"start": {
 			"appVisible": "应用对分配了角色的用户可见",
 			"appVisibleOff": "应用对用户不可见",
@@ -1848,7 +1902,8 @@
 			"003": "系统无法加密记录值。请重试。",
 			"004": "系统无法解密记录值。请重试。",
 			"005": "系统无法检索所选记录的解密密钥。",
-			"006": "并非所有选择的用户都启用了端到端加密 - 这些用户是：{NAMES}"
+			"006": "并非所有选择的用户都启用了端到端加密 - 这些用户是：{NAMES}",
+			"007": "End-to-end encryption is waiting for your personal encryption password to be entered in the user settings."
 		},
 		"initCollection": "登录期间加载集合失败：{MSG}"
 	},
@@ -1901,6 +1956,7 @@
 		"nowOffsetHint": "+/- X {MODE}",
 		"nowOffsetTitle": "从现在开始添加（正数）或减去（负数） X 天/小时/分钟/秒。",
 		"operatorsArray": "数组",
+		"operatorsFts": "Full-text search",
 		"operatorsNull": "空值",
 		"operatorsRegex": "Regular expression",
 		"operatorsSets": "子集",
@@ -1920,6 +1976,7 @@
 				"formChanged": "form has unsaved changes",
 				"formState": "form state",
 				"getter": "URL parameter",
+				"globalSearch": "user search input",
 				"javascript": "JavaScript",
 				"languageCode": "user language",
 				"login": "user ID",
@@ -1928,6 +1985,9 @@
 				"nowTime": "时间",
 				"preset": "预设记录",
 				"record": "记录 ID",
+				"recordMayCreate": "record may be created",
+				"recordMayDelete": "record may be deleted",
+				"recordMayUpdate": "record may be updated",
 				"recordNew": "记录是新的",
 				"role": "user has role",
 				"subQuery": "子查询",
@@ -1944,6 +2004,7 @@
 				"formChanged": "TRUE/FALSE, depending on whether form currently has unsaved changes.",
 				"formState": "TRUE/FALSE, depending on whether the chosen form state is currently active.",
 				"getter": "Value of a URL parameter, such as 'https://system?param=123' with 'param' being the name and '123' the value.",
+				"globalSearch": "Text value of the global search input field.",
 				"javascript": "返回给定 JavaScript 表达式的值。",
 				"languageCode": "当前登录的所选用户语言代码（en_us、de_de 等）。",
 				"login": "当前登录的 ID（整数）。",
@@ -1952,6 +2013,9 @@
 				"nowTime": "当前时间（本小时/分钟/秒），用于与时间值进行比较。",
 				"preset": "给定预设记录的 ID（整数）。",
 				"record": "当前表单上的当前记录的 ID（整数，关系 0）。",
+				"recordMayCreate": "TRUE if a new record may be created, based on relation permissions & join settings.",
+				"recordMayDelete": "TRUE if current record my be deleted, based on relation permissions & policies & join settings.",
+				"recordMayUpdate": "TRUE if current record my be updated, based on relation permissions & policies & join settings.",
 				"recordNew": "根据当前记录在此表单上是否为新记录而为 TRUE/FALSE。",
 				"role": "根据当前登录是否具有给定角色分配而为 TRUE/FALSE。",
 				"subQuery": "返回给定子查询的值。",
@@ -2040,6 +2104,33 @@
 		"fileRenamed": "已重命名文件",
 		"fileUpdated": "已更新文件",
 		"title": "变更日志"
+	},
+	"fullTextSearch": {
+		"dictionary": {
+			"arabic": "Arabic",
+			"danish": "Danish",
+			"dutch": "Dutch",
+			"english": "English",
+			"finnish": "Finnish",
+			"french": "French",
+			"german": "German",
+			"greek": "Greek",
+			"hungarian": "Hungarian",
+			"indonesian": "Indonesian",
+			"irish": "Irish",
+			"italian": "Italian",
+			"lithuanian": "Lithuanian",
+			"nepali": "Nepali",
+			"norwegian": "Norwegian",
+			"portuguese": "Portuguese",
+			"romanian": "Romanian",
+			"russian": "Russian",
+			"simple": "[Not selected]",
+			"spanish": "Spanish",
+			"swedish": "Swedish",
+			"tamil": "Tamil",
+			"turkish": "Turkish"
+		}
 	},
 	"generic": {
 		"action": "Action",
@@ -2131,7 +2222,10 @@
 		"collection": "收藏",
 		"collections": "收藏",
 		"color": "颜色",
+		"columnSettings": "列设置",
 		"columns": "Columns",
+		"columnsActive": "活动列",
+		"columnsAvailable": "可用列",
 		"comments": "评论",
 		"content": "内容",
 		"contextHelp": "上下文帮助",
@@ -2155,6 +2249,7 @@
 			"maintenanceComing": "The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your changes before then.",
 			"systemMsg": "System message"
 		},
+		"disabled": "Disabled",
 		"displayed": "显示的",
 		"encryption": "Encryption",
 		"error": {
@@ -2172,9 +2267,11 @@
 		"filters": "过滤器",
 		"form": "表单",
 		"formActions": "Form actions",
+		"formOpen": "打开表单",
 		"forms": "表单",
 		"functions": "Functions",
 		"global": "Global",
+		"globalSearch": "Global search",
 		"help": "帮助",
 		"home": "主页",
 		"hotkey": "Hotkey",
@@ -2207,6 +2304,8 @@
 		"login": "Login",
 		"loginForm": "登录表单",
 		"loginForms": "登录表单",
+		"loginTemplate": "User template",
+		"loginTemplateHint": "Predefined settings are applied once from the selected template when a new user is created. If nothing is selected here, the global template is used.",
 		"maintenance": "Maintenance",
 		"menu": "菜单",
 		"menus": "菜单",
@@ -2263,6 +2362,11 @@
 		"returns": "Returns",
 		"role": "角色",
 		"roles": "角色",
+		"search": "Search",
+		"searchBar": "Search bar",
+		"searchBars": "Search bars",
+		"searchCompleted": "Search completed",
+		"searchRunning": "Search is running",
 		"selected": "已选",
 		"selectedMaxOne": "已选（最多1个）",
 		"settings": "设置",
@@ -2271,8 +2375,10 @@
 		"sqlPreview": "SQL预览",
 		"standard": "标准",
 		"status": "状态",
+		"systemModes": "System modes",
 		"textSearch": "文本搜索",
 		"threeDots": "...",
+		"tip": "Tip",
 		"title": "标题",
 		"token": "令牌",
 		"type": "类型",
@@ -2280,6 +2386,7 @@
 		"uninstall": "Uninstall",
 		"update": "Update",
 		"username": "用户名",
+		"value": "Value",
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "版本",
@@ -2288,6 +2395,32 @@
 		"widget": "新微件",
 		"widgets": "小部件",
 		"wrap": "Wrap"
+	},
+	"globalSearch": {
+		"button": {
+			"dictReset": "Reset to user language",
+			"fullTextSearch": "Supports full-text search",
+			"openAsPopUp": "Open as pop-up",
+			"openAsPopUpMobile": "Pop-up",
+			"showHeader": "Column titles",
+			"showHeaderMobile": "Columns"
+		},
+		"help": {
+			"ftsDict": [
+				"Defines which language the search query is written in.",
+				"This does not help find words or names containing a few characters; but by knowing the language of the search query, the system can make use of full-text search features.",
+				"When full-text search is supported, a corresponding message is displayed in the search title bar - click on it to get more details about search options."
+			],
+			"ftsDictTitle": "Search input language"
+		},
+		"inputPlaceholder": "Write out names, words or email addresses",
+		"modulesInactive": "Additional search options",
+		"tips": [
+			"A new search can be started from anywhere in REI3 by pressing <b>CTRL + SHIFT + F</b>. If text is selected, it will be used as search input.",
+			"When searching for names, words or email addresses, write them out in full.",
+			"If multilingual content is searched, it is important to set the language of your search query (top right corner).",
+			"Language specific searches, like matching 'making' with 'make', work if the content has a defined language. This often makes sense for articles, but is usually not done for emails."
+		]
 	},
 	"home": {
 		"button": {
@@ -2406,7 +2539,6 @@
 		"inputHintCreate": "创建新记录",
 		"inputHintOpen": "打开记录",
 		"inputHintRemove": "移除记录",
-		"inputHintSelect": "添加现有记录",
 		"inputPlaceholderAdd": "…添加更多",
 		"message": {
 			"csvExport": "CSV 导出使用当前列表的过滤器和排序。",
@@ -2426,6 +2558,12 @@
 	},
 	"settings": {
 		"account": {
+			"button": {
+				"loginOptionsDel": "Reset all field settings"
+			},
+			"dialog": {
+				"loginOptionsDel": "<p>This will reset all field settings, such as list sorting, visible columns, filters, and so on, to their default values.</p><p>Do you want to continue?</p>"
+			},
 			"messagePwCurrentWrong": "当前密码无效",
 			"messagePwDiff": "密码不匹配",
 			"messagePwRequiresDigit": "密码必须包含数字",
@@ -2434,6 +2572,7 @@
 			"messagePwRequiresUpper": "密码必须包含大写字母",
 			"messagePwShort": "密码过短",
 			"nodeName": "已连接到：{NAME}",
+			"pwChangeNotAllowed": "Login data is managed externally",
 			"pwNew0": "新密码",
 			"pwNew1": "重复新密码",
 			"pwOld": "当前密码",
@@ -2457,9 +2596,6 @@
 		"colorMenu": "覆盖颜色",
 		"dark": "夜间模式",
 		"dateFormat": "日期格式",
-		"dialog": {
-			"searchDictionary": "该系统提供全文搜索功能。在使用全文搜索时，即使是非常大的文本也可以通过高级搜索功能（例如比较同义词和词干）快速查找。<br /><br />'用于全文搜索的词典' 通知系统用户使用特定语言的搜索功能，并指示系统哪些语言可以使用语言特定的搜索功能。"
-		},
 		"encryption": {
 			"backupCode": "备份代码",
 			"backupCodeDesc": "备份代码非常重要；如果忘记密码，它用于重新获得访问权限。",
@@ -2474,6 +2610,11 @@
 			"modulesEnc": "使用加密的应用程序",
 			"newKeys": "密钥创建成功",
 			"newKeysDesc": "为完成设置，请将您的个人备份代码复制到安全位置。",
+			"noCredMasterKey": "Encryption password",
+			"noCredMasterKeyChoose": "Your user is authenticated via an external provider. To enable end-to-end-encryption, you must choose a personal encryption password.",
+			"noCredMasterKeyEnter": "End-to-end-encryption is protected by your personal encryption password.",
+			"noCredMasterKeyFailed": "The encryption password was not accepted. Please try again.<br /><br />If you forgot your encryption password, please see below for recovery options.",
+			"noCredMasterKeyNew": "New encryption password",
 			"prevPassword": "先前的密码",
 			"regainAccess": "重新获得对个人密钥的访问权限",
 			"regainAccessDesc": "您可以通过输入先前的密码重新获得对个人密钥的访问权限。如果您不知道先前的密码，您需要使用个人备份代码。",
@@ -2504,13 +2645,13 @@
 				"apos": "撇号（'）",
 				"comma": "逗号（,）",
 				"dot": "点号（.）",
-				"mdot": "中间点（·）"
+				"mdot": "中间点（·）",
+				"none": "[no separator]",
+				"space": "Space ( )"
 			}
 		},
 		"pageTitle": "设置",
 		"pattern": "背景图案",
-		"searchDictionaries": "全文搜索词典",
-		"searchDictionaryNew": "添加词典",
 		"spacing": "间距",
 		"sundayFirstDow": "将星期天设为第一天",
 		"tabRemember": "打开上次使用的选项卡",

@@ -5,93 +5,7 @@ import {getDependentModules}  from '../shared/builder.js';
 import {copyValueDialog}      from '../shared/generic.js';
 export {MyBuilderRole as default};
 
-let MyBuilderRoleAccessApi = {
-	name:'my-builder-role-access-api',
-	template:`<tr class="entry">
-		<td>
-			<span class="builder-role-td-name">{{ api.name + ' (v' + api.version + ')' }}</span>
-		</td>
-		<td>
-			<my-bool
-				@update:modelValue="$emit('apply',api.id,access === 1 ? -1 : 1)"
-				:modelValue="access === 1 ? true : false"
-				:readonly="readonly"
-			/>
-		</td>
-		<td class="maximum"></td>
-	</tr>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		api:            { type:Object,  required:true },
-		idMapAccess:    { type:Object,  required:true },
-		readonly:       { type:Boolean, required:true }
-	},
-	emits:['apply'],
-	computed:{
-		access:(s) => typeof s.idMapAccess[s.api.id] === 'undefined'
-			? -1 : s.idMapAccess[s.api.id]
-	}
-};
-
-let MyBuilderRoleAccessClientEvent = {
-	name:'my-builder-role-access-client-event',
-	template:`<tr class="entry">
-		<td>
-			<span class="builder-role-td-name">
-				{{ clientEvent.captions.clientEventTitle[builderLanguage] }}
-			</span>
-		</td>
-		<td>
-			<my-bool
-				@update:modelValue="$emit('apply',clientEvent.id,access === 1 ? -1 : 1)"
-				:modelValue="access === 1 ? true : false"
-				:readonly="readonly"
-			/>
-		</td>
-		<td class="maximum"></td>
-	</tr>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		clientEvent:    { type:Object,  required:true },
-		idMapAccess:    { type:Object,  required:true },
-		readonly:       { type:Boolean, required:true }
-	},
-	emits:['apply'],
-	computed:{
-		access:(s) => typeof s.idMapAccess[s.clientEvent.id] === 'undefined'
-			? -1 : s.idMapAccess[s.clientEvent.id]
-	}
-};
-
-let MyBuilderRoleAccessCollection = {
-	name:'my-builder-role-access-collection',
-	template:`<tr class="entry">
-		<td>
-			<span class="builder-role-td-name">{{ collection.name }}</span>
-		</td>
-		<td>
-			<my-bool
-				@update:modelValue="$emit('apply',collection.id,access === 1 ? -1 : 1)"
-				:modelValue="access === 1 ? true : false"
-				:readonly="readonly"
-			/>
-		</td>
-		<td class="maximum"></td>
-	</tr>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		collection:     { type:Object,  required:true },
-		idMapAccess:    { type:Object,  required:true },
-		readonly:       { type:Boolean, required:true }
-	},
-	emits:['apply'],
-	computed:{
-		access:(s) => typeof s.idMapAccess[s.collection.id] === 'undefined'
-			? -1 : s.idMapAccess[s.collection.id]
-	}
-};
-
-let MyBuilderRoleAccessMenu = {
+const MyBuilderRoleAccessMenu = {
 	name:'my-builder-role-access-menu',
 	template:`<tr class="entry">
 		<td>
@@ -169,7 +83,7 @@ let MyBuilderRoleAccessMenu = {
 	}
 };
 
-let MyBuilderRoleAccessRelation = {
+const MyBuilderRoleAccessRelation = {
 	name:'my-builder-role-access-relation',
 	template:`<tr>
 		<td>
@@ -252,7 +166,7 @@ let MyBuilderRoleAccessRelation = {
 	},
 	emits:['apply-attribute','apply-relation','relation-selected'],
 	computed:{
-		access:(s) => typeof s.relationIdMapAccess[s.relation.id] === 'undefined'
+		access:(s) => s.relationIdMapAccess[s.relation.id] === undefined
 			? -1 : s.relationIdMapAccess[s.relation.id],
 		attributeIdMapAccessParsed:(s) => {
 			let out = {};
@@ -283,20 +197,21 @@ let MyBuilderRoleAccessRelation = {
 			this.$emit('apply-attribute',attributeId,this.attributeIdMapAccessParsed[attributeId] >= access ? access - 1 : access);
 		},
 		setRelation(access) {
+			if(access === 1 && this.access !== -1)
+				return this.$emit('apply-relation',this.relation.id,-1);
+
 			this.$emit('apply-relation',this.relation.id,this.access >= access ? access - 1 : access);
 		}
 	}
 };
 
-let MyBuilderRoleAccessWidget = {
-	name:'my-builder-role-access-widget',
+const MyBuilderRoleAccessSimple = {
+	name:'my-builder-role-access-simple',
 	template:`<tr class="entry">
-		<td>
-			<span class="builder-role-td-name">{{ widget.name }}</span>
-		</td>
+		<td><span class="builder-role-td-name">{{ caption }}</span></td>
 		<td>
 			<my-bool
-				@update:modelValue="$emit('apply',widget.id,access === 1 ? -1 : 1)"
+				@update:modelValue="$emit('apply',id,access === 1 ? -1 : 1)"
 				:modelValue="access === 1 ? true : false"
 				:readonly="readonly"
 			/>
@@ -305,28 +220,30 @@ let MyBuilderRoleAccessWidget = {
 	</tr>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
+		captions:       { type:Object,  required:false, default:() => { return {}; } },
+		captionTitle:   { type:String,  required:false, default: '' },
+		name:           { type:String,  required:false, default: '' },
+		id:             { type:String,  required:true },
 		idMapAccess:    { type:Object,  required:true },
-		readonly:       { type:Boolean, required:true },
-		widget:         { type:Object,  required:true }
+		readonly:       { type:Boolean, required:true }
 	},
 	emits:['apply'],
 	computed:{
-		access:(s) => typeof s.idMapAccess[s.widget.id] === 'undefined'
-			? -1 : s.idMapAccess[s.widget.id]
+		access: (s) => s.idMapAccess[s.id] === undefined ? -1 : s.idMapAccess[s.id],
+		caption:(s) => s.captionTitle !== '' && s.captions[s.captionTitle][s.builderLanguage] !== undefined
+			? s.captions[s.captionTitle][s.builderLanguage]
+			: s.name
 	}
 };
 
-let MyBuilderRole = {
+const MyBuilderRole = {
 	name:'my-builder-role',
 	components:{
 		MyBuilderCaption,
 		MyBuilderMenuTabSelect,
-		MyBuilderRoleAccessApi,
-		MyBuilderRoleAccessClientEvent,
-		MyBuilderRoleAccessCollection,
 		MyBuilderRoleAccessMenu,
 		MyBuilderRoleAccessRelation,
-		MyBuilderRoleAccessWidget,
+		MyBuilderRoleAccessSimple,
 		MyTabs
 	},
 	template:`<div class="builder-role contentBox grow" v-if="ready">
@@ -379,8 +296,8 @@ let MyBuilderRole = {
 			<div class="column grow">
 				<my-tabs
 					v-model="tabTarget"
-					:entries="['data','menus','collections','apis','widgets','clientEvents']"
-					:entriesIcon="['images/database.png','images/menu.png','images/tray.png','images/api.png','images/tiles.png','images/screen.png']"
+					:entries="['data','menus','collections','searchBars','widgets','apis','clientEvents']"
+					:entriesIcon="['images/database.png','images/menu.png','images/tray.png','images/search.png','images/tiles.png','images/api.png','images/screen.png']"
 					:entriesText="tabCaptions"
 				/>
 				
@@ -495,13 +412,15 @@ let MyBuilderRole = {
 							</tr>
 						</thead>
 						<tbody>
-							<my-builder-role-access-client-event
-								v-for="ce in module.clientEvents"
+							<my-builder-role-access-simple
+								v-for="e in module.clientEvents"
 								@apply="(...args) => apply('clientEvent',args[0],args[1])"
 								:builderLanguage="builderLanguage"
-								:clientEvent="ce"
+								:captions="e.captions"
+								:captionTitle="'clientEventTitle'"
+								:id="e.id"
 								:idMapAccess="accessClientEvents"
-								:key="role.id + '_' + ce.id"
+								:key="role.id + '_' + e.id"
 								:readonly="readonly"
 							/>
 						</tbody>
@@ -516,13 +435,14 @@ let MyBuilderRole = {
 							</tr>
 						</thead>
 						<tbody>
-							<my-builder-role-access-collection
-								v-for="c in module.collections"
+							<my-builder-role-access-simple
+								v-for="e in module.collections"
 								@apply="(...args) => apply('collection',args[0],args[1])"
 								:builderLanguage="builderLanguage"
-								:collection="c"
+								:id="e.id"
 								:idMapAccess="accessCollections"
-								:key="role.id + '_' + c.id"
+								:key="role.id + '_' + e.id"
+								:name="e.name"
 								:readonly="readonly"
 							/>
 						</tbody>
@@ -537,13 +457,38 @@ let MyBuilderRole = {
 							</tr>
 						</thead>
 						<tbody>
-							<my-builder-role-access-api
-								v-for="a in module.apis"
+							<my-builder-role-access-simple
+								v-for="e in module.apis"
 								@apply="(...args) => apply('api',args[0],args[1])"
-								:api="a"
 								:builderLanguage="builderLanguage"
+								:id="e.id"
 								:idMapAccess="accessApis"
-								:key="role.id + '_' + a.id"
+								:key="role.id + '_' + e.id"
+								:name="e.name + '(v' + e.version + ')'"
+								:readonly="readonly"
+							/>
+						</tbody>
+					</table>
+					
+					<table class="generic-table sticky-top default-inputs" v-if="tabTarget === 'searchBars'">
+						<thead>
+							<tr>
+								<th>{{ capGen.searchBars }}</th>
+								<th>{{ capApp.access }}</th>
+								<th class="maximum"></th>
+							</tr>
+						</thead>
+						<tbody>
+							<my-builder-role-access-simple
+								v-for="e in module.searchBars"
+								@apply="(...args) => apply('searchBar',args[0],args[1])"
+								:builderLanguage="builderLanguage"
+								:captions="e.captions"
+								:captionTitle="'searchBarTitle'"
+								:id="e.id"
+								:idMapAccess="accessSearchBars"
+								:key="role.id + '_' + e.id"
+								:name="e.name"
 								:readonly="readonly"
 							/>
 						</tbody>
@@ -558,14 +503,17 @@ let MyBuilderRole = {
 							</tr>
 						</thead>
 						<tbody>
-							<my-builder-role-access-widget
-								v-for="w in module.widgets"
+							<my-builder-role-access-simple
+								v-for="e in module.widgets"
 								@apply="(...args) => apply('widget',args[0],args[1])"
 								:builderLanguage="builderLanguage"
+								:captions="e.captions"
+								:captionTitle="'widgetTitle'"
+								:id="e.id"
 								:idMapAccess="accessWidgets"
-								:key="role.id + '_' + w.id"
+								:key="role.id + '_' + e.id"
+								:name="e.name"
 								:readonly="readonly"
-								:widget="w"
 							/>
 						</tbody>
 					</table>
@@ -684,6 +632,7 @@ let MyBuilderRole = {
 			accessCollections:{},
 			accessMenus:{},
 			accessRelations:{},
+			accessSearchBars:{},
 			accessWidgets:{},
 			assignable:true,
 			captions:{},
@@ -711,6 +660,7 @@ let MyBuilderRole = {
 			|| JSON.stringify(s.accessCollections)  !== JSON.stringify(s.role.accessCollections)
 			|| JSON.stringify(s.accessMenus)        !== JSON.stringify(s.role.accessMenus)
 			|| JSON.stringify(s.accessRelations)    !== JSON.stringify(s.role.accessRelations)
+			|| JSON.stringify(s.accessSearchBars)   !== JSON.stringify(s.role.accessSearchBars)
 			|| JSON.stringify(s.accessWidgets)      !== JSON.stringify(s.role.accessWidgets)
 			|| JSON.stringify(s.captions)           !== JSON.stringify(s.role.captions),
 		menuIdsAll:(s) => {
@@ -734,8 +684,9 @@ let MyBuilderRole = {
 				`${s.capGen.data} (${s.module.relations.length})`,
 				`${s.capGen.menus} (${s.module.menuTabs.length})`,
 				`${s.capGen.collections} (${s.module.collections.length})`,
-				`${s.capGen.apis} (${s.module.apis.length})`,
+				`${s.capGen.searchBars} (${s.module.searchBars.length})`,
 				`${s.capGen.widgets} (${s.module.widgets.length})`,
+				`${s.capGen.apis} (${s.module.apis.length})`,
 				`${s.capGen.clientEvents} (${s.module.clientEvents.length})`
 			];
 		},
@@ -767,6 +718,7 @@ let MyBuilderRole = {
 				case 'collection':  this.accessCollections[id]  = access; break;
 				case 'menu':        this.accessMenus[id]        = access; break;
 				case 'relation':    this.accessRelations[id]    = access; break;
+				case 'searchBar':   this.accessSearchBars[id]   = access; break;
 				case 'widget':      this.accessWidgets[id]      = access; break;
 			}
 		},
@@ -789,6 +741,7 @@ let MyBuilderRole = {
 			this.accessCollections  = JSON.parse(JSON.stringify(this.role.accessCollections));
 			this.accessMenus        = JSON.parse(JSON.stringify(this.role.accessMenus));
 			this.accessRelations    = JSON.parse(JSON.stringify(this.role.accessRelations));
+			this.accessSearchBars   = JSON.parse(JSON.stringify(this.role.accessSearchBars));
 			this.accessWidgets      = JSON.parse(JSON.stringify(this.role.accessWidgets));
 			this.captions           = JSON.parse(JSON.stringify(this.role.captions));
 
@@ -865,6 +818,7 @@ let MyBuilderRole = {
 				accessCollections:this.accessCollections,
 				accessMenus:this.accessMenus,
 				accessRelations:this.accessRelations,
+				accessSearchBars:this.accessSearchBars,
 				accessWidgets:this.accessWidgets,
 				captions:this.captions
 			},true).then(

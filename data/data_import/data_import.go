@@ -229,7 +229,7 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 				if !atr.Nullable && setAtr.Value == nil {
 					rel := cache.RelationIdMap[atr.RelationId]
-					log.Info("csv", fmt.Sprintf("skips record on relation '%s', no value set for required attribute '%s'",
+					log.Info(log.ContextCsv, fmt.Sprintf("skips record on relation '%s', no value set for required attribute '%s'",
 						rel.Name, atr.Name))
 
 					badNulls = true

@@ -58,7 +58,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Role, e
 			return roles, err
 		}
 
-		r.Captions, err = caption.Get_tx(ctx, tx, "role", r.Id, []string{"roleTitle", "roleDesc"})
+		r.Captions, err = caption.Get_tx(ctx, tx, schema.DbRole, r.Id, []string{"roleTitle", "roleDesc"})
 		if err != nil {
 			return roles, err
 		}
@@ -75,11 +75,12 @@ func getAccess_tx(ctx context.Context, tx pgx.Tx, role types.Role) (types.Role, 
 	role.AccessCollections = make(map[uuid.UUID]types.Access)
 	role.AccessRelations = make(map[uuid.UUID]types.Access)
 	role.AccessMenus = make(map[uuid.UUID]types.Access)
+	role.AccessSearchBars = make(map[uuid.UUID]types.Access)
 	role.AccessWidgets = make(map[uuid.UUID]types.Access)
 
 	rows, err := tx.Query(ctx, `
 		SELECT api_id, attribute_id, client_event_id, collection_id,
-			menu_id, relation_id, widget_id, access
+			menu_id, relation_id, search_bar_id, widget_id, access
 		FROM app.role_access
 		WHERE role_id = $1
 	`, role.Id)
@@ -89,11 +90,11 @@ func getAccess_tx(ctx context.Context, tx pgx.Tx, role types.Role) (types.Role, 
 	defer rows.Close()
 
 	for rows.Next() {
-		var apiId, attributeId, clientEventId, collectionId, menuId, relationId, widgetId pgtype.UUID
+		var apiId, attributeId, clientEventId, collectionId, menuId, relationId, searchBarId, widgetId pgtype.UUID
 		var access types.Access
 
 		if err := rows.Scan(&apiId, &attributeId, &clientEventId, &collectionId,
-			&menuId, &relationId, &widgetId, &access); err != nil {
+			&menuId, &relationId, &searchBarId, &widgetId, &access); err != nil {
 
 			return role, err
 		}
@@ -115,6 +116,9 @@ func getAccess_tx(ctx context.Context, tx pgx.Tx, role types.Role) (types.Role, 
 		if relationId.Valid {
 			role.AccessRelations[relationId.Bytes] = access
 		}
+		if searchBarId.Valid {
+			role.AccessSearchBars[searchBarId.Bytes] = access
+		}
 		if widgetId.Valid {
 			role.AccessWidgets[widgetId.Bytes] = access
 		}
@@ -131,7 +135,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, role types.Role) error {
 	// compatibility fix: missing role content <3.0
 	role = compatible.FixMissingRoleContent(role)
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &role.Id, "role", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &role.Id, schema.DbRole, "id")
 	if err != nil {
 		return err
 	}
@@ -179,37 +183,42 @@ func Set_tx(ctx context.Context, tx pgx.Tx, role types.Role) error {
 	}
 
 	for trgId, access := range role.AccessApis {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, "api", access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbApi, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessAttributes {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, "attribute", access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbAttribute, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessClientEvents {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, "client_event", access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbClientEvent, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessCollections {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, "collection", access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbCollection, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessMenus {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, "menu", access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbMenu, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessRelations {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, "relation", access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbRelation, access); err != nil {
+			return err
+		}
+	}
+	for trgId, access := range role.AccessSearchBars {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbSearchBar, access); err != nil {
 			return err
 		}
 	}
 	for trgId, access := range role.AccessWidgets {
-		if err := setAccess_tx(ctx, tx, role.Id, trgId, "widget", access); err != nil {
+		if err := setAccess_tx(ctx, tx, role.Id, trgId, schema.DbWidget, access); err != nil {
 			return err
 		}
 	}
@@ -218,35 +227,39 @@ func Set_tx(ctx context.Context, tx pgx.Tx, role types.Role) error {
 	return caption.Set_tx(ctx, tx, role.Id, role.Captions)
 }
 
-func setAccess_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity string, access types.Access) error {
+func setAccess_tx(ctx context.Context, tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity schema.DbEntity, access types.Access) error {
 
 	// check valid access levels
 	switch entity {
-	case "api": // 1 access API
+	case schema.DbApi: // 1 access API
 		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}
-	case "attribute": // 1 read, 2 write attribute value
+	case schema.DbAttribute: // 1 read, 2 write attribute value
 		if access < -1 || access > 2 {
 			return errors.New("invalid access level")
 		}
-	case "client_event": // 1 access client event
+	case schema.DbClientEvent: // 1 access client event
 		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}
-	case "collection": // 1 read collection
+	case schema.DbCollection: // 1 read collection
 		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}
-	case "menu": // 1 read (e. g. see) menu
+	case schema.DbMenu: // 1 read (e. g. see) menu
 		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}
-	case "relation": // 1 read, 2 write, 3 delete relation record
+	case schema.DbRelation: // 1 read, 2 write, 3 delete relation record
 		if access < -1 || access > 3 {
 			return errors.New("invalid access level")
 		}
-	case "widget": // 1 access widget
+	case schema.DbSearchBar: // 1 access search bar
+		if access < -1 || access > 1 {
+			return errors.New("invalid access level")
+		}
+	case schema.DbWidget: // 1 access widget
 		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}

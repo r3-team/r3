@@ -1,12 +1,11 @@
-import MyInputDate                 from '../inputDate.js';
-import MyInputOffset               from '../inputOffset.js';
-import {getLineBreaksParsedToHtml} from '../shared/generic.js';
-import {getUnixFormat}             from '../shared/time.js';
+import MyInputDateWrap from '../inputDateWrap.js';
+import MyInputOffset   from '../inputOffset.js';
+import {getUnixFormat} from '../shared/time.js';
 export {MyAdminLogs as default};
 
 let MyAdminLogs = {
 	name:'my-admin-logs',
-	components:{MyInputDate,MyInputOffset},
+	components:{MyInputDateWrap,MyInputOffset},
 	template:`<div class="contentBox admin-logs grow">
 		
 		<div class="top">
@@ -16,8 +15,12 @@ let MyAdminLogs = {
 			</div>
 		</div>
 		<div class="top lower">
-			<div class="area admin-logs-date-wrap">
-				<my-input-date
+			<div class="area nowrap default-inputs">
+				<my-button image="refresh.png"
+					@trigger="get"
+					:caption="capGen.button.refresh"
+				/>
+				<my-input-date-wrap class="long"
 					@set-unix-from="setDate($event,true)"
 					@set-unix-to="setDate($event,false)"
 					:isDate="true"
@@ -38,11 +41,6 @@ let MyAdminLogs = {
 				/>
 			</div>
 			<div class="area gap default-inputs">
-				<my-button image="refresh.png"
-					@trigger="get"
-					:captionTitle="capGen.button.refresh"
-					:naked="true"
-				/>
 				<input class="short"
 					v-model="byString"
 					@keyup.enter="offset = 0;get()"
@@ -166,8 +164,8 @@ let MyAdminLogs = {
 	data() {
 		return {
 			contextsValid:[
-				'module','api','backup','cache','cluster','csv','imager',
-				'ldap','mail','scheduler','server','transfer','websocket'
+				'module','api','backup','cache','cluster','csv','file','imager',
+				'ldap','oauth','mail','scheduler','server','transfer','websocket'
 			],
 			messageLengthShow:200,
 			
@@ -208,7 +206,6 @@ let MyAdminLogs = {
 	},
 	methods:{
 		// externals
-		getLineBreaksParsedToHtml,
 		getUnixFormat,
 		
 		getConfigLogContextName(context) {
@@ -232,6 +229,8 @@ let MyAdminLogs = {
 			return msg.length > this.messageLengthShow
 				? msg.substr(0,this.messageLengthShow)+'...' : msg;
 		},
+
+		// actions
 		setDate(unix,from) {
 			if(from) {
 				this.unixFrom = unix;
@@ -248,7 +247,7 @@ let MyAdminLogs = {
 		},
 		showMessage(index) {
 			this.$store.commit('dialog',{
-				captionBody:this.getLineBreaksParsedToHtml(this.logs[index].message),
+				captionBody:this.logs[index].message,
 				textDisplay:'textarea',
 				width:800
 			});

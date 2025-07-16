@@ -70,7 +70,7 @@ type QueryFilterSide struct {
 	QueryAggregator pgtype.Text `json:"queryAggregator"` // sub query aggregator (COUNT, AGG, etc.)
 
 	// for frontend processing
-	Content      string      `json:"content"`      // attribute, collection, field, language code, login, nowDate, nowDatetime, nowTime, preset, record, record new, role, sub query, true, value
+	Content      string      `json:"content"`      // attribute, collection, field, language code, login, nowDate, nowDatetime, nowTime, preset, record, record new, role, subQuery, true, value
 	CollectionId pgtype.UUID `json:"collectionId"` // collection ID of which column value to compare
 	ColumnId     pgtype.UUID `json:"columnId"`     // column ID from collection of which value to compare
 	FieldId      pgtype.UUID `json:"fieldId"`      // frontend field value

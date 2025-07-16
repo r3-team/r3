@@ -1,13 +1,7 @@
-import MyInputCollection  from './inputCollection.js';
-import MyForm             from './form.js';
-import MyValueRich        from './valueRich.js';
-import srcBase64Icon      from './shared/image.js';
-import {getChoiceFilters} from './shared/form.js';
-import {getCaption}       from './shared/language.js';
-import {
-	fieldOptionGet,
-	fieldOptionSet
-} from './shared/field.js';
+import MyInputCollection from './inputCollection.js';
+import MyForm            from './form.js';
+import srcBase64Icon     from './shared/image.js';
+import {getCaption}      from './shared/language.js';
 import {
 	checkDataOptions,
 	colorAdjustBg,
@@ -36,7 +30,6 @@ export {MyGantt as default};
 
 let MyGanttLineRecord = {
 	name:'my-gantt-line-record',
-	components:{MyValueRich},
 	template:
 	`<div class="gantt-line-record"
 		@click.ctrl.exact="clickRecord(true)"
@@ -60,6 +53,8 @@ let MyGanttLineRecord = {
 					:key="i"
 					:length="columns[i].length"
 					:monospace="columns[i].flags.monospace"
+					:noShrink="columns[i].flags.noShrink"
+					:noThousandsSep="columns[i].flags.noThousandsSep"
 					:value="v"
 				/>
 			</template>
@@ -182,8 +177,7 @@ let MyGantt = {
 	name:'my-gantt',
 	components:{
 		MyGanttLine,
-		MyInputCollection,
-		MyValueRich
+		MyInputCollection
 	},
 	template:`<div class="gantt" :class="{ isSingleField:isSingleField }" v-if="ready">
 		
@@ -200,7 +194,7 @@ let MyGantt = {
 					:captionTitle="capGen.button.newHint"
 				/>
 				<my-button
-					@trigger="showGroupLabels = !showGroupLabels"
+					@trigger="$emit('set-login-option','ganttShowGroupLabels',!showGroupLabels)"
 					:caption="!isMobile ? capApp.button.ganttShowLabels : ''"
 					:captionTitle="capApp.button.ganttShowLabelsHint"
 					:image="showGroupLabels ? 'visible1.png' : 'visible0.png'"
@@ -230,7 +224,7 @@ let MyGantt = {
 			<div class="area nowrap default-inputs">
 				<my-button
 					v-if="!isMobile && stepTypeToggle"
-					@trigger="toggleStepType"
+					@trigger="$emit('set-login-option','ganttStepType', stepType === 'days' ? 'hours' : 'days')"
 					:captionTitle="capApp.button.ganttToggleHint"
 					:image="isDays ? 'clock.png' : 'clock24.png'"
 					:naked="true"
@@ -238,14 +232,16 @@ let MyGantt = {
 				
 				<my-button image="search.png"
 					v-if="!isMobile"
-					@trigger="stepZoom = stepZoomDefault"
+					@trigger="$emit('set-login-option','ganttStepZoom',stepZoomDefault)"
+					:active="stepZoom !== stepZoomDefault"
 					:captionTitle="capGen.button.zoomReset"
 					:naked="true"
 				/>
 				
 				<input class="zoom-factor clickable" type="range" min="3" max="12"
 					v-if="!isMobile"
-					v-model="stepZoom"
+					@change="$emit('set-login-option','ganttStepZoom',parseInt($event.target.value))"
+					:value="stepZoom"
 				/>
 				
 				<my-input-collection class="selector"
@@ -261,8 +257,8 @@ let MyGantt = {
 				
 				<select class="selector"
 					v-if="hasChoices"
-					v-model="choiceId"
-					@change="choiceIdSet($event.target.value)"
+					:value="choiceId"
+					@change="$emit('set-login-option','choiceId',$event.target.value)"
 				>
 					<option v-for="c in choices" :value="c.id">
 						{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
@@ -299,6 +295,8 @@ let MyGantt = {
 								:key="c.index"
 								:length="columns[c.index].length"
 								:monospace="columns[c.index].flags.monospace"
+								:noShrink="columns[c.index].flags.noShrink"
+								:noThousandsSep="columns[c.index].flags.noThousandsSep"
 								:value="c.value"
 							/>
 						</div>
@@ -384,7 +382,6 @@ let MyGantt = {
 		collections:     { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		dataOptions:     { type:Number,  required:false, default:0 },
-		favoriteId:      { required:false, default:null },
 		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true }, // processed query filters
 		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
@@ -395,6 +392,7 @@ let MyGantt = {
 		indexDate1:      { type:Number,  required:true }, // index of attribute that provides record date to
 		isHidden:        { type:Boolean, required:false, default:false },
 		isSingleField:   { type:Boolean, required:false, default:false },
+		loginOptions:    { type:Object,  required:true },
 		moduleId:        { type:String,  required:true },
 		popUpFormInline: { required:false, default:null },
 		query:           { type:Object,  required:true },
@@ -402,10 +400,9 @@ let MyGantt = {
 		stepTypeToggle:  { type:Boolean, required:true },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['close-inline','open-form','set-args','set-collection-indexes'],
+	emits:['close-inline','open-form','set-args','set-collection-indexes','set-login-option'],
 	data() {
 		return {
-			choiceId:null,
 			dateStart:null,
 			notScrolled:true,
 			groups:[],              // gantt groups, by defined column, each with its lines of records
@@ -415,11 +412,8 @@ let MyGantt = {
 			page:0,                 // which page we are on (0: default, 1: next, -1: prev)
 			ready:false,            // component ready to be used
 			resizeTimer:null,
-			showGroupLabels:true,
 			startDate:0,            // start date (TZ), base for date ranges, set once to keep navigation clear
 			stepBase:8,             // base size of step width in pixels, used to multiply with zoom factor
-			stepType:'days',        // gantt step type (hours, days)
-			stepZoom:7,             // zoom factor for step, 7 is default (7*8=56)
 			stepZoomDefault:7,      // zoom reset to
 			steps:0,                // available steps, calculated based on field size and zoom factor
 			unixInput0:null,        // date input, start
@@ -505,7 +499,6 @@ let MyGantt = {
 		},
 		
 		// simple
-		choiceFilters:  (s) => s.getChoiceFilters(s.choices,s.choiceId),
 		expressions:    (s) => s.getQueryExpressions(s.columns),
 		hasChoices:     (s) => s.choices.length > 1,
 		hasColor:       (s) => s.attributeIdColor !== null,
@@ -517,6 +510,12 @@ let MyGantt = {
 		joins:          (s) => s.fillRelationRecordIds(s.query.joins),
 		stepPixels:     (s) => s.stepBase * s.stepZoom,
 		styleHeaderItem:(s) => `width:${s.stepPixels}px;`,
+
+		// login options
+		choiceId:       (s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		stepType:       (s) => s.$root.getOrFallback(s.loginOptions,'ganttStepType',s.stepTypeDefault), // gantt step type (hours, days)
+		stepZoom:       (s) => s.$root.getOrFallback(s.loginOptions,'ganttStepZoom',7),                 // zoom factor for step, 7 is default (7*8=56)
+		showGroupLabels:(s) => s.$root.getOrFallback(s.loginOptions,'ganttShowGroupLabels',true),
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -532,60 +531,45 @@ let MyGantt = {
 		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
-		this.stepType  = this.stepTypeDefault;
-		this.dateStart = this.getDateNowRounded();
-		
 		// setup watchers
 		this.$watch('appResized',this.resized);
+		this.$watch('columns',() => { this.groups = []; });
+		this.$watch('formLoading',v => { if(!v) this.get(); });
+		this.$watch('isHidden',v => { if(!v) this.$nextTick(() => this.setSteps(true)); });
 		this.$watch('popUpFormInline',this.resized);
-		this.$watch('columns',(valOld,valNew) => {
-			if(JSON.stringify(valOld) !== JSON.stringify(valNew))
-				this.reset();
-		});
-		this.$watch('favoriteId',(val) => {
-			this.reloadOptions();
-		});
-		this.$watch('formLoading',(val) => {
-			if(!val) this.reloadOutside();
-		});
-		this.$watch('isHidden',(val) => {
-			// if field is hidden, steps cannot be calculated
-			if(!val) this.$nextTick(() => this.setSteps(true));
+		this.$watch('stepType',() => {
+			this.page = 0;
+			this.paramsUpdate(true);
+			this.$nextTick(() => this.setSteps(true));
 		});
 		this.$watch(() => [this.choices,this.filters],(newVals, oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
 				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
-					return this.reloadOutside();
+					return this.get();
 			}
+		});
+		this.$watch(() => [this.showGroupLabels,this.stepZoom],() => {
+			this.$nextTick(() => this.setSteps(false));
 		});
 		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
-				if(this.routeChangeFieldReload(newVals,oldVals)) {
-					this.paramsUpdated();
-					this.reloadOutside();
-				}
+				if(this.routeChangeFieldReload(newVals,oldVals))
+					this.paramsUpdated(true);
 			});
+
+			// load initial route parameters
+			this.paramsUpdated(false);
 		}
-		
-		// setup watchers for presentation changes
-		this.$watch(() => [this.showGroupLabels,this.stepZoom],() => {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'ganttStepZoom',this.stepZoom);
-			this.$nextTick(() => this.setSteps(false));
-		});
-		
-		this.reloadOptions();
-		this.ready = true;
+
+		this.dateStart = this.getDateNowRounded();
+		this.ready     = true;
 		this.$nextTick(() => this.setSteps(false));
 	},
 	methods:{
 		// external
 		checkDataOptions,
-		fieldOptionGet,
-		fieldOptionSet,
 		fillRelationRecordIds,
 		getCaption,
-		getChoiceFilters,
 		getDateFormat,
 		getDateFromUnix,
 		getQueryExpressions,
@@ -665,11 +649,6 @@ let MyGantt = {
 		},
 		
 		// actions
-		choiceIdSet(choiceId) {
-			this.fieldOptionSet(this.favoriteId,this.fieldId,'choiceId',choiceId);
-			this.choiceId = choiceId;
-			this.reloadInside();
-		},
 		clickHeaderItem(unix,mousedown) {
 			if(!this.hasCreate) return;
 			
@@ -698,7 +677,8 @@ let MyGantt = {
 		},
 		pageChange(factor) {
 			this.page += factor;
-			this.reloadInside();
+			this.paramsUpdate(true);
+			this.get();
 		},
 		resized() {
 			clearTimeout(this.resizeTimer);
@@ -717,68 +697,21 @@ let MyGantt = {
 			
 			this.$refs.content.scrollLeft = this.pxPerSec * secFromStart;
 		},
-		toggleStepType() {
-			switch(this.stepType) {
-				case 'hours': this.stepType = 'days';  break;
-				case 'days':  this.stepType = 'hours'; break;
-			}
-			this.reloadInside();
-		},
-		
-		// reloads
-		reloadOptions() {
-			this.choiceId        = this.fieldOptionGet(this.favoriteId,this.fieldId,'choiceId',this.choices.length === 0 ? null : this.choices[0].id);
-			this.showGroupLabels = this.fieldOptionGet(this.favoriteId,this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
-			this.stepZoom        = this.fieldOptionGet(this.favoriteId,this.fieldId,'ganttStepZoom',this.stepZoom);
-			
-			if(this.usesPageHistory) {
-				// set initial states via route parameters
-				this.paramsUpdated();     // load existing parameters from route query
-				this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
-			}
-		},
-		reloadOutside() {
-			this.createHeaderItems();
-			this.get();
-		},
-		reloadInside() {
-			// reload full page gantt by updating route parameters
-			// enables browser history for fullpage list navigation
-			if(this.usesPageHistory)
-				return this.paramsUpdate(true);
-			
-			this.createHeaderItems();
-			this.get();
-		},
-		reset() {
-			this.groups = [];
-		},
 		
 		// page routing
 		paramsUpdate(pushHistory) {
-			let args = [
-				`page=${this.page}`,
-				`type=${this.stepType}`
-			];
-			
-			if(this.choiceId !== null)
-				args.push(`choice=${this.choiceId}`);
-			
-			this.$emit('set-args',args,pushHistory);
+			if(this.usesPageHistory)
+				this.$emit('set-args',this.page !== 0 ? [`page=${this.page}`] : [],pushHistory);
 		},
-		paramsUpdated() {
-			let params = {
-				choice:{ parse:'string', value:this.choiceId },
-				page:  { parse:'int',    value:0 },
-				type:  { parse:'string', value:this.stepTypeDefault }
-			};
-			
+		paramsUpdated(reloadIfChanged) {
+			let params = { page:{ parse:'int', value:0 } };
 			this.routeParseParams(params);
-			this.page     = params.page.value;
-			this.stepType = params.type.value;
-			
-			if(this.choiceId !== params.choice.value)
-				this.choiceId = params.choice.value;
+			if(this.page !== params.page.value) {
+				this.page = params.page.value;
+
+				if(reloadIfChanged)
+					this.get();
+			}
 		},
 		
 		// presentation
@@ -791,7 +724,7 @@ let MyGantt = {
 		},
 		setSteps(forceReload) {
 			// get count of steps that fit within Gantt content
-			let stepsNew = Math.floor(
+			const stepsNew = Math.floor(
 				this.$refs.content.offsetWidth /
 				(this.stepBase * this.stepZoom)
 			);
@@ -800,7 +733,7 @@ let MyGantt = {
 				return;
 			
 			this.steps = stepsNew;
-			this.reloadOutside();
+			this.get();
 		},
 		styleLabel(group) {
 			return `height:${group.lines.length*this.linePixels}px;`;
@@ -849,6 +782,8 @@ let MyGantt = {
 			if(this.formLoading || this.isHidden)
 				return;
 			
+			this.createHeaderItems();
+
 			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.joins),
@@ -858,13 +793,10 @@ let MyGantt = {
 					this.attributeIdColor,this.indexColor
 				).concat(this.expressions),
 				filters:this.filters.concat(this.getQueryFiltersDateRange(
-					this.attributeIdDate0,
-					this.indexDate0,
-					this.getUnixFromDate(this.date0),
-					this.attributeIdDate1,
-					this.indexDate1,
-					this.getUnixFromDate(this.date1)
-				)).concat(this.choiceFilters),
+					true,
+					this.attributeIdDate0,this.indexDate0,this.getUnixFromDate(this.date0),
+					this.attributeIdDate1,this.indexDate1,this.getUnixFromDate(this.date1)
+				)),
 				orders:this.query.orders
 			},true).then(
 				res => {

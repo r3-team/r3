@@ -101,11 +101,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID) ([
 
 	// collect query and columns
 	for i, a := range apis {
-		a.Query, err = query.Get_tx(ctx, tx, "api", a.Id, 0, 0, 0)
+		a.Query, err = query.Get_tx(ctx, tx, schema.DbApi, a.Id, 0, 0, 0)
 		if err != nil {
 			return apis, err
 		}
-		a.Columns, err = column.Get_tx(ctx, tx, "api", a.Id)
+		a.Columns, err = column.Get_tx(ctx, tx, schema.DbApi, a.Id)
 		if err != nil {
 			return apis, err
 		}
@@ -120,7 +120,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, api types.Api) error {
 		return err
 	}
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &api.Id, "api", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &api.Id, schema.DbApi, "id")
 	if err != nil {
 		return err
 	}
@@ -148,8 +148,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, api types.Api) error {
 			return err
 		}
 	}
-	if err := query.Set_tx(ctx, tx, "api", api.Id, 0, 0, 0, api.Query); err != nil {
+	if err := query.Set_tx(ctx, tx, schema.DbApi, api.Id, 0, 0, 0, api.Query); err != nil {
 		return err
 	}
-	return column.Set_tx(ctx, tx, "api", api.Id, api.Columns)
+	return column.Set_tx(ctx, tx, schema.DbApi, api.Id, api.Columns)
 }

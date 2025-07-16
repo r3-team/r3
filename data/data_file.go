@@ -1,6 +1,7 @@
 package data
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -61,7 +62,8 @@ func GetFilePathVersion(fileId uuid.UUID, version int64) string {
 }
 
 // attempts to store file upload
-func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId uuid.UUID, part *multipart.Part, isNewFile bool) error {
+func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
+	fileSourcePart *multipart.Part, fileSourcePath pgtype.Text, fileSourceString pgtype.Text, isNewFile bool) error {
 
 	cache.Schema_mx.RLock()
 	attribute, exists := cache.AttributeIdMap[attributeId]
@@ -71,7 +73,8 @@ func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId u
 	}
 	cache.Schema_mx.RUnlock()
 
-	if !authorizedAttribute(loginId, attributeId, types.AccessWrite) {
+	// check for access permissions, unless it´s a system task (login ID = -1)
+	if loginId != -1 && !authorizedAttribute(loginId, attributeId, types.AccessWrite) {
 		return errors.New(handler.ErrUnauthorized)
 	}
 
@@ -100,19 +103,63 @@ func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId u
 		return err
 	}
 
-	// write file
+	fileName := ""
 	filePath := GetFilePathVersion(fileId, version)
-	dest, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
 
-	if _, err := io.Copy(dest, part); err != nil {
-		dest.Close()
-		return err
-	}
-	if err := dest.Close(); err != nil {
-		return err
+	// move/copy file from its source to its final target file path
+	if fileSourcePart != nil {
+
+		// write file from multipart form
+		file, err := os.Create(filePath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		if _, err := io.Copy(file, fileSourcePart); err != nil {
+			return err
+		}
+		if err := file.Close(); err != nil {
+			return err
+		}
+		fileName = fileSourcePart.FileName()
+
+	} else if fileSourcePath.Valid {
+
+		// move file from file path
+		stat, err := os.Stat(fileSourcePath.String)
+		if err != nil {
+			return err
+		}
+		if stat.IsDir() {
+			return fmt.Errorf("file path '%s' is a directory", fileSourcePath.String)
+		}
+		if err := tools.FileMove(fileSourcePath.String, filePath, false); err != nil {
+			return err
+		}
+		fileName = filepath.Base(fileSourcePath.String)
+
+	} else if fileSourceString.Valid {
+
+		// write file from string
+		file, err := os.Create(filePath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		bufWriter := bufio.NewWriter(file)
+		if _, err := bufWriter.WriteString(fileSourceString.String); err != nil {
+			return err
+		}
+		if err := bufWriter.Flush(); err != nil {
+			return err
+		}
+		if err := file.Close(); err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("failed to set file, no file source defined")
 	}
 
 	// check size
@@ -133,7 +180,7 @@ func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId u
 	}
 
 	// create/update thumbnail - failure should not block progress
-	data_image.CreateThumbnail(fileId, filepath.Ext(part.FileName()), filePath,
+	data_image.CreateThumbnail(fileId, filepath.Ext(fileName), filePath,
 		GetFilePathThumb(fileId), false)
 
 	// store file meta data in database
@@ -143,9 +190,8 @@ func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId u
 	}
 	defer tx.Rollback(ctx)
 
-	if err := FileApplyVersion_tx(ctx, tx, isNewFile, attributeId,
-		attribute.RelationId, fileId, hash, part.FileName(),
-		fileSizeKb, version, recordIds, loginId); err != nil {
+	if err := FileApplyVersion_tx(ctx, tx, isNewFile, attributeId, attribute.RelationId,
+		fileId, hash, fileName, fileSizeKb, version, recordIds, loginId); err != nil {
 
 		return err
 	}

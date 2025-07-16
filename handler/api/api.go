@@ -47,7 +47,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		if errToLog == nil {
 			errToLog = errors.New(errMsgUser)
 		}
-		handler.AbortRequestWithCode(w, "api", httpCode, errToLog, errMsgUser)
+		handler.AbortRequestWithCode(w, handler.ContextApi, httpCode, errToLog, errMsgUser)
 	}
 
 	ctx, ctxCanc := context.WithTimeout(context.Background(),
@@ -55,11 +55,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	defer ctxCanc()
 
-	// check token
-	var loginId int64
-	var admin bool
-	var noAuth bool
-	_, languageCode, err := login_auth.Token(ctx, token, &loginId, &admin, &noAuth)
+	// authenticate via token
+	login, err := login_auth.Token(ctx, token)
 	if err != nil {
 		abort(http.StatusUnauthorized, err, handler.ErrUnauthorized)
 		bruteforce.BadAttempt(r)
@@ -123,7 +120,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// URL processing complete, actually use API
-	log.Info("api", fmt.Sprintf("'%s.%s' (v%d) is called with %s (record ID: %d)",
+	log.Info(log.ContextApi, fmt.Sprintf("'%s.%s' (v%d) is called with %s (record ID: %d)",
 		modName, apiName, version, r.Method, recordId))
 
 	// resolve API by module+API names
@@ -151,7 +148,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check role access
-	access, err := cache.GetAccessById(loginId)
+	access, err := cache.GetAccessById(login.Id)
 	if err != nil {
 		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
 		return
@@ -203,9 +200,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get valid module language code (for captions)
-	languageCodeModule := languageCode
+	languageCodeModule := login.LanguageCode
 	mod := cache.ModuleIdMap[api.ModuleId]
-	if !slices.Contains(mod.Languages, languageCode) {
+	if !slices.Contains(mod.Languages, login.LanguageCode) {
 		languageCodeModule = mod.LanguageMain
 	}
 
@@ -217,7 +214,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback(ctx)
 
-	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+	if err := db.SetSessionConfig_tx(ctx, tx, login.Id); err != nil {
 		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
 		return
 	}
@@ -294,7 +291,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			for _, id := range relationIndexMapRecordIds[join.Index] {
-				if err := data.Del_tx(ctx, tx, join.RelationId, id, loginId); err != nil {
+				if err := data.Del_tx(ctx, tx, join.RelationId, id, login.Id); err != nil {
 					abort(http.StatusConflict, nil, err.Error())
 					return
 				}
@@ -337,12 +334,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		// build expressions from columns
 		for _, column := range api.Columns {
 			dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertColumnToExpression(
-				column, loginId, languageCode, getters.filters))
+				column, login.Id, login.LanguageCode, getters.filters))
 		}
 
 		// apply filters
 		dataGet.Filters = data_query.ConvertQueryToDataFilter(
-			api.Query.Filters, loginId, languageCode, getters.filters)
+			api.Query.Filters, login.Id, login.LanguageCode, getters.filters)
 
 		// add record filter
 		if recordId != 0 {
@@ -365,7 +362,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		// get data
 		var query string
-		results, _, err := data.Get_tx(ctx, tx, dataGet, loginId, &query)
+		results, _, err := data.Get_tx(ctx, tx, dataGet, login.Id, &query)
 		if err != nil {
 			if err.Error() == handler.ErrUnauthorized {
 				abort(http.StatusUnauthorized, err, handler.ErrUnauthorized)
@@ -505,7 +502,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		indexRecordIds, err := data_import.FromInterfaceValues_tx(ctx, tx,
-			loginId, values, api.Columns, api.Query.Joins, api.Query.Lookups,
+			login.Id, values, api.Columns, api.Query.Joins, api.Query.Lookups,
 			data_import.ResolveQueryLookups(api.Query.Joins, api.Query.Lookups))
 
 		if err != nil {

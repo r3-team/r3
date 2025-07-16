@@ -55,8 +55,6 @@ var (
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024}
 
-	handlerContext = "websocket"
-
 	hub = hubType{
 		clients:   make(map[*clientType]bool),
 		clientAdd: make(chan *clientType),
@@ -87,21 +85,21 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// get client host address
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextWebsocket, err, handler.ErrGeneral)
 		return
 	}
 
 	// create unique client ID for session tracking
 	clientId, err := uuid.NewV4()
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextWebsocket, err, handler.ErrGeneral)
 		return
 	}
 
 	// upgrade to websocket
 	ws, err := clientUpgrader.Upgrade(w, r, nil)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextWebsocket, err, handler.ErrGeneral)
 		return
 	}
 
@@ -147,15 +145,15 @@ func (hub *hubType) start() {
 		delete(hub.clients, client)
 
 		if wasKicked {
-			log.Info(handlerContext, fmt.Sprintf("kicked client (login ID %d) at %s", client.loginId, client.address))
+			log.Info(log.ContextWebsocket, fmt.Sprintf("kicked client (login ID %d) at %s", client.loginId, client.address))
 		} else {
-			log.Info(handlerContext, fmt.Sprintf("disconnected client (login ID %d) at %s", client.loginId, client.address))
+			log.Info(log.ContextWebsocket, fmt.Sprintf("disconnected client (login ID %d) at %s", client.loginId, client.address))
 		}
 
 		go func() {
 			// run DB calls in async func as they must not block hub operations during heavy DB load
 			if err := login_session.LogRemove(client.id); err != nil {
-				log.Error(handlerContext, "failed to remove login session log", err)
+				log.Error(log.ContextWebsocket, "failed to remove login session log", err)
 			}
 		}()
 	}
@@ -211,7 +209,7 @@ func (hub *hubType) start() {
 			}
 
 			if err != nil {
-				log.Error(handlerContext, "could not prepare unrequested transaction", err)
+				log.Error(log.ContextWebsocket, "could not prepare unrequested transaction", err)
 				continue
 			}
 
@@ -300,11 +298,11 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 	// umarshal user input, this can always fail (never trust user input)
 	if err := json.Unmarshal(reqTransJson, &reqTrans); err != nil {
-		log.Error(handlerContext, "failed to unmarshal transaction", err)
+		log.Error(log.ContextWebsocket, "failed to unmarshal transaction", err)
 		return []byte("{}")
 	}
 
-	log.Info(handlerContext, fmt.Sprintf("TRANSACTION %d, started by login ID %d (%s)",
+	log.Info(log.ContextWebsocket, fmt.Sprintf("TRANSACTION %d, started by login ID %d (%s)",
 		reqTrans.TransactionNr, client.loginId, client.address))
 
 	// take over transaction number for response so client can match it locally
@@ -343,32 +341,34 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		}
 
 	} else {
-		// execute authentication request
-		var req = reqTrans.Requests[0]
-		resTrans.Responses = make([]types.Response, 0)
-
 		if blocked := bruteforce.CheckByHost(client.address); blocked {
 			hub.clientDel <- client
 			return []byte("{}")
 		}
 
+		// execute authentication request
 		var err error
-		var resPayload interface{}
+		var login types.LoginAuthResult
+		var req = reqTrans.Requests[0]
+		resTrans.Responses = make([]types.Response, 0)
 
 		switch req.Action {
+		case "openId": // authentication via Open ID Connect
+			login, err = request.LoginAuthOpenId(ctx, req.Payload)
+
 		case "token": // authentication via JSON web token
-			resPayload, err = request.LoginAuthToken(ctx, req.Payload, &client.loginId, &client.admin, &client.noAuth)
+			login, err = request.LoginAuthToken(ctx, req.Payload)
 
 		case "tokenFixed": // authentication via fixed token (fat-client only)
-			resPayload, err = request.LoginAuthTokenFixed(ctx, req.Payload, &client.loginId)
+			login, err = request.LoginAuthTokenFixed(ctx, req.Payload)
 			client.device = types.WebsocketClientDeviceFatClient
 
-		case "user": // authentication via credentials
-			resPayload, err = request.LoginAuthUser(ctx, req.Payload, &client.loginId, &client.admin, &client.noAuth)
+		case "user": // authentication via username + password (+ MFA if used)
+			login, err = request.LoginAuthUser(ctx, req.Payload)
 		}
 
 		if err != nil {
-			log.Warning(handlerContext, "failed to authenticate user", err)
+			log.Warning(log.ContextWebsocket, "failed to authenticate user", err)
 			bruteforce.BadAttemptByHost(client.address)
 
 			if handler.CheckForLicenseErrCode(err) {
@@ -380,10 +380,15 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 			}
 		} else {
 			var res types.Response
-			res.Payload, err = json.Marshal(resPayload)
+			res.Payload, err = json.Marshal(login)
 			if err != nil {
 				resTrans.Error = handler.ErrGeneral
 			} else {
+				// everything in order, grant login ID, admin & noAuth states
+				client.loginId = login.Id
+				client.admin = login.Admin
+				client.noAuth = login.NoAuth
+
 				resTrans.Responses = append(resTrans.Responses, res)
 			}
 		}
@@ -391,10 +396,10 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		// authentication can return with no error but incomplete if MFA is on but 2nd factor not provided yet
 		//  in this case the login ID is still 0
 		if resTrans.Error == "" && client.loginId != 0 {
-			log.Info(handlerContext, fmt.Sprintf("authenticated client (login ID %d, admin: %v)", client.loginId, client.admin))
+			log.Info(log.ContextWebsocket, fmt.Sprintf("authenticated client (login ID %d, admin: %v)", client.loginId, client.admin))
 
 			if err := login_session.Log(client.id, client.loginId, client.address, client.device); err != nil {
-				log.Error(handlerContext, "failed to create login session log", err)
+				log.Error(log.ContextWebsocket, "failed to create login session log", err)
 			}
 		}
 	}
@@ -402,7 +407,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 	// marshal response transaction
 	resTransJson, err := json.Marshal(resTrans)
 	if err != nil {
-		log.Error(handlerContext, "cannot marshal responses", err)
+		log.Error(log.ContextWebsocket, "cannot marshal responses", err)
 		return []byte("{}")
 	}
 	return resTransJson
@@ -411,7 +416,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 func processReturnErr(err error, isAdmin bool, loginId int64, transNr uint64) error {
 	returnErr, isExpected := handler.ConvertToErrCode(err, !isAdmin)
 	if !isExpected {
-		log.Warning(handlerContext, fmt.Sprintf("TRANSACTION %d failure (login ID %d)", transNr, loginId), err)
+		log.Warning(log.ContextWebsocket, fmt.Sprintf("TRANSACTION %d failure (login ID %d)", transNr, loginId), err)
 	}
 	return returnErr
 }

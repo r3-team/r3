@@ -58,7 +58,7 @@ func CheckRenewCert() error {
 	}
 
 	if file.ModTime().Unix() != certUnixMod {
-		log.Info("server", fmt.Sprintf("loading HTTP server certificate from '%s'", certPath))
+		log.Info(log.ContextServer, fmt.Sprintf("loading HTTP server certificate from '%s'", certPath))
 
 		cert, err = tls.LoadX509KeyPair(certPath, certPathKey)
 		if err != nil {

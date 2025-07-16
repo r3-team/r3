@@ -125,8 +125,7 @@ func FileCopy(src string, dst string, copyModTime bool) error {
 
 		// in case of copy error, try to delete target file
 		out.Close()
-		_ = os.Remove(dst)
-
+		os.Remove(dst)
 		return err
 	}
 	if err := out.Sync(); err != nil {
@@ -145,11 +144,7 @@ func FileCopy(src string, dst string, copyModTime bool) error {
 	if err != nil {
 		return err
 	}
-
-	if err := os.Chtimes(dst, fileInfo.ModTime(), fileInfo.ModTime()); err != nil {
-		return err
-	}
-	return nil
+	return os.Chtimes(dst, fileInfo.ModTime(), fileInfo.ModTime())
 }
 
 func Exists(path string) (bool, error) {

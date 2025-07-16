@@ -9,28 +9,24 @@ import (
 	"time"
 )
 
-var (
-	handlerContext = "cache_download"
-)
-
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// parse getters
 	moduleId, err := handler.ReadUuidGetterFromUrl(r, "module_id")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCacheDownload, err, handler.ErrGeneral)
 		return
 	}
 	dateChange, err := handler.ReadInt64GetterFromUrl(r, "date")
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCacheDownload, err, handler.ErrGeneral)
 		return
 	}
 
 	// load JSON cache for requested module
 	json, err := cache.GetModuleCacheJson(moduleId)
 	if err != nil {
-		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextCacheDownload, err, handler.ErrGeneral)
 		return
 	}
 

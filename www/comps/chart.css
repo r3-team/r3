@@ -1,0 +1,8 @@
+.chart{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:column nowrap;
+	background-color:var(--color-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
+}

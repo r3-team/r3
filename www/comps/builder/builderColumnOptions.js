@@ -68,6 +68,32 @@ let MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr>
+					<td>{{ capApp.columnSize }}</td>
+					<td>
+						<input
+							v-if="column.basis !== 0"
+							@change="setInt('basis',$event.target.value,false)"
+							:value="column.basis"
+						/>
+						<my-button
+							v-else
+							@trigger="setInt('basis',25,false)"
+							:caption="capApp.columnSize0"
+							:naked="true"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capGen.alignment }}</td>
+					<td>
+						<select v-model="alignment">
+							<option value="def">{{ capGen.alignmentHor.left }}</option>
+							<option value="mid">{{ capGen.alignmentHor.center }}</option>
+							<option value="end">{{ capGen.alignmentHor.right }}</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
 					<td>{{ capGen.options }}</td>
 					<td>
 						<div class="row gap wrap" style="max-width:300px;">
@@ -108,33 +134,18 @@ let MyBuilderColumnOptions = {
 								:caption="capApp.columnBoolAtrIcon"
 								:modelValue="column.styles.includes('boolAtrIcon')"
 							/>
+							<my-button-check
+								@update:modelValue="setStyle('noShrink',$event)"
+								:caption="capApp.columnNoShrink"
+								:modelValue="column.styles.includes('noShrink')"
+							/>
+							<my-button-check
+								v-if="isInteger"
+								@update:modelValue="setStyle('noThousandsSep',$event)"
+								:caption="capApp.columnNoThousandsSep"
+								:modelValue="column.styles.includes('noThousandsSep')"
+							/>
 						</div>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capGen.alignment }}</td>
-					<td>
-						<select v-model="alignment">
-							<option value="def">{{ capGen.alignmentHor.left }}</option>
-							<option value="mid">{{ capGen.alignmentHor.center }}</option>
-							<option value="end">{{ capGen.alignmentHor.right }}</option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.columnSize }}</td>
-					<td>
-						<input
-							v-if="column.basis !== 0"
-							@change="setInt('basis',$event.target.value,false)"
-							:value="column.basis"
-						/>
-						<my-button
-							v-else
-							@trigger="setInt('basis',25,false)"
-							:caption="capApp.columnSize0"
-							:naked="true"
-						/>
 					</td>
 				</tr>
 				<tr v-if="!isDrawing && !isUuid && !isColor">

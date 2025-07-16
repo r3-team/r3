@@ -155,19 +155,21 @@ func SetLicense(l types.License) {
 	license = l
 }
 func SetLogLevels() {
-	log.SetLogLevel("api", int(GetUint64("logApi")))
-	log.SetLogLevel("backup", int(GetUint64("logBackup")))
-	log.SetLogLevel("cache", int(GetUint64("logCache")))
-	log.SetLogLevel("cluster", int(GetUint64("logCluster")))
-	log.SetLogLevel("csv", int(GetUint64("logCsv")))
-	log.SetLogLevel("imager", int(GetUint64("logImager")))
-	log.SetLogLevel("ldap", int(GetUint64("logLdap")))
-	log.SetLogLevel("mail", int(GetUint64("logMail")))
-	log.SetLogLevel("module", int(GetUint64("logModule")))
-	log.SetLogLevel("scheduler", int(GetUint64("logScheduler")))
-	log.SetLogLevel("server", int(GetUint64("logServer")))
-	log.SetLogLevel("transfer", int(GetUint64("logTransfer")))
-	log.SetLogLevel("websocket", int(GetUint64("logWebsocket")))
+	log.SetLogLevel(log.ContextApi, int(GetUint64("logApi")))
+	log.SetLogLevel(log.ContextBackup, int(GetUint64("logBackup")))
+	log.SetLogLevel(log.ContextCache, int(GetUint64("logCache")))
+	log.SetLogLevel(log.ContextCluster, int(GetUint64("logCluster")))
+	log.SetLogLevel(log.ContextCsv, int(GetUint64("logCsv")))
+	log.SetLogLevel(log.ContextFile, int(GetUint64("logFile")))
+	log.SetLogLevel(log.ContextImager, int(GetUint64("logImager")))
+	log.SetLogLevel(log.ContextLdap, int(GetUint64("logLdap")))
+	log.SetLogLevel(log.ContextMail, int(GetUint64("logMail")))
+	log.SetLogLevel(log.ContextModule, int(GetUint64("logModule")))
+	log.SetLogLevel(log.ContextOauth, int(GetUint64("logOauth")))
+	log.SetLogLevel(log.ContextScheduler, int(GetUint64("logScheduler")))
+	log.SetLogLevel(log.ContextServer, int(GetUint64("logServer")))
+	log.SetLogLevel(log.ContextTransfer, int(GetUint64("logTransfer")))
+	log.SetLogLevel(log.ContextWebsocket, int(GetUint64("logWebsocket")))
 }
 func SetInstanceIdIfEmpty_tx(ctx context.Context, tx pgx.Tx) error {
 	if GetString("instanceId") != "" {

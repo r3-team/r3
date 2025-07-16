@@ -1,7 +1,7 @@
 export {MyButtonCheck};
 export {MyButton as default};
 
-let MyButton = {
+const MyButton = {
 	name:'my-button',
 	template:`<div class="button" data-is-input="1"
 		@click.ctrl.exact ="triggerMiddle"
@@ -63,6 +63,7 @@ let MyButton = {
 		// style props
 		adjusts:{ type:Boolean, required:false, default:false }, // adjusts its length to avail. space (text is ellipsed if too small)
 		cancel: { type:Boolean, required:false, default:false },
+		darkBg: { type:Boolean, required:false, default:false },
 		large:  { type:Boolean, required:false, default:false },
 		naked:  { type:Boolean, required:false, default:false }
 	},
@@ -74,6 +75,7 @@ let MyButton = {
 				background:!s.naked,
 				cancel:s.cancel,
 				clickable:s.active,
+				darkBg:s.darkBg,
 				large:s.large,
 				naked:s.naked
 			};
@@ -121,14 +123,14 @@ let MyButton = {
 	}
 };
 
-let MyButtonCheck = {
+const MyButtonCheck = {
 	name:'my-button-check',
 	template:`<my-button
 		@trigger="$emit('update:modelValue',!modelValue)"
 		:active="!readonly"
 		:caption="caption"
 		:captionTitle="captionTitle"
-		:image="image"
+		:image="(reversed ? !modelValue : modelValue) ? 'checkbox1.png' : 'checkbox0.png'"
 		:naked="true"
 	/>`,
 	props:{
@@ -138,11 +140,5 @@ let MyButtonCheck = {
 		readonly:    { type:Boolean, required:false, default:false },
 		reversed:    { type:Boolean, required:false, default:false }
 	},
-	emits:['update:modelValue'],
-	computed:{
-		image:(s) => {
-			const v = s.reversed ? !s.modelValue : s.modelValue;
-			return v ? 'checkbox1.png' : 'checkbox0.png';
-		}
-	}
+	emits:['update:modelValue']
 };

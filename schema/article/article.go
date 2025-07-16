@@ -11,9 +11,9 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Assign_tx(ctx context.Context, tx pgx.Tx, target string, targetId uuid.UUID, articleIds []uuid.UUID) error {
+func Assign_tx(ctx context.Context, tx pgx.Tx, target schema.DbEntity, targetId uuid.UUID, articleIds []uuid.UUID) error {
 	switch target {
-	case "form":
+	case schema.DbForm:
 		if _, err := tx.Exec(ctx, `
 			DELETE FROM app.article_form
 			WHERE form_id = $1
@@ -28,7 +28,7 @@ func Assign_tx(ctx context.Context, tx pgx.Tx, target string, targetId uuid.UUID
 				return err
 			}
 		}
-	case "module":
+	case schema.DbModule:
 		if _, err := tx.Exec(ctx, `
 			DELETE FROM app.article_help
 			WHERE module_id = $1
@@ -82,7 +82,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Article
 	}
 
 	for i, a := range articles {
-		articles[i].Captions, err = caption.Get_tx(ctx, tx, "article", a.Id, []string{"articleBody", "articleTitle"})
+		articles[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbArticle, a.Id, []string{"articleBody", "articleTitle"})
 		if err != nil {
 			return articles, err
 		}
@@ -96,7 +96,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, na
 		return errors.New("missing name")
 	}
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &id, "article", "id")
+	known, err := schema.CheckCreateId_tx(ctx, tx, &id, schema.DbArticle, "id")
 	if err != nil {
 		return err
 	}

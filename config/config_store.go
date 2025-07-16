@@ -32,13 +32,13 @@ var (
 		"dbTimeoutDataWs", "dbTimeoutIcs", "filesKeepDaysDeleted",
 		"fileVersionsKeepCount", "fileVersionsKeepDays", "icsDaysPost",
 		"icsDaysPre", "icsDownload", "imagerThumbWidth", "logApi", "logBackup",
-		"logCache", "logCluster", "logCsv", "logImager", "logLdap", "logMail",
-		"logModule", "logServer", "logScheduler", "logTransfer", "logWebsocket",
-		"logsKeepDays", "mailTrafficKeepDays", "productionMode", "pwForceDigit",
-		"pwForceLower", "pwForceSpecial", "pwForceUpper", "pwLengthMin",
-		"repoChecked", "repoFeedback", "repoSkipVerify", "systemMsgDate0",
-		"systemMsgDate1", "systemMsgMaintenance", "tokenExpiryHours",
-		"tokenKeepEnable"}
+		"logCache", "logCluster", "logCsv", "logFile", "logImager", "logLdap",
+		"logMail", "logModule", "logOauth", "logServer", "logScheduler",
+		"logTransfer", "logWebsocket", "logsKeepDays", "mailTrafficKeepDays",
+		"productionMode", "pwForceDigit", "pwForceLower", "pwForceSpecial",
+		"pwForceUpper", "pwLengthMin", "repoChecked", "repoFeedback",
+		"repoSkipVerify", "systemMsgDate0", "systemMsgDate1",
+		"systemMsgMaintenance", "tokenExpiryHours", "tokenKeepEnable"}
 
 	NamesUint64Slice = []string{"loginBackgrounds"}
 )
@@ -94,7 +94,7 @@ func GetString(name string) string {
 	defer access_mx.RUnlock()
 
 	if _, exists := storeString[name]; !exists {
-		log.Error("server", "configuration store get error",
+		log.Error(log.ContextServer, "configuration store get error",
 			fmt.Errorf("string value '%s' does not exist", name))
 
 		return ""
@@ -106,7 +106,7 @@ func GetUint64(name string) uint64 {
 	defer access_mx.RUnlock()
 
 	if _, exists := storeUint64[name]; !exists {
-		log.Error("server", "configuration store get error",
+		log.Error(log.ContextServer, "configuration store get error",
 			fmt.Errorf("uint64 value '%s' does not exist", name))
 
 		return 0
@@ -118,7 +118,7 @@ func GetUint64Slice(name string) []uint64 {
 	defer access_mx.RUnlock()
 
 	if _, exists := storeUint64Slice[name]; !exists {
-		log.Error("server", "configuration store get error",
+		log.Error(log.ContextServer, "configuration store get error",
 			fmt.Errorf("uint64 slice value '%s' does not exist", name))
 
 		return make([]uint64, 0)

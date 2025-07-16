@@ -24,7 +24,7 @@ import {
 
 export {MyBuilderRelation as default};
 
-let MyBuilderRelationsItemPolicy = {
+const MyBuilderRelationsItemPolicy = {
 	name:'my-builder-relations-item-policy',
 	template:`<tr>
 		<td><img v-if="!readonly" class="action dragAnchor" src="images/drag.png" /></td>
@@ -129,7 +129,7 @@ let MyBuilderRelationsItemPolicy = {
 	}
 };
 
-let MyBuilderRelation = {
+const MyBuilderRelation = {
 	name:'my-builder-relation',
 	components:{
 		echarts:VueECharts,
@@ -464,6 +464,8 @@ let MyBuilderRelation = {
 			<!-- relationship graph -->
 			<div class="tab-content graph" v-if="tabTarget === 'relationships'">
 				<echarts
+					@click="graphClicked"
+					:autoresize="true"
 					:option="graphOption"
 					:theme="settings.dark ? 'dark' : ''"
 				/>
@@ -582,6 +584,7 @@ let MyBuilderRelation = {
 				name:s.relation.name,
 				category:0,
 				label:{ show:true },
+				r3:{ relationId:null },
 				symbolSize:50,
 				value:''
 			}];
@@ -609,9 +612,8 @@ let MyBuilderRelation = {
 					id:relIn ? `${rTarget.id}.${a.id}` : `${rSource.id}.${a.id}`,
 					name:external ? `${s.moduleIdMap[rTarget.moduleId].name}.${rTarget.name}` : rTarget.name,
 					category:category,
-					label:{
-						show:true
-					},
+					label:{ show:true },
+					r3:{ relationId:rTarget.id },
 					symbolSize:30,
 					value:relIn ? a.name : `${rSource.name}: ${a.name}`
 				});
@@ -730,6 +732,10 @@ let MyBuilderRelation = {
 
 				e.preventDefault();
 			}
+		},
+		graphClicked(ev) {
+			if(typeof ev.data.r3.relationId !== 'undefined' && ev.data.r3.relationId !== null)
+				this.$router.push('/builder/relation/'+ev.data.r3.relationId);
 		},
 		previewReload() {
 			this.previewOffset = 0;

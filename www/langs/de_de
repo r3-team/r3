@@ -45,6 +45,7 @@
 			"bruteforceAttempts": "Host blocken nach Versuchen",
 			"bruteforceCountBlocked": "Blockierte Hosts",
 			"bruteforceCountTracked": "Verfolgte Hosts",
+			"bruteforceDesc": "<p>Diese Funktion blockt Clients, wenn sie versuchen, wiederholt mit ungültigen Zugangsdaten auf das System zuzugreifen. Es macht Sinn für Betrieb in der Cloud, wo Zugriff öffentlicher Clients möglich ist.</p><p>Es macht wenig Sinn für lokalen Betrieb oder wenn das System mit einem Reverse-Proxy betrieben wird.</p>",
 			"bruteforceProtection": "Bruteforce-Schutz aktivieren",
 			"bruteforceTitle": "Bruteforce-Schutz",
 			"builderMode": "Builder-Modus",
@@ -155,7 +156,6 @@
 			"bindUserDnHint": "Beispiel: CN=readonly,OU=User,DC=mycompany,DC=local",
 			"bindUserPw": "Benutzer-Passwort für Verbindung",
 			"button": {
-				"expert": "Experteneinstellungen",
 				"import": "Benutzer jetzt importieren",
 				"new": "Verbindung hinzufügen",
 				"test": "Verbindung testen"
@@ -166,7 +166,6 @@
 				"importPlanned": "Importaufgabe wurde zur sofortigen Ausführung eingeplant",
 				"testDone": "Verbindungstest war erfolgreich"
 			},
-			"groupDn": "Gruppen-DN",
 			"groupDnHint": "Beispiel: CN=Admin_User,OU=Group,DC=mycompany,DC=local",
 			"host": "Host",
 			"hostHint": "LDAP-Hostname",
@@ -174,27 +173,14 @@
 			"keyAttributeHint": "Beispiel: objectGUID",
 			"loginAttribute": "Benutzernameattribut",
 			"loginAttributeHint": "Beispiel: sAMAccountName",
+			"loginMetaMap": "Benutzer-Details zu LDAP-Attribute zuordnen",
 			"memberAttribute": "Mitgliedschaftsattribut",
 			"memberAttributeHint": "Beispiel: memberOf",
-			"metaHint": {
-				"department": "Beispiel: department",
-				"email": "Beispiel: mail",
-				"location": "Beispiel: physicalDeliveryOfficeName",
-				"nameDisplay": "Beispiel: displayName",
-				"nameFore": "Beispiel: givenName",
-				"nameSur": "Beispiel: sn",
-				"notes": "Beispiel: description",
-				"organization": "Beispiel: company",
-				"phoneFax": "Beispiel: facsimileTelephoneNumber",
-				"phoneLandline": "Beispiel: telephoneNumber",
-				"phoneMobile": "Beispiel: mobile"
-			},
 			"msAdExt": "Microsoft AD-Erweiterungen",
 			"msAdExtHint": "Verschachtelte Gruppenzugehör., Benutzer-Account-Kontrolle",
 			"nameHint": "Einzigartiger Name",
 			"port": "Port",
 			"portHint": "Standardmäßig 389, 636 für SSL/TLS",
-			"role": "Rolle",
 			"searchClass": "Objektklasse",
 			"searchClassHint": "Beispiel: user",
 			"searchDn": "Such-DN",
@@ -236,7 +222,6 @@
 			},
 			"dialog": {
 				"delete": "Bist du sicher, dass du diesen Benutzer löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>",
-				"notUniqueEmail": "Die gleiche Email-Adresse wurde bereits einem anderen Benutzer zugewiesen.",
 				"notUniqueName": "Der gleiche Benutzername wurde bereits einem anderen Benutzer zugewiesen.",
 				"resetTotp": "Hiermit werden alle Multi-Faktor-Authentifizierungsmethoden (MFA) für diesen Benutzer zurückgesetzt. Systemzugriff ist dann mit nur Benutzername & Passwort möglich.<br /><br />Zurücksetzung der MFA hat keinen Einfluss auf die Ende-zu-Ende-Verschlüsselung.<br /><br />Möchten Sie fortfahren?"
 			},
@@ -249,7 +234,6 @@
 				"name": "Benutzername - muss im System einzigartig sein.",
 				"noAuth": "Öffentliche Benutzer brauchen keine Authentifizierung. Systemzugriff ist nur mit einer URL möglich.",
 				"password": "Hiermit wird das aktuelle Password für den Benutzer überschrieben. Multi-Faktor-Authentifizierung ist davon nicht betroffen. Ende-zu-Ende-Verschlüsselung (E2EE) wird erst wieder verfügbar sein, wenn der Benutzer seinen Backup-Code eingibt.",
-				"template": "Vorausgewählte Einstellungen (Anzeige- & Darstellungsoptionen) der gewählten Vorlage werden angewendet.",
 				"tokenExpiryHours": "Überschreibt die globale Einstellung für die max. Sitzungszeit."
 			},
 			"ldap": "LDAP zugewiesen",
@@ -257,27 +241,15 @@
 			"ldapMeta": "Details werden über LDAP importiert",
 			"limited": "Limitierter Benutzer",
 			"limitedDesc": "Wenn einem Benutzer nicht mehr als eine Rolle zugewiesen ist, zählt dieser als \"limitiert\". Praktisch für Benutzer, die nur Zugriff auf Teile einer Anwendung brauchen, für Dinge wie Anfragen oder Abschicken von Formularen.<br /><br />Limitierte Benutzer können keine Admins oder öffentliche Benutzer sein und bedienen sich von einem separaten Lizenz-Vorrat.",
-			"meta": {
-				"department": "Abteilung",
-				"email": "E-Mail",
-				"location": "Standort",
-				"nameDisplay": "Anzeigename",
-				"nameFore": "Vorname",
-				"nameSur": "Nachname",
-				"notes": "Beschreibung",
-				"organization": "Organisation",
-				"phone": "Telefon",
-				"phoneFax": "Fax",
-				"phoneLandline": "Festnetz",
-				"phoneMobile": "Mobil"
-			},
 			"noAuth": "Öffentlicher Zugriff",
+			"oauth": "OAuth-Client",
+			"oauthAssignActive": "Rollen werden über Claims im ID-Token zugewiesen",
+			"oauthMeta": "Details werden über Claims im ID-Token gesetzt",
 			"password": "Neues Passwort setzen",
 			"roleContentAdmin": "Admin",
 			"roleContentOther": "Besonders",
 			"roleContentUser": "Benutzer",
 			"roles": "Rollen ({COUNT}）",
-			"template": "Benutzervorlage",
 			"title": "Benutzer \"{NAME}\"",
 			"titleLimited": "Limitierter Benutzer \"{NAME}\"",
 			"titleNew": "Neuer Benutzer",
@@ -287,9 +259,27 @@
 				"ldap": "LDAP",
 				"limited": "Limitiert",
 				"name": "Name",
-				"noAuth": "Öffentlich"
+				"noAuth": "Öffentlich",
+				"oauth": "OAuth-Client"
 			},
 			"tokenExpiryHours": "Max. Sitzungszeit in Stunden"
+		},
+		"loginMeta": {
+			"department": "Abteilung",
+			"dialog": {
+				"notUniqueEmail": "Die gleiche Email-Adresse wurde bereits einem anderen Benutzer zugewiesen."
+			},
+			"email": "E-Mail",
+			"location": "Standort",
+			"nameDisplay": "Anzeigename",
+			"nameFore": "Vorname",
+			"nameSur": "Nachname",
+			"notes": "Beschreibung",
+			"organization": "Organisation",
+			"phone": "Telefon",
+			"phoneFax": "Fax",
+			"phoneLandline": "Festnetz",
+			"phoneMobile": "Mobil"
 		},
 		"loginSessions": {
 			"noData": "Keine Sitzungen verfügbar",
@@ -326,10 +316,12 @@
 				"cache": "Cache",
 				"cluster": "Cluster",
 				"csv": "CSV-Import/Export",
+				"file": "Dateiverarbeitung",
 				"imager": "Bildverarbeitung",
 				"ldap": "LDAP",
 				"mail": "Mail",
 				"module": "Anwendungen",
+				"oauth": "OAuth-Client",
 				"scheduler": "Aufgabenplaner",
 				"server": "Server",
 				"transfer": "Transfer",
@@ -460,6 +452,14 @@
 		"navigationScheduler": "Aufgabenplaner",
 		"navigationSystemMsg": "Systemnachricht",
 		"oauthClient": {
+			"button": {
+				"defaultO365": "Standardwerte: Exchange Online",
+				"defaultOpenId": "Standardwerte: Open ID Connect"
+			},
+			"claimRoles": "Rollen-Claim",
+			"claimRolesHint": "Name des Claim-Feldes, welches Benutzerrollen oder -gruppen beinhaltet. Wenn gesetzt, können REI3-Rollen zu Werten in diesem Claim zugeordnet werden. Wert muss ein JSON-String-Array sein, wie z. B.: [\"alle-benutzer\", \"abteilung-it\"]",
+			"claimUsername": "Benutzer-Claim",
+			"claimUsernameHint": "Name des Claim-Feldes, welches den Benutzernamen beinhaltet. Muss gesetzt sein. Benutzernamen im jeweiligen OAuth-Client müssen einzigartig sein.",
 			"clientId": "Client-ID",
 			"clientIdHint": "Wird auf der Anbieterseite bei der Erstellung eines OAuth2-Clients erzeugt.",
 			"clientSecret": "Client-Secret",
@@ -469,23 +469,29 @@
 			"dialog": {
 				"delete": "Bist du sicher, dass du diesen OAuth-Client löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>"
 			},
-			"intro": "Ein OAuth-Client authentifiziert sich gegenüber einem Identitätsanbieter, um Aktionen auszuführen oder auf Ressourcen zuzugreifen.<br /><br />REI3 implementiert den \"OAuth 2.0 client credentials grant flow\"; dieser erfordert, dass der OAuth-Client beim Anbieter registriert ist, bevor er hier eingerichtet werden kann.",
+			"flow": "OAuth-Flow",
+			"loginMetaMap": "Benutzer-Details über Claims aktualisieren",
 			"nameHint": "Ein interner Name, um auf diesen OAuth-Client innerhalb von REI3 zu referenzieren.",
 			"option": {
-				"template": {
-					"custom": "-",
-					"ms365_mail": "O365-Mailing"
+				"flow": {
+					"authCodePkce": "Authentication Code with PKCE",
+					"clientCreds": "Client credentials"
+				},
+				"flowHint": {
+					"authCodePkce": "<p>Dieser Flow wird in REI3 verwendet, um Benutzer über einen externen Identitätsanbieter anzumelden, wie z. B. Keycloak oder Microsoft Entra ID.</p><p>'Authentication Code with Proof Key for Code Exchange' ist ein Open ID Connect-Flow. Benutzer werden zur Authentifizierung zu einem Identitätsanbieter weitergeleitet. Nach Authentifizierung wird der Benutzer zurück zu REI3 geschickt, wobei seine Identität verifiziert und Metadaten aktualisiert werden.</p>",
+					"clientCreds": "<p>Dieser Flow wird in REI3 verwendet, damit sich das System gegen einen Dienst, wie z. B. Exchange Online, authentifizieren kann.</p><p>'Client Credentials' ist ein OAuth 2.0-Flow, mit welcher sich ein Client gegen Diensteanbieter authentifzieren kann, um auf geschützte Ressourcen wie z. B. Postfächer zuzugreifen. Ressourcen, die über den 'Client Credentials'-Flow zugegriffen werden, sollten zum Client (in diesem Fall REI3) gehören; dieser Flow ist nicht dafür gedacht, auf Benutzer-Ressourcen direkt oder in Namen dessen zuzugreifen.</p><p>Dieser Flow wird aktuell nur für Zugriff auf E-Mail-Ressourcen verwendet.</p>"
 				}
 			},
+			"providerUrl": "Anbieter-URL",
+			"providerUrlHint": "URL des gewählten Anbieters für OAuth-Service-Discovery, oft auch \"Issuer URL\" genannt.",
+			"redirectUrl": "Weiterleitungs-URL",
+			"redirectUrlHint": "Benutzer werden hierhin weitergeleitet, nachdem sie sich authentifiziert haben. Sollte die URL der Anmeldeseite von REI3 sein. Muss ebenfalls beim Anbieter registriert sein.",
 			"scopes": "Scopes",
 			"scopesHint": "Scopes teilen dem Anbieter mit, was ein OAuth-Client tun oder worauf er zugreifen möchte. Sie werden vom Anbieter definiert und müssen dem Client zugewiesen werden, um nutzbar zu sein - eine Liste der verfügbaren Scopes sollte in der Dokumentation vom Anbieter zu finden sein.",
-			"template": "Vorlage",
-			"templateHint": "Eine Vorlage kann ausgewählt werden, um Standardeinstellungen für bekannte Anbieter anzuwenden.",
-			"tenant": "Mandant",
-			"tenantHint": "Bei einigen Anbietern erforderlich. Ein Mandant (oder \"Tenant\") ist ein Name oder eine ID, die eine Organisation im Cloud-System eines Anbieters eindeutig identifiziert.",
 			"title": "OAuth-Client '{NAME}'",
 			"titleNew": "Neuer OAuth-Client",
 			"tokenUrl": "Token-URL",
+			"tokenUrlExample": "Beispiel für Exchange Online: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
 			"tokenUrlHint": "URL, unter der OAuth2-Tokens generiert werden. Die Token-URL wird vom Anbieter definiert."
 		},
 		"repo": {
@@ -538,6 +544,7 @@
 				"clusterCheckIn": "Cluster-Knoten einchecken",
 				"clusterProcessEvents": "Cluster-Ereignisse verarbeiten",
 				"dbOptimize": "Datenbankoptimierung",
+				"filesProcess": "Dateijobs verarbeiten",
 				"httpCertRenew": "Neuladen des SSL-Zertifikates falls es erneuert wurde",
 				"importLdapLogins": "Import von Benutzern über LDAP",
 				"mailAttach": "E-Mail-Anhänge transferieren",
@@ -589,9 +596,6 @@
 				"versionNewHint": "Dupliziert diese API mit einer neuen Versionsnummer."
 			},
 			"calls": "Aufrufe",
-			"columnSettings": "Spalteneinstellungen",
-			"columnsAvailable": "Verfügbare Spalten",
-			"columnsTarget": "Aktive Spalten",
 			"content": "API-Typ",
 			"contentValue": "REST",
 			"dialog": {
@@ -776,23 +780,17 @@
 			"titleNew": "Neues Client-Ereignis"
 		},
 		"collection": {
-			"columnSettings": "Spalteneinstellungen",
-			"columnsAvailable": "Verfügbare Spalten",
-			"columnsTarget": "Aktive Spalten",
 			"dialog": {
 				"delete": "Bist du sicher, dass du diese Sammlung löschen möchtest?"
 			},
 			"inHeader": "In Titelzeile anzeigen",
-			"new": "Neue Sammlung",
 			"previewHint": "Sammlungswerte für den eingeloggten Benutzer. Sammlungen werden beim Seitenaufruf geladen (F5 zum neu laden) wenn sie in zugewiesenen Rollen aktiviert sind.",
-			"query": "Query",
 			"title": "Sammlungen",
 			"titleOne": "Sammlung \"{NAME}\""
 		},
 		"collectionInput": {
 			"collection": "Sammlung",
 			"column": "Wert(e) aus Spalte",
-			"formIdOpen": "Formular öffnen",
 			"multiValue": "Mehrfachauswahl",
 			"noDisplayEmpty": "Verstecken wenn leer",
 			"onMobile": "In mobiler Ansicht",
@@ -815,7 +813,6 @@
 				"columnsAll": "Alle Spalten",
 				"layoutColumns": "{CNT} Spalten"
 			},
-			"category": "Kategorieauswahl",
 			"chart": {
 				"axisType": "Achsentyp",
 				"axisTypeCategory": "Kategorie",
@@ -844,6 +841,8 @@
 			"columnLength": "Länge (Charakt.)",
 			"columnLength0": "kein Limit",
 			"columnLengthFiles": "Dateianzahl",
+			"columnNoShrink": "Schrumpft nicht",
+			"columnNoThousandsSep": "Kein Tausendertrennzeichen",
 			"columnPreviewLarge": "Große Vorschau",
 			"columnShowDefault": "Standardm. anzeigen",
 			"columnShowDefaultMobile": "Standardm. anzeigen auf mobil",
@@ -890,6 +889,11 @@
 			"fieldDefault": "Standardwert",
 			"fieldDefaultPresetIds": "Standard vord. Datensätze",
 			"fieldDirection": "Ausrichtung",
+			"fieldFlags": {
+				"hideInputs": "Eingaben verstecken",
+				"relCategory": "Kategorieanzeige",
+				"relFlow": "Fortschrittsanzeige"
+			},
 			"fieldHelp": "Hilfetext",
 			"fieldIcon": "Feld-Icon",
 			"fieldIdFocus": "Feldfokus setzen beim Öffnen",
@@ -952,7 +956,6 @@
 			"headerSize": "Größe",
 			"helpText": "Hilfetext",
 			"hidden": "Feld ist standardmäßig versteckt",
-			"hideInputs": "Eingaben verstecken",
 			"icon": "Formular-Icon",
 			"ics": "iCAL-Abonnements",
 			"jsFunctionButton": "Funktion nack Klick",
@@ -1073,6 +1076,8 @@
 			"codeReturnsHintJs": "optional, \"number\", \"array\",...",
 			"codeReturnsHintPg": "\"text\", \"integer\",...",
 			"collectionId": "[Sammlung auswählen]",
+			"cost": "Kosten",
+			"costHelp": "<b>Experteneinstellung</b><p>Kosten ist ein geschätzter Wert, der hilft, den Query-Planer zu optimieren. Diesen Wert zu ändern kann die Leistung verbessern, indem dem Query-Planer mitgeteilt wird, ob eine Funktion erwartungsgemäß lang (teuer, hohe Kosten) oder kurz (günstig, niedrige Kosten) läuft.</p><p>Höhere Werte können für komplexe Funktionen (wie z. B. Relationsrichtlinien) sinnvoll sein, da der Query-Planer dann die Ausführung dieser Funktion, wo möglich, zugunsten anderer Evaluierungen vermeidet.</p>",
 			"dialog": {
 				"delete": "Bist du sicher, dass du diese Funktion löschen möchtest?"
 			},
@@ -1091,6 +1096,7 @@
 				"dialog_show": "app.dialog_show({ARGS}) => PROMISE<br /><br />Zeigt einen Dialog mit den definierten Titel und Inhalt. Der Titel ist ein simpler Textstring, der Inhalt kann entweder Text oder HTML sein.<br /><br />Buttons werden mithilfe einer Liste an Textstrings definiert. Wenn keine definiert sind, wird ein simpler OK-Button angezeigt.<br /><br />Der Rückgabewert ist der Index vom gedrückten Button. Wenn also der 1. Button gedrückt wurde, ist der Wert 0. Beim 2. Button ist der Wert 1 usw.<br /><br /><b>Example</b><br />app.dialog_show(<blockquote>'Please confirm',<br />'Do you really want to delete this item?',<br />['Yes', 'Cancel action']</blockquote>).then(<blockquote>res => { if(res === 0) { console.log('clicked Yes!'); } }</blockquote>);",
 				"form_close": "app.form_close() => UNDEFINED<br /><br />Schließt das Formular (falls schwebend oder Subformular), ansonsten geht zurück in der Browser-Historie.",
 				"form_open": "app.form_open({ARGS}) => UNDEFINED<br /><br />Öffnet ein Formular direkt, in einem neuen Browser-Tab oder als Pop-up-Fenster.<br /><br />Das neue Formular, wenn direkt geöffnet (nicht als Tab or Pop-Up), fügt sich der Browser-History hinzu, solange 'replace_history' nicht auf 'true' gesetzt ist.",
+				"form_parent_refresh": "app.form_parent_refresh() => UNDEFINED<br /><br />Nur relevant für Kindformulare (also schwebende oder Subformulare).<br /><br />Wenn ein Datensatz auf einem Kindformular geändert wird, erneuert sich das Elternformular automatisch; dies kann eine Beziehungseingabe sein, die einen neu erstellten Datensatz anzeigt, oder ein Listenfeld, welches geänderte Daten darstellt.<br /><br />In manchen Fällen, wie z. B. wenn man Änderungen in einer Backend-Funktion ausführt, kann das nicht automatisch passieren, da das System nicht weiß welche, oder ob überhaupt Änderungen ausgeführt worden sind. Diese Funktion informiert das Elternformular, dass es sich zur Anzeige neuer Daten erneuern muss. Dies aktualisiert Beziehungseingaben und Datenfelder, wie Listen oder Kalender; es lädt nicht den Datensatz des Elternformulares neu, da ungespeicherte Änderungen existieren können.",
 				"form_set_title": "app.form_set_title({ARGS}) => UNDEFINED<br /><br />Überschreibt den aktuellen Formtitel. Auf <i>null</i> setzen, um den originalen Formtitel wiederherzustellen.",
 				"form_show_message": "app.form_show_message({ARGS}) => UNDEFINED<br /><br />Ersetzt den Formtitel für eine kurze Zeit mit einer definierten Meldung. Das 2. Argument legt fest, in Millisekunden, wie lange die Meldung angezeigt wird.",
 				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Entschlüsselt den beigefügten Datenschlüssel mit dem privaten Schlüssel des aktuellen Benutzers.",
@@ -1210,7 +1216,13 @@
 			"helpPg": {
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Löscht Ende-Zu-Ende-Datenschlüssel für Datensätze, auf die ein Benutzer keinen Zugriff mehr hat. Dies macht Entschlüsselung für den Benutzer unmöglich.",
+				"file_export": "instance.file_export({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Export einer Datei auf Festplatte. Relevante Parameter:<ul><li>file_id: Datei zu exportieren - die Datei-ID kann via instance.files_get() gefunden werden</li><li>file_path: Wohin die Datei exportiert werden soll (muss in einen Dateinamen enden)</li><li>file_version: Version der Datei, die exportiert werden soll (NULL = aktuellste Version)</li><li>overwrite: Überschreiben, wenn am definierten Dateipfad bereits eine Datei existiert</li></ul><p>Der Dateipfad ist immer relativ zum Exportpfad, der in der Serverkonfigurationsdatei definiert ist. Aus Sicherheitsgründen werden absolute Pfade nicht unterstützt.</p>",
+				"file_export_text": "instance.file_export_text({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Export eines UTF8-Textes als Datei auf Festplatte. Relevante Parameter:<ul><li>file_path: Wohin die Datei exportiert werden soll (muss in einen Dateinamen enden)</li><li>file_text_content: UTF8 Textinhalt</li><li>overwrite: Überschreiben, wenn am definierten Dateipfad bereits eine Datei existiert</li></ul><p>Der Dateipfad ist immer relativ zum Exportpfad, der in der Serverkonfigurationsdatei definiert ist. Aus Sicherheitsgründen werden absolute Pfade nicht unterstützt.</p>",
+				"file_import": "instance.file_import({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Import einer Datei von Festplatte. Relevante Parameter:<ul><li>file_path: Von wo die Datei importiert werden soll (muss in einen Dateinamen enden)</li><li>attribute_id: ID des Dateien-Attributes, dass die Datei empfängt</li><li>record_id: ID des Datensatzes, dessen Dateien-Attributwert aktualisiert wird (NULL = neuer Datensatz)</li></ul><p>Die Quelldatei wird nach erfolgreichen Import gelöscht.</p><p>Der Dateipfad ist immer relativ zum Importpfad, der in der Serverkonfigurationsdatei definiert ist. Aus Sicherheitsgründen werden absolute Pfade nicht unterstützt.</p>",
+				"file_import_text": "instance.file_import_text({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Import eines Textes aus einer UTF8-Textdatei von Festplatte. Relevante Parameter:<ul><li>file_path: Von wo die Datei importiert werden soll (muss in einen Dateinamen enden)</li><li>callback_function_id: ID der Backendfunktion, die mit dem importierten Text aufgerufen wird - sie muss zwei Parameter haben: TEXT (Dateiname), TEXT (Dateiinhalt)</li></ul><p>Die Quelldatei wird nach erfolgreichen Import gelöscht.</p><p>Der Dateipfad ist immer relativ zum Importpfad, der in der Serverkonfigurationsdatei definiert ist. Aus Sicherheitsgründen werden absolute Pfade nicht unterstützt.</p>",
 				"file_link": "instance.file_link({ARGS}) => VOID<br /><br />Verknüpft eine existierende Datei mit einem anderen Datensatz (hinzugefügt zu dem gewählten Dateiattribut). Es handelt sich hierbei um eine harte Verknüpfung, d. h. es wird auf die gleiche Datei zugegriffen.<br /><br />Umbenennen oder Löschen der Datei, betrifft jeweils nur die Dateiverknüpfung. Die Datei selbst wird behalten, solange noch eine Verknüpfung existiert.",
+				"file_text_read": "instance.file_text_read({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Senden des Inhaltes einer UTF8-Textdatei zu einer Backendfunktion. Relevante Parameter:<ul><li>callback_function_id: ID der Backendfunktion, die aufgerufen wird - sie muss einen Parameter haben: TEXT (Dateiinhalt)</li><li>file_id: Datei zu lesen - die Datei-ID kann via instance.files_get() gefunden werden</li><li>file_version: Version der Datei, die gelesen werden soll (NULL = aktuellste Version)</li></ul>",
+				"file_text_write": "instance.file_text_write({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Erstellen einer UTF8-Textdatei. Relevante Parameter:<ul><li>file_name: Name der zu erstellenden Datei</li><li>file_text_content: UTF8-Textinhalt</li><li>attribute_id: ID des Dateien-Attributes, dass die Datei empfängt</li><li>record_id: ID des Datensatzes, dessen Dateien-Attributwert aktualisiert wird (NULL = neuer Datensatz)</li></ul>",
 				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Entfernt Verknüpfung einer existierenden Datei zu einem Datei-Attribut des angegebenen Datensatzes. Es handelt sich hierbei um eine harte Verknüpfung, d. h. die Datei selbst wird behalten, solange noch eine Verknüpfung zu einem Datei-Attribut eines anderen Datensatzes existiert.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]<br /><br />Liefert Metadaten für Dateien vom gewählten Dateiattribut und Datensatz (kann optional gelöschte Dateien inkludieren).<br /><br />Der gelieferte Typ 'instance.file_meta' besteht aus:<blockquote>id UUID,<br />user_id_creator INTEGER,<br />hash TEXT,<br />name TEXT,<br />size_kb INTEGER,<br />version INTEGER,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
 				"get_e2ee_data_key_enc": "instance.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Liefert den verschlüsselten Datenschlüssel für den gewählten Relationsdatensatz und Benutzer. Datenschlüssel existieren für individuelle Datensätze für jeden Benutzer, der darauf Zugriff hat. Sie können am Frontend mit dem assoziierten privaten Schlüssel des Benutzers entschlüsselt werden.",
@@ -1243,11 +1255,42 @@
 					"relation_id UUID",
 					"record_ids_access INTEGER[]"
 				],
+				"file_export": [
+					"file_id UUID",
+					"file_path TEXT",
+					"file_version INTEGER DEFAULT NULL",
+					"overwrite BOOLEAN DEFAULT FALSE"
+				],
+				"file_export_text": [
+					"file_path TEXT",
+					"file_text_content TEXT",
+					"overwrite BOOLEAN DEFAULT FALSE"
+				],
+				"file_import": [
+					"file_path TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL"
+				],
+				"file_import_text": [
+					"file_path TEXT",
+					"callback_function_id UUID"
+				],
 				"file_link": [
 					"file_id UUID",
 					"file_name TEXT",
 					"attribute_id UUID",
 					"record_id BIGINT"
+				],
+				"file_text_read": [
+					"callback_function_id UUID",
+					"file_id UUID",
+					"file_version INTEGER DEFAULT NULL"
+				],
+				"file_text_write": [
+					"file_name TEXT",
+					"file_text_content TEXT",
+					"attribute_id UUID",
+					"record_id BIGINT DEFAULT NULL"
 				],
 				"file_unlink": [
 					"file_id UUID",
@@ -1525,6 +1568,7 @@
 			"relationEncryption": "Ende-zu-Ende-Verschlüsselung",
 			"relationEncryptionHint": "Erlaubt Ende-zu-Ende-Verschlüsselung (E2EE) für Attribute auf dieser Relation. E2EE hat Vor- und Nachteile - die Builder-Dokumentation sollte hierzu gelesen werden. Diese Einstellung kann nachträglich nicht geändert werden.",
 			"role": "Neue Rolle",
+			"searchBar": "Neue Suchleiste",
 			"template": {
 				"loginSync": "Benutzer-Sync-Funktion",
 				"mailsFromSpooler": "E-Mail-Verarbeitung (eingehend)",
@@ -1695,6 +1739,16 @@
 			"title": "Rollen",
 			"titleOne": "Role \"{NAME}\""
 		},
+		"searchBar": {
+			"dialog": {
+				"delete": "Bist du sicher, dass du diese Suchleiste löschen möchtest?"
+			},
+			"title": "Suchleisten",
+			"titleOne": "Suchleiste '{NAME}'",
+			"warning": {
+				"noSearchInput": "Min. einen \"Globale-Suche: Benutzereingabe\"-Filter setzen, um Suchabfrage anzuwenden"
+			}
+		},
 		"start": {
 			"appVisible": "Anwendung ist sichtbar für Benutzer mit zugewiesenen Rollen",
 			"appVisibleOff": "Anwendung ist nicht sichtbar für Benutzer",
@@ -1848,7 +1902,8 @@
 			"003": "Das System konnte die Datensatzwerte nicht verschlüsseln. Bitte erneut versuchen.",
 			"004": "Das System konnte die Datensatzwerte nicht entschlüsseln. Bitte erneut versuchen.",
 			"005": "Das System konnte Entschlüsselungs-Codes für die ausgewählten Datensätze nicht laden.",
-			"006": "Nicht alle ausgewählten Benutzer haben Ende-Zu-Ende-Verschlüsselung aktiviert - diese sind: {NAMES}"
+			"006": "Nicht alle ausgewählten Benutzer haben Ende-Zu-Ende-Verschlüsselung aktiviert - diese sind: {NAMES}",
+			"007": "Ende-Zu-Ende-Verschlüsselung wartet auf Eingabe des persönlichen Verschlüsselungspassworts in den Benutzereinstellungen."
 		},
 		"initCollection": "Fehler beim Laden von Sammlungen während der Anmeldung: {MSG}"
 	},
@@ -1901,6 +1956,7 @@
 		"nowOffsetHint": "+/- X {MODE}",
 		"nowOffsetTitle": "Addiere (positive Nummer) or subtrahiere (negative Nummer) X Tage/Stunden/Minuten/Sekunden von jetzt.",
 		"operatorsArray": "Array",
+		"operatorsFts": "Volltextsuche",
 		"operatorsNull": "Leerer Wert",
 		"operatorsRegex": "Regulärer Ausdruck",
 		"operatorsSets": "Subset",
@@ -1920,6 +1976,7 @@
 				"formChanged": "Formular hat ungesp. Änder.",
 				"formState": "Formularzustand",
 				"getter": "URL-Parameter",
+				"globalSearch": "Benutzereingabe",
 				"javascript": "JavaScript",
 				"languageCode": "Benutzersprache",
 				"login": "Benutzer-ID",
@@ -1928,6 +1985,9 @@
 				"nowTime": "Zeit",
 				"preset": "Vordef. Datensatz",
 				"record": "Datensatz-ID",
+				"recordMayCreate": "Datensatz darf erstellt werden",
+				"recordMayDelete": "Datensatz darf gelöscht werden",
+				"recordMayUpdate": "Datensatz darf aktualisiert werden",
 				"recordNew": "Datensatz ist neu",
 				"role": "Benutzer hat Rolle",
 				"subQuery": "Sub-Query",
@@ -1944,6 +2004,7 @@
 				"formChanged": "WAHR/FALSCH, abhängig davon, ob das Formular aktuell ungespeicherte Änderungen hat.",
 				"formState": "WAHR/FALSCH, abhängig davon, ob der ausgewählte Formularzustand aktuell aktiv ist.",
 				"getter": "Wert eines URL-Parameters, wie z. B. 'https://system?param=123', wobei 'param' den Namen und '123' den Wert darstellt.",
+				"globalSearch": "Textwert des Eingabefeldes der globalen Suche.",
 				"javascript": "Rückgabewert des gewählten Javascript-Ausdrucks.",
 				"languageCode": "Der gewählte Sprach-Code vom aktuellen Benutzer (en_us, de_de, ...).",
 				"login": "ID des aktuellen Benutzers (Integer).",
@@ -1952,6 +2013,9 @@
 				"nowTime": "Die aktuelle Zeit (diese Stunde/Minute/Sekunde), zum Vergleich mit Zeitwerten.",
 				"preset": "ID des gewählten, vordefinierten Datensatzes (Integer).",
 				"record": "ID des aktuellen Datensatzes auf dem Formular (Integer, Relation 0).",
+				"recordMayCreate": "WAHR wenn ein neuer Datensatz erstellt werden darf, basierend auf Relationsberechtigungen & Join-Einstellungen.",
+				"recordMayDelete": "WAHR wenn aktuelle Datensatz gelöscht werden darf, basierend auf Relationsberechtigungen, Richtlinien & Join-Einstellungen.",
+				"recordMayUpdate": "WAHR wenn aktuelle Datensatz aktualisiert werden darf, basierend auf Relationsberechtigungen, Richtlinien & Join-Einstellungen.",
 				"recordNew": "WAHR/FALSCH, abhängig davon, ob der aktuelle Datensatz auf dem Formular neu ist.",
 				"role": "WAHR/FALSCH, abhängig davon, ob der aktuelle Benutzer die gewählte Rolle zugewiesen ist.",
 				"subQuery": "Rückgabewert der gewählten Sub-Query.",
@@ -2040,6 +2104,33 @@
 		"fileRenamed": "Datei umbenannt",
 		"fileUpdated": "Datei verändert",
 		"title": "Veränderungen"
+	},
+	"fullTextSearch": {
+		"dictionary": {
+			"arabic": "Arabisch",
+			"danish": "Dänisch",
+			"dutch": "Niederländisch",
+			"english": "Englisch",
+			"finnish": "Finnisch",
+			"french": "Französisch",
+			"german": "Deutsch",
+			"greek": "Griechisch",
+			"hungarian": "Ungarisch",
+			"indonesian": "Indonesisch",
+			"irish": "Irisch",
+			"italian": "Italienisch",
+			"lithuanian": "Litauisch",
+			"nepali": "Nepalesisch",
+			"norwegian": "Norwegisch",
+			"portuguese": "Portugiesisch",
+			"romanian": "Rumänisch",
+			"russian": "Russisch",
+			"simple": "[Nicht ausgewählt]",
+			"spanish": "Spanisch",
+			"swedish": "Schwedisch",
+			"tamil": "Tamilisch",
+			"turkish": "Türkisch"
+		}
 	},
 	"generic": {
 		"action": "Aktion",
@@ -2131,7 +2222,10 @@
 		"collection": "Sammlung",
 		"collections": "Sammlungen",
 		"color": "Farbe",
+		"columnSettings": "Spalteneinstellungen",
 		"columns": "Spalten",
+		"columnsActive": "Aktive Spalten",
+		"columnsAvailable": "Verfügbare Spalten",
 		"comments": "Kommentare",
 		"content": "Inhalt",
 		"contextHelp": "Kontexthilfe",
@@ -2155,6 +2249,7 @@
 			"maintenanceComing": "Das System wird in einen geplanten Wartungsmodus gesetzt: <b>{DATE}</b>. Änderungen sollten vorher gespeichert werden.",
 			"systemMsg": "Systemnachricht"
 		},
+		"disabled": "Deaktiviert",
 		"displayed": "Angezeigt",
 		"encryption": "Verschlüsselung",
 		"error": {
@@ -2172,9 +2267,11 @@
 		"filters": "Filter",
 		"form": "Formular",
 		"formActions": "Formularaktionen",
+		"formOpen": "Formular öffnen",
 		"forms": "Formulare",
 		"functions": "Funktionen",
 		"global": "Global",
+		"globalSearch": "Globale Suche",
 		"help": "Hilfe",
 		"home": "Start",
 		"hotkey": "Hotkey",
@@ -2207,6 +2304,8 @@
 		"login": "Anmeldung",
 		"loginForm": "Anmeldeformular",
 		"loginForms": "Anmeldeformulare",
+		"loginTemplate": "Benutzervorlage",
+		"loginTemplateHint": "Vordefinierte Einstellungen werden einmalig von gewählter Vorlage angewendet, wenn neuer Benutzer erstellt wird. Wenn nichts ausgewählt wurde, wird die globale Vorlage angewendet.",
 		"maintenance": "Wartung",
 		"menu": "Menü",
 		"menus": "Menüs",
@@ -2263,6 +2362,11 @@
 		"returns": "Gibt zurück",
 		"role": "Rolle",
 		"roles": "Rollen",
+		"search": "Suche",
+		"searchBar": "Suchleiste",
+		"searchBars": "Suchleisten",
+		"searchCompleted": "Suche abgeschlossen",
+		"searchRunning": "Suche läuft",
 		"selected": "Ausgewählt",
 		"selectedMaxOne": "Ausgewählt (max. 1)",
 		"settings": "Einstellungen",
@@ -2271,8 +2375,10 @@
 		"sqlPreview": "SQL-Vorschau",
 		"standard": "Standard",
 		"status": "Status",
+		"systemModes": "Betriebsarten",
 		"textSearch": "Textsuche",
 		"threeDots": "...",
+		"tip": "Tipp",
 		"title": "Titel",
 		"token": "Token",
 		"type": "Typ",
@@ -2280,6 +2386,7 @@
 		"uninstall": "Deinstallieren",
 		"update": "Aktualisieren",
 		"username": "Benutzername",
+		"value": "Wert",
 		"variable": "Variable",
 		"variables": "Variabeln",
 		"version": "Version",
@@ -2288,6 +2395,32 @@
 		"widget": "Widget",
 		"widgets": "Widgets",
 		"wrap": "Umbrechen"
+	},
+	"globalSearch": {
+		"button": {
+			"dictReset": "Auf Benutzersprache zurücksetzen",
+			"fullTextSearch": "Unterstützt Volltextsuche",
+			"openAsPopUp": "Als Pop-Up öffnen",
+			"openAsPopUpMobile": "Pop-Up",
+			"showHeader": "Spaltentitel",
+			"showHeaderMobile": "Spalten"
+		},
+		"help": {
+			"ftsDict": [
+				"Definiert welche Sprache die Sucheingabe hat.",
+				"Dies hilft nicht beim Finden von Wörtern oder Namen, die ein paar Buchstaben beinhalten; mit Festlegen der Suchsprache kann das System jedoch Funktionen der Volltextsuche nutzen.",
+				"Sollte eine Volltextsuche unterstützt sein, wird eine entsprechende Nachricht im Suchleistentitel angezeigt; für mehr Details zu Suchoptionen diese anklicken."
+			],
+			"ftsDictTitle": "Sprache der Sucheingabe"
+		},
+		"inputPlaceholder": "Namen, Wörter & E-Mail-Adressen immer ausschreiben",
+		"modulesInactive": "Weitere Suchoptionen",
+		"tips": [
+			"Eine neue Suche kann von überall in REI3 durch Drücken von <b>STRG + SHIFT + F</b> gestartet werden. Falls Text ausgewählt ist, wird dieser als Sucheingabe genutzt.",
+			"Bei der Suche nach Namen, Wörtern oder E-Mail-Adressen, diese immer ausschreiben.",
+			"Wenn mehrsprachige Inhalte durchsucht werden, ist es wichtig, die Sprache der Sucheingabe festzulegen (rechts-oben).",
+			"Sprachabhängige Suchen, wie z. B. das Finden von \"Einträgen\" mit der Suche nach \"Eintrag\", sind möglich, wenn die Sprache des Inhaltes definiert ist. Dies macht oft für Artikel oder Dokumentationen Sinn, wird aber meist für E-Mails nicht gemacht."
+		]
 	},
 	"home": {
 		"button": {
@@ -2406,7 +2539,6 @@
 		"inputHintCreate": "Neuen Datensatz anlegen",
 		"inputHintOpen": "Datensatz öffnen",
 		"inputHintRemove": "Datensatz entfernen",
-		"inputHintSelect": "Bestehenden Datensatz hinzufügen",
 		"inputPlaceholderAdd": "...weitere hinzufügen",
 		"message": {
 			"csvExport": "Der CSV-Export verwendet Filter und Sortierung der aktuellen Liste.",
@@ -2426,6 +2558,12 @@
 	},
 	"settings": {
 		"account": {
+			"button": {
+				"loginOptionsDel": "Alle Feldeinstellungen zurücksetzen"
+			},
+			"dialog": {
+				"loginOptionsDel": "<p>Hiermit werden alle Feldeinstellungen, wie Sortierungen in Listen, sichtbare Spalten, Filter und so weiter, auf ihre Standardwerte zurückgesetzt.</p><p>Fortfahren?</p>"
+			},
 			"messagePwCurrentWrong": "Aktuelles Passwort ist inkorrekt",
 			"messagePwDiff": "Passwörter stimmen nicht überein",
 			"messagePwRequiresDigit": "Passwort muss eine Zahl beinhalten",
@@ -2434,6 +2572,7 @@
 			"messagePwRequiresUpper": "Passwort muss einen Großbuchstaben beinhalten",
 			"messagePwShort": "Password is too short",
 			"nodeName": "Verbunden mit: {NAME}",
+			"pwChangeNotAllowed": "Zugangsdaten werden extern verwaltet",
 			"pwNew0": "Neues Passwort",
 			"pwNew1": "Neues Passwort (wiederholt)",
 			"pwOld": "Aktuelles Passwort",
@@ -2457,9 +2596,6 @@
 		"colorMenu": "Farbe überschreiben",
 		"dark": "Dunkle Ansicht",
 		"dateFormat": "Datumsformat",
-		"dialog": {
-			"searchDictionary": "Dieses System bietet eine Volltextsuche. Wo Volltextsuchen verfügbar sind, können selbst sehr große Texte schnell gefunden werden, mit erweiterten Suchfunktionen wie der Vergleich mit Synonymen oder Wortstämmen.<br /><br />\"Wörterbücher für Volltextsuchen\" lassen das System wissen, in welchen Sprachen ein Benutzer arbeitet, damit sprachspezifische Funktionen genutzt werden können."
-		},
 		"encryption": {
 			"backupCode": "Backup-Code",
 			"backupCodeDesc": "Der Backup-Code ist <b>sehr wichtig</b>; er stellt Zugriff wieder her, falls du dein Passwort vergessen hast.",
@@ -2474,6 +2610,11 @@
 			"modulesEnc": "Anwendungen, die Verschlüsselung nutzen",
 			"newKeys": "Schlüssel erfolgreich erzeugt",
 			"newKeysDesc": "Um die Einrichtung abzuschließen, kopiere deinen persönlichen Backup-Code an einen sicheren Ort.",
+			"noCredMasterKey": "Verschlüsselungspasswort",
+			"noCredMasterKeyChoose": "Dieser Benutzer wurde über einen externen Anbieter authentifiziert. Um Ende-Zu-Ende-Verschlüsselung zu aktivieren, muss ein persönliches Verschlüsselungspasswort gewählt werden.",
+			"noCredMasterKeyEnter": "Die Ende-Zu-Ende-Verschlüsselung wird durch das persönliche Verschlüsselungspasswort geschützt.",
+			"noCredMasterKeyFailed": "Das Verschlüsselungspasswort wurde nicht angenommen. Bitte erneut versuchen.<br /><br />Falls das Passwort vergessen wurde, werden Wiederherstellungsoptionen weiter unten angezeigt.",
+			"noCredMasterKeyNew": "Neues Verschlüsselungspasswort",
 			"prevPassword": "Vorheriges Passwort",
 			"regainAccess": "Zugriff auf persönliche Schlüssel wiederherstellen",
 			"regainAccessDesc": "Du kannst Zugriff auf deine persönliche Schlüssel wiederherstellen, indem du dein vorheriges Passwort eingibst. Wenn du dein vorheriges Passwort nicht kennst, musst du deinen persönlichen Backup-Code nutzen.",
@@ -2504,13 +2645,13 @@
 				"apos": "Apostroph (')",
 				"comma": "Komma (,)",
 				"dot": "Punkt (.)",
-				"mdot": "Punkt, mittig (·)"
+				"mdot": "Punkt, mittig (·)",
+				"none": "[kein Trennzeichen]",
+				"space": "Leerzeichen ( )"
 			}
 		},
 		"pageTitle": "Einstellungen",
 		"pattern": "Hintergrundmuster",
-		"searchDictionaries": "Wörterbücher für Volltextsuche",
-		"searchDictionaryNew": "Wörterbuch hinzufügen",
 		"spacing": "Abstände",
 		"sundayFirstDow": "Sonntag ist 1. Wochentag",
 		"tabRemember": "Zuletzt genutzten Tab öffnen",
