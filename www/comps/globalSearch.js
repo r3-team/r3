@@ -426,6 +426,7 @@ const MyGlobalSearch = {
 						:large="true"
 					/>
 					<my-global-search-module
+						@close="close"
 						@toggle="toggle"
 						v-for="m in modulesInactive"
 						:disabled="true"
