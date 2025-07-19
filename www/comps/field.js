@@ -444,6 +444,7 @@ let MyField = {
 					:attributeIdFile="field.attributeIdAlt"
 					:clipboard="isClipboard"
 					:isHidden="isHidden"
+					:printCaption="caption"
 					:readonly="isReadonly"
 					:valueFiles="valueAlt"
 				>

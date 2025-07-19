@@ -1,5 +1,6 @@
 import {getAttributeFileHref} from './shared/attribute.js';
 import {deepIsEqual}          from './shared/generic.js';
+import {getDateFormat}        from './shared/time.js';
 export {MyInputRichtext as default};
 
 const MyInputRichtext = {
@@ -45,6 +46,7 @@ const MyInputRichtext = {
 		clipboard:      { type:Boolean, required:false, default:false },
 		isHidden:       { type:Boolean, required:false, default:false },
 		modelValue:     { required:true },
+		printCaption:   { type:String,  required:false, default:'export' },
 		readonly:       { type:Boolean, required:false, default:false },
 		valueFiles:     { required:false, default:null }
 	},
@@ -101,13 +103,14 @@ const MyInputRichtext = {
 				// adds more elements that tiny does not convert (adds to default valid_elements)
 				// known issues: auto converts <b> to <strong>
 				extended_valid_elements:'b',
-
-				// debug events
+				
 				setup:(e) => {
-					if(!s.debug) return;
-					
-					e.on('remove', ()    => s.debugEvent('remove') );
-					e.on('error',  (err) => s.debugEvent('error',err) );
+					e.ui.registry.addButton('customPrint',{ icon:'print', onAction:s.print });
+
+					if(s.debug) {
+						e.on('remove', ()    => s.debugEvent('remove') );
+						e.on('error',  (err) => s.debugEvent('error',err) );
+					}
 				}
 			};
 		},
@@ -149,7 +152,7 @@ const MyInputRichtext = {
 		active:(s) => s.isMounted && (!s.isHidden || s.editor !== null),
 		toolbar:(s) => {
 			if(s.readonly) return false;
-			return s.isMobile ? s.toolbarBase : `undo redo ${s.toolbarBase} outdent indent insertgroup code print searchreplace`;
+			return s.isMobile ? s.toolbarBase : `undo redo ${s.toolbarBase} outdent indent insertgroup code customPrint searchreplace`;
 		},
 
 		// simple
@@ -181,6 +184,7 @@ const MyInputRichtext = {
 		// externals
 		deepIsEqual,
 		getAttributeFileHref,
+		getDateFormat,
 		
 		// editor
 		debugEvent(ev,err) {
@@ -208,6 +212,14 @@ const MyInputRichtext = {
 				});
 			}
 			this.images = out;
+		},
+		print() {
+			const win = window.open('', '', 'height=600,width=800');
+			win.document.write(`<html><head><title>${this.printCaption}_${this.getDateFormat(new Date(),'Y-m-d H:i:S')}</title></head><body style="margin:20px;">${this.input}</body></html>`);
+			win.document.close();
+			win.focus();
+			win.print();
+			win.close();
 		},
 		register(ev,editor) {
 			this.editor = editor;
