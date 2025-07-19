@@ -9,7 +9,7 @@ import {
 } from '../shared/generic.js';
 export {MyBuilderPreset as default};
 
-let MyBuilderPresetValue = {
+const MyBuilderPresetValue = {
 	name:'my-builder-preset-value',
 	template:`<tr>
 		<td>{{ attribute.name + (attribute.nullable ? '' : '*') }}</td>
@@ -88,7 +88,7 @@ let MyBuilderPresetValue = {
 	}
 };
 
-let MyBuilderPreset = {
+const MyBuilderPreset = {
 	name:'my-builder-preset',
 	components:{ MyBuilderPresetValue },
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
@@ -159,11 +159,18 @@ let MyBuilderPreset = {
 							<td colspan="3">
 								<div class="row space-between">
 									<b>{{ capApp.values }}</b>
-									<my-button image="edit.png"
-										@trigger="childAddAllMissing"
-										:active="values.values.length < attributesValid.length"
-										:caption="capApp.addMissing"
-									/>
+									<div class="row gap">
+										<my-button image="edit.png"
+											@trigger="childAllAddMissing"
+											:active="values.values.length < attributesValid.length"
+											:caption="capApp.addMissing"
+										/>
+										<my-button image="lock.png"
+											@trigger="childAllToggleProtected"
+											:active="values.values.length !== 0 && attributesValid.length !== 0"
+											:caption="capApp.toggleProtected"
+										/>
+									</div>
 								</div>
 							</td>
 						</tr>
@@ -232,25 +239,35 @@ let MyBuilderPreset = {
 		isAttributeRelationship,
 		
 		// actions
-		childAddAllMissing() {
+		childAllAddMissing() {
 			for(const atr of this.attributesValid) {
 				if(this.attributeIdMapValue[atr.id] === undefined)
 					this.childSet(atr.id,null,false,null);
 			}
 		},
+		childAllToggleProtected() {
+			let anyNotProtected = false;
+			for(const atr of this.attributesValid) {
+				if(this.childGet(atr.id,'protected') === false) {
+					anyNotProtected = true;
+					break;
+				}
+			}
+			for(const atr of this.attributesValid) {
+				if(this.attributeIdMapValue[atr.id] !== undefined)
+					this.childSet(atr.id,
+						this.childGet(atr.id,'presetIdRefer'),
+						anyNotProtected,
+						this.childGet(atr.id,'value')
+					);
+			}
+		},
 		childGet(atrId,mode) {
 			const exists = this.attributeIdMapValue[atrId] !== undefined;
-			
 			switch(mode) {
-				case 'presetIdRefer':
-					return exists ? this.attributeIdMapValue[atrId].presetIdRefer : null;
-				break;
-				case 'protected':
-					return exists ? this.attributeIdMapValue[atrId].protected : true;
-				break;
-				case 'value':
-					return exists ? this.attributeIdMapValue[atrId].value : '';
-				break;
+				case 'presetIdRefer': return exists ? this.attributeIdMapValue[atrId].presetIdRefer : null; break;
+				case 'protected':     return exists ? this.attributeIdMapValue[atrId].protected     : true; break;
+				case 'value':         return exists ? this.attributeIdMapValue[atrId].value         : '';   break;
 			}
 			return false;
 		},

@@ -1646,6 +1646,7 @@
 			"protectedHint": "Después de la creación, un registro predefinido protegido solo puede eliminarse en el Constructor. Los predefinidos protegidos se usan a menudo para datos que son requeridos para que la aplicación funcione, como estados de flujo de trabajo u opciones de configuración.<br /><br />Los predefinidos no protegidos pueden eliminarse en cualquier momento; estos se usan a menudo para datos de ejemplo.<br /><br />Independientemente de la configuración de protección del registro predefinido, sus valores pueden editarse, a menos que también estén protegidos (ver abajo).",
 			"title": "Predefinido '{NAME}'",
 			"titleNew": "Nuevo predefinido",
+			"toggleProtected": "Toggle all protected",
 			"valueNotSet": "Haz clic aquí para establecer un valor para este atributo.",
 			"values": "Valores de atributos"
 		},
