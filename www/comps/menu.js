@@ -7,7 +7,7 @@ import {getCaption}          from './shared/language.js';
 
 export {MyMenu as default};
 
-let MyMenuFavoritesEdit = {
+const MyMenuFavoritesEdit = {
 	name:'my-menu-favorites-edit',
 	template:`<div class="menu-favorites-edit default-inputs">
 		<draggable handle=".dragAnchor" class="menu-favorites-edit-list" group="favorites" itemKey="id" animation="150"
@@ -98,7 +98,7 @@ let MyMenuFavoritesEdit = {
 	}
 };
 
-let MyMenuItemFavorite = {
+const MyMenuItemFavorite = {
 	name:'my-menu-item-favorite',
 	template:`<div class="item">
 		<div class="line noHighlight" tabindex="0"
@@ -131,7 +131,7 @@ let MyMenuItemFavorite = {
 	}
 };
 
-let MyMenuItem = {
+const MyMenuItem = {
 	name:'my-menu-item',
 	template:`<div class="item" v-if="active">
 		<!-- menu item line -->
@@ -206,7 +206,7 @@ let MyMenuItem = {
 		// simple
 		active:           (s) => s.menuAccess[s.menu.id] === 1,
 		collectionEntries:(s) => s.getConsumersEntries(s.menu.collections),
-		color:            (s) => s.menu.color !== null ? s.menu.color : (s.colorParent !== null ? s.colorParent : null),
+		color:            (s) => s.menu.color ?? s.colorParent,
 		hasChildren:      (s) => s.menu.menus.length !== 0,
 		selected:         (s) => (!s.recordOpen || s.formOpensPreset) && s.menu.formId === s.formIdActive && s.favoriteIdActive === null,
 		showChildren:     (s) => s.hasChildren && s.menuIdMapOpen[s.menu.id],
@@ -254,7 +254,7 @@ let MyMenuItem = {
 	}
 };
 
-let MyMenu = {
+const MyMenu = {
 	name:'my-menu',
 	components:{
 		MyMenuFavoritesEdit,

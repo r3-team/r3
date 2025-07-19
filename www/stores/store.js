@@ -358,26 +358,23 @@ const MyStore = Vuex.createStore({
 				}
 			} else {
 				// accent color disabled, use main color for gradient
-				colorRgb = state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault;
+				colorRgb = state.settings.colorHeader ?? state.colorHeaderDefault;
 			}
 			return tinycolor(colorRgb).brighten(brighten).desaturate(desature);
 		},
 		colorHeaderMain:(state,payload) => {
-			return tinycolor(state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault);
+			return tinycolor(state.settings.colorHeader ?? state.colorHeaderDefault);
 		},
 		colorLogin:(state,payload) => {
 			return tinycolor(MyStoreLocal.state.activated && MyStoreLocal.state.companyColorLogin !== '' ? MyStoreLocal.state.companyColorLogin : state.colorLoginDefault);
 		},
 		colorMenu:(state,payload) => {
-			return tinycolor(state.settings.colorMenu !== null
-				? state.settings.colorMenu
-				: (state.settings.dark ? state.colorMenuDefaultDark : state.colorMenuDefault));
+			return tinycolor(state.settings.colorMenu ?? (state.settings.dark ? state.colorMenuDefaultDark : state.colorMenuDefault));
 		},
 		colorMenuStyle:(state,payload) => {
-			const colorRgb = state.settings.colorMenu !== null
-				? state.settings.colorMenu
-				: (state.settings.dark ? state.colorMenuDefaultDark : state.colorMenuDefault);
-			const color = tinycolor(colorRgb).lighten(4);
+			const colorUser = tinycolor(state.settings.colorMenu).isValid() ? state.settings.colorMenu : null;
+			const colorRgb  = colorUser ?? (state.settings.dark ? state.colorMenuDefaultDark : state.colorMenuDefault);
+			const color     = tinycolor(colorRgb).lighten(4);
 			return `background:radial-gradient(at right bottom, ${color.toString()} 20%, #${colorRgb} 60%);`;
 		},
 		licenseDays:(state) => {
