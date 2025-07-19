@@ -663,6 +663,7 @@ const MyList = {
 		inputIsNew:     { type:Boolean, required:false, default:false },    // input field belongs to new record
 		inputIsReadonly:{ type:Boolean, required:false, default:false },    // input field is readonly
 		inputMulti:     { type:Boolean, required:false, default:false },    // input has multiple records to represent (instead of just one)
+		inputNoFilters: { type:Boolean, required:false, default:false },    // input only resolves values by record IDs, ignores filters (not possible if showAllValues is active)
 		inputRecordIds: { type:Array,   required:false, default:() => [] }, // input record IDs, representing active values to show
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
@@ -1453,8 +1454,10 @@ const MyList = {
 			if(!this.showAllValues && !this.autoSelect && !this.anyInputRows)
 				return;
 			
-			// apply relevant filters, without choice filters as these should not affect the input
-			let filters = JSON.parse(JSON.stringify(this.filtersInput));
+			// apply input filters if active
+			// input filters must always be applied, if all values are shown (category/flow options)
+			let filters = !this.inputNoFilters || this.showAllValues ? JSON.parse(JSON.stringify(this.filtersInput)) : [];
+			
 			if(!this.showAllValues && this.anyInputRows)
 				filters.push(this.getQueryAttributesPkFilter(
 					this.query.relationId,this.inputRecordIds,0,false
