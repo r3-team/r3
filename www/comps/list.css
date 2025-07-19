@@ -336,6 +336,7 @@
 	display:flex;
 	flex-flow:row wrap;
 	gap:calc(var(--spacing) / 4);
+	color:var(--color-font);
 }
 .list-input-flow-entry-wrap{
 	/* required, as clip-path on child element would but of shadow */
@@ -369,11 +370,11 @@
 	background-color:var(--color-flow);
 	opacity:0.7;
 }
-
-.list-input-flow-entry:hover,
+.list-input-flow-entry:hover:not(.readonly),
 .list-input-flow-entry.active{
 	background-color:var(--color-flow-active);
 	color:var(--color-font-bright);
+	--image-filter:var(--image-filter-bg);
 }
 .list-input-flow-entry:hover{
 	opacity:0.85;
@@ -385,6 +386,7 @@
 .list-input-flow-entry-values{
 	display:flex;
 	flex-flow:row nowrap;
+	gap:calc(var(--spacing) / 2);
 }
 
 /* filters */

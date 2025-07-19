@@ -9,7 +9,7 @@ const MyListInputFlow = {
 				@click="$emit('clicked-row',r)"
 				:class="{ clickable:!readonly }"
 			>
-				<div class="list-input-flow-entry" :class="{ active:i <= rowLastIndexActive }">
+				<div class="list-input-flow-entry" :class="{ active:i <= rowLastIndexActive, readonly }">
 					<div class="list-input-flow-entry-values" v-for="(b,bi) in columnBatches" :style="b.style">
 						<template v-for="(ci,cii) in b.columnIndexes">
 							<my-value-rich class="context-list-input"
