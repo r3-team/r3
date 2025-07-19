@@ -840,6 +840,8 @@ let MyBuilderPgFunction = {
 			// stored in function text as: (ATR_ID)
 			body = body.replace(/\(([a-z0-9\-]{36})\)/g,(match,id) => {
 				const atr = this.attributeIdMap[id];
+				if(atr === undefined) return match;
+				
 				const rel = this.relationIdMap[atr.relationId];
 				const mod = this.moduleIdMap[rel.moduleId];
 				return `(${mod.name}.${rel.name}.${atr.name})`;
@@ -868,6 +870,8 @@ let MyBuilderPgFunction = {
 			// preset name may not include closed curly bracket '}'
 			body = body.replace(/instance\.get_preset_record_id\(\'([a-z0-9\-]{36})\'\)/g,(match,presetId) => {
 				const prs = this.presetIdMap[presetId];
+				if(prs === undefined) return match;
+
 				const rel = this.relationIdMap[prs.relationId];
 				const mod = this.moduleIdMap[rel.moduleId];
 				const pat = new RegExp(`[\{\}]`,'g');
