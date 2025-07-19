@@ -18,7 +18,7 @@ import {
 } from './shared/time.js';
 export {MyInputDate as default};
 
-let MyInputDateEntryInput = {
+const MyInputDateEntryInput = {
 	name:'my-input-date-entry-input',
 	template:`<input data-is-input="1"
 		@change="change($event)"
@@ -60,7 +60,7 @@ let MyInputDateEntryInput = {
 	}
 };
 
-let MyInputDateEntry = {
+const MyInputDateEntry = {
 	name:'my-input-date-entry',
 	components:{MyInputDateEntryInput},
 	template:`<div class="input-date-inputs entry">
@@ -333,7 +333,7 @@ let MyInputDateEntry = {
 	}
 };
 
-let MyInputDate = {
+const MyInputDate = {
 	name:'my-input-date',
 	components:{
 		MyCalendarDateSelect,
@@ -393,7 +393,7 @@ let MyInputDate = {
 		</div>
 
 		<teleport to="#dropdown" v-if="dropdownShow">
-			<div class="input-date-dropdown-actions">
+			<div class="input-date-dropdown-actions" data-dropdown-width-min="300">
 				<div></div>
 				<div class="default-inputs">
 					<my-calendar-date-select v-model="date" :daysShow="viewMonth ? 42 : 7" />

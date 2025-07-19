@@ -7,7 +7,7 @@ import {
 } from './shared/time.js';
 export {MyListColumnBatch as default};
 
-let MyListColumnBatch = {
+const MyListColumnBatch = {
 	name:'my-list-column-batch',
 	template:`<div class="columnBatchHeader" ref="content">
 		<my-button image="filter.png"

@@ -1,6 +1,6 @@
 export {MyDropdown as default};
 
-let MyDropdown = {
+const MyDropdown = {
 	name:'my-dropdown',
 	template:`<div id="dropdown" ref="self"
 		v-show="active && !targetLeftWindow"
@@ -98,14 +98,16 @@ let MyDropdown = {
 				// check for dropdown configuration options in first child
 				const child = this.$refs.self.firstElementChild;
 				this.config.borderSimple = child !== null && child.dataset['dropdownBorderSimple'] !== undefined;
-				this.config.marginX      = child !== null && child.dataset['dropdownMarginX']      !== undefined ? parseInt(child.dataset['dropdownMarginX']) : null;
-				this.config.width        = child !== null && child.dataset['dropdownWidth']        !== undefined ? parseInt(child.dataset['dropdownWidth'])   : null;
+				this.config.marginX      = child !== null && child.dataset['dropdownMarginX']      !== undefined ? parseInt(child.dataset['dropdownMarginX'])  : null;
+				this.config.width        = child !== null && child.dataset['dropdownWidth']        !== undefined ? parseInt(child.dataset['dropdownWidth'])    : null;
+				this.config.widthMin     = child !== null && child.dataset['dropdownWidthMin']     !== undefined ? parseInt(child.dataset['dropdownWidthMin']) : null;
 
-				const cssMarginX = this.config.marginX !== null ? `${this.config.marginX}px` : this.marginXDef;
-				const cssPos     = dropLeavesWinRight           ? `right:0px` : `left:calc(${rectTarget.left + window.scrollX}px + ${cssMarginX} + var(--border-input-radius))`;
-				const cssTop     = this.isDownwards             ? `top:${rectTarget.bottom}px` : `top:${rectTarget.top - rectDrop.height}px`;
-				const cssWidth   = this.config.width   !== null ? `width:${this.config.width}px` : `width:calc(${rectTarget.width}px - ((${cssMarginX} + var(--border-input-radius)) * 2) )`;
-				this.style = [cssPos,cssTop,cssWidth].join(';');
+				const cssMarginX  = this.config.marginX  !== null ? `${this.config.marginX}px` : this.marginXDef;
+				const cssPos      = dropLeavesWinRight            ? `right:0px` : `left:calc(${rectTarget.left + window.scrollX}px + ${cssMarginX} + var(--border-input-radius))`;
+				const cssTop      = this.isDownwards              ? `top:${rectTarget.bottom}px` : `top:${rectTarget.top - rectDrop.height}px`;
+				const cssWidth    = this.config.width    !== null ? `width:${this.config.width}px` : `width:calc(${rectTarget.width}px - ((${cssMarginX} + var(--border-input-radius)) * 2) )`;
+				const cssWidthMin = this.config.widthMin !== null ? `min-width:${this.config.widthMin}px` : `min-width:0px`;
+				this.style = [cssPos,cssTop,cssWidth,cssWidthMin].join(';');
 				
 				this.isWaitingForFrame = false;
 				
