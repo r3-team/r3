@@ -528,8 +528,8 @@ let MyForm = {
 		relationId:     (s) => s.form.query.relationId,
 		relationsJoined:(s) => s.getRelationsJoined(s.joins),
 		joinsIndexMap:  (s) => s.getJoinIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet),
-		joinsIndexesDel:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyDelete && !v.recordNoDel && v.recordId !== 0 && s.hasAccessToRelation(s.access,v.relationId,3)); },
-		joinsIndexesSet:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyUpdate && !v.recordNoSet && v.recordId !== 0 && s.hasAccessToRelation(s.access,v.relationId,2)); },
+		joinsIndexesDel:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyDelete && s.hasAccessToRelation(s.access,v.relationId,3) && !v.recordNoDel && v.recordId !== 0); },
+		joinsIndexesSet:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyUpdate && s.hasAccessToRelation(s.access,v.relationId,2) && ((!v.recordNoSet && v.recordId !== 0 ) || s.isBulkUpdate)); },
 		iconSrc:(s) => {
 			if(s.favoriteId  !== null) return 'images/star1.png';
 			if(s.form.iconId !== null) return s.srcBase64(s.iconIdMap[s.form.iconId].file);
@@ -1902,7 +1902,8 @@ let MyForm = {
 				if(this.attributeIdMap[f.attributeId].encrypted)
 					err = this.capApp.dialog.bulkEncrypted;
 				
-				if(err !== null)
+				if(err !== null) {
+					this.changingRecord = false;
 					return this.$store.commit('dialog',{
 						captionBody:err,
 						buttons:[{
@@ -1913,6 +1914,7 @@ let MyForm = {
 							image:'ok.png'
 						}]
 					});
+				}
 				
 				attributes.push({
 					attributeId:f.attributeId,
