@@ -860,8 +860,7 @@ const MyList = {
 		this.$watch('appResized',this.resized);
 		this.$watch('limit',this.get);
 		this.$watch('dropdownShow',v => {
-			if(!v) return;
-			this.setOffsetAndReload(0);
+			if(v) this.setOffsetAndReload(0);
 			
 			const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
 			if(inputEl !== null)
