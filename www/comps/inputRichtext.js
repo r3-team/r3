@@ -53,11 +53,12 @@ const MyInputRichtext = {
 	data() {
 		return {
 			debug:false,
-			editor:null,     // registered tinymce editor instance
-			isMounted:false, // wait for mount as toolbar ref must exist for tinymce init object to target it
-			images:[],       // image links to offer in editor
-			key:0,           // forces recreation of the editor on init change, 0 = not yet initialized
+			editor:null,       // registered tinymce editor instance
+			isMounted:false,   // wait for mount as toolbar ref must exist for tinymce init object to target it
+			images:[],         // image links to offer in editor
+			key:0,             // forces recreation of the editor on init change, 0 = not yet initialized
 			toolbarBase:'bold italic forecolor paragraphgroup numlist bullist alignleft aligncenter alignright alignjustify',
+			wasfocussed:false, // user focussed editor input
 			
 			// tokens are used to authenticate with the current user session
 			// we cannot store sensitive tokens inside richtext, but tokens are required for accessing files
@@ -106,6 +107,7 @@ const MyInputRichtext = {
 				
 				setup:(e) => {
 					e.ui.registry.addButton('customPrint',{ icon:'print', onAction:s.print });
+					e.on('focus', () => s.wasfocussed = true);
 
 					if(s.debug) {
 						e.on('remove', ()    => s.debugEvent('remove') );
@@ -137,7 +139,7 @@ const MyInputRichtext = {
 				return this.modelValue === null ? '' : this.modelValue.replace(this.rxTokensAdd,this.token);
 			},
 			set(v) {
-				if(this.readonly)
+				if(this.readonly || !this.wasfocussed)
 					return;
 				
 				// remove authentication tokens from file download link
