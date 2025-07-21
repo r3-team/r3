@@ -28,7 +28,7 @@ import {
 } from './shared/router.js';
 export {MyGantt as default};
 
-let MyGanttLineRecord = {
+const MyGanttLineRecord = {
 	name:'my-gantt-line-record',
 	template:
 	`<div class="gantt-line-record"
@@ -138,7 +138,7 @@ let MyGanttLineRecord = {
 	}
 };
 
-let MyGanttLine = {
+const MyGanttLine = {
 	name:'my-gantt-line',
 	components:{MyGanttLineRecord},
 	template:`<div class="gantt-line">
@@ -533,7 +533,6 @@ let MyGantt = {
 	mounted() {
 		// setup watchers
 		this.$watch('appResized',this.resized);
-		this.$watch('columns',() => { this.groups = []; });
 		this.$watch('formLoading',v => { if(!v) this.get(); });
 		this.$watch('isHidden',v => { if(!v) this.$nextTick(() => this.setSteps(true)); });
 		this.$watch('popUpFormInline',this.resized);
@@ -542,11 +541,15 @@ let MyGantt = {
 			this.paramsUpdate(true);
 			this.$nextTick(() => this.setSteps(true));
 		});
-		this.$watch(() => [this.choices,this.filters],(newVals, oldVals) => {
-			for(let i = 0, j = newVals.length; i < j; i++) {
-				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
-					return this.get();
+		this.$watch('columns',(valNew,valOld) => {
+			if(JSON.stringify(valNew) !== JSON.stringify(valOld)) {
+				this.groups = [];
+				this.get();
 			}
+		});
+		this.$watch('filters',(valNew,valOld) => {
+			if(JSON.stringify(valNew) !== JSON.stringify(valOld))
+				this.get();
 		});
 		this.$watch(() => [this.showGroupLabels,this.stepZoom],() => {
 			this.$nextTick(() => this.setSteps(false));
