@@ -29,7 +29,7 @@ import {
 
 export {MyApp as default};
 
-let MyApp = {
+const MyApp = {
 	name:'app',
 	components:{
 		MyDialog,

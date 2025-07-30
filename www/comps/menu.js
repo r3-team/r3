@@ -376,6 +376,38 @@ const MyMenu = {
 		module:          { type:Object,  required:true },
 		recordOpen:      { type:Boolean, required:true }
 	},
+	watch:{
+		$route:{
+			handler(v) {
+				const menuOrChildHasForm = (menu,formId) => {
+					if(menu.formId === formId)
+						return true;
+
+					for(const child of menu.menus) {
+						if(menuOrChildHasForm(child,formId))
+							return true;
+					}
+					return false;
+				};
+
+				// when route changes, check if currently active menu tab shows the opened form
+				// get indexes of all menu tabs that include the form (could be multiple)
+				let menuTabIndexesHaveForm = [];
+				for(let i = 0, j = this.menuTabsAccess.length; i < j; i++) {
+					for(const menu of this.menuTabsAccess[i].menus) {
+						if(menuOrChildHasForm(menu, this.formIdActive)) {
+							menuTabIndexesHaveForm.push(i);
+							break;
+						}
+					}
+				}
+
+				// if there are menu tabs that have the form, switch to first one if currently active menu tab does not have it
+				if(menuTabIndexesHaveForm.length !== 0 && !menuTabIndexesHaveForm.includes(this.menuTabIndexShown))
+					this.menuTabIndexShown = menuTabIndexesHaveForm[0];
+			}
+		}
+	},
 	computed:{
 		menuTabsAccess:(s) => {
 			let out = [];
