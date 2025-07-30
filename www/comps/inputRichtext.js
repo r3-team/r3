@@ -18,6 +18,7 @@ const MyInputRichtext = {
 					class="input-richtext-toolbar-link clickable"
 					target="_blank"
 					href="https://www.tiny.cloud/powered-by-tiny?utm_campaign=poweredby&utm_source=tiny&utm_medium=referral&utm_content=v6"
+					tabindex="-1"
 				>
 					<img class="input-richtext-toolbar-logo" src="images/externals/tinymce.svg" />
 				</a>
