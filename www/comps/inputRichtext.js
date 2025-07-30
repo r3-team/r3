@@ -220,9 +220,12 @@ const MyInputRichtext = {
 			const win = window.open('', '', 'height=600,width=800');
 			win.document.write(`<html><head><title>${this.printCaption}_${this.getDateFormat(new Date(),'Y-m-d H:i:S')}</title></head><body style="margin:20px;">${this.input}</body></html>`);
 			win.document.close();
-			win.focus();
-			win.print();
-			win.close();
+
+			setTimeout(() => {
+				win.focus();
+				win.print();
+				win.close();
+			}, 500);
 		},
 		register(ev,editor) {
 			this.editor = editor;
