@@ -589,7 +589,7 @@
 	transition:height 0.2s;
 }
 .input-richtext-content{
-	flex:1 1 auto;
+	flex:1 1 1px;
 	overflow:auto;
 	display:flex;
 }
