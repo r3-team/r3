@@ -260,7 +260,6 @@ const MyList = {
 						v-if="filterQuick"
 						@keyup.enter="updatedFilterQuick"
 						v-model="filtersQuick"
-						:disabled="rowsFetching"
 						:placeholder="capGen.threeDots"
 						:title="capApp.quick"
 					/>
@@ -1240,7 +1239,9 @@ const MyList = {
 				return this.$emit('dropdown-show',true);
 			
 			this.offset = 0;
-			this.get();
+			
+			if(!this.rowsFetching)
+				this.get();
 		},
 		
 		// user actions, cards layout
