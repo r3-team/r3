@@ -202,6 +202,10 @@
 	color:var(--color-font-bright);
 	border:2px solid var(--color-border-bright);
 }
+.app-header-search-input.isDark::placeholder{
+	color:var(--color-border-bright);
+	-webkit-text-fill-color:var(--color-border-bright);
+}
 
 /* user overwrites */
 .user-dark .app-header .entry-wrap:focus .entry-bg,

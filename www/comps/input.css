@@ -447,11 +447,6 @@
 	background-color:transparent;
 	box-shadow:none;
 }
-.input-date-inputs input:disabled{
-	color:var(--color-font-disabled);
-	background-color:var(--color-input-disabled);
-	-webkit-text-fill-color:var(--color-font-disabled); /* fix for Safari < 18.0 */
-}
 .input-date-inputs input::placeholder{
 	font-family:monospace;
 }

@@ -195,7 +195,8 @@ let MyCalendar = {
 				<div class="content column gap default-inputs">
 					<input
 						v-model="icsTokenName"
-						v-focus :disabled="icsToken !== ''"
+						v-focus
+						:disabled="icsToken !== ''"
 						:placeholder="capApp.icsTokenNameHint"
 					/>
 					<div v-if="icsToken === ''">

@@ -4,7 +4,7 @@ import {srcBase64}      from '../shared/image.js';
 import {MyModuleSelect} from '../input.js';
 export {MyAdminCustom as default};
 
-let MyAdminCustomLogo = {
+const MyAdminCustomLogo = {
 	name:'my-admin-custom-logo',
 	template:`<td>
 		<input type="file"
@@ -54,7 +54,7 @@ let MyAdminCustomLogo = {
 	}
 };
 
-let MyAdminCustom = {
+const MyAdminCustom = {
 	name:'my-admin-custom',
 	components:{
 		MyAdminCustomLogo,

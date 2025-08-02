@@ -93,7 +93,7 @@
 	--color-font:          #101010;
 	--color-font-bright:   #ffffff;
 	--color-font-dark:     #101010;
-	--color-font-disabled: #797979;
+	--color-font-disabled: #4d4d4d;
 	--color-input:         #ffffff;
 	--color-input-disabled:#efefef;
 	--color-list-row-even: #e9eeef;
@@ -183,6 +183,12 @@ h3{
 hr{
 	border-top:1px solid var(--color-border);
 	border-bottom:none;
+}
+*:disabled,
+*::placeholder{
+	color:var(--color-font-disabled);
+	-webkit-text-fill-color:var(--color-font-disabled); /* fix for Safari */
+	opacity:1;                                          /* some browsers change opacity */
 }
 
 /* generics */
@@ -1428,6 +1434,7 @@ table td.maximum{
 	--color-cal-day-event: #444c51;
 	--color-cal-outside:   #525455;
 	--color-font:          #ededed;
+	--color-font-disabled: #b5b5b5;
 	--color-input-disabled:#222222;
 	--color-list-row-even: #3e4141;
 	--color-shade:         #1b1b1b;

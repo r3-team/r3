@@ -2,7 +2,7 @@ import MyInputColor from './inputColor.js';
 
 export default {
 	components:{ MyInputColor },
-	template: `<div class="input-custom row nowrap gap" ref="content" :class="{ focus:dropdownShow }">
+	template: `<div class="input-custom row nowrap gap" ref="content" :class="{ disabled:readonly, focus:dropdownShow }">
 		<my-label v-if="image !== ''" :image />
 		<my-input-color
 			@dropdown-show="dropdownSet"

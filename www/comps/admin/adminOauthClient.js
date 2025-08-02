@@ -95,6 +95,7 @@ let MyAdminOauthClient = {
 									@set-unix-from="inputs.dateExpiry = $event"
 									:isDate="true"
 									:isTime="false"
+									:isReadonly="readonly"
 									:isValid="true"
 									:unixFrom="inputs.dateExpiry"
 								/>
@@ -147,7 +148,7 @@ let MyAdminOauthClient = {
 							<tr>
 								<td>{{ capGen.loginTemplate }}</td>
 								<td>
-									<select v-model="inputs.loginTemplateId">
+									<select v-model="inputs.loginTemplateId" :disabled="readonly">
 										<option v-for="t in loginTemplates" :title="t.comment" :value="t.id">{{ t.name }}</option>
 									</select>
 								</td>

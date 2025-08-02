@@ -6,7 +6,7 @@ import {
 } from './shared/collection.js';
 export {MyInputCollection as default};
 
-let MyInputCollection = {
+const MyInputCollection = {
 	name:'my-input-collection',
 	template:`<div class="input-collection input-custom" @keyup.esc="escape">
 	

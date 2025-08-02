@@ -3,7 +3,7 @@ import MyInputDate from './inputDate.js';
 export default {
 	components:{ MyInputDate },
 	template: `<div class="input-date-wrap input-custom row nowrap gap" ref="content"
-		:class="{ dropdown:dropdownShow, focus:dropdownShow }"
+		:class="{ disabled:isReadonly, dropdown:dropdownShow, focus:dropdownShow }"
 	>
 		<my-input-date
 			@dropdown-show="dropdownSet"
