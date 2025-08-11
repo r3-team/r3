@@ -287,7 +287,7 @@ let MyForm = {
 					:formBlockInputs="blockInputs"
 					:formIsEmbedded="isPopUp || isWidget"
 					:formLoading="loading"
-					:formNoDataPerm="(isNew && !mayCreate) || (!isNew && !mayUpdate)"
+					:formNoDataPerm="!mayCreate && !mayUpdate"
 					:isAloneInForm="isSingleField"
 					:joinsIndexMap
 					:key="f.id"
