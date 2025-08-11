@@ -2,7 +2,7 @@ import {hasAnyAssignableRole} from '../shared/access.js';
 import {getCaption}           from '../shared/language.js';
 export {MyAdminLoginRolesAssign as default};
 
-let MyAdminLoginRolesAssign = {
+const MyAdminLoginRolesAssign = {
 	name:'my-admin-login-roles-assign',
 	template:`<div class="column gap">
 		<table v-if="modelValue.length !== 0">

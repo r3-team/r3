@@ -3,7 +3,7 @@ import {getCaption}           from './shared/language.js';
 export {MyBool,MyBoolStringNumber,MyModuleSelect};
 
 // generic inputs
-let MyBool = {
+const MyBool = {
 	name:'my-bool',
 	template:`<div class="bool" tabindex="0"
 		@click="trigger"
@@ -38,7 +38,7 @@ let MyBool = {
 	}
 };
 
-let MyBoolStringNumber = {
+const MyBoolStringNumber = {
 	name:'my-bool-string-number',
 	template:`<div>
 		<my-bool
@@ -61,23 +61,23 @@ let MyBoolStringNumber = {
 	}
 };
 
-let MyModuleSelect = {
+const MyModuleSelect = {
 	name:'my-module-select',
 	template:`<select
 		@change="$emit('update:modelValue',$event.target.value)"
 		:value="modelValue"
 	>
 		<option
-			v-for="m in modules.filter(v => !moduleIdsFilter.includes(v.id))"
-			:disabled="enableAssignable && displayInvalid(m)"
+			v-for="m in modules.filter(v => !moduleIdsFilter.includes(v.id) && !moduleIdMapMeta[v.id].hidden)"
+			:disabled="!getModuleIsValid(m)"
 			:value="m.id"
-		>{{ displayModuleName(m) }}</option>
+		>{{ getModuleName(m) }}</option>
 	</select>`,
 	props:{
-		enableAssignable:{ type:Boolean, required:false, default:false },
-		preSelectOne:    { type:Boolean, required:false, default:true },
-		moduleIdsFilter: { type:Array,   required:false, default:() => [] },
-		modelValue:      { required:true } // module ID
+		preSelectOne:        { type:Boolean, required:false, default:true },     // pre select the first valid module
+		moduleIdsFilter:     { type:Array,   required:false, default:() => [] }, // remove modules with given IDs
+		modelValue:          { required:true }, // module ID
+		showOnlyIfAssignable:{ type:Boolean, required:false, default:false }     // include only modules with assignable roles
 	},
 	emits:['update:modelValue'],
 	mounted() {
@@ -87,13 +87,14 @@ let MyModuleSelect = {
 		// select any valid module
 		if(this.preSelectOne) {
 			for(const m of this.modules) {
-				if(!this.enableAssignable || !this.displayInvalid(m))
+				if(this.getModuleIsValid(m) && !this.moduleIdMapMeta[m.id].hidden)
 					return this.$emit('update:modelValue',m.id);
 			}
 		}
 	},
 	computed:{
-		modules:(s) => s.$store.getters['schema/modules']
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta,
 	},
 	methods:{
 		// externals
@@ -101,11 +102,11 @@ let MyModuleSelect = {
 		hasAnyAssignableRole,
 		
 		// presentation
-		displayInvalid(module) {
-			return module.hidden || !this.hasAnyAssignableRole(module.roles);
+		getModuleIsValid(m) {
+			return !this.showOnlyIfAssignable || this.hasAnyAssignableRole(m.roles);
 		},
-		displayModuleName(mod) {
-			return `${mod.parentId !== null ? '- ' : ''}` + this.getCaption('moduleTitle',mod.id,mod.id,mod.captions,mod.name);
+		getModuleName(m) {
+			return `${m.parentId !== null ? '- ' : ''}` + this.getCaption('moduleTitle',m.id,m.id,m.captions,m.name);
 		}
 	}
 };
