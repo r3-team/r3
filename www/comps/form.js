@@ -2,7 +2,6 @@ import MyArticles                    from './articles.js';
 import MyField                       from './field.js';
 import MyFormActions                 from './formActions.js';
 import MyFormLog                     from './formLog.js';
-import {hasAccessToRelation}         from './shared/access.js';
 import {getAttributeFileVersionHref} from './shared/attribute.js';
 import {getCollectionValues}         from './shared/collection.js';
 import {getColumnsProcessed}         from './shared/column.js';
@@ -34,7 +33,6 @@ import {
 	getFieldProcessedDefault
 } from './shared/field.js';
 import {
-	checkDataOptions,
 	filterIsCorrect,
 	filterOperatorIsSingleValue,
 	openLink
@@ -287,7 +285,6 @@ let MyForm = {
 					:formBlockInputs="blockInputs"
 					:formIsEmbedded="isPopUp || isWidget"
 					:formLoading="loading"
-					:formNoDataPerm="!mayCreate && !mayUpdate"
 					:isAloneInForm="isSingleField"
 					:joinsIndexMap
 					:key="f.id"
@@ -499,9 +496,9 @@ let MyForm = {
 		warnUnsaved:   (s) => s.hasChanges && !s.form.noDataActions && !s.blockInputs && s.settings.warnUnsaved,
 
 		// permissions
-		mayCreate:(s) => !s.badLoad && s.joinsIndexesCrt.length !== 0 && s.checkDataOptions(4,s.entityIdMapEffect.form.data),
-		mayDelete:(s) => !s.badLoad && s.joinsIndexesDel.length !== 0 && s.checkDataOptions(1,s.entityIdMapEffect.form.data),
-		mayUpdate:(s) => !s.badLoad && s.joinsIndexesSet.length !== 0 && s.checkDataOptions(2,s.entityIdMapEffect.form.data),
+		mayCreate:(s) => !s.badLoad && s.joinsIndexesCrt.length !== 0,
+		mayDelete:(s) => !s.badLoad && s.joinsIndexesDel.length !== 0,
+		mayUpdate:(s) => !s.badLoad && s.joinsIndexesSet.length !== 0,
 
 		// buttons
 		buttonActiveDel:     (s) => !s.buttonsReadonly && s.mayDelete,
@@ -524,10 +521,10 @@ let MyForm = {
 		joins:          (s) => s.fillRelationRecordIds(s.form.query.joins),
 		relationId:     (s) => s.form.query.relationId,
 		relationsJoined:(s) => s.getRelationsJoined(s.joins),
-		joinsIndexMap:  (s) => s.getJoinIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet),
-		joinsIndexesCrt:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyCreate && s.hasAccessToRelation(s.access,v.relationId,2) && v.recordId === 0); },
-		joinsIndexesDel:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyDelete && s.hasAccessToRelation(s.access,v.relationId,3) && !v.recordNoDel && v.recordId !== 0 && s.relationIdMap[v.relationId].presets.filter(p => p.protected && s.presetIdMapRecordId[p.id] === v.recordId).length === 0); },
-		joinsIndexesSet:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyUpdate && s.hasAccessToRelation(s.access,v.relationId,2) && !v.recordNoSet && v.recordId !== 0); },
+		joinsIndexMap:  (s) => s.getJoinIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet,s.entityIdMapEffect.form.data),
+		joinsIndexesCrt:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordCreate); },
+		joinsIndexesDel:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordDelete); },
+		joinsIndexesSet:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordUpdate); },
 		iconSrc:(s) => {
 			if(s.favoriteId  !== null) return 'images/star1.png';
 			if(s.form.iconId !== null) return s.srcBase64(s.iconIdMap[s.form.iconId].file);
@@ -869,7 +866,6 @@ let MyForm = {
 		// externals
 		aesGcmDecryptBase64WithPhrase,
 		aesGcmEncryptBase64WithPhrase,
-		checkDataOptions,
 		consoleError,
 		dialogCloseAsk,
 		fillRelationRecordIds,
@@ -897,7 +893,6 @@ let MyForm = {
 		getRelationsJoined,
 		getResolvedPlaceholders,
 		getRowsDecrypted,
-		hasAccessToRelation,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		jsFunctionRun,

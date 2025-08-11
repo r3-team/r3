@@ -69,7 +69,6 @@ let MyFormLog = {
 							:formBlockInputs="false"
 							:formIsEmbedded="true"
 							:formLoading="loading"
-							:formNoDataPerm="false"
 							:logViewer="true"
 							:isAloneInForm="false"
 							:joinsIndexMap

@@ -316,7 +316,6 @@ const MyField = {
 							:formBlockInputs
 							:formIsEmbedded
 							:formLoading
-							:formNoDataPerm
 							:isAloneInTab="t.fields.length === 1"
 							:isAloneInForm="false"
 							:isBulkUpdate
@@ -664,7 +663,6 @@ const MyField = {
 			:formBlockInputs
 			:formIsEmbedded
 			:formLoading
-			:formNoDataPerm
 			:flexDirParent="field.direction"
 			:isAloneInForm
 			:joinsIndexMap
@@ -690,7 +688,6 @@ const MyField = {
 		formBlockInputs:    { type:Boolean, required:true },
 		formIsEmbedded:     { type:Boolean, required:true },                 // parent form is embedded (pop-up, inline, widget)
 		formLoading:        { type:Boolean, required:true },
-		formNoDataPerm:     { type:Boolean, required:true },                 // no permissions to edit record on data form
 		flexDirParent:      { type:String,  required:true },                 // flex direction (row/column) of parent
 		isAloneInForm:      { type:Boolean, required:true },                 // parent form contains only this field
 		isAloneInTab:       { type:Boolean, required:false, default:false }, // parent tab only contains this field
@@ -916,12 +913,9 @@ const MyField = {
 				) state = 'required';
 			}
 
-			// overwrites for 'visible' states
-			if(state !== 'hidden' && (
-				s.logViewer ||
-				(s.formNoDataPerm && s.isData && !s.isVariable) ||
-				(s.formBlockInputs && (s.isData || s.isButton || s.isVariable))
-			)) state = 'readonly';
+			// readonly overwrite for 'visible' states
+			if(state !== 'hidden' && (s.logViewer || (s.formBlockInputs && (s.isData || s.isButton || s.isVariable))))
+				state = 'readonly';
 
 			return state;
 		},
@@ -986,9 +980,16 @@ const MyField = {
 			if(!s.isData)    return false;
 			if(s.isVariable) return true;
 			
-			// if field shows preset value and it is protected (set more than once)
+			// block access to protected preset value
 			if(s.presetValue !== false && s.presetValue.protected)
 				return false;
+
+			// check join permissions
+			const join = s.joinsIndexMap[s.field.index];
+			if(!s.isBulkUpdate) {
+				if(s.isNew  && !join.recordCreate) return false;
+				if(!s.isNew && !join.recordUpdate) return false;
+			}
 			
 			// check SET(2) permission for attribute
 			if(!s.hasAccessToAttribute(s.access,s.field.attributeId,
@@ -1004,16 +1005,8 @@ const MyField = {
 				return false;
 			}
 			
-			// check join of field attribute
-			const join = s.joinsIndexMap[s.field.index];
-			
-			// SET denied on join due to relation policy
-			if(join.recordNoSet)
-				return false;
-			
-			// SET dependent on join allowing record update
-			if(join.recordId !== 0 || s.isBulkUpdate)
-				return join.applyUpdate;
+			if(!s.isNew || s.isBulkUpdate)
+				return true;
 			
 			// field attribute relation has no record ID
 			// collect relationship chain until source relation
