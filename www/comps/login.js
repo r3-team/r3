@@ -9,9 +9,8 @@ import {
 	getLineBreaksParsedToHtml,
 	openLink
 } from './shared/generic.js';
-export {MyLogin as default};
 
-let MyLogin = {
+export default {
 	name:'my-login',
 	template:`<div class="login" :class="{ badAuth:badAuth }">
 		

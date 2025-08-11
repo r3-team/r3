@@ -25,7 +25,7 @@ import {
 } from './shared/router.js';
 export {MyKanban as default};
 
-let MyKanbanCard = {
+const MyKanbanCard = {
 	name:'my-kanban-card',
 	template:`<div class="kanban-card" :class="{ template:isTemplate }">
 		<div class="kanban-card-header"
@@ -87,7 +87,7 @@ let MyKanbanCard = {
 	}
 };
 
-let MyKanbanBox = {
+const MyKanbanBox = {
 	name:'my-kanban-box',
 	components:{ MyKanbanCard },
 	template:`<draggable class="kanban-box" handle=".dragAnchor" group="cards" itemKey="id" animation="150" direction="vertical"
@@ -197,7 +197,7 @@ let MyKanbanBox = {
 	}
 };
 
-let MyKanban = {
+const MyKanban = {
 	name:'my-kanban',
 	components:{
 		MyInputCollection,

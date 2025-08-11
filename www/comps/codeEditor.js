@@ -2,9 +2,8 @@ import {
 	builderOptionGet,
 	builderOptionSet
 } from './shared/builder.js';
-export {MyCodeEditor as default};
 
-let MyCodeEditor = {
+export default {
 	name:'my-code-editor',
 	template:`<div class="code-editor">
 	<div class="code-editor-field" ref="codeEditor"></div>

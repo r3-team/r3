@@ -173,7 +173,7 @@ const MyGanttLine = {
 	emits:['record-selected']
 };
 
-let MyGantt = {
+const MyGantt = {
 	name:'my-gantt',
 	components:{
 		MyGanttLine,

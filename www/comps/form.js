@@ -56,9 +56,8 @@ import {
 	variableValueGet,
 	variableValueSet
 } from './shared/variable.js';
-export {MyForm as default};
 
-let MyForm = {
+export default {
 	name:'my-form',
 	components:{
 		MyArticles,

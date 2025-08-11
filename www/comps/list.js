@@ -37,9 +37,8 @@ import {
 	routeChangeFieldReload,
 	routeParseParams
 } from './shared/router.js';
-export {MyList as default};
 
-const MyList = {
+export default {
 	name:'my-list',
 	components:{
 		MyFilters,

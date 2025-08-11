@@ -42,9 +42,8 @@ import {
 	variableValueGet,
 	variableValueSet
 } from './shared/variable.js';
-export {MyField as default};
 
-const MyField = {
+export default {
 	name:'my-field',
 	components:{
 		'chrome-picker':VueColor.Chrome,

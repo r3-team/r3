@@ -5,9 +5,8 @@ import {
 	getCaption,
 	getCaptionForLang
 } from './shared/language.js';
-export {MyArticles as default};
 
-let MyArticles = {
+export default {
 	name:'my-articles',
 	components:{ MyTabs },
 	template:`<div class="contentBox" :class="{ large:showLarge || isMobile, 'float':isFloat }">

@@ -6,9 +6,8 @@ import {
 	getUnixFormat,
 	getUtcTimeStringFromUnix
 } from './shared/time.js';
-export {MyListAggregate as default};
 
-let MyListAggregate = {
+export default {
 	name:'my-list-aggregate',
 	template:`<tr class="aggregation" v-if="anyValues">
 		<td v-if="leaveOneEmpty"></td>

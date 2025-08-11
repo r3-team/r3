@@ -1,7 +1,6 @@
 import MyInputSelect from './inputSelect.js';
-export {MyInputLogin as default};
 
-const MyInputLogin = {
+export default {
 	name:'my-input-login',
 	components:{ MyInputSelect },
 	template:`<my-input-select

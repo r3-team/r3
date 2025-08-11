@@ -3,9 +3,8 @@ import {
 } from './shared/column.js';
 import {getCaption}                    from './shared/language.js';
 import {setSingle as setSettingSingle} from './shared/settings.js';
-export {MyListOptions as default};
 
-let MyListOptions = {
+export default {
 	name:'my-list-options',
 	template:`<table class="generic-table-vertical fullWidth">
 		<tbody>

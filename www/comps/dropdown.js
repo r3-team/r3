@@ -1,6 +1,4 @@
-export {MyDropdown as default};
-
-const MyDropdown = {
+export default {
 	name:'my-dropdown',
 	template:`<div id="dropdown" ref="self"
 		v-show="active && !targetLeftWindow"

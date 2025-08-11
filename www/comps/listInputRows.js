@@ -1,6 +1,4 @@
-export {MyListInputRows as default};
-
-const MyListInputRows = {
+export default {
 	name:'my-list-input-rows',
 	template:`<div class="list-input-rows-wrap"
 			@click="$emit('clicked')"

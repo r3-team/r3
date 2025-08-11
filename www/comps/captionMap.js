@@ -8,7 +8,7 @@ import {MyModuleSelect}    from './input.js';
 import MyBuilderCaption    from './builder/builderCaption.js';
 export {MyCaptionMap as default};
 
-let MyCaptionMapTransfer = {
+const MyCaptionMapTransfer = {
 	name:'my-caption-map-transfer',
 	template:`<div class="app-sub-window under-header" @mousedown.self="close">
 		<div class="contentBox float">
@@ -159,7 +159,7 @@ let MyCaptionMapTransfer = {
 	}
 };
 
-let MyCaptionMapNewLanguage = {
+const MyCaptionMapNewLanguage = {
 	name:'my-caption-map-new-language',
 	template:`<div class="app-sub-window under-header" @mousedown.self="close">
 		<div class="contentBox float">
@@ -229,7 +229,7 @@ let MyCaptionMapNewLanguage = {
 	}
 };
 
-let MyCaptionMapItemValue = {
+const MyCaptionMapItemValue = {
 	name:'my-caption-map-item-value',
 	components:{ MyBuilderCaption },
 	template:`<td>
@@ -288,7 +288,7 @@ let MyCaptionMapItemValue = {
 	}
 };
 
-let MyCaptionMapItem = {
+const MyCaptionMapItem = {
 	name:'my-caption-map-item',
 	components:{ MyCaptionMapItemValue },
 	template:`<tr>
@@ -355,7 +355,7 @@ let MyCaptionMapItem = {
 	}
 };
 
-let MyCaptionMapItems = {
+const MyCaptionMapItems = {
 	name:'my-caption-map-items',
 	components:{ MyCaptionMapItem },
 	template:`<tr :class="{ 'sticky-row':show }">
@@ -401,7 +401,7 @@ let MyCaptionMapItems = {
 	}
 };
 
-let MyCaptionMap = {
+const MyCaptionMap = {
 	name:'my-caption-map',
 	components:{
 		MyCaptionMapItems,

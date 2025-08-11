@@ -1,6 +1,4 @@
-export {MyInputIframe as default};
-
-let MyInputIframe = {
+export default {
 	name:'my-input-iframe',
 	template:`<div class="input-iframe">
 		<div class="input-toolbar" v-if="!hideInputs" :class="{ readonly:readonly }">

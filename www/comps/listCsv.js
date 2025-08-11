@@ -1,8 +1,7 @@
 import {resolveErrCode}      from './shared/error.js';
 import {getQueryExpressions} from './shared/query.js';
-export {MyListCsv as default};
 
-let MyListCsv = {
+export default {
 	name:'my-list-csv',
 	template:`
 		<p v-if="action === 'export'">{{ capApp.message.csvExport }}</p>

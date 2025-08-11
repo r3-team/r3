@@ -20,7 +20,7 @@ import {
 } from './shared/crypto.js';
 export {MySettings as default};
 
-let MySettingsEncryption = {
+const MySettingsEncryption = {
 	name:'my-settings-encryption',
 	template:`<div class="encryption">
 	
@@ -448,7 +448,7 @@ let MySettingsEncryption = {
 	}
 };
 
-let MySettingsAccount = {
+const MySettingsAccount = {
 	name:'my-settings-account',
 	template:`<table class="default-inputs">
 		<tbody>
@@ -686,7 +686,7 @@ let MySettingsAccount = {
 	}
 };
 
-let MySettingsClientEvents = {
+const MySettingsClientEvents = {
 	name:'my-settings-client-events',
 	components:{ MyInputHotkey },
 	template:`<div class="settings-client-events">
@@ -819,7 +819,7 @@ let MySettingsClientEvents = {
 	}
 };
 
-let MySettingsFixedTokens = {
+const MySettingsFixedTokens = {
 	name:'my-settings-fixed-tokens',
 	components:{MyTabs},
 	template:`<div>
@@ -1209,7 +1209,7 @@ let MySettingsFixedTokens = {
 	}
 };
 
-let MySettings = {
+const MySettings = {
 	name:'my-settings',
 	components:{
 		MyInputColorWrap,

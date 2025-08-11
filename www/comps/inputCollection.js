@@ -4,9 +4,8 @@ import {
 	getCollectionColumn,
 	getCollectionColumnIndex
 } from './shared/collection.js';
-export {MyInputCollection as default};
 
-const MyInputCollection = {
+export default {
 	name:'my-input-collection',
 	template:`<div class="input-collection input-custom" @keyup.esc="escape">
 	

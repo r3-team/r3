@@ -10,7 +10,7 @@ import {
 } from './shared/generic.js';
 export {MyInputFiles as default};
 
-let MyInputFilesName = {
+const MyInputFilesName = {
 	name:'my-input-files-name',
 	template:`<div class="input-files-name">
 		<input
@@ -40,7 +40,7 @@ let MyInputFilesName = {
 	}
 };
 
-let MyInputFilesRequest = {
+const MyInputFilesRequest = {
 	name:'my-input-files-request',
 	template:`<my-button image="screenFile.png"
 		@trigger="$emit('open',false)"
@@ -58,7 +58,7 @@ let MyInputFilesRequest = {
 	}
 };
 
-let MyInputFiles = {
+const MyInputFiles = {
 	name:'my-input-files',
 	components:{
 		MyInputFilesName,

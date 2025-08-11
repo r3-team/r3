@@ -10,7 +10,7 @@ import {
 } from './shared/collection.js';
 export {MyWidgets as default};
 
-let MyWidget = {
+const MyWidget = {
 	name:'my-widget',
 	components:{ MyForm },
 	template:`<div class="widget" v-if="active" :class="cssClasses">
@@ -235,7 +235,7 @@ let MyWidget = {
 	}
 };
 
-let MyWidgetGroup = {
+const MyWidgetGroup = {
 	name:'my-widget-group',
 	components:{ MyWidget },
 	template:`<div class="widget-group" :class="{ editMode:editMode }">
@@ -278,7 +278,7 @@ let MyWidgetGroup = {
 	}
 };
 
-let MyWidgets = {
+const MyWidgets = {
 	name:'my-widgets',
 	components:{
 		MyWidget,

@@ -16,9 +16,8 @@ import {
 	getNumberFormatted,
 	openLink
 } from './shared/generic.js';
-export {MyValueRich as default};
 
-const MyValueRich = {
+export default {
 	name:'my-value-rich',
 	template:`<div class="value-rich"
 		v-if="active"

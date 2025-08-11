@@ -1,9 +1,8 @@
 import {getAttributeFileHref} from './shared/attribute.js';
 import {deepIsEqual}          from './shared/generic.js';
 import {getDateFormat}        from './shared/time.js';
-export {MyInputRichtext as default};
 
-const MyInputRichtext = {
+export default {
 	name:'my-input-richtext',
 	components:{'editor':Editor},
 	template:`<div class="input-richtext">

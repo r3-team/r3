@@ -5,9 +5,8 @@ import {
 	getUnixShifted,
 	getUtcTimeStringFromUnix
 } from './shared/time.js';
-export {MyListColumnBatch as default};
 
-const MyListColumnBatch = {
+export default {
 	name:'my-list-column-batch',
 	template:`<div class="columnBatchHeader" ref="content">
 		<my-button image="filter.png"

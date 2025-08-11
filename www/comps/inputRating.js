@@ -1,8 +1,7 @@
 
 import {srcBase64} from './shared/image.js';
-export {MyInputRating as default};
 
-let MyInputRating = {
+export default {
 	name:'my-input-rating',
 	template:`<div class="input-rating">
 		<div class="input-rating-icons">

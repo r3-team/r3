@@ -1,6 +1,4 @@
-export {MyListInputFlow as default};
-
-const MyListInputFlow = {
+export default {
 	name:'my-list-input-flow',
 	template:`<div class="list-input-flow">
 			<slot name="input-icon" />

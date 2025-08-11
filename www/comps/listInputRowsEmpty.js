@@ -1,6 +1,4 @@
-export {MyListInputRowsEmpty as default};
-
-const MyListInputRowsEmpty = {
+export default {
 	name:'my-list-input-rows-empty',
 	template:`<table class="list-input-rows"
 		@click="$emit('clicked')"

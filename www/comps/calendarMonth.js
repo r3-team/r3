@@ -9,9 +9,8 @@ import {
 	getUnixFromDate,
 	isUnixUtcZero
 } from './shared/time.js';
-export {MyCalendarMonth as default};
 
-let MyCalendarMonth = {
+export default {
 	name:'my-calendar-month',
 	template:`<div class="calendar-month">
 		

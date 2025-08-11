@@ -1,7 +1,6 @@
 import MyInputRichtext from './inputRichtext.js';
-export {MyDialog as default};
 
-let MyDialog = {
+export default {
 	name:'my-dialog',
 	components:{MyInputRichtext},
 	template:`<div class="app-sub-window" @mousedown.self="close">

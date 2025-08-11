@@ -8,9 +8,8 @@ import {
 	getCollectionColumn,
 	getConsumersEntries
 } from './shared/collection.js';
-export {MyHeader as default};
 
-let MyHeader = {
+export default {
 	name:'my-header',
 	template:`<div class="app-header shade noPrint" :class="{ isDark:isDark }" :style="bgStyle">
 		
