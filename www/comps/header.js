@@ -194,7 +194,7 @@ let MyHeader = {
 				v-if="isGlobalSearchOn"
 				v-model="globalSearchInput"
 				@keyup.enter="globalSearchStart($event.target.value); globalSearchInput = ''"
-				:class="{ isDark }"
+				:class="{ isDark, 'placeholder-bright':isDark }"
 				:placeholder="capGen.search + '...'"
 			/>
 			

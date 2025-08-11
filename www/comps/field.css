@@ -103,6 +103,9 @@
 .field .disabled .caption{
 	color:var(--color-font);
 }
+.field .invalid{
+	color:var(--color-error) !important;
+}
 .field .captionSub{
 	margin:3px 0px 0px 6px;
 	font-size:80%;
@@ -143,13 +146,6 @@
 .field .header-label .richtext{
 	flex:1 1 auto;
 	overflow:auto;
-}
-
-
-.field .invalid,
-.field .invalid::placeholder{
-	/* necessary for chrome */
-	color:var(--color-error) !important;
 }
 
 /* input field */

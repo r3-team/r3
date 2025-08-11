@@ -92,7 +92,7 @@ let MyLogin = {
 					<img src="images/server.png" />
 					<span>{{ message.authInt[language] }}</span>
 				</div>
-				<input autocomplete="username" type="text" spellcheck="false"
+				<input autocomplete="username" class="placeholder-bright" type="text" spellcheck="false"
 					@keyup="badAuth = false"
 					@keyup.enter="authenticate"
 					v-model="username"
@@ -100,7 +100,7 @@ let MyLogin = {
 					:placeholder="message.username[language]"
 				/>
 				
-				<input autocomplete="current-password" type="password"
+				<input autocomplete="current-password" class="placeholder-bright" type="password"
 					@keyup="badAuth = false"
 					@keyup.enter="authenticate"
 					v-model="password"
