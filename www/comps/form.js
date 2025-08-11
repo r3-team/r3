@@ -505,7 +505,7 @@ let MyForm = {
 
 		// buttons
 		buttonActiveDel:     (s) => !s.buttonsReadonly && s.mayDelete,
-		buttonActiveNew:     (s) => !s.buttonsReadonly && s.mayCreate && (!s.isNew || s.hasChanges),
+		buttonActiveNew:     (s) => !s.buttonsReadonly && (!s.isNew || s.hasChanges),
 		buttonActiveSave:    (s) => !s.buttonsReadonly && (s.mayUpdate || s.mayCreate)    && s.hasChanges,
 		buttonActiveSaveBulk:(s) => !s.buttonsReadonly && (s.mayUpdate || s.isBulkUpdate) && s.hasChangesBulk,
 		buttonShownDel:      (s) => !s.isBulkUpdate && s.showButtonDel && (s.buttonActiveDel || s.layoutElements.includes('dataActionReadonly')),
