@@ -499,18 +499,15 @@ let MyForm = {
 		warnUnsaved:   (s) => s.hasChanges && !s.form.noDataActions && !s.blockInputs && s.settings.warnUnsaved,
 
 		// permissions
-		mayCreate:      (s) => s.mayCreateRecord && s.checkDataOptions(4,s.entityIdMapEffect.form.data),
-		mayCreateRecord:(s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.hasAccessToRelation(s.access,s.joins[0].relationId,2),
-		mayDelete:      (s) => s.mayDeleteRecord && s.checkDataOptions(1,s.entityIdMapEffect.form.data),
-		mayDeleteRecord:(s) => !s.badLoad && s.joinsIndexesDel.length !== 0 && !s.isNew && s.relationIdMap[s.joins[0].relationId].presets.filter(v => v.protected && s.recordIds.includes(s.presetIdMapRecordId[v.id])).length === 0,
-		mayUpdate:      (s) => s.mayUpdateRecord && s.checkDataOptions((s.isNew ? 4 : 2),s.entityIdMapEffect.form.data),
-		mayUpdateRecord:(s) => !s.badLoad && (s.joinsIndexesSet.length !== 0 || (s.isNew && s.mayCreateRecord)),
+		mayCreate:(s) => !s.badLoad && s.joinsIndexesCrt.length !== 0 && s.checkDataOptions(4,s.entityIdMapEffect.form.data),
+		mayDelete:(s) => !s.badLoad && s.joinsIndexesDel.length !== 0 && s.checkDataOptions(1,s.entityIdMapEffect.form.data),
+		mayUpdate:(s) => !s.badLoad && s.joinsIndexesSet.length !== 0 && s.checkDataOptions(2,s.entityIdMapEffect.form.data),
 
 		// buttons
 		buttonActiveDel:     (s) => !s.buttonsReadonly && s.mayDelete,
 		buttonActiveNew:     (s) => !s.buttonsReadonly && s.mayCreate && (!s.isNew || s.hasChanges),
-		buttonActiveSave:    (s) => !s.buttonsReadonly && s.mayUpdate && s.hasChanges,
-		buttonActiveSaveBulk:(s) => !s.buttonsReadonly && s.mayUpdate && s.hasChangesBulk,
+		buttonActiveSave:    (s) => !s.buttonsReadonly && (s.mayUpdate || s.mayCreate)    && s.hasChanges,
+		buttonActiveSaveBulk:(s) => !s.buttonsReadonly && (s.mayUpdate || s.isBulkUpdate) && s.hasChangesBulk,
 		buttonShownDel:      (s) => !s.isBulkUpdate && s.showButtonDel && (s.buttonActiveDel || s.layoutElements.includes('dataActionReadonly')),
 		buttonShownNew:      (s) => !s.isBulkUpdate && s.showButtonNew && (s.buttonActiveNew || s.layoutElements.includes('dataActionReadonly')),
 		buttonShownSave:     (s) => !s.isBulkUpdate && (s.buttonActiveSave     || s.layoutElements.includes('dataActionReadonly')),
@@ -528,8 +525,9 @@ let MyForm = {
 		relationId:     (s) => s.form.query.relationId,
 		relationsJoined:(s) => s.getRelationsJoined(s.joins),
 		joinsIndexMap:  (s) => s.getJoinIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet),
-		joinsIndexesDel:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyDelete && s.hasAccessToRelation(s.access,v.relationId,3) && !v.recordNoDel && v.recordId !== 0); },
-		joinsIndexesSet:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyUpdate && s.hasAccessToRelation(s.access,v.relationId,2) && ((!v.recordNoSet && v.recordId !== 0 ) || s.isBulkUpdate)); },
+		joinsIndexesCrt:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyCreate && s.hasAccessToRelation(s.access,v.relationId,2) && v.recordId === 0); },
+		joinsIndexesDel:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyDelete && s.hasAccessToRelation(s.access,v.relationId,3) && !v.recordNoDel && v.recordId !== 0 && s.relationIdMap[v.relationId].presets.filter(p => p.protected && s.presetIdMapRecordId[p.id] === v.recordId).length === 0); },
+		joinsIndexesSet:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyUpdate && s.hasAccessToRelation(s.access,v.relationId,2) && !v.recordNoSet && v.recordId !== 0); },
 		iconSrc:(s) => {
 			if(s.favoriteId  !== null) return 'images/star1.png';
 			if(s.form.iconId !== null) return s.srcBase64(s.iconIdMap[s.form.iconId].file);
@@ -698,9 +696,9 @@ let MyForm = {
 					case 'login':           return s.loginId; break;
 					case 'preset':          return s.presetIdMapRecordId[side.presetId]; break;
 					case 'record':          return s.joinsIndexMap['0'] !== undefined ? s.joinsIndexMap['0'].recordId : false; break;
-					case 'recordMayCreate': return s.mayCreateRecord; break;
-					case 'recordMayDelete': return s.mayDeleteRecord; break;
-					case 'recordMayUpdate': return s.mayUpdateRecord; break;
+					case 'recordMayCreate': return s.mayCreate; break;
+					case 'recordMayDelete': return s.mayDelete; break;
+					case 'recordMayUpdate': return s.mayUpdate; break;
 					case 'recordNew':       return s.isNew; break;
 					case 'role':            return s.access.roleIds.includes(side.roleId); break;
 					case 'true':            return true; break;
@@ -814,19 +812,19 @@ let MyForm = {
 						const collectionIdMap = s.$root.getOrFallback(s.fieldIdMapOptions[f.id],'collectionIdMapIndexes',{});
 						const filters         = s.getQueryFiltersProcessed(
 							f.query.filters,s.joinsIndexMap,null,null,s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
-							s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord,collectionIdMap,s.variableIdMapLocal
+							s.mayCreate,s.mayDelete,s.mayUpdate,collectionIdMap,s.variableIdMapLocal
 						);
 
 						for(let i = 0, j = choices.length; i < j; i++) {
 							choices[i].filters = s.getQueryFiltersProcessed(
 								choices[i].filters,s.joinsIndexMap,null,null,s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
-								s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord,collectionIdMap,s.variableIdMapLocal);
+								s.mayCreate,s.mayDelete,s.mayUpdate,collectionIdMap,s.variableIdMapLocal);
 						}
 
 						out.choices[f.id] = choices;
 						out.columns[f.id] = s.getColumnsProcessed(
 							f.columns,columnIdsByUser,s.joinsIndexMap,null,null,s.fieldIdMapData,s.fieldIdsChanged,
-							s.fieldIdsInvalid,s.values,s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord);
+							s.fieldIdsInvalid,s.values,s.mayCreate,s.mayDelete,s.mayUpdate);
 						out.filters[f.id] = filters.concat(getChoiceFilters(choices,choiceId));
 						out.filtersInput[f.id] = filters;
 					}
@@ -926,7 +924,7 @@ let MyForm = {
 				ev.preventDefault();
 				ev.stopPropagation();
 
-				if(!this.form.noDataActions && !this.blockInputs && this.mayUpdate) {
+				if(!this.form.noDataActions && this.buttonActiveSave) {
 					if(!this.isBulkUpdate && this.hasChanges)     this.set(false);
 					if(this.isBulkUpdate  && this.hasChangesBulk) this.setBulkUpdate();
 				}
