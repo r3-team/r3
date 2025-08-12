@@ -19,7 +19,7 @@ export default {
 
 		<div class="input-color-preview" :style="'background-color:#'+input"></div>
 
-		<div class="row gap">
+		<div class="row gap centered">
 			<my-button image="cancel.png"
 				@trigger="clear"
 				v-if="isSet"
