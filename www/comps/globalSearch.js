@@ -270,6 +270,7 @@ const MyGlobalSearchModule = {
 		colorAdjustBg,
 		getCaption,
 		getIsOperatorInAnyFilter,
+		openLink,
 		srcBase64Icon,
 
 		// data
@@ -281,7 +282,7 @@ const MyGlobalSearchModule = {
 		// actions
 		openBuilder(middle) {
 			if(middle)
-				return window.open('#/builder/search-bars/'+this.module.id,'_blank');
+				return this.openLink('#/builder/search-bars/'+this.module.id,true);
 			
 			this.$router.push('/builder/search-bars/'+this.module.id);
 			this.$emit('close');

@@ -1,3 +1,4 @@
+import {openLink}          from './shared/generic.js';
 import srcBase64Icon       from './shared/image.js';
 import {getCaption}        from './shared/language.js';
 import {set as setSetting} from './shared/settings.js';
@@ -1106,11 +1107,12 @@ const MySettingsFixedTokens = {
 	methods:{
 		// externals
 		getUnixFormat,
+		openLink,
 		
 		// actions
 		loadApp() {
 			let call = [`os=${this.deviceOs}`,`token=${this.token}`];
-			window.open(`/client/download/?${call.join('&')}`);
+			this.openLink(`/client/download/?${call.join('&')}`,false);
 		},
 		loadCnf() {
 			let langCode = this.languageCodesOfficial.includes(this.languageCode)
@@ -1132,7 +1134,7 @@ const MySettingsFixedTokens = {
 				`token=${this.token}`,
 				`ssl=${ isSsl ? 1 : 0}`
 			];
-			window.open(`/client/download/config/?${call.join('&')}`);
+			this.openLink(`/client/download/config/?${call.join('&')}`,false);
 		},
 		showSubWindow(target) {
 			this.tokenFixed    = '';

@@ -1,6 +1,5 @@
 import {getColumnTitle} from './shared/column.js';
 import {formOpen}       from './shared/form.js';
-import {colorAdjustBg}  from './shared/generic.js';
 import {getCaption}     from './shared/language.js';
 import srcBase64Icon    from './shared/image.js';
 import MyForm           from './form.js';
@@ -8,6 +7,10 @@ import {
 	getCollectionColumn,
 	getConsumersEntries
 } from './shared/collection.js';
+import {
+	colorAdjustBg,
+	openLink
+} from './shared/generic.js';
 export {MyWidgets as default};
 
 const MyWidget = {
@@ -216,6 +219,7 @@ const MyWidget = {
 		getCollectionColumn,
 		getConsumersEntries,
 		getColumnTitle,
+		openLink,
 		srcBase64Icon,
 		
 		// actions
@@ -230,7 +234,7 @@ const MyWidget = {
 			const url = `/builder/widgets/${this.moduleWidget.moduleId}?widgetIdEdit=${this.moduleWidget.id}`;
 			
 			if(!middle) this.$router.push(url);
-			else        window.open(`#${url}`,'_blank');
+			else        this.openLink(`#${url}`,true);
 		}
 	}
 };

@@ -124,10 +124,11 @@ const MyMenuItemFavorite = {
 	methods:{
 		// externals
 		getFormRoute,
+		openLink,
 
 		// actions
 		click()       { this.$router.push(this.route); },
-		clickMiddle() { window.open('#'+this.route,'_blank'); }
+		clickMiddle() { this.openLink('#'+this.route,true); }
 	}
 };
 
@@ -227,6 +228,7 @@ const MyMenuItem = {
 		getConsumersEntries,
 		getFormRoute,
 		getCaption,
+		openLink,
 		srcBase64,
 		srcBase64Icon,
 		
@@ -245,7 +247,7 @@ const MyMenuItem = {
 		},
 		clickMiddle() {
 			if(this.menu.formId !== null)
- 				window.open('#'+this.getFormRoute(null,this.menu.formId,0,true),'_blank');
+ 				this.openLink('#'+this.getFormRoute(null,this.menu.formId,0,true),true);
 		},
 		clickSubMenus() {
 			if(this.hasChildren)
@@ -467,7 +469,7 @@ const MyMenu = {
 		// actions
 		openBuilder(middle) {
 			if(!middle) this.$router.push('/builder/menu/'+this.module.id);
-			else        window.open('#/builder/menu/'+this.module.id,'_blank');
+			else        this.openLink('#/builder/menu/'+this.module.id,true);
 		}
 	}
 };

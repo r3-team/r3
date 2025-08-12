@@ -1203,7 +1203,7 @@ export default {
 				true,this.getGetterFromAttributeValues(this.attributeIdMapDef));
 			
 			if(!middleClick) navigator.clipboard.writeText(`${location.protocol}//${location.host}/#${path}`);
-			else             window.open(`${location.protocol}//${location.host}/#${path}`);
+			else             this.openLink(`${location.protocol}//${location.host}/#${path}`,true);
 		},
 		makeFavorite() {
 			const recordId = this.recordIds.length === 1 ? this.recordIds[0] : null;
@@ -1240,7 +1240,7 @@ export default {
 		},
 		openBuilder(middle) {
 			if(middle)
-				return window.open('#/builder/form/'+this.form.id,'_blank');
+				return this.openLink('#/builder/form/'+this.form.id,true);
 			
 			this.blockInputs = true;
 			this.$router.push('/builder/form/'+this.form.id);

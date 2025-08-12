@@ -59,7 +59,7 @@ export default {
 	},
 	emits:[],
 	computed:{
-		allCancel:   (s) => s.group.filter(v => v.isCancel   === undefined || !v.isCancel).length === s.group.length,
+		allCancel:   (s) => s.group.filter(v => v.isCancel   === undefined || v.isCancel).length === s.group.length,
 		anyClickable:(s) => s.group.filter(v => v.isReadonly === undefined || !v.isReadonly).length > 0
 	}
 };

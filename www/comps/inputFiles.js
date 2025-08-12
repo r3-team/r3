@@ -234,7 +234,7 @@ const MyInputFiles = {
 						<td v-if="!noSpace">{{ displayDate(f.changed) }}</td>
 						<td>
 							<div class="row">
-								<a target="_blank"
+								<a target="_self" download
 									:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 								>
 									<my-button image="download.png"
@@ -255,7 +255,7 @@ const MyInputFiles = {
 			<!-- list comfortable -->
 			<div class="listComfort" v-if="viewListComfort">
 				<div class="item" v-for="f in filesProcessed">
-					<a draggable="false" target="_blank"
+					<a draggable="false" target="_self" download
 						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 						:title="capApp.button.downloadHint"
 					>
@@ -293,7 +293,7 @@ const MyInputFiles = {
 			<!-- gallery -->
 			<div class="gallery" v-if="viewGallery" >
 				<div class="item" v-for="f in filesProcessed">
-					<a draggable="false" target="_blank"
+					<a draggable="false" target="_self" download
 						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 						:title="capApp.button.downloadHint"
 					>
