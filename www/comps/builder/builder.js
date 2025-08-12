@@ -457,6 +457,10 @@ let MyBuilder = {
 					this.isReady = false;
 					return;
 				}
+
+				// close global search if routed to anywhere in the Builder
+				if(this.globalSearchInput !== null)
+					this.$store.commit('globalSearchInput',null);
 				
 				// apply module ID from target
 				this.moduleId = isModule ? val.params.id : targetIdMap[val.params.id].moduleId;
@@ -501,26 +505,27 @@ let MyBuilder = {
 		moduleOwner:  (s) => s.isNew ? true  : s.moduleIdMapMeta[s.moduleId].owner,
 		
 		// stores
-		apiIdMap:       (s) => s.$store.getters['schema/apiIdMap'],
-		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
-		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
-		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
-		iconIdMap:      (s) => s.$store.getters['schema/iconIdMap'],
-		jsFunctionIdMap:(s) => s.$store.getters['schema/jsFunctionIdMap'],
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
-		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
-		roleIdMap:      (s) => s.$store.getters['schema/roleIdMap'],
-		searchBarIdMap: (s) => s.$store.getters['schema/searchBarIdMap'],
-		variableIdMap:  (s) => s.$store.getters['schema/variableIdMap'],
-		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
-		bgStyle:        (s) => s.$store.getters.colorMenuStyle,
-		builderEnabled: (s) => s.$store.getters.builderEnabled,
-		capApp:         (s) => s.$store.getters.captions.builder,
-		capGen:         (s) => s.$store.getters.captions.generic,
-		colorMenu:      (s) => s.$store.getters.colorMenu,
-		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta,
-		settings:       (s) => s.$store.getters.settings
+		apiIdMap:         (s) => s.$store.getters['schema/apiIdMap'],
+		attributeIdMap:   (s) => s.$store.getters['schema/attributeIdMap'],
+		collectionIdMap:  (s) => s.$store.getters['schema/collectionIdMap'],
+		formIdMap:        (s) => s.$store.getters['schema/formIdMap'],
+		iconIdMap:        (s) => s.$store.getters['schema/iconIdMap'],
+		jsFunctionIdMap:  (s) => s.$store.getters['schema/jsFunctionIdMap'],
+		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
+		pgFunctionIdMap:  (s) => s.$store.getters['schema/pgFunctionIdMap'],
+		relationIdMap:    (s) => s.$store.getters['schema/relationIdMap'],
+		roleIdMap:        (s) => s.$store.getters['schema/roleIdMap'],
+		searchBarIdMap:   (s) => s.$store.getters['schema/searchBarIdMap'],
+		variableIdMap:    (s) => s.$store.getters['schema/variableIdMap'],
+		widgetIdMap:      (s) => s.$store.getters['schema/widgetIdMap'],
+		bgStyle:          (s) => s.$store.getters.colorMenuStyle,
+		builderEnabled:   (s) => s.$store.getters.builderEnabled,
+		capApp:           (s) => s.$store.getters.captions.builder,
+		capGen:           (s) => s.$store.getters.captions.generic,
+		colorMenu:        (s) => s.$store.getters.colorMenu,
+		globalSearchInput:(s) => s.$store.getters.globalSearchInput,
+		moduleIdMapMeta:  (s) => s.$store.getters.moduleIdMapMeta,
+		settings:         (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
