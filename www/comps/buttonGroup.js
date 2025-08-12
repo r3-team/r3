@@ -1,6 +1,6 @@
 const MyButtonGroupPart = {
 	template: `<div class="buttonGroup-part"
-		@click.ctrl.exact ="onClick('middle')"
+		@click.ctrl.exact="onClick('middle')"
 		@click.left.exact="onClick('left')"
 		@click.shift.exact="onClick('shift')"
 		@click.prevent.middle="onClick('middle')"
@@ -25,10 +25,6 @@ const MyButtonGroupPart = {
 		onClickRight: { type:Function, required:false },
 		onClickShift: { type:Function, required:false }
 	},
-	emits:[],
-	computed:{
-		anyClickable:(s) => s.group.filter(v => v.isReadonly === undefined || !v.isReadonly).length > 0
-	},
 	methods:{
 		onClick(mode) {
 			switch(mode) {
@@ -43,9 +39,7 @@ const MyButtonGroupPart = {
 
 export default {
 	components:{ MyButtonGroupPart },
-	template: `<div class="buttonGroup"
-		:class="{ anyClickable, cancel:allCancel }"
-	>
+	template: `<div class="buttonGroup" :class="{ anyClickable, cancel:allCancel }">
 		<my-button-group-part
 			v-for="(g,i) in group"
 			:caption="g.caption"
@@ -57,6 +51,7 @@ export default {
 			:onClickLeft="g.onClickLeft"
 			:onClickMiddle="g.onClickMiddle"
 			:onClickRight="g.onClickRight"
+			:onClickShift="g.onClickShift"
 		/>
 	</div>`,
 	props:{

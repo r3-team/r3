@@ -115,7 +115,7 @@ export default {
 						{{ t.name }}
 					</option>
 				</select>
-				<input autocomplete="one-time-code" type="text" maxlength="6"
+				<input autocomplete="one-time-code" class="placeholder-bright" type="text" maxlength="6"
 					@keyup="badAuth = false"
 					@keyup.enter="authenticate"
 					v-model="mfaTokenPin"
