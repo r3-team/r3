@@ -1464,7 +1464,7 @@ export default {
 			// different path, same form
 			if(openSameForm) {
 				// switch from existing to new one or between two existing records
-				if(!this.isNew && recordIdOpen !== this.recordIds[0])
+				if(!replace && !this.isNew && recordIdOpen !== this.recordIds[0])
 					return this.$router.push(path);
 				
 				return this.$router.replace(path);
@@ -1523,7 +1523,7 @@ export default {
 					this.triggerEventAfter('delete');
 					
 					if(this.recordActionFree) {
-						if(deleteAndNew || this.isAtHistoryStart) return this.openForm();
+						if(deleteAndNew || this.isAtHistoryStart) return this.openForm(null,null,[],false,null,true);
 						if(this.isPopUp)                          return this.closeAsk();
 						if(!this.isPopUp)                         return this.openPrevAsk();
 					}
