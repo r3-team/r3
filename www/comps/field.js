@@ -569,7 +569,6 @@ export default {
 					:inputAsCategory="field.flags.includes('relCategory')"
 					:inputAsFlow="field.flags.includes('relFlow')"
 					:inputAutoSelect="field.autoSelect"
-					:inputNoFilters="logViewer"
 					:inputIsNew="isNew"
 					:inputIsReadonly="isReadonly"
 					:inputMulti="isRelationship1N"
