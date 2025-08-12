@@ -4,7 +4,7 @@ export {MyButton as default};
 const MyButton = {
 	name:'my-button',
 	template:`<div class="button" data-is-input="1"
-		@click.ctrl.exact ="triggerMiddle"
+		@click.ctrl.exact="triggerMiddle"
 		@click.left.exact="trigger"
 		@click.shift.exact="triggerShift"
 		@click.prevent.middle="triggerMiddle"

@@ -5,6 +5,7 @@ import {
 } from './shared/query.js';
 import {
 	getUnixFormat,
+	getUnixShifted,
 	getUtcTimeStringFromUnix
 } from './shared/time.js';
 
@@ -108,6 +109,7 @@ export default {
 		getQueryExpressions,
 		getRelationsJoined,
 		getUnixFormat,
+		getUnixShifted,
 		getUtcTimeStringFromUnix,
 		
 		// actions
@@ -155,23 +157,23 @@ export default {
 					
 					// overwrite dataset source with query data (currently only 1 dataset is usable)
 					this.option.dataset.source = [];
-					for(let i = 0, j = res.payload.rows.length; i < j; i++) {
+					for(let row of res.payload.rows) {
 						
 						// apply date|time column display options
 						if(this.dateTimeColumnIndexes.length !== 0) {
-							for(let columnIndex of this.dateTimeColumnIndexes) {
-								let atr   = this.attributeIdMap[this.columns[columnIndex].attributeId];
-								let value = res.payload.rows[i].values[columnIndex];
+							for(const columnIndex of this.dateTimeColumnIndexes) {
+								const atr   = this.attributeIdMap[this.columns[columnIndex].attributeId];
+								let   value = row.values[columnIndex];
 								
 								switch(atr.contentUse) {
-									case 'date':     value = this.getUnixFormat(value,'Y-m-d');     break;
-									case 'datetime': value = this.getUnixFormat(value,'Y-m-d H:i'); break;
-									case 'time':     value = this.getUtcTimeStringFromUnix(value);  break;
+									case 'date':     value = this.getUnixFormat(this.getUnixShifted(value,true),'Y-m-d'); break;
+									case 'datetime': value = this.getUnixFormat(value,'Y-m-d H:i');                       break;
+									case 'time':     value = this.getUtcTimeStringFromUnix(value);                        break;
 								}
-								res.payload.rows[i].values[columnIndex] = value;
+								row.values[columnIndex] = value;
 							}
 						}
-						this.option.dataset.source.push(res.payload.rows[i].values);
+						this.option.dataset.source.push(row.values);
 					}
 					this.ready = true;
 				},
