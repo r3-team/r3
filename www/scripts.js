@@ -1,10 +1,11 @@
-import MyApp       from './comps/app.js';
-import MyButton    from './comps/button.js';
-import MyFilters   from './comps/filters.js';
-import MyHome      from './comps/home.js';
-import MyLabel     from './comps/label.js';
-import MyValueRich from './comps/valueRich.js';
-import MyStore     from './stores/store.js';
+import MyApp           from './comps/app.js';
+import MyButton        from './comps/button.js';
+import MyButtonGroup   from './comps/buttonGroup.js';
+import MyFilters       from './comps/filters.js';
+import MyHome          from './comps/home.js';
+import MyLabel         from './comps/label.js';
+import MyValueRich     from './comps/valueRich.js';
+import MyStore         from './stores/store.js';
 import {MyButtonCheck} from './comps/button.js';
 import {
 	MyGoForm,
@@ -294,6 +295,10 @@ MyRouter.beforeEach((to,from) => {
 	if(e !== null)
 		MyRouterPositions[from.path] = e.scrollTop;
 	
+	if(window.history?.state !== undefined) {
+		MyStore.commit('isAtHistoryEnd',   window.history.state.forward === null);
+		MyStore.commit('isAtHistoryStart', window.history.state.back    === null);
+	}
 	return true;
 });
 
@@ -307,6 +312,7 @@ const app = Vue.createApp(MyApp)
 	.component('my-bool-string-number',MyBoolStringNumber)
 	.component('my-button',MyButton)
 	.component('my-button-check',MyButtonCheck)
+	.component('my-button-group',MyButtonGroup)
 	.component('my-filters',MyFilters)
 	.component('my-label',MyLabel)
 	.component('my-value-rich',MyValueRich);

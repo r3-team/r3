@@ -69,6 +69,8 @@ const MyStore = Vuex.createStore({
 		isAtFavorites:false,           // is the favorites menu entry active?
 		isAtFavoritesEdit:false,       // is the favorites menu entry active and in edit mode?
 		isAtFeedback:false,            // app shows feedback dialog
+		isAtHistoryEnd:false,          // current page is at browser history end
+		isAtHistoryStart:false,        // current page is at browser history start
 		isAtMenu:false,                // user navigated to menu (only relevant if isMobile)
 		isAtModule:false,              // app currently shows a module (instead of Builder, admin panel, settings, etc.)
 		isCollapsedMenuApp:false,      // app menu is collapsed
@@ -287,6 +289,8 @@ const MyStore = Vuex.createStore({
 		isAtFavorites:           (state,payload) => state.isAtFavorites            = payload,
 		isAtFavoritesEdit:       (state,payload) => state.isAtFavoritesEdit        = payload,
 		isAtFeedback:            (state,payload) => state.isAtFeedback             = payload,
+		isAtHistoryEnd:          (state,payload) => state.isAtHistoryEnd           = payload,
+		isAtHistoryStart:        (state,payload) => state.isAtHistoryStart         = payload,
 		isAtMenu:                (state,payload) => state.isAtMenu                 = payload,
 		isAtModule:              (state,payload) => state.isAtModule               = payload,
 		isCollapsedMenuApp:      (state,payload) => state.isCollapsedMenuApp       = payload,
@@ -460,6 +464,8 @@ const MyStore = Vuex.createStore({
 		isAtFavorites:           (state) => state.isAtFavorites,
 		isAtFavoritesEdit:       (state) => state.isAtFavoritesEdit,
 		isAtFeedback:            (state) => state.isAtFeedback,
+		isAtHistoryEnd:          (state) => state.isAtHistoryEnd,
+		isAtHistoryStart:        (state) => state.isAtHistoryStart,
 		isAtMenu:                (state) => state.isAtMenu,
 		isAtModule:              (state) => state.isAtModule && state.moduleIdLast !== null,
 		isCollapsedMenuApp:      (state) => state.isCollapsedMenuApp,

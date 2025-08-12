@@ -101,9 +101,9 @@ export default {
 			<div class="top nowrap" :class="{ lower:!hasBarLower && !isSingleField }" v-if="!isWidget">
 				<div class="area nowrap form-title-wrap">
 					<my-button image="upward.png"
-						v-if="hasGoBack"
+						v-if="buttonShownGoBack"
 						@trigger="openPrevAsk"
-						:active="!changingRecord"
+						:active="buttonActiveGoBack"
 						:captionTitle="capGen.button.goBack"
 					/>
 					<img class="icon" :src="iconSrc" />
@@ -193,15 +193,9 @@ export default {
 						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
 					/>
-					<my-button image="save.png" alt-image="add.png"
+					<my-button-group
 						v-if="buttonShownSave"
-						@trigger="set(false)"
-						@trigger-alt="set(true)"
-						:active="buttonActiveSave"
-						:altAction="buttonShownSaveAlt"
-						:altCaptionTitle="capGen.button.saveNewHint"
-						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.save : ''"
-						:captionTitle="capGen.button.saveHint"
+						:group="buttonGroupSave"
 					/>
 					<my-button image="save.png"
 						v-if="buttonShownSaveBulk"
@@ -233,13 +227,9 @@ export default {
 				/>
 				<div class="form-bar-layout-check" ref="formBarLowerCheck" />
 				<div class="area">
-					<my-button image="shred.png"
+					<my-button-group
 						v-if="buttonShownDel"
-						@trigger="delAsk"
-						:active="buttonActiveDel"
-						:cancel="true"
-						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.delete : ''"
-						:captionTitle="capGen.button.deleteHint"
+						:group="buttonGroupDelete"
 					/>
 				</div>
 			</div>
@@ -485,7 +475,6 @@ export default {
 		hasChanges:    (s) => s.fieldIdsChanged.length !== 0,
 		hasChangesBulk:(s) => s.fieldIdsTouched.length !== 0 && s.isBulkUpdate,
 		hasFormActions:(s) => s.form.actions.filter(v => (s.entityIdMapEffect.formAction[v.id]?.state !== undefined ? s.entityIdMapEffect.formAction[v.id].state : v.state) !== 'hidden').length > 0,
-		hasGoBack:     (s) => s.isData && !s.isMobile && !s.isPopUp,
 		helpAvailable: (s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
 		isBulkUpdate:  (s) => s.isData && s.recordIds.length > 1,
 		isData:        (s) => s.relationId !== null,
@@ -500,15 +489,18 @@ export default {
 		mayUpdate:(s) => !s.badLoad && s.joinsIndexesSet.length !== 0,
 
 		// buttons
+		buttonActiveGoBack:  (s) => !s.buttonsReadonly && !s.isAtHistoryStart,
 		buttonActiveDel:     (s) => !s.buttonsReadonly && s.mayDelete,
 		buttonActiveNew:     (s) => !s.buttonsReadonly && (!s.isNew || s.hasChanges),
 		buttonActiveSave:    (s) => !s.buttonsReadonly && (s.mayUpdate || s.mayCreate)    && s.hasChanges,
 		buttonActiveSaveBulk:(s) => !s.buttonsReadonly && (s.mayUpdate || s.isBulkUpdate) && s.hasChangesBulk,
 		buttonShownDel:      (s) => !s.isBulkUpdate && s.showButtonDel && (s.buttonActiveDel || s.layoutElements.includes('dataActionReadonly')),
+		buttonShownGoBack:   (s) => s.isData && !s.isMobile && !s.isPopUp,
 		buttonShownNew:      (s) => !s.isBulkUpdate && s.showButtonNew && (s.buttonActiveNew || s.layoutElements.includes('dataActionReadonly')),
 		buttonShownSave:     (s) => !s.isBulkUpdate && (s.buttonActiveSave     || s.layoutElements.includes('dataActionReadonly')),
-		buttonShownSaveAlt:  (s) => s.buttonShownSave && s.buttonShownNew && !s.isMobile && s.mayCreate,
 		buttonShownSaveBulk: (s) => s.isBulkUpdate  && (s.buttonActiveSaveBulk || s.layoutElements.includes('dataActionReadonly')),
+		buttonShownSaveClose:(s) => s.buttonShownSave && !s.isAtHistoryStart && !s.isMobile,
+		buttonShownSaveNew:  (s) => s.buttonShownSave && s.buttonShownNew && !s.isMobile,
 		buttonsReadonly:     (s) => s.blockInputs || s.changingRecord,
 
 		// general entities
@@ -541,6 +533,52 @@ export default {
 		},
 		
 		// presentation
+		buttonGroupDelete:(s) => {
+			let group = [{
+				caption:s.layoutElements.includes('dataActionLabels') ? s.capGen.button.delete : '',
+				captionTitle:s.capGen.button.deleteHint,
+				image:'shred.png',
+				isCancel:true,
+				isReadonly:!s.buttonActiveDel,
+				onClickLeft:() => s.delAsk(false)
+			}];
+			if(!s.isMobile) {
+				group.push({
+					captionTitle:s.capGen.button.deleteNewHint,
+					image:'add2.png',
+					isCancel:true,
+					isReadonly:!s.buttonActiveDel,
+					onClickLeft:() => s.delAsk(true)
+				});
+			}
+			return group;
+		},
+		buttonGroupSave:(s) => {
+			let group = [{
+				caption:s.layoutElements.includes('dataActionLabels') ? s.capGen.button.save : '',
+				captionTitle:s.capGen.button.saveHint,
+				image:'save.png',
+				isReadonly:!s.buttonActiveSave,
+				onClickLeft:() => s.set(false,false)
+			}];
+			if(s.buttonShownSaveClose) {
+				group.push({
+					captionTitle:s.capGen.button.saveCloseHint,
+					image:'ok.png',
+					isReadonly:!s.buttonActiveSave,
+					onClickLeft:() => s.set(false,true)
+				});
+			}
+			if(s.buttonShownSaveNew) {
+				group.push({
+					captionTitle:s.capGen.button.saveNewHint,
+					image:'add2.png',
+					isReadonly:!s.buttonActiveSave,
+					onClickLeft:() => s.set(true,false)
+				});
+			}
+			return group;
+		},
 		title:(s) => {
 			if(s.titleOverwrite !== null)
 				return s.titleOverwrite;
@@ -590,11 +628,11 @@ export default {
 				form_show_message:s.messageSet,
 				
 				// record functions
-				record_delete:  () => { s.delAsk();     s.recordActionFree = false; },
-				record_new:     () => { s.openNewAsk(); s.recordActionFree = false; },
-				record_reload:  () => { s.get();        s.recordActionFree = false; },
-				record_save:    () => { s.set(false);   s.recordActionFree = false; },
-				record_save_new:() => { s.set(true);    s.recordActionFree = false; },
+				record_delete:  () => { s.delAsk(false);    s.recordActionFree = false; },
+				record_new:     () => { s.openNewAsk();     s.recordActionFree = false; },
+				record_reload:  () => { s.get();            s.recordActionFree = false; },
+				record_save:    () => { s.set(false,false); s.recordActionFree = false; },
+				record_save_new:() => { s.set(true,false);  s.recordActionFree = false; },
 				
 				// timeout/interval function calls
 				timer_clear:s.timerClear,
@@ -691,7 +729,7 @@ export default {
 					case 'languageCode':    return s.settings.languageCode; break;
 					case 'login':           return s.loginId; break;
 					case 'preset':          return s.presetIdMapRecordId[side.presetId]; break;
-					case 'record':          return s.joinsIndexMap['0'] !== undefined ? s.joinsIndexMap['0'].recordId : false; break;
+					case 'record':          return s.joinsIndexMap?.['0'] !== undefined ? s.joinsIndexMap['0'].recordId : false; break;
 					case 'recordMayCreate': return s.mayCreate; break;
 					case 'recordMayDelete': return s.mayDelete; break;
 					case 'recordMayUpdate': return s.mayUpdate; break;
@@ -852,6 +890,7 @@ export default {
 		colorMenu:          (s) => s.$store.getters.colorMenu,
 		isAdmin:            (s) => s.$store.getters.isAdmin,
 		isAtFavoritesEdit:  (s) => s.$store.getters.isAtFavoritesEdit,
+		isAtHistoryStart:   (s) => s.$store.getters.isAtHistoryStart,
 		isMobile:           (s) => s.$store.getters.isMobile,
 		isNoAuth:           (s) => s.$store.getters.isNoAuth,
 		keyLength:          (s) => s.$store.getters.constants.keyLength,
@@ -919,7 +958,7 @@ export default {
 				ev.stopPropagation();
 
 				if(!this.form.noDataActions && this.buttonActiveSave) {
-					if(!this.isBulkUpdate && this.hasChanges)     this.set(false);
+					if(!this.isBulkUpdate && this.hasChanges)     this.set(false,false);
 					if(this.isBulkUpdate  && this.hasChangesBulk) this.setBulkUpdate();
 				}
 			}
@@ -1447,13 +1486,13 @@ export default {
 		},
 		
 		// backend calls
-		delAsk() {
+		delAsk(deleteAndNew) {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,
 				buttons:[{
 					cancel:true,
 					caption:this.capGen.button.delete,
-					exec:this.del,
+					exec:() => this.del(deleteAndNew),
 					keyEnter:true,
 					image:'shred.png'
 				},{
@@ -1463,7 +1502,7 @@ export default {
 				}]
 			});
 		},
-		del() {
+		del(deleteAndNew) {
 			this.triggerEventBefore('delete');
 			
 			let requests = [];
@@ -1483,9 +1522,11 @@ export default {
 					
 					this.triggerEventAfter('delete');
 					
-					if(this.recordActionFree)
-						this.openForm();
-					
+					if(this.recordActionFree) {
+						if(deleteAndNew || this.isAtHistoryStart) return this.openForm();
+						if(this.isPopUp)                          return this.closeAsk();
+						if(!this.isPopUp)                         return this.openPrevAsk();
+					}
 					this.messageSet('[DELETED]');
 				},
 				this.$root.genericError
@@ -1639,7 +1680,7 @@ export default {
 				this.$root.genericError
 			);
 		},
-		set:async function(saveAndNew) {
+		set:async function(saveAndNew,saveAndClose) {
 			if(this.fieldIdsInvalid.length !== 0)
 				return this.badSave = true;
 			
@@ -1852,14 +1893,11 @@ export default {
 					
 					if(!this.recordActionFree)
 						return;
-					
-					// load empty record if requested
-					if(saveAndNew)
-						return this.openForm();
-					
-					// load newly created record
-					if(this.isNew)
-						return this.openForm([resSet.payload.indexRecordIds['0']]);
+
+					if(saveAndClose && !this.isPopUp) return this.openPrevAsk();
+					if(saveAndClose &&  this.isPopUp) return this.closeAsk();
+					if(saveAndNew)                    return this.openForm();
+					if(this.isNew)                    return this.openForm([resSet.payload.indexRecordIds['0']]);
 					
 					// reload same record
 					// unfortunately necessary as update trigger in backend can change values

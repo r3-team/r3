@@ -28,21 +28,6 @@ const MyButton = {
 			v-if="caption !== ''"
 			:title="captionTitle"
 		>{{ caption }}</span>
-		
-		<div class="alt"
-			v-if="altAction"
-			@click.exact="triggerAlt"
-		>
-			<img draggable="false"
-				v-if="altImage !== ''"
-				:src="'images/'+altImage"
-				:title="altCaptionTitle"
-			/>
-			<span
-				v-if="altCaption !== ''"
-				:title="altCaptionTitle"
-			>{{ altCaption }}</span>
-		</div>
 	</div>`,
 	props:{
 		// content props
@@ -54,12 +39,6 @@ const MyButton = {
 		images:      { type:Array,   required:false, default:() => [] },
 		imageBase64: { type:String,  required:false, default:'' },
 		
-		// alternative action (left-click only)
-		altAction:      { type:Boolean, required:false, default:false },
-		altCaption:     { type:String,  required:false, default:'' },
-		altCaptionTitle:{ type:String,  required:false, default:'' },
-		altImage:       { type:String,  required:false, default:'' },
-		
 		// style props
 		adjusts:{ type:Boolean, required:false, default:false }, // adjusts its length to avail. space (text is ellipsed if too small)
 		cancel: { type:Boolean, required:false, default:false },
@@ -67,7 +46,7 @@ const MyButton = {
 		large:  { type:Boolean, required:false, default:false },
 		naked:  { type:Boolean, required:false, default:false }
 	},
-	emits:['trigger','trigger-alt','trigger-middle','trigger-right','trigger-shift'],
+	emits:['trigger','trigger-middle','trigger-right','trigger-shift'],
 	computed:{
 		classes:(s) => {
 			return {
@@ -89,12 +68,6 @@ const MyButton = {
 				ev.stopPropagation();
 			
 			this.$emit('trigger');
-		},
-		triggerAlt(ev) {
-			if(!this.active) return;
-			
-			ev.stopPropagation();
-			this.$emit('trigger-alt');
 		},
 		triggerMiddle(ev) {
 			if(!this.active) return;

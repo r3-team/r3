@@ -103,14 +103,6 @@
 	margin-right:-2px;
 	transition:height 0.2s, width 0.2s, margin 0.2s;
 }
-.button .alt{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	padding-left:calc(var(--spacing) / 2);
-	gap:calc(var(--spacing) / 2);
-	border-left:2px solid var(--color-bright);
-}
 
 /* user overwrites */
 .user-dark .button.background.inactive{
