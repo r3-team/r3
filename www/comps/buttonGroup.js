@@ -27,6 +27,9 @@ const MyButtonGroupPart = {
 	},
 	methods:{
 		onClick(mode) {
+			if(this.isReadonly)
+				return;
+
 			switch(mode) {
 				case 'left':   if(this.onClickLeft   !== undefined) this.onClickLeft();   break;
 				case 'middle': if(this.onClickMiddle !== undefined) this.onClickMiddle(); break;
