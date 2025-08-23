@@ -37,9 +37,12 @@ export function getJoinIndexMapExpanded(joins,indexMapRecordId,indexesNoDel,inde
 	for(let j of joins) {
 		const recordId = indexMapRecordId[j.index];
 		j.recordId     = Number.isInteger(recordId) ? recordId : 0;
-		j.recordCreate = j.applyCreate && checkDataOptions(4,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,2) && j.recordId === 0;
-		j.recordUpdate = j.applyUpdate && checkDataOptions(2,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,2) && j.recordId !== 0 && !indexesNoSet.includes(j.index);
-		j.recordDelete = j.applyDelete && checkDataOptions(1,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,3) && j.recordId !== 0 && !indexesNoDel.includes(j.index) &&
+		j.recordNew    = j.applyCreate && checkDataOptions(4,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,2);
+
+		// states based on combined join settings, data option overwrite, user access, state of record on current join, protection setting of preset record (delete only)
+		j.recordCreate = j.applyCreate && j.recordId === 0 && checkDataOptions(4,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,2);
+		j.recordUpdate = j.applyUpdate && j.recordId !== 0 && checkDataOptions(2,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,2) && !indexesNoSet.includes(j.index);
+		j.recordDelete = j.applyDelete && j.recordId !== 0 && checkDataOptions(1,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,3) && !indexesNoDel.includes(j.index) &&
 			MyStore.getters['schema/relationIdMap'][j.relationId].presets.filter(p => p.protected && MyStore.getters['schema/presetIdMapRecordId'][p.id] === j.recordId).length === 0;
 		
 		map[j.index] = j;

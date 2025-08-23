@@ -101,9 +101,9 @@ export default {
 			<div class="top nowrap" :class="{ lower:!hasBarLower && !isSingleField }" v-if="!isWidget">
 				<div class="area nowrap form-title-wrap">
 					<my-button image="upward.png"
-						v-if="buttonShownGoBack"
+						v-if="buttonGoBackShown"
 						@trigger="openPrevAsk"
-						:active="buttonActiveGoBack"
+						:active="buttonGoBackUsable"
 						:captionTitle="capGen.button.goBack"
 					/>
 					<img class="icon" :src="iconSrc" />
@@ -186,21 +186,21 @@ export default {
 			<div class="top lower nowrap" v-if="hasBarLower">
 				<div class="area nowrap">
 					<my-button image="new.png"
-						v-if="buttonShownNew"
+						v-if="buttonNewShown"
 						@trigger="openNewAsk(false)"
 						@trigger-middle="openNewAsk(true)"
-						:active="buttonActiveNew"
+						:active="buttonNewUsable"
 						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button-group
-						v-if="buttonShownSave"
+						v-if="buttonSaveShown"
 						:group="buttonGroupSave"
 					/>
 					<my-button image="save.png"
-						v-if="buttonShownSaveBulk"
+						v-if="buttonSaveShownBulk"
 						@trigger="setBulkUpdate"
-						:active="buttonActiveSaveBulk"
+						:active="buttonSaveUsableBulk"
 						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length)) : ''"
 						:captionTitle="capGen.button.saveHint"
 					/>
@@ -228,7 +228,7 @@ export default {
 				<div class="form-bar-layout-check" ref="formBarLowerCheck" />
 				<div class="area">
 					<my-button-group
-						v-if="buttonShownDel"
+						v-if="buttonDelShown"
 						:group="buttonGroupDelete"
 					/>
 				</div>
@@ -486,35 +486,37 @@ export default {
 		// permissions
 		mayCreate:(s) => !s.badLoad && s.joinsIndexesCrt.length !== 0,
 		mayDelete:(s) => !s.badLoad && s.joinsIndexesDel.length !== 0,
+		mayNew:   (s) => !s.badLoad && s.joinsIndexesNew.length !== 0,
 		mayUpdate:(s) => !s.badLoad && s.joinsIndexesSet.length !== 0,
 
 		// buttons
-		buttonActiveGoBack:  (s) => !s.buttonsReadonly && !s.isAtHistoryStart,
-		buttonActiveDel:     (s) => !s.buttonsReadonly && s.mayDelete,
-		buttonActiveNew:     (s) => !s.buttonsReadonly && (!s.isNew || s.hasChanges),
-		buttonActiveSave:    (s) => !s.buttonsReadonly && (s.mayUpdate || s.mayCreate)    && s.hasChanges,
-		buttonActiveSaveBulk:(s) => !s.buttonsReadonly && (s.mayUpdate || s.isBulkUpdate) && s.hasChangesBulk,
-		buttonShownDel:      (s) => !s.isBulkUpdate && s.showButtonDel && (s.buttonActiveDel || s.layoutElements.includes('dataActionReadonly')),
-		buttonShownGoBack:   (s) => s.isData && !s.isMobile && !s.isPopUp,
-		buttonShownNew:      (s) => !s.isBulkUpdate && s.showButtonNew && (s.buttonActiveNew || s.layoutElements.includes('dataActionReadonly')),
-		buttonShownSave:     (s) => !s.isBulkUpdate && (s.buttonActiveSave     || s.layoutElements.includes('dataActionReadonly')),
-		buttonShownSaveBulk: (s) => s.isBulkUpdate  && (s.buttonActiveSaveBulk || s.layoutElements.includes('dataActionReadonly')),
-		buttonShownSaveClose:(s) => s.buttonShownSave && !s.isAtHistoryStart && !s.isMobile,
-		buttonShownSaveNew:  (s) => s.buttonShownSave && s.buttonShownNew && !s.isMobile,
+		buttonDelShown:      (s) => !s.isBulkUpdate && s.showButtonDel && (s.buttonDelUsable || s.layoutElements.includes('dataActionReadonly')),
+		buttonDelUsable:     (s) => !s.buttonsReadonly && s.mayDelete,
+		buttonGoBackShown:   (s) => s.isData && !s.isMobile && !s.isPopUp,
+		buttonGoBackUsable:  (s) => !s.buttonsReadonly && !s.isAtHistoryStart,
+		buttonNewShown:      (s) => !s.isBulkUpdate && s.showButtonNew && (s.buttonNewUsable || s.layoutElements.includes('dataActionReadonly')),
+		buttonNewUsable:     (s) => !s.buttonsReadonly && s.mayNew && (!s.isNew || s.hasChanges),
+		buttonSaveShown:     (s) => !s.isBulkUpdate && (s.buttonSaveUsable     || s.layoutElements.includes('dataActionReadonly')),
+		buttonSaveShownBulk: (s) => s.isBulkUpdate  && (s.buttonSaveUsableBulk || s.layoutElements.includes('dataActionReadonly')),
+		buttonSaveShownClose:(s) => s.buttonSaveShown && !s.isAtHistoryStart && !s.isMobile,
+		buttonSaveShownNew:  (s) => s.buttonSaveShown && s.buttonNewShown && !s.isMobile,
+		buttonSaveUsable:    (s) => !s.buttonsReadonly && (s.mayUpdate || s.mayCreate)    && s.hasChanges,
+		buttonSaveUsableBulk:(s) => !s.buttonsReadonly && (s.mayUpdate || s.isBulkUpdate) && s.hasChangesBulk,
 		buttonsReadonly:     (s) => s.blockInputs || s.changingRecord,
 
 		// general entities
-		formStateIdMap: (s) => s.getFormStateIdMap(s.form.states),
 		fieldIdMapData: (s) => s.getDataFieldMap(s.fields),
 		fields:         (s) => s.form.fields,
 		filters:        (s) => s.form.query.filters,
 		form:           (s) => s.formIdMap[s.formId],
+		formStateIdMap: (s) => s.getFormStateIdMap(s.form.states),
 		joins:          (s) => s.fillRelationRecordIds(s.form.query.joins),
 		relationId:     (s) => s.form.query.relationId,
 		relationsJoined:(s) => s.getRelationsJoined(s.joins),
 		joinsIndexMap:  (s) => s.getJoinIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet,s.entityIdMapEffect.form.data),
 		joinsIndexesCrt:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordCreate); },
 		joinsIndexesDel:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordDelete); },
+		joinsIndexesNew:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordNew); },
 		joinsIndexesSet:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordUpdate); },
 		iconSrc:(s) => {
 			if(s.favoriteId  !== null) return 'images/star1.png';
@@ -539,7 +541,7 @@ export default {
 				captionTitle:s.capGen.button.deleteHint,
 				image:'shred.png',
 				isCancel:true,
-				isReadonly:!s.buttonActiveDel,
+				isReadonly:!s.buttonDelUsable,
 				onClickLeft:() => s.delAsk(false)
 			}];
 			if(!s.isMobile) {
@@ -547,7 +549,7 @@ export default {
 					captionTitle:s.capGen.button.deleteNewHint,
 					image:'add2.png',
 					isCancel:true,
-					isReadonly:!s.buttonActiveDel,
+					isReadonly:!s.buttonDelUsable,
 					onClickLeft:() => s.delAsk(true)
 				});
 			}
@@ -558,22 +560,22 @@ export default {
 				caption:s.layoutElements.includes('dataActionLabels') ? s.capGen.button.save : '',
 				captionTitle:s.capGen.button.saveHint,
 				image:'save.png',
-				isReadonly:!s.buttonActiveSave,
+				isReadonly:!s.buttonSaveUsable,
 				onClickLeft:() => s.set(false,false)
 			}];
-			if(s.buttonShownSaveClose) {
+			if(s.buttonSaveShownClose) {
 				group.push({
 					captionTitle:s.capGen.button.saveCloseHint,
 					image:'ok.png',
-					isReadonly:!s.buttonActiveSave,
+					isReadonly:!s.buttonSaveUsable,
 					onClickLeft:() => s.set(false,true)
 				});
 			}
-			if(s.buttonShownSaveNew) {
+			if(s.buttonSaveShownNew) {
 				group.push({
 					captionTitle:s.capGen.button.saveNewHint,
 					image:'add2.png',
-					isReadonly:!s.buttonActiveSave,
+					isReadonly:!s.buttonSaveUsable,
 					onClickLeft:() => s.set(true,false)
 				});
 			}
@@ -957,7 +959,7 @@ export default {
 				ev.preventDefault();
 				ev.stopPropagation();
 
-				if(!this.form.noDataActions && this.buttonActiveSave) {
+				if(!this.form.noDataActions && this.buttonSaveUsable) {
 					if(!this.isBulkUpdate && this.hasChanges)     this.set(false,false);
 					if(this.isBulkUpdate  && this.hasChangesBulk) this.setBulkUpdate();
 				}
