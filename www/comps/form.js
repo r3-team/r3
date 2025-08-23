@@ -1525,9 +1525,13 @@ export default {
 					this.triggerEventAfter('delete');
 					
 					if(this.recordActionFree) {
-						if(deleteAndNew || this.isAtHistoryStart) return this.openForm(null,null,[],false,null,true);
-						if(this.isPopUp)                          return this.closeAsk();
-						if(!this.isPopUp)                         return this.openPrevAsk();
+						if(this.isPopUp && deleteAndNew)  return this.$emit('records-open',[]);
+						if(this.isPopUp && !deleteAndNew) return this.closeAsk();
+						
+						if(deleteAndNew || this.isAtHistoryStart)
+							return this.openForm(null,null,[],false,null,true);
+						
+						return this.openPrevAsk();
 					}
 					this.messageSet('[DELETED]');
 				},
