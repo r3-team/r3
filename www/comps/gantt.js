@@ -238,9 +238,11 @@ const MyGantt = {
 					:naked="true"
 				/>
 				
-				<input class="zoom-factor clickable" type="range" min="3" max="12"
+				<input class="zoom-factor clickable" type="range"
 					v-if="!isMobile"
 					@change="$emit('set-login-option','ganttStepZoom',parseInt($event.target.value))"
+					:max="stepZoomMax"
+					:min="stepZoomMin"
 					:value="stepZoom"
 				/>
 				
@@ -415,6 +417,8 @@ const MyGantt = {
 			startDate:0,            // start date (TZ), base for date ranges, set once to keep navigation clear
 			stepBase:8,             // base size of step width in pixels, used to multiply with zoom factor
 			stepZoomDefault:7,      // zoom reset to
+			stepZoomMin:3,
+			stepZoomMax:30,
 			steps:0,                // available steps, calculated based on field size and zoom factor
 			unixInput0:null,        // date input, start
 			unixInput1:null,        // date input, end
