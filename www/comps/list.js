@@ -302,14 +302,13 @@ export default {
 			</div>
 			
 			<!-- list content -->
-			<div class="list-content" :class="{ showsInlineForm:popUpFormInline !== null }">
+			<div class="list-content" :class="{ showsInlineForm:popUpFormInline !== null }" :id="usesPageHistory ? scrollFormId : null">
 			
 				<!-- list results as table or card layout -->
 				<teleport to="#dropdown" :disabled="!dropdownShow">
 					<div
 						@keydown="handleKeydownLocal"
 						:class="{ 'list-cards':isCards, 'list-table':isTable, 'list-dropdown':dropdownShow, rowsColored:settings.listColored, scrolls:isSingleField}"
-						:id="usesPageHistory ? scrollFormId : null"
 					>
 						<table v-if="isTable" :class="{ asInput:isInput }">
 							<thead v-if="header && headerColumns">

@@ -406,7 +406,7 @@ const MyGantt = {
 		query:           { type:Object,  required:true },
 		stepTypeDefault: { type:String,  required:true },
 		stepTypeToggle:  { type:Boolean, required:true },
-		usesHotkeys:     { type:Boolean, required:false },
+		usesHotkeys:     { type:Boolean, required:true },
 		usesPageHistory: { type:Boolean, required:true }
 	},
 	emits:['close-inline','open-form','set-args','set-collection-indexes','set-login-option'],
