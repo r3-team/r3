@@ -406,6 +406,7 @@ const MyGantt = {
 		query:           { type:Object,  required:true },
 		stepTypeDefault: { type:String,  required:true },
 		stepTypeToggle:  { type:Boolean, required:true },
+		usesHotkeys:     { type:Boolean, required:false },
 		usesPageHistory: { type:Boolean, required:true }
 	},
 	emits:['close-inline','open-form','set-args','set-collection-indexes','set-login-option'],
@@ -574,9 +575,16 @@ const MyGantt = {
 			this.paramsUpdated(false);
 		}
 
+		if(this.usesHotkeys)
+			window.addEventListener('keydown',this.handleHotkeys);
+
 		this.dateStart = this.getDateNowRounded();
 		this.ready     = true;
 		this.$nextTick(() => this.setSteps(false));
+	},
+	unmounted() {
+		if(this.usesHotkeys)
+			window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
 		// external
@@ -681,6 +689,12 @@ const MyGantt = {
 			}
 			this.unixInput0 = null;
 			this.unixInput1 = null;
+		},
+		handleHotkeys(e) {
+			switch(e.key) {
+				case 'ArrowLeft':  this.pageChange(-1); break;
+				case 'ArrowRight': this.pageChange(1);  break;
+			}
 		},
 		hoverHeaderItem(unix) {
 			if(!this.unixInputActive) return;
