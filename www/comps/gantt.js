@@ -222,6 +222,12 @@ const MyGantt = {
 			</div>
 			
 			<div class="area nowrap default-inputs">
+				<my-button image="refresh.png"
+					@trigger="get"
+					:captionTitle="capGen.button.refresh"
+					:naked="true"
+				/>
+
 				<my-button
 					v-if="!isMobile && stepTypeToggle"
 					@trigger="$emit('set-login-option','ganttStepType', stepType === 'days' ? 'hours' : 'days')"

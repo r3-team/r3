@@ -263,6 +263,7 @@ const MyCalendar = {
 				<my-button image="refresh.png"
 					v-if="!isMobile"
 					@trigger="get"
+					:captionTitle="capGen.button.refresh"
 					:naked="true"
 				/>
 				
