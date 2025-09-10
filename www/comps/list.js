@@ -858,10 +858,7 @@ export default {
 		this.$watch('limit',this.get);
 		this.$watch('dropdownShow',v => {
 			if(v) this.setOffsetAndReload(0);
-			
-			const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
-			if(inputEl !== null)
-				inputEl.focus();
+			this.focusOnInput();
 		});
 		this.$watch('formLoading',v => {
 			if(v) return;
@@ -1111,6 +1108,11 @@ export default {
 				this.filtersQuick = '';
 			}
 		},
+		focusOnInput() {
+			const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
+			if(inputEl !== null)
+				inputEl.focus();
+		},
 		resetColumns() {
 			this.setColumnBatchSort([[],[]]);
 			// setting columns will reload data & aggregations
@@ -1268,6 +1270,7 @@ export default {
 			this.$emit('record-removed',this.rowsInput[i].indexRecordIds['0']);
 			this.rowsInput.splice(i,1);
 			this.escape();
+			this.$nextTick(this.focusOnInput);
 		},
 
 		// cleanup
