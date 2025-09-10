@@ -455,15 +455,15 @@ export default {
 
 			// apply default values, set for attributes (usually via getters/arguments)
 			for(let k in out) {
-				const ia = s.getDetailsFromIndexAttributeId(k);
+				const d = s.getDetailsFromIndexAttributeId(k);
 				
-				if(s.attributeIdMapDef[ia.attributeId] !== undefined) {
-					out[k] = ia.outsideIn && s.isAttributeRelationshipN1(s.attributeIdMap[ia.attributeId].content)
-						? [s.attributeIdMapDef[ia.attributeId]] : s.attributeIdMapDef[ia.attributeId];
+				if(s.attributeIdMapDef[d.attributeId] !== undefined) {
+					out[k] = d.outsideIn && s.isAttributeRelationshipN1(s.attributeIdMap[d.attributeId].content)
+						? [s.attributeIdMapDef[d.attributeId]] : s.attributeIdMapDef[d.attributeId];
 				}
 				
-				if(s.attributeIdMapDef[ia.attributeIdNm] !== undefined)
-					out[k] = [s.attributeIdMapDef[ia.attributeIdNm]];
+				if(s.attributeIdMapDef[d.attributeIdNm] !== undefined)
+					out[k] = [s.attributeIdMapDef[d.attributeIdNm]];
 			}
 			return out;
 		},
@@ -1020,8 +1020,8 @@ export default {
 			this.valuesOld       = {};
 			this.$nextTick(this.resized);
 
-			// for new records: apply defaults to update joins
-			// before get() as default values could be overwritten by form function
+			// for new records: apply defaults
+			// before get() as default values could be overwritten by form function (after load event)
 			if(this.isNew) {
 				for(const ia in this.valuesDef) {
 					if(this.valuesDef[ia] !== null)
@@ -1094,12 +1094,12 @@ export default {
 			
 			// update joined data, if relevant (because relationship value changed or defaults were loaded)
 			if(updateJoins && (changed || isOriginal)) {
-				const ia = this.getDetailsFromIndexAttributeId(indexAttributeId);
-				if(ia.outsideIn) return;
+				const d = this.getDetailsFromIndexAttributeId(indexAttributeId);
+				if(d.outsideIn) return;
 				
 				// get data from sub joins if relationship attribute value has changed
 				for(let k in this.joinsIndexMap) {
-					if(this.joinsIndexMap[k].attributeId === ia.attributeId)
+					if(this.joinsIndexMap[k].attributeId === d.attributeId)
 						this.getFromSubJoin(this.joinsIndexMap[k],value);
 				}
 			}
@@ -1149,16 +1149,16 @@ export default {
 			// set row values (decrypt first if necessary)
 			return this.getRowsDecrypted(rows,expressions).then(
 				rows => {
-					for(let i = 0, j = row.values.length; i < j; i++) {
-						const e = expressions[i];
-						
-						this.valueSet(
-							this.getIndexAttributeId(
-								e.index,e.attributeId,
-								e.outsideIn,e.attributeIdNm
-							),
-							row.values[i],true,false
-						);
+					const rowDecr = rows[0];
+					for(let i = 0, j = rowDecr.values.length; i < j; i++) {
+						const e  = expressions[i];
+						const ia = this.getIndexAttributeId(e.index,e.attributeId,e.outsideIn,e.attributeIdNm);
+
+						// if it´s a new record on affected relation, use defaults
+						if(row.indexRecordIds[e.index] === null)
+							this.valueSet(ia,this.valuesDef[ia],true,true);
+						else
+							this.valueSet(ia,rowDecr.values[i],true,false);
 					}
 				}
 			);
