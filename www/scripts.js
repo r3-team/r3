@@ -295,11 +295,13 @@ MyRouter.beforeEach((to,from) => {
 	if(e !== null)
 		MyRouterPositions[from.path] = e.scrollTop;
 	
+	return true;
+});
+MyRouter.afterEach((to,from) => {
 	if(window.history?.state !== undefined) {
 		MyStore.commit('isAtHistoryEnd',   window.history.state.forward === null);
 		MyStore.commit('isAtHistoryStart', window.history.state.back    === null);
 	}
-	return true;
 });
 
 // define main app
