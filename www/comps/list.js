@@ -1,20 +1,20 @@
-import MyFilters            from './filters.js';
-import MyForm               from './form.js';
-import MyInputCollection    from './inputCollection.js';
-import MyInputOffset        from './inputOffset.js';
-import MyListAggregate      from './listAggregate.js';
-import MyListColumnBatch    from './listColumnBatch.js';
-import MyListCsv            from './listCsv.js';
-import MyListFilters        from './listFilters.js';
-import MyListInputFlow      from './listInputFlow.js';
-import MyListInputRows      from './listInputRows.js';
-import MyListInputRowsEmpty from './listInputRowsEmpty.js';
-import MyListOptions        from './listOptions.js';
-import {consoleError}       from './shared/error.js';
-import {getRowsDecrypted}   from './shared/form.js';
-import {getCaption}         from './shared/language.js';
-import {layoutSettleSpace}  from './shared/layout.js';
-import {isAttributeFiles}   from './shared/attribute.js';
+import MyFilters                   from './filters.js';
+import MyForm                      from './form.js';
+import MyInputCollection           from './inputCollection.js';
+import MyInputOffset               from './inputOffset.js';
+import MyListAggregate             from './listAggregate.js';
+import MyListColumnBatch           from './listColumnBatch.js';
+import MyListCsv                   from './listCsv.js';
+import MyListFilters               from './listFilters.js';
+import MyListInputFlow             from './listInputFlow.js';
+import MyListInputRows             from './listInputRows.js';
+import MyListInputRowsEmpty        from './listInputRowsEmpty.js';
+import MyListOptions               from './listOptions.js';
+import {consoleError}              from './shared/error.js';
+import {getRowsDecrypted}          from './shared/form.js';
+import {getCaption}                from './shared/language.js';
+import {layoutSettleSpace}         from './shared/layout.js';
+import {isAttributeTextSearchable} from './shared/attribute.js';
 import {
 	getColumnBatches,
 	getColumnTitle,
@@ -714,7 +714,7 @@ export default {
 			// already encapsulated filters: list, choice, quick, column
 			let filters = s.filters
 				.concat(s.filtersColumn)
-				.concat(s.filtersParsedQuick)
+				.concat(s.filtersQuickParsed)
 				.concat(s.getFiltersEncapsulated(
 					JSON.parse(JSON.stringify(s.filtersUser))
 				));
@@ -764,15 +764,20 @@ export default {
 		},
 
 		// filters
-		filtersParsedQuick:(s) => {
-			if(s.filtersQuick === '') return [];
-			
+		filtersQuickColumns:(s) => {
 			let out = [];
 			for(const c of s.columns) {
 				const a = s.attributeIdMap[c.attributeId];
-				if(c.subQuery || s.isAttributeFiles(a.content) || (c.aggregator !== null && c.aggregator !== 'record'))
-					continue;
-				
+				if(s.isAttributeTextSearchable(a.content,a.contentUse) && !c.subQuery && (c.aggregator === null || c.aggregator === 'record'))
+					out.push(c);
+			}
+			return out;
+		},
+		filtersQuickParsed:(s) => {
+			if(s.filtersQuick === '') return [];
+			
+			let out = [];
+			for(const c of s.filtersQuickColumns) {
 				out.push({
 					connector:out.length === 0 ? 'AND' : 'OR',
 					index:0,
@@ -944,7 +949,7 @@ export default {
 		getQueryExpressions,
 		getRelationsJoined,
 		getRowsDecrypted,
-		isAttributeFiles,
+		isAttributeTextSearchable,
 		layoutSettleSpace,
 		routeChangeFieldReload,
 		routeParseParams,
