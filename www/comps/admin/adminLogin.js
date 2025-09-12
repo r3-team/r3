@@ -9,7 +9,7 @@ import srcBase64Icon    from '../shared/image.js';
 import {getCaption}     from '../shared/language.js';
 export {MyAdminLogin as default};
 
-let MyAdminLoginRole = {
+const MyAdminLoginRole = {
 	name:'my-admin-login-role',
 	template:`<td class="minimum role-content">
 		<div class="row wrap gap">
@@ -36,7 +36,7 @@ let MyAdminLoginRole = {
 	}
 };
 
-let MyAdminLogin = {
+const MyAdminLogin = {
 	name:'my-admin-login',
 	components:{
 		MyAdminLoginMeta,

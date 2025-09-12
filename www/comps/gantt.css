@@ -10,7 +10,8 @@
 	border-radius:0px;
 }
 .gantt input.zoom-factor{
-	width:80px !important;
+	width:90px !important;
+	padding:0px !important;
 }
 .gantt .date-range-label{
 	font-size:110%;

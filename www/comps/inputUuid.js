@@ -1,6 +1,4 @@
-export {MyInputUuid as default};
-
-let MyInputUuid = {
+export default {
 	name:'my-input-uuid',
 	template:`<div class="input-uuid">
 		<div class="row wrap">

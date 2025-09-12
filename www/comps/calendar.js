@@ -29,7 +29,7 @@ import {
 export {MyCalendar as default};
 export {MyCalendarDateSelect};
 
-let MyCalendarDateSelect = {
+const MyCalendarDateSelect = {
 	name:'my-calendar-date-select',
 	template:`<div class="calendar-select row gap">
 		<my-button image="pagePrev.png"
@@ -165,7 +165,7 @@ let MyCalendarDateSelect = {
 	}
 };
 
-let MyCalendar = {
+const MyCalendar = {
 	name:'my-calendar',
 	components:{
 		MyCalendarDays,
@@ -195,7 +195,8 @@ let MyCalendar = {
 				<div class="content column gap default-inputs">
 					<input
 						v-model="icsTokenName"
-						v-focus :disabled="icsToken !== ''"
+						v-focus
+						:disabled="icsToken !== ''"
 						:placeholder="capApp.icsTokenNameHint"
 					/>
 					<div v-if="icsToken === ''">
@@ -262,6 +263,7 @@ let MyCalendar = {
 				<my-button image="refresh.png"
 					v-if="!isMobile"
 					@trigger="get"
+					:captionTitle="capGen.button.refresh"
 					:naked="true"
 				/>
 				

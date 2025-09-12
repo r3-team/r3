@@ -1,8 +1,7 @@
 
 import { openDataImageAsNewTag } from './shared/generic.js';
-export {MyInputBarcode as default};
 
-let MyInputBarcode = {
+export default {
 	name:'my-input-barcode',
 	template:`<div class="input-barcode">
 		<div class="input-toolbar row gap" v-if="!hideInputs">

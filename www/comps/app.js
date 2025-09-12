@@ -9,6 +9,7 @@ import MySettings            from './settings.js';
 import {getStartFormId}      from './shared/access.js';
 import {updateCollections}   from './shared/collection.js';
 import {formOpen}            from './shared/form.js';
+import {getOrFallback}       from './shared/generic.js';
 import {jsFunctionRun}       from './shared/jsFunction.js';
 import {getCaption}          from './shared/language.js';
 import srcBase64Icon         from './shared/image.js';
@@ -22,14 +23,8 @@ import {
 	genericErrorWithFallback,
 	resolveErrCode
 } from './shared/error.js';
-import {
-	colorAdjustBgHeader,
-	getOrFallback
-} from './shared/generic.js';
 
-export {MyApp as default};
-
-let MyApp = {
+export default {
 	name:'app',
 	components:{
 		MyDialog,
@@ -463,7 +458,6 @@ let MyApp = {
 	},
 	methods:{
 		// externals
-		colorAdjustBgHeader,
 		consoleError,
 		formOpen,
 		genericError,

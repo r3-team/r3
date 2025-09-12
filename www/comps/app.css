@@ -80,27 +80,28 @@
 	
 	/**/
 	/* colors */
-	--color-bg:            #f7f7f7;
-	--color-bg-bright:     #fcfcfc;
-	--color-bg-dark:       #474747;
-	--color-bg-module:     #555555;
-	--color-bright:        #ffffff;
-	--color-border:        #9b9b9b;
-	--color-border-bright: #9f9f9f;
-	--color-border-dark:   #2f2f2f;
-	--color-cal-day-event: #d6e2e9;
-	--color-cal-outside:   #e9eeef;
-	--color-font:          #101010;
-	--color-font-bright:   #ffffff;
-	--color-font-dark:     #101010;
-	--color-font-disabled: #797979;
-	--color-input:         #ffffff;
-	--color-input-disabled:#efefef;
-	--color-list-row-even: #e9eeef;
-	--color-shade:         #4e4e4e;
-	--color-shade-bright:  #dddddd;
-	--color-shade-input:   #757575;
-	--color-hover-underlay:rgba(0,0,0,0.35);
+	--color-bg:                     #f7f7f7;
+	--color-bg-bright:              #fcfcfc;
+	--color-bg-dark:                #474747;
+	--color-bg-module:              #555555;
+	--color-bright:                 #ffffff;
+	--color-border:                 #9b9b9b;
+	--color-border-bright:          #9f9f9f;
+	--color-border-dark:            #2f2f2f;
+	--color-cal-day-event:          #d6e2e9;
+	--color-cal-outside:            #e9eeef;
+	--color-font:                   #101010;
+	--color-font-bright:            #ffffff;
+	--color-font-bright-placeholder:#e0e0e0;
+	--color-font-dark:              #101010;
+	--color-font-disabled:          #4d4d4d;
+	--color-input:                  #ffffff;
+	--color-input-disabled:         #efefef;
+	--color-list-row-even:          #e9eeef;
+	--color-shade:                  #4e4e4e;
+	--color-shade-bright:           #dddddd;
+	--color-shade-input:            #757575;
+	--color-hover-underlay:         rgba(0,0,0,0.35);
 	
 	--color-accent1:       hsl(311,57%,40%); /* input outlines */
 	--color-accent2:       hsl(127,86%,96%); /* calendar/gantt weekend */
@@ -109,16 +110,16 @@
 	--color-accent4:       hsl(339, 4%,61%); /* gantt entry */
 	--color-accent5:       hsl(207,20%,42%); /* collection entry */
 	--color-accent5-alt:   hsl(207,20%,34%); /* collection entry hover */
-	--color-error:         hsl(0,  84%,61%);
-	--color-success:       hsl(113,84%,44%);
 	--color-action:        hsl(196,27%,39%);
 	--color-action-border: hsl(196, 26%, 25%);
 	--color-action-bright: hsl(196,22%,72%);
 	--color-action-disable:hsl(0,   0%,77%);
 	--color-cancel:        hsl(0,  57%,32%);
 	--color-cancel-border: hsl(0, 59%, 19%);
+	--color-error:         hsl(0,  84%,61%);
 	--color-flow:          hsl(0, 0%, 97%);
 	--color-flow-active:   hsl(106, 18%, 51%);
+	--color-success:       hsl(113,84%,44%);
 	
 	--color-form-builder-actions:     hsl(196deg 45% 86%);
 	--color-form-builder-actions-bg:  hsl(200deg 30% 94%);
@@ -183,6 +184,16 @@ h3{
 hr{
 	border-top:1px solid var(--color-border);
 	border-bottom:none;
+}
+*:disabled,
+*::placeholder{
+	color:var(--color-font-disabled);
+	-webkit-text-fill-color:var(--color-font-disabled); /* fix for Safari */
+	opacity:1;                                          /* some browsers change opacity */
+}
+.placeholder-bright::placeholder{
+	color:var(--color-font-bright-placeholder);
+	-webkit-text-fill-color:var(--color-font-bright-placeholder);
 }
 
 /* generics */
@@ -1428,6 +1439,7 @@ table td.maximum{
 	--color-cal-day-event: #444c51;
 	--color-cal-outside:   #525455;
 	--color-font:          #ededed;
+	--color-font-disabled: #b5b5b5;
 	--color-input-disabled:#222222;
 	--color-list-row-even: #3e4141;
 	--color-shade:         #1b1b1b;

@@ -1,9 +1,13 @@
+import {hasAccessToRelation}         from './access.js';
 import {getIndexAttributeId}         from './attribute.js';
 import {getItemTitle}                from './builder.js';
 import {getCollectionValues}         from './collection.js';
-import {filterOperatorIsSingleValue} from './generic.js';
 import {variableValueGet}            from './variable.js';
 import MyStore                       from '../../stores/store.js';
+import {
+	checkDataOptions,
+	filterOperatorIsSingleValue
+} from './generic.js';
 import {
 	getUnixNowDate,
 	getUnixNowDatetime,
@@ -28,13 +32,19 @@ export function getJoinIndexMap(joins) {
 	}
 	return map;
 };
-export function getJoinIndexMapExpanded(joins,indexMapRecordId,indexesNoDel,indexesNoSet) {
+export function getJoinIndexMapExpanded(joins,indexMapRecordId,indexesNoDel,indexesNoSet,dataOptions) {
 	let map = {};
 	for(let j of joins) {
 		const recordId = indexMapRecordId[j.index];
 		j.recordId     = Number.isInteger(recordId) ? recordId : 0;
-		j.recordNoDel  = indexesNoDel.includes(j.index);
-		j.recordNoSet  = indexesNoSet.includes(j.index);
+		j.recordNew    = j.applyCreate && checkDataOptions(4,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,2);
+
+		// states based on combined join settings, data option overwrite, user access, state of record on current join, protection setting of preset record (delete only)
+		j.recordCreate = j.applyCreate && j.recordId === 0 && checkDataOptions(4,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,2);
+		j.recordUpdate = j.applyUpdate && j.recordId !== 0 && checkDataOptions(2,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,2) && !indexesNoSet.includes(j.index);
+		j.recordDelete = j.applyDelete && j.recordId !== 0 && checkDataOptions(1,dataOptions) && hasAccessToRelation(MyStore.getters.access,j.relationId,3) && !indexesNoDel.includes(j.index) &&
+			MyStore.getters['schema/relationIdMap'][j.relationId].presets.filter(p => p.protected && MyStore.getters['schema/presetIdMapRecordId'][p.id] === j.recordId).length === 0;
+		
 		map[j.index] = j;
 	}
 	return map;

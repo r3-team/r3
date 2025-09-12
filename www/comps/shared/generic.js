@@ -212,7 +212,15 @@ export function objectDeepMerge(target,...sources) {
 };
 
 export function openLink(href,blank) {
-	window.open(href,blank ? '_blank' : '_self');
+	// this method (compared to window.open()) allows for keeping in browser context
+	// important for PWA, to open new window in PWA style
+	const link  = document.createElement('a');
+	link.href   = href;
+	link.target = blank ? '_blank' : '_self';
+	link.rel    = 'noopener noreferrer';
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
 };
 
 export function openDataImageAsNewTag(data) {

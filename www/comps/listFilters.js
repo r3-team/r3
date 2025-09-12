@@ -1,8 +1,7 @@
 import {getColumnIsFilterable} from './shared/column.js';
 import {getQueryFilterNew}     from './shared/query.js';
-export {MyListFilters as default};
 
-let MyListFilters = {
+export default {
 	name:'my-list-filters',
 	template:`<div class="list-filters">
 		<div class="list-filters-content">

@@ -1,8 +1,8 @@
 import {getAttributeFileHref} from './shared/attribute.js';
 import {deepIsEqual}          from './shared/generic.js';
-export {MyInputRichtext as default};
+import {getDateFormat}        from './shared/time.js';
 
-const MyInputRichtext = {
+export default {
 	name:'my-input-richtext',
 	components:{'editor':Editor},
 	template:`<div class="input-richtext">
@@ -17,6 +17,7 @@ const MyInputRichtext = {
 					class="input-richtext-toolbar-link clickable"
 					target="_blank"
 					href="https://www.tiny.cloud/powered-by-tiny?utm_campaign=poweredby&utm_source=tiny&utm_medium=referral&utm_content=v6"
+					tabindex="-1"
 				>
 					<img class="input-richtext-toolbar-logo" src="images/externals/tinymce.svg" />
 				</a>
@@ -45,17 +46,19 @@ const MyInputRichtext = {
 		clipboard:      { type:Boolean, required:false, default:false },
 		isHidden:       { type:Boolean, required:false, default:false },
 		modelValue:     { required:true },
+		printCaption:   { type:String,  required:false, default:'export' },
 		readonly:       { type:Boolean, required:false, default:false },
 		valueFiles:     { required:false, default:null }
 	},
 	data() {
 		return {
 			debug:false,
-			editor:null,     // registered tinymce editor instance
-			isMounted:false, // wait for mount as toolbar ref must exist for tinymce init object to target it
-			images:[],       // image links to offer in editor
-			key:0,           // forces recreation of the editor on init change, 0 = not yet initialized
+			editor:null,       // registered tinymce editor instance
+			isMounted:false,   // wait for mount as toolbar ref must exist for tinymce init object to target it
+			images:[],         // image links to offer in editor
+			key:0,             // forces recreation of the editor on init change, 0 = not yet initialized
 			toolbarBase:'bold italic forecolor paragraphgroup numlist bullist alignleft aligncenter alignright alignjustify',
+			wasfocussed:false, // user focussed editor input
 			
 			// tokens are used to authenticate with the current user session
 			// we cannot store sensitive tokens inside richtext, but tokens are required for accessing files
@@ -101,13 +104,15 @@ const MyInputRichtext = {
 				// adds more elements that tiny does not convert (adds to default valid_elements)
 				// known issues: auto converts <b> to <strong>
 				extended_valid_elements:'b',
-
-				// debug events
+				
 				setup:(e) => {
-					if(!s.debug) return;
-					
-					e.on('remove', ()    => s.debugEvent('remove') );
-					e.on('error',  (err) => s.debugEvent('error',err) );
+					e.ui.registry.addButton('customPrint',{ icon:'print', onAction:s.print });
+					e.on('focus', () => s.wasfocussed = true);
+
+					if(s.debug) {
+						e.on('remove', ()    => s.debugEvent('remove') );
+						e.on('error',  (err) => s.debugEvent('error',err) );
+					}
 				}
 			};
 		},
@@ -134,7 +139,7 @@ const MyInputRichtext = {
 				return this.modelValue === null ? '' : this.modelValue.replace(this.rxTokensAdd,this.token);
 			},
 			set(v) {
-				if(this.readonly)
+				if(this.readonly || !this.wasfocussed)
 					return;
 				
 				// remove authentication tokens from file download link
@@ -149,7 +154,7 @@ const MyInputRichtext = {
 		active:(s) => s.isMounted && (!s.isHidden || s.editor !== null),
 		toolbar:(s) => {
 			if(s.readonly) return false;
-			return s.isMobile ? s.toolbarBase : `undo redo ${s.toolbarBase} outdent indent insertgroup code print searchreplace`;
+			return s.isMobile ? s.toolbarBase : `undo redo ${s.toolbarBase} outdent indent insertgroup code customPrint searchreplace`;
 		},
 
 		// simple
@@ -181,6 +186,7 @@ const MyInputRichtext = {
 		// externals
 		deepIsEqual,
 		getAttributeFileHref,
+		getDateFormat,
 		
 		// editor
 		debugEvent(ev,err) {
@@ -208,6 +214,17 @@ const MyInputRichtext = {
 				});
 			}
 			this.images = out;
+		},
+		print() {
+			const win = window.open('', '', 'height=600,width=800');
+			win.document.write(`<html><head><title>${this.printCaption}_${this.getDateFormat(new Date(),'Y-m-d H:i:S')}</title></head><body style="margin:20px;">${this.input}</body></html>`);
+			win.document.close();
+
+			setTimeout(() => {
+				win.focus();
+				win.print();
+				win.close();
+			}, 500);
 		},
 		register(ev,editor) {
 			this.editor = editor;

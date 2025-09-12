@@ -8,9 +8,8 @@ import {
 	getCollectionColumn,
 	getConsumersEntries
 } from './shared/collection.js';
-export {MyHeader as default};
 
-let MyHeader = {
+export default {
 	name:'my-header',
 	template:`<div class="app-header shade noPrint" :class="{ isDark:isDark }" :style="bgStyle">
 		
@@ -134,17 +133,21 @@ let MyHeader = {
 			</div>
 			
 			<!-- navigation -->
-			<div class="entry no-wrap clickable" tabindex="0"
+			<div class="entry no-wrap clickable"
 				v-if="showNavPrev"
 				@click="pagePrev"
 				@keyup.enter="pagePrev"
+				:class="{ readonly:isAtHistoryStart }"
+				:tabindex="isAtHistoryStart ? -1 : 0"
 			>
 				<img src="images/pagePrev.png" />
 			</div>
-			<div class="entry no-wrap clickable" tabindex="0"
+			<div class="entry no-wrap clickable"
 				v-if="showNavNext"
 				@click="pageNext"
 				@keyup.enter="pageNext"
+				:class="{ readonly:isAtHistoryEnd }"
+				:tabindex="isAtHistoryEnd ? -1 : 0"
 			>
 				<img src="images/pageNext.png" />
 			</div>
@@ -194,7 +197,7 @@ let MyHeader = {
 				v-if="isGlobalSearchOn"
 				v-model="globalSearchInput"
 				@keyup.enter="globalSearchStart($event.target.value); globalSearchInput = ''"
-				:class="{ isDark }"
+				:class="{ isDark, 'placeholder-bright':isDark }"
 				:placeholder="capGen.search + '...'"
 			/>
 			
@@ -366,6 +369,8 @@ let MyHeader = {
 		colorHeaderMain:     (s) => s.$store.getters.colorHeaderMain,
 		feedback:            (s) => s.$store.getters.feedback,
 		isAdmin:             (s) => s.$store.getters.isAdmin,
+		isAtHistoryEnd:      (s) => s.$store.getters.isAtHistoryEnd,
+		isAtHistoryStart:    (s) => s.$store.getters.isAtHistoryStart,
 		isAtMenu:            (s) => s.$store.getters.isAtMenu,
 		isMobile:            (s) => s.$store.getters.isMobile,
 		isNoAuth:            (s) => s.$store.getters.isNoAuth,
@@ -473,7 +478,7 @@ let MyHeader = {
 			});
 		},
 		openFeedback() { this.$store.commit('isAtFeedback',true); },
-		pagePrev()     { window.history.back(); },
-		pageNext()     { window.history.forward(); }
+		pagePrev()     { if(!this.isAtHistoryStart) window.history.back(); },
+		pageNext()     { if(!this.isAtHistoryEnd)   window.history.forward(); }
 	}
 };

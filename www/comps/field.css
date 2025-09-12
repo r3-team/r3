@@ -103,6 +103,9 @@
 .field .disabled .caption{
 	color:var(--color-font);
 }
+.field .invalid{
+	color:var(--color-error) !important;
+}
 .field .captionSub{
 	margin:3px 0px 0px 6px;
 	font-size:80%;
@@ -145,13 +148,6 @@
 	overflow:auto;
 }
 
-
-.field .invalid,
-.field .invalid::placeholder{
-	/* necessary for chrome */
-	color:var(--color-error) !important;
-}
-
 /* input field */
 .field .input{
 	width:0px; /* base width, required for inputs < 100px */
@@ -171,15 +167,6 @@
 	justify-content:center;
 	outline:none;
 	color:var(--color-font);
-}
-.field .input::placeholder{
-	color:var(--color-font-disabled);
-	opacity:1; /* standardize across browsers */
-}
-.field .input:disabled{
-	color:inherit; /* readonly state is represented by field background */
-	opacity:1;     /* standardize across browsers */
-	-webkit-text-fill-color:var(--color-font-disabled); /* fix for Safari < 18.0 */
 }
 .field .input .list{
 	margin:0px;

@@ -28,7 +28,7 @@ import {
 } from './shared/router.js';
 export {MyGantt as default};
 
-let MyGanttLineRecord = {
+const MyGanttLineRecord = {
 	name:'my-gantt-line-record',
 	template:
 	`<div class="gantt-line-record"
@@ -138,7 +138,7 @@ let MyGanttLineRecord = {
 	}
 };
 
-let MyGanttLine = {
+const MyGanttLine = {
 	name:'my-gantt-line',
 	components:{MyGanttLineRecord},
 	template:`<div class="gantt-line">
@@ -173,7 +173,7 @@ let MyGanttLine = {
 	emits:['record-selected']
 };
 
-let MyGantt = {
+const MyGantt = {
 	name:'my-gantt',
 	components:{
 		MyGanttLine,
@@ -222,6 +222,12 @@ let MyGantt = {
 			</div>
 			
 			<div class="area nowrap default-inputs">
+				<my-button image="refresh.png"
+					@trigger="get"
+					:captionTitle="capGen.button.refresh"
+					:naked="true"
+				/>
+
 				<my-button
 					v-if="!isMobile && stepTypeToggle"
 					@trigger="$emit('set-login-option','ganttStepType', stepType === 'days' ? 'hours' : 'days')"
@@ -238,9 +244,11 @@ let MyGantt = {
 					:naked="true"
 				/>
 				
-				<input class="zoom-factor clickable" type="range" min="3" max="12"
+				<input class="zoom-factor clickable" type="range"
 					v-if="!isMobile"
 					@change="$emit('set-login-option','ganttStepZoom',parseInt($event.target.value))"
+					:max="stepZoomMax"
+					:min="stepZoomMin"
 					:value="stepZoom"
 				/>
 				
@@ -398,6 +406,7 @@ let MyGantt = {
 		query:           { type:Object,  required:true },
 		stepTypeDefault: { type:String,  required:true },
 		stepTypeToggle:  { type:Boolean, required:true },
+		usesHotkeys:     { type:Boolean, required:true },
 		usesPageHistory: { type:Boolean, required:true }
 	},
 	emits:['close-inline','open-form','set-args','set-collection-indexes','set-login-option'],
@@ -415,6 +424,8 @@ let MyGantt = {
 			startDate:0,            // start date (TZ), base for date ranges, set once to keep navigation clear
 			stepBase:8,             // base size of step width in pixels, used to multiply with zoom factor
 			stepZoomDefault:7,      // zoom reset to
+			stepZoomMin:3,
+			stepZoomMax:30,
 			steps:0,                // available steps, calculated based on field size and zoom factor
 			unixInput0:null,        // date input, start
 			unixInput1:null,        // date input, end
@@ -533,7 +544,6 @@ let MyGantt = {
 	mounted() {
 		// setup watchers
 		this.$watch('appResized',this.resized);
-		this.$watch('columns',() => { this.groups = []; });
 		this.$watch('formLoading',v => { if(!v) this.get(); });
 		this.$watch('isHidden',v => { if(!v) this.$nextTick(() => this.setSteps(true)); });
 		this.$watch('popUpFormInline',this.resized);
@@ -542,11 +552,15 @@ let MyGantt = {
 			this.paramsUpdate(true);
 			this.$nextTick(() => this.setSteps(true));
 		});
-		this.$watch(() => [this.choices,this.filters],(newVals, oldVals) => {
-			for(let i = 0, j = newVals.length; i < j; i++) {
-				if(JSON.stringify(newVals[i]) !== JSON.stringify(oldVals[i]))
-					return this.get();
+		this.$watch('columns',(valNew,valOld) => {
+			if(JSON.stringify(valNew) !== JSON.stringify(valOld)) {
+				this.groups = [];
+				this.get();
 			}
+		});
+		this.$watch('filters',(valNew,valOld) => {
+			if(JSON.stringify(valNew) !== JSON.stringify(valOld))
+				this.get();
 		});
 		this.$watch(() => [this.showGroupLabels,this.stepZoom],() => {
 			this.$nextTick(() => this.setSteps(false));
@@ -561,9 +575,16 @@ let MyGantt = {
 			this.paramsUpdated(false);
 		}
 
+		if(this.usesHotkeys)
+			window.addEventListener('keydown',this.handleHotkeys);
+
 		this.dateStart = this.getDateNowRounded();
 		this.ready     = true;
 		this.$nextTick(() => this.setSteps(false));
+	},
+	unmounted() {
+		if(this.usesHotkeys)
+			window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
 		// external
@@ -668,6 +689,12 @@ let MyGantt = {
 			}
 			this.unixInput0 = null;
 			this.unixInput1 = null;
+		},
+		handleHotkeys(e) {
+			switch(e.key) {
+				case 'ArrowLeft':  this.pageChange(-1); break;
+				case 'ArrowRight': this.pageChange(1);  break;
+			}
 		},
 		hoverHeaderItem(unix) {
 			if(!this.unixInputActive) return;

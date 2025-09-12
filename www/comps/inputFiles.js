@@ -10,7 +10,7 @@ import {
 } from './shared/generic.js';
 export {MyInputFiles as default};
 
-let MyInputFilesName = {
+const MyInputFilesName = {
 	name:'my-input-files-name',
 	template:`<div class="input-files-name">
 		<input
@@ -40,7 +40,7 @@ let MyInputFilesName = {
 	}
 };
 
-let MyInputFilesRequest = {
+const MyInputFilesRequest = {
 	name:'my-input-files-request',
 	template:`<my-button image="screenFile.png"
 		@trigger="$emit('open',false)"
@@ -58,7 +58,7 @@ let MyInputFilesRequest = {
 	}
 };
 
-let MyInputFiles = {
+const MyInputFiles = {
 	name:'my-input-files',
 	components:{
 		MyInputFilesName,
@@ -234,7 +234,7 @@ let MyInputFiles = {
 						<td v-if="!noSpace">{{ displayDate(f.changed) }}</td>
 						<td>
 							<div class="row">
-								<a target="_blank"
+								<a target="_self" download
 									:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 								>
 									<my-button image="download.png"
@@ -255,7 +255,7 @@ let MyInputFiles = {
 			<!-- list comfortable -->
 			<div class="listComfort" v-if="viewListComfort">
 				<div class="item" v-for="f in filesProcessed">
-					<a draggable="false" target="_blank"
+					<a draggable="false" target="_self" download
 						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 						:title="capApp.button.downloadHint"
 					>
@@ -293,7 +293,7 @@ let MyInputFiles = {
 			<!-- gallery -->
 			<div class="gallery" v-if="viewGallery" >
 				<div class="item" v-for="f in filesProcessed">
-					<a draggable="false" target="_blank"
+					<a draggable="false" target="_self" download
 						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 						:title="capApp.button.downloadHint"
 					>
@@ -484,31 +484,35 @@ let MyInputFiles = {
 			return this.sortDirAsc ? ' \u25B2' : ' \u25BC';
 		},
 		imagePreview(fileId,name,version) {
-			let ext = this.extRegex.exec(name)[1].toLowerCase();
-			if(this.extPreview.includes(ext))
-				return this.getAttributeFileThumbHref(this.attributeId,fileId,name,version,this.token);
-			
-			if(['doc','docx','odt'].includes(ext))
-				return 'images/fileRichtext.png';
-			
-			if(['xls','xlsx','ods'].includes(ext))
-				return 'images/fileSheet.png';
-			
-			if(['7z','gz','iso','rar','zip'].includes(ext))
-				return 'images/fileZip.png';
-			
-			if(['asc','der','key','p12','pem','pfx','ppk','pub'].includes(ext))
-				return 'images/fileKey.png';
-			
-			if(['aac','flac','m4a','mp3','mp4','ogg','wav','wma'].includes(ext))
-				return 'images/fileAudio.png';
-			
-			if(['avi','flv','m4v','mp4','mov','mpg','mpeg','mkv','ogv','webm','wmv'].includes(ext))
-				return 'images/fileVideo.png';
-			
-			if(ext === 'rei3')
-				return 'images/fileRei3.png';
-			
+			let ext = this.extRegex.exec(name)[1];
+			if(ext !== undefined) {
+				// if extension can be identified, decide what to display based on type
+				ext = ext.toLowerCase();
+
+				if(this.extPreview.includes(ext))
+					return this.getAttributeFileThumbHref(this.attributeId,fileId,name,version,this.token);
+				
+				if(['doc','docx','odt'].includes(ext))
+					return 'images/fileRichtext.png';
+				
+				if(['xls','xlsx','ods'].includes(ext))
+					return 'images/fileSheet.png';
+				
+				if(['7z','gz','iso','rar','zip'].includes(ext))
+					return 'images/fileZip.png';
+				
+				if(['asc','der','key','p12','pem','pfx','ppk','pub'].includes(ext))
+					return 'images/fileKey.png';
+				
+				if(['aac','flac','m4a','mp3','mp4','ogg','wav','wma'].includes(ext))
+					return 'images/fileAudio.png';
+				
+				if(['avi','flv','m4v','mp4','mov','mpg','mpeg','mkv','ogv','webm','wmv'].includes(ext))
+					return 'images/fileVideo.png';
+				
+				if(ext === 'rei3')
+					return 'images/fileRei3.png';
+			}
 			return 'images/noPic.png';
 		},
 		resized() {

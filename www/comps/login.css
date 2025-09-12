@@ -76,9 +76,6 @@
     border:1px solid rgba(0,0,0,0.9);
     transition:background 0.2s, border 0.2s;
 }
-.login input::placeholder{
-    color:#e2e2e2;
-}
 .login.badAuth input{
 	color:var(--color-error);
 }

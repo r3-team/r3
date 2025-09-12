@@ -1,6 +1,4 @@
-export {MyLabel as default};
-
-const MyLabel = {
+export default {
 	name:'my-label',
 	template:`<div class="label" :class="{ darkBg, error, large }">
 		<img draggable="false"

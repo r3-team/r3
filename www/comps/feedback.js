@@ -1,8 +1,7 @@
 import {dialogCloseAsk} from './shared/dialog.js';
 import {getCaption}     from './shared/language.js';
-export {MyFeedback as default};
 
-let MyFeedback = {
+export default {
 	name:'my-feedback',
 	template:`<div class="app-sub-window" @click.self="closeAsk">
 		<div class="contentBox feedback float">

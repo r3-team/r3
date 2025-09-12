@@ -69,6 +69,8 @@ const MyStore = Vuex.createStore({
 		isAtFavorites:false,           // is the favorites menu entry active?
 		isAtFavoritesEdit:false,       // is the favorites menu entry active and in edit mode?
 		isAtFeedback:false,            // app shows feedback dialog
+		isAtHistoryEnd:false,          // current page is at browser history end
+		isAtHistoryStart:false,        // current page is at browser history start
 		isAtMenu:false,                // user navigated to menu (only relevant if isMobile)
 		isAtModule:false,              // app currently shows a module (instead of Builder, admin panel, settings, etc.)
 		isCollapsedMenuApp:false,      // app menu is collapsed
@@ -287,6 +289,8 @@ const MyStore = Vuex.createStore({
 		isAtFavorites:           (state,payload) => state.isAtFavorites            = payload,
 		isAtFavoritesEdit:       (state,payload) => state.isAtFavoritesEdit        = payload,
 		isAtFeedback:            (state,payload) => state.isAtFeedback             = payload,
+		isAtHistoryEnd:          (state,payload) => state.isAtHistoryEnd           = payload,
+		isAtHistoryStart:        (state,payload) => state.isAtHistoryStart         = payload,
 		isAtMenu:                (state,payload) => state.isAtMenu                 = payload,
 		isAtModule:              (state,payload) => state.isAtModule               = payload,
 		isCollapsedMenuApp:      (state,payload) => state.isCollapsedMenuApp       = payload,
@@ -358,26 +362,23 @@ const MyStore = Vuex.createStore({
 				}
 			} else {
 				// accent color disabled, use main color for gradient
-				colorRgb = state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault;
+				colorRgb = state.settings.colorHeader ?? state.colorHeaderDefault;
 			}
 			return tinycolor(colorRgb).brighten(brighten).desaturate(desature);
 		},
 		colorHeaderMain:(state,payload) => {
-			return tinycolor(state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault);
+			return tinycolor(state.settings.colorHeader ?? state.colorHeaderDefault);
 		},
 		colorLogin:(state,payload) => {
 			return tinycolor(MyStoreLocal.state.activated && MyStoreLocal.state.companyColorLogin !== '' ? MyStoreLocal.state.companyColorLogin : state.colorLoginDefault);
 		},
 		colorMenu:(state,payload) => {
-			return tinycolor(state.settings.colorMenu !== null
-				? state.settings.colorMenu
-				: (state.settings.dark ? state.colorMenuDefaultDark : state.colorMenuDefault));
+			return tinycolor(state.settings.colorMenu ?? (state.settings.dark ? state.colorMenuDefaultDark : state.colorMenuDefault));
 		},
 		colorMenuStyle:(state,payload) => {
-			const colorRgb = state.settings.colorMenu !== null
-				? state.settings.colorMenu
-				: (state.settings.dark ? state.colorMenuDefaultDark : state.colorMenuDefault);
-			const color = tinycolor(colorRgb).lighten(4);
+			const colorUser = tinycolor(state.settings.colorMenu).isValid() ? state.settings.colorMenu : null;
+			const colorRgb  = colorUser ?? (state.settings.dark ? state.colorMenuDefaultDark : state.colorMenuDefault);
+			const color     = tinycolor(colorRgb).lighten(4);
 			return `background:radial-gradient(at right bottom, ${color.toString()} 20%, #${colorRgb} 60%);`;
 		},
 		licenseDays:(state) => {
@@ -463,6 +464,8 @@ const MyStore = Vuex.createStore({
 		isAtFavorites:           (state) => state.isAtFavorites,
 		isAtFavoritesEdit:       (state) => state.isAtFavoritesEdit,
 		isAtFeedback:            (state) => state.isAtFeedback,
+		isAtHistoryEnd:          (state) => state.isAtHistoryEnd,
+		isAtHistoryStart:        (state) => state.isAtHistoryStart,
 		isAtMenu:                (state) => state.isAtMenu,
 		isAtModule:              (state) => state.isAtModule && state.moduleIdLast !== null,
 		isCollapsedMenuApp:      (state) => state.isCollapsedMenuApp,

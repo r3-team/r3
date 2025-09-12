@@ -1,6 +1,4 @@
-export {MyInputDictionary as default};
-
-const MyInputDictionary = {
+export default {
 	name:'my-input-dictionary',
 	template:`<select class="auto"
 		@input="$emit('update:modelValue',$event.target.value)"

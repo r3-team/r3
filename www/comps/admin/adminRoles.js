@@ -4,7 +4,7 @@ import MyInputLogin     from '../inputLogin.js';
 import {MyModuleSelect} from '../input.js';
 export {MyAdminRoles as default};
 
-let MyAdminRoleItem = {	
+const MyAdminRoleItem = {	
 	name:'my-admin-role-item',
 	components:{MyInputLogin},
 	template:`<div class="admin-role">
@@ -120,14 +120,13 @@ let MyAdminRoleItem = {
 	}
 };
 
-let MyAdminRoles = {
+const MyAdminRoles = {
 	name:'my-admin-roles',
 	components:{
 		MyAdminRoleItem,
 		MyModuleSelect
 	},
 	template:`<div class="admin-roles contentBox grow scroll">
-		
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/admin.png" />
@@ -155,8 +154,8 @@ let MyAdminRoles = {
 				<my-module-select class="selector"
 					v-if="modules.length !== 0"
 					@update:modelValue="moduleId = $event;get()"
-					:enableAssignable="true"
 					:modelValue="moduleId"
+					:showOnlyIfAssignable="true"
 				/>
 			</div>
 			<div class="area">
@@ -228,7 +227,7 @@ let MyAdminRoles = {
 		
 		// simple
 		hasChanges:(s) => s.loginIdsChanged.length !== 0,
-		module:(s) => s.moduleId === null ? false : s.moduleIdMap[s.moduleId],
+		module:    (s) => s.moduleId === null ? false : s.moduleIdMap[s.moduleId],
 		
 		// stores
 		modules:    (s) => s.$store.getters['schema/modules'],

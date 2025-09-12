@@ -77,6 +77,7 @@
 }
 .app-header .entry.readonly{
 	cursor:default;
+	opacity:0.5;
 }
 .app-header .entry.no-wrap{
 	margin:0px 3px 0px 0px;

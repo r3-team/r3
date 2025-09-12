@@ -1,6 +1,4 @@
-export {MyTabs as default};
-
-let MyTabs = {
+export default {
 	name:'my-tabs',
 	template:`<div class="tabs">
 		<div class="tab-entry" tabindex="0"

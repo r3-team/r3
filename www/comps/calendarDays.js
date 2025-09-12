@@ -12,7 +12,7 @@ import {
 } from './shared/time.js';
 export {MyCalendarDays as default};
 
-let MyCalendarDaysEvent = {
+const MyCalendarDaysEvent = {
 	name:'my-calendar-days-event',
 	template:`<div class="eventWrap"
 		@click.ctrl.exact="$emit('click-middle')"
@@ -58,7 +58,7 @@ let MyCalendarDaysEvent = {
 	emits:['click','click-middle','clipboard']
 };
 
-let MyCalendarDays = {
+const MyCalendarDays = {
 	name:'my-calendar-days',
 	components:{ MyCalendarDaysEvent },
 	template:`<div class="calendar-days">

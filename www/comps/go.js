@@ -4,7 +4,7 @@ import {getAttributeValuesFromGetter} from './shared/attribute.js';
 import {getStartFormId }              from './shared/access.js';
 export {MyGoForm, MyGoModule};
 
-let MyGoModule = {
+const MyGoModule = {
 	name:'my-go-module',
 	template:`<div />`,
 	props:{
@@ -56,7 +56,7 @@ let MyGoModule = {
 	}
 };
 
-let MyGoForm = {
+const MyGoForm = {
 	name:'my-go-form',
 	components:{ MyForm, MyMenu },
 	template:`<div v-if="moduleId !== null">

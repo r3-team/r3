@@ -7,7 +7,8 @@ import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {getJoinIndexMap}               from '../shared/query.js';
 import {
 	getNilUuid,
-	getRandomInt
+	getRandomInt,
+	openLink
 } from '../shared/generic.js';
 import {
 	getDependentModules,
@@ -1481,6 +1482,7 @@ let MyBuilderFieldOptions = {
 		isAttributeRegconfig,
 		isAttributeRelationship,
 		isAttributeString,
+		openLink,
 		
 		// actions
 		collectionAdd() {
@@ -1495,7 +1497,7 @@ let MyBuilderFieldOptions = {
 		},
 		openAttribute(relationId,middle) {
 			if(!middle) this.$router.push('/builder/relation/'+relationId);
-			else        window.open('#/builder/relation/'+relationId,'_blank');
+			else        this.openLink('#/builder/relation/'+relationId,true);
 		},
 		presetIdAdd(value) {
 			let ids = JSON.parse(JSON.stringify(this.field.defPresetIds));

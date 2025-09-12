@@ -4,11 +4,11 @@ import {getNumberFormatted}               from './shared/generic.js';
 import {getQueryExpressions}              from './shared/query.js';
 import {
 	getUnixFormat,
+	getUnixShifted,
 	getUtcTimeStringFromUnix
 } from './shared/time.js';
-export {MyListAggregate as default};
 
-let MyListAggregate = {
+export default {
 	name:'my-list-aggregate',
 	template:`<tr class="aggregation" v-if="anyValues">
 		<td v-if="leaveOneEmpty"></td>
@@ -59,6 +59,7 @@ let MyListAggregate = {
 		getNumberFormatted,
 		getQueryExpressions,
 		getUnixFormat,
+		getUnixShifted,
 		getUtcTimeStringFromUnix,
 		isAttributeDecimal,
 		
@@ -110,9 +111,9 @@ let MyListAggregate = {
 						// integer values are parsed as an aggregation can contain fractions
 						if(c.aggregator !== 'count') {
 							switch(a.contentUse) {
-								case 'date':     v = this.getUnixFormat(v,this.dateFormat);          break;
-								case 'datetime': v = this.getUnixFormat(v,this.dateFormat + ' H:i'); break;
-								case 'time':     v = this.getUtcTimeStringFromUnix(v);               break;
+								case 'date':     v = this.getUnixFormat(this.getUnixShifted(v,true),this.dateFormat); break;
+								case 'datetime': v = this.getUnixFormat(v,this.dateFormat + ' H:i');                  break;
+								case 'time':     v = this.getUtcTimeStringFromUnix(v);                                break;
 								default:         v = this.isAttributeDecimal(a.content) ? this.getNumberFormatted(v,a) : parseInt(v); break;
 							}
 						}

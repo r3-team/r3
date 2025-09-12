@@ -1,6 +1,4 @@
-export {MyInputOffset as default};
-
-let MyInputOffset = {
+export default {
 	name:'my-input-offset',
 	template:`<div class="input-offset default-inputs">
 		<!-- prev page -->

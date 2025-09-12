@@ -12,9 +12,8 @@ import {
 	getIndexAttributeIdByField,
 	isAttributeFiles
 } from './shared/attribute.js';
-export {MyFormLog as default};
 
-let MyFormLog = {
+export default {
 	name:'my-form-log',
 	components:{MyField},
 	template:`<div class="form-log contentBox" :class="{ 'float':isPopUpFloating }">
@@ -69,7 +68,6 @@ let MyFormLog = {
 							:formBlockInputs="false"
 							:formIsEmbedded="true"
 							:formLoading="loading"
-							:formNoDataPerm="false"
 							:logViewer="true"
 							:isAloneInForm="false"
 							:joinsIndexMap

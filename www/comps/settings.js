@@ -1,3 +1,4 @@
+import {openLink}          from './shared/generic.js';
 import srcBase64Icon       from './shared/image.js';
 import {getCaption}        from './shared/language.js';
 import {set as setSetting} from './shared/settings.js';
@@ -20,7 +21,7 @@ import {
 } from './shared/crypto.js';
 export {MySettings as default};
 
-let MySettingsEncryption = {
+const MySettingsEncryption = {
 	name:'my-settings-encryption',
 	template:`<div class="encryption">
 	
@@ -448,7 +449,7 @@ let MySettingsEncryption = {
 	}
 };
 
-let MySettingsAccount = {
+const MySettingsAccount = {
 	name:'my-settings-account',
 	template:`<table class="default-inputs">
 		<tbody>
@@ -686,7 +687,7 @@ let MySettingsAccount = {
 	}
 };
 
-let MySettingsClientEvents = {
+const MySettingsClientEvents = {
 	name:'my-settings-client-events',
 	components:{ MyInputHotkey },
 	template:`<div class="settings-client-events">
@@ -819,7 +820,7 @@ let MySettingsClientEvents = {
 	}
 };
 
-let MySettingsFixedTokens = {
+const MySettingsFixedTokens = {
 	name:'my-settings-fixed-tokens',
 	components:{MyTabs},
 	template:`<div>
@@ -1106,11 +1107,12 @@ let MySettingsFixedTokens = {
 	methods:{
 		// externals
 		getUnixFormat,
+		openLink,
 		
 		// actions
 		loadApp() {
 			let call = [`os=${this.deviceOs}`,`token=${this.token}`];
-			window.open(`/client/download/?${call.join('&')}`);
+			this.openLink(`/client/download/?${call.join('&')}`,false);
 		},
 		loadCnf() {
 			let langCode = this.languageCodesOfficial.includes(this.languageCode)
@@ -1132,7 +1134,7 @@ let MySettingsFixedTokens = {
 				`token=${this.token}`,
 				`ssl=${ isSsl ? 1 : 0}`
 			];
-			window.open(`/client/download/config/?${call.join('&')}`);
+			this.openLink(`/client/download/config/?${call.join('&')}`,false);
 		},
 		showSubWindow(target) {
 			this.tokenFixed    = '';
@@ -1209,7 +1211,7 @@ let MySettingsFixedTokens = {
 	}
 };
 
-let MySettings = {
+const MySettings = {
 	name:'my-settings',
 	components:{
 		MyInputColorWrap,

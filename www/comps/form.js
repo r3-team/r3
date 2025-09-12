@@ -2,7 +2,6 @@ import MyArticles                    from './articles.js';
 import MyField                       from './field.js';
 import MyFormActions                 from './formActions.js';
 import MyFormLog                     from './formLog.js';
-import {hasAccessToRelation}         from './shared/access.js';
 import {getAttributeFileVersionHref} from './shared/attribute.js';
 import {getCollectionValues}         from './shared/collection.js';
 import {getColumnsProcessed}         from './shared/column.js';
@@ -34,7 +33,6 @@ import {
 	getFieldProcessedDefault
 } from './shared/field.js';
 import {
-	checkDataOptions,
 	filterIsCorrect,
 	filterOperatorIsSingleValue,
 	openLink
@@ -58,9 +56,8 @@ import {
 	variableValueGet,
 	variableValueSet
 } from './shared/variable.js';
-export {MyForm as default};
 
-let MyForm = {
+export default {
 	name:'my-form',
 	components:{
 		MyArticles,
@@ -104,9 +101,9 @@ let MyForm = {
 			<div class="top nowrap" :class="{ lower:!hasBarLower && !isSingleField }" v-if="!isWidget">
 				<div class="area nowrap form-title-wrap">
 					<my-button image="upward.png"
-						v-if="hasGoBack"
+						v-if="buttonGoBackShown"
 						@trigger="openPrevAsk"
-						:active="!changingRecord"
+						:active="buttonGoBackUsable"
 						:captionTitle="capGen.button.goBack"
 					/>
 					<img class="icon" :src="iconSrc" />
@@ -189,27 +186,21 @@ let MyForm = {
 			<div class="top lower nowrap" v-if="hasBarLower">
 				<div class="area nowrap">
 					<my-button image="new.png"
-						v-if="buttonShownNew"
+						v-if="buttonNewShown"
 						@trigger="openNewAsk(false)"
 						@trigger-middle="openNewAsk(true)"
-						:active="buttonActiveNew"
+						:active="buttonNewUsable"
 						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
 					/>
-					<my-button image="save.png" alt-image="add.png"
-						v-if="buttonShownSave"
-						@trigger="set(false)"
-						@trigger-alt="set(true)"
-						:active="buttonActiveSave"
-						:altAction="buttonShownSaveAlt"
-						:altCaptionTitle="capGen.button.saveNewHint"
-						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.save : ''"
-						:captionTitle="capGen.button.saveHint"
+					<my-button-group
+						v-if="buttonSaveShown"
+						:group="buttonGroupSave"
 					/>
 					<my-button image="save.png"
-						v-if="buttonShownSaveBulk"
+						v-if="buttonSaveShownBulk"
 						@trigger="setBulkUpdate"
-						:active="buttonActiveSaveBulk"
+						:active="buttonSaveUsableBulk"
 						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length)) : ''"
 						:captionTitle="capGen.button.saveHint"
 					/>
@@ -236,13 +227,9 @@ let MyForm = {
 				/>
 				<div class="form-bar-layout-check" ref="formBarLowerCheck" />
 				<div class="area">
-					<my-button image="shred.png"
-						v-if="buttonShownDel"
-						@trigger="delAsk"
-						:active="buttonActiveDel"
-						:cancel="true"
-						:caption="layoutElements.includes('dataActionLabels') ? capGen.button.delete : ''"
-						:captionTitle="capGen.button.deleteHint"
+					<my-button-group
+						v-if="buttonDelShown"
+						:group="buttonGroupDelete"
 					/>
 				</div>
 			</div>
@@ -287,7 +274,6 @@ let MyForm = {
 					:formBlockInputs="blockInputs"
 					:formIsEmbedded="isPopUp || isWidget"
 					:formLoading="loading"
-					:formNoDataPerm="(isNew && !mayCreate) || (!isNew && !mayUpdate)"
 					:isAloneInForm="isSingleField"
 					:joinsIndexMap
 					:key="f.id"
@@ -469,15 +455,15 @@ let MyForm = {
 
 			// apply default values, set for attributes (usually via getters/arguments)
 			for(let k in out) {
-				const ia = s.getDetailsFromIndexAttributeId(k);
+				const d = s.getDetailsFromIndexAttributeId(k);
 				
-				if(s.attributeIdMapDef[ia.attributeId] !== undefined) {
-					out[k] = ia.outsideIn && s.isAttributeRelationshipN1(s.attributeIdMap[ia.attributeId].content)
-						? [s.attributeIdMapDef[ia.attributeId]] : s.attributeIdMapDef[ia.attributeId];
+				if(s.attributeIdMapDef[d.attributeId] !== undefined) {
+					out[k] = d.outsideIn && s.isAttributeRelationshipN1(s.attributeIdMap[d.attributeId].content)
+						? [s.attributeIdMapDef[d.attributeId]] : s.attributeIdMapDef[d.attributeId];
 				}
 				
-				if(s.attributeIdMapDef[ia.attributeIdNm] !== undefined)
-					out[k] = [s.attributeIdMapDef[ia.attributeIdNm]];
+				if(s.attributeIdMapDef[d.attributeIdNm] !== undefined)
+					out[k] = [s.attributeIdMapDef[d.attributeIdNm]];
 			}
 			return out;
 		},
@@ -489,7 +475,6 @@ let MyForm = {
 		hasChanges:    (s) => s.fieldIdsChanged.length !== 0,
 		hasChangesBulk:(s) => s.fieldIdsTouched.length !== 0 && s.isBulkUpdate,
 		hasFormActions:(s) => s.form.actions.filter(v => (s.entityIdMapEffect.formAction[v.id]?.state !== undefined ? s.entityIdMapEffect.formAction[v.id].state : v.state) !== 'hidden').length > 0,
-		hasGoBack:     (s) => s.isData && !s.isMobile && !s.isPopUp,
 		helpAvailable: (s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
 		isBulkUpdate:  (s) => s.isData && s.recordIds.length > 1,
 		isData:        (s) => s.relationId !== null,
@@ -499,37 +484,40 @@ let MyForm = {
 		warnUnsaved:   (s) => s.hasChanges && !s.form.noDataActions && !s.blockInputs && s.settings.warnUnsaved,
 
 		// permissions
-		mayCreate:      (s) => s.mayCreateRecord && s.checkDataOptions(4,s.entityIdMapEffect.form.data),
-		mayCreateRecord:(s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.hasAccessToRelation(s.access,s.joins[0].relationId,2),
-		mayDelete:      (s) => s.mayDeleteRecord && s.checkDataOptions(1,s.entityIdMapEffect.form.data),
-		mayDeleteRecord:(s) => !s.badLoad && s.joinsIndexesDel.length !== 0 && !s.isNew && s.relationIdMap[s.joins[0].relationId].presets.filter(v => v.protected && s.recordIds.includes(s.presetIdMapRecordId[v.id])).length === 0,
-		mayUpdate:      (s) => s.mayUpdateRecord && s.checkDataOptions((s.isNew ? 4 : 2),s.entityIdMapEffect.form.data),
-		mayUpdateRecord:(s) => !s.badLoad && (s.joinsIndexesSet.length !== 0 || (s.isNew && s.mayCreateRecord)),
+		mayCreate:(s) => !s.badLoad && s.joinsIndexesCrt.length !== 0,
+		mayDelete:(s) => !s.badLoad && s.joinsIndexesDel.length !== 0,
+		mayNew:   (s) => !s.badLoad && s.joinsIndexesNew.length !== 0,
+		mayUpdate:(s) => !s.badLoad && s.joinsIndexesSet.length !== 0,
 
 		// buttons
-		buttonActiveDel:     (s) => !s.buttonsReadonly && s.mayDelete,
-		buttonActiveNew:     (s) => !s.buttonsReadonly && s.mayCreate && (!s.isNew || s.hasChanges),
-		buttonActiveSave:    (s) => !s.buttonsReadonly && s.mayUpdate && s.hasChanges,
-		buttonActiveSaveBulk:(s) => !s.buttonsReadonly && s.mayUpdate && s.hasChangesBulk,
-		buttonShownDel:      (s) => !s.isBulkUpdate && s.showButtonDel && (s.buttonActiveDel || s.layoutElements.includes('dataActionReadonly')),
-		buttonShownNew:      (s) => !s.isBulkUpdate && s.showButtonNew && (s.buttonActiveNew || s.layoutElements.includes('dataActionReadonly')),
-		buttonShownSave:     (s) => !s.isBulkUpdate && (s.buttonActiveSave     || s.layoutElements.includes('dataActionReadonly')),
-		buttonShownSaveAlt:  (s) => s.buttonShownSave && s.buttonShownNew && !s.isMobile && s.mayCreate,
-		buttonShownSaveBulk: (s) => s.isBulkUpdate  && (s.buttonActiveSaveBulk || s.layoutElements.includes('dataActionReadonly')),
+		buttonDelShown:      (s) => !s.isBulkUpdate && s.showButtonDel && (s.buttonDelUsable || s.layoutElements.includes('dataActionReadonly')),
+		buttonDelUsable:     (s) => !s.buttonsReadonly && s.mayDelete,
+		buttonGoBackShown:   (s) => s.isData && !s.isMobile && !s.isPopUp,
+		buttonGoBackUsable:  (s) => !s.buttonsReadonly && !s.isAtHistoryStart,
+		buttonNewShown:      (s) => !s.isBulkUpdate && s.showButtonNew && (s.buttonNewUsable || s.layoutElements.includes('dataActionReadonly')),
+		buttonNewUsable:     (s) => !s.buttonsReadonly && s.mayNew && (!s.isNew || s.hasChanges),
+		buttonSaveShown:     (s) => !s.isBulkUpdate && (s.buttonSaveUsable     || s.layoutElements.includes('dataActionReadonly')),
+		buttonSaveShownBulk: (s) => s.isBulkUpdate  && (s.buttonSaveUsableBulk || s.layoutElements.includes('dataActionReadonly')),
+		buttonSaveShownClose:(s) => s.buttonSaveShown && !s.isAtHistoryStart && !s.isMobile,
+		buttonSaveShownNew:  (s) => s.buttonSaveShown && s.buttonNewShown && !s.isMobile,
+		buttonSaveUsable:    (s) => !s.buttonsReadonly && (s.mayUpdate || s.mayCreate)    && s.hasChanges,
+		buttonSaveUsableBulk:(s) => !s.buttonsReadonly && (s.mayUpdate || s.isBulkUpdate) && s.hasChangesBulk,
 		buttonsReadonly:     (s) => s.blockInputs || s.changingRecord,
 
 		// general entities
-		formStateIdMap: (s) => s.getFormStateIdMap(s.form.states),
 		fieldIdMapData: (s) => s.getDataFieldMap(s.fields),
 		fields:         (s) => s.form.fields,
 		filters:        (s) => s.form.query.filters,
 		form:           (s) => s.formIdMap[s.formId],
+		formStateIdMap: (s) => s.getFormStateIdMap(s.form.states),
 		joins:          (s) => s.fillRelationRecordIds(s.form.query.joins),
 		relationId:     (s) => s.form.query.relationId,
 		relationsJoined:(s) => s.getRelationsJoined(s.joins),
-		joinsIndexMap:  (s) => s.getJoinIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet),
-		joinsIndexesDel:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyDelete && !v.recordNoDel && v.recordId !== 0 && s.hasAccessToRelation(s.access,v.relationId,3)); },
-		joinsIndexesSet:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.applyUpdate && !v.recordNoSet && v.recordId !== 0 && s.hasAccessToRelation(s.access,v.relationId,2)); },
+		joinsIndexMap:  (s) => s.getJoinIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet,s.entityIdMapEffect.form.data),
+		joinsIndexesCrt:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordCreate); },
+		joinsIndexesDel:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordDelete); },
+		joinsIndexesNew:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordNew); },
+		joinsIndexesSet:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordUpdate); },
 		iconSrc:(s) => {
 			if(s.favoriteId  !== null) return 'images/star1.png';
 			if(s.form.iconId !== null) return s.srcBase64(s.iconIdMap[s.form.iconId].file);
@@ -547,6 +535,52 @@ let MyForm = {
 		},
 		
 		// presentation
+		buttonGroupDelete:(s) => {
+			let group = [{
+				caption:s.layoutElements.includes('dataActionLabels') ? s.capGen.button.delete : '',
+				captionTitle:s.capGen.button.deleteHint,
+				image:'shred.png',
+				isCancel:true,
+				isReadonly:!s.buttonDelUsable,
+				onClickLeft:() => s.delAsk(false)
+			}];
+			if(!s.isMobile) {
+				group.push({
+					captionTitle:s.capGen.button.deleteNewHint,
+					image:'add2.png',
+					isCancel:true,
+					isReadonly:!s.buttonDelUsable,
+					onClickLeft:() => s.delAsk(true)
+				});
+			}
+			return group;
+		},
+		buttonGroupSave:(s) => {
+			let group = [{
+				caption:s.layoutElements.includes('dataActionLabels') ? s.capGen.button.save : '',
+				captionTitle:s.capGen.button.saveHint,
+				image:'save.png',
+				isReadonly:!s.buttonSaveUsable,
+				onClickLeft:() => s.set(false,false)
+			}];
+			if(s.buttonSaveShownClose) {
+				group.push({
+					captionTitle:s.capGen.button.saveCloseHint,
+					image:'ok.png',
+					isReadonly:!s.buttonSaveUsable,
+					onClickLeft:() => s.set(false,true)
+				});
+			}
+			if(s.buttonSaveShownNew) {
+				group.push({
+					captionTitle:s.capGen.button.saveNewHint,
+					image:'add2.png',
+					isReadonly:!s.buttonSaveUsable,
+					onClickLeft:() => s.set(true,false)
+				});
+			}
+			return group;
+		},
 		title:(s) => {
 			if(s.titleOverwrite !== null)
 				return s.titleOverwrite;
@@ -596,11 +630,11 @@ let MyForm = {
 				form_show_message:s.messageSet,
 				
 				// record functions
-				record_delete:  () => { s.delAsk();     s.recordActionFree = false; },
-				record_new:     () => { s.openNewAsk(); s.recordActionFree = false; },
-				record_reload:  () => { s.get();        s.recordActionFree = false; },
-				record_save:    () => { s.set(false);   s.recordActionFree = false; },
-				record_save_new:() => { s.set(true);    s.recordActionFree = false; },
+				record_delete:  () => { s.delAsk(false);    s.recordActionFree = false; },
+				record_new:     () => { s.openNewAsk();     s.recordActionFree = false; },
+				record_reload:  () => { s.get();            s.recordActionFree = false; },
+				record_save:    () => { s.set(false,false); s.recordActionFree = false; },
+				record_save_new:() => { s.set(true,false);  s.recordActionFree = false; },
 				
 				// timeout/interval function calls
 				timer_clear:s.timerClear,
@@ -697,10 +731,10 @@ let MyForm = {
 					case 'languageCode':    return s.settings.languageCode; break;
 					case 'login':           return s.loginId; break;
 					case 'preset':          return s.presetIdMapRecordId[side.presetId]; break;
-					case 'record':          return s.joinsIndexMap['0'] !== undefined ? s.joinsIndexMap['0'].recordId : false; break;
-					case 'recordMayCreate': return s.mayCreateRecord; break;
-					case 'recordMayDelete': return s.mayDeleteRecord; break;
-					case 'recordMayUpdate': return s.mayUpdateRecord; break;
+					case 'record':          return s.joinsIndexMap?.['0'] !== undefined ? s.joinsIndexMap['0'].recordId : false; break;
+					case 'recordMayCreate': return s.mayCreate; break;
+					case 'recordMayDelete': return s.mayDelete; break;
+					case 'recordMayUpdate': return s.mayUpdate; break;
 					case 'recordNew':       return s.isNew; break;
 					case 'role':            return s.access.roleIds.includes(side.roleId); break;
 					case 'true':            return true; break;
@@ -814,19 +848,19 @@ let MyForm = {
 						const collectionIdMap = s.$root.getOrFallback(s.fieldIdMapOptions[f.id],'collectionIdMapIndexes',{});
 						const filters         = s.getQueryFiltersProcessed(
 							f.query.filters,s.joinsIndexMap,null,null,s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
-							s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord,collectionIdMap,s.variableIdMapLocal
+							s.mayCreate,s.mayDelete,s.mayUpdate,collectionIdMap,s.variableIdMapLocal
 						);
 
 						for(let i = 0, j = choices.length; i < j; i++) {
 							choices[i].filters = s.getQueryFiltersProcessed(
 								choices[i].filters,s.joinsIndexMap,null,null,s.fieldIdMapData,s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
-								s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord,collectionIdMap,s.variableIdMapLocal);
+								s.mayCreate,s.mayDelete,s.mayUpdate,collectionIdMap,s.variableIdMapLocal);
 						}
 
 						out.choices[f.id] = choices;
 						out.columns[f.id] = s.getColumnsProcessed(
 							f.columns,columnIdsByUser,s.joinsIndexMap,null,null,s.fieldIdMapData,s.fieldIdsChanged,
-							s.fieldIdsInvalid,s.values,s.mayCreateRecord,s.mayDeleteRecord,s.mayUpdateRecord);
+							s.fieldIdsInvalid,s.values,s.mayCreate,s.mayDelete,s.mayUpdate);
 						out.filters[f.id] = filters.concat(getChoiceFilters(choices,choiceId));
 						out.filtersInput[f.id] = filters;
 					}
@@ -858,6 +892,7 @@ let MyForm = {
 		colorMenu:          (s) => s.$store.getters.colorMenu,
 		isAdmin:            (s) => s.$store.getters.isAdmin,
 		isAtFavoritesEdit:  (s) => s.$store.getters.isAtFavoritesEdit,
+		isAtHistoryStart:   (s) => s.$store.getters.isAtHistoryStart,
 		isMobile:           (s) => s.$store.getters.isMobile,
 		isNoAuth:           (s) => s.$store.getters.isNoAuth,
 		keyLength:          (s) => s.$store.getters.constants.keyLength,
@@ -871,7 +906,6 @@ let MyForm = {
 		// externals
 		aesGcmDecryptBase64WithPhrase,
 		aesGcmEncryptBase64WithPhrase,
-		checkDataOptions,
 		consoleError,
 		dialogCloseAsk,
 		fillRelationRecordIds,
@@ -899,7 +933,6 @@ let MyForm = {
 		getRelationsJoined,
 		getResolvedPlaceholders,
 		getRowsDecrypted,
-		hasAccessToRelation,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		jsFunctionRun,
@@ -926,8 +959,8 @@ let MyForm = {
 				ev.preventDefault();
 				ev.stopPropagation();
 
-				if(!this.form.noDataActions && !this.blockInputs && this.mayUpdate) {
-					if(!this.isBulkUpdate && this.hasChanges)     this.set(false);
+				if(!this.form.noDataActions && this.buttonSaveUsable) {
+					if(!this.isBulkUpdate && this.hasChanges)     this.set(false,false);
 					if(this.isBulkUpdate  && this.hasChangesBulk) this.setBulkUpdate();
 				}
 			}
@@ -987,8 +1020,8 @@ let MyForm = {
 			this.valuesOld       = {};
 			this.$nextTick(this.resized);
 
-			// for new records: apply defaults to update joins
-			// before get() as default values could be overwritten by form function
+			// for new records: apply defaults
+			// before get() as default values could be overwritten by form function (after load event)
 			if(this.isNew) {
 				for(const ia in this.valuesDef) {
 					if(this.valuesDef[ia] !== null)
@@ -1061,12 +1094,12 @@ let MyForm = {
 			
 			// update joined data, if relevant (because relationship value changed or defaults were loaded)
 			if(updateJoins && (changed || isOriginal)) {
-				const ia = this.getDetailsFromIndexAttributeId(indexAttributeId);
-				if(ia.outsideIn) return;
+				const d = this.getDetailsFromIndexAttributeId(indexAttributeId);
+				if(d.outsideIn) return;
 				
 				// get data from sub joins if relationship attribute value has changed
 				for(let k in this.joinsIndexMap) {
-					if(this.joinsIndexMap[k].attributeId === ia.attributeId)
+					if(this.joinsIndexMap[k].attributeId === d.attributeId)
 						this.getFromSubJoin(this.joinsIndexMap[k],value);
 				}
 			}
@@ -1116,16 +1149,16 @@ let MyForm = {
 			// set row values (decrypt first if necessary)
 			return this.getRowsDecrypted(rows,expressions).then(
 				rows => {
-					for(let i = 0, j = row.values.length; i < j; i++) {
-						const e = expressions[i];
-						
-						this.valueSet(
-							this.getIndexAttributeId(
-								e.index,e.attributeId,
-								e.outsideIn,e.attributeIdNm
-							),
-							row.values[i],true,false
-						);
+					const rowDecr = rows[0];
+					for(let i = 0, j = rowDecr.values.length; i < j; i++) {
+						const e  = expressions[i];
+						const ia = this.getIndexAttributeId(e.index,e.attributeId,e.outsideIn,e.attributeIdNm);
+
+						// if it´s a new record on affected relation, use defaults
+						if(row.indexRecordIds[e.index] === null)
+							this.valueSet(ia,this.valuesDef[ia],true,true);
+						else
+							this.valueSet(ia,rowDecr.values[i],true,false);
 					}
 				}
 			);
@@ -1172,7 +1205,7 @@ let MyForm = {
 				true,this.getGetterFromAttributeValues(this.attributeIdMapDef));
 			
 			if(!middleClick) navigator.clipboard.writeText(`${location.protocol}//${location.host}/#${path}`);
-			else             window.open(`${location.protocol}//${location.host}/#${path}`);
+			else             this.openLink(`${location.protocol}//${location.host}/#${path}`,true);
 		},
 		makeFavorite() {
 			const recordId = this.recordIds.length === 1 ? this.recordIds[0] : null;
@@ -1209,7 +1242,7 @@ let MyForm = {
 		},
 		openBuilder(middle) {
 			if(middle)
-				return window.open('#/builder/form/'+this.form.id,'_blank');
+				return this.openLink('#/builder/form/'+this.form.id,true);
 			
 			this.blockInputs = true;
 			this.$router.push('/builder/form/'+this.form.id);
@@ -1433,7 +1466,7 @@ let MyForm = {
 			// different path, same form
 			if(openSameForm) {
 				// switch from existing to new one or between two existing records
-				if(!this.isNew && recordIdOpen !== this.recordIds[0])
+				if(!replace && !this.isNew && recordIdOpen !== this.recordIds[0])
 					return this.$router.push(path);
 				
 				return this.$router.replace(path);
@@ -1455,13 +1488,13 @@ let MyForm = {
 		},
 		
 		// backend calls
-		delAsk() {
+		delAsk(deleteAndNew) {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,
 				buttons:[{
 					cancel:true,
 					caption:this.capGen.button.delete,
-					exec:this.del,
+					exec:() => this.del(deleteAndNew),
 					keyEnter:true,
 					image:'shred.png'
 				},{
@@ -1471,7 +1504,7 @@ let MyForm = {
 				}]
 			});
 		},
-		del() {
+		del(deleteAndNew) {
 			this.triggerEventBefore('delete');
 			
 			let requests = [];
@@ -1491,9 +1524,15 @@ let MyForm = {
 					
 					this.triggerEventAfter('delete');
 					
-					if(this.recordActionFree)
-						this.openForm();
-					
+					if(this.recordActionFree) {
+						if(this.isPopUp && deleteAndNew)  return this.$emit('records-open',[]);
+						if(this.isPopUp && !deleteAndNew) return this.closeAsk();
+						
+						if(deleteAndNew || this.isAtHistoryStart)
+							return this.openForm(null,null,[],false,null,true);
+						
+						return this.openPrevAsk();
+					}
 					this.messageSet('[DELETED]');
 				},
 				this.$root.genericError
@@ -1647,7 +1686,7 @@ let MyForm = {
 				this.$root.genericError
 			);
 		},
-		set:async function(saveAndNew) {
+		set:async function(saveAndNew,saveAndClose) {
 			if(this.fieldIdsInvalid.length !== 0)
 				return this.badSave = true;
 			
@@ -1860,14 +1899,11 @@ let MyForm = {
 					
 					if(!this.recordActionFree)
 						return;
-					
-					// load empty record if requested
-					if(saveAndNew)
-						return this.openForm();
-					
-					// load newly created record
-					if(this.isNew)
-						return this.openForm([resSet.payload.indexRecordIds['0']]);
+
+					if(saveAndClose && !this.isPopUp) return this.openPrevAsk();
+					if(saveAndClose &&  this.isPopUp) return this.closeAsk();
+					if(saveAndNew)                    return this.openForm();
+					if(this.isNew)                    return this.openForm([resSet.payload.indexRecordIds['0']]);
 					
 					// reload same record
 					// unfortunately necessary as update trigger in backend can change values
@@ -1902,7 +1938,8 @@ let MyForm = {
 				if(this.attributeIdMap[f.attributeId].encrypted)
 					err = this.capApp.dialog.bulkEncrypted;
 				
-				if(err !== null)
+				if(err !== null) {
+					this.changingRecord = false;
 					return this.$store.commit('dialog',{
 						captionBody:err,
 						buttons:[{
@@ -1913,6 +1950,7 @@ let MyForm = {
 							image:'ok.png'
 						}]
 					});
+				}
 				
 				attributes.push({
 					attributeId:f.attributeId,

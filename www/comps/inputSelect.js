@@ -1,6 +1,4 @@
-export {MyInputSelect as default};
-
-let MyInputSelect = {
+export default {
 	name:'my-input-select',
 	template:`<div class="input-select"
 		@keydown.esc="escape"

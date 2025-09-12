@@ -7,7 +7,7 @@ import {getCaption}          from './shared/language.js';
 
 export {MyMenu as default};
 
-let MyMenuFavoritesEdit = {
+const MyMenuFavoritesEdit = {
 	name:'my-menu-favorites-edit',
 	template:`<div class="menu-favorites-edit default-inputs">
 		<draggable handle=".dragAnchor" class="menu-favorites-edit-list" group="favorites" itemKey="id" animation="150"
@@ -98,7 +98,7 @@ let MyMenuFavoritesEdit = {
 	}
 };
 
-let MyMenuItemFavorite = {
+const MyMenuItemFavorite = {
 	name:'my-menu-item-favorite',
 	template:`<div class="item">
 		<div class="line noHighlight" tabindex="0"
@@ -124,14 +124,15 @@ let MyMenuItemFavorite = {
 	methods:{
 		// externals
 		getFormRoute,
+		openLink,
 
 		// actions
 		click()       { this.$router.push(this.route); },
-		clickMiddle() { window.open('#'+this.route,'_blank'); }
+		clickMiddle() { this.openLink('#'+this.route,true); }
 	}
 };
 
-let MyMenuItem = {
+const MyMenuItem = {
 	name:'my-menu-item',
 	template:`<div class="item" v-if="active">
 		<!-- menu item line -->
@@ -206,7 +207,7 @@ let MyMenuItem = {
 		// simple
 		active:           (s) => s.menuAccess[s.menu.id] === 1,
 		collectionEntries:(s) => s.getConsumersEntries(s.menu.collections),
-		color:            (s) => s.menu.color !== null ? s.menu.color : (s.colorParent !== null ? s.colorParent : null),
+		color:            (s) => s.menu.color ?? s.colorParent,
 		hasChildren:      (s) => s.menu.menus.length !== 0,
 		selected:         (s) => (!s.recordOpen || s.formOpensPreset) && s.menu.formId === s.formIdActive && s.favoriteIdActive === null,
 		showChildren:     (s) => s.hasChildren && s.menuIdMapOpen[s.menu.id],
@@ -227,6 +228,7 @@ let MyMenuItem = {
 		getConsumersEntries,
 		getFormRoute,
 		getCaption,
+		openLink,
 		srcBase64,
 		srcBase64Icon,
 		
@@ -245,7 +247,7 @@ let MyMenuItem = {
 		},
 		clickMiddle() {
 			if(this.menu.formId !== null)
- 				window.open('#'+this.getFormRoute(null,this.menu.formId,0,true),'_blank');
+ 				this.openLink('#'+this.getFormRoute(null,this.menu.formId,0,true),true);
 		},
 		clickSubMenus() {
 			if(this.hasChildren)
@@ -254,7 +256,7 @@ let MyMenuItem = {
 	}
 };
 
-let MyMenu = {
+const MyMenu = {
 	name:'my-menu',
 	components:{
 		MyMenuFavoritesEdit,
@@ -376,6 +378,38 @@ let MyMenu = {
 		module:          { type:Object,  required:true },
 		recordOpen:      { type:Boolean, required:true }
 	},
+	watch:{
+		$route:{
+			handler(v) {
+				const menuOrChildHasForm = (menu,formId) => {
+					if(menu.formId === formId)
+						return true;
+
+					for(const child of menu.menus) {
+						if(menuOrChildHasForm(child,formId))
+							return true;
+					}
+					return false;
+				};
+
+				// when route changes, check if currently active menu tab shows the opened form
+				// get indexes of all menu tabs that include the form (could be multiple)
+				let menuTabIndexesHaveForm = [];
+				for(let i = 0, j = this.menuTabsAccess.length; i < j; i++) {
+					for(const menu of this.menuTabsAccess[i].menus) {
+						if(menuOrChildHasForm(menu, this.formIdActive)) {
+							menuTabIndexesHaveForm.push(i);
+							break;
+						}
+					}
+				}
+
+				// if there are menu tabs that have the form, switch to first one if currently active menu tab does not have it
+				if(menuTabIndexesHaveForm.length !== 0 && !menuTabIndexesHaveForm.includes(this.menuTabIndexShown))
+					this.menuTabIndexShown = menuTabIndexesHaveForm[0];
+			}
+		}
+	},
 	computed:{
 		menuTabsAccess:(s) => {
 			let out = [];
@@ -435,7 +469,7 @@ let MyMenu = {
 		// actions
 		openBuilder(middle) {
 			if(!middle) this.$router.push('/builder/menu/'+this.module.id);
-			else        window.open('#/builder/menu/'+this.module.id,'_blank');
+			else        this.openLink('#/builder/menu/'+this.module.id,true);
 		}
 	}
 };

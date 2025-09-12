@@ -1,7 +1,6 @@
 import MyInputColorWrap from './inputColorWrap.js';
-export {MyInputDraw as default};
 
-const MyInputDraw = {
+export default {
 	name:'my-input-draw',
 	components:{ MyInputColorWrap },
 	template:`<div class="input-draw">

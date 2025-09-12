@@ -1,6 +1,4 @@
-export {MyInputHotkey as default};
-
-let MyInputHotkey = {
+export default {
 	name:'my-input-hotkey',
 	template:`<div class="input-hotkey gap default-inputs" :class="{ column:twoLines, row:!twoLines }">
 		<div class="row gap">

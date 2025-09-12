@@ -1,20 +1,20 @@
-import MyFilters            from './filters.js';
-import MyForm               from './form.js';
-import MyInputCollection    from './inputCollection.js';
-import MyInputOffset        from './inputOffset.js';
-import MyListAggregate      from './listAggregate.js';
-import MyListColumnBatch    from './listColumnBatch.js';
-import MyListCsv            from './listCsv.js';
-import MyListFilters        from './listFilters.js';
-import MyListInputFlow      from './listInputFlow.js';
-import MyListInputRows      from './listInputRows.js';
-import MyListInputRowsEmpty from './listInputRowsEmpty.js';
-import MyListOptions        from './listOptions.js';
-import {consoleError}       from './shared/error.js';
-import {getRowsDecrypted}   from './shared/form.js';
-import {getCaption}         from './shared/language.js';
-import {layoutSettleSpace}  from './shared/layout.js';
-import {isAttributeFiles}   from './shared/attribute.js';
+import MyFilters                   from './filters.js';
+import MyForm                      from './form.js';
+import MyInputCollection           from './inputCollection.js';
+import MyInputOffset               from './inputOffset.js';
+import MyListAggregate             from './listAggregate.js';
+import MyListColumnBatch           from './listColumnBatch.js';
+import MyListCsv                   from './listCsv.js';
+import MyListFilters               from './listFilters.js';
+import MyListInputFlow             from './listInputFlow.js';
+import MyListInputRows             from './listInputRows.js';
+import MyListInputRowsEmpty        from './listInputRowsEmpty.js';
+import MyListOptions               from './listOptions.js';
+import {consoleError}              from './shared/error.js';
+import {getRowsDecrypted}          from './shared/form.js';
+import {getCaption}                from './shared/language.js';
+import {layoutSettleSpace}         from './shared/layout.js';
+import {isAttributeTextSearchable} from './shared/attribute.js';
 import {
 	getColumnBatches,
 	getColumnTitle,
@@ -37,9 +37,8 @@ import {
 	routeChangeFieldReload,
 	routeParseParams
 } from './shared/router.js';
-export {MyList as default};
 
-const MyList = {
+export default {
 	name:'my-list',
 	components:{
 		MyFilters,
@@ -260,7 +259,6 @@ const MyList = {
 						v-if="filterQuick"
 						@keyup.enter="updatedFilterQuick"
 						v-model="filtersQuick"
-						:disabled="rowsFetching"
 						:placeholder="capGen.threeDots"
 						:title="capApp.quick"
 					/>
@@ -304,14 +302,13 @@ const MyList = {
 			</div>
 			
 			<!-- list content -->
-			<div class="list-content" :class="{ showsInlineForm:popUpFormInline !== null }">
+			<div class="list-content" :class="{ showsInlineForm:popUpFormInline !== null }" :id="usesPageHistory ? scrollFormId : null">
 			
 				<!-- list results as table or card layout -->
 				<teleport to="#dropdown" :disabled="!dropdownShow">
 					<div
 						@keydown="handleKeydownLocal"
 						:class="{ 'list-cards':isCards, 'list-table':isTable, 'list-dropdown':dropdownShow, rowsColored:settings.listColored, scrolls:isSingleField}"
-						:id="usesPageHistory ? scrollFormId : null"
 					>
 						<table v-if="isTable" :class="{ asInput:isInput }">
 							<thead v-if="header && headerColumns">
@@ -717,7 +714,7 @@ const MyList = {
 			// already encapsulated filters: list, choice, quick, column
 			let filters = s.filters
 				.concat(s.filtersColumn)
-				.concat(s.filtersParsedQuick)
+				.concat(s.filtersQuickParsed)
 				.concat(s.getFiltersEncapsulated(
 					JSON.parse(JSON.stringify(s.filtersUser))
 				));
@@ -767,15 +764,20 @@ const MyList = {
 		},
 
 		// filters
-		filtersParsedQuick:(s) => {
-			if(s.filtersQuick === '') return [];
-			
+		filtersQuickColumns:(s) => {
 			let out = [];
 			for(const c of s.columns) {
 				const a = s.attributeIdMap[c.attributeId];
-				if(c.subQuery || s.isAttributeFiles(a.content) || (c.aggregator !== null && c.aggregator !== 'record'))
-					continue;
-				
+				if(s.isAttributeTextSearchable(a.content,a.contentUse) && !c.subQuery && (c.aggregator === null || c.aggregator === 'record'))
+					out.push(c);
+			}
+			return out;
+		},
+		filtersQuickParsed:(s) => {
+			if(s.filtersQuick === '') return [];
+			
+			let out = [];
+			for(const c of s.filtersQuickColumns) {
 				out.push({
 					connector:out.length === 0 ? 'AND' : 'OR',
 					index:0,
@@ -859,12 +861,8 @@ const MyList = {
 		this.$watch('appResized',this.resized);
 		this.$watch('limit',this.get);
 		this.$watch('dropdownShow',v => {
-			if(!v) return;
-			this.setOffsetAndReload(0);
-			
-			const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
-			if(inputEl !== null)
-				inputEl.focus();
+			if(v) this.setOffsetAndReload(0);
+			this.focusOnInput();
 		});
 		this.$watch('formLoading',v => {
 			if(v) return;
@@ -951,7 +949,7 @@ const MyList = {
 		getQueryExpressions,
 		getRelationsJoined,
 		getRowsDecrypted,
-		isAttributeFiles,
+		isAttributeTextSearchable,
 		layoutSettleSpace,
 		routeChangeFieldReload,
 		routeParseParams,
@@ -1114,6 +1112,11 @@ const MyList = {
 				this.filtersQuick = '';
 			}
 		},
+		focusOnInput() {
+			const inputEl = this.$refs.content.querySelector('[data-is-input-empty="1"]');
+			if(inputEl !== null)
+				inputEl.focus();
+		},
 		resetColumns() {
 			this.setColumnBatchSort([[],[]]);
 			// setting columns will reload data & aggregations
@@ -1240,7 +1243,9 @@ const MyList = {
 				return this.$emit('dropdown-show',true);
 			
 			this.offset = 0;
-			this.get();
+			
+			if(!this.rowsFetching)
+				this.get();
 		},
 		
 		// user actions, cards layout
@@ -1269,6 +1274,7 @@ const MyList = {
 			this.$emit('record-removed',this.rowsInput[i].indexRecordIds['0']);
 			this.rowsInput.splice(i,1);
 			this.escape();
+			this.$nextTick(this.focusOnInput);
 		},
 
 		// cleanup
@@ -1453,8 +1459,11 @@ const MyList = {
 			if(!this.showAllValues && !this.autoSelect && !this.anyInputRows)
 				return;
 			
-			// apply relevant filters, without choice filters as these should not affect the input
+			// apply input filters (all but choice filters, which should never affect input display)
+			// input filters cannot be ignored even in readonly contexts (such as log viewer)
+			//  reason: input filters may resolve 1:n relationships (like translations)
 			let filters = JSON.parse(JSON.stringify(this.filtersInput));
+			
 			if(!this.showAllValues && this.anyInputRows)
 				filters.push(this.getQueryAttributesPkFilter(
 					this.query.relationId,this.inputRecordIds,0,false

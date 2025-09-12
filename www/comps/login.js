@@ -9,9 +9,8 @@ import {
 	getLineBreaksParsedToHtml,
 	openLink
 } from './shared/generic.js';
-export {MyLogin as default};
 
-let MyLogin = {
+export default {
 	name:'my-login',
 	template:`<div class="login" :class="{ badAuth:badAuth }">
 		
@@ -92,7 +91,7 @@ let MyLogin = {
 					<img src="images/server.png" />
 					<span>{{ message.authInt[language] }}</span>
 				</div>
-				<input autocomplete="username" type="text" spellcheck="false"
+				<input autocomplete="username" class="placeholder-bright" type="text" spellcheck="false"
 					@keyup="badAuth = false"
 					@keyup.enter="authenticate"
 					v-model="username"
@@ -100,7 +99,7 @@ let MyLogin = {
 					:placeholder="message.username[language]"
 				/>
 				
-				<input autocomplete="current-password" type="password"
+				<input autocomplete="current-password" class="placeholder-bright" type="password"
 					@keyup="badAuth = false"
 					@keyup.enter="authenticate"
 					v-model="password"
@@ -116,7 +115,7 @@ let MyLogin = {
 						{{ t.name }}
 					</option>
 				</select>
-				<input autocomplete="one-time-code" type="text" maxlength="6"
+				<input autocomplete="one-time-code" class="placeholder-bright" type="text" maxlength="6"
 					@keyup="badAuth = false"
 					@keyup.enter="authenticate"
 					v-model="mfaTokenPin"

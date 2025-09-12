@@ -2,7 +2,7 @@ import {srcBase64}  from './shared/image.js';
 import {getCaption} from './shared/language.js';
 export {MyFormActions as default};
 
-let MyFormAction = {
+const MyFormAction = {
 	name:'my-form-action',
 	template:`<my-button
 		v-if="state !== 'hidden'"
@@ -35,7 +35,7 @@ let MyFormAction = {
 	}
 };
 
-let MyFormActions = {
+const MyFormActions = {
 	name:'my-form-actions',
 	components:{ MyFormAction },
 	template:`<div class="row gap nowrap"

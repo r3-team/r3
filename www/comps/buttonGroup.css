@@ -1,0 +1,76 @@
+.buttonGroup{
+	height:30px;
+	margin:0px;
+	font-size:inherit;
+	color:inherit;
+	display:flex;
+	flex-flow:row nowrap;
+	box-sizing:border-box;
+	user-select:none;
+	overflow:hidden;
+	transition:box-shadow 0.1s, border-bottom 0.1s, filter 0.1s, padding 0.1s, margin 0.1s, height 0.1s;
+
+	border:1px solid var(--color-border);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
+	color:var(--color-font-bright);
+	--buttonGroup-padding-cut:0px;
+}
+
+.buttonGroup.anyClickable{
+	border-color:var(--color-action-border);
+}
+.buttonGroup.anyClickable.cancel{
+	border-color:var(--color-cancel-border);
+}
+.buttonGroup.anyClickable:active{
+	height:26px;
+	margin:2px;
+	--buttonGroup-padding-cut:2px;
+}
+
+/* individual parts of button group */
+.buttonGroup-part{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	outline:none;
+	box-sizing:border-box;
+	box-shadow:var(--shadow-input);
+	padding:0px var(--buttonGroup-padding) 1px;
+	gap:calc(var(--spacing) / 2);
+	transition:box-shadow 0.1s, border-bottom 0.1s, filter 0.1s, padding 0.1s, margin 0.1s, height 0.1s;
+	background-color:var(--color-action-disable);
+	--buttonGroup-padding:calc(var(--spacing) / 1.5);
+}
+.buttonGroup-part.clickable{
+	background-color:var(--color-action);
+}
+.buttonGroup-part.cancel.clickable{
+	background-color:var(--color-cancel);
+}
+.buttonGroup-part.clickable:focus,
+.buttonGroup-part.clickable:hover{
+	filter:brightness(120%);
+	box-shadow:var(--shadow-input-focus);
+	border-bottom:3px solid var(--color-action-border);
+}
+.buttonGroup-part.cancel.clickable:focus,
+.buttonGroup-part.cancel.clickable:hover{
+	border-bottom:3px solid var(--color-cancel-border);
+}
+.buttonGroup-part.justImage{
+	--buttonGroup-padding:calc(var(--spacing) / 3.5);
+}
+.buttonGroup-part:first-child{
+	padding-left:calc(var(--buttonGroup-padding) - var(--buttonGroup-padding-cut));
+}
+.buttonGroup-part:last-child{
+	padding-right:calc(var(--buttonGroup-padding) - var(--buttonGroup-padding-cut));
+}
+
+.buttonGroup-part-img{
+	width:20px;
+	height:20px;
+	filter:var(--image-filter-bg);
+}
