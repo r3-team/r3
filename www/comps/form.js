@@ -1314,34 +1314,36 @@ export default {
 				// update data field value to reflect change of pop-up form record
 				const field = this.fieldIdMapData[this.popUpFieldIdSrc];
 				const atr   = this.attributeIdMap[field.attributeId];
-				const iaId  = this.getIndexAttributeIdByField(field,false);
+				const ia    = this.getIndexAttributeIdByField(field,false);
 				
 				if(this.isAttributeRelationship(atr.content)) {
+					let   valNew  = null;
 					const isMulti = field.attributeIdNm !== null ||
 						(field.outsideIn && this.isAttributeRelationshipN1(atr.content));
 					
 					if(!isMulti) {
-						this.valuesNew[iaId] = isDeleted ? null : recordId;
+						valNew = isDeleted ? null : recordId;
 					}
 					else {
-						let val = JSON.parse(JSON.stringify(this.values[iaId]));
+						let val = JSON.parse(JSON.stringify(this.values[ia]));
 
 						if(isDeleted && val !== null) {
 							const pos = val.indexOf(recordId);
 							if(pos !== -1) val.splice(pos,1);
 
-							this.valuesNew[iaId] = val;
+							valNew = val;
 						}
 						else if(isUpdated) {
 							if(val === null) {
-								this.valuesNew[iaId] = [recordId];
+								valNew = [recordId];
 							}
 							else if(val.indexOf(recordId) === -1) {
 								val.push(recordId);
-								this.valuesNew[iaId] = val;
+								valNew = val;
 							}
 						}
 					}
+					this.valueSetByField(ia,valNew,false,true,field.id);
 
 					if(field.jsFunctionId !== null)
 						this.jsFunctionRun(field.jsFunctionId,[],this.exposedFunctions);
