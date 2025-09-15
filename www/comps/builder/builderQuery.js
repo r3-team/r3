@@ -20,7 +20,7 @@ import {
 } from '../shared/builder.js';
 export {MyBuilderQuery as default};
 
-let MyBuilderQueryFilter = {
+const MyBuilderQueryFilter = {
 	name:'my-builder-query-filter',
 	template:`<div class="query-title">
 		<my-button
@@ -156,7 +156,7 @@ let MyBuilderQueryFilter = {
 	}
 };
 
-let MyBuilderQueryChoice = {
+const MyBuilderQueryChoice = {
 	name:'my-builder-query-choice',
 	components:{
 		MyBuilderCaption,
@@ -200,6 +200,7 @@ let MyBuilderQueryChoice = {
 			:entityIdMapRef="entityIdMapRef"
 			:expertMode="expertMode"
 			:fieldIdMap="fieldIdMap"
+			:filtersDisable="filtersDisable"
 			:formId="formId"
 			:joins="joins"
 			:joinsParents="joinsParents"
@@ -212,6 +213,7 @@ let MyBuilderQueryChoice = {
 		choice:         { type:Object, required:true },
 		entityIdMapRef: { type:Object, required:true },
 		fieldIdMap:     { type:Object, required:true },
+		filtersDisable: { type:Array,  required:true },
 		formId:         { type:String, required:true },
 		joins:          { type:Array,  required:true },
 		joinsParents:   { type:Array,  required:true },
@@ -248,7 +250,7 @@ let MyBuilderQueryChoice = {
 	}
 };
 
-let MyBuilderQueryLookupItem = {
+const MyBuilderQueryLookupItem = {
 	name:'my-builder-query-lookup-item',
 	template:`<div class="query-lookup-item">
 		<span>{{ join.index + ') ' + relationIdMap[join.relationId].name }}</span>
@@ -295,7 +297,7 @@ let MyBuilderQueryLookupItem = {
 	}
 };
 
-let MyBuilderQueryLookups = {
+const MyBuilderQueryLookups = {
 	name:'my-builder-query-lookups',
 	components:{MyBuilderQueryLookupItem},
 	template:`<div class="query-lookups">
@@ -344,7 +346,7 @@ let MyBuilderQueryLookups = {
 	}
 };
 
-let MyBuilderQueryOrderItem = {
+const MyBuilderQueryOrderItem = {
 	name:'my-builder-query-order-item',
 	template:`<div class="query-order-item">
 	
@@ -422,7 +424,7 @@ let MyBuilderQueryOrderItem = {
 	}
 };
 
-let MyBuilderQueryOrders = {
+const MyBuilderQueryOrders = {
 	name:'my-builder-query-orders',
 	components:{MyBuilderQueryOrderItem},
 	template:`<div>
@@ -462,7 +464,7 @@ let MyBuilderQueryOrders = {
 	}
 };
 
-let MyBuilderQueryNestedJoin = {
+const MyBuilderQueryNestedJoin = {
 	name:'my-builder-query-nested-join',
 	template:`<div class="nested-join" :class="{ nested:index !== 0 }">
 	
@@ -669,7 +671,7 @@ let MyBuilderQueryNestedJoin = {
 	}
 };
 
-let MyBuilderQuery = {
+const MyBuilderQuery = {
 	name:'my-builder-query',
 	components:{
 		MyBuilderQueryChoice,
@@ -815,6 +817,7 @@ let MyBuilderQuery = {
 				:expertMode="expertMode"
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
+				:filtersDisable="filtersDisable"
 				:formId="formId"
 				:joins="joins"
 				:joinsParents="joinsParents"
