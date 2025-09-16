@@ -860,7 +860,7 @@ export default {
 						out.choices[f.id] = choices;
 						out.columns[f.id] = s.getColumnsProcessed(
 							f.columns,columnIdsByUser,s.joinsIndexMap,null,null,s.fieldIdMapData,s.fieldIdsChanged,
-							s.fieldIdsInvalid,s.values,s.mayCreate,s.mayDelete,s.mayUpdate);
+							s.fieldIdsInvalid,s.values,s.mayCreate,s.mayDelete,s.mayUpdate,s.variableIdMapLocal);
 						out.filters[f.id] = filters.concat(getChoiceFilters(choices,choiceId));
 						out.filtersInput[f.id] = filters;
 					}
