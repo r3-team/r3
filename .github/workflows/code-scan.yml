@@ -1,0 +1,40 @@
+name: code-scan
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  analyze:
+    name: Code-Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - language: go
+            build-mode: autobuild
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended,security-and-quality
+
+      - name: Perform Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
