@@ -102,6 +102,14 @@ REI3 follows a four-digit versioning syntax, such as `3.2.0.4246` (MAJOR.MINOR.P
 
 The branch `main` will contain the currently released minor version of REI3; patches for this version can directly be submitted for the main branch. Each new minor release will use a separate branch, which will merge with `main` once the latest minor version is released.
 
+## :pick: Third party tools and resources
+We want to give a shout-out to a number of projects around REI3. Often created for specific requirements, these projects have been prepared and made public by awesome people to help others do more with REI3.
+1. [R3 Toolshop](https://github.com/Umb-Astardo/R3-Toolshop): A toolset for REI3 operations - including data importers, bulk user creation and relation duplication.
+1. [REI3-Tickets-MCP-Server](https://github.com/lgndluke/REI3-Tickets-MCP-Server): A FastMCP server for LLM integration for [REI3 Tickets](https://rei3.de/en/applications/tickets).
+1. [Google Material Icons for REI3](https://github.com/fmvalsera/r3_material_icons_app): A REI3 application that can be built on, providing the Google Material icon pack for use in your apps.
+
+We are humbled by the effort put into these projects and want to say thank you.
+
 ## :nut_and_bolt: Build REI3 yourself
 If you want to build REI3 itself, you can fork this repo or download the source code to build your own executable. The master branch contains the current minor release, while new minor releases are managed in new branches.
 
