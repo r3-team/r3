@@ -52,6 +52,15 @@ func fileRelationsCreate_tx(ctx context.Context, tx pgx.Tx, attributeId uuid.UUI
 }
 
 func FileRelationsDelete_tx(ctx context.Context, tx pgx.Tx, attributeId uuid.UUID) error {
+
+	// delete tupels first to trigger file reference count update
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`
+		DELETE FROM instance_file."%s"
+	`, schema.GetFilesTableName(attributeId))); err != nil {
+		return err
+	}
+
+	// drop file relation
 	_, err := tx.Exec(ctx, fmt.Sprintf(`
 		DROP TABLE instance_file."%s"
 	`, schema.GetFilesTableName(attributeId)))

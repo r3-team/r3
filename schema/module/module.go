@@ -8,10 +8,10 @@ import (
 	"r3/db/check"
 	"r3/schema"
 	"r3/schema/article"
-	"r3/schema/attribute"
 	"r3/schema/caption"
 	"r3/schema/compatible"
 	"r3/schema/pgFunction"
+	"r3/schema/relation"
 	"r3/types"
 	"slices"
 	"strings"
@@ -28,49 +28,23 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	}
 
 	// drop e2ee data key relations for module relations with encryption
-	relIdsEncrypted := make([]uuid.UUID, 0)
+	relIds := make([]uuid.UUID, 0)
 	if err := tx.QueryRow(ctx, `
 		SELECT ARRAY_AGG(id)
 		FROM app.relation
 		WHERE module_id = $1
-		AND   encryption
-	`, id).Scan(&relIdsEncrypted); err != nil {
+	`, id).Scan(&relIds); err != nil {
 		return err
 	}
 
-	for _, relId := range relIdsEncrypted {
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			DROP TABLE IF EXISTS instance_e2ee."%s"
-		`, schema.GetEncKeyTableName(relId))); err != nil {
-			return err
-		}
-	}
-
-	// drop file attribute relations
-	atrIdsFile := make([]uuid.UUID, 0)
-	if err := tx.QueryRow(ctx, `
-		SELECT ARRAY_AGG(id)
-		FROM app.attribute
-		WHERE relation_id IN (
-			SELECT id
-			FROM app.relation
-			WHERE module_id = $1
-		)
-		AND content = 'files'
-	`, id).Scan(&atrIdsFile); err != nil {
-		return err
-	}
-
-	for _, atrId := range atrIdsFile {
-		if err := attribute.FileRelationsDelete_tx(ctx, tx, atrId); err != nil {
+	for _, relId := range relIds {
+		if err := relation.Del_tx(ctx, tx, relId); err != nil {
 			return err
 		}
 	}
 
 	// drop module schema
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`DROP SCHEMA "%s" CASCADE`,
-		name)); err != nil {
-
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`DROP SCHEMA "%s" CASCADE`, name)); err != nil {
 		return err
 	}
 

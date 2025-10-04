@@ -5,7 +5,7 @@ import {getUnixFormat}       from '../shared/time.js';
 import {getCaption}          from '../shared/language.js';
 export {MyAdminModules as default};
 
-let MyAdminModulesItem = {
+const MyAdminModulesItem = {
 	name:'my-admin-modules-item',
 	template:`<tr :class="{ grouping:module.parentId === null }">
 		<td class="noWrap">
@@ -296,7 +296,7 @@ let MyAdminModulesItem = {
 	}
 };
 
-let MyAdminModules = {
+const MyAdminModules = {
 	name:'my-admin-modules',
 	components:{
 		MyAdminModulesItem,
