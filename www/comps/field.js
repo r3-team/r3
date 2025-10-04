@@ -163,7 +163,7 @@ export default {
 					:stepTypeDefault="field.ganttSteps"
 					:stepTypeToggle="field.ganttStepsToggle"
 					:query="field.query"
-					:usesHotkeys="isAloneInForm"
+					:usesHotkeys="isAlone"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				/>
 				
