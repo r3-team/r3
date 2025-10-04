@@ -288,9 +288,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			reflect.TypeOf(result.Values[0]).String() != "int64" ||
 			reflect.TypeOf(result.Values[1]).String() != "int64" {
 
-			handler.AbortRequest(w, handler.ContextIcsUpload, errors.New("invalid values for date"),
-				handler.ErrGeneral)
-
+			handler.AbortRequest(w, handler.ContextIcsUpload, errors.New("invalid values for date"), handler.ErrGeneral)
 			return
 		}
 
@@ -321,6 +319,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		summaryParts := make([]string, 0)
 		for i, value := range result.Values {
 			if i < 2 {
+				// skip date values
+				continue
+			}
+			if value == nil {
+				// skip null values
+				continue
+			}
+			switch value.(type) {
+			case bool:
+				// skip booleans, no use in calender view
 				continue
 			}
 			summaryParts = append(summaryParts, fmt.Sprintf("%v", value))
