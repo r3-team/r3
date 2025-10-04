@@ -67,11 +67,12 @@ type taskSchedule struct {
 
 var (
 	change_mx                              = &sync.Mutex{}
-	loadTasks                              = true // if true, tasks are reloaded from the database on next run
-	loadCounter             int            = 0    // number of times tasks were loaded - used to check whether tasks were reloaded during execution
-	nextExecutionUnix       int64          = 0    // unix time of next (earliest) task to run
-	oneDayInSeconds         int64          = 60 * 60 * 24
-	tasks                   []task         // all tasks
+	loadTasks                              = true         // if true, tasks are reloaded from the database on next run
+	loadCounter             int            = 0            // number of times tasks were loaded - used to check whether tasks were reloaded during execution
+	nextExecutionUnix       int64          = 0            // unix time of next (earliest) task to run
+	secondsOneDay           int64          = 60 * 60 * 24 // for easy reference, 1 day in seconds
+	secondsKeepNewFiles     int64          = 60 * 60 * 8  // how long to keep new files with no references (in case record is not saved yet)
+	tasks                   []task                        // all tasks
 	tasksDisabledMirrorMode []string       = []string{"adminMails", "backupRun", "mailAttach", "mailRetrieve", "mailSend", "restExecute"}
 	OsExit                  chan os.Signal = make(chan os.Signal)
 

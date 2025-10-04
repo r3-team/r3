@@ -150,7 +150,7 @@ func adminMails() error {
 				body = templates.oauthClientExpirationBody
 			}
 
-			dateNotifySend := dateExpiration - (daysBefore * oneDayInSeconds)
+			dateNotifySend := dateExpiration - (daysBefore * secondsOneDay)
 			if now < dateNotifySend || am.dateLastSent > dateNotifySend {
 				continue
 			}

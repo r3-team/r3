@@ -39,7 +39,7 @@ func cleanupTemp() error {
 			return err
 		}
 
-		if fileInfo.IsDir() || fileInfo.ModTime().Unix()+oneDayInSeconds > tools.GetTimeUnix() {
+		if fileInfo.IsDir() || fileInfo.ModTime().Unix()+secondsOneDay > tools.GetTimeUnix() {
 			continue
 		}
 
@@ -63,7 +63,7 @@ func cleanupLogs() error {
 	_, err := db.Pool.Exec(ctx, `
 		DELETE FROM instance.log
 		WHERE date_milli < $1
-	`, (tools.GetTimeUnix()-(oneDayInSeconds*int64(keepForDays)))*1000)
+	`, (tools.GetTimeUnix()-(secondsOneDay*int64(keepForDays)))*1000)
 	return err
 }
 
@@ -80,7 +80,7 @@ func cleanupMailTraffic() error {
 	_, err := db.Pool.Exec(ctx, `
 		DELETE FROM instance.mail_traffic
 		WHERE date < $1
-	`, tools.GetTimeUnix()-(oneDayInSeconds*int64(keepForDays)))
+	`, tools.GetTimeUnix()-(secondsOneDay*int64(keepForDays)))
 	return err
 }
 
@@ -88,7 +88,7 @@ func cleanupMailTraffic() error {
 func cleanUpFiles() error {
 
 	now := tools.GetTimeUnix()
-	keepFilesUntil := now - (int64(config.GetUint64("filesKeepDaysDeleted")) * oneDayInSeconds)
+	keepFilesUntil := now - (int64(config.GetUint64("filesKeepDaysDeleted")) * secondsOneDay)
 
 	// delete file record assignments, if file link was deleted and retention has been reached
 	attributeIdsFile := make([]uuid.UUID, 0)
@@ -111,9 +111,10 @@ func cleanUpFiles() error {
 	}
 
 	// delete file versions that do not fulfill either file version retention setting
+	// this only deletes file versions other than the latest one
 	processLimit := 100
 	fileVersionsKeepCount := config.GetUint64("fileVersionsKeepCount")
-	fileVersionsKeepUntil := now - (int64(config.GetUint64("fileVersionsKeepDays")) * oneDayInSeconds)
+	fileVersionsKeepUntil := now - (int64(config.GetUint64("fileVersionsKeepDays")) * secondsOneDay)
 	type fileVersion struct {
 		fileId  uuid.UUID
 		version int64
@@ -176,16 +177,16 @@ func cleanUpFiles() error {
 			}
 
 			if _, err := db.Pool.Exec(context.Background(), `
-					DELETE FROM instance.file_version
-					WHERE file_id = $1
-					AND   version = $2
-				`, fv.fileId, fv.version); err != nil {
+				DELETE FROM instance.file_version
+				WHERE file_id = $1
+				AND   version = $2
+			`, fv.fileId, fv.version); err != nil {
 				return err
 			}
 			removeCnt++
 		}
 
-		// if not a single file version was deleted this loop, nothing more we can do
+		// if not a single file version was deleted this loop, nothing more to do
 		if removeCnt == 0 {
 			break
 		}
@@ -199,7 +200,7 @@ func cleanUpFiles() error {
 		}
 	}
 
-	// delete files that no records references
+	// delete files that no records reference
 	for {
 		fileIds := make([]uuid.UUID, 0)
 		if err := db.Pool.QueryRow(context.Background(), `
@@ -223,6 +224,26 @@ func cleanUpFiles() error {
 				WHERE file_id = $1
 			`, fileId).Scan(&versions); err != nil {
 				return err
+			}
+
+			// if only first version exists, it might have been just uploaded
+			// newly uploaded files might not be referenced yet, as record with file attachment may still be unsaved
+			if len(versions) == 1 && versions[0] == 0 {
+				var dateChange int64 = 0
+
+				if err := db.Pool.QueryRow(context.Background(), `
+					SELECT date_change
+					FROM instance.file_version
+					WHERE file_id = $1
+					AND   version = $2
+				`, fileId, versions[0]).Scan(&dateChange); err != nil {
+					return err
+				}
+
+				if dateChange+secondsKeepNewFiles > tools.GetTimeUnix() {
+					// first/only file version is too new, do not cleanup yet
+					continue
+				}
 			}
 
 			for _, version := range versions {
@@ -260,7 +281,6 @@ func cleanUpFiles() error {
 			if exists, _ := tools.Exists(filePathThumb); exists {
 				if err := os.Remove(filePathThumb); err != nil {
 					log.Warning(log.ContextServer, "failed to remove old file thumbnail", err)
-					continue
 				}
 			}
 		}
