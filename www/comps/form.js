@@ -47,7 +47,7 @@ import {
 } from './shared/form.js';
 import {
 	fillRelationRecordIds,
-	getJoinIndexMapExpanded,
+	getJoinsIndexMapExpanded,
 	getQueryAttributePkFilter,
 	getQueryFiltersProcessed,
 	getRelationsJoined
@@ -505,19 +505,20 @@ export default {
 		buttonsReadonly:     (s) => s.blockInputs || s.changingRecord,
 
 		// general entities
-		fieldIdMapData: (s) => s.getDataFieldMap(s.fields),
-		fields:         (s) => s.form.fields,
-		filters:        (s) => s.form.query.filters,
-		form:           (s) => s.formIdMap[s.formId],
-		formStateIdMap: (s) => s.getFormStateIdMap(s.form.states),
-		joins:          (s) => s.fillRelationRecordIds(s.form.query.joins),
-		relationId:     (s) => s.form.query.relationId,
-		relationsJoined:(s) => s.getRelationsJoined(s.joins),
-		joinsIndexMap:  (s) => s.getJoinIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet,s.entityIdMapEffect.form.data),
-		joinsIndexesCrt:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordCreate); },
-		joinsIndexesDel:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordDelete); },
-		joinsIndexesNew:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordNew); },
-		joinsIndexesSet:(s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordUpdate); },
+		fieldIdMapData:    (s) => s.getDataFieldMap(s.fields),
+		fields:            (s) => s.form.fields,
+		filters:           (s) => s.form.query.filters,
+		form:              (s) => s.formIdMap[s.formId],
+		formStateIdMap:    (s) => s.getFormStateIdMap(s.form.states),
+		joins:             (s) => s.fillRelationRecordIds(s.form.query.joins),
+		relationId:        (s) => s.form.query.relationId,
+		relationsJoined:   (s) => s.getRelationsJoined(s.joins),
+		joinsIndexMap:     (s) => s.getJoinsIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet,s.entityIdMapEffect.form.data),
+		joinsIndexMapNoOpt:(s) => s.getJoinsIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet,0),
+		joinsIndexesCrt:   (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordCreate); },
+		joinsIndexesDel:   (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordDelete); },
+		joinsIndexesNew:   (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordNew); },
+		joinsIndexesSet:   (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordUpdate); },
 		iconSrc:(s) => {
 			if(s.favoriteId  !== null) return 'images/star1.png';
 			if(s.form.iconId !== null) return s.srcBase64(s.iconIdMap[s.form.iconId].file);
@@ -732,13 +733,16 @@ export default {
 					case 'login':           return s.loginId; break;
 					case 'preset':          return s.presetIdMapRecordId[side.presetId]; break;
 					case 'record':          return s.joinsIndexMap?.['0'] !== undefined ? s.joinsIndexMap['0'].recordId : false; break;
-					case 'recordMayCreate': return s.mayCreate; break;
-					case 'recordMayDelete': return s.mayDelete; break;
-					case 'recordMayUpdate': return s.mayUpdate; break;
 					case 'recordNew':       return s.isNew; break;
 					case 'role':            return s.access.roleIds.includes(side.roleId); break;
 					case 'true':            return true; break;
 					case 'variable':        return s.variableValueGet(side.variableId,s.variableIdMapLocal); break;
+
+					// use joins index map that does not use form data options overwrite, as it can be set via form state (circular dependency!)
+					case 'recordMayCreate': return Object.values(s.joinsIndexMapNoOpt).filter(v => v.recordCreate).length > 0; break;
+					case 'recordMayDelete': return Object.values(s.joinsIndexMapNoOpt).filter(v => v.recordDelete).length > 0; break;
+					case 'recordMayUpdate': return Object.values(s.joinsIndexMapNoOpt).filter(v => v.recordUpdate).length > 0; break;
+
 					case 'value':
 						// compatibility fix, true value should be used instead
 						if(typeof side.value === 'string') {
@@ -926,7 +930,7 @@ export default {
 		getGetterFromAttributeValues,
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
-		getJoinIndexMapExpanded,
+		getJoinsIndexMapExpanded,
 		getQueryAttributePkFilter,
 		getQueryFiltersProcessed,
 		getRandomString,

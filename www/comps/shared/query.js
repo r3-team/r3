@@ -32,8 +32,9 @@ export function getJoinIndexMap(joins) {
 	}
 	return map;
 };
-export function getJoinIndexMapExpanded(joins,indexMapRecordId,indexesNoDel,indexesNoSet,dataOptions) {
+export function getJoinsIndexMapExpanded(joins,indexMapRecordId,indexesNoDel,indexesNoSet,dataOptions) {
 	let map = {};
+	joins = JSON.parse(JSON.stringify(joins));
 	for(let j of joins) {
 		const recordId = indexMapRecordId[j.index];
 		j.recordId     = Number.isInteger(recordId) ? recordId : 0;
