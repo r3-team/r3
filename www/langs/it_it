@@ -1354,7 +1354,7 @@
 					"cc_list TEXT DEFAULT ''",
 					"bcc_list TEXT DEFAULT ''",
 					"account_name TEXT DEFAULT NULL",
-					"attach_record_id INTEGER DEFAULT NULL",
+					"attach_record_id BIGINT DEFAULT NULL",
 					"attach_attribute_id UUID DEFAULT NULL"
 				],
 				"rest_call": [

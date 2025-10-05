@@ -1341,7 +1341,7 @@
 				],
 				"mail_delete_after_attach": [
 					"mail_id عدد صحيح",
-					"Attach_record_id INTEGER",
+					"Attach_record_id BIGINT",
 					"Attach_attribute_id UUID"
 				],
 				"mail_get_next": [
