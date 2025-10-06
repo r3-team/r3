@@ -681,7 +681,6 @@ const MyBuilderQuery = {
 		MyBuilderQueryOrders
 	},
 	template:`<div class="builder-query default-inputs">
-	
 		<div class="query-component">
 			<div class="query-title">
 				<my-button
@@ -702,8 +701,9 @@ const MyBuilderQuery = {
 			
 			<select
 				v-show="showRelations"
-				v-if="relationIdInput === null"
-				v-model="relationIdInput"
+				v-if="relationId === null"
+				@input="set('relationId',$event.target.value)"
+				:value="relationId"
 			>
 				<option :value="null">-</option>
 				<option v-for="rel in module.relations" :value="rel.id">{{ rel.name }}</option>
@@ -758,7 +758,7 @@ const MyBuilderQuery = {
 			</div>
 			<my-builder-query-orders
 				v-show="showOrders"
-				@update="ordersInput = $event"
+				@update="set('orders',$event)"
 				:joins="joins"
 				:orders="orders"
 			/>
@@ -767,7 +767,7 @@ const MyBuilderQuery = {
 		<!-- filters -->
 		<div class="query-component" v-if="allowFilters && joins.length !== 0">
 			<my-builder-query-filter
-				v-model="filtersInput"
+				@update:modelValue="set('filters',$event)"
 				:entityIdMapRef="entityIdMapRef"
 				:expertMode="expertMode"
 				:fieldIdMap="fieldIdMap"
@@ -776,6 +776,7 @@ const MyBuilderQuery = {
 				:joins="joins"
 				:joinsParents="joinsParents"
 				:moduleId="moduleId"
+				:modelValue="filters"
 			/>
 		</div>
 		
@@ -800,20 +801,20 @@ const MyBuilderQuery = {
 				</div>
 			</div>
 			
-			<template v-if="showChoices && choicesInput.length > 0">
+			<template v-if="showChoices && choices.length > 0">
 				<span><i>{{ capApp.choicesHint }}</i></span>
 				<br /><br />
 			</template>
 			
 			<my-builder-query-choice
 				v-show="showChoices"
-				v-for="(c,i) in choicesInput"
+				v-for="(c,i) in choices"
 				@move-down="choiceMove(i,true)"
 				@move-up="choiceMove(i,false)"
 				@remove="choiceRemove(i)"
 				@update="choiceApply(i,$event)"
 				:builderLanguage="builderLanguage"
-				:choice="choicesInput[i]"
+				:choice="choices[i]"
 				:expertMode="expertMode"
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
@@ -823,7 +824,7 @@ const MyBuilderQuery = {
 				:joinsParents="joinsParents"
 				:key="i+'_'+c.id"
 				:moduleId="moduleId"
-				:moveDown="i < choicesInput.length - 1"
+				:moveDown="i < choices.length - 1"
 				:moveUp="i !== 0"
 			/>
 		</div>
@@ -843,7 +844,7 @@ const MyBuilderQuery = {
 			</div>
 			<my-builder-query-lookups
 				v-show="showLookups"
-				@update="lookupsInput = $event"
+				@update="set('lookups',$event)"
 				:joins="joins"
 				:lookups="lookups"
 			/>
@@ -858,14 +859,15 @@ const MyBuilderQuery = {
 				:naked="true"
 			/>
 			<my-button
-				v-if="fixedLimitInput === 0"
-				@trigger="fixedLimitInput = 10"
+				v-if="fixedLimit === 0"
+				@trigger="set('fixedLimit',10)"
 				:caption="capApp.fixedLimit0"
 				:naked="true"
 			/>
 			<input class="short"
-				v-if="fixedLimitInput !== 0"
-				v-model.number="fixedLimitInput"
+				v-if="fixedLimit !== 0"
+				@input="set('fixedLimit',isNaN(parseInt($event.target.value)) ? 0 : parseInt($event.target.value))"
+				:value="fixedLimit"
 			/>
 		</div>
 	</div>`,
@@ -877,25 +879,16 @@ const MyBuilderQuery = {
 		allowLookups:   { type:Boolean, required:false, default:false },
 		allowOrders:    { type:Boolean, required:false, default:false },
 		builderLanguage:{ type:String,  required:false, default:'' },
-		choices:        { type:Array,   required:false, default:() => [] },          // choices for optional query filters (selectable by users)
 		entityIdMapRef: { type:Object,  required:false, default:() => {return {}} },
 		fieldIdMap:     { type:Object,  required:false, default:() => {return {}} }, // form field map, key: field ID
-		filters:        { type:Array,   required:true },
-		filtersDisable: { type:Array,   required:false, default:() => [] }, // filter content to disable (attribute, javascript, collection, preset, ...)
-		fixedLimit:     { type:Number,  required:true },
-		formId:         { type:String,  required:false, default:'' },       // ID of form in which context the query is used
-		lookups:        { type:Array,   required:false, default:() => [] },
-		joins:          { type:Array,   required:true },                    // available relations, incl. source relation
-		joinsParents:   { type:Array,   required:false, default:() => [] }, // each item is an array of joins from a parent query
-		orders:         { type:Array,   required:false, default:() => [] },
+		filtersDisable: { type:Array,   required:false, default:() => [] },          // filter content to disable (attribute, javascript, collection, preset, ...)
+		formId:         { type:String,  required:false, default:'' },                // ID of form in which context the query is used
+		joinsParents:   { type:Array,   required:false, default:() => [] },          // each item is an array of joins from a parent query
+		modelValue:     { type:Object,  required:true },                             // { choices:[], filters:[], fixedLimit:0, joins:[], lookups:[], orders:[], relationId:'' }
 		moduleId:       { type:String,  required:true },
-		relationId:     { required:true },                                  // source relation
-		relationIdStart:{ required:false, default:null }                    // when query starts with a defined relation
+		relationIdStart:{ required:false, default:null }                             // when query starts with a defined relation
 	},
-	emits:[
-		'index-removed','set-choices','set-filters','set-fixed-limit',
-		'set-joins','set-lookups','set-orders','set-relation-id'
-	],
+	emits:['index-removed','update:modelValue'],
 	data() {
 		return {
 			expertMode:false,
@@ -905,56 +898,24 @@ const MyBuilderQuery = {
 			showRelations:true
 		};
 	},
-	computed:{
-		// inputs
-		choicesInput:{
-			get()  { return this.choices; },
-			set(v) { this.$emit('set-choices',v); }
-		},
-		filtersInput:{
-			get()  { return this.filters; },
-			set(v) { this.$emit('set-filters',v); }
-		},
-		fixedLimitInput:{
-			get()  { return this.fixedLimit; },
-			set(v) { this.$emit('set-fixed-limit',v === '' ? 0 : v); }
-		},
-		joinsInput:{
-			get()  { return this.joins; },
-			set(v) { this.$emit('set-joins',v); }
-		},
-		lookupsInput:{
-			get()  { return this.lookups; },
-			set(v) { this.$emit('set-lookups',v); }
-		},
-		ordersInput:{
-			get()  { return this.orders; },
-			set(v) { this.$emit('set-orders',v); }
-		},
-		relationIdInput:{
-			get() {
-				let relId = this.relationId;
-				if(relId === null && this.relationIdStart !== null) {
-					
-					// if source relation not set, but default given: set
-					this.$emit('set-relation-id',this.relationIdStart);
-					return null;
-				}
+	watch:{
+		relationId:{
+			handler(v) {
+				// if source relation not set, but default given: set
+				if(v === null && this.relationIdStart !== null)
+					return this.set('relationId',this.relationIdStart);
 				
-				if(relId !== null && this.joins.length === 0) {
-					
-					// if source relation set, but not added as join yet: add
-					this.relationAdd(-1,relId,null,'INNER');
-				}
-				return relId;
+				// if source relation set, but not added as join yet: add
+				if(v !== null && this.joins.length === 0)
+					return this.relationAdd(-1,v,null,'INNER');
 			},
-			set(v) { this.$emit('set-relation-id',v); }
-		},
-		
-		// entities
+			immediate:true
+		}
+	},
+	computed:{
 		relationNextIndex:(s) => {
 			let indexCandidate = 0;
-			for(let join of s.joinsInput) {
+			for(let join of s.joins) {
 				if(join.index >= indexCandidate)
 					indexCandidate = join.index + 1;
 			}
@@ -963,14 +924,11 @@ const MyBuilderQuery = {
 		relationsNested:(s) => {
 			let getChildRelationsByIndex = function(indexFrom) {
 				let rels = [];
-				for(let i = 0, j = s.joinsInput.length; i < j; i++) {
-					if(s.joinsInput[i].indexFrom !== indexFrom)
+				for(const j of s.joins) {
+					if(j.indexFrom !== indexFrom)
 						continue;
 					
-					let join = JSON.parse(JSON.stringify(s.joinsInput[i]));
-					let atr  = s.attributeIdMap[join.attributeId];
-					let rel  = s.relationIdMap[join.relationId];
-					
+					let join = JSON.parse(JSON.stringify(j));
 					rels.push({
 						applyCreate:join.applyCreate,
 						applyUpdate:join.applyUpdate,
@@ -978,21 +936,21 @@ const MyBuilderQuery = {
 						connector:join.connector,
 						index:join.index,
 						joins:getChildRelationsByIndex(join.index),
-						joinAttributeId:atr.id,
-						joinRelationId:rel.id
+						joinAttributeId:join.attributeId,
+						joinRelationId:join.relationId
 					});
 				}
 				return rels;
 			};
 			
-			if(!s.module || !s.relation)
+			if(!s.module || !s.relation || s.joins.length === 0)
 				return false;
 			
 			// source relation with all relations deep-nested
 			return {
-				applyCreate:s.joinsInput[0].applyCreate,
-				applyUpdate:s.joinsInput[0].applyUpdate,
-				applyDelete:s.joinsInput[0].applyDelete,
+				applyCreate:s.joins[0].applyCreate,
+				applyUpdate:s.joins[0].applyUpdate,
+				applyDelete:s.joins[0].applyDelete,
 				connector:'INNER',
 				index:0,
 				joins:getChildRelationsByIndex(0),
@@ -1002,9 +960,17 @@ const MyBuilderQuery = {
 			};
 		},
 		
-		// entities, simple
-		module:  (s) => s.moduleIdMap[s.moduleId]     === undefined ? false : s.moduleIdMap[s.moduleId],
-		relation:(s) => s.relationIdMap[s.relationId] === undefined ? false : s.relationIdMap[s.relationId],
+		// simple
+		module:    (s) => s.moduleIdMap[s.moduleId]     === undefined ? false : s.moduleIdMap[s.moduleId],
+		relation:  (s) => s.relationIdMap[s.relationId] === undefined ? false : s.relationIdMap[s.relationId],
+		choices:   (s) => s.modelValue.choices,
+		filters:   (s) => s.modelValue.filters,
+		fixedLimit:(s) => s.modelValue.fixedLimit,
+		id:        (s) => s.modelValue.id,
+		joins:     (s) => s.modelValue.joins,
+		lookups:   (s) => s.modelValue.lookups,
+		orders:    (s) => s.modelValue.orders,
+		relationId:(s) => s.modelValue.relationId,
 		
 		// stores
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
@@ -1028,17 +994,10 @@ const MyBuilderQuery = {
 			return state && count !== 0 ? 'triangleDown.png' : 'triangleRight.png';
 		},
 		
-		getRelationByIndex(index) {
-			for(let i = 0, j = this.joinsInput.length; i < j; i++) {
-				if(this.joinsInput[i].index === index)
-					return this.joinsInput[i];
-			}
-			return false;
-		},
-		
 		// actions
 		choiceAdd() {
-			this.choicesInput.push({
+			let v = JSON.parse(JSON.stringify(this.choices));
+			v.push({
 				id:this.getNilUuid(),
 				name:'',
 				filters:[],
@@ -1046,30 +1005,36 @@ const MyBuilderQuery = {
 					queryChoiceTitle:{}
 				}
 			});
+			this.set('choices',v);
 			
 			if(!this.showChoices)
 				this.showChoices = true;
 		},
 		choiceApply(i,value) {
-			this.choicesInput[i] = value;
-			this.choicesInput = this.choicesInput;
+			let v = JSON.parse(JSON.stringify(this.choices));
+			v[i] = value;
+			this.set('choices',v);
 		},
 		choiceMove(i,down) {
-			let c = this.choicesInput[i];
-			this.choicesInput.splice(i,1);
-			this.choicesInput.splice((down ? i + 1 : i - 1),0,c);
+			let v = JSON.parse(JSON.stringify(this.choices));
+			let c = v[i];
+			v.splice(i,1);
+			v.splice((down ? i + 1 : i - 1),0,c);
+			this.set('choices',v);
 		},
 		choiceRemove(i) {
-			this.choicesInput.splice(i,1);
-			this.choicesInput = this.choicesInput;
+			let v = JSON.parse(JSON.stringify(this.choices));
+			v.splice(i,1);
+			this.set('choices',v);
 		},
 		orderAdd() {
-			this.ordersInput.push({
+			let v = JSON.parse(JSON.stringify(this.orders));
+			v.push({
 				ascending:true,
 				attributeId:null,
 				index:0
 			});
-			this.ordersInput = this.ordersInput;
+			this.set('orders',v);
 			
 			if(!this.showOrders)
 				this.showOrders = true;
@@ -1099,8 +1064,9 @@ const MyBuilderQuery = {
 			} else {
 				relId = relationIdFrom;
 			}
+			let v = JSON.parse(JSON.stringify(this.joins));
 			
-			this.joinsInput.push({
+			v.push({
 				applyCreate:isSource ? true : false,
 				applyUpdate:isSource ? true : false,
 				applyDelete:isSource ? true : false,
@@ -1110,39 +1076,71 @@ const MyBuilderQuery = {
 				index:this.relationNextIndex,
 				indexFrom:indexFrom
 			});
-			this.joinsInput = this.joinsInput;
+			this.set('joins',v);
 		},
 		relationRemove(index) {
 			// remove relation & lookup
-			this.joinsInput   = this.joinsInput.filter(v => v.index !== index);
-			this.lookupsInput = this.lookupsInput.filter(v => v.index !== index);
+			let changes = {
+				joins:this.joins.filter(v => v.index !== index),
+				lookups:this.lookups.filter(v => v.index !== index)
+			};
 			
 			if(index === 0) {
 				// source relation has changed
-				this.relationIdInput = null;
-				this.filtersInput    = [];
+				changes.relationId = null;
+				changes.filters    = [];
 			}
+			this.setMultiple(changes);
 
 			// inform parent about removed index, to remove affected fields/columns/etc.
 			this.$emit('index-removed',index);
 		},
 		relationApplyToggle(index,content) {
-			let r = this.getRelationByIndex(index);
-			if(r === false) return;
-			
-			switch(content) {
-				case 'create': r.applyCreate = !r.applyCreate; break;
-				case 'update': r.applyUpdate = !r.applyUpdate; break;
-				case 'delete': r.applyDelete = !r.applyDelete; break;
+			let joins = JSON.parse(JSON.stringify(this.joins));
+			for(let j of joins) {
+				if(j.index === index) {
+					switch(content) {
+						case 'create': j.applyCreate = !j.applyCreate; break;
+						case 'update': j.applyUpdate = !j.applyUpdate; break;
+						case 'delete': j.applyDelete = !j.applyDelete; break;
+					}
+					this.set('joins',joins);
+					break;
+				}
 			}
-			this.joinsInput = this.joinsInput;
 		},
 		relationConnectorSet(index,connector) {
-			let r = this.getRelationByIndex(index);
-			if(r === false) return;
-			
-			r.connector = connector;
-			this.joinsInput = this.joinsInput;
+			let joins = JSON.parse(JSON.stringify(this.joins));
+			for(let j of joins) {
+				if(j.index === index) {
+					j.connector = connector;
+					this.set('joins',joins);
+					break;
+				}
+			}
+		},
+
+		// emitter
+		set(name,value) {
+			let changes = {};
+			changes[name] = value;
+			this.setMultiple(changes);
+		},
+		setMultiple(changes) {
+			let query = {
+				id:this.id,
+				relationId:this.relationId,
+				fixedLimit:this.fixedLimit,
+				joins:this.joins,
+				filters:this.filters,
+				orders:this.orders,
+				lookups:this.lookups,
+				choices:this.choices
+			};
+			for(const k in changes) {
+				query[k] = changes[k];
+			}
+			this.$emit('update:modelValue',query);
 		}
 	}
 };

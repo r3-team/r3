@@ -22,7 +22,7 @@ import {
 } from '../shared/query.js';
 export {MyBuilderSearchBar as default};
 
-let MyBuilderSearchBar = {
+const MyBuilderSearchBar = {
 	name:'my-builder-search-bar',
 	components:{
 		MyBuilderCaption,
@@ -101,7 +101,7 @@ let MyBuilderSearchBar = {
 							<my-builder-column-templates groupName="batches_columns"
 								@column-add="columns.push($event)"
 								:columns="columns"
-								:joins="joins"
+								:joins="query.joins"
 							/>
 						</div>
 					</div>
@@ -125,24 +125,14 @@ let MyBuilderSearchBar = {
 			
 			<!-- content -->
 			<div class="content grow" v-if="tabTarget === 'content'">
-				<my-builder-query
+				<my-builder-query v-model="query"
 					@index-removed="removeIndex($event)"
-					@set-filters="filters = $event"
-					@set-fixed-limit="fixedLimit = $event"
-					@set-joins="joins = $event"
-					@set-orders="orders = $event"
-					@set-relation-id="relationId = $event"
 					:allowChoices="false"
 					:allowLookups="false"
 					:allowOrders="true"
 					:builderLanguage="builderLanguage"
-					:filters="filters"
 					:filtersDisable="filtersDisable"
-					:fixedLimit="fixedLimit"
-					:joins="joins"
 					:moduleId="module.id"
-					:orders="orders"
-					:relationId="relationId"
 				/>
 
 				<!-- SQL preview -->
@@ -169,26 +159,13 @@ let MyBuilderSearchBar = {
 					
 					<my-builder-query
 						v-if="columnShow.subQuery"
-						@set-choices="columnSetQuery('choices',$event)"
-						@set-filters="columnSetQuery('filters',$event)"
-						@set-fixed-limit="columnSetQuery('fixedLimit',$event)"
-						@set-joins="columnSetQuery('joins',$event)"
-						@set-lookups="columnSetQuery('lookups',$event)"
-						@set-orders="columnSetQuery('orders',$event)"
-						@set-relation-id="columnSetQuery('relationId',$event)"
+						v-model="columnShow.query"
 						:allowChoices="false"
 						:allowOrders="true"
 						:builderLanguage="builderLanguage"
-						:choices="columnShow.query.choices"
-						:filters="columnShow.query.filters"
 						:filtersDisable="filtersDisable"
-						:fixedLimit="columnShow.query.fixedLimit"
-						:joins="columnShow.query.joins"
-						:joinsParents="[joins]"
-						:orders="columnShow.query.orders"
-						:lookups="columnShow.query.lookups"
+						:joinsParents="[query.joins]"
 						:moduleId="module.id"
-						:relationId="columnShow.query.relationId"
 					/>
 					
 					<my-builder-column-options
@@ -271,19 +248,13 @@ let MyBuilderSearchBar = {
 	},
 	data() {
 		return {
-			// query
-			relationId:'',
-			joins:[],
-			filters:[],
-			orders:[],
-			fixedLimit:0,
-			
 			// inputs
+			captions:{},
 			columns:[],
 			iconId:null,
 			name:'',
 			openForm:null,
-			captions:{},
+			query:{},
 			
 			// state
 			columnIdShow:null,
@@ -307,18 +278,14 @@ let MyBuilderSearchBar = {
 		},
 		hasChanges:(s) => s.name          !== s.searchBar.name
 			|| s.iconId                   !== s.searchBar.iconId
-			|| s.relationId               !== s.searchBar.query.relationId
-			|| s.fixedLimit               !== s.searchBar.query.fixedLimit
-			|| JSON.stringify(s.joins)    !== JSON.stringify(s.searchBar.query.joins)
-			|| JSON.stringify(s.filters)  !== JSON.stringify(s.searchBar.query.filters)
-			|| JSON.stringify(s.orders)   !== JSON.stringify(s.searchBar.query.orders)
+			|| JSON.stringify(s.query)    !== JSON.stringify(s.searchBar.query)
 			|| JSON.stringify(s.columns)  !== JSON.stringify(s.searchBar.columns)
 			|| JSON.stringify(s.captions) !== JSON.stringify(s.searchBar.captions)
 			|| JSON.stringify(s.openForm) !== JSON.stringify(s.searchBar.openForm),
 		
 		// simple
-		anySearchInput:(s) => s.getIsContentInAnyFilter(s.filters,s.columns,'globalSearch'),
-		joinIndexMap:  (s) => s.getJoinIndexMap(s.joins),
+		anySearchInput:(s) => s.getIsContentInAnyFilter(s.query.filters,s.columns,'globalSearch'),
+		joinIndexMap:  (s) => s.getJoinIndexMap(s.query.joins),
 		searchBar:     (s) => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
 		module:        (s) => s.moduleIdMap[s.searchBar.moduleId],
 		
@@ -347,11 +314,6 @@ let MyBuilderSearchBar = {
 		columnSet(name,value) {
 			this.columnShow[name] = value;
 		},
-		columnSetQuery(name,value) {
-			let v = JSON.parse(JSON.stringify(this.columnShow.query));
-			v[name] = value;
-			this.columnShow.query = v;
-		},
 		removeIndex(index) {
 			for(let i = 0, j = this.columns.length; i < j; i++) {
 				if(this.columns[i].index === index) {
@@ -363,16 +325,12 @@ let MyBuilderSearchBar = {
 		reset() {
 			if(!this.searchBar) return;
 			
-			this.name       = this.searchBar.name;
-			this.iconId     = this.searchBar.iconId;
-			this.relationId = this.searchBar.query.relationId;
-			this.fixedLimit = this.searchBar.query.fixedLimit;
-			this.joins      = JSON.parse(JSON.stringify(this.searchBar.query.joins));
-			this.filters    = JSON.parse(JSON.stringify(this.searchBar.query.filters));
-			this.orders     = JSON.parse(JSON.stringify(this.searchBar.query.orders));
-			this.columns    = JSON.parse(JSON.stringify(this.searchBar.columns));
-			this.captions   = JSON.parse(JSON.stringify(this.searchBar.captions));
-			this.openForm   = JSON.parse(JSON.stringify(this.searchBar.openForm));
+			this.name      = this.searchBar.name;
+			this.iconId    = this.searchBar.iconId;
+			this.query     = JSON.parse(JSON.stringify(this.searchBar.query));
+			this.columns   = JSON.parse(JSON.stringify(this.searchBar.columns));
+			this.captions  = JSON.parse(JSON.stringify(this.searchBar.captions));
+			this.openForm  = JSON.parse(JSON.stringify(this.searchBar.openForm));
 			this.columnIdShow = null;
 		},
 		toggleColumnOptions(id) {
@@ -426,14 +384,7 @@ let MyBuilderSearchBar = {
 					columns:this.replaceBuilderId(
 						JSON.parse(JSON.stringify(this.columns))
 					),
-					query:{
-						id:this.searchBar.query.id,
-						relationId:this.relationId,
-						joins:this.joins,
-						filters:this.filters,
-						orders:this.orders,
-						fixedLimit:this.fixedLimit
-					},
+					query:this.query,
 					captions:this.captions,
 					openForm:this.openForm
 				}),

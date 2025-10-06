@@ -491,28 +491,16 @@ const MyFilterSide = {
 		<div class="subQuery shade" v-if="isSubQuery && showQuery">
 			<!-- filter sub query -->
 			<my-builder-query
-				@set-choices="setQuery('choices',$event)"
-				@set-filters="setQuery('filters',$event)"
-				@set-fixed-limit="setQuery('fixedLimit',$event)"
-				@set-lookups="setQuery('lookups',$event)"
-				@set-joins="setQuery('joins',$event)"
-				@set-orders="setQuery('orders',$event)"
-				@set-relation-id="setQuery('relationId',$event)"
+				@update:modelValue="set('query',$event)"
 				:allowChoices="false"
 				:allowOrders="true"
-				:choices="query.choices"
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
-				:filters="query.filters"
 				:filtersDisable="disableContent"
-				:fixedLimit="query.fixedLimit"
 				:formId="formId"
-				:joins="query.joins"
 				:joinsParents="joinsParents.concat([joins])"
-				:lookups="query.lookups"
+				:modelValue="query"
 				:moduleId="moduleId"
-				:orders="query.orders"
-				:relationId="query.relationId"
 			/>
 			<template v-if="query.relationId !== null">
 				<br />
@@ -792,11 +780,6 @@ const MyFilterSide = {
 				this.showQuery = true;
 			}
 			this.$emit('update:modelValue',v);
-		},
-		setQuery(name,newValue) {
-			let v = JSON.parse(JSON.stringify(this.modelValue.query));
-			v[name] = newValue;
-			this.set('query',v);
 		},
 		changeOffsetMode() {
 			if(this.nowOffset !== 0 && this.nowOffset !== null)

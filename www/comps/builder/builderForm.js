@@ -45,7 +45,7 @@ import {
 } from '../shared/query.js';
 export {MyBuilderForm as default};
 
-let MyBuilderForm = {
+const MyBuilderForm = {
 	name:'my-builder-form',
 	components:{
 		MyBuilderCaption,
@@ -237,20 +237,14 @@ let MyBuilderForm = {
 					<template v-if="tabTarget === 'content'">
 						<!-- form record query -->
 						<my-builder-query
+							v-model="query"
 							@index-removed="removeDataFields(fields,$event)"
-							@set-filters="filters = $event"
-							@set-joins="joins = $event"
-							@set-relation-id="relationId = $event"
 							:allowChoices="false"
 							:allowFixedLimit="false"
 							:builderLanguage="builderLanguage"
-							:filters="filters"
 							:filtersDisable="['formChanged','formState','field','fieldChanged','fieldValid','getter','globalSearch','recordMayCreate','recordMayDelete','recordMayUpdate']"
-							:fixedLimit="0"
 							:formId="id"
-							:joins="joins"
 							:moduleId="form.moduleId"
-							:relationId="relationId"
 						/>
 						
 						<!-- 1:n join warning -->
@@ -451,29 +445,16 @@ let MyBuilderForm = {
 					<!-- field query (relationship inputs, lists, calendars, charts, ...) -->
 					<template v-if="fieldShowHasQuery && tabTargetField === 'content'">
 						<my-builder-query
+							v-model="fieldShow.query"
 							@index-removed="fieldQueryRemoveIndex($event)"
-							@set-choices="fieldQuerySet('choices',$event)"
-							@set-filters="fieldQuerySet('filters',$event)"
-							@set-fixed-limit="fieldQuerySet('fixedLimit',$event)"
-							@set-joins="fieldQuerySet('joins',$event)"
-							@set-lookups="fieldQuerySet('lookups',$event)"
-							@set-orders="fieldQuerySet('orders',$event)"
-							@set-relation-id="fieldQuerySet('relationId',$event)"
 							:allowLookups="fieldShow.content === 'list' && fieldShow.csvImport"
 							:allowOrders="true"
 							:builderLanguage="builderLanguage"
-							:choices="fieldShow.query.choices"
 							:entityIdMapRef="entityIdMapRef"
 							:fieldIdMap="fieldIdMap"
-							:filters="fieldShow.query.filters"
 							:filtersDisable="['formState','getter','globalSearch']"
-							:fixedLimit="fieldShow.query.fixedLimit"
 							:formId="id"
-							:joins="fieldShow.query.joins"
 							:moduleId="module.id"
-							:orders="fieldShow.query.orders"
-							:lookups="fieldShow.query.lookups"
-							:relationId="fieldShow.query.relationId"
 							:relationIdStart="fieldQueryRelationIdStart"
 						/>
 
@@ -505,29 +486,16 @@ let MyBuilderForm = {
 			<template v-if="columnShow">
 				<div class="content no-shrink" v-if="columnShow.subQuery">
 					<my-builder-query
-						@set-choices="fieldColumnQuerySet('choices',$event)"
-						@set-filters="fieldColumnQuerySet('filters',$event)"
-						@set-fixed-limit="fieldColumnQuerySet('fixedLimit',$event)"
-						@set-joins="fieldColumnQuerySet('joins',$event)"
-						@set-lookups="fieldColumnQuerySet('lookups',$event)"
-						@set-orders="fieldColumnQuerySet('orders',$event)"
-						@set-relation-id="fieldColumnQuerySet('relationId',$event)"
+						v-model="columnShow.query"
 						:allowChoices="false"
 						:allowOrders="true"
 						:builderLanguage="builderLanguage"
-						:choices="columnShow.query.choices"
 						:entityIdMapRef="entityIdMapRef"
 						:fieldIdMap="fieldIdMap"
-						:filters="columnShow.query.filters"
 						:filtersDisable="['formState','getter','globalSearch']"
-						:fixedLimit="columnShow.query.fixedLimit"
 						:formId="id"
-						:joins="columnShow.query.joins"
 						:joinsParents="[fieldShow.query.joins]"
-						:orders="columnShow.query.orders"
-						:lookups="columnShow.query.lookups"
 						:moduleId="module.id"
-						:relationId="columnShow.query.relationId"
 					/>
 				</div>
 				<my-builder-column-options
@@ -561,6 +529,7 @@ let MyBuilderForm = {
 			fieldIdFocus:null,   // field input to place focus on form load
 			name:'',             // form name
 			noDataActions:false, // disable all data actions (save, new, delete)
+			query:{},            // form query
 			captions:{},         // form captions
 			fieldIdsRemove:[],   // IDs of fields to remove
 
@@ -569,11 +538,6 @@ let MyBuilderForm = {
 			fields:[],           // form fields (nested within each other)
 			functions:[],        // form functions
 			states:[],           // form states
-			
-			// form data from query
-			relationId:'', // source relation ID
-			joins:[],      // joined relations, incl. source relation
-			filters:[],
 			
 			// state
 			columnIdShow:null,
@@ -608,10 +572,8 @@ let MyBuilderForm = {
 			|| JSON.stringify(s.captions)  !== JSON.stringify(s.form.captions)
 			|| JSON.stringify(s.fields)    !== JSON.stringify(s.form.fields)
 			|| JSON.stringify(s.functions) !== JSON.stringify(s.form.functions)
-			|| JSON.stringify(s.states)    !== JSON.stringify(s.form.states)
-			|| s.relationId                !== s.form.query.relationId
-			|| JSON.stringify(s.joins)     !== JSON.stringify(s.form.query.joins)
-			|| JSON.stringify(s.filters)   !== JSON.stringify(s.form.query.filters),
+			|| JSON.stringify(s.query)     !== JSON.stringify(s.form.query)
+			|| JSON.stringify(s.states)    !== JSON.stringify(s.form.states),
 		columnIdMap:(s) => {
 			let map = {};
 			let collect = function(fields) {
@@ -676,11 +638,8 @@ let MyBuilderForm = {
 				
 				// data fields from relations
 				if(this.relation) {
-					for(let i = 0, j = this.joins.length; i < j; i++) {
-						let join = this.joins[i];
-						
-						fields = fields.concat(this.createFieldsForRelation(
-							this.relationIdMap[join.relationId],join.index));
+					for(const j of this.query.joins) {
+						fields = fields.concat(this.createFieldsForRelation(this.relationIdMap[j.relationId],j.index));
 					}
 				}
 				return fields;
@@ -728,7 +687,7 @@ let MyBuilderForm = {
 			return atr.relationId;
 		},
 		hasAny1nJoin:(s) => {
-			for(let j of s.joins) {
+			for(let j of s.query.joins) {
 				if(j.index === 0)
 					continue;
 				
@@ -753,9 +712,9 @@ let MyBuilderForm = {
 		fieldShow:        (s) => s.fieldIdShow === null || s.fieldIdMap[s.fieldIdShow] === undefined ? false : s.fieldIdMap[s.fieldIdShow],
 		fieldShowHasQuery:(s) => s.fieldShow !== false && s.getFieldHasQuery(s.fieldShow),
 		form:             (s) => s.formIdMap[s.id] === undefined ? false : s.formIdMap[s.id],
-		joinsIndexMap:    (s) => s.getJoinIndexMap(s.joins),
-		presetCandidates: (s) => s.relation === false ? [] : s.relationIdMap[s.relationId].presets,
-		relation:         (s) => s.relationIdMap[s.relationId] === undefined ? false : s.relationIdMap[s.relationId],
+		joinsIndexMap:    (s) => s.getJoinIndexMap(s.query.joins),
+		presetCandidates: (s) => s.relation === false ? [] : s.relationIdMap[s.query.relationId].presets,
+		relation:         (s) => s.relationIdMap[s.query.relationId] === undefined ? false : s.relationIdMap[s.query.relationId],
 		
 		// stores
 		module:        (s) => s.moduleIdMap[s.form.moduleId],
@@ -841,10 +800,8 @@ let MyBuilderForm = {
 			this.captions       = JSON.parse(JSON.stringify(this.form.captions));
 			this.fields         = JSON.parse(JSON.stringify(this.form.fields));
 			this.functions      = JSON.parse(JSON.stringify(this.form.functions));
+			this.query          = JSON.parse(JSON.stringify(this.form.query));
 			this.states         = JSON.parse(JSON.stringify(this.form.states));
-			this.relationId     = this.form.query.relationId;
-			this.joins          = JSON.parse(JSON.stringify(this.form.query.joins));
-			this.filters        = JSON.parse(JSON.stringify(this.form.query.filters));
 			this.fieldIdsRemove = [];
 			this.showColumnsAll = this.fields.length === 1
 				&& !['container','tabs'].includes(this.fields[0].content);
@@ -1304,16 +1261,6 @@ let MyBuilderForm = {
 			}
 			this.fieldShow.columns = colsCloned;
 		},
-		fieldQuerySet(name,value) {
-			let v = JSON.parse(JSON.stringify(this.fieldShow.query));
-			v[name] = value;
-			this.fieldShow.query = v;
-		},
-		fieldColumnQuerySet(name,value) {
-			let v = JSON.parse(JSON.stringify(this.columnShow.query));
-			v[name] = value;
-			this.columnShow.query = v;
-		},
 		setFieldShow(fieldId,columnId,tab) {
 			if(columnId !== null && columnId === this.columnIdShow)
 				return this.columnIdShow = null;
@@ -1388,12 +1335,7 @@ let MyBuilderForm = {
 				fieldIdFocus:this.fieldIdFocus,
 				name:this.name,
 				noDataActions:this.noDataActions,
-				query:{
-					id:this.form.query.id,
-					relationId:this.relationId,
-					joins:this.joins,
-					filters:this.filters
-				},
+				query:this.query,
 				actions:this.actions,
 				fields:fieldsCleaned,
 				functions:this.functions,

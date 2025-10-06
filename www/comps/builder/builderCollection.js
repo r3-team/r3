@@ -15,7 +15,7 @@ import {
 } from '../shared/generic.js';
 export {MyBuilderCollection as default};
 
-let MyBuilderCollection = {
+const MyBuilderCollection = {
 	name:'my-builder-collection',
 	components:{
 		MyBuilderColumnOptions,
@@ -120,7 +120,7 @@ let MyBuilderCollection = {
 								@column-add="columns.push($event)"
 								:allowRelationships="true"
 								:columns="columns"
-								:joins="joins"
+								:joins="query.joins"
 							/>
 						</div>
 					</div>
@@ -145,23 +145,14 @@ let MyBuilderCollection = {
 			<!-- collection content -->
 			<div class="content grow" v-if="tabTarget === 'content'">
 				<my-builder-query
+					v-model="query"
 					@index-removed="removeIndex($event)"
-					@set-filters="filters = $event"
-					@set-fixed-limit="fixedLimit = $event"
-					@set-joins="joins = $event"
-					@set-orders="orders = $event"
-					@set-relation-id="relationId = $event"
 					:allowChoices="false"
 					:allowLookups="false"
 					:allowOrders="true"
 					:builderLanguage="builderLanguage"
-					:filters="filters"
 					:filtersDisable="filtersDisable"
-					:fixedLimit="fixedLimit"
-					:joins="joins"
 					:moduleId="module.id"
-					:orders="orders"
-					:relationId="relationId"
 				/>
 				
 				<!-- column settings -->
@@ -171,26 +162,13 @@ let MyBuilderCollection = {
 					
 					<my-builder-query
 						v-if="columnShow.subQuery"
-						@set-choices="columnSetQuery('choices',$event)"
-						@set-filters="columnSetQuery('filters',$event)"
-						@set-fixed-limit="columnSetQuery('fixedLimit',$event)"
-						@set-joins="columnSetQuery('joins',$event)"
-						@set-lookups="columnSetQuery('lookups',$event)"
-						@set-orders="columnSetQuery('orders',$event)"
-						@set-relation-id="columnSetQuery('relationId',$event)"
+						v-model="columnShow.query"
 						:allowChoices="false"
 						:allowOrders="true"
 						:builderLanguage="builderLanguage"
-						:choices="columnShow.query.choices"
-						:filters="columnShow.query.filters"
 						:filtersDisable="filtersDisable"
-						:fixedLimit="columnShow.query.fixedLimit"
-						:joins="columnShow.query.joins"
-						:joinsParents="[joins]"
-						:orders="columnShow.query.orders"
-						:lookups="columnShow.query.lookups"
+						:joinsParents="[query.joins]"
 						:moduleId="module.id"
-						:relationId="columnShow.query.relationId"
 					/>
 					<my-builder-column-options
 						@set="(...args) => columnSet(args[0],args[1])"
@@ -269,18 +247,12 @@ let MyBuilderCollection = {
 	},
 	data() {
 		return {
-			// query
-			relationId:'',
-			joins:[],
-			filters:[],
-			orders:[],
-			fixedLimit:0,
-			
 			// inputs
 			columns:[],
 			iconId:null,
 			inHeader:[],
 			name:'',
+			query:{},
 			
 			// state
 			columnIdShow:null,
@@ -317,11 +289,7 @@ let MyBuilderCollection = {
 		},
 		hasChanges:(s) => s.name          !== s.collection.name
 			|| s.iconId                   !== s.collection.iconId
-			|| s.relationId               !== s.collection.query.relationId
-			|| s.fixedLimit               !== s.collection.query.fixedLimit
-			|| JSON.stringify(s.joins)    !== JSON.stringify(s.collection.query.joins)
-			|| JSON.stringify(s.filters)  !== JSON.stringify(s.collection.query.filters)
-			|| JSON.stringify(s.orders)   !== JSON.stringify(s.collection.query.orders)
+			|| JSON.stringify(s.query)    !== JSON.stringify(s.collection.query)
 			|| JSON.stringify(s.columns)  !== JSON.stringify(s.collection.columns)
 			|| JSON.stringify(s.inHeader) !== JSON.stringify(s.collection.inHeader),
 		
@@ -366,11 +334,6 @@ let MyBuilderCollection = {
 		columnSet(name,value) {
 			this.columnShow[name] = value;
 		},
-		columnSetQuery(name,value) {
-			let v = JSON.parse(JSON.stringify(this.columnShow.query));
-			v[name] = value;
-			this.columnShow.query = v;
-		},
 		removeIndex(index) {
 			for(let i = 0, j = this.columns.length; i < j; i++) {
 				if(this.columns[i].index === index) {
@@ -382,15 +345,11 @@ let MyBuilderCollection = {
 		reset() {
 			if(!this.collection) return;
 			
-			this.name       = this.collection.name;
-			this.iconId     = this.collection.iconId;
-			this.relationId = this.collection.query.relationId;
-			this.fixedLimit = this.collection.query.fixedLimit;
-			this.joins      = JSON.parse(JSON.stringify(this.collection.query.joins));
-			this.filters    = JSON.parse(JSON.stringify(this.collection.query.filters));
-			this.orders     = JSON.parse(JSON.stringify(this.collection.query.orders));
-			this.columns    = JSON.parse(JSON.stringify(this.collection.columns));
-			this.inHeader   = JSON.parse(JSON.stringify(this.collection.inHeader));
+			this.name     = this.collection.name;
+			this.iconId   = this.collection.iconId;
+			this.query    = JSON.parse(JSON.stringify(this.collection.query));
+			this.columns  = JSON.parse(JSON.stringify(this.collection.columns));
+			this.inHeader = JSON.parse(JSON.stringify(this.collection.inHeader));
 			this.columnIdShow = null;
 		},
 		toggleColumnOptions(id) {
@@ -444,14 +403,7 @@ let MyBuilderCollection = {
 					columns:this.replaceBuilderId(
 						JSON.parse(JSON.stringify(this.columns))
 					),
-					query:{
-						id:this.collection.query.id,
-						relationId:this.relationId,
-						joins:this.joins,
-						filters:this.filters,
-						orders:this.orders,
-						fixedLimit:this.fixedLimit
-					},
+					query:this.query,
 					inHeader:this.inHeader
 				}),
 				ws.prepare('schema','check',{moduleId:this.module.id})

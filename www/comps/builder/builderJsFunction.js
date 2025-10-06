@@ -135,14 +135,8 @@ let MyBuilderJsFunction = {
 								:allowFilters="false"
 								:allowJoinEdit="false"
 								:builderLanguage="builderLanguage"
-								:choices="form.query.choices"
-								:filters="form.query.filters"
-								:fixedLimit="0"
-								:joins="form.query.joins"
-								:lookups="form.query.lookups"
+								:modelValue="form.query"
 								:moduleId="form.moduleId"
-								:orders="form.query.orders"
-								:relationId="form.query.relationId"
 							/>
 						</div>
 						

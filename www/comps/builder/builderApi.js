@@ -20,7 +20,7 @@ import {
 } from '../shared/generic.js';
 export {MyBuilderApi as default};
 
-let MyBuilderApiPreview = {
+const MyBuilderApiPreview = {
 	name:'my-builder-api-preview',
 	template:`<table class="generic-table-vertical default-inputs">
 		<tbody>
@@ -329,7 +329,7 @@ let MyBuilderApiPreview = {
 	}
 };
 
-let MyBuilderApi = {
+const MyBuilderApi = {
 	name:'my-builder-api',
 	components:{
 		MyBuilderApiPreview,
@@ -415,7 +415,7 @@ let MyBuilderApi = {
 								@column-add="columns.push($event)"
 								:allowRelationships="true"
 								:columns="columns"
-								:joins="joins"
+								:joins="query.joins"
 							/>
 						</div>
 					</div>
@@ -440,25 +440,14 @@ let MyBuilderApi = {
 			<!-- API content -->
 			<div class="content grow" v-if="tabTarget === 'content'">
 				<my-builder-query
+					v-model="query"
 					@index-removed="removeIndex($event)"
-					@set-filters="filters = $event"
-					@set-fixed-limit="fixedLimit = $event"
-					@set-joins="joins = $event"
-					@set-lookups="lookups = $event"
-					@set-orders="orders = $event"
-					@set-relation-id="relationId = $event"
 					:allowChoices="false"
 					:allowLookups="true"
 					:allowOrders="true"
 					:builderLanguage="builderLanguage"
-					:filters="filters"
 					:filtersDisable="filtersDisable"
-					:fixedLimit="fixedLimit"
-					:joins="joins"
-					:lookups="lookups"
 					:moduleId="module.id"
-					:orders="orders"
-					:relationId="relationId"
 				/>
 				
 				<!-- column settings -->
@@ -468,26 +457,13 @@ let MyBuilderApi = {
 					
 					<my-builder-query
 						v-if="columnShow.subQuery"
-						@set-choices="columnSetQuery('choices',$event)"
-						@set-filters="columnSetQuery('filters',$event)"
-						@set-fixed-limit="columnSetQuery('fixedLimit',$event)"
-						@set-joins="columnSetQuery('joins',$event)"
-						@set-lookups="columnSetQuery('lookups',$event)"
-						@set-orders="columnSetQuery('orders',$event)"
-						@set-relation-id="columnSetQuery('relationId',$event)"
+						v-model="columnShow.query"
 						:allowChoices="false"
 						:allowOrders="true"
 						:builderLanguage="builderLanguage"
-						:choices="columnShow.query.choices"
-						:filters="columnShow.query.filters"
 						:filtersDisable="filtersDisable"
-						:fixedLimit="columnShow.query.fixedLimit"
-						:joins="columnShow.query.joins"
-						:joinsParents="[joins]"
-						:orders="columnShow.query.orders"
-						:lookups="columnShow.query.lookups"
+						:joinsParents="[query.joins]"
 						:moduleId="module.id"
-						:relationId="columnShow.query.relationId"
 					/>
 					<my-builder-column-options
 						@set="(...args) => columnSet(args[0],args[1])"
@@ -509,7 +485,7 @@ let MyBuilderApi = {
 					:hasDelete="hasDelete"
 					:hasGet="hasGet"
 					:hasPost="hasPost"
-					:joins="joins"
+					:joins="query.joins"
 					:limitDef="limitDef"
 					:module="module"
 					:name="name"
@@ -611,14 +587,6 @@ let MyBuilderApi = {
 	},
 	data() {
 		return {
-			// query
-			relationId:'',
-			joins:[],
-			filters:[],
-			orders:[],
-			lookups:[],
-			fixedLimit:0,
-			
 			// API inputs
 			columns:[],
 			comment:'',
@@ -628,6 +596,7 @@ let MyBuilderApi = {
 			limitDef:100,
 			limitMax:1000,
 			name:'',
+			query:{},
 			verboseDef:false,
 			version:1,
 			
@@ -663,18 +632,13 @@ let MyBuilderApi = {
 			|| s.limitMax                !== s.api.limitMax
 			|| s.verboseDef              !== s.api.verboseDef
 			|| s.version                 !== s.api.version
-			|| s.relationId              !== s.api.query.relationId
-			|| s.fixedLimit              !== s.api.query.fixedLimit
-			|| JSON.stringify(s.joins)   !== JSON.stringify(s.api.query.joins)
-			|| JSON.stringify(s.filters) !== JSON.stringify(s.api.query.filters)
-			|| JSON.stringify(s.orders)  !== JSON.stringify(s.api.query.orders)
-			|| JSON.stringify(s.lookups) !== JSON.stringify(s.api.query.lookups)
+			|| JSON.stringify(s.query)   !== JSON.stringify(s.api.query)
 			|| JSON.stringify(s.columns) !== JSON.stringify(s.api.columns),
 		warnings:(s) => {
 			let out = [];
 			if(s.hasGet || s.hasPost) {
 				// check no base relation/no columns
-				if(s.relationId === '' || s.columns.length === 0)
+				if(s.query.relationId === '' || s.columns.length === 0)
 					out.push(s.capApp.warning.noData);
 			}
 			if(s.hasPost) {
@@ -686,10 +650,10 @@ let MyBuilderApi = {
 					}
 				}
 				// check missing record lookups
-				for(let j of s.joins) {
+				for(let j of s.query.joins) {
 					if(!j.applyUpdate) continue;
 					
-					if(s.lookups.filter(l => l.index === j.index).length === 0) {
+					if(s.query.lookups.filter(l => l.index === j.index).length === 0) {
 						out.push(s.capApp.warning.postNoUpdate);
 						break;
 					}
@@ -723,11 +687,6 @@ let MyBuilderApi = {
 		columnSet(name,value) {
 			this.columnShow[name] = value;
 		},
-		columnSetQuery(name,value) {
-			let v = JSON.parse(JSON.stringify(this.columnShow.query));
-			v[name] = value;
-			this.columnShow.query = v;
-		},
 		removeIndex(index) {
 			for(let i = 0, j = this.columns.length; i < j; i++) {
 				if(this.columns[i].index === index) {
@@ -748,12 +707,7 @@ let MyBuilderApi = {
 			this.limitMax   = this.api.limitMax;
 			this.verboseDef = this.api.verboseDef;
 			this.version    = this.api.version;
-			this.relationId = this.api.query.relationId;
-			this.fixedLimit = this.api.query.fixedLimit;
-			this.joins      = JSON.parse(JSON.stringify(this.api.query.joins));
-			this.filters    = JSON.parse(JSON.stringify(this.api.query.filters));
-			this.orders     = JSON.parse(JSON.stringify(this.api.query.orders));
-			this.lookups    = JSON.parse(JSON.stringify(this.api.query.lookups));
+			this.query      = JSON.parse(JSON.stringify(this.api.query));
 			this.columns    = JSON.parse(JSON.stringify(this.api.columns));
 			this.columnIdShow = null;
 		},
@@ -816,15 +770,7 @@ let MyBuilderApi = {
 					columns:this.replaceBuilderId(
 						JSON.parse(JSON.stringify(this.columns))
 					),
-					query:{
-						id:this.api.query.id,
-						relationId:this.relationId,
-						joins:this.joins,
-						filters:this.filters,
-						orders:this.orders,
-						lookups:this.lookups,
-						fixedLimit:this.fixedLimit
-					},
+					query:this.query,
 					hasDelete:this.hasDelete,
 					hasGet:this.hasGet,
 					hasPost:this.hasPost,
