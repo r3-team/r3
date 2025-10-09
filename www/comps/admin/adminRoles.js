@@ -33,12 +33,12 @@ const MyAdminRoleItem = {
 		<div class="admin-role-members" v-if="showMembers || showAll">
 			
 			<!-- login assignment input -->
-			<div class="entry">
+			<div class="entry" ref="content">
 				<my-input-login
-					@dropdown-show="showInputDropdown = $event"
+					@dropdown-show="dropdownSet"
 					@update:modelValue="add($event)"
 					:clearInput="true"
-					:dropdownShow="showInputDropdown"
+					:dropdownShow
 					:idsExclude="loginIds"
 					:modelValue="loginId"
 					:noLdapAssign="true"
@@ -67,7 +67,6 @@ const MyAdminRoleItem = {
 	data() {
 		return {
 			loginId:null,
-			showInputDropdown:false,
 			showMembers:false
 		};
 	},
@@ -81,11 +80,13 @@ const MyAdminRoleItem = {
 		},
 		
 		// simple
-		description:(s) => s.getCaption('roleDesc',s.module.id,s.role.id,s.role.captions),
-		titleIcon:  (s) => s.showAll ? '' : (s.showMembers ? 'triangleDown.png' : 'triangleRight.png'),
+		description: (s) => s.getCaption('roleDesc',s.module.id,s.role.id,s.role.captions),
+		dropdownShow:(s) => s.dropdownElm === s.$refs.content,
+		titleIcon:   (s) => s.showAll ? '' : (s.showMembers ? 'triangleDown.png' : 'triangleRight.png'),
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.admin.roles
+		capApp:     (s) => s.$store.getters.captions.admin.roles,
+		dropdownElm:(s) => s.$store.getters.dropdownElm
 	},
 	methods:{
 		// externals
@@ -105,6 +106,10 @@ const MyAdminRoleItem = {
 					return false;
 			}
 			this.getNewName(loginId);
+		},
+		dropdownSet(state) {
+			if(state && !this.dropdownShow) this.$store.commit('dropdownElm',this.$refs.content);
+			if(!state && this.dropdownShow) this.$store.commit('dropdownElm',null);
 		},
 		remove(loginIndex) {
 			this.$emit('remove-by-index',loginIndex);
@@ -181,7 +186,6 @@ const MyAdminRoles = {
 				v-for="r in rolesValid"
 				@add="add(r.id,$event)"
 				@remove-by-index="remove(r.id,$event)"
-				@toggle-members=""
 				:key="r.id"
 				:logins="roleIdMapLogins[r.id]"
 				:module="module"

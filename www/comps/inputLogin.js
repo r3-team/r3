@@ -9,11 +9,11 @@ export default {
 		@dropdown-show="$emit('dropdown-show',$event)"
 		@request-data="get"
 		@updated-text-input="inputText = $event"
-		:dropdownShow="dropdownShow"
-		:inputTextSet="inputTextSet"
+		:dropdownShow
+		:inputTextSet
 		:options="logins"
-		:placeholder="placeholder"
-		:readonly="readonly"
+		:placeholder
+		:readonly
 	/>`,
 	props:{
 		clearInput:  { type:Boolean, required:false, default:false }, // keep text input clear
@@ -76,6 +76,9 @@ export default {
 				noLdapAssign:this.noLdapAssign
 			},true).then(
 				res => {
+					if(res.payload.length === 1)
+						console.log('set text', res.payload[0].name);
+
 					if(res.payload.length === 1)
 						this.inputTextSet = res.payload[0].name;
 				},

@@ -536,10 +536,6 @@
 	padding:2px 5px;
 	position:relative;
 }
-.admin-roles .admin-role-members .entry:focus,
-.admin-roles .admin-role-members .entry:hover{
-	background-color:var(--color-accent3);
-}
 .admin-roles .admin-role input{
 	flex:1 1 auto;
 	border:none;
