@@ -1319,8 +1319,9 @@ export default {
 				const field = this.fieldIdMapData[this.popUpFieldIdSrc];
 				const atr   = this.attributeIdMap[field.attributeId];
 				const ia    = this.getIndexAttributeIdByField(field,false);
-				
-				if(this.isAttributeRelationship(atr.content)) {
+
+				// apply new record ID from pop up form if we opened from the base relation
+				if(field.openForm !== undefined && field.openForm.relationIndexOpen === 0 && this.isAttributeRelationship(atr.content)) {
 					let   valNew  = null;
 					const isMulti = field.attributeIdNm !== null ||
 						(field.outsideIn && this.isAttributeRelationshipN1(atr.content));

@@ -665,7 +665,7 @@ export default {
 	},
 	emits:[
 		'clipboard','close-inline','dropdown-show','open-form','open-form-bulk',
-		'record-count-change','record-removed','records-selected','records-selected-init',
+		'record-count-change','record-removed','records-selected','records-selected-original',
 		'set-args','set-column-ids-by-user','set-collection-indexes','set-login-option'
 	],
 	data() {
@@ -1521,7 +1521,7 @@ export default {
 							}
 						}
 						if(ids.length !== 0)
-							this.$emit('records-selected-init',this.inputMulti ? ids : ids[0]);
+							this.$emit('records-selected-original',this.inputMulti ? ids : ids[0]);
 						
 						this.inputAutoSelectDone = true;
 					}

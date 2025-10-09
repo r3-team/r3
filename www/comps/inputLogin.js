@@ -77,9 +77,6 @@ export default {
 			},true).then(
 				res => {
 					if(res.payload.length === 1)
-						console.log('set text', res.payload[0].name);
-
-					if(res.payload.length === 1)
 						this.inputTextSet = res.payload[0].name;
 				},
 				this.$root.genericError

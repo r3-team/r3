@@ -554,8 +554,8 @@ export default {
 					@dropdown-show="dropdownSet"
 					@open-form="(...args) => openForm(args[0],[],args[1],null)"
 					@record-removed="relationshipRecordRemoved"
-					@records-selected="relationshipRecordsSelected"
-					@records-selected-init="$emit('set-value',fieldAttributeId,$event,true,true,field.id)"
+					@records-selected="relationshipRecordsSelected($event,false)"
+					@records-selected-original="relationshipRecordsSelected($event,true)"
 					@set-login-option="setLoginOption"
 					:choices
 					:columns
@@ -747,7 +747,7 @@ export default {
 				return this.values[this.fieldAttributeId];
 			},
 			set(val,valOld) {
-				this.setValue(val,valOld,this.fieldAttributeId);
+				this.setValue(val,valOld,this.fieldAttributeId,false);
 			}
 		},
 		
@@ -763,7 +763,7 @@ export default {
 			},
 			set(val,valOld) {
 				if(this.fieldAttributeIdAlt !== false)
-					this.setValue(val,valOld,this.fieldAttributeIdAlt);
+					this.setValue(val,valOld,this.fieldAttributeIdAlt,false);
 			}
 		},
 		
@@ -1307,12 +1307,15 @@ export default {
 			
 			this.$emit('open-form',recordIds,openForm,getterArgs,newTab,this.field.id);
 		},
-		relationshipRecordsSelected(recordIds) {
-			if(recordIds === null)     return this.value = null;
-			if(!this.isRelationship1N) return this.value = recordIds[0];
-			if(this.value === null)    return this.value = recordIds;
+		relationshipRecordsSelected(recordIds,isOriginal) {
+			let v;
+			if     (isOriginal)             v = recordIds;
+			else if(recordIds === null)     v = null;
+			else if(!this.isRelationship1N) v = recordIds[0];
+			else if(this.value === null)    v = recordIds;
+			else                            v = this.value.concat(recordIds);
 			
-			this.value = this.value.concat(recordIds);
+			this.setValue(v,this.value,this.fieldAttributeId,isOriginal);
 		},
 		relationshipRecordRemoved(recordId) {
 			if(!this.isRelationship1N)
@@ -1370,12 +1373,12 @@ export default {
 					return this.tabIndexShow = i;
 			}
 		},
-		setValue(val,valOld,indexAttributeId) {
+		setValue(val,valOld,indexAttributeId,isOriginal) {
 			// clean inputs
-			if(val === '')
-				val = null;
-
 			if(val !== null && typeof val === 'string') {
+				if(val === '')
+					val = null;
+
 				if(this.isInteger && /^\-?\d+$/.test(val))
 					val = parseInt(val);
 
@@ -1385,16 +1388,17 @@ export default {
 			
 			if(!this.isVariable) {
 				// regular field, send changes up to the form
-				this.$emit('set-value',indexAttributeId,val,false,true,this.field.id);
+				this.$emit('set-value',indexAttributeId,val,isOriginal,true,this.field.id);
 			} else {
 				// variable field, send changes to the variable
-				if(!this.isTouched && val !== valOld)
+				if(!isOriginal && !this.isTouched && val !== valOld)
 					this.$emit('set-touched',this.field.id);
 
 				this.variableValueSet(this.variable.id,val,this.variableIdMapLocal);
 			}
 			
-			if(this.field.jsFunctionId !== null)
+			// on field value change, execute registered function
+			if(!isOriginal && this.field.jsFunctionId !== null)
 				this.$emit('execute-function',this.field.jsFunctionId);
 		},
 		triggerButton(middleClick) {
