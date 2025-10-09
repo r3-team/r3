@@ -619,7 +619,7 @@ let MyBuilderJsFunction = {
 				'get_role_ids','get_url_query_string','get_user_id','go_back','has_role','logoff',
 				'pdf_create','record_delete','record_new','record_reload','record_save','record_save_new',
 				'set_e2ee_by_user_ids','set_e2ee_by_user_ids_and_relation','timer_clear',
-				'timer_clear_global','timer_set','timer_set_global'
+				'timer_clear_global','timer_set','timer_set_global','url_open_as_tab','url_open_as_window'
 			],
 			appFunctionsAsync:[
 				'dialog_show','get_e2ee_data_key','get_e2ee_data_value','pdf_create'

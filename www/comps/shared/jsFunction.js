@@ -1,7 +1,10 @@
 import MyStore       from '../../stores/store.js';
 import {formOpen}    from './form.js';
 import {generatePdf} from './pdf.js';
-import {getNilUuid}  from './generic.js';
+import {
+	getNilUuid,
+	openLink
+} from './generic.js';
 import {
 	getCollectionMultiValues,
 	updateCollections
@@ -34,6 +37,19 @@ const exposedFunctionsGlobal = {
 	go_back:          ()  => window.history.back(),
 	has_role:         (v) => MyStore.getters.access.roleIds.includes(v),
 	logoff:           ()  => MyStore.getters.appFunctions.sessionInvalid(false,true),
+
+	// URL open functions
+	url_open_as_tab:(url) => openLink(url,true),
+	url_open_as_window:(url,width,height,top,left) => {
+		if(width  === undefined || isNaN(parseInt(width)))  width  = 800;
+		if(height === undefined || isNaN(parseInt(height))) height = 600;
+
+		let opts = ['noopener','noreferrer','resizable=yes','scrollbars=yes','titlebar=yes',`width=${width}`,`height=${height}`];
+		if(top  !== undefined && !isNaN(parseInt(top)))  opts.push(`top=${top}`);
+		if(left !== undefined && !isNaN(parseInt(left))) opts.push(`left=${left}`);
+
+		window.open(url,'_blank',opts.join(','));
+	},
 
 	// collection functions
 	collection_read:getCollectionMultiValues,
@@ -193,6 +209,7 @@ export function jsFunctionRun(jsFunctionId,args,exposedFunctionsContext) {
 		let history        = {};
 		let location       = {};
 		let navigator      = {};
+		let open           = {};
 		let setInterval    = {};
 		let setTimeout     = {};
 		let XMLHttpRequest = {};

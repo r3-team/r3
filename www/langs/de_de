@@ -1121,7 +1121,9 @@
 				"timer_clear": "app.timer_clear({ARGS}) => UNDEFINED<br /><br />Bricht einen Timer mit dem angegebenen Namen ab, welcher vorher mit \"app.timer_set()\" erstellt worden ist.",
 				"timer_clear_global": "app.timer_clear_global({ARGS}) => UNDEFINED<br /><br />Bricht einen globalen Timer mit dem angegebenen Namen ab, welcher vorher mit \"app.timer_set_global()\" erstellt worden ist.",
 				"timer_set": "app.timer_set({ARGS}) => UNDEFINED<br /><br />Führt eine Funktion nach einer definierten Zeit in Millisekunden aus. Wenn \"isInterval\" auf TRUE gestellt ist, wird die Funktion wiederholt ausgeführt.<br /><br />Ein Timer ist immer an das aktuelle Formular gebunden. Wenn das Formular zurückgesetzt oder verlassen wird, werden auch Timer zurückgesetzt.<br /><br />Jeder Timer braucht einen einzigartigen Namen, welcher später genutzt werden kann, um den Timer mit \"app.timer_clear()\" abzubrechen; Timer mit dem gleichen Namen überschreiben sich gegenseitig.",
-				"timer_set_global": "app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Führt eine Funktion nach einer definierten Zeit in Millisekunden aus. Wenn \"isInterval\" auf TRUE gestellt ist, wird die Funktion wiederholt ausgeführt.<br /><br />Ein globaler Timer wird fortgeführt, selbst wenn der Kontext (bspw. ein Formular auf dem er gestartet worden ist) verlassen wurde.<br /><br />Jeder globale Timer braucht einen einzigartigen Namen, welcher später genutzt werden kann, um den Timer mit \"app.timer_clear_global()\" abzubrechen; globale Timer mit dem gleichen Namen, von der gleichen Anwendung, überschreiben sich gegenseitig."
+				"timer_set_global": "app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Führt eine Funktion nach einer definierten Zeit in Millisekunden aus. Wenn \"isInterval\" auf TRUE gestellt ist, wird die Funktion wiederholt ausgeführt.<br /><br />Ein globaler Timer wird fortgeführt, selbst wenn der Kontext (bspw. ein Formular auf dem er gestartet worden ist) verlassen wurde.<br /><br />Jeder globale Timer braucht einen einzigartigen Namen, welcher später genutzt werden kann, um den Timer mit \"app.timer_clear_global()\" abzubrechen; globale Timer mit dem gleichen Namen, von der gleichen Anwendung, überschreiben sich gegenseitig.",
+				"url_open_as_tab": "app.url_open_as_tab({ARGS}) => UNDEFINED<br /><br />Öffnet die definierte URL in einem neuen Browser-Tab.",
+				"url_open_as_window": "app.url_open_as_window({ARGS}) => UNDEFINED<br /><br />Öffnet die definierte URL in einem neuen Browser-Fenster. Ob die URL tatsächlich in einem Fenster geöffnet wird, hängt von Browser-Einstellungen ab. Das Gleiche mit den Parametern \"width\", \"height\", \"top\" & \"left\" - dies sind Vorschläge an den Browser, die ignoriert werden können."
 			},
 			"helpJsArgs": {
 				"block_inputs": [
@@ -1211,6 +1213,16 @@
 					"is_interval BOOLEAN",
 					"function FUNCTION",
 					"milliseconds NUMBER"
+				],
+				"url_open_as_tab": [
+					"url STRING"
+				],
+				"url_open_as_window": [
+					"url STRING",
+					"width NUMBER",
+					"height NUMBER",
+					"top NUMBER",
+					"left NUMBER"
 				]
 			},
 			"helpPg": {

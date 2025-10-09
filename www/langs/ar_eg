@@ -1121,7 +1121,9 @@
 				"timer_clear": "app.timer_clear({ARGS}) => غير محدد<br /><br />يلغي مؤقتًا بالاسم المحدد، تم إنشاؤه مسبقًا باستخدام 'app.timer_set()'.",
 				"timer_clear_global": "app.timer_clear_global({ARGS}) => غير محدد<br /><br />يلغي مؤقتًا عامًا بالاسم المحدد، تم إنشاؤه مسبقًا باستخدام 'app.timer_set_global()'.",
 				"timer_set": "app.timer_set({ARGS}) => غير محدد<br /><br />ينفذ وظيفة معينة بعد وقت محدد بالمللي ثانية. <br /><br />يرتبط المؤقت دائمًا بالنموذج الحالي. <br /><br />يجب أن يكون لكل مؤقت اسم فريد، والذي يمكن استخدامه لإلغاء المؤقت لاحقًا باستخدام 'timer_clear()'؛ ",
-				"timer_set_global": "app.timer_set_global({ARGS}) => غير محدد<br /><br />ينفذ وظيفة معينة بعد وقت محدد بالمللي ثانية. <br /><br />يستمر المؤقت العام حتى لو تم إغلاق السياق الحالي (مثل النموذج الذي بدأ منه).<br /><br />يجب أن يكون لكل مؤقت اسم فريد، والذي يمكن استخدامه لإلغاء المؤقت لاحقًا باستخدام 'timer_clear_global()'؛ "
+				"timer_set_global": "app.timer_set_global({ARGS}) => غير محدد<br /><br />ينفذ وظيفة معينة بعد وقت محدد بالمللي ثانية. <br /><br />يستمر المؤقت العام حتى لو تم إغلاق السياق الحالي (مثل النموذج الذي بدأ منه).<br /><br />يجب أن يكون لكل مؤقت اسم فريد، والذي يمكن استخدامه لإلغاء المؤقت لاحقًا باستخدام 'timer_clear_global()'؛ ",
+				"url_open_as_tab": "app.url_open_as_tab({ARGS}) => UNDEFINED<br /><br />Opens the given URL in a new browser tab.",
+				"url_open_as_window": "app.url_open_as_window({ARGS}) => UNDEFINED<br /><br />Opens the given URL in a new browser window. Whether or not the URL will actually be opened in a window depends on browser settings. The same with parameters 'width', 'height', 'top' & 'left' - these are suggestions to the browser that may be ignored."
 			},
 			"helpJsArgs": {
 				"block_inputs": [
@@ -1211,6 +1213,16 @@
 					"is_interval منطقية",
 					"وظيفة",
 					"عدد المللي ثانية"
+				],
+				"url_open_as_tab": [
+					"url STRING"
+				],
+				"url_open_as_window": [
+					"url STRING",
+					"width NUMBER",
+					"height NUMBER",
+					"top NUMBER",
+					"left NUMBER"
 				]
 			},
 			"helpPg": {
