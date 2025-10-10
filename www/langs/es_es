@@ -1107,6 +1107,7 @@
 				"get_role_ids": "app.get_role_ids() => ARRAY<br /><br />Devuelve todos los IDs de roles asignados al usuario actual (se incluyen roles anidados).",
 				"get_url_query_string": "app.get_url_query_string() => STRING<br /><br />Devuelve los parámetros de consulta actuales, como:<br />'?arg1=hola&arg2=mundo'",
 				"get_user_id": "app.get_user_id() => NUMBER<br /><br />Devuelve el ID del usuario actual.",
+				"global_search_start": "app.global_search_start({ARGS}) => Opens the global search with the given search input. If no search input is defined, the current text selection is used.",
 				"go_back": "app.go_back() => UNDEFINED<br /><br />Ejecuta una navegación hacia atrás en el navegador.",
 				"has_role": "app.has_role({ARGS}) => BOOLEAN<br /><br />Devuelve verdadero si el usuario actual tiene el rol asignado (se incluyen roles anidados).",
 				"logoff": "app.logoff() => UNDEFINED<br /><br />Cierra la sesión del usuario actual. Esto resulta en que se muestre la página de inicio de sesión y el usuario se vea obligado a autenticarse nuevamente para continuar.<br /><br />Después de la reautenticación, se mostrará el formulario previamente abierto. Si esto no es deseado, abre otro formulario primero y luego ejecuta el cierre de sesión.",
@@ -1171,6 +1172,9 @@
 				],
 				"get_record_id": [
 					"relation_index NUMBER"
+				],
+				"global_search_start": [
+					"search_input TEXT"
 				],
 				"has_role": [
 					"role_id STRING"

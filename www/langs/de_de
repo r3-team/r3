@@ -1107,6 +1107,7 @@
 				"get_role_ids": "app.get_role_ids() => ARRAY<br /><br />Liefert die IDs aller zugewiesenen Rollen für den aktuellen Benutzer (geerbte Rollen sind inkludiert).",
 				"get_url_query_string": "app.get_url_query_string() => STRING<br /><br />Liefert die aktuellen URL-Parameter, wie bspw. \"?arg1=hello&arg2=world\"",
 				"get_user_id": "app.get_user_id() => NUMBER<br /><br />Liefert die ID des aktuellen Benutzers.",
+				"global_search_start": "app.global_search_start({ARGS}) => Öffnet die globale Suche mit der definierten Sucheingabe. Wenn keine Sucheingabe definiert ist, wird der aktuell markierte Text verwendet.",
 				"go_back": "app.go_back() => UNDEFINED<br /><br />Führt eine Browser-zurück Navigation aus.",
 				"has_role": "app.has_role({ARGS}) => BOOLEAN<br /><br />Liefert zurück, ob der spezifizierte Benutzer der spezifizierten Rolle zugewiesen ist (geerbte Rollen werden berücksichtigt).",
 				"logoff": "app.logoff() => UNDEFINED<br /><br />Meldet den aktuellen Benutzer ab. Die Anmeldemaske erscheint und der Benutzer muss sich erneut anmelden, um fortzufahren.<br /><br />Nach erneuter Anmeldung wird das vorher offene Formular angezeigt. Falls das nicht gewünscht sein sollte, erst ein anderes Formular öffnen und dann die Abmeldung durchführen.",
@@ -1171,6 +1172,9 @@
 				],
 				"get_record_id": [
 					"relation_index NUMBER"
+				],
+				"global_search_start": [
+					"search_input TEXT"
 				],
 				"has_role": [
 					"role_id STRING"

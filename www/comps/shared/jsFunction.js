@@ -51,6 +51,14 @@ const exposedFunctionsGlobal = {
 		window.open(url,'_blank',opts.join(','));
 	},
 
+	// global search
+	global_search_start:(input) => {
+		if(MyStore.getters.searchModuleIds.length === 0)
+			return console.warn('cannot start global search, no search bars available');
+
+		MyStore.commit('globalSearchInput',input !== undefined ? input : window.getSelection().toString());
+	},
+
 	// collection functions
 	collection_read:getCollectionMultiValues,
 	collection_update:updateCollections,

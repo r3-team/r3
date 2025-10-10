@@ -1107,6 +1107,7 @@
 				"get_role_ids": "app.get_role_ids() => ARRAY<br /><br />إرجاع جميع معرفات الأدوار المعينة لتسجيل الدخول الحالي (يتم تضمين الأدوار المتداخلة).",
 				"get_url_query_string": "app.get_url_query_string() => STRING<br /><br />إرجاع معلمات الاستعلام الحالية، مثل:<br />'?arg1=hello&arg2=world'",
 				"get_user_id": "app.get_user_id() => رقم<br /><br />إرجاع معرف تسجيل الدخول الحالي.",
+				"global_search_start": "app.global_search_start({ARGS}) => Opens the global search with the given search input. If no search input is defined, the current text selection is used.",
 				"go_back": "app.go_back() => غير محدد<br /><br />ينفذ التنقل الخلفي للمتصفح.",
 				"has_role": "app.has_role({ARGS}) => BOOLEAN<br /><br />يُرجع صحيحًا إذا كان لتسجيل الدخول الحالي الدور المعين (يتم تضمين الأدوار المتداخلة).",
 				"logoff": "app.logoff() => UNDEFINED<br /><br />Logs off the current user. This results in the login page being shown and the user being forced to re-authenticate to continue.<br /><br />After re-authentication, the previously open form will be shown. If this is not desired, open another form first and then execute the logoff.",
@@ -1171,6 +1172,9 @@
 				],
 				"get_record_id": [
 					"رقم_فهرس_العلاقة"
+				],
+				"global_search_start": [
+					"search_input TEXT"
 				],
 				"has_role": [
 					"سلسلة معرف الدور"
