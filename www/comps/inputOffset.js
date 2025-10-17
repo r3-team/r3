@@ -16,7 +16,7 @@ export default {
 			:class="classInput"
 			:title="captionText"
 		>
-			<option v-for="n in pageCount" :value="(n-1)*limit">
+			<option v-for="n in pageCount" :value="(n-1)*limit" :key="n">
 				{{ displayOffset(n, pageCount) }}
 			</option>
 		</select>
@@ -52,15 +52,34 @@ export default {
 			if(s.total === 0 || s.limit === 0)
 				return 0;
 			
-			let count = 0;
-			let countResults = s.total;
-			
+			let maxShowPages = 21;
+			let maxPages = parseInt(Math.ceil((s.total+1) / s.limit));
+			let curentPage = parseInt(Math.ceil((s.offset+1) / s.limit));
+			let firstPage = curentPage;
+			let lastPage = curentPage;
+
+			// add/substract at most maxShowPages from currentPage, resulting
+			// in firstPage and lastPage to be used for the selector
 			do {
-				countResults -= s.limit;
-				count++; 
-			} while(countResults > 0);
+				if(firstPage > 1) {
+					firstPage--;
+					maxShowPages--;
+				}
+				if(lastPage < maxPages) {
+					lastPage++;
+					maxShowPages--;
+				}
+			} while(maxShowPages > 1 && (firstPage > 1 || lastPage < maxPages));
+
+
+			// generate page list for the selector
+			let pages = [];
+			for(let i = firstPage; i <= lastPage; i++)
+			{
+				pages.push(i)
+			}
 			
-			return count;
+			return pages;
 		},
 		
 		// inputs
