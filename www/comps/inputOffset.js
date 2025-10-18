@@ -16,8 +16,8 @@ export default {
 			:class="classInput"
 			:title="captionText"
 		>
-			<option v-for="n in pageCount" :value="(n-1)*limit" :key="n">
-				{{ displayOffset(n, pageCount) }}
+			<option v-for="n in pages" :value="(n-1)*limit" :key="n">
+				{{ displayOffset(n) }}
 			</option>
 		</select>
 		
@@ -48,37 +48,33 @@ export default {
 			? s.capGen.resultsOf.replace('{CNT}',s.total)
 			: s.capGen.results.replace('{CNT}',s.total),
 		offsetSelectShow:(s) => s.total > s.limit || s.offset !== 0,
-		pageCount:(s) => {
+		pageCurr:(s) => parseInt(Math.ceil((s.offset+1) / s.limit)),
+		pageLast:(s) => parseInt(Math.ceil((s.total+1)  / s.limit)),
+		pages:(s) => {
 			if(s.total === 0 || s.limit === 0)
-				return 0;
+				return [];
 			
-			let maxShowPages = 21;
-			let maxPages = parseInt(Math.ceil((s.total+1) / s.limit));
-			let curentPage = parseInt(Math.ceil((s.offset+1) / s.limit));
-			let firstPage = curentPage;
-			let lastPage = curentPage;
+			let pagesCount = 21;
+			let pageStart  = s.pageCurr;
+			let pageEnd    = s.pageCurr;
 
-			// add/substract at most maxShowPages from currentPage, resulting
-			// in firstPage and lastPage to be used for the selector
+			// add/substract at most pagesCount from current page, resulting in start & end page numbers
 			do {
-				if(firstPage > 1) {
-					firstPage--;
-					maxShowPages--;
+				if(pageStart > 1) {
+					pageStart--;
+					pagesCount--;
 				}
-				if(lastPage < maxPages) {
-					lastPage++;
-					maxShowPages--;
+				if(pageEnd < s.pageLast) {
+					pageEnd++;
+					pagesCount--;
 				}
-			} while(maxShowPages > 1 && (firstPage > 1 || lastPage < maxPages));
-
+			} while(pagesCount > 1 && (pageStart > 1 || pageEnd < s.pageLast));
 
 			// generate page list for the selector
 			let pages = [];
-			for(let i = firstPage; i <= lastPage; i++)
-			{
+			for(let i = pageStart; i <= pageEnd; i++) {
 				pages.push(i)
 			}
-			
 			return pages;
 		},
 		
@@ -92,11 +88,10 @@ export default {
 		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
-		displayOffset(page,pageCount) {
-			if(page === pageCount)
-				return ((page-1)*this.limit)+1 + ' - ' + this.total;
-			
-			return ((page-1)*this.limit)+1 + ' - ' + (((page-1)*this.limit) + this.limit);
+		displayOffset(page) {
+			return page === this.pageLast
+				? ((page-1)*this.limit)+1 + ' - ' + this.total
+				: ((page-1)*this.limit)+1 + ' - ' + (((page-1)*this.limit) + this.limit);
 		},
 		pageChanged(next) {
 			if(next) this.$emit('input',this.offset + this.limit);
