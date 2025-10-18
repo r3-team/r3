@@ -106,7 +106,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	var columns []types.Column
+	var columns []types.CsvExportColumn
 	if err := json.Unmarshal([]byte(columnsString), &columns); err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return

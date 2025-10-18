@@ -142,6 +142,17 @@ export default {
 		clearInterval(this.cacheDenialTimeout);
 	},
 	computed:{
+		columnsCsv:(s) => {
+			let out = [];
+			for(const c of s.columnsSorted) {
+				// only keep relevant data
+				out.push({
+					attributeId:c.attributeId,
+					captions:c.captions
+				});
+			}
+			return out;
+		},
 		columnsSorted:(s) => {
 			let out = [];
 			for(const b of s.columnBatches) {
@@ -161,7 +172,7 @@ export default {
 				`timezone=${encodeURIComponent(s.timezone)}`,
 				`ignore_header=${s.hasHeader ? 'false' : 'true'}`,
 				`relation_id=${s.query.relationId}`,
-				`columns=${encodeURIComponent(JSON.stringify(s.columnsSorted))}`,
+				`columns=${encodeURIComponent(JSON.stringify(s.columnsCsv))}`,
 				`joins=${encodeURIComponent(JSON.stringify(s.joins))}`,
 				`expressions=${encodeURIComponent(JSON.stringify(s.expressions))}`,
 				`filters=${encodeURIComponent(JSON.stringify(s.filters))}`,
