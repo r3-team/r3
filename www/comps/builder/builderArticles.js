@@ -4,7 +4,7 @@ import {getDependentModules} from '../shared/builder.js';
 import {copyValueDialog}     from '../shared/generic.js';
 export {MyBuilderArticles as default};
 
-let MyBuilderArticlesItem = {
+const MyBuilderArticlesItem = {
 	name:'my-builder-articles-item',
 	components:{MyBuilderCaption},
 	template:`<tbody>
@@ -42,13 +42,13 @@ let MyBuilderArticlesItem = {
 			</td>
 			<td>
 				<my-button image="edit.png"
-					@trigger="showContent = !showContent"
+					@trigger="open"
 					:caption="capGen.button.edit"
 				/>
 			</td>
 			<td>
 				<!-- article body pop up window -->
-				<div class="app-sub-window under-header" v-if="showContent" @mousedown.self="showContent = false">
+				<div class="app-sub-window under-header" v-if="showContent" @mousedown.self="close">
 					<div class="contentBox builder-articles-body shade popUp">
 						<div class="top lower">
 							<div class="area">
@@ -77,7 +77,7 @@ let MyBuilderArticlesItem = {
 									:caption="capGen.button.save"
 								/>
 								<my-button image="cancel.png"
-									@trigger="showContent = false"
+									@trigger="close"
 									:cancel="true"
 									:captionTitle="capGen.button.close"
 								/>
@@ -133,33 +133,31 @@ let MyBuilderArticlesItem = {
 		capApp:(s) => s.$store.getters.captions.builder.articles,
 		capGen:(s) => s.$store.getters.captions.generic
 	},
-	mounted() {
-		window.addEventListener('keydown',this.handleHotkeys);
-	},
-	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
-	},
 	methods:{
 		// externals
 		copyValueDialog,
 		
 		// actions
-		handleHotkeys(e) {
-			if(e.key === 'Escape' && this.showContent)
+		close() {
+			if(this.showContent) {
+				this.$store.commit('keyDownHandlerDel',this.set);
+				this.$store.commit('keyDownHandlerDel',this.nextLanguage);
+				this.$store.commit('keyDownHandlerDel',this.close);
+				this.$store.commit('keyDownHandlerWake');
 				this.showContent = false;
-			
-			if(e.ctrlKey && e.key === 's') {
-				e.preventDefault();
-				
-				if(this.hasChanges)
-					this.set();
 			}
-			
-			if(e.ctrlKey && e.key === 'q') {
-				e.preventDefault();
-				
-				this.$emit('nextLanguage');
+		},
+		open() {
+			if(!this.showContent) {
+				this.$store.commit('keyDownHandlerSleep');
+				this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+				this.$store.commit('keyDownHandlerAdd',{fnc:this.nextLanguage,key:'q',keyCtrl:true});
+				this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape'});
+				this.showContent = true;
 			}
+		},
+		nextLanguage() {
+			this.$emit('nextLanguage');
 		},
 		
 		// backend calls
@@ -184,6 +182,9 @@ let MyBuilderArticlesItem = {
 			);
 		},
 		set() {
+			if(!this.hasChanges)
+				return;
+
 			ws.send('article','set',{
 				id:this.article.id,
 				moduleId:this.module.id,
@@ -206,7 +207,7 @@ let MyBuilderArticlesItem = {
 	}
 };
 
-let MyBuilderArticles = {
+const MyBuilderArticles = {
 	name:'my-builder-articles',
 	components:{
 		MyArticles,
