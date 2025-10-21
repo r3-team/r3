@@ -93,8 +93,6 @@ func DoAll() error {
 }
 
 func do(m types.Mail) error {
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
 
 	// get mail account to send with
 	var err error
@@ -162,7 +160,10 @@ func do(m types.Mail) error {
 	fileList := make([]string, 0)
 	if m.RecordId.Valid && m.AttributeId.Valid {
 
+		cache.Schema_mx.RLock()
 		atr, exists := cache.AttributeIdMap[m.AttributeId.Bytes]
+		cache.Schema_mx.RUnlock()
+
 		if !exists {
 			return fmt.Errorf("cannot attach file(s) from unknown attribute %s", m.AttributeId.String())
 		}

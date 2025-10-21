@@ -36,22 +36,27 @@ func doImport(filePath string, attributeIdFiles uuid.UUID, recordId pgtype.Int8)
 	// access schema cache
 	cache.Schema_mx.RLock()
 	atr, exists := cache.AttributeIdMap[attributeIdFiles]
+	cache.Schema_mx.RUnlock()
+
 	if !exists || !schema.IsContentFiles(atr.Content) {
-		cache.Schema_mx.RUnlock()
 		return handler.ErrSchemaUnknownAttribute(attributeIdFiles)
 	}
 
+	cache.Schema_mx.RLock()
 	rel, exists := cache.RelationIdMap[atr.RelationId]
+	cache.Schema_mx.RUnlock()
+
 	if !exists {
-		cache.Schema_mx.RUnlock()
 		return handler.ErrSchemaUnknownRelation(atr.RelationId)
 	}
+
+	cache.Schema_mx.RLock()
 	mod, exists := cache.ModuleIdMap[rel.ModuleId]
+	cache.Schema_mx.RUnlock()
+
 	if !exists {
-		cache.Schema_mx.RUnlock()
 		return handler.ErrSchemaUnknownModule(rel.ModuleId)
 	}
-	cache.Schema_mx.RUnlock()
 
 	if err := checkImportPath(filePathSource, int64(atr.Length)); err != nil {
 		return err

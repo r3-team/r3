@@ -27,22 +27,27 @@ func doTextWrite(fileName string, fileTextContent string, attributeIdFiles uuid.
 	// access schema cache
 	cache.Schema_mx.RLock()
 	atr, exists := cache.AttributeIdMap[attributeIdFiles]
+	cache.Schema_mx.RUnlock()
+
 	if !exists || !schema.IsContentFiles(atr.Content) {
-		cache.Schema_mx.RUnlock()
 		return handler.ErrSchemaUnknownAttribute(attributeIdFiles)
 	}
 
+	cache.Schema_mx.RLock()
 	rel, exists := cache.RelationIdMap[atr.RelationId]
+	cache.Schema_mx.RUnlock()
+
 	if !exists {
-		cache.Schema_mx.RUnlock()
 		return handler.ErrSchemaUnknownRelation(atr.RelationId)
 	}
+
+	cache.Schema_mx.RLock()
 	mod, exists := cache.ModuleIdMap[rel.ModuleId]
+	cache.Schema_mx.RUnlock()
+
 	if !exists {
-		cache.Schema_mx.RUnlock()
 		return handler.ErrSchemaUnknownModule(rel.ModuleId)
 	}
-	cache.Schema_mx.RUnlock()
 
 	// set file
 	fileId, err := uuid.NewV4()

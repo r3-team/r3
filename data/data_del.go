@@ -13,8 +13,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
-	recordId int64, loginId int64) error {
+func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, recordId int64, loginId int64) error {
 
 	if !authorizedRelation(loginId, relationId, types.AccessDelete) {
 		return errors.New(handler.ErrUnauthorized)

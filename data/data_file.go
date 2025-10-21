@@ -35,10 +35,10 @@ var (
 
 func MayAccessFile(loginId int64, attributeId uuid.UUID) error {
 	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
+	atr, exists := cache.AttributeIdMap[attributeId]
+	cache.Schema_mx.RUnlock()
 
-	attribute, exists := cache.AttributeIdMap[attributeId]
-	if !exists || !schema.IsContentFiles(attribute.Content) {
+	if !exists || !schema.IsContentFiles(atr.Content) {
 		return errors.New("not a file attribute")
 	}
 
@@ -67,11 +67,11 @@ func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId u
 
 	cache.Schema_mx.RLock()
 	attribute, exists := cache.AttributeIdMap[attributeId]
+	cache.Schema_mx.RUnlock()
+
 	if !exists || !schema.IsContentFiles(attribute.Content) {
-		cache.Schema_mx.RUnlock()
 		return handler.ErrSchemaUnknownAttribute(attributeId)
 	}
-	cache.Schema_mx.RUnlock()
 
 	// check for access permissions, unless it´s a system task (login ID = -1)
 	if loginId != -1 && !authorizedAttribute(loginId, attributeId, types.AccessWrite) {
@@ -233,11 +233,11 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool, attribu
 
 	cache.Schema_mx.RLock()
 	relation, exists := cache.RelationIdMap[relationId]
+	cache.Schema_mx.RUnlock()
+
 	if !exists {
-		cache.Schema_mx.RUnlock()
 		return handler.ErrSchemaUnknownRelation(relationId)
 	}
-	cache.Schema_mx.RUnlock()
 
 	if !relationUsesLogging(relation.RetentionCount, relation.RetentionDays) {
 		return nil

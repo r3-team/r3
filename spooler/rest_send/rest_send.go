@@ -130,18 +130,23 @@ func callExecute(c restCall) error {
 			return fmt.Errorf("could not read response body, %s", err)
 		}
 
+		cache.Schema_mx.RLock()
 		fnc, exists := cache.PgFunctionIdMap[c.pgFunctionIdCallback.Bytes]
+		cache.Schema_mx.RUnlock()
+
 		if !exists {
 			return fmt.Errorf("unknown function '%s'", c.pgFunctionIdCallback.String())
 		}
+
+		cache.Schema_mx.RLock()
 		mod, exists := cache.ModuleIdMap[fnc.ModuleId]
+		cache.Schema_mx.RUnlock()
+
 		if !exists {
 			return fmt.Errorf("unknown module '%s'", fnc.ModuleId)
 		}
 
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1,$2,$3)`,
-			mod.Name, fnc.Name), httpRes.StatusCode, bodyRaw, c.callbackValue); err != nil {
-
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1,$2,$3)`, mod.Name, fnc.Name), httpRes.StatusCode, bodyRaw, c.callbackValue); err != nil {
 			return err
 		}
 	}

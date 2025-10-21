@@ -113,10 +113,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// start work
-		cache.Schema_mx.RLock()
-		defer cache.Schema_mx.RUnlock()
-
 		// store file in temporary directory
 		filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)
 		if err != nil {
@@ -249,7 +245,10 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 	// apply column value overwrites
 	for i, column := range columns {
 
+		cache.Schema_mx.RLock()
 		atr, exists := cache.AttributeIdMap[column.AttributeId]
+		cache.Schema_mx.RUnlock()
+
 		if !exists {
 			return handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppUnknownAttribute)
 		}

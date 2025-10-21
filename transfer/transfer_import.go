@@ -56,8 +56,8 @@ type importMeta struct {
 
 // imports extracted modules from given file paths
 func ImportFromFiles(ctx context.Context, filePathsImport []string) error {
-	Import_mx.Lock()
-	defer Import_mx.Unlock()
+	import_mx.Lock()
+	defer import_mx.Unlock()
 
 	log.Info(log.ContextTransfer, fmt.Sprintf("start import for modules from file(s): '%s'", strings.Join(filePathsImport, "', '")))
 
@@ -177,7 +177,7 @@ func ImportFromFiles(ctx context.Context, filePathsImport []string) error {
 
 	// update schema cache
 	moduleIdsUpdated := make([]uuid.UUID, 0)
-	for id, _ := range moduleIdMapImportMeta {
+	for id := range moduleIdMapImportMeta {
 		moduleIdsUpdated = append(moduleIdsUpdated, id)
 	}
 
@@ -187,6 +187,7 @@ func ImportFromFiles(ctx context.Context, filePathsImport []string) error {
 	}
 	defer tx.Rollback(ctx)
 
+	fmt.Println("Schema changed called import")
 	if err := cluster.SchemaChanged_tx(ctx, tx, true, moduleIdsUpdated); err != nil {
 		return err
 	}
@@ -610,9 +611,7 @@ func importCheckResultAndApply(ctx context.Context, tx pgx.Tx, resultErr error, 
 		if _, err := tx.Exec(ctx, `RELEASE SAVEPOINT transfer_import`); err != nil {
 			return err
 		}
-		if _, exists := idMapSkipped[entityId]; exists {
-			delete(idMapSkipped, entityId)
-		}
+		delete(idMapSkipped, entityId)
 		return nil
 	}
 
@@ -627,11 +626,8 @@ func importCheckResultAndApply(ctx context.Context, tx pgx.Tx, resultErr error, 
 }
 
 func parseModulesFromPaths_tx(ctx context.Context, tx pgx.Tx, filePaths []string, moduleIdMapImportMeta map[uuid.UUID]importMeta) ([]types.Module, error) {
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
 
 	modules := make([]types.Module, 0)
-
 	log.Info(log.ContextTransfer, fmt.Sprintf("import is parsing %d module files", len(filePaths)))
 
 	// read all modules from file paths
@@ -664,7 +660,9 @@ func parseModulesFromPaths_tx(ctx context.Context, tx pgx.Tx, filePaths []string
 		}
 
 		// check whether module is imported anew or updated
+		cache.Schema_mx.RLock()
 		exModule, isModuleUpgrade := cache.ModuleIdMap[moduleId]
+		cache.Schema_mx.RUnlock()
 
 		if isModuleUpgrade {
 
@@ -720,7 +718,7 @@ func parseModulesFromPaths_tx(ctx context.Context, tx pgx.Tx, filePaths []string
 	moduleIdsSort := make([]uuid.UUID, 0)
 	moduleNames := make([]string, 0)
 
-	for id, _ := range moduleIdMapImportMeta {
+	for id := range moduleIdMapImportMeta {
 		moduleIdsSort = append(moduleIdsSort, id)
 	}
 	sort.SliceStable(moduleIdsSort, func(i, j int) bool {

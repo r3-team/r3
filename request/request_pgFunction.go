@@ -27,8 +27,6 @@ func PgFunctionDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (
 }
 
 func PgFunctionExec_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, onlyFrontendFnc bool) (interface{}, error) {
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
 
 	var req struct {
 		Id   uuid.UUID     `json:"id"`
@@ -39,7 +37,10 @@ func PgFunctionExec_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, 
 		return nil, err
 	}
 
+	cache.Schema_mx.RLock()
 	fnc, exists := cache.PgFunctionIdMap[req.Id]
+	cache.Schema_mx.RUnlock()
+
 	if !exists {
 		return nil, handler.ErrSchemaUnknownPgFunction(req.Id)
 	}
@@ -50,10 +51,16 @@ func PgFunctionExec_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, 
 		return nil, handler.ErrSchemaBadFrontendExecPgFunctionCall(req.Id)
 	}
 
-	mod := cache.ModuleIdMap[fnc.ModuleId]
+	cache.Schema_mx.RLock()
+	mod, exists := cache.ModuleIdMap[fnc.ModuleId]
+	cache.Schema_mx.RUnlock()
+
+	if !exists {
+		return nil, handler.ErrSchemaUnknownModule(fnc.ModuleId)
+	}
 
 	placeholders := make([]string, 0)
-	for i, _ := range req.Args {
+	for i := range req.Args {
 		placeholders = append(placeholders, fmt.Sprintf("$%d", i+1))
 	}
 

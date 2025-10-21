@@ -21,6 +21,7 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/config/module_meta"
+	"r3/handler"
 	"r3/tools"
 	"r3/types"
 	"sync"
@@ -31,7 +32,7 @@ import (
 
 var (
 	exportKey string       // in memory storage for export key
-	Import_mx sync.RWMutex // transfer import mutex
+	import_mx sync.RWMutex // transfer import mutex
 )
 
 func StoreExportKey(key string) {
@@ -39,15 +40,15 @@ func StoreExportKey(key string) {
 }
 
 func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
 	var exists bool
 	var file types.TransferFile
 
+	cache.Schema_mx.RLock()
 	file.Content.Module, exists = cache.ModuleIdMap[moduleId]
+	cache.Schema_mx.RUnlock()
+
 	if !exists {
-		return errors.New("module does not exist")
+		return handler.ErrSchemaUnknownModule(moduleId)
 	}
 
 	// update version info
@@ -95,7 +96,7 @@ func GetModuleChangedWithDependencies_tx(ctx context.Context, tx pgx.Tx, moduleI
 
 		module, exists := cache.ModuleIdMap[id]
 		if !exists {
-			return errors.New("unknown module")
+			return handler.ErrSchemaUnknownModule(id)
 		}
 
 		var err error

@@ -9,15 +9,14 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID,
-	formId pgtype.UUID, mood int, code int, text string) error {
-
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
+func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID, formId pgtype.UUID, mood int, code int, text string) error {
 
 	releaseBuild := 0
 	if moduleId.Valid {
+		cache.Schema_mx.RLock()
 		module, exists := cache.ModuleIdMap[moduleId.Bytes]
+		cache.Schema_mx.RUnlock()
+
 		if !exists {
 			return handler.ErrSchemaUnknownModule(moduleId.Bytes)
 		}

@@ -57,6 +57,11 @@ var (
 	ClientEventIdMap   = make(map[uuid.UUID]types.ClientEvent) // all client events by ID
 )
 
+func GetClientEventIdMap() map[uuid.UUID]types.ClientEvent {
+	Schema_mx.RLock()
+	defer Schema_mx.RUnlock()
+	return ClientEventIdMap
+}
 func GetModuleIdMapMeta() map[uuid.UUID]types.ModuleMeta {
 	Schema_mx.RLock()
 	defer Schema_mx.RUnlock()
@@ -81,7 +86,7 @@ func LoadModuleIdMapMeta_tx(ctx context.Context, tx pgx.Tx) error {
 	defer Schema_mx.Unlock()
 
 	// apply deletions if relevant
-	for id, _ := range moduleIdMapMeta {
+	for id := range moduleIdMapMeta {
 		if _, exists := moduleIdMapMetaNew[id]; !exists {
 			delete(ModuleIdMap, id)
 			delete(moduleIdMapJson, id)
@@ -133,9 +138,11 @@ func UpdateSchema_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID, init
 	}
 
 	// update module meta cache
-	Schema_mx.Lock()
 	for _, id := range moduleIds {
+		Schema_mx.RLock()
 		meta, exists := moduleIdMapMeta[id]
+		Schema_mx.RUnlock()
+
 		if !exists {
 			meta, err = module_meta.Get_tx(ctx, tx, id)
 			if err != nil {
@@ -143,9 +150,11 @@ func UpdateSchema_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID, init
 			}
 		}
 		meta.DateChange = now
+
+		Schema_mx.Lock()
 		moduleIdMapMeta[id] = meta
+		Schema_mx.Unlock()
 	}
-	Schema_mx.Unlock()
 	return nil
 }
 

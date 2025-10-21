@@ -51,6 +51,8 @@ func DoAll() error {
 }
 
 func do(mail types.Mail) error {
+
+	// check validity of attribute to attach files to
 	cache.Schema_mx.RLock()
 	atr, exists := cache.AttributeIdMap[mail.AttributeId.Bytes]
 	var rel types.Relation
@@ -61,13 +63,13 @@ func do(mail types.Mail) error {
 	}
 	cache.Schema_mx.RUnlock()
 
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
-
-	// check validity of attribute to attach files to
 	if !exists {
 		return fmt.Errorf("cannot attach file(s) to unknown attribute '%s'", mail.AttributeId.String())
 	}
+
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+	defer ctxCanc()
+
 	if !schema.IsContentFiles(atr.Content) {
 		log.Error(log.ContextMail, fmt.Sprintf("cannot store attachments in non-files attribute '%s'", atr.Name), fmt.Errorf("deleting mail"))
 		return deleteMail(ctx, mail.Id)

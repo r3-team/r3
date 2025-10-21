@@ -59,8 +59,8 @@ func clientEventGetFatClient_tx(ctx context.Context, tx pgx.Tx, loginId int64) (
 		return nil, err
 	}
 
-	cache.Schema_mx.RLock()
-	for id, ce := range cache.ClientEventIdMap {
+	clientEventMap := cache.GetClientEventIdMap()
+	for id, ce := range clientEventMap {
 		if _, exists := access.ClientEvent[id]; !exists {
 			continue // login has no access, ignore
 		}
@@ -71,7 +71,6 @@ func clientEventGetFatClient_tx(ctx context.Context, tx pgx.Tx, loginId int64) (
 		}
 		res.ClientEvents = append(res.ClientEvents, ce)
 	}
-	cache.Schema_mx.RUnlock()
 	return res, nil
 }
 func clientEventExecFatClient_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {

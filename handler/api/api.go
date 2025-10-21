@@ -123,6 +123,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	log.Info(log.ContextApi, fmt.Sprintf("'%s.%s' (v%d) is called with %s (record ID: %d)",
 		modName, apiName, version, r.Method, recordId))
 
+	// start DB transaction before locking schema as connection pool could be exhausted
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
+		return
+	}
+	defer tx.Rollback(ctx)
+
 	// resolve API by module+API names
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
@@ -207,13 +215,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// execute request
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
-		return
-	}
-	defer tx.Rollback(ctx)
-
 	if err := db.SetSessionConfig_tx(ctx, tx, login.Id); err != nil {
 		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
 		return

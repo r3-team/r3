@@ -31,16 +31,19 @@ func doTextRead(fileId uuid.UUID, fileVersion pgtype.Int8, pgFunctionId uuid.UUI
 	// access schema cache
 	cache.Schema_mx.RLock()
 	fnc, exists := cache.PgFunctionIdMap[pgFunctionId]
+	cache.Schema_mx.RUnlock()
+
 	if !exists {
-		cache.Schema_mx.RUnlock()
 		return handler.ErrSchemaUnknownPgFunction(pgFunctionId)
 	}
+
+	cache.Schema_mx.RLock()
 	mod, exists := cache.ModuleIdMap[fnc.ModuleId]
+	cache.Schema_mx.RUnlock()
+
 	if !exists {
-		cache.Schema_mx.RUnlock()
 		return handler.ErrSchemaUnknownModule(fnc.ModuleId)
 	}
-	cache.Schema_mx.RUnlock()
 
 	// define paths
 	filePathSource := data.GetFilePathVersion(fileId, fileVersion.Int64)

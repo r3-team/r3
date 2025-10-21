@@ -165,10 +165,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// start work
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
 	// prepare CSV file
 	filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)
 	if err != nil {
@@ -206,7 +202,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// fallback to attribute title
+			cache.Schema_mx.RLock()
 			atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
+			cache.Schema_mx.RUnlock()
+
 			if !exists {
 				handler.AbortRequest(w, handler.ContextCsvDownload, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes), handler.ErrGeneral)
 				return
@@ -218,7 +217,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// fallback to attribute + relation name
+			cache.Schema_mx.RLock()
 			rel, exists := cache.RelationIdMap[atr.RelationId]
+			cache.Schema_mx.RUnlock()
+
 			if !exists {
 				handler.AbortRequest(w, handler.ContextCsvDownload, handler.ErrSchemaUnknownRelation(atr.RelationId), handler.ErrGeneral)
 				return
@@ -248,7 +250,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// store attribute content use for each column
 	columnAttributeContentUse := make([]string, len(columns))
 	for i, column := range columns {
+		cache.Schema_mx.RLock()
 		atr, exists := cache.AttributeIdMap[column.AttributeId]
+		cache.Schema_mx.RUnlock()
+
 		if !exists {
 			handler.AbortRequest(w, handler.ContextCsvDownload, nil,
 				handler.ErrSchemaUnknownAttribute(column.AttributeId).Error())

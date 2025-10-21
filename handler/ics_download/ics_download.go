@@ -37,9 +37,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
 	// parse getters
 	fieldId, err := handler.ReadUuidGetterFromUrl(r, "field_id")
 	if err != nil {
@@ -194,7 +191,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// add event summary expressions
 	for _, column := range f.Columns {
 
+		cache.Schema_mx.RLock()
 		atr, exists := cache.AttributeIdMap[column.AttributeId]
+		cache.Schema_mx.RUnlock()
+
 		if !exists {
 			handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
 			return
