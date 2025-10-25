@@ -612,7 +612,7 @@
 			"limitDefHint": "Anzahl der Ergebnisse, wenn nicht überschrieben mit dem Parameter \"limit\" (bspw. \"limit=1000\").",
 			"limitMax": "GET maximale Ergebnisanzahl",
 			"limitMaxHint": "Höchste Ergebnisanzahl, die mit einem GET-Aufruf geliefert wird.",
-			"nameHint": "Der API-Name wird im REST-Aufruf verwendet. The Aufruf muss verändert werden, wenn der API-Name sich ändert.",
+			"nameHint": "Der API-Name wird im REST-Aufruf verwendet. Der Aufruf muss verändert werden, wenn der API-Name sich ändert.",
 			"preview": {
 				"call": "Aufruf",
 				"empty": "<leer>",
