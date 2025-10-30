@@ -959,28 +959,24 @@ export default {
 			let arrow       = false;
 			
 			switch(ev.code) {
-				case 'ArrowDown':  arrow = true; focusTarget = ev.target.nextElementSibling;     break;
-				case 'ArrowLeft':  arrow = true; focusTarget = ev.target.previousElementSibling; break;
-				case 'ArrowRight': arrow = true; focusTarget = ev.target.nextElementSibling;     break;
-				case 'ArrowUp':    arrow = true; focusTarget = ev.target.previousElementSibling; break;
-				case 'Escape':     this.escape(ev); break;
+				case 'ArrowDown': arrow = true; focusTarget = ev.target.nextElementSibling;     break;
+				case 'ArrowUp':   arrow = true; focusTarget = ev.target.previousElementSibling; break;
+				case 'Escape':    return this.escape(ev); break;
 			}
 
-			// arrow key used and tab focus target is available
-			if(arrow && focusTarget !== null && focusTarget.tabIndex !== -1) {
-				ev.preventDefault();
-				return focusTarget.focus();
-			}
-			
-			// arrow key used in regular list input
+			// deal with arrow key in input if dropdown is available
 			if(arrow && this.isInput && !this.showAllValues) {
 				
-				// show dropdown
 				if(!this.dropdownShow) {
 					ev.preventDefault();
 					return this.$emit('dropdown-show',true);
 				}
-				
+
+				if(focusTarget !== null && focusTarget.tabIndex !== -1) {
+					ev.preventDefault();
+					return focusTarget.focus();
+				}
+
 				// focus first/last input element
 				if(this.dropdownShow && this.rows.length !== 0) {
 					ev.preventDefault();
