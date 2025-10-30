@@ -55,7 +55,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 			return indexRecordIds, handler.ErrSchemaUnknownRelation(dataSet.RelationId)
 		}
 
-		if isNewRecord && !authorizedRelation(loginId, dataSet.RelationId, types.AccessWrite) {
+		if !authorizedRelation(loginId, dataSet.RelationId, types.AccessWrite) {
 			return indexRecordIds, errors.New(handler.ErrUnauthorized)
 		}
 
