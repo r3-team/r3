@@ -187,7 +187,6 @@ func ImportFromFiles(ctx context.Context, filePathsImport []string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	fmt.Println("Schema changed called import")
 	if err := cluster.SchemaChanged_tx(ctx, tx, true, moduleIdsUpdated); err != nil {
 		return err
 	}
