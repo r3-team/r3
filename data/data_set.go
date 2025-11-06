@@ -55,7 +55,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 			return indexRecordIds, handler.ErrSchemaUnknownRelation(dataSet.RelationId)
 		}
 
-		if !authorizedRelation(loginId, dataSet.RelationId, types.AccessWrite) {
+		// check write access to relation
+		// if no attributes are to be SET for an existing record, WRITE permission is not required
+		//  case: joined record is to be created but existing base record is untouched, SET still includes base relation (to resolve relationship)
+		if (isNewRecord || len(dataSet.Attributes) != 0) && !authorizedRelation(loginId, dataSet.RelationId, types.AccessWrite) {
 			return indexRecordIds, errors.New(handler.ErrUnauthorized)
 		}
 
