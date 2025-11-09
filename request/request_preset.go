@@ -25,10 +25,8 @@ func PresetDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (inte
 func PresetSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req types.Preset
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, preset.Set_tx(ctx, tx, req.RelationId, req.Id,
-		req.Name, req.Protected, req.Values)
+	return nil, preset.Set_tx(ctx, tx, req.RelationId, req.Id, req.Name, req.Protected, false, req.Values)
 }

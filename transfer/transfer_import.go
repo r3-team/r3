@@ -564,17 +564,18 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 
 			// special case
 			// presets can fail import because referenced, unprotected presets were deleted or unique constraints are broken
-			// if preset itself is unprotected, we try until the last loop and then give up
+			// if preset itself is unprotected, we just update the schema
 			if lastRun && !e.Protected {
-				log.Info(log.ContextTransfer, "import failed to resolve unprotected preset until last loop, it will be ignored")
-				if err := importCheckResultAndApply(ctx, tx, nil, e.Id, idMapSkipped); err != nil {
+				log.Info(log.ContextTransfer, fmt.Sprintf("import failed to create or update unprotected preset '%s' until last loop, it will be ignored", e.Id))
+				if err := importCheckResultAndApply(ctx, tx, preset.Set_tx(ctx, tx, e.RelationId,
+					e.Id, e.Name, e.Protected, true, e.Values), e.Id, idMapSkipped); err != nil {
 					return err
 				}
 				continue
 			}
 
 			if err := importCheckResultAndApply(ctx, tx, preset.Set_tx(ctx, tx, e.RelationId,
-				e.Id, e.Name, e.Protected, e.Values), e.Id, idMapSkipped); err != nil {
+				e.Id, e.Name, e.Protected, false, e.Values), e.Id, idMapSkipped); err != nil {
 
 				return err
 			}

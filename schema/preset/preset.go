@@ -86,10 +86,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Prese
 }
 
 // set preset
-// included setting of preset values and creation/update of preset record
-// returns whether preset record was created/updated
+// presets are stored in the schema but also created in the instance
+// doing anything in the instance is dangerous as the instance state is fickle
+// depending on the protection setting of the preset, not every preset record must be created/updated in the instance
 func Set_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
-	protected bool, values []types.PresetValue) error {
+	protected bool, onlySchema bool, values []types.PresetValue) error {
 
 	if len(values) == 0 {
 		return errors.New("cannot set preset with zero values")
@@ -134,6 +135,16 @@ func Set_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, 
 	// set new preset values
 	if err := setValues_tx(ctx, tx, relationId, id, values); err != nil {
 		return err
+	}
+
+	// special case: not creating/updating unprotected presets on the last transfer run
+	// sometimes unprotected presets cannot be created/updated due to references to other presets not existing yet
+	//  in this case, we repeat the attempt on later runs, so we need to return with an error
+	// sometimes unprotected presets cannot be created/updated due to constraints (like unique)
+	//  in this case, it does not matter how often we try - we however still need to update the schema, so we return with nil
+	// protected presets must always be created to protect the application logic - if this fails, the transfer fails
+	if !protected && onlySchema {
+		return nil
 	}
 
 	// record ID is unique to the instance and is registered when creating the preset record
@@ -301,7 +312,7 @@ func setRecord_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID, recordId i
 	}
 
 	if isNew {
-		for i, _ := range sqlNames {
+		for i := range sqlNames {
 			sqlRefs = append(sqlRefs, fmt.Sprintf(`$%d`, i+1))
 		}
 
