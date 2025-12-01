@@ -29,7 +29,7 @@ func DataGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage,
 		return nil, err
 	}
 
-	res.Rows, res.Count, err = data.Get_tx(ctx, tx, req, loginId, &query)
+	res.Rows, res.Count, err = data.Get_tx(ctx, tx, req, false, loginId, &query)
 	if err != nil {
 		if query != "" {
 			return nil, fmt.Errorf("%s, SQL: %s", err, query)
@@ -90,8 +90,7 @@ func DataLogGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage,
 }
 
 // data SQL
-func DataSqlGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage,
-	loginId int64) (interface{}, error) {
+func DataSqlGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
 
 	var req types.DataGet
 	if err := json.Unmarshal(reqJson, &req); err != nil {
@@ -99,7 +98,7 @@ func DataSqlGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage,
 	}
 
 	var query string
-	if _, _, err := data.Get_tx(ctx, tx, req, loginId, &query); err != nil {
+	if _, _, err := data.Get_tx(ctx, tx, req, false, loginId, &query); err != nil {
 		return nil, err
 	}
 	return query, nil

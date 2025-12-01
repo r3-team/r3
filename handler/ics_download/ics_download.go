@@ -209,7 +209,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// get data
 	var query string
-	results, _, err := data.Get_tx(ctx, tx, dataGet, login.Id, &query)
+	results, _, err := data.Get_tx(ctx, tx, dataGet, false, login.Id, &query)
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
 		return

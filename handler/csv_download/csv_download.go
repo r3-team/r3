@@ -308,7 +308,7 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 	}
 
 	var query string
-	rows, total, err := data.Get_tx(ctx, tx, get, loginId, &query)
+	rows, total, err := data.Get_tx(ctx, tx, get, false, loginId, &query)
 	if err != nil {
 		return 0, fmt.Errorf("%s, SQL: %s", err, query)
 	}

@@ -38,8 +38,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 	var indexRecordsCreated = make(map[int]bool) // created record IDs by index
 
 	// sort relation indexes, starting with source relation (index:0)
-	for index, _ := range dataSetsByIndex {
-		indexes = append(indexes, index)
+	for i := range dataSetsByIndex {
+		indexes = append(indexes, i)
 	}
 	sort.Ints(indexes)
 
@@ -551,7 +551,7 @@ func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
 	// use transaction to get data - otherwise larger tasks (like CSV import)
 	//  will fail as created records cannot be retrieved
 	var query string
-	results, _, err := Get_tx(ctx, tx, dataGet, loginId, &query)
+	results, _, err := Get_tx(ctx, tx, dataGet, false, loginId, &query)
 	if err != nil {
 		return result, err
 	}
