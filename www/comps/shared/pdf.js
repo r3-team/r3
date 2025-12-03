@@ -70,99 +70,110 @@ export function generatePdf(filename,format,orientation,marginX,marginY,
 					<div id="pdf-footer">${htmlFooter}</div>
 				</div>
 			</body>
+			<script type="text/javascript" src="externals/dompurify.js"><\/script>
 			<script type="text/javascript" src="externals/html2canvas.js"><\/script>
 			<script type="text/javascript" src="externals/jspdf.js"><\/script>
 			<script type="text/javascript">
 				// collect elements to use for PDF document
-				let header = document.getElementById('pdf-header');
-				let body   = document.getElementById('pdf-body');
-				let footer = document.getElementById('pdf-footer');
-				
+				const header = document.getElementById('pdf-header').getHTML();
+				const body   = document.getElementById('pdf-body').getHTML();
+				const footer = document.getElementById('pdf-footer').getHTML();
+
 				// generate new PDF document
-				const docOptions = {
-					compress:true,
-					format:'${format}',
-					hotfixes:['px_scaling'],
-					orientation:'${orientation}',
-					unit:'px'
-				};
-				const { jsPDF } = window.jspdf;
-				const doc = new jsPDF(docOptions);
-				
-				// document working variables
-				const headerFooterOffset = 20; // margin from page top if header or from content if footer
-				const pageWidth  = doc.internal.pageSize.width - ${marginLeft} - ${marginRight};
-				const headerPosY = headerFooterOffset;
-				const footerPosY = (doc.internal.pageSize.height - ${marginBottom}) + headerFooterOffset;
-				
-				const addPageMeta = function(element,elementPosY,pageCur,pageCount) {
-					return new Promise((resolve,reject) => {
+				var bodyIndexPageCount = [];
+
+				const genDoc = async () => {
+					const addPageMeta = async (element,elementPosY,pageCur,pageCount) => {
 						// replace placeholders in HTML
-						let htmlOrg = element.innerHTML;
-						let html    = element.innerHTML;
-						html = html.replace('{PAGE_CUR}',pageCur);
-						html = html.replace('{PAGE_END}',pageCount);
-						element.innerHTML = html;
+						const content = element
+							.replace('{PAGE_CUR}',pageCur)
+							.replace('{PAGE_END}',pageCount);
 						
-						doc.html(element,{
+						await doc.html(content,{
 							autoPaging:false,
-							callback:() => {
-								// recover original HTML so that placeholders can be reused
-								element.innerHTML = htmlOrg;
-								resolve();
-							},
-							width:pageWidth,
-							windowWidth:pageWidth,
+							width:pageWidthUsable,
+							windowWidth:pageWidthUsable,
 							x:${marginLeft},
 							y:elementPosY
 						});
-					});
-				};
-				
-				// create document
-				// bug: if document created from HTML is > 1 page, adobe reader reports page errors starting with page 2
-				// fix: manually add pages that would exist if HTML is rendered (must be added before rendering the HTML)
-				// ugly solution: render document once, count pages, render again with the required pages added beforehand
-				new jsPDF(docOptions).html(body,{
-					autoPaging:'text',
-					margin:[${marginTop},${marginRight},${marginBottom},${marginLeft}],
-					width:pageWidth,
-					windowWidth:pageWidth,
-					callback:res => {
-						// add pages that are required by the rendered HTML (start with page 2)
-						for(let i = 2, j = res.internal.getNumberOfPages(); i <= j; i++) {
-							doc.addPage('${format}','${orientation}');
+					};
+
+					const { jsPDF } = window.jspdf;
+					const docOptions = {
+						compress:true,
+						format:'${format}',
+						hotfixes:['px_scaling'],
+						orientation:'${orientation}',
+						unit:'px'
+					};
+
+					const doc                = new jsPDF(docOptions);
+					const pageMarginX        = ${marginLeft} + ${marginRight};
+					const pageMarginY        = ${marginTop} + ${marginBottom};
+					const pageHeightUsable   = doc.internal.pageSize.height - pageMarginY;
+					const pageWidthUsable    = doc.internal.pageSize.width - pageMarginX;
+					const headerFooterOffset = 20; // margin from page top if header or from content if footer
+					const headerPosY         = headerFooterOffset;
+					const footerPosY         = doc.internal.pageSize.height - ${marginBottom} + headerFooterOffset;
+					const partsBody          = body.split('{PAGE_BREAK}');
+
+					// due to the buggy .html() implementation, we need to generate the PDF twice
+					// once to count the number of pages that each .html() call requires
+					//  and again to add the pages before each .html() is called
+					const firstRun = bodyIndexPageCount.length === 0;
+
+					for(let i = 0; i < partsBody.length; i++) {
+
+						// the page we start on
+						// on initial HTML call, the start page is 1
+						// on subsequent HTML calls, the start page is the one the last call ended on
+						const pageNoStart = doc.getNumberOfPages();
+
+						if(!firstRun) {
+							// manually add number of pages that html() requires
+							for(let a = 0; a < bodyIndexPageCount[i]; a++) {
+								doc.addPage('${format}','${orientation}');
+							}
 						}
-						
-						// create document proper
-						doc.html(body,{
+
+						await doc.html(partsBody[i],{
 							autoPaging:'text',
 							margin:[${marginTop},${marginRight},${marginBottom},${marginLeft}],
-							width:pageWidth,
-							windowWidth:pageWidth,
-							callback:async () => {
-								for(let i = 1, j = doc.internal.getNumberOfPages(); i <= j; i++) {
-									doc.setPage(i);
-									await addPageMeta(header,headerPosY,i,j);
-									await addPageMeta(footer,footerPosY,i,j);
-								}
-								
-								// document done
-								if(window.r3_callbackResult !== undefined)
-									window.r3_callbackResult(doc.output('blob'));
-								
-								if(window.r3_closeWhenDone)
-									return self.close();
-								
-								// enable document save action
-								document.getElementById('pdf-download').onclick  = () => doc.save('${filename}');
-								document.getElementById('pdf-download-icon').src = 'images/download.png';
-							}
+							// with y we place the new HTML content at the next page
+							y:i === 0 ? 0 : (pageHeightUsable * pageNoStart) - 1,
+							width:pageWidthUsable,
+							windowWidth:pageWidthUsable
 						});
+
+						if(firstRun) {
+							// store page count that this html() call adds to the doc
+							bodyIndexPageCount[i] = doc.getNumberOfPages() - pageNoStart;
+						}
 					}
-				});
+
+					if(firstRun)
+						return genDoc();
+					
+					// add headers & footers on each page
+					for(let i = 1, j = doc.getNumberOfPages(); i <= j; i++) {
+						doc.setPage(i);
+						await addPageMeta(header,headerPosY,i,j);
+						await addPageMeta(footer,footerPosY,i,j);
+					}
+					
+					// document done
+					if(window.r3_callbackResult !== undefined)
+						window.r3_callbackResult(doc.output('blob'));
+					
+					if(window.r3_closeWhenDone)
+						return self.close();
+					
+					// enable document save action
+					document.getElementById('pdf-download').onclick  = () => doc.save('${filename}');
+					document.getElementById('pdf-download-icon').src = 'images/download.png';
+				};
+				genDoc();
 			<\/script>
 		`);
 	}).catch(console.warn);
-
 };
