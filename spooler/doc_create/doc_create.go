@@ -35,7 +35,7 @@ var (
 	}
 )
 
-func Run(ctx context.Context, doc types.Document) error {
+func Run(ctx context.Context, doc types.Document, pathOut string) error {
 
 	if len(doc.Pages) < 1 {
 		return errors.New("cannot create document, 0 pages defined")
@@ -86,15 +86,11 @@ func Run(ctx context.Context, doc types.Document) error {
 			i, page.Size, pageWidth, pageWidthUsable, pageHeight, pageHeightUsable)
 
 		// add fields, page layout is always flow
-		var posY float64 = page.Margin.T
-		for _, fieldIf := range page.Fields {
-			posY, err = addField(ctx, e, page.Margin.L, posY, pageWidthUsable, pageHeightUsable, page.Margin.T, false, font, fieldIf, m)
-			if err != nil {
-				return err
-			}
+		if _, err := addFieldFlowKids(ctx, e, page.Fields, page.Margin, page.Margin.T, page.Gap, 0, 0, pageWidth, pageHeightUsable, false, font, m); err != nil {
+			return err
 		}
 	}
-	return e.OutputFileAndClose("c:/Temp/r3/pdf_input.pdf")
+	return e.OutputFileAndClose(pathOut)
 }
 
 // helpers

@@ -4,14 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"r3/tools"
 	"r3/types"
 
 	"codeberg.org/go-pdf/fpdf"
 )
 
-func addField(ctx context.Context, e *fpdf.Fpdf, parentPosX, parentPosY, parentWidth, pageHeightUsable, pageMarginT float64, parentIsGrid bool,
-	fontParent types.DocumentFont, fieldIf interface{}, m relationIndexAttributeIdMap) (float64, error) {
+func addField(ctx context.Context, e *fpdf.Fpdf, parentPosX, parentPosY, parentWidth, pageHeightUsable, pageMarginT float64,
+	parentIsGrid bool, fontParent types.DocumentFont, fieldIf any, m relationIndexAttributeIdMap) (float64, error) {
 
 	fieldJson, err := json.Marshal(fieldIf)
 	if err != nil {
@@ -74,101 +73,4 @@ func addField(ctx context.Context, e *fpdf.Fpdf, parentPosX, parentPosY, parentW
 		return addFieldText(e, fieldJson, width, f.Border, font)
 	}
 	return 0, fmt.Errorf("invalid field content '%s'", f.Content)
-}
-
-func addFieldFlow(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, width float64, border types.DocumentBorder,
-	font types.DocumentFont, posX, posY, pageHeightUsable, pageMarginT float64, m relationIndexAttributeIdMap) (float64, error) {
-
-	var f types.DocumentFieldFlow
-	if err := json.Unmarshal(fieldJson, &f); err != nil {
-		return 0, err
-	}
-
-	pageNoStart := e.PageNo()
-
-	var err error
-	var posYChildMax float64 = posY
-	for _, fieldIfChild := range f.Fields {
-		posYChildMax, err = addField(ctx, e, posX, posYChildMax, width, pageHeightUsable, pageMarginT, true, font, fieldIfChild, m)
-		if err != nil {
-			return 0, err
-		}
-	}
-
-	// draw layout container
-	pageNoEnd := e.PageNo()
-	if pageNoStart == pageNoEnd {
-		e.SetXY(posX, posY)
-		drawBox(e, border, "", width, posYChildMax-posY)
-	} else {
-		for i := pageNoStart; i <= pageNoEnd; i++ {
-			e.SetPage(i)
-
-			if i == pageNoStart {
-				// draw on initial page until page end
-				e.SetXY(posX, posY)
-				drawBox(e, border, "", width, pageHeightUsable+pageMarginT-posY)
-			} else if i != pageNoEnd {
-				// draw entire inbetween page
-				e.SetXY(posX, pageMarginT)
-				drawBox(e, border, "", width, pageHeightUsable)
-			} else {
-				// draw on last page until child end
-				e.SetXY(posX, pageMarginT)
-				drawBox(e, border, "", width, posYChildMax-pageMarginT)
-			}
-		}
-	}
-	return posYChildMax, nil
-}
-
-func addFieldGrid(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, width float64, border types.DocumentBorder,
-	font types.DocumentFont, posX, posY, pageHeightUsable, pageMarginT float64, m relationIndexAttributeIdMap) (float64, error) {
-
-	var f types.DocumentFieldGrid
-	if err := json.Unmarshal(fieldJson, &f); err != nil {
-		return 0, err
-	}
-
-	// grid fields can never be higher than the usable page height
-	if f.SizeHeight > pageHeightUsable {
-		return posY, nil
-	}
-
-	var posYChildMax float64
-	for _, fieldIfChild := range f.Fields {
-		posYChild, err := addField(ctx, e, posX, posY, width, pageHeightUsable, pageMarginT, true, font, fieldIfChild, m)
-		if err != nil {
-			return 0, err
-		}
-		if posYChildMax < posYChild {
-			posYChildMax = posYChild
-		}
-	}
-	if posYChildMax > posY+f.SizeHeight || !f.Shrink {
-		// exceeding grid field height is not allowed
-		// not reaching its height is allowed, if field shrink is enabled
-		posYChildMax = posY + f.SizeHeight
-	}
-
-	// draw layout container from its start position up to its calculated height
-	e.SetXY(posX, posY)
-	drawBox(e, border, "", width, posYChildMax-posY)
-
-	return posYChildMax, nil
-}
-
-func addFieldText(e *fpdf.Fpdf, fieldJson json.RawMessage, w float64, b types.DocumentBorder, font types.DocumentFont) (float64, error) {
-
-	var f types.DocumentFieldText
-	if err := json.Unmarshal(fieldJson, &f); err != nil {
-		return 0, err
-	}
-	if b.Draw != "" {
-		rgb := tools.HexToInt(b.Color)
-		e.SetDrawColor(rgb[0], rgb[1], rgb[2])
-		e.SetLineWidth(b.Size)
-	}
-	e.MultiCell(w, font.LineFactor*font.Size, f.Value, b.Draw, font.Align, false)
-	return e.GetY(), nil
 }

@@ -25,6 +25,7 @@ type DocumentPage struct {
 	Fields           []any                 `json:"fields"`
 	Size             string                `json:"size"` // "A1", "A2", "A3", "A4", "A5", "A6", "A7", "Letter", "Legal"
 	Margin           DocumentMarginPadding `json:"margin"`
+	Gap              float64               `json:"gap"`         // space between flow children
 	Orientation      string                `json:"orientation"` // "landscape" / "portrait"
 	Set              []DocumentSet         `json:"set"`         // overwrites
 	SetByData        []DocumentSetByData   `json:"setByData"`   // overwrites by resolved attribute data
@@ -99,7 +100,6 @@ type DocumentFieldFlow struct {
 	Border     DocumentBorder      `json:"border"`
 
 	// flow field
-	DirVert bool                  `json:"dirVert"` // vertical flow?
 	Fields  []any                 `json:"fields"`
 	Gap     float64               `json:"gap"` // space between flow children
 	Padding DocumentMarginPadding `json:"padding"`
@@ -179,11 +179,11 @@ type DocumentMarginPadding struct {
 	B float64 `json:"b"` // margin in mm
 }
 type DocumentSet struct {
-	Target string `json:"target"` // overwrite target (font.family, margin.r, padding.l, grid.posX, etc.)
+	Target string `json:"target"` // overwrite target (font.family, margin.r, etc.)
 	Value  any    `json:"value"`  // overwrite value
 }
 type DocumentSetByData struct {
 	AttributeId uuid.UUID `json:"attributeId"` // overwrite by attribute value
 	Index       int       `json:"index"`       // overwrite by attribute value
-	Target      string    `json:"target"`      // overwrite target (font.family, margin.r, padding.l, grid.posX, etc.)
+	Target      string    `json:"target"`      // overwrite target (font.family, margin.r, etc.)
 }

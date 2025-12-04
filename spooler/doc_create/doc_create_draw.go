@@ -17,6 +17,10 @@ func drawBorderLine(e *fpdf.Fpdf, b types.DocumentBorder, x1, y1, x2, y2 float64
 }
 
 func drawBox(e *fpdf.Fpdf, b types.DocumentBorder, fillColor string, w, h float64) {
+	if b.Draw == "" && fillColor == "" {
+		return
+	}
+
 	if b.Draw != "" {
 		rgb := tools.HexToInt(b.Color)
 		e.SetDrawColor(rgb[0], rgb[1], rgb[2])
