@@ -2,6 +2,8 @@ package doc_create
 
 import (
 	"r3/types"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func applyResolvedData(set []types.DocumentSet, setByData []types.DocumentSetByData, m relationIndexAttributeIdMap) []types.DocumentSet {
@@ -14,10 +16,33 @@ func applyResolvedData(set []types.DocumentSet, setByData []types.DocumentSetByD
 		if !exists {
 			continue
 		}
-		set = append(set, types.DocumentSet{
-			Target: o.Target,
-			Value:  value,
-		})
+
+		// type conversions
+		switch v := value.(type) {
+		case pgtype.Numeric:
+			v1, err := v.Float64Value()
+			if err == nil {
+				value = v1.Float64
+			}
+		}
+
+		// overwrite manual overwrite values
+		overwroteExisting := false
+		for i, s := range set {
+			if s.Target == o.Target {
+				set[i].Value = value
+				overwroteExisting = true
+				break
+			}
+		}
+
+		// add overwrite value
+		if !overwroteExisting {
+			set = append(set, types.DocumentSet{
+				Target: o.Target,
+				Value:  value,
+			})
+		}
 	}
 	return set
 }

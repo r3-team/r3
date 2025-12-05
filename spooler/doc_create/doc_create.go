@@ -41,9 +41,17 @@ func Run(ctx context.Context, doc types.Document, pathOut string) error {
 		return errors.New("cannot create document, 0 pages defined")
 	}
 
-	// collect expressions from all data fields
+	// collect expressions for primary query
+	// * data fields
+	// * overwrite rules in document, pages & fields
 	exprs := make([]types.DataGetExpression, 0)
+	exprs = append(exprs, getExpressionsFromSetByData(doc.SetByData)...)
+
 	for _, page := range doc.Pages {
+		// pages
+		exprs = append(exprs, getExpressionsFromSetByData(page.SetByData)...)
+
+		// fields
 		exprsSub, err := getExpressionsFromFields(page.Fields)
 		if err != nil {
 			return err
@@ -58,7 +66,9 @@ func Run(ctx context.Context, doc types.Document, pathOut string) error {
 	}
 
 	// apply overwrites from data
-	doc = applyToDocument(applyResolvedData([]types.DocumentSet{}, doc.SetByData, m), doc)
+	set := applyResolvedData([]types.DocumentSet{}, doc.SetByData, m)
+	doc = applyToDocument(set, doc)
+	doc.Font = applyToFont(set, doc.Font)
 
 	// generate document
 	e := fpdf.New(doc.Pages[0].Orientation, pageUnit, doc.Pages[0].Size, "")
@@ -94,6 +104,20 @@ func Run(ctx context.Context, doc types.Document, pathOut string) error {
 }
 
 // helpers
+func getExpressionsFromSetByData(set []types.DocumentSetByData) []types.DataGetExpression {
+	exprs := make([]types.DataGetExpression, 0)
+
+	for _, s := range set {
+		exprs = append(exprs, types.DataGetExpression{
+			AttributeId: pgtype.UUID{
+				Bytes: s.AttributeId,
+				Valid: true,
+			},
+			Index: s.Index,
+		})
+	}
+	return exprs
+}
 func getExpressionsFromFields(fieldsIf []any) ([]types.DataGetExpression, error) {
 	exprs := make([]types.DataGetExpression, 0)
 
@@ -108,6 +132,7 @@ func getExpressionsFromFields(fieldsIf []any) ([]types.DataGetExpression, error)
 			return nil, err
 		}
 
+		// expressions from field content
 		switch field.Content {
 		case "flow", "grid":
 			var fields []any
@@ -144,6 +169,9 @@ func getExpressionsFromFields(fieldsIf []any) ([]types.DataGetExpression, error)
 				Index: f.Index,
 			})
 		}
+
+		// expressions from overwrite rules
+		exprs = append(exprs, getExpressionsFromSetByData(field.SetByData)...)
 	}
 	return exprs, nil
 }
