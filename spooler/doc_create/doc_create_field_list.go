@@ -211,7 +211,7 @@ func addFieldList(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, 
 			fmt.Printf("print row %d cell, column %d, width %.2f, row height %.2f, at %.2f/%.2f, value: %s\n",
 				ri, i, columnIndexMapWidth[i], heightRow, e.GetX(), e.GetY(), row.Values[i])
 
-			if err := drawCell(e, borderEmpty, font, columnIndexMapWidth[i], heightRow, columnIndexMapLines[i], columnIndexMapAtr[i], row.Values[i]); err != nil {
+			if err := drawAttributeValue(e, borderEmpty, font, columnIndexMapWidth[i], heightRow, columnIndexMapLines[i], columnIndexMapAtr[i], row.Values[i]); err != nil {
 				return 0, err
 			}
 			posXOffset += columnIndexMapWidth[i] + paddingX

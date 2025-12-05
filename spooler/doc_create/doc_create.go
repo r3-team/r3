@@ -185,7 +185,7 @@ func getImageName() string {
 func getCellHeightLines(e *fpdf.Fpdf, font types.DocumentFont, width float64, s string) (float64, int) {
 	setFont(e, font)
 	lineCount := len(e.SplitText(s, width))
-	return float64(lineCount) * font.Size * font.LineFactor, lineCount
+	return font.Size * font.LineFactor * 0.5 * float64(lineCount), lineCount
 }
 
 func getYWithNewPageIfNeeded(e *fpdf.Fpdf, posY, height, pageMarginB float64) (float64, bool) {

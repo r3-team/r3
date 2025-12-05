@@ -28,7 +28,7 @@ func addFieldData(e *fpdf.Fpdf, fieldJson json.RawMessage, width float64, border
 	if !exists {
 		return 0, handler.ErrSchemaUnknownAttribute(f.AttributeId)
 	}
-	if err := drawCell(e, border, font, width, font.Size*font.LineFactor, 0, atr, v); err != nil {
+	if err := drawAttributeValue(e, border, font, width, -1, -1, atr, v); err != nil {
 		return 0, err
 	}
 	return e.GetY(), nil

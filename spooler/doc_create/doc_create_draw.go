@@ -36,7 +36,10 @@ func drawBox(e *fpdf.Fpdf, b types.DocumentBorder, fillColor string, w, h float6
 	e.CellFormat(w, h, "", b.Draw, -1, "", fill, 0, "")
 }
 
-func drawCell(e *fpdf.Fpdf, b types.DocumentBorder, font types.DocumentFont, w, h float64, lineCount int, atr types.Attribute, valueIf interface{}) error {
+// draws attribute value as cell
+// if line count is set to -1 it will be calculated
+// if height is set to -1, font line height will be used
+func drawAttributeValue(e *fpdf.Fpdf, b types.DocumentBorder, font types.DocumentFont, w, h float64, lineCount int, atr types.Attribute, valueIf interface{}) error {
 
 	switch atr.Content {
 	case "text", "varchar":
@@ -88,18 +91,30 @@ func drawCell(e *fpdf.Fpdf, b types.DocumentBorder, font types.DocumentFont, w, 
 	return nil
 }
 
+// draws text value as cell
+// if line count is set to -1 it will be calculated
+// if height is set to -1, font line height will be used
 func drawCellText(e *fpdf.Fpdf, b types.DocumentBorder, font types.DocumentFont, w, h float64, lineCount int, s string) {
 	if b.Draw != "" {
 		rgb := tools.HexToInt(b.Color)
 		e.SetDrawColor(rgb[0], rgb[1], rgb[2])
 		e.SetLineWidth(b.Size)
 	}
+
+	if h == -1 {
+		h = font.Size * font.LineFactor * 0.5
+	}
+
+	if lineCount == -1 {
+		lineCount = len(e.SplitText(s, w))
+	}
+
 	if lineCount == 1 {
-		e.CellFormat(w, h, s, b.Draw, 0, font.Align, false, 0, "")
+		e.CellFormat(w, h, s, b.Draw, 2, font.Align, false, 0, "")
 		return
 	}
 
-	hAllLines := font.Size * font.LineFactor * float64(lineCount)
+	hAllLines := font.Size * font.LineFactor * 0.5 * float64(lineCount)
 	if h > hAllLines {
 		// target height is larger than what lines require combined
 		if strings.Contains(font.Align, "T") {
@@ -113,5 +128,5 @@ func drawCellText(e *fpdf.Fpdf, b types.DocumentBorder, font types.DocumentFont,
 			e.SetXY(e.GetX(), e.GetY()+((h-hAllLines)/2))
 		}
 	}
-	e.MultiCell(w, font.Size*font.LineFactor, s, b.Draw, font.Align, false)
+	e.MultiCell(w, font.Size*font.LineFactor*0.5, s, b.Draw, font.Align, false)
 }
