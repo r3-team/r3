@@ -6,9 +6,9 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func applyResolvedData(set []types.DocumentSet, setByData []types.DocumentSetByData, m relationIndexAttributeIdMap) []types.DocumentSet {
+func applyResolvedData(doc *doc, set []types.DocumentSet, setByData []types.DocumentSetByData) []types.DocumentSet {
 	for _, o := range setByData {
-		attributeIdMap, exists := m[o.Index]
+		attributeIdMap, exists := doc.data[o.Index]
 		if !exists {
 			continue
 		}

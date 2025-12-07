@@ -5,41 +5,39 @@ import (
 	"r3/tools"
 	"r3/types"
 	"strings"
-
-	"codeberg.org/go-pdf/fpdf"
 )
 
-func drawBorderLine(e *fpdf.Fpdf, b types.DocumentBorder, x1, y1, x2, y2 float64) {
+func drawBorderLine(doc *doc, b types.DocumentBorder, x1, y1, x2, y2 float64) {
 	rgb := tools.HexToInt(b.Color)
-	e.SetDrawColor(rgb[0], rgb[1], rgb[2])
-	e.SetLineWidth(b.Size)
-	e.Line(x1, y1, x2, y2)
+	doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
+	doc.p.SetLineWidth(b.Size)
+	doc.p.Line(x1, y1, x2, y2)
 }
 
-func drawBox(e *fpdf.Fpdf, b types.DocumentBorder, fillColor string, w, h float64) {
+func drawBox(doc *doc, b types.DocumentBorder, fillColor string, w, h float64) {
 	if b.Draw == "" && fillColor == "" {
 		return
 	}
 
 	if b.Draw != "" {
 		rgb := tools.HexToInt(b.Color)
-		e.SetDrawColor(rgb[0], rgb[1], rgb[2])
-		e.SetLineWidth(b.Size)
+		doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
+		doc.p.SetLineWidth(b.Size)
 	}
 
 	fill := false
 	if fillColor != "" {
 		rgb := tools.HexToInt(fillColor)
-		e.SetFillColor(rgb[0], rgb[1], rgb[2])
+		doc.p.SetFillColor(rgb[0], rgb[1], rgb[2])
 		fill = true
 	}
-	e.CellFormat(w, h, "", b.Draw, -1, "", fill, 0, "")
+	doc.p.CellFormat(w, h, "", b.Draw, -1, "", fill, 0, "")
 }
 
 // draws attribute value as cell
 // if line count is set to -1 it will be calculated
 // if height is set to -1, font line height will be used
-func drawAttributeValue(e *fpdf.Fpdf, b types.DocumentBorder, font types.DocumentFont, w, h float64, lineCount int, atr types.Attribute, valueIf interface{}) error {
+func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFont, w, h float64, lineCount int, atr types.Attribute, valueIf interface{}) error {
 
 	switch atr.Content {
 	case "text", "varchar":
@@ -67,9 +65,9 @@ func drawAttributeValue(e *fpdf.Fpdf, b types.DocumentBorder, font types.Documen
 		if atr.ContentUse == "color" {
 
 		}
-		drawCellText(e, b, font, w, h, lineCount, fmt.Sprintf("%s", valueIf))
+		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%s", valueIf))
 	case "numeric":
-		drawCellText(e, b, font, w, h, lineCount, fmt.Sprintf("%f", valueIf))
+		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%f", valueIf))
 	case "real", "double precision":
 	case "boolean":
 	case "regconfig":
@@ -84,7 +82,7 @@ func drawAttributeValue(e *fpdf.Fpdf, b types.DocumentBorder, font types.Documen
 		if atr.ContentUse == "time" {
 
 		}
-		drawCellText(e, b, font, w, h, lineCount, fmt.Sprintf("%d", valueIf))
+		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%d", valueIf))
 	default:
 		return fmt.Errorf("failed to add field, no definition for attribute content '%s'", atr.Content)
 	}
@@ -94,11 +92,11 @@ func drawAttributeValue(e *fpdf.Fpdf, b types.DocumentBorder, font types.Documen
 // draws text value as cell
 // if line count is set to -1 it will be calculated
 // if height is set to -1, font line height will be used
-func drawCellText(e *fpdf.Fpdf, b types.DocumentBorder, font types.DocumentFont, w, h float64, lineCount int, s string) {
+func drawCellText(doc *doc, b types.DocumentBorder, font types.DocumentFont, w, h float64, lineCount int, s string) {
 	if b.Draw != "" {
 		rgb := tools.HexToInt(b.Color)
-		e.SetDrawColor(rgb[0], rgb[1], rgb[2])
-		e.SetLineWidth(b.Size)
+		doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
+		doc.p.SetLineWidth(b.Size)
 	}
 
 	if h == -1 {
@@ -106,11 +104,11 @@ func drawCellText(e *fpdf.Fpdf, b types.DocumentBorder, font types.DocumentFont,
 	}
 
 	if lineCount == -1 {
-		lineCount = len(e.SplitText(s, w))
+		lineCount = len(doc.p.SplitText(s, w))
 	}
 
 	if lineCount == 1 {
-		e.CellFormat(w, h, s, b.Draw, 2, font.Align, false, 0, "")
+		doc.p.CellFormat(w, h, s, b.Draw, 2, font.Align, false, 0, "")
 		return
 	}
 
@@ -121,12 +119,12 @@ func drawCellText(e *fpdf.Fpdf, b types.DocumentBorder, font types.DocumentFont,
 			// if align is set to T (top), nothing to do
 		} else if strings.Contains(font.Align, "B") {
 			// if align is set to B (bottom), adjust start position for content to reach bottom
-			e.SetXY(e.GetX(), e.GetY()+h-hAllLines)
+			doc.p.SetXY(doc.p.GetX(), doc.p.GetY()+h-hAllLines)
 		} else {
 			// if align is set to M (middle) or has no vertical option (TBM), adjust start position for content to be in center
 			// FPDF defaults to M (middle) if nothing is set for vertical alignment
-			e.SetXY(e.GetX(), e.GetY()+((h-hAllLines)/2))
+			doc.p.SetXY(doc.p.GetX(), doc.p.GetY()+((h-hAllLines)/2))
 		}
 	}
-	e.MultiCell(w, font.Size*font.LineFactor*0.5, s, b.Draw, font.Align, false)
+	doc.p.MultiCell(w, font.Size*font.LineFactor*0.5, s, b.Draw, font.Align, false)
 }

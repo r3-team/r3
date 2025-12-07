@@ -4,12 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"r3/types"
-
-	"codeberg.org/go-pdf/fpdf"
 )
 
-func addFieldGrid(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, width float64, border types.DocumentBorder,
-	font types.DocumentFont, posX, posY, pageHeightUsable, pageMarginT float64, m relationIndexAttributeIdMap) (float64, error) {
+func addFieldGrid(ctx context.Context, doc *doc, fieldJson json.RawMessage, width float64, border types.DocumentBorder,
+	font types.DocumentFont, posX, posY, pageHeightUsable, pageMarginT float64) (float64, error) {
 
 	var f types.DocumentFieldGrid
 	if err := json.Unmarshal(fieldJson, &f); err != nil {
@@ -31,7 +29,7 @@ func addFieldGrid(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, 
 			continue
 		}
 
-		posYAfterFields, err := addField(ctx, e, posX, posY, width, pageHeightUsable, pageMarginT, true, font, fieldIfChild, m)
+		posYAfterFields, err := addField(ctx, doc, posX, posY, width, pageHeightUsable, pageMarginT, true, font, fieldIfChild)
 		if err != nil {
 			return 0, err
 		}
@@ -46,8 +44,8 @@ func addFieldGrid(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, 
 	}
 
 	// draw layout container from its start position up to its calculated height
-	e.SetXY(posX, posY)
-	drawBox(e, border, "", width, posYChildMax-posY)
+	doc.p.SetXY(posX, posY)
+	drawBox(doc, border, "", width, posYChildMax-posY)
 
 	return posYChildMax, nil
 }

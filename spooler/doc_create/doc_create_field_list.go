@@ -10,12 +10,9 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/types"
-
-	"codeberg.org/go-pdf/fpdf"
 )
 
-func addFieldList(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, width float64,
-	fontParent types.DocumentFont, m relationIndexAttributeIdMap) (float64, error) {
+func addFieldList(ctx context.Context, doc *doc, fieldJson json.RawMessage, width float64, fontParent types.DocumentFont) (float64, error) {
 
 	var f types.DocumentFieldList
 	if err := json.Unmarshal(fieldJson, &f); err != nil {
@@ -32,19 +29,19 @@ func addFieldList(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, 
 		RelationId:  f.Query.RelationId.Bytes,
 		IndexSource: 0,
 		Expressions: make([]types.DataGetExpression, 0),
-		Filters:     data_query.ConvertQueryToDataFilter(f.Query.Filters, 0, e.GetLang(), make(map[string]string)),
+		Filters:     data_query.ConvertQueryToDataFilter(f.Query.Filters, 0, doc.p.GetLang(), make(map[string]string)),
 		Joins:       data_query.ConvertQueryToDataJoins(f.Query.Joins),
 		Limit:       f.Query.FixedLimit,
 	}
 
 	// apply overwrites
-	set := applyResolvedData(f.Set, f.SetByData, m)
+	set := applyResolvedData(doc, f.Set, f.SetByData)
 	f = applyToFieldList(set, f)
 	fontField := applyToFont(set, fontParent)
 
 	// build expressions from columns
 	for _, column := range f.Columns {
-		dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertDocumentColumnToExpression(column, e.GetLang()))
+		dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertDocumentColumnToExpression(column, doc.p.GetLang()))
 	}
 
 	if len(dataGet.Expressions) == 0 {
@@ -62,8 +59,8 @@ func addFieldList(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, 
 	}
 
 	// disable auto paging
-	_, pageMarginB := e.GetAutoPageBreak()
-	e.SetAutoPageBreak(false, 0)
+	_, pageMarginB := doc.p.GetAutoPageBreak()
+	doc.p.SetAutoPageBreak(false, 0)
 
 	// padding
 	paddingX := f.Padding.L + f.Padding.R
@@ -108,46 +105,46 @@ func addFieldList(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, 
 			return 0, handler.ErrSchemaUnknownAttribute(column.AttributeId)
 		}
 		columnIndexMapAtr[i] = atr
-		columnIndexMapFontHeader[i] = applyToFont(applyResolvedData(column.SetHeader, column.SetHeaderByData, m), fontField)
-		columnIndexMapFontBody[i] = applyToFont(applyResolvedData(column.SetBody, column.SetBodyByData, m), fontField)
-		columnIndexMapFontFooter[i] = applyToFont(applyResolvedData(column.SetFooter, column.SetFooterByData, m), fontField)
+		columnIndexMapFontHeader[i] = applyToFont(applyResolvedData(doc, column.SetHeader, column.SetHeaderByData), fontField)
+		columnIndexMapFontBody[i] = applyToFont(applyResolvedData(doc, column.SetBody, column.SetBodyByData), fontField)
+		columnIndexMapFontFooter[i] = applyToFont(applyResolvedData(doc, column.SetFooter, column.SetFooterByData), fontField)
 
 		// calcuclate header titles and row height
-		title, exists := column.Captions["columnTitle"][e.GetLang()]
+		title, exists := column.Captions["columnTitle"][doc.p.GetLang()]
 		if !exists {
 			title = columnIndexMapAtr[i].Name
 		}
 		columnIndexMapTitle[i] = title
 
-		cellHeight, cellLines := getCellHeightLines(e, columnIndexMapFontHeader[i], columnIndexMapWidth[i], title)
+		cellHeight, cellLines := getCellHeightLines(doc, columnIndexMapFontHeader[i], columnIndexMapWidth[i], title)
 		if heightHeader < cellHeight {
 			heightHeader = cellHeight
 		}
 		columnIndexMapLines[i] = cellLines
 	}
 
-	posXStart := e.GetX()
-	posYStart, _ := getYWithNewPageIfNeeded(e, e.GetY(), heightHeader, pageMarginB)
+	posXStart := doc.p.GetX()
+	posYStart, _ := getYWithNewPageIfNeeded(doc, heightHeader, pageMarginB)
 
 	drawHeader := func() {
 		// draw table header
 		if f.HeaderBorder.Draw != "" || f.HeaderColorFill != "" {
 			// draw box to display outer border and/or color fill
-			e.SetXY(posXStart, posYStart)
-			drawBox(e, f.HeaderBorder, f.HeaderColorFill, width, heightHeader+paddingY)
+			doc.p.SetXY(posXStart, posYStart)
+			drawBox(doc, f.HeaderBorder, f.HeaderColorFill, width, heightHeader+paddingY)
 		}
 		posXOffset := float64(0)
 		for i := range f.Columns {
 			// draw intercell border
 			if i != 0 && f.HeaderBorder.Cell {
-				drawBorderLine(e, f.HeaderBorder, posXStart+posXOffset, posYStart, posXStart+posXOffset, posYStart+heightHeader+paddingY)
+				drawBorderLine(doc, f.HeaderBorder, posXStart+posXOffset, posYStart, posXStart+posXOffset, posYStart+heightHeader+paddingY)
 			}
 			// draw cell
 			font := columnIndexMapFontHeader[i]
-			setFont(e, font)
-			e.SetXY(posXStart+posXOffset+f.Padding.L, posYStart+f.Padding.T)
+			setFont(doc, font)
+			doc.p.SetXY(posXStart+posXOffset+f.Padding.L, posYStart+f.Padding.T)
 
-			drawCellText(e, borderEmpty, font, columnIndexMapWidth[i], heightHeader, columnIndexMapLines[i], columnIndexMapTitle[i])
+			drawCellText(doc, borderEmpty, font, columnIndexMapWidth[i], heightHeader, columnIndexMapLines[i], columnIndexMapTitle[i])
 			posXOffset += columnIndexMapWidth[i] + paddingX
 		}
 		posYStart += heightHeader + paddingY
@@ -155,7 +152,7 @@ func addFieldList(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, 
 		if f.HeaderBorder.Draw == "B" || f.HeaderBorder.Draw == "1" {
 			posYStart += f.HeaderBorder.Size
 		}
-		e.SetXY(posXStart, posYStart)
+		doc.p.SetXY(posXStart, posYStart)
 	}
 	drawHeader()
 
@@ -174,7 +171,7 @@ func addFieldList(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, 
 			isNum := columnIndexMapAtr[i].Content == "numeric"
 
 			if isText || isInt || isNum {
-				cellHeight, cellLines := getCellHeightLines(e, columnIndexMapFontBody[i], columnIndexMapWidth[i], fmt.Sprint(row.Values[i]))
+				cellHeight, cellLines := getCellHeightLines(doc, columnIndexMapFontBody[i], columnIndexMapWidth[i], fmt.Sprint(row.Values[i]))
 				if heightRow < cellHeight {
 					heightRow = cellHeight
 				}
@@ -184,7 +181,7 @@ func addFieldList(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, 
 
 		// set row cells
 		var pageAdded bool
-		posYStart, pageAdded = getYWithNewPageIfNeeded(e, e.GetY(), heightRow, pageMarginB)
+		posYStart, pageAdded = getYWithNewPageIfNeeded(doc, heightRow, pageMarginB)
 		if f.HeaderRepeat && pageAdded {
 			drawHeader()
 		}
@@ -194,24 +191,24 @@ func addFieldList(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, 
 			if ri%2 != 0 {
 				fillColor = f.BodyColorFillEven
 			}
-			e.SetXY(posXStart, posYStart)
-			drawBox(e, f.BodyBorder, fillColor, width, heightRow+paddingY)
+			doc.p.SetXY(posXStart, posYStart)
+			drawBox(doc, f.BodyBorder, fillColor, width, heightRow+paddingY)
 		}
 		posXOffset := float64(0)
 		for i := range f.Columns {
 			// draw intercell border
 			if i != 0 && f.BodyBorder.Cell {
-				drawBorderLine(e, f.BodyBorder, posXStart+posXOffset, posYStart, posXStart+posXOffset, posYStart+heightRow+paddingY)
+				drawBorderLine(doc, f.BodyBorder, posXStart+posXOffset, posYStart, posXStart+posXOffset, posYStart+heightRow+paddingY)
 			}
 			// draw cell
 			font := columnIndexMapFontBody[i]
-			setFont(e, font)
-			e.SetXY(posXStart+posXOffset+f.Padding.L, posYStart+f.Padding.T)
+			setFont(doc, font)
+			doc.p.SetXY(posXStart+posXOffset+f.Padding.L, posYStart+f.Padding.T)
 
 			fmt.Printf("print row %d cell, column %d, width %.2f, row height %.2f, at %.2f/%.2f, value: %s\n",
-				ri, i, columnIndexMapWidth[i], heightRow, e.GetX(), e.GetY(), row.Values[i])
+				ri, i, columnIndexMapWidth[i], heightRow, doc.p.GetX(), doc.p.GetY(), row.Values[i])
 
-			if err := drawAttributeValue(e, borderEmpty, font, columnIndexMapWidth[i], heightRow, columnIndexMapLines[i], columnIndexMapAtr[i], row.Values[i]); err != nil {
+			if err := drawAttributeValue(doc, borderEmpty, font, columnIndexMapWidth[i], heightRow, columnIndexMapLines[i], columnIndexMapAtr[i], row.Values[i]); err != nil {
 				return 0, err
 			}
 			posXOffset += columnIndexMapWidth[i] + paddingX
@@ -221,11 +218,11 @@ func addFieldList(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, 
 		if f.BodyBorder.Draw == "B" || f.BodyBorder.Draw == "1" {
 			posYStart += f.BodyBorder.Size
 		}
-		e.SetXY(posXStart, posYStart)
+		doc.p.SetXY(posXStart, posYStart)
 	}
 
 	// re-enable auto paging
-	e.SetAutoPageBreak(true, pageMarginB)
+	doc.p.SetAutoPageBreak(true, pageMarginB)
 
-	return e.GetY(), nil
+	return doc.p.GetY(), nil
 }

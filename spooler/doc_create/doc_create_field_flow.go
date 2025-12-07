@@ -4,46 +4,44 @@ import (
 	"context"
 	"encoding/json"
 	"r3/types"
-
-	"codeberg.org/go-pdf/fpdf"
 )
 
-func addFieldFlow(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, width float64, border types.DocumentBorder,
-	font types.DocumentFont, posX, posY, pageHeightUsable, pageMarginT float64, m relationIndexAttributeIdMap) (float64, error) {
+func addFieldFlow(ctx context.Context, doc *doc, fieldJson json.RawMessage, width float64, border types.DocumentBorder,
+	font types.DocumentFont, posX, posY, pageHeightUsable, pageMarginT float64) (float64, error) {
 
 	var f types.DocumentFieldFlow
 	if err := json.Unmarshal(fieldJson, &f); err != nil {
 		return 0, err
 	}
 
-	pageNoStart := e.PageNo()
-	posYAfterFields, err := addFieldFlowKids(ctx, e, f.Fields, f.Padding, pageMarginT, f.Gap, posX, posY, width, pageHeightUsable, false, font, m)
+	pageNoStart := doc.p.PageNo()
+	posYAfterFields, err := addFieldFlowKids(ctx, doc, f.Fields, f.Padding, pageMarginT, f.Gap, posX, posY, width, pageHeightUsable, false, font)
 	if err != nil {
 		return 0, err
 	}
 
 	// draw layout container if border is used
 	if border.Draw != "" {
-		pageNoEnd := e.PageNo()
+		pageNoEnd := doc.p.PageNo()
 		if pageNoStart == pageNoEnd {
-			e.SetXY(posX, posY)
-			drawBox(e, border, "", width, posYAfterFields-posY)
+			doc.p.SetXY(posX, posY)
+			drawBox(doc, border, "", width, posYAfterFields-posY)
 		} else {
 			for i := pageNoStart; i <= pageNoEnd; i++ {
-				e.SetPage(i)
+				doc.p.SetPage(i)
 
 				if i == pageNoStart {
 					// draw on initial page until page end
-					e.SetXY(posX, posY)
-					drawBox(e, border, "", width, pageHeightUsable+pageMarginT-posY)
+					doc.p.SetXY(posX, posY)
+					drawBox(doc, border, "", width, pageHeightUsable+pageMarginT-posY)
 				} else if i != pageNoEnd {
 					// draw entire inbetween page
-					e.SetXY(posX, pageMarginT)
-					drawBox(e, border, "", width, pageHeightUsable)
+					doc.p.SetXY(posX, pageMarginT)
+					drawBox(doc, border, "", width, pageHeightUsable)
 				} else {
 					// draw on last page until child end
-					e.SetXY(posX, pageMarginT)
-					drawBox(e, border, "", width, posYAfterFields-pageMarginT)
+					doc.p.SetXY(posX, pageMarginT)
+					drawBox(doc, border, "", width, posYAfterFields-pageMarginT)
 				}
 			}
 		}
@@ -51,8 +49,8 @@ func addFieldFlow(ctx context.Context, e *fpdf.Fpdf, fieldJson json.RawMessage, 
 	return posYAfterFields, nil
 }
 
-func addFieldFlowKids(ctx context.Context, e *fpdf.Fpdf, fields []any, padding types.DocumentMarginPadding,
-	pageMarginT, gap, posX, posY, width, pageHeightUsable float64, parentIsGrid bool, font types.DocumentFont, m relationIndexAttributeIdMap) (float64, error) {
+func addFieldFlowKids(ctx context.Context, doc *doc, fields []any, padding types.DocumentMarginPadding,
+	pageMarginT, gap, posX, posY, width, pageHeightUsable float64, parentIsGrid bool, font types.DocumentFont) (float64, error) {
 
 	var err error
 	gapNeeded := false
@@ -74,7 +72,7 @@ func addFieldFlowKids(ctx context.Context, e *fpdf.Fpdf, fields []any, padding t
 			posY += gap
 		}
 
-		posY, err = addField(ctx, e, posX+padding.L, posY, width, pageHeightUsable, pageMarginT, parentIsGrid, font, fieldIfChild, m)
+		posY, err = addField(ctx, doc, posX+padding.L, posY, width, pageHeightUsable, pageMarginT, parentIsGrid, font, fieldIfChild)
 		if err != nil {
 			return 0, err
 		}

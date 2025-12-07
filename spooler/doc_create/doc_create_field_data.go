@@ -6,18 +6,15 @@ import (
 	"r3/cache"
 	"r3/handler"
 	"r3/types"
-
-	"codeberg.org/go-pdf/fpdf"
 )
 
-func addFieldData(e *fpdf.Fpdf, fieldJson json.RawMessage, width float64, border types.DocumentBorder,
-	font types.DocumentFont, m relationIndexAttributeIdMap) (float64, error) {
+func addFieldData(doc *doc, fieldJson json.RawMessage, width float64, border types.DocumentBorder, font types.DocumentFont) (float64, error) {
 
 	var f types.DocumentFieldData
 	if err := json.Unmarshal(fieldJson, &f); err != nil {
 		return 0, err
 	}
-	v, exists := m[f.Index][f.AttributeId]
+	v, exists := doc.data[f.Index][f.AttributeId]
 	if !exists {
 		return 0, fmt.Errorf("failed to find field value, attribute '%s' not found on relation index %d", f.AttributeId, f.Index)
 	}
@@ -28,8 +25,8 @@ func addFieldData(e *fpdf.Fpdf, fieldJson json.RawMessage, width float64, border
 	if !exists {
 		return 0, handler.ErrSchemaUnknownAttribute(f.AttributeId)
 	}
-	if err := drawAttributeValue(e, border, font, width, -1, -1, atr, v); err != nil {
+	if err := drawAttributeValue(doc, border, font, width, -1, -1, atr, v); err != nil {
 		return 0, err
 	}
-	return e.GetY(), nil
+	return doc.p.GetY(), nil
 }

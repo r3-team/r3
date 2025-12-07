@@ -5,12 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"r3/types"
-
-	"codeberg.org/go-pdf/fpdf"
 )
 
-func addField(ctx context.Context, e *fpdf.Fpdf, parentPosX, parentPosY, parentWidth, pageHeightUsable, pageMarginT float64,
-	parentIsGrid bool, fontParent types.DocumentFont, fieldIf any, m relationIndexAttributeIdMap) (float64, error) {
+func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentWidth, pageHeightUsable, pageMarginT float64,
+	parentIsGrid bool, fontParent types.DocumentFont, fieldIf any) (float64, error) {
 
 	fieldJson, err := json.Marshal(fieldIf)
 	if err != nil {
@@ -25,9 +23,9 @@ func addField(ctx context.Context, e *fpdf.Fpdf, parentPosX, parentPosY, parentW
 	// grid fields have defined height, if they do not fit on current page, add to next one
 	// only relevant on root level where grids are allowed
 	if f.Content == "grid" && f.SizeHeight+parentPosY > pageHeightUsable+pageMarginT {
-		e.AddPage()
-		e.SetHomeXY()
-		parentPosY = e.GetY()
+		doc.p.AddPage()
+		doc.p.SetHomeXY()
+		parentPosY = doc.p.GetY()
 	}
 
 	// set positioning and width of this field
@@ -44,33 +42,33 @@ func addField(ctx context.Context, e *fpdf.Fpdf, parentPosX, parentPosY, parentW
 			width = f.SizeWidth
 		}
 	}
-	e.SetXY(posX, posY)
+	doc.p.SetXY(posX, posY)
 
 	// reset styles
-	e.SetDrawColor(0, 0, 0)
-	e.SetFillColor(0, 0, 0)
+	doc.p.SetDrawColor(0, 0, 0)
+	doc.p.SetFillColor(0, 0, 0)
 
 	fmt.Printf("Set field '%s' (P%d), parent X/Y %.0f/%.0f at pos %.0f/%.0f (w %.0f, h %0.f)\n",
-		f.Content, e.PageNo(), parentPosX, parentPosY, posX, posY, width, f.SizeHeight)
+		f.Content, doc.p.PageNo(), parentPosX, parentPosY, posX, posY, width, f.SizeHeight)
 
 	// apply overwrites
-	set := applyResolvedData(f.Set, f.SetByData, m)
+	set := applyResolvedData(doc, f.Set, f.SetByData)
 	font := applyToFont(set, fontParent)
 	f = applyToField(set, f)
-	setFont(e, font)
+	setFont(doc, font)
 
 	// draw field content
 	switch f.Content {
 	case "data":
-		return addFieldData(e, fieldJson, width, f.Border, font, m)
+		return addFieldData(doc, fieldJson, width, f.Border, font)
 	case "flow":
-		return addFieldFlow(ctx, e, fieldJson, width, f.Border, font, posX, posY, pageHeightUsable, pageMarginT, m)
+		return addFieldFlow(ctx, doc, fieldJson, width, f.Border, font, posX, posY, pageHeightUsable, pageMarginT)
 	case "grid":
-		return addFieldGrid(ctx, e, fieldJson, width, f.Border, font, posX, posY, pageHeightUsable, pageMarginT, m)
+		return addFieldGrid(ctx, doc, fieldJson, width, f.Border, font, posX, posY, pageHeightUsable, pageMarginT)
 	case "list":
-		return addFieldList(ctx, e, fieldJson, width, font, m)
+		return addFieldList(ctx, doc, fieldJson, width, font)
 	case "text":
-		return addFieldText(e, fieldJson, width, f.Border, font)
+		return addFieldText(doc, fieldJson, width, f.Border, font)
 	}
 	return 0, fmt.Errorf("invalid field content '%s'", f.Content)
 }
