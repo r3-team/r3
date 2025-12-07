@@ -539,25 +539,36 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 			SELECT icon_id
 			FROM app.search_bar
 			WHERE module_id = $6
+
+			UNION
+
+			-- attribute icons
+			SELECT icon_id
+			FROM app.attribute
+			WHERE relation_id IN (
+				SELECT id
+				FROM app.relation
+				WHERE module_id = $7
+			)
 		)
 		
 		-- dependency
 		AND id NOT IN (
 			SELECT id
 			FROM app.icon
-			WHERE module_id = $7
+			WHERE module_id = $8
 			OR module_id IN (
 				SELECT module_id_on
 				FROM app.module_depends
-				WHERE module_id = $8
+				WHERE module_id = $9
 			)
 		)
-	`, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId).Scan(&cnt); err != nil {
+	`, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId).Scan(&cnt); err != nil {
 		return err
 	}
 
 	if cnt != 0 {
-		return fmt.Errorf("dependency check failed, accessing %d icons(s) from independent module(s), check application, collection, search bar, menu & field icons", cnt)
+		return fmt.Errorf("dependency check failed, accessing %d icons(s) from independent module(s), check application, attribute, collection, search bar, menu & field icons", cnt)
 	}
 
 	// check PG function access to external pgFunctions/modules/relations/attributes
