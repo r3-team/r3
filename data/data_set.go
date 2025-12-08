@@ -213,7 +213,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 			switch v := attribute.Value.(type) {
 			case float64:
 				shipValues.values = append(shipValues.values, int64(v))
-			case []interface{}:
+			case []any:
 				for _, v1 := range v {
 					if v1 == nil || reflect.TypeOf(v1).String() != "float64" {
 						return fmt.Errorf("invalid type for relationship value")

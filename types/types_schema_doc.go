@@ -168,6 +168,7 @@ type DocumentFont struct {
 	Align      string  `json:"align"`      // text: "L", "R", "J" (left, right, justify), column: "L", "C", "R" (left, center, right) &  "T", "M", "B" (top, middle, bottom)
 	Color      string  `json:"color"`      // RGB HEX value, like "000000"
 	Family     string  `json:"family"`     // "Courier", "Helvetica", "Arial", "Times"
+	FormatDate string  `json:"formatDate"` // date format, such as 'Y-m-d'
 	LineFactor float64 `json:"lineFactor"` // line height factor in % of font size (125% = font height * 1.25)
 	Size       float64 `json:"size"`       // font size in points
 	Style      string  `json:"style"`      // "B" (bold), "I" (italic), "U" (underscore), "S" (strike-out)

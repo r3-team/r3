@@ -5,6 +5,7 @@ import (
 	"r3/tools"
 	"r3/types"
 	"strings"
+	"time"
 )
 
 func drawBorderLine(doc *doc, b types.DocumentBorder, x1, y1, x2, y2 float64) {
@@ -37,14 +38,19 @@ func drawBox(doc *doc, b types.DocumentBorder, fillColor string, w, h float64) {
 // draws attribute value as cell
 // if line count is set to -1 it will be calculated
 // if height is set to -1, font line height will be used
-func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFont, w, h float64, lineCount int, atr types.Attribute, valueIf interface{}) error {
+func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFont, w, h float64, lineCount int, atr types.Attribute, valueIf any) error {
+
+	if valueIf == nil {
+		return nil
+	}
 
 	switch atr.Content {
 	case "text", "varchar":
-		if atr.ContentUse == "barcode" {
-
-		}
-		if atr.ContentUse == "drawing" {
+		switch atr.ContentUse {
+		case "barcode":
+		case "default":
+			drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%s", valueIf))
+		case "drawing":
 			/*
 				imgBytes, err := base64.StdEncoding.DecodeString(field.Value)
 				if err != nil {
@@ -54,35 +60,48 @@ func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFon
 				e.RegisterImageOptionsReader(imageName, fpdf.ImageOptions{ImageType: "PNG"}, bytes.NewReader(imgBytes))
 				e.Image(imageName, posX, posY, width, 0, true, "PNG", 0, "")
 			*/
-		}
-		if atr.ContentUse == "iframe" {
-
-		}
-		if atr.ContentUse == "richtext" {
+		case "iframe":
+		case "richtext":
 			// TEMP
 			// remove HTML or try HTML element??
+		case "color":
 		}
-		if atr.ContentUse == "color" {
-
-		}
-		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%s", valueIf))
 	case "numeric":
-		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%f", valueIf))
+
 	case "real", "double precision":
+		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%f", valueIf))
 	case "boolean":
 	case "regconfig":
 	case "files":
 	case "integer", "bigint":
-		if atr.ContentUse == "date" {
+		switch atr.ContentUse {
+		case "date", "datetime":
+			v, ok := valueIf.(int64)
+			if !ok {
+				return fmt.Errorf("failed to parse date/datetime value as int64")
+			}
+			tFormat := tools.GetDatetimeFormat(font.FormatDate, atr.ContentUse == "datetime")
 
-		}
-		if atr.ContentUse == "datetime" {
+			if atr.ContentUse == "datetime" {
+				// print datetime at local server time
+				drawCellText(doc, b, font, w, h, lineCount, time.Unix(v, 0).Local().Format(tFormat))
+			} else {
+				// print date at UTC
+				drawCellText(doc, b, font, w, h, lineCount, time.Unix(v, 0).Format(tFormat))
+			}
+		case "time":
+			v, ok := valueIf.(int32)
+			if !ok {
+				return fmt.Errorf("failed to parse time value as int32")
+			}
+			hh := int32(v / 3600)
+			mm := int32((v - (hh * 3600)) / 60)
+			ss := int32(v - (hh * 3600) - (mm * 60))
+			drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%02d:%02d:%02d", hh, mm, ss))
 
+		case "default":
+			drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%d", valueIf))
 		}
-		if atr.ContentUse == "time" {
-
-		}
-		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%d", valueIf))
 	default:
 		return fmt.Errorf("failed to add field, no definition for attribute content '%s'", atr.Content)
 	}

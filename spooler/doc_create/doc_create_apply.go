@@ -151,6 +151,8 @@ func applyToFont(set []types.DocumentSet, f types.DocumentFont) types.DocumentFo
 				f.Align = v
 			case "font.color":
 				f.Color = v
+			case "font.formatDate":
+				f.FormatDate = v
 			case "font.family":
 				f.Family = v
 			case "font.style":

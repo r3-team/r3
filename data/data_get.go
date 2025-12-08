@@ -73,9 +73,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, noAuth bool, log
 			}
 		}
 
-		indexRecordIds := make(map[int]interface{}) // ID for each relation tuple by index
-		indexRecordEncKeys := make(map[int]string)  // encrypted key for each relation tuple by index
-		values := make([]interface{}, 0)            // final values for selected attributes
+		indexRecordIds := make(map[int]any)        // ID for each relation tuple by index
+		indexRecordEncKeys := make(map[int]string) // encrypted key for each relation tuple by index
+		values := make([]any, 0)                   // final values for selected attributes
 
 		// collect values for expressions
 		for i := 0; i < len(data.Expressions); i++ {

@@ -322,25 +322,11 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 		case "date", "datetime":
 			// date values are always stored as UTC at midnight
 			loc := time.UTC
-			format := "2006-01-02"
-
-			switch dateFormat {
-			case "Y-m-d":
-				format = "2006-01-02"
-			case "Y/m/d":
-				format = "2006/01/02"
-			case "d.m.Y":
-				format = "02.01.2006"
-			case "d/m/Y":
-				format = "02/01/2006"
-			case "m/d/Y":
-				format = "01/02/2006"
-			}
+			format := tools.GetDatetimeFormat(dateFormat, display == "datetime")
 
 			// datetime values are in context of user timezone
 			if display == "datetime" {
 				loc = locUser
-				format = fmt.Sprintf("%s 15:04:05", format)
 			}
 			return time.Unix(value, 0).In(loc).Format(format)
 		case "time":

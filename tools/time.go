@@ -1,7 +1,30 @@
 package tools
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
+func GetDatetimeFormat(format string, withTime bool) string {
+	s := "2006-01-02"
+	switch format {
+	case "Y-m-d":
+		s = "2006-01-02"
+	case "Y/m/d":
+		s = "2006/01/02"
+	case "d.m.Y":
+		s = "02.01.2006"
+	case "d/m/Y":
+		s = "02/01/2006"
+	case "m/d/Y":
+		s = "01/02/2006"
+	}
+
+	if withTime {
+		return fmt.Sprintf("%s 15:04:05", s)
+	}
+	return s
+}
 func GetTimeUnix() int64 {
 	return time.Now().UTC().Unix()
 }
