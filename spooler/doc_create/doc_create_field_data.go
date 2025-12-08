@@ -25,7 +25,7 @@ func addFieldData(doc *doc, fieldJson json.RawMessage, width float64, border typ
 	if !exists {
 		return 0, handler.ErrSchemaUnknownAttribute(f.AttributeId)
 	}
-	if err := drawAttributeValue(doc, border, font, width, -1, -1, atr, v); err != nil {
+	if err := drawAttributeValue(doc, border, font, width, f.SizeHeight, 0, atr, v); err != nil {
 		return 0, err
 	}
 	return doc.p.GetY(), nil

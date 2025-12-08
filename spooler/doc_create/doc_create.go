@@ -18,10 +18,10 @@ import (
 const pageUnit string = "mm"
 
 type doc struct {
-	p          *fpdf.Fpdf                // PDF document
-	data       map[int]map[uuid.UUID]any // values retrieved from document query, [relationIndex][attributeId]
-	fontKeyMap map[string]bool           // fonts used
-	//imageCounter int                       // for unique image references
+	p            *fpdf.Fpdf                // PDF document
+	data         map[int]map[uuid.UUID]any // values retrieved from document query, [relationIndex][attributeId]
+	fontKeyMap   map[string]bool           // fonts used
+	imageCounter int                       // for unique image references
 }
 
 var (
