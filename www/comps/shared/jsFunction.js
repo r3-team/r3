@@ -1,10 +1,7 @@
 import MyStore       from '../../stores/store.js';
 import {formOpen}    from './form.js';
 import {generatePdf} from './pdf.js';
-import {
-	getNilUuid,
-	openLink
-} from './generic.js';
+import {openLink}    from './generic.js';
 import {
 	getCollectionMultiValues,
 	updateCollections
@@ -95,41 +92,10 @@ const exposedFunctionsGlobal = {
 				
 	// PDF functions
 	pdf_create:(filename,format,orientation,marginX,marginY,header,body,footer,css,attributeId,recordId) => {
-		return new Promise((resolve,reject) => {
-			const uploadFile = attributeId !== undefined && recordId !== undefined;
-			const callbackResult = (blob) => {
-				if(!uploadFile)
-					return resolve();
-				
-				let formData = new FormData();
-				let xhr      = new XMLHttpRequest();
-				xhr.onload = event => {
-					const res = JSON.parse(xhr.response);
-					if(typeof res.error !== 'undefined')
-						return reject(res.error);
-					
-					let value = {fileIdMapChange:{}};
-					value.fileIdMapChange[res.id] = {
-						action:'create',
-						name:filename,
-						version:-1
-					};
-					ws.send('data','set',{0:{
-						relationId:MyStore.getters['schema/attributeIdMap'][attributeId].relationId,
-						recordId:recordId,
-						attributes:[{attributeId:attributeId,value:value}]
-					}},true).then(() => resolve(),reject);
-				};
-				formData.append('token',MyStore.getters['local/token']);
-				formData.append('attributeId',attributeId);
-				formData.append('fileId',getNilUuid());
-				formData.append('file',blob);
-				xhr.open('POST','data/upload',true);
-				xhr.send(formData);
-			};
-			generatePdf(filename,format,orientation,marginX,marginY,
-				header,body,footer,css,callbackResult,uploadFile);
-		});
+		return generatePdf('transliterate',filename,format,orientation,marginX,marginY,header,body,footer,css,attributeId,recordId);
+	},
+	pdf_create_utf8:(utf8_mode,filename,format,orientation,marginX,marginY,header,body,footer,css,attributeId,recordId) => {
+		return generatePdf(utf8_mode,filename,format,orientation,marginX,marginY,header,body,footer,css,attributeId,recordId);
 	},
 
 	// dialog functions

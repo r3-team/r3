@@ -1112,6 +1112,7 @@
 				"has_role": "app.has_role({ARGS}) => BOOLEAN<br /><br />يُرجع صحيحًا إذا كان لتسجيل الدخول الحالي الدور المعين (يتم تضمين الأدوار المتداخلة).",
 				"logoff": "app.logoff() => UNDEFINED<br /><br />Logs off the current user. This results in the login page being shown and the user being forced to re-authenticate to continue.<br /><br />After re-authentication, the previously open form will be shown. If this is not desired, open another form first and then execute the logoff.",
 				"pdf_create": "app.pdf_create({ARGS}) => PROMISE<br /><br />Generates a PDF file from given HTML templates and CSS styles. Parameters:<ul><li>filename: Any filename ending in '.pdf'</li><li>pageFormat: Format of page, such as: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' or 'landscape'</li><li>pageMarginX: Horizontal page margins in pixel, either single number (left & right side) or array (first value is left side, second value is right side)</li><li>pageMarginY: Vertical page margins in pixel, either single number (top & bottom) or array (first value is top, second value is bottom)</li><li>htmlHeader: HTML template, applied to top of each page</li><li>htmlBody: HTML template, fills out document</li><li>htmlFooter: HTML template, applied to bottom of each page</li><li>cssStyles: CSS rules, applied to HTML templates</li><li>attachAttributeId: Optional, see below.</li><li>attachRecordId: Optional, see below.</li></ul>By default, the PDF document is generated in a new window, in which the user can see a preview and download the file. If both 'attachAttributeId' & 'attachRecordId' are set, the PDF file is instead immediately attached to the chosen files attribute of the chosen record.<br /><br />The placeholders '{PAGE_CUR}' & '{PAGE_END}' can be used in both header & footer HTML templates to display the current and total page numbers. '{PAGE_BREAK}' can be used in the body HTML template to force a page break.",
+				"pdf_create_utf8": "app.pdf_create_utf8({ARGS}) => PROMISE<br /><br />Generates a PDF file with a UTF8 font (larger PDF file but support for more characters) from given HTML templates and CSS styles. Parameters:<ul><li>utf8_font: Which font type to use. Options: 'basic' (for most western languages), 'arabic', 'japanese', 'korean', 'simplified_chinese', 'thai'</li><li>filename: Any filename ending in '.pdf'</li><li>pageFormat: Format of page, such as: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' or 'landscape'</li><li>pageMarginX: Horizontal page margins in pixel, either single number (left & right side) or array (first value is left side, second value is right side)</li><li>pageMarginY: Vertical page margins in pixel, either single number (top & bottom) or array (first value is top, second value is bottom)</li><li>htmlHeader: HTML template, applied to top of each page</li><li>htmlBody: HTML template, fills out document</li><li>htmlFooter: HTML template, applied to bottom of each page</li><li>cssStyles: CSS rules, applied to HTML templates</li><li>attachAttributeId: Optional, see below.</li><li>attachRecordId: Optional, see below.</li></ul>By default, the PDF document is generated in a new window, in which the user can see a preview and download the file. If both 'attachAttributeId' & 'attachRecordId' are set, the PDF file is instead immediately attached to the chosen files attribute of the chosen record.<br /><br />The placeholders '{PAGE_CUR}' & '{PAGE_END}' can be used in both header & footer HTML templates to display the current and total page numbers. '{PAGE_BREAK}' can be used in the body HTML template to force a page break.",
 				"record_delete": "app.record_delete() => غير محدد<br /><br />حذف سجل النموذج الحالي.",
 				"record_new": "app.record_new() => غير محدد<br /><br />يفتح سجلا جديدا.",
 				"record_reload": "app.record_reload() => غير محدد<br /><br />يعيد تحميل سجل النموذج الحالي.",
@@ -1180,6 +1181,20 @@
 					"سلسلة معرف الدور"
 				],
 				"pdf_create": [
+					"filename STRING",
+					"page_format STRING",
+					"page_orientation STRING",
+					"page_marginX NUMBER || ARRAY",
+					"page_marginY NUMBER || ARRAY",
+					"html_header STRING",
+					"html_body STRING",
+					"html_footer STRING",
+					"css_styles STRING",
+					"attach_attribute_id STRING",
+					"attach_record_id NUMBER"
+				],
+				"pdf_create_utf8": [
+					"utf8_font STRING",
 					"filename STRING",
 					"page_format STRING",
 					"page_orientation STRING",

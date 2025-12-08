@@ -1112,6 +1112,7 @@
 				"has_role": "app.has_role({ARGS}) => BOOLEAN<br /><br />Liefert zurück, ob der spezifizierte Benutzer der spezifizierten Rolle zugewiesen ist (geerbte Rollen werden berücksichtigt).",
 				"logoff": "app.logoff() => UNDEFINED<br /><br />Meldet den aktuellen Benutzer ab. Die Anmeldemaske erscheint und der Benutzer muss sich erneut anmelden, um fortzufahren.<br /><br />Nach erneuter Anmeldung wird das vorher offene Formular angezeigt. Falls das nicht gewünscht sein sollte, erst ein anderes Formular öffnen und dann die Abmeldung durchführen.",
 				"pdf_create": "app.pdf_create({ARGS}) => UNDEFINED<br /><br />Erzeugt eine PDF-Datei mithilfe von HTML-Vorlagen und CSS-Regeln. Parameter:<ul><li>filename: Beliebiger Dateiname, welcher in \".pdf\" endet</li><li>pageFormat: Seitenformat, wie bspw.: \"a4\", \"letter\", \"legal\"</li><li>pageOrientation: \"portrait\" oder \"landscape\"</li><li>pageMarginX: Horizontaler Seitenrand in Pixeln, entweder eine Nummer (links & rechts) oder ein Array (erster Wert ist link, zweiter Wert ist rechts)</li><li>pageMarginY: Vertikaler Seitenrand in Pixeln, entweder eine Nummer (oben & unten) oder ein Array (erster Wert ist oben, zweiter Wert ist unten)</li><li>htmlHeader: HTML-Vorlage, angewendet auf die Kopfzeile jeder Seite</li><li>htmlBody: HTML-Vorlage, füllt das Dokument</li><li>htmlFooter: HTML-Vorlage, angewendet auf die Fußzeile jeder Seite</li><li>cssStyles: CSS-Regeln, werden auf die HTML-Vorlagen angewendet</li><li>attachAttributeId: Optional, siehe unten.</li><li>attachRecordId: Optional, siehe unten.</li></ul>Standardmäßig wird das PDF-Dokument in einem neuen Fenster geöffnet, in welchem Benutzer eine Vorschau sehen und die Datei herunterladen können. Wenn sowohl \"attachAttributeId\" als auch \"attachRecordId\" gesetzt sind, wird das erstellte Dokument sofort an das gewählte Dateien-Attribut des gewählten Datensatzes angehängt.<br /><br />Die Platzhalter \"{PAGE_CUR}\" & \"{PAGE_END}\" können genutzt werden in sowohl Kopf- als auch Fußzeilen-HTML-Vorlagen, um die aktuelle und totale Seitenanzahl anzuzeigen. \"{PAGE_BREAK}\" kann in der HTML-Vorlage für das Dokument genutzt werden, um einen Seitenumbruch zu erzeugen.",
+				"pdf_create_utf8": "app.pdf_create_utf8({ARGS}) => PROMISE<br /><br />Generates a PDF file with a UTF8 font (larger PDF file but support for more characters) from given HTML templates and CSS styles. Parameters:<ul><li>utf8_font: Which font type to use. Options: 'basic' (for most western languages), 'arabic', 'japanese', 'korean', 'simplified_chinese', 'thai'</li><li>filename: Any filename ending in '.pdf'</li><li>pageFormat: Format of page, such as: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' or 'landscape'</li><li>pageMarginX: Horizontal page margins in pixel, either single number (left & right side) or array (first value is left side, second value is right side)</li><li>pageMarginY: Vertical page margins in pixel, either single number (top & bottom) or array (first value is top, second value is bottom)</li><li>htmlHeader: HTML template, applied to top of each page</li><li>htmlBody: HTML template, fills out document</li><li>htmlFooter: HTML template, applied to bottom of each page</li><li>cssStyles: CSS rules, applied to HTML templates</li><li>attachAttributeId: Optional, see below.</li><li>attachRecordId: Optional, see below.</li></ul>By default, the PDF document is generated in a new window, in which the user can see a preview and download the file. If both 'attachAttributeId' & 'attachRecordId' are set, the PDF file is instead immediately attached to the chosen files attribute of the chosen record.<br /><br />The placeholders '{PAGE_CUR}' & '{PAGE_END}' can be used in both header & footer HTML templates to display the current and total page numbers. '{PAGE_BREAK}' can be used in the body HTML template to force a page break.",
 				"record_delete": "app.record_delete() => UNDEFINED<br /><br />Löscht den aktuellen Formulardatensatz.",
 				"record_new": "app.record_new() => UNDEFINED<br /><br />Öffnet einen neuen Datensatz.",
 				"record_reload": "app.record_reload() => UNDEFINED<br /><br />Lädt den aktuellen Formulardatensatz neu.",
@@ -1180,6 +1181,20 @@
 					"role_id STRING"
 				],
 				"pdf_create": [
+					"filename STRING",
+					"page_format STRING",
+					"page_orientation STRING",
+					"page_marginX NUMBER || ARRAY",
+					"page_marginY NUMBER || ARRAY",
+					"html_header STRING",
+					"html_body STRING",
+					"html_footer STRING",
+					"css_styles STRING",
+					"attach_attribute_id STRING",
+					"attach_record_id NUMBER"
+				],
+				"pdf_create_utf8": [
+					"utf8_font STRING",
 					"filename STRING",
 					"page_format STRING",
 					"page_orientation STRING",

@@ -82,7 +82,7 @@ export default {
 	},
 	computed:{
 		articlesShown:(s) => {
-			let articleIds = s.tabTarget === 'module'
+			const articleIds = s.tabTarget === 'module'
 				? s.module.articleIdsHelp : s.form.articleIdsHelp;
 			
 			let out = [];
@@ -123,7 +123,7 @@ export default {
 		
 		// actions
 		articleToggle(id) {
-			let pos = this.articleIdsClosed.indexOf(id);
+			const pos = this.articleIdsClosed.indexOf(id);
 			
 			if(pos === -1) this.articleIdsClosed.push(id);
 			else           this.articleIdsClosed.splice(pos,1);
@@ -140,8 +140,9 @@ export default {
 				: `${this.getCaptionForLang('moduleTitle',this.languageForce,mod.id,mod.captions,mod.name)} v${mod.releaseBuild}`;
 			
 			this.generatePdf(
-				`${titleModule} - ${titleHelp}.pdf`
-				,'a4','p',60,90,`
+				'transliterate',
+				`${titleModule} - ${titleHelp}.pdf`,
+				'a4','p',60,90,`
 					<div class="pdf-header">
 						<span>${titleModule}</span>
 						<span>${titleHelp}</span>
