@@ -26,57 +26,6 @@ type textDrawing struct {
 	Image string `json:"image"`
 }
 
-func drawBorderLine(doc *doc, b types.DocumentBorder, x1, y1, x2, y2 float64) {
-	rgb := tools.HexToInt(b.Color)
-	doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
-	doc.p.SetLineWidth(b.Size)
-	doc.p.Line(x1, y1, x2, y2)
-}
-
-func drawBox(doc *doc, b types.DocumentBorder, fillColor string, w, h float64) {
-	if b.Draw == "" && fillColor == "" {
-		return
-	}
-
-	if b.Draw != "" {
-		rgb := tools.HexToInt(b.Color)
-		doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
-		doc.p.SetLineWidth(b.Size)
-	}
-
-	fill := false
-	if fillColor != "" {
-		rgb := tools.HexToInt(fillColor)
-		doc.p.SetFillColor(rgb[0], rgb[1], rgb[2])
-		fill = true
-	}
-	doc.p.CellFormat(w, h, "", b.Draw, -1, "", fill, 0, "")
-}
-
-func drawImagePngBase64(doc *doc, imgBase64 string, w, h float64) error {
-
-	// find extension
-	matches := regexFindDataImageExt.FindStringSubmatch(imgBase64)
-	if len(matches) != 2 {
-		return fmt.Errorf("failed to read base64 image data")
-	}
-	ext := matches[1]
-	imgBase64 = strings.Replace(imgBase64, fmt.Sprintf("data:image/%s;base64,", ext), "", 1)
-
-	doc.imageCounter++
-	imgName := fmt.Sprintf("img_%d", doc.imageCounter)
-	imgBytes, err := base64.StdEncoding.DecodeString(imgBase64)
-	if err != nil {
-		return err
-	}
-
-	doc.p.RegisterImageOptionsReader(imgName, fpdf.ImageOptions{ImageType: ext}, bytes.NewReader(imgBytes))
-	doc.p.ImageOptions(imgName, doc.p.GetX(), doc.p.GetY(), w, h, true,
-		fpdf.ImageOptions{ImageType: ext, AllowNegativePosition: false, ReadDpi: true}, 0, "")
-
-	return nil
-}
-
 // draws attribute value as cell
 func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFont, w, h float64, lineCount int, atr types.Attribute, valueIf any) error {
 
@@ -99,7 +48,7 @@ func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFon
 			if err := json.Unmarshal([]byte(v), &b); err != nil {
 				return err
 			}
-			if err := drawImagePngBase64(doc, b.Image, w, h); err != nil {
+			if err := drawImageBase64(doc, b.Image, w, h); err != nil {
 				return err
 			}
 		case "color":
@@ -109,7 +58,7 @@ func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFon
 			if err := json.Unmarshal([]byte(v), &d); err != nil {
 				return err
 			}
-			if err := drawImagePngBase64(doc, d.Image, w, h); err != nil {
+			if err := drawImageBase64(doc, d.Image, w, h); err != nil {
 				return err
 			}
 		case "iframe":
@@ -134,7 +83,17 @@ func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFon
 	case "real", "double precision":
 		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%f", valueIf))
 	case "boolean":
+		v, ok := valueIf.(bool)
+		if !ok {
+			return fmt.Errorf("failed to parse boolean attribute value")
+		}
+		if v {
+			drawCellText(doc, b, font, w, h, lineCount, font.BoolTrue)
+		} else {
+			drawCellText(doc, b, font, w, h, lineCount, font.BoolFalse)
+		}
 	case "regconfig":
+		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%s", valueIf))
 	case "files":
 	case "integer", "bigint":
 		switch atr.ContentUse {
@@ -170,6 +129,57 @@ func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFon
 	default:
 		return fmt.Errorf("failed to add field, no definition for attribute content '%s'", atr.Content)
 	}
+	return nil
+}
+
+func drawBorderLine(doc *doc, b types.DocumentBorder, x1, y1, x2, y2 float64) {
+	rgb := tools.HexToInt(b.Color)
+	doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
+	doc.p.SetLineWidth(b.Size)
+	doc.p.Line(x1, y1, x2, y2)
+}
+
+func drawBox(doc *doc, b types.DocumentBorder, fillColor string, w, h float64) {
+	if b.Draw == "" && fillColor == "" {
+		return
+	}
+
+	if b.Draw != "" {
+		rgb := tools.HexToInt(b.Color)
+		doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
+		doc.p.SetLineWidth(b.Size)
+	}
+
+	fill := false
+	if fillColor != "" {
+		rgb := tools.HexToInt(fillColor)
+		doc.p.SetFillColor(rgb[0], rgb[1], rgb[2])
+		fill = true
+	}
+	doc.p.CellFormat(w, h, "", b.Draw, -1, "", fill, 0, "")
+}
+
+func drawImageBase64(doc *doc, imgBase64 string, w, h float64) error {
+
+	// find extension
+	matches := regexFindDataImageExt.FindStringSubmatch(imgBase64)
+	if len(matches) != 2 {
+		return fmt.Errorf("failed to read base64 image data")
+	}
+	ext := matches[1]
+	imgBase64 = strings.Replace(imgBase64, fmt.Sprintf("data:image/%s;base64,", ext), "", 1)
+
+	doc.imageCounter++
+	imgName := fmt.Sprintf("img_%d", doc.imageCounter)
+	imgBytes, err := base64.StdEncoding.DecodeString(imgBase64)
+	if err != nil {
+		return err
+	}
+
+	doc.p.RegisterImageOptionsReader(imgName, fpdf.ImageOptions{ImageType: ext}, bytes.NewReader(imgBytes))
+	doc.p.ImageOptions(imgName, doc.p.GetX(), doc.p.GetY(), w, h, true,
+		fpdf.ImageOptions{ImageType: ext, AllowNegativePosition: false, ReadDpi: true}, 0, "")
+
 	return nil
 }
 

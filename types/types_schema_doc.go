@@ -166,13 +166,15 @@ type DocumentBorder struct {
 }
 type DocumentFont struct {
 	Align        string  `json:"align"`        // text: "L", "R", "J" (left, right, justify), column: "L", "C", "R" (left, center, right) &  "T", "M", "B" (top, middle, bottom)
+	BoolFalse    string  `json:"boolFalse"`    // string representing bool FALSE
+	BoolTrue     string  `json:"boolTrue"`     // string representing bool TRUE
 	Color        string  `json:"color"`        // RGB HEX value, like "000000"
-	Family       string  `json:"family"`       // "Courier", "Helvetica", "Arial", "Times"
+	Family       string  `json:"family"`       // "cousine", "roboto", ...
 	FormatDate   string  `json:"formatDate"`   // date format, such as 'Y-m-d'
-	LineFactor   float64 `json:"lineFactor"`   // line height factor in % of font size (125% = font height * 1.25)
+	LineFactor   float64 `json:"lineFactor"`   // line height factor in % of font size
 	NumberSepDec string  `json:"numberSepDec"` // number decimal separator
 	NumberSepTho string  `json:"numberSepTho"` // number thousand separator
-	Size         float64 `json:"size"`         // font size in points
+	Size         float64 `json:"size"`         // font size in mm
 	Style        string  `json:"style"`        // "B" (bold), "I" (italic), "U" (underscore), "S" (strike-out)
 }
 type DocumentMarginPadding struct {
