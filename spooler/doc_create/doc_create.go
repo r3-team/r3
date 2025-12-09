@@ -116,6 +116,14 @@ func Run(ctx context.Context, docDef types.Document, pathOut string) error {
 }
 
 // helpers
+func getLineHeight(f types.DocumentFont) float64 {
+	return f.Size * f.LineFactor * 0.5
+}
+func getCellHeightLines(doc *doc, font types.DocumentFont, width float64, s string) (float64, int) {
+	setFont(doc, font)
+	lineCount := len(doc.p.SplitText(s, width))
+	return getLineHeight(font) * float64(lineCount), lineCount
+}
 func getExpressionsFromSetByData(set []types.DocumentSetByData) []types.DataGetExpression {
 	exprs := make([]types.DataGetExpression, 0)
 
@@ -186,12 +194,6 @@ func getExpressionsFromFields(fieldsIf []any) ([]types.DataGetExpression, error)
 		exprs = append(exprs, getExpressionsFromSetByData(field.SetByData)...)
 	}
 	return exprs, nil
-}
-
-func getCellHeightLines(doc *doc, font types.DocumentFont, width float64, s string) (float64, int) {
-	setFont(doc, font)
-	lineCount := len(doc.p.SplitText(s, width))
-	return font.Size * font.LineFactor * 0.5 * float64(lineCount), lineCount
 }
 
 func getYWithNewPageIfNeeded(doc *doc, height, pageMarginB float64) (float64, bool) {

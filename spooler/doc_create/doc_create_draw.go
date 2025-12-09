@@ -102,6 +102,8 @@ func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFon
 			if err := drawImagePngBase64(doc, b.Image, w, h); err != nil {
 				return err
 			}
+		case "color":
+			drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("#%s", valueIf))
 		case "drawing":
 			var d textDrawing
 			if err := json.Unmarshal([]byte(v), &d); err != nil {
@@ -111,10 +113,10 @@ func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFon
 				return err
 			}
 		case "iframe":
+			drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%s", valueIf))
 		case "richtext":
-			// TEMP
-			// remove HTML or try HTML element??
-		case "color":
+			h := doc.p.HTMLBasicNew()
+			h.Write(getLineHeight(font), v)
 		}
 	case "numeric":
 		v, ok := valueIf.(pgtype.Numeric)
@@ -182,7 +184,7 @@ func drawCellText(doc *doc, b types.DocumentBorder, font types.DocumentFont, w, 
 	}
 
 	if h == 0 {
-		h = font.Size * font.LineFactor * 0.5
+		h = getLineHeight(font)
 	}
 
 	if lineCount == 0 {
@@ -194,7 +196,7 @@ func drawCellText(doc *doc, b types.DocumentBorder, font types.DocumentFont, w, 
 		return
 	}
 
-	hAllLines := font.Size * font.LineFactor * 0.5 * float64(lineCount)
+	hAllLines := getLineHeight(font) * float64(lineCount)
 	if h > hAllLines {
 		// target height is larger than what lines require combined
 		if strings.Contains(font.Align, "T") {
