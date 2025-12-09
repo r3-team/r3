@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"codeberg.org/go-pdf/fpdf"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var (
@@ -116,6 +117,17 @@ func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFon
 		case "color":
 		}
 	case "numeric":
+		v, ok := valueIf.(pgtype.Numeric)
+		if !ok {
+			return fmt.Errorf("failed to parse numeric attribute value")
+		}
+
+		f, err := v.Float64Value()
+		if err != nil {
+			return err
+		}
+		drawCellText(doc, b, font, w, h, lineCount, tools.FormatFloat(
+			f.Float64, atr.LengthFract, font.NumberSepDec, font.NumberSepTho))
 
 	case "real", "double precision":
 		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%f", valueIf))

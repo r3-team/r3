@@ -155,6 +155,10 @@ func applyToFont(set []types.DocumentSet, f types.DocumentFont) types.DocumentFo
 				f.FormatDate = v
 			case "font.family":
 				f.Family = v
+			case "font.numberSepDec":
+				f.NumberSepDec = v
+			case "font.numberSepTho":
+				f.NumberSepTho = v
 			case "font.style":
 				f.Style = v
 			}

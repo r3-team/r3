@@ -2,6 +2,7 @@ package tools
 
 import (
 	"bytes"
+	"fmt"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -25,6 +26,36 @@ func Substring(s string, start, end int) string {
 		ctr++
 	}
 	return s[index0:]
+}
+
+func FormatFloat(f float64, decCount int, charDec string, charThou string) string {
+
+	// format with default string formatting (ie. -12.0033)
+	s := fmt.Sprintf("%.*f", decCount, f)
+
+	// split integer and decimal
+	parts := strings.Split(s, ".")
+	sInt := parts[0]
+	sDec := ""
+
+	if len(parts) > 1 {
+		sDec = parts[1]
+	}
+
+	// add thousands separator
+	// stop before dash character if negative number
+	lastChar := 0
+	if f < 0 {
+		lastChar = 1
+	}
+	for i := len(sInt) - 3; i > lastChar; i -= 3 {
+		sInt = sInt[:i] + charThou + sInt[i:]
+	}
+
+	if sDec == "" {
+		return sInt
+	}
+	return sInt + charDec + sDec
 }
 
 func RemoveUtf8Bom(input []byte) []byte {
