@@ -20,6 +20,8 @@ require (
 )
 
 require (
+	codeberg.org/go-pdf/fpdf v0.11.1
+	github.com/PaesslerAG/gval v1.2.4
 	github.com/coreos/go-oidc/v3 v3.14.1
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
 	github.com/jackc/pgx-gofrs-uuid v0.0.0-20230224015001-1d428863c2e2
@@ -31,7 +33,6 @@ require (
 )
 
 require (
-	codeberg.org/go-pdf/fpdf v0.11.1 // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.0 // indirect
 	github.com/gofrs/uuid/v5 v5.3.2 // indirect
@@ -39,6 +40,7 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/shopspring/decimal v1.3.1 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 )

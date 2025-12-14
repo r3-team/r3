@@ -15,15 +15,7 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocumentFieldGrid, widt
 
 	var posYChildMax float64
 	for _, fieldIfChild := range f.Fields {
-
-		// TEMP
-		// MOCKUP: field condition check
-		fieldShown := true
-		if !fieldShown {
-			continue
-		}
-
-		posYAfterFields, err := addField(ctx, doc, posX, posY, width, pageHeightUsable, pageMarginT, true, font, fieldIfChild)
+		posYAfterFields, err := addField(ctx, doc, posX, posY, 0, width, pageHeightUsable, pageMarginT, true, font, fieldIfChild)
 		if err != nil {
 			return 0, err
 		}

@@ -47,30 +47,16 @@ func addFieldFlowKids(ctx context.Context, doc *doc, fields []any, padding types
 	pageMarginT, gap, posX, posY, width, pageHeightUsable float64, parentIsGrid bool, font types.DocumentFont) (float64, error) {
 
 	var err error
-	gapNeeded := false
+	var gapAdd float64 = 0.0
 	posY += padding.T
 	width -= padding.R + padding.L
 
 	for _, fieldIfChild := range fields {
-
-		// TEMP
-		// MOCKUP: field condition check
-		fieldShown := true
-		if !fieldShown {
-			continue
-		}
-
-		// gap is added between visible fields
-		if gapNeeded {
-			gapNeeded = false
-			posY += gap
-		}
-
-		posY, err = addField(ctx, doc, posX+padding.L, posY, width, pageHeightUsable, pageMarginT, parentIsGrid, font, fieldIfChild)
+		posY, err = addField(ctx, doc, posX+padding.L, posY, gapAdd, width, pageHeightUsable, pageMarginT, parentIsGrid, font, fieldIfChild)
 		if err != nil {
 			return 0, err
 		}
-		gapNeeded = true
+		gapAdd = gap
 	}
 	return posY + padding.B, nil
 }

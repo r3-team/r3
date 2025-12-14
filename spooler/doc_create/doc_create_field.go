@@ -7,8 +7,8 @@ import (
 	"r3/types"
 )
 
-func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentWidth, pageHeightUsable, pageMarginT float64,
-	parentIsGrid bool, fontParent types.DocumentFont, fieldIf any) (float64, error) {
+func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY, parentWidth, pageHeightUsable,
+	pageMarginT float64, parentIsGrid bool, fontParent types.DocumentFont, fieldIf any) (float64, error) {
 
 	fieldJson, err := json.Marshal(fieldIf)
 	if err != nil {
@@ -19,6 +19,18 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentWidth
 	if err := json.Unmarshal(fieldJson, &f); err != nil {
 		return 0, err
 	}
+
+	stateFinal := f.State
+	stateOverwrite, exists := doc.fieldIdMapState[f.Id]
+	if exists {
+		stateFinal = stateOverwrite
+	}
+	if !stateFinal {
+		return doc.p.GetY(), nil
+	}
+
+	// apply vertical parent gap as defined
+	parentPosY += parentGapY
 
 	// grid fields have defined height, if they do not fit on current page, add to next one
 	// only relevant on root level where grids are allowed

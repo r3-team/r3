@@ -10,6 +10,7 @@ type Document struct {
 	Font      DocumentFont        `json:"font"`
 	Pages     []DocumentPage      `json:"pages"` // pages in order
 	Query     Query               `json:"query"`
+	States    []DocumentState     `json:"states"`
 	SetByData []DocumentSetByData `json:"setByData"` // overwrites by resolved attribute data
 
 	// meta
@@ -28,6 +29,7 @@ type DocumentPage struct {
 	Orientation string                `json:"orientation"` // "landscape" / "portrait"
 	Set         []DocumentSet         `json:"set"`         // overwrites
 	SetByData   []DocumentSetByData   `json:"setByData"`   // overwrites by resolved attribute data
+	State       bool                  `json:"state"`
 }
 type DocumentBorder struct {
 	Cell  bool    `json:"cell"`  // also draw cell borders - only relevant in tables
@@ -66,6 +68,7 @@ type DocumentField struct {
 	SizeWidth  float64             `json:"sizeWidth"`  // width in mm (0 = parent width)
 	Set        []DocumentSet       `json:"set"`
 	SetByData  []DocumentSetByData `json:"setByData"`
+	State      bool                `json:"state"`
 	Border     DocumentBorder      `json:"border"`
 }
 type DocumentFieldData struct {
@@ -77,6 +80,7 @@ type DocumentFieldData struct {
 	SizeWidth  float64             `json:"sizeWidth"`
 	Set        []DocumentSet       `json:"set"`
 	SetByData  []DocumentSetByData `json:"setByData"`
+	State      bool                `json:"state"`
 	Border     DocumentBorder      `json:"border"`
 
 	// data field
@@ -92,6 +96,7 @@ type DocumentFieldFlow struct {
 	SizeWidth  float64             `json:"sizeWidth"`
 	Set        []DocumentSet       `json:"set"`
 	SetByData  []DocumentSetByData `json:"setByData"`
+	State      bool                `json:"state"`
 	Border     DocumentBorder      `json:"border"`
 
 	// flow field
@@ -108,6 +113,7 @@ type DocumentFieldGrid struct {
 	SizeWidth  float64             `json:"sizeWidth"`
 	Set        []DocumentSet       `json:"set"`
 	SetByData  []DocumentSetByData `json:"setByData"`
+	State      bool                `json:"state"`
 	Border     DocumentBorder      `json:"border"`
 
 	// grid field
@@ -123,6 +129,7 @@ type DocumentFieldList struct {
 	SizeWidth  float64             `json:"sizeWidth"`
 	Set        []DocumentSet       `json:"set"`
 	SetByData  []DocumentSetByData `json:"setByData"`
+	State      bool                `json:"state"`
 	Border     DocumentBorder      `json:"border"`
 
 	// list field
@@ -148,6 +155,7 @@ type DocumentFieldText struct {
 	SizeWidth  float64             `json:"sizeWidth"`
 	Set        []DocumentSet       `json:"set"`
 	SetByData  []DocumentSetByData `json:"setByData"`
+	State      bool                `json:"state"`
 	Border     DocumentBorder      `json:"border"`
 
 	// text field
@@ -184,4 +192,31 @@ type DocumentSetByData struct {
 	AttributeId uuid.UUID `json:"attributeId"` // overwrite by attribute value
 	Index       int       `json:"index"`       // overwrite by attribute value
 	Target      string    `json:"target"`      // overwrite target (font.family, margin.r, etc.)
+}
+
+type DocumentState struct {
+	Id          uuid.UUID                `json:"id"`
+	Description string                   `json:"description"` // builder reference, used to order and search by
+	Conditions  []DocumentStateCondition `json:"conditions"`  // conditions to be met for effects to be applied
+	Effects     []DocumentStateEffect    `json:"effects"`     // effects to apply when conditions are met
+}
+type DocumentStateCondition struct {
+	Position  int                        `json:"position"`
+	Connector string                     `json:"connector"` // AND, OR
+	Operator  string                     `json:"operator"`  // comparison operator (=, <>, etc.)
+	Side0     DocumentStateConditionSide `json:"side0"`     // comparison: left side
+	Side1     DocumentStateConditionSide `json:"side1"`     // comparison: right side
+}
+type DocumentStateConditionSide struct {
+	Brackets       int         `json:"brackets"`       // opening/closing brackets (side 0/1)
+	Content        string      `json:"content"`        // attribute, preset, true, value
+	AttributeId    pgtype.UUID `json:"attributeId"`    // attribute ID to retrieve value for
+	AttributeIndex pgtype.Int4 `json:"attributeIndex"` // attribute index to retrieve value for
+	PresetId       pgtype.UUID `json:"presetId"`       // preset ID of record to be compared
+	Value          pgtype.Text `json:"value"`          // fixed value, can be anything including NULL
+}
+type DocumentStateEffect struct {
+	FieldId  pgtype.UUID `json:"fieldId"`  // affected field
+	PageId   pgtype.UUID `json:"pageId"`   // affected page
+	NewState bool        `json:"newState"` // show or no-show
 }
