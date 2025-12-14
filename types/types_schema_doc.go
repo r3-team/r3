@@ -18,27 +18,22 @@ type Document struct {
 	Title        string `json:"title"`
 }
 type DocumentPage struct {
-	Id               uuid.UUID             `json:"id"`
-	DocumentId       uuid.UUID             `json:"documentId"`
-	PageIdTakeHeader pgtype.UUID           `json:"pageIdTakeHeader"` // page to inherit header from
-	PageIdTakeFooter pgtype.UUID           `json:"pageIdTakeFooter"` // page to inherit footer from
-	Fields           []any                 `json:"fields"`
-	Size             string                `json:"size"` // "A1", "A2", "A3", "A4", "A5", "A6", "A7", "Letter", "Legal"
-	Margin           DocumentMarginPadding `json:"margin"`
-	Gap              float64               `json:"gap"`         // space between flow children
-	Orientation      string                `json:"orientation"` // "landscape" / "portrait"
-	Set              []DocumentSet         `json:"set"`         // overwrites
-	SetByData        []DocumentSetByData   `json:"setByData"`   // overwrites by resolved attribute data
-
-	// header
-	HeaderActive bool            `json:"headerActive"` // use header?
-	HeaderFields []DocumentField `json:"headerFields"`
-	HeaderHeight int             `json:"headerHeight"` // height in mm
-
-	// footer
-	FooterActive bool            `json:"footerActive"` // use footer?
-	FooterFields []DocumentField `json:"footerFields"`
-	FooterHeight int             `json:"footerHeight"` // height in mm
+	Id          uuid.UUID             `json:"id"`
+	DocumentId  uuid.UUID             `json:"documentId"`
+	FieldFlow   DocumentFieldFlow     `json:"fieldFlow"`
+	Size        string                `json:"size"` // "A1", "A2", "A3", "A4", "A5", "A6", "A7", "Letter", "Legal"
+	Margin      DocumentMarginPadding `json:"margin"`
+	Header      DocumentHeaderFooter  `json:"header"`
+	Footer      DocumentHeaderFooter  `json:"footer"`
+	Orientation string                `json:"orientation"` // "landscape" / "portrait"
+	Set         []DocumentSet         `json:"set"`         // overwrites
+	SetByData   []DocumentSetByData   `json:"setByData"`   // overwrites by resolved attribute data
+}
+type DocumentBorder struct {
+	Cell  bool    `json:"cell"`  // also draw cell borders - only relevant in tables
+	Color string  `json:"color"` // RGB HEX value, like "000000"
+	Draw  string  `json:"draw"`  // "" (none), "1" (all), "L", "T", "R", "B" - can be comined like "LT" or "RB"
+	Size  float64 `json:"size"`  // border thickness
 }
 type DocumentColumn struct {
 	AttributeId uuid.UUID   `json:"attributeId"`
@@ -158,11 +153,9 @@ type DocumentFieldText struct {
 	// text field
 	Value string `json:"value"`
 }
-type DocumentBorder struct {
-	Cell  bool    `json:"cell"`  // also draw cell borders - only relevant in tables
-	Color string  `json:"color"` // RGB HEX value, like "000000"
-	Draw  string  `json:"draw"`  // "" (none), "1" (all), "L", "T", "R", "B" - can be comined like "LT" or "RB"
-	Size  float64 `json:"size"`  // border thickness
+type DocumentHeaderFooter struct {
+	PageIdInherit pgtype.UUID       `json:"pageIdInherit"` // page to inherit header/footer from (instead of its own definition)
+	FieldGrid     DocumentFieldGrid `json:"fieldGrid"`     // header/footer only ever have a fixed grid field of their internal size (if they need flow, they can add a flow field)
 }
 type DocumentFont struct {
 	Align        string  `json:"align"`        // text: "L", "R", "J" (left, right, justify), column: "L", "C", "R" (left, center, right) &  "T", "M", "B" (top, middle, bottom)

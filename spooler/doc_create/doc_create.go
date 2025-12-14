@@ -61,7 +61,7 @@ func Run(ctx context.Context, docDef types.Document, pathOut string) error {
 		exprs = append(exprs, getExpressionsFromSetByData(page.SetByData)...)
 
 		// fields
-		exprsSub, err := getExpressionsFromFields(page.Fields)
+		exprsSub, err := getExpressionsFromFields(page.FieldFlow.Fields)
 		if err != nil {
 			return err
 		}
@@ -89,26 +89,50 @@ func Run(ctx context.Context, docDef types.Document, pathOut string) error {
 	doc.p.SetTitle(docDef.Title, true)
 	doc.p.SetCellMargin(0) // kills the default margin within text cells
 
+	// generate page ID map for direct reference
+	pageIdMapIndex := make(map[uuid.UUID]int)
+	for i, page := range docDef.Pages {
+		pageIdMapIndex[page.Id] = i
+	}
+
 	// add pages
 	for i, page := range docDef.Pages {
 
 		// apply overwrites
 		font := applyToFont(applyResolvedData(doc, page.Set, page.SetByData), docDef.Font)
 
-		doc.p.AddPageFormat(page.Orientation, pageSizeMapMm[page.Size])
 		doc.p.SetMargins(page.Margin.L, page.Margin.T, page.Margin.R)
 		doc.p.SetAutoPageBreak(true, page.Margin.B)
-		doc.p.SetHomeXY()
 
 		pageWidth, pageHeight := doc.p.GetPageSize()
 		pageWidthUsable := pageWidth - page.Margin.L - page.Margin.R
 		pageHeightUsable := pageHeight - page.Margin.T - page.Margin.B
 
-		fmt.Printf("Set page %d (%s), width %.0f, width usable %.0f, height %.0f, height usable %.0f\n",
-			i, page.Size, pageWidth, pageWidthUsable, pageHeight, pageHeightUsable)
+		// set header for page
+		doc.p.SetHeaderFuncMode(func() {
+			e := page.Header
+			if page.Header.PageIdInherit.Valid {
+				e = docDef.Pages[pageIdMapIndex[page.Header.PageIdInherit.Bytes]].Header
+			}
+			addHeaderFooter(ctx, doc, e.FieldGrid, font, pageWidth, pageHeight, 0)
+		}, true)
 
-		// add fields, page layout is always flow
-		if _, err := addFieldFlowKids(ctx, doc, page.Fields, page.Margin, page.Margin.T, page.Gap, 0, 0, pageWidth, pageHeightUsable, false, font); err != nil {
+		fmt.Printf("Set page %d (%s), width %.0f, width usable %.0f, height %.0f, height usable %.0f\n", i, page.Size, pageWidth, pageWidthUsable, pageHeight, pageHeightUsable)
+		doc.p.AddPageFormat(page.Orientation, pageSizeMapMm[page.Size])
+		doc.p.SetHomeXY()
+
+		// set footer for page
+		// after addPage() because footer for previous page is added on addPage() and must therefore not be overwritten before
+		doc.p.SetFooterFunc(func() {
+			e := page.Footer
+			if page.Footer.PageIdInherit.Valid {
+				e = docDef.Pages[pageIdMapIndex[page.Footer.PageIdInherit.Bytes]].Footer
+			}
+			addHeaderFooter(ctx, doc, e.FieldGrid, font, pageWidth, pageHeight, 0-page.Margin.B)
+		})
+
+		// a page is always a single flow field on root level
+		if _, err := addFieldFlow(ctx, doc, page.FieldFlow, pageWidthUsable, page.FieldFlow.Border, font, page.Margin.L, page.Margin.T, pageHeightUsable, page.Margin.T); err != nil {
 			return err
 		}
 	}

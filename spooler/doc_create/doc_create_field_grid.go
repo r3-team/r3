@@ -2,17 +2,11 @@ package doc_create
 
 import (
 	"context"
-	"encoding/json"
 	"r3/types"
 )
 
-func addFieldGrid(ctx context.Context, doc *doc, fieldJson json.RawMessage, width float64, border types.DocumentBorder,
+func addFieldGrid(ctx context.Context, doc *doc, f types.DocumentFieldGrid, width float64, border types.DocumentBorder,
 	font types.DocumentFont, posX, posY, pageHeightUsable, pageMarginT float64) (float64, error) {
-
-	var f types.DocumentFieldGrid
-	if err := json.Unmarshal(fieldJson, &f); err != nil {
-		return 0, err
-	}
 
 	// grid fields can never be higher than the usable page height
 	if f.SizeHeight > pageHeightUsable {

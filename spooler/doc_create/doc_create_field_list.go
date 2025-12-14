@@ -2,7 +2,6 @@ package doc_create
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"r3/cache"
 	"r3/data"
@@ -12,12 +11,7 @@ import (
 	"r3/types"
 )
 
-func addFieldList(ctx context.Context, doc *doc, fieldJson json.RawMessage, width float64, fontParent types.DocumentFont) (float64, error) {
-
-	var f types.DocumentFieldList
-	if err := json.Unmarshal(fieldJson, &f); err != nil {
-		return 0, err
-	}
+func addFieldList(ctx context.Context, doc *doc, f types.DocumentFieldList, width float64, fontParent types.DocumentFont) (float64, error) {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {

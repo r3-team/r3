@@ -2,17 +2,11 @@ package doc_create
 
 import (
 	"context"
-	"encoding/json"
 	"r3/types"
 )
 
-func addFieldFlow(ctx context.Context, doc *doc, fieldJson json.RawMessage, width float64, border types.DocumentBorder,
+func addFieldFlow(ctx context.Context, doc *doc, f types.DocumentFieldFlow, width float64, border types.DocumentBorder,
 	font types.DocumentFont, posX, posY, pageHeightUsable, pageMarginT float64) (float64, error) {
-
-	var f types.DocumentFieldFlow
-	if err := json.Unmarshal(fieldJson, &f); err != nil {
-		return 0, err
-	}
 
 	pageNoStart := doc.p.PageNo()
 	posYAfterFields, err := addFieldFlowKids(ctx, doc, f.Fields, f.Padding, pageMarginT, f.Gap, posX, posY, width, pageHeightUsable, false, font)

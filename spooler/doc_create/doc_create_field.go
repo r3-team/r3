@@ -60,15 +60,35 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentWidth
 	// draw field content
 	switch f.Content {
 	case "data":
-		return addFieldData(doc, fieldJson, width, f.Border, font)
+		var f types.DocumentFieldData
+		if err := json.Unmarshal(fieldJson, &f); err != nil {
+			return 0, err
+		}
+		return addFieldData(doc, f, width, f.Border, font)
 	case "flow":
-		return addFieldFlow(ctx, doc, fieldJson, width, f.Border, font, posX, posY, pageHeightUsable, pageMarginT)
+		var f types.DocumentFieldFlow
+		if err := json.Unmarshal(fieldJson, &f); err != nil {
+			return 0, err
+		}
+		return addFieldFlow(ctx, doc, f, width, f.Border, font, posX, posY, pageHeightUsable, pageMarginT)
 	case "grid":
-		return addFieldGrid(ctx, doc, fieldJson, width, f.Border, font, posX, posY, pageHeightUsable, pageMarginT)
+		var f types.DocumentFieldGrid
+		if err := json.Unmarshal(fieldJson, &f); err != nil {
+			return 0, err
+		}
+		return addFieldGrid(ctx, doc, f, width, f.Border, font, posX, posY, pageHeightUsable, pageMarginT)
 	case "list":
-		return addFieldList(ctx, doc, fieldJson, width, font)
+		var f types.DocumentFieldList
+		if err := json.Unmarshal(fieldJson, &f); err != nil {
+			return 0, err
+		}
+		return addFieldList(ctx, doc, f, width, font)
 	case "text":
-		return addFieldText(doc, fieldJson, width, f.Border, font)
+		var f types.DocumentFieldText
+		if err := json.Unmarshal(fieldJson, &f); err != nil {
+			return 0, err
+		}
+		return addFieldText(doc, f, width, f.Border, font)
 	}
 	return 0, fmt.Errorf("invalid field content '%s'", f.Content)
 }
