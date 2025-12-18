@@ -109,7 +109,7 @@ export default {
 						// count aggregations can be taken directly
 						// decimal numbers need to be formatted
 						// integer values are parsed as an aggregation can contain fractions
-						if(c.aggregator !== 'count') {
+						if(v !== null && c.aggregator !== 'count') {
 							switch(a.contentUse) {
 								case 'date':     v = this.getUnixFormat(this.getUnixShifted(v,true),this.dateFormat); break;
 								case 'datetime': v = this.getUnixFormat(v,this.dateFormat + ' H:i');                  break;
