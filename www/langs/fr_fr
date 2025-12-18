@@ -2293,6 +2293,7 @@
 		"globalSearch": "Global search",
 		"help": "Aide",
 		"home": "Accueil",
+		"homepage": "Page d'accueil",
 		"hotkey": "Hotkey",
 		"icon": "Icône",
 		"icons": "Icônes",
@@ -2453,7 +2454,6 @@
 		"noAccess": "Aucun accès n'a encore été accordé.<br />Veuillez contacter votre administrateur système.",
 		"noAccessAdmin": "Pour obtenir l'accès, attribuez des rôles à votre utilisateur.",
 		"noAccessTitle": "Pas d'accès aux applications",
-		"title": "Page d'accueil",
 		"wizard": {
 			"installBundle": "Ensemble de base de l'entreprise",
 			"installBundleDesc": "Installez un ensemble pré-emballé d'applications de base, utile pour toute organisation. L'ensemble 'Core Company' comprend :<ul><li>Gestion des absences</li><li>Suivi du temps</li><li>Gestion de projets et de tâches</li><li>Traitement des demandes</li><li>Un coffre-fort de mots de passe</li><li>Gestion des actifs informatiques</li></ul>Après l'installation, veuillez consulter les pages d'aide individuelles des applications pour en savoir plus sur la configuration initiale de chacune.",

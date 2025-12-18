@@ -992,7 +992,9 @@ export default {
 			
 			// rebuild form if ID changed
 			if(this.lastFormId !== this.form.id) {
-				this.$store.commit('pageTitle',this.title);
+				if(!this.isWidget)
+					this.$store.commit('pageTitle',this.title);
+
 				this.message            = null;
 				this.showLog            = false;
 				this.titleOverwrite     = null;
@@ -1202,7 +1204,9 @@ export default {
 		},
 		closePopUp() {
 			this.popUp = null;
-			this.$store.commit('pageTitle',this.title);
+
+			if(!this.isWidget) this.$store.commit('pageTitle',this.title);
+			else               this.$store.commit('pageTitle',this.capGen.homepage);
 		},
 		copyFormUrlToClipboard(middleClick) {
 			const path = this.getFormRoute(this.favoriteId,this.form.id,(this.isNew ? 0 : this.recordIds[0]),

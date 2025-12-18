@@ -2293,6 +2293,7 @@
 		"globalSearch": "Global search",
 		"help": "Ayuda",
 		"home": "Inicio",
+		"homepage": "Página de inicio",
 		"hotkey": "Tecla rápida",
 		"icon": "Icono",
 		"icons": "Iconos",
@@ -2453,7 +2454,6 @@
 		"noAccess": "Aún no se ha concedido acceso.<br />Por favor, contacta a tu administrador del sistema.",
 		"noAccessAdmin": "Para obtener acceso, asigna roles a tu usuario.",
 		"noAccessTitle": "Sin acceso a aplicaciones",
-		"title": "Página de inicio",
 		"wizard": {
 			"installBundle": "Core Company",
 			"installBundleDesc": "Instala un conjunto preempaquetado de aplicaciones básicas, útiles para cualquier organización. El conjunto 'Core Company' incluye:<ul><li>Gestión de ausencias</li><li>Seguimiento de tiempo</li><li>Gestión de proyectos y tareas</li><li>Manejo de solicitudes</li><li>Un gestor de contraseñas</li><li>Gestión de activos de TI</li></ul>Después de la instalación, consulta las páginas de ayuda de cada aplicación individual para obtener más información sobre la configuración inicial de cada una.",

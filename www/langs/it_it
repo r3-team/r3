@@ -2293,6 +2293,7 @@
 		"globalSearch": "Global search",
 		"help": "Help",
 		"home": "Home",
+		"homepage": "Home page",
 		"hotkey": "Hotkey",
 		"icon": "Icona",
 		"icons": "Icone",
@@ -2453,7 +2454,6 @@
 		"noAccess": "Non è stato ancora concesso l'accesso.<br />Contatta il tuo amministratore di sistema.",
 		"noAccessAdmin": "To get access, assign roles to your user.",
 		"noAccessTitle": "Nessun accesso alle applicazioni",
-		"title": "Home page",
 		"wizard": {
 			"installBundle": "Core Company",
 			"installBundleDesc": "Installa un set preconfezionato di applicazioni principali, utile per qualsiasi organizzazione. L'insieme \"Core Company\" include:<ul><li>Gestione delle assenze</li><li>Monitoraggio del tempo</li><li>Gestione delle attività</li><li>A password safe</li><li>IT asset management</li></ul>Dopo l'installazione, dai un'occhiata alle pagine di aiuto delle singole applicazioni per saperne di più sulla configurazione iniziale di ciascuna.",
