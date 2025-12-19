@@ -325,9 +325,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 		return 0, err
 	}
 
-	// execute login sync
-	syncLogin_tx(ctx, tx, "UPDATED", id)
-
 	// set records
 	for _, record := range records {
 
@@ -359,7 +356,14 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id int64, loginTemplateId pgtype.Int
 	}
 
 	// set roles
-	return id, login_role.Set_tx(ctx, tx, id, roleIds)
+	if err := login_role.Set_tx(ctx, tx, id, roleIds); err != nil {
+		return 0, err
+	}
+
+	// execute login sync
+	syncLogin_tx(ctx, tx, "UPDATED", id)
+
+	return id, nil
 }
 
 func SetSaltHash_tx(ctx context.Context, tx pgx.Tx, salt pgtype.Text, hash pgtype.Text, id int64) error {
