@@ -30,10 +30,7 @@ const MyInputFilesName = {
 	},
 	emits:['update:name'],
 	computed:{
-		value:(s) => {
-			return typeof s.change !== 'undefined' && s.change.name !== ''
-				? s.change.name : s.name;
-		},
+		value:(s) => typeof s.change !== 'undefined' && s.change.name !== '' ? s.change.name : s.name,
 		
 		// store
 		capApp:(s) => s.$store.getters.captions.input.files
