@@ -7,18 +7,16 @@ import (
 	"time"
 )
 
-var (
-	timeoutHandshake = time.Duration(5)
-)
+var timeoutSecHandshake = time.Duration(5)
 
-func GetHttpClient(skipVerify bool, timeoutHttp int64) (http.Client, error) {
+func GetHttpClient(skipVerify bool, timeoutSecRequest int64) (http.Client, error) {
 
 	tlsConfig := tls.Config{
 		InsecureSkipVerify:       skipVerify,
 		PreferServerCipherSuites: true,
 	}
 	transport := &http.Transport{
-		TLSHandshakeTimeout: time.Second * time.Duration(timeoutHandshake),
+		TLSHandshakeTimeout: time.Second * time.Duration(timeoutSecHandshake),
 		TLSClientConfig:     &tlsConfig,
 	}
 
@@ -30,7 +28,7 @@ func GetHttpClient(skipVerify bool, timeoutHttp int64) (http.Client, error) {
 		transport.Proxy = http.ProxyURL(proxyUrl)
 	}
 	return http.Client{
-		Timeout:   time.Second * time.Duration(timeoutHttp),
+		Timeout:   time.Second * time.Duration(timeoutSecRequest),
 		Transport: transport,
 	}, nil
 }

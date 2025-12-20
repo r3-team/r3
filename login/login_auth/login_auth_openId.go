@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"r3/cache"
+	"r3/config"
 	"r3/db"
 	"r3/log"
 	"r3/login"
@@ -39,7 +40,14 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		return types.LoginAuthResult{}, errors.New("missing provider or redirect URL for OAUTH client")
 	}
 
-	provider, err := oidc.NewProvider(ctx, c.ProviderUrl.String)
+	httpClient, err := config.GetHttpClient(false, 10)
+	if err != nil {
+		return types.LoginAuthResult{}, err
+	}
+
+	ctxHttp := oidc.ClientContext(ctx, &httpClient)
+
+	provider, err := oidc.NewProvider(ctxHttp, c.ProviderUrl.String)
 	if err != nil {
 		return types.LoginAuthResult{}, err
 	}
@@ -57,7 +65,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 		Endpoint:     provider.Endpoint(),
 		Scopes:       c.Scopes,
 	}
-	tokens, err := oauth2Config.Exchange(ctx, code, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
+	tokens, err := oauth2Config.Exchange(ctxHttp, code, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
 	if err != nil {
 		return types.LoginAuthResult{}, err
 	}
@@ -67,7 +75,7 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 	if !ok {
 		return types.LoginAuthResult{}, err
 	}
-	idToken, err := provider.Verifier(&oidc.Config{ClientID: c.ClientId}).Verify(ctx, tokenIdRaw)
+	idToken, err := provider.Verifier(&oidc.Config{ClientID: c.ClientId}).Verify(ctxHttp, tokenIdRaw)
 	if err != nil {
 		return types.LoginAuthResult{}, err
 	}
