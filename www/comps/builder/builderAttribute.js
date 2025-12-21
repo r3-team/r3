@@ -231,7 +231,7 @@ const MyBuilderAttribute = {
 							<td>{{ lengthTitle }}</td>
 							<td>
 								<input type="number"
-									@input="updateLengths('length',$event.target.value)"
+									@input="updateLengths('length',$event.target)"
 									:disabled="readonly"
 									:value="values.length"
 								/>
@@ -252,14 +252,14 @@ const MyBuilderAttribute = {
 										<tr>
 											<td>
 												<input type="number"
-													@input="updateLengths('length',$event.target.value)"
+													@input="updateLengths('length',$event.target)"
 													:disabled="readonly"
 													:value="values.length - values.lengthFract"
 												/>
 											</td>
 											<td>
 												<input type="number"
-													@input="updateLengths('lengthFract',$event.target.value)"
+													@input="updateLengths('lengthFract',$event.target)"
 													:disabled="readonly"
 													:value="values.lengthFract"
 												/>
@@ -593,9 +593,14 @@ const MyBuilderAttribute = {
 				default:         this.values.def = '';                                 break;
 			}
 		},
-		updateLengths(name,v) {
-			var newValue = v === '' ? 0  : parseInt(v);
+		updateLengths(name,target) {
+			var newValue = target.value === '' ? 0  : parseInt(target.value);
 			var oldValue = this.values[name];
+
+			if(newValue < 0) {
+				newValue = 0;
+				target.value = 0;
+			}
 
 			switch(name) {
 				case 'length':
