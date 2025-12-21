@@ -112,6 +112,7 @@ func Run(ctx context.Context, docDef types.Document, pathOut string) error {
 	doc.p.SetLang(docDef.LanguageCode)
 	doc.p.SetTitle(docDef.Title, true)
 	doc.p.SetCellMargin(0) // kills the default margin within text cells
+	doc.p.AliasNbPages("{PAGE_END}")
 
 	// generate page ID map for direct reference
 	pageIdMapIndex := make(map[uuid.UUID]int)

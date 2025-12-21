@@ -21,9 +21,12 @@ func GetDatetimeFormat(format string, withTime bool) string {
 	}
 
 	if withTime {
-		return fmt.Sprintf("%s 15:04:05", s)
+		return fmt.Sprintf("%s %s", s, GetTimeFormat())
 	}
 	return s
+}
+func GetTimeFormat() string {
+	return "15:04:05"
 }
 func GetTimeUnix() int64 {
 	return time.Now().UTC().Unix()
