@@ -21,7 +21,7 @@ export {MyInputDate as default};
 const MyInputDateEntryInput = {
 	name:'my-input-date-entry-input',
 	template:`<input data-is-input="1"
-		@change="change($event)"
+		@blur="blur"
 		@keydown="keydownPressed = true"
 		@keyup="keyup($event)"
 		:disabled="isReadonly"
@@ -38,7 +38,7 @@ const MyInputDateEntryInput = {
 	props:{
 		caption:   { type:String,  required:true },
 		isReadonly:{ type:Boolean, required:true },
-		modelValue:{ required:true },
+		modelValue:{ type:String,  required:true },
 		size:      { type:Number,  required:true }
 	},
 	emits:['filled','update:modelValue'],
@@ -46,23 +46,64 @@ const MyInputDateEntryInput = {
 		styles:(s) => `width:${s.size}ch;`
 	},
 	methods:{
-		change(e) {
-			this.$emit('update:modelValue',e.target.value);
+		blur(e) {
+			// on blur, if string does not reach required length, fill it
+			if(e.target.value !== '' && e.target.value.length < this.size) {
+				e.target.value = e.target.value.padStart(this.size,'0');
+				this.set(e.target);
+			}
 		},
 		keyup(e) {
-			// on number input
+			// on number input, if string reaches required length, send update
 			if(this.keydownPressed && /[0-9]/.test(e.key) && e.target.value.length >= this.size) {
-				this.$emit('update:modelValue',e.target.value);
+				this.set(e.target);
 				this.$nextTick(() => this.$emit('filled'));
 			}
 			this.keydownPressed = false;
+		},
+
+		// set
+		set(target) {
+			this.$emit('update:modelValue',target.value);
+
+			// important fix: If updated model value is rejected, reset input value back to modelValue
+			// rejection reasons could be things like "Month was set to 13", "date to is < date from (in ranges)"
+			target.value = this.modelValue;
+		}
+	}
+};
+
+const MyInputDateEntryInputMobile = {
+	name:'my-input-date-entry-input-mobile',
+	template:`<input data-is-input="1" step="1"
+		@input="set"
+		:disabled="isReadonly"
+		:type="inputType"
+		:value="modelValue"
+	/>`,
+	props:{
+		inputType: { type:String,  required:true },
+		isReadonly:{ type:Boolean, required:true },
+		modelValue:{ type:String,  required:true }
+	},
+	emits:['update:modelValue'],
+	methods:{
+		set(e) {
+			this.$emit('update:modelValue',e.target.value);
+
+			// important fix: If updated model value is rejected, reset input value back to modelValue
+			// rejection reasons could be things like "Month was set to 13", "date to is < date from (in ranges)"
+			e.target.value = this.modelValue;
 		}
 	}
 };
 
 const MyInputDateEntry = {
 	name:'my-input-date-entry',
-	components:{MyInputDateEntryInput},
+	components:{
+		MyInputDateEntryInput,
+		MyInputDateEntryInputMobile
+	},
 	template:`<div class="input-date-inputs entry">
 		
 		<span v-if="captionPrefix !== ''" class="prefix">
@@ -71,9 +112,9 @@ const MyInputDateEntry = {
 	
 		<!-- mobile date inputs -->
 		<div class="mobile-inputs" v-if="isMobile">
-			<input step="1" type="datetime-local" v-if="isDate && isTime" v-model="inputMobileDatetime" :disabled="isReadonly" />
-			<input step="1" type="date" v-if="isDate && !isTime" v-model="inputMobileDate" :disabled="isReadonly" />
-			<input step="1" type="time" v-if="!isDate && isTime" v-model="inputMobileTime" :disabled="isReadonly" />
+			<my-input-date-entry-input-mobile input-type="datetime-local" v-if=" isDate &&  isTime" v-model="inputMobileDatetime" :isReadonly />
+			<my-input-date-entry-input-mobile input-type="date"           v-if=" isDate && !isTime" v-model="inputMobileDate"     :isReadonly />
+			<my-input-date-entry-input-mobile input-type="time"           v-if="!isDate &&  isTime" v-model="inputMobileTime"     :isReadonly />
 		</div>
 		
 		<!-- non-mobile date inputs -->
@@ -132,7 +173,8 @@ const MyInputDateEntry = {
 		isDate:       { type:Boolean, required:true },
 		isTime:       { type:Boolean, required:true },
 		isReadonly:   { type:Boolean, required:true },
-		modelValue:   { required:true }
+		modelValue:   { required:true },
+		unixMin:      { required:false, default:null } // min. unix value that this date entry must have
 	},
 	emits:['update:modelValue'],
 	computed:{
@@ -145,7 +187,7 @@ const MyInputDateEntry = {
 		},
 		
 		// inputs
-		inputYear:  (s) => s.localDate === null ? '' : s.localDate.getFullYear(),
+		inputYear:  (s) => s.localDate === null ? '' : String(s.localDate.getFullYear()),
 		inputMonth: (s) => s.localDate === null ? '' : s.getStringFilled(s.localDate.getMonth()+1,2,'0'),
 		inputDay:   (s) => s.localDate === null ? '' : s.getStringFilled(s.localDate.getDate(),2,'0'),
 		inputHour:  (s) => s.localDate === null ? '' : s.getStringFilled(s.localDate.getHours(),2,'0'),
@@ -163,7 +205,7 @@ const MyInputDateEntry = {
 			set(v) {
 				let d = new Date(v);
 				if(!isNaN(d.getTime()))
-					this.$emit('update:modelValue',d.getTime() / 1000);
+					this.set(d);
 			}
 		},
 		inputMobileDate:{
@@ -174,7 +216,7 @@ const MyInputDateEntry = {
 			set(v) {
 				let d = new Date(v);
 				if(!isNaN(d.getTime()))
-					this.$emit('update:modelValue',d.getTime() / 1000);
+					this.set(d);
 			}
 		},
 		inputMobileTime:{
@@ -206,9 +248,9 @@ const MyInputDateEntry = {
 		},
 		
 		// simple
-		isDateOnly:(s) => s.isDate && !s.isTime,
-		isDateTime:(s) => s.isDate && s.isTime,
-		isTimeOnly:(s) => !s.isDate && s.isTime,
+		isDateOnly:(s) =>  s.isDate && !s.isTime,
+		isDateTime:(s) =>  s.isDate &&  s.isTime,
+		isTimeOnly:(s) => !s.isDate &&  s.isTime,
 		
 		// stores
 		capApp:  (s) => s.$store.getters.captions.input.date,
@@ -288,8 +330,15 @@ const MyInputDateEntry = {
 				
 				if(this.isDateOnly)
 					d = this.getDateShifted(d,false);
+
+				// unixMin is used to force a 2nd date in a range to never be smaller than the 1st date
+				// if this date entry is null orginally, date is initially set to NOW
+				// if the day input, applied to NOW as initial value, is set to any day value lower than 1st date, NOW + day value will always be smaller
+				// in this case, we move to the next month
+				if(this.unixMin !== null && name === 'd' && Math.floor(d.getTime() / 1000) < this.unixMin)
+					d.setMonth(d.getMonth() + 1);
 			}
-			this.$emit('update:modelValue',Math.floor(d.getTime() / 1000));
+			this.set(d);
 		},
 		getInputCaption(position) {
 			switch(this.getInputType(position)) {
@@ -329,6 +378,15 @@ const MyInputDateEntry = {
 				case 2: this.moveInput('D4'); break;
 				case 4: if(this.isTime) this.moveInput('H'); break;
 			}
+		},
+		set(d) {
+			let unix = Math.floor(d.getTime() / 1000);
+
+			// force minimum value if defined
+			if(this.unixMin !== null && this.unixMin > unix)
+				unix = this.unixMin;
+			
+			this.$emit('update:modelValue',unix);
 		}
 	}
 };
@@ -363,6 +421,7 @@ const MyInputDate = {
 					:isDate="isDate"
 					:isTime="isTime && !fullDay"
 					:isReadonly="isReadonly"
+					:unixMin="unixFromInput"
 				/>
 			</div>
 			
@@ -485,13 +544,7 @@ const MyInputDate = {
 		},
 		unixToInput:{
 			get()  { return this.unixTo; },
-			set(v) {
-				// if to unix is smaller, set to from
-				if(v !== null && v < this.unixFromInput)
-					v = this.unixFromInput;
-				
-				this.$emit('set-unix-to',v);
-			}
+			set(v) { this.$emit('set-unix-to',v); }
 		},
 		
 		// simple
@@ -589,26 +642,24 @@ const MyInputDate = {
 			}
 			
 			// toggle dates (if set) between date / datetime
-			// emit change (instead of setting unixInput)
-			// otherwise timing issue exists: unixToInput < unixFromInput
 			if(this.unixFrom !== null)
-				this.$emit('set-unix-from',this.getUnixFromDate(this.getDateFullDayToggled(
-					new Date(this.unixFrom*1000),this.fullDay)));
+				this.unixFromInput = this.getUnixFromDate(this.getDateFullDayToggled(
+					new Date(this.unixFrom*1000),this.fullDay));
 			
 			if(this.unixTo !== null)
-				this.$emit('set-unix-to',this.getUnixFromDate(this.getDateFullDayToggled(
-					new Date(this.unixTo*1000),this.fullDay)));
+				this.unixToInput = this.getUnixFromDate(this.getDateFullDayToggled(
+					new Date(this.unixTo*1000),this.fullDay));
 
 			// trigger app resize, as full day toggle can wrap if date range is used
 			this.$nextTick(() => this.$store.commit('appResized'));
 		},
 		dateSet(unix0,unix1) {
-			this.dateSelect0 = new Date(unix0 * 1000);
-			this.$emit('set-unix-from',unix0);
+			this.dateSelect0   = new Date(unix0 * 1000);
+			this.unixFromInput = unix0;
 			
 			if(this.isRange) {
 				this.dateSelect1 = new Date(unix1 * 1000);
-				this.$emit('set-unix-to',unix1);
+				this.unixToInput = unix1;
 			}
 			this.dropdownSet(false);
 		},
