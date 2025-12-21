@@ -2308,6 +2308,7 @@
 		"globalSearch": "Globale Suche",
 		"help": "Hilfe",
 		"home": "Start",
+		"homepage": "Startseite",
 		"hotkey": "Hotkey",
 		"icon": "Icon",
 		"icons": "Icons",
@@ -2468,7 +2469,6 @@
 		"noAccess": "Es ist noch kein Zugriff eingerichtet.<br />Bitte kontaktiere deinen Systemadministrator.",
 		"noAccessAdmin": "Um Zugriff zu erhalten, weise deinem Benutzer Rollen zu.",
 		"noAccessTitle": "Kein Zugriff auf Anwendungen",
-		"title": "Startseite",
 		"wizard": {
 			"installBundle": "Core Company",
 			"installBundleDesc": "Installiere eine vorselektierte Sammlung an Kernanwendungen für Organisationen. Die Sammlung \"Core Company\" inkludiert:<ul><li>Abwesenheitsverwaltung</li><li>Zeiterfassung</li><li>Projekt- & Aufgabenverwaltung</li><li>Anfragenverwaltung</li><li>Ein Passwort-Safe</li><li>IT-Anlagenverwaltung</li></ul>Nach der Installation unterstützen die Hilfeseiten der jeweiligen Anwendungen bei der Ersteinrichtung.",

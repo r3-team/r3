@@ -2308,6 +2308,7 @@
 		"globalSearch": "Global search",
 		"help": "Help",
 		"home": "Home",
+		"homepage": "Home page",
 		"hotkey": "Hotkey",
 		"icon": "Icon",
 		"icons": "Icons",
@@ -2468,7 +2469,6 @@
 		"noAccess": "No access has been granted yet.<br />Please contact your system administrator.",
 		"noAccessAdmin": "To get access, assign roles to your user.",
 		"noAccessTitle": "No access to applications",
-		"title": "Home page",
 		"wizard": {
 			"installBundle": "Core Company",
 			"installBundleDesc": "Install a pre-packaged set of core applications, useful for any organization. The set 'Core Company' includes:<ul><li>Absence management</li><li>Time tracking</li><li>Project & task management</li><li>Request handling</li><li>A password safe</li><li>IT asset management</li></ul>After installation, please have a look at the individual application help pages to learn more about the initial setup for each.",

@@ -1,4 +1,3 @@
-import {openLink}          from './shared/generic.js';
 import srcBase64Icon       from './shared/image.js';
 import {getCaption}        from './shared/language.js';
 import {set as setSetting} from './shared/settings.js';
@@ -995,16 +994,18 @@ const MySettingsFixedTokens = {
 						<div class="column gap">
 							<span>{{ capApp.device.installStep2 }}</span>
 							<div class="row gap">
-								<my-button image="download.png"
-									@trigger="loadApp"
-									:active="tokenSet"
-									:caption="capApp.button.loadApp"
-								/>
-								<my-button image="download.png"
-									@trigger="loadCnf"
-									:active="tokenSet"
-									:caption="capApp.button.loadCnf"
-								/>
+								<a target="_blank" :href="tokenSet ? urlApp : null">
+									<my-button image="download.png"
+										:active="tokenSet"
+										:caption="capApp.button.loadApp"
+									/>
+								</a>
+								<a target="_blank" :href="tokenSet ? urlCnf : null">
+									<my-button image="download.png"
+										:active="tokenSet"
+										:caption="capApp.button.loadCnf"
+									/>
+								</a>
 							</div>
 						</div>
 					</li>
@@ -1021,10 +1022,9 @@ const MySettingsFixedTokens = {
 						<div class="column gap">
 							<span>{{ capApp.device.updateStep1 }}</span>
 							<div class="row gap">
-								<my-button image="download.png"
-									@trigger="loadApp"
-									:caption="capApp.button.loadApp"
-								/>
+								<a target="_blank" :href="urlApp">
+									<my-button image="download.png" :caption="capApp.button.loadApp" />
+								</a>
 							</div>
 						</div>
 					</li>
@@ -1072,6 +1072,29 @@ const MySettingsFixedTokens = {
 			return !s.tokenSet ? '' : uri;
 		},
 		tokenSet:(s) => s.tokenFixed !== '',
+		urlApp:(s) => `/client/download/?${[`os=${s.deviceOs}`,`token=${s.token}`].join('&')}`,
+		urlCnf:(s) => {
+			const langCode = s.languageCodesOfficial.includes(s.languageCode)
+				? s.languageCode : 'en_us';
+			
+			const isSsl = location.protocol.includes('https');
+			let port  = location.port;
+			
+			// known issue, empty is returned if port is default HTTP(S)
+			if(port === null || port === '')
+				port = isSsl ? '443' : '80';
+			
+			const call = [
+				`deviceName=${s.tokenName}`,
+				`hostName=${location.hostname}`,
+				`hostPort=${port}`,
+				`languageCode=${langCode}`,
+				`tokenFixed=${s.tokenFixed}`,
+				`token=${s.token}`,
+				`ssl=${ isSsl ? 1 : 0}`
+			];
+			return `/client/download/config/?${call.join('&')}`;
+		},
 		
 		// stores
 		appNameShort:         (s) => s.$store.getters['local/appNameShort'],
@@ -1107,35 +1130,8 @@ const MySettingsFixedTokens = {
 	methods:{
 		// externals
 		getUnixFormat,
-		openLink,
 		
 		// actions
-		loadApp() {
-			let call = [`os=${this.deviceOs}`,`token=${this.token}`];
-			this.openLink(`/client/download/?${call.join('&')}`,false);
-		},
-		loadCnf() {
-			let langCode = this.languageCodesOfficial.includes(this.languageCode)
-				? this.languageCode : 'en_us';
-			
-			let isSsl = location.protocol.includes('https');
-			let port  = location.port;
-			
-			// known issue, empty is returned if port is default HTTP(S)
-			if(port === null || port === '')
-				port = isSsl ? '443' : '80';
-			
-			let call = [
-				`deviceName=${this.tokenName}`,
-				`hostName=${location.hostname}`,
-				`hostPort=${port}`,
-				`languageCode=${langCode}`,
-				`tokenFixed=${this.tokenFixed}`,
-				`token=${this.token}`,
-				`ssl=${ isSsl ? 1 : 0}`
-			];
-			this.openLink(`/client/download/config/?${call.join('&')}`,false);
-		},
 		showSubWindow(target) {
 			this.tokenFixed    = '';
 			this.tokenFixedB32 = '';

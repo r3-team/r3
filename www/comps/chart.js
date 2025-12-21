@@ -120,8 +120,8 @@ export default {
 		
 		// backend calls
 		get() {
-			// no need to fetch data if entire options object (incl. data) is overwritten
-			if(this.hasOverwrite)
+			// no need to fetch data if options object (incl. data) is overwritten or query is not defined
+			if(this.hasOverwrite || this.query.relationId === null)
 				return;
 
 			ws.send('data','get',{

@@ -84,12 +84,8 @@ let MyAdminFiles = {
 										@trigger="restore(atrId,f.id,f.recordId)"
 										:caption="capGen.button.restore"
 									/>
-									<a target="_blank"
-										:href="getAttributeFileHref(atrId,f.id,f.name,token)"
-									>
-										<my-button image="download.png"
-											:caption="capGen.button.download"
-										/>
+									<a target="_blank" :href="getAttributeFileHref(atrId,f.id,f.name,token)">
+										<my-button image="download.png" :caption="capGen.button.download" />
 									</a>
 								</div>
 							</td>

@@ -91,7 +91,7 @@
 	flex-flow:row nowrap;
 	justify-content:space-between;
 	align-items:center;
-	z-index:var(--z-index-field-input-toolbar);
+	z-index:var(--z-index-input-toolbar);
 }
 
 /* select input */

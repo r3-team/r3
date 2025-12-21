@@ -2308,6 +2308,7 @@
 		"globalSearch": "Global search",
 		"help": "Help",
 		"home": "Acasă",
+		"homepage": "Pagina principală",
 		"hotkey": "Hotkey",
 		"icon": "Icoană",
 		"icons": "Pictograme",
@@ -2468,7 +2469,6 @@
 		"noAccess": "Nu a fost acordat încă acces.<br />Vă rugăm să contactați administratorul de sistem.",
 		"noAccessAdmin": "To get access, assign roles to your user.",
 		"noAccessTitle": "Fără acces la aplicații",
-		"title": "Pagina principală",
 		"wizard": {
 			"installBundle": "Core Company",
 			"installBundleDesc": "Instalați un set de aplicații de bază, utile pentru orice organizație. Setul „Core Company” include:<ul><li>Gestionarea absențelor</li><li>Urmărirea timpului</li><li>Gestionarea sarcinilor</li><li>A password safe</li><li>IT asset management</li></ul>După instalare, vă rugăm să aruncați o privire la paginile individuale de ajutor ale aplicației pentru a afla mai multe despre configurarea inițială pentru fiecare.",

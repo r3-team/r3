@@ -2308,6 +2308,7 @@
 		"globalSearch": "Global search",
 		"help": "Segítség",
 		"home": "Kezdőlap",
+		"homepage": "Kezdőlap",
 		"hotkey": "Hotkey",
 		"icon": "Ikon",
 		"icons": "Ikonok",
@@ -2468,7 +2469,6 @@
 		"noAccess": "Még nincs hozzáférés beállítva.<br />Kérjük, vegye fel a kapcsolatot rendszergazdájával.",
 		"noAccessAdmin": "To get access, assign roles to your user.",
 		"noAccessTitle": "Nincs hozzáférés az alkalmazásokhoz",
-		"title": "Kezdőlap",
 		"wizard": {
 			"installBundle": "Alapvállalat",
 			"installBundleDesc": "Telepítse az alapvállalat előre kiválasztott alkalmazásainak gyűjteményét szervezetek számára. Az „Alapvállalat” gyűjtemény tartalmazza a következőket:<ul><li>Hiányzáskezelés</li><li>Időkövetés</li><li>Projekt- és feladatkezelés</li><li>Levélkéréskezelés</li><li>Jelszókezelő</li><li>IT-eszközkezelés</li></ul>A telepítés után az egyes alkalmazások első beállítását segítik az alkalmazások saját súgó oldalai.",

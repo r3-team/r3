@@ -127,7 +127,7 @@ const MyAdminLogin = {
 							</td>
 							<td class="default-inputs">
 								<div class="column gap">
-									<input v-model="inputs.name" v-focus @keyup="typedUniqueField('name',inputs.name)" :disabled="!isAuthR3" />
+									<input v-model="inputs.name" v-focus @input="typedUniqueField('name',inputs.name)" :disabled="!isAuthR3" />
 									<div v-if="notUniqueName && inputs.name !== ''" class="message error">
 										{{ capApp.dialog.notUniqueName }}
 									</div>

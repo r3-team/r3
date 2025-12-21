@@ -496,7 +496,7 @@ let MyBuilderPgFunction = {
 						</tr>
 						<tr v-if="!isTrigger">
 							<td>{{ capApp.codeArgs }}</td>
-							<td><textarea v-model="codeArgs" @keyup="resetExec" :disabled="isTrigger || isLoginSync || readonly" placeholder="-"></textarea></td>
+							<td><textarea v-model="codeArgs" @input="resetExec" :disabled="isTrigger || isLoginSync || readonly" placeholder="-"></textarea></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.codeReturns }}</td>
@@ -507,7 +507,7 @@ let MyBuilderPgFunction = {
 							<td>
 								<div class="row gap centered">
 									<input type="number"
-										@keyup="updateCost($event.target.value)"
+										@input="updateCost($event.target.value)"
 										:disabled="readonly"
 										:value="cost"
 									/>

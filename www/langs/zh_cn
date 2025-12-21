@@ -2308,6 +2308,7 @@
 		"globalSearch": "Global search",
 		"help": "帮助",
 		"home": "主页",
+		"homepage": "主页",
 		"hotkey": "Hotkey",
 		"icon": "图标",
 		"icons": "图标",
@@ -2468,7 +2469,6 @@
 		"noAccess": "尚未授予访问权限。<br />请联系您的系统管理员。",
 		"noAccessAdmin": "To get access, assign roles to your user.",
 		"noAccessTitle": "无法访问应用程序",
-		"title": "主页",
 		"wizard": {
 			"installBundle": "核心应用程序",
 			"installBundleDesc": "安装预打包的核心应用程序集，适用于任何组织。'核心应用程序'套件包括：<ul><li>缺勤管理</li><li>时间跟踪</li><li>项目和任务管理</li><li>请求处理</li><li>密码保险柜</li><li>IT 资产管理</li></ul>安装后，请查看各个应用程序的帮助页面，了解每个应用程序的初始设置。",

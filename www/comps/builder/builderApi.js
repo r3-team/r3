@@ -99,7 +99,7 @@ const MyBuilderApiPreview = {
 						<tbody>
 							<tr v-if="isGet">
 								<td>Limit</td>
-								<td><input v-model.number="params.limit" @keyup="limitChanged = true" /></td>
+								<td><input v-model.number="params.limit" @input="limitChanged = true" /></td>
 								<td>{{ capApp.limitHint }}</td>
 							</tr>
 							<tr v-if="isGet">

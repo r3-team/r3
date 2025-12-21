@@ -158,7 +158,7 @@ let MyHome = {
 		settings:     (s) => s.$store.getters.settings
 	},
 	mounted() {
-		this.$store.commit('pageTitle',this.capApp.title);
+		this.$store.commit('pageTitle',this.capGen.homepage);
 		
 		// forward to PWA if enabled
 		if(this.pwaModuleId !== null) {

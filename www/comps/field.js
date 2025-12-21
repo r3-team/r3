@@ -1376,14 +1376,15 @@ export default {
 		setValue(val,valOld,indexAttributeId,isOriginal) {
 			// clean inputs
 			if(val !== null && typeof val === 'string') {
-				if(val === '')
+				if(val === '') {
 					val = null;
-
-				if(this.isInteger && /^\-?\d+$/.test(val))
+				}
+				else if(this.isInteger && /^\-?\d+$/.test(val)) {
 					val = parseInt(val);
-
-				if(this.isDecimal)
+				}
+				else if(this.isDecimal) {
 					val = val.replace(',','.');
+				}
 			}
 			
 			if(!this.isVariable) {

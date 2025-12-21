@@ -260,9 +260,7 @@ let MyBuilderModulesExport = {
 			<!-- export actions -->
 			<div class="actions" v-if="id !== null && keyIsSet && exportValid">
 				<a :href="exportHref" :download="exportFileName">
-					<my-button image="download.png"
-						:caption="capApp.button.export"
-					/>
+					<my-button image="download.png" :caption="capApp.button.export" />
 				</a>
 			</div>
 		</div>
