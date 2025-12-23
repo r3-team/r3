@@ -100,15 +100,11 @@ func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFon
 		case "default":
 			drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%d", valueIf))
 		case "date", "datetime":
-			var tUnix int64
-			switch v := valueIf.(type) {
-			case int64:
-				tUnix = v
-			case int32:
-				tUnix = int64(v)
-			default:
-				return fmt.Errorf("failed to parse date/datetime attribute value")
+			tUnix, err := getInt64FromInterface(valueIf)
+			if err != nil {
+				return err
 			}
+
 			if atr.ContentUse == "datetime" {
 				// print datetime at local server time
 				drawCellText(doc, b, font, w, h, lineCount, time.Unix(tUnix, 0).Local().Format(tools.GetDatetimeFormat(font.FormatDate, true)))

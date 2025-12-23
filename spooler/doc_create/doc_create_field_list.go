@@ -8,8 +8,18 @@ import (
 	"r3/data/data_query"
 	"r3/db"
 	"r3/handler"
+	"r3/tools"
 	"r3/types"
 )
+
+type cell struct {
+	atr      types.Attribute
+	atrValue any
+	font     types.DocumentFont
+	text     string
+	lines    int
+	width    float64
+}
 
 func addFieldList(ctx context.Context, doc *doc, f types.DocumentFieldList, width float64, fontParent types.DocumentFont) (float64, error) {
 
@@ -81,14 +91,20 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocumentFieldList, widt
 		}
 	}
 
-	// process column definitions
+	// working variables
+	//var heightFooter float64 = 0
 	var heightHeader float64 = 0
+	printAggregationRow := false
 	columnIndexMapAtr := make(map[int]types.Attribute)
-	columnIndexMapLines := make(map[int]int)
 	columnIndexMapFontBody := make(map[int]types.DocumentFont)
 	columnIndexMapFontHeader := make(map[int]types.DocumentFont)
 	columnIndexMapFontFooter := make(map[int]types.DocumentFont)
-	columnIndexMapTitle := make(map[int]string)
+	columnIndexMapAggValueCnt := make(map[int]int)
+	columnIndexMapAggValueInt := make(map[int]int64)
+	columnIndexMapAggValueNum := make(map[int]float64)
+	cellsHeader := make([]cell, 0)
+
+	// process column definitions
 	for i, column := range f.Columns {
 
 		// parse & store column meta data
@@ -108,115 +124,243 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocumentFieldList, widt
 		if !exists {
 			title = columnIndexMapAtr[i].Name
 		}
-		columnIndexMapTitle[i] = title
 
 		cellHeight, cellLines := getCellHeightLines(doc, columnIndexMapFontHeader[i], columnIndexMapWidth[i], title)
 		if heightHeader < cellHeight {
 			heightHeader = cellHeight
 		}
-		columnIndexMapLines[i] = cellLines
+
+		cellsHeader = append(cellsHeader, cell{
+			font:  columnIndexMapFontHeader[i],
+			lines: cellLines,
+			text:  title,
+			width: columnIndexMapWidth[i],
+		})
+
+		// enable aggregation
+		if column.Aggregator.Valid {
+			printAggregationRow = true
+		}
 	}
 
 	posXStart := doc.p.GetX()
 	posYStart, _ := getYWithNewPageIfNeeded(doc, heightHeader, pageMarginB)
 
-	drawHeader := func() {
-		// draw table header
-		if f.HeaderBorder.Draw != "" || f.HeaderColorFill != "" {
-			// draw box to display outer border and/or color fill
-			doc.p.SetXY(posXStart, posYStart)
-			drawBox(doc, f.HeaderBorder, f.HeaderColorFill, width, heightHeader+paddingY)
-		}
-		posXOffset := float64(0)
-		for i := range f.Columns {
-			// draw intercell border
-			if i != 0 && f.HeaderBorder.Cell {
-				drawBorderLine(doc, f.HeaderBorder, posXStart+posXOffset, posYStart, posXStart+posXOffset, posYStart+heightHeader+paddingY)
-			}
-			// draw cell
-			font := columnIndexMapFontHeader[i]
-			setFont(doc, font)
-			doc.p.SetXY(posXStart+posXOffset+f.Padding.L, posYStart+f.Padding.T)
-
-			drawCellText(doc, borderEmpty, font, columnIndexMapWidth[i], heightHeader, columnIndexMapLines[i], columnIndexMapTitle[i])
-			posXOffset += columnIndexMapWidth[i] + paddingX
-		}
-		posYStart += heightHeader + paddingY
-
-		if f.HeaderBorder.Draw == "B" || f.HeaderBorder.Draw == "1" {
-			posYStart += f.HeaderBorder.Size
-		}
-		doc.p.SetXY(posXStart, posYStart)
+	// draw header
+	posYStart, err = addFieldListRow(doc, f.HeaderBorder, cellsHeader, f.Padding, f.HeaderColorFill, posXStart, posYStart, width, heightHeader, paddingX, paddingY)
+	if err != nil {
+		return 0, err
 	}
-	drawHeader()
 
 	// draw table body
 	for ri, row := range rows {
 
 		// set row height by largest cell height
 		var heightRow float64
-		for i := range f.Columns {
-			if columnIndexMapAtr[i].ContentUse != "default" {
-				continue
-			}
+		cells := make([]cell, 0)
+		for i, column := range f.Columns {
 
-			isText := columnIndexMapAtr[i].Content == "text"
-			isInt := columnIndexMapAtr[i].Content == "integer" || columnIndexMapAtr[i].Content == "bigint"
-			isNum := columnIndexMapAtr[i].Content == "numeric"
+			atr := columnIndexMapAtr[i]
+			font := columnIndexMapFontBody[i]
+			text := ""
+			columnWidth := columnIndexMapWidth[i]
 
-			if isText || isInt || isNum {
-				cellHeight, cellLines := getCellHeightLines(doc, columnIndexMapFontBody[i], columnIndexMapWidth[i], fmt.Sprint(row.Values[i]))
-				if heightRow < cellHeight {
-					heightRow = cellHeight
+			// collect values for aggregation
+			if printAggregationRow && column.Aggregator.Valid && row.Values[i] != nil {
+				columnIndexMapAggValueCnt[i]++
+
+				switch atr.Content {
+				case "numeric":
+					if _, exists := columnIndexMapAggValueNum[i]; !exists {
+						columnIndexMapAggValueNum[i] = 0
+					}
+
+					value, err := getFloat64FromInterface(row.Values[i])
+					if err != nil {
+						return 0, err
+					}
+
+					switch column.Aggregator.String {
+					case "avg", "sum":
+						columnIndexMapAggValueNum[i] += value
+					case "max":
+						if columnIndexMapAggValueNum[i] < value {
+							columnIndexMapAggValueNum[i] = value
+						}
+					case "min":
+						if columnIndexMapAggValueNum[i] > value || columnIndexMapAggValueNum[i] == 0 {
+							columnIndexMapAggValueNum[i] = value
+						}
+					}
+				case "integer", "bigint":
+					if _, exists := columnIndexMapAggValueInt[i]; !exists {
+						columnIndexMapAggValueInt[i] = 0
+					}
+
+					value, err := getInt64FromInterface(row.Values[i])
+					if err != nil {
+						return 0, err
+					}
+
+					switch column.Aggregator.String {
+					case "avg", "sum":
+						columnIndexMapAggValueInt[i] += value
+					case "max":
+						if columnIndexMapAggValueInt[i] < value {
+							columnIndexMapAggValueInt[i] = value
+						}
+					case "min":
+						if columnIndexMapAggValueInt[i] > value || columnIndexMapAggValueInt[i] == 0 {
+							columnIndexMapAggValueInt[i] = value
+						}
+					}
 				}
-				columnIndexMapLines[i] = cellLines
 			}
+
+			if atr.ContentUse == "default" {
+				isText := atr.Content == "text"
+				isInt := atr.Content == "integer" || atr.Content == "bigint"
+				isNum := atr.Content == "numeric"
+
+				if isText || isInt || isNum {
+					text = fmt.Sprint(row.Values[i])
+				}
+			}
+
+			cellHeight, cellLines := getCellHeightLines(doc, font, columnWidth, text)
+			if heightRow < cellHeight {
+				heightRow = cellHeight
+			}
+
+			cells = append(cells, cell{
+				atr:      atr,
+				atrValue: row.Values[i],
+				font:     font,
+				lines:    cellLines,
+				text:     "",
+				width:    columnWidth,
+			})
+
+			fmt.Printf("print row %d cell, column %d, width %.2f, row height %.2f, at %.2f/%.2f, value: %s\n", ri, i, columnWidth, heightRow, doc.p.GetX(), doc.p.GetY(), row.Values[i])
 		}
 
-		// set row cells
 		var pageAdded bool
 		posYStart, pageAdded = getYWithNewPageIfNeeded(doc, heightRow+paddingY, pageMarginB)
 		if f.HeaderRepeat && pageAdded {
-			drawHeader()
-		}
-		if f.BodyBorder.Draw != "" || (f.BodyColorFillOdd != "" && ri%2 == 0) || (f.BodyColorFillEven != "" && ri%2 != 0) {
-			// draw box to display outer border and/or color fill
-			fillColor := f.BodyColorFillOdd
-			if ri%2 != 0 {
-				fillColor = f.BodyColorFillEven
-			}
-			doc.p.SetXY(posXStart, posYStart)
-			drawBox(doc, f.BodyBorder, fillColor, width, heightRow+paddingY)
-		}
-		posXOffset := float64(0)
-		for i := range f.Columns {
-			// draw intercell border
-			if i != 0 && f.BodyBorder.Cell {
-				drawBorderLine(doc, f.BodyBorder, posXStart+posXOffset, posYStart, posXStart+posXOffset, posYStart+heightRow+paddingY)
-			}
-			// draw cell
-			font := columnIndexMapFontBody[i]
-			setFont(doc, font)
-			doc.p.SetXY(posXStart+posXOffset+f.Padding.L, posYStart+f.Padding.T)
-
-			fmt.Printf("print row %d cell, column %d, width %.2f, row height %.2f, at %.2f/%.2f, value: %s\n",
-				ri, i, columnIndexMapWidth[i], heightRow, doc.p.GetX(), doc.p.GetY(), row.Values[i])
-
-			if err := drawAttributeValue(doc, borderEmpty, font, columnIndexMapWidth[i], heightRow, columnIndexMapLines[i], columnIndexMapAtr[i], row.Values[i]); err != nil {
+			posYStart, err = addFieldListRow(doc, f.HeaderBorder, cellsHeader, f.Padding, f.HeaderColorFill, posXStart, posYStart, width, heightHeader, paddingX, paddingY)
+			if err != nil {
 				return 0, err
 			}
-			posXOffset += columnIndexMapWidth[i] + paddingX
 		}
-		posYStart += heightRow + paddingY
 
-		if f.BodyBorder.Draw == "B" || f.BodyBorder.Draw == "1" {
-			posYStart += f.BodyBorder.Size
+		colorFill := f.BodyColorFillOdd
+		if ri%2 != 0 {
+			colorFill = f.BodyColorFillEven
 		}
-		doc.p.SetXY(posXStart, posYStart)
+
+		posYStart, err = addFieldListRow(doc, f.BodyBorder, cells, f.Padding, colorFill, posXStart, posYStart, width, heightRow, paddingX, paddingY)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	// draw aggregation footer
+	if printAggregationRow {
+
+		// process aggregation values
+		var heightRow float64 = 0
+		var cells = make([]cell, 0)
+		for i, column := range f.Columns {
+			text := ""
+
+			if column.Aggregator.Valid {
+
+				if column.Aggregator.String == "count" {
+					text = fmt.Sprintf("%d", columnIndexMapAggValueCnt[i])
+				} else {
+					atr := columnIndexMapAtr[i]
+
+					switch atr.Content {
+					case "numeric":
+						switch column.Aggregator.String {
+						case "avg":
+							text = tools.FormatFloat(columnIndexMapAggValueNum[i]/float64(columnIndexMapAggValueCnt[i]), atr.LengthFract, columnIndexMapFontFooter[i].NumberSepDec, columnIndexMapFontFooter[i].NumberSepTho)
+						case "max", "min", "sum":
+							text = tools.FormatFloat(columnIndexMapAggValueNum[i], atr.LengthFract, columnIndexMapFontFooter[i].NumberSepDec, columnIndexMapFontFooter[i].NumberSepTho)
+						}
+					case "integer", "bigint":
+						switch column.Aggregator.String {
+						case "avg":
+							text = fmt.Sprintf("%d", columnIndexMapAggValueInt[i]/int64(columnIndexMapAggValueCnt[i]))
+						case "max", "min", "sum":
+							text = fmt.Sprintf("%d", columnIndexMapAggValueInt[i])
+						}
+					}
+				}
+			}
+
+			// figure out row height
+			cellHeight, cellLines := getCellHeightLines(doc, columnIndexMapFontFooter[i], columnIndexMapWidth[i], text)
+			if heightRow < cellHeight {
+				heightRow = cellHeight
+			}
+
+			cells = append(cells, cell{
+				font:  columnIndexMapFontFooter[i],
+				lines: cellLines,
+				text:  text,
+				width: columnIndexMapWidth[i],
+			})
+		}
+
+		posYStart, _ = getYWithNewPageIfNeeded(doc, heightRow+paddingY, pageMarginB)
+		posYStart, err = addFieldListRow(doc, f.FooterBorder, cells, f.Padding, f.FooterColorFill, posXStart, posYStart, width, heightRow, paddingX, paddingY)
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	// re-enable auto paging
 	doc.p.SetAutoPageBreak(true, pageMarginB)
 
 	return doc.p.GetY(), nil
+}
+
+func addFieldListRow(doc *doc, b types.DocumentBorder, cells []cell, padding types.DocumentMarginPadding, colorFill string, posXStart, posYStart, width, height, paddingX, paddingY float64) (float64, error) {
+
+	// draw box to display outer border and/or color fill
+	if b.Draw != "" || colorFill != "" {
+		doc.p.SetXY(posXStart, posYStart)
+		drawBox(doc, b, colorFill, width, height+paddingY)
+	}
+
+	// draw cells
+	posXOffset := float64(0)
+	for i, c := range cells {
+
+		// draw intercell border
+		if i != 0 && b.Cell {
+			drawBorderLine(doc, b, posXStart+posXOffset, posYStart, posXStart+posXOffset, posYStart+height+paddingY)
+		}
+
+		// draw cell text
+		setFont(doc, c.font)
+		doc.p.SetXY(posXStart+posXOffset+padding.L, posYStart+padding.T)
+
+		if c.text != "" {
+			drawCellText(doc, borderEmpty, c.font, c.width, height, c.lines, c.text)
+		} else {
+			if err := drawAttributeValue(doc, borderEmpty, c.font, c.width, height, c.lines, c.atr, c.atrValue); err != nil {
+				return 0, err
+			}
+		}
+		posXOffset += c.width + paddingX
+	}
+	posYStart += height + paddingY
+
+	if b.Draw == "B" || b.Draw == "1" {
+		posYStart += b.Size
+	}
+	doc.p.SetXY(posXStart, posYStart)
+	return posYStart, nil
 }

@@ -42,15 +42,15 @@ func ConvertDocumentColumnToExpression(column types.DocumentColumn, languageCode
 		AttributeId: pgtype.UUID{Bytes: column.AttributeId, Valid: true},
 		Index:       column.Index,
 		GroupBy:     column.GroupBy,
-		Aggregator:  pgtype.Text{}, // aggregation is done on the expression containing the sub query
 		Distincted:  column.Distincted,
+		// aggregation for regular columns is done on returned values
 	}
 	if !column.SubQuery {
 		return expr
 	}
 
 	return types.DataGetExpression{
-		Aggregator: column.Aggregator, // aggregation is done here
+		Aggregator: column.Aggregator, // aggregation for sub queries is done here
 		Query: types.DataGet{
 			RelationId:  column.Query.RelationId.Bytes,
 			Joins:       ConvertQueryToDataJoins(column.Query.Joins),

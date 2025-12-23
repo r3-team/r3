@@ -139,6 +139,28 @@ func getYWithNewPageIfNeeded(doc *doc, height, pageMarginB float64) (float64, bo
 	return doc.p.GetY(), false
 }
 
+func getInt64FromInterface(valueIf any) (int64, error) {
+	switch v := valueIf.(type) {
+	case int64:
+		return v, nil
+	case int32:
+		return int64(v), nil
+	}
+	return 0, fmt.Errorf("failed to parse integer value")
+}
+
+func getFloat64FromInterface(valueIf any) (float64, error) {
+	vNum, ok := valueIf.(pgtype.Numeric)
+	if !ok {
+		return 0, fmt.Errorf("failed to parse numeric value")
+	}
+	v, err := vNum.Float64Value()
+	if err != nil {
+		return 0, err
+	}
+	return v.Float64, nil
+}
+
 func setFont(doc *doc, f types.DocumentFont) {
 
 	// font key is also used as file name
