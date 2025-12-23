@@ -175,7 +175,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocumentFieldList, widt
 
 		// set row cells
 		var pageAdded bool
-		posYStart, pageAdded = getYWithNewPageIfNeeded(doc, heightRow, pageMarginB)
+		posYStart, pageAdded = getYWithNewPageIfNeeded(doc, heightRow+paddingY, pageMarginB)
 		if f.HeaderRepeat && pageAdded {
 			drawHeader()
 		}

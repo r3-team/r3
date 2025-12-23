@@ -112,6 +112,8 @@ func getExpressionsFromStates(states []types.DocumentState) []types.DataGetExpre
 	return exprs
 }
 
+// adds a new page, if requested content height does not fit any more
+// returns Y position on new page
 func getYWithNewPageIfNeeded(doc *doc, height, pageMarginB float64) (float64, bool) {
 	_, pageHeight := doc.p.GetPageSize()
 
