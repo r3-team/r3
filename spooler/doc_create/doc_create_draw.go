@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"os"
+	"r3/data"
 	"r3/tools"
 	"r3/types"
 	"regexp"
@@ -95,6 +97,31 @@ func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFon
 	case "regconfig":
 		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%s", valueIf))
 	case "files":
+		valueJson, err := json.Marshal(valueIf)
+		if err != nil {
+			return err
+		}
+
+		var files []types.DataGetValueFile
+		if err := json.Unmarshal(valueJson, &files); err != nil {
+			return err
+		}
+
+		imgFound := false
+		for _, f := range files {
+			ext := tools.GetFileExtension(f.Name)
+
+			switch ext {
+			case "png", "jpg", "jpeg":
+				if err := drawImageFile(doc, data.GetFilePathVersion(f.Id, f.Version), ext, w, h); err != nil {
+					return err
+				}
+				imgFound = true
+			}
+			if imgFound {
+				break
+			}
+		}
 	case "integer", "bigint":
 		switch atr.ContentUse {
 		case "default":
@@ -153,6 +180,23 @@ func drawBox(doc *doc, b types.DocumentBorder, fillColor string, w, h float64) {
 		fill = true
 	}
 	doc.p.CellFormat(w, h, "", b.Draw, -1, "", fill, 0, "")
+}
+
+func drawImageFile(doc *doc, path string, ext string, w, h float64) error {
+	doc.imageCounter++
+	imgName := fmt.Sprintf("img_%d", doc.imageCounter)
+
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	doc.p.RegisterImageOptionsReader(imgName, fpdf.ImageOptions{ImageType: ext}, file)
+	doc.p.ImageOptions(imgName, doc.p.GetX(), doc.p.GetY(), w, h, true,
+		fpdf.ImageOptions{ImageType: ext, AllowNegativePosition: false, ReadDpi: true}, 0, "")
+
+	return nil
 }
 
 func drawImageBase64(doc *doc, imgBase64 string, w, h float64) error {
