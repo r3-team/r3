@@ -19,6 +19,20 @@ func getCellHeightLines(doc *doc, font types.DocumentFont, width float64, s stri
 	lineCount := len(doc.p.SplitText(s, width))
 	return getLineHeight(font) * float64(lineCount), lineCount
 }
+func getExpressionsDistinct(exprIn []types.DataGetExpression) []types.DataGetExpression {
+	exprOut := make([]types.DataGetExpression, 0)
+	atrIndexIdMap := make(map[string]bool)
+
+	for _, e := range exprIn {
+		atrIndexId := fmt.Sprintf("%s_%d", e.AttributeId.String(), e.Index)
+
+		if _, exists := atrIndexIdMap[atrIndexId]; !exists {
+			atrIndexIdMap[atrIndexId] = true
+			exprOut = append(exprOut, e)
+		}
+	}
+	return exprOut
+}
 func getExpressionsFromSetByData(set []types.DocumentSetByData) []types.DataGetExpression {
 	exprs := make([]types.DataGetExpression, 0)
 

@@ -72,6 +72,9 @@ func Run(ctx context.Context, docDef types.Document, pathOut string) error {
 		exprs = append(exprs, exprsSub...)
 	}
 
+	// remove duplicate expressions
+	exprs = getExpressionsDistinct(exprs)
+
 	// get data from document query
 	doc := &doc{
 		data:       make(map[int]map[uuid.UUID]any),
