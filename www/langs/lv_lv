@@ -316,6 +316,7 @@
 				"cache": "Kešatmiņa",
 				"cluster": "Klasters",
 				"csv": "CSV importēšana/eksportēšana",
+				"doc": "PDF creator",
 				"file": "File processing",
 				"imager": "Attēlu apstrāde",
 				"ldap": "LDAP",

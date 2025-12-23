@@ -316,6 +316,7 @@
 				"cache": "Cache",
 				"cluster": "Cluster",
 				"csv": "Importation/Exportation CSV",
+				"doc": "PDF creator",
 				"file": "File processing",
 				"imager": "Traitement d'image",
 				"ldap": "LDAP",

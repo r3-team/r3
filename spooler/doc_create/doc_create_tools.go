@@ -178,6 +178,8 @@ func setFont(doc *doc, f types.DocumentFont) {
 			// fallback to internal times font, should support all styles
 			f.Family = "times"
 		} else {
+
+			log.Info(log.ContextDoc, fmt.Sprintf("embedding font '%s' (style: %s)", f.Family, f.Style))
 			doc.p.AddUTF8FontFromBytes(f.Family, f.Style, fontFile)
 			doc.fontKeyMap[fontKey] = true
 		}

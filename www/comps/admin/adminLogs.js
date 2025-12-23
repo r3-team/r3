@@ -164,7 +164,7 @@ let MyAdminLogs = {
 	data() {
 		return {
 			contextsValid:[
-				'module','api','backup','cache','cluster','csv','file','imager',
+				'module','api','backup','cache','cluster','csv','doc','file','imager',
 				'ldap','oauth','mail','scheduler','server','transfer','websocket'
 			],
 			messageLengthShow:200,

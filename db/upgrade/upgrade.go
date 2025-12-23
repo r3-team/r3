@@ -101,6 +101,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
 	*/
 
+	"3.11": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
+			INSERT INTO instance.config (name,value) VALUES ('logDoc',2);
+			ALTER TYPE instance.log_context ADD VALUE 'doc';
+		`)
+		return "3.12", err
+	},
 	"3.10": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `
 			-- cleanup from last release

@@ -316,6 +316,7 @@
 				"cache": "Gyorsítótár",
 				"cluster": "Klaszter",
 				"csv": "CSV import/export",
+				"doc": "PDF creator",
 				"file": "File processing",
 				"imager": "Képkezelés",
 				"ldap": "LDAP",

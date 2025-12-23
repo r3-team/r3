@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"r3/log"
 	"r3/types"
 
 	"codeberg.org/go-pdf/fpdf"
@@ -50,6 +51,8 @@ func Run(ctx context.Context, docDef types.Document, pathOut string) error {
 	if len(docDef.Pages) < 1 {
 		return errors.New("cannot create document, 0 pages defined")
 	}
+
+	log.Info(log.ContextDoc, fmt.Sprintf("document creator has started, title: '%s'", docDef.Title))
 
 	// collect expressions for primary query
 	// * data fields
@@ -155,7 +158,7 @@ func Run(ctx context.Context, docDef types.Document, pathOut string) error {
 			addHeaderFooter(ctx, doc, e.FieldGrid, font, pageWidth, pageHeight, 0)
 		}, true)
 
-		fmt.Printf("Set page %d (%s), width %.0f, width usable %.0f, height %.0f, height usable %.0f\n", i, page.Size, pageWidth, pageWidthUsable, pageHeight, pageHeightUsable)
+		log.Info(log.ContextDoc, fmt.Sprintf("adding page %d (%s)", i+1, page.Size))
 		doc.p.AddPageFormat(page.Orientation, pageSizeMapMm[page.Size])
 		doc.p.SetHomeXY()
 

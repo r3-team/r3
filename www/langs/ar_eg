@@ -316,6 +316,7 @@
 				"cache": "مخبأ",
 				"cluster": "تَجَمَّع",
 				"csv": "استيراد/تصدير ملف CSV",
+				"doc": "PDF creator",
 				"file": "File processing",
 				"imager": "معالجة الصور",
 				"ldap": "لداب",

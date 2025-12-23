@@ -316,6 +316,7 @@
 				"cache": "Tampon",
 				"cluster": "Cluster",
 				"csv": "CSV import/export",
+				"doc": "PDF creator",
 				"file": "File processing",
 				"imager": "Image processing",
 				"ldap": "LDAP",

@@ -92,7 +92,6 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocumentFieldList, widt
 	}
 
 	// working variables
-	//var heightFooter float64 = 0
 	var heightHeader float64 = 0
 	printAggregationRow := false
 	columnIndexMapAtr := make(map[int]types.Attribute)
@@ -240,8 +239,6 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocumentFieldList, widt
 				text:     "",
 				width:    columnWidth,
 			})
-
-			fmt.Printf("print row %d cell, column %d, width %.2f, row height %.2f, at %.2f/%.2f, value: %s\n", ri, i, columnWidth, heightRow, doc.p.GetX(), doc.p.GetY(), row.Values[i])
 		}
 
 		var pageAdded bool
@@ -343,7 +340,7 @@ func addFieldListRow(doc *doc, b types.DocumentBorder, cells []cell, padding typ
 			drawBorderLine(doc, b, posXStart+posXOffset, posYStart, posXStart+posXOffset, posYStart+height+paddingY)
 		}
 
-		// draw cell text
+		// draw cell content
 		setFont(doc, c.font)
 		doc.p.SetXY(posXStart+posXOffset+padding.L, posYStart+padding.T)
 
