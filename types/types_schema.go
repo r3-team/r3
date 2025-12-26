@@ -40,6 +40,7 @@ type Module struct {
 	JsFunctions           []JsFunction      `json:"jsFunctions"`
 	Collections           []Collection      `json:"collections"`
 	Apis                  []Api             `json:"apis"`
+	Docs                  []Doc             `json:"docs"`
 	ClientEvents          []ClientEvent     `json:"clientEvents"`
 	SearchBars            []SearchBar       `json:"searchBars"`
 	Variables             []Variable        `json:"variables"`

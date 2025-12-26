@@ -9,9 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type (
-	DbEntity string
-)
+type DbEntity string
 
 const (
 	// DB relations accessed throughout the schema (central reference for dynamic queries)
@@ -22,6 +20,8 @@ const (
 	DbCollection            DbEntity = "collection"
 	DbCollectionConsumer    DbEntity = "collection_consumer"
 	DbColumn                DbEntity = "column"
+	DbDoc                   DbEntity = "doc"
+	DbDocColumn             DbEntity = "doc_column"
 	DbField                 DbEntity = "field"
 	DbFieldButton           DbEntity = "field_button"
 	DbFieldCalendar         DbEntity = "field_calendar"

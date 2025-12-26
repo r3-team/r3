@@ -115,11 +115,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				'Arimo','ComicNeue','CourierPrime','Cousine','NotoSans','NotoSansArabic',
 				'NotoSansJP','NotoSansKR','NotoSansSC','NotoSansThai','OpenSans','Roboto','Tinos'
 			);
-			CREATE TYPE app.page_orientation   AS ENUM('landscape','portrait');
-			CREATE TYPE app.page_size          AS ENUM('A1','A2','A3','A4','A5','A6','A7','Letter','Legal');
-			CREATE TYPE app.doc_border_context AS ENUM('default','listBody','listHeader','listFooter');
-			CREATE TYPE app.doc_field_content  AS ENUM('data','flow','grid','gridFooter','gridHeader','list','text');
-			CREATE TYPE app.doc_set_target     AS ENUM(
+			CREATE TYPE app.page_orientation  AS ENUM('landscape','portrait');
+			CREATE TYPE app.page_size         AS ENUM('A1','A2','A3','A4','A5','A6','A7','Letter','Legal');
+			CREATE TYPE app.doc_field_content AS ENUM('data','flow','grid','gridFooter','gridHeader','list','text');
+			CREATE TYPE app.doc_set_target    AS ENUM(
 				'author','languageCode',
 				'border.color','border.draw','border.size',
 				'bodyBorder.cell',  'bodyBorder.color',  'bodyBorder.draw',  'bodyBorder.size',  
@@ -129,6 +128,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				'font.align','font.color','font.dateFormat','font.family','font.lineFactor',
 				'font.numberSepDec','font.numberSepTho','font.size','font.style'
 			);
+
+			ALTER TYPE app.caption_content ADD VALUE 'docTitle';
+			ALTER TYPE app.caption_content ADD VALUE 'docColumnTitle';
 
 			CREATE TABLE IF NOT EXISTS app.doc (
 				id uuid NOT NULL,

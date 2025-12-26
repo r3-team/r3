@@ -7,6 +7,7 @@ import (
 )
 
 func applyToDocument(set []types.DocSet, d types.Doc) types.Doc {
+	// order is relevant here, language code must be set before title
 	for _, o := range set {
 		switch v := o.Value.(type) {
 		case string:
@@ -16,7 +17,10 @@ func applyToDocument(set []types.DocSet, d types.Doc) types.Doc {
 			case "languageCode":
 				d.LanguageCode = v
 			case "title":
-				d.Title = v
+				if _, exists := d.Captions["docTitle"]; !exists {
+					d.Captions["docTitle"] = make(map[string]string)
+				}
+				d.Captions["docTitle"][d.LanguageCode] = v
 			}
 		}
 	}

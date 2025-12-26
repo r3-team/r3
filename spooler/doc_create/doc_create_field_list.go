@@ -121,7 +121,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, width flo
 		columnIndexMapFontFooter[i] = applyToFont(getSetDataResolved(doc, column.SetFooter), fontField)
 
 		// calcuclate header titles and row height
-		title, exists := column.Captions["columnTitle"][doc.p.GetLang()]
+		title, exists := column.Captions["docColumnTitle"][doc.p.GetLang()]
 		if !exists {
 			title = columnIndexMapAtr[i].Name
 		}

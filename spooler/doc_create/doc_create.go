@@ -52,7 +52,7 @@ func Run(ctx context.Context, docDef types.Doc, pathOut string) error {
 		return errors.New("cannot create document, 0 pages defined")
 	}
 
-	log.Info(log.ContextDoc, fmt.Sprintf("document creator has started, title: '%s'", docDef.Title))
+	log.Info(log.ContextDoc, "document creator has started")
 
 	// collect expressions for primary query
 	// * data fields
@@ -116,7 +116,10 @@ func Run(ctx context.Context, docDef types.Doc, pathOut string) error {
 	doc.p = fpdf.New(docDef.Pages[0].Orientation, pageUnit, docDef.Pages[0].Size, "")
 	doc.p.SetAuthor(docDef.Author, true)
 	doc.p.SetLang(docDef.LanguageCode)
-	doc.p.SetTitle(docDef.Title, true)
+	if _, exists := docDef.Captions["docTitle"][docDef.LanguageCode]; !exists {
+		doc.p.SetTitle(docDef.Captions["docTitle"][docDef.LanguageCode], true)
+	}
+
 	doc.p.SetCellMargin(0) // kills the default margin within text cells
 	doc.p.AliasNbPages("{PAGE_END}")
 

@@ -6,19 +6,20 @@ import (
 )
 
 type Doc struct {
-	Id      uuid.UUID  `json:"id"`
-	Name    uuid.UUID  `json:"name"`
-	Comment uuid.UUID  `json:"comment"`
-	Font    DocFont    `json:"font"`
-	Pages   []DocPage  `json:"pages"` // pages in order
-	Query   Query      `json:"query"`
-	States  []DocState `json:"states"`
-	Set     []DocSet   `json:"set"` // overwrites
+	Id       uuid.UUID  `json:"id"`
+	ModuleId uuid.UUID  `json:"moduleId"`
+	Name     string     `json:"name"`
+	Comment  string     `json:"comment"`
+	Font     DocFont    `json:"font"`
+	Pages    []DocPage  `json:"pages"` // pages in order
+	Query    Query      `json:"query"`
+	States   []DocState `json:"states"`
+	Set      []DocSet   `json:"set"` // overwrites
 
 	// meta
-	Author       string `json:"author"`
-	LanguageCode string `json:"languageCode"`
-	Title        string `json:"title"`
+	Author       string     `json:"author"`
+	Captions     CaptionMap `json:"captions"` // document titles
+	LanguageCode string     `json:"languageCode"`
 }
 type DocPage struct {
 	Id          uuid.UUID        `json:"id"`
