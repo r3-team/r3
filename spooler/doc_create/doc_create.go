@@ -58,14 +58,14 @@ func Run(ctx context.Context, docDef types.Doc, pathOut string) error {
 	// * data fields
 	// * overwrite rules in document, pages & fields
 	exprs := make([]types.DataGetExpression, 0)
-	exprs = append(exprs, getExpressionsFromSetByData(docDef.SetByData)...)
+	exprs = append(exprs, getExpressionsFromSet(docDef.Set)...)
 
 	for _, page := range docDef.Pages {
 		// states
 		exprs = append(exprs, getExpressionsFromStates(docDef.States)...)
 
 		// pages
-		exprs = append(exprs, getExpressionsFromSetByData(page.SetByData)...)
+		exprs = append(exprs, getExpressionsFromSet(page.Set)...)
 
 		// fields
 		exprsSub, err := getExpressionsFromFields(page.FieldFlow.Fields)
@@ -108,7 +108,7 @@ func Run(ctx context.Context, docDef types.Doc, pathOut string) error {
 	}
 
 	// apply overwrites from data
-	set := applyResolvedData(doc, []types.DocSet{}, docDef.SetByData)
+	set := getSetDataResolved(doc, docDef.Set)
 	docDef = applyToDocument(set, docDef)
 	docDef.Font = applyToFont(set, docDef.Font)
 
@@ -140,7 +140,7 @@ func Run(ctx context.Context, docDef types.Doc, pathOut string) error {
 		}
 
 		// apply overwrites
-		font := applyToFont(applyResolvedData(doc, page.Set, page.SetByData), docDef.Font)
+		font := applyToFont(getSetDataResolved(doc, page.Set), docDef.Font)
 
 		doc.p.SetMargins(page.Margin.L, page.Margin.T, page.Margin.R)
 		doc.p.SetAutoPageBreak(true, page.Margin.B)

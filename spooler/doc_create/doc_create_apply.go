@@ -6,47 +6,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func applyResolvedData(doc *doc, set []types.DocSet, setByData []types.DocSetByData) []types.DocSet {
-	for _, o := range setByData {
-		attributeIdMap, exists := doc.data[o.Index]
-		if !exists {
-			continue
-		}
-		value, exists := attributeIdMap[o.AttributeId]
-		if !exists {
-			continue
-		}
-
-		// type conversions
-		switch v := value.(type) {
-		case pgtype.Numeric:
-			v1, err := v.Float64Value()
-			if err == nil {
-				value = v1.Float64
-			}
-		}
-
-		// overwrite manual overwrite values
-		overwroteExisting := false
-		for i, s := range set {
-			if s.Target == o.Target {
-				set[i].Value = value
-				overwroteExisting = true
-				break
-			}
-		}
-
-		// add overwrite value
-		if !overwroteExisting {
-			set = append(set, types.DocSet{
-				Target: o.Target,
-				Value:  value,
-			})
-		}
-	}
-	return set
-}
-
 func applyToDocument(set []types.DocSet, d types.Doc) types.Doc {
 	for _, o := range set {
 		switch v := o.Value.(type) {
@@ -109,12 +68,6 @@ func applyToFieldList(set []types.DocSet, f types.DocFieldList) types.DocFieldLi
 			}
 		case string:
 			switch o.Target {
-			case "footerBorder.color":
-				f.FooterBorder.Color = v
-			case "footerBorder.draw":
-				f.FooterBorder.Draw = v
-			case "footerColorFill":
-				f.FooterColorFill = pgtype.Text{String: v, Valid: true}
 			case "bodyBorder.color":
 				f.BodyBorder.Color = v
 			case "bodyBorder.draw":
@@ -123,6 +76,12 @@ func applyToFieldList(set []types.DocSet, f types.DocFieldList) types.DocFieldLi
 				f.BodyColorFillEven = pgtype.Text{String: v, Valid: true}
 			case "bodyColorFillOdd":
 				f.BodyColorFillOdd = pgtype.Text{String: v, Valid: true}
+			case "footerBorder.color":
+				f.FooterBorder.Color = v
+			case "footerBorder.draw":
+				f.FooterBorder.Draw = v
+			case "footerColorFill":
+				f.FooterColorFill = pgtype.Text{String: v, Valid: true}
 			case "headerBorder.color":
 				f.HeaderBorder.Color = v
 			case "headerBorder.draw":

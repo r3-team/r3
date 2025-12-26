@@ -11,6 +11,33 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+func getSetDataResolved(doc *doc, set []types.DocSet) []types.DocSet {
+	for i, s := range set {
+		if !s.AttributeId.Valid || !s.AttributeIndex.Valid {
+			continue
+		}
+
+		attributeIdMap, exists := doc.data[int(s.AttributeIndex.Int32)]
+		if !exists {
+			continue
+		}
+		value, exists := attributeIdMap[s.AttributeId.Bytes]
+		if !exists {
+			continue
+		}
+
+		// type conversions
+		switch v := value.(type) {
+		case pgtype.Numeric:
+			v1, err := v.Float64Value()
+			if err == nil {
+				value = v1.Float64
+			}
+		}
+		set[i].Value = value
+	}
+	return set
+}
 func getLineHeight(f types.DocFont) float64 {
 	return f.Size * f.LineFactor * 0.5
 }
@@ -33,17 +60,16 @@ func getExpressionsDistinct(exprIn []types.DataGetExpression) []types.DataGetExp
 	}
 	return exprOut
 }
-func getExpressionsFromSetByData(set []types.DocSetByData) []types.DataGetExpression {
+func getExpressionsFromSet(set []types.DocSet) []types.DataGetExpression {
 	exprs := make([]types.DataGetExpression, 0)
 
 	for _, s := range set {
-		exprs = append(exprs, types.DataGetExpression{
-			AttributeId: pgtype.UUID{
-				Bytes: s.AttributeId,
-				Valid: true,
-			},
-			Index: s.Index,
-		})
+		if s.AttributeId.Valid && s.AttributeIndex.Valid {
+			exprs = append(exprs, types.DataGetExpression{
+				AttributeId: s.AttributeId,
+				Index:       int(s.AttributeIndex.Int32),
+			})
+		}
 	}
 	return exprs
 }
@@ -100,7 +126,7 @@ func getExpressionsFromFields(fieldsIf []any) ([]types.DataGetExpression, error)
 		}
 
 		// expressions from overwrite rules
-		exprs = append(exprs, getExpressionsFromSetByData(field.SetByData)...)
+		exprs = append(exprs, getExpressionsFromSet(field.Set)...)
 	}
 	return exprs, nil
 }

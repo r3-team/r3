@@ -41,7 +41,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, width flo
 	}
 
 	// apply overwrites
-	set := applyResolvedData(doc, f.Set, f.SetByData)
+	set := getSetDataResolved(doc, f.Set)
 	f = applyToFieldList(set, f)
 	fontField := applyToFont(set, fontParent)
 
@@ -116,9 +116,9 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, width flo
 			return 0, handler.ErrSchemaUnknownAttribute(column.AttributeId)
 		}
 		columnIndexMapAtr[i] = atr
-		columnIndexMapFontHeader[i] = applyToFont(applyResolvedData(doc, column.SetHeader, column.SetHeaderByData), fontField)
-		columnIndexMapFontBody[i] = applyToFont(applyResolvedData(doc, column.SetBody, column.SetBodyByData), fontField)
-		columnIndexMapFontFooter[i] = applyToFont(applyResolvedData(doc, column.SetFooter, column.SetFooterByData), fontField)
+		columnIndexMapFontHeader[i] = applyToFont(getSetDataResolved(doc, column.SetHeader), fontField)
+		columnIndexMapFontBody[i] = applyToFont(getSetDataResolved(doc, column.SetBody), fontField)
+		columnIndexMapFontFooter[i] = applyToFont(getSetDataResolved(doc, column.SetFooter), fontField)
 
 		// calcuclate header titles and row height
 		title, exists := column.Captions["columnTitle"][doc.p.GetLang()]

@@ -40,7 +40,7 @@ func ConvertDocumentColumnToExpression(column types.DocColumn, languageCode stri
 
 	expr := types.DataGetExpression{
 		AttributeId: pgtype.UUID{Bytes: column.AttributeId, Valid: true},
-		Index:       column.Index,
+		Index:       column.AttributeIndex,
 		GroupBy:     column.GroupBy,
 		Distincted:  column.Distincted,
 		// aggregation for regular columns is done on returned values

@@ -6,14 +6,14 @@ import (
 )
 
 type Doc struct {
-	Id        uuid.UUID      `json:"id"`
-	Name      uuid.UUID      `json:"name"`
-	Comment   uuid.UUID      `json:"comment"`
-	Font      DocFont        `json:"font"`
-	Pages     []DocPage      `json:"pages"` // pages in order
-	Query     Query          `json:"query"`
-	States    []DocState     `json:"states"`
-	SetByData []DocSetByData `json:"setByData"` // overwrites by resolved attribute data
+	Id      uuid.UUID  `json:"id"`
+	Name    uuid.UUID  `json:"name"`
+	Comment uuid.UUID  `json:"comment"`
+	Font    DocFont    `json:"font"`
+	Pages   []DocPage  `json:"pages"` // pages in order
+	Query   Query      `json:"query"`
+	States  []DocState `json:"states"`
+	Set     []DocSet   `json:"set"` // overwrites
 
 	// meta
 	Author       string `json:"author"`
@@ -30,7 +30,6 @@ type DocPage struct {
 	Footer      DocHeaderFooter  `json:"footer"`
 	Orientation string           `json:"orientation"` // "landscape" / "portrait"
 	Set         []DocSet         `json:"set"`         // overwrites
-	SetByData   []DocSetByData   `json:"setByData"`   // overwrites by resolved attribute data
 	State       bool             `json:"state"`
 }
 type DocBorder struct {
@@ -40,65 +39,60 @@ type DocBorder struct {
 	Size  float64 `json:"size"`  // border thickness
 }
 type DocColumn struct {
-	AttributeId uuid.UUID   `json:"attributeId"`
-	Index       int         `json:"index"`      // attribute index
-	GroupBy     bool        `json:"groupBy"`    // group by column attribute value?
-	Aggregator  pgtype.Text `json:"aggregator"` // aggregator (SUM, COUNT, etc.)
-	Distincted  bool        `json:"distincted"` // attribute values are distinct?
-	SubQuery    bool        `json:"subQuery"`   // column uses sub query?
-	SizeX       float64     `json:"sizeX"`      // width in mm (0 = parent width)
-	Query       Query       `json:"query"`      // sub query
-	Captions    CaptionMap  `json:"captions"`   // column titles
+	AttributeId    uuid.UUID   `json:"attributeId"`
+	AttributeIndex int         `json:"attributeIndex"` // attribute index
+	GroupBy        bool        `json:"groupBy"`        // group by column attribute value?
+	Aggregator     pgtype.Text `json:"aggregator"`     // aggregator (SUM, COUNT, etc.)
+	Distincted     bool        `json:"distincted"`     // attribute values are distinct?
+	SubQuery       bool        `json:"subQuery"`       // column uses sub query?
+	SizeX          float64     `json:"sizeX"`          // width in mm (0 = parent width)
+	Query          Query       `json:"query"`          // sub query
+	Captions       CaptionMap  `json:"captions"`       // column titles
 
-	SetHeader       []DocSet       `json:"setHeader"`
-	SetHeaderByData []DocSetByData `json:"setHeaderByData"`
-	SetBody         []DocSet       `json:"setBody"`
-	SetBodyByData   []DocSetByData `json:"setBodyByData"`
-	SetFooter       []DocSet       `json:"setFooter"`
-	SetFooterByData []DocSetByData `json:"setFooterByData"`
+	// overwrites
+	SetBody   []DocSet `json:"setBody"`
+	SetFooter []DocSet `json:"setFooter"`
+	SetHeader []DocSet `json:"setHeader"`
 
 	// presentation
 	Length int `json:"length"` // text length limit (in characters)
 }
 type DocField struct {
-	Id        uuid.UUID      `json:"id"`
-	Content   string         `json:"content"` // "data", "flow", "grid", "gridFooter", "gridHeader", "list", "text"
-	PosX      float64        `json:"posX"`    // X position (relative to parent), 0 if in flow parent
-	PosY      float64        `json:"posY"`    // Y position (relative to parent), 0 if in flow parent
-	SizeX     float64        `json:"sizeX"`   // width in mm (0 = parent width)
-	SizeY     float64        `json:"sizeY"`   // height in mm (0 = min. content height)
-	Set       []DocSet       `json:"set"`
-	SetByData []DocSetByData `json:"setByData"`
-	State     bool           `json:"state"`
-	Border    DocBorder      `json:"border"`
+	Id      uuid.UUID `json:"id"`
+	Content string    `json:"content"` // "data", "flow", "grid", "gridFooter", "gridHeader", "list", "text"
+	PosX    float64   `json:"posX"`    // X position (relative to parent), 0 if in flow parent
+	PosY    float64   `json:"posY"`    // Y position (relative to parent), 0 if in flow parent
+	SizeX   float64   `json:"sizeX"`   // width in mm (0 = parent width)
+	SizeY   float64   `json:"sizeY"`   // height in mm (0 = min. content height)
+	Set     []DocSet  `json:"set"`
+	State   bool      `json:"state"`
+	Border  DocBorder `json:"border"`
 }
 type DocFieldData struct {
-	Id        uuid.UUID      `json:"id"`
-	Content   string         `json:"content"`
-	PosX      float64        `json:"posX"`
-	PosY      float64        `json:"posY"`
-	SizeX     float64        `json:"sizeX"`
-	SizeY     float64        `json:"sizeY"`
-	Set       []DocSet       `json:"set"`
-	SetByData []DocSetByData `json:"setByData"`
-	State     bool           `json:"state"`
-	Border    DocBorder      `json:"border"`
+	Id      uuid.UUID `json:"id"`
+	Content string    `json:"content"`
+	PosX    float64   `json:"posX"`
+	PosY    float64   `json:"posY"`
+	SizeX   float64   `json:"sizeX"`
+	SizeY   float64   `json:"sizeY"`
+	Set     []DocSet  `json:"set"`
+	State   bool      `json:"state"`
+	Border  DocBorder `json:"border"`
 
 	// data field
 	AttributeId    uuid.UUID `json:"attributeId"`
 	AttributeIndex int       `json:"attributeIndex"`
 }
 type DocFieldFlow struct {
-	Id        uuid.UUID      `json:"id"`
-	Content   string         `json:"content"`
-	PosX      float64        `json:"posX"`
-	PosY      float64        `json:"posY"`
-	SizeX     float64        `json:"sizeX"`
-	SizeY     float64        `json:"sizeY"`
-	Set       []DocSet       `json:"set"`
-	SetByData []DocSetByData `json:"setByData"`
-	State     bool           `json:"state"`
-	Border    DocBorder      `json:"border"`
+	Id      uuid.UUID `json:"id"`
+	Content string    `json:"content"`
+	PosX    float64   `json:"posX"`
+	PosY    float64   `json:"posY"`
+	SizeX   float64   `json:"sizeX"`
+	SizeY   float64   `json:"sizeY"`
+	Set     []DocSet  `json:"set"`
+	State   bool      `json:"state"`
+	Border  DocBorder `json:"border"`
 
 	// flow field
 	Fields  []any            `json:"fields"`
@@ -106,32 +100,30 @@ type DocFieldFlow struct {
 	Padding DocMarginPadding `json:"padding"`
 }
 type DocFieldGrid struct {
-	Id        uuid.UUID      `json:"id"`
-	Content   string         `json:"content"`
-	PosX      float64        `json:"posX"`
-	PosY      float64        `json:"posY"`
-	SizeX     float64        `json:"sizeX"`
-	SizeY     float64        `json:"sizeY"`
-	Set       []DocSet       `json:"set"`
-	SetByData []DocSetByData `json:"setByData"`
-	State     bool           `json:"state"`
-	Border    DocBorder      `json:"border"`
+	Id      uuid.UUID `json:"id"`
+	Content string    `json:"content"`
+	PosX    float64   `json:"posX"`
+	PosY    float64   `json:"posY"`
+	SizeX   float64   `json:"sizeX"`
+	SizeY   float64   `json:"sizeY"`
+	Set     []DocSet  `json:"set"`
+	State   bool      `json:"state"`
+	Border  DocBorder `json:"border"`
 
 	// grid field
 	Fields []any `json:"fields"`
 	Shrink bool  `json:"shrink"` // shrink if content does not fill height
 }
 type DocFieldList struct {
-	Id        uuid.UUID      `json:"id"`
-	Content   string         `json:"content"`
-	PosX      float64        `json:"posX"`
-	PosY      float64        `json:"posY"`
-	SizeX     float64        `json:"sizeX"`
-	SizeY     float64        `json:"sizeY"`
-	Set       []DocSet       `json:"set"`
-	SetByData []DocSetByData `json:"setByData"`
-	State     bool           `json:"state"`
-	Border    DocBorder      `json:"border"`
+	Id      uuid.UUID `json:"id"`
+	Content string    `json:"content"`
+	PosX    float64   `json:"posX"`
+	PosY    float64   `json:"posY"`
+	SizeX   float64   `json:"sizeX"`
+	SizeY   float64   `json:"sizeY"`
+	Set     []DocSet  `json:"set"`
+	State   bool      `json:"state"`
+	Border  DocBorder `json:"border"`
 
 	// list field
 	HeaderBorder      DocBorder   `json:"headerBorder"`
@@ -148,16 +140,15 @@ type DocFieldList struct {
 	Query   Query            `json:"query"`
 }
 type DocFieldText struct {
-	Id        uuid.UUID      `json:"id"`
-	Content   string         `json:"content"`
-	PosX      float64        `json:"posX"`
-	PosY      float64        `json:"posY"`
-	SizeX     float64        `json:"sizeX"`
-	SizeY     float64        `json:"sizeY"`
-	Set       []DocSet       `json:"set"`
-	SetByData []DocSetByData `json:"setByData"`
-	State     bool           `json:"state"`
-	Border    DocBorder      `json:"border"`
+	Id      uuid.UUID `json:"id"`
+	Content string    `json:"content"`
+	PosX    float64   `json:"posX"`
+	PosY    float64   `json:"posY"`
+	SizeX   float64   `json:"sizeX"`
+	SizeY   float64   `json:"sizeY"`
+	Set     []DocSet  `json:"set"`
+	State   bool      `json:"state"`
+	Border  DocBorder `json:"border"`
 
 	// text field
 	Value string `json:"value"`
@@ -187,15 +178,11 @@ type DocMarginPadding struct {
 	B float64 `json:"b"` // margin in mm
 }
 type DocSet struct {
-	Target string `json:"target"` // overwrite target (font.family, margin.r, etc.)
-	Value  any    `json:"value"`  // overwrite value
+	AttributeId    pgtype.UUID `json:"attributeId"`    // overwrite by attribute value
+	AttributeIndex pgtype.Int4 `json:"attributeIndex"` // overwrite by attribute value
+	Target         string      `json:"target"`         // overwrite target (font.family, margin.r, etc.)
+	Value          any         `json:"value"`          // overwrite value
 }
-type DocSetByData struct {
-	AttributeId uuid.UUID `json:"attributeId"` // overwrite by attribute value
-	Index       int       `json:"index"`       // overwrite by attribute value
-	Target      string    `json:"target"`      // overwrite target (font.family, margin.r, etc.)
-}
-
 type DocState struct {
 	Id          uuid.UUID           `json:"id"`
 	Description string              `json:"description"` // builder reference, used to order and search by
