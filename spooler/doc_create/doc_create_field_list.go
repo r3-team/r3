@@ -10,18 +10,20 @@ import (
 	"r3/handler"
 	"r3/tools"
 	"r3/types"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type cell struct {
 	atr      types.Attribute
 	atrValue any
-	font     types.DocumentFont
+	font     types.DocFont
 	text     string
 	lines    int
 	width    float64
 }
 
-func addFieldList(ctx context.Context, doc *doc, f types.DocumentFieldList, width float64, fontParent types.DocumentFont) (float64, error) {
+func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, width float64, fontParent types.DocFont) (float64, error) {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
@@ -76,18 +78,18 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocumentFieldList, widt
 	widthForAuto := width
 	var columnCountAutoWidth int = 0
 	for _, column := range f.Columns {
-		if column.SizeWidth != 0 {
-			widthForAuto = widthForAuto - column.SizeWidth
+		if column.SizeX != 0 {
+			widthForAuto = widthForAuto - column.SizeX
 		} else {
 			columnCountAutoWidth++
 		}
 	}
 	columnIndexMapWidth := make(map[int]float64)
 	for i, column := range f.Columns {
-		if column.SizeWidth == 0 {
+		if column.SizeX == 0 {
 			columnIndexMapWidth[i] = (widthForAuto / float64(columnCountAutoWidth)) - paddingX
 		} else {
-			columnIndexMapWidth[i] = column.SizeWidth - paddingX
+			columnIndexMapWidth[i] = column.SizeX - paddingX
 		}
 	}
 
@@ -95,9 +97,9 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocumentFieldList, widt
 	var heightHeader float64 = 0
 	printAggregationRow := false
 	columnIndexMapAtr := make(map[int]types.Attribute)
-	columnIndexMapFontBody := make(map[int]types.DocumentFont)
-	columnIndexMapFontHeader := make(map[int]types.DocumentFont)
-	columnIndexMapFontFooter := make(map[int]types.DocumentFont)
+	columnIndexMapFontBody := make(map[int]types.DocFont)
+	columnIndexMapFontHeader := make(map[int]types.DocFont)
+	columnIndexMapFontFooter := make(map[int]types.DocFont)
 	columnIndexMapAggValueCnt := make(map[int]int)
 	columnIndexMapAggValueInt := make(map[int]int64)
 	columnIndexMapAggValueNum := make(map[int]float64)
@@ -323,10 +325,10 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocumentFieldList, widt
 	return doc.p.GetY(), nil
 }
 
-func addFieldListRow(doc *doc, b types.DocumentBorder, cells []cell, padding types.DocumentMarginPadding, colorFill string, posXStart, posYStart, width, height, paddingX, paddingY float64) (float64, error) {
+func addFieldListRow(doc *doc, b types.DocBorder, cells []cell, padding types.DocMarginPadding, colorFill pgtype.Text, posXStart, posYStart, width, height, paddingX, paddingY float64) (float64, error) {
 
 	// draw box to display outer border and/or color fill
-	if b.Draw != "" || colorFill != "" {
+	if b.Draw != "" || colorFill.Valid {
 		doc.p.SetXY(posXStart, posYStart)
 		drawBox(doc, b, colorFill, width, height+paddingY)
 	}

@@ -27,7 +27,7 @@ type doc struct {
 }
 
 var (
-	borderEmpty                            = types.DocumentBorder{}
+	borderEmpty                            = types.DocBorder{}
 	pageSizeMapMm map[string]fpdf.SizeType = map[string]fpdf.SizeType{
 		"A1":     {Wd: 594, Ht: 841},
 		"A2":     {Wd: 420, Ht: 594},
@@ -46,7 +46,7 @@ func SetWwwFs(fs fs.FS) {
 	wwwFs = fs
 }
 
-func Run(ctx context.Context, docDef types.Document, pathOut string) error {
+func Run(ctx context.Context, docDef types.Doc, pathOut string) error {
 
 	if len(docDef.Pages) < 1 {
 		return errors.New("cannot create document, 0 pages defined")
@@ -108,7 +108,7 @@ func Run(ctx context.Context, docDef types.Document, pathOut string) error {
 	}
 
 	// apply overwrites from data
-	set := applyResolvedData(doc, []types.DocumentSet{}, docDef.SetByData)
+	set := applyResolvedData(doc, []types.DocSet{}, docDef.SetByData)
 	docDef = applyToDocument(set, docDef)
 	docDef.Font = applyToFont(set, docDef.Font)
 

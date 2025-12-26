@@ -29,7 +29,7 @@ type textDrawing struct {
 }
 
 // draws attribute value as cell
-func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFont, w, h float64, lineCount int, atr types.Attribute, valueIf any) error {
+func drawAttributeValue(doc *doc, b types.DocBorder, font types.DocFont, w, h float64, lineCount int, atr types.Attribute, valueIf any) error {
 
 	if valueIf == nil {
 		return nil
@@ -134,10 +134,10 @@ func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFon
 
 			if atr.ContentUse == "datetime" {
 				// print datetime at local server time
-				drawCellText(doc, b, font, w, h, lineCount, time.Unix(tUnix, 0).Local().Format(tools.GetDatetimeFormat(font.FormatDate, true)))
+				drawCellText(doc, b, font, w, h, lineCount, time.Unix(tUnix, 0).Local().Format(tools.GetDatetimeFormat(font.DateFormat, true)))
 			} else {
 				// print date at UTC
-				drawCellText(doc, b, font, w, h, lineCount, time.Unix(tUnix, 0).Format(tools.GetDatetimeFormat(font.FormatDate, false)))
+				drawCellText(doc, b, font, w, h, lineCount, time.Unix(tUnix, 0).Format(tools.GetDatetimeFormat(font.DateFormat, false)))
 			}
 		case "time":
 			v, ok := valueIf.(int32)
@@ -155,15 +155,15 @@ func drawAttributeValue(doc *doc, b types.DocumentBorder, font types.DocumentFon
 	return nil
 }
 
-func drawBorderLine(doc *doc, b types.DocumentBorder, x1, y1, x2, y2 float64) {
+func drawBorderLine(doc *doc, b types.DocBorder, x1, y1, x2, y2 float64) {
 	rgb := tools.HexToInt(b.Color)
 	doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
 	doc.p.SetLineWidth(b.Size)
 	doc.p.Line(x1, y1, x2, y2)
 }
 
-func drawBox(doc *doc, b types.DocumentBorder, fillColor string, w, h float64) {
-	if b.Draw == "" && fillColor == "" {
+func drawBox(doc *doc, b types.DocBorder, fillColor pgtype.Text, w, h float64) {
+	if b.Draw == "" && !fillColor.Valid {
 		return
 	}
 
@@ -174,8 +174,8 @@ func drawBox(doc *doc, b types.DocumentBorder, fillColor string, w, h float64) {
 	}
 
 	fill := false
-	if fillColor != "" {
-		rgb := tools.HexToInt(fillColor)
+	if fillColor.Valid {
+		rgb := tools.HexToInt(fillColor.String)
 		doc.p.SetFillColor(rgb[0], rgb[1], rgb[2])
 		fill = true
 	}
@@ -226,7 +226,7 @@ func drawImageBase64(doc *doc, imgBase64 string, w, h float64) error {
 // draws text value as cell
 // if line count is set to 0 it will be calculated
 // if height is set to 0, font line height will be used
-func drawCellText(doc *doc, b types.DocumentBorder, font types.DocumentFont, w, h float64, lineCount int, s string) {
+func drawCellText(doc *doc, b types.DocBorder, font types.DocFont, w, h float64, lineCount int, s string) {
 	if b.Draw != "" {
 		rgb := tools.HexToInt(b.Color)
 		doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])

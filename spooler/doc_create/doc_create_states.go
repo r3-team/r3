@@ -10,7 +10,7 @@ import (
 	"github.com/PaesslerAG/gval"
 )
 
-func getConditionsResult(ctx context.Context, doc *doc, conditions []types.DocumentStateCondition) (bool, error) {
+func getConditionsResult(ctx context.Context, doc *doc, conditions []types.DocStateCondition) (bool, error) {
 
 	evalString := ""
 	evalValues := make(map[string]any)
@@ -69,7 +69,7 @@ func getConditionsResult(ctx context.Context, doc *doc, conditions []types.Docum
 	return eval.EvalBool(ctx, evalValues)
 }
 
-func getConditionSideValue(doc *doc, s types.DocumentStateConditionSide, isLeftSide bool) (any, error) {
+func getConditionSideValue(doc *doc, s types.DocStateConditionSide, isLeftSide bool) (any, error) {
 	switch s.Content {
 	case "attribute":
 		if !s.AttributeId.Valid || !s.AttributeIndex.Valid {

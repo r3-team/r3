@@ -5,9 +5,9 @@ import (
 	"r3/types"
 )
 
-func addHeaderFooter(ctx context.Context, doc *doc, f types.DocumentFieldGrid, font types.DocumentFont, pageWidth, pageHeight, posY float64) {
+func addHeaderFooter(ctx context.Context, doc *doc, f types.DocFieldGrid, font types.DocFont, pageWidth, pageHeight, posY float64) {
 
-	if f.SizeHeight == 0 {
+	if f.SizeY == 0 {
 		return
 	}
 

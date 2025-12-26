@@ -94,17 +94,212 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		ALTER TABLE instance.oauth_client ALTER COLUMN flow
-			TYPE instance.oauth_client_flow USING flow::TEXT::instance.oauth_client_flow;
-
-		ALTER TABLE app.field ALTER COLUMN flags
-			TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
+		nothing yet
 	*/
 
 	"3.11": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `
+			-- cleanup from last release
+			ALTER TABLE instance.oauth_client ALTER COLUMN flow
+				TYPE instance.oauth_client_flow USING flow::TEXT::instance.oauth_client_flow;
+
+			ALTER TABLE app.field ALTER COLUMN flags
+				TYPE app.field_flag[] USING flags::CHARACTER VARYING(12)[]::app.field_flag[];
+
+			-- new log context
 			INSERT INTO instance.config (name,value) VALUES ('logDoc',2);
 			ALTER TYPE instance.log_context ADD VALUE 'doc';
+			
+			-- document entity
+			CREATE TYPE app.font_family AS ENUM(
+				'Arimo','ComicNeue','CourierPrime','Cousine','NotoSans','NotoSansArabic',
+				'NotoSansJP','NotoSansKR','NotoSansSC','NotoSansThai','OpenSans','Roboto','Tinos'
+			);
+			CREATE TYPE app.page_size          AS ENUM('A1','A2','A3','A4','A5','A6','A7','Letter','Legal');
+			CREATE TYPE app.page_orientation   AS ENUM('landscape','portrait');
+			CREATE TYPE app.doc_field_content  AS ENUM('data','flow','grid','gridFooter','gridHeader','list','text');
+			CREATE TYPE app.doc_border_context AS ENUM('default','listBody','listHeader','listFooter');
+
+			CREATE TABLE IF NOT EXISTS app.doc (
+				id uuid NOT NULL,
+				module_id uuid NOT NULL,
+				name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+				comment text COLLATE pg_catalog."default",
+				author character varying(128),
+				language character(5) NOT NULL,
+				title character varying(128),
+				CONSTRAINT doc_pkey PRIMARY KEY (id),
+				CONSTRAINT doc_name_key UNIQUE (module_id, name)
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_module_id_fkey FOREIGN KEY (module_id)
+					REFERENCES app.module (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_module_fkey ON app.doc USING btree (module_id ASC NULLS LAST);
+			
+			CREATE TABLE IF NOT EXISTS app.doc_font (
+				doc_id uuid NOT NULL,
+				align character varying(2) NOT NULL,
+				bool_false character varying(32) NOT NULL,
+				bool_true character varying(32) NOT NULL,
+				color character(6) NOT NULL,
+				date_format character(5) NOT NULL,
+				family app.font_family NOT NULL,
+				line_factor real NOT NULL,
+				number_sep_dec character(1) NOT NULL,
+				number_sep_tho character(1) NOT NULL,
+				size real NOT NULL,
+				style character varying(2) NOT NULL,
+				CONSTRAINT doc_font_pkey PRIMARY KEY (doc_id),
+				CONSTRAINT doc_font_doc_id_fkey FOREIGN KEY (doc_id)
+					REFERENCES app.doc (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_font_doc_fkey ON app.doc_font USING btree (doc_id ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS app.doc_page (
+				id uuid NOT NULL,
+				doc_id uuid NOT NULL,
+				doc_page_id_footer_inherit uuid,
+				doc_page_id_header_inherit uuid,
+				size app.page_size NOT NULL,
+				orientation app.page_orientation NOT NULL,
+				margins real[] NOT NULL,
+				state boolean NOT NULL,
+				CONSTRAINT doc_page_pkey PRIMARY KEY (id),
+				CONSTRAINT doc_page_doc_id_fkey FOREIGN KEY (doc_id)
+					REFERENCES app.doc (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_page_doc_page_id_footer_inherit_fkey FOREIGN KEY (doc_page_id_footer_inherit)
+					REFERENCES app.doc_page (id) MATCH SIMPLE
+					ON UPDATE SET NULL
+					ON DELETE SET NULL
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_page_doc_page_id_header_inherit_fkey FOREIGN KEY (doc_page_id_header_inherit)
+					REFERENCES app.doc_page (id) MATCH SIMPLE
+					ON UPDATE SET NULL
+					ON DELETE SET NULL
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_page_doc_fkey                     ON app.doc_page USING btree (doc_id                     ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_page_doc_page_footer_inherit_fkey ON app.doc_page USING btree (doc_page_id_footer_inherit ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_page_doc_page_header_inherit_fkey ON app.doc_page USING btree (doc_page_id_header_inherit ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS app.doc_field (
+				id uuid NOT NULL,
+				parent_id uuid,
+				doc_page_id uuid NOT NULL,
+				content app.doc_field_content NOT NULL,
+				pos_x real,
+				pos_y real,
+				size_x real,
+				size_y real,
+				state boolean NOT NULL,
+				CONSTRAINT doc_field_pkey PRIMARY KEY (id),
+				CONSTRAINT doc_field_doc_page_id_fkey FOREIGN KEY (doc_page_id)
+					REFERENCES app.doc_page (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_field_parent_id_fkey FOREIGN KEY (parent_id)
+					REFERENCES app.doc_field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_field_doc_page_fkey ON app.doc_field USING btree (doc_page_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_field_parent_fkey   ON app.doc_field USING btree (parent_id   ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_field_content       ON app.doc_field USING btree (content     ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS app.doc_field_data (
+				doc_field_id uuid NOT NULL,
+				attribute_id uuid NOT NULL,
+				attribute_index integer NOT NULL,
+				CONSTRAINT doc_field_data_pkey PRIMARY KEY (doc_field_id),
+				CONSTRAINT doc_field_data_doc_field_id_fkey FOREIGN KEY (doc_field_id)
+					REFERENCES app.doc_field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_field_data_attribute_id_fkey FOREIGN KEY (attribute_id)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_field_data_attribute_fkey ON app.doc_field_data USING btree (attribute_id ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS app.doc_field_flow (
+				doc_field_id uuid NOT NULL,
+				gap real NOT NULL,
+				paddings real[],
+				CONSTRAINT doc_field_flow_pkey PRIMARY KEY (doc_field_id),
+				CONSTRAINT doc_field_flow_doc_field_id_fkey FOREIGN KEY (doc_field_id)
+					REFERENCES app.doc_field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+
+			CREATE TABLE IF NOT EXISTS app.doc_field_grid (
+				doc_field_id uuid NOT NULL,
+				shrink boolean NOT NULL,
+				CONSTRAINT doc_field_grid_pkey PRIMARY KEY (doc_field_id),
+				CONSTRAINT doc_field_grid_doc_field_id_fkey FOREIGN KEY (doc_field_id)
+					REFERENCES app.doc_field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+
+			CREATE TABLE IF NOT EXISTS app.doc_field_list (
+				doc_field_id uuid NOT NULL,
+				body_color_fill_even character(5),
+				body_color_fill_odd character(5),
+				footer_color_fill character(5),
+				header_color_fill character(5),
+				header_repeat boolean NOT NULL,
+				paddings real[] NOT NULL,
+				CONSTRAINT doc_field_list_pkey PRIMARY KEY (doc_field_id),
+				CONSTRAINT doc_field_list_doc_field_id_fkey FOREIGN KEY (doc_field_id)
+					REFERENCES app.doc_field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+
+			CREATE TABLE IF NOT EXISTS app.doc_field_text (
+				doc_field_id uuid NOT NULL,
+				value text NOT NULL,
+				CONSTRAINT doc_field_text_pkey PRIMARY KEY (doc_field_id),
+				CONSTRAINT doc_field_text_doc_field_id_fkey FOREIGN KEY (doc_field_id)
+					REFERENCES app.doc_field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE TABLE IF NOT EXISTS app.doc_border (
+				doc_field_id uuid NOT NULL,
+				context app.doc_border_context NOT NULL,
+				cell boolean NOT NULL,
+				color character(5) NOT NULL,
+				draw character varying(2) NOT NULL,
+				size real NOT NULL,
+				CONSTRAINT doc_border_pkey PRIMARY KEY (doc_field_id, context),
+				CONSTRAINT doc_border_doc_field_id_fkey FOREIGN KEY (doc_field_id)
+					REFERENCES app.doc_field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_border_doc_field_fkey ON app.doc_border USING btree (doc_field_id ASC NULLS LAST);
 		`)
 		return "3.12", err
 	},

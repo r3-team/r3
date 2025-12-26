@@ -11,10 +11,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func getLineHeight(f types.DocumentFont) float64 {
+func getLineHeight(f types.DocFont) float64 {
 	return f.Size * f.LineFactor * 0.5
 }
-func getCellHeightLines(doc *doc, font types.DocumentFont, width float64, s string) (float64, int) {
+func getCellHeightLines(doc *doc, font types.DocFont, width float64, s string) (float64, int) {
 	setFont(doc, font)
 	lineCount := len(doc.p.SplitText(s, width))
 	return getLineHeight(font) * float64(lineCount), lineCount
@@ -33,7 +33,7 @@ func getExpressionsDistinct(exprIn []types.DataGetExpression) []types.DataGetExp
 	}
 	return exprOut
 }
-func getExpressionsFromSetByData(set []types.DocumentSetByData) []types.DataGetExpression {
+func getExpressionsFromSetByData(set []types.DocSetByData) []types.DataGetExpression {
 	exprs := make([]types.DataGetExpression, 0)
 
 	for _, s := range set {
@@ -56,7 +56,7 @@ func getExpressionsFromFields(fieldsIf []any) ([]types.DataGetExpression, error)
 			return nil, err
 		}
 
-		var field types.DocumentField
+		var field types.DocField
 		if err := json.Unmarshal(fieldJson, &field); err != nil {
 			return nil, err
 		}
@@ -67,13 +67,13 @@ func getExpressionsFromFields(fieldsIf []any) ([]types.DataGetExpression, error)
 			var fields []any
 
 			if field.Content == "flow" {
-				var f types.DocumentFieldFlow
+				var f types.DocFieldFlow
 				if err := json.Unmarshal(fieldJson, &f); err != nil {
 					return nil, err
 				}
 				fields = f.Fields
 			} else {
-				var f types.DocumentFieldGrid
+				var f types.DocFieldGrid
 				if err := json.Unmarshal(fieldJson, &f); err != nil {
 					return nil, err
 				}
@@ -86,7 +86,7 @@ func getExpressionsFromFields(fieldsIf []any) ([]types.DataGetExpression, error)
 			exprs = append(exprs, exprsSub...)
 
 		case "data":
-			var f types.DocumentFieldData
+			var f types.DocFieldData
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return nil, err
 			}
@@ -95,7 +95,7 @@ func getExpressionsFromFields(fieldsIf []any) ([]types.DataGetExpression, error)
 					Bytes: f.AttributeId,
 					Valid: true,
 				},
-				Index: f.Index,
+				Index: f.AttributeIndex,
 			})
 		}
 
@@ -104,7 +104,7 @@ func getExpressionsFromFields(fieldsIf []any) ([]types.DataGetExpression, error)
 	}
 	return exprs, nil
 }
-func getExpressionsFromStates(states []types.DocumentState) []types.DataGetExpression {
+func getExpressionsFromStates(states []types.DocState) []types.DataGetExpression {
 	exprs := make([]types.DataGetExpression, 0)
 
 	for _, s := range states {
@@ -161,7 +161,7 @@ func getFloat64FromInterface(valueIf any) (float64, error) {
 	return v.Float64, nil
 }
 
-func setFont(doc *doc, f types.DocumentFont) {
+func setFont(doc *doc, f types.DocFont) {
 
 	// font key is also used as file name
 	// Tinos_.ttf, Tinos_B.ttf, Tinos_BI.ttf, Tinos_I.ttf

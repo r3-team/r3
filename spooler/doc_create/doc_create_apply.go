@@ -6,7 +6,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func applyResolvedData(doc *doc, set []types.DocumentSet, setByData []types.DocumentSetByData) []types.DocumentSet {
+func applyResolvedData(doc *doc, set []types.DocSet, setByData []types.DocSetByData) []types.DocSet {
 	for _, o := range setByData {
 		attributeIdMap, exists := doc.data[o.Index]
 		if !exists {
@@ -38,7 +38,7 @@ func applyResolvedData(doc *doc, set []types.DocumentSet, setByData []types.Docu
 
 		// add overwrite value
 		if !overwroteExisting {
-			set = append(set, types.DocumentSet{
+			set = append(set, types.DocSet{
 				Target: o.Target,
 				Value:  value,
 			})
@@ -47,7 +47,7 @@ func applyResolvedData(doc *doc, set []types.DocumentSet, setByData []types.Docu
 	return set
 }
 
-func applyToDocument(set []types.DocumentSet, d types.Document) types.Document {
+func applyToDocument(set []types.DocSet, d types.Doc) types.Doc {
 	for _, o := range set {
 		switch v := o.Value.(type) {
 		case string:
@@ -64,7 +64,7 @@ func applyToDocument(set []types.DocumentSet, d types.Document) types.Document {
 	return d
 }
 
-func applyToField(set []types.DocumentSet, f types.DocumentField) types.DocumentField {
+func applyToField(set []types.DocSet, f types.DocField) types.DocField {
 	for _, o := range set {
 		switch v := o.Value.(type) {
 		case float64:
@@ -84,7 +84,7 @@ func applyToField(set []types.DocumentSet, f types.DocumentField) types.Document
 	return f
 }
 
-func applyToFieldList(set []types.DocumentSet, f types.DocumentFieldList) types.DocumentFieldList {
+func applyToFieldList(set []types.DocSet, f types.DocFieldList) types.DocFieldList {
 	for _, o := range set {
 		switch v := o.Value.(type) {
 		case bool:
@@ -114,28 +114,28 @@ func applyToFieldList(set []types.DocumentSet, f types.DocumentFieldList) types.
 			case "footerBorder.draw":
 				f.FooterBorder.Draw = v
 			case "footerColorFill":
-				f.FooterColorFill = v
+				f.FooterColorFill = pgtype.Text{String: v, Valid: true}
 			case "bodyBorder.color":
 				f.BodyBorder.Color = v
 			case "bodyBorder.draw":
 				f.BodyBorder.Draw = v
 			case "bodyColorFillEven":
-				f.BodyColorFillEven = v
+				f.BodyColorFillEven = pgtype.Text{String: v, Valid: true}
 			case "bodyColorFillOdd":
-				f.BodyColorFillOdd = v
+				f.BodyColorFillOdd = pgtype.Text{String: v, Valid: true}
 			case "headerBorder.color":
 				f.HeaderBorder.Color = v
 			case "headerBorder.draw":
 				f.HeaderBorder.Draw = v
 			case "headerColorFill":
-				f.HeaderColorFill = v
+				f.HeaderColorFill = pgtype.Text{String: v, Valid: true}
 			}
 		}
 	}
 	return f
 }
 
-func applyToFont(set []types.DocumentSet, f types.DocumentFont) types.DocumentFont {
+func applyToFont(set []types.DocSet, f types.DocFont) types.DocFont {
 	for _, o := range set {
 		switch v := o.Value.(type) {
 		case float64:
@@ -151,8 +151,8 @@ func applyToFont(set []types.DocumentSet, f types.DocumentFont) types.DocumentFo
 				f.Align = v
 			case "font.color":
 				f.Color = v
-			case "font.formatDate":
-				f.FormatDate = v
+			case "font.dateFormat":
+				f.DateFormat = v
 			case "font.family":
 				f.Family = v
 			case "font.numberSepDec":

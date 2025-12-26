@@ -36,7 +36,7 @@ func ConvertColumnToExpression(column types.Column, loginId int64, languageCode 
 	}
 }
 
-func ConvertDocumentColumnToExpression(column types.DocumentColumn, languageCode string) types.DataGetExpression {
+func ConvertDocumentColumnToExpression(column types.DocColumn, languageCode string) types.DataGetExpression {
 
 	expr := types.DataGetExpression{
 		AttributeId: pgtype.UUID{Bytes: column.AttributeId, Valid: true},
