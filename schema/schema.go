@@ -81,6 +81,7 @@ var (
 		DbApi,
 		DbCollection,
 		DbColumn,
+		DbDoc,
 		DbField,
 		DbForm,
 		DbQueryFilterQuery,

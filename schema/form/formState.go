@@ -28,19 +28,19 @@ func getStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.For
 	for rows.Next() {
 		var s types.FormState
 		if err := rows.Scan(&s.Id, &s.Description); err != nil {
-			return states, err
+			return nil, err
 		}
 		states = append(states, s)
 	}
 
-	for i, _ := range states {
+	for i := range states {
 		states[i].Conditions, err = getStateConditions_tx(ctx, tx, states[i].Id)
 		if err != nil {
-			return states, nil
+			return nil, err
 		}
 		states[i].Effects, err = getStateEffects_tx(ctx, tx, states[i].Id)
 		if err != nil {
-			return states, nil
+			return nil, err
 		}
 	}
 	return states, nil
@@ -71,11 +71,11 @@ func getStateConditions_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID
 	for i, c := range conditions {
 		c.Side0, err = getStateConditionSide_tx(ctx, tx, formStateId, c.Position, 0)
 		if err != nil {
-			return conditions, err
+			return nil, err
 		}
 		c.Side1, err = getStateConditionSide_tx(ctx, tx, formStateId, c.Position, 1)
 		if err != nil {
-			return conditions, err
+			return nil, err
 		}
 		conditions[i] = c
 	}
@@ -115,7 +115,7 @@ func getStateEffects_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID) (
 	for rows.Next() {
 		var e types.FormStateEffect
 		if err := rows.Scan(&e.FieldId, &e.FormActionId, &e.TabId, &e.NewData, &e.NewState); err != nil {
-			return effects, err
+			return nil, err
 		}
 		effects = append(effects, e)
 	}

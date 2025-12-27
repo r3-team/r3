@@ -21,18 +21,6 @@ type Doc struct {
 	Captions     CaptionMap `json:"captions"` // document titles
 	LanguageCode string     `json:"languageCode"`
 }
-type DocPage struct {
-	Id          uuid.UUID        `json:"id"`
-	DocId       uuid.UUID        `json:"docId"`
-	FieldFlow   DocFieldFlow     `json:"fieldFlow"`
-	Size        string           `json:"size"` // "A1", "A2", "A3", "A4", "A5", "A6", "A7", "Letter", "Legal"
-	Margin      DocMarginPadding `json:"margin"`
-	Header      DocHeaderFooter  `json:"header"`
-	Footer      DocHeaderFooter  `json:"footer"`
-	Orientation string           `json:"orientation"` // "landscape" / "portrait"
-	Set         []DocSet         `json:"set"`         // overwrites
-	State       bool             `json:"state"`
-}
 type DocBorder struct {
 	Cell  bool    `json:"cell"`  // also draw cell borders - only relevant in tables
 	Color string  `json:"color"` // RGB HEX value, like "000000"
@@ -155,9 +143,9 @@ type DocFieldText struct {
 	Value string `json:"value"`
 }
 type DocHeaderFooter struct {
-	Active        bool         `json:"active"`        // true if header/footer is enabled at all (not stored in DB, resolved based on stored data)
-	PageIdInherit pgtype.UUID  `json:"pageIdInherit"` // page to inherit header/footer from (instead of its own definition)
-	FieldGrid     DocFieldGrid `json:"fieldGrid"`     // header/footer only ever have a fixed grid field of their internal size (if they need flow, they can add a flow field)
+	Active           bool         `json:"active"`           // true if header/footer is enabled at all (not stored in DB, resolved based on stored data)
+	DocPageIdInherit pgtype.UUID  `json:"docPageIdInherit"` // page to inherit header/footer from (instead of its own definition)
+	FieldGrid        DocFieldGrid `json:"fieldGrid"`        // header/footer only ever have a fixed grid field of their internal size (if they need flow, they can add a flow field)
 }
 type DocFont struct {
 	Align        string  `json:"align"`        // text: "L", "R", "J" (left, right, justify), column: "L", "C", "R" (left, center, right) &  "T", "M", "B" (top, middle, bottom)
@@ -177,6 +165,18 @@ type DocMarginPadding struct {
 	T float64 `json:"t"` // margin in mm
 	R float64 `json:"r"` // margin in mm
 	B float64 `json:"b"` // margin in mm
+}
+type DocPage struct {
+	Id          uuid.UUID        `json:"id"`
+	DocId       uuid.UUID        `json:"docId"`
+	FieldFlow   DocFieldFlow     `json:"fieldFlow"`
+	Size        string           `json:"size"` // "A1", "A2", "A3", "A4", "A5", "A6", "A7", "Letter", "Legal"
+	Margin      DocMarginPadding `json:"margin"`
+	Header      DocHeaderFooter  `json:"header"`
+	Footer      DocHeaderFooter  `json:"footer"`
+	Orientation string           `json:"orientation"` // "landscape" / "portrait"
+	Set         []DocSet         `json:"set"`         // overwrites
+	State       bool             `json:"state"`
 }
 type DocSet struct {
 	AttributeId    pgtype.UUID `json:"attributeId"`    // overwrite by attribute value
@@ -206,7 +206,7 @@ type DocStateConditionSide struct {
 	Value          pgtype.Text `json:"value"`          // fixed value, can be anything including NULL
 }
 type DocStateEffect struct {
-	FieldId  pgtype.UUID `json:"fieldId"`  // affected field
-	PageId   pgtype.UUID `json:"pageId"`   // affected page
-	NewState bool        `json:"newState"` // show or no-show
+	DocFieldId pgtype.UUID `json:"docFieldId"` // affected field
+	DocPageId  pgtype.UUID `json:"docPageId"`  // affected page
+	NewState   bool        `json:"newState"`   // show or no-show
 }

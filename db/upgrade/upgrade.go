@@ -131,6 +131,36 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			ALTER TYPE app.caption_content ADD VALUE 'docTitle';
 			ALTER TYPE app.caption_content ADD VALUE 'docColumnTitle';
+			
+			ALTER TABLE app.query ADD COLUMN     doc_id       uuid;
+			ALTER TABLE app.query ADD COLUMN     doc_field_id uuid;
+			ALTER TABLE app.query ADD CONSTRAINT query_doc_id_fkey FOREIGN KEY (doc_id)
+				REFERENCES app.doc (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE app.query ADD CONSTRAINT query_doc_field_id_fkey FOREIGN KEY (doc_field_id)
+				REFERENCES app.doc_field (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_query_doc_id_fkey       ON app.query USING btree (doc_id       ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_query_doc_field_id_fkey ON app.query USING btree (doc_field_id ASC NULLS LAST);
+			
+			ALTER TABLE app.query DROP CONSTRAINT query_single_parent;
+			ALTER TABLE app.query ADD  CONSTRAINT query_single_parent CHECK (1 = (
+				CASE WHEN api_id                IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN collection_id         IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN column_id             IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN doc_id                IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN doc_field_id          IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN field_id              IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN form_id               IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN query_filter_query_id IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN search_bar_id         IS NULL THEN 0 ELSE 1
+				END
+			));
 
 			CREATE TABLE IF NOT EXISTS app.doc (
 				id uuid NOT NULL,
@@ -401,6 +431,94 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_field_id_fkey         ON app.doc_set USING btree (doc_field_id         ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_page_id_fkey          ON app.doc_set USING btree (doc_page_id          ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_doc_set_attribute_id_fkey         ON app.doc_set USING btree (attribute_id         ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS app.doc_state(
+				id uuid NOT NULL,
+				doc_id uuid NOT NULL,
+				description text COLLATE pg_catalog."default" NOT NULL,
+				CONSTRAINT doc_state_pkey PRIMARY KEY (id),
+				CONSTRAINT doc_state_doc_id_fkey FOREIGN KEY (doc_id)
+					REFERENCES app.doc (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_state_doc_id_fkey ON app.doc_state USING btree (doc_id ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS app.doc_state_condition(
+				doc_state_id uuid NOT NULL,
+				"position" smallint NOT NULL,
+				connector condition_connector NOT NULL,
+				operator condition_operator NOT NULL,
+				CONSTRAINT doc_state_condition_pkey PRIMARY KEY (doc_state_id, "position"),
+				CONSTRAINT doc_state_condition_doc_state_id_fkey FOREIGN KEY (doc_state_id)
+					REFERENCES app.doc_state (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_state_condition_doc_state_id_fkey ON app.doc_state_condition USING btree (doc_state_id ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS app.doc_state_condition_side(
+				doc_state_id uuid NOT NULL,
+				doc_state_condition_position smallint NOT NULL,
+				attribute_id uuid,
+				attribute_index smallint,
+				preset_id uuid,
+				side smallint NOT NULL,
+				brackets smallint NOT NULL,
+				content filter_side_content NOT NULL,
+				value text COLLATE pg_catalog."default",
+				CONSTRAINT doc_state_condition_side_pkey PRIMARY KEY (doc_state_id, doc_state_condition_position, side),
+				CONSTRAINT doc_state_condition_side_doc_state_id_fkey FOREIGN KEY (doc_state_id)
+					REFERENCES app.doc_state (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_state_condition_side_doc_state_id_doc_state_con_pos_fkey FOREIGN KEY (doc_state_condition_position, doc_state_id)
+					REFERENCES app.doc_state_condition ("position", doc_state_id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_state_condition_side_attribute_id_fkey FOREIGN KEY (attribute_id)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_state_condition_side_preset_id_fkey FOREIGN KEY (preset_id)
+					REFERENCES app.preset (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_state_condition_side_doc_state_id_fkey ON app.doc_state_condition_side USING btree (doc_state_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_state_condition_side_attribute_id_fkey ON app.doc_state_condition_side USING btree (attribute_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_state_condition_side_preset_id_fkey    ON app.doc_state_condition_side USING btree (preset_id    ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS app.doc_state_effect(
+				doc_state_id uuid NOT NULL,
+				doc_field_id uuid,
+				doc_page_id uuid,
+				new_state bool NOT NULL,
+				CONSTRAINT doc_state_effect_doc_field_id_fkey FOREIGN KEY (doc_field_id)
+					REFERENCES app.doc_field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_state_effect_doc_state_id_fkey FOREIGN KEY (doc_state_id)
+					REFERENCES app.doc_state (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_state_effect_doc_page_id_fkey FOREIGN KEY (doc_page_id)
+					REFERENCES app.doc_page (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_state_effect_doc_field_id_fkey ON app.doc_state_effect USING btree (doc_field_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_state_effect_doc_state_id_fkey ON app.doc_state_effect USING btree (doc_state_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_state_effect_doc_page_id_fkey  ON app.doc_state_effect USING btree (doc_page_id ASC NULLS LAST);
 		`)
 		return "3.12", err
 	},

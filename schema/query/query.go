@@ -83,7 +83,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID
 		return q, err
 	}
 
-	// retrieve orderings
+	// retrieve order criteria
 	rows, err = tx.Query(ctx, `
 		SELECT attribute_id, index, ascending
 		FROM app.query_order

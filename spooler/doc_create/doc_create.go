@@ -97,11 +97,11 @@ func Run(ctx context.Context, docDef types.Doc, pathOut string) error {
 		}
 		if res {
 			for _, e := range s.Effects {
-				if e.FieldId.Valid {
-					doc.fieldIdMapState[e.FieldId.Bytes] = e.NewState
+				if e.DocFieldId.Valid {
+					doc.fieldIdMapState[e.DocFieldId.Bytes] = e.NewState
 				}
-				if e.PageId.Valid {
-					doc.pageIdMapState[e.PageId.Bytes] = e.NewState
+				if e.DocPageId.Valid {
+					doc.pageIdMapState[e.DocPageId.Bytes] = e.NewState
 				}
 			}
 		}
@@ -155,8 +155,8 @@ func Run(ctx context.Context, docDef types.Doc, pathOut string) error {
 		// set header for page
 		doc.p.SetHeaderFuncMode(func() {
 			e := page.Header
-			if page.Header.PageIdInherit.Valid {
-				e = docDef.Pages[pageIdMapIndex[page.Header.PageIdInherit.Bytes]].Header
+			if page.Header.DocPageIdInherit.Valid {
+				e = docDef.Pages[pageIdMapIndex[page.Header.DocPageIdInherit.Bytes]].Header
 			}
 			addHeaderFooter(ctx, doc, e.FieldGrid, font, pageWidth, pageHeight, 0)
 		}, true)
@@ -169,8 +169,8 @@ func Run(ctx context.Context, docDef types.Doc, pathOut string) error {
 		// after addPage() because footer for previous page is added on addPage() and must therefore not be overwritten before
 		doc.p.SetFooterFunc(func() {
 			e := page.Footer
-			if page.Footer.PageIdInherit.Valid {
-				e = docDef.Pages[pageIdMapIndex[page.Footer.PageIdInherit.Bytes]].Footer
+			if page.Footer.DocPageIdInherit.Valid {
+				e = docDef.Pages[pageIdMapIndex[page.Footer.DocPageIdInherit.Bytes]].Footer
 			}
 			addHeaderFooter(ctx, doc, e.FieldGrid, font, pageWidth, pageHeight, 0-page.Margin.B)
 		})

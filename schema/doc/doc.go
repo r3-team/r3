@@ -4,6 +4,7 @@ import (
 	"context"
 	"r3/schema"
 	"r3/schema/caption"
+	"r3/schema/query"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -51,8 +52,16 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 		}
 
 		// get query
+		docs[i].Query, err = query.Get_tx(ctx, tx, schema.DbForm, docs[i].Id, 0, 0, 0)
+		if err != nil {
+			return nil, err
+		}
 
 		// get states
+		docs[i].States, err = getStates_tx(ctx, tx, docs[i].Id)
+		if err != nil {
+			return nil, err
+		}
 
 		// get overwrites
 
