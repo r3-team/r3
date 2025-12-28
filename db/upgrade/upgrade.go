@@ -117,7 +117,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			);
 			CREATE TYPE app.page_orientation  AS ENUM('landscape','portrait');
 			CREATE TYPE app.page_size         AS ENUM('A1','A2','A3','A4','A5','A6','A7','Letter','Legal');
-			CREATE TYPE app.doc_field_content AS ENUM('data','flow','grid','gridFooter','gridHeader','list','text');
+			CREATE TYPE app.doc_field_content AS ENUM('data','flow','flowBody','grid','gridFooter','gridHeader','list','text');
 			CREATE TYPE app.doc_set_target    AS ENUM(
 				'author','languageCode',
 				'border.color','border.draw','border.size',
@@ -235,6 +235,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				doc_id uuid NOT NULL,
 				doc_page_id_footer_inherit uuid,
 				doc_page_id_header_inherit uuid,
+				"position" smallint NOT NULL,
 				size app.page_size NOT NULL,
 				orientation app.page_orientation NOT NULL,
 				margins real[] NOT NULL,

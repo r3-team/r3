@@ -66,6 +66,7 @@ func getStateConditions_tx(ctx context.Context, tx pgx.Tx, docStateId uuid.UUID)
 		}
 		conditions = append(conditions, c)
 	}
+	rows.Close()
 
 	for i, c := range conditions {
 		c.Side0, err = getStateConditionSide_tx(ctx, tx, docStateId, c.Position, 0)

@@ -4,6 +4,8 @@ import (
 	"context"
 	"r3/schema"
 	"r3/schema/caption"
+	"r3/schema/doc_page"
+	"r3/schema/doc_set"
 	"r3/schema/query"
 	"r3/types"
 
@@ -44,6 +46,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 		d.ModuleId = moduleId
 		docs = append(docs, d)
 	}
+	rows.Close()
 
 	for i, d := range docs {
 		docs[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbDoc, d.Id, []string{"docTitle"})
@@ -52,20 +55,28 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 		}
 
 		// get query
-		docs[i].Query, err = query.Get_tx(ctx, tx, schema.DbForm, docs[i].Id, 0, 0, 0)
+		docs[i].Query, err = query.Get_tx(ctx, tx, schema.DbForm, d.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}
 
 		// get states
-		docs[i].States, err = getStates_tx(ctx, tx, docs[i].Id)
+		docs[i].States, err = getStates_tx(ctx, tx, d.Id)
 		if err != nil {
 			return nil, err
 		}
 
 		// get overwrites
+		docs[i].Set, err = doc_set.Get_tx(ctx, tx, d.Id, schema.DbDoc, "")
+		if err != nil {
+			return nil, err
+		}
 
 		// get pages
+		docs[i].Pages, err = doc_page.Get_tx(ctx, tx, d.Id)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return docs, nil
 }

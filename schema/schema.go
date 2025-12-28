@@ -22,6 +22,8 @@ const (
 	DbColumn                DbEntity = "column"
 	DbDoc                   DbEntity = "doc"
 	DbDocColumn             DbEntity = "doc_column"
+	DbDocField              DbEntity = "doc_field"
+	DbDocPage               DbEntity = "doc_page"
 	DbField                 DbEntity = "field"
 	DbFieldButton           DbEntity = "field_button"
 	DbFieldCalendar         DbEntity = "field_calendar"
@@ -71,6 +73,12 @@ var (
 		DbField,
 		DbSearchBar,
 	}
+	DbAssignedDocSet = []DbEntity{
+		DbDoc,
+		DbColumn,
+		DbDocField,
+		DbDocPage,
+	}
 	DbAssignedOpenForm = []DbEntity{
 		DbColumn,
 		DbCollectionConsumer,
@@ -82,6 +90,7 @@ var (
 		DbCollection,
 		DbColumn,
 		DbDoc,
+		DbDocField,
 		DbField,
 		DbForm,
 		DbQueryFilterQuery,
