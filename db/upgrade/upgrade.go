@@ -117,6 +117,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			);
 			CREATE TYPE app.page_orientation  AS ENUM('landscape','portrait');
 			CREATE TYPE app.page_size         AS ENUM('A1','A2','A3','A4','A5','A6','A7','Letter','Legal');
+			CREATE TYPE app.doc_place_context AS ENUM('default','body','footer','header');
 			CREATE TYPE app.doc_field_content AS ENUM('data','flow','flowBody','grid','gridFooter','gridHeader','list','text');
 			CREATE TYPE app.doc_set_target    AS ENUM(
 				'author','languageCode',
@@ -356,40 +357,26 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			);
 			
 			CREATE TABLE IF NOT EXISTS app.doc_border (
-				doc_field_id_body uuid,
-				doc_field_id_footer uuid,
-				doc_field_id_header uuid,
+				doc_field_id uuid,
+				context app.doc_place_context NOT NULL,
 				cell boolean NOT NULL,
 				color character(5) NOT NULL,
 				draw character varying(2) NOT NULL,
 				size real NOT NULL,
-				CONSTRAINT doc_border_doc_field_id_body_fkey FOREIGN KEY (doc_field_id_body)
-					REFERENCES app.doc_field (id) MATCH SIMPLE
-					ON UPDATE CASCADE
-					ON DELETE CASCADE
-					DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT doc_border_doc_field_id_footer_fkey FOREIGN KEY (doc_field_id_footer)
-					REFERENCES app.doc_field (id) MATCH SIMPLE
-					ON UPDATE CASCADE
-					ON DELETE CASCADE
-					DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT doc_border_doc_field_id_header_fkey FOREIGN KEY (doc_field_id_header)
+				CONSTRAINT doc_border_doc_field_id_fkey FOREIGN KEY (doc_field_id)
 					REFERENCES app.doc_field (id) MATCH SIMPLE
 					ON UPDATE CASCADE
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
-			CREATE INDEX IF NOT EXISTS fki_doc_border_doc_field_id_body_fkey   ON app.doc_border USING btree (doc_field_id_body   ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_border_doc_field_id_footer_fkey ON app.doc_border USING btree (doc_field_id_footer ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_border_doc_field_id_header_fkey ON app.doc_border USING btree (doc_field_id_header ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_border_doc_field_id_fkey ON app.doc_border USING btree (doc_field_id ASC NULLS LAST);
 			
 			CREATE TABLE IF NOT EXISTS app.doc_set (
 				doc_id uuid,
-				doc_column_id_body uuid,
-				doc_column_id_footer uuid,
-				doc_column_id_header uuid,
+				doc_column_id uuid,
 				doc_field_id uuid,
 				doc_page_id uuid,
+				context app.doc_place_context NOT NULL,
 				attribute_id uuid,
 				attribute_index smallint,
 				target app.doc_set_target NOT NULL,
@@ -399,17 +386,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON UPDATE NO ACTION
 					ON DELETE NO ACTION
 					DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT doc_set_doc_column_id_body_fkey FOREIGN KEY (doc_column_id_body)
-					REFERENCES app.doc_column (id) MATCH SIMPLE
-					ON UPDATE CASCADE
-					ON DELETE CASCADE
-					DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT doc_set_doc_column_id_footer_fkey FOREIGN KEY (doc_column_id_footer)
-					REFERENCES app.doc_column (id) MATCH SIMPLE
-					ON UPDATE CASCADE
-					ON DELETE CASCADE
-					DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT doc_set_doc_column_id_header_fkey FOREIGN KEY (doc_column_id_header)
+				CONSTRAINT doc_set_doc_column_id_fkey FOREIGN KEY (doc_column_id)
 					REFERENCES app.doc_column (id) MATCH SIMPLE
 					ON UPDATE CASCADE
 					ON DELETE CASCADE
@@ -425,13 +402,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
-			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_id_fkey               ON app.doc_set USING btree (doc_id               ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_column_id_body_fkey   ON app.doc_set USING btree (doc_column_id_body   ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_column_id_footer_fkey ON app.doc_set USING btree (doc_column_id_footer ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_column_id_header_fkey ON app.doc_set USING btree (doc_column_id_header ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_field_id_fkey         ON app.doc_set USING btree (doc_field_id         ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_page_id_fkey          ON app.doc_set USING btree (doc_page_id          ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_set_attribute_id_fkey         ON app.doc_set USING btree (attribute_id         ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_id_fkey        ON app.doc_set USING btree (doc_id        ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_column_id_fkey ON app.doc_set USING btree (doc_column_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_field_id_fkey  ON app.doc_set USING btree (doc_field_id  ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_page_id_fkey   ON app.doc_set USING btree (doc_page_id   ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_set_attribute_id_fkey  ON app.doc_set USING btree (attribute_id  ASC NULLS LAST);
 
 			CREATE TABLE IF NOT EXISTS app.doc_state(
 				id uuid NOT NULL,

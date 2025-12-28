@@ -148,7 +148,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 
 	forms := make([]types.Form, 0)
 	sqlWheres := []string{}
-	sqlValues := []interface{}{}
+	sqlValues := []any{}
 
 	// filter to specified module ID
 	if moduleId != uuid.Nil {

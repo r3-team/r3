@@ -91,7 +91,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocPage, e
 
 		// get grid field for page footer
 		if _, exists := pageIdMapFieldIdFooter[p.Id]; exists {
-			pages[i].Footer.FieldGrid, err = doc_field.Get_tx(ctx, tx, p.Id, pageIdMapFieldIdFooter[p.Id], pgtype.UUID{})
+			pages[i].Footer.FieldGrid, err = doc_field.GetSingleGrid_tx(ctx, tx, p.Id, pageIdMapFieldIdFooter[p.Id])
 			if err != nil {
 				return nil, err
 			}
@@ -99,20 +99,20 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocPage, e
 
 		// get grid field for page header
 		if _, exists := pageIdMapFieldIdHeader[p.Id]; exists {
-			pages[i].Header.FieldGrid, err = doc_field.Get_tx(ctx, tx, p.Id, pageIdMapFieldIdHeader[p.Id], pgtype.UUID{})
+			pages[i].Header.FieldGrid, err = doc_field.GetSingleGrid_tx(ctx, tx, p.Id, pageIdMapFieldIdHeader[p.Id])
 			if err != nil {
 				return nil, err
 			}
 		}
 
 		// get flow field for page body
-		pages[i].FieldFlow, err = doc_field.Get_tx(ctx, tx, p.Id, pageIdMapFieldIdBody[p.Id], pgtype.UUID{})
+		pages[i].FieldFlow, err = doc_field.GetSingleFlow_tx(ctx, tx, p.Id, pageIdMapFieldIdBody[p.Id])
 		if err != nil {
 			return nil, err
 		}
 
 		// get overwrites
-		pages[i].Set, err = doc_set.Get_tx(ctx, tx, p.Id, schema.DbDocPage, "")
+		pages[i].Set, err = doc_set.Get_tx(ctx, tx, p.Id, schema.DbDocPage, "default")
 		if err != nil {
 			return nil, err
 		}

@@ -67,7 +67,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 		}
 
 		// get overwrites
-		docs[i].Set, err = doc_set.Get_tx(ctx, tx, d.Id, schema.DbDoc, "")
+		docs[i].Set, err = doc_set.Get_tx(ctx, tx, d.Id, schema.DbDoc, "default")
 		if err != nil {
 			return nil, err
 		}

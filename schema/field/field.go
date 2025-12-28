@@ -28,8 +28,8 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 
-func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]interface{}, error) {
-	fields := make([]interface{}, 0)
+func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
+	fields := make([]any, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT f.id, f.parent_id, f.tab_id, f.icon_id, f.content, f.state,
@@ -594,9 +594,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]interface{}, er
 	sort.Ints(orderedPos)
 
 	// initialize function for recursive execution
-	var getChildren func(parentId uuid.UUID, tabId uuid.UUID) []interface{}
-	getChildren = func(parentId uuid.UUID, tabId uuid.UUID) []interface{} {
-		children := make([]interface{}, 0)
+	var getChildren func(parentId uuid.UUID, tabId uuid.UUID) []any
+	getChildren = func(parentId uuid.UUID, tabId uuid.UUID) []any {
+		children := make([]any, 0)
 
 		for _, pos := range orderedPos {
 			if posMapParentId[pos] != parentId || posMapTabId[pos] != tabId {
