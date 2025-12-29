@@ -141,17 +141,39 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPa
 			return err
 		}
 
-		// set grid field for page footer
+		// set fields
+		fieldIds := make([]uuid.UUID, 0)
 
-		// set grid field for page header
+		// set grid field for page header & footer
+		if p.Footer.Active && !p.Footer.DocPageIdInherit.Valid {
+			if err := doc_field.Set_tx(ctx, tx, p.Id, pgtype.UUID{}, []any{p.Footer.FieldGrid}, &fieldIds); err != nil {
+				return err
+			}
+		}
+		if p.Header.Active && !p.Header.DocPageIdInherit.Valid {
+			if err := doc_field.Set_tx(ctx, tx, p.Id, pgtype.UUID{}, []any{p.Header.FieldGrid}, &fieldIds); err != nil {
+				return err
+			}
+		}
 
 		// set flow field for page body
+		if err := doc_field.Set_tx(ctx, tx, p.Id, pgtype.UUID{}, []any{p.FieldFlow}, &fieldIds); err != nil {
+			return err
+		}
 
 		// remove unused fields
-
-		// set overwrites
-		if err := doc_set.Set_tx(ctx, tx, p.Id, schema.DbDocPage, schema.DbDocContextDefault, p.Set); err != nil {
-			return err
+		if len(fieldIds) == 0 {
+			if _, err := tx.Exec(ctx, `DELETE FROM app.doc_field WHERE doc_page_id = $1`, p.Id); err != nil {
+				return err
+			}
+		} else {
+			if _, err := tx.Exec(ctx, `
+				DELETE FROM app.doc_field
+				WHERE doc_page_id =  $1
+				AND   id          <> ALL($2)
+			`, p.Id, fieldIds); err != nil {
+				return err
+			}
 		}
 
 		// remove unused header/footer fields
@@ -164,6 +186,11 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPa
 			if err := doc_field.DelByPage_tx(ctx, tx, p.Id, "gridHeader"); err != nil {
 				return err
 			}
+		}
+
+		// set overwrites
+		if err := doc_set.Set_tx(ctx, tx, p.Id, schema.DbDocPage, schema.DbDocContextDefault, p.Set); err != nil {
+			return err
 		}
 	}
 	return nil

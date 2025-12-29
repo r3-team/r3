@@ -66,9 +66,8 @@ func ExecTransaction(ctx context.Context, address string, loginId int64, isAdmin
 	return responses, nil
 }
 
-func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAdmin bool,
-	device types.WebsocketClientDevice, isNoAuth bool, ressource string, action string,
-	reqJson json.RawMessage) (interface{}, error) {
+func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAdmin bool, device types.WebsocketClientDevice,
+	isNoAuth bool, ressource string, action string, reqJson json.RawMessage) (any, error) {
 
 	// public requests: accessible to all
 	switch ressource {
@@ -324,6 +323,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		switch action {
 		case "get":
 			return DataSqlGet_tx(ctx, tx, reqJson, loginId)
+		}
+	case "doc":
+		switch action {
+		case "del":
+			return DocDel_tx(ctx, tx, reqJson)
+		case "set":
+			return DocSet_tx(ctx, tx, reqJson)
 		}
 	case "field":
 		switch action {
@@ -618,5 +624,5 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return WidgetSet_tx(ctx, tx, reqJson)
 		}
 	}
-	return nil, fmt.Errorf("unknown ressource or action")
+	return nil, fmt.Errorf("unknown resource or action")
 }

@@ -360,7 +360,7 @@ func GetSingleGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, field
 	return field, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype.UUID, fields []any) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype.UUID, fields []any, fieldIds *[]uuid.UUID) error {
 
 	for pos, fieldIf := range fields {
 
@@ -378,6 +378,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 		if err := schema.CreateIdIfNil(&fieldId); err != nil {
 			return err
 		}
+		*fieldIds = append(*fieldIds, fieldId)
 
 		if err := setGeneric_tx(ctx, tx, docPageId, fieldId, parentId, f, pos); err != nil {
 			return err
@@ -399,7 +400,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setFlow_tx(ctx, tx, docPageId, fieldId, f); err != nil {
+			if err := setFlow_tx(ctx, tx, docPageId, fieldId, f, fieldIds); err != nil {
 				return err
 			}
 
@@ -408,7 +409,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setGrid_tx(ctx, tx, docPageId, fieldId, f); err != nil {
+			if err := setGrid_tx(ctx, tx, docPageId, fieldId, f, fieldIds); err != nil {
 				return err
 			}
 
@@ -434,7 +435,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 			return errors.New("unknown document field content")
 		}
 	}
-
 	return nil
 }
 
@@ -470,7 +470,7 @@ func setData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.DocFi
 	return err
 }
 
-func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId uuid.UUID, f types.DocFieldFlow) error {
+func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId uuid.UUID, f types.DocFieldFlow, fieldIds *[]uuid.UUID) error {
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO app.doc_field_flow (doc_field_id, gap, paddings)
 		VALUES ($1,$2,$3)
@@ -479,10 +479,10 @@ func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId uui
 	`, fieldId, f.Gap, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}); err != nil {
 		return err
 	}
-	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: fieldId, Valid: true}, f.Fields)
+	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: fieldId, Valid: true}, f.Fields, fieldIds)
 }
 
-func setGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId uuid.UUID, f types.DocFieldGrid) error {
+func setGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId uuid.UUID, f types.DocFieldGrid, fieldIds *[]uuid.UUID) error {
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO app.doc_field_grid (doc_field_id, shrink)
 		VALUES ($1,$2)
@@ -491,7 +491,7 @@ func setGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId uui
 	`, fieldId, f.Shrink); err != nil {
 		return err
 	}
-	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: fieldId, Valid: true}, f.Fields)
+	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: fieldId, Valid: true}, f.Fields, fieldIds)
 }
 
 func setList_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.DocFieldList) error {
@@ -500,13 +500,8 @@ func setList_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.DocFi
 			footer_color_fill, header_color_fill, header_repeat, paddings)
 		VALUES ($1,$2,$3,$4,$5,$6,$7)
 		ON CONFLICT (doc_field_id)
-		DO UPDATE SET
-			body_color_fill_even = $2,
-			body_color_fill_odd  = $3,
-			footer_color_fill    = $4,
-			header_color_fill    = $5,
-			header_repeat        = $6,
-			paddings             = $7
+		DO UPDATE SET body_color_fill_even = $2, body_color_fill_odd = $3, footer_color_fill = $4,
+			header_color_fill = $5, header_repeat = $6, paddings = $7
 	`, fieldId, f.BodyColorFillEven, f.BodyColorFillOdd, f.FooterColorFill, f.HeaderColorFill,
 		f.HeaderRepeat, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}); err != nil {
 

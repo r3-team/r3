@@ -70,9 +70,30 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocCo
 
 func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []types.DocColumn) error {
 
-	//for i, c := range columns {
+	for i, c := range columns {
+		if err := schema.CreateIdIfNil(&c.Id); err != nil {
+			return err
+		}
 
-	//}
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO app.doc_column (id, doc_field_id, attribute_id, attribute_index, 
+				aggregator, length, distincted, group_by, size_x, sub_query, position)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+			ON CONFLICT(id)
+			DO UPDATE SET
+				attribute_id = $3, attribute_index = $4, aggregator = $5, length = $6,
+				distincted = $7, group_by = $8, size_x = $9, sub_query = $10, position = $11
+		`, c.Id, docFieldId, c.AttributeId, c.AttributeIndex, c.Aggregator, c.Length,
+			c.Distincted, c.GroupBy, c.SizeX, c.SubQuery, i); err != nil {
 
+			return err
+		}
+
+		if c.SubQuery {
+			if err := query.Set_tx(ctx, tx, schema.DbDocColumn, c.Id, 0, 0, 0, c.Query); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
