@@ -24,6 +24,10 @@ const (
 	DbDocColumn             DbEntity = "doc_column"
 	DbDocField              DbEntity = "doc_field"
 	DbDocPage               DbEntity = "doc_page"
+	DbDocContextBody        DbEntity = "body"
+	DbDocContextDefault     DbEntity = "default"
+	DbDocContextFooter      DbEntity = "footer"
+	DbDocContextHeader      DbEntity = "header"
 	DbField                 DbEntity = "field"
 	DbFieldButton           DbEntity = "field_button"
 	DbFieldCalendar         DbEntity = "field_calendar"
@@ -122,6 +126,14 @@ var (
 		DbModule,
 		DbPgFunction,
 		DbRelation,
+	}
+
+	// elements valid as document context
+	DbDocContextsValid = []DbEntity{
+		DbDocContextBody,
+		DbDocContextDefault,
+		DbDocContextFooter,
+		DbDocContextHeader,
 	}
 
 	// element transfer delete check

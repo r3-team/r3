@@ -67,7 +67,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 		}
 
 		// get overwrites
-		docs[i].Set, err = doc_set.Get_tx(ctx, tx, d.Id, schema.DbDoc, "default")
+		docs[i].Set, err = doc_set.Get_tx(ctx, tx, d.Id, schema.DbDoc, schema.DbDocContextDefault)
 		if err != nil {
 			return nil, err
 		}
@@ -79,4 +79,45 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 		}
 	}
 	return docs, nil
+}
+
+func Set_tx(ctx context.Context, tx pgx.Tx, d types.Doc) error {
+
+	known, err := schema.CheckCreateId_tx(ctx, tx, &d.Id, schema.DbDoc, "id")
+	if err != nil {
+		return err
+	}
+
+	if known {
+		if _, err := tx.Exec(ctx, `
+			UPDATE app.doc
+			SET name = $1, comment = $2, author = $3, language = $4
+			WHERE id = $5
+		`, d.Name, d.Comment, d.Author, d.LanguageCode, d.Id); err != nil {
+			return err
+		}
+	} else {
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO app.doc (id, module_id, name, comment, author, language)
+			VALUES ($1,$2,$3,$4,$5,$6)
+		`, d.Id, d.ModuleId, d.Name, d.Comment, d.Author, d.LanguageCode); err != nil {
+			return err
+		}
+	}
+	if err := query.Set_tx(ctx, tx, schema.DbDoc, d.Id, 0, 0, 0, d.Query); err != nil {
+		return err
+	}
+
+	// set pages
+	if err := doc_page.Set_tx(ctx, tx, d.Id, d.Pages); err != nil {
+		return err
+	}
+
+	// set states
+
+	// set overwrites
+	if err := doc_set.Set_tx(ctx, tx, d.Id, schema.DbDoc, schema.DbDocContextDefault, d.Set); err != nil {
+		return err
+	}
+	return nil
 }

@@ -402,11 +402,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
-			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_id_fkey        ON app.doc_set USING btree (doc_id        ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_column_id_fkey ON app.doc_set USING btree (doc_column_id ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_field_id_fkey  ON app.doc_set USING btree (doc_field_id  ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_set_doc_page_id_fkey   ON app.doc_set USING btree (doc_page_id   ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_set_attribute_id_fkey  ON app.doc_set USING btree (attribute_id  ASC NULLS LAST);
+			CREATE        INDEX IF NOT EXISTS fki_doc_set_attribute_id_fkey ON app.doc_set USING btree (attribute_id  ASC NULLS LAST);
+			CREATE UNIQUE INDEX IF NOT EXISTS ind_doc_set_doc_unique        ON app.doc_set USING btree (doc_id        ASC NULLS LAST, context ASC NULLS LAST, target ASC NULLS LAST);
+			CREATE UNIQUE INDEX IF NOT EXISTS ind_doc_set_doc_column_unique ON app.doc_set USING btree (doc_column_id ASC NULLS LAST, context ASC NULLS LAST, target ASC NULLS LAST);
+			CREATE UNIQUE INDEX IF NOT EXISTS ind_doc_set_doc_field_unique  ON app.doc_set USING btree (doc_field_id  ASC NULLS LAST, context ASC NULLS LAST, target ASC NULLS LAST);
+			CREATE UNIQUE INDEX IF NOT EXISTS ind_doc_set_doc_page_unique   ON app.doc_set USING btree (doc_page_id   ASC NULLS LAST, context ASC NULLS LAST, target ASC NULLS LAST);
 
 			CREATE TABLE IF NOT EXISTS app.doc_state(
 				id uuid NOT NULL,

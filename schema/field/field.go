@@ -234,7 +234,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 				Basis:          int(basis.Int16),
 				PerMin:         int(perMin.Int16),
 				PerMax:         int(perMax.Int16),
-				Fields:         []interface{}{},
+				Fields:         []any{},
 			})
 			posParentLookup = append(posParentLookup, pos)
 
@@ -671,7 +671,7 @@ func GetCalendar_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID) (types.Fi
 }
 
 func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID,
-	fields []interface{}, fieldIdMapQuery map[uuid.UUID]types.Query) error {
+	fields []any, fieldIdMapQuery map[uuid.UUID]types.Query) error {
 
 	for pos, fieldIf := range fields {
 
@@ -688,7 +688,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, parentId pgtype.UU
 		// check for special case: data relationship field
 		var isDataRel = false
 		if f.Content == "data" {
-			fieldData, valid := fieldIf.(map[string]interface{})
+			fieldData, valid := fieldIf.(map[string]any)
 			if !valid {
 				return errors.New("field interface is not map string interface")
 			}

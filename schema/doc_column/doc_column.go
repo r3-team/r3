@@ -44,15 +44,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocCo
 		}
 
 		// get overwrites
-		columns[i].SetBody, err = doc_set.Get_tx(ctx, tx, c.Id, schema.DbDocColumn, "body")
+		columns[i].SetBody, err = doc_set.Get_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextBody)
 		if err != nil {
 			return nil, err
 		}
-		columns[i].SetFooter, err = doc_set.Get_tx(ctx, tx, c.Id, schema.DbDocColumn, "footer")
+		columns[i].SetFooter, err = doc_set.Get_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextFooter)
 		if err != nil {
 			return nil, err
 		}
-		columns[i].SetHeader, err = doc_set.Get_tx(ctx, tx, c.Id, schema.DbDocColumn, "header")
+		columns[i].SetHeader, err = doc_set.Get_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextHeader)
 		if err != nil {
 			return nil, err
 		}

@@ -20,7 +20,7 @@ func ReplaceUuid(id uuid.UUID, idMapReplaced map[uuid.UUID]uuid.UUID) (uuid.UUID
 // entity duplication
 func ReplaceColumnIds(columns []types.Column, idMapReplaced map[uuid.UUID]uuid.UUID) ([]types.Column, error) {
 	var err error
-	for i, _ := range columns {
+	for i := range columns {
 		columns[i].Id, err = ReplaceUuid(columns[i].Id, idMapReplaced)
 		if err != nil {
 			return columns, err
@@ -78,7 +78,7 @@ func ReplaceQueryIds(queryIn types.Query, idMapReplaced map[uuid.UUID]uuid.UUID)
 	}
 
 	// replace IDs in filters
-	for i, _ := range queryIn.Filters {
+	for i := range queryIn.Filters {
 		queryIn.Filters[i], err = replaceQueryFilterIds(queryIn.Filters[i], idMapReplaced)
 		if err != nil {
 			return queryIn, err
@@ -86,13 +86,13 @@ func ReplaceQueryIds(queryIn types.Query, idMapReplaced map[uuid.UUID]uuid.UUID)
 	}
 
 	// replace IDs in choices
-	for i, _ := range queryIn.Choices {
+	for i := range queryIn.Choices {
 		queryIn.Choices[i].Id, err = ReplaceUuid(queryIn.Choices[i].Id, idMapReplaced)
 		if err != nil {
 			return queryIn, err
 		}
 
-		for x, _ := range queryIn.Choices[i].Filters {
+		for x := range queryIn.Choices[i].Filters {
 			queryIn.Choices[i].Filters[x], err = replaceQueryFilterIds(
 				queryIn.Choices[i].Filters[x], idMapReplaced)
 

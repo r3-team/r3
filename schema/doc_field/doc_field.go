@@ -16,6 +16,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+func DelByPage_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, content string) error {
+	_, err := tx.Exec(ctx, `
+		DELETE FROM app.doc_field
+		WHERE doc_page_id = $1
+		AND   context     = $2
+	`, docPageId, content)
+	return err
+}
+
 // retrieve one or many fields
 // either by specific field ID or by getting all children of a parent field
 func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.UUID, fieldIdParent pgtype.UUID) ([]any, error) {
@@ -187,13 +196,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			}
 
 			// get overwrites
-			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, "default")
+			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
 
 			// get border
-			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, "default")
+			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
@@ -207,7 +216,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			}
 
 			// get overwrites
-			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, "default")
+			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
@@ -219,7 +228,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			}
 
 			// get border
-			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, "default")
+			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
@@ -233,7 +242,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			}
 
 			// get overwrites
-			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, "default")
+			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
@@ -245,7 +254,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			}
 
 			// get border
-			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, "default")
+			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
@@ -259,7 +268,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			}
 
 			// get overwrites
-			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, "default")
+			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
@@ -277,15 +286,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			}
 
 			// get borders
-			f.BodyBorder, err = doc_border.Get_tx(ctx, tx, f.Id, "body")
+			f.BodyBorder, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextBody)
 			if err != nil {
 				return nil, err
 			}
-			f.FooterBorder, err = doc_border.Get_tx(ctx, tx, f.Id, "footer")
+			f.FooterBorder, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextFooter)
 			if err != nil {
 				return nil, err
 			}
-			f.HeaderBorder, err = doc_border.Get_tx(ctx, tx, f.Id, "header")
+			f.HeaderBorder, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextHeader)
 			if err != nil {
 				return nil, err
 			}
@@ -299,13 +308,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			}
 
 			// get overwrites
-			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, "default")
+			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
 
 			// get border
-			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, "default")
+			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}

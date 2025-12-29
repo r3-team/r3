@@ -112,10 +112,61 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocPage, e
 		}
 
 		// get overwrites
-		pages[i].Set, err = doc_set.Get_tx(ctx, tx, p.Id, schema.DbDocPage, "default")
+		pages[i].Set, err = doc_set.Get_tx(ctx, tx, p.Id, schema.DbDocPage, schema.DbDocContextDefault)
 		if err != nil {
 			return nil, err
 		}
 	}
 	return pages, nil
+}
+
+func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPage) error {
+
+	for i, p := range pages {
+
+		known, err := schema.CheckCreateId_tx(ctx, tx, &p.Id, schema.DbDocPage, "id")
+		if err != nil {
+			return err
+		}
+
+		margins := []float64{p.Margin.T, p.Margin.R, p.Margin.B, p.Margin.L}
+		if known {
+			if _, err := tx.Exec(ctx, `
+				UPDATE app.doc_page
+				SET size = $1, orientation = $2, margins = $3, state = $4, doc_page_id_footer_inherit = $5, doc_page_id_header_inherit = $6, position = $7
+				WHERE id = $8
+			`, p.Size, p.Orientation, margins, p.State, p.Footer.DocPageIdInherit, p.Header.DocPageIdInherit, i, p.Id); err != nil {
+				return err
+			}
+		} else {
+			if _, err := tx.Exec(ctx, `
+				INSERT INTO app.doc_page (id, doc_id, size, orientation, margins, state, doc_page_id_footer_inherit, doc_page_id_header_inherit, position)
+				VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+			`, p.Id, docId, p.Size, p.Orientation, margins, p.State, p.Footer.DocPageIdInherit, p.Header.DocPageIdInherit, i); err != nil {
+				return err
+			}
+		}
+
+		// set fields
+
+		// set overwrites
+		if err := doc_set.Set_tx(ctx, tx, p.Id, schema.DbDocPage, schema.DbDocContextDefault, p.Set); err != nil {
+			return err
+		}
+
+		// remove unused header/footer fields
+		if known {
+			if !p.Footer.Active || p.Footer.DocPageIdInherit.Valid {
+				if err := doc_field.DelByPage_tx(ctx, tx, p.Id, "gridFooter"); err != nil {
+					return err
+				}
+			}
+			if !p.Header.Active || p.Header.DocPageIdInherit.Valid {
+				if err := doc_field.DelByPage_tx(ctx, tx, p.Id, "gridHeader"); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }

@@ -3,6 +3,7 @@ package doc_border
 import (
 	"context"
 	"fmt"
+	"r3/schema"
 	"r3/types"
 	"slices"
 
@@ -10,10 +11,10 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, context string) (types.DocBorder, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, context schema.DbEntity) (types.DocBorder, error) {
 	var b types.DocBorder
 
-	if !slices.Contains([]string{"default", "body", "footer", "header"}, context) {
+	if !slices.Contains(schema.DbDocContextsValid, context) {
 		return b, fmt.Errorf("invalid border context '%s'", context)
 	}
 
