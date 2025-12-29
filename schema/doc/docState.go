@@ -2,6 +2,7 @@ package doc
 
 import (
 	"context"
+	"r3/schema"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -119,4 +120,96 @@ func getStateEffects_tx(ctx context.Context, tx pgx.Tx, docStateId uuid.UUID) ([
 		effects = append(effects, e)
 	}
 	return effects, nil
+}
+
+func setStates_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, states []types.DocState) error {
+
+	var err error
+	stateIds := make([]uuid.UUID, 0)
+
+	for _, s := range states {
+		s.Id, err = setState_tx(ctx, tx, docId, s)
+		if err != nil {
+			return err
+		}
+		stateIds = append(stateIds, s.Id)
+	}
+
+	// remove non-specified states
+	_, err = tx.Exec(ctx, `
+		DELETE FROM app.doc_state
+		WHERE docId = $1
+		AND id <> ALL($2)
+	`, docId, stateIds)
+
+	return err
+}
+func setState_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, state types.DocState) (uuid.UUID, error) {
+
+	if err := schema.CreateIdIfNil(&state.Id); err != nil {
+		return state.Id, err
+	}
+
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.doc_state (id, doc_id, description)
+		VALUES ($1,$2,$3)
+		ON CONFLICT (id)
+		DO UPDATE SET description = $3
+	`, state.Id, docId, state.Description); err != nil {
+		return state.Id, err
+	}
+
+	// reset conditions
+	if _, err := tx.Exec(ctx, `
+		DELETE FROM app.doc_state_condition
+		WHERE doc_state_id = $1
+	`, state.Id); err != nil {
+		return state.Id, err
+	}
+
+	for i, c := range state.Conditions {
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO app.doc_state_condition (doc_state_id, position, connector, operator)
+			VALUES ($1,$2,$3,$4)
+		`, state.Id, i, c.Connector, c.Operator); err != nil {
+			return state.Id, err
+		}
+		if err := setStateConditionSide_tx(ctx, tx, state.Id, i, 0, c.Side0); err != nil {
+			return state.Id, err
+		}
+		if err := setStateConditionSide_tx(ctx, tx, state.Id, i, 1, c.Side1); err != nil {
+			return state.Id, err
+		}
+	}
+
+	// reset effects
+	if _, err := tx.Exec(ctx, `
+		DELETE FROM app.doc_state_effect
+		WHERE doc_state_id = $1
+	`, state.Id); err != nil {
+		return state.Id, err
+	}
+
+	for _, e := range state.Effects {
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO app.doc_state_effect (doc_state_id, doc_field_id, doc_page_id, new_state)
+			VALUES ($1,$2,$3,$4)
+		`, state.Id, e.DocFieldId, e.DocPageId, e.NewState); err != nil {
+			return state.Id, err
+		}
+	}
+	return state.Id, nil
+}
+func setStateConditionSide_tx(ctx context.Context, tx pgx.Tx, docStateId uuid.UUID,
+	position int, side int, s types.DocStateConditionSide) error {
+
+	_, err := tx.Exec(ctx, `
+		INSERT INTO app.doc_state_condition_side (
+			doc_state_id, doc_state_condition_position, side,
+			attribute_id, attribute_index, preset_id, brackets, content, value
+		)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+	`, docStateId, position, side, s.AttributeId, s.AttributeIndex, s.PresetId, s.Brackets, s.Content, s.Value)
+
+	return err
 }

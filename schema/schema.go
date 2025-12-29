@@ -22,12 +22,13 @@ const (
 	DbColumn                DbEntity = "column"
 	DbDoc                   DbEntity = "doc"
 	DbDocColumn             DbEntity = "doc_column"
-	DbDocField              DbEntity = "doc_field"
-	DbDocPage               DbEntity = "doc_page"
 	DbDocContextBody        DbEntity = "body"
 	DbDocContextDefault     DbEntity = "default"
 	DbDocContextFooter      DbEntity = "footer"
 	DbDocContextHeader      DbEntity = "header"
+	DbDocField              DbEntity = "doc_field"
+	DbDocPage               DbEntity = "doc_page"
+	DbDocState              DbEntity = "doc_state"
 	DbField                 DbEntity = "field"
 	DbFieldButton           DbEntity = "field_button"
 	DbFieldCalendar         DbEntity = "field_calendar"
@@ -188,6 +189,14 @@ func CheckCreateId_tx(ctx context.Context, tx pgx.Tx, id *uuid.UUID, entity DbEn
 	`, entity, pkName), id).Scan(&known)
 
 	return known, err
+}
+func CreateIdIfNil(id *uuid.UUID) error {
+	if *id != uuid.Nil {
+		return nil
+	}
+	var err error
+	*id, err = uuid.NewV4()
+	return err
 }
 
 // attribute checks

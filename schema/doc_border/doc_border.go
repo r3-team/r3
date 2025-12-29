@@ -29,3 +29,18 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, context schema
 	}
 	return b, nil
 }
+
+func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, context schema.DbEntity, b types.DocBorder) error {
+
+	if !slices.Contains(schema.DbDocContextsValid, context) {
+		return fmt.Errorf("invalid border context '%s'", context)
+	}
+
+	_, err := tx.Exec(ctx, `
+		INSERT INTO app.doc_border (doc_field_id, context, cell, color, draw, size)
+		VALUES ($1,$2,$3,$4,$5,$6)
+		ON CONFLICT (doc_field_id, context)
+		DO UPDATE SET cell = $3, color = $4, draw = $5, size = $6
+	`, docFieldId, context, b.Cell, b.Color, b.Draw, b.Size)
+	return err
+}

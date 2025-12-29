@@ -67,3 +67,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocCo
 	}
 	return columns, nil
 }
+
+func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []types.DocColumn) error {
+
+	//for i, c := range columns {
+
+	//}
+
+	return nil
+}

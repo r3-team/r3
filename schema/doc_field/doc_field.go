@@ -2,6 +2,8 @@ package doc_field
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"r3/schema"
 	"r3/schema/doc_border"
@@ -70,6 +72,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 		LEFT JOIN app.doc_field_list AS fl ON fl.doc_field_id = f.id
 		LEFT JOIN app.doc_field_text AS ft ON ft.doc_field_id = f.id
 		%s
+		ORDER BY f.position ASC
 	`, strings.Join(sqlWheres, "\n")), docPageId)
 	if err != nil {
 		return nil, err
@@ -355,4 +358,181 @@ func GetSingleGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, field
 		return types.DocFieldGrid{}, fmt.Errorf("failed to parse field")
 	}
 	return field, nil
+}
+
+func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype.UUID, fields []any) error {
+
+	for pos, fieldIf := range fields {
+
+		fieldJson, err := json.Marshal(fieldIf)
+		if err != nil {
+			return err
+		}
+
+		var f types.DocField
+		if err := json.Unmarshal(fieldJson, &f); err != nil {
+			return err
+		}
+
+		fieldId := f.Id
+		if err := schema.CreateIdIfNil(&fieldId); err != nil {
+			return err
+		}
+
+		if err := setGeneric_tx(ctx, tx, docPageId, fieldId, parentId, f, pos); err != nil {
+			return err
+		}
+
+		switch f.Content {
+
+		case "data":
+			var f types.DocFieldData
+			if err := json.Unmarshal(fieldJson, &f); err != nil {
+				return err
+			}
+			if err := setData_tx(ctx, tx, fieldId, f); err != nil {
+				return err
+			}
+
+		case "flow", "flowBody":
+			var f types.DocFieldFlow
+			if err := json.Unmarshal(fieldJson, &f); err != nil {
+				return err
+			}
+			if err := setFlow_tx(ctx, tx, docPageId, fieldId, f); err != nil {
+				return err
+			}
+
+		case "grid", "gridFooter", "gridHeader":
+			var f types.DocFieldGrid
+			if err := json.Unmarshal(fieldJson, &f); err != nil {
+				return err
+			}
+			if err := setGrid_tx(ctx, tx, docPageId, fieldId, f); err != nil {
+				return err
+			}
+
+		case "list":
+			var f types.DocFieldList
+			if err := json.Unmarshal(fieldJson, &f); err != nil {
+				return err
+			}
+			if err := setList_tx(ctx, tx, fieldId, f); err != nil {
+				return err
+			}
+
+		case "text":
+			var f types.DocFieldText
+			if err := json.Unmarshal(fieldJson, &f); err != nil {
+				return err
+			}
+			if err := setText_tx(ctx, tx, fieldId, f); err != nil {
+				return err
+			}
+
+		default:
+			return errors.New("unknown document field content")
+		}
+	}
+
+	return nil
+}
+
+func setGeneric_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId uuid.UUID, parentId pgtype.UUID, f types.DocField, position int) error {
+	// field content cannot be changed after creation
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.doc_field (id, doc_page_id, parent_id, content, pos_x, pos_y, size_x, size_y, state, position)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+		ON CONFLICT (id)
+		DO UPDATE SET
+			doc_page_id = $2,
+			parent_id   = $3,
+			pos_x       = $5,
+			pos_y       = $6,
+			size_x      = $7,
+			size_y      = $8,
+			state       = $9,
+			position    = $10
+	`, fieldId, docPageId, parentId, f.Content, f.PosX, f.PosY, f.SizeX, f.SizeY, f.State, position); err != nil {
+		return err
+	}
+	return doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border)
+}
+
+func setData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.DocFieldData) error {
+	// currently, there is nothing to update in data fields
+	_, err := tx.Exec(ctx, `
+		INSERT INTO app.doc_field_data (doc_field_id, attribute_id, attribute_index)
+		VALUES ($1,$2,$3)
+		ON CONFLICT (doc_field_id)
+		DO NOTHING
+	`, fieldId, f.AttributeId, f.AttributeIndex)
+	return err
+}
+
+func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId uuid.UUID, f types.DocFieldFlow) error {
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.doc_field_flow (doc_field_id, gap, paddings)
+		VALUES ($1,$2,$3)
+		ON CONFLICT (doc_field_id)
+		DO UPDATE SET gap = $2, paddings = $3
+	`, fieldId, f.Gap, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}); err != nil {
+		return err
+	}
+	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: fieldId, Valid: true}, f.Fields)
+}
+
+func setGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId uuid.UUID, f types.DocFieldGrid) error {
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.doc_field_grid (doc_field_id, shrink)
+		VALUES ($1,$2)
+		ON CONFLICT (doc_field_id)
+		DO UPDATE SET shrink = $2
+	`, fieldId, f.Shrink); err != nil {
+		return err
+	}
+	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: fieldId, Valid: true}, f.Fields)
+}
+
+func setList_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.DocFieldList) error {
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.doc_field_list (doc_field_id, body_color_fill_even, body_color_fill_odd,
+			footer_color_fill, header_color_fill, header_repeat, paddings)
+		VALUES ($1,$2,$3,$4,$5,$6,$7)
+		ON CONFLICT (doc_field_id)
+		DO UPDATE SET
+			body_color_fill_even = $2,
+			body_color_fill_odd  = $3,
+			footer_color_fill    = $4,
+			header_color_fill    = $5,
+			header_repeat        = $6,
+			paddings             = $7
+	`, fieldId, f.BodyColorFillEven, f.BodyColorFillOdd, f.FooterColorFill, f.HeaderColorFill,
+		f.HeaderRepeat, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}); err != nil {
+
+		return err
+	}
+	if err := query.Set_tx(ctx, tx, schema.DbDocField, fieldId, 0, 0, 0, f.Query); err != nil {
+		return err
+	}
+	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextBody, f.BodyBorder); err != nil {
+		return err
+	}
+	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextFooter, f.FooterBorder); err != nil {
+		return err
+	}
+	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextHeader, f.HeaderBorder); err != nil {
+		return err
+	}
+	return doc_column.Set_tx(ctx, tx, fieldId, f.Columns)
+}
+
+func setText_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.DocFieldText) error {
+	_, err := tx.Exec(ctx, `
+		INSERT INTO app.doc_field_data (doc_field_id, value)
+		VALUES ($1,$2)
+		ON CONFLICT (doc_field_id)
+		DO UPDATE SET value = $2
+	`, fieldId, f.Value)
+	return err
 }

@@ -137,14 +137,13 @@ func setStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, states []typ
 	}
 
 	// remove non-specified states
-	if _, err := tx.Exec(ctx, `
+	_, err = tx.Exec(ctx, `
 		DELETE FROM app.form_state
 		WHERE form_id = $1
 		AND id <> ALL($2)
-	`, formId, stateIds); err != nil {
-		return err
-	}
-	return nil
+	`, formId, stateIds)
+
+	return err
 }
 
 // sets new/existing form state, returns form state ID

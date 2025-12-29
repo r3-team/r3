@@ -272,6 +272,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				size_x real,
 				size_y real,
 				state boolean NOT NULL,
+				"position" smallint NOT NULL,
 				CONSTRAINT doc_field_pkey PRIMARY KEY (id),
 				CONSTRAINT doc_field_doc_page_id_fkey FOREIGN KEY (doc_page_id)
 					REFERENCES app.doc_page (id) MATCH SIMPLE
@@ -363,6 +364,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				color character(5) NOT NULL,
 				draw character varying(2) NOT NULL,
 				size real NOT NULL,
+				CONSTRAINT doc_border_pkey PRIMARY KEY (doc_field_id, context),
 				CONSTRAINT doc_border_doc_field_id_fkey FOREIGN KEY (doc_field_id)
 					REFERENCES app.doc_field (id) MATCH SIMPLE
 					ON UPDATE CASCADE

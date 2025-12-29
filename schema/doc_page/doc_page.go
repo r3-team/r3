@@ -123,31 +123,31 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocPage, e
 func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPage) error {
 
 	for i, p := range pages {
-
-		known, err := schema.CheckCreateId_tx(ctx, tx, &p.Id, schema.DbDocPage, "id")
-		if err != nil {
+		if err := schema.CreateIdIfNil(&p.Id); err != nil {
 			return err
 		}
 
-		margins := []float64{p.Margin.T, p.Margin.R, p.Margin.B, p.Margin.L}
-		if known {
-			if _, err := tx.Exec(ctx, `
-				UPDATE app.doc_page
-				SET size = $1, orientation = $2, margins = $3, state = $4, doc_page_id_footer_inherit = $5, doc_page_id_header_inherit = $6, position = $7
-				WHERE id = $8
-			`, p.Size, p.Orientation, margins, p.State, p.Footer.DocPageIdInherit, p.Header.DocPageIdInherit, i, p.Id); err != nil {
-				return err
-			}
-		} else {
-			if _, err := tx.Exec(ctx, `
-				INSERT INTO app.doc_page (id, doc_id, size, orientation, margins, state, doc_page_id_footer_inherit, doc_page_id_header_inherit, position)
-				VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-			`, p.Id, docId, p.Size, p.Orientation, margins, p.State, p.Footer.DocPageIdInherit, p.Header.DocPageIdInherit, i); err != nil {
-				return err
-			}
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO app.doc_page (id, doc_id, size, orientation, margins, state,
+				doc_page_id_footer_inherit, doc_page_id_header_inherit, position)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+			ON CONFLICT(id)
+			DO UPPDATE SET
+				size = $3, orientation = $4, margins = $5, state = $6,
+				doc_page_id_footer_inherit = $7, doc_page_id_header_inherit = $8, position = $9
+		`, p.Id, docId, p.Size, p.Orientation, []float64{p.Margin.T, p.Margin.R, p.Margin.B, p.Margin.L},
+			p.State, p.Footer.DocPageIdInherit, p.Header.DocPageIdInherit, i); err != nil {
+
+			return err
 		}
 
-		// set fields
+		// set grid field for page footer
+
+		// set grid field for page header
+
+		// set flow field for page body
+
+		// remove unused fields
 
 		// set overwrites
 		if err := doc_set.Set_tx(ctx, tx, p.Id, schema.DbDocPage, schema.DbDocContextDefault, p.Set); err != nil {
@@ -155,16 +155,14 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPa
 		}
 
 		// remove unused header/footer fields
-		if known {
-			if !p.Footer.Active || p.Footer.DocPageIdInherit.Valid {
-				if err := doc_field.DelByPage_tx(ctx, tx, p.Id, "gridFooter"); err != nil {
-					return err
-				}
+		if !p.Footer.Active || p.Footer.DocPageIdInherit.Valid {
+			if err := doc_field.DelByPage_tx(ctx, tx, p.Id, "gridFooter"); err != nil {
+				return err
 			}
-			if !p.Header.Active || p.Header.DocPageIdInherit.Valid {
-				if err := doc_field.DelByPage_tx(ctx, tx, p.Id, "gridHeader"); err != nil {
-					return err
-				}
+		}
+		if !p.Header.Active || p.Header.DocPageIdInherit.Valid {
+			if err := doc_field.DelByPage_tx(ctx, tx, p.Id, "gridHeader"); err != nil {
+				return err
 			}
 		}
 	}
