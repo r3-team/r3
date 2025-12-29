@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"r3/schema"
 	"r3/schema/doc_border"
+	"r3/schema/doc_column"
 	"r3/schema/doc_set"
+	"r3/schema/query"
 	"r3/types"
 	"strings"
 
@@ -263,8 +265,16 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			}
 
 			// get query
+			f.Query, err = query.Get_tx(ctx, tx, schema.DbDocField, f.Id, 0, 0, 0)
+			if err != nil {
+				return nil, err
+			}
 
 			// get columns
+			f.Columns, err = doc_column.Get_tx(ctx, tx, f.Id)
+			if err != nil {
+				return nil, err
+			}
 
 			// get borders
 			f.BodyBorder, err = doc_border.Get_tx(ctx, tx, f.Id, "body")

@@ -55,7 +55,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 		}
 
 		// get query
-		docs[i].Query, err = query.Get_tx(ctx, tx, schema.DbForm, d.Id, 0, 0, 0)
+		docs[i].Query, err = query.Get_tx(ctx, tx, schema.DbDoc, d.Id, 0, 0, 0)
 		if err != nil {
 			return nil, err
 		}

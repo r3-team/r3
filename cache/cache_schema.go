@@ -14,6 +14,7 @@ import (
 	"r3/schema/attribute"
 	"r3/schema/clientEvent"
 	"r3/schema/collection"
+	"r3/schema/doc"
 	"r3/schema/form"
 	"r3/schema/icon"
 	"r3/schema/jsFunction"
@@ -54,6 +55,7 @@ var (
 	RoleIdMap          = make(map[uuid.UUID]types.Role)        // all roles by ID
 	PgFunctionIdMap    = make(map[uuid.UUID]types.PgFunction)  // all PG functions by ID
 	ApiIdMap           = make(map[uuid.UUID]types.Api)         // all APIs by ID
+	DocIdMap           = make(map[uuid.UUID]types.Doc)         // all documents by ID
 	ClientEventIdMap   = make(map[uuid.UUID]types.ClientEvent) // all client events by ID
 )
 
@@ -181,6 +183,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		mod.JsFunctions = make([]types.JsFunction, 0)
 		mod.Collections = make([]types.Collection, 0)
 		mod.Apis = make([]types.Api, 0)
+		mod.Docs = make([]types.Doc, 0)
 		mod.ClientEvents = make([]types.ClientEvent, 0)
 		mod.SearchBars = make([]types.SearchBar, 0)
 		mod.Variables = make([]types.Variable, 0)
@@ -322,6 +325,17 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		for _, a := range mod.Apis {
 			ApiIdMap[a.Id] = a
 			ModuleApiNameMapId[mod.Name][fmt.Sprintf("%s.v%d", a.Name, a.Version)] = a.Id
+		}
+
+		// get documents
+		log.Info(log.ContextCache, "load documents")
+
+		mod.Docs, err = doc.Get_tx(ctx, tx, mod.Id)
+		if err != nil {
+			return err
+		}
+		for _, d := range mod.Docs {
+			DocIdMap[d.Id] = d
 		}
 
 		// get client events

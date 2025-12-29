@@ -28,6 +28,7 @@ type DocBorder struct {
 	Size  float64 `json:"size"`  // border thickness
 }
 type DocColumn struct {
+	Id             uuid.UUID   `json:"id"`
 	AttributeId    uuid.UUID   `json:"attributeId"`
 	AttributeIndex int         `json:"attributeIndex"` // attribute index
 	GroupBy        bool        `json:"groupBy"`        // group by column attribute value?

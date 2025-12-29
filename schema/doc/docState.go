@@ -31,6 +31,7 @@ func getStates_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocS
 		}
 		states = append(states, s)
 	}
+	rows.Close()
 
 	for i := range states {
 		states[i].Conditions, err = getStateConditions_tx(ctx, tx, states[i].Id)

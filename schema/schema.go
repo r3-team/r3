@@ -75,7 +75,7 @@ var (
 	}
 	DbAssignedDocSet = []DbEntity{
 		DbDoc,
-		DbColumn,
+		DbDocColumn,
 		DbDocField,
 		DbDocPage,
 	}
@@ -90,6 +90,7 @@ var (
 		DbCollection,
 		DbColumn,
 		DbDoc,
+		DbDocColumn,
 		DbDocField,
 		DbField,
 		DbForm,
