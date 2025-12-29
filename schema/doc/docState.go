@@ -138,8 +138,8 @@ func setStates_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, states []type
 	// remove non-specified states
 	_, err = tx.Exec(ctx, `
 		DELETE FROM app.doc_state
-		WHERE docId = $1
-		AND id <> ALL($2)
+		WHERE doc_id =  $1
+		AND   id     <> ALL($2)
 	`, docId, stateIds)
 
 	return err

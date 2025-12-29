@@ -1,56 +1,61 @@
 export {MyBuilderDocs as default};
 
-let MyBuilderDocs = {
+const MyBuilderDocs = {
 	name:'my-builder-docs',
-	template:`<div class="contentBox grow">
+	template:`<div class="builder-docs contentBox grow">
 		<div class="top lower">
-			<div class="area">
-				<img class="icon" src="images/question.png" />
-				<h1>{{ capApp.pageTitleDocs }}</h1>
+			<div class="area nowrap">
+				<img class="icon" src="images/document.png" />
+				<h1 class="title">{{ capGen.documents }}</h1>
 			</div>
-			
-			<div class="area">
-				<my-button image="cancel.png"
-					@trigger="$emit('close')"
-					:cancel="true"
-				/>
+			<div class="area default-inputs">
+				<input v-model="filter" placeholder="..." />
 			</div>
 		</div>
 		
-		<div class="content html-docs" v-html="docsFinal"></div>
+		<div class="content default-inputs" v-if="module">
+			<div class="generic-entry-list">
+				
+				<div class="entry"
+					v-if="!readonly"
+					@click="$emit('createNew','doc')"
+					:class="{ clickable:!readonly }"
+				>
+					<div class="row gap centered">
+						<img class="icon" src="images/add.png" />
+						<span>{{ capGen.button.new }}</span>
+					</div>
+				</div>
+				
+				<router-link class="entry clickable"
+					v-for="a in module.docs.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
+					:key="a.id"
+					:to="'/builder/doc/'+a.id" 
+				>
+					<div class="lines">
+						<span>{{ a.name }}</span>
+					</div>
+				</router-link>
+
+			</div>
+		</div>
 	</div>`,
-	emits:['close'],
+	emits:['createNew'],
+	props:{
+		id:      { type:String,  required:true },
+		readonly:{ type:Boolean, required:true }
+	},
 	data() {
 		return {
-			docs:'',
-			idPlaceholder:'builder-docs_'
+			filter:'',
 		};
 	},
 	computed:{
-		docsFinal:(s) => s.docs
-			.replace(/href="#(.*?)"/g,'href="'+window.location+'#'+s.idPlaceholder+`$1`+'"')
-			.replace(/id="(.*?)"/g,'id="'+s.idPlaceholder+`$1`+'"')
-			.replace(/src="(.*?)"/g,'src="docs/'+`$1`+'"'),
+		module:(s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.builder
-	},
-	mounted() {
-		this.get();
-	},
-	methods:{
-		get() {
-			let that = this;
-			let req  = new XMLHttpRequest();
-			let lang = 'en_us';
-			
-			let url = `/docs/${lang}_builder.html`;
-			req.open('GET',url,true);
-			req.send(null);
-			req.onreadystatechange = function() {
-				if(req.readyState === 4 && req.status === 200)
-					that.docs = req.responseText;
-			};
-		}
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.doc,
+		capGen:     (s) => s.$store.getters.captions.generic
 	}
 };

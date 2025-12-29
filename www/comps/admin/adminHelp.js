@@ -1,7 +1,7 @@
-export {MyAdminDocs as default};
+export {MyAdminHelp as default};
 
-let MyAdminDocs = {
-	name:'my-admin-docs',
+const MyAdminHelp = {
+	name:'my-admin-help',
 	template:`<div class="contentBox grow">
 		<div class="top lower">
 			<div class="area">
@@ -17,20 +17,20 @@ let MyAdminDocs = {
 			</div>
 		</div>
 		
-		<div class="content html-docs" v-html="docsFinal"></div>
+		<div class="content html-docs" v-html="helpFinal"></div>
 	</div>`,
 	emits:['close'],
 	data() {
 		return {
-			docs:'',
-			idPlaceholder:'admin-docs_'
+			help:'',
+			idPlaceholder:'admin-help_'
 		};
 	},
 	computed:{
-		docsFinal:(s) => s.docs
+		helpFinal:(s) => s.help
 			.replace(/href="#(.*?)"/g,'href="'+window.location+'#'+s.idPlaceholder+`$1`+'"')
 			.replace(/id="(.*?)"/g,'id="'+s.idPlaceholder+`$1`+'"')
-			.replace(/src="(.*?)"/g,'src="docs/'+`$1`+'"'),
+			.replace(/src="(.*?)"/g,'src="help/'+`$1`+'"'),
 		
 		// stores
 		capApp:  (s) => s.$store.getters.captions.admin,
@@ -41,19 +41,18 @@ let MyAdminDocs = {
 	},
 	methods:{
 		get() {
-			let that = this;
 			let req  = new XMLHttpRequest();
-			
 			let lang = this.settings.languageCode;
-			if(lang !== 'en_us' && lang !== 'de_de')
-				lang = 'en_us';
+
+			if(lang.startsWith('de')) lang = 'de_de';
+			else                      lang = 'en_us';
 			
-			let url = `/docs/${lang}_admin.html`;
+			let url = `/help/${lang}_admin.html`;
 			req.open('GET',url,true);
 			req.send(null);
-			req.onreadystatechange = function() {
+			req.onreadystatechange = () => {
 				if(req.readyState === 4 && req.status === 200)
-					that.docs = req.responseText;
+					this.help = req.responseText;
 			};
 		}
 	}

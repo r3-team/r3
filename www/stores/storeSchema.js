@@ -13,6 +13,7 @@ const MyStoreSchema = {
 		attributeIdMap:{},
 		clientEventIdMap:{},
 		collectionIdMap:{},
+		docIdMap:{},
 		formIdMap:{},
 		iconIdMap:{},
 		indexIdMap:{},
@@ -39,13 +40,13 @@ const MyStoreSchema = {
 			delete(state.moduleIdMap[payload]);
 		},
 		setModules(state,payload) {
-			const getFormIdsFromMenus = (menus) => {
+			const getFormIdsFromMenus = menus => {
 				for(const menu of menus) {
 					state.formIdMapMenu[menu.formId] = menu;
 					getFormIdsFromMenus(menu.menus);
 				}
 			};
-			const processFields = (fields) => {
+			const processFields = fields => {
 				for(let i = 0, j = fields.length; i < j; i++) {
 					if(typeof fields[i].query !== 'undefined')
 						fields[i].query = getQueryTemplateIfNull(fields[i].query);
@@ -60,6 +61,19 @@ const MyStoreSchema = {
 					}
 				}
 				return fields;
+			};
+			const processDocField = field => {
+				if(typeof field.query !== 'undefined')
+					field.query = getQueryTemplateIfNull(field.query);
+				
+				switch(field.content) {
+					case 'flow':       // fallthrough
+					case 'flowBody':   // fallthrough
+					case 'grid':       // fallthrough
+					case 'gridFooter': // fallthrough
+					case 'gridHeader': field.fields = processDocField(field.fields); break;
+				}
+				return field;
 			};
 			
 			for(let mod of payload) {
@@ -122,22 +136,36 @@ const MyStoreSchema = {
 				
 				// process search bars
 				for(const bar of mod.searchBars) {
-					bar.query  = getQueryTemplateIfNull(bar.query);
+					bar.query = getQueryTemplateIfNull(bar.query);
 					state.searchBarIdMap[bar.id] = bar;
 				}
 				
 				// process collections
 				for(let collection of mod.collections) {
 					collection.query = getQueryTemplateIfNull(collection.query);
-					
 					state.collectionIdMap[collection.id] = collection;
 				}
 				
 				// process APIs
 				for(let api of mod.apis) {
 					api.query = getQueryTemplateIfNull(api.query);
-					
 					state.apiIdMap[api.id] = api;
+				}
+				
+				// process documents
+				for(let doc of mod.docs) {
+					doc.query = getQueryTemplateIfNull(doc.query);
+					for(let i = 0, j = doc.pages.length; i < j; i++) {
+						const p = doc.pages[i];
+						p.fieldFlow = processDocField(p.fieldFlow)
+
+						if(p.footer.active && p.footer.docPageIdInherit !== null)
+							p.footer.fieldGrid = processDocField(p.footer.fieldGrid);
+						
+						if(p.header.active && p.header.docPageIdInherit !== null)
+							p.header.fieldGrid = processDocField(p.header.fieldGrid);
+					}
+					state.docIdMap[doc.id] = doc;
 				}
 				
 				// process client events
@@ -180,6 +208,7 @@ const MyStoreSchema = {
 		attributeIdMap:     (state) => state.attributeIdMap,
 		clientEventIdMap:   (state) => state.clientEventIdMap,
 		collectionIdMap:    (state) => state.collectionIdMap,
+		docIdMap:           (state) => state.docIdMap,
 		formIdMap:          (state) => state.formIdMap,
 		formIdMapMenu:      (state) => state.formIdMapMenu,
 		iconIdMap:          (state) => state.iconIdMap,

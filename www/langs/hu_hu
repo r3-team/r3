@@ -797,6 +797,12 @@
 			"onMobile": "Mobil nézetben",
 			"showRowCount": "Show result count instead"
 		},
+		"doc": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this document?"
+			},
+			"titleOne": "Document '{NAME}'"
+		},
 		"form": {
 			"actions": {
 				"jsFunctionId": "Előtéri funkció végrehajtása",
@@ -1580,6 +1586,7 @@
 		"new": {
 			"api": "Új API",
 			"collection": "Új gyűjtemény",
+			"doc": "New document",
 			"form": "Új űrlap",
 			"formIdDuplicate": "Copy form",
 			"jsFunction": "Új frontend funkció",
@@ -2286,6 +2293,8 @@
 		},
 		"disabled": "Disabled",
 		"displayed": "Megjelenített",
+		"document": "Document",
+		"documents": "Documents",
 		"encryption": "Encryption",
 		"error": {
 			"nameTaken": "Name is already taken, please choose another.",

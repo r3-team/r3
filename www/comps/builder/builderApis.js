@@ -1,6 +1,6 @@
 export {MyBuilderApis as default};
 
-let MyBuilderApis = {
+const MyBuilderApis = {
 	name:'my-builder-apis',
 	template:`<div class="builder-apis contentBox grow">
 		<div class="top lower">
@@ -53,6 +53,7 @@ let MyBuilderApis = {
 			</div>
 		</div>
 	</div>`,
+	emits:['createNew'],
 	props:{
 		id:      { type:String,  required:true },
 		readonly:{ type:Boolean, required:true }
@@ -63,7 +64,7 @@ let MyBuilderApis = {
 		};
 	},
 	computed:{
-		module:(s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
+		module:(s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		
 		// stores
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],

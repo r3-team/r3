@@ -38,7 +38,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 	for rows.Next() {
 		var d types.Doc
 		if err := rows.Scan(&d.Id, &d.Name, &d.Comment, &d.Author, &d.LanguageCode,
-			&d.Font.Align, &d.Font.BoolFalse, &d.Font.Color, &d.Font.DateFormat, &d.Font.Family,
+			&d.Font.Align, &d.Font.BoolFalse, &d.Font.BoolTrue, &d.Font.Color, &d.Font.DateFormat, &d.Font.Family,
 			&d.Font.LineFactor, &d.Font.NumberSepDec, &d.Font.NumberSepTho, &d.Font.Size, &d.Font.Style); err != nil {
 			return nil, err
 		}
@@ -82,10 +82,24 @@ func Set_tx(ctx context.Context, tx pgx.Tx, d types.Doc) error {
 		INSERT INTO app.doc (id, module_id, name, comment, author, language)
 		VALUES ($1,$2,$3,$4,$5,$6)
 		ON CONFLICT (id)
-		SET name = $3, comment = $4, author = $5, language = $6
+		DO UPDATE SET name = $3, comment = $4, author = $5, language = $6
 	`, d.Id, d.ModuleId, d.Name, d.Comment, d.Author, d.LanguageCode); err != nil {
 		return err
 	}
+
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.doc_font (doc_id, align, bool_false, bool_true, color, date_format,
+			family, line_factor, number_sep_dec, number_sep_tho, size, style)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		ON CONFLICT (doc_id)
+		DO UPDATE SET align = $2, bool_false = $3, bool_true = $4, color = $5, date_format = $6,
+			family = $7, line_factor = $8, number_sep_dec = $9, number_sep_tho = $10, size = $11, style = $12
+	`, d.Id, d.Font.Align, d.Font.BoolFalse, d.Font.BoolTrue, d.Font.Color, d.Font.DateFormat, d.Font.Family,
+		d.Font.LineFactor, d.Font.NumberSepDec, d.Font.NumberSepTho, d.Font.Size, d.Font.Style); err != nil {
+
+		return err
+	}
+
 	if err := query.Set_tx(ctx, tx, schema.DbDoc, d.Id, 0, 0, 0, d.Query); err != nil {
 		return err
 	}

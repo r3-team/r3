@@ -6,7 +6,7 @@ let displayArrow = function(state) {
 	return state ? 'images/triangleDown.png' : 'images/triangleRight.png';
 };
 
-let MyBuilderModulesKeyCreate = {
+const MyBuilderModulesKeyCreate = {
 	name:'my-builder-modules-key-create',
 	template:`<div class="key-create contentBox grow">
 		
@@ -76,7 +76,7 @@ let MyBuilderModulesKeyCreate = {
 	}
 };
 
-let MyBuilderModulesGraph = {
+const MyBuilderModulesGraph = {
 	name:'my-builder-modules-graph',
 	components:{
 		echarts:VueECharts,
@@ -164,7 +164,7 @@ let MyBuilderModulesGraph = {
 	}
 };
 
-let MyBuilderModulesExport = {
+const MyBuilderModulesExport = {
 	name:'my-builder-modules-export',
 	components:{MyModuleSelect},
 	template:`<div class="contentBox grow">
@@ -342,7 +342,7 @@ let MyBuilderModulesExport = {
 	}
 };
 
-let MyBuilderModules = {
+const MyBuilderModules = {
 	name:'my-builder-modules',
 	components:{
 		MyBuilderModulesExport,
@@ -368,7 +368,7 @@ let MyBuilderModules = {
 						:caption="capApp.button.manageApps"
 					/>
 					<my-button image="question.png"
-						@trigger="$emit('toggleDocs')"
+						@trigger="$emit('toggleHelp')"
 						:caption="capGen.help"
 					/>
 				</div>
@@ -419,7 +419,7 @@ let MyBuilderModules = {
 	props:{
 		builderLanguage:{ type:String, required:true }
 	},
-	emits:['createNew','toggleDocs'],
+	emits:['createNew','toggleHelp'],
 	data() {
 		return {
 			show:true

@@ -797,6 +797,12 @@
 			"onMobile": "In mobiler Ansicht",
 			"showRowCount": "Stattdessen Ergebnisanzahl zeigen"
 		},
+		"doc": {
+			"dialog": {
+				"delete": "Bist du sicher, dass du dieses Dokument löschen möchtest?"
+			},
+			"titleOne": "Dokument '{NAME}'"
+		},
 		"form": {
 			"actions": {
 				"jsFunctionId": "Frontend-Funktion ausführen",
@@ -1580,6 +1586,7 @@
 		"new": {
 			"api": "Neue API",
 			"collection": "Neue Sammlung",
+			"doc": "Neues Dokument",
 			"form": "Neues Formular",
 			"formIdDuplicate": "Formular kopieren",
 			"jsFunction": "Neue Frontend-Funktion",
@@ -2286,6 +2293,8 @@
 		},
 		"disabled": "Deaktiviert",
 		"displayed": "Angezeigt",
+		"document": "Dokument",
+		"documents": "Dokumente",
 		"encryption": "Verschlüsselung",
 		"error": {
 			"nameTaken": "Name bereits in Benutzung, bitte einen anderen wählen.",

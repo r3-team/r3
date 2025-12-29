@@ -797,6 +797,12 @@
 			"onMobile": "Mostrar en móvil",
 			"showRowCount": "Mostrar recuento de resultados en su lugar"
 		},
+		"doc": {
+			"dialog": {
+				"delete": "Are you sure you want to delete this document?"
+			},
+			"titleOne": "Document '{NAME}'"
+		},
 		"form": {
 			"actions": {
 				"jsFunctionId": "Ejecutar función frontend",
@@ -1580,6 +1586,7 @@
 		"new": {
 			"api": "Nueva API",
 			"collection": "Nueva colección",
+			"doc": "New document",
 			"form": "Nuevo formulario",
 			"formIdDuplicate": "Copiar formulario",
 			"jsFunction": "Nueva función Frontend",
@@ -2286,6 +2293,8 @@
 		},
 		"disabled": "Disabled",
 		"displayed": "Mostrado",
+		"document": "Document",
+		"documents": "Documents",
 		"encryption": "Encriptación",
 		"error": {
 			"nameTaken": "El nombre ya está en uso, por favor elija otro.",

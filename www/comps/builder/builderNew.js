@@ -1,3 +1,4 @@
+import MyBuilderFormInput from './builderFormInput.js';
 import {getQueryTemplate} from '../shared/query.js';
 import {getNilUuid}       from '../shared/generic.js';
 import {
@@ -5,10 +6,9 @@ import {
 	getTemplateFnc,
 	getTemplateReturn
 } from '../shared/templates.js';
-import MyBuilderFormInput from './builderFormInput.js';
 export {MyBuilderNew as default};
 
-let MyBuilderNew = {
+const MyBuilderNew = {
 	name:'my-builder-new',
 	components:{ MyBuilderFormInput },
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
@@ -153,6 +153,7 @@ let MyBuilderNew = {
 			switch(s.entity) {
 				case 'api':        return 60; break;
 				case 'collection': return 64; break;
+				case 'doc':        return 64; break;
 				case 'form':       return 64; break;
 				case 'jsFunction': return 64; break;
 				case 'module':     return 60; break;
@@ -174,6 +175,7 @@ let MyBuilderNew = {
 				case 'module':     searchList = s.modules;            break;
 				case 'api':        searchList = s.module.apis;        break;
 				case 'collection': searchList = s.module.collections; break;
+				case 'doc':        searchList = s.module.docs;        break;
 				case 'form':       searchList = s.module.forms;       break;
 				case 'jsFunction': searchList = s.module.jsFunctions; break;
 				case 'pgFunction': searchList = s.module.pgFunctions; break;
@@ -203,6 +205,7 @@ let MyBuilderNew = {
 			switch(s.entity) {
 				case 'api':        return s.capApp.api;        break;
 				case 'collection': return s.capApp.collection; break;
+				case 'doc':        return s.capApp.doc;        break;
 				case 'form':       return s.capApp.form;       break;
 				case 'jsFunction': return s.capApp.jsFunction; break;
 				case 'module':     return s.capApp.module;     break;
@@ -219,6 +222,7 @@ let MyBuilderNew = {
 			switch(s.entity) {
 				case 'api':        return 'images/api.png';            break;
 				case 'collection': return 'images/tray.png';           break;
+				case 'doc':        return 'images/document.png';       break;
 				case 'form':       return 'images/fileText.png';       break;
 				case 'jsFunction': return 'images/codeScreen.png';     break;
 				case 'module':     return 'images/module.png';         break;
@@ -305,6 +309,31 @@ let MyBuilderNew = {
 						columns:[],
 						query:this.getQueryTemplate(),
 						inHeader:[]
+					};
+				break;
+				case 'doc':
+					request = {
+						id:this.getNilUuid(),
+						moduleId:this.moduleId,
+						name:this.inputs.name,
+						comment:null,
+						font:{
+							align:'L',
+							boolFalse:'no',
+							boolTrue:'yes',
+							color:'',
+							dateFormat:'Y-m-d',
+							family:'Roboto',
+							lineFactor:1,
+							numberSepDec:'.',
+							numberSepTho:',',
+							size:11,
+							style:''
+						},
+						query:this.getQueryTemplate(),
+						pages:[],
+						states:[],
+						set:[]
 					};
 				break;
 				case 'form':
@@ -467,10 +496,8 @@ let MyBuilderNew = {
 			
 			ws.sendMultiple(requests,true).then(
 				res => {
-					if(this.entity === 'module')
-						this.$root.schemaReload(res[0].payload);
-					else
-						this.$root.schemaReload(this.moduleId);
+					if(this.entity === 'module') this.$root.schemaReload(res[0].payload);
+					else                         this.$root.schemaReload(this.moduleId);
 					
 					this.$emit('close');
 				},

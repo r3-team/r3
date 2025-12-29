@@ -1,11 +1,9 @@
-import MyAdminDocs from './adminDocs.js';
+import MyAdminHelp from './adminHelp.js';
 export {MyAdmin as default};
 
 let MyAdmin = {
 	name:'my-admin',
-	components:{
-		MyAdminDocs,
-	},
+	components:{MyAdminHelp},
 	template:`<div class="admin">
 		<div class="navigation" :class="{ isDark:colorMenu.isDark() }" :style="bgStyle">
 			<div class="navigation-header">
@@ -14,7 +12,7 @@ let MyAdmin = {
 					<span>{{ capApp.title }}</span>
 				</div>
 				<my-button image="question.png"
-					@trigger="showDocs = !showDocs"
+					@trigger="showHelp = !showHelp"
 				/>
 			</div>
 			
@@ -153,21 +151,21 @@ let MyAdmin = {
 		
 		<router-view
 			v-if="ready"
-			v-show="!showDocs"
+			v-show="!showHelp"
 			:concurrentLogins="concurrentLogins"
 			:concurrentLoginsLimited="concurrentLoginsLimited"
 			:menuTitle="contentTitle"
 		/>
 		
-		<my-admin-docs
-			v-if="showDocs"
-			@close="showDocs = false"
+		<my-admin-help
+			v-if="showHelp"
+			@close="showHelp = false"
 		/>
 	</div>`,
 	watch:{
 		$route(val) {
 			if(val.hash === '')
-				this.showDocs = false;
+				this.showHelp = false;
 
 			if(this.activated && (val.path.includes('license') || val.path.includes('login-sessions')))
 				this.getConcurrentLogins();
@@ -178,7 +176,7 @@ let MyAdmin = {
 			concurrentLogins:0,        // count of concurrent logins (full)
 			concurrentLoginsLimited:0, // count of concurrent logins (limited)
 			ready:false,
-			showDocs:false
+			showHelp:false
 		};
 	},
 	mounted() {
@@ -195,7 +193,6 @@ let MyAdmin = {
 			if(s.$route.path.includes('cluster'))         return s.capApp.navigationCluster;
 			if(s.$route.path.includes('config'))          return s.capApp.navigationConfig;
 			if(s.$route.path.includes('custom'))          return s.capApp.navigationCustom;
-			if(s.$route.path.includes('docs'))            return s.capApp.navigationDocs;
 			if(s.$route.path.includes('files'))           return s.capApp.navigationFiles;
 			if(s.$route.path.includes('license'))         return s.capApp.navigationActivation;
 			if(s.$route.path.includes('logins'))          return s.capApp.navigationLogins;
