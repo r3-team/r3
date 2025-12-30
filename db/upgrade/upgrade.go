@@ -132,68 +132,6 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			ALTER TYPE app.caption_content ADD VALUE 'docTitle';
 			ALTER TYPE app.caption_content ADD VALUE 'docColumnTitle';
-			
-			ALTER TABLE app.caption ADD COLUMN     doc_id uuid;
-			ALTER TABLE app.caption ADD COLUMN     doc_column_id uuid;
-			ALTER TABLE app.caption ADD CONSTRAINT caption_doc_id_fkey        FOREIGN KEY (doc_id)
-				REFERENCES app.doc (id) MATCH SIMPLE
-				ON UPDATE CASCADE
-				ON DELETE CASCADE
-				DEFERRABLE INITIALLY DEFERRED;
-			ALTER TABLE app.caption ADD CONSTRAINT caption_doc_column_id_fkey FOREIGN KEY (doc_column_id)
-				REFERENCES app.doc_column (id) MATCH SIMPLE
-				ON UPDATE CASCADE
-				ON DELETE CASCADE
-				DEFERRABLE INITIALLY DEFERRED;
-			
-			CREATE INDEX fki_caption_doc_id_fkey        ON app.caption USING BTREE (doc_id        ASC NULLS LAST);
-			CREATE INDEX fki_caption_doc_column_id_fkey ON app.caption USING BTREE (doc_column_id ASC NULLS LAST);
-			
-			ALTER TABLE instance.caption ADD COLUMN doc_id uuid;
-			ALTER TABLE instance.caption ADD COLUMN doc_column_id uuid;
-			ALTER TABLE instance.caption ADD CONSTRAINT caption_doc_id_fkey        FOREIGN KEY (doc_id)
-				REFERENCES app.doc (id) MATCH SIMPLE
-				ON UPDATE CASCADE
-				ON DELETE CASCADE
-				DEFERRABLE INITIALLY DEFERRED;
-			ALTER TABLE instance.caption ADD CONSTRAINT caption_doc_column_id_fkey FOREIGN KEY (doc_column_id)
-				REFERENCES app.doc_column (id) MATCH SIMPLE
-				ON UPDATE CASCADE
-				ON DELETE CASCADE
-				DEFERRABLE INITIALLY DEFERRED;
-			
-			CREATE INDEX fki_caption_doc_id_fkey ON instance.caption USING BTREE (doc_id ASC NULLS LAST);
-			CREATE INDEX fki_caption_doc_column_id_fkey ON instance.caption USING BTREE (doc_column_id ASC NULLS LAST);
-			
-			ALTER TABLE app.query ADD COLUMN     doc_id       uuid;
-			ALTER TABLE app.query ADD COLUMN     doc_field_id uuid;
-			ALTER TABLE app.query ADD CONSTRAINT query_doc_id_fkey FOREIGN KEY (doc_id)
-				REFERENCES app.doc (id) MATCH SIMPLE
-				ON UPDATE CASCADE
-			    ON DELETE CASCADE
-			    DEFERRABLE INITIALLY DEFERRED;
-			ALTER TABLE app.query ADD CONSTRAINT query_doc_field_id_fkey FOREIGN KEY (doc_field_id)
-				REFERENCES app.doc_field (id) MATCH SIMPLE
-				ON UPDATE CASCADE
-			    ON DELETE CASCADE
-			    DEFERRABLE INITIALLY DEFERRED;
-			
-			CREATE INDEX IF NOT EXISTS fki_query_doc_id_fkey       ON app.query USING btree (doc_id       ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_query_doc_field_id_fkey ON app.query USING btree (doc_field_id ASC NULLS LAST);
-			
-			ALTER TABLE app.query DROP CONSTRAINT query_single_parent;
-			ALTER TABLE app.query ADD  CONSTRAINT query_single_parent CHECK (1 = (
-				CASE WHEN api_id                IS NULL THEN 0 ELSE 1 END +
-				CASE WHEN collection_id         IS NULL THEN 0 ELSE 1 END +
-				CASE WHEN column_id             IS NULL THEN 0 ELSE 1 END +
-				CASE WHEN doc_id                IS NULL THEN 0 ELSE 1 END +
-				CASE WHEN doc_field_id          IS NULL THEN 0 ELSE 1 END +
-				CASE WHEN field_id              IS NULL THEN 0 ELSE 1 END +
-				CASE WHEN form_id               IS NULL THEN 0 ELSE 1 END +
-				CASE WHEN query_filter_query_id IS NULL THEN 0 ELSE 1 END +
-				CASE WHEN search_bar_id         IS NULL THEN 0 ELSE 1
-				END
-			));
 
 			CREATE TABLE IF NOT EXISTS app.doc (
 				id uuid NOT NULL,
@@ -213,33 +151,6 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					DEFERRABLE INITIALLY DEFERRED
 			);
 			CREATE INDEX IF NOT EXISTS fki_doc_module_fkey ON app.doc USING btree (module_id ASC NULLS LAST);
-
-			CREATE TABLE IF NOT EXISTS app.doc_column(
-				id uuid NOT NULL,
-				doc_field_id uuid NOT NULL,
-				attribute_id uuid NOT NULL,
-				attribute_index smallint NOT NULL,
-				aggregator app.aggregator,
-				length smallint NOT NULL,
-				"position" smallint NOT NULL,
-				distincted boolean NOT NULL,
-				group_by boolean NOT NULL,
-				size_x real NOT NULL,
-				sub_query boolean NOT NULL,
-				CONSTRAINT doc_column_pkey PRIMARY KEY (id),
-				CONSTRAINT doc_column_attribute_id_fkey FOREIGN KEY (attribute_id)
-					REFERENCES app.attribute (id) MATCH SIMPLE
-					ON UPDATE NO ACTION
-					ON DELETE NO ACTION
-					DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT doc_column_doc_field_id_fkey FOREIGN KEY (doc_field_id)
-					REFERENCES app.doc_field (id) MATCH SIMPLE
-					ON UPDATE CASCADE
-					ON DELETE CASCADE
-					DEFERRABLE INITIALLY DEFERRED
-			);
-			CREATE INDEX IF NOT EXISTS fki_doc_column_doc_field_id_fkey  ON app.doc_column USING btree (doc_field_id ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_doc_column_attribute_id_fkey  ON app.doc_column USING btree (attribute_id ASC NULLS LAST);
 			
 			CREATE TABLE IF NOT EXISTS app.doc_font (
 				doc_id uuid NOT NULL,
@@ -388,6 +299,33 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
+
+			CREATE TABLE IF NOT EXISTS app.doc_column(
+				id uuid NOT NULL,
+				doc_field_id uuid NOT NULL,
+				attribute_id uuid NOT NULL,
+				attribute_index smallint NOT NULL,
+				aggregator app.aggregator,
+				length smallint NOT NULL,
+				"position" smallint NOT NULL,
+				distincted boolean NOT NULL,
+				group_by boolean NOT NULL,
+				size_x real NOT NULL,
+				sub_query boolean NOT NULL,
+				CONSTRAINT doc_column_pkey PRIMARY KEY (id),
+				CONSTRAINT doc_column_attribute_id_fkey FOREIGN KEY (attribute_id)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_column_doc_field_id_fkey FOREIGN KEY (doc_field_id)
+					REFERENCES app.doc_field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_column_doc_field_id_fkey ON app.doc_column USING btree (doc_field_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_column_attribute_id_fkey ON app.doc_column USING btree (attribute_id ASC NULLS LAST);
 			
 			CREATE TABLE IF NOT EXISTS app.doc_border (
 				doc_field_id uuid,
@@ -529,6 +467,68 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX IF NOT EXISTS fki_doc_state_effect_doc_field_id_fkey ON app.doc_state_effect USING btree (doc_field_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_doc_state_effect_doc_state_id_fkey ON app.doc_state_effect USING btree (doc_state_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_doc_state_effect_doc_page_id_fkey  ON app.doc_state_effect USING btree (doc_page_id ASC NULLS LAST);
+			
+			ALTER TABLE app.caption ADD COLUMN     doc_id uuid;
+			ALTER TABLE app.caption ADD COLUMN     doc_column_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_doc_id_fkey        FOREIGN KEY (doc_id)
+				REFERENCES app.doc (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_doc_column_id_fkey FOREIGN KEY (doc_column_id)
+				REFERENCES app.doc_column (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_doc_id_fkey        ON app.caption USING BTREE (doc_id        ASC NULLS LAST);
+			CREATE INDEX fki_caption_doc_column_id_fkey ON app.caption USING BTREE (doc_column_id ASC NULLS LAST);
+			
+			ALTER TABLE instance.caption ADD COLUMN doc_id uuid;
+			ALTER TABLE instance.caption ADD COLUMN doc_column_id uuid;
+			ALTER TABLE instance.caption ADD CONSTRAINT caption_doc_id_fkey        FOREIGN KEY (doc_id)
+				REFERENCES app.doc (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE instance.caption ADD CONSTRAINT caption_doc_column_id_fkey FOREIGN KEY (doc_column_id)
+				REFERENCES app.doc_column (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_doc_id_fkey ON instance.caption USING BTREE (doc_id ASC NULLS LAST);
+			CREATE INDEX fki_caption_doc_column_id_fkey ON instance.caption USING BTREE (doc_column_id ASC NULLS LAST);
+			
+			ALTER TABLE app.query ADD COLUMN     doc_id       uuid;
+			ALTER TABLE app.query ADD COLUMN     doc_field_id uuid;
+			ALTER TABLE app.query ADD CONSTRAINT query_doc_id_fkey FOREIGN KEY (doc_id)
+				REFERENCES app.doc (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE app.query ADD CONSTRAINT query_doc_field_id_fkey FOREIGN KEY (doc_field_id)
+				REFERENCES app.doc_field (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_query_doc_id_fkey       ON app.query USING btree (doc_id       ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_query_doc_field_id_fkey ON app.query USING btree (doc_field_id ASC NULLS LAST);
+			
+			ALTER TABLE app.query DROP CONSTRAINT query_single_parent;
+			ALTER TABLE app.query ADD  CONSTRAINT query_single_parent CHECK (1 = (
+				CASE WHEN api_id                IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN collection_id         IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN column_id             IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN doc_id                IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN doc_field_id          IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN field_id              IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN form_id               IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN query_filter_query_id IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN search_bar_id         IS NULL THEN 0 ELSE 1
+				END
+			));
 		`)
 		return "3.12", err
 	},
