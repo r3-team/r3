@@ -37,7 +37,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocCo
 
 	for i, c := range columns {
 
-		// get captions
 		columns[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbDocColumn, c.Id, []string{"docColumnTitle"})
 		if err != nil {
 			return nil, err
@@ -57,7 +56,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocCo
 			return nil, err
 		}
 
-		// get sub query
 		if c.SubQuery {
 			columns[i].Query, err = query.Get_tx(ctx, tx, schema.DbDocColumn, c.Id, 0, 0, 0)
 			if err != nil {
@@ -93,6 +91,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []type
 			if err := query.Set_tx(ctx, tx, schema.DbDocColumn, c.Id, 0, 0, 0, c.Query); err != nil {
 				return err
 			}
+		}
+		if err := caption.Set_tx(ctx, tx, c.Id, c.Captions); err != nil {
+			return err
 		}
 	}
 	return nil

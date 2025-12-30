@@ -109,5 +109,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, d types.Doc) error {
 	if err := doc_set.Set_tx(ctx, tx, d.Id, schema.DbDoc, schema.DbDocContextDefault, d.Set); err != nil {
 		return err
 	}
-	return setStates_tx(ctx, tx, d.Id, d.States)
+	if err := setStates_tx(ctx, tx, d.Id, d.States); err != nil {
+		return err
+	}
+	return caption.Set_tx(ctx, tx, d.Id, d.Captions)
 }
