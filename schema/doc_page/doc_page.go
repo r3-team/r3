@@ -123,10 +123,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocPage, e
 
 func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPage) error {
 
+	pageIds := make([]uuid.UUID, 0)
 	for i, p := range pages {
 		if err := schema.CreateIdIfNil(&p.Id); err != nil {
 			return err
 		}
+		pageIds = append(pageIds, p.Id)
 
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.doc_page (id, doc_id, size, orientation, margins, state,
@@ -193,6 +195,15 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPa
 		if err := doc_set.Set_tx(ctx, tx, p.Id, schema.DbDocPage, schema.DbDocContextDefault, p.Set); err != nil {
 			return err
 		}
+	}
+
+	// delete unused pages
+	if _, err := tx.Exec(ctx, `
+		DELETE FROM app.doc_page
+		WHERE doc_id =  $1
+		AND   id     <> ALL($2)
+	`, docId, pageIds); err != nil {
+		return err
 	}
 	return nil
 }
