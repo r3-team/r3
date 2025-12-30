@@ -2,7 +2,7 @@ import MyBuilderCaption      from './builderCaption.js';
 import MyBuilderQuery        from './builderQuery.js';
 import MyTabs                from '../tabs.js';
 import {deepIsEqual}         from '../shared/generic.js';
-import {getDocPageTemplate} from '../shared/builderDoc.js';
+import {getDocPageTemplate}  from '../shared/builderDoc.js';
 export {MyBuilderDoc as default};
 
 const MyBuilderDoc = {
@@ -35,10 +35,6 @@ const MyBuilderDoc = {
 						:active="hasChanges && !readonly"
 						:caption="capGen.button.save"
 					/>
-					<my-button image="add.png"
-						@trigger="pageAdd"
-						:caption="capGen.button.add"
-					/>
 					<my-button image="refresh.png"
 						@trigger="reset"
 						:active="hasChanges"
@@ -56,6 +52,19 @@ const MyBuilderDoc = {
 				</div>
 			</div>
 			<div class="builder-doc-content">
+				<div class="content grow no-padding">
+					<my-tabs
+						v-model="tabPageIndex"
+						@add="pageAdd"
+						@del="pageDel"
+						:actionAdd="true"
+						:actionAddCap="capApp.button.addPage"
+						:actionDel="doc.pages.length > 1"
+						:entries="tabsPages.entries"
+						:entriesText="tabsPages.entriesText"
+						:small="true"
+					/>
+				</div>
 			</div>
 		</div>
 		
@@ -74,8 +83,6 @@ const MyBuilderDoc = {
 			/>
 			
 			<!-- content -->
-			<div class="content grow" v-if="tabTarget === 'content'">
-			</div>
 			
 			<!-- properties -->
 			<div class="content no-padding" v-if="tabTarget === 'properties'">
@@ -119,10 +126,24 @@ const MyBuilderDoc = {
 			
 			// state
 			showSidebar:true,
+			tabPageIndex:0,
 			tabTarget:'properties'
 		};
 	},
 	computed:{
+		tabsPages:(s) => {
+			let pageIndexes = [];
+			let texts   = [];
+			for(let i = 0, j = s.doc.pages.length; i < j; i++) {
+				pageIndexes.push(i);
+				texts.push(`P${i+1}`);
+			}
+			return {
+				entries:pageIndexes,
+				entriesText:texts
+			};
+		},
+
 		// states
 		hasChanges:(s) => !s.deepIsEqual(s.doc,s.docOrg),
 		
@@ -150,10 +171,21 @@ const MyBuilderDoc = {
 		// actions
 		pageAdd() {
 			this.doc.pages.push(this.getDocPageTemplate());
+			this.tabPageIndex = this.doc.pages.length - 1;
+		},
+		pageDel(i) {
+			this.doc.pages.splice(i,1);
+			this.resetPageTab();
 		},
 		reset() {
-			if(this.docOrg !== false && !this.deepIsEqual(this.doc,this.docOrg))
+			if(this.docOrg !== false && !this.deepIsEqual(this.doc,this.docOrg)) {
 				this.doc = JSON.parse(JSON.stringify(this.docOrg));
+				this.resetPageTab();
+			}
+		},
+		resetPageTab() {
+			if(this.tabPageIndex >= this.doc.pages.length)
+				this.tabPageIndex = this.doc.pages.length - 1;
 		},
 		
 		// backend calls

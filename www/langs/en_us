@@ -798,6 +798,9 @@
 			"showRowCount": "Show result count instead"
 		},
 		"doc": {
+			"button":{
+				"addPage": "Add page"
+			},
 			"dialog": {
 				"delete": "Are you sure you want to delete this document?"
 			},

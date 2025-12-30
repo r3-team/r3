@@ -1,6 +1,7 @@
-import MyBuilderFormInput from './builderFormInput.js';
-import {getQueryTemplate} from '../shared/query.js';
-import {getNilUuid}       from '../shared/generic.js';
+import MyBuilderFormInput   from './builderFormInput.js';
+import {getQueryTemplate}   from '../shared/query.js';
+import {getNilUuid}         from '../shared/generic.js';
+import {getDocPageTemplate} from '../shared/builderDoc.js';
 import {
 	getTemplateArgs,
 	getTemplateFnc,
@@ -266,6 +267,7 @@ const MyBuilderNew = {
 	},
 	methods:{
 		// externals
+		getDocPageTemplate,
 		getNilUuid,
 		getQueryTemplate,
 		getTemplateArgs,
@@ -331,7 +333,7 @@ const MyBuilderNew = {
 							style:''
 						},
 						query:this.getQueryTemplate(),
-						pages:[],
+						pages:[this.getDocPageTemplate()],
 						states:[],
 						set:[],
 						captions:{

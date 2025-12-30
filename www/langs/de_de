@@ -798,6 +798,9 @@
 			"showRowCount": "Stattdessen Ergebnisanzahl zeigen"
 		},
 		"doc": {
+			"button": {
+				"addPage": "Seite hinzufügen"
+			},
 			"dialog": {
 				"delete": "Bist du sicher, dass du dieses Dokument löschen möchtest?"
 			},
