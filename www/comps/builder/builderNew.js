@@ -333,7 +333,10 @@ const MyBuilderNew = {
 						query:this.getQueryTemplate(),
 						pages:[],
 						states:[],
-						set:[]
+						set:[],
+						captions:{
+							docTitle:{}
+						}
 					};
 				break;
 				case 'form':

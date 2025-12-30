@@ -54,8 +54,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocPage, e
 		var m []float64
 		var fieldIdBody uuid.UUID
 		var fieldIdFooter, fieldIdHeader pgtype.UUID
-		if err := rows.Scan(&p.Id, &p.Size, &m, &p.Orientation, &p.State, &fieldIdBody,
-			&p.Footer.DocPageIdInherit, &p.Header.DocPageIdInherit, &fieldIdFooter, &fieldIdHeader); err != nil {
+		if err := rows.Scan(&p.Id, &p.Size, &m, &p.Orientation, &p.State, &p.Footer.DocPageIdInherit,
+			&p.Header.DocPageIdInherit, &fieldIdBody, &fieldIdFooter, &fieldIdHeader); err != nil {
+
 			return nil, err
 		}
 
@@ -132,7 +133,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPa
 				doc_page_id_footer_inherit, doc_page_id_header_inherit, position)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
 			ON CONFLICT(id)
-			DO UPPDATE SET
+			DO UPDATE SET
 				size = $3, orientation = $4, margins = $5, state = $6,
 				doc_page_id_footer_inherit = $7, doc_page_id_header_inherit = $8, position = $9
 		`, p.Id, docId, p.Size, p.Orientation, []float64{p.Margin.T, p.Margin.R, p.Margin.B, p.Margin.L},

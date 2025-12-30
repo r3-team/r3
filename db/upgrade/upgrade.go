@@ -140,7 +140,6 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				comment text COLLATE pg_catalog."default",
 				author character varying(128),
 				language character(5) NOT NULL,
-				title character varying(128),
 				CONSTRAINT doc_pkey PRIMARY KEY (id),
 				CONSTRAINT doc_name_key UNIQUE (module_id, name)
 					DEFERRABLE INITIALLY DEFERRED,

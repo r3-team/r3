@@ -1,20 +1,24 @@
-import MyBuilderQuery from './builderQuery.js';
-import MyTabs         from '../tabs.js';
+import MyBuilderCaption      from './builderCaption.js';
+import MyBuilderQuery        from './builderQuery.js';
+import MyTabs                from '../tabs.js';
+import {deepIsEqual}         from '../shared/generic.js';
+import {getDocPageTemplate} from '../shared/builderDoc.js';
 export {MyBuilderDoc as default};
 
 const MyBuilderDoc = {
 	name:'my-builder-doc',
 	components:{
+		MyBuilderCaption,
 		MyBuilderQuery,
 		MyTabs
 	},
-	template:`<div class="builder-doc" v-if="doc">
+	template:`<div class="builder-doc" v-if="doc !== false">
 		<div class="contentBox grow">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/document.png" />
 					<h1 class="title">
-						{{ capApp.titleOne.replace('{NAME}',name) }}
+						{{ capApp.titleOne.replace('{NAME}',doc.name) }}
 					</h1>
 				</div>
 				<div class="area">
@@ -31,6 +35,10 @@ const MyBuilderDoc = {
 						:active="hasChanges && !readonly"
 						:caption="capGen.button.save"
 					/>
+					<my-button image="add.png"
+						@trigger="pageAdd"
+						:caption="capGen.button.add"
+					/>
 					<my-button image="refresh.png"
 						@trigger="reset"
 						:active="hasChanges"
@@ -46,6 +54,8 @@ const MyBuilderDoc = {
 						:captionTitle="capGen.button.delete"
 					/>
 				</div>
+			</div>
+			<div class="builder-doc-content">
 			</div>
 		</div>
 		
@@ -69,6 +79,26 @@ const MyBuilderDoc = {
 			
 			<!-- properties -->
 			<div class="content no-padding" v-if="tabTarget === 'properties'">
+				<table class="generic-table-vertical default-inputs">
+					<tbody>
+						<tr>
+							<td>{{ capGen.name }}</td>
+							<td><input class="long" v-model="doc.name" :disabled="readonly" /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.title }}</td>
+							<td>
+								<my-builder-caption
+									v-model="doc.captions.docTitle"
+									:contentName="capGen.title"
+									:language="builderLanguage"
+									:longInput="true"
+									:readonly="readonly"
+								/>
+							</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</div>`,
@@ -85,7 +115,7 @@ const MyBuilderDoc = {
 	},
 	data() {
 		return {
-			// inputs
+			doc:false,
 			
 			// state
 			showSidebar:true,
@@ -94,36 +124,36 @@ const MyBuilderDoc = {
 	},
 	computed:{
 		// states
-		hasChanges:(s) => s.name         !== s.doc.name
-			|| s.comment                 !== s.doc.comment
-			|| JSON.stringify(s.query)   !== JSON.stringify(s.doc.query),
+		hasChanges:(s) => !s.deepIsEqual(s.doc,s.docOrg),
 		
 		// simple
-		doc:   (s) => s.docIdMap[s.id] === undefined ? false : s.docIdMap[s.id],
+		docOrg:(s) => s.docIdMap[s.id] === undefined ? false : s.docIdMap[s.id],
 		module:(s) => s.moduleIdMap[s.doc.moduleId],
 		
 		// stores
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		docIdMap:   (s) => s.$store.getters['schema/docIdMap'],
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.doc,
 		capGen:     (s) => s.$store.getters.captions.generic
 	},
 	watch:{
-		doc:{
+		docOrg:{
 			handler() { this.reset(); },
 			immediate:true
 		}
 	},
 	methods:{
 		// externals
+		deepIsEqual,
+		getDocPageTemplate,
 		
 		// actions
+		pageAdd() {
+			this.doc.pages.push(this.getDocPageTemplate());
+		},
 		reset() {
-			if(!this.doc) return;
-			
-			this.name       = this.doc.name;
-			this.comment    = this.doc.comment;
-			this.query      = JSON.parse(JSON.stringify(this.doc.query));
+			if(this.docOrg !== false && !this.deepIsEqual(this.doc,this.docOrg))
+				this.doc = JSON.parse(JSON.stringify(this.docOrg));
 		},
 		
 		// backend calls
@@ -142,7 +172,7 @@ const MyBuilderDoc = {
 			});
 		},
 		del() {
-			ws.send('doc','del',{id:this.doc.id},true).then(
+			ws.send('doc','del',this.doc.id,true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.$router.push('/builder/docs/'+this.module.id);
@@ -152,13 +182,7 @@ const MyBuilderDoc = {
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('doc','set',{
-					id:this.doc.id,
-					moduleId:this.doc.moduleId,
-					name:this.name,
-					comment:this.comment === '' ? null : this.comment,
-					query:this.query
-				}),
+				ws.prepare('doc','set',this.doc),
 				ws.prepare('schema','check',{moduleId:this.module.id})
 			],true).then(
 				() => this.$root.schemaReload(this.module.id),

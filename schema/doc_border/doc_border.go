@@ -23,8 +23,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, context schema
 		FROM app.doc_border
 		WHERE doc_field_id = $1
 		AND   context      = $2
-		ORDER BY position ASC
-	`, docFieldId, context).Scan(&b.Cell, b.Color, b.Draw, b.Size); err != nil {
+	`, docFieldId, context).Scan(&b.Cell, &b.Color, &b.Draw, &b.Size); err != nil {
 		return b, err
 	}
 	return b, nil

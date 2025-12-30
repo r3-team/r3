@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"r3/schema/doc"
-	"r3/schema/form"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -16,7 +15,7 @@ func DocDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 	if err := json.Unmarshal(reqJson, &id); err != nil {
 		return nil, err
 	}
-	return nil, form.Del_tx(ctx, tx, id)
+	return nil, doc.Del_tx(ctx, tx, id)
 }
 
 func DocSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {

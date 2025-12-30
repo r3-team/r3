@@ -22,7 +22,7 @@ func DelByPage_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, content s
 	_, err := tx.Exec(ctx, `
 		DELETE FROM app.doc_field
 		WHERE doc_page_id = $1
-		AND   context     = $2
+		AND   content     = $2
 	`, docPageId, content)
 	return err
 }
@@ -55,7 +55,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			fd.attribute_id, fd.attribute_index,
 
 			-- flow
-			ff.gap, ff.paddings,
+			ff.gap,
 
 			-- grid
 			fg.shrink,
@@ -73,7 +73,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 		LEFT JOIN app.doc_field_text AS ft ON ft.doc_field_id = f.id
 		%s
 		ORDER BY f.position ASC
-	`, strings.Join(sqlWheres, "\n")), docPageId)
+	`, strings.Join(sqlWheres, "\n")), sqlValues...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,9 +90,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 		var shrink, headerRepeat pgtype.Bool
 		var bodyColorFillEven, bodyColorFillOdd, footerColorFill, headerColorFill, value pgtype.Text
 		if err := rows.Scan(&f.Id, &f.Content, &f.PosX, &f.PosY, &f.SizeX, &f.SizeY, &f.State,
-			&paddings, &attributeId, &attributeIndex, &gap, &shrink,
-			&bodyColorFillEven, &bodyColorFillOdd, &footerColorFill, &headerColorFill, &headerRepeat,
-			&value); err != nil {
+			&paddings, &attributeId, &attributeIndex, &gap, &shrink, &bodyColorFillEven,
+			&bodyColorFillOdd, &footerColorFill, &headerColorFill, &headerRepeat, &value); err != nil {
 
 			return nil, err
 		}
@@ -456,7 +455,7 @@ func setGeneric_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId 
 	`, fieldId, docPageId, parentId, f.Content, f.PosX, f.PosY, f.SizeX, f.SizeY, f.State, position); err != nil {
 		return err
 	}
-	return doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border)
+	return doc_border.Set_tx(ctx, tx, fieldId, schema.DbDocContextDefault, f.Border)
 }
 
 func setData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.DocFieldData) error {
@@ -510,13 +509,13 @@ func setList_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.DocFi
 	if err := query.Set_tx(ctx, tx, schema.DbDocField, fieldId, 0, 0, 0, f.Query); err != nil {
 		return err
 	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextBody, f.BodyBorder); err != nil {
+	if err := doc_border.Set_tx(ctx, tx, fieldId, schema.DbDocContextBody, f.BodyBorder); err != nil {
 		return err
 	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextFooter, f.FooterBorder); err != nil {
+	if err := doc_border.Set_tx(ctx, tx, fieldId, schema.DbDocContextFooter, f.FooterBorder); err != nil {
 		return err
 	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextHeader, f.HeaderBorder); err != nil {
+	if err := doc_border.Set_tx(ctx, tx, fieldId, schema.DbDocContextHeader, f.HeaderBorder); err != nil {
 		return err
 	}
 	return doc_column.Set_tx(ctx, tx, fieldId, f.Columns)
