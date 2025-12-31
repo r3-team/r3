@@ -114,7 +114,7 @@ export default {
 								case 'date':     v = this.getUnixFormat(this.getUnixShifted(v,true),this.dateFormat); break;
 								case 'datetime': v = this.getUnixFormat(v,this.dateFormat + ' H:i');                  break;
 								case 'time':     v = this.getUtcTimeStringFromUnix(v);                                break;
-								default:         v = this.isAttributeDecimal(a.content) ? this.getNumberFormatted(v,a) : parseInt(v); break;
+								default:         v = this.isAttributeDecimal(a.content) ? this.getNumberFormatted(v,a.length,a.lengthFract) : parseInt(v); break;
 							}
 						}
 

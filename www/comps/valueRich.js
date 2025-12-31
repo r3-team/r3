@@ -268,7 +268,7 @@ export default {
 						case 'datetime': this.stringValueFull = this.getUnixFormat(this.value,this.settings.dateFormat + ' H:i'); break;
 						case 'time':     this.stringValueFull = this.getUtcTimeStringFromUnix(this.value);                        break;
 						default:
-							this.stringValueFull = this.noThousandsSep ? this.value : this.getNumberFormatted(this.value,this.attribute);
+							this.stringValueFull = this.noThousandsSep ? this.value : this.getNumberFormatted(this.value,this.attribute.length,this.attribute.lengthFract);
 						break;
 					}
 					if(this.display === 'rating')
@@ -279,7 +279,7 @@ export default {
 				case 'numeric': // fallthrough
 				case 'double precision':
 				case 'real':
-					this.stringValueFull = this.getNumberFormatted(this.value,this.attribute);
+					this.stringValueFull = this.getNumberFormatted(this.value,this.attribute.length,this.attribute.lengthFract);
 				break;
 				
 				// others (UUID)
