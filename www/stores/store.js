@@ -406,6 +406,13 @@ const MyStore = Vuex.createStore({
 			}
 			return out;
 		},
+		numberSepThousand:(state) => {
+			const sepDec = state.settings.numberSepDecimal  !== '0' ? state.settings.numberSepDecimal  : '';
+			const sepTho = state.settings.numberSepThousand !== '0' ? state.settings.numberSepThousand : '';
+
+			// if thousands separator is identical to decimal one, remove it - decimal has precedence
+			return sepTho !== sepDec ? sepTho : '';
+		},
 		patternStyle:(state) => {
 			return state.settings.pattern !== null
 				? `background-image:url('images/patterns/${state.settings.pattern}.webp');background-repeat:repeat-x`
@@ -493,7 +500,6 @@ const MyStore = Vuex.createStore({
 		moduleIdLast:            (state) => state.moduleIdLast,
 		moduleIdMapMeta:         (state) => state.moduleIdMapMeta,
 		numberSepDecimal:        (state) => state.settings.numberSepDecimal  !== '0' ? state.settings.numberSepDecimal  : '',
-		numberSepThousand:       (state) => state.settings.numberSepThousand !== '0' ? state.settings.numberSepThousand : '',
 		oauthClientIdMapOpenId:  (state) => state.oauthClientIdMapOpenId,
 		pageTitleFull:           (state) => state.pageTitleFull,
 		popUpFormGlobal:         (state) => state.popUpFormGlobal,
