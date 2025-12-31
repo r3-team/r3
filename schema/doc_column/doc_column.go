@@ -69,10 +69,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocCo
 func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []types.DocColumn) error {
 
 	for i, c := range columns {
-		if err := schema.CreateIdIfNil(&c.Id); err != nil {
-			return err
-		}
-
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.doc_column (id, doc_field_id, attribute_id, attribute_index, 
 				aggregator, length, distincted, group_by, size_x, sub_query, position)

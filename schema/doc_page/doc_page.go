@@ -125,9 +125,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPa
 
 	pageIds := make([]uuid.UUID, 0)
 	for i, p := range pages {
-		if err := schema.CreateIdIfNil(&p.Id); err != nil {
-			return err
-		}
 		pageIds = append(pageIds, p.Id)
 
 		if _, err := tx.Exec(ctx, `

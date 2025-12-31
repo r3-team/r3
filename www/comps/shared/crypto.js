@@ -289,6 +289,9 @@ export function getRandomString(len) {
 	}
 	return out;
 };
+export function getUuidV4() {
+	return crypto.randomUUID();
+};
 function arrayBufferToString(arrayBuffer) {
 	const byteArray = Array.from(new Uint8Array(arrayBuffer));
 	return byteArray.map(byte => String.fromCharCode(byte)).join('');

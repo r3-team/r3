@@ -190,14 +190,6 @@ func CheckCreateId_tx(ctx context.Context, tx pgx.Tx, id *uuid.UUID, entity DbEn
 
 	return known, err
 }
-func CreateIdIfNil(id *uuid.UUID) error {
-	if *id != uuid.Nil {
-		return nil
-	}
-	var err error
-	*id, err = uuid.NewV4()
-	return err
-}
 
 // attribute checks
 func IsContentFiles(content string) bool {

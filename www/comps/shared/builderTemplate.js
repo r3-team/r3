@@ -1,31 +1,94 @@
+import {getUuidV4}        from './crypto.js';
+import {getNilUuid}       from './generic.js';
 import {getQueryTemplate} from './query.js';
 
-export function getDocPageTemplate() {
+export function getTemplateApi(moduleId,name) {
 	return {
-		fieldFlow:getDocFieldTemplate('flowBody'),
+		id:getNilUuid(),
+		moduleId:moduleId,
+		name:name,
+		comment:null,
+		columns:[],
+		query:getQueryTemplate(),
+		hasDelete:false,
+		hasGet:true,
+		hasPost:false,
+		limitDef:100,
+		limitMax:1000,
+		verboseDef:true,
+		version:1
+	};
+};
+
+export function getTemplateCollection(moduleId,name) {
+	return {
+		id:getNilUuid(),
+		moduleId:moduleId,
+		iconId:null,
+		name:name,
+		columns:[],
+		query:getQueryTemplate(),
+		inHeader:[]
+	};
+};
+
+export function getTemplateDoc(moduleId,name) {
+	return {
+		id:getUuidV4(),
+		moduleId:moduleId,
+		name:name,
+		comment:null,
+		font:{
+			align:'L',
+			boolFalse:'no',
+			boolTrue:'yes',
+			color:'',
+			dateFormat:'Y-m-d',
+			family:'Roboto',
+			lineFactor:1,
+			numberSepDec:'.',
+			numberSepTho:',',
+			size:11,
+			style:''
+		},
+		query:getQueryTemplate(),
+		pages:[getTemplateDocPage()],
+		states:[],
+		set:[],
+		captions:{
+			docTitle:{}
+		}
+	};
+};
+
+export function getTemplateDocPage() {
+	return {
+		id:getUuidV4(),
+		fieldFlow:getTemplateDocField('flowBody'),
 		size:'A4',
 		orientation:'portrait',
 		margin:{t:5,r:3,b:5,l:3},
 		footer:{
 			active:false,
 			docPageIdInherit:null,
-			fieldGrid:getDocFieldTemplate('gridFooter')
+			fieldGrid:getTemplateDocField('gridFooter')
 		},
 		header:{
 			active:false,
 			docPageIdInherit:null,
-			fieldGrid:getDocFieldTemplate('gridHeader')
+			fieldGrid:getTemplateDocField('gridHeader')
 		},
 		set:[],
 		state:true
 	};
 };
 
-export function getDocFieldTemplate(content) {
+export function getTemplateDocField(content) {
 	const getBorderTemplate = () => { return { cell:false, color:'', draw:'', size:0}; };
 	const getMarginTemplate = () => { return { t:0, r:0, b:0, l:0 }; };
 
 	let f = {
+		id:getUuidV4(),
 		content:content,
 		posX:0,
 		posY:0,

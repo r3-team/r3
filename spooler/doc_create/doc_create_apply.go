@@ -113,7 +113,7 @@ func applyToFont(set []types.DocSet, f types.DocFont) types.DocFont {
 			case "font.align":
 				f.Align = v
 			case "font.color":
-				f.Color = v
+				f.Color = pgtype.Text{String: v, Valid: true}
 			case "font.dateFormat":
 				f.DateFormat = v
 			case "font.family":

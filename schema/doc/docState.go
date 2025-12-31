@@ -2,7 +2,6 @@ package doc
 
 import (
 	"context"
-	"r3/schema"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -145,10 +144,6 @@ func setStates_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, states []type
 	return err
 }
 func setState_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, state types.DocState) (uuid.UUID, error) {
-
-	if err := schema.CreateIdIfNil(&state.Id); err != nil {
-		return state.Id, err
-	}
 
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO app.doc_state (id, doc_id, description)

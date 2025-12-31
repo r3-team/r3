@@ -804,6 +804,28 @@
 			"dialog": {
 				"delete": "Bist du sicher, dass du dieses Dokument löschen möchtest?"
 			},
+			"font": {
+				"alignHor": "Horizontal ausrichten",
+				"alignVer": "Vertikal ausrichten",
+				"bool": "Boolesche Bezeichner",
+				"color": "Farbe",
+				"dateFormat": "Datumsformat",
+				"family": "Familie",
+				"familyInternational": "International",
+				"familyMonospace": "Monospace",
+				"familySansSerif": "Serifenlos",
+				"familySerif": "Serifen",
+				"lineFactor": "Zeilenhöhe",
+				"numberSepDec": "Dezimal-Trennzeichen",
+				"numberSepTho": "Tausender-Trennzeichen",
+				"size": "Größe (mm)",
+				"style": "Stile",
+				"styleBold": "Bold",
+				"styleItalic": "Italic"
+			},
+			"fontSettings": "Schrifteinstellungen",
+			"sidebarField": "Feld: {NAME}",
+			"sidebarPage": "Seite: {NAME}",
 			"titleOne": "Dokument '{NAME}'"
 		},
 		"form": {
@@ -2198,6 +2220,8 @@
 		"attributes": "Attribute",
 		"available": "Verfügbar",
 		"before": "Davor",
+		"boolFalse": "False",
+		"boolTrue": "True",
 		"bright": "Hell",
 		"busy": "Arbeitet - Zum Abbrechen hier klicken",
 		"button": {

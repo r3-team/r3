@@ -211,7 +211,11 @@ func setFont(doc *doc, f types.DocFont) {
 		}
 	}
 
-	rgb := tools.HexToInt(f.Color)
-	doc.p.SetTextColor(rgb[0], rgb[1], rgb[2])
+	if f.Color.Valid {
+		rgb := tools.HexToInt(f.Color.String)
+		doc.p.SetTextColor(rgb[0], rgb[1], rgb[2])
+	} else {
+		doc.p.SetTextColor(0, 0, 0)
+	}
 	doc.p.SetFont(f.Family, f.Style, f.Size)
 }

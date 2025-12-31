@@ -8,8 +8,15 @@ export default {
 			@key.enter="$emit('update:modelValue',e)"
 			:class="{ active:e === modelValue, clickable:e !== modelValue }"
 		>
-			<div />
 			<div>
+				<my-button image="edit.png"
+					v-if="actionUpd"
+					@trigger="$emit('upd',e)"
+					:blockBubble="true"
+					:naked="true"
+				/>
+			</div>
+			<div class="row centered gap">
 				<img v-if="entriesIcon.length !== 0" :src="entriesIcon[i]" />
 				<span>{{ entriesText[i] }}</span>
 			</div>
@@ -22,6 +29,7 @@ export default {
 				/>
 			</div>
 		</div>
+		
 		<div class="tab-entry" v-if="actionAdd">
 			<my-button image="add.png"
 				@trigger="$emit('add')"
@@ -35,11 +43,12 @@ export default {
 		actionAdd:   { type:Boolean, required:false, default:false },    // show add action
 		actionAddCap:{ type:String , required:false, default:'' },
 		actionDel:   { type:Boolean, required:false, default:false },    // show delete action
+		actionUpd:   { type:Boolean, required:false, default:false },    // show update action
 		entries:     { type:Array,   required:true },
 		entriesIcon: { type:Array,   required:false, default:() => [] }, // icons for entries, same order
 		entriesText: { type:Array,   required:true },                    // labels for entries, same order
 		modelValue:  { required:true },                                  // modelValue must match any entry to be valid
 		small:       { type:Boolean, required:false, default:false }
 	},
-	emits:['add','del','update:modelValue']
+	emits:['add','del','upd','update:modelValue']
 };

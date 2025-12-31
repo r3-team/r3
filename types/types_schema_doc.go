@@ -149,17 +149,17 @@ type DocHeaderFooter struct {
 	FieldGrid        DocFieldGrid `json:"fieldGrid"`        // header/footer only ever have a fixed grid field of their internal size (if they need flow, they can add a flow field)
 }
 type DocFont struct {
-	Align        string  `json:"align"`        // text: "L", "R", "J" (left, right, justify), column: "L", "C", "R" (left, center, right) &  "T", "M", "B" (top, middle, bottom)
-	BoolFalse    string  `json:"boolFalse"`    // string representing bool FALSE
-	BoolTrue     string  `json:"boolTrue"`     // string representing bool TRUE
-	Color        string  `json:"color"`        // RGB HEX value, like "000000"
-	DateFormat   string  `json:"dateFormat"`   // date format, such as 'Y-m-d'
-	Family       string  `json:"family"`       // "cousine", "roboto", ...
-	LineFactor   float64 `json:"lineFactor"`   // line height factor in % of font size
-	NumberSepDec string  `json:"numberSepDec"` // number decimal separator
-	NumberSepTho string  `json:"numberSepTho"` // number thousand separator
-	Size         float64 `json:"size"`         // font size in mm
-	Style        string  `json:"style"`        // "B" (bold), "I" (italic), "U" (underscore), "S" (strike-out)
+	Align        string      `json:"align"`        // text: "L", "R", "J" (left, right, justify), column: "L", "C", "R" (left, center, right) &  "T", "M", "B" (top, middle, bottom)
+	BoolFalse    string      `json:"boolFalse"`    // string representing bool FALSE
+	BoolTrue     string      `json:"boolTrue"`     // string representing bool TRUE
+	Color        pgtype.Text `json:"color"`        // RGB HEX value, like "000000"
+	DateFormat   string      `json:"dateFormat"`   // date format, such as 'Y-m-d'
+	Family       string      `json:"family"`       // "cousine", "roboto", ...
+	LineFactor   float64     `json:"lineFactor"`   // line height factor in % of font size
+	NumberSepDec string      `json:"numberSepDec"` // number decimal separator
+	NumberSepTho string      `json:"numberSepTho"` // number thousand separator
+	Size         float64     `json:"size"`         // font size in mm
+	Style        string      `json:"style"`        // "B" (bold), "I" (italic), "U" (underscore), "S" (strike-out)
 }
 type DocMarginPadding struct {
 	L float64 `json:"l"` // margin in mm

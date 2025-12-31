@@ -804,6 +804,28 @@
 			"dialog": {
 				"delete": "Are you sure you want to delete this document?"
 			},
+			"font": {
+				"alignHor": "Align horizontally",
+				"alignVer": "Align vertically",
+				"bool": "Boolean labels",
+				"color": "Color",
+				"dateFormat": "Date format",
+				"family": "Family",
+				"familyInternational": "International",
+				"familyMonospace": "Monospace",
+				"familySansSerif": "Sans serif",
+				"familySerif": "Serif",
+				"lineFactor": "Line height",
+				"numberSepDec": "Decimal separator",
+				"numberSepTho": "Thousands separator",
+				"size": "Size (mm)",
+				"style": "Styles",
+				"styleBold": "Bold",
+				"styleItalic": "Italic"
+			},
+			"fontSettings": "Font settings",
+			"sidebarField": "Field: {NAME}",
+			"sidebarPage": "Page: {NAME}",
 			"titleOne": "Document '{NAME}'"
 		},
 		"form": {
@@ -2198,6 +2220,8 @@
 		"attributes": "Attributes",
 		"available": "Disponible",
 		"before": "Avant",
+		"boolFalse": "False",
+		"boolTrue": "True",
 		"bright": "Bright",
 		"busy": "En cours - Cliquez ici pour annuler",
 		"button": {

@@ -1,7 +1,12 @@
-import MyBuilderFormInput   from './builderFormInput.js';
-import {getQueryTemplate}   from '../shared/query.js';
-import {getNilUuid}         from '../shared/generic.js';
-import {getDocPageTemplate} from '../shared/builderDoc.js';
+import MyBuilderFormInput from './builderFormInput.js';
+import {getUuidV4}        from '../shared/crypto.js';
+import {getQueryTemplate} from '../shared/query.js';
+import {getNilUuid}       from '../shared/generic.js';
+import {
+	getTemplateApi,
+	getTemplateCollection,
+	getTemplateDoc
+} from '../shared/builderTemplate.js';
 import {
 	getTemplateArgs,
 	getTemplateFnc,
@@ -267,12 +272,15 @@ const MyBuilderNew = {
 	},
 	methods:{
 		// externals
-		getDocPageTemplate,
 		getNilUuid,
 		getQueryTemplate,
+		getTemplateApi,
 		getTemplateArgs,
+		getTemplateCollection,
+		getTemplateDoc,
 		getTemplateFnc,
 		getTemplateReturn,
+		getUuidV4,
 		
 		// actions
 		close() { this.$emit('close'); },
@@ -285,62 +293,10 @@ const MyBuilderNew = {
 			let request;
 			let dependencyCheck = false;
 			switch(this.entity) {
-				case 'api':
-					request = {
-						id:this.getNilUuid(),
-						moduleId:this.moduleId,
-						name:this.inputs.name,
-						comment:null,
-						columns:[],
-						query:this.getQueryTemplate(),
-						hasDelete:false,
-						hasGet:true,
-						hasPost:false,
-						limitDef:100,
-						limitMax:1000,
-						verboseDef:true,
-						version:1
-					};
-				break;
-				case 'collection':
-					request = {
-						id:this.getNilUuid(),
-						moduleId:this.moduleId,
-						iconId:null,
-						name:this.inputs.name,
-						columns:[],
-						query:this.getQueryTemplate(),
-						inHeader:[]
-					};
-				break;
-				case 'doc':
-					request = {
-						id:this.getNilUuid(),
-						moduleId:this.moduleId,
-						name:this.inputs.name,
-						comment:null,
-						font:{
-							align:'L',
-							boolFalse:'no',
-							boolTrue:'yes',
-							color:'',
-							dateFormat:'Y-m-d',
-							family:'Roboto',
-							lineFactor:1,
-							numberSepDec:'.',
-							numberSepTho:',',
-							size:11,
-							style:''
-						},
-						query:this.getQueryTemplate(),
-						pages:[this.getDocPageTemplate()],
-						states:[],
-						set:[],
-						captions:{
-							docTitle:{}
-						}
-					};
-				break;
+				case 'api':	       request = this.getTemplateApi(this.module.id,this.inputs.name);        break;
+				case 'collection': request = this.getTemplateCollection(this.module.id,this.inputs.name); break;
+				case 'doc':        request = this.getTemplateDoc(this.module.id,this.inputs.name);        break;
+
 				case 'form':
 					if(this.inputs.formIdDuplicate !== null) {
 						action = 'copy';

@@ -373,13 +373,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 			return err
 		}
 
-		fieldId := f.Id
-		if err := schema.CreateIdIfNil(&fieldId); err != nil {
-			return err
-		}
-		*fieldIds = append(*fieldIds, fieldId)
+		*fieldIds = append(*fieldIds, f.Id)
 
-		if err := setGeneric_tx(ctx, tx, docPageId, fieldId, parentId, f, pos); err != nil {
+		if err := setGeneric_tx(ctx, tx, docPageId, parentId, f, pos); err != nil {
 			return err
 		}
 
@@ -390,7 +386,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setData_tx(ctx, tx, fieldId, f); err != nil {
+			if err := setData_tx(ctx, tx, f); err != nil {
 				return err
 			}
 
@@ -399,7 +395,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setFlow_tx(ctx, tx, docPageId, fieldId, f, fieldIds); err != nil {
+			if err := setFlow_tx(ctx, tx, docPageId, f, fieldIds); err != nil {
 				return err
 			}
 
@@ -408,7 +404,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setGrid_tx(ctx, tx, docPageId, fieldId, f, fieldIds); err != nil {
+			if err := setGrid_tx(ctx, tx, docPageId, f, fieldIds); err != nil {
 				return err
 			}
 
@@ -417,7 +413,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setList_tx(ctx, tx, fieldId, f); err != nil {
+			if err := setList_tx(ctx, tx, f); err != nil {
 				return err
 			}
 
@@ -426,7 +422,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setText_tx(ctx, tx, fieldId, f); err != nil {
+			if err := setText_tx(ctx, tx, f); err != nil {
 				return err
 			}
 
@@ -437,7 +433,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype
 	return nil
 }
 
-func setGeneric_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId uuid.UUID, parentId pgtype.UUID, f types.DocField, position int) error {
+func setGeneric_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId pgtype.UUID, f types.DocField, position int) error {
 	// field content cannot be changed after creation
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO app.doc_field (id, doc_page_id, parent_id, content, pos_x, pos_y, size_x, size_y, state, position)
@@ -452,48 +448,48 @@ func setGeneric_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId 
 			size_y      = $8,
 			state       = $9,
 			position    = $10
-	`, fieldId, docPageId, parentId, f.Content, f.PosX, f.PosY, f.SizeX, f.SizeY, f.State, position); err != nil {
+	`, f.Id, docPageId, parentId, f.Content, f.PosX, f.PosY, f.SizeX, f.SizeY, f.State, position); err != nil {
 		return err
 	}
-	return doc_border.Set_tx(ctx, tx, fieldId, schema.DbDocContextDefault, f.Border)
+	return doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border)
 }
 
-func setData_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.DocFieldData) error {
+func setData_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldData) error {
 	// currently, there is nothing to update in data fields
 	_, err := tx.Exec(ctx, `
 		INSERT INTO app.doc_field_data (doc_field_id, attribute_id, attribute_index)
 		VALUES ($1,$2,$3)
 		ON CONFLICT (doc_field_id)
 		DO NOTHING
-	`, fieldId, f.AttributeId, f.AttributeIndex)
+	`, f.Id, f.AttributeId, f.AttributeIndex)
 	return err
 }
 
-func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId uuid.UUID, f types.DocFieldFlow, fieldIds *[]uuid.UUID) error {
+func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.DocFieldFlow, fieldIds *[]uuid.UUID) error {
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO app.doc_field_flow (doc_field_id, gap, paddings)
 		VALUES ($1,$2,$3)
 		ON CONFLICT (doc_field_id)
 		DO UPDATE SET gap = $2, paddings = $3
-	`, fieldId, f.Gap, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}); err != nil {
+	`, f.Id, f.Gap, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}); err != nil {
 		return err
 	}
-	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: fieldId, Valid: true}, f.Fields, fieldIds)
+	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: f.Id, Valid: true}, f.Fields, fieldIds)
 }
 
-func setGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId uuid.UUID, f types.DocFieldGrid, fieldIds *[]uuid.UUID) error {
+func setGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.DocFieldGrid, fieldIds *[]uuid.UUID) error {
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO app.doc_field_grid (doc_field_id, shrink)
 		VALUES ($1,$2)
 		ON CONFLICT (doc_field_id)
 		DO UPDATE SET shrink = $2
-	`, fieldId, f.Shrink); err != nil {
+	`, f.Id, f.Shrink); err != nil {
 		return err
 	}
-	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: fieldId, Valid: true}, f.Fields, fieldIds)
+	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: f.Id, Valid: true}, f.Fields, fieldIds)
 }
 
-func setList_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.DocFieldList) error {
+func setList_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldList) error {
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO app.doc_field_list (doc_field_id, body_color_fill_even, body_color_fill_odd,
 			footer_color_fill, header_color_fill, header_repeat, paddings)
@@ -501,32 +497,32 @@ func setList_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.DocFi
 		ON CONFLICT (doc_field_id)
 		DO UPDATE SET body_color_fill_even = $2, body_color_fill_odd = $3, footer_color_fill = $4,
 			header_color_fill = $5, header_repeat = $6, paddings = $7
-	`, fieldId, f.BodyColorFillEven, f.BodyColorFillOdd, f.FooterColorFill, f.HeaderColorFill,
+	`, f.Id, f.BodyColorFillEven, f.BodyColorFillOdd, f.FooterColorFill, f.HeaderColorFill,
 		f.HeaderRepeat, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}); err != nil {
 
 		return err
 	}
-	if err := query.Set_tx(ctx, tx, schema.DbDocField, fieldId, 0, 0, 0, f.Query); err != nil {
+	if err := query.Set_tx(ctx, tx, schema.DbDocField, f.Id, 0, 0, 0, f.Query); err != nil {
 		return err
 	}
-	if err := doc_border.Set_tx(ctx, tx, fieldId, schema.DbDocContextBody, f.BodyBorder); err != nil {
+	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextBody, f.BodyBorder); err != nil {
 		return err
 	}
-	if err := doc_border.Set_tx(ctx, tx, fieldId, schema.DbDocContextFooter, f.FooterBorder); err != nil {
+	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextFooter, f.FooterBorder); err != nil {
 		return err
 	}
-	if err := doc_border.Set_tx(ctx, tx, fieldId, schema.DbDocContextHeader, f.HeaderBorder); err != nil {
+	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextHeader, f.HeaderBorder); err != nil {
 		return err
 	}
-	return doc_column.Set_tx(ctx, tx, fieldId, f.Columns)
+	return doc_column.Set_tx(ctx, tx, f.Id, f.Columns)
 }
 
-func setText_tx(ctx context.Context, tx pgx.Tx, fieldId uuid.UUID, f types.DocFieldText) error {
+func setText_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldText) error {
 	_, err := tx.Exec(ctx, `
 		INSERT INTO app.doc_field_data (doc_field_id, value)
 		VALUES ($1,$2)
 		ON CONFLICT (doc_field_id)
 		DO UPDATE SET value = $2
-	`, fieldId, f.Value)
+	`, f.Id, f.Value)
 	return err
 }

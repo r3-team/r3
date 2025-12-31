@@ -74,10 +74,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 
 func Set_tx(ctx context.Context, tx pgx.Tx, d types.Doc) error {
 
-	if err := schema.CreateIdIfNil(&d.Id); err != nil {
-		return err
-	}
-
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO app.doc (id, module_id, name, comment, author, language)
 		VALUES ($1,$2,$3,$4,$5,$6)
