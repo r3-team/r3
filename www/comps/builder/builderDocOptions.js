@@ -1,9 +1,10 @@
 
 import MyInputColorWrap from '../inputColorWrap.js';
+import MyInputDecimal   from '../inputDecimal.js';
 
 export const MyBuilderDocFont = {
 	name:'my-builder-form-functions',
-	components:{ MyInputColorWrap },
+	components:{ MyInputColorWrap, MyInputDecimal },
 	template:`
 		<tr>
 			<td>{{ capApp.family }}</td>
@@ -59,6 +60,11 @@ export const MyBuilderDocFont = {
 			</td>
 		</tr>
 		<tr>
+			<td>{{ capApp.size }}</td>
+			<td><my-input-decimal :modelValue="size" @update:modelValue="$emit('update:size',$event)" /></td>
+			<td></td>
+		</tr>
+		<tr>
 			<td>{{ capApp.bool }}</td>
 			<td>
 				<div class="row gap centered">
@@ -78,11 +84,12 @@ export const MyBuilderDocFont = {
 		dateFormat:{ type:String,  required:true },
 		family:    { type:String,  required:true },
 		readonly:  { type:Boolean, required:true },
+		size:      { type:Number,  required:true },
 		style:     { type:String,  required:true }
 	},
 	emits:[
 		'update:boolFalse','update:boolTrue','update:color','update:dateFormat','update:family',
-		'update:style'
+		'update:size','update:style'
 	],
 	computed:{
 		// stores

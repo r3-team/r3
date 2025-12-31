@@ -132,6 +132,7 @@ const MyBuilderDoc = {
 								v-model:color="doc.font.color"
 								v-model:dateFormat="doc.font.dateFormat"
 								v-model:family="doc.font.family"
+								v-model:size="doc.font.size"
 								v-model:style="doc.font.style"
 								:readonly="readonly"
 							/>
