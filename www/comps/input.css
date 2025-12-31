@@ -605,6 +605,14 @@
 .input-richtext .tox .tox-toolbar__group{
 	padding:0px;
 }
+.input-decimal{
+	width:100%;
+    color:inherit;
+    outline:none !important;
+    border:none !important;
+    box-shadow:none !important;
+    background-color:transparent !important;
+}
 
 /* mobile overwrites */
 .is-mobile .input-collection input{

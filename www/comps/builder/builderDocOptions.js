@@ -61,7 +61,7 @@ export const MyBuilderDocFont = {
 		</tr>
 		<tr>
 			<td>{{ capApp.size }}</td>
-			<td><my-input-decimal :modelValue="size" @update:modelValue="$emit('update:size',$event)" /></td>
+			<td><my-input-decimal :length="4" :lengthFract="2" :modelValue="size" @update:modelValue="$emit('update:size',$event)" /></td>
 			<td></td>
 		</tr>
 		<tr>

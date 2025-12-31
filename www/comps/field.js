@@ -5,6 +5,7 @@ import MyKanban               from './kanban.js';
 import MyInputBarcode         from './inputBarcode.js';
 import MyInputColor           from './inputColor.js';
 import MyInputDate            from './inputDate.js';
+import MyInputDecimal         from './inputDecimal.js';
 import MyInputDrawing         from './inputDrawing.js';
 import MyInputFiles           from './inputFiles.js';
 import MyInputIframe          from './inputIframe.js';
@@ -54,6 +55,7 @@ export default {
 		MyInputBarcode,
 		MyInputColor,
 		MyInputDate,
+		MyInputDecimal,
 		MyInputDrawing,
 		MyInputFiles,
 		MyInputIframe,
@@ -330,15 +332,24 @@ export default {
 					</div>
 				</div>
 				
-				<!-- regular text line input (numeric, strings, etc.) -->
+				<!-- text input -->
 				<input class="input" data-is-input="1"
 					v-if="isLineInput"
 					v-model="value"
-					@click="click"
 					:class="{ invalid:showInvalid }"
 					:disabled="isReadonly"
 					:placeholder="capGen.threeDots"
 					:type="lineInputType"
+				/>
+
+				<!-- decimal input -->
+				<my-input-decimal
+					v-if="isDecimal"
+					v-model="value"
+					:allowNull="attribute.nullable"
+					:length="attribute.length"
+					:lengthFract="attribute.lengthFract"
+					:readonly="isReadonly"
 				/>
 				
 				<!-- iframe input -->
@@ -430,7 +441,6 @@ export default {
 				<textarea class="input textarea" data-is-input="1"
 					v-if="isTextarea"
 					v-model="value"
-					@click="click"
 					:class="{ invalid:showInvalid }"
 					:disabled="isReadonly"
 				></textarea>
@@ -738,12 +748,6 @@ export default {
 				if(this.values[this.fieldAttributeId] === undefined)
 					return null;
 				
-				// apply fixed decimal length to newly loaded decimal numbers
-				if(!this.isTouched && this.isDecimal && typeof this.values[this.fieldAttributeId] === 'number' && (
-					this.attribute.length !== 0 || this.attribute.lengthFract !== 0
-				)) {
-					return this.values[this.fieldAttributeId].toFixed(this.attribute.lengthFract);
-				}
 				return this.values[this.fieldAttributeId];
 			},
 			set(val,valOld) {
@@ -850,7 +854,7 @@ export default {
 			return s.isData && !s.isVariable && s.attribute.iconId !== null ? s.attribute.iconId : false;
 		},
 		lineInputType:(s) => {
-			if(s.isMobile && (s.isDecimal || s.isInteger)) return 'number';
+			if(s.isMobile && s.isInteger) return 'number';
 			return !s.isPassword || s.showPassword ? 'text' : 'password';
 		},
 		presetValue:(s) => {
@@ -1039,7 +1043,7 @@ export default {
 			&& !s.isTextarea     && !s.isRegconfig
 			&& !s.isRelationship && !s.isRichtext
 			&& !s.isUuid         && !s.isBarcode
-			&& !s.isRating,
+			&& !s.isRating       && !s.isDecimal,
 		isLineSingle:(s) => s.isData && (
 			s.isLineInput || s.isBoolean || s.isColor || s.isDateInput || s.isSlider || s.isRating ||
 			s.isLogin || s.isRegconfig || s.isUuid || (s.isRelationship && !s.isRelationship1N)
@@ -1252,10 +1256,6 @@ export default {
 			
 			navigator.clipboard.writeText(value);
 			this.$emit('clipboard');
-		},
-		click() {
-			if(this.isColor && !this.isReadonly)
-				this.dropdownSet(!this.dropdownShow);
 		},
 		clickOutside() {
 			this.dropdownSet(false);
