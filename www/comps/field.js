@@ -1046,8 +1046,8 @@ export default {
 			&& !s.isUuid         && !s.isBarcode
 			&& !s.isRating       && !s.isDecimal,
 		isLineSingle:(s) => s.isData && (
-			s.isLineInput || s.isBoolean || s.isColor || s.isDateInput || s.isSlider || s.isRating ||
-			s.isLogin || s.isRegconfig || s.isUuid || (s.isRelationship && !s.isRelationship1N)
+			s.isLineInput || s.isBoolean || s.isDecimal || s.isColor || s.isDateInput || s.isSlider ||
+			s.isRating || s.isLogin || s.isRegconfig || s.isUuid || (s.isRelationship && !s.isRelationship1N)
 		),
 		isValid:(s) => {
 			if(!s.isData || s.isReadonly) return true;
