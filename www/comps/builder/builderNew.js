@@ -1,11 +1,17 @@
 import MyBuilderFormInput from './builderFormInput.js';
-import {getUuidV4}        from '../shared/crypto.js';
-import {getQueryTemplate} from '../shared/query.js';
-import {getNilUuid}       from '../shared/generic.js';
 import {
 	getTemplateApi,
 	getTemplateCollection,
-	getTemplateDoc
+	getTemplateDoc,
+	getTemplateForm,
+	getTemplateJsFunction,
+	getTemplateModule,
+	getTemplatePgFunction,
+	getTemplateRelation,
+	getTemplateRole,
+	getTemplateSearchBar,
+	getTemplateVariable,
+	getTemplateWidget
 } from '../shared/builderTemplate.js';
 import {
 	getTemplateArgs,
@@ -272,15 +278,21 @@ const MyBuilderNew = {
 	},
 	methods:{
 		// externals
-		getNilUuid,
-		getQueryTemplate,
 		getTemplateApi,
 		getTemplateArgs,
 		getTemplateCollection,
 		getTemplateDoc,
 		getTemplateFnc,
+		getTemplateForm,
+		getTemplateJsFunction,
+		getTemplateModule,
+		getTemplatePgFunction,
+		getTemplateRelation,
+		getTemplateRole,
+		getTemplateSearchBar,
+		getTemplateVariable,
+		getTemplateWidget,
 		getTemplateReturn,
-		getUuidV4,
 		
 		// actions
 		close() { this.$emit('close'); },
@@ -293,10 +305,17 @@ const MyBuilderNew = {
 			let request;
 			let dependencyCheck = false;
 			switch(this.entity) {
-				case 'api':	       request = this.getTemplateApi(this.module.id,this.inputs.name);        break;
+				case 'api':	       request = this.getTemplateApi(this.module.id,this.inputs.name); break;
 				case 'collection': request = this.getTemplateCollection(this.module.id,this.inputs.name); break;
-				case 'doc':        request = this.getTemplateDoc(this.module.id,this.inputs.name);        break;
-
+				case 'doc':        request = this.getTemplateDoc(this.module.id,this.inputs.name); break;
+				case 'jsFunction': request = this.getTemplateJsFunction(this.moduleId,this.inputs.formId,this.inputs.name); break;
+				case 'module':     request = this.getTemplateModule(this.inputs.name); break;
+				case 'pgFunction': request = this.getTemplatePgFunction(this.moduleId,this.inputs.name,this.inputs.template,this.inputs.isTrigger); break;
+				case 'relation':   request = this.getTemplateRelation(this.module.id,this.inputs.name,this.inputs.encryption); break;
+				case 'role':       request = this.getTemplateRole(this.moduleId,this.inputs.name); break;
+				case 'searchBar':  request = this.getTemplateSearchBar(this.moduleId,this.inputs.name); break;
+				case 'variable':   request = this.getTemplateVariable(this.moduleId,this.inputs.formId,this.inputs.name); break;
+				case 'widget':     request = this.getTemplateWidget(this.moduleId,this.inputs.name); break;
 				case 'form':
 					if(this.inputs.formIdDuplicate !== null) {
 						action = 'copy';
@@ -307,145 +326,8 @@ const MyBuilderNew = {
 						};
 						dependencyCheck = true;
 					} else {
-						request = {
-							id:this.getNilUuid(),
-							moduleId:this.moduleId,
-							fieldIdFocus:null,
-							presetIdOpen:null,
-							iconId:null,
-							name:this.inputs.name,
-							noDataActions:false,
-							query:this.getQueryTemplate(),
-							fields:[],
-							functions:[],
-							states:[],
-							actions:[],
-							articleIdsHelp:[],
-							captions:{
-								formTitle:{}
-							}
-						};
+						request = this.getTemplateForm(this.moduleId,this.inputs.name);
 					}
-				break;
-				case 'jsFunction':
-					request = {
-						id:this.getNilUuid(),
-						moduleId:this.moduleId,
-						formId:this.inputs.formId,
-						name:this.inputs.name,
-						codeArgs:'',
-						codeFunction:'',
-						codeReturns:'',
-						isClientEventExec:false,
-						captions:{
-							jsFunctionTitle:{},
-							jsFunctionDesc:{}
-						}
-					};
-				break;
-				case 'module':
-					request = {
-						id:this.getNilUuid(),
-						parentId:null,
-						formId:null,
-						iconId:null,
-						name:this.inputs.name,
-						color1:'217A4D',
-						position:0,
-						releaseBuild:0,
-						releaseBuildApp:0,
-						releaseDate:0,
-						languageMain:'en_us',
-						languages:['en_us'],
-						dependsOn:[],
-						startForms:[],
-						articleIdsHelp:[],
-						captions:{
-							moduleTitle:{}
-						}
-					};
-				break;
-				case 'pgFunction':
-					request = {
-						id:this.getNilUuid(),
-						moduleId:this.moduleId,
-						name:this.inputs.name,
-						codeArgs:this.getTemplateArgs(this.inputs.template),
-						codeFunction:this.getTemplateFnc(this.inputs.template,this.inputs.isTrigger),
-						codeReturns:this.getTemplateReturn(this.inputs.isTrigger),
-						isFrontendExec:false,
-						isLoginSync:this.inputs.template === 'loginSync',
-						isTrigger:this.inputs.isTrigger,
-						volatility:'VOLATILE',
-						schedules:[],
-						captions:{
-							pgFunctionTitle:{},
-							pgFunctionDesc:{}
-						}
-					};
-				break;
-				case 'relation':
-					request = {
-						id:this.getNilUuid(),
-						moduleId:this.moduleId,
-						name:this.inputs.name,
-						comment:null,
-						encryption:this.inputs.encryption,
-						retentionCount:null,
-						retentionDays:null,
-						policies:[]
-					};
-				break;
-				case 'role':
-					request = {
-						id:this.getNilUuid(),
-						moduleId:this.moduleId,
-						content:'user',
-						name:this.inputs.name,
-						assignable:true,
-						captions:{},
-						childrenIds:[],
-						accessApis:{},
-						accessAttributes:{},
-						accessClientEvents:{},
-						accessCollections:{},
-						accessMenus:{},
-						accessRelations:{}
-					};
-				break;
-				case 'searchBar':
-					request = {
-						id:this.getNilUuid(),
-						moduleId:this.moduleId,
-						iconId:null,
-						name:this.inputs.name,
-						columns:[],
-						query:this.getQueryTemplate(),
-						openForm:null,
-						captions:{
-							searchBarTitle:{}
-						}
-					};
-				break;
-				case 'variable':
-					request = {
-						id:this.getNilUuid(),
-						moduleId:this.moduleId,
-						formId:this.inputs.formId,
-						name:this.inputs.name,
-						comment:null,
-						content:'text',
-						contentUse:'default'
-					};
-				break;
-				case 'widget':
-					request = {
-						id:this.getNilUuid(),
-						moduleId:this.moduleId,
-						formId:null,
-						size:1,
-						name:this.inputs.name
-					};
 				break;
 				default: return; break;
 			}

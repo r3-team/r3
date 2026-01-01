@@ -19,7 +19,6 @@ export function getTemplateApi(moduleId,name) {
 		version:1
 	};
 };
-
 export function getTemplateCollection(moduleId,name) {
 	return {
 		id:getNilUuid(),
@@ -31,7 +30,6 @@ export function getTemplateCollection(moduleId,name) {
 		inHeader:[]
 	};
 };
-
 export function getTemplateDoc(moduleId,name) {
 	return {
 		id:getUuidV4(),
@@ -60,7 +58,6 @@ export function getTemplateDoc(moduleId,name) {
 		}
 	};
 };
-
 export function getTemplateDocPage() {
 	return {
 		id:getUuidV4(),
@@ -82,7 +79,6 @@ export function getTemplateDocPage() {
 		state:true
 	};
 };
-
 export function getTemplateDocField(content) {
 	const getBorderTemplate = () => { return { cell:false, color:'', draw:'', size:0}; };
 	const getMarginTemplate = () => { return { t:0, r:0, b:0, l:0 }; };
@@ -134,4 +130,144 @@ export function getTemplateDocField(content) {
 		break;
 	}
 	return f;
+};
+export function getTemplateForm(moduleId,name) {
+	return {
+		id:getNilUuid(),
+		moduleId:moduleId,
+		fieldIdFocus:null,
+		presetIdOpen:null,
+		iconId:null,
+		name:name,
+		noDataActions:false,
+		query:getQueryTemplate(),
+		fields:[],
+		functions:[],
+		states:[],
+		actions:[],
+		articleIdsHelp:[],
+		captions:{
+			formTitle:{}
+		}
+	};
+};
+export function getTemplateJsFunction(moduleId,formId,name) {
+	return {
+		id:getNilUuid(),
+		moduleId:moduleId,
+		formId:formId,
+		name:name,
+		codeArgs:'',
+		codeFunction:'',
+		codeReturns:'',
+		isClientEventExec:false,
+		captions:{
+			jsFunctionTitle:{},
+			jsFunctionDesc:{}
+		}
+	};
+};
+export function getTemplateModule(name) {
+	return {
+		id:getNilUuid(),
+		parentId:null,
+		formId:null,
+		iconId:null,
+		name:name,
+		color1:'217A4D',
+		position:0,
+		releaseBuild:0,
+		releaseBuildApp:0,
+		releaseDate:0,
+		languageMain:'en_us',
+		languages:['en_us'],
+		dependsOn:[],
+		startForms:[],
+		articleIdsHelp:[],
+		captions:{
+			moduleTitle:{}
+		}
+	};
+};
+export function getTemplatePgFunction(moduleId,name,template,isTrigger) {
+	return  {
+		id:getNilUuid(),
+		moduleId:moduleId,
+		name:name,
+		codeArgs:this.getTemplateArgs(template),
+		codeFunction:this.getTemplateFnc(template,isTrigger),
+		codeReturns:this.getTemplateReturn(isTrigger),
+		isFrontendExec:false,
+		isLoginSync:template === 'loginSync',
+		isTrigger:isTrigger,
+		volatility:'VOLATILE',
+		schedules:[],
+		captions:{
+			pgFunctionTitle:{},
+			pgFunctionDesc:{}
+		}
+	};
+};
+export function getTemplateRelation(moduleId,name,encryption) {
+	return {
+		id:getNilUuid(),
+		moduleId:moduleId,
+		name:name,
+		comment:null,
+		encryption:encryption,
+		retentionCount:null,
+		retentionDays:null,
+		policies:[]
+	};
+};
+export function getTemplateRole(moduleId,name) {
+	return {
+		id:getNilUuid(),
+		moduleId:moduleId,
+		content:'user',
+		name:name,
+		assignable:true,
+		captions:{},
+		childrenIds:[],
+		accessApis:{},
+		accessAttributes:{},
+		accessClientEvents:{},
+		accessCollections:{},
+		accessMenus:{},
+		accessRelations:{}
+	};
+};
+export function getTemplateSearchBar(moduleId,name) {
+	return {
+		id:getNilUuid(),
+		moduleId:moduleId,
+		iconId:null,
+		name:name,
+		columns:[],
+		query:getQueryTemplate(),
+		openForm:null,
+		captions:{
+			searchBarTitle:{}
+		}
+	};
+};
+export function getTemplateVariable(moduleId,formId,name) {
+	return {
+		id:getNilUuid(),
+		moduleId:moduleId,
+		formId:formId,
+		name:name,
+		comment:null,
+		content:'text',
+		contentUse:'default'
+	};
+};
+export function getTemplateWidget(moduleId,name) {
+	return {
+		id:getNilUuid(),
+		moduleId:moduleId,
+		formId:null,
+		size:1,
+		name:name
+	};
 };
