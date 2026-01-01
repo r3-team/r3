@@ -31,7 +31,6 @@ import {
 } from './shared/attribute.js';
 import {
 	getLinkMeta,
-	getNilUuid,
 	openLink
 } from './shared/generic.js';
 import {
@@ -1204,7 +1203,6 @@ export default {
 		getFormPopUpConfig,
 		getIndexAttributeId,
 		getLinkMeta,
-		getNilUuid,
 		hasAccessToAttribute,
 		isAttributeBoolean,
 		isAttributeDecimal,

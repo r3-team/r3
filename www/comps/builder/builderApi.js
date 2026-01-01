@@ -1,6 +1,7 @@
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderColumnOptions from './builderColumnOptions.js';
 import MyTabs                 from '../tabs.js';
+import { copyValueDialog }    from '../shared/generic.js';
 import {
 	isAttributeBoolean,
 	isAttributeDecimal,
@@ -14,10 +15,6 @@ import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
 } from './builderColumns.js';
-import {
-	copyValueDialog,
-	getNilUuid
-} from '../shared/generic.js';
 export {MyBuilderApi as default};
 
 const MyBuilderApiPreview = {
@@ -681,7 +678,6 @@ const MyBuilderApi = {
 	methods:{
 		// externals
 		copyValueDialog,
-		getNilUuid,
 		
 		// actions
 		columnSet(name,value) {
@@ -716,15 +712,6 @@ const MyBuilderApi = {
 			
 			if(this.columnIdShow !== null)
 				this.tabTarget = 'content';
-		},
-		
-		// helpers
-		replaceBuilderId(columns) {
-			for(let i = 0, j = columns.length; i < j; i++) {
-				if(columns[i].id.startsWith('new_'))
-					columns[i].id = this.getNilUuid();
-			}
-			return columns;
 		},
 		
 		// backend calls
@@ -767,9 +754,7 @@ const MyBuilderApi = {
 					moduleId:this.api.moduleId,
 					name:this.name,
 					comment:this.comment === '' ? null : this.comment,
-					columns:this.replaceBuilderId(
-						JSON.parse(JSON.stringify(this.columns))
-					),
+					columns:this.columns,
 					query:this.query,
 					hasDelete:this.hasDelete,
 					hasGet:this.hasGet,

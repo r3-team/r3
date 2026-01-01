@@ -3,7 +3,7 @@ import {getFieldTitle}           from '../shared/field.js';
 import {getNilUuid}              from '../shared/generic.js';
 export {MyBuilderFormStates as default};
 
-let MyBuilderFormStateEffect = {
+const MyBuilderFormStateEffect = {
 	name:'my-builder-form-state-effect',
 	template:`<div class="builder-form-state-effect row gap" :style="'order:'+order">
 		
@@ -25,7 +25,6 @@ let MyBuilderFormStateEffect = {
 			<optgroup :label="capApp.option.effectField">
 				<option
 					v-for="(ref,fieldId) in entityIdMapRef.field"
-					:disabled="fieldId.startsWith('new')"
 					:value="'F'+fieldId"
 				>{{ getTitleEffect('F', ref, fieldId) }}</option>
 			</optgroup>
@@ -119,13 +118,7 @@ let MyBuilderFormStateEffect = {
 
 		// presentation
 		getTitleEffect(type,ref,id) {
-			const notSaved = id.startsWith('new');
-			const postfix  = notSaved ? ` (${this.capGen.notSaved})` : '';
-			let title      = '';
-
-			if(type === 'F') title = this.getFieldTitle(this.fieldIdMap[id]);
-			
-			return type + ref + ' - ' + title + postfix;
+			return `${type}${ref} - ${type === 'F' ? this.getFieldTitle(this.fieldIdMap[id]) : ''}`;
 		},
 
 		// set
@@ -137,7 +130,7 @@ let MyBuilderFormStateEffect = {
 	}
 };
 
-let MyBuilderFormState = {
+const MyBuilderFormState = {
 	name:'my-builder-form-state',
 	components:{MyBuilderFormStateEffect},
 	template:`<div class="builder-form-state">
@@ -294,7 +287,7 @@ let MyBuilderFormState = {
 	}
 };
 
-let MyBuilderFormStates = {
+const MyBuilderFormStates = {
 	name:'my-builder-form-states',
 	components:{ MyBuilderFormState },
 	template:`<div class="builder-form-states">

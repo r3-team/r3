@@ -3,8 +3,8 @@ import MyBuilderCollectionInput        from './builderCollectionInput.js';
 import MyBuilderFormInput              from './builderFormInput.js';
 import MyBuilderIconInput              from './builderIconInput.js';
 import MyBuilderMenuTabSelect          from './builderMenuTabSelect.js';
-import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {getDependentModules}           from '../shared/builder.js';
+import {getTemplateCollectionConsumer} from '../shared/builderTemplate.js';
 import {getNilUuid}                    from '../shared/generic.js';
 import {getCaptionForLang}             from '../shared/language.js';
 export {MyBuilderMenu as default};
@@ -127,7 +127,7 @@ let MyBuilderMenuItems = {
 											<div class="column gap">
 												<span>{{ capApp.collections }}</span>
 												<my-button image="add.png"
-													@trigger="element.collections.push(getCollectionConsumerTemplate())"
+													@trigger="element.collections.push(getTemplateCollectionConsumer())"
 													:active="!readonly"
 													:caption="capGen.button.add"
 													:naked="true"
@@ -195,8 +195,8 @@ let MyBuilderMenuItems = {
 	},
 	methods:{
 		// externals
-		getCollectionConsumerTemplate,
 		getNilUuid,
+		getTemplateCollectionConsumer,
 		
 		// presentation
 		colorStyle(color) {

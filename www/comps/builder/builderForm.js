@@ -9,10 +9,11 @@ import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
 import MyTabs                 from '../tabs.js';
 import {getColumnIcon}        from '../shared/column.js';
+import {copyValueDialog}      from '../shared/generic.js';
+import {getJoinIndexMap}      from '../shared/query.js';
 import {routeParseParams}     from '../shared/router.js';
 import {
 	getIndexAttributeId,
-	isAttributeBoolean,
 	isAttributeRelationship,
 	isAttributeRelationshipN1
 } from '../shared/attribute.js';
@@ -24,7 +25,17 @@ import {
 	getSqlPreview
 } from '../shared/builder.js';
 import {
-	getTemplateFieldTabs
+	getTemplateFieldButton,
+	getTemplateFieldCalendar,
+	getTemplateFieldChart,
+	getTemplateFieldContainer,
+	getTemplateFieldData,
+	getTemplateFieldGantt,
+	getTemplateFieldHeader,
+	getTemplateFieldKanban,
+	getTemplateFieldList,
+	getTemplateFieldTabs,
+	getTemplateFieldVariable
 } from '../shared/builderTemplate.js';
 import {
 	MyBuilderColumns,
@@ -35,17 +46,9 @@ import {
 	getFieldTitle
 } from '../shared/field.js';
 import {
-	copyValueDialog,
-	getNilUuid
-} from '../shared/generic.js';
-import {
 	getDataFields,
 	getFormRoute
 } from '../shared/form.js';
-import {
-	getJoinIndexMap,
-	getQueryTemplate
-} from '../shared/query.js';
 export {MyBuilderForm as default};
 
 const MyBuilderForm = {
@@ -167,7 +170,6 @@ const MyBuilderForm = {
 				<!-- form builder fields -->
 				<my-builder-fields class="builder-form-fields default-inputs" flexDirParent="column"
 					@column-id-show="(...args) => setFieldShow(args[0],args[1],'content')"
-					@field-counter-set="fieldCounter = $event"
 					@field-id-show="(...args) => setFieldShow(args[0],null,args[1])"
 					@field-move-store="fieldMoveStore"
 					@field-remove="removeFieldById($event)"
@@ -175,7 +177,6 @@ const MyBuilderForm = {
 					:columnIdShow="columnIdShow"
 					:dataFields="dataFields"
 					:entityIdMapRef="entityIdMapRef"
-					:fieldCounter="fieldCounter"
 					:fieldIdShow="fieldIdShow"
 					:fieldIdShowTab="tabTargetField"
 					:fieldMoveList="fieldMoveList"
@@ -280,13 +281,11 @@ const MyBuilderForm = {
 							<div class="templates">
 								<my-builder-fields flexDirParent="column"
 									v-if="fieldsShow === 'add'"
-									@field-counter-set="fieldCounter = $event"
 									@field-move-store="fieldMoveStore"
 									:builderLanguage="builderLanguage"
 									:fields="fieldsTemplate"
 									:fieldMoveList="fieldMoveList"
 									:fieldMoveIndex="fieldMoveIndex"
-									:fieldCounter="fieldCounter"
 									:filterData="true"
 									:filterData1n="showTemplate1n"
 									:filterDataIndex="parseInt(templateIndex)"
@@ -306,7 +305,6 @@ const MyBuilderForm = {
 									:fields="dataFields"
 									:fieldMoveList="null"
 									:fieldMoveIndex="0"
-									:fieldCounter="fieldCounter"
 									:filterData="true"
 									:filterData1n="showTemplate1n"
 									:filterDataIndex="parseInt(templateIndex)"
@@ -408,9 +406,8 @@ const MyBuilderForm = {
 										<template v-for="(ref,fieldId) in entityIdMapRef.field">
 											<option
 												v-if="fieldContentFocus.includes(fieldIdMap[fieldId].content)"
-												:disabled="fieldId.startsWith('new')"
 												:value="fieldId"
-											>F{{ fieldId.startsWith('new') ? ref + ' (' + capGen.notSaved + ')' : ref }}</option>
+											>F{{ ref }}</option>
 										</template>
 									</select>
 								</td>
@@ -545,7 +542,6 @@ const MyBuilderForm = {
 			// state
 			columnIdShow:null,
 			fieldsShow:'add',         // which fields to show (add = template fields, edit = existing data fields)
-			fieldCounter:0,           // counter to generate unique IDs for all fields (used to populate new fields and for template fields)
 			fieldIdShow:null,         // field ID which is shown in sidebar to be edited
 			fieldMoveList:null,       // fields list from which to move field (move by click)
 			fieldMoveIndex:0,         // index of field which to move (move by click)
@@ -628,16 +624,16 @@ const MyBuilderForm = {
 				let fields = [];
 				
 				// relation-independent fields
-				fields.push(this.createFieldContainer()); // container
-				fields.push(this.getTemplateFieldTabs()); // tabs
-				fields.push(this.createFieldList());      // list
-				fields.push(this.createFieldCalendar());  // calendar
-				fields.push(this.createFieldGantt());     // Gantt
-				fields.push(this.createFieldKanban());    // Kanban
-				fields.push(this.createFieldChart());     // chart
-				fields.push(this.createFieldHeader());    // header
-				fields.push(this.createFieldButton());    // button
-				fields.push(this.createFieldVariable());  // variable
+				fields.push(this.getTemplateFieldContainer()); // container
+				fields.push(this.getTemplateFieldTabs());      // tabs
+				fields.push(this.getTemplateFieldList());      // list
+				fields.push(this.getTemplateFieldCalendar());  // calendar
+				fields.push(this.getTemplateFieldGantt());     // Gantt
+				fields.push(this.getTemplateFieldKanban());    // Kanban
+				fields.push(this.getTemplateFieldChart());     // chart
+				fields.push(this.getTemplateFieldHeader());    // header
+				fields.push(this.getTemplateFieldButton());    // button
+				fields.push(this.getTemplateFieldVariable());  // variable
 				
 				// data fields from relations
 				if(this.relation) {
@@ -754,25 +750,30 @@ const MyBuilderForm = {
 		getIndexAttributeId,
 		getItemTitleColumn,
 		getJoinIndexMap,
-		getNilUuid,
-		getQueryTemplate,
 		getSqlPreview,
+		getTemplateFieldButton,
+		getTemplateFieldCalendar,
+		getTemplateFieldChart,
+		getTemplateFieldContainer,
+		getTemplateFieldData,
+		getTemplateFieldGantt,
+		getTemplateFieldHeader,
+		getTemplateFieldKanban,
+		getTemplateFieldList,
 		getTemplateFieldTabs,
-		isAttributeBoolean,
+		getTemplateFieldVariable,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		routeParseParams,
 		
 		// actions
 		addLayoutColumns(count) {
-			let parent = this.createFieldContainer();
-			parent.id        = 'new_'+this.fieldCounter++;
+			let parent = this.getTemplateFieldContainer();
 			parent.direction = 'row';
 			parent.wrap      = true;
 			
 			for(; count > 0; count--) {
-				let child = this.createFieldContainer();
-				child.id    = 'new_'+this.fieldCounter++;
+				let child = this.getTemplateFieldContainer();
 				child.basis = 300;
 				parent.fields.push(child);
 			}
@@ -831,258 +832,6 @@ const MyBuilderForm = {
 			}
 			this.$store.commit('dialog',{ captionBody:msg });
 		},
-		
-		createFieldButton() {
-			return {
-				id:'template_button',
-				iconId:null,
-				jsFunctionId:null,
-				content:'button',
-				state:'default',
-				flags:[],
-				openForm:null,
-				onMobile:true,
-				captions:{
-					fieldTitle:{}
-				}
-			};
-		},
-		createFieldCalendar() {
-			return {
-				id:'template_calendar',
-				iconId:null,
-				content:'calendar',
-				state:'default',
-				flags:[],
-				onMobile:true,
-				attributeIdDate0:null,
-				attributeIdDate1:null,
-				attributeIdColor:null,
-				indexDate0:null,
-				indexDate1:null,
-				indexColor:null,
-				gantt:false,
-				ganttSteps:null,
-				ics:false,
-				dateRange0:0,
-				dateRange1:0,
-				days:42,
-				daysToggle:true,
-				openForm:null,
-				query:this.getQueryTemplate(),
-				columns:[],
-				collections:[]
-			};
-		},
-		createFieldGantt() {
-			return {
-				id:'template_gantt',
-				iconId:null,
-				content:'calendar',
-				state:'default',
-				flags:[],
-				onMobile:true,
-				attributeIdDate0:null,
-				attributeIdDate1:null,
-				attributeIdColor:null,
-				indexDate0:null,
-				indexDate1:null,
-				indexColor:null,
-				gantt:true,
-				ganttSteps:'days',
-				ics:false,
-				dateRange0:0,
-				dateRange1:0,
-				days:42,
-				daysToggle:true,
-				openForm:null,
-				query:this.getQueryTemplate(),
-				columns:[],
-				collections:[]
-			};
-		},
-		createFieldChart() {
-			return {
-				id:'template_chart',
-				iconId:null,
-				content:'chart',
-				state:'default',
-				flags:[],
-				onMobile:true,
-				chartOption:JSON.stringify({
-					dataset:{
-						source:['filled by app'],
-						sourceHeader:false
-					},
-					legend: {
-						orient:'vertical',
-						left:'left',
-						type:'scroll'
-					},
-					series:[],
-					toolbox:{
-						feature:{
-							saveAsImage:{ show:true }
-						}
-					},
-					tooltip:{
-						trigger:'item'
-					},
-					xAxis:{
-						position:'bottom',
-						type:'category'
-					},
-					yAxis:{
-						position:'left',
-						type:'value'
-					}
-				},null,2),
-				query:this.getQueryTemplate(),
-				columns:[],
-				captions:{
-					fieldTitle:{}
-				}
-			};
-		},
-		createFieldContainer() {
-			return {
-				id:'template_container',
-				iconId:null,
-				content:'container',
-				state:'default',
-				flags:[],
-				onMobile:true,
-				fields:[],
-				direction:'column',
-				justifyContent:'flex-start',
-				alignItems:'stretch',
-				alignContent:'stretch',
-				wrap:false,
-				grow:1,
-				shrink:0,
-				basis:0,
-				perMin:50,
-				perMax:150
-			};
-		},
-		createFieldData(index,attribute,outsideIn,attributeIdNm) {
-			let field = {
-				id:'template_data_'+this.getIndexAttributeId(
-					index,attribute.id,outsideIn,attributeIdNm
-				),
-				iconId:null,
-				content:'data',
-				state:'default',
-				flags:[],
-				onMobile:true,
-				attributeId:attribute.id,
-				attributeIdAlt:null, // altern. attribute (used for date period)
-				index:index,
-				presentation:'',
-				display:'default',
-				def:'',
-				defCollection:null,
-				min:null,
-				max:null,
-				regexCheck:null,
-				jsFunctionId:null,
-				captions:{
-					fieldTitle:{},
-					fieldHelp:{}
-				},
-				
-				// legacy
-				collectionIdDef:null,
-				columnIdDef:null
-			};
-			if(this.isAttributeBoolean(attribute.content))
-				field.def = 'true';
-
-			if(this.isAttributeRelationship(attribute.content)) {
-				field.attributeIdNm = attributeIdNm;
-				field.columns       = [];
-				field.query         = this.getQueryTemplate();
-				field.filterQuick   = false;
-				field.outsideIn     = outsideIn;
-				field.defPresetIds  = [];
-				field.openForm      = null;
-			}
-			return field;
-		},
-		createFieldHeader() {
-			return {
-				id:'template_header',
-				iconId:null,
-				content:'header',
-				state:'default',
-				flags:[],
-				onMobile:true,
-				size:2,
-				captions:{
-					fieldTitle:{}
-				}
-			};
-		},
-		createFieldKanban() {
-			return {
-				id:'template_kanban',
-				iconId:null,
-				content:'kanban',
-				state:'default',
-				flags:[],
-				onMobile:true,
-				columns:[],
-				collections:[],
-				relationIndexData:null,
-				relationIndexAxisX:null,
-				relationIndexAxisY:null,
-				attributeIdSort:null,
-				openForm:null,
-				query:this.getQueryTemplate()
-			};
-		},
-		createFieldList() {
-			return {
-				id:'template_list',
-				iconId:null,
-				content:'list',
-				state:'default',
-				flags:[],
-				onMobile:true,
-				columns:[],
-				collections:[],
-				autoRenew:null,
-				csvExport:false,
-				csvImport:false,
-				filterQuick:false,
-				layout:'table',
-				openForm:null,
-				openFormBulk:null,
-				captions:{
-					fieldTitle:{}
-				},
-				query:this.getQueryTemplate(),
-				resultLimit:50
-			};
-		},
-		createFieldVariable() {
-			return {
-				id:'template_variable',
-				variableId:null,
-				jsFunctionId:null,
-				iconId:null,
-				content:'variable',
-				columns:[],
-				query:this.getQueryTemplate(),
-				state:'default',
-				flags:[],
-				onMobile:true,
-				captions:{
-					fieldTitle:{},
-					fieldHelp:{}
-				}
-			};
-		},
 		createFieldsForRelation(relation,index) {
 			let fields = [];
 			// create data fields from all attributes from this relation
@@ -1092,7 +841,7 @@ const MyBuilderForm = {
 					&& relation.attributeIdPk !== atr.id
 					&& !this.isAttributeRelationship(atr.content)
 				) {
-					fields.push(this.createFieldData(index,atr,false,null));
+					fields.push(this.getTemplateFieldData(index,atr,false,null));
 				}
 			}
 			
@@ -1101,7 +850,7 @@ const MyBuilderForm = {
 				if(!this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null))
 					&& this.isAttributeRelationship(atr.content)
 				) {
-					fields.push(this.createFieldData(index,atr,false,null));
+					fields.push(this.getTemplateFieldData(index,atr,false,null));
 				}
 			}
 			
@@ -1119,7 +868,7 @@ const MyBuilderForm = {
 					if(!this.isAttributeRelationship(atr.content))
 						continue;
 					
-					fields.push(this.createFieldData(index,atr,true,null));
+					fields.push(this.getTemplateFieldData(index,atr,true,null));
 				}
 				
 				// relationship attributes that can be used to build n:m relationships
@@ -1143,7 +892,7 @@ const MyBuilderForm = {
 						if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atrN1.id,true,atrNm.id)))
 							continue;
 						
-						fields.push(this.createFieldData(index,atrN1,true,atrNm.id));
+						fields.push(this.getTemplateFieldData(index,atrN1,true,atrNm.id));
 					}
 				}
 			}
@@ -1174,9 +923,7 @@ const MyBuilderForm = {
 			if(this.fieldIdShow === fieldId)
 				this.fieldIdShow = null;
 			
-			// add pre-existing field to remove list
-			if(!fieldId.startsWith('new_'))
-				this.fieldIdsRemove.push(fieldId);
+			this.fieldIdsRemove.push(fieldId);
 			
 			// remove field from array
 			let remove = function(fields) {
@@ -1194,36 +941,6 @@ const MyBuilderForm = {
 				}
 			};
 			remove(this.fields);
-		},
-		replaceBuilderId(fields) {
-			for(let i = 0, j = fields.length; i < j; i++) {
-				let f = fields[i];
-				
-				switch(f.content) {
-					case 'container': this.replaceBuilderId(f.fields); break;
-					case 'tabs':
-						for(let x = 0, y = f.tabs.length; x < y; x++) {
-							this.replaceBuilderId(f.tabs[x].fields);
-							
-							if(f.tabs[x].id.startsWith('new_'))
-								f.tabs[x].id = this.getNilUuid();
-						}
-					break;
-				}
-				
-				if(f.id.startsWith('new_'))
-					f.id = this.getNilUuid();
-				
-				if(typeof f.columns !== 'undefined') {
-					
-					for(let x = 0, y = f.columns.length; x < y; x++) {
-						if(f.columns[x].id.startsWith('new_'))
-							f.columns[x].id = this.getNilUuid();
-					}
-				}
-				fields[i] = f;
-			}
-			return fields;
 		},
 		
 		// field manipulation
@@ -1284,10 +1001,7 @@ const MyBuilderForm = {
 		},
 		set() {
 			if(!this.canSave) return;
-			
-			// replace builder counter ID with empty field UUID for creation
-			let fieldsCleaned = this.replaceBuilderId(JSON.parse(JSON.stringify(this.fields)));
-			
+
 			// check removed fields being referenced in form states
 			for(const s of this.states) {
 				for(const c of s.conditions) {
@@ -1320,7 +1034,7 @@ const MyBuilderForm = {
 				noDataActions:this.noDataActions,
 				query:this.query,
 				actions:this.actions,
-				fields:fieldsCleaned,
+				fields:this.fields,
 				functions:this.functions,
 				states:this.states,
 				articleIdsHelp:this.form.articleIdsHelp,

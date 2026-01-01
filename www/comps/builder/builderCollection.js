@@ -3,16 +3,13 @@ import MyBuilderCollectionInput        from './builderCollectionInput.js';
 import MyBuilderColumnOptions          from './builderColumnOptions.js';
 import MyBuilderIconInput              from './builderIconInput.js';
 import {getItemTitleColumn}            from '../shared/builder.js';
-import {getCollectionConsumerTemplate} from '../shared/collection.js';
+import {getTemplateCollectionConsumer} from '../shared/builderTemplate.js';
+import {copyValueDialog}               from '../shared/generic.js';
 import MyTabs                          from '../tabs.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
 } from './builderColumns.js';
-import {
-	copyValueDialog,
-	getNilUuid
-} from '../shared/generic.js';
 export {MyBuilderCollection as default};
 
 const MyBuilderCollection = {
@@ -313,14 +310,13 @@ const MyBuilderCollection = {
 	methods:{
 		// externals
 		copyValueDialog,
-		getCollectionConsumerTemplate,
 		getItemTitleColumn,
-		getNilUuid,
+		getTemplateCollectionConsumer,
 		
 		// actions
 		collectionAdd() {
 			let v = JSON.parse(JSON.stringify(this.inHeader));
-			let c = this.getCollectionConsumerTemplate();
+			let c = this.getTemplateCollectionConsumer();
 			c.collectionId = this.collection.id;
 			v.push(c);
 			this.inHeader = v;
@@ -359,16 +355,6 @@ const MyBuilderCollection = {
 				this.tabTarget = 'content';
 		},
 		
-		// helpers
-		replaceBuilderId(columns) {
-			for(let i = 0, j = columns.length; i < j; i++) {
-				
-				if(columns[i].id.startsWith('new_'))
-					columns[i].id = this.getNilUuid();
-			}
-			return columns;
-		},
-		
 		// backend calls
 		delAsk() {
 			this.$store.commit('dialog',{
@@ -400,9 +386,7 @@ const MyBuilderCollection = {
 					moduleId:this.collection.moduleId,
 					iconId:this.iconId,
 					name:this.name,
-					columns:this.replaceBuilderId(
-						JSON.parse(JSON.stringify(this.columns))
-					),
+					columns:this.columns,
 					query:this.query,
 					inHeader:this.inHeader
 				}),

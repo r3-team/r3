@@ -5,11 +5,8 @@ import MyBuilderPgTriggers   from './builderPgTriggers.js';
 import MyBuilderPresets      from './builderPresets.js';
 import MyInputOffset         from '../inputOffset.js';
 import MyTabs                from '../tabs.js';
+import {copyValueDialog}     from '../shared/generic.js';
 import {srcBase64}           from '../shared/image.js';
-import {
-	copyValueDialog,
-	getNilUuid
-} from '../shared/generic.js';
 import {
 	getAttributeIcon,
 	isAttributeFiles,
@@ -685,7 +682,6 @@ const MyBuilderRelation = {
 		copyValueDialog,
 		getAttributeIcon,
 		getDependentAttributes,
-		getNilUuid,
 		isAttributeFiles,
 		isAttributeRelationship,
 		isAttributeRelationship11,

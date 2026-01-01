@@ -71,7 +71,7 @@ const MyStoreSchema = {
 				return fields;
 			};
 			const processDocField = field => {
-				if(typeof field.query !== 'undefined')
+				if(field.query !== undefined)
 					field.query = getQueryTemplateIfNull(field.query);
 				
 				switch(field.content) {

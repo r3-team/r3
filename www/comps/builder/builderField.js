@@ -17,7 +17,7 @@ import {
 } from '../shared/field.js';
 export {MyBuilderField as default};
 
-let MyBuilderField = {
+const MyBuilderField = {
 	name:'my-builder-field',
 	components:{
 		MyBuilderCaption,
@@ -171,7 +171,6 @@ let MyBuilderField = {
 			<my-builder-fields class="fields-nested column"
 				v-for="(t,i) in field.tabs.filter((v,i) => tabIndexShown === i )"
 				@column-id-show="(...args) => $emit('column-id-show',...args)"
-				@field-counter-set="$emit('field-counter-set',$event)"
 				@field-id-show="(...args) => $emit('field-id-show',...args)"
 				@field-remove="$emit('field-remove',$event)"
 				@field-move-store="$emit('field-move-store',$event)"
@@ -179,7 +178,6 @@ let MyBuilderField = {
 				:columnIdShow="columnIdShow"
 				:dataFields="dataFields"
 				:entityIdMapRef="entityIdMapRef"
-				:fieldCounter="fieldCounter"
 				:fieldIdShow="fieldIdShow"
 				:fieldIdShowTab="fieldIdShowTab"
 				:fieldMoveList="fieldMoveList"
@@ -212,7 +210,6 @@ let MyBuilderField = {
 		<my-builder-fields class="fields-nested"
 			v-if="!isTemplate && isContainer"
 			@column-id-show="(...args) => $emit('column-id-show',...args)"
-			@field-counter-set="$emit('field-counter-set',$event)"
 			@field-id-show="(...args) => $emit('field-id-show',...args)"
 			@field-remove="$emit('field-remove',$event)"
 			@field-move-store="$emit('field-move-store',$event)"
@@ -221,7 +218,6 @@ let MyBuilderField = {
 			:columnIdShow="columnIdShow"
 			:dataFields="dataFields"
 			:entityIdMapRef="entityIdMapRef"
-			:fieldCounter="fieldCounter"
 			:fieldIdShow="fieldIdShow"
 			:fieldIdShowTab="fieldIdShowTab"
 			:fieldMoveList="fieldMoveList"
@@ -242,7 +238,6 @@ let MyBuilderField = {
 		columnIdShow:   { required:true },
 		dataFields:     { type:Array,   required:true },
 		entityIdMapRef: { type:Object,  required:true },
-		fieldCounter:   { type:Number,  required:true },
 		fieldIdShow:    { required:true },
 		fieldIdShowTab: { type:String,  required:true },
 		fieldMoveList:  { required:true },              
@@ -261,10 +256,7 @@ let MyBuilderField = {
 		showColumnsAll: { type:Boolean, required:true },
 		uiScale:        { type:Number,  required:true }
 	},
-	emits:[
-		'column-id-show','field-counter-set','field-id-show','field-move',
-		'field-move-store','field-property-set','field-remove'
-	],
+	emits:['column-id-show','field-id-show','field-move','field-move-store','field-property-set','field-remove'],
 	data() {
 		return {
 			tabIndex:0 // which tab index to show (tab fields)

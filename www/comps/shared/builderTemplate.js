@@ -2,6 +2,10 @@ import {getUuidV4}        from './crypto.js';
 import {getNilUuid}       from './generic.js';
 import {getQueryTemplate} from './query.js';
 import {
+	isAttributeBoolean,
+	isAttributeRelationship
+} from './attribute.js';
+import {
 	getTemplateArgs,
 	getTemplateFnc,
 	getTemplateReturn
@@ -55,6 +59,38 @@ export function getTemplateCollection(moduleId,name) {
 		columns:[],
 		query:getQueryTemplate(),
 		inHeader:[]
+	};
+};
+export function getTemplateCollectionConsumer() {
+	return {
+		id:getNilUuid(),
+		collectionId:null,
+		columnIdDisplay:null,
+		flags:[],
+		onMobile:false,
+		openForm:null
+	};
+};
+export function getTemplateColumn(attributeId,index,subQuery) {
+	return {
+		id:getUuidV4(),
+		attributeId:attributeId,
+		index:index,
+		batch:null,
+		basis:0,
+		length:0,
+		display:'default',
+		groupBy:false,
+		aggregator:null,
+		distincted:false,
+		subQuery:subQuery,
+		query:getQueryTemplate(),
+		hidden:false,
+		onMobile:true,
+		styles:['wrap'],
+		captions:{
+			columnTitle:{}
+		}
 	};
 };
 export function getTemplateDoc(moduleId,name) {
@@ -158,9 +194,240 @@ export function getTemplateDocField(content) {
 	}
 	return f;
 };
+export function getTemplateFieldButton() {
+	return {
+		id:getUuidV4(),
+		iconId:null,
+		jsFunctionId:null,
+		content:'button',
+		state:'default',
+		flags:[],
+		openForm:null,
+		onMobile:true,
+		captions:{
+			fieldTitle:{}
+		}
+	};
+};
+export function getTemplateFieldCalendar() {
+	return {
+		id:getUuidV4(),
+		iconId:null,
+		content:'calendar',
+		state:'default',
+		flags:[],
+		onMobile:true,
+		attributeIdDate0:null,
+		attributeIdDate1:null,
+		attributeIdColor:null,
+		indexDate0:null,
+		indexDate1:null,
+		indexColor:null,
+		gantt:false,
+		ganttSteps:null,
+		ics:false,
+		dateRange0:0,
+		dateRange1:0,
+		days:42,
+		daysToggle:true,
+		openForm:null,
+		query:getQueryTemplate(),
+		columns:[],
+		collections:[]
+	};
+};
+export function getTemplateFieldContainer() {
+	return {
+		id:getUuidV4(),
+		iconId:null,
+		content:'container',
+		state:'default',
+		flags:[],
+		onMobile:true,
+		fields:[],
+		direction:'column',
+		justifyContent:'flex-start',
+		alignItems:'stretch',
+		alignContent:'stretch',
+		wrap:false,
+		grow:1,
+		shrink:0,
+		basis:0,
+		perMin:50,
+		perMax:150
+	};
+};
+export function getTemplateFieldData(index,attribute,outsideIn,attributeIdNm) {
+	let field = {
+		id:getUuidV4(),
+		iconId:null,
+		content:'data',
+		state:'default',
+		flags:[],
+		onMobile:true,
+		attributeId:attribute.id,
+		attributeIdAlt:null, // altern. attribute (used for date period)
+		index:index,
+		presentation:'',
+		display:'default',
+		def:'',
+		defCollection:null,
+		min:null,
+		max:null,
+		regexCheck:null,
+		jsFunctionId:null,
+		captions:{
+			fieldTitle:{},
+			fieldHelp:{}
+		},
+		
+		// legacy
+		collectionIdDef:null,
+		columnIdDef:null
+	};
+	if(isAttributeBoolean(attribute.content))
+		field.def = 'true';
+
+	if(isAttributeRelationship(attribute.content)) {
+		field.attributeIdNm = attributeIdNm;
+		field.columns       = [];
+		field.query         = getQueryTemplate();
+		field.filterQuick   = false;
+		field.outsideIn     = outsideIn;
+		field.defPresetIds  = [];
+		field.openForm      = null;
+	}
+	return field;
+};
+export function getTemplateFieldGantt() {
+	return {
+		id:getUuidV4(),
+		iconId:null,
+		content:'calendar',
+		state:'default',
+		flags:[],
+		onMobile:true,
+		attributeIdDate0:null,
+		attributeIdDate1:null,
+		attributeIdColor:null,
+		indexDate0:null,
+		indexDate1:null,
+		indexColor:null,
+		gantt:true,
+		ganttSteps:'days',
+		ics:false,
+		dateRange0:0,
+		dateRange1:0,
+		days:42,
+		daysToggle:true,
+		openForm:null,
+		query:getQueryTemplate(),
+		columns:[],
+		collections:[]
+	};
+};
+export function getTemplateFieldChart() {
+	return {
+		id:getUuidV4(),
+		iconId:null,
+		content:'chart',
+		state:'default',
+		flags:[],
+		onMobile:true,
+		chartOption:JSON.stringify({
+			dataset:{
+				source:['filled by app'],
+				sourceHeader:false
+			},
+			legend: {
+				orient:'vertical',
+				left:'left',
+				type:'scroll'
+			},
+			series:[],
+			toolbox:{
+				feature:{
+					saveAsImage:{ show:true }
+				}
+			},
+			tooltip:{
+				trigger:'item'
+			},
+			xAxis:{
+				position:'bottom',
+				type:'category'
+			},
+			yAxis:{
+				position:'left',
+				type:'value'
+			}
+		},null,2),
+		query:getQueryTemplate(),
+		columns:[],
+		captions:{
+			fieldTitle:{}
+		}
+	};
+};
+export function getTemplateFieldHeader() {
+	return {
+		id:getUuidV4(),
+		iconId:null,
+		content:'header',
+		state:'default',
+		flags:[],
+		onMobile:true,
+		size:2,
+		captions:{
+			fieldTitle:{}
+		}
+	};
+};
+export function getTemplateFieldKanban() {
+	return {
+		id:getUuidV4(),
+		iconId:null,
+		content:'kanban',
+		state:'default',
+		flags:[],
+		onMobile:true,
+		columns:[],
+		collections:[],
+		relationIndexData:null,
+		relationIndexAxisX:null,
+		relationIndexAxisY:null,
+		attributeIdSort:null,
+		openForm:null,
+		query:getQueryTemplate()
+	};
+};
+export function getTemplateFieldList() {
+	return {
+		id:getUuidV4(),
+		iconId:null,
+		content:'list',
+		state:'default',
+		flags:[],
+		onMobile:true,
+		columns:[],
+		collections:[],
+		autoRenew:null,
+		csvExport:false,
+		csvImport:false,
+		filterQuick:false,
+		layout:'table',
+		openForm:null,
+		openFormBulk:null,
+		captions:{
+			fieldTitle:{}
+		},
+		query:getQueryTemplate(),
+		resultLimit:50
+	};
+};
 export function getTemplateFieldTabs() {
 	return {
-		id:'template_tabs',
+		id:getUuidV4(),
 		iconId:null,
 		content:'tabs',
 		state:'default',
@@ -169,14 +436,25 @@ export function getTemplateFieldTabs() {
 		captions:{
 			fieldTitle:{}
 		},
-		tabs:[{
-			id:getUuidV4(),
-			state:'default',
-			fields:[],
-			captions:{
-				tabTitle:{}
-			}
-		}]
+		tabs:[getTemplateTab()]
+	};
+};
+export function getTemplateFieldVariable() {
+	return {
+		id:getUuidV4(),
+		variableId:null,
+		jsFunctionId:null,
+		iconId:null,
+		content:'variable',
+		columns:[],
+		query:getQueryTemplate(),
+		state:'default',
+		flags:[],
+		onMobile:true,
+		captions:{
+			fieldTitle:{},
+			fieldHelp:{}
+		}
 	};
 };
 export function getTemplateForm(moduleId,name) {
@@ -305,6 +583,17 @@ export function getTemplateSearchBar(moduleId,name) {
 		openForm:null,
 		captions:{
 			searchBarTitle:{}
+		}
+	};
+};
+export function getTemplateTab() {
+	return {
+		id:getUuidV4(),
+		contentCounter:false,
+		state:'default',
+		fields:[],
+		captions:{
+			tabTitle:{}
 		}
 	};
 };

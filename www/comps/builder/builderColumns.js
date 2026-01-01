@@ -1,8 +1,7 @@
 import MyBuilderCaption     from './builderCaption.js';
 import {getItemTitleColumn} from '../shared/builder.js';
+import {getTemplateColumn}  from '../shared/builderTemplate.js';
 import {getFlexBasis}       from '../shared/form.js';
-import {getRandomInt}       from '../shared/generic.js';
-import {getQueryTemplate}   from '../shared/query.js';
 import {
 	getIndexAttributeId,
 	isAttributeRelationship
@@ -12,7 +11,7 @@ import {
 	getColumnTitleForLang
 } from '../shared/column.js';
 
-export let MyBuilderColumns = {
+export const MyBuilderColumns = {
 	name:'my-builder-columns',
 	components:{MyBuilderCaption},
 	template:`<draggable class="builder-column-batches" handle=".dragBatch" animation="100" itemKey="id"
@@ -213,7 +212,7 @@ export let MyBuilderColumns = {
 	}
 };
 
-export let MyBuilderColumnTemplates = {
+export const MyBuilderColumnTemplates = {
 	name:'my-builder-column-templates',
 	template:`<draggable class="builder-column-batches template" handle=".dragAnchor" animation="100" itemKey="id"
 		v-model="batches"
@@ -263,7 +262,7 @@ export let MyBuilderColumnTemplates = {
 						
 						out.push({
 							batch:null,
-							columns:[this.createColumn(join.index,atr.id,false)],
+							columns:[this.getTemplateColumn(atr.id,join.index,false)],
 							vertical:false
 						});
 					}
@@ -272,10 +271,9 @@ export let MyBuilderColumnTemplates = {
 				// add sub query column
 				out.push({
 					batch:null,
-					columns:[this.createColumn(0,null,true)],
+					columns:[this.getTemplateColumn(null,0,true)],
 					vertical:false
 				});
-				
 				return out;
 			},
 			set() {}
@@ -298,35 +296,7 @@ export let MyBuilderColumnTemplates = {
 		getColumnIcon,
 		getIndexAttributeId,
 		getItemTitleColumn,
-		getQueryTemplate,
-		getRandomInt,
-		isAttributeRelationship,
-		
-		createColumn(index,attributeId,subQuery) {
-			let id = !subQuery
-				? 'new_'+this.getIndexAttributeId(index,attributeId,false,null)
-				: 'new_sub_query' + this.getRandomInt(1,99999);
-			
-			return {
-				id:id,
-				attributeId:attributeId,
-				index:index,
-				batch:null,
-				basis:0,
-				length:0,
-				display:'default',
-				groupBy:false,
-				aggregator:null,
-				distincted:false,
-				subQuery:subQuery,
-				query:this.getQueryTemplate(),
-				hidden:false,
-				onMobile:true,
-				styles:['wrap'],
-				captions:{
-					columnTitle:{}
-				}
-			};
-		}
+		getTemplateColumn,
+		isAttributeRelationship
 	}
 };

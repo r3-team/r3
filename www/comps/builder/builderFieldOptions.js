@@ -3,13 +3,12 @@ import MyBuilderCollectionInput        from './builderCollectionInput.js';
 import MyBuilderIconInput              from './builderIconInput.js';
 import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
 import MyCodeEditor                    from '../codeEditor.js';
-import {getCollectionConsumerTemplate} from '../shared/collection.js';
+import {openLink}                      from '../shared/generic.js';
 import {getJoinIndexMap}               from '../shared/query.js';
 import {
-	getNilUuid,
-	getRandomInt,
-	openLink
-} from '../shared/generic.js';
+	getTemplateCollectionConsumer,
+	getTemplateTab
+} from '../shared/builderTemplate.js';
 import {
 	getDependentModules,
 	getItemTitle,
@@ -1467,15 +1466,14 @@ let MyBuilderFieldOptions = {
 	methods:{
 		// externals
 		getAttributeIcon,
-		getCollectionConsumerTemplate,
 		getDependentModules,
 		getDetailsFromIndexAttributeId,
 		getIndexAttributeId,
 		getItemTitle,
 		getItemTitlePath,
 		getJoinIndexMap,
-		getNilUuid,
-		getRandomInt,
+		getTemplateCollectionConsumer,
+		getTemplateTab,
 		isAttributeBoolean,
 		isAttributeFiles,
 		isAttributeInteger,
@@ -1487,7 +1485,7 @@ let MyBuilderFieldOptions = {
 		// actions
 		collectionAdd() {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
-			v.push(this.getCollectionConsumerTemplate());
+			v.push(this.getTemplateCollectionConsumer());
 			this.set('collections',v);
 		},
 		collectionRemove(i) {
@@ -1579,17 +1577,9 @@ let MyBuilderFieldOptions = {
 				image:'question.png'
 			});
 		},
-		tabAdd(i) {
+		tabAdd() {
 			let v = JSON.parse(JSON.stringify(this.field.tabs));
-			v.push({
-				id:'new_tab' + this.getRandomInt(1,99999),
-				contentCounter:false,
-				state:'default',
-				fields:[],
-				captions:{
-					tabTitle:{}
-				}
-			});
+			v.push(this.getTemplateTab());
 			this.set('tabs',v);
 		}
 	}

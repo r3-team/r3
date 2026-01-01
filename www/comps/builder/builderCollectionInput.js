@@ -1,5 +1,5 @@
 import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
-import {getCollectionConsumerTemplate} from '../shared/collection.js';
+import {getTemplateCollectionConsumer} from '../shared/builderTemplate.js';
 import {
 	getDependentModules,
 	getItemTitleColumn
@@ -121,7 +121,7 @@ let MyBuilderCollectionInput = {
 			get() {
 				return this.consumer !== null
 					? JSON.parse(JSON.stringify(this.consumer))
-					: this.getCollectionConsumerTemplate();
+					: this.getTemplateCollectionConsumer();
 			}
 		},
 		collectionIdInput:{
@@ -152,9 +152,9 @@ let MyBuilderCollectionInput = {
 	},
 	methods:{
 		// externals
-		getCollectionConsumerTemplate,
 		getDependentModules,
 		getItemTitleColumn,
+		getTemplateCollectionConsumer,
 		
 		// actions
 		set(name,value) {

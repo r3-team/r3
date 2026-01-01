@@ -54,18 +54,17 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 	return tabs, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, position int, tab types.Tab) (uuid.UUID, error) {
+func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, position int, tab types.Tab) error {
 	if !slices.Contains(schema.DbAssignedTab, entity) {
-		return tab.Id, errors.New("bad entity")
+		return errors.New("bad entity")
 	}
-
 	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		INSERT INTO app.tab (id, %s_id, position, content_counter, state)
 		VALUES ($1,$2,$3,$4,$5)
 		ON CONFLICT (id)
 		DO UPDATE SET position = $3, content_counter = $4, state = $5
 	`, entity), tab.Id, entityId, position, tab.ContentCounter, tab.State); err != nil {
-		return tab.Id, err
+		return err
 	}
-	return tab.Id, caption.Set_tx(ctx, tx, tab.Id, tab.Captions)
+	return caption.Set_tx(ctx, tx, tab.Id, tab.Captions)
 }

@@ -1,5 +1,4 @@
-import MyStore               from '../../stores/store.js';
-import {getNilUuid}          from './generic.js';
+import MyStore from '../../stores/store.js';
 import {
 	getColumnsProcessed,
 	getColumnTitle
@@ -14,16 +13,6 @@ import {
 // a collection is an array of records
 // each record is an array of attribute values, retrieved and ordered following the collection columns
 
-export function getCollectionConsumerTemplate() {
-	return {
-		id:getNilUuid(),
-		collectionId:null,
-		columnIdDisplay:null,
-		flags:[],
-		onMobile:false,
-		openForm:null
-	};
-};
 export function getCollectionColumnIndex(collectionId,columnId) {
 	const colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
 	for(let i = 0, j = colSchema.columns.length; i < j; i++) {

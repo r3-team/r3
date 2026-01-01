@@ -4,6 +4,7 @@ import MyBuilderIconInput     from './builderIconInput.js';
 import MyBuilderOpenFormInput from './builderOpenFormInput.js';
 import MyBuilderQuery         from './builderQuery.js';
 import MyTabs                 from '../tabs.js';
+import {copyValueDialog}      from '../shared/generic.js';
 import {
 	getItemTitleColumn,
 	getSqlPreview
@@ -12,10 +13,6 @@ import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
 } from './builderColumns.js';
-import {
-	copyValueDialog,
-	getNilUuid
-} from '../shared/generic.js';
 import {
 	getIsContentInAnyFilter,
 	getJoinIndexMap
@@ -307,7 +304,6 @@ const MyBuilderSearchBar = {
 		getIsContentInAnyFilter,
 		getItemTitleColumn,
 		getJoinIndexMap,
-		getNilUuid,
 		getSqlPreview,
 		
 		// actions
@@ -338,16 +334,6 @@ const MyBuilderSearchBar = {
 			
 			if(this.columnIdShow !== null)
 				this.tabTarget = 'content';
-		},
-		
-		// helpers
-		replaceBuilderId(columns) {
-			for(let i = 0, j = columns.length; i < j; i++) {
-				
-				if(columns[i].id.startsWith('new_'))
-					columns[i].id = this.getNilUuid();
-			}
-			return columns;
 		},
 		
 		// backend calls
@@ -381,9 +367,7 @@ const MyBuilderSearchBar = {
 					moduleId:this.searchBar.moduleId,
 					iconId:this.iconId,
 					name:this.name,
-					columns:this.replaceBuilderId(
-						JSON.parse(JSON.stringify(this.columns))
-					),
+					columns:this.columns,
 					query:this.query,
 					captions:this.captions,
 					openForm:this.openForm
