@@ -263,7 +263,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		}
 		log.Info(log.ContextTransfer, fmt.Sprintf("set relation %s", e.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, relation.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, relation.Set_tx(ctx, tx, e, false), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -285,7 +285,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 			}
 			log.Info(log.ContextTransfer, fmt.Sprintf("set PK attribute %s", e.Id))
 
-			if err := importCheckResultAndApply(ctx, tx, attribute.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+			if err := importCheckResultAndApply(ctx, tx, attribute.Set_tx(ctx, tx, e, false), e.Id, idMapSkipped); err != nil {
 				return err
 			}
 		}
@@ -307,7 +307,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 			}
 			log.Info(log.ContextTransfer, fmt.Sprintf("set attribute %s", e.Id))
 
-			if err := importCheckResultAndApply(ctx, tx, attribute.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+			if err := importCheckResultAndApply(ctx, tx, attribute.Set_tx(ctx, tx, e, false), e.Id, idMapSkipped); err != nil {
 				return err
 			}
 		}
@@ -567,16 +567,12 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 			// if preset itself is unprotected, we just update the schema
 			if lastRun && !e.Protected {
 				log.Info(log.ContextTransfer, fmt.Sprintf("import failed to create or update unprotected preset '%s' until last loop, it will be ignored", e.Id))
-				if err := importCheckResultAndApply(ctx, tx, preset.Set_tx(ctx, tx, e.RelationId,
-					e.Id, e.Name, e.Protected, true, e.Values), e.Id, idMapSkipped); err != nil {
+				if err := importCheckResultAndApply(ctx, tx, preset.Set_tx(ctx, tx, e, true), e.Id, idMapSkipped); err != nil {
 					return err
 				}
 				continue
 			}
-
-			if err := importCheckResultAndApply(ctx, tx, preset.Set_tx(ctx, tx, e.RelationId,
-				e.Id, e.Name, e.Protected, false, e.Values), e.Id, idMapSkipped); err != nil {
-
+			if err := importCheckResultAndApply(ctx, tx, preset.Set_tx(ctx, tx, e, false), e.Id, idMapSkipped); err != nil {
 				return err
 			}
 		}

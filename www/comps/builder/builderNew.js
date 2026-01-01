@@ -13,11 +13,6 @@ import {
 	getTemplateVariable,
 	getTemplateWidget
 } from '../shared/builderTemplate.js';
-import {
-	getTemplateArgs,
-	getTemplateFnc,
-	getTemplateReturn
-} from '../shared/templates.js';
 export {MyBuilderNew as default};
 
 const MyBuilderNew = {
@@ -279,10 +274,8 @@ const MyBuilderNew = {
 	methods:{
 		// externals
 		getTemplateApi,
-		getTemplateArgs,
 		getTemplateCollection,
 		getTemplateDoc,
-		getTemplateFnc,
 		getTemplateForm,
 		getTemplateJsFunction,
 		getTemplateModule,
@@ -292,7 +285,6 @@ const MyBuilderNew = {
 		getTemplateSearchBar,
 		getTemplateVariable,
 		getTemplateWidget,
-		getTemplateReturn,
 		
 		// actions
 		close() { this.$emit('close'); },

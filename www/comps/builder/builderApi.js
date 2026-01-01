@@ -663,7 +663,7 @@ const MyBuilderApi = {
 		},
 		
 		// simple
-		api:   (s) => typeof s.apiIdMap[s.id] === 'undefined' ? false : s.apiIdMap[s.id],
+		api:   (s) => s.apiIdMap[s.id] === undefined ? false : s.apiIdMap[s.id],
 		module:(s) => s.moduleIdMap[s.api.moduleId],
 		
 		// stores

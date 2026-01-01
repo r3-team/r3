@@ -31,7 +31,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	}
 
 	// delete protected preset records if they exist
-	// protected records are system-relevant and are controlled by the module author, they decided when they are deleted
+	// protected records are system-relevant and are controlled by the module author, they decide when they are deleted
 	// non-protected records are optional and can be controlled by the instance users, they might want to keep them
 	if protected && recordId != 0 {
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
@@ -53,8 +53,6 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
 func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Preset, error) {
 
-	presets := make([]types.Preset, 0)
-
 	rows, err := tx.Query(ctx, `
 		SELECT id, name, protected
 		FROM app.preset
@@ -62,24 +60,25 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Prese
 		ORDER BY name ASC
 	`, relationId)
 	if err != nil {
-		return presets, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	presets := make([]types.Preset, 0)
 	for rows.Next() {
 		var p types.Preset
 		if err := rows.Scan(&p.Id, &p.Name, &p.Protected); err != nil {
-			return presets, err
+			return nil, err
 		}
 		p.RelationId = relationId
 		presets = append(presets, p)
 	}
+	rows.Close()
 
-	// get preset values
 	for i, p := range presets {
 		presets[i].Values, err = getValues_tx(ctx, tx, p.Id)
 		if err != nil {
-			return presets, err
+			return nil, err
 		}
 	}
 	return presets, nil
@@ -89,51 +88,44 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Prese
 // presets are stored in the schema but also created in the instance
 // doing anything in the instance is dangerous as the instance state is fickle
 // depending on the protection setting of the preset, not every preset record must be created/updated in the instance
-func Set_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
-	protected bool, onlySchema bool, values []types.PresetValue) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, preset types.Preset, onlySchema bool) error {
 
-	if len(values) == 0 {
+	if len(preset.Values) == 0 {
 		return errors.New("cannot set preset with zero values")
 	}
 
-	modName, relName, err := schema.GetRelationNamesById_tx(ctx, tx, relationId)
+	modName, relName, err := schema.GetRelationNamesById_tx(ctx, tx, preset.RelationId)
 	if err != nil {
 		return err
 	}
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &id, schema.DbPreset, "id")
+	known, err := schema.CheckId_tx(ctx, tx, preset.Id, schema.DbPreset, "id")
 	if err != nil {
 		return err
 	}
 
-	if known {
-		if _, err := tx.Exec(ctx, `
-			UPDATE app.preset
-			SET name = $1, protected = $2
-			WHERE id = $3
-		`, name, protected, id); err != nil {
-			return err
-		}
-	} else {
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.preset (id, relation_id, name, protected)
-			VALUES ($1,$2,$3,$4)
-		`, id, relationId, name, protected); err != nil {
-			return err
-		}
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.preset (id, relation_id, name, protected)
+		VALUES ($1,$2,$3,$4)
+		ON CONFLICT (id)
+		DO UPDATE SET name = $3, protected = $4
+	`, preset.Id, preset.RelationId, preset.Name, preset.Protected); err != nil {
+		return err
+	}
 
+	if !known {
 		// instance data reference
 		// connects preset from schema to record from instance
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO instance.preset_record (preset_id, record_id_wofk)
 			VALUES ($1,0)
-		`, id); err != nil {
+		`, preset.Id); err != nil {
 			return err
 		}
 	}
 
 	// set new preset values
-	if err := setValues_tx(ctx, tx, relationId, id, values); err != nil {
+	if err := setValues_tx(ctx, tx, preset.RelationId, preset.Id, preset.Values); err != nil {
 		return err
 	}
 
@@ -143,7 +135,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, 
 	// sometimes unprotected presets cannot be created/updated due to constraints (like unique)
 	//  in this case, it does not matter how often we try - we however still need to update the schema, so we return with nil
 	// protected presets must always be created to protect the application logic - if this fails, the transfer fails
-	if !protected && onlySchema {
+	if !preset.Protected && onlySchema {
 		return nil
 	}
 
@@ -161,23 +153,23 @@ func Set_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, 
 		)
 		FROM instance.preset_record
 		WHERE preset_id = $1
-	`, fullRelName, schema.PkName), id).Scan(&recordId, &recordExists); err != nil && err != pgx.ErrNoRows {
+	`, fullRelName, schema.PkName), preset.Id).Scan(&recordId, &recordExists); err != nil && err != pgx.ErrNoRows {
 		return err
 	}
 	recordExisted := recordId != 0
 
 	if recordExists {
 		// update preset record if available
-		if err := setRecord_tx(ctx, tx, id, recordId, values, fullRelName); err != nil {
+		if err := setRecord_tx(ctx, tx, preset.Id, recordId, preset.Values, fullRelName); err != nil {
 			return err
 		}
 
-	} else if !recordExisted || protected {
+	} else if !recordExisted || preset.Protected {
 		// create preset record if
 		// * it did not exist before or
 		// * it did exist, but not anymore and is currently a protected preset
 		//   (preset record was deleted before it was protected)
-		if err := setRecord_tx(ctx, tx, id, 0, values, fullRelName); err != nil {
+		if err := setRecord_tx(ctx, tx, preset.Id, 0, preset.Values, fullRelName); err != nil {
 			return err
 		}
 	}
@@ -264,7 +256,7 @@ func setRecord_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID, recordId i
 
 	sqlRefs := make([]string, 0)
 	sqlNames := make([]string, 0)
-	sqlValues := make([]interface{}, 0)
+	sqlValues := make([]any, 0)
 	isNew := recordId == 0
 
 	// collect preset record values

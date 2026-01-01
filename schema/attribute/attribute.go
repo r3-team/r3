@@ -67,7 +67,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Attri
 	var onUpdateNull pgtype.Text
 	var onDeleteNull pgtype.Text
 
-	attributes := make([]types.Attribute, 0)
 	rows, err := tx.Query(ctx, `
 		SELECT id, relationship_id, icon_id, name, content, content_use,
 			length, length_fract, nullable, encrypted, def, on_update, on_delete
@@ -76,34 +75,36 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.Attri
 		ORDER BY CASE WHEN name = 'id' THEN 0 END, name ASC
 	`, relationId)
 	if err != nil {
-		return attributes, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	attributes := make([]types.Attribute, 0)
 	for rows.Next() {
 		var atr types.Attribute
 		if err := rows.Scan(&atr.Id, &atr.RelationshipId, &atr.IconId, &atr.Name,
 			&atr.Content, &atr.ContentUse, &atr.Length, &atr.LengthFract, &atr.Nullable,
 			&atr.Encrypted, &atr.Def, &onUpdateNull, &onDeleteNull); err != nil {
 
-			return attributes, err
+			return nil, err
 		}
 		atr.OnUpdate = onUpdateNull.String
 		atr.OnDelete = onDeleteNull.String
 		atr.RelationId = relationId
 		attributes = append(attributes, atr)
 	}
+	rows.Close()
 
 	for i, atr := range attributes {
 		attributes[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbAttribute, atr.Id, []string{"attributeTitle"})
 		if err != nil {
-			return attributes, err
+			return nil, err
 		}
 	}
 	return attributes, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute, fromLocal bool) error {
 
 	if err := check.DbIdentifier(atr.Name); err != nil {
 		return err
@@ -131,13 +132,13 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute) error {
 		return err
 	}
 
-	isNew := atr.Id == uuid.Nil
 	isRel := schema.IsContentRelationship(atr.Content)
 	isFiles := schema.IsContentFiles(atr.Content)
-	known, err := schema.CheckCreateId_tx(ctx, tx, &atr.Id, schema.DbAttribute, "id")
+	known, err := schema.CheckId_tx(ctx, tx, atr.Id, schema.DbAttribute, "id")
 	if err != nil {
 		return err
 	}
+	isNew := fromLocal && !known
 
 	// prepare onUpdate / onDelete values
 	var onUpdateNull = pgtype.Text{}
@@ -165,8 +166,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute) error {
 		var onDeleteEx pgtype.Text
 		var relationshipIdEx pgtype.UUID
 		if err := tx.QueryRow(ctx, `
-			SELECT name, content, length, length_fract, nullable,
-				def, on_update, on_delete, relationship_id
+			SELECT name, content, length, length_fract, nullable, def, on_update, on_delete, relationship_id
 			FROM app.attribute
 			WHERE id = $1
 		`, atr.Id).Scan(&nameEx, &contentEx, &lengthEx, &lengthFractEx, &nullableEx,
@@ -187,22 +187,16 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute) error {
 		contentUpdateOk := false
 		switch contentEx {
 
-		case "integer": // keep integer or upgrade to bigint
-			fallthrough
-		case "bigint": // keep bigint or downgrade to integer
+		case "integer", "bigint": // keep integer/bigint or downgrade/upgrade
 			contentUpdateOk = slices.Contains([]string{"integer", "bigint"}, atr.Content)
 
 		case "numeric": // keep numeric
 			contentUpdateOk = atr.Content == "numeric"
 
-		case "real": // keep real or upgrade to double
-			fallthrough
-		case "double precision": // keep double or downgrade to real
+		case "real", "double precision": // keep real/double or downgrade/upgrade
 			contentUpdateOk = slices.Contains([]string{"real", "double precision"}, atr.Content)
 
-		case "varchar": // keep varchar or upgrade to text
-			fallthrough
-		case "text": // keep text or downgrade to varchar
+		case "varchar", "text": // keep varchar/text or downgrade/upgrade
 			contentUpdateOk = slices.Contains([]string{"varchar", "text"}, atr.Content)
 
 		case "boolean": // keep boolean
@@ -214,9 +208,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute) error {
 		case "uuid": // keep UUID
 			contentUpdateOk = atr.Content == "uuid"
 
-		case "1:1": // keep 1:1 or switch to n:1
-			fallthrough
-		case "n:1": // keep n:1 or switch to 1:1
+		case "1:1", "n:1": // keep 1:1/n:1 or switch between
 			contentUpdateOk = slices.Contains([]string{"1:1", "n:1"}, atr.Content)
 
 		case "files": // keep files
@@ -389,10 +381,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute) error {
 			}
 
 			// add attribute to relation
-			if _, err := tx.Exec(ctx, fmt.Sprintf(`
-				ALTER TABLE "%s"."%s" 
-				ADD COLUMN "%s" %s %s %s
-			`, moduleName, relationName, atr.Name, columnDef, nullableDef, defaultDef)); err != nil {
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`ALTER TABLE "%s"."%s" ADD COLUMN "%s" %s %s %s`,
+				moduleName, relationName, atr.Name, columnDef, nullableDef, defaultDef)); err != nil {
+
 				return err
 			}
 		}
@@ -465,10 +456,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, atr types.Attribute) error {
 				return err
 			}
 			if isNew {
-				// add automatic FK index for new attributes
-				if err := pgIndex.SetAutoFkiForAttribute_tx(ctx, tx, atr.RelationId,
-					atr.Id, (atr.Content == "1:1")); err != nil {
-
+				// add automatic FK index for new relationship attributes
+				if err := pgIndex.SetAutoFkiForAttribute_tx(ctx, tx, atr.RelationId, atr.Id, atr.Content == "1:1"); err != nil {
 					return err
 				}
 			}
@@ -500,10 +489,9 @@ func setName_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, name string, ignor
 
 	if nameEx != name {
 		if !isFiles {
-			if _, err := tx.Exec(ctx, fmt.Sprintf(`
-				ALTER TABLE "%s"."%s"
-				RENAME COLUMN "%s" TO "%s"
-			`, moduleName, relationName, nameEx, name)); err != nil {
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`ALTER TABLE "%s"."%s" RENAME COLUMN "%s" TO "%s"`,
+				moduleName, relationName, nameEx, name)); err != nil {
+
 				return err
 			}
 		}

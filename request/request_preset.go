@@ -10,23 +10,18 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func PresetDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
-	var req struct {
-		Id uuid.UUID `json:"id"`
-	}
-
+func PresetDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, preset.Del_tx(ctx, tx, req.Id)
+	return nil, preset.Del_tx(ctx, tx, req)
 }
 
-func PresetSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
+func PresetSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req types.Preset
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, preset.Set_tx(ctx, tx, req.RelationId, req.Id, req.Name, req.Protected, false, req.Values)
+	return nil, preset.Set_tx(ctx, tx, req, false)
 }

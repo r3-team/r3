@@ -10,30 +10,26 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func AttributeDelCheck_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-	var req struct {
-		Id uuid.UUID `json:"id"`
-	}
+func AttributeDelCheck_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return attribute.DelCheck_tx(ctx, tx, req.Id)
+	return attribute.DelCheck_tx(ctx, tx, req)
 }
 
-func AttributeDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-	var req struct {
-		Id uuid.UUID `json:"id"`
-	}
+func AttributeDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, attribute.Del_tx(ctx, tx, req.Id)
+	return nil, attribute.Del_tx(ctx, tx, req)
 }
 
-func AttributeSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func AttributeSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req types.Attribute
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, attribute.Set_tx(ctx, tx, req)
+	return nil, attribute.Set_tx(ctx, tx, req, true)
 }

@@ -1,6 +1,11 @@
 import {getUuidV4}        from './crypto.js';
 import {getNilUuid}       from './generic.js';
 import {getQueryTemplate} from './query.js';
+import {
+	getTemplateArgs,
+	getTemplateFnc,
+	getTemplateReturn
+} from './templates.js';
 
 export function getTemplateApi(moduleId,name) {
 	return {
@@ -17,6 +22,28 @@ export function getTemplateApi(moduleId,name) {
 		limitMax:1000,
 		verboseDef:true,
 		version:1
+	};
+};
+export function getTemplateAttribute(moduleId,relationId) {
+	return {
+		id:getUuidV4(),
+		moduleId:moduleId,
+		relationId:relationId,
+		relationshipId:null,
+		iconId:null,
+		content:'text',
+		contentUse:'default',
+		length:0,
+		lengthFract:0,
+		name:'',
+		nullable:true,
+		encrypted:false,
+		def:'',
+		onUpdate:'NO ACTION',
+		onDelete:'NO ACTION',
+		captions:{
+			attributeTitle:{}
+		}
 	};
 };
 export function getTemplateCollection(moduleId,name) {
@@ -131,6 +158,27 @@ export function getTemplateDocField(content) {
 	}
 	return f;
 };
+export function getTemplateFieldTabs() {
+	return {
+		id:'template_tabs',
+		iconId:null,
+		content:'tabs',
+		state:'default',
+		flags:[],
+		onMobile:true,
+		captions:{
+			fieldTitle:{}
+		},
+		tabs:[{
+			id:getUuidV4(),
+			state:'default',
+			fields:[],
+			captions:{
+				tabTitle:{}
+			}
+		}]
+	};
+};
 export function getTemplateForm(moduleId,name) {
 	return {
 		id:getNilUuid(),
@@ -194,9 +242,9 @@ export function getTemplatePgFunction(moduleId,name,template,isTrigger) {
 		id:getNilUuid(),
 		moduleId:moduleId,
 		name:name,
-		codeArgs:this.getTemplateArgs(template),
-		codeFunction:this.getTemplateFnc(template,isTrigger),
-		codeReturns:this.getTemplateReturn(isTrigger),
+		codeArgs:getTemplateArgs(template),
+		codeFunction:getTemplateFnc(template,isTrigger),
+		codeReturns:getTemplateReturn(isTrigger),
 		isFrontendExec:false,
 		isLoginSync:template === 'loginSync',
 		isTrigger:isTrigger,
@@ -208,9 +256,18 @@ export function getTemplatePgFunction(moduleId,name,template,isTrigger) {
 		}
 	};
 };
+export function getTemplatePreset(relationId) {
+	return {
+		id:getUuidV4(),
+		name:'',
+		relationId:relationId,
+		protected:true,
+		values:[]
+	};
+};
 export function getTemplateRelation(moduleId,name,encryption) {
 	return {
-		id:getNilUuid(),
+		id:getUuidV4(),
 		moduleId:moduleId,
 		name:name,
 		comment:null,
@@ -222,7 +279,7 @@ export function getTemplateRelation(moduleId,name,encryption) {
 };
 export function getTemplateRole(moduleId,name) {
 	return {
-		id:getNilUuid(),
+		id:getUuidV4(),
 		moduleId:moduleId,
 		content:'user',
 		name:name,
@@ -239,7 +296,7 @@ export function getTemplateRole(moduleId,name) {
 };
 export function getTemplateSearchBar(moduleId,name) {
 	return {
-		id:getNilUuid(),
+		id:getUuidV4(),
 		moduleId:moduleId,
 		iconId:null,
 		name:name,
@@ -253,7 +310,7 @@ export function getTemplateSearchBar(moduleId,name) {
 };
 export function getTemplateVariable(moduleId,formId,name) {
 	return {
-		id:getNilUuid(),
+		id:getUuidV4(),
 		moduleId:moduleId,
 		formId:formId,
 		name:name,
@@ -264,7 +321,7 @@ export function getTemplateVariable(moduleId,formId,name) {
 };
 export function getTemplateWidget(moduleId,name) {
 	return {
-		id:getNilUuid(),
+		id:getUuidV4(),
 		moduleId:moduleId,
 		formId:null,
 		size:1,

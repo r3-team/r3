@@ -171,6 +171,12 @@ var (
 	}
 )
 
+func CheckId_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity DbEntity, pkName string) (bool, error) {
+	var known bool
+	err := tx.QueryRow(ctx, fmt.Sprintf(`SELECT EXISTS(SELECT 1 FROM app.%s WHERE "%s" = $1)`, entity, pkName), id).Scan(&known)
+	return known, err
+}
+
 // checks the given ID
 // if nil, it is overwritten with a new one
 // if not nil, it is checked whether the ID is known already

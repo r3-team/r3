@@ -24,6 +24,9 @@ import {
 	getSqlPreview
 } from '../shared/builder.js';
 import {
+	getTemplateFieldTabs
+} from '../shared/builderTemplate.js';
+import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
 } from './builderColumns.js';
@@ -626,7 +629,7 @@ const MyBuilderForm = {
 				
 				// relation-independent fields
 				fields.push(this.createFieldContainer()); // container
-				fields.push(this.createFieldTabs());      // tabs
+				fields.push(this.getTemplateFieldTabs()); // tabs
 				fields.push(this.createFieldList());      // list
 				fields.push(this.createFieldCalendar());  // calendar
 				fields.push(this.createFieldGantt());     // Gantt
@@ -754,6 +757,7 @@ const MyBuilderForm = {
 		getNilUuid,
 		getQueryTemplate,
 		getSqlPreview,
+		getTemplateFieldTabs,
 		isAttributeBoolean,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
@@ -1059,27 +1063,6 @@ const MyBuilderForm = {
 				},
 				query:this.getQueryTemplate(),
 				resultLimit:50
-			};
-		},
-		createFieldTabs() {
-			return {
-				id:'template_tabs',
-				iconId:null,
-				content:'tabs',
-				state:'default',
-				flags:[],
-				onMobile:true,
-				captions:{
-					fieldTitle:{}
-				},
-				tabs:[{
-					id:this.getNilUuid(),
-					state:'default',
-					fields:[],
-					captions:{
-						tabTitle:{}
-					}
-				}]
 			};
 		},
 		createFieldVariable() {

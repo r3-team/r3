@@ -24,7 +24,6 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 }
 
 func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Role, error) {
-	roles := make([]types.Role, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT r.id, r.name, r.content, r.assignable, ARRAY(
@@ -37,30 +36,32 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Role, e
 		ORDER BY r.content = 'everyone' DESC, r.name ASC
 	`, moduleId)
 	if err != nil {
-		return roles, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	roles := make([]types.Role, 0)
 	for rows.Next() {
 		var r types.Role
 		if err := rows.Scan(&r.Id, &r.Name, &r.Content, &r.Assignable, &r.ChildrenIds); err != nil {
-			return roles, err
+			return nil, err
 		}
 		r.ModuleId = moduleId
 		roles = append(roles, r)
 	}
+	rows.Close()
 
 	// get access & captions
 	for i, r := range roles {
 
 		r, err = getAccess_tx(ctx, tx, r)
 		if err != nil {
-			return roles, err
+			return nil, err
 		}
 
 		r.Captions, err = caption.Get_tx(ctx, tx, schema.DbRole, r.Id, []string{"roleTitle", "roleDesc"})
 		if err != nil {
-			return roles, err
+			return nil, err
 		}
 		roles[i] = r
 	}
@@ -135,27 +136,14 @@ func Set_tx(ctx context.Context, tx pgx.Tx, role types.Role) error {
 	// compatibility fix: missing role content <3.0
 	role = compatible.FixMissingRoleContent(role)
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &role.Id, schema.DbRole, "id")
-	if err != nil {
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.role (id, module_id, name, content, assignable)
+		VALUES ($1,$2,$3,$4,$5)
+		ON CONFLICT (id)
+		DO UPDATE SET name = $3, content = $4, assignable = $5
+		WHERE role.content <> 'everyone' -- cannot update default role
+	`, role.Id, role.ModuleId, role.Name, role.Content, role.Assignable); err != nil {
 		return err
-	}
-
-	if known {
-		if _, err := tx.Exec(ctx, `
-			UPDATE app.role
-			SET name = $1, content = $2, assignable = $3
-			WHERE id = $4
-			AND content <> 'everyone' -- cannot update default role
-		`, role.Name, role.Content, role.Assignable, role.Id); err != nil {
-			return err
-		}
-	} else {
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.role (id, module_id, name, content, assignable)
-			VALUES ($1,$2,$3,$4,$5)
-		`, role.Id, role.ModuleId, role.Name, role.Content, role.Assignable); err != nil {
-			return err
-		}
 	}
 
 	// set children
@@ -222,8 +210,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, role types.Role) error {
 			return err
 		}
 	}
-
-	// set captions
 	return caption.Set_tx(ctx, tx, role.Id, role.Captions)
 }
 

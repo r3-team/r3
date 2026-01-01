@@ -4,7 +4,7 @@ import MyBuilderFormInput       from './builderFormInput.js';
 import {copyValueDialog}        from '../shared/generic.js';
 export {MyBuilderWidget as default};
 
-let MyBuilderWidget = {
+const MyBuilderWidget = {
 	name:'my-builder-widget',
 	components:{
 		MyBuilderCaption,

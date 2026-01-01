@@ -1,7 +1,8 @@
-import MyBuilderCaption      from './builderCaption.js';
-import MyBuilderIconInput    from './builderIconInput.js';
-import {getFieldMap}         from '../shared/form.js';
-import {copyValueDialog}     from '../shared/generic.js';
+import MyBuilderCaption       from './builderCaption.js';
+import MyBuilderIconInput     from './builderIconInput.js';
+import {getFieldMap}          from '../shared/form.js';
+import {copyValueDialog}      from '../shared/generic.js';
+import {getTemplateAttribute} from '../shared/builderTemplate.js';
 import {
 	getDependentModules,
 	getItemTitle
@@ -522,6 +523,7 @@ const MyBuilderAttribute = {
 		getDependentModules,
 		getFieldMap,
 		getItemTitle,
+		getTemplateAttribute,
 		isAttributeBoolean,
 		isAttributeFiles,
 		isAttributeFloat,
@@ -552,26 +554,7 @@ const MyBuilderAttribute = {
 		reset() {
 			this.values = this.attributeId !== null
 				? JSON.parse(JSON.stringify(this.attributeIdMap[this.attributeId]))
-				: {
-					id:null,
-					moduleId:this.relation.moduleId,
-					relationId:this.relation.id,
-					relationshipId:null,
-					iconId:null,
-					content:'text',
-					contentUse:'default',
-					length:0,
-					lengthFract:0,
-					name:'',
-					nullable:true,
-					encrypted:false,
-					def:'',
-					onUpdate:'NO ACTION',
-					onDelete:'NO ACTION',
-					captions:{
-						attributeTitle:{}
-					}
-				};
+				: this.getTemplateAttribute(this.relation.moduleId,this.relation.id);
 			
 			this.resetOrg();
 			
@@ -633,7 +616,7 @@ const MyBuilderAttribute = {
 			});
 		},
 		delCheck() {
-			ws.send('attribute','delCheck',{id:this.attributeId},true).then(
+			ws.send('attribute','delCheck',this.attributeId,true).then(
 				res => {
 					const noDependencies =
 						res.payload.apiIds.length         === 0 &&
@@ -703,7 +686,7 @@ const MyBuilderAttribute = {
 			);
 		},
 		del() {
-			ws.send('attribute','del',{id:this.attributeId},true).then(
+			ws.send('attribute','del',this.attributeId,true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.$emit('close');

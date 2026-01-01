@@ -72,7 +72,6 @@ func delPkSeq_tx(ctx context.Context, tx pgx.Tx, modName string, id uuid.UUID) e
 
 func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Relation, error) {
 
-	relations := make([]types.Relation, 0)
 	rows, err := tx.Query(ctx, `
 		SELECT id, name, comment, encryption, retention_count, retention_days, (
 			SELECT id
@@ -85,33 +84,33 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Relatio
 		ORDER BY name ASC
 	`, schema.PkName, moduleId)
 	if err != nil {
-		return relations, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	relations := make([]types.Relation, 0)
 	for rows.Next() {
 		var r types.Relation
-		if err := rows.Scan(&r.Id, &r.Name, &r.Comment, &r.Encryption,
-			&r.RetentionCount, &r.RetentionDays, &r.AttributeIdPk); err != nil {
-
-			return relations, err
+		if err := rows.Scan(&r.Id, &r.Name, &r.Comment, &r.Encryption, &r.RetentionCount, &r.RetentionDays, &r.AttributeIdPk); err != nil {
+			return nil, err
 		}
 		r.ModuleId = moduleId
 		r.Attributes = make([]types.Attribute, 0)
 		r.Triggers = make([]types.PgTrigger, 0)
 		relations = append(relations, r)
 	}
+	rows.Close()
 
 	for i, r := range relations {
 		relations[i].Policies, err = getPolicies_tx(ctx, tx, r.Id)
 		if err != nil {
-			return relations, err
+			return nil, err
 		}
 	}
 	return relations, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation) error {
+func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation, fromLocal bool) error {
 
 	if err := check.DbIdentifier(rel.Name); err != nil {
 		return err
@@ -122,8 +121,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation) error {
 		return err
 	}
 
-	isNew := rel.Id == uuid.Nil
-	known, err := schema.CheckCreateId_tx(ctx, tx, &rel.Id, schema.DbRelation, "id")
+	known, err := schema.CheckId_tx(ctx, tx, rel.Id, schema.DbRelation, "id")
 	if err != nil {
 		return err
 	}
@@ -145,10 +143,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation) error {
 
 		// if name changed, update relation and all affected entities
 		if nameEx != rel.Name {
-			if _, err := tx.Exec(ctx, fmt.Sprintf(`
-				ALTER TABLE "%s"."%s"
-				RENAME TO "%s"
-			`, moduleName, nameEx, rel.Name)); err != nil {
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`ALTER TABLE "%s"."%s" RENAME TO "%s"`, moduleName, nameEx, rel.Name)); err != nil {
 				return err
 			}
 
@@ -157,9 +152,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation) error {
 			}
 		}
 	} else {
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			CREATE TABLE "%s"."%s" ()
-		`, moduleName, rel.Name)); err != nil {
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`CREATE TABLE "%s"."%s" ()`, moduleName, rel.Name)); err != nil {
 			return err
 		}
 
@@ -168,14 +161,12 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation) error {
 			INSERT INTO app.relation (id, module_id, name, comment,
 				encryption, retention_count, retention_days)
 			VALUES ($1,$2,$3,$4,$5,$6,$7)
-		`, rel.Id, rel.ModuleId, rel.Name, rel.Comment, rel.Encryption,
-			rel.RetentionCount, rel.RetentionDays); err != nil {
-
+		`, rel.Id, rel.ModuleId, rel.Name, rel.Comment, rel.Encryption, rel.RetentionCount, rel.RetentionDays); err != nil {
 			return err
 		}
 
 		// create primary key attribute if relation is new (e. g. not imported or updated)
-		if isNew {
+		if fromLocal && !known {
 			if err := attribute.Set_tx(ctx, tx, types.Attribute{
 				Id:             uuid.Nil,
 				RelationId:     rel.Id,
@@ -191,7 +182,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation) error {
 				OnUpdate:       "",
 				OnDelete:       "",
 				Captions:       types.CaptionMap{},
-			}); err != nil {
+			}, fromLocal); err != nil {
 				return err
 			}
 		}

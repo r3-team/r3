@@ -769,7 +769,7 @@ const MyBuilderRelation = {
 			});
 		},
 		del() {
-			ws.send('relation','del',{id:this.relation.id},true).then(
+			ws.send('relation','del',this.relation.id,true).then(
 				() => {
 					this.$root.schemaReload(this.relation.moduleId);
 					this.$router.push('/builder/relations/'+this.relation.moduleId);

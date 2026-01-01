@@ -1,4 +1,5 @@
 import {getDependentModules} from '../shared/builder.js';
+import {getTemplatePreset}   from '../shared/builderTemplate.js';
 import {
 	isAttributeFiles,
 	isAttributeRelationship
@@ -235,6 +236,7 @@ const MyBuilderPreset = {
 		copyValueDialog,
 		getDependentModules,
 		getNilUuid,
+		getTemplatePreset,
 		isAttributeFiles,
 		isAttributeRelationship,
 		
@@ -320,13 +322,7 @@ const MyBuilderPreset = {
 		},
 		reset() {
 			if(this.id === null) {
-				this.values = {
-					id:null,
-					name:'',
-					relationId:this.relation.id,
-					protected:true,
-					values:[]
-				};
+				this.values = this.getTemplatePreset(this.relation.id);
 			}
 			else {
 				for(const p of this.relation.presets) {
@@ -354,8 +350,8 @@ const MyBuilderPreset = {
 				}]
 			});
 		},
-		del(rel) {
-			ws.send('preset','del',{id:this.id},true).then(
+		del() {
+			ws.send('preset','del',this.id,true).then(
 				this.closeReload,
 				this.$root.genericError
 			);

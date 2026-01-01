@@ -20,7 +20,6 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 }
 
 func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.SearchBar, error) {
-	bars := make([]types.SearchBar, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, icon_id, name
@@ -29,15 +28,17 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.SearchB
 		ORDER BY name ASC
 	`, moduleId)
 	if err != nil {
-		return bars, err
+		return nil, err
 	}
+	defer rows.Close()
 
+	bars := make([]types.SearchBar, 0)
 	for rows.Next() {
 		var b types.SearchBar
 		b.ModuleId = moduleId
 
 		if err := rows.Scan(&b.Id, &b.IconId, &b.Name); err != nil {
-			return bars, err
+			return nil, err
 		}
 		bars = append(bars, b)
 	}
@@ -46,19 +47,19 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.SearchB
 	for i, b := range bars {
 		b.Captions, err = caption.Get_tx(ctx, tx, schema.DbSearchBar, b.Id, []string{"searchBarTitle"})
 		if err != nil {
-			return bars, err
+			return nil, err
 		}
 		b.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbSearchBar, b.Id, pgtype.Text{})
 		if err != nil {
-			return bars, err
+			return nil, err
 		}
 		b.Query, err = query.Get_tx(ctx, tx, schema.DbSearchBar, b.Id, 0, 0, 0)
 		if err != nil {
-			return bars, err
+			return nil, err
 		}
 		b.Columns, err = column.Get_tx(ctx, tx, schema.DbSearchBar, b.Id)
 		if err != nil {
-			return bars, err
+			return nil, err
 		}
 		bars[i] = b
 	}
@@ -67,27 +68,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.SearchB
 
 func Set_tx(ctx context.Context, tx pgx.Tx, bar types.SearchBar) error {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &bar.Id, schema.DbSearchBar, "id")
-	if err != nil {
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.search_bar (id,module_id,icon_id,name)
+		VALUES ($1,$2,$3,$4)
+		ON CONFLICT (id)
+		DO UPDATE SET icon_id = $3, name = $4
+	`, bar.Id, bar.ModuleId, bar.IconId, bar.Name); err != nil {
 		return err
 	}
 
-	if known {
-		if _, err := tx.Exec(ctx, `
-			UPDATE app.search_bar
-			SET icon_id = $1, name = $2
-			WHERE id = $3
-		`, bar.IconId, bar.Name, bar.Id); err != nil {
-			return err
-		}
-	} else {
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.search_bar (id,icon_id,module_id,name)
-			VALUES ($1,$2,$3,$4)
-		`, bar.Id, bar.IconId, bar.ModuleId, bar.Name); err != nil {
-			return err
-		}
-	}
 	if err := caption.Set_tx(ctx, tx, bar.Id, bar.Captions); err != nil {
 		return err
 	}

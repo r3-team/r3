@@ -1,7 +1,7 @@
 import MyBuilderPreset from './builderPreset.js';
 export {MyBuilderPresets as default};
 
-let MyBuilderPresets = {
+const MyBuilderPresets = {
 	name:'my-builder-presets',
 	components:{MyBuilderPreset},
 	template:`<div class="generic-entry-list">
@@ -63,7 +63,6 @@ let MyBuilderPresets = {
 					items.push(v.protected ? `[${v.value}]` : v.value);
 			}
 			const line = items.join(', ');
-
 			return line.length < 50 ? line : `${line.substring(0,50)}...`;
 		}
 	}
