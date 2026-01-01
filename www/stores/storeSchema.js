@@ -48,8 +48,16 @@ const MyStoreSchema = {
 			};
 			const processFields = fields => {
 				for(let i = 0, j = fields.length; i < j; i++) {
-					if(typeof fields[i].query !== 'undefined')
+
+					if(fields[i].query !== undefined)
 						fields[i].query = getQueryTemplateIfNull(fields[i].query);
+
+					if(fields[i].columns !== undefined) {
+						for(let x = 0, y = fields[i].columns.length; x < y; x++) {
+							if(fields[i].columns[x].subQuery)
+								fields[i].columns[x].query = getQueryTemplateIfNull(fields[i].columns[x].query);
+						}
+					}
 					
 					switch(fields[i].content) {
 						case 'container': fields[i].fields = processFields(fields[i].fields); break;
