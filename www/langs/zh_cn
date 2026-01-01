@@ -2205,6 +2205,7 @@
 		"alignment": "Alignment",
 		"alignmentHor": {
 			"center": "center",
+			"justify": "justify",
 			"left": "left",
 			"right": "right"
 		},
@@ -2393,6 +2394,8 @@
 		"nothingSelected": "未选择任何内容",
 		"nothingThere": "没有结果可用",
 		"notice": "通知",
+		"numberSepDecimal": "小数分隔符",
+		"numberSepThousand": "千位分隔符",
 		"option": {
 			"aggArray": "数组",
 			"aggAvg": "平均值",
@@ -2405,6 +2408,14 @@
 			"aggSum": "求和",
 			"all": "全部",
 			"no": "否",
+			"numberSeparator": {
+				"apos": "撇号（'）",
+				"comma": "逗号（,）",
+				"dot": "点号（.）",
+				"mdot": "中间点（·）",
+				"none": "[no separator]",
+				"space": "Space ( )"
+			},
 			"size0": "最小",
 			"size1": "较小",
 			"size2": "默认",
@@ -2709,18 +2720,6 @@
 		"listRows": "列表行数",
 		"listSpaced": "较大",
 		"mobileScrollForm": "移动端：滚动整个表单",
-		"numberSepDecimal": "小数分隔符",
-		"numberSepThousand": "千位分隔符",
-		"option": {
-			"numberSeparator": {
-				"apos": "撇号（'）",
-				"comma": "逗号（,）",
-				"dot": "点号（.）",
-				"mdot": "中间点（·）",
-				"none": "[no separator]",
-				"space": "Space ( )"
-			}
-		},
 		"pageTitle": "设置",
 		"pattern": "背景图案",
 		"spacing": "间距",

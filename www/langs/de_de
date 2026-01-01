@@ -2205,6 +2205,7 @@
 		"alignment": "Ausrichtung",
 		"alignmentHor": {
 			"center": "mittig",
+			"justify": "Blocksatz",
 			"left": "links",
 			"right": "rechts"
 		},
@@ -2393,6 +2394,8 @@
 		"nothingSelected": "Keine Auswahl getroffen",
 		"nothingThere": "Keine Ergebnisse verfügbar",
 		"notice": "Hinweis",
+		"numberSepDecimal": "Dezimal-Trennzeichen",
+		"numberSepThousand": "Tausender-Trennzeichen",
 		"option": {
 			"aggArray": "Array",
 			"aggAvg": "Durchschnitt",
@@ -2405,6 +2408,14 @@
 			"aggSum": "Summe",
 			"all": "alle",
 			"no": "nein",
+			"numberSeparator": {
+				"apos": "Apostroph (')",
+				"comma": "Komma (,)",
+				"dot": "Punkt (.)",
+				"mdot": "Punkt, mittig (·)",
+				"none": "[kein Trennzeichen]",
+				"space": "Leerzeichen ( )"
+			},
 			"size0": "kleinste",
 			"size1": "klein",
 			"size2": "normal",
@@ -2709,18 +2720,6 @@
 		"listRows": "Listenzeilen",
 		"listSpaced": "Größer",
 		"mobileScrollForm": "Mobil: Gesamtes Formular scrollen",
-		"numberSepDecimal": "Dezimal-Trennzeichen",
-		"numberSepThousand": "Tausender-Trennzeichen",
-		"option": {
-			"numberSeparator": {
-				"apos": "Apostroph (')",
-				"comma": "Komma (,)",
-				"dot": "Punkt (.)",
-				"mdot": "Punkt, mittig (·)",
-				"none": "[kein Trennzeichen]",
-				"space": "Leerzeichen ( )"
-			}
-		},
 		"pageTitle": "Einstellungen",
 		"pattern": "Hintergrundmuster",
 		"spacing": "Abstände",

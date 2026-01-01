@@ -2205,6 +2205,7 @@
 		"alignment": "Alignment",
 		"alignmentHor": {
 			"center": "center",
+			"justify": "justify",
 			"left": "left",
 			"right": "right"
 		},
@@ -2393,6 +2394,8 @@
 		"nothingSelected": "Niente selezionato",
 		"nothingThere": "Nessun risultato disponibile",
 		"notice": "Avviso",
+		"numberSepDecimal": "Decimal separator",
+		"numberSepThousand": "Thousands separator",
 		"option": {
 			"aggArray": "vettore",
 			"aggAvg": "media",
@@ -2405,6 +2408,14 @@
 			"aggSum": "somma",
 			"all": "all",
 			"no": "no",
+			"numberSeparator": {
+				"apos": "Apostrophe (')",
+				"comma": "Comma (,)",
+				"dot": "Dot (.)",
+				"mdot": "Middle dot (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
+			},
 			"size0": "più piccolo",
 			"size1": "minore",
 			"size2": "predefinito",
@@ -2709,18 +2720,6 @@
 		"listRows": "List rows",
 		"listSpaced": "Larger",
 		"mobileScrollForm": "Mobile: Scroll entire form",
-		"numberSepDecimal": "Decimal separator",
-		"numberSepThousand": "Thousands separator",
-		"option": {
-			"numberSeparator": {
-				"apos": "Apostrophe (')",
-				"comma": "Comma (,)",
-				"dot": "Dot (.)",
-				"mdot": "Middle dot (·)",
-				"none": "[no separator]",
-				"space": "Space ( )"
-			}
-		},
 		"pageTitle": "Impostazioni",
 		"pattern": "Background pattern",
 		"spacing": "Spaziatura",

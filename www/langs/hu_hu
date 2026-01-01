@@ -2205,6 +2205,7 @@
 		"alignment": "Alignment",
 		"alignmentHor": {
 			"center": "center",
+			"justify": "justify",
 			"left": "left",
 			"right": "right"
 		},
@@ -2393,6 +2394,8 @@
 		"nothingSelected": "Nincs kiválasztva",
 		"nothingThere": "Nincs elérhető eredmény",
 		"notice": "Értesítés",
+		"numberSepDecimal": "Decimal separator",
+		"numberSepThousand": "Thousands separator",
 		"option": {
 			"aggArray": "Tömb",
 			"aggAvg": "Átlag",
@@ -2405,6 +2408,14 @@
 			"aggSum": "Összeg",
 			"all": "mind",
 			"no": "nem",
+			"numberSeparator": {
+				"apos": "Apostrophe (')",
+				"comma": "Comma (,)",
+				"dot": "Dot (.)",
+				"mdot": "Middle dot (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
+			},
 			"size0": "legkisebb",
 			"size1": "kicsi",
 			"size2": "normál",
@@ -2709,18 +2720,6 @@
 		"listRows": "List rows",
 		"listSpaced": "Larger",
 		"mobileScrollForm": "Mobil: Teljes űrlap görgetése",
-		"numberSepDecimal": "Decimal separator",
-		"numberSepThousand": "Thousands separator",
-		"option": {
-			"numberSeparator": {
-				"apos": "Apostrophe (')",
-				"comma": "Comma (,)",
-				"dot": "Dot (.)",
-				"mdot": "Middle dot (·)",
-				"none": "[no separator]",
-				"space": "Space ( )"
-			}
-		},
 		"pageTitle": "Beállítások",
 		"pattern": "Háttérminta",
 		"spacing": "Térköz",

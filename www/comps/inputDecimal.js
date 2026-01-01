@@ -10,12 +10,14 @@ export default {
 	template:`<input class="input input-decimal" inputmode="decimal" type="text"
 		@focus="focus"
 		@input="input"
+		:class="{ 'input-decimal-embedded':embedded }"
 		:disabled="readonly"
 		:placeholder="placeholder"
 		:value="getNumberAsText(modelValue)"
 	/>`,
 	props:{
-		allowNull : { type:Boolean, required:false, default:false },
+		allowNull:  { type:Boolean, required:false, default:false },
+		embedded:   { type:Boolean, required:false, default:false },
 		length:     { type:Number,  required:false, default:0 }, // length of integer + fraction, 0 if unrestricted
 		lengthFract:{ type:Number,  required:false, default:2 }, // length of fraction, if total length is defined 0 = no fract., otherwise 0 = unrestricted
 		modelValue: { required:true },

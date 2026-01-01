@@ -2205,6 +2205,7 @@
 		"alignment": "Alineación",
 		"alignmentHor": {
 			"center": "centro",
+			"justify": "justify",
 			"left": "izquierda",
 			"right": "derecha"
 		},
@@ -2393,6 +2394,8 @@
 		"nothingSelected": "Nada seleccionado",
 		"nothingThere": "No hay resultados disponibles",
 		"notice": "Aviso",
+		"numberSepDecimal": "Separador decimal",
+		"numberSepThousand": "Separador de miles",
 		"option": {
 			"aggArray": "array",
 			"aggAvg": "promedio",
@@ -2405,6 +2408,14 @@
 			"aggSum": "suma",
 			"all": "todos",
 			"no": "no",
+			"numberSeparator": {
+				"apos": "Apóstrofo (')",
+				"comma": "Coma (,)",
+				"dot": "Punto (.)",
+				"mdot": "Punto medio (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
+			},
 			"size0": "más pequeño",
 			"size1": "pequeño",
 			"size2": "predeterminado",
@@ -2709,18 +2720,6 @@
 		"listRows": "Filas de la lista",
 		"listSpaced": "Más grande",
 		"mobileScrollForm": "Móvil: Desplazar todo el formulario",
-		"numberSepDecimal": "Separador decimal",
-		"numberSepThousand": "Separador de miles",
-		"option": {
-			"numberSeparator": {
-				"apos": "Apóstrofo (')",
-				"comma": "Coma (,)",
-				"dot": "Punto (.)",
-				"mdot": "Punto medio (·)",
-				"none": "[no separator]",
-				"space": "Space ( )"
-			}
-		},
 		"pageTitle": "Configuraciones",
 		"pattern": "Patrón de fondo",
 		"spacing": "Espaciado",

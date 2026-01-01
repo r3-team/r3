@@ -2205,6 +2205,7 @@
 		"alignment": "Alignment",
 		"alignmentHor": {
 			"center": "center",
+			"justify": "justify",
 			"left": "left",
 			"right": "right"
 		},
@@ -2393,6 +2394,8 @@
 		"nothingSelected": "Nothing selected",
 		"nothingThere": "No results available",
 		"notice": "Notice",
+		"numberSepDecimal": "Decimal separator",
+		"numberSepThousand": "Thousands separator",
 		"option": {
 			"aggArray": "array",
 			"aggAvg": "average",
@@ -2405,6 +2408,14 @@
 			"aggSum": "sum",
 			"all": "all",
 			"no": "no",
+			"numberSeparator": {
+				"apos": "Apostrophe (')",
+				"comma": "Comma (,)",
+				"dot": "Dot (.)",
+				"mdot": "Middle dot (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
+			},
 			"size0": "smallest",
 			"size1": "small",
 			"size2": "default",
@@ -2709,18 +2720,6 @@
 		"listRows": "List rows",
 		"listSpaced": "Larger",
 		"mobileScrollForm": "Mobile: Scroll entire form",
-		"numberSepDecimal": "Decimal separator",
-		"numberSepThousand": "Thousands separator",
-		"option": {
-			"numberSeparator": {
-				"apos": "Apostrophe (')",
-				"comma": "Comma (,)",
-				"dot": "Dot (.)",
-				"mdot": "Middle dot (·)",
-				"none": "[no separator]",
-				"space": "Space ( )"
-			}
-		},
 		"pageTitle": "Settings",
 		"pattern": "Background pattern",
 		"spacing": "Spacing",

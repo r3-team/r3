@@ -127,11 +127,15 @@ const MyBuilderDoc = {
 
 							<tr><td colspan="2"><b>{{ capApp.fontSettings }}</b></td></tr>
 							<my-builder-doc-font
+								v-model:align="doc.font.align"
 								v-model:boolFalse="doc.font.boolFalse"
 								v-model:boolTrue="doc.font.boolTrue"
 								v-model:color="doc.font.color"
 								v-model:dateFormat="doc.font.dateFormat"
 								v-model:family="doc.font.family"
+								v-model:lineFactor="doc.font.lineFactor"
+								v-model:numberSepDec="doc.font.numberSepDec"
+								v-model:numberSepTho="doc.font.numberSepTho"
 								v-model:size="doc.font.size"
 								v-model:style="doc.font.style"
 								:readonly="readonly"

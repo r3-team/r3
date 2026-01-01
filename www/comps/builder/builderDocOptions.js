@@ -35,6 +35,44 @@ export const MyBuilderDocFont = {
 			</td>
 		</tr>
 		<tr>
+			<td>{{ capApp.size }}</td>
+			<td>
+				<my-input-decimal
+					@update:modelValue="$emit('update:size',$event)"
+					:length="4"
+					:lengthFract="2"
+					:modelValue="size"
+					:readonly="readonly"
+				/>
+			</td>
+		</tr>
+		<tr>
+			<td>{{ capApp.lineFactor }}</td>
+			<td>
+				<div class="row gap centered">
+					<input type="range"
+						@input="$emit('update:lineFactor', Number($event.target.value))"
+						:disabled="readonly"
+						:min="0.05"
+						:max="3.0"
+						:step="0.05"
+						:value="lineFactor"
+					/>
+					<input class="short" disabled :value="String(parseInt(lineFactor * 100)) + '%'" />
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>{{ capApp.alignHor }}</td>
+			<td>
+				<select :disabled="readonly" :value="align" @input="$emit('update:align', $event.target.value)">
+					<option value="L">{{ capGen.alignmentHor.left }}</option>
+					<option value="J">{{ capGen.alignmentHor.justify }}</option>
+					<option value="R">{{ capGen.alignmentHor.right }}</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
 			<td>{{ capApp.style }}</td>
 			<td>
 				<div class="row gap centered">
@@ -46,6 +84,31 @@ export const MyBuilderDocFont = {
 		<tr>
 			<td>{{ capApp.color }}</td>
 			<td><my-input-color-wrap :allowNull="true" :modelValue="color" @update:modelValue="$emit('update:color',$event)" :readonly /></td>
+		</tr>
+		<tr>
+			<td>{{ capGen.numberSepThousand }}</td>
+			<td>
+				<select :disabled="readonly" :value="numberSepTho" @input="$emit('update:numberSepTho', $event.target.value)">
+					<option value=".">{{ capGen.option.numberSeparator.dot }}</option>
+					<option value=",">{{ capGen.option.numberSeparator.comma }}</option>
+					<option value="'">{{ capGen.option.numberSeparator.apos }}</option>
+					<option value="·">{{ capGen.option.numberSeparator.mdot }}</option>
+					<option value=" ">{{ capGen.option.numberSeparator.space }}</option>
+					<option value="0">{{ capGen.option.numberSeparator.none }}</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>{{ capGen.numberSepDecimal }}</td>
+			<td>
+				<select :disabled="readonly" :value="numberSepDec" @input="$emit('update:numberSepDec', $event.target.value)">
+					<option value=".">{{ capGen.option.numberSeparator.dot }}</option>
+					<option value=",">{{ capGen.option.numberSeparator.comma }}</option>
+					<option value="'">{{ capGen.option.numberSeparator.apos }}</option>
+					<option value="·">{{ capGen.option.numberSeparator.mdot }}</option>
+					<option value=" ">{{ capGen.option.numberSeparator.space }}</option>
+				</select>
+			</td>
 		</tr>
 		<tr>
 			<td>{{ capApp.dateFormat }}</td>
@@ -60,36 +123,34 @@ export const MyBuilderDocFont = {
 			</td>
 		</tr>
 		<tr>
-			<td>{{ capApp.size }}</td>
-			<td><my-input-decimal :length="4" :lengthFract="2" :modelValue="size" @update:modelValue="$emit('update:size',$event)" /></td>
-			<td></td>
-		</tr>
-		<tr>
 			<td>{{ capApp.bool }}</td>
 			<td>
 				<div class="row gap centered">
 					<span>{{ capGen.boolTrue }}</span>
-					<input class="short" :disabled="readonly" :value="boolTrue" @input="$emit('update:boolTrue', $event.target.value)" />
+					<input class="short" :disabled="readonly" :value="boolTrue"  @input="$emit('update:boolTrue',  $event.target.value)" />
 					<span>{{ capGen.boolFalse }}</span>
 					<input class="short" :disabled="readonly" :value="boolFalse" @input="$emit('update:boolFalse', $event.target.value)" />
 				</div>
 			</td>
-			<td></td>
 		</tr>
 	`,
 	props:{
-		boolFalse: { type:String,  required:true },
-		boolTrue:  { type:String,  required:true },
-		color:     { required:true },
-		dateFormat:{ type:String,  required:true },
-		family:    { type:String,  required:true },
-		readonly:  { type:Boolean, required:true },
-		size:      { type:Number,  required:true },
-		style:     { type:String,  required:true }
+		align:       { type:String,  required:true },
+		boolFalse:   { type:String,  required:true },
+		boolTrue:    { type:String,  required:true },
+		color:       { required:true },
+		dateFormat:  { type:String,  required:true },
+		family:      { type:String,  required:true },
+		lineFactor:  { type:Number,  required:true },
+		numberSepDec:{ type:String,  required:true },
+		numberSepTho:{ type:String,  required:true },
+		readonly:    { type:Boolean, required:true },
+		size:        { type:Number,  required:true },
+		style:       { type:String,  required:true }
 	},
 	emits:[
-		'update:boolFalse','update:boolTrue','update:color','update:dateFormat','update:family',
-		'update:size','update:style'
+		'update:align','update:boolFalse','update:boolTrue','update:color','update:dateFormat','update:family',
+		'update:lineFactor','update:numberSepDec','update:numberSepTho','update:size','update:style'
 	],
 	computed:{
 		// stores

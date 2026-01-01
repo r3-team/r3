@@ -2205,6 +2205,7 @@
 		"alignment": "Alignment",
 		"alignmentHor": {
 			"center": "center",
+			"justify": "justify",
 			"left": "left",
 			"right": "right"
 		},
@@ -2393,6 +2394,8 @@
 		"nothingSelected": "Nimic selectat",
 		"nothingThere": "Rezultate lipsă",
 		"notice": "Notă",
+		"numberSepDecimal": "Decimal separator",
+		"numberSepThousand": "Thousands separator",
 		"option": {
 			"aggArray": "vector",
 			"aggAvg": "medie",
@@ -2405,6 +2408,14 @@
 			"aggSum": "suma",
 			"all": "all",
 			"no": "nu",
+			"numberSeparator": {
+				"apos": "Apostrophe (')",
+				"comma": "Comma (,)",
+				"dot": "Dot (.)",
+				"mdot": "Middle dot (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
+			},
 			"size0": "micuț",
 			"size1": "minor",
 			"size2": "implicit",
@@ -2709,18 +2720,6 @@
 		"listRows": "List rows",
 		"listSpaced": "Larger",
 		"mobileScrollForm": "Mobile: Scroll entire form",
-		"numberSepDecimal": "Decimal separator",
-		"numberSepThousand": "Thousands separator",
-		"option": {
-			"numberSeparator": {
-				"apos": "Apostrophe (')",
-				"comma": "Comma (,)",
-				"dot": "Dot (.)",
-				"mdot": "Middle dot (·)",
-				"none": "[no separator]",
-				"space": "Space ( )"
-			}
-		},
 		"pageTitle": "Setări",
 		"pattern": "Background pattern",
 		"spacing": "Spaţierea",

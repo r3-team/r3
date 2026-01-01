@@ -2205,6 +2205,7 @@
 		"alignment": "Alignment",
 		"alignmentHor": {
 			"center": "center",
+			"justify": "justify",
 			"left": "left",
 			"right": "right"
 		},
@@ -2393,6 +2394,8 @@
 		"nothingSelected": "Nav izvēlēts nekas",
 		"nothingThere": "Nav pieejamu rezultātu",
 		"notice": "Paziņojums",
+		"numberSepDecimal": "Decimālpunkta atdalītājs",
+		"numberSepThousand": "Tūkstošu atdalītājs",
 		"option": {
 			"aggArray": "masīvs",
 			"aggAvg": "vidējais",
@@ -2405,6 +2408,14 @@
 			"aggSum": "summa",
 			"all": "visi",
 			"no": "nē",
+			"numberSeparator": {
+				"apos": "Apostrophe (')",
+				"comma": "Comma (,)",
+				"dot": "Dot (.)",
+				"mdot": "Middle dot (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
+			},
 			"size0": "mazākais",
 			"size1": "mazs",
 			"size2": "noklusējums",
@@ -2709,18 +2720,6 @@
 		"listRows": "Saraksta rindas",
 		"listSpaced": "Liels",
 		"mobileScrollForm": "Mobilais: Ritiniet visu veidlapu",
-		"numberSepDecimal": "Decimālpunkta atdalītājs",
-		"numberSepThousand": "Tūkstošu atdalītājs",
-		"option": {
-			"numberSeparator": {
-				"apos": "Apostrophe (')",
-				"comma": "Comma (,)",
-				"dot": "Dot (.)",
-				"mdot": "Middle dot (·)",
-				"none": "[no separator]",
-				"space": "Space ( )"
-			}
-		},
 		"pageTitle": "Iestatījumi",
 		"pattern": "Fona raksts",
 		"spacing": "Atstarpe",

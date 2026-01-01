@@ -608,6 +608,8 @@
 .input-decimal{
 	width:100%;
     color:inherit;
+}
+.input-decimal-embedded{
     outline:none !important;
     border:none !important;
     box-shadow:none !important;

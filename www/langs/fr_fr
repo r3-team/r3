@@ -2205,6 +2205,7 @@
 		"alignment": "Alignment",
 		"alignmentHor": {
 			"center": "center",
+			"justify": "justify",
 			"left": "left",
 			"right": "right"
 		},
@@ -2393,6 +2394,8 @@
 		"nothingSelected": "Rien de sélectionné",
 		"nothingThere": "Aucun résultat disponible",
 		"notice": "Avis",
+		"numberSepDecimal": "Séparateur décimal",
+		"numberSepThousand": "Séparateur de milliers",
 		"option": {
 			"aggArray": "tableau",
 			"aggAvg": "moyenne",
@@ -2405,6 +2408,14 @@
 			"aggSum": "somme",
 			"all": "tous",
 			"no": "non",
+			"numberSeparator": {
+				"apos": "Apostrophe (')",
+				"comma": "Virgule (,)",
+				"dot": "Point (.)",
+				"mdot": "Point médian (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
+			},
 			"size0": "le plus petit",
 			"size1": "petit",
 			"size2": "par défaut",
@@ -2709,18 +2720,6 @@
 		"listRows": "Lignes de liste",
 		"listSpaced": "Plus grand",
 		"mobileScrollForm": "Mobile : Faire défiler tout le formulaire",
-		"numberSepDecimal": "Séparateur décimal",
-		"numberSepThousand": "Séparateur de milliers",
-		"option": {
-			"numberSeparator": {
-				"apos": "Apostrophe (')",
-				"comma": "Virgule (,)",
-				"dot": "Point (.)",
-				"mdot": "Point médian (·)",
-				"none": "[no separator]",
-				"space": "Space ( )"
-			}
-		},
 		"pageTitle": "Paramètres",
 		"pattern": "Motif de fond",
 		"spacing": "Espacement",

@@ -347,6 +347,7 @@ export default {
 					v-if="isDecimal"
 					v-model="value"
 					:allowNull="attribute.nullable"
+					:embedded="true"
 					:length="attribute.length"
 					:lengthFract="attribute.lengthFract"
 					:readonly="isReadonly"

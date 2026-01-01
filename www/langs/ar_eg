@@ -2205,6 +2205,7 @@
 		"alignment": "تنسيق",
 		"alignmentHor": {
 			"center": "مركز",
+			"justify": "justify",
 			"left": "غادر",
 			"right": "يمين"
 		},
@@ -2393,6 +2394,8 @@
 		"nothingSelected": "لم يتم تحديد أي شيء",
 		"nothingThere": "لا توجد نتائج متاحة",
 		"notice": "يلاحظ",
+		"numberSepDecimal": "فاصل عشري",
+		"numberSepThousand": "فاصل الآلاف",
 		"option": {
 			"aggArray": "صفيف",
 			"aggAvg": "متوسط",
@@ -2405,6 +2408,14 @@
 			"aggSum": "مجموع",
 			"all": "الجميع",
 			"no": "لا",
+			"numberSeparator": {
+				"apos": "الفاصلة العليا (')",
+				"comma": "فاصلة (،)",
+				"dot": "نقطة (.)",
+				"mdot": "النقطة الوسطى (·)",
+				"none": "[no separator]",
+				"space": "Space ( )"
+			},
 			"size0": "الأصغر",
 			"size1": "صغير",
 			"size2": "تقصير",
@@ -2709,18 +2720,6 @@
 		"listRows": "صفوف القائمة",
 		"listSpaced": "أكبر",
 		"mobileScrollForm": "الهاتف المحمول: قم بتمرير النموذج بأكمله",
-		"numberSepDecimal": "فاصل عشري",
-		"numberSepThousand": "فاصل الآلاف",
-		"option": {
-			"numberSeparator": {
-				"apos": "الفاصلة العليا (')",
-				"comma": "فاصلة (،)",
-				"dot": "نقطة (.)",
-				"mdot": "النقطة الوسطى (·)",
-				"none": "[no separator]",
-				"space": "Space ( )"
-			}
-		},
 		"pageTitle": "إعدادات",
 		"pattern": "نمط الخلفية",
 		"spacing": "تباعد",
