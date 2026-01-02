@@ -13,7 +13,7 @@ import {
 
 export function getTemplateApi(moduleId,name) {
 	return {
-		id:getNilUuid(),
+		id:getUuidV4(),
 		moduleId:moduleId,
 		name:name,
 		comment:null,
@@ -26,6 +26,17 @@ export function getTemplateApi(moduleId,name) {
 		limitMax:1000,
 		verboseDef:true,
 		version:1
+	};
+};
+export function getTemplateArticle(moduleId) {
+	return {
+		id:getUuidV4(),
+		moduleId:moduleId,
+		name:'',
+		captions:{
+			articleTitle:{},
+			articleBody:{}
+		}
 	};
 };
 export function getTemplateAttribute(moduleId,relationId) {
@@ -50,9 +61,26 @@ export function getTemplateAttribute(moduleId,relationId) {
 		}
 	};
 };
+export function getTemplateClientEvent(moduleId) {
+	return {
+		id:getUuidV4(),
+		moduleId:moduleId,
+		action:'callJsFunction',
+		arguments:[],
+		event:'onHotkey',
+		hotkeyModifier1:'CTRL',
+		hotkeyModifier2:null,
+		hotkeyChar:null,
+		jsFunctionId:null,
+		pgFunctionId:null,
+		captions:{
+			clientEventTitle:{}
+		}
+	};
+};
 export function getTemplateCollection(moduleId,name) {
 	return {
-		id:getNilUuid(),
+		id:getUuidV4(),
 		moduleId:moduleId,
 		iconId:null,
 		name:name,
@@ -63,7 +91,7 @@ export function getTemplateCollection(moduleId,name) {
 };
 export function getTemplateCollectionConsumer() {
 	return {
-		id:getNilUuid(),
+		id:getUuidV4(),
 		collectionId:null,
 		columnIdDisplay:null,
 		flags:[],
@@ -459,7 +487,7 @@ export function getTemplateFieldVariable() {
 };
 export function getTemplateForm(moduleId,name) {
 	return {
-		id:getNilUuid(),
+		id:getUuidV4(),
 		moduleId:moduleId,
 		fieldIdFocus:null,
 		presetIdOpen:null,

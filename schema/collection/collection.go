@@ -19,7 +19,6 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 }
 
 func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Collection, error) {
-	collections := make([]types.Collection, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, icon_id, name
@@ -28,33 +27,33 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Collect
 		ORDER BY name ASC
 	`, moduleId)
 	if err != nil {
-		return collections, err
+		return nil, err
 	}
 
+	collections := make([]types.Collection, 0)
 	for rows.Next() {
 		var c types.Collection
 		c.ModuleId = moduleId
 
 		if err := rows.Scan(&c.Id, &c.IconId, &c.Name); err != nil {
-			return collections, err
+			return nil, err
 		}
 		collections = append(collections, c)
 	}
 	rows.Close()
 
-	// collect query and columns
 	for i, c := range collections {
 		c.Query, err = query.Get_tx(ctx, tx, schema.DbCollection, c.Id, 0, 0, 0)
 		if err != nil {
-			return collections, err
+			return nil, err
 		}
 		c.Columns, err = column.Get_tx(ctx, tx, schema.DbCollection, c.Id)
 		if err != nil {
-			return collections, err
+			return nil, err
 		}
 		c.InHeader, err = consumer.Get_tx(ctx, tx, schema.DbCollection, c.Id, "headerDisplay")
 		if err != nil {
-			return collections, err
+			return nil, err
 		}
 		collections[i] = c
 	}
@@ -64,26 +63,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Collect
 func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, iconId pgtype.UUID, name string,
 	columns []types.Column, queryIn types.Query, inHeader []types.CollectionConsumer) error {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &id, schema.DbCollection, "id")
-	if err != nil {
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.collection (id,module_id,icon_id,name)
+		VALUES ($1,$2,$3,$4)
+		ON CONFLICT (id)
+		DO UPDATE SET icon_id = $3, name = $4
+	`, id, moduleId, iconId, name); err != nil {
 		return err
-	}
-
-	if known {
-		if _, err := tx.Exec(ctx, `
-			UPDATE app.collection
-			SET icon_id = $1, name = $2
-			WHERE id = $3
-		`, iconId, name, id); err != nil {
-			return err
-		}
-	} else {
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.collection (id,icon_id,module_id,name)
-			VALUES ($1,$2,$3,$4)
-		`, id, iconId, moduleId, name); err != nil {
-			return err
-		}
 	}
 	if err := query.Set_tx(ctx, tx, schema.DbCollection, id, 0, 0, 0, queryIn); err != nil {
 		return err

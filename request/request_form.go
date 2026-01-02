@@ -11,13 +11,11 @@ import (
 )
 
 func FormCopy_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
 	var req struct {
 		Id       uuid.UUID `json:"id"`
 		ModuleId uuid.UUID `json:"moduleId"`
 		NewName  string    `json:"newName"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
@@ -25,20 +23,15 @@ func FormCopy_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (inter
 }
 
 func FormDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
-	var req struct {
-		Id uuid.UUID `json:"id"`
-	}
-
+	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, form.Del_tx(ctx, tx, req.Id)
+	return nil, form.Del_tx(ctx, tx, req)
 }
 
 func FormSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.Form
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}

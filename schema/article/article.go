@@ -59,8 +59,6 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 
 func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Article, error) {
 
-	articles := make([]types.Article, 0)
-
 	rows, err := tx.Query(ctx, `
 		SELECT id, name
 		FROM app.article
@@ -68,56 +66,41 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Article
 		ORDER BY name ASC
 	`, moduleId)
 	if err != nil {
-		return articles, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	articles := make([]types.Article, 0)
 	for rows.Next() {
 		var a types.Article
 		if err := rows.Scan(&a.Id, &a.Name); err != nil {
-			return articles, err
+			return nil, err
 		}
 		a.ModuleId = moduleId
 		articles = append(articles, a)
 	}
+	rows.Close()
 
 	for i, a := range articles {
 		articles[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbArticle, a.Id, []string{"articleBody", "articleTitle"})
 		if err != nil {
-			return articles, err
+			return nil, err
 		}
 	}
 	return articles, nil
 }
 
 func Set_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string, captions types.CaptionMap) error {
-
 	if name == "" {
 		return errors.New("missing name")
 	}
-
-	known, err := schema.CheckCreateId_tx(ctx, tx, &id, schema.DbArticle, "id")
-	if err != nil {
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.article (id, module_id, name)
+		VALUES ($1,$2,$3)
+		ON CONFLICT (id)
+		DO UPDATE SET name = $3
+	`, id, moduleId, name); err != nil {
 		return err
 	}
-
-	if known {
-		if _, err := tx.Exec(ctx, `
-			UPDATE app.article
-			SET name = $1
-			WHERE id = $2
-		`, name, id); err != nil {
-			return err
-		}
-	} else {
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.article (id, module_id, name)
-			VALUES ($1,$2,$3)
-		`, id, moduleId, name); err != nil {
-			return err
-		}
-	}
-
-	// set captions
 	return caption.Set_tx(ctx, tx, id, captions)
 }

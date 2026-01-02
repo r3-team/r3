@@ -1,8 +1,8 @@
-import {getNilUuid} from '../shared/generic.js';
-import {srcBase64}  from '../shared/image.js';
+import {getUuidV4} from '../shared/crypto.js';
+import {srcBase64} from '../shared/image.js';
 export {MyBuilderIcons as default};
 
-let MyBuilderIcon = {
+const MyBuilderIcon = {
 	name:'my-builder-icon',
 	template:`<div class="icon">
 		<my-button
@@ -55,11 +55,10 @@ let MyBuilderIcon = {
 	}
 };
 
-let MyBuilderIcons = {
+const MyBuilderIcons = {
 	name:'my-builder-icons',
 	components:{ MyBuilderIcon },
 	template:`<div class="contentBox grow">
-		
 		<div class="top">
 			<div class="area nowrap">
 				<img class="icon" src="images/fileImage.png" />
@@ -113,7 +112,7 @@ let MyBuilderIcons = {
 	computed:{
 		// if single icon is selected, it can be updated
 		iconIdUpdate:(s) => s.iconIdsSelected.length !== 1 ? -1 : s.iconIdsSelected[0],
-		module:      (s) => s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
+		module:      (s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		
 		// stores
 		token:      (s) => s.$store.getters['local/token'],
@@ -123,7 +122,7 @@ let MyBuilderIcons = {
 	},
 	methods:{
 		// externals
-		getNilUuid,
+		getUuidV4,
 		
 		// actions
 		toggleSelect(id) {
@@ -137,7 +136,7 @@ let MyBuilderIcons = {
 		del() {
 			let requests = [];
 			for(let i = 0, j = this.iconIdsSelected.length; i < j; i++) {
-				requests.push(ws.prepare('icon','del',{id:this.iconIdsSelected[i]}));
+				requests.push(ws.prepare('icon','del',this.iconIdsSelected[i]));
 			}
 			
 			ws.sendMultiple(requests,true).then(
@@ -179,7 +178,7 @@ let MyBuilderIcons = {
 			
 			formData.append('token',this.token);
 			formData.append('moduleId',this.module.id);
-			formData.append('iconId',this.iconIdUpdate !== -1 ? this.iconIdUpdate : this.getNilUuid());
+			formData.append('iconId',this.iconIdUpdate !== -1 ? this.iconIdUpdate : this.getUuidV4());
 			formData.append('file',file);
 			httpRequest.open('POST','icon/upload',true);
 			httpRequest.send(formData);

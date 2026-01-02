@@ -6,7 +6,7 @@ import {
 } from '../shared/builder.js';
 export {MyBuilderCollectionInput as default};
 
-let MyBuilderCollectionInput = {
+const MyBuilderCollectionInput = {
 	name:'my-builder-collection-input',
 	components:{MyBuilderOpenFormInput},
 	template:`<table class="builder-collection-input">

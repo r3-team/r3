@@ -39,10 +39,9 @@ func GetOne_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId 
 	return c, nil
 }
 func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uuid.UUID, content string) ([]types.CollectionConsumer, error) {
-	var consumers = make([]types.CollectionConsumer, 0)
 
 	if !slices.Contains(schema.DbAssignedCollectionConsumers, entity) {
-		return consumers, errors.New("invalid collection consumer entity")
+		return nil, errors.New("invalid collection consumer entity")
 	}
 
 	rows, err := tx.Query(ctx, fmt.Sprintf(`
@@ -52,22 +51,24 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 		AND   content = $2
 	`, entity), entityId, content)
 	if err != nil {
-		return consumers, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	var consumers = make([]types.CollectionConsumer, 0)
 	for rows.Next() {
 		var c types.CollectionConsumer
 		if err := rows.Scan(&c.Id, &c.CollectionId, &c.ColumnIdDisplay, &c.Flags, &c.OnMobile); err != nil {
-			return consumers, err
+			return nil, err
 		}
 		consumers = append(consumers, c)
 	}
+	rows.Close()
 
 	for i, c := range consumers {
 		consumers[i].OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbCollectionConsumer, c.Id, pgtype.Text{})
 		if err != nil {
-			return consumers, err
+			return nil, err
 		}
 	}
 	return consumers, nil
@@ -86,7 +87,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 		return err
 	}
 
-	var err error
 	for _, c := range consumers {
 		if c.CollectionId == uuid.Nil {
 			continue
@@ -94,13 +94,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 
 		// fix import < 3.10: add missing flags
 		c = compatible.FixCollectionConsumerFlags(c)
-
-		if c.Id == uuid.Nil {
-			c.Id, err = uuid.NewV4()
-			if err != nil {
-				return err
-			}
-		}
 
 		if entity == "collection" {
 			if _, err := tx.Exec(ctx, `

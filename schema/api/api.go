@@ -84,7 +84,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID) ([
 		ORDER BY name ASC, version ASC
 	`, strings.Join(sqlWheres, "\n")), sqlValues...)
 	if err != nil {
-		return apis, err
+		return nil, err
 	}
 
 	for rows.Next() {
@@ -93,7 +93,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID) ([
 			&a.HasDelete, &a.HasGet, &a.HasPost, &a.LimitDef, &a.LimitMax,
 			&a.VerboseDef, &a.Version); err != nil {
 
-			return apis, err
+			return nil, err
 		}
 		apis = append(apis, a)
 	}
@@ -103,11 +103,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID) ([
 	for i, a := range apis {
 		a.Query, err = query.Get_tx(ctx, tx, schema.DbApi, a.Id, 0, 0, 0)
 		if err != nil {
-			return apis, err
+			return nil, err
 		}
 		a.Columns, err = column.Get_tx(ctx, tx, schema.DbApi, a.Id)
 		if err != nil {
-			return apis, err
+			return nil, err
 		}
 		apis[i] = a
 	}
@@ -119,34 +119,18 @@ func Set_tx(ctx context.Context, tx pgx.Tx, api types.Api) error {
 	if err := check.DbIdentifier(api.Name); err != nil {
 		return err
 	}
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.api (id, module_id, name, comment, has_delete,
+			has_get, has_post, limit_def, limit_max, verbose_def, version)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		ON CONFLICT (id)
+		DO UPDATE SET name = $3, comment = $4, has_delete = $5, has_get = $6,
+			has_post = $7, limit_def = $8, limit_max = $9, verbose_def = $10,
+			version = $11
+	`, api.Id, api.ModuleId, api.Name, api.Comment, api.HasDelete, api.HasGet,
+		api.HasPost, api.LimitDef, api.LimitMax, api.VerboseDef, api.Version); err != nil {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &api.Id, schema.DbApi, "id")
-	if err != nil {
 		return err
-	}
-
-	if known {
-		if _, err := tx.Exec(ctx, `
-			UPDATE app.api
-			SET name = $1, comment = $2, has_delete = $3, has_get = $4,
-				has_post = $5, limit_def = $6, limit_max = $7, verbose_def = $8,
-				version = $9
-			WHERE id = $10
-		`, api.Name, api.Comment, api.HasDelete, api.HasGet, api.HasPost,
-			api.LimitDef, api.LimitMax, api.VerboseDef, api.Version, api.Id); err != nil {
-
-			return err
-		}
-	} else {
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.api (id, module_id, name, comment, has_delete,
-				has_get, has_post, limit_def, limit_max, verbose_def, version)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
-		`, api.Id, api.ModuleId, api.Name, api.Comment, api.HasDelete, api.HasGet,
-			api.HasPost, api.LimitDef, api.LimitMax, api.VerboseDef, api.Version); err != nil {
-
-			return err
-		}
 	}
 	if err := query.Set_tx(ctx, tx, schema.DbApi, api.Id, 0, 0, 0, api.Query); err != nil {
 		return err

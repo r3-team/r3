@@ -1,6 +1,7 @@
 import MyBuilderCaption      from './builderCaption.js';
 import MyArticles            from '../articles.js';
 import {getDependentModules} from '../shared/builder.js';
+import {getTemplateArticle}  from '../shared/builderTemplate.js';
 import {copyValueDialog}     from '../shared/generic.js';
 export {MyBuilderArticles as default};
 
@@ -37,7 +38,7 @@ const MyBuilderArticlesItem = {
 				<my-builder-caption
 					v-model="captions.articleTitle"
 					:language="builderLanguage"
-					:readonly="readonly"
+					:readonly
 				/>
 			</td>
 			<td>
@@ -88,7 +89,7 @@ const MyBuilderArticlesItem = {
 								v-model="captions.articleBody"
 								:contentName="''"
 								:language="builderLanguage"
-								:readonly="readonly"
+								:readonly
 								:richtext="true"
 							/>
 						</div>
@@ -98,21 +99,13 @@ const MyBuilderArticlesItem = {
 		</tr>
 	</tbody>`,
 	props:{
+		article:        { type:Object,  required:true },
 		builderLanguage:{ type:String,  required:true },
+		isNew:          { type:Boolean, required:true },
 		module:         { type:Object,  required:true },
-		readonly:       { type:Boolean, required:true },
-		article:        { type:Object,  required:false,
-			default() { return{
-				id:null,
-				name:'',
-				captions:{
-					articleTitle:{},
-					articleBody:{}
-				}
-			}}
-		}
+		readonly:       { type:Boolean, required:true }
 	},
-	emits:['nextLanguage'],
+	emits:['nextLanguage','reset-new'],
 	data() {
 		return {
 			captions:JSON.parse(JSON.stringify(this.article.captions)),
@@ -125,9 +118,6 @@ const MyBuilderArticlesItem = {
 	computed:{
 		hasChanges:(s) => s.name !== s.article.name
 			|| JSON.stringify(s.captions) !== JSON.stringify(s.article.captions),
-		
-		// simple states
-		isNew:(s) => s.article.id === null,
 		
 		// stores
 		capApp:(s) => s.$store.getters.captions.builder.articles,
@@ -176,7 +166,7 @@ const MyBuilderArticlesItem = {
 			});
 		},
 		del() {
-			ws.send('article','del',{id:this.article.id},true).then(
+			ws.send('article','del',this.article.id,true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);
@@ -192,13 +182,9 @@ const MyBuilderArticlesItem = {
 				captions:this.captions
 			},true).then(
 				() => {
-					if(this.isNew) {
-						this.name     = '';
-						this.captions = {
-							articleTitle:{},
-							articleBody:{}
-						};
-					}
+					if(this.isNew)
+						this.$emit('reset-new');
+					
 					this.$root.schemaReload(this.module.id);
 				},
 				this.$root.genericError
@@ -236,10 +222,15 @@ const MyBuilderArticles = {
 					
 					<!-- new article -->
 					<my-builder-articles-item
+						v-if="articleNew !== false"
 						@nextLanguage="$emit('nextLanguage')"
-						:builderLanguage="builderLanguage"
-						:module="module"
-						:readonly="readonly"
+						@reset-new="resetArticleNew"
+						:article="articleNew"
+						:builderLanguage
+						:isNew="true"
+						:key="articleNew.id"
+						:module
+						:readonly
 					/>
 					
 					<!-- existing articles -->
@@ -247,10 +238,11 @@ const MyBuilderArticles = {
 						v-for="art in module.articles"
 						@nextLanguage="$emit('nextLanguage')"
 						:article="art"
-						:builderLanguage="builderLanguage"
+						:builderLanguage
+						:isNew="false"
 						:key="art.id"
-						:module="module"
-						:readonly="readonly"
+						:module
+						:readonly
 					/>
 				</table>
 			</div>
@@ -354,6 +346,7 @@ const MyBuilderArticles = {
 		readonly:       { type:Boolean, required:true }
 	},
 	mounted() {
+		this.resetArticleNew();
 		this.$store.commit('keyDownHandlerAdd',{fnc:this.assign,key:'s',keyCtrl:true});
 	},
 	unmounted() {
@@ -367,6 +360,7 @@ const MyBuilderArticles = {
 			formIdAssignTo:null,   // form to add article to (if target is 'form')
 			
 			// states
+			articleNew:false,
 			articleIdsAssigned:[],
 			articleIdsAssignedOrg:[], // to compare for changes
 			showPreview:false
@@ -376,7 +370,7 @@ const MyBuilderArticles = {
 		hasChanges:(s) => JSON.stringify(s.articleIdsAssigned) !== JSON.stringify(s.articleIdsAssignedOrg),
 		
 		// stores
-		module:      (s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
+		module:      (s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		moduleIdMap: (s) => s.$store.getters['schema/moduleIdMap'],
 		formIdMap:   (s) => s.$store.getters['schema/formIdMap'],
 		articleIdMap:(s) => s.$store.getters['schema/articleIdMap'],
@@ -392,9 +386,11 @@ const MyBuilderArticles = {
 	methods:{
 		// externals
 		getDependentModules,
+		getTemplateArticle,
 		
 		// states
 		reset() {
+			this.resetArticleNew();
 			this.articleIdsAssigned    = [];
 			this.articleIdsAssignedOrg = [];
 			
@@ -409,6 +405,9 @@ const MyBuilderArticles = {
 				this.articleIdsAssignedOrg = JSON.parse(JSON.stringify(f.articleIdsHelp));
 				return;
 			}
+		},
+		resetArticleNew() {
+			this.articleNew = this.getTemplateArticle(this.module.id);
 		},
 		
 		// actions

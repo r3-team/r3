@@ -991,7 +991,7 @@ const MyBuilderForm = {
 			});
 		},
 		del() {
-			ws.send('form','del',{id:this.form.id},true).then(
+			ws.send('form','del',this.form.id,true).then(
 				() => {
 					this.$root.schemaReload(this.form.moduleId);
 					this.$router.push('/builder/forms/'+this.form.moduleId);

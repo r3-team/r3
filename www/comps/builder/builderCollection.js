@@ -371,7 +371,7 @@ const MyBuilderCollection = {
 			});
 		},
 		del() {
-			ws.send('collection','del',{id:this.collection.id},true).then(
+			ws.send('collection','del',this.collection.id,true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.$router.push('/builder/collections/'+this.collection.moduleId);

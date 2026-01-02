@@ -1,9 +1,10 @@
-import MyBuilderCaption  from './builderCaption.js';
-import MyInputHotkey     from '../inputHotkey.js';
-import {copyValueDialog} from '../shared/generic.js';
+import MyBuilderCaption         from './builderCaption.js';
+import MyInputHotkey            from '../inputHotkey.js';
+import {getTemplateClientEvent} from '../shared/builderTemplate.js';
+import {copyValueDialog}        from '../shared/generic.js';
 export {MyBuilderClientEvent as default};
 
-let MyBuilderClientEvent = {
+const MyBuilderClientEvent = {
 	name:'my-builder-client-event',
 	components:{ MyBuilderCaption, MyInputHotkey },
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
@@ -215,6 +216,7 @@ let MyBuilderClientEvent = {
 	methods:{
 		// externals
 		copyValueDialog,
+		getTemplateClientEvent,
 		
 		// actions
 		closeReload() {
@@ -235,21 +237,7 @@ let MyBuilderClientEvent = {
 		reset() {
 			this.values = this.id !== null
 				? JSON.parse(JSON.stringify(this.clientEventIdMap[this.id]))
-				: {
-					id:null,
-					moduleId:this.module.id,
-					action:'callJsFunction',
-					arguments:[],
-					event:'onHotkey',
-					hotkeyModifier1:'CTRL',
-					hotkeyModifier2:null,
-					hotkeyChar:null,
-					jsFunctionId:null,
-					pgFunctionId:null,
-					captions:{
-						clientEventTitle:{}
-					}
-				};
+				: this.getTemplateClientEvent(this.module.id);
 			
 			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
@@ -270,7 +258,7 @@ let MyBuilderClientEvent = {
 			});
 		},
 		del() {
-			ws.send('clientEvent','del',{id:this.id},true).then(
+			ws.send('clientEvent','del',this.id,true).then(
 				this.closeReload,
 				this.$root.genericError
 			);

@@ -24,14 +24,11 @@ func ArticleAssign_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (
 }
 
 func ArticleDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-	var req struct {
-		Id uuid.UUID `json:"id"`
-	}
-
+	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, article.Del_tx(ctx, tx, req.Id)
+	return nil, article.Del_tx(ctx, tx, req)
 }
 
 func ArticleSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
