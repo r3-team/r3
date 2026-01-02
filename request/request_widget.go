@@ -10,19 +10,15 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func WidgetDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
-	var req struct {
-		Id uuid.UUID `json:"id"`
-	}
+func WidgetDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, widget.Del_tx(ctx, tx, req.Id)
+	return nil, widget.Del_tx(ctx, tx, req)
 }
 
-func WidgetSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
+func WidgetSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req types.Widget
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err

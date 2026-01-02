@@ -794,7 +794,7 @@ const MyBuilderRole = {
 			});
 		},
 		del() {
-			ws.send('role','del',{id:this.role.id},true).then(
+			ws.send('role','del',this.role.id,true).then(
 				() => {
 					this.$root.schemaReload(this.role.moduleId);
 					this.appFunctions.loginReauthAll(false);

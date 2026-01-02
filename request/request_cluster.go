@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func ClusterNodeDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func ClusterNodeDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		Id uuid.UUID `json:"id"`
@@ -21,11 +21,11 @@ func ClusterNodeDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	return nil, cluster.DelNode_tx(ctx, tx, req.Id)
 }
 
-func ClusterNodesGet_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
+func ClusterNodesGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 	return cluster.GetNodes_tx(ctx, tx)
 }
 
-func ClusterNodeSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func ClusterNodeSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		Id   uuid.UUID `json:"id"`
@@ -37,7 +37,7 @@ func ClusterNodeSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	return nil, cluster.SetNode_tx(ctx, tx, req.Id, req.Name)
 }
 
-func ClusterNodeShutdown_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func ClusterNodeShutdown_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		Id uuid.UUID `json:"id"`

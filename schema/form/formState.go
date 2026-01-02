@@ -2,7 +2,6 @@ package form
 
 import (
 	"context"
-	"r3/schema"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -10,7 +9,6 @@ import (
 )
 
 func getStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.FormState, error) {
-	states := make([]types.FormState, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, description
@@ -21,10 +19,11 @@ func getStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.For
 		ORDER BY description, id ASC
 	`, formId)
 	if err != nil {
-		return states, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	states := make([]types.FormState, 0)
 	for rows.Next() {
 		var s types.FormState
 		if err := rows.Scan(&s.Id, &s.Description); err != nil {
@@ -32,6 +31,7 @@ func getStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.For
 		}
 		states = append(states, s)
 	}
+	rows.Close()
 
 	for i := range states {
 		states[i].Conditions, err = getStateConditions_tx(ctx, tx, states[i].Id)
@@ -47,7 +47,6 @@ func getStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.For
 }
 
 func getStateConditions_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID) ([]types.FormStateCondition, error) {
-	conditions := make([]types.FormStateCondition, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT position, connector, operator
@@ -56,17 +55,19 @@ func getStateConditions_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID
 		ORDER BY position ASC
 	`, formStateId)
 	if err != nil {
-		return conditions, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	conditions := make([]types.FormStateCondition, 0)
 	for rows.Next() {
 		var c types.FormStateCondition
 		if err := rows.Scan(&c.Position, &c.Connector, &c.Operator); err != nil {
-			return conditions, err
+			return nil, err
 		}
 		conditions = append(conditions, c)
 	}
+	rows.Close()
 
 	for i, c := range conditions {
 		c.Side0, err = getStateConditionSide_tx(ctx, tx, formStateId, c.Position, 0)
@@ -99,7 +100,6 @@ func getStateConditionSide_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.U
 }
 
 func getStateEffects_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID) ([]types.FormStateEffect, error) {
-	effects := make([]types.FormStateEffect, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT field_id, form_action_id, tab_id, new_data, new_state
@@ -108,10 +108,11 @@ func getStateEffects_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID) (
 		ORDER BY field_id ASC, tab_id ASC
 	`, formStateId)
 	if err != nil {
-		return effects, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	effects := make([]types.FormStateEffect, 0)
 	for rows.Next() {
 		var e types.FormStateEffect
 		if err := rows.Scan(&e.FieldId, &e.FormActionId, &e.TabId, &e.NewData, &e.NewState); err != nil {
@@ -125,19 +126,16 @@ func getStateEffects_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID) (
 // set given form states, deletes non-specified states
 func setStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, states []types.FormState) error {
 
-	var err error
 	stateIds := make([]uuid.UUID, 0)
-
 	for _, s := range states {
-		s.Id, err = setState_tx(ctx, tx, formId, s)
-		if err != nil {
+		if err := setState_tx(ctx, tx, formId, s); err != nil {
 			return err
 		}
 		stateIds = append(stateIds, s.Id)
 	}
 
 	// remove non-specified states
-	_, err = tx.Exec(ctx, `
+	_, err := tx.Exec(ctx, `
 		DELETE FROM app.form_state
 		WHERE form_id = $1
 		AND id <> ALL($2)
@@ -147,27 +145,15 @@ func setStates_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, states []typ
 }
 
 // sets new/existing form state, returns form state ID
-func setState_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID, error) {
+func setState_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, state types.FormState) error {
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &state.Id, schema.DbFormState, "id")
-	if err != nil {
-		return state.Id, err
-	}
-
-	if known {
-		if _, err := tx.Exec(ctx, `
-			UPDATE app.form_state SET description = $1
-			WHERE id = $2
-		`, state.Description, state.Id); err != nil {
-			return state.Id, err
-		}
-	} else {
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.form_state (id, form_id, description)
-			VALUES ($1,$2,$3)
-		`, state.Id, formId, state.Description); err != nil {
-			return state.Id, err
-		}
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.form_state (id, form_id, description)
+		VALUES ($1,$2,$3)
+		ON CONFLICT (id)
+		DO UPDATE SET description = $3
+	`, state.Id, formId, state.Description); err != nil {
+		return err
 	}
 
 	// reset conditions
@@ -175,23 +161,21 @@ func setState_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, state types.F
 		DELETE FROM app.form_state_condition
 		WHERE form_state_id = $1
 	`, state.Id); err != nil {
-		return state.Id, err
+		return err
 	}
 
 	for i, c := range state.Conditions {
 		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.form_state_condition (
-				form_state_id, position, connector, operator
-			)
+			INSERT INTO app.form_state_condition (form_state_id, position, connector, operator)
 			VALUES ($1,$2,$3,$4)
 		`, state.Id, i, c.Connector, c.Operator); err != nil {
-			return state.Id, err
+			return err
 		}
 		if err := setStateConditionSide_tx(ctx, tx, state.Id, i, 0, c.Side0); err != nil {
-			return state.Id, err
+			return err
 		}
 		if err := setStateConditionSide_tx(ctx, tx, state.Id, i, 1, c.Side1); err != nil {
-			return state.Id, err
+			return err
 		}
 	}
 
@@ -200,20 +184,18 @@ func setState_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, state types.F
 		DELETE FROM app.form_state_effect
 		WHERE form_state_id = $1
 	`, state.Id); err != nil {
-		return state.Id, err
+		return err
 	}
 
 	for _, e := range state.Effects {
 		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.form_state_effect (
-				form_state_id, field_id, form_action_id, tab_id, new_data, new_state
-			)
+			INSERT INTO app.form_state_effect (form_state_id, field_id, form_action_id, tab_id, new_data, new_state)
 			VALUES ($1,$2,$3,$4,$5,$6)
 		`, state.Id, e.FieldId, e.FormActionId, e.TabId, e.NewData, e.NewState); err != nil {
-			return state.Id, err
+			return err
 		}
 	}
-	return state.Id, nil
+	return nil
 }
 func setStateConditionSide_tx(ctx context.Context, tx pgx.Tx, formStateId uuid.UUID,
 	position int, side int, s types.FormStateConditionSide) error {

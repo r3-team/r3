@@ -13,7 +13,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func OauthClientDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func OauthClientDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var id int32
 	if err := json.Unmarshal(reqJson, &id); err != nil {
 		return nil, err
@@ -30,15 +30,15 @@ func OauthClientDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	return nil, err
 }
 
-func OauthClientGet() (interface{}, error) {
+func OauthClientGet() (any, error) {
 	return cache.GetOauthClientMap(), nil
 }
 
-func OauthClientReload_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
+func OauthClientReload_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 	return nil, cache.LoadOauthClientMap_tx(ctx, tx)
 }
 
-func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req types.OauthClient
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err

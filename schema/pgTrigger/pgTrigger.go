@@ -73,7 +73,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, trg types.PgTrigger) error {
 		return err
 	}
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &trg.Id, schema.DbPgTrigger, "id")
+	known, err := schema.CheckId_tx(ctx, tx, trg.Id, schema.DbPgTrigger, "id")
 	if err != nil {
 		return err
 	}
@@ -94,36 +94,25 @@ func Set_tx(ctx context.Context, tx pgx.Tx, trg types.PgTrigger) error {
 		trg.IsDeferred = false
 	}
 
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.pg_trigger (id, module_id, pg_function_id, relation_id,
+			on_insert, on_update, on_delete, is_constraint, is_deferrable,
+			is_deferred, per_row, fires, code_condition)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+		ON CONFLICT (id)
+		DO UPDATE SET pg_function_id = $3, on_insert = $5, on_update = $6,
+			on_delete = $7, is_constraint = $8, is_deferrable = $9,
+			is_deferred = $10, per_row = $11, fires = $12, code_condition = $13
+	`, trg.Id, trg.ModuleId, trg.PgFunctionId, trg.RelationId, trg.OnInsert,
+		trg.OnUpdate, trg.OnDelete, trg.IsConstraint, trg.IsDeferrable,
+		trg.IsDeferred, trg.PerRow, trg.Fires, trg.CodeCondition); err != nil {
+
+		return err
+	}
+
 	if known {
-		if _, err := tx.Exec(ctx, `
-			UPDATE app.pg_trigger
-			SET pg_function_id = $1, on_insert = $2, on_update = $3,
-				on_delete = $4, is_constraint = $5, is_deferrable = $6,
-				is_deferred = $7, per_row = $8, fires = $9, code_condition = $10
-			WHERE id = $11
-		`, trg.PgFunctionId, trg.OnInsert, trg.OnUpdate, trg.OnDelete,
-			trg.IsConstraint, trg.IsDeferrable, trg.IsDeferred, trg.PerRow,
-			trg.Fires, trg.CodeCondition, trg.Id); err != nil {
-
-			return err
-		}
-
 		// remove existing trigger
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			DROP TRIGGER "%s" ON "%s"."%s"
-		`, getName(trg.Id), nameMod, nameRel)); err != nil {
-			return err
-		}
-	} else {
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.pg_trigger (id, module_id, pg_function_id, relation_id,
-				on_insert, on_update, on_delete, is_constraint, is_deferrable,
-				is_deferred, per_row, fires, code_condition)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
-		`, trg.Id, trg.ModuleId, trg.PgFunctionId, trg.RelationId, trg.OnInsert,
-			trg.OnUpdate, trg.OnDelete, trg.IsConstraint, trg.IsDeferrable,
-			trg.IsDeferred, trg.PerRow, trg.Fires, trg.CodeCondition); err != nil {
-
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`DROP TRIGGER "%s" ON "%s"."%s"`, getName(trg.Id), nameMod, nameRel)); err != nil {
 			return err
 		}
 	}

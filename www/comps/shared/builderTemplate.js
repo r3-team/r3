@@ -1,5 +1,4 @@
-import {getUuidV4}        from './crypto.js';
-import {getQueryTemplate} from './query.js';
+import {getUuidV4} from './crypto.js';
 import {
 	isAttributeBoolean,
 	isAttributeRelationship
@@ -17,7 +16,7 @@ export function getTemplateApi(moduleId,name) {
 		name:name,
 		comment:null,
 		columns:[],
-		query:getQueryTemplate(),
+		query:getTemplateQuery(),
 		hasDelete:false,
 		hasGet:true,
 		hasPost:false,
@@ -84,7 +83,7 @@ export function getTemplateCollection(moduleId,name) {
 		iconId:null,
 		name:name,
 		columns:[],
-		query:getQueryTemplate(),
+		query:getTemplateQuery(),
 		inHeader:[]
 	};
 };
@@ -111,7 +110,7 @@ export function getTemplateColumn(attributeId,index,subQuery) {
 		aggregator:null,
 		distincted:false,
 		subQuery:subQuery,
-		query:getQueryTemplate(),
+		query:getTemplateQuery(),
 		hidden:false,
 		onMobile:true,
 		styles:['wrap'],
@@ -139,7 +138,7 @@ export function getTemplateDoc(moduleId,name) {
 			size:11,
 			style:''
 		},
-		query:getQueryTemplate(),
+		query:getTemplateQuery(),
 		pages:[getTemplateDocPage()],
 		states:[],
 		set:[],
@@ -212,7 +211,7 @@ export function getTemplateDocField(content) {
 			f.footerColorFill   = null;
 
 			f.columns = [];
-			f.query   = getQueryTemplate();
+			f.query   = getTemplateQuery();
 			f.padding = getMarginTemplate();
 		break;
 		case 'text':
@@ -258,7 +257,7 @@ export function getTemplateFieldCalendar() {
 		days:42,
 		daysToggle:true,
 		openForm:null,
-		query:getQueryTemplate(),
+		query:getTemplateQuery(),
 		columns:[],
 		collections:[]
 	};
@@ -318,7 +317,7 @@ export function getTemplateFieldData(index,attribute,outsideIn,attributeIdNm) {
 	if(isAttributeRelationship(attribute.content)) {
 		field.attributeIdNm = attributeIdNm;
 		field.columns       = [];
-		field.query         = getQueryTemplate();
+		field.query         = getTemplateQuery();
 		field.filterQuick   = false;
 		field.outsideIn     = outsideIn;
 		field.defPresetIds  = [];
@@ -348,7 +347,7 @@ export function getTemplateFieldGantt() {
 		days:42,
 		daysToggle:true,
 		openForm:null,
-		query:getQueryTemplate(),
+		query:getTemplateQuery(),
 		columns:[],
 		collections:[]
 	};
@@ -389,7 +388,7 @@ export function getTemplateFieldChart() {
 				type:'value'
 			}
 		},null,2),
-		query:getQueryTemplate(),
+		query:getTemplateQuery(),
 		columns:[],
 		captions:{
 			fieldTitle:{}
@@ -425,7 +424,7 @@ export function getTemplateFieldKanban() {
 		relationIndexAxisY:null,
 		attributeIdSort:null,
 		openForm:null,
-		query:getQueryTemplate()
+		query:getTemplateQuery()
 	};
 };
 export function getTemplateFieldList() {
@@ -448,7 +447,7 @@ export function getTemplateFieldList() {
 		captions:{
 			fieldTitle:{}
 		},
-		query:getQueryTemplate(),
+		query:getTemplateQuery(),
 		resultLimit:50
 	};
 };
@@ -474,7 +473,7 @@ export function getTemplateFieldVariable() {
 		iconId:null,
 		content:'variable',
 		columns:[],
-		query:getQueryTemplate(),
+		query:getTemplateQuery(),
 		state:'default',
 		flags:[],
 		onMobile:true,
@@ -493,7 +492,7 @@ export function getTemplateForm(moduleId,name) {
 		iconId:null,
 		name:name,
 		noDataActions:false,
-		query:getQueryTemplate(),
+		query:getTemplateQuery(),
 		fields:[],
 		functions:[],
 		states:[],
@@ -502,6 +501,26 @@ export function getTemplateForm(moduleId,name) {
 		captions:{
 			formTitle:{}
 		}
+	};
+};
+export function getTemplateFormAction() {
+	return {
+		id:getUuidV4(),
+		color:null,
+		iconId:null,
+		jsFunctionId:'',
+		state:'default',
+		captions:{
+			formActionTitle:{}
+		}
+	};
+};
+export function getTemplateFormState() {
+	return {
+		id:getUuidV4(),
+		description:'',
+		conditions:[],
+		effects:[]
 	};
 };
 export function getTemplateJsFunction(moduleId,formId,name) {
@@ -610,6 +629,18 @@ export function getTemplatePgFunctionSchedule() {
 		intervalValue:3
 	};
 };
+export function getTemplatePgIndex(relationId) {
+	return {
+		id:getUuidV4(),
+		relationId:relationId,
+		attributeIdDict:null,
+		autoFki:false,
+		method:'BTREE',
+		noDuplicates:false,
+		primaryKey:false,
+		attributes:[]
+	};
+};
 export function getTemplatePreset(relationId) {
 	return {
 		id:getUuidV4(),
@@ -617,6 +648,79 @@ export function getTemplatePreset(relationId) {
 		relationId:relationId,
 		protected:true,
 		values:[]
+	};
+};
+export function getTemplatePresetValue(atrId,presetIdRefer,protec,value) {
+	return {
+		id:getUuidV4(),
+		attributeId:atrId,
+		presetIdRefer:presetIdRefer,
+		protected:protec,
+		value:value
+	};
+};
+export function getTemplateQuery() {
+	return {
+		id:getUuidV4(),
+		relationId:null,
+		fixedLimit:0,
+		joins:[],
+		filters:[],
+		orders:[],
+		lookups:[],
+		choices:[]
+	};
+};
+export function getTemplateQueryIfNull(q) {
+	return q === null ? getTemplateQuery() : q;
+};
+export function getTemplateQueryChoice() {
+	return {
+		id:getUuidV4(),
+		name:'',
+		filters:[],
+		captions:{
+			queryChoiceTitle:{}
+		}
+	};
+};
+export function getTemplateQueryFilter() {
+	return {
+		connector:'AND',
+		operator:'=',
+		index:0,
+		side0:{
+			attributeId:null,
+			attributeIndex:0,
+			attributeNested:0,
+			brackets:0,
+			collectionId:null,
+			columnId:null,
+			content:'attribute',
+			fieldId:null,
+			ftsDict:null,
+			query:null,
+			queryAggregator:null,
+			presetId:null,
+			roleId:null,
+			value:''
+		},
+		side1:{
+			attributeId:null,
+			attributeIndex:0,
+			attributeNested:0,
+			brackets:0,
+			collectionId:null,
+			columnId:null,
+			content:'value',
+			fieldId:null,
+			ftsDict:null,
+			query:null,
+			queryAggregator:null,
+			presetId:null,
+			roleId:null,
+			value:''
+		}
 	};
 };
 export function getTemplateRelation(moduleId,name,encryption) {
@@ -655,7 +759,7 @@ export function getTemplateSearchBar(moduleId,name) {
 		iconId:null,
 		name:name,
 		columns:[],
-		query:getQueryTemplate(),
+		query:getTemplateQuery(),
 		openForm:null,
 		captions:{
 			searchBarTitle:{}
@@ -689,7 +793,7 @@ export function getTemplateWidget(moduleId,name) {
 		id:getUuidV4(),
 		moduleId:moduleId,
 		formId:null,
-		size:1,
-		name:name
+		name:name,
+		size:1
 	};
 };

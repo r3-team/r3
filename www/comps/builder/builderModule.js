@@ -1,22 +1,17 @@
-import MyBuilderCaption      from './builderCaption.js';
-import MyBuilderClientEvent  from './builderClientEvent.js';
-import MyBuilderIconInput    from './builderIconInput.js';
-import MyBuilderSelectForm   from './builderSelectForm.js';
-import srcBase64Icon         from '../shared/image.js';
-import {getDependentModules} from '../shared/builder.js';
-import {getUnixFormat}       from '../shared/time.js';
-import {MyModuleSelect}      from '../input.js';
-import MyInputColorWrap      from '../inputColorWrap.js';
+import MyBuilderCaption        from './builderCaption.js';
+import MyBuilderClientEvent    from './builderClientEvent.js';
+import MyBuilderIconInput      from './builderIconInput.js';
+import MyBuilderSelectForm     from './builderSelectForm.js';
+import srcBase64Icon           from '../shared/image.js';
+import {getDependentModules}   from '../shared/builder.js';
+import {getTemplatePgFunction} from '../shared/builderTemplate.js';
+import {getUnixFormat}         from '../shared/time.js';
+import {MyModuleSelect}        from '../input.js';
+import MyInputColorWrap        from '../inputColorWrap.js';
 import {
 	copyValueDialog,
-	getNilUuid,
 	getRandomInt
 } from '../shared/generic.js';
-import {
-	getTemplateArgs,
-	getTemplateFnc,
-	getTemplateReturn
-} from '../shared/templates.js';
 export {MyBuilderModule as default};
 
 const MyBuilderModuleStartForm = {
@@ -73,7 +68,7 @@ const MyBuilderModuleStartForm = {
 	}
 };
 
-let MyBuilderModule = {
+const MyBuilderModule = {
 	name:'my-builder-module',
 	components:{
 		MyBuilderCaption,
@@ -530,11 +525,8 @@ let MyBuilderModule = {
 		// externals
 		copyValueDialog,
 		getDependentModules,
-		getNilUuid,
 		getRandomInt,
-		getTemplateArgs,
-		getTemplateFnc,
-		getTemplateReturn,
+		getTemplatePgFunction,
 		getUnixFormat,
 		srcBase64Icon,
 		
@@ -643,24 +635,8 @@ let MyBuilderModule = {
 					break;
 				}
 			}
-			
 			ws.sendMultiple([
-				ws.prepare('pgFunction','set',{
-					id:this.getNilUuid(),
-					moduleId:this.id,
-					name:fncName,
-					codeArgs:this.getTemplateArgs('loginSync'),
-					codeFunction:this.getTemplateFnc('loginSync',false),
-					codeReturns:this.getTemplateReturn(false),
-					isFrontendExec:false,
-					isLoginSync:true,
-					isTrigger:false,
-					schedules:[],
-					captions:{
-						pgFunctionTitle:{},
-						pgFunctionDesc:{}
-					}
-				}),
+				ws.prepare('pgFunction','set',this.getTemplatePgFunction(this.id,fncName,'loginSync',false)),
 				ws.prepare('schema','check',{moduleId:this.id})
 			],true).then(
 				() => this.$root.schemaReload(this.id),

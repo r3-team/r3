@@ -12,7 +12,7 @@ import (
 )
 
 // returns deleted or unassigned files
-func FileGet_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
+func FileGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 	type file struct {
 		Id       uuid.UUID   `json:"id"`
 		Name     string      `json:"name"`
@@ -73,7 +73,7 @@ func FileGet_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
 
 // removed deletion state from file
 // file must still be assigned to a record to be restored to its file attribute
-func FileRestore_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func FileRestore_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req struct {
 		AttributeId uuid.UUID `json:"attributeId"`
 		FileId      uuid.UUID `json:"fileId"`

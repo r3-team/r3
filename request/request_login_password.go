@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func loginPasswortSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func loginPasswortSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 
 	var req struct {
 		PwNew0 string `json:"pwNew0"`
@@ -24,7 +24,6 @@ func loginPasswortSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage
 	if req.PwOld == "" || req.PwNew0 == "" || req.PwNew0 != req.PwNew1 {
 		return nil, fmt.Errorf("invalid input")
 	}
-
 	if err := login_check.Password(ctx, tx, loginId, req.PwOld); err != nil {
 		return nil, err
 	}

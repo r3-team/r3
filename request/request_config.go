@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func ConfigGet() (interface{}, error) {
+func ConfigGet() (any, error) {
 
 	// not directly changeable configuration options
 	ignore := []string{"dbVersionCut", "tokenSecret"}
@@ -49,7 +49,7 @@ func ConfigGet() (interface{}, error) {
 	return res, nil
 }
 
-func ConfigSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func ConfigSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req map[string]string
 	if err := json.Unmarshal(reqJson, &req); err != nil {

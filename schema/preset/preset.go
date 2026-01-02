@@ -178,7 +178,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, preset types.Preset, onlySchema bool
 
 // preset values
 func getValues_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID) ([]types.PresetValue, error) {
-	values := make([]types.PresetValue, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, preset_id, preset_id_refer, attribute_id, protected, value
@@ -188,14 +187,15 @@ func getValues_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID) ([]types.P
 		                          -- we use attribute ID for better value preview in builder UI
 	`, presetId)
 	if err != nil {
-		return values, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	values := make([]types.PresetValue, 0)
 	for rows.Next() {
 		var v types.PresetValue
 		if err := rows.Scan(&v.Id, &v.PresetId, &v.PresetIdRefer, &v.AttributeId, &v.Protected, &v.Value); err != nil {
-			return values, err
+			return nil, err
 		}
 		values = append(values, v)
 	}
@@ -215,14 +215,6 @@ func setValues_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, presetId
 	// insert current values
 	for _, value := range values {
 
-		if value.Id == uuid.Nil {
-			var err error
-			value.Id, err = uuid.NewV4()
-			if err != nil {
-				return err
-			}
-		}
-
 		// make sure that preset values belong to the correct relation
 		var relationIdAtr uuid.UUID
 		if err := tx.QueryRow(ctx, `
@@ -238,12 +230,9 @@ func setValues_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, presetId
 		}
 
 		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.preset_value (id, preset_id,
-				preset_id_refer, attribute_id, protected, value)
+			INSERT INTO app.preset_value (id, preset_id, preset_id_refer, attribute_id, protected, value)
 			VALUES ($1,$2,$3,$4,$5,$6)
-		`, value.Id, presetId, value.PresetIdRefer, value.AttributeId,
-			value.Protected, value.Value); err != nil {
-
+		`, value.Id, presetId, value.PresetIdRefer, value.AttributeId, value.Protected, value.Value); err != nil {
 			return err
 		}
 	}
@@ -383,14 +372,10 @@ func getRecordIdByReferal_tx(ctx context.Context, tx pgx.Tx, presetId uuid.UUID)
 	exists := false
 
 	if err := tx.QueryRow(ctx, fmt.Sprintf(`
-		SELECT EXISTS (
-			SELECT FROM "%s"."%s"
-			WHERE id = $1
-		)
+		SELECT EXISTS (SELECT FROM "%s"."%s" WHERE id = $1)
 	`, modName, relName), recordId).Scan(&exists); err != nil {
 		return 0, false, err
 	}
-
 	if !exists {
 		return 0, false, nil
 	}

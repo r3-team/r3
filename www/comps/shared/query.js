@@ -291,57 +291,6 @@ export function getQueryAttributesPkFilter(relationId,recordIds,index,not) {
 	};
 };
 
-export function getQueryTemplate() {
-	return {
-		id:'00000000-0000-0000-0000-000000000000',
-		relationId:null,fixedLimit:0,joins:[],filters:[],orders:[],lookups:[],choices:[]
-	};
-};
-
-export function getQueryTemplateIfNull(query) {
-	return query === null ? getQueryTemplate() : query;
-};
-
-export function getQueryFilterNew() {
-	return {
-		connector:'AND',
-		operator:'=',
-		index:0,
-		side0:{
-			attributeId:null,
-			attributeIndex:0,
-			attributeNested:0,
-			brackets:0,
-			collectionId:null,
-			columnId:null,
-			content:'attribute',
-			fieldId:null,
-			ftsDict:null,
-			query:null,
-			queryAggregator:null,
-			presetId:null,
-			roleId:null,
-			value:''
-		},
-		side1:{
-			attributeId:null,
-			attributeIndex:0,
-			attributeNested:0,
-			brackets:0,
-			collectionId:null,
-			columnId:null,
-			content:'value',
-			fieldId:null,
-			ftsDict:null,
-			query:null,
-			queryAggregator:null,
-			presetId:null,
-			roleId:null,
-			value:''
-		}
-	};
-};
-
 export function getQueryFiltersDateRange(subJoinFilter,attributeId0,index0,date0,attributeId1,index1,date1) {
 	// set query filters for attribute date values (attribute 0 to 1) occuring in date range (date 0 to 1)
 	// if sub join filter is used, we apply filter to relation joins, allowing for other relation data to be retrieved

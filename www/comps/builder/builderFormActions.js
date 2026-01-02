@@ -1,9 +1,10 @@
 import MyBuilderCaption        from './builderCaption.js';
 import MyBuilderIconInput      from './builderIconInput.js';
-import { getDependentModules } from '../shared/builder.js';
+import {getDependentModules}   from '../shared/builder.js';
+import {getTemplateFormAction} from '../shared/builderTemplate.js';
 export {MyBuilderFormActions as default};
 
-let MyBuilderFormAction = {
+const MyBuilderFormAction = {
 	name:'my-builder-form-action',
 	components:{
 		MyBuilderCaption,
@@ -123,7 +124,7 @@ let MyBuilderFormAction = {
 	}
 };
 
-let MyBuilderFormActions = {
+const MyBuilderFormActions = {
 	name:'my-builder-form-actions',
 	components:{ MyBuilderFormAction },
 	template:`<div class="builder-form-actions">
@@ -190,18 +191,13 @@ let MyBuilderFormActions = {
 		capGen:    (s) => s.$store.getters.captions.generic
 	},
 	methods:{
+		// externals
+		getTemplateFormAction,
+
 		// actions
 		add() {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
-			v.unshift({
-				captions:{
-					formActionTitle:{}
-				},
-				color:null,
-				iconId:null,
-				jsFunctionId:'',
-				state:'default'
-			});
+			v.unshift(this.getTemplateFormAction());
 			this.$emit('update:modelValue',v);
 		},
 		remove(i) {

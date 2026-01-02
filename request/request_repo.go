@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func RepoModuleGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func RepoModuleGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var (
 		err error
@@ -44,7 +44,7 @@ func RepoModuleGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (
 	return res, nil
 }
 
-func RepoModuleInstall(ctx context.Context, reqJson json.RawMessage) (interface{}, error) {
+func RepoModuleInstall(ctx context.Context, reqJson json.RawMessage) (any, error) {
 	var req struct {
 		FileId uuid.UUID `json:"fileId"`
 	}
@@ -60,7 +60,7 @@ func RepoModuleInstall(ctx context.Context, reqJson json.RawMessage) (interface{
 	return nil, transfer.ImportFromFiles(ctx, []string{filePath})
 }
 
-func RepoModuleInstallAll(ctx context.Context) (interface{}, error) {
+func RepoModuleInstallAll(ctx context.Context) (any, error) {
 
 	// get all files to be updated from repository
 	fileIds := make([]uuid.UUID, 0)
@@ -85,6 +85,6 @@ func RepoModuleInstallAll(ctx context.Context) (interface{}, error) {
 	return nil, transfer.ImportFromFiles(ctx, filePaths)
 }
 
-func RepoModuleUpdate_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
+func RepoModuleUpdate_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 	return nil, repo.Update_tx(ctx, tx)
 }

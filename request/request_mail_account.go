@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func MailAccountDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func MailAccountDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req struct {
 		Id int64 `json:"id"`
 	}
@@ -26,11 +26,11 @@ func MailAccountDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	return nil, err
 }
 
-func MailAccountGet() (interface{}, error) {
+func MailAccountGet() (any, error) {
 	return cache.GetMailAccountMap(), nil
 }
 
-func MailAccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func MailAccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req types.MailAccount
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func MailAccountSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	return nil, err
 }
 
-func MailAccountTest_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func MailAccountTest_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		AccountName string `json:"accountName"`

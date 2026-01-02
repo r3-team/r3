@@ -32,7 +32,7 @@ type DataGetFilterSide struct {
 	FtsDict         pgtype.Text `json:"ftsDict"`         // chosen dictionary (postgres regconfig), is applied on fulltext comparisons (@@) for TSQUERY
 	Query           DataGet     `json:"query"`           // sub query, optional
 	QueryAggregator pgtype.Text `json:"queryAggregator"` // sub query aggregator, optional
-	Value           interface{} `json:"value"`           // fixed value, optional, filled by frontend with value of field/login ID/record/...
+	Value           any         `json:"value"`           // fixed value, optional, filled by frontend with value of field/login ID/record/...
 }
 
 // a JOIN connects multiple relations via a relationship attribute
@@ -91,11 +91,11 @@ type DataGet struct {
 	SearchDicts []string            `json:"searchDicts"` // list of fulltext search dictionaries (english, german, ...)
 }
 type DataGetResult struct {
-	IndexRecordIds     map[int]interface{} `json:"indexRecordIds"`     // IDs of relation records, key: relation index
-	IndexRecordEncKeys map[int]string      `json:"indexRecordEncKeys"` // record data keys, encrypted with login´s public key, key: relation index
-	IndexesPermNoDel   []int               `json:"indexesPermNoDel"`   // if getPerm, relation indexes of which records may not be deleted
-	IndexesPermNoSet   []int               `json:"indexesPermNoSet"`   // if getPerm, relation indexes of which records may not be updated
-	Values             []interface{}       `json:"values"`             // expression values, same order as requested expressions
+	IndexRecordIds     map[int]any    `json:"indexRecordIds"`     // IDs of relation records, key: relation index
+	IndexRecordEncKeys map[int]string `json:"indexRecordEncKeys"` // record data keys, encrypted with login´s public key, key: relation index
+	IndexesPermNoDel   []int          `json:"indexesPermNoDel"`   // if getPerm, relation indexes of which records may not be deleted
+	IndexesPermNoSet   []int          `json:"indexesPermNoSet"`   // if getPerm, relation indexes of which records may not be updated
+	Values             []any          `json:"values"`             // expression values, same order as requested expressions
 }
 type DataGetValueFile struct {
 	Id      uuid.UUID `json:"id"`
@@ -111,7 +111,7 @@ type DataSetAttribute struct {
 	AttributeId   uuid.UUID   `json:"attributeId"`   // attribute ID
 	AttributeIdNm pgtype.UUID `json:"attributeIdNm"` // attribute ID for n:m relationship
 	OutsideIn     bool        `json:"outsideIn"`     // not from this index, comes from other relation via relationship attribute
-	Value         interface{} `json:"value"`
+	Value         any         `json:"value"`
 }
 type DataSetEncKeys struct {
 	LoginId int64  `json:"loginId"`

@@ -1,6 +1,6 @@
 import {isAttributeRelationship} from '../shared/attribute.js';
 import {getFieldTitle}           from '../shared/field.js';
-import {getNilUuid}              from '../shared/generic.js';
+import {getTemplateFormState}    from '../shared/builderTemplate.js';
 export {MyBuilderFormStates as default};
 
 const MyBuilderFormStateEffect = {
@@ -476,17 +476,12 @@ const MyBuilderFormStates = {
 	},
 	methods:{
 		// externals
-		getNilUuid,
+		getTemplateFormState,
 		
 		// actions
 		add() {
 			let v = JSON.parse(JSON.stringify(this.states));
-			v.unshift({
-				id:this.getNilUuid(),
-				description:'',
-				conditions:[],
-				effects:[]
-			});
+			v.unshift(this.getTemplateFormState());
 			this.$emit('update:modelValue',v);
 		},
 		open(i) {

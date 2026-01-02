@@ -1,4 +1,4 @@
-import {getQueryTemplateIfNull} from '../comps/shared/query.js';
+import {getTemplateQueryIfNull} from '../comps/shared/builderTemplate.js';
 export {MyStoreSchema as default};
 
 const MyStoreSchema = {
@@ -50,12 +50,12 @@ const MyStoreSchema = {
 				for(let i = 0, j = fields.length; i < j; i++) {
 
 					if(fields[i].query !== undefined)
-						fields[i].query = getQueryTemplateIfNull(fields[i].query);
+						fields[i].query = getTemplateQueryIfNull(fields[i].query);
 
 					if(fields[i].columns !== undefined) {
 						for(let x = 0, y = fields[i].columns.length; x < y; x++) {
 							if(fields[i].columns[x].subQuery)
-								fields[i].columns[x].query = getQueryTemplateIfNull(fields[i].columns[x].query);
+								fields[i].columns[x].query = getTemplateQueryIfNull(fields[i].columns[x].query);
 						}
 					}
 					
@@ -72,7 +72,7 @@ const MyStoreSchema = {
 			};
 			const processDocField = field => {
 				if(field.query !== undefined)
-					field.query = getQueryTemplateIfNull(field.query);
+					field.query = getTemplateQueryIfNull(field.query);
 				
 				switch(field.content) {
 					case 'flow':       // fallthrough
@@ -127,7 +127,7 @@ const MyStoreSchema = {
 				
 				// process forms
 				for(let form of mod.forms) {
-					form.query  = getQueryTemplateIfNull(form.query);
+					form.query  = getTemplateQueryIfNull(form.query);
 					form.fields = processFields(form.fields);
 					
 					state.formIdMap[form.id]   = form;
@@ -144,25 +144,25 @@ const MyStoreSchema = {
 				
 				// process search bars
 				for(const bar of mod.searchBars) {
-					bar.query = getQueryTemplateIfNull(bar.query);
+					bar.query = getTemplateQueryIfNull(bar.query);
 					state.searchBarIdMap[bar.id] = bar;
 				}
 				
 				// process collections
 				for(let collection of mod.collections) {
-					collection.query = getQueryTemplateIfNull(collection.query);
+					collection.query = getTemplateQueryIfNull(collection.query);
 					state.collectionIdMap[collection.id] = collection;
 				}
 				
 				// process APIs
 				for(let api of mod.apis) {
-					api.query = getQueryTemplateIfNull(api.query);
+					api.query = getTemplateQueryIfNull(api.query);
 					state.apiIdMap[api.id] = api;
 				}
 				
 				// process documents
 				for(let doc of mod.docs) {
-					doc.query = getQueryTemplateIfNull(doc.query);
+					doc.query = getTemplateQueryIfNull(doc.query);
 					for(let i = 0, j = doc.pages.length; i < j; i++) {
 						const p = doc.pages[i];
 						p.fieldFlow = processDocField(p.fieldFlow)

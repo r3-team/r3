@@ -222,7 +222,7 @@ const MyBuilderWidget = {
 			});
 		},
 		del() {
-			ws.send('widget','del',{id:this.widgetId},true).then(
+			ws.send('widget','del',this.widgetId,true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.$emit('close');

@@ -5,7 +5,7 @@ import (
 	"r3/bruteforce"
 )
 
-func BruteforceGet(reqJson json.RawMessage) (interface{}, error) {
+func BruteforceGet(reqJson json.RawMessage) (any, error) {
 
 	var res struct {
 		HostsTracked int `json:"hostsTracked"`

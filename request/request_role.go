@@ -10,18 +10,15 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func RoleDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
-	var req struct {
-		Id uuid.UUID `json:"id"`
-	}
+func RoleDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, role.Del_tx(ctx, tx, req.Id)
+	return nil, role.Del_tx(ctx, tx, req)
 }
 
-func RoleSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func RoleSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req types.Role
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {

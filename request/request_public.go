@@ -9,7 +9,7 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-func PublicGet() (interface{}, error) {
+func PublicGet() (any, error) {
 
 	// random background from available list
 	var loginBackgrounds = config.GetUint64Slice("loginBackgrounds")

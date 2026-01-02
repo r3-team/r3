@@ -12,11 +12,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func LoginOptionsDel_tx(ctx context.Context, tx pgx.Tx, loginId int64) (interface{}, error) {
+func LoginOptionsDel_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
 	return nil, login_options.Del_tx(ctx, tx, loginId)
 }
 
-func LoginOptionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, isNoAuth bool) (interface{}, error) {
+func LoginOptionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, isNoAuth bool) (any, error) {
 	var (
 		err error
 		req struct {
@@ -50,7 +50,7 @@ func LoginOptionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage,
 	return res, nil
 }
 
-func LoginOptionsSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func LoginOptionsSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 	var req struct {
 		FavoriteId pgtype.UUID `json:"favoriteId"` // NULL if option is for non-favorited form
 		FieldId    uuid.UUID   `json:"fieldId"`

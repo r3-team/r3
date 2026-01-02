@@ -298,7 +298,7 @@ let MyBuilderPgTrigger = {
 			});
 		},
 		del() {
-			ws.send('pgTrigger','del',{id:this.id},true).then(
+			ws.send('pgTrigger','del',this.id,true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
 					this.$emit('close');

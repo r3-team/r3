@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func schedulersGet_tx(ctx context.Context, tx pgx.Tx) (interface{}, error) {
+func schedulersGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 
 	type nodeMeta struct {
 		Name        string `json:"name"`

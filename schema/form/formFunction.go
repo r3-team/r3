@@ -9,7 +9,6 @@ import (
 )
 
 func getFunctions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.FormFunction, error) {
-	fncs := make([]types.FormFunction, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT js_function_id, event, event_before
@@ -18,14 +17,15 @@ func getFunctions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.
 		ORDER BY position ASC
 	`, formId)
 	if err != nil {
-		return fncs, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	fncs := make([]types.FormFunction, 0)
 	for rows.Next() {
 		var f types.FormFunction
 		if err := rows.Scan(&f.JsFunctionId, &f.Event, &f.EventBefore); err != nil {
-			return fncs, err
+			return nil, err
 		}
 		fncs = append(fncs, f)
 	}
@@ -43,9 +43,7 @@ func setFunctions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, fncs []ty
 
 	for i, f := range fncs {
 		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.form_function (
-				form_id, position, js_function_id, event, event_before
-			)
+			INSERT INTO app.form_function (form_id, position, js_function_id, event, event_before)
 			VALUES ($1,$2,$3,$4,$5)
 		`, formId, i, f.JsFunctionId, f.Event, f.EventBefore); err != nil {
 			return err

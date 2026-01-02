@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func MailSpoolerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func MailSpoolerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req struct {
 		Ids []int64 `json:"ids"`
 	}
@@ -25,7 +25,7 @@ func MailSpoolerDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	return nil, err
 }
 
-func MailSpoolerGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func MailSpoolerGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var (
 		err error
@@ -56,7 +56,7 @@ func mailSpoolerRead(ctx context.Context, tx pgx.Tx, limit int, offset int, sear
 	var searchFields = []string{"from_list", "to_list", "cc_list", "bcc_list", "subject", "body"}
 
 	// prepare SQL request and arguments
-	sqlArgs := make([]interface{}, 0)
+	sqlArgs := make([]any, 0)
 	sqlArgs = append(sqlArgs, limit)
 	sqlArgs = append(sqlArgs, offset)
 	sqlWhere := ""
@@ -110,7 +110,7 @@ func mailSpoolerRead(ctx context.Context, tx pgx.Tx, limit int, offset int, sear
 	}
 
 	// get total count
-	sqlArgs = make([]interface{}, 0)
+	sqlArgs = make([]any, 0)
 	sqlWhere = ""
 	if search != "" {
 		for i, field := range searchFields {
@@ -134,7 +134,7 @@ func mailSpoolerRead(ctx context.Context, tx pgx.Tx, limit int, offset int, sear
 	return mails, total, nil
 }
 
-func MailSpoolerReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func MailSpoolerReset_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req struct {
 		Ids []int64 `json:"ids"`
 	}

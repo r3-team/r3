@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func FeedbackSend(reqJson json.RawMessage) (interface{}, error) {
+func FeedbackSend(reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		Code          int         `json:"code"`

@@ -10,7 +10,7 @@ import (
 )
 
 // request file(s) to be pasted
-func filesPaste_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func filesPaste_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 	var req struct {
 		SrcAttributeId uuid.UUID   `json:"srcAttributeId"`
 		SrcFileIds     []uuid.UUID `json:"srcFileIds"`

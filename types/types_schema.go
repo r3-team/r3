@@ -193,7 +193,7 @@ type Form struct {
 	Name           string         `json:"name"`
 	NoDataActions  bool           `json:"noDataActions"` // disables record manipulation actions (new/save/delete)
 	Query          Query          `json:"query"`
-	Fields         []interface{}  `json:"fields"`
+	Fields         []any          `json:"fields"`
 	Actions        []FormAction   `json:"actions"`
 	Functions      []FormFunction `json:"functions"`
 	States         []FormState    `json:"states"`
@@ -308,24 +308,24 @@ type FieldChart struct {
 	Captions    CaptionMap  `json:"captions"`
 }
 type FieldContainer struct {
-	Id             uuid.UUID     `json:"id"`
-	TabId          pgtype.UUID   `json:"tabId"`
-	IconId         pgtype.UUID   `json:"iconId"`
-	Content        string        `json:"content"`
-	State          string        `json:"state"`
-	Flags          []string      `json:"flags"`
-	OnMobile       bool          `json:"onMobile"`
-	Fields         []interface{} `json:"fields"`
-	Direction      string        `json:"direction"`
-	JustifyContent string        `json:"justifyContent"`
-	AlignItems     string        `json:"alignItems"`
-	AlignContent   string        `json:"alignContent"`
-	Wrap           bool          `json:"wrap"`
-	Grow           int           `json:"grow"`
-	Shrink         int           `json:"shrink"`
-	Basis          int           `json:"basis"`
-	PerMin         int           `json:"perMin"`
-	PerMax         int           `json:"perMax"`
+	Id             uuid.UUID   `json:"id"`
+	TabId          pgtype.UUID `json:"tabId"`
+	IconId         pgtype.UUID `json:"iconId"`
+	Content        string      `json:"content"`
+	State          string      `json:"state"`
+	Flags          []string    `json:"flags"`
+	OnMobile       bool        `json:"onMobile"`
+	Fields         []any       `json:"fields"`
+	Direction      string      `json:"direction"`
+	JustifyContent string      `json:"justifyContent"`
+	AlignItems     string      `json:"alignItems"`
+	AlignContent   string      `json:"alignContent"`
+	Wrap           bool        `json:"wrap"`
+	Grow           int         `json:"grow"`
+	Shrink         int         `json:"shrink"`
+	Basis          int         `json:"basis"`
+	PerMin         int         `json:"perMin"`
+	PerMax         int         `json:"perMax"`
 }
 type FieldData struct {
 	Id             uuid.UUID          `json:"id"`
@@ -597,12 +597,12 @@ type JsFunction struct {
 	Captions          CaptionMap  `json:"captions"`
 }
 type Tab struct {
-	Id             uuid.UUID     `json:"id"`
-	Position       int           `json:"position"`
-	ContentCounter bool          `json:"contentCounter"` // tab shows counter of its child field values (list rows, calendar entries, file counts)
-	State          string        `json:"state"`          // tab default state (default, hidden)
-	Fields         []interface{} `json:"fields"`         // fields assigned to tab
-	Captions       CaptionMap    `json:"captions"`
+	Id             uuid.UUID  `json:"id"`
+	Position       int        `json:"position"`
+	ContentCounter bool       `json:"contentCounter"` // tab shows counter of its child field values (list rows, calendar entries, file counts)
+	State          string     `json:"state"`          // tab default state (default, hidden)
+	Fields         []any      `json:"fields"`         // fields assigned to tab
+	Captions       CaptionMap `json:"captions"`
 }
 type ClientEvent struct {
 	Id              uuid.UUID   `json:"id"`

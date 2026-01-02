@@ -477,11 +477,6 @@ func setName_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, name string, ignor
 		}
 	}
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &id, schema.DbAttribute, "id")
-	if err != nil || !known {
-		return err
-	}
-
 	moduleName, relationName, nameEx, _, err := schema.GetAttributeDetailsById_tx(ctx, tx, id)
 	if err != nil {
 		return err
@@ -503,7 +498,6 @@ func setName_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, name string, ignor
 		`, name, id); err != nil {
 			return err
 		}
-
 		if err := pgFunction.RecreateAffectedBy_tx(ctx, tx, schema.DbAttribute, id); err != nil {
 			return err
 		}

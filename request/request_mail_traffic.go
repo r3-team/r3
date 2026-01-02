@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func MailTrafficGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func MailTrafficGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var (
 		req struct {
@@ -30,7 +30,7 @@ func MailTrafficGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	var searchFields = []string{"from_list", "to_list", "cc_list", "bcc_list", "subject"}
 
 	// prepare SQL request and arguments
-	sqlArgs := make([]interface{}, 0)
+	sqlArgs := make([]any, 0)
 	sqlArgs = append(sqlArgs, req.Limit)
 	sqlArgs = append(sqlArgs, req.Offset)
 	sqlWhere := ""
@@ -71,7 +71,7 @@ func MailTrafficGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 	}
 
 	// get total count
-	sqlArgs = make([]interface{}, 0)
+	sqlArgs = make([]any, 0)
 	sqlWhere = ""
 	if req.Search != "" {
 		for i, field := range searchFields {

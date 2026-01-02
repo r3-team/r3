@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func TaskSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func TaskSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req struct {
 		Active   bool   `json:"active"`
 		Interval int64  `json:"interval"`
@@ -41,7 +41,7 @@ func TaskSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interf
 	return nil, err
 }
 
-func TaskRun_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func TaskRun_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		// trigger PG function scheduler by ID

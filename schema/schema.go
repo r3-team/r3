@@ -171,29 +171,10 @@ var (
 	}
 )
 
+// checks whether a record exists for the given primary ID
 func CheckId_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity DbEntity, pkName string) (bool, error) {
 	var known bool
 	err := tx.QueryRow(ctx, fmt.Sprintf(`SELECT EXISTS(SELECT 1 FROM app.%s WHERE "%s" = $1)`, entity, pkName), id).Scan(&known)
-	return known, err
-}
-
-// checks the given ID
-// if nil, it is overwritten with a new one
-// if not nil, it is checked whether the ID is known already
-// returns whether the ID was already known
-func CheckCreateId_tx(ctx context.Context, tx pgx.Tx, id *uuid.UUID, entity DbEntity, pkName string) (bool, error) {
-
-	var err error
-	if *id == uuid.Nil {
-		*id, err = uuid.NewV4()
-		return false, err
-	}
-
-	var known bool
-	err = tx.QueryRow(ctx, fmt.Sprintf(`
-		SELECT EXISTS(SELECT * FROM app.%s WHERE "%s" = $1)
-	`, entity, pkName), id).Scan(&known)
-
 	return known, err
 }
 

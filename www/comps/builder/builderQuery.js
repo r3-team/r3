@@ -1,22 +1,22 @@
-import MyBuilderCaption from './builderCaption.js';
-import {getNilUuid}     from '../shared/generic.js';
+import MyBuilderCaption               from './builderCaption.js';
+import {getCaptionByIndexAttributeId} from '../shared/query.js';
+import {
+	getTemplateQueryChoice,
+	getTemplateQueryFilter
+} from '../shared/builderTemplate.js';
 import {
 	builderOptionGet,
 	builderOptionSet,
 	getItemTitleRelation
 } from '../shared/builder.js';
 import {
-	getCaptionByIndexAttributeId,
-	getQueryFilterNew
-} from '../shared/query.js';
-import {
 	getIndexAttributeIdsByJoins,
 	isAttributeRelationship,
 	isAttributeRelationship11
 } from '../shared/attribute.js';
 import {
-	getDependentModules,
-	getDependentAttributes
+	getDependentAttributes,
+	getDependentModules
 } from '../shared/builder.js';
 export {MyBuilderQuery as default};
 
@@ -118,8 +118,8 @@ const MyBuilderQueryFilter = {
 	},
 	methods:{
 		// externals
-		getQueryFilterNew,
 		getItemTitleRelation,
+		getTemplateQueryFilter,
 
 		// presentation
 		displayArrow(state,count) {
@@ -135,7 +135,7 @@ const MyBuilderQueryFilter = {
 
 		// actions
 		add(indexTarget) {
-			let f = this.getQueryFilterNew();
+			let f = this.getTemplateQueryFilter();
 			f.index = indexTarget;
 			
 			let v = JSON.parse(JSON.stringify(this.modelValue));
@@ -555,16 +555,13 @@ const MyBuilderQueryNestedJoin = {
 		connector:       { type:String, required:true },
 		index:           { type:Number, required:true },
 		joins:           { type:Array,  required:true },
-		joinAttributeId: { type:String, required:true },
+		joinAttributeId: { required:true },
 		joinRelationId:  { type:String, required:true },
 		module:          { type:Object, required:true },
 		readonly:        { type:Boolean,required:true },
 		relationIdParent:{ type:String, required:false, default: null}
 	},
-	emits:[
-		'relation-add','relation-apply-toggle',
-		'relation-connector-set','relation-remove'
-	],
+	emits:['relation-add','relation-apply-toggle','relation-connector-set','relation-remove'],
 	computed:{
 		attributesUnused:(s) => {
 			let atrs = [];
@@ -922,7 +919,7 @@ const MyBuilderQuery = {
 			return indexCandidate;
 		},
 		relationsNested:(s) => {
-			let getChildRelationsByIndex = function(indexFrom) {
+			const getChildRelationsByIndex = function(indexFrom) {
 				let rels = [];
 				for(const j of s.joins) {
 					if(j.indexFrom !== indexFrom)
@@ -954,7 +951,7 @@ const MyBuilderQuery = {
 				connector:'INNER',
 				index:0,
 				joins:getChildRelationsByIndex(0),
-				joinAttributeId:s.getNilUuid(),
+				joinAttributeId:null,
 				joinRelationId:s.relation.id,
 				name:s.relation.name
 			};
@@ -987,7 +984,7 @@ const MyBuilderQuery = {
 		builderOptionGet,
 		builderOptionSet,
 		getDependentModules,
-		getNilUuid,
+		getTemplateQueryChoice,
 		
 		// presentation
 		displayArrow(state,count) {
@@ -997,14 +994,7 @@ const MyBuilderQuery = {
 		// actions
 		choiceAdd() {
 			let v = JSON.parse(JSON.stringify(this.choices));
-			v.push({
-				id:this.getNilUuid(),
-				name:'',
-				filters:[],
-				captions:{
-					queryChoiceTitle:{}
-				}
-			});
+			v.push(this.getTemplateQueryChoice());
 			this.set('choices',v);
 			
 			if(!this.showChoices)

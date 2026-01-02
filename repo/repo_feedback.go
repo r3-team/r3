@@ -62,6 +62,6 @@ func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID, formId
 		},
 	}
 
-	var res interface{}
+	var res any
 	return httpCallPost(token, fmt.Sprintf("%s/api/lsw_repo/feedback/v1", baseUrl), req, &res)
 }

@@ -9,7 +9,7 @@ import (
 	"encoding/pem"
 )
 
-func KeyCreate(reqJson json.RawMessage) (interface{}, error) {
+func KeyCreate(reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		KeyLength int `json:"keyLength"`

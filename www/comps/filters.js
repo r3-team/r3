@@ -1,8 +1,10 @@
-import MyBuilderQuery          from './builder/builderQuery.js';
-import MyInputDateWrap         from './inputDateWrap.js';
-import MyInputDictionary       from './inputDictionary.js';
-import {isAttributeString}     from './shared/attribute.js';
-import {getColumnIsFilterable} from './shared/column.js';
+import MyBuilderQuery                      from './builder/builderQuery.js';
+import MyInputDateWrap                     from './inputDateWrap.js';
+import MyInputDictionary                   from './inputDictionary.js';
+import {isAttributeString}                 from './shared/attribute.js';
+import {getTemplateQuery}                  from './shared/builderTemplate.js';
+import {getColumnIsFilterable}             from './shared/column.js';
+import {getNestedIndexAttributeIdsByJoins} from './shared/query.js';
 import {
 	getDependentModules,
 	getItemTitleColumn,
@@ -12,10 +14,6 @@ import {
 	getCaption,
 	getDictByLang
 } from './shared/language.js';
-import {
-	getNestedIndexAttributeIdsByJoins,
-	getQueryTemplate
-} from './shared/query.js';
 export {MyFilters as default};
 export {MyFilterBrackets};
 export {MyFilterConnector};
@@ -724,7 +722,7 @@ const MyFilterSide = {
 		getDependentModules,
 		getItemTitleColumn,
 		getNestedIndexAttributeIdsByJoins,
-		getQueryTemplate,
+		getTemplateQuery,
 		
 		// actions
 		set(name,newValue) {
@@ -775,7 +773,7 @@ const MyFilterSide = {
 				v.queryAggregator = null;
 			}
 			else {
-				v.query = this.getQueryTemplate();
+				v.query = this.getTemplateQuery();
 				this.showQuery = true;
 			}
 			this.$emit('update:modelValue',v);

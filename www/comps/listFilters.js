@@ -1,5 +1,5 @@
-import {getColumnIsFilterable} from './shared/column.js';
-import {getQueryFilterNew}     from './shared/query.js';
+import {getColumnIsFilterable}  from './shared/column.js';
+import {getTemplateQueryFilter} from './shared/builderTemplate.js';
 
 export default {
 	name:'my-list-filters',
@@ -71,11 +71,11 @@ export default {
 	methods:{
 		// externals
 		getColumnIsFilterable,
-		getQueryFilterNew,
+		getTemplateQueryFilter,
 
 		// actions
 		add() {
-			let f = this.getQueryFilterNew();
+			let f = this.getTemplateQueryFilter();
 			f.operator = 'ILIKE';
 			
 			// apply first available column

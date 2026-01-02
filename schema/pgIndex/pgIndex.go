@@ -32,7 +32,6 @@ func DelAutoFkiForAttribute_tx(ctx context.Context, tx pgx.Tx, attributeId uuid.
 		if err == pgx.ErrNoRows {
 			return nil
 		}
-
 		return fmt.Errorf("failed to get auto PG index ID for attribute FK %s: %w", attributeId, err)
 	}
 
@@ -59,7 +58,6 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 }
 
 func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.PgIndex, error) {
-	pgIndexes := make([]types.PgIndex, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, attribute_id_dict, method, no_duplicates, auto_fki, primary_key
@@ -69,28 +67,28 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.PgInd
 		ORDER BY primary_key DESC, auto_fki DESC, id ASC
 	`, relationId)
 	if err != nil {
-		return pgIndexes, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	pgIndexes := make([]types.PgIndex, 0)
 	for rows.Next() {
 		var pgi types.PgIndex
 
 		if err := rows.Scan(&pgi.Id, &pgi.AttributeIdDict, &pgi.Method,
 			&pgi.NoDuplicates, &pgi.AutoFki, &pgi.PrimaryKey); err != nil {
 
-			return pgIndexes, err
+			return nil, err
 		}
 		pgi.RelationId = relationId
 		pgIndexes = append(pgIndexes, pgi)
 	}
+	rows.Close()
 
-	// get index attributes
 	for i, pgi := range pgIndexes {
-
 		pgi.Attributes, err = getAttributes_tx(ctx, tx, pgi.Id)
 		if err != nil {
-			return pgIndexes, err
+			return nil, err
 		}
 		pgIndexes[i] = pgi
 	}
@@ -98,7 +96,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID) ([]types.PgInd
 }
 
 func getAttributes_tx(ctx context.Context, tx pgx.Tx, pgIndexId uuid.UUID) ([]types.PgIndexAttribute, error) {
-	attributes := make([]types.PgIndexAttribute, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT attribute_id, order_asc
@@ -107,15 +104,15 @@ func getAttributes_tx(ctx context.Context, tx pgx.Tx, pgIndexId uuid.UUID) ([]ty
 		ORDER BY position ASC
 	`, pgIndexId)
 	if err != nil {
-		return attributes, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	attributes := make([]types.PgIndexAttribute, 0)
 	for rows.Next() {
 		var a types.PgIndexAttribute
-
 		if err := rows.Scan(&a.AttributeId, &a.OrderAsc); err != nil {
-			return attributes, err
+			return nil, err
 		}
 		a.PgIndexId = pgIndexId
 		attributes = append(attributes, a)
@@ -124,8 +121,12 @@ func getAttributes_tx(ctx context.Context, tx pgx.Tx, pgIndexId uuid.UUID) ([]ty
 }
 
 func SetAutoFkiForAttribute_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributeId uuid.UUID, noDuplicates bool) error {
+	id, err := uuid.NewV4()
+	if err != nil {
+		return err
+	}
 	return Set_tx(ctx, tx, types.PgIndex{
-		Id:           uuid.Nil,
+		Id:           id,
 		RelationId:   relationId,
 		AutoFki:      true,
 		Method:       "BTREE",
@@ -141,8 +142,12 @@ func SetAutoFkiForAttribute_tx(ctx context.Context, tx pgx.Tx, relationId uuid.U
 	})
 }
 func SetPrimaryKeyForAttribute_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributeId uuid.UUID) error {
+	id, err := uuid.NewV4()
+	if err != nil {
+		return err
+	}
 	return Set_tx(ctx, tx, types.PgIndex{
-		Id:           uuid.Nil,
+		Id:           id,
 		RelationId:   relationId,
 		AutoFki:      false,
 		Method:       "BTREE",
@@ -158,13 +163,11 @@ func SetPrimaryKeyForAttribute_tx(ctx context.Context, tx pgx.Tx, relationId uui
 	})
 }
 func Set_tx(ctx context.Context, tx pgx.Tx, pgi types.PgIndex) error {
-
 	if len(pgi.Attributes) == 0 {
 		return errors.New("cannot create index without attributes")
 	}
 
-	var err error
-	known, err := schema.CheckCreateId_tx(ctx, tx, &pgi.Id, schema.DbPgIndex, "id")
+	known, err := schema.CheckId_tx(ctx, tx, pgi.Id, schema.DbPgIndex, "id")
 	if err != nil {
 		return err
 	}

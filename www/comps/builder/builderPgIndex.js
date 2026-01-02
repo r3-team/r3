@@ -1,6 +1,7 @@
+import {getTemplatePgIndex} from '../shared/builderTemplate.js';
 export {MyBuilderPgIndex as default};
 
-let MyBuilderPgIndex = {
+const MyBuilderPgIndex = {
 	name:'my-builder-pg-index',
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-pg-index float" v-if="values !== null">
@@ -153,6 +154,9 @@ let MyBuilderPgIndex = {
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
+		// externals
+		getTemplatePgIndex,
+
 		// display
 		getAttributeCaption(attributeId,orderAsc) {
 			let order = this.isBtree ? ` (${orderAsc ? 'ASC' : 'DESC'})` : '';
@@ -183,16 +187,7 @@ let MyBuilderPgIndex = {
 		reset() {
 			this.values = this.pgIndexId !== null
 				? JSON.parse(JSON.stringify(this.indexIdMap[this.pgIndexId]))
-				: {
-					id:null,
-					relationId:this.relation.id,
-					attributeIdDict:null,
-					autoFki:false,
-					method:'BTREE',
-					noDuplicates:false,
-					primaryKey:false,
-					attributes:[]
-				};
+				: this.getTemplatePgIndex(this.relation.id);
 			
 			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
@@ -213,7 +208,7 @@ let MyBuilderPgIndex = {
 			});
 		},
 		del() {
-			ws.send('pgIndex','del',{id:this.pgIndexId},true).then(
+			ws.send('pgIndex','del',this.pgIndexId,true).then(
 				() => {
 					this.$root.schemaReload(this.relation.moduleId);
 					this.$emit('close');

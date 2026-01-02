@@ -14,7 +14,7 @@ import (
 )
 
 // requests for browser clients
-func eventFilesCopied_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
+func eventFilesCopied_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (any, error) {
 	// request file(s) to be copied (synchronized across all browser clients)
 	var req struct {
 		AttributeId uuid.UUID   `json:"attributeId"`
@@ -28,10 +28,10 @@ func eventFilesCopied_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage
 }
 
 // requests for fat clients
-func eventClientEventsChanged_tx(ctx context.Context, tx pgx.Tx, loginId int64, address string) (interface{}, error) {
+func eventClientEventsChanged_tx(ctx context.Context, tx pgx.Tx, loginId int64, address string) (any, error) {
 	return nil, cluster.ClientEventsChanged_tx(ctx, tx, true, address, loginId)
 }
-func eventFileRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
+func eventFileRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (any, error) {
 	var req struct {
 		AttributeId uuid.UUID `json:"attributeId"`
 		FileId      uuid.UUID `json:"fileId"`
@@ -78,7 +78,7 @@ func eventFileRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessa
 	return nil, cluster.FileRequested_tx(ctx, tx, true, address, loginId,
 		req.AttributeId, req.FileId, hash.String, name, req.ChooseApp)
 }
-func eventKeystrokesRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (interface{}, error) {
+func eventKeystrokesRequested_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, address string) (any, error) {
 	var keystrokes string
 
 	if err := json.Unmarshal(reqJson, &keystrokes); err != nil {

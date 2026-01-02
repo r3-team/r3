@@ -30,9 +30,9 @@ type ClusterEventFileRequested struct {
 	FileName    string    `json:"fileName"`
 }
 type ClusterEventJsFunctionCalled struct {
-	ModuleId     uuid.UUID     `json:"moduleId"` // module ID that JS function belongs to, relevant for filtering to direct app access
-	JsFunctionId uuid.UUID     `json:"jsFunctionId"`
-	Arguments    []interface{} `json:"arguments"`
+	ModuleId     uuid.UUID `json:"moduleId"` // module ID that JS function belongs to, relevant for filtering to direct app access
+	JsFunctionId uuid.UUID `json:"jsFunctionId"`
+	Arguments    []any     `json:"arguments"`
 }
 
 // cluster event payloads used by instance functions
@@ -66,6 +66,6 @@ type ClusterEventTarget struct {
 // cluster event to be processed by nodes and, in most cases, to be distributed to clients of cluster nodes
 type ClusterEvent struct {
 	Content string             `json:"content"` // collectionChanged, configChanged, kick, kickNoAdmin, renew, schemaLoading, schemaLoaded, ...
-	Payload interface{}        `json:"payload"` // content dependent payload
+	Payload any                `json:"payload"` // content dependent payload
 	Target  ClusterEventTarget `json:"target"`  // target filter, to which clients this event is to be sent
 }

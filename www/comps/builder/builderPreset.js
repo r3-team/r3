@@ -1,13 +1,13 @@
 import {getDependentModules} from '../shared/builder.js';
-import {getTemplatePreset}   from '../shared/builderTemplate.js';
+import {copyValueDialog}     from '../shared/generic.js';
 import {
 	isAttributeFiles,
 	isAttributeRelationship
 } from '../shared/attribute.js';
 import {
-	copyValueDialog,
-	getNilUuid
-} from '../shared/generic.js';
+	getTemplatePreset,
+	getTemplatePresetValue
+} from '../shared/builderTemplate.js';
 export {MyBuilderPreset as default};
 
 const MyBuilderPresetValue = {
@@ -235,8 +235,8 @@ const MyBuilderPreset = {
 		// externals
 		copyValueDialog,
 		getDependentModules,
-		getNilUuid,
 		getTemplatePreset,
+		getTemplatePresetValue,
 		isAttributeFiles,
 		isAttributeRelationship,
 		
@@ -284,13 +284,7 @@ const MyBuilderPreset = {
 			
 			// no preset value yet for attribute, create one
 			if(this.attributeIdMapValue[atrId] === undefined)
-				return this.values.values.push({
-					id:this.getNilUuid(),
-					attributeId:atrId,
-					presetIdRefer:presetIdRefer,
-					protected:protec,
-					value:value
-				});
+				return this.values.values.push(this.getTemplatePresetValue(atrId,presetIdRefer,protec,value));
 			
 			// update existing preset value
 			for(let i = 0, j = this.values.values.length; i < j; i++) {
