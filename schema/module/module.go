@@ -54,7 +54,6 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 }
 
 func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, error) {
-	modules := make([]types.Module, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
@@ -82,45 +81,45 @@ func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, er
 		WHERE id = ANY($1)
 	`, ids)
 	if err != nil {
-		return modules, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	modules := make([]types.Module, 0)
 	for rows.Next() {
 		var m types.Module
-		if err := rows.Scan(&m.Id, &m.ParentId, &m.FormId, &m.IconId, &m.IconIdPwa1,
-			&m.IconIdPwa2, &m.JsFunctionIdOnLogin, &m.PgFunctionIdLoginSync, &m.Name,
-			&m.NamePwa, &m.NamePwaShort, &m.Color1, &m.Position, &m.LanguageMain,
-			&m.ReleaseBuild, &m.ReleaseBuildApp, &m.ReleaseDate, &m.DependsOn,
-			&m.ArticleIdsHelp, &m.Languages); err != nil {
+		if err := rows.Scan(&m.Id, &m.ParentId, &m.FormId, &m.IconId, &m.IconIdPwa1, &m.IconIdPwa2,
+			&m.JsFunctionIdOnLogin, &m.PgFunctionIdLoginSync, &m.Name, &m.NamePwa, &m.NamePwaShort,
+			&m.Color1, &m.Position, &m.LanguageMain, &m.ReleaseBuild, &m.ReleaseBuildApp,
+			&m.ReleaseDate, &m.DependsOn, &m.ArticleIdsHelp, &m.Languages); err != nil {
 
-			return modules, err
+			return nil, err
 		}
 		modules = append(modules, m)
 	}
+	rows.Close()
 
 	// get start forms & captions
 	for i, mod := range modules {
 
 		mod.StartForms, err = getStartForms_tx(ctx, tx, mod.Id)
 		if err != nil {
-			return modules, err
+			return nil, err
 		}
-
 		mod.Captions, err = caption.Get_tx(ctx, tx, schema.DbModule, mod.Id, []string{"moduleTitle"})
 		if err != nil {
-			return modules, err
+			return nil, err
 		}
 		modules[i] = mod
 	}
 	return modules, nil
 }
 
-func Set_tx(ctx context.Context, tx pgx.Tx, mod types.Module) error {
-	_, err := SetReturnId_tx(ctx, tx, mod)
+func Set_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal bool) error {
+	_, err := SetReturnId_tx(ctx, tx, mod, fromLocal)
 	return err
 }
-func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
+func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal bool) (uuid.UUID, error) {
 
 	if err := check.DbIdentifier(mod.Name); err != nil {
 		return mod.Id, err
@@ -130,11 +129,11 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 		return mod.Id, errors.New("language code must have 5 characters")
 	}
 
-	create := mod.Id == uuid.Nil
-	known, err := schema.CheckCreateId_tx(ctx, tx, &mod.Id, schema.DbModule, "id")
+	known, err := schema.CheckId_tx(ctx, tx, mod.Id, schema.DbModule, "id")
 	if err != nil {
 		return mod.Id, err
 	}
+	isNew := fromLocal && !known
 
 	if strings.HasPrefix(mod.Name, "instance") {
 		return mod.Id, fmt.Errorf("application name must not start with 'instance'")
@@ -198,7 +197,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 			return mod.Id, err
 		}
 
-		if create {
+		if isNew {
 			// generate entities that need to be created if module did not exist before
 			// otherwise they are imported with existing IDs (and foreign key references)
 
@@ -230,7 +229,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module) (uuid.UUID
 		}
 
 		// create module meta data record for instance
-		if err := module_meta.Create_tx(ctx, tx, mod.Id, false, create, mod.Position); err != nil {
+		if err := module_meta.Create_tx(ctx, tx, mod.Id, false, isNew, mod.Position); err != nil {
 			return mod.Id, err
 		}
 	}

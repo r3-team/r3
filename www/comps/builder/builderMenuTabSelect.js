@@ -3,7 +3,7 @@ import srcBase64Icon                   from '../shared/image.js';
 import {getCaptionForLang}             from '../shared/language.js';
 export {MyBuilderMenuTabSelect as default};
 
-let MyBuilderMenuTabSelect = {
+const MyBuilderMenuTabSelect = {
 	name:'my-builder-menu-tab-select',
 	components:{MyTabs},
 	template:`<my-tabs

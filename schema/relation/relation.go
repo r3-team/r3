@@ -167,8 +167,13 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation, fromLocal bool) 
 
 		// create primary key attribute if relation is new (e. g. not imported or updated)
 		if fromLocal && !known {
+			idAtr, err := uuid.NewV4()
+			if err != nil {
+				return err
+			}
+
 			if err := attribute.Set_tx(ctx, tx, types.Attribute{
-				Id:             uuid.Nil,
+				Id:             idAtr,
 				RelationId:     rel.Id,
 				RelationshipId: pgtype.UUID{},
 				IconId:         pgtype.UUID{},

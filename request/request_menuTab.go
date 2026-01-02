@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func MenuTabDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func MenuTabDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
@@ -18,7 +18,7 @@ func MenuTabDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (int
 	return nil, menuTab.Del_tx(ctx, tx, req)
 }
 
-func MenuTabSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func MenuTabSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req struct {
 		MenuTab  types.MenuTab `json:"menuTab"`
 		Position int           `json:"position"`

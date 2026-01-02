@@ -1,15 +1,13 @@
-import MyBuilderCaption    from './builderCaption.js';
-import MyBuilderPgTriggers from './builderPgTriggers.js';
-import MyCodeEditor        from '../codeEditor.js';
-import MyTabs              from '../tabs.js';
+import MyBuilderCaption                from './builderCaption.js';
+import MyBuilderPgTriggers             from './builderPgTriggers.js';
+import MyCodeEditor                    from '../codeEditor.js';
+import MyTabs                          from '../tabs.js';
+import {getTemplatePgFunctionSchedule} from '../shared/builderTemplate.js';
+import {copyValueDialog}               from '../shared/generic.js';
 import {
 	getAttributeIcon,
 	isAttributeFiles
 }  from '../shared/attribute.js';
-import {
-	copyValueDialog,
-	getNilUuid
-} from '../shared/generic.js';
 import {
 	getDependentModules,
 	getFunctionHelp,
@@ -17,7 +15,7 @@ import {
 } from '../shared/builder.js';
 export {MyBuilderPgFunction as default};
 
-let MyBuilderPgFunctionItemSchedule = {
+const MyBuilderPgFunctionItemSchedule = {
 	name:'my-builder-pg-function-item-schedule',
 	template:`<div class="schedule">
 		
@@ -123,7 +121,7 @@ let MyBuilderPgFunctionItemSchedule = {
 	}
 };
 
-let MyBuilderPgFunction = {
+const MyBuilderPgFunction = {
 	name:'my-builder-pg-function',
 	components:{
 		MyBuilderCaption,
@@ -745,7 +743,7 @@ let MyBuilderPgFunction = {
 		getAttributeIcon,
 		getDependentModules,
 		getFunctionHelp,
-		getNilUuid,
+		getTemplatePgFunctionSchedule,
 		getValidDbCharsForRx,
 		isAttributeFiles,
 		
@@ -760,15 +758,7 @@ let MyBuilderPgFunction = {
 		
 		// actions
 		addSchedule() {
-			this.schedules.push({
-				id:this.getNilUuid(),
-				atSecond:0,
-				atMinute:0,
-				atHour:12,
-				atDay:1,
-				intervalType:'days',
-				intervalValue:3
-			});
+			this.schedules.push(this.getTemplatePgFunctionSchedule());
 		},
 		reset() {
 			this.name           = this.pgFunction.name;
@@ -1026,7 +1016,7 @@ let MyBuilderPgFunction = {
 			});
 		},
 		del() {
-			ws.send('pgFunction','del',{id:this.pgFunction.id},true).then(
+			ws.send('pgFunction','del',this.pgFunction.id,true).then(
 				() => {
 					this.$root.schemaReload(this.pgFunction.moduleId);
 					this.$router.push('/builder/pg-functions/'+this.pgFunction.moduleId);

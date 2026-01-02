@@ -119,6 +119,5 @@ func clientEventExecFatClient_tx(ctx context.Context, tx pgx.Tx, reqJson json.Ra
 
 		return nil, err
 	}
-
 	return nil, fmt.Errorf("invalid client event action")
 }

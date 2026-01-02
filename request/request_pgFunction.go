@@ -14,23 +14,19 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func PgFunctionDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
-	var req struct {
-		Id uuid.UUID `json:"id"`
-	}
-
+func PgFunctionDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, pgFunction.Del_tx(ctx, tx, req.Id)
+	return nil, pgFunction.Del_tx(ctx, tx, req)
 }
 
-func PgFunctionExec_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, onlyFrontendFnc bool) (interface{}, error) {
+func PgFunctionExec_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, onlyFrontendFnc bool) (any, error) {
 
 	var req struct {
-		Id   uuid.UUID     `json:"id"`
-		Args []interface{} `json:"args"`
+		Id   uuid.UUID `json:"id"`
+		Args []any     `json:"args"`
 	}
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
@@ -64,7 +60,7 @@ func PgFunctionExec_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, 
 		placeholders = append(placeholders, fmt.Sprintf("$%d", i+1))
 	}
 
-	var returnIf interface{}
+	var returnIf any
 	if err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT "%s"."%s"(%s)
 	`, mod.Name, fnc.Name, strings.Join(placeholders, ",")),
@@ -75,10 +71,8 @@ func PgFunctionExec_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, 
 	return returnIf, nil
 }
 
-func PgFunctionSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
+func PgFunctionSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req types.PgFunction
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}

@@ -4,12 +4,16 @@ import MyBuilderFormInput              from './builderFormInput.js';
 import MyBuilderIconInput              from './builderIconInput.js';
 import MyBuilderMenuTabSelect          from './builderMenuTabSelect.js';
 import {getDependentModules}           from '../shared/builder.js';
-import {getTemplateCollectionConsumer} from '../shared/builderTemplate.js';
-import {getNilUuid}                    from '../shared/generic.js';
+import {getUuidV4}                     from '../shared/crypto.js';
 import {getCaptionForLang}             from '../shared/language.js';
+import {
+	getTemplateCollectionConsumer,
+	getTemplateMenu,
+	getTemplateMenuTab
+} from '../shared/builderTemplate.js';
 export {MyBuilderMenu as default};
 
-let MyBuilderMenuItems = {
+const MyBuilderMenuItems = {
 	name:'my-builder-menu-items',
 	components:{
 		'chrome-picker':VueColor.Chrome,
@@ -195,7 +199,6 @@ let MyBuilderMenuItems = {
 	},
 	methods:{
 		// externals
-		getNilUuid,
 		getTemplateCollectionConsumer,
 		
 		// presentation
@@ -214,7 +217,7 @@ let MyBuilderMenuItems = {
 	}
 };
 
-let MyBuilderMenuTabOptions = {
+const MyBuilderMenuTabOptions = {
 	name:'my-builder-menu-tab-options',
 	components:{
 		MyBuilderCaption,
@@ -263,7 +266,7 @@ let MyBuilderMenuTabOptions = {
 	}
 };
 
-let MyBuilderMenu = {
+const MyBuilderMenu = {
 	name:'my-builder-menu',
 	components:{
 		MyBuilderMenuItems,
@@ -385,8 +388,6 @@ let MyBuilderMenu = {
 		return {
 			copyMenuTabId:null,
 			copyModuleId:null,
-			newCntEntry:0, // temporary menu IDs, replaced with NULL UUIDs on SET
-			newCntTab:0,   // temporary menu tab IDs, replaced with NULL UUIDs on SET
 			menuTabs:[],
 			menuTabsIndexShown:0,
 			menuTabIdsRemoved:[]
@@ -434,40 +435,23 @@ let MyBuilderMenu = {
 		// externals
 		getCaptionForLang,
 		getDependentModules,
-		getNilUuid,
+		getTemplateMenu,
+		getTemplateMenuTab,
+		getUuidV4,
 		
 		// actions
 		addEntry() {
-			this.menuTabs[this.menuTabsIndexShown].menus.unshift({
-				id:this.newCntEntry++,
-				formId:null,
-				iconId:null,
-				menus:[],
-				showChildren:false,
-				color:null,
-				collections:[],
-				captions:{
-					menuTitle:{}
-				}
-			});
+			this.menuTabs[this.menuTabsIndexShown].menus.unshift(this.getTemplateMenu());
 		},
 		addTab() {
-			this.menuTabs.push({
-				id:this.newCntTab++,
-				moduleId:this.module.id,
-				iconId:null,
-				menus:[],
-				captions:{
-					menuTabTitle:{}
-				}
-			});
+			this.menuTabs.push(this.getTemplateMenuTab(this.module.id));
 		},
 		copy() {
 			const mod = this.moduleIdMap[this.copyModuleId];
 			for(const mt of mod.menuTabs) {
 				if(mt.id === this.copyMenuTabId) {
-					return this.menuTabs[this.menuTabsIndexShown].menus = this.replaceMenuIdsNested(
-						this.menuTabs[this.menuTabsIndexShown].menus.concat(JSON.parse(JSON.stringify(mt.menus))),false);
+					return this.menuTabs[this.menuTabsIndexShown].menus = this.replaceIdsForCopy(
+						this.menuTabs[this.menuTabsIndexShown].menus.concat(JSON.parse(JSON.stringify(mt.menus))));
 				}
 			}
 		},
@@ -476,22 +460,15 @@ let MyBuilderMenu = {
 			this.menuTabs.splice(newIndex, 0, this.menuTabs.splice(this.menuTabsIndexShown,1)[0]);
 			this.menuTabsIndexShown = newIndex;
 		},
-		replaceMenuIdsNested(menus,newToNilUuid) {
+		replaceIdsForCopy(menus) {
 			for(let i = 0, j = menus.length; i < j; i++) {
 
-				// replace temporary counter IDs with NULL UUIDs (for SET of new menu entries)
-				if(newToNilUuid && Number.isInteger(menus[i].id))
-					menus[i].id = this.getNilUuid();
-
-				// replace existing UUIDs with temporary counter IDs (for menu copy)
-				if(!newToNilUuid && !Number.isInteger(menus[i].id))
-					menus[i].id = this.newCntEntry++;
-
-				// replace collection consumer IDs with NULL UUIDs to create new ones
+				// replace menu & collection consumer UUIDs with new ones
+				menus[i].id = this.getUuidV4();
 				for(let ci = 0, cj = menus[i].collections.length; ci < cj; ci++) {
-					menus[i].collections[ci].id = this.getNilUuid();
+					menus[i].collections[ci].id = this.getUuidV4();
 				}
-				menus[i].menus = this.replaceMenuIdsNested(menus[i].menus,newToNilUuid);
+				menus[i].menus = this.replaceIdsForCopy(menus[i].menus);
 			}
 			return menus;
 		},
@@ -510,22 +487,14 @@ let MyBuilderMenu = {
 		
 		// backend functions
 		del() {
-			if(!Number.isInteger(this.menuTabs[this.menuTabsIndexShown].id))
-				this.menuTabIdsRemoved.push(this.menuTabs[this.menuTabsIndexShown].id);
-
+			this.menuTabIdsRemoved.push(this.menuTabs[this.menuTabsIndexShown].id);
 			this.menuTabs.splice(this.menuTabsIndexShown,1);
 			this.switchToValidMenuTab();
 		},
 		set() {
 			let requests = [];
 			for(let i = 0, j = this.menuTabs.length; i < j; i++) {
-				let mt   = JSON.parse(JSON.stringify(this.menuTabs[i]));
-				mt.menus = this.replaceMenuIdsNested(mt.menus,true);
-
-				if(Number.isInteger(mt.id))
-					mt.id = this.getNilUuid();
-
-				requests.push(ws.prepare('menuTab','set',{menuTab:mt,position:i}));
+				requests.push(ws.prepare('menuTab','set',{menuTab:this.menuTabs[i],position:i}));
 			}
 			for(const id of this.menuTabIdsRemoved) {
 				requests.push(ws.prepare('menuTab','del',id));

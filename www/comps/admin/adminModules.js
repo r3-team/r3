@@ -281,11 +281,11 @@ const MyAdminModulesItem = {
 			});
 		},
 		del() {
-			let requests = [ws.prepare('module','del',{id:this.id})];
+			let requests = [ws.prepare('module','del',this.id)];
 			
 			// add dependencies to delete
 			for(let id of this.moduleIdsDependendOnUs) {
-				requests.push(ws.prepare('module','del',{id:id}));
+				requests.push(ws.prepare('module','del',id));
 			}
 			
 			ws.sendMultiple(requests,true).then(

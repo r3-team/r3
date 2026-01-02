@@ -1,11 +1,12 @@
-import MyBuilderCaption from './builderCaption.js';
+import MyBuilderCaption       from './builderCaption.js';
+import {getTemplateLoginForm} from '../shared/builderTemplate.js';
 import {
 	isAttributeInteger,
 	isAttributeString
 } from '../shared/attribute.js';
 export {MyBuilderLoginForms as default};
 
-let MyBuilderLoginFormsItem = {
+const MyBuilderLoginFormsItem = {
 	name:'my-builder-login-forms-item',
 	components:{ MyBuilderCaption },
 	template:`<tr>
@@ -65,22 +66,13 @@ let MyBuilderLoginFormsItem = {
 			</select>
 		</td>
 	</tr>`,
+	emits:['reset-new'],
 	props:{
-		builderLanguage:{ type:String, required:true },
-		module:         { type:Object, required:true },
-		loginForm:      { type:Object, required:false,
-			default:function() { return{
-				id:null,
-				attributeIdLogin:null,
-				attributeIdLookup:null,
-				formId:null,
-				name:'',
-				captions:{
-					loginFormTitle:{}
-				}
-			}}
-		},
-		readonly:{ type:Boolean, required:true }
+		builderLanguage:{ type:String,  required:true },
+		isNew:          { type:Boolean, required:true },
+		module:         { type:Object,  required:true },
+		loginForm:      { type:Object,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	data() {
 		return {
@@ -122,9 +114,6 @@ let MyBuilderLoginFormsItem = {
 			|| s.formId            !== s.loginForm.formId
 			|| JSON.stringify(s.captions) !== JSON.stringify(s.loginForm.captions),
 		
-		// simple states
-		isNew:(s) => s.loginForm.id === null,
-		
 		// stores
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
@@ -139,7 +128,7 @@ let MyBuilderLoginFormsItem = {
 		
 		// actions
 		del() {
-			ws.send('loginForm','del',{id:this.loginForm.id},true).then(
+			ws.send('loginForm','del',this.loginForm.id,true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);
@@ -155,12 +144,9 @@ let MyBuilderLoginFormsItem = {
 				captions:this.captions
 			},true).then(
 				() => {
-					if(this.isNew) {
-						this.attributeIdLogin  = null;
-						this.attributeIdLookup = null;
-						this.formId            = null;
-						this.name              = '';
-					}
+					if(this.isNew)
+						this.$emit('reset-new');
+					
 					this.$root.schemaReload(this.module.id);
 				},
 				this.$root.genericError
@@ -169,11 +155,10 @@ let MyBuilderLoginFormsItem = {
 	}
 };
 
-let MyBuilderLoginForms = {
+const MyBuilderLoginForms = {
 	name:'my-builder-login-forms',
 	components:{MyBuilderLoginFormsItem},
 	template:`<div class="contentBox grow">
-		
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" src="images/personCog.png" />
@@ -199,19 +184,25 @@ let MyBuilderLoginForms = {
 				<tbody>
 					<!-- new record -->
 					<my-builder-login-forms-item
-						:builderLanguage="builderLanguage"
-						:module="module"
-						:readonly="readonly"
+						v-if="loginFormNew !== false"
+						@reset-new="resetLoginFormNew"
+						:builderLanguage
+						:isNew="true"
+						:loginForm="loginFormNew"
+						:key="loginFormNew.id"
+						:module
+						:readonly
 					/>
 					
 					<!-- existing records -->
 					<my-builder-login-forms-item
 						v-for="l in module.loginForms"
-						:builderLanguage="builderLanguage"
+						:builderLanguage
+						:isNew="false"
 						:loginForm="l"
 						:key="l.id"
-						:module="module"
-						:readonly="readonly"
+						:module
+						:readonly
 					/>
 				</tbody>
 			</table>
@@ -222,13 +213,29 @@ let MyBuilderLoginForms = {
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
+	data() {
+		return {
+			loginFormNew:false
+		};
+	},
 	computed:{
-		module:(s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
+		module:(s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		
 		// stores
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		formIdMap:  (s) => s.$store.getters['schema/formIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.loginForm,
 		capGen:     (s) => s.$store.getters.captions.generic
+	},
+	mounted() {
+		this.resetLoginFormNew();
+	},
+	methods:{
+		// externals
+		getTemplateLoginForm,
+
+		resetLoginFormNew() {
+			this.loginFormNew = this.getTemplateLoginForm(this.module.id);
+		}
 	}
 };

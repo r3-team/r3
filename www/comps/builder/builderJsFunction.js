@@ -23,7 +23,7 @@ import {
 } from '../shared/field.js';
 export {MyBuilderJsFunction as default};
 
-let MyBuilderJsFunction = {
+const MyBuilderJsFunction = {
 	name:'my-builder-js-function',
 	components:{
 		MyBuilderCaption,
@@ -32,7 +32,6 @@ let MyBuilderJsFunction = {
 		MyTabs
 	},
 	template:`<div class="builder-function">
-		
 		<div class="contentBox grow" v-if="jsFunction">
 			<div class="top">
 				<div class="area nowrap">
@@ -1164,7 +1163,7 @@ let MyBuilderJsFunction = {
 			});
 		},
 		del() {
-			ws.send('jsFunction','del',{id:this.jsFunction.id},true).then(
+			ws.send('jsFunction','del',this.jsFunction.id,true).then(
 				() => {
 					this.$root.schemaReload(this.jsFunction.moduleId);
 					this.$router.push('/builder/js-functions/'+this.jsFunction.moduleId);

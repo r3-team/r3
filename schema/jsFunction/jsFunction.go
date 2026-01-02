@@ -28,10 +28,6 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 }
 
 func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.JsFunction, error) {
-
-	var err error
-	functions := make([]types.JsFunction, 0)
-
 	rows, err := tx.Query(ctx, `
 		SELECT id, form_id, name, code_args, code_function, code_returns, is_client_event_exec
 		FROM app.js_function
@@ -39,26 +35,25 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.JsFunct
 		ORDER BY form_id ASC, name ASC -- sort by both as name is only in unique in combination
 	`, moduleId)
 	if err != nil {
-		return functions, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	functions := make([]types.JsFunction, 0)
 	for rows.Next() {
 		var f types.JsFunction
-
-		if err := rows.Scan(&f.Id, &f.FormId, &f.Name, &f.CodeArgs,
-			&f.CodeFunction, &f.CodeReturns, &f.IsClientEventExec); err != nil {
-
-			return functions, err
+		if err := rows.Scan(&f.Id, &f.FormId, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns, &f.IsClientEventExec); err != nil {
+			return nil, err
 		}
 		functions = append(functions, f)
 	}
+	rows.Close()
 
 	for i, f := range functions {
 		f.ModuleId = moduleId
 		f.Captions, err = caption.Get_tx(ctx, tx, schema.DbJsFunction, f.Id, []string{"jsFunctionTitle", "jsFunctionDesc"})
 		if err != nil {
-			return functions, err
+			return nil, err
 		}
 		functions[i] = f
 	}
@@ -72,31 +67,16 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.JsFunction) error {
 	if fnc.Name == "" {
 		return fmt.Errorf("function name must not be empty")
 	}
-
-	known, err := schema.CheckCreateId_tx(ctx, tx, &fnc.Id, schema.DbJsFunction, "id")
-	if err != nil {
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO app.js_function (id, module_id, form_id, name,
+			code_args, code_function, code_returns, is_client_event_exec)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+		ON CONFLICT (id)
+		DO UPDATE SET name = $4, code_args = $5, code_function = $6, code_returns = $7, is_client_event_exec = $8
+	`, fnc.Id, fnc.ModuleId, fnc.FormId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsClientEventExec); err != nil {
 		return err
 	}
 
-	if known {
-		if _, err := tx.Exec(ctx, `
-			UPDATE app.js_function
-			SET name = $1, code_args = $2, code_function = $3, code_returns = $4, is_client_event_exec = $5
-			WHERE id = $6
-		`, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsClientEventExec, fnc.Id); err != nil {
-			return err
-		}
-	} else {
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.js_function (id, module_id, form_id, name,
-				code_args, code_function, code_returns, is_client_event_exec)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-		`, fnc.Id, fnc.ModuleId, fnc.FormId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsClientEventExec); err != nil {
-			return err
-		}
-	}
-
-	// set captions
 	if err := caption.Set_tx(ctx, tx, fnc.Id, fnc.Captions); err != nil {
 		return err
 	}
@@ -108,7 +88,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.JsFunction) error {
 	`, fnc.Id); err != nil {
 		return err
 	}
-
 	if err := storeDependencies_tx(ctx, tx, fnc.Id, schema.DbCollection, fmt.Sprintf(`%s\.collection_(read|update)\('(%s)'`, rxPrefix, rxUuid), 2, fnc.CodeFunction); err != nil {
 		return err
 	}

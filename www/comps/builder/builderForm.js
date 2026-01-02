@@ -1021,7 +1021,7 @@ const MyBuilderForm = {
 			// save form and delete removed fields
 			let requests = [];
 			for(const fieldId of this.fieldIdsRemove) {
-				requests.push(ws.prepare('field','del',{id:fieldId}));
+				requests.push(ws.prepare('field','del',fieldId));
 			}
 			
 			requests.push(ws.prepare('form','set',{

@@ -1,5 +1,4 @@
 import {getUuidV4}        from './crypto.js';
-import {getNilUuid}       from './generic.js';
 import {getQueryTemplate} from './query.js';
 import {
 	isAttributeBoolean,
@@ -507,7 +506,7 @@ export function getTemplateForm(moduleId,name) {
 };
 export function getTemplateJsFunction(moduleId,formId,name) {
 	return {
-		id:getNilUuid(),
+		id:getUuidV4(),
 		moduleId:moduleId,
 		formId:formId,
 		name:name,
@@ -521,9 +520,47 @@ export function getTemplateJsFunction(moduleId,formId,name) {
 		}
 	};
 };
+export function getTemplateLoginForm(moduleId) {
+	return {
+		id:getUuidV4(),
+		moduleId:moduleId,
+		attributeIdLogin:null,
+		attributeIdLookup:null,
+		formId:null,
+		name:'',
+		captions:{
+			loginFormTitle:{}
+		}
+	};
+};
+export function getTemplateMenu() {
+	return {
+		id:getUuidV4(),
+		formId:null,
+		iconId:null,
+		menus:[],
+		showChildren:false,
+		color:null,
+		collections:[],
+		captions:{
+			menuTitle:{}
+		}
+	};
+};
+export function getTemplateMenuTab(moduleId) {
+	return {
+		id:getUuidV4(),
+		moduleId:moduleId,
+		iconId:null,
+		menus:[],
+		captions:{
+			menuTabTitle:{}
+		}
+	};
+};
 export function getTemplateModule(name) {
 	return {
-		id:getNilUuid(),
+		id:getUuidV4(),
 		parentId:null,
 		formId:null,
 		iconId:null,
@@ -544,8 +581,8 @@ export function getTemplateModule(name) {
 	};
 };
 export function getTemplatePgFunction(moduleId,name,template,isTrigger) {
-	return  {
-		id:getNilUuid(),
+	return {
+		id:getUuidV4(),
 		moduleId:moduleId,
 		name:name,
 		codeArgs:getTemplateArgs(template),
@@ -560,6 +597,17 @@ export function getTemplatePgFunction(moduleId,name,template,isTrigger) {
 			pgFunctionTitle:{},
 			pgFunctionDesc:{}
 		}
+	};
+};
+export function getTemplatePgFunctionSchedule() {
+	return {
+		id:getUuidV4(),
+		atSecond:0,
+		atMinute:0,
+		atHour:12,
+		atDay:1,
+		intervalType:'days',
+		intervalValue:3
 	};
 };
 export function getTemplatePreset(relationId) {

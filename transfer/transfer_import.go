@@ -211,7 +211,7 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		log.Info(log.ContextTransfer, fmt.Sprintf("set module '%s' v%d, %s",
 			mod.Name, mod.ReleaseBuild, mod.Id))
 
-		if err := importCheckResultAndApply(ctx, tx, module.Set_tx(ctx, tx, mod), mod.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(ctx, tx, module.Set_tx(ctx, tx, mod, false), mod.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}

@@ -1,7 +1,7 @@
 import {getJsFunctionsProcessed} from '../shared/builder.js';
 export {MyBuilderJsFunctions as default};
 
-let MyBuilderJsFunctions = {
+const MyBuilderJsFunctions = {
 	name:'my-builder-js-functions',
 	template:`<div class="contentBox grow builder-functions">
 		
@@ -67,7 +67,7 @@ let MyBuilderJsFunctions = {
 		jsFunctions:(s) => s.getJsFunctionsProcessed(s.module.jsFunctions,s.filter),
 		
 		// stores
-		module:     (s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
+		module:     (s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		formIdMap:  (s) => s.$store.getters['schema/formIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.function,

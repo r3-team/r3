@@ -24,25 +24,16 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 		return err
 	}
 
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`
-		DROP FUNCTION "%s"."%s"
-	`, nameMod, nameEx)); err != nil {
+	if _, err := tx.Exec(ctx, fmt.Sprintf(`DROP FUNCTION "%s"."%s"`, nameMod, nameEx)); err != nil {
 		return err
 	}
-
-	if _, err := tx.Exec(ctx, `
-		DELETE FROM app.pg_function
-		WHERE id = $1
-	`, id); err != nil {
+	if _, err := tx.Exec(ctx, `DELETE FROM app.pg_function WHERE id = $1`, id); err != nil {
 		return err
 	}
 	return nil
 }
 
 func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunction, error) {
-
-	var err error
-	functions := make([]types.PgFunction, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, name, code_args, code_function, code_returns,
@@ -52,37 +43,38 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunct
 		ORDER BY name ASC
 	`, moduleId)
 	if err != nil {
-		return functions, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	functions := make([]types.PgFunction, 0)
 	for rows.Next() {
 		var f types.PgFunction
 
 		if err := rows.Scan(&f.Id, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns,
 			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility, &f.Cost); err != nil {
 
-			return functions, err
+			return nil, err
 		}
 		functions = append(functions, f)
 	}
+	rows.Close()
 
 	for i, f := range functions {
 		f.ModuleId = moduleId
 		f.Schedules, err = getSchedules_tx(ctx, tx, f.Id)
 		if err != nil {
-			return functions, err
+			return nil, err
 		}
 		f.Captions, err = caption.Get_tx(ctx, tx, schema.DbPgFunction, f.Id, []string{"pgFunctionTitle", "pgFunctionDesc"})
 		if err != nil {
-			return functions, err
+			return nil, err
 		}
 		functions[i] = f
 	}
 	return functions, nil
 }
 func getSchedules_tx(ctx context.Context, tx pgx.Tx, pgFunctionId uuid.UUID) ([]types.PgFunctionSchedule, error) {
-	schedules := make([]types.PgFunctionSchedule, 0)
 
 	rows, err := tx.Query(ctx, `
 		SELECT id, at_second, at_minute, at_hour, at_day, interval_type, interval_value
@@ -91,17 +83,15 @@ func getSchedules_tx(ctx context.Context, tx pgx.Tx, pgFunctionId uuid.UUID) ([]
 		ORDER BY id ASC
 	`, pgFunctionId)
 	if err != nil {
-		return schedules, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	schedules := make([]types.PgFunctionSchedule, 0)
 	for rows.Next() {
 		var s types.PgFunctionSchedule
-
-		if err := rows.Scan(&s.Id, &s.AtSecond, &s.AtMinute, &s.AtHour,
-			&s.AtDay, &s.IntervalType, &s.IntervalValue); err != nil {
-
-			return schedules, err
+		if err := rows.Scan(&s.Id, &s.AtSecond, &s.AtMinute, &s.AtHour, &s.AtDay, &s.IntervalType, &s.IntervalValue); err != nil {
+			return nil, err
 		}
 		schedules = append(schedules, s)
 	}
@@ -141,7 +131,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 		return errors.New("empty function body or missing returns")
 	}
 
-	known, err := schema.CheckCreateId_tx(ctx, tx, &fnc.Id, schema.DbPgFunction, "id")
+	known, err := schema.CheckId_tx(ctx, tx, fnc.Id, schema.DbPgFunction, "id")
 	if err != nil {
 		return err
 	}
@@ -206,7 +196,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 	scheduleIds := make([]uuid.UUID, 0)
 	for _, s := range fnc.Schedules {
 
-		known, err = schema.CheckCreateId_tx(ctx, tx, &s.Id, schema.DbPgFunctionSchedule, "id")
+		known, err = schema.CheckId_tx(ctx, tx, s.Id, schema.DbPgFunctionSchedule, "id")
 		if err != nil {
 			return err
 		}
@@ -214,33 +204,22 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 		// overwrite invalid inputs
 		s.AtDay = schema.GetValidAtDay(s.IntervalType, s.AtDay)
 
-		if known {
-			if _, err := tx.Exec(ctx, `
-				UPDATE app.pg_function_schedule
-				SET at_second = $1, at_minute = $2, at_hour = $3, at_day = $4,
-					interval_type = $5, interval_value = $6
-				WHERE id = $7
-			`, s.AtSecond, s.AtMinute, s.AtHour, s.AtDay,
-				s.IntervalType, s.IntervalValue, s.Id); err != nil {
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO app.pg_function_schedule (
+				id, pg_function_id, at_second, at_minute, at_hour, at_day,
+				interval_type, interval_value
+			)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+			ON CONFLICT (id)
+			DO UPDATE SET at_second = $3, at_minute = $4, at_hour = $5, at_day = $6,
+				interval_type = $7, interval_value = $8
+		`, s.Id, fnc.Id, s.AtSecond, s.AtMinute, s.AtHour, s.AtDay, s.IntervalType, s.IntervalValue); err != nil {
+			return err
+		}
 
-				return err
-			}
-		} else {
+		if !known {
 			if _, err := tx.Exec(ctx, `
-				INSERT INTO app.pg_function_schedule (
-					id, pg_function_id, at_second, at_minute, at_hour, at_day,
-					interval_type, interval_value
-				)
-				VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-			`, s.Id, fnc.Id, s.AtSecond, s.AtMinute, s.AtHour, s.AtDay,
-				s.IntervalType, s.IntervalValue); err != nil {
-
-				return err
-			}
-			if _, err := tx.Exec(ctx, `
-				INSERT INTO instance.schedule (
-					pg_function_schedule_id,date_attempt,date_success
-				)
+				INSERT INTO instance.schedule (pg_function_schedule_id,date_attempt,date_success)
 				VALUES ($1,0,0)
 			`, s.Id); err != nil {
 				return err
@@ -257,7 +236,6 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 		return err
 	}
 
-	// set captions
 	if err := caption.Set_tx(ctx, tx, fnc.Id, fnc.Captions); err != nil {
 		return err
 	}

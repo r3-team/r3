@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func ModuleCheckChange_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func ModuleCheckChange_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var (
 		err error
 		req struct {
@@ -25,7 +25,6 @@ func ModuleCheckChange_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessag
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-
 	res.ModuleIdMapChanged, err = transfer.GetModuleChangedWithDependencies_tx(ctx, tx, req.Id)
 	if err != nil {
 		return nil, err
@@ -33,20 +32,18 @@ func ModuleCheckChange_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessag
 	return res, nil
 }
 
-func ModuleDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-	var req struct {
-		Id uuid.UUID `json:"id"`
-	}
+func ModuleDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, module.Del_tx(ctx, tx, req.Id)
+	return nil, module.Del_tx(ctx, tx, req)
 }
 
-func ModuleSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func ModuleSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req types.Module
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return module.SetReturnId_tx(ctx, tx, req)
+	return module.SetReturnId_tx(ctx, tx, req, true)
 }
