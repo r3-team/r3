@@ -1,7 +1,6 @@
 import {getDependentModules} from '../shared/builder.js';
-export {MyBuilderFormInput as default};
 
-let MyBuilderFormInput = {
+export default {
 	name:'my-builder-form-input',
 	template:`<div class="row gap centered">
 		<select v-model="input" :disabled="readonly">

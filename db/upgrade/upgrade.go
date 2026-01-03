@@ -163,7 +163,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				number_sep_dec character(1) NOT NULL,
 				number_sep_tho character(1) NOT NULL,
 				size real NOT NULL,
-				style character varying(2) NOT NULL,
+				style character varying(2),
 				CONSTRAINT doc_font_pkey PRIMARY KEY (doc_id),
 				CONSTRAINT doc_font_doc_id_fkey FOREIGN KEY (doc_id)
 					REFERENCES app.doc (id) MATCH SIMPLE

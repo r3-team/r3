@@ -191,7 +191,7 @@ func setFont(doc *doc, f types.DocFont) {
 
 	// font key is also used as file name
 	// Tinos_.ttf, Tinos_B.ttf, Tinos_BI.ttf, Tinos_I.ttf
-	fontKey := fmt.Sprintf("%s_%s", f.Family, f.Style)
+	fontKey := fmt.Sprintf("%s_%s", f.Family, f.Style.String)
 
 	if _, exists := doc.fontKeyMap[fontKey]; !exists {
 
@@ -206,7 +206,7 @@ func setFont(doc *doc, f types.DocFont) {
 		} else {
 
 			log.Info(log.ContextDoc, fmt.Sprintf("embedding font '%s' (style: %s)", f.Family, f.Style))
-			doc.p.AddUTF8FontFromBytes(f.Family, f.Style, fontFile)
+			doc.p.AddUTF8FontFromBytes(f.Family, f.Style.String, fontFile)
 			doc.fontKeyMap[fontKey] = true
 		}
 	}
@@ -217,5 +217,5 @@ func setFont(doc *doc, f types.DocFont) {
 	} else {
 		doc.p.SetTextColor(0, 0, 0)
 	}
-	doc.p.SetFont(f.Family, f.Style, f.Size)
+	doc.p.SetFont(f.Family, f.Style.String, f.Size)
 }

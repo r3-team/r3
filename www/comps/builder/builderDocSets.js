@@ -1,12 +1,22 @@
-import MyInputColorWrap    from '../inputColorWrap.js';
-import MyInputDateFormat   from '../inputDateFormat.js';
-import MyInputDecimal      from '../inputDecimal.js';
-import MyInputNumberSep    from '../inputNumberSep.js';
-import {getTemplateDocSet} from '../shared/builderTemplate.js';
+import MyInputColorWrap  from '../inputColorWrap.js';
+import MyInputDateFormat from '../inputDateFormat.js';
+import MyInputDecimal    from '../inputDecimal.js';
+import MyInputNumberSep  from '../inputNumberSep.js';
+import {
+	MyBuilderDocFontAlign,
+	MyBuilderDocFontFamily,
+	MyBuilderDocFontLineFactor,
+	MyBuilderDocFontStyles
+} from './builderDocFontInput.js';
+import {getTemplateDocSet}      from '../shared/builderTemplate.js';
 
 const MyBuilderDocSetTarget = {
 	name:'my-builder-doc-set-target',
 	components:{
+		MyBuilderDocFontAlign,
+		MyBuilderDocFontFamily,
+		MyBuilderDocFontLineFactor,
+		MyBuilderDocFontStyles,
 		MyInputColorWrap,
 		MyInputDateFormat,
 		MyInputDecimal,
@@ -23,7 +33,7 @@ const MyBuilderDocSetTarget = {
 		</td>
 		<td>
 			<div class="row gap centered" v-if="active">
-				<select class="short" v-if="setType !== false" :value="setType" @input="typeUpdate($event.target.value)">
+				<select class="short" v-if="hasTypeChoice" @input="typeUpdate($event.target.value)" :value="setType">
 					<option value="value" v-if="allowTypeValue">{{ capApp.setSourceValue }}</option>
 					<option value="data"  v-if="allowTypeData">{{ capApp.setSourceData }}</option>
 				</select>
@@ -32,30 +42,14 @@ const MyBuilderDocSetTarget = {
 
 				<!-- value inputs -->
 				<template v-if="setType === 'value'">
-					<my-input-color-wrap
-						v-if="isColor"
-						v-model="value"
-						:allowNull="true"
-						:readonly
-					/>
-					<my-input-date-format
-						v-if="isDateFormat"
-						v-model="value"
-						:readonly
-					/>
-					<my-input-decimal
-						v-if="isDecimal"
-						v-model="value"
-						:allowNull="true"
-						:length="4"
-						:lengthFract="2"
-						:readonly
-					/>
-					<my-input-number-sep
-						v-if="isNumberSep"
-						v-model="value"
-						:allowNone="target === 'font.numberSepTho'"
-					/>
+					<my-builder-doc-font-align       v-if="isFontAlign"      v-model="value" :readonly />
+					<my-builder-doc-font-family      v-if="isFontFamily"     v-model="value" :readonly />
+					<my-builder-doc-font-line-factor v-if="isFontLineFactor" v-model="value" :readonly />
+					<my-builder-doc-font-styles      v-if="isFontStyle"      v-model="value" :readonly />
+					<my-input-color-wrap             v-if="isColor"          v-model="value" :readonly :allowNull="true" />
+					<my-input-date-format            v-if="isDateFormat"     v-model="value" :readonly />
+					<my-input-decimal                v-if="isDecimal"        v-model="value" :readonly :allowNull="true" :length="4" :lengthFract="2" />
+					<my-input-number-sep             v-if="isNumberSep"      v-model="value" :readonly :allowNone="target === 'font.numberSepTho'" />
 				</template>
 			</div>
 		</td>
@@ -72,11 +66,12 @@ const MyBuilderDocSetTarget = {
 	data() {
 		return {
 			setType:false,
-			targetTypeDecimal:['font.lineFactor','font.size'],
+			targetTypeDecimal:['font.size'],
 			targetTypeColor:['font.color'],
 			targetTypeDateFormat:['font.dateFormat'],
 			targetTypeFontAlign:['font.align'],
 			targetTypeFontFamily:['font.family'],
+			targetTypeFontLineFactor:['font.lineFactor'],
 			targetTypeFontStyle:['font.style'],
 			targetTypeNumberSep:['font.numberSepDec','font.numberSepTho'],
 			targetCapMap:{}
@@ -90,13 +85,18 @@ const MyBuilderDocSetTarget = {
 		},
 
 		// simple
-		active:      s => s.setIndex !== -1,
-		isColor:     s => s.targetTypeColor.includes(s.target),
-		isDateFormat:s => s.targetTypeDateFormat.includes(s.target),
-		isDecimal:   s => s.targetTypeDecimal.includes(s.target),
-		isNumberSep: s => s.targetTypeNumberSep.includes(s.target),
-		set:         s => s.setIndex !== -1 ? JSON.parse(JSON.stringify(s.sets[s.setIndex])) : s.initTemplate(),
-		setIndex:    s => s.sets.findIndex(v => v.target === s.target),
+		active:           s => s.setIndex !== -1,
+		hasTypeChoice:    s => s.allowTypeData && s.allowTypeValue && s.setType !== false,
+		isColor:          s => s.targetTypeColor.includes(s.target),
+		isDateFormat:     s => s.targetTypeDateFormat.includes(s.target),
+		isDecimal:        s => s.targetTypeDecimal.includes(s.target),
+		isFontAlign:      s => s.targetTypeFontAlign.includes(s.target),
+		isFontFamily:     s => s.targetTypeFontFamily.includes(s.target),
+		isFontLineFactor: s => s.targetTypeFontLineFactor.includes(s.target),
+		isFontStyle:      s => s.targetTypeFontStyle.includes(s.target),
+		isNumberSep:      s => s.targetTypeNumberSep.includes(s.target),
+		set:              s => s.setIndex !== -1 ? JSON.parse(JSON.stringify(s.sets[s.setIndex])) : s.initTemplate(),
+		setIndex:         s => s.sets.findIndex(v => v.target === s.target),
 
 		// stores
 		capApp:s => s.$store.getters.captions.builder.doc,
@@ -153,8 +153,11 @@ const MyBuilderDocSetTarget = {
 		// actions
 		initTemplate() {
 			let value = null;
-			if(this.isDateFormat) value = 'Y-m-d';
-			if(this.isNumberSep)  value = '.';
+			if(this.isDateFormat)     value = 'Y-m-d';
+			if(this.isNumberSep)      value = '.';
+			if(this.isFontAlign)      value = 'L';
+			if(this.isFontFamily)     value = 'Roboto';
+			if(this.isFontLineFactor) value = 1.0;
 			return this.getTemplateDocSet(this.target,value);
 		},
 		toggle() {
@@ -200,7 +203,7 @@ export const MyBuilderDocSets = {
 		return {
 			targets:[
 				// font settings
-				'font.size','font.lineFactor','font.align','font.style','font.color','font.family',
+				'font.family','font.size','font.lineFactor','font.align','font.style','font.color',
 				'font.numberSepTho','font.numberSepDec','font.dateFormat'
 			]
 		};

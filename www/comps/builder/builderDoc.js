@@ -147,7 +147,7 @@ const MyBuilderDoc = {
 							<my-builder-doc-sets
 								v-model="doc.sets"
 								:allowTypeData="true"
-								:allowTypeValue="true"
+								:allowTypeValue="false"
 								:joinsIndexMap="[]"
 								:readonly
 							/>

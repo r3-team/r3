@@ -123,7 +123,7 @@ func applyToFont(set []types.DocSet, f types.DocFont) types.DocFont {
 			case "font.numberSepTho":
 				f.NumberSepTho = v
 			case "font.style":
-				f.Style = v
+				f.Style = pgtype.Text{String: v, Valid: true}
 			}
 		}
 	}
