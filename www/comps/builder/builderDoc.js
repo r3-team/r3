@@ -4,6 +4,7 @@ import {MyBuilderDocFont}    from './builderDocOptions.js';
 import {MyBuilderDocSets}    from './builderDocSets.js';
 import MyTabs                from '../tabs.js';
 import {deepIsEqual}         from '../shared/generic.js';
+import {getJoinsIndexMap}    from '../shared/query.js';
 import {getTemplateDocPage}  from '../shared/builderTemplate.js';
 export {MyBuilderDoc as default};
 
@@ -105,9 +106,20 @@ const MyBuilderDoc = {
 				/>
 
 				<!-- content -->
+				<div class="content grow" v-if="tabTarget === 'content'">
+					<my-builder-query
+						v-model="doc.query"
+						@index-removed=""
+						:allowChoices="false"
+						:allowFixedLimit="false"
+						:builderLanguage
+						:filtersDisable
+						:moduleId="doc.moduleId"
+					/>
+				</div>
 				
 				<!-- properties -->
-				<div class="content no-padding" v-if="tabTarget === 'properties'">
+				<div class="content grow no-padding" v-if="tabTarget === 'properties'">
 					<table class="generic-table-vertical default-inputs">
 						<tbody>
 							<tr>
@@ -148,7 +160,7 @@ const MyBuilderDoc = {
 								v-model="doc.sets"
 								:allowTypeData="true"
 								:allowTypeValue="false"
-								:joinsIndexMap="[]"
+								:joinsIndexMap="joinsIndexMap"
 								:readonly
 							/>
 						</tbody>
@@ -177,6 +189,11 @@ const MyBuilderDoc = {
 	data() {
 		return {
 			doc:false,
+			filtersDisable:[
+				'collection','field','fieldChanged','fieldValid','formChanged',
+				'formState','getter','globalSearch','javascript','record','recordMayCreate',
+				'recordMayDelete','recordMayUpdate','recordNew','variable'
+			],
 			
 			// state
 			sideColumnIdShow:null,
@@ -184,7 +201,7 @@ const MyBuilderDoc = {
 			sidePageIdShow:null,
 			showSidebar:true,
 			tabPageIdShow:0,
-			tabTarget:'properties'
+			tabTarget:'content'
 		};
 	},
 	computed:{
@@ -211,6 +228,7 @@ const MyBuilderDoc = {
 		// simple
 		docOrg:        (s) => s.docIdMap[s.id] === undefined ? false : s.docIdMap[s.id],
 		hasChanges:    (s) => !s.deepIsEqual(s.doc,s.docOrg),
+		joinsIndexMap: (s) => s.getJoinsIndexMap(s.doc.query.joins),
 		module:        (s) => s.moduleIdMap[s.doc.moduleId],
 		sideColumnShow:(s) => s.sideColumnIdShow !== null,
 		sideDocShow:   (s) => !s.sideColumnShow && !s.sideFieldShow && !s.sidePageShow,
@@ -232,6 +250,7 @@ const MyBuilderDoc = {
 	methods:{
 		// externals
 		deepIsEqual,
+		getJoinsIndexMap,
 		getTemplateDocPage,
 
 		// presentation

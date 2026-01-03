@@ -442,8 +442,8 @@ const MyBuilderApi = {
 					:allowChoices="false"
 					:allowLookups="true"
 					:allowOrders="true"
-					:builderLanguage="builderLanguage"
-					:filtersDisable="filtersDisable"
+					:builderLanguage
+					:filtersDisable
 					:moduleId="module.id"
 				/>
 				
@@ -457,14 +457,14 @@ const MyBuilderApi = {
 						v-model="columnShow.query"
 						:allowChoices="false"
 						:allowOrders="true"
-						:builderLanguage="builderLanguage"
-						:filtersDisable="filtersDisable"
+						:builderLanguage
+						:filtersDisable
 						:joinsParents="[query.joins]"
 						:moduleId="module.id"
 					/>
 					<my-builder-column-options
 						@set="(...args) => columnSet(args[0],args[1])"
-						:builderLanguage="builderLanguage"
+						:builderLanguage
 						:column="columnShow"
 						:hasCaptions="true"
 						:moduleId="module.id"
@@ -477,7 +477,7 @@ const MyBuilderApi = {
 			<div class="content no-padding" v-if="tabTarget === 'calls'">
 				<my-builder-api-preview
 					:api="api"
-					:builderLanguage="builderLanguage"
+					:builderLanguage
 					:columns="columns"
 					:hasDelete="hasDelete"
 					:hasGet="hasGet"

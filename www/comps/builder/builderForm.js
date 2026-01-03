@@ -10,7 +10,7 @@ import MyBuilderFields        from './builderFields.js';
 import MyTabs                 from '../tabs.js';
 import {getColumnIcon}        from '../shared/column.js';
 import {copyValueDialog}      from '../shared/generic.js';
-import {getJoinIndexMap}      from '../shared/query.js';
+import {getJoinsIndexMap}     from '../shared/query.js';
 import {routeParseParams}     from '../shared/router.js';
 import {
 	getIndexAttributeId,
@@ -245,7 +245,7 @@ const MyBuilderForm = {
 							@index-removed="removeDataFields(fields,$event)"
 							:allowChoices="false"
 							:allowFixedLimit="false"
-							:builderLanguage="builderLanguage"
+							:builderLanguage
 							:filtersDisable="['formChanged','formState','field','fieldChanged','fieldValid','getter','globalSearch','recordMayCreate','recordMayDelete','recordMayUpdate']"
 							:formId="id"
 							:moduleId="form.moduleId"
@@ -711,7 +711,7 @@ const MyBuilderForm = {
 		fieldShow:        (s) => s.fieldIdShow === null || s.fieldIdMap[s.fieldIdShow] === undefined ? false : s.fieldIdMap[s.fieldIdShow],
 		fieldShowHasQuery:(s) => s.fieldShow !== false && s.getFieldHasQuery(s.fieldShow),
 		form:             (s) => s.formIdMap[s.id] === undefined ? false : s.formIdMap[s.id],
-		joinsIndexMap:    (s) => s.getJoinIndexMap(s.query.joins),
+		joinsIndexMap:    (s) => s.getJoinsIndexMap(s.query.joins),
 		presetCandidates: (s) => s.relation === false ? [] : s.relationIdMap[s.query.relationId].presets,
 		relation:         (s) => s.relationIdMap[s.query.relationId] === undefined ? false : s.relationIdMap[s.query.relationId],
 		
@@ -749,7 +749,7 @@ const MyBuilderForm = {
 		getFormRoute,
 		getIndexAttributeId,
 		getItemTitleColumn,
-		getJoinIndexMap,
+		getJoinsIndexMap,
 		getSqlPreview,
 		getTemplateFieldButton,
 		getTemplateFieldCalendar,

@@ -25,7 +25,7 @@ let getQueryExpressionAttribute = function(column) {
 };
 
 // map of joins keyed by relation index
-export function getJoinIndexMap(joins) {
+export function getJoinsIndexMap(joins) {
 	let map = {};
 	for(const j of joins) {
 		map[j.index] = j;

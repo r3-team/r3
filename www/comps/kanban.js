@@ -15,7 +15,7 @@ import {
 } from './shared/generic.js';
 import {
 	fillRelationRecordIds,
-	getJoinIndexMap,
+	getJoinsIndexMap,
 	getQueryExpressions,
 	getRelationsJoined
 } from './shared/query.js';
@@ -519,7 +519,7 @@ const MyKanban = {
 		hasNullsInX:       (s) => s.attributeIdMap[s.attributeIdAxisX].nullable,
 		hasNullsInY:       (s) => s.attributeIdAxisY !== null && s.attributeIdMap[s.attributeIdAxisY].nullable,
 		joins:             (s) => s.fillRelationRecordIds(s.query.joins),
-		joinsIndexMap:     (s) => s.getJoinIndexMap(s.joins),
+		joinsIndexMap:     (s) => s.getJoinsIndexMap(s.joins),
 
 		// login options
 		choiceId:    (s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
@@ -570,7 +570,7 @@ const MyKanban = {
 		getCaption,
 		getChoiceFilters,
 		getColumnBatches,
-		getJoinIndexMap,
+		getJoinsIndexMap,
 		getQueryExpressions,
 		getRelationsJoined,
 		routeChangeFieldReload,

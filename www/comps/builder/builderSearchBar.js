@@ -15,7 +15,7 @@ import {
 } from './builderColumns.js';
 import {
 	getIsContentInAnyFilter,
-	getJoinIndexMap
+	getJoinsIndexMap
 } from '../shared/query.js';
 export {MyBuilderSearchBar as default};
 
@@ -282,7 +282,7 @@ const MyBuilderSearchBar = {
 		
 		// simple
 		anySearchInput:(s) => s.getIsContentInAnyFilter(s.query.filters,s.columns,'globalSearch'),
-		joinIndexMap:  (s) => s.getJoinIndexMap(s.query.joins),
+		joinIndexMap:  (s) => s.getJoinsIndexMap(s.query.joins),
 		searchBar:     (s) => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
 		module:        (s) => s.moduleIdMap[s.searchBar.moduleId],
 		
@@ -303,7 +303,7 @@ const MyBuilderSearchBar = {
 		copyValueDialog,
 		getIsContentInAnyFilter,
 		getItemTitleColumn,
-		getJoinIndexMap,
+		getJoinsIndexMap,
 		getSqlPreview,
 		
 		// actions

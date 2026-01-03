@@ -20,7 +20,7 @@ import {
 import {
 	getIsOperatorInAnyFilter,
 	getQueryFiltersProcessed,
-	getJoinIndexMap
+	getJoinsIndexMap
 } from './shared/query.js';
 export {MyGlobalSearch as default};
 
@@ -88,7 +88,7 @@ const MyGlobalSearchModuleSearchBar = {
 		query:           (s) => s.searchBar.query,
 		filters:         (s) => s.query.filters,
 		filtersProcessed:(s) => s.getQueryFiltersProcessed(s.filters,s.joinIndexMap,s.input,s.options.dictionary),
-		joinIndexMap:    (s) => s.getJoinIndexMap(s.query.joins),
+		joinIndexMap:    (s) => s.getJoinsIndexMap(s.query.joins),
 
 		// stores
 		capGen: (s) => s.$store.getters.captions.generic,
@@ -101,7 +101,7 @@ const MyGlobalSearchModuleSearchBar = {
 		getFormPopUpConfig,
 		getFormRoute,
 		getQueryFiltersProcessed,
-		getJoinIndexMap,
+		getJoinsIndexMap,
 		openLink,
 		srcBase64Icon,
 

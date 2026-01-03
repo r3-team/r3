@@ -9,3 +9,6 @@
 	display:flex;
 	flex-flow:column nowrap;
 }
+.builder-doc .sidebar{
+	min-width:500px;
+}

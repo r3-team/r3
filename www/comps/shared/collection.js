@@ -4,7 +4,7 @@ import {
 	getColumnTitle
 } from './column.js';
 import {
-	getJoinIndexMap,
+	getJoinsIndexMap,
 	getQueryExpressions,
 	getQueryFiltersProcessed,
 	getRelationsJoined
@@ -168,7 +168,7 @@ export function updateCollections(collectionId) {
 			if(q.relationId === null)
 				return;
 			
-			const joinIndexMap = getJoinIndexMap(q.joins);
+			const joinIndexMap = getJoinsIndexMap(q.joins);
 			const filters      = getQueryFiltersProcessed(q.filters,joinIndexMap);
 			const columns      = getColumnsProcessed(c.columns,[],joinIndexMap);
 			
