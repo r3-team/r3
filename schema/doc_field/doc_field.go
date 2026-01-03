@@ -196,19 +196,14 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if !ok {
 				return nil, fmt.Errorf("failed to parse field")
 			}
-
-			// get overwrites
-			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
+			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
-
-			// get border
 			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
-
 			fieldsIf[i] = f
 
 		case "flow", "flowBody":
@@ -216,25 +211,18 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if !ok {
 				return nil, fmt.Errorf("failed to parse field")
 			}
-
-			// get overwrites
-			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
+			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
-
-			// get children
 			f.Fields, err = Get_tx(ctx, tx, docPageId, pgtype.UUID{}, pgtype.UUID{Bytes: f.Id, Valid: true})
 			if err != nil {
 				return nil, err
 			}
-
-			// get border
 			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
-
 			fieldsIf[i] = f
 
 		case "grid", "gridFooter", "gridHeader":
@@ -242,20 +230,14 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if !ok {
 				return nil, fmt.Errorf("failed to parse field")
 			}
-
-			// get overwrites
-			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
+			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
-
-			// get children
 			f.Fields, err = Get_tx(ctx, tx, docPageId, pgtype.UUID{}, pgtype.UUID{Bytes: f.Id, Valid: true})
 			if err != nil {
 				return nil, err
 			}
-
-			// get border
 			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
@@ -268,26 +250,18 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if !ok {
 				return nil, fmt.Errorf("failed to parse field")
 			}
-
-			// get overwrites
-			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
+			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
-
-			// get query
 			f.Query, err = query.Get_tx(ctx, tx, schema.DbDocField, f.Id, 0, 0, 0)
 			if err != nil {
 				return nil, err
 			}
-
-			// get columns
 			f.Columns, err = doc_column.Get_tx(ctx, tx, f.Id)
 			if err != nil {
 				return nil, err
 			}
-
-			// get borders
 			f.BodyBorder, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextBody)
 			if err != nil {
 				return nil, err
@@ -300,7 +274,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if err != nil {
 				return nil, err
 			}
-
 			fieldsIf[i] = f
 
 		case "text":
@@ -308,19 +281,14 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if !ok {
 				return nil, fmt.Errorf("failed to parse field")
 			}
-
-			// get overwrites
-			f.Set, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
+			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
-
-			// get border
 			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
-
 			fieldsIf[i] = f
 		default:
 			return nil, fmt.Errorf("unknown document field content '%s'", content)

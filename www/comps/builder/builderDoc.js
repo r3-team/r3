@@ -1,6 +1,7 @@
 import MyBuilderCaption      from './builderCaption.js';
 import MyBuilderQuery        from './builderQuery.js';
 import {MyBuilderDocFont}    from './builderDocOptions.js';
+import {MyBuilderDocSets}    from './builderDocSets.js';
 import MyTabs                from '../tabs.js';
 import {deepIsEqual}         from '../shared/generic.js';
 import {getTemplateDocPage}  from '../shared/builderTemplate.js';
@@ -11,6 +12,7 @@ const MyBuilderDoc = {
 	components:{
 		MyBuilderCaption,
 		MyBuilderDocFont,
+		MyBuilderDocSets,
 		MyBuilderQuery,
 		MyTabs
 	},
@@ -139,6 +141,15 @@ const MyBuilderDoc = {
 								v-model:size="doc.font.size"
 								v-model:style="doc.font.style"
 								:readonly="readonly"
+							/>
+
+							<tr><td colspan="2"><b>{{ capGen.overwrites }}</b></td></tr>
+							<my-builder-doc-sets
+								v-model="doc.sets"
+								:allowTypeData="true"
+								:allowTypeValue="true"
+								:joinsIndexMap="[]"
+								:readonly
 							/>
 						</tbody>
 					</table>

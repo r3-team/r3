@@ -824,6 +824,8 @@
 				"styleItalic": "Italic"
 			},
 			"fontSettings": "Font settings",
+			"setSourceData": "From data",
+			"setSourceValue": "Direct",
 			"sidebarField": "Field: {NAME}",
 			"sidebarPage": "Page: {NAME}",
 			"titleOne": "Document '{NAME}'"
@@ -2427,6 +2429,7 @@
 		},
 		"options": "Opciones",
 		"order": "Orden",
+		"overwrites": "Overwrites",
 		"password": "Contraseña",
 		"pgFunction": "Función (trasera)",
 		"pgFunctions": "Funciones (traseras)",

@@ -3,6 +3,8 @@ import {getCaption}        from './shared/language.js';
 import {set as setSetting} from './shared/settings.js';
 import {getUnixFormat}     from './shared/time.js';
 import MyInputColorWrap    from './inputColorWrap.js';
+import MyInputDateFormat   from './inputDateFormat.js';
+import MyInputNumberSep    from './inputNumberSep.js';
 import MyInputHotkey       from './inputHotkey.js';
 import MyTabs              from './tabs.js';
 import {
@@ -1211,6 +1213,8 @@ const MySettings = {
 	name:'my-settings',
 	components:{
 		MyInputColorWrap,
+		MyInputDateFormat,
+		MyInputNumberSep,
 		MySettingsAccount,
 		MySettingsClientEvents,
 		MySettingsEncryption,
@@ -1263,42 +1267,17 @@ const MySettings = {
 						</tr>
 						<tr class="default-inputs">
 							<td>{{ capApp.dateFormat }}</td>
-							<td>
-								<select v-model="settingsInput.dateFormat">
-									<option value="Y-m-d">{{ capGen.dateFormat0 }}</option>
-									<option value="Y/m/d">{{ capGen.dateFormat1 }}</option>
-									<option value="d.m.Y">{{ capGen.dateFormat2 }}</option>
-									<option value="d/m/Y">{{ capGen.dateFormat3 }}</option>
-									<option value="m/d/Y">{{ capGen.dateFormat4 }}</option>
-								</select>
-							</td>
+							<td><my-input-date-format v-model="settingsInput.dateFormat" /></td>
 						</tr>
 						<tr><td colspan="2"><hr /></td></tr>
 						<tr><td colspan="2"><b>{{ capApp.titleSubNumbers }}</b></td></tr>
 						<tr class="default-inputs">
 							<td>{{ capGen.numberSepThousand }}</td>
-							<td>
-								<select v-model="settingsInput.numberSepThousand">
-									<option value=".">{{ capGen.option.numberSeparator.dot }}</option>
-									<option value=",">{{ capGen.option.numberSeparator.comma }}</option>
-									<option value="'">{{ capGen.option.numberSeparator.apos }}</option>
-									<option value="·">{{ capGen.option.numberSeparator.mdot }}</option>
-									<option value=" ">{{ capGen.option.numberSeparator.space }}</option>
-									<option value="0">{{ capGen.option.numberSeparator.none }}</option>
-								</select>
-							</td>
+							<td><my-input-number-sep v-model="settingsInput.numberSepThousand" :allowNone="true" /></td>
 						</tr>
 						<tr class="default-inputs">
 							<td>{{ capGen.numberSepDecimal }}</td>
-							<td>
-								<select v-model="settingsInput.numberSepDecimal">
-									<option value=".">{{ capGen.option.numberSeparator.dot }}</option>
-									<option value=",">{{ capGen.option.numberSeparator.comma }}</option>
-									<option value="'">{{ capGen.option.numberSeparator.apos }}</option>
-									<option value="·">{{ capGen.option.numberSeparator.mdot }}</option>
-									<option value=" ">{{ capGen.option.numberSeparator.space }}</option>
-								</select>
-							</td>
+							<td><my-input-number-sep v-model="settingsInput.numberSepDecimal" :allowNone="false" /></td>
 						</tr>
 						<tr><td colspan="2"><hr /></td></tr>
 						<tr><td colspan="2"><b>{{ capApp.titleSubMisc }}</b></td></tr>

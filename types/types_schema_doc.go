@@ -14,7 +14,7 @@ type Doc struct {
 	Pages    []DocPage  `json:"pages"` // pages in order
 	Query    Query      `json:"query"`
 	States   []DocState `json:"states"`
-	Set      []DocSet   `json:"set"` // overwrites
+	Sets     []DocSet   `json:"sets"` // overwrites
 
 	// meta
 	Author       string     `json:"author"`
@@ -40,9 +40,9 @@ type DocColumn struct {
 	Captions       CaptionMap  `json:"captions"`       // column titles
 
 	// overwrites
-	SetBody   []DocSet `json:"setBody"`
-	SetFooter []DocSet `json:"setFooter"`
-	SetHeader []DocSet `json:"setHeader"`
+	SetsBody   []DocSet `json:"setsBody"`
+	SetsFooter []DocSet `json:"setsFooter"`
+	SetsHeader []DocSet `json:"setsHeader"`
 
 	// presentation
 	Length int `json:"length"` // text length limit (in characters)
@@ -54,7 +54,7 @@ type DocField struct {
 	PosY    float64   `json:"posY"`    // Y position (relative to parent), 0 if in flow parent
 	SizeX   float64   `json:"sizeX"`   // width in mm (0 = parent width)
 	SizeY   float64   `json:"sizeY"`   // height in mm (0 = min. content height)
-	Set     []DocSet  `json:"set"`
+	Sets    []DocSet  `json:"sets"`
 	State   bool      `json:"state"`
 	Border  DocBorder `json:"border"`
 }
@@ -65,7 +65,7 @@ type DocFieldData struct {
 	PosY    float64   `json:"posY"`
 	SizeX   float64   `json:"sizeX"`
 	SizeY   float64   `json:"sizeY"`
-	Set     []DocSet  `json:"set"`
+	Sets    []DocSet  `json:"sets"`
 	State   bool      `json:"state"`
 	Border  DocBorder `json:"border"`
 
@@ -80,7 +80,7 @@ type DocFieldFlow struct {
 	PosY    float64   `json:"posY"`
 	SizeX   float64   `json:"sizeX"`
 	SizeY   float64   `json:"sizeY"`
-	Set     []DocSet  `json:"set"`
+	Sets    []DocSet  `json:"sets"`
 	State   bool      `json:"state"`
 	Border  DocBorder `json:"border"`
 
@@ -96,7 +96,7 @@ type DocFieldGrid struct {
 	PosY    float64   `json:"posY"`
 	SizeX   float64   `json:"sizeX"`
 	SizeY   float64   `json:"sizeY"`
-	Set     []DocSet  `json:"set"`
+	Sets    []DocSet  `json:"sets"`
 	State   bool      `json:"state"`
 	Border  DocBorder `json:"border"`
 
@@ -111,7 +111,7 @@ type DocFieldList struct {
 	PosY    float64   `json:"posY"`
 	SizeX   float64   `json:"sizeX"`
 	SizeY   float64   `json:"sizeY"`
-	Set     []DocSet  `json:"set"`
+	Sets    []DocSet  `json:"sets"`
 	State   bool      `json:"state"`
 	Border  DocBorder `json:"border"`
 
@@ -136,7 +136,7 @@ type DocFieldText struct {
 	PosY    float64   `json:"posY"`
 	SizeX   float64   `json:"sizeX"`
 	SizeY   float64   `json:"sizeY"`
-	Set     []DocSet  `json:"set"`
+	Sets    []DocSet  `json:"sets"`
 	State   bool      `json:"state"`
 	Border  DocBorder `json:"border"`
 
@@ -176,7 +176,7 @@ type DocPage struct {
 	Header      DocHeaderFooter  `json:"header"`
 	Footer      DocHeaderFooter  `json:"footer"`
 	Orientation string           `json:"orientation"` // "landscape" / "portrait"
-	Set         []DocSet         `json:"set"`         // overwrites
+	Sets        []DocSet         `json:"sets"`
 	State       bool             `json:"state"`
 }
 type DocSet struct {

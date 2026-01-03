@@ -64,9 +64,9 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 	log.Info(log.ContextDoc, fmt.Sprintf("drawing field '%s' on page %d at %.0f/%.0f (w%0.f, h%0.f)", f.Content, doc.p.PageNo(), posX, posY, width, f.SizeY))
 
 	// apply overwrites
-	set := getSetDataResolved(doc, f.Set)
-	font := applyToFont(set, fontParent)
-	f = applyToField(set, f)
+	sets := getSetDataResolved(doc, f.Sets)
+	font := applyToFont(sets, fontParent)
+	f = applyToField(sets, f)
 	setFont(doc, font)
 
 	// draw field content

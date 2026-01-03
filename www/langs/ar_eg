@@ -824,6 +824,8 @@
 				"styleItalic": "Italic"
 			},
 			"fontSettings": "Font settings",
+			"setSourceData": "From data",
+			"setSourceValue": "Direct",
 			"sidebarField": "Field: {NAME}",
 			"sidebarPage": "Page: {NAME}",
 			"titleOne": "Document '{NAME}'"
@@ -2427,6 +2429,7 @@
 		},
 		"options": "خيارات",
 		"order": "طلب",
+		"overwrites": "Overwrites",
 		"password": "كلمة المرور",
 		"pgFunction": "الوظيفة (الخلفية)",
 		"pgFunctions": "الوظائف (الخلفية)",

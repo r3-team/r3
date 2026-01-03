@@ -13,7 +13,7 @@ import {
 } from '../shared/query.js';
 export {MyBuilderColumnOptions as default};
 
-let MyBuilderColumnOptions = {
+const MyBuilderColumnOptions = {
 	name:'my-builder-column-options',
 	components:{
 		MyBuilderCaption,

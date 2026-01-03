@@ -824,6 +824,8 @@
 				"styleItalic": "Italic"
 			},
 			"fontSettings": "Font settings",
+			"setSourceData": "From data",
+			"setSourceValue": "Direct",
 			"sidebarField": "Field: {NAME}",
 			"sidebarPage": "Page: {NAME}",
 			"titleOne": "Document '{NAME}'"
@@ -2427,6 +2429,7 @@
 		},
 		"options": "Options",
 		"order": "Sorrend",
+		"overwrites": "Overwrites",
 		"password": "Jelszó",
 		"pgFunction": "Function (back)",
 		"pgFunctions": "Függvények (hátul)",

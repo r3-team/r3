@@ -126,7 +126,7 @@ func getExpressionsFromFields(fieldsIf []any) ([]types.DataGetExpression, error)
 		}
 
 		// expressions from overwrite rules
-		exprs = append(exprs, getExpressionsFromSet(field.Set)...)
+		exprs = append(exprs, getExpressionsFromSet(field.Sets)...)
 	}
 	return exprs, nil
 }

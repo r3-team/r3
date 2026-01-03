@@ -1,10 +1,17 @@
 
-import MyInputColorWrap from '../inputColorWrap.js';
-import MyInputDecimal   from '../inputDecimal.js';
+import MyInputColorWrap  from '../inputColorWrap.js';
+import MyInputDateFormat from '../inputDateFormat.js';
+import MyInputDecimal    from '../inputDecimal.js';
+import MyInputNumberSep  from '../inputNumberSep.js';
 
 export const MyBuilderDocFont = {
-	name:'my-builder-form-functions',
-	components:{ MyInputColorWrap, MyInputDecimal },
+	name:'my-builder-doc-font',
+	components:{
+		MyInputColorWrap,
+		MyInputDateFormat,
+		MyInputDecimal,
+		MyInputNumberSep
+	},
 	template:`
 		<tr>
 			<td>{{ capApp.family }}</td>
@@ -87,40 +94,15 @@ export const MyBuilderDocFont = {
 		</tr>
 		<tr>
 			<td>{{ capGen.numberSepThousand }}</td>
-			<td>
-				<select :disabled="readonly" :value="numberSepTho" @input="$emit('update:numberSepTho', $event.target.value)">
-					<option value=".">{{ capGen.option.numberSeparator.dot }}</option>
-					<option value=",">{{ capGen.option.numberSeparator.comma }}</option>
-					<option value="'">{{ capGen.option.numberSeparator.apos }}</option>
-					<option value="·">{{ capGen.option.numberSeparator.mdot }}</option>
-					<option value=" ">{{ capGen.option.numberSeparator.space }}</option>
-					<option value="0">{{ capGen.option.numberSeparator.none }}</option>
-				</select>
-			</td>
+			<td><my-input-number-sep @update:modelValue="$emit('update:numberSepTho',$event)" :allowNone="true"  :modelValue="numberSepTho" /></td>
 		</tr>
 		<tr>
 			<td>{{ capGen.numberSepDecimal }}</td>
-			<td>
-				<select :disabled="readonly" :value="numberSepDec" @input="$emit('update:numberSepDec', $event.target.value)">
-					<option value=".">{{ capGen.option.numberSeparator.dot }}</option>
-					<option value=",">{{ capGen.option.numberSeparator.comma }}</option>
-					<option value="'">{{ capGen.option.numberSeparator.apos }}</option>
-					<option value="·">{{ capGen.option.numberSeparator.mdot }}</option>
-					<option value=" ">{{ capGen.option.numberSeparator.space }}</option>
-				</select>
-			</td>
+			<td><my-input-number-sep @update:modelValue="$emit('update:numberSepDec',$event)" :allowNone="false" :modelValue="numberSepDec" /></td>
 		</tr>
 		<tr>
 			<td>{{ capApp.dateFormat }}</td>
-			<td>
-				<select :disabled="readonly" :value="dateFormat" @input="$emit('update:dateFormat', $event.target.value)">
-					<option value="Y-m-d">{{ capGen.dateFormat0 }}</option>
-					<option value="Y/m/d">{{ capGen.dateFormat1 }}</option>
-					<option value="d.m.Y">{{ capGen.dateFormat2 }}</option>
-					<option value="d/m/Y">{{ capGen.dateFormat3 }}</option>
-					<option value="m/d/Y">{{ capGen.dateFormat4 }}</option>
-				</select>
-			</td>
+			<td><my-input-date-format :modelValue="dateFormat" :readonly @update:modelValue="$emit('update:dateFormat',$event)" /></td>
 		</tr>
 		<tr>
 			<td>{{ capApp.bool }}</td>
@@ -138,7 +120,7 @@ export const MyBuilderDocFont = {
 		align:       { type:String,  required:true },
 		boolFalse:   { type:String,  required:true },
 		boolTrue:    { type:String,  required:true },
-		color:       { required:true },
+		color:       { type:[String,null], required:true },
 		dateFormat:  { type:String,  required:true },
 		family:      { type:String,  required:true },
 		lineFactor:  { type:Number,  required:true },

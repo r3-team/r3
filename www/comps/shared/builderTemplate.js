@@ -220,6 +220,14 @@ export function getTemplateDocField(content) {
 	}
 	return f;
 };
+export function getTemplateDocSet(target,value) {
+	return {
+		attributeId:null,
+		attributeIndex:null,
+		target:target,
+		value:value
+	};
+};
 export function getTemplateFieldButton() {
 	return {
 		id:getUuidV4(),

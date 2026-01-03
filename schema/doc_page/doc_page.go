@@ -113,7 +113,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocPage, e
 		}
 
 		// get overwrites
-		pages[i].Set, err = doc_set.Get_tx(ctx, tx, p.Id, schema.DbDocPage, schema.DbDocContextDefault)
+		pages[i].Sets, err = doc_set.Get_tx(ctx, tx, p.Id, schema.DbDocPage, schema.DbDocContextDefault)
 		if err != nil {
 			return nil, err
 		}
@@ -189,7 +189,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID, pages []types.DocPa
 		}
 
 		// set overwrites
-		if err := doc_set.Set_tx(ctx, tx, p.Id, schema.DbDocPage, schema.DbDocContextDefault, p.Set); err != nil {
+		if err := doc_set.Set_tx(ctx, tx, p.Id, schema.DbDocPage, schema.DbDocContextDefault, p.Sets); err != nil {
 			return err
 		}
 	}

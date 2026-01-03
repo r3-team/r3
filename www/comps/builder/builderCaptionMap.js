@@ -1,7 +1,7 @@
 import MyCaptionMap from '../captionMap.js';
 export {MyBuilderCaptionMap as default};
 
-let MyBuilderCaptionMap = {
+const MyBuilderCaptionMap = {
 	name:'my-builder-caption-map',
 	components:{ MyCaptionMap },
 	template:`<my-caption-map

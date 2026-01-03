@@ -2,6 +2,7 @@ package doc_set
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"r3/schema"
 	"r3/types"
@@ -60,15 +61,25 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity schema.DbEntity
 	}
 
 	for _, s := range sets {
+
+		// values can be anything, parse to JSON if not nil
+		var err error
+		var vIf any = nil
+		if s.Value != nil {
+			vIf, err = json.Marshal(s.Value)
+			if err != nil {
+				return err
+			}
+		}
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			INSERT INTO app.doc_set (%s_id, context, target, attribute_id, attribute_index, value)
 			VALUES ($1,$2,$3,$4,$5,$6)
 			ON CONFLICT(%s_id, context, target)
 			DO UPDATE SET
-				attribute_id    = $7,
-				attribute_index = $8,
-				value           = $9
-		`, entity, entity), id, context, s.Target, s.AttributeId, s.AttributeIndex, s.Value, s.AttributeId, s.AttributeIndex, s.Value); err != nil {
+				attribute_id    = $4,
+				attribute_index = $5,
+				value           = $6
+		`, entity, entity), id, context, s.Target, s.AttributeId, s.AttributeIndex, vIf); err != nil {
 			return err
 		}
 	}

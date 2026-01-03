@@ -60,7 +60,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 		if err != nil {
 			return nil, err
 		}
-		docs[i].Set, err = doc_set.Get_tx(ctx, tx, d.Id, schema.DbDoc, schema.DbDocContextDefault)
+		docs[i].Sets, err = doc_set.Get_tx(ctx, tx, d.Id, schema.DbDoc, schema.DbDocContextDefault)
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +102,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, d types.Doc) error {
 	if err := doc_page.Set_tx(ctx, tx, d.Id, d.Pages); err != nil {
 		return err
 	}
-	if err := doc_set.Set_tx(ctx, tx, d.Id, schema.DbDoc, schema.DbDocContextDefault, d.Set); err != nil {
+	if err := doc_set.Set_tx(ctx, tx, d.Id, schema.DbDoc, schema.DbDocContextDefault, d.Sets); err != nil {
 		return err
 	}
 	if err := setStates_tx(ctx, tx, d.Id, d.States); err != nil {
