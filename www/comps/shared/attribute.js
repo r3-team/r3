@@ -37,13 +37,17 @@ export function getIndexAttributeIdByField(f,altAttribute) {
 	);
 };
 
-export function getIndexAttributeIdsByJoins(joins) {
+export function getIndexAttributeIdsByJoins(joins,atrContentWhitelist) {
+	const atrContentWhitelistUsed = atrContentWhitelist.length !== 0;
 	let out = [];
-	for(let i = 0, j = joins.length; i < j; i++) {
-		let rel  = MyStore.getters['schema/relationIdMap'][joins[i].relationId];
+	for(const j of joins) {
+		const r = MyStore.getters['schema/relationIdMap'][j.relationId];
 		
-		for(let x = 0, y = rel.attributes.length; x < y; x++) {
-			out.push(joins[i].index+'_'+rel.attributes[x].id);
+		for(const a of r.attributes) {
+			if(atrContentWhitelistUsed && !atrContentWhitelist.includes(a.content))
+				continue;
+			
+			out.push(String(j.index)+'_'+a.id);
 		}
 	}
 	return out;

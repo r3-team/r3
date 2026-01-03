@@ -1,7 +1,10 @@
-import MyInputColorWrap  from '../inputColorWrap.js';
-import MyInputDateFormat from '../inputDateFormat.js';
-import MyInputDecimal    from '../inputDecimal.js';
-import MyInputNumberSep  from '../inputNumberSep.js';
+import MyInputColorWrap               from '../inputColorWrap.js';
+import MyInputDateFormat              from '../inputDateFormat.js';
+import MyInputDecimal                 from '../inputDecimal.js';
+import MyInputNumberSep               from '../inputNumberSep.js';
+import {getIndexAttributeIdsByJoins}  from '../shared/attribute.js';
+import {deepIsEqual}                  from '../shared/generic.js';
+import {getCaptionByIndexAttributeId} from '../shared/query.js';
 import {
 	MyBuilderDocFontAlign,
 	MyBuilderDocFontFamily,
@@ -34,11 +37,17 @@ const MyBuilderDocSetTarget = {
 		<td>
 			<div class="row gap centered" v-if="active">
 				<select class="short" v-if="hasTypeChoice" @input="typeUpdate($event.target.value)" :value="setType">
-					<option value="value" v-if="allowTypeValue">{{ capApp.setSourceValue }}</option>
-					<option value="data"  v-if="allowTypeData">{{ capApp.setSourceData }}</option>
+					<option value="value" v-if="allowTypeValue">{{ capGen.manual }}</option>
+					<option value="data"  v-if="allowTypeData">{{ capGen.attribute }}</option>
 				</select>
 
 				<!-- attribute index inputs -->
+				<select v-if="setType === 'data'" @input="updateIndexAttribute($event.target.value)" :disabled="readonly" :value="set.attributeIndex+'_'+set.attributeId">
+					<option value="null_null">-</option>
+					<option v-for="ia in indexAttributeIds" :value="ia">
+						{{ getCaptionByIndexAttributeId(ia) }}
+					</option>
+				</select>
 
 				<!-- value inputs -->
 				<template v-if="setType === 'value'">
@@ -57,7 +66,7 @@ const MyBuilderDocSetTarget = {
 	props:{
 		allowTypeData: { type:Boolean, required:true },
 		allowTypeValue:{ type:Boolean, required:true },
-		joinsIndexMap: { type:Object,  required:true },
+		joins:         { type:Array,   required:true },
 		readonly:      { type:Boolean, required:true },
 		sets:          { type:Array,   required:true }, // all sets that are enabled, current set might or not might not be in it
 		target:        { type:String,  required:true }  // target to set (font.align, font.numberSepTho, etc.)
@@ -78,25 +87,40 @@ const MyBuilderDocSetTarget = {
 		};
 	},
 	computed:{
+		valueDef:s => {
+			if(s.setType === 'data')
+				return null;
+
+			if(s.isDateFormat)     return 'Y-m-d';
+			if(s.isNumberSep)      return '.';
+			if(s.isFontAlign)      return 'L';
+			if(s.isFontFamily)     return 'Roboto';
+			if(s.isFontLineFactor) return 1.0;
+
+			return null;
+		},
+		
 		// inputs
 		value:{
 			get()  { return this.set.value; },
-			set(v) { this.updateByKeys(['value'],v); }
+			set(v) { this.updateMultiple(['value'],[v]); }
 		},
 
 		// simple
-		active:           s => s.setIndex !== -1,
-		hasTypeChoice:    s => s.allowTypeData && s.allowTypeValue && s.setType !== false,
-		isColor:          s => s.targetTypeColor.includes(s.target),
-		isDateFormat:     s => s.targetTypeDateFormat.includes(s.target),
-		isDecimal:        s => s.targetTypeDecimal.includes(s.target),
-		isFontAlign:      s => s.targetTypeFontAlign.includes(s.target),
-		isFontFamily:     s => s.targetTypeFontFamily.includes(s.target),
-		isFontLineFactor: s => s.targetTypeFontLineFactor.includes(s.target),
-		isFontStyle:      s => s.targetTypeFontStyle.includes(s.target),
-		isNumberSep:      s => s.targetTypeNumberSep.includes(s.target),
-		set:              s => s.setIndex !== -1 ? JSON.parse(JSON.stringify(s.sets[s.setIndex])) : s.initTemplate(),
-		setIndex:         s => s.sets.findIndex(v => v.target === s.target),
+		active:             s => s.setIndex !== -1,
+		atrContentWhitelist:s => s.isDecimal || s.isFontLineFactor ? ['numeric','real','double precision'] : ['varchar','text'],
+		hasTypeChoice:      s => s.allowTypeData && s.allowTypeValue && s.setType !== false,
+		indexAttributeIds:  s => s.getIndexAttributeIdsByJoins(s.joins,s.atrContentWhitelist),
+		isColor:            s => s.targetTypeColor.includes(s.target),
+		isDateFormat:       s => s.targetTypeDateFormat.includes(s.target),
+		isDecimal:          s => s.targetTypeDecimal.includes(s.target),
+		isFontAlign:        s => s.targetTypeFontAlign.includes(s.target),
+		isFontFamily:       s => s.targetTypeFontFamily.includes(s.target),
+		isFontLineFactor:   s => s.targetTypeFontLineFactor.includes(s.target),
+		isFontStyle:        s => s.targetTypeFontStyle.includes(s.target),
+		isNumberSep:        s => s.targetTypeNumberSep.includes(s.target),
+		set:                s => s.setIndex !== -1 ? JSON.parse(JSON.stringify(s.sets[s.setIndex])) : s.getTemplateDocSet(s.target,s.valueDef),
+		setIndex:           s => s.sets.findIndex(v => v.target === s.target),
 
 		// stores
 		capApp:s => s.$store.getters.captions.builder.doc,
@@ -117,12 +141,15 @@ const MyBuilderDocSetTarget = {
 	},
 	watch:{
 		active:{
-			handler(v) { if(v) this.typeLoad(); },
+			handler() { this.typeLoad(); },
 			immediate:true
 		}
 	},
 	methods:{
 		// externals
+		deepIsEqual,
+		getCaptionByIndexAttributeId,
+		getIndexAttributeIdsByJoins,
 		getTemplateDocSet,
 
 		// presentation
@@ -140,26 +167,22 @@ const MyBuilderDocSetTarget = {
 		typeUpdate(v) {
 			this.setType = v;
 
-			// clear up invalid options
-			let keysSetToNull = [];
+			let keys   = [];
+			let values = [];
 
-			if(v !== 'value') keysSetToNull.push('value');
-			if(v !== 'data')  keysSetToNull.push('attributeIndex','attributeIndex');
+			// set initial value
+			keys.push('value');
+			values.push(this.valueDef);
 
-			if(keysSetToNull.length !== 0)
-				this.updateByKeys(keysSetToNull,null);
+			// clear up invalid attribute reference
+			if(v !== 'data')  {
+				keys.push('attributeIndex','attributeId');
+				values.push(null,null);
+			}
+			this.updateMultiple(keys,values);
 		},
 
 		// actions
-		initTemplate() {
-			let value = null;
-			if(this.isDateFormat)     value = 'Y-m-d';
-			if(this.isNumberSep)      value = '.';
-			if(this.isFontAlign)      value = 'L';
-			if(this.isFontFamily)     value = 'Roboto';
-			if(this.isFontLineFactor) value = 1.0;
-			return this.getTemplateDocSet(this.target,value);
-		},
 		toggle() {
 			if(!this.active)
 				return this.$emit('apply',this.set);
@@ -167,12 +190,17 @@ const MyBuilderDocSetTarget = {
 			this.$emit('remove');
 			this.setType = false;
 		},
-		updateByKeys(keys,v) {
+		updateIndexAttribute(indexAttributeId) {
+			const v = indexAttributeId.split('_');
+			this.updateMultiple(['attributeIndex','attributeId'], v[1] === 'null' ? [null,null] : [parseInt(v[0]),v[1]]);
+		},
+		updateMultiple(keys,values) {
 			let m = JSON.parse(JSON.stringify(this.set));
-			for(const k of keys) {
-				m[k] = v;
+			for(let i = 0, j = keys.length; i < j; i++) {
+				m[keys[i]] = values[i];
 			}
-			this.$emit('apply',m);
+			if(!this.deepIsEqual(m,this.set))
+				this.$emit('apply',m);
 		}
 	}
 };
@@ -186,7 +214,7 @@ export const MyBuilderDocSets = {
 		@remove="remove(t)"
 		:allowTypeData
 		:allowTypeValue
-		:joinsIndexMap
+		:joins
 		:readonly
 		:sets="modelValue"
 		:target="t"
@@ -194,7 +222,7 @@ export const MyBuilderDocSets = {
 	props:{
 		allowTypeData: { type:Boolean, required:true },
 		allowTypeValue:{ type:Boolean, required:true },
-		joinsIndexMap: { type:Object,  required:true },
+		joins:         { type:Array,   required:true },
 		modelValue:    { type:Array,   required:true },
 		readonly:      { type:Boolean, required:true }
 	},

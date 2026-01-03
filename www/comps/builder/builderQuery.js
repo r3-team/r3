@@ -396,7 +396,7 @@ const MyBuilderQueryOrderItem = {
 		},
 		
 		// simple
-		indexAttributeIds:(s) => s.getIndexAttributeIdsByJoins(s.joins),
+		indexAttributeIds:(s) => s.getIndexAttributeIdsByJoins(s.joins,[]),
 		
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],

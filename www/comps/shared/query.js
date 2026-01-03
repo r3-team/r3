@@ -126,7 +126,7 @@ export function getQueryExpressionsDateRange(attributeId0,index0,attributeId1,in
 export function getNestedIndexAttributeIdsByJoins(joins,nestingLevel,inclEncrypted) {
 	let out = [];
 	for(const join of joins) {
-		let r = MyStore.getters['schema/relationIdMap'][join.relationId];
+		const r = MyStore.getters['schema/relationIdMap'][join.relationId];
 		
 		for(const atr of r.attributes) {
 			if(!atr.encrypted || inclEncrypted)
@@ -137,7 +137,7 @@ export function getNestedIndexAttributeIdsByJoins(joins,nestingLevel,inclEncrypt
 };
 
 export function getCaptionByIndexAttributeId(indexAttributeId) {
-	let v = indexAttributeId.split('_');
+	const v = indexAttributeId.split('_');
 	return getItemTitle(v[1],v[0],false,null);
 };
 

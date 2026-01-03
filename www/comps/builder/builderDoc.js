@@ -160,7 +160,7 @@ const MyBuilderDoc = {
 								v-model="doc.sets"
 								:allowTypeData="true"
 								:allowTypeValue="false"
-								:joinsIndexMap="joinsIndexMap"
+								:joins="doc.query.joins"
 								:readonly
 							/>
 						</tbody>
@@ -228,7 +228,6 @@ const MyBuilderDoc = {
 		// simple
 		docOrg:        (s) => s.docIdMap[s.id] === undefined ? false : s.docIdMap[s.id],
 		hasChanges:    (s) => !s.deepIsEqual(s.doc,s.docOrg),
-		joinsIndexMap: (s) => s.getJoinsIndexMap(s.doc.query.joins),
 		module:        (s) => s.moduleIdMap[s.doc.moduleId],
 		sideColumnShow:(s) => s.sideColumnIdShow !== null,
 		sideDocShow:   (s) => !s.sideColumnShow && !s.sideFieldShow && !s.sidePageShow,

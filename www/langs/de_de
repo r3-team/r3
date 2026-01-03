@@ -824,8 +824,6 @@
 				"styleItalic": "Italic"
 			},
 			"fontSettings": "Schrifteinstellungen",
-			"setSourceData": "Aus Daten",
-			"setSourceValue": "Direkt",
 			"sidebarField": "Feld: {NAME}",
 			"sidebarPage": "Seite: {NAME}",
 			"titleOne": "Dokument '{NAME}'"
@@ -2382,6 +2380,7 @@
 		"loginTemplate": "Benutzervorlage",
 		"loginTemplateHint": "Vordefinierte Einstellungen werden einmalig von gewählter Vorlage angewendet, wenn neuer Benutzer erstellt wird. Wenn nichts ausgewählt wurde, wird die globale Vorlage angewendet.",
 		"maintenance": "Wartung",
+		"manual": "Manuell",
 		"menu": "Menü",
 		"menus": "Menüs",
 		"menusSub": "Untermenüs",

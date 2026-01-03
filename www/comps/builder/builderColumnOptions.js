@@ -233,7 +233,7 @@ const MyBuilderColumnOptions = {
 		attribute:(s) => typeof s.attributeIdMap[s.column.attributeId] === 'undefined'
 			? false : s.attributeIdMap[s.column.attributeId],
 		indexAttributeIds:(s) => !s.isSubQuery
-			? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins),
+			? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins,[]),
 		
 		// inputs
 		alignment:{
