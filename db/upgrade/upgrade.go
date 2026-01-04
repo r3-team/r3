@@ -120,7 +120,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TYPE app.doc_place_context AS ENUM('default','body','footer','header');
 			CREATE TYPE app.doc_field_content AS ENUM('data','flow','flowBody','grid','gridFooter','gridHeader','list','text');
 			CREATE TYPE app.doc_set_target    AS ENUM(
-				'author','languageCode',
+				'author','language',
 				'border.color','border.draw','border.size',
 				'bodyBorder.cell',  'bodyBorder.color',  'bodyBorder.draw',  'bodyBorder.size',  
 				'footerBorder.cell','footerBorder.color','footerBorder.draw','footerBorder.size',

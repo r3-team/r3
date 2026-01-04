@@ -1,4 +1,5 @@
-import MyInputDecimal from '../inputDecimal.js';
+import MyBuilderDocSets from './builderDocSets.js';
+import MyInputDecimal   from '../inputDecimal.js';
 
 const pageSizeMapMm = {
 	'A1':    [594,841],
@@ -14,7 +15,10 @@ const pageSizeMapMm = {
 
 export default {
 	name:'my-builder-doc-page',
-	components:{MyInputDecimal},
+	components:{
+		MyBuilderDocSets,
+		MyInputDecimal
+	},
 	template:`<div class="builder-doc-page" v-if="page !== false">
 		<div class="builder-doc-page-outer" :style="stylePage">
 			<div class="builder-doc-page-footer-header" v-if="header !== false && header.docPageIdInherit === null" :style="styleHeader"></div>
@@ -31,6 +35,10 @@ export default {
 		<teleport v-if="pageOptionsElm" :to="pageOptionsElm">
 			<table class="generic-table-vertical default-inputs">
 				<tbody>
+					<tr>
+						<td>{{ capGen.showDefault1 }}</td>
+						<td><my-bool v-model="page.state" :disabled="readonly"/></td>
+					</tr>
 					<tr>
 						<td>{{ capGen.size }}</td>
 						<td>
@@ -57,12 +65,23 @@ export default {
 							<my-input-decimal class="short" v-model="page.margin.l" :readonly :allowNull="false" :length="5" :lengthFract="2" />
 						</td>
 					</tr>
+
+					<tr><td colspan="2"><b>{{ capGen.overwrites }}</b></td></tr>
+					<my-builder-doc-sets
+						v-model="page.sets"
+						:allowTypeData="true"
+						:allowTypeValue="true"
+						:joins
+						:readonly
+						:targetsFont="true"
+					/>
 				</tbody>
 			</table>
 		</teleport>
 	</div>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
+		joins:          { type:Array,   required:true },
 		modelValue:     { type:Object,  required:true },
 		pageOptionsElm: { required:true },
 		readonly:       { type:Boolean, required:true }

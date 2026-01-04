@@ -10,7 +10,7 @@ export default {
 		>
 			<div></div>
 			<div class="row centered gap">
-				<img v-if="entriesIcon.length !== 0" :src="entriesIcon[i]" />
+				<img v-if="entriesIcon.length !== 0 && entriesIcon[i] !== null" :src="entriesIcon[i]" />
 				<span>{{ entriesText[i] }}</span>
 			</div>
 			<div>

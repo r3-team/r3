@@ -17,9 +17,9 @@ type Doc struct {
 	Sets     []DocSet   `json:"sets"` // overwrites
 
 	// meta
-	Author       string     `json:"author"`
-	Captions     CaptionMap `json:"captions"` // document titles
-	LanguageCode string     `json:"languageCode"`
+	Author   string     `json:"author"`
+	Captions CaptionMap `json:"captions"` // document titles
+	Language string     `json:"language"` // language code such as en_us
 }
 type DocBorder struct {
 	Cell  bool    `json:"cell"`  // also draw cell borders - only relevant in tables

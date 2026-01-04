@@ -115,9 +115,9 @@ func Run(ctx context.Context, docDef types.Doc, pathOut string) error {
 	// generate document
 	doc.p = fpdf.New(docDef.Pages[0].Orientation, pageUnit, docDef.Pages[0].Size, "")
 	doc.p.SetAuthor(docDef.Author, true)
-	doc.p.SetLang(docDef.LanguageCode)
-	if _, exists := docDef.Captions["docTitle"][docDef.LanguageCode]; !exists {
-		doc.p.SetTitle(docDef.Captions["docTitle"][docDef.LanguageCode], true)
+	doc.p.SetLang(docDef.Language)
+	if _, exists := docDef.Captions["docTitle"][docDef.Language]; !exists {
+		doc.p.SetTitle(docDef.Captions["docTitle"][docDef.Language], true)
 	}
 
 	doc.p.SetCellMargin(0) // kills the default margin within text cells

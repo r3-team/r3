@@ -11,7 +11,7 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-func getDataDoc(ctx context.Context, doc *doc, q types.Query, exprs []types.DataGetExpression, languageCode string) error {
+func getDataDoc(ctx context.Context, doc *doc, q types.Query, exprs []types.DataGetExpression, language string) error {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
@@ -23,7 +23,7 @@ func getDataDoc(ctx context.Context, doc *doc, q types.Query, exprs []types.Data
 		RelationId:  q.RelationId.Bytes,
 		IndexSource: 0,
 		Expressions: exprs,
-		Filters:     data_query.ConvertQueryToDataFilter(q.Filters, 0, languageCode, make(map[string]string)),
+		Filters:     data_query.ConvertQueryToDataFilter(q.Filters, 0, language, make(map[string]string)),
 		Joins:       data_query.ConvertQueryToDataJoins(q.Joins),
 		Limit:       1,
 	}

@@ -38,13 +38,13 @@ const MyBuilderColumnOptions = {
 						<div class="row gap wrap" style="max-width:300px;">
 							<my-button-check
 								@update:modelValue="set('hidden',$event)"
-								:caption="capApp.columnShowDefault"
+								:caption="capGen.showDefault1"
 								:modelValue="column.hidden"
 								:reversed="true"
 							/>
 							<my-button-check
 								@update:modelValue="set('onMobile',$event)"
-								:caption="capApp.columnShowDefaultMobile"
+								:caption="capGen.showDefaultMobile1"
 								:modelValue="column.onMobile && !column.hidden"
 								:readonly="column.hidden"
 							/>

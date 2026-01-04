@@ -14,13 +14,13 @@ func applyToDocument(set []types.DocSet, d types.Doc) types.Doc {
 			switch o.Target {
 			case "author":
 				d.Author = v
-			case "languageCode":
-				d.LanguageCode = v
+			case "language":
+				d.Language = v
 			case "title":
 				if _, exists := d.Captions["docTitle"]; !exists {
 					d.Captions["docTitle"] = make(map[string]string)
 				}
-				d.Captions["docTitle"][d.LanguageCode] = v
+				d.Captions["docTitle"][d.Language] = v
 			}
 		}
 	}

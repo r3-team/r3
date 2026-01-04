@@ -80,12 +80,12 @@ export const MyBuilderColumns = {
 									<img class="action clickable" src="images/visible0.png"
 										v-if="column.hidden"
 										@click="columnSetBy(column.id,'hidden',false)"
-										:title="capApp.columnShowDefaultOff"
+										:title="capGen.showDefault0"
 									/>
 									<img class="action clickable" src="images/smartphoneOff.png"
 										v-if="!column.hidden && !column.onMobile"
 										@click="columnSetBy(column.id,'onMobile',true)"
-										:title="capApp.columnShowDefaultMobileOff"
+										:title="capGen.showDefaultMobile0"
 									/>
 									<img class="action end clickable" src="images/columnOff.png"
 										v-if="batch.columns.length !== 1"

@@ -37,9 +37,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 	docs := make([]types.Doc, 0)
 	for rows.Next() {
 		var d types.Doc
-		if err := rows.Scan(&d.Id, &d.Name, &d.Comment, &d.Author, &d.LanguageCode,
+		if err := rows.Scan(&d.Id, &d.Name, &d.Comment, &d.Author, &d.Language,
 			&d.Font.Align, &d.Font.BoolFalse, &d.Font.BoolTrue, &d.Font.Color, &d.Font.DateFormat, &d.Font.Family,
 			&d.Font.LineFactor, &d.Font.NumberSepDec, &d.Font.NumberSepTho, &d.Font.Size, &d.Font.Style); err != nil {
+
 			return nil, err
 		}
 		d.ModuleId = moduleId
@@ -79,7 +80,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, d types.Doc) error {
 		VALUES ($1,$2,$3,$4,$5,$6)
 		ON CONFLICT (id)
 		DO UPDATE SET name = $3, comment = $4, author = $5, language = $6
-	`, d.Id, d.ModuleId, d.Name, d.Comment, d.Author, d.LanguageCode); err != nil {
+	`, d.Id, d.ModuleId, d.Name, d.Comment, d.Author, d.Language); err != nil {
 		return err
 	}
 

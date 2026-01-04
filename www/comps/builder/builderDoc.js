@@ -66,6 +66,7 @@ export default {
 					:actionAddCap="capApp.button.addPage"
 					:actionDel="doc.pages.length > 1"
 					:entries="tabsPages.entries"
+					:entriesIcon="tabsPages.entriesIcon"
 					:entriesText="tabsPages.entriesText"
 					:small="true"
 				/>
@@ -74,6 +75,7 @@ export default {
 				<my-builder-doc-page
 					v-model="pageActive"
 					:builderLanguage
+					:joins="doc.query.joins"
 					:pageOptionsElm="$refs.pageOptions"
 					:readonly
 				/>
@@ -135,6 +137,10 @@ export default {
 									/>
 								</td>
 							</tr>
+							<tr>
+								<td>{{ capGen.author }}</td>
+								<td><input class="long" v-model="doc.author" :disabled="readonly" /></td>
+							</tr>
 
 							<tr><td colspan="2"><b>{{ capApp.fontSettings }}</b></td></tr>
 							<my-builder-doc-font
@@ -159,6 +165,8 @@ export default {
 								:allowTypeValue="false"
 								:joins="doc.query.joins"
 								:readonly
+								:targetsDoc="true"
+								:targetsFont="true"
 							/>
 						</tbody>
 					</table>
@@ -211,14 +219,18 @@ export default {
 		},
 		tabsPages:(s) => {
 			let pageIndexes = [];
+			let icons   = [];
 			let texts   = [];
 			const titleShort = s.doc.pages.length > 3;
 			for(let i = 0, j = s.doc.pages.length; i < j; i++) {
-				pageIndexes.push(s.doc.pages[i].id);
+				const p = s.doc.pages[i];
+				pageIndexes.push(p.id);
+				icons.push(p.state ? null : 'images/visible0.png');
 				texts.push(titleShort ? `P${i+1}` : `${s.capGen.page} ${i+1}`);
 			}
 			return {
 				entries:pageIndexes,
+				entriesIcon:icons,
 				entriesText:texts
 			};
 		},

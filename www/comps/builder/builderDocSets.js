@@ -13,6 +13,22 @@ import {
 	MyBuilderDocFontStyles
 } from './builderDocFontInput.js';
 
+const targetTypes = {
+	color:['font.color'],
+	dateFormat:['font.dateFormat'],
+	decimal:['font.size'],
+	fontAlign:['font.align'],
+	fontFamily:['font.family'],
+	fontLineFactor:['font.lineFactor'],
+	fontStyle:['font.style'],
+	numberSep:['font.numberSepDec','font.numberSepTho']
+};
+const targetsDoc  = ['title','language','author'];
+const targetsFont = [
+	'font.family','font.size','font.lineFactor','font.align','font.style',
+	'font.color','font.numberSepTho','font.numberSepDec','font.dateFormat'
+];
+
 const MyBuilderDocSetTarget = {
 	name:'my-builder-doc-set-target',
 	components:{
@@ -75,14 +91,6 @@ const MyBuilderDocSetTarget = {
 	data() {
 		return {
 			setType:false,
-			targetTypeDecimal:['font.size'],
-			targetTypeColor:['font.color'],
-			targetTypeDateFormat:['font.dateFormat'],
-			targetTypeFontAlign:['font.align'],
-			targetTypeFontFamily:['font.family'],
-			targetTypeFontLineFactor:['font.lineFactor'],
-			targetTypeFontStyle:['font.style'],
-			targetTypeNumberSep:['font.numberSepDec','font.numberSepTho'],
 			targetCapMap:{}
 		};
 	},
@@ -111,14 +119,14 @@ const MyBuilderDocSetTarget = {
 		atrContentWhitelist:s => s.isDecimal || s.isFontLineFactor ? ['numeric','real','double precision'] : ['varchar','text'],
 		hasTypeChoice:      s => s.allowTypeData && s.allowTypeValue && s.setType !== false,
 		indexAttributeIds:  s => s.getIndexAttributeIdsByJoins(s.joins,s.atrContentWhitelist),
-		isColor:            s => s.targetTypeColor.includes(s.target),
-		isDateFormat:       s => s.targetTypeDateFormat.includes(s.target),
-		isDecimal:          s => s.targetTypeDecimal.includes(s.target),
-		isFontAlign:        s => s.targetTypeFontAlign.includes(s.target),
-		isFontFamily:       s => s.targetTypeFontFamily.includes(s.target),
-		isFontLineFactor:   s => s.targetTypeFontLineFactor.includes(s.target),
-		isFontStyle:        s => s.targetTypeFontStyle.includes(s.target),
-		isNumberSep:        s => s.targetTypeNumberSep.includes(s.target),
+		isColor:            s => targetTypes.color.includes(s.target),
+		isDateFormat:       s => targetTypes.dateFormat.includes(s.target),
+		isDecimal:          s => targetTypes.decimal.includes(s.target),
+		isFontAlign:        s => targetTypes.fontAlign.includes(s.target),
+		isFontFamily:       s => targetTypes.fontFamily.includes(s.target),
+		isFontLineFactor:   s => targetTypes.fontLineFactor.includes(s.target),
+		isFontStyle:        s => targetTypes.fontStyle.includes(s.target),
+		isNumberSep:        s => targetTypes.numberSep.includes(s.target),
 		set:                s => s.setIndex !== -1 ? JSON.parse(JSON.stringify(s.sets[s.setIndex])) : s.getTemplateDocSet(s.target,s.valueDef),
 		setIndex:           s => s.sets.findIndex(v => v.target === s.target),
 
@@ -128,6 +136,12 @@ const MyBuilderDocSetTarget = {
 	},
 	created() {
 		this.targetCapMap =	{
+			// doc
+			'author':  this.capGen.author,
+			'language':this.capGen.language,
+			'title':   this.capGen.title,
+
+			// font
 			'font.align':       this.capApp.font.alignHor,
 			'font.color':       this.capApp.font.color,
 			'font.dateFormat':  this.capApp.font.dateFormat,
@@ -224,17 +238,18 @@ export default {
 		allowTypeValue:{ type:Boolean, required:true },
 		joins:         { type:Array,   required:true },
 		modelValue:    { type:Array,   required:true },
-		readonly:      { type:Boolean, required:true }
+		readonly:      { type:Boolean, required:true },
+		targetsDoc:    { type:Boolean, required:false, default:false },
+		targetsFont:   { type:Boolean, required:false, default:false }
 	},
 	emits:['update:modelValue'],
-	data() {
-		return {
-			targets:[
-				// font settings
-				'font.family','font.size','font.lineFactor','font.align','font.style','font.color',
-				'font.numberSepTho','font.numberSepDec','font.dateFormat'
-			]
-		};
+	computed:{
+		targets:s => {
+			let out = [];
+			if(s.targetsDoc)  out = out.concat(targetsDoc);
+			if(s.targetsFont) out = out.concat(targetsFont);
+			return out;
+		}
 	},
 	methods:{
 		apply(target,value) {
