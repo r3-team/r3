@@ -153,7 +153,7 @@ export function getTemplateDocPage() {
 		fieldFlow:getTemplateDocField('flowBody'),
 		size:'A4',
 		orientation:'portrait',
-		margin:{t:5,r:3,b:5,l:3},
+		margin:{t:10,r:15,b:10,l:15},
 		footer:{
 			active:false,
 			docPageIdInherit:null,

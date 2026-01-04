@@ -8,7 +8,40 @@
 	overflow:auto;
 	display:flex;
 	flex-flow:column nowrap;
+	overflow:auto;
 }
 .builder-doc .sidebar{
 	min-width:500px;
+}
+
+.builder-doc-page{
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:center;
+	padding:var(--spacing);
+	overflow:auto;
+}
+.builder-doc-page-outer{
+	box-shadow:1px 1px 4px var(--color-shade);
+	position:relative;
+	background-color:var(--color-doc-page-outer);
+}
+.builder-doc-page-margin-hor{
+	width:100%;
+	position:absolute;
+	background-color:var(--color-doc-page-margin);
+}
+.builder-doc-page-margin-ver{
+	height:100%;
+	position:absolute;
+	background-color:var(--color-doc-page-margin);
+}
+.builder-doc-page-margin-footer-header{
+	width:100%;
+	position:absolute;
+	background-color:var(--color-doc-page-footer-header);
+}
+
+.builder-doc-page-body{
+	
 }

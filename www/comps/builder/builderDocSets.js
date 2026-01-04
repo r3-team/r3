@@ -3,6 +3,7 @@ import MyInputDateFormat              from '../inputDateFormat.js';
 import MyInputDecimal                 from '../inputDecimal.js';
 import MyInputNumberSep               from '../inputNumberSep.js';
 import {getIndexAttributeIdsByJoins}  from '../shared/attribute.js';
+import {getTemplateDocSet}            from '../shared/builderTemplate.js';
 import {deepIsEqual}                  from '../shared/generic.js';
 import {getCaptionByIndexAttributeId} from '../shared/query.js';
 import {
@@ -11,7 +12,6 @@ import {
 	MyBuilderDocFontLineFactor,
 	MyBuilderDocFontStyles
 } from './builderDocFontInput.js';
-import {getTemplateDocSet}      from '../shared/builderTemplate.js';
 
 const MyBuilderDocSetTarget = {
 	name:'my-builder-doc-set-target',
@@ -205,7 +205,7 @@ const MyBuilderDocSetTarget = {
 	}
 };
 
-export const MyBuilderDocSets = {
+export default {
 	name:'my-builder-doc-sets',
 	components:{MyBuilderDocSetTarget},
 	template:`<my-builder-doc-set-target

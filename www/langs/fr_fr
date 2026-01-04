@@ -826,6 +826,7 @@
 			"fontSettings": "Font settings",
 			"sidebarField": "Field: {NAME}",
 			"sidebarPage": "Page: {NAME}",
+			"tabStates": "States ({CNT})",
 			"titleOne": "Document '{NAME}'"
 		},
 		"form": {
@@ -2428,7 +2429,11 @@
 		},
 		"options": "Options",
 		"order": "Ordre",
+		"orientation": "Orientation",
+		"orientationLandscape": "Landscape",
+		"orientationPortrait": "Portrait",
 		"overwrites": "Overwrites",
+		"page": "Page",
 		"password": "Mot de passe",
 		"pgFunction": "Function (back)",
 		"pgFunctions": "Fonctions (back)",
@@ -2457,6 +2462,7 @@
 		"settings": "Paramètres",
 		"shadows": "Shadows",
 		"size": "Taille",
+		"spacing": "Spacing",
 		"sqlPreview": "Aperçu SQL",
 		"standard": "Standard",
 		"status": "Statut",

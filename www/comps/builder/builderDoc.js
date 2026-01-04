@@ -1,18 +1,19 @@
-import MyBuilderCaption      from './builderCaption.js';
-import MyBuilderQuery        from './builderQuery.js';
-import {MyBuilderDocFont}    from './builderDocOptions.js';
-import {MyBuilderDocSets}    from './builderDocSets.js';
-import MyTabs                from '../tabs.js';
-import {deepIsEqual}         from '../shared/generic.js';
-import {getJoinsIndexMap}    from '../shared/query.js';
-import {getTemplateDocPage}  from '../shared/builderTemplate.js';
-export {MyBuilderDoc as default};
+import MyBuilderCaption     from './builderCaption.js';
+import MyBuilderQuery       from './builderQuery.js';
+import MyBuilderDocFont     from './builderDocFont.js';
+import MyBuilderDocPage     from './builderDocPage.js';
+import MyBuilderDocSets     from './builderDocSets.js';
+import MyTabs               from '../tabs.js';
+import {deepIsEqual}        from '../shared/generic.js';
+import {getJoinsIndexMap}   from '../shared/query.js';
+import {getTemplateDocPage} from '../shared/builderTemplate.js';
 
-const MyBuilderDoc = {
+export default {
 	name:'my-builder-doc',
 	components:{
 		MyBuilderCaption,
 		MyBuilderDocFont,
+		MyBuilderDocPage,
 		MyBuilderDocSets,
 		MyBuilderQuery,
 		MyTabs
@@ -57,42 +58,33 @@ const MyBuilderDoc = {
 				</div>
 			</div>
 			<div class="builder-doc-content">
-				<div class="content grow no-padding">
-					<my-tabs
-						v-model="tabPageIdShow"
-						@add="pageAdd"
-						@del="pageDel"
-						@upd="pageSel"
-						:actionAdd="true"
-						:actionAddCap="capApp.button.addPage"
-						:actionDel="doc.pages.length > 1"
-						:actionUpd="true"
-						:entries="tabsPages.entries"
-						:entriesText="tabsPages.entriesText"
-						:small="true"
-					/>
-				</div>
+				<my-tabs
+					v-model="tabPageIdShow"
+					@add="pageAdd"
+					@del="pageDel"
+					:actionAdd="true"
+					:actionAddCap="capApp.button.addPage"
+					:actionDel="doc.pages.length > 1"
+					:entries="tabsPages.entries"
+					:entriesText="tabsPages.entriesText"
+					:small="true"
+				/>
+
+				<!-- page -->
+				<my-builder-doc-page
+					v-model="pageActive"
+					:builderLanguage
+					:pageOptionsElm="$refs.pageOptions"
+					:readonly
+				/>
 			</div>
 		</div>
 		
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
-			<div class="top lower" :class="{ clickable:sidePageIdShow }" @click="sideFieldIdShow = null; sidePageIdShow = null; sideColumnIdShow = null">
+			<div class="top lower" @click="sideFieldIdShow = null; sideColumnIdShow = null">
 				<div class="area">
 					<img class="icon" src="images/document.png" />
 					<h1>{{ capGen.document }}</h1>
-				</div>
-			</div>
-			<div class="top lower" v-if="sidePageShow">
-				<div class="area">
-					<img class="icon" src="images/fileText.png" />
-					<h2>{{ capApp.sidebarPage.replace('{NAME}',getPageName(sidePageIdShow)) }}</h2>
-				</div>
-				<div class="area">
-					<my-button image="cancel.png"
-						@trigger="sidePageIdShow = null;"
-						:cancel="true"
-						:captionTitle="capGen.button.close"
-					/>
 				</div>
 			</div>
 			
@@ -100,9 +92,8 @@ const MyBuilderDoc = {
 			<template v-if="sideDocShow">
 				<my-tabs
 					v-model="tabTarget"
-					:entries="['content','properties']"
-					:entriesIcon="['images/database.png','images/edit.png']"
-					:entriesText="[capGen.content,capGen.properties]"
+					:entries="['content','states','page','properties']"
+					:entriesText="[capGen.content,capApp.tabStates.replace('{CNT}',doc.states.length),capGen.page + ' ' + String(pageIndexActive+1),capGen.properties]"
 				/>
 
 				<!-- content -->
@@ -117,8 +108,14 @@ const MyBuilderDoc = {
 						:moduleId="doc.moduleId"
 					/>
 				</div>
+
+				<!-- states -->
 				
-				<!-- properties -->
+				<!-- page properties -->
+				<div class="content grow no-padding" ref="pageOptions" v-show="tabTarget === 'page'">
+				</div>
+				
+				<!-- document properties -->
 				<div class="content grow no-padding" v-if="tabTarget === 'properties'">
 					<table class="generic-table-vertical default-inputs">
 						<tbody>
@@ -134,7 +131,7 @@ const MyBuilderDoc = {
 										:contentName="capGen.title"
 										:language="builderLanguage"
 										:longInput="true"
-										:readonly="readonly"
+										:readonly
 									/>
 								</td>
 							</tr>
@@ -152,7 +149,7 @@ const MyBuilderDoc = {
 								v-model:numberSepTho="doc.font.numberSepTho"
 								v-model:size="doc.font.size"
 								v-model:style="doc.font.style"
-								:readonly="readonly"
+								:readonly
 							/>
 
 							<tr><td colspan="2"><b>{{ capGen.overwrites }}</b></td></tr>
@@ -196,9 +193,9 @@ const MyBuilderDoc = {
 			],
 			
 			// state
+			pageOptions:null,
 			sideColumnIdShow:null,
 			sideFieldIdShow:null,
-			sidePageIdShow:null,
 			showSidebar:true,
 			tabPageIdShow:0,
 			tabTarget:'content'
@@ -215,9 +212,10 @@ const MyBuilderDoc = {
 		tabsPages:(s) => {
 			let pageIndexes = [];
 			let texts   = [];
+			const titleShort = s.doc.pages.length > 3;
 			for(let i = 0, j = s.doc.pages.length; i < j; i++) {
 				pageIndexes.push(s.doc.pages[i].id);
-				texts.push(`P${i+1}`);
+				texts.push(titleShort ? `P${i+1}` : `${s.capGen.page} ${i+1}`);
 			}
 			return {
 				entries:pageIndexes,
@@ -225,20 +223,26 @@ const MyBuilderDoc = {
 			};
 		},
 
+		// inputs
+		pageActive:{
+			get()  { return this.doc.pages[this.pageIndexActive]; },
+			set(v) { this.doc.pages[this.pageIndexActive] = v; }
+		},
+
 		// simple
-		docOrg:        (s) => s.docIdMap[s.id] === undefined ? false : s.docIdMap[s.id],
-		hasChanges:    (s) => !s.deepIsEqual(s.doc,s.docOrg),
-		module:        (s) => s.moduleIdMap[s.doc.moduleId],
-		sideColumnShow:(s) => s.sideColumnIdShow !== null,
-		sideDocShow:   (s) => !s.sideColumnShow && !s.sideFieldShow && !s.sidePageShow,
-		sideFieldShow: (s) => s.sideFieldIdShow !== null,
-		sidePageShow:  (s) => s.sidePageIdShow !== null,
+		docOrg:         s => s.docIdMap[s.id] === undefined ? false : s.docIdMap[s.id],
+		hasChanges:     s => !s.deepIsEqual(s.doc,s.docOrg),
+		module:         s => s.moduleIdMap[s.doc.moduleId],
+		pageIndexActive:s => s.pageIdMapIndex[s.tabPageIdShow],
+		sideColumnShow: s => s.sideColumnIdShow !== null,
+		sideDocShow:    s => !s.sideColumnShow && !s.sideFieldShow,
+		sideFieldShow:  s => s.sideFieldIdShow !== null,
 		
 		// stores
-		docIdMap:   (s) => s.$store.getters['schema/docIdMap'],
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.doc,
-		capGen:     (s) => s.$store.getters.captions.generic
+		docIdMap:   s => s.$store.getters['schema/docIdMap'],
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
+		capApp:     s => s.$store.getters.captions.builder.doc,
+		capGen:     s => s.$store.getters.captions.generic
 	},
 	watch:{
 		docOrg:{
@@ -264,19 +268,12 @@ const MyBuilderDoc = {
 			this.tabPageIdShow = p.id;
 		},
 		pageDel(id) {
-			if(id === this.sidePageIdShow)
-				this.sidePageIdShow = null;
-
 			const i = this.pageIdMapIndex[id];
 			this.doc.pages.splice(i,1);
 			this.resetPageTab();
 		},
 		pageMove(forward) {
 
-		},
-		pageSel(id) {
-			this.sidePageIdShow = id;
-			this.tabPageIdShow  = id;
 		},
 		reset() {
 			if(this.docOrg !== false && !this.deepIsEqual(this.doc,this.docOrg)) {

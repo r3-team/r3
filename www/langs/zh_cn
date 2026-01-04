@@ -826,6 +826,7 @@
 			"fontSettings": "Font settings",
 			"sidebarField": "Field: {NAME}",
 			"sidebarPage": "Page: {NAME}",
+			"tabStates": "States ({CNT})",
 			"titleOne": "Document '{NAME}'"
 		},
 		"form": {
@@ -2428,7 +2429,11 @@
 		},
 		"options": "Options",
 		"order": "顺序",
+		"orientation": "Orientation",
+		"orientationLandscape": "Landscape",
+		"orientationPortrait": "Portrait",
 		"overwrites": "Overwrites",
+		"page": "Page",
 		"password": "密码",
 		"pgFunction": "Function (back)",
 		"pgFunctions": "函数（后端）",
@@ -2457,6 +2462,7 @@
 		"settings": "设置",
 		"shadows": "Shadows",
 		"size": "大小",
+		"spacing": "Spacing",
 		"sqlPreview": "SQL预览",
 		"standard": "标准",
 		"status": "状态",
