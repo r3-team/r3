@@ -186,17 +186,36 @@ const MyBuilderDocSetTarget = {
 export default {
 	name:'my-builder-doc-sets',
 	components:{MyBuilderDocSetTarget},
-	template:`<my-builder-doc-set-target
-		v-for="t in targets"
-		@apply="apply(t,$event)"
-		@remove="remove(t)"
-		:allowData
-		:allowValue
-		:joins
-		:readonly
-		:sets="modelValue"
-		:target="t"
-	/>`,
+	template:`
+		<template v-if="targetsDoc">
+			<tr><td><b>{{ capGen.overwrites + ' (' + capGen.document + ')' }}</b></td></tr>
+			<my-builder-doc-set-target
+				v-for="t in targetsListDoc"
+				@apply="apply(t,$event)"
+				@remove="remove(t)"
+				:allowData
+				:allowValue
+				:joins
+				:readonly
+				:sets="modelValue"
+				:target="t"
+			/>
+		</template>
+		<template v-if="targetsFont">
+			<tr><td><b>{{ capGen.overwrites + ' (' + capGen.font + ')' }}</b></td></tr>
+			<my-builder-doc-set-target
+				v-for="t in targetsListFont"
+				@apply="apply(t,$event)"
+				@remove="remove(t)"
+				:allowData
+				:allowValue
+				:joins
+				:readonly
+				:sets="modelValue"
+				:target="t"
+			/>
+		</template>
+	`,
 	props:{
 		allowData:  { type:Boolean, required:false, default:false },
 		allowValue: { type:Boolean, required:false, default:false },
@@ -208,12 +227,11 @@ export default {
 	},
 	emits:['update:modelValue'],
 	computed:{
-		targets:s => {
-			let out = [];
-			if(s.targetsDoc)  out = out.concat(targetsDoc);
-			if(s.targetsFont) out = out.concat(targetsFont);
-			return out;
-		}
+		targetsListDoc: s => targetsDoc,
+		targetsListFont:s => targetsFont,
+
+		// stores
+		capGen:s => s.$store.getters.captions.generic
 	},
 	methods:{
 		apply(target,value) {

@@ -823,7 +823,6 @@
 				"styleBold": "Bold",
 				"styleItalic": "Italic"
 			},
-			"fontSettings": "Schrifteinstellungen",
 			"setData": "Von Attributwert überschreiben",
 			"setValue": "Manuell überschreiben",
 			"sidebarField": "Feld: {NAME}",
@@ -2337,6 +2336,7 @@
 		"field": "Feld",
 		"files": "Dateien",
 		"filters": "Filter",
+		"font": "Schrift",
 		"form": "Formular",
 		"formActions": "Formularaktionen",
 		"formOpen": "Formular öffnen",

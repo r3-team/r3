@@ -65,8 +65,6 @@ export default {
 							<my-input-decimal class="short" v-model="page.margin.l" :readonly :allowNull="false" :length="5" :lengthFract="2" />
 						</td>
 					</tr>
-
-					<tr><td colspan="2"><b>{{ capGen.overwrites }}</b></td></tr>
 					<my-builder-doc-sets
 						v-model="page.sets"
 						:allowData="true"

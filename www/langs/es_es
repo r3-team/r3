@@ -823,7 +823,6 @@
 				"styleBold": "Bold",
 				"styleItalic": "Italic"
 			},
-			"fontSettings": "Font settings",
 			"setData": "Overwrite by attribute value",
 			"setValue": "Overwrite manually",
 			"sidebarField": "Field: {NAME}",
@@ -2337,6 +2336,7 @@
 		"field": "Campo",
 		"files": "Archivos",
 		"filters": "Filtros",
+		"font": "Font",
 		"form": "Formulario",
 		"formActions": "Acciones de formulario",
 		"formOpen": "Abrir formulario",

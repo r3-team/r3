@@ -823,7 +823,6 @@
 				"styleBold": "Bold",
 				"styleItalic": "Italic"
 			},
-			"fontSettings": "Font settings",
 			"setData": "Overwrite by attribute value",
 			"setValue": "Overwrite manually",
 			"sidebarField": "Field: {NAME}",
@@ -2337,6 +2336,7 @@
 		"field": "字段",
 		"files": "文件",
 		"filters": "过滤器",
+		"font": "Font",
 		"form": "表单",
 		"formActions": "Form actions",
 		"formOpen": "打开表单",

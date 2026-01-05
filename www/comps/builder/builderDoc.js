@@ -142,7 +142,7 @@ export default {
 								<td><input class="long" v-model="doc.author" :disabled="readonly" /></td>
 							</tr>
 
-							<tr><td colspan="2"><b>{{ capApp.fontSettings }}</b></td></tr>
+							<tr><td colspan="2"><b>{{ capGen.font }}</b></td></tr>
 							<my-builder-doc-font
 								v-model:align="doc.font.align"
 								v-model:boolFalse="doc.font.boolFalse"
@@ -157,8 +157,6 @@ export default {
 								v-model:style="doc.font.style"
 								:readonly
 							/>
-
-							<tr><td colspan="2"><b>{{ capGen.overwrites }}</b></td></tr>
 							<my-builder-doc-sets
 								v-model="doc.sets"
 								:allowData="true"

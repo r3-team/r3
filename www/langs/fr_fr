@@ -823,7 +823,6 @@
 				"styleBold": "Bold",
 				"styleItalic": "Italic"
 			},
-			"fontSettings": "Font settings",
 			"setData": "Overwrite by attribute value",
 			"setValue": "Overwrite manually",
 			"sidebarField": "Field: {NAME}",
@@ -2337,6 +2336,7 @@
 		"field": "Champ",
 		"files": "Fichiers",
 		"filters": "Filtres",
+		"font": "Font",
 		"form": "Formulaire",
 		"formActions": "Form actions",
 		"formOpen": "Ouvrir le formulaire",
