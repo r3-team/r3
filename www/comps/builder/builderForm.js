@@ -49,9 +49,8 @@ import {
 	getDataFields,
 	getFormRoute
 } from '../shared/form.js';
-export {MyBuilderForm as default};
 
-const MyBuilderForm = {
+export default {
 	name:'my-builder-form',
 	components:{
 		MyBuilderCaption,
@@ -185,7 +184,6 @@ const MyBuilderForm = {
 					:formId="id"
 					:isTemplate="false"
 					:joinsIndexMap="joinsIndexMap"
-					:moduleId="form.moduleId"
 					:showColumnsAll="showColumnsAll"
 					:uiScale="uiScale"
 				/>
@@ -313,7 +311,6 @@ const MyBuilderForm = {
 									:formId="id"
 									:isTemplate="false"
 									:joinsIndexMap="joinsIndexMap"
-									:moduleId="form.moduleId"
 									:noMovement="true"
 								/>
 							</div>

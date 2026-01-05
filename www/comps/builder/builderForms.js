@@ -1,7 +1,6 @@
 import {srcBase64} from '../shared/image.js';
-export {MyBuilderForms as default};
 
-const MyBuilderForms = {
+export default {
 	name:'my-builder-forms',
 	template:`<div class="contentBox grow">
 		

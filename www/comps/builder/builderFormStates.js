@@ -1,7 +1,6 @@
 import {isAttributeRelationship} from '../shared/attribute.js';
 import {getFieldTitle}           from '../shared/field.js';
 import {getTemplateFormState}    from '../shared/builderTemplate.js';
-export {MyBuilderFormStates as default};
 
 const MyBuilderFormStateEffect = {
 	name:'my-builder-form-state-effect',
@@ -287,7 +286,7 @@ const MyBuilderFormState = {
 	}
 };
 
-const MyBuilderFormStates = {
+export default {
 	name:'my-builder-form-states',
 	components:{ MyBuilderFormState },
 	template:`<div class="builder-form-states">

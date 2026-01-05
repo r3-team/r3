@@ -15,9 +15,8 @@ import {
 	getFieldIcon,
 	getFieldTitle
 } from '../shared/field.js';
-export {MyBuilderField as default};
 
-const MyBuilderField = {
+export default {
 	name:'my-builder-field',
 	components:{
 		MyBuilderCaption,
@@ -187,7 +186,6 @@ const MyBuilderField = {
 				:formId="formId"
 				:isTemplate="false"
 				:joinsIndexMap="joinsIndexMap"
-				:moduleId="moduleId"
 				:showColumnsAll="showColumnsAll"
 				:uiScale="uiScale"
 			/>
@@ -227,7 +225,6 @@ const MyBuilderField = {
 			:formId="formId"
 			:isTemplate="isTemplate"
 			:joinsIndexMap="joinsIndexMap"
-			:moduleId="moduleId"
 			:showColumnsAll="showColumnsAll"
 			:uiScale="uiScale"
 		/>
@@ -251,7 +248,6 @@ const MyBuilderField = {
 		formId:         { type:String,  required:true },
 		isTemplate:     { type:Boolean, required:true },
 		joinsIndexMap:  { type:Object,  required:true },
-		moduleId:       { type:String,  required:true },
 		noMovement:     { type:Boolean, required:true },
 		showColumnsAll: { type:Boolean, required:true },
 		uiScale:        { type:Number,  required:true }

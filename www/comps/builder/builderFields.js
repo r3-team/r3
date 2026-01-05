@@ -1,8 +1,7 @@
 import MyBuilderField from './builderField.js';
 import {getUuidV4}    from '../shared/crypto.js';
-export {MyBuilderFields as default};
 
-const MyBuilderFields = {
+export default {
 	name:'my-builder-fields',
 	components:{ MyBuilderField },
 	template:`<draggable class="builder-fields" handle=".dragAnchor" animation="100" itemKey="id"
@@ -38,7 +37,6 @@ const MyBuilderFields = {
 				:formId="formId"
 				:isTemplate="isTemplate"
 				:joinsIndexMap="joinsIndexMap"
-				:moduleId="moduleId"
 				:noMovement="noMovement"
 				:showColumnsAll="showColumnsAll"
 				:uiScale="uiScale"
@@ -64,7 +62,6 @@ const MyBuilderFields = {
 		formId:         { type:String,  required:true },
 		isTemplate:     { type:Boolean, required:true }, // is template for fields
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
-		moduleId:       { type:String,  required:false, default:'' },
 		noMovement:     { type:Boolean, required:false, default:false },
 		showColumnsAll: { type:Boolean, required:false, default:false },
 		uiScale:        { type:Number,  required:false, default:100 }

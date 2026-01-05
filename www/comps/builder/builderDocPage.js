@@ -1,5 +1,6 @@
-import MyBuilderDocSets from './builderDocSets.js';
-import MyInputDecimal   from '../inputDecimal.js';
+import MyBuilderDocField from './builderDocField.js';
+import MyBuilderDocSets  from './builderDocSets.js';
+import MyInputDecimal    from '../inputDecimal.js';
 
 const pageSizeMapMm = {
 	'A1':    [594,841],
@@ -16,19 +17,27 @@ const pageSizeMapMm = {
 export default {
 	name:'my-builder-doc-page',
 	components:{
+		MyBuilderDocField,
 		MyBuilderDocSets,
 		MyInputDecimal
 	},
 	template:`<div class="builder-doc-page" v-if="page !== false">
 		<div class="builder-doc-page-outer" :style="stylePage">
 			<div class="builder-doc-page-footer-header" v-if="header !== false && header.docPageIdInherit === null" :style="styleHeader"></div>
-			<div class="builder-doc-page-margin-hor" v-if="margin.l > 0" :style="styleMarginT"></div>
-			<div class="builder-doc-page-margin-ver" v-if="margin.r > 0" :style="styleMarginR"></div>
-			<div class="builder-doc-page-margin-hor" v-if="margin.b > 0" :style="styleMarginB"></div>
-			<div class="builder-doc-page-margin-ver" v-if="margin.l > 0" :style="styleMarginL"></div>
+			<div class="builder-doc-page-margin-hor"    v-if="margin.l > 0" :style="styleMarginT"></div>
+			<div class="builder-doc-page-margin-ver"    v-if="margin.r > 0" :style="styleMarginR"></div>
+			<div class="builder-doc-page-margin-hor"    v-if="margin.b > 0" :style="styleMarginB"></div>
+			<div class="builder-doc-page-margin-ver"    v-if="margin.l > 0" :style="styleMarginL"></div>
 			<div class="builder-doc-page-footer-header" v-if="footer !== false && footer.docPageIdInherit === null" :style="styleFooter"></div>
 
-			<div class="builder-doc-page-body"></div>
+			<div class="builder-doc-page-body" :style="styleBody">
+				<my-builder-doc-field
+					v-model="page.fieldFlow"
+					:builderLanguage
+					:readonly
+					:template="false"
+				/>
+			</div>
 		</div>
 
 		<!-- options -->
@@ -98,6 +107,7 @@ export default {
 		pageSizeX:   s => s.page.orientation === 'portrait' ? pageSizeMapMm[s.page.size][0] : pageSizeMapMm[s.page.size][1],
 		pageSizeY:   s => s.page.orientation === 'portrait' ? pageSizeMapMm[s.page.size][1] : pageSizeMapMm[s.page.size][0],
 		pageSizes:   s => Object.keys(pageSizeMapMm),
+		styleBody:   s => `top:${s.margin.t}mm;right:${s.margin.r}mm;bottom:${s.margin.b}mm;left:${s.margin.l}mm`,
 		styleFooter: s => `bottom:0px;left:0px;height:${s.footer.fieldGrid.SizeY}mm`,
 		styleHeader: s => `top:0px;left:0px;height:${s.header.fieldGrid.SizeY}mm`,
 		styleMarginT:s => `top:0px;left:0px;height:${s.margin.t}mm`,

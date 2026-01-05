@@ -1,8 +1,7 @@
 import {getDependentModules} from '../shared/builder.js';
 import {srcBase64}           from '../shared/image.js';
-export {MyBuilderIconInput as default};
 
-let MyBuilderIconInput = {
+export default {
 	name:'my-builder-icon-input',
 	template:`<div class="builder-icon-input">
 		<div class="iconLine input-custom" v-if="!naked" :tabindex="readonly ? -1 : 0"

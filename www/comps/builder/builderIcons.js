@@ -1,6 +1,5 @@
 import {getUuidV4} from '../shared/crypto.js';
 import {srcBase64} from '../shared/image.js';
-export {MyBuilderIcons as default};
 
 const MyBuilderIcon = {
 	name:'my-builder-icon',
@@ -55,7 +54,7 @@ const MyBuilderIcon = {
 	}
 };
 
-const MyBuilderIcons = {
+export default {
 	name:'my-builder-icons',
 	components:{ MyBuilderIcon },
 	template:`<div class="contentBox grow">

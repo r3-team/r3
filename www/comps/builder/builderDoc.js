@@ -1,17 +1,22 @@
-import MyBuilderCaption     from './builderCaption.js';
-import MyBuilderQuery       from './builderQuery.js';
-import MyBuilderDocFont     from './builderDocFont.js';
-import MyBuilderDocPage     from './builderDocPage.js';
-import MyBuilderDocSets     from './builderDocSets.js';
-import MyTabs               from '../tabs.js';
-import {deepIsEqual}        from '../shared/generic.js';
-import {getJoinsIndexMap}   from '../shared/query.js';
-import {getTemplateDocPage} from '../shared/builderTemplate.js';
+import MyBuilderCaption   from './builderCaption.js';
+import MyBuilderQuery     from './builderQuery.js';
+import MyBuilderDocFields from './builderDocFields.js';
+import MyBuilderDocFont   from './builderDocFont.js';
+import MyBuilderDocPage   from './builderDocPage.js';
+import MyBuilderDocSets   from './builderDocSets.js';
+import MyTabs             from '../tabs.js';
+import {deepIsEqual}      from '../shared/generic.js';
+import {getJoinsIndexMap} from '../shared/query.js';
+import {
+	getTemplateDocField,
+	getTemplateDocPage
+} from '../shared/builderTemplate.js';
 
 export default {
 	name:'my-builder-doc',
 	components:{
 		MyBuilderCaption,
+		MyBuilderDocFields,
 		MyBuilderDocFont,
 		MyBuilderDocPage,
 		MyBuilderDocSets,
@@ -94,8 +99,8 @@ export default {
 			<template v-if="sideDocShow">
 				<my-tabs
 					v-model="tabTarget"
-					:entries="['content','states','page','properties']"
-					:entriesText="[capGen.content,capApp.tabStates.replace('{CNT}',doc.states.length),capGen.page + ' ' + String(pageIndexActive+1),capGen.properties]"
+					:entries="['content','states','properties','page']"
+					:entriesText="[capGen.content,capApp.tabStates.replace('{CNT}',doc.states.length),capGen.properties,capGen.page + ' ' + String(pageIndexActive+1)]"
 				/>
 
 				<!-- content -->
@@ -108,6 +113,14 @@ export default {
 						:builderLanguage
 						:filtersDisable
 						:moduleId="doc.moduleId"
+					/>
+
+					<!-- field templates -->
+					<my-builder-doc-fields
+						v-model="fieldsTemplate"
+						:builderLanguage
+						:template="true"
+						:readonly
 					/>
 				</div>
 
@@ -207,14 +220,30 @@ export default {
 		};
 	},
 	computed:{
-		pageIdMapIndex:(s) => {
+		fieldsTemplate:s => {
+			let out = [
+				s.getTemplateDocField('flow'),
+				s.getTemplateDocField('grid'),
+				s.getTemplateDocField('list'),
+				s.getTemplateDocField('text')
+			];
+			for(const j of s.doc.query.joins) {
+				const r = s.relationIdMap[j.relationId];
+
+				for(const a of r.attributes) {
+					out.push(s.getTemplateDocField('data',j.index,a.id));
+				}
+			}
+			return out;
+		},
+		pageIdMapIndex:s => {
 			let out = {};
 			for(let i = 0, j = s.doc.pages.length; i < j; i++) {
 				out[s.doc.pages[i].id] = i;
 			}
 			return out;
 		},
-		tabsPages:(s) => {
+		tabsPages:s => {
 			let pageIndexes = [];
 			let icons   = [];
 			let texts   = [];
@@ -248,10 +277,11 @@ export default {
 		sideFieldShow:  s => s.sideFieldIdShow !== null,
 		
 		// stores
-		docIdMap:   s => s.$store.getters['schema/docIdMap'],
-		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
-		capApp:     s => s.$store.getters.captions.builder.doc,
-		capGen:     s => s.$store.getters.captions.generic
+		docIdMap:     s => s.$store.getters['schema/docIdMap'],
+		moduleIdMap:  s => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap:s => s.$store.getters['schema/relationIdMap'],
+		capApp:       s => s.$store.getters.captions.builder.doc,
+		capGen:       s => s.$store.getters.captions.generic
 	},
 	watch:{
 		docOrg:{
@@ -263,6 +293,7 @@ export default {
 		// externals
 		deepIsEqual,
 		getJoinsIndexMap,
+		getTemplateDocField,
 		getTemplateDocPage,
 
 		// presentation
@@ -274,7 +305,7 @@ export default {
 		pageAdd() {
 			const p = this.getTemplateDocPage();
 			this.doc.pages.push(p);
-			this.tabPageIdShow = p.id;
+			//this.tabPageIdShow = p.id;
 		},
 		pageDel(id) {
 			const i = this.pageIdMapIndex[id];

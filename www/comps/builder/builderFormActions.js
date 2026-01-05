@@ -2,7 +2,6 @@ import MyBuilderCaption        from './builderCaption.js';
 import MyBuilderIconInput      from './builderIconInput.js';
 import {getDependentModules}   from '../shared/builder.js';
 import {getTemplateFormAction} from '../shared/builderTemplate.js';
-export {MyBuilderFormActions as default};
 
 const MyBuilderFormAction = {
 	name:'my-builder-form-action',
@@ -124,7 +123,7 @@ const MyBuilderFormAction = {
 	}
 };
 
-const MyBuilderFormActions = {
+export default {
 	name:'my-builder-form-actions',
 	components:{ MyBuilderFormAction },
 	template:`<div class="builder-form-actions">

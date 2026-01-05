@@ -28,9 +28,7 @@ import {
 	isAttributeString
 } from '../shared/attribute.js';
 
-export {MyBuilderFieldOptions as default};
-
-let MyBuilderFieldOptionsChartSerie = {
+const MyBuilderFieldOptionsChartSerie = {
 	name:'my-builder-field-options-chart-serie',
 	template:`<tr>
 		<td colspan="999">
@@ -129,7 +127,7 @@ let MyBuilderFieldOptionsChartSerie = {
 	}
 };
 
-let MyBuilderFieldOptionsChart = {
+const MyBuilderFieldOptionsChart = {
 	name:'my-builder-field-options-chart',
 	components:{
 		MyBuilderFieldOptionsChartSerie,
@@ -277,7 +275,7 @@ let MyBuilderFieldOptionsChart = {
 	}
 };
 
-let MyBuilderFieldOptions = {
+export default {
 	name:'my-builder-field-options',
 	components:{
 		MyBuilderCaption,

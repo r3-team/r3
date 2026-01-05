@@ -141,34 +141,16 @@ export function getTemplateDoc(moduleId,name) {
 		query:getTemplateQuery(),
 		pages:[getTemplateDocPage()],
 		states:[],
-		set:[],
+		sets:[],
 		captions:{
 			docTitle:{}
 		}
 	};
 };
-export function getTemplateDocPage() {
-	return {
-		id:getUuidV4(),
-		fieldFlow:getTemplateDocField('flowBody'),
-		size:'A4',
-		orientation:'portrait',
-		margin:{t:10,r:15,b:10,l:15},
-		footer:{
-			active:false,
-			docPageIdInherit:null,
-			fieldGrid:getTemplateDocField('gridFooter')
-		},
-		header:{
-			active:false,
-			docPageIdInherit:null,
-			fieldGrid:getTemplateDocField('gridHeader')
-		},
-		set:[],
-		state:true
-	};
-};
-export function getTemplateDocField(content) {
+export function getTemplateDocField(content,attributeIndex,attributeId) {
+	if(attributeIndex === undefined) attributeIndex = 0;
+	if(attributeId    === undefined) attributeId    = null;
+
 	const getBorderTemplate = () => { return { cell:false, color:'', draw:'', size:0}; };
 	const getMarginTemplate = () => { return { t:0, r:0, b:0, l:0 }; };
 
@@ -179,14 +161,14 @@ export function getTemplateDocField(content) {
 		posY:0,
 		sizeX:0,
 		sizeY:0,
-		set:[],
+		sets:[],
 		state:true,
 		border:getBorderTemplate()
 	};
 	switch(content) {
 		case 'data':
-			f.attributeId    = null;
-			f.attributeIndex = 0;
+			f.attributeId    = attributeId;
+			f.attributeIndex = attributeIndex;
 		break;
 		case 'flow':     // fallthrough
         case 'flowBody':
@@ -197,6 +179,7 @@ export function getTemplateDocField(content) {
 		case 'grid':       // fallthrough
         case 'gridFooter': // fallthrough
         case 'gridHeader':
+			f.sizeY  = 20;
 			f.fields = [];
 			f.shrink = false;
 		break;
@@ -219,6 +202,27 @@ export function getTemplateDocField(content) {
 		break;
 	}
 	return f;
+};
+export function getTemplateDocPage() {
+	return {
+		id:getUuidV4(),
+		fieldFlow:getTemplateDocField('flowBody'),
+		size:'A4',
+		orientation:'portrait',
+		margin:{t:10,r:15,b:10,l:15},
+		footer:{
+			active:false,
+			docPageIdInherit:null,
+			fieldGrid:getTemplateDocField('gridFooter')
+		},
+		header:{
+			active:false,
+			docPageIdInherit:null,
+			fieldGrid:getTemplateDocField('gridHeader')
+		},
+		sets:[],
+		state:true
+	};
 };
 export function getTemplateDocSet(target) {
 	return {

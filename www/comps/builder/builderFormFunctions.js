@@ -1,7 +1,6 @@
 import { getDependentModules } from '../shared/builder.js';
-export {MyBuilderFormFunctions as default};
 
-let MyBuilderFormFunction = {
+const MyBuilderFormFunction = {
 	name:'my-builder-form-function',
 	template:`<tr class="builder-form-function">
 		<td>
@@ -113,7 +112,7 @@ let MyBuilderFormFunction = {
 	}
 };
 
-let MyBuilderFormFunctions = {
+export default {
 	name:'my-builder-form-functions',
 	components:{ MyBuilderFormFunction },
 	template:`<div class="builder-form-functions">

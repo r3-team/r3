@@ -1,6 +1,4 @@
-export {MyBuilderHelp as default};
-
-const MyBuilderHelp = {
+export default {
 	name:'my-builder-help',
 	template:`<div class="contentBox grow">
 		<div class="top lower">
