@@ -161,8 +161,7 @@ export default {
 							<tr><td colspan="2"><b>{{ capGen.overwrites }}</b></td></tr>
 							<my-builder-doc-sets
 								v-model="doc.sets"
-								:allowTypeData="true"
-								:allowTypeValue="false"
+								:allowData="true"
 								:joins="doc.query.joins"
 								:readonly
 								:targetsDoc="true"

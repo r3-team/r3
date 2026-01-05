@@ -824,6 +824,8 @@
 				"styleItalic": "Italic"
 			},
 			"fontSettings": "Schrifteinstellungen",
+			"setData": "Von Attributwert überschreiben",
+			"setValue": "Manuell überschreiben",
 			"sidebarField": "Feld: {NAME}",
 			"sidebarPage": "Seite: {NAME}",
 			"tabStates": "Zustände ({CNT})",

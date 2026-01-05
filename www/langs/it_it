@@ -824,6 +824,8 @@
 				"styleItalic": "Italic"
 			},
 			"fontSettings": "Font settings",
+			"setData": "Overwrite by attribute value",
+			"setValue": "Overwrite manually",
 			"sidebarField": "Field: {NAME}",
 			"sidebarPage": "Page: {NAME}",
 			"tabStates": "States ({CNT})",

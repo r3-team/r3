@@ -220,12 +220,12 @@ export function getTemplateDocField(content) {
 	}
 	return f;
 };
-export function getTemplateDocSet(target,value) {
+export function getTemplateDocSet(target) {
 	return {
 		attributeId:null,
 		attributeIndex:null,
 		target:target,
-		value:value
+		value:null
 	};
 };
 export function getTemplateFieldButton() {
