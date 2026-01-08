@@ -49,15 +49,14 @@ func DoAll() error {
 
 	for rows.Next() {
 		var m types.Mail
-
-		if err := rows.Scan(&m.Id, &m.ToList, &m.CcList, &m.BccList,
-			&m.Subject, &m.Body, &m.AttemptCount, &m.AccountId,
-			&m.RecordId, &m.AttributeId); err != nil {
+		if err := rows.Scan(&m.Id, &m.ToList, &m.CcList, &m.BccList, &m.Subject, &m.Body,
+			&m.AttemptCount, &m.AccountId, &m.RecordId, &m.AttributeId); err != nil {
 
 			return err
 		}
 		mails = append(mails, m)
 	}
+	rows.Close()
 
 	log.Info(log.ContextMail, fmt.Sprintf("found %d messages to be sent", len(mails)))
 
@@ -196,6 +195,7 @@ func do(m types.Mail) error {
 			}
 			files = append(files, f)
 		}
+		rows.Close()
 
 		for _, f := range files {
 			filePath := data.GetFilePathVersion(f.Id, f.Version)
