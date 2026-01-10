@@ -127,7 +127,7 @@ type DataSetFileChanges struct {
 }
 type DataSet struct {
 	RelationId  uuid.UUID          `json:"relationId"`  // relation ID to update
-	AttributeId uuid.UUID          `json:"attributeId"` // attribute ID of relationship to join with
+	AttributeId uuid.UUID          `json:"attributeId"` // attribute ID of relationship to join with, UUID Nil if base relation
 	IndexFrom   int                `json:"indexFrom"`   // from relation index
 	RecordId    int64              `json:"recordId"`    // record ID to update (0 if new)
 	Attributes  []DataSetAttribute `json:"attributes"`  // attribute values to set

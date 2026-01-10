@@ -411,12 +411,17 @@ export default {
 										oauthClientId:c.id,
 										state:state
 									});
+
+									// enforce 'openid' scope
+									let scopes = JSON.parse(JSON.stringify(c.scopes));
+									if(!scopes.includes('openid'))
+										scopes.push('openid');
 									
 									const urlEndpoint = new URL(as.authorization_endpoint);
 									urlEndpoint.searchParams.set('client_id',c.clientId);
 									urlEndpoint.searchParams.set('redirect_uri',c.redirectUrl);
 									urlEndpoint.searchParams.set('response_type','code');
-									urlEndpoint.searchParams.set('scope','openid');
+									urlEndpoint.searchParams.set('scope',scopes.join(' '));
 									urlEndpoint.searchParams.set('code_challenge',challenge);
 									urlEndpoint.searchParams.set('code_challenge_method','S256');
 									// encode state with base64, some characters are not correctly returned in redirect URL (example: Azure AD '§')

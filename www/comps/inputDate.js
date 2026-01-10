@@ -16,25 +16,18 @@ import {
 	getUnixNowDatetime,
 	isUnixUtcZero
 } from './shared/time.js';
-export {MyInputDate as default};
 
 const MyInputDateEntryInput = {
 	name:'my-input-date-entry-input',
 	template:`<input data-is-input="1"
-		@blur="blur"
-		@keydown="keydownPressed = true"
-		@keyup="keyup($event)"
+		@blur="set($event,true)"
+		@input="set($event,false)"
 		:disabled="isReadonly"
 		:maxlength="size"
 		:placeholder="caption"
 		:style="styles"
 		:value="modelValue"
 	/>`,
-	data() {
-		return {
-			keydownPressed:false // to block keyup to fire in next input component, if input focus switches quickly
-		};
-	},
 	props:{
 		caption:   { type:String,  required:true },
 		isReadonly:{ type:Boolean, required:true },
@@ -43,32 +36,34 @@ const MyInputDateEntryInput = {
 	},
 	emits:['filled','update:modelValue'],
 	computed:{
-		styles:(s) => `width:${s.size}ch;`
+		styles:s => `width:${s.size}ch;`
 	},
 	methods:{
-		blur(e) {
-			// on blur, if string does not reach required length, fill it
-			if(e.target.value !== '' && e.target.value.length < this.size) {
-				e.target.value = e.target.value.padStart(this.size,'0');
-				this.set(e.target);
-			}
-		},
-		keyup(e) {
-			// on number input, if string reaches required length, send update
-			if(this.keydownPressed && /[0-9]/.test(e.key) && e.target.value.length >= this.size) {
-				this.set(e.target);
-				this.$nextTick(() => this.$emit('filled'));
-			}
-			this.keydownPressed = false;
-		},
+		set(e,onBlur) {
+			let v = e.target.value;
 
-		// set
-		set(target) {
-			this.$emit('update:modelValue',target.value);
+			// remove non-digit characters
+			v = v.replace(/\D/g,'');
 
-			// important fix: If updated model value is rejected, reset input value back to modelValue
-			// rejection reasons could be things like "Month was set to 13", "date to is < date from (in ranges)"
-			target.value = this.modelValue;
+			// on blur, zero-fill input to required length
+			if(onBlur && v !== '' && v.length < this.size)
+				v = v.padStart(this.size,'0');
+
+			if(v.length < this.size)
+				return;
+
+			this.$emit('update:modelValue',v);
+
+			this.$nextTick(() => {
+				// important fix: If updated model value is rejected, reset input value back to modelValue
+				// rejection reasons could be things like "Month was set to 13", "date to is < date from (in ranges)"
+				if(this.modelValue !== v)
+					e.target.value = this.modelValue;
+
+				// if value was accepted and length reached on regular input, inform parent that input was filled
+				if(!onBlur && v.length === this.size)
+					this.$emit('filled');
+			});
 		}
 	}
 };
@@ -391,7 +386,7 @@ const MyInputDateEntry = {
 	}
 };
 
-const MyInputDate = {
+export default {
 	name:'my-input-date',
 	components:{
 		MyCalendarDateSelect,

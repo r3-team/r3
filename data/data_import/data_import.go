@@ -49,12 +49,11 @@ func ResolveQueryLookups(joins []types.QueryJoin, lookups []types.QueryLookup) m
 	return indexMapPgIndexAttributeIds
 }
 
-// executes a data SET call from a list of ordered interface{} values
+// executes a data SET call from a list of ordered any values
 // uses columns to recognize attribute (and their orders)
 // uses query joins/lookups to recognize relationships and resolve records via unique indexes
-func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
-	valuesIn []interface{}, columns []types.Column, joins []types.QueryJoin,
-	lookups []types.QueryLookup, indexMapPgIndexAttributeIds map[int][]uuid.UUID) (map[int]int64, error) {
+func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64, valuesIn []any, columns []types.Column,
+	joins []types.QueryJoin, lookups []types.QueryLookup, indexMapPgIndexAttributeIds map[int][]uuid.UUID) (map[int]int64, error) {
 
 	indexRecordIds := make(map[int]int64)
 
@@ -132,7 +131,7 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 			}
 
 			names := make([]string, 0)
-			paras := make([]interface{}, 0)
+			paras := make([]any, 0)
 
 			for _, pgIndexAtrId := range pgIndexAtrIds {
 
@@ -251,12 +250,12 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 		}
 	}
 
-	// update relationship attribute values that point to looked up records
-	// e. g. if a record was identified, relationship attribute values (if used for join) can be updated
-	// because relationship attributes cannot be imported directly, resolved records must be added this way
+	// add relationship attribute values that point to looked up records
+	// ie. if a record was identified, join relationship attribute values can be set
 	for index, dataSet := range dataSetsByIndex {
 
 		if dataSet.RecordId == 0 || dataSet.AttributeId == uuid.Nil {
+			// irrelavant for base relation as it cannot come from anywhere (indexFrom is -1)
 			continue
 		}
 
@@ -264,51 +263,43 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 		if !exists {
 			return indexRecordIds, handler.ErrSchemaUnknownAttribute(dataSet.AttributeId)
 		}
+		joinAtrOnThisRelation := joinAtr.RelationId == dataSet.RelationId
 
-		if joinAtr.RelationId == dataSet.RelationId {
-
-			if !joinsByIndex[index].ApplyUpdate {
-				// only if allowed for this join
+		for indexOther, dataSetOther := range dataSetsByIndex {
+			if indexOther != dataSet.IndexFrom {
 				continue
 			}
 
-			// join is from this relation (self reference), update attribute for this record
-			dataSet.Attributes = append(dataSet.Attributes, types.DataSetAttribute{
-				AttributeId:   joinAtr.Id,
-				AttributeIdNm: pgtype.UUID{},
-				OutsideIn:     false,
-				Value:         dataSet.RecordId,
-			})
-			dataSetsByIndex[index] = dataSet
+			// self joins come from the left side (indexFrom) - example: a child joins its parent, not the other way around
+			// so even if the join attribute exists on the current relation (it´s the same on both), we need to update the source record
+			selfJoin := dataSetOther.RelationId == dataSet.RelationId
 
-		} else {
-			// join from other relation, update attribute for other record if available
-			for otherIndex, otherDataSet := range dataSetsByIndex {
-
-				if !joinsByIndex[otherIndex].ApplyUpdate {
-					// only if allowed for this join
-					continue
+			if joinAtrOnThisRelation && !selfJoin {
+				// join attribute on current relation, update current data SET if we may
+				if joinsByIndex[index].ApplyUpdate {
+					dataSet.Attributes = append(dataSet.Attributes, types.DataSetAttribute{
+						AttributeId:   joinAtr.Id,
+						AttributeIdNm: pgtype.UUID{},
+						OutsideIn:     false,
+						Value:         dataSetOther.RecordId,
+					})
+					dataSetsByIndex[index] = dataSet
+					break
 				}
 
-				if otherDataSet.RecordId == 0 {
-					// join attributes are only relevant for existing records
-					// new ones get them automatically
-					continue
+			} else {
+				// join attribute on other relation, update other data SET
+				// only if we may and if it has a record (relationship values of new records are set by data.Set_tx())
+				if joinsByIndex[indexOther].ApplyUpdate && dataSetOther.RecordId != 0 {
+					dataSetOther.Attributes = append(dataSetOther.Attributes, types.DataSetAttribute{
+						AttributeId:   joinAtr.Id,
+						AttributeIdNm: pgtype.UUID{},
+						OutsideIn:     false,
+						Value:         dataSet.RecordId,
+					})
+					dataSetsByIndex[indexOther] = dataSetOther
+					break
 				}
-
-				if joinAtr.RelationId != otherDataSet.RelationId ||
-					(otherIndex != dataSet.IndexFrom && otherDataSet.IndexFrom != index) {
-					continue
-				}
-
-				otherDataSet.Attributes = append(otherDataSet.Attributes, types.DataSetAttribute{
-					AttributeId:   joinAtr.Id,
-					AttributeIdNm: pgtype.UUID{},
-					OutsideIn:     false,
-					Value:         dataSet.RecordId,
-				})
-				dataSetsByIndex[otherIndex] = otherDataSet
-				break
 			}
 		}
 	}
