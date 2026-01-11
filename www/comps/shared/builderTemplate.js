@@ -166,6 +166,7 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 		border:getBorderTemplate()
 	};
 	switch(content) {
+		case 'dragDropPreview': break; // for drag&drop
 		case 'data':
 			f.attributeId    = attributeId;
 			f.attributeIndex = attributeIndex;

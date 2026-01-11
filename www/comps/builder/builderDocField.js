@@ -1,29 +1,37 @@
+import {getTemplateDocField} from '../shared/builderTemplate.js';
+
 export default {
 	name:'my-builder-doc-field',
 	components:{},
 	template:`<div class="builder-doc-field"
-		@dragover.stop
-		:class="{ flow:isFlow }"
+		:class="{ flow:isFlow, 'drag-preview':isDragPreview }"
 		:style
 		:key="field.id"
 	>
-		<div class="builder-doc-field-title">{{ title }}</div>
+		<div class="builder-doc-field-title" v-if="!hasChildren">{{ title }}</div>
 
-		<div class="builder-doc-fields"
+		<span v-if="isDragPreview">PREV</span>
+
+		<div class="builder-doc-fields" ref="fields"
 			v-if="hasChildren"
+			@dragenter.stop="dragEnter"
+			@dragleave.stop="dragLeave"
 			@dragover.prevent
 			@drop.stop="drop"
 			:class="{ 'layout-flow':isFlow, 'layout-grid':isGrid }"
+			:data-is-parent="hasChildren"
 			:style="styleChildren"
 		>
 			<my-builder-doc-field
 				v-for="(f,i) in field.fields"
 				v-model="f"
 				draggable="true"
+				@dragenter.stop="dragEnterField($event,i)"
+				@dragleave.stop
 				@dragend.stop="dragEnd"
-				@dragstart.stop="dragStart($event,f,i)"
+				@dragstart.stop="dragStart($event,f)"
 				:builderLanguage
-				:class="{ 'being-dragged':i === fieldIndexDragged }"
+				:class="{ 'drag-source':f.id === fieldIdDragged }"
 				:entityIdMapRef
 				:key="f.id"
 				:parentGrid="isGrid"
@@ -38,7 +46,9 @@ export default {
 	},
 	data() {
 		return {
-			fieldIndexDragged:null,
+			fieldIdDragged:null,        // ID of child field being dragged
+			fieldIndexDragPreview:null, // index of child field that something is being dragged over
+			fieldIndexDropped:null,     // index of child field that was just dropped (to block removal)
 			gridFieldSizeMinX:10,
 			gridFieldSizeMinY:5,
 			gridSize:2,
@@ -67,6 +77,7 @@ export default {
 		// simple
 		attribute:    s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
 		isData:       s => s.field.content === 'data',
+		isDragPreview:s => s.field.content === 'dragDropPreview',
 		isFlow:       s => ['flow','flowBody'].includes(s.field.content),
 		isGrid:       s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
 		hasChildren:  s => s.isFlow || s.isGrid,
@@ -80,32 +91,71 @@ export default {
 		capGen:        s => s.$store.getters.captions.generic
 	},
 	methods:{
-		dragEnd(e) {
-			if(e.dataTransfer.dropEffect !== 'none' && this.fieldIndexDragged !== null) {
-				this.field.fields.splice(this.fieldIndexDragged,1);
-				this.fieldIndexDragged = null;
+		// externals
+		getTemplateDocField,
+
+		// helpers
+		dragPreviewCreate(index) {
+			if(this.isFlow && this.fieldIndexDragPreview === null) {
+				this.field.fields.splice(index,0,this.getTemplateDocField('dragDropPreview',null,null));
+				this.fieldIndexDragPreview = index;
 			}
 		},
-		dragStart(e,field,fieldIndex) {
+		dragPreviewRemove() {
+			if(this.isFlow && this.fieldIndexDragPreview !== null) {
+				this.field.fields.splice(this.field.fields.findIndex(v => v.content === 'dragDropPreview'),1);
+				this.fieldIndexDragPreview = null;
+			}
+		},
+
+		// drag source
+		dragEnd(e) {
+			if(e.dataTransfer.dropEffect !== 'none' && this.fieldIdDragged !== null) {
+				this.field.fields.splice(this.field.fields.findIndex((v,i) => i !== this.fieldIndexDropped && v.id === this.fieldIdDragged),1);
+				this.fieldIdDragged    = null;
+				this.fieldIndexDropped = null;
+			}
+		},
+		dragStart(e,field) {
 			// store field for later drop & adjust ghost image to start at mouse position
 			e.dataTransfer.setData('application/json',JSON.stringify(field));
 			e.dataTransfer.setDragImage(e.srcElement,0,0);
 
 			// store field index for removal from the source on later drop
 			// timeout serves to make sure that ghost image is taken before hidden CSS is applied
-			setTimeout(() => { this.fieldIndexDragged = fieldIndex; },50);
+			setTimeout(() => this.fieldIdDragged = field.id,50);
+		},
+
+		// drag target
+		dragEnter(e) {
+			e.preventDefault(); // to allow drop on parent
+
+			// generate preview if dragover occurs on this elm and preview does not exist yet
+			if(e.target === e.currentTarget)
+				this.dragPreviewCreate(this.field.fields.length);
+		},
+		dragEnterField(e,fieldIndex) {
+			e.preventDefault(); // to allow drop on parent
+
+			if(this.fieldIndexDragPreview !== null)
+				this.dragPreviewRemove();
+
+			this.dragPreviewCreate(fieldIndex);
+		},
+		dragLeave(e) {
+			this.dragPreviewRemove();
 		},
 		drop(e) {
-			const rect      = e.target.getBoundingClientRect();
-			const gridSizeX = rect.width  * this.pixelToMm;
-			const gridSizeY = rect.height * this.pixelToMm;
-
-			const field = JSON.parse(e.dataTransfer.getData('application/json'));
+			const field         = JSON.parse(e.dataTransfer.getData('application/json'));
+			const fieldsElm     = e.currentTarget; // the valid drop elm, ie. fields container
+			const fieldsElmRect = fieldsElm.getBoundingClientRect();
+			const gridSizeX     = fieldsElmRect.width  * this.pixelToMm;
+			const gridSizeY     = fieldsElmRect.height * this.pixelToMm;
 
 			if(this.isGrid) {
 				// find position in grid
-				field.posX  = (e.clientX - rect.left) * this.pixelToMm;
-				field.posY  = (e.clientY - rect.top)  * this.pixelToMm;
+				field.posX  = (e.clientX - fieldsElmRect.left) * this.pixelToMm;
+				field.posY  = (e.clientY - fieldsElmRect.top)  * this.pixelToMm;
 	
 				// snap position to grid
 				field.posX = Math.round(field.posX / this.gridSize) * this.gridSize;
@@ -126,10 +176,18 @@ export default {
 				// snap field sizes to grid
 				field.sizeX = Math.max(this.gridSize, Math.round(field.sizeX / this.gridSize) * this.gridSize);
 				field.sizeY = Math.max(this.gridSize, Math.round(field.sizeY / this.gridSize) * this.gridSize);
-			} else {
+			}
+
+			if(this.isFlow) {
 				field.sizeX = 0;
 			}
-			this.field.fields.push(field);
+
+			if(this.fieldIndexDragPreview === null)
+				return this.field.fields.push(field);
+			
+			this.field.fields.splice(this.fieldIndexDragPreview,1,field);
+			this.fieldIndexDropped     = this.fieldIndexDragPreview;
+			this.fieldIndexDragPreview = null;
 		}
 	}
 };
