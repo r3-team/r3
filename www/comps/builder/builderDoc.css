@@ -49,15 +49,8 @@
 
 .builder-doc-fields{
 	flex:1 1 auto;
-	display:flex;
-	flex-flow:column nowrap;
 }
-.builder-doc-field{
-	background:yellow;
-	border-bottom:1px solid black;
-}
-.builder-doc-field.layout-flow{
-	flex:1 1 auto;
+.builder-doc-fields.layout-flow{
 	display:flex;
 	flex-flow:column nowrap;
 	border:1px solid blue;
@@ -71,6 +64,21 @@
 		var(--color-form-builder-actions-bg) 20px
 	);
 }
-.builder-doc-field.layout-grid{
+.builder-doc-fields.layout-grid{
+	display:block;
+	position:relative;
 	border:1px solid red;
+	background-image:radial-gradient(circle at 1px 1px, rgb(150, 150, 150) 1px, transparent 0);
+}
+
+.builder-doc-field{
+	border:1px dashed black;
+	display:flex;
+	flex-flow:column nowrap;
+}
+.builder-doc-field.being-dragged{
+	visibility:hidden;
+}
+.builder-doc-field.flow{
+	flex:1 1 auto;
 }

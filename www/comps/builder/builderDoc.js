@@ -1,10 +1,10 @@
 import MyBuilderCaption   from './builderCaption.js';
 import MyBuilderQuery     from './builderQuery.js';
-import MyBuilderDocFields from './builderDocFields.js';
 import MyBuilderDocFont   from './builderDocFont.js';
 import MyBuilderDocPage   from './builderDocPage.js';
 import MyBuilderDocSets   from './builderDocSets.js';
 import MyTabs             from '../tabs.js';
+import {getUuidV4}        from '../shared/crypto.js';
 import {deepIsEqual}      from '../shared/generic.js';
 import {getJoinsIndexMap} from '../shared/query.js';
 import {
@@ -16,7 +16,6 @@ export default {
 	name:'my-builder-doc',
 	components:{
 		MyBuilderCaption,
-		MyBuilderDocFields,
 		MyBuilderDocFont,
 		MyBuilderDocPage,
 		MyBuilderDocSets,
@@ -116,12 +115,15 @@ export default {
 					/>
 
 					<!-- field templates -->
-					<my-builder-doc-fields
-						v-model="fieldsTemplate"
-						:builderLanguage
-						:template="true"
-						:readonly
-					/>
+					<div class="builder-doc-fields">
+						<div class="builder-doc-field" v-for="f in fieldsTemplate">
+							<div class="builder-doc-field-title"
+								draggable="true"
+								@dragstart="fieldDragStart($event,f)"
+								:key="f.id"
+							>TESTFIELD</div>
+						</div>
+					</div>
 				</div>
 
 				<!-- states -->
@@ -295,6 +297,7 @@ export default {
 		getJoinsIndexMap,
 		getTemplateDocField,
 		getTemplateDocPage,
+		getUuidV4,
 
 		// presentation
 		getPageName(id) {
@@ -302,6 +305,12 @@ export default {
 		},
 		
 		// actions
+		fieldDragStart(e,field) {
+			let f = JSON.parse(JSON.stringify(field));
+			f.id = this.getUuidV4();
+			e.dataTransfer.setData('application/json',JSON.stringify(f));
+			e.dataTransfer.setDragImage(e.srcElement,0,0);
+		},
 		pageAdd() {
 			const p = this.getTemplateDocPage();
 			this.doc.pages.push(p);

@@ -160,7 +160,7 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 		posX:0,
 		posY:0,
 		sizeX:0,
-		sizeY:0,
+		sizeY:6,
 		sets:[],
 		state:true,
 		border:getBorderTemplate()
@@ -179,7 +179,7 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 		case 'grid':       // fallthrough
         case 'gridFooter': // fallthrough
         case 'gridHeader':
-			f.sizeY  = 20;
+			f.sizeY  = 25;
 			f.fields = [];
 			f.shrink = false;
 		break;
