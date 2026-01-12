@@ -197,7 +197,7 @@ func setFont(doc *doc, f types.DocFont) {
 
 		// we collect the font files from the WWW embedded directory
 		// fonts are stored in WWW to be usable by frontend code like jsPDF
-		fontFile, err := fs.ReadFile(wwwFs, fmt.Sprintf("www/font/%s.ttf", fontKey))
+		fontFile, err := fs.ReadFile(fsFont, fmt.Sprintf("%s.ttf", fontKey))
 		if err != nil {
 			log.Error(log.ContextServer, fmt.Sprintf("failed to load font '%s'", fontKey), err)
 

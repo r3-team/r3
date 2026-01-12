@@ -5,11 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"r3/cache"
+	"r3/handler"
 	"r3/log"
 	"r3/types"
 
 	"codeberg.org/go-pdf/fpdf"
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const pageUnit string = "mm"
@@ -39,14 +42,28 @@ var (
 		"Legal":  {Wd: 216, Ht: 356},
 		"Letter": {Wd: 216, Ht: 279},
 	}
-	wwwFs fs.FS
+	fsFont fs.FS
 )
 
-func SetWwwFs(fs fs.FS) {
-	wwwFs = fs
+func SetFontFs(fs fs.FS) {
+	fsFont = fs
 }
 
-func Run(ctx context.Context, docDef types.Doc, pathOut string) error {
+// TEMP
+// Mockup for later scheduler run
+func DoAll() error {
+	return nil
+}
+
+func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) error {
+
+	cache.Schema_mx.RLock()
+	docDef, exists := cache.DocIdMap[docId]
+	cache.Schema_mx.RUnlock()
+
+	if !exists {
+		return handler.ErrSchemaUnknownDoc(docId)
+	}
 
 	if len(docDef.Pages) < 1 {
 		return errors.New("cannot create document, 0 pages defined")
@@ -54,37 +71,71 @@ func Run(ctx context.Context, docDef types.Doc, pathOut string) error {
 
 	log.Info(log.ContextDoc, "document creator has started")
 
-	// collect expressions for primary query
-	// * data fields
-	// * overwrite rules in document, pages & fields
-	exprs := make([]types.DataGetExpression, 0)
-	exprs = append(exprs, getExpressionsFromSet(docDef.Sets)...)
-
-	for _, page := range docDef.Pages {
-		// states
-		exprs = append(exprs, getExpressionsFromStates(docDef.States)...)
-
-		// pages
-		exprs = append(exprs, getExpressionsFromSet(page.Sets)...)
-
-		// fields
-		exprsSub, err := getExpressionsFromFields(page.FieldFlow.Fields)
-		if err != nil {
-			return err
-		}
-		exprs = append(exprs, exprsSub...)
-	}
-
-	// remove duplicate expressions
-	exprs = getExpressionsDistinct(exprs)
-
-	// get data from document query
+	docHasData := docDef.Query.RelationId.Valid
 	doc := &doc{
 		data:       make(map[int]map[uuid.UUID]any),
 		fontKeyMap: make(map[string]bool),
 	}
-	if err := getDataDoc(ctx, doc, docDef.Query, exprs, "en_us"); err != nil {
-		return err
+
+	if docHasData {
+		if recordId != 0 {
+			// apply record filter to base relation
+			cache.Schema_mx.RLock()
+			rel, exists := cache.RelationIdMap[docDef.Query.RelationId.Bytes]
+			cache.Schema_mx.RUnlock()
+
+			if !exists {
+				return handler.ErrSchemaUnknownRelation(docDef.Query.RelationId.Bytes)
+			}
+
+			cache.Schema_mx.RLock()
+			atrPk, exists := cache.AttributeIdMap[rel.AttributeIdPk]
+			cache.Schema_mx.RUnlock()
+
+			if !exists {
+				return handler.ErrSchemaUnknownAttribute(rel.AttributeIdPk)
+			}
+
+			docDef.Query.Filters = append(docDef.Query.Filters, types.QueryFilter{
+				Connector: "AND",
+				Operator:  "=",
+				Side0: types.QueryFilterSide{
+					AttributeId: pgtype.UUID{Bytes: atrPk.Id, Valid: true},
+				},
+				Side1: types.QueryFilterSide{
+					Value: pgtype.Text{String: fmt.Sprintf("%d", recordId), Valid: true},
+				},
+			})
+		}
+
+		// collect expressions for primary query
+		// * data fields
+		// * overwrite rules in document, pages & fields
+		exprs := make([]types.DataGetExpression, 0)
+		exprs = append(exprs, getExpressionsFromSet(docDef.Sets)...)
+
+		for _, page := range docDef.Pages {
+			// states
+			exprs = append(exprs, getExpressionsFromStates(docDef.States)...)
+
+			// pages
+			exprs = append(exprs, getExpressionsFromSet(page.Sets)...)
+
+			// fields
+			exprsSub, err := getExpressionsFromFields(page.FieldFlow.Fields)
+			if err != nil {
+				return err
+			}
+			exprs = append(exprs, exprsSub...)
+		}
+
+		// remove duplicate expressions
+		exprs = getExpressionsDistinct(exprs)
+
+		// get data from document query
+		if err := getDataDoc(ctx, doc, docDef.Query, exprs, "en_us"); err != nil {
+			return err
+		}
 	}
 
 	// process states

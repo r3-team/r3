@@ -139,7 +139,7 @@ export default {
 		this.cacheDenialTimeout = setInterval(this.setCacheDenialTimestamp,1000);
 	},
 	unmounted() {
-		clearInterval(this.cacheDenialTimeout);
+		clearInterval(this.setCacheDenialTimestamp);
 	},
 	computed:{
 		columnsCsv:(s) => {

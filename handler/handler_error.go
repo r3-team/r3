@@ -239,6 +239,9 @@ func ErrSchemaUnknownClientEvent(id uuid.UUID) error {
 func ErrSchemaUnknownPgFunction(id uuid.UUID) error {
 	return fmt.Errorf("unknown backend function '%s'", id)
 }
+func ErrSchemaUnknownDoc(id uuid.UUID) error {
+	return fmt.Errorf("unknown document '%s'", id)
+}
 func ErrSchemaTriggerPgFunctionCall(id uuid.UUID) error {
 	return fmt.Errorf("backend function '%s' is a trigger function, it cannot be called directly", id)
 }

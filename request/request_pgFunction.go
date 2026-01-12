@@ -63,9 +63,7 @@ func PgFunctionExec_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, 
 	var returnIf any
 	if err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT "%s"."%s"(%s)
-	`, mod.Name, fnc.Name, strings.Join(placeholders, ",")),
-		req.Args...).Scan(&returnIf); err != nil {
-
+	`, mod.Name, fnc.Name, strings.Join(placeholders, ",")), req.Args...).Scan(&returnIf); err != nil {
 		return nil, err
 	}
 	return returnIf, nil

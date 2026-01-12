@@ -19,13 +19,14 @@ var (
 	Pool *pgxpool.Pool
 
 	// default context timeouts
-	CtxDefTimeoutDbTask   = 300 * time.Second // heavy DB operations (init/upgrade/relation retention cleanup)
-	CtxDefTimeoutLogWrite = 30 * time.Second  // writing to database log
-	CtxDefTimeoutPgFunc   = 240 * time.Second // executing plsql functions, to be replaced by config option
-	CtxDefTimeoutShutdown = 10 * time.Second  // shutting down system
-	CtxDefTimeoutSysTask  = 30 * time.Second  // executing system tasks
-	CtxDefTimeoutSysStart = 300 * time.Second // executing system startup tasks
-	CtxDefTimeoutTransfer = 600 * time.Second // executing module transfers, to be replaced by config option
+	CtxDefTimeoutDbTask     = 300 * time.Second // heavy DB operations (init/upgrade/relation retention cleanup)
+	CtxDefTimeoutDocPreview = 20 * time.Second  // document previews
+	CtxDefTimeoutLogWrite   = 30 * time.Second  // writing to database log
+	CtxDefTimeoutPgFunc     = 240 * time.Second // executing plsql functions, to be replaced by config option
+	CtxDefTimeoutShutdown   = 10 * time.Second  // shutting down system
+	CtxDefTimeoutSysTask    = 30 * time.Second  // executing system tasks
+	CtxDefTimeoutSysStart   = 300 * time.Second // executing system startup tasks
+	CtxDefTimeoutTransfer   = 600 * time.Second // executing module transfers, to be replaced by config option
 )
 
 // attempts to open a database connection

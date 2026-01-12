@@ -34,6 +34,7 @@ import (
 	"r3/handler/data_download"
 	"r3/handler/data_download_thumb"
 	"r3/handler/data_upload"
+	"r3/handler/doc_download"
 	"r3/handler/icon_upload"
 	"r3/handler/ics_download"
 	"r3/handler/license_upload"
@@ -46,6 +47,7 @@ import (
 	"r3/login"
 	"r3/login/login_session"
 	"r3/scheduler"
+	"r3/spooler/doc_create"
 	"r3/tools"
 	"strings"
 	"sync/atomic"
@@ -415,7 +417,15 @@ func (prg *program) execute(svc service.Service) {
 	} else {
 		mux.Handle("/", http.FileServer(http.Dir(cli.wwwPath)))
 	}
+
+	fsStaticFont, err := fs.Sub(fs.FS(fsStatic), "www/font")
+	if err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to access embedded font directory, %v", err))
+		return
+	}
+
 	handler.SetNoImage(fsStaticNoPic)
+	doc_create.SetFontFs(fsStaticFont)
 
 	mux.HandleFunc("/api/", api.Handler)
 	mux.HandleFunc("/api/auth", api_auth.Handler)
@@ -427,6 +437,7 @@ func (prg *program) execute(svc service.Service) {
 	mux.HandleFunc("/data/download/", data_download.Handler)
 	mux.HandleFunc("/data/download/thumb/", data_download_thumb.Handler)
 	mux.HandleFunc("/data/upload", data_upload.Handler)
+	mux.HandleFunc("/doc/download/", doc_download.Handler)
 	mux.HandleFunc("/icon/upload", icon_upload.Handler)
 	mux.HandleFunc("/ics/download/", ics_download.Handler)
 	mux.HandleFunc("/license/upload", license_upload.Handler)

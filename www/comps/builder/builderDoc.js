@@ -3,6 +3,7 @@ import MyBuilderQuery     from './builderQuery.js';
 import MyBuilderDocFont   from './builderDocFont.js';
 import MyBuilderDocPage   from './builderDocPage.js';
 import MyBuilderDocSets   from './builderDocSets.js';
+import MyInputDecimal     from '../inputDecimal.js';
 import MyTabs             from '../tabs.js';
 import {getUuidV4}        from '../shared/crypto.js';
 import {deepIsEqual}      from '../shared/generic.js';
@@ -20,6 +21,7 @@ export default {
 		MyBuilderDocPage,
 		MyBuilderDocSets,
 		MyBuilderQuery,
+		MyInputDecimal,
 		MyTabs
 	},
 	template:`<div class="builder-doc" v-if="doc !== false">
@@ -50,6 +52,15 @@ export default {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
+				</div>
+				<div class="area nowrap default-inputs">
+					<my-input-decimal class="short" v-model="recordId" :allowNull="true" :readonly :lengthFract="0" />
+					<a target="_blank" :href="previewUrl">
+						<my-button image="download.png"
+							:active="previewUrl !== null"
+							:caption="capGen.preview"
+						/>
+					</a>
 				</div>
 				<div class="area nowrap">
 					<my-button image="delete.png"
@@ -212,18 +223,24 @@ export default {
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.cacheDenialTimestamp = setInterval(this.setCacheDenialTimestamp,1000);
 	},
 	unmounted() {
 		this.$store.commit('keyDownHandlerDel',this.set);
+		clearInterval(this.setCacheDenialTimestamp);
 	},
 	data() {
 		return {
+			cacheDenialTimestamp:0,
 			doc:false,
 			filtersDisable:[
 				'collection','field','fieldChanged','fieldValid','formChanged',
 				'formState','getter','globalSearch','javascript','record','recordMayCreate',
 				'recordMayDelete','recordMayUpdate','recordNew','variable'
 			],
+
+			// inputs
+			recordId:null,
 			
 			// state
 			pageOptions:null,
@@ -287,6 +304,7 @@ export default {
 		hasChanges:     s => !s.deepIsEqual(s.doc,s.docOrg),
 		module:         s => s.moduleIdMap[s.doc.moduleId],
 		pageIndexActive:s => s.pageIdMapIndex[s.tabPageIdShow],
+		previewUrl:     s => s.recordId !== null ? `/doc/download/test.pdf?doc_id=${s.id}&record_id=${s.recordId}&token=${s.token}&date=${s.cacheDenialTimestamp}` : null,
 		sideColumnShow: s => s.sideColumnIdShow !== null,
 		sideDocShow:    s => !s.sideColumnShow && !s.sideFieldShow,
 		sideFieldShow:  s => s.sideFieldIdShow !== null,
@@ -295,8 +313,9 @@ export default {
 		docIdMap:     s => s.$store.getters['schema/docIdMap'],
 		moduleIdMap:  s => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap:s => s.$store.getters['schema/relationIdMap'],
+		token:        s => s.$store.getters['local/token'],
 		capApp:       s => s.$store.getters.captions.builder.doc,
-		capGen:       s => s.$store.getters.captions.generic
+		capGen:       s => s.$store.getters.captions.generic,
 	},
 	watch:{
 		docOrg:{
@@ -315,6 +334,11 @@ export default {
 		// presentation
 		getPageName(id) {
 			return String(this.pageIdMapIndex[id] + 1);
+		},
+
+		// system
+		setCacheDenialTimestamp() {
+			this.cacheDenialTimestamp = Math.floor(new Date().getTime() / 1000);
 		},
 		
 		// actions
