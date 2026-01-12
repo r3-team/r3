@@ -38,6 +38,7 @@ export default {
 					:elmFieldOptions
 					:entityIdMapRef="{}"
 					:fieldIdOptions
+					:isChildFlow="true"
 					:joins
 					:parentSizeX="pageSizeX - margin.l - margin.r"
 					:parentSizeY="pageSizeY - margin.t - margin.b"
@@ -128,11 +129,5 @@ export default {
 		// stores
 		capApp:s => s.$store.getters.captions.builder.doc,
 		capGen:s => s.$store.getters.captions.generic
-	},
-	methods:{
-		// actions
-		update() {
-			this.$emit('update:modelValue',v);
-		}
 	}
 };

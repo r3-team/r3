@@ -10,9 +10,9 @@ export default {
 		MyInputDecimal,
 		MyInputRange
 	},
-	template:`<div class="builder-doc-field"
-		@click.stop="$emit('setFieldIdOptions',field.id)"
-		:class="{ flow:isFlow, 'drag-preview':isDragPreview, selected:isOptionsShow }"
+	template:`<div class="builder-doc-field" ref="field"
+		@mousedown.stop="$emit('setFieldIdOptions',field.id)"
+		:class="{ flow:isFlow, 'drag-preview':isDragPreview, 'resizable-both':isChildGrid, 'resizable-height':isChildFlow, selected:isOptionsShow }"
 		:style
 		:key="field.id"
 	>
@@ -49,7 +49,8 @@ export default {
 				:gridParentSnap="isGrid ? field.sizeSnap : 0"
 				:joins
 				:key="f.id"
-				:isGridChild="isGrid"
+				:isChildFlow="isFlow"
+				:isChildGrid="isGrid"
 				:readonly
 			/>
 		</div>
@@ -63,8 +64,8 @@ export default {
 						<td><my-bool v-model="field.state" :readonly /></td>
 					</tr>
 					
-					<template v-if="isGrid || isGridChild">
-						<tr v-if="isGridChild">
+					<template v-if="isGrid || isChildGrid">
+						<tr v-if="isChildGrid">
 							<td>{{ capGen.sizeX }}</td>
 							<td>
 								<div class="row gap centered">
@@ -89,8 +90,8 @@ export default {
 							<td>{{ capApp.grid.sizeSnap }}</td>
 							<td>
 								<div class="row gap centered">
-									<my-input-range   class="short" v-model="field.sizeSnap" :readonly :min="0.5" :max="99" :step="0.1" />
-									<my-input-decimal class="short" v-model="field.sizeSnap" :readonly :min="0.5" :max="99" :allowNull="false" :length="4" :lengthFract="2" />
+									<my-input-range   class="short" v-model="field.sizeSnap" :readonly :min="0.5" :max="10" :step="0.1" />
+									<my-input-decimal class="short" v-model="field.sizeSnap" :readonly :min="0.5" :max="10" :allowNull="false" :length="4" :lengthFract="2" />
 								</div>
 							</td>
 						</tr>
@@ -122,7 +123,8 @@ export default {
 		modelValue:     { type:Object,        required:true },
 		parentSizeX:    { type:Number,        required:true },
 		parentSizeY:    { type:Number,        required:true },
-		isGridChild:    { type:Boolean,       required:false, default:false },
+		isChildGrid:    { type:Boolean,       required:false, default:false },
+		isChildFlow:    { type:Boolean,       required:false, default:false },
 		readonly:       { type:Boolean,       required:true }
 	},
 	data() {
@@ -132,7 +134,9 @@ export default {
 			fieldIndexDropped:null,     // index of child field that was just dropped (to block removal)
 			gridFieldSizeMinX:0,
 			gridFieldSizeMinY:5,
-			pixelToMm:25.4 / 96
+			pixelToMm:25.4 / 96,
+			sizeObserver:null,          // for HTML resize actions without custom drag&drop
+			timerAdjustSize:null
 		};
 	},
 	emits:['setFieldIdOptions','update:modelValue'],
@@ -147,6 +151,10 @@ export default {
 			}
 			return '';
 		},
+		styleChildren:s => s.isGrid ? `
+			background-image:radial-gradient(var(--color-border) ${s.styleDotSize}mm, transparent ${s.styleDotSize}mm);
+			background-size:${s.sizeSnap}mm ${s.sizeSnap}mm;
+			background-position:${s.styleDotPos}mm ${s.styleDotPos}mm` : '',
 
 		// inputs
 		field:{ // this method updates obj directly
@@ -165,20 +173,65 @@ export default {
 		sizeSnap:     s => s.isGrid ? s.field.sizeSnap : s.gridParentSnap,
 		sizeXMax:     s => s.parentSizeX - s.field.posX,
 		sizeYMax:     s => s.parentSizeY - s.field.posY,
-		style:        s => s.isGrid || s.isGridChild ? `height:${s.field.sizeY}mm;${s.styleGrid}` : '',
-		styleChildren:s => s.isGrid ? `background-size:${s.sizeSnap}mm ${s.sizeSnap}mm;` : '',
-		styleGrid:    s => s.isGridChild ? `position:absolute;top:${s.field.posY}mm;left:${s.field.posX}mm;width:${s.field.sizeX}mm;height:${s.field.sizeY}mm` : '',
+		style:        s => s.isGrid || s.isChildGrid ? `height:${s.field.sizeY}mm;${s.styleGrid}` : '',
+		styleDotPos:  s => (s.sizeSnap / 2) - s.sizeSnap,
+		styleDotSize: s => s.sizeSnap / 5,
+		styleGrid:    s => s.isChildGrid ? `position:absolute;top:${s.field.posY}mm;left:${s.field.posX}mm;width:${s.field.sizeX}mm;height:${s.field.sizeY}mm` : '',
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
 		capApp:        s => s.$store.getters.captions.builder.doc,
 		capGen:        s => s.$store.getters.captions.generic
 	},
+	mounted() {
+		this.sizeObserver = new ResizeObserver(entries => {
+			requestAnimationFrame(() => {
+				const entry = entries[0];
+				const rect  = entry.contentRect;
+				const sizeX = rect.width  * this.pixelToMm;
+				const sizeY = rect.height * this.pixelToMm;
+				clearTimeout(this.timerAdjustSize);
+
+				if(sizeX !== 0 && sizeY !== 0)
+					this.timerAdjustSize = setTimeout(() => this.adjustSizeToSnap(sizeX,sizeY),50);
+			});
+		});
+		this.sizeObserver.observe(this.$refs.field);
+	},
+	unmounted() {
+		if(this.sizeObserver) this.sizeObserver.disconnect();
+	},
 	methods:{
 		// externals
 		getTemplateDocField,
 
-		// helpers
+		// presentation
+		adjustSizeToSnap(sizeX,sizeY) {
+			const sizeXClean = this.getSizeClean(this.field.posX,sizeX,this.parentSizeX,this.gridFieldSizeMinX);
+			const sizeYClean = this.getSizeClean(this.field.posY,sizeY,this.parentSizeY,this.gridFieldSizeMinY);
+
+			if(sizeXClean !== sizeX || sizeYClean !== sizeY) {
+				this.field.sizeX = sizeXClean;
+				this.field.sizeY = sizeYClean;
+			}
+		},
+		getSizeClean(posChild,sizeChild,sizeParent,sizeMin) {
+			// limit size to parent size
+			if(this.isChildGrid && posChild + sizeChild > sizeParent)
+				sizeChild = sizeParent - posChild;
+
+			// force minimum sizes
+			if(sizeChild < sizeMin)
+				sizeChild = sizeMin;
+
+			// snap size to grid
+			if(this.isChildGrid)
+				sizeChild = Math.max(this.sizeSnap, Math.round(sizeChild / this.sizeSnap) * this.sizeSnap);
+
+			return sizeChild;
+		},
+
+		// drag & drop
 		dragPreviewCreate(index) {
 			if(this.isFlow && this.fieldIndexDragPreview === null) {
 				this.field.fields.splice(index,0,this.getTemplateDocField('dragDropPreview',null,null));
@@ -234,12 +287,11 @@ export default {
 			const fieldsElm     = e.currentTarget; // the valid drop elm, ie. fields container
 			const fieldsElmRect = fieldsElm.getBoundingClientRect();
 			const gridSizeX     = fieldsElmRect.width  * this.pixelToMm;
-			const gridSizeY     = fieldsElmRect.height * this.pixelToMm;
 
 			if(this.isGrid) {
 				// find position in grid
-				field.posX  = (e.clientX - fieldsElmRect.left) * this.pixelToMm;
-				field.posY  = (e.clientY - fieldsElmRect.top)  * this.pixelToMm;
+				field.posX = (e.clientX - fieldsElmRect.left) * this.pixelToMm;
+				field.posY = (e.clientY - fieldsElmRect.top)  * this.pixelToMm;
 	
 				// snap position to grid
 				field.posX = Math.round(field.posX / this.sizeSnap) * this.sizeSnap;
@@ -248,22 +300,13 @@ export default {
 				// if field has no size, set to half of grid width
 				if(field.sizeX === 0) field.sizeX = gridSizeX / 2;
 				if(field.sizeY === 0) field.sizeY = this.gridFieldSizeMinY;
-
-				// limit size to grid size
-				if(field.posX + field.sizeX > gridSizeX) field.sizeX = gridSizeX - field.posX;
-				if(field.posY + field.sizeY > gridSizeY) field.sizeY = gridSizeY - field.posY;
-
-				// force minimum field sizes
-				if(field.sizeX < this.gridFieldSizeMinX) field.sizeX = this.gridFieldSizeMinX;
-				if(field.sizeY < this.gridFieldSizeMinY) field.sizeY = this.gridFieldSizeMinY;
-	
-				// snap field sizes to grid
-				field.sizeX = Math.max(this.sizeSnap, Math.round(field.sizeX / this.sizeSnap) * this.sizeSnap);
-				field.sizeY = Math.max(this.sizeSnap, Math.round(field.sizeY / this.sizeSnap) * this.sizeSnap);
 			}
 
 			if(this.isFlow) {
 				field.sizeX = 0;
+
+				if(field.sizeY === 0)
+					field.sizeY = 6;
 			}
 
 			if(this.fieldIndexDragPreview === null)

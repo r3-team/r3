@@ -50,7 +50,7 @@
 
 /* field */
 .builder-doc-field{
-	border:1px dashed black;
+	border:1px solid var(--color-border);
 	box-sizing:border-box;
 	display:flex;
 	flex-flow:column nowrap;
@@ -68,6 +68,14 @@
 }
 .builder-doc-field.flow{
 	flex:1 1 auto;
+}
+.builder-doc-field.resizable-both{
+	resize:both;
+	overflow:hidden;
+}
+.builder-doc-field.resizable-height{
+	resize:vertical;
+	overflow:hidden;
 }
 
 /* field children */
@@ -90,5 +98,4 @@
 .builder-doc-fields.layout-grid{
 	display:block;
 	position:relative;
-	background-image:radial-gradient(circle at 1px 1px, rgb(150, 150, 150) 1px, transparent 0);
 }

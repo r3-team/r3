@@ -1,6 +1,6 @@
 export default {
 	name:'my-input-range',
-	template:`<input type="range"
+	template:`<input class="input input-range" type="range"
 		@input="$emit('update:modelValue',Number($event.target.value))"
 		:disabled="readonly"
 		:max="max"
