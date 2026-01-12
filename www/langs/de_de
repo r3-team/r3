@@ -823,6 +823,10 @@
 				"styleBold": "Bold",
 				"styleItalic": "Italic"
 			},
+			"grid": {
+				"shrink": "Vertikal schrumpfen, wenn leer",
+				"sizeSnap": "Rastergröße"
+			},
 			"setData": "Von Attributwert überschreiben",
 			"setValue": "Manuell überschreiben",
 			"sidebarField": "Feld: {NAME}",
@@ -2465,6 +2469,8 @@
 		"showDefaultMobile0": "Standardm. nicht auf mobil angezeigt",
 		"showDefaultMobile1": "Standardm. anzeigen auf mobil",
 		"size": "Größe",
+		"sizeX": "Breite",
+		"sizeY": "Höhe",
 		"spacing": "Abstände",
 		"sqlPreview": "SQL-Vorschau",
 		"standard": "Standard",

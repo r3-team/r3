@@ -101,8 +101,9 @@ type DocFieldGrid struct {
 	Border  DocBorder `json:"border"`
 
 	// grid field
-	Fields []any `json:"fields"`
-	Shrink bool  `json:"shrink"` // shrink if content does not fill height
+	Fields   []any   `json:"fields"`
+	Shrink   bool    `json:"shrink"`   // shrink if content does not fill height
+	SizeSnap float64 `json:"sizeSnap"` // grid snap size
 }
 type DocFieldList struct {
 	Id      uuid.UUID `json:"id"`

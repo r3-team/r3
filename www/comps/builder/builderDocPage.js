@@ -33,7 +33,14 @@ export default {
 			<div class="builder-doc-page-body" :style="styleBody">
 				<my-builder-doc-field
 					v-model="page.fieldFlow"
+					@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 					:builderLanguage
+					:elmFieldOptions
+					:entityIdMapRef="{}"
+					:fieldIdOptions
+					:joins
+					:parentSizeX="pageSizeX - margin.l - margin.r"
+					:parentSizeY="pageSizeY - margin.t - margin.b"
 					:readonly
 					:template="false"
 				/>
@@ -41,7 +48,7 @@ export default {
 		</div>
 
 		<!-- options -->
-		<teleport v-if="pageOptionsElm" :to="pageOptionsElm">
+		<teleport v-if="elmPageOptions" :to="elmPageOptions">
 			<table class="generic-table-vertical default-inputs">
 				<tbody>
 					<tr>
@@ -87,13 +94,15 @@ export default {
 		</teleport>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String,  required:true },
-		joins:          { type:Array,   required:true },
-		modelValue:     { type:Object,  required:true },
-		pageOptionsElm: { required:true },
-		readonly:       { type:Boolean, required:true }
+		builderLanguage:{ type:String,        required:true },
+		elmPageOptions: { required:true },
+		elmFieldOptions:{ required:true },
+		fieldIdOptions: { type:[String,null], required:true },
+		joins:          { type:Array,         required:true },
+		modelValue:     { type:Object,        required:true },
+		readonly:       { type:Boolean,       required:true }
 	},
-	emits:['update:modelValue'],
+	emits:['setFieldIdOptions','update:modelValue'],
 	computed:{
 		page:{ // this method updates obj directly
 			get()  { return this.modelValue; },

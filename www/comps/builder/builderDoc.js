@@ -78,19 +78,34 @@ export default {
 				<!-- page -->
 				<my-builder-doc-page
 					v-model="pageActive"
+					@setFieldIdOptions="sideFieldIdShow = $event"
 					:builderLanguage
+					:elmPageOptions="$refs.pageOptions"
+					:elmFieldOptions="$refs.fieldOptions"
+					:fieldIdOptions="sideFieldIdShow"
 					:joins="doc.query.joins"
-					:pageOptionsElm="$refs.pageOptions"
 					:readonly
 				/>
 			</div>
 		</div>
 		
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
-			<div class="top lower" @click="sideFieldIdShow = null; sideColumnIdShow = null">
+			<div class="top lower" @click="sideFieldIdShow = null; sideColumnIdShow = null" :class="{ clickable:sideFieldShow || sideColumnShow }">
 				<div class="area">
 					<img class="icon" src="images/document.png" />
 					<h1>{{ capGen.document }}</h1>
+				</div>
+			</div>
+			<div class="top lower" v-if="sideFieldShow" :class="{ clickable:sideColumnShow }" @click="sideColumnIdShow = null;">
+				<div class="area">
+					<h2>FIELD OPTIONS</h2>
+				</div>
+				<div class="area">
+					<my-button image="cancel.png"
+						@trigger="sideFieldIdShow = null; sideColumnIdShow = null;"
+						:cancel="true"
+						:captionTitle="capGen.button.close"
+					/>
 				</div>
 			</div>
 			
@@ -128,9 +143,8 @@ export default {
 
 				<!-- states -->
 				
-				<!-- page properties -->
-				<div class="content grow no-padding" ref="pageOptions" v-show="tabTarget === 'page'">
-				</div>
+				<!-- page options -->
+				<div class="content grow no-padding" ref="pageOptions" v-show="tabTarget === 'page'"></div>
 				
 				<!-- document properties -->
 				<div class="content grow no-padding" v-if="tabTarget === 'properties'">
@@ -185,11 +199,10 @@ export default {
 				</div>
 			</template>
 
-			<!-- page -->
+			<!-- field options -->
+			<div class="content grow no-padding" ref="fieldOptions" v-show="sideFieldShow"></div>
 
-			<!-- field -->
-
-			<!-- column -->
+			<!-- column options -->
 		</div>
 	</div>`,
 	props:{

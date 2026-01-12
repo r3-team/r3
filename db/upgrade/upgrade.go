@@ -264,6 +264,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TABLE IF NOT EXISTS app.doc_field_grid (
 				doc_field_id uuid NOT NULL,
 				shrink boolean NOT NULL,
+				size_snap real NOT NULL,
 				CONSTRAINT doc_field_grid_pkey PRIMARY KEY (doc_field_id),
 				CONSTRAINT doc_field_grid_doc_field_id_fkey FOREIGN KEY (doc_field_id)
 					REFERENCES app.doc_field (id) MATCH SIMPLE

@@ -823,6 +823,10 @@
 				"styleBold": "Bold",
 				"styleItalic": "Italic"
 			},
+			"grid": {
+				"shrink": "Shrink vertically if empty",
+				"sizeSnap": "Grid snap size"
+			},
 			"setData": "Overwrite by attribute value",
 			"setValue": "Overwrite manually",
 			"sidebarField": "Field: {NAME}",
@@ -2465,6 +2469,8 @@
 		"showDefaultMobile0": "لا يتم عرضه بشكل افتراضي على الهاتف المحمول",
 		"showDefaultMobile1": "تظهر بشكل افتراضي على الهاتف المحمول",
 		"size": "مقاس",
+		"sizeX": "Width",
+		"sizeY": "Height",
 		"spacing": "Spacing",
 		"sqlPreview": "معاينة SQL",
 		"standard": "معيار",

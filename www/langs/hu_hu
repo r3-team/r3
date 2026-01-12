@@ -823,6 +823,10 @@
 				"styleBold": "Bold",
 				"styleItalic": "Italic"
 			},
+			"grid": {
+				"shrink": "Shrink vertically if empty",
+				"sizeSnap": "Grid snap size"
+			},
 			"setData": "Overwrite by attribute value",
 			"setValue": "Overwrite manually",
 			"sidebarField": "Field: {NAME}",
@@ -2465,6 +2469,8 @@
 		"showDefaultMobile0": "Not shown by default on mobile",
 		"showDefaultMobile1": "Show by default on mobile",
 		"size": "Méret",
+		"sizeX": "Width",
+		"sizeY": "Height",
 		"spacing": "Spacing",
 		"sqlPreview": "SQL előnézet",
 		"standard": "Szabvány",

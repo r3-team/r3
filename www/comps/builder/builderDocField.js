@@ -1,61 +1,141 @@
 import {getTemplateDocField} from '../shared/builderTemplate.js';
+import MyInputDecimal        from '../inputDecimal.js';
+import MyInputRange          from '../inputRange.js';
+import MyBuilderDocSets      from './builderDocSets.js';
 
 export default {
 	name:'my-builder-doc-field',
-	components:{},
+	components:{
+		MyBuilderDocSets,
+		MyInputDecimal,
+		MyInputRange
+	},
 	template:`<div class="builder-doc-field"
-		:class="{ flow:isFlow, 'drag-preview':isDragPreview }"
+		@click.stop="$emit('setFieldIdOptions',field.id)"
+		:class="{ flow:isFlow, 'drag-preview':isDragPreview, selected:isOptionsShow }"
 		:style
 		:key="field.id"
 	>
-		<div class="builder-doc-field-title" v-if="!hasChildren">{{ title }}</div>
+		<div class="builder-doc-field-title" v-if="!isParent">{{ title }}</div>
 
 		<span v-if="isDragPreview">PREV</span>
 
-		<div class="builder-doc-fields" ref="fields"
-			v-if="hasChildren"
+		<div class="builder-doc-fields"
+			v-if="isParent"
 			@dragenter.stop="dragEnter"
 			@dragleave.stop="dragLeave"
 			@dragover.prevent
 			@drop.stop="drop"
 			:class="{ 'layout-flow':isFlow, 'layout-grid':isGrid }"
-			:data-is-parent="hasChildren"
+			:data-is-parent="isParent"
 			:style="styleChildren"
 		>
 			<my-builder-doc-field
 				v-for="(f,i) in field.fields"
 				v-model="f"
 				draggable="true"
+				@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 				@dragenter.stop="dragEnterField($event,i)"
 				@dragleave.stop
 				@dragend.stop="dragEnd"
 				@dragstart.stop="dragStart($event,f)"
 				:builderLanguage
 				:class="{ 'drag-source':f.id === fieldIdDragged }"
+				:elmFieldOptions
 				:entityIdMapRef
+				:fieldIdOptions
+				:parentSizeX="field.sizeX !== 0 ? field.sizeX : parentSizeX"
+				:parentSizeY="field.sizeY !== 0 ? field.sizeY : parentSizeY"
+				:gridParentSnap="isGrid ? field.sizeSnap : 0"
+				:joins
 				:key="f.id"
-				:parentGrid="isGrid"
+				:isGridChild="isGrid"
+				:readonly
 			/>
 		</div>
+
+		<!-- options -->
+		<teleport v-if="isOptionsShow" :to="elmFieldOptions">
+			<table class="generic-table-vertical default-inputs">
+				<tbody>
+					<tr>
+						<td>{{ capGen.showDefault1 }}</td>
+						<td><my-bool v-model="field.state" :readonly /></td>
+					</tr>
+					
+					<template v-if="isGrid || isGridChild">
+						<tr v-if="isGridChild">
+							<td>{{ capGen.sizeX }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-input-range   class="short" v-model="field.sizeX" :readonly :min="gridParentSnap" :max="sizeXMax" :step="gridParentSnap" />
+									<my-input-decimal class="short" v-model="field.sizeX" :readonly :min="gridParentSnap" :max="sizeXMax" :allowNull="false" :length="5" :lengthFract="2" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.sizeY }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-input-range   class="short" v-model="field.sizeY" :readonly :min="gridParentSnap" :max="sizeYMax" :step="gridParentSnap" />
+									<my-input-decimal class="short" v-model="field.sizeY" :readonly :min="gridParentSnap" :max="sizeYMax" :allowNull="false" :length="5" :lengthFract="2" />
+								</div>
+							</td>
+						</tr>
+					</template>
+
+					<template v-if="isGrid">
+						<tr>
+							<td>{{ capApp.grid.sizeSnap }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-input-range   class="short" v-model="field.sizeSnap" :readonly :min="0.5" :max="99" :step="0.1" />
+									<my-input-decimal class="short" v-model="field.sizeSnap" :readonly :min="0.5" :max="99" :allowNull="false" :length="4" :lengthFract="2" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.grid.shrink }}</td>
+							<td><my-bool v-model="field.shrink" :readonly /></td>
+						</tr>
+					</template>
+					
+					<my-builder-doc-sets
+						v-model="field.sets"
+						:allowData="true"
+						:allowValue="true"
+						:joins
+						:readonly
+						:targetsFont="true"
+					/>
+				</tbody>
+			</table>
+		</teleport>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String,  required:true },
-		entityIdMapRef: { type:Object,  required:false, default:() => {return {}} },
-		modelValue:     { type:Object,  required:true },
-		parentGrid:     { type:Boolean, required:false, default:false }
+		builderLanguage:{ type:String,        required:true },
+		elmFieldOptions:{ required:true },
+		entityIdMapRef: { type:Object,        required:true },
+		fieldIdOptions: { type:[String,null], required:true },
+		gridParentSnap: { type:Number,        required:false, default:0 },
+		joins:          { type:Array,         required:true },
+		modelValue:     { type:Object,        required:true },
+		parentSizeX:    { type:Number,        required:true },
+		parentSizeY:    { type:Number,        required:true },
+		isGridChild:    { type:Boolean,       required:false, default:false },
+		readonly:       { type:Boolean,       required:true }
 	},
 	data() {
 		return {
 			fieldIdDragged:null,        // ID of child field being dragged
 			fieldIndexDragPreview:null, // index of child field that something is being dragged over
 			fieldIndexDropped:null,     // index of child field that was just dropped (to block removal)
-			gridFieldSizeMinX:10,
+			gridFieldSizeMinX:0,
 			gridFieldSizeMinY:5,
-			gridSize:2,
 			pixelToMm:25.4 / 96
 		};
 	},
-	emits:['update:modelValue'],
+	emits:['setFieldIdOptions','update:modelValue'],
 	computed:{
 		title:s => {
 			switch(s.field.content) {
@@ -80,10 +160,14 @@ export default {
 		isDragPreview:s => s.field.content === 'dragDropPreview',
 		isFlow:       s => ['flow','flowBody'].includes(s.field.content),
 		isGrid:       s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
-		hasChildren:  s => s.isFlow || s.isGrid,
-		style:        s => s.isFlow ? '' : `height:${s.field.sizeY}mm;${s.styleGrid}`,
-		styleChildren:s => s.isGrid ? `background-size:${s.gridSize}mm ${s.gridSize}mm;` : '',
-		styleGrid:    s => s.parentGrid ? `position:absolute;top:${s.field.posY}mm;left:${s.field.posX}mm;width:${s.field.sizeX}mm;height:${s.field.sizeY}mm` : '',
+		isParent:     s => s.isFlow || s.isGrid,
+		isOptionsShow:s => s.fieldIdOptions === s.field.id,
+		sizeSnap:     s => s.isGrid ? s.field.sizeSnap : s.gridParentSnap,
+		sizeXMax:     s => s.parentSizeX - s.field.posX,
+		sizeYMax:     s => s.parentSizeY - s.field.posY,
+		style:        s => s.isGrid || s.isGridChild ? `height:${s.field.sizeY}mm;${s.styleGrid}` : '',
+		styleChildren:s => s.isGrid ? `background-size:${s.sizeSnap}mm ${s.sizeSnap}mm;` : '',
+		styleGrid:    s => s.isGridChild ? `position:absolute;top:${s.field.posY}mm;left:${s.field.posX}mm;width:${s.field.sizeX}mm;height:${s.field.sizeY}mm` : '',
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
@@ -158,12 +242,12 @@ export default {
 				field.posY  = (e.clientY - fieldsElmRect.top)  * this.pixelToMm;
 	
 				// snap position to grid
-				field.posX = Math.round(field.posX / this.gridSize) * this.gridSize;
-				field.posY = Math.round(field.posY / this.gridSize) * this.gridSize;
+				field.posX = Math.round(field.posX / this.sizeSnap) * this.sizeSnap;
+				field.posY = Math.round(field.posY / this.sizeSnap) * this.sizeSnap;
 
 				// if field has no size, set to half of grid width
-				if(field.sizeX === 0)
-					field.sizeX = gridSizeX / 2;
+				if(field.sizeX === 0) field.sizeX = gridSizeX / 2;
+				if(field.sizeY === 0) field.sizeY = this.gridFieldSizeMinY;
 
 				// limit size to grid size
 				if(field.posX + field.sizeX > gridSizeX) field.sizeX = gridSizeX - field.posX;
@@ -174,8 +258,8 @@ export default {
 				if(field.sizeY < this.gridFieldSizeMinY) field.sizeY = this.gridFieldSizeMinY;
 	
 				// snap field sizes to grid
-				field.sizeX = Math.max(this.gridSize, Math.round(field.sizeX / this.gridSize) * this.gridSize);
-				field.sizeY = Math.max(this.gridSize, Math.round(field.sizeY / this.gridSize) * this.gridSize);
+				field.sizeX = Math.max(this.sizeSnap, Math.round(field.sizeX / this.sizeSnap) * this.sizeSnap);
+				field.sizeY = Math.max(this.sizeSnap, Math.round(field.sizeY / this.sizeSnap) * this.sizeSnap);
 			}
 
 			if(this.isFlow) {

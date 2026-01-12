@@ -58,7 +58,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			ff.gap,
 
 			-- grid
-			fg.shrink,
+			fg.shrink, fg.size_snap,
 
 			-- list
 			fl.body_color_fill_even, fl.body_color_fill_odd, fl.footer_color_fill, fl.header_color_fill, fl.header_repeat,
@@ -85,12 +85,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 		var f types.DocField
 		var attributeId pgtype.UUID
 		var attributeIndex pgtype.Int4
-		var gap pgtype.Float8
+		var gap, sizeSnap pgtype.Float8
 		var paddings []float64
 		var shrink, headerRepeat pgtype.Bool
 		var bodyColorFillEven, bodyColorFillOdd, footerColorFill, headerColorFill, value pgtype.Text
 		if err := rows.Scan(&f.Id, &f.Content, &f.PosX, &f.PosY, &f.SizeX, &f.SizeY, &f.State,
-			&paddings, &attributeId, &attributeIndex, &gap, &shrink, &bodyColorFillEven,
+			&paddings, &attributeId, &attributeIndex, &gap, &shrink, &sizeSnap, &bodyColorFillEven,
 			&bodyColorFillOdd, &footerColorFill, &headerColorFill, &headerRepeat, &value); err != nil {
 
 			return nil, err
@@ -140,7 +140,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 				SizeY:   f.SizeY,
 				State:   f.State,
 
-				Shrink: shrink.Bool,
+				Shrink:   shrink.Bool,
+				SizeSnap: sizeSnap.Float64,
 			})
 		case "list":
 			f := types.DocFieldList{
@@ -419,7 +420,10 @@ func setGeneric_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId
 	`, f.Id, docPageId, parentId, f.Content, f.PosX, f.PosY, f.SizeX, f.SizeY, f.State, position); err != nil {
 		return err
 	}
-	return doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border)
+	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border); err != nil {
+		return err
+	}
+	return doc_set.Set_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault, f.Sets)
 }
 
 func setData_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldData) error {
@@ -447,11 +451,11 @@ func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.Doc
 
 func setGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.DocFieldGrid, fieldIds *[]uuid.UUID) error {
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO app.doc_field_grid (doc_field_id, shrink)
-		VALUES ($1,$2)
+		INSERT INTO app.doc_field_grid (doc_field_id, shrink, size_snap)
+		VALUES ($1,$2,$3)
 		ON CONFLICT (doc_field_id)
-		DO UPDATE SET shrink = $2
-	`, f.Id, f.Shrink); err != nil {
+		DO UPDATE SET shrink = $2, size_snap = $3
+	`, f.Id, f.Shrink, f.SizeSnap); err != nil {
 		return err
 	}
 	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: f.Id, Valid: true}, f.Fields, fieldIds)
