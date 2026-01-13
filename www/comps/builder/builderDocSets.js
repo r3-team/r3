@@ -11,7 +11,7 @@ import {
 	MyBuilderDocFontFamily,
 	MyBuilderDocFontLineFactor,
 	MyBuilderDocFontStyles
-} from './builderDocFontInput.js';
+} from './builderDocInput.js';
 
 const targetTypes = {
 	color:['font.color'],

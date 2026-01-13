@@ -8,7 +8,7 @@ import {
 	MyBuilderDocFontFamily,
 	MyBuilderDocFontLineFactor,
 	MyBuilderDocFontStyles
-} from './builderDocFontInput.js';
+} from './builderDocInput.js';
 
 export default {
 	name:'my-builder-doc-font',

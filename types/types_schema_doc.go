@@ -163,10 +163,10 @@ type DocFont struct {
 	Style        pgtype.Text `json:"style"`        // "B" (bold), "I" (italic), "U" (underscore), "S" (strike-out)
 }
 type DocMarginPadding struct {
-	L float64 `json:"l"` // margin in mm
 	T float64 `json:"t"` // margin in mm
 	R float64 `json:"r"` // margin in mm
 	B float64 `json:"b"` // margin in mm
+	L float64 `json:"l"` // margin in mm
 }
 type DocPage struct {
 	Id          uuid.UUID        `json:"id"`

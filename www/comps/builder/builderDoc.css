@@ -99,3 +99,11 @@
 	display:block;
 	position:relative;
 }
+
+/* options */
+.builder-doc-margin-padding-box{
+	height:30px;
+	border:2px solid var(--color-border);
+	background-color:var(--color-input-disabled);
+	flex:0 0 30px;
+}

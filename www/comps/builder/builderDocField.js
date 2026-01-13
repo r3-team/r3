@@ -1,11 +1,13 @@
-import {getTemplateDocField} from '../shared/builderTemplate.js';
-import MyInputDecimal        from '../inputDecimal.js';
-import MyInputRange          from '../inputRange.js';
-import MyBuilderDocSets      from './builderDocSets.js';
+import {getTemplateDocField}       from '../shared/builderTemplate.js';
+import MyInputDecimal              from '../inputDecimal.js';
+import MyInputRange                from '../inputRange.js';
+import {MyBuilderDocMarginPadding} from './builderDocInput.js';
+import MyBuilderDocSets            from './builderDocSets.js';
 
 export default {
 	name:'my-builder-doc-field',
 	components:{
+		MyBuilderDocMarginPadding,
 		MyBuilderDocSets,
 		MyInputDecimal,
 		MyInputRange
@@ -101,6 +103,25 @@ export default {
 							<td><my-bool v-model="field.shrink" :readonly /></td>
 						</tr>
 					</template>
+
+					<template v-if="isFlow">
+						<tr>
+							<td>{{ capGen.gap }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-input-range   class="short" v-model="field.gap" :readonly :min="0" :max="20" :step="0.1" />
+									<my-input-decimal class="short" v-model="field.gap" :readonly :min="0" :allowNull="false" :length="5" :lengthFract="2" />
+								</div>
+							</td>
+						</tr>
+						<my-builder-doc-margin-padding
+							v-model:t="field.padding.t"
+							v-model:r="field.padding.r"
+							v-model:b="field.padding.b"
+							v-model:l="field.padding.l"
+							:readonly
+						/>
+					</template>
 					
 					<my-builder-doc-sets
 						v-model="field.sets"
@@ -152,10 +173,12 @@ export default {
 			}
 			return '';
 		},
-		styleChildren:s => s.isGrid ? `
-			background-image:radial-gradient(var(--color-border) ${s.styleDotSize}mm, transparent ${s.styleDotSize}mm);
-			background-size:${s.sizeSnap}mm ${s.sizeSnap}mm;
-			background-position:${s.styleDotPos}mm ${s.styleDotPos}mm` : '',
+		styleChildren:s => s.isGrid
+			? `background-image:radial-gradient(var(--color-border) ${s.styleDotSize}mm, transparent ${s.styleDotSize}mm);
+			background-size:${s.field.sizeSnap}mm ${s.field.sizeSnap}mm;
+			background-position:${s.styleDotPos}mm ${s.styleDotPos}mm`
+			: `padding:${s.field.padding.t}mm ${s.field.padding.r}mm ${s.field.padding.l}mm ${s.field.padding.b}mm;
+			gap:${s.field.gap}mm;`,
 
 		// inputs
 		field:{ // this method updates obj directly
@@ -171,13 +194,12 @@ export default {
 		isGrid:       s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
 		isParent:     s => s.isFlow || s.isGrid,
 		isOptionsShow:s => s.fieldIdOptions === s.field.id,
-		sizeSnap:     s => s.isGrid ? s.field.sizeSnap : s.gridParentSnap,
 		sizeXMax:     s => s.parentSizeX - s.field.posX,
 		sizeYMax:     s => s.parentSizeY - s.field.posY,
 		style:        s => s.isGrid || s.isChildGrid ? `height:${s.field.sizeY}mm;${s.styleGrid}` : '',
-		styleDotPos:  s => (s.sizeSnap / 2) - s.sizeSnap,
-		styleDotSize: s => s.sizeSnap / 5,
-		styleGrid:    s => s.isChildGrid ? `position:absolute;top:${s.field.posY}mm;left:${s.field.posX}mm;width:${s.field.sizeX}mm;height:${s.field.sizeY}mm` : '',
+		styleDotPos:  s => (s.field.sizeSnap / 2) - s.field.sizeSnap,
+		styleDotSize: s => s.field.sizeSnap / 5,
+		styleGrid:    s => s.isChildGrid ? `position:absolute;top:${s.field.posY}mm;left:${s.field.posX}mm;width:${s.field.sizeX}mm;height:${s.field.sizeY}mm;` : '',
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
@@ -209,7 +231,7 @@ export default {
 
 			// snap size to grid
 			if(this.isChildGrid)
-				sizeChild = Math.max(this.sizeSnap, Math.round(sizeChild / this.sizeSnap) * this.sizeSnap);
+				sizeChild = Math.max(this.gridParentSnap, Math.round(sizeChild / this.gridParentSnap) * this.gridParentSnap);
 
 			return sizeChild;
 		},
@@ -295,8 +317,8 @@ export default {
 				field.posY = (e.clientY - fieldsElmRect.top)  * this.pixelToMm;
 	
 				// snap position to grid
-				field.posX = Math.round(field.posX / this.sizeSnap) * this.sizeSnap;
-				field.posY = Math.round(field.posY / this.sizeSnap) * this.sizeSnap;
+				field.posX = Math.round(field.posX / this.field.sizeSnap) * this.field.sizeSnap;
+				field.posY = Math.round(field.posY / this.field.sizeSnap) * this.field.sizeSnap;
 
 				// if field has no size, set to half of grid width
 				if(field.sizeX === 0) field.sizeX = gridSizeX / 2;

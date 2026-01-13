@@ -1,8 +1,44 @@
+import MyInputDecimal from '../inputDecimal.js';
 export {
 	MyBuilderDocFontAlign,
 	MyBuilderDocFontFamily,
 	MyBuilderDocFontLineFactor,
-	MyBuilderDocFontStyles
+	MyBuilderDocFontStyles,
+	MyBuilderDocMarginPadding
+};
+
+const MyBuilderDocMarginPadding = {
+	name:'my-builder-doc-margin-padding',
+	components:{MyInputDecimal},
+	template:`<tr>
+		<td>{{ capGen.spacing }}</td>
+		<td>
+			<div class="column gap centered">
+				<div class="row">
+					<my-input-decimal class="short" @update:modelValue="$emit('update:t',$event)" :modelValue="t" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+				</div>
+				<div class="row gap centered">
+					<my-input-decimal class="short" @update:modelValue="$emit('update:l',$event)" :modelValue="l" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+					<div class="builder-doc-margin-padding-box"></div>
+					<my-input-decimal class="short" @update:modelValue="$emit('update:r',$event)" :modelValue="r" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+				</div>
+				<div class="row">
+					<my-input-decimal class="short" @update:modelValue="$emit('update:b',$event)" :modelValue="b" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+				</div>
+			</div>
+		</td>
+	</tr>`,
+	props:{
+		t:       { type:Number,  required:true },
+		r:       { type:Number,  required:true },
+		b:       { type:Number,  required:true },
+		l:       { type:Number,  required:true },
+		readonly:{ type:Boolean, required:true }
+	},
+	emits:['update:t','update:r','update:b','update:l'],
+	computed:{
+		capGen:s => s.$store.getters.captions.generic
+	}
 };
 
 const MyBuilderDocFontAlign = {
@@ -14,7 +50,7 @@ const MyBuilderDocFontAlign = {
 	</select>`,
 	props:{
 		modelValue:{ type:String,  required:true },
-		readonly:  { type:Boolean, required:false, default:false }
+		readonly:  { type:Boolean, required:true }
 	},
 	emits:['update:modelValue'],
 	computed:{
@@ -49,7 +85,7 @@ const MyBuilderDocFontFamily = {
 	</select>`,
 	props:{
 		modelValue:{ type:String,  required:true },
-		readonly:  { type:Boolean, required:false, default:false }
+		readonly:  { type:Boolean, required:true }
 	},
 	emits:['update:modelValue'],
 	computed:{
@@ -72,7 +108,7 @@ const MyBuilderDocFontLineFactor = {
 	</div>`,
 	props:{
 		modelValue:{ type:Number,  required:true },
-		readonly:  { type:Boolean, required:false, default:false }
+		readonly:  { type:Boolean, required:true }
 	},
 	emits:['update:modelValue']
 };
@@ -85,7 +121,7 @@ const MyBuilderDocFontStyles = {
 	</div>`,
 	props:{
 		modelValue:{ type:[String,null], required:true },
-		readonly:  { type:Boolean,       required:false, default:false }
+		readonly:  { type:Boolean,       required:true }
 	},
 	emits:['update:modelValue'],
 	computed:{

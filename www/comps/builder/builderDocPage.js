@@ -1,6 +1,7 @@
-import MyBuilderDocField from './builderDocField.js';
-import MyBuilderDocSets  from './builderDocSets.js';
-import MyInputDecimal    from '../inputDecimal.js';
+import MyBuilderDocField           from './builderDocField.js';
+import MyBuilderDocSets            from './builderDocSets.js';
+import MyInputDecimal              from '../inputDecimal.js';
+import {MyBuilderDocMarginPadding} from './builderDocInput.js';
 
 const pageSizeMapMm = {
 	'A1':    [594,841],
@@ -19,9 +20,10 @@ export default {
 	components:{
 		MyBuilderDocField,
 		MyBuilderDocSets,
+		MyBuilderDocMarginPadding,
 		MyInputDecimal
 	},
-	template:`<div class="builder-doc-page" v-if="page !== false">
+	template:`<div class="builder-doc-page" v-if="page !== false" @mouseup.stop="$emit('setFieldIdOptions',null)">
 		<div class="builder-doc-page-outer" :style="stylePage">
 			<div class="builder-doc-page-footer-header" v-if="header !== false && header.docPageIdInherit === null" :style="styleHeader"></div>
 			<div class="builder-doc-page-margin-hor"    v-if="margin.l > 0" :style="styleMarginT"></div>
@@ -73,15 +75,13 @@ export default {
 							</select>
 						</td>
 					</tr>
-					<tr>
-						<td>{{ capGen.spacing }}</td>
-						<td>
-							<my-input-decimal class="short" v-model="page.margin.t" :readonly :allowNull="false" :length="5" :lengthFract="2" />
-							<my-input-decimal class="short" v-model="page.margin.r" :readonly :allowNull="false" :length="5" :lengthFract="2" />
-							<my-input-decimal class="short" v-model="page.margin.b" :readonly :allowNull="false" :length="5" :lengthFract="2" />
-							<my-input-decimal class="short" v-model="page.margin.l" :readonly :allowNull="false" :length="5" :lengthFract="2" />
-						</td>
-					</tr>
+					<my-builder-doc-margin-padding
+						v-model:t="page.margin.t"
+						v-model:r="page.margin.r"
+						v-model:b="page.margin.b"
+						v-model:l="page.margin.l"
+						:readonly
+					/>
 					<my-builder-doc-sets
 						v-model="page.sets"
 						:allowData="true"
