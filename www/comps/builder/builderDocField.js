@@ -11,7 +11,8 @@ export default {
 		MyInputRange
 	},
 	template:`<div class="builder-doc-field" ref="field"
-		@mousedown.stop="$emit('setFieldIdOptions',field.id)"
+		@mousedown.stop="mousedown"
+		@mouseup.stop="mouseup"
 		:class="{ flow:isFlow, 'drag-preview':isDragPreview, 'resizable-both':isChildGrid, 'resizable-height':isChildFlow, selected:isOptionsShow }"
 		:style
 		:key="field.id"
@@ -135,8 +136,8 @@ export default {
 			gridFieldSizeMinX:0,
 			gridFieldSizeMinY:5,
 			pixelToMm:25.4 / 96,
-			sizeObserver:null,          // for HTML resize actions without custom drag&drop
-			timerAdjustSize:null
+			sizeXOnMousedown:0, // to check whether element was resized
+			sizeYOnMousedown:0  // to check whether element was resized
 		};
 	},
 	emits:['setFieldIdOptions','update:modelValue'],
@@ -183,24 +184,6 @@ export default {
 		capApp:        s => s.$store.getters.captions.builder.doc,
 		capGen:        s => s.$store.getters.captions.generic
 	},
-	mounted() {
-		this.sizeObserver = new ResizeObserver(entries => {
-			requestAnimationFrame(() => {
-				const entry = entries[0];
-				const rect  = entry.contentRect;
-				const sizeX = rect.width  * this.pixelToMm;
-				const sizeY = rect.height * this.pixelToMm;
-				clearTimeout(this.timerAdjustSize);
-
-				if(sizeX !== 0 && sizeY !== 0)
-					this.timerAdjustSize = setTimeout(() => this.adjustSizeToSnap(sizeX,sizeY),50);
-			});
-		});
-		this.sizeObserver.observe(this.$refs.field);
-	},
-	unmounted() {
-		if(this.sizeObserver) this.sizeObserver.disconnect();
-	},
 	methods:{
 		// externals
 		getTemplateDocField,
@@ -229,6 +212,23 @@ export default {
 				sizeChild = Math.max(this.sizeSnap, Math.round(sizeChild / this.sizeSnap) * this.sizeSnap);
 
 			return sizeChild;
+		},
+
+		// actions
+		mousedown(e) {
+			const rect = this.$refs.field.getBoundingClientRect();
+			this.sizeXOnMousedown = rect.width  * this.pixelToMm;
+			this.sizeYOnMousedown = rect.height * this.pixelToMm;
+		},
+		mouseup(e) {
+			const rect  = this.$refs.field.getBoundingClientRect();
+			const sizeX = rect.width  * this.pixelToMm;
+			const sizeY = rect.height * this.pixelToMm;
+
+			if(this.sizeXOnMousedown !== sizeX || this.sizeYOnMousedown !== sizeY)
+				this.adjustSizeToSnap(sizeX,sizeY);
+			else
+				this.$emit('setFieldIdOptions',this.field.id);
 		},
 
 		// drag & drop
@@ -287,6 +287,7 @@ export default {
 			const fieldsElm     = e.currentTarget; // the valid drop elm, ie. fields container
 			const fieldsElmRect = fieldsElm.getBoundingClientRect();
 			const gridSizeX     = fieldsElmRect.width  * this.pixelToMm;
+			const gridSizeY     = fieldsElmRect.height * this.pixelToMm;
 
 			if(this.isGrid) {
 				// find position in grid
@@ -300,6 +301,9 @@ export default {
 				// if field has no size, set to half of grid width
 				if(field.sizeX === 0) field.sizeX = gridSizeX / 2;
 				if(field.sizeY === 0) field.sizeY = this.gridFieldSizeMinY;
+
+				field.sizeX = this.getSizeClean(field.posX,field.sizeX,gridSizeX,this.gridFieldSizeMinX);
+				field.sizeY = this.getSizeClean(field.posY,field.sizeY,gridSizeY,this.gridFieldSizeMinY);
 			}
 
 			if(this.isFlow) {
