@@ -86,15 +86,9 @@
 .builder-doc-fields.layout-flow{
 	display:flex;
 	flex-flow:column nowrap;
-	background-position:5px;
-	background-size:100% 10px;
-	background-image:linear-gradient(
-		0deg,
-		var(--color-bg) 8px,
-		var(--color-bg),
-		var(--color-form-builder-actions-bg),
-		var(--color-form-builder-actions-bg) 8px
-	);
+	background-image:linear-gradient(to bottom, transparent 0px, rgba(0,0,0,0.3) 1px, transparent 1.6px);
+	background-position:0.25px 0.25px;
+	background-size:10px 10px;
 }
 .builder-doc-fields.layout-grid{
 	display:block;

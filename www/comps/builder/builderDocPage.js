@@ -27,7 +27,7 @@ export default {
 		MyBuilderDocMarginPadding,
 		MyInputDecimal
 	},
-	template:`<div class="builder-doc-page" v-if="page !== false" @mouseup.stop="$emit('setFieldIdOptions',null)">
+	template:`<div class="builder-doc-page" v-if="page !== false" @dragover.prevent @drop.stop="drop" @mouseup.stop="$emit('setFieldIdOptions',null)">
 		<div class="builder-doc-page-outer" :style="stylePage">
 
 			<div class="builder-doc-page-margin-hor" v-if="margin.l > 0" :style="styleMarginT"></div>
@@ -164,7 +164,7 @@ export default {
 		modelValue:     { type:Object,        required:true },
 		pages:          { type:Array,         required:true },
 		readonly:       { type:Boolean,       required:true },
-		zoom:           { type:Number,       required:true }
+		zoom:           { type:Number,        required:true }
 	},
 	emits:['setFieldIdOptions','update:modelValue'],
 	computed:{
@@ -194,6 +194,11 @@ export default {
 		capGen:s => s.$store.getters.captions.generic
 	},
 	methods:{
+		drop(e) {
+			const field = JSON.parse(e.dataTransfer.getData('application/json'));
+			if(field.id === this.fieldIdOptions)
+				this.$emit('setFieldIdOptions',null);
+		},
 		setMarginVertical(isTop,v) {
 			if(isTop && this.header !== false)
 				this.page.header.fieldGrid.sizeY = v;

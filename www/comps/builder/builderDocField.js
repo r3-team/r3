@@ -34,7 +34,6 @@ export default {
 			@dragover.prevent
 			@drop.stop="drop"
 			:class="{ 'layout-flow':isFlow, 'layout-grid':isGrid }"
-			:data-is-parent="isParent"
 			:style="styleChildren"
 		>
 			<my-builder-doc-field draggable="true"
@@ -188,7 +187,8 @@ export default {
 		},
 		styleChildren:s => s.isGrid
 			? `background-size:${s.field.sizeSnap*s.zoom}mm ${s.field.sizeSnap*s.zoom}mm;`
-			: `padding:${s.field.padding.t*s.zoom}mm ${s.field.padding.r*s.zoom}mm ${s.field.padding.l*s.zoom}mm ${s.field.padding.b*s.zoom}mm;gap:${s.field.gap*s.zoom}mm;`,
+			: `gap:${s.field.gap*s.zoom}mm;
+				padding:${s.field.padding.t*s.zoom}mm ${s.field.padding.r*s.zoom}mm ${s.field.padding.l*s.zoom}mm ${s.field.padding.b*s.zoom}mm;`,
 		title:s => {
 			switch(s.field.content) {
 				case 'data': return `${s.field.attributeIndex} ${s.attribute.name}`; break;
@@ -207,19 +207,18 @@ export default {
 		},
 
 		// simple
-		attribute:      s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
-		isData:         s => s.field.content === 'data',
-		isDragPreview:  s => s.field.content === 'dragDropPreview',
-		isFlow:         s => ['flow','flowBody'].includes(s.field.content),
-		isGrid:         s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
-		isParent:       s => s.isFlow || s.isGrid,
-		isOptionsShow:  s => s.fieldIdOptions === s.field.id,
-		sizeXMax:       s => s.parentSizeX - s.field.posX,
-		sizeYMax:       s => s.parentSizeY - s.field.posY,
-		style:          s => `${s.styleHeight}${s.styleGrid}`,
-		styleGrid:      s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;height:${s.field.sizeY*s.zoom}mm;` : '',
-		styleGridOffset:s => 0.25,
-		styleHeight:    s => s.isFlow && s.field.sizeY === 0 ? '' : `height:${s.field.sizeY*s.zoom}mm;`,
+		attribute:    s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
+		isData:       s => s.field.content === 'data',
+		isDragPreview:s => s.field.content === 'dragDropPreview',
+		isFlow:       s => ['flow','flowBody'].includes(s.field.content),
+		isGrid:       s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
+		isParent:     s => s.isFlow || s.isGrid,
+		isOptionsShow:s => s.fieldIdOptions === s.field.id,
+		sizeXMax:     s => s.parentSizeX - s.field.posX,
+		sizeYMax:     s => s.parentSizeY - s.field.posY,
+		style:        s => `${s.styleHeight}${s.styleGrid}`,
+		styleGrid:    s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;height:${s.field.sizeY*s.zoom}mm;` : '',
+		styleHeight:  s => s.isFlow && s.field.sizeY === 0 ? '' : `height:${s.field.sizeY*s.zoom}mm;`,
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
@@ -289,11 +288,13 @@ export default {
 
 		// drag source
 		dragEnd(e) {
-			if(e.dataTransfer.dropEffect !== 'none' && this.fieldIdDragged !== null) {
+			if(e.dataTransfer.dropEffect !== 'none') {
 				this.field.fields.splice(this.field.fields.findIndex((v,i) => i !== this.fieldIndexDropped && v.id === this.fieldIdDragged),1);
 				this.fieldIdDragged    = null;
 				this.fieldIndexDropped = null;
 			}
+			if(this.fieldIdDragged !== null)
+				this.fieldIdDragged = null;
 		},
 		dragStart(e,field) {
 			// store field for later drop & adjust ghost image to start at mouse position

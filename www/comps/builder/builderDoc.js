@@ -167,9 +167,6 @@ export default {
 
 				<!-- states -->
 				
-				<!-- page options -->
-				<div class="content grow no-padding" ref="pageOptions" v-show="tabTarget === 'page'"></div>
-				
 				<!-- document properties -->
 				<div class="content grow no-padding" v-if="tabTarget === 'properties'">
 					<table class="generic-table-vertical default-inputs">
@@ -221,6 +218,9 @@ export default {
 						</tbody>
 					</table>
 				</div>
+				
+				<!-- page options -->
+				<div class="content grow no-padding" ref="pageOptions" v-show="tabTarget === 'page'"></div>
 			</template>
 
 			<!-- field options -->
