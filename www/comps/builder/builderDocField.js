@@ -40,6 +40,7 @@ export default {
 				v-for="(f,i) in field.fields"
 				v-model="f"
 				@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
+				@setFieldIdOptionsParent="$emit('setFieldIdOptions',field.id)"
 				@dragenter.stop="dragEnterField($event,i)"
 				@dragleave.stop
 				@dragend.stop="dragEnd"
@@ -66,6 +67,11 @@ export default {
 			<table class="generic-table-vertical default-inputs">
 				<tbody>
 					<tr>
+						<td colspan="2">
+							<my-button image="upward.png" @trigger="$emit('setFieldIdOptionsParent')" :active="isChild" :caption="capApp.button.selectParent" />
+						</td>
+					</tr>
+					<tr>
 						<td>{{ capGen.showDefault1 }}</td>
 						<td><my-bool v-model="field.state" :readonly /></td>
 					</tr>
@@ -77,6 +83,7 @@ export default {
 								<div class="row gap centered">
 									<my-input-range   class="short" v-model="field.sizeX" :readonly :min="gridParentSnap" :max="sizeXMax" :step="gridParentSnap" />
 									<my-input-decimal class="short" v-model="field.sizeX" :readonly :min="gridParentSnap" :max="sizeXMax" :allowNull="false" :length="5" :lengthFract="2" />
+									<span>mm</span>
 								</div>
 							</td>
 						</tr>
@@ -86,6 +93,7 @@ export default {
 								<div class="row gap centered">
 									<my-input-range   class="short" v-model="field.sizeY" :readonly :min="gridParentSnap" :max="sizeYMax" :step="gridParentSnap" />
 									<my-input-decimal class="short" v-model="field.sizeY" :readonly :min="gridParentSnap" :max="sizeYMax" :allowNull="false" :length="5" :lengthFract="2" />
+									<span>mm</span>
 								</div>
 							</td>
 						</tr>
@@ -98,6 +106,7 @@ export default {
 								<div class="row gap centered">
 									<my-input-range   class="short" v-model="field.sizeSnap" :readonly :min="0.5" :max="10" :step="0.1" />
 									<my-input-decimal class="short" v-model="field.sizeSnap" :readonly :min="0.5" :max="10" :allowNull="false" :length="4" :lengthFract="2" />
+									<span>mm</span>
 								</div>
 							</td>
 						</tr>
@@ -114,6 +123,7 @@ export default {
 								<div class="row gap centered">
 									<my-input-range   class="short" v-model="field.gap" :readonly :min="0" :max="20" :step="0.1" />
 									<my-input-decimal class="short" v-model="field.gap" :readonly :min="0" :allowNull="false" :length="5" :lengthFract="2" />
+									<span>mm</span>
 								</div>
 							</td>
 						</tr>
@@ -174,7 +184,7 @@ export default {
 			sizeYOnMousedown:0  // to check whether element was resized
 		};
 	},
-	emits:['setFieldIdOptions','update:modelValue'],
+	emits:['setFieldIdOptions','setFieldIdOptionsParent','update:modelValue'],
 	computed:{
 		classCss:s => {
 			return {
@@ -208,6 +218,7 @@ export default {
 
 		// simple
 		attribute:    s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
+		isChild:      s => s.isChildFlow || s.isChildGrid,
 		isData:       s => s.field.content === 'data',
 		isDragPreview:s => s.field.content === 'dragDropPreview',
 		isFlow:       s => ['flow','flowBody'].includes(s.field.content),

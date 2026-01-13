@@ -27,15 +27,18 @@ export default {
 		<td><my-builder-doc-font-family @update:modelValue="$emit('update:family',$event)" :modelValue="family" :readonly /></td>
 	</tr>
 	<tr>
-		<td>{{ capApp.size }}</td>
+		<td>{{ capGen.size }}</td>
 		<td>
-			<my-input-decimal
-				@update:modelValue="$emit('update:size',$event)"
-				:length="4"
-				:lengthFract="2"
-				:modelValue="size"
-				:readonly="readonly"
-			/>
+			<div class="row gap centered">
+				<my-input-decimal class="short"
+					@update:modelValue="$emit('update:size',$event)"
+					:length="4"
+					:lengthFract="2"
+					:modelValue="size"
+					:readonly="readonly"
+				/>
+				<span>mm</span>
+			</div>
 		</td>
 	</tr>
 	<tr>

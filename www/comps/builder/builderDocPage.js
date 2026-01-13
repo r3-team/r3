@@ -43,7 +43,6 @@ export default {
 					:elmFieldOptions
 					:entityIdMapRef="{}"
 					:fieldIdOptions
-					:isChildFlow="true"
 					:joins
 					:parentSizeX="pageSizeX - margin.l - margin.r"
 					:parentSizeY="pageSizeY - margin.t - margin.b"
@@ -60,7 +59,6 @@ export default {
 					:elmFieldOptions
 					:entityIdMapRef="{}"
 					:fieldIdOptions
-					:isChildGrid="true"
 					:joins
 					:parentSizeX="pageSizeX"
 					:parentSizeY="margin.t"
@@ -77,7 +75,6 @@ export default {
 					:elmFieldOptions
 					:entityIdMapRef="{}"
 					:fieldIdOptions
-					:isChildGrid="true"
 					:joins
 					:parentSizeX="pageSizeX"
 					:parentSizeY="margin.b"
@@ -98,9 +95,12 @@ export default {
 					<tr>
 						<td>{{ capGen.size }}</td>
 						<td>
-							<select v-model="page.size" :disabled="readonly">
-								<option v-for="p in pageSizes">{{ p }}</option>
-							</select>
+							<div class="row gap centered">
+								<select class="short" v-model="page.size" :disabled="readonly">
+									<option v-for="p in pageSizes">{{ p }}</option>
+								</select>
+								<span>{{ pageSizeX + ' x ' + pageSizeY }}mm</span>
+							</div>
 						</td>
 					</tr>
 					<tr>

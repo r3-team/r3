@@ -800,7 +800,8 @@
 		"doc": {
 			"borderCell": "Cell border",
 			"button":{
-				"addPage": "Add page"
+				"addPage": "Add page",
+				"selectParent": "Select field above"
 			},
 			"dialog": {
 				"delete": "Are you sure you want to delete this document?"
@@ -819,7 +820,6 @@
 				"lineFactor": "Line height",
 				"numberSepDec": "Decimal separator",
 				"numberSepTho": "Thousands separator",
-				"size": "Size (mm)",
 				"style": "Styles",
 				"styleBold": "Bold",
 				"styleItalic": "Italic"

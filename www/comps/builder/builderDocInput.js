@@ -44,6 +44,7 @@ const MyBuilderDocBorder = {
 			<div class="row gap centered">
 				<my-input-range   class="short" @update:modelValue="$emit('update:size',$event)" :modelValue="size" :readonly :min="0" :max="20" :step="0.1" />
 				<my-input-decimal class="short" @update:modelValue="$emit('update:size',$event)" :modelValue="size" :allowNull="false" :max="20" :length="4" :lengthFract="2" />
+				<span>mm</span>
 			</div>
 		</td>
 	</tr>

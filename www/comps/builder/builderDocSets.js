@@ -149,7 +149,7 @@ const MyBuilderDocSetTarget = {
 			'font.lineFactor':  this.capApp.font.lineFactor,
 			'font.numberSepDec':this.capApp.font.numberSepDec,
 			'font.numberSepTho':this.capApp.font.numberSepTho,
-			'font.size':        this.capApp.font.size,
+			'font.size':        this.capGen.size,
 			'font.style':       this.capApp.font.style
 		};
 	},
