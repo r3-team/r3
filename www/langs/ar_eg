@@ -828,6 +828,7 @@
 				"shrink": "Shrink vertically if empty",
 				"sizeSnap": "Grid snap size"
 			},
+			"inheritFrom": "Inherit from",
 			"setData": "Overwrite by attribute value",
 			"setValue": "Overwrite manually",
 			"sidebarField": "Field: {NAME}",
@@ -2343,6 +2344,7 @@
 		"files": "ملفات",
 		"filters": "المرشحات",
 		"font": "Font",
+		"footer": "Footer",
 		"form": "استمارة",
 		"formActions": "Form actions",
 		"formOpen": "فتح النموذج",
@@ -2351,6 +2353,7 @@
 		"gap": "Gap",
 		"global": "Global",
 		"globalSearch": "Global search",
+		"header": "Header",
 		"help": "يساعد",
 		"home": "بيت",
 		"homepage": "الصفحة الرئيسية",

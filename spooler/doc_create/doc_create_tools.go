@@ -205,7 +205,7 @@ func setFont(doc *doc, f types.DocFont) {
 			f.Family = "times"
 		} else {
 
-			log.Info(log.ContextDoc, fmt.Sprintf("embedding font '%s' (style: %s)", f.Family, f.Style))
+			log.Info(log.ContextDoc, fmt.Sprintf("embedding font '%s' (style: %s)", f.Family, f.Style.String))
 			doc.p.AddUTF8FontFromBytes(f.Family, f.Style.String, fontFile)
 			doc.fontKeyMap[fontKey] = true
 		}

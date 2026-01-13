@@ -100,6 +100,11 @@
 	position:relative;
 }
 
+/* header / footer */
+.builder-doc-page-footer-header{
+	position:absolute;
+}
+
 /* options */
 .builder-doc-input-page-box{
 	height:30px;

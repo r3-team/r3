@@ -1,12 +1,14 @@
-import MyInputColorWrap from '../inputColorWrap.js';
-import MyInputDecimal   from '../inputDecimal.js';
-import MyInputRange     from '../inputRange.js';
+import MyInputColorWrap      from '../inputColorWrap.js';
+import MyInputDecimal        from '../inputDecimal.js';
+import MyInputRange          from '../inputRange.js';
+import {getTemplateDocField} from '../shared/builderTemplate.js';
 export {
 	MyBuilderDocBorder,
 	MyBuilderDocFontAlign,
 	MyBuilderDocFontFamily,
 	MyBuilderDocFontLineFactor,
 	MyBuilderDocFontStyles,
+	MyBuilderDocHeaderFooter,
 	MyBuilderDocMarginPadding
 };
 
@@ -54,12 +56,14 @@ const MyBuilderDocBorder = {
 		<td><my-bool @update:modelValue="$emit('update:cell',$event)" :modelValue="cell" :readonly /></td>
 	</tr>`,
 	props:{
-		allowCell: { type:Boolean,       required:true },
-		cell:      { type:Boolean,       required:true },
-		color:     { type:[String,null], required:true },
-		draw:      { type:String,        required:true },
-		size:      { type:Number,        required:true },
-		readonly:  { type:Boolean,       required:true }
+		allowCell:{ type:Boolean, required:true },
+		readonly: { type:Boolean, required:true },
+
+		// values
+		cell: { type:Boolean,       required:true },
+		color:{ type:[String,null], required:true },
+		draw: { type:String,        required:true },
+		size: { type:Number,        required:true }
 	},
 	emits:['update:cell','update:color','update:draw','update:size'],
 	computed:{
@@ -84,6 +88,65 @@ const MyBuilderDocBorder = {
 		}
 	}
 };
+
+const MyBuilderDocHeaderFooter = {
+	name:'my-builder-doc-header-footer',
+	components:{
+		MyInputDecimal,
+		MyInputRange
+	},
+	template:`<tr>
+		<td>
+			<my-button-check @update:modelValue="setActive" :caption="isHeader ? capGen.header : capGen.footer" :modelValue="active" :readonly />
+		</td>
+		<td>
+			<select v-if="active" @input="setPageIdInherit($event.target.value)" :value="pageIdInherit !== null ? pageIdInherit : ''">
+				<option value="">[{{ capApp.inheritFrom }}]</option>
+				<option
+					v-for="(p,i) in pages"
+					v-show="p.id !== pageId"
+					:value="p.id"
+				>{{ capApp.inheritFrom + ': ' + capGen.page + ' ' + (i+1) }}</option>
+			</select>
+		</td>
+	</tr>`,
+	props:{
+		isHeader: { type:Boolean, required:true },
+		pages:    { type:Array,   required:true },
+		pageId:   { type:String,  required:true },
+		pageSizeX:{ type:Number,  required:true },
+		readonly: { type:Boolean, required:true },
+		sizeMax:  { type:Number,  required:true },
+
+		// inputs
+		active:       { type:Boolean,       required:true },
+		fieldGrid:    { type:Object,        required:true },
+		pageIdInherit:{ type:[String,null], required:true }
+	},
+	emits:['update:active','update:fieldGrid','update:pageIdInherit'],
+	computed:{
+		capApp:s => s.$store.getters.captions.builder.doc,
+		capGen:s => s.$store.getters.captions.generic
+	},
+	methods:{
+		// externals
+		getTemplateDocField,
+
+		// actions
+		setActive(v) {
+			let f = this.getTemplateDocField(this.isHeader ? 'gridHeader' : 'gridFooter');
+			f.sizeX = this.pageSizeX;
+			f.sizeY = this.sizeMax;
+			this.$emit('update:active',v);
+			this.$emit('update:fieldGrid',f);
+			this.$emit('update:pageIdInherit',null);
+		},
+		setPageIdInherit(v) {
+			this.$emit('update:pageIdInherit',v !== '' ? v : null);
+		}
+	}
+};
+
 const MyBuilderDocMarginPadding = {
 	name:'my-builder-doc-margin-padding',
 	components:{MyInputDecimal},
@@ -106,11 +169,13 @@ const MyBuilderDocMarginPadding = {
 		</td>
 	</tr>`,
 	props:{
-		t:       { type:Number,  required:true },
-		r:       { type:Number,  required:true },
-		b:       { type:Number,  required:true },
-		l:       { type:Number,  required:true },
-		readonly:{ type:Boolean, required:true }
+		readonly:{ type:Boolean, required:true },
+
+		// values
+		t:{ type:Number, required:true },
+		r:{ type:Number, required:true },
+		b:{ type:Number, required:true },
+		l:{ type:Number, required:true }
 	},
 	emits:['update:t','update:r','update:b','update:l'],
 	computed:{

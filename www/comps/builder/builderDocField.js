@@ -19,7 +19,7 @@ export default {
 	template:`<div class="builder-doc-field" ref="field"
 		@mousedown.stop="mousedown"
 		@mouseup.stop="mouseup"
-		:class="{ flow:isFlow, 'drag-preview':isDragPreview, 'resizable-both':isChildGrid, 'resizable-height':isChildFlow, selected:isOptionsShow }"
+		:class="classCss"
 		:style
 		:key="field.id"
 	>
@@ -37,10 +37,9 @@ export default {
 			:data-is-parent="isParent"
 			:style="styleChildren"
 		>
-			<my-builder-doc-field
+			<my-builder-doc-field draggable="true"
 				v-for="(f,i) in field.fields"
 				v-model="f"
-				draggable="true"
 				@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 				@dragenter.stop="dragEnterField($event,i)"
 				@dragleave.stop
@@ -71,7 +70,7 @@ export default {
 						<td><my-bool v-model="field.state" :readonly /></td>
 					</tr>
 					
-					<template v-if="isGrid || isChildGrid">
+					<template v-if="(isGrid || isChildGrid) && allowResize">
 						<tr v-if="isChildGrid">
 							<td>{{ capGen.sizeX }}</td>
 							<td>
@@ -148,6 +147,7 @@ export default {
 		</teleport>
 	</div>`,
 	props:{
+		allowResize:    { type:Boolean,       required:false, default:true },
 		builderLanguage:{ type:String,        required:true },
 		elmFieldOptions:{ required:true },
 		entityIdMapRef: { type:Object,        required:true },
@@ -175,6 +175,21 @@ export default {
 	},
 	emits:['setFieldIdOptions','update:modelValue'],
 	computed:{
+		classCss:s => {
+			return {
+				flow:s.isFlow,
+				'drag-preview':s.isDragPreview,
+				'resizable-both':s.allowResize && s.isChildGrid,
+				'resizable-height':s.allowResize && s.isChildFlow,
+				selected:s.isOptionsShow
+			};
+		},
+		styleChildren:s => s.isGrid
+			? `background-image:radial-gradient(var(--color-border) ${s.styleDotSize}mm, transparent ${s.styleDotSize}mm);
+			background-size:${s.field.sizeSnap}mm ${s.field.sizeSnap}mm;
+			background-position:${s.styleDotPos}mm ${s.styleDotPos}mm`
+			: `padding:${s.field.padding.t}mm ${s.field.padding.r}mm ${s.field.padding.l}mm ${s.field.padding.b}mm;
+			gap:${s.field.gap}mm;`,
 		title:s => {
 			switch(s.field.content) {
 				case 'data': return `${s.field.attributeIndex} ${s.attribute.name}`; break;
@@ -185,12 +200,6 @@ export default {
 			}
 			return '';
 		},
-		styleChildren:s => s.isGrid
-			? `background-image:radial-gradient(var(--color-border) ${s.styleDotSize}mm, transparent ${s.styleDotSize}mm);
-			background-size:${s.field.sizeSnap}mm ${s.field.sizeSnap}mm;
-			background-position:${s.styleDotPos}mm ${s.styleDotPos}mm`
-			: `padding:${s.field.padding.t}mm ${s.field.padding.r}mm ${s.field.padding.l}mm ${s.field.padding.b}mm;
-			gap:${s.field.gap}mm;`,
 
 		// inputs
 		field:{ // this method updates obj directly
@@ -224,17 +233,17 @@ export default {
 
 		// presentation
 		adjustSizeToSnap(sizeX,sizeY) {
-			const sizeXClean = this.getSizeClean(this.field.posX,sizeX,this.parentSizeX,this.gridFieldSizeMinX);
-			const sizeYClean = this.getSizeClean(this.field.posY,sizeY,this.parentSizeY,this.gridFieldSizeMinY);
+			const sizeXClean = this.getSizeClean(this.isChildGrid,this.field.posX,sizeX,this.parentSizeX,this.gridFieldSizeMinX,this.gridParentSnap);
+			const sizeYClean = this.getSizeClean(this.isChildGrid,this.field.posY,sizeY,this.parentSizeY,this.gridFieldSizeMinY,this.gridParentSnap);
 
 			if(sizeXClean !== sizeX || sizeYClean !== sizeY) {
 				this.field.sizeX = sizeXClean;
 				this.field.sizeY = sizeYClean;
 			}
 		},
-		getSizeClean(posChild,sizeChild,sizeParent,sizeMin) {
+		getSizeClean(isChildGrid,posChild,sizeChild,sizeParent,sizeMin,sizeSnap) {
 			// limit size to parent size
-			if(this.isChildGrid && posChild + sizeChild > sizeParent)
+			if(isChildGrid && posChild + sizeChild > sizeParent)
 				sizeChild = sizeParent - posChild;
 
 			// force minimum sizes
@@ -242,8 +251,8 @@ export default {
 				sizeChild = sizeMin;
 
 			// snap size to grid
-			if(this.isChildGrid)
-				sizeChild = Math.max(this.gridParentSnap, Math.round(sizeChild / this.gridParentSnap) * this.gridParentSnap);
+			if(isChildGrid)
+				sizeChild = Math.max(sizeSnap, Math.round(sizeChild / sizeSnap) * sizeSnap);
 
 			return sizeChild;
 		},
@@ -336,8 +345,8 @@ export default {
 				if(field.sizeX === 0) field.sizeX = gridSizeX / 2;
 				if(field.sizeY === 0) field.sizeY = this.gridFieldSizeMinY;
 
-				field.sizeX = this.getSizeClean(field.posX,field.sizeX,gridSizeX,this.gridFieldSizeMinX);
-				field.sizeY = this.getSizeClean(field.posY,field.sizeY,gridSizeY,this.gridFieldSizeMinY);
+				field.sizeX = this.getSizeClean(true,field.posX,field.sizeX,gridSizeX,this.gridFieldSizeMinX,this.field.sizeSnap);
+				field.sizeY = this.getSizeClean(true,field.posY,field.sizeY,gridSizeY,this.gridFieldSizeMinY,this.field.sizeSnap);
 			}
 
 			if(this.isFlow) {

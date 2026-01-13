@@ -828,6 +828,7 @@
 				"shrink": "Vertikal schrumpfen, wenn leer",
 				"sizeSnap": "Rastergröße"
 			},
+			"inheritFrom": "Übernehmen von",
 			"setData": "Von Attributwert überschreiben",
 			"setValue": "Manuell überschreiben",
 			"sidebarField": "Feld: {NAME}",
@@ -2343,6 +2344,7 @@
 		"files": "Dateien",
 		"filters": "Filter",
 		"font": "Schrift",
+		"footer": "Fußzeile",
 		"form": "Formular",
 		"formActions": "Formularaktionen",
 		"formOpen": "Formular öffnen",
@@ -2351,6 +2353,7 @@
 		"gap": "Abstand",
 		"global": "Global",
 		"globalSearch": "Globale Suche",
+		"header": "Kopfzeile",
 		"help": "Hilfe",
 		"home": "Start",
 		"homepage": "Startseite",

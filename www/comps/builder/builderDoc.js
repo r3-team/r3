@@ -95,6 +95,7 @@ export default {
 					:elmFieldOptions="$refs.fieldOptions"
 					:fieldIdOptions="sideFieldIdShow"
 					:joins="doc.query.joins"
+					:pages="doc.pages"
 					:readonly
 				/>
 			</div>
@@ -143,8 +144,7 @@ export default {
 					<!-- field templates -->
 					<div class="builder-doc-fields">
 						<div class="builder-doc-field" v-for="f in fieldsTemplate">
-							<div class="builder-doc-field-title"
-								draggable="true"
+							<div class="builder-doc-field-title" draggable="true"
 								@dragstart="fieldDragStart($event,f)"
 								:key="f.id"
 							>TESTFIELD</div>

@@ -1,7 +1,10 @@
-import MyBuilderDocField           from './builderDocField.js';
-import MyBuilderDocSets            from './builderDocSets.js';
-import MyInputDecimal              from '../inputDecimal.js';
-import {MyBuilderDocMarginPadding} from './builderDocInput.js';
+import MyBuilderDocField from './builderDocField.js';
+import MyBuilderDocSets  from './builderDocSets.js';
+import MyInputDecimal    from '../inputDecimal.js';
+import {
+	MyBuilderDocHeaderFooter,
+	MyBuilderDocMarginPadding
+} from './builderDocInput.js';
 
 const pageSizeMapMm = {
 	'A1':    [594,841],
@@ -20,17 +23,50 @@ export default {
 	components:{
 		MyBuilderDocField,
 		MyBuilderDocSets,
+		MyBuilderDocHeaderFooter,
 		MyBuilderDocMarginPadding,
 		MyInputDecimal
 	},
 	template:`<div class="builder-doc-page" v-if="page !== false" @mouseup.stop="$emit('setFieldIdOptions',null)">
 		<div class="builder-doc-page-outer" :style="stylePage">
-			<div class="builder-doc-page-footer-header" v-if="header !== false && header.docPageIdInherit === null" :style="styleHeader"></div>
-			<div class="builder-doc-page-margin-hor"    v-if="margin.l > 0" :style="styleMarginT"></div>
-			<div class="builder-doc-page-margin-ver"    v-if="margin.r > 0" :style="styleMarginR"></div>
-			<div class="builder-doc-page-margin-hor"    v-if="margin.b > 0" :style="styleMarginB"></div>
-			<div class="builder-doc-page-margin-ver"    v-if="margin.l > 0" :style="styleMarginL"></div>
-			<div class="builder-doc-page-footer-header" v-if="footer !== false && footer.docPageIdInherit === null" :style="styleFooter"></div>
+
+			<div class="builder-doc-page-margin-hor" v-if="margin.l > 0" :style="styleMarginT"></div>
+			<div class="builder-doc-page-margin-ver" v-if="margin.r > 0" :style="styleMarginR"></div>
+			<div class="builder-doc-page-margin-hor" v-if="margin.b > 0" :style="styleMarginB"></div>
+			<div class="builder-doc-page-margin-ver" v-if="margin.l > 0" :style="styleMarginL"></div>
+
+			<div class="builder-doc-page-footer-header" v-if="header !== false && header.docPageIdInherit === null" :style="styleHeader">
+				<my-builder-doc-field
+					v-model="page.header.fieldGrid"
+					@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
+					:allowResize="false"
+					:builderLanguage
+					:elmFieldOptions
+					:entityIdMapRef="{}"
+					:fieldIdOptions
+					:isChildGrid="true"
+					:joins
+					:parentSizeX="pageSizeX"
+					:parentSizeY="margin.t"
+					:readonly
+				/>
+			</div>
+			<div class="builder-doc-page-footer-header" v-if="footer !== false && footer.docPageIdInherit === null" :style="styleFooter">
+				<my-builder-doc-field
+					v-model="page.footer.fieldGrid"
+					@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
+					:allowResize="false"
+					:builderLanguage
+					:elmFieldOptions
+					:entityIdMapRef="{}"
+					:fieldIdOptions
+					:isChildGrid="true"
+					:joins
+					:parentSizeX="pageSizeX"
+					:parentSizeY="margin.b"
+					:readonly
+				/>
+			</div>
 
 			<div class="builder-doc-page-body" :style="styleBody">
 				<my-builder-doc-field
@@ -45,7 +81,6 @@ export default {
 					:parentSizeX="pageSizeX - margin.l - margin.r"
 					:parentSizeY="pageSizeY - margin.t - margin.b"
 					:readonly
-					:template="false"
 				/>
 			</div>
 		</div>
@@ -80,7 +115,31 @@ export default {
 						v-model:r="page.margin.r"
 						v-model:b="page.margin.b"
 						v-model:l="page.margin.l"
+						@update:t="setMarginVertical(true,$event)"
+						@update:b="setMarginVertical(false,$event)"
 						:readonly
+					/>
+					<my-builder-doc-header-footer
+						v-model:active="page.header.active"
+						v-model:fieldGrid="page.header.fieldGrid"
+						v-model:pageIdInherit="page.header.docPageIdInherit"
+						:isHeader="true"
+						:pages
+						:pageId="page.id"
+						:pageSizeX="pageSizeX"
+						:readonly
+						:sizeMax="page.margin.t"
+					/>
+					<my-builder-doc-header-footer
+						v-model:active="page.footer.active"
+						v-model:fieldGrid="page.footer.fieldGrid"
+						v-model:pageIdInherit="page.footer.docPageIdInherit"
+						:isHeader="false"
+						:pages
+						:pageId="page.id"
+						:pageSizeX="pageSizeX"
+						:readonly
+						:sizeMax="page.margin.b"
 					/>
 					<my-builder-doc-sets
 						v-model="page.sets"
@@ -101,6 +160,7 @@ export default {
 		fieldIdOptions: { type:[String,null], required:true },
 		joins:          { type:Array,         required:true },
 		modelValue:     { type:Object,        required:true },
+		pages:          { type:Array,         required:true },
 		readonly:       { type:Boolean,       required:true }
 	},
 	emits:['setFieldIdOptions','update:modelValue'],
@@ -118,16 +178,25 @@ export default {
 		pageSizeY:   s => s.page.orientation === 'portrait' ? pageSizeMapMm[s.page.size][1] : pageSizeMapMm[s.page.size][0],
 		pageSizes:   s => Object.keys(pageSizeMapMm),
 		styleBody:   s => `top:${s.margin.t}mm;right:${s.margin.r}mm;bottom:${s.margin.b}mm;left:${s.margin.l}mm`,
-		styleFooter: s => `bottom:0px;left:0px;height:${s.footer.fieldGrid.SizeY}mm`,
-		styleHeader: s => `top:0px;left:0px;height:${s.header.fieldGrid.SizeY}mm`,
-		styleMarginT:s => `top:0px;left:0px;height:${s.margin.t}mm`,
-		styleMarginR:s => `top:0px;right:0px;width:${s.margin.r}mm`,
-		styleMarginB:s => `bottom:0px;left:0px;height:${s.margin.b}mm`,
-		styleMarginL:s => `top:0px;left:0px;width:${s.margin.l}mm`,
+		styleFooter: s => `width:${s.pageSizeX}mm;bottom:0mm;left:0mm;height:${s.page.footer.fieldGrid.sizeY}mm`,
+		styleHeader: s => `width:${s.pageSizeX}mm;top:0mm;left:0mm;height:${s.page.header.fieldGrid.sizeY}mm`,
+		styleMarginT:s => `top:0mm;left:0mm;height:${s.margin.t}mm`,
+		styleMarginR:s => `top:0mm;right:0mm;width:${s.margin.r}mm`,
+		styleMarginB:s => `bottom:0mm;left:0mm;height:${s.margin.b}mm`,
+		styleMarginL:s => `top:0mm;left:0mm;width:${s.margin.l}mm`,
 		stylePage:   s => `width:${s.pageSizeX}mm;height:${s.pageSizeY}mm`,
 
 		// stores
 		capApp:s => s.$store.getters.captions.builder.doc,
 		capGen:s => s.$store.getters.captions.generic
+	},
+	methods:{
+		setMarginVertical(isTop,v) {
+			if(isTop && this.header !== false)
+				this.page.header.fieldGrid.sizeY = v;
+
+			if(!isTop && this.footer !== false)
+				this.page.footer.fieldGrid.sizeY = v;
+		}
 	}
 };
