@@ -101,7 +101,7 @@
 }
 
 /* options */
-.builder-doc-margin-padding-box{
+.builder-doc-input-page-box{
 	height:30px;
 	border:2px solid var(--color-border);
 	background-color:var(--color-input-disabled);

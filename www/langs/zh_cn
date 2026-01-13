@@ -798,6 +798,7 @@
 			"showRowCount": "Show result count instead"
 		},
 		"doc": {
+			"borderCell": "Cell border",
 			"button": {
 				"addPage": "Add page"
 			},
@@ -2226,6 +2227,7 @@
 		"before": "之前",
 		"boolFalse": "False",
 		"boolTrue": "True",
+		"border": "Border",
 		"bright": "Bright",
 		"busy": "工作中 - 点击此处中止",
 		"button": {

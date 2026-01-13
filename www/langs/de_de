@@ -798,6 +798,7 @@
 			"showRowCount": "Stattdessen Ergebnisanzahl zeigen"
 		},
 		"doc": {
+			"borderCell": "Zellrahmen",
 			"button": {
 				"addPage": "Seite hinzufügen"
 			},
@@ -2226,6 +2227,7 @@
 		"before": "Davor",
 		"boolFalse": "False",
 		"boolTrue": "True",
+		"border": "Rahmen",
 		"bright": "Hell",
 		"busy": "Arbeitet - Zum Abbrechen hier klicken",
 		"button": {

@@ -38,7 +38,7 @@ func applyToField(set []types.DocSet, f types.DocField) types.DocField {
 		case string:
 			switch o.Target {
 			case "border.color":
-				f.Border.Color = v
+				f.Border.Color = pgtype.Text{String: v, Valid: true}
 			case "border.draw":
 				f.Border.Draw = v
 			}
@@ -73,7 +73,7 @@ func applyToFieldList(set []types.DocSet, f types.DocFieldList) types.DocFieldLi
 		case string:
 			switch o.Target {
 			case "bodyBorder.color":
-				f.BodyBorder.Color = v
+				f.BodyBorder.Color = pgtype.Text{String: v, Valid: true}
 			case "bodyBorder.draw":
 				f.BodyBorder.Draw = v
 			case "bodyColorFillEven":
@@ -81,13 +81,13 @@ func applyToFieldList(set []types.DocSet, f types.DocFieldList) types.DocFieldLi
 			case "bodyColorFillOdd":
 				f.BodyColorFillOdd = pgtype.Text{String: v, Valid: true}
 			case "footerBorder.color":
-				f.FooterBorder.Color = v
+				f.FooterBorder.Color = pgtype.Text{String: v, Valid: true}
 			case "footerBorder.draw":
 				f.FooterBorder.Draw = v
 			case "footerColorFill":
 				f.FooterColorFill = pgtype.Text{String: v, Valid: true}
 			case "headerBorder.color":
-				f.HeaderBorder.Color = v
+				f.HeaderBorder.Color = pgtype.Text{String: v, Valid: true}
 			case "headerBorder.draw":
 				f.HeaderBorder.Draw = v
 			case "headerColorFill":

@@ -304,7 +304,7 @@ export default {
 		hasChanges:     s => !s.deepIsEqual(s.doc,s.docOrg),
 		module:         s => s.moduleIdMap[s.doc.moduleId],
 		pageIndexActive:s => s.pageIdMapIndex[s.tabPageIdShow],
-		previewUrl:     s => s.recordId !== null ? `/doc/download/test.pdf?doc_id=${s.id}&record_id=${s.recordId}&token=${s.token}&date=${s.cacheDenialTimestamp}` : null,
+		previewUrl:     s => s.recordId !== null && !s.hasChanges ? `/doc/download/test.pdf?doc_id=${s.id}&record_id=${s.recordId}&token=${s.token}&date=${s.cacheDenialTimestamp}` : null,
 		sideColumnShow: s => s.sideColumnIdShow !== null,
 		sideDocShow:    s => !s.sideColumnShow && !s.sideFieldShow,
 		sideFieldShow:  s => s.sideFieldIdShow !== null,

@@ -798,6 +798,7 @@
 			"showRowCount": "Show result count instead"
 		},
 		"doc": {
+			"borderCell": "Cell border",
 			"button": {
 				"addPage": "Add page"
 			},
@@ -2226,6 +2227,7 @@
 		"before": "Before",
 		"boolFalse": "False",
 		"boolTrue": "True",
+		"border": "Border",
 		"bright": "Bright",
 		"busy": "Lucrează - Apasă aici pentru anulare",
 		"button": {

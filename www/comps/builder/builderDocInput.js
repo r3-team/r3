@@ -1,5 +1,8 @@
-import MyInputDecimal from '../inputDecimal.js';
+import MyInputColorWrap from '../inputColorWrap.js';
+import MyInputDecimal   from '../inputDecimal.js';
+import MyInputRange     from '../inputRange.js';
 export {
+	MyBuilderDocBorder,
 	MyBuilderDocFontAlign,
 	MyBuilderDocFontFamily,
 	MyBuilderDocFontLineFactor,
@@ -7,6 +10,80 @@ export {
 	MyBuilderDocMarginPadding
 };
 
+const MyBuilderDocBorder = {
+	name:'my-builder-doc-border',
+	components:{
+		MyInputColorWrap,
+		MyInputDecimal,
+		MyInputRange
+	},
+	template:`<tr><td><b>{{ capGen.border }}</b></td></tr>
+	<tr>
+		<td><my-button-check @update:modelValue="setDraw('1',$event)" :caption="capGen.button.all" :modelValue="drawAll" :readonly /></td>
+		<td>
+			<div class="column gap centered" v-if="!drawAll">
+				<div class="row">
+					<my-bool @update:modelValue="setDraw('T',$event)" :modelValue="draw.includes('T')" :readonly />
+				</div>
+				<div class="row gap centered">
+					<my-bool @update:modelValue="setDraw('L',$event)" :modelValue="draw.includes('L')" :readonly />
+					<div class="builder-doc-input-page-box"></div>
+					<my-bool @update:modelValue="setDraw('R',$event)" :modelValue="draw.includes('R')" :readonly />
+				</div>
+				<div class="row">
+					<my-bool @update:modelValue="setDraw('B',$event)" :modelValue="draw.includes('B')" :readonly />
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td>{{ capGen.size }}</td>
+		<td>
+			<div class="row gap centered">
+				<my-input-range   class="short" @update:modelValue="$emit('update:size',$event)" :modelValue="size" :readonly :min="0" :max="20" :step="0.1" />
+				<my-input-decimal class="short" @update:modelValue="$emit('update:size',$event)" :modelValue="size" :allowNull="false" :max="20" :length="4" :lengthFract="2" />
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td>{{ capGen.color }}</td>
+		<td><my-input-color-wrap @update:modelValue="$emit('update:color',$event)" :allowNull="true" :modelValue="color" :readonly /></td>
+	</tr>
+	<tr v-if="allowCell">
+		<td>{{ capApp.borderCell }}</td>
+		<td><my-bool @update:modelValue="$emit('update:cell',$event)" :modelValue="cell" :readonly /></td>
+	</tr>`,
+	props:{
+		allowCell: { type:Boolean,       required:true },
+		cell:      { type:Boolean,       required:true },
+		color:     { type:[String,null], required:true },
+		draw:      { type:String,        required:true },
+		size:      { type:Number,        required:true },
+		readonly:  { type:Boolean,       required:true }
+	},
+	emits:['update:cell','update:color','update:draw','update:size'],
+	computed:{
+		drawAll:s => s.draw.includes('1'),
+
+		// stores
+		capApp:s => s.$store.getters.captions.builder.doc,
+		capGen:s => s.$store.getters.captions.generic
+	},
+	methods:{
+		setDraw(mode,add) {
+			// set all borders on/off
+			if(mode === '1')
+				return this.$emit('update:draw', add ? '1' : '');
+
+			let v = this.draw;
+
+			if(add) v += mode;
+			else    v = v.replace(mode,'');
+
+			this.$emit('update:draw',v);
+		}
+	}
+};
 const MyBuilderDocMarginPadding = {
 	name:'my-builder-doc-margin-padding',
 	components:{MyInputDecimal},
@@ -19,7 +96,7 @@ const MyBuilderDocMarginPadding = {
 				</div>
 				<div class="row gap centered">
 					<my-input-decimal class="short" @update:modelValue="$emit('update:l',$event)" :modelValue="l" :readonly :allowNull="false" :length="5" :lengthFract="2" />
-					<div class="builder-doc-margin-padding-box"></div>
+					<div class="builder-doc-input-page-box"></div>
 					<my-input-decimal class="short" @update:modelValue="$emit('update:r',$event)" :modelValue="r" :readonly :allowNull="false" :length="5" :lengthFract="2" />
 				</div>
 				<div class="row">

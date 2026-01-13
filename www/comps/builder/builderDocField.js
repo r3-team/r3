@@ -1,12 +1,16 @@
-import {getTemplateDocField}       from '../shared/builderTemplate.js';
-import MyInputDecimal              from '../inputDecimal.js';
-import MyInputRange                from '../inputRange.js';
-import {MyBuilderDocMarginPadding} from './builderDocInput.js';
-import MyBuilderDocSets            from './builderDocSets.js';
+import {getTemplateDocField} from '../shared/builderTemplate.js';
+import MyInputDecimal        from '../inputDecimal.js';
+import MyInputRange          from '../inputRange.js';
+import MyBuilderDocSets      from './builderDocSets.js';
+import {
+	MyBuilderDocBorder,
+	MyBuilderDocMarginPadding
+} from './builderDocInput.js';
 
 export default {
 	name:'my-builder-doc-field',
 	components:{
+		MyBuilderDocBorder,
 		MyBuilderDocMarginPadding,
 		MyBuilderDocSets,
 		MyInputDecimal,
@@ -123,6 +127,14 @@ export default {
 						/>
 					</template>
 					
+					<my-builder-doc-border
+						v-model:cell="field.border.cell"
+						v-model:color="field.border.color"
+						v-model:draw="field.border.draw"
+						v-model:size="field.border.size"
+						:allowCell="false"
+						:readonly
+					/>
 					<my-builder-doc-sets
 						v-model="field.sets"
 						:allowData="true"

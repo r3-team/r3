@@ -798,6 +798,7 @@
 			"showRowCount": "Mostrar recuento de resultados en su lugar"
 		},
 		"doc": {
+			"borderCell": "Cell border",
 			"button": {
 				"addPage": "Add page"
 			},
@@ -2226,6 +2227,7 @@
 		"before": "Antes",
 		"boolFalse": "False",
 		"boolTrue": "True",
+		"border": "Border",
 		"bright": "Claro",
 		"busy": "Trabajando - Haga clic aquí para abortar",
 		"button": {

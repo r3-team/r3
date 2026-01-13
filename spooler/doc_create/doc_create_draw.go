@@ -156,8 +156,12 @@ func drawAttributeValue(doc *doc, b types.DocBorder, font types.DocFont, w, h fl
 }
 
 func drawBorderLine(doc *doc, b types.DocBorder, x1, y1, x2, y2 float64) {
-	rgb := tools.HexToInt(b.Color)
-	doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
+	if b.Color.Valid {
+		rgb := tools.HexToInt(b.Color.String)
+		doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
+	} else {
+		doc.p.SetDrawColor(0, 0, 0)
+	}
 	doc.p.SetLineWidth(b.Size)
 	doc.p.Line(x1, y1, x2, y2)
 }
@@ -168,8 +172,12 @@ func drawBox(doc *doc, b types.DocBorder, fillColor pgtype.Text, w, h float64) {
 	}
 
 	if b.Draw != "" {
-		rgb := tools.HexToInt(b.Color)
-		doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
+		if b.Color.Valid {
+			rgb := tools.HexToInt(b.Color.String)
+			doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
+		} else {
+			doc.p.SetDrawColor(0, 0, 0)
+		}
 		doc.p.SetLineWidth(b.Size)
 	}
 
@@ -228,8 +236,12 @@ func drawImageBase64(doc *doc, imgBase64 string, w, h float64) error {
 // if height is set to 0, font line height will be used
 func drawCellText(doc *doc, b types.DocBorder, font types.DocFont, w, h float64, lineCount int, s string) {
 	if b.Draw != "" {
-		rgb := tools.HexToInt(b.Color)
-		doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
+		if b.Color.Valid {
+			rgb := tools.HexToInt(b.Color.String)
+			doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
+		} else {
+			doc.p.SetDrawColor(0, 0, 0)
+		}
 		doc.p.SetLineWidth(b.Size)
 	}
 

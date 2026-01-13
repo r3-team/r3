@@ -798,6 +798,7 @@
 			"showRowCount": "Show result count instead"
 		},
 		"doc": {
+			"borderCell": "Cell border",
 			"button":{
 				"addPage": "Add page"
 			},
@@ -2226,6 +2227,7 @@
 		"before": "Before",
 		"boolTrue": "True",
 		"boolFalse": "False",
+		"border": "Border",
 		"bright": "Bright",
 		"busy": "Working - Click here to abort",
 		"button": {
