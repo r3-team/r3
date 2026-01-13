@@ -2500,7 +2500,8 @@
 		"warnings": "Figyelmeztetések",
 		"widget": "Widget",
 		"widgets": "Widgets",
-		"wrap": "Wrap"
+		"wrap": "Wrap",
+		"zoom": "Zoom"
 	},
 	"globalSearch": {
 		"button": {

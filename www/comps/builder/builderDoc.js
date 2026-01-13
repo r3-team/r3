@@ -25,7 +25,7 @@ export default {
 		MyTabs
 	},
 	template:`<div class="builder-doc" v-if="doc !== false">
-		<div class="contentBox grow">
+		<div class="contentBox grow scroll">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/document.png" />
@@ -61,6 +61,18 @@ export default {
 							:caption="capGen.preview"
 						/>
 					</a>
+					<my-button image="search.png"
+						@trigger="zoom = zoomOrg"
+						:active="zoom !== zoomOrg"
+						:captionTitle="capGen.zoom"
+						:naked="true"
+					/>
+					<input type="range"
+						v-model.number="zoom"
+						:max="3"
+						:min="0.5"
+						:step="0.1"
+					/>
 				</div>
 				<div class="area nowrap">
 					<my-button image="delete.png"
@@ -97,6 +109,7 @@ export default {
 					:joins="doc.query.joins"
 					:pages="doc.pages"
 					:readonly
+					:zoom
 				/>
 			</div>
 		</div>
@@ -241,6 +254,8 @@ export default {
 
 			// inputs
 			recordId:null,
+			zoom:1,
+			zoomOrg:1,
 			
 			// state
 			pageOptions:null,

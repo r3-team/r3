@@ -2500,7 +2500,8 @@
 		"warnings": "Advertencias",
 		"widget": "Widget",
 		"widgets": "Widgets",
-		"wrap": "Ajustar"
+		"wrap": "Ajustar",
+		"zoom": "Zoom"
 	},
 	"globalSearch": {
 		"button": {

@@ -58,6 +58,7 @@ export default {
 				:isChildFlow="isFlow"
 				:isChildGrid="isGrid"
 				:readonly
+				:zoom
 			/>
 		</div>
 
@@ -159,7 +160,8 @@ export default {
 		parentSizeY:    { type:Number,        required:true },
 		isChildGrid:    { type:Boolean,       required:false, default:false },
 		isChildFlow:    { type:Boolean,       required:false, default:false },
-		readonly:       { type:Boolean,       required:true }
+		readonly:       { type:Boolean,       required:true },
+		zoom:           { type:Number,        required:true }
 	},
 	data() {
 		return {
@@ -185,11 +187,8 @@ export default {
 			};
 		},
 		styleChildren:s => s.isGrid
-			? `background-image:radial-gradient(var(--color-border) ${s.styleDotSize}mm, transparent ${s.styleDotSize}mm);
-			background-size:${s.field.sizeSnap}mm ${s.field.sizeSnap}mm;
-			background-position:${s.styleDotPos}mm ${s.styleDotPos}mm`
-			: `padding:${s.field.padding.t}mm ${s.field.padding.r}mm ${s.field.padding.l}mm ${s.field.padding.b}mm;
-			gap:${s.field.gap}mm;`,
+			? `background-size:${s.field.sizeSnap*s.zoom}mm ${s.field.sizeSnap*s.zoom}mm;`
+			: `padding:${s.field.padding.t*s.zoom}mm ${s.field.padding.r*s.zoom}mm ${s.field.padding.l*s.zoom}mm ${s.field.padding.b*s.zoom}mm;gap:${s.field.gap*s.zoom}mm;`,
 		title:s => {
 			switch(s.field.content) {
 				case 'data': return `${s.field.attributeIndex} ${s.attribute.name}`; break;
@@ -208,19 +207,19 @@ export default {
 		},
 
 		// simple
-		attribute:    s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
-		isData:       s => s.field.content === 'data',
-		isDragPreview:s => s.field.content === 'dragDropPreview',
-		isFlow:       s => ['flow','flowBody'].includes(s.field.content),
-		isGrid:       s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
-		isParent:     s => s.isFlow || s.isGrid,
-		isOptionsShow:s => s.fieldIdOptions === s.field.id,
-		sizeXMax:     s => s.parentSizeX - s.field.posX,
-		sizeYMax:     s => s.parentSizeY - s.field.posY,
-		style:        s => s.isGrid || s.isChildGrid ? `height:${s.field.sizeY}mm;${s.styleGrid}` : '',
-		styleDotPos:  s => (s.field.sizeSnap / 2) - s.field.sizeSnap,
-		styleDotSize: s => s.field.sizeSnap / 5,
-		styleGrid:    s => s.isChildGrid ? `position:absolute;top:${s.field.posY}mm;left:${s.field.posX}mm;width:${s.field.sizeX}mm;height:${s.field.sizeY}mm;` : '',
+		attribute:      s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
+		isData:         s => s.field.content === 'data',
+		isDragPreview:  s => s.field.content === 'dragDropPreview',
+		isFlow:         s => ['flow','flowBody'].includes(s.field.content),
+		isGrid:         s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
+		isParent:       s => s.isFlow || s.isGrid,
+		isOptionsShow:  s => s.fieldIdOptions === s.field.id,
+		sizeXMax:       s => s.parentSizeX - s.field.posX,
+		sizeYMax:       s => s.parentSizeY - s.field.posY,
+		style:          s => `${s.styleHeight}${s.styleGrid}`,
+		styleGrid:      s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;height:${s.field.sizeY*s.zoom}mm;` : '',
+		styleGridOffset:s => 0.25,
+		styleHeight:    s => s.isFlow && s.field.sizeY === 0 ? '' : `height:${s.field.sizeY*s.zoom}mm;`,
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
@@ -260,13 +259,13 @@ export default {
 		// actions
 		mousedown(e) {
 			const rect = this.$refs.field.getBoundingClientRect();
-			this.sizeXOnMousedown = rect.width  * this.pixelToMm;
-			this.sizeYOnMousedown = rect.height * this.pixelToMm;
+			this.sizeXOnMousedown = rect.width  * this.pixelToMm / this.zoom;
+			this.sizeYOnMousedown = rect.height * this.pixelToMm / this.zoom;
 		},
 		mouseup(e) {
 			const rect  = this.$refs.field.getBoundingClientRect();
-			const sizeX = rect.width  * this.pixelToMm;
-			const sizeY = rect.height * this.pixelToMm;
+			const sizeX = rect.width  * this.pixelToMm / this.zoom;
+			const sizeY = rect.height * this.pixelToMm / this.zoom;
 
 			if(this.sizeXOnMousedown !== sizeX || this.sizeYOnMousedown !== sizeY)
 				this.adjustSizeToSnap(sizeX,sizeY);
@@ -329,13 +328,13 @@ export default {
 			const field         = JSON.parse(e.dataTransfer.getData('application/json'));
 			const fieldsElm     = e.currentTarget; // the valid drop elm, ie. fields container
 			const fieldsElmRect = fieldsElm.getBoundingClientRect();
-			const gridSizeX     = fieldsElmRect.width  * this.pixelToMm;
-			const gridSizeY     = fieldsElmRect.height * this.pixelToMm;
+			const gridSizeX     = fieldsElmRect.width  * this.pixelToMm / this.zoom;
+			const gridSizeY     = fieldsElmRect.height * this.pixelToMm / this.zoom;
 
 			if(this.isGrid) {
 				// find position in grid
-				field.posX = (e.clientX - fieldsElmRect.left) * this.pixelToMm;
-				field.posY = (e.clientY - fieldsElmRect.top)  * this.pixelToMm;
+				field.posX = (e.clientX - fieldsElmRect.left) * this.pixelToMm / this.zoom;
+				field.posY = (e.clientY - fieldsElmRect.top)  * this.pixelToMm / this.zoom;
 	
 				// snap position to grid
 				field.posX = Math.round(field.posX / this.field.sizeSnap) * this.field.sizeSnap;

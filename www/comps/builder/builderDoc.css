@@ -2,6 +2,7 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-direction:row;
+	overflow:auto;
 }
 .builder-doc-content{
 	flex:1 5 auto;
@@ -18,11 +19,12 @@
 .builder-doc-page{
 	display:flex;
 	flex-flow:row nowrap;
-	justify-content:center;
 	padding:var(--spacing);
 	overflow:auto;
 }
 .builder-doc-page-outer{
+	flex:0 0 auto;
+	margin:0 auto;
 	box-shadow:1px 1px 4px var(--color-shade);
 	position:relative;
 	background-color:var(--color-doc-page-outer);
@@ -50,7 +52,6 @@
 
 /* field */
 .builder-doc-field{
-	border:1px solid var(--color-border);
 	box-sizing:border-box;
 	display:flex;
 	flex-flow:column nowrap;
@@ -98,11 +99,16 @@
 .builder-doc-fields.layout-grid{
 	display:block;
 	position:relative;
+	background-image:
+		linear-gradient(to right,  transparent 0px, rgba(0,0,0,0.3) 1px, transparent 1.6px),
+		linear-gradient(to bottom, transparent 0px, rgba(0,0,0,0.3) 1px, transparent 1.6px);
+	background-position:0.25px 0.25px;
 }
 
 /* header / footer */
 .builder-doc-page-footer-header{
 	position:absolute;
+	box-shadow:1px 1px 3px var(--color-shade);
 }
 
 /* options */
