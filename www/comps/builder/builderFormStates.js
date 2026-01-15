@@ -138,6 +138,7 @@ const MyBuilderFormState = {
 				@trigger="$emit('open')"
 				:captionTitle="capGen.button.show"
 				:image="open ? 'triangleDown.png' : 'triangleRight.png'"
+				:naked="true"
 			/>
 			<input class="description"
 				@input="update('description',-1,$event.target.value)"
@@ -335,7 +336,7 @@ export default {
 			<my-builder-form-state
 				v-for="(s,i) in states"
 				v-show="stateIndexesShow.includes(i)"
-				@open="open(i)"
+				@open="open(s.id)"
 				@remove="remove(i)"
 				@update:modelValue="update(i,$event)"
 				:dataFields="dataFields"
@@ -344,7 +345,7 @@ export default {
 				:form="form"
 				:key="s.id"
 				:modelValue="states[i]"
-				:open="stateIndexesOpen.includes(i)"
+				:open="stateIdsOpen.includes(s.id)"
 			/>
 		</div>
 	</div>`,
@@ -362,7 +363,7 @@ export default {
 			filterFieldId:'',
 			filterFormActionId:'',
 			filterTabId:'',
-			stateIndexesOpen:[]
+			stateIdsOpen:[]
 		};
 	},
 	computed:{
@@ -409,7 +410,7 @@ export default {
 				let s = this.states[i];
 				
 				// always keep open states visible
-				if(this.stateIndexesOpen.includes(i)) {
+				if(this.stateIdsOpen.includes(s.id)) {
 					out.push(i);
 					continue;
 				}
@@ -483,10 +484,10 @@ export default {
 			v.unshift(this.getTemplateFormState());
 			this.$emit('update:modelValue',v);
 		},
-		open(i) {
-			let pos = this.stateIndexesOpen.indexOf(i);
-			if(pos === -1) this.stateIndexesOpen.push(i);
-			else           this.stateIndexesOpen.splice(pos,1);
+		open(id) {
+			const pos = this.stateIdsOpen.indexOf(id);
+			if(pos === -1) this.stateIdsOpen.push(id);
+			else           this.stateIdsOpen.splice(pos,1);
 		},
 		remove(i) {
 			let v = JSON.parse(JSON.stringify(this.states));
