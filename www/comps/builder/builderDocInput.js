@@ -188,6 +188,7 @@ const MyBuilderDocFontAlign = {
 	name:'my-builder-doc-font-align',
 	template:`<select :disabled="readonly" :value="modelValue" @input="$emit('update:modelValue',$event.target.value)">
 		<option value="L">{{ capGen.alignmentHor.left }}</option>
+		<option value="C">{{ capGen.alignmentHor.center }}</option>
 		<option value="J">{{ capGen.alignmentHor.justify }}</option>
 		<option value="R">{{ capGen.alignmentHor.right }}</option>
 	</select>`,
