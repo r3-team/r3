@@ -822,7 +822,9 @@
 				"numberSepTho": "Thousands separator",
 				"style": "Styles",
 				"styleBold": "Bold",
-				"styleItalic": "Italic"
+				"styleItalic": "Italic",
+				"styleStrikeout": "Strike-out",
+				"styleUnderline": "Underline"
 			},
 			"grid": {
 				"shrink": "Shrink vertically if empty",

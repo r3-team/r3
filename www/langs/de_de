@@ -822,7 +822,9 @@
 				"numberSepTho": "Tausender-Trennzeichen",
 				"style": "Stile",
 				"styleBold": "Bold",
-				"styleItalic": "Italic"
+				"styleItalic": "Italic",
+				"styleStrikeout": "Durchgestrichen",
+				"styleUnderline": "Unterstrichen"
 			},
 			"grid": {
 				"shrink": "Vertikal schrumpfen, wenn leer",
