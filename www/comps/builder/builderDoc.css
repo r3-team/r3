@@ -96,7 +96,6 @@
 	background-image:
 		linear-gradient(to right,  transparent 0px, rgba(0,0,0,0.3) 1px, transparent 1.6px),
 		linear-gradient(to bottom, transparent 0px, rgba(0,0,0,0.3) 1px, transparent 1.6px);
-	background-position:0.25px 0.25px;
 }
 
 /* header / footer */

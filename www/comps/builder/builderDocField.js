@@ -227,7 +227,7 @@ export default {
 		isOptionsShow:s => s.fieldIdOptions === s.field.id,
 		sizeXMax:     s => s.parentSizeX - s.field.posX,
 		sizeYMax:     s => s.parentSizeY - s.field.posY,
-		style:        s => `${s.styleHeight}${s.styleGrid}`,
+		style:        s => `${s.styleHeight}${s.styleGrid}${s.getBorderCss(s.field.border)}`,
 		styleGrid:    s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;height:${s.field.sizeY*s.zoom}mm;` : '',
 		styleHeight:  s => s.isFlow && s.field.sizeY === 0 ? '' : `height:${s.field.sizeY*s.zoom}mm;`,
 
@@ -249,6 +249,24 @@ export default {
 				this.field.sizeX = sizeXClean;
 				this.field.sizeY = sizeYClean;
 			}
+		},
+		getBorderCss(b) {
+			if(b.draw === '')
+				return '';
+
+			const color = b.color === null ? '000000' : b.color;
+			const size  = b.size  === 0    ? 0.1 * this.zoom : b.size * this.zoom;
+			const sizeH = size / 2;
+			let s = `outline:${size}mm solid #${color};outline-offset:${sizeH - (sizeH * 2)}mm;`;
+
+			if(b.draw === '1')
+				return s;
+
+			if(!b.draw.includes('T')) s += 'outline-top:none;';
+			if(!b.draw.includes('R')) s += 'outline-right:none;';
+			if(!b.draw.includes('B')) s += 'outline-bottom:none;';
+			if(!b.draw.includes('L')) s += 'outline-left:none;';
+			return s;
 		},
 		getSizeClean(isChildGrid,posChild,sizeChild,sizeParent,sizeMin,sizeSnap) {
 			// limit size to parent size
