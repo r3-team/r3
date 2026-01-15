@@ -255,17 +255,16 @@ export default {
 				return '';
 
 			const color = b.color === null ? '000000' : b.color;
-			const size  = b.size  === 0    ? 0.1 * this.zoom : b.size * this.zoom;
-			const sizeH = size / 2;
-			let s = `outline:${size}mm solid #${color};outline-offset:${sizeH - (sizeH * 2)}mm;`;
+			const size  = b.size  === 0    ? 0.2 * this.zoom : b.size * this.zoom; // 0.2mm is default size for border if 0
+			let s = `border:${size}mm solid #${color};`;
 
 			if(b.draw === '1')
 				return s;
 
-			if(!b.draw.includes('T')) s += 'outline-top:none;';
-			if(!b.draw.includes('R')) s += 'outline-right:none;';
-			if(!b.draw.includes('B')) s += 'outline-bottom:none;';
-			if(!b.draw.includes('L')) s += 'outline-left:none;';
+			if(!b.draw.includes('T')) s += 'border-top:none;';
+			if(!b.draw.includes('R')) s += 'border-right:none;';
+			if(!b.draw.includes('B')) s += 'border-bottom:none;';
+			if(!b.draw.includes('L')) s += 'border-left:none;';
 			return s;
 		},
 		getSizeClean(isChildGrid,posChild,sizeChild,sizeParent,sizeMin,sizeSnap) {

@@ -170,16 +170,7 @@ func drawBox(doc *doc, b types.DocBorder, fillColor pgtype.Text, w, h float64) {
 	if b.Draw == "" && !fillColor.Valid {
 		return
 	}
-
-	if b.Draw != "" {
-		if b.Color.Valid {
-			rgb := tools.HexToInt(b.Color.String)
-			doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
-		} else {
-			doc.p.SetDrawColor(0, 0, 0)
-		}
-		doc.p.SetLineWidth(b.Size)
-	}
+	setBorder(doc, b)
 
 	fill := false
 	if fillColor.Valid {
@@ -235,15 +226,7 @@ func drawImageBase64(doc *doc, imgBase64 string, w, h float64) error {
 // if line count is set to 0 it will be calculated
 // if height is set to 0, font line height will be used
 func drawCellText(doc *doc, b types.DocBorder, font types.DocFont, w, h float64, lineCount int, s string) {
-	if b.Draw != "" {
-		if b.Color.Valid {
-			rgb := tools.HexToInt(b.Color.String)
-			doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
-		} else {
-			doc.p.SetDrawColor(0, 0, 0)
-		}
-		doc.p.SetLineWidth(b.Size)
-	}
+	setBorder(doc, b)
 
 	if h == 0 {
 		h = getLineHeight(font)

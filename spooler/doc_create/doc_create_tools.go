@@ -7,6 +7,7 @@ import (
 	"r3/log"
 	"r3/tools"
 	"r3/types"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -187,11 +188,47 @@ func getFloat64FromInterface(valueIf any) (float64, error) {
 	return v.Float64, nil
 }
 
+func getBorderSize(b types.DocBorder) float64 {
+	if b.Size == 0 {
+		// 0.2mm is the default border size if 0 is set
+		return 0.2
+	}
+	return b.Size
+}
+
+func setBorder(doc *doc, b types.DocBorder) {
+
+	if b.Draw == "" {
+		doc.p.SetCellMargin(0)
+		return
+	}
+
+	if b.Color.Valid {
+		rgb := tools.HexToInt(b.Color.String)
+		doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
+	} else {
+		doc.p.SetDrawColor(0, 0, 0)
+	}
+
+	size := getBorderSize(b)
+	doc.p.SetLineWidth(size)
+
+	// cell margin is set to offset content from border
+	doc.p.SetCellMargin(size / 2)
+}
+
 func setFont(doc *doc, f types.DocFont) {
 
 	// font key is also used as file name
 	// Tinos_.ttf, Tinos_B.ttf, Tinos_BI.ttf, Tinos_I.ttf
-	fontKey := fmt.Sprintf("%s_%s", f.Family, f.Style.String)
+	// U (underline) & S (strike-out) are valid styles but not part of the font
+	fontKeyStyle := f.Style.String
+	fontKeyStyle = strings.ReplaceAll(fontKeyStyle, "U", "")
+	fontKeyStyle = strings.ReplaceAll(fontKeyStyle, "S", "")
+	if fontKeyStyle == "IB" {
+		fontKeyStyle = "BI"
+	}
+	fontKey := fmt.Sprintf("%s_%s", f.Family, fontKeyStyle)
 
 	if _, exists := doc.fontKeyMap[fontKey]; !exists {
 
@@ -205,8 +242,8 @@ func setFont(doc *doc, f types.DocFont) {
 			f.Family = "times"
 		} else {
 
-			log.Info(log.ContextDoc, fmt.Sprintf("embedding font '%s' (style: %s)", f.Family, f.Style.String))
-			doc.p.AddUTF8FontFromBytes(f.Family, f.Style.String, fontFile)
+			log.Info(log.ContextDoc, fmt.Sprintf("embedding font '%s' (style: %s)", f.Family, fontKeyStyle))
+			doc.p.AddUTF8FontFromBytes(f.Family, fontKeyStyle, fontFile)
 			doc.fontKeyMap[fontKey] = true
 		}
 	}

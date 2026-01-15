@@ -3,6 +3,7 @@ package doc_create
 import (
 	"context"
 	"r3/types"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -15,9 +16,30 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, width flo
 		return posY, nil
 	}
 
+	// border offsets
+	b := f.Border
+	borderSize := getBorderSize(f.Border)
+	var borderOffsetT float64 = 0
+	var borderOffsetR float64 = 0
+	var borderOffsetB float64 = 0
+	var borderOffsetL float64 = 0
+
+	if b.Draw == "1" || strings.Contains(b.Draw, "T") {
+		borderOffsetT = borderSize
+	}
+	if b.Draw == "1" || strings.Contains(b.Draw, "R") {
+		borderOffsetR = borderSize
+	}
+	if b.Draw == "1" || strings.Contains(b.Draw, "B") {
+		borderOffsetB = borderSize
+	}
+	if b.Draw == "1" || strings.Contains(b.Draw, "L") {
+		borderOffsetL = borderSize
+	}
+
 	var posYChildMax float64
 	for _, fieldIfChild := range f.Fields {
-		posYAfterFields, err := addField(ctx, doc, posX, posY, 0, width, pageHeightUsable, pageMarginT, true, font, fieldIfChild)
+		posYAfterFields, err := addField(ctx, doc, posX+borderOffsetL, posY+borderOffsetT, 0, width-borderOffsetL-borderOffsetR, pageHeightUsable, pageMarginT, true, font, fieldIfChild)
 		if err != nil {
 			return 0, err
 		}
@@ -32,8 +54,8 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, width flo
 	}
 
 	// draw layout container from its start position up to its calculated height
-	doc.p.SetXY(posX, posY)
-	drawBox(doc, border, pgtype.Text{}, width, posYChildMax-posY)
+	doc.p.SetXY(posX+(borderOffsetL/2), posY+(borderOffsetT/2))
+	drawBox(doc, border, pgtype.Text{}, width-(borderOffsetL/2)-(borderOffsetR/2), posYChildMax-posY-(borderOffsetT/2)-(borderOffsetB/2))
 
 	return posYChildMax, nil
 }
