@@ -3,43 +3,25 @@ package doc_create
 import (
 	"context"
 	"r3/types"
-	"strings"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, width float64, border types.DocBorder,
-	font types.DocFont, posX, posY, pageHeightUsable, pageMarginT float64) (float64, error) {
+func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font types.DocFont, posX, posY, pageYUsable, pageMarginT float64) (float64, error) {
 
 	// grid fields can never be higher than the usable page height
-	if f.SizeY > pageHeightUsable {
+	if f.SizeY > pageYUsable {
 		return posY, nil
 	}
 
-	// border offsets
-	b := f.Border
-	borderSize := getBorderSize(f.Border)
-	var borderOffsetT float64 = 0
-	var borderOffsetR float64 = 0
-	var borderOffsetB float64 = 0
-	var borderOffsetL float64 = 0
-
-	if b.Draw == "1" || strings.Contains(b.Draw, "T") {
-		borderOffsetT = borderSize
-	}
-	if b.Draw == "1" || strings.Contains(b.Draw, "R") {
-		borderOffsetR = borderSize
-	}
-	if b.Draw == "1" || strings.Contains(b.Draw, "B") {
-		borderOffsetB = borderSize
-	}
-	if b.Draw == "1" || strings.Contains(b.Draw, "L") {
-		borderOffsetL = borderSize
-	}
+	_, bOffsetT, bOffsetR, bOffsetB, bOffsetL := getBorderSize(f.Border)
+	posXChildren := posX + bOffsetL
+	posYChildren := posY + bOffsetT
 
 	var posYChildMax float64
 	for _, fieldIfChild := range f.Fields {
-		posYAfterFields, err := addField(ctx, doc, posX+borderOffsetL, posY+borderOffsetT, 0, width-borderOffsetL-borderOffsetR, pageHeightUsable, pageMarginT, true, font, fieldIfChild)
+
+		posYAfterFields, err := addField(ctx, doc, posXChildren, posYChildren, 0, 0, pageYUsable, pageMarginT, true, font, fieldIfChild)
 		if err != nil {
 			return 0, err
 		}
@@ -54,8 +36,9 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, width flo
 	}
 
 	// draw layout container from its start position up to its calculated height
-	doc.p.SetXY(posX+(borderOffsetL/2), posY+(borderOffsetT/2))
-	drawBox(doc, border, pgtype.Text{}, width-(borderOffsetL/2)-(borderOffsetR/2), posYChildMax-posY-(borderOffsetT/2)-(borderOffsetB/2))
+	// border offsets are halved as border lines are drawn over lines (half going over, half under)
+	doc.p.SetXY(posX+(bOffsetL/2), posY+(bOffsetT/2))
+	drawBox(doc, f.Border, pgtype.Text{}, f.SizeX-((bOffsetL/2)+(bOffsetR/2)), posYChildMax-posY-((bOffsetT/2)+(bOffsetB/2)))
 
 	return posYChildMax, nil
 }

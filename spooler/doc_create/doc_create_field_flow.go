@@ -7,58 +7,56 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, width float64, border types.DocBorder,
-	font types.DocFont, posX, posY, pageHeightUsable, pageMarginT float64) (float64, error) {
+func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font types.DocFont, posX, posY, pageYUsable, pageMarginT float64) (float64, error) {
+
+	_, bOffsetT, bOffsetR, bOffsetB, bOffsetL := getBorderSize(f.Border)
 
 	pageNoStart := doc.p.PageNo()
-	posYAfterFields, err := addFieldFlowKids(ctx, doc, f.Fields, f.Padding, pageMarginT, f.Gap, posX, posY, width, pageHeightUsable, false, font)
-	if err != nil {
-		return 0, err
+	posXChildren := posX + bOffsetL + f.Padding.L
+	posYChildren := posY + bOffsetT + f.Padding.T
+	sizeXChildren := f.SizeX - bOffsetL - bOffsetR - f.Padding.R - f.Padding.L
+
+	var err error
+	var gapAdd float64 = 0.0
+	var posYAfterFields float64 = 0.0
+	for _, fieldIfChild := range f.Fields {
+		posYAfterFields, err = addField(ctx, doc, posXChildren, posYChildren, gapAdd, sizeXChildren, pageYUsable, pageMarginT, false, font, fieldIfChild)
+		if err != nil {
+			return 0, err
+		}
+		gapAdd = f.Gap
 	}
+	posYAfterFields += bOffsetB + f.Padding.B
 
 	// draw layout container if border is used
-	if border.Draw != "" {
+	// border offsets are halved as border lines are drawn over lines (half going over, half under)
+	if f.Border.Draw != "" {
+		bOffsetX := (bOffsetL / 2) + (bOffsetR / 2)
+		bOffsetY := (bOffsetT / 2) + (bOffsetB / 2)
+
 		pageNoEnd := doc.p.PageNo()
 		if pageNoStart == pageNoEnd {
-			doc.p.SetXY(posX, posY)
-			drawBox(doc, border, pgtype.Text{}, width, posYAfterFields-posY)
+			doc.p.SetXY(posX+(bOffsetL/2), posY+(bOffsetT/2))
+			drawBox(doc, f.Border, pgtype.Text{}, f.SizeX-bOffsetX, f.SizeY-bOffsetY)
 		} else {
 			for i := pageNoStart; i <= pageNoEnd; i++ {
 				doc.p.SetPage(i)
 
 				if i == pageNoStart {
 					// draw on initial page until page end
-					doc.p.SetXY(posX, posY)
-					drawBox(doc, border, pgtype.Text{}, width, pageHeightUsable+pageMarginT-posY)
+					doc.p.SetXY(posX+(bOffsetL/2), posY+(bOffsetT/2))
+					drawBox(doc, f.Border, pgtype.Text{}, f.SizeX-bOffsetX, pageYUsable+pageMarginT-posY-bOffsetY)
 				} else if i != pageNoEnd {
 					// draw entire inbetween page
-					doc.p.SetXY(posX, pageMarginT)
-					drawBox(doc, border, pgtype.Text{}, width, pageHeightUsable)
+					doc.p.SetXY(posX+(bOffsetL/2), pageMarginT+(bOffsetT/2))
+					drawBox(doc, f.Border, pgtype.Text{}, f.SizeX-bOffsetX, pageYUsable-bOffsetY)
 				} else {
 					// draw on last page until child end
-					doc.p.SetXY(posX, pageMarginT)
-					drawBox(doc, border, pgtype.Text{}, width, posYAfterFields-pageMarginT)
+					doc.p.SetXY(posX+(bOffsetL/2), pageMarginT+(bOffsetT/2))
+					drawBox(doc, f.Border, pgtype.Text{}, f.SizeX-bOffsetX, posYAfterFields-pageMarginT-bOffsetY)
 				}
 			}
 		}
 	}
 	return posYAfterFields, nil
-}
-
-func addFieldFlowKids(ctx context.Context, doc *doc, fields []any, padding types.DocMarginPadding,
-	pageMarginT, gap, posX, posY, width, pageHeightUsable float64, parentIsGrid bool, font types.DocFont) (float64, error) {
-
-	var err error
-	var gapAdd float64 = 0.0
-	posY += padding.T
-	width -= padding.R + padding.L
-
-	for _, fieldIfChild := range fields {
-		posY, err = addField(ctx, doc, posX+padding.L, posY, gapAdd, width, pageHeightUsable, pageMarginT, parentIsGrid, font, fieldIfChild)
-		if err != nil {
-			return 0, err
-		}
-		gapAdd = gap
-	}
-	return posY + padding.B, nil
 }

@@ -50,8 +50,8 @@ export default {
 				:elmFieldOptions
 				:entityIdMapRef
 				:fieldIdOptions
-				:parentSizeX="field.sizeX !== 0 ? field.sizeX : parentSizeX"
-				:parentSizeY="field.sizeY !== 0 ? field.sizeY : parentSizeY"
+				:parentSizeX="sizeX"
+				:parentSizeY="sizeY"
 				:gridParentSnap="isGrid ? field.sizeSnap : 0"
 				:joins
 				:key="f.id"
@@ -174,6 +174,7 @@ export default {
 	},
 	data() {
 		return {
+			borderSizeEmpty:0.2,        // default border size, if 0 is given but border is drawn
 			fieldIdDragged:null,        // ID of child field being dragged
 			fieldIndexDragPreview:null, // index of child field that something is being dragged over
 			fieldIndexDropped:null,     // index of child field that was just dropped (to block removal)
@@ -198,7 +199,7 @@ export default {
 		styleChildren:s => s.isGrid
 			? `background-size:${s.field.sizeSnap*s.zoom}mm ${s.field.sizeSnap*s.zoom}mm;`
 			: `gap:${s.field.gap*s.zoom}mm;
-				padding:${s.field.padding.t*s.zoom}mm ${s.field.padding.r*s.zoom}mm ${s.field.padding.l*s.zoom}mm ${s.field.padding.b*s.zoom}mm;`,
+				padding:${s.field.padding.t*s.zoom}mm ${s.field.padding.r*s.zoom}mm ${s.field.padding.b*s.zoom}mm ${s.field.padding.l*s.zoom}mm;`,
 		title:s => {
 			switch(s.field.content) {
 				case 'data': return `${s.field.attributeIndex} ${s.attribute.name}`; break;
@@ -218,6 +219,14 @@ export default {
 
 		// simple
 		attribute:    s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
+		bordersAll:   s => s.field.border.draw === '1',
+		borderSize:   s => s.field.border.draw === '' ? 0 : (s.field.border.size !== 0 ? s.field.border.size : s.borderSizeEmpty),
+		borderSizeT:  s => s.bordersAll || s.field.border.draw.includes('T') ? s.borderSize : 0,
+		borderSizeR:  s => s.bordersAll || s.field.border.draw.includes('R') ? s.borderSize : 0,
+		borderSizeB:  s => s.bordersAll || s.field.border.draw.includes('B') ? s.borderSize : 0,
+		borderSizeL:  s => s.bordersAll || s.field.border.draw.includes('L') ? s.borderSize : 0,
+		borderX:      s => s.borderSizeL+s.borderSizeR,
+		borderY:      s => s.borderSizeT+s.borderSizeB,
 		isChild:      s => s.isChildFlow || s.isChildGrid,
 		isData:       s => s.field.content === 'data',
 		isDragPreview:s => s.field.content === 'dragDropPreview',
@@ -225,6 +234,11 @@ export default {
 		isGrid:       s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
 		isParent:     s => s.isFlow || s.isGrid,
 		isOptionsShow:s => s.fieldIdOptions === s.field.id,
+		padding:      s => s.isFlow ? s.field.padding : { t:0, r:0, b:0, l:0 },
+		paddingX:     s => s.padding.l+s.padding.r,
+		paddingY:     s => s.padding.t+s.padding.b,
+		sizeX:        s => s.field.sizeX !== 0 ? s.field.sizeX-s.borderX-s.paddingX : s.parentSizeX-s.borderX-s.paddingX,
+		sizeY:        s => s.field.sizeY !== 0 ? s.field.sizeY-s.borderY-s.paddingY : s.parentSizeY-s.borderY-s.paddingY,
 		sizeXMax:     s => s.parentSizeX - s.field.posX,
 		sizeYMax:     s => s.parentSizeY - s.field.posY,
 		style:        s => `${s.styleHeight}${s.styleGrid}${s.getBorderCss(s.field.border)}`,
@@ -255,16 +269,15 @@ export default {
 				return '';
 
 			const color = b.color === null ? '000000' : b.color;
-			const size  = b.size  === 0    ? 0.2 * this.zoom : b.size * this.zoom; // 0.2mm is default size for border if 0
-			let s = `border:${size}mm solid #${color};`;
+			let s = `border:${this.borderSize*this.zoom}mm solid #${color};`;
 
-			if(b.draw === '1')
+			if(this.bordersAll)
 				return s;
 
-			if(!b.draw.includes('T')) s += 'border-top:none;';
-			if(!b.draw.includes('R')) s += 'border-right:none;';
-			if(!b.draw.includes('B')) s += 'border-bottom:none;';
-			if(!b.draw.includes('L')) s += 'border-left:none;';
+			if(this.borderSizeT === 0) s += 'border-top:none;';
+			if(this.borderSizeR === 0) s += 'border-right:none;';
+			if(this.borderSizeB === 0) s += 'border-bottom:none;';
+			if(this.borderSizeL === 0) s += 'border-left:none;';
 			return s;
 		},
 		getSizeClean(isChildGrid,posChild,sizeChild,sizeParent,sizeMin,sizeSnap) {

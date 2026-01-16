@@ -23,7 +23,7 @@ type cell struct {
 	width    float64
 }
 
-func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, width float64, fontParent types.DocFont) (float64, error) {
+func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParent types.DocFont) (float64, error) {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
@@ -75,7 +75,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, width flo
 	// calculate column width
 	// first remove all fixed column widths from available width
 	// then devide the rest to the auto width columns (width = 0)
-	widthForAuto := width
+	widthForAuto := f.SizeX
 	var columnCountAutoWidth int = 0
 	for _, column := range f.Columns {
 		if column.SizeX != 0 {
@@ -148,7 +148,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, width flo
 	posYStart, _ := getYWithNewPageIfNeeded(doc, heightHeader, pageMarginB)
 
 	// draw header
-	posYStart, err = addFieldListRow(doc, f.HeaderBorder, cellsHeader, f.Padding, f.HeaderColorFill, posXStart, posYStart, width, heightHeader, paddingX, paddingY)
+	posYStart, err = addFieldListRow(doc, f.HeaderBorder, cellsHeader, f.Padding, f.HeaderColorFill, posXStart, posYStart, f.SizeX, heightHeader, paddingX, paddingY)
 	if err != nil {
 		return 0, err
 	}
@@ -246,7 +246,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, width flo
 		var pageAdded bool
 		posYStart, pageAdded = getYWithNewPageIfNeeded(doc, heightRow+paddingY, pageMarginB)
 		if f.HeaderRepeat && pageAdded {
-			posYStart, err = addFieldListRow(doc, f.HeaderBorder, cellsHeader, f.Padding, f.HeaderColorFill, posXStart, posYStart, width, heightHeader, paddingX, paddingY)
+			posYStart, err = addFieldListRow(doc, f.HeaderBorder, cellsHeader, f.Padding, f.HeaderColorFill, posXStart, posYStart, f.SizeX, heightHeader, paddingX, paddingY)
 			if err != nil {
 				return 0, err
 			}
@@ -257,7 +257,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, width flo
 			colorFill = f.BodyColorFillEven
 		}
 
-		posYStart, err = addFieldListRow(doc, f.BodyBorder, cells, f.Padding, colorFill, posXStart, posYStart, width, heightRow, paddingX, paddingY)
+		posYStart, err = addFieldListRow(doc, f.BodyBorder, cells, f.Padding, colorFill, posXStart, posYStart, f.SizeX, heightRow, paddingX, paddingY)
 		if err != nil {
 			return 0, err
 		}
@@ -313,7 +313,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, width flo
 		}
 
 		posYStart, _ = getYWithNewPageIfNeeded(doc, heightRow+paddingY, pageMarginB)
-		posYStart, err = addFieldListRow(doc, f.FooterBorder, cells, f.Padding, f.FooterColorFill, posXStart, posYStart, width, heightRow, paddingX, paddingY)
+		posYStart, err = addFieldListRow(doc, f.FooterBorder, cells, f.Padding, f.FooterColorFill, posXStart, posYStart, f.SizeX, heightRow, paddingX, paddingY)
 		if err != nil {
 			return 0, err
 		}

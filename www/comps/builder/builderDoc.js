@@ -366,7 +366,6 @@ export default {
 		pageAdd() {
 			const p = this.getTemplateDocPage();
 			this.doc.pages.push(p);
-			//this.tabPageIdShow = p.id;
 		},
 		pageDel(id) {
 			const i = this.pageIdMapIndex[id];

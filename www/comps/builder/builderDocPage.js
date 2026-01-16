@@ -30,7 +30,7 @@ export default {
 	template:`<div class="builder-doc-page" v-if="page !== false" @dragover.prevent @drop.stop="drop" @mouseup.stop="$emit('setFieldIdOptions',null)">
 		<div class="builder-doc-page-outer" :style="stylePage">
 
-			<div class="builder-doc-page-margin-hor" v-if="margin.l > 0" :style="styleMarginT"></div>
+			<div class="builder-doc-page-margin-hor" v-if="margin.t > 0" :style="styleMarginT"></div>
 			<div class="builder-doc-page-margin-ver" v-if="margin.r > 0" :style="styleMarginR"></div>
 			<div class="builder-doc-page-margin-hor" v-if="margin.b > 0" :style="styleMarginB"></div>
 			<div class="builder-doc-page-margin-ver" v-if="margin.l > 0" :style="styleMarginL"></div>

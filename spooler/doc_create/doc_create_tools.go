@@ -188,12 +188,36 @@ func getFloat64FromInterface(valueIf any) (float64, error) {
 	return v.Float64, nil
 }
 
-func getBorderSize(b types.DocBorder) float64 {
+// returns border size and offsets (T,R,B,L)
+func getBorderSize(b types.DocBorder) (float64, float64, float64, float64, float64) {
+	if b.Draw == "" {
+		return 0, 0, 0, 0, 0
+	}
 	if b.Size == 0 {
 		// 0.2mm is the default border size if 0 is set
-		return 0.2
+		b.Size = 0.2
 	}
-	return b.Size
+	if b.Draw == "1" {
+		return b.Size, b.Size, b.Size, b.Size, b.Size
+	}
+
+	var offsetT float64 = 0
+	var offsetR float64 = 0
+	var offsetB float64 = 0
+	var offsetL float64 = 0
+	if strings.Contains(b.Draw, "T") {
+		offsetT = b.Size
+	}
+	if strings.Contains(b.Draw, "R") {
+		offsetR = b.Size
+	}
+	if strings.Contains(b.Draw, "B") {
+		offsetB = b.Size
+	}
+	if strings.Contains(b.Draw, "L") {
+		offsetL = b.Size
+	}
+	return b.Size, offsetT, offsetR, offsetB, offsetL
 }
 
 func setBorder(doc *doc, b types.DocBorder) {
@@ -210,7 +234,7 @@ func setBorder(doc *doc, b types.DocBorder) {
 		doc.p.SetDrawColor(0, 0, 0)
 	}
 
-	size := getBorderSize(b)
+	size, _, _, _, _ := getBorderSize(b)
 	doc.p.SetLineWidth(size)
 
 	// cell margin is set to offset content from border
