@@ -7,7 +7,7 @@ import (
 	"r3/types"
 )
 
-func addFieldData(doc *doc, f types.DocFieldData, font types.DocFont) (float64, error) {
+func addFieldData(doc *doc, f types.DocFieldData, font types.DocFont, posX, posY float64) (float64, error) {
 
 	v, exists := doc.data[f.AttributeIndex][f.AttributeId]
 	if !exists {
@@ -20,7 +20,7 @@ func addFieldData(doc *doc, f types.DocFieldData, font types.DocFont) (float64, 
 	if !exists {
 		return 0, handler.ErrSchemaUnknownAttribute(f.AttributeId)
 	}
-	if err := drawAttributeValue(doc, font, f.SizeX, f.SizeY, 0, atr, v); err != nil {
+	if err := drawAttributeValue(doc, font, posX, posY, f.SizeX, f.SizeY, 0, atr, v); err != nil {
 		return 0, err
 	}
 	return doc.p.GetY(), nil

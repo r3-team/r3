@@ -29,7 +29,7 @@ type textDrawing struct {
 }
 
 // draws attribute value as cell
-func drawAttributeValue(doc *doc, font types.DocFont, sizeX, sizeY float64, lineCount int, atr types.Attribute, valueIf any) error {
+func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY float64, lineCount int, atr types.Attribute, valueIf any) error {
 
 	if valueIf == nil {
 		return nil
@@ -64,8 +64,22 @@ func drawAttributeValue(doc *doc, font types.DocFont, sizeX, sizeY float64, line
 				return err
 			}
 		case "richtext":
+			// HTML writer only considers page margins for its content
+			// set page margins to reflect dimensions of the current field
+			pageMarginL, pageMarginT, pageMarginR, _ := doc.p.GetMargins()
+			pageSizeX, _ := doc.p.GetPageSize()
+			doc.p.SetMargins(posX, pageMarginT, pageSizeX-(posX+sizeX))
+
+			lineHeight := getLineHeight(font)
+
 			h := doc.p.HTMLBasicNew()
-			h.Write(getLineHeight(font), v)
+			h.Write(lineHeight, v)
+
+			// move to next line
+			doc.p.SetY(doc.p.GetY() + lineHeight)
+
+			// reset page margins
+			doc.p.SetMargins(pageMarginL, pageMarginT, pageMarginR)
 		}
 	case "numeric":
 		v, ok := valueIf.(pgtype.Numeric)
