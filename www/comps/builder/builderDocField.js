@@ -141,6 +141,8 @@ export default {
 						v-model:color="field.border.color"
 						v-model:draw="field.border.draw"
 						v-model:size="field.border.size"
+						v-model:styleCap="field.border.styleCap"
+						v-model:styleJoin="field.border.styleJoin"
 						:allowCell="false"
 						:readonly
 					/>

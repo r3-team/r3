@@ -798,7 +798,23 @@
 			"showRowCount": "Show result count instead"
 		},
 		"doc": {
-			"borderCell": "Cell border",
+			"border": {
+				"cap": "Cap",
+				"cell": "Cell border",
+				"join": "Join",
+				"style": {
+					"cap": {
+						"butt": "Butt",
+						"round": "Round",
+						"square": "Square"
+					},
+					"join": {
+						"bevel": "Bevel",
+						"miter": "Miter",
+						"round": "Round"
+					}
+				}
+			},
 			"button":{
 				"addPage": "Add page",
 				"selectParent": "Select field above"
@@ -2483,6 +2499,7 @@
 		"sqlPreview": "SQL preview",
 		"standard": "Standard",
 		"status": "Status",
+		"styles": "Styles",
 		"systemModes": "System modes",
 		"textSearch": "Text search",
 		"threeDots": "...",

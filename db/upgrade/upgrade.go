@@ -119,6 +119,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TYPE app.page_size         AS ENUM('A1','A2','A3','A4','A5','A6','A7','Letter','Legal');
 			CREATE TYPE app.doc_place_context AS ENUM('default','body','footer','header');
 			CREATE TYPE app.doc_field_content AS ENUM('data','flow','flowBody','grid','gridFooter','gridHeader','list','text');
+			CREATE TYPE app.border_style_cap  AS ENUM('butt','round','square');
+			CREATE TYPE app.border_style_join AS ENUM('bevel','miter','round');
 			CREATE TYPE app.doc_set_target    AS ENUM(
 				'author','language','title',
 				'border.color','border.draw','border.size',
@@ -334,6 +336,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				color character(6),
 				draw character varying(4) NOT NULL,
 				size real NOT NULL,
+				style_cap app.border_style_cap NOT NULL,
+				style_join app.border_style_join NOT NULL,
 				CONSTRAINT doc_border_pkey PRIMARY KEY (doc_field_id, context),
 				CONSTRAINT doc_border_doc_field_id_fkey FOREIGN KEY (doc_field_id)
 					REFERENCES app.doc_field (id) MATCH SIMPLE

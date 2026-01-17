@@ -234,6 +234,9 @@ func setBorder(doc *doc, b types.DocBorder) {
 		doc.p.SetDrawColor(0, 0, 0)
 	}
 
+	doc.p.SetLineCapStyle(b.StyleCap)
+	doc.p.SetLineJoinStyle(b.StyleJoin)
+
 	size, _, _, _, _ := getBorderSize(b)
 	doc.p.SetLineWidth(size)
 

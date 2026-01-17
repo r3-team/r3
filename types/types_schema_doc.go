@@ -22,10 +22,12 @@ type Doc struct {
 	Language string     `json:"language"` // language code such as en_us
 }
 type DocBorder struct {
-	Cell  bool        `json:"cell"`  // also draw cell borders - only relevant in tables
-	Color pgtype.Text `json:"color"` // RGB HEX value, like "000000"
-	Draw  string      `json:"draw"`  // "" (none), "1" (all), "L", "T", "R", "B" - can be comined like "LT" or "RB"
-	Size  float64     `json:"size"`  // border thickness
+	Cell      bool        `json:"cell"`      // also draw cell borders - only relevant in tables
+	Color     pgtype.Text `json:"color"`     // RGB HEX value, like "000000"
+	Draw      string      `json:"draw"`      // "" (none), "1" (all), "L", "T", "R", "B" - can be comined like "LT" or "RB"
+	Size      float64     `json:"size"`      // border thickness
+	StyleCap  string      `json:"styleCap"`  // "round", "square", "square"
+	StyleJoin string      `json:"styleJoin"` // "bevel", "miter", "round"
 }
 type DocColumn struct {
 	Id             uuid.UUID   `json:"id"`

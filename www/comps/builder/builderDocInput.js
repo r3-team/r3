@@ -38,40 +38,64 @@ const MyBuilderDocBorder = {
 			</div>
 		</td>
 	</tr>
-	<tr>
-		<td>{{ capGen.size }}</td>
-		<td>
-			<div class="row gap centered">
-				<my-input-range   class="short" @update:modelValue="$emit('update:size',$event)" :modelValue="size" :readonly :min="0" :max="20" :step="0.1" />
-				<my-input-decimal class="short" @update:modelValue="$emit('update:size',$event)" :modelValue="size" :allowNull="false" :max="20" :length="4" :lengthFract="2" />
-				<span>mm</span>
-			</div>
-		</td>
-	</tr>
-	<tr>
-		<td>{{ capGen.color }}</td>
-		<td><my-input-color-wrap @update:modelValue="$emit('update:color',$event)" :allowNull="true" :modelValue="color" :readonly /></td>
-	</tr>
-	<tr v-if="allowCell">
-		<td>{{ capApp.borderCell }}</td>
-		<td><my-bool @update:modelValue="$emit('update:cell',$event)" :modelValue="cell" :readonly /></td>
-	</tr>`,
+	<template v-if="drawAny">
+		<tr>
+			<td>{{ capGen.size }}</td>
+			<td>
+				<div class="row gap centered">
+					<my-input-range   class="short" @update:modelValue="$emit('update:size',$event)" :modelValue="size" :readonly :min="0" :max="20" :step="0.1" />
+					<my-input-decimal class="short" @update:modelValue="$emit('update:size',$event)" :modelValue="size" :allowNull="false" :max="20" :length="4" :lengthFract="2" />
+					<span>mm</span>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>{{ capGen.styles }}</td>
+			<td>
+				<div class="row gap centered">
+					<span>{{ capApp.cap }}</span>
+					<select class="dynamic" @input="$emit('update:styleCap',$event.target.value)" :value="styleCap">
+						<option value="butt"  >{{ capApp.style.cap.butt }}</option>
+						<option value="square">{{ capApp.style.cap.square }}</option>
+						<option value="round" >{{ capApp.style.cap.round }}</option>
+					</select>
+					<span>{{ capApp.join }}</span>
+					<select class="dynamic"@input="$emit('update:styleJoin',$event.target.value)" :value="styleJoin">
+						<option value="miter">{{ capApp.style.join.miter }}</option>
+						<option value="bevel">{{ capApp.style.join.bevel }}</option>
+						<option value="round">{{ capApp.style.join.round }}</option>
+					</select>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>{{ capGen.color }}</td>
+			<td><my-input-color-wrap @update:modelValue="$emit('update:color',$event)" :allowNull="true" :modelValue="color" :readonly /></td>
+		</tr>
+		<tr v-if="allowCell">
+			<td>{{ capApp.cell }}</td>
+			<td><my-bool @update:modelValue="$emit('update:cell',$event)" :modelValue="cell" :readonly /></td>
+		</tr>
+	</template>`,
 	props:{
 		allowCell:{ type:Boolean, required:true },
 		readonly: { type:Boolean, required:true },
 
 		// values
-		cell: { type:Boolean,       required:true },
-		color:{ type:[String,null], required:true },
-		draw: { type:String,        required:true },
-		size: { type:Number,        required:true }
+		cell:     { type:Boolean,       required:true },
+		color:    { type:[String,null], required:true },
+		draw:     { type:String,        required:true },
+		size:     { type:Number,        required:true },
+		styleCap: { type:String,        required:true },
+		styleJoin:{ type:String,        required:true }
 	},
-	emits:['update:cell','update:color','update:draw','update:size'],
+	emits:['update:cell','update:color','update:draw','update:size','update:styleCap','update:styleJoin'],
 	computed:{
-		drawAll:s => s.draw.includes('1'),
+		drawAll:s => s.draw === '1',
+		drawAny:s => s.draw !== '',
 
 		// stores
-		capApp:s => s.$store.getters.captions.builder.doc,
+		capApp:s => s.$store.getters.captions.builder.doc.border,
 		capGen:s => s.$store.getters.captions.generic
 	},
 	methods:{

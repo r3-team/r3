@@ -798,7 +798,23 @@
 			"showRowCount": "Stattdessen Ergebnisanzahl zeigen"
 		},
 		"doc": {
-			"borderCell": "Zellrahmen",
+			"border": {
+				"cap": "Abschluss",
+				"cell": "Zellrahmen",
+				"join": "Verbindung",
+				"style": {
+					"cap": {
+						"butt": "Bündig",
+						"round": "Abgerundet",
+						"square": "Quadratisch"
+					},
+					"join": {
+						"bevel": "Abgeflacht",
+						"miter": "Spitz",
+						"round": "Abgerundet"
+					}
+				}
+			},
 			"button": {
 				"addPage": "Seite hinzufügen",
 				"selectParent": "Feld darüber auswählen"
@@ -2483,6 +2499,7 @@
 		"sqlPreview": "SQL-Vorschau",
 		"standard": "Standard",
 		"status": "Status",
+		"styles": "Style",
 		"systemModes": "Betriebsarten",
 		"textSearch": "Textsuche",
 		"threeDots": "...",

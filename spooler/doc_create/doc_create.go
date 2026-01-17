@@ -172,8 +172,6 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 	}
 
 	doc.p.SetCellMargin(0) // kills the default margin within text cells
-	doc.p.SetLineCapStyle("round")
-	doc.p.SetLineJoinStyle("round")
 	doc.p.AliasNbPages("{PAGE_END}")
 
 	// generate page ID map for direct reference
