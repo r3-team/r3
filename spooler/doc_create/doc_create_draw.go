@@ -225,35 +225,50 @@ func drawImageBase64(doc *doc, imgBase64 string, w, h float64) error {
 // draws text value as cell
 // if line count is set to 0 it will be calculated
 // if height is set to 0, font line height will be used
-func drawCellText(doc *doc, b types.DocBorder, font types.DocFont, w, h float64, lineCount int, s string) {
+func drawCellText(doc *doc, b types.DocBorder, font types.DocFont, sizeX, sizeY float64, lineCount int, s string) {
+
+	// since content can go over multiple pages, we rely on cell margins
+	// this means that we do not provide offset inside the bordered box (cell margins do this)
+	// we still need to move & shrink the cell as borders are not drawn inside it
+	_, bSizeT, bSizeR, bSizeB, bSizeL := getBorderSize(b)
+	bSizeX := bSizeL + bSizeR
+	bSizeY := bSizeT + bSizeB
+	sizeX -= bSizeX / 2
+	sizeY -= bSizeY / 2
+
+	posX, posY := doc.p.GetXY()
+	posX += bSizeL / 2
+	posY += bSizeT / 2
+	doc.p.SetXY(posX, posY)
+
 	setBorder(doc, b)
 
-	if h == 0 {
-		h = getLineHeight(font)
+	if sizeY == 0 {
+		sizeY = getLineHeight(font)
 	}
 
 	if lineCount == 0 {
-		lineCount = len(doc.p.SplitText(s, w))
+		lineCount = len(doc.p.SplitText(s, sizeX))
 	}
 
 	if lineCount == 1 {
-		doc.p.CellFormat(w, h, s, b.Draw, 2, font.Align, false, 0, "")
+		doc.p.CellFormat(sizeX, sizeY, s, b.Draw, 2, font.Align, false, 0, "")
 		return
 	}
 
-	hAllLines := getLineHeight(font) * float64(lineCount)
-	if h > hAllLines {
+	sizeYAllLines := getLineHeight(font) * float64(lineCount)
+	if sizeY > sizeYAllLines {
 		// target height is larger than what lines require combined
 		if strings.Contains(font.Align, "T") {
 			// if align is set to T (top), nothing to do
 		} else if strings.Contains(font.Align, "B") {
 			// if align is set to B (bottom), adjust start position for content to reach bottom
-			doc.p.SetXY(doc.p.GetX(), doc.p.GetY()+h-hAllLines)
+			doc.p.SetXY(doc.p.GetX(), doc.p.GetY()+sizeY-sizeYAllLines)
 		} else {
 			// if align is set to M (middle) or has no vertical option (TBM), adjust start position for content to be in center
 			// FPDF defaults to M (middle) if nothing is set for vertical alignment
-			doc.p.SetXY(doc.p.GetX(), doc.p.GetY()+((h-hAllLines)/2))
+			doc.p.SetXY(doc.p.GetX(), doc.p.GetY()+((sizeY-sizeYAllLines)/2))
 		}
 	}
-	doc.p.MultiCell(w, font.Size*font.LineFactor*0.5, s, b.Draw, font.Align, false)
+	doc.p.MultiCell(sizeX, font.Size*font.LineFactor*0.5, s, b.Draw, font.Align, false)
 }
