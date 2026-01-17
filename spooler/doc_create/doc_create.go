@@ -200,8 +200,8 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 		doc.p.SetAutoPageBreak(true, page.Margin.B)
 
 		pageX, pageY := doc.p.GetPageSize()
-		pageXUsable := pageX - page.Margin.L - page.Margin.R
-		pageYUsable := pageY - page.Margin.T - page.Margin.B
+		pageSizeXUsable := pageX - page.Margin.L - page.Margin.R
+		pageSizeYUsable := pageY - page.Margin.T - page.Margin.B
 
 		// set header for page
 		doc.p.SetHeaderFuncMode(func() {
@@ -229,9 +229,9 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 		})
 
 		// a page is always a single flow field on root level
-		page.FieldFlow.SizeX = pageXUsable
-		page.FieldFlow.SizeY = pageYUsable
-		if _, err := addFieldFlow(ctx, doc, page.FieldFlow, font, page.Margin.L, page.Margin.T, pageYUsable, page.Margin.T); err != nil {
+		page.FieldFlow.SizeX = pageSizeXUsable
+		page.FieldFlow.SizeY = pageSizeYUsable
+		if _, err := addFieldFlow(ctx, doc, page.FieldFlow, font, page.Margin.L, page.Margin.T, pageSizeYUsable, page.Margin.T); err != nil {
 			return err
 		}
 	}

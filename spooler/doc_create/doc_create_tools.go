@@ -247,7 +247,7 @@ func setBorder(doc *doc, b types.DocBorder) {
 func setFont(doc *doc, f types.DocFont) {
 
 	// font key is also used as file name
-	// Tinos_.ttf, Tinos_B.ttf, Tinos_BI.ttf, Tinos_I.ttf
+	// example: Tinos_.ttf, Tinos_B.ttf, Tinos_BI.ttf, Tinos_I.ttf
 	// U (underline) & S (strike-out) are valid styles but not part of the font
 	fontKeyStyle := f.Style.String
 	fontKeyStyle = strings.ReplaceAll(fontKeyStyle, "U", "")

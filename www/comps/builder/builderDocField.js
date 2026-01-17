@@ -2,6 +2,7 @@ import {getTemplateDocField} from '../shared/builderTemplate.js';
 import MyInputDecimal        from '../inputDecimal.js';
 import MyInputRange          from '../inputRange.js';
 import MyBuilderDocSets      from './builderDocSets.js';
+import {copyValueDialog}     from '../shared/generic.js';
 import {
 	MyBuilderDocBorder,
 	MyBuilderDocMarginPadding
@@ -68,7 +69,10 @@ export default {
 				<tbody>
 					<tr>
 						<td colspan="2">
-							<my-button image="upward.png" @trigger="$emit('setFieldIdOptionsParent')" :active="isChild" :caption="capApp.button.selectParent" />
+							<div class="row centered space-between">
+								<my-button image="upward.png"   @trigger="$emit('setFieldIdOptionsParent')" :active="isChild" :caption="capApp.button.selectParent" />
+								<my-button image="visible1.png" @trigger="copyValueDialog(field.content,field.id,field.id)" :caption="capGen.id" />
+							</div>
 						</td>
 					</tr>
 					<tr>
@@ -254,6 +258,7 @@ export default {
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		getTemplateDocField,
 
 		// presentation

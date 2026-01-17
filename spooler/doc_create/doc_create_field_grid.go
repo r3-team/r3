@@ -7,19 +7,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font types.DocFont, posX, posY, pageYUsable, pageMarginT float64) (float64, error) {
+func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font types.DocFont, posX, posY, pageSizeYUsable, pageMarginT float64) (float64, error) {
 
-	// get border sizes
+	// border sizes
 	_, bSizeT, bSizeR, bSizeB, bSizeL := getBorderSize(f.Border)
 	bSizeX := bSizeL + bSizeR
 	bSizeY := bSizeT + bSizeB
 
 	// grid fields can never be higher than the usable page height
-	if f.SizeY > pageYUsable {
+	if f.SizeY > pageSizeYUsable {
 		return posY, nil
 	}
 
-	// field size is defined space including borders, borders reduce available space for children
+	// field size is defined space including borders
 	// place children inside
 	posXChildren := posX + bSizeL
 	posYChildren := posY + bSizeT
@@ -27,7 +27,7 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font type
 	var posYChildMax float64
 	for _, fieldIfChild := range f.Fields {
 
-		posYAfterFields, err := addField(ctx, doc, posXChildren, posYChildren, 0, 0, pageYUsable, pageMarginT, true, font, fieldIfChild)
+		posYAfterFields, err := addField(ctx, doc, posXChildren, posYChildren, 0, 0, pageSizeYUsable, pageMarginT, true, font, fieldIfChild)
 		if err != nil {
 			return 0, err
 		}
@@ -35,7 +35,7 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font type
 			posYChildMax = posYAfterFields
 		}
 	}
-	childrenExceedParent := posYChildMax > f.SizeY-bSizeB
+	childrenExceedParent := posYChildMax > posY+f.SizeY-bSizeB
 
 	if f.Shrink && !childrenExceedParent {
 		// can shrink and there is place free, stay where we are and add space for bottom border
@@ -46,7 +46,7 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font type
 	}
 
 	// draw layout container from its start position up to its calculated height
-	// border offsets are halved as border lines are drawn over lines (half going over, half under)
+	// border sizes are halved as border lines are drawn over lines (half going over, half under)
 	doc.p.SetXY(posX+(bSizeL/2), posY+(bSizeT/2))
 	drawBox(doc, f.Border, pgtype.Text{}, f.SizeX-(bSizeX/2), posYChildMax-posY-(bSizeY/2))
 

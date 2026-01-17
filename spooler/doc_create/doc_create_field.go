@@ -8,7 +8,7 @@ import (
 	"r3/types"
 )
 
-func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY, parentWidth, pageYUsable, pageMarginT float64,
+func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY, parentSizeX, pageSizeYUsable, pageMarginT float64,
 	parentIsGrid bool, fontParent types.DocFont, fieldIf any) (float64, error) {
 
 	fieldJson, err := json.Marshal(fieldIf)
@@ -36,12 +36,11 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 		posX += f.PosX
 		posY += f.PosY
 	} else {
-		f.SizeX = parentWidth
+		f.SizeX = parentSizeX
 	}
 
 	// grid fields have defined height, if they do not fit on current page, add to next one
-	// only relevant on root level where grids are allowed
-	if f.Content == "grid" && f.SizeY+parentPosY > pageYUsable+pageMarginT {
+	if f.Content == "grid" && f.SizeY+parentPosY > pageSizeYUsable+pageMarginT {
 		doc.p.AddPage()
 		doc.p.SetHomeXY()
 		parentPosY = doc.p.GetY()
@@ -52,8 +51,8 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 	doc.p.SetDrawColor(0, 0, 0)
 	doc.p.SetFillColor(0, 0, 0)
 
-	log.Info(log.ContextDoc, fmt.Sprintf("drawing field '%s' on page %d at %.0fx %.0fy (size: %0.fx%0.fmm)",
-		f.Content, doc.p.PageNo(), posX, posY, f.SizeX, f.SizeY))
+	log.Info(log.ContextDoc, fmt.Sprintf("drawing field '%s' (%s) on page %d at %.0fx %.0fy (size: %0.fx%0.fmm)",
+		f.Id, f.Content, doc.p.PageNo(), posX, posY, f.SizeX, f.SizeY))
 
 	// apply overwrites
 	sets := getSetDataResolved(doc, f.Sets)
@@ -80,7 +79,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 		if err := json.Unmarshal(fieldJson, &ff); err != nil {
 			return 0, err
 		}
-		return addFieldFlow(ctx, doc, ff, font, posX, posY, pageYUsable, pageMarginT)
+		return addFieldFlow(ctx, doc, ff, font, posX, posY, pageSizeYUsable, pageMarginT)
 	case "grid":
 		var fg types.DocFieldGrid
 		if err := json.Unmarshal(fieldJson, &fg); err != nil {
@@ -89,7 +88,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 		fg.Border = f.Border
 		fg.SizeX = f.SizeX
 		fg.SizeY = f.SizeY
-		return addFieldGrid(ctx, doc, fg, font, posX, posY, pageYUsable, pageMarginT)
+		return addFieldGrid(ctx, doc, fg, font, posX, posY, pageSizeYUsable, pageMarginT)
 	case "list":
 		var fl types.DocFieldList
 		if err := json.Unmarshal(fieldJson, &fl); err != nil {
