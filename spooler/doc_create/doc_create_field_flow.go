@@ -3,6 +3,7 @@ package doc_create
 import (
 	"context"
 	"r3/types"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -56,19 +57,40 @@ func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font type
 		} else {
 			for i := pageNoStart; i <= pageNoEnd; i++ {
 				doc.p.SetPage(i)
+				b := f.Border
 
 				if i == pageNoStart {
-					// draw on initial page until page end
+					// draw on initial page until page end, remove bottom border
+					if b.Draw == "1" {
+						b.Draw = "TRL"
+					} else if strings.Contains(b.Draw, "B") {
+						b.Draw = strings.ReplaceAll(b.Draw, "B", "")
+					}
 					doc.p.SetXY(posX+(bSizeL/2), posY+(bSizeT/2))
-					drawBox(doc, f.Border, pgtype.Text{}, f.SizeX-(bSizeX/2), pageSizeYUsable+pageMarginT-posY-(bSizeY/2))
+					drawBox(doc, b, pgtype.Text{}, f.SizeX-(bSizeX/2), pageSizeYUsable+pageMarginT-posY-(bSizeY/2))
 				} else if i != pageNoEnd {
-					// draw entire inbetween page
+					// draw entire inbetween page, only allow left/ride borders
+					if b.Draw == "1" {
+						b.Draw = "LR"
+					} else {
+						if strings.Contains(b.Draw, "T") {
+							b.Draw = strings.ReplaceAll(b.Draw, "T", "")
+						}
+						if strings.Contains(b.Draw, "B") {
+							b.Draw = strings.ReplaceAll(b.Draw, "B", "")
+						}
+					}
 					doc.p.SetXY(posX+(bSizeL/2), pageMarginT+(bSizeT/2))
-					drawBox(doc, f.Border, pgtype.Text{}, f.SizeX-(bSizeX/2), pageSizeYUsable-(bSizeY/2))
+					drawBox(doc, b, pgtype.Text{}, f.SizeX-(bSizeX/2), pageSizeYUsable-(bSizeY/2))
 				} else {
-					// draw on last page until child end
+					// draw on last page until child end, remove top border
+					if b.Draw == "1" {
+						b.Draw = "RBL"
+					} else if strings.Contains(b.Draw, "T") {
+						b.Draw = strings.ReplaceAll(b.Draw, "T", "")
+					}
 					doc.p.SetXY(posX+(bSizeL/2), pageMarginT+(bSizeT/2))
-					drawBox(doc, f.Border, pgtype.Text{}, f.SizeX-(bSizeX/2), posYChildren-pageMarginT-(bSizeY/2))
+					drawBox(doc, b, pgtype.Text{}, f.SizeX-(bSizeX/2), posYChildren-pageMarginT-(bSizeY/2))
 				}
 			}
 		}
