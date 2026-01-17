@@ -57,35 +57,33 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 	// apply overwrites
 	sets := getSetDataResolved(doc, f.Sets)
 	font := applyToFont(sets, fontParent)
-	f = applyToField(sets, f)
 	setFont(doc, font)
 
 	// draw field content
 	switch f.Content {
 	case "data":
 		var fd types.DocFieldData
-		fd.Border = f.Border
-		fd.SizeX = f.SizeX
-		fd.SizeY = f.SizeY
 		if err := json.Unmarshal(fieldJson, &fd); err != nil {
 			return 0, err
 		}
+		fd.SizeX = f.SizeX
+		fd.SizeY = f.SizeY
 		return addFieldData(doc, fd, font)
 	case "flow":
 		var ff types.DocFieldFlow
-		ff.Border = f.Border
-		ff.SizeX = f.SizeX
-		ff.SizeY = f.SizeY
 		if err := json.Unmarshal(fieldJson, &ff); err != nil {
 			return 0, err
 		}
+		ff = applyToFieldFlow(sets, ff)
+		ff.SizeX = f.SizeX
+		ff.SizeY = f.SizeY
 		return addFieldFlow(ctx, doc, ff, font, posX, posY, pageSizeYUsable, pageMarginT)
 	case "grid":
 		var fg types.DocFieldGrid
 		if err := json.Unmarshal(fieldJson, &fg); err != nil {
 			return 0, err
 		}
-		fg.Border = f.Border
+		fg = applyToFieldGrid(sets, fg)
 		fg.SizeX = f.SizeX
 		fg.SizeY = f.SizeY
 		return addFieldGrid(ctx, doc, fg, font, posX, posY, pageSizeYUsable, pageMarginT)
@@ -94,7 +92,6 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 		if err := json.Unmarshal(fieldJson, &fl); err != nil {
 			return 0, err
 		}
-		fl.Border = f.Border
 		fl.SizeX = f.SizeX
 		fl.SizeY = f.SizeY
 		return addFieldList(ctx, doc, fl, font)
@@ -103,7 +100,6 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 		if err := json.Unmarshal(fieldJson, &ft); err != nil {
 			return 0, err
 		}
-		ft.Border = f.Border
 		ft.SizeX = f.SizeX
 		ft.SizeY = f.SizeY
 		return addFieldText(doc, ft, font)

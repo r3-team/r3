@@ -27,7 +27,27 @@ func applyToDocument(set []types.DocSet, d types.Doc) types.Doc {
 	return d
 }
 
-func applyToField(set []types.DocSet, f types.DocField) types.DocField {
+func applyToFieldGrid(set []types.DocSet, f types.DocFieldGrid) types.DocFieldGrid {
+	for _, o := range set {
+		switch v := o.Value.(type) {
+		case float64:
+			switch o.Target {
+			case "border.size":
+				f.Border.Size = v
+			}
+		case string:
+			switch o.Target {
+			case "border.color":
+				f.Border.Color = pgtype.Text{String: v, Valid: true}
+			case "border.draw":
+				f.Border.Draw = v
+			}
+		}
+	}
+	return f
+}
+
+func applyToFieldFlow(set []types.DocSet, f types.DocFieldFlow) types.DocFieldFlow {
 	for _, o := range set {
 		switch v := o.Value.(type) {
 		case float64:

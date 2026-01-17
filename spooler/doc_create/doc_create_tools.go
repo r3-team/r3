@@ -222,11 +222,6 @@ func getBorderSize(b types.DocBorder) (float64, float64, float64, float64, float
 
 func setBorder(doc *doc, b types.DocBorder) {
 
-	if b.Draw == "" {
-		doc.p.SetCellMargin(0)
-		return
-	}
-
 	if b.Color.Valid {
 		rgb := tools.HexToInt(b.Color.String)
 		doc.p.SetDrawColor(rgb[0], rgb[1], rgb[2])
@@ -239,9 +234,6 @@ func setBorder(doc *doc, b types.DocBorder) {
 
 	size, _, _, _, _ := getBorderSize(b)
 	doc.p.SetLineWidth(size)
-
-	// cell margin is set to offset content from border
-	doc.p.SetCellMargin(size / 2)
 }
 
 func setFont(doc *doc, f types.DocFont) {

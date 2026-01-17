@@ -58,7 +58,6 @@ type DocField struct {
 	SizeY   float64   `json:"sizeY"`   // height in mm (0 = min. content height)
 	Sets    []DocSet  `json:"sets"`
 	State   bool      `json:"state"`
-	Border  DocBorder `json:"border"`
 }
 type DocFieldData struct {
 	Id      uuid.UUID `json:"id"`
@@ -69,7 +68,6 @@ type DocFieldData struct {
 	SizeY   float64   `json:"sizeY"`
 	Sets    []DocSet  `json:"sets"`
 	State   bool      `json:"state"`
-	Border  DocBorder `json:"border"`
 
 	// data field
 	AttributeId    uuid.UUID `json:"attributeId"`
@@ -84,9 +82,9 @@ type DocFieldFlow struct {
 	SizeY   float64   `json:"sizeY"`
 	Sets    []DocSet  `json:"sets"`
 	State   bool      `json:"state"`
-	Border  DocBorder `json:"border"`
 
 	// flow field
+	Border  DocBorder        `json:"border"`
 	Fields  []any            `json:"fields"`
 	Gap     float64          `json:"gap"` // space between flow children
 	Padding DocMarginPadding `json:"padding"`
@@ -100,12 +98,12 @@ type DocFieldGrid struct {
 	SizeY   float64   `json:"sizeY"`
 	Sets    []DocSet  `json:"sets"`
 	State   bool      `json:"state"`
-	Border  DocBorder `json:"border"`
 
 	// grid field
-	Fields   []any   `json:"fields"`
-	Shrink   bool    `json:"shrink"`   // shrink if content does not fill height
-	SizeSnap float64 `json:"sizeSnap"` // grid snap size
+	Border   DocBorder `json:"border"`
+	Fields   []any     `json:"fields"`
+	Shrink   bool      `json:"shrink"`   // shrink if content does not fill height
+	SizeSnap float64   `json:"sizeSnap"` // grid snap size
 }
 type DocFieldList struct {
 	Id      uuid.UUID `json:"id"`
@@ -116,7 +114,6 @@ type DocFieldList struct {
 	SizeY   float64   `json:"sizeY"`
 	Sets    []DocSet  `json:"sets"`
 	State   bool      `json:"state"`
-	Border  DocBorder `json:"border"`
 
 	// list field
 	HeaderBorder      DocBorder   `json:"headerBorder"`
@@ -141,7 +138,6 @@ type DocFieldText struct {
 	SizeY   float64   `json:"sizeY"`
 	Sets    []DocSet  `json:"sets"`
 	State   bool      `json:"state"`
-	Border  DocBorder `json:"border"`
 
 	// text field
 	Value string `json:"value"`

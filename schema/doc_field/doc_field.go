@@ -201,10 +201,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if err != nil {
 				return nil, err
 			}
-			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextDefault)
-			if err != nil {
-				return nil, err
-			}
 			fieldsIf[i] = f
 
 		case "flow", "flowBody":
@@ -243,7 +239,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			if err != nil {
 				return nil, err
 			}
-
 			fieldsIf[i] = f
 
 		case "list":
@@ -283,10 +278,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 				return nil, fmt.Errorf("failed to parse field")
 			}
 			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
-			if err != nil {
-				return nil, err
-			}
-			f.Border, err = doc_border.Get_tx(ctx, tx, f.Id, schema.DbDocContextDefault)
 			if err != nil {
 				return nil, err
 			}
@@ -420,9 +411,6 @@ func setGeneric_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId
 	`, f.Id, docPageId, parentId, f.Content, f.PosX, f.PosY, f.SizeX, f.SizeY, f.State, position); err != nil {
 		return err
 	}
-	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border); err != nil {
-		return err
-	}
 	return doc_set.Set_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault, f.Sets)
 }
 
@@ -446,6 +434,9 @@ func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.Doc
 	`, f.Id, f.Gap, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}); err != nil {
 		return err
 	}
+	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border); err != nil {
+		return err
+	}
 	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: f.Id, Valid: true}, f.Fields, fieldIds)
 }
 
@@ -456,6 +447,9 @@ func setGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.Doc
 		ON CONFLICT (doc_field_id)
 		DO UPDATE SET shrink = $2, size_snap = $3
 	`, f.Id, f.Shrink, f.SizeSnap); err != nil {
+		return err
+	}
+	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border); err != nil {
 		return err
 	}
 	return Set_tx(ctx, tx, docPageId, pgtype.UUID{Bytes: f.Id, Valid: true}, f.Fields, fieldIds)

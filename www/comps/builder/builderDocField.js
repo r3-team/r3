@@ -141,6 +141,7 @@ export default {
 					</template>
 					
 					<my-builder-doc-border
+						v-if="isGrid || isFlow"
 						v-model:cell="field.border.cell"
 						v-model:color="field.border.color"
 						v-model:draw="field.border.draw"
@@ -225,12 +226,12 @@ export default {
 
 		// simple
 		attribute:    s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
-		bordersAll:   s => s.field.border.draw === '1',
-		borderSize:   s => s.field.border.draw === '' ? 0 : (s.field.border.size !== 0 ? s.field.border.size : s.borderSizeEmpty),
-		borderSizeT:  s => s.bordersAll || s.field.border.draw.includes('T') ? s.borderSize : 0,
-		borderSizeR:  s => s.bordersAll || s.field.border.draw.includes('R') ? s.borderSize : 0,
-		borderSizeB:  s => s.bordersAll || s.field.border.draw.includes('B') ? s.borderSize : 0,
-		borderSizeL:  s => s.bordersAll || s.field.border.draw.includes('L') ? s.borderSize : 0,
+		bordersAll:   s => s.isWithBorder && s.field.border.draw === '1',
+		borderSize:   s => s.isWithBorder && s.field.border.draw !== '' ? (s.field.border.size !== 0 ? s.field.border.size : s.borderSizeEmpty) : 0,
+		borderSizeT:  s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('T')) ? s.borderSize : 0,
+		borderSizeR:  s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('R')) ? s.borderSize : 0,
+		borderSizeB:  s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('B')) ? s.borderSize : 0,
+		borderSizeL:  s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('L')) ? s.borderSize : 0,
 		borderX:      s => s.borderSizeL+s.borderSizeR,
 		borderY:      s => s.borderSizeT+s.borderSizeB,
 		isChild:      s => s.isChildFlow || s.isChildGrid,
@@ -240,6 +241,7 @@ export default {
 		isGrid:       s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
 		isParent:     s => s.isFlow || s.isGrid,
 		isOptionsShow:s => s.fieldIdOptions === s.field.id,
+		isWithBorder: s => s.isFlow || s.isGrid,
 		padding:      s => s.isFlow ? s.field.padding : { t:0, r:0, b:0, l:0 },
 		paddingX:     s => s.padding.l+s.padding.r,
 		paddingY:     s => s.padding.t+s.padding.b,
@@ -272,7 +274,7 @@ export default {
 			}
 		},
 		getBorderCss(b) {
-			if(b.draw === '')
+			if(!this.isWithBorder || b.draw === '')
 				return '';
 
 			const color = b.color === null ? '000000' : b.color;

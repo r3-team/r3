@@ -29,7 +29,7 @@ type textDrawing struct {
 }
 
 // draws attribute value as cell
-func drawAttributeValue(doc *doc, b types.DocBorder, font types.DocFont, w, h float64, lineCount int, atr types.Attribute, valueIf any) error {
+func drawAttributeValue(doc *doc, font types.DocFont, sizeX, sizeY float64, lineCount int, atr types.Attribute, valueIf any) error {
 
 	if valueIf == nil {
 		return nil
@@ -43,28 +43,26 @@ func drawAttributeValue(doc *doc, b types.DocBorder, font types.DocFont, w, h fl
 		}
 
 		switch atr.ContentUse {
-		case "default":
-			drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%s", valueIf))
+		case "iframe", "default", "textarea":
+			drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("%s", valueIf))
 		case "barcode":
 			var b textBarcode
 			if err := json.Unmarshal([]byte(v), &b); err != nil {
 				return err
 			}
-			if err := drawImageBase64(doc, b.Image, w, h); err != nil {
+			if err := drawImageBase64(doc, b.Image, sizeX, sizeY); err != nil {
 				return err
 			}
 		case "color":
-			drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("#%s", valueIf))
+			drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("#%s", valueIf))
 		case "drawing":
 			var d textDrawing
 			if err := json.Unmarshal([]byte(v), &d); err != nil {
 				return err
 			}
-			if err := drawImageBase64(doc, d.Image, w, h); err != nil {
+			if err := drawImageBase64(doc, d.Image, sizeX, sizeY); err != nil {
 				return err
 			}
-		case "iframe":
-			drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%s", valueIf))
 		case "richtext":
 			h := doc.p.HTMLBasicNew()
 			h.Write(getLineHeight(font), v)
@@ -79,23 +77,23 @@ func drawAttributeValue(doc *doc, b types.DocBorder, font types.DocFont, w, h fl
 		if err != nil {
 			return err
 		}
-		drawCellText(doc, b, font, w, h, lineCount, tools.FormatFloat(
+		drawCellText(doc, font, sizeX, sizeY, lineCount, tools.FormatFloat(
 			f.Float64, atr.LengthFract, font.NumberSepDec, font.NumberSepTho))
 
 	case "real", "double precision":
-		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%f", valueIf))
+		drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("%f", valueIf))
 	case "boolean":
 		v, ok := valueIf.(bool)
 		if !ok {
 			return fmt.Errorf("failed to parse boolean attribute value")
 		}
 		if v {
-			drawCellText(doc, b, font, w, h, lineCount, font.BoolTrue)
+			drawCellText(doc, font, sizeX, sizeY, lineCount, font.BoolTrue)
 		} else {
-			drawCellText(doc, b, font, w, h, lineCount, font.BoolFalse)
+			drawCellText(doc, font, sizeX, sizeY, lineCount, font.BoolFalse)
 		}
 	case "regconfig":
-		drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%s", valueIf))
+		drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("%s", valueIf))
 	case "files":
 		valueJson, err := json.Marshal(valueIf)
 		if err != nil {
@@ -113,7 +111,7 @@ func drawAttributeValue(doc *doc, b types.DocBorder, font types.DocFont, w, h fl
 
 			switch ext {
 			case "png", "jpg", "jpeg":
-				if err := drawImageFile(doc, data.GetFilePathVersion(f.Id, f.Version), ext, w, h); err != nil {
+				if err := drawImageFile(doc, data.GetFilePathVersion(f.Id, f.Version), ext, sizeX, sizeY); err != nil {
 					return err
 				}
 				imgFound = true
@@ -125,7 +123,7 @@ func drawAttributeValue(doc *doc, b types.DocBorder, font types.DocFont, w, h fl
 	case "integer", "bigint":
 		switch atr.ContentUse {
 		case "default":
-			drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%d", valueIf))
+			drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("%d", valueIf))
 		case "date", "datetime":
 			tUnix, err := getInt64FromInterface(valueIf)
 			if err != nil {
@@ -134,10 +132,10 @@ func drawAttributeValue(doc *doc, b types.DocBorder, font types.DocFont, w, h fl
 
 			if atr.ContentUse == "datetime" {
 				// print datetime at local server time
-				drawCellText(doc, b, font, w, h, lineCount, time.Unix(tUnix, 0).Local().Format(tools.GetDatetimeFormat(font.DateFormat, true)))
+				drawCellText(doc, font, sizeX, sizeY, lineCount, time.Unix(tUnix, 0).Local().Format(tools.GetDatetimeFormat(font.DateFormat, true)))
 			} else {
 				// print date at UTC
-				drawCellText(doc, b, font, w, h, lineCount, time.Unix(tUnix, 0).Format(tools.GetDatetimeFormat(font.DateFormat, false)))
+				drawCellText(doc, font, sizeX, sizeY, lineCount, time.Unix(tUnix, 0).Format(tools.GetDatetimeFormat(font.DateFormat, false)))
 			}
 		case "time":
 			v, ok := valueIf.(int32)
@@ -147,7 +145,7 @@ func drawAttributeValue(doc *doc, b types.DocBorder, font types.DocFont, w, h fl
 			hh := int32(v / 3600)
 			mm := int32((v - (hh * 3600)) / 60)
 			ss := int32(v - (hh * 3600) - (mm * 60))
-			drawCellText(doc, b, font, w, h, lineCount, fmt.Sprintf("%02d:%02d:%02d", hh, mm, ss))
+			drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("%02d:%02d:%02d", hh, mm, ss))
 		}
 	default:
 		return fmt.Errorf("failed to add field, no definition for attribute content '%s'", atr.Content)
@@ -166,7 +164,7 @@ func drawBorderLine(doc *doc, b types.DocBorder, x1, y1, x2, y2 float64) {
 	doc.p.Line(x1, y1, x2, y2)
 }
 
-func drawBox(doc *doc, b types.DocBorder, fillColor pgtype.Text, w, h float64) {
+func drawBox(doc *doc, b types.DocBorder, fillColor pgtype.Text, sizeX, sizeY float64) {
 	if b.Draw == "" && !fillColor.Valid {
 		return
 	}
@@ -178,10 +176,10 @@ func drawBox(doc *doc, b types.DocBorder, fillColor pgtype.Text, w, h float64) {
 		doc.p.SetFillColor(rgb[0], rgb[1], rgb[2])
 		fill = true
 	}
-	doc.p.CellFormat(w, h, "", b.Draw, -1, "", fill, 0, "")
+	doc.p.CellFormat(sizeX, sizeY, "", b.Draw, -1, "", fill, 0, "")
 }
 
-func drawImageFile(doc *doc, path string, ext string, w, h float64) error {
+func drawImageFile(doc *doc, path string, ext string, sizeX, sizeY float64) error {
 	doc.imageCounter++
 	imgName := fmt.Sprintf("img_%d", doc.imageCounter)
 
@@ -192,13 +190,13 @@ func drawImageFile(doc *doc, path string, ext string, w, h float64) error {
 	defer file.Close()
 
 	doc.p.RegisterImageOptionsReader(imgName, fpdf.ImageOptions{ImageType: ext}, file)
-	doc.p.ImageOptions(imgName, doc.p.GetX(), doc.p.GetY(), w, h, true,
+	doc.p.ImageOptions(imgName, doc.p.GetX(), doc.p.GetY(), sizeX, sizeY, true,
 		fpdf.ImageOptions{ImageType: ext, AllowNegativePosition: false, ReadDpi: true}, 0, "")
 
 	return nil
 }
 
-func drawImageBase64(doc *doc, imgBase64 string, w, h float64) error {
+func drawImageBase64(doc *doc, imgBase64 string, sizeX, sizeY float64) error {
 
 	// find extension
 	matches := regexFindDataImageExt.FindStringSubmatch(imgBase64)
@@ -216,7 +214,7 @@ func drawImageBase64(doc *doc, imgBase64 string, w, h float64) error {
 	}
 
 	doc.p.RegisterImageOptionsReader(imgName, fpdf.ImageOptions{ImageType: ext}, bytes.NewReader(imgBytes))
-	doc.p.ImageOptions(imgName, doc.p.GetX(), doc.p.GetY(), w, h, true,
+	doc.p.ImageOptions(imgName, doc.p.GetX(), doc.p.GetY(), sizeX, sizeY, true,
 		fpdf.ImageOptions{ImageType: ext, AllowNegativePosition: false, ReadDpi: true}, 0, "")
 
 	return nil
@@ -225,23 +223,7 @@ func drawImageBase64(doc *doc, imgBase64 string, w, h float64) error {
 // draws text value as cell
 // if line count is set to 0 it will be calculated
 // if height is set to 0, font line height will be used
-func drawCellText(doc *doc, b types.DocBorder, font types.DocFont, sizeX, sizeY float64, lineCount int, s string) {
-
-	// since content can go over multiple pages, we rely on cell margins
-	// this means that we do not provide offset inside the bordered box (cell margins do this)
-	// we still need to move & shrink the cell as borders are not drawn inside it
-	_, bSizeT, bSizeR, bSizeB, bSizeL := getBorderSize(b)
-	bSizeX := bSizeL + bSizeR
-	bSizeY := bSizeT + bSizeB
-	sizeX -= bSizeX / 2
-	sizeY -= bSizeY / 2
-
-	posX, posY := doc.p.GetXY()
-	posX += bSizeL / 2
-	posY += bSizeT / 2
-	doc.p.SetXY(posX, posY)
-
-	setBorder(doc, b)
+func drawCellText(doc *doc, font types.DocFont, sizeX, sizeY float64, lineCount int, s string) {
 
 	if sizeY == 0 {
 		sizeY = getLineHeight(font)
@@ -252,23 +234,22 @@ func drawCellText(doc *doc, b types.DocBorder, font types.DocFont, sizeX, sizeY 
 	}
 
 	if lineCount == 1 {
-		doc.p.CellFormat(sizeX, sizeY, s, b.Draw, 2, font.Align, false, 0, "")
-		return
-	}
-
-	sizeYAllLines := getLineHeight(font) * float64(lineCount)
-	if sizeY > sizeYAllLines {
-		// target height is larger than what lines require combined
-		if strings.Contains(font.Align, "T") {
-			// if align is set to T (top), nothing to do
-		} else if strings.Contains(font.Align, "B") {
-			// if align is set to B (bottom), adjust start position for content to reach bottom
-			doc.p.SetXY(doc.p.GetX(), doc.p.GetY()+sizeY-sizeYAllLines)
-		} else {
-			// if align is set to M (middle) or has no vertical option (TBM), adjust start position for content to be in center
-			// FPDF defaults to M (middle) if nothing is set for vertical alignment
-			doc.p.SetXY(doc.p.GetX(), doc.p.GetY()+((sizeY-sizeYAllLines)/2))
+		doc.p.CellFormat(sizeX, sizeY, s, "", 2, font.Align, false, 0, "")
+	} else {
+		sizeYAllLines := getLineHeight(font) * float64(lineCount)
+		if sizeY > sizeYAllLines {
+			// target height is larger than what lines require combined
+			if strings.Contains(font.Align, "T") {
+				// if align is set to T (top), nothing to do
+			} else if strings.Contains(font.Align, "B") {
+				// if align is set to B (bottom), adjust start position for content to reach bottom
+				doc.p.SetXY(doc.p.GetX(), doc.p.GetY()+sizeY-sizeYAllLines)
+			} else {
+				// if align is set to M (middle) or has no vertical option (TBM), adjust start position for content to be in center
+				// FPDF defaults to M (middle) if nothing is set for vertical alignment
+				doc.p.SetXY(doc.p.GetX(), doc.p.GetY()+((sizeY-sizeYAllLines)/2))
+			}
 		}
+		doc.p.MultiCell(sizeX, font.Size*font.LineFactor*0.5, s, "", font.Align, false)
 	}
-	doc.p.MultiCell(sizeX, font.Size*font.LineFactor*0.5, s, b.Draw, font.Align, false)
 }

@@ -16,6 +16,6 @@ func addFieldText(doc *doc, f types.DocFieldText, font types.DocFont) (float64, 
 	f.Value = strings.ReplaceAll(f.Value, "{DATETIME_NOW}", time.Now().Local().Format(tools.GetDatetimeFormat(font.DateFormat, true)))
 	f.Value = strings.ReplaceAll(f.Value, "{TIME_NOW}", time.Now().Local().Format(tools.GetTimeFormat()))
 
-	drawCellText(doc, f.Border, font, f.SizeX, -1, -1, f.Value)
+	drawCellText(doc, font, f.SizeX, -1, -1, f.Value)
 	return doc.p.GetY(), nil
 }
