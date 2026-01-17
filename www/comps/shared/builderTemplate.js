@@ -151,7 +151,7 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 	if(attributeIndex === undefined) attributeIndex = 0;
 	if(attributeId    === undefined) attributeId    = null;
 
-	const getBorderTemplate = () => { return { cell:false, color:null, draw:'', size:0}; };
+	const getBorderTemplate = () => { return { cell:false, color:null, draw:'', size:0, styleCap:'butt', styleJoin:'miter' }; };
 	const getMarginTemplate = () => { return { t:0, r:0, b:0, l:0 }; };
 
 	let f = {
