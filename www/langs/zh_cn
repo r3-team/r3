@@ -822,6 +822,13 @@
 			"dialog": {
 				"delete": "Are you sure you want to delete this document?"
 			},
+			"field": {
+				"content": {
+					"flow": "Flow layout",
+					"grid": "Grid layout",
+					"text": "Fixed text"
+				}
+			},
 			"font": {
 				"alignHor": "Align horizontally",
 				"alignVer": "Align vertically",
@@ -2402,6 +2409,7 @@
 		"less": "更少",
 		"licenseRequired": "需要许可证",
 		"limit": "限值",
+		"list": "List",
 		"login": "Login",
 		"loginForm": "登录表单",
 		"loginForms": "登录表单",

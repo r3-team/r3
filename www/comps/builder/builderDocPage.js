@@ -41,7 +41,8 @@ export default {
 					@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 					:builderLanguage
 					:elmFieldOptions
-					:entityIdMapRef="{}"
+					:elmFieldTitle
+					:entityIdMapRef
 					:fieldIdOptions
 					:joins
 					:parentSizeX="pageSizeX - margin.l - margin.r"
@@ -57,7 +58,8 @@ export default {
 					:allowResize="false"
 					:builderLanguage
 					:elmFieldOptions
-					:entityIdMapRef="{}"
+					:elmFieldTitle
+					:entityIdMapRef
 					:fieldIdOptions
 					:joins
 					:parentSizeX="pageSizeX"
@@ -73,7 +75,8 @@ export default {
 					:allowResize="false"
 					:builderLanguage
 					:elmFieldOptions
-					:entityIdMapRef="{}"
+					:elmFieldTitle
+					:entityIdMapRef
 					:fieldIdOptions
 					:joins
 					:parentSizeX="pageSizeX"
@@ -159,6 +162,8 @@ export default {
 		builderLanguage:{ type:String,        required:true },
 		elmPageOptions: { required:true },
 		elmFieldOptions:{ required:true },
+		elmFieldTitle:  { required:true },
+		entityIdMapRef: { type:Object,        required:true },
 		fieldIdOptions: { type:[String,null], required:true },
 		joins:          { type:Array,         required:true },
 		modelValue:     { type:Object,        required:true },

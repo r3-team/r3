@@ -2,6 +2,7 @@ import {getTemplateDocField} from '../shared/builderTemplate.js';
 import MyInputDecimal        from '../inputDecimal.js';
 import MyInputRange          from '../inputRange.js';
 import MyBuilderDocSets      from './builderDocSets.js';
+import {getDocFieldTitle}    from '../shared/builderDoc.js';
 import {copyValueDialog}     from '../shared/generic.js';
 import {
 	MyBuilderDocBorder,
@@ -49,6 +50,7 @@ export default {
 				:builderLanguage
 				:class="{ 'drag-source':f.id === fieldIdDragged }"
 				:elmFieldOptions
+				:elmFieldTitle
 				:entityIdMapRef
 				:fieldIdOptions
 				:parentSizeX="sizeX"
@@ -64,6 +66,10 @@ export default {
 		</div>
 
 		<!-- options -->
+		<teleport v-if="isOptionsShow" :to="elmFieldTitle">
+			<span>{{ title }}</span>
+		</teleport>
+
 		<teleport v-if="isOptionsShow" :to="elmFieldOptions">
 			<table class="generic-table-vertical default-inputs">
 				<tbody>
@@ -167,6 +173,7 @@ export default {
 		allowResize:    { type:Boolean,       required:false, default:true },
 		builderLanguage:{ type:String,        required:true },
 		elmFieldOptions:{ required:true },
+		elmFieldTitle:  { required:true },
 		entityIdMapRef: { type:Object,        required:true },
 		fieldIdOptions: { type:[String,null], required:true },
 		gridParentSnap: { type:Number,        required:false, default:0 },
@@ -207,16 +214,6 @@ export default {
 			? `background-size:${s.field.sizeSnap*s.zoom}mm ${s.field.sizeSnap*s.zoom}mm;`
 			: `gap:${s.field.gap*s.zoom}mm;
 				padding:${s.field.padding.t*s.zoom}mm ${s.field.padding.r*s.zoom}mm ${s.field.padding.b*s.zoom}mm ${s.field.padding.l*s.zoom}mm;`,
-		title:s => {
-			switch(s.field.content) {
-				case 'data': return `${s.field.attributeIndex} ${s.attribute.name}`; break;
-				case 'flow': return 'FLOW';
-				case 'grid': return 'GRID';
-				case 'list': return 'LIST';
-				case 'text': return 'TEXT';
-			}
-			return '';
-		},
 
 		// inputs
 		field:{ // this method updates obj directly
@@ -252,6 +249,7 @@ export default {
 		style:        s => `${s.styleHeight}${s.styleGrid}${s.getBorderCss(s.field.border)}`,
 		styleGrid:    s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;height:${s.field.sizeY*s.zoom}mm;` : '',
 		styleHeight:  s => s.isFlow && s.field.sizeY === 0 ? '' : `height:${s.field.sizeY*s.zoom}mm;`,
+		title:        s => s.getDocFieldTitle(s.entityIdMapRef,s.field,false),
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
@@ -261,6 +259,7 @@ export default {
 	methods:{
 		// externals
 		copyValueDialog,
+		getDocFieldTitle,
 		getTemplateDocField,
 
 		// presentation

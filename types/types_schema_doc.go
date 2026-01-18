@@ -57,7 +57,7 @@ type DocField struct {
 	SizeX   float64   `json:"sizeX"`   // width in mm (0 = parent width)
 	SizeY   float64   `json:"sizeY"`   // height in mm (0 = min. content height)
 	Sets    []DocSet  `json:"sets"`
-	State   bool      `json:"state"`
+	State   bool      `json:"state"` // default visibility state
 }
 type DocFieldData struct {
 	Id      uuid.UUID `json:"id"`

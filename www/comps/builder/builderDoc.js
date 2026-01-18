@@ -9,6 +9,11 @@ import {getUuidV4}        from '../shared/crypto.js';
 import {deepIsEqual}      from '../shared/generic.js';
 import {getJoinsIndexMap} from '../shared/query.js';
 import {
+	getDocEntityMapRef,
+	getDocFieldIcon,
+	getDocFieldTitle
+} from '../shared/builderDoc.js';
+import {
 	getTemplateDocField,
 	getTemplateDocPage
 } from '../shared/builderTemplate.js';
@@ -105,6 +110,8 @@ export default {
 					:builderLanguage
 					:elmPageOptions="$refs.pageOptions"
 					:elmFieldOptions="$refs.fieldOptions"
+					:elmFieldTitle="$refs.fieldOptionsTitle"
+					:entityIdMapRef
 					:fieldIdOptions="sideFieldIdShow"
 					:joins="doc.query.joins"
 					:pages="doc.pages"
@@ -121,9 +128,9 @@ export default {
 					<h1>{{ capGen.document }}</h1>
 				</div>
 			</div>
-			<div class="top lower" v-if="sideFieldShow" :class="{ clickable:sideColumnShow }" @click="sideColumnIdShow = null;">
+			<div class="top lower" v-show="sideFieldShow" :class="{ clickable:sideColumnShow }" @click="sideColumnIdShow = null;">
 				<div class="area">
-					<h2>FIELD OPTIONS</h2>
+					<h2 ref="fieldOptionsTitle"></h2>
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
@@ -155,12 +162,15 @@ export default {
 					/>
 
 					<!-- field templates -->
-					<div class="builder-doc-fields">
-						<div class="builder-doc-field" v-for="f in fieldsTemplate">
-							<div class="builder-doc-field-title" draggable="true"
-								@dragstart="fieldDragStart($event,f)"
-								:key="f.id"
-							>TESTFIELD</div>
+					<div class="builder-doc-template-fields">
+						<div class="builder-doc-template-field" draggable="true"
+							@dragstart="fieldDragStart($event,f)"
+							v-for="f in fieldsTemplate"
+							:class="{ 'isLayout':f.content === 'flow' || f.content === 'grid', 'notData':f.content !== 'data' }"
+							:key="f.id"
+						>
+							<img class="builder-doc-template-field-icon" :src="'images/' + getDocFieldIcon(f)" />
+							<span>{{ getDocFieldTitle(entityIdMapRef,f,true) }}</span>
 						</div>
 					</div>
 				</div>
@@ -316,6 +326,7 @@ export default {
 
 		// simple
 		docOrg:         s => s.docIdMap[s.id] === undefined ? false : s.docIdMap[s.id],
+		entityIdMapRef: s => s.getDocEntityMapRef(s.doc),
 		hasChanges:     s => !s.deepIsEqual(s.doc,s.docOrg),
 		module:         s => s.moduleIdMap[s.doc.moduleId],
 		pageIndexActive:s => s.pageIdMapIndex[s.tabPageIdShow],
@@ -341,6 +352,9 @@ export default {
 	methods:{
 		// externals
 		deepIsEqual,
+		getDocEntityMapRef,
+		getDocFieldIcon,
+		getDocFieldTitle,
 		getJoinsIndexMap,
 		getTemplateDocField,
 		getTemplateDocPage,

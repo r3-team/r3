@@ -822,6 +822,13 @@
 			"dialog": {
 				"delete": "Bist du sicher, dass du dieses Dokument löschen möchtest?"
 			},
+			"field": {
+				"content": {
+					"flow": "Flow-Layout",
+					"grid": "Raster-Layout",
+					"text": "Fester Text"
+				}
+			},
 			"font": {
 				"alignHor": "Horizontal ausrichten",
 				"alignVer": "Vertikal ausrichten",
@@ -2402,6 +2409,7 @@
 		"less": "Weniger",
 		"licenseRequired": "Lizenz erforderlich",
 		"limit": "Anzahl",
+		"list": "Liste",
 		"login": "Anmeldung",
 		"loginForm": "Anmeldeformular",
 		"loginForms": "Anmeldeformulare",
