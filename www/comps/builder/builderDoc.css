@@ -85,7 +85,7 @@
 
 /* field */
 .builder-doc-field{
-	min-height:4mm; /* to allow access regardles of defined height */
+	min-height:5mm; /* to allow access regardles of defined height */
 	box-sizing:border-box;
 	display:flex;
 	flex-flow:column nowrap;
@@ -117,6 +117,9 @@
 	background-color:var(--color-form-builder-selected);
 	outline:3px solid var(--color-form-builder-selected);
 }
+.builder-doc-field-title{
+	padding:4px;
+}
 
 /* field children */
 .builder-doc-fields{
@@ -144,6 +147,38 @@
 	transform:translate(-50%,-50%);
 	opacity:0.8;
 }
+
+/* columns */
+.builder-doc-columns{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+	border-top:1px solid var(--color-border);
+	background-image:linear-gradient(to right, transparent 0px, rgba(0,0,0,0.3) 1px, transparent 1.6px);
+	background-position:0.25px 0.25px;
+	background-size:10px 10px;
+}
+.builder-doc-column{
+	min-width:3mm; /* to allow access regardles of defined width */
+	box-sizing:border-box;
+	display:flex;
+	flex-flow:row nowrap;
+	background-color:white;
+	outline:1px solid var(--color-border);
+}
+.builder-doc-column.dragSource{
+	display:none;
+}
+.builder-doc-column.dragPreview{
+	min-width:8mm;
+	pointer-events:none;
+	border:3px dashed var(--color-border);
+	border-radius:3px;
+}
+.builder-doc-column-title{
+	padding:4px;
+}
+
 
 /* header / footer */
 .builder-doc-page-footer-header{

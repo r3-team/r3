@@ -1,9 +1,9 @@
-import MyInputDecimal            from '../inputDecimal.js';
-import MyInputRange              from '../inputRange.js';
+import MyBuilderDocColumns       from './builderDocColumns.js';
 import MyBuilderDocSets          from './builderDocSets.js';
 import MyBuilderQuery            from './builderQuery.js';
+import MyInputDecimal            from '../inputDecimal.js';
+import MyInputRange              from '../inputRange.js';
 import {isAttributeRelationship} from '../shared/attribute.js';
-import {getItemTitle}            from '../shared/builder.js';
 import {getUuidV4}               from '../shared/crypto.js';
 import {copyValueDialog}         from '../shared/generic.js';
 import {
@@ -23,6 +23,7 @@ export default {
 	name:'my-builder-doc-field',
 	components:{
 		MyBuilderDocBorder,
+		MyBuilderDocColumns,
 		MyBuilderDocMarginPadding,
 		MyBuilderDocSets,
 		MyBuilderQuery,
@@ -45,6 +46,16 @@ export default {
 	>
 		<div class="builder-doc-field-title"    v-if="!isWithFields && !isDragPreview">{{ title }}</div>
 		<div class="builder-doc-fields-bg-text" v-if="isWithFields">F{{ entityIdMapRef.field[field.id] }}</div>
+
+		<my-builder-doc-columns
+			v-if="isWithColumns && isOptionsShow"
+			v-model="field.columns"
+			:builderLanguage
+			:dragType="dragTypeColumn"
+			:parentSizeX="sizeX"
+			:readonly
+			:zoom
+		/>
 
 		<div class="builder-doc-fields" ref="fields"
 			v-if="isWithFields"
@@ -232,9 +243,10 @@ export default {
 			beingDragged:false,
 			borderSizeEmpty:0.2, // default border size, if 0 is given but border is drawn
 			dragEnterCounter:0,
+			dragType:'doc-field',
 			filtersDisable:[
 				'collection','field','fieldChanged','fieldValid','formChanged',
-				'formState','getter','globalSearch','javascript','record','recordMayCreate',
+				'formState','getter','globalSearch','javascript','recordMayCreate',
 				'recordMayDelete','recordMayUpdate','recordNew','variable'
 			],
 			gridFieldSizeMinX:0,
@@ -320,18 +332,19 @@ export default {
 		styleHeight:s => s.isFlow && s.field.sizeY === 0 ? '' : `height:${s.field.sizeY*s.zoom}mm;`,
 
 		// simple
-		attribute:    s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
-		isChild:      s => s.isChildFlow || s.isChildGrid,
-		isData:       s => s.field.content === 'data',
-		isDragPreview:s => s.field.content === s.dragContent,
-		isFlow:       s => ['flow','flowBody'].includes(s.field.content),
-		isGrid:       s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
-		isList:       s => s.field.content === 'list',
-		isOptionsShow:s => s.fieldIdOptions === s.field.id,
-		isWithColumns:s => s.isList,
-		isWithFields: s => s.isFlow || s.isGrid,
-		isWithBorder: s => s.isFlow || s.isGrid,
-		title:        s => s.getDocFieldTitle(s.entityIdMapRef,s.field,false),
+		attribute:     s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
+		dragTypeColumn:s => `doc-column_${s.field.id}`,
+		isChild:       s => s.isChildFlow || s.isChildGrid,
+		isData:        s => s.field.content === 'data',
+		isDragPreview: s => s.field.content === s.dragContent,
+		isFlow:        s => ['flow','flowBody'].includes(s.field.content),
+		isGrid:        s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
+		isList:        s => s.field.content === 'list',
+		isOptionsShow: s => s.fieldIdOptions === s.field.id,
+		isWithColumns: s => s.isList,
+		isWithFields:  s => s.isFlow || s.isGrid,
+		isWithBorder:  s => s.isFlow || s.isGrid,
+		title:         s => s.getDocFieldTitle(s.entityIdMapRef,s.field,false),
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
@@ -418,7 +431,8 @@ export default {
 			c.id = this.getUuidV4();
 			e.dataTransfer.setData('application/json',JSON.stringify(c));
 			e.dataTransfer.setDragImage(e.srcElement,0,0);
-			e.dataTransfer.setData('doc-column','');
+			e.dataTransfer.setData(`doc-column`,'');                  // for drop on page
+			e.dataTransfer.setData(`doc-column_${this.field.id}`,''); // for drop on column field
 		},
 
 		// drag source
@@ -431,7 +445,7 @@ export default {
 		dragStart(e) {
 			// store field for later drop & adjust ghost image to start at mouse position
 			e.dataTransfer.setData('application/json',JSON.stringify(this.field));
-			e.dataTransfer.setData('doc-field','');
+			e.dataTransfer.setData(this.dragType,'');
 			e.dataTransfer.setDragImage(e.srcElement,0,0);
 
 			// store field index for removal from the source on later drop
@@ -451,11 +465,11 @@ export default {
 
 		// drag target
 		dragOver(e) {
-			if(e.dataTransfer.types.includes('doc-field'))
+			if(e.dataTransfer.types.includes(this.dragType))
 				e.preventDefault();
 		},
 		dragEnter(e) {
-			if(!e.dataTransfer.types.includes('doc-field'))
+			if(!e.dataTransfer.types.includes(this.dragType))
 				return e.stopPropagation();
 
 			if(!this.isWithFields) {
@@ -472,7 +486,7 @@ export default {
 				this.dragPreviewUpdate(this.field.fields.length);
 		},
 		dragLeave(e) {
-			if(!e.dataTransfer.types.includes('doc-field'))
+			if(!e.dataTransfer.types.includes(this.dragType))
 				return e.stopPropagation();
 
 			if(!this.isWithFields)
@@ -488,7 +502,7 @@ export default {
 			if(!this.isWithFields)
 				return;
 
-			if(!e.dataTransfer.types.includes('doc-field'))
+			if(!e.dataTransfer.types.includes(this.dragType))
 				return;
 			
 			e.stopPropagation();

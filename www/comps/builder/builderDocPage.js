@@ -205,9 +205,11 @@ export default {
 	},
 	methods:{
 		drop(e) {
-			const field = JSON.parse(e.dataTransfer.getData('application/json'));
-			if(field.id === this.fieldIdOptions)
-				this.$emit('setFieldIdOptions',null);
+			if(e.dataTransfer.types.includes('doc-field')) {
+				const field = JSON.parse(e.dataTransfer.getData('application/json'));
+				if(field.id === this.fieldIdOptions)
+					this.$emit('setFieldIdOptions',null);
+			}
 		},
 		setMarginVertical(isTop,v) {
 			if(isTop && this.header !== false)

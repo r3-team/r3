@@ -35,7 +35,8 @@ const MyStore = Vuex.createStore({
 		colorMenuDefaultDark:'1e2022', // default menu color, if not overwritten, dark mode
 		config:{},                     // configuration values (admin only)
 		constants:{                    // constant variables, codes/messages/IDs
-			dragFieldContent:'dragDropPreview', // content name for drag&drop preview fields
+			dragColumnContent:'dragDropPrevColumn', // content name for drag&drop preview columns
+			dragFieldContent:'dragDropPrevField',   // content name for drag&drop preview fields
 			kdfIterations:10000,       // number of iterations for PBKDF2 key derivation function
 			languageCodesOfficial:[    // officially supported language codes
 				'en_us','de_de'

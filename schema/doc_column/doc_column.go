@@ -15,7 +15,7 @@ import (
 func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocColumn, error) {
 
 	rows, err := tx.Query(ctx, `
-		SELECT attribute_id, attribute_index, group_by, aggregator, distincted, length, sub_query, size_x
+		SELECT id, attribute_id, attribute_index, group_by, aggregator, distincted, length, sub_query, size_x
 		FROM app.doc_column
 		WHERE doc_field_id = $1
 		ORDER BY position ASC
@@ -41,8 +41,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocCo
 		if err != nil {
 			return nil, err
 		}
-
-		// get overwrites
 		columns[i].SetsBody, err = doc_set.Get_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextBody)
 		if err != nil {
 			return nil, err
@@ -68,6 +66,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocCo
 
 func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []types.DocColumn) error {
 
+	columnIds := make([]uuid.UUID, 0)
 	for i, c := range columns {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.doc_column (id, doc_field_id, attribute_id, attribute_index, 
@@ -82,6 +81,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []type
 
 			return err
 		}
+		columnIds = append(columnIds, c.Id)
 
 		if c.SubQuery {
 			if err := query.Set_tx(ctx, tx, schema.DbDocColumn, c.Id, 0, 0, 0, c.Query); err != nil {
@@ -89,6 +89,20 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []type
 			}
 		}
 		if err := caption.Set_tx(ctx, tx, c.Id, c.Captions); err != nil {
+			return err
+		}
+	}
+
+	if len(columnIds) == 0 {
+		if _, err := tx.Exec(ctx, `DELETE FROM app.doc_column WHERE doc_field_id = $1`, docFieldId); err != nil {
+			return err
+		}
+	} else {
+		if _, err := tx.Exec(ctx, `
+			DELETE FROM app.doc_column
+			WHERE doc_field_id =  $1
+			AND   id           <> ALL($2)
+		`, docFieldId, columnIds); err != nil {
 			return err
 		}
 	}
