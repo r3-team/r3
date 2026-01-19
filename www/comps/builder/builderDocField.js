@@ -1,13 +1,23 @@
-import {getTemplateDocField} from '../shared/builderTemplate.js';
-import MyInputDecimal        from '../inputDecimal.js';
-import MyInputRange          from '../inputRange.js';
-import MyBuilderDocSets      from './builderDocSets.js';
-import {getDocFieldTitle}    from '../shared/builderDoc.js';
-import {copyValueDialog}     from '../shared/generic.js';
+import MyInputDecimal            from '../inputDecimal.js';
+import MyInputRange              from '../inputRange.js';
+import MyBuilderDocSets          from './builderDocSets.js';
+import MyBuilderQuery            from './builderQuery.js';
+import {isAttributeRelationship} from '../shared/attribute.js';
+import {getItemTitle}            from '../shared/builder.js';
+import {getUuidV4}               from '../shared/crypto.js';
+import {copyValueDialog}         from '../shared/generic.js';
 import {
 	MyBuilderDocBorder,
 	MyBuilderDocMarginPadding
 } from './builderDocInput.js';
+import {
+	getDocColumnTitle,
+	getDocFieldTitle
+} from '../shared/builderDoc.js';
+import {
+	getTemplateDocColumn,
+	getTemplateDocField
+} from '../shared/builderTemplate.js';
 
 export default {
 	name:'my-builder-doc-field',
@@ -15,6 +25,7 @@ export default {
 		MyBuilderDocBorder,
 		MyBuilderDocMarginPadding,
 		MyBuilderDocSets,
+		MyBuilderQuery,
 		MyInputDecimal,
 		MyInputRange
 	},
@@ -23,20 +34,20 @@ export default {
 		@dragleave="dragLeave"
 		@dragend.stop="dragEnd"
 		@dragstart.stop="dragStart"
-		@dragover.prevent
+		@dragover="dragOver"
 		@drop="drop"
 		@mousedown.stop="mousedown"
 		@mouseup.stop="mouseup"
 		:class="classCss"
-		:draggable="!isRoot"
+		:draggable="!isRoot && !readonly"
 		:style
 		:key="field.id"
 	>
-		<div class="builder-doc-field-title"    v-if="!isParent && !isDragPreview">{{ title }}</div>
-		<div class="builder-doc-fields-bg-text" v-if="isParent">F{{ entityIdMapRef.field[field.id] }}</div>
+		<div class="builder-doc-field-title"    v-if="!isWithFields && !isDragPreview">{{ title }}</div>
+		<div class="builder-doc-fields-bg-text" v-if="isWithFields">F{{ entityIdMapRef.field[field.id] }}</div>
 
 		<div class="builder-doc-fields" ref="fields"
-			v-if="isParent"
+			v-if="isWithFields"
 			:class="{ 'layout-flow':isFlow, 'layout-grid':isGrid }"
 			:style="styleChildren"
 		>
@@ -55,10 +66,11 @@ export default {
 				:parentSizeX="sizeX"
 				:parentSizeY="sizeY"
 				:gridParentSnap="isGrid ? field.sizeSnap : 0"
-				:joins
-				:key="f.id"
 				:isChildFlow="isFlow"
 				:isChildGrid="isGrid"
+				:joins
+				:key="f.id"
+				:moduleId
 				:readonly
 				:zoom
 			/>
@@ -85,7 +97,7 @@ export default {
 						<td><my-bool v-model="field.state" :readonly /></td>
 					</tr>
 					
-					<template v-if="allowResize">
+					<template v-if="!isRoot">
 						<tr v-if="isChildGrid">
 							<td>{{ capGen.sizeX }}</td>
 							<td>
@@ -144,9 +156,38 @@ export default {
 							:readonly
 						/>
 					</template>
+
+					<template v-if="isList">
+						<tr>
+							<td colspan="2">
+								<my-builder-query
+									v-model="field.query"
+									@index-removed=""
+									:allowChoices="false"
+									:builderLanguage
+									:filtersDisable
+									:moduleId="moduleId"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<div class="builder-doc-templates">
+									<div class="builder-doc-template" draggable="true"
+										@dragstart="dragStartColumnTemplate($event,c)"
+										v-for="c in columnsTemplate"
+										:key="c.id"
+									>
+										<span>{{ getDocColumnTitle(c) }}</span>
+									</div>
+								</div>
+							</td>
+						</tr>
+
+					</template>
 					
 					<my-builder-doc-border
-						v-if="isGrid || isFlow"
+						v-if="isWithBorder"
 						v-model:cell="field.border.cell"
 						v-model:color="field.border.color"
 						v-model:draw="field.border.draw"
@@ -169,7 +210,6 @@ export default {
 		</teleport>
 	</div>`,
 	props:{
-		allowResize:    { type:Boolean,       required:false, default:true },
 		builderLanguage:{ type:String,        required:true },
 		elmFieldOptions:{ required:true },
 		elmFieldTitle:  { required:true },
@@ -178,6 +218,7 @@ export default {
 		gridParentSnap: { type:Number,        required:false, default:0 },
 		joins:          { type:Array,         required:true },
 		modelValue:     { type:Object,        required:true },
+		moduleId:       { type:String,        required:true },
 		parentSizeX:    { type:Number,        required:true },
 		parentSizeY:    { type:Number,        required:true },
 		isChildGrid:    { type:Boolean,       required:false, default:false },
@@ -191,6 +232,11 @@ export default {
 			beingDragged:false,
 			borderSizeEmpty:0.2, // default border size, if 0 is given but border is drawn
 			dragEnterCounter:0,
+			filtersDisable:[
+				'collection','field','fieldChanged','fieldValid','formChanged',
+				'formState','getter','globalSearch','javascript','record','recordMayCreate',
+				'recordMayDelete','recordMayUpdate','recordNew','variable'
+			],
 			gridFieldSizeMinX:0,
 			gridFieldSizeMinY:5,
 			pixelToMm:25.4 / 96,
@@ -205,10 +251,26 @@ export default {
 				flow:s.isFlow,
 				'dragPreview':s.isDragPreview,
 				'dragSource':s.beingDragged,
-				'resizable-both':s.allowResize && s.isChildGrid,
-				'resizable-height':s.allowResize && s.isChildFlow,
+				'resizable-both':!s.isRoot && s.isChildGrid,
+				'resizable-height':!s.isRoot && s.isChildFlow,
 				selected:s.isOptionsShow
 			};
+		},
+		columnsTemplate:s => {
+			if(!s.isWithColumns)
+				return [];
+
+			let out = [];
+			for(const j of s.field.query.joins) {
+				const r = s.relationIdMap[j.relationId];
+				for(const a of r.attributes) {
+					if(s.isAttributeRelationship(a.content))
+						continue;
+
+					out.push(s.getTemplateDocColumn(a.id,j.index));
+				}
+			}
+			return out;
 		},
 		styleBorder:s => {
 			if(!s.isWithBorder || s.field.border.draw === '')
@@ -264,13 +326,16 @@ export default {
 		isDragPreview:s => s.field.content === s.dragContent,
 		isFlow:       s => ['flow','flowBody'].includes(s.field.content),
 		isGrid:       s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
-		isParent:     s => s.isFlow || s.isGrid,
+		isList:       s => s.field.content === 'list',
 		isOptionsShow:s => s.fieldIdOptions === s.field.id,
+		isWithColumns:s => s.isList,
+		isWithFields: s => s.isFlow || s.isGrid,
 		isWithBorder: s => s.isFlow || s.isGrid,
 		title:        s => s.getDocFieldTitle(s.entityIdMapRef,s.field,false),
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		capApp:        s => s.$store.getters.captions.builder.doc,
 		capGen:        s => s.$store.getters.captions.generic,
 		dragContent:   s => s.$store.getters.constants.dragFieldContent
@@ -278,8 +343,12 @@ export default {
 	methods:{
 		// externals
 		copyValueDialog,
+		getDocColumnTitle,
 		getDocFieldTitle,
+		getTemplateDocColumn,
 		getTemplateDocField,
+		getUuidV4,
+		isAttributeRelationship,
 
 		// presentation
 		getSizeAfterSnap(isChildGrid,posChild,sizeChild,sizeParent,sizeMin,sizeSnap) {
@@ -343,6 +412,15 @@ export default {
 			}
 		},
 
+		// drag templates
+		dragStartColumnTemplate(e,column) {
+			let c = JSON.parse(JSON.stringify(column));
+			c.id = this.getUuidV4();
+			e.dataTransfer.setData('application/json',JSON.stringify(c));
+			e.dataTransfer.setDragImage(e.srcElement,0,0);
+			e.dataTransfer.setData('doc-column','');
+		},
+
 		// drag source
 		dragEnd(e) {
 			if(e.dataTransfer.dropEffect !== 'none')
@@ -353,6 +431,7 @@ export default {
 		dragStart(e) {
 			// store field for later drop & adjust ghost image to start at mouse position
 			e.dataTransfer.setData('application/json',JSON.stringify(this.field));
+			e.dataTransfer.setData('doc-field','');
 			e.dataTransfer.setDragImage(e.srcElement,0,0);
 
 			// store field index for removal from the source on later drop
@@ -371,8 +450,15 @@ export default {
 		},
 
 		// drag target
+		dragOver(e) {
+			if(e.dataTransfer.types.includes('doc-field'))
+				e.preventDefault();
+		},
 		dragEnter(e) {
-			if(!this.isParent) {
+			if(!e.dataTransfer.types.includes('doc-field'))
+				return e.stopPropagation();
+
+			if(!this.isWithFields) {
 				if(!this.isDragPreview)
 					this.$emit('dragChildEnter');
 				
@@ -386,7 +472,10 @@ export default {
 				this.dragPreviewUpdate(this.field.fields.length);
 		},
 		dragLeave(e) {
-			if(!this.isParent)
+			if(!e.dataTransfer.types.includes('doc-field'))
+				return e.stopPropagation();
+
+			if(!this.isWithFields)
 				return;
 
 			e.stopPropagation();
@@ -396,7 +485,10 @@ export default {
 				this.dragPreviewRemove();
 		},
 		drop(e) {
-			if(!this.isParent)
+			if(!this.isWithFields)
+				return;
+
+			if(!e.dataTransfer.types.includes('doc-field'))
 				return;
 			
 			e.stopPropagation();

@@ -147,6 +147,26 @@ export function getTemplateDoc(moduleId,name) {
 		}
 	};
 };
+export function getTemplateDocColumn(attributeId,attributeIndex) {
+	return {
+		id:getUuidV4(),
+		attributeId:attributeId,
+		attributeIndex:attributeIndex,
+		aggregator:null,
+		distincted:false,
+		groupBy:false,
+		length:0,
+		subQuery:false,
+		sizeX:0,
+		query:getTemplateQuery(),
+		setsBody:[],
+		setsFooter:[],
+		setsHeader:[],
+		captions:{
+			docColumnTitle:{}
+		}
+	};
+};
 export function getTemplateDocField(content,attributeIndex,attributeId) {
 	if(attributeIndex === undefined) attributeIndex = 0;
 	if(attributeId    === undefined) attributeId    = null;

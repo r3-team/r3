@@ -46,6 +46,7 @@ export default {
 					:fieldIdOptions
 					:isRoot="true"
 					:joins
+					:moduleId
 					:parentSizeX="pageSizeX - margin.l - margin.r"
 					:parentSizeY="pageSizeY - margin.t - margin.b"
 					:readonly
@@ -56,7 +57,6 @@ export default {
 				<my-builder-doc-field
 					v-model="page.header.fieldGrid"
 					@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
-					:allowResize="false"
 					:builderLanguage
 					:elmFieldOptions
 					:elmFieldTitle
@@ -64,6 +64,7 @@ export default {
 					:fieldIdOptions
 					:isRoot="true"
 					:joins
+					:moduleId
 					:parentSizeX="pageSizeX"
 					:parentSizeY="margin.t"
 					:readonly
@@ -74,7 +75,6 @@ export default {
 				<my-builder-doc-field
 					v-model="page.footer.fieldGrid"
 					@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
-					:allowResize="false"
 					:builderLanguage
 					:elmFieldOptions
 					:elmFieldTitle
@@ -82,6 +82,7 @@ export default {
 					:fieldIdOptions
 					:isRoot="true"
 					:joins
+					:moduleId
 					:parentSizeX="pageSizeX"
 					:parentSizeY="margin.b"
 					:readonly
@@ -170,6 +171,7 @@ export default {
 		fieldIdOptions: { type:[String,null], required:true },
 		joins:          { type:Array,         required:true },
 		modelValue:     { type:Object,        required:true },
+		moduleId:       { type:String,        required:true },
 		pages:          { type:Array,         required:true },
 		readonly:       { type:Boolean,       required:true },
 		zoom:           { type:Number,        required:true }

@@ -114,6 +114,7 @@ export default {
 					:entityIdMapRef
 					:fieldIdOptions="sideFieldIdShow"
 					:joins="doc.query.joins"
+					:moduleId="doc.moduleId"
 					:pages="doc.pages"
 					:readonly
 					:zoom
@@ -162,14 +163,14 @@ export default {
 					/>
 
 					<!-- field templates -->
-					<div class="builder-doc-template-fields">
-						<div class="builder-doc-template-field" draggable="true"
+					<div class="builder-doc-templates">
+						<div class="builder-doc-template" draggable="true"
 							@dragstart="fieldDragStart($event,f)"
 							v-for="f in fieldsTemplate"
 							:class="{ 'isLayout':f.content === 'flow' || f.content === 'grid', 'notData':f.content !== 'data' }"
 							:key="f.id"
 						>
-							<img class="builder-doc-template-field-icon" :src="'images/' + getDocFieldIcon(f)" />
+							<img class="builder-doc-template-icon" :src="'images/' + getDocFieldIcon(f)" />
 							<span>{{ getDocFieldTitle(entityIdMapRef,f,true) }}</span>
 						</div>
 					</div>
@@ -375,6 +376,7 @@ export default {
 			let f = JSON.parse(JSON.stringify(field));
 			f.id = this.getUuidV4();
 			e.dataTransfer.setData('application/json',JSON.stringify(f));
+			e.dataTransfer.setData('doc-field','');
 			e.dataTransfer.setDragImage(e.srcElement,0,0);
 		},
 		pageAdd() {

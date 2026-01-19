@@ -1,4 +1,3 @@
-
 import {getAttributeIcon} from './attribute.js';
 import MyStore from '../../stores/store.js';
 
@@ -34,6 +33,15 @@ export function getDocEntityMapRef(doc) {
 			collectFromField(p.footer.fieldGrid);
 	}
 	return refs;
+};
+
+export function getDocColumnTitle(c) {
+	if(c.subQuery)
+		return 'SubQuery';
+
+	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+	const rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
+	return `${c.attributeIndex} ${rel.name}.${atr.name}`
 };
 
 export function getDocFieldIcon(field) {

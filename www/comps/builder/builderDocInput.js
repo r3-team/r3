@@ -145,7 +145,7 @@ const MyBuilderDocHeaderFooter = {
 
 		// inputs
 		active:       { type:Boolean,       required:true },
-		fieldGrid:    { type:Object,        required:true },
+		fieldGrid:    { type:[Object,null], required:true },
 		pageIdInherit:{ type:[String,null], required:true }
 	},
 	emits:['update:active','update:fieldGrid','update:pageIdInherit'],
@@ -159,15 +159,20 @@ const MyBuilderDocHeaderFooter = {
 
 		// actions
 		setActive(v) {
-			let f = this.getTemplateDocField(this.isHeader ? 'gridHeader' : 'gridFooter');
-			f.sizeX = this.pageSizeX;
-			f.sizeY = this.sizeMax;
+			let f = null;
+			if(v === true) {
+				f = this.getTemplateDocField(this.isHeader ? 'gridHeader' : 'gridFooter');
+				f.sizeX = this.pageSizeX;
+				f.sizeY = this.sizeMax;
+			}
 			this.$emit('update:active',v);
 			this.$emit('update:fieldGrid',f);
 			this.$emit('update:pageIdInherit',null);
 		},
 		setPageIdInherit(v) {
-			this.$emit('update:pageIdInherit',v !== '' ? v : null);
+			const validPage = v !== '';
+			this.$emit('update:fieldGrid',validPage ? null : this.getTemplateDocField(this.isHeader ? 'gridHeader' : 'gridFooter'));
+			this.$emit('update:pageIdInherit',validPage ? v : null);
 		}
 	}
 };

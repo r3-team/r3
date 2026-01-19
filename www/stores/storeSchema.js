@@ -71,15 +71,16 @@ const MyStoreSchema = {
 				return fields;
 			};
 			const processDocField = field => {
+				if(field === null) // not used header/footer
+					return null;
+
 				if(field.query !== undefined)
 					field.query = getTemplateQueryIfNull(field.query);
 				
-				switch(field.content) {
-					case 'flow':       // fallthrough
-					case 'flowBody':   // fallthrough
-					case 'grid':       // fallthrough
-					case 'gridFooter': // fallthrough
-					case 'gridHeader': field.fields = processDocField(field.fields); break;
+				if(field.fields !== undefined) {
+					for(let i = 0, j = field.fields.length; i < j; i++) {
+						field.fields[i] = processDocField(field.fields[i]);
+					}
 				}
 				return field;
 			};

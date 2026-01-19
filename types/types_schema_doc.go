@@ -1,6 +1,8 @@
 package types
 
 import (
+	"encoding/json"
+
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -209,4 +211,16 @@ type DocStateEffect struct {
 	DocFieldId pgtype.UUID `json:"docFieldId"` // affected field
 	DocPageId  pgtype.UUID `json:"docPageId"`  // affected page
 	NewState   bool        `json:"newState"`   // show or no-show
+}
+
+// custom marshallers
+// use local type to avoid marshal loop (has same fields but none of the original methods)
+func (src DocFieldGrid) MarshalJSON() ([]byte, error) {
+
+	// if ID is not set, field is null (header/footer field)
+	if src.Id == uuid.Nil {
+		return []byte("null"), nil
+	}
+	type alias DocFieldGrid
+	return json.Marshal(alias(src))
 }

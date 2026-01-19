@@ -50,8 +50,8 @@
 	flex-flow:column nowrap;
 }
 
-/* field templates */
-.builder-doc-template-fields{
+/* templates */
+.builder-doc-templates{
 	width:100%;
 	max-width:500px;
 	display:flex;
@@ -60,7 +60,7 @@
 	border-radius:5px;
 	overflow:hidden;
 }
-.builder-doc-template-field{
+.builder-doc-template{
 	flex:0 0 100%;
 	box-sizing:border-box;
 	display:flex;
@@ -72,15 +72,15 @@
 	min-height:32px;
 	cursor:move;
 }
-.builder-doc-template-field-icon{
-	width:24px;
-	height:24px;
-}
-.builder-doc-template-field.notData{
+.builder-doc-template.notData{
 	flex:1 0 40%;
 }
-.builder-doc-template-field.isLayout{
+.builder-doc-template.isLayout{
 	background-color:var(--color-form-builder-container);
+}
+.builder-doc-template-icon{
+	width:24px;
+	height:24px;
 }
 
 /* field */
