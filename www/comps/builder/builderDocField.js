@@ -19,36 +19,35 @@ export default {
 		MyInputRange
 	},
 	template:`<div class="builder-doc-field" ref="field"
+		@dragenter="dragEnter"
+		@dragleave="dragLeave"
+		@dragend.stop="dragEnd"
+		@dragstart.stop="dragStart"
+		@dragover.prevent
+		@drop="drop"
 		@mousedown.stop="mousedown"
 		@mouseup.stop="mouseup"
 		:class="classCss"
+		:draggable="!isRoot"
 		:style
 		:key="field.id"
 	>
-		<div class="builder-doc-field-title" v-if="!isParent">{{ title }}</div>
+		<div class="builder-doc-field-title"    v-if="!isParent && !isDragPreview">{{ title }}</div>
+		<div class="builder-doc-fields-bg-text" v-if="isParent">F{{ entityIdMapRef.field[field.id] }}</div>
 
-		<span v-if="isDragPreview">PREV</span>
-
-		<div class="builder-doc-fields"
+		<div class="builder-doc-fields" ref="fields"
 			v-if="isParent"
-			@dragenter.stop="dragEnter"
-			@dragleave.stop="dragLeave"
-			@dragover.prevent
-			@drop.stop="drop"
 			:class="{ 'layout-flow':isFlow, 'layout-grid':isGrid }"
 			:style="styleChildren"
 		>
-			<my-builder-doc-field draggable="true"
+			<my-builder-doc-field
 				v-for="(f,i) in field.fields"
 				v-model="f"
+				@dragChildEnd="dragChildEnd(f.id)"
+				@dragChildEnter="dragChildEnter(i)"
 				@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 				@setFieldIdOptionsParent="$emit('setFieldIdOptions',field.id)"
-				@dragenter.stop="dragEnterField($event,i)"
-				@dragleave.stop
-				@dragend.stop="dragEnd"
-				@dragstart.stop="dragStart($event,f)"
 				:builderLanguage
-				:class="{ 'drag-source':f.id === fieldIdDragged }"
 				:elmFieldOptions
 				:elmFieldTitle
 				:entityIdMapRef
@@ -86,7 +85,7 @@ export default {
 						<td><my-bool v-model="field.state" :readonly /></td>
 					</tr>
 					
-					<template v-if="(isGrid || isChildGrid) && allowResize">
+					<template v-if="allowResize">
 						<tr v-if="isChildGrid">
 							<td>{{ capGen.sizeX }}</td>
 							<td>
@@ -183,32 +182,49 @@ export default {
 		parentSizeY:    { type:Number,        required:true },
 		isChildGrid:    { type:Boolean,       required:false, default:false },
 		isChildFlow:    { type:Boolean,       required:false, default:false },
+		isRoot:         { type:Boolean,       required:false, default:false },
 		readonly:       { type:Boolean,       required:true },
 		zoom:           { type:Number,        required:true }
 	},
 	data() {
 		return {
-			borderSizeEmpty:0.2,        // default border size, if 0 is given but border is drawn
-			fieldIdDragged:null,        // ID of child field being dragged
-			fieldIndexDragPreview:null, // index of child field that something is being dragged over
-			fieldIndexDropped:null,     // index of child field that was just dropped (to block removal)
+			beingDragged:false,
+			borderSizeEmpty:0.2, // default border size, if 0 is given but border is drawn
+			dragEnterCounter:0,
 			gridFieldSizeMinX:0,
 			gridFieldSizeMinY:5,
 			pixelToMm:25.4 / 96,
-			sizeXOnMousedown:0, // to check whether element was resized
-			sizeYOnMousedown:0  // to check whether element was resized
+			sizeXOnMousedown:0,  // to check whether element was resized
+			sizeYOnMousedown:0   // to check whether element was resized
 		};
 	},
-	emits:['setFieldIdOptions','setFieldIdOptionsParent','update:modelValue'],
+	emits:['dragChildEnd','dragChildEnter','setFieldIdOptions','setFieldIdOptionsParent','update:modelValue'],
 	computed:{
 		classCss:s => {
 			return {
 				flow:s.isFlow,
-				'drag-preview':s.isDragPreview,
+				'dragPreview':s.isDragPreview,
+				'dragSource':s.beingDragged,
 				'resizable-both':s.allowResize && s.isChildGrid,
 				'resizable-height':s.allowResize && s.isChildFlow,
 				selected:s.isOptionsShow
 			};
+		},
+		styleBorder:s => {
+			if(!s.isWithBorder || s.field.border.draw === '')
+				return '';
+
+			const color = s.field.border.color === null ? '000000' : s.field.border.color;
+			let out = `border:${s.borderSize*s.zoom}mm solid #${color};`;
+
+			if(s.bordersAll)
+				return out;
+
+			if(s.borderSizeT === 0) out += 'border-top:none;';
+			if(s.borderSizeR === 0) out += 'border-right:none;';
+			if(s.borderSizeB === 0) out += 'border-bottom:none;';
+			if(s.borderSizeL === 0) out += 'border-left:none;';
+			return out;
 		},
 		styleChildren:s => s.isGrid
 			? `background-size:${s.field.sizeSnap*s.zoom}mm ${s.field.sizeSnap*s.zoom}mm;`
@@ -221,40 +237,43 @@ export default {
 			set(v) { this.$emit('update:modelValue',v); }
 		},
 
+		// styling
+		bordersAll: s => s.isWithBorder && s.field.border.draw === '1',
+		borderSize: s => s.isWithBorder && s.field.border.draw !== '' ? (s.field.border.size !== 0 ? s.field.border.size : s.borderSizeEmpty) : 0,
+		borderSizeT:s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('T')) ? s.borderSize : 0,
+		borderSizeR:s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('R')) ? s.borderSize : 0,
+		borderSizeB:s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('B')) ? s.borderSize : 0,
+		borderSizeL:s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('L')) ? s.borderSize : 0,
+		borderX:    s => s.borderSizeL+s.borderSizeR,
+		borderY:    s => s.borderSizeT+s.borderSizeB,
+		padding:    s => s.isFlow ? s.field.padding : { t:0, r:0, b:0, l:0 },
+		paddingX:   s => s.padding.l+s.padding.r,
+		paddingY:   s => s.padding.t+s.padding.b,
+		sizeX:      s => s.field.sizeX !== 0 ? s.field.sizeX-s.borderX-s.paddingX : s.parentSizeX-s.borderX-s.paddingX,
+		sizeY:      s => s.field.sizeY !== 0 ? s.field.sizeY-s.borderY-s.paddingY : s.parentSizeY-s.borderY-s.paddingY,
+		sizeXMax:   s => s.parentSizeX - s.field.posX,
+		sizeYMax:   s => s.parentSizeY - s.field.posY,
+		style:      s => `${s.styleHeight}${s.styleGrid}${s.styleBorder}`,
+		styleGrid:  s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;height:${s.field.sizeY*s.zoom}mm;` : '',
+		styleHeight:s => s.isFlow && s.field.sizeY === 0 ? '' : `height:${s.field.sizeY*s.zoom}mm;`,
+
 		// simple
 		attribute:    s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
-		bordersAll:   s => s.isWithBorder && s.field.border.draw === '1',
-		borderSize:   s => s.isWithBorder && s.field.border.draw !== '' ? (s.field.border.size !== 0 ? s.field.border.size : s.borderSizeEmpty) : 0,
-		borderSizeT:  s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('T')) ? s.borderSize : 0,
-		borderSizeR:  s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('R')) ? s.borderSize : 0,
-		borderSizeB:  s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('B')) ? s.borderSize : 0,
-		borderSizeL:  s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('L')) ? s.borderSize : 0,
-		borderX:      s => s.borderSizeL+s.borderSizeR,
-		borderY:      s => s.borderSizeT+s.borderSizeB,
 		isChild:      s => s.isChildFlow || s.isChildGrid,
 		isData:       s => s.field.content === 'data',
-		isDragPreview:s => s.field.content === 'dragDropPreview',
+		isDragPreview:s => s.field.content === s.dragContent,
 		isFlow:       s => ['flow','flowBody'].includes(s.field.content),
 		isGrid:       s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
 		isParent:     s => s.isFlow || s.isGrid,
 		isOptionsShow:s => s.fieldIdOptions === s.field.id,
 		isWithBorder: s => s.isFlow || s.isGrid,
-		padding:      s => s.isFlow ? s.field.padding : { t:0, r:0, b:0, l:0 },
-		paddingX:     s => s.padding.l+s.padding.r,
-		paddingY:     s => s.padding.t+s.padding.b,
-		sizeX:        s => s.field.sizeX !== 0 ? s.field.sizeX-s.borderX-s.paddingX : s.parentSizeX-s.borderX-s.paddingX,
-		sizeY:        s => s.field.sizeY !== 0 ? s.field.sizeY-s.borderY-s.paddingY : s.parentSizeY-s.borderY-s.paddingY,
-		sizeXMax:     s => s.parentSizeX - s.field.posX,
-		sizeYMax:     s => s.parentSizeY - s.field.posY,
-		style:        s => `${s.styleHeight}${s.styleGrid}${s.getBorderCss(s.field.border)}`,
-		styleGrid:    s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;height:${s.field.sizeY*s.zoom}mm;` : '',
-		styleHeight:  s => s.isFlow && s.field.sizeY === 0 ? '' : `height:${s.field.sizeY*s.zoom}mm;`,
 		title:        s => s.getDocFieldTitle(s.entityIdMapRef,s.field,false),
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
 		capApp:        s => s.$store.getters.captions.builder.doc,
-		capGen:        s => s.$store.getters.captions.generic
+		capGen:        s => s.$store.getters.captions.generic,
+		dragContent:   s => s.$store.getters.constants.dragFieldContent
 	},
 	methods:{
 		// externals
@@ -263,32 +282,7 @@ export default {
 		getTemplateDocField,
 
 		// presentation
-		adjustSizeToSnap(sizeX,sizeY) {
-			const sizeXClean = this.getSizeClean(this.isChildGrid,this.field.posX,sizeX,this.parentSizeX,this.gridFieldSizeMinX,this.gridParentSnap);
-			const sizeYClean = this.getSizeClean(this.isChildGrid,this.field.posY,sizeY,this.parentSizeY,this.gridFieldSizeMinY,this.gridParentSnap);
-
-			if(sizeXClean !== sizeX || sizeYClean !== sizeY) {
-				this.field.sizeX = sizeXClean;
-				this.field.sizeY = sizeYClean;
-			}
-		},
-		getBorderCss(b) {
-			if(!this.isWithBorder || b.draw === '')
-				return '';
-
-			const color = b.color === null ? '000000' : b.color;
-			let s = `border:${this.borderSize*this.zoom}mm solid #${color};`;
-
-			if(this.bordersAll)
-				return s;
-
-			if(this.borderSizeT === 0) s += 'border-top:none;';
-			if(this.borderSizeR === 0) s += 'border-right:none;';
-			if(this.borderSizeB === 0) s += 'border-bottom:none;';
-			if(this.borderSizeL === 0) s += 'border-left:none;';
-			return s;
-		},
-		getSizeClean(isChildGrid,posChild,sizeChild,sizeParent,sizeMin,sizeSnap) {
+		getSizeAfterSnap(isChildGrid,posChild,sizeChild,sizeParent,sizeMin,sizeSnap) {
 			// limit size to parent size
 			if(isChildGrid && posChild + sizeChild > sizeParent)
 				sizeChild = sizeParent - posChild;
@@ -315,68 +309,101 @@ export default {
 			const sizeX = rect.width  * this.pixelToMm / this.zoom;
 			const sizeY = rect.height * this.pixelToMm / this.zoom;
 
-			if(this.sizeXOnMousedown !== sizeX || this.sizeYOnMousedown !== sizeY)
-				this.adjustSizeToSnap(sizeX,sizeY);
-			else
-				this.$emit('setFieldIdOptions',this.field.id);
+			// size not changed, assume direct click to access field options
+			if(this.sizeXOnMousedown === sizeX && this.sizeYOnMousedown === sizeY)
+				return this.$emit('setFieldIdOptions',this.field.id);
+			
+			if(this.isChildGrid) {
+				const sizeXClean = this.getSizeAfterSnap(this.isChildGrid,this.field.posX,sizeX,this.parentSizeX,this.gridFieldSizeMinX,this.gridParentSnap);
+				const sizeYClean = this.getSizeAfterSnap(this.isChildGrid,this.field.posY,sizeY,this.parentSizeY,this.gridFieldSizeMinY,this.gridParentSnap);
+				if(sizeXClean !== sizeX || sizeYClean !== sizeY) {
+					this.field.sizeX = sizeXClean;
+					this.field.sizeY = sizeYClean;
+				}
+			} else {
+				this.field.sizeX = sizeX;
+				this.field.sizeY = sizeY;
+			}
 		},
 
 		// drag & drop
-		dragPreviewCreate(index) {
-			if(this.isFlow && this.fieldIndexDragPreview === null) {
-				this.field.fields.splice(index,0,this.getTemplateDocField('dragDropPreview',null,null));
-				this.fieldIndexDragPreview = index;
-			}
+		dragPreviewGetIndex() {
+			return this.field.fields.findIndex(v => v.content === this.dragContent);
 		},
 		dragPreviewRemove() {
-			if(this.isFlow && this.fieldIndexDragPreview !== null) {
-				this.field.fields.splice(this.field.fields.findIndex(v => v.content === 'dragDropPreview'),1);
-				this.fieldIndexDragPreview = null;
+			if(this.isFlow) {
+				const ind = this.dragPreviewGetIndex();
+				if(ind !== -1) this.field.fields.splice(ind,1);
+			}
+		},
+		dragPreviewUpdate(index) {
+			if(this.isFlow) {
+				this.dragPreviewRemove();
+				this.field.fields.splice(index,0,this.getTemplateDocField(this.dragContent,null,null));
 			}
 		},
 
 		// drag source
 		dragEnd(e) {
-			if(e.dataTransfer.dropEffect !== 'none') {
-				this.field.fields.splice(this.field.fields.findIndex((v,i) => i !== this.fieldIndexDropped && v.id === this.fieldIdDragged),1);
-				this.fieldIdDragged    = null;
-				this.fieldIndexDropped = null;
-			}
-			if(this.fieldIdDragged !== null)
-				this.fieldIdDragged = null;
+			if(e.dataTransfer.dropEffect !== 'none')
+				this.$emit('dragChildEnd');
+
+			this.beingDragged = false;
 		},
-		dragStart(e,field) {
+		dragStart(e) {
 			// store field for later drop & adjust ghost image to start at mouse position
-			e.dataTransfer.setData('application/json',JSON.stringify(field));
+			e.dataTransfer.setData('application/json',JSON.stringify(this.field));
 			e.dataTransfer.setDragImage(e.srcElement,0,0);
 
 			// store field index for removal from the source on later drop
 			// timeout serves to make sure that ghost image is taken before hidden CSS is applied
-			setTimeout(() => this.fieldIdDragged = field.id,50);
+			setTimeout(() => this.beingDragged = true,50);
+		},
+
+		// drag source child
+		dragChildEnd(fieldId) {
+			const pos = this.field.fields.findIndex(v => v.id === fieldId);
+			if(pos !== -1)
+				this.field.fields.splice(pos,1);
+		},
+		dragChildEnter(index) {
+			this.dragPreviewUpdate(index);
 		},
 
 		// drag target
 		dragEnter(e) {
-			e.preventDefault(); // to allow drop on parent
+			if(!this.isParent) {
+				if(!this.isDragPreview)
+					this.$emit('dragChildEnter');
+				
+				return;
+			}
 
-			// generate preview if dragover occurs on this elm and preview does not exist yet
-			if(e.target === e.currentTarget)
-				this.dragPreviewCreate(this.field.fields.length);
-		},
-		dragEnterField(e,fieldIndex) {
-			e.preventDefault(); // to allow drop on parent
+			e.stopPropagation();
+			this.dragEnterCounter++;
 
-			if(this.fieldIndexDragPreview !== null)
-				this.dragPreviewRemove();
-
-			this.dragPreviewCreate(fieldIndex);
+			if(this.dragEnterCounter === 1)
+				this.dragPreviewUpdate(this.field.fields.length);
 		},
 		dragLeave(e) {
-			this.dragPreviewRemove();
+			if(!this.isParent)
+				return;
+
+			e.stopPropagation();
+			this.dragEnterCounter--;
+
+			if(this.dragEnterCounter === 0)
+				this.dragPreviewRemove();
 		},
 		drop(e) {
+			if(!this.isParent)
+				return;
+			
+			e.stopPropagation();
+			this.dragEnterCounter = 0;
+			
 			const field         = JSON.parse(e.dataTransfer.getData('application/json'));
-			const fieldsElm     = e.currentTarget; // the valid drop elm, ie. fields container
+			const fieldsElm     = this.$refs.fields;
 			const fieldsElmRect = fieldsElm.getBoundingClientRect();
 			const gridSizeX     = fieldsElmRect.width  * this.pixelToMm / this.zoom;
 			const gridSizeY     = fieldsElmRect.height * this.pixelToMm / this.zoom;
@@ -394,23 +421,21 @@ export default {
 				if(field.sizeX === 0) field.sizeX = gridSizeX / 2;
 				if(field.sizeY === 0) field.sizeY = this.gridFieldSizeMinY;
 
-				field.sizeX = this.getSizeClean(true,field.posX,field.sizeX,gridSizeX,this.gridFieldSizeMinX,this.field.sizeSnap);
-				field.sizeY = this.getSizeClean(true,field.posY,field.sizeY,gridSizeY,this.gridFieldSizeMinY,this.field.sizeSnap);
+				field.sizeX = this.getSizeAfterSnap(true,field.posX,field.sizeX,gridSizeX,this.gridFieldSizeMinX,this.field.sizeSnap);
+				field.sizeY = this.getSizeAfterSnap(true,field.posY,field.sizeY,gridSizeY,this.gridFieldSizeMinY,this.field.sizeSnap);
 			}
 
 			if(this.isFlow) {
 				field.sizeX = 0;
 
-				if(field.sizeY === 0)
+				// set min. size for grid fields
+				if(field.sizeY === 0 && field.content === 'grid')
 					field.sizeY = 6;
 			}
 
-			if(this.fieldIndexDragPreview === null)
-				return this.field.fields.push(field);
-			
-			this.field.fields.splice(this.fieldIndexDragPreview,1,field);
-			this.fieldIndexDropped     = this.fieldIndexDragPreview;
-			this.fieldIndexDragPreview = null;
+			const indPreview = this.dragPreviewGetIndex();
+			if(indPreview !== -1) this.field.fields.splice(indPreview,1,field);
+			else                  this.field.fields.push(field);
 		}
 	}
 };

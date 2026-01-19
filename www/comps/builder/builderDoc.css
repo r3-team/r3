@@ -85,20 +85,22 @@
 
 /* field */
 .builder-doc-field{
+	min-height:4mm; /* to allow access regardles of defined height */
 	box-sizing:border-box;
 	display:flex;
 	flex-flow:column nowrap;
 	background-color:white;
+	position:relative;
+	outline:1px solid var(--color-border);
 }
-.builder-doc-field.selected{
-	outline:4px solid var(--color-form-builder-selected);
-}
-.builder-doc-field.drag-source{
+.builder-doc-field.dragSource{
 	display:none;
 }
-.builder-doc-field.drag-preview{
+.builder-doc-field.dragPreview{
+	min-height:8mm;
 	pointer-events:none;
-	border:2px dashed blue;
+	border:3px dashed var(--color-border);
+	border-radius:3px;
 }
 .builder-doc-field.flow{
 	flex:1 1 auto;
@@ -110,6 +112,10 @@
 .builder-doc-field.resizable-height{
 	resize:vertical;
 	overflow:hidden;
+}
+.builder-doc-field.selected{
+	background-color:var(--color-form-builder-selected);
+	outline:3px solid var(--color-form-builder-selected);
 }
 
 /* field children */
@@ -129,6 +135,14 @@
 	background-image:
 		linear-gradient(to right,  transparent 0px, rgba(0,0,0,0.3) 1px, transparent 1.6px),
 		linear-gradient(to bottom, transparent 0px, rgba(0,0,0,0.3) 1px, transparent 1.6px);
+}
+.builder-doc-fields-bg-text{
+	position:absolute;
+	font-size:130%;
+	left:50%;
+	top:50%;
+	transform:translate(-50%,-50%);
+	opacity:0.8;
 }
 
 /* header / footer */

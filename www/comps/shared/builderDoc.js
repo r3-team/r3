@@ -9,6 +9,9 @@ export function getDocEntityMapRef(doc) {
 	const parents = ['flow','flowBody','grid','gridFooter','gridHeader'];
 
 	const collectFromField = field => {
+		if(field.content === MyStore.getters.constants.dragFieldContent)
+			return;
+
 		refs.field[field.id] = ctrFields++;
 
 		if(!parents.includes(field.content))

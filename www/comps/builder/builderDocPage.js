@@ -44,6 +44,7 @@ export default {
 					:elmFieldTitle
 					:entityIdMapRef
 					:fieldIdOptions
+					:isRoot="true"
 					:joins
 					:parentSizeX="pageSizeX - margin.l - margin.r"
 					:parentSizeY="pageSizeY - margin.t - margin.b"
@@ -61,6 +62,7 @@ export default {
 					:elmFieldTitle
 					:entityIdMapRef
 					:fieldIdOptions
+					:isRoot="true"
 					:joins
 					:parentSizeX="pageSizeX"
 					:parentSizeY="margin.t"
@@ -78,6 +80,7 @@ export default {
 					:elmFieldTitle
 					:entityIdMapRef
 					:fieldIdOptions
+					:isRoot="true"
 					:joins
 					:parentSizeX="pageSizeX"
 					:parentSizeY="margin.b"
