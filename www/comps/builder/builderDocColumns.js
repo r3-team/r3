@@ -10,6 +10,7 @@ export default {
 		@dragover="dragOver"
 		@drop="drop"
 	>
+		<div class="builder-doc-bg-text">{{ capGen.columns }}</div>
 		<div class="builder-doc-column"
 			v-for="(c,i) in columns"
 			@dragenter="dragEnter($event,i)"

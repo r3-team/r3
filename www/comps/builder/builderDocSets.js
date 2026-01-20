@@ -186,36 +186,38 @@ const MyBuilderDocSetTarget = {
 export default {
 	name:'my-builder-doc-sets',
 	components:{MyBuilderDocSetTarget},
-	template:`
-		<template v-if="targetsDoc">
-			<tr><td><b>{{ capGen.overwrites + ' (' + capGen.document + ')' }}</b></td></tr>
-			<my-builder-doc-set-target
-				v-for="t in targetsListDoc"
-				@apply="apply(t,$event)"
-				@remove="remove(t)"
-				:allowData
-				:allowValue
-				:joins
-				:readonly
-				:sets="modelValue"
-				:target="t"
-			/>
-		</template>
-		<template v-if="targetsFont">
-			<tr><td><b>{{ capGen.overwrites + ' (' + capGen.font + ')' }}</b></td></tr>
-			<my-builder-doc-set-target
-				v-for="t in targetsListFont"
-				@apply="apply(t,$event)"
-				@remove="remove(t)"
-				:allowData
-				:allowValue
-				:joins
-				:readonly
-				:sets="modelValue"
-				:target="t"
-			/>
-		</template>
-	`,
+	template:`<table class="generic-table-vertical default-inputs">
+		<tbody>
+			<template v-if="targetsDoc">
+				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.document + ')' }}</b></td></tr>
+				<my-builder-doc-set-target
+					v-for="t in targetsListDoc"
+					@apply="apply(t,$event)"
+					@remove="remove(t)"
+					:allowData
+					:allowValue
+					:joins
+					:readonly
+					:sets="modelValue"
+					:target="t"
+				/>
+			</template>
+			<template v-if="targetsFont">
+				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.font + ')' }}</b></td></tr>
+				<my-builder-doc-set-target
+					v-for="t in targetsListFont"
+					@apply="apply(t,$event)"
+					@remove="remove(t)"
+					:allowData
+					:allowValue
+					:joins
+					:readonly
+					:sets="modelValue"
+					:target="t"
+				/>
+			</template>
+		</tbody>
+	</table>`,
 	props:{
 		allowData:  { type:Boolean, required:false, default:false },
 		allowValue: { type:Boolean, required:false, default:false },

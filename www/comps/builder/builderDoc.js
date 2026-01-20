@@ -129,18 +129,7 @@ export default {
 					<h1>{{ capGen.document }}</h1>
 				</div>
 			</div>
-			<div class="top lower" v-show="sideFieldShow" :class="{ clickable:sideColumnShow }" @click="sideColumnIdShow = null;">
-				<div class="area">
-					<h2 ref="fieldOptionsTitle"></h2>
-				</div>
-				<div class="area">
-					<my-button image="cancel.png"
-						@trigger="sideFieldIdShow = null; sideColumnIdShow = null;"
-						:cancel="true"
-						:captionTitle="capGen.button.close"
-					/>
-				</div>
-			</div>
+			<div class="top lower" ref="fieldOptionsTitle" v-show="sideFieldShow" :class="{ clickable:sideColumnShow }" @click="sideColumnIdShow = null;"></div>
 			
 			<!-- document -->
 			<template v-if="sideDocShow">
@@ -170,7 +159,7 @@ export default {
 							:class="{ 'isLayout':f.content === 'flow' || f.content === 'grid', 'notData':f.content !== 'data' }"
 							:key="f.id"
 						>
-							<img class="builder-doc-template-icon" :src="'images/' + getDocFieldIcon(f)" />
+							<img class="builder-doc-element-icon" :src="'images/' + getDocFieldIcon(f)" />
 							<span>{{ getDocFieldTitle(entityIdMapRef,f,true) }}</span>
 						</div>
 					</div>
@@ -218,16 +207,16 @@ export default {
 								v-model:style="doc.font.style"
 								:readonly
 							/>
-							<my-builder-doc-sets
-								v-model="doc.sets"
-								:allowData="true"
-								:joins="doc.query.joins"
-								:readonly
-								:targetsDoc="true"
-								:targetsFont="true"
-							/>
 						</tbody>
 					</table>
+					<my-builder-doc-sets
+						v-model="doc.sets"
+						:allowData="true"
+						:joins="doc.query.joins"
+						:readonly
+						:targetsDoc="true"
+						:targetsFont="true"
+					/>
 				</div>
 				
 				<!-- page options -->

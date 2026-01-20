@@ -1,8 +1,10 @@
 import MyBuilderDocColumns       from './builderDocColumns.js';
 import MyBuilderDocSets          from './builderDocSets.js';
 import MyBuilderQuery            from './builderQuery.js';
+import MyInputColorWrap          from '../inputColorWrap.js';
 import MyInputDecimal            from '../inputDecimal.js';
 import MyInputRange              from '../inputRange.js';
+import MyTabs                    from '../tabs.js';
 import {isAttributeRelationship} from '../shared/attribute.js';
 import {getUuidV4}               from '../shared/crypto.js';
 import {copyValueDialog}         from '../shared/generic.js';
@@ -12,6 +14,7 @@ import {
 } from './builderDocInput.js';
 import {
 	getDocColumnTitle,
+	getDocFieldIcon,
 	getDocFieldTitle
 } from '../shared/builderDoc.js';
 import {
@@ -27,8 +30,10 @@ export default {
 		MyBuilderDocMarginPadding,
 		MyBuilderDocSets,
 		MyBuilderQuery,
+		MyInputColorWrap,
 		MyInputDecimal,
-		MyInputRange
+		MyInputRange,
+		MyTabs
 	},
 	template:`<div class="builder-doc-field" ref="field"
 		@dragenter="dragEnter"
@@ -44,8 +49,12 @@ export default {
 		:style
 		:key="field.id"
 	>
-		<div class="builder-doc-field-title"    v-if="!isWithFields && !isDragPreview">{{ title }}</div>
-		<div class="builder-doc-fields-bg-text" v-if="isWithFields">F{{ entityIdMapRef.field[field.id] }}</div>
+		<div class="builder-doc-field-title-bar" v-if="!isWithFields">
+			<img class="builder-doc-element-icon" :src="'images/' + getDocFieldIcon(field)" />
+			<img class="builder-doc-element-icon" v-if="!field.state" src="images/visible0.png" />
+			<div v-if="!isWithFields && !isDragPreview">{{ title }}</div>
+		</div>
+		<div class="builder-doc-bg-text" v-if="isWithFields">F{{ entityIdMapRef.field[field.id] }}</div>
 
 		<my-builder-doc-columns
 			v-if="isWithColumns && isOptionsShow"
@@ -89,20 +98,24 @@ export default {
 
 		<!-- options -->
 		<teleport v-if="isOptionsShow" :to="elmFieldTitle">
-			<span>{{ title }}</span>
+			<div class="area">
+				<img class="builder-doc-element-icon" :src="'images/' + getDocFieldIcon(field)" />
+				<h2>{{ title }}</h2>
+			</div>
+			<div class="area">
+				<my-button image="upward.png"   @trigger="$emit('setFieldIdOptionsParent')" :active="isChild" :caption="capApp.button.selectParent" />
+				<my-button image="visible1.png" @trigger="copyValueDialog(field.content,field.id,field.id)" :caption="capGen.id" />
+				<my-button image="cancel.png"
+					@trigger="$emit('setFieldIdOptions',null)"
+					:cancel="true"
+					:captionTitle="capGen.button.close"
+				/>
+			</div>
 		</teleport>
 
 		<teleport v-if="isOptionsShow" :to="elmFieldOptions">
 			<table class="generic-table-vertical default-inputs">
 				<tbody>
-					<tr>
-						<td colspan="2">
-							<div class="row centered space-between">
-								<my-button image="upward.png"   @trigger="$emit('setFieldIdOptionsParent')" :active="isChild" :caption="capApp.button.selectParent" />
-								<my-button image="visible1.png" @trigger="copyValueDialog(field.content,field.id,field.id)" :caption="capGen.id" />
-							</div>
-						</td>
-					</tr>
 					<tr>
 						<td>{{ capGen.showDefault1 }}</td>
 						<td><my-bool v-model="field.state" :readonly /></td>
@@ -159,44 +172,19 @@ export default {
 								</div>
 							</td>
 						</tr>
+					</template>
+
+					<template v-if="isList || isFlow">
 						<my-builder-doc-margin-padding
 							v-model:t="field.padding.t"
 							v-model:r="field.padding.r"
 							v-model:b="field.padding.b"
 							v-model:l="field.padding.l"
+							:label="capGen.spacingCell"
 							:readonly
 						/>
 					</template>
 
-					<template v-if="isList">
-						<tr>
-							<td colspan="2">
-								<my-builder-query
-									v-model="field.query"
-									@index-removed=""
-									:allowChoices="false"
-									:builderLanguage
-									:filtersDisable
-									:moduleId="moduleId"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td colspan="2">
-								<div class="builder-doc-templates">
-									<div class="builder-doc-template" draggable="true"
-										@dragstart="dragStartColumnTemplate($event,c)"
-										v-for="c in columnsTemplate"
-										:key="c.id"
-									>
-										<span>{{ getDocColumnTitle(c) }}</span>
-									</div>
-								</div>
-							</td>
-						</tr>
-
-					</template>
-					
 					<my-builder-doc-border
 						v-if="isWithBorder"
 						v-model:cell="field.border.cell"
@@ -208,16 +196,108 @@ export default {
 						:allowCell="false"
 						:readonly
 					/>
-					<my-builder-doc-sets
-						v-model="field.sets"
-						:allowData="true"
-						:allowValue="true"
-						:joins
-						:readonly
-						:targetsFont="true"
-					/>
 				</tbody>
 			</table>
+			
+			<template v-if="isList">
+				<div class="content grow">
+					<my-builder-query
+						v-model="field.query"
+						@index-removed=""
+						:allowChoices="false"
+						:builderLanguage
+						:filtersDisable
+						:moduleId="moduleId"
+					/>
+					<div class="builder-doc-templates">
+						<div class="builder-doc-template" draggable="true"
+							@dragstart="dragStartColumnTemplate($event,c)"
+							v-for="c in columnsTemplate"
+							:key="c.id"
+						>
+							<span>{{ getDocColumnTitle(c) }}</span>
+						</div>
+					</div>
+				</div>
+				
+				<div class="builder-doc-field-list-settings">
+					<my-tabs
+						v-model="listTabTarget"
+						:entries="listTabTargets.entries"
+						:entriesText="listTabTargets.labels"
+					/>
+					<table class="generic-table-vertical default-inputs" v-if="listTabTarget === 'body'">
+						<tbody>
+							<tr>
+								<td>{{ capGen.colorFillRowsOdd }}</td>
+								<td><my-input-color-wrap v-model="field.bodyColorFillOdd" :allowNull="true" :readonly /></td>
+							</tr>
+							<tr>
+								<td>{{ capGen.colorFillRowsEven }}</td>
+								<td><my-input-color-wrap v-model="field.bodyColorFillEven" :allowNull="true" :readonly /></td>
+							</tr>
+							<my-builder-doc-border
+								v-model:cell="field.bodyBorder.cell"
+								v-model:color="field.bodyBorder.color"
+								v-model:draw="field.bodyBorder.draw"
+								v-model:size="field.bodyBorder.size"
+								v-model:styleCap="field.bodyBorder.styleCap"
+								v-model:styleJoin="field.bodyBorder.styleJoin"
+								:allowCell="true"
+								:readonly
+							/>
+						</tbody>
+					</table>
+					<table class="generic-table-vertical default-inputs" v-if="listTabTarget === 'header'">
+						<tbody>
+							<tr>
+								<td colspan="2"><my-button-check v-model="field.headerRepeat" :caption="capApp.headerRepeat" :readonly /></td>
+							</tr>
+							<tr>
+								<td>{{ capGen.colorFill }}</td>
+								<td><my-input-color-wrap v-model="field.headerColorFill" :allowNull="true" :readonly /></td>
+							</tr>
+							<my-builder-doc-border
+								v-model:cell="field.headerBorder.cell"
+								v-model:color="field.headerBorder.color"
+								v-model:draw="field.headerBorder.draw"
+								v-model:size="field.headerBorder.size"
+								v-model:styleCap="field.headerBorder.styleCap"
+								v-model:styleJoin="field.headerBorder.styleJoin"
+								:allowCell="true"
+								:readonly
+							/>
+						</tbody>
+					</table>
+					<table class="generic-table-vertical default-inputs" v-if="listTabTarget === 'footer'">
+						<tbody>
+							<tr>
+								<td>{{ capGen.colorFill }}</td>
+								<td><my-input-color-wrap v-model="field.footerColorFill" :allowNull="true" :readonly /></td>
+							</tr>
+							<my-builder-doc-border
+								v-model:cell="field.footerBorder.cell"
+								v-model:color="field.footerBorder.color"
+								v-model:draw="field.footerBorder.draw"
+								v-model:size="field.footerBorder.size"
+								v-model:styleCap="field.footerBorder.styleCap"
+								v-model:styleJoin="field.footerBorder.styleJoin"
+								:allowCell="true"
+								:readonly
+							/>
+						</tbody>
+					</table>
+				</div>
+			</template>
+
+			<my-builder-doc-sets
+				v-model="field.sets"
+				:allowData="true"
+				:allowValue="true"
+				:joins
+				:readonly
+				:targetsFont="true"
+			/>
 		</teleport>
 	</div>`,
 	props:{
@@ -251,6 +331,7 @@ export default {
 			],
 			gridFieldSizeMinX:0,
 			gridFieldSizeMinY:5,
+			listTabTarget:'body',
 			pixelToMm:25.4 / 96,
 			sizeXOnMousedown:0,  // to check whether element was resized
 			sizeYOnMousedown:0   // to check whether element was resized
@@ -261,10 +342,11 @@ export default {
 		classCss:s => {
 			return {
 				flow:s.isFlow,
-				'dragPreview':s.isDragPreview,
-				'dragSource':s.beingDragged,
-				'resizable-both':!s.isRoot && s.isChildGrid,
-				'resizable-height':!s.isRoot && s.isChildFlow,
+				clickable:true,
+				dragPreview:s.isDragPreview,
+				dragSource:s.beingDragged,
+				resizableBoth:!s.isRoot && s.isChildGrid,
+				resizableHeight:!s.isRoot && s.isChildFlow,
 				selected:s.isOptionsShow
 			};
 		},
@@ -283,6 +365,12 @@ export default {
 				}
 			}
 			return out;
+		},
+		listTabTargets:s => {
+			return {
+				entries:['body','header','footer'],
+				labels:[s.capGen.content,s.capGen.header,s.capGen.footer]
+			}
 		},
 		styleBorder:s => {
 			if(!s.isWithBorder || s.field.border.draw === '')
@@ -341,9 +429,9 @@ export default {
 		isGrid:        s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
 		isList:        s => s.field.content === 'list',
 		isOptionsShow: s => s.fieldIdOptions === s.field.id,
+		isWithBorder:  s => s.isFlow || s.isGrid,
 		isWithColumns: s => s.isList,
 		isWithFields:  s => s.isFlow || s.isGrid,
-		isWithBorder:  s => s.isFlow || s.isGrid,
 		title:         s => s.getDocFieldTitle(s.entityIdMapRef,s.field,false),
 
 		// stores
@@ -357,6 +445,7 @@ export default {
 		// externals
 		copyValueDialog,
 		getDocColumnTitle,
+		getDocFieldIcon,
 		getDocFieldTitle,
 		getTemplateDocColumn,
 		getTemplateDocField,

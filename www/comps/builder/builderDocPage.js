@@ -150,16 +150,16 @@ export default {
 						:readonly
 						:sizeMax="page.margin.b"
 					/>
-					<my-builder-doc-sets
-						v-model="page.sets"
-						:allowData="true"
-						:allowValue="true"
-						:joins
-						:readonly
-						:targetsFont="true"
-					/>
 				</tbody>
 			</table>
+			<my-builder-doc-sets
+				v-model="page.sets"
+				:allowData="true"
+				:allowValue="true"
+				:joins
+				:readonly
+				:targetsFont="true"
+			/>
 		</teleport>
 	</div>`,
 	props:{

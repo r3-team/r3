@@ -181,7 +181,7 @@ const MyBuilderDocMarginPadding = {
 	name:'my-builder-doc-margin-padding',
 	components:{MyInputDecimal},
 	template:`<tr>
-		<td>{{ capGen.spacing }}</td>
+		<td>{{ label !== '' ? label : capGen.spacing }}</td>
 		<td>
 			<div class="column gap centered">
 				<div class="row">
@@ -199,6 +199,7 @@ const MyBuilderDocMarginPadding = {
 		</td>
 	</tr>`,
 	props:{
+		label:   { type:String,  required:false, default:'' },
 		readonly:{ type:Boolean, required:true },
 
 		// values
