@@ -819,6 +819,7 @@
 				"addPage": "Add page",
 				"selectParent": "Select field above"
 			},
+			"cellStyles": "Cell styles",
 			"dialog": {
 				"delete": "Are you sure you want to delete this document?"
 			},
@@ -969,7 +970,6 @@
 			"fieldRegexCheck": "Validați cu RegEx",
 			"fieldSize": "Dimensiunea de bază (pixeli)",
 			"fieldSize0": "automatic",
-			"fields": "Câmpuri",
 			"fieldsEditInputs": "Edit inputs",
 			"fileExt": "Extensia fișierului",
 			"fileName": "Numele fișierului",
@@ -2370,6 +2370,7 @@
 		"favorites": "Favorites",
 		"favoritesEmpty": "No favorites saved",
 		"field": "Field",
+		"fields": "Câmpuri",
 		"files": "Files",
 		"filters": "Filtre",
 		"font": "Font",

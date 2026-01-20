@@ -259,7 +259,7 @@ export default {
 						
 						<!-- template fields -->
 						<div class="templates-wrap">
-							<h2>{{ capApp.fields }}</h2>
+							<h2>{{ capGen.fields }}</h2>
 							<div class="row gap default-inputs">
 								<select v-model="fieldsShow" class="dynamic">
 									<option value="add">{{ capGen.button.add }}</option>

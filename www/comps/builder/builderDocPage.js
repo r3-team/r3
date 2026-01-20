@@ -41,7 +41,6 @@ export default {
 					@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 					:builderLanguage
 					:elmFieldOptions
-					:elmFieldTitle
 					:entityIdMapRef
 					:fieldIdOptions
 					:isRoot="true"
@@ -59,7 +58,6 @@ export default {
 					@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 					:builderLanguage
 					:elmFieldOptions
-					:elmFieldTitle
 					:entityIdMapRef
 					:fieldIdOptions
 					:isRoot="true"
@@ -77,7 +75,6 @@ export default {
 					@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 					:builderLanguage
 					:elmFieldOptions
-					:elmFieldTitle
 					:entityIdMapRef
 					:fieldIdOptions
 					:isRoot="true"
@@ -166,7 +163,6 @@ export default {
 		builderLanguage:{ type:String,        required:true },
 		elmPageOptions: { required:true },
 		elmFieldOptions:{ required:true },
-		elmFieldTitle:  { required:true },
 		entityIdMapRef: { type:Object,        required:true },
 		fieldIdOptions: { type:[String,null], required:true },
 		joins:          { type:Array,         required:true },

@@ -819,6 +819,7 @@
 				"addPage": "Add page",
 				"selectParent": "Select field above"
 			},
+			"cellStyles": "Cell styles",
 			"dialog": {
 				"delete": "Are you sure you want to delete this document?"
 			},
@@ -969,7 +970,6 @@
 			"fieldRegexCheck": "Convalida con RegEx",
 			"fieldSize": "Dimensione base (pixel)",
 			"fieldSize0": "automatico",
-			"fields": "Campi",
 			"fieldsEditInputs": "Edit inputs",
 			"fileExt": "Estensione file",
 			"fileName": "nome file",
@@ -2370,6 +2370,7 @@
 		"favorites": "Favorites",
 		"favoritesEmpty": "No favorites saved",
 		"field": "Field",
+		"fields": "Campi",
 		"files": "Files",
 		"filters": "Filtri",
 		"font": "Font",

@@ -819,6 +819,7 @@
 				"addPage": "Add page",
 				"selectParent": "Select field above"
 			},
+			"cellStyles": "Cell styles",
 			"dialog": {
 				"delete": "Are you sure you want to delete this document?"
 			},
@@ -969,7 +970,6 @@
 			"fieldRegexCheck": "使用正则表达式验证",
 			"fieldSize": "基本大小（像素）",
 			"fieldSize0": "自动",
-			"fields": "字段",
 			"fieldsEditInputs": "编辑输入",
 			"fileExt": "文件扩展名",
 			"fileName": "文件名",
@@ -2370,6 +2370,7 @@
 		"favorites": "Favorites",
 		"favoritesEmpty": "No favorites saved",
 		"field": "字段",
+		"fields": "字段",
 		"files": "文件",
 		"filters": "过滤器",
 		"font": "Font",

@@ -61,14 +61,11 @@ export function getDocFieldIcon(field) {
 	return 'noPic.png';
 };
 
-export function getDocFieldTitle(entityIdMapRef,field,isTemplate) {
+export function getDocFieldTitle(field) {
 
 	const capApp = MyStore.getters.captions.builder.doc.field;
 	const capGen = MyStore.getters.captions.generic;
 	let   parts  = [];
-
-	if(!isTemplate)
-		parts.push(`F${entityIdMapRef.field[field.id]}`);
 	
 	if(field.content === 'data') {
 		const atr = MyStore.getters['schema/attributeIdMap'][field.attributeId];

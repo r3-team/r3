@@ -819,6 +819,7 @@
 				"addPage": "Seite hinzufügen",
 				"selectParent": "Feld darüber auswählen"
 			},
+			"cellStyles": "Zellstile",
 			"dialog": {
 				"delete": "Bist du sicher, dass du dieses Dokument löschen möchtest?"
 			},
@@ -969,7 +970,6 @@
 			"fieldRegexCheck": "Validieren mit RegEx",
 			"fieldSize": "Startgröße (Pixel)",
 			"fieldSize0": "automatisch",
-			"fields": "Felder",
 			"fieldsEditInputs": "Eingaben bearbeiten",
 			"fileExt": "Dateiendung",
 			"fileName": "Dateiname",
@@ -2325,8 +2325,8 @@
 		"collections": "Sammlungen",
 		"color": "Farbe",
 		"colorFill": "Füllfarbe",
-		"colorFillRowsEven": "Füllfarbe, grade Zeilennr.",
-		"colorFillRowsOdd": "Füllfarbe, ungrade Zeilennr.",
+		"colorFillRowsEven": "Füllfarbe, grade Zeilen",
+		"colorFillRowsOdd": "Füllfarbe, ungrade Zeilen",
 		"columnSettings": "Spalteneinstellungen",
 		"columns": "Spalten",
 		"columnsActive": "Aktive Spalten",
@@ -2370,6 +2370,7 @@
 		"favorites": "Favoriten",
 		"favoritesEmpty": "Keine Favoriten gespeichert",
 		"field": "Feld",
+		"fields": "Felder",
 		"files": "Dateien",
 		"filters": "Filter",
 		"font": "Schrift",

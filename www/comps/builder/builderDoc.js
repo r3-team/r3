@@ -1,13 +1,14 @@
-import MyBuilderCaption   from './builderCaption.js';
-import MyBuilderQuery     from './builderQuery.js';
-import MyBuilderDocFont   from './builderDocFont.js';
-import MyBuilderDocPage   from './builderDocPage.js';
-import MyBuilderDocSets   from './builderDocSets.js';
-import MyInputDecimal     from '../inputDecimal.js';
-import MyTabs             from '../tabs.js';
-import {getUuidV4}        from '../shared/crypto.js';
-import {deepIsEqual}      from '../shared/generic.js';
-import {getJoinsIndexMap} from '../shared/query.js';
+import MyBuilderCaption          from './builderCaption.js';
+import MyBuilderQuery            from './builderQuery.js';
+import MyBuilderDocFont          from './builderDocFont.js';
+import MyBuilderDocPage          from './builderDocPage.js';
+import MyBuilderDocSets          from './builderDocSets.js';
+import MyInputDecimal            from '../inputDecimal.js';
+import MyTabs                    from '../tabs.js';
+import {isAttributeRelationship} from '../shared/attribute.js';
+import {getUuidV4}               from '../shared/crypto.js';
+import {deepIsEqual}             from '../shared/generic.js';
+import {getJoinsIndexMap}        from '../shared/query.js';
 import {
 	getDocEntityMapRef,
 	getDocFieldIcon,
@@ -110,7 +111,6 @@ export default {
 					:builderLanguage
 					:elmPageOptions="$refs.pageOptions"
 					:elmFieldOptions="$refs.fieldOptions"
-					:elmFieldTitle="$refs.fieldOptionsTitle"
 					:entityIdMapRef
 					:fieldIdOptions="sideFieldIdShow"
 					:joins="doc.query.joins"
@@ -123,15 +123,14 @@ export default {
 		</div>
 		
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
-			<div class="top lower" @click="sideFieldIdShow = null; sideColumnIdShow = null" :class="{ clickable:sideFieldShow || sideColumnShow }">
+			<div class="top lower" @click="sideFieldIdShow = null" :class="{ clickable:sideFieldShow }">
 				<div class="area">
 					<img class="icon" src="images/document.png" />
 					<h1>{{ capGen.document }}</h1>
 				</div>
 			</div>
-			<div class="top lower" ref="fieldOptionsTitle" v-show="sideFieldShow" :class="{ clickable:sideColumnShow }" @click="sideColumnIdShow = null;"></div>
 			
-			<!-- document -->
+			<!-- document / page options -->
 			<template v-if="sideDocShow">
 				<my-tabs
 					v-model="tabTarget"
@@ -151,7 +150,9 @@ export default {
 						:moduleId="doc.moduleId"
 					/>
 
+					<br />
 					<!-- field templates -->
+					<h2>{{ capGen.fields }}</h2>
 					<div class="builder-doc-templates">
 						<div class="builder-doc-template" draggable="true"
 							@dragstart="fieldDragStart($event,f)"
@@ -159,8 +160,10 @@ export default {
 							:class="{ 'isLayout':f.content === 'flow' || f.content === 'grid', 'notData':f.content !== 'data' }"
 							:key="f.id"
 						>
-							<img class="builder-doc-element-icon" :src="'images/' + getDocFieldIcon(f)" />
-							<span>{{ getDocFieldTitle(entityIdMapRef,f,true) }}</span>
+							<div class="builder-doc-button">
+								<img :src="'images/' + getDocFieldIcon(f)" />
+							</div>
+							<span>{{ getDocFieldTitle(f) }}</span>
 						</div>
 					</div>
 				</div>
@@ -225,8 +228,6 @@ export default {
 
 			<!-- field options -->
 			<div class="content grow no-padding" ref="fieldOptions" v-show="sideFieldShow"></div>
-
-			<!-- column options -->
 		</div>
 	</div>`,
 	props:{
@@ -259,7 +260,6 @@ export default {
 			
 			// state
 			pageOptions:null,
-			sideColumnIdShow:null,
 			sideFieldIdShow:null,
 			showSidebar:true,
 			tabPageIdShow:0,
@@ -278,6 +278,9 @@ export default {
 				const r = s.relationIdMap[j.relationId];
 
 				for(const a of r.attributes) {
+					if(s.isAttributeRelationship(a.content))
+						continue;
+
 					out.push(s.getTemplateDocField('data',j.index,a.id));
 				}
 			}
@@ -321,8 +324,7 @@ export default {
 		module:         s => s.moduleIdMap[s.doc.moduleId],
 		pageIndexActive:s => s.pageIdMapIndex[s.tabPageIdShow],
 		previewUrl:     s => s.recordId !== null && !s.hasChanges ? `/doc/download/test.pdf?doc_id=${s.id}&record_id=${s.recordId}&token=${s.token}&date=${s.cacheDenialTimestamp}` : null,
-		sideColumnShow: s => s.sideColumnIdShow !== null,
-		sideDocShow:    s => !s.sideColumnShow && !s.sideFieldShow,
+		sideDocShow:    s => !s.sideFieldShow,
 		sideFieldShow:  s => s.sideFieldIdShow !== null,
 		
 		// stores
@@ -349,6 +351,7 @@ export default {
 		getTemplateDocField,
 		getTemplateDocPage,
 		getUuidV4,
+		isAttributeRelationship,
 
 		// presentation
 		getPageName(id) {
