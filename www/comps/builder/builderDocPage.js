@@ -40,7 +40,7 @@ export default {
 					v-model="page.fieldFlow"
 					@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 					:builderLanguage
-					:elmFieldOptions
+					:elmOptions="elmFieldOptions"
 					:entityIdMapRef
 					:fieldIdOptions
 					:isRoot="true"
@@ -57,7 +57,7 @@ export default {
 					v-model="page.header.fieldGrid"
 					@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 					:builderLanguage
-					:elmFieldOptions
+					:elmOptions="elmFieldOptions"
 					:entityIdMapRef
 					:fieldIdOptions
 					:isRoot="true"
@@ -74,7 +74,7 @@ export default {
 					v-model="page.footer.fieldGrid"
 					@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 					:builderLanguage
-					:elmFieldOptions
+					:elmOptions="elmFieldOptions"
 					:entityIdMapRef
 					:fieldIdOptions
 					:isRoot="true"

@@ -83,13 +83,22 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []type
 		}
 		columnIds = append(columnIds, c.Id)
 
+		if err := caption.Set_tx(ctx, tx, c.Id, c.Captions); err != nil {
+			return err
+		}
+		if err := doc_set.Set_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextBody, c.SetsBody); err != nil {
+			return err
+		}
+		if err := doc_set.Set_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextFooter, c.SetsFooter); err != nil {
+			return err
+		}
+		if err := doc_set.Set_tx(ctx, tx, c.Id, schema.DbDocColumn, schema.DbDocContextHeader, c.SetsHeader); err != nil {
+			return err
+		}
 		if c.SubQuery {
 			if err := query.Set_tx(ctx, tx, schema.DbDocColumn, c.Id, 0, 0, 0, c.Query); err != nil {
 				return err
 			}
-		}
-		if err := caption.Set_tx(ctx, tx, c.Id, c.Captions); err != nil {
-			return err
 		}
 	}
 

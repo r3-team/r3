@@ -55,8 +55,9 @@ func Set_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, entity schema.DbEntity
 
 	if _, err := tx.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM app.doc_set
-		WHERE %s_id = $1
-	`, entity), id); err != nil {
+		WHERE %s_id   = $1
+		AND   context = $2
+	`, entity), id, context); err != nil {
 		return err
 	}
 

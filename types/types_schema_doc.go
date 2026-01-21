@@ -38,6 +38,7 @@ type DocColumn struct {
 	GroupBy        bool        `json:"groupBy"`        // group by column attribute value?
 	Aggregator     pgtype.Text `json:"aggregator"`     // aggregator (SUM, COUNT, etc.)
 	Distincted     bool        `json:"distincted"`     // attribute values are distinct?
+	Length         int         `json:"length"`         // text length limit (in characters)
 	SubQuery       bool        `json:"subQuery"`       // column uses sub query?
 	SizeX          float64     `json:"sizeX"`          // width in mm (0 = parent width)
 	Query          Query       `json:"query"`          // sub query
@@ -47,9 +48,6 @@ type DocColumn struct {
 	SetsBody   []DocSet `json:"setsBody"`
 	SetsFooter []DocSet `json:"setsFooter"`
 	SetsHeader []DocSet `json:"setsHeader"`
-
-	// presentation
-	Length int `json:"length"` // text length limit (in characters)
 }
 type DocField struct {
 	Id      uuid.UUID `json:"id"`

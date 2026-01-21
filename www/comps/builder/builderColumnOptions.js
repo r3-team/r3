@@ -1,5 +1,6 @@
-import MyBuilderCaption from './builderCaption.js';
-import MyBuilderQuery   from './builderQuery.js';
+import MyBuilderAggregatorInput from './builderAggregatorInput.js';
+import MyBuilderCaption         from './builderCaption.js';
+import MyBuilderQuery           from './builderQuery.js';
 import {
 	getIndexAttributeIdsByJoins,
 	isAttributeBoolean,
@@ -16,6 +17,7 @@ export {MyBuilderColumnOptions as default};
 const MyBuilderColumnOptions = {
 	name:'my-builder-column-options',
 	components:{
+		MyBuilderAggregatorInput,
 		MyBuilderCaption,
 		MyBuilderQuery
 	},
@@ -52,7 +54,7 @@ const MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr v-if="!isDrawing && !isColor">
-					<td>{{ !isFiles ? capApp.columnLength : capApp.columnLengthFiles }}</td>
+					<td>{{ !isFiles ? capGen.lengthChars : capApp.columnLengthFiles }}</td>
 					<td>
 						<input
 							v-if="column.length !== 0"
@@ -62,7 +64,7 @@ const MyBuilderColumnOptions = {
 						<my-button
 							v-else
 							@trigger="setInt('length',50,false)"
-							:caption="capApp.columnLength0"
+							:caption="capGen.noLimit"
 							:naked="true"
 						/>
 					</td>
@@ -78,7 +80,7 @@ const MyBuilderColumnOptions = {
 						<my-button
 							v-else
 							@trigger="setInt('basis',25,false)"
-							:caption="capApp.columnSize0"
+							:caption="capGen.automatic"
 							:naked="true"
 						/>
 					</td>
@@ -167,26 +169,11 @@ const MyBuilderColumnOptions = {
 				</tr>
 			</template>
 			<tr>
-				<td colspan="999"><b>{{ capApp.columnHeaderData }}</b></td>
+				<td colspan="999"><b>{{ capGen.dataRetrieval }}</b></td>
 			</tr>
 			<tr>
-				<td>{{ capApp.aggregator }}</td>
-				<td>
-					<select
-						@input="set('aggregator',$event.target.value)"
-						:value="column.aggregator"
-					>
-						<option value="">-</option>
-						<option value="record">{{ capGen.option.aggRecord }}</option>
-						<option value="avg">{{ capGen.option.aggAvg }}</option>
-						<option value="count">{{ capGen.option.aggCount }}</option>
-						<option value="list">{{ capGen.option.aggList }}</option>
-						<option value="max">{{ capGen.option.aggMax }}</option>
-						<option value="min">{{ capGen.option.aggMin }}</option>
-						<option value="sum">{{ capGen.option.aggSum }}</option>
-						<option value="array">{{ capGen.option.aggArray }}</option>
-					</select>
-				</td>
+				<td>{{ capGen.aggregator }}</td>
+				<td><my-builder-aggregator-input :modelValue="column.aggregator" @update:modelValue="set('aggregator',$event)" /></td>
 			</tr>
 			<tr>
 				<td>{{ capGen.options }}</td>
@@ -194,12 +181,12 @@ const MyBuilderColumnOptions = {
 					<div class="row gap wrap">
 						<my-button-check
 							@update:modelValue="set('distincted',$event)"
-							:caption="capApp.distincted"
+							:caption="capGen.distincted"
 							:modelValue="column.distincted"
 						/>
 						<my-button-check
 							@update:modelValue="set('groupBy',$event)"
-							:caption="capApp.groupBy"
+							:caption="capGen.groupBy"
 							:modelValue="column.groupBy"
 						/>
 					</div>

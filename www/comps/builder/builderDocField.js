@@ -67,10 +67,16 @@ export default {
 		<my-builder-doc-columns
 			v-if="isWithQuery && isOptionsShow"
 			v-model="field.columns"
+			@setColumnIdOptions="columnIdOptions = $event"
 			:builderLanguage
+			:columnIdOptions
 			:dragType="dragTypeColumn"
+			:elmOptions="$refs.columnOptions"
+			:joins
+			:joinsParent="field.query.joins"
 			:parentSizeX="sizeX"
 			:readonly
+			:sizeXMax
 			:zoom
 		/>
 
@@ -87,7 +93,7 @@ export default {
 				@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 				@setFieldIdOptionsParent="$emit('setFieldIdOptions',field.id)"
 				:builderLanguage
-				:elmFieldOptions
+				:elmOptions
 				:entityIdMapRef
 				:fieldIdOptions
 				:parentSizeX="sizeX"
@@ -104,8 +110,8 @@ export default {
 		</div>
 
 		<!-- options -->
-		<teleport v-if="isOptionsShow" :to="elmFieldOptions">
-			<div class="top lower" :class="{ clickable:columnIdShow !== null }" @click="columnIdShow = null">
+		<teleport v-if="isOptionsShow" :to="elmOptions">
+			<div class="top lower" :class="{ clickable:columnIdOptions !== null }" @click="columnIdOptions = null">
 				<div class="area">
 					<img class="icon" :src="'images/' + getDocFieldIcon(field)" />
 					<h2>{{ title }}</h2>
@@ -120,211 +126,215 @@ export default {
 					/>
 				</div>
 			</div>
+			
+			<!-- column properties -->
+			<div ref="columnOptions" v-show="columnIdOptions !== null"></div>
 
-			<my-tabs
-				v-if="tabsNeeded"
-				v-model="tabTargetField"
-				:entries="['properties','content']"
-				:entriesIcon="['images/edit.png','images/database.png']"
-				:entriesText="[capGen.properties,capGen.content]"
-			/>
-
-			<!-- content -->
-			<div class="content grow" v-if="tabTargetField === 'content'">
-				<my-builder-query
-					v-model="field.query"
-					@index-removed=""
-					:allowChoices="false"
-					:builderLanguage
-					:filtersDisable
-					:moduleId="moduleId"
+			<!-- field properties -->
+			<template v-if="columnIdOptions === null">
+				<my-tabs
+					v-if="isTabsNeeded"
+					v-model="tabTargetField"
+					:entries="['properties','content']"
+					:entriesIcon="['images/edit.png','images/database.png']"
+					:entriesText="[capGen.properties,capGen.content]"
 				/>
-				<div class="builder-doc-templates">
-					<div class="builder-doc-template" draggable="true"
-						@dragstart="dragStartColumnTemplate($event,c)"
-						v-for="c in columnsTemplate"
-						:key="c.id"
-					>
-						<span>{{ getDocColumnTitle(c) }}</span>
-					</div>
-				</div>
-			</div>
 
-			<!-- properties -->
-			<template v-if="!tabsNeeded || tabTargetField === 'properties'">
-				<table class="generic-table-vertical default-inputs">
-					<tbody>
-						<tr>
-							<td>{{ capGen.showDefault1 }}</td>
-							<td><my-bool v-model="field.state" :readonly /></td>
-						</tr>
-						
-						<template v-if="!isRoot">
-							<tr v-if="isChildGrid">
-								<td>{{ capGen.sizeX }}</td>
-								<td>
-									<div class="row gap centered">
-										<my-input-range   class="short" v-model="field.sizeX" :readonly :min="gridParentSnap" :max="sizeXMax" :step="gridParentSnap" />
-										<my-input-decimal class="short" v-model="field.sizeX" :readonly :min="gridParentSnap" :max="sizeXMax" :allowNull="false" :length="5" :lengthFract="2" />
-										<span>mm</span>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td>{{ capGen.sizeY }}</td>
-								<td>
-									<div class="row gap centered">
-										<my-input-range   class="short" v-model="field.sizeY" :readonly :min="gridParentSnap" :max="sizeYMax" :step="gridParentSnap" />
-										<my-input-decimal class="short" v-model="field.sizeY" :readonly :min="gridParentSnap" :max="sizeYMax" :allowNull="false" :length="5" :lengthFract="2" />
-										<span>mm</span>
-									</div>
-								</td>
-							</tr>
-						</template>
-
-						<template v-if="isGrid">
-							<tr>
-								<td>{{ capApp.grid.sizeSnap }}</td>
-								<td>
-									<div class="row gap centered">
-										<my-input-range   class="short" v-model="field.sizeSnap" :readonly :min="0.5" :max="10" :step="0.1" />
-										<my-input-decimal class="short" v-model="field.sizeSnap" :readonly :min="0.5" :max="10" :allowNull="false" :length="4" :lengthFract="2" />
-										<span>mm</span>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td>{{ capApp.grid.shrink }}</td>
-								<td><my-bool v-model="field.shrink" :readonly /></td>
-							</tr>
-						</template>
-
-						<template v-if="isFlow">
-							<tr>
-								<td>{{ capGen.gap }}</td>
-								<td>
-									<div class="row gap centered">
-										<my-input-range   class="short" v-model="field.gap" :readonly :min="0" :max="20" :step="0.1" />
-										<my-input-decimal class="short" v-model="field.gap" :readonly :min="0" :allowNull="false" :length="5" :lengthFract="2" />
-										<span>mm</span>
-									</div>
-								</td>
-							</tr>
-						</template>
-
-						<my-builder-doc-margin-padding
-							v-if="isList || isFlow"
-							v-model:t="field.padding.t"
-							v-model:r="field.padding.r"
-							v-model:b="field.padding.b"
-							v-model:l="field.padding.l"
-							:label="capGen.spacingCell"
-							:readonly
-						/>
-						<my-builder-doc-border
-							v-if="isWithBorder"
-							v-model:cell="field.border.cell"
-							v-model:color="field.border.color"
-							v-model:draw="field.border.draw"
-							v-model:size="field.border.size"
-							v-model:styleCap="field.border.styleCap"
-							v-model:styleJoin="field.border.styleJoin"
-							:allowCell="false"
-							:readonly
-						/>
-					</tbody>
-				</table>
-
-				<!-- list properties -->
-				<div class="content grow" v-if="isList">
-					<h2>{{ capApp.cellStyles }}</h2>
-					<div class="builder-doc-field-list-settings">
-						<my-tabs
-							v-model="tabTargetListArea"
-							:entries="tabTargetListAreas.entries"
-							:entriesText="tabTargetListAreas.labels"
-						/>
-						<table class="generic-table-vertical default-inputs" v-if="tabTargetListArea === 'body'">
-							<tbody>
-								<tr>
-									<td>{{ capGen.colorFillRowsOdd }}</td>
-									<td><my-input-color-wrap v-model="field.bodyColorFillOdd" :allowNull="true" :readonly /></td>
-								</tr>
-								<tr>
-									<td>{{ capGen.colorFillRowsEven }}</td>
-									<td><my-input-color-wrap v-model="field.bodyColorFillEven" :allowNull="true" :readonly /></td>
-								</tr>
-								<my-builder-doc-border
-									v-model:cell="field.bodyBorder.cell"
-									v-model:color="field.bodyBorder.color"
-									v-model:draw="field.bodyBorder.draw"
-									v-model:size="field.bodyBorder.size"
-									v-model:styleCap="field.bodyBorder.styleCap"
-									v-model:styleJoin="field.bodyBorder.styleJoin"
-									:allowCell="true"
-									:readonly
-								/>
-							</tbody>
-						</table>
-						<table class="generic-table-vertical default-inputs" v-if="tabTargetListArea === 'header'">
-							<tbody>
-								<tr>
-									<td>{{ capGen.colorFill }}</td>
-									<td><my-input-color-wrap v-model="field.headerColorFill" :allowNull="true" :readonly /></td>
-								</tr>
-								<tr>
-									<td colspan="2"><my-button-check v-model="field.headerRepeat" :caption="capApp.headerRepeat" :readonly /></td>
-								</tr>
-								<my-builder-doc-border
-									v-model:cell="field.headerBorder.cell"
-									v-model:color="field.headerBorder.color"
-									v-model:draw="field.headerBorder.draw"
-									v-model:size="field.headerBorder.size"
-									v-model:styleCap="field.headerBorder.styleCap"
-									v-model:styleJoin="field.headerBorder.styleJoin"
-									:allowCell="true"
-									:readonly
-								/>
-							</tbody>
-						</table>
-						<table class="generic-table-vertical default-inputs" v-if="tabTargetListArea === 'footer'">
-							<tbody>
-								<tr>
-									<td>{{ capGen.colorFill }}</td>
-									<td><my-input-color-wrap v-model="field.footerColorFill" :allowNull="true" :readonly /></td>
-								</tr>
-								<my-builder-doc-border
-									v-model:cell="field.footerBorder.cell"
-									v-model:color="field.footerBorder.color"
-									v-model:draw="field.footerBorder.draw"
-									v-model:size="field.footerBorder.size"
-									v-model:styleCap="field.footerBorder.styleCap"
-									v-model:styleJoin="field.footerBorder.styleJoin"
-									:allowCell="true"
-									:readonly
-								/>
-							</tbody>
-						</table>
+				<!-- content -->
+				<div class="content grow" v-if="tabTargetField === 'content'">
+					<my-builder-query
+						v-model="field.query"
+						@index-removed=""
+						:allowChoices="false"
+						:builderLanguage
+						:filtersDisable
+						:moduleId="moduleId"
+					/>
+					<div class="builder-doc-templates">
+						<div class="builder-doc-template" draggable="true"
+							@dragstart="dragStartColumnTemplate($event,c)"
+							v-for="c in columnsTemplate"
+							:key="c.id"
+						>
+							<span>{{ getDocColumnTitle(c) }}</span>
+						</div>
 					</div>
 				</div>
 
-				<!-- overwrites -->
-				<my-builder-doc-sets
-					v-model="field.sets"
-					:allowData="true"
-					:allowValue="true"
-					:joins
-					:readonly
-					:targetsFont="true"
-				/>
+				<!-- properties -->
+				<template v-if="!isTabsNeeded || tabTargetField === 'properties'">
+					<table class="generic-table-vertical default-inputs">
+						<tbody>
+							<tr>
+								<td>{{ capGen.showDefault1 }}</td>
+								<td><my-bool v-model="field.state" :readonly /></td>
+							</tr>
+							
+							<template v-if="!isRoot">
+								<tr v-if="isChildGrid">
+									<td>{{ capGen.sizeX }}</td>
+									<td>
+										<div class="row gap centered">
+											<my-input-range   class="short" v-model="field.sizeX" :readonly :min="gridParentSnap" :max="sizeXMax" :step="gridParentSnap" />
+											<my-input-decimal class="short" v-model="field.sizeX" :readonly :min="gridParentSnap" :max="sizeXMax" :allowNull="false" :length="5" :lengthFract="2" />
+											<span>mm</span>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td>{{ capGen.sizeY }}</td>
+									<td>
+										<div class="row gap centered">
+											<my-input-range   class="short" v-model="field.sizeY" :readonly :min="gridParentSnap" :max="sizeYMax" :step="gridParentSnap" />
+											<my-input-decimal class="short" v-model="field.sizeY" :readonly :min="gridParentSnap" :max="sizeYMax" :allowNull="false" :length="5" :lengthFract="2" />
+											<span>mm</span>
+										</div>
+									</td>
+								</tr>
+							</template>
+
+							<template v-if="isGrid">
+								<tr>
+									<td>{{ capApp.grid.sizeSnap }}</td>
+									<td>
+										<div class="row gap centered">
+											<my-input-range   class="short" v-model="field.sizeSnap" :readonly :min="0.5" :max="10" :step="0.1" />
+											<my-input-decimal class="short" v-model="field.sizeSnap" :readonly :min="0.5" :max="10" :allowNull="false" :length="4" :lengthFract="2" />
+											<span>mm</span>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td>{{ capApp.grid.shrink }}</td>
+									<td><my-bool v-model="field.shrink" :readonly /></td>
+								</tr>
+							</template>
+
+							<template v-if="isFlow">
+								<tr>
+									<td>{{ capGen.gap }}</td>
+									<td>
+										<div class="row gap centered">
+											<my-input-range   class="short" v-model="field.gap" :readonly :min="0" :max="20" :step="0.1" />
+											<my-input-decimal class="short" v-model="field.gap" :readonly :min="0" :allowNull="false" :length="5" :lengthFract="2" />
+											<span>mm</span>
+										</div>
+									</td>
+								</tr>
+							</template>
+
+							<my-builder-doc-margin-padding
+								v-if="isList || isFlow"
+								v-model:t="field.padding.t"
+								v-model:r="field.padding.r"
+								v-model:b="field.padding.b"
+								v-model:l="field.padding.l"
+								:label="capGen.spacingCell"
+								:readonly
+							/>
+							<my-builder-doc-border
+								v-if="isWithBorder"
+								v-model:cell="field.border.cell"
+								v-model:color="field.border.color"
+								v-model:draw="field.border.draw"
+								v-model:size="field.border.size"
+								v-model:styleCap="field.border.styleCap"
+								v-model:styleJoin="field.border.styleJoin"
+								:allowCell="false"
+								:readonly
+							/>
+						</tbody>
+					</table>
+
+					<!-- list properties -->
+					<div class="content grow" v-if="isList">
+						<h2>{{ capApp.cellStyles }}</h2>
+						<div class="builder-doc-sub-settings">
+							<my-tabs
+								v-model="tabTargetListArea"
+								:entries="tabTargetListAreas.entries"
+								:entriesText="tabTargetListAreas.labels"
+							/>
+							<table class="generic-table-vertical default-inputs" v-if="tabTargetListArea === 'body'">
+								<tbody>
+									<tr>
+										<td>{{ capGen.colorFillRowsOdd }}</td>
+										<td><my-input-color-wrap v-model="field.bodyColorFillOdd" :allowNull="true" :readonly /></td>
+									</tr>
+									<tr>
+										<td>{{ capGen.colorFillRowsEven }}</td>
+										<td><my-input-color-wrap v-model="field.bodyColorFillEven" :allowNull="true" :readonly /></td>
+									</tr>
+									<my-builder-doc-border
+										v-model:cell="field.bodyBorder.cell"
+										v-model:color="field.bodyBorder.color"
+										v-model:draw="field.bodyBorder.draw"
+										v-model:size="field.bodyBorder.size"
+										v-model:styleCap="field.bodyBorder.styleCap"
+										v-model:styleJoin="field.bodyBorder.styleJoin"
+										:allowCell="true"
+										:readonly
+									/>
+								</tbody>
+							</table>
+							<table class="generic-table-vertical default-inputs" v-if="tabTargetListArea === 'header'">
+								<tbody>
+									<tr>
+										<td>{{ capGen.colorFill }}</td>
+										<td><my-input-color-wrap v-model="field.headerColorFill" :allowNull="true" :readonly /></td>
+									</tr>
+									<tr>
+										<td colspan="2"><my-button-check v-model="field.headerRepeat" :caption="capApp.headerRepeat" :readonly /></td>
+									</tr>
+									<my-builder-doc-border
+										v-model:cell="field.headerBorder.cell"
+										v-model:color="field.headerBorder.color"
+										v-model:draw="field.headerBorder.draw"
+										v-model:size="field.headerBorder.size"
+										v-model:styleCap="field.headerBorder.styleCap"
+										v-model:styleJoin="field.headerBorder.styleJoin"
+										:allowCell="true"
+										:readonly
+									/>
+								</tbody>
+							</table>
+							<table class="generic-table-vertical default-inputs" v-if="tabTargetListArea === 'footer'">
+								<tbody>
+									<tr>
+										<td>{{ capGen.colorFill }}</td>
+										<td><my-input-color-wrap v-model="field.footerColorFill" :allowNull="true" :readonly /></td>
+									</tr>
+									<my-builder-doc-border
+										v-model:cell="field.footerBorder.cell"
+										v-model:color="field.footerBorder.color"
+										v-model:draw="field.footerBorder.draw"
+										v-model:size="field.footerBorder.size"
+										v-model:styleCap="field.footerBorder.styleCap"
+										v-model:styleJoin="field.footerBorder.styleJoin"
+										:allowCell="true"
+										:readonly
+									/>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<!-- overwrites -->
+					<my-builder-doc-sets
+						v-model="field.sets"
+						:allowData="true"
+						:allowValue="true"
+						:joins
+						:readonly
+						:targetsFont="true"
+					/>
+				</template>
 			</template>
 		</teleport>
-
-		<!-- column options -->
 	</div>`,
 	props:{
 		builderLanguage:{ type:String,        required:true },
-		elmFieldOptions:{ required:true },
+		elmOptions:     { required:true },
 		entityIdMapRef: { type:Object,        required:true },
 		fieldIdOptions: { type:[String,null], required:true },
 		gridParentSnap: { type:Number,        required:false, default:0 },
@@ -343,7 +353,7 @@ export default {
 		return {
 			beingDragged:false,
 			borderSizeEmpty:0.2, // default border size, if 0 is given but border is drawn
-			columnIdShow:null,
+			columnIdOptions:null,
 			dragEnterCounter:0,
 			dragType:'doc-field',
 			filtersDisable:[
@@ -452,10 +462,10 @@ export default {
 		isGrid:        s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
 		isList:        s => s.field.content === 'list',
 		isOptionsShow: s => s.fieldIdOptions === s.field.id,
+		isTabsNeeded:  s => s.isList,
 		isWithBorder:  s => s.isFlow || s.isGrid,
 		isWithFields:  s => s.isFlow || s.isGrid,
 		isWithQuery:   s => s.isList,
-		tabsNeeded:    s => s.isList,
 		title:         s => s.getDocFieldTitle(s.field),
 
 		// stores
@@ -505,8 +515,10 @@ export default {
 			const sizeY = rect.height * this.pixelToMm / this.zoom;
 
 			// size not changed, assume direct click to access field options
-			if(this.sizeXOnMousedown === sizeX && this.sizeYOnMousedown === sizeY)
+			if(this.sizeXOnMousedown === sizeX && this.sizeYOnMousedown === sizeY) {
+				this.columnIdOptions = null;
 				return this.$emit('setFieldIdOptions',this.field.id);
+			}
 			
 			if(this.isChildGrid) {
 				const sizeXClean = this.getSizeAfterSnap(this.isChildGrid,this.field.posX,sizeX,this.parentSizeX,this.gridFieldSizeMinX,this.gridParentSnap);

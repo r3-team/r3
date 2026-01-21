@@ -61,14 +61,14 @@ const MyBuilderQueryFilter = {
 				@update:modelValue="set($event,parseInt(index))"
 				:builderMode="true"
 				:disableContent="filtersDisable"
-				:entityIdMapRef="entityIdMapRef"
-				:fieldIdMap="fieldIdMap"
-				:formId="formId"
+				:entityIdMapRef
+				:fieldIdMap
+				:formId
 				:indexTarget="parseInt(index)"
-				:joins="joins"
-				:joinsParents="joinsParents"
+				:joins
+				:joinsParents
 				:modelValue="filters"
-				:moduleId="moduleId"
+				:moduleId
 			/>
 		</template>
 	</div>`,
@@ -197,14 +197,14 @@ const MyBuilderQueryChoice = {
 		
 		<my-builder-query-filter
 			v-model="filtersInput"
-			:entityIdMapRef="entityIdMapRef"
-			:expertMode="expertMode"
-			:fieldIdMap="fieldIdMap"
-			:filtersDisable="filtersDisable"
-			:formId="formId"
-			:joins="joins"
-			:joinsParents="joinsParents"
-			:moduleId="moduleId"
+			:entityIdMapRef
+			:expertMode
+			:fieldIdMap
+			:filtersDisable
+			:formId
+			:joins
+			:joinsParents
+			:moduleId
 		/>
 	</div>`,
 	props:{
@@ -765,14 +765,14 @@ const MyBuilderQuery = {
 		<div class="query-component" v-if="allowFilters && joins.length !== 0">
 			<my-builder-query-filter
 				@update:modelValue="set('filters',$event)"
-				:entityIdMapRef="entityIdMapRef"
-				:expertMode="expertMode"
-				:fieldIdMap="fieldIdMap"
-				:filtersDisable="filtersDisable"
-				:formId="formId"
-				:joins="joins"
-				:joinsParents="joinsParents"
-				:moduleId="moduleId"
+				:entityIdMapRef
+				:expertMode
+				:fieldIdMap
+				:filtersDisable
+				:formId
+				:joins
+				:joinsParents
+				:moduleId
 				:modelValue="filters"
 			/>
 		</div>
@@ -812,15 +812,15 @@ const MyBuilderQuery = {
 				@update="choiceApply(i,$event)"
 				:builderLanguage="builderLanguage"
 				:choice="choices[i]"
-				:expertMode="expertMode"
-				:entityIdMapRef="entityIdMapRef"
-				:fieldIdMap="fieldIdMap"
-				:filtersDisable="filtersDisable"
-				:formId="formId"
-				:joins="joins"
-				:joinsParents="joinsParents"
+				:expertMode
+				:entityIdMapRef
+				:fieldIdMap
+				:filtersDisable
+				:formId
+				:joins
+				:joinsParents
 				:key="i+'_'+c.id"
-				:moduleId="moduleId"
+				:moduleId
 				:moveDown="i < choices.length - 1"
 				:moveUp="i !== 0"
 			/>

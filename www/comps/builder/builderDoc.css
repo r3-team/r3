@@ -39,6 +39,10 @@
 	height:24px;
 	filter:var(--image-filter);
 }
+.builder-doc-sub-settings{
+	border:1px solid var(--color-border);
+	margin-bottom:20px;
+}
 
 /* page */
 .builder-doc-page{
@@ -193,14 +197,12 @@
 	border:3px dashed var(--color-border);
 	border-radius:3px;
 }
+.builder-doc-column.selected{
+	background-color:var(--color-form-builder-selected);
+	outline:3px solid var(--color-form-builder-selected);
+}
 .builder-doc-column-title{
 	padding:4px;
-}
-
-/* list settings */
-.builder-doc-field-list-settings{
-	border:1px solid var(--color-border);
-	margin-bottom:20px;
 }
 
 

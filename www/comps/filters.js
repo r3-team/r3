@@ -491,13 +491,13 @@ const MyFilterSide = {
 				@update:modelValue="set('query',$event)"
 				:allowChoices="false"
 				:allowOrders="true"
-				:entityIdMapRef="entityIdMapRef"
-				:fieldIdMap="fieldIdMap"
+				:entityIdMapRef
+				:fieldIdMap
 				:filtersDisable="disableContent"
-				:formId="formId"
+				:formId
 				:joinsParents="joinsParents.concat([joins])"
 				:modelValue="query"
-				:moduleId="moduleId"
+				:moduleId
 			/>
 			<template v-if="query.relationId !== null">
 				<br />
@@ -811,24 +811,24 @@ const MyFilter = {
 		<my-filter-side
 			v-model="side0Input"
 			@apply-value="$emit('apply-value')"
-			:builderMode="builderMode"
-			:columns="columns"
-			:columnBatches="columnBatches"
-			:disableContent="disableContent"
-			:entityIdMapRef="entityIdMapRef"
-			:fieldIdMap="fieldIdMap"
-			:formId="formId"
-			:isNullOperator="isNullOperator"
-			:joins="joins"
-			:joinsParents="joinsParents"
+			:builderMode
+			:columns
+			:columnBatches
+			:disableContent
+			:entityIdMapRef
+			:fieldIdMap
+			:formId
+			:isNullOperator
+			:joins
+			:joinsParents
 			:leftSide="true"
-			:moduleId="moduleId"
-			:nestedIndexAttributeIds="nestedIndexAttributeIds"
-			:nestingLevels="nestingLevels"
+			:moduleId
+			:nestedIndexAttributeIds
+			:nestingLevels
 		/>
 		<my-filter-operator class="operator"
 			v-model="operatorInput"
-			:builderMode="builderMode"
+			:builderMode
 			:onlyDates="side0ColumDate || side0ColumTime"
 			:onlyFts="side0ColumFtsMode !== null"
 			:onlyString="isStringInput"
@@ -840,22 +840,22 @@ const MyFilter = {
 		<my-filter-side
 			v-model="side1Input"
 			@apply-value="$emit('apply-value')"
-			:builderMode="builderMode"
+			:builderMode
 			:columnDate="side0ColumDate"
 			:columnTime="side0ColumTime"
-			:columns="columns"
-			:columnBatches="columnBatches"
-			:disableContent="disableContent"
-			:entityIdMapRef="entityIdMapRef"
-			:fieldIdMap="fieldIdMap"
-			:formId="formId"
-			:isNullOperator="isNullOperator"
-			:joins="joins"
-			:joinsParents="joinsParents"
+			:columns
+			:columnBatches
+			:disableContent
+			:entityIdMapRef
+			:fieldIdMap
+			:formId
+			:isNullOperator
+			:joins
+			:joinsParents
 			:leftSide="false"
-			:moduleId="moduleId"
-			:nestedIndexAttributeIds="nestedIndexAttributeIds"
-			:nestingLevels="nestingLevels"
+			:moduleId
+			:nestedIndexAttributeIds
+			:nestingLevels
 		/>
 		
 		<!-- full text search, dictionary input (only with dictionary attribute) -->
@@ -1037,19 +1037,19 @@ const MyFilters = {
 					@apply-value="apply"
 					@remove="remove"
 					@update="setValue"
-					:builderMode="builderMode"
-					:columns="columns"
-					:columnBatches="columnBatches"
+					:builderMode
+					:columns
+					:columnBatches
 					:connector="element.connector"
-					:disableContent="disableContent"
-					:entityIdMapRef="entityIdMapRef"
-					:fieldIdMap="fieldIdMap"
-					:formId="formId"
+					:disableContent
+					:entityIdMapRef
+					:fieldIdMap
+					:formId
 					:indentation="getIndentation(index)"
-					:joins="joins"
-					:joinsParents="joinsParents"
+					:joins
+					:joinsParents
 					:key="index"
-					:moduleId="moduleId"
+					:moduleId
 					:multipleFilters="filters.length > 1"
 					:nestedIndexAttributeIds="nestedIndexAttributeIds"
 					:nestingLevels="joinsParents.length+1"

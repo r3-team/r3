@@ -1,9 +1,185 @@
-import {getDocColumnTitle}    from '../shared/builderDoc.js';
-import {getTemplateDocColumn} from '../shared/builderTemplate.js';
+import MyBuilderAggregatorInput from './builderAggregatorInput.js';
+import MyBuilderCaption         from './builderCaption.js';
+import MyBuilderDocSets         from './builderDocSets.js';
+import MyBuilderQuery           from './builderQuery.js';
+import MyInputDecimal           from '../inputDecimal.js';
+import MyInputRange             from '../inputRange.js';
+import myTabs                   from '../tabs.js';
+import {getDocColumnTitle}      from '../shared/builderDoc.js';
+import {getTemplateDocColumn}   from '../shared/builderTemplate.js';
+
+const MyBuilderDocColumn = {
+	name:'my-builder-doc-column',
+	components:{
+		MyBuilderAggregatorInput,
+		MyBuilderCaption,
+		MyBuilderDocSets,
+		MyBuilderQuery,
+		MyInputDecimal,
+		MyInputRange,
+		myTabs
+	},
+	template:`<div class="builder-doc-column" :class="classCss">
+		<div class="builder-doc-column-title" v-if="!isDragPreview">{{ title }}</div>
+		
+		<teleport v-if="isOptionsShow" :to="elmOptions">
+			
+			<my-builder-query
+				v-if="false"
+				v-model="column.query"
+				:allowChoices="false"
+				:allowOrders="true"
+				:builderLanguage
+				:filtersDisable
+				:joinsParents="[joinsParent]"
+				:moduleId
+			/>
+
+			<table class="generic-table-vertical default-inputs">
+				<tbody>
+					<tr>
+						<td>{{ capGen.title }}</td>
+						<td>
+							<my-builder-caption
+								v-model="column.captions.docColumnTitle"
+								:contentName="capGen.title"
+								:language="builderLanguage"
+								:longInput="true"
+								:readonly
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capGen.lengthChars }}</td>
+						<td><my-input-decimal class="short" v-model="column.length" :min="0" :allowNull="false" :length="9" :lengthFract="0" :readonly /></td>
+					</tr>
+					<tr>
+						<td>{{ capGen.sizeX }}</td>
+						<td>
+							<div class="row gap centered" v-if="column.sizeX !== 0">
+								<my-input-range   class="short" v-model="column.sizeX" :min="0" :max="sizeXMax" :readonly :step="0.1" />
+								<my-input-decimal class="short" v-model="column.sizeX" :min="0" :max="sizeXMax" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+								<span>mm</span>
+							</div>
+							<my-button
+								v-else
+								@trigger="column.sizeX = 50"
+								:caption="capGen.automatic"
+								:naked="true"
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capGen.resultRow }}</td>
+						<td><my-builder-aggregator-input v-model="column.aggregator" :readonly /></td>
+					</tr>
+					<tr><td colspan="2"><b>{{ capGen.dataRetrieval }}</b></td></tr>
+					<tr>
+						<td>{{ capGen.options }}</td>
+						<td>
+							<div class="row gap centered">
+								<my-button-check v-model="column.distincted" :caption="capGen.distincted" :readonly />
+								<my-button-check v-model="column.groupBy"    :caption="capGen.groupBy"    :readonly />
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			
+			<div class="content grow">
+				<div class="builder-doc-sub-settings">
+					<my-tabs
+						v-model="tabTarget"
+						:entries="tabTargetList.entries"
+						:entriesText="tabTargetList.labels"
+					/>
+					<my-builder-doc-sets
+						v-if="tabTarget === 'body'"
+						v-model="column.setsBody"
+						:allowData="true"
+						:allowValue="true"
+						:joins
+						:readonly
+						:targetsFont="true"
+					/>
+					<my-builder-doc-sets
+						v-if="tabTarget === 'header'"
+						v-model="column.setsHeader"
+						:allowData="true"
+						:allowValue="true"
+						:joins
+						:readonly
+						:targetsFont="true"
+					/>
+					<my-builder-doc-sets
+						v-if="tabTarget === 'footer'"
+						v-model="column.setsFooter"
+						:allowData="true"
+						:allowValue="true"
+						:joins
+						:readonly
+						:targetsFont="true"
+					/>
+				</div>
+			</div>
+		</teleport>
+	</div>`,
+	props:{
+		builderLanguage:{ type:String,  required:true },
+		elmOptions:     { required:true },
+		isDragPreview:  { type:Boolean, required:true },
+		isDragSource:   { type:Boolean, required:true },
+		isOptionsShow:  { type:Boolean, required:true },
+		joins:          { type:Array,   required:true },
+		joinsParent:    { type:Array,   required:true },
+		modelValue:     { type:Object,  required:true },
+		readonly:       { type:Boolean, required:true },
+		sizeXMax:       { type:Number,  required:true }
+	},
+	emits:['update:modelValue'],
+	data() {
+		return {
+			filtersDisable:[
+				'collection','field','fieldChanged','fieldValid','formChanged',
+				'formState','getter','globalSearch','javascript','recordMayCreate',
+				'recordMayDelete','recordMayUpdate','recordNew','variable'
+			],
+			tabTarget:'body'
+		};
+	},
+	computed:{
+		classCss:s => {
+			return { dragPreview:s.isDragPreview, dragSource:s.isDragSource, selected:s.isOptionsShow };
+		},
+		tabTargetList:s => {
+			return {
+				entries:['body','header','footer'],
+				labels:[s.capGen.content,s.capGen.header,s.capGen.footer]
+			}
+		},
+
+		// inputs
+		column:{ // this method updates obj directly
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
+		},
+
+		// simple
+		title:s => getDocColumnTitle(s.column),
+
+		// stores
+		capApp:s => s.$store.getters.captions.builder.doc,
+		capGen:s => s.$store.getters.captions.generic
+	},
+	methods:{
+		// externals
+		getDocColumnTitle
+	}
+};
 
 export default {
 	name:'my-builder-doc-columns',
-	components:{},
+	components:{MyBuilderDocColumn},
 	template:`<div class="builder-doc-columns"
 		@dragenter="dragEnter($event,columns.length-1)"
 		@dragleave="dragLeave"
@@ -11,29 +187,41 @@ export default {
 		@drop="drop"
 	>
 		<div class="builder-doc-bg-text">{{ capGen.columns }}</div>
-		<div class="builder-doc-column"
+
+		<my-builder-doc-column
+			v-model="c"
 			v-for="(c,i) in columns"
+			@click.stop="$emit('setColumnIdOptions',c.id)"
 			@dragenter="dragEnter($event,i)"
 			@dragleave="dragLeave"
 			@dragend.stop="dragEnd($event,c.id)"
 			@dragstart.stop="dragStart($event,c)"
-			:class="{ dragPreview:c.content === dragContent, dragSource:columnIdDragged === c.id }"
+			:builderLanguage
+			:elmOptions
+			:isDragPreview="c.content === dragContent"
+			:isDragSource="columnIdDragged === c.id"
+			:isOptionsShow="columnIdOptions === c.id"
+			:joins
+			:joinsParent
 			:style="getStyle(c)"
 			:draggable="!readonly"
 			:key="c.id"
-		>
-			<div class="builder-doc-column-title" v-if="c.content !== dragContent">
-				{{ getDocColumnTitle(c) }}
-			</div>
-		</div>
+			:readonly
+			:sizeXMax
+		/>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		dragType:       { type:String, required:true },
-		modelValue:     { type:Array,  required:true },
-		parentSizeX:    { type:Number, required:true },
-		readonly:       { type:Boolean,required:true },
-		zoom:           { type:Number, required:true }
+		builderLanguage:{ type:String,        required:true },
+		columnIdOptions:{ type:[String,null], required:true },
+		dragType:       { type:String,        required:true },
+		elmOptions:     { required:true },
+		joins:          { type:Array,         required:true },
+		joinsParent:    { type:Array,         required:true },
+		modelValue:     { type:Array,         required:true },
+		parentSizeX:    { type:Number,        required:true },
+		readonly:       { type:Boolean,       required:true },
+		sizeXMax:       { type:Number,        required:true },
+		zoom:           { type:Number,        required:true }
 	},
 	data() {
 		return {
@@ -41,7 +229,7 @@ export default {
 			dragEnterCounter:0
 		};
 	},
-	emits:['update:modelValue'],
+	emits:['setColumnIdOptions','update:modelValue'],
 	computed:{
 		columnIdMapWidth:s => {
 			let out            = {};
@@ -79,7 +267,6 @@ export default {
 	},
 	methods:{
 		// externals
-		getDocColumnTitle,
 		getTemplateDocColumn,
 
 		// presentation
