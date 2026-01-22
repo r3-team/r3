@@ -12,9 +12,8 @@ import {
 import {
 	getCaptionByIndexAttributeId
 } from '../shared/query.js';
-export {MyBuilderColumnOptions as default};
 
-const MyBuilderColumnOptions = {
+export default {
 	name:'my-builder-column-options',
 	components:{
 		MyBuilderAggregatorInput,
@@ -193,7 +192,7 @@ const MyBuilderColumnOptions = {
 				</td>
 			</tr>
 			<tr v-if="isSubQuery">
-				<td>{{ capApp.subQueryAttribute }}</td>
+				<td>{{ capGen.attribute }}</td>
 				<td>
 					<select
 						@change="setIndexAttribute($event.target.value)"

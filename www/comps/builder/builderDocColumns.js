@@ -1,12 +1,17 @@
-import MyBuilderAggregatorInput from './builderAggregatorInput.js';
-import MyBuilderCaption         from './builderCaption.js';
-import MyBuilderDocSets         from './builderDocSets.js';
-import MyBuilderQuery           from './builderQuery.js';
-import MyInputDecimal           from '../inputDecimal.js';
-import MyInputRange             from '../inputRange.js';
-import myTabs                   from '../tabs.js';
-import {getDocColumnTitle}      from '../shared/builderDoc.js';
-import {getTemplateDocColumn}   from '../shared/builderTemplate.js';
+import MyBuilderAggregatorInput       from './builderAggregatorInput.js';
+import MyBuilderCaption               from './builderCaption.js';
+import MyBuilderDocSets               from './builderDocSets.js';
+import MyBuilderQuery                 from './builderQuery.js';
+import MyInputDecimal                 from '../inputDecimal.js';
+import MyInputRange                   from '../inputRange.js';
+import myTabs                         from '../tabs.js';
+import {getIndexAttributeIdsByJoins}  from '../shared/attribute.js';
+import {getTemplateDocColumn}         from '../shared/builderTemplate.js';
+import {getCaptionByIndexAttributeId} from '../shared/query.js';
+import {
+	getDocColumnIcon,
+	getDocColumnTitle
+} from '../shared/builderDoc.js';
 
 const MyBuilderDocColumn = {
 	name:'my-builder-doc-column',
@@ -20,108 +25,163 @@ const MyBuilderDocColumn = {
 		myTabs
 	},
 	template:`<div class="builder-doc-column" :class="classCss">
-		<div class="builder-doc-column-title" v-if="!isDragPreview">{{ title }}</div>
+		<div class="builder-doc-column-title" v-if="!isDragPreview">
+			<img class="builder-doc-column-icon" :src="'images/' + icon" />
+			<span>{{ title }}</span>
+		</div>
 		
 		<teleport v-if="isOptionsShow" :to="elmOptions">
-			
-			<my-builder-query
-				v-if="false"
-				v-model="column.query"
-				:allowChoices="false"
-				:allowOrders="true"
-				:builderLanguage
-				:filtersDisable
-				:joinsParents="[joinsParent]"
-				:moduleId
-			/>
-
-			<table class="generic-table-vertical default-inputs">
-				<tbody>
-					<tr>
-						<td>{{ capGen.title }}</td>
-						<td>
-							<my-builder-caption
-								v-model="column.captions.docColumnTitle"
-								:contentName="capGen.title"
-								:language="builderLanguage"
-								:longInput="true"
-								:readonly
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.lengthChars }}</td>
-						<td><my-input-decimal class="short" v-model="column.length" :min="0" :allowNull="false" :length="9" :lengthFract="0" :readonly /></td>
-					</tr>
-					<tr>
-						<td>{{ capGen.sizeX }}</td>
-						<td>
-							<div class="row gap centered" v-if="column.sizeX !== 0">
-								<my-input-range   class="short" v-model="column.sizeX" :min="0" :max="sizeXMax" :readonly :step="0.1" />
-								<my-input-decimal class="short" v-model="column.sizeX" :min="0" :max="sizeXMax" :readonly :allowNull="false" :length="5" :lengthFract="2" />
-								<span>mm</span>
-							</div>
-							<my-button
-								v-else
-								@trigger="column.sizeX = 50"
-								:caption="capGen.automatic"
-								:naked="true"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.resultRow }}</td>
-						<td><my-builder-aggregator-input v-model="column.aggregator" :readonly /></td>
-					</tr>
-					<tr><td colspan="2"><b>{{ capGen.dataRetrieval }}</b></td></tr>
-					<tr>
-						<td>{{ capGen.options }}</td>
-						<td>
-							<div class="row gap centered">
-								<my-button-check v-model="column.distincted" :caption="capGen.distincted" :readonly />
-								<my-button-check v-model="column.groupBy"    :caption="capGen.groupBy"    :readonly />
-							</div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-			
-			<div class="content grow">
-				<div class="builder-doc-sub-settings">
-					<my-tabs
-						v-model="tabTarget"
-						:entries="tabTargetList.entries"
-						:entriesText="tabTargetList.labels"
-					/>
-					<my-builder-doc-sets
-						v-if="tabTarget === 'body'"
-						v-model="column.setsBody"
-						:allowData="true"
-						:allowValue="true"
-						:joins
-						:readonly
-						:targetsFont="true"
-					/>
-					<my-builder-doc-sets
-						v-if="tabTarget === 'header'"
-						v-model="column.setsHeader"
-						:allowData="true"
-						:allowValue="true"
-						:joins
-						:readonly
-						:targetsFont="true"
-					/>
-					<my-builder-doc-sets
-						v-if="tabTarget === 'footer'"
-						v-model="column.setsFooter"
-						:allowData="true"
-						:allowValue="true"
-						:joins
-						:readonly
-						:targetsFont="true"
+			<div class="top lower">
+				<div class="area">
+					<img class="icon" src="images/dash.png" />
+					<img class="icon" :src="'images/' + icon" />
+					<h2>{{ titleBar }}</h2>
+				</div>
+				<div class="area">
+					<my-button image="cancel.png"
+						@trigger="$emit('close')"
+						:cancel="true"
+						:captionTitle="capGen.button.close"
 					/>
 				</div>
 			</div>
+
+			<my-tabs
+				v-if="isWithQuery"
+				v-model="tabTarget"
+				:entries="['properties','content']"
+				:entriesIcon="['images/edit.png','images/database.png']"
+				:entriesText="[capGen.properties,capGen.content]"
+			/>
+			
+			<template v-if="tabTarget === 'content'">
+				<div class="content grow">
+					<my-builder-query
+						v-if="column.subQuery"
+						v-model="column.query"
+						:allowChoices="false"
+						:allowOrders="true"
+						:builderLanguage
+						:filtersDisable
+						:joinsParents="[joinsParent]"
+						:moduleId
+					/>
+				</div>
+				<br />
+				<table class="generic-table-vertical default-inputs">
+					<tbody>
+						<tr><td colspan="2"><b>{{ capGen.dataRetrieval }}</b></td></tr>
+						<tr>
+							<td>{{ capGen.attribute }}</td>
+							<td>
+								<select
+									@input="setIndexAttribute($event.target.value)"
+									:value="column.attributeIndex+'_'+column.attributeId"
+								>
+									<option value="0_null">-</option>
+									<option v-for="ia in indexAttributeIds" :value="ia">
+										{{ getCaptionByIndexAttributeId(ia) }}
+									</option>
+								</select>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</template>
+
+			<template v-if="tabTarget === 'properties' || !isWithQuery">
+				<table class="generic-table-vertical default-inputs">
+					<tbody>
+						<tr>
+							<td>{{ capGen.title }}</td>
+							<td>
+								<my-builder-caption
+									v-model="column.captions.docColumnTitle"
+									:contentName="capGen.title"
+									:language="builderLanguage"
+									:longInput="true"
+									:readonly
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.lengthChars }}</td>
+							<td><my-input-decimal class="short" v-model="column.length" :min="0" :allowNull="false" :length="9" :lengthFract="0" :readonly /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.sizeX }}</td>
+							<td>
+								<div class="row gap centered" v-if="column.sizeX !== 0">
+									<my-input-range   class="short" v-model="column.sizeX" :min="0" :max="sizeXMax" :readonly :step="0.1" />
+									<my-input-decimal class="short" v-model="column.sizeX" :min="0" :max="sizeXMax" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+									<span>mm</span>
+								</div>
+								<my-button
+									v-else
+									@trigger="column.sizeX = 50"
+									:caption="capGen.automatic"
+									:naked="true"
+								/>
+							</td>
+						</tr>
+						<tr><td colspan="2"><b>{{ capGen.dataRetrieval }}</b></td></tr>
+						<tr>
+							<td>{{ capGen.aggregator }}</td>
+							<td><my-builder-aggregator-input v-model="column.aggregator" :readonly /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.options }}</td>
+							<td>
+								<div class="row gap centered">
+									<my-button-check v-model="column.distincted" :caption="capGen.distincted" :readonly />
+									<my-button-check v-model="column.groupBy"    :caption="capGen.groupBy"    :readonly />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.resultRow }}</td>
+							<td><my-builder-aggregator-input v-model="column.aggregatorRow" :itemsFilter="['record','list','array']" :readonly /></td>
+						</tr>
+					</tbody>
+				</table>
+				
+				<div class="content grow">
+					<div class="builder-doc-sub-settings">
+						<my-tabs
+							v-model="tabTargetArea"
+							:entries="tabTargetAreaList.entries"
+							:entriesText="tabTargetAreaList.labels"
+						/>
+						<my-builder-doc-sets
+							v-if="tabTargetArea === 'body'"
+							v-model="column.setsBody"
+							:allowData="true"
+							:allowValue="true"
+							:joins
+							:readonly
+							:targetsFont="true"
+						/>
+						<my-builder-doc-sets
+							v-if="tabTargetArea === 'header'"
+							v-model="column.setsHeader"
+							:allowData="true"
+							:allowValue="true"
+							:joins
+							:readonly
+							:targetsFont="true"
+						/>
+						<my-builder-doc-sets
+							v-if="tabTargetArea === 'footer'"
+							v-model="column.setsFooter"
+							:allowData="true"
+							:allowValue="true"
+							:joins
+							:readonly
+							:targetsFont="true"
+						/>
+					</div>
+				</div>
+			</template>
 		</teleport>
 	</div>`,
 	props:{
@@ -133,10 +193,11 @@ const MyBuilderDocColumn = {
 		joins:          { type:Array,   required:true },
 		joinsParent:    { type:Array,   required:true },
 		modelValue:     { type:Object,  required:true },
+		moduleId:       { type:String,  required:true },
 		readonly:       { type:Boolean, required:true },
 		sizeXMax:       { type:Number,  required:true }
 	},
-	emits:['update:modelValue'],
+	emits:['close','update:modelValue'],
 	data() {
 		return {
 			filtersDisable:[
@@ -144,14 +205,15 @@ const MyBuilderDocColumn = {
 				'formState','getter','globalSearch','javascript','recordMayCreate',
 				'recordMayDelete','recordMayUpdate','recordNew','variable'
 			],
-			tabTarget:'body'
+			tabTarget:'properties',
+			tabTargetArea:'body'
 		};
 	},
 	computed:{
 		classCss:s => {
 			return { dragPreview:s.isDragPreview, dragSource:s.isDragSource, selected:s.isOptionsShow };
 		},
-		tabTargetList:s => {
+		tabTargetAreaList:s => {
 			return {
 				entries:['body','header','footer'],
 				labels:[s.capGen.content,s.capGen.header,s.capGen.footer]
@@ -165,7 +227,11 @@ const MyBuilderDocColumn = {
 		},
 
 		// simple
-		title:s => getDocColumnTitle(s.column),
+		icon:             s => s.getDocColumnIcon(s.column),
+		isWithQuery:      s => s.column.subQuery,
+		indexAttributeIds:s => !s.column.subQuery ? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins,[]),
+		title:            s => s.getDocColumnTitle(s.column),
+		titleBar:         s => `${s.capGen.column}: ${s.title}`,
 
 		// stores
 		capApp:s => s.$store.getters.captions.builder.doc,
@@ -173,7 +239,22 @@ const MyBuilderDocColumn = {
 	},
 	methods:{
 		// externals
-		getDocColumnTitle
+		getCaptionByIndexAttributeId,
+		getIndexAttributeIdsByJoins,
+		getDocColumnIcon,
+		getDocColumnTitle,
+
+		// actions
+		setIndexAttribute(indexAttributeId) {
+			const p = indexAttributeId.split('_');
+			if(p[1] === 'null') {
+				this.column.attributeId    = null;
+				this.column.attributeIndex = null;
+			} else {
+				this.column.attributeId    = p[1];
+				this.column.attributeIndex = parseInt(p[0]);
+			}
+		}
 	}
 };
 
@@ -192,6 +273,7 @@ export default {
 			v-model="c"
 			v-for="(c,i) in columns"
 			@click.stop="$emit('setColumnIdOptions',c.id)"
+			@close="$emit('setColumnIdOptions',null)"
 			@dragenter="dragEnter($event,i)"
 			@dragleave="dragLeave"
 			@dragend.stop="dragEnd($event,c.id)"
@@ -206,6 +288,7 @@ export default {
 			:style="getStyle(c)"
 			:draggable="!readonly"
 			:key="c.id"
+			:moduleId
 			:readonly
 			:sizeXMax
 		/>
@@ -218,6 +301,7 @@ export default {
 		joins:          { type:Array,         required:true },
 		joinsParent:    { type:Array,         required:true },
 		modelValue:     { type:Array,         required:true },
+		moduleId:       { type:String,  required:true },
 		parentSizeX:    { type:Number,        required:true },
 		readonly:       { type:Boolean,       required:true },
 		sizeXMax:       { type:Number,        required:true },
@@ -284,7 +368,7 @@ export default {
 		},
 		dragPreviewUpdate(ind) {
 			this.dragPreviewRemove();
-			let column = this.getTemplateDocColumn(this.dragContent,null,null);
+			let column = this.getTemplateDocColumn(null,0,false);
 			column.content = this.dragContent;
 			this.columns.splice(ind,0,column);
 		},

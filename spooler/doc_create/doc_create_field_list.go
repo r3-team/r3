@@ -47,7 +47,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 
 	// build expressions from columns
 	for _, column := range f.Columns {
-		dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertDocumentColumnToExpression(column, doc.p.GetLang()))
+		dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertDocumentColumnToExpression(column, 0, doc.p.GetLang()))
 	}
 
 	if len(dataGet.Expressions) == 0 {
@@ -139,7 +139,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		})
 
 		// enable aggregation
-		if column.Aggregator.Valid {
+		if column.AggregatorRow.Valid {
 			printAggregationRow = true
 		}
 	}
@@ -167,7 +167,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 			columnWidth := columnIndexMapWidth[i]
 
 			// collect values for aggregation
-			if printAggregationRow && column.Aggregator.Valid && row.Values[i] != nil {
+			if printAggregationRow && column.AggregatorRow.Valid && row.Values[i] != nil {
 				columnIndexMapAggValueCnt[i]++
 
 				switch atr.Content {
@@ -181,7 +181,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 						return 0, err
 					}
 
-					switch column.Aggregator.String {
+					switch column.AggregatorRow.String {
 					case "avg", "sum":
 						columnIndexMapAggValueNum[i] += value
 					case "max":
@@ -203,7 +203,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 						return 0, err
 					}
 
-					switch column.Aggregator.String {
+					switch column.AggregatorRow.String {
 					case "avg", "sum":
 						columnIndexMapAggValueInt[i] += value
 					case "max":
@@ -272,23 +272,23 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		for i, column := range f.Columns {
 			text := ""
 
-			if column.Aggregator.Valid {
+			if column.AggregatorRow.Valid {
 
-				if column.Aggregator.String == "count" {
+				if column.AggregatorRow.String == "count" {
 					text = fmt.Sprintf("%d", columnIndexMapAggValueCnt[i])
 				} else {
 					atr := columnIndexMapAtr[i]
 
 					switch atr.Content {
 					case "numeric":
-						switch column.Aggregator.String {
+						switch column.AggregatorRow.String {
 						case "avg":
 							text = tools.FormatFloat(columnIndexMapAggValueNum[i]/float64(columnIndexMapAggValueCnt[i]), atr.LengthFract, columnIndexMapFontFooter[i].NumberSepDec, columnIndexMapFontFooter[i].NumberSepTho)
 						case "max", "min", "sum":
 							text = tools.FormatFloat(columnIndexMapAggValueNum[i], atr.LengthFract, columnIndexMapFontFooter[i].NumberSepDec, columnIndexMapFontFooter[i].NumberSepTho)
 						}
 					case "integer", "bigint":
-						switch column.Aggregator.String {
+						switch column.AggregatorRow.String {
 						case "avg":
 							text = fmt.Sprintf("%d", columnIndexMapAggValueInt[i]/int64(columnIndexMapAggValueCnt[i]))
 						case "max", "min", "sum":

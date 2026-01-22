@@ -181,10 +181,11 @@
 }
 .builder-doc-column{
 	position:relative;
-	min-width:3mm; /* to allow access regardles of defined width */
+	min-width:4mm; /* to allow access regardles of defined width */
 	box-sizing:border-box;
 	display:flex;
 	flex-flow:row nowrap;
+	align-items:flex-start;
 	background-color:white;
 	outline:1px solid var(--color-border);
 }
@@ -201,8 +202,15 @@
 	background-color:var(--color-form-builder-selected);
 	outline:3px solid var(--color-form-builder-selected);
 }
+.builder-doc-column-icon{
+	height:24px;
+}
 .builder-doc-column-title{
-	padding:4px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	padding:4px 6px;
+	gap:4px;
 }
 
 

@@ -35,6 +35,13 @@ export function getDocEntityMapRef(doc) {
 	return refs;
 };
 
+export function getDocColumnIcon(column) {
+	if(column.subQuery) return 'database.png';
+	
+	const atr = MyStore.getters['schema/attributeIdMap'][column.attributeId];
+	return `${getAttributeIcon(atr.content,atr.contentUse,false,false)}`;
+};
+
 export function getDocColumnTitle(c) {
 	if(c.subQuery)
 		return 'SubQuery';

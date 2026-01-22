@@ -308,6 +308,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				attribute_id uuid NOT NULL,
 				attribute_index smallint NOT NULL,
 				aggregator app.aggregator,
+				aggregator_row app.aggregator,
 				length smallint NOT NULL,
 				"position" smallint NOT NULL,
 				distincted boolean NOT NULL,
@@ -504,10 +505,16 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE INDEX fki_caption_doc_id_fkey ON instance.caption USING BTREE (doc_id ASC NULLS LAST);
 			CREATE INDEX fki_caption_doc_column_id_fkey ON instance.caption USING BTREE (doc_column_id ASC NULLS LAST);
 			
-			ALTER TABLE app.query ADD COLUMN     doc_id       uuid;
-			ALTER TABLE app.query ADD COLUMN     doc_field_id uuid;
+			ALTER TABLE app.query ADD COLUMN     doc_id        uuid;
+			ALTER TABLE app.query ADD COLUMN     doc_column_id uuid;
+			ALTER TABLE app.query ADD COLUMN     doc_field_id  uuid;
 			ALTER TABLE app.query ADD CONSTRAINT query_doc_id_fkey FOREIGN KEY (doc_id)
 				REFERENCES app.doc (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE app.query ADD CONSTRAINT query_doc_column_id_fkey FOREIGN KEY (doc_column_id)
+				REFERENCES app.doc_column (id) MATCH SIMPLE
 				ON UPDATE CASCADE
 			    ON DELETE CASCADE
 			    DEFERRABLE INITIALLY DEFERRED;
@@ -517,8 +524,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			    ON DELETE CASCADE
 			    DEFERRABLE INITIALLY DEFERRED;
 			
-			CREATE INDEX IF NOT EXISTS fki_query_doc_id_fkey       ON app.query USING btree (doc_id       ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS fki_query_doc_field_id_fkey ON app.query USING btree (doc_field_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_query_doc_id_fkey        ON app.query USING btree (doc_id        ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_query_doc_field_id_fkey  ON app.query USING btree (doc_field_id  ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_query_doc_column_id_fkey ON app.query USING btree (doc_column_id ASC NULLS LAST);
 			
 			ALTER TABLE app.query DROP CONSTRAINT query_single_parent;
 			ALTER TABLE app.query ADD  CONSTRAINT query_single_parent CHECK (1 = (
@@ -526,6 +534,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				CASE WHEN collection_id         IS NULL THEN 0 ELSE 1 END +
 				CASE WHEN column_id             IS NULL THEN 0 ELSE 1 END +
 				CASE WHEN doc_id                IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN doc_column_id         IS NULL THEN 0 ELSE 1 END +
 				CASE WHEN doc_field_id          IS NULL THEN 0 ELSE 1 END +
 				CASE WHEN field_id              IS NULL THEN 0 ELSE 1 END +
 				CASE WHEN form_id               IS NULL THEN 0 ELSE 1 END +

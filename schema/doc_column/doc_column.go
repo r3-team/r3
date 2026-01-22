@@ -15,7 +15,8 @@ import (
 func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocColumn, error) {
 
 	rows, err := tx.Query(ctx, `
-		SELECT id, attribute_id, attribute_index, group_by, aggregator, distincted, length, sub_query, size_x
+		SELECT id, attribute_id, attribute_index, group_by, aggregator,
+			aggregator_row, distincted, length, sub_query, size_x
 		FROM app.doc_column
 		WHERE doc_field_id = $1
 		ORDER BY position ASC
@@ -28,7 +29,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID) ([]types.DocCo
 	columns := make([]types.DocColumn, 0)
 	for rows.Next() {
 		var c types.DocColumn
-		if err := rows.Scan(&c.Id, &c.AttributeId, &c.AttributeIndex, &c.GroupBy, &c.Aggregator, &c.Distincted, &c.Length, &c.SubQuery, &c.SizeX); err != nil {
+		if err := rows.Scan(&c.Id, &c.AttributeId, &c.AttributeIndex, &c.GroupBy, &c.Aggregator,
+			&c.AggregatorRow, &c.Distincted, &c.Length, &c.SubQuery, &c.SizeX); err != nil {
+
 			return nil, err
 		}
 		columns = append(columns, c)
@@ -69,15 +72,15 @@ func Set_tx(ctx context.Context, tx pgx.Tx, docFieldId uuid.UUID, columns []type
 	columnIds := make([]uuid.UUID, 0)
 	for i, c := range columns {
 		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.doc_column (id, doc_field_id, attribute_id, attribute_index, 
-				aggregator, length, distincted, group_by, size_x, sub_query, position)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+			INSERT INTO app.doc_column (id, doc_field_id, attribute_id, attribute_index, aggregator,
+				aggregator_row, length, distincted, group_by, size_x, sub_query, position)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
 			ON CONFLICT(id)
 			DO UPDATE SET
-				attribute_id = $3, attribute_index = $4, aggregator = $5, length = $6,
-				distincted = $7, group_by = $8, size_x = $9, sub_query = $10, position = $11
-		`, c.Id, docFieldId, c.AttributeId, c.AttributeIndex, c.Aggregator, c.Length,
-			c.Distincted, c.GroupBy, c.SizeX, c.SubQuery, i); err != nil {
+				attribute_id = $3, attribute_index = $4, aggregator = $5, aggregator_row = $6,
+				length = $7, distincted = $8, group_by = $9, size_x = $10, sub_query = $11, position = $12
+		`, c.Id, docFieldId, c.AttributeId, c.AttributeIndex, c.Aggregator, c.AggregatorRow,
+			c.Length, c.Distincted, c.GroupBy, c.SizeX, c.SubQuery, i); err != nil {
 
 			return err
 		}

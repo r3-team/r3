@@ -147,18 +147,19 @@ export function getTemplateDoc(moduleId,name) {
 		}
 	};
 };
-export function getTemplateDocColumn(attributeId,attributeIndex) {
+export function getTemplateDocColumn(attributeId,attributeIndex,subQuery) {
 	return {
 		id:getUuidV4(),
 		attributeId:attributeId,
 		attributeIndex:attributeIndex,
 		aggregator:null,
+		aggregatorRow:null,
 		distincted:false,
 		groupBy:false,
 		length:0,
-		subQuery:false,
-		sizeX:0,
 		query:getTemplateQuery(),
+		sizeX:0,
+		subQuery:subQuery,
 		setsBody:[],
 		setsFooter:[],
 		setsHeader:[],

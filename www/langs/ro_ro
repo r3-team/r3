@@ -858,7 +858,6 @@
 			"inheritFrom": "Inherit from",
 			"setData": "Overwrite by attribute value",
 			"setValue": "Overwrite manually",
-			"sidebarField": "Field: {NAME}",
 			"sidebarPage": "Page: {NAME}",
 			"tabStates": "States ({CNT})",
 			"titleOne": "Document '{NAME}'"
@@ -1064,9 +1063,6 @@
 			"readonly": "Numai citire",
 			"required": "Necesar",
 			"scale": "UI scale",
-			"sidebarField": "Field: {NAME}",
-			"sidebarFieldColumn": "Column: {NAME}",
-			"sidebarFieldColumns": "Available columns",
 			"sidebarForm": "Form",
 			"state": "Statut",
 			"stateDefault": "implicit",
@@ -1085,7 +1081,6 @@
 				}
 			},
 			"subQuery": "Sub interogare",
-			"subQueryAttribute": "Atribut",
 			"systemDefaults": {
 				"false": "'No' value",
 				"fixed": "Custom value",
@@ -2148,7 +2143,6 @@
 		"searchDictionarySimple": "[No dictionary]",
 		"searchDictionarySimpleHint": "This is option is for when expected result texts do not have a dictionary assigned.",
 		"subQueryAggregator": "Aggregate",
-		"subQueryAttribute": "Attribute",
 		"valueHint": "Valoare text sau număr"
 	},
 	"form": {
@@ -2226,6 +2220,17 @@
 		"active": "Activ",
 		"after": "After",
 		"aggregator": "Agrega",
+		"aggregatorItem": {
+			"array": "vector",
+			"avg": "medie",
+			"count": "număr",
+			"json": "JSON",
+			"list": "listă separată de virgule",
+			"max": "maximum",
+			"min": "minimum",
+			"record": "[înregistrare unică]",
+			"sum": "suma"
+		},
 		"alignment": "Alignment",
 		"alignmentHor": {
 			"center": "center",
@@ -2322,6 +2327,7 @@
 		"colorFill": "Fill color",
 		"colorFillRowsEven": "Fill color, even rows",
 		"colorFillRowsOdd": "Fill color, odd rows",
+		"column": "Column",
 		"columnSettings": "Column settings",
 		"columns": "Columns",
 		"columnsActive": "Active columns",
@@ -2439,15 +2445,6 @@
 		"numberSepDecimal": "Decimal separator",
 		"numberSepThousand": "Thousands separator",
 		"option": {
-			"aggArray": "vector",
-			"aggAvg": "medie",
-			"aggCount": "număr",
-			"aggJson": "JSON",
-			"aggList": "listă separată de virgule",
-			"aggMax": "maximum",
-			"aggMin": "minimum",
-			"aggRecord": "[înregistrare unică]",
-			"aggSum": "suma",
 			"all": "all",
 			"no": "nu",
 			"numberSeparator": {

@@ -36,14 +36,14 @@ func ConvertColumnToExpression(column types.Column, loginId int64, languageCode 
 	}
 }
 
-func ConvertDocumentColumnToExpression(column types.DocColumn, languageCode string) types.DataGetExpression {
+func ConvertDocumentColumnToExpression(column types.DocColumn, loginId int64, languageCode string) types.DataGetExpression {
 
 	expr := types.DataGetExpression{
 		AttributeId: pgtype.UUID{Bytes: column.AttributeId, Valid: true},
 		Index:       column.AttributeIndex,
 		GroupBy:     column.GroupBy,
+		Aggregator:  pgtype.Text{}, // aggregation is done on the expression containing the sub query
 		Distincted:  column.Distincted,
-		// aggregation for regular columns is done on returned values
 	}
 	if !column.SubQuery {
 		return expr
@@ -55,7 +55,7 @@ func ConvertDocumentColumnToExpression(column types.DocColumn, languageCode stri
 			RelationId:  column.Query.RelationId.Bytes,
 			Joins:       ConvertQueryToDataJoins(column.Query.Joins),
 			Expressions: []types.DataGetExpression{expr},
-			Filters:     ConvertQueryToDataFilter(column.Query.Filters, 0, languageCode, map[string]string{}),
+			Filters:     ConvertQueryToDataFilter(column.Query.Filters, loginId, languageCode, map[string]string{}),
 			Orders:      ConvertQueryToDataOrders(column.Query.Orders),
 			Limit:       column.Query.FixedLimit,
 		},

@@ -201,8 +201,9 @@ export default {
 			</div>
 			<div class="top lower" v-if="fieldShow" :class="{ clickable:columnShow }" @click="columnIdShow = null;">
 				<div class="area">
+					<img class="icon" src="images/dash.png" />
 					<img class="icon" :src="'images/' + getFieldIcon(fieldShow)" />
-					<h2>{{ capApp.sidebarField.replace('{NAME}','F' + entityIdMapRef.field[fieldShow.id] + ', ' + getFieldTitle(fieldShow)) }}</h2>
+					<h2>{{ capGen.field + ': F' + entityIdMapRef.field[fieldShow.id] + ', ' + getFieldTitle(fieldShow) }}</h2>
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
@@ -214,8 +215,9 @@ export default {
 			</div>
 			<div class="top lower" v-if="columnShow">
 				<div class="area">
+					<img class="icon" src="images/dash.png" />
 					<img class="icon" :src="'images/' + getColumnIcon(columnShow)" />
-					<h2>{{ capApp.sidebarFieldColumn.replace('{NAME}',getItemTitleColumn(columnShow,false)) }}</h2>
+					<h2>{{  capGen.column + ': ' + getItemTitleColumn(columnShow,false) }}</h2>
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
@@ -465,7 +467,7 @@ export default {
 
 						<!-- column templates query fields -->
 						<br />
-						<h2>{{ capApp.sidebarFieldColumns }}</h2>
+						<h2>{{ capGen.columnsAvailable }}</h2>
 						
 						<div class="columns shade">
 							<my-builder-column-templates

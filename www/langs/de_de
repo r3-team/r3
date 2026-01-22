@@ -858,7 +858,6 @@
 			"inheritFrom": "Übernehmen von",
 			"setData": "Von Attributwert überschreiben",
 			"setValue": "Manuell überschreiben",
-			"sidebarField": "Feld: {NAME}",
 			"sidebarPage": "Seite: {NAME}",
 			"tabStates": "Zustände ({CNT})",
 			"titleOne": "Dokument '{NAME}'"
@@ -1064,9 +1063,6 @@
 			"readonly": "Lesend",
 			"required": "Benötigt",
 			"scale": "UI-Skalierung",
-			"sidebarField": "Feld: {NAME}",
-			"sidebarFieldColumn": "Spalte: {NAME}",
-			"sidebarFieldColumns": "Verfügbare Spalten",
 			"sidebarForm": "Formular",
 			"state": "Status",
 			"stateDefault": "standard",
@@ -1085,7 +1081,6 @@
 				}
 			},
 			"subQuery": "Sub-Query",
-			"subQueryAttribute": "Attribut",
 			"systemDefaults": {
 				"false": "\"Nein\"-Wert",
 				"fixed": "Benutzerdefinierter Wert",
@@ -2148,7 +2143,6 @@
 		"searchDictionarySimple": "[Kein Wörterbuch]",
 		"searchDictionarySimpleHint": "Diese Option ist für wenn die erwarteten Textergebnisse kein Wörterbuch zugewiesen haben.",
 		"subQueryAggregator": "Aggregieren",
-		"subQueryAttribute": "Attribut",
 		"valueHint": "Text oder Zahlenwert"
 	},
 	"form": {
@@ -2226,6 +2220,17 @@
 		"active": "Aktiv",
 		"after": "Danach",
 		"aggregator": "Aggregieren",
+		"aggregatorItem": {
+			"array": "Array",
+			"avg": "Durchschnitt",
+			"count": "Anzahl",
+			"json": "JSON",
+			"list": "Kommaliste",
+			"max": "Maximal",
+			"min": "Minimal",
+			"record": "[Einzelner Datensatz]",
+			"sum": "Summe"
+		},
 		"alignment": "Ausrichtung",
 		"alignmentHor": {
 			"center": "mittig",
@@ -2322,6 +2327,7 @@
 		"colorFill": "Füllfarbe",
 		"colorFillRowsEven": "Füllfarbe, grade Zeilen",
 		"colorFillRowsOdd": "Füllfarbe, ungrade Zeilen",
+		"column": "Spalte",
 		"columnSettings": "Spalteneinstellungen",
 		"columns": "Spalten",
 		"columnsActive": "Aktive Spalten",
@@ -2439,15 +2445,6 @@
 		"numberSepDecimal": "Dezimal-Trennzeichen",
 		"numberSepThousand": "Tausender-Trennzeichen",
 		"option": {
-			"aggArray": "Array",
-			"aggAvg": "Durchschnitt",
-			"aggCount": "Anzahl",
-			"aggJson": "JSON",
-			"aggList": "Kommaliste",
-			"aggMax": "Maximal",
-			"aggMin": "Minimal",
-			"aggRecord": "[Einzelner Datensatz]",
-			"aggSum": "Summe",
 			"all": "alle",
 			"no": "nein",
 			"numberSeparator": {

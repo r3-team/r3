@@ -13,6 +13,7 @@ import {
 	MyBuilderDocMarginPadding
 } from './builderDocInput.js';
 import {
+	getDocColumnIcon,
 	getDocColumnTitle,
 	getDocFieldIcon,
 	getDocFieldTitle
@@ -74,6 +75,7 @@ export default {
 			:elmOptions="$refs.columnOptions"
 			:joins
 			:joinsParent="field.query.joins"
+			:moduleId
 			:parentSizeX="sizeX"
 			:readonly
 			:sizeXMax
@@ -113,8 +115,9 @@ export default {
 		<teleport v-if="isOptionsShow" :to="elmOptions">
 			<div class="top lower" :class="{ clickable:columnIdOptions !== null }" @click="columnIdOptions = null">
 				<div class="area">
+					<img class="icon" src="images/dash.png" />
 					<img class="icon" :src="'images/' + getDocFieldIcon(field)" />
-					<h2>{{ title }}</h2>
+					<h2>{{ titleBar }}</h2>
 				</div>
 				<div class="area">
 					<my-button image="upward.png"   @trigger="$emit('setFieldIdOptionsParent')" :active="isChild" :caption="capApp.button.selectParent" />
@@ -148,7 +151,7 @@ export default {
 						:allowChoices="false"
 						:builderLanguage
 						:filtersDisable
-						:moduleId="moduleId"
+						:moduleId
 					/>
 					<div class="builder-doc-templates">
 						<div class="builder-doc-template" draggable="true"
@@ -156,6 +159,9 @@ export default {
 							v-for="c in columnsTemplate"
 							:key="c.id"
 						>
+							<div class="builder-doc-button">
+								<img :src="'images/' + getDocColumnIcon(c)" />
+							</div>
 							<span>{{ getDocColumnTitle(c) }}</span>
 						</div>
 					</div>
@@ -394,9 +400,10 @@ export default {
 					if(s.isAttributeRelationship(a.content))
 						continue;
 
-					out.push(s.getTemplateDocColumn(a.id,j.index));
+					out.push(s.getTemplateDocColumn(a.id,j.index,false));
 				}
 			}
+			out.push(s.getTemplateDocColumn(null,0,true));
 			return out;
 		},
 		tabTargetListAreas:s => {
@@ -467,6 +474,7 @@ export default {
 		isWithFields:  s => s.isFlow || s.isGrid,
 		isWithQuery:   s => s.isList,
 		title:         s => s.getDocFieldTitle(s.field),
+		titleBar:      s => `${s.capGen.field}: ${s.title}`,
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
@@ -478,6 +486,7 @@ export default {
 	methods:{
 		// externals
 		copyValueDialog,
+		getDocColumnIcon,
 		getDocColumnTitle,
 		getDocFieldIcon,
 		getDocFieldTitle,

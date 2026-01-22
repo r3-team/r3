@@ -36,7 +36,8 @@ type DocColumn struct {
 	AttributeId    uuid.UUID   `json:"attributeId"`
 	AttributeIndex int         `json:"attributeIndex"` // attribute index
 	GroupBy        bool        `json:"groupBy"`        // group by column attribute value?
-	Aggregator     pgtype.Text `json:"aggregator"`     // aggregator (SUM, COUNT, etc.)
+	Aggregator     pgtype.Text `json:"aggregator"`     // aggregator (SUM, COUNT, etc.) for result content
+	AggregatorRow  pgtype.Text `json:"aggregatorRow"`  // aggregator (SUM, COUNT, etc.) for result row
 	Distincted     bool        `json:"distincted"`     // attribute values are distinct?
 	Length         int         `json:"length"`         // text length limit (in characters)
 	SubQuery       bool        `json:"subQuery"`       // column uses sub query?

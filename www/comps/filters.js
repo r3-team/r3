@@ -505,7 +505,7 @@ const MyFilterSide = {
 				<table class="default-inputs">
 					<tbody>
 						<tr>
-							<td>{{ capApp.subQueryAttribute }}</td>
+							<td>{{ capGen.attribute }}</td>
 							<td>
 								<!-- sub query attribute input -->
 								<my-filter-attribute
