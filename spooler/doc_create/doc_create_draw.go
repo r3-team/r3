@@ -29,7 +29,7 @@ type textDrawing struct {
 }
 
 // draws attribute value as cell
-func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY float64, lineCount int, atr types.Attribute, valueIf any) error {
+func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY float64, lengthChars int, lineCount int, atr types.Attribute, valueIf any) error {
 
 	if valueIf == nil {
 		return nil
@@ -44,7 +44,10 @@ func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY f
 
 		switch atr.ContentUse {
 		case "iframe", "default", "textarea":
-			drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("%s", valueIf))
+			if lengthChars != 0 && len(v) > lengthChars-3 {
+				v = fmt.Sprintf("%s...", v[:lengthChars-3])
+			}
+			drawCellText(doc, font, sizeX, sizeY, lineCount, v)
 		case "barcode":
 			var b textBarcode
 			if err := json.Unmarshal([]byte(v), &b); err != nil {
@@ -54,7 +57,7 @@ func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY f
 				return err
 			}
 		case "color":
-			drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("#%s", valueIf))
+			drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("#%s", v))
 		case "drawing":
 			var d textDrawing
 			if err := json.Unmarshal([]byte(v), &d); err != nil {

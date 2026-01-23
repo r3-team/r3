@@ -19,6 +19,7 @@ type cell struct {
 	atrValue any
 	font     types.DocFont
 	text     string
+	length   int
 	lines    int
 	width    float64
 }
@@ -132,10 +133,11 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		}
 
 		cellsHeader = append(cellsHeader, cell{
-			font:  columnIndexMapFontHeader[i],
-			lines: cellLines,
-			text:  title,
-			width: columnIndexMapWidth[i],
+			font:   columnIndexMapFontHeader[i],
+			length: column.Length,
+			lines:  cellLines,
+			text:   title,
+			width:  columnIndexMapWidth[i],
 		})
 
 		// enable aggregation
@@ -237,6 +239,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 				atr:      atr,
 				atrValue: row.Values[i],
 				font:     font,
+				length:   column.Length,
 				lines:    cellLines,
 				text:     "",
 				width:    columnWidth,
@@ -305,10 +308,11 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 			}
 
 			cells = append(cells, cell{
-				font:  columnIndexMapFontFooter[i],
-				lines: cellLines,
-				text:  text,
-				width: columnIndexMapWidth[i],
+				font:   columnIndexMapFontFooter[i],
+				length: column.Length,
+				lines:  cellLines,
+				text:   text,
+				width:  columnIndexMapWidth[i],
 			})
 		}
 
@@ -325,7 +329,8 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 	return doc.p.GetY(), nil
 }
 
-func addFieldListRow(doc *doc, b types.DocBorder, cells []cell, padding types.DocMarginPadding, colorFill pgtype.Text, posXStart, posYStart, width, height, paddingX, paddingY float64) (float64, error) {
+func addFieldListRow(doc *doc, b types.DocBorder, cells []cell, padding types.DocMarginPadding,
+	colorFill pgtype.Text, posXStart, posYStart, width, height, paddingX, paddingY float64) (float64, error) {
 
 	// draw box to display outer border and/or color fill
 	if b.Draw != "" || colorFill.Valid {
@@ -347,9 +352,12 @@ func addFieldListRow(doc *doc, b types.DocBorder, cells []cell, padding types.Do
 		doc.p.SetXY(posXStart+posXOffset+padding.L, posYStart+padding.T)
 
 		if c.text != "" {
+			if c.length != 0 && len(c.text) > c.length-3 {
+				c.text = fmt.Sprintf("%s...", c.text[:c.length-3])
+			}
 			drawCellText(doc, c.font, c.width, height, c.lines, c.text)
 		} else {
-			if err := drawAttributeValue(doc, c.font, 0, 0, c.width, height, c.lines, c.atr, c.atrValue); err != nil {
+			if err := drawAttributeValue(doc, c.font, 0, 0, c.width, height, c.length, c.lines, c.atr, c.atrValue); err != nil {
 				return 0, err
 			}
 		}

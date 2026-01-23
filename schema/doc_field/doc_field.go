@@ -53,7 +53,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			COALESCE(ff.shrink_y, fg.shrink_y),
 
 			-- data
-			fd.attribute_id, fd.attribute_index,
+			fd.attribute_id, fd.attribute_index, fd.length,
 
 			-- flow
 			ff.gap,
@@ -85,13 +85,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 	for rows.Next() {
 		var f types.DocField
 		var attributeId pgtype.UUID
-		var attributeIndex pgtype.Int4
+		var attributeIndex, length pgtype.Int4
 		var gap, sizeSnap pgtype.Float8
 		var paddings []float64
 		var shrinkY, headerRepeat pgtype.Bool
 		var bodyColorFillEven, bodyColorFillOdd, footerColorFill, headerColorFill, value pgtype.Text
-		if err := rows.Scan(&f.Id, &f.Content, &f.PosX, &f.PosY, &f.SizeX, &f.SizeY, &f.State,
-			&paddings, &shrinkY, &attributeId, &attributeIndex, &gap, &sizeSnap, &bodyColorFillEven,
+		if err := rows.Scan(&f.Id, &f.Content, &f.PosX, &f.PosY, &f.SizeX, &f.SizeY, &f.State, &paddings,
+			&shrinkY, &attributeId, &attributeIndex, &length, &gap, &sizeSnap, &bodyColorFillEven,
 			&bodyColorFillOdd, &footerColorFill, &headerColorFill, &headerRepeat, &value); err != nil {
 
 			return nil, err
@@ -111,6 +111,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 
 				AttributeId:    attributeId.Bytes,
 				AttributeIndex: int(attributeIndex.Int32),
+				Length:         int(length.Int32),
 			})
 		case "flow", "flowBody":
 			f := types.DocFieldFlow{
@@ -417,13 +418,12 @@ func setGeneric_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId
 }
 
 func setData_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldData) error {
-	// currently, there is nothing to update in data fields
 	_, err := tx.Exec(ctx, `
-		INSERT INTO app.doc_field_data (doc_field_id, attribute_id, attribute_index)
-		VALUES ($1,$2,$3)
+		INSERT INTO app.doc_field_data (doc_field_id, attribute_id, attribute_index, length)
+		VALUES ($1,$2,$3,$4)
 		ON CONFLICT (doc_field_id)
-		DO NOTHING
-	`, f.Id, f.AttributeId, f.AttributeIndex)
+		DO UPDATE SET length = $4
+	`, f.Id, f.AttributeId, f.AttributeIndex, f.Length)
 	return err
 }
 

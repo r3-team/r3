@@ -106,7 +106,10 @@ const MyBuilderDocColumn = {
 						</tr>
 						<tr>
 							<td>{{ capGen.lengthChars }}</td>
-							<td><my-input-decimal class="short" v-model="column.length" :min="0" :allowNull="false" :length="9" :lengthFract="0" :readonly /></td>
+							<td>
+								<my-input-decimal class="short" v-if="column.length !== 0" v-model="column.length" :min="0" :allowNull="false" :lengthFract="0" :readonly />
+								<my-button v-else @trigger="column.length = 50" :caption="capGen.noLimit" :naked="true" />
+							</td>
 						</tr>
 						<tr>
 							<td>{{ capGen.sizeX }}</td>

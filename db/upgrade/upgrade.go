@@ -237,6 +237,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				doc_field_id uuid NOT NULL,
 				attribute_id uuid NOT NULL,
 				attribute_index integer NOT NULL,
+				length integer NOT NULL,
 				CONSTRAINT doc_field_data_pkey PRIMARY KEY (doc_field_id),
 				CONSTRAINT doc_field_data_doc_field_id_fkey FOREIGN KEY (doc_field_id)
 					REFERENCES app.doc_field (id) MATCH SIMPLE

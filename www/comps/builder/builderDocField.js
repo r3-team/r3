@@ -225,6 +225,16 @@ export default {
 								</tr>
 							</template>
 
+							<template v-if="isDataTextPrint">
+								<tr>
+									<td>{{ capGen.lengthChars }}</td>
+									<td>
+										<my-input-decimal class="short" v-if="field.length !== 0" v-model="field.length" :min="0" :readonly :allowNull="false" :lengthFract="0" />
+										<my-button v-else @trigger="field.length = 50" :caption="capGen.noLimit" :naked="true" />
+									</td>
+								</tr>
+							</template>
+
 							<template v-if="isFlow || isGrid">
 								<tr>
 									<td>{{ capApp.shrinkY }}</td>
@@ -462,21 +472,22 @@ export default {
 		styleHeight:s => s.isFlow && s.isRoot ? 'flex:1 1 auto;' : `height:${s.field.sizeY*s.zoom}mm;`,
 
 		// simple
-		attribute:     s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
-		dragTypeColumn:s => `doc-column_${s.field.id}`,
-		isChild:       s => s.isChildFlow || s.isChildGrid,
-		isData:        s => s.field.content === 'data',
-		isDragPreview: s => s.field.content === s.dragContent,
-		isFlow:        s => ['flow','flowBody'].includes(s.field.content),
-		isGrid:        s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
-		isList:        s => s.field.content === 'list',
-		isOptionsShow: s => s.fieldIdOptions === s.field.id,
-		isTabsNeeded:  s => s.isList,
-		isWithBorder:  s => s.isFlow || s.isGrid,
-		isWithFields:  s => s.isFlow || s.isGrid,
-		isWithQuery:   s => s.isList,
-		title:         s => s.getDocFieldTitle(s.field),
-		titleBar:      s => `${s.capGen.field}: ${s.title}`,
+		attribute:      s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
+		dragTypeColumn: s => `doc-column_${s.field.id}`,
+		isChild:        s => s.isChildFlow || s.isChildGrid,
+		isData:         s => s.field.content === 'data',
+		isDataTextPrint:s => s.isData && ['iframe','default','textarea'].includes(s.attribute.contentUse),
+		isDragPreview:  s => s.field.content === s.dragContent,
+		isFlow:         s => ['flow','flowBody'].includes(s.field.content),
+		isGrid:         s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
+		isList:         s => s.field.content === 'list',
+		isOptionsShow:  s => s.fieldIdOptions === s.field.id,
+		isTabsNeeded:   s => s.isList,
+		isWithBorder:   s => s.isFlow || s.isGrid,
+		isWithFields:   s => s.isFlow || s.isGrid,
+		isWithQuery:    s => s.isList,
+		title:          s => s.getDocFieldTitle(s.field),
+		titleBar:       s => `${s.capGen.field}: ${s.title}`,
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],

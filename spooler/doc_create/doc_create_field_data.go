@@ -20,7 +20,7 @@ func addFieldData(doc *doc, f types.DocFieldData, font types.DocFont, posX, posY
 	if !exists {
 		return 0, handler.ErrSchemaUnknownAttribute(f.AttributeId)
 	}
-	if err := drawAttributeValue(doc, font, posX, posY, f.SizeX, f.SizeY, 0, atr, v); err != nil {
+	if err := drawAttributeValue(doc, font, posX, posY, f.SizeX, f.SizeY, f.Length, 0, atr, v); err != nil {
 		return 0, err
 	}
 	return doc.p.GetY(), nil
