@@ -487,7 +487,7 @@ func setList_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldList) error {
 
 func setText_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldText) error {
 	_, err := tx.Exec(ctx, `
-		INSERT INTO app.doc_field_data (doc_field_id, value)
+		INSERT INTO app.doc_field_text (doc_field_id, value)
 		VALUES ($1,$2)
 		ON CONFLICT (doc_field_id)
 		DO UPDATE SET value = $2

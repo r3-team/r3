@@ -108,7 +108,7 @@ const MyBuilderJsFunction = {
 				v-model="tabTarget"
 				:entries="['content','properties']"
 				:entriesIcon="['images/database.png','images/edit.png']"
-				:entriesText="[capApp.placeholders,capGen.properties]"
+				:entriesText="[capGen.placeholders,capGen.properties]"
 			/>
 			
 			<div class="content default-inputs" :class="{ 'no-padding':tabTarget !== 'content' }">

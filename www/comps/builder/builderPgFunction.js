@@ -709,7 +709,7 @@ const MyBuilderPgFunction = {
 			let out = {
 				icons:['images/code.png','images/edit.png'],
 				keys:['content','properties'],
-				labels:[s.capApp.placeholders,s.capGen.properties]
+				labels:[s.capGen.placeholders,s.capGen.properties]
 			};
 			if(!s.isTrigger) {
 				out.icons.splice(1,0,'images/settingsPlay.png');

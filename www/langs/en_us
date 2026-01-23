@@ -853,6 +853,13 @@
 			"grid": {
 				"sizeSnap": "Grid snap size"
 			},
+			"placeholders": {
+				"{DATE_TODAY}": "Current date",
+				"{DATETIME_NOW}": "Current date & time",
+				"{PAGE_CUR}": "Current page number",
+				"{PAGE_END}": "Total page number",
+				"{TIME_NOW}": "Current time"
+			},
 			"headerRepeat": "Repeat header row on page break",
 			"inheritFrom": "Inherit from",
 			"setData": "Overwrite by attribute value",
@@ -1507,7 +1514,6 @@
 			"placeholderPresetsHelp": "Placeholders for the ID (as BIGINT) of the record that exists for the selected preset.<br /><br />If the preset is not protected, it could have been deleted by users. In this case 'null' is returned.",
 			"placeholderRelations": "Relations",
 			"placeholderRelationsHelp": "Placeholders for relations & attributes - used for SQL requests (SELECT/INSERT/UPDATE/DELETE).",
-			"placeholders": "Placeholders",
 			"placeholdersCollections": "Collections",
 			"placeholdersFormFields": "Form fields",
 			"placeholdersVariables": "Variables",
@@ -2474,6 +2480,7 @@
 		"password": "Password",
 		"pgFunction": "Function (back)",
 		"pgFunctions": "Functions (back)",
+		"placeholders": "Placeholders",
 		"preview": "Preview",
 		"properties": "Properties",
 		"queryChoices": "Filter sets",
@@ -2513,6 +2520,7 @@
 		"status": "Status",
 		"styles": "Styles",
 		"systemModes": "System modes",
+		"text": "Text",
 		"textSearch": "Text search",
 		"threeDots": "...",
 		"tip": "Tip",

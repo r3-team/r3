@@ -235,6 +235,20 @@ export default {
 								</tr>
 							</template>
 
+							<template v-if="isText">
+								<tr>
+									<td colspan="2">
+										<textarea class="dynamic" v-model="field.value" :disabled="readonly" :placeholder="capGen.text"></textarea>
+									</td>
+								</tr>
+								<tr><td><b>{{ capGen.placeholders }}</b></td></tr>
+								<tr><td>{PAGE_CUR}</td><td>{{ capApp.placeholders['{PAGE_CUR}'] }}</td></tr>
+								<tr><td>{PAGE_END}</td><td>{{ capApp.placeholders['{PAGE_END}'] }}</td></tr>
+								<tr><td>{DATE_TODAY}</td><td>{{ capApp.placeholders['{DATE_TODAY}'] }}</td></tr>
+								<tr><td>{DATETIME_NOW}</td><td>{{ capApp.placeholders['{DATETIME_NOW}'] }}</td></tr>
+								<tr><td>{TIME_NOW}</td><td>{{ capApp.placeholders['{TIME_NOW}'] }}</td></tr>
+							</template>
+
 							<template v-if="isFlow || isGrid">
 								<tr>
 									<td>{{ capApp.shrinkY }}</td>
@@ -481,6 +495,7 @@ export default {
 		isFlow:         s => ['flow','flowBody'].includes(s.field.content),
 		isGrid:         s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
 		isList:         s => s.field.content === 'list',
+		isText:         s => s.field.content === 'text',
 		isOptionsShow:  s => s.fieldIdOptions === s.field.id,
 		isTabsNeeded:   s => s.isList,
 		isWithBorder:   s => s.isFlow || s.isGrid,
@@ -678,13 +693,8 @@ export default {
 				field.sizeY = this.getSizeAfterSnap(true,field.posY,field.sizeY,gridSizeY,this.gridFieldSizeMinY,this.field.sizeSnap);
 			}
 
-			if(this.isFlow) {
+			if(this.isFlow)
 				field.sizeX = 0;
-
-				// set min. size for grid fields
-				if(field.sizeY === 0 && field.content === 'grid')
-					field.sizeY = 6;
-			}
 
 			const indPreview = this.dragPreviewGetIndex();
 			if(indPreview !== -1) this.field.fields.splice(indPreview,1,field);

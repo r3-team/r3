@@ -181,7 +181,7 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 		posX:0,
 		posY:0,
 		sizeX:0,
-		sizeY:0,
+		sizeY:9,
 		sets:[],
 		state:true,
 		border:getBorderTemplate()
@@ -191,6 +191,7 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 		case 'data':
 			f.attributeId    = attributeId;
 			f.attributeIndex = attributeIndex;
+			f.length         = 0;
 		break;
 		case 'flow':     // fallthrough
         case 'flowBody':
