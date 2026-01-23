@@ -210,10 +210,6 @@ export default {
 										</div>
 									</td>
 								</tr>
-								<tr>
-									<td>{{ capApp.grid.shrink }}</td>
-									<td><my-bool v-model="field.shrink" :readonly /></td>
-								</tr>
 							</template>
 
 							<template v-if="isFlow">
@@ -226,6 +222,13 @@ export default {
 											<span>mm</span>
 										</div>
 									</td>
+								</tr>
+							</template>
+
+							<template v-if="isFlow || isGrid">
+								<tr>
+									<td>{{ capApp.shrinkY }}</td>
+									<td><my-bool v-model="field.shrinkY" :readonly /></td>
 								</tr>
 							</template>
 
@@ -380,7 +383,6 @@ export default {
 	computed:{
 		classCss:s => {
 			return {
-				flow:s.isFlow,
 				clickable:true,
 				dragPreview:s.isDragPreview,
 				dragSource:s.beingDragged,
@@ -456,8 +458,8 @@ export default {
 		sizeXMax:   s => s.parentSizeX - s.field.posX,
 		sizeYMax:   s => s.parentSizeY - s.field.posY,
 		style:      s => `${s.styleHeight}${s.styleGrid}${s.styleBorder}`,
-		styleGrid:  s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;height:${s.field.sizeY*s.zoom}mm;` : '',
-		styleHeight:s => s.isFlow && s.field.sizeY === 0 ? '' : `height:${s.field.sizeY*s.zoom}mm;`,
+		styleGrid:  s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;` : '',
+		styleHeight:s => s.isFlow && s.isRoot ? 'flex:1 1 auto;' : `height:${s.field.sizeY*s.zoom}mm;`,
 
 		// simple
 		attribute:     s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,

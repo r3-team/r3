@@ -851,13 +851,13 @@
 				"styleUnderline": "Underline"
 			},
 			"grid": {
-				"shrink": "Shrink vertically if empty",
 				"sizeSnap": "Grid snap size"
 			},
 			"headerRepeat": "Repeat header row on page break",
 			"inheritFrom": "Inherit from",
 			"setData": "Overwrite by attribute value",
 			"setValue": "Overwrite manually",
+			"shrinkY": "Shrink vertically if empty",
 			"sidebarPage": "Page: {NAME}",
 			"tabStates": "States ({CNT})",
 			"titleOne": "Document '{NAME}'"

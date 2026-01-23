@@ -50,6 +50,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 
 			-- shared
 			COALESCE(ff.paddings, fl.paddings),
+			COALESCE(ff.shrink_y, fg.shrink_y),
 
 			-- data
 			fd.attribute_id, fd.attribute_index,
@@ -58,7 +59,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			ff.gap,
 
 			-- grid
-			fg.shrink, fg.size_snap,
+			fg.size_snap,
 
 			-- list
 			fl.body_color_fill_even, fl.body_color_fill_odd, fl.footer_color_fill, fl.header_color_fill, fl.header_repeat,
@@ -87,10 +88,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 		var attributeIndex pgtype.Int4
 		var gap, sizeSnap pgtype.Float8
 		var paddings []float64
-		var shrink, headerRepeat pgtype.Bool
+		var shrinkY, headerRepeat pgtype.Bool
 		var bodyColorFillEven, bodyColorFillOdd, footerColorFill, headerColorFill, value pgtype.Text
 		if err := rows.Scan(&f.Id, &f.Content, &f.PosX, &f.PosY, &f.SizeX, &f.SizeY, &f.State,
-			&paddings, &attributeId, &attributeIndex, &gap, &shrink, &sizeSnap, &bodyColorFillEven,
+			&paddings, &shrinkY, &attributeId, &attributeIndex, &gap, &sizeSnap, &bodyColorFillEven,
 			&bodyColorFillOdd, &footerColorFill, &headerColorFill, &headerRepeat, &value); err != nil {
 
 			return nil, err
@@ -121,7 +122,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 				SizeY:   f.SizeY,
 				State:   f.State,
 
-				Gap: gap.Float64,
+				Gap:     gap.Float64,
+				ShrinkY: shrinkY.Bool,
 			}
 			if len(paddings) == 4 {
 				f.Padding.T = paddings[0]
@@ -140,7 +142,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 				SizeY:   f.SizeY,
 				State:   f.State,
 
-				Shrink:   shrink.Bool,
+				ShrinkY:  shrinkY.Bool,
 				SizeSnap: sizeSnap.Float64,
 			})
 		case "list":
@@ -427,11 +429,11 @@ func setData_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldData) error {
 
 func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.DocFieldFlow, fieldIds *[]uuid.UUID) error {
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO app.doc_field_flow (doc_field_id, gap, paddings)
-		VALUES ($1,$2,$3)
+		INSERT INTO app.doc_field_flow (doc_field_id, gap, paddings, shrink_y)
+		VALUES ($1,$2,$3,$4)
 		ON CONFLICT (doc_field_id)
-		DO UPDATE SET gap = $2, paddings = $3
-	`, f.Id, f.Gap, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}); err != nil {
+		DO UPDATE SET gap = $2, paddings = $3, shrink_y = $4
+	`, f.Id, f.Gap, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}, f.ShrinkY); err != nil {
 		return err
 	}
 	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border); err != nil {
@@ -442,11 +444,11 @@ func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.Doc
 
 func setGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.DocFieldGrid, fieldIds *[]uuid.UUID) error {
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO app.doc_field_grid (doc_field_id, shrink, size_snap)
+		INSERT INTO app.doc_field_grid (doc_field_id, shrink_y, size_snap)
 		VALUES ($1,$2,$3)
 		ON CONFLICT (doc_field_id)
-		DO UPDATE SET shrink = $2, size_snap = $3
-	`, f.Id, f.Shrink, f.SizeSnap); err != nil {
+		DO UPDATE SET shrink_y = $2, size_snap = $3
+	`, f.Id, f.ShrinkY, f.SizeSnap); err != nil {
 		return err
 	}
 	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border); err != nil {

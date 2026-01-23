@@ -851,13 +851,13 @@
 				"styleUnderline": "Unterstrichen"
 			},
 			"grid": {
-				"shrink": "Vertikal schrumpfen, wenn leer",
 				"sizeSnap": "Rastergröße"
 			},
 			"headerRepeat": "Kopfzeile bei Seitenumbruch wiederholen",
 			"inheritFrom": "Übernehmen von",
 			"setData": "Von Attributwert überschreiben",
 			"setValue": "Manuell überschreiben",
+			"shrinkY": "Vertikal schrumpfen wenn leer",
 			"sidebarPage": "Seite: {NAME}",
 			"tabStates": "Zustände ({CNT})",
 			"titleOne": "Dokument '{NAME}'"

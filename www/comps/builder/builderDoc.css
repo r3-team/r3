@@ -126,9 +126,6 @@
 	border:3px dashed var(--color-border);
 	border-radius:3px;
 }
-.builder-doc-field.flow{
-	flex:1 1 auto;
-}
 .builder-doc-field.resizableBoth{
 	resize:both;
 	overflow:hidden;

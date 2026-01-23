@@ -89,6 +89,7 @@ type DocFieldFlow struct {
 	Fields  []any            `json:"fields"`
 	Gap     float64          `json:"gap"` // space between flow children
 	Padding DocMarginPadding `json:"padding"`
+	ShrinkY bool             `json:"shrinkY"` // shrink height if content does not fill height
 }
 type DocFieldGrid struct {
 	Id      uuid.UUID `json:"id"`
@@ -103,7 +104,7 @@ type DocFieldGrid struct {
 	// grid field
 	Border   DocBorder `json:"border"`
 	Fields   []any     `json:"fields"`
-	Shrink   bool      `json:"shrink"`   // shrink if content does not fill height
+	ShrinkY  bool      `json:"shrinkY"`  // shrink height if content does not fill height
 	SizeSnap float64   `json:"sizeSnap"` // grid snap size
 }
 type DocFieldList struct {

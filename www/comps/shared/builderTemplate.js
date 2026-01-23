@@ -197,13 +197,14 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 			f.fields  = [];
 			f.gap     = 1;
 			f.padding = getMarginTemplate();
+			f.shrinkY = false;
 		break;
 		case 'grid':       // fallthrough
         case 'gridFooter': // fallthrough
         case 'gridHeader':
 			f.sizeY    = 25;
 			f.fields   = [];
-			f.shrink   = false;
+			f.shrinkY  = false;
 			f.sizeSnap = 2;
 		break;
 		case 'list':

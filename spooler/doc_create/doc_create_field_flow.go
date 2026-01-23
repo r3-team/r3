@@ -35,14 +35,16 @@ func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font type
 		gapAdd = f.Gap
 	}
 
+	// figure out new state after all children were placed
+	pageNoEnd := doc.p.PageNo()
+	stayedOnPage := pageNoStart == pageNoEnd
 	childrenExceedParent := posYChildren > posY+f.SizeY-bSizeB-f.Padding.B
 
-	// flow fields shrink with their content but cannot exceed their max size
-	if childrenExceedParent {
-		// reset to parent size
+	if stayedOnPage && (childrenExceedParent || !f.ShrinkY) {
+		// revert to parent size
 		posYChildren = posY + f.SizeY
 	} else {
-		// add bottom offsets (border+padding)
+		// add bottom offsets (border+padding) if we don´t apply parent size
 		posYChildren += bSizeB + f.Padding.B
 	}
 
@@ -50,8 +52,7 @@ func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font type
 	// border sizes are halved as border lines are drawn over lines (half going over, half under)
 	if f.Border.Draw != "" {
 
-		pageNoEnd := doc.p.PageNo()
-		if pageNoStart == pageNoEnd {
+		if stayedOnPage {
 			doc.p.SetXY(posX+(bSizeL/2), posY+(bSizeT/2))
 			drawBox(doc, f.Border, pgtype.Text{}, f.SizeX-(bSizeX/2), posYChildren-posY-(bSizeY/2))
 		} else {

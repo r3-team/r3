@@ -37,7 +37,7 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font type
 	}
 	childrenExceedParent := posYChildMax > posY+f.SizeY-bSizeB
 
-	if f.Shrink && !childrenExceedParent {
+	if f.ShrinkY && !childrenExceedParent {
 		// can shrink and there is place free, stay where we are and add space for bottom border
 		posYChildMax += bSizeB
 	} else {
