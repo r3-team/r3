@@ -101,7 +101,7 @@ func getStateEffects_tx(ctx context.Context, tx pgx.Tx, docStateId uuid.UUID) ([
 	effects := make([]types.DocStateEffect, 0)
 
 	rows, err := tx.Query(ctx, `
-		SELECT doc_field_id, new_state
+		SELECT doc_field_id, doc_page_id, new_state
 		FROM app.doc_state_effect
 		WHERE doc_state_id = $1
 		ORDER BY doc_field_id ASC

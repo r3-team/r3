@@ -1056,9 +1056,6 @@
 					"slider": "value slider",
 					"url": "URL"
 				},
-				"effectField": "Field",
-				"effectFormAction": "Action",
-				"effectTab": "Tab",
 				"ganttStepsDays": "days",
 				"ganttStepsHours": "hours",
 				"style": {
@@ -1067,26 +1064,7 @@
 				}
 			},
 			"presetOpen": "Open preset",
-			"readonly": "Read only",
-			"required": "Required",
 			"scale": "UI scale",
-			"sidebarForm": "Form",
-			"state": "State",
-			"stateDefault": "default",
-			"stateHidden": "hidden",
-			"stateOptional": "optional",
-			"stateReadonly": "readonly",
-			"stateRequired": "required",
-			"states": {
-				"conditions": "Conditions",
-				"descriptionHint": "Description",
-				"effects": "Effects",
-				"option": {
-					"filterFieldIdHint": "By field",
-					"filterFormActionIdHint": "By action",
-					"filterTabIdHint": "By tab"
-				}
-			},
 			"subQuery": "Sub query",
 			"systemDefaults": {
 				"false": "'No' value",
@@ -2339,6 +2317,7 @@
 		"columnsActive": "Aktīvās kolonnas",
 		"columnsAvailable": "Pieejamās kolonnas",
 		"comments": "Komentāri",
+		"conditions": "Conditions",
 		"content": "Saturs",
 		"contextHelp": "Konteksta palīdzība",
 		"dark": "Dark",
@@ -2367,6 +2346,7 @@
 		"distincted": "Distinct",
 		"document": "Document",
 		"documents": "Documents",
+		"effects": "Effects",
 		"encryption": "Encryption",
 		"error": {
 			"nameTaken": "Vārds jau ir aizņemts, lūdzu, izvēlieties citu.",
@@ -2395,6 +2375,7 @@
 		"groupBy": "Group by",
 		"header": "Header",
 		"help": "Palīdzība",
+		"hidden": "Hidden",
 		"home": "Mājas",
 		"homepage": "Home page",
 		"hotkey": "Hotkey",
@@ -2470,6 +2451,7 @@
 			"sortDesc": "dilstošs",
 			"yes": "jā"
 		},
+		"optional": "Optional",
 		"options": "Options",
 		"order": "Kārtība",
 		"orientation": "Orientation",
@@ -2490,6 +2472,7 @@
 		"relations": "Relations",
 		"relationship": "Attiecība",
 		"relationships": "Attiecības",
+		"required": "Required",
 		"resultRow": "Result row",
 		"results": "{CNT} rezultāti",
 		"resultsNone": "- nav rezultātu -",
@@ -2517,9 +2500,11 @@
 		"spacingCell": "Cell spacing",
 		"sqlPreview": "SQL preview",
 		"standard": "Standarta",
+		"state": "State",
 		"status": "Statuss",
 		"styles": "Styles",
 		"systemModes": "System modes",
+		"tab": "Tab",
 		"text": "Text",
 		"textSearch": "Teksta meklēšana",
 		"threeDots": "...",

@@ -320,17 +320,17 @@ export default {
 					</td>
 				</tr>
 				<tr>
-					<td>{{ capApp.state }}</td>
+					<td>{{ capGen.state }}</td>
 					<td>
 						<select
 							@input="set('state',$event.target.value)"
 							:value="field.state"
 						>
-							<option value="hidden">{{ capApp.stateHidden }}</option>
-							<option value="default">{{ capApp.stateDefault }}</option>
-							<option v-if="isData" value="optional">{{ capApp.stateOptional }}</option>
-							<option v-if="isData" value="required">{{ capApp.stateRequired }}</option>
-							<option v-if="isData || isButton" value="readonly">{{ capApp.stateReadonly }}</option>
+							<option value="hidden">{{ capGen.hidden }}</option>
+							<option value="default">{{ capGen.default }}</option>
+							<option v-if="isData" value="optional">{{ capGen.optional }}</option>
+							<option v-if="isData" value="required">{{ capGen.required }}</option>
+							<option v-if="isData || isButton" value="readonly">{{ capGen.readonly }}</option>
 						</select>
 					</td>
 				</tr>
@@ -1014,8 +1014,8 @@ export default {
 														@input="element.state = $event.target.value;set('tabs',field.tabs)"
 														:value="element.state"
 													>
-														<option value="hidden">{{ capApp.stateHidden }}</option>
-														<option value="default">{{ capApp.stateDefault }}</option>
+														<option value="hidden">{{ capGen.hidden }}</option>
+														<option value="default">{{ capGen.default }}</option>
 													</select>
 												</td>
 												<td>

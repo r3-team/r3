@@ -59,9 +59,9 @@ const MyBuilderFormAction = {
 		</td>
 		<td>
 			<select v-model="state">
-				<option value="hidden">{{ capApp.stateHidden }}</option>
-				<option value="default">{{ capApp.stateDefault }}</option>
-				<option value="readonly">{{ capApp.stateReadonly }}</option>
+				<option value="hidden">{{ capGen.hidden }}</option>
+				<option value="default">{{ capGen.default }}</option>
+				<option value="readonly">{{ capGen.readonly }}</option>
 			</select>
 		</td>
 		<td>

@@ -3,6 +3,7 @@ import MyBuilderQuery            from './builderQuery.js';
 import MyBuilderDocFont          from './builderDocFont.js';
 import MyBuilderDocPage          from './builderDocPage.js';
 import MyBuilderDocSets          from './builderDocSets.js';
+import MyBuilderDocStates        from './builderDocStates.js';
 import MyInputDecimal            from '../inputDecimal.js';
 import MyTabs                    from '../tabs.js';
 import {isAttributeRelationship} from '../shared/attribute.js';
@@ -26,6 +27,7 @@ export default {
 		MyBuilderDocFont,
 		MyBuilderDocPage,
 		MyBuilderDocSets,
+		MyBuilderDocStates,
 		MyBuilderQuery,
 		MyInputDecimal,
 		MyTabs
@@ -169,8 +171,17 @@ export default {
 				</div>
 
 				<!-- states -->
+				<div class="content grow" v-if="tabTarget === 'states'">
+					<my-builder-doc-states
+						v-model="doc.states"
+						:entityIdMapRef
+						:joins="doc.query.joins"
+						:moduleId="doc.moduleId"
+						:readonly
+					/>
+				</div>
 				
-				<!-- document properties -->
+				<!-- properties -->
 				<div class="content grow no-padding" v-if="tabTarget === 'properties'">
 					<table class="generic-table-vertical default-inputs">
 						<tbody>

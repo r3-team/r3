@@ -1056,9 +1056,6 @@
 					"slider": "curseur de valeur",
 					"url": "URL"
 				},
-				"effectField": "Champ",
-				"effectFormAction": "Action",
-				"effectTab": "Onglet",
 				"ganttStepsDays": "jours",
 				"ganttStepsHours": "heures",
 				"style": {
@@ -1067,26 +1064,7 @@
 				}
 			},
 			"presetOpen": "Ouvrir le préréglage",
-			"readonly": "Lecture seule",
-			"required": "Champ obligatoire",
 			"scale": "Échelle de l'interface utilisateur",
-			"sidebarForm": "Formulaire",
-			"state": "État",
-			"stateDefault": "par défaut",
-			"stateHidden": "caché",
-			"stateOptional": "facultatif",
-			"stateReadonly": "lecture seule",
-			"stateRequired": "obligatoire",
-			"states": {
-				"conditions": "Conditions",
-				"descriptionHint": "Description",
-				"effects": "Effets",
-				"option": {
-					"filterFieldIdHint": "Par champ",
-					"filterFormActionIdHint": "By action",
-					"filterTabIdHint": "Par onglet"
-				}
-			},
 			"subQuery": "Sous-requête",
 			"systemDefaults": {
 				"false": "'No' value",
@@ -2339,6 +2317,7 @@
 		"columnsActive": "Colonnes actives",
 		"columnsAvailable": "Colonnes disponibles",
 		"comments": "Commentaires",
+		"conditions": "Conditions",
 		"content": "Contenu",
 		"contextHelp": "Aide contextuelle",
 		"dark": "Dark",
@@ -2367,6 +2346,7 @@
 		"distincted": "Distinct",
 		"document": "Document",
 		"documents": "Documents",
+		"effects": "Effets",
 		"encryption": "Encryption",
 		"error": {
 			"nameTaken": "Ce nom est déjà pris, veuillez en choisir un autre.",
@@ -2395,6 +2375,7 @@
 		"groupBy": "Regrouper par",
 		"header": "Header",
 		"help": "Aide",
+		"hidden": "Caché",
 		"home": "Accueil",
 		"homepage": "Page d'accueil",
 		"hotkey": "Hotkey",
@@ -2470,6 +2451,7 @@
 			"sortDesc": "descendant",
 			"yes": "oui"
 		},
+		"optional": "Facultatif",
 		"options": "Options",
 		"order": "Ordre",
 		"orientation": "Orientation",
@@ -2490,6 +2472,7 @@
 		"relations": "Relations",
 		"relationship": "Relation",
 		"relationships": "Relations",
+		"required": "Obligatoire",
 		"resultRow": "Result row",
 		"results": "{CNT} résultats",
 		"resultsNone": "- aucun résultat -",
@@ -2517,9 +2500,11 @@
 		"spacingCell": "Cell spacing",
 		"sqlPreview": "Aperçu SQL",
 		"standard": "Standard",
+		"state": "État",
 		"status": "Statut",
 		"styles": "Styles",
 		"systemModes": "System modes",
+		"tab": "Tab",
 		"text": "Text",
 		"textSearch": "Recherche de texte",
 		"threeDots": "...",

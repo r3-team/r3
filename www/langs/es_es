@@ -1056,9 +1056,6 @@
 					"slider": "deslizador de valor",
 					"url": "URL"
 				},
-				"effectField": "Campo",
-				"effectFormAction": "Acción",
-				"effectTab": "Pestaña",
 				"ganttStepsDays": "días",
 				"ganttStepsHours": "horas",
 				"style": {
@@ -1067,26 +1064,7 @@
 				}
 			},
 			"presetOpen": "Abrir preset",
-			"readonly": "Solo lectura",
-			"required": "Obligatorio",
 			"scale": "Escala de UI",
-			"sidebarForm": "Formulario",
-			"state": "Estado",
-			"stateDefault": "predeterminado",
-			"stateHidden": "oculto",
-			"stateOptional": "opcional",
-			"stateReadonly": "solo lectura",
-			"stateRequired": "obligatorio",
-			"states": {
-				"conditions": "Condiciones",
-				"descriptionHint": "Descripción",
-				"effects": "Efectos",
-				"option": {
-					"filterFieldIdHint": "Por campo",
-					"filterFormActionIdHint": "Por acción",
-					"filterTabIdHint": "Por pestaña"
-				}
-			},
 			"subQuery": "Subconsulta",
 			"systemDefaults": {
 				"false": "Valor 'No'",
@@ -2339,6 +2317,7 @@
 		"columnsActive": "Columnas activas",
 		"columnsAvailable": "Columnas disponibles",
 		"comments": "Comentarios",
+		"conditions": "Condiciones",
 		"content": "Contenido",
 		"contextHelp": "Ayuda contextual",
 		"dark": "Oscuro",
@@ -2367,6 +2346,7 @@
 		"distincted": "Distinto",
 		"document": "Document",
 		"documents": "Documents",
+		"effects": "Efectos",
 		"encryption": "Encriptación",
 		"error": {
 			"nameTaken": "El nombre ya está en uso, por favor elija otro.",
@@ -2395,6 +2375,7 @@
 		"groupBy": "Agrupar por",
 		"header": "Header",
 		"help": "Ayuda",
+		"hidden": "Oculto",
 		"home": "Inicio",
 		"homepage": "Página de inicio",
 		"hotkey": "Tecla rápida",
@@ -2470,6 +2451,7 @@
 			"sortDesc": "descendente",
 			"yes": "sí"
 		},
+		"optional": "Opcional",
 		"options": "Opciones",
 		"order": "Orden",
 		"orientation": "Orientation",
@@ -2490,6 +2472,7 @@
 		"relations": "Relaciones",
 		"relationship": "Relación",
 		"relationships": "Relaciones",
+		"required": "Obligatorio",
 		"resultRow": "Result row",
 		"results": "{CNT} resultados",
 		"resultsNone": "- sin resultados -",
@@ -2517,9 +2500,11 @@
 		"spacingCell": "Cell spacing",
 		"sqlPreview": "Vista previa SQL",
 		"standard": "Estándar",
+		"state": "Estado",
 		"status": "Estado",
 		"styles": "Styles",
 		"systemModes": "System modes",
+		"tab": "Tab",
 		"text": "Text",
 		"textSearch": "Búsqueda de texto",
 		"threeDots": "...",

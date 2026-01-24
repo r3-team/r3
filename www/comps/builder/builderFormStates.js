@@ -9,19 +9,19 @@ const MyBuilderFormStateEffect = {
 		<!-- target -->
 		<select class="long" v-model="target">
 			<option value="">{{ capGen.form }}</option>
-			<optgroup :label="capApp.option.effectFormAction">
+			<optgroup :label="capGen.action">
 				<option
 					v-for="(ref,id) in entityIdMapRef.formAction"
 					:value="'A'+id"
 				>A{{ ref }}</option>
 			</optgroup>
-			<optgroup :label="capApp.option.effectTab">
+			<optgroup :label="capGen.tab">
 				<option
 					v-for="(ref,id) in entityIdMapRef.tab"
 					:value="'T'+id"
 				>T{{ ref }}</option>
 			</optgroup>
-			<optgroup :label="capApp.option.effectField">
+			<optgroup :label="capGen.field">
 				<option
 					v-for="(ref,fieldId) in entityIdMapRef.field"
 					:value="'F'+fieldId"
@@ -31,11 +31,11 @@ const MyBuilderFormStateEffect = {
 		
 		<!-- new state -->
 		<select class="short" v-model="newState" v-if="!isForm">
-			<option value="hidden">{{ capApp.stateHidden }}</option>
-			<option value="default">{{ capApp.stateDefault }}</option>
-			<option value="readonly" :disabled="!isData && !isVariable && !isButton && !isAction">{{ capApp.stateReadonly }}</option>
-			<option value="optional" :disabled="!isData && !isVariable">{{ capApp.stateOptional }}</option>
-			<option value="required" :disabled="!isData && !isVariable">{{ capApp.stateRequired }}</option>
+			<option value="hidden">{{ capGen.hidden }}</option>
+			<option value="default">{{ capGen.default }}</option>
+			<option value="readonly" :disabled="!isData && !isVariable && !isButton && !isAction">{{ capGen.readonly }}</option>
+			<option value="optional" :disabled="!isData && !isVariable">{{ capGen.optional }}</option>
+			<option value="required" :disabled="!isData && !isVariable">{{ capGen.required }}</option>
 		</select>
 		
 		<!-- new data -->
@@ -142,7 +142,7 @@ const MyBuilderFormState = {
 			/>
 			<input class="description"
 				@input="update('description',-1,$event.target.value)"
-				:placeholder="capApp.descriptionHint"
+				:placeholder="capGen.description"
 				:value="state.description"
 			/>
 			<my-button image="delete.png"
@@ -155,7 +155,7 @@ const MyBuilderFormState = {
 		<div class="details" v-if="open">
 			<my-button image="add.png"
 				@trigger="addCondition"
-				:caption="capApp.conditions"
+				:caption="capGen.conditions"
 				:naked="true"
 			/>
 			<my-filters
@@ -170,7 +170,7 @@ const MyBuilderFormState = {
 			
 			<my-button image="add.png"
 				@trigger="addEffect"
-				:caption="capApp.effects"
+				:caption="capGen.effects"
 				:naked="true"
 			/>
 			<div class="effects">
@@ -230,26 +230,30 @@ const MyBuilderFormState = {
 			let v = JSON.parse(JSON.stringify(this.state));
 			v.conditions.push({
 				connector:'AND',
-				index:0,
+				position:0,
 				operator:'=',
 				side0:{
 					brackets:0,
+					content:'field',
 					collectionId:null,
 					columnId:null,
-					content:'field',
 					fieldId:null,
+					formStateId:null,
 					presetId:null,
 					roleId:null,
+					variableId:null,
 					value:''
 				},
 				side1:{
 					brackets:0,
+					content:'value',
 					collectionId:null,
 					columnId:null,
-					content:'value',
 					fieldId:null,
+					formStateId:null,
 					presetId:null,
 					roleId:null,
+					variableId:null,
 					value:''
 				}
 			});
@@ -303,7 +307,7 @@ export default {
 					:placeholder="capGen.button.filter"
 				/>
 				<select v-model="filterFieldId">
-					<option value="">{{ capApp.option.filterFieldIdHint }}</option>
+					<option value="">{{ capGen.field }}</option>
 					<template v-for="(ref,fieldId) in entityIdMapRef.field">
 						<option
 							v-if="fieldIdsUsed.includes(fieldId)"
@@ -312,7 +316,7 @@ export default {
 					</template>
 				</select>
 				<select v-model="filterFormActionId">
-					<option value="">{{ capApp.option.filterFormActionIdHint }}</option>
+					<option value="">{{ capGen.action }}</option>
 					<template v-for="(ref,formActionId) in entityIdMapRef.formAction">
 						<option
 							v-if="formActionIdsUsed.includes(formActionId)"
@@ -321,7 +325,7 @@ export default {
 					</template>
 				</select>
 				<select v-model="filterTabId">
-					<option value="">{{ capApp.option.filterTabIdHint }}</option>
+					<option value="">{{ capGen.tab }}</option>
 					<template v-for="(ref,tabId) in entityIdMapRef.tab">
 						<option
 							v-if="tabIdsUsed.includes(tabId)"

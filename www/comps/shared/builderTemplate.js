@@ -257,6 +257,40 @@ export function getTemplateDocSet(target) {
 		value:null
 	};
 };
+export function getTemplateDocState() {
+	return {
+		id:getUuidV4(),
+		description:'',
+		conditions:[],
+		effects:[]
+	};
+};
+export function getTemplateDocStateCondition() {
+	return {
+		connector:'AND',
+		operator:'=',
+		position:0,
+		side0:getTemplateDocStateConditionSide(),
+		side1:getTemplateDocStateConditionSide()
+	};
+};
+export function getTemplateDocStateConditionSide() {
+	return {
+		brackets:0,
+		content:'value',
+		attributeId:null,
+		attributeIndex:0,
+		presetId:null,
+		value:''
+	};
+};
+export function getTemplateDocStateEffect() {
+	return {
+		docFieldId:null,
+		docPageId:null,
+		newState:true
+	};
+};
 export function getTemplateFieldButton() {
 	return {
 		id:getUuidV4(),

@@ -14,10 +14,6 @@ import {
 	getCaption,
 	getDictByLang
 } from './shared/language.js';
-export {MyFilters as default};
-export {MyFilterBrackets};
-export {MyFilterConnector};
-export {MyFilterOperator};
 
 const MyFilterBrackets = {
 	name:'my-filter-brackets',
@@ -1022,7 +1018,7 @@ const MyFilter = {
 	}
 };
 
-const MyFilters = {
+export default {
 	name:'my-filters',
 	components:{MyFilter},
 	template:`<div class="filters">
@@ -1141,6 +1137,7 @@ const MyFilters = {
 		},
 		reset() {
 			this.filters = JSON.parse(JSON.stringify(this.modelValue));
+			console.log('got new filters', this.filters);
 		},
 		set() {
 			// overwrite first filter with only valid connector

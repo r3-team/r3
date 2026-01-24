@@ -1056,9 +1056,6 @@
 					"slider": "Értékcsúszka",
 					"url": "URL"
 				},
-				"effectField": "Mező",
-				"effectFormAction": "Action",
-				"effectTab": "Lap",
 				"ganttStepsDays": "Napok",
 				"ganttStepsHours": "Órák",
 				"style": {
@@ -1067,26 +1064,7 @@
 				}
 			},
 			"presetOpen": "Alapértelmezett rekord megnyitása",
-			"readonly": "Csak olvasható",
-			"required": "Kötelező",
 			"scale": "UI méretezés",
-			"sidebarForm": "Űrlap",
-			"state": "Állapot",
-			"stateDefault": "alapértelmezett",
-			"stateHidden": "rejtett",
-			"stateOptional": "opcionális",
-			"stateReadonly": "csak olvasható",
-			"stateRequired": "kötelező",
-			"states": {
-				"conditions": "Feltételek",
-				"descriptionHint": "Leírás",
-				"effects": "Hatások",
-				"option": {
-					"filterFieldIdHint": "Mező alapján",
-					"filterFormActionIdHint": "By action",
-					"filterTabIdHint": "Lap alapján"
-				}
-			},
 			"subQuery": "Al-lekérdezés",
 			"systemDefaults": {
 				"false": "'No' value",
@@ -2339,6 +2317,7 @@
 		"columnsActive": "Aktív oszlopok",
 		"columnsAvailable": "Elérhető oszlopok",
 		"comments": "Megjegyzések",
+		"conditions": "Feltételek",
 		"content": "Tartalom",
 		"contextHelp": "Kontextussegítség",
 		"dark": "Dark",
@@ -2367,6 +2346,7 @@
 		"distincted": "Különböztetve",
 		"document": "Document",
 		"documents": "Documents",
+		"effects": "Hatások",
 		"encryption": "Encryption",
 		"error": {
 			"nameTaken": "Name is already taken, please choose another.",
@@ -2395,6 +2375,7 @@
 		"groupBy": "Csoportosítás",
 		"header": "Header",
 		"help": "Segítség",
+		"hidden": "Rejtett",
 		"home": "Kezdőlap",
 		"homepage": "Kezdőlap",
 		"hotkey": "Hotkey",
@@ -2470,6 +2451,7 @@
 			"sortDesc": "csökkenő",
 			"yes": "igen"
 		},
+		"optional": "Opcionális",
 		"options": "Options",
 		"order": "Sorrend",
 		"orientation": "Orientation",
@@ -2490,6 +2472,7 @@
 		"relations": "Kapcsolatok",
 		"relationship": "Kapcsolat",
 		"relationships": "Kapcsolatok",
+		"required": "Kötelező",
 		"resultRow": "Result row",
 		"results": "{CNT} eredmény",
 		"resultsNone": "- nincs eredmény -",
@@ -2517,9 +2500,11 @@
 		"spacingCell": "Cell spacing",
 		"sqlPreview": "SQL előnézet",
 		"standard": "Szabvány",
+		"state": "Állapot",
 		"status": "Állapot",
 		"styles": "Styles",
 		"systemModes": "System modes",
+		"tab": "Tab",
 		"text": "Text",
 		"textSearch": "Szövegkeresés",
 		"threeDots": "...",

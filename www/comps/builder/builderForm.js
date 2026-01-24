@@ -196,7 +196,7 @@ export default {
 			<div class="top lower" :class="{ clickable:fieldShow }" @click="fieldIdShow = null; columnIdShow = null;">
 				<div class="area">
 					<img class="icon" src="images/fileText.png" />
-					<h1>{{ capApp.sidebarForm }}</h1>
+					<h1>{{ capGen.form }}</h1>
 				</div>
 			</div>
 			<div class="top lower" v-if="fieldShow" :class="{ clickable:columnShow }" @click="columnIdShow = null;">

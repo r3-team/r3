@@ -1056,9 +1056,6 @@
 					"slider": "شريط تمرير القيمة",
 					"url": "عنوان URL"
 				},
-				"effectField": "مجال",
-				"effectFormAction": "فعل",
-				"effectTab": "فاتورة غير مدفوعة",
 				"ganttStepsDays": "أيام",
 				"ganttStepsHours": "ساعات",
 				"style": {
@@ -1067,26 +1064,7 @@
 				}
 			},
 			"presetOpen": "فتح الإعداد المسبق",
-			"readonly": "اقرأ فقط",
-			"required": "مطلوب",
 			"scale": "مقياس واجهة المستخدم",
-			"sidebarForm": "إعدادات النموذج",
-			"state": "ولاية",
-			"stateDefault": "تقصير",
-			"stateHidden": "مختفي",
-			"stateOptional": "خياري",
-			"stateReadonly": "للقراءة فقط",
-			"stateRequired": "مطلوب",
-			"states": {
-				"conditions": "شروط",
-				"descriptionHint": "وصف",
-				"effects": "التأثيرات",
-				"option": {
-					"filterFieldIdHint": "حسب المجال",
-					"filterFormActionIdHint": "من خلال العمل",
-					"filterTabIdHint": "بواسطة علامة التبويب"
-				}
-			},
 			"subQuery": "الاستعلام الفرعي",
 			"systemDefaults": {
 				"false": "'No' value",
@@ -2339,6 +2317,7 @@
 		"columnsActive": "الأعمدة النشطة",
 		"columnsAvailable": "الأعمدة المتاحة",
 		"comments": "تعليقات",
+		"conditions": "شروط",
 		"content": "محتوى",
 		"contextHelp": "مساعدة السياق",
 		"dark": "مظلم",
@@ -2367,6 +2346,7 @@
 		"distincted": "متميز",
 		"document": "Document",
 		"documents": "Documents",
+		"effects": "التأثيرات",
 		"encryption": "التشفير",
 		"error": {
 			"nameTaken": "الاسم مأخوذ بالفعل، يرجى اختيار اسم آخر.",
@@ -2395,6 +2375,7 @@
 		"groupBy": "تجميع حسب",
 		"header": "Header",
 		"help": "يساعد",
+		"hidden": "مختفي",
 		"home": "بيت",
 		"homepage": "الصفحة الرئيسية",
 		"hotkey": "مفتاح الاختصار",
@@ -2470,6 +2451,7 @@
 			"sortDesc": "تنازلي",
 			"yes": "نعم"
 		},
+		"optional": "خياري",
 		"options": "خيارات",
 		"order": "طلب",
 		"orientation": "Orientation",
@@ -2490,6 +2472,7 @@
 		"relations": "العلاقات",
 		"relationship": "علاقة",
 		"relationships": "العلاقات",
+		"required": "مطلوب",
 		"resultRow": "Result row",
 		"results": "نتائج {CNT}.",
 		"resultsNone": "- لا توجد نتائج -",
@@ -2517,9 +2500,11 @@
 		"spacingCell": "Cell spacing",
 		"sqlPreview": "معاينة SQL",
 		"standard": "معيار",
+		"state": "ولاية",
 		"status": "حالة",
 		"styles": "Styles",
 		"systemModes": "System modes",
+		"tab": "Tab",
 		"text": "Text",
 		"textSearch": "البحث عن النص",
 		"threeDots": "...",

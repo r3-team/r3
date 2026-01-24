@@ -1056,9 +1056,6 @@
 					"slider": "值滑块",
 					"url": "网址"
 				},
-				"effectField": "字段",
-				"effectFormAction": "Action",
-				"effectTab": "选项卡",
 				"ganttStepsDays": "天",
 				"ganttStepsHours": "小时",
 				"style": {
@@ -1067,26 +1064,7 @@
 				}
 			},
 			"presetOpen": "打开预设",
-			"readonly": "只读",
-			"required": "必填",
 			"scale": "UI比例",
-			"sidebarForm": "表单",
-			"state": "状态",
-			"stateDefault": "默认",
-			"stateHidden": "隐藏",
-			"stateOptional": "可选",
-			"stateReadonly": "只读",
-			"stateRequired": "必填",
-			"states": {
-				"conditions": "条件",
-				"descriptionHint": "描述",
-				"effects": "效果",
-				"option": {
-					"filterFieldIdHint": "按字段",
-					"filterFormActionIdHint": "By action",
-					"filterTabIdHint": "按选项卡"
-				}
-			},
 			"subQuery": "子查询",
 			"systemDefaults": {
 				"false": "'No' value",
@@ -2339,6 +2317,7 @@
 		"columnsActive": "活动列",
 		"columnsAvailable": "可用列",
 		"comments": "评论",
+		"conditions": "条件",
 		"content": "内容",
 		"contextHelp": "上下文帮助",
 		"dark": "Dark",
@@ -2367,6 +2346,7 @@
 		"distincted": "不重复",
 		"document": "Document",
 		"documents": "Documents",
+		"effects": "效果",
 		"encryption": "Encryption",
 		"error": {
 			"nameTaken": "名称已被使用，请选择其他名称。",
@@ -2395,6 +2375,7 @@
 		"groupBy": "按...分组",
 		"header": "Header",
 		"help": "帮助",
+		"hidden": "隐藏",
 		"home": "主页",
 		"homepage": "主页",
 		"hotkey": "Hotkey",
@@ -2470,6 +2451,7 @@
 			"sortDesc": "降序",
 			"yes": "是"
 		},
+		"optional": "可选",
 		"options": "Options",
 		"order": "顺序",
 		"orientation": "Orientation",
@@ -2490,6 +2472,7 @@
 		"relations": "关联",
 		"relationship": "关系",
 		"relationships": "关系",
+		"required": "必填",
 		"resultRow": "Result row",
 		"results": "{CNT} 结果",
 		"resultsNone": "- 没有结果 -",
@@ -2517,9 +2500,11 @@
 		"spacingCell": "Cell spacing",
 		"sqlPreview": "SQL预览",
 		"standard": "标准",
+		"state": "状态",
 		"status": "状态",
 		"styles": "Styles",
 		"systemModes": "System modes",
+		"tab": "Tab",
 		"text": "Text",
 		"textSearch": "文本搜索",
 		"threeDots": "...",

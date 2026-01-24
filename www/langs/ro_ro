@@ -1056,9 +1056,6 @@
 					"slider": "valoarea cursorului",
 					"url": "URL"
 				},
-				"effectField": "Field",
-				"effectFormAction": "Action",
-				"effectTab": "Tab",
 				"ganttStepsDays": "zile",
 				"ganttStepsHours": "ore",
 				"style": {
@@ -1067,26 +1064,7 @@
 				}
 			},
 			"presetOpen": "Deschide presetarea",
-			"readonly": "Numai citire",
-			"required": "Necesar",
 			"scale": "UI scale",
-			"sidebarForm": "Form",
-			"state": "Statut",
-			"stateDefault": "implicit",
-			"stateHidden": "ascuns",
-			"stateOptional": "opțional",
-			"stateReadonly": "numai citire",
-			"stateRequired": "necesar",
-			"states": {
-				"conditions": "Condiții",
-				"descriptionHint": "Descriere",
-				"effects": "Consecințe",
-				"option": {
-					"filterFieldIdHint": "După câmp",
-					"filterFormActionIdHint": "By action",
-					"filterTabIdHint": "By tab"
-				}
-			},
 			"subQuery": "Sub interogare",
 			"systemDefaults": {
 				"false": "'No' value",
@@ -2339,6 +2317,7 @@
 		"columnsActive": "Active columns",
 		"columnsAvailable": "Available columns",
 		"comments": "Comments",
+		"conditions": "Condiții",
 		"content": "Content",
 		"contextHelp": "Context help",
 		"dark": "Dark",
@@ -2367,6 +2346,7 @@
 		"distincted": "Distinct",
 		"document": "Document",
 		"documents": "Documents",
+		"effects": "Consecințe",
 		"encryption": "Encryption",
 		"error": {
 			"nameTaken": "Name is already taken, please choose another.",
@@ -2395,6 +2375,7 @@
 		"groupBy": "Grupați după",
 		"header": "Header",
 		"help": "Help",
+		"hidden": "Ascuns",
 		"home": "Acasă",
 		"homepage": "Pagina principală",
 		"hotkey": "Hotkey",
@@ -2470,6 +2451,7 @@
 			"sortDesc": "descendent",
 			"yes": "da"
 		},
+		"optional": "Opțional",
 		"options": "Options",
 		"order": "Comandă",
 		"orientation": "Orientation",
@@ -2490,6 +2472,7 @@
 		"relations": "Relații",
 		"relationship": "Relationship",
 		"relationships": "Relationships",
+		"required": "Necesar",
 		"resultRow": "Result row",
 		"results": "{CNT} rezultate",
 		"resultsNone": "- fără rezultate -",
@@ -2517,9 +2500,11 @@
 		"spacingCell": "Cell spacing",
 		"sqlPreview": "Previzualizare SQL",
 		"standard": "Standard",
+		"state": "Statut",
 		"status": "Status",
 		"styles": "Styles",
 		"systemModes": "System modes",
+		"tab": "Tab",
 		"text": "Text",
 		"textSearch": "Căutare text",
 		"threeDots": "...",

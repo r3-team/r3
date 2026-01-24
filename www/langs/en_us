@@ -1056,9 +1056,6 @@
 					"url": "URL"
 				},
 				"dataOptions": "Overwrite relation settings",
-				"effectField": "Field",
-				"effectFormAction": "Action",
-				"effectTab": "Tab",
 				"ganttStepsDays": "days",
 				"ganttStepsHours": "hours",
 				"style": {
@@ -1067,26 +1064,7 @@
 				}
 			},
 			"presetOpen": "Open preset",
-			"readonly": "Read only",
-			"required": "Required",
 			"scale": "UI scale",
-			"sidebarForm": "Form",
-			"state": "State",
-			"stateDefault": "default",
-			"stateHidden": "hidden",
-			"stateOptional": "optional",
-			"stateReadonly": "readonly",
-			"stateRequired": "required",
-			"states": {
-				"conditions": "Conditions",
-				"descriptionHint": "Description",
-				"effects": "Effects",
-				"option": {
-					"filterFieldIdHint": "By field",
-					"filterFormActionIdHint": "By action",
-					"filterTabIdHint": "By tab"
-				}
-			},
 			"subQuery": "Sub query",
 			"systemDefaults": {
 				"false": "'No' value",
@@ -2339,6 +2317,7 @@
 		"columnsAvailable": "Available columns",
 		"columnSettings": "Column settings",
 		"comments": "Comments",
+		"conditions": "Conditions",
 		"content": "Content",
 		"contextHelp": "Context help",
 		"dark": "Dark",
@@ -2367,6 +2346,7 @@
 		"distincted": "Distinct",
 		"document": "Document",
 		"documents": "Documents",
+		"effects": "Effects",
 		"encryption": "Encryption",
 		"error": {
 			"nameTaken": "Name is already taken, please choose another.",
@@ -2395,6 +2375,7 @@
 		"groupBy": "Group by",
 		"header": "Header",
 		"help": "Help",
+		"hidden": "Hidden",
 		"home": "Home",
 		"homepage": "Home page",
 		"hotkey": "Hotkey",
@@ -2470,6 +2451,7 @@
 			"sortDesc": "descending",
 			"yes": "yes"
 		},
+		"optional": "Optional",
 		"options": "Options",
 		"order": "Order",
 		"orientation": "Orientation",
@@ -2490,6 +2472,7 @@
 		"relations": "Relations",
 		"relationship": "Relationship",
 		"relationships": "Relationships",
+		"required": "Required",
 		"results": "{CNT} results",
 		"resultsNone": "- no results -",
 		"resultsOf": "/ {CNT}",
@@ -2517,9 +2500,11 @@
 		"spacingCell": "Cell spacing",
 		"sqlPreview": "SQL preview",
 		"standard": "Standard",
+		"state": "State",
 		"status": "Status",
 		"styles": "Styles",
 		"systemModes": "System modes",
+		"tab": "Tab",
 		"text": "Text",
 		"textSearch": "Text search",
 		"threeDots": "...",
@@ -2536,6 +2521,7 @@
 		"variables": "Variables",
 		"version": "Version",
 		"visibility": "Visibility",
+		"visible": "Visible",
 		"warnings": "Warnings",
 		"widget": "Widget",
 		"widgets": "Widgets",
