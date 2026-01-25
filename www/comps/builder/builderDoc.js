@@ -385,6 +385,7 @@ export default {
 		pageAdd() {
 			const p = this.getTemplateDocPage();
 			this.doc.pages.push(p);
+			this.tabPageIdShow = p.id;
 		},
 		pageDel(id) {
 			const i = this.pageIdMapIndex[id];
@@ -397,7 +398,9 @@ export default {
 		reset() {
 			if(this.docOrg !== false && !this.deepIsEqual(this.doc,this.docOrg)) {
 				this.doc = JSON.parse(JSON.stringify(this.docOrg));
-				this.resetPageTab();
+
+				if(this.doc.pages.findIndex(v => v.id === this.tabPageIdShow) === -1)
+					this.resetPageTab();
 			}
 		},
 		resetPageTab() {
