@@ -50,18 +50,19 @@ export default {
 		:style
 		:key="field.id"
 	>
+		<template v-if="isFlow">
+			<div class="builder-doc-padding-margin-hor" v-if="field.padding.t > 0" :style="stylePaddingT"></div>
+			<div class="builder-doc-padding-margin-ver" v-if="field.padding.r > 0" :style="stylePaddingR"></div>
+			<div class="builder-doc-padding-margin-hor" v-if="field.padding.b > 0" :style="stylePaddingB"></div>
+			<div class="builder-doc-padding-margin-ver" v-if="field.padding.l > 0" :style="stylePaddingL"></div>
+		</template>
+		
 		<div class="builder-doc-field-title-bar" v-if="!isWithFields">
-			<div class="builder-doc-button">
-				<img :src="'images/' + getDocFieldIcon(field)" @click="tabTargetField = 'properties'" />
-				<span>F{{ entityIdMapRef.field[field.id] }}</span>
-			</div>
-			<div class="builder-doc-button" v-if="isWithQuery">
-				<img @click="tabTargetField = 'content'" src="images/database.png" />
-			</div>
-			<div class="builder-doc-button" v-if="!field.state">
-				<img @click.stop="field.state = true" src="images/visible0.png" />
-			</div>
-			<div v-if="!isWithFields && !isDragPreview">{{ title }}</div>
+			<img :src="'images/' + getDocFieldIcon(field)" @click="tabTargetField = 'properties'" />
+			<span>F{{ entityIdMapRef.field[field.id] }}</span>
+			<img v-if="isWithQuery"  @click="tabTargetField = 'content'" src="images/database.png" />
+			<img v-if="!field.state" @click.stop="field.state = true"    src="images/visible0.png" />
+			<span v-if="!isWithFields && !isDragPreview">{{ title }}</span>
 		</div>
 		<div class="builder-doc-bg-text" v-if="isWithFields">F{{ entityIdMapRef.field[field.id] }}</div>
 
@@ -177,7 +178,7 @@ export default {
 							</tr>
 							
 							<template v-if="!isRoot">
-								<tr v-if="isChildGrid">
+								<tr v-if="isResizeInGrid">
 									<td>{{ capGen.sizeX }}</td>
 									<td>
 										<div class="row gap centered">
@@ -187,7 +188,7 @@ export default {
 										</div>
 									</td>
 								</tr>
-								<tr>
+								<tr v-if="isResizeInFlow || isResizeInGrid">
 									<td>{{ capGen.sizeY }}</td>
 									<td>
 										<div class="row gap centered">
@@ -262,6 +263,8 @@ export default {
 								v-model:r="field.padding.r"
 								v-model:b="field.padding.b"
 								v-model:l="field.padding.l"
+								@update:all="field.padding = $event"
+								:defaults="{t:3,r:3,b:3,l:3}"
 								:label="capGen.spacingCell"
 								:readonly
 							/>
@@ -410,8 +413,9 @@ export default {
 				clickable:true,
 				dragPreview:s.isDragPreview,
 				dragSource:s.beingDragged,
-				resizableBoth:!s.isRoot && s.isChildGrid,
-				resizableHeight:!s.isRoot && s.isChildFlow,
+				isList:s.isList,
+				resizableBoth:s.isResizeInGrid,
+				resizableHeight:s.isResizeInFlow,
 				selected:s.isOptionsShow
 			};
 		},
@@ -466,24 +470,28 @@ export default {
 		},
 
 		// styling
-		bordersAll: s => s.isWithBorder && s.field.border.draw === '1',
-		borderSize: s => s.isWithBorder && s.field.border.draw !== '' ? (s.field.border.size !== 0 ? s.field.border.size : s.borderSizeEmpty) : 0,
-		borderSizeT:s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('T')) ? s.borderSize : 0,
-		borderSizeR:s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('R')) ? s.borderSize : 0,
-		borderSizeB:s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('B')) ? s.borderSize : 0,
-		borderSizeL:s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('L')) ? s.borderSize : 0,
-		borderX:    s => s.borderSizeL+s.borderSizeR,
-		borderY:    s => s.borderSizeT+s.borderSizeB,
-		padding:    s => s.isFlow ? s.field.padding : { t:0, r:0, b:0, l:0 },
-		paddingX:   s => s.padding.l+s.padding.r,
-		paddingY:   s => s.padding.t+s.padding.b,
-		sizeX:      s => s.field.sizeX !== 0 ? s.field.sizeX-s.borderX-s.paddingX : s.parentSizeX-s.borderX-s.paddingX,
-		sizeY:      s => s.field.sizeY !== 0 ? s.field.sizeY-s.borderY-s.paddingY : s.parentSizeY-s.borderY-s.paddingY,
-		sizeXMax:   s => s.parentSizeX - s.field.posX,
-		sizeYMax:   s => s.parentSizeY - s.field.posY,
-		style:      s => `${s.styleHeight}${s.styleGrid}${s.styleBorder}`,
-		styleGrid:  s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;` : '',
-		styleHeight:s => s.isFlow && s.isRoot ? 'flex:1 1 auto;' : `height:${s.field.sizeY*s.zoom}mm;`,
+		bordersAll:   s => s.isWithBorder && s.field.border.draw === '1',
+		borderSize:   s => s.isWithBorder && s.field.border.draw !== '' ? (s.field.border.size !== 0 ? s.field.border.size : s.borderSizeEmpty) : 0,
+		borderSizeT:  s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('T')) ? s.borderSize : 0,
+		borderSizeR:  s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('R')) ? s.borderSize : 0,
+		borderSizeB:  s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('B')) ? s.borderSize : 0,
+		borderSizeL:  s => s.isWithBorder && (s.bordersAll || s.field.border.draw.includes('L')) ? s.borderSize : 0,
+		borderX:      s => s.borderSizeL+s.borderSizeR,
+		borderY:      s => s.borderSizeT+s.borderSizeB,
+		padding:      s => s.isFlow ? s.field.padding : { t:0, r:0, b:0, l:0 },
+		paddingX:     s => s.padding.l+s.padding.r,
+		paddingY:     s => s.padding.t+s.padding.b,
+		sizeX:        s => s.field.sizeX !== 0 ? s.field.sizeX-s.borderX-s.paddingX : s.parentSizeX-s.borderX-s.paddingX,
+		sizeY:        s => s.field.sizeY !== 0 ? s.field.sizeY-s.borderY-s.paddingY : s.parentSizeY-s.borderY-s.paddingY,
+		sizeXMax:     s => s.parentSizeX - s.field.posX,
+		sizeYMax:     s => s.parentSizeY - s.field.posY,
+		style:        s => `${s.styleHeight}${s.styleGrid}${s.styleBorder}`,
+		styleGrid:    s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;` : '',
+		styleHeight:  s => s.isFlow && s.isRoot ? 'flex:1 1 auto;' : `height:${s.field.sizeY*s.zoom}mm;`,
+		stylePaddingT:s => `top:0mm;left:0mm;height:${s.field.padding.t*s.zoom}mm`,
+		stylePaddingR:s => `top:0mm;right:0mm;width:${s.field.padding.r*s.zoom}mm`,
+		stylePaddingB:s => `bottom:0mm;left:0mm;height:${s.field.padding.b*s.zoom}mm`,
+		stylePaddingL:s => `top:0mm;left:0mm;width:${s.field.padding.l*s.zoom}mm`,
 
 		// simple
 		attribute:      s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
@@ -497,6 +505,8 @@ export default {
 		isList:         s => s.field.content === 'list',
 		isText:         s => s.field.content === 'text',
 		isOptionsShow:  s => s.fieldIdOptions === s.field.id,
+		isResizeInFlow: s => !s.isRoot && s.isChildFlow && (s.isFlow || s.isGrid),
+		isResizeInGrid: s => !s.isRoot && s.isChildGrid,
 		isTabsNeeded:   s => s.isList,
 		isWithBorder:   s => s.isFlow || s.isGrid,
 		isWithFields:   s => s.isFlow || s.isGrid,
@@ -693,8 +703,13 @@ export default {
 				field.sizeY = this.getSizeAfterSnap(true,field.posY,field.sizeY,gridSizeY,this.gridFieldSizeMinY,this.field.sizeSnap);
 			}
 
-			if(this.isFlow)
+			if(this.isFlow) {
 				field.sizeX = 0;
+
+				// only flow/grid fields can have height in flow parents
+				if(field.content !== 'flow' && field.content !== 'grid')
+					field.sizeY = 0;
+			}
 
 			const indPreview = this.dragPreviewGetIndex();
 			if(indPreview !== -1) this.field.fields.splice(indPreview,1,field);

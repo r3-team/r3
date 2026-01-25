@@ -189,7 +189,7 @@ const MyBuilderDocMarginPadding = {
 				</div>
 				<div class="row gap centered">
 					<my-input-decimal class="short" @update:modelValue="$emit('update:l',$event)" :modelValue="l" :readonly :allowNull="false" :length="5" :lengthFract="2" />
-					<div class="builder-doc-input-page-box"></div>
+					<div class="builder-doc-input-page-box" :class="{ clickable:!readonly }" @click.stop="toggle"></div>
 					<my-input-decimal class="short" @update:modelValue="$emit('update:r',$event)" :modelValue="r" :readonly :allowNull="false" :length="5" :lengthFract="2" />
 				</div>
 				<div class="row">
@@ -199,6 +199,7 @@ const MyBuilderDocMarginPadding = {
 		</td>
 	</tr>`,
 	props:{
+		defaults:{ type:Object,  required:true },
 		label:   { type:String,  required:false, default:'' },
 		readonly:{ type:Boolean, required:true },
 
@@ -208,9 +209,17 @@ const MyBuilderDocMarginPadding = {
 		b:{ type:Number, required:true },
 		l:{ type:Number, required:true }
 	},
-	emits:['update:t','update:r','update:b','update:l'],
+	emits:['update:all','update:t','update:r','update:b','update:l'],
 	computed:{
+		anyActive:s => s.t !== 0 || s.r !== 0 || s.b !== 0 || s.l !== 0,
+
+		// stores
 		capGen:s => s.$store.getters.captions.generic
+	},
+	methods:{
+		toggle() {
+			this.$emit('update:all',this.anyActive ? {t:0,r:0,b:0,l:0} : this.defaults);
+		}
 	}
 };
 

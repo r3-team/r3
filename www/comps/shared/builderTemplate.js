@@ -196,7 +196,7 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 		case 'flow':     // fallthrough
         case 'flowBody':
 			f.fields  = [];
-			f.gap     = 1;
+			f.gap     = 0;
 			f.padding = getMarginTemplate();
 			f.shrinkY = false;
 		break;
@@ -206,7 +206,7 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 			f.sizeY    = 25;
 			f.fields   = [];
 			f.shrinkY  = false;
-			f.sizeSnap = 2;
+			f.sizeSnap = 3;
 		break;
 		case 'list':
 			f.bodyBorder        = getBorderTemplate();
@@ -234,7 +234,7 @@ export function getTemplateDocPage() {
 		fieldFlow:getTemplateDocField('flowBody'),
 		size:'A4',
 		orientation:'portrait',
-		margin:{t:10,r:15,b:10,l:15},
+		margin:{t:24,r:15,b:12,l:15},
 		footer:{
 			active:false,
 			docPageIdInherit:null,

@@ -30,10 +30,10 @@ export default {
 	template:`<div class="builder-doc-page" v-if="page !== false" @dragover.prevent @drop.stop="drop" @mouseup.stop="$emit('setFieldIdOptions',null)">
 		<div class="builder-doc-page-outer" :style="stylePage">
 
-			<div class="builder-doc-page-margin-hor" v-if="margin.t > 0" :style="styleMarginT"></div>
-			<div class="builder-doc-page-margin-ver" v-if="margin.r > 0" :style="styleMarginR"></div>
-			<div class="builder-doc-page-margin-hor" v-if="margin.b > 0" :style="styleMarginB"></div>
-			<div class="builder-doc-page-margin-ver" v-if="margin.l > 0" :style="styleMarginL"></div>
+			<div class="builder-doc-padding-margin-hor" v-if="margin.t > 0" :style="styleMarginT"></div>
+			<div class="builder-doc-padding-margin-ver" v-if="margin.r > 0" :style="styleMarginR"></div>
+			<div class="builder-doc-padding-margin-hor" v-if="margin.b > 0" :style="styleMarginB"></div>
+			<div class="builder-doc-padding-margin-ver" v-if="margin.l > 0" :style="styleMarginL"></div>
 
 			<div class="builder-doc-page-body" :style="styleBody">
 				<my-builder-doc-field
@@ -121,8 +121,10 @@ export default {
 						v-model:r="page.margin.r"
 						v-model:b="page.margin.b"
 						v-model:l="page.margin.l"
+						@update:all="page.margin = $event;setMarginVertical(true,$event.t);setMarginVertical(false,$event.b)"
 						@update:t="setMarginVertical(true,$event)"
 						@update:b="setMarginVertical(false,$event)"
+						:defaults="{t:24,r:15,b:12,l:15}"
 						:readonly
 					/>
 					<my-builder-doc-header-footer

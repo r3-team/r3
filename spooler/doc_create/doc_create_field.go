@@ -8,7 +8,7 @@ import (
 	"r3/types"
 )
 
-func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY, parentSizeX, pageSizeYUsable, pageMarginT float64,
+func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentSizeX, pageSizeYUsable, pageMarginT float64,
 	parentIsGrid bool, fontParent types.DocFont, fieldIf any) error {
 
 	fieldJson, err := json.Marshal(fieldIf)
@@ -31,7 +31,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 
 	// set positioning and width of this field
 	var posX float64 = parentPosX
-	var posY float64 = parentPosY + parentGapY
+	var posY float64 = parentPosY
 	if parentIsGrid {
 		posX += f.PosX
 		posY += f.PosY

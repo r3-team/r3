@@ -130,8 +130,8 @@
 	--color-form-builder-tabs:        hsl(135deg 45% 78%);
 	--color-form-builder-tabs-active: hsl(135deg 54% 87%);
 
+	--color-doc-padding-margin:hsl(65.77deg 47.41% 73.33%);
 	--color-doc-page-outer:hsl(0, 0%, 100%);
-	--color-doc-page-margin:hsl(65.77deg 47.41% 73.33%);
 	--color-doc-page-footer-header:hsl(158, 47%, 73%);
 	
 	/**/

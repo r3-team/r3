@@ -28,7 +28,7 @@ func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font type
 	var err error
 	var gapAdd float64 = 0.0
 	for _, fieldIfChild := range f.Fields {
-		if err = addField(ctx, doc, posXChildren, posYChildren, gapAdd, sizeXChildren, pageSizeYUsable, pageMarginT, false, font, fieldIfChild); err != nil {
+		if err = addField(ctx, doc, posXChildren, posYChildren+gapAdd, sizeXChildren, pageSizeYUsable, pageMarginT, false, font, fieldIfChild); err != nil {
 			return err
 		}
 		posYChildren = doc.p.GetY()

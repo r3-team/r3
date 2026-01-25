@@ -26,7 +26,7 @@ const MyBuilderDocColumn = {
 	},
 	template:`<div class="builder-doc-column" :class="classCss">
 		<div class="builder-doc-column-title" v-if="!isDragPreview">
-			<img class="builder-doc-column-icon" :src="'images/' + icon" />
+			<img :src="'images/' + icon" />
 			<span>{{ title }}</span>
 		</div>
 		

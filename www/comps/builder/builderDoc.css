@@ -43,6 +43,16 @@
 	border:1px solid var(--color-border);
 	margin-bottom:20px;
 }
+.builder-doc-padding-margin-hor{
+	width:100%;
+	position:absolute;
+	background-color:var(--color-doc-padding-margin);
+}
+.builder-doc-padding-margin-ver{
+	height:100%;
+	position:absolute;
+	background-color:var(--color-doc-padding-margin);
+}
 
 /* page */
 .builder-doc-page{
@@ -57,16 +67,6 @@
 	box-shadow:1px 1px 4px var(--color-shade);
 	position:relative;
 	background-color:var(--color-doc-page-outer);
-}
-.builder-doc-page-margin-hor{
-	width:100%;
-	position:absolute;
-	background-color:var(--color-doc-page-margin);
-}
-.builder-doc-page-margin-ver{
-	height:100%;
-	position:absolute;
-	background-color:var(--color-doc-page-margin);
 }
 .builder-doc-page-margin-footer-header{
 	width:100%;
@@ -109,13 +109,16 @@
 
 /* field */
 .builder-doc-field{
-	min-height:5mm; /* to allow access regardles of defined height */
+	min-height:6mm; /* to allow access regardles of defined height */
 	box-sizing:border-box;
 	display:flex;
 	flex-flow:column nowrap;
 	background-color:white;
 	position:relative;
 	outline:1px solid var(--color-border);
+}
+.builder-doc-field.isList{
+	min-height:24mm; /* to allow access regardles of defined height */
 }
 .builder-doc-field.dragSource{
 	display:none;
@@ -139,11 +142,14 @@
 	outline:3px solid var(--color-form-builder-selected);
 }
 .builder-doc-field-title-bar{
-	margin:3px;
+	margin:1px 3px;
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
 	gap:4px;
+}
+.builder-doc-field-title-bar>img{
+	height:20px;
 }
 
 /* field children */
@@ -185,6 +191,7 @@
 	align-items:flex-start;
 	background-color:white;
 	outline:1px solid var(--color-border);
+	overflow:hidden;
 }
 .builder-doc-column.dragSource{
 	display:none;
@@ -199,15 +206,15 @@
 	background-color:var(--color-form-builder-selected);
 	outline:3px solid var(--color-form-builder-selected);
 }
-.builder-doc-column-icon{
-	height:24px;
-}
 .builder-doc-column-title{
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
-	padding:4px 6px;
+	padding:2px 3px;
 	gap:4px;
+}
+.builder-doc-column-title>img{
+	height:20px;
 }
 
 
