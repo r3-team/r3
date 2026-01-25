@@ -12,6 +12,10 @@ import (
 
 func getConditionsResult(ctx context.Context, doc *doc, conditions []types.DocStateCondition) (bool, error) {
 
+	if len(conditions) == 0 {
+		return false, nil
+	}
+
 	evalString := ""
 	evalValues := make(map[string]any)
 
