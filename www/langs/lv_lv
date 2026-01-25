@@ -867,7 +867,10 @@
 			"shrinkY": "Shrink vertically if empty",
 			"sidebarPage": "Page: {NAME}",
 			"tabStates": "States ({CNT})",
-			"titleOne": "Document '{NAME}'"
+			"titleOne": "Document '{NAME}'",
+			"warning": {
+				"flowRow": "Direction 'row' only supports single text lines.<br />Images or multi line text requires column flow or a grid field."
+			}
 		},
 		"form": {
 			"actions": {
@@ -951,7 +954,6 @@
 			"fieldAttributeIdAltRichtextFiles": "Richtext file access",
 			"fieldDefault": "Default value",
 			"fieldDefaultPresetIds": "Default preset(s)",
-			"fieldDirection": "Direction",
 			"fieldFlags": {
 				"hideInputs": "Hide inputs",
 				"relCategory": "Category display",
@@ -2341,6 +2343,7 @@
 			"maintenanceComing": "The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your changes before then.",
 			"systemMsg": "System message"
 		},
+		"direction": "Direction",
 		"disabled": "Disabled",
 		"displayed": "Rādīts",
 		"distincted": "Distinct",
@@ -2480,6 +2483,7 @@
 		"returns": "Returns",
 		"role": "Loma",
 		"roles": "Roles",
+		"row": "Row",
 		"search": "Search",
 		"searchBar": "Search bar",
 		"searchBars": "Search bars",
@@ -2521,6 +2525,7 @@
 		"variables": "Variables",
 		"version": "Versija",
 		"visibility": "Visibility",
+		"visible": "Visible",
 		"warnings": "Brīdinājumi",
 		"widget": "Widget",
 		"widgets": "Widgets",

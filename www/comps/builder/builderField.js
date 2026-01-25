@@ -52,7 +52,7 @@ export default {
 					@click="$emit('field-property-set','direction',toggleDir(field.direction))"
 					@click.prevent.right="$emit('field-property-set','direction',toggleDir(field.direction))"
 					:src="field.direction === 'row' ? 'images/flexRow.png' : 'images/flexColumn.png'"
-					:title="capApp.fieldDirection+': '+field.direction"
+					:title="capGen.direction+': '+field.direction"
 				/>
 				
 				<img class="action clickable"

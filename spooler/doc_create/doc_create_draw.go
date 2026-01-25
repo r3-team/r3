@@ -29,7 +29,8 @@ type textDrawing struct {
 }
 
 // draws attribute value as cell
-func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY float64, lengthChars int, lineCount int, atr types.Attribute, valueIf any) error {
+func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY float64,
+	flowHorizontal bool, lengthChars int, lineCount int, atr types.Attribute, valueIf any) error {
 
 	if valueIf == nil {
 		return nil
@@ -43,11 +44,11 @@ func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY f
 		}
 
 		switch atr.ContentUse {
-		case "iframe", "default", "textarea":
+		case "default", "iframe", "textarea":
 			if lengthChars != 0 && len(v) > lengthChars-3 {
 				v = fmt.Sprintf("%s...", v[:lengthChars-3])
 			}
-			drawCellText(doc, font, sizeX, sizeY, lineCount, v)
+			drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, v)
 		case "barcode":
 			var b textBarcode
 			if err := json.Unmarshal([]byte(v), &b); err != nil {
@@ -57,7 +58,7 @@ func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY f
 				return err
 			}
 		case "color":
-			drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("#%s", v))
+			drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, fmt.Sprintf("#%s", v))
 		case "drawing":
 			var d textDrawing
 			if err := json.Unmarshal([]byte(v), &d); err != nil {
@@ -94,23 +95,23 @@ func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY f
 		if err != nil {
 			return err
 		}
-		drawCellText(doc, font, sizeX, sizeY, lineCount, tools.FormatFloat(
+		drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, tools.FormatFloat(
 			f.Float64, atr.LengthFract, font.NumberSepDec, font.NumberSepTho))
 
 	case "real", "double precision":
-		drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("%f", valueIf))
+		drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, fmt.Sprintf("%f", valueIf))
 	case "boolean":
 		v, ok := valueIf.(bool)
 		if !ok {
 			return fmt.Errorf("failed to parse boolean attribute value")
 		}
 		if v {
-			drawCellText(doc, font, sizeX, sizeY, lineCount, font.BoolTrue)
+			drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, font.BoolTrue)
 		} else {
-			drawCellText(doc, font, sizeX, sizeY, lineCount, font.BoolFalse)
+			drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, font.BoolFalse)
 		}
 	case "regconfig":
-		drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("%s", valueIf))
+		drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, fmt.Sprintf("%s", valueIf))
 	case "files":
 		valueJson, err := json.Marshal(valueIf)
 		if err != nil {
@@ -140,7 +141,7 @@ func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY f
 	case "integer", "bigint":
 		switch atr.ContentUse {
 		case "default":
-			drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("%d", valueIf))
+			drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, fmt.Sprintf("%d", valueIf))
 		case "date", "datetime":
 			tUnix, err := getInt64FromInterface(valueIf)
 			if err != nil {
@@ -149,10 +150,10 @@ func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY f
 
 			if atr.ContentUse == "datetime" {
 				// print datetime at local server time
-				drawCellText(doc, font, sizeX, sizeY, lineCount, time.Unix(tUnix, 0).Local().Format(tools.GetDatetimeFormat(font.DateFormat, true)))
+				drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, time.Unix(tUnix, 0).Local().Format(tools.GetDatetimeFormat(font.DateFormat, true)))
 			} else {
 				// print date at UTC
-				drawCellText(doc, font, sizeX, sizeY, lineCount, time.Unix(tUnix, 0).Format(tools.GetDatetimeFormat(font.DateFormat, false)))
+				drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, time.Unix(tUnix, 0).Format(tools.GetDatetimeFormat(font.DateFormat, false)))
 			}
 		case "time":
 			v, ok := valueIf.(int32)
@@ -162,7 +163,7 @@ func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY f
 			hh := int32(v / 3600)
 			mm := int32((v - (hh * 3600)) / 60)
 			ss := int32(v - (hh * 3600) - (mm * 60))
-			drawCellText(doc, font, sizeX, sizeY, lineCount, fmt.Sprintf("%02d:%02d:%02d", hh, mm, ss))
+			drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, fmt.Sprintf("%02d:%02d:%02d", hh, mm, ss))
 		}
 	default:
 		return fmt.Errorf("failed to add field, no definition for attribute content '%s'", atr.Content)
@@ -240,18 +241,28 @@ func drawImageBase64(doc *doc, imgBase64 string, sizeX, sizeY float64) error {
 // draws text value as cell
 // if line count is set to 0 it will be calculated
 // if height is set to 0, font line height will be used
-func drawCellText(doc *doc, font types.DocFont, sizeX, sizeY float64, lineCount int, s string) {
+func drawCellText(doc *doc, font types.DocFont, sizeX, sizeY float64, flowHorizontal bool, lineCount int, s string) {
 
 	if sizeY == 0 {
+		// height is known in some cases (like in list rows), if not calculate it
 		sizeY = getLineHeight(font)
 	}
-
+	if flowHorizontal {
+		// horizontal flow is only supported for single line fields
+		sizeX = doc.p.GetStringWidth(s)
+		lineCount = 1
+	}
 	if lineCount == 0 {
+		// if line count is not known, calculate it
 		lineCount = len(doc.p.SplitText(s, sizeX))
 	}
 
 	if lineCount == 1 {
-		doc.p.CellFormat(sizeX, sizeY, s, "", 2, font.Align, false, 0, "")
+		lnMode := 2
+		if flowHorizontal {
+			lnMode = 0
+		}
+		doc.p.CellFormat(sizeX, sizeY, s, "", lnMode, font.Align, false, 0, "")
 	} else {
 		sizeYAllLines := getLineHeight(font) * float64(lineCount)
 		if sizeY > sizeYAllLines {

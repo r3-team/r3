@@ -254,6 +254,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			CREATE TABLE IF NOT EXISTS app.doc_field_flow (
 				doc_field_id uuid NOT NULL,
+				direction app.field_container_direction NOT NULL,
 				gap real NOT NULL,
 				paddings real[],
 				shrink_y boolean NOT NULL,

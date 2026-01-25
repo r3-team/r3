@@ -867,7 +867,10 @@
 			"shrinkY": "Shrink vertically if empty",
 			"sidebarPage": "Page: {NAME}",
 			"tabStates": "States ({CNT})",
-			"titleOne": "Document '{NAME}'"
+			"titleOne": "Document '{NAME}'",
+			"warning": {
+				"flowRow": "Direction 'row' only supports single text lines.<br />Images or multi line text requires column flow or a grid field."
+			}
 		},
 		"form": {
 			"actions": {
@@ -951,7 +954,6 @@
 			"fieldAttributeIdAltRichtextFiles": "富文本文件访问",
 			"fieldDefault": "默认值",
 			"fieldDefaultPresetIds": "默认预设值",
-			"fieldDirection": "方向",
 			"fieldFlags": {
 				"hideInputs": "Hide inputs",
 				"relCategory": "Category display",
@@ -2341,6 +2343,7 @@
 			"maintenanceComing": "The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your changes before then.",
 			"systemMsg": "System message"
 		},
+		"direction": "方向",
 		"disabled": "Disabled",
 		"displayed": "显示的",
 		"distincted": "不重复",
@@ -2480,6 +2483,7 @@
 		"returns": "Returns",
 		"role": "角色",
 		"roles": "角色",
+		"row": "Row",
 		"search": "Search",
 		"searchBar": "Search bar",
 		"searchBars": "Search bars",
@@ -2521,6 +2525,7 @@
 		"variables": "Variables",
 		"version": "版本",
 		"visibility": "Visibility",
+		"visible": "Visible",
 		"warnings": "警告",
 		"widget": "新微件",
 		"widgets": "小部件",

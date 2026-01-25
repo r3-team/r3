@@ -86,11 +86,12 @@ type DocFieldFlow struct {
 	State   bool      `json:"state"`
 
 	// flow field
-	Border  DocBorder        `json:"border"`
-	Fields  []any            `json:"fields"`
-	Gap     float64          `json:"gap"` // space between flow children
-	Padding DocMarginPadding `json:"padding"`
-	ShrinkY bool             `json:"shrinkY"` // shrink height if content does not fill height
+	Border    DocBorder        `json:"border"`
+	Direction string           `json:"direction"` // column, row
+	Fields    []any            `json:"fields"`
+	Gap       float64          `json:"gap"` // space between flow children
+	Padding   DocMarginPadding `json:"padding"`
+	ShrinkY   bool             `json:"shrinkY"` // shrink height if content does not fill height
 }
 type DocFieldGrid struct {
 	Id      uuid.UUID `json:"id"`

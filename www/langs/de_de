@@ -867,7 +867,10 @@
 			"shrinkY": "Vertikal schrumpfen wenn leer",
 			"sidebarPage": "Seite: {NAME}",
 			"tabStates": "Zustände ({CNT})",
-			"titleOne": "Dokument '{NAME}'"
+			"titleOne": "Dokument '{NAME}'",
+			"warning": {
+				"flowRow": "Die Ausrichung \"Reihe\" unterstützt nur Textwerte mit einer Zeile.<br />Bilder oder Mehrzeilentexte brauchen das Flow-Layout \"Spalte\" oder ein Grid-Layout."
+			}
 		},
 		"form": {
 			"actions": {
@@ -951,7 +954,6 @@
 			"fieldAttributeIdAltRichtextFiles": "Rich-Text Dateizugriff",
 			"fieldDefault": "Standardwert",
 			"fieldDefaultPresetIds": "Standard vord. Datensätze",
-			"fieldDirection": "Ausrichtung",
 			"fieldFlags": {
 				"hideInputs": "Eingaben verstecken",
 				"relCategory": "Kategorieanzeige",
@@ -2341,6 +2343,7 @@
 			"maintenanceComing": "Das System wird in einen geplanten Wartungsmodus gesetzt: <b>{DATE}</b>. Änderungen sollten vorher gespeichert werden.",
 			"systemMsg": "Systemnachricht"
 		},
+		"direction": "Ausrichtung",
 		"disabled": "Deaktiviert",
 		"displayed": "Angezeigt",
 		"distincted": "Unterscheiden",
@@ -2480,6 +2483,7 @@
 		"returns": "Gibt zurück",
 		"role": "Rolle",
 		"roles": "Rollen",
+		"row": "Reihe",
 		"search": "Suche",
 		"searchBar": "Suchleiste",
 		"searchBars": "Suchleisten",
@@ -2521,6 +2525,7 @@
 		"variables": "Variabeln",
 		"version": "Version",
 		"visibility": "Sichtbarkeit",
+		"visible": "Sichtbar",
 		"warnings": "Warnungen",
 		"widget": "Widget",
 		"widgets": "Widgets",

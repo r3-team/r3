@@ -26,7 +26,7 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font type
 
 	var posYChildMax float64
 	for _, fieldIfChild := range f.Fields {
-		if err := addField(ctx, doc, posXChildren, posYChildren, 0, pageSizeYUsable, pageMarginT, true, font, fieldIfChild); err != nil {
+		if err := addField(ctx, doc, posXChildren, posYChildren, 0, pageSizeYUsable, pageMarginT, false, true, font, fieldIfChild); err != nil {
 			return err
 		}
 		if posYChildMax < doc.p.GetY() {

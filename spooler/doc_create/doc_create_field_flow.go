@@ -23,15 +23,26 @@ func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font type
 	posXChildren := posX + bSizeL + f.Padding.L
 	posYChildren := posY + bSizeT + f.Padding.T
 	sizeXChildren := f.SizeX - bSizeX - pSizeX
+	isHorizontal := f.Direction == "row"
 
 	pageNoStart := doc.p.PageNo()
 	var err error
 	var gapAdd float64 = 0.0
 	for _, fieldIfChild := range f.Fields {
-		if err = addField(ctx, doc, posXChildren, posYChildren+gapAdd, sizeXChildren, pageSizeYUsable, pageMarginT, false, font, fieldIfChild); err != nil {
+
+		if isHorizontal {
+			posXChildren += gapAdd
+		} else {
+			posYChildren += gapAdd
+		}
+		if err = addField(ctx, doc, posXChildren, posYChildren, sizeXChildren, pageSizeYUsable, pageMarginT, isHorizontal, false, font, fieldIfChild); err != nil {
 			return err
 		}
-		posYChildren = doc.p.GetY()
+		if isHorizontal {
+			posXChildren = doc.p.GetX()
+		} else {
+			posYChildren = doc.p.GetY()
+		}
 		gapAdd = f.Gap
 	}
 

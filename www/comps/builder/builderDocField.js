@@ -45,7 +45,7 @@ export default {
 		@drop="drop"
 		@mousedown.stop="mousedown"
 		@mouseup.stop="mouseup"
-		:class="classCss"
+		:class="classMain"
 		:draggable="!isRoot && !readonly"
 		:style
 		:key="field.id"
@@ -85,7 +85,7 @@ export default {
 
 		<div class="builder-doc-fields" ref="fields"
 			v-if="isWithFields"
-			:class="{ 'layout-flow':isFlow, 'layout-grid':isGrid }"
+			:class="classFields"
 			:style="styleChildren"
 		>
 			<my-builder-doc-field
@@ -214,6 +214,28 @@ export default {
 							</template>
 
 							<template v-if="isFlow">
+								<tr v-if="!isRoot">
+									<td>{{ capGen.direction }}</td>
+									<td>
+										<div class="column gap">
+											<div class="row gap">
+												<select v-model="field.direction">
+													<option value="row">{{ capGen.row }}</option>
+													<option value="column">{{ capGen.column }}</option>
+												</select>
+												<my-button
+													@trigger="field.direction = field.direction === 'row' ? 'column' : 'row'"
+													:captionTitle="capGen.direction+': '+field.direction"
+													:image="field.direction === 'row' ? 'flexRow.png' : 'flexColumn.png'"
+												/>
+											</div>
+											<div v-if="field.direction === 'row'" class="warning">
+												<img src="images/flexRow.png" />
+												<span v-html="capApp.warning.flowRow"></span>
+											</div>
+										</div>
+									</td>
+								</tr>
 								<tr>
 									<td>{{ capGen.gap }}</td>
 									<td>
@@ -408,7 +430,14 @@ export default {
 	},
 	emits:['dragChildEnd','dragChildEnter','setFieldIdOptions','setFieldIdOptionsParent','update:modelValue'],
 	computed:{
-		classCss:s => {
+		classFields:s => {
+			return {
+				layoutFlowColumn:s.isFlow && s.field.direction === 'column',
+				layoutFlowRow:s.isFlow && s.field.direction === 'row',
+				layoutGrid:s.isGrid
+			};
+		},
+		classMain:s => {
 			return {
 				clickable:true,
 				dragPreview:s.isDragPreview,

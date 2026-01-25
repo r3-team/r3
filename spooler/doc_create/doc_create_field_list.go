@@ -355,9 +355,9 @@ func addFieldListRow(doc *doc, b types.DocBorder, cells []cell, padding types.Do
 			if c.length != 0 && len(c.text) > c.length-3 {
 				c.text = fmt.Sprintf("%s...", c.text[:c.length-3])
 			}
-			drawCellText(doc, c.font, c.width, height, c.lines, c.text)
+			drawCellText(doc, c.font, c.width, height, false, c.lines, c.text)
 		} else {
-			if err := drawAttributeValue(doc, c.font, 0, 0, c.width, height, c.length, c.lines, c.atr, c.atrValue); err != nil {
+			if err := drawAttributeValue(doc, c.font, 0, 0, c.width, height, false, c.length, c.lines, c.atr, c.atrValue); err != nil {
 				return 0, err
 			}
 		}

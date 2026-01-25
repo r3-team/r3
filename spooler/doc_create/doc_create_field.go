@@ -9,7 +9,7 @@ import (
 )
 
 func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentSizeX, pageSizeYUsable, pageMarginT float64,
-	parentIsGrid bool, fontParent types.DocFont, fieldIf any) error {
+	flowHorizontal bool, parentIsGrid bool, fontParent types.DocFont, fieldIf any) error {
 
 	fieldJson, err := json.Marshal(fieldIf)
 	if err != nil {
@@ -36,7 +36,11 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentSizeX
 		posX += f.PosX
 		posY += f.PosY
 	} else {
-		f.SizeX = parentSizeX
+		if flowHorizontal {
+			f.SizeX = 0
+		} else {
+			f.SizeX = parentSizeX
+		}
 	}
 
 	// grid fields have defined height, if they do not fit on current page, add to next one
@@ -68,7 +72,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentSizeX
 		}
 		fd.SizeX = f.SizeX
 		fd.SizeY = f.SizeY
-		return addFieldData(doc, fd, font, posX, posY)
+		return addFieldData(doc, fd, font, flowHorizontal, posX, posY)
 	case "flow":
 		var ff types.DocFieldFlow
 		if err := json.Unmarshal(fieldJson, &ff); err != nil {
@@ -102,7 +106,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentSizeX
 		}
 		ft.SizeX = f.SizeX
 		ft.SizeY = f.SizeY
-		return addFieldText(doc, ft, font)
+		return addFieldText(doc, ft, font, flowHorizontal)
 	}
 	return fmt.Errorf("invalid field content '%s'", f.Content)
 }

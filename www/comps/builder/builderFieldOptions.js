@@ -855,19 +855,19 @@ export default {
 						<td colspan="2"><b>{{ capApp.containerContent }}</b></td>
 					</tr>
 					<tr>
-						<td>{{ capApp.fieldDirection }}</td>
+						<td>{{ capGen.direction }}</td>
 						<td>
 							<div class="row gap">
 								<select
 									@input="set('direction',$event.target.value)"
 									:value="field.direction"
 								>
-									<option value="row">row</option>
-									<option value="column">column</option>
+									<option value="row">{{ capGen.row }}</option>
+									<option value="column">{{ capGen.column }}</option>
 								</select>
 								<my-button
 									@trigger="set('direction',field.direction === 'row' ? 'column' : 'row' )"
-									:captionTitle="capApp.fieldDirection+': '+field.direction"
+									:captionTitle="capGen.direction+': '+field.direction"
 									:image="field.direction === 'row' ? 'flexRow.png' : 'flexColumn.png'"
 								/>
 							</div>

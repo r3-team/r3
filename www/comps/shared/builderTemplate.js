@@ -195,10 +195,11 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 		break;
 		case 'flow':     // fallthrough
         case 'flowBody':
-			f.fields  = [];
-			f.gap     = 0;
-			f.padding = getMarginTemplate();
-			f.shrinkY = false;
+			f.direction = 'column';
+			f.fields    = [];
+			f.gap       = 0;
+			f.padding   = getMarginTemplate();
+			f.shrinkY   = false;
 		break;
 		case 'grid':       // fallthrough
         case 'gridFooter': // fallthrough

@@ -860,6 +860,9 @@
 				"{PAGE_END}": "Total page number",
 				"{TIME_NOW}": "Current time"
 			},
+			"warning": {
+				"flowRow": "Direction 'row' only supports single text lines.<br />Images or multi line text requires column flow or a grid field."
+			},
 			"headerRepeat": "Repeat header row on page break",
 			"inheritFrom": "Inherit from",
 			"setData": "Overwrite by attribute value",
@@ -951,7 +954,6 @@
 			"fieldAttributeIdAltRichtextFiles": "Richtext file access",
 			"fieldDefault": "Default value",
 			"fieldDefaultPresetIds": "Default preset(s)",
-			"fieldDirection": "Direction",
 			"fieldHelp": "Help text",
 			"fieldIcon": "Field icon",
 			"fieldIdFocus": "Set field focus on load",
@@ -2341,6 +2343,7 @@
 			"maintenanceComing": "The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your changes before then.",
 			"systemMsg": "System message"
 		},
+		"direction": "Direction",
 		"disabled": "Not enabled",
 		"displayed": "Displayed",
 		"distincted": "Distinct",
@@ -2480,6 +2483,7 @@
 		"returns": "Returns",
 		"role": "Role",
 		"roles": "Roles",
+		"row": "Row",
 		"search": "Search",
 		"searchBar": "Search bar",
 		"searchBars": "Search bars",

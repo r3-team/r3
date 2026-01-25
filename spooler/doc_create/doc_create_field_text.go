@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func addFieldText(doc *doc, f types.DocFieldText, font types.DocFont) error {
+func addFieldText(doc *doc, f types.DocFieldText, font types.DocFont, flowHorizontal bool) error {
 
 	// replace known document placeholders ({PAGE_END} is set by fpdf)
 	f.Value = strings.ReplaceAll(f.Value, "{PAGE_CUR}", fmt.Sprintf("%d", doc.p.PageNo()))
@@ -16,6 +16,6 @@ func addFieldText(doc *doc, f types.DocFieldText, font types.DocFont) error {
 	f.Value = strings.ReplaceAll(f.Value, "{DATETIME_NOW}", time.Now().Local().Format(tools.GetDatetimeFormat(font.DateFormat, true)))
 	f.Value = strings.ReplaceAll(f.Value, "{TIME_NOW}", time.Now().Local().Format(tools.GetTimeFormat()))
 
-	drawCellText(doc, font, f.SizeX, -1, -1, f.Value)
+	drawCellText(doc, font, f.SizeX, 0, flowHorizontal, 0, f.Value)
 	return nil
 }

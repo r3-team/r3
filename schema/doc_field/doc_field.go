@@ -56,7 +56,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			fd.attribute_id, fd.attribute_index, fd.length,
 
 			-- flow
-			ff.gap,
+			ff.direction, ff.gap,
 
 			-- grid
 			fg.size_snap,
@@ -86,12 +86,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 		var f types.DocField
 		var attributeId pgtype.UUID
 		var attributeIndex, length pgtype.Int4
+		var direction pgtype.Text
 		var gap, sizeSnap pgtype.Float8
 		var paddings []float64
 		var shrinkY, headerRepeat pgtype.Bool
 		var bodyColorFillEven, bodyColorFillOdd, footerColorFill, headerColorFill, value pgtype.Text
 		if err := rows.Scan(&f.Id, &f.Content, &f.PosX, &f.PosY, &f.SizeX, &f.SizeY, &f.State, &paddings,
-			&shrinkY, &attributeId, &attributeIndex, &length, &gap, &sizeSnap, &bodyColorFillEven,
+			&shrinkY, &attributeId, &attributeIndex, &length, &direction, &gap, &sizeSnap, &bodyColorFillEven,
 			&bodyColorFillOdd, &footerColorFill, &headerColorFill, &headerRepeat, &value); err != nil {
 
 			return nil, err
@@ -123,8 +124,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 				SizeY:   f.SizeY,
 				State:   f.State,
 
-				Gap:     gap.Float64,
-				ShrinkY: shrinkY.Bool,
+				Direction: direction.String,
+				Gap:       gap.Float64,
+				ShrinkY:   shrinkY.Bool,
 			}
 			if len(paddings) == 4 {
 				f.Padding.T = paddings[0]
@@ -429,11 +431,11 @@ func setData_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldData) error {
 
 func setFlow_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.DocFieldFlow, fieldIds *[]uuid.UUID) error {
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO app.doc_field_flow (doc_field_id, gap, paddings, shrink_y)
-		VALUES ($1,$2,$3,$4)
+		INSERT INTO app.doc_field_flow (doc_field_id, direction, gap, paddings, shrink_y)
+		VALUES ($1,$2,$3,$4,$5)
 		ON CONFLICT (doc_field_id)
-		DO UPDATE SET gap = $2, paddings = $3, shrink_y = $4
-	`, f.Id, f.Gap, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}, f.ShrinkY); err != nil {
+		DO UPDATE SET direction = $2, gap = $3, paddings = $4, shrink_y = $5
+	`, f.Id, f.Direction, f.Gap, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}, f.ShrinkY); err != nil {
 		return err
 	}
 	if err := doc_border.Set_tx(ctx, tx, f.Id, schema.DbDocContextDefault, f.Border); err != nil {
