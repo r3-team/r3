@@ -7,21 +7,21 @@ import (
 	"r3/types"
 )
 
-func addFieldData(doc *doc, f types.DocFieldData, font types.DocFont, posX, posY float64) (float64, error) {
+func addFieldData(doc *doc, f types.DocFieldData, font types.DocFont, posX, posY float64) error {
 
 	v, exists := doc.data[f.AttributeIndex][f.AttributeId]
 	if !exists {
-		return 0, fmt.Errorf("failed to find field value, attribute '%s' not found on relation index %d", f.AttributeId, f.AttributeIndex)
+		return fmt.Errorf("failed to find field value, attribute '%s' not found on relation index %d", f.AttributeId, f.AttributeIndex)
 	}
 
 	cache.Schema_mx.RLock()
 	atr, exists := cache.AttributeIdMap[f.AttributeId]
 	cache.Schema_mx.RUnlock()
 	if !exists {
-		return 0, handler.ErrSchemaUnknownAttribute(f.AttributeId)
+		return handler.ErrSchemaUnknownAttribute(f.AttributeId)
 	}
 	if err := drawAttributeValue(doc, font, posX, posY, f.SizeX, f.SizeY, f.Length, 0, atr, v); err != nil {
-		return 0, err
+		return err
 	}
-	return doc.p.GetY(), nil
+	return nil
 }

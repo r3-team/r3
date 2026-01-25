@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font types.DocFont, posX, posY, pageSizeYUsable, pageMarginT float64) (float64, error) {
+func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font types.DocFont, posX, posY, pageSizeYUsable, pageMarginT float64) error {
 
 	// border sizes
 	_, bSizeT, bSizeR, bSizeB, bSizeL := getBorderSize(f.Border)
@@ -16,7 +16,7 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font type
 
 	// grid fields can never be higher than the usable page height
 	if f.SizeY > pageSizeYUsable {
-		return posY, nil
+		return nil
 	}
 
 	// field size is defined space including borders
@@ -26,13 +26,11 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font type
 
 	var posYChildMax float64
 	for _, fieldIfChild := range f.Fields {
-
-		posYAfterFields, err := addField(ctx, doc, posXChildren, posYChildren, 0, 0, pageSizeYUsable, pageMarginT, true, font, fieldIfChild)
-		if err != nil {
-			return 0, err
+		if err := addField(ctx, doc, posXChildren, posYChildren, 0, 0, pageSizeYUsable, pageMarginT, true, font, fieldIfChild); err != nil {
+			return err
 		}
-		if posYChildMax < posYAfterFields {
-			posYChildMax = posYAfterFields
+		if posYChildMax < doc.p.GetY() {
+			posYChildMax = doc.p.GetY()
 		}
 	}
 	childrenExceedParent := posYChildMax > posY+f.SizeY-bSizeB
@@ -50,5 +48,6 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font type
 	doc.p.SetXY(posX+(bSizeL/2), posY+(bSizeT/2))
 	drawBox(doc, f.Border, pgtype.Text{}, f.SizeX-(bSizeX/2), posYChildMax-posY-(bSizeY/2))
 
-	return posYChildMax, nil
+	doc.p.SetY(posYChildMax)
+	return nil
 }

@@ -9,16 +9,16 @@ import (
 )
 
 func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY, parentSizeX, pageSizeYUsable, pageMarginT float64,
-	parentIsGrid bool, fontParent types.DocFont, fieldIf any) (float64, error) {
+	parentIsGrid bool, fontParent types.DocFont, fieldIf any) error {
 
 	fieldJson, err := json.Marshal(fieldIf)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	var f types.DocField
 	if err := json.Unmarshal(fieldJson, &f); err != nil {
-		return 0, err
+		return err
 	}
 
 	stateOverwrite, exists := doc.fieldIdMapState[f.Id]
@@ -26,7 +26,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 		f.State = stateOverwrite
 	}
 	if !f.State {
-		return doc.p.GetY(), nil
+		return nil
 	}
 
 	// set positioning and width of this field
@@ -64,7 +64,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 	case "data":
 		var fd types.DocFieldData
 		if err := json.Unmarshal(fieldJson, &fd); err != nil {
-			return 0, err
+			return err
 		}
 		fd.SizeX = f.SizeX
 		fd.SizeY = f.SizeY
@@ -72,7 +72,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 	case "flow":
 		var ff types.DocFieldFlow
 		if err := json.Unmarshal(fieldJson, &ff); err != nil {
-			return 0, err
+			return err
 		}
 		ff = applyToFieldFlow(sets, ff)
 		ff.SizeX = f.SizeX
@@ -81,7 +81,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 	case "grid":
 		var fg types.DocFieldGrid
 		if err := json.Unmarshal(fieldJson, &fg); err != nil {
-			return 0, err
+			return err
 		}
 		fg = applyToFieldGrid(sets, fg)
 		fg.SizeX = f.SizeX
@@ -90,7 +90,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 	case "list":
 		var fl types.DocFieldList
 		if err := json.Unmarshal(fieldJson, &fl); err != nil {
-			return 0, err
+			return err
 		}
 		fl.SizeX = f.SizeX
 		fl.SizeY = f.SizeY
@@ -98,11 +98,11 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentGapY,
 	case "text":
 		var ft types.DocFieldText
 		if err := json.Unmarshal(fieldJson, &ft); err != nil {
-			return 0, err
+			return err
 		}
 		ft.SizeX = f.SizeX
 		ft.SizeY = f.SizeY
 		return addFieldText(doc, ft, font)
 	}
-	return 0, fmt.Errorf("invalid field content '%s'", f.Content)
+	return fmt.Errorf("invalid field content '%s'", f.Content)
 }

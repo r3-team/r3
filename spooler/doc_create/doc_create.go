@@ -173,6 +173,7 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 
 	doc.p.SetCellMargin(0) // kills the default margin within text cells
 	doc.p.AliasNbPages("{PAGE_END}")
+	setFont(doc, docDef.Font) // set default font in case no font is set later (a font must always be set)
 
 	// generate page ID map for direct reference
 	pageIdMapIndex := make(map[uuid.UUID]int)
@@ -231,7 +232,7 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 		// a page is always a single flow field on root level
 		page.FieldFlow.SizeX = pageSizeXUsable
 		page.FieldFlow.SizeY = pageSizeYUsable
-		if _, err := addFieldFlow(ctx, doc, page.FieldFlow, font, page.Margin.L, page.Margin.T, pageSizeYUsable, page.Margin.T); err != nil {
+		if err := addFieldFlow(ctx, doc, page.FieldFlow, font, page.Margin.L, page.Margin.T, pageSizeYUsable, page.Margin.T); err != nil {
 			return err
 		}
 	}

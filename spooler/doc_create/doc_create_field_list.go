@@ -24,11 +24,11 @@ type cell struct {
 	width    float64
 }
 
-func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParent types.DocFont) (float64, error) {
+func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParent types.DocFont) error {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	defer tx.Rollback(ctx)
 
@@ -52,17 +52,17 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 	}
 
 	if len(dataGet.Expressions) == 0 {
-		return 0, fmt.Errorf("failed to add list field, 0 expressions defined")
+		return fmt.Errorf("failed to add list field, 0 expressions defined")
 	}
 
 	// fetch data
 	var query string
 	rows, _, err := data.Get_tx(ctx, tx, dataGet, true, 0, &query)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	if err := tx.Commit(ctx); err != nil {
-		return 0, err
+		return err
 	}
 
 	// disable auto paging
@@ -114,7 +114,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		atr, exists := cache.AttributeIdMap[column.AttributeId]
 		cache.Schema_mx.RUnlock()
 		if !exists {
-			return 0, handler.ErrSchemaUnknownAttribute(column.AttributeId)
+			return handler.ErrSchemaUnknownAttribute(column.AttributeId)
 		}
 		columnIndexMapAtr[i] = atr
 		columnIndexMapFontHeader[i] = applyToFont(getSetDataResolved(doc, column.SetsHeader), fontField)
@@ -152,7 +152,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 	// draw header
 	posYStart, err = addFieldListRow(doc, f.HeaderBorder, cellsHeader, f.Padding, f.HeaderColorFill, posXStart, posYStart, f.SizeX, heightHeader, paddingX, paddingY)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// draw table body
@@ -180,7 +180,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 
 					value, err := getFloat64FromInterface(row.Values[i])
 					if err != nil {
-						return 0, err
+						return err
 					}
 
 					switch column.AggregatorRow.String {
@@ -202,7 +202,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 
 					value, err := getInt64FromInterface(row.Values[i])
 					if err != nil {
-						return 0, err
+						return err
 					}
 
 					switch column.AggregatorRow.String {
@@ -251,7 +251,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		if f.HeaderRepeat && pageAdded {
 			posYStart, err = addFieldListRow(doc, f.HeaderBorder, cellsHeader, f.Padding, f.HeaderColorFill, posXStart, posYStart, f.SizeX, heightHeader, paddingX, paddingY)
 			if err != nil {
-				return 0, err
+				return err
 			}
 		}
 
@@ -262,7 +262,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 
 		posYStart, err = addFieldListRow(doc, f.BodyBorder, cells, f.Padding, colorFill, posXStart, posYStart, f.SizeX, heightRow, paddingX, paddingY)
 		if err != nil {
-			return 0, err
+			return err
 		}
 	}
 
@@ -319,14 +319,14 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		posYStart, _ = getYWithNewPageIfNeeded(doc, heightRow+paddingY, pageMarginB)
 		posYStart, err = addFieldListRow(doc, f.FooterBorder, cells, f.Padding, f.FooterColorFill, posXStart, posYStart, f.SizeX, heightRow, paddingX, paddingY)
 		if err != nil {
-			return 0, err
+			return err
 		}
 	}
 
 	// re-enable auto paging
 	doc.p.SetAutoPageBreak(true, pageMarginB)
 
-	return doc.p.GetY(), nil
+	return nil
 }
 
 func addFieldListRow(doc *doc, b types.DocBorder, cells []cell, padding types.DocMarginPadding,
