@@ -220,13 +220,20 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 				}
 			}
 
-			if atr.ContentUse == "default" {
+			if row.Values[i] != nil && atr.ContentUse == "default" {
 				isText := atr.Content == "text"
 				isInt := atr.Content == "integer" || atr.Content == "bigint"
 				isNum := atr.Content == "numeric"
 
-				if isText || isInt || isNum {
+				if isText || isInt {
 					text = fmt.Sprint(row.Values[i])
+				}
+				if isNum {
+					v, err := getFloat64FromInterface(row.Values[i])
+					if err != nil {
+						return err
+					}
+					text = tools.FormatFloat(v, atr.LengthFract, columnIndexMapFontBody[i].NumberSepDec, columnIndexMapFontBody[i].NumberSepTho)
 				}
 			}
 
