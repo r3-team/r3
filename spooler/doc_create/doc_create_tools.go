@@ -42,8 +42,11 @@ func getSetDataResolved(doc *doc, set []types.DocSet) []types.DocSet {
 func getLineHeight(f types.DocFont) float64 {
 	return f.Size * f.LineFactor * 0.5
 }
-func getCellHeightLines(doc *doc, font types.DocFont, width float64, s string) (float64, int) {
+func getCellHeightLines(doc *doc, font types.DocFont, width float64, length int, s string) (float64, int) {
 	setFont(doc, font)
+	if length != 0 && len(s) > length-3 {
+		s = fmt.Sprintf("%s...", s[:length-3])
+	}
 	lineCount := len(doc.p.SplitText(s, width))
 	return getLineHeight(font) * float64(lineCount), lineCount
 }

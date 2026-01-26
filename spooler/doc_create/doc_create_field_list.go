@@ -127,7 +127,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 			title = columnIndexMapAtr[i].Name
 		}
 
-		cellHeight, cellLines := getCellHeightLines(doc, columnIndexMapFontHeader[i], columnIndexMapWidth[i], title)
+		cellHeight, cellLines := getCellHeightLines(doc, columnIndexMapFontHeader[i], columnIndexMapWidth[i], column.Length, title)
 		if heightHeader < cellHeight {
 			heightHeader = cellHeight
 		}
@@ -230,7 +230,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 				}
 			}
 
-			cellHeight, cellLines := getCellHeightLines(doc, font, columnWidth, text)
+			cellHeight, cellLines := getCellHeightLines(doc, font, columnWidth, column.Length, text)
 			if heightRow < cellHeight {
 				heightRow = cellHeight
 			}
@@ -302,7 +302,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 			}
 
 			// figure out row height
-			cellHeight, cellLines := getCellHeightLines(doc, columnIndexMapFontFooter[i], columnIndexMapWidth[i], text)
+			cellHeight, cellLines := getCellHeightLines(doc, columnIndexMapFontFooter[i], columnIndexMapWidth[i], column.Length, text)
 			if heightRow < cellHeight {
 				heightRow = cellHeight
 			}
