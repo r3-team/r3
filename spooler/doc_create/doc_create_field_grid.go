@@ -10,7 +10,7 @@ import (
 func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font types.DocFont, posX, posY, pageSizeYUsable, pageMarginT float64) error {
 
 	// border sizes
-	_, bSizeT, bSizeR, bSizeB, bSizeL := getBorderSize(f.Border)
+	_, bSizeT, bSizeR, bSizeB, bSizeL, _ := getBorderSize(f.Border)
 	bSizeX := bSizeL + bSizeR
 	bSizeY := bSizeT + bSizeB
 

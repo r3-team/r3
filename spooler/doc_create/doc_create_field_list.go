@@ -70,7 +70,6 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 	doc.p.SetAutoPageBreak(false, 0)
 
 	// padding
-	paddingX := f.Padding.L + f.Padding.R
 	paddingY := f.Padding.T + f.Padding.B
 
 	// calculate column width
@@ -88,14 +87,14 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 	columnIndexMapWidth := make(map[int]float64)
 	for i, column := range f.Columns {
 		if column.SizeX == 0 {
-			columnIndexMapWidth[i] = (widthForAuto / float64(columnCountAutoWidth)) - paddingX
+			columnIndexMapWidth[i] = widthForAuto / float64(columnCountAutoWidth)
 		} else {
-			columnIndexMapWidth[i] = column.SizeX - paddingX
+			columnIndexMapWidth[i] = column.SizeX
 		}
 	}
 
 	// working variables
-	var heightHeader float64 = 0
+	var sizeYHeader float64 = 0
 	printAggregationRow := false
 	columnIndexMapAtr := make(map[int]types.Attribute)
 	columnIndexMapFontBody := make(map[int]types.DocFont)
@@ -105,6 +104,16 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 	columnIndexMapAggValueInt := make(map[int]int64)
 	columnIndexMapAggValueNum := make(map[int]float64)
 	cellsHeader := make([]cell, 0)
+
+	// calculate cell size adjustments due to borders & paddings
+	// cell widths are pre-calculated to the desired value, must shrink to allow for borders/paddings
+	// cell heights are calculated based on content, must grow to allow for borders/paddings
+	sizeXReductionHeader := getSizeXReductionCell(f.HeaderBorder, f.Padding, len(f.Columns))
+	sizeXReductionBody := getSizeXReductionCell(f.BodyBorder, f.Padding, len(f.Columns))
+	sizeXReductionFooter := getSizeXReductionCell(f.FooterBorder, f.Padding, len(f.Columns))
+	sizeYAdditionHeader := getSizeYAdditionCell(f.HeaderBorder, f.Padding)
+	sizeYAdditionBody := getSizeYAdditionCell(f.BodyBorder, f.Padding)
+	sizeYAdditionFooter := getSizeYAdditionCell(f.FooterBorder, f.Padding)
 
 	// process column definitions
 	for i, column := range f.Columns {
@@ -127,9 +136,10 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 			title = columnIndexMapAtr[i].Name
 		}
 
-		cellHeight, cellLines := getRowCellHeightLines(doc, f.HeaderBorder, columnIndexMapFontHeader[i], columnIndexMapWidth[i], column.Length, title)
-		if heightHeader < cellHeight {
-			heightHeader = cellHeight
+		sizeYCell, cellLines := getRowCellHeightLines(doc, columnIndexMapFontHeader[i], columnIndexMapWidth[i]-sizeXReductionHeader, column.Length, title)
+		sizeYCell += sizeYAdditionHeader
+		if sizeYHeader < sizeYCell {
+			sizeYHeader = sizeYCell
 		}
 
 		cellsHeader = append(cellsHeader, cell{
@@ -146,27 +156,26 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		}
 	}
 
-	posXStart := doc.p.GetX()
-	posYStart, _ := getYWithNewPageIfNeeded(doc, heightHeader, pageMarginB)
+	posX := doc.p.GetX()
+	posY, _ := getYWithNewPageIfNeeded(doc, sizeYHeader, pageMarginB)
 
 	// draw header
-	if err := addFieldListRow(doc, f.HeaderBorder, true, cellsHeader, f.Padding, f.HeaderColorFill, posXStart, posYStart, f.SizeX, heightHeader, paddingX, paddingY); err != nil {
+	if err := addListRow(doc, f.HeaderBorder, true, cellsHeader, f.Padding, f.HeaderColorFill, posX, posY, f.SizeX, sizeYHeader, sizeXReductionHeader); err != nil {
 		return err
 	}
-	posYStart = doc.p.GetY()
+	posY = doc.p.GetY()
 
 	// draw table body
 	for ri, row := range rows {
 
 		// set row height by largest cell height
-		var heightRow float64
+		var sizeYRow float64
 		cells := make([]cell, 0)
 		for i, column := range f.Columns {
 
 			atr := columnIndexMapAtr[i]
 			font := columnIndexMapFontBody[i]
 			text := ""
-			columnWidth := columnIndexMapWidth[i]
 
 			// collect values for aggregation
 			if printAggregationRow && column.AggregatorRow.Valid && row.Values[i] != nil {
@@ -233,13 +242,14 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 					if err != nil {
 						return err
 					}
-					text = tools.FormatFloat(v, atr.LengthFract, columnIndexMapFontBody[i].NumberSepDec, columnIndexMapFontBody[i].NumberSepTho)
+					text = tools.FormatFloat(v, atr.LengthFract, font.NumberSepDec, font.NumberSepTho)
 				}
 			}
 
-			cellHeight, cellLines := getRowCellHeightLines(doc, f.BodyBorder, font, columnWidth, column.Length, text)
-			if heightRow < cellHeight {
-				heightRow = cellHeight
+			sizeYCell, cellLines := getRowCellHeightLines(doc, font, columnIndexMapWidth[i]-sizeXReductionBody, column.Length, text)
+			sizeYCell += sizeYAdditionBody
+			if sizeYRow < sizeYCell {
+				sizeYRow = sizeYCell
 			}
 
 			cells = append(cells, cell{
@@ -249,18 +259,17 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 				length:   column.Length,
 				lines:    cellLines,
 				text:     "",
-				width:    columnWidth,
+				width:    columnIndexMapWidth[i],
 			})
 		}
 
 		var pageAdded bool
-		posYStart, pageAdded = getYWithNewPageIfNeeded(doc, heightRow+paddingY, pageMarginB)
+		posY, pageAdded = getYWithNewPageIfNeeded(doc, sizeYRow+paddingY, pageMarginB)
 		if f.HeaderRepeat && pageAdded {
-
-			if err := addFieldListRow(doc, f.HeaderBorder, true, cellsHeader, f.Padding, f.HeaderColorFill, posXStart, posYStart, f.SizeX, heightHeader, paddingX, paddingY); err != nil {
+			if err := addListRow(doc, f.HeaderBorder, true, cellsHeader, f.Padding, f.HeaderColorFill, posX, posY, f.SizeX, sizeYHeader, sizeXReductionHeader); err != nil {
 				return err
 			}
-			posYStart = doc.p.GetY()
+			posY = doc.p.GetY()
 		}
 
 		colorFill := f.BodyColorFillOdd
@@ -268,17 +277,18 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 			colorFill = f.BodyColorFillEven
 		}
 
-		if err := addFieldListRow(doc, f.BodyBorder, ri == 0, cells, f.Padding, colorFill, posXStart, posYStart, f.SizeX, heightRow, paddingX, paddingY); err != nil {
+		isFirstRow := ri == 0 || pageAdded
+		if err := addListRow(doc, f.BodyBorder, isFirstRow, cells, f.Padding, colorFill, posX, posY, f.SizeX, sizeYRow, sizeXReductionBody); err != nil {
 			return err
 		}
-		posYStart = doc.p.GetY()
+		posY = doc.p.GetY()
 	}
 
 	// draw aggregation footer
 	if printAggregationRow {
 
 		// process aggregation values
-		var heightRow float64 = 0
+		var sizeYRow float64 = 0
 		var cells = make([]cell, 0)
 		for i, column := range f.Columns {
 			text := ""
@@ -310,9 +320,10 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 			}
 
 			// figure out row height
-			cellHeight, cellLines := getRowCellHeightLines(doc, f.FooterBorder, columnIndexMapFontFooter[i], columnIndexMapWidth[i], column.Length, text)
-			if heightRow < cellHeight {
-				heightRow = cellHeight
+			sizeYCell, cellLines := getRowCellHeightLines(doc, columnIndexMapFontFooter[i], columnIndexMapWidth[i]-sizeXReductionFooter, column.Length, text)
+			sizeYCell += sizeYAdditionFooter
+			if sizeYRow < sizeYCell {
+				sizeYRow = sizeYCell
 			}
 
 			cells = append(cells, cell{
@@ -324,11 +335,11 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 			})
 		}
 
-		posYStart, _ = getYWithNewPageIfNeeded(doc, heightRow+paddingY, pageMarginB)
-		if err := addFieldListRow(doc, f.FooterBorder, true, cells, f.Padding, f.FooterColorFill, posXStart, posYStart, f.SizeX, heightRow, paddingX, paddingY); err != nil {
+		posY, _ = getYWithNewPageIfNeeded(doc, sizeYRow+paddingY, pageMarginB)
+		if err := addListRow(doc, f.FooterBorder, true, cells, f.Padding, f.FooterColorFill, posX, posY, f.SizeX, sizeYRow, sizeXReductionFooter); err != nil {
 			return err
 		}
-		posYStart = doc.p.GetY()
+		posY = doc.p.GetY()
 	}
 
 	// re-enable auto paging
@@ -337,69 +348,78 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 	return nil
 }
 
-func addFieldListRow(doc *doc, b types.DocBorder, isFirstRow bool, cells []cell, padding types.DocMarginPadding,
-	colorFill pgtype.Text, posX, posY, sizeX, sizeY, paddingX, paddingY float64) error {
+func addListRow(doc *doc, b types.DocBorder, isFirstRow bool, cells []cell, padding types.DocMarginPadding,
+	colorFill pgtype.Text, posX, posY, sizeX, sizeY, sizeXReduction float64) error {
 
-	bSize, bSizeT, bSizeR, bSizeB, bSizeL := getBorderSize(b)
-	bSizeX := bSizeL + bSizeR
+	_, bSizeT, bSizeR, bSizeB, bSizeL, bSizeCell := getBorderSize(b)
+	bSizeX := bSizeR + bSizeL
 	bSizeY := bSizeT + bSizeB
-	var bSizeCell float64 = 0
-	if b.Cell {
-		bSizeCell = bSize
-	}
+	bUsed := b.Draw != ""
 
 	if !isFirstRow {
 		// not first row, move above the bottom border of previous row
-		posY -= bSizeB
+		posY -= bSizeT
 	}
+
+	paddingX := padding.L + padding.R
+	paddingY := padding.T + padding.B
 
 	// draw box to display outer border and/or color fill
-	if b.Draw != "" || colorFill.Valid {
+	if bUsed || colorFill.Valid {
 		doc.p.SetXY(posX+(bSizeL/2), posY+(bSizeT/2))
-		drawBox(doc, b, colorFill, sizeX-(bSizeX/2), sizeY+paddingY-(bSizeY/2))
+		drawBox(doc, b, colorFill, sizeX-(bSizeX/2), sizeY-(bSizeY/2))
 	}
 
-	// adjust start position based on border
-	posX += bSizeL
-	posY += bSizeT
-
 	// draw cells
-	posXOffset := float64(0)
+	posXOffset := bSizeL
+	sizeYContent := sizeY - bSizeY - paddingY
 	for i, c := range cells {
 
 		// draw intercell border
-		if i != 0 && b.Cell {
-			drawBorderLine(doc, b, posX+posXOffset-(bSizeCell/2), posY, posX+posXOffset-(bSizeCell/2), posY+sizeY-bSizeY+paddingY)
-		}
-
-		// reduce cell width by average of horizontal border width
-		sizeXColumn := c.width - (bSizeX / float64(len(cells)))
-		if i != len(cells)-1 {
-			// reduce cell width by inter-cell border
-			sizeXColumn -= bSizeCell
+		if i != 0 && b.Cell && bUsed {
+			drawBorderLine(doc, b, posX+posXOffset-(bSizeCell/2), posY+bSizeT, posX+posXOffset-(bSizeCell/2), posY+sizeY-bSizeB)
 		}
 
 		// draw cell content
 		setFont(doc, c.font)
-		doc.p.SetXY(posX+posXOffset+padding.L, posY+padding.T)
+		doc.p.SetXY(posX+posXOffset+padding.L, posY+bSizeT+padding.T)
 
 		if c.text != "" {
 			if c.length != 0 && len(c.text) > c.length-3 {
 				c.text = fmt.Sprintf("%s...", c.text[:c.length-3])
 			}
-			drawCellText(doc, c.font, sizeXColumn, sizeY-bSizeY, false, c.lines, c.text)
+			drawCellText(doc, c.font, c.width-sizeXReduction, sizeYContent, false, c.lines, c.text)
 		} else {
-			if err := drawAttributeValue(doc, c.font, 0, 0, sizeXColumn, sizeY-bSizeY, false, c.length, c.lines, c.atr, c.atrValue); err != nil {
+			if err := drawAttributeValue(doc, c.font, 0, 0, c.width-sizeXReduction, sizeYContent, false, c.length, c.lines, c.atr, c.atrValue); err != nil {
 				return err
 			}
 		}
-		posXOffset += sizeXColumn + paddingX + bSizeCell
+		posXOffset += c.width - sizeXReduction + paddingX + bSizeCell
 	}
 
-	// adjust start position based on border
-	posY -= bSizeB
-
 	// move to next row
-	doc.p.SetXY(posX, posY+sizeY+paddingY)
+	doc.p.SetXY(posX, posY+sizeY)
 	return nil
+}
+
+func getRowCellHeightLines(doc *doc, font types.DocFont, sizeX float64, length int, s string) (float64, int) {
+	setFont(doc, font)
+	if length != 0 && len(s) > length-3 {
+		s = fmt.Sprintf("%s...", s[:length-3])
+	}
+	lineCount := len(doc.p.SplitText(s, sizeX))
+	return getLineHeight(font) * float64(lineCount), lineCount
+}
+
+// returns width that each cell needs to give up due to borders & padding
+func getSizeXReductionCell(b types.DocBorder, p types.DocMarginPadding, columnCnt int) float64 {
+	_, _, bSizeR, _, bSizeL, bSizeCell := getBorderSize(b)
+	bSizeX := bSizeR + bSizeL
+	return (bSizeX / float64(columnCnt)) + ((bSizeCell * float64(columnCnt-1)) / float64(columnCnt)) + p.L + p.R
+}
+
+// returns height that each cell needs to add due to borders & paddings
+func getSizeYAdditionCell(b types.DocBorder, p types.DocMarginPadding) float64 {
+	_, bSizeT, _, bSizeB, _, _ := getBorderSize(b)
+	return bSizeT + bSizeB + p.T + p.B
 }

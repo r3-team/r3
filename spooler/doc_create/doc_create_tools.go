@@ -42,15 +42,6 @@ func getSetDataResolved(doc *doc, set []types.DocSet) []types.DocSet {
 func getLineHeight(f types.DocFont) float64 {
 	return f.Size * f.LineFactor * 0.5
 }
-func getRowCellHeightLines(doc *doc, b types.DocBorder, font types.DocFont, sizeX float64, length int, s string) (float64, int) {
-	setFont(doc, font)
-	if length != 0 && len(s) > length-3 {
-		s = fmt.Sprintf("%s...", s[:length-3])
-	}
-	lineCount := len(doc.p.SplitText(s, sizeX))
-	_, bSizeT, _, bSizeB, _ := getBorderSize(b)
-	return (getLineHeight(font)*float64(lineCount) + bSizeT + bSizeB), lineCount
-}
 func getExpressionsDistinct(exprIn []types.DataGetExpression) []types.DataGetExpression {
 	exprOut := make([]types.DataGetExpression, 0)
 	atrIndexIdMap := make(map[string]bool)
@@ -159,10 +150,10 @@ func getExpressionsFromStates(states []types.DocState) []types.DataGetExpression
 
 // adds a new page, if requested content height does not fit any more
 // returns Y position on new page
-func getYWithNewPageIfNeeded(doc *doc, height, pageMarginB float64) (float64, bool) {
+func getYWithNewPageIfNeeded(doc *doc, sizeY, pageMarginB float64) (float64, bool) {
 	_, pageHeight := doc.p.GetPageSize()
 
-	if doc.p.GetY()+height > pageHeight-pageMarginB {
+	if doc.p.GetY()+sizeY > pageHeight-pageMarginB {
 		doc.p.AddPage()
 		doc.p.SetHomeXY()
 		return doc.p.GetY(), true
@@ -192,36 +183,40 @@ func getFloat64FromInterface(valueIf any) (float64, error) {
 	return v.Float64, nil
 }
 
-// returns border size and offsets (T,R,B,L)
-func getBorderSize(b types.DocBorder) (float64, float64, float64, float64, float64) {
+// returns border sizes (size,sizeT,sizeR,sizeB,sizeL,sizeCell)
+func getBorderSize(b types.DocBorder) (float64, float64, float64, float64, float64, float64) {
 	if b.Draw == "" {
-		return 0, 0, 0, 0, 0
+		return 0, 0, 0, 0, 0, 0
 	}
 	if b.Size == 0 {
 		// 0.2mm is the default border size if 0 is set
 		b.Size = 0.2
 	}
+	bSizeCell := b.Size
+	if !b.Cell {
+		bSizeCell = 0
+	}
 	if b.Draw == "1" {
-		return b.Size, b.Size, b.Size, b.Size, b.Size
+		return b.Size, b.Size, b.Size, b.Size, b.Size, bSizeCell
 	}
 
-	var offsetT float64 = 0
-	var offsetR float64 = 0
-	var offsetB float64 = 0
-	var offsetL float64 = 0
+	var sizeT float64 = 0
+	var sizeR float64 = 0
+	var sizeB float64 = 0
+	var sizeL float64 = 0
 	if strings.Contains(b.Draw, "T") {
-		offsetT = b.Size
+		sizeT = b.Size
 	}
 	if strings.Contains(b.Draw, "R") {
-		offsetR = b.Size
+		sizeR = b.Size
 	}
 	if strings.Contains(b.Draw, "B") {
-		offsetB = b.Size
+		sizeB = b.Size
 	}
 	if strings.Contains(b.Draw, "L") {
-		offsetL = b.Size
+		sizeL = b.Size
 	}
-	return b.Size, offsetT, offsetR, offsetB, offsetL
+	return b.Size, sizeT, sizeR, sizeB, sizeL, bSizeCell
 }
 
 func setBorder(doc *doc, b types.DocBorder) {
@@ -236,7 +231,7 @@ func setBorder(doc *doc, b types.DocBorder) {
 	doc.p.SetLineCapStyle(b.StyleCap)
 	doc.p.SetLineJoinStyle(b.StyleJoin)
 
-	size, _, _, _, _ := getBorderSize(b)
+	size, _, _, _, _, _ := getBorderSize(b)
 	doc.p.SetLineWidth(size)
 }
 

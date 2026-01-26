@@ -11,7 +11,7 @@ import (
 func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font types.DocFont, posX, posY, pageSizeYUsable, pageMarginT float64) error {
 
 	// border sizes
-	_, bSizeT, bSizeR, bSizeB, bSizeL := getBorderSize(f.Border)
+	_, bSizeT, bSizeR, bSizeB, bSizeL, _ := getBorderSize(f.Border)
 	bSizeX := bSizeL + bSizeR
 	bSizeY := bSizeT + bSizeB
 
@@ -35,6 +35,10 @@ func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font type
 		} else {
 			posYChildren += gapAdd
 		}
+
+		// set here as hidden fields do not update XY
+		doc.p.SetXY(posXChildren, posYChildren)
+
 		if err = addField(ctx, doc, posXChildren, posYChildren, sizeXChildren, pageSizeYUsable, pageMarginT, isHorizontal, false, font, fieldIfChild); err != nil {
 			return err
 		}
