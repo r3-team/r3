@@ -42,13 +42,14 @@ func getSetDataResolved(doc *doc, set []types.DocSet) []types.DocSet {
 func getLineHeight(f types.DocFont) float64 {
 	return f.Size * f.LineFactor * 0.5
 }
-func getCellHeightLines(doc *doc, font types.DocFont, width float64, length int, s string) (float64, int) {
+func getRowCellHeightLines(doc *doc, b types.DocBorder, font types.DocFont, sizeX float64, length int, s string) (float64, int) {
 	setFont(doc, font)
 	if length != 0 && len(s) > length-3 {
 		s = fmt.Sprintf("%s...", s[:length-3])
 	}
-	lineCount := len(doc.p.SplitText(s, width))
-	return getLineHeight(font) * float64(lineCount), lineCount
+	lineCount := len(doc.p.SplitText(s, sizeX))
+	_, bSizeT, _, bSizeB, _ := getBorderSize(b)
+	return (getLineHeight(font)*float64(lineCount) + bSizeT + bSizeB), lineCount
 }
 func getExpressionsDistinct(exprIn []types.DataGetExpression) []types.DataGetExpression {
 	exprOut := make([]types.DataGetExpression, 0)
