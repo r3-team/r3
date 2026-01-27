@@ -265,38 +265,37 @@ export default {
 	name:'my-builder-doc-columns',
 	components:{MyBuilderDocColumn},
 	template:`<div class="builder-doc-columns"
-		@dragenter="dragEnter($event,null)"
+		@dragenter="dragEnter"
 		@dragleave="dragLeave"
-		@dragover="dragOver"
+		@dragover="dragOver($event,null)"
 		@drop="drop"
 	>
 		<div class="builder-doc-bg-text">{{ capGen.columns }}</div>
 
-		<transition-group class="builder-doc-columns-anim" name="builder-doc-columns-anim" tag="div">
-			<my-builder-doc-column
-				v-model="c"
-				v-for="(c,i) in columns"
-				@click.stop="$emit('setColumnIdOptions',c.id)"
-				@close="$emit('setColumnIdOptions',null)"
-				@dragenter="dragEnter($event,c.id)"
-				@dragleave="dragLeave"
-				@dragend.stop="dragEnd"
-				@dragstart.stop="dragStart($event,c)"
-				:builderLanguage
-				:elmOptions
-				:isDragPreview="columnIdPreview === c.id"
-				:isDragSource="columnIdDragged === c.id"
-				:isOptionsShow="columnIdOptions === c.id"
-				:joins
-				:joinsParent
-				:style="getStyle(c)"
-				:draggable="!readonly"
-				:key="c.id"
-				:moduleId
-				:readonly
-				:sizeXMax
-			/>
-		</transition-group>
+		<my-builder-doc-column
+			v-model="c"
+			v-for="(c,i) in columns"
+			@click.stop="$emit('setColumnIdOptions',c.id)"
+			@close="$emit('setColumnIdOptions',null)"
+			@dragenter="dragEnter"
+			@dragover="dragOver($event,c.id)"
+			@dragleave="dragLeave"
+			@dragend.stop="dragEnd"
+			@dragstart.stop="dragStart($event,c)"
+			:builderLanguage
+			:elmOptions
+			:isDragPreview="columnIdPreview === c.id"
+			:isDragSource="columnIdDragged === c.id"
+			:isOptionsShow="columnIdOptions === c.id"
+			:joins
+			:joinsParent
+			:style="getStyle(c)"
+			:draggable="!readonly"
+			:key="c.id"
+			:moduleId
+			:readonly
+			:sizeXMax
+		/>
 	</div>`,
 	props:{
 		builderLanguage:{ type:String,        required:true },
@@ -367,20 +366,29 @@ export default {
 		},
 
 		// drag & drop
+		dragPreviewMoveTo(ind) {
+			if(this.dragPreviewIndex === -1) {
+				const column = this.getTemplateDocColumn(null,0,false);
+				this.columns.splice(ind,0,column);
+				this.columnIdPreview = column.id;
+				return;
+			}
+
+			if(ind === -1)
+				ind = 0;
+
+			if(this.dragPreviewIndex === ind)
+				return;
+
+			const columnsNew = this.columns.filter(v => v.id !== this.columnIdPreview);
+			columnsNew.splice(ind,0,this.columns[this.dragPreviewIndex]);
+			this.columns = columnsNew;
+		},
 		dragPreviewRemove() {
 			if(this.dragPreviewIndex !== -1)
 				this.columns.splice(this.dragPreviewIndex,1);
 
 			this.columnIdPreview = null;
-		},
-		dragPreviewUpdate(columnId) {
-			const ind = columnId !== null ? this.columns.findIndex(v => v.id === columnId) : this.columns.length;
-			if(ind !== -1) {
-				this.dragPreviewRemove();
-				const column = this.getTemplateDocColumn(null,0,false);
-				this.columns.splice(ind,0,column);
-				this.columnIdPreview = column.id;
-			}
 		},
 
 		// drag source
@@ -403,20 +411,32 @@ export default {
 		},
 
 		// drag target
-		dragOver(e) {
+		dragOver(e,columnId) {
 			if(e.dataTransfer.types.includes(this.dragType))
 				e.preventDefault();
+			
+			e.stopPropagation();
+
+			// column ID is null when dragOver on parent elm
+			if(columnId === null) {
+				if(this.dragPreviewIndex !== -1)
+					return;
+
+				return this.dragPreviewMoveTo(this.columns.length);
+			}
+
+			const rect = e.target.getBoundingClientRect();
+			const leftSide = e.clientX < rect.left + (rect.width / 2);
+
+			const ind = this.columns.filter(v => v.id !== this.dragPreviewIndex).findIndex(v => v.id === columnId);
+			this.dragPreviewMoveTo(leftSide ? ind-1 : ind+1);
 		},
-		dragEnter(e,columnId) {
+		dragEnter(e) {
 			if(!e.dataTransfer.types.includes(this.dragType))
 				return e.stopPropagation();
 
 			e.stopPropagation();
 			this.dragEnterCounter++;
-
-			// column ID is null when dragEnter on parent elm
-			if(columnId !== null || this.dragPreviewIndex === -1)
-				this.dragPreviewUpdate(columnId);
 		},
 		dragLeave(e) {
 			if(!e.dataTransfer.types.includes(this.dragType))
