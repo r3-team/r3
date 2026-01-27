@@ -265,36 +265,38 @@ export default {
 	name:'my-builder-doc-columns',
 	components:{MyBuilderDocColumn},
 	template:`<div class="builder-doc-columns"
-		@dragenter="dragEnter($event,columns.length-1)"
+		@dragenter="dragEnter($event,null)"
 		@dragleave="dragLeave"
 		@dragover="dragOver"
 		@drop="drop"
 	>
 		<div class="builder-doc-bg-text">{{ capGen.columns }}</div>
 
-		<my-builder-doc-column
-			v-model="c"
-			v-for="(c,i) in columns"
-			@click.stop="$emit('setColumnIdOptions',c.id)"
-			@close="$emit('setColumnIdOptions',null)"
-			@dragenter="dragEnter($event,i)"
-			@dragleave="dragLeave"
-			@dragend.stop="dragEnd($event,c.id)"
-			@dragstart.stop="dragStart($event,c)"
-			:builderLanguage
-			:elmOptions
-			:isDragPreview="c.content === dragContent"
-			:isDragSource="columnIdDragged === c.id"
-			:isOptionsShow="columnIdOptions === c.id"
-			:joins
-			:joinsParent
-			:style="getStyle(c)"
-			:draggable="!readonly"
-			:key="c.id"
-			:moduleId
-			:readonly
-			:sizeXMax
-		/>
+		<transition-group class="builder-doc-columns-anim" name="builder-doc-columns-anim" tag="div">
+			<my-builder-doc-column
+				v-model="c"
+				v-for="(c,i) in columns"
+				@click.stop="$emit('setColumnIdOptions',c.id)"
+				@close="$emit('setColumnIdOptions',null)"
+				@dragenter="dragEnter($event,c.id)"
+				@dragleave="dragLeave"
+				@dragend.stop="dragEnd"
+				@dragstart.stop="dragStart($event,c)"
+				:builderLanguage
+				:elmOptions
+				:isDragPreview="columnIdPreview === c.id"
+				:isDragSource="columnIdDragged === c.id"
+				:isOptionsShow="columnIdOptions === c.id"
+				:joins
+				:joinsParent
+				:style="getStyle(c)"
+				:draggable="!readonly"
+				:key="c.id"
+				:moduleId
+				:readonly
+				:sizeXMax
+			/>
+		</transition-group>
 	</div>`,
 	props:{
 		builderLanguage:{ type:String,        required:true },
@@ -313,6 +315,7 @@ export default {
 	data() {
 		return {
 			columnIdDragged:null,
+			columnIdPreview:null,
 			dragEnterCounter:0
 		};
 	},
@@ -347,10 +350,12 @@ export default {
 			set(v) { this.$emit('update:modelValue',v); }
 		},
 
+		// simple
+		dragPreviewIndex:s => s.columns.findIndex(v => v.id === s.columnIdPreview),
+
 		// stores
-		capApp:     s => s.$store.getters.captions.builder.doc,
-		capGen:     s => s.$store.getters.captions.generic,
-		dragContent:s => s.$store.getters.constants.dragColumnContent
+		capApp:s => s.$store.getters.captions.builder.doc,
+		capGen:s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -362,26 +367,29 @@ export default {
 		},
 
 		// drag & drop
-		dragPreviewGetIndex() {
-			return this.columns.findIndex(v => v.content === this.dragContent);
-		},
 		dragPreviewRemove() {
-			const ind = this.dragPreviewGetIndex();
-			if(ind !== -1) this.columns.splice(ind,1);
+			if(this.dragPreviewIndex !== -1)
+				this.columns.splice(this.dragPreviewIndex,1);
+
+			this.columnIdPreview = null;
 		},
-		dragPreviewUpdate(ind) {
-			this.dragPreviewRemove();
-			let column = this.getTemplateDocColumn(null,0,false);
-			column.content = this.dragContent;
-			this.columns.splice(ind,0,column);
+		dragPreviewUpdate(columnId) {
+			const ind = columnId !== null ? this.columns.findIndex(v => v.id === columnId) : this.columns.length;
+			if(ind !== -1) {
+				this.dragPreviewRemove();
+				const column = this.getTemplateDocColumn(null,0,false);
+				this.columns.splice(ind,0,column);
+				this.columnIdPreview = column.id;
+			}
 		},
 
 		// drag source
-		dragEnd(e,columnId) {
-			this.columnIdDragged = null;
-
-			const ind = this.columns.findIndex(v => v.id === columnId);
+		dragEnd(e) {
+			const ind = this.columns.findIndex(v => v.id === this.columnIdDragged);
 			if(ind !== -1) this.columns.splice(ind,1);
+
+			this.columnIdDragged = null;
+			this.dragPreviewRemove();
 		},
 		dragStart(e,column) {
 			// store column for later drop & adjust ghost image to start at mouse position
@@ -399,14 +407,16 @@ export default {
 			if(e.dataTransfer.types.includes(this.dragType))
 				e.preventDefault();
 		},
-		dragEnter(e,ind) {
+		dragEnter(e,columnId) {
 			if(!e.dataTransfer.types.includes(this.dragType))
 				return e.stopPropagation();
 
 			e.stopPropagation();
 			this.dragEnterCounter++;
-			if(this.dragEnterCounter === 1)
-				this.dragPreviewUpdate(ind);
+
+			// column ID is null when dragEnter on parent elm
+			if(columnId !== null || this.dragPreviewIndex === -1)
+				this.dragPreviewUpdate(columnId);
 		},
 		dragLeave(e) {
 			if(!e.dataTransfer.types.includes(this.dragType))
@@ -422,12 +432,20 @@ export default {
 				return;
 			
 			e.stopPropagation();
-			this.dragEnterCounter = 0;
+			
+			const column = JSON.parse(e.dataTransfer.getData('application/json'));
+			const indEx  = this.columns.findIndex(v => v.id === column.id); // index of existing column (if there)
 
-			const column     = JSON.parse(e.dataTransfer.getData('application/json'));
-			const indPreview = this.dragPreviewGetIndex();
-			if(indPreview !== -1) this.columns.splice(indPreview,1,column);
-			else                  this.columns.push(column);
+			// replace preview with new/existing column
+			this.columns.splice(this.dragPreviewIndex,1,column);
+
+			// delete existing column if there
+			if(indEx !== -1)
+				this.columns.splice(indEx,1);
+			
+			this.dragEnterCounter = 0;
+			this.columnIdDragged = null;
+			this.columnIdPreview = null;
 		}
 	}
 };
