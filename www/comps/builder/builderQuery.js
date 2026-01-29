@@ -699,10 +699,10 @@ const MyBuilderQuery = {
 			<select
 				v-show="showRelations"
 				v-if="relationId === null"
-				@input="set('relationId',$event.target.value)"
-				:value="relationId"
+				@input="set('relationId',$event.target.value === '' ? null : $event.target.value)"
+				:value="relationId === null ? '' : relationId"
 			>
-				<option :value="null">-</option>
+				<option value="">-</option>
 				<option v-for="rel in module.relations" :value="rel.id">{{ rel.name }}</option>
 				<optgroup
 					v-for="mod in getDependentModules(module).filter(v => v.id !== module.id)"
