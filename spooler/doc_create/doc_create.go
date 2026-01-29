@@ -218,9 +218,9 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 		doc.p.SetMargins(page.Margin.L, page.Margin.T, page.Margin.R)
 		doc.p.SetAutoPageBreak(true, page.Margin.B)
 
-		pageX, pageY := doc.p.GetPageSize()
-		pageSizeXUsable := pageX - page.Margin.L - page.Margin.R
-		pageSizeYUsable := pageY - page.Margin.T - page.Margin.B
+		sizeXPage, sizeYPage := doc.p.GetPageSize()
+		sizeXPageUsable := sizeXPage - page.Margin.L - page.Margin.R
+		sizeYPageUsable := sizeYPage - page.Margin.T - page.Margin.B
 
 		// set header for page
 		doc.p.SetHeaderFuncMode(func() {
@@ -228,8 +228,7 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 			if page.Header.DocPageIdInherit.Valid {
 				e = docDef.Pages[pageIdMapIndex[page.Header.DocPageIdInherit.Bytes]].Header
 			}
-			e.FieldGrid.SizeX = pageX
-			addHeaderFooter(ctx, doc, e.FieldGrid, font, pageY, 0)
+			addHeaderFooter(ctx, doc, e.FieldGrid, font, 0, sizeXPage, page.Margin.T)
 		}, true)
 
 		log.Info(log.ContextDoc, fmt.Sprintf("adding page %d (%s)", i+1, page.Size))
@@ -243,12 +242,11 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 			if page.Footer.DocPageIdInherit.Valid {
 				e = docDef.Pages[pageIdMapIndex[page.Footer.DocPageIdInherit.Bytes]].Footer
 			}
-			e.FieldGrid.SizeX = pageX
-			addHeaderFooter(ctx, doc, e.FieldGrid, font, pageY, 0-page.Margin.B)
+			addHeaderFooter(ctx, doc, e.FieldGrid, font, 0-page.Margin.B, sizeXPage, page.Margin.B)
 		})
 
 		// a page is always a single flow field on root level
-		if err := addField(ctx, doc, page.Margin.L, page.Margin.T, pageSizeXUsable, pageSizeYUsable, page.Margin.T, false, false, font, page.FieldFlow); err != nil {
+		if err := addField(ctx, doc, page.Margin.L, page.Margin.T, sizeXPageUsable, sizeYPageUsable, page.Margin.T, false, false, font, page.FieldFlow); err != nil {
 			return err
 		}
 	}
