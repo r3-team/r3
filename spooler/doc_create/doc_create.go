@@ -55,7 +55,7 @@ func DoAll() error {
 	return nil
 }
 
-func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) error {
+func Run(ctx context.Context, docId uuid.UUID, loginId int64, recordId int64, pathOut string) error {
 
 	cache.Schema_mx.RLock()
 	docDef, exists := cache.DocIdMap[docId]

@@ -21,7 +21,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// get authentication token
 	token, err := handler.ReadGetterFromUrl(r, "token")
 	if err != nil {
-		log.Error(log.ContextServer, genErr, err)
+		handler.ServeErrorPage(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -31,35 +31,33 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// authenticate via token
 	login, err := login_auth.Token(ctx, token)
 	if err != nil {
-		log.Error(log.ContextServer, genErr, err)
-		return
-	}
-
-	if !login.Admin {
-		log.Error(log.ContextServer, genErr, errors.New(handler.ErrUnauthorized))
+		// authentication errors are not returned, but logged
+		handler.ServeErrorPage(w, http.StatusUnauthorized, errors.New(handler.ErrUnauthorized))
+		log.Warning(log.ContextServer, genErr, err)
 		return
 	}
 
 	// get document & base relation record ID
 	docId, err := handler.ReadUuidGetterFromUrl(r, "doc_id")
 	if err != nil {
-		log.Error(log.ContextServer, genErr, err)
+		handler.ServeErrorPage(w, http.StatusBadRequest, err)
 		return
 	}
 	recordId, err := handler.ReadInt64GetterFromUrl(r, "record_id")
 	if err != nil {
-		log.Error(log.ContextServer, genErr, err)
+		handler.ServeErrorPage(w, http.StatusBadRequest, err)
 		return
 	}
 
 	filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)
 	if err != nil {
+		handler.ServeErrorPage(w, http.StatusInternalServerError, errors.New(handler.ErrGeneral))
 		log.Error(log.ContextServer, genErr, err)
 		return
 	}
 
-	if err := doc_create.Run(ctx, docId, recordId, filePath); err != nil {
-		log.Error(log.ContextServer, genErr, err)
+	if err := doc_create.Run(ctx, docId, login.Id, recordId, filePath); err != nil {
+		handler.ServeErrorPage(w, http.StatusInternalServerError, err)
 		return
 	}
 
