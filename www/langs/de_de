@@ -868,7 +868,7 @@
 			"shrinkY": "Vertikal schrumpfen wenn leer",
 			"sidebarPage": "Seite: {NAME}",
 			"tabStates": "Zustände ({CNT})",
-			"titleOne": "Dokument '{NAME}'",
+			"titleOne": "PDF '{NAME}'",
 			"warning": {
 				"flowRow": "Die Ausrichung \"Reihe\" unterstützt nur Textwerte mit einer Zeile.<br />Bilder oder Mehrzeilentexte brauchen das Flow-Layout \"Spalte\" oder ein Grid-Layout."
 			}
@@ -1616,7 +1616,7 @@
 		"new": {
 			"api": "Neue API",
 			"collection": "Neue Sammlung",
-			"doc": "Neues Dokument",
+			"doc": "Neues PDF",
 			"form": "Neues Formular",
 			"formIdDuplicate": "Formular kopieren",
 			"jsFunction": "Neue Frontend-Funktion",
@@ -2464,6 +2464,8 @@
 		"overwrites": "Überschreibungen",
 		"page": "Seite",
 		"password": "Passwort",
+		"pdf": "PDF",
+		"pdfs": "PDFs",
 		"pgFunction": "Funktion (back)",
 		"pgFunctions": "Funktionen (back)",
 		"placeholders": "Placeholders",

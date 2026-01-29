@@ -868,7 +868,7 @@
 			"shrinkY": "Shrink vertically if empty",
 			"sidebarPage": "Page: {NAME}",
 			"tabStates": "States ({CNT})",
-			"titleOne": "Document '{NAME}'",
+			"titleOne": "PDF '{NAME}'",
 			"warning": {
 				"flowRow": "Direction 'row' only supports single text lines.<br />Images or multi line text requires column flow or a grid field."
 			}
@@ -1616,7 +1616,7 @@
 		"new": {
 			"api": "واجهة برمجة التطبيقات الجديدة",
 			"collection": "مجموعة جديدة",
-			"doc": "New document",
+			"doc": "New PDF",
 			"form": "شكل جديد",
 			"formIdDuplicate": "نسخ النموذج",
 			"jsFunction": "وظيفة الواجهة الأمامية الجديدة",
@@ -2464,6 +2464,8 @@
 		"overwrites": "Overwrites",
 		"page": "Page",
 		"password": "كلمة المرور",
+		"pdf": "PDF",
+		"pdfs": "PDFs",
 		"pgFunction": "الوظيفة (الخلفية)",
 		"pgFunctions": "الوظائف (الخلفية)",
 		"placeholders": "Placeholders",

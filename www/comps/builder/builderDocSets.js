@@ -189,7 +189,7 @@ export default {
 	template:`<table class="generic-table-vertical default-inputs">
 		<tbody>
 			<template v-if="targetsDoc">
-				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.document + ')' }}</b></td></tr>
+				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.pdf + ')' }}</b></td></tr>
 				<my-builder-doc-set-target
 					v-for="t in targetsListDoc"
 					@apply="apply(t,$event)"

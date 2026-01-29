@@ -1,12 +1,10 @@
-export {MyBuilderDocs as default};
-
-const MyBuilderDocs = {
+export default {
 	name:'my-builder-docs',
 	template:`<div class="builder-docs contentBox grow">
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" src="images/document.png" />
-				<h1 class="title">{{ capGen.documents }}</h1>
+				<h1 class="title">{{ capGen.pdfs }}</h1>
 			</div>
 			<div class="area default-inputs">
 				<input v-model="filter" placeholder="..." />

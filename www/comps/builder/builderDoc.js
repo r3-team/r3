@@ -128,7 +128,7 @@ export default {
 			<div class="top lower" @click="sideFieldIdShow = null" :class="{ clickable:sideFieldShow }">
 				<div class="area">
 					<img class="icon" src="images/document.png" />
-					<h1>{{ capGen.document }}</h1>
+					<h1>{{ capGen.pdf }}</h1>
 				</div>
 			</div>
 			

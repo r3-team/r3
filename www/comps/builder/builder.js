@@ -101,7 +101,7 @@ const MyBuilder = {
 					
 					<router-link class="entry clickable" :to="'/builder/docs/'+module.id">
 						<img src="images/document.png" />
-						<span>{{ capGen.documents }}</span>
+						<span>{{ capGen.pdfs }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable" :to="'/builder/icons/'+module.id">
@@ -207,7 +207,7 @@ const MyBuilder = {
 					:to="'/builder/docs/'+module.id"
 				>
 					<img src="images/document.png" />
-					<span>{{ capGen.documents }}</span>
+					<span>{{ capGen.pdfs }}</span>
 				</router-link>
 				<router-link class="entry isTitle grow clickable"
 					v-if="navigation === 'apis'"

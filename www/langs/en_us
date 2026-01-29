@@ -871,7 +871,7 @@
 			"shrinkY": "Shrink vertically if empty",
 			"sidebarPage": "Page: {NAME}",
 			"tabStates": "States ({CNT})",
-			"titleOne": "Document '{NAME}'"
+			"titleOne": "PDF '{NAME}'"
 		},
 		"form": {
 			"actions": {
@@ -1616,7 +1616,7 @@
 		"new": {
 			"api": "New API",
 			"collection": "New collection",
-			"doc": "New document",
+			"doc": "New PDF",
 			"form": "New form",
 			"formIdDuplicate": "Copy form",
 			"jsFunction": "New Frontend function",
@@ -2464,6 +2464,8 @@
 		"overwrites": "Overwrites",
 		"page": "Page",
 		"password": "Password",
+		"pdf": "PDF",
+		"pdfs": "PDFs",
 		"pgFunction": "Function (back)",
 		"pgFunctions": "Functions (back)",
 		"placeholders": "Placeholders",
