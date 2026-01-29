@@ -1,3 +1,4 @@
+import MyBuilderCaption    from './builderCaption.js';
 import MyBuilderDocColumns from './builderDocColumns.js';
 import MyBuilderDocSets    from './builderDocSets.js';
 import MyBuilderQuery      from './builderQuery.js';
@@ -29,6 +30,7 @@ import {
 export default {
 	name:'my-builder-doc-field',
 	components:{
+		MyBuilderCaption,
 		MyBuilderDocBorder,
 		MyBuilderDocColumns,
 		MyBuilderDocMarginPadding,
@@ -264,7 +266,14 @@ export default {
 							<template v-if="isText">
 								<tr>
 									<td colspan="2">
-										<textarea class="dynamic" v-model="field.value" :disabled="readonly" :placeholder="capGen.text"></textarea>
+										<my-builder-caption
+											v-model="field.captions.docFieldText"
+											:contentName="capGen.text"
+											:language="builderLanguage"
+											:longInput="true"
+											:multiLine="true"
+											:readonly
+										/>
 									</td>
 								</tr>
 								<tr><td><b>{{ capGen.placeholders }}</b></td></tr>

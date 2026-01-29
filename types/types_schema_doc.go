@@ -144,7 +144,7 @@ type DocFieldText struct {
 	State   bool      `json:"state"`
 
 	// text field
-	Value string `json:"value"`
+	Captions CaptionMap `json:"captions"`
 }
 type DocHeaderFooter struct {
 	Active           bool         `json:"active"`           // true if header/footer is enabled at all (not stored in DB, resolved based on stored data)

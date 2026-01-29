@@ -134,6 +134,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			ALTER TYPE app.caption_content ADD VALUE 'docTitle';
 			ALTER TYPE app.caption_content ADD VALUE 'docColumnTitle';
+			ALTER TYPE app.caption_content ADD VALUE 'docFieldText';
 
 			CREATE TABLE IF NOT EXISTS app.doc (
 				id uuid NOT NULL,
@@ -288,17 +289,6 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				paddings real[] NOT NULL,
 				CONSTRAINT doc_field_list_pkey PRIMARY KEY (doc_field_id),
 				CONSTRAINT doc_field_list_doc_field_id_fkey FOREIGN KEY (doc_field_id)
-					REFERENCES app.doc_field (id) MATCH SIMPLE
-					ON UPDATE CASCADE
-					ON DELETE CASCADE
-					DEFERRABLE INITIALLY DEFERRED
-			);
-
-			CREATE TABLE IF NOT EXISTS app.doc_field_text (
-				doc_field_id uuid NOT NULL,
-				value text NOT NULL,
-				CONSTRAINT doc_field_text_pkey PRIMARY KEY (doc_field_id),
-				CONSTRAINT doc_field_text_doc_field_id_fkey FOREIGN KEY (doc_field_id)
 					REFERENCES app.doc_field (id) MATCH SIMPLE
 					ON UPDATE CASCADE
 					ON DELETE CASCADE
@@ -478,6 +468,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			
 			ALTER TABLE app.caption ADD COLUMN     doc_id uuid;
 			ALTER TABLE app.caption ADD COLUMN     doc_column_id uuid;
+			ALTER TABLE app.caption ADD COLUMN     doc_field_id uuid;
 			ALTER TABLE app.caption ADD CONSTRAINT caption_doc_id_fkey        FOREIGN KEY (doc_id)
 				REFERENCES app.doc (id) MATCH SIMPLE
 				ON UPDATE CASCADE
@@ -488,12 +479,19 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_doc_field_id_fkey FOREIGN KEY (doc_field_id)
+				REFERENCES app.doc_field (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
 			
 			CREATE INDEX fki_caption_doc_id_fkey        ON app.caption USING BTREE (doc_id        ASC NULLS LAST);
 			CREATE INDEX fki_caption_doc_column_id_fkey ON app.caption USING BTREE (doc_column_id ASC NULLS LAST);
+			CREATE INDEX fki_caption_doc_field_id_fkey  ON app.caption USING BTREE (doc_field_id  ASC NULLS LAST);
 			
 			ALTER TABLE instance.caption ADD COLUMN doc_id uuid;
 			ALTER TABLE instance.caption ADD COLUMN doc_column_id uuid;
+			ALTER TABLE instance.caption ADD COLUMN doc_field_id uuid;
 			ALTER TABLE instance.caption ADD CONSTRAINT caption_doc_id_fkey        FOREIGN KEY (doc_id)
 				REFERENCES app.doc (id) MATCH SIMPLE
 				ON UPDATE CASCADE
@@ -504,9 +502,15 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE instance.caption ADD CONSTRAINT caption_doc_field_id_fkey FOREIGN KEY (doc_field_id)
+				REFERENCES app.doc_field (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
 			
-			CREATE INDEX fki_caption_doc_id_fkey ON instance.caption USING BTREE (doc_id ASC NULLS LAST);
+			CREATE INDEX fki_caption_doc_id_fkey        ON instance.caption USING BTREE (doc_id ASC        NULLS LAST);
 			CREATE INDEX fki_caption_doc_column_id_fkey ON instance.caption USING BTREE (doc_column_id ASC NULLS LAST);
+			CREATE INDEX fki_caption_doc_field_id_fkey  ON instance.caption USING BTREE (doc_field_id ASC  NULLS LAST);
 			
 			ALTER TABLE app.query ADD COLUMN     doc_id        uuid;
 			ALTER TABLE app.query ADD COLUMN     doc_column_id uuid;

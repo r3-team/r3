@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"r3/schema"
+	"r3/schema/caption"
 	"r3/schema/doc_border"
 	"r3/schema/doc_column"
 	"r3/schema/doc_set"
@@ -62,16 +63,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			fg.size_snap,
 
 			-- list
-			fl.body_color_fill_even, fl.body_color_fill_odd, fl.footer_color_fill, fl.header_color_fill, fl.header_repeat,
-
-			-- text
-			ft.value
+			fl.body_color_fill_even, fl.body_color_fill_odd, fl.footer_color_fill, fl.header_color_fill, fl.header_repeat
 		FROM      app.doc_field      AS f
 		LEFT JOIN app.doc_field_data AS fd ON fd.doc_field_id = f.id
 		LEFT JOIN app.doc_field_flow AS ff ON ff.doc_field_id = f.id
 		LEFT JOIN app.doc_field_grid AS fg ON fg.doc_field_id = f.id
 		LEFT JOIN app.doc_field_list AS fl ON fl.doc_field_id = f.id
-		LEFT JOIN app.doc_field_text AS ft ON ft.doc_field_id = f.id
 		%s
 		ORDER BY f.position ASC
 	`, strings.Join(sqlWheres, "\n")), sqlValues...)
@@ -90,10 +87,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 		var gap, sizeSnap pgtype.Float8
 		var paddings []float64
 		var shrinkY, headerRepeat pgtype.Bool
-		var bodyColorFillEven, bodyColorFillOdd, footerColorFill, headerColorFill, value pgtype.Text
+		var bodyColorFillEven, bodyColorFillOdd, footerColorFill, headerColorFill pgtype.Text
 		if err := rows.Scan(&f.Id, &f.Content, &f.PosX, &f.PosY, &f.SizeX, &f.SizeY, &f.State, &paddings,
 			&shrinkY, &attributeId, &attributeIndex, &length, &direction, &gap, &sizeSnap, &bodyColorFillEven,
-			&bodyColorFillOdd, &footerColorFill, &headerColorFill, &headerRepeat, &value); err != nil {
+			&bodyColorFillOdd, &footerColorFill, &headerColorFill, &headerRepeat); err != nil {
 
 			return nil, err
 		}
@@ -180,8 +177,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 				SizeX:   f.SizeX,
 				SizeY:   f.SizeY,
 				State:   f.State,
-
-				Value: value.String,
 			})
 		default:
 			return nil, fmt.Errorf("unknown document field content '%s'", f.Content)
@@ -283,6 +278,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 				return nil, fmt.Errorf("failed to parse field")
 			}
 			f.Sets, err = doc_set.Get_tx(ctx, tx, f.Id, schema.DbDocField, schema.DbDocContextDefault)
+			if err != nil {
+				return nil, err
+			}
+			f.Captions, err = caption.Get_tx(ctx, tx, schema.DbDocField, f.Id, []string{"docFieldText"})
 			if err != nil {
 				return nil, err
 			}
@@ -488,11 +487,5 @@ func setList_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldList) error {
 }
 
 func setText_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldText) error {
-	_, err := tx.Exec(ctx, `
-		INSERT INTO app.doc_field_text (doc_field_id, value)
-		VALUES ($1,$2)
-		ON CONFLICT (doc_field_id)
-		DO UPDATE SET value = $2
-	`, f.Id, f.Value)
-	return err
+	return caption.Set_tx(ctx, tx, f.Id, f.Captions)
 }

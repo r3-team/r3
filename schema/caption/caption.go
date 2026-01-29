@@ -108,6 +108,10 @@ func GetDefaultContent(entity string) types.CaptionMap {
 		return types.CaptionMap{
 			"docColumnTitle": make(map[string]string),
 		}
+	case "docField":
+		return types.CaptionMap{
+			"docFieldText": make(map[string]string),
+		}
 	case "field":
 		return types.CaptionMap{
 			"fieldTitle": make(map[string]string),
@@ -192,6 +196,9 @@ func GetEntityName(content string) (schema.DbEntity, error) {
 
 	case "docColumnTitle":
 		return schema.DbDocColumn, nil
+
+	case "docFieldText":
+		return schema.DbDocField, nil
 
 	case "fieldTitle", "fieldHelp":
 		return schema.DbField, nil
