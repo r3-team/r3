@@ -40,7 +40,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, noAuth bool, log
 	indexRelationIds := make(map[int]uuid.UUID) // map of accessed relation IDs, key: relation index
 	isDoingRowCount := data.Limit != 0
 	relationIndexesEnc := make([]int, 0) // indexes of relations from encrypted attributes within expressions
-	queryArgs := make([]interface{}, 0)  // SQL arguments for data query
+	queryArgs := make([]any, 0)          // SQL arguments for data query
 
 	// prepare SQL query for data GET request
 	*query, err = prepareQuery(data, indexRelationIds, &queryArgs, noAuth, loginId, isDoingRowCount, 0)
@@ -272,7 +272,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, noAuth bool, log
 }
 
 // returns SQL query from data GET request (sub query if nesting level != 0)
-func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryArgs *[]interface{},
+func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryArgs *[]any,
 	noAuth bool, loginId int64, addRowCount bool, nestingLevel int) (string, error) {
 
 	if !noAuth {
@@ -564,7 +564,7 @@ func getQuerySelect(exprPos int, expr types.DataGetExpression, nestingLevel int)
 }
 
 func getQueryJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin, filters []types.DataGetFilter,
-	queryArgs *[]interface{}, noAuth bool, loginId int64, nestingLevel int) (string, error) {
+	queryArgs *[]any, noAuth bool, loginId int64, nestingLevel int) (string, error) {
 
 	// check join attribute
 	atr, exists := cache.AttributeIdMap[join.AttributeId]
@@ -635,7 +635,7 @@ func getQueryJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin, fi
 }
 
 // parses filters to generate query lines and arguments
-func getQueryWhere(filter types.DataGetFilter, queryArgs *[]interface{}, noAuth bool, loginId int64, nestingLevel int) (string, error) {
+func getQueryWhere(filter types.DataGetFilter, queryArgs *[]any, noAuth bool, loginId int64, nestingLevel int) (string, error) {
 
 	if !slices.Contains(types.QueryFilterConnectors, filter.Connector) {
 		return "", errors.New("bad filter connector")

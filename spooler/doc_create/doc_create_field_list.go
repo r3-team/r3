@@ -38,6 +38,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		Expressions: make([]types.DataGetExpression, 0),
 		Filters:     data_query.ConvertQueryToDataFilter(f.Query.Filters, 0, doc.p.GetLang(), make(map[string]string)),
 		Joins:       data_query.ConvertQueryToDataJoins(f.Query.Joins),
+		Orders:      data_query.ConvertQueryToDataOrders(f.Query.Orders),
 		Limit:       f.Query.FixedLimit,
 	}
 

@@ -1,8 +1,8 @@
-import {getDependentModules} from '../shared/builder.js';
-import {copyValueDialog}     from '../shared/generic.js';
-export {MyBuilderPgTrigger as default};
+import {getDependentModules}  from '../shared/builder.js';
+import {getTemplatePgTrigger} from '../shared/builderTemplate.js';
+import {copyValueDialog}      from '../shared/generic.js';
 
-let MyBuilderPgTrigger = {
+export default {
 	name:'my-builder-pg-trigger',
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-pg-trigger float" v-if="values !== null">
@@ -234,6 +234,7 @@ let MyBuilderPgTrigger = {
 		// externals
 		copyValueDialog,
 		getDependentModules,
+		getTemplatePgTrigger,
 		
 		// actions
 		handleHotkeys(e) {
@@ -256,21 +257,11 @@ let MyBuilderPgTrigger = {
 		reset() {
 			this.values = this.id !== null
 				? JSON.parse(JSON.stringify(this.pgTriggerIdMap[this.id]))
-				: {
-					id:null,
-					moduleId:this.module.id,
-					relationId:this.isFromRelation ? this.contextId : null,
-					pgFunctionId:this.isFromPgFunction ? this.contextId : null,
-					fires:'BEFORE',
-					onDelete:false,
-					onInsert:true,
-					onUpdate:false,
-					isConstraint:false,
-					isDeferrable:false,
-					isDeferred:false,
-					perRow:true,
-					codeCondition:null
-				};
+				: this.getTemplatePgTrigger(
+					this.module.id,
+					this.isFromRelation   ? this.contextId : null,
+					this.isFromPgFunction ? this.contextId : null
+				);
 			
 			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},

@@ -717,6 +717,23 @@ export function getTemplatePgIndex(relationId) {
 		attributes:[]
 	};
 };
+export function getTemplatePgTrigger(moduleId,relationId,pgFunctionId) {
+	return {
+		id:getUuidV4(),
+		moduleId:moduleId,
+		relationId:relationId,
+		pgFunctionId:pgFunctionId,
+		fires:'BEFORE',
+		onDelete:false,
+		onInsert:true,
+		onUpdate:false,
+		isConstraint:false,
+		isDeferrable:false,
+		isDeferred:false,
+		perRow:true,
+		codeCondition:null
+	};
+};
 export function getTemplatePreset(relationId) {
 	return {
 		id:getUuidV4(),

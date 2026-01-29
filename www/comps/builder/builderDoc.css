@@ -166,6 +166,11 @@
 .builder-doc-field-title-bar>img{
 	height:20px;
 }
+.builder-doc-field-title-bar>span{
+	display:flex;
+	flex-flow:row nowrap;
+	white-space:nowrap;
+}
 
 /* field children */
 .builder-doc-fields{
@@ -237,6 +242,11 @@
 }
 .builder-doc-column-title>img{
 	height:20px;
+}
+.builder-doc-column-title>span{
+	display:flex;
+	flex-flow:row nowrap;
+	white-space:nowrap;
 }
 
 

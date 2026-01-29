@@ -827,7 +827,7 @@
 				"content": {
 					"flow": "Flow-Layout",
 					"grid": "Raster-Layout",
-					"text": "Fester Text"
+					"text": "Text"
 				}
 			},
 			"font": {
@@ -845,8 +845,8 @@
 				"numberSepDec": "Dezimal-Trennzeichen",
 				"numberSepTho": "Tausender-Trennzeichen",
 				"style": "Stile",
-				"styleBold": "Bold",
-				"styleItalic": "Italic",
+				"styleBold": "Fett",
+				"styleItalic": "Kursiv",
 				"styleStrikeout": "Durchgestrichen",
 				"styleUnderline": "Unterstrichen"
 			},

@@ -1137,7 +1137,6 @@ export default {
 		},
 		reset() {
 			this.filters = JSON.parse(JSON.stringify(this.modelValue));
-			console.log('got new filters', this.filters);
 		},
 		set() {
 			// overwrite first filter with only valid connector

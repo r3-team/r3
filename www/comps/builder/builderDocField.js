@@ -53,6 +53,7 @@ export default {
 		:class="classMain"
 		:draggable="!isRoot && !readonly"
 		:style
+		:title
 		:key="field.id"
 	>
 		<template v-if="isFlow">
@@ -155,6 +156,7 @@ export default {
 						v-model="field.query"
 						@index-removed=""
 						:allowChoices="false"
+						:allowOrders="true"
 						:builderLanguage
 						:filtersDisable
 						:moduleId
@@ -524,8 +526,8 @@ export default {
 		paddingY:     s => s.padding.t+s.padding.b,
 		sizeX:        s => s.field.sizeX !== 0 ? s.field.sizeX-s.borderX-s.paddingX : s.parentSizeX-s.borderX-s.paddingX,
 		sizeY:        s => s.field.sizeY !== 0 ? s.field.sizeY-s.borderY-s.paddingY : s.parentSizeY-s.borderY-s.paddingY,
-		sizeXMax:     s => s.parentSizeX - s.field.posX,
-		sizeYMax:     s => s.parentSizeY - s.field.posY,
+		sizeXMax:     s => !s.isChildFlow ? s.parentSizeX - s.field.posX : 9999,
+		sizeYMax:     s => !s.isChildFlow ? s.parentSizeY - s.field.posY : 9999,
 		style:        s => `${s.styleHeight}${s.styleGrid}${s.styleBorder}`,
 		styleGrid:    s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;` : '',
 		styleHeight:  s => s.isRoot ? 'flex:1 1 auto;' : `height:${s.field.sizeY*s.zoom}mm;`,

@@ -827,7 +827,7 @@
 				"content": {
 					"flow": "Flow layout",
 					"grid": "Grid layout",
-					"text": "Fixed text"
+					"text": "Text"
 				}
 			},
 			"font": {

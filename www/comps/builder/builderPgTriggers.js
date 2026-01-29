@@ -1,8 +1,7 @@
 import {getDependentModules} from '../shared/builder.js';
 import MyBuilderPgTrigger    from './builderPgTrigger.js';
-export {MyBuilderPgTriggers as default};
 
-let MyBuilderPgTriggers = {
+export default {
 	name:'my-builder-pg-triggers',
 	components:{MyBuilderPgTrigger},
 	template:`<div class="generic-entry-list" :class="{ singleColumn:singleColumn }">
