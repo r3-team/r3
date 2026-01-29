@@ -21,6 +21,7 @@ import (
 	"r3/schema/clientEvent"
 	"r3/schema/collection"
 	"r3/schema/compatible"
+	"r3/schema/doc"
 	"r3/schema/form"
 	"r3/schema/icon"
 	"r3/schema/jsFunction"
@@ -344,6 +345,22 @@ func importModule_tx(ctx context.Context, tx pgx.Tx, mod types.Module, firstRun 
 		log.Info(log.ContextTransfer, fmt.Sprintf("set API %s", e.Id))
 
 		if err := importCheckResultAndApply(ctx, tx, api.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
+			return err
+		}
+	}
+
+	// documents
+	for _, e := range mod.Docs {
+		run, err := importCheckRunAndSave(ctx, tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info(log.ContextTransfer, fmt.Sprintf("set document %s", e.Id))
+
+		if err := importCheckResultAndApply(ctx, tx, doc.Set_tx(ctx, tx, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}

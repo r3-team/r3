@@ -356,6 +356,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON UPDATE NO ACTION
 					ON DELETE NO ACTION
 					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_set_doc_id_fkey FOREIGN KEY (doc_id)
+					REFERENCES app.doc (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
 				CONSTRAINT doc_set_doc_column_id_fkey FOREIGN KEY (doc_column_id)
 					REFERENCES app.doc_column (id) MATCH SIMPLE
 					ON UPDATE CASCADE

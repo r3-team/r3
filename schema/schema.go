@@ -150,6 +150,7 @@ var (
 		DbArticle,
 		DbClientEvent,
 		DbCollection,
+		DbDoc,
 		DbForm,
 		DbIcon,
 		DbJsFunction,

@@ -13,6 +13,7 @@ import (
 	"r3/schema/clientEvent"
 	"r3/schema/collection"
 	"r3/schema/column"
+	"r3/schema/doc"
 	"r3/schema/field"
 	"r3/schema/form"
 	"r3/schema/icon"
@@ -100,6 +101,11 @@ func NotExisting_tx(ctx context.Context, tx pgx.Tx, module types.Module) error {
 
 	// APIs
 	if err := deleteApis_tx(ctx, tx, module.Id, module.Apis); err != nil {
+		return err
+	}
+
+	// Docs
+	if err := deleteDocs_tx(ctx, tx, module.Id, module.Docs); err != nil {
 		return err
 	}
 
@@ -528,6 +534,23 @@ func deleteClientEvents_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, c
 	for _, id := range idsDelete {
 		log.Info(log.ContextTransfer, fmt.Sprintf("del client event %s", id.String()))
 		if err := clientEvent.Del_tx(ctx, tx, id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func deleteDocs_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, docs []types.Doc) error {
+	idsKeep := make([]uuid.UUID, 0)
+	for _, entity := range docs {
+		idsKeep = append(idsKeep, entity.Id)
+	}
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(ctx, tx, schema.DbDoc, moduleId, idsKeep)
+	if err != nil {
+		return err
+	}
+	for _, id := range idsDelete {
+		log.Info(log.ContextTransfer, fmt.Sprintf("del Document %s", id.String()))
+		if err := doc.Del_tx(ctx, tx, id); err != nil {
 			return err
 		}
 	}
