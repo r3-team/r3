@@ -20,11 +20,11 @@ func getConditionsResult(ctx context.Context, doc *doc, conditions []types.DocSt
 	evalValues := make(map[string]any)
 
 	for i, c := range conditions {
-		s0, err := getConditionSideValue(doc, c.Side0, true)
+		s0, err := getConditionSideValue(doc, c.Side0)
 		if err != nil {
 			return false, err
 		}
-		s1, err := getConditionSideValue(doc, c.Side1, false)
+		s1, err := getConditionSideValue(doc, c.Side1)
 		if err != nil {
 			return false, err
 		}
@@ -73,7 +73,7 @@ func getConditionsResult(ctx context.Context, doc *doc, conditions []types.DocSt
 	return eval.EvalBool(ctx, evalValues)
 }
 
-func getConditionSideValue(doc *doc, s types.DocStateConditionSide, isLeftSide bool) (any, error) {
+func getConditionSideValue(doc *doc, s types.DocStateConditionSide) (any, error) {
 	switch s.Content {
 	case "attribute":
 		if !s.AttributeId.Valid || !s.AttributeIndex.Valid {
