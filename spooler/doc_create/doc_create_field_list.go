@@ -133,7 +133,12 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		// calcuclate header titles and row height
 		title, exists := column.Captions["docColumnTitle"][doc.p.GetLang()]
 		if !exists {
-			title = columnIndexMapAtr[i].Name
+			// fallback to attribute title
+			title, exists = atr.Captions["attributeTitle"][doc.p.GetLang()]
+			if !exists {
+				// fallback to column attribute name
+				title = atr.Name
+			}
 		}
 
 		sizeYCell, cellLines := getRowCellHeightLines(doc, columnIndexMapFontHeader[i], columnIndexMapWidth[i]-sizeXReductionHeader, column.Length, title)
