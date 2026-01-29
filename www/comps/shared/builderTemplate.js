@@ -226,7 +226,9 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 			f.padding = getMarginTemplate();
 		break;
 		case 'text':
-			f.value = '';
+			f.captions = {
+				docFieldText:{}
+			}
 		break;
 	}
 	return f;
