@@ -73,7 +73,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentSizeX
 		fd.SizeX = f.SizeX
 		fd.SizeY = f.SizeY
 		return addFieldData(doc, fd, font, flowHorizontal, posX, posY)
-	case "flow":
+	case "flow", "flowBody":
 		var ff types.DocFieldFlow
 		if err := json.Unmarshal(fieldJson, &ff); err != nil {
 			return err
@@ -82,7 +82,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentSizeX
 		ff.SizeX = f.SizeX
 		ff.SizeY = f.SizeY
 		return addFieldFlow(ctx, doc, ff, font, posX, posY, pageSizeYUsable, pageMarginT)
-	case "grid":
+	case "grid", "gridFooter", "gridHeader":
 		var fg types.DocFieldGrid
 		if err := json.Unmarshal(fieldJson, &fg); err != nil {
 			return err

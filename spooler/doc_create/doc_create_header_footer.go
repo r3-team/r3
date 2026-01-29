@@ -13,5 +13,5 @@ func addHeaderFooter(ctx context.Context, doc *doc, f types.DocFieldGrid, font t
 
 	// a header/footer is always a single grid field on root level
 	// this grid field does not have margins, everything is positioned absolutely, including spacing from all sides
-	addFieldGrid(ctx, doc, f, font, 0, posY, pageHeight, 0)
+	addField(ctx, doc, 0, posY, 0, pageHeight, 0, false, false, font, f)
 }

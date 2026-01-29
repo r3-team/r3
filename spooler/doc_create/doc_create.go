@@ -121,8 +121,26 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 			// pages
 			exprs = append(exprs, getExpressionsFromSet(page.Sets)...)
 
-			// fields
-			exprsSub, err := getExpressionsFromFields(page.FieldFlow.Fields)
+			// page header field
+			if page.Header.Active && !page.Header.DocPageIdInherit.Valid {
+				exprsSub, err := getExpressionsFromField(page.Header.FieldGrid)
+				if err != nil {
+					return err
+				}
+				exprs = append(exprs, exprsSub...)
+			}
+
+			// page footer field
+			if page.Footer.Active && !page.Footer.DocPageIdInherit.Valid {
+				exprsSub, err := getExpressionsFromField(page.Footer.FieldGrid)
+				if err != nil {
+					return err
+				}
+				exprs = append(exprs, exprsSub...)
+			}
+
+			// main page body field
+			exprsSub, err := getExpressionsFromField(page.FieldFlow)
 			if err != nil {
 				return err
 			}
@@ -230,9 +248,7 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 		})
 
 		// a page is always a single flow field on root level
-		page.FieldFlow.SizeX = pageSizeXUsable
-		page.FieldFlow.SizeY = pageSizeYUsable
-		if err := addFieldFlow(ctx, doc, page.FieldFlow, font, page.Margin.L, page.Margin.T, pageSizeYUsable, page.Margin.T); err != nil {
+		if err := addField(ctx, doc, page.Margin.L, page.Margin.T, pageSizeXUsable, pageSizeYUsable, page.Margin.T, false, false, font, page.FieldFlow); err != nil {
 			return err
 		}
 	}

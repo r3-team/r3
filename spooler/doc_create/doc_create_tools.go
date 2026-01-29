@@ -69,60 +69,63 @@ func getExpressionsFromSet(set []types.DocSet) []types.DataGetExpression {
 	}
 	return exprs
 }
-func getExpressionsFromFields(fieldsIf []any) ([]types.DataGetExpression, error) {
+func getExpressionsFromField(fieldIf any) ([]types.DataGetExpression, error) {
 	exprs := make([]types.DataGetExpression, 0)
 
-	for _, fieldIf := range fieldsIf {
-		fieldJson, err := json.Marshal(fieldIf)
-		if err != nil {
+	fieldJson, err := json.Marshal(fieldIf)
+	if err != nil {
+		return nil, err
+	}
+
+	var field types.DocField
+	if err := json.Unmarshal(fieldJson, &field); err != nil {
+		return nil, err
+	}
+
+	// expressions from overwrite rules
+	exprs = append(exprs, getExpressionsFromSet(field.Sets)...)
+
+	// expressions from field content
+	switch field.Content {
+
+	case "data":
+		var f types.DocFieldData
+		if err := json.Unmarshal(fieldJson, &f); err != nil {
 			return nil, err
 		}
+		exprs = append(exprs, types.DataGetExpression{
+			AttributeId: pgtype.UUID{
+				Bytes: f.AttributeId,
+				Valid: true,
+			},
+			Index: f.AttributeIndex,
+		})
 
-		var field types.DocField
-		if err := json.Unmarshal(fieldJson, &field); err != nil {
+	case "flow", "flowBody":
+		var f types.DocFieldFlow
+		if err := json.Unmarshal(fieldJson, &f); err != nil {
 			return nil, err
 		}
-
-		// expressions from field content
-		switch field.Content {
-		case "flow", "grid":
-			var fields []any
-
-			if field.Content == "flow" {
-				var f types.DocFieldFlow
-				if err := json.Unmarshal(fieldJson, &f); err != nil {
-					return nil, err
-				}
-				fields = f.Fields
-			} else {
-				var f types.DocFieldGrid
-				if err := json.Unmarshal(fieldJson, &f); err != nil {
-					return nil, err
-				}
-				fields = f.Fields
-			}
-			exprsSub, err := getExpressionsFromFields(fields)
+		for _, subFieldIf := range f.Fields {
+			exprsSub, err := getExpressionsFromField(subFieldIf)
 			if err != nil {
 				return nil, err
 			}
 			exprs = append(exprs, exprsSub...)
-
-		case "data":
-			var f types.DocFieldData
-			if err := json.Unmarshal(fieldJson, &f); err != nil {
-				return nil, err
-			}
-			exprs = append(exprs, types.DataGetExpression{
-				AttributeId: pgtype.UUID{
-					Bytes: f.AttributeId,
-					Valid: true,
-				},
-				Index: f.AttributeIndex,
-			})
 		}
 
-		// expressions from overwrite rules
-		exprs = append(exprs, getExpressionsFromSet(field.Sets)...)
+	case "grid", "gridFooter", "gridHeader":
+		var f types.DocFieldGrid
+		if err := json.Unmarshal(fieldJson, &f); err != nil {
+			return nil, err
+		}
+		for _, subFieldIf := range f.Fields {
+			exprsSub, err := getExpressionsFromField(subFieldIf)
+			if err != nil {
+				return nil, err
+			}
+			exprs = append(exprs, exprsSub...)
+		}
 	}
 	return exprs, nil
 }
