@@ -56,7 +56,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := doc_create.Run(ctx, docId, login.Id, recordId, filePath); err != nil {
+	if err := doc_create.Run(ctx, docId, false, login.Id, recordId, filePath); err != nil {
 		handler.ServeErrorPage(w, http.StatusInternalServerError, err)
 		return
 	}

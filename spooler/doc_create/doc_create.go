@@ -55,7 +55,7 @@ func DoAll() error {
 	return nil
 }
 
-func Run(ctx context.Context, docId uuid.UUID, loginId int64, recordId int64, pathOut string) error {
+func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recordId int64, pathOut string) error {
 
 	cache.Schema_mx.RLock()
 	docDef, exists := cache.DocIdMap[docId]
@@ -151,7 +151,7 @@ func Run(ctx context.Context, docId uuid.UUID, loginId int64, recordId int64, pa
 		exprs = getExpressionsDistinct(exprs)
 
 		// get data from document query
-		if err := getDataDoc(ctx, doc, docDef.Query, exprs, "en_us"); err != nil {
+		if err := getDataDoc(ctx, doc, noAuth, loginId, docDef.Query, exprs, "en_us"); err != nil {
 			return err
 		}
 	}
