@@ -1,13 +1,16 @@
-import MyBuilderDocColumns       from './builderDocColumns.js';
-import MyBuilderDocSets          from './builderDocSets.js';
-import MyBuilderQuery            from './builderQuery.js';
-import MyInputColorWrap          from '../inputColorWrap.js';
-import MyInputDecimal            from '../inputDecimal.js';
-import MyInputRange              from '../inputRange.js';
-import MyTabs                    from '../tabs.js';
-import {isAttributeRelationship} from '../shared/attribute.js';
-import {getUuidV4}               from '../shared/crypto.js';
-import {copyValueDialog}         from '../shared/generic.js';
+import MyBuilderDocColumns from './builderDocColumns.js';
+import MyBuilderDocSets    from './builderDocSets.js';
+import MyBuilderQuery      from './builderQuery.js';
+import MyInputColorWrap    from '../inputColorWrap.js';
+import MyInputDecimal      from '../inputDecimal.js';
+import MyInputRange        from '../inputRange.js';
+import MyTabs              from '../tabs.js';
+import {getUuidV4}         from '../shared/crypto.js';
+import {copyValueDialog}   from '../shared/generic.js';
+import {
+	isAttributeFiles,
+	isAttributeRelationship
+} from '../shared/attribute.js';
 import {
 	MyBuilderDocBorder,
 	MyBuilderDocMarginPadding
@@ -192,7 +195,7 @@ export default {
 									<td>{{ capGen.sizeY }}</td>
 									<td>
 										<div class="row gap centered">
-											<my-input-range   class="short" v-model="field.sizeY" :readonly :min="gridParentSnap" :max="sizeYMax" :step="gridParentSnap" />
+											<my-input-range   class="short" v-model="field.sizeY" :readonly :min="gridParentSnap" :max="sizeYMax" :step="gridParentSnap" v-if="isResizeInGrid" />
 											<my-input-decimal class="short" v-model="field.sizeY" :readonly :min="gridParentSnap" :max="sizeYMax" :allowNull="false" :length="5" :lengthFract="2" />
 											<span>mm</span>
 										</div>
@@ -528,13 +531,14 @@ export default {
 		isChild:        s => s.isChildFlow || s.isChildGrid,
 		isData:         s => s.field.content === 'data',
 		isDataTextPrint:s => s.isData && ['iframe','default','textarea'].includes(s.attribute.contentUse),
+		isDataFiles:    s => s.isData && s.isAttributeFiles(s.attribute.content),
 		isDragPreview:  s => s.field.content === s.dragContent,
 		isFlow:         s => ['flow','flowBody'].includes(s.field.content),
 		isGrid:         s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
 		isList:         s => s.field.content === 'list',
 		isText:         s => s.field.content === 'text',
 		isOptionsShow:  s => s.fieldIdOptions === s.field.id,
-		isResizeInFlow: s => !s.isRoot && s.isChildFlow && (s.isFlow || s.isGrid),
+		isResizeInFlow: s => !s.isRoot && s.isChildFlow && (s.isFlow || s.isGrid || s.isDataFiles),
 		isResizeInGrid: s => !s.isRoot && s.isChildGrid,
 		isTabsNeeded:   s => s.isList,
 		isWithBorder:   s => s.isFlow || s.isGrid,
@@ -560,6 +564,7 @@ export default {
 		getTemplateDocColumn,
 		getTemplateDocField,
 		getUuidV4,
+		isAttributeFiles,
 		isAttributeRelationship,
 
 		// presentation
