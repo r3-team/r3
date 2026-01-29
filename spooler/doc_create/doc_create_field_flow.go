@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font types.DocFont, posX, posY, pageSizeYUsable, pageMarginT float64) error {
+func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font types.DocFont, posX, posY, sizeYPageUsable, pageMarginT float64) error {
 
 	// border sizes
 	_, bSizeT, bSizeR, bSizeB, bSizeL, _ := getBorderSize(f.Border)
@@ -39,7 +39,7 @@ func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font type
 		// set here as hidden fields do not update XY
 		doc.p.SetXY(posXChildren, posYChildren)
 
-		if err = addField(ctx, doc, posXChildren, posYChildren, sizeXChildren, pageSizeYUsable, pageMarginT, isHorizontal, false, font, fieldIfChild); err != nil {
+		if err = addField(ctx, doc, posXChildren, posYChildren, sizeXChildren, sizeYPageUsable, pageMarginT, isHorizontal, false, false, font, fieldIfChild); err != nil {
 			return err
 		}
 		if isHorizontal {
@@ -83,7 +83,7 @@ func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font type
 						b.Draw = strings.ReplaceAll(b.Draw, "B", "")
 					}
 					doc.p.SetXY(posX+(bSizeL/2), posY+(bSizeT/2))
-					drawBox(doc, b, pgtype.Text{}, f.SizeX-(bSizeX/2), pageSizeYUsable+pageMarginT-posY-(bSizeY/2))
+					drawBox(doc, b, pgtype.Text{}, f.SizeX-(bSizeX/2), sizeYPageUsable+pageMarginT-posY-(bSizeY/2))
 				} else if i != pageNoEnd {
 					// draw entire inbetween page, only allow left/ride borders
 					if b.Draw == "1" {
@@ -97,7 +97,7 @@ func addFieldFlow(ctx context.Context, doc *doc, f types.DocFieldFlow, font type
 						}
 					}
 					doc.p.SetXY(posX+(bSizeL/2), pageMarginT+(bSizeT/2))
-					drawBox(doc, b, pgtype.Text{}, f.SizeX-(bSizeX/2), pageSizeYUsable-(bSizeY/2))
+					drawBox(doc, b, pgtype.Text{}, f.SizeX-(bSizeX/2), sizeYPageUsable-(bSizeY/2))
 				} else {
 					// draw on last page until child end, remove top border
 					if b.Draw == "1" {

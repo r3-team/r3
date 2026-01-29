@@ -10,7 +10,7 @@ import (
 
 func addFieldText(doc *doc, f types.DocFieldText, font types.DocFont, flowHorizontal bool) error {
 
-	// replace known document placeholders ({PAGE_END} is set by fpdf)
+	f.Value = strings.ReplaceAll(f.Value, "{PAGE_END}", "{nb}")
 	f.Value = strings.ReplaceAll(f.Value, "{PAGE_CUR}", fmt.Sprintf("%d", doc.p.PageNo()))
 	f.Value = strings.ReplaceAll(f.Value, "{DATE_TODAY}", time.Now().Local().Format(tools.GetDatetimeFormat(font.DateFormat, false)))
 	f.Value = strings.ReplaceAll(f.Value, "{DATETIME_NOW}", time.Now().Local().Format(tools.GetDatetimeFormat(font.DateFormat, true)))

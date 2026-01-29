@@ -855,6 +855,7 @@
 			},
 			"headerRepeat": "Kopfzeile bei Seitenumbruch wiederholen",
 			"inheritFrom": "Übernehmen von",
+			"inheritNone": "Für diese Seite setzen",
 			"placeholders": {
 				"{DATETIME_NOW}": "Aktuelles Datum & Uhrzeit",
 				"{DATE_TODAY}": "Aktuelles Datum",

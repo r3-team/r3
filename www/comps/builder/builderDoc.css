@@ -244,6 +244,7 @@
 .builder-doc-page-footer-header{
 	position:absolute;
 	box-shadow:1px 1px 3px var(--color-shade);
+	display:flex;
 }
 
 /* options */

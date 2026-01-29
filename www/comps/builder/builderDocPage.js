@@ -125,6 +125,8 @@ export default {
 						@update:t="setMarginVertical(true,$event)"
 						@update:b="setMarginVertical(false,$event)"
 						:defaults="{t:24,r:15,b:12,l:15}"
+						:disableT="headerInherit"
+						:disableB="footerInherit"
 						:readonly
 					/>
 					<my-builder-doc-header-footer
@@ -136,7 +138,6 @@ export default {
 						:pageId="page.id"
 						:pageSizeX="pageSizeX"
 						:readonly
-						:sizeMax="page.margin.t"
 					/>
 					<my-builder-doc-header-footer
 						v-model:active="page.footer.active"
@@ -147,7 +148,6 @@ export default {
 						:pageId="page.id"
 						:pageSizeX="pageSizeX"
 						:readonly
-						:sizeMax="page.margin.b"
 					/>
 				</tbody>
 			</table>
@@ -176,26 +176,35 @@ export default {
 	},
 	emits:['setFieldIdOptions','update:modelValue'],
 	computed:{
+		margin:s => {
+			let out = JSON.parse(JSON.stringify(s.page.margin));
+			if(s.footerInherit) out.b = s.getPageMarginById(s.page.footer.docPageIdInherit).b;
+			if(s.headerInherit) out.t = s.getPageMarginById(s.page.header.docPageIdInherit).t;
+			return out;
+		},
+
+		// inputs
 		page:{ // this method updates obj directly
 			get()  { return this.modelValue; },
 			set(v) { this.$emit('update:modelValue',v); }
 		},
 
 		// simple
-		footer:      s => s.page.footer.active ? s.page.footer : false,
-		header:      s => s.page.header.active ? s.page.header : false,
-		margin:      s => s.page.margin,
-		pageSizeX:   s => s.page.orientation === 'portrait' ? pageSizeMapMm[s.page.size][0] : pageSizeMapMm[s.page.size][1],
-		pageSizeY:   s => s.page.orientation === 'portrait' ? pageSizeMapMm[s.page.size][1] : pageSizeMapMm[s.page.size][0],
-		pageSizes:   s => Object.keys(pageSizeMapMm),
-		styleBody:   s => `top:${s.margin.t*s.zoom}mm;right:${s.margin.r*s.zoom}mm;bottom:${s.margin.b*s.zoom}mm;left:${s.margin.l*s.zoom}mm`,
-		styleFooter: s => `width:${s.pageSizeX*s.zoom}mm;bottom:0mm;left:0mm;height:${s.page.footer.fieldGrid.sizeY*s.zoom}mm`,
-		styleHeader: s => `width:${s.pageSizeX*s.zoom}mm;top:0mm;left:0mm;height:${s.page.header.fieldGrid.sizeY*s.zoom}mm`,
-		styleMarginT:s => `top:0mm;left:0mm;height:${s.margin.t*s.zoom}mm`,
-		styleMarginR:s => `top:0mm;right:0mm;width:${s.margin.r*s.zoom}mm`,
-		styleMarginB:s => `bottom:0mm;left:0mm;height:${s.margin.b*s.zoom}mm`,
-		styleMarginL:s => `top:0mm;left:0mm;width:${s.margin.l*s.zoom}mm`,
-		stylePage:   s => `width:${s.pageSizeX*s.zoom}mm;height:${s.pageSizeY*s.zoom}mm`,
+		footer:       s => s.page.footer.active ? s.page.footer : false,
+		footerInherit:s => s.page.footer.docPageIdInherit !== null,
+		header:       s => s.page.header.active ? s.page.header : false,
+		headerInherit:s => s.page.header.docPageIdInherit !== null,
+		pageSizeX:    s => s.page.orientation === 'portrait' ? pageSizeMapMm[s.page.size][0] : pageSizeMapMm[s.page.size][1],
+		pageSizeY:    s => s.page.orientation === 'portrait' ? pageSizeMapMm[s.page.size][1] : pageSizeMapMm[s.page.size][0],
+		pageSizes:    s => Object.keys(pageSizeMapMm),
+		styleBody:    s => `top:${s.margin.t*s.zoom}mm;right:${s.margin.r*s.zoom}mm;bottom:${s.margin.b*s.zoom}mm;left:${s.margin.l*s.zoom}mm`,
+		styleFooter:  s => `width:${s.pageSizeX*s.zoom}mm;bottom:0mm;left:0mm;height:${s.margin.b*s.zoom}mm`,
+		styleHeader:  s => `width:${s.pageSizeX*s.zoom}mm;top:0mm;left:0mm;height:${s.margin.t*s.zoom}mm`,
+		styleMarginT: s => `top:0mm;left:0mm;height:${s.margin.t*s.zoom}mm`,
+		styleMarginR: s => `top:0mm;right:0mm;width:${s.margin.r*s.zoom}mm`,
+		styleMarginB: s => `bottom:0mm;left:0mm;height:${s.margin.b*s.zoom}mm`,
+		styleMarginL: s => `top:0mm;left:0mm;width:${s.margin.l*s.zoom}mm`,
+		stylePage:    s => `width:${s.pageSizeX*s.zoom}mm;height:${s.pageSizeY*s.zoom}mm`,
 
 		// stores
 		capApp:s => s.$store.getters.captions.builder.doc,
@@ -209,12 +218,9 @@ export default {
 					this.$emit('setFieldIdOptions',null);
 			}
 		},
-		setMarginVertical(isTop,v) {
-			if(isTop && this.header !== false)
-				this.page.header.fieldGrid.sizeY = v;
-
-			if(!isTop && this.footer !== false)
-				this.page.footer.fieldGrid.sizeY = v;
+		getPageMarginById(id) {
+			const ind = this.pages.findIndex(v => v.id === id);
+			return ind === -1 ? {t:0,r:0,b:0,l:0} : this.pages[ind].margin;
 		}
 	}
 };

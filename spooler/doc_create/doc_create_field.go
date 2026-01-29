@@ -8,8 +8,8 @@ import (
 	"r3/types"
 )
 
-func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentSizeX, pageSizeYUsable, pageMarginT float64,
-	flowHorizontal bool, parentIsGrid bool, fontParent types.DocFont, fieldIf any) error {
+func addField(ctx context.Context, doc *doc, posXParent, posYParent, sizeXParent, sizeYPageUsable, pageMarginT float64,
+	flowHorizontal bool, parentIsGrid bool, parentIsRoot bool, fontParent types.DocFont, fieldIf any) error {
 
 	fieldJson, err := json.Marshal(fieldIf)
 	if err != nil {
@@ -30,8 +30,8 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentSizeX
 	}
 
 	// set positioning and width of this field
-	var posX float64 = parentPosX
-	var posY float64 = parentPosY
+	var posX float64 = posXParent
+	var posY float64 = posYParent
 	if parentIsGrid {
 		posX += f.PosX
 		posY += f.PosY
@@ -39,15 +39,22 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentSizeX
 		if flowHorizontal {
 			f.SizeX = 0
 		} else {
-			f.SizeX = parentSizeX
+			f.SizeX = sizeXParent
 		}
 	}
 
+	// root fields always take over the parent sizes (of page, header or footer)
+	if parentIsRoot {
+		f.SizeX = sizeXParent
+		f.SizeY = sizeYPageUsable
+	}
+
 	// grid fields have defined height, if they do not fit on current page, add to next one
-	if f.Content == "grid" && f.SizeY+parentPosY > pageSizeYUsable+pageMarginT {
+	// ignore grid header/footer fields
+	if f.Content == "grid" && f.SizeY+posYParent > sizeYPageUsable+pageMarginT {
 		doc.p.AddPage()
 		doc.p.SetHomeXY()
-		parentPosY = doc.p.GetY()
+		posYParent = doc.p.GetY()
 	}
 	doc.p.SetXY(posX, posY)
 
@@ -81,7 +88,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentSizeX
 		ff = applyToFieldFlow(sets, ff)
 		ff.SizeX = f.SizeX
 		ff.SizeY = f.SizeY
-		return addFieldFlow(ctx, doc, ff, font, posX, posY, pageSizeYUsable, pageMarginT)
+		return addFieldFlow(ctx, doc, ff, font, posX, posY, sizeYPageUsable, pageMarginT)
 	case "grid", "gridFooter", "gridHeader":
 		var fg types.DocFieldGrid
 		if err := json.Unmarshal(fieldJson, &fg); err != nil {
@@ -90,7 +97,7 @@ func addField(ctx context.Context, doc *doc, parentPosX, parentPosY, parentSizeX
 		fg = applyToFieldGrid(sets, fg)
 		fg.SizeX = f.SizeX
 		fg.SizeY = f.SizeY
-		return addFieldGrid(ctx, doc, fg, font, posX, posY, pageSizeYUsable, pageMarginT)
+		return addFieldGrid(ctx, doc, fg, font, posX, posY, sizeYPageUsable, pageMarginT)
 	case "list":
 		var fl types.DocFieldList
 		if err := json.Unmarshal(fieldJson, &fl); err != nil {

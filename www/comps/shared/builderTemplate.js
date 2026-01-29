@@ -204,10 +204,10 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 		case 'grid':       // fallthrough
         case 'gridFooter': // fallthrough
         case 'gridHeader':
-			f.sizeY    = 25;
 			f.fields   = [];
 			f.shrinkY  = false;
 			f.sizeSnap = 3;
+			f.sizeY    = 25;
 		break;
 		case 'list':
 			f.bodyBorder        = getBorderTemplate();

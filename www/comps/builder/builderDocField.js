@@ -519,7 +519,7 @@ export default {
 		sizeYMax:     s => s.parentSizeY - s.field.posY,
 		style:        s => `${s.styleHeight}${s.styleGrid}${s.styleBorder}`,
 		styleGrid:    s => s.isChildGrid ? `position:absolute;top:${s.field.posY*s.zoom}mm;left:${s.field.posX*s.zoom}mm;width:${s.field.sizeX*s.zoom}mm;` : '',
-		styleHeight:  s => s.isFlow && s.isRoot ? 'flex:1 1 auto;' : `height:${s.field.sizeY*s.zoom}mm;`,
+		styleHeight:  s => s.isRoot ? 'flex:1 1 auto;' : `height:${s.field.sizeY*s.zoom}mm;`,
 		stylePaddingT:s => `top:0mm;left:0mm;height:${s.field.padding.t*s.zoom}mm`,
 		stylePaddingR:s => `top:0mm;right:0mm;width:${s.field.padding.r*s.zoom}mm`,
 		stylePaddingB:s => `bottom:0mm;left:0mm;height:${s.field.padding.b*s.zoom}mm`,

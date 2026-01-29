@@ -855,6 +855,7 @@
 			},
 			"headerRepeat": "Repeat header row on page break",
 			"inheritFrom": "Inherit from",
+			"inheritNone": "Set for this page",
 			"placeholders": {
 				"{DATETIME_NOW}": "Current date & time",
 				"{DATE_TODAY}": "Current date",

@@ -126,7 +126,7 @@ const MyBuilderDocHeaderFooter = {
 		</td>
 		<td>
 			<select v-if="active" @input="setPageIdInherit($event.target.value)" :value="pageIdInherit !== null ? pageIdInherit : ''">
-				<option value="">[{{ capApp.inheritFrom }}]</option>
+				<option value="">[{{ capApp.inheritNone }}]</option>
 				<option
 					v-for="(p,i) in pages"
 					v-show="p.id !== pageId"
@@ -141,7 +141,6 @@ const MyBuilderDocHeaderFooter = {
 		pageId:   { type:String,  required:true },
 		pageSizeX:{ type:Number,  required:true },
 		readonly: { type:Boolean, required:true },
-		sizeMax:  { type:Number,  required:true },
 
 		// inputs
 		active:       { type:Boolean,       required:true },
@@ -163,7 +162,7 @@ const MyBuilderDocHeaderFooter = {
 			if(v === true) {
 				f = this.getTemplateDocField(this.isHeader ? 'gridHeader' : 'gridFooter');
 				f.sizeX = this.pageSizeX;
-				f.sizeY = this.sizeMax;
+				f.sizeY = 0;
 			}
 			this.$emit('update:active',v);
 			this.$emit('update:fieldGrid',f);
@@ -171,7 +170,12 @@ const MyBuilderDocHeaderFooter = {
 		},
 		setPageIdInherit(v) {
 			const validPage = v !== '';
-			this.$emit('update:fieldGrid',validPage ? null : this.getTemplateDocField(this.isHeader ? 'gridHeader' : 'gridFooter'));
+			let field = validPage ? null : this.getTemplateDocField(this.isHeader ? 'gridHeader' : 'gridFooter')
+			if(field !== null) {
+				// header/footer fields always have dynamic heights (= relevant top/bottom page margin)
+				field.sizeY = 0;
+			}
+			this.$emit('update:fieldGrid',field);
 			this.$emit('update:pageIdInherit',validPage ? v : null);
 		}
 	}
@@ -185,23 +189,27 @@ const MyBuilderDocMarginPadding = {
 		<td>
 			<div class="column gap centered">
 				<div class="row">
-					<my-input-decimal class="short" @update:modelValue="$emit('update:t',$event)" :modelValue="t" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+					<my-input-decimal class="short" @update:modelValue="$emit('update:t',$event)" :modelValue="disableT ? 0 : t" :readonly="readonly || disableT" :allowNull="false" :length="5" :lengthFract="2" />
 				</div>
 				<div class="row gap centered">
-					<my-input-decimal class="short" @update:modelValue="$emit('update:l',$event)" :modelValue="l" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+					<my-input-decimal class="short" @update:modelValue="$emit('update:l',$event)" :modelValue="disableL ? 0 : l" :readonly="readonly || disableL" :allowNull="false" :length="5" :lengthFract="2" />
 					<div class="builder-doc-input-page-box" :class="{ clickable:!readonly }" @click.stop="toggle"></div>
-					<my-input-decimal class="short" @update:modelValue="$emit('update:r',$event)" :modelValue="r" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+					<my-input-decimal class="short" @update:modelValue="$emit('update:r',$event)" :modelValue="disableR ? 0 : r" :readonly="readonly || disableR" :allowNull="false" :length="5" :lengthFract="2" />
 				</div>
 				<div class="row">
-					<my-input-decimal class="short" @update:modelValue="$emit('update:b',$event)" :modelValue="b" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+					<my-input-decimal class="short" @update:modelValue="$emit('update:b',$event)" :modelValue="disableB ? 0 : b" :readonly="readonly || disableB" :allowNull="false" :length="5" :lengthFract="2" />
 				</div>
 			</div>
 		</td>
 	</tr>`,
 	props:{
-		defaults:{ type:Object,  required:true },
-		label:   { type:String,  required:false, default:'' },
-		readonly:{ type:Boolean, required:true },
+		defaults: { type:Object,  required:true },
+		disableT: { type:Boolean, required:false, default:false },
+		disableR: { type:Boolean, required:false, default:false },
+		disableB: { type:Boolean, required:false, default:false },
+		disableL: { type:Boolean, required:false, default:false },
+		label:    { type:String,  required:false, default:'' },
+		readonly: { type:Boolean, required:true },
 
 		// values
 		t:{ type:Number, required:true },

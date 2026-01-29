@@ -190,7 +190,7 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 	}
 
 	doc.p.SetCellMargin(0) // kills the default margin within text cells
-	doc.p.AliasNbPages("{PAGE_END}")
+	doc.p.AliasNbPages("{nb}")
 	setFont(doc, docDef.Font) // set default font in case no font is set later (a font must always be set)
 
 	// generate page ID map for direct reference
@@ -214,6 +214,14 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 
 		// apply overwrites
 		font := applyToFont(getSetDataResolved(doc, page.Sets), docDef.Font)
+
+		// inherit header/footer margins from other pages
+		if page.Header.DocPageIdInherit.Valid {
+			page.Margin.T = docDef.Pages[pageIdMapIndex[page.Header.DocPageIdInherit.Bytes]].Margin.T
+		}
+		if page.Footer.DocPageIdInherit.Valid {
+			page.Margin.B = docDef.Pages[pageIdMapIndex[page.Footer.DocPageIdInherit.Bytes]].Margin.B
+		}
 
 		doc.p.SetMargins(page.Margin.L, page.Margin.T, page.Margin.R)
 		doc.p.SetAutoPageBreak(true, page.Margin.B)
@@ -246,7 +254,7 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 		})
 
 		// a page is always a single flow field on root level
-		if err := addField(ctx, doc, page.Margin.L, page.Margin.T, sizeXPageUsable, sizeYPageUsable, page.Margin.T, false, false, font, page.FieldFlow); err != nil {
+		if err := addField(ctx, doc, page.Margin.L, page.Margin.T, sizeXPageUsable, sizeYPageUsable, page.Margin.T, false, false, true, font, page.FieldFlow); err != nil {
 			return err
 		}
 	}
