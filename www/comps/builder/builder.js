@@ -357,7 +357,7 @@ const MyBuilder = {
 			@createNew="createNew"
 			@nextLanguage="nextLanguage"
 			@toggleHelp="showHelp = !showHelp"
-			:builderLanguage="builderLanguage"
+			:builderLanguage
 			:readonly="!moduleOwner"
 		/>
 		
@@ -370,6 +370,7 @@ const MyBuilder = {
 		<my-builder-new
 			v-if="createNewOpen"
 			@close="createNewEntity = null"
+			:builderLanguage
 			:entity="createNewEntity"
 			:moduleId="moduleId"
 			:presets="createNewPresets"

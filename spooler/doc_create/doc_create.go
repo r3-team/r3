@@ -185,8 +185,8 @@ func Run(ctx context.Context, docId uuid.UUID, recordId int64, pathOut string) e
 	doc.p = fpdf.New(docDef.Pages[0].Orientation, pageUnit, docDef.Pages[0].Size, "")
 	doc.p.SetAuthor(docDef.Author, true)
 	doc.p.SetLang(docDef.Language)
-	if _, exists := docDef.Captions["docTitle"][docDef.Language]; !exists {
-		doc.p.SetTitle(docDef.Captions["docTitle"][docDef.Language], true)
+	if v, exists := docDef.Captions["docTitle"][docDef.Language]; exists {
+		doc.p.SetTitle(v, true)
 	}
 
 	doc.p.SetCellMargin(0) // kills the default margin within text cells

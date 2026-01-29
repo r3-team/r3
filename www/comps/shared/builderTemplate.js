@@ -119,10 +119,12 @@ export function getTemplateColumn(attributeId,index,subQuery) {
 		}
 	};
 };
-export function getTemplateDoc(moduleId,name) {
+export function getTemplateDoc(moduleId,language,name) {
 	return {
 		id:getUuidV4(),
 		moduleId:moduleId,
+		author:'',
+		language:language,
 		name:name,
 		comment:null,
 		font:{

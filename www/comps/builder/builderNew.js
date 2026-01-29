@@ -13,9 +13,8 @@ import {
 	getTemplateVariable,
 	getTemplateWidget
 } from '../shared/builderTemplate.js';
-export {MyBuilderNew as default};
 
-const MyBuilderNew = {
+export default {
 	name:'my-builder-new',
 	components:{ MyBuilderFormInput },
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
@@ -129,9 +128,10 @@ const MyBuilderNew = {
 		</div>
 	</div>`,
 	props:{
-		entity:  { type:String, required:true },
-		moduleId:{ type:String, required:true },
-		presets: { type:Object, required:true } // preset values for inputs
+		builderLanguage:{ type:String, required:true },
+		entity:         { type:String, required:true },
+		moduleId:       { type:String, required:true },
+		presets:        { type:Object, required:true } // preset values for inputs
 	},
 	emits:['close'],
 	data() {
@@ -299,7 +299,7 @@ const MyBuilderNew = {
 			switch(this.entity) {
 				case 'api':	       request = this.getTemplateApi(this.module.id,this.inputs.name); break;
 				case 'collection': request = this.getTemplateCollection(this.module.id,this.inputs.name); break;
-				case 'doc':        request = this.getTemplateDoc(this.module.id,this.inputs.name); break;
+				case 'doc':        request = this.getTemplateDoc(this.module.id,this.builderLanguage,this.inputs.name); break;
 				case 'jsFunction': request = this.getTemplateJsFunction(this.moduleId,this.inputs.formId,this.inputs.name); break;
 				case 'module':     request = this.getTemplateModule(this.inputs.name); break;
 				case 'pgFunction': request = this.getTemplatePgFunction(this.moduleId,this.inputs.name,this.inputs.template,this.inputs.isTrigger); break;

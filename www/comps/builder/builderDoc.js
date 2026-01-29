@@ -190,6 +190,18 @@ export default {
 								<td><input class="long" v-model="doc.name" :disabled="readonly" /></td>
 							</tr>
 							<tr>
+								<td>{{ capGen.comments }}</td>
+								<td><textarea class="long" v-model="doc.comment" :disabled="readonly"></textarea></td>
+							</tr>
+							<tr>
+								<td>{{ capGen.language }}</td>
+								<td>
+									<select class="long" v-model="doc.language">
+										<option v-for="l in module.languages" :value="l">{{ l }}</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
 								<td>{{ capGen.title }}</td>
 								<td>
 									<my-builder-caption
