@@ -10,6 +10,7 @@ import (
 	"r3/handler"
 	"r3/tools"
 	"r3/types"
+	"slices"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -23,6 +24,8 @@ type cell struct {
 	lines    int
 	width    float64
 }
+
+var attributeContentUseParsable = []string{"default", "textarea", "richtext", "iframe"}
 
 func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParent types.DocFont) error {
 
@@ -235,12 +238,11 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 				}
 			}
 
-			if row.Values[i] != nil && atr.ContentUse == "default" {
-				isText := atr.Content == "text"
-				isInt := atr.Content == "integer" || atr.Content == "bigint"
+			if row.Values[i] != nil && slices.Contains(attributeContentUseParsable, atr.ContentUse) {
+				isChars := atr.Content == "text" || atr.Content == "integer" || atr.Content == "bigint"
 				isNum := atr.Content == "numeric"
 
-				if isText || isInt {
+				if isChars {
 					text = fmt.Sprint(row.Values[i])
 				}
 				if isNum {
