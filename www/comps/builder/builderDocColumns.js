@@ -24,7 +24,7 @@ const MyBuilderDocColumn = {
 		MyInputRange,
 		myTabs
 	},
-	template:`<div class="builder-doc-column" :class="classCss" :title>
+	template:`<div class="builder-doc-column" :class="classCss" :title="isDragPreview ? '' : title">
 		<div class="builder-doc-column-title" v-if="!isDragPreview">
 			<img :src="'images/' + icon" />
 			<span>{{ title }}</span>
