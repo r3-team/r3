@@ -79,7 +79,7 @@ func addField(ctx context.Context, doc *doc, posXParent, posYParent, sizeXParent
 		}
 		fd.SizeX = f.SizeX
 		fd.SizeY = f.SizeY
-		return addFieldData(doc, fd, font, flowHorizontal, posX, posY)
+		return addFieldData(doc, fd, font, flowHorizontal, posX)
 	case "flow", "flowBody":
 		var ff types.DocFieldFlow
 		if err := json.Unmarshal(fieldJson, &ff); err != nil {

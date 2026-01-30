@@ -7,7 +7,7 @@ import (
 	"r3/types"
 )
 
-func addFieldData(doc *doc, f types.DocFieldData, font types.DocFont, flowHorizontal bool, posX, posY float64) error {
+func addFieldData(doc *doc, f types.DocFieldData, font types.DocFont, flowHorizontal bool, posX float64) error {
 
 	v, exists := doc.data[f.AttributeIndex][f.AttributeId]
 	if !exists {
@@ -20,5 +20,17 @@ func addFieldData(doc *doc, f types.DocFieldData, font types.DocFont, flowHorizo
 	if !exists {
 		return handler.ErrSchemaUnknownAttribute(f.AttributeId)
 	}
-	return drawAttributeValue(doc, font, posX, posY, f.SizeX, f.SizeY, flowHorizontal, f.Length, 0, atr, v)
+
+	isString, str, err := getAttributeString(font, atr, v)
+	if err != nil {
+		return err
+	}
+
+	if isString {
+		if str != "" {
+			drawCellText(doc, font, f.SizeX, f.SizeY, flowHorizontal, 0, getStringClean(str, "", "", f.Length))
+		}
+		return nil
+	}
+	return drawAttributeNonString(doc, font, posX, f.SizeX, f.SizeY, atr, v)
 }

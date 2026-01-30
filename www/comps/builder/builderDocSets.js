@@ -13,6 +13,7 @@ import {
 	MyBuilderDocFontStyles
 } from './builderDocInput.js';
 
+// value/input types for targets
 const targetTypes = {
 	bool:['bodyBorder.cell','footerBorder.cell','headerBorder.cell','headerRow.repeat'],
 	border:['bodyBorder.draw','footerBorder.draw','headerBorder.draw'],
@@ -23,9 +24,13 @@ const targetTypes = {
 	fontFamily:['font.family'],
 	fontLineFactor:['font.lineFactor'],
 	fontStyle:['font.style'],
-	numberSep:['font.numberSepDec','font.numberSepTho']
+	numberSep:['font.numberSepDec','font.numberSepTho'],
+	string:['text.postfix','text.prefix']
 };
+
+// ordered targets
 const targetsDoc              = ['title','language','author'];
+const targetsColumn           = ['text.prefix','text.postfix'];
 const targetsFont             = ['font.family','font.size','font.lineFactor','font.align','font.style','font.color','font.numberSepTho','font.numberSepDec','font.dateFormat'];
 const targetsListBodyBorder   = ['bodyBorder.draw','bodyBorder.cell','bodyBorder.size','bodyBorder.color'];
 const targetsListBodyRow      = ['bodyRow.colorFillEven','bodyRow.colorFillOdd'];
@@ -76,6 +81,7 @@ const MyBuilderDocSetTarget = {
 						<my-input-date-format            v-if="isDateFormat"     v-model="value" :readonly />
 						<my-input-decimal                v-if="isDecimal"        v-model="value" :readonly :allowNull="false" :length="4" :lengthFract="2" />
 						<my-input-number-sep             v-if="isNumberSep"      v-model="value" :readonly :allowNone="target === 'font.numberSepTho'" />
+						<input                           v-if="isString"         v-model="value" :disabled="readonly" />
 					</template>
 				</template>
 
@@ -119,6 +125,7 @@ const MyBuilderDocSetTarget = {
 			if(s.isFontAlign)      return 'L';
 			if(s.isFontFamily)     return 'Roboto';
 			if(s.isFontLineFactor) return 1.0;
+			if(s.isString)         return '';
 			return '';
 		},
 		
@@ -140,6 +147,7 @@ const MyBuilderDocSetTarget = {
 		isFontLineFactor: s => targetTypes.fontLineFactor.includes(s.target),
 		isFontStyle:      s => targetTypes.fontStyle.includes(s.target),
 		isNumberSep:      s => targetTypes.numberSep.includes(s.target),
+		isString:         s => targetTypes.string.includes(s.target),
 		set:              s => s.setIndex !== -1 ? JSON.parse(JSON.stringify(s.sets[s.setIndex])) : s.getTemplateDocSet(s.target),
 		setIndex:         s => s.sets.findIndex(v => v.target === s.target),
 
@@ -186,7 +194,11 @@ const MyBuilderDocSetTarget = {
 			'headerBorder.color': this.capGen.color,
 			'headerBorder.draw':  this.capGen.border,
 			'headerRow.colorFill':this.capGen.colorFill,
-			'headerRow.repeat':   this.capApp.headerRowRepeat
+			'headerRow.repeat':   this.capApp.headerRowRepeat,
+
+			// column
+			'text.postfix': this.capGen.postfix,
+			'text.prefix':  this.capGen.prefix
 		};
 	},
 	methods:{
@@ -224,6 +236,9 @@ export default {
 	components:{MyBuilderDocSetTarget},
 	template:`<table class="generic-table-vertical default-inputs">
 		<tbody>
+			<template v-if="showColumn">
+				<my-builder-doc-set-target v-for="t in targetsColumn" @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
+			</template>
 			<template v-if="showDoc">
 				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.pdf + ')' }}</b></td></tr>
 				<my-builder-doc-set-target
@@ -278,6 +293,7 @@ export default {
 		joins:         { type:Array,   required:true },
 		modelValue:    { type:Array,   required:true },
 		readonly:      { type:Boolean, required:true },
+		showColumn:    { type:Boolean, required:false, default:false },
 		showDoc:       { type:Boolean, required:false, default:false },
 		showFont:      { type:Boolean, required:false, default:false },
 		showListBody:  { type:Boolean, required:false, default:false },
@@ -286,6 +302,7 @@ export default {
 	},
 	emits:['update:modelValue'],
 	computed:{
+		targetsColumn:          s => targetsColumn,
 		targetsDoc:             s => targetsDoc,
 		targetsFont:            s => targetsFont,
 		targetsListBodyBorder:  s => targetsListBodyBorder,

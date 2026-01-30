@@ -42,6 +42,8 @@ type DocColumn struct {
 	Length         int         `json:"length"`         // text length limit (in characters)
 	SubQuery       bool        `json:"subQuery"`       // column uses sub query?
 	SizeX          float64     `json:"sizeX"`          // width in mm (0 = parent width)
+	TextPostfix    string      `json:"textPostfix"`    // fixed postfix value
+	TextPrefix     string      `json:"textPrefix"`     // fixed prefix value
 	Query          Query       `json:"query"`          // sub query
 	Captions       CaptionMap  `json:"captions"`       // column titles
 

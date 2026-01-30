@@ -2468,6 +2468,8 @@
 		"pgFunction": "Function (back)",
 		"pgFunctions": "Functions (back)",
 		"placeholders": "Placeholders",
+		"postfix": "Postfix",
+		"prefix": "Prefix",
 		"preview": "Preview",
 		"properties": "Properties",
 		"queryChoices": "Filter sets",

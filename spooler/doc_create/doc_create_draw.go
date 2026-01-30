@@ -11,7 +11,6 @@ import (
 	"r3/types"
 	"regexp"
 	"strings"
-	"time"
 
 	"codeberg.org/go-pdf/fpdf"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -29,8 +28,7 @@ type textDrawing struct {
 }
 
 // draws attribute value as cell
-func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY float64,
-	flowHorizontal bool, lengthChars int, lineCount int, atr types.Attribute, valueIf any) error {
+func drawAttributeNonString(doc *doc, font types.DocFont, posX, sizeX, sizeY float64, atr types.Attribute, valueIf any) error {
 
 	if valueIf == nil {
 		return nil
@@ -44,11 +42,6 @@ func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY f
 		}
 
 		switch atr.ContentUse {
-		case "default", "iframe", "textarea":
-			if lengthChars != 0 && len(v) > lengthChars-3 {
-				v = fmt.Sprintf("%s...", v[:lengthChars-3])
-			}
-			drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, v)
 		case "barcode":
 			var b textBarcode
 			if err := json.Unmarshal([]byte(v), &b); err != nil {
@@ -57,8 +50,6 @@ func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY f
 			if err := drawImageBase64(doc, b.Image, sizeX, sizeY); err != nil {
 				return err
 			}
-		case "color":
-			drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, fmt.Sprintf("#%s", v))
 		case "drawing":
 			var d textDrawing
 			if err := json.Unmarshal([]byte(v), &d); err != nil {
@@ -85,33 +76,6 @@ func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY f
 			// reset page margins
 			doc.p.SetMargins(pageMarginL, pageMarginT, pageMarginR)
 		}
-	case "numeric":
-		v, ok := valueIf.(pgtype.Numeric)
-		if !ok {
-			return fmt.Errorf("failed to parse numeric attribute value")
-		}
-
-		f, err := v.Float64Value()
-		if err != nil {
-			return err
-		}
-		drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, tools.FormatFloat(
-			f.Float64, atr.LengthFract, font.NumberSepDec, font.NumberSepTho))
-
-	case "real", "double precision":
-		drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, fmt.Sprintf("%f", valueIf))
-	case "boolean":
-		v, ok := valueIf.(bool)
-		if !ok {
-			return fmt.Errorf("failed to parse boolean attribute value")
-		}
-		if v {
-			drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, font.BoolTrue)
-		} else {
-			drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, font.BoolFalse)
-		}
-	case "regconfig":
-		drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, fmt.Sprintf("%s", valueIf))
 	case "files":
 		valueJson, err := json.Marshal(valueIf)
 		if err != nil {
@@ -138,35 +102,6 @@ func drawAttributeValue(doc *doc, font types.DocFont, posX, posY, sizeX, sizeY f
 				break
 			}
 		}
-	case "integer", "bigint":
-		switch atr.ContentUse {
-		case "default":
-			drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, fmt.Sprintf("%d", valueIf))
-		case "date", "datetime":
-			tUnix, err := getInt64FromInterface(valueIf)
-			if err != nil {
-				return err
-			}
-
-			if atr.ContentUse == "datetime" {
-				// print datetime at local server time
-				drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, time.Unix(tUnix, 0).Local().Format(tools.GetDatetimeFormat(font.DateFormat, true)))
-			} else {
-				// print date at UTC
-				drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, time.Unix(tUnix, 0).Format(tools.GetDatetimeFormat(font.DateFormat, false)))
-			}
-		case "time":
-			v, ok := valueIf.(int32)
-			if !ok {
-				return fmt.Errorf("failed to parse time attribute value")
-			}
-			hh := int32(v / 3600)
-			mm := int32((v - (hh * 3600)) / 60)
-			ss := int32(v - (hh * 3600) - (mm * 60))
-			drawCellText(doc, font, sizeX, sizeY, flowHorizontal, lineCount, fmt.Sprintf("%02d:%02d:%02d", hh, mm, ss))
-		}
-	default:
-		return fmt.Errorf("failed to add field, no definition for attribute content '%s'", atr.Content)
 	}
 	return nil
 }

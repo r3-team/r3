@@ -6,9 +6,12 @@ import (
 	"r3/data"
 	"r3/data/data_query"
 	"r3/db"
+	"r3/tools"
 	"r3/types"
+	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func getDataDoc(ctx context.Context, doc *doc, noAuth bool, loginId int64, q types.Query, exprs []types.DataGetExpression, language string) error {
@@ -50,4 +53,85 @@ func getDataDoc(ctx context.Context, doc *doc, noAuth bool, loginId int64, q typ
 		doc.data[expr.Index][expr.AttributeId.Bytes] = rows[0].Values[i]
 	}
 	return nil
+}
+
+// returns whether an attribute value can be returned as string and the string value itself if valid
+func getAttributeString(font types.DocFont, atr types.Attribute, valueIf any) (bool, string, error) {
+
+	if valueIf == nil {
+		return true, "", nil
+	}
+
+	switch atr.Content {
+	case "real", "double precision":
+		return true, fmt.Sprintf("%f", valueIf), nil
+	case "regconfig":
+		return true, fmt.Sprintf("%s", valueIf), nil
+	case "text", "varchar":
+		v, ok := valueIf.(string)
+		if !ok {
+			return false, "", fmt.Errorf("failed to parse text attribute value")
+		}
+
+		switch atr.ContentUse {
+		case "default", "iframe", "textarea":
+			return true, v, nil
+		case "color":
+			return true, fmt.Sprintf("#%s", v), nil
+		case "barcode", "drawing", "richtext":
+			return false, "", nil
+		}
+	case "boolean":
+		v, ok := valueIf.(bool)
+		if !ok {
+			return false, "", fmt.Errorf("failed to parse boolean attribute value")
+		}
+		if v {
+			return true, font.BoolTrue, nil
+		} else {
+			return true, font.BoolFalse, nil
+		}
+	case "files":
+		return false, "", nil
+	case "integer", "bigint":
+		switch atr.ContentUse {
+		case "default":
+			return true, fmt.Sprintf("%d", valueIf), nil
+		case "date", "datetime":
+			tUnix, err := getInt64FromInterface(valueIf)
+			if err != nil {
+				return false, "", err
+			}
+			if atr.ContentUse == "datetime" {
+				// print datetime at local server time
+				return true, time.Unix(tUnix, 0).Local().Format(tools.GetDatetimeFormat(font.DateFormat, true)), nil
+			} else {
+				// print date at UTC
+				return true, time.Unix(tUnix, 0).Format(tools.GetDatetimeFormat(font.DateFormat, false)), nil
+			}
+		case "time":
+			v, ok := valueIf.(int32)
+			if !ok {
+				return false, "", fmt.Errorf("failed to parse time attribute value")
+			}
+			hh := int32(v / 3600)
+			mm := int32((v - (hh * 3600)) / 60)
+			ss := int32(v - (hh * 3600) - (mm * 60))
+			return true, fmt.Sprintf("%02d:%02d:%02d", hh, mm, ss), nil
+		}
+	case "numeric":
+		v, ok := valueIf.(pgtype.Numeric)
+		if !ok {
+			return false, "", fmt.Errorf("failed to parse numeric attribute value")
+		}
+		f, err := v.Float64Value()
+		if err != nil {
+			return false, "", err
+		}
+		return true, tools.FormatFloat(f.Float64, atr.LengthFract, font.NumberSepDec, font.NumberSepTho), nil
+
+	default:
+		return false, "", fmt.Errorf("failed to add field, no definition for attribute content '%s'", atr.Content)
+	}
+	return false, "", nil
 }

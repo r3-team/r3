@@ -2468,6 +2468,8 @@
 		"pgFunction": "الوظيفة (الخلفية)",
 		"pgFunctions": "الوظائف (الخلفية)",
 		"placeholders": "Placeholders",
+		"postfix": "Postfix",
+		"prefix": "Prefix",
 		"preview": "معاينة",
 		"properties": "ملكيات",
 		"queryChoices": "مجموعات التصفية",

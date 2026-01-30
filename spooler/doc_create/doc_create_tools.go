@@ -12,6 +12,16 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+func getStringClean(s string, prefix, postfix string, lengthChars int) string {
+	if prefix != "" || postfix != "" {
+		s = fmt.Sprintf("%s%s%s", prefix, s, postfix)
+	}
+	if lengthChars != 0 && len(s) > lengthChars-3 {
+		s = fmt.Sprintf("%s...", s[:lengthChars-3])
+	}
+	return s
+}
+
 func getSetDataResolved(doc *doc, set []types.DocSet) []types.DocSet {
 	for i, s := range set {
 		if !s.AttributeId.Valid || !s.AttributeIndex.Valid {
@@ -125,6 +135,17 @@ func getExpressionsFromField(fieldIf any) ([]types.DataGetExpression, error) {
 				return nil, err
 			}
 			exprs = append(exprs, exprsSub...)
+		}
+
+	case "list":
+		var f types.DocFieldList
+		if err := json.Unmarshal(fieldJson, &f); err != nil {
+			return nil, err
+		}
+		for _, column := range f.Columns {
+			exprs = append(exprs, getExpressionsFromSet(column.SetsBody)...)
+			exprs = append(exprs, getExpressionsFromSet(column.SetsFooter)...)
+			exprs = append(exprs, getExpressionsFromSet(column.SetsHeader)...)
 		}
 	}
 	return exprs, nil

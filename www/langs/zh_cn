@@ -2468,6 +2468,8 @@
 		"pgFunction": "Function (back)",
 		"pgFunctions": "函数（后端）",
 		"placeholders": "Placeholders",
+		"postfix": "Postfix",
+		"prefix": "Prefix",
 		"preview": "预览",
 		"properties": "属性",
 		"queryChoices": "过滤器集",

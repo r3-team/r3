@@ -10,7 +10,6 @@ import (
 	"r3/handler"
 	"r3/tools"
 	"r3/types"
-	"slices"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -22,10 +21,10 @@ type cell struct {
 	text     string
 	length   int
 	lines    int
+	postfix  string
+	prefix   string
 	width    float64
 }
-
-var attributeContentUseParsable = []string{"default", "textarea", "richtext", "iframe"}
 
 func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParent types.DocFont) error {
 
@@ -129,6 +128,8 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		if !exists {
 			return handler.ErrSchemaUnknownAttribute(column.AttributeId)
 		}
+
+		column = applyToColumn(column.SetsHeader, column)
 		columnIndexMapAtr[i] = atr
 		columnIndexMapFontHeader[i] = applyToFont(getSetDataResolved(doc, column.SetsHeader), fontField)
 		columnIndexMapFontBody[i] = applyToFont(getSetDataResolved(doc, column.SetsBody), fontField)
@@ -145,6 +146,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 			}
 		}
 
+		title = getStringClean(title, column.TextPrefix, column.TextPostfix, column.Length)
 		sizeYCell, cellLines := getRowCellHeightLines(doc, columnIndexMapFontHeader[i], columnIndexMapWidth[i]-sizeXReductionHeader, column.Length, title)
 		sizeYCell += sizeYAdditionHeader
 		if sizeYHeader < sizeYCell {
@@ -182,9 +184,9 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		cells := make([]cell, 0)
 		for i, column := range f.Columns {
 
+			column = applyToColumn(column.SetsBody, column)
 			atr := columnIndexMapAtr[i]
 			font := columnIndexMapFontBody[i]
-			text := ""
 
 			// collect values for aggregation
 			if printAggregationRow && column.AggregatorRow.Valid && row.Values[i] != nil {
@@ -238,23 +240,15 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 				}
 			}
 
-			if row.Values[i] != nil && slices.Contains(attributeContentUseParsable, atr.ContentUse) {
-				isChars := atr.Content == "text" || atr.Content == "integer" || atr.Content == "bigint"
-				isNum := atr.Content == "numeric"
-
-				if isChars {
-					text = fmt.Sprint(row.Values[i])
-				}
-				if isNum {
-					v, err := getFloat64FromInterface(row.Values[i])
-					if err != nil {
-						return err
-					}
-					text = tools.FormatFloat(v, atr.LengthFract, font.NumberSepDec, font.NumberSepTho)
-				}
+			isString, str, err := getAttributeString(font, atr, row.Values[i])
+			if err != nil {
+				return err
+			}
+			if isString {
+				str = getStringClean(str, column.TextPrefix, column.TextPostfix, column.Length)
 			}
 
-			sizeYCell, cellLines := getRowCellHeightLines(doc, font, columnIndexMapWidth[i]-sizeXReductionBody, column.Length, text)
+			sizeYCell, cellLines := getRowCellHeightLines(doc, font, columnIndexMapWidth[i]-sizeXReductionBody, column.Length, str)
 			sizeYCell += sizeYAdditionBody
 			if sizeYRow < sizeYCell {
 				sizeYRow = sizeYCell
@@ -266,7 +260,9 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 				font:     font,
 				length:   column.Length,
 				lines:    cellLines,
-				text:     "",
+				postfix:  column.TextPostfix,
+				prefix:   column.TextPrefix,
+				text:     str, // text is empty string if it cannot be parsed
 				width:    columnIndexMapWidth[i],
 			})
 		}
@@ -299,10 +295,11 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		var sizeYRow float64 = 0
 		var cells = make([]cell, 0)
 		for i, column := range f.Columns {
+
+			column = applyToColumn(column.SetsFooter, column)
 			text := ""
 
 			if column.AggregatorRow.Valid {
-
 				if column.AggregatorRow.String == "count" {
 					text = fmt.Sprintf("%d", columnIndexMapAggValueCnt[i])
 				} else {
@@ -328,6 +325,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 			}
 
 			// figure out row height
+			text = getStringClean(text, column.TextPrefix, column.TextPostfix, column.Length)
 			sizeYCell, cellLines := getRowCellHeightLines(doc, columnIndexMapFontFooter[i], columnIndexMapWidth[i]-sizeXReductionFooter, column.Length, text)
 			sizeYCell += sizeYAdditionFooter
 			if sizeYRow < sizeYCell {
@@ -393,12 +391,9 @@ func addListRow(doc *doc, b types.DocBorder, isFirstRow bool, cells []cell, padd
 		doc.p.SetXY(posX+posXOffset+padding.L, posY+bSizeT+padding.T)
 
 		if c.text != "" {
-			if c.length != 0 && len(c.text) > c.length-3 {
-				c.text = fmt.Sprintf("%s...", c.text[:c.length-3])
-			}
 			drawCellText(doc, c.font, c.width-sizeXReduction, sizeYContent, false, c.lines, c.text)
 		} else {
-			if err := drawAttributeValue(doc, c.font, 0, 0, c.width-sizeXReduction, sizeYContent, false, c.length, c.lines, c.atr, c.atrValue); err != nil {
+			if err := drawAttributeNonString(doc, c.font, 0, c.width-sizeXReduction, sizeYContent, c.atr, c.atrValue); err != nil {
 				return err
 			}
 		}

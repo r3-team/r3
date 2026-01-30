@@ -27,6 +27,21 @@ func applyToDocument(set []types.DocSet, d types.Doc) types.Doc {
 	return d
 }
 
+func applyToColumn(set []types.DocSet, c types.DocColumn) types.DocColumn {
+	for _, o := range set {
+		switch v := o.Value.(type) {
+		case string:
+			switch o.Target {
+			case "text.postfix":
+				c.TextPostfix = v
+			case "text.prefix":
+				c.TextPrefix = v
+			}
+		}
+	}
+	return c
+}
+
 func applyToFieldGrid(set []types.DocSet, f types.DocFieldGrid) types.DocFieldGrid {
 	for _, o := range set {
 		switch v := o.Value.(type) {

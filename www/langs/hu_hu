@@ -2468,6 +2468,8 @@
 		"pgFunction": "Function (back)",
 		"pgFunctions": "Függvények (hátul)",
 		"placeholders": "Placeholders",
+		"postfix": "Postfix",
+		"prefix": "Prefix",
 		"preview": "Előnézet",
 		"properties": "Tulajdonságok",
 		"queryChoices": "Szűrő sorok",

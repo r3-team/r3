@@ -110,7 +110,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 
 		// collect expressions for primary query
 		// * data fields
-		// * overwrite rules in document, pages & fields
+		// * overwrite rules in document, pages, fields & columns
 		exprs := make([]types.DataGetExpression, 0)
 		exprs = append(exprs, getExpressionsFromSet(docDef.Sets)...)
 
