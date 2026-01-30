@@ -162,7 +162,7 @@ const MyBuilderDocColumn = {
 							:allowValue="true"
 							:joins
 							:readonly
-							:targetsFont="true"
+							:showFont="true"
 						/>
 						<my-builder-doc-sets
 							v-if="tabTargetArea === 'header'"
@@ -171,7 +171,7 @@ const MyBuilderDocColumn = {
 							:allowValue="true"
 							:joins
 							:readonly
-							:targetsFont="true"
+							:showFont="true"
 						/>
 						<my-builder-doc-sets
 							v-if="tabTargetArea === 'footer'"
@@ -180,7 +180,7 @@ const MyBuilderDocColumn = {
 							:allowValue="true"
 							:joins
 							:readonly
-							:targetsFont="true"
+							:showFont="true"
 						/>
 					</div>
 				</div>

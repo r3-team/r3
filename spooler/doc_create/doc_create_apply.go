@@ -78,8 +78,8 @@ func applyToFieldList(set []types.DocSet, f types.DocFieldList) types.DocFieldLi
 				f.FooterBorder.Cell = v
 			case "headerBorder.cell":
 				f.HeaderBorder.Cell = v
-			case "headerRepat":
-				f.HeaderRepeat = v
+			case "headerRow.repeat":
+				f.HeaderRowRepeat = v
 			}
 		case float64:
 			switch o.Target {
@@ -96,22 +96,22 @@ func applyToFieldList(set []types.DocSet, f types.DocFieldList) types.DocFieldLi
 				f.BodyBorder.Color = pgtype.Text{String: v, Valid: true}
 			case "bodyBorder.draw":
 				f.BodyBorder.Draw = v
-			case "bodyColorFillEven":
-				f.BodyColorFillEven = pgtype.Text{String: v, Valid: true}
-			case "bodyColorFillOdd":
-				f.BodyColorFillOdd = pgtype.Text{String: v, Valid: true}
+			case "bodyRow.colorFillEven":
+				f.BodyRowColorFillEven = pgtype.Text{String: v, Valid: true}
+			case "bodyRow.colorFillOdd":
+				f.BodyRowColorFillOdd = pgtype.Text{String: v, Valid: true}
 			case "footerBorder.color":
 				f.FooterBorder.Color = pgtype.Text{String: v, Valid: true}
 			case "footerBorder.draw":
 				f.FooterBorder.Draw = v
-			case "footerColorFill":
-				f.FooterColorFill = pgtype.Text{String: v, Valid: true}
+			case "footerRow.colorFill":
+				f.FooterRowColorFill = pgtype.Text{String: v, Valid: true}
 			case "headerBorder.color":
 				f.HeaderBorder.Color = pgtype.Text{String: v, Valid: true}
 			case "headerBorder.draw":
 				f.HeaderBorder.Draw = v
-			case "headerColorFill":
-				f.HeaderColorFill = pgtype.Text{String: v, Valid: true}
+			case "headerRow.colorFill":
+				f.HeaderRowColorFill = pgtype.Text{String: v, Valid: true}
 			}
 		}
 	}

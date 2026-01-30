@@ -39,6 +39,10 @@ const MyBuilderDocBorder = {
 		</td>
 	</tr>
 	<template v-if="drawAny">
+		<tr v-if="allowCell">
+			<td>{{ capApp.cell }}</td>
+			<td><my-bool @update:modelValue="$emit('update:cell',$event)" :modelValue="cell" :readonly /></td>
+		</tr>
 		<tr>
 			<td>{{ capGen.size }}</td>
 			<td>
@@ -71,10 +75,6 @@ const MyBuilderDocBorder = {
 		<tr>
 			<td>{{ capGen.color }}</td>
 			<td><my-input-color-wrap @update:modelValue="$emit('update:color',$event)" :allowNull="true" :modelValue="color" :readonly /></td>
-		</tr>
-		<tr v-if="allowCell">
-			<td>{{ capApp.cell }}</td>
-			<td><my-bool @update:modelValue="$emit('update:cell',$event)" :modelValue="cell" :readonly /></td>
 		</tr>
 	</template>`,
 	props:{

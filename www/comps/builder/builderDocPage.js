@@ -121,9 +121,7 @@ export default {
 						v-model:r="page.margin.r"
 						v-model:b="page.margin.b"
 						v-model:l="page.margin.l"
-						@update:all="page.margin = $event;setMarginVertical(true,$event.t);setMarginVertical(false,$event.b)"
-						@update:t="setMarginVertical(true,$event)"
-						@update:b="setMarginVertical(false,$event)"
+						@update:all="page.margin = $event"
 						:defaults="{t:24,r:15,b:12,l:15}"
 						:disableT="headerInherit"
 						:disableB="footerInherit"
@@ -157,7 +155,7 @@ export default {
 				:allowValue="true"
 				:joins
 				:readonly
-				:targetsFont="true"
+				:showFont="true"
 			/>
 		</teleport>
 	</div>`,

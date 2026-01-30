@@ -127,9 +127,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				'bodyBorder.cell',  'bodyBorder.color',  'bodyBorder.draw',  'bodyBorder.size',  
 				'footerBorder.cell','footerBorder.color','footerBorder.draw','footerBorder.size',
 				'headerBorder.cell','headerBorder.color','headerBorder.draw','headerBorder.size',
-				'bodyColorFillEven','bodyColorFillOdd','footerColorFill','headerColorFill',
-				'font.align','font.color','font.dateFormat','font.family','font.lineFactor',
-				'font.numberSepDec','font.numberSepTho','font.size','font.style'
+				'bodyRow.colorFillEven','bodyRow.colorFillOdd','footerRow.colorFill','headerRow.colorFill',
+				'headerRow.repeat','font.align','font.color','font.dateFormat','font.family',
+				'font.lineFactor','font.numberSepDec','font.numberSepTho','font.size','font.style'
 			);
 
 			ALTER TYPE app.caption_content ADD VALUE 'docTitle';
@@ -281,11 +281,11 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			CREATE TABLE IF NOT EXISTS app.doc_field_list (
 				doc_field_id uuid NOT NULL,
-				body_color_fill_even character(6),
-				body_color_fill_odd character(6),
-				footer_color_fill character(6),
-				header_color_fill character(6),
-				header_repeat boolean NOT NULL,
+				body_row_color_fill_even character(6),
+				body_row_color_fill_odd character(6),
+				footer_row_color_fill character(6),
+				header_row_color_fill character(6),
+				header_row_repeat boolean NOT NULL,
 				paddings real[] NOT NULL,
 				CONSTRAINT doc_field_list_pkey PRIMARY KEY (doc_field_id),
 				CONSTRAINT doc_field_list_doc_field_id_fkey FOREIGN KEY (doc_field_id)

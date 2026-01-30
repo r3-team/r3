@@ -120,14 +120,14 @@ type DocFieldList struct {
 	State   bool      `json:"state"`
 
 	// list field
-	HeaderBorder      DocBorder   `json:"headerBorder"`
-	HeaderColorFill   pgtype.Text `json:"headerColorFill"`
-	HeaderRepeat      bool        `json:"headerRepeat"`
-	BodyBorder        DocBorder   `json:"bodyBorder"`
-	BodyColorFillEven pgtype.Text `json:"bodyColorFillEven"`
-	BodyColorFillOdd  pgtype.Text `json:"bodyColorFillOdd"`
-	FooterBorder      DocBorder   `json:"footerBorder"`
-	FooterColorFill   pgtype.Text `json:"footerColorFill"`
+	HeaderBorder         DocBorder   `json:"headerBorder"`
+	HeaderRowColorFill   pgtype.Text `json:"headerRowColorFill"`
+	HeaderRowRepeat      bool        `json:"headerRowRepeat"`
+	BodyBorder           DocBorder   `json:"bodyBorder"`
+	BodyRowColorFillEven pgtype.Text `json:"bodyRowColorFillEven"`
+	BodyRowColorFillOdd  pgtype.Text `json:"bodyRowColorFillOdd"`
+	FooterBorder         DocBorder   `json:"footerBorder"`
+	FooterRowColorFill   pgtype.Text `json:"footerRowColorFill"`
 
 	Columns []DocColumn      `json:"columns"`
 	Padding DocMarginPadding `json:"padding"`

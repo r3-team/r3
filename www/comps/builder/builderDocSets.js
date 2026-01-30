@@ -14,20 +14,25 @@ import {
 } from './builderDocInput.js';
 
 const targetTypes = {
-	color:['font.color'],
+	bool:['bodyBorder.cell','footerBorder.cell','headerBorder.cell','headerRow.repeat'],
+	border:['bodyBorder.draw','footerBorder.draw','headerBorder.draw'],
+	color:['bodyBorder.color','bodyRow.colorFillEven','bodyRow.colorFillOdd','footerBorder.color','footerRow.colorFill','headerBorder.color','headerRow.colorFill','font.color'],
 	dateFormat:['font.dateFormat'],
-	decimal:['font.size'],
+	decimal:['bodyBorder.size','footerBorder.size','headerBorder.size','font.size'],
 	fontAlign:['font.align'],
 	fontFamily:['font.family'],
 	fontLineFactor:['font.lineFactor'],
 	fontStyle:['font.style'],
 	numberSep:['font.numberSepDec','font.numberSepTho']
 };
-const targetsDoc  = ['title','language','author'];
-const targetsFont = [
-	'font.family','font.size','font.lineFactor','font.align','font.style',
-	'font.color','font.numberSepTho','font.numberSepDec','font.dateFormat'
-];
+const targetsDoc              = ['title','language','author'];
+const targetsFont             = ['font.family','font.size','font.lineFactor','font.align','font.style','font.color','font.numberSepTho','font.numberSepDec','font.dateFormat'];
+const targetsListBodyBorder   = ['bodyBorder.draw','bodyBorder.cell','bodyBorder.size','bodyBorder.color'];
+const targetsListBodyRow      = ['bodyRow.colorFillEven','bodyRow.colorFillOdd'];
+const targetsListFooterBorder = ['footerBorder.draw','footerBorder.cell','footerBorder.size','footerBorder.color'];
+const targetsListFooterRow    = ['footerRow.colorFill'];
+const targetsListHeaderBorder = ['headerBorder.draw','headerBorder.cell','headerBorder.size','headerBorder.color'];
+const targetsListHeaderRow    = ['headerRow.colorFill','headerRow.repeat'];
 
 const MyBuilderDocSetTarget = {
 	name:'my-builder-doc-set-target',
@@ -62,6 +67,7 @@ const MyBuilderDocSetTarget = {
 						:naked="true"
 					/>
 					<template v-if="value !== null">
+						<my-bool                         v-if="isBool"           v-model="value" :readonly />
 						<my-builder-doc-font-align       v-if="isFontAlign"      v-model="value" :readonly />
 						<my-builder-doc-font-family      v-if="isFontFamily"     v-model="value" :readonly />
 						<my-builder-doc-font-line-factor v-if="isFontLineFactor" v-model="value" :readonly />
@@ -98,7 +104,14 @@ const MyBuilderDocSetTarget = {
 		};
 	},
 	computed:{
+		atrContentWhitelist:s => {
+			if(s.isDecimal || s.isFontLineFactor) return ['numeric','real','double precision'];
+			if(s.isBool)                          return ['boolean'];
+
+			return ['varchar','text'];
+		},
 		valueDef:s => {
+			if(s.isBool)           return false;
 			if(s.isColor)          return '000000';
 			if(s.isDateFormat)     return 'Y-m-d';
 			if(s.isDecimal)        return 0.0;
@@ -116,19 +129,19 @@ const MyBuilderDocSetTarget = {
 		},
 
 		// simple
-		active:             s => s.setIndex !== -1,
-		atrContentWhitelist:s => s.isDecimal || s.isFontLineFactor ? ['numeric','real','double precision'] : ['varchar','text'],
-		indexAttributeIds:  s => s.getIndexAttributeIdsByJoins(s.joins,s.atrContentWhitelist),
-		isColor:            s => targetTypes.color.includes(s.target),
-		isDateFormat:       s => targetTypes.dateFormat.includes(s.target),
-		isDecimal:          s => targetTypes.decimal.includes(s.target),
-		isFontAlign:        s => targetTypes.fontAlign.includes(s.target),
-		isFontFamily:       s => targetTypes.fontFamily.includes(s.target),
-		isFontLineFactor:   s => targetTypes.fontLineFactor.includes(s.target),
-		isFontStyle:        s => targetTypes.fontStyle.includes(s.target),
-		isNumberSep:        s => targetTypes.numberSep.includes(s.target),
-		set:                s => s.setIndex !== -1 ? JSON.parse(JSON.stringify(s.sets[s.setIndex])) : s.getTemplateDocSet(s.target),
-		setIndex:           s => s.sets.findIndex(v => v.target === s.target),
+		active:           s => s.setIndex !== -1,
+		indexAttributeIds:s => s.getIndexAttributeIdsByJoins(s.joins,s.atrContentWhitelist),
+		isBool:           s => targetTypes.bool.includes(s.target),
+		isColor:          s => targetTypes.color.includes(s.target),
+		isDateFormat:     s => targetTypes.dateFormat.includes(s.target),
+		isDecimal:        s => targetTypes.decimal.includes(s.target),
+		isFontAlign:      s => targetTypes.fontAlign.includes(s.target),
+		isFontFamily:     s => targetTypes.fontFamily.includes(s.target),
+		isFontLineFactor: s => targetTypes.fontLineFactor.includes(s.target),
+		isFontStyle:      s => targetTypes.fontStyle.includes(s.target),
+		isNumberSep:      s => targetTypes.numberSep.includes(s.target),
+		set:              s => s.setIndex !== -1 ? JSON.parse(JSON.stringify(s.sets[s.setIndex])) : s.getTemplateDocSet(s.target),
+		setIndex:         s => s.sets.findIndex(v => v.target === s.target),
 
 		// stores
 		capApp:s => s.$store.getters.captions.builder.doc,
@@ -150,7 +163,30 @@ const MyBuilderDocSetTarget = {
 			'font.numberSepDec':this.capApp.font.numberSepDec,
 			'font.numberSepTho':this.capApp.font.numberSepTho,
 			'font.size':        this.capGen.size,
-			'font.style':       this.capApp.font.style
+			'font.style':       this.capApp.font.style,
+
+			// list body
+			'bodyBorder.cell':      this.capApp.border.cell,
+			'bodyBorder.size':      this.capGen.size,
+			'bodyBorder.color':     this.capGen.color,
+			'bodyBorder.draw':      this.capGen.border,
+			'bodyRow.colorFillEven':this.capGen.colorFillRowsEven,
+			'bodyRow.colorFillOdd': this.capGen.colorFillRowsOdd,
+
+			// list footer
+			'footerBorder.cell':  this.capApp.border.cell,
+			'footerBorder.size':  this.capGen.size,
+			'footerBorder.color': this.capGen.color,
+			'footerBorder.draw':  this.capGen.border,
+			'footerRow.colorFill':this.capGen.colorFill,
+
+			// list header
+			'headerBorder.cell':  this.capApp.border.cell,
+			'headerBorder.size':  this.capGen.size,
+			'headerBorder.color': this.capGen.color,
+			'headerBorder.draw':  this.capGen.border,
+			'headerRow.colorFill':this.capGen.colorFill,
+			'headerRow.repeat':   this.capApp.headerRowRepeat
 		};
 	},
 	methods:{
@@ -188,10 +224,10 @@ export default {
 	components:{MyBuilderDocSetTarget},
 	template:`<table class="generic-table-vertical default-inputs">
 		<tbody>
-			<template v-if="targetsDoc">
+			<template v-if="showDoc">
 				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.pdf + ')' }}</b></td></tr>
 				<my-builder-doc-set-target
-					v-for="t in targetsListDoc"
+					v-for="t in targetsDoc"
 					@apply="apply(t,$event)"
 					@remove="remove(t)"
 					:allowData
@@ -202,10 +238,10 @@ export default {
 					:target="t"
 				/>
 			</template>
-			<template v-if="targetsFont">
+			<template v-if="showFont">
 				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.font + ')' }}</b></td></tr>
 				<my-builder-doc-set-target
-					v-for="t in targetsListFont"
+					v-for="t in targetsFont"
 					@apply="apply(t,$event)"
 					@remove="remove(t)"
 					:allowData
@@ -215,22 +251,49 @@ export default {
 					:sets="modelValue"
 					:target="t"
 				/>
+			</template>
+			<template v-if="showListBody">
+				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.rows + ')' }}</b></td></tr>
+				<my-builder-doc-set-target v-for="t in targetsListBodyRow"    @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
+				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.border + ')' }}</b></td></tr>
+				<my-builder-doc-set-target v-for="t in targetsListBodyBorder" @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
+			</template>
+			<template v-if="showListFooter">
+				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.rows + ')' }}</b></td></tr>
+				<my-builder-doc-set-target v-for="t in targetsListFooterRow"    @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
+				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.border + ')' }}</b></td></tr>
+				<my-builder-doc-set-target v-for="t in targetsListFooterBorder" @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
+			</template>
+			<template v-if="showListHeader">
+				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.rows + ')' }}</b></td></tr>
+				<my-builder-doc-set-target v-for="t in targetsListHeaderRow"    @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
+				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.border + ')' }}</b></td></tr>
+				<my-builder-doc-set-target v-for="t in targetsListHeaderBorder" @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
 			</template>
 		</tbody>
 	</table>`,
 	props:{
-		allowData:  { type:Boolean, required:false, default:false },
-		allowValue: { type:Boolean, required:false, default:false },
-		joins:      { type:Array,   required:true },
-		modelValue: { type:Array,   required:true },
-		readonly:   { type:Boolean, required:true },
-		targetsDoc: { type:Boolean, required:false, default:false },
-		targetsFont:{ type:Boolean, required:false, default:false }
+		allowData:     { type:Boolean, required:false, default:false },
+		allowValue:    { type:Boolean, required:false, default:false },
+		joins:         { type:Array,   required:true },
+		modelValue:    { type:Array,   required:true },
+		readonly:      { type:Boolean, required:true },
+		showDoc:       { type:Boolean, required:false, default:false },
+		showFont:      { type:Boolean, required:false, default:false },
+		showListBody:  { type:Boolean, required:false, default:false },
+		showListFooter:{ type:Boolean, required:false, default:false },
+		showListHeader:{ type:Boolean, required:false, default:false }
 	},
 	emits:['update:modelValue'],
 	computed:{
-		targetsListDoc: s => targetsDoc,
-		targetsListFont:s => targetsFont,
+		targetsDoc:             s => targetsDoc,
+		targetsFont:            s => targetsFont,
+		targetsListBodyBorder:  s => targetsListBodyBorder,
+		targetsListBodyRow:     s => targetsListBodyRow,
+		targetsListFooterBorder:s => targetsListFooterBorder,
+		targetsListFooterRow:   s => targetsListFooterRow,
+		targetsListHeaderBorder:s => targetsListHeaderBorder,
+		targetsListHeaderRow:   s => targetsListHeaderRow,
 
 		// stores
 		capGen:s => s.$store.getters.captions.generic

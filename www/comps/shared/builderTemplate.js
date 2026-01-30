@@ -212,14 +212,14 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 			f.sizeY    = 25;
 		break;
 		case 'list':
-			f.bodyBorder        = getBorderTemplate();
-			f.BodyColorFillEven = null;
-			f.BodyColorFillOdd  = null;
-			f.headerBorder      = getBorderTemplate();
-			f.HeaderColorFill   = null;
-			f.headerRepeat      = false;
-			f.footerBorder      = getBorderTemplate();
-			f.footerColorFill   = null;
+			f.bodyBorder           = getBorderTemplate();
+			f.BodyRowColorFillEven = null;
+			f.BodyRowColorFillOdd  = null;
+			f.headerBorder         = getBorderTemplate();
+			f.HeaderRowColorFill   = null;
+			f.headerRowRepeat      = false;
+			f.footerBorder         = getBorderTemplate();
+			f.footerRowColorFill   = null;
 
 			f.columns = [];
 			f.query   = getTemplateQuery();

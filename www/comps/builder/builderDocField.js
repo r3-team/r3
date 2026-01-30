@@ -320,74 +320,101 @@ export default {
 
 					<!-- list properties -->
 					<div class="content grow" v-if="isList">
-						<h2>{{ capApp.cellStyles }}</h2>
+						<h2>{{ capGen.rows }}</h2>
 						<div class="builder-doc-sub-settings">
 							<my-tabs
 								v-model="tabTargetListArea"
 								:entries="tabTargetListAreas.entries"
 								:entriesText="tabTargetListAreas.labels"
 							/>
-							<table class="generic-table-vertical default-inputs" v-if="tabTargetListArea === 'body'">
-								<tbody>
-									<tr>
-										<td>{{ capGen.colorFillRowsOdd }}</td>
-										<td><my-input-color-wrap v-model="field.bodyColorFillOdd" :allowNull="true" :readonly /></td>
-									</tr>
-									<tr>
-										<td>{{ capGen.colorFillRowsEven }}</td>
-										<td><my-input-color-wrap v-model="field.bodyColorFillEven" :allowNull="true" :readonly /></td>
-									</tr>
-									<my-builder-doc-border
-										v-model:cell="field.bodyBorder.cell"
-										v-model:color="field.bodyBorder.color"
-										v-model:draw="field.bodyBorder.draw"
-										v-model:size="field.bodyBorder.size"
-										v-model:styleCap="field.bodyBorder.styleCap"
-										v-model:styleJoin="field.bodyBorder.styleJoin"
-										:allowCell="true"
-										:readonly
-									/>
-								</tbody>
-							</table>
-							<table class="generic-table-vertical default-inputs" v-if="tabTargetListArea === 'header'">
-								<tbody>
-									<tr>
-										<td>{{ capGen.colorFill }}</td>
-										<td><my-input-color-wrap v-model="field.headerColorFill" :allowNull="true" :readonly /></td>
-									</tr>
-									<tr>
-										<td colspan="2"><my-button-check v-model="field.headerRepeat" :caption="capApp.headerRepeat" :readonly /></td>
-									</tr>
-									<my-builder-doc-border
-										v-model:cell="field.headerBorder.cell"
-										v-model:color="field.headerBorder.color"
-										v-model:draw="field.headerBorder.draw"
-										v-model:size="field.headerBorder.size"
-										v-model:styleCap="field.headerBorder.styleCap"
-										v-model:styleJoin="field.headerBorder.styleJoin"
-										:allowCell="true"
-										:readonly
-									/>
-								</tbody>
-							</table>
-							<table class="generic-table-vertical default-inputs" v-if="tabTargetListArea === 'footer'">
-								<tbody>
-									<tr>
-										<td>{{ capGen.colorFill }}</td>
-										<td><my-input-color-wrap v-model="field.footerColorFill" :allowNull="true" :readonly /></td>
-									</tr>
-									<my-builder-doc-border
-										v-model:cell="field.footerBorder.cell"
-										v-model:color="field.footerBorder.color"
-										v-model:draw="field.footerBorder.draw"
-										v-model:size="field.footerBorder.size"
-										v-model:styleCap="field.footerBorder.styleCap"
-										v-model:styleJoin="field.footerBorder.styleJoin"
-										:allowCell="true"
-										:readonly
-									/>
-								</tbody>
-							</table>
+							<template v-if="tabTargetListArea === 'body'">
+								<table class="generic-table-vertical default-inputs">
+									<tbody>
+										<tr>
+											<td>{{ capGen.colorFillRowsOdd }}</td>
+											<td><my-input-color-wrap v-model="field.bodyRowColorFillOdd" :allowNull="true" :readonly /></td>
+										</tr>
+										<tr>
+											<td>{{ capGen.colorFillRowsEven }}</td>
+											<td><my-input-color-wrap v-model="field.bodyRowColorFillEven" :allowNull="true" :readonly /></td>
+										</tr>
+										<my-builder-doc-border
+											v-model:cell="field.bodyBorder.cell"
+											v-model:color="field.bodyBorder.color"
+											v-model:draw="field.bodyBorder.draw"
+											v-model:size="field.bodyBorder.size"
+											v-model:styleCap="field.bodyBorder.styleCap"
+											v-model:styleJoin="field.bodyBorder.styleJoin"
+											:allowCell="true"
+											:readonly
+										/>
+									</tbody>
+								</table>
+								<my-builder-doc-sets
+									v-model="field.sets"
+									:allowData="true"
+									:joins
+									:readonly
+									:showListBody="true"
+								/>
+							</template>
+							<template v-if="tabTargetListArea === 'header'">
+								<table class="generic-table-vertical default-inputs">
+									<tbody>
+										<tr>
+											<td>{{ capGen.colorFill }}</td>
+											<td><my-input-color-wrap v-model="field.headerColorFill" :allowNull="true" :readonly /></td>
+										</tr>
+										<tr>
+											<td colspan="2"><my-button-check v-model="field.headerRowRepeat" :caption="capApp.headerRowRepeat" :readonly /></td>
+										</tr>
+										<my-builder-doc-border
+											v-model:cell="field.headerBorder.cell"
+											v-model:color="field.headerBorder.color"
+											v-model:draw="field.headerBorder.draw"
+											v-model:size="field.headerBorder.size"
+											v-model:styleCap="field.headerBorder.styleCap"
+											v-model:styleJoin="field.headerBorder.styleJoin"
+											:allowCell="true"
+											:readonly
+										/>
+									</tbody>
+								</table>
+								<my-builder-doc-sets
+									v-model="field.sets"
+									:allowData="true"
+									:joins
+									:readonly
+									:showListHeader="true"
+								/>
+							</template>
+							<template v-if="tabTargetListArea === 'footer'">
+								<table class="generic-table-vertical default-inputs">
+									<tbody>
+										<tr>
+											<td>{{ capGen.colorFill }}</td>
+											<td><my-input-color-wrap v-model="field.footerColorFill" :allowNull="true" :readonly /></td>
+										</tr>
+										<my-builder-doc-border
+											v-model:cell="field.footerBorder.cell"
+											v-model:color="field.footerBorder.color"
+											v-model:draw="field.footerBorder.draw"
+											v-model:size="field.footerBorder.size"
+											v-model:styleCap="field.footerBorder.styleCap"
+											v-model:styleJoin="field.footerBorder.styleJoin"
+											:allowCell="true"
+											:readonly
+										/>
+									</tbody>
+								</table>
+								<my-builder-doc-sets
+									v-model="field.sets"
+									:allowData="true"
+									:joins
+									:readonly
+									:showListFooter="true"
+								/>
+							</template>
 						</div>
 					</div>
 
@@ -398,7 +425,7 @@ export default {
 						:allowValue="true"
 						:joins
 						:readonly
-						:targetsFont="true"
+						:showFont="true"
 					/>
 				</template>
 			</template>

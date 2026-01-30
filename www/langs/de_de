@@ -819,7 +819,6 @@
 				"addPage": "Seite hinzufügen",
 				"selectParent": "Feld darüber auswählen"
 			},
-			"cellStyles": "Zellstile",
 			"dialog": {
 				"delete": "Bist du sicher, dass du dieses Dokument löschen möchtest?"
 			},
@@ -853,7 +852,7 @@
 			"grid": {
 				"sizeSnap": "Rastergröße"
 			},
-			"headerRepeat": "Kopfzeile bei Seitenumbruch wiederholen",
+			"headerRowRepeat": "Kopfzeile bei Seitenumbruch wiederholen",
 			"inheritFrom": "Übernehmen von",
 			"inheritNone": "Für diese Seite setzen",
 			"placeholders": {
@@ -2486,7 +2485,8 @@
 		"returns": "Gibt zurück",
 		"role": "Rolle",
 		"roles": "Rollen",
-		"row": "Reihe",
+		"row": "Zeile",
+		"rows": "Zeilen",
 		"search": "Suche",
 		"searchBar": "Suchleiste",
 		"searchBars": "Suchleisten",

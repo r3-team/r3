@@ -63,7 +63,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			fg.size_snap,
 
 			-- list
-			fl.body_color_fill_even, fl.body_color_fill_odd, fl.footer_color_fill, fl.header_color_fill, fl.header_repeat
+			fl.body_row_color_fill_even, fl.body_row_color_fill_odd, fl.footer_row_color_fill, fl.header_row_color_fill, fl.header_row_repeat
 		FROM      app.doc_field      AS f
 		LEFT JOIN app.doc_field_data AS fd ON fd.doc_field_id = f.id
 		LEFT JOIN app.doc_field_flow AS ff ON ff.doc_field_id = f.id
@@ -86,11 +86,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 		var direction pgtype.Text
 		var gap, sizeSnap pgtype.Float8
 		var paddings []float64
-		var shrinkY, headerRepeat pgtype.Bool
-		var bodyColorFillEven, bodyColorFillOdd, footerColorFill, headerColorFill pgtype.Text
+		var shrinkY, headerRowRepeat pgtype.Bool
+		var bodyRowColorFillEven, bodyRowColorFillOdd, footerRowColorFill, headerRowColorFill pgtype.Text
 		if err := rows.Scan(&f.Id, &f.Content, &f.PosX, &f.PosY, &f.SizeX, &f.SizeY, &f.State, &paddings,
-			&shrinkY, &attributeId, &attributeIndex, &length, &direction, &gap, &sizeSnap, &bodyColorFillEven,
-			&bodyColorFillOdd, &footerColorFill, &headerColorFill, &headerRepeat); err != nil {
+			&shrinkY, &attributeId, &attributeIndex, &length, &direction, &gap, &sizeSnap, &bodyRowColorFillEven,
+			&bodyRowColorFillOdd, &footerRowColorFill, &headerRowColorFill, &headerRowRepeat); err != nil {
 
 			return nil, err
 		}
@@ -155,11 +155,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 				SizeY:   f.SizeY,
 				State:   f.State,
 
-				HeaderColorFill:   headerColorFill,
-				HeaderRepeat:      headerRepeat.Bool,
-				BodyColorFillEven: bodyColorFillEven,
-				BodyColorFillOdd:  bodyColorFillOdd,
-				FooterColorFill:   footerColorFill,
+				HeaderRowColorFill:   headerRowColorFill,
+				HeaderRowRepeat:      headerRowRepeat.Bool,
+				BodyRowColorFillEven: bodyRowColorFillEven,
+				BodyRowColorFillOdd:  bodyRowColorFillOdd,
+				FooterRowColorFill:   footerRowColorFill,
 			}
 			if len(paddings) == 4 {
 				f.Padding.T = paddings[0]
@@ -460,14 +460,14 @@ func setGrid_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, f types.Doc
 
 func setList_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldList) error {
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO app.doc_field_list (doc_field_id, body_color_fill_even, body_color_fill_odd,
-			footer_color_fill, header_color_fill, header_repeat, paddings)
+		INSERT INTO app.doc_field_list (doc_field_id, body_row_color_fill_even, body_row_color_fill_odd,
+			footer_row_color_fill, header_row_color_fill, header_row_repeat, paddings)
 		VALUES ($1,$2,$3,$4,$5,$6,$7)
 		ON CONFLICT (doc_field_id)
-		DO UPDATE SET body_color_fill_even = $2, body_color_fill_odd = $3, footer_color_fill = $4,
-			header_color_fill = $5, header_repeat = $6, paddings = $7
-	`, f.Id, f.BodyColorFillEven, f.BodyColorFillOdd, f.FooterColorFill, f.HeaderColorFill,
-		f.HeaderRepeat, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}); err != nil {
+		DO UPDATE SET body_row_color_fill_even = $2, body_row_color_fill_odd = $3,
+			footer_row_color_fill = $4, header_row_color_fill = $5, header_row_repeat = $6, paddings = $7
+	`, f.Id, f.BodyRowColorFillEven, f.BodyRowColorFillOdd, f.FooterRowColorFill, f.HeaderRowColorFill,
+		f.HeaderRowRepeat, []float64{f.Padding.T, f.Padding.R, f.Padding.B, f.Padding.L}); err != nil {
 
 		return err
 	}

@@ -169,7 +169,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 	posY, _ := getYWithNewPageIfNeeded(doc, sizeYHeader, pageMarginB)
 
 	// draw header
-	if err := addListRow(doc, f.HeaderBorder, true, cellsHeader, f.Padding, f.HeaderColorFill, posX, posY, f.SizeX, sizeYHeader, sizeXReductionHeader); err != nil {
+	if err := addListRow(doc, f.HeaderBorder, true, cellsHeader, f.Padding, f.HeaderRowColorFill, posX, posY, f.SizeX, sizeYHeader, sizeXReductionHeader); err != nil {
 		return err
 	}
 	posY = doc.p.GetY()
@@ -273,16 +273,16 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 
 		var pageAdded bool
 		posY, pageAdded = getYWithNewPageIfNeeded(doc, sizeYRow+paddingY, pageMarginB)
-		if f.HeaderRepeat && pageAdded {
-			if err := addListRow(doc, f.HeaderBorder, true, cellsHeader, f.Padding, f.HeaderColorFill, posX, posY, f.SizeX, sizeYHeader, sizeXReductionHeader); err != nil {
+		if f.HeaderRowRepeat && pageAdded {
+			if err := addListRow(doc, f.HeaderBorder, true, cellsHeader, f.Padding, f.HeaderRowColorFill, posX, posY, f.SizeX, sizeYHeader, sizeXReductionHeader); err != nil {
 				return err
 			}
 			posY = doc.p.GetY()
 		}
 
-		colorFill := f.BodyColorFillOdd
+		colorFill := f.BodyRowColorFillOdd
 		if ri%2 != 0 {
-			colorFill = f.BodyColorFillEven
+			colorFill = f.BodyRowColorFillEven
 		}
 
 		isFirstRow := ri == 0 || pageAdded
@@ -344,7 +344,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		}
 
 		posY, _ = getYWithNewPageIfNeeded(doc, sizeYRow+paddingY, pageMarginB)
-		if err := addListRow(doc, f.FooterBorder, true, cells, f.Padding, f.FooterColorFill, posX, posY, f.SizeX, sizeYRow, sizeXReductionFooter); err != nil {
+		if err := addListRow(doc, f.FooterBorder, true, cells, f.Padding, f.FooterRowColorFill, posX, posY, f.SizeX, sizeYRow, sizeXReductionFooter); err != nil {
 			return err
 		}
 		posY = doc.p.GetY()

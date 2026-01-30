@@ -240,8 +240,8 @@ export default {
 						:allowData="true"
 						:joins="doc.query.joins"
 						:readonly
-						:targetsDoc="true"
-						:targetsFont="true"
+						:showDoc="true"
+						:showFont="true"
 					/>
 				</div>
 				
