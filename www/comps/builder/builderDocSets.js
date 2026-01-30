@@ -24,13 +24,13 @@ const targetTypes = {
 	fontFamily:['font.family'],
 	fontLineFactor:['font.lineFactor'],
 	fontStyle:['font.style'],
+	integer:['text.length'],
 	numberSep:['font.numberSepDec','font.numberSepTho'],
 	string:['text.postfix','text.prefix']
 };
 
 // ordered targets
 const targetsDoc              = ['title','language','author'];
-const targetsColumn           = ['text.prefix','text.postfix'];
 const targetsFont             = ['font.family','font.size','font.lineFactor','font.align','font.style','font.color','font.numberSepTho','font.numberSepDec','font.dateFormat'];
 const targetsListBodyBorder   = ['bodyBorder.draw','bodyBorder.cell','bodyBorder.size','bodyBorder.color'];
 const targetsListBodyRow      = ['bodyRow.colorFillEven','bodyRow.colorFillOdd'];
@@ -38,6 +38,7 @@ const targetsListFooterBorder = ['footerBorder.draw','footerBorder.cell','footer
 const targetsListFooterRow    = ['footerRow.colorFill'];
 const targetsListHeaderBorder = ['headerBorder.draw','headerBorder.cell','headerBorder.size','headerBorder.color'];
 const targetsListHeaderRow    = ['headerRow.colorFill','headerRow.repeat'];
+const targetsText             = ['text.length','text.prefix','text.postfix'];
 
 const MyBuilderDocSetTarget = {
 	name:'my-builder-doc-set-target',
@@ -82,6 +83,11 @@ const MyBuilderDocSetTarget = {
 						<my-input-decimal                v-if="isDecimal"        v-model="value" :readonly :allowNull="false" :length="4" :lengthFract="2" />
 						<my-input-number-sep             v-if="isNumberSep"      v-model="value" :readonly :allowNone="target === 'font.numberSepTho'" />
 						<input                           v-if="isString"         v-model="value" :disabled="readonly" />
+						<input v-if="isInteger"
+							@input="value = $event.target.value === '' ? 0 : parseInt($event.target.value)"
+							:modelValue="String(value)"
+							:disabled="readonly"
+						/>
 					</template>
 				</template>
 
@@ -112,6 +118,7 @@ const MyBuilderDocSetTarget = {
 	computed:{
 		atrContentWhitelist:s => {
 			if(s.isDecimal || s.isFontLineFactor) return ['numeric','real','double precision'];
+			if(s.isInteger)                       return ['integer','bigint'];
 			if(s.isBool)                          return ['boolean'];
 
 			return ['varchar','text'];
@@ -121,6 +128,7 @@ const MyBuilderDocSetTarget = {
 			if(s.isColor)          return '000000';
 			if(s.isDateFormat)     return 'Y-m-d';
 			if(s.isDecimal)        return 0.0;
+			if(s.isInteger)        return 0;
 			if(s.isNumberSep)      return '.';
 			if(s.isFontAlign)      return 'L';
 			if(s.isFontFamily)     return 'Roboto';
@@ -146,6 +154,7 @@ const MyBuilderDocSetTarget = {
 		isFontFamily:     s => targetTypes.fontFamily.includes(s.target),
 		isFontLineFactor: s => targetTypes.fontLineFactor.includes(s.target),
 		isFontStyle:      s => targetTypes.fontStyle.includes(s.target),
+		isInteger:        s => targetTypes.integer.includes(s.target),
 		isNumberSep:      s => targetTypes.numberSep.includes(s.target),
 		isString:         s => targetTypes.string.includes(s.target),
 		set:              s => s.setIndex !== -1 ? JSON.parse(JSON.stringify(s.sets[s.setIndex])) : s.getTemplateDocSet(s.target),
@@ -161,6 +170,11 @@ const MyBuilderDocSetTarget = {
 			'author':  this.capGen.author,
 			'language':this.capGen.language,
 			'title':   this.capGen.title,
+
+			// text
+			'text.length':  this.capGen.lengthChars,
+			'text.postfix': this.capGen.postfix,
+			'text.prefix':  this.capGen.prefix,
 
 			// font
 			'font.align':       this.capApp.font.alignHor,
@@ -194,11 +208,7 @@ const MyBuilderDocSetTarget = {
 			'headerBorder.color': this.capGen.color,
 			'headerBorder.draw':  this.capGen.border,
 			'headerRow.colorFill':this.capGen.colorFill,
-			'headerRow.repeat':   this.capApp.headerRowRepeat,
-
-			// column
-			'text.postfix': this.capGen.postfix,
-			'text.prefix':  this.capGen.prefix
+			'headerRow.repeat':   this.capApp.headerRowRepeat
 		};
 	},
 	methods:{
@@ -236,11 +246,12 @@ export default {
 	components:{MyBuilderDocSetTarget},
 	template:`<table class="generic-table-vertical default-inputs">
 		<tbody>
-			<template v-if="showColumn">
-				<my-builder-doc-set-target v-for="t in targetsColumn" @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
+			<template v-if="showText">
+				<tr><td><b>{{ capGen.overwrite + ' (' + capGen.text + ')' }}</b></td></tr>
+				<my-builder-doc-set-target v-for="t in targetsText" @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
 			</template>
 			<template v-if="showDoc">
-				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.pdf + ')' }}</b></td></tr>
+				<tr><td><b>{{ capGen.overwrite + ' (' + capGen.pdf + ')' }}</b></td></tr>
 				<my-builder-doc-set-target
 					v-for="t in targetsDoc"
 					@apply="apply(t,$event)"
@@ -254,7 +265,7 @@ export default {
 				/>
 			</template>
 			<template v-if="showFont">
-				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.font + ')' }}</b></td></tr>
+				<tr><td><b>{{ capGen.overwrite + ' (' + capGen.font + ')' }}</b></td></tr>
 				<my-builder-doc-set-target
 					v-for="t in targetsFont"
 					@apply="apply(t,$event)"
@@ -268,21 +279,21 @@ export default {
 				/>
 			</template>
 			<template v-if="showListBody">
-				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.rows + ')' }}</b></td></tr>
+				<tr><td><b>{{ capGen.overwrite + ' (' + capGen.rows + ')' }}</b></td></tr>
 				<my-builder-doc-set-target v-for="t in targetsListBodyRow"    @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
-				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.border + ')' }}</b></td></tr>
+				<tr><td><b>{{ capGen.overwrite + ' (' + capGen.border + ')' }}</b></td></tr>
 				<my-builder-doc-set-target v-for="t in targetsListBodyBorder" @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
 			</template>
 			<template v-if="showListFooter">
-				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.rows + ')' }}</b></td></tr>
+				<tr><td><b>{{ capGen.overwrite + ' (' + capGen.rows + ')' }}</b></td></tr>
 				<my-builder-doc-set-target v-for="t in targetsListFooterRow"    @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
-				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.border + ')' }}</b></td></tr>
+				<tr><td><b>{{ capGen.overwrite + ' (' + capGen.border + ')' }}</b></td></tr>
 				<my-builder-doc-set-target v-for="t in targetsListFooterBorder" @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
 			</template>
 			<template v-if="showListHeader">
-				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.rows + ')' }}</b></td></tr>
+				<tr><td><b>{{ capGen.overwrite + ' (' + capGen.rows + ')' }}</b></td></tr>
 				<my-builder-doc-set-target v-for="t in targetsListHeaderRow"    @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
-				<tr><td><b>{{ capGen.overwrites + ' (' + capGen.border + ')' }}</b></td></tr>
+				<tr><td><b>{{ capGen.overwrite + ' (' + capGen.border + ')' }}</b></td></tr>
 				<my-builder-doc-set-target v-for="t in targetsListHeaderBorder" @apply="apply(t,$event)" @remove="remove(t)" :allowData :allowValue :joins :readonly :sets="modelValue" :target="t" />
 			</template>
 		</tbody>
@@ -293,16 +304,15 @@ export default {
 		joins:         { type:Array,   required:true },
 		modelValue:    { type:Array,   required:true },
 		readonly:      { type:Boolean, required:true },
-		showColumn:    { type:Boolean, required:false, default:false },
 		showDoc:       { type:Boolean, required:false, default:false },
 		showFont:      { type:Boolean, required:false, default:false },
 		showListBody:  { type:Boolean, required:false, default:false },
 		showListFooter:{ type:Boolean, required:false, default:false },
-		showListHeader:{ type:Boolean, required:false, default:false }
+		showListHeader:{ type:Boolean, required:false, default:false },
+		showText:      { type:Boolean, required:false, default:false }
 	},
 	emits:['update:modelValue'],
 	computed:{
-		targetsColumn:          s => targetsColumn,
 		targetsDoc:             s => targetsDoc,
 		targetsFont:            s => targetsFont,
 		targetsListBodyBorder:  s => targetsListBodyBorder,
@@ -311,6 +321,7 @@ export default {
 		targetsListFooterRow:   s => targetsListFooterRow,
 		targetsListHeaderBorder:s => targetsListHeaderBorder,
 		targetsListHeaderRow:   s => targetsListHeaderRow,
+		targetsText:            s => targetsText,
 
 		// stores
 		capGen:s => s.$store.getters.captions.generic

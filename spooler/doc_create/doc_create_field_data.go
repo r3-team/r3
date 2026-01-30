@@ -28,7 +28,7 @@ func addFieldData(doc *doc, f types.DocFieldData, font types.DocFont, flowHorizo
 
 	if isString {
 		if str != "" {
-			drawCellText(doc, font, f.SizeX, f.SizeY, flowHorizontal, 0, getStringClean(str, "", "", f.Length))
+			drawCellText(doc, font, f.SizeX, f.SizeY, flowHorizontal, 0, getStringClean(str, f.TextPrefix, f.TextPostfix, f.Length))
 		}
 		return nil
 	}

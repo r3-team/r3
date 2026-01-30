@@ -30,6 +30,21 @@ func applyToDocument(set []types.DocSet, d types.Doc) types.Doc {
 func applyToColumn(set []types.DocSet, c types.DocColumn) types.DocColumn {
 	for _, o := range set {
 		switch v := o.Value.(type) {
+		case float64:
+			switch o.Target {
+			case "text.length":
+				c.Length = int(v)
+			}
+		case int32:
+			switch o.Target {
+			case "text.length":
+				c.Length = int(v)
+			}
+		case int64:
+			switch o.Target {
+			case "text.length":
+				c.Length = int(v)
+			}
 		case string:
 			switch o.Target {
 			case "text.postfix":
@@ -40,6 +55,36 @@ func applyToColumn(set []types.DocSet, c types.DocColumn) types.DocColumn {
 		}
 	}
 	return c
+}
+
+func applyToFieldData(set []types.DocSet, f types.DocFieldData) types.DocFieldData {
+	for _, o := range set {
+		switch v := o.Value.(type) {
+		case float64:
+			switch o.Target {
+			case "text.length":
+				f.Length = int(v)
+			}
+		case int32:
+			switch o.Target {
+			case "text.length":
+				f.Length = int(v)
+			}
+		case int64:
+			switch o.Target {
+			case "text.length":
+				f.Length = int(v)
+			}
+		case string:
+			switch o.Target {
+			case "text.postfix":
+				f.TextPostfix = v
+			case "text.prefix":
+				f.TextPrefix = v
+			}
+		}
+	}
+	return f
 }
 
 func applyToFieldGrid(set []types.DocSet, f types.DocFieldGrid) types.DocFieldGrid {

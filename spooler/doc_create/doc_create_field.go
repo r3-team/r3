@@ -77,6 +77,7 @@ func addField(ctx context.Context, doc *doc, posXParent, posYParent, sizeXParent
 		if err := json.Unmarshal(fieldJson, &fd); err != nil {
 			return err
 		}
+		fd = applyToFieldData(f.Sets, fd)
 		fd.SizeX = f.SizeX
 		fd.SizeY = f.SizeY
 		return addFieldData(doc, fd, font, flowHorizontal, posX)
@@ -103,6 +104,7 @@ func addField(ctx context.Context, doc *doc, posXParent, posYParent, sizeXParent
 		if err := json.Unmarshal(fieldJson, &fl); err != nil {
 			return err
 		}
+		fl = applyToFieldList(sets, fl)
 		fl.SizeX = f.SizeX
 		fl.SizeY = f.SizeY
 		return addFieldList(ctx, doc, fl, font)

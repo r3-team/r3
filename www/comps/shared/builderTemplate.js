@@ -162,6 +162,8 @@ export function getTemplateDocColumn(attributeId,attributeIndex,subQuery) {
 		query:getTemplateQuery(),
 		sizeX:0,
 		subQuery:subQuery,
+		textPostfix:'',
+		textPrefix:'',
 		setsBody:[],
 		setsFooter:[],
 		setsHeader:[],
@@ -194,6 +196,8 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 			f.attributeId    = attributeId;
 			f.attributeIndex = attributeIndex;
 			f.length         = 0;
+			f.textPostfix    = '';
+			f.textPrefix     = '';
 		break;
 		case 'flow':     // fallthrough
         case 'flowBody':

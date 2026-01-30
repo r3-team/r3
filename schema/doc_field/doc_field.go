@@ -54,7 +54,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 			COALESCE(ff.shrink_y, fg.shrink_y),
 
 			-- data
-			fd.attribute_id, fd.attribute_index, fd.length,
+			fd.attribute_id, fd.attribute_index, fd.length, fd.text_postfix, fd.text_prefix,
 
 			-- flow
 			ff.direction, ff.gap,
@@ -87,10 +87,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 		var gap, sizeSnap pgtype.Float8
 		var paddings []float64
 		var shrinkY, headerRowRepeat pgtype.Bool
-		var bodyRowColorFillEven, bodyRowColorFillOdd, footerRowColorFill, headerRowColorFill pgtype.Text
+		var bodyRowColorFillEven, bodyRowColorFillOdd, footerRowColorFill, headerRowColorFill, textPostfix, textPrefix pgtype.Text
 		if err := rows.Scan(&f.Id, &f.Content, &f.PosX, &f.PosY, &f.SizeX, &f.SizeY, &f.State, &paddings,
-			&shrinkY, &attributeId, &attributeIndex, &length, &direction, &gap, &sizeSnap, &bodyRowColorFillEven,
-			&bodyRowColorFillOdd, &footerRowColorFill, &headerRowColorFill, &headerRowRepeat); err != nil {
+			&shrinkY, &attributeId, &attributeIndex, &length, &textPostfix, &textPrefix, &direction, &gap,
+			&sizeSnap, &bodyRowColorFillEven, &bodyRowColorFillOdd, &footerRowColorFill, &headerRowColorFill,
+			&headerRowRepeat); err != nil {
 
 			return nil, err
 		}
@@ -110,6 +111,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, fieldId pgtype.
 				AttributeId:    attributeId.Bytes,
 				AttributeIndex: int(attributeIndex.Int32),
 				Length:         int(length.Int32),
+				TextPostfix:    textPostfix.String,
+				TextPrefix:     textPrefix.String,
 			})
 		case "flow", "flowBody":
 			f := types.DocFieldFlow{
@@ -420,11 +423,11 @@ func setGeneric_tx(ctx context.Context, tx pgx.Tx, docPageId uuid.UUID, parentId
 
 func setData_tx(ctx context.Context, tx pgx.Tx, f types.DocFieldData) error {
 	_, err := tx.Exec(ctx, `
-		INSERT INTO app.doc_field_data (doc_field_id, attribute_id, attribute_index, length)
-		VALUES ($1,$2,$3,$4)
+		INSERT INTO app.doc_field_data (doc_field_id, attribute_id, attribute_index, length, text_postfix, text_prefix)
+		VALUES ($1,$2,$3,$4,$5,$6)
 		ON CONFLICT (doc_field_id)
-		DO UPDATE SET length = $4
-	`, f.Id, f.AttributeId, f.AttributeIndex, f.Length)
+		DO UPDATE SET length = $4, text_postfix = $5, text_prefix = $6
+	`, f.Id, f.AttributeId, f.AttributeIndex, f.Length, f.TextPostfix, f.TextPrefix)
 	return err
 }
 

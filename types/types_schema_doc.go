@@ -75,7 +75,9 @@ type DocFieldData struct {
 	// data field
 	AttributeId    uuid.UUID `json:"attributeId"`
 	AttributeIndex int       `json:"attributeIndex"`
-	Length         int       `json:"length"` // text length limit (in characters)
+	Length         int       `json:"length"`      // text length limit (in characters)
+	TextPostfix    string    `json:"textPostfix"` // fixed postfix value
+	TextPrefix     string    `json:"textPrefix"`  // fixed prefix value
 }
 type DocFieldFlow struct {
 	Id      uuid.UUID `json:"id"`

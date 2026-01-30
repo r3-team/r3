@@ -2460,6 +2460,7 @@
 		"orientation": "Orientation",
 		"orientationLandscape": "Landscape",
 		"orientationPortrait": "Portrait",
+		"overwrite": "Overwrite",
 		"overwrites": "Overwrites",
 		"page": "Page",
 		"password": "كلمة المرور",

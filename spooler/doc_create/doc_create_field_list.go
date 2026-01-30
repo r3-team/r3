@@ -26,7 +26,7 @@ type cell struct {
 	width    float64
 }
 
-func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParent types.DocFont) error {
+func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, font types.DocFont) error {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
@@ -43,11 +43,6 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 		Orders:      data_query.ConvertQueryToDataOrders(f.Query.Orders),
 		Limit:       f.Query.FixedLimit,
 	}
-
-	// apply overwrites
-	sets := getSetDataResolved(doc, f.Sets)
-	f = applyToFieldList(sets, f)
-	fontField := applyToFont(sets, fontParent)
 
 	// build expressions from columns
 	for _, column := range f.Columns {
@@ -131,9 +126,9 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, fontParen
 
 		column = applyToColumn(column.SetsHeader, column)
 		columnIndexMapAtr[i] = atr
-		columnIndexMapFontHeader[i] = applyToFont(getSetDataResolved(doc, column.SetsHeader), fontField)
-		columnIndexMapFontBody[i] = applyToFont(getSetDataResolved(doc, column.SetsBody), fontField)
-		columnIndexMapFontFooter[i] = applyToFont(getSetDataResolved(doc, column.SetsFooter), fontField)
+		columnIndexMapFontHeader[i] = applyToFont(getSetDataResolved(doc, column.SetsHeader), font)
+		columnIndexMapFontBody[i] = applyToFont(getSetDataResolved(doc, column.SetsBody), font)
+		columnIndexMapFontFooter[i] = applyToFont(getSetDataResolved(doc, column.SetsFooter), font)
 
 		// calcuclate header titles and row height
 		title, exists := column.Captions["docColumnTitle"][doc.p.GetLang()]

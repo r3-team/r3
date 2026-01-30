@@ -16,7 +16,7 @@ func getStringClean(s string, prefix, postfix string, lengthChars int) string {
 	if prefix != "" || postfix != "" {
 		s = fmt.Sprintf("%s%s%s", prefix, s, postfix)
 	}
-	if lengthChars != 0 && len(s) > lengthChars-3 {
+	if lengthChars != 0 && lengthChars >= 3 && len(s) > lengthChars-3 {
 		s = fmt.Sprintf("%s...", s[:lengthChars-3])
 	}
 	return s

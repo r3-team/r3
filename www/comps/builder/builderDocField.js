@@ -255,13 +255,21 @@ export default {
 								</tr>
 							</template>
 
-							<template v-if="isDataTextPrint">
+							<template v-if="isData">
 								<tr>
 									<td>{{ capGen.lengthChars }}</td>
 									<td>
-										<my-input-decimal class="short" v-if="field.length !== 0" v-model="field.length" :min="0" :readonly :allowNull="false" :lengthFract="0" />
+										<my-input-decimal class="short" v-if="field.length !== 0" v-model="field.length" :min="3" :readonly :allowNull="false" :lengthFract="0" />
 										<my-button v-else @trigger="field.length = 50" :caption="capGen.noLimit" :naked="true" />
 									</td>
+								</tr>
+								<tr>
+									<td>{{ capGen.prefix }}</td>
+									<td><input v-model="field.textPrefix" :disabled="readonly" /></td>
+								</tr>
+								<tr>
+									<td>{{ capGen.postfix }}</td>
+									<td><input v-model="field.textPostfix" :disabled="readonly" /></td>
 								</tr>
 							</template>
 
@@ -420,6 +428,14 @@ export default {
 
 					<!-- overwrites -->
 					<my-builder-doc-sets
+						v-if="isData"
+						v-model="field.sets"
+						:allowData="true"
+						:joins
+						:readonly
+						:showText="true"
+					/>
+					<my-builder-doc-sets
 						v-model="field.sets"
 						:allowData="true"
 						:allowValue="true"
@@ -564,26 +580,25 @@ export default {
 		stylePaddingL:s => `top:0mm;left:0mm;width:${s.field.padding.l*s.zoom}mm`,
 
 		// simple
-		attribute:      s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
-		dragTypeColumn: s => `doc-column_${s.field.id}`,
-		isChild:        s => s.isChildFlow || s.isChildGrid,
-		isData:         s => s.field.content === 'data',
-		isDataTextPrint:s => s.isData && ['iframe','default','textarea'].includes(s.attribute.contentUse),
-		isDataFiles:    s => s.isData && s.isAttributeFiles(s.attribute.content),
-		isDragPreview:  s => s.field.content === s.dragContent,
-		isFlow:         s => ['flow','flowBody'].includes(s.field.content),
-		isGrid:         s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
-		isList:         s => s.field.content === 'list',
-		isText:         s => s.field.content === 'text',
-		isOptionsShow:  s => s.fieldIdOptions === s.field.id,
-		isResizeInFlow: s => !s.isRoot && s.isChildFlow && (s.isFlow || s.isGrid || s.isDataFiles),
-		isResizeInGrid: s => !s.isRoot && s.isChildGrid,
-		isTabsNeeded:   s => s.isList,
-		isWithBorder:   s => s.isFlow || s.isGrid,
-		isWithFields:   s => s.isFlow || s.isGrid,
-		isWithQuery:    s => s.isList,
-		title:          s => s.getDocFieldTitle(s.field),
-		titleBar:       s => `${s.capGen.field}: ${s.title}`,
+		attribute:     s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
+		dragTypeColumn:s => `doc-column_${s.field.id}`,
+		isChild:       s => s.isChildFlow || s.isChildGrid,
+		isData:        s => s.field.content === 'data',
+		isDataFiles:   s => s.isData && s.isAttributeFiles(s.attribute.content),
+		isDragPreview: s => s.field.content === s.dragContent,
+		isFlow:        s => ['flow','flowBody'].includes(s.field.content),
+		isGrid:        s => ['grid','gridFooter','gridHeader'].includes(s.field.content),
+		isList:        s => s.field.content === 'list',
+		isText:        s => s.field.content === 'text',
+		isOptionsShow: s => s.fieldIdOptions === s.field.id,
+		isResizeInFlow:s => !s.isRoot && s.isChildFlow && (s.isFlow || s.isGrid || s.isDataFiles),
+		isResizeInGrid:s => !s.isRoot && s.isChildGrid,
+		isTabsNeeded:  s => s.isList,
+		isWithBorder:  s => s.isFlow || s.isGrid,
+		isWithFields:  s => s.isFlow || s.isGrid,
+		isWithQuery:   s => s.isList,
+		title:         s => s.getDocFieldTitle(s.field),
+		titleBar:      s => `${s.capGen.field}: ${s.title}`,
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],

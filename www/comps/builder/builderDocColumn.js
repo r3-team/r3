@@ -169,8 +169,8 @@ export default {
 							:allowValue="true"
 							:joins
 							:readonly
-							:showColumn="true"
 							:showFont="true"
+							:showText="true"
 						/>
 						<my-builder-doc-sets
 							v-if="tabTargetArea === 'header'"
@@ -179,8 +179,8 @@ export default {
 							:allowValue="true"
 							:joins
 							:readonly
-							:showColumn="true"
 							:showFont="true"
+							:showText="true"
 						/>
 						<my-builder-doc-sets
 							v-if="tabTargetArea === 'footer'"
@@ -189,8 +189,8 @@ export default {
 							:allowValue="true"
 							:joins
 							:readonly
-							:showColumn="true"
 							:showFont="true"
+							:showText="true"
 						/>
 					</div>
 				</div>

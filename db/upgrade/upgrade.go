@@ -130,7 +130,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				'bodyRow.colorFillEven','bodyRow.colorFillOdd','footerRow.colorFill','headerRow.colorFill',
 				'headerRow.repeat','font.align','font.color','font.dateFormat','font.family',
 				'font.lineFactor','font.numberSepDec','font.numberSepTho','font.size','font.style',
-				'text.postfix','text.prefix'
+				'text.length','text.postfix','text.prefix'
 			);
 
 			ALTER TYPE app.caption_content ADD VALUE 'docTitle';
@@ -240,6 +240,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				attribute_id uuid NOT NULL,
 				attribute_index integer NOT NULL,
 				length integer NOT NULL,
+				text_postfix text NOT NULL,
+				text_prefix text NOT NULL,
 				CONSTRAINT doc_field_data_pkey PRIMARY KEY (doc_field_id),
 				CONSTRAINT doc_field_data_doc_field_id_fkey FOREIGN KEY (doc_field_id)
 					REFERENCES app.doc_field (id) MATCH SIMPLE
