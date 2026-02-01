@@ -127,6 +127,7 @@ type DocFieldList struct {
 	HeaderBorder         DocBorder   `json:"headerBorder"`
 	HeaderRowColorFill   pgtype.Text `json:"headerRowColorFill"`
 	HeaderRowRepeat      bool        `json:"headerRowRepeat"`
+	HeaderRowShow        bool        `json:"headerRowShow"`
 	BodyBorder           DocBorder   `json:"bodyBorder"`
 	BodyRowColorFillEven pgtype.Text `json:"bodyRowColorFillEven"`
 	BodyRowColorFillOdd  pgtype.Text `json:"bodyRowColorFillOdd"`

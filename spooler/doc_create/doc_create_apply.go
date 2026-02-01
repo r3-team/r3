@@ -138,6 +138,8 @@ func applyToFieldList(set []types.DocSet, f types.DocFieldList) types.DocFieldLi
 				f.FooterBorder.Cell = v
 			case "headerBorder.cell":
 				f.HeaderBorder.Cell = v
+			case "headerRow.show":
+				f.HeaderRowShow = v
 			case "headerRow.repeat":
 				f.HeaderRowRepeat = v
 			}

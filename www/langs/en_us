@@ -863,6 +863,7 @@
 				"flowRow": "Direction 'row' only supports single text lines.<br />Images or multi line text requires column flow or a grid field."
 			},
 			"headerRowRepeat": "Repeat header row on page break",
+			"headerRowShow": "Show header row",
 			"inheritFrom": "Inherit from",
 			"inheritNone": "Set for this page",
 			"setData": "Overwrite by attribute value",

@@ -853,6 +853,7 @@
 				"sizeSnap": "Rastergröße"
 			},
 			"headerRowRepeat": "Kopfzeile bei Seitenumbruch wiederholen",
+			"headerRowShow": "Kopfzeile anzeigen",
 			"inheritFrom": "Übernehmen von",
 			"inheritNone": "Für diese Seite setzen",
 			"placeholders": {

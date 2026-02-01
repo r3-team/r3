@@ -370,25 +370,31 @@ export default {
 								<table class="generic-table-vertical default-inputs">
 									<tbody>
 										<tr>
-											<td>{{ capGen.colorFill }}</td>
-											<td><my-input-color-wrap v-model="field.headerColorFill" :allowNull="true" :readonly /></td>
+											<td colspan="2"><my-button-check v-model="field.headerRowShow" :caption="capApp.headerRowShow" :readonly /></td>
 										</tr>
-										<tr>
-											<td colspan="2"><my-button-check v-model="field.headerRowRepeat" :caption="capApp.headerRowRepeat" :readonly /></td>
-										</tr>
-										<my-builder-doc-border
-											v-model:cell="field.headerBorder.cell"
-											v-model:color="field.headerBorder.color"
-											v-model:draw="field.headerBorder.draw"
-											v-model:size="field.headerBorder.size"
-											v-model:styleCap="field.headerBorder.styleCap"
-											v-model:styleJoin="field.headerBorder.styleJoin"
-											:allowCell="true"
-											:readonly
-										/>
+										<template v-if="field.headerRowShow">
+											<tr>
+												<td colspan="2"><my-button-check v-model="field.headerRowRepeat" :caption="capApp.headerRowRepeat" :readonly /></td>
+											</tr>
+											<tr>
+												<td>{{ capGen.colorFill }}</td>
+												<td><my-input-color-wrap v-model="field.headerColorFill" :allowNull="true" :readonly /></td>
+											</tr>
+											<my-builder-doc-border
+												v-model:cell="field.headerBorder.cell"
+												v-model:color="field.headerBorder.color"
+												v-model:draw="field.headerBorder.draw"
+												v-model:size="field.headerBorder.size"
+												v-model:styleCap="field.headerBorder.styleCap"
+												v-model:styleJoin="field.headerBorder.styleJoin"
+												:allowCell="true"
+												:readonly
+											/>
+										</template>
 									</tbody>
 								</table>
 								<my-builder-doc-sets
+									v-if="field.headerRowShow"
 									v-model="field.sets"
 									:allowData="true"
 									:joins

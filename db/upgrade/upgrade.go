@@ -128,9 +128,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				'footerBorder.cell','footerBorder.color','footerBorder.draw','footerBorder.size',
 				'headerBorder.cell','headerBorder.color','headerBorder.draw','headerBorder.size',
 				'bodyRow.colorFillEven','bodyRow.colorFillOdd','footerRow.colorFill','headerRow.colorFill',
-				'headerRow.repeat','font.align','font.color','font.dateFormat','font.family',
-				'font.lineFactor','font.numberSepDec','font.numberSepTho','font.size','font.style',
-				'text.length','text.postfix','text.prefix'
+				'headerRow.repeat','headerRow.show','font.align','font.color','font.dateFormat',
+				'font.family','font.lineFactor','font.numberSepDec','font.numberSepTho','font.size',
+				'font.style','text.length','text.postfix','text.prefix'
 			);
 
 			ALTER TYPE app.caption_content ADD VALUE 'docTitle';
@@ -289,6 +289,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				footer_row_color_fill character(6),
 				header_row_color_fill character(6),
 				header_row_repeat boolean NOT NULL,
+				header_row_show boolean NOT NULL,
 				paddings real[] NOT NULL,
 				CONSTRAINT doc_field_list_pkey PRIMARY KEY (doc_field_id),
 				CONSTRAINT doc_field_list_doc_field_id_fkey FOREIGN KEY (doc_field_id)

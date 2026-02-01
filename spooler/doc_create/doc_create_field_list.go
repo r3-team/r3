@@ -166,10 +166,12 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, font type
 	posY, _ := getYWithNewPageIfNeeded(doc, sizeYHeader, pageMarginB)
 
 	// draw header
-	if err := addListRow(doc, f.HeaderBorder, true, cellsHeader, f.Padding, f.HeaderRowColorFill, posX, posY, f.SizeX, sizeYHeader, sizeXReductionHeader); err != nil {
-		return err
+	if f.HeaderRowShow {
+		if err := addListRow(doc, f.HeaderBorder, true, cellsHeader, f.Padding, f.HeaderRowColorFill, posX, posY, f.SizeX, sizeYHeader, sizeXReductionHeader); err != nil {
+			return err
+		}
+		posY = doc.p.GetY()
 	}
-	posY = doc.p.GetY()
 
 	// draw table body
 	for ri, row := range rows {
@@ -264,7 +266,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, font type
 
 		var pageAdded bool
 		posY, pageAdded = getYWithNewPageIfNeeded(doc, sizeYRow+paddingY, pageMarginB)
-		if f.HeaderRowRepeat && pageAdded {
+		if pageAdded && f.HeaderRowShow && f.HeaderRowRepeat {
 			if err := addListRow(doc, f.HeaderBorder, true, cellsHeader, f.Padding, f.HeaderRowColorFill, posX, posY, f.SizeX, sizeYHeader, sizeXReductionHeader); err != nil {
 				return err
 			}

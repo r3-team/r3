@@ -222,6 +222,7 @@ export function getTemplateDocField(content,attributeIndex,attributeId) {
 			f.headerBorder         = getBorderTemplate();
 			f.HeaderRowColorFill   = null;
 			f.headerRowRepeat      = false;
+			f.headerRowShow        = true;
 			f.footerBorder         = getBorderTemplate();
 			f.footerRowColorFill   = null;
 

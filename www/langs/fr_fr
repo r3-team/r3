@@ -853,6 +853,7 @@
 				"sizeSnap": "Grid snap size"
 			},
 			"headerRowRepeat": "Repeat header row on page break",
+			"headerRowShow": "Show header row",
 			"inheritFrom": "Inherit from",
 			"inheritNone": "Set for this page",
 			"placeholders": {

@@ -15,7 +15,7 @@ import {
 
 // value/input types for targets
 const targetTypes = {
-	bool:['bodyBorder.cell','footerBorder.cell','headerBorder.cell','headerRow.repeat'],
+	bool:['bodyBorder.cell','footerBorder.cell','headerBorder.cell','headerRow.show','headerRow.repeat'],
 	border:['bodyBorder.draw','footerBorder.draw','headerBorder.draw'],
 	color:['bodyBorder.color','bodyRow.colorFillEven','bodyRow.colorFillOdd','footerBorder.color','footerRow.colorFill','headerBorder.color','headerRow.colorFill','font.color'],
 	dateFormat:['font.dateFormat'],
@@ -37,7 +37,7 @@ const targetsListBodyRow      = ['bodyRow.colorFillEven','bodyRow.colorFillOdd']
 const targetsListFooterBorder = ['footerBorder.draw','footerBorder.cell','footerBorder.size','footerBorder.color'];
 const targetsListFooterRow    = ['footerRow.colorFill'];
 const targetsListHeaderBorder = ['headerBorder.draw','headerBorder.cell','headerBorder.size','headerBorder.color'];
-const targetsListHeaderRow    = ['headerRow.colorFill','headerRow.repeat'];
+const targetsListHeaderRow    = ['headerRow.show','headerRow.repeat','headerRow.colorFill'];
 const targetsText             = ['text.length','text.prefix','text.postfix'];
 
 const MyBuilderDocSetTarget = {
@@ -208,7 +208,8 @@ const MyBuilderDocSetTarget = {
 			'headerBorder.color': this.capGen.color,
 			'headerBorder.draw':  this.capGen.border,
 			'headerRow.colorFill':this.capGen.colorFill,
-			'headerRow.repeat':   this.capApp.headerRowRepeat
+			'headerRow.repeat':   this.capApp.headerRowRepeat,
+			'headerRow.show':     this.capApp.headerRowShow
 		};
 	},
 	methods:{
