@@ -378,7 +378,7 @@ export default {
 											</tr>
 											<tr>
 												<td>{{ capGen.colorFill }}</td>
-												<td><my-input-color-wrap v-model="field.headerColorFill" :allowNull="true" :readonly /></td>
+												<td><my-input-color-wrap v-model="field.headerRowColorFill" :allowNull="true" :readonly /></td>
 											</tr>
 											<my-builder-doc-border
 												v-model:cell="field.headerBorder.cell"
@@ -407,7 +407,7 @@ export default {
 									<tbody>
 										<tr>
 											<td>{{ capGen.colorFill }}</td>
-											<td><my-input-color-wrap v-model="field.footerColorFill" :allowNull="true" :readonly /></td>
+											<td><my-input-color-wrap v-model="field.footerRowColorFill" :allowNull="true" :readonly /></td>
 										</tr>
 										<my-builder-doc-border
 											v-model:cell="field.footerBorder.cell"
