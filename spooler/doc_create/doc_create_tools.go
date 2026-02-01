@@ -173,9 +173,15 @@ func getExpressionsFromStates(states []types.DocState) []types.DataGetExpression
 }
 
 // adds a new page, if requested content height does not fit any more
+// if -1 is given for page margin bottom, settings from document are retrieved
 // returns Y position on new page
 func getYWithNewPageIfNeeded(doc *doc, sizeY, pageMarginB float64) (float64, bool) {
 	_, pageHeight := doc.p.GetPageSize()
+	if pageMarginB == -1 {
+		_, _, _, pageMarginB = doc.p.GetMargins()
+	}
+
+	fmt.Printf("Y pos %f, sizeY %f, pageHeight %f, pageMarginB %f\n", doc.p.GetY(), sizeY, pageHeight, pageMarginB)
 
 	if doc.p.GetY()+sizeY > pageHeight-pageMarginB {
 		doc.p.AddPage()

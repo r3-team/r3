@@ -254,7 +254,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 		})
 
 		// a page is always a single flow field on root level
-		if err := addField(ctx, doc, page.Margin.L, page.Margin.T, sizeXPageUsable, sizeYPageUsable, page.Margin.T, false, false, true, font, page.FieldFlow); err != nil {
+		if err := addField(ctx, doc, page.Margin.L, page.Margin.T, sizeXPageUsable, sizeYPageUsable, false, false, true, font, page.FieldFlow); err != nil {
 			return err
 		}
 	}
