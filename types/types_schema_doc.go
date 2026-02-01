@@ -166,7 +166,7 @@ type DocFont struct {
 	NumberSepDec string      `json:"numberSepDec"` // number decimal separator
 	NumberSepTho string      `json:"numberSepTho"` // number thousand separator
 	Size         float64     `json:"size"`         // font size in mm
-	Style        pgtype.Text `json:"style"`        // "B" (bold), "I" (italic), "U" (underscore), "S" (strike-out)
+	Style        pgtype.Text `json:"style"`        // mix of "B" (bold), "I" (italic), "U" (underscore), "S" (strike-out), such as "I", "BI" or "IU"
 }
 type DocMarginPadding struct {
 	T float64 `json:"t"` // margin in mm

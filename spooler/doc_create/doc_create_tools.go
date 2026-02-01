@@ -297,3 +297,16 @@ func setFont(doc *doc, f types.DocFont) {
 	}
 	doc.p.SetFont(f.Family, f.Style.String, f.Size)
 }
+
+func setFontStyleIfMissing(doc *doc, f types.DocFont, style string) types.DocFont {
+	if !f.Style.Valid || !strings.Contains(f.Style.String, style) {
+		f.Style.Valid = true
+		f.Style.String = f.Style.String + style
+	}
+	return f
+}
+
+func setFontSizeByFactor(doc *doc, f types.DocFont, factor float64) types.DocFont {
+	f.Size *= factor
+	return f
+}

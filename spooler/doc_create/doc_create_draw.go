@@ -14,6 +14,7 @@ import (
 
 	"codeberg.org/go-pdf/fpdf"
 	"github.com/jackc/pgx/v5/pgtype"
+	"golang.org/x/net/html"
 )
 
 var (
@@ -59,19 +60,15 @@ func drawAttributeNonString(doc *doc, font types.DocFont, posX, sizeX, sizeY flo
 				return err
 			}
 		case "richtext":
-			// HTML writer only considers page margins for its content
 			// set page margins to reflect dimensions of the current field
+			// this way content can wrap at the correct positions
 			pageMarginL, pageMarginT, pageMarginR, _ := doc.p.GetMargins()
 			pageSizeX, _ := doc.p.GetPageSize()
 			doc.p.SetMargins(posX, pageMarginT, pageSizeX-(posX+sizeX))
 
-			lineHeight := getLineHeight(font)
-
-			h := doc.p.HTMLBasicNew()
-			h.Write(lineHeight, v)
-
-			// move to next line
-			doc.p.SetY(doc.p.GetY() + lineHeight)
+			if err := drawHtml(doc, font, v); err != nil {
+				return err
+			}
 
 			// reset page margins
 			doc.p.SetMargins(pageMarginL, pageMarginT, pageMarginR)
@@ -215,4 +212,110 @@ func drawCellText(doc *doc, font types.DocFont, sizeX, sizeY float64, flowHorizo
 		}
 		doc.p.MultiCell(sizeX, font.Size*font.LineFactor*0.5, s, "", font.Align, false)
 	}
+}
+
+func drawHtml(doc *doc, font types.DocFont, htmlString string) error {
+	n, err := html.Parse(strings.NewReader(htmlString))
+	if err != nil {
+		return err
+	}
+	if err := drawHtmlTraverse(doc, font, getLineHeight(font), "", true, n); err != nil {
+		return err
+	}
+	doc.p.Ln(-1)
+	return nil
+}
+
+func drawHtmlTraverse(doc *doc, fontParent types.DocFont, lineHeightDef float64, listChars string, firstChild bool, n *html.Node) error {
+
+	switch n.Type {
+	case html.DocumentNode, html.ElementNode:
+
+		pageMarginL, pageMarginT, pageMarginR, _ := doc.p.GetMargins()
+		font := fontParent
+
+		switch n.Data {
+		case "br":
+			doc.p.Ln(-1)
+		case "h1", "h2", "h3", "h4", "h5", "h6":
+			if !firstChild {
+				doc.p.Ln(-1)
+				doc.p.Ln(-1)
+			}
+			switch n.Data {
+			case "h1":
+				font = setFontSizeByFactor(doc, font, 1.4)
+			case "h2":
+				font = setFontSizeByFactor(doc, font, 1.25)
+			case "h3":
+				font = setFontSizeByFactor(doc, font, 1.15)
+			case "h4":
+				font = setFontStyleIfMissing(doc, font, "B")
+			}
+		case "p":
+			if !firstChild {
+				doc.p.Ln(-1)
+				doc.p.Ln(-1)
+			}
+		case "ol", "ul":
+			// update left page margins to offset list item content
+			doc.p.SetMargins(pageMarginL+(doc.p.GetStringWidth("0")*4), pageMarginT, pageMarginR)
+			doc.p.Ln(-1)
+			if !firstChild {
+				doc.p.Ln(-1)
+			}
+		case "li":
+			if !firstChild {
+				doc.p.Ln(-1)
+			}
+			// print list item characters (offset from the start position of the list item content)
+			sizeX := doc.p.GetStringWidth(listChars)
+			doc.p.SetX(pageMarginL - sizeX - doc.p.GetStringWidth(" "))
+			doc.p.CellFormat(sizeX, lineHeightDef, listChars, "", 0, "R", false, 0, "")
+			doc.p.SetX(pageMarginL)
+		case "b", "strong":
+			font = setFontStyleIfMissing(doc, font, "B")
+		case "i", "em":
+			font = setFontStyleIfMissing(doc, font, "I")
+		case "s":
+			font = setFontStyleIfMissing(doc, font, "S")
+		}
+
+		var ctrChildren int
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+
+			var listChars string
+			switch n.Data {
+			case "ol":
+				listChars = fmt.Sprintf("%d.", ctrChildren+1)
+			case "ul":
+				listChars = "•"
+			}
+			if err := drawHtmlTraverse(doc, font, lineHeightDef, listChars, ctrChildren == 0, c); err != nil {
+				return err
+			}
+			if c.Type == html.DocumentNode || c.Type == html.ElementNode {
+				ctrChildren++
+			}
+		}
+
+		switch n.Data {
+		case "ol", "ul":
+			// reset margins
+			doc.p.SetMargins(pageMarginL, pageMarginT, pageMarginR)
+		case "b", "em", "h1", "h2", "h3", "h4", "i", "s", "strong":
+			// reset font affected by styling in this node
+			setFont(doc, fontParent)
+		}
+
+	case html.TextNode:
+		// newlines can exist in HTML but should not have semantic meaning
+		// go-fpdf however will apply meaning to them so we remove them
+		s := strings.ReplaceAll(n.Data, "\n", "")
+		if s != "" {
+			setFont(doc, fontParent)
+			doc.p.Write(lineHeightDef, s)
+		}
+	}
+	return nil
 }
