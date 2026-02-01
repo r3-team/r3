@@ -157,7 +157,7 @@ type DocHeaderFooter struct {
 	FieldGrid        DocFieldGrid `json:"fieldGrid"`        // header/footer only ever have a fixed grid field of their internal size (if they need flow, they can add a flow field)
 }
 type DocFont struct {
-	Align        string      `json:"align"`        // text: "L", "R", "J" (left, right, justify), column: "L", "C", "R" (left, center, right) &  "T", "M", "B" (top, middle, bottom)
+	Align        string      `json:"align"`        // text: "L", "C", "R", "J" (left, center, right, justify), column: "L", "C", "R" (left, center, right) &  "T", "M", "B" (top, middle, bottom)
 	BoolFalse    string      `json:"boolFalse"`    // string representing bool FALSE
 	BoolTrue     string      `json:"boolTrue"`     // string representing bool TRUE
 	Color        pgtype.Text `json:"color"`        // RGB HEX value, like "000000"

@@ -46,7 +46,7 @@ export default {
 		<td><my-builder-doc-font-line-factor @update:modelValue="$emit('update:lineFactor',$event)" :modelValue="lineFactor" :readonly /></td>
 	</tr>
 	<tr>
-		<td>{{ capApp.alignHor }}</td>
+		<td>{{ capApp.align }}</td>
 		<td><my-builder-doc-font-align @update:modelValue="$emit('update:align',$event)" :modelValue="align" :readonly /></td>
 	</tr>
 	<tr>

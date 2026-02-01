@@ -177,7 +177,7 @@ const MyBuilderDocSetTarget = {
 			'text.prefix':  this.capGen.prefix,
 
 			// font
-			'font.align':       this.capApp.font.alignHor,
+			'font.align':       this.capApp.font.align,
 			'font.color':       this.capApp.font.color,
 			'font.dateFormat':  this.capApp.font.dateFormat,
 			'font.family':      this.capApp.font.family,

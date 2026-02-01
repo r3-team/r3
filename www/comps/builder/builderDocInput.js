@@ -233,18 +233,39 @@ const MyBuilderDocMarginPadding = {
 
 const MyBuilderDocFontAlign = {
 	name:'my-builder-doc-font-align',
-	template:`<select :disabled="readonly" :value="modelValue" @input="$emit('update:modelValue',$event.target.value)">
-		<option value="L">{{ capGen.alignmentHor.left }}</option>
-		<option value="C">{{ capGen.alignmentHor.center }}</option>
-		<option value="J">{{ capGen.alignmentHor.justify }}</option>
-		<option value="R">{{ capGen.alignmentHor.right }}</option>
-	</select>`,
+	template:`<div class="row gap">
+		<select v-model="alignHor" :disabled="readonly"">
+			<option value="L">{{ capGen.alignmentHor.left }}</option>
+			<option value="C">{{ capGen.alignmentHor.center }}</option>
+			<option value="R">{{ capGen.alignmentHor.right }}</option>
+			<option value="J">{{ capGen.alignmentHor.justify }}</option>
+		</select>
+		<select v-model="alignVer" :disabled="readonly"">
+			<option value="T">{{ capGen.alignmentVer.top }}</option>
+			<option value="M">{{ capGen.alignmentVer.middle }}</option>
+			<option value="B">{{ capGen.alignmentVer.bottom }}</option>
+		</select>
+	</div>`,
 	props:{
 		modelValue:{ type:String,  required:true },
 		readonly:  { type:Boolean, required:true }
 	},
 	emits:['update:modelValue'],
 	computed:{
+		// inputs
+		alignHor:{
+			get()  { return this.modelValue.replace(/[TMB]/g,''); },
+			set(v) { this.$emit('update:modelValue', `${v}${this.alignVer}`); }
+		},
+		alignVer:{
+			get() {
+				const v = this.modelValue.replace(/[LCRJ]/g,'');
+				return v !== '' ? v : 'M'
+			},
+			set(v) { this.$emit('update:modelValue', `${this.alignHor}${v}`); }
+		},
+
+		// stores
 		capGen:s => s.$store.getters.captions.generic
 	}
 };

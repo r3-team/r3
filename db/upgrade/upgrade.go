@@ -157,7 +157,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			
 			CREATE TABLE IF NOT EXISTS app.doc_font (
 				doc_id uuid NOT NULL,
-				align character(1) NOT NULL,
+				align character(2) NOT NULL,
 				bool_false character varying(32) NOT NULL,
 				bool_true character varying(32) NOT NULL,
 				color character(6) NOT NULL,

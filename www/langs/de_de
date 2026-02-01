@@ -830,8 +830,7 @@
 				}
 			},
 			"font": {
-				"alignHor": "Horizontal ausrichten",
-				"alignVer": "Vertikal ausrichten",
+				"align": "Ausrichten",
 				"bool": "Boolesche Bezeichner",
 				"color": "Farbe",
 				"dateFormat": "Datumsformat",
@@ -2224,6 +2223,11 @@
 			"justify": "Blocksatz",
 			"left": "links",
 			"right": "rechts"
+		},
+		"alignmentVer": {
+			"bottom": "unten",
+			"middle": "mittig",
+			"top": "oben"
 		},
 		"api": "API",
 		"apis": "APIs",
