@@ -42,6 +42,7 @@ export default {
 		MyTabs
 	},
 	template:`<div class="builder-doc-field" ref="field"
+		@click.stop
 		@dragenter="dragEnter"
 		@dragleave="dragLeave"
 		@dragend.stop="dragEnd"

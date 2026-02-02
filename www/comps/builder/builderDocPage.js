@@ -27,7 +27,7 @@ export default {
 		MyBuilderDocMarginPadding,
 		MyInputDecimal
 	},
-	template:`<div class="builder-doc-page" v-if="page !== false" @dragover.prevent @drop.stop="drop" @mouseup.stop="$emit('setFieldIdOptions',null)">
+	template:`<div class="builder-doc-page" v-if="page !== false" @dragover.prevent @drop.stop="drop" @click.stop="$emit('setFieldIdOptions',null)">
 		<div class="builder-doc-page-outer" :style="stylePage">
 
 			<div class="builder-doc-padding-margin-hor" v-if="margin.t > 0" :style="styleMarginT"></div>
