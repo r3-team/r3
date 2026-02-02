@@ -886,7 +886,6 @@
 			"autoSelect": "Sélection automatique des enregistrements",
 			"autoSelectHint": "0=désactivé, 2=premiers deux, -3=derniers trois",
 			"button": {
-				"columnsAll": "Toutes les colonnes",
 				"layoutColumns": "{CNT} colonnes"
 			},
 			"chart": {

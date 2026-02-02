@@ -886,7 +886,6 @@
 			"autoSelect": "Selezione automatica dei record",
 			"autoSelectHint": "0=off, 2=primi due, -3=ultimi tre",
 			"button": {
-				"columnsAll": "All columns",
 				"layoutColumns": "{CNT} columns"
 			},
 			"chart": {

@@ -1,6 +1,5 @@
 import MyAdminLoginMeta from './adminLoginMeta.js';
 import MyForm           from '../form.js';
-import MyTabs           from '../tabs.js';
 import MyInputSelect    from '../inputSelect.js';
 import {getLoginIcon}   from '../shared/admin.js';
 import {dialogCloseAsk} from '../shared/dialog.js';
@@ -42,8 +41,7 @@ const MyAdminLogin = {
 		MyAdminLoginMeta,
 		MyAdminLoginRole,
 		MyForm,
-		MyInputSelect,
-		MyTabs
+		MyInputSelect
 	},
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 		

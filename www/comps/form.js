@@ -507,11 +507,11 @@ export default {
 		// general entities
 		fieldIdMapData:    (s) => s.getDataFieldMap(s.fields),
 		fields:            (s) => s.form.fields,
-		filters:           (s) => s.form.query.filters,
+		filters:           (s) => s.form.query !== null ? s.form.query.filters : [],
 		form:              (s) => s.formIdMap[s.formId],
 		formStateIdMap:    (s) => s.getFormStateIdMap(s.form.states),
-		joins:             (s) => s.fillRelationRecordIds(s.form.query.joins),
-		relationId:        (s) => s.form.query.relationId,
+		joins:             (s) => s.form.query !== null ? s.fillRelationRecordIds(s.form.query.joins) : [],
+		relationId:        (s) => s.form.query !== null ? s.form.query.relationId : null,
 		relationsJoined:   (s) => s.getRelationsJoined(s.joins),
 		joinsIndexMap:     (s) => s.getJoinsIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet,s.entityIdMapEffect.form.data),
 		joinsIndexMapNoOpt:(s) => s.getJoinsIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet,0),
@@ -1578,7 +1578,7 @@ export default {
 				});
 			}
 			
-			const filters = this.getQueryFiltersProcessed(this.form.query.filters,this.joinsIndexMap).concat([
+			const filters = this.getQueryFiltersProcessed(this.filters,this.joinsIndexMap).concat([
 				this.getQueryAttributePkFilter(this.relationId,this.recordIds[0],0,false)]);
 			
 			ws.send('data','get',{
@@ -1675,7 +1675,7 @@ export default {
 			};
 			
 			let filters = this.getQueryFiltersProcessed(
-				removeInvalid(JSON.parse(JSON.stringify(this.form.query.filters))),this.joinsIndexMap);
+				removeInvalid(JSON.parse(JSON.stringify(this.filters))),this.joinsIndexMap);
 			
 			filters.push(this.getQueryAttributePkFilter(this.relationId,recordId,join.index,false));
 			

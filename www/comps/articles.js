@@ -1,6 +1,5 @@
-import MyTabs              from './tabs.js';
-import {generatePdf}       from './shared/pdf.js';
-import {getDateFormat}     from './shared/time.js';
+import {generatePdf}   from './shared/pdf.js';
+import {getDateFormat} from './shared/time.js';
 import {
 	getCaption,
 	getCaptionForLang
@@ -8,7 +7,6 @@ import {
 
 export default {
 	name:'my-articles',
-	components:{ MyTabs },
 	template:`<div class="contentBox" :class="{ large:showLarge || isMobile, 'float':isFloat }">
 		<div class="top lower">
 			<div class="area">

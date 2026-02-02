@@ -4,7 +4,6 @@ import MyBuilderDocSets               from './builderDocSets.js';
 import MyBuilderQuery                 from './builderQuery.js';
 import MyInputDecimal                 from '../inputDecimal.js';
 import MyInputRange                   from '../inputRange.js';
-import myTabs                         from '../tabs.js';
 import {getIndexAttributeIdsByJoins}  from '../shared/attribute.js';
 import {getCaptionByIndexAttributeId} from '../shared/query.js';
 import {
@@ -20,8 +19,7 @@ export default {
 		MyBuilderDocSets,
 		MyBuilderQuery,
 		MyInputDecimal,
-		MyInputRange,
-		myTabs
+		MyInputRange
 	},
 	template:`<div class="builder-doc-column" :class="classCss" :title="isDragPreview ? '' : title">
 		<div class="builder-doc-column-title" v-if="!isDragPreview">

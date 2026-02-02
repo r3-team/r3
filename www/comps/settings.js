@@ -6,7 +6,6 @@ import MyInputColorWrap    from './inputColorWrap.js';
 import MyInputDateFormat   from './inputDateFormat.js';
 import MyInputNumberSep    from './inputNumberSep.js';
 import MyInputHotkey       from './inputHotkey.js';
-import MyTabs              from './tabs.js';
 import {
 	aesGcmDecryptBase64,
 	aesGcmDecryptBase64WithPhrase,
@@ -823,7 +822,6 @@ const MySettingsClientEvents = {
 
 const MySettingsFixedTokens = {
 	name:'my-settings-fixed-tokens',
-	components:{MyTabs},
 	template:`<div>
 		<div class="settings-tokens" v-if="tokensFixed.length !== 0">
 			<table class="generic-table sticky-top bright default-inputs">

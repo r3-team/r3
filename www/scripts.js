@@ -4,6 +4,7 @@ import MyButtonGroup   from './comps/buttonGroup.js';
 import MyFilters       from './comps/filters.js';
 import MyHome          from './comps/home.js';
 import MyLabel         from './comps/label.js';
+import MyTabs          from './comps/tabs.js';
 import MyValueRich     from './comps/valueRich.js';
 import MyStore         from './stores/store.js';
 import {MyButtonCheck} from './comps/button.js';
@@ -329,6 +330,7 @@ const app = Vue.createApp(MyApp)
 	.component('my-button-group',MyButtonGroup)
 	.component('my-filters',MyFilters)
 	.component('my-label',MyLabel)
+	.component('my-tabs',MyTabs)
 	.component('my-value-rich',MyValueRich);
 
 app.directive('click-outside',{

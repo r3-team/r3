@@ -1,9 +1,7 @@
 import MyBuilderCaption       from './builderCaption.js';
 import MyBuilderMenuTabSelect from './builderMenuTabSelect.js';
-import MyTabs                 from '../tabs.js';
 import {getDependentModules}  from '../shared/builder.js';
 import {copyValueDialog}      from '../shared/generic.js';
-export {MyBuilderRole as default};
 
 const MyBuilderRoleAccessMenu = {
 	name:'my-builder-role-access-menu',
@@ -236,15 +234,14 @@ const MyBuilderRoleAccessSimple = {
 	}
 };
 
-const MyBuilderRole = {
+export default {
 	name:'my-builder-role',
 	components:{
 		MyBuilderCaption,
 		MyBuilderMenuTabSelect,
 		MyBuilderRoleAccessMenu,
 		MyBuilderRoleAccessRelation,
-		MyBuilderRoleAccessSimple,
-		MyTabs
+		MyBuilderRoleAccessSimple
 	},
 	template:`<div class="builder-role contentBox grow" v-if="ready">
 			

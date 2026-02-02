@@ -5,7 +5,6 @@ import MyBuilderQuery      from './builderQuery.js';
 import MyInputColorWrap    from '../inputColorWrap.js';
 import MyInputDecimal      from '../inputDecimal.js';
 import MyInputRange        from '../inputRange.js';
-import MyTabs              from '../tabs.js';
 import {getUuidV4}         from '../shared/crypto.js';
 import {copyValueDialog}   from '../shared/generic.js';
 import {
@@ -24,7 +23,8 @@ import {
 } from '../shared/builderDoc.js';
 import {
 	getTemplateDocColumn,
-	getTemplateDocField
+	getTemplateDocField,
+	getTemplateQuery
 } from '../shared/builderTemplate.js';
 
 export default {
@@ -38,8 +38,7 @@ export default {
 		MyBuilderQuery,
 		MyInputColorWrap,
 		MyInputDecimal,
-		MyInputRange,
-		MyTabs
+		MyInputRange
 	},
 	template:`<div class="builder-doc-field" ref="field"
 		@click.stop
@@ -82,7 +81,7 @@ export default {
 			:dragType="dragTypeColumn"
 			:elmOptions="$refs.columnOptions"
 			:joins
-			:joinsParent="field.query.joins"
+			:joinsParent="query.joins"
 			:moduleId
 			:parentSizeX="sizeX"
 			:readonly
@@ -154,12 +153,13 @@ export default {
 				<!-- content -->
 				<div class="content grow" v-if="tabTargetField === 'content'">
 					<my-builder-query
-						v-model="field.query"
 						@index-removed=""
+						@update:modelValue="field.query = $event"
 						:allowChoices="false"
 						:allowOrders="true"
 						:builderLanguage
 						:filtersDisable
+						:modelValue="query"
 						:moduleId
 					/>
 					<div class="builder-doc-templates">
@@ -526,7 +526,7 @@ export default {
 				return [];
 
 			let out = [];
-			for(const j of s.field.query.joins) {
+			for(const j of s.query.joins) {
 				const r = s.relationIdMap[j.relationId];
 				for(const a of r.attributes) {
 					if(s.isAttributeRelationship(a.content))
@@ -613,6 +613,7 @@ export default {
 		isWithBorder:  s => s.isFlow || s.isGrid,
 		isWithFields:  s => s.isFlow || s.isGrid,
 		isWithQuery:   s => s.isList,
+		query:         s => s.field.query !== null ? s.field.query : s.getTemplateQuery(),
 		title:         s => s.getDocFieldTitle(s.field),
 		titleBar:      s => `${s.capGen.field}: ${s.title}`,
 
@@ -632,6 +633,7 @@ export default {
 		getDocFieldTitle,
 		getTemplateDocColumn,
 		getTemplateDocField,
+		getTemplateQuery,
 		getUuidV4,
 		isAttributeFiles,
 		isAttributeRelationship,

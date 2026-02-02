@@ -5,7 +5,6 @@ import MyBuilderIconInput              from './builderIconInput.js';
 import {getItemTitleColumn}            from '../shared/builder.js';
 import {getTemplateCollectionConsumer} from '../shared/builderTemplate.js';
 import {copyValueDialog}               from '../shared/generic.js';
-import MyTabs                          from '../tabs.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
@@ -20,8 +19,7 @@ const MyBuilderCollection = {
 		MyBuilderColumns,
 		MyBuilderColumnTemplates,
 		MyBuilderIconInput,
-		MyBuilderQuery,
-		MyTabs
+		MyBuilderQuery
 	},
 	template:`<div class="builder-collection" v-if="collection">
 		<div class="contentBox grow">

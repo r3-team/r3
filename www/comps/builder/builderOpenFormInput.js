@@ -164,9 +164,12 @@ const MyBuilderOpenFormInput = {
 			if(relationIdRecord === null)
 				return [];
 			
-			let form   = s.formIdMap[s.openForm.formIdOpen];
-			let out    = [];
-			let atrAdd = (join,atrId,atrIdNm) => {
+			const form = s.formIdMap[s.openForm.formIdOpen];
+			if(form.query === null)
+				return [];
+
+			let out = [];
+			const atrAdd = (join,atrId,atrIdNm) => {
 				let atr = s.attributeIdMap[atrId];
 				let cap = atrIdNm === null
 					? `${join} ${s.relationIdMap[atr.relationId].name}.${atr.name}`

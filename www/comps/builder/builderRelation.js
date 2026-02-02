@@ -4,7 +4,6 @@ import MyBuilderPgIndex      from './builderPgIndex.js';
 import MyBuilderPgTriggers   from './builderPgTriggers.js';
 import MyBuilderPresets      from './builderPresets.js';
 import MyInputOffset         from '../inputOffset.js';
-import MyTabs                from '../tabs.js';
 import {copyValueDialog}     from '../shared/generic.js';
 import {srcBase64}           from '../shared/image.js';
 import {
@@ -18,8 +17,6 @@ import {
 	getDependentModules,
 	getDependentAttributes
 } from '../shared/builder.js';
-
-export {MyBuilderRelation as default};
 
 const MyBuilderRelationsItemPolicy = {
 	name:'my-builder-relations-item-policy',
@@ -126,7 +123,7 @@ const MyBuilderRelationsItemPolicy = {
 	}
 };
 
-const MyBuilderRelation = {
+export default {
 	name:'my-builder-relation',
 	components:{
 		echarts:VueECharts,
@@ -136,8 +133,7 @@ const MyBuilderRelation = {
 		MyBuilderPgTriggers,
 		MyBuilderPresets,
 		MyBuilderRelationsItemPolicy,
-		MyInputOffset,
-		MyTabs
+		MyInputOffset
 	},
 	template:`<div class="contentBox grow scroll">
 		<div class="top lower nowrap">

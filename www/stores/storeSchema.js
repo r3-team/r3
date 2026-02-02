@@ -70,20 +70,6 @@ const MyStoreSchema = {
 				}
 				return fields;
 			};
-			const processDocField = field => {
-				if(field === null) // not used header/footer
-					return null;
-
-				if(field.query !== undefined)
-					field.query = getTemplateQueryIfNull(field.query);
-				
-				if(field.fields !== undefined) {
-					for(let i = 0, j = field.fields.length; i < j; i++) {
-						field.fields[i] = processDocField(field.fields[i]);
-					}
-				}
-				return field;
-			};
 			
 			for(let mod of payload) {
 				mod.formNameMap = {};
@@ -128,7 +114,6 @@ const MyStoreSchema = {
 				
 				// process forms
 				for(let form of mod.forms) {
-					form.query  = getTemplateQueryIfNull(form.query);
 					form.fields = processFields(form.fields);
 					
 					state.formIdMap[form.id]   = form;
@@ -163,17 +148,6 @@ const MyStoreSchema = {
 				
 				// process documents
 				for(let doc of mod.docs) {
-					doc.query = getTemplateQueryIfNull(doc.query);
-					for(let i = 0, j = doc.pages.length; i < j; i++) {
-						const p = doc.pages[i];
-						p.fieldFlow = processDocField(p.fieldFlow)
-
-						if(p.footer.active && p.footer.docPageIdInherit !== null)
-							p.footer.fieldGrid = processDocField(p.footer.fieldGrid);
-						
-						if(p.header.active && p.header.docPageIdInherit !== null)
-							p.header.fieldGrid = processDocField(p.header.fieldGrid);
-					}
 					state.docIdMap[doc.id] = doc;
 				}
 				

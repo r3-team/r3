@@ -886,7 +886,6 @@
 			"autoSelect": "Selección automática de registros",
 			"autoSelectHint": "0=desactivado, 2=primeros dos, -3=últimos tres",
 			"button": {
-				"columnsAll": "Todas las columnas",
 				"layoutColumns": "{CNT} columnas"
 			},
 			"chart": {

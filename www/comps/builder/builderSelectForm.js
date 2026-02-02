@@ -5,7 +5,7 @@ export default {
 	template:`<select v-model="value" :disabled="readonly">
 		<option value="">{{ captionEmpty }}</option>
 		<option
-			v-for="f in module.forms.filter(v => allowAllForms || v.query.relationId === relationIdFilter)" 
+			v-for="f in module.forms.filter(v => allowAllForms || (v.query !== null && v.query.relationId === relationIdFilter))" 
 			:value="f.id"
 		>{{ f.name }}</option>
 		<optgroup
@@ -13,7 +13,7 @@ export default {
 			:label="mod.name"
 		>
 			<option
-				v-for="f in mod.forms.filter(v => allowAllForms || v.query.relationId === relationIdFilter)" 
+				v-for="f in mod.forms.filter(v => allowAllForms || (v.query !== null && v.query.relationId === relationIdFilter))" 
 				:value="f.id"
 			>{{ f.name }}</option>
 		</optgroup>

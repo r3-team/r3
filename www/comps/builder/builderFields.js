@@ -24,22 +24,21 @@ export default {
 				:dataFields="dataFields"
 				:entityIdMapRef="entityIdMapRef"
 				:field="element"
-				:fieldIdShow="fieldIdShow"
-				:fieldIdShowTab="fieldIdShowTab"
-				:fieldMoveIndex="fieldMoveIndex"
-				:fieldMoveList="fieldMoveList"
-				:filterData="filterData"
-				:filterData1n="filterData1n"
-				:filterDataIndex="filterDataIndex"
-				:filterDataN1="filterDataN1"
-				:filterDataNm="filterDataNm"
-				:flexDirParent="flexDirParent"
-				:formId="formId"
-				:isTemplate="isTemplate"
-				:joinsIndexMap="joinsIndexMap"
-				:noMovement="noMovement"
-				:showColumnsAll="showColumnsAll"
-				:uiScale="uiScale"
+				:fieldIdShow
+				:fieldIdShowTab
+				:fieldMoveIndex
+				:fieldMoveList
+				:filterData
+				:filterData1n
+				:filterDataIndex
+				:filterDataN1
+				:filterDataNm
+				:flexDirParent
+				:formId
+				:isTemplate
+				:joinsIndexMap
+				:noMovement
+				:uiScale
 			/>
 		</template>
 	</draggable>`,
@@ -63,7 +62,6 @@ export default {
 		isTemplate:     { type:Boolean, required:true }, // is template for fields
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
 		noMovement:     { type:Boolean, required:false, default:false },
-		showColumnsAll: { type:Boolean, required:false, default:false },
 		uiScale:        { type:Number,  required:false, default:100 }
 	},
 	emits:['column-id-show','field-id-show','field-remove','field-move-store'],

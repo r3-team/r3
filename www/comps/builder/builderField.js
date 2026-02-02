@@ -173,21 +173,20 @@ export default {
 				@field-id-show="(...args) => $emit('field-id-show',...args)"
 				@field-remove="$emit('field-remove',$event)"
 				@field-move-store="$emit('field-move-store',$event)"
-				:builderLanguage="builderLanguage"
-				:columnIdShow="columnIdShow"
-				:dataFields="dataFields"
-				:entityIdMapRef="entityIdMapRef"
-				:fieldIdShow="fieldIdShow"
-				:fieldIdShowTab="fieldIdShowTab"
-				:fieldMoveList="fieldMoveList"
-				:fieldMoveIndex="fieldMoveIndex"
+				:builderLanguage
+				:columnIdShow
+				:dataFields
+				:entityIdMapRef
+				:fieldIdShow
+				:fieldIdShowTab
+				:fieldMoveList
+				:fieldMoveIndex
 				:fields="t.fields"
 				:flexDirParent="'column'"
 				:formId="formId"
 				:isTemplate="false"
-				:joinsIndexMap="joinsIndexMap"
-				:showColumnsAll="showColumnsAll"
-				:uiScale="uiScale"
+				:joinsIndexMap
+				:uiScale
 			/>
 		</div>
 		
@@ -197,7 +196,7 @@ export default {
 			@column-id-show="$emit('column-id-show',field.id,$event)"
 			@columns-set="$emit('field-property-set','columns',$event)"
 			:batchIndexTitle="columnBatchIndexTitle"
-			:builderLanguage="builderLanguage"
+			:builderLanguage
 			:columns="field.columns"
 			:columnIdShow="columnIdShow"
 			:groupName="field.id+'_columns'"
@@ -211,22 +210,21 @@ export default {
 			@field-id-show="(...args) => $emit('field-id-show',...args)"
 			@field-remove="$emit('field-remove',$event)"
 			@field-move-store="$emit('field-move-store',$event)"
-			:builderLanguage="builderLanguage"
+			:builderLanguage
 			:class="cssClassChildren"
-			:columnIdShow="columnIdShow"
-			:dataFields="dataFields"
-			:entityIdMapRef="entityIdMapRef"
-			:fieldIdShow="fieldIdShow"
-			:fieldIdShowTab="fieldIdShowTab"
-			:fieldMoveList="fieldMoveList"
-			:fieldMoveIndex="fieldMoveIndex"
+			:columnIdShow
+			:dataFields
+			:entityIdMapRef
+			:fieldIdShow
+			:fieldIdShowTab
+			:fieldMoveList
+			:fieldMoveIndex
 			:fields="field.fields"
 			:flexDirParent="field.direction"
-			:formId="formId"
-			:isTemplate="isTemplate"
-			:joinsIndexMap="joinsIndexMap"
-			:showColumnsAll="showColumnsAll"
-			:uiScale="uiScale"
+			:formId
+			:isTemplate
+			:joinsIndexMap
+			:uiScale
 		/>
 	</div>`,
 	props:{
@@ -249,7 +247,6 @@ export default {
 		isTemplate:     { type:Boolean, required:true },
 		joinsIndexMap:  { type:Object,  required:true },
 		noMovement:     { type:Boolean, required:true },
-		showColumnsAll: { type:Boolean, required:true },
 		uiScale:        { type:Number,  required:true }
 	},
 	emits:['column-id-show','field-id-show','field-move','field-move-store','field-property-set','field-remove'],
@@ -387,7 +384,7 @@ export default {
 		parentChildren:  (s) => s.isContainer ? s.field.fields : (s.isTabs ? s.field.tabs[s.tabIndex].fields : []),
 		moveActive:      (s) => s.fieldMoveList !== null,
 		reference:       (s) => s.isTemplate ? '' : 'F' + s.entityIdMapRef.field[s.field.id],
-		showColumns:     (s) => !s.isTemplate && s.hasQuery && ((s.fieldIdShow === s.field.id && s.fieldIdShowTab === 'content') || s.showColumnsAll),
+		showColumns:     (s) => !s.isTemplate && s.hasQuery && s.fieldIdShow === s.field.id && s.fieldIdShowTab === 'content',
 		tabIndexShown:   (s) => s.isTabs && s.field.tabs.length > s.tabIndex ? s.tabIndex : 0,
 		title:           (s) => s.getFieldTitle(s.field),
 		

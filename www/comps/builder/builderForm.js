@@ -7,9 +7,7 @@ import MyBuilderFormFunctions from './builderFormFunctions.js';
 import MyBuilderFormStates    from './builderFormStates.js';
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
-import MyTabs                 from '../tabs.js';
 import {getColumnIcon}        from '../shared/column.js';
-import {copyValueDialog}      from '../shared/generic.js';
 import {getJoinsIndexMap}     from '../shared/query.js';
 import {routeParseParams}     from '../shared/router.js';
 import {
@@ -35,7 +33,8 @@ import {
 	getTemplateFieldKanban,
 	getTemplateFieldList,
 	getTemplateFieldTabs,
-	getTemplateFieldVariable
+	getTemplateFieldVariable,
+	getTemplateQuery
 } from '../shared/builderTemplate.js';
 import {
 	MyBuilderColumns,
@@ -49,6 +48,10 @@ import {
 	getDataFields,
 	getFormRoute
 } from '../shared/form.js';
+import {
+	copyValueDialog,
+	deepIsEqual
+} from '../shared/generic.js';
 
 export default {
 	name:'my-builder-form',
@@ -63,10 +66,9 @@ export default {
 		MyBuilderFormFunctions,
 		MyBuilderFormStates,
 		MyBuilderIconInput,
-		MyBuilderQuery,
-		MyTabs
+		MyBuilderQuery
 	},
-	template:`<div class="builder-form" v-if="form">
+	template:`<div class="builder-form" v-if="form !== false">
 	
 		<!-- form builder main area -->
 		<div class="contentBox builder-form-main">
@@ -75,19 +77,19 @@ export default {
 				<div class="top nowrap">
 					<div class="area nowrap overflowHidden">
 						<img class="icon" src="images/fileText.png" />
-						<h1 class="title">{{ capApp.titleOne.replace('{NAME}',name) }}</h1>
+						<h1 class="title">{{ capApp.titleOne.replace('{NAME}',form.name) }}</h1>
 					</div>
 					
 					<div class="area nowrap">
 						<my-builder-icon-input
-							@input="iconId = $event"
-							:icon-id-selected="iconId"
+							@input="form.iconId = $event"
+							:icon-id-selected="form.iconId"
 							:module="module"
 							:title="capApp.icon"
 							:readonly="readonly"
 						/>
 						<my-builder-caption class="title"
-							v-model="captions.formTitle"
+							v-model="form.captions.formTitle"
 							:contentName="capApp.formTitle"
 							:language="builderLanguage"
 							:longInput="true"
@@ -110,18 +112,13 @@ export default {
 							:caption="capGen.button.save"
 						/>
 						<my-button image="refresh.png"
-							@trigger="reset"
+							@trigger="reset(true)"
 							:active="hasChanges"
 							:caption="capGen.button.refresh"
 						/>
 						<my-button image="open.png"
 							@trigger="open"
 							:caption="capGen.button.open"
-						/>
-						<my-button
-							@trigger="showColumnsAll = !showColumnsAll"
-							:caption="capApp.button.columnsAll"
-							:image="showColumnsAll ? 'checkbox1.png' : 'checkbox0.png'"
 						/>
 					</div>
 					<div class="area nowrap">
@@ -154,7 +151,7 @@ export default {
 				</div>
 				
 				<!-- empty form assistant -->
-				<div class="builder-form-assistant" v-if="fields.length === 0">
+				<div class="builder-form-assistant" v-if="form.fields.length === 0">
 					<h2>{{ capApp.dragDrop }}</h2>
 					<div class="row gap centered">
 						<span>{{ capApp.layoutCreate }}</span>
@@ -172,20 +169,19 @@ export default {
 					@field-id-show="(...args) => setFieldShow(args[0],null,args[1])"
 					@field-move-store="fieldMoveStore"
 					@field-remove="removeFieldById($event)"
-					:builderLanguage="builderLanguage"
-					:columnIdShow="columnIdShow"
-					:dataFields="dataFields"
-					:entityIdMapRef="entityIdMapRef"
-					:fieldIdShow="fieldIdShow"
+					:builderLanguage
+					:columnIdShow
+					:dataFields
+					:entityIdMapRef
+					:fieldIdShow
 					:fieldIdShowTab="tabTargetField"
-					:fieldMoveList="fieldMoveList"
-					:fieldMoveIndex="fieldMoveIndex"
-					:fields="fields"
+					:fieldMoveList
+					:fieldMoveIndex
+					:fields="form.fields"
 					:formId="id"
 					:isTemplate="false"
-					:joinsIndexMap="joinsIndexMap"
-					:showColumnsAll="showColumnsAll"
-					:uiScale="uiScale"
+					:joinsIndexMap
+					:uiScale
 				/>
 			</div>
 		</div>
@@ -232,7 +228,7 @@ export default {
 				<my-tabs
 					v-model="tabTarget"
 					:entries="['content','states','actions','functions','properties']"
-					:entriesText="[capGen.content,capApp.tabStates.replace('{CNT}',states.length),capApp.tabActions.replace('{CNT}',actions.length),capApp.tabFunctions.replace('{CNT}',functions.length),capGen.properties]"
+					:entriesText="[capGen.content,capApp.tabStates.replace('{CNT}',form.states.length),capApp.tabActions.replace('{CNT}',form.actions.length),capApp.tabFunctions.replace('{CNT}',form.functions.length),capGen.properties]"
 				/>
 				
 				<!-- form content -->
@@ -241,13 +237,14 @@ export default {
 					<template v-if="tabTarget === 'content'">
 						<!-- form record query -->
 						<my-builder-query
-							v-model="query"
-							@index-removed="removeDataFields(fields,$event)"
+							@index-removed="removeDataFields(form.fields,$event)"
+							@update:modelValue="form.query = $event"
 							:allowChoices="false"
 							:allowFixedLimit="false"
 							:builderLanguage
 							:filtersDisable="['formChanged','formState','field','fieldChanged','fieldValid','getter','globalSearch','recordMayCreate','recordMayDelete','recordMayUpdate']"
 							:formId="id"
+							:modelValue="query"
 							:moduleId="form.moduleId"
 						/>
 						
@@ -282,10 +279,10 @@ export default {
 								<my-builder-fields flexDirParent="column"
 									v-if="fieldsShow === 'add'"
 									@field-move-store="fieldMoveStore"
-									:builderLanguage="builderLanguage"
+									:builderLanguage
 									:fields="fieldsTemplate"
-									:fieldMoveList="fieldMoveList"
-									:fieldMoveIndex="fieldMoveIndex"
+									:fieldMoveList
+									:fieldMoveIndex
 									:filterData="true"
 									:filterData1n="showTemplate1n"
 									:filterDataIndex="parseInt(templateIndex)"
@@ -299,9 +296,9 @@ export default {
 									@column-id-show="(...args) => setFieldShow(args[0],args[1],'content')"
 									@field-id-show="(...args) => setFieldShow(args[0],null,args[1])"
 									@field-remove="removeFieldById($event)"
-									:builderLanguage="builderLanguage"
-									:dataFields="dataFields"
-									:entityIdMapRef="entityIdMapRef"
+									:builderLanguage
+									:dataFields
+									:entityIdMapRef
 									:fields="dataFields"
 									:fieldMoveList="null"
 									:fieldMoveIndex="0"
@@ -312,7 +309,7 @@ export default {
 									:filterDataNm="showTemplateNm"
 									:formId="id"
 									:isTemplate="false"
-									:joinsIndexMap="joinsIndexMap"
+									:joinsIndexMap
 									:noMovement="true"
 								/>
 							</div>
@@ -322,28 +319,28 @@ export default {
 					<!-- form states -->
 					<my-builder-form-states
 						v-if="tabTarget === 'states'"
-						v-model="states"
-						:dataFields="dataFields"
-						:entityIdMapRef="entityIdMapRef"
-						:fieldIdMap="fieldIdMap"
-						:form="form"
+						v-model="form.states"
+						:dataFields
+						:entityIdMapRef
+						:fieldIdMap
+						:form
 					/>
 
 					<!-- form actions -->
 					<my-builder-form-actions
 						v-if="tabTarget === 'actions'"
-						v-model="actions"
+						v-model="form.actions"
 						@createNew="(...args) => $emit('createNew',...args)"
-						:builderLanguage="builderLanguage"
-						:formId="form.id"
+						:builderLanguage
+						:formId="id"
 					/>
 					
 					<!-- form functions -->
 					<my-builder-form-functions
 						v-if="tabTarget === 'functions'"
-						v-model="functions"
+						v-model="form.functions"
 						@createNew="(...args) => $emit('createNew',...args)"
-						:formId="form.id"
+						:formId="id"
 					/>
 
 					<!-- form properties -->
@@ -351,17 +348,17 @@ export default {
 						<tbody>
 							<tr>
 								<td>{{ capGen.name }}</td>
-								<td><input class="long" v-model="name" :disabled="readonly" /></td>
+								<td><input class="long" v-model="form.name" :disabled="readonly" /></td>
 							</tr>
 							<tr>
 								<td>{{ capGen.title }}</td>
 								<td>
 									<my-builder-caption
-										v-model="captions.formTitle"
+										v-model="form.captions.formTitle"
 										:contentName="capApp.formTitle"
 										:language="builderLanguage"
 										:longInput="true"
-										:readonly="readonly"
+										:readonly
 									/>
 								</td>
 							</tr>
@@ -369,28 +366,24 @@ export default {
 								<td>{{ capGen.icon }}</td>
 								<td>
 									<my-builder-icon-input
-										@input="iconId = $event"
-										:iconIdSelected="iconId"
-										:module="module"
+										@input="form.iconId = $event"
+										:iconIdSelected="form.iconId"
+										:module
 										:title="capApp.icon"
-										:readonly="readonly"
+										:readonly
 									/>
 								</td>
 							</tr>
 							<tr>
 								<td>{{ capApp.noDataActions }}</td>
-								<td><my-bool v-model="noDataActions" :readonly="readonly" /></td>
+								<td><my-bool v-model="form.noDataActions" :readonly="readonly" /></td>
 							</tr>
 							<tr>
 								<td>{{ capApp.presetOpen }}</td>
 								<td>
-									<select v-model="presetIdOpen" :disabled="readonly">
-										<option :value="null" v-if="presetCandidates.length === 0">
-											{{ capGen.nothingThere }}
-										</option>
-										<option :value="null" v-if="presetCandidates.length !== 0">
-											{{ capGen.nothingSelected }}
-										</option>
+									<select v-model="form.presetIdOpen" :disabled="readonly">
+										<option :value="null" v-if="presetCandidates.length === 0">{{ capGen.nothingThere }}</option>
+										<option :value="null" v-if="presetCandidates.length !== 0">{{ capGen.nothingSelected }}</option>
 										<option v-for="p in presetCandidates" :key="p.id" :value="p.id">
 											{{ p.name }}
 										</option>
@@ -400,7 +393,7 @@ export default {
 							<tr>
 								<td>{{ capApp.fieldIdFocus }}</td>
 								<td>
-									<select v-model="fieldIdFocus" :disabled="readonly">
+									<select v-model="form.fieldIdFocus" :disabled="readonly">
 										<option :value="null">{{ capApp.fieldIdFocusEmpty }}</option>
 										<template v-for="(ref,fieldId) in entityIdMapRef.field">
 											<option
@@ -432,12 +425,12 @@ export default {
 						v-if="tabTargetField === 'properties'"
 						@createNew="(...args) => $emit('createNew',...args)"
 						@set="(...args) => fieldPropertySet(args[0],args[1])"
-						:builderLanguage="builderLanguage"
-						:dataFields="dataFields"
-						:entityIdMapRef="entityIdMapRef"
+						:builderLanguage
+						:dataFields
+						:entityIdMapRef
 						:field="fieldShow"
 						:formId="id"
-						:joinsIndexMap="joinsIndexMap"
+						:joinsIndexMap
 						:moduleId="module.id"
 					/>
 					
@@ -448,9 +441,9 @@ export default {
 							@index-removed="fieldQueryRemoveIndex($event)"
 							:allowLookups="fieldShow.content === 'list' && fieldShow.csvImport"
 							:allowOrders="true"
-							:builderLanguage="builderLanguage"
-							:entityIdMapRef="entityIdMapRef"
-							:fieldIdMap="fieldIdMap"
+							:builderLanguage
+							:entityIdMapRef
+							:fieldIdMap
 							:filtersDisable="['formState','getter','globalSearch']"
 							:formId="id"
 							:moduleId="module.id"
@@ -488,9 +481,9 @@ export default {
 						v-model="columnShow.query"
 						:allowChoices="false"
 						:allowOrders="true"
-						:builderLanguage="builderLanguage"
-						:entityIdMapRef="entityIdMapRef"
-						:fieldIdMap="fieldIdMap"
+						:builderLanguage
+						:entityIdMapRef
+						:fieldIdMap
 						:filtersDisable="['formState','getter','globalSearch']"
 						:formId="id"
 						:joinsParents="[fieldShow.query.joins]"
@@ -499,7 +492,7 @@ export default {
 				</div>
 				<my-builder-column-options
 					@set="(...args) => fieldColumnPropertySet(args[0],args[1])"
-					:builderLanguage="builderLanguage"
+					:builderLanguage
 					:column="columnShow"
 					:hasCaptions="fieldShow.content === 'list'"
 					:moduleId="module.id"
@@ -522,21 +515,10 @@ export default {
 	},
 	data() {
 		return {
-			// form data
-			iconId:null,         // form icon
-			presetIdOpen:null,   // open specific preset record on form open
-			fieldIdFocus:null,   // field input to place focus on form load
-			name:'',             // form name
-			noDataActions:false, // disable all data actions (save, new, delete)
-			query:{},            // form query
-			captions:{},         // form captions
-			fieldIdsRemove:[],   // IDs of fields to remove
-
-			// form sub entities
-			actions:[],          // form actions
-			fields:[],           // form fields (nested within each other)
-			functions:[],        // form functions
-			states:[],           // form states
+			// inputs
+			fieldIdsRemove:[], // IDs of fields to remove
+			form:false,        // form being edited in this component
+			formCopy:{},       // copy of form from schema when component last reset
 			
 			// state
 			columnIdShow:null,
@@ -544,7 +526,6 @@ export default {
 			fieldIdShow:null,         // field ID which is shown in sidebar to be edited
 			fieldMoveList:null,       // fields list from which to move field (move by click)
 			fieldMoveIndex:0,         // index of field which to move (move by click)
-			showColumnsAll:false,     // show columns from all relevant fields regardless of whether field is selected
 			showSidebar:true,         // show form Builder sidebar
 			showTemplate1n:false,     // show templates for 1:n relationship input fields
 			showTemplateN1:true,      // show templates for n:1 relationship input fields
@@ -559,22 +540,9 @@ export default {
 		};
 	},
 	computed:{
-		hasChanges:(s) =>
-			s.fieldIdsRemove.length        !== 0
-			|| s.iconId                    !== s.form.iconId
-			|| s.presetIdOpen              !== s.form.presetIdOpen
-			|| s.fieldIdFocus              !== s.form.fieldIdFocus
-			|| s.name                      !== s.form.name
-			|| s.noDataActions             !== s.form.noDataActions
-			|| JSON.stringify(s.actions)   !== JSON.stringify(s.form.actions)
-			|| JSON.stringify(s.captions)  !== JSON.stringify(s.form.captions)
-			|| JSON.stringify(s.fields)    !== JSON.stringify(s.form.fields)
-			|| JSON.stringify(s.functions) !== JSON.stringify(s.form.functions)
-			|| JSON.stringify(s.query)     !== JSON.stringify(s.form.query)
-			|| JSON.stringify(s.states)    !== JSON.stringify(s.form.states),
-		columnIdMap:(s) => {
+		columnIdMap:s => {
 			let map = {};
-			let collect = function(fields) {
+			const collect = function(fields) {
 				for(const field of fields) {
 					if(field.content === 'container') {
 						collect(field.fields);
@@ -593,12 +561,12 @@ export default {
 					}
 				}
 			};
-			collect(s.fields);
+			collect(s.form.fields);
 			return map;
 		},
-		fieldIdMap:(s) => {
+		fieldIdMap:s => {
 			let map = {};
-			let collect = function(fields) {
+			const collect = function(fields) {
 				for(let f of fields) {
 					map[f.id] = f;
 					
@@ -612,7 +580,7 @@ export default {
 					}
 				}
 			};
-			collect(s.fields);
+			collect(s.form.fields);
 			return map;
 		},
 		fieldsTemplate:{
@@ -644,8 +612,8 @@ export default {
 			},
 			set() {} // cannot be set
 		},
-		indexAttributeIdsUsed:(s) => {
-			let getIndexIds = function(fields) {
+		indexAttributeIdsUsed:s => {
+			const getIndexIds = function(fields) {
 				let indexIds = [];
 				
 				for(const f of fields) {
@@ -666,9 +634,9 @@ export default {
 				}
 				return indexIds;
 			};
-			return getIndexIds(s.fields);
+			return getIndexIds(s.form.fields);
 		},
-		fieldQueryRelationIdStart:(s) => {
+		fieldQueryRelationIdStart:s => {
 			if(s.fieldShow === false || s.fieldShow.content !== 'data')
 				return null;
 			
@@ -684,7 +652,7 @@ export default {
 			
 			return atr.relationId;
 		},
-		hasAny1nJoin:(s) => {
+		hasAny1nJoin:s => {
 			for(let j of s.query.joins) {
 				if(j.index === 0)
 					continue;
@@ -702,42 +670,45 @@ export default {
 		},
 		
 		// simple
-		canSave:          (s) => s.hasChanges && !s.readonly,
-		columnShow:       (s) => s.columnIdShow === null ? false : s.columnIdMap[s.columnIdShow],
-		dataFields:       (s) => s.getDataFields(s.fields),
-		entityIdMapRef:   (s) => s.getFormEntityMapRef(s.fields,s.actions),
-		fieldContentFocus:(s) => ['button','data'],
-		fieldShow:        (s) => s.fieldIdShow === null || s.fieldIdMap[s.fieldIdShow] === undefined ? false : s.fieldIdMap[s.fieldIdShow],
-		fieldShowHasQuery:(s) => s.fieldShow !== false && s.getFieldHasQuery(s.fieldShow),
-		form:             (s) => s.formIdMap[s.id] === undefined ? false : s.formIdMap[s.id],
-		joinsIndexMap:    (s) => s.getJoinsIndexMap(s.query.joins),
-		presetCandidates: (s) => s.relation === false ? [] : s.relationIdMap[s.query.relationId].presets,
-		relation:         (s) => s.relationIdMap[s.query.relationId] === undefined ? false : s.relationIdMap[s.query.relationId],
+		canSave:          s => s.hasChanges && !s.readonly,
+		columnShow:       s => s.columnIdShow === null ? false : s.columnIdMap[s.columnIdShow],
+		dataFields:       s => s.getDataFields(s.form.fields),
+		entityIdMapRef:   s => s.getFormEntityMapRef(s.form.fields,s.form.actions),
+		fieldContentFocus:s => ['button','data'],
+		fieldShow:        s => s.fieldIdShow === null || s.fieldIdMap[s.fieldIdShow] === undefined ? false : s.fieldIdMap[s.fieldIdShow],
+		fieldShowHasQuery:s => s.fieldShow !== false && s.getFieldHasQuery(s.fieldShow),
+		formSchema:       s => s.formIdMap[s.id] === undefined ? false : s.formIdMap[s.id],
+		hasChanges:       s => s.fieldIdsRemove.length !== 0 || !s.deepIsEqual(s.form,s.formSchema),
+		joinsIndexMap:    s => s.getJoinsIndexMap(s.query.joins),
+		presetCandidates: s => s.relation === false ? [] : s.relationIdMap[s.query.relationId].presets,
+		query:            s => s.form.query !== null ? s.form.query : s.getTemplateQuery(),
+		relation:         s => s.relationIdMap[s.query.relationId] === undefined ? false : s.relationIdMap[s.query.relationId],
 		
 		// stores
-		module:        (s) => s.moduleIdMap[s.form.moduleId],
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		formIdMap:     (s) => s.$store.getters['schema/formIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.form,
-		capFldTitle:   (s) => s.$store.getters.captions.fieldTitle,
-		capFldHelp:    (s) => s.$store.getters.captions.fieldHelp,
-		capGen:        (s) => s.$store.getters.captions.generic
+		module:        s => s.moduleIdMap[s.form.moduleId],
+		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		formIdMap:     s => s.$store.getters['schema/formIdMap'],
+		capApp:        s => s.$store.getters.captions.builder.form,
+		capFldTitle:   s => s.$store.getters.captions.fieldTitle,
+		capFldHelp:    s => s.$store.getters.captions.fieldHelp,
+		capGen:        s => s.$store.getters.captions.generic
 	},
 	watch:{
 		$route:{
 			handler() { this.resetRouteParams(); },
 			immediate:true
 		},
-		form:{
-			handler() { this.reset(); },
+		formSchema:{
+			handler() { this.reset(false); },
 			immediate:true
 		}
 	},
 	methods:{
 		// externals
 		copyValueDialog,
+		deepIsEqual,
 		getColumnIcon,
 		getDataFields,
 		getDependentRelations,
@@ -761,6 +732,7 @@ export default {
 		getTemplateFieldList,
 		getTemplateFieldTabs,
 		getTemplateFieldVariable,
+		getTemplateQuery,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		routeParseParams,
@@ -776,7 +748,7 @@ export default {
 				child.basis = 300;
 				parent.fields.push(child);
 			}
-			this.fields.push(parent);
+			this.form.fields.push(parent);
 		},
 		fieldMoveStore(evt) {
 			this.fieldMoveList  = evt.fieldList;
@@ -792,23 +764,12 @@ export default {
 				image:image
 			});
 		},
-		reset() {
-			if(!this.form) return;
-			
-			this.name           = this.form.name;
-			this.iconId         = this.form.iconId;
-			this.presetIdOpen   = this.form.presetIdOpen;
-			this.fieldIdFocus   = this.form.fieldIdFocus;
-			this.noDataActions  = this.form.noDataActions;
-			this.actions        = JSON.parse(JSON.stringify(this.form.actions));
-			this.captions       = JSON.parse(JSON.stringify(this.form.captions));
-			this.fields         = JSON.parse(JSON.stringify(this.form.fields));
-			this.functions      = JSON.parse(JSON.stringify(this.form.functions));
-			this.query          = JSON.parse(JSON.stringify(this.form.query));
-			this.states         = JSON.parse(JSON.stringify(this.form.states));
-			this.fieldIdsRemove = [];
-			this.showColumnsAll = this.fields.length === 1
-				&& !['container','tabs'].includes(this.fields[0].content);
+		reset(manuelReset) {
+			if(this.formSchema !== false && (manuelReset || !this.deepIsEqual(this.formCopy,this.formSchema))) {
+				this.form     = JSON.parse(JSON.stringify(this.formSchema));
+				this.formCopy = JSON.parse(JSON.stringify(this.formSchema));
+				this.fieldIdsRemove = [];
+			}
 		},
 		resetRouteParams() {
 			let params = { fieldIdShow:{ parse:'string', value:null } };
@@ -925,7 +886,7 @@ export default {
 			this.fieldIdsRemove.push(fieldId);
 			
 			// remove field from array
-			let remove = function(fields) {
+			const remove = function(fields) {
 				for(let i = 0, j = fields.length; i < j; i++) {
 					let f = fields[i];
 					
@@ -939,7 +900,7 @@ export default {
 					}
 				}
 			};
-			remove(this.fields);
+			remove(this.form.fields);
 		},
 		
 		// field manipulation
@@ -1002,7 +963,7 @@ export default {
 			if(!this.canSave) return;
 
 			// check removed fields being referenced in form states
-			for(const s of this.states) {
+			for(const s of this.form.states) {
 				for(const c of s.conditions) {
 					if(this.fieldIdsRemove.includes(c.side0.fieldId) || this.fieldIdsRemove.includes(c.side1.fieldId))
 						return this.showMessage(this.capApp.error.formStateFieldRemovedCondition.replace('{NAME}',s.description));
@@ -1014,8 +975,8 @@ export default {
 			}
 			
 			// clear focus on removed field
-			if(this.fieldIdsRemove.includes(this.fieldIdFocus))
-				this.fieldIdFocus = null;
+			if(this.fieldIdsRemove.includes(this.form.fieldIdFocus))
+				this.form.fieldIdFocus = null;
 			
 			// save form and delete removed fields
 			let requests = [];
@@ -1023,25 +984,8 @@ export default {
 				requests.push(ws.prepare('field','del',fieldId));
 			}
 			
-			requests.push(ws.prepare('form','set',{
-				id:this.form.id,
-				moduleId:this.form.moduleId,
-				iconId:this.iconId,
-				presetIdOpen:this.presetIdOpen,
-				fieldIdFocus:this.fieldIdFocus,
-				name:this.name,
-				noDataActions:this.noDataActions,
-				query:this.query,
-				actions:this.actions,
-				fields:this.fields,
-				functions:this.functions,
-				states:this.states,
-				articleIdsHelp:this.form.articleIdsHelp,
-				captions:this.captions
-			}));
-			requests.push(ws.prepare('schema','check',{
-				moduleId:this.form.moduleId
-			}));
+			requests.push(ws.prepare('form','set',this.form));
+			requests.push(ws.prepare('schema','check',{moduleId:this.form.moduleId}));
 			
 			ws.sendMultiple(requests,true).then(
 				() => this.$root.schemaReload(this.module.id),

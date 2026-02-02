@@ -886,7 +886,6 @@
 			"autoSelect": "Rekordok Automatikus Kiválasztása",
 			"autoSelectHint": "0=kikapcsolva, 2=első kettő, -3=utolsó három",
 			"button": {
-				"columnsAll": "Minden Oszlop",
 				"layoutColumns": "{CNT} Oszlop"
 			},
 			"chart": {

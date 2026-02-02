@@ -1,7 +1,6 @@
 import MyBuilderCaption                from './builderCaption.js';
 import MyBuilderPgTriggers             from './builderPgTriggers.js';
 import MyCodeEditor                    from '../codeEditor.js';
-import MyTabs                          from '../tabs.js';
 import {getTemplatePgFunctionSchedule} from '../shared/builderTemplate.js';
 import {copyValueDialog}               from '../shared/generic.js';
 import {
@@ -127,8 +126,7 @@ const MyBuilderPgFunction = {
 		MyBuilderCaption,
 		MyBuilderPgFunctionItemSchedule,
 		MyBuilderPgTriggers,
-		MyCodeEditor,
-		MyTabs
+		MyCodeEditor
 	},
 	template:`<div class="builder-function">
 		<div class="contentBox left" v-if="pgFunction">

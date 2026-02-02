@@ -1,10 +1,8 @@
-import MyBuilderCaption   from './builderCaption.js';
-import MyBuilderQuery     from './builderQuery.js';
-import MyCodeEditor       from '../codeEditor.js';
-import {getFieldMap}      from '../shared/form.js';
-import {copyValueDialog}  from '../shared/generic.js';
-import {getJoinsIndexMap} from '../shared/query.js';
-import MyTabs             from '../tabs.js';
+import MyBuilderCaption  from './builderCaption.js';
+import MyBuilderQuery    from './builderQuery.js';
+import MyCodeEditor      from '../codeEditor.js';
+import {getFieldMap}     from '../shared/form.js';
+import {copyValueDialog} from '../shared/generic.js';
 import {
 	getAttributeIcon,
 	isAttributeFiles
@@ -28,8 +26,7 @@ const MyBuilderJsFunction = {
 	components:{
 		MyBuilderCaption,
 		MyBuilderQuery,
-		MyCodeEditor,
-		MyTabs
+		MyCodeEditor
 	},
 	template:`<div class="builder-function">
 		<div class="contentBox grow" v-if="jsFunction">
@@ -127,7 +124,7 @@ const MyBuilderJsFunction = {
 							</router-link>
 						</div>
 						
-						<div class="placeholders" v-if="form.query.joins.length !== 0">
+						<div class="placeholders" v-if="form.query !== null">
 							<my-builder-query
 								:allowChoices="false"
 								:allowFixedLimit="false"
@@ -796,7 +793,6 @@ const MyBuilderJsFunction = {
 		entityIdMapRef:    (s) => s.formId === null ? {} : s.getFormEntityMapRef(s.form.fields,s.form.actions),
 		fieldIdMap:        (s) => s.formId === null ? {} : s.getFieldMap(s.formIdMap[s.formId].fields),
 		form:              (s) => s.formId === null ? false : s.formIdMap[s.formId],
-		joinsIndexMap:     (s) => s.form !== false ? s.getJoinsIndexMap(s.form.query.joins) : {},
 		jsFunction:        (s) => s.jsFunctionIdMap[s.id] === undefined ? false : s.jsFunctionIdMap[s.id],
 		module:            (s) => s.jsFunction === false ? false : s.moduleIdMap[s.jsFunction.moduleId],
 		modulesData:       (s) => s.getDependentModules(s.module).filter(v => v.relations.length !== 0),
@@ -830,7 +826,6 @@ const MyBuilderJsFunction = {
 		getFunctionHelp,
 		getItemTitle,
 		getItemTitlePath,
-		getJoinsIndexMap,
 		getValidDbCharsForRx,
 		isAttributeFiles,
 		

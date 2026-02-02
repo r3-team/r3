@@ -886,7 +886,6 @@
 			"autoSelect": "Datensätze autom. wählen",
 			"autoSelectHint": "0=aus, 2=erste zwei, -3=letzten drei",
 			"button": {
-				"columnsAll": "Alle Spalten",
 				"layoutColumns": "{CNT} Spalten"
 			},
 			"chart": {

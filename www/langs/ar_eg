@@ -886,7 +886,6 @@
 			"autoSelect": "تحديد السجلات تلقائيًا",
 			"autoSelectHint": "0=إيقاف، 2=أول اثنين، -3=آخر ثلاثة",
 			"button": {
-				"columnsAll": "جميع الأعمدة",
 				"layoutColumns": "أعمدة {CNT}."
 			},
 			"chart": {

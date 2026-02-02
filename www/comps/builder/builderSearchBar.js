@@ -3,7 +3,6 @@ import MyBuilderColumnOptions from './builderColumnOptions.js';
 import MyBuilderIconInput     from './builderIconInput.js';
 import MyBuilderOpenFormInput from './builderOpenFormInput.js';
 import MyBuilderQuery         from './builderQuery.js';
-import MyTabs                 from '../tabs.js';
 import {copyValueDialog}      from '../shared/generic.js';
 import {
 	getItemTitleColumn,
@@ -28,8 +27,7 @@ const MyBuilderSearchBar = {
 		MyBuilderColumnTemplates,
 		MyBuilderIconInput,
 		MyBuilderOpenFormInput,
-		MyBuilderQuery,
-		MyTabs
+		MyBuilderQuery
 	},
 	template:`<div class="builder-search-bar" v-if="searchBar">
 		<div class="contentBox grow">

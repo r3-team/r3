@@ -1,11 +1,9 @@
-import MyTabs                          from '../tabs.js';
-import srcBase64Icon                   from '../shared/image.js';
-import {getCaptionForLang}             from '../shared/language.js';
+import srcBase64Icon       from '../shared/image.js';
+import {getCaptionForLang} from '../shared/language.js';
 export {MyBuilderMenuTabSelect as default};
 
 const MyBuilderMenuTabSelect = {
 	name:'my-builder-menu-tab-select',
-	components:{MyTabs},
 	template:`<my-tabs
 		@update:modelValue="$emit('update:modelValue',$event)"
 		:entries="tabs.indx"

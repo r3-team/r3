@@ -5,7 +5,6 @@ import MyBuilderDocPage          from './builderDocPage.js';
 import MyBuilderDocSets          from './builderDocSets.js';
 import MyBuilderDocStates        from './builderDocStates.js';
 import MyInputDecimal            from '../inputDecimal.js';
-import MyTabs                    from '../tabs.js';
 import {isAttributeRelationship} from '../shared/attribute.js';
 import {getUuidV4}               from '../shared/crypto.js';
 import {deepIsEqual}             from '../shared/generic.js';
@@ -17,7 +16,8 @@ import {
 } from '../shared/builderDoc.js';
 import {
 	getTemplateDocField,
-	getTemplateDocPage
+	getTemplateDocPage,
+	getTemplateQuery
 } from '../shared/builderTemplate.js';
 
 export default {
@@ -29,8 +29,7 @@ export default {
 		MyBuilderDocSets,
 		MyBuilderDocStates,
 		MyBuilderQuery,
-		MyInputDecimal,
-		MyTabs
+		MyInputDecimal
 	},
 	template:`<div class="builder-doc" v-if="doc !== false">
 		<div class="contentBox grow scroll">
@@ -56,7 +55,7 @@ export default {
 						:caption="capGen.button.save"
 					/>
 					<my-button image="refresh.png"
-						@trigger="reset"
+						@trigger="reset(true)"
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
@@ -116,7 +115,7 @@ export default {
 					:elmFieldOptions="$refs.fieldOptions"
 					:entityIdMapRef
 					:fieldIdOptions="sideFieldIdShow"
-					:joins="doc.query.joins"
+					:joins="query.joins"
 					:moduleId="doc.moduleId"
 					:pages="doc.pages"
 					:readonly
@@ -144,12 +143,13 @@ export default {
 				<!-- content -->
 				<div class="content grow" v-if="tabTarget === 'content'">
 					<my-builder-query
-						v-model="doc.query"
 						@index-removed=""
+						@update:modelValue="doc.query = $event"
 						:allowChoices="false"
 						:allowFixedLimit="false"
 						:builderLanguage
 						:filtersDisable
+						:modelValue="query"
 						:moduleId="doc.moduleId"
 					/>
 
@@ -176,7 +176,7 @@ export default {
 					<my-builder-doc-states
 						v-model="doc.states"
 						:entityIdMapRef
-						:joins="doc.query.joins"
+						:joins="query.joins"
 						:moduleId="doc.moduleId"
 						:readonly
 					/>
@@ -239,7 +239,7 @@ export default {
 					<my-builder-doc-sets
 						v-model="doc.sets"
 						:allowData="true"
-						:joins="doc.query.joins"
+						:joins="query.joins"
 						:readonly
 						:showDoc="true"
 						:showFont="true"
@@ -270,7 +270,6 @@ export default {
 	data() {
 		return {
 			cacheDenialTimestamp:0,
-			doc:false,
 			filtersDisable:[
 				'collection','field','fieldChanged','fieldValid','formChanged',
 				'formState','getter','globalSearch','javascript','record','recordMayCreate',
@@ -278,6 +277,8 @@ export default {
 			],
 
 			// inputs
+			doc:false,  // document being edited in this component
+			docCopy:{}, // copy of document from schema when component last reset
 			recordId:null,
 			zoom:1,
 			zoomOrg:1,
@@ -298,7 +299,7 @@ export default {
 				s.getTemplateDocField('list'),
 				s.getTemplateDocField('text')
 			];
-			for(const j of s.doc.query.joins) {
+			for(const j of s.query.joins) {
 				const r = s.relationIdMap[j.relationId];
 
 				for(const a of r.attributes) {
@@ -342,12 +343,13 @@ export default {
 		},
 
 		// simple
-		docOrg:         s => s.docIdMap[s.id] === undefined ? false : s.docIdMap[s.id],
+		docSchema:      s => s.docIdMap[s.id] === undefined ? false : s.docIdMap[s.id],
 		entityIdMapRef: s => s.getDocEntityMapRef(s.doc),
-		hasChanges:     s => !s.deepIsEqual(s.doc,s.docOrg),
+		hasChanges:     s => !s.deepIsEqual(s.doc,s.docSchema),
 		module:         s => s.moduleIdMap[s.doc.moduleId],
 		pageIndexActive:s => s.pageIdMapIndex[s.tabPageIdShow],
 		previewUrl:     s => s.recordId !== null && !s.hasChanges ? `/doc/download/test.pdf?doc_id=${s.id}&record_id=${s.recordId}&token=${s.token}&date=${s.cacheDenialTimestamp}` : null,
+		query:          s => s.doc.query !== null ? s.doc.query : s.getTemplateQuery(),
 		sideDocShow:    s => !s.sideFieldShow,
 		sideFieldShow:  s => s.sideFieldIdShow !== null,
 		
@@ -360,8 +362,8 @@ export default {
 		capGen:       s => s.$store.getters.captions.generic,
 	},
 	watch:{
-		docOrg:{
-			handler() { this.reset(); },
+		docSchema:{
+			handler() { this.reset(false); },
 			immediate:true
 		}
 	},
@@ -374,6 +376,7 @@ export default {
 		getJoinsIndexMap,
 		getTemplateDocField,
 		getTemplateDocPage,
+		getTemplateQuery,
 		getUuidV4,
 		isAttributeRelationship,
 
@@ -408,9 +411,10 @@ export default {
 		pageMove(forward) {
 
 		},
-		reset() {
-			if(this.docOrg !== false && !this.deepIsEqual(this.doc,this.docOrg)) {
-				this.doc = JSON.parse(JSON.stringify(this.docOrg));
+		reset(manuelReset) {
+			if(this.docSchema !== false && (manuelReset || !this.deepIsEqual(this.docCopy,this.docSchema))) {
+				this.doc     = JSON.parse(JSON.stringify(this.docSchema));
+				this.docCopy = JSON.parse(JSON.stringify(this.docSchema));
 
 				if(this.doc.pages.findIndex(v => v.id === this.tabPageIdShow) === -1)
 					this.resetPageTab();

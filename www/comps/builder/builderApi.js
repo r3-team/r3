@@ -1,6 +1,5 @@
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderColumnOptions from './builderColumnOptions.js';
-import MyTabs                 from '../tabs.js';
 import { copyValueDialog }    from '../shared/generic.js';
 import {
 	isAttributeBoolean,
@@ -333,8 +332,7 @@ const MyBuilderApi = {
 		MyBuilderColumnOptions,
 		MyBuilderColumns,
 		MyBuilderColumnTemplates,
-		MyBuilderQuery,
-		MyTabs
+		MyBuilderQuery
 	},
 	template:`<div class="builder-api" v-if="api">
 		<div class="contentBox grow">

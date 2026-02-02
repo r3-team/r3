@@ -886,7 +886,6 @@
 			"autoSelect": "自动选择记录",
 			"autoSelectHint": "0=关闭，2=前两个，-3=最后三个",
 			"button": {
-				"columnsAll": "所有列",
 				"layoutColumns": "{CNT} 列"
 			},
 			"chart": {
