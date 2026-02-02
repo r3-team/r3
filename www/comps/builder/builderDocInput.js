@@ -258,10 +258,7 @@ const MyBuilderDocFontAlign = {
 			set(v) { this.$emit('update:modelValue', `${v}${this.alignVer}`); }
 		},
 		alignVer:{
-			get() {
-				const v = this.modelValue.replace(/[LCRJ]/g,'');
-				return v !== '' ? v : 'M'
-			},
+			get()  { return this.modelValue.replace(/[LCRJ]/g,''); },
 			set(v) { this.$emit('update:modelValue', `${this.alignHor}${v}`); }
 		},
 

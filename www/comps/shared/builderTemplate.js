@@ -128,7 +128,7 @@ export function getTemplateDoc(moduleId,language,name) {
 		name:name,
 		comment:null,
 		font:{
-			align:'L',
+			align:'LM',
 			boolFalse:'no',
 			boolTrue:'yes',
 			color:null,

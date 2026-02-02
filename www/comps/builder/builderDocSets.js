@@ -130,7 +130,7 @@ const MyBuilderDocSetTarget = {
 			if(s.isDecimal)        return 0.0;
 			if(s.isInteger)        return 0;
 			if(s.isNumberSep)      return '.';
-			if(s.isFontAlign)      return 'L';
+			if(s.isFontAlign)      return 'LM';
 			if(s.isFontFamily)     return 'Roboto';
 			if(s.isFontLineFactor) return 1.0;
 			if(s.isString)         return '';
