@@ -478,9 +478,9 @@ export default {
 			dragEnterCounter:0,
 			dragType:'doc-field',
 			filtersDisable:[
-				'collection','field','fieldChanged','fieldValid','formChanged',
-				'formState','getter','globalSearch','javascript','recordMayCreate',
-				'recordMayDelete','recordMayUpdate','recordNew','variable'
+				'collection','field','fieldChanged','fieldValid','formChanged','formState',
+				'getter','globalSearch','javascript','languageCode','login','recordMayCreate',
+				'recordMayDelete','recordMayUpdate','recordNew','role','variable'
 			],
 			gridFieldSizeMinX:0,
 			gridFieldSizeMinY:5,
