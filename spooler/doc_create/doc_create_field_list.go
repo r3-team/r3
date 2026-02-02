@@ -26,7 +26,7 @@ type cell struct {
 	width    float64
 }
 
-func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, font types.DocFont) error {
+func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int64, f types.DocFieldList, font types.DocFont) error {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
@@ -38,7 +38,7 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, font type
 		RelationId:  f.Query.RelationId.Bytes,
 		IndexSource: 0,
 		Expressions: make([]types.DataGetExpression, 0),
-		Filters:     data_query.ConvertQueryToDataFilter(f.Query.Filters, 0, doc.p.GetLang(), make(map[string]string)),
+		Filters:     data_query.ConvertQueryToDataFilter(f.Query.Filters, loginId, doc.p.GetLang(), recordIdDoc, make(map[string]string)),
 		Joins:       data_query.ConvertQueryToDataJoins(f.Query.Joins),
 		Orders:      data_query.ConvertQueryToDataOrders(f.Query.Orders),
 		Limit:       f.Query.FixedLimit,
@@ -46,7 +46,8 @@ func addFieldList(ctx context.Context, doc *doc, f types.DocFieldList, font type
 
 	// build expressions from columns
 	for _, column := range f.Columns {
-		dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertDocumentColumnToExpression(column, 0, doc.p.GetLang()))
+		dataGet.Expressions = append(dataGet.Expressions,
+			data_query.ConvertDocumentColumnToExpression(column, loginId, doc.p.GetLang(), recordIdDoc))
 	}
 
 	if len(dataGet.Expressions) == 0 {

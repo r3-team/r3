@@ -110,7 +110,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// apply field filters
 	// some filters are not compatible with backend requests (field value, open form record ID, ...)
 	dataGet.Filters = data_query.ConvertQueryToDataFilter(
-		f.Query.Filters, login.Id, login.LanguageCode, make(map[string]string))
+		f.Query.Filters, login.Id, login.LanguageCode, 0, make(map[string]string))
 
 	// define ICS event range, if defined
 	dateRange0 := f.DateRange0
@@ -204,7 +204,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertColumnToExpression(
-			column, login.Id, login.LanguageCode, make(map[string]string)))
+			column, login.Id, login.LanguageCode, 0, make(map[string]string)))
 	}
 
 	// get data

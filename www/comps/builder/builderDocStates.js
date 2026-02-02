@@ -7,7 +7,7 @@ import {
 const filtersDisable = [
 	'collection','field','fieldChanged','fieldValid','formChanged','formState','getter','globalSearch',
 	'javascript','languageCode','login','nowDate','nowDatetime','nowTime','role','recordMayCreate',
-	'recordMayDelete','recordMayUpdate','record','recordNew','subQuery','variable'
+	'recordMayDelete','recordMayUpdate','subQuery','variable'
 ];
 
 const MyBuilderDocStateEffect = {

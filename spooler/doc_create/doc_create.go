@@ -151,7 +151,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 		exprs = getExpressionsDistinct(exprs)
 
 		// get data from document query
-		if err := getDataDoc(ctx, doc, noAuth, loginId, docDef.Query, exprs, "en_us"); err != nil {
+		if err := getDataDoc(ctx, doc, noAuth, loginId, recordId, docDef.Query, exprs, "en_us"); err != nil {
 			return err
 		}
 	}
@@ -160,7 +160,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 	doc.fieldIdMapState = make(map[uuid.UUID]bool)
 	doc.pageIdMapState = make(map[uuid.UUID]bool)
 	for _, s := range docDef.States {
-		res, err := getConditionsResult(ctx, doc, s.Conditions)
+		res, err := getConditionsResult(ctx, doc, recordId, s.Conditions)
 		if err != nil {
 			return err
 		}
@@ -236,7 +236,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 			if page.Header.DocPageIdInherit.Valid {
 				e = docDef.Pages[pageIdMapIndex[page.Header.DocPageIdInherit.Bytes]].Header
 			}
-			addHeaderFooter(ctx, doc, e.FieldGrid, font, 0, sizeXPage, page.Margin.T)
+			addHeaderFooter(ctx, doc, loginId, recordId, e.FieldGrid, font, 0, sizeXPage, page.Margin.T)
 		}, true)
 
 		log.Info(log.ContextDoc, fmt.Sprintf("adding page %d (%s)", i+1, page.Size))
@@ -250,11 +250,13 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 			if page.Footer.DocPageIdInherit.Valid {
 				e = docDef.Pages[pageIdMapIndex[page.Footer.DocPageIdInherit.Bytes]].Footer
 			}
-			addHeaderFooter(ctx, doc, e.FieldGrid, font, 0-page.Margin.B, sizeXPage, page.Margin.B)
+			addHeaderFooter(ctx, doc, loginId, recordId, e.FieldGrid, font, 0-page.Margin.B, sizeXPage, page.Margin.B)
 		})
 
 		// a page is always a single flow field on root level
-		if err := addField(ctx, doc, page.Margin.L, page.Margin.T, sizeXPageUsable, sizeYPageUsable, false, false, true, font, page.FieldFlow); err != nil {
+		if err := addField(ctx, doc, loginId, recordId, page.Margin.L, page.Margin.T,
+			sizeXPageUsable, sizeYPageUsable, false, false, true, font, page.FieldFlow); err != nil {
+
 			return err
 		}
 	}

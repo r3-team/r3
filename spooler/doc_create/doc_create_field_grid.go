@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font types.DocFont, posX, posY, pageSizeYUsable float64) error {
+func addFieldGrid(ctx context.Context, doc *doc, loginId, recordIdDoc int64, f types.DocFieldGrid, font types.DocFont, posX, posY, pageSizeYUsable float64) error {
 
 	// border sizes
 	_, bSizeT, bSizeR, bSizeB, bSizeL, _ := getBorderSize(f.Border)
@@ -26,7 +26,9 @@ func addFieldGrid(ctx context.Context, doc *doc, f types.DocFieldGrid, font type
 
 	var posYChildMax float64
 	for _, fieldIfChild := range f.Fields {
-		if err := addField(ctx, doc, posXChildren, posYChildren, 0, pageSizeYUsable, false, true, false, font, fieldIfChild); err != nil {
+		if err := addField(ctx, doc, loginId, recordIdDoc, posXChildren, posYChildren, 0,
+			pageSizeYUsable, false, true, false, font, fieldIfChild); err != nil {
+
 			return err
 		}
 		if posYChildMax < doc.p.GetY() {

@@ -104,28 +104,28 @@ export default {
 					:attributeIdColor="field.attributeIdColor"
 					:attributeIdDate0="field.attributeIdDate0"
 					:attributeIdDate1="field.attributeIdDate1"
-					:choices="choices"
-					:columns="columns"
+					:choices
+					:columns
 					:collections="field.collections"
-					:collectionIdMapIndexes="collectionIdMapIndexes"
-					:dataOptions="dataOptions"
+					:collectionIdMapIndexes
+					:dataOptions
 					:daysShowDef="field.days"
 					:daysShowToggle="field.daysToggle"
 					:fieldId="field.id"
-					:filters="filters"
-					:formLoading="formLoading"
+					:filters
+					:formLoading
 					:hasOpenForm="field.openForm !== null"
 					:iconId="iconId ? iconId : null"
 					:ics="field.ics"
 					:indexColor="field.indexColor"
 					:indexDate0="field.indexDate0"
 					:indexDate1="field.indexDate1"
-					:isHidden="isHidden"
+					:isHidden
 					:isSingleField="isAlone"
 					:loadWhileHidden="parentIsCounting"
-					:loginOptions="loginOptions"
-					:moduleId="moduleId"
-					:popUpFormInline="popUpFormInline"
+					:loginOptions
+					:moduleI
+					:popUpFormInline
 					:query="field.query"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				/>

@@ -10,7 +10,7 @@ import (
 	"github.com/PaesslerAG/gval"
 )
 
-func getConditionsResult(ctx context.Context, doc *doc, conditions []types.DocStateCondition) (bool, error) {
+func getConditionsResult(ctx context.Context, doc *doc, recordIdDoc int64, conditions []types.DocStateCondition) (bool, error) {
 
 	if len(conditions) == 0 {
 		return false, nil
@@ -20,11 +20,11 @@ func getConditionsResult(ctx context.Context, doc *doc, conditions []types.DocSt
 	evalValues := make(map[string]any)
 
 	for i, c := range conditions {
-		s0, err := getConditionSideValue(doc, c.Side0)
+		s0, err := getConditionSideValue(doc, recordIdDoc, c.Side0)
 		if err != nil {
 			return false, err
 		}
-		s1, err := getConditionSideValue(doc, c.Side1)
+		s1, err := getConditionSideValue(doc, recordIdDoc, c.Side1)
 		if err != nil {
 			return false, err
 		}
@@ -73,7 +73,7 @@ func getConditionsResult(ctx context.Context, doc *doc, conditions []types.DocSt
 	return eval.EvalBool(ctx, evalValues)
 }
 
-func getConditionSideValue(doc *doc, s types.DocStateConditionSide) (any, error) {
+func getConditionSideValue(doc *doc, recordIdDoc int64, s types.DocStateConditionSide) (any, error) {
 	switch s.Content {
 	case "attribute":
 		if !s.AttributeId.Valid || !s.AttributeIndex.Valid {
@@ -96,6 +96,12 @@ func getConditionSideValue(doc *doc, s types.DocStateConditionSide) (any, error)
 			return 0, fmt.Errorf("preset ID does not exist")
 		}
 		return id, nil
+
+	case "record":
+		return recordIdDoc, nil
+
+	case "recordNew":
+		return recordIdDoc < 1, nil
 
 	case "true":
 		return true, nil

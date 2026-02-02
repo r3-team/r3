@@ -335,12 +335,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		// build expressions from columns
 		for _, column := range api.Columns {
 			dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertColumnToExpression(
-				column, login.Id, login.LanguageCode, getters.filters))
+				column, login.Id, login.LanguageCode, recordId, getters.filters))
 		}
 
 		// apply filters
 		dataGet.Filters = data_query.ConvertQueryToDataFilter(
-			api.Query.Filters, login.Id, login.LanguageCode, getters.filters)
+			api.Query.Filters, login.Id, login.LanguageCode, recordId, getters.filters)
 
 		// add record filter
 		if recordId != 0 {

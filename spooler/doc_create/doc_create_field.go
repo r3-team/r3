@@ -8,8 +8,8 @@ import (
 	"r3/types"
 )
 
-func addField(ctx context.Context, doc *doc, posXParent, posYParent, sizeXParent, sizeYPageUsable float64,
-	flowHorizontal bool, parentIsGrid bool, parentIsRoot bool, fontParent types.DocFont, fieldIf any) error {
+func addField(ctx context.Context, doc *doc, loginId, recordIdDoc int64, posXParent, posYParent, sizeXParent,
+	sizeYPageUsable float64, flowHorizontal bool, parentIsGrid bool, parentIsRoot bool, fontParent types.DocFont, fieldIf any) error {
 
 	fieldJson, err := json.Marshal(fieldIf)
 	if err != nil {
@@ -87,7 +87,7 @@ func addField(ctx context.Context, doc *doc, posXParent, posYParent, sizeXParent
 		ff = applyToFieldFlow(sets, ff)
 		ff.SizeX = f.SizeX
 		ff.SizeY = f.SizeY
-		return addFieldFlow(ctx, doc, ff, font, posX, posY, sizeYPageUsable)
+		return addFieldFlow(ctx, doc, loginId, recordIdDoc, ff, font, posX, posY, sizeYPageUsable)
 	case "grid", "gridFooter", "gridHeader":
 		var fg types.DocFieldGrid
 		if err := json.Unmarshal(fieldJson, &fg); err != nil {
@@ -96,7 +96,7 @@ func addField(ctx context.Context, doc *doc, posXParent, posYParent, sizeXParent
 		fg = applyToFieldGrid(sets, fg)
 		fg.SizeX = f.SizeX
 		fg.SizeY = f.SizeY
-		return addFieldGrid(ctx, doc, fg, font, posX, posY, sizeYPageUsable)
+		return addFieldGrid(ctx, doc, loginId, recordIdDoc, fg, font, posX, posY, sizeYPageUsable)
 	case "list":
 		var fl types.DocFieldList
 		if err := json.Unmarshal(fieldJson, &fl); err != nil {
@@ -105,7 +105,7 @@ func addField(ctx context.Context, doc *doc, posXParent, posYParent, sizeXParent
 		fl = applyToFieldList(sets, fl)
 		fl.SizeX = f.SizeX
 		fl.SizeY = f.SizeY
-		return addFieldList(ctx, doc, fl, font)
+		return addFieldList(ctx, doc, loginId, recordIdDoc, fl, font)
 	case "text":
 		var ft types.DocFieldText
 		if err := json.Unmarshal(fieldJson, &ft); err != nil {
