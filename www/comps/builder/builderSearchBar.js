@@ -316,7 +316,7 @@ export default {
 			}
 		},
 		reset(manuelReset) {
-			if(this.searchBarSchema !== false && (manuelReset || !this.deepIsEqual(this.searchBar,this.searchBarSchema))) {
+			if(this.searchBarSchema !== false && (manuelReset || !this.deepIsEqual(this.searchBarCopy,this.searchBarSchema))) {
 				this.searchBar     = JSON.parse(JSON.stringify(this.searchBarSchema));
 				this.searchBarCopy = JSON.parse(JSON.stringify(this.searchBarSchema));
 				this.columnIdShow  = null;
