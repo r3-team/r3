@@ -862,6 +862,7 @@
 				"{PAGE_END}": "Letzte Seitennummer",
 				"{TIME_NOW}": "Aktuelle Uhrzeit"
 			},
+			"rowMinHeight": "Minimale Zeilenhöhe",
 			"setData": "Von Attributwert überschreiben",
 			"setValue": "Manuell überschreiben",
 			"shrinkY": "Vertikal schrumpfen wenn leer",

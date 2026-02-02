@@ -340,6 +340,15 @@ export default {
 								<table class="generic-table-vertical default-inputs">
 									<tbody>
 										<tr>
+											<td>{{ capApp.rowMinHeight }}</td>
+											<td>
+												<div class="row gap centered">
+													<my-input-decimal class="short" v-model="field.bodyRowSizeY" :readonly :min="0" :allowNull="false" :length="5" :lengthFract="2" />
+													<span>mm</span>
+												</div>
+											</td>
+										</tr>
+										<tr>
 											<td>{{ capGen.colorFillRowsOdd }}</td>
 											<td><my-input-color-wrap v-model="field.bodyRowColorFillOdd" :allowNull="true" :readonly /></td>
 										</tr>

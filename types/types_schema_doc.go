@@ -41,7 +41,7 @@ type DocColumn struct {
 	Distincted     bool        `json:"distincted"`     // attribute values are distinct?
 	Length         int         `json:"length"`         // text length limit (in characters)
 	SubQuery       bool        `json:"subQuery"`       // column uses sub query?
-	SizeX          float64     `json:"sizeX"`          // width in mm (0 = parent width)
+	SizeX          float64     `json:"sizeX"`          // width in mm (0 = auto calculated based on remaining space)
 	TextPostfix    string      `json:"textPostfix"`    // fixed postfix value
 	TextPrefix     string      `json:"textPrefix"`     // fixed prefix value
 	Query          Query       `json:"query"`          // sub query
@@ -131,6 +131,7 @@ type DocFieldList struct {
 	BodyBorder           DocBorder   `json:"bodyBorder"`
 	BodyRowColorFillEven pgtype.Text `json:"bodyRowColorFillEven"`
 	BodyRowColorFillOdd  pgtype.Text `json:"bodyRowColorFillOdd"`
+	BodyRowSizeY         float64     `json:"bodyRowSizeY"` // min height
 	FooterBorder         DocBorder   `json:"footerBorder"`
 	FooterRowColorFill   pgtype.Text `json:"footerRowColorFill"`
 

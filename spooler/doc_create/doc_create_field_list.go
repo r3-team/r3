@@ -238,15 +238,18 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 				}
 			}
 
+			var sizeYCell float64 = 0
+			var cellLines int = 1
+
 			isString, str, err := getAttributeString(font, atr, row.Values[i])
 			if err != nil {
 				return err
 			}
 			if isString {
 				str = getStringClean(str, column.TextPrefix, column.TextPostfix, column.Length)
+				sizeYCell, cellLines = getRowCellHeightLines(doc, font, columnIndexMapWidth[i]-sizeXReductionBody, column.Length, str)
 			}
 
-			sizeYCell, cellLines := getRowCellHeightLines(doc, font, columnIndexMapWidth[i]-sizeXReductionBody, column.Length, str)
 			sizeYCell += sizeYAdditionBody
 			if sizeYRow < sizeYCell {
 				sizeYRow = sizeYCell
@@ -277,6 +280,10 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 		colorFill := f.BodyRowColorFillOdd
 		if ri%2 != 0 {
 			colorFill = f.BodyRowColorFillEven
+		}
+
+		if sizeYRow < f.BodyRowSizeY {
+			sizeYRow = f.BodyRowSizeY
 		}
 
 		isFirstRow := ri == 0 || pageAdded
@@ -391,7 +398,9 @@ func addListRow(doc *doc, b types.DocBorder, isFirstRow bool, cells []cell, padd
 		if c.text != "" {
 			drawCellText(doc, c.font, c.width-sizeXReduction, sizeYContent, false, c.lines, c.text)
 		} else {
-			if err := drawAttributeNonString(doc, c.font, 0, c.width-sizeXReduction, sizeYContent, c.atr, c.atrValue); err != nil {
+			// non string attributes need to be drawn (QR codes, images from files, base64 images from drawings, etc.)
+			// only provide height to keep aspect ratio
+			if err := drawAttributeNonString(doc, c.font, 0, 0, sizeYContent, c.atr, c.atrValue); err != nil {
 				return err
 			}
 		}

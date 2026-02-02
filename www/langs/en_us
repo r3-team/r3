@@ -865,6 +865,7 @@
 			"headerRowShow": "Show header row",
 			"inheritFrom": "Inherit from",
 			"inheritNone": "Set for this page",
+			"rowMinHeight": "Minimum row height",
 			"setData": "Overwrite by attribute value",
 			"setValue": "Overwrite manually",
 			"shrinkY": "Shrink vertically if empty",

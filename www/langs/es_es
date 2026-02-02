@@ -862,6 +862,7 @@
 				"{PAGE_END}": "Total page number",
 				"{TIME_NOW}": "Current time"
 			},
+			"rowMinHeight": "Minimum row height",
 			"setData": "Overwrite by attribute value",
 			"setValue": "Overwrite manually",
 			"shrinkY": "Shrink vertically if empty",

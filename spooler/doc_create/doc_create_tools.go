@@ -181,8 +181,6 @@ func getYWithNewPageIfNeeded(doc *doc, sizeY, pageMarginB float64) (float64, boo
 		_, _, _, pageMarginB = doc.p.GetMargins()
 	}
 
-	fmt.Printf("Y pos %f, sizeY %f, pageHeight %f, pageMarginB %f\n", doc.p.GetY(), sizeY, pageHeight, pageMarginB)
-
 	if doc.p.GetY()+sizeY > pageHeight-pageMarginB {
 		doc.p.AddPage()
 		doc.p.SetHomeXY()
