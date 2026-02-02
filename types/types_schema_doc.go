@@ -207,12 +207,13 @@ type DocStateCondition struct {
 	Side1     DocStateConditionSide `json:"side1"`     // comparison: right side
 }
 type DocStateConditionSide struct {
-	Brackets       int         `json:"brackets"`       // opening/closing brackets (side 0/1)
-	Content        string      `json:"content"`        // attribute, preset, true, value
-	AttributeId    pgtype.UUID `json:"attributeId"`    // attribute ID to retrieve value for
-	AttributeIndex pgtype.Int4 `json:"attributeIndex"` // attribute index to retrieve value for
-	PresetId       pgtype.UUID `json:"presetId"`       // preset ID of record to be compared
-	Value          pgtype.Text `json:"value"`          // fixed value, can be anything including NULL
+	Brackets        int         `json:"brackets"`        // opening/closing brackets (side 0/1)
+	Content         string      `json:"content"`         // attribute, preset, true, value
+	AttributeId     pgtype.UUID `json:"attributeId"`     // attribute ID to retrieve value for
+	AttributeIndex  pgtype.Int4 `json:"attributeIndex"`  // attribute index to retrieve value for
+	AttributeNested int         `json:"attributeNested"` // attribute nesting level (0 = main query, 1 = 1st sub query), not used in conditions atm but expected by query filter
+	PresetId        pgtype.UUID `json:"presetId"`        // preset ID of record to be compared
+	Value           pgtype.Text `json:"value"`           // fixed value, can be anything including NULL
 }
 type DocStateEffect struct {
 	DocFieldId pgtype.UUID `json:"docFieldId"` // affected field
