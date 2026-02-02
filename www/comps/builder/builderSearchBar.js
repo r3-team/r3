@@ -3,7 +3,7 @@ import MyBuilderColumnOptions from './builderColumnOptions.js';
 import MyBuilderIconInput     from './builderIconInput.js';
 import MyBuilderOpenFormInput from './builderOpenFormInput.js';
 import MyBuilderQuery         from './builderQuery.js';
-import {copyValueDialog}      from '../shared/generic.js';
+import {getTemplateQuery}     from '../shared/builderTemplate.js';
 import {
 	getItemTitleColumn,
 	getSqlPreview
@@ -13,12 +13,15 @@ import {
 	MyBuilderColumnTemplates
 } from './builderColumns.js';
 import {
+	copyValueDialog,
+	deepIsEqual
+} from '../shared/generic.js';
+import {
 	getIsContentInAnyFilter,
 	getJoinsIndexMap
 } from '../shared/query.js';
-export {MyBuilderSearchBar as default};
 
-const MyBuilderSearchBar = {
+export default {
 	name:'my-builder-search-bar',
 	components:{
 		MyBuilderCaption,
@@ -35,7 +38,7 @@ const MyBuilderSearchBar = {
 				<div class="area nowrap">
 					<img class="icon" src="images/tray.png" />
 					<h1 class="title">
-						{{ capApp.titleOne.replace('{NAME}',name) }}
+						{{ capApp.titleOne.replace('{NAME}',searchBar.name) }}
 					</h1>
 				</div>
 				<div class="area">
@@ -53,14 +56,14 @@ const MyBuilderSearchBar = {
 						:caption="capGen.button.save"
 					/>
 					<my-button image="refresh.png"
-						@trigger="reset"
+						@trigger="reset(true)"
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
 				</div>
 				<div class="area nowrap">
 					<my-button image="visible1.png"
-						@trigger="copyValueDialog(name,id,id)"
+						@trigger="copyValueDialog(searchBar.name,id,id)"
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
@@ -81,11 +84,11 @@ const MyBuilderSearchBar = {
 					<div class="builder-search-bar-columns-active">
 						<h2>{{ capGen.columnsActive }}</h2>
 						<my-builder-columns groupName="columns"
-							@columns-set="columns = $event"
+							@columns-set="searchBar.columns = $event"
 							@column-id-show="toggleColumnOptions($event)"
-							:builderLanguage="builderLanguage"
-							:columnIdShow="columnIdShow"
-							:columns="columns"
+							:builderLanguage
+							:columnIdShow
+							:columns="searchBar.columns"
 							:hasCaptions="true"
 						/>
 					</div>
@@ -94,8 +97,8 @@ const MyBuilderSearchBar = {
 						<h2>{{ capGen.columnsAvailable }}</h2>
 						<div class="builder-search-bar-column-templates">
 							<my-builder-column-templates groupName="batches_columns"
-								@column-add="columns.push($event)"
-								:columns="columns"
+								@column-add="searchBar.columns.push($event)"
+								:columns="searchBar.columns"
 								:joins="query.joins"
 							/>
 						</div>
@@ -120,20 +123,22 @@ const MyBuilderSearchBar = {
 			
 			<!-- content -->
 			<div class="content grow" v-if="tabTarget === 'content'">
-				<my-builder-query v-model="query"
+				<my-builder-query
 					@index-removed="removeIndex($event)"
+					@update:modelValue="searchBar.query = $event"
 					:allowChoices="false"
 					:allowLookups="false"
 					:allowOrders="true"
 					:builderLanguage="builderLanguage"
 					:filtersDisable="filtersDisable"
+					:modelValue="query"
 					:moduleId="module.id"
 				/>
 
 				<!-- SQL preview -->
 				<div class="row">
 					<my-button image="code.png"
-						@trigger="getSqlPreview(searchBar.query,searchBar.columns)"
+						@trigger="getSqlPreview(query,searchBar.columns)"
 						:caption="capGen.sqlPreview"
 					/>
 				</div>
@@ -180,17 +185,17 @@ const MyBuilderSearchBar = {
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}</td>
-							<td><input v-model="name" :disabled="readonly" /></td>
+							<td><input v-model="searchBar.name" :disabled="readonly" /></td>
 						</tr>
 						<tr>
 							<td>{{ capGen.title }}</td>
 							<td>
 								<div class="row gap centered">
 									<my-builder-caption
-										v-model="captions.searchBarTitle"
+										v-model="searchBar.captions.searchBarTitle"
 										:dynamicSize="true"
 										:language="builderLanguage"
-										:readonly="readonly"
+										:readonly
 									/>
 									<my-button image="languages.png"
 										@trigger="$emit('next-language')"
@@ -204,11 +209,11 @@ const MyBuilderSearchBar = {
 							<td>{{ capGen.icon }}</td>
 							<td>
 								<my-builder-icon-input
-									@input="iconId = $event"
-									:iconIdSelected="iconId"
-									:module="module"
+									@input="searchBar.iconId = $event"
+									:iconIdSelected="searchBar.iconId"
+									:module
 									:title="capGen.icon"
-									:readonly="readonly"
+									:readonly
 								/>
 							</td>
 						</tr>
@@ -216,12 +221,12 @@ const MyBuilderSearchBar = {
 							<td>{{ capGen.formOpen }}</td>
 							<td>
 								<my-builder-open-form-input
-									@update:openForm="openForm = $event"
+									@update:openForm="searchBar.openForm = $event"
 									:allowAllForms="false"
 									:joinsIndexMapField="joinIndexMap"
-									:module="module"
-									:openForm="openForm"
-									:readonly="readonly"
+									:module
+									:openForm="searchBar.openForm"
+									:readonly
 								/>
 							</td>
 						</tr>
@@ -244,12 +249,8 @@ const MyBuilderSearchBar = {
 	data() {
 		return {
 			// inputs
-			captions:{},
-			columns:[],
-			iconId:null,
-			name:'',
-			openForm:null,
-			query:{},
+			searchBar:false,
+			searchBarCopy:{},
 			
 			// state
 			columnIdShow:null,
@@ -262,70 +263,64 @@ const MyBuilderSearchBar = {
 		};
 	},
 	computed:{
-		columnShow:(s) => {
+		columnShow:s => {
 			if(s.columnIdShow === null) return false;
 			
-			for(let i = 0, j = s.columns.length; i < j; i++) {
-				if(s.columns[i].id === s.columnIdShow)
-					return s.columns[i];
+			for(let i = 0, j = s.searchBar.columns.length; i < j; i++) {
+				if(s.searchBar.columns[i].id === s.columnIdShow)
+					return s.searchBar.columns[i];
 			}
 			return false;
 		},
-		hasChanges:(s) => s.name          !== s.searchBar.name
-			|| s.iconId                   !== s.searchBar.iconId
-			|| JSON.stringify(s.query)    !== JSON.stringify(s.searchBar.query)
-			|| JSON.stringify(s.columns)  !== JSON.stringify(s.searchBar.columns)
-			|| JSON.stringify(s.captions) !== JSON.stringify(s.searchBar.captions)
-			|| JSON.stringify(s.openForm) !== JSON.stringify(s.searchBar.openForm),
 		
 		// simple
-		anySearchInput:(s) => s.getIsContentInAnyFilter(s.query.filters,s.columns,'globalSearch'),
-		joinIndexMap:  (s) => s.getJoinsIndexMap(s.query.joins),
-		searchBar:     (s) => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
-		module:        (s) => s.moduleIdMap[s.searchBar.moduleId],
+		anySearchInput: s => s.getIsContentInAnyFilter(s.query.filters,s.searchBar.columns,'globalSearch'),
+		hasChanges:     s => !s.deepIsEqual(s.searchBar,s.searchBarSchema),
+		joinIndexMap:   s => s.getJoinsIndexMap(s.query.joins),
+		module:         s => s.moduleIdMap[s.searchBar.moduleId],
+		query:          s => s.searchBar.query !== null ? s.searchBar.query : s.getTemplateQuery(),
+		searchBarSchema:s => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
 		
 		// stores
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		searchBarIdMap:(s) => s.$store.getters['schema/searchBarIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.searchBar,
-		capGen:        (s) => s.$store.getters.captions.generic
+		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
+		searchBarIdMap: s => s.$store.getters['schema/searchBarIdMap'],
+		capApp:         s => s.$store.getters.captions.builder.searchBar,
+		capGen:         s => s.$store.getters.captions.generic
 	},
 	watch:{
-		searchBar:{
-			handler() { this.reset(); },
+		searchBarSchema:{
+			handler() { this.reset(false); },
 			immediate:true
 		}
 	},
 	methods:{
 		// externals
 		copyValueDialog,
+		deepIsEqual,
 		getIsContentInAnyFilter,
 		getItemTitleColumn,
 		getJoinsIndexMap,
 		getSqlPreview,
+		getTemplateQuery,
 		
 		// actions
 		columnSet(name,value) {
 			this.columnShow[name] = value;
 		},
 		removeIndex(index) {
-			for(let i = 0, j = this.columns.length; i < j; i++) {
-				if(this.columns[i].index === index) {
-					this.columns.splice(i,1);
+			for(let i = 0, j = this.searchBar.columns.length; i < j; i++) {
+				if(this.searchBar.columns[i].index === index) {
+					this.searchBar.columns.splice(i,1);
 					i--; j--;
 				}
 			}
 		},
-		reset() {
-			if(!this.searchBar) return;
-			
-			this.name      = this.searchBar.name;
-			this.iconId    = this.searchBar.iconId;
-			this.query     = JSON.parse(JSON.stringify(this.searchBar.query));
-			this.columns   = JSON.parse(JSON.stringify(this.searchBar.columns));
-			this.captions  = JSON.parse(JSON.stringify(this.searchBar.captions));
-			this.openForm  = JSON.parse(JSON.stringify(this.searchBar.openForm));
-			this.columnIdShow = null;
+		reset(manuelReset) {
+			if(this.searchBarSchema !== false && (manuelReset || !this.deepIsEqual(this.searchBar,this.searchBarSchema))) {
+				this.searchBar     = JSON.parse(JSON.stringify(this.searchBarSchema));
+				this.searchBarCopy = JSON.parse(JSON.stringify(this.searchBarSchema));
+				this.columnIdShow  = null;
+			}
 		},
 		toggleColumnOptions(id) {
 			this.columnIdShow = this.columnIdShow === id ? null : id;
@@ -360,16 +355,7 @@ const MyBuilderSearchBar = {
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('searchBar','set',{
-					id:this.searchBar.id,
-					moduleId:this.searchBar.moduleId,
-					iconId:this.iconId,
-					name:this.name,
-					columns:this.columns,
-					query:this.query,
-					captions:this.captions,
-					openForm:this.openForm
-				}),
+				ws.prepare('searchBar','set',this.searchBar),
 				ws.prepare('schema','check',{moduleId:this.module.id})
 			],true).then(
 				() => this.$root.schemaReload(this.module.id),

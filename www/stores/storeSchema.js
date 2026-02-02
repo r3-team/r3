@@ -130,7 +130,6 @@ const MyStoreSchema = {
 				
 				// process search bars
 				for(const bar of mod.searchBars) {
-					bar.query = getTemplateQueryIfNull(bar.query);
 					state.searchBarIdMap[bar.id] = bar;
 				}
 				

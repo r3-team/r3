@@ -48,7 +48,7 @@ const MyGlobalSearchModuleSearchBar = {
 			:limitDefault="options.limit"
 			:loginOptions="listOptions"
 			:moduleId="searchBar.moduleId"
-			:query="query"
+			:query="searchBar.query"
 		>
 			<template #input-icon>
 				<my-label
@@ -85,10 +85,9 @@ const MyGlobalSearchModuleSearchBar = {
 		columns:         (s) => s.searchBar.columns,
 		columnsProcessed:(s) => s.getColumnsProcessed(s.columns,[],s.joinIndexMap,s.input,s.options.dictionary),
 		dataOptions:     (s) => s.searchBar.openForm !== null ? 2 : -1,
-		query:           (s) => s.searchBar.query,
-		filters:         (s) => s.query.filters,
+		filters:         (s) => s.searchBar.query.filters,
 		filtersProcessed:(s) => s.getQueryFiltersProcessed(s.filters,s.joinIndexMap,s.input,s.options.dictionary),
-		joinIndexMap:    (s) => s.getJoinsIndexMap(s.query.joins),
+		joinIndexMap:    (s) => s.getJoinsIndexMap(s.searchBar.query.joins),
 
 		// stores
 		capGen: (s) => s.$store.getters.captions.generic,
@@ -224,7 +223,7 @@ const MyGlobalSearchModule = {
 			return false;
 		},
 		anyFtsOperator:(s) => {
-			for(const b of s.module.searchBars) {
+			for(const b of s.module.searchBars.filter(v => v.query !== null)) {
 				if(s.getIsOperatorInAnyFilter(b.query.filters,b.columns,'@@'))
 					return true;
 			}
@@ -254,7 +253,7 @@ const MyGlobalSearchModule = {
 		// simple
 		active:     (s) => s.input !== '' && !s.disabled,
 		bobbleStyle:(s) => s.module.color1 !== null ? `border-bottom-color:${s.colorAdjustBg(s.module.color1)}` : '',
-		searchBars: (s) => s.module.searchBars.filter(v => s.access[v.id] !== undefined && s.access[v.id] === 1),
+		searchBars: (s) => s.module.searchBars.filter(v => v.query !== null && s.access[v.id] !== undefined && s.access[v.id] === 1),
 
 		// stores
 		builderEnabled:(s) => s.$store.getters.builderEnabled,
