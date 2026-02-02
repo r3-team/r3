@@ -97,6 +97,7 @@ export default {
 					v-model="tabPageIdShow"
 					@add="pageAdd"
 					@del="pageDel"
+					@update:modelValue="sideFieldIdShow = null"
 					:actionAdd="true"
 					:actionAddCap="capApp.button.addPage"
 					:actionDel="doc.pages.length > 1"
@@ -133,7 +134,7 @@ export default {
 			</div>
 			
 			<!-- document / page options -->
-			<template v-if="sideDocShow">
+			<div v-show="sideDocShow">
 				<my-tabs
 					v-model="tabTarget"
 					:entries="['content','states','properties','page']"
@@ -247,7 +248,7 @@ export default {
 				
 				<!-- page options -->
 				<div class="content grow no-padding" ref="pageOptions" v-show="tabTarget === 'page'"></div>
-			</template>
+			</div>
 
 			<!-- field options -->
 			<div class="content grow no-padding" ref="fieldOptions" v-show="sideFieldShow"></div>
