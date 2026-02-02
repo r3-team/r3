@@ -250,12 +250,12 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 			if page.Footer.DocPageIdInherit.Valid {
 				e = docDef.Pages[pageIdMapIndex[page.Footer.DocPageIdInherit.Bytes]].Footer
 			}
-			addHeaderFooter(ctx, doc, loginId, recordId, e.FieldGrid, font, 0-page.Margin.B, sizeXPage, page.Margin.B)
+			addHeaderFooter(ctx, doc, loginId, recordId, e.FieldGrid, font, sizeYPage-page.Margin.B, sizeXPage, page.Margin.B)
 		})
 
 		// a page is always a single flow field on root level
 		if err := addField(ctx, doc, loginId, recordId, page.Margin.L, page.Margin.T,
-			sizeXPageUsable, sizeYPageUsable, false, false, true, font, page.FieldFlow); err != nil {
+			sizeXPageUsable, sizeYPageUsable, false, false, true, false, font, page.FieldFlow); err != nil {
 
 			return err
 		}

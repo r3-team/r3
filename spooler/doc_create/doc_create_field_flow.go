@@ -8,7 +8,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func addFieldFlow(ctx context.Context, doc *doc, loginId, recordIdDoc int64, f types.DocFieldFlow, font types.DocFont, posX, posY, sizeYPageUsable float64) error {
+func addFieldFlow(ctx context.Context, doc *doc, loginId, recordIdDoc int64, f types.DocFieldFlow,
+	font types.DocFont, posX, posY, sizeYPageUsable float64, parentIsHeaderFooter bool) error {
 
 	// border sizes
 	_, bSizeT, bSizeR, bSizeB, bSizeL, _ := getBorderSize(f.Border)
@@ -40,7 +41,7 @@ func addFieldFlow(ctx context.Context, doc *doc, loginId, recordIdDoc int64, f t
 		doc.p.SetXY(posXChildren, posYChildren)
 
 		if err = addField(ctx, doc, loginId, recordIdDoc, posXChildren, posYChildren, sizeXChildren,
-			sizeYPageUsable, isHorizontal, false, false, font, fieldIfChild); err != nil {
+			sizeYPageUsable, isHorizontal, false, false, parentIsHeaderFooter, font, fieldIfChild); err != nil {
 
 			return err
 		}
