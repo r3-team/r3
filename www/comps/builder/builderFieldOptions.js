@@ -1312,11 +1312,13 @@ export default {
 				</tr>
 
 				<!-- open doc -->
-				<tr v-if="hasOpenDoc">
-					<td>{{ capApp.openDoc }}</td>
+				<tr >
+					<td>{{ capGen.button.pdfCreate }}</td>
 					<td>
 						<my-builder-open-doc
+							v-if="hasOpenDoc"
 							@update:modelValue="set('openDoc',$event)"
+							:dataFields
 							:joinsIndexMap="joinsIndexMap"
 							:modelValue="field.openDoc"
 							:module

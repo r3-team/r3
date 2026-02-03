@@ -1041,7 +1041,6 @@
 			"new": "Új űrlap",
 			"noDataActions": "Nincsenek adatműveletek",
 			"onMobile": "Mobil nézetben",
-			"openDoc": "Generate PDF",
 			"openForm": "Űrlap megnyitása",
 			"openFormBulk": "Űrlap megnyitása (Tömeges szerkesztés)",
 			"option": {
@@ -2251,6 +2250,7 @@
 		"busy": "Folyamatban - Kattintson ide a megszakításhoz",
 		"button": {
 			"add": "Hozzáadás",
+			"addToField": "Add to field",
 			"all": "Mind",
 			"apply": "Alkalmazás",
 			"cancel": "Mégse",
@@ -2282,6 +2282,7 @@
 			"open": "Megnyitás",
 			"openBuilder": "Építő megnyitása",
 			"paste": "Beillesztés",
+			"pdfCreate": "Create PDF",
 			"read": "Read",
 			"refresh": "Frissítés",
 			"refreshHint": "Adatok frissítése",
@@ -2369,6 +2370,7 @@
 		"favoritesEmpty": "No favorites saved",
 		"field": "Field",
 		"fields": "Mezők",
+		"filename": "Filename",
 		"files": "Fájlok",
 		"filters": "Szűrők",
 		"font": "Font",

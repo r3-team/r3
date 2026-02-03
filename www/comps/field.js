@@ -124,7 +124,7 @@ export default {
 					:isSingleField="isAlone"
 					:loadWhileHidden="parentIsCounting"
 					:loginOptions
-					:moduleI
+					:moduleId
 					:popUpFormInline
 					:query="field.query"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"

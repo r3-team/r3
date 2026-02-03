@@ -1041,7 +1041,6 @@
 			"new": "New form",
 			"noDataActions": "No data actions",
 			"onMobile": "In mobile view",
-			"openDoc": "Generate PDF",
 			"openForm": "Open form",
 			"openFormBulk": "Open form<br />(bulk editing)",
 			"option": {
@@ -2251,6 +2250,7 @@
 		"busy": "Working - Click here to abort",
 		"button": {
 			"add": "Add",
+			"addToField": "Add to field",
 			"all": "All",
 			"apply": "Apply",
 			"cancel": "Cancel",
@@ -2282,6 +2282,7 @@
 			"open": "Open",
 			"openBuilder": "Open Builder",
 			"paste": "Paste",
+			"pdfCreate": "Create PDF",
 			"read": "Read",
 			"refresh": "Reload",
 			"refreshHint": "Reload record",
@@ -2369,6 +2370,7 @@
 		"favoritesEmpty": "No favorites saved",
 		"field": "Field",
 		"fields": "Fields",
+		"filename": "Filename",
 		"files": "Files",
 		"filters": "Filters",
 		"font": "Font",

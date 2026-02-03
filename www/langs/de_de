@@ -1041,7 +1041,6 @@
 			"new": "Neues Formular",
 			"noDataActions": "Keine Datenaktionen",
 			"onMobile": "In mobiler Ansicht",
-			"openDoc": "PDF erzeugen",
 			"openForm": "Formular öffnen",
 			"openFormBulk": "Formular öffnen<br />(Massenbearbeitung)",
 			"option": {
@@ -2251,6 +2250,7 @@
 		"busy": "Arbeitet - Zum Abbrechen hier klicken",
 		"button": {
 			"add": "Hinzufügen",
+			"addToField": "Add to field",
 			"all": "Alle",
 			"apply": "Ausführen",
 			"cancel": "Abbrechen",
@@ -2282,6 +2282,7 @@
 			"open": "Öffnen",
 			"openBuilder": "Builder öffnen",
 			"paste": "Einfügen",
+			"pdfCreate": "Create PDF",
 			"read": "Lesen",
 			"refresh": "Neu laden",
 			"refreshHint": "Datensatz neu laden",
@@ -2369,6 +2370,7 @@
 		"favoritesEmpty": "Keine Favoriten gespeichert",
 		"field": "Feld",
 		"fields": "Felder",
+		"filename": "Dateiname",
 		"files": "Dateien",
 		"filters": "Filter",
 		"font": "Schrift",

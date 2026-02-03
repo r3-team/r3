@@ -1041,7 +1041,6 @@
 			"new": "شكل جديد",
 			"noDataActions": "لا توجد إجراءات البيانات",
 			"onMobile": "في عرض الجوال",
-			"openDoc": "Generate PDF",
 			"openForm": "فتح النموذج",
 			"openFormBulk": "فتح النموذج<br />(التحرير بالجملة)",
 			"option": {
@@ -2251,6 +2250,7 @@
 		"busy": "العمل - انقر هنا للإلغاء",
 		"button": {
 			"add": "يضيف",
+			"addToField": "Add to field",
 			"all": "الجميع",
 			"apply": "يتقدم",
 			"cancel": "يلغي",
@@ -2282,6 +2282,7 @@
 			"open": "يفتح",
 			"openBuilder": "افتح منشئ",
 			"paste": "لصق",
+			"pdfCreate": "Create PDF",
 			"read": "يقرأ",
 			"refresh": "إعادة تحميل",
 			"refreshHint": "إعادة تحميل السجل",
@@ -2369,6 +2370,7 @@
 		"favoritesEmpty": "No favorites saved",
 		"field": "مجال",
 		"fields": "الحقول",
+		"filename": "Filename",
 		"files": "ملفات",
 		"filters": "المرشحات",
 		"font": "Font",

@@ -1041,7 +1041,6 @@
 			"new": "新建表单",
 			"noDataActions": "无数据操作",
 			"onMobile": "移动视图中",
-			"openDoc": "Generate PDF",
 			"openForm": "打开表单",
 			"openFormBulk": "打开表单<br />(批量编辑)",
 			"option": {
@@ -2251,6 +2250,7 @@
 		"busy": "工作中 - 点击此处中止",
 		"button": {
 			"add": "添加",
+			"addToField": "Add to field",
 			"all": "所有",
 			"apply": "申请",
 			"cancel": "取消",
@@ -2282,6 +2282,7 @@
 			"open": "打开",
 			"openBuilder": "打开构建器",
 			"paste": "粘帖",
+			"pdfCreate": "Create PDF",
 			"read": "读取",
 			"refresh": "重新加载",
 			"refreshHint": "重新加载记录",
@@ -2369,6 +2370,7 @@
 		"favoritesEmpty": "No favorites saved",
 		"field": "字段",
 		"fields": "字段",
+		"filename": "Filename",
 		"files": "文件",
 		"filters": "过滤器",
 		"font": "Font",

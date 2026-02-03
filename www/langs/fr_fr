@@ -1041,7 +1041,6 @@
 			"new": "Nouveau formulaire",
 			"noDataActions": "Pas d'actions sur les données",
 			"onMobile": "En vue mobile",
-			"openDoc": "Generate PDF",
 			"openForm": "Ouvrir le formulaire",
 			"openFormBulk": "Ouvrir le formulaire<br />(édition en masse)",
 			"option": {
@@ -2251,6 +2250,7 @@
 		"busy": "En cours - Cliquez ici pour annuler",
 		"button": {
 			"add": "Ajouter",
+			"addToField": "Add to field",
 			"all": "Tout",
 			"apply": "Appliquer",
 			"cancel": "Annuler",
@@ -2282,6 +2282,7 @@
 			"open": "Ouvrir",
 			"openBuilder": "Ouvrir le créateur",
 			"paste": "Coller",
+			"pdfCreate": "Create PDF",
 			"read": "Read",
 			"refresh": "Recharger",
 			"refreshHint": "Recharger l'enregistrement",
@@ -2369,6 +2370,7 @@
 		"favoritesEmpty": "No favorites saved",
 		"field": "Champ",
 		"fields": "Champs",
+		"filename": "Filename",
 		"files": "Fichiers",
 		"filters": "Filtres",
 		"font": "Font",

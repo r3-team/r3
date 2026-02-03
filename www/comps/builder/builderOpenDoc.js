@@ -1,12 +1,14 @@
+import {isAttributeFiles}   from '../shared/attribute.js';
 import {getTemplateOpenDoc} from '../shared/builderTemplate.js';
 import {
 	getDependentDocs,
+	getItemTitle,
 	getItemTitleRelation
 } from '../shared/builder.js';
 
 export default {
 	name:'my-builder-open-doc',
-	template:`
+	template:`<div class="column gap">
 		<select v-model="doc" :disabled="readonly">
 			<option value="">-</option>
 			<option v-for="d in docsAvailNoQuery" :value="'0_' + d.id">{{ d.name }}</option>
@@ -20,11 +22,22 @@ export default {
 				>{{ d.name }}</option>
 			</optgroup>
 		</select>
-	`,
+		<div class="row gap centered">
+			<span>{{ capGen.button.addToField }}</span>
+			<select class="auto" v-if="active" v-model="fieldIdAddTo">
+				<option value="">-</option>
+				<option
+					v-for="f in dataFields.filter(v => isAttributeFiles(attributeIdMap[v.attributeId].content))"
+					:value="f.id"
+				>{{ getItemTitle(f.attributeId,f.index) }}</option>
+			</select>
+		</div>
+	</div>`,
 	props:{
+		dataFields:   { type:Array,         required:true },
 		joinsIndexMap:{ type:Object,        required:true },
-		module:       { type:Object,        required:true },
 		modelValue:   { type:[Object,null], required:true },
+		module:       { type:Object,        required:true },
 		readonly:     { type:Boolean,       required:true }
 	},
 	emits:['update:modelValue'],
@@ -46,16 +59,30 @@ export default {
 				this.$emit('update:modelValue',o);
 			}
 		},
+		fieldIdAddTo:{
+			get()  { return this.modelValue.fieldIdAddTo !== null ? this.modelValue.fieldIdAddTo : ''; },
+			set(v) {
+				let o = JSON.parse(JSON.stringify(this.modelValue));
+				o.fieldIdAddTo = v === '' ? null : v;
+				return this.$emit('update:modelValue',o);
+			}
+		},
 
 		// simple
 		active:          s => s.modelValue !== null,
 		docsAvail:       s => s.getDependentDocs(s.module),
-		docsAvailNoQuery:s => s.docsAvail.filter(v => v.query === null)
+		docsAvailNoQuery:s => s.docsAvail.filter(v => v.query === null),
+
+		// stores
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		capGen:        s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		getDependentDocs,
+		getItemTitle,
 		getItemTitleRelation,
-		getTemplateOpenDoc
+		getTemplateOpenDoc,
+		isAttributeFiles
 	}
 };

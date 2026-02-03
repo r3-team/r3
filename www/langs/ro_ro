@@ -1041,7 +1041,6 @@
 			"new": "Formular nou",
 			"noDataActions": "No data actions",
 			"onMobile": "Vizualizare dispozitiv mobil",
-			"openDoc": "Generate PDF",
 			"openForm": "Deschideți formularul",
 			"openFormBulk": "Deschideți formularul<br />(bulk editing)",
 			"option": {
@@ -2251,6 +2250,7 @@
 		"busy": "Lucrează - Apasă aici pentru anulare",
 		"button": {
 			"add": "Adaugă",
+			"addToField": "Add to field",
 			"all": "All",
 			"apply": "Aplică",
 			"cancel": "Anulează",
@@ -2282,6 +2282,7 @@
 			"open": "Deschide",
 			"openBuilder": "Open Builder",
 			"paste": "Paste",
+			"pdfCreate": "Create PDF",
 			"read": "Read",
 			"refresh": "Reîncarcă",
 			"refreshHint": "Reîncarcă înregistrarea",
@@ -2369,6 +2370,7 @@
 		"favoritesEmpty": "No favorites saved",
 		"field": "Field",
 		"fields": "Câmpuri",
+		"filename": "Filename",
 		"files": "Files",
 		"filters": "Filtre",
 		"font": "Font",

@@ -1041,7 +1041,6 @@
 			"new": "New form",
 			"noDataActions": "No data actions",
 			"onMobile": "In mobile view",
-			"openDoc": "Generate PDF",
 			"openForm": "Open form",
 			"openFormBulk": "Open form<br />(bulk editing)",
 			"option": {
@@ -2251,6 +2250,7 @@
 		"busy": "Strādā - Noklikšķiniet šeit, lai pārtrauktu",
 		"button": {
 			"add": "Pievienot",
+			"addToField": "Add to field",
 			"all": "Visi",
 			"apply": "Pielietot",
 			"cancel": "Atcelt",
@@ -2282,6 +2282,7 @@
 			"open": "Atvērt",
 			"openBuilder": "Atvērt veidotāju",
 			"paste": "Ielīmēt",
+			"pdfCreate": "Create PDF",
 			"read": "Read",
 			"refresh": "Atjaunināt",
 			"refreshHint": "Atjaunināt ierakstu",
@@ -2369,6 +2370,7 @@
 		"favoritesEmpty": "No favorites saved",
 		"field": "Lauks",
 		"fields": "Fields",
+		"filename": "Filename",
 		"files": "Faili",
 		"filters": "Filtri",
 		"font": "Font",

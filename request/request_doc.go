@@ -3,12 +3,54 @@ package request
 import (
 	"context"
 	"encoding/json"
+	"os"
+	"r3/config"
+	"r3/data"
 	"r3/schema/doc"
+	"r3/spooler/doc_create"
+	"r3/tools"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+func DocCreate_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+	var req struct {
+		DocId             uuid.UUID `json:"docId"`
+		RecordIdLoad      int64     `json:"recordIdLoad"`
+		AttributeIdTarget uuid.UUID `json:"attributeIdTarget"`
+	}
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)
+	if err != nil {
+		return nil, err
+	}
+	fileId, err := uuid.NewV4()
+	if err != nil {
+		return nil, err
+	}
+	if err := doc_create.Run(ctx, req.DocId, false, loginId, req.RecordIdLoad, filePath); err != nil {
+		return nil, err
+	}
+	fileInfo, err := os.Stat(filePath)
+	if err != nil {
+		return nil, err
+	}
+	fileSizeKb := int64(fileInfo.Size() / 1024)
+
+	if err := data.SetFile(ctx, loginId, req.AttributeIdTarget, fileId, nil, pgtype.Text{String: filePath, Valid: true}, pgtype.Text{}, true); err != nil {
+		return nil, err
+	}
+	return types.DataGetValueFile{
+		Id:   fileId,
+		Name: "Myfile.pdf",
+		Size: fileSizeKb,
+	}, nil
+}
 
 func DocDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var id uuid.UUID

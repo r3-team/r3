@@ -192,7 +192,7 @@ export function getItemTitle(attributeId,index,outsideIn,attributeIdNm) {
 	let atr = MyStore.getters['schema/attributeIdMap'][attributeId];
 	let rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
 	
-	if(isAttributeRelationship(atr.content) && typeof attributeIdNm !== 'undefined' && attributeIdNm !== null) {
+	if(isAttributeRelationship(atr.content) && attributeIdNm !== undefined && attributeIdNm !== null) {
 		let atrNm = MyStore.getters['schema/attributeIdMap'][attributeIdNm];
 		return `${index} ${rel.name}.${atr.name} -> ${atrNm.name}`;
 	}

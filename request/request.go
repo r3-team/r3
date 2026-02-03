@@ -118,6 +118,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "setKeys":
 			return DataSetKeys_tx(ctx, tx, reqJson)
 		}
+	case "doc":
+		switch action {
+		case "create":
+			return DocCreate_tx(ctx, tx, reqJson, loginId)
+		}
 	case "event":
 		switch action {
 		case "clientEventsChanged":

@@ -1415,7 +1415,32 @@ export default {
 		// navigation
 		openDoc(openDoc) {
 			const recordId = this.indexMapRecordId[openDoc.relationIndexOpen] !== undefined ? this.indexMapRecordId[openDoc.relationIndexOpen] : 0;
-			this.openLinkNoCache(`/doc/download/test.pdf?doc_id=${openDoc.docIdOpen}&record_id=${recordId}&token=${this.token}`,true);
+			if(openDoc.fieldIdAddTo === null || this.fieldIdMapData[openDoc.fieldIdAddTo] === undefined)
+				return this.openLinkNoCache(`/doc/download/test.pdf?doc_id=${openDoc.docIdOpen}&record_id=${recordId}&token=${this.token}`,true);
+			
+			const fieldId = openDoc.fieldIdAddTo;
+			const atr     = this.attributeIdMap[this.fieldIdMapData[fieldId].attributeId];
+			ws.send('doc','create',{
+				docId:openDoc.docIdOpen,
+				recordIdLoad:recordId,
+				attributeIdTarget:atr.id
+			},true).then(
+				res => {
+					const ia = this.getIndexAttributeIdByField(this.fieldIdMapData[fieldId],false);
+					let v = JSON.parse(JSON.stringify(this.values[ia]));
+
+					if(v === null || Array.isArray(v))
+						v = {fileCount:1,fileIdMapChange:{}};
+					
+					v.fileIdMapChange[res.payload.id] = {
+						action:"create",
+						name:res.payload.name,
+						version:-1
+					};
+					this.valueSetByField(ia,v,false,false,fieldId);
+				},
+				this.$root.genericError
+			);
 		},
 		openForm(recordIds,openForm,getterArgs,newTab,fieldIdSrc,replace) {
 			// set defaults

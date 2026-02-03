@@ -163,7 +163,7 @@ type LoginForm struct {
 type OpenDoc struct {
 	DocIdOpen         uuid.UUID   `json:"docIdOpen"`         // document to open
 	RelationIndexOpen int         `json:"relationIndexOpen"` // relation index of record to open
-	FieldIdAddTo      pgtype.UUID `json:"fieldIdApply"`      // optional, field to add document to
+	FieldIdAddTo      pgtype.UUID `json:"fieldIdAddTo"`      // optional, field to add document to
 }
 type OpenForm struct {
 	PopUpType pgtype.Text `json:"popUpType"` // if set, form is opened as pop-up, values: float, inline

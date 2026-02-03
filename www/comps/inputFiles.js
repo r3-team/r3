@@ -456,12 +456,28 @@ const MyInputFiles = {
 			// model value is either:
 			// * null, empty input/no files -> reset input
 			// * array of files, initial attribute value -> initialize input
-			// * object with file changes (removed, renamed, ...) -> ignore, input already has this state
+			// * object with file changes (removed, renamed, ...)
 			if(this.modelValue === null || Array.isArray(this.modelValue)) {
 				let v = JSON.parse(JSON.stringify(this.modelValue));
 				this.files = v !== null ? v : [];
 				this.fileIdMapChange = {};
 				this.$emit('file-count-change',this.files.length);
+			} else {
+				// modelValue can be updated from outside (PDF generation) -> add unknown file changes
+				for(const fileId in this.modelValue.fileIdMapChange) {
+					if(this.fileIdMapChange[fileId] !== undefined)
+						continue;
+
+					const c = this.modelValue.fileIdMapChange[fileId];
+					this.files.push({
+						changed:Math.floor(new Date().getTime() / 1000),
+						id:fileId,
+						name:c.name,
+						size:0,
+						version:c.version
+					});
+					this.fileIdMapChange[fileId] = c;
+				}
 			}
 		},
 		
@@ -635,7 +651,7 @@ const MyInputFiles = {
 			}
 		},
 		update(fileId,action,name) {
-			if(typeof this.fileIdMapChange[fileId] === 'undefined') {
+			if(this.fileIdMapChange[fileId] === undefined) {
 				this.fileIdMapChange[fileId] = {
 					action:action,
 					name:name,

@@ -1041,7 +1041,6 @@
 			"new": "Nuovo modulo",
 			"noDataActions": "No data actions",
 			"onMobile": "Nella vista mobile",
-			"openDoc": "Generate PDF",
 			"openForm": "Apri modulo",
 			"openFormBulk": "Apri modulo<br />(bulk editing)",
 			"option": {
@@ -2251,6 +2250,7 @@
 		"busy": "Elaborazione - Clicca qui per annullare",
 		"button": {
 			"add": "Aggiungi",
+			"addToField": "Add to field",
 			"all": "All",
 			"apply": "Applica",
 			"cancel": "Annulla",
@@ -2282,6 +2282,7 @@
 			"open": "Apri",
 			"openBuilder": "Open Builder",
 			"paste": "Paste",
+			"pdfCreate": "Create PDF",
 			"read": "Read",
 			"refresh": "Ricarica",
 			"refreshHint": "Ricarica il record",
@@ -2369,6 +2370,7 @@
 		"favoritesEmpty": "No favorites saved",
 		"field": "Field",
 		"fields": "Campi",
+		"filename": "Filename",
 		"files": "Files",
 		"filters": "Filtri",
 		"font": "Font",

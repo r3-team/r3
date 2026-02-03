@@ -1041,7 +1041,6 @@
 			"new": "Nuevo formulario",
 			"noDataActions": "Acciones sin datos",
 			"onMobile": "En vista móvil",
-			"openDoc": "Generate PDF",
 			"openForm": "Abrir formulario",
 			"openFormBulk": "Abrir formulario<br />(edición masiva)",
 			"option": {
@@ -2251,6 +2250,7 @@
 		"busy": "Trabajando - Haga clic aquí para abortar",
 		"button": {
 			"add": "Añadir",
+			"addToField": "Add to field",
 			"all": "Todos",
 			"apply": "Aplicar",
 			"cancel": "Cancelar",
@@ -2282,6 +2282,7 @@
 			"open": "Abrir",
 			"openBuilder": "Abrir Constructor",
 			"paste": "Pegar",
+			"pdfCreate": "Create PDF",
 			"read": "Leer",
 			"refresh": "Recargar",
 			"refreshHint": "Recargar registro",
@@ -2369,6 +2370,7 @@
 		"favoritesEmpty": "No hay favoritos guardados",
 		"field": "Campo",
 		"fields": "Campos",
+		"filename": "Filename",
 		"files": "Archivos",
 		"filters": "Filtros",
 		"font": "Font",
