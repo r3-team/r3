@@ -20,7 +20,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID
 		return f, errors.New("invalid open form entity")
 	}
 
-	sqlArgs := make([]interface{}, 0)
+	sqlArgs := make([]any, 0)
 	sqlArgs = append(sqlArgs, id)
 
 	sqlWhere := "AND context IS NULL"
@@ -62,7 +62,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, id uuid.UUID
 	// fix imports < 3.5: Relation index for applying record relationship value
 	f = compatible.FixOpenFormRelationIndexApply(f)
 
-	sqlArgs := make([]interface{}, 0)
+	sqlArgs := make([]any, 0)
 	sqlArgs = append(sqlArgs, id)
 
 	sqlWhere := "AND context IS NULL"

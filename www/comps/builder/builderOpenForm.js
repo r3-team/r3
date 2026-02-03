@@ -4,10 +4,9 @@ import {
 	getItemTitleRelation
 } from '../shared/builder.js';
 import MyBuilderSelectForm from './builderSelectForm.js';
-export {MyBuilderOpenFormInput as default};
 
-const MyBuilderOpenFormInput = {
-	name:'my-builder-open-form-input',
+export default {
+	name:'my-builder-open-form',
 	components:{ MyBuilderSelectForm },
 	template:`<table>
 		<tbody>

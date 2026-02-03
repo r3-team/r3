@@ -1,7 +1,8 @@
 import MyBuilderCaption                from './builderCaption.js';
 import MyBuilderCollectionInput        from './builderCollectionInput.js';
 import MyBuilderIconInput              from './builderIconInput.js';
-import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
+import MyBuilderOpenDoc                from './builderOpenDoc.js';
+import MyBuilderOpenForm               from './builderOpenForm.js';
 import MyCodeEditor                    from '../codeEditor.js';
 import {openLink}                      from '../shared/generic.js';
 import {getJoinsIndexMap}              from '../shared/query.js';
@@ -282,7 +283,8 @@ export default {
 		MyBuilderCollectionInput,
 		MyBuilderFieldOptionsChart,
 		MyBuilderIconInput,
-		MyBuilderOpenFormInput
+		MyBuilderOpenDoc,
+		MyBuilderOpenForm
 	},
 	template:`<div class="builder-field-options">
 		<table class="generic-table-vertical default-inputs">
@@ -1280,7 +1282,7 @@ export default {
 				<tr v-if="hasOpenForm">
 					<td>{{ capApp.openForm }}</td>
 					<td>
-						<my-builder-open-form-input
+						<my-builder-open-form
 							@update:openForm="set('openForm',$event)"
 							:allowAllForms="isButton"
 							:allowNewRecords="true"
@@ -1295,7 +1297,7 @@ export default {
 				<tr v-if="isList && field.query.relationId !== null">
 					<td v-html="capApp.openFormBulk"></td>
 					<td>
-						<my-builder-open-form-input
+						<my-builder-open-form
 							@update:openForm="set('openFormBulk',$event)"
 							:allowAllForms="false"
 							:allowNewRecords="false"
@@ -1305,6 +1307,20 @@ export default {
 							:joinsIndexMapField="joinsIndexMapField"
 							:module="module"
 							:openForm="field.openFormBulk"
+						/>
+					</td>
+				</tr>
+
+				<!-- open doc -->
+				<tr v-if="hasOpenDoc">
+					<td>{{ capApp.openDoc }}</td>
+					<td>
+						<my-builder-open-doc
+							@update:modelValue="set('openDoc',$event)"
+							:joinsIndexMap="joinsIndexMap"
+							:modelValue="field.openDoc"
+							:module
+							:readonly="false"
 						/>
 					</td>
 				</tr>
@@ -1419,6 +1435,7 @@ export default {
 		contentData:      (s) => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
 		contentUse:       (s) => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
 		hasCaption:       (s) => s.isData || s.isHeader,
+		hasOpenDoc:       (s) => !s.isVariable && s.isButton,
 		hasOpenForm:      (s) => !s.isVariable && (s.isButton || ((s.isList || s.isCalendar || s.isKanban || s.isRelationship) && s.field.query.relationId !== null)),
 		isBarcode:        (s) => s.isData && s.contentUse === 'barcode',
 		isBoolean:        (s) => s.isData && s.isAttributeBoolean(s.contentData),

@@ -84,6 +84,10 @@ var (
 		DbDocField,
 		DbDocPage,
 	}
+	DbAssignedOpenDoc = []DbEntity{
+		DbFormAction,
+		DbField,
+	}
 	DbAssignedOpenForm = []DbEntity{
 		DbColumn,
 		DbCollectionConsumer,

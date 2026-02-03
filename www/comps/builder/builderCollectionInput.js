@@ -1,4 +1,4 @@
-import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
+import MyBuilderOpenForm              from './builderOpenForm.js';
 import {getTemplateCollectionConsumer} from '../shared/builderTemplate.js';
 import {
 	getDependentModules,
@@ -8,7 +8,7 @@ export {MyBuilderCollectionInput as default};
 
 const MyBuilderCollectionInput = {
 	name:'my-builder-collection-input',
-	components:{MyBuilderOpenFormInput},
+	components:{MyBuilderOpenForm},
 	template:`<table class="builder-collection-input">
 		<tbody>
 			<tr>
@@ -47,7 +47,7 @@ const MyBuilderCollectionInput = {
 				<!-- form open input -->
 				<td>{{ capGen.formOpen }}</td>
 				<td>
-					<my-builder-open-form-input
+					<my-builder-open-form
 						@update:openForm="openFormInput = $event"
 						:allowAllForms="true"
 						:module="module"

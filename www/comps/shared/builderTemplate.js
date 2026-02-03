@@ -310,6 +310,7 @@ export function getTemplateFieldButton() {
 		content:'button',
 		state:'default',
 		flags:[],
+		openDoc:null,
 		openForm:null,
 		onMobile:true,
 		captions:{
@@ -679,6 +680,13 @@ export function getTemplateModule(name) {
 		captions:{
 			moduleTitle:{}
 		}
+	};
+};
+export function getTemplateOpenDoc() {
+	return {
+		docIdOpen:null,
+		fieldIdAddTo:null,
+		relationIndexOpen:0
 	};
 };
 export function getTemplatePgFunction(moduleId,name,template,isTrigger) {

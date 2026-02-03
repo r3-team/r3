@@ -298,6 +298,7 @@ export default {
 							v-for="f in t.fields"
 							@clipboard="$emit('clipboard')"
 							@execute-function="$emit('execute-function',$event)"
+							@open-doc="$emit('open-doc',$event)"
 							@open-form="(...args) => $emit('open-form',...args)"
 							@set-counter="(...args) => setTabCounter(i,args[0],args[1])"
 							@set-form-args="(...args) => $emit('set-form-args',...args)"
@@ -652,6 +653,7 @@ export default {
 			v-for="f in field.fields"
 			@clipboard="$emit('clipboard')"
 			@execute-function="$emit('execute-function',$event)"
+			@open-doc="$emit('open-doc',$event)"
 			@open-form="(...args) => $emit('open-form',...args)"
 			@set-counter="(...args) => $emit('set-counter',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
@@ -710,7 +712,7 @@ export default {
 		variableIdMapLocal: { type:Object,  required:true }                  // variable values by ID (variables assigned to form)
 	},
 	emits:[
-		'clipboard','execute-function','open-form','set-form-args',
+		'clipboard','execute-function','open-doc','open-form','set-form-args',
 		'set-counter','set-touched','set-valid','set-value'
 	],
 	data() {
@@ -1402,6 +1404,9 @@ export default {
 				this.$emit('execute-function',this.field.jsFunctionId);
 		},
 		triggerButton(middleClick) {
+			if(this.field.openDoc !== null)
+				this.$emit('open-doc',this.field.openDoc);
+
 			if(this.field.openForm !== null)
 				this.openForm([],[],middleClick,null);
 			

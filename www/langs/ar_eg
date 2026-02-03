@@ -1041,6 +1041,7 @@
 			"new": "شكل جديد",
 			"noDataActions": "لا توجد إجراءات البيانات",
 			"onMobile": "في عرض الجوال",
+			"openDoc": "Generate PDF",
 			"openForm": "فتح النموذج",
 			"openFormBulk": "فتح النموذج<br />(التحرير بالجملة)",
 			"option": {

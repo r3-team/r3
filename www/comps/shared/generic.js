@@ -150,10 +150,6 @@ export function getOrFallback(obj,name,fallbackValue) {
 	return obj?.[name] !== undefined ? JSON.parse(JSON.stringify(obj[name])) : fallbackValue;
 };
 
-export function isIdNilUuid(id) {
-	return id === getNilUuid();
-};
-
 export function getRandomInt(min,max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 };
@@ -226,6 +222,11 @@ export function openLink(href,blank) {
 	document.body.appendChild(link);
 	link.click();
 	document.body.removeChild(link);
+};
+export function openLinkNoCache(href,blank) {
+	if(href.includes('?')) href += `&date=${Math.floor(new Date().getTime() / 1000)}`;
+	else                   href += `?date=${Math.floor(new Date().getTime() / 1000)}`;
+	return openLink(href,blank);
 };
 
 export function openDataImageAsNewTag(data) {

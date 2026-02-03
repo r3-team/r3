@@ -1,7 +1,7 @@
 import MyBuilderCaption       from './builderCaption.js';
 import MyBuilderColumnOptions from './builderColumnOptions.js';
 import MyBuilderIconInput     from './builderIconInput.js';
-import MyBuilderOpenFormInput from './builderOpenFormInput.js';
+import MyBuilderOpenForm      from './builderOpenForm.js';
 import MyBuilderQuery         from './builderQuery.js';
 import {getTemplateQuery}     from '../shared/builderTemplate.js';
 import {
@@ -29,7 +29,7 @@ export default {
 		MyBuilderColumns,
 		MyBuilderColumnTemplates,
 		MyBuilderIconInput,
-		MyBuilderOpenFormInput,
+		MyBuilderOpenForm,
 		MyBuilderQuery
 	},
 	template:`<div class="builder-search-bar" v-if="searchBar">
@@ -220,7 +220,7 @@ export default {
 						<tr>
 							<td>{{ capGen.formOpen }}</td>
 							<td>
-								<my-builder-open-form-input
+								<my-builder-open-form
 									@update:openForm="searchBar.openForm = $event"
 									:allowAllForms="false"
 									:joinsIndexMapField="joinIndexMap"

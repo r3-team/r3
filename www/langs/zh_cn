@@ -1041,6 +1041,7 @@
 			"new": "新建表单",
 			"noDataActions": "无数据操作",
 			"onMobile": "移动视图中",
+			"openDoc": "Generate PDF",
 			"openForm": "打开表单",
 			"openFormBulk": "打开表单<br />(批量编辑)",
 			"option": {

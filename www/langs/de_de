@@ -1041,6 +1041,7 @@
 			"new": "Neues Formular",
 			"noDataActions": "Keine Datenaktionen",
 			"onMobile": "In mobiler Ansicht",
+			"openDoc": "PDF erzeugen",
 			"openForm": "Formular öffnen",
 			"openFormBulk": "Formular öffnen<br />(Massenbearbeitung)",
 			"option": {

@@ -11,6 +11,7 @@ import (
 	"r3/schema/collection/consumer"
 	"r3/schema/column"
 	"r3/schema/compatible"
+	"r3/schema/openDoc"
 	"r3/schema/openForm"
 	"r3/schema/query"
 	"r3/schema/tab"
@@ -169,6 +170,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 				Flags:        flags,
 				OnMobile:     onMobile,
 				JsFunctionId: jsFunctionIdButton,
+				OpenDoc:      types.OpenDoc{},
 				OpenForm:     types.OpenForm{},
 			})
 			posButtonLookup = append(posButtonLookup, pos)
@@ -393,6 +395,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]any, error) {
 	for _, pos := range posButtonLookup {
 		var field = fields[pos].(types.FieldButton)
 
+		field.OpenDoc, err = openDoc.Get_tx(ctx, tx, schema.DbField, field.Id)
+		if err != nil {
+			return nil, err
+		}
 		field.OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbField, field.Id, pgtype.Text{})
 		if err != nil {
 			return nil, err
@@ -889,6 +895,9 @@ func setButton_tx(ctx context.Context, tx pgx.Tx, f types.FieldButton) error {
 		ON CONFLICT (field_id)
 		DO UPDATE SET js_function_id = $2
 	`, f.Id, f.JsFunctionId); err != nil {
+		return err
+	}
+	if err := openDoc.Set_tx(ctx, tx, schema.DbField, f.Id, f.OpenDoc); err != nil {
 		return err
 	}
 	return openForm.Set_tx(ctx, tx, schema.DbField, f.Id, f.OpenForm, pgtype.Text{})

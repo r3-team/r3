@@ -83,15 +83,6 @@ export function getDependentModules(moduleSource) {
 	return MyStore.getters['schema/modules'].filter(v => v.id === moduleSource.id || moduleSource.dependsOn.includes(v.id));
 };
 
-export function getDependentRelations(moduleSource) {
-	const modules = getDependentModules(moduleSource);
-	let rels = [];
-	for(const mod of modules) {
-		rels = rels.concat(mod.relations);
-	}
-	return rels;
-};
-
 export function getDependentAttributes(moduleSource) {
 	const modules = getDependentModules(moduleSource);
 	let atrs = [];
@@ -101,6 +92,24 @@ export function getDependentAttributes(moduleSource) {
 		}
 	}
 	return atrs;
+};
+
+export function getDependentDocs(moduleSource) {
+	const modules = getDependentModules(moduleSource);
+	let docs = [];
+	for(const mod of modules) {
+		docs = docs.concat(mod.docs);
+	}
+	return docs;
+};
+
+export function getDependentRelations(moduleSource) {
+	const modules = getDependentModules(moduleSource);
+	let rels = [];
+	for(const mod of modules) {
+		rels = rels.concat(mod.relations);
+	}
+	return rels;
 };
 
 export function getFunctionHelp(functionPrefix,functionObj,builderLanguage) {

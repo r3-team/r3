@@ -1041,6 +1041,7 @@
 			"new": "New form",
 			"noDataActions": "No data actions",
 			"onMobile": "In mobile view",
+			"openDoc": "Generate PDF",
 			"openForm": "Open form",
 			"openFormBulk": "Open form<br />(bulk editing)",
 			"option": {

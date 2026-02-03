@@ -728,7 +728,7 @@ const MyInputFiles = {
 				let formData = new FormData();
 				formData.append('token',this.token);
 				formData.append('attributeId',this.attributeId);
-				formData.append('fileId',this.getNilUuid())
+				formData.append('fileId',this.getNilUuid());
 				formData.append('file',file);
 				xhr.open('POST','data/upload',true);
 				xhr.send(formData);

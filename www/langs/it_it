@@ -1041,6 +1041,7 @@
 			"new": "Nuovo modulo",
 			"noDataActions": "No data actions",
 			"onMobile": "Nella vista mobile",
+			"openDoc": "Generate PDF",
 			"openForm": "Apri modulo",
 			"openFormBulk": "Apri modulo<br />(bulk editing)",
 			"option": {

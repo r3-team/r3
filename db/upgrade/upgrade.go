@@ -561,6 +561,40 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				CASE WHEN search_bar_id         IS NULL THEN 0 ELSE 1
 				END
 			));
+
+			-- open doc action for button fields and form actions
+			CREATE TABLE IF NOT EXISTS app.open_doc (
+				field_id uuid,
+				form_action_id uuid,
+				doc_id_open uuid NOT NULL,
+				field_id_add_to uuid,
+				relation_index_open int NOT NULL,
+				CONSTRAINT open_doc_field_id_fkey FOREIGN KEY (field_id)
+					REFERENCES app.field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT open_doc_form_action_id_fkey FOREIGN KEY (form_action_id)
+					REFERENCES app.form_action (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT open_doc_doc_id_open_fkey FOREIGN KEY (doc_id_open)
+					REFERENCES app.doc (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT open_doc_field_id_add_to_fkey FOREIGN KEY (field_id_add_to)
+					REFERENCES app.field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+
+			CREATE INDEX IF NOT EXISTS fki_open_doc_id_open_fkey     ON app.open_doc USING btree (doc_id_open     ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_open_field_id_fkey        ON app.open_doc USING btree (field_id        ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_open_field_id_add_to_fkey ON app.open_doc USING btree (field_id_add_to ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_open_form_action_id_fkey  ON app.open_doc USING btree (form_action_id  ASC NULLS LAST);
 		`)
 		return "3.12", err
 	},

@@ -35,7 +35,8 @@ import {
 import {
 	filterIsCorrect,
 	filterOperatorIsSingleValue,
-	openLink
+	openLink,
+	openLinkNoCache
 } from './shared/generic.js';
 import {
 	getDataFieldMap,
@@ -255,6 +256,7 @@ export default {
 					v-for="(f,i) in fields"
 					@clipboard="messageSet('[CLIPBOARD]')"
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
+					@open-doc="openDoc"
 					@open-form="openForm"
 					@set-form-args="setFormArgs"
 					@set-touched="fieldSetTouched"
@@ -942,6 +944,7 @@ export default {
 		jsFunctionRun,
 		layoutSettleSpace,
 		openLink,
+		openLinkNoCache,
 		pemImport,
 		rsaDecrypt,
 		rsaEncrypt,
@@ -1410,6 +1413,10 @@ export default {
 		},
 		
 		// navigation
+		openDoc(openDoc) {
+			const recordId = this.indexMapRecordId[openDoc.relationIndexOpen] !== undefined ? this.indexMapRecordId[openDoc.relationIndexOpen] : 0;
+			this.openLinkNoCache(`/doc/download/test.pdf?doc_id=${openDoc.docIdOpen}&record_id=${recordId}&token=${this.token}`,true);
+		},
 		openForm(recordIds,openForm,getterArgs,newTab,fieldIdSrc,replace) {
 			// set defaults
 			if(recordIds  === undefined || recordIds  === null) recordIds  = [];

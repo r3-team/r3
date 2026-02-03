@@ -1041,6 +1041,7 @@
 			"new": "Új űrlap",
 			"noDataActions": "Nincsenek adatműveletek",
 			"onMobile": "Mobil nézetben",
+			"openDoc": "Generate PDF",
 			"openForm": "Űrlap megnyitása",
 			"openFormBulk": "Űrlap megnyitása (Tömeges szerkesztés)",
 			"option": {

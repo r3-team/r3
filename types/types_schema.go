@@ -160,6 +160,11 @@ type LoginForm struct {
 	Name              string     `json:"name"`
 	Captions          CaptionMap `json:"captions"`
 }
+type OpenDoc struct {
+	DocIdOpen         uuid.UUID   `json:"docIdOpen"`         // document to open
+	RelationIndexOpen int         `json:"relationIndexOpen"` // relation index of record to open
+	FieldIdAddTo      pgtype.UUID `json:"fieldIdApply"`      // optional, field to add document to
+}
 type OpenForm struct {
 	PopUpType pgtype.Text `json:"popUpType"` // if set, form is opened as pop-up, values: float, inline
 	Context   pgtype.Text `json:"context"`   // used when same entity needs multiple open forms, values: bulk
@@ -264,6 +269,7 @@ type FieldButton struct {
 	Flags        []string    `json:"flags"`
 	OnMobile     bool        `json:"onMobile"`
 	JsFunctionId pgtype.UUID `json:"jsFunctionId"` // JS function to executing when triggering button
+	OpenDoc      OpenDoc     `json:"openDoc"`
 	OpenForm     OpenForm    `json:"openForm"`
 	Captions     CaptionMap  `json:"captions"`
 }
@@ -654,6 +660,14 @@ type CaptionMap map[string]map[string]string // content->language_code->value
 
 // custom marshallers
 // use local type to avoid marshal loop (has same fields but none of the original methods)
+func (src OpenDoc) MarshalJSON() ([]byte, error) {
+
+	if src.DocIdOpen == uuid.Nil {
+		return []byte("null"), nil
+	}
+	type alias OpenDoc
+	return json.Marshal(alias(src))
+}
 func (src OpenForm) MarshalJSON() ([]byte, error) {
 
 	if src.FormIdOpen == uuid.Nil {

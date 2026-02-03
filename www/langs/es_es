@@ -1041,6 +1041,7 @@
 			"new": "Nuevo formulario",
 			"noDataActions": "Acciones sin datos",
 			"onMobile": "En vista móvil",
+			"openDoc": "Generate PDF",
 			"openForm": "Abrir formulario",
 			"openFormBulk": "Abrir formulario<br />(edición masiva)",
 			"option": {

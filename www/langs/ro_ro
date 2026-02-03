@@ -1041,6 +1041,7 @@
 			"new": "Formular nou",
 			"noDataActions": "No data actions",
 			"onMobile": "Vizualizare dispozitiv mobil",
+			"openDoc": "Generate PDF",
 			"openForm": "Deschideți formularul",
 			"openFormBulk": "Deschideți formularul<br />(bulk editing)",
 			"option": {
