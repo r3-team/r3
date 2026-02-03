@@ -1416,7 +1416,7 @@ export default {
 		openDoc(openDoc) {
 			const recordId = this.indexMapRecordId[openDoc.relationIndexOpen] !== undefined ? this.indexMapRecordId[openDoc.relationIndexOpen] : 0;
 			if(openDoc.fieldIdAddTo === null || this.fieldIdMapData[openDoc.fieldIdAddTo] === undefined)
-				return this.openLinkNoCache(`/doc/download/test.pdf?doc_id=${openDoc.docIdOpen}&record_id=${recordId}&token=${this.token}`,true);
+				return this.openLinkNoCache(`/doc/download/file.pdf?doc_id=${openDoc.docIdOpen}&record_id=${recordId}&token=${this.token}`,true);
 			
 			const fieldId = openDoc.fieldIdAddTo;
 			const atr     = this.attributeIdMap[this.fieldIdMapData[fieldId].attributeId];

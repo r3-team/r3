@@ -14,6 +14,8 @@ func applyToDocument(set []types.DocSet, d types.Doc) types.Doc {
 			switch o.Target {
 			case "author":
 				d.Author = v
+			case "filename":
+				d.Filename = v
 			case "language":
 				d.Language = v
 			case "title":

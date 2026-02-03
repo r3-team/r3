@@ -55,18 +55,19 @@ func DoAll() error {
 	return nil
 }
 
-func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recordId int64, pathOut string) error {
+// returns filename of generated document
+func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recordId int64, pathOut string) (string, error) {
 
 	cache.Schema_mx.RLock()
 	docDef, exists := cache.DocIdMap[docId]
 	cache.Schema_mx.RUnlock()
 
 	if !exists {
-		return handler.ErrSchemaUnknownDoc(docId)
+		return "", handler.ErrSchemaUnknownDoc(docId)
 	}
 
 	if len(docDef.Pages) < 1 {
-		return errors.New("cannot create document, 0 pages defined")
+		return "", errors.New("cannot create document, 0 pages defined")
 	}
 
 	log.Info(log.ContextDoc, "document creator has started")
@@ -85,7 +86,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 			cache.Schema_mx.RUnlock()
 
 			if !exists {
-				return handler.ErrSchemaUnknownRelation(docDef.Query.RelationId.Bytes)
+				return "", handler.ErrSchemaUnknownRelation(docDef.Query.RelationId.Bytes)
 			}
 
 			cache.Schema_mx.RLock()
@@ -93,7 +94,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 			cache.Schema_mx.RUnlock()
 
 			if !exists {
-				return handler.ErrSchemaUnknownAttribute(rel.AttributeIdPk)
+				return "", handler.ErrSchemaUnknownAttribute(rel.AttributeIdPk)
 			}
 
 			docDef.Query.Filters = append(docDef.Query.Filters, types.QueryFilter{
@@ -125,7 +126,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 			if page.Header.Active && !page.Header.DocPageIdInherit.Valid {
 				exprsSub, err := getExpressionsFromField(page.Header.FieldGrid)
 				if err != nil {
-					return err
+					return "", err
 				}
 				exprs = append(exprs, exprsSub...)
 			}
@@ -134,7 +135,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 			if page.Footer.Active && !page.Footer.DocPageIdInherit.Valid {
 				exprsSub, err := getExpressionsFromField(page.Footer.FieldGrid)
 				if err != nil {
-					return err
+					return "", err
 				}
 				exprs = append(exprs, exprsSub...)
 			}
@@ -142,7 +143,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 			// main page body field
 			exprsSub, err := getExpressionsFromField(page.FieldFlow)
 			if err != nil {
-				return err
+				return "", err
 			}
 			exprs = append(exprs, exprsSub...)
 		}
@@ -152,7 +153,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 
 		// get data from document query
 		if err := getDataDoc(ctx, doc, noAuth, loginId, recordId, docDef.Query, exprs, "en_us"); err != nil {
-			return err
+			return "", err
 		}
 	}
 
@@ -162,7 +163,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 	for _, s := range docDef.States {
 		res, err := getConditionsResult(ctx, doc, recordId, s.Conditions)
 		if err != nil {
-			return err
+			return "", err
 		}
 		if res {
 			for _, e := range s.Effects {
@@ -257,8 +258,8 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 		if err := addField(ctx, doc, loginId, recordId, page.Margin.L, page.Margin.T,
 			sizeXPageUsable, sizeYPageUsable, false, false, true, false, font, page.FieldFlow); err != nil {
 
-			return err
+			return "", err
 		}
 	}
-	return doc.p.OutputFileAndClose(pathOut)
+	return docDef.Filename, doc.p.OutputFileAndClose(pathOut)
 }

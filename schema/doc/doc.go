@@ -21,7 +21,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, error) {
 
 	rows, err := tx.Query(ctx, `
-		SELECT d.id, d.name, d.comment, d.author, d.language,
+		SELECT d.id, d.name, d.comment, d.filename, d.author, d.language,
 			f.align, f.bool_false, f.bool_true, f.color, f.date_format, f.family,
 			f.line_factor, f.number_sep_dec, f.number_sep_tho, f.size, f.style
 		FROM app.doc      AS d
@@ -37,7 +37,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 	docs := make([]types.Doc, 0)
 	for rows.Next() {
 		var d types.Doc
-		if err := rows.Scan(&d.Id, &d.Name, &d.Comment, &d.Author, &d.Language,
+		if err := rows.Scan(&d.Id, &d.Name, &d.Comment, &d.Filename, &d.Author, &d.Language,
 			&d.Font.Align, &d.Font.BoolFalse, &d.Font.BoolTrue, &d.Font.Color, &d.Font.DateFormat, &d.Font.Family,
 			&d.Font.LineFactor, &d.Font.NumberSepDec, &d.Font.NumberSepTho, &d.Font.Size, &d.Font.Style); err != nil {
 
@@ -76,11 +76,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Doc, er
 func Set_tx(ctx context.Context, tx pgx.Tx, d types.Doc) error {
 
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO app.doc (id, module_id, name, comment, author, language)
-		VALUES ($1,$2,$3,$4,$5,$6)
+		INSERT INTO app.doc (id, module_id, name, comment, filename, author, language)
+		VALUES ($1,$2,$3,$4,$5,$6,$7)
 		ON CONFLICT (id)
-		DO UPDATE SET name = $3, comment = $4, author = $5, language = $6
-	`, d.Id, d.ModuleId, d.Name, d.Comment, d.Author, d.Language); err != nil {
+		DO UPDATE SET name = $3, comment = $4, filename = $5, author = $6, language = $7
+	`, d.Id, d.ModuleId, d.Name, d.Comment, d.Filename, d.Author, d.Language); err != nil {
 		return err
 	}
 

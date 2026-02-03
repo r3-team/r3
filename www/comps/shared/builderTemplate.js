@@ -127,6 +127,7 @@ export function getTemplateDoc(moduleId,language,name) {
 		language:language,
 		name:name,
 		comment:null,
+		filename:'MyFile.pdf',
 		font:{
 			align:'LM',
 			boolFalse:'no',

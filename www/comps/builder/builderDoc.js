@@ -195,6 +195,10 @@ export default {
 								<td><textarea class="long" v-model="doc.comment" :disabled="readonly"></textarea></td>
 							</tr>
 							<tr>
+								<td>{{ capGen.filename }}</td>
+								<td><input class="long" v-model="doc.filename" :disabled="readonly" /></td>
+							</tr>
+							<tr>
 								<td>{{ capGen.language }}</td>
 								<td>
 									<select class="long" v-model="doc.language">
@@ -348,7 +352,7 @@ export default {
 		hasChanges:     s => !s.deepIsEqual(s.doc,s.docSchema),
 		module:         s => s.moduleIdMap[s.doc.moduleId],
 		pageIndexActive:s => s.pageIdMapIndex[s.tabPageIdShow],
-		previewUrl:     s => s.recordId !== null && !s.hasChanges ? `/doc/download/test.pdf?doc_id=${s.id}&record_id=${s.recordId}&token=${s.token}&date=${s.cacheDenialTimestamp}` : null,
+		previewUrl:     s => s.recordId !== null && !s.hasChanges ? `/doc/download/file.pdf?doc_id=${s.id}&record_id=${s.recordId}&token=${s.token}&date=${s.cacheDenialTimestamp}` : null,
 		query:          s => s.doc.query !== null ? s.doc.query : s.getTemplateQuery(),
 		sideDocShow:    s => !s.sideFieldShow,
 		sideFieldShow:  s => s.sideFieldIdShow !== null,
@@ -359,7 +363,7 @@ export default {
 		relationIdMap:s => s.$store.getters['schema/relationIdMap'],
 		token:        s => s.$store.getters['local/token'],
 		capApp:       s => s.$store.getters.captions.builder.doc,
-		capGen:       s => s.$store.getters.captions.generic,
+		capGen:       s => s.$store.getters.captions.generic
 	},
 	watch:{
 		docSchema:{

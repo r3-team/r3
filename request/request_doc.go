@@ -33,7 +33,8 @@ func DocCreate_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, login
 	if err != nil {
 		return nil, err
 	}
-	if err := doc_create.Run(ctx, req.DocId, false, loginId, req.RecordIdLoad, filePath); err != nil {
+	filename, err := doc_create.Run(ctx, req.DocId, false, loginId, req.RecordIdLoad, filePath)
+	if err != nil {
 		return nil, err
 	}
 	fileInfo, err := os.Stat(filePath)
@@ -47,7 +48,7 @@ func DocCreate_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, login
 	}
 	return types.DataGetValueFile{
 		Id:   fileId,
-		Name: "Myfile.pdf",
+		Name: filename,
 		Size: fileSizeKb,
 	}, nil
 }

@@ -122,7 +122,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TYPE app.border_style_cap  AS ENUM('butt','round','square');
 			CREATE TYPE app.border_style_join AS ENUM('bevel','miter','round');
 			CREATE TYPE app.doc_set_target    AS ENUM(
-				'author','language','title',
+				'author','filename','language','title',
 				'border.color','border.draw','border.size',
 				'bodyBorder.cell',  'bodyBorder.color',  'bodyBorder.draw',  'bodyBorder.size',  
 				'footerBorder.cell','footerBorder.color','footerBorder.draw','footerBorder.size',
@@ -142,6 +142,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				module_id uuid NOT NULL,
 				name character varying(64) COLLATE pg_catalog."default" NOT NULL,
 				comment text COLLATE pg_catalog."default",
+				filename character varying(64) COLLATE pg_catalog."default" NOT NULL,
 				author character varying(128),
 				language character(5) NOT NULL,
 				CONSTRAINT doc_pkey PRIMARY KEY (id),

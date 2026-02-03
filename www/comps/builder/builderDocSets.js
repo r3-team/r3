@@ -26,11 +26,11 @@ const targetTypes = {
 	fontStyle:['font.style'],
 	integer:['text.length'],
 	numberSep:['font.numberSepDec','font.numberSepTho'],
-	string:['text.postfix','text.prefix']
+	string:['author','filename','language','text.postfix','text.prefix','title']
 };
 
 // ordered targets
-const targetsDoc              = ['title','language','author'];
+const targetsDoc              = ['title','filename','language','author'];
 const targetsFont             = ['font.family','font.size','font.lineFactor','font.align','font.style','font.color','font.numberSepTho','font.numberSepDec','font.dateFormat'];
 const targetsListBodyBorder   = ['bodyBorder.draw','bodyBorder.cell','bodyBorder.size','bodyBorder.color'];
 const targetsListBodyRow      = ['bodyRow.colorFillEven','bodyRow.colorFillOdd'];
@@ -168,6 +168,7 @@ const MyBuilderDocSetTarget = {
 		this.targetCapMap =	{
 			// doc
 			'author':  this.capGen.author,
+			'filename':this.capGen.filename,
 			'language':this.capGen.language,
 			'title':   this.capGen.title,
 

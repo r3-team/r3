@@ -12,6 +12,7 @@ type Doc struct {
 	ModuleId uuid.UUID  `json:"moduleId"`
 	Name     string     `json:"name"`
 	Comment  string     `json:"comment"`
+	Filename string     `json:"filename"`
 	Font     DocFont    `json:"font"`
 	Pages    []DocPage  `json:"pages"` // pages in order
 	Query    Query      `json:"query"`

@@ -3,6 +3,7 @@ package doc_download
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"r3/config"
@@ -56,10 +57,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := doc_create.Run(ctx, docId, false, login.Id, recordId, filePath); err != nil {
+	filename, err := doc_create.Run(ctx, docId, false, login.Id, recordId, filePath)
+	if err != nil {
 		handler.ServeErrorPage(w, http.StatusInternalServerError, err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%s", filename))
 
 	http.ServeFile(w, r, filePath)
 	if err := os.Remove(filePath); err != nil {
