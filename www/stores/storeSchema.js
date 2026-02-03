@@ -141,7 +141,6 @@ const MyStoreSchema = {
 				
 				// process APIs
 				for(let api of mod.apis) {
-					api.query = getTemplateQueryIfNull(api.query);
 					state.apiIdMap[api.id] = api;
 				}
 				

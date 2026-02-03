@@ -1,6 +1,6 @@
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderColumnOptions from './builderColumnOptions.js';
-import { copyValueDialog }    from '../shared/generic.js';
+import {getTemplateQuery}     from '../shared/builderTemplate.js';
 import {
 	isAttributeBoolean,
 	isAttributeDecimal,
@@ -14,7 +14,10 @@ import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
 } from './builderColumns.js';
-export {MyBuilderApi as default};
+import {
+	copyValueDialog,
+	deepIsEqual
+} from '../shared/generic.js';
 
 const MyBuilderApiPreview = {
 	name:'my-builder-api-preview',
@@ -325,7 +328,7 @@ const MyBuilderApiPreview = {
 	}
 };
 
-const MyBuilderApi = {
+export default {
 	name:'my-builder-api',
 	components:{
 		MyBuilderApiPreview,
@@ -340,7 +343,7 @@ const MyBuilderApi = {
 				<div class="area nowrap">
 					<img class="icon" src="images/api.png" />
 					<h1 class="title">
-						{{ capApp.titleOne.replace('{NAME}',name) }}
+						{{ capApp.titleOne.replace('{NAME}',api.name) }}
 					</h1>
 				</div>
 				<div class="area">
@@ -358,7 +361,7 @@ const MyBuilderApi = {
 						:caption="capGen.button.save"
 					/>
 					<my-button image="refresh.png"
-						@trigger="reset"
+						@trigger="reset(true)"
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
@@ -371,7 +374,7 @@ const MyBuilderApi = {
 				</div>
 				<div class="area nowrap">
 					<my-button image="visible1.png"
-						@trigger="copyValueDialog(name,id,id)"
+						@trigger="copyValueDialog(api.name,id,id)"
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
@@ -392,11 +395,11 @@ const MyBuilderApi = {
 					<div class="builder-api-columns-active">
 						<h2>{{ capGen.columnsActive }}</h2>
 						<my-builder-columns groupName="columns"
-							@columns-set="columns = $event"
+							@columns-set="api.columns = $event"
 							@column-id-show="toggleColumnOptions($event)"
-							:builderLanguage="builderLanguage"
-							:columnIdShow="columnIdShow"
-							:columns="columns"
+							:builderLanguage
+							:columnIdShow
+							:columns="api.columns"
 							:hasBatches="false"
 							:hasCaptions="true"
 							:hasStyling="false"
@@ -407,9 +410,9 @@ const MyBuilderApi = {
 						<h2>{{ capGen.columnsAvailable }}</h2>
 						<div class="builder-api-column-templates">
 							<my-builder-column-templates groupName="batches_columns"
-								@column-add="columns.push($event)"
+								@column-add="api.columns.push($event)"
 								:allowRelationships="true"
-								:columns="columns"
+								:columns="api.columns"
 								:joins="query.joins"
 							/>
 						</div>
@@ -435,13 +438,14 @@ const MyBuilderApi = {
 			<!-- API content -->
 			<div class="content grow" v-if="tabTarget === 'content'">
 				<my-builder-query
-					v-model="query"
 					@index-removed="removeIndex($event)"
+					@update:modelValue="api.query = $event"
 					:allowChoices="false"
 					:allowLookups="true"
 					:allowOrders="true"
 					:builderLanguage
 					:filtersDisable
+					:modelValue="query"
 					:moduleId="module.id"
 				/>
 				
@@ -476,17 +480,17 @@ const MyBuilderApi = {
 				<my-builder-api-preview
 					:api="api"
 					:builderLanguage
-					:columns="columns"
-					:hasDelete="hasDelete"
-					:hasGet="hasGet"
-					:hasPost="hasPost"
+					:columns="api.columns"
+					:hasDelete="api.hasDelete"
+					:hasGet="api.hasGet"
+					:hasPost="api.hasPost"
 					:joins="query.joins"
-					:limitDef="limitDef"
-					:module="module"
-					:name="name"
-					:verboseDef="verboseDef"
-					:version="version"
-					:warnings="warnings"
+					:limitDef="api.limitDef"
+					:module
+					:name="api.name"
+					:verboseDef="api.verboseDef"
+					:version="api.version"
+					:warnings
 				/>
 			</div>
 			
@@ -496,18 +500,18 @@ const MyBuilderApi = {
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}</td>
-							<td><input v-model="name" :disabled="readonly" /></td>
+							<td><input v-model="api.name" :disabled="readonly" /></td>
 							<td>{{ capApp.nameHint }}</td>
 						</tr>
 						<tr>
 							<td>{{ capGen.version }}</td>
-							<td><input v-model.number="version" :disabled="readonly" /></td>
+							<td><input v-model.number="api.version" :disabled="readonly" /></td>
 							<td>{{ capApp.versionHint }}</td>
 						</tr>
 						<tr>
 							<td>{{ capGen.comments }}</td>
 							<td colspan="2">
-								<textarea class="long" v-model="comment" :disabled="readonly"></textarea>
+								<textarea class="long" @input="api.comment = $event.target.value !== '' ? $event.target.value : null" :disabled="readonly" :value="api.comment"></textarea>
 							</td>
 						</tr>
 						<tr>
@@ -517,7 +521,7 @@ const MyBuilderApi = {
 						</tr>
 						<tr>
 							<td>{{ capApp.verboseDef }}</td>
-							<td><my-bool v-model="verboseDef" /></td>
+							<td><my-bool v-model="api.verboseDef" /></td>
 							<td>{{ capApp.verboseDefHint }}</td>
 						</tr>
 						<tr v-if="warnings.length !== 0">
@@ -536,17 +540,17 @@ const MyBuilderApi = {
 										<tbody>
 											<tr>
 												<td>GET</td>
-												<td><my-bool v-model="hasGet" /></td>
+												<td><my-bool v-model="api.hasGet" /></td>
 												<td>{{ capApp.hint.get }}</td>
 											</tr>
 											<tr>
 												<td>POST</td>
-												<td><my-bool v-model="hasPost" /></td>
+												<td><my-bool v-model="api.hasPost" /></td>
 												<td>{{ capApp.hint.post }}</td>
 											</tr>
 											<tr>
 												<td>DELETE</td>
-												<td><my-bool v-model="hasDelete" /></td>
+												<td><my-bool v-model="api.hasDelete" /></td>
 												<td>{{ capApp.hint.delete }}</td>
 											</tr>
 										</tbody>
@@ -554,14 +558,14 @@ const MyBuilderApi = {
 								</div>
 							</td>
 						</tr>
-						<tr v-if="hasGet">
+						<tr v-if="api.hasGet">
 							<td>{{ capApp.limitDef }}</td>
-							<td><input v-model.number="limitDef" :disabled="readonly" /></td>
+							<td><input v-model.number="api.limitDef" :disabled="readonly" /></td>
 							<td>{{ capApp.limitDefHint }}</td>
 						</tr>
-						<tr v-if="hasGet">
+						<tr v-if="api.hasGet">
 							<td>{{ capApp.limitMax }}</td>
-							<td><input v-model.number="limitMax" :disabled="readonly" /></td>
+							<td><input v-model.number="api.limitMax" :disabled="readonly" /></td>
 							<td>{{ capApp.limitMaxHint }}</td>
 						</tr>
 					</tbody>
@@ -582,18 +586,9 @@ const MyBuilderApi = {
 	},
 	data() {
 		return {
-			// API inputs
-			columns:[],
-			comment:'',
-			hasDelete:false,
-			hasGet:false,
-			hasPost:false,
-			limitDef:100,
-			limitMax:1000,
-			name:'',
-			query:{},
-			verboseDef:false,
-			version:1,
+			// inputs
+			api:false,  // API being edited in this component
+			apiCopy:{}, // copy of API from schema when component last reset
 			
 			// state
 			columnIdShow:null,
@@ -609,36 +604,25 @@ const MyBuilderApi = {
 	},
 	computed:{
 		// states
-		columnShow:(s) => {
+		columnShow:s => {
 			if(s.columnIdShow === null) return false;
 			
-			for(let i = 0, j = s.columns.length; i < j; i++) {
-				if(s.columns[i].id === s.columnIdShow)
-					return s.columns[i];
+			for(let i = 0, j = s.api.columns.length; i < j; i++) {
+				if(s.api.columns[i].id === s.columnIdShow)
+					return s.api.columns[i];
 			}
 			return false;
 		},
-		hasChanges:(s) => s.name         !== s.api.name
-			|| s.comment                 !== s.api.comment
-			|| s.hasDelete               !== s.api.hasDelete
-			|| s.hasGet                  !== s.api.hasGet
-			|| s.hasPost                 !== s.api.hasPost
-			|| s.limitDef                !== s.api.limitDef
-			|| s.limitMax                !== s.api.limitMax
-			|| s.verboseDef              !== s.api.verboseDef
-			|| s.version                 !== s.api.version
-			|| JSON.stringify(s.query)   !== JSON.stringify(s.api.query)
-			|| JSON.stringify(s.columns) !== JSON.stringify(s.api.columns),
-		warnings:(s) => {
+		warnings:s => {
 			let out = [];
-			if(s.hasGet || s.hasPost) {
+			if(s.api.hasGet || s.api.hasPost) {
 				// check no base relation/no columns
-				if(s.query.relationId === '' || s.columns.length === 0)
+				if(s.query.relationId === '' || s.api.columns.length === 0)
 					out.push(s.capApp.warning.noData);
 			}
-			if(s.hasPost) {
+			if(s.api.hasPost) {
 				// check sub queries in POST API
-				for(let c of s.columns) {
+				for(let c of s.api.columns) {
 					if(c.subQuery) {
 						out.push(s.capApp.warning.postSubQuery);
 						break;
@@ -658,52 +642,47 @@ const MyBuilderApi = {
 		},
 		
 		// simple
-		api:   (s) => s.apiIdMap[s.id] === undefined ? false : s.apiIdMap[s.id],
-		module:(s) => s.moduleIdMap[s.api.moduleId],
+		apiSchema: s => s.apiIdMap[s.id] === undefined ? false : s.apiIdMap[s.id],
+		hasChanges:s => !s.deepIsEqual(s.api,s.apiSchema),
+		module:    s => s.moduleIdMap[s.api.moduleId],
+		query:     s => s.api.query !== null ? s.api.query : s.getTemplateQuery(),
 		
 		// stores
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		apiIdMap:   (s) => s.$store.getters['schema/apiIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.api,
-		capGen:     (s) => s.$store.getters.captions.generic
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
+		apiIdMap:   s => s.$store.getters['schema/apiIdMap'],
+		capApp:     s => s.$store.getters.captions.builder.api,
+		capGen:     s => s.$store.getters.captions.generic
 	},
 	watch:{
-		api:{
-			handler() { this.reset(); },
+		apiSchema:{
+			handler() { this.reset(false); },
 			immediate:true
 		}
 	},
 	methods:{
 		// externals
 		copyValueDialog,
+		deepIsEqual,
+		getTemplateQuery,
 		
 		// actions
 		columnSet(name,value) {
 			this.columnShow[name] = value;
 		},
 		removeIndex(index) {
-			for(let i = 0, j = this.columns.length; i < j; i++) {
-				if(this.columns[i].index === index) {
-					this.columns.splice(i,1);
+			for(let i = 0, j = this.api.columns.length; i < j; i++) {
+				if(this.api.columns[i].index === index) {
+					this.api.columns.splice(i,1);
 					i--; j--;
 				}
 			}
 		},
-		reset() {
-			if(!this.api) return;
-			
-			this.name       = this.api.name;
-			this.comment    = this.api.comment;
-			this.hasDelete  = this.api.hasDelete;
-			this.hasGet     = this.api.hasGet;
-			this.hasPost    = this.api.hasPost;
-			this.limitDef   = this.api.limitDef;
-			this.limitMax   = this.api.limitMax;
-			this.verboseDef = this.api.verboseDef;
-			this.version    = this.api.version;
-			this.query      = JSON.parse(JSON.stringify(this.api.query));
-			this.columns    = JSON.parse(JSON.stringify(this.api.columns));
-			this.columnIdShow = null;
+		reset(manuelReset) {
+			if(this.apiSchema !== false && (manuelReset || !this.deepIsEqual(this.apiCopy,this.apiSchema))) {
+				this.api     = JSON.parse(JSON.stringify(this.apiSchema));
+				this.apiCopy = JSON.parse(JSON.stringify(this.apiSchema));
+				this.columnIdShow = null;
+			}
 		},
 		toggleColumnOptions(id) {
 			this.columnIdShow = this.columnIdShow === id ? null : id;
@@ -747,21 +726,7 @@ const MyBuilderApi = {
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('api','set',{
-					id:this.api.id,
-					moduleId:this.api.moduleId,
-					name:this.name,
-					comment:this.comment === '' ? null : this.comment,
-					columns:this.columns,
-					query:this.query,
-					hasDelete:this.hasDelete,
-					hasGet:this.hasGet,
-					hasPost:this.hasPost,
-					limitDef:this.limitDef,
-					limitMax:this.limitMax,
-					verboseDef:this.verboseDef,
-					version:this.version
-				}),
+				ws.prepare('api','set',this.api),
 				ws.prepare('schema','check',{moduleId:this.module.id})
 			],true).then(
 				() => this.$root.schemaReload(this.module.id),
