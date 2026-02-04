@@ -63,12 +63,12 @@ export default {
 			<div class="builder-doc-padding-margin-ver" v-if="field.padding.l > 0" :style="stylePaddingL"></div>
 		</template>
 		
-		<div class="builder-doc-field-title-bar" v-if="!isWithFields">
+		<div class="builder-doc-field-title-bar" v-if="!isWithFields && !isDragPreview">
 			<img :src="'images/' + getDocFieldIcon(field)" @click="tabTargetField = 'properties'" />
 			<span>F{{ entityIdMapRef.field[field.id] }}</span>
 			<img v-if="isWithQuery"  @click="tabTargetField = 'content'" src="images/database.png" />
 			<img v-if="!field.state" @click.stop="field.state = true"    src="images/visible0.png" />
-			<span v-if="!isWithFields && !isDragPreview">{{ title }}</span>
+			<span>{{ title }}</span>
 		</div>
 		<div class="builder-doc-bg-text" v-if="isWithFields">F{{ entityIdMapRef.field[field.id] }}</div>
 
@@ -487,6 +487,7 @@ export default {
 			columnIdOptions:null,
 			dragEnterCounter:0,
 			dragType:'doc-field',
+			draggedInSameParent:false,
 			filtersDisable:[
 				'collection','field','fieldChanged','fieldValid','formChanged','formState',
 				'getter','globalSearch','javascript','languageCode','login','recordMayCreate',
@@ -732,6 +733,9 @@ export default {
 
 		// drag source child
 		dragChildEnd(fieldId) {
+			if(this.draggedInSameParent)
+				return this.draggedInSameParent = false;
+
 			const pos = this.field.fields.findIndex(v => v.id === fieldId);
 			if(pos !== -1)
 				this.field.fields.splice(pos,1);
@@ -816,6 +820,13 @@ export default {
 					field.sizeY = 0;
 			}
 
+			// remove existing field if dragged within the same parent
+			const fieldIndexOld = this.field.fields.findIndex(v => v.id === field.id);
+			this.draggedInSameParent = fieldIndexOld !== -1;
+			if(this.draggedInSameParent)
+				this.field.fields.splice(fieldIndexOld,1);
+
+			// add field at position of preview
 			const indPreview = this.dragPreviewGetIndex();
 			if(indPreview !== -1) this.field.fields.splice(indPreview,1,field);
 			else                  this.field.fields.push(field);
