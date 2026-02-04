@@ -45,7 +45,7 @@ export default {
 		joins:          { type:Array,         required:true },
 		joinsParent:    { type:Array,         required:true },
 		modelValue:     { type:Array,         required:true },
-		moduleId:       { type:String,  required:true },
+		moduleId:       { type:String,        required:true },
 		parentSizeX:    { type:Number,        required:true },
 		readonly:       { type:Boolean,       required:true },
 		sizeXMax:       { type:Number,        required:true },

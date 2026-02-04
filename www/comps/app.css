@@ -126,13 +126,13 @@
 	--color-form-builder-columns:     hsl(226deg 25% 77%);
 	--color-form-builder-column-batch:hsl(199deg 28% 79%);
 	--color-form-builder-container:   hsl(99deg 47% 83%);
-	--color-form-builder-selected:    hsl(59deg 100% 50%);
+	--color-form-builder-hover:       hsla(57, 100%, 96%, 0.904);
+	--color-form-builder-selected:    hsla(59, 100%, 50%, 0.6);
 	--color-form-builder-tabs:        hsl(135deg 45% 78%);
 	--color-form-builder-tabs-active: hsl(135deg 54% 87%);
 
-	--color-doc-padding-margin:hsl(65.77deg 47.41% 73.33%);
-	--color-doc-page-outer:hsl(0, 0%, 100%);
-	--color-doc-page-footer-header:hsl(158, 47%, 73%);
+	--color-doc-builder-field: hsl(0, 0%, 100%);
+	--color-doc-padding-margin:hsl(60, 9%, 87%);
 	
 	/**/
 	/* shadows */
@@ -1474,9 +1474,13 @@ table td.maximum{
 	--color-form-builder-columns:     hsl(176deg 9% 32%);
 	--color-form-builder-column-batch:hsl(176deg 2% 32%);
 	--color-form-builder-container:   hsl(125deg 17% 31%);
-	--color-form-builder-selected:    hsl(59deg 72% 44%);
+	--color-form-builder-hover:       hsla(59, 72%, 44%, 0.13);
+	--color-form-builder-selected:    hsla(59, 72%, 44%, 0.801);
 	--color-form-builder-tabs:        hsl(104deg 15% 32%);
 	--color-form-builder-tabs-active: hsl(104deg 12% 39%);
+
+	--color-doc-builder-field: hsl(0, 0%, 21%);
+	--color-doc-padding-margin:hsl(0, 0%, 17%);
 	
 	--border-input:1px solid var(--color-border);
 	--outline-input-focus:2px solid var(--color-accent1);

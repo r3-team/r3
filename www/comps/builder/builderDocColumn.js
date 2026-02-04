@@ -120,8 +120,9 @@ export default {
 							<td>{{ capGen.sizeX }}</td>
 							<td>
 								<div class="row gap centered" v-if="column.sizeX !== 0">
-									<my-input-range   class="short" v-model="column.sizeX" :min="0" :max="sizeXMax" :readonly :step="0.1" />
-									<my-input-decimal class="short" v-model="column.sizeX" :min="0" :max="sizeXMax" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+									<my-input-range   class="short" v-model="column.sizeX" :min="1" :max="sizeXMax" :readonly :step="0.1" />
+									<my-input-decimal class="short" v-model="column.sizeX" :min="1" :max="sizeXMax" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+									<my-button image="cancel.png" :active="column.sizeX !== 0" :naked="true" @trigger="column.sizeX = 0" />
 									<span>mm</span>
 								</div>
 								<my-button

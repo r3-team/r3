@@ -237,10 +237,7 @@ export default {
 													:image="field.direction === 'row' ? 'flexRow.png' : 'flexColumn.png'"
 												/>
 											</div>
-											<div v-if="field.direction === 'row'" class="warning">
-												<img src="images/flexRow.png" />
-												<span v-html="capApp.warning.flowRow"></span>
-											</div>
+											<my-label image="flexRow.png" v-if="field.direction === 'row'" :caption="capApp.warning.flowRow" />
 										</div>
 									</td>
 								</tr>
@@ -295,7 +292,7 @@ export default {
 								<tr><td>{TIME_NOW}</td><td>{{ capApp.placeholders['{TIME_NOW}'] }}</td></tr>
 							</template>
 
-							<template v-if="isFlow || isGrid">
+							<template v-if="!isRoot && (isFlow || isGrid)">
 								<tr>
 									<td>{{ capApp.shrinkY }}</td>
 									<td><my-bool v-model="field.shrinkY" :readonly /></td>
@@ -519,7 +516,7 @@ export default {
 				isList:s.isList,
 				resizableBoth:s.isResizeInGrid,
 				resizableHeight:s.isResizeInFlow,
-				selected:s.isOptionsShow
+				selected:s.isOptionsShow && s.columnIdOptions === null
 			};
 		},
 		columnsTemplate:s => {
@@ -721,6 +718,9 @@ export default {
 			this.beingDragged = false;
 		},
 		dragStart(e) {
+			if(this.fieldIdOptions !== null)
+				this.$emit('setFieldIdOptions',null);
+
 			// store field for later drop & adjust ghost image to start at mouse position
 			e.dataTransfer.setData('application/json',JSON.stringify(this.field));
 			e.dataTransfer.setData(this.dragType,'');
