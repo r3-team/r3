@@ -153,11 +153,6 @@ type DocFieldText struct {
 	// text field
 	Captions CaptionMap `json:"captions"`
 }
-type DocHeaderFooter struct {
-	Active           bool         `json:"active"`           // true if header/footer is enabled at all (not stored in DB, resolved based on stored data)
-	DocPageIdInherit pgtype.UUID  `json:"docPageIdInherit"` // page to inherit header/footer from (instead of its own definition)
-	FieldGrid        DocFieldGrid `json:"fieldGrid"`        // header/footer only ever have a fixed grid field of their internal size (if they need flow, they can add a flow field)
-}
 type DocFont struct {
 	Align        string      `json:"align"`        // text: "L", "C", "R", "J" (left, center, right, justify), column: "L", "C", "R" (left, center, right) &  "T", "M", "B" (top, middle, bottom)
 	BoolFalse    string      `json:"boolFalse"`    // string representing bool FALSE
@@ -170,6 +165,11 @@ type DocFont struct {
 	NumberSepTho string      `json:"numberSepTho"` // number thousand separator
 	Size         float64     `json:"size"`         // font size in mm
 	Style        pgtype.Text `json:"style"`        // mix of "B" (bold), "I" (italic), "U" (underscore), "S" (strike-out), such as "I", "BI" or "IU"
+}
+type DocHeaderFooter struct {
+	Active           bool         `json:"active"`           // true if header/footer is enabled at all (not stored in DB, resolved based on stored data)
+	DocPageIdInherit pgtype.UUID  `json:"docPageIdInherit"` // page to inherit header/footer from (instead of its own definition)
+	FieldGrid        DocFieldGrid `json:"fieldGrid"`        // header/footer only ever have a fixed grid field of their internal size (if they need flow, they can add a flow field)
 }
 type DocMarginPadding struct {
 	T float64 `json:"t"` // margin in mm
