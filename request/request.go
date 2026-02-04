@@ -121,7 +121,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 	case "doc":
 		switch action {
 		case "create":
-			return DocCreate_tx(ctx, tx, reqJson, loginId)
+			return DocCreate(ctx, reqJson, loginId)
 		}
 	case "event":
 		switch action {

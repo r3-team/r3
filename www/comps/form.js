@@ -1424,7 +1424,7 @@ export default {
 				docId:openDoc.docIdOpen,
 				recordIdLoad:recordId,
 				attributeIdTarget:atr.id
-			},true).then(
+			},true,true).then(
 				res => {
 					const ia = this.getIndexAttributeIdByField(this.fieldIdMapData[fieldId],false);
 					let v = JSON.parse(JSON.stringify(this.values[ia]));

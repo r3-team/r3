@@ -16,7 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func DocCreate_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func DocCreate(ctx context.Context, reqJson json.RawMessage, loginId int64) (any, error) {
 	var req struct {
 		DocId             uuid.UUID `json:"docId"`
 		RecordIdLoad      int64     `json:"recordIdLoad"`
