@@ -33,6 +33,19 @@ self.addEventListener('fetch', event => {
 	if(event.request.method === 'POST')
 		return;
 
+	const url = new URL(event.request.url);
+
+	// skip unsupported schemes such as 'chrome-extension://'
+	const schemeOk = url.protocol === 'http:' || url.protocol === 'https:';
+	if(!schemeOk)
+		return;
+
+	// skip service worker cache for non-static resources
+	// InstallEvent/addRoutes would be a better solution as it can skip the worker entirely for certain routes
+	//  at the moment (2026-02-04) only Chromium v123+ supports it so we cannot use it
+	if(url.pathname.includes('/doc/download/') || url.pathname.includes('/csv/download/'))
+		return;
+
 	// respond with cached resource or fetch it first
 	event.respondWith(
 		caches.open(appCacheName).then(cache => {
