@@ -1,6 +1,7 @@
 import MyAdminLoginMeta        from './adminLoginMeta.js';
 import MyAdminLoginRolesAssign from './adminLoginRolesAssign.js';
 import MyInputDateWrap         from '../inputDateWrap.js';
+import {dialogDeleteAsk}       from '../shared/dialog.js';
 import {deepIsEqual}           from '../shared/generic.js';
 import {getUnixNowDate}        from '../shared/time.js';
 
@@ -49,7 +50,7 @@ export default {
 				<div class="area">
 					<my-button image="delete.png"
 						v-if="!isNew"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -273,6 +274,7 @@ export default {
 	methods:{
 		// external
 		deepIsEqual,
+		dialogDeleteAsk,
 		getUnixNowDate,
 		
 		// actions
@@ -301,20 +303,6 @@ export default {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('oauthClient','del',this.id,true).then(
 				this.reloadAndClose,

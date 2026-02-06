@@ -2,11 +2,13 @@ import MyAdminLoginMeta from './adminLoginMeta.js';
 import MyForm           from '../form.js';
 import MyInputSelect    from '../inputSelect.js';
 import {getLoginIcon}   from '../shared/admin.js';
-import {dialogCloseAsk} from '../shared/dialog.js';
 import {deepIsEqual}    from '../shared/generic.js';
 import srcBase64Icon    from '../shared/image.js';
 import {getCaption}     from '../shared/language.js';
-export {MyAdminLogin as default};
+import {
+	dialogCloseAsk,
+	dialogDeleteAsk
+} from '../shared/dialog.js';
 
 const MyAdminLoginRole = {
 	name:'my-admin-login-role',
@@ -35,7 +37,7 @@ const MyAdminLoginRole = {
 	}
 };
 
-const MyAdminLogin = {
+export default {
 	name:'my-admin-login',
 	components:{
 		MyAdminLoginMeta,
@@ -106,7 +108,7 @@ const MyAdminLogin = {
 					/>
 					<my-button image="delete.png"
 						v-if="!isNew"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:cancel="true"
 						:caption="capGen.button.delete"
 					/>
@@ -451,6 +453,7 @@ const MyAdminLogin = {
 		// externals
 		deepIsEqual,
 		dialogCloseAsk,
+		dialogDeleteAsk,
 		getCaption,
 		getLoginIcon,
 		srcBase64Icon,
@@ -563,20 +566,6 @@ const MyAdminLogin = {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('login','del',{id:this.loginId},true).then(
 				() => {

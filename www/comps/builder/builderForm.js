@@ -8,6 +8,7 @@ import MyBuilderFormStates    from './builderFormStates.js';
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
 import {getColumnIcon}        from '../shared/column.js';
+import {dialogDeleteAsk}      from '../shared/dialog.js';
 import {getJoinsIndexMap}     from '../shared/query.js';
 import {routeParseParams}     from '../shared/router.js';
 import {
@@ -141,7 +142,7 @@ export default {
 							:caption="capGen.id"
 						/>
 						<my-button image="delete.png"
-							@trigger="delAsk"
+							@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 							:active="!readonly"
 							:cancel="true"
 							:caption="capGen.button.delete"
@@ -709,6 +710,7 @@ export default {
 		// externals
 		copyValueDialog,
 		deepIsEqual,
+		dialogDeleteAsk,
 		getColumnIcon,
 		getDataFields,
 		getDependentRelations,
@@ -936,20 +938,6 @@ export default {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('form','del',this.form.id,true).then(
 				() => {

@@ -2,8 +2,8 @@ import MyBuilderCaption      from './builderCaption.js';
 import MyArticles            from '../articles.js';
 import {getDependentModules} from '../shared/builder.js';
 import {getTemplateArticle}  from '../shared/builderTemplate.js';
+import {dialogDeleteAsk}     from '../shared/dialog.js';
 import {copyValueDialog}     from '../shared/generic.js';
-export {MyBuilderArticles as default};
 
 const MyBuilderArticlesItem = {
 	name:'my-builder-articles-item',
@@ -20,7 +20,7 @@ const MyBuilderArticlesItem = {
 					/>
 					<my-button image="delete.png"
 						v-if="!isNew"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:active="!readonly"
 						:cancel="true"
 						:captionTitle="capGen.button.delete"
@@ -126,6 +126,7 @@ const MyBuilderArticlesItem = {
 	methods:{
 		// externals
 		copyValueDialog,
+		dialogDeleteAsk,
 		
 		// actions
 		close() {
@@ -151,20 +152,6 @@ const MyBuilderArticlesItem = {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('article','del',this.article.id,true).then(
 				() => this.$root.schemaReload(this.module.id),
@@ -193,7 +180,7 @@ const MyBuilderArticlesItem = {
 	}
 };
 
-const MyBuilderArticles = {
+export default {
 	name:'my-builder-articles',
 	components:{
 		MyArticles,

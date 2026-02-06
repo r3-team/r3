@@ -1,7 +1,7 @@
-import {getUnixFormat} from '../shared/time.js';
-export {MyAdminLicense as default};
+import {dialogDeleteAsk} from '../shared/dialog.js';
+import {getUnixFormat}   from '../shared/time.js';
 
-let MyAdminLicense = {
+export default {
 	name:'my-admin-license',
 	template:`<div class="admin-license contentBox grow">
 		
@@ -64,7 +64,7 @@ let MyAdminLicense = {
 					<img src="images/logo_license.webp" />
 					<div class="actions">
 						<my-button image="cancel.png"
-							@trigger="delAsk"
+							@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 							:cancel="true"
 						/>
 					</div>
@@ -127,6 +127,7 @@ let MyAdminLicense = {
 	},
 	methods:{
 		// externals
+		dialogDeleteAsk,
 		getUnixFormat,
 		
 		// actions
@@ -135,20 +136,6 @@ let MyAdminLicense = {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('license','del',{},true).then(
 				res => {}, this.$root.genericError

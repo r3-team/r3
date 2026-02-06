@@ -1,6 +1,7 @@
 import MyBuilderCaption  from './builderCaption.js';
 import MyBuilderQuery    from './builderQuery.js';
 import MyCodeEditor      from '../codeEditor.js';
+import {dialogDeleteAsk} from '../shared/dialog.js';
 import {getFieldMap}     from '../shared/form.js';
 import {copyValueDialog} from '../shared/generic.js';
 import {
@@ -19,9 +20,8 @@ import {
 	getFieldIcon,
 	getFieldTitle
 } from '../shared/field.js';
-export {MyBuilderJsFunction as default};
 
-const MyBuilderJsFunction = {
+export default {
 	name:'my-builder-js-function',
 	components:{
 		MyBuilderCaption,
@@ -74,7 +74,7 @@ const MyBuilderJsFunction = {
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -817,6 +817,7 @@ const MyBuilderJsFunction = {
 	methods:{
 		// externals
 		copyValueDialog,
+		dialogDeleteAsk,
 		getAttributeIcon,
 		getDependentModules,
 		getFieldIcon,
@@ -1143,20 +1144,6 @@ const MyBuilderJsFunction = {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('jsFunction','del',this.jsFunction.id,true).then(
 				() => {

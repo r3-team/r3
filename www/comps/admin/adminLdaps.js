@@ -1,9 +1,9 @@
 import MyAdminLoginMeta        from './adminLoginMeta.js';
 import MyAdminLoginRolesAssign from './adminLoginRolesAssign.js';
+import {dialogDeleteAsk}       from '../shared/dialog.js';
 import {deepIsEqual}           from '../shared/generic.js';
-export {MyAdminLdaps as default};
 
-let MyAdminLdaps = {
+export default {
 	name:'my-admin-ldaps',
 	components:{
 		MyAdminLoginMeta,
@@ -76,7 +76,7 @@ let MyAdminLdaps = {
 					/>
 					<my-button image="delete.png"
 						v-if="!isNew"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:cancel="true"
 						:caption="capGen.button.delete"
 					/>
@@ -231,6 +231,7 @@ let MyAdminLdaps = {
 	methods:{
 		// externals
 		deepIsEqual,
+		dialogDeleteAsk,
 		
 		// actions
 		close() {
@@ -318,20 +319,6 @@ let MyAdminLdaps = {
 				() => {},
 				this.$root.genericError
 			);
-		},
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		del() {
 			ws.send('ldap','del',{id:this.idEdit},true).then(

@@ -1,4 +1,5 @@
 import {getDependentModules} from '../shared/builder.js';
+import {dialogDeleteAsk}     from '../shared/dialog.js';
 import {copyValueDialog}     from '../shared/generic.js';
 import {
 	isAttributeFiles,
@@ -8,7 +9,6 @@ import {
 	getTemplatePreset,
 	getTemplatePresetValue
 } from '../shared/builderTemplate.js';
-export {MyBuilderPreset as default};
 
 const MyBuilderPresetValue = {
 	name:'my-builder-preset-value',
@@ -89,7 +89,7 @@ const MyBuilderPresetValue = {
 	}
 };
 
-const MyBuilderPreset = {
+export default {
 	name:'my-builder-preset',
 	components:{ MyBuilderPresetValue },
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
@@ -127,7 +127,7 @@ const MyBuilderPreset = {
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:active="!isNew && !readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -234,6 +234,7 @@ const MyBuilderPreset = {
 	methods:{
 		// externals
 		copyValueDialog,
+		dialogDeleteAsk,
 		getDependentModules,
 		getTemplatePreset,
 		getTemplatePresetValue,
@@ -330,20 +331,6 @@ const MyBuilderPreset = {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('preset','del',this.id,true).then(
 				this.closeReload,

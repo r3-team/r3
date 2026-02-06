@@ -2,9 +2,8 @@ import {
 	getUnixFormat,
 	getUnixFromDate
 } from '../shared/time.js';
-export {MyAdminCluster as default};
 
-let MyAdminClusterNode = {
+const MyAdminClusterNode = {
 	name:'my-admin-cluster-node',
 	template:`<div class="admin-cluster-node shade">
 		<img class="server" src="images/server.png"
@@ -88,22 +87,22 @@ let MyAdminClusterNode = {
 		statMemory:  { type:Number,  required:true }
 	},
 	computed:{
-		available:(s) => s.running && !s.missing,
-		displayTitle:(s) => {
+		displayTitle:s => {
 			if(!s.running) return s.capApp.title.offline;
 			if(!s.missing) return s.capApp.title.connected;
 			return s.capApp.title.missing;
 		},
-		missing:(s) => {
-			return s.dateCheckIn + parseInt(s.config.clusterNodeMissingAfter) < s.getUnixFromDate(new Date());
-		},
+
+		// simple
+		available:s => s.running && !s.missing,
+		missing:  s => s.dateCheckIn + parseInt(s.config.clusterNodeMissingAfter) < s.getUnixFromDate(new Date()),
 		
 		// stores
-		capApp:      (s) => s.$store.getters.captions.admin.cluster,
-		capGen:      (s) => s.$store.getters.captions.generic,
-		config:      (s) => s.$store.getters.config,
-		licenseValid:(s) => s.$store.getters.licenseValid,
-		settings:    (s) => s.$store.getters.settings
+		capApp:      s => s.$store.getters.captions.admin.cluster,
+		capGen:      s => s.$store.getters.captions.generic,
+		config:      s => s.$store.getters.config,
+		licenseValid:s => s.$store.getters.licenseValid,
+		settings:    s => s.$store.getters.settings
 	},
 	data() {
 		return {
@@ -152,7 +151,7 @@ let MyAdminClusterNode = {
 	}
 };
 
-let MyAdminCluster = {
+export default {
 	name:'my-admin-cluster',
 	components:{ MyAdminClusterNode },
 	template:`<div class="admin-cluster contentBox grow">
@@ -247,13 +246,13 @@ let MyAdminCluster = {
 		},
 		
 		// simple
-		hasChangesConfig:(s) => s.config.clusterNodeMissingAfter !== s.configInput.clusterNodeMissingAfter,
+		hasChangesConfig:s => s.config.clusterNodeMissingAfter !== s.configInput.clusterNodeMissingAfter,
 		
 		// stores
-		capApp:      (s) => s.$store.getters.captions.admin.cluster,
-		capGen:      (s) => s.$store.getters.captions.generic,
-		config:      (s) => s.$store.getters.config,
-		licenseValid:(s) => s.$store.getters.licenseValid
+		capApp:      s => s.$store.getters.captions.admin.cluster,
+		capGen:      s => s.$store.getters.captions.generic,
+		config:      s => s.$store.getters.config,
+		licenseValid:s => s.$store.getters.licenseValid
 	},
 	data() {
 		return {

@@ -1,7 +1,9 @@
-import {dialogCloseAsk} from '../shared/dialog.js';
-export {MyAdminMailAccount as default};
+import {
+	dialogCloseAsk,
+	dialogDeleteAsk
+} from '../shared/dialog.js';
 
-let MyAdminMailAccount = {
+export default {
 	name:'my-admin-mail-account',
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
 		
@@ -40,7 +42,7 @@ let MyAdminMailAccount = {
 				<div class="area">
 					<my-button image="delete.png"
 						v-if="!isNew"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:cancel="true"
 						:caption="capGen.button.delete"
 					/>
@@ -219,6 +221,7 @@ let MyAdminMailAccount = {
 	methods:{
 		// externals
 		dialogCloseAsk,
+		dialogDeleteAsk,
 
 		handleHotkeys(e) {
 			if(e.ctrlKey && e.key === 's') {
@@ -252,22 +255,6 @@ let MyAdminMailAccount = {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png',
-					keyEnter:true
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png',
-					keyEscape:true
-				}]
-			});
-		},
 		del() {
 			ws.send('mailAccount','del',{id:this.id},true).then(
 				this.reloadAndClose,

@@ -1,7 +1,7 @@
 import {getTemplatePgIndex} from '../shared/builderTemplate.js';
-export {MyBuilderPgIndex as default};
+import {dialogDeleteAsk}    from '../shared/dialog.js';
 
-const MyBuilderPgIndex = {
+export default {
 	name:'my-builder-pg-index',
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-pg-index float" v-if="values !== null">
@@ -32,7 +32,7 @@ const MyBuilderPgIndex = {
 				</div>
 				<div class="area">
 					<my-button image="delete.png"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:active="!isNew && !isSystem && !readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -155,6 +155,7 @@ const MyBuilderPgIndex = {
 	},
 	methods:{
 		// externals
+		dialogDeleteAsk,
 		getTemplatePgIndex,
 
 		// display
@@ -193,20 +194,6 @@ const MyBuilderPgIndex = {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('pgIndex','del',this.pgIndexId,true).then(
 				() => {

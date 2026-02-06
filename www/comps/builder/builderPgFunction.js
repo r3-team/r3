@@ -2,6 +2,7 @@ import MyBuilderCaption                from './builderCaption.js';
 import MyBuilderPgTriggers             from './builderPgTriggers.js';
 import MyCodeEditor                    from '../codeEditor.js';
 import {getTemplatePgFunctionSchedule} from '../shared/builderTemplate.js';
+import {dialogDeleteAsk}               from '../shared/dialog.js';
 import {copyValueDialog}               from '../shared/generic.js';
 import {
 	getAttributeIcon,
@@ -12,7 +13,6 @@ import {
 	getFunctionHelp,
 	getValidDbCharsForRx
 } from '../shared/builder.js';
-export {MyBuilderPgFunction as default};
 
 const MyBuilderPgFunctionItemSchedule = {
 	name:'my-builder-pg-function-item-schedule',
@@ -120,7 +120,7 @@ const MyBuilderPgFunctionItemSchedule = {
 	}
 };
 
-const MyBuilderPgFunction = {
+export default {
 	name:'my-builder-pg-function',
 	components:{
 		MyBuilderCaption,
@@ -174,7 +174,7 @@ const MyBuilderPgFunction = {
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -738,6 +738,7 @@ const MyBuilderPgFunction = {
 	methods:{
 		// externals
 		copyValueDialog,
+		dialogDeleteAsk,
 		getAttributeIcon,
 		getDependentModules,
 		getFunctionHelp,
@@ -999,20 +1000,6 @@ const MyBuilderPgFunction = {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('pgFunction','del',this.pgFunction.id,true).then(
 				() => {

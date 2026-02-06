@@ -11,7 +11,6 @@ import {
 	getTemplateMenu,
 	getTemplateMenuTab
 } from '../shared/builderTemplate.js';
-export {MyBuilderMenu as default};
 
 const MyBuilderMenuItems = {
 	name:'my-builder-menu-items',
@@ -266,7 +265,7 @@ const MyBuilderMenuTabOptions = {
 	}
 };
 
-const MyBuilderMenu = {
+export default {
 	name:'my-builder-menu',
 	components:{
 		MyBuilderMenuItems,

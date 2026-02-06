@@ -4,6 +4,7 @@ import MyBuilderIconInput     from './builderIconInput.js';
 import MyBuilderOpenForm      from './builderOpenForm.js';
 import MyBuilderQuery         from './builderQuery.js';
 import {getTemplateQuery}     from '../shared/builderTemplate.js';
+import {dialogDeleteAsk}      from '../shared/dialog.js';
 import {
 	getItemTitleColumn,
 	getSqlPreview
@@ -67,7 +68,7 @@ export default {
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -297,6 +298,7 @@ export default {
 		// externals
 		copyValueDialog,
 		deepIsEqual,
+		dialogDeleteAsk,
 		getIsContentInAnyFilter,
 		getItemTitleColumn,
 		getJoinsIndexMap,
@@ -330,20 +332,6 @@ export default {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('searchBar','del',this.searchBar.id,true).then(
 				() => {

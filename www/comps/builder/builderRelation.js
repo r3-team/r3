@@ -4,6 +4,7 @@ import MyBuilderPgIndex      from './builderPgIndex.js';
 import MyBuilderPgTriggers   from './builderPgTriggers.js';
 import MyBuilderPresets      from './builderPresets.js';
 import MyInputOffset         from '../inputOffset.js';
+import {dialogDeleteAsk}     from '../shared/dialog.js';
 import {copyValueDialog}     from '../shared/generic.js';
 import {srcBase64}           from '../shared/image.js';
 import {
@@ -187,7 +188,7 @@ export default {
 							:caption="capGen.id"
 						/>
 						<my-button image="delete.png"
-							@trigger="delAsk"
+							@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 							:active="!readonly"
 							:cancel="true"
 							:caption="capGen.button.delete"
@@ -676,6 +677,7 @@ export default {
 	methods:{
 		// externals
 		copyValueDialog,
+		dialogDeleteAsk,
 		getAttributeIcon,
 		getDependentAttributes,
 		isAttributeFiles,
@@ -746,20 +748,6 @@ export default {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('relation','del',this.relation.id,true).then(
 				() => {

@@ -1,10 +1,10 @@
 import MyBuilderCaption         from './builderCaption.js';
 import MyInputHotkey            from '../inputHotkey.js';
 import {getTemplateClientEvent} from '../shared/builderTemplate.js';
+import {dialogDeleteAsk}        from '../shared/dialog.js';
 import {copyValueDialog}        from '../shared/generic.js';
-export {MyBuilderClientEvent as default};
 
-const MyBuilderClientEvent = {
+export default {
 	name:'my-builder-client-event',
 	components:{ MyBuilderCaption, MyInputHotkey },
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
@@ -41,7 +41,7 @@ const MyBuilderClientEvent = {
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:active="!isNew && !readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -216,6 +216,7 @@ const MyBuilderClientEvent = {
 	methods:{
 		// externals
 		copyValueDialog,
+		dialogDeleteAsk,
 		getTemplateClientEvent,
 		
 		// actions
@@ -243,20 +244,6 @@ const MyBuilderClientEvent = {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('clientEvent','del',this.id,true).then(
 				this.closeReload,

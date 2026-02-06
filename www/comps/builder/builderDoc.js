@@ -7,6 +7,7 @@ import MyBuilderDocStates        from './builderDocStates.js';
 import MyInputDecimal            from '../inputDecimal.js';
 import {isAttributeRelationship} from '../shared/attribute.js';
 import {getUuidV4}               from '../shared/crypto.js';
+import {dialogDeleteAsk}         from '../shared/dialog.js';
 import {deepIsEqual}             from '../shared/generic.js';
 import {getJoinsIndexMap}        from '../shared/query.js';
 import {
@@ -83,7 +84,7 @@ export default {
 				</div>
 				<div class="area nowrap">
 					<my-button image="delete.png"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -374,6 +375,7 @@ export default {
 	methods:{
 		// externals
 		deepIsEqual,
+		dialogDeleteAsk,
 		getDocEntityMapRef,
 		getDocFieldIcon,
 		getDocFieldTitle,
@@ -429,20 +431,6 @@ export default {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('doc','del',this.doc.id,true).then(
 				() => {

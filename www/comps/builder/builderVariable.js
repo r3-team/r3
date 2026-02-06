@@ -1,5 +1,6 @@
 import MyCodeEditor       from '../codeEditor.js';
 import MyBuilderFormInput from './builderFormInput.js';
+import {dialogDeleteAsk}  from '../shared/dialog.js';
 import {copyValueDialog}  from '../shared/generic.js';
 import {variableValueGet} from '../shared/variable.js';
 import {
@@ -7,9 +8,8 @@ import {
 	getAttributeContentsByUse,
 	getAttributeIcon
 } from '../shared/attribute.js';
-export {MyBuilderVariable as default};
 
-let MyBuilderVariable = {
+export default {
 	name:'my-builder-variable',
 	components:{
 		MyBuilderFormInput,
@@ -48,7 +48,7 @@ let MyBuilderVariable = {
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -214,6 +214,7 @@ let MyBuilderVariable = {
 	methods:{
 		// external
 		copyValueDialog,
+		dialogDeleteAsk,
 		getAttributeContentUse,
 		getAttributeContentsByUse,
 		getAttributeIcon,
@@ -236,20 +237,6 @@ let MyBuilderVariable = {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('variable','del',this.variableId,true).then(
 				() => {

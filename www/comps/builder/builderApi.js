@@ -1,6 +1,7 @@
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderColumnOptions from './builderColumnOptions.js';
 import {getTemplateQuery}     from '../shared/builderTemplate.js';
+import {dialogDeleteAsk}      from '../shared/dialog.js';
 import {
 	isAttributeBoolean,
 	isAttributeDecimal,
@@ -378,7 +379,7 @@ export default {
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -663,6 +664,7 @@ export default {
 		// externals
 		copyValueDialog,
 		deepIsEqual,
+		dialogDeleteAsk,
 		getTemplateQuery,
 		
 		// actions
@@ -700,20 +702,6 @@ export default {
 				},
 				this.$root.genericError
 			);
-		},
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		del() {
 			ws.send('api','del',{id:this.api.id},true).then(

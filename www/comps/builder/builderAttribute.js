@@ -3,6 +3,7 @@ import MyBuilderIconInput     from './builderIconInput.js';
 import {getFieldMap}          from '../shared/form.js';
 import {copyValueDialog}      from '../shared/generic.js';
 import {getTemplateAttribute} from '../shared/builderTemplate.js';
+import {dialogDeleteAsk}      from '../shared/dialog.js';
 import {
 	getDependentModules,
 	getItemTitle
@@ -22,9 +23,8 @@ import {
 	isAttributeString,
 	isAttributeUuid
 } from '../shared/attribute.js';
-export {MyBuilderAttribute as default};
 
-const MyBuilderAttribute = {
+export default {
 	name:'my-builder-attribute',
 	components:{
 		MyBuilderCaption,
@@ -518,6 +518,7 @@ const MyBuilderAttribute = {
 	methods:{
 		// external
 		copyValueDialog,
+		dialogDeleteAsk,
 		getAttributeContentUse,
 		getAttributeIcon,
 		getDependentModules,
@@ -601,20 +602,6 @@ const MyBuilderAttribute = {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		delCheck() {
 			ws.send('attribute','delCheck',this.attributeId,true).then(
 				res => {
@@ -627,7 +614,7 @@ const MyBuilderAttribute = {
 						res.payload.fields.length         === 0;
 					
 					if(noDependencies)
-						return this.delAsk();
+						return this.dialogDeleteAsk(this.del,this.capApp.dialog.delete);
 					
 					// display open dependencies
 					let dependencies = [];

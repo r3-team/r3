@@ -1,6 +1,7 @@
 import MyBuilderCaption       from './builderCaption.js';
 import MyBuilderMenuTabSelect from './builderMenuTabSelect.js';
 import {getDependentModules}  from '../shared/builder.js';
+import {dialogDeleteAsk}      from '../shared/dialog.js';
 import {copyValueDialog}      from '../shared/generic.js';
 
 const MyBuilderRoleAccessMenu = {
@@ -280,7 +281,7 @@ export default {
 					:caption="capGen.id"
 				/>
 				<my-button image="delete.png"
-					@trigger="delAsk"
+					@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 					:active="!readonly && !isEveryone"
 					:cancel="true"
 					:caption="capGen.button.delete"
@@ -704,6 +705,7 @@ export default {
 	methods:{
 		// externals
 		copyValueDialog,
+		dialogDeleteAsk,
 		getDependentModules,
 		
 		// actions
@@ -776,20 +778,6 @@ export default {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('role','del',this.role.id,true).then(
 				() => {
