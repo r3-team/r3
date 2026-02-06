@@ -159,13 +159,13 @@ export function updateCollections(collectionId) {
 		let requestIds        = []; // collection ID, in order, for each data GET request
 		
 		const addCollection = function(collectionId) {
-			if(typeof access[collectionId] === 'undefined' || access[collectionId] < 1)
+			if(access[collectionId] === undefined || access[collectionId] < 1)
 				return;
 			
 			const c = collectionIdMap[collectionId];
 			const q = c.query;
 			
-			if(q.relationId === null)
+			if(q === null)
 				return;
 			
 			const joinIndexMap = getJoinsIndexMap(q.joins);

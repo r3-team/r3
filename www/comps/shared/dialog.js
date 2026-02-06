@@ -19,3 +19,19 @@ export function dialogCloseAsk(fncClose,hasChanges) {
         }]
     });
 };
+
+export function dialogDeleteAsk(fncDelete,msg) {
+	this.$store.commit('dialog',{
+		captionBody:msg,
+		buttons:[{
+			cancel:true,
+			caption:MyStore.getters.captions.generic.button.delete,
+			exec:fncDelete,
+			image:'delete.png'
+		},{
+			caption:MyStore.getters.captions.generic.button.cancel,
+            keyEscape:true,
+			image:'cancel.png'
+		}]
+	});
+};

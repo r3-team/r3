@@ -847,7 +847,7 @@ export default {
 						continue;
 					}
 					
-					if(f.query !== undefined) {
+					if(f.query !== undefined && f.query !== null) {
 						let choices           = JSON.parse(JSON.stringify(f.query.choices));
 						const choiceId        = s.$root.getOrFallback(s.fieldIdMapOptions[f.id],'choiceId',choices.length === 0 ? null : choices[0].id);
 						const columnIdsByUser = s.$root.getOrFallback(s.fieldIdMapOptions[f.id],'columnIdsByUser',[]);

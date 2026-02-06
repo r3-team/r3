@@ -1,17 +1,23 @@
-import MyBuilderQuery                  from './builderQuery.js';
-import MyBuilderCollectionInput        from './builderCollectionInput.js';
-import MyBuilderColumnOptions          from './builderColumnOptions.js';
-import MyBuilderIconInput              from './builderIconInput.js';
-import {getItemTitleColumn}            from '../shared/builder.js';
-import {getTemplateCollectionConsumer} from '../shared/builderTemplate.js';
-import {copyValueDialog}               from '../shared/generic.js';
+import MyBuilderQuery           from './builderQuery.js';
+import MyBuilderCollectionInput from './builderCollectionInput.js';
+import MyBuilderColumnOptions   from './builderColumnOptions.js';
+import MyBuilderIconInput       from './builderIconInput.js';
+import {getItemTitleColumn}     from '../shared/builder.js';
+import {dialogDeleteAsk}        from '../shared/dialog.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
 } from './builderColumns.js';
-export {MyBuilderCollection as default};
+import {
+	getTemplateCollectionConsumer,
+	getTemplateQuery
+} from '../shared/builderTemplate.js';
+import {
+	copyValueDialog,
+	deepIsEqual
+} from '../shared/generic.js';
 
-const MyBuilderCollection = {
+export default {
 	name:'my-builder-collection',
 	components:{
 		MyBuilderColumnOptions,
@@ -21,13 +27,13 @@ const MyBuilderCollection = {
 		MyBuilderIconInput,
 		MyBuilderQuery
 	},
-	template:`<div class="builder-collection" v-if="collection">
+	template:`<div class="builder-collection" v-if="collection !== false">
 		<div class="contentBox grow">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/tray.png" />
 					<h1 class="title">
-						{{ capApp.titleOne.replace('{NAME}',name) }}
+						{{ capApp.titleOne.replace('{NAME}',collection.name) }}
 					</h1>
 				</div>
 				<div class="area">
@@ -45,7 +51,7 @@ const MyBuilderCollection = {
 						:caption="capGen.button.save"
 					/>
 					<my-button image="refresh.png"
-						@trigger="reset"
+						@trigger="reset(true)"
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
@@ -57,11 +63,11 @@ const MyBuilderCollection = {
 				</div>
 				<div class="area nowrap">
 					<my-button image="visible1.png"
-						@trigger="copyValueDialog(name,id,id)"
+						@trigger="copyValueDialog(collection.name,id,id)"
 						:caption="capGen.id"
 					/>
 					<my-button image="delete.png"
-						@trigger="delAsk"
+						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -77,7 +83,7 @@ const MyBuilderCollection = {
 					<table>
 						<thead>
 							<tr>
-								<th v-for="c in collection.columns">
+								<th v-for="c in collectionSchema.columns">
 									{{ getItemTitleColumn(c,true) }}
 								</th>
 							</tr>
@@ -97,11 +103,11 @@ const MyBuilderCollection = {
 					<div class="builder-collection-columns-active">
 						<h2>{{ capGen.columnsActive }}</h2>
 						<my-builder-columns groupName="columns"
-							@columns-set="columns = $event"
+							@columns-set="collection.columns = $event"
 							@column-id-show="toggleColumnOptions($event)"
-							:builderLanguage="builderLanguage"
+							:builderLanguage
 							:columnIdShow="columnIdShow"
-							:columns="columns"
+							:columns="collection.columns"
 							:hasBatches="false"
 							:hasCaptions="true"
 							:hasStyling="false"
@@ -112,9 +118,9 @@ const MyBuilderCollection = {
 						<h2>{{ capGen.columnsAvailable }}</h2>
 						<div class="builder-collection-column-templates">
 							<my-builder-column-templates groupName="batches_columns"
-								@column-add="columns.push($event)"
+								@column-add="collection.columns.push($event)"
 								:allowRelationships="true"
-								:columns="columns"
+								:columns="collection.columns"
 								:joins="query.joins"
 							/>
 						</div>
@@ -140,13 +146,14 @@ const MyBuilderCollection = {
 			<!-- collection content -->
 			<div class="content grow" v-if="tabTarget === 'content'">
 				<my-builder-query
-					v-model="query"
 					@index-removed="removeIndex($event)"
+					@update:modelValue="collection.query = $event"
 					:allowChoices="false"
 					:allowLookups="false"
 					:allowOrders="true"
 					:builderLanguage="builderLanguage"
 					:filtersDisable="filtersDisable"
+					:modelValue="query"
 					:moduleId="module.id"
 				/>
 				
@@ -160,14 +167,14 @@ const MyBuilderCollection = {
 						v-model="columnShow.query"
 						:allowChoices="false"
 						:allowOrders="true"
-						:builderLanguage="builderLanguage"
+						:builderLanguage
 						:filtersDisable="filtersDisable"
 						:joinsParents="[query.joins]"
 						:moduleId="module.id"
 					/>
 					<my-builder-column-options
 						@set="(...args) => columnSet(args[0],args[1])"
-						:builderLanguage="builderLanguage"
+						:builderLanguage
 						:column="columnShow"
 						:hasCaptions="true"
 						:moduleId="module.id"
@@ -182,17 +189,17 @@ const MyBuilderCollection = {
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}</td>
-							<td><input v-model="name" :disabled="readonly" /></td>
+							<td><input v-model="collection.name" :disabled="readonly" /></td>
 						</tr>
 						<tr>
 							<td>{{ capGen.icon }}</td>
 							<td>
 								<my-builder-icon-input
-									@input="iconId = $event"
-									:iconIdSelected="iconId"
-									:module="module"
+									@input="collection.iconId = $event"
+									:iconIdSelected="collection.iconId"
+									:module
 									:title="capGen.icon"
-									:readonly="readonly"
+									:readonly
 								/>
 							</td>
 						</tr>
@@ -210,7 +217,7 @@ const MyBuilderCollection = {
 							</td>
 							<td>
 								<my-builder-collection-input
-									v-for="(c,i) in inHeader"
+									v-for="(c,i) in collection.inHeader"
 									@remove="collectionRemove(i)"
 									@update:consumer="collectionSet(i,$event)"
 									:allowFormOpen="true"
@@ -218,8 +225,8 @@ const MyBuilderCollection = {
 									:consumer="c"
 									:fixedCollection="true"
 									:flagsEnable="['noDisplayEmpty','showRowCount']"
-									:module="module"
-									:readonly="readonly"
+									:module
+									:readonly
 									:showOnMobile="true"
 								/>
 							</td>
@@ -243,12 +250,9 @@ const MyBuilderCollection = {
 	data() {
 		return {
 			// inputs
-			columns:[],
-			iconId:null,
-			inHeader:[],
-			name:'',
-			query:{},
-			
+			collection:false,  // collection being edited in this component
+			collectionCopy:{}, // copy of collection from schema when component last reset
+
 			// state
 			columnIdShow:null,
 			filtersDisable:[
@@ -262,9 +266,9 @@ const MyBuilderCollection = {
 		};
 	},
 	computed:{
-		collectionRows:(s) => {
+		collectionRows:s => {
 			const col = s.$store.getters.collectionIdMap[s.collection.id];
-			if(typeof col === 'undefined')
+			if(col === undefined)
 				return [];
 			
 			let out = [];
@@ -273,78 +277,76 @@ const MyBuilderCollection = {
 			}
 			return out;
 		},
-		columnShow:(s) => {
+		columnShow:s => {
 			if(s.columnIdShow === null) return false;
 			
-			for(let i = 0, j = s.columns.length; i < j; i++) {
-				if(s.columns[i].id === s.columnIdShow)
-					return s.columns[i];
+			for(let i = 0, j = s.collection.columns.length; i < j; i++) {
+				if(s.collection.columns[i].id === s.columnIdShow)
+					return s.collection.columns[i];
 			}
 			return false;
 		},
-		hasChanges:(s) => s.name          !== s.collection.name
-			|| s.iconId                   !== s.collection.iconId
-			|| JSON.stringify(s.query)    !== JSON.stringify(s.collection.query)
-			|| JSON.stringify(s.columns)  !== JSON.stringify(s.collection.columns)
-			|| JSON.stringify(s.inHeader) !== JSON.stringify(s.collection.inHeader),
 		
 		// simple
-		collection:(s) => typeof s.collectionIdMap[s.id] === 'undefined' ? false : s.collectionIdMap[s.id],
-		module:    (s) => s.moduleIdMap[s.collection.moduleId],
+		collectionSchema:s => s.collectionIdMap[s.id] === undefined ? false : s.collectionIdMap[s.id],
+		hasChanges:      s => !s.deepIsEqual(s.collection,s.collectionSchema),
+		module:          s => s.moduleIdMap[s.collection.moduleId],
+		query:           s => s.collection.query !== null ? s.collection.query : s.getTemplateQuery(),
 		
 		// stores
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
-		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
-		capApp:         (s) => s.$store.getters.captions.builder.collection,
-		capGen:         (s) => s.$store.getters.captions.generic
+		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		collectionIdMap:s => s.$store.getters['schema/collectionIdMap'],
+		capApp:         s => s.$store.getters.captions.builder.collection,
+		capGen:         s => s.$store.getters.captions.generic
 	},
 	watch:{
-		collection:{
-			handler() { this.reset(); },
+		collectionSchema:{
+			handler() { this.reset(false); },
 			immediate:true
 		}
 	},
 	methods:{
 		// externals
 		copyValueDialog,
+		deepIsEqual,
+		dialogDeleteAsk,
 		getItemTitleColumn,
 		getTemplateCollectionConsumer,
+		getTemplateQuery,
 		
 		// actions
 		collectionAdd() {
-			let v = JSON.parse(JSON.stringify(this.inHeader));
+			let v = JSON.parse(JSON.stringify(this.collection.inHeader));
 			let c = this.getTemplateCollectionConsumer();
 			c.collectionId = this.collection.id;
 			v.push(c);
-			this.inHeader = v;
+			this.collection.inHeader = v;
 		},
 		collectionRemove(i) {
-			this.inHeader.splice(i,1);
+			this.collection.inHeader.splice(i,1);
 		},
 		collectionSet(i,value) {
-			this.inHeader[i] = value;
+			this.collection.inHeader[i] = value;
 		},
 		columnSet(name,value) {
 			this.columnShow[name] = value;
 		},
 		removeIndex(index) {
-			for(let i = 0, j = this.columns.length; i < j; i++) {
-				if(this.columns[i].index === index) {
-					this.columns.splice(i,1);
+			for(let i = 0, j = this.collection.columns.length; i < j; i++) {
+				if(this.collection.columns[i].index === index) {
+					this.collection.columns.splice(i,1);
 					i--; j--;
 				}
 			}
 		},
-		reset() {
-			if(!this.collection) return;
-			
-			this.name     = this.collection.name;
-			this.iconId   = this.collection.iconId;
-			this.query    = JSON.parse(JSON.stringify(this.collection.query));
-			this.columns  = JSON.parse(JSON.stringify(this.collection.columns));
-			this.inHeader = JSON.parse(JSON.stringify(this.collection.inHeader));
-			this.columnIdShow = null;
+		reset(manuelReset) {
+			if(this.collectionSchema !== false && (manuelReset || !this.deepIsEqual(this.collectionCopy,this.collectionSchema))) {
+				this.collection     = JSON.parse(JSON.stringify(this.collectionSchema));
+				this.collectionCopy = JSON.parse(JSON.stringify(this.collectionSchema));
+
+				this.columnIdShow = null;
+			}
 		},
 		toggleColumnOptions(id) {
 			this.columnIdShow = this.columnIdShow === id ? null : id;
@@ -354,20 +356,6 @@ const MyBuilderCollection = {
 		},
 		
 		// backend calls
-		delAsk() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		del() {
 			ws.send('collection','del',this.collection.id,true).then(
 				() => {
@@ -379,15 +367,7 @@ const MyBuilderCollection = {
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('collection','set',{
-					id:this.collection.id,
-					moduleId:this.collection.moduleId,
-					iconId:this.iconId,
-					name:this.name,
-					columns:this.columns,
-					query:this.query,
-					inHeader:this.inHeader
-				}),
+				ws.prepare('collection','set',this.collection),
 				ws.prepare('schema','check',{moduleId:this.module.id})
 			],true).then(
 				() => this.$root.schemaReload(this.module.id),
