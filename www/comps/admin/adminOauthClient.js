@@ -3,9 +3,8 @@ import MyAdminLoginRolesAssign from './adminLoginRolesAssign.js';
 import MyInputDateWrap         from '../inputDateWrap.js';
 import {deepIsEqual}           from '../shared/generic.js';
 import {getUnixNowDate}        from '../shared/time.js';
-export {MyAdminOauthClient as default};
 
-let MyAdminOauthClient = {
+export default {
 	name:'my-admin-oauth-client',
 	components:{
 		MyAdminLoginMeta,

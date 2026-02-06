@@ -56,11 +56,11 @@
 	
 	/**/
 	/* heights */
-	--row-height:38px;
-	--row-height-icon:27px;
 	--app-header-height:65px;
 	--field-header-height:46px;
 	--menu-line-height:36px;
+	--row-height-base:22px;
+	--row-padding-ver:2px;
 
 	/**/
 	/* font families */
@@ -301,8 +301,9 @@ hr{
 	background-color:var(--color-bg);
 
 	/* app wide variable overwrites */
-	--row-height:calc(22px + var(--spacing));
-	--row-height-icon:calc(11px + var(--spacing));
+	--row-height:calc(var(--row-height-base) + var(--spacing));
+	--row-height-content:calc(var(--row-height) - (var(--row-padding-ver)*2));
+	--row-height-icon:calc(var(--row-height-content) - 10px);
 }
 #app.login-visible{
 	height:auto;

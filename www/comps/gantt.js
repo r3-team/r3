@@ -292,7 +292,7 @@ const MyGantt = {
 						:key="k"
 						:style="styleLabel(g)"
 					>
-						<div class="columnBatch ganttGroup" :class="{ vertical:g.vertical }">
+						<div class="columnBatch" :class="{ vertical:g.vertical }">
 							<my-value-rich class="context-calendar-gantt"
 								v-for="c in g.columns.filter(v => v.value !== null)"
 								:attribute-id="columns[c.index].attributeId"

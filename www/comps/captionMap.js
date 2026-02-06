@@ -6,7 +6,6 @@ import srcBase64Icon       from './shared/image.js';
 import {getCaptionMapName} from './shared/language.js';
 import {MyModuleSelect}    from './input.js';
 import MyBuilderCaption    from './builder/builderCaption.js';
-export {MyCaptionMap as default};
 
 const MyCaptionMapTransfer = {
 	name:'my-caption-map-transfer',
@@ -71,9 +70,9 @@ const MyCaptionMapTransfer = {
 	},
 	computed:{
 		// stores
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:     (s) => s.$store.getters.captions.captionMap,
-		capGen:     (s) => s.$store.getters.captions.generic
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
+		capApp:     s => s.$store.getters.captions.captionMap,
+		capGen:     s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
@@ -200,18 +199,17 @@ const MyCaptionMapNewLanguage = {
 		};
 	},
 	computed:{
-		canSave:(s) =>
-			s.input !== '' &&
-			s.input.length === 5 &&
-			!s.languagesCustom.includes(s.input),
 		inputLine:{
 			get()  { return this.input; },
 			set(v) { this.input = v.toLowerCase().replace('-','_').replace(/[^a-z\_]/g,''); }
 		},
+
+		// simple
+		canSave:s => s.input !== '' && s.input.length === 5 && !s.languagesCustom.includes(s.input),
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.captionMap,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:s => s.$store.getters.captions.captionMap,
+		capGen:s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
@@ -264,9 +262,9 @@ const MyCaptionMapItemValue = {
 						<my-builder-caption
 							@update:modelValue="$emit('update',showRichtextContent,language,$event[language])"
 							:contentName="''"
-							:language="language"
+							:language
 							:modelValue="captionMap[showRichtextContent]"
-							:readonly="readonly"
+							:readonly
 							:richtext="true"
 						/>
 					</div>
@@ -319,11 +317,11 @@ const MyCaptionMapItem = {
 		@update="(...args) => $emit('update',args[0],args[1],args[2],args[3])"
 		:isCustom="isCustom"
 		:item="child"
-		:languages="languages"
+		:languages
 		:languagesCustom="languagesCustom"
 		:level="level + 1"
-		:levelMax="levelMax"
-		:readonly="readonly"
+		:levelMax
+		:readonly
 	/>`,
 	emits:['update'],
 	props:{
@@ -341,10 +339,10 @@ const MyCaptionMapItem = {
 		};
 	},
 	computed:{
-		actionCaption:(s) => s.level >= s.levelMax || s.item.children.length === 0 ? s.item.name : `${s.item.name} (${s.item.children.length})`,
-		actionImage:  (s) => s.level >= s.levelMax ? '' : s.showChildrenIds.includes(s.item.id) ? 'triangleDown.png' : 'triangleRight.png',
-		children:     (s) => typeof s.item.children !== 'undefined' ? s.item.children : [],
-		style:        (s) => `margin-left:${s.level * 20}px;`
+		actionCaption:s => s.level >= s.levelMax || s.item.children.length === 0 ? s.item.name : `${s.item.name} (${s.item.children.length})`,
+		actionImage:  s => s.level >= s.levelMax ? '' : s.showChildrenIds.includes(s.item.id) ? 'triangleDown.png' : 'triangleRight.png',
+		children:     s => s.item.children !== undefined ? s.item.children : [],
+		style:        s => `margin-left:${s.level * 20}px;`
 	},
 	methods:{
 		toggleDisplay(list,value) {
@@ -373,12 +371,12 @@ const MyCaptionMapItems = {
 		v-if="show"
 		v-for="item in items"
 		@update="(...args) => $emit('update',...args)"
-		:isCustom="isCustom"
-		:item="item"
-		:languages="languages"
-		:languagesCustom="languagesCustom"
-		:levelMax="levelMax"
-		:readonly="readonly"
+		:isCustom
+		:item
+		:languages
+		:languagesCustom
+		:levelMax
+		:readonly
 	/>`,
 	emits:['update'],
 	props:{
@@ -397,11 +395,11 @@ const MyCaptionMapItems = {
 		};
 	},
 	computed:{
-		label:(s) => s.items.length === 0 ? s.name : `${s.name} (${s.items.length})`
+		label:s => s.items.length === 0 ? s.name : `${s.name} (${s.items.length})`
 	}
 };
 
-const MyCaptionMap = {
+export default {
 	name:'my-caption-map',
 	components:{
 		MyCaptionMapItems,
@@ -708,8 +706,8 @@ const MyCaptionMap = {
 			hasChanges:false,
 			isReady:false,
 			moduleId:null,            // current module to show caption map for
-			showLanguageNew:false,
 			showLanguageCodes:[],
+			showLanguageNew:false,
 			showTransfer:false,
 			showTransferMode:'export'
 		};
@@ -721,7 +719,7 @@ const MyCaptionMap = {
 		}
 	},
 	computed:{
-		captionsApis:(s) => {
+		captionsApis:s => {
 			let apiIdMap = {};
 			for(const api of s.module.apis) {
 				let childCaptions = [];
@@ -739,32 +737,33 @@ const MyCaptionMap = {
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
-		captionsAttributesByRelations:(s) => {
-			let relIdMap = {};
+		captionsAttributesByRelations:s => {
+			let relIdMapChildren = {};
 			for(let atrId in s.captionMap.attributeIdMap) {
 				const atr   = s.attributeIdMap[atrId];
 				const relId = atr.relationId;
-				if(relIdMap[relId] === undefined)
-					relIdMap[relId] = [];
+				if(relIdMapChildren[relId] === undefined)
+					relIdMapChildren[relId] = [];
 				
-				relIdMap[relId].push(s.makeItem(atrId,atr.name,s.captionMap.attributeIdMap[atrId],[]));
+				relIdMapChildren[relId].push(s.makeItem(atrId,atr.name,s.captionMap.attributeIdMap[atrId],[]));
 			}
 			
 			// return sorted by relation and attribute names
 			let out = [];
-			for(let id in relIdMap) {
-				out.push(s.makeItem(id,s.relationIdMap[id].name,null,relIdMap[id]));
+			for(let id in relIdMapChildren) {
+				const children = relIdMapChildren[id].sort((a,b) => (a.name > b.name) ? 1 : -1);
+				out.push(s.makeItem(id,s.relationIdMap[id].name,null,children));
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
-		captionsClientEvents:(s) => {
+		captionsClientEvents:s => {
 			let out = [];
 			for(const ce of s.module.clientEvents) {
 				out.push(s.makeItem(ce.id,'-',s.captionMap.clientEventIdMap[ce.id],[]));
 			}
 			return out;
 		},
-		captionsCollections:(s) => {
+		captionsCollections:s => {
 			let collectionIdMap = {};
 			for(const collection of s.module.collections) {
 				let childCaptions = [];
@@ -782,7 +781,7 @@ const MyCaptionMap = {
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
-		captionsFieldsByForms:(s) => {
+		captionsFieldsByForms:s => {
 			let frmIdMapChildren = {};
 			for(const frm of s.module.forms) {
 				const fieldIdMap = s.getFieldMap(frm.fields);
@@ -828,32 +827,30 @@ const MyCaptionMap = {
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
-		captionsMenusByMenuTabs:(s) => {
-			let out          = [];
-			let menuTabIdMap = {};
-			for(const mt of s.module.menuTabs) {
-				menuTabIdMap[mt.id] = mt;
-			}
-
-			for(const id in s.captionMap.menuTabIdMap) {
-				let children = [];
-				if(menuTabIdMap[id] !== undefined) {
-					for(const m of menuTabIdMap[id].menus) {
-						children.push(s.makeItem(m.id,'-',s.captionMap.menuIdMap[m.id],[]));
-					}
+		captionsMenusByMenuTabs:s => {
+			const addMenus = menus => {
+				let out = [];
+				for(const m of menus) {
+					out.push(s.makeItem(m.id,'',s.captionMap.menuIdMap[m.id],addMenus(m.menus)));
 				}
-				out.push(s.makeItem(id,'-',s.captionMap.menuTabIdMap[id],children));
+				return out;
+			};
+
+			let out = [];
+			for(const mt of s.module.menuTabs) {
+				const map = s.captionMap.menuTabIdMap[mt.id] === undefined ? {} : s.captionMap.menuTabIdMap[mt.id];
+				out.push(s.makeItem(mt.id,'',map,addMenus(mt.menus)));
 			}
 			return out;
 		},
-		captionsQueryChoices:(s) => {
+		captionsQueryChoices:s => {
 			let out = [];
 			for(const id in s.captionMap.queryChoiceIdMap) {
 				out.push(s.makeItem(id,'-',s.captionMap.queryChoiceIdMap[id],[]));
 			}
 			return out;
 		},
-		captionsSearchBars:(s) => {
+		captionsSearchBars:s => {
 			let searchBarIdMap = {};
 			for(const bar of s.module.searchBars) {
 				let childCaptions = [];
@@ -873,36 +870,36 @@ const MyCaptionMap = {
 		},
 		
 		// simple
-		captionsArticles:   (s) => s.makeSortedItemList(s.captionMap.articleIdMap,s.articleIdMap),
-		captionsJsFunctions:(s) => s.makeSortedItemList(s.captionMap.jsFunctionIdMap,s.jsFunctionIdMap),
-		captionsLoginForms: (s) => s.makeSortedItemList(s.captionMap.loginFormIdMap,s.loginFormIdMap),
-		captionsPgFunctions:(s) => s.makeSortedItemList(s.captionMap.pgFunctionIdMap,s.pgFunctionIdMap),
-		captionsRoles:      (s) => s.makeSortedItemList(s.captionMap.roleIdMap,s.roleIdMap),
-		captionsWidgets:    (s) => s.makeSortedItemList(s.captionMap.widgetIdMap,s.widgetIdMap),
-		canSave:            (s) => !s.readonly && s.hasChanges,
-		canSwitchModules:   (s) => s.moduleIdForce === null && s.moduleId !== null,
-		languages:          (s) => s.moduleId === null ? [] : s.moduleIdMap[s.moduleId].languages,
-		languagesCustom:    (s) => s.moduleId === null ? [] : s.moduleIdMapMeta[s.moduleId].languagesCustom,
-		module:             (s) => s.moduleId === null ? false : s.moduleIdMap[s.moduleId],
+		captionsArticles:   s => s.makeItemListSorted(s.captionMap.articleIdMap,s.articleIdMap),
+		captionsJsFunctions:s => s.makeItemListSorted(s.captionMap.jsFunctionIdMap,s.jsFunctionIdMap),
+		captionsLoginForms: s => s.makeItemListSorted(s.captionMap.loginFormIdMap,s.loginFormIdMap),
+		captionsPgFunctions:s => s.makeItemListSorted(s.captionMap.pgFunctionIdMap,s.pgFunctionIdMap),
+		captionsRoles:      s => s.makeItemListSorted(s.captionMap.roleIdMap,s.roleIdMap),
+		captionsWidgets:    s => s.makeItemListSorted(s.captionMap.widgetIdMap,s.widgetIdMap),
+		canSave:            s => !s.readonly && s.hasChanges,
+		canSwitchModules:   s => s.moduleIdForce === null && s.moduleId !== null,
+		languages:          s => s.moduleId === null ? [] : s.moduleIdMap[s.moduleId].languages,
+		languagesCustom:    s => s.moduleId === null ? [] : s.moduleIdMapMeta[s.moduleId].languagesCustom,
+		module:             s => s.moduleId === null ? false : s.moduleIdMap[s.moduleId],
 		
 		// stores
-		modules:        (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		apiIdMap:       (s) => s.$store.getters['schema/apiIdMap'],
-		articleIdMap:   (s) => s.$store.getters['schema/articleIdMap'],
-		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
-		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
-		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
-		jsFunctionIdMap:(s) => s.$store.getters['schema/jsFunctionIdMap'],
-		loginFormIdMap: (s) => s.$store.getters['schema/loginFormIdMap'],
-		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
-		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
-		roleIdMap:      (s) => s.$store.getters['schema/roleIdMap'],
-		searchBarIdMap: (s) => s.$store.getters['schema/searchBarIdMap'],
-		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
-		capApp:         (s) => s.$store.getters.captions.captionMap,
-		capGen:         (s) => s.$store.getters.captions.generic,
-		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta
+		modules:        s => s.$store.getters['schema/modules'],
+		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
+		apiIdMap:       s => s.$store.getters['schema/apiIdMap'],
+		articleIdMap:   s => s.$store.getters['schema/articleIdMap'],
+		attributeIdMap: s => s.$store.getters['schema/attributeIdMap'],
+		collectionIdMap:s => s.$store.getters['schema/collectionIdMap'],
+		formIdMap:      s => s.$store.getters['schema/formIdMap'],
+		jsFunctionIdMap:s => s.$store.getters['schema/jsFunctionIdMap'],
+		loginFormIdMap: s => s.$store.getters['schema/loginFormIdMap'],
+		pgFunctionIdMap:s => s.$store.getters['schema/pgFunctionIdMap'],
+		relationIdMap:  s => s.$store.getters['schema/relationIdMap'],
+		roleIdMap:      s => s.$store.getters['schema/roleIdMap'],
+		searchBarIdMap: s => s.$store.getters['schema/searchBarIdMap'],
+		widgetIdMap:    s => s.$store.getters['schema/widgetIdMap'],
+		capApp:         s => s.$store.getters.captions.captionMap,
+		capGen:         s => s.$store.getters.captions.generic,
+		moduleIdMapMeta:s => s.$store.getters.moduleIdMapMeta
 	},
 	mounted() {
 		this.resetDefaults();
@@ -1010,12 +1007,12 @@ const MyCaptionMap = {
 		makeItem(id,name,capMap,children) {
 			return {
 				capMap:capMap !== undefined ? capMap : null,
-				children:children !== undefined ? children.sort((a,b) => (a.name > b.name) ? 1 : -1) : [],
+				children:children !== undefined ? children : [],
 				id:id,
 				name:name
 			};
 		},
-		makeSortedItemList(capMap,entityMap) {
+		makeItemListSorted(capMap,entityMap) {
 			let out = [];
 			for(const id in capMap) {
 				out.push(this.makeItem(id,entityMap[id].name,capMap[id],[]));

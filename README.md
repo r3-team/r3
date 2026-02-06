@@ -123,7 +123,7 @@ If you want to build REI3 itself, you can fork this repo or download the source 
 1. You can now start your own REI3 version. Make sure to clear all browser caches after creating/updating your own version.
 
 ## :page_with_curl: Copyright, license & trademark
-REI3<sup>©</sup> 2019-2025 Gabriel Victor Herbert
+REI3<sup>©</sup> 2019-2026 Gabriel Victor Herbert
 
 The REI3 source code is released under the [MIT license](https://opensource.org/license/mit).
 

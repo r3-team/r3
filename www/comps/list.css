@@ -118,7 +118,7 @@
 .list-table tfoot tr.aggregation td{
 	font-weight:bold;
 	border-top:2px solid var(--color-border);
-	padding:2px 8px;
+	padding:var(--row-padding-ver) 8px;
 }
 .list-table tfoot tr.aggregation td.alignEnd{
 	text-align:right;
@@ -130,7 +130,6 @@
 	font-family:var(--font-family-monospace);
 }
 .list-table th{
-	padding:0px;
 	margin-bottom:-1px;
 	background-color:var(--color-bg);
 	position:relative;
@@ -139,6 +138,7 @@
 .list-table th,
 .list-table td{
 	height:var(--row-height);
+	padding:var(--row-padding-ver) 0px;
 	box-sizing:border-box;
 }
 .list-table th .headerToggle{
@@ -167,7 +167,6 @@
 	margin:0px;
 }
 .list-table td{
-	padding:0px;
 	border-bottom:1px solid var(--color-border);
 	background-color:var(--color-bright);
 }
@@ -191,9 +190,10 @@
 	flex-flow:row nowrap;
 	align-items:center;
 	justify-content:space-between;
-	padding:0px 10px;
+	padding:var(--row-padding-ver) 10px;
 	gap:10px;
 	background-color:var(--color-bg);
+	box-sizing:border-box;
 }
 
 
@@ -297,11 +297,10 @@
 	overflow:hidden;
 	padding-right:var(--spacing-field-padding);
 }
-.list-input-rows tr{
-	height:var(--row-height);
-}
 .list-input-rows td{
-	padding:0px;
+	height:var(--row-height);
+	padding:var(--row-padding-ver) 0px;
+	box-sizing:border-box;
 }
 .list-input-row-items{
 	display:flex;
@@ -324,8 +323,14 @@
 .list-input-row-checkbox{
 	padding-right:5px;
 }
-.list-input-rows-wrap.multi-line .list-input-rows td{
+.list-input-rows.multi-line td{
 	border-bottom:1px dotted var(--color-border);
+}
+.list-input-rows.multi-line.clickable tr:hover{
+	box-shadow:inset 0 -3px 0 0 var(--color-accent3-alt);
+}
+.list-input-rows.multi-line.clickable tr:hover td{
+	border-bottom:1px solid transparent;
 }
 
 /* list as input field, flow */

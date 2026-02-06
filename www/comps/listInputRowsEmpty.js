@@ -18,7 +18,7 @@ export default {
 							@keyup="$emit('key-pressed',$event)"
 							:class="{ invalid:!valid }"
 							:disabled="readonly"
-							:placeholder="placeholder"
+							:placeholder
 							:tabindex="!readonly ? 0 : -1"
 							:value="text"
 						/>
@@ -45,7 +45,6 @@ export default {
 	</table>`,
 	props:{
 		anyRows:   { type:Boolean, required:true },
-		focused:   { type:Boolean, required:true },
 		readonly:  { type:Boolean, required:true },
 		text:      { type:String,  required:true },
 		showCreate:{ type:Boolean, required:true },
@@ -53,10 +52,10 @@ export default {
 	},
 	emits:['clicked','clicked-open','clicked-open-middle','focus','key-pressed','text-updated'],
 	computed:{
-		placeholder:(s) => s.focused ? '' : (s.anyRows ? s.capApp.inputPlaceholderAdd : s.capGen.threeDots),
+		placeholder:s => s.anyRows ? s.capApp.inputPlaceholderAdd : s.capGen.threeDots,
 
 		// stores
-		capApp:(s) => s.$store.getters.captions.list,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:s => s.$store.getters.captions.list,
+		capGen:s => s.$store.getters.captions.generic
 	}
 };

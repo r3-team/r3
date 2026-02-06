@@ -19,6 +19,14 @@
 	filter:var(--image-filter-bright);
 }
 
+/* disabled */
+.label.disabled{
+	color:var(--color-font-disabled);
+}
+.label.disabled img{
+	filter:var(--image-filter-alt);
+}
+
 /* error */
 .label.error{
 	color:var(--color-error);

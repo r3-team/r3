@@ -1,13 +1,16 @@
-import MyInputDateWrap from '../inputDateWrap.js';
-import MyInputOffset   from '../inputOffset.js';
-import {getUnixFormat} from '../shared/time.js';
-export {MyAdminLogs as default};
+import MyAdminLogOptions from './adminLogOptions.js';
+import MyInputDateWrap   from '../inputDateWrap.js';
+import MyInputOffset     from '../inputOffset.js';
+import {getUnixFormat}   from '../shared/time.js';
 
-let MyAdminLogs = {
+export default {
 	name:'my-admin-logs',
-	components:{MyInputDateWrap,MyInputOffset},
+	components:{
+		MyAdminLogOptions,
+		MyInputDateWrap,
+		MyInputOffset
+},
 	template:`<div class="contentBox admin-logs grow">
-		
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/fileText.png" />
@@ -60,7 +63,7 @@ let MyAdminLogs = {
 				</select>
 				<my-button
 					@trigger="showOptions = !showOptions"
-					:caption="capGen.settings"
+					:caption="capGen.options"
 					:image="showOptions ? 'visible1.png' : 'visible0.png'"
 				/>
 			</div>
@@ -69,49 +72,11 @@ let MyAdminLogs = {
 		<div class="content admin-logs-content no-padding">
 		
 			<!-- options -->
-			<div v-if="showOptions" class="admin-logs-settings">
-				<table class="default-inputs">
-					<tbody>
-						<tr>
-							<td>{{ capApp.keepDays }}</td>
-							<td colspan="2">
-								<input class="short" v-model="configInput.logsKeepDays" />
-							</td>
-							<td>
-								<my-button image="save.png"
-									@trigger="setConfig"
-									:active="config.logsKeepDays !== configInput.logsKeepDays"
-									:caption="capGen.button.save"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.logLevel }}</td>
-							<td>
-								<select v-model="levelContext">
-									<option v-for="c in contextsValid" :value="getConfigLogContextName(c)">
-										{{ capApp.contextLabel[c] }}
-									</option>
-								</select>
-							</td>
-							<td>
-								<select v-model="configInput[levelContext]">
-									<option value="1">{{ capApp.logLevel1 }}</option>
-									<option value="2">{{ capApp.logLevel2 }}</option>
-									<option value="3">{{ capApp.logLevel3 }}</option>
-								</select>
-							</td>
-							<td>
-								<my-button image="save.png"
-									@trigger="setConfig"
-									:active="config[levelContext] !== configInput[levelContext]"
-									:caption="capGen.button.save"
-								/>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+			<my-admin-log-options
+				v-if="showOptions"
+				@close="showOptions = false"
+				:contextsValid
+			/>
 			
 			<!-- logs -->
 			<div class="admin-logs-table">
@@ -171,7 +136,6 @@ let MyAdminLogs = {
 			
 			// inputs
 			byString:'',
-			configInput:{},
 			context:'',
 			levelContext:'logModule',
 			limit:100,
@@ -189,7 +153,6 @@ let MyAdminLogs = {
 	},
 	mounted() {
 		this.$store.commit('pageTitle',this.menuTitle);
-		this.configInput = JSON.parse(JSON.stringify(this.config));
 		
 		// set date range for log retrieval (7 days ago to now)
 		let d = new Date();
@@ -201,16 +164,13 @@ let MyAdminLogs = {
 		// stores
 		settings:(s) => s.$store.getters.settings,
 		capApp:  (s) => s.$store.getters.captions.admin.logs,
-		capGen:  (s) => s.$store.getters.captions.generic,
-		config:  (s) => s.$store.getters.config
+		capGen:  (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		getUnixFormat,
 		
-		getConfigLogContextName(context) {
-			return `log${context[0].toUpperCase() + context.slice(1)}`;
-		},
+		// presentation
 		displayDate(date) {
 			let format = [this.settings.dateFormat,'H:i:S'];
 			return this.getUnixFormat(date,format.join(' '));
@@ -267,12 +227,6 @@ let MyAdminLogs = {
 					this.logs  = res.payload.logs;
 					this.total = res.payload.total;
 				},
-				this.$root.genericError
-			);
-		},
-		setConfig() {
-			ws.send('config','set',this.configInput,true).then(
-				() => {},
 				this.$root.genericError
 			);
 		}

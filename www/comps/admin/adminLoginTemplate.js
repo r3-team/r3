@@ -1,8 +1,7 @@
 import {dialogCloseAsk} from '../shared/dialog.js';
 import MyInputColorWrap from '../inputColorWrap.js';
-export {MyAdminLoginTemplate as default};
 
-let MyAdminLoginTemplate = {
+export default {
 	name:'my-admin-login-template',
 	components:{ MyInputColorWrap },
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">

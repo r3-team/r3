@@ -140,10 +140,9 @@ export default {
 
 		<my-list-input-rows
 			v-if="isInput && !inputAsFlow"
-			@clicked="clickInputRow"
 			@clicked-open="clickOpen($event,false)"
 			@clicked-open-middle="clickOpen($event,true)"
-			@clicked-row="inputTriggerRow($event)"
+			@clicked-row="clickInputRow();inputTriggerRow($event)"
 			@clicked-row-remove="inputTriggerRowRemove($event)"
 			@focus="focus"
 			:columns="columns"
@@ -168,7 +167,6 @@ export default {
 			@key-pressed="updatedTextInput"
 			@text-updated="filtersQuick = $event"
 			:anyRows="anyInputRows"
-			:focused="focused"
 			:readonly="inputIsReadonly"
 			:showCreate="hasCreate"
 			:text="filtersQuick"
@@ -1055,7 +1053,7 @@ export default {
 				this.$emit('dropdown-show',true);
 		},
 		clickInputRow() {
-			if(!this.inputIsReadonly && !this.showAllValues && !this.showInputAddLine)
+			if(!this.inputIsReadonly && !this.showAllValues && (!this.showInputAddLine || this.inputMulti))
 				this.$emit('dropdown-show',!this.dropdownShow);
 		},
 		clickRow(row,middleClick) {
@@ -1250,6 +1248,8 @@ export default {
 			this.cardsOrderByColumnBatchIndex = columnBatchIndex;
 			if(columnBatchIndex !== -1)
 				this.setOrder(this.columnBatches[columnBatchIndex],true,true);
+			else
+				this.setOrders(this.ordersOriginal);
 		},
 		cardsToggleOrderBy() {
 			const wasAsc = this.orders[0].ascending;

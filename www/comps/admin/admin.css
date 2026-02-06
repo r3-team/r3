@@ -482,12 +482,12 @@
 	display:flex;
 	flex-flow:column nowrap;
 }
-.admin-logs-settings{
-	margin:16px;
-}
 .admin-logs-table{
 	flex:1 1 auto;
 	overflow:auto;
+}
+.admin-log-options{
+	width:800px;
 }
 
 

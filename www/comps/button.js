@@ -1,7 +1,6 @@
 export {MyButtonCheck};
-export {MyButton as default};
 
-const MyButton = {
+export default {
 	name:'my-button',
 	template:`<div class="button" data-is-input="1"
 		@click.ctrl.exact="triggerMiddle"

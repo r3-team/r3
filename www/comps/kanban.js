@@ -47,7 +47,7 @@ const MyKanbanCard = {
 					<tr v-for="b in columnBatches">
 						<td v-if="b.caption !== null" class="kanban-label">{{ b.caption }}</td>
 						<td>
-							<div class="columnBatch kanbanCards" :class="{ vertical:b.vertical }">
+							<div class="columnBatch" :class="{ vertical:b.vertical }">
 								<my-value-rich
 									v-for="ind in b.columnIndexes.filter(v => values[v] !== null || columns[v].display === 'gallery')"
 									@clipboard="$emit('clipboard')"
