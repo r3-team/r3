@@ -407,8 +407,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			CREATE TABLE IF NOT EXISTS app.doc_state_condition(
 				doc_state_id uuid NOT NULL,
 				"position" smallint NOT NULL,
-				connector condition_connector NOT NULL,
-				operator condition_operator NOT NULL,
+				connector app.condition_connector NOT NULL,
+				operator app.condition_operator NOT NULL,
 				CONSTRAINT doc_state_condition_pkey PRIMARY KEY (doc_state_id, "position"),
 				CONSTRAINT doc_state_condition_doc_state_id_fkey FOREIGN KEY (doc_state_id)
 					REFERENCES app.doc_state (id) MATCH SIMPLE
@@ -426,7 +426,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				preset_id uuid,
 				side smallint NOT NULL,
 				brackets smallint NOT NULL,
-				content filter_side_content NOT NULL,
+				content app.filter_side_content NOT NULL,
 				value text COLLATE pg_catalog."default",
 				CONSTRAINT doc_state_condition_side_pkey PRIMARY KEY (doc_state_id, doc_state_condition_position, side),
 				CONSTRAINT doc_state_condition_side_doc_state_id_fkey FOREIGN KEY (doc_state_id)
