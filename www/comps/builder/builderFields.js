@@ -13,19 +13,19 @@ export default {
 	>
 		<template #item="{element,index}">
 			<my-builder-field
-				@column-id-show="(...args) => $emit('column-id-show',...args)"
-				@field-id-show="(...args) => $emit('field-id-show',...args)"
+				@createNew="(...args) => $emit('createNew',...args)"
+				@field-id-show="$emit('field-id-show',$event)"
 				@field-move="(...args) => moveByClick(args[0],index,args[1],isTemplate)"
 				@field-remove="$emit('field-remove',$event)"
 				@field-move-store="$emit('field-move-store',$event)"
 				@field-property-set="(...args) => fields[index][args[0]] = args[1]"
-				:builderLanguage="builderLanguage"
-				:columnIdShow="columnIdShow"
-				:dataFields="dataFields"
-				:entityIdMapRef="entityIdMapRef"
+				:builderLanguage
+				:dataFields
+				:elmOptions
+				:entityIdMapRef
 				:field="element"
+				:fieldIdMap
 				:fieldIdShow
-				:fieldIdShowTab
 				:fieldMoveIndex
 				:fieldMoveList
 				:filterData
@@ -37,6 +37,7 @@ export default {
 				:formId
 				:isTemplate
 				:joinsIndexMap
+				:moduleId
 				:noMovement
 				:uiScale
 			/>
@@ -44,12 +45,12 @@ export default {
 	</draggable>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
-		columnIdShow:   { required:false, default:null },
 		dataFields:     { type:Array,   required:false, default:() => [] },
+		elmOptions:     { required:true },
 		entityIdMapRef: { type:Object,  required:false, default:() => {return {}} },
 		fields:         { type:Array,   required:true },
+		fieldIdMap:     { type:Object,  required:true },
 		fieldIdShow:    { required:false, default:null },
-		fieldIdShowTab: { type:String,  required:false, default:'' },
 		fieldMoveList:  { required:true },
 		fieldMoveIndex: { type:Number,  required:true },
 		filterData:     { type:Boolean, required:false, default:false },
@@ -61,17 +62,18 @@ export default {
 		formId:         { type:String,  required:true },
 		isTemplate:     { type:Boolean, required:true }, // is template for fields
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
+		moduleId:       { type:String,  required:true },
 		noMovement:     { type:Boolean, required:false, default:false },
 		uiScale:        { type:Number,  required:false, default:100 }
 	},
-	emits:['column-id-show','field-id-show','field-remove','field-move-store'],
+	emits:['createNew','field-id-show','field-remove','field-move-store'],
 	data() {
 		return {
 			clone:false
 		};
 	},
 	computed:{
-		moveActive:(s) => s.fieldMoveList !== null
+		moveActive:s => s.fieldMoveList !== null
 	},
 	methods:{
 		// externals

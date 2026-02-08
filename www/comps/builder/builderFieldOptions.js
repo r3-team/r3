@@ -316,7 +316,7 @@ export default {
 						<my-builder-icon-input
 							@input="set('iconId',$event)"
 							:icon-id-selected="field.iconId"
-							:module="module"
+							:module
 							:title="capGen.icon"
 						/>
 					</td>
@@ -478,7 +478,7 @@ export default {
 								:consumer="field.defCollection"
 								:fixedCollection="false"
 								:flagsEnable="[]"
-								:module="module"
+								:module
 								:readonly="false"
 								:showOnMobile="false"
 							/>
@@ -1312,11 +1312,10 @@ export default {
 				</tr>
 
 				<!-- open doc -->
-				<tr >
+				<tr v-if="hasOpenDoc">
 					<td>{{ capGen.button.pdfCreate }}</td>
 					<td>
 						<my-builder-open-doc
-							v-if="hasOpenDoc"
 							@update:modelValue="set('openDoc',$event)"
 							:dataFields
 							:joinsIndexMap

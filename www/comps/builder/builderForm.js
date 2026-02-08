@@ -1,13 +1,10 @@
 import MyBuilderCaption       from './builderCaption.js';
-import MyBuilderColumnOptions from './builderColumnOptions.js';
 import MyBuilderIconInput     from './builderIconInput.js';
-import MyBuilderFieldOptions  from './builderFieldOptions.js';
 import MyBuilderFormActions   from './builderFormActions.js';
 import MyBuilderFormFunctions from './builderFormFunctions.js';
 import MyBuilderFormStates    from './builderFormStates.js';
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
-import {getColumnIcon}        from '../shared/column.js';
 import {dialogDeleteAsk}      from '../shared/dialog.js';
 import {getJoinsIndexMap}     from '../shared/query.js';
 import {routeParseParams}     from '../shared/router.js';
@@ -18,10 +15,7 @@ import {
 } from '../shared/attribute.js';
 import {
 	getDependentRelations,
-	getFieldHasQuery,
-	getFormEntityMapRef,
-	getItemTitleColumn,
-	getSqlPreview
+	getFormEntityMapRef
 } from '../shared/builder.js';
 import {
 	getTemplateFieldButton,
@@ -38,14 +32,6 @@ import {
 	getTemplateQuery
 } from '../shared/builderTemplate.js';
 import {
-	MyBuilderColumns,
-	MyBuilderColumnTemplates
-} from './builderColumns.js';
-import {
-	getFieldIcon,
-	getFieldTitle
-} from '../shared/field.js';
-import {
 	getDataFields,
 	getFormRoute
 } from '../shared/form.js';
@@ -58,11 +44,7 @@ export default {
 	name:'my-builder-form',
 	components:{
 		MyBuilderCaption,
-		MyBuilderColumns,
-		MyBuilderColumnOptions,
-		MyBuilderColumnTemplates,
 		MyBuilderFields,
-		MyBuilderFieldOptions,
 		MyBuilderFormActions,
 		MyBuilderFormFunctions,
 		MyBuilderFormStates,
@@ -70,8 +52,6 @@ export default {
 		MyBuilderQuery
 	},
 	template:`<div class="builder-form" v-if="form !== false">
-	
-		<!-- form builder main area -->
 		<div class="contentBox builder-form-main">
 			
 			<div class="builder-form-content">
@@ -166,22 +146,23 @@ export default {
 				
 				<!-- form builder fields -->
 				<my-builder-fields class="builder-form-fields default-inputs" flexDirParent="column"
-					@column-id-show="(...args) => setFieldShow(args[0],args[1],'content')"
-					@field-id-show="(...args) => setFieldShow(args[0],null,args[1])"
+					@createNew="(...args) => $emit('createNew',...args)"
+					@field-id-show="setFieldShow"
 					@field-move-store="fieldMoveStore"
-					@field-remove="removeFieldById($event)"
+					@field-remove="removeFieldById"
 					:builderLanguage
-					:columnIdShow
 					:dataFields
+					:elmOptions="$refs.fieldOptions"
 					:entityIdMapRef
+					:fieldIdMap
 					:fieldIdShow
-					:fieldIdShowTab="tabTargetField"
 					:fieldMoveList
 					:fieldMoveIndex
 					:fields="form.fields"
 					:formId="id"
 					:isTemplate="false"
 					:joinsIndexMap
+					:moduleId="module.id"
 					:uiScale
 				/>
 			</div>
@@ -190,42 +171,14 @@ export default {
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
 		
 			<!-- form builder sidebar -->
-			<div class="top lower" :class="{ clickable:fieldShow }" @click="fieldIdShow = null; columnIdShow = null;">
+			<div class="top lower" :class="{ clickable:sideFieldShow }" @click="fieldIdShow = null">
 				<div class="area">
 					<img class="icon" src="images/fileText.png" />
 					<h1>{{ capGen.form }}</h1>
 				</div>
 			</div>
-			<div class="top lower" v-if="fieldShow" :class="{ clickable:columnShow }" @click="columnIdShow = null;">
-				<div class="area">
-					<img class="icon" src="images/dash.png" />
-					<img class="icon" :src="'images/' + getFieldIcon(fieldShow)" />
-					<h2>{{ capGen.field + ': F' + entityIdMapRef.field[fieldShow.id] + ', ' + getFieldTitle(fieldShow) }}</h2>
-				</div>
-				<div class="area">
-					<my-button image="cancel.png"
-						@trigger="fieldIdShow = null; columnIdShow = null;"
-						:cancel="true"
-						:captionTitle="capGen.button.close"
-					/>
-				</div>
-			</div>
-			<div class="top lower" v-if="columnShow">
-				<div class="area">
-					<img class="icon" src="images/dash.png" />
-					<img class="icon" :src="'images/' + getColumnIcon(columnShow)" />
-					<h2>{{  capGen.column + ': ' + getItemTitleColumn(columnShow,false) }}</h2>
-				</div>
-				<div class="area">
-					<my-button image="cancel.png"
-						@trigger="columnIdShow = null;"
-						:cancel="true"
-						:captionTitle="capGen.button.close"
-					/>
-				</div>
-			</div>
 			
-			<template v-if="!fieldShow">
+			<template v-if="!sideFieldShow">
 				<my-tabs
 					v-model="tabTarget"
 					:entries="['content','states','actions','functions','properties']"
@@ -246,7 +199,7 @@ export default {
 							:filtersDisable="['formChanged','formState','field','fieldChanged','fieldValid','getter','globalSearch','recordMayCreate','recordMayDelete','recordMayUpdate']"
 							:formId="id"
 							:modelValue="query"
-							:moduleId="form.moduleId"
+							:moduleId="module.id"
 						/>
 						
 						<!-- 1:n join warning -->
@@ -281,7 +234,9 @@ export default {
 									v-if="fieldsShow === 'add'"
 									@field-move-store="fieldMoveStore"
 									:builderLanguage
+									:elmOptions="$refs.fieldOptions"
 									:fields="fieldsTemplate"
+									:fieldIdMap
 									:fieldMoveList
 									:fieldMoveIndex
 									:filterData="true"
@@ -291,16 +246,19 @@ export default {
 									:filterDataNm="showTemplateNm"
 									:formId="id"
 									:isTemplate="true"
+									:moduleId="module.id"
 								/>
 								<my-builder-fields flexDirParent="column"
 									v-if="fieldsShow === 'edit'"
-									@column-id-show="(...args) => setFieldShow(args[0],args[1],'content')"
-									@field-id-show="(...args) => setFieldShow(args[0],null,args[1])"
-									@field-remove="removeFieldById($event)"
+									@createNew="(...args) => $emit('createNew',...args)"
+									@field-id-show="setFieldShow"
+									@field-remove="removeFieldById"
 									:builderLanguage
 									:dataFields
+									:elmOptions="$refs.fieldOptions"
 									:entityIdMapRef
 									:fields="dataFields"
+									:fieldIdMap
 									:fieldMoveList="null"
 									:fieldMoveIndex="0"
 									:filterData="true"
@@ -311,6 +269,7 @@ export default {
 									:formId="id"
 									:isTemplate="false"
 									:joinsIndexMap
+									:moduleId="module.id"
 									:noMovement="true"
 								/>
 							</div>
@@ -410,96 +369,8 @@ export default {
 				</div>
 			</template>
 			
-			<!-- field content -->
-			<template v-if="fieldShow && !columnShow">
-				<my-tabs
-					v-if="fieldShowHasQuery"
-					v-model="tabTargetField"
-					:entries="['properties','content']"
-					:entriesIcon="['images/edit.png','images/database.png']"
-					:entriesText="[capGen.properties,capGen.content]"
-				/>
-				<div class="content grow" :class="{ 'no-padding':tabTargetField === 'properties' }">
-					
-					<!-- field options -->
-					<my-builder-field-options
-						v-if="tabTargetField === 'properties'"
-						@createNew="(...args) => $emit('createNew',...args)"
-						@set="(...args) => fieldPropertySet(args[0],args[1])"
-						:builderLanguage
-						:dataFields
-						:entityIdMapRef
-						:field="fieldShow"
-						:formId="id"
-						:joinsIndexMap
-						:moduleId="module.id"
-					/>
-					
-					<!-- field query (relationship inputs, lists, calendars, charts, ...) -->
-					<template v-if="fieldShowHasQuery && tabTargetField === 'content'">
-						<my-builder-query
-							v-model="fieldShow.query"
-							@index-removed="fieldQueryRemoveIndex($event)"
-							:allowLookups="fieldShow.content === 'list' && fieldShow.csvImport"
-							:allowOrders="true"
-							:builderLanguage
-							:entityIdMapRef
-							:fieldIdMap
-							:filtersDisable="['formState','getter','globalSearch']"
-							:formId="id"
-							:moduleId="module.id"
-							:relationIdStart="fieldQueryRelationIdStart"
-						/>
-
-						<!-- SQL preview -->
-						<div class="row">
-							<my-button image="code.png"
-								@trigger="getSqlPreview(fieldShow.query,fieldShow.columns)"
-								:caption="capGen.sqlPreview"
-							/>
-						</div>
-
-						<!-- column templates query fields -->
-						<br />
-						<h2>{{ capGen.columnsAvailable }}</h2>
-						
-						<div class="columns shade">
-							<my-builder-column-templates
-								@column-add="fieldShow.columns.push($event)"
-								:columns="fieldShow.columns"
-								:groupName="'batches_' + fieldIdShow+'_columns'"
-								:joins="fieldShow.query.joins"
-							/>
-						</div>
-					</template>
-				</div>
-			</template>
-
-			<!-- column settings -->
-			<template v-if="columnShow">
-				<div class="content no-shrink" v-if="columnShow.subQuery">
-					<my-builder-query
-						v-model="columnShow.query"
-						:allowChoices="false"
-						:allowOrders="true"
-						:builderLanguage
-						:entityIdMapRef
-						:fieldIdMap
-						:filtersDisable="['formState','getter','globalSearch']"
-						:formId="id"
-						:joinsParents="[fieldShow.query.joins]"
-						:moduleId="module.id"
-					/>
-				</div>
-				<my-builder-column-options
-					@set="(...args) => fieldColumnPropertySet(args[0],args[1])"
-					:builderLanguage
-					:column="columnShow"
-					:hasCaptions="fieldShow.content === 'list'"
-					:moduleId="module.id"
-					:onlyData="false"
-				/>
-			</template>
+			<!-- field options -->
+			<div class="content grow no-padding" ref="fieldOptions" v-show="sideFieldShow"></div>
 		</div>
 	</div>`,
 	emits:['createNew'],
@@ -522,17 +393,15 @@ export default {
 			formCopy:{},       // copy of form from schema when component last reset
 			
 			// state
-			columnIdShow:null,
-			fieldsShow:'add',         // which fields to show (add = template fields, edit = existing data fields)
-			fieldIdShow:null,         // field ID which is shown in sidebar to be edited
-			fieldMoveList:null,       // fields list from which to move field (move by click)
-			fieldMoveIndex:0,         // index of field which to move (move by click)
-			showSidebar:true,         // show form Builder sidebar
-			showTemplate1n:false,     // show templates for 1:n relationship input fields
-			showTemplateN1:true,      // show templates for n:1 relationship input fields
-			showTemplateNm:false,     // show templates for n:m relationship input fields
-			tabTarget:'content',      // sidebar tab target (content, states, actions, functions, properties)
-			tabTargetField:'content', // sidebar tab target for field (content, properties)
+			fieldsShow:'add',     // which fields to show (add = template fields, edit = existing data fields)
+			fieldIdShow:null,     // field ID which is shown in sidebar to be edited
+			fieldMoveList:null,   // fields list from which to move field (move by click)
+			fieldMoveIndex:0,     // index of field which to move (move by click)
+			showSidebar:true,     // show form Builder sidebar
+			showTemplate1n:false, // show templates for 1:n relationship input fields
+			showTemplateN1:true,  // show templates for n:1 relationship input fields
+			showTemplateNm:false, // show templates for n:m relationship input fields
+			tabTarget:'content',  // sidebar tab target (content, states, actions, functions, properties)
 			templateIndex:'-1',
 			uiScale:90,
 			uiScaleMax:160,
@@ -541,30 +410,6 @@ export default {
 		};
 	},
 	computed:{
-		columnIdMap:s => {
-			let map = {};
-			const collect = function(fields) {
-				for(const field of fields) {
-					if(field.content === 'container') {
-						collect(field.fields);
-						continue;
-					}
-					if(field.content === 'tabs') {
-						for(const tab of field.tabs) {
-							collect(tab.fields);
-						}
-						continue;
-					}
-					if(typeof field.columns !== 'undefined') {
-						for(const c of field.columns) {
-							map[c.id] = c;
-						}
-					}
-				}
-			};
-			collect(s.form.fields);
-			return map;
-		},
 		fieldIdMap:s => {
 			let map = {};
 			const collect = function(fields) {
@@ -637,22 +482,6 @@ export default {
 			};
 			return getIndexIds(s.form.fields);
 		},
-		fieldQueryRelationIdStart:s => {
-			if(s.fieldShow === false || s.fieldShow.content !== 'data')
-				return null;
-			
-			let atr = s.attributeIdMap[s.fieldShow.attributeId];
-			if(!s.isAttributeRelationship(atr.content))
-				return null;
-			
-			if(s.fieldShow.attributeIdNm !== null)
-				return s.attributeIdMap[s.fieldShow.attributeIdNm].relationshipId;
-			
-			if(s.joinsIndexMap[s.fieldShow.index].relationId === atr.relationId)
-				return atr.relationshipId;
-			
-			return atr.relationId;
-		},
 		hasAny1nJoin:s => {
 			for(let j of s.query.joins) {
 				if(j.index === 0)
@@ -672,18 +501,16 @@ export default {
 		
 		// simple
 		canSave:          s => s.hasChanges && !s.readonly,
-		columnShow:       s => s.columnIdShow === null ? false : s.columnIdMap[s.columnIdShow],
 		dataFields:       s => s.getDataFields(s.form.fields),
 		entityIdMapRef:   s => s.getFormEntityMapRef(s.form.fields,s.form.actions),
 		fieldContentFocus:s => ['button','data'],
-		fieldShow:        s => s.fieldIdShow === null || s.fieldIdMap[s.fieldIdShow] === undefined ? false : s.fieldIdMap[s.fieldIdShow],
-		fieldShowHasQuery:s => s.fieldShow !== false && s.getFieldHasQuery(s.fieldShow),
 		formSchema:       s => s.formIdMap[s.id] === undefined ? false : s.formIdMap[s.id],
 		hasChanges:       s => s.fieldIdsRemove.length !== 0 || !s.deepIsEqual(s.form,s.formSchema),
 		joinsIndexMap:    s => s.getJoinsIndexMap(s.query.joins),
 		presetCandidates: s => s.relation === false ? [] : s.relationIdMap[s.query.relationId].presets,
 		query:            s => s.form.query !== null ? s.form.query : s.getTemplateQuery(),
 		relation:         s => s.relationIdMap[s.query.relationId] === undefined ? false : s.relationIdMap[s.query.relationId],
+		sideFieldShow:    s => s.fieldIdShow !== null,
 		
 		// stores
 		module:        s => s.moduleIdMap[s.form.moduleId],
@@ -711,18 +538,12 @@ export default {
 		copyValueDialog,
 		deepIsEqual,
 		dialogDeleteAsk,
-		getColumnIcon,
 		getDataFields,
 		getDependentRelations,
-		getFieldHasQuery,
-		getFieldIcon,
-		getFieldTitle,
 		getFormEntityMapRef,
 		getFormRoute,
 		getIndexAttributeId,
-		getItemTitleColumn,
 		getJoinsIndexMap,
-		getSqlPreview,
 		getTemplateFieldButton,
 		getTemplateFieldCalendar,
 		getTemplateFieldChart,
@@ -751,48 +572,6 @@ export default {
 				parent.fields.push(child);
 			}
 			this.form.fields.push(parent);
-		},
-		fieldMoveStore(evt) {
-			this.fieldMoveList  = evt.fieldList;
-			this.fieldMoveIndex = evt.fieldIndex;
-		},
-		open() {
-			this.$router.push(this.getFormRoute(null,this.form.id,0,false));
-		},
-		showMessage(msg,top,image) {
-			this.$store.commit('dialog',{
-				captionTop:top,
-				captionBody:msg,
-				image:image
-			});
-		},
-		reset(manuelReset) {
-			if(this.formSchema !== false && (manuelReset || !this.deepIsEqual(this.formCopy,this.formSchema))) {
-				this.form     = JSON.parse(JSON.stringify(this.formSchema));
-				this.formCopy = JSON.parse(JSON.stringify(this.formSchema));
-				this.fieldIdsRemove = [];
-			}
-		},
-		resetRouteParams() {
-			let params = { fieldIdShow:{ parse:'string', value:null } };
-			this.routeParseParams(params);
-			
-			if(params.fieldIdShow.value !== null) {
-				this.tabTargetField = 'properties';
-				this.fieldIdShow    = params.fieldIdShow.value;
-			}
-		},
-		showJsFunctionHelp(event) {
-			let msg = '';
-			switch(event) {
-				case 'formLoadedAfter':     msg = this.capApp.dialog.eventHelp.formLoadedAfter;     break;
-				case 'formLoadedBefore':    msg = this.capApp.dialog.eventHelp.formLoadedBefore;    break;
-				case 'recordDeletedAfter':  msg = this.capApp.dialog.eventHelp.recordDeletedAfter;  break;
-				case 'recordDeletedBefore': msg = this.capApp.dialog.eventHelp.recordDeletedBefore; break;
-				case 'recordSavedAfter':    msg = this.capApp.dialog.eventHelp.recordSavedAfter;    break;
-				case 'recordSavedBefore':   msg = this.capApp.dialog.eventHelp.recordSavedBefore;   break;
-			}
-			this.$store.commit('dialog',{ captionBody:msg });
 		},
 		createFieldsForRelation(relation,index) {
 			let fields = [];
@@ -860,6 +639,13 @@ export default {
 			}
 			return fields;
 		},
+		fieldMoveStore(evt) {
+			this.fieldMoveList  = evt.fieldList;
+			this.fieldMoveIndex = evt.fieldIndex;
+		},
+		open() {
+			this.$router.push(this.getFormRoute(null,this.form.id,0,false));
+		},
 		removeDataFields(fields,index) {
 			for(let i = 0, j = fields.length; i < j; i++) {
 				let field = fields[i];
@@ -904,37 +690,37 @@ export default {
 			};
 			remove(this.form.fields);
 		},
-		
-		// field manipulation
-		fieldColumnPropertySet(name,value) {
-			this.columnShow[name] = value;
-		},
-		fieldPropertySet(name,value) {
-			this.fieldShow[name] = value;
-		},
-		fieldQueryRemoveIndex(index) {
-			let colsCloned = JSON.parse(JSON.stringify(this.fieldShow.columns));
-			
-			for(let i = 0, j = colsCloned.length; i < j; i++) {
-				if(colsCloned[i].index === index) {
-					colsCloned.splice(i,1);
-					i--; j--;
-				}
+		reset(manuelReset) {
+			if(this.formSchema !== false && (manuelReset || !this.deepIsEqual(this.formCopy,this.formSchema))) {
+				this.form     = JSON.parse(JSON.stringify(this.formSchema));
+				this.formCopy = JSON.parse(JSON.stringify(this.formSchema));
+				this.fieldIdsRemove = [];
 			}
-			this.fieldShow.columns = colsCloned;
 		},
-		setFieldShow(fieldId,columnId,tab) {
-			if(columnId !== null && columnId === this.columnIdShow)
-				return this.columnIdShow = null;
+		resetRouteParams() {
+			let params = { fieldIdShow:{ parse:'string', value:null } };
+			this.routeParseParams(params);
 			
-			if(fieldId === this.fieldIdShow && columnId === this.columnIdShow && tab === this.tabTargetField) {
-				this.fieldIdShow  = null;
-				this.columnIdShow = null;
-				return;
+			if(params.fieldIdShow.value !== null)
+				this.fieldIdShow = params.fieldIdShow.value;
+		},
+		setFieldShow(fieldId) {
+			this.fieldIdShow = fieldId === this.fieldIdShow ? null : fieldId;
+		},
+		showJsFunctionHelp(event) {
+			let msg = '';
+			switch(event) {
+				case 'formLoadedAfter':     msg = this.capApp.dialog.eventHelp.formLoadedAfter;     break;
+				case 'formLoadedBefore':    msg = this.capApp.dialog.eventHelp.formLoadedBefore;    break;
+				case 'recordDeletedAfter':  msg = this.capApp.dialog.eventHelp.recordDeletedAfter;  break;
+				case 'recordDeletedBefore': msg = this.capApp.dialog.eventHelp.recordDeletedBefore; break;
+				case 'recordSavedAfter':    msg = this.capApp.dialog.eventHelp.recordSavedAfter;    break;
+				case 'recordSavedBefore':   msg = this.capApp.dialog.eventHelp.recordSavedBefore;   break;
 			}
-			this.tabTargetField = tab;
-			this.fieldIdShow    = fieldId;
-			this.columnIdShow   = columnId;
+			this.$store.commit('dialog',{ captionBody:msg });
+		},
+		showMessage(msg,top,image) {
+			this.$store.commit('dialog',{captionTop:top,captionBody:msg,image:image});
 		},
 		
 		// backend calls
