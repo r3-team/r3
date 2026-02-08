@@ -1283,14 +1283,14 @@ export default {
 					<td>{{ capApp.openForm }}</td>
 					<td>
 						<my-builder-open-form
-							@update:openForm="set('openForm',$event)"
+							@update:modelValue="set('openForm',$event)"
 							:allowAllForms="isButton"
 							:allowNewRecords="true"
 							:allowPopUpInline="isCalendar || isKanban || isList"
-							:joinsIndexMap="joinsIndexMap"
-							:joinsIndexMapField="joinsIndexMapField"
-							:module="module"
-							:openForm="field.openForm"
+							:joinsIndexMap
+							:joinsIndexMapField
+							:modelValue="field.openForm"
+							:module
 						/>
 					</td>
 				</tr>
@@ -1298,15 +1298,15 @@ export default {
 					<td v-html="capApp.openFormBulk"></td>
 					<td>
 						<my-builder-open-form
-							@update:openForm="set('openFormBulk',$event)"
+							@update:modelValue="set('openFormBulk',$event)"
 							:allowAllForms="false"
 							:allowNewRecords="false"
 							:allowPopUpInline="true"
 							:forcePopUp="true"
-							:joinsIndexMap="joinsIndexMap"
-							:joinsIndexMapField="joinsIndexMapField"
-							:module="module"
-							:openForm="field.openFormBulk"
+							:joinsIndexMap
+							:joinsIndexMapField
+							:modelValue="field.openFormBulk"
+							:module
 						/>
 					</td>
 				</tr>
@@ -1319,7 +1319,7 @@ export default {
 							v-if="hasOpenDoc"
 							@update:modelValue="set('openDoc',$event)"
 							:dataFields
-							:joinsIndexMap="joinsIndexMap"
+							:joinsIndexMap
 							:modelValue="field.openDoc"
 							:module
 							:readonly="false"
@@ -1351,7 +1351,7 @@ export default {
 									:consumer="c"
 									:fixedCollection="false"
 									:flagsEnable="['multiValue']"
-									:module="module"
+									:module
 									:readonly="false"
 									:showOnMobile="false"
 								/>

@@ -1652,7 +1652,6 @@
 		"noOwner": "La aplicación está en modo de solo lectura",
 		"openFormInput": {
 			"attributeApply": "Usar como predeterminado en el formulario abierto",
-			"formIdOpen": "Formulario",
 			"maxHeight": "Altura máx. (px)",
 			"maxWidth": "Anchura máx. (px)",
 			"newRecord": "Establecer relación con nuevos registros",
@@ -1662,9 +1661,7 @@
 				"inline": "Subformulario dentro del campo",
 				"none": "Formulario de página completa"
 			},
-			"popUpType": "Abrir como",
-			"relationIndexApply": "Registro en formulario actual",
-			"relationIndexOpen": "De la relación"
+			"relationIndexApply": "Registro en formulario actual"
 		},
 		"pageTitle": "Constructor",
 		"pageTitleDocs": "Documentación del Constructor",

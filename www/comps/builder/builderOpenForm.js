@@ -1,49 +1,49 @@
 import {isAttributeRelationship} from '../shared/attribute.js';
+import {getTemplateOpenForm}     from '../shared/builderTemplate.js';
 import {
+	getDependentModules,
 	getDependentRelations,
 	getItemTitleRelation
 } from '../shared/builder.js';
-import MyBuilderSelectForm from './builderSelectForm.js';
 
 export default {
 	name:'my-builder-open-form',
-	components:{ MyBuilderSelectForm },
-	template:`<table>
+	template:`<table v-if="openForm !== false">
 		<tbody>
-			<tr v-if="!allowAllForms">
-				<td>{{ capApp.relationIndexOpen }}</td>
-				<td>
-					<select
-						@input="set('relationIndexOpen',$event.target.value)"
-						:disabled="readonly"
-						:value="isActive ? openForm.relationIndexOpen : -1"
-					>
-						<option :value="-1">-</option>
-						<option
-							v-for="j in joinsIndexMapField"
-							:value="j.index"
-						>{{ getItemTitleRelation(j.relationId,j.index) }}</option>
+			<tr>
+				<td colspan="2">
+					<select v-model="form" :disabled="readonly">
+						<option value="">-</option>
+
+						<!-- local forms -->
+						<option v-if="allowAllForms" v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
+						<template v-if="!allowAllForms" v-for="j in joinsIndexMapField">
+							<option
+								v-for="f in module.forms.filter(v => v.query !== null && v.query.relationId === j.relationId)"
+								:value="j.index + '_' + f.id"
+							>{{ getItemTitleRelation(j.relationId,j.index) + ': ' + f.name }}</option>
+						</template>
+
+						<!-- forms from dependent modules -->
+						<optgroup
+							v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.forms.length !== 0)"
+							:label="mod.name"
+						>
+							<option v-if="allowAllForms" v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
+							<template v-if="!allowAllForms" v-for="j in joinsIndexMapField">
+								<option
+									v-for="f in mod.forms.filter(v => v.query !== null && v.query.relationId === j.relationId)"
+									:value="j.index + '_' + f.id"
+								>{{ getItemTitleRelation(j.relationId,j.index) + ': ' + f.name }}</option>
+							</template>
+						</optgroup>
 					</select>
-				</td>
-			</tr>
-			<tr v-if="allowAllForms || (isActive && openForm.relationIndexOpen !== -1)">
-				<td>{{ capApp.formIdOpen }}</td>
-				<td>
-					<my-builder-select-form
-						@update:modelValue="set('formIdOpen',$event)"
-						:allowAllForms
-						:modelValue="isActive ? openForm.formIdOpen : null"
-						:module
-						:readonly
-						:relationIdFilter="relationIdSource"
-					/>
 				</td>
 			</tr>
 			
 			<template v-if="formIsSet">
 				<tr>
-					<td>{{ capApp.popUpType }}</td>
-					<td>
+					<td colspan="2">
 						<select v-model="popUpType" :disabled="readonly">
 							<option value="" :disabled="forcePopUp">
 								{{ capApp.option.none }}
@@ -58,24 +58,16 @@ export default {
 					</td>
 				</tr>
 				<tr v-if="popUpType !== ''">
-					<td>{{ capApp.maxWidth }}</td>
-					<td>
-						<input
-							@input="set('maxWidth',$event.target.value)"
-							:disabled="readonly"
-							:value="openForm.maxWidth"
-						/>
-					</td>
-				</tr>
-				<tr v-if="popUpType === 'float'">
-					<td>{{ capApp.maxHeight }}</td>
-					<td>
-						<input
-							@input="set('maxHeight',$event.target.value)"
-							:disabled="readonly"
-							:value="openForm.maxHeight"
-						/>
-					</td>
+					<td colspan="2">
+						<div class="row gap centered">
+							<span>{{ capGen.sizeX }}</span>
+							<input class="short" v-model.number="openForm.maxWidth" :disabled="readonly" />
+							<template v-if="popUpType === 'float'">
+								<span>{{ capGen.sizeY }}</span>
+								<input class="short" v-model.number="openForm.maxHeight" :disabled="readonly" />
+							</template>
+						</div>
+					 </td>
 				</tr>
 				<template v-if="allowNewRecords && formIsData">
 					<tr>
@@ -91,11 +83,7 @@ export default {
 					<tr>
 						<td>{{ capApp.relationIndexApply }}</td>
 						<td>
-							<select
-								@input="set('relationIndexApply',$event.target.value)"
-								:disabled="readonly"
-								:value="openForm.relationIndexApply"
-							>
+							<select v-model="openForm.relationIndexApply" :disabled="readonly">
 								<option :value="-1">-</option>
 								<option
 									v-for="j in joinsIndexMap"
@@ -108,7 +96,7 @@ export default {
 						<td>{{ capApp.attributeApply }}</td>
 						<td>
 							<select
-								@input="set('attributeIdApply',$event.target.value)"
+								@input="openForm.attributeIdApply = $event.target.value !== '' ? $event.target.value : null"
 								:disabled="readonly"
 								:value="openForm.attributeIdApply !== null ? openForm.attributeIdApply : ''"
 							>
@@ -124,32 +112,86 @@ export default {
 		</tbody>
 	</table>`,
 	props:{
-		allowAllForms:     { type:Boolean, required:false, default:false },
-		allowNewRecords:   { type:Boolean, required:false, default:false },
-		allowPopUpInline:  { type:Boolean, required:false, default:false },
-		forcePopUp:        { type:Boolean, required:false, default:false },
-		joinsIndexMap:     { type:Object,  required:false, default:function() { return {}; } },
-		joinsIndexMapField:{ type:Object,  required:false, default:function() { return {}; } },
-		module:            { type:Object,  required:true },
-		openForm:          { required:true },
-		readonly:          { type:Boolean, required:false, default:false }
+		allowAllForms:     { type:Boolean,       required:false, default:false },
+		allowNewRecords:   { type:Boolean,       required:false, default:false },
+		allowPopUpInline:  { type:Boolean,       required:false, default:false },
+		forcePopUp:        { type:Boolean,       required:false, default:false },
+		joinsIndexMap:     { type:Object,        required:false, default:function() { return {}; } },
+		joinsIndexMapField:{ type:Object,        required:false, default:function() { return {}; } },
+		modelValue:        { type:[Object,null], required:true },
+		module:            { type:Object,        required:true },
+		readonly:          { type:Boolean,       required:false, default:false }
 	},
-	emits:['update:openForm'],
+	emits:['update:modelValue'],
+	data() {
+		return {
+			openForm:false
+		};
+	},
+	watch:{
+		modelValue:{
+			handler(v) {
+				this.openForm = v === null ? this.getTemplateOpenForm(this.forcePopUp) : { ...v };
+			},
+			deep:true,
+			immediate:true
+		},
+		openForm:{
+			handler(v) {
+				if(!this.formIsSet) {
+					if(this.modelValue !== null)
+						this.$emit('update:modelValue', null);
+
+					return;
+				}
+
+				if(JSON.stringify(v) !== JSON.stringify(this.modelValue))
+					this.$emit('update:modelValue', { ...v });
+			},
+			deep:true
+		}
+	},
 	computed:{
 		// inputs
+		form:{
+			get()  {
+				if(this.openForm.formIdOpen === null)
+					return '';
+
+				if(this.allowAllForms)
+					return this.openForm.formIdOpen;
+
+				return `${this.openForm.relationIndexOpen}_${this.openForm.formIdOpen}`;
+			},
+			set(v) {
+				let o = JSON.parse(JSON.stringify(this.openForm));
+
+				// reset attribute on any form change
+				o.attributeIdApply = null;
+
+				if(v === '') {
+					o.relationIndexOpen = -1;
+					o.formIdOpen        = null;
+				}
+				else if(this.allowAllForms) {
+					o.relationIndexOpen = -1;
+					o.formIdOpen        = v;
+				}
+				const p = v.split('_');
+				if(p.length === 2) {
+					o.relationIndexOpen = parseInt(p[0]);
+					o.formIdOpen        = p[1];
+				}
+				this.openForm = o;
+			}
+		},
 		popUpType:{
 			get()  { return this.openForm.popUpType === null ? '' : this.openForm.popUpType; },
-			set(v) { this.set('popUpType',v === '' ? null : v); }
+			set(v) { this.openForm.popUpType = v === '' ? null : v; }
 		},
 		
 		// options
-		relationIdSource:(s) => {
-			if(!s.isActive) return null;
-			
-			return typeof s.joinsIndexMapField[s.openForm.relationIndexOpen] !== 'undefined'
-				? s.joinsIndexMapField[s.openForm.relationIndexOpen].relationId : null;
-		},
-		targetAttributes:(s) => {
+		targetAttributes:s => {
 			if(!s.formIsSet) return [];
 			
 			// parse from which relation the record is applied, based on the chosen relation index
@@ -222,64 +264,22 @@ export default {
 		},
 		
 		// simple
-		formIsData:(s) => typeof s.joinsIndexMap['0'] !== 'undefined',
-		formIsSet: (s) => s.isActive && s.openForm.formIdOpen !== null,
-		isActive:  (s) => s.openForm !== null,
+		formIsData:s => s.joinsIndexMap['0'] !== undefined,
+		formIsSet: s => s.openForm.formIdOpen !== null,
 		
 		// stores
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		formIdMap:     (s) => s.$store.getters['schema/formIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.openFormInput
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		formIdMap:     s => s.$store.getters['schema/formIdMap'],
+		capApp:        s => s.$store.getters.captions.builder.openFormInput,
+		capGen:        s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
+		getDependentModules,
 		getDependentRelations,
 		getItemTitleRelation,
-		isAttributeRelationship,
-		
-		set(name,val) {
-			// clear if no form is opened
-			if(name === 'formIdOpen' && val === null)
-				return this.$emit('update:openForm',null);
-			
-			let v = JSON.parse(JSON.stringify(this.openForm));
-			
-			// set initial value if empty
-			if(v === null)
-				v = {
-					relationIndexOpen:-1,
-					formIdOpen:null,
-					relationIndexApply:-1,
-					attributeIdApply:null,
-					popUpType:this.forcePopUp ? 'float' : null,
-					maxHeight:1000,
-					maxWidth:1200
-				};
-			
-			// set changed value
-			if(['maxHeight','maxWidth'].includes(name))
-				val = val !== '' && !isNaN(val) ? parseInt(val) : 0;
-			
-			if(name === 'relationIndexOpen')
-				val = val !== '' && !isNaN(val) ? parseInt(val) : 0;
-			
-			if(name === 'relationIndexApply')
-				val = val !== '' && !isNaN(val) ? parseInt(val) : -1;
-			
-			if(name === 'attributeIdApply' && val === '')
-				val = null;
-			
-			if(name === 'relationIndexOpen') {
-				v.formIdOpen       = null;
-				v.attributeIdApply = null;
-			}
-			
-			if(name === 'formIdOpen')
-				v.attributeIdApply = null;
-			
-			v[name] = val;
-			this.$emit('update:openForm',v);
-		}
+		getTemplateOpenForm,
+		isAttributeRelationship
 	}
 };

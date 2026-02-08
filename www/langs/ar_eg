@@ -1652,7 +1652,6 @@
 		"noOwner": "التطبيق في وضع القراءة فقط",
 		"openFormInput": {
 			"attributeApply": "استخدم كإعداد افتراضي في النموذج المفتوح",
-			"formIdOpen": "استمارة",
 			"maxHeight": "الأعلى. ",
 			"maxWidth": "الأعلى. ",
 			"newRecord": "إقامة علاقة مع السجلات الجديدة",
@@ -1662,9 +1661,7 @@
 				"inline": "النموذج الفرعي داخل الحقل",
 				"none": "نموذج صفحة كاملة"
 			},
-			"popUpType": "فتح باسم",
-			"relationIndexApply": "سجل في النموذج الحالي",
-			"relationIndexOpen": "من العلاقة"
+			"relationIndexApply": "سجل في النموذج الحالي"
 		},
 		"pageTitle": "منشئ",
 		"pageTitleDocs": "وثائق البناء",

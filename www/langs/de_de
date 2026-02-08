@@ -1652,7 +1652,6 @@
 		"noOwner": "Anwendung ist schreibgeschützt",
 		"openFormInput": {
 			"attributeApply": "Als Standardwert auf geöffneten Formular nutzen",
-			"formIdOpen": "Formular",
 			"maxHeight": "Max. Höhe (px)",
 			"maxWidth": "Max. Breite (px)",
 			"newRecord": "Beziehung herstellen für neue Datensätze",
@@ -1662,9 +1661,7 @@
 				"inline": "Subformular im Feld",
 				"none": "Ganze Seite"
 			},
-			"popUpType": "Öffnen als",
-			"relationIndexApply": "Datensatz auf akt. Formular",
-			"relationIndexOpen": "Von Relation"
+			"relationIndexApply": "Datensatz auf akt. Formular"
 		},
 		"pageTitle": "Builder",
 		"pageTitleDocs": "Builder-Dokumentation",

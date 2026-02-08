@@ -222,11 +222,10 @@ export default {
 							<td>{{ capGen.formOpen }}</td>
 							<td>
 								<my-builder-open-form
-									@update:openForm="searchBar.openForm = $event"
+									v-model="searchBar.openForm"
 									:allowAllForms="false"
 									:joinsIndexMapField="joinIndexMap"
 									:module
-									:openForm="searchBar.openForm"
 									:readonly
 								/>
 							</td>

@@ -99,8 +99,8 @@ export default {
 							<td>
 								<my-builder-form-input
 									v-model="values.formId"
-									:module="module"
-									:readonly="readonly"
+									:module
+									:readonly
 									:showOpen="true"
 								/>
 							</td>
@@ -116,8 +116,8 @@ export default {
 									:consumer="values.collection"
 									:fixedCollection="false"
 									:flagsEnable="['noDisplayEmpty','showRowCount']"
-									:module="module"
-									:readonly="readonly"
+									:module
+									:readonly
 									:showOnMobile="true"
 								/>
 							</td>

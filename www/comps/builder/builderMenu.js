@@ -147,8 +147,8 @@ const MyBuilderMenuItems = {
 												:consumer="c"
 												:fixedCollection="false"
 												:flagsEnable="['noDisplayEmpty','showRowCount']"
-												:module="module"
-												:readonly="readonly"
+												:module
+												:readonly
 												:showOnMobile="true"
 											/>
 										</td>

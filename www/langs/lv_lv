@@ -1652,7 +1652,6 @@
 		"noOwner": "Application is in read-only mode",
 		"openFormInput": {
 			"attributeApply": "Use as default on opened form",
-			"formIdOpen": "Form",
 			"maxHeight": "Max. height (px)",
 			"maxWidth": "Max. width (px)",
 			"newRecord": "Establish relationship with new records",
@@ -1662,9 +1661,7 @@
 				"inline": "Sub form inside field",
 				"none": "Full page form"
 			},
-			"popUpType": "Open as",
-			"relationIndexApply": "Record on current form",
-			"relationIndexOpen": "From relation"
+			"relationIndexApply": "Record on current form"
 		},
 		"pageTitle": "Builder",
 		"pageTitleDocs": "Builder documentation",

@@ -1652,7 +1652,6 @@
 		"noOwner": "应用程序处于只读模式",
 		"openFormInput": {
 			"attributeApply": "在打开的表单上使用为默认值",
-			"formIdOpen": "表单ID",
 			"maxHeight": "最大高度（像素）",
 			"maxWidth": "最大宽度（像素）",
 			"newRecord": "与新记录建立关系",
@@ -1662,9 +1661,7 @@
 				"inline": "字段内的子表单",
 				"none": "全页表单"
 			},
-			"popUpType": "打开方式",
-			"relationIndexApply": "当前表单上的记录",
-			"relationIndexOpen": "来自关系"
+			"relationIndexApply": "当前表单上的记录"
 		},
 		"pageTitle": "构建器",
 		"pageTitleDocs": "构建器文档",

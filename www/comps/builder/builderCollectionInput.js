@@ -4,9 +4,8 @@ import {
 	getDependentModules,
 	getItemTitleColumn
 } from '../shared/builder.js';
-export {MyBuilderCollectionInput as default};
 
-const MyBuilderCollectionInput = {
+export default {
 	name:'my-builder-collection-input',
 	components:{MyBuilderOpenForm},
 	template:`<table class="builder-collection-input">
@@ -48,11 +47,10 @@ const MyBuilderCollectionInput = {
 				<td>{{ capGen.formOpen }}</td>
 				<td>
 					<my-builder-open-form
-						@update:openForm="openFormInput = $event"
+						v-model="openFormInput"
 						:allowAllForms="true"
-						:module="module"
-						:openForm="openFormInput"
-						:readonly="readonly"
+						:module
+						:readonly
 					/>
 				</td>
 			</tr>
@@ -66,7 +64,7 @@ const MyBuilderCollectionInput = {
 							@update:modelValue="setFlag('multiValue',$event)"
 							:caption="capApp.multiValue"
 							:modelValue="consumer.flags.includes('multiValue')"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- do not display if value is empty input -->
 						<my-button-check
@@ -74,7 +72,7 @@ const MyBuilderCollectionInput = {
 							@update:modelValue="setFlag('noDisplayEmpty',$event)"
 							:caption="capApp.noDisplayEmpty"
 							:modelValue="consumer.flags.includes('noDisplayEmpty')"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- show aggregated row count instead of value -->
 						<my-button-check
@@ -82,7 +80,7 @@ const MyBuilderCollectionInput = {
 							@update:modelValue="setFlag('showRowCount',$event)"
 							:caption="capApp.showRowCount"
 							:modelValue="consumer.flags.includes('showRowCount')"
-							:readonly="readonly"
+							:readonly
 						/>
 					</div>
 				</td>
@@ -90,7 +88,7 @@ const MyBuilderCollectionInput = {
 			<tr v-if="collectionSet && showOnMobile">
 				<!-- show on mobile input -->
 				<td>{{ capApp.onMobile }}</td>
-				<td><my-bool v-model="onMobileInput" :readonly="readonly" /></td>
+				<td><my-bool v-model="onMobileInput" :readonly /></td>
 			</tr>
 			<tr>
 				<td>

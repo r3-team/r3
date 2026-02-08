@@ -690,6 +690,17 @@ export function getTemplateOpenDoc() {
 		relationIndexOpen:0
 	};
 };
+export function getTemplateOpenForm(forcePopUp) {
+	return {
+		attributeIdApply:null,
+		formIdOpen:null,
+		relationIndexApply:-1,
+		relationIndexOpen:-1,
+		popUpType:forcePopUp ? 'float' : null,
+		maxHeight:1000,
+		maxWidth:1200
+	};
+};
 export function getTemplatePgFunction(moduleId,name,template,isTrigger) {
 	return {
 		id:getUuidV4(),

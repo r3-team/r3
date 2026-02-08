@@ -1652,7 +1652,6 @@
 		"noOwner": "Az alkalmazás írásvédett",
 		"openFormInput": {
 			"attributeApply": "... az űrlap értékének beállításához",
-			"formIdOpen": "Űrlap",
 			"maxHeight": "Maximális magasság (px)",
 			"maxWidth": "Maximális szélesség (px)",
 			"newRecord": "Új rekord létrehozásakor",
@@ -1662,9 +1661,7 @@
 				"inline": "Alűrlap a mezőben",
 				"none": "Teljes oldal"
 			},
-			"popUpType": "Megnyitás mint",
-			"relationIndexApply": "Record on current form",
-			"relationIndexOpen": "From relation"
+			"relationIndexApply": "Record on current form"
 		},
 		"pageTitle": "Builder",
 		"pageTitleDocs": "Builder Dokumentáció",

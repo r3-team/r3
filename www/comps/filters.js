@@ -1074,7 +1074,7 @@ export default {
 	emits:['apply','update:modelValue'],
 	watch:{
 		modelValue:{
-			handler:function() { this.reset(); },
+			handler() { this.reset(); },
 			immediate:true
 		}
 	},
