@@ -16,6 +16,8 @@ import MyInputSelect          from './inputSelect.js';
 import MyInputUuid            from './inputUuid.js';
 import MyList                 from './list.js';
 import {hasAccessToAttribute} from './shared/access.js';
+import {getFieldHasQuery}     from './shared/builder.js';
+import {getTemplateQuery}     from './shared/builderTemplate.js';
 import {srcBase64}            from './shared/image.js';
 import {getCaption}           from './shared/language.js';
 import {
@@ -75,7 +77,7 @@ export default {
 		<template v-if="isData || isList || isTabs || isCalendar || isKanban || isChart">
 			
 			<div class="field-caption"
-				v-if="hasCaption"
+				v-if="isWithCaption"
 				:class="{ invalid:showInvalid }"
 			>
 				<img src="images/lock.png" v-if="isEncrypted" :title="capApp.dialog.encrypted" />
@@ -84,7 +86,7 @@ export default {
 			
 			<div class="field-content" ref="content"
 				v-click-outside="clickOutside"
-				:class="{ data:isData, dropdown:dropdownShow, disabled:isReadonly, isSingleField:isAlone, intent:hasIntent }"
+				:class="{ data:isData, dropdown:dropdownShow, disabled:isReadonly, isSingleField:isAlone, intent:isWithIntent }"
 			>
 				<!-- data field icon -->
 				<div class="field-icon" v-if="iconId && isData && !isRelationship && !isDrawing && !isFiles && !isRichtext && !isTextarea && !isRating && !isBarcode && !isIframe">
@@ -126,7 +128,7 @@ export default {
 					:loginOptions
 					:moduleId
 					:popUpFormInline
-					:query="field.query"
+					:query
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				/>
 				
@@ -141,29 +143,29 @@ export default {
 					:attributeIdColor="field.attributeIdColor"
 					:attributeIdDate0="field.attributeIdDate0"
 					:attributeIdDate1="field.attributeIdDate1"
-					:choices="choices"
-					:columns="columns"
+					:choices
+					:columns
 					:collections="field.collections"
-					:collectionIdMapIndexes="collectionIdMapIndexes"
-					:dataOptions="dataOptions"
+					:collectionIdMapIndexes
+					:dataOptions
 					:fieldId="field.id"
 					:days0="field.dateRange0 / 86400"
 					:days1="field.dateRange1 / 86400"
-					:filters="filters"
-					:formLoading="formLoading"
+					:filters
+					:formLoading
 					:hasOpenForm="field.openForm !== null"
 					:iconId="iconId ? iconId : null"
 					:indexColor="field.indexColor"
 					:indexDate0="field.indexDate0"
 					:indexDate1="field.indexDate1"
-					:isHidden="isHidden"
+					:isHidden
 					:isSingleField="isAlone"
-					:loginOptions="loginOptions"
-					:moduleId="moduleId"
+					:loginOptions
+					:moduleId
 					:popUpFormInline="popUpFormInline"
 					:stepTypeDefault="field.ganttSteps"
 					:stepTypeToggle="field.ganttStepsToggle"
-					:query="field.query"
+					:query
 					:usesHotkeys="isAlone"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				/>
@@ -179,44 +181,44 @@ export default {
 					@set-collection-indexes="setCollectionIndexes"
 					@set-login-option="setLoginOption"
 					:attributeIdSort="field.attributeIdSort"
-					:choices="choices"
-					:columns="columns"
+					:choices
+					:columns
 					:collections="field.collections"
-					:collectionIdMapIndexes="collectionIdMapIndexes"
-					:dataOptions="dataOptions"
+					:collectionIdMapIndexes
+					:dataOptions
 					:fieldId="field.id"
-					:filters="filters"
-					:formLoading="formLoading"
+					:filters
+					:formLoading
 					:hasOpenForm="field.openForm !== null"
 					:iconId="iconId ? iconId : null"
-					:isHidden="isHidden"
+					:isHidden
 					:isSingleField="isAlone"
 					:loadWhileHidden="parentIsCounting"
-					:loginOptions="loginOptions"
-					:moduleId="moduleId"
+					:loginOptions
+					:moduleId
 					:popUpFormInline="popUpFormInline"
 					:relationIndexData="field.relationIndexData"
 					:relationIndexAxisX="field.relationIndexAxisX"
 					:relationIndexAxisY="field.relationIndexAxisY"
-					:query="field.query"
+					:query
 				/>
 				
 				<!-- chart -->
 				<my-chart
 					v-if="isChart"
 					@set-login-option="setLoginOption"
-					:choices="choices"
-					:columns="columns"
-					:filters="filters"
-					:formLoading="formLoading"
-					:isHidden="isHidden"
-					:limit="field.query.fixedLimit"
-					:loginOptions="loginOptions"
-					:moduleId="moduleId"
+					:choices
+					:columns
+					:filters
+					:formLoading
+					:isHidden
+					:limit="query.fixedLimit"
+					:loginOptions
+					:moduleId
 					:needsHeader="isAlone"
 					:optionJson="field.chartOption"
 					:optionOverwrite="fieldIdMapOverwrite.chart[field.id]"
-					:query="field.query"
+					:query
 				/>
 				
 				<!-- list -->
@@ -250,12 +252,12 @@ export default {
 					:isHidden
 					:isSingleField="isAlone"
 					:layoutDefault="field.layout"
-					:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
+					:limitDefault="query.fixedLimit === 0 ? field.resultLimit : query.fixedLimit"
 					:loadWhileHidden="parentIsCounting"
 					:loginOptions
 					:moduleId
 					:popUpFormInline
-					:query="field.query"
+					:query
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				>
 					<template #input-icon>
@@ -590,7 +592,7 @@ export default {
 					:limitDefault="100"
 					:loginOptions
 					:moduleId
-					:query="field.query"
+					:query
 				>
 					<template #input-icon>
 						<div class="field-icon inList" v-if="iconId">
@@ -1098,7 +1100,8 @@ export default {
 		},
 		
 		// simple
-		attribute:   (s) => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false ,
+		attribute:   (s) => s.isData && !s.isVariable ? s.attributeIdMap[s.field.attributeId] : false,
+		collectionIdMapIndexes:(s) => s.$root.getOrFallback(s.loginOptions,'collectionIdMapIndexes',{}),
 		content:     (s) => s.isVariable ? 'data' : s.field.content,
 		contentData: (s) => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
 		contentUse:  (s) => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
@@ -1106,25 +1109,12 @@ export default {
 			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
 		dataOptions: (s) => s.entityIdMapEffect.field[s.field.id] === undefined ? 0 : s.entityIdMapEffect.field[s.field.id].data,
 		dropdownShow:(s) => s.dropdownElm === s.$refs.content,
-		hasCaption:  (s) => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
-		hasIntent:   (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
 		inputRegex:  (s) => !s.isData || s.isVariable || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:        (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
 		loginOptions:(s) => s.fieldIdMapOptions[s.field.id] === undefined ? {} : s.fieldIdMapOptions[s.field.id],
+		query:       (s) => s.getFieldHasQuery(s.field) && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
 		showInvalid: (s) => !s.isValid && (s.formBadSave || s.isTouched),
 		variable:    (s) => (!s.isVariable || s.field.variableId === null) ? false : s.variableIdMap[s.field.variableId],
-		
-		// content types
-		isButton:   (s) => s.content === 'button',
-		isCalendar: (s) => s.content === 'calendar',
-		isChart:    (s) => s.content === 'chart',
-		isContainer:(s) => s.content === 'container',
-		isData:     (s) => s.content === 'data',
-		isHeader:   (s) => s.content === 'header',
-		isKanban:   (s) => s.content === 'kanban',
-		isList:     (s) => s.content === 'list',
-		isTabs:     (s) => s.content === 'tabs',
-		isVariable: (s) => s.field.content === 'variable',
 
 		// processed states
 		choices:     (s) => s.fieldIdMapProcessed.choices[s.field.id]      ?? [],
@@ -1132,23 +1122,15 @@ export default {
 		filters:     (s) => s.fieldIdMapProcessed.filters[s.field.id]      ?? [],
 		filtersInput:(s) => s.fieldIdMapProcessed.filtersInput[s.field.id] ?? [],
 		
-		// states
-		isAlone:   (s) => s.isAloneInForm || s.isAloneInTab,
-		isHidden:  (s) => s.stateFinal === 'hidden' || s.parentIsHidden,
-		isTouched: (s) => s.fieldIdsTouched.includes(s.field.id),
-		isReadonly:(s) => s.stateFinal === 'readonly',
-		isRequired:(s) => s.stateFinal === 'required',
-		
-		// display options
-		isLogin:    (s) => s.isData && s.field.display === 'login',
-		isMonospace:(s) => s.field.flags.includes('monospace'),
-		isPassword: (s) => s.isData && s.field.display === 'password',
-		isRating:   (s) => s.isData && s.field.display === 'rating',
-		isSlider:   (s) => s.isData && s.field.display === 'slider',
-		
-		// composite
+		// bool states
 		isActive:        (s) => (!s.isMobile || s.field.onMobile) && (!s.isVariable || s.field.variableId !== null),
+		isAlone:         (s) => s.isAloneInForm || s.isAloneInTab,
 		isBarcode:       (s) => s.isData && s.contentUse === 'barcode',
+		isButton:        (s) => s.content === 'button',
+		isCalendar:      (s) => s.content === 'calendar',
+		isChart:         (s) => s.content === 'chart',
+		isContainer:     (s) => s.content === 'container',
+		isData:          (s) => s.content === 'data',
 		isEncrypted:     (s) => s.isData && s.attribute.encrypted,
 		isNew:           (s) => s.isData && !s.isVariable && s.joinsIndexMap[s.field.index].recordId === 0,
 		isBoolean:       (s) => s.isData && s.isAttributeBoolean(s.contentData),
@@ -1161,19 +1143,32 @@ export default {
 		isDecimal:       (s) => s.isData && s.isAttributeDecimal(s.contentData),
 		isDrawing:       (s) => s.isData && s.contentUse === 'drawing',
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.contentData),
+		isHeader:        (s) => s.content === 'header',
+		isHidden:        (s) => s.stateFinal === 'hidden' || s.parentIsHidden,
 		isIframe:        (s) => s.isData && s.contentUse === 'iframe',
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.contentData),
+		isKanban:        (s) => s.content === 'kanban',
+		isList:          (s) => s.content === 'list',
+		isLogin:         (s) => s.isData && s.field.display === 'login',
+		isMonospace:     (s) => s.field.flags.includes('monospace'),
+		isPassword:      (s) => s.isData && s.field.display === 'password',
+		isRating:        (s) => s.isData && s.field.display === 'rating',
+		isReadonly:      (s) => s.stateFinal === 'readonly',
 		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.contentData),
 		isRelationship1N:(s) => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
 		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.contentData),
+		isRequired:      (s) => s.stateFinal === 'required',
 		isRichtext:      (s) => s.isData && s.contentUse === 'richtext',
+		isSlider:        (s) => s.isData && s.field.display === 'slider',
 		isString:        (s) => s.isData && s.isAttributeString(s.contentData),
+		isTabs:          (s) => s.content === 'tabs',
 		isTextarea:      (s) => s.isData && s.contentUse === 'textarea',
 		isTime:          (s) => s.isData && s.contentUse === 'time',
+		isTouched:       (s) => s.fieldIdsTouched.includes(s.field.id),
+		isVariable:      (s) => s.field.content === 'variable',
+		isWithCaption:   (s) => !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
+		isWithIntent:    (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles && !s.isBarcode && !s.isTextarea && !s.isRichtext,
 		isUuid:          (s) => s.isData && s.isAttributeUuid(s.contentData),
-
-		// login options
-		collectionIdMapIndexes:(s) => s.$root.getOrFallback(s.loginOptions,'collectionIdMapIndexes',{}),
 		
 		// stores
 		relationIdMap:      (s) => s.$store.getters['schema/relationIdMap'],
@@ -1201,10 +1196,12 @@ export default {
 	methods:{
 		// externals
 		getCaption,
+		getFieldHasQuery,
 		getFlexStyle,
 		getFormPopUpConfig,
 		getIndexAttributeId,
 		getLinkMeta,
+		getTemplateQuery,
 		hasAccessToAttribute,
 		isAttributeBoolean,
 		isAttributeDecimal,

@@ -8,6 +8,7 @@ import {openLink}                      from '../shared/generic.js';
 import {getJoinsIndexMap}              from '../shared/query.js';
 import {
 	getTemplateCollectionConsumer,
+	getTemplateQuery,
 	getTemplateTab
 } from '../shared/builderTemplate.js';
 import {
@@ -631,7 +632,7 @@ export default {
 							>
 								<option :value="getIndexAttributeId(null,null,false,null)">-</option>
 								<optgroup
-									v-for="j in field.query.joins"
+									v-for="j in query.joins"
 									:label="j.index+' '+relationIdMap[j.relationId].name"
 								>
 									<option
@@ -653,7 +654,7 @@ export default {
 							>
 								<option :value="getIndexAttributeId(null,null,false,null)">-</option>
 								<optgroup
-									v-for="j in field.query.joins"
+									v-for="j in query.joins"
 									:label="j.index+' '+relationIdMap[j.relationId].name"
 								>
 									<option
@@ -675,7 +676,7 @@ export default {
 							>
 								<option :value="getIndexAttributeId(null,null,false,null)">-</option>
 								<optgroup
-									v-for="j in field.query.joins"
+									v-for="j in query.joins"
 									:label="j.index+' '+relationIdMap[j.relationId].name"
 								>
 									<option
@@ -1037,7 +1038,7 @@ export default {
 				</template>
 				
 				<template v-if="isKanban">
-					<tr v-if="field.query.relationId !== null">
+					<tr v-if="query.relationId !== null">
 						<td>{{ capApp.kanban.relationIndexData }}</td>
 						<td>
 							<div class="row gap">
@@ -1047,7 +1048,7 @@ export default {
 								>
 									<option value="">-</option>
 									<option
-										v-for="j in field.query.joins"
+										v-for="j in query.joins"
 										:value="j.index"
 									>{{ j.index+' '+relationIdMap[j.relationId].name }}</option>
 								</select>
@@ -1106,7 +1107,7 @@ export default {
 									:value="field.attributeIdSort === null ? '' : field.attributeIdSort"
 								>
 									<option value="">-</option>
-									<optgroup v-for="j in field.query.joins.filter(v => v.index === field.relationIndexData)"
+									<optgroup v-for="j in query.joins.filter(v => v.index === field.relationIndexData)"
 										:label="j.index+' '+relationIdMap[j.relationId].name"
 									>
 										<option
@@ -1294,7 +1295,7 @@ export default {
 						/>
 					</td>
 				</tr>
-				<tr v-if="isList && field.query.relationId !== null">
+				<tr v-if="isList && query.relationId !== null">
 					<td v-html="capApp.openFormBulk"></td>
 					<td>
 						<my-builder-open-form
@@ -1373,24 +1374,24 @@ export default {
 	},
 	emits:['createNew','set'],
 	computed:{
-		displayOptions:(s) => {
+		displayOptions:s => {
 			let out = ['default'];
 			if(s.isInteger && s.isDisplayDefault) out.push('rating','slider','login');
 			if(s.isString  && s.isDisplayDefault) out.push('password','email','phone','url');
 			if(s.isFiles)                         out.push('gallery');
 			return out;
 		},
-		joinsIndexMapField:(s) => {
-			return s.isQuery ? s.getJoinsIndexMap(s.field.query.joins) : {};
+		joinsIndexMapField:s => {
+			return s.isQuery ? s.getJoinsIndexMap(s.query.joins) : {};
 		},
-		joinsKanbanAxis:(s) => {
+		joinsKanbanAxis:s => {
 			if(!s.isKanban || s.field.relationIndexData === null)
 				return [];
 
 			const joinData = s.joinsIndexMapField[s.field.relationIndexData];
-			return s.field.query.joins.filter(v => v.indexFrom === joinData.index || v.index === joinData.indexFrom);
+			return s.query.joins.filter(v => v.indexFrom === joinData.index || v.index === joinData.indexFrom);
 		},
-		presetIdMap:(s) => {
+		presetIdMap:s => {
 			if(!s.isRelationship)
 				return {};
 			
@@ -1407,7 +1408,7 @@ export default {
 			}
 			return map;
 		},
-		systemDefaults:(s) => {
+		systemDefaults:s => {
 			if(s.isRichtext || s.isBarcode || s.isIFrame) return [];
 			if(s.isDate)     return ['{CURR_DATE}'];
 			if(s.isDatetime) return ['{CURR_DATETIME}'];
@@ -1432,52 +1433,53 @@ export default {
 		},
 		
 		// simple states
-		content:          (s) => s.isVariable ? 'data' : s.field.content,
-		contentData:      (s) => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
-		contentUse:       (s) => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
-		hasCaption:       (s) => s.isData || s.isHeader,
-		hasOpenDoc:       (s) => !s.isVariable && s.isButton,
-		hasOpenForm:      (s) => !s.isVariable && (s.isButton || ((s.isList || s.isCalendar || s.isKanban || s.isRelationship) && s.field.query.relationId !== null)),
-		isBarcode:        (s) => s.isData && s.contentUse === 'barcode',
-		isBoolean:        (s) => s.isData && s.isAttributeBoolean(s.contentData),
-		isButton:         (s) => s.content === 'button',
-		isCalendar:       (s) => s.content === 'calendar',
-		isChart:          (s) => s.content === 'chart',
-		isContainer:      (s) => s.content === 'container',
-		isData:           (s) => s.content === 'data',
-		isDate:           (s) => s.isData && s.contentUse === 'date',
-		isDatetime:       (s) => s.isData && s.contentUse === 'datetime',
-		isDisplayDefault: (s) => s.isData && s.contentUse === 'default',
-		isDrawing:        (s) => s.isData && s.contentUse === 'drawing',
-		isFiles:          (s) => s.isData && s.isAttributeFiles(s.contentData),
-		isHeader:         (s) => s.content === 'header',
-		isIFrame:         (s) => s.isData && s.contentUse === 'iframe',
-		isInteger:        (s) => s.isData && s.isAttributeInteger(s.contentData),
-		isList:           (s) => s.content === 'list',
-		isKanban:         (s) => s.content === 'kanban',
-		isQuery:          (s) => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
-		isTabs:           (s) => s.content === 'tabs',
-		isRegconfig:      (s) => s.isData && s.isAttributeRegconfig(s.contentData),
-		isRelationship:   (s) => s.isData && s.isAttributeRelationship(s.contentData),
-		isRelationship1N: (s) => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
-		isRichtext:       (s) => s.isData && s.contentUse === 'richtext',
-		isString:         (s) => s.isData && s.isAttributeString(s.contentData),
-		isTime:           (s) => s.isData && s.contentUse === 'time',
-		isVariable:       (s) => s.field.content === 'variable',
-		systemDefaultUsed:(s) => s.systemDefaults.includes(s.field.def),
+		content:          s => s.isVariable ? 'data' : s.field.content,
+		contentData:      s => s.isData && !s.isVariable ? s.attribute.content    : s.variable.content,
+		contentUse:       s => s.isData && !s.isVariable ? s.attribute.contentUse : s.variable.contentUse,
+		hasCaption:       s => s.isData || s.isHeader,
+		hasOpenDoc:       s => !s.isVariable && s.isButton,
+		hasOpenForm:      s => !s.isVariable && (s.isButton || ((s.isList || s.isCalendar || s.isKanban || s.isRelationship) && s.query.relationId !== null)),
+		isBarcode:        s => s.isData && s.contentUse === 'barcode',
+		isBoolean:        s => s.isData && s.isAttributeBoolean(s.contentData),
+		isButton:         s => s.content === 'button',
+		isCalendar:       s => s.content === 'calendar',
+		isChart:          s => s.content === 'chart',
+		isContainer:      s => s.content === 'container',
+		isData:           s => s.content === 'data',
+		isDate:           s => s.isData && s.contentUse === 'date',
+		isDatetime:       s => s.isData && s.contentUse === 'datetime',
+		isDisplayDefault: s => s.isData && s.contentUse === 'default',
+		isDrawing:        s => s.isData && s.contentUse === 'drawing',
+		isFiles:          s => s.isData && s.isAttributeFiles(s.contentData),
+		isHeader:         s => s.content === 'header',
+		isIFrame:         s => s.isData && s.contentUse === 'iframe',
+		isInteger:        s => s.isData && s.isAttributeInteger(s.contentData),
+		isList:           s => s.content === 'list',
+		isKanban:         s => s.content === 'kanban',
+		isQuery:          s => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
+		isTabs:           s => s.content === 'tabs',
+		isRegconfig:      s => s.isData && s.isAttributeRegconfig(s.contentData),
+		isRelationship:   s => s.isData && s.isAttributeRelationship(s.contentData),
+		isRelationship1N: s => s.isRelationship && (s.contentData === '1:n' || (s.field.outsideIn === true && s.contentData === 'n:1')),
+		isRichtext:       s => s.isData && s.contentUse === 'richtext',
+		isString:         s => s.isData && s.isAttributeString(s.contentData),
+		isTime:           s => s.isData && s.contentUse === 'time',
+		isVariable:       s => s.field.content === 'variable',
+		query:            s => s.isQuery && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
+		systemDefaultUsed:s => s.systemDefaults.includes(s.field.def),
 		
 		// stores
-		attribute:     (s) => !s.isData || s.attributeIdMap[s.field.attributeId] === undefined ? false : s.attributeIdMap[s.field.attributeId],
-		module:        (s) => s.moduleIdMap[s.moduleId],
-		variable:      (s) => !s.isVariable || s.variableIdMap[s.field.variableId] === undefined ? false : s.variableIdMap[s.field.variableId],
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		formIdMap:     (s) => s.$store.getters['schema/formIdMap'],
-		variableIdMap: (s) => s.$store.getters['schema/variableIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.form,
-		capCal:        (s) => s.$store.getters.captions.calendar,
-		capGen:        (s) => s.$store.getters.captions.generic
+		attribute:     s => !s.isData || s.attributeIdMap[s.field.attributeId] === undefined ? false : s.attributeIdMap[s.field.attributeId],
+		module:        s => s.moduleIdMap[s.moduleId],
+		variable:      s => !s.isVariable || s.variableIdMap[s.field.variableId] === undefined ? false : s.variableIdMap[s.field.variableId],
+		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		formIdMap:     s => s.$store.getters['schema/formIdMap'],
+		variableIdMap: s => s.$store.getters['schema/variableIdMap'],
+		capApp:        s => s.$store.getters.captions.builder.form,
+		capCal:        s => s.$store.getters.captions.calendar,
+		capGen:        s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -1489,6 +1491,7 @@ export default {
 		getItemTitlePath,
 		getJoinsIndexMap,
 		getTemplateCollectionConsumer,
+		getTemplateQuery,
 		getTemplateTab,
 		isAttributeBoolean,
 		isAttributeFiles,
@@ -1535,7 +1538,7 @@ export default {
 		set(name,val) {
 			if(name === 'csvImport' && !val) {
 				// no CSV import, clear query lookups
-				let q = JSON.parse(JSON.stringify(this.field.query));
+				let q = JSON.parse(JSON.stringify(this.query));
 				q.lookups = [];
 				this.$emit('set','query',q);
 			}

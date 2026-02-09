@@ -46,30 +46,6 @@ const MyStoreSchema = {
 					getFormIdsFromMenus(menu.menus);
 				}
 			};
-			const processFields = fields => {
-				for(let i = 0, j = fields.length; i < j; i++) {
-
-					if(fields[i].query !== undefined)
-						fields[i].query = getTemplateQueryIfNull(fields[i].query);
-
-					if(fields[i].columns !== undefined) {
-						for(let x = 0, y = fields[i].columns.length; x < y; x++) {
-							if(fields[i].columns[x].subQuery)
-								fields[i].columns[x].query = getTemplateQueryIfNull(fields[i].columns[x].query);
-						}
-					}
-					
-					switch(fields[i].content) {
-						case 'container': fields[i].fields = processFields(fields[i].fields); break;
-						case 'tabs':
-							for(let x = 0, y = fields[i].tabs.length; x < y; x++) {
-								fields[i].tabs[x].fields = processFields(fields[i].tabs[x].fields);
-							}
-						break;
-					}
-				}
-				return fields;
-			};
 			
 			for(let mod of p) {
 				mod.formNameMap = {};
@@ -114,8 +90,6 @@ const MyStoreSchema = {
 				
 				// process forms
 				for(let form of mod.forms) {
-					form.fields = processFields(form.fields);
-					
 					s.formIdMap[form.id]   = form;
 					mod.formNameMap[form.name] = form;
 				}

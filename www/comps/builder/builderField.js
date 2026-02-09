@@ -3,6 +3,7 @@ import MyBuilderColumnOptions from './builderColumnOptions.js';
 import MyBuilderFields        from './builderFields.js';
 import MyBuilderFieldOptions  from './builderFieldOptions.js';
 import MyBuilderQuery         from './builderQuery.js';
+import {getTemplateQuery}     from '../shared/builderTemplate.js';
 import {getColumnIcon}        from '../shared/column.js';
 import {getFlexBasis}         from '../shared/form.js';
 import {getJoinsIndexMap}     from '../shared/query.js';
@@ -44,7 +45,7 @@ export default {
 		<div class="builder-field-header" :class="{ dragAnchor:!moveActive && !noMovement }">
 			<!-- field icon -->
 			<div class="builder-field-button"
-				@click="openSettings"
+				@click="openSettings('properties')"
 				:class="{ clickable:!isTemplate && !moveActive, selected:isOptionsShow }"
 				:title="capApp.fieldOptions"
 			>
@@ -80,7 +81,7 @@ export default {
 			<!-- action: edit field content -->
 			<img class="action clickable" src="images/database.png"
 				v-if="!isTemplate && !moveActive && hasQuery"
-				@click="$emit('field-id-show',field.id); tabTarget = 'content'"
+				@click="openSettings('content')"
 				:class="{ selected:isOptionsShow && tabTarget === 'content' }"
 				:title="capApp.contentField"
 			/>
@@ -207,7 +208,7 @@ export default {
 		<!-- columns -->
 		<my-builder-columns
 			v-if="showColumns"
-			@column-id-show="columnIdShow = $event"
+			@column-id-show="columnShowById"
 			@columns-set="$emit('field-property-set','columns',$event)"
 			:batchIndexTitle="columnBatchIndexTitle"
 			:builderLanguage
@@ -243,7 +244,7 @@ export default {
 		/>
 
 		<teleport v-if="isOptionsShow" :to="elmOptions">
-			<div class="top lower" :class="{ clickable:columnIdShow !== null }" @click="$emit('field-id-show',field.id)">
+			<div class="top lower" :class="{ clickable:columnIdShow !== null }" @click="columnIdShow = null">
 				<div class="area">
 					<img class="icon" src="images/dash.png" />
 					<img class="icon" :src="'images/' + getFieldIcon(field)" />
@@ -251,22 +252,22 @@ export default {
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
-						@trigger="$emit('field-id-show',null)"
+						@trigger="$emit('field-id-show',null);columnIdShow = null"
 						:blockBubble="true"
 						:cancel="true"
 						:captionTitle="capGen.button.close"
 					/>
 				</div>
 			</div>
-			<div class="top lower" v-if="columnIdShow !== null">
+			<div class="top lower" v-if="columnShow !== false">
 				<div class="area">
 					<img class="icon" src="images/dash.png" />
 					<img class="icon" :src="'images/' + getColumnIcon(columnShow)" />
-					<h2>{{  capGen.column + ': ' + getItemTitleColumn(columnShow,false) }}</h2>
+					<h2>{{ capGen.column + ': ' + getItemTitleColumn(columnShow,false) }}</h2>
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
-						@trigger="columnIdShow = null;"
+						@trigger="columnIdShow = null"
 						:cancel="true"
 						:captionTitle="capGen.button.close"
 					/>
@@ -301,8 +302,8 @@ export default {
 					<!-- field query (relationship inputs, lists, calendars, charts, ...) -->
 					<template v-if="hasQuery && tabTarget === 'content'">
 						<my-builder-query
-							v-model="field.query"
 							@index-removed="queryRemoveIndex($event)"
+							@update:modelValue="field.query = $event"
 							:allowLookups="field.content === 'list' && field.csvImport"
 							:allowOrders="true"
 							:builderLanguage
@@ -310,14 +311,15 @@ export default {
 							:fieldIdMap
 							:filtersDisable="['formState','getter','globalSearch']"
 							:formId
+							:modelValue="query"
 							:moduleId
-							:relationIdStart="relationIdStart"
+							:relationIdStart
 						/>
 
 						<!-- SQL preview -->
 						<div class="row">
 							<my-button image="code.png"
-								@trigger="getSqlPreview(field.query,field.columns)"
+								@trigger="getSqlPreview(query,field.columns)"
 								:caption="capGen.sqlPreview"
 							/>
 						</div>
@@ -329,7 +331,7 @@ export default {
 								@column-add="columnAdd"
 								:columns="field.columns"
 								:groupName="'batches_' + field.id + '_columns'"
-								:joins="field.query.joins"
+								:joins="query.joins"
 							/>
 						</div>
 					</template>
@@ -337,10 +339,17 @@ export default {
 			</template>
 
 			<!-- column properties -->
-			<template v-if="columnIdShow !== null">
-				<div class="content no-shrink" v-if="columnShow.subQuery">
+			<template v-if="columnShow !== false">
+				<my-tabs
+					v-if="columnShow.subQuery"
+					v-model="tabTargetColumn"
+					:entries="['properties','content']"
+					:entriesIcon="['images/edit.png','images/database.png']"
+					:entriesText="[capGen.properties,capGen.content]"
+				/>
+				<div class="content no-shrink" v-if="columnShow.subQuery && tabTargetColumn === 'content'">
 					<my-builder-query
-						v-model="columnShow.query"
+						@update:modelValue="columnShow.query = $event"
 						:allowChoices="false"
 						:allowOrders="true"
 						:builderLanguage
@@ -348,11 +357,13 @@ export default {
 						:fieldIdMap
 						:filtersDisable="['formState','getter','globalSearch']"
 						:formId
-						:joinsParents="[field.query.joins]"
+						:joinsParents="[query.joins]"
+						:modelValue="columnShowQuery"
 						:moduleId
 					/>
 				</div>
 				<my-builder-column-options
+					v-if="!columnShow.subQuery || tabTargetColumn === 'properties'"
 					@set="(...args) => columnPropertySet(args[0],args[1])"
 					:builderLanguage
 					:column="columnShow"
@@ -389,16 +400,17 @@ export default {
 	emits:['createNew','field-id-show','field-move','field-move-store','field-property-set','field-remove'],
 	data() {
 		return {
-			columnIdShow:null,  // currently open column
-			tabIndex:0,         // which tab index to show (tab fields)
-			tabTarget:'content' // sidebar tab target for field (content, properties)
+			columnIdShow:null,        // currently open column
+			tabIndex:0,               // which tab index to show (tab fields)
+			tabTarget:'content',      // sidebar tab target for column (content, properties)
+			tabTargetColumn:'content' // sidebar tab target for field (content, properties)
 		};
 	},
 	computed:{
 		columnBatchIndexTitle:s => {
 			if(s.isGantt) return [s.capApp.ganttBatch];
 			if(s.isKanban) {
-				const joinsIndexMap = s.getJoinsIndexMap(s.field.query.joins);
+				const joinsIndexMap = s.getJoinsIndexMap(s.query.joins);
 				const getCaption = function(relationIndex) {
 					const j = joinsIndexMap[relationIndex];
 					return `${relationIndex} ${s.relationIdMap[j.relationId].name}`;
@@ -415,12 +427,12 @@ export default {
 			return [];
 		},
 		columnShow:s => {
-			if(s.columnIdShow === null) return null;
+			if(s.columnIdShow === null) return false;
 			for(const c of s.field.columns) {
 				if(c.id === s.columnIdShow)
 					return c;
 			}
-			return null;
+			return false;
 		},
 		cssClass:s => {
 			return {
@@ -503,7 +515,7 @@ export default {
 		warnings:s => {
 			let out = [];
 			if(s.hasQuery) {
-				if(s.field.query.relationId === null) out.push(s.capApp.warning.queryRelationNotSet);
+				if(s.query.relationId === null) out.push(s.capApp.warning.queryRelationNotSet);
 				if(s.field.columns.length   === 0)    out.push(s.capApp.warning.queryColumnsNotSet);
 				
 				for(let c of s.field.columns) {
@@ -521,6 +533,7 @@ export default {
 		},
 		
 		// simple
+		columnShowQuery: s => s.columnShow !== false && s.columnShow.subQuery && s.columnShow.query !== null ? s.columnShow.query : s.getTemplateQuery(),
 		hasQuery:        s => s.getFieldHasQuery(s.field),
 		isBarcode:       s => s.isData && s.attribute.contentUse === 'barcode',
 		isButton:        s => s.field.content === 'button',
@@ -542,8 +555,9 @@ export default {
 		isRelationship:  s => s.isData && s.isAttributeRelationship(s.attribute.content),
 		isRelationship1N:s => s.isRelationship && s.field.outsideIn === true && s.attribute.content === 'n:1',
 		isVariable:      s => s.field.content === 'variable',
-		parentChildren:  s => s.isContainer ? s.field.fields : (s.isTabs ? s.field.tabs[s.tabIndex].fields : []),
 		moveActive:      s => s.fieldMoveList !== null,
+		parentChildren:  s => s.isContainer ? s.field.fields : (s.isTabs ? s.field.tabs[s.tabIndex].fields : []),
+		query:           s => s.hasQuery && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
 		reference:       s => s.isTemplate ? '' : 'F' + s.entityIdMapRef.field[s.field.id],
 		showColumns:     s => !s.isTemplate && s.hasQuery && s.fieldIdShow === s.field.id && s.tabTarget === 'content',
 		tabIndexShown:   s => s.isTabs && s.field.tabs.length > s.tabIndex ? s.tabIndex : 0,
@@ -571,6 +585,7 @@ export default {
 		getItemTitleColumn,
 		getJoinsIndexMap,
 		getSqlPreview,
+		getTemplateQuery,
 		isAttributeFiles,
 		isAttributeRelationship,
 		
@@ -583,9 +598,19 @@ export default {
 		columnPropertySet(name,value) {
 			this.columnShow[name] = value;
 		},
-		openSettings() {
+		columnShowById(id,tabTarget) {
+			if(this.columnIdShow === id && this.tabTargetColumn === tabTarget)
+				return this.columnIdShow = null;
+
+			this.columnIdShow    = id;
+			this.tabTargetColumn = tabTarget;
+		},
+		openSettings(tabTarget) {
+			if(this.fieldIdShow === this.field.id && tabTarget !== this.tabTarget)
+				return this.tabTarget = tabTarget;
+
 			this.$emit('field-id-show',this.field.id);
-			this.tabTarget = 'properties';
+			this.tabTarget = tabTarget;
 		},
 		queryRemoveIndex(index) {
 			let colsCloned = JSON.parse(JSON.stringify(this.field.columns));

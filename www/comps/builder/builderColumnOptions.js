@@ -170,6 +170,20 @@ export default {
 			<tr>
 				<td colspan="999"><b>{{ capGen.dataRetrieval }}</b></td>
 			</tr>
+			<tr v-if="isSubQuery">
+				<td>{{ capGen.attribute }}*</td>
+				<td>
+					<select
+						@change="setIndexAttribute($event.target.value)"
+						:value="column.index+'_'+column.attributeId"
+					>
+						<option value="0_null">-</option>
+						<option v-for="ia in indexAttributeIds" :value="ia">
+							{{ getCaptionByIndexAttributeId(ia) }}
+						</option>
+					</select>
+				</td>
+			</tr>
 			<tr>
 				<td>{{ capGen.aggregator }}</td>
 				<td><my-builder-aggregator-input :modelValue="column.aggregator" @update:modelValue="set('aggregator',$event)" /></td>
@@ -191,20 +205,6 @@ export default {
 					</div>
 				</td>
 			</tr>
-			<tr v-if="isSubQuery">
-				<td>{{ capGen.attribute }}</td>
-				<td>
-					<select
-						@change="setIndexAttribute($event.target.value)"
-						:value="column.index+'_'+column.attributeId"
-					>
-						<option value="0_null">-</option>
-						<option v-for="ia in indexAttributeIds" :value="ia">
-							{{ getCaptionByIndexAttributeId(ia) }}
-						</option>
-					</select>
-				</td>
-			</tr>
 		</tbody>
 	</table>`,
 	props:{
@@ -218,7 +218,7 @@ export default {
 	computed:{
 		attribute:(s) => typeof s.attributeIdMap[s.column.attributeId] === 'undefined'
 			? false : s.attributeIdMap[s.column.attributeId],
-		indexAttributeIds:(s) => !s.isSubQuery
+		indexAttributeIds:(s) => !s.isSubQuery && s.column.query !== null
 			? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins,[]),
 		
 		// inputs

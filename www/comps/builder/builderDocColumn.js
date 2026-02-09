@@ -5,6 +5,7 @@ import MyBuilderQuery                 from './builderQuery.js';
 import MyInputDecimal                 from '../inputDecimal.js';
 import MyInputRange                   from '../inputRange.js';
 import {getIndexAttributeIdsByJoins}  from '../shared/attribute.js';
+import {getTemplateQuery}             from '../shared/builderTemplate.js';
 import {getCaptionByIndexAttributeId} from '../shared/query.js';
 import {
 	getDocColumnIcon,
@@ -55,12 +56,13 @@ export default {
 				<div class="content grow">
 					<my-builder-query
 						v-if="column.subQuery"
-						v-model="column.query"
+						@update:modelValue="column.query = $event"
 						:allowChoices="false"
 						:allowOrders="true"
 						:builderLanguage
 						:filtersDisable
 						:joinsParents="[joinsParent]"
+						:modelValue="query"
 						:moduleId
 					/>
 				</div>
@@ -241,7 +243,8 @@ export default {
 		// simple
 		icon:             s => s.getDocColumnIcon(s.column),
 		isWithQuery:      s => s.column.subQuery,
-		indexAttributeIds:s => !s.column.subQuery ? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins,[]),
+		indexAttributeIds:s => !s.column.subQuery ? [] : s.getIndexAttributeIdsByJoins(s.query.joins,[]),
+		query:            s => s.isWithQuery && s.column.query !== null ? s.column.query : s.getTemplateQuery(),
 		title:            s => s.getDocColumnTitle(s.column),
 		titleBar:         s => `${s.capGen.column}: ${s.title}`,
 
@@ -255,6 +258,7 @@ export default {
 		getIndexAttributeIdsByJoins,
 		getDocColumnIcon,
 		getDocColumnTitle,
+		getTemplateQuery,
 
 		// actions
 		setIndexAttribute(indexAttributeId) {

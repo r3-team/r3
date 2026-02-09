@@ -59,8 +59,13 @@ export const MyBuilderColumns = {
 				   	 	<div class="builder-field column column-wrap dragAnchor" :class="{ selected:columnIdShow === column.id }">
 							<div class="builder-field-header">
 								<my-button
-									@trigger="$emit('column-id-show',column.id)"
+									@trigger="$emit('column-id-show',column.id,'properties')"
 									:image="getColumnIcon(column)"
+									:naked="true"
+								/>
+								<my-button image="database.png"
+									v-if="column.subQuery"
+									@trigger="$emit('column-id-show',column.id,'content')"
 									:naked="true"
 								/>
 								<div class="title word-break"
@@ -188,6 +193,14 @@ export const MyBuilderColumns = {
 		
 		// actions
 		batchRemove(i) {
+			// close column properties
+			for(const c of this.batches[i].columns) {
+				if(c.id === this.columnIdShow) {
+					this.$emit('column-id-show',null,'properties');
+					break;
+				}
+			}
+
 			let batches = JSON.parse(JSON.stringify(this.batches));
 			batches.splice(i,1);
 			this.batches = batches;
