@@ -874,12 +874,6 @@
 			}
 		},
 		"form": {
-			"actions": {
-				"jsFunctionId": "Frontend-Funktion ausführen",
-				"warning": {
-					"noJsFunction": "Mindestens eine Aktion hat keine Frontend-Funktion zugewiesen."
-				}
-			},
 			"autoRenew": "Auto-Aktualisierung",
 			"autoRenew0": "nicht aktiv",
 			"autoRenewHint": "in Sekunden",
@@ -2270,6 +2264,7 @@
 			"export": "Exportieren",
 			"filter": "Filtern",
 			"filterHint": "Ergebnisse filtern",
+			"functionExec": "Funktion ausführen",
 			"goBack": "Zurück gehen",
 			"hide": "Verstecken",
 			"import": "Importieren",

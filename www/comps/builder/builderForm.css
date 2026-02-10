@@ -351,11 +351,21 @@
 	min-height:360px;
 	margin:0px;
 }
-.builder-form-actions table{
-	margin-top:20px;
+.builder-form-action{
+	display:flex;
+	flex-flow:column nowrap;
+	margin:2px 2px 4px 2px;
+	padding:2px 4px;
+	gap:4px;
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
 }
-.builder-form-actions table td.color-input{
-	min-width:200px;
+.builder-form-action-top{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:6px;
 }
 
 

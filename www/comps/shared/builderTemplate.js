@@ -592,7 +592,9 @@ export function getTemplateFormAction() {
 		id:getUuidV4(),
 		color:null,
 		iconId:null,
-		jsFunctionId:'',
+		jsFunctionId:null,
+		openDoc:null,
+		openForm:null,
 		state:'default',
 		captions:{
 			formActionTitle:{}

@@ -874,12 +874,6 @@
 			}
 		},
 		"form": {
-			"actions": {
-				"jsFunctionId": "执行前端函数",
-				"warning": {
-					"noJsFunction": "At least one action has no frontend function assigned."
-				}
-			},
 			"autoRenew": "自动刷新",
 			"autoRenew0": "未激活",
 			"autoRenewHint": "秒",
@@ -2270,6 +2264,7 @@
 			"export": "导出",
 			"filter": "筛选器",
 			"filterHint": "筛选结果",
+			"functionExec": "Execute function",
 			"goBack": "返回",
 			"hide": "隐藏",
 			"import": "导入",

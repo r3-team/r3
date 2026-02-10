@@ -207,10 +207,12 @@ type Form struct {
 }
 type FormAction struct {
 	Id           uuid.UUID   `json:"id"`
-	JsFunctionId uuid.UUID   `json:"jsFunctionId"`
+	JsFunctionId pgtype.UUID `json:"jsFunctionId"` // JS function to execute
 	IconId       pgtype.UUID `json:"iconId"`
 	Color        pgtype.Text `json:"color"`
-	State        string      `json:"state"` // default state (hidden, default, readonly)
+	OpenDoc      OpenDoc     `json:"openDoc"`  // document to open
+	OpenForm     OpenForm    `json:"openForm"` // form to open
+	State        string      `json:"state"`    // default state (hidden, default, readonly)
 	Captions     CaptionMap  `json:"captions"`
 }
 type FormFunction struct {

@@ -119,6 +119,8 @@ export default {
 				<my-form-actions
 					v-if="!hasBarLower && hasFormActions"
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
+					@open-doc="openDoc"
+					@open-form="openForm"
 					:entityIdMapEffect="entityIdMapEffect"
 					:formActions="form.actions"
 					:formId
@@ -220,6 +222,8 @@ export default {
 				<my-form-actions
 					v-if="hasFormActions"
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
+					@open-doc="openDoc"
+					@open-form="openForm"
 					:entityIdMapEffect="entityIdMapEffect"
 					:formActions="form.actions"
 					:formId
@@ -239,6 +243,8 @@ export default {
 			<div class="top lower" v-if="hasBarWidget">
 				<my-form-actions
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
+					@open-doc="openDoc"
+					@open-form="openForm"
 					:entityIdMapEffect="entityIdMapEffect"
 					:formActions="form.actions"
 					:formId

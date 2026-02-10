@@ -4,10 +4,13 @@ import (
 	"context"
 	"r3/schema"
 	"r3/schema/caption"
+	"r3/schema/openDoc"
+	"r3/schema/openForm"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func getActions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.FormAction, error) {
@@ -34,6 +37,14 @@ func getActions_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID) ([]types.Fo
 	rows.Close()
 
 	for i, a := range actions {
+		actions[i].OpenDoc, err = openDoc.Get_tx(ctx, tx, schema.DbFormAction, a.Id)
+		if err != nil {
+			return nil, err
+		}
+		actions[i].OpenForm, err = openForm.Get_tx(ctx, tx, schema.DbFormAction, a.Id, pgtype.Text{})
+		if err != nil {
+			return nil, err
+		}
 		actions[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbFormAction, a.Id, []string{"formActionTitle"})
 		if err != nil {
 			return nil, err
@@ -69,6 +80,12 @@ func setAction_tx(ctx context.Context, tx pgx.Tx, formId uuid.UUID, a types.Form
 		ON CONFLICT (id)
 		DO UPDATE SET js_function_id = $3, icon_id = $4, position = $5, state = $6, color = $7
 	`, a.Id, formId, a.JsFunctionId, a.IconId, position, a.State, a.Color); err != nil {
+		return err
+	}
+	if err := openDoc.Set_tx(ctx, tx, schema.DbFormAction, a.Id, a.OpenDoc); err != nil {
+		return err
+	}
+	if err := openForm.Set_tx(ctx, tx, schema.DbFormAction, a.Id, a.OpenForm, pgtype.Text{}); err != nil {
 		return err
 	}
 	return caption.Set_tx(ctx, tx, a.Id, a.Captions)

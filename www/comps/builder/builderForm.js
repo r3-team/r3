@@ -292,7 +292,9 @@ export default {
 						v-model="form.actions"
 						@createNew="(...args) => $emit('createNew',...args)"
 						:builderLanguage
+						:dataFields
 						:formId="id"
+						:joinsIndexMap
 					/>
 					
 					<!-- form functions -->

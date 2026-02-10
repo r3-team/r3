@@ -1,16 +1,16 @@
 import {srcBase64}  from './shared/image.js';
 import {getCaption} from './shared/language.js';
-export {MyFormActions as default};
 
 const MyFormAction = {
 	name:'my-form-action',
 	template:`<my-button
 		v-if="state !== 'hidden'"
-		@trigger="$emit('execute-function',formAction.jsFunctionId)"
+		@trigger="exec(false)"
+		@trigger-middle="exec(true)"
 		:active="state !== 'readonly'"
 		:caption="getCaption('formActionTitle',moduleId,formAction.id,formAction.captions)"
 		:imageBase64="formAction.iconId ? srcBase64(iconIdMap[formAction.iconId].file) : ''"
-		:large="large"
+		:large
 	/>`,
 	props:{
 		entityIdMapEffect:{ type:Object,  required:true },
@@ -19,23 +19,32 @@ const MyFormAction = {
 		large:            { type:Boolean, required:true },
 		moduleId:         { type:String,  required:true }
 	},
-	emits:['execute-function'],
+	emits:['executed','execute-function','open-doc','open-form'],
 	computed:{
-		state:(s) => s.entityIdMapEffect.formAction[s.formAction.id]?.state !== undefined
+		state:s => s.entityIdMapEffect.formAction[s.formAction.id]?.state !== undefined
 			? s.entityIdMapEffect.formAction[s.formAction.id].state
 			: s.formAction.state,
 		
 		// stores
-		iconIdMap:(s) => s.$store.getters['schema/iconIdMap']
+		iconIdMap:s => s.$store.getters['schema/iconIdMap']
 	},
 	methods:{
 		// external
 		getCaption,
-		srcBase64
+		srcBase64,
+
+		// actions
+		exec(middleClick) {
+			const fa = this.formAction;
+			if(fa.jsFunctionId !== null) this.$emit('execute-function',fa.jsFunctionId);
+			if(fa.openDoc      !== null) this.$emit('open-doc',fa.openDoc);
+			if(fa.openForm     !== null) this.$emit('open-form',[],fa.openForm,[],middleClick,null,false);
+			this.$emit('executed');
+		}
 	}
 };
 
-const MyFormActions = {
+export default {
 	name:'my-form-actions',
 	components:{ MyFormAction },
 	template:`<div class="row gap nowrap"
@@ -45,10 +54,12 @@ const MyFormActions = {
 			v-if="!noSpace"
 			v-for="a in formActions"
 			@execute-function="$emit('execute-function',$event)"
-			:entityIdMapEffect="entityIdMapEffect"
+			@open-doc="$emit('open-doc',$event)"
+			@open-form="(...args) => $emit('open-form',...args)"
+			:entityIdMapEffect
 			:formAction="a"
-			:formId="formId"
-			:moduleId="moduleId"
+			:formId
+			:moduleId
 			:large="false"
 		/>
 		<my-button image="open.png"
@@ -77,11 +88,14 @@ const MyFormActions = {
 					<div class="form-actions-pop-up-entries">
 						<my-form-action
 							v-for="a in formActions"
-							@execute-function="$emit('execute-function',$event);showPopUp = false"
-							:entityIdMapEffect="entityIdMapEffect"
+							@executed="showPopUp = false"
+							@execute-function="$emit('execute-function',$event)"
+							@open-doc="$emit('open-doc',$event)"
+							@open-form="(...args) => $emit('open-form',...args)"
+							:entityIdMapEffect
 							:formAction="a"
-							:formId="formId"
-							:moduleId="moduleId"
+							:formId
+							:moduleId
 							:large="true"
 						/>
 					</div>
@@ -96,14 +110,14 @@ const MyFormActions = {
 		moduleId:         { type:String,  required:true },
 		noSpace:          { type:Boolean, required:true }
 	},
-	emits:['execute-function'],
+	emits:['execute-function','open-doc','open-form'],
 	data() {
 		return {
 			showPopUp:false,
 		};
 	},
 	computed:{
-		capGen:  (s) => s.$store.getters.captions.generic,
-		settings:(s) => s.$store.getters.settings
+		capGen:  s => s.$store.getters.captions.generic,
+		settings:s => s.$store.getters.settings
 	}
 };

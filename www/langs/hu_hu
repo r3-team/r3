@@ -874,12 +874,6 @@
 			}
 		},
 		"form": {
-			"actions": {
-				"jsFunctionId": "Előtéri funkció végrehajtása",
-				"warning": {
-					"noJsFunction": "At least one action has no frontend function assigned."
-				}
-			},
 			"autoRenew": "Automatikus Frissítés",
 			"autoRenew0": "kikapcsolva",
 			"autoRenewHint": "másodpercben",
@@ -2270,6 +2264,7 @@
 			"export": "Exportálás",
 			"filter": "Szűrés",
 			"filterHint": "Eredmények szűrése",
+			"functionExec": "Execute function",
 			"goBack": "Vissza",
 			"hide": "Hide",
 			"import": "Importálás",

@@ -874,12 +874,6 @@
 			}
 		},
 		"form": {
-			"actions": {
-				"jsFunctionId": "Executați funcția de interfață",
-				"warning": {
-					"noJsFunction": "At least one action has no frontend function assigned."
-				}
-			},
 			"autoRenew": "Reîmprospătare automată",
 			"autoRenew0": "inactiv",
 			"autoRenewHint": "în secunde",
@@ -2270,6 +2264,7 @@
 			"export": "Exportă",
 			"filter": "Filtru",
 			"filterHint": "Rezultate filtru",
+			"functionExec": "Execute function",
 			"goBack": "Înapoi",
 			"hide": "Hide",
 			"import": "Importă",

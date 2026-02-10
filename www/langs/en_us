@@ -874,12 +874,6 @@
 			"titleOne": "PDF '{NAME}'"
 		},
 		"form": {
-			"actions": {
-				"jsFunctionId": "Execute frontend function",
-				"warning": {
-					"noJsFunction": "At least one action has no frontend function assigned."
-				}
-			},
 			"autoRenew": "Auto refresh",
 			"autoRenew0": "not active",
 			"autoRenewHint": "in seconds",
@@ -2270,6 +2264,7 @@
 			"export": "Export",
 			"filter": "Filter",
 			"filterHint": "Filter results",
+			"functionExec": "Execute function",
 			"goBack": "Go back",
 			"hide": "Hide",
 			"import": "Import",

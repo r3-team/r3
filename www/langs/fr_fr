@@ -874,12 +874,6 @@
 			}
 		},
 		"form": {
-			"actions": {
-				"jsFunctionId": "Exécuter la fonction frontend",
-				"warning": {
-					"noJsFunction": "At least one action has no frontend function assigned."
-				}
-			},
 			"autoRenew": "Actualiser automatiquement",
 			"autoRenew0": "non actif",
 			"autoRenewHint": "en secondes",
@@ -2270,6 +2264,7 @@
 			"export": "Exporter",
 			"filter": "Filtrer",
 			"filterHint": "Filtrer les résultats",
+			"functionExec": "Execute function",
 			"goBack": "Retourner",
 			"hide": "Masquer",
 			"import": "Importer",

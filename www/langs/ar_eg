@@ -874,12 +874,6 @@
 			}
 		},
 		"form": {
-			"actions": {
-				"jsFunctionId": "تنفيذ وظيفة الواجهة الأمامية",
-				"warning": {
-					"noJsFunction": "إجراء واحد على الأقل لم يتم تعيين وظيفة الواجهة الأمامية له."
-				}
-			},
 			"autoRenew": "التحديث التلقائي",
 			"autoRenew0": "غير نشط",
 			"autoRenewHint": "في ثواني",
@@ -2270,6 +2264,7 @@
 			"export": "يصدّر",
 			"filter": "فلتر",
 			"filterHint": "تصفية النتائج",
+			"functionExec": "Execute function",
 			"goBack": "عُد",
 			"hide": "يخفي",
 			"import": "يستورد",

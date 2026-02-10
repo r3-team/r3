@@ -874,12 +874,6 @@
 			}
 		},
 		"form": {
-			"actions": {
-				"jsFunctionId": "Execute frontend function",
-				"warning": {
-					"noJsFunction": "At least one action has no frontend function assigned."
-				}
-			},
 			"autoRenew": "Auto refresh",
 			"autoRenew0": "not active",
 			"autoRenewHint": "in seconds",
@@ -2270,6 +2264,7 @@
 			"export": "Eksportēt",
 			"filter": "Filtrs",
 			"filterHint": "Filtrēt rezultātus",
+			"functionExec": "Execute function",
 			"goBack": "Atgriezties atpakaļ",
 			"hide": "Slēpt",
 			"import": "Importēt",

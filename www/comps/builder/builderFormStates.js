@@ -162,8 +162,8 @@ const MyBuilderFormState = {
 				v-model="conditions"
 				:builderMode="true"
 				:disableContent="['attribute','getter','globalSearch','javascript','nowDate','nowDatetime','nowTime','subQuery']"
-				:entityIdMapRef="entityIdMapRef"
-				:fieldIdMap="fieldIdMap"
+				:entityIdMapRef
+				:fieldIdMap
 				:formId="form.id"
 				:moduleId="form.moduleId"
 			/>
@@ -178,8 +178,8 @@ const MyBuilderFormState = {
 					v-for="(e,i) in state.effects"
 					@update:modelValue="update('effects',i,$event)"
 					@remove="remove('effects',i)"
-					:entityIdMapRef="entityIdMapRef"
-					:fieldIdMap="fieldIdMap"
+					:entityIdMapRef
+					:fieldIdMap
 					:key="getEffectRef(state.effects[i])"
 					:modelValue="state.effects[i]"
 					:order="effectIndexesOrdered.indexOf(i)"
@@ -343,10 +343,10 @@ export default {
 				@open="open(s.id)"
 				@remove="remove(i)"
 				@update:modelValue="update(i,$event)"
-				:dataFields="dataFields"
-				:entityIdMapRef="entityIdMapRef"
-				:fieldIdMap="fieldIdMap"
-				:form="form"
+				:dataFields
+				:entityIdMapRef
+				:fieldIdMap
+				:form
 				:key="s.id"
 				:modelValue="states[i]"
 				:open="stateIdsOpen.includes(s.id)"

@@ -92,6 +92,7 @@ var (
 		DbColumn,
 		DbCollectionConsumer,
 		DbField,
+		DbFormAction,
 		DbSearchBar,
 	}
 	DbAssignedQuery = []DbEntity{
