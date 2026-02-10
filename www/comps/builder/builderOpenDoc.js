@@ -1,5 +1,6 @@
 import {isAttributeFiles}   from '../shared/attribute.js';
 import {getTemplateOpenDoc} from '../shared/builderTemplate.js';
+import {openLink}           from '../shared/generic.js';
 import {
 	getDependentDocs,
 	getItemTitle,
@@ -9,27 +10,32 @@ import {
 export default {
 	name:'my-builder-open-doc',
 	template:`<div class="column gap">
-		<select v-model="doc" :disabled="readonly">
-			<option value="">-</option>
-			<option v-for="d in docsAvailNoQuery" :value="'0_' + d.id">{{ d.name }}</option>
-			<optgroup
-				v-for="j in joinsIndexMap"
-				:label="getItemTitleRelation(j.relationId,j.index)"
-			>
-				<option
-					v-for="d in docsAvail.filter(v => v.query !== null && v.query.relationId === j.relationId)"
-					:value="j.index + '_' + d.id"
-				>{{ d.name }}</option>
-			</optgroup>
-		</select>
 		<div class="row gap centered">
-			<span>{{ capGen.button.addToField }}</span>
-			<select class="auto" v-if="active" v-model="fieldIdAddTo">
+			<select v-model="doc" :disabled="readonly">
 				<option value="">-</option>
-				<option
-					v-for="f in dataFields.filter(v => isAttributeFiles(attributeIdMap[v.attributeId].content))"
-					:value="f.id"
-				>{{ getItemTitle(f.attributeId,f.index) }}</option>
+				<option v-for="d in docsAvailNoQuery" :value="'0_' + d.id">{{ d.name }}</option>
+				<optgroup
+					v-for="j in joinsIndexMap"
+					:label="getItemTitleRelation(j.relationId,j.index)"
+				>
+					<option
+						v-for="d in docsAvail.filter(v => v.query !== null && v.query.relationId === j.relationId)"
+						:value="j.index + '_' + d.id"
+					>{{ d.name }}</option>
+				</optgroup>
+			</select>
+			<my-button image="open.png"
+				v-if="active"
+				@trigger="$router.push('/builder/doc/'+docIdOpen)"
+				@trigger-middle="openLink('#/builder/doc/'+docIdOpen,true)"
+				:captionTitle="capGen.button.open"
+			/>
+		</div>
+		<div class="row gap centered" v-if="active && fieldsAddToList.length !== 0">
+			<span>{{ capGen.button.addToField }}</span>
+			<select class="auto" v-model="fieldIdAddTo">
+				<option value="">-</option>
+				<option v-for="f in fieldsAddToList" :value="f.id">{{ getItemTitle(f.attributeId,f.index) }}</option>
 			</select>
 		</div>
 	</div>`,
@@ -72,6 +78,8 @@ export default {
 		active:          s => s.modelValue !== null,
 		docsAvail:       s => s.getDependentDocs(s.module),
 		docsAvailNoQuery:s => s.docsAvail.filter(v => v.query === null),
+		docIdOpen:       s => s.active ? s.doc.split('_')[1] : null,
+		fieldsAddToList: s => s.dataFields.filter(v => s.isAttributeFiles(s.attributeIdMap[v.attributeId].content)),
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
@@ -83,6 +91,7 @@ export default {
 		getItemTitle,
 		getItemTitleRelation,
 		getTemplateOpenDoc,
-		isAttributeFiles
+		isAttributeFiles,
+		openLink
 	}
 };
