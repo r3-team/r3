@@ -526,7 +526,7 @@ func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
 	// use transaction to get data - otherwise larger tasks (like CSV import)
 	//  will fail as created records cannot be retrieved
 	var query string
-	results, _, err := Get_tx(ctx, tx, dataGet, false, loginId, &query)
+	results, _, err := Get_tx(ctx, tx, dataGet, loginId, &query)
 	if err != nil {
 		return result, err
 	}

@@ -2,12 +2,10 @@ import {getStringFilled} from '../shared/generic.js';
 import srcBase64Icon     from '../shared/image.js';
 import {getUnixFormat}   from '../shared/time.js';
 import {getCaption}      from '../shared/language.js';
-export {MyAdminScheduler as default};
 
-let MyAdminScheduler = {
+export default {
 	name:'my-admin-scheduler',
 	template:`<div class="admin-scheduler contentBox grow">
-	
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/clock.png" />
@@ -196,7 +194,7 @@ let MyAdminScheduler = {
 		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	computed:{
-		hasAppSchedules:(s) => {
+		hasAppSchedules:s => {
 			for(let e of s.schedulers) {
 				if(e.taskName === '')
 					return true;
@@ -205,16 +203,16 @@ let MyAdminScheduler = {
 		},
 
 		// simple
-		hasChanges:          (s) => JSON.stringify(s.schedulers) !== JSON.stringify(s.schedulersInput),
-		pgFunctionSchedulers:(s) => s.schedulers.filter(v => v.taskName === '' && v.intervalType !== 'once'),
+		hasChanges:          s => JSON.stringify(s.schedulers) !== JSON.stringify(s.schedulersInput),
+		pgFunctionSchedulers:s => s.schedulers.filter(v => v.taskName === '' && v.intervalType !== 'once'),
 		
 		// stores
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
-		capApp:         (s) => s.$store.getters.captions.admin.scheduler,
-		capGen:         (s) => s.$store.getters.captions.generic,
-		mirrorMode:     (s) => s.$store.getters.mirrorMode,
-		settings:       (s) => s.$store.getters.settings
+		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
+		pgFunctionIdMap:s => s.$store.getters['schema/pgFunctionIdMap'],
+		capApp:         s => s.$store.getters.captions.admin.scheduler,
+		capGen:         s => s.$store.getters.captions.generic,
+		mirrorMode:     s => s.$store.getters.mirrorMode,
+		settings:       s => s.$store.getters.settings
 	},
 	methods:{
 		// externals

@@ -180,8 +180,7 @@ func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId u
 	}
 
 	// create/update thumbnail - failure should not block progress
-	data_image.CreateThumbnail(fileId, filepath.Ext(fileName), filePath,
-		GetFilePathThumb(fileId), false)
+	data_image.CreateThumbnail(fileId, filepath.Ext(fileName), filePath, GetFilePathThumb(fileId), false)
 
 	// store file meta data in database
 	tx, err := db.Pool.Begin(ctx)
@@ -205,9 +204,7 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool, attribu
 
 	if isNewFile {
 		// store file reference
-		if _, err := tx.Exec(ctx, `
-			INSERT INTO instance.file (id, ref_counter) VALUES ($1,0)
-		`, fileId); err != nil {
+		if _, err := tx.Exec(ctx, `INSERT INTO instance.file (id, ref_counter) VALUES ($1,0)`, fileId); err != nil {
 			return err
 		}
 	}
@@ -218,8 +215,7 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool, attribu
 		Valid: loginId != -1,
 	}
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO instance.file_version (
-			file_id,version,login_id,hash,size_kb,date_change)
+		INSERT INTO instance.file_version (file_id,version,login_id,hash,size_kb,date_change)
 		VALUES ($1,$2,$3,$4,$5,$6)
 	`, fileId, fileVersion, loginNull, fileHash, fileSizeKb, tools.GetTimeUnix()); err != nil {
 		return err
@@ -259,13 +255,10 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool, attribu
 		},
 	}
 	logAttributeFileIndexes := []int{0}
-	logValuesOld := []interface{}{nil}
+	logValuesOld := []any{nil}
 
 	for _, recordId := range recordIds {
-		if err := setLog_tx(ctx, tx, relationId, logAttributes,
-			logAttributeFileIndexes, false, logValuesOld, recordId,
-			loginId); err != nil {
-
+		if err := setLog_tx(ctx, tx, relationId, logAttributes, logAttributeFileIndexes, false, logValuesOld, recordId, loginId); err != nil {
 			return err
 		}
 	}
@@ -273,9 +266,8 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool, attribu
 }
 
 // updates file record assignment or deletion state based on file attribute changes
-func FilesApplyAttributChanges_tx(ctx context.Context,
-	tx pgx.Tx, recordId int64, attributeId uuid.UUID,
-	fileIdMapChange map[uuid.UUID]types.DataSetFileChange) error {
+func FilesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx, recordId int64,
+	attributeId uuid.UUID, fileIdMapChange map[uuid.UUID]types.DataSetFileChange) error {
 
 	tNameR := schema.GetFilesTableName(attributeId)
 

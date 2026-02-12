@@ -10,6 +10,7 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/db"
+	"r3/handler"
 	"r3/log"
 	"strings"
 
@@ -135,7 +136,7 @@ func callExecute(c restCall) error {
 		cache.Schema_mx.RUnlock()
 
 		if !exists {
-			return fmt.Errorf("unknown function '%s'", c.pgFunctionIdCallback.String())
+			return handler.ErrSchemaUnknownPgFunction(c.pgFunctionIdCallback.Bytes)
 		}
 
 		cache.Schema_mx.RLock()
@@ -143,7 +144,7 @@ func callExecute(c restCall) error {
 		cache.Schema_mx.RUnlock()
 
 		if !exists {
-			return fmt.Errorf("unknown module '%s'", fnc.ModuleId)
+			return handler.ErrSchemaUnknownModule(fnc.ModuleId)
 		}
 
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1,$2,$3)`, mod.Name, fnc.Name), httpRes.StatusCode, bodyRaw, c.callbackValue); err != nil {

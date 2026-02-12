@@ -792,9 +792,6 @@ export function getTemplateQuery() {
 		choices:[]
 	};
 };
-export function getTemplateQueryIfNull(q) {
-	return q === null ? getTemplateQuery() : q;
-};
 export function getTemplateQueryChoice() {
 	return {
 		id:getUuidV4(),

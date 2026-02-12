@@ -609,6 +609,95 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- make JS function optional for form actions
 			ALTER TABLE app.form_action ALTER COLUMN js_function_id DROP NOT NULL;
+
+			-- document generation spooler
+			CREATE TABLE IF NOT EXISTS instance.doc_spool (
+				id uuid NOT NULL DEFAULT gen_random_uuid(),
+				doc_id uuid NOT NULL,
+				attribute_id_attach uuid,
+				pg_function_id_callback uuid,
+				callback_value text COLLATE pg_catalog."default",
+				record_id_attach bigint,
+				record_id_load bigint,
+				file_path text,
+				overwrite boolean DEFAULT FALSE,
+				CONSTRAINT doc_spool_pkey PRIMARY KEY (id),
+				CONSTRAINT doc_spool_doc_id_fkey FOREIGN KEY (doc_id)
+					REFERENCES app.doc (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_spool_attribute_id_attach_fkey FOREIGN KEY (attribute_id_attach)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT doc_spool_pg_function_id_callback_fkey FOREIGN KEY (pg_function_id_callback)
+					REFERENCES app.pg_function (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_doc_spool_doc_id_fkey                  ON instance.doc_spool USING btree (doc_id                  ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_spool_pg_function_id_callback_fkey ON instance.doc_spool USING btree (pg_function_id_callback ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_doc_spool_attribute_id_attach_fkey     ON instance.doc_spool USING btree (attribute_id_attach     ASC NULLS LAST);
+
+			INSERT INTO instance.task (name,interval_seconds,cluster_master_only,embedded_only,active_only,active)
+			VALUES ('docsGenerate',15,true,false,false,true);
+			
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('docsGenerate',0,0);
+
+			-- document generation instance functions
+			CREATE OR REPLACE FUNCTION instance.pdf_create_attach(
+				doc_id uuid,
+				record_id_load bigint,
+				record_id_attach bigint,
+				attribute_id_attach uuid,
+				pg_function_id_callback uuid DEFAULT NULL,
+				callback_value text DEFAULT NULL)
+				RETURNS void
+				LANGUAGE 'plpgsql'
+				COST 100
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				INSERT INTO instance.doc_spool (
+					doc_id, attribute_id_attach, pg_function_id_callback,
+					callback_value, record_id_load, record_id_attach
+				)
+				VALUES(
+					doc_id, attribute_id_attach, pg_function_id_callback,
+					callback_value, record_id_load, record_id_attach
+				);
+			END;
+			$BODY$;
+
+			CREATE OR REPLACE FUNCTION instance.pdf_create_export(
+				doc_id uuid,
+				record_id_load bigint,
+				file_path text,
+				overwrite boolean DEFAULT FALSE,
+				pg_function_id_callback uuid DEFAULT NULL,
+				callback_value text DEFAULT NULL)
+				RETURNS void
+				LANGUAGE 'plpgsql'
+				COST 100
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				INSERT INTO instance.doc_spool (
+					doc_id, pg_function_id_callback, callback_value,
+					record_id_load, file_path, overwrite
+				)
+				VALUES(
+					doc_id, pg_function_id_callback, callback_value,
+					record_id_load, file_path, overwrite
+				);
+			END;
+			$BODY$;
 		`)
 		return "3.12", err
 	},

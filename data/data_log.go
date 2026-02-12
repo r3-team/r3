@@ -162,10 +162,8 @@ func getLogValues_tx(ctx context.Context, tx pgx.Tx, logId uuid.UUID,
 }
 
 // set data change log for specific record that was either created or updated
-func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
-	attributes []types.DataSetAttribute, fileAttributeIndexes []int,
-	wasCreated bool, valuesOld []interface{}, recordId int64,
-	loginId int64) error {
+func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributes []types.DataSetAttribute,
+	fileAttributeIndexes []int, wasCreated bool, valuesOld []any, recordId int64, loginId int64) error {
 
 	// new record, apply logs for record and its attribute values
 	if wasCreated {

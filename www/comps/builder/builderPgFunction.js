@@ -427,6 +427,64 @@ export default {
 							</div>
 						</div>
 					</div>
+					
+					<!-- documents -->
+					<div class="entities-title">
+						<my-button
+							@trigger="showHolderDoc = !showHolderDoc"
+							:caption="capApp.placeholderDoc"
+							:images="[showHolderDoc ? 'triangleDown.png' : 'triangleRight.png','document.png']"
+							:large="true"
+							:naked="true"
+						/>
+						<div class="row centered gap">
+							<template v-if="showHolderDoc">
+								<input class="short" v-model="holderDocText" :placeholder="capGen.threeDots" :title="capGen.button.filter" />
+								<select class="dynamic" v-model="holderDocModuleId">
+									<option v-for="m in modulesDoc" :value="m.id">{{ m.name }}</option>
+								</select>
+							</template>
+							<my-button image="question.png"
+								@trigger="showHelp(capApp.placeholderDoc,capApp.placeholderDocHelp)"
+							/>
+						</div>
+					</div>
+					<div class="entities" v-if="showHolderDoc">
+						<template v-for="mod in modulesDoc.filter(v => holderDocModuleId === null || holderDocModuleId === v.id)">
+							<div class="entity" v-for="doc in mod.docs.filter(v => !v.isTrigger && (holderDocText === '' || v.name.toLowerCase().includes(holderDocText.toLowerCase())))">
+								<div class="entity-title">
+									<div class="row gap centered grow">
+										<my-button
+											@trigger="toggleDocShow(doc.id)"
+											:image="holderDocIdsOpen.includes(doc.id) ? 'triangleDown.png' : 'triangleRight.png'"
+											:naked="true"
+											:caption="doc.name"
+										/>
+									</div>
+
+									<div class="row gap centered">
+										<router-link :key="doc.id" :to="'/builder/doc/'+doc.id">
+											<my-button image="open.png" :captionTitle="capGen.button.open" :naked="true" />
+										</router-link>
+									</div>
+								</div>
+								<div class="entity-children" v-if="holderDocIdsOpen.includes(doc.id)">
+									<my-button
+										@trigger="selectEntity('docAttach',doc.id)"
+										:caption="capGen.button.attach"
+										:image="radioIcon('docAttach',doc.id)"
+										:naked="true"
+									/>
+									<my-button
+										@trigger="selectEntity('docExport',doc.id)"
+										:caption="capGen.button.export"
+										:image="radioIcon('docExport',doc.id)"
+										:naked="true"
+									/>
+								</div>
+							</div>
+						</template>
+					</div>
 				</template>
 				
 				<template v-if="tabTarget === 'exec'">
@@ -589,6 +647,7 @@ export default {
 		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
 		
 		// set defaults
+		this.holderDocModuleId      = this.module.id;
 		this.holderFunctionModuleId = this.module.id;
 		this.holderPresetModuleId   = this.module.id;
 		this.holderRelationModuleId = this.module.id;
@@ -620,6 +679,8 @@ export default {
 			addOld:false,
 			entity:'relation', // selected placeholder entity (relation, attribute, pgFunction, instanceFunction)
 			entityId:null,
+			holderDocIdsOpen:[],         // opened document placeholders (shows methods 'attach', 'export')
+			holderDocText:'',            // text filter for documents
 			holderFunctionModuleId:null, // module filter for backend functions
 			holderFunctionText:'',       // text filter for backend functions
 			holderPresetModuleId:null,   // module filter for presets
@@ -635,6 +696,7 @@ export default {
 				'mail_delete_after_attach','mail_get_next','mail_send','rest_call','update_collection',
 				'user_meta_set','user_sync_all'
 			],
+			showHolderDoc:false,
 			showHolderFncInstance:false,
 			showHolderFncModule:false,
 			showHolderPreset:false,
@@ -667,10 +729,31 @@ export default {
 			// attribute:   (module_name.relation_name.attribute_name)
 			// preset:      {PRESET::module_name.relation_name.preset_name}
 			switch(s.entity) {
-				case 'relation':
-					rel  = s.relationIdMap[s.entityId];
+				case 'attribute':
+					atr  = s.attributeIdMap[s.entityId];
+					rel  = s.relationIdMap[atr.relationId];
 					mod  = s.moduleIdMap[rel.moduleId];
-					text = `{${mod.name}}.[${rel.name}]`;
+					text = `(${mod.name}.${rel.name}.${atr.name})`;
+					
+					if(s.addNew) text = 'NEW.'+text;
+					if(s.addOld) text = 'OLD.'+text;
+				break;
+				case 'docAttach': // fallthrough
+				case 'docExport':
+					const doc = s.docIdMap[s.entityId];
+					mod = s.moduleIdMap[doc.moduleId];
+					const mode = s.entity === 'docAttach' ? 'ATTACH' : 'EXPORT';
+					const help = s.entity === 'docAttach' ? s.capApp.helpPgArgs.pdf_create_attach : s.capApp.helpPgArgs.pdf_create_export;
+					text = `{PDF_CREATE_${mode}::${mod.name}.${doc.name}}(${help})`;
+				break;
+				case 'instanceFunction':
+					args = s.capApp.helpPgArgs[s.entityId] !== undefined ? s.capApp.helpPgArgs[s.entityId].join(', ') : '';
+					text = `instance.${s.entityId}(${args})`;
+				break;
+				case 'pgFunction':
+					fnc  = s.pgFunctionIdMap[s.entityId];
+					mod  = s.moduleIdMap[fnc.moduleId];
+					text = `{${mod.name}}.[${fnc.name}](${fnc.codeArgs})`;
 				break;
 				case 'preset':
 					prs  = s.presetIdMap[s.entityId];
@@ -682,23 +765,10 @@ export default {
 						? `{PRESET::${mod.name}.${rel.name}.${prs.name}}`
 						: `instance.get_preset_record_id('${s.entityId}')`;
 				break;
-				case 'pgFunction':
-					fnc  = s.pgFunctionIdMap[s.entityId];
-					mod  = s.moduleIdMap[fnc.moduleId];
-					text = `{${mod.name}}.[${fnc.name}](${fnc.codeArgs})`;
-				break;
-				case 'attribute':
-					atr  = s.attributeIdMap[s.entityId];
-					rel  = s.relationIdMap[atr.relationId];
+				case 'relation':
+					rel  = s.relationIdMap[s.entityId];
 					mod  = s.moduleIdMap[rel.moduleId];
-					text = `(${mod.name}.${rel.name}.${atr.name})`;
-					
-					if(s.addNew) text = 'NEW.'+text;
-					if(s.addOld) text = 'OLD.'+text;
-				break;
-				case 'instanceFunction':
-					args = s.capApp.helpPgArgs[s.entityId] !== undefined ? s.capApp.helpPgArgs[s.entityId].join(', ') : '';
-					text = `instance.${s.entityId}(${args})`;
+					text = `{${mod.name}}.[${rel.name}]`;
 				break;
 			}
 			return text;
@@ -720,12 +790,14 @@ export default {
 		// simple
 		execArgInputs:(s) => s.codeArgs.trim() === '' ? [] : s.codeArgs.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/),
 		module:       (s) => s.pgFunction === false ? false : s.moduleIdMap[s.pgFunction.moduleId],
+		modulesDoc:   (s) => s.getDependentModules(s.module).filter(v => v.docs.length        !== 0),
 		modulesData:  (s) => s.getDependentModules(s.module).filter(v => v.relations.length   !== 0),
 		modulesFnc:   (s) => s.getDependentModules(s.module).filter(v => v.pgFunctions.length !== 0),
 		pgFunction:   (s) => s.pgFunctionIdMap[s.id] === undefined ? false : s.pgFunctionIdMap[s.id],
 		preview:      (s) => !s.showPreview ? '' : s.placeholdersUnset(true),
 		
 		// stores
+		docIdMap:       (s) => s.$store.getters['schema/docIdMap'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:  (s) => s.$store.getters['schema/moduleNameMap'],
 		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
@@ -800,7 +872,7 @@ export default {
 
 			this.$store.commit('dialog',{
 				captionTop:top,
-				captionBody:text,
+				captionBody:Array.isArray(text) ? text.join('<br /><br />') : text,
 				image:'question.png'
 			});
 		},
@@ -810,6 +882,11 @@ export default {
 				captionBody:this.capApp.volatilityHelp,
 				image:'question.png'
 			});
+		},
+		toggleDocShow(docId) {
+			let pos = this.holderDocIdsOpen.indexOf(docId);
+			if(pos === -1) this.holderDocIdsOpen.push(docId);
+			else           this.holderDocIdsOpen.splice(pos,1);
 		},
 		toggleRelationShow(relationId) {
 			let pos = this.holderRelationIdsOpen.indexOf(relationId);
@@ -869,6 +946,16 @@ export default {
 					return `{PRESET::${mod.name}.${rel.name}.${prs.name}}`;
 				
 				return match;
+			});
+
+			// replace documents with placeholders
+			// stored in function text as: {PDF_CREATE_ATTACH::MOD_NAME.DOC_NAME})() or {PDF_CREATE_EXPORT::MOD_NAME.DOC_NAME})()
+			body = body.replace(/instance\.pdf_create_(attach|export)\(\'([a-z0-9\-]{36})\',/g,(match,mode,docId) => {
+				const doc = this.docIdMap[docId];
+				if(doc === undefined) return match;
+
+				const mod = this.moduleIdMap[doc.moduleId];
+				return `{PDF_CREATE_${mode.toUpperCase()}::${mod.name}.${doc.name}}(`;
 			});
 			return body;
 		},
@@ -992,6 +1079,20 @@ export default {
 							if(p.name === presetName)
 								return `instance\.get_preset_record_id('${p.id}')`;
 						}
+					}
+				}
+				return match;
+			});
+
+			// replace document placeholders
+			// stored as: {PDF_CREATE_ATTACH::MOD_NAME.DOC_NAME})(...) or {PDF_CREATE_EXPORT::MOD_NAME.DOC_NAME})(...)
+			pat = new RegExp(`\\{PDF_CREATE_(ATTACH|EXPORT)\\:\\:(${dbChars})\\.([^\}]*)\\}\\(`,'g');
+			body = body.replace(pat,(match,mode,modName,docName) => {
+				const mod = this.moduleNameMap[modName];
+				if(mod !== undefined) {
+					for(let d of mod.docs) {
+						if(d.name === docName)
+							return `instance.pdf_create_${mode.toLowerCase()}('${d.id}',`;
 					}
 				}
 				return match;

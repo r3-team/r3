@@ -545,6 +545,7 @@
 				"clusterCheckIn": "Klaszter csomópont regisztráció",
 				"clusterProcessEvents": "Klaszter események feldolgozása",
 				"dbOptimize": "Database optimization",
+				"docsGenerate": "Generate PDF documents",
 				"filesProcess": "File job processing",
 				"httpCertRenew": "SSL tanúsítvány újratöltése, ha megújították",
 				"importLdapLogins": "Import users via LDAP",
@@ -1419,6 +1420,20 @@
 					"attach_record_id BIGINT DEFAULT NULL",
 					"attach_attribute_id UUID DEFAULT NULL"
 				],
+				"pdf_create_attach": [
+					"load_record_id BIGINT",
+					"attach_record_id BIGINT",
+					"attach_attribute_id UUID",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
+				"pdf_create_export": [
+					"load_record_id BIGINT",
+					"file_path TEXT",
+					"overwrite BOOLEAN DEFAULT FALSE",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
 				"rest_call": [
 					"method TEXT",
 					"url TEXT",
@@ -1479,6 +1494,15 @@
 				"intervalWeeks": "Hetek",
 				"intervalYears": "Évek"
 			},
+			"placeholderDoc": "PDFs",
+			"placeholderDocHelp": [
+				"Placeholders to generate predefined PDFs - either as file export or attached to a files attribute.",
+				"If the PDF document has a data query (see 'Content' tab in PDF definition), a record ID can be provided to be loaded during generation.",
+				"When exporting as file, the 'fileExport' path must be defined in the REI3 configuration file ('config.json').",
+				"When attaching to a files attribute, the given attribute and record ID must both exist.",
+				"Generation occurs asynchronously via scheduler (s. 'System tasks', REI3 admin panel); the function will not wait for the PDF generation to complete.",
+				"Another backend function can be called after generation completes to execute some action, like sending an email. A callback value can be provided to the callback function to provide some context. The callback function must have a single TEXT parameter, which is filled with the callback value."
+			],
 			"placeholderFncBackend": "Funkciók (backend)",
 			"placeholderFncBackendHelp": "Helyőrzők a backend függvényekhez - vagy kifejezésként ('SELECT function_abc()') vagy közvetlenül hívva ('PERFORM function_abc()').",
 			"placeholderFncFrontend": "Funkciók (frontend)",
@@ -2244,6 +2268,7 @@
 			"addToField": "Add to field",
 			"all": "Mind",
 			"apply": "Alkalmazás",
+			"attach": "Attach",
 			"cancel": "Mégse",
 			"clear": "Törlés",
 			"close": "Bezárás",

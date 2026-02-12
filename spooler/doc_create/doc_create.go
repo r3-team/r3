@@ -5,13 +5,20 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"path/filepath"
 	"r3/cache"
+	"r3/config"
+	"r3/data"
+	"r3/db"
 	"r3/handler"
 	"r3/log"
+	"r3/schema"
+	"r3/tools"
 	"r3/types"
 
 	"codeberg.org/go-pdf/fpdf"
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -27,6 +34,25 @@ type doc struct {
 
 	fieldIdMapState map[uuid.UUID]bool // show/hide fields
 	pageIdMapState  map[uuid.UUID]bool // show/hide pages
+}
+type docJob struct {
+	Id    uuid.UUID // ID from doc_spool
+	DocId uuid.UUID
+
+	// load record on document
+	RecordIdLoad pgtype.Int8
+
+	// output doc as file
+	FilePath  pgtype.Text
+	Overwrite bool
+
+	// attach doc to filesattribute
+	AttributeIdAttach pgtype.UUID
+	RecordIdAttach    pgtype.Int8
+
+	// callback after generation
+	PgFunctionIdCallback pgtype.UUID
+	CallbackValue        pgtype.Text
 }
 
 var (
@@ -49,14 +75,178 @@ func SetFontFs(fs fs.FS) {
 	fsFont = fs
 }
 
-// TEMP
-// Mockup for later scheduler run
 func DoAll() error {
+
+	rows, err := db.Pool.Query(context.Background(), `
+		SELECT id, doc_id, attribute_id_attach, pg_function_id_callback, callback_value,
+			record_id_attach, record_id_load, file_path, overwrite
+		FROM instance.doc_spool
+	`)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	jobs := make([]docJob, 0)
+	for rows.Next() {
+		var j docJob
+		if err := rows.Scan(&j.Id, &j.DocId, &j.AttributeIdAttach, &j.PgFunctionIdCallback,
+			&j.CallbackValue, &j.RecordIdAttach, &j.RecordIdLoad, &j.FilePath, &j.Overwrite); err != nil {
+
+			return err
+		}
+		jobs = append(jobs, j)
+	}
+	rows.Close()
+
+	log.Info(log.ContextDoc, fmt.Sprintf("found %d documents to be generated", len(jobs)))
+
+	for _, j := range jobs {
+
+		if err := do(j); err != nil {
+			log.Error(log.ContextDoc, "unable to generate document", err)
+		} else {
+			log.Info(log.ContextDoc, "successfully generated document")
+		}
+
+		// doc spooler is single attempt only - if generation fails, new job must be generated
+		// reason: in contrast to mailing/REST calls, what we need to generate documents is in our control, if it fails once it will likely fail again
+		if _, err := db.Pool.Exec(context.Background(), `DELETE FROM instance.doc_spool WHERE id = $1`, j.Id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func do(j docJob) error {
+	if !j.FilePath.Valid && !j.AttributeIdAttach.Valid {
+		return errors.New("no defined export file path nor record/files attribute for attachment")
+	}
+
+	var err error
+	var filePath string
+	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutDocGenerate)
+	defer ctxCanc()
+
+	if j.FilePath.Valid {
+		if config.File.Paths.FileExport == "" {
+			return errors.New("no file export path defined in configuration file")
+		}
+		filePath = filepath.Join(config.File.Paths.FileExport, j.FilePath.String)
+
+		if !j.Overwrite {
+			fileExists, err := tools.Exists(filePath)
+			if err != nil {
+				return err
+			}
+			if fileExists {
+				return fmt.Errorf("file at '%s' already exists, overwrite is disabled", filePath)
+			}
+		}
+	}
+
+	if j.AttributeIdAttach.Valid {
+		if !j.RecordIdAttach.Valid || j.RecordIdAttach.Int64 < 1 {
+			return errors.New("no record ID for attachment given")
+		}
+
+		cache.Schema_mx.RLock()
+		atr, exists := cache.AttributeIdMap[j.AttributeIdAttach.Bytes]
+		var rel types.Relation
+		var mod types.Module
+		if exists {
+			rel = cache.RelationIdMap[atr.RelationId]
+			mod = cache.ModuleIdMap[rel.ModuleId]
+		}
+		cache.Schema_mx.RUnlock()
+
+		if err := db.Pool.QueryRow(ctx, fmt.Sprintf(`
+			SELECT TRUE
+			FROM %s.%s
+			WHERE %s = $1
+		`, mod.Name, rel.Name, schema.PkName), j.RecordIdAttach.Int64).Scan(&exists); err != nil {
+			if err == pgx.ErrNoRows {
+				return fmt.Errorf("record %d to attach to on relation '%s' does not exist", j.RecordIdAttach.Int64, rel.Name)
+			}
+		}
+
+		filePath, err = tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)
+		if err != nil {
+			return err
+		}
+	}
+
+	fileName, err := Run(ctx, j.DocId, -1, j.RecordIdLoad.Int64, filePath)
+	if err != nil {
+		return err
+	}
+
+	if j.AttributeIdAttach.Valid {
+		fileId, err := uuid.NewV4()
+		if err != nil {
+			return err
+		}
+		if err := data.SetFile(ctx, -1, j.AttributeIdAttach.Bytes, fileId, nil, pgtype.Text{String: filePath, Valid: true}, pgtype.Text{}, true); err != nil {
+			return err
+		}
+
+		tx, err := db.Pool.Begin(ctx)
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback(ctx)
+
+		fileIdMapChange := make(map[uuid.UUID]types.DataSetFileChange)
+		fileIdMapChange[fileId] = types.DataSetFileChange{
+			Action:  "create",
+			Name:    fileName,
+			Version: -1,
+		}
+		if err := data.FilesApplyAttributChanges_tx(ctx, tx, j.RecordIdAttach.Int64, j.AttributeIdAttach.Bytes, fileIdMapChange); err != nil {
+			return err
+		}
+		if err := tx.Commit(ctx); err != nil {
+			return err
+		}
+	}
+
+	// execute callback if used
+	if j.PgFunctionIdCallback.Valid {
+
+		cache.Schema_mx.RLock()
+		fnc, exists := cache.PgFunctionIdMap[j.PgFunctionIdCallback.Bytes]
+		cache.Schema_mx.RUnlock()
+
+		if !exists {
+			return handler.ErrSchemaUnknownPgFunction(j.PgFunctionIdCallback.Bytes)
+		}
+
+		cache.Schema_mx.RLock()
+		mod, exists := cache.ModuleIdMap[fnc.ModuleId]
+		cache.Schema_mx.RUnlock()
+
+		if !exists {
+			return handler.ErrSchemaUnknownModule(fnc.ModuleId)
+		}
+
+		tx, err := db.Pool.Begin(ctx)
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback(ctx)
+
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`SELECT "%s"."%s"($1)`, mod.Name, fnc.Name), j.CallbackValue); err != nil {
+			return err
+		}
+		if err := tx.Commit(ctx); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 // returns filename of generated document
-func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recordId int64, pathOut string) (string, error) {
+func Run(ctx context.Context, docId uuid.UUID, loginId int64, recordId int64, pathOut string) (string, error) {
 
 	cache.Schema_mx.RLock()
 	docDef, exists := cache.DocIdMap[docId]
@@ -152,7 +342,7 @@ func Run(ctx context.Context, docId uuid.UUID, noAuth bool, loginId int64, recor
 		exprs = getExpressionsDistinct(exprs)
 
 		// get data from document query
-		if err := getDataDoc(ctx, doc, noAuth, loginId, recordId, docDef.Query, exprs, "en_us"); err != nil {
+		if err := getDataDoc(ctx, doc, loginId, recordId, docDef.Query, exprs, "en_us"); err != nil {
 			return "", err
 		}
 	}

@@ -56,7 +56,7 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 
 	// fetch data
 	var query string
-	rows, _, err := data.Get_tx(ctx, tx, dataGet, true, 0, &query)
+	rows, _, err := data.Get_tx(ctx, tx, dataGet, loginId, &query)
 	if err != nil {
 		return err
 	}

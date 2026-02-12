@@ -1,7 +1,4 @@
-import {getTemplateQueryIfNull} from '../comps/shared/builderTemplate.js';
-export {MyStoreSchema as default};
-
-const MyStoreSchema = {
+export default {
 	namespaced:true,
 	state:{
 		languageCodes:[],       // language codes available, both official & community

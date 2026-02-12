@@ -4,9 +4,8 @@ import {getJsFunctionsProcessed} from '../shared/builder.js';
 import srcBase64Icon             from '../shared/image.js';
 import {getCaptionForLang}       from '../shared/language.js';
 import {MyModuleSelect}          from '../input.js';
-export {MyBuilder as default};
 
-const MyBuilder = {
+export default {
 	name:'my-builder',
 	components:{
 		MyBuilderHelp,

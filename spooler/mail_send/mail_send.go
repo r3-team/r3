@@ -30,9 +30,7 @@ func DoAll() error {
 		log.Info(log.ContextMail, "cannot start sending, no accounts defined")
 		return nil
 	}
-
 	now := tools.GetTimeUnix()
-	mails := make([]types.Mail, 0)
 
 	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, to_list, cc_list, bcc_list, subject, body, attempt_count,
@@ -47,6 +45,7 @@ func DoAll() error {
 	}
 	defer rows.Close()
 
+	mails := make([]types.Mail, 0)
 	for rows.Next() {
 		var m types.Mail
 		if err := rows.Scan(&m.Id, &m.ToList, &m.CcList, &m.BccList, &m.Subject, &m.Body,

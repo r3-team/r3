@@ -33,7 +33,7 @@ func DocCreate(ctx context.Context, reqJson json.RawMessage, loginId int64) (any
 	if err != nil {
 		return nil, err
 	}
-	filename, err := doc_create.Run(ctx, req.DocId, false, loginId, req.RecordIdLoad, filePath)
+	filename, err := doc_create.Run(ctx, req.DocId, loginId, req.RecordIdLoad, filePath)
 	if err != nil {
 		return nil, err
 	}

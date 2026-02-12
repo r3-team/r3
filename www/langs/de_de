@@ -545,6 +545,7 @@
 				"clusterCheckIn": "Cluster-Knoten einchecken",
 				"clusterProcessEvents": "Cluster-Ereignisse verarbeiten",
 				"dbOptimize": "Datenbankoptimierung",
+				"docsGenerate": "PDF-Dokumente erzeugen",
 				"filesProcess": "Dateijobs verarbeiten",
 				"httpCertRenew": "Neuladen des SSL-Zertifikates falls es erneuert wurde",
 				"importLdapLogins": "Import von Benutzern über LDAP",
@@ -1419,6 +1420,20 @@
 					"attach_record_id BIGINT DEFAULT NULL",
 					"attach_attribute_id UUID DEFAULT NULL"
 				],
+				"pdf_create_attach": [
+					"load_record_id BIGINT",
+					"attach_record_id BIGINT",
+					"attach_attribute_id UUID",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
+				"pdf_create_export": [
+					"load_record_id BIGINT",
+					"file_path TEXT",
+					"overwrite BOOLEAN DEFAULT FALSE",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
 				"rest_call": [
 					"method TEXT",
 					"url TEXT",
@@ -1479,6 +1494,15 @@
 				"intervalWeeks": "Wochen",
 				"intervalYears": "Jahre"
 			},
+			"placeholderDoc": "PDFs",
+			"placeholderDocHelp": [
+				"Platzhalter, um vordefinierte PDFs zu erzeugen - entweder als Dateiexport oder angehängt an ein Dateien-Attribut.",
+				"Wenn das PDF-Dokument eine Datenabfrage hat (s. \"Inhalt\"-Tab in der PDF-Definition), kann eine Datensatz-ID mitgegeben werden, die während der PDF-Erzeugung geladen wird.",
+				"Wenn Dateiexport gewünscht ist, muss der \"fileExport\"-Pfad in der REI3-Konfigurationsdatei (\"config.json\") definiert sein.",
+				"Wenn Anhang an ein Dateien-Attribut gewünscht ist, müssen Attribut und Datensatz-ID beide existieren.",
+				"Die PDF-Erzeugung erfolgt asynchron über geplante Aufgaben (s. \"Aufgabenplaner\", REI3-Adminpanel); die Funktion wird nicht auf die Fertigstellung der PDF-Erzeugung warten.",
+				"Eine weitere Backend-Funktion kann nach Fertigstellung der PDF-Erzeugung aufgerufen werden, um Aktionen, wie das Senden einer E-Mail, auszuführen. Ein Textwert kann der Callback-Funktion mitgegeben werden, um Kontext mitzuschicken. Die Callback-Funktion muss einen einzelnen TEXT-Parameter haben - dieser wird mit dem Callback-Wert gefüllt."
+			],
 			"placeholderFncBackend": "Funktionen (Backend)",
 			"placeholderFncBackendHelp": "Platzhalter für Backend-Funktionen - entweder als Ausdruck ('SELECT function_abc()') oder direkt aufgerufen ('PERFORM function_abc()').",
 			"placeholderFncFrontend": "Funktionen (Frontend)",
@@ -2244,6 +2268,7 @@
 			"addToField": "Add to field",
 			"all": "Alle",
 			"apply": "Ausführen",
+			"attach": "Anhängen",
 			"cancel": "Abbrechen",
 			"clear": "Entfernen",
 			"close": "Schließen",

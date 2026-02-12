@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func getDataDoc(ctx context.Context, doc *doc, noAuth bool, loginId int64, recordIdDoc int64, q types.Query, exprs []types.DataGetExpression, language string) error {
+func getDataDoc(ctx context.Context, doc *doc, loginId int64, recordIdDoc int64, q types.Query, exprs []types.DataGetExpression, language string) error {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
@@ -33,7 +33,7 @@ func getDataDoc(ctx context.Context, doc *doc, noAuth bool, loginId int64, recor
 
 	// fetch data
 	var query string
-	rows, _, err := data.Get_tx(ctx, tx, dataGet, noAuth, loginId, &query)
+	rows, _, err := data.Get_tx(ctx, tx, dataGet, loginId, &query)
 	if err != nil {
 		return err
 	}

@@ -16,6 +16,7 @@ import (
 	"r3/log"
 	"r3/repo"
 	"r3/schema"
+	"r3/spooler/doc_create"
 	"r3/spooler/file_process"
 	"r3/spooler/mail_attach"
 	"r3/spooler/mail_receive"
@@ -369,6 +370,9 @@ func load() error {
 		case "dbOptimize":
 			t.nameLog = "Database optimization"
 			t.fn = dbOptimize
+		case "docsGenerate":
+			t.nameLog = "Document generation"
+			t.fn = doc_create.DoAll
 		case "filesProcess":
 			t.nameLog = "File processing"
 			t.fn = file_process.DoAll

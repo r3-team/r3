@@ -57,7 +57,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filename, err := doc_create.Run(ctx, docId, false, login.Id, recordId, filePath)
+	filename, err := doc_create.Run(ctx, docId, login.Id, recordId, filePath)
 	if err != nil {
 		handler.ServeErrorPage(w, http.StatusInternalServerError, err)
 		return

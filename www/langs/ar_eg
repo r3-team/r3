@@ -545,6 +545,7 @@
 				"clusterCheckIn": "تسجيل الدخول الجماعي",
 				"clusterProcessEvents": "معالجة الأحداث الجماعية",
 				"dbOptimize": "تحسين قاعدة البيانات",
+				"docsGenerate": "Generate PDF documents",
 				"filesProcess": "File job processing",
 				"httpCertRenew": "أعد تحميل شهادة SSL إذا تم تحديثها",
 				"importLdapLogins": "استيراد تسجيلات الدخول والأدوار عبر LDAP",
@@ -1419,6 +1420,20 @@
 					"Attach_record_id عدد صحيح افتراضي فارغ",
 					"Attach_attribute_id UUID DEFAULT NULL"
 				],
+				"pdf_create_attach": [
+					"load_record_id BIGINT",
+					"attach_record_id BIGINT",
+					"attach_attribute_id UUID",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
+				"pdf_create_export": [
+					"load_record_id BIGINT",
+					"file_path TEXT",
+					"overwrite BOOLEAN DEFAULT FALSE",
+					"callback_function_id UUID DEFAULT NULL",
+					"callback_value TEXT DEFAULT NULL"
+				],
 				"rest_call": [
 					"نص الطريقة",
 					"نص عنوان URL",
@@ -1479,6 +1494,15 @@
 				"intervalWeeks": "أسابيع",
 				"intervalYears": "سنين"
 			},
+			"placeholderDoc": "PDFs",
+			"placeholderDocHelp": [
+				"Placeholders to generate predefined PDFs - either as file export or attached to a files attribute.",
+				"If the PDF document has a data query (see 'Content' tab in PDF definition), a record ID can be provided to be loaded during generation.",
+				"When exporting as file, the 'fileExport' path must be defined in the REI3 configuration file ('config.json').",
+				"When attaching to a files attribute, the given attribute and record ID must both exist.",
+				"Generation occurs asynchronously via scheduler (s. 'System tasks', REI3 admin panel); the function will not wait for the PDF generation to complete.",
+				"Another backend function can be called after generation completes to execute some action, like sending an email. A callback value can be provided to the callback function to provide some context. The callback function must have a single TEXT parameter, which is filled with the callback value."
+			],
 			"placeholderFncBackend": "وظائف (الخلفية)",
 			"placeholderFncBackendHelp": "العناصر النائبة لوظائف الواجهة الخلفية - تُستخدم إما كتعبير ('SELECT function_abc()') أو مباشرة ('PERFORM function_abc()').",
 			"placeholderFncFrontend": "الوظائف (الواجهة الأمامية)",
@@ -2244,6 +2268,7 @@
 			"addToField": "Add to field",
 			"all": "الجميع",
 			"apply": "يتقدم",
+			"attach": "Attach",
 			"cancel": "يلغي",
 			"clear": "واضح",
 			"close": "يغلق",
