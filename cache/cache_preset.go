@@ -33,8 +33,6 @@ func renewPresetRecordIds_tx(ctx context.Context, tx pgx.Tx) error {
 	preset_mx.Lock()
 	defer preset_mx.Unlock()
 
-	presetIdMapRecordId = make(map[uuid.UUID]int64)
-
 	rows, err := tx.Query(ctx, `
 		SELECT preset_id, record_id_wofk
 		FROM instance.preset_record
@@ -44,6 +42,7 @@ func renewPresetRecordIds_tx(ctx context.Context, tx pgx.Tx) error {
 	}
 	defer rows.Close()
 
+	presetIdMapRecordId = make(map[uuid.UUID]int64)
 	for rows.Next() {
 		var id uuid.UUID
 		var recordId int64

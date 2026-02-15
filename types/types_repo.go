@@ -5,6 +5,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Repo struct {
+	Id             uuid.UUID `json:"id"`
+	Name           string    `json:"name"`
+	DateChecked    int64     `json:"dateChecked"`
+	FeedbackEnable bool      `json:"feedbackEnable"`
+	FetchUserName  string    `json:"fetchUserName"`
+	FetchUserPass  string    `json:"fetchUserPass"`
+	SkipVerify     bool      `json:"skipVerify"`
+	Url            string    `json:"url"`
+}
+
 type RepoModule struct {
 	// module meta data
 	ModuleId  uuid.UUID   `json:"moduleId"`

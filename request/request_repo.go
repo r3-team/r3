@@ -12,6 +12,14 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+func RepoSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+	var req types.Repo
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	return nil, repo.Set_tx(ctx, tx, req)
+}
+
 func RepoModuleGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var (
@@ -68,8 +76,8 @@ func RepoModuleInstallAll(ctx context.Context) (any, error) {
 
 	if err := db.Pool.QueryRow(ctx, `
 		SELECT ARRAY_AGG(rm.file)
-		FROM app.module AS m
-		INNER JOIN instance.repo_module AS rm ON rm.module_id_wofk = m.id
+		FROM app.module           AS m
+		JOIN instance.repo_module AS rm ON rm.module_id_wofk = m.id
 		WHERE rm.release_build > m.release_build
 	`).Scan(&fileIds); err != nil {
 		return nil, err
@@ -86,5 +94,5 @@ func RepoModuleInstallAll(ctx context.Context) (any, error) {
 }
 
 func RepoModuleUpdate_tx(ctx context.Context, tx pgx.Tx) (any, error) {
-	return nil, repo.Update_tx(ctx, tx)
+	return nil, repo.UpdateAll_tx(ctx, tx)
 }

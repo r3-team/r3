@@ -160,6 +160,7 @@ export default {
 		send() {
 			ws.send('feedback','send',{
 				code:this.code,
+				repoId:'TEMP',
 				formId:!this.form ? null : this.form.id,
 				isAdmin:this.isAdmin,
 				moduleId:!this.module ? null : this.module.id,

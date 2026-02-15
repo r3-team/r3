@@ -6,10 +6,11 @@ import (
 	"r3/config"
 	"r3/handler"
 
+	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID, formId pgtype.UUID, mood int, code int, text string) error {
+func SendFeedback(isAdmin bool, moduleRelated bool, repoId uuid.UUID, moduleId pgtype.UUID, formId pgtype.UUID, mood int, code int, text string) error {
 
 	releaseBuild := 0
 	if moduleId.Valid {
@@ -23,10 +24,13 @@ func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID, formId
 		releaseBuild = module.ReleaseBuild
 	}
 
-	baseUrl := config.GetString("repoUrl")
+	repo, err := cache.GetRepoById(repoId)
+	if err != nil {
+		return err
+	}
 
 	// get authentication token
-	token, err := getToken(baseUrl)
+	token, err := getToken(repo)
 	if err != nil {
 		return err
 	}
@@ -63,5 +67,5 @@ func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID, formId
 	}
 
 	var res any
-	return httpCallPost(token, fmt.Sprintf("%s/api/lsw_repo/feedback/v1", baseUrl), req, &res)
+	return httpCallPost(token, fmt.Sprintf("%s/api/lsw_repo/feedback/v1", repo.Url), req, &res)
 }

@@ -151,7 +151,7 @@ func SetNode_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, name string) error
 
 // helper
 // creates node events to some nodes (by node IDs) or all but the current node (if no node IDs are given)
-func CreateEventForNodes_tx(ctx context.Context, tx pgx.Tx, nodeIds []uuid.UUID, content string, payload interface{}, target types.ClusterEventTarget) error {
+func CreateEventForNodes_tx(ctx context.Context, tx pgx.Tx, nodeIds []uuid.UUID, content string, payload any, target types.ClusterEventTarget) error {
 	payloadJson, err := json.Marshal(payload)
 	if err != nil {
 		return err
@@ -204,6 +204,6 @@ func CreateEventForNodes_tx(ctx context.Context, tx pgx.Tx, nodeIds []uuid.UUID,
 	}
 	return nil
 }
-func createEventsForOtherNodes_tx(ctx context.Context, tx pgx.Tx, content string, payload interface{}, target types.ClusterEventTarget) error {
+func createEventsForOtherNodes_tx(ctx context.Context, tx pgx.Tx, content string, payload any, target types.ClusterEventTarget) error {
 	return CreateEventForNodes_tx(ctx, tx, []uuid.UUID{}, content, payload, target)
 }

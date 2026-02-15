@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"r3/cache"
 	"r3/config"
 	"r3/db"
 	"r3/tools"
@@ -14,28 +15,46 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// update internal module repository from external repository API
-func Update() error {
-	ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
-	defer ctxCanc()
+func UpdateAll() error {
+	var run = func(r types.Repo) error {
+		ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
+		defer ctxCanc()
 
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
+		tx, err := db.Pool.Begin(ctx)
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback(ctx)
 
-	if err := Update_tx(ctx, tx); err != nil {
-		return err
+		if err := update_tx(ctx, tx, r); err != nil {
+			return err
+		}
+		return tx.Commit(ctx)
 	}
-	return tx.Commit(ctx)
+
+	for _, r := range cache.GetRepos() {
+		if err := run(r); err != nil {
+			return err
+		}
+	}
+	return nil
 }
-func Update_tx(ctx context.Context, tx pgx.Tx) error {
+func UpdateAll_tx(ctx context.Context, tx pgx.Tx) error {
+	for _, r := range cache.GetRepos() {
+		if err := update_tx(ctx, tx, r); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// update internal module repository from external repository API
+func update_tx(ctx context.Context, tx pgx.Tx, r types.Repo) error {
 	baseUrl := config.GetString("repoUrl")
 	repoModuleMap := make(map[uuid.UUID]types.RepoModule)
 
 	// get authentication token
-	token, err := getToken(baseUrl)
+	token, err := getToken(r)
 	if err != nil {
 		return err
 	}
@@ -144,7 +163,7 @@ func addModules_tx(ctx context.Context, tx pgx.Tx, repoModuleMap map[uuid.UUID]t
 func removeModules_tx(ctx context.Context, tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) error {
 
 	moduleIds := make([]uuid.UUID, 0)
-	for id, _ := range repoModuleMap {
+	for id := range repoModuleMap {
 		moduleIds = append(moduleIds, id)
 	}
 

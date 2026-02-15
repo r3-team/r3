@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"r3/cache"
 	"r3/config"
 	"r3/tools"
 
@@ -14,22 +15,24 @@ import (
 // attribute ID of lsw_repo, module_release->file
 var fileAttributeId = "b28e8f5c-ebeb-4565-941b-4d942eedc588"
 
-func Download(fileId uuid.UUID) (string, error) {
+func Download(repoId, fileId uuid.UUID) (string, error) {
 
-	baseUrl := config.GetString("repoUrl")
-	skipVerify := config.GetUint64("repoSkipVerify") == 1
+	repo, err := cache.GetRepoById(repoId)
+	if err != nil {
+		return "", err
+	}
 
 	// get authentication token
-	token, err := getToken(baseUrl)
+	token, err := getToken(repo)
 	if err != nil {
 		return "", err
 	}
 
 	// get module file
 	fileUrl := fmt.Sprintf("%s/data/download/file.zip?attribute_id=%s&file_id=%s&token=%s",
-		baseUrl, fileAttributeId, fileId, token)
+		repo.Url, fileAttributeId, fileId, token)
 
-	httpClient, err := config.GetHttpClient(skipVerify, 30)
+	httpClient, err := config.GetHttpClient(repo.SkipVerify, 30)
 	if err != nil {
 		return "", err
 	}

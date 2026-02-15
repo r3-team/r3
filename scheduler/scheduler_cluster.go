@@ -144,6 +144,8 @@ func clusterProcessEvent(ctx context.Context, tx pgx.Tx, e types.ClusterEvent, c
 			return err
 		}
 		err = cluster.MasterAssigned(p.State)
+	case "reposChanged":
+		err = cluster.ReposChanged(ctx, tx, false)
 	case "schemaChanged":
 		var moduleIds []uuid.UUID
 		if err := json.Unmarshal(jsonPayload, &moduleIds); err != nil {

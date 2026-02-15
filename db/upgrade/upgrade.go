@@ -698,6 +698,41 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				);
 			END;
 			$BODY$;
+
+			-- repository changes
+			CREATE TABLE IF NOT EXISTS instance.repo(
+				id uuid NOT NULL DEFAULT gen_random_uuid(),
+				name text COLLATE pg_catalog."default" NOT NULL,
+				url text COLLATE pg_catalog."default" NOT NULL,
+				fetch_user_name character varying(256) COLLATE pg_catalog."default" NOT NULL,
+				fetch_user_pass character varying(5120) COLLATE pg_catalog."default" NOT NULL,
+				skip_verify boolean NOT NULL,
+				feedback_enable boolean NOT NULL,
+				date_checked bigint NOT NULL,
+				CONSTRAINT repo_pkey PRIMARY KEY (id)
+			);
+
+			INSERT INTO instance.repo(name,url,fetch_user_name,fetch_user_pass,skip_verify,feedback_enable,date_checked)
+			VALUES (
+				'Standard',
+				(SELECT value FROM instance.config WHERE name = 'repoUrl'),
+				(SELECT value FROM instance.config WHERE name = 'repoUser'),
+				(SELECT value FROM instance.config WHERE name = 'repoPass'),
+				CASE (SELECT value FROM instance.config WHERE name = 'repoSkipVerify')
+					WHEN '1' THEN TRUE
+					ELSE FALSE
+				END,
+				CASE (SELECT value FROM instance.config WHERE name = 'repoFeedback')
+					WHEN '1' THEN TRUE
+					ELSE FALSE
+				END,
+				(SELECT value FROM instance.config WHERE name = 'repoChecked')::BIGINT
+			);
+
+			DELETE FROM instance.config
+			WHERE name = ANY('{repoUrl,repoUser,repoPass,repoSkipVerify,repoFeedback,repoChecked}'::TEXT[]);
+			
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'reposChanged';
 		`)
 		return "3.12", err
 	},

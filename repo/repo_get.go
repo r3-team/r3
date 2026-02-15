@@ -14,8 +14,6 @@ import (
 func GetModule_tx(ctx context.Context, tx pgx.Tx, byString string, languageCode string, limit int,
 	offset int, getInstalled bool, getNew bool, getInStore bool) ([]types.RepoModule, int, error) {
 
-	repoModules := make([]types.RepoModule, 0)
-
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
 	qb.AddList("SELECT", []string{"rm.module_id_wofk", "rm.name",
@@ -84,23 +82,23 @@ func GetModule_tx(ctx context.Context, tx pgx.Tx, byString string, languageCode 
 
 	query, err := qb.GetQuery()
 	if err != nil {
-		return repoModules, 0, err
+		return nil, 0, err
 	}
 
 	rows, err := tx.Query(ctx, query, qb.GetParaValues()...)
 	if err != nil {
-		return repoModules, 0, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
+	repoModules := make([]types.RepoModule, 0)
 	for rows.Next() {
 		var rm types.RepoModule
 
-		if err := rows.Scan(&rm.ModuleId, &rm.Name, &rm.ChangeLog, &rm.Author,
-			&rm.InStore, &rm.ReleaseBuild, &rm.ReleaseBuildApp, &rm.ReleaseDate,
-			&rm.FileId); err != nil {
+		if err := rows.Scan(&rm.ModuleId, &rm.Name, &rm.ChangeLog, &rm.Author, &rm.InStore,
+			&rm.ReleaseBuild, &rm.ReleaseBuildApp, &rm.ReleaseDate, &rm.FileId); err != nil {
 
-			return repoModules, 0, err
+			return nil, 0, err
 		}
 		repoModules = append(repoModules, rm)
 	}
@@ -108,7 +106,7 @@ func GetModule_tx(ctx context.Context, tx pgx.Tx, byString string, languageCode 
 	for i, rm := range repoModules {
 		rm.LanguageCodeMeta, err = getModuleMeta_tx(ctx, tx, rm.ModuleId)
 		if err != nil {
-			return repoModules, 0, err
+			return nil, 0, err
 		}
 		repoModules[i] = rm
 	}
@@ -127,11 +125,11 @@ func GetModule_tx(ctx context.Context, tx pgx.Tx, byString string, languageCode 
 
 		query, err = qb.GetQuery()
 		if err != nil {
-			return repoModules, 0, err
+			return nil, 0, err
 		}
 
 		if err := tx.QueryRow(ctx, query, qb.GetParaValues()...).Scan(&total); err != nil {
-			return repoModules, 0, err
+			return nil, 0, err
 		}
 	}
 	return repoModules, total, nil
@@ -139,24 +137,23 @@ func GetModule_tx(ctx context.Context, tx pgx.Tx, byString string, languageCode 
 
 func getModuleMeta_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) (map[string]types.RepoModuleMeta, error) {
 
-	metaMap := make(map[string]types.RepoModuleMeta)
-
 	rows, err := tx.Query(ctx, `
 		SELECT language_code, title, description, support_page
 		FROM instance.repo_module_meta
 		WHERE module_id_wofk = $1
 	`, moduleId)
 	if err != nil {
-		return metaMap, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	metaMap := make(map[string]types.RepoModuleMeta)
 	for rows.Next() {
 		var code string
 		var m types.RepoModuleMeta
 
 		if err := rows.Scan(&code, &m.Title, &m.Description, &m.SupportPage); err != nil {
-			return metaMap, err
+			return nil, err
 		}
 		metaMap[code] = m
 	}

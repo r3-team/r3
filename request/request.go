@@ -561,6 +561,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "set":
 			return RelationSet_tx(ctx, tx, reqJson)
 		}
+	case "repo":
+		switch action {
+		case "set":
+			return RepoSet_tx(ctx, tx, reqJson)
+		}
 	case "repoModule":
 		switch action {
 		case "get":

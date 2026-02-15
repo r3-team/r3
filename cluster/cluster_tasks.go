@@ -277,6 +277,14 @@ func MasterAssigned(state bool) error {
 	SchedulerRestart <- true
 	return nil
 }
+func ReposChanged(ctx context.Context, tx pgx.Tx, updateNodes bool) error {
+	if updateNodes {
+		if err := createEventsForOtherNodes_tx(ctx, tx, "reposChanged", nil, types.ClusterEventTarget{}); err != nil {
+			return err
+		}
+	}
+	return cache.LoadRepos_tx(ctx, tx)
+}
 func SchemaChanged_tx(ctx context.Context, tx pgx.Tx, updateNodes bool, moduleIds []uuid.UUID) error {
 	target := types.ClusterEventTarget{Device: types.WebsocketClientDeviceBrowser}
 
