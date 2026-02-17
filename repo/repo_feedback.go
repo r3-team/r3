@@ -65,5 +65,5 @@ func SendFeedback(isAdmin bool, moduleRelated bool, repoId uuid.UUID, moduleId p
 	}
 
 	var res any
-	return httpCallPost(token, fmt.Sprintf("%s/api/lsw_repo/feedback/v1", repo.Url), req, &res)
+	return httpCallPost(token, fmt.Sprintf("%s/api/lsw_repo/feedback/v1", repo.Url), repo.SkipVerify, req, &res)
 }

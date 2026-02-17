@@ -19,13 +19,6 @@ export default {
 			</div>
 			
 			<div class="content gap default-inputs">
-
-				<div class="row gap centered" v-if="isMultipleRepos">
-					<span>{{ capApp.repoId }}</span>
-					<select v-model="repoId">
-						<option v-for="r in reposFeedback" :value="r.id">{{ r.name }}</option>
-					</select>
-				</div>
 				<select v-model.number="code">
 					<option value="1">{{ capApp.option.codeGeneric }}</option>
 					<option value="2">{{ capApp.option.codeBug }}</option>
@@ -37,6 +30,12 @@ export default {
 					v-model="text"
 					:placeholder="capApp.textHint"
 				/>
+				<div class="row gap centered" v-if="isMultipleRepos">
+					<span>{{ capApp.repoId }}</span>
+					<select v-model="repoId" class="auto">
+						<option v-for="r in reposFeedback" :value="r.id">{{ r.name }}</option>
+					</select>
+				</div>
 				<div class="submit-choice" v-if="module">
 					<span>
 						{{ capApp.moduleRelated.replace('{NAME}',getCaption('moduleTitle',module.id,module.id,module.captions,module.name)) }}

@@ -24,9 +24,9 @@ export function getTemplateReturn(isTrigger) {
 	return isTrigger ? 'TRIGGER' : 'INTEGER';
 };
 
-export function getTemplateRepo() {
+export function getTemplateRepo(id) {
 	return {
-		id:null,
+		id:id,
 		active:true,
 		name:'',
 		dateChecked:0,

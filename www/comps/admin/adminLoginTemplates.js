@@ -1,7 +1,6 @@
 import MyAdminLoginTemplate from './adminLoginTemplate.js';
-export {MyAdminLoginTemplates as default};
 
-let MyAdminLoginTemplates = {
+export default {
 	name:'my-admin-login-templates',
 	components:{ MyAdminLoginTemplate, },
 	template:`<div class="admin-login-templates contentBox grow">
@@ -59,17 +58,13 @@ let MyAdminLoginTemplates = {
 	},
 	data() {
 		return {
-			// data
 			templates:[],
-			
-			// state
 			templateIdOpen:null
 		};
 	},
 	computed:{
-		// stores
-		capApp:(s) => s.$store.getters.captions.admin.loginTemplate,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:s => s.$store.getters.captions.admin.loginTemplate,
+		capGen:s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.get();

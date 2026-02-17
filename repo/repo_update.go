@@ -91,10 +91,10 @@ func refresh_tx(ctx context.Context, tx pgx.Tx, r types.Repo) error {
 	repoModuleMap := make(map[uuid.UUID]types.RepoModule)
 
 	// get modules, their latest releases and translated module meta data
-	if err := getModules(token, r.Url, repoModuleMap); err != nil {
+	if err := getModules(token, r.Url, r.SkipVerify, repoModuleMap); err != nil {
 		return fmt.Errorf("failed to get modules, %w", err)
 	}
-	if err := getModuleMetas(token, r.Url, repoModuleMap); err != nil {
+	if err := getModuleMetas(token, r.Url, r.SkipVerify, repoModuleMap); err != nil {
 		return fmt.Errorf("failed to get meta info for modules, %w", err)
 	}
 
@@ -225,7 +225,7 @@ func removeModules_tx(ctx context.Context, tx pgx.Tx, repoId uuid.UUID, repoModu
 	return nil
 }
 
-func getModules(token string, baseUrl string, repoModuleMap map[uuid.UUID]types.RepoModule) error {
+func getModules(token string, baseUrl string, skipVerify bool, repoModuleMap map[uuid.UUID]types.RepoModule) error {
 
 	type moduleResponse struct {
 		Module struct {
@@ -252,7 +252,7 @@ func getModules(token string, baseUrl string, repoModuleMap map[uuid.UUID]types.
 		url := fmt.Sprintf("%s/api/lsw_repo/module/v1?limit=%d&offset=%d", baseUrl, limit, offset)
 
 		var res []moduleResponse
-		if err := httpCallGet(token, url, "", &res); err != nil {
+		if err := httpCallGet(token, url, skipVerify, "", &res); err != nil {
 			return err
 		}
 
@@ -286,7 +286,7 @@ func getModules(token string, baseUrl string, repoModuleMap map[uuid.UUID]types.
 	return nil
 }
 
-func getModuleMetas(token string, baseUrl string, repoModuleMap map[uuid.UUID]types.RepoModule) error {
+func getModuleMetas(token string, baseUrl string, skipVerify bool, repoModuleMap map[uuid.UUID]types.RepoModule) error {
 
 	type moduleMetaResponse struct {
 		Meta struct {
@@ -309,7 +309,7 @@ func getModuleMetas(token string, baseUrl string, repoModuleMap map[uuid.UUID]ty
 		url := fmt.Sprintf("%s/api/lsw_repo/module_meta/v1?limit=%d&offset=%d", baseUrl, limit, offset)
 
 		var res []moduleMetaResponse
-		if err := httpCallGet(token, url, "", &res); err != nil {
+		if err := httpCallGet(token, url, skipVerify, "", &res); err != nil {
 			return err
 		}
 

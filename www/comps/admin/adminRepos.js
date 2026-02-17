@@ -7,14 +7,8 @@ export default {
 	template:`<div class="admin-repos contentBox grow">
 		<div class="top lower">
 			<div class="area">
-				<my-button image="add.png"
-					@trigger="idOpen = 0"
-					:caption="capGen.button.new"
-				/>
-				<my-button image="refresh.png"
-					@trigger="get"
-					:caption="capGen.button.refresh"
-				/>
+				<my-button image="add.png"     @trigger="create" :caption="capGen.button.new" />
+				<my-button image="refresh.png" @trigger="get"    :caption="capGen.button.refresh" />
 			</div>
 		</div>
 		
@@ -30,6 +24,24 @@ export default {
 						<span>{{ r.name }}</span>
 						<span class="subtitle">{{ r.url }}</span>
 					</div>
+					<my-button image="feedback.png"
+						v-if="r.feedbackEnable"
+						:active="false"
+						:captionTitle="capApp.repoFeedback"
+						:naked="true"
+					/>
+					<my-button image="keyLocked.png"
+						v-if="r.skipVerify"
+						:active="false"
+						:captionTitle="capApp.repoSkipVerify"
+						:naked="true"
+					/>
+					<my-button image="remove.png"
+						v-if="!r.active"
+						:active="false"
+						:captionTitle="capGen.disabled"
+						:naked="true"
+					/>
 				</div>
 			</div>
 			
@@ -61,6 +73,7 @@ export default {
 		},
 
 		// stores
+		capApp:s => s.$store.getters.captions.admin.modules,
 		capGen:s => s.$store.getters.captions.generic
 	},
 	methods:{

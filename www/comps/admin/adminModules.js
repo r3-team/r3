@@ -26,7 +26,7 @@ export default {
 			<my-tabs
 				v-model="tabTarget"
 				:entries="['modules','installFromRepo','installFromFile','repos','keys']"
-				:entriesIcon="['images/builder.png','images/box.png','images/upload.png','images/box.png','images/key.png']"
+				:entriesIcon="['images/builder.png','images/box.png','images/upload.png','images/boxMultiple.png','images/key.png']"
 				:entriesText="[capApp.installedApps,capApp.repoInstallFrom,capApp.import,capApp.reposManage,capApp.publicKeys]"
 			/>
 
@@ -196,7 +196,7 @@ export default {
 		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	computed:{
-		moduleIdsUpdate:(s) => {
+		moduleIdsUpdate:s => {
 			let out = [];
 			for(let rm of s.repoModules) {
 				if(rm.releaseBuildApp <= s.appVersionBuild
@@ -210,19 +210,19 @@ export default {
 		},
 		
 		// simple
-		canUploadFile:(s) => !s.installStarted && !s.fileUploading && !s.productionMode,
-		hasChanges:   (s) => Object.keys(s.moduleIdMapUpdated).length !== 0,
+		canUploadFile:s => !s.installStarted && !s.fileUploading && !s.productionMode,
+		hasChanges:   s => Object.keys(s.moduleIdMapUpdated).length !== 0,
 		
 		// stores
-		appVersionBuild:(s) => s.$store.getters['local/appVersionBuild'],
-		token:          (s) => s.$store.getters['local/token'],
-		modules:        (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		builderEnabled: (s) => s.$store.getters.builderEnabled,
-		capApp:         (s) => s.$store.getters.captions.admin.modules,
-		capGen:         (s) => s.$store.getters.captions.generic,
-		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta,
-		productionMode: (s) => s.$store.getters.productionMode
+		appVersionBuild:s => s.$store.getters['local/appVersionBuild'],
+		token:          s => s.$store.getters['local/token'],
+		modules:        s => s.$store.getters['schema/modules'],
+		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
+		builderEnabled: s => s.$store.getters.builderEnabled,
+		capApp:         s => s.$store.getters.captions.admin.modules,
+		capGen:         s => s.$store.getters.captions.generic,
+		moduleIdMapMeta:s => s.$store.getters.moduleIdMapMeta,
+		productionMode: s => s.$store.getters.productionMode
 	},
 	methods:{
 		// error handling

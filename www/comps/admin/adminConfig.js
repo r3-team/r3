@@ -1,7 +1,6 @@
 import {getBuildFromVersion} from '../shared/generic.js';
-export {MyAdminConfig as default};
 
-let MyAdminConfig = {
+export default {
 	name:'my-admin-config',
 	template:`<div class="contentBox admin-config" v-if="ready">
 		<div class="top">
@@ -169,35 +168,6 @@ let MyAdminConfig = {
 				
 				<table class="default-inputs">
 					<tbody>
-						<tr>
-							<td>{{ capApp.repoUrl }}</td>
-							<td><input v-model="configInput.repoUrl" /></td>
-						</tr>
-						<tr>
-							<td>{{ capGen.username }}</td>
-							<td><input v-model="configInput.repoUser" /></td>
-						</tr>
-						<tr>
-							<td>{{ capGen.password }}</td>
-							<td><input type="password" v-model="configInput.repoPass" /></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.repoSkipVerify }}</td>
-							<td>
-								<my-bool-string-number
-									v-model="configInput.repoSkipVerify"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.repoFeedback }}</td>
-							<td>
-								<my-bool-string-number
-									v-model="configInput.repoFeedback"
-								/>
-							</td>
-						</tr>
-						<tr><td colspan="2"><hr /></td></tr>
 						<tr><td colspan="2"><b>{{ capApp.repoKeyManagement }}</b></td></tr>
 						<tr>
 							<td>{{ capApp.repoPublicKeys }}</td>
