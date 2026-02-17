@@ -82,7 +82,8 @@ func GetModule_tx(ctx context.Context, tx pgx.Tx, byString string, languageCode 
 	// filter by translated module meta
 	qb.Add("JOIN", `
 		INNER JOIN instance.repo_module_meta AS rmm
-			ON rm.module_id_wofk = rmm.module_id_wofk
+			ON  rmm.module_id_wofk = rm.module_id_wofk
+			AND rmm.repo_id        = rm.repo_id
 	`)
 
 	qb.Add("WHERE", `

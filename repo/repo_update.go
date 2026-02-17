@@ -257,10 +257,8 @@ func getModules(token string, baseUrl string, skipVerify bool, repoModuleMap map
 		}
 
 		for _, mod := range res {
-
 			if len(mod.Release.File) != 1 {
-				return fmt.Errorf("module release does not have exactly 1 file, file count: %d",
-					len(mod.Release.File))
+				return fmt.Errorf("module release does not have exactly 1 file, file count: %d", len(mod.Release.File))
 			}
 
 			repoModuleMap[mod.Module.Uuid] = types.RepoModule{

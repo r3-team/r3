@@ -2021,7 +2021,7 @@
 			"codePraise": "مدح",
 			"codeSuggestion": "اقتراح"
 		},
-		"repoId": "Send feedback to",
+		"repoId": "Send to",
 		"sendNok": "لا يمكن إرسال التعليقات. ",
 		"sendOk": "تم إرسال التعليقات بنجاح. ",
 		"textHint": "ملاحظاتك",

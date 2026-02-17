@@ -2021,7 +2021,7 @@
 			"codePraise": "Dicséret",
 			"codeSuggestion": "Javaslat"
 		},
-		"repoId": "Send feedback to",
+		"repoId": "Send to",
 		"sendNok": "A visszajelzést nem sikerült elküldeni. Kérjük, próbálja meg később újra.",
 		"sendOk": "A visszajelzést sikeresen elküldtük. Köszönjük!",
 		"textHint": "Your feedback",

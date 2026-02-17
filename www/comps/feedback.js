@@ -19,33 +19,30 @@ export default {
 			</div>
 			
 			<div class="content gap default-inputs">
-				<select v-model.number="code">
-					<option value="1">{{ capApp.option.codeGeneric }}</option>
-					<option value="2">{{ capApp.option.codeBug }}</option>
-					<option value="3">{{ capApp.option.codeSuggestion }}</option>
-					<option value="4">{{ capApp.option.codePraise }}</option>
-				</select>
+				<div class="row gap">
+					<select v-model.number="code">
+						<option value="1">{{ capApp.option.codeGeneric }}</option>
+						<option value="2">{{ capApp.option.codeBug }}</option>
+						<option value="3">{{ capApp.option.codeSuggestion }}</option>
+						<option value="4">{{ capApp.option.codePraise }}</option>
+					</select>
+					<div class="row gap centered" v-if="isMultipleRepos">
+						<span>{{ capApp.repoId }}</span>
+						<select v-model="repoId" class="auto">
+							<option v-for="r in reposFeedback" :value="r.id">{{ r.name }}</option>
+						</select>
+					</div>
+				</div>
 				<textarea
 					v-focus
 					v-model="text"
 					:placeholder="capApp.textHint"
 				/>
-				<div class="row gap centered" v-if="isMultipleRepos">
-					<span>{{ capApp.repoId }}</span>
-					<select v-model="repoId" class="auto">
-						<option v-for="r in reposFeedback" :value="r.id">{{ r.name }}</option>
-					</select>
-				</div>
-				<div class="submit-choice" v-if="module">
-					<span>
-						{{ capApp.moduleRelated.replace('{NAME}',getCaption('moduleTitle',module.id,module.id,module.captions,module.name)) }}
-					</span>
-					<my-bool
-						v-model="moduleRelated"
-						:caption0="capGen.option.no"
-						:caption1="capGen.option.yes"
-					/>
-				</div>
+				<my-button-check
+					v-if="module"
+					v-model="moduleRelated"
+					:caption="capApp.moduleRelated.replace('{NAME}',getCaption('moduleTitle',module.id,module.id,module.captions,module.name))"
+				/>
 				
 				<div class="submit-box">
 					<img src="images/smiley5.png" tabindex="0"
@@ -78,7 +75,7 @@ export default {
 				<div class="submit-text"
 					v-if="message !== ''"
 					:class="{ error:messageError }"
-				><span>{{ message }}</span></div>
+				><span><b>{{ message }}</b></span></div>
 				
 				<div class="row gap space-between">
 					<my-button image="question.png"

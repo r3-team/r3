@@ -2021,7 +2021,7 @@
 			"codePraise": "Mulțumiri",
 			"codeSuggestion": "Sugestie"
 		},
-		"repoId": "Send feedback to",
+		"repoId": "Send to",
 		"sendNok": "Feedback-ul nu a putut fi trimis. Vă rugăm să încercați din nou mai târziu.",
 		"sendOk": "Feedback-ul a fost trimis cu succes. Mulțumesc!",
 		"textHint": "Your feedback",

@@ -2021,7 +2021,7 @@
 			"codePraise": "Lob",
 			"codeSuggestion": "Vorschlag"
 		},
-		"repoId": "Feedback senden an",
+		"repoId": "Senden an",
 		"sendNok": "Feedback konnte nicht gesendet werden. Bitte später erneut versuchen.",
 		"sendOk": "Feedback wurde erfolgreich gesendet. Vielen Dank!",
 		"textHint": "Ihr Feedback",
