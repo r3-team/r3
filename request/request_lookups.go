@@ -24,15 +24,6 @@ func lookupGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, login
 	case "access":
 		return cache.GetAccessById(loginId)
 
-	case "feedback":
-		var res struct {
-			Feedback    bool   `json:"feedback"`
-			FeedbackUrl string `json:"feedbackUrl"`
-		}
-		res.Feedback = config.GetUint64("repoFeedback") == 1
-		res.FeedbackUrl = config.GetString("repoUrl")
-		return res, nil
-
 	case "loginHasClient":
 		var hasClient bool
 		err := tx.QueryRow(ctx, `

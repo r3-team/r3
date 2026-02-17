@@ -392,7 +392,7 @@ func load() error {
 			t.nameLog = "Email dispatch"
 			t.fn = mail_send.DoAll
 		case "repoCheck":
-			t.nameLog = "Check for updates from repository"
+			t.nameLog = "Check for updates from repositories"
 			t.fn = repo.UpdateAll
 		case "restExecute":
 			t.nameLog = "REST call execution"

@@ -19,14 +19,14 @@ type QueryBuilder struct {
 	cOrder  []string
 	cLimit  int
 	cOffset int
-	cParas  map[string]interface{} // named parameters, used as WHERE = {NAME}
+	cParas  map[string]any // named parameters, used as WHERE = {NAME}
 
 	// options
 	dollarSigns     bool
 	dollarSignCount int
 
 	// ordered parameters, important for SQL statement with ? placeholders
-	cParasOrdered []interface{}
+	cParasOrdered []any
 }
 
 func (qb *QueryBuilder) Add(component string, value string) {
@@ -48,9 +48,9 @@ func (qb *QueryBuilder) AddList(component string, values []string) {
 		qb.Add(component, value)
 	}
 }
-func (qb *QueryBuilder) AddPara(name string, value interface{}) {
+func (qb *QueryBuilder) AddPara(name string, value any) {
 	if qb.cParas == nil {
-		qb.cParas = make(map[string]interface{})
+		qb.cParas = make(map[string]any)
 	}
 
 	qb.cParas[name] = value
@@ -72,7 +72,7 @@ func (qb *QueryBuilder) Reset(component string) {
 		qb.cJoin = nil
 	case "WHERE":
 		qb.cWhere = nil
-		qb.cParas = make(map[string]interface{})
+		qb.cParas = make(map[string]any)
 	case "GROUP":
 		qb.cGroup = nil
 	case "ORDER":
@@ -86,7 +86,7 @@ func (qb *QueryBuilder) Reset(component string) {
 
 func (qb *QueryBuilder) GetQuery() (string, error) {
 
-	qb.cParasOrdered = make([]interface{}, 0)
+	qb.cParasOrdered = make([]any, 0)
 
 	// build query, start with SELECT, FROM, JOIN
 	query := fmt.Sprintf("SELECT %s\n", strings.Join(qb.cSelect, ", "))
@@ -163,7 +163,7 @@ func (qb *QueryBuilder) GetQuery() (string, error) {
 
 	return query, nil
 }
-func (qb *QueryBuilder) GetParaValues() []interface{} {
+func (qb *QueryBuilder) GetParaValues() []any {
 	return qb.cParasOrdered
 }
 

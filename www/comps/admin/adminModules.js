@@ -3,7 +3,6 @@ import srcBase64Icon         from '../shared/image.js';
 import {openLink}            from '../shared/generic.js';
 import {getUnixFormat}       from '../shared/time.js';
 import {getCaption}          from '../shared/language.js';
-export {MyAdminModules as default};
 
 const MyAdminModulesItem = {
 	name:'my-admin-modules-item',
@@ -38,7 +37,7 @@ const MyAdminModulesItem = {
 		
 			<my-button
 				v-if="isReadyForUpdate"
-				@trigger="$emit('install',repoModule.fileId)"
+				@trigger="$emit('install',repoModule.moduleId)"
 				:active="!installStarted && !productionMode"
 				:caption="capApp.button.update.replace('{VERSION}',repoModule.releaseBuild)"
 				:image="!installStarted ? 'download.png' : 'load.gif'"
@@ -296,7 +295,7 @@ const MyAdminModulesItem = {
 	}
 };
 
-const MyAdminModules = {
+export default {
 	name:'my-admin-modules',
 	components:{
 		MyAdminModulesItem,
@@ -440,8 +439,8 @@ const MyAdminModules = {
 						:key="m.id"
 						:module="m"
 						:options="moduleIdMapMeta[m.id]"
-						:repoModules="repoModules"
-						:warningShown="warningShown"
+						:repoModules
+						:warningShown
 					/>
 				</tbody>
 			</table>
@@ -557,8 +556,8 @@ const MyAdminModules = {
 				this.$root.genericError
 			);
 		},
-		install(fileId) {
-			ws.send('repoModule','install',{fileId:fileId},true,true).then(
+		install(moduleId) {
+			ws.send('repoModule','install',moduleId,true,true).then(
 				() => this.installOk(),
 				this.installError
 			);

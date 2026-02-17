@@ -57,6 +57,11 @@ type importMeta struct {
 
 // imports extracted modules from given file paths
 func ImportFromFiles(ctx context.Context, filePathsImport []string) error {
+
+	if len(filePathsImport) == 0 {
+		return fmt.Errorf("cannot import modules, no file paths defined")
+	}
+
 	import_mx.Lock()
 	defer import_mx.Unlock()
 

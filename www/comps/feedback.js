@@ -19,6 +19,13 @@ export default {
 			</div>
 			
 			<div class="content gap default-inputs">
+
+				<div class="row gap centered" v-if="isMultipleRepos">
+					<span>{{ capApp.repoId }}</span>
+					<select v-model="repoId">
+						<option v-for="r in reposFeedback" :value="r.id">{{ r.name }}</option>
+					</select>
+				</div>
 				<select v-model.number="code">
 					<option value="1">{{ capApp.option.codeGeneric }}</option>
 					<option value="2">{{ capApp.option.codeBug }}</option>
@@ -87,7 +94,7 @@ export default {
 					/>
 				</div>
 				
-				<div class="moreInfo default-inputs" v-if="showInfo">
+				<div class="moreInfo" v-if="showInfo">
 					<h3>{{ capApp.info.what }}</h3>
 					<ul>
 						<li v-for="l in capApp.info.data">{{ l }}</li>
@@ -108,28 +115,39 @@ export default {
 			messageError:false,
 			moduleRelated:true,
 			mood:3,
+			repoId:'',
 			sent:false,
 			showInfo:false,
 			text:''
 		};
 	},
 	computed:{
-		form:(s) => typeof s.$route.params.formId === 'undefined'
-			? false : s.formIdMap[s.$route.params.formId],
-		module:(s) => !s.form ? false : s.moduleIdMap[s.form.moduleId],
-		
+		feedbackUrl:s => {
+			for(const r of s.reposFeedback) {
+				if(r.id === s.repoId)
+					return r.url;
+			}
+			return '';
+		},
+
 		// simple
-		isRepoDefault:(s) => s.feedbackUrl === 'https://store.rei3.de',
+		form:           s => typeof s.$route.params.formId === 'undefined' ? false : s.formIdMap[s.$route.params.formId],
+		isMultipleRepos:s => s.reposFeedback.length > 1,
+		isRepoDefault:  s => s.feedbackUrl === 'https://store.rei3.de',
+		module:         s => !s.form ? false : s.moduleIdMap[s.form.moduleId],
 		
 		// stores
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		formIdMap:  (s) => s.$store.getters['schema/formIdMap'],
-		capApp:     (s) => s.$store.getters.captions.feedback,
-		capGen:     (s) => s.$store.getters.captions.generic,
-		feedbackUrl:(s) => s.$store.getters.feedbackUrl,
-		isAdmin:    (s) => s.$store.getters.isAdmin
+		moduleIdMap:  s => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:    s => s.$store.getters['schema/formIdMap'],
+		capApp:       s => s.$store.getters.captions.feedback,
+		capGen:       s => s.$store.getters.captions.generic,
+		isAdmin:      s => s.$store.getters.isAdmin,
+		reposFeedback:s => s.$store.getters.reposFeedback
 	},
 	mounted() {
+		if(this.reposFeedback.length !== 0)
+			this.repoId = this.reposFeedback[0].id;
+
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
 	unmounted() {
@@ -160,7 +178,7 @@ export default {
 		send() {
 			ws.send('feedback','send',{
 				code:this.code,
-				repoId:'TEMP',
+				repoId:this.repoId,
 				formId:!this.form ? null : this.form.id,
 				isAdmin:this.isAdmin,
 				moduleId:!this.module ? null : this.module.id,

@@ -10,25 +10,6 @@ import (
 	"r3/types"
 )
 
-func getToken(r types.Repo) (string, error) {
-
-	var req = struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}{
-		Username: r.FetchUserName,
-		Password: r.FetchUserPass,
-	}
-
-	var res struct {
-		Token string `json:"token"`
-	}
-	if err := httpCallPost("", fmt.Sprintf("%s/api/auth", r.Url), req, &res); err != nil {
-		return "", err
-	}
-	return res.Token, nil
-}
-
 func httpCallGet(token string, url string, reqIf any, resIf any) error {
 	return httpCall(http.MethodGet, token, url, reqIf, resIf)
 }
@@ -78,4 +59,23 @@ func httpCall(method string, token string, url string, reqIf any, resIf any) err
 		return err
 	}
 	return json.Unmarshal(bodyRaw, resIf)
+}
+
+func httpGetAuthToken(r types.Repo) (string, error) {
+
+	var req = struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}{
+		Username: r.FetchUserName,
+		Password: r.FetchUserPass,
+	}
+
+	var res struct {
+		Token string `json:"token"`
+	}
+	if err := httpCallPost("", fmt.Sprintf("%s/api/auth", r.Url), req, &res); err != nil {
+		return "", err
+	}
+	return res.Token, nil
 }

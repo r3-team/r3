@@ -575,6 +575,9 @@ func initCaches(ctx context.Context) error {
 	if err := cache.LoadPwaDomainMap_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize PWA domain cache, %v", err)
 	}
+	if err := cache.LoadRepos_tx(ctx, tx); err != nil {
+		return fmt.Errorf("failed to initialize repository cache, %v", err)
+	}
 	if err := ldap.UpdateCache_tx(ctx, tx); err != nil {
 		return fmt.Errorf("failed to initialize LDAP cache, %v", err)
 	}

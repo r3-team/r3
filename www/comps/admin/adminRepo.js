@@ -1,8 +1,7 @@
 import MyInputOffset   from '../inputOffset.js';
 import {getUnixFormat} from '../shared/time.js';
-export {MyAdminRepo as default};
 
-let MyAdminRepoModule = {
+const MyAdminRepoModule = {
 	name:'my-admin-repo-module',
 	template:`<div class="repo-module">
 		<div class="part left">
@@ -23,7 +22,7 @@ let MyAdminRepoModule = {
 			<div class="actions-box">
 				<my-button
 					v-if="!isInstalled"
-					@trigger="install(repoModule.fileId)"
+					@trigger="install(repoModule.moduleId)"
 					:active="!installStarted && isCompatible && !productionMode"
 					:caption="capApp.button.install"
 				/>
@@ -87,8 +86,8 @@ let MyAdminRepoModule = {
 		getUnixFormat,
 		
 		// backend calls
-		install(fileId) {
-			ws.send('repoModule','install',{fileId:fileId},true,true).then(
+		install(moduleId) {
+			ws.send('repoModule','install',moduleId,true,true).then(
 				() => {
 					this.$store.commit('dialog',{
 						captionBody:this.capApp.fetchDone
@@ -102,7 +101,7 @@ let MyAdminRepoModule = {
 	}
 };
 
-let MyAdminRepo = {
+export default {
 	name:'my-admin-repo',
 	components:{
 		MyInputOffset,

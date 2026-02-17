@@ -709,12 +709,16 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				skip_verify boolean NOT NULL,
 				feedback_enable boolean NOT NULL,
 				date_checked bigint NOT NULL,
+				active bool NOT NULL,
 				CONSTRAINT repo_pkey PRIMARY KEY (id)
 			);
 
-			INSERT INTO instance.repo(name,url,fetch_user_name,fetch_user_pass,skip_verify,feedback_enable,date_checked)
+			INSERT INTO instance.repo(name,url,fetch_user_name,fetch_user_pass,skip_verify,feedback_enable,date_checked,active)
 			VALUES (
-				'Standard',
+				CASE (SELECT value FROM instance.config WHERE name = 'repoUrl')
+					WHEN 'https://store.rei3.de' THEN 'Official REI3 Repository'
+					ELSE 'Standard'
+				END,
 				(SELECT value FROM instance.config WHERE name = 'repoUrl'),
 				(SELECT value FROM instance.config WHERE name = 'repoUser'),
 				(SELECT value FROM instance.config WHERE name = 'repoPass'),
@@ -726,13 +730,42 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					WHEN '1' THEN TRUE
 					ELSE FALSE
 				END,
-				(SELECT value FROM instance.config WHERE name = 'repoChecked')::BIGINT
+				(SELECT value FROM instance.config WHERE name = 'repoChecked')::BIGINT,
+				TRUE
 			);
 
 			DELETE FROM instance.config
 			WHERE name = ANY('{repoUrl,repoUser,repoPass,repoSkipVerify,repoFeedback,repoChecked}'::TEXT[]);
 			
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'reposChanged';
+
+			ALTER TABLE instance.repo_module      ADD COLUMN repo_id UUID;
+			ALTER TABLE instance.repo_module_meta ADD COLUMN repo_id UUID;
+
+			UPDATE instance.repo_module      SET repo_id = (SELECT id FROM instance.repo LIMIT 1);
+			UPDATE instance.repo_module_meta SET repo_id = (SELECT id FROM instance.repo LIMIT 1);
+
+			ALTER TABLE instance.repo_module      ALTER COLUMN repo_id SET NOT NULL;
+			ALTER TABLE instance.repo_module_meta ALTER COLUMN repo_id SET NOT NULL;
+
+			ALTER TABLE instance.repo_module ADD CONSTRAINT repo_module_repo_id_fkey FOREIGN KEY (repo_id)
+				REFERENCES instance.repo (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE instance.repo_module_meta ADD CONSTRAINT repo_module_repo_id_fkey FOREIGN KEY (repo_id)
+				REFERENCES instance.repo (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX IF NOT EXISTS fki_repo_module_repo_id_fkey      ON instance.repo_module USING btree (repo_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_repo_module_meta_repo_id_fkey ON instance.repo_module USING btree (repo_id ASC NULLS LAST);
+
+			ALTER TABLE instance.repo_module DROP CONSTRAINT repo_module_name_key;
+			ALTER TABLE instance.repo_module DROP CONSTRAINT repo_module_pkey;
+			ALTER TABLE instance.repo_module      ADD CONSTRAINT repo_module_pkey      PRIMARY KEY (repo_id,module_id_wofk);
+			ALTER TABLE instance.repo_module_meta ADD CONSTRAINT repo_module_meta_pkey PRIMARY KEY (repo_id,module_id_wofk,language_code);
 		`)
 		return "3.12", err
 	},

@@ -28,9 +28,7 @@ func SendFeedback(isAdmin bool, moduleRelated bool, repoId uuid.UUID, moduleId p
 	if err != nil {
 		return err
 	}
-
-	// get authentication token
-	token, err := getToken(repo)
+	token, err := httpGetAuthToken(repo)
 	if err != nil {
 		return err
 	}

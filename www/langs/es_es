@@ -2018,6 +2018,7 @@
 			"codePraise": "Elogio",
 			"codeSuggestion": "Sugerencia"
 		},
+		"repoId": "Send feedback to",
 		"sendNok": "No se pudieron enviar los comentarios. Por favor, inténtelo más tarde.",
 		"sendOk": "Los comentarios se enviaron con éxito. ¡Gracias!",
 		"textHint": "Su comentario",

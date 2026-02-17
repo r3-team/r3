@@ -58,8 +58,6 @@ const MyStore = Vuex.createStore({
 		dialogStyles:'',
 		dialogTextDisplay:'',          // display option (html, textarea, richtext)
 		dropdownElm:null,
-		feedback:false,                // feedback function is enabled
-		feedbackUrl:'',                // feedback receiver, URL of current repository
 		filesCopy:{                    // meta data for file copy (filled on copy, emptied on paste)
 			attributeId:null,
 			fileIds:[]
@@ -102,10 +100,11 @@ const MyStore = Vuex.createStore({
 		popUpFormGlobal:null,          // configuration of global pop-up form
 		productionMode:false,          // system in production mode, false if maintenance
 		pwaDomainMap:{},               // map of modules per PWA sub domain, key: sub domain, value: module ID
+		reposFeedback:[],              // list of repositories with feedback enabled, [ { id:UUID, name:'Prod', url:'https://my-repo.local' }, ... ]
 		routingGuards:[],              // functions to call before routing, abort if any returns falls
 		searchDictionaries:[],         // dictionaries used for full text search for this login, ['english', 'german', ...]
 		settings:{},                   // setting values for logged in user, key: settings name
-		sessionTimerStore:{},          // user session timer store for frontend functions,     { moduleId1:{ timerName1:{ id:jsTimerId, isInterval:true }, ... }, ... }
+		sessionTimerStore:{},          // user session timer store for frontend functions, { moduleId1:{ timerName1:{ id:jsTimerId, isInterval:true }, ... }, ... }
 		system:{},                     // system details (admin only)
 		systemMsg:{                    // system message
 			date0:0,                   // date from
@@ -281,8 +280,6 @@ const MyStore = Vuex.createStore({
 		captionMapCustom:        (state,payload) => state.captionMapCustom         = payload,
 		clusterNodeName:         (state,payload) => state.clusterNodeName          = payload,
 		dropdownElm:             (state,payload) => state.dropdownElm              = payload,
-		feedback:                (state,payload) => state.feedback                 = payload,
-		feedbackUrl:             (state,payload) => state.feedbackUrl              = payload,
 		filesCopy:               (state,payload) => state.filesCopy                = payload,
 		globalSearchInput:       (state,payload) => state.globalSearchInput        = payload,
 		isAdmin:                 (state,payload) => state.isAdmin                  = payload,
@@ -317,6 +314,7 @@ const MyStore = Vuex.createStore({
 		popUpFormGlobal:         (state,payload) => state.popUpFormGlobal          = payload,
 		productionMode:          (state,payload) => state.productionMode           = payload,
 		pwaDomainMap:            (state,payload) => state.pwaDomainMap             = payload,
+		reposFeedback:           (state,payload) => state.reposFeedback            = payload,
 		searchDictionaries:      (state,payload) => state.searchDictionaries       = payload,
 		settings:                (state,payload) => state.settings                 = payload,
 		system:                  (state,payload) => state.system                   = payload,
@@ -461,8 +459,6 @@ const MyStore = Vuex.createStore({
 		dialogStyles:            (state) => state.dialogStyles,
 		dialogTextDisplay:       (state) => state.dialogTextDisplay,
 		dropdownElm:             (state) => state.dropdownElm,
-		feedback:                (state) => state.feedback,
-		feedbackUrl:             (state) => state.feedbackUrl,
 		filesCopy:               (state) => state.filesCopy,
 		globalSearchInput:       (state) => state.globalSearchInput,
 		isAdmin:                 (state) => state.isAdmin,
@@ -506,6 +502,7 @@ const MyStore = Vuex.createStore({
 		popUpFormGlobal:         (state) => state.popUpFormGlobal,
 		productionMode:          (state) => state.productionMode,
 		pwaDomainMap:            (state) => state.pwaDomainMap,
+		reposFeedback:           (state) => state.reposFeedback,
 		routingGuards:           (state) => state.routingGuards,
 		searchDictionaries:      (state) => state.searchDictionaries,
 		settings:                (state) => state.settings,

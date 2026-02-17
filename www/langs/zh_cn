@@ -2018,6 +2018,7 @@
 			"codePraise": "赞扬",
 			"codeSuggestion": "建议"
 		},
+		"repoId": "Send feedback to",
 		"sendNok": "无法发送反馈。请稍后重试。",
 		"sendOk": "反馈已成功发送。谢谢！",
 		"textHint": "您的反馈",

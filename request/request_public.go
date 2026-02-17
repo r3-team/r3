@@ -43,6 +43,7 @@ func PublicGet() (any, error) {
 		PresetIdMapRecordId    map[uuid.UUID]int64               `json:"presetIdMapRecordId"`
 		ProductionMode         uint64                            `json:"productionMode"`
 		PwaDomainMap           map[string]uuid.UUID              `json:"pwaDomainMap"`
+		ReposFeedback          []types.RepoFeedback              `json:"reposFeedback"`
 		SearchDictionaries     []string                          `json:"searchDictionaries"`
 		SystemMsg              types.SystemMsg                   `json:"systemMsg"`
 		TokenKeepEnable        bool                              `json:"tokenKeepEnable"`
@@ -69,6 +70,7 @@ func PublicGet() (any, error) {
 		PresetIdMapRecordId:    cache.GetPresetRecordIds(),
 		ProductionMode:         config.GetUint64("productionMode"),
 		PwaDomainMap:           cache.GetPwaDomainMap(),
+		ReposFeedback:          cache.GetReposFeedback(),
 		SearchDictionaries:     cache.GetSearchDictionaries(),
 		SystemMsg: types.SystemMsg{
 			Date0:       config.GetUint64("systemMsgDate0"),

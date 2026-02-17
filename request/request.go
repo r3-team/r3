@@ -573,7 +573,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "install":
 			return RepoModuleInstall(ctx, reqJson)
 		case "installAll":
-			return RepoModuleInstallAll(ctx)
+			return RepoModuleInstallAllUpdates(ctx)
 		case "update":
 			return RepoModuleUpdate_tx(ctx, tx)
 		}

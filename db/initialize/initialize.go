@@ -100,6 +100,12 @@ func renewDbUserPw_tx(ctx context.Context, tx pgx.Tx) error {
 	return nil
 }
 
+/*
+	when renewing init
+	* initial repository (instance.repo) should be called 'Official REI3 Repository'
+	* remove old repo configuration records (instance.config) - everything but 'repoPublicKeys'
+*/
+
 // instance initalized to 3.10
 func initInstanceValues_tx(ctx context.Context, tx pgx.Tx) error {
 
