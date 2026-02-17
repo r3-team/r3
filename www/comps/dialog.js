@@ -66,19 +66,18 @@ export default {
 		};
 	},
 	computed:{
-		captionTop:(s) => s.$store.getters.dialogCaptionTop === ''
-			? s.capGen.dialog.confirm : s.$store.getters.dialogCaptionTop,
-		isHtml:    (s) => s.textDisplay === 'html',
-		isRichtext:(s) => s.textDisplay === 'richtext',
-		isTextarea:(s) => s.textDisplay === 'textarea',
+		captionTop:s => s.$store.getters.dialogCaptionTop === '' ? s.capGen.dialog.confirm : s.$store.getters.dialogCaptionTop,
+		isHtml:    s => s.textDisplay === 'html',
+		isRichtext:s => s.textDisplay === 'richtext',
+		isTextarea:s => s.textDisplay === 'textarea',
 		
 		// stores
-		buttons:    (s) => s.$store.getters.dialogButtons,
-		captionBody:(s) => s.$store.getters.dialogCaptionBody,
-		capGen:     (s) => s.$store.getters.captions.generic,
-		image:      (s) => s.$store.getters.dialogImage,
-		styles:     (s) => s.$store.getters.dialogStyles,
-		textDisplay:(s) => s.$store.getters.dialogTextDisplay
+		buttons:    s => s.$store.getters.dialogButtons,
+		captionBody:s => s.$store.getters.dialogCaptionBody,
+		capGen:     s => s.$store.getters.captions.generic,
+		image:      s => s.$store.getters.dialogImage,
+		styles:     s => s.$store.getters.dialogStyles,
+		textDisplay:s => s.$store.getters.dialogTextDisplay
 	},
 	methods:{
 		handleHotkeys(e) {

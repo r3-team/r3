@@ -79,10 +79,6 @@
 			"pwForceUpper": "Exiger des lettres majuscules",
 			"pwLengthMin": "Longueur minimale",
 			"pwTitle": "Paramètres du mot de passe",
-			"repoPublicKeyAdd": "Ajouter une clé publique",
-			"repoPublicKeyInputNameHint": "Nom de la clé",
-			"repoPublicKeyInputValueHint": "Exemple :\n-----BEGIN RSA PUBLIC KEY-----\nCLÉ\n-----END RSA PUBLIC KEY-----",
-			"repoPublicKeys": "Clés publiques",
 			"title": "Configuration du système",
 			"titleGeneral": "Général",
 			"titleIcs": "Abonnements calendaires",
@@ -90,7 +86,6 @@
 			"titleLogins": "Users",
 			"titleMail": "Envoi de courriers",
 			"titlePerformance": "Performance",
-			"titleRepo": "Répertoire d'applications",
 			"tokenExpiryHours": "Durée maximale de session en heures",
 			"updateCheck": "État de la version",
 			"updateCheckCurrent": "Actuelle",
@@ -508,6 +503,9 @@
 			"fetchDone": "L'application a été installée avec succès.<br /><br />Pour y accéder, des rôles doivent être attribués.",
 			"maintenanceBlock": "Installation uniquement en mode maintenance",
 			"notCompatible": "Mise à niveau de la plateforme requise",
+			"publicKeyAdd": "Ajouter une clé publique",
+			"publicKeyHint": "Exemple:\n-----BEGIN RSA PUBLIC KEY-----\nCLÉ\n-----END RSA PUBLIC KEY-----",
+			"publicKeysTrustedDesc": "REI3 will only allow applications to be installed if they are signed by the owners of these keys.",
 			"supportPage": "Site web de support"
 		},
 		"roles": {

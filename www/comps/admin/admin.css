@@ -394,6 +394,10 @@
 	min-width:300px;
 }
 
+.admin-repo-keys-table{
+	max-width:500px;
+}
+
 
 /* LDAP */
 .admin-ldaps input{

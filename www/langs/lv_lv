@@ -79,10 +79,6 @@
 			"pwForceUpper": "Pieprasīt lielos burtus",
 			"pwLengthMin": "Minimālais garums",
 			"pwTitle": "Paroles iestatījumi",
-			"repoPublicKeyAdd": "Pievienot publisko atslēgu",
-			"repoPublicKeyInputNameHint": "Atslēgas nosaukums",
-			"repoPublicKeyInputValueHint": "Piemērs:\n-----BEGIN RSA PUBLIC KEY-----\nATSLĒGA\n-----END RSA PUBLIC KEY-----",
-			"repoPublicKeys": "Publiskās atslēgas",
 			"title": "Sistēmas konfigurācija",
 			"titleGeneral": "Vispārīgi",
 			"titleIcs": "Kalendāra abonēšana",
@@ -90,7 +86,6 @@
 			"titleLogins": "Users",
 			"titleMail": "Sūtīt e-pasta ziņojumus",
 			"titlePerformance": "Veiktspēja",
-			"titleRepo": "Lietotņu rezerves kopija",
 			"tokenExpiryHours": "Maksimālais sesijas laiks stundās",
 			"updateCheck": "Versijas stāvoklis",
 			"updateCheckCurrent": "Pašreizējā",
@@ -508,6 +503,9 @@
 			"fetchDone": "Lietotne tika veiksmīgi instalēta.<br /><br />Lai iegūtu piekļuvi, jāpiešķir lomas.",
 			"maintenanceBlock": "Instalēšana tikai apkopes režīmā",
 			"notCompatible": "Nepieciešama platformas jaunināšana",
+			"publicKeyAdd": "Pievienot publisko atslēgu",
+			"publicKeyHint": "Piemērs:\n-----BEGIN RSA PUBLIC KEY-----\nATSLĒGA\n-----END RSA PUBLIC KEY-----",
+			"publicKeysTrustedDesc": "REI3 will only allow applications to be installed if they are signed by the owners of these keys.",
 			"supportPage": "Tīmekļa vietne"
 		},
 		"roles": {

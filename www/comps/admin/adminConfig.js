@@ -159,61 +159,6 @@ export default {
 				</div>
 			</div>
 			
-			<!-- repository -->
-			<div class="contentPart">
-				<div class="contentPartHeader">
-					<img class="icon" src="images/box.png" />
-					<h1>{{ capApp.titleRepo }}</h1>
-				</div>
-				
-				<table class="default-inputs">
-					<tbody>
-						<tr><td colspan="2"><b>{{ capApp.repoKeyManagement }}</b></td></tr>
-						<tr>
-							<td>{{ capApp.repoPublicKeys }}</td>
-							<td>
-								<div class="repo-key" v-for="(key,name) in publicKeys">
-									<my-button
-										:active="false"
-										:caption="name"
-										:naked="true"
-									/>
-									<div class="row gap">
-										<my-button image="search.png"
-											@trigger="publicKeyShow(name,key)"
-										/>
-										<my-button image="cancel.png"
-											@trigger="publicKeyRemove(name)"
-											:cancel="true"
-										/>
-									</div>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.repoPublicKeyAdd }}</td>
-							<td>
-								<div class="column gap">
-									<input v-model="publicKeyInputName"
-										:placeholder="capApp.repoPublicKeyInputNameHint"
-									/>
-									<textarea v-model="publicKeyInputValue"
-										:placeholder="capApp.repoPublicKeyInputValueHint"
-									></textarea>
-									<div>
-										<my-button image="add.png"
-											@trigger="publicKeyAdd"
-											:active="publicKeyInputName !== '' && publicKeyInputValue !== ''"
-											:caption="capGen.button.add"
-										/>
-									</div>
-								</div>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			
 			<!-- performance -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
@@ -373,8 +318,6 @@ export default {
 			bruteforceCountBlocked:0,
 			bruteforceCountTracked:0,
 			loginBackgroundCount:12,
-			publicKeyInputName:'',
-			publicKeyInputValue:'',
 			ready:false
 		};
 	},
@@ -387,10 +330,6 @@ export default {
 		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	computed:{
-		publicKeys:{
-			get()  { return JSON.parse(this.configInput.repoPublicKeys); },
-			set(v) { this.configInput.repoPublicKeys = JSON.stringify(v); }
-		},
 		updateCheckText:(s) => {
 			if(s.config.updateCheckVersion === '')
 				return s.capApp.updateCheckUnknown;
@@ -468,24 +407,6 @@ export default {
 			else           list.push(n);
 			
 			this.configInput.loginBackgrounds = JSON.stringify(list);
-		},
-		publicKeyShow(name,key) {
-			this.$store.commit('dialog',{
-				captionBody:key,
-				captionTop:name,
-				image:'key.png',
-				textDisplay:'textarea'
-			});
-		},
-		publicKeyAdd() {
-			this.publicKeys[this.publicKeyInputName] = this.publicKeyInputValue;
-			this.publicKeys = this.publicKeys;
-		},
-		publicKeyRemove(keyName) {
-			if(typeof this.publicKeys[keyName] !== 'undefined')
-				delete this.publicKeys[keyName];
-			
-			this.publicKeys = this.publicKeys;
 		},
 		showHelp(msg) {
 			this.$store.commit('dialog',{ captionBody:msg });

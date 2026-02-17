@@ -79,10 +79,6 @@
 			"pwForceUpper": "Necesită litere mari",
 			"pwLengthMin": "Lungimea minimă",
 			"pwTitle": "Setări parolă",
-			"repoPublicKeyAdd": "Adăugați cheia publică",
-			"repoPublicKeyInputNameHint": "Numele cheii",
-			"repoPublicKeyInputValueHint": "Exemplu:\n-----BEGIN RSA PUBLIC KEY-----\nKEY\n-----END RSA PUBLIC KEY-----",
-			"repoPublicKeys": "Chei publice",
 			"title": "Configuratia sistemului",
 			"titleGeneral": "General",
 			"titleIcs": "Abonamente la calendar",
@@ -90,7 +86,6 @@
 			"titleLogins": "Users",
 			"titleMail": "Trimite mailuri",
 			"titlePerformance": "Performanță",
-			"titleRepo": "Depozitul de aplicații",
 			"tokenExpiryHours": "Durata max. a unei sesiuni în ore",
 			"updateCheck": "Stare versiune",
 			"updateCheckCurrent": "Actual",
@@ -508,6 +503,9 @@
 			"fetchDone": "Aplicația a fost instalată cu succes.<br /><br />Pentru a obține acces, trebuie să fie atribuite roluri.",
 			"maintenanceBlock": "Instalare numai în modul de întreținere",
 			"notCompatible": "Este necesară actualizarea platformei",
+			"publicKeyAdd": "Adăugați cheia publică",
+			"publicKeyHint": "Exemplu:\n-----BEGIN RSA PUBLIC KEY-----\nKEY\n-----END RSA PUBLIC KEY-----",
+			"publicKeysTrustedDesc": "REI3 will only allow applications to be installed if they are signed by the owners of these keys.",
 			"supportPage": "Site-ul web"
 		},
 		"roles": {

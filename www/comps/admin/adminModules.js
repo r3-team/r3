@@ -1,6 +1,7 @@
 import MyAdminModulesItem from './adminModulesItem.js';
 import MyAdminRepos       from './adminRepos.js';
 import MyAdminRepoInstall from './adminRepoInstall.js';
+import MyAdminRepoKeys    from './adminRepoKeys.js';
 import MyArticles         from '../articles.js';
 
 export default {
@@ -9,6 +10,7 @@ export default {
 		MyAdminModulesItem,
 		MyAdminRepos,
 		MyAdminRepoInstall,
+		MyAdminRepoKeys,
 		MyArticles
 	},
 	template:`<div class="contentBox admin-modules grow">
@@ -32,6 +34,7 @@ export default {
 
 			<my-admin-repos        v-if="tabTarget === 'repos'" />
 			<my-admin-repo-install v-if="tabTarget === 'installFromRepo'" />
+			<my-admin-repo-keys    v-if="tabTarget === 'keys'" />
 
 			<template v-if="tabTarget === 'installFromFile'">
 				<div class="content">

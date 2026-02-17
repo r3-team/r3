@@ -79,10 +79,6 @@
 			"pwForceUpper": "Nagybetű kényszerítése",
 			"pwLengthMin": "Minimális hossz",
 			"pwTitle": "Jelszó beállítások",
-			"repoPublicKeyAdd": "Nyilvános kulcs hozzáadása",
-			"repoPublicKeyInputNameHint": "Kulcsnév",
-			"repoPublicKeyInputValueHint": "Példa:\n-----BEGIN RSA PUBLIC KEY-----\nKULCS\n-----END RSA PUBLIC KEY-----",
-			"repoPublicKeys": "Nyilvános kulcsok",
 			"title": "Rendszerbeállítások",
 			"titleGeneral": "Általános",
 			"titleIcs": "Naptár előfizetések",
@@ -90,7 +86,6 @@
 			"titleLogins": "Users",
 			"titleMail": "E-mailek küldése",
 			"titlePerformance": "Teljesítmény",
-			"titleRepo": "Alkalmazás Repository",
 			"tokenExpiryHours": "Makszimális munkamenet-idő órában",
 			"updateCheck": "Verzióellenőrzés",
 			"updateCheckCurrent": "Jelenlegi",
@@ -508,6 +503,9 @@
 			"fetchDone": "Az alkalmazás sikeresen telepítve lett.<br /><br />Az eléréshez szerepeket kell hozzárendelni.",
 			"maintenanceBlock": "Telepítés csak karbantartási módban engedélyezett",
 			"notCompatible": "Platform frissítés szükséges",
+			"publicKeyAdd": "Nyilvános kulcs hozzáadása",
+			"publicKeyHint": "Példa:\n-----BEGIN RSA PUBLIC KEY-----\nKULCS\n-----END RSA PUBLIC KEY-----",
+			"publicKeysTrustedDesc": "REI3 will only allow applications to be installed if they are signed by the owners of these keys.",
 			"supportPage": "Weboldal"
 		},
 		"roles": {

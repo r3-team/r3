@@ -79,10 +79,6 @@
 			"pwForceUpper": "Erzwinge Großbuchstaben",
 			"pwLengthMin": "Minimale Länge",
 			"pwTitle": "Passworteinstellungen",
-			"repoPublicKeyAdd": "Öffentlichen Schlüssel hinzufügen",
-			"repoPublicKeyInputNameHint": "Schlüsselname",
-			"repoPublicKeyInputValueHint": "Beispiel:\n-----BEGIN RSA PUBLIC KEY-----\nSCHLÜSSEL\n-----END RSA PUBLIC KEY-----",
-			"repoPublicKeys": "Öffentliche Schlüssel",
 			"title": "Systemkonfiguration",
 			"titleGeneral": "Allgemein",
 			"titleIcs": "Kalender-Abonnements",
@@ -90,7 +86,6 @@
 			"titleLogins": "Benutzer",
 			"titleMail": "Emails senden",
 			"titlePerformance": "Leistung",
-			"titleRepo": "Anwendungs-Repository",
 			"tokenExpiryHours": "Max. Sitzungszeit in Stunden",
 			"updateCheck": "Versionsstand",
 			"updateCheckCurrent": "Aktuell",
@@ -508,6 +503,9 @@
 			"fetchDone": "Anwendung wurde erfolgreich installiert.<br /><br />Um Zugriff zu erlangen, müssen Rollen zugewiesen werden.",
 			"maintenanceBlock": "Installation nur im Wartungsmodus",
 			"notCompatible": "Plattform-Update erforderlich",
+			"publicKeyAdd": "Öffentlichen Schlüssel hinzufügen",
+			"publicKeyHint": "Beispiel:\n-----BEGIN RSA PUBLIC KEY-----\nSCHLÜSSEL\n-----END RSA PUBLIC KEY-----",
+			"publicKeysTrustedDesc": "REI3 wird nur Anwendungen installieren, die von Eigentümern dieser Schlüssel signiert worden sind.",
 			"supportPage": "Webseite"
 		},
 		"roles": {

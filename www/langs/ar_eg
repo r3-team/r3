@@ -79,10 +79,6 @@
 			"pwForceUpper": "تتطلب الحروف الكبيرة",
 			"pwLengthMin": "الحد الأدنى للطول",
 			"pwTitle": "إعدادات كلمة المرور",
-			"repoPublicKeyAdd": "أضف المفتاح العام",
-			"repoPublicKeyInputNameHint": "اسم المفتاح",
-			"repoPublicKeyInputValueHint": "مثال:\n",
-			"repoPublicKeys": "المفاتيح العامة",
 			"title": "تكوين النظام",
 			"titleGeneral": "عام",
 			"titleIcs": "اشتراكات التقويم",
@@ -90,7 +86,6 @@
 			"titleLogins": "تسجيلات الدخول",
 			"titleMail": "إرسال رسائل البريد",
 			"titlePerformance": "أداء",
-			"titleRepo": "مستودع التطبيقات",
 			"tokenExpiryHours": "الأعلى. ",
 			"updateCheck": "حالة الإصدار",
 			"updateCheckCurrent": "حاضِر",
@@ -508,6 +503,9 @@
 			"fetchDone": "تم تثبيت التطبيق بنجاح.<br /><br />للوصول، يجب تعيين الأدوار.",
 			"maintenanceBlock": "التثبيت فقط في وضع الصيانة",
 			"notCompatible": "ترقية النظام الأساسي مطلوبة",
+			"publicKeyAdd": "أضف المفتاح العام",
+			"publicKeyHint": "مثال:\n-----BEGIN RSA PUBLIC KEY-----\nKEY\n-----END RSA PUBLIC KEY-----",
+			"publicKeysTrustedDesc": "REI3 will only allow applications to be installed if they are signed by the owners of these keys.",
 			"supportPage": "موقع إلكتروني"
 		},
 		"roles": {

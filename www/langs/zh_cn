@@ -79,10 +79,6 @@
 			"pwForceUpper": "包含大写字母",
 			"pwLengthMin": "最小长度",
 			"pwTitle": "密码设置",
-			"repoPublicKeyAdd": "添加公钥",
-			"repoPublicKeyInputNameHint": "密钥名称",
-			"repoPublicKeyInputValueHint": "示例：\n-----开始 RSA 公钥-----\n密钥\n-----结束 RSA 公钥-----",
-			"repoPublicKeys": "公钥",
 			"title": "系统配置",
 			"titleGeneral": "常规",
 			"titleIcs": "日历订阅",
@@ -90,7 +86,6 @@
 			"titleLogins": "Users",
 			"titleMail": "发送邮件",
 			"titlePerformance": "性能",
-			"titleRepo": "应用程序存储库",
 			"tokenExpiryHours": "会话最长时间（小时）",
 			"updateCheck": "版本状态",
 			"updateCheckCurrent": "当前",
@@ -508,6 +503,9 @@
 			"fetchDone": "应用程序已成功安装。<br /><br />要获得访问权限，必须分配角色。",
 			"maintenanceBlock": "仅在维护模式下安装",
 			"notCompatible": "需要平台升级",
+			"publicKeyAdd": "添加公钥",
+			"publicKeyHint": "示例:\n-----BEGIN RSA PUBLIC KEY-----\n密钥\n-----END RSA PUBLIC KEY-----",
+			"publicKeysTrustedDesc": "REI3 will only allow applications to be installed if they are signed by the owners of these keys.",
 			"supportPage": "网站"
 		},
 		"roles": {
