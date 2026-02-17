@@ -401,7 +401,6 @@
 		},
 		"modules": {
 			"button": {
-				"repository": "أضف من المستودع",
 				"repositoryRefresh": "تحقق من المستودع للحصول على التحديثات",
 				"update": "التحديث إلى الإصدار v{VERSION}",
 				"updateAll": "تحديث الكل ({COUNT})"
@@ -421,12 +420,16 @@
 			},
 			"hidden": "مختفي",
 			"import": "أضف من الملف",
+			"installedApps": "Installed applications",
 			"position": "النظام في القائمة",
 			"productionMode": "لا يمكن تغيير التطبيقات إلا عندما يكون وضع الصيانة نشطًا.",
+			"publicKeys": "Trusted keys",
 			"releaseDate": "تاريخ الافراج عنه",
+			"repoInstallFrom": "Install from repository",
 			"repoNotIncluded": "غير متوفر",
 			"repoOutdatedApp": "مطلوب ترقية النظام الأساسي",
 			"repoUpToDate": "أحدث نسخة",
+			"reposManage": "Manage repositories",
 			"update": "تحديث",
 			"updateDone": "تم تطبيق التحديث بنجاح"
 		},
@@ -448,7 +451,6 @@
 		"navigationMailTraffic": "حركة البريد الإلكتروني",
 		"navigationModules": "التطبيقات",
 		"navigationOauthClients": "عملاء OAuth",
-		"navigationRepo": "مستودع",
 		"navigationRoles": "العضويات",
 		"navigationScheduler": "مجدول",
 		"navigationSystemMsg": "System message",

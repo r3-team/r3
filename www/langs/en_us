@@ -401,8 +401,7 @@
 		},
 		"modules": {
 			"button": {
-				"repository": "Add from repository",
-				"repositoryRefresh": "Check repository for updates",
+				"repositoryRefresh": "Check repositories for updates",
 				"update": "Update to v{VERSION}",
 				"updateAll": "Update all ({COUNT})"
 			},
@@ -420,12 +419,16 @@
 				"uploadFailed": "Failed to add application from the uploaded file. Please increase the log level for transfers to 'Everything' and try again - details will then be visible in the system logs."
 			},
 			"hidden": "Hidden",
-			"import": "Add from file",
+			"installedApps": "Installed applications",
+			"import": "Install from file",
 			"position": "Order in menu",
 			"productionMode": "Applications can only be changed when the maintenance mode is active.",
+			"publicKeys": "Trusted keys",
 			"releaseDate": "Release date",
+			"repoInstallFrom": "Install from repository",
 			"repoNotIncluded": "not available",
 			"repoOutdatedApp": "platform upgrade required",
+			"reposManage": "Manage repositories",
 			"repoUpToDate": "latest version",
 			"update": "Update",
 			"updateDone": "Update has been successfully applied"
@@ -448,7 +451,6 @@
 		"navigationMailTraffic": "Email traffic",
 		"navigationModules": "Applications",
 		"navigationOauthClients": "OAuth clients",
-		"navigationRepo": "Repository",
 		"navigationRoles": "Memberships",
 		"navigationScheduler": "Scheduler",
 		"navigationSystemMsg": "System message",

@@ -12,6 +12,7 @@ import (
 	"r3/handler"
 	"r3/ldap"
 	"r3/log"
+	"r3/repo"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
@@ -563,6 +564,12 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		}
 	case "repo":
 		switch action {
+		case "del":
+			return RepoDel_tx(ctx, tx, reqJson)
+		case "get":
+			return cache.GetRepos(), nil
+		case "refresh":
+			return nil, repo.RefreshAll_tx(ctx, tx)
 		case "set":
 			return RepoSet_tx(ctx, tx, reqJson)
 		}
@@ -573,9 +580,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "install":
 			return RepoModuleInstall(ctx, reqJson)
 		case "installAll":
-			return RepoModuleInstallAllUpdates(ctx)
-		case "update":
-			return RepoModuleUpdate_tx(ctx, tx)
+			return nil, repo.InstallModulesNewVersions(ctx)
 		}
 	case "role":
 		switch action {

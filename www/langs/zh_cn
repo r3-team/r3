@@ -401,7 +401,6 @@
 		},
 		"modules": {
 			"button": {
-				"repository": "从存储库添加",
 				"repositoryRefresh": "Check repository for updates",
 				"update": "升级到 v{VERSION}",
 				"updateAll": "全部更新（{COUNT}）"
@@ -421,12 +420,16 @@
 			},
 			"hidden": "隐藏",
 			"import": "从文件添加",
+			"installedApps": "Installed applications",
 			"position": "菜单中的顺序",
 			"productionMode": "只有在维护模式激活时才能修改应用程序。",
+			"publicKeys": "Trusted keys",
 			"releaseDate": "发布日期",
+			"repoInstallFrom": "Install from repository",
 			"repoNotIncluded": "不可用",
 			"repoOutdatedApp": "需要升级平台",
 			"repoUpToDate": "最新版本",
+			"reposManage": "Manage repositories",
 			"update": "更新",
 			"updateDone": "更新已成功应用"
 		},
@@ -448,7 +451,6 @@
 		"navigationMailTraffic": "邮件流量",
 		"navigationModules": "应用程序",
 		"navigationOauthClients": "OAuth 客户端",
-		"navigationRepo": "存储库",
 		"navigationRoles": "成员资格",
 		"navigationScheduler": "调度器",
 		"navigationSystemMsg": "System message",

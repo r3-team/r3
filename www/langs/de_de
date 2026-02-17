@@ -401,7 +401,6 @@
 		},
 		"modules": {
 			"button": {
-				"repository": "Vom Repository hinzufügen",
 				"repositoryRefresh": "Repository auf Updates prüfen",
 				"update": "Auf v{VERSION} aktualisieren",
 				"updateAll": "Alle aktualisieren ({COUNT})"
@@ -420,13 +419,17 @@
 				"uploadFailed": "Anwendung konnte nicht von der hochgeladenen Datei installiert werden. Bitte das Loglevel für Transfere auf \"Alles\" erhöhen und erneut versuchen - Details werden dann im Systemlog aufgeführt."
 			},
 			"hidden": "Versteckt",
-			"import": "Von Datei hinzufügen",
+			"import": "Von Datei installieren",
+			"installedApps": "Installierte Anwendungen",
 			"position": "Reihenfolge im Menü",
 			"productionMode": "Anwendungen können nur im Wartungsmodus verändert werden.",
+			"publicKeys": "Vertraute Schlüssel",
 			"releaseDate": "Veröff.-Datum",
+			"repoInstallFrom": "Vom Repository installieren",
 			"repoNotIncluded": "nicht verfügbar",
 			"repoOutdatedApp": "Plattform-Update erforderlich",
 			"repoUpToDate": "aktuelle Version",
+			"reposManage": "Repositories verwalten",
 			"update": "Aktualisierung",
 			"updateDone": "Aktualisierung wurde erfolgreich durchgeführt"
 		},
@@ -448,7 +451,6 @@
 		"navigationMailTraffic": "E-Mail-Verkehr",
 		"navigationModules": "Anwendungen",
 		"navigationOauthClients": "OAuth-Clients",
-		"navigationRepo": "Repository",
 		"navigationRoles": "Mitgliedschaften",
 		"navigationScheduler": "Aufgabenplaner",
 		"navigationSystemMsg": "Systemnachricht",

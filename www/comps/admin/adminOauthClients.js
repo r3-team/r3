@@ -1,8 +1,7 @@
 import MyAdminOauthClient from './adminOauthClient.js';
 import {getUnixFormat}    from '../shared/time.js';
-export {MyAdminOauthClients as default};
 
-let MyAdminOauthClients = {
+export default {
 	name:'my-admin-oauth-clients',
 	components:{ MyAdminOauthClient, },
 	template:`<div class="admin-oauth-client contentBox grow">
@@ -46,8 +45,8 @@ let MyAdminOauthClients = {
 				@close="idOpen = null;get()"
 				@makeNew="idOpen = 0"
 				:id="idOpen"
-				:loginTemplates="loginTemplates"
-				:oauthClientIdMap="oauthClientIdMap"
+				:loginTemplates
+				:oauthClientIdMap
 				:readonly="!licenseValid"
 			/>
 		</div>
@@ -64,10 +63,10 @@ let MyAdminOauthClients = {
 	},
 	computed:{
 		// stores
-		capApp:      (s) => s.$store.getters.captions.admin.oauthClient,
-		capGen:      (s) => s.$store.getters.captions.generic,
-		licenseValid:(s) => s.$store.getters.licenseValid,
-		settings:    (s) => s.$store.getters.settings
+		capApp:      s => s.$store.getters.captions.admin.oauthClient,
+		capGen:      s => s.$store.getters.captions.generic,
+		licenseValid:s => s.$store.getters.licenseValid,
+		settings:    s => s.$store.getters.settings
 	},
 	mounted() {
 		this.get();

@@ -16,7 +16,7 @@ import (
 )
 
 // update repositories in individual transactions
-func UpdateAll() error {
+func RefreshAll() error {
 	var run = func(r types.Repo) error {
 		ctx, ctxCanc := context.WithTimeout(context.Background(), db.CtxDefTimeoutSysTask)
 		defer ctxCanc()
@@ -27,7 +27,7 @@ func UpdateAll() error {
 		}
 		defer tx.Rollback(ctx)
 
-		if err := update_tx(ctx, tx, r); err != nil {
+		if err := refresh_tx(ctx, tx, r); err != nil {
 			return err
 		}
 		return tx.Commit(ctx)
@@ -64,13 +64,13 @@ func UpdateAll() error {
 }
 
 // update repositories within one transaction
-func UpdateAll_tx(ctx context.Context, tx pgx.Tx) error {
+func RefreshAll_tx(ctx context.Context, tx pgx.Tx) error {
 	anyActiveRepo := false
 	for _, r := range cache.GetRepos() {
 		if !r.Active {
 			continue
 		}
-		if err := update_tx(ctx, tx, r); err != nil {
+		if err := refresh_tx(ctx, tx, r); err != nil {
 			return err
 		}
 		anyActiveRepo = true
@@ -82,7 +82,7 @@ func UpdateAll_tx(ctx context.Context, tx pgx.Tx) error {
 }
 
 // update internal module repository from external repository API
-func update_tx(ctx context.Context, tx pgx.Tx, r types.Repo) error {
+func refresh_tx(ctx context.Context, tx pgx.Tx, r types.Repo) error {
 
 	token, err := httpGetAuthToken(r)
 	if err != nil {

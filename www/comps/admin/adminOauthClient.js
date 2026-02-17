@@ -219,7 +219,7 @@ export default {
 		};
 	},
 	computed:{
-		canSave:(s) =>
+		canSave:s =>
 			s.ready &&
 			!s.readonly &&
 			s.hasChanges &&
@@ -231,7 +231,7 @@ export default {
 			(!s.isFlowAuthCodePkce || s.inputs.providerUrl !== '') &&
 			(!s.isFlowAuthCodePkce || s.inputs.redirectUrl !== '') &&
 			(!s.isFlowClientCreds  || s.isTokenUrlSet),
-		inputsOrg:(s) => s.isNew ? {
+		inputsOrg:s => s.isNew ? {
 			id:0,
 			name:'',
 			flow:'authCodePkce',
@@ -249,17 +249,17 @@ export default {
 			tokenUrl:null
 		} : s.oauthClientIdMap[s.id],
 		
-		// simple states
-		hasChanges:        (s) => !s.deepIsEqual(s.inputsOrg,s.inputs),
-		isClaimRolesSet:   (s) => s.inputs.claimRoles !== null && s.inputs.claimRoles !== '',
-		isFlowAuthCodePkce:(s) => s.inputs.flow === 'authCodePkce',
-		isFlowClientCreds: (s) => s.inputs.flow === 'clientCreds',
-		isTokenUrlSet:     (s) => s.inputs.tokenUrl   !== null && s.inputs.tokenUrl   !== '',
-		isNew:             (s) => s.id === 0,
+		// simple
+		hasChanges:        s => !s.deepIsEqual(s.inputsOrg,s.inputs),
+		isClaimRolesSet:   s => s.inputs.claimRoles !== null && s.inputs.claimRoles !== '',
+		isFlowAuthCodePkce:s => s.inputs.flow === 'authCodePkce',
+		isFlowClientCreds: s => s.inputs.flow === 'clientCreds',
+		isTokenUrlSet:     s => s.inputs.tokenUrl   !== null && s.inputs.tokenUrl   !== '',
+		isNew:             s => s.id === 0,
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.admin.oauthClient,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:s => s.$store.getters.captions.admin.oauthClient,
+		capGen:s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');

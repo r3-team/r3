@@ -55,7 +55,7 @@ func InstallModules(ctx context.Context, moduleIds []uuid.UUID) error {
 	return transfer.ImportFromFiles(ctx, filePaths)
 }
 
-func InstallModulesAllUpdates(ctx context.Context) error {
+func InstallModulesNewVersions(ctx context.Context) error {
 
 	// get all installed modules, that can be updated from repository
 	moduleIds := make([]uuid.UUID, 0)

@@ -24,6 +24,20 @@ export function getTemplateReturn(isTrigger) {
 	return isTrigger ? 'TRIGGER' : 'INTEGER';
 };
 
+export function getTemplateRepo() {
+	return {
+		id:null,
+		active:true,
+		name:'',
+		dateChecked:0,
+		feedbackEnable:false,
+		fetchUserName:'',
+		fetchUserPass:'',
+		skipVerify:false,
+		url:''
+	};
+};
+
 // login sync
 let loginSync = `/*
 	# Introduction

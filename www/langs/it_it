@@ -401,7 +401,6 @@
 		},
 		"modules": {
 			"button": {
-				"repository": "Aggiungi dall'archivio",
 				"repositoryRefresh": "Check repository for updates",
 				"update": "Aggiorna a v{VERSION}",
 				"updateAll": "Aggiorna tutti ({COUNT})"
@@ -421,12 +420,16 @@
 			},
 			"hidden": "Nascosto",
 			"import": "Aggiungi dal file",
+			"installedApps": "Installed applications",
 			"position": "Ordine nel menu",
 			"productionMode": "Le applicazioni possono essere modificate solo quando è attiva la modalità di manutenzione.",
+			"publicKeys": "Trusted keys",
 			"releaseDate": "Data rilascio",
+			"repoInstallFrom": "Install from repository",
 			"repoNotIncluded": "non disponibile",
 			"repoOutdatedApp": "aggiornamento della piattaforma richiesto",
 			"repoUpToDate": "ultima versione",
+			"reposManage": "Manage repositories",
 			"update": "Aggiorna",
 			"updateDone": "L'aggiornamento è stato applicato con successo"
 		},
@@ -448,7 +451,6 @@
 		"navigationMailTraffic": "Traffico Email",
 		"navigationModules": "Applicazioni",
 		"navigationOauthClients": "OAuth clients",
-		"navigationRepo": "Archivio",
 		"navigationRoles": "Memberships",
 		"navigationScheduler": "Pianificatore",
 		"navigationSystemMsg": "System message",

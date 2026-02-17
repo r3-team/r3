@@ -10,6 +10,14 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+func RepoDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+	var id uuid.UUID
+	if err := json.Unmarshal(reqJson, &id); err != nil {
+		return nil, err
+	}
+	return nil, repo.Del_Tx(ctx, tx, id)
+}
+
 func RepoSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req types.Repo
 	if err := json.Unmarshal(reqJson, &req); err != nil {
@@ -56,12 +64,4 @@ func RepoModuleInstall(ctx context.Context, reqJson json.RawMessage) (any, error
 		return nil, err
 	}
 	return nil, repo.InstallModules(ctx, []uuid.UUID{moduleId})
-}
-
-func RepoModuleInstallAllUpdates(ctx context.Context) (any, error) {
-	return nil, repo.InstallModulesAllUpdates(ctx)
-}
-
-func RepoModuleUpdate_tx(ctx context.Context, tx pgx.Tx) (any, error) {
-	return nil, repo.UpdateAll_tx(ctx, tx)
 }

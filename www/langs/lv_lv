@@ -401,7 +401,6 @@
 		},
 		"modules": {
 			"button": {
-				"repository": "Pievienot no repozitorija",
 				"repositoryRefresh": "Check repository for updates",
 				"update": "Atjaunināt uz v{VERSION}",
 				"updateAll": "Atjaunināt visu ({COUNT})"
@@ -421,12 +420,16 @@
 			},
 			"hidden": "Paslēpts",
 			"import": "Pievienot no faila",
+			"installedApps": "Installed applications",
 			"position": "Secība izvēlnē",
 			"productionMode": "Lietotnes var mainīt tikai tad, ja ir aktīvs apkopes režīms.",
+			"publicKeys": "Trusted keys",
 			"releaseDate": "Izdošanas datums",
+			"repoInstallFrom": "Install from repository",
 			"repoNotIncluded": "nav pieejams",
 			"repoOutdatedApp": "nepieciešama platformas jaunināšana",
 			"repoUpToDate": "jaunākā versija",
+			"reposManage": "Manage repositories",
 			"update": "Atjaunināt",
 			"updateDone": "Atjauninājums veiksmīgi piemērots"
 		},
@@ -448,7 +451,6 @@
 		"navigationMailTraffic": "E-pasta datu pārsūtījumi",
 		"navigationModules": "Pieteikumi",
 		"navigationOauthClients": "OAuth clients",
-		"navigationRepo": "Repozitorijs",
 		"navigationRoles": "Dalībnieki",
 		"navigationScheduler": "Plānotājs",
 		"navigationSystemMsg": "System message",

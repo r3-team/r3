@@ -401,7 +401,6 @@
 		},
 		"modules": {
 			"button": {
-				"repository": "Repository-ból hozzáadás",
 				"repositoryRefresh": "Check repository for updates",
 				"update": "Frissítés {VERSION}-ra",
 				"updateAll": "Az összes frissítése ({COUNT})"
@@ -421,12 +420,16 @@
 			},
 			"hidden": "Rejtett",
 			"import": "Fájlból hozzáadás",
+			"installedApps": "Installed applications",
 			"position": "Sorrend a menüben",
 			"productionMode": "Az alkalmazások csak karbantartási módban módosíthatók.",
+			"publicKeys": "Trusted keys",
 			"releaseDate": "Kiadás dátuma",
+			"repoInstallFrom": "Install from repository",
 			"repoNotIncluded": "nem elérhető",
 			"repoOutdatedApp": "Platform frissítés szükséges",
 			"repoUpToDate": "aktuális verzió",
+			"reposManage": "Manage repositories",
 			"update": "Frissítés",
 			"updateDone": "A frissítés sikeresen megtörtént."
 		},
@@ -448,7 +451,6 @@
 		"navigationMailTraffic": "Email traffic",
 		"navigationModules": "Alkalmazások",
 		"navigationOauthClients": "OAuth clients",
-		"navigationRepo": "Repository",
 		"navigationRoles": "Szerepek",
 		"navigationScheduler": "Ütemező",
 		"navigationSystemMsg": "System message",

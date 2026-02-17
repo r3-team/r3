@@ -1,7 +1,6 @@
 import MyAdminHelp from './adminHelp.js';
-export {MyAdmin as default};
 
-let MyAdmin = {
+export default {
 	name:'my-admin',
 	components:{MyAdminHelp},
 	template:`<div class="admin">
@@ -50,12 +49,6 @@ let MyAdmin = {
 			<router-link class="entry clickable" tag="div" to="/admin/modules">
 				<img src="images/builder.png" />
 				<span>{{ capApp.navigationModules }}</span>
-			</router-link>
-			
-			<!-- repo -->
-			<router-link class="entry clickable" tag="div" to="/admin/repo">
-				<img src="images/box.png" />
-				<span>{{ capApp.navigationRepo }}</span>
 			</router-link>
 			
 			<!-- mail accounts -->
@@ -187,7 +180,7 @@ let MyAdmin = {
 		this.ready = true;
 	},
 	computed:{
-		contentTitle:(s) => {
+		contentTitle:s => {
 			if(s.$route.path.includes('backups'))         return s.capApp.navigationBackups;
 			if(s.$route.path.includes('caption-map'))     return s.capApp.navigationCaptionMap;
 			if(s.$route.path.includes('cluster'))         return s.capApp.navigationCluster;
@@ -205,24 +198,23 @@ let MyAdmin = {
 			if(s.$route.path.includes('mail-traffic'))    return s.capApp.navigationMailTraffic;
 			if(s.$route.path.includes('modules'))         return s.capApp.navigationModules;
 			if(s.$route.path.includes('oauth-clients'))   return s.capApp.navigationOauthClients;
-			if(s.$route.path.includes('repo'))            return s.capApp.navigationRepo;
 			if(s.$route.path.includes('roles'))           return s.capApp.navigationRoles;
 			if(s.$route.path.includes('scheduler'))       return s.capApp.navigationScheduler;
 			if(s.$route.path.includes('system-msg'))      return s.capApp.navigationSystemMsg;
 			return '';
 		},
-		licenseTitle:(s) => !s.activated
+		licenseTitle:s => !s.activated
 			? s.capApp.navigationLicense
 			:`${s.capApp.navigationLicense} (${s.concurrentLogins}/${s.license.loginCount} - ${s.concurrentLoginsLimited}/${s.license.loginCount * s.limitedFactor})`,
 		
 		// stores
-		activated:    (s) => s.$store.getters['local/activated'],
-		bgStyle:      (s) => s.$store.getters.colorMenuStyle,
-		capApp:       (s) => s.$store.getters.captions.admin,
-		colorMenu:    (s) => s.$store.getters.colorMenu,
-		isAdmin:      (s) => s.$store.getters.isAdmin,
-		license:      (s) => s.$store.getters.license,
-		limitedFactor:(s) => s.$store.getters.constants.loginLimitedFactor
+		activated:    s => s.$store.getters['local/activated'],
+		bgStyle:      s => s.$store.getters.colorMenuStyle,
+		capApp:       s => s.$store.getters.captions.admin,
+		colorMenu:    s => s.$store.getters.colorMenu,
+		isAdmin:      s => s.$store.getters.isAdmin,
+		license:      s => s.$store.getters.license,
+		limitedFactor:s => s.$store.getters.constants.loginLimitedFactor
 	},
 	methods:{
 		// backend calls

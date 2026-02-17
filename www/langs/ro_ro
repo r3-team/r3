@@ -401,7 +401,6 @@
 		},
 		"modules": {
 			"button": {
-				"repository": "Adăugați din depozit",
 				"repositoryRefresh": "Check repository for updates",
 				"update": "Actualizați la v{VERSION}",
 				"updateAll": "Actualizați tot ({COUNT})"
@@ -421,12 +420,16 @@
 			},
 			"hidden": "Ascuns",
 			"import": "Adăugați din fișier",
+			"installedApps": "Installed applications",
 			"position": "Ordinea în meniu",
 			"productionMode": "Aplicațiile pot fi modificate numai atunci când modul de întreținere este activ.",
+			"publicKeys": "Trusted keys",
 			"releaseDate": "Data lansării",
+			"repoInstallFrom": "Install from repository",
 			"repoNotIncluded": "nu este disponibil",
 			"repoOutdatedApp": "este necesar upgrade-ul platformei",
 			"repoUpToDate": "ultima versiune",
+			"reposManage": "Manage repositories",
 			"update": "Actualizați",
 			"updateDone": "Actualizarea a fost aplicată cu succes"
 		},
@@ -448,7 +451,6 @@
 		"navigationMailTraffic": "Trafic de e-mail",
 		"navigationModules": "Aplicații",
 		"navigationOauthClients": "OAuth clients",
-		"navigationRepo": "Depozit",
 		"navigationRoles": "Memberships",
 		"navigationScheduler": "Planificatorul",
 		"navigationSystemMsg": "System message",
