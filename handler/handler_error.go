@@ -218,6 +218,9 @@ func CheckForDbsCacheErrCode(err error) bool {
 }
 
 // default schema errors
+func ErrSchemaUnknownApi(id uuid.UUID) error {
+	return fmt.Errorf("unknown API '%s'", id)
+}
 func ErrSchemaUnknownModule(id uuid.UUID) error {
 	return fmt.Errorf("unknown module '%s'", id)
 }

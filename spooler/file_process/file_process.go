@@ -41,8 +41,6 @@ type run struct {
 }
 
 func DoAll() error {
-	runs := make([]run, 0)
-
 	rows, err := db.Pool.Query(context.Background(), `
 		SELECT id, attribute_id, file_id, pg_function_id, record_id_wofk,
 			content, file_path, file_text_content, file_version, overwrite
@@ -54,6 +52,7 @@ func DoAll() error {
 	}
 	defer rows.Close()
 
+	runs := make([]run, 0)
 	for rows.Next() {
 		var r run
 		if err := rows.Scan(&r.Id, &r.AttributeId, &r.FileId, &r.PgFunctionId, &r.RecordIdWofk,

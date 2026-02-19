@@ -62,8 +62,8 @@ func GetFilePathVersion(fileId uuid.UUID, version int64) string {
 }
 
 // attempts to store file upload
-func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
-	fileSourcePart *multipart.Part, fileSourcePath pgtype.Text, fileSourceString pgtype.Text, isNewFile bool) error {
+func SetFile(ctx context.Context, loginId int64, attributeId, fileId uuid.UUID, fileSourcePart *multipart.Part,
+	fileSourcePath, fileSourceString pgtype.Text, isNewFile bool) error {
 
 	cache.Schema_mx.RLock()
 	attribute, exists := cache.AttributeIdMap[attributeId]
@@ -92,9 +92,7 @@ func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId u
 			WHERE v.file_id = $1
 			ORDER BY v.version DESC
 			LIMIT 1
-		`, schema.GetFilesTableName(attributeId)),
-			fileId).Scan(&version, &recordIds); err != nil {
-
+		`, schema.GetFilesTableName(attributeId)), fileId).Scan(&version, &recordIds); err != nil {
 			return err
 		}
 	}
@@ -198,9 +196,8 @@ func SetFile(ctx context.Context, loginId int64, attributeId uuid.UUID, fileId u
 }
 
 // stores database changes for uploaded/updated files
-func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool, attributeId uuid.UUID,
-	relationId uuid.UUID, fileId uuid.UUID, fileHash string, fileName string,
-	fileSizeKb int64, fileVersion int64, recordIds []int64, loginId int64) error {
+func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool, attributeId, relationId, fileId uuid.UUID,
+	fileHash, fileName string, fileSizeKb, fileVersion int64, recordIds []int64, loginId int64) error {
 
 	if isNewFile {
 		// store file reference

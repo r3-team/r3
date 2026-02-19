@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"r3/config/module_meta"
+	"r3/handler"
 	"r3/log"
 	"r3/schema/api"
 	"r3/schema/article"
@@ -32,6 +33,7 @@ import (
 	"r3/schema/widget"
 	"r3/tools"
 	"r3/types"
+	"slices"
 	"sync"
 
 	"github.com/gofrs/uuid"
@@ -79,6 +81,37 @@ func GetModuleCacheJson(moduleId uuid.UUID) (json.RawMessage, error) {
 	}
 	return json, nil
 }
+
+// overwrites language code with primary language of module if it´s not supported by module
+func GetModuleLanguageCodeValid(moduleId uuid.UUID, languageCode string) (string, error) {
+	Schema_mx.RLock()
+	defer Schema_mx.RUnlock()
+
+	if _, exists := ModuleIdMap[moduleId]; !exists {
+		return "", handler.ErrSchemaUnknownModule(moduleId)
+	}
+
+	if !slices.Contains(ModuleIdMap[moduleId].Languages, languageCode) {
+		languageCode = ModuleIdMap[moduleId].LanguageMain
+	}
+	return languageCode, nil
+}
+
+func GetApiByNames(modName, apiName string, apiVersion int) (types.Api, error) {
+	Schema_mx.RLock()
+	defer Schema_mx.RUnlock()
+
+	apiId, exists := ModuleApiNameMapId[modName][fmt.Sprintf("%s.v%d", apiName, apiVersion)]
+	if !exists {
+		return types.Api{}, fmt.Errorf("API '%s.%s' (v%d) does not exist", modName, apiName, apiVersion)
+	}
+	api, exists := ApiIdMap[apiId]
+	if !exists {
+		return types.Api{}, handler.ErrSchemaUnknownApi(apiId)
+	}
+	return api, nil
+}
+
 func LoadModuleIdMapMeta_tx(ctx context.Context, tx pgx.Tx) error {
 	moduleIdMapMetaNew, err := module_meta.GetIdMap_tx(ctx, tx)
 	if err != nil {
