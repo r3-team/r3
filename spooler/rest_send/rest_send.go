@@ -4,14 +4,19 @@ package rest_send
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"r3/cache"
 	"r3/config"
+	"r3/data"
 	"r3/db"
 	"r3/handler"
 	"r3/log"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -21,6 +26,9 @@ import (
 var (
 	attemptsAllow = 5   // how many attempts for each REST call before quitting
 	callLimit     = 100 // how many REST calls to execute per loop
+
+	// finds {FILE_FORMDATA:FILE_ID|FILE_VERSION} or {FILE_BASE64:FILE_ID|FILE_VERSION}, ex. {FILE_FORMDATA:948fe83d-5d52-442d-9d93-64ea0b7195ea|0}
+	rxFilePlaceholder = regexp.MustCompile(`\{FILE_(FORMDATA|BASE64)\:([a-z0-9\-]{36})\|(\d+)\}`)
 )
 
 type restCall struct {
@@ -93,6 +101,10 @@ func DoAll() error {
 func callExecute(c restCall) error {
 	log.Info(log.ContextApi, fmt.Sprintf("is calling %s '%s'", c.method, c.url))
 
+	if err := callResolveBodyPlaceholders(&c.body.String); err != nil {
+		return err
+	}
+
 	httpReq, err := http.NewRequest(c.method, c.url, strings.NewReader(c.body.String))
 	if err != nil {
 		return fmt.Errorf("could not prepare request, %s", err)
@@ -160,4 +172,46 @@ func callExecute(c restCall) error {
 		return err
 	}
 	return tx.Commit(ctx)
+}
+
+func callResolveBodyPlaceholders(body *string) error {
+	replaceStringPairs := make([]string, 0)
+
+	for _, match := range rxFilePlaceholder.FindAllStringSubmatch(*body, -1) {
+		if len(match) != 4 {
+			continue
+		}
+
+		mode := match[1]
+		fileId, err := uuid.FromString(match[2])
+		if err != nil {
+			return err
+		}
+		fileVersion, err := strconv.Atoi(match[3])
+		if err != nil {
+			return err
+		}
+		fileContent, err := os.ReadFile(data.GetFilePathVersion(fileId, int64(fileVersion)))
+		if err != nil {
+			return err
+		}
+
+		switch mode {
+		case "FORMDATA":
+			replaceStringPairs = append(replaceStringPairs, match[0], string(fileContent))
+		case "BASE64":
+			replaceStringPairs = append(replaceStringPairs, match[0], base64.StdEncoding.EncodeToString(fileContent))
+		default:
+			return fmt.Errorf("invalid REST placeholder mode '%s', expected: FORMDATA or BASE64", mode)
+		}
+	}
+
+	if len(replaceStringPairs) == 0 {
+		return nil
+	}
+
+	// replacer works by using string pairs (old/new)
+	replacer := strings.NewReplacer(replaceStringPairs...)
+	*body = replacer.Replace(*body)
+	return nil
 }

@@ -45,6 +45,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		if err == io.EOF {
 			break
 		}
+		if err != nil {
+			handler.AbortRequest(w, handler.ContextDataUpload, err, handler.ErrGeneral)
+			return
+		}
 
 		// fixed order: token, attribute ID, file ID (nil if new), file
 		switch part.FormName() {
