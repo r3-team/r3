@@ -362,24 +362,19 @@ func FilesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx, recordId int64
 	return nil
 }
 
-func FilesAssignToRecord_tx(ctx context.Context, tx pgx.Tx,
-	attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
-
+func FilesAssignToRecord_tx(ctx context.Context, tx pgx.Tx, attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
 	for _, fileId := range fileIds {
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			INSERT INTO instance_file."%s" (file_id, record_id, name)
 			VALUES ($1,$2,$3)
-		`, schema.GetFilesTableName(attributeId)), fileId,
-			recordId, newFileUnnamed); err != nil {
-
+		`, schema.GetFilesTableName(attributeId)), fileId, recordId, newFileUnnamed); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func FilesSetDeletedForRecord_tx(ctx context.Context, tx pgx.Tx,
-	attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
+func FilesSetDeletedForRecord_tx(ctx context.Context, tx pgx.Tx, attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
 
 	_, err := tx.Exec(ctx, fmt.Sprintf(`
 		UPDATE instance_file."%s"

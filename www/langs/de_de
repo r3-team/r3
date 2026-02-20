@@ -1662,6 +1662,7 @@
 				"restAuthRequest": "REST-Authentifizierung (via JSON)",
 				"restAuthResponse": "REST-Authentifizierung, Antwortverarbeitung",
 				"restDataResponse": "REST-Datenaufruf, Antwortverarbeitung",
+				"restFileAttachViaREI3API": "REST-Dateianhang über REI3-API",
 				"restFileUploadToREI3": "REST-Dateiupload in REI3"
 			},
 			"variable": "Neue Variable",
