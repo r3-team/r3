@@ -93,6 +93,7 @@ export default {
 								<option value="restAuthRequest">{{ capApp.template.restAuthRequest }}</option>
 								<option value="restAuthResponse">{{ capApp.template.restAuthResponse }}</option>
 								<option value="restDataResponse">{{ capApp.template.restDataResponse }}</option>
+								<option value="restFileUploadToREI3">{{ capApp.template.restFileUploadToREI3 }}</option>
 							</select>
 						</div>
 						<hr />

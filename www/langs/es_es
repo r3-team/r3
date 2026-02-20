@@ -1661,7 +1661,8 @@
 				"mailsFromSpooler": "Procesamiento de correo electrónico (entrante)",
 				"restAuthRequest": "Autenticación REST (vía JSON)",
 				"restAuthResponse": "Callback de respuesta de autenticación REST",
-				"restDataResponse": "Callback de respuesta de datos REST"
+				"restDataResponse": "Callback de respuesta de datos REST",
+				"restFileUploadToREI3": "REST file upload to REI3"
 			},
 			"variable": "Nueva variable",
 			"variableFormId": "Asignada al formulario",

@@ -1661,7 +1661,8 @@
 				"mailsFromSpooler": "E-mail feldolgozás (bejövő)",
 				"restAuthRequest": "REST hitelesítés (JSON keresztül)",
 				"restAuthResponse": "REST hitelesítés, válaszfeldolgozás",
-				"restDataResponse": "REST adatkérés, válaszfeldolgozás"
+				"restDataResponse": "REST adatkérés, válaszfeldolgozás",
+				"restFileUploadToREI3": "REST file upload to REI3"
 			},
 			"variable": "New variable",
 			"variableFormId": "Assigned to form",
