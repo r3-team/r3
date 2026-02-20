@@ -1306,6 +1306,8 @@
 				"mail_get_next": "instance.mail_get_next({ARGS}) => instance.mail<br /><br />Devuelve el siguiente correo electrónico entrante del spooler de correo; devuelve NULL si no hay correos electrónicos disponibles. Cuando se especifica un nombre de cuenta, devuelve solo los correos recibidos con la cuenta dada.<br /><br />El tipo devuelto 'instance.mail' consiste en:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>Después de procesar un correo electrónico, debe eliminarse; ya sea directamente (mail_delete) o después de almacenar sus archivos adjuntos (mail_delete_after_attach).",
 				"mail_send": "instance.mail_send({ARGS}) => INTEGER<br /><br />Genera un correo electrónico saliente para el spooler de correo. Parámetros opcionales:<ul><li>Lista separada por comas de destinatarios TO/CC/BCC (se debe establecer uno de estos)</li><li>Nombre de la cuenta de correo desde la cual enviar (se usa una cuenta aleatoria si no se especifica)</li><li>Atributo de archivo y registro desde los cuales adjuntar archivos</li></ul>",
 				"rest_call": "instance.rest_call({ARGS}) => INTEGER<br /><br />Agrega una llamada HTTP REST al spooler interno para su ejecución inmediata. Los métodos compatibles son: DELETE, GET, PATCH, POST, PUT.<br /><br />La URL puede incluir parámetros de consulta si es necesario.<br /><br />Los encabezados deben proporcionarse como JSONB: cada par clave-valor resultará en un encabezado.<br /><br />La verificación de validez para TLS/SSL se puede desactivar si es necesario.<br /><br />Si la respuesta REST necesita ser procesada, se puede establecer otra función de backend para la devolución de llamada. Esta función de devolución de llamada debe tener tres argumentos: INTEGER (para el código de estado HTTP), TEXT (cuerpo de la respuesta HTTP), TEXT (valor de devolución de llamada).<br /><br />Si se establece un 'valor de devolución de llamada' en instance.rest_call(...), se pasará a la función de devolución de llamada; esto es útil cuando se deben ejecutar múltiples llamadas en orden (como autenticación antes de una llamada de datos).",
+				"rest_get_placeholder_file_base64": "instance.rest_get_placeholder_file_base64({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the content of the specified file (encoded as BASE64), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
+				"rest_get_placeholder_file_raw": "instance.rest_get_placeholder_file_raw({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the raw content of the specified file (for requests like formData), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
 				"update_collection": "instance.update_collection({ARGS}) => INTEGER<br /><br />Informa a los clientes conectados para actualizar la colección especificada. Si se dan IDs de usuario, solo los clientes que pertenecen a estos usuarios se ven afectados.",
 				"user_meta_set": "instance.user_meta_set({ARGS}) => INTEGER<br /><br />Establece metadatos para el usuario elegido.",
 				"user_sync_all": "instance.user_sync_all({ARGS}) => INTEGER<br /><br />Ejecuta una sincronización de todos los metadatos de usuario con la función de backend definida.<br /><br />Útil para sincronizar usuarios preexistentes con una aplicación después de que se haya instalado.<br /><br />Para que funcione, se debe establecer una función de sincronización de usuarios en la página de configuración de la aplicación en el Constructor; el ID de la aplicación requerido también se puede encontrar allí."
@@ -1443,6 +1445,14 @@
 					"tls_skip_verify BOOLEAN DEFAULT FALSE",
 					"callback_function_id UUID DEFAULT NULL",
 					"callback_value TEXT DEFAULT NULL"
+				],
+				"rest_get_placeholder_file_base64": [
+					"file_id UUID",
+					"version INTEGER DEFAULT 0"
+				],
+				"rest_get_placeholder_file_raw": [
+					"file_id UUID",
+					"version INTEGER DEFAULT 0"
 				],
 				"update_collection": [
 					"collection_id",

@@ -1306,6 +1306,8 @@
 				"mail_get_next": "instance.mail_get_next({ARGS}) => instance.mail<br /><br />Visszaadja a levélszemét következő bejövő e-mailjét; ha nincs elérhető e-mail, NULL értékkel tér vissza. Ha megad egy fióknévet (account_name), akkor csak azok az e-mailek kerülnek visszaadásra, amelyeket ennek a fióknak fogadott be.<br /><br />Az \"instance.mail\" típus a következő információkat tartalmazza:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote> Miután az e-mailt feldolgozták, azt törölni kell; vagy közvetlenül (mail_delete), vagy miután a mellékleteket mentették (mail_delete_after_attach).",
 				"mail_send": "instance.mail_send({ARGS}) => INTEGER<br /><br />Létrehoz egy kimenő e-mailt a levélszemétben. Opcionális paraméterek:<ul><li>Az \"TO\", \"CC\" és \"BCC\" címzettek vesszővel elválasztott listái (közülük legalább egynek meg kell lennie)</li><li>A feladó e-mail fiók neve (ha nincs megadva, akkor véletlenszerűen választ egy fiókot)</li><li>A fájlattribútum neve és azonosítója, amelyeket a levélhez mellékletként hozzá szeretné adni</li></ul>",
 				"rest_call": "instance.rest_call({ARGS}) => INTEGER<br /><br />Hozzáad egy HTTP REST hívást a belső várólistához az azonnali végrehajtáshoz. A támogatott módszerek: DELETE, GET, PATCH, POST, PUT.<br /><br />Az URL tartalmazhat lekérdezési paramétereket, ha szükséges.<br /><br />A fejléceknek JSONB-ként kell lenniük definiálva, minden kulcs-érték pár egy fejlécbe kerül.<br /><br />Az SSL/TLS ellenőrzésének érvényességi ellenőrzése kikapcsolható, ha szükséges.<br /><br />Ha a REST választ feldolgozni kell, akkor további három argumentumot definiálhat egy háttéralkalmazás függvényként. Ez a háttéralkalmazás függvény három argumentummal rendelkezik: INTEGER (HTTP státuszkódhoz), SZÖVEG (HTTP válasz testéhez), SZÖVEG (visszahívási értékhez).<br /><br />Ha a 'callback_value' értéket megadja az instance.rest_call(...) függvényben, akkor azt a callback függvénynek átadja. Ez hasznos lehet, ha több hívást kell egy bizonyos sorrendben végrehajtani (például az adatok lekérdezése előtt az azonosítás).",
+				"rest_get_placeholder_file_base64": "instance.rest_get_placeholder_file_base64({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the content of the specified file (encoded as BASE64), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
+				"rest_get_placeholder_file_raw": "instance.rest_get_placeholder_file_raw({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the raw content of the specified file (for requests like formData), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
 				"update_collection": "instance.update_collection({ARGS}) => INTEGER<br /><br />Értesíti a kapcsolódó klienseket, hogy frissítsék a meghatározott gyűjteményt. Ha megadott felhasználói azonosítókat (login_ids), akkor csak azokat a klienseket értesíti, akik ezekhez a felhasználókhoz tartoznak.",
 				"user_meta_set": "instance.user_meta_set({ARGS}) => INTEGER<br /><br />Sets meta data for the chosen user.",
 				"user_sync_all": "instance.user_sync_all({ARGS}) => INTEGER<br /><br />Executes a sync of all user meta data with the defined backend function.<br /><br />Useful to sync pre-existing users to an application after it has been installed.<br /><br />To work, a user sync backend function must be set in the application configuration page in the Builder; the required application ID can also be found there."
@@ -1443,6 +1445,14 @@
 					"tls_skip_verify BOOLEAN DEFAULT FALSE",
 					"callback_function_id UUID DEFAULT NULL",
 					"callback_value TEXT DEFAULT NULL"
+				],
+				"rest_get_placeholder_file_base64": [
+					"file_id UUID",
+					"version INTEGER DEFAULT 0"
+				],
+				"rest_get_placeholder_file_raw": [
+					"file_id UUID",
+					"version INTEGER DEFAULT 0"
 				],
 				"update_collection": [
 					"collection_id",

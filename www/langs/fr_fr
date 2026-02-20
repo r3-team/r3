@@ -1306,6 +1306,8 @@
 				"mail_get_next": "instance.mail_get_next({ARGS}) => instance.mail\n\nRetourne le prochain courrier électronique entrant du spooler de courrier ; retourne NULL s'il n'y a aucun courrier électronique disponible. Lorsqu'un nom de compte est spécifié, ne retourne que les courriels reçus avec le compte donné.\n\nLe type retourné 'instance.mail' se compose de :\n{id INTEGER, from_list TEXT, to_list TEXT, cc_list TEXT, subject TEXT, body TEXT}\n\nAprès le traitement d'un courriel, il doit être supprimé ; soit directement (mail_delete) ou après avoir enregistré ses pièces jointes (mail_delete_after_attach).",
 				"mail_send": "instance.mail_send({ARGS}) => INTEGER\n\nGénère un courrier électronique sortant pour le spooler de courrier. Paramètres optionnels :\n- Liste des destinataires TO/CC/BCC séparés par des virgules (l'un d'entre eux doit être défini)\n- Nom du compte de messagerie à partir duquel envoyer (un compte aléatoire est utilisé s'il n'est pas spécifié)\n- Attribut de fichier et enregistrement à partir desquels attacher des fichiers",
 				"rest_call": "instance.rest_call({ARGS}) => INTEGER\n\nAjoute un appel REST HTTP au spooler interne pour une exécution immédiate. Les méthodes prises en charge sont : DELETE, GET, PATCH, POST, PUT.\n\nL'URL peut inclure des paramètres de requête si nécessaire.\n\nLes en-têtes doivent être fournis sous forme de JSONB - chaque paire clé-valeur donnera lieu à un en-tête.\n\nLa vérification de la validité de TLS/SSL peut être désactivée si nécessaire.\n\nSi la réponse REST doit être traitée, une autre fonction backend peut être définie pour la rappeler. Cette fonction de rappel doit avoir trois arguments : INTEGER (pour le code d'état HTTP), TEXT (corps de la réponse HTTP), TEXT (valeur de rappel).\n\nSi une 'valeur de rappel' est définie dans instance.rest_call(...), elle sera transmise à la fonction de rappel - c'est utile lorsque plusieurs appels doivent être exécutés dans l'ordre (comme l'authentification avant un appel de données).",
+				"rest_get_placeholder_file_base64": "instance.rest_get_placeholder_file_base64({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the content of the specified file (encoded as BASE64), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
+				"rest_get_placeholder_file_raw": "instance.rest_get_placeholder_file_raw({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the raw content of the specified file (for requests like formData), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
 				"update_collection": "instance.update_collection({ARGS}) => INTEGER\n\nInforme les clients connectés de mettre à jour la collection spécifiée. Si des IDs d'utilisateur sont fournis, seuls les clients appartenant à ces utilisateurs sont concernés.",
 				"user_meta_set": "instance.user_meta_set({ARGS}) => INTEGER<br /><br />Sets meta data for the chosen user.",
 				"user_sync_all": "instance.user_sync_all({ARGS}) => INTEGER<br /><br />Executes a sync of all user meta data with the defined backend function.<br /><br />Useful to sync pre-existing users to an application after it has been installed.<br /><br />To work, a user sync backend function must be set in the application configuration page in the Builder; the required application ID can also be found there."
@@ -1443,6 +1445,14 @@
 					"tls_skip_verify BOOLEAN DEFAULT FALSE",
 					"callback_function_id UUID DEFAULT NULL",
 					"callback_value TEXT DEFAULT NULL"
+				],
+				"rest_get_placeholder_file_base64": [
+					"file_id UUID",
+					"version INTEGER DEFAULT 0"
+				],
+				"rest_get_placeholder_file_raw": [
+					"file_id UUID",
+					"version INTEGER DEFAULT 0"
 				],
 				"update_collection": [
 					"collection_id",

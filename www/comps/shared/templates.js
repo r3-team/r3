@@ -493,7 +493,7 @@ BEGIN
 
 	-- set FormData content (token, attributeId, fileId, file content, close boundary string)
 	-- for new files, we send an empty ID ('00000000-0000-0000-0000-000000000000')
-	-- the function instance.rest_get_placeholder_file_formdata() prepares a placeholder to be used to add the file content during REST call execution
+	-- the function instance.rest_get_placeholder_file_raw() prepares a placeholder to be used to add the file content during REST call execution
 	form_data_parts := ARRAY_APPEND(form_data_parts, FORMAT(E'--%s\\r\\nContent-Disposition: form-data; name="token"\\r\\n\\r\\n%s',
 		form_data_boundary,
 		token
@@ -509,7 +509,7 @@ BEGIN
 	form_data_parts := ARRAY_APPEND(form_data_parts, FORMAT(E'--%s\\r\\nContent-Disposition: form-data; name="file"; filename="%s"\\r\\n\\r\\n%s',
 		form_data_boundary,
 		source_file.name,
-		instance.rest_get_placeholder_file_formdata(ource_file.id, source_file.version)
+		instance.rest_get_placeholder_file_raw(ource_file.id, source_file.version)
 	));
 
 	-- request body consists of FormData parts and closing boundary string

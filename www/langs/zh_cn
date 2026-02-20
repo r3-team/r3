@@ -1306,6 +1306,8 @@
 				"mail_get_next": "instance.mail_get_next({ARGS}) => instance.mail\n\n从邮件队列获取下一个接收到的电子邮件；如果没有可用的电子邮件则返回NULL。当指定账户名时，仅返回使用给定账户接收的电子邮件。\n\n返回的类型 'instance.mail' 包括：<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>处理完邮件后应将其删除；可以直接删除（mail_delete）或在存储附件后删除(mail_delete_after_attach)。",
 				"mail_send": "instance.mail_send({ARGS}) => INTEGER\n\n为邮件队列生成一封出站邮件。可选参数：<ul><li>逗号分隔的收件人/抄送/密送（必须设置其中之一）</li><li>要发送的邮件帐户名称（如果未指定，则使用随机帐户）</li><li>要附加文件的文件属性和记录</li></ul>",
 				"rest_call": "instance.rest_call({ARGS}) => INTEGER\n\n向内部队列添加一个HTTP REST调用以进行立即执行。支持的方法有：DELETE、GET、PATCH、POST、PUT。\n\nURL 可以包含查询参数（如果需要）。\n\n必须以 JSONB 格式提供头信息 - 每个键值对都将生成一个头信息。\n\n如果需要，可以禁用 TLS/SSL 的有效性检查。\n\n如果需要处理 REST 响应，可以为回调设置另一个后端函数。此回调函数必须具有三个参数：INTEGER（表示 HTTP 状态码）、TEXT（HTTP 响应正文）、TEXT（回调值）。\n\n如果在 `instance.rest_call(...)` 中设置了“回调值”，它将被传递到回调函数中 - 当需要按顺序执行多个调用（比如在数据调用之前进行身份验证）时，这很有用。",
+				"rest_get_placeholder_file_base64": "instance.rest_get_placeholder_file_base64({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the content of the specified file (encoded as BASE64), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
+				"rest_get_placeholder_file_raw": "instance.rest_get_placeholder_file_raw({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the raw content of the specified file (for requests like formData), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
 				"update_collection": "instance.update_collection({ARGS}) => INTEGER\n\n通知连接的客户端更新指定的集合。如果给定登录 ID，则只影响属于这些登录的客户端。",
 				"user_meta_set": "instance.user_meta_set({ARGS}) => INTEGER<br /><br />Sets meta data for the chosen user.",
 				"user_sync_all": "instance.user_sync_all({ARGS}) => INTEGER<br /><br />Executes a sync of all user meta data with the defined backend function.<br /><br />Useful to sync pre-existing users to an application after it has been installed.<br /><br />To work, a user sync backend function must be set in the application configuration page in the Builder; the required application ID can also be found there."
@@ -1443,6 +1445,14 @@
 					"tls_skip_verify BOOLEAN DEFAULT FALSE",
 					"callback_function_id UUID DEFAULT NULL",
 					"callback_value TEXT DEFAULT NULL"
+				],
+				"rest_get_placeholder_file_base64": [
+					"file_id UUID",
+					"version INTEGER DEFAULT 0"
+				],
+				"rest_get_placeholder_file_raw": [
+					"file_id UUID",
+					"version INTEGER DEFAULT 0"
 				],
 				"update_collection": [
 					"collection_id",

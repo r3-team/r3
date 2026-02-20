@@ -27,8 +27,8 @@ var (
 	attemptsAllow = 5   // how many attempts for each REST call before quitting
 	callLimit     = 100 // how many REST calls to execute per loop
 
-	// finds {FILE_FORMDATA:FILE_ID|FILE_VERSION} or {FILE_BASE64:FILE_ID|FILE_VERSION}, ex. {FILE_FORMDATA:948fe83d-5d52-442d-9d93-64ea0b7195ea|0}
-	rxFilePlaceholder = regexp.MustCompile(`\{FILE_(FORMDATA|BASE64)\:([a-z0-9\-]{36})\|(\d+)\}`)
+	// finds {FILE_RAW:FILE_ID|FILE_VERSION} or {FILE_BASE64:FILE_ID|FILE_VERSION}, ex. {FILE_RAW:948fe83d-5d52-442d-9d93-64ea0b7195ea|0}
+	regexFilePlaceholder = regexp.MustCompile(`\{FILE_(BASE64|RAW)\:([a-z0-9\-]{36})\|(\d+)\}`)
 )
 
 type restCall struct {
@@ -48,8 +48,7 @@ func DoAll() error {
 
 		// collect spooled REST calls
 		rows, err := db.Pool.Query(context.Background(), `
-			SELECT id, pg_function_id_callback, method, headers,
-				url, body, callback_value, skip_verify
+			SELECT id, pg_function_id_callback, method, headers, url, body, callback_value, skip_verify
 			FROM instance.rest_spool
 			WHERE attempt_count < $1
 			ORDER BY date_added ASC
@@ -177,7 +176,7 @@ func callExecute(c restCall) error {
 func callResolveBodyPlaceholders(body *string) error {
 	replaceStringPairs := make([]string, 0)
 
-	for _, match := range rxFilePlaceholder.FindAllStringSubmatch(*body, -1) {
+	for _, match := range regexFilePlaceholder.FindAllStringSubmatch(*body, -1) {
 		if len(match) != 4 {
 			continue
 		}
@@ -197,12 +196,12 @@ func callResolveBodyPlaceholders(body *string) error {
 		}
 
 		switch mode {
-		case "FORMDATA":
-			replaceStringPairs = append(replaceStringPairs, match[0], string(fileContent))
 		case "BASE64":
 			replaceStringPairs = append(replaceStringPairs, match[0], base64.StdEncoding.EncodeToString(fileContent))
+		case "RAW":
+			replaceStringPairs = append(replaceStringPairs, match[0], string(fileContent))
 		default:
-			return fmt.Errorf("invalid REST placeholder mode '%s', expected: FORMDATA or BASE64", mode)
+			return fmt.Errorf("invalid REST file placeholder '%s', expected: 'FILE_BASE64' or 'FILE_RAW'", mode)
 		}
 	}
 

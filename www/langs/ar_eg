@@ -1306,6 +1306,8 @@
 				"mail_get_next": "instance.mail_get_next({ARGS}) => instance.mail<br /><br />إرجاع البريد الإلكتروني الوارد التالي من التخزين المؤقت للبريد؛ <br /><br />يتكون النوع الذي تم إرجاعه \"instance.mail\" من:<blockquote>معرف عدد صحيح,<br />نص from_list،<br />إلى_قائمة النص،<br />نص cc_list،<br />نص الموضوع,<br />نص الجسم</blockquote>بعد معالجة البريد الإلكتروني يجب حذفه؛ ",
 				"mail_send": "instance.mail_send({ARGS}) => INTEGER<br /><br />يقوم بإنشاء بريد إلكتروني صادر للتخزين المؤقت للبريد. <ul><li>قائمة مفصولة بفواصل لمستلمي TO/CC/BCC (يجب تعيين واحد منهم)</li><li>اسم حساب البريد المراد الإرسال منه (يتم استخدام حساب عشوائي إذا لم يتم تحديده)</li><li>سمة الملف والسجل الذي سيتم إرفاق الملفات منه</li></ul>",
 				"rest_call": "instance.rest_call({ARGS}) => INTEGER<br /><br />يضيف استدعاء HTTP REST إلى التخزين المؤقت الداخلي للتنفيذ الفوري. <br /><br />يمكن أن يتضمن عنوان URL معلمات الاستعلام إذا لزم الأمر.<br /><br />يجب توفير الرؤوس كـ JSONB - كل زوج من قيم المفاتيح سينتج عنه رأس واحد.<br /><br />يمكن تعطيل التحقق من صحة TLS/SSL إذا لزم الأمر.<br /><br />إذا كانت استجابة REST بحاجة إلى المعالجة، فيمكن تعيين وظيفة خلفية أخرى لرد الاتصال. <br /><br />إذا تم تعيين \"قيمة رد الاتصال\" في instance.rest_call(...)، فسيتم تمريرها إلى وظيفة رد الاتصال - وهذا مفيد عندما يجب تنفيذ مكالمات متعددة بالترتيب (مثل المصادقة قبل مكالمة البيانات).",
+				"rest_get_placeholder_file_base64": "instance.rest_get_placeholder_file_base64({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the content of the specified file (encoded as BASE64), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
+				"rest_get_placeholder_file_raw": "instance.rest_get_placeholder_file_raw({ARGS}) => TEXT<br /><br />Returns a placeholder text that is replaced with the raw content of the specified file (for requests like formData), during REST call execution, when used in request body in instance.rest_call(...).<br /><br />File ID and version can be retrieved via instance.files_get(...), which loops through files attached to an existing record and files attribute.",
 				"update_collection": "instance.update_collection({ARGS}) => INTEGER<br /><br />إبلاغ العملاء المتصلين بتحديث المجموعة المحددة. ",
 				"user_meta_set": "instance.user_meta_set({ARGS}) => INTEGER<br /><br />Sets meta data for the chosen user.",
 				"user_sync_all": "instance.user_sync_all({ARGS}) => INTEGER<br /><br />Executes a sync of all user meta data with the defined backend function.<br /><br />Useful to sync pre-existing users to an application after it has been installed.<br /><br />To work, a user sync backend function must be set in the application configuration page in the Builder; the required application ID can also be found there."
@@ -1443,6 +1445,14 @@
 					"tls_skip_verify BOOLEAN DEFAULT FALSE",
 					"callback_function_id UUID DEFAULT NULL",
 					"callback_value النص الافتراضي NULL"
+				],
+				"rest_get_placeholder_file_base64": [
+					"file_id UUID",
+					"version INTEGER DEFAULT 0"
+				],
+				"rest_get_placeholder_file_raw": [
+					"file_id UUID",
+					"version INTEGER DEFAULT 0"
 				],
 				"update_collection": [
 					"Collection_id",

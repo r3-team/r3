@@ -2905,23 +2905,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			$BODY$;
 
 			-- REST call placeholder functions
-			CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_formdata(
-				file_id uuid,
-				version integer DEFAULT 0)
-				RETURNS text
-				LANGUAGE 'plpgsql'
-				COST 100
-				STABLE PARALLEL UNSAFE
-			AS $BODY$
-			DECLARE
-			BEGIN
-				RETURN FORMAT('{FILE_FORMDATA:%s|%s}', file_id::TEXT, version);
-			END;
-			$BODY$;
-
-			CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_base64(
-				file_id uuid,
-				version integer DEFAULT 0)
+			CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_base64(file_id uuid, version integer DEFAULT 0)
 				RETURNS text
 				LANGUAGE 'plpgsql'
 				COST 100
@@ -2930,6 +2914,18 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			DECLARE
 			BEGIN
 				RETURN FORMAT('{FILE_BASE64:%s|%s}', file_id::TEXT, version);
+			END;
+			$BODY$;
+
+			CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_raw(file_id uuid, version integer DEFAULT 0)
+				RETURNS text
+				LANGUAGE 'plpgsql'
+				COST 100
+				STABLE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				RETURN FORMAT('{FILE_RAW:%s|%s}', file_id::TEXT, version);
 			END;
 			$BODY$;
 		`)
