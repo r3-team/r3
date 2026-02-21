@@ -469,6 +469,19 @@
 	flex-flow:column nowrap;
 }
 
+/* history */
+.builder-history-release{
+	display:flex;
+	flex-flow:column nowrap;
+	gap:6px;
+}
+.builder-history-release-entry{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:6px;
+}
+
 /* collection */
 .builder-collection{
 	flex:1 1 auto;

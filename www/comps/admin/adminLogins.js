@@ -1,9 +1,8 @@
 import MyInputOffset  from '../inputOffset.js';
 import MyAdminLogin   from './adminLogin.js';
 import {getLoginIcon} from '../shared/admin.js';
-export {MyAdminLogins as default};
 
-let MyAdminLogins = {
+export default {
 	name:'my-admin-logins',
 	components:{
 		MyAdminLogin,

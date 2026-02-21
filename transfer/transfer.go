@@ -66,13 +66,21 @@ func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
 		return err
 	}
 
+	// pin new release history entries to this new version
+	if _, err := tx.Exec(ctx, `
+		UPDATE app.history
+		SET release_build = $1
+		WHERE module_id     = $2
+		AND   release_build = 0
+	`, file.Content.Module.ReleaseBuild, moduleId); err != nil {
+		return err
+	}
+
 	_, err = tx.Exec(ctx, `
 		UPDATE app.module
-		SET release_build_app = $1, release_build = $2,
-			release_date = $3
+		SET release_build_app = $1, release_build = $2,	release_date = $3
 		WHERE id = $4
-	`, file.Content.Module.ReleaseBuildApp,
-		file.Content.Module.ReleaseBuild,
+	`, file.Content.Module.ReleaseBuildApp, file.Content.Module.ReleaseBuild,
 		file.Content.Module.ReleaseDate, moduleId)
 
 	return err

@@ -609,6 +609,14 @@ export function getTemplateFormState() {
 		effects:[]
 	};
 };
+export function getTemplateHistory(category,build) {
+	return {
+		id:getUuidV4(),
+		category:category,
+		content:'',
+		releaseBuild:build
+	};
+};
 export function getTemplateJsFunction(moduleId,formId,name) {
 	return {
 		id:getUuidV4(),
@@ -669,17 +677,19 @@ export function getTemplateModule(name) {
 		parentId:null,
 		formId:null,
 		iconId:null,
+		articleIdsHelp:[],
 		name:name,
 		color1:'217A4D',
+		dependsOn:[],
+		history:[],
+		historyCategories:['Added','Improved','Fixed'],
+		languageMain:'en_us',
+		languages:['en_us'],
 		position:0,
 		releaseBuild:0,
 		releaseBuildApp:0,
 		releaseDate:0,
-		languageMain:'en_us',
-		languages:['en_us'],
-		dependsOn:[],
 		startForms:[],
-		articleIdsHelp:[],
 		captions:{
 			moduleTitle:{}
 		}

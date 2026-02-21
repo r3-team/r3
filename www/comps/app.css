@@ -900,6 +900,10 @@ table td.maximum{
 	border-bottom:1px solid var(--color-border);
 	background-color:var(--color-bg);
 }
+.generic-table>thead>tr>th.topAligned,
+.generic-table>tbody>tr>td.topAligned{
+	vertical-align:top;
+}
 .generic-table.bright>tbody>tr>td{
 	background-color:var(--color-input);
 }

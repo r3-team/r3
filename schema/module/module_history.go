@@ -33,6 +33,8 @@ func getHistory_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) ([]types.Histor
 }
 
 func setHistory_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, logs []types.History) error {
+
+	idsKeep := make([]uuid.UUID, 0)
 	for i, l := range logs {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.history (module_id, id, position, category, content, release_build)
@@ -42,6 +44,9 @@ func setHistory_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, logs []ty
 		`, moduleId, l.Id, i, l.Category, l.Content, l.ReleaseBuild); err != nil {
 			return err
 		}
+		idsKeep = append(idsKeep, l.Id)
 	}
-	return nil
+
+	_, err := tx.Exec(ctx, `DELETE FROM app.history WHERE module_id = $1 AND id <> ALL($2)`, moduleId, idsKeep)
+	return err
 }

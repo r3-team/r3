@@ -12,7 +12,6 @@ import {
 	copyValueDialog,
 	getRandomInt
 } from '../shared/generic.js';
-export {MyBuilderModule as default};
 
 const MyBuilderModuleStartForm = {
 	name:'my-builder-module-start-form',
@@ -68,7 +67,7 @@ const MyBuilderModuleStartForm = {
 	}
 };
 
-const MyBuilderModule = {
+export default {
 	name:'my-builder-module',
 	components:{
 		MyBuilderCaption,
@@ -423,11 +422,11 @@ const MyBuilderModule = {
 						<td colspan="2"><input :value="displayReleaseDate" disabled="disabled" /></td>
 					</tr>
 					<tr>
-						<td>{{ capApp.releaseBuild }}</td>
+						<td>{{ capGen.versionApp }}</td>
 						<td colspan="2"><input class="short" v-model="releaseBuild" disabled="disabled" /></td>
 					</tr>
 					<tr>
-						<td>{{ capApp.releaseBuildApp }}</td>
+						<td>{{ capGen.versionPlatform }}</td>
 						<td colspan="2"><input class="short" v-model="releaseBuildApp" disabled="disabled" /></td>
 					</tr>
 				</tbody>
@@ -617,6 +616,8 @@ const MyBuilderModule = {
 					startForms:this.startForms,
 					languages:this.languages,
 					articleIdsHelp:this.module.articleIdsHelp,
+					history:this.module.history,
+					historyCategories:this.module.historyCategories,
 					captions:this.captions
 				}),
 				ws.prepare('schema','check',{moduleId:this.id})

@@ -296,6 +296,12 @@ export default {
 			tabTarget:'content'
 		};
 	},
+	watch:{
+		docSchema:{
+			handler() { this.reset(false); },
+			immediate:true
+		}
+	},
 	computed:{
 		fieldsTemplate:s => {
 			let out = [
@@ -365,12 +371,6 @@ export default {
 		token:        s => s.$store.getters['local/token'],
 		capApp:       s => s.$store.getters.captions.builder.doc,
 		capGen:       s => s.$store.getters.captions.generic
-	},
-	watch:{
-		docSchema:{
-			handler() { this.reset(false); },
-			immediate:true
-		}
 	},
 	methods:{
 		// externals
