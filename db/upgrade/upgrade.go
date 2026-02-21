@@ -766,6 +766,27 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.repo_module DROP CONSTRAINT repo_module_pkey;
 			ALTER TABLE instance.repo_module      ADD CONSTRAINT repo_module_pkey      PRIMARY KEY (repo_id,module_id_wofk);
 			ALTER TABLE instance.repo_module_meta ADD CONSTRAINT repo_module_meta_pkey PRIMARY KEY (repo_id,module_id_wofk,language_code);
+
+			-- release build history
+			ALTER TABLE app.module ADD   COLUMN history_categories TEXT[] NOT NULL DEFAULT '{Added,Improved,Fixed}';
+			ALTER TABLE app.module ALTER COLUMN history_categories DROP DEFAULT;
+
+			CREATE TABLE IF NOT EXISTS app.history (
+				id uuid NOT NULL,
+				module_id uuid NOT NULL,
+				category smallint NOT NULL,
+				content text COLLATE pg_catalog."default" NOT NULL,
+				"position" smallint NOT NULL,
+				release_build integer NOT NULL,
+				CONSTRAINT history_pkey PRIMARY KEY (id),
+				CONSTRAINT history_module_id_fkey FOREIGN KEY (module_id)
+					REFERENCES app.module (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_history_module_id_fkey ON app.history USING btree (module_id  ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS ind_history_position       ON app.history USING btree ("position" ASC NULLS LAST);
 		`)
 		return "3.12", err
 	},

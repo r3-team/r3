@@ -52,6 +52,7 @@ import MyBuilderDoc         from './comps/builder/builderDoc.js';
 import MyBuilderDocs        from './comps/builder/builderDocs.js';
 import MyBuilderForm        from './comps/builder/builderForm.js';
 import MyBuilderForms       from './comps/builder/builderForms.js';
+import MyBuilderHistory     from './comps/builder/builderHistory.js';
 import MyBuilderIcons       from './comps/builder/builderIcons.js';
 import MyBuilderJsFunction  from './comps/builder/builderJsFunction.js';
 import MyBuilderJsFunctions from './comps/builder/builderJsFunctions.js';
@@ -231,6 +232,11 @@ const MyRouter = VueRouter.createRouter({
 				path:'docs/:id',
 				meta:{ nav:'docs', target:'module' },
 				component:MyBuilderDocs,
+				props:true
+			},{
+				path:'history/:id',
+				meta:{ nav:'history', target:'module' },
+				component:MyBuilderHistory,
 				props:true
 			},{
 				path:'doc/:id',

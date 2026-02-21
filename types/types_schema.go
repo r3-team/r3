@@ -7,55 +7,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Module struct {
-	Id                    uuid.UUID         `json:"id"`
-	ParentId              pgtype.UUID       `json:"parentId"`              // module parent ID
-	FormId                pgtype.UUID       `json:"formId"`                // default start form
-	IconId                pgtype.UUID       `json:"iconId"`                // module icon in header/menu
-	IconIdPwa1            pgtype.UUID       `json:"iconIdPwa1"`            // PWA icon, 192x192
-	IconIdPwa2            pgtype.UUID       `json:"iconIdPwa2"`            // PWA icon, 512x512
-	JsFunctionIdOnLogin   pgtype.UUID       `json:"jsFunctionIdOnLogin"`   // frontend function called when login happens in frontend
-	PgFunctionIdLoginSync pgtype.UUID       `json:"pgFunctionIdLoginSync"` // backend function called when login meta data changes
-	Name                  string            `json:"name"`                  // name of module, is used for DB schema
-	NamePwa               pgtype.Text       `json:"namePwa"`               // name of module shown for PWA
-	NamePwaShort          pgtype.Text       `json:"namePwaShort"`          // name of module shown for PWA, short version
-	Color1                pgtype.Text       `json:"color1"`                // primary module color (used for header)
-	Position              int               `json:"position"`              // position of module in nav. contexts (home, header)
-	LanguageMain          string            `json:"languageMain"`          // language code of main language (for fallback)
-	ReleaseBuild          int               `json:"releaseBuild"`          // build of this module, incremented with each release
-	ReleaseBuildApp       int               `json:"releaseBuildApp"`       // build of app at last release
-	ReleaseDate           int64             `json:"releaseDate"`           // date of last release
-	DependsOn             []uuid.UUID       `json:"dependsOn"`             // modules that this module is dependent on
-	StartForms            []ModuleStartForm `json:"startForms"`            // start forms, assigned via role membership
-	Languages             []string          `json:"languages"`             // language codes that this module supports
-	Relations             []Relation        `json:"relations"`
-	Forms                 []Form            `json:"forms"`
-	MenuTabs              []MenuTab         `json:"menuTabs"`
-	Icons                 []Icon            `json:"icons"`
-	Roles                 []Role            `json:"roles"`
-	Articles              []Article         `json:"articles"`
-	LoginForms            []LoginForm       `json:"loginForms"`
-	PgFunctions           []PgFunction      `json:"pgFunctions"`
-	PgTriggers            []PgTrigger       `json:"pgTriggers"`
-	JsFunctions           []JsFunction      `json:"jsFunctions"`
-	Collections           []Collection      `json:"collections"`
-	Apis                  []Api             `json:"apis"`
-	Docs                  []Doc             `json:"docs"`
-	ClientEvents          []ClientEvent     `json:"clientEvents"`
-	SearchBars            []SearchBar       `json:"searchBars"`
-	Variables             []Variable        `json:"variables"`
-	Widgets               []Widget          `json:"widgets"`
-	ArticleIdsHelp        []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
-	Captions              CaptionMap        `json:"captions"`
-
-	// legacy
-	Menus []Menu `json:"menus"`
-}
-type ModuleStartForm struct {
-	Position int       `json:"position"`
-	RoleId   uuid.UUID `json:"roleId"`
-	FormId   uuid.UUID `json:"formId"`
-}
 type Api struct {
 	Id         uuid.UUID   `json:"id"`
 	ModuleId   uuid.UUID   `json:"moduleId"`
@@ -77,46 +28,6 @@ type Article struct {
 	Name     string     `json:"name"`
 	Captions CaptionMap `json:"captions"`
 }
-type Relation struct {
-	Id             uuid.UUID        `json:"id"`
-	ModuleId       uuid.UUID        `json:"moduleId"`
-	AttributeIdPk  uuid.UUID        `json:"attributeIdPk"`  // read only, ID of PK attribute
-	Name           string           `json:"name"`           // unique (within module) relation name
-	Comment        pgtype.Text      `json:"comment"`        // author comment
-	Encryption     bool             `json:"encryption"`     // relation supports encrypted attribute values
-	RetentionCount pgtype.Int4      `json:"retentionCount"` // minimum number of retained change events
-	RetentionDays  pgtype.Int4      `json:"retentionDays"`  // minimum age of retained change events
-	Attributes     []Attribute      `json:"attributes"`     // read only, all relation attributes
-	Indexes        []PgIndex        `json:"indexes"`        // read only, all relation indexes
-	Policies       []RelationPolicy `json:"policies"`       // read only, all relation policies
-	Presets        []Preset         `json:"presets"`        // read only, all relation presets
-
-	// legacy
-	Triggers []PgTrigger `json:"triggers"` // moved to module pgTriggers
-}
-type RelationPolicy struct {
-	RoleId           uuid.UUID     `json:"roleId"`
-	PgFunctionIdExcl uuid.NullUUID `json:"pgFunctionIdExcl"`
-	PgFunctionIdIncl uuid.NullUUID `json:"pgFunctionIdIncl"`
-	ActionDelete     bool          `json:"actionDelete"`
-	ActionSelect     bool          `json:"actionSelect"`
-	ActionUpdate     bool          `json:"actionUpdate"`
-}
-type Preset struct {
-	Id         uuid.UUID     `json:"id"`
-	RelationId uuid.UUID     `json:"relationId"`
-	Name       string        `json:"name"`
-	Protected  bool          `json:"protected"`
-	Values     []PresetValue `json:"values"`
-}
-type PresetValue struct {
-	Id            uuid.UUID   `json:"id"`
-	PresetId      uuid.UUID   `json:"presetId"`
-	PresetIdRefer pgtype.UUID `json:"presetIdRefer"`
-	AttributeId   uuid.UUID   `json:"attributeId"`
-	Protected     bool        `json:"protected"`
-	Value         pgtype.Text `json:"value"`
-}
 type Attribute struct {
 	Id             uuid.UUID   `json:"id"`
 	RelationId     uuid.UUID   `json:"relationId"`     // attribute belongs to this relation
@@ -134,124 +45,71 @@ type Attribute struct {
 	OnDelete       string      `json:"onDelete"`       // relationship attribute, action on 'DELETE'
 	Captions       CaptionMap  `json:"captions"`
 }
-type Menu struct {
-	Id           uuid.UUID            `json:"id"`
-	FormId       pgtype.UUID          `json:"formId"`
-	IconId       pgtype.UUID          `json:"iconId"`
-	Menus        []Menu               `json:"menus"`
-	Color        pgtype.Text          `json:"color"`
-	ShowChildren bool                 `json:"showChildren"`
-	Collections  []CollectionConsumer `json:"collections"` // collection values to display on menu entry
-	Captions     CaptionMap           `json:"captions"`
+type CaptionMap map[string]map[string]string // content->language_code->value
+type ClientEvent struct {
+	Id              uuid.UUID   `json:"id"`
+	ModuleId        uuid.UUID   `json:"moduleId"`
+	Action          string      `json:"action"`          // action to execute when event is running (callJsFunction, callPgFunction)
+	Arguments       []string    `json:"arguments"`       // arguments to supply to function call (clipboard, hostname, username, windowTitle)
+	Event           string      `json:"event"`           // events to react to (onConnect, onDisconnect, onHotkey)
+	HotkeyChar      string      `json:"hotkeyChar"`      // single character
+	HotkeyModifier1 string      `json:"hotkeyModifier1"` // ALT, CMD, CTRL, SHIFT
+	HotkeyModifier2 pgtype.Text `json:"hotkeyModifier2"` // ALT, CMD, CTRL, SHIFT (optional)
+	JsFunctionId    pgtype.UUID `json:"jsFunctionId"`
+	PgFunctionId    pgtype.UUID `json:"pgFunctionId"`
+	Captions        CaptionMap  `json:"captions"`
 }
-type MenuTab struct {
-	Id       uuid.UUID   `json:"id"`
-	ModuleId uuid.UUID   `json:"moduleId"`
-	IconId   pgtype.UUID `json:"iconId"`
-	Menus    []Menu      `json:"menus"`
-	Captions CaptionMap  `json:"captions"`
+type Collection struct {
+	Id       uuid.UUID            `json:"id"`
+	ModuleId uuid.UUID            `json:"moduleId"`
+	IconId   pgtype.UUID          `json:"iconId"`
+	Name     string               `json:"name"`
+	Columns  []Column             `json:"columns"`
+	Query    Query                `json:"query"`
+	InHeader []CollectionConsumer `json:"inHeader"` // collection consumers used by application header
 }
-type LoginForm struct {
-	Id                uuid.UUID  `json:"id"`
-	ModuleId          uuid.UUID  `json:"moduleId"`
-	FormId            uuid.UUID  `json:"formId"`            // form to open
-	AttributeIdLogin  uuid.UUID  `json:"attributeIdLogin"`  // attribute containing login ID (integer)
-	AttributeIdLookup uuid.UUID  `json:"attributeIdLookup"` // attribute used for text lookup
-	Name              string     `json:"name"`
-	Captions          CaptionMap `json:"captions"`
-}
-type OpenDoc struct {
-	DocIdOpen         uuid.UUID   `json:"docIdOpen"`         // document to open
-	RelationIndexOpen int         `json:"relationIndexOpen"` // relation index of record to open
-	FieldIdAddTo      pgtype.UUID `json:"fieldIdAddTo"`      // optional, field to add document to
-}
-type OpenForm struct {
-	PopUpType pgtype.Text `json:"popUpType"` // if set, form is opened as pop-up, values: float, inline
-	Context   pgtype.Text `json:"context"`   // used when same entity needs multiple open forms, values: bulk
-	MaxHeight int         `json:"maxHeight"` // max. height in PX for opened form (pop-up only)
-	MaxWidth  int         `json:"maxWidth"`  // max. width  in PX for opened form (pop-up only)
+type CollectionConsumer struct {
+	Id              uuid.UUID   `json:"id"`
+	CollectionId    uuid.UUID   `json:"collectionId"`
+	ColumnIdDisplay pgtype.UUID `json:"columnIdDisplay"` // ID of collection column to display
+	Flags           []string    `json:"flags"`           // flags for options (showRowCount, multiValue, noDisplayEmpty, ...)
 
-	// open form
-	RelationIndexOpen int       `json:"relationIndexOpen"` // relation index of record to open
-	FormIdOpen        uuid.UUID `json:"formIdOpen"`        // form to open record in (must have chosen relation as base relation)
-
-	// apply record from current form as relationship value on target form
-	RelationIndexApply int         `json:"relationIndexApply"` // relation index of record to use as relationship value
-	AttributeIdApply   pgtype.UUID `json:"attributeIdApply"`   // apply record ID as relationship value to attribute on opened form
+	// presentation options (to show collection in header, menu, etc.)
+	OnMobile bool     `json:"onMobile"` // show on mobile
+	OpenForm OpenForm `json:"openForm"` // open form when clicked on
 
 	// legacy
-	RelationIndex int  `json:"relationIndex"` // replaced by relationIndexApply
-	PopUp         bool `json:"popUp"`         // replaced by popUpType
+	MultiValue     bool `json:"multiValue"`     // moved to flags
+	NoDisplayEmpty bool `json:"noDisplayEmpty"` // moved to flags
 }
-type Icon struct {
-	Id       uuid.UUID `json:"id"`
-	ModuleId uuid.UUID `json:"moduleId"`
-	Name     string    `json:"name"`
-	File     []byte    `json:"file"`
+type Column struct {
+	Id          uuid.UUID   `json:"id"`
+	AttributeId uuid.UUID   `json:"attributeId"`
+	Index       int         `json:"index"`      // attribute index
+	GroupBy     bool        `json:"groupBy"`    // group by column attribute value?
+	Aggregator  pgtype.Text `json:"aggregator"` // aggregator (SUM, COUNT, etc.)
+	Distincted  bool        `json:"distincted"` // attribute values are distinct?
+	SubQuery    bool        `json:"subQuery"`   // column uses sub query?
+	Query       Query       `json:"query"`      // sub query
+	Captions    CaptionMap  `json:"captions"`   // column titles
+
+	// presentation
+	Basis    int         `json:"basis"`    // size basis (usually width)
+	Batch    pgtype.Int4 `json:"batch"`    // index of column batch (multiple columns as one)
+	Display  string      `json:"display"`  // how to display value (email, gallery, etc.)
+	Hidden   bool        `json:"hidden"`   // hide column by default?
+	Length   int         `json:"length"`   // text length limit (in characters)
+	OnMobile bool        `json:"onMobile"` // display column on mobile by default?
+	Styles   []string    `json:"styles"`   // alignEnd, alignMid, bold, clipboard, hide, italic, vertical, wrap
+
+	// legacy
+	BatchVertical bool `json:"batchVertical"`
+	Clipboard     bool `json:"clipboard"`
+	Wrap          bool `json:"wrap"`
 }
-type Form struct {
-	Id             uuid.UUID      `json:"id"`
-	ModuleId       uuid.UUID      `json:"moduleId"`
-	PresetIdOpen   pgtype.UUID    `json:"presetIdOpen"`
-	FieldIdFocus   pgtype.UUID    `json:"fieldIdFocus"` // field to set focus to on form load
-	IconId         pgtype.UUID    `json:"iconId"`
-	Name           string         `json:"name"`
-	NoDataActions  bool           `json:"noDataActions"` // disables record manipulation actions (new/save/delete)
-	Query          Query          `json:"query"`
-	Fields         []any          `json:"fields"`
-	Actions        []FormAction   `json:"actions"`
-	Functions      []FormFunction `json:"functions"`
-	States         []FormState    `json:"states"`
-	ArticleIdsHelp []uuid.UUID    `json:"articleIdsHelp"` // IDs of articles for form context help, in order
-	Captions       CaptionMap     `json:"captions"`
-}
-type FormAction struct {
-	Id           uuid.UUID   `json:"id"`
-	JsFunctionId pgtype.UUID `json:"jsFunctionId"` // JS function to execute
-	IconId       pgtype.UUID `json:"iconId"`
-	Color        pgtype.Text `json:"color"`
-	OpenDoc      OpenDoc     `json:"openDoc"`  // document to open
-	OpenForm     OpenForm    `json:"openForm"` // form to open
-	State        string      `json:"state"`    // default state (hidden, default, readonly)
-	Captions     CaptionMap  `json:"captions"`
-}
-type FormFunction struct {
-	Position     int       `json:"position"`
-	JsFunctionId uuid.UUID `json:"jsFunctionId"`
-	Event        string    `json:"event"` // open, save, delete
-	EventBefore  bool      `json:"eventBefore"`
-}
-type FormState struct {
-	Id          uuid.UUID            `json:"id"`
-	Description string               `json:"description"` // builder reference, used to order and search by
-	Conditions  []FormStateCondition `json:"conditions"`  // conditions to be met for effects to be applied
-	Effects     []FormStateEffect    `json:"effects"`     // effects to apply when conditions are met
-}
-type FormStateCondition struct {
-	Position  int                    `json:"position"`
-	Connector string                 `json:"connector"` // AND, OR
-	Operator  string                 `json:"operator"`  // comparison operator (=, <>, etc.)
-	Side0     FormStateConditionSide `json:"side0"`     // comparison: left side
-	Side1     FormStateConditionSide `json:"side1"`     // comparison: right side
-}
-type FormStateConditionSide struct {
-	Brackets     int         `json:"brackets"`     // opening/closing brackets (side 0/1)
-	Content      string      `json:"content"`      // collection, field, fieldChanged, fieldValid, formChanged, formState, login, preset, recordNew, role, true, value, variable
-	CollectionId pgtype.UUID `json:"collectionId"` // collection ID of which column value to compare
-	ColumnId     pgtype.UUID `json:"columnId"`     // column ID from collection of which value to compare
-	FieldId      pgtype.UUID `json:"fieldId"`      // field ID, for checks: value / has changed / is valid
-	FormStateId  pgtype.UUID `json:"formStateId"`  // form state ID, for taking result of other form state as condition
-	PresetId     pgtype.UUID `json:"presetId"`     // preset ID of record to be compared
-	RoleId       pgtype.UUID `json:"roleId"`       // role ID assigned to user
-	VariableId   pgtype.UUID `json:"variableId"`   // variable ID of value to retrieve
-	Value        pgtype.Text `json:"value"`        // fixed value, can be anything including NULL
-}
-type FormStateEffect struct {
-	FormActionId pgtype.UUID `json:"formActionId"` // affected form action
-	FieldId      pgtype.UUID `json:"fieldId"`      // affected field
-	TabId        pgtype.UUID `json:"tabId"`        // affected tab
-	NewData      int32       `json:"newData"`      // defines data handling via number (CREATE=4, UPDATE=2, DELETE=1, NOTHING=0) for form or data fields (lists, calendars, kanban, etc.)
-	NewState     string      `json:"newState"`     // applied state (hidden, default, readonly, optional, required)
+type Deletion struct {
+	Id     uuid.UUID `json:"id"`
+	Entity string    `json:"entity"`
 }
 type Field struct {
 	Id       uuid.UUID   `json:"id"`
@@ -473,53 +331,194 @@ type FieldVariable struct {
 	// legacy
 	Clipboard bool `json:"clipboard"`
 }
-type Collection struct {
-	Id       uuid.UUID            `json:"id"`
-	ModuleId uuid.UUID            `json:"moduleId"`
-	IconId   pgtype.UUID          `json:"iconId"`
-	Name     string               `json:"name"`
-	Columns  []Column             `json:"columns"`
-	Query    Query                `json:"query"`
-	InHeader []CollectionConsumer `json:"inHeader"` // collection consumers used by application header
+type Form struct {
+	Id             uuid.UUID      `json:"id"`
+	ModuleId       uuid.UUID      `json:"moduleId"`
+	PresetIdOpen   pgtype.UUID    `json:"presetIdOpen"`
+	FieldIdFocus   pgtype.UUID    `json:"fieldIdFocus"` // field to set focus to on form load
+	IconId         pgtype.UUID    `json:"iconId"`
+	Name           string         `json:"name"`
+	NoDataActions  bool           `json:"noDataActions"` // disables record manipulation actions (new/save/delete)
+	Query          Query          `json:"query"`
+	Fields         []any          `json:"fields"`
+	Actions        []FormAction   `json:"actions"`
+	Functions      []FormFunction `json:"functions"`
+	States         []FormState    `json:"states"`
+	ArticleIdsHelp []uuid.UUID    `json:"articleIdsHelp"` // IDs of articles for form context help, in order
+	Captions       CaptionMap     `json:"captions"`
 }
-type CollectionConsumer struct {
-	Id              uuid.UUID   `json:"id"`
-	CollectionId    uuid.UUID   `json:"collectionId"`
-	ColumnIdDisplay pgtype.UUID `json:"columnIdDisplay"` // ID of collection column to display
-	Flags           []string    `json:"flags"`           // flags for options (showRowCount, multiValue, noDisplayEmpty, ...)
+type FormAction struct {
+	Id           uuid.UUID   `json:"id"`
+	JsFunctionId pgtype.UUID `json:"jsFunctionId"` // JS function to execute
+	IconId       pgtype.UUID `json:"iconId"`
+	Color        pgtype.Text `json:"color"`
+	OpenDoc      OpenDoc     `json:"openDoc"`  // document to open
+	OpenForm     OpenForm    `json:"openForm"` // form to open
+	State        string      `json:"state"`    // default state (hidden, default, readonly)
+	Captions     CaptionMap  `json:"captions"`
+}
+type FormFunction struct {
+	Position     int       `json:"position"`
+	JsFunctionId uuid.UUID `json:"jsFunctionId"`
+	Event        string    `json:"event"` // open, save, delete
+	EventBefore  bool      `json:"eventBefore"`
+}
+type FormState struct {
+	Id          uuid.UUID            `json:"id"`
+	Description string               `json:"description"` // builder reference, used to order and search by
+	Conditions  []FormStateCondition `json:"conditions"`  // conditions to be met for effects to be applied
+	Effects     []FormStateEffect    `json:"effects"`     // effects to apply when conditions are met
+}
+type FormStateCondition struct {
+	Position  int                    `json:"position"`
+	Connector string                 `json:"connector"` // AND, OR
+	Operator  string                 `json:"operator"`  // comparison operator (=, <>, etc.)
+	Side0     FormStateConditionSide `json:"side0"`     // comparison: left side
+	Side1     FormStateConditionSide `json:"side1"`     // comparison: right side
+}
+type FormStateConditionSide struct {
+	Brackets     int         `json:"brackets"`     // opening/closing brackets (side 0/1)
+	Content      string      `json:"content"`      // collection, field, fieldChanged, fieldValid, formChanged, formState, login, preset, recordNew, role, true, value, variable
+	CollectionId pgtype.UUID `json:"collectionId"` // collection ID of which column value to compare
+	ColumnId     pgtype.UUID `json:"columnId"`     // column ID from collection of which value to compare
+	FieldId      pgtype.UUID `json:"fieldId"`      // field ID, for checks: value / has changed / is valid
+	FormStateId  pgtype.UUID `json:"formStateId"`  // form state ID, for taking result of other form state as condition
+	PresetId     pgtype.UUID `json:"presetId"`     // preset ID of record to be compared
+	RoleId       pgtype.UUID `json:"roleId"`       // role ID assigned to user
+	VariableId   pgtype.UUID `json:"variableId"`   // variable ID of value to retrieve
+	Value        pgtype.Text `json:"value"`        // fixed value, can be anything including NULL
+}
+type FormStateEffect struct {
+	FormActionId pgtype.UUID `json:"formActionId"` // affected form action
+	FieldId      pgtype.UUID `json:"fieldId"`      // affected field
+	TabId        pgtype.UUID `json:"tabId"`        // affected tab
+	NewData      int32       `json:"newData"`      // defines data handling via number (CREATE=4, UPDATE=2, DELETE=1, NOTHING=0) for form or data fields (lists, calendars, kanban, etc.)
+	NewState     string      `json:"newState"`     // applied state (hidden, default, readonly, optional, required)
+}
+type History struct {
+	Id           uuid.UUID `json:"id"`
+	Category     int       `json:"category"`     // index of module history categories
+	Content      string    `json:"content"`      // content of log, simple text
+	ReleaseBuild int       `json:"releaseBuild"` // pinned version, 0 if not pinned to any module version yet
+}
+type Icon struct {
+	Id       uuid.UUID `json:"id"`
+	ModuleId uuid.UUID `json:"moduleId"`
+	Name     string    `json:"name"`
+	File     []byte    `json:"file"`
+}
+type JsFunction struct {
+	Id                uuid.UUID   `json:"id"`
+	ModuleId          uuid.UUID   `json:"moduleId"`
+	FormId            pgtype.UUID `json:"formId"`
+	Name              string      `json:"name"`
+	CodeArgs          string      `json:"codeArgs"`
+	CodeFunction      string      `json:"codeFunction"`
+	CodeReturns       string      `json:"codeReturns"`
+	IsClientEventExec bool        `json:"isClientEventExec"` // can be executed from client events
+	Captions          CaptionMap  `json:"captions"`
+}
+type LoginForm struct {
+	Id                uuid.UUID  `json:"id"`
+	ModuleId          uuid.UUID  `json:"moduleId"`
+	FormId            uuid.UUID  `json:"formId"`            // form to open
+	AttributeIdLogin  uuid.UUID  `json:"attributeIdLogin"`  // attribute containing login ID (integer)
+	AttributeIdLookup uuid.UUID  `json:"attributeIdLookup"` // attribute used for text lookup
+	Name              string     `json:"name"`
+	Captions          CaptionMap `json:"captions"`
+}
+type Menu struct {
+	Id           uuid.UUID            `json:"id"`
+	FormId       pgtype.UUID          `json:"formId"`
+	IconId       pgtype.UUID          `json:"iconId"`
+	Menus        []Menu               `json:"menus"`
+	Color        pgtype.Text          `json:"color"`
+	ShowChildren bool                 `json:"showChildren"`
+	Collections  []CollectionConsumer `json:"collections"` // collection values to display on menu entry
+	Captions     CaptionMap           `json:"captions"`
+}
+type MenuTab struct {
+	Id       uuid.UUID   `json:"id"`
+	ModuleId uuid.UUID   `json:"moduleId"`
+	IconId   pgtype.UUID `json:"iconId"`
+	Menus    []Menu      `json:"menus"`
+	Captions CaptionMap  `json:"captions"`
+}
+type Module struct {
+	Id                    uuid.UUID   `json:"id"`
+	ParentId              pgtype.UUID `json:"parentId"`              // module parent ID
+	FormId                pgtype.UUID `json:"formId"`                // default start form
+	IconId                pgtype.UUID `json:"iconId"`                // module icon in header/menu
+	IconIdPwa1            pgtype.UUID `json:"iconIdPwa1"`            // PWA icon, 192x192
+	IconIdPwa2            pgtype.UUID `json:"iconIdPwa2"`            // PWA icon, 512x512
+	JsFunctionIdOnLogin   pgtype.UUID `json:"jsFunctionIdOnLogin"`   // frontend function called when login happens in frontend
+	PgFunctionIdLoginSync pgtype.UUID `json:"pgFunctionIdLoginSync"` // backend function called when login meta data changes
+	Name                  string      `json:"name"`                  // name of module, is used for DB schema
+	NamePwa               pgtype.Text `json:"namePwa"`               // name of module shown for PWA
+	NamePwaShort          pgtype.Text `json:"namePwaShort"`          // name of module shown for PWA, short version
+	Color1                pgtype.Text `json:"color1"`                // primary module color (used for header)
+	Position              int         `json:"position"`              // position of module in nav. contexts (home, header)
+	LanguageMain          string      `json:"languageMain"`          // language code of main language (for fallback)
+	ReleaseBuild          int         `json:"releaseBuild"`          // build of this module, incremented with each release
+	ReleaseBuildApp       int         `json:"releaseBuildApp"`       // build of platform at last release
+	ReleaseDate           int64       `json:"releaseDate"`           // date of last release
 
-	// presentation options (to show collection in header, menu, etc.)
-	OnMobile bool     `json:"onMobile"` // show on mobile
-	OpenForm OpenForm `json:"openForm"` // open form when clicked on
+	// sub entities
+	Apis              []Api             `json:"apis"`
+	Articles          []Article         `json:"articles"`
+	ArticleIdsHelp    []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
+	Captions          CaptionMap        `json:"captions"`
+	ClientEvents      []ClientEvent     `json:"clientEvents"`
+	Collections       []Collection      `json:"collections"`
+	Docs              []Doc             `json:"docs"`
+	DependsOn         []uuid.UUID       `json:"dependsOn"` // modules that this module is dependent on
+	Forms             []Form            `json:"forms"`
+	History           []History         `json:"history"`
+	HistoryCategories []string          `json:"historyCategories"` // ordered list of history categories
+	Icons             []Icon            `json:"icons"`
+	JsFunctions       []JsFunction      `json:"jsFunctions"`
+	Languages         []string          `json:"languages"` // language codes that this module supports
+	LoginForms        []LoginForm       `json:"loginForms"`
+	MenuTabs          []MenuTab         `json:"menuTabs"`
+	PgFunctions       []PgFunction      `json:"pgFunctions"`
+	PgTriggers        []PgTrigger       `json:"pgTriggers"`
+	Relations         []Relation        `json:"relations"`
+	Roles             []Role            `json:"roles"`
+	SearchBars        []SearchBar       `json:"searchBars"`
+	StartForms        []ModuleStartForm `json:"startForms"` // start forms, assigned via role membership
+	Variables         []Variable        `json:"variables"`
+	Widgets           []Widget          `json:"widgets"`
 
 	// legacy
-	MultiValue     bool `json:"multiValue"`     // moved to flags
-	NoDisplayEmpty bool `json:"noDisplayEmpty"` // moved to flags
+	Menus []Menu `json:"menus"`
 }
-type Column struct {
-	Id          uuid.UUID   `json:"id"`
-	AttributeId uuid.UUID   `json:"attributeId"`
-	Index       int         `json:"index"`      // attribute index
-	GroupBy     bool        `json:"groupBy"`    // group by column attribute value?
-	Aggregator  pgtype.Text `json:"aggregator"` // aggregator (SUM, COUNT, etc.)
-	Distincted  bool        `json:"distincted"` // attribute values are distinct?
-	SubQuery    bool        `json:"subQuery"`   // column uses sub query?
-	Query       Query       `json:"query"`      // sub query
-	Captions    CaptionMap  `json:"captions"`   // column titles
+type ModuleStartForm struct {
+	Position int       `json:"position"`
+	RoleId   uuid.UUID `json:"roleId"`
+	FormId   uuid.UUID `json:"formId"`
+}
+type OpenDoc struct {
+	DocIdOpen         uuid.UUID   `json:"docIdOpen"`         // document to open
+	RelationIndexOpen int         `json:"relationIndexOpen"` // relation index of record to open
+	FieldIdAddTo      pgtype.UUID `json:"fieldIdAddTo"`      // optional, field to add document to
+}
+type OpenForm struct {
+	PopUpType pgtype.Text `json:"popUpType"` // if set, form is opened as pop-up, values: float, inline
+	Context   pgtype.Text `json:"context"`   // used when same entity needs multiple open forms, values: bulk
+	MaxHeight int         `json:"maxHeight"` // max. height in PX for opened form (pop-up only)
+	MaxWidth  int         `json:"maxWidth"`  // max. width  in PX for opened form (pop-up only)
 
-	// presentation
-	Basis    int         `json:"basis"`    // size basis (usually width)
-	Batch    pgtype.Int4 `json:"batch"`    // index of column batch (multiple columns as one)
-	Display  string      `json:"display"`  // how to display value (email, gallery, etc.)
-	Hidden   bool        `json:"hidden"`   // hide column by default?
-	Length   int         `json:"length"`   // text length limit (in characters)
-	OnMobile bool        `json:"onMobile"` // display column on mobile by default?
-	Styles   []string    `json:"styles"`   // alignEnd, alignMid, bold, clipboard, hide, italic, vertical, wrap
+	// open form
+	RelationIndexOpen int       `json:"relationIndexOpen"` // relation index of record to open
+	FormIdOpen        uuid.UUID `json:"formIdOpen"`        // form to open record in (must have chosen relation as base relation)
+
+	// apply record from current form as relationship value on target form
+	RelationIndexApply int         `json:"relationIndexApply"` // relation index of record to use as relationship value
+	AttributeIdApply   pgtype.UUID `json:"attributeIdApply"`   // apply record ID as relationship value to attribute on opened form
 
 	// legacy
-	BatchVertical bool `json:"batchVertical"`
-	Clipboard     bool `json:"clipboard"`
-	Wrap          bool `json:"wrap"`
+	RelationIndex int  `json:"relationIndex"` // replaced by relationIndexApply
+	PopUp         bool `json:"popUp"`         // replaced by popUpType
 }
 type Role struct {
 	Id                 uuid.UUID            `json:"id"`
@@ -593,37 +592,45 @@ type PgIndexAttribute struct {
 	Position    int       `json:"position"`
 	OrderAsc    bool      `json:"orderAsc"`
 }
-type JsFunction struct {
-	Id                uuid.UUID   `json:"id"`
-	ModuleId          uuid.UUID   `json:"moduleId"`
-	FormId            pgtype.UUID `json:"formId"`
-	Name              string      `json:"name"`
-	CodeArgs          string      `json:"codeArgs"`
-	CodeFunction      string      `json:"codeFunction"`
-	CodeReturns       string      `json:"codeReturns"`
-	IsClientEventExec bool        `json:"isClientEventExec"` // can be executed from client events
-	Captions          CaptionMap  `json:"captions"`
+type Preset struct {
+	Id         uuid.UUID     `json:"id"`
+	RelationId uuid.UUID     `json:"relationId"`
+	Name       string        `json:"name"`
+	Protected  bool          `json:"protected"`
+	Values     []PresetValue `json:"values"`
 }
-type Tab struct {
-	Id             uuid.UUID  `json:"id"`
-	Position       int        `json:"position"`
-	ContentCounter bool       `json:"contentCounter"` // tab shows counter of its child field values (list rows, calendar entries, file counts)
-	State          string     `json:"state"`          // tab default state (default, hidden)
-	Fields         []any      `json:"fields"`         // fields assigned to tab
-	Captions       CaptionMap `json:"captions"`
+type PresetValue struct {
+	Id            uuid.UUID   `json:"id"`
+	PresetId      uuid.UUID   `json:"presetId"`
+	PresetIdRefer pgtype.UUID `json:"presetIdRefer"`
+	AttributeId   uuid.UUID   `json:"attributeId"`
+	Protected     bool        `json:"protected"`
+	Value         pgtype.Text `json:"value"`
 }
-type ClientEvent struct {
-	Id              uuid.UUID   `json:"id"`
-	ModuleId        uuid.UUID   `json:"moduleId"`
-	Action          string      `json:"action"`          // action to execute when event is running (callJsFunction, callPgFunction)
-	Arguments       []string    `json:"arguments"`       // arguments to supply to function call (clipboard, hostname, username, windowTitle)
-	Event           string      `json:"event"`           // events to react to (onConnect, onDisconnect, onHotkey)
-	HotkeyChar      string      `json:"hotkeyChar"`      // single character
-	HotkeyModifier1 string      `json:"hotkeyModifier1"` // ALT, CMD, CTRL, SHIFT
-	HotkeyModifier2 pgtype.Text `json:"hotkeyModifier2"` // ALT, CMD, CTRL, SHIFT (optional)
-	JsFunctionId    pgtype.UUID `json:"jsFunctionId"`
-	PgFunctionId    pgtype.UUID `json:"pgFunctionId"`
-	Captions        CaptionMap  `json:"captions"`
+type Relation struct {
+	Id             uuid.UUID        `json:"id"`
+	ModuleId       uuid.UUID        `json:"moduleId"`
+	AttributeIdPk  uuid.UUID        `json:"attributeIdPk"`  // read only, ID of PK attribute
+	Name           string           `json:"name"`           // unique (within module) relation name
+	Comment        pgtype.Text      `json:"comment"`        // author comment
+	Encryption     bool             `json:"encryption"`     // relation supports encrypted attribute values
+	RetentionCount pgtype.Int4      `json:"retentionCount"` // minimum number of retained change events
+	RetentionDays  pgtype.Int4      `json:"retentionDays"`  // minimum age of retained change events
+	Attributes     []Attribute      `json:"attributes"`     // read only, all relation attributes
+	Indexes        []PgIndex        `json:"indexes"`        // read only, all relation indexes
+	Policies       []RelationPolicy `json:"policies"`       // read only, all relation policies
+	Presets        []Preset         `json:"presets"`        // read only, all relation presets
+
+	// legacy
+	Triggers []PgTrigger `json:"triggers"` // moved to module pgTriggers
+}
+type RelationPolicy struct {
+	RoleId           uuid.UUID     `json:"roleId"`
+	PgFunctionIdExcl uuid.NullUUID `json:"pgFunctionIdExcl"`
+	PgFunctionIdIncl uuid.NullUUID `json:"pgFunctionIdIncl"`
+	ActionDelete     bool          `json:"actionDelete"`
+	ActionSelect     bool          `json:"actionSelect"`
+	ActionUpdate     bool          `json:"actionUpdate"`
 }
 type SearchBar struct {
 	Id       uuid.UUID   `json:"id"`
@@ -634,6 +641,14 @@ type SearchBar struct {
 	Query    Query       `json:"query"`
 	OpenForm OpenForm    `json:"openForm"`
 	Captions CaptionMap  `json:"captions"`
+}
+type Tab struct {
+	Id             uuid.UUID  `json:"id"`
+	Position       int        `json:"position"`
+	ContentCounter bool       `json:"contentCounter"` // tab shows counter of its child field values (list rows, calendar entries, file counts)
+	State          string     `json:"state"`          // tab default state (default, hidden)
+	Fields         []any      `json:"fields"`         // fields assigned to tab
+	Captions       CaptionMap `json:"captions"`
 }
 type Variable struct {
 	Id         uuid.UUID   `json:"id"`
@@ -654,11 +669,6 @@ type Widget struct {
 	Collection CollectionConsumer `json:"collection"` // collection to display
 	Captions   CaptionMap         `json:"captions"`
 }
-type Deletion struct {
-	Id     uuid.UUID `json:"id"`
-	Entity string    `json:"entity"`
-}
-type CaptionMap map[string]map[string]string // content->language_code->value
 
 // custom marshallers
 // use local type to avoid marshal loop (has same fields but none of the original methods)

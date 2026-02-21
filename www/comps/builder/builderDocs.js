@@ -34,7 +34,6 @@ export default {
 						<span>{{ a.name }}</span>
 					</div>
 				</router-link>
-
 			</div>
 		</div>
 	</div>`,
@@ -49,11 +48,11 @@ export default {
 		};
 	},
 	computed:{
-		module:(s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		
 		// stores
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.doc,
-		capGen:     (s) => s.$store.getters.captions.generic
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
+		capApp:     s => s.$store.getters.captions.builder.doc,
+		capGen:     s => s.$store.getters.captions.generic
 	}
 };

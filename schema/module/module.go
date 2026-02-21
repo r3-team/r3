@@ -56,9 +56,9 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, error) {
 
 	rows, err := tx.Query(ctx, `
-		SELECT id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
-			js_function_id_on_login, pg_function_id_login_sync, name, name_pwa, name_pwa_short,
-			color1, position, language_main, release_build, release_build_app, release_date,
+		SELECT id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2, js_function_id_on_login,
+			pg_function_id_login_sync, name, name_pwa, name_pwa_short, color1, position, 
+			language_main, release_build, release_build_app, release_date, history_categories,
 			ARRAY(
 				SELECT module_id_on
 				FROM app.module_depends
@@ -90,8 +90,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, er
 		var m types.Module
 		if err := rows.Scan(&m.Id, &m.ParentId, &m.FormId, &m.IconId, &m.IconIdPwa1, &m.IconIdPwa2,
 			&m.JsFunctionIdOnLogin, &m.PgFunctionIdLoginSync, &m.Name, &m.NamePwa, &m.NamePwaShort,
-			&m.Color1, &m.Position, &m.LanguageMain, &m.ReleaseBuild, &m.ReleaseBuildApp,
-			&m.ReleaseDate, &m.DependsOn, &m.ArticleIdsHelp, &m.Languages); err != nil {
+			&m.Color1, &m.Position, &m.LanguageMain, &m.ReleaseBuild, &m.ReleaseBuildApp, &m.ReleaseDate,
+			&m.HistoryCategories, &m.DependsOn, &m.ArticleIdsHelp, &m.Languages); err != nil {
 
 			return nil, err
 		}
@@ -99,10 +99,14 @@ func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, er
 	}
 	rows.Close()
 
-	// get start forms & captions
+	// get sub entities
 	for i, mod := range modules {
 
 		mod.StartForms, err = getStartForms_tx(ctx, tx, mod.Id)
+		if err != nil {
+			return nil, err
+		}
+		mod.History, err = getHistory_tx(ctx, tx, mod.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -154,12 +158,12 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 				icon_id_pwa1 = $4, icon_id_pwa2 = $5, js_function_id_on_login = $6,
 				pg_function_id_login_sync = $7, name = $8, name_pwa = $9, name_pwa_short = $10,
 				color1 = $11, position = $12, language_main = $13, release_build = $14,
-				release_build_app = $15, release_date = $16
-			WHERE id = $17
+				release_build_app = $15, release_date = $16, history_categories = $17
+			WHERE id = $18
 		`, mod.ParentId, mod.FormId, mod.IconId, mod.IconIdPwa1, mod.IconIdPwa2,
 			mod.JsFunctionIdOnLogin, mod.PgFunctionIdLoginSync, mod.Name, mod.NamePwa,
 			mod.NamePwaShort, mod.Color1, mod.Position, mod.LanguageMain, mod.ReleaseBuild,
-			mod.ReleaseBuildApp, mod.ReleaseDate, mod.Id); err != nil {
+			mod.ReleaseBuildApp, mod.ReleaseDate, mod.HistoryCategories, mod.Id); err != nil {
 
 			return mod.Id, err
 		}
@@ -186,13 +190,13 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 				id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
 				js_function_id_on_login, pg_function_id_login_sync, name, name_pwa,
 				name_pwa_short, color1, position, language_main, release_build,
-				release_build_app, release_date
+				release_build_app, release_date, history_categories
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
 		`, mod.Id, mod.ParentId, mod.FormId, mod.IconId, mod.IconIdPwa1, mod.IconIdPwa2,
 			mod.JsFunctionIdOnLogin, mod.PgFunctionIdLoginSync, mod.Name, mod.NamePwa,
-			mod.NamePwaShort, mod.Color1, mod.Position, mod.LanguageMain,
-			mod.ReleaseBuild, mod.ReleaseBuildApp, mod.ReleaseDate); err != nil {
+			mod.NamePwaShort, mod.Color1, mod.Position, mod.LanguageMain, mod.ReleaseBuild,
+			mod.ReleaseBuildApp, mod.ReleaseDate, mod.HistoryCategories); err != nil {
 
 			return mod.Id, err
 		}
@@ -313,8 +317,11 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 		}
 	}
 
-	// set help articles
+	// set sub entities
 	if err := article.Assign_tx(ctx, tx, schema.DbModule, mod.Id, mod.ArticleIdsHelp); err != nil {
+		return mod.Id, err
+	}
+	if err := setHistory_tx(ctx, tx, mod.Id, mod.History); err != nil {
 		return mod.Id, err
 	}
 
@@ -327,9 +334,31 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 	return mod.Id, caption.Set_tx(ctx, tx, mod.Id, mod.Captions)
 }
 
+func getDependsOn_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
+
+	rows, err := tx.Query(ctx, `
+		SELECT module_id_on
+		FROM app.module_depends
+		WHERE module_id = $1
+	`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	moduleIdsDependsOn := make([]uuid.UUID, 0)
+	for rows.Next() {
+		var moduleIdDependsOn uuid.UUID
+		if err := rows.Scan(&moduleIdDependsOn); err != nil {
+			return nil, err
+		}
+		moduleIdsDependsOn = append(moduleIdsDependsOn, moduleIdDependsOn)
+	}
+	return moduleIdsDependsOn, nil
+}
+
 func getStartForms_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) ([]types.ModuleStartForm, error) {
 
-	startForms := make([]types.ModuleStartForm, 0)
 	rows, err := tx.Query(ctx, `
 		SELECT role_id, form_id
 		FROM app.module_start_form
@@ -337,39 +366,17 @@ func getStartForms_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) ([]types.Mod
 		ORDER BY position ASC
 	`, id)
 	if err != nil {
-		return startForms, err
+		return nil, err
 	}
 	defer rows.Close()
 
+	startForms := make([]types.ModuleStartForm, 0)
 	for rows.Next() {
 		var sf types.ModuleStartForm
 		if err := rows.Scan(&sf.RoleId, &sf.FormId); err != nil {
-			return startForms, err
+			return nil, err
 		}
 		startForms = append(startForms, sf)
 	}
 	return startForms, nil
-}
-
-func getDependsOn_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
-
-	moduleIdsDependsOn := make([]uuid.UUID, 0)
-	rows, err := tx.Query(ctx, `
-		SELECT module_id_on
-		FROM app.module_depends
-		WHERE module_id = $1
-	`, id)
-	if err != nil {
-		return moduleIdsDependsOn, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var moduleIdDependsOn uuid.UUID
-		if err := rows.Scan(&moduleIdDependsOn); err != nil {
-			return moduleIdsDependsOn, err
-		}
-		moduleIdsDependsOn = append(moduleIdsDependsOn, moduleIdDependsOn)
-	}
-	return moduleIdsDependsOn, nil
 }
