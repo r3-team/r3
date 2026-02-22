@@ -159,7 +159,7 @@ export default {
 						<span>{{ capGen.widgets }}</span>
 					</router-link>
 					
-					<router-link class="entry clickable" :to="'/builder/history/'+module.id">
+					<router-link class="entry clickable" :to="'/builder/releases/'+module.id">
 						<img src="images/versionHistory.png" />
 						<span>{{ capGen.versionHistory }}</span>
 					</router-link>

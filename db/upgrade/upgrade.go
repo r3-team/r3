@@ -767,26 +767,45 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.repo_module      ADD CONSTRAINT repo_module_pkey      PRIMARY KEY (repo_id,module_id_wofk);
 			ALTER TABLE instance.repo_module_meta ADD CONSTRAINT repo_module_meta_pkey PRIMARY KEY (repo_id,module_id_wofk,language_code);
 
-			-- release build history
-			ALTER TABLE app.module ADD   COLUMN history_categories TEXT[] NOT NULL DEFAULT '{Added,Improved,Fixed}';
-			ALTER TABLE app.module ALTER COLUMN history_categories DROP DEFAULT;
+			-- modules releases
+			ALTER TABLE app.module ADD   COLUMN release_log_categories TEXT[] NOT NULL DEFAULT '{Added,Improved,Fixed}';
+			ALTER TABLE app.module ALTER COLUMN release_log_categories DROP DEFAULT;
 
-			CREATE TABLE IF NOT EXISTS app.history (
-				id uuid NOT NULL,
+			CREATE TABLE IF NOT EXISTS app.release (
 				module_id uuid NOT NULL,
-				category smallint NOT NULL,
-				content text COLLATE pg_catalog."default" NOT NULL,
-				"position" smallint NOT NULL,
-				release_build integer NOT NULL,
-				CONSTRAINT history_pkey PRIMARY KEY (id),
-				CONSTRAINT history_module_id_fkey FOREIGN KEY (module_id)
+				build integer NOT NULL,
+				build_app integer NOT NULL,
+				date_created bigint NOT NULL,
+				CONSTRAINT release_pkey PRIMARY KEY (module_id,build),
+				CONSTRAINT release_module_id_fkey FOREIGN KEY (module_id)
 					REFERENCES app.module (id) MATCH SIMPLE
 					ON UPDATE CASCADE
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
-			CREATE INDEX IF NOT EXISTS fki_history_module_id_fkey ON app.history USING btree (module_id  ASC NULLS LAST);
-			CREATE INDEX IF NOT EXISTS ind_history_position       ON app.history USING btree ("position" ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_release_module_id_fkey ON app.release USING btree (module_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS ind_release_build          ON app.release USING btree (build     ASC NULLS LAST);
+
+			CREATE TABLE IF NOT EXISTS app.release_log (
+				module_id uuid NOT NULL,
+				build integer NOT NULL,
+				"position" smallint NOT NULL,
+				category smallint NOT NULL,
+				content text COLLATE pg_catalog."default" NOT NULL,
+				CONSTRAINT release_log_pkey PRIMARY KEY (module_id, build, position),
+				CONSTRAINT release_log_release_fkey FOREIGN KEY (module_id, build)
+					REFERENCES app.release (module_id, build) MATCH FULL
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_release_log_module_id_fkey ON app.release_log USING btree (module_id        ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_release_log_release_fkey   ON app.release_log USING btree (module_id, build ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS ind_release_log_position       ON app.release_log USING btree ("position"       ASC NULLS LAST);
+
+			INSERT INTO app.release (module_id, build, build_app, date_created)
+			SELECT id, 0, 0, 0
+			FROM app.module;
 		`)
 		return "3.12", err
 	},

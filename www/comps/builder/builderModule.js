@@ -612,12 +612,12 @@ export default {
 					releaseBuild:this.releaseBuild,
 					releaseBuildApp:this.releaseBuildApp,
 					releaseDate:this.releaseDate,
+					releaseLogCategories:this.module.releaseLogCategories,
+					releases:this.module.releases,
 					dependsOn:this.dependsOn,
 					startForms:this.startForms,
 					languages:this.languages,
 					articleIdsHelp:this.module.articleIdsHelp,
-					history:this.module.history,
-					historyCategories:this.module.historyCategories,
 					captions:this.captions
 				}),
 				ws.prepare('schema','check',{moduleId:this.id})

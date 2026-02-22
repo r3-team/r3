@@ -469,13 +469,13 @@
 	flex-flow:column nowrap;
 }
 
-/* history */
-.builder-history-release{
+/* releases */
+.builder-release-logs{
 	display:flex;
 	flex-flow:column nowrap;
 	gap:6px;
 }
-.builder-history-release-entry{
+.builder-release-log{
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;

@@ -395,12 +395,6 @@ type FormStateEffect struct {
 	NewData      int32       `json:"newData"`      // defines data handling via number (CREATE=4, UPDATE=2, DELETE=1, NOTHING=0) for form or data fields (lists, calendars, kanban, etc.)
 	NewState     string      `json:"newState"`     // applied state (hidden, default, readonly, optional, required)
 }
-type History struct {
-	Id           uuid.UUID `json:"id"`
-	Category     int       `json:"category"`     // index of module history categories
-	Content      string    `json:"content"`      // content of log, simple text
-	ReleaseBuild int       `json:"releaseBuild"` // pinned version, 0 if not pinned to any module version yet
-}
 type Icon struct {
 	Id       uuid.UUID `json:"id"`
 	ModuleId uuid.UUID `json:"moduleId"`
@@ -464,30 +458,30 @@ type Module struct {
 	ReleaseDate           int64       `json:"releaseDate"`           // date of last release
 
 	// sub entities
-	Apis              []Api             `json:"apis"`
-	Articles          []Article         `json:"articles"`
-	ArticleIdsHelp    []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
-	Captions          CaptionMap        `json:"captions"`
-	ClientEvents      []ClientEvent     `json:"clientEvents"`
-	Collections       []Collection      `json:"collections"`
-	Docs              []Doc             `json:"docs"`
-	DependsOn         []uuid.UUID       `json:"dependsOn"` // modules that this module is dependent on
-	Forms             []Form            `json:"forms"`
-	History           []History         `json:"history"`
-	HistoryCategories []string          `json:"historyCategories"` // ordered list of history categories
-	Icons             []Icon            `json:"icons"`
-	JsFunctions       []JsFunction      `json:"jsFunctions"`
-	Languages         []string          `json:"languages"` // language codes that this module supports
-	LoginForms        []LoginForm       `json:"loginForms"`
-	MenuTabs          []MenuTab         `json:"menuTabs"`
-	PgFunctions       []PgFunction      `json:"pgFunctions"`
-	PgTriggers        []PgTrigger       `json:"pgTriggers"`
-	Relations         []Relation        `json:"relations"`
-	Roles             []Role            `json:"roles"`
-	SearchBars        []SearchBar       `json:"searchBars"`
-	StartForms        []ModuleStartForm `json:"startForms"` // start forms, assigned via role membership
-	Variables         []Variable        `json:"variables"`
-	Widgets           []Widget          `json:"widgets"`
+	Apis                 []Api             `json:"apis"`
+	Articles             []Article         `json:"articles"`
+	ArticleIdsHelp       []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
+	Captions             CaptionMap        `json:"captions"`
+	ClientEvents         []ClientEvent     `json:"clientEvents"`
+	Collections          []Collection      `json:"collections"`
+	Docs                 []Doc             `json:"docs"`
+	DependsOn            []uuid.UUID       `json:"dependsOn"` // modules that this module is dependent on
+	Forms                []Form            `json:"forms"`
+	Icons                []Icon            `json:"icons"`
+	JsFunctions          []JsFunction      `json:"jsFunctions"`
+	Languages            []string          `json:"languages"` // language codes that this module supports
+	LoginForms           []LoginForm       `json:"loginForms"`
+	MenuTabs             []MenuTab         `json:"menuTabs"`
+	PgFunctions          []PgFunction      `json:"pgFunctions"`
+	PgTriggers           []PgTrigger       `json:"pgTriggers"`
+	Relations            []Relation        `json:"relations"`
+	Releases             []Release         `json:"releases"`
+	ReleaseLogCategories []string          `json:"releaseLogCategories"` // ordered list of release log categories
+	Roles                []Role            `json:"roles"`
+	SearchBars           []SearchBar       `json:"searchBars"`
+	StartForms           []ModuleStartForm `json:"startForms"` // start forms, assigned via role membership
+	Variables            []Variable        `json:"variables"`
+	Widgets              []Widget          `json:"widgets"`
 
 	// legacy
 	Menus []Menu `json:"menus"`
@@ -631,6 +625,16 @@ type RelationPolicy struct {
 	ActionDelete     bool          `json:"actionDelete"`
 	ActionSelect     bool          `json:"actionSelect"`
 	ActionUpdate     bool          `json:"actionUpdate"`
+}
+type Release struct {
+	Build       int          `json:"build"`
+	BuildApp    int          `json:"buildApp"`
+	DateCreated int64        `json:"dateCreated"`
+	Logs        []ReleaseLog `json:"logs"`
+}
+type ReleaseLog struct {
+	Category int    `json:"category"` // index of module release log categories
+	Content  string `json:"content"`  // content of log, simple text
 }
 type SearchBar struct {
 	Id       uuid.UUID   `json:"id"`

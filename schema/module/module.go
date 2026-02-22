@@ -58,7 +58,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, er
 	rows, err := tx.Query(ctx, `
 		SELECT id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2, js_function_id_on_login,
 			pg_function_id_login_sync, name, name_pwa, name_pwa_short, color1, position, 
-			language_main, release_build, release_build_app, release_date, history_categories,
+			language_main, release_build, release_build_app, release_date, release_log_categories,
 			ARRAY(
 				SELECT module_id_on
 				FROM app.module_depends
@@ -91,7 +91,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, er
 		if err := rows.Scan(&m.Id, &m.ParentId, &m.FormId, &m.IconId, &m.IconIdPwa1, &m.IconIdPwa2,
 			&m.JsFunctionIdOnLogin, &m.PgFunctionIdLoginSync, &m.Name, &m.NamePwa, &m.NamePwaShort,
 			&m.Color1, &m.Position, &m.LanguageMain, &m.ReleaseBuild, &m.ReleaseBuildApp, &m.ReleaseDate,
-			&m.HistoryCategories, &m.DependsOn, &m.ArticleIdsHelp, &m.Languages); err != nil {
+			&m.ReleaseLogCategories, &m.DependsOn, &m.ArticleIdsHelp, &m.Languages); err != nil {
 
 			return nil, err
 		}
@@ -106,7 +106,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, ids []uuid.UUID) ([]types.Module, er
 		if err != nil {
 			return nil, err
 		}
-		mod.History, err = getHistory_tx(ctx, tx, mod.Id)
+		mod.Releases, err = getReleases_tx(ctx, tx, mod.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -128,6 +128,9 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 	if err := check.DbIdentifier(mod.Name); err != nil {
 		return mod.Id, err
 	}
+
+	// fix imports < 3.12: Missing zero release
+	mod.Releases = compatible.FixMissingZeroRelease(mod.Releases)
 
 	if len(mod.LanguageMain) != 5 {
 		return mod.Id, errors.New("language code must have 5 characters")
@@ -158,12 +161,12 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 				icon_id_pwa1 = $4, icon_id_pwa2 = $5, js_function_id_on_login = $6,
 				pg_function_id_login_sync = $7, name = $8, name_pwa = $9, name_pwa_short = $10,
 				color1 = $11, position = $12, language_main = $13, release_build = $14,
-				release_build_app = $15, release_date = $16, history_categories = $17
+				release_build_app = $15, release_date = $16, release_log_categories = $17
 			WHERE id = $18
 		`, mod.ParentId, mod.FormId, mod.IconId, mod.IconIdPwa1, mod.IconIdPwa2,
 			mod.JsFunctionIdOnLogin, mod.PgFunctionIdLoginSync, mod.Name, mod.NamePwa,
 			mod.NamePwaShort, mod.Color1, mod.Position, mod.LanguageMain, mod.ReleaseBuild,
-			mod.ReleaseBuildApp, mod.ReleaseDate, mod.HistoryCategories, mod.Id); err != nil {
+			mod.ReleaseBuildApp, mod.ReleaseDate, mod.ReleaseLogCategories, mod.Id); err != nil {
 
 			return mod.Id, err
 		}
@@ -190,13 +193,13 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 				id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
 				js_function_id_on_login, pg_function_id_login_sync, name, name_pwa,
 				name_pwa_short, color1, position, language_main, release_build,
-				release_build_app, release_date, history_categories
+				release_build_app, release_date, release_log_categories
 			)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
 		`, mod.Id, mod.ParentId, mod.FormId, mod.IconId, mod.IconIdPwa1, mod.IconIdPwa2,
 			mod.JsFunctionIdOnLogin, mod.PgFunctionIdLoginSync, mod.Name, mod.NamePwa,
 			mod.NamePwaShort, mod.Color1, mod.Position, mod.LanguageMain, mod.ReleaseBuild,
-			mod.ReleaseBuildApp, mod.ReleaseDate, mod.HistoryCategories); err != nil {
+			mod.ReleaseBuildApp, mod.ReleaseDate, mod.ReleaseLogCategories); err != nil {
 
 			return mod.Id, err
 		}
@@ -321,7 +324,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 	if err := article.Assign_tx(ctx, tx, schema.DbModule, mod.Id, mod.ArticleIdsHelp); err != nil {
 		return mod.Id, err
 	}
-	if err := setHistory_tx(ctx, tx, mod.Id, mod.History); err != nil {
+	if err := setReleases_tx(ctx, tx, mod.Id, mod.Releases); err != nil {
 		return mod.Id, err
 	}
 

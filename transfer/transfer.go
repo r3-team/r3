@@ -66,22 +66,39 @@ func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
 		return err
 	}
 
-	// pin new release history entries to this new version
-	if _, err := tx.Exec(ctx, `
-		UPDATE app.history
-		SET release_build = $1
-		WHERE module_id     = $2
-		AND   release_build = 0
-	`, file.Content.Module.ReleaseBuild, moduleId); err != nil {
+	// if release logs exist for zero build (ie. current version), create a new release
+	var releaseZeroLogCnt int = 0
+	if err := tx.QueryRow(ctx, `
+		SELECT COUNT(*)
+		FROM app.release_log
+		WHERE module_id = $1
+		AND   build     = 0
+	`, moduleId).Scan(&releaseZeroLogCnt); err != nil {
 		return err
+	}
+
+	if releaseZeroLogCnt != 0 {
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO app.release (module_id, build, build_app, date_created)
+			VALUES ($1,$2,$3,$4)
+		`, moduleId, file.Content.Module.ReleaseBuild, file.Content.Module.ReleaseBuildApp, file.Content.Module.ReleaseDate); err != nil {
+			return err
+		}
+		if _, err := tx.Exec(ctx, `
+			UPDATE app.release_log
+			SET build = $1
+			WHERE module_id = $2
+			AND   build     = 0
+		`, file.Content.Module.ReleaseBuild, moduleId); err != nil {
+			return err
+		}
 	}
 
 	_, err = tx.Exec(ctx, `
 		UPDATE app.module
 		SET release_build_app = $1, release_build = $2,	release_date = $3
 		WHERE id = $4
-	`, file.Content.Module.ReleaseBuildApp, file.Content.Module.ReleaseBuild,
-		file.Content.Module.ReleaseDate, moduleId)
+	`, file.Content.Module.ReleaseBuildApp, file.Content.Module.ReleaseBuild, file.Content.Module.ReleaseDate, moduleId)
 
 	return err
 }
