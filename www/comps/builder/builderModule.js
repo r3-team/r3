@@ -5,6 +5,7 @@ import MyBuilderSelectForm     from './builderSelectForm.js';
 import srcBase64Icon           from '../shared/image.js';
 import {getDependentModules}   from '../shared/builder.js';
 import {getTemplatePgFunction} from '../shared/builderTemplate.js';
+import {deepIsEqual}           from '../shared/generic.js';
 import {getUnixFormat}         from '../shared/time.js';
 import {MyModuleSelect}        from '../input.js';
 import MyInputColorWrap        from '../inputColorWrap.js';
@@ -16,7 +17,7 @@ import {
 const MyBuilderModuleStartForm = {
 	name:'my-builder-module-start-form',
 	components:{ MyBuilderSelectForm },
-	template:`<div class="item">
+	template:`<div class="row gap centered">
 		<img v-if="!readonly" class="dragAnchor" src="images/drag.png" />
 		<select v-model="roleId" :disabled="readonly">
 			<option :value="null">[{{ capGen.role }}]</option>
@@ -54,8 +55,8 @@ const MyBuilderModuleStartForm = {
 		},
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.builder.module,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:s => s.$store.getters.captions.builder.module,
+		capGen:s => s.$store.getters.captions.generic
 	},
 	methods:{
 		update(name,value) {
@@ -82,25 +83,25 @@ export default {
 		<div class="top">
 			<div class="area nowrap">
 				<img class="icon" src="images/module.png" />
-				<h1 class="title">{{ capApp.title.replace('{NAME}',this.name) }}</h1>
+				<h1 class="title">{{ capApp.title.replace('{NAME}',module.name) }}</h1>
 			</div>
 		</div>
 		<div class="top lower">
 			<div class="area nowrap">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges && !readonly"
+					:active="isChanged && !readonly"
 					:caption="capGen.button.save"
 				/>
 				<my-button image="refresh.png"
-					@trigger="reset"
-					:active="hasChanges"
+					@trigger="reset(true)"
+					:active="isChanged"
 					:caption="capGen.button.refresh"
 				/>
 			</div>
 			<div class="area nowrap">
 				<my-button image="visible1.png"
-					@trigger="copyValueDialog(module.name,module.id,module.id)"
+					@trigger="copyValueDialog(module.name,id,id)"
 					:caption="capGen.id"
 				/>
 			</div>
@@ -111,17 +112,17 @@ export default {
 				<tbody>
 					<tr>
 						<td>{{ capGen.name }}</td>
-						<td><input v-model="name" :disabled="readonly" :placeholder="capApp.nameHolder" /></td>
+						<td><input v-model="module.name" :disabled="readonly" :placeholder="capApp.nameHolder" /></td>
 						<td>{{ capApp.nameHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capGen.title }}</td>
 						<td>
 							<my-builder-caption class="title"
-								v-model="captions.moduleTitle"
+								v-model="module.captions.moduleTitle"
 								:contentName="capGen.title"
 								:language="builderLanguage"
-								:readonly="readonly"
+								:readonly
 							/>
 						</td>
 						<td>{{ capApp.titleHint }}</td>
@@ -129,9 +130,9 @@ export default {
 					<tr>
 						<td>{{ capApp.dependsOn }}</td>
 						<td>
-							<div class="item-list">
+							<div class="builder-module-depends-list">
 								<my-button image="delete.png"
-									v-for="m in modules.filter(v => v.id !== module.id && dependsOn.includes(v.id))"
+									v-for="m in modules.filter(v => v.id !== id && module.dependsOn.includes(v.id))"
 									@trigger="toggleDependsOn(m.id,false)"
 									:active="!readonly"
 									:caption="m.name"
@@ -141,7 +142,7 @@ export default {
 							<my-module-select
 								v-if="!readonly"
 								@update:modelValue="toggleDependsOn($event,true)"
-								:moduleIdsFilter="dependsOn.concat([id])"
+								:moduleIdsFilter="module.dependsOn.concat([id])"
 								:modelValue="moduleIdDependsOnInput"
 								:preSelectOne="false"
 							/>
@@ -152,26 +153,26 @@ export default {
 						<td>{{ capGen.icon }}</td>
 						<td>
 							<my-builder-icon-input
-								@input="iconId = $event"
-								:icon-id-selected="iconId"
-								:module="module"
-								:readonly="readonly"
+								@input="module.iconId = $event"
+								:icon-id-selected="module.iconId"
+								:module
+								:readonly
 							/>
 						</td>
 						<td>{{ capApp.iconHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.color }}</td>
-						<td><my-input-color-wrap v-model="color1" :allowNull="true" :readonly /></td>
+						<td><my-input-color-wrap v-model="module.color1" :allowNull="true" :readonly /></td>
 						<td>{{ capApp.colorHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.parent }}</td>
 						<td>
-							<select v-model="parentId" :disabled="readonly">
+							<select v-model="module.parentId" :disabled="readonly">
 								<option :value="null">-</option>
 								<option
-									v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.parentId === null)"
+									v-for="mod in getDependentModules(module).filter(v => v.id !== id && v.parentId === null)"
 									:value="mod.id"
 								>
 									{{ mod.name }}
@@ -182,14 +183,14 @@ export default {
 					</tr>
 					<tr>
 						<td>{{ capApp.position }}</td>
-						<td><input class="short" v-model.number="position" :disabled="readonly" /></td>
+						<td><input class="short" v-model.number="module.position" :disabled="readonly" /></td>
 						<td>{{ capApp.positionHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.startFormDefault }}</td>
 						<td>
 							<my-builder-select-form
-								v-model="formId"
+								v-model="module.formId"
 								:allowAllForms="true"
 								:module
 								:readonly
@@ -200,26 +201,29 @@ export default {
 					<tr>
 						<td>{{ capApp.startFormByRole }}</td>
 						<td>
-							<draggable class="item-list" handle=".dragAnchor" group="start-forms" itemKey="id" animation="100"
-								:fallbackOnBody="true"
-								:list="startForms"
-							>
-								<template #item="{element,index}">
-									<my-builder-module-start-form
-										@remove="startForms.splice(index,1)"
-										@update:modelValue="startForms[index] = $event"
-										:modelValue="element"
-										:module
-										:readonly
+							<div class="column gap">
+								<draggable class="column gap" handle=".dragAnchor" group="start-forms" itemKey="id" animation="100"
+									:fallbackOnBody="true"
+									:list="module.startForms"
+								>
+									<template #item="{element,index}">
+										<my-builder-module-start-form
+											@remove="module.startForms.splice(index,1)"
+											@update:modelValue="module.startForms[index] = $event"
+											:modelValue="element"
+											:module
+											:readonly
+										/>
+									</template>
+								</draggable>
+								<div>
+									<my-button image="add.png"
+										@trigger="addStartForm"
+										:active="!readonly"
+										:caption="capGen.button.add"
 									/>
-								</template>
-							</draggable>
-								
-							<my-button image="add.png"
-								@trigger="addStartForm"
-								:active="!readonly"
-								:caption="capGen.button.add"
-							/>
+								</div>
+							</div>
 						</td>
 						<td>{{ capApp.startFormByRoleHint }}</td>
 					</tr>
@@ -227,35 +231,36 @@ export default {
 						<td>{{ capApp.languages }}</td>
 						<td>
 							<!-- language entry and header title -->
-							<div class="item-list">
-								<div class="item" v-for="(l,i) in languages">
+							<div class="column gap">
+								<div class="row gap centered" v-for="(l,i) in module.languages">
 									<input type="text"
-										v-model="languages[i]"
+										v-model="module.languages[i]"
 										:disabled="readonly"
 										:placeholder="capApp.languageCodeHint"
 									/>
 									<my-button image="delete.png"
-										@trigger="languages.splice(i,1)"
+										@trigger="module.languages.splice(i,1)"
 										:active="!readonly"
 										:cancel="true"
 									/>
 								</div>
+								<div>
+									<my-button image="add.png"
+										@trigger="module.languages.push('')"
+										:active="!readonly"
+										:caption="capGen.button.add"
+									/>
+								</div>
 							</div>
-							
-							<my-button image="add.png"
-								@trigger="languages.push('')"
-								:active="!readonly"
-								:caption="capGen.button.add"
-							/>
 						</td>
 						<td>{{ capApp.languagesHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.languageMain }}</td>
 						<td>
-							<select v-model="languageMain" :disabled="readonly">
+							<select v-model="module.languageMain" :disabled="readonly">
 								<option
-									v-for="l in languages"
+									v-for="l in module.languages"
 									:value="l"
 								>{{ l }}</option>
 							</select>
@@ -272,7 +277,7 @@ export default {
 						<td>
 							<input maxlength="60"
 								:disabled="readonly"
-								:value="namePwa === null ? '' : namePwa"
+								:value="module.namePwa === null ? '' : module.namePwa"
 								@input="applyNullString('namePwa',$event.target.value)"
 							/>
 						</td>
@@ -283,7 +288,7 @@ export default {
 						<td>
 							<input maxlength="12"
 								:disabled="readonly"
-								:value="namePwaShort === null ? '' : namePwaShort"
+								:value="module.namePwaShort === null ? '' : module.namePwaShort"
 								@input="applyNullString('namePwaShort',$event.target.value)"
 							/>
 						</td>
@@ -295,18 +300,18 @@ export default {
 							<div class="row gap centered">
 								<span>192x192 px</span>
 								<my-builder-icon-input
-									@input="iconIdPwa1 = $event"
-									:icon-id-selected="iconIdPwa1"
-									:module="module"
-									:readonly="readonly"
+									@input="module.iconIdPwa1 = $event"
+									:icon-id-selected="module.iconIdPwa1"
+									:module
+									:readonly
 								/>
 								<span></span>
 								<span>512x512 px</span>
 								<my-builder-icon-input
-									@input="iconIdPwa2 = $event"
-									:icon-id-selected="iconIdPwa2"
-									:module="module"
-									:readonly="readonly"
+									@input="module.iconIdPwa2 = $event"
+									:icon-id-selected="module.iconIdPwa2"
+									:module
+									:readonly
 								/>
 							</div>
 						</td>
@@ -323,7 +328,7 @@ export default {
 								<select
 									@input="applyNullString('jsFunctionIdOnLogin',$event.target.value)"
 									:disabled="readonly"
-									:value="jsFunctionIdOnLogin === null ? '' : jsFunctionIdOnLogin"
+									:value="module.jsFunctionIdOnLogin === null ? '' : module.jsFunctionIdOnLogin"
 								>
 									<option value="">-</option>
 									<option v-for="fnc in module.jsFunctions.filter(v => v.formId === null)" :value="fnc.id">
@@ -331,8 +336,8 @@ export default {
 									</option>
 								</select>
 								<my-button image="open.png"
-									@trigger="$router.push('/builder/js-function/'+jsFunctionIdOnLogin)"
-									:active="jsFunctionIdOnLogin !== null"
+									@trigger="$router.push('/builder/js-function/'+module.jsFunctionIdOnLogin)"
+									:active="module.jsFunctionIdOnLogin !== null"
 									:captionTitle="capGen.button.open"
 								/>
 							</div>
@@ -347,7 +352,7 @@ export default {
 									<select
 										@input="applyNullString('pgFunctionIdLoginSync',$event.target.value)"
 										:disabled="readonly"
-										:value="pgFunctionIdLoginSync === null ? '' : pgFunctionIdLoginSync"
+										:value="module.pgFunctionIdLoginSync === null ? '' : module.pgFunctionIdLoginSync"
 									>
 										<option value="">-</option>
 										<option v-for="fnc in module.pgFunctions.filter(v => v.isLoginSync)" :value="fnc.id">
@@ -355,8 +360,8 @@ export default {
 										</option>
 									</select>
 									<my-button image="open.png"
-										@trigger="$router.push('/builder/pg-function/'+pgFunctionIdLoginSync)"
-										:active="pgFunctionIdLoginSync !== null"
+										@trigger="$router.push('/builder/pg-function/'+module.pgFunctionIdLoginSync)"
+										:active="module.pgFunctionIdLoginSync !== null"
 										:captionTitle="capGen.button.open"
 									/>
 								</div>
@@ -407,8 +412,8 @@ export default {
 										@newRecord="clientEventIdEdit = null"
 										:builderLanguage="builderLanguage"
 										:id="clientEventIdEdit"
-										:module="module"
-										:readonly="readonly"
+										:module
+										:readonly
 									/>
 								</div>
 							</div>
@@ -423,11 +428,11 @@ export default {
 					</tr>
 					<tr>
 						<td>{{ capGen.versionApp }}</td>
-						<td colspan="2"><input class="short" v-model="releaseBuild" disabled="disabled" /></td>
+						<td colspan="2"><input class="short" v-model="module.releaseBuild" disabled="disabled" /></td>
 					</tr>
 					<tr>
 						<td>{{ capGen.versionPlatform }}</td>
-						<td colspan="2"><input class="short" v-model="releaseBuildApp" disabled="disabled" /></td>
+						<td colspan="2"><input class="short" v-model="module.releaseBuildApp" disabled="disabled" /></td>
 					</tr>
 				</tbody>
 			</table>
@@ -446,30 +451,8 @@ export default {
 	},
 	data() {
 		return {
-			// inputs
-			color1:'217A4D',
-			formId:null,
-			iconId:null,
-			iconIdPwa1:null,
-			iconIdPwa2:null,
-			jsFunctionIdOnLogin:null,
-			pgFunctionIdLoginSync:null,
-			name:'',
-			namePwa:null,
-			namePwaShort:null,
-			parentId:null,
-			position:0,
-			releaseBuild:0,
-			releaseBuildApp:0,
-			releaseDate:0,
-			languageMain:'en_us',
-			languages:['en_us'],
-			dependsOn:[],
-			startForms:[],
-			articleIdsHelp:[],
-			captions:{
-				moduleTitle:{}
-			},
+			module:false,  // module being edited in this component
+			moduleCopy:{}, // copy of module from schema when component last reset
 			
 			// states
 			clientEventIdEdit:false,
@@ -480,102 +463,63 @@ export default {
 		};
 	},
 	computed:{
-		hasChanges:(s) =>
-			s.parentId                 !== s.module.parentId
-			|| s.formId                !== s.module.formId
-			|| s.iconId                !== s.module.iconId
-			|| s.iconIdPwa1            !== s.module.iconIdPwa1
-			|| s.iconIdPwa2            !== s.module.iconIdPwa2
-			|| s.jsFunctionIdOnLogin   !== s.module.jsFunctionIdOnLogin
-			|| s.pgFunctionIdLoginSync !== s.module.pgFunctionIdLoginSync
-			|| s.name                  !== s.module.name
-			|| s.namePwa               !== s.module.namePwa
-			|| s.namePwaShort          !== s.module.namePwaShort
-			|| s.color1                !== s.module.color1
-			|| s.position              !== s.module.position
-			|| s.languageMain          !== s.module.languageMain
-			|| JSON.stringify(s.dependsOn)  !== JSON.stringify(s.module.dependsOn)
-			|| JSON.stringify(s.startForms) !== JSON.stringify(s.module.startForms)
-			|| JSON.stringify(s.languages)  !== JSON.stringify(s.module.languages)
-			|| JSON.stringify(s.captions)   !== JSON.stringify(s.module.captions),
-		
 		// simple
-		displayReleaseDate:(s) => s.releaseDate === 0 ? '-' : s.getUnixFormat(s.releaseDate,'Y-m-d H:i'),
-		module:            (s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
+		displayReleaseDate:s => s.module.releaseDate === 0 ? '-' : s.getUnixFormat(s.module.releaseDate,'Y-m-d H:i'),
+		isChanged:         s => !s.deepIsEqual(s.module,s.moduleSchema),
+		moduleSchema:      s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		
 		// stores
-		modules:           (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
-		relationIdMap:     (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:    (s) => s.$store.getters['schema/attributeIdMap'],
-		jsFunctionIdMap:   (s) => s.$store.getters['schema/jsFunctionIdMap'],
-		pgFunctionIdMap:   (s) => s.$store.getters['schema/pgFunctionIdMap'],
-		capApp:            (s) => s.$store.getters.captions.builder.module,
-		capAppClientEvent: (s) => s.$store.getters.captions.builder.clientEvent,
-		capGen:            (s) => s.$store.getters.captions.generic
+		attributeIdMap:   s => s.$store.getters['schema/attributeIdMap'],
+		jsFunctionIdMap:  s => s.$store.getters['schema/jsFunctionIdMap'],
+		modules:          s => s.$store.getters['schema/modules'],
+		moduleIdMap:      s => s.$store.getters['schema/moduleIdMap'],
+		pgFunctionIdMap:  s => s.$store.getters['schema/pgFunctionIdMap'],
+		relationIdMap:    s => s.$store.getters['schema/relationIdMap'],
+		capApp:           s => s.$store.getters.captions.builder.module,
+		capAppClientEvent:s => s.$store.getters.captions.builder.clientEvent,
+		capGen:           s => s.$store.getters.captions.generic
 	},
 	watch:{
-		module:{
-			handler() { this.reset(); },
+		moduleSchema:{
+			handler() { this.reset(false); },
 			immediate:true
 		}
 	},
 	methods:{
 		// externals
 		copyValueDialog,
+		deepIsEqual,
 		getDependentModules,
 		getRandomInt,
 		getTemplatePgFunction,
 		getUnixFormat,
 		srcBase64Icon,
 		
-		reset() {
-			if(!this.module) return;
-			
-			// values
-			this.parentId              = this.module.parentId;
-			this.formId                = this.module.formId;
-			this.iconId                = this.module.iconId;
-			this.iconIdPwa1            = this.module.iconIdPwa1;
-			this.iconIdPwa2            = this.module.iconIdPwa2;
-			this.jsFunctionIdOnLogin   = this.module.jsFunctionIdOnLogin;
-			this.pgFunctionIdLoginSync = this.module.pgFunctionIdLoginSync;
-			this.name                  = this.module.name;
-			this.namePwa               = this.module.namePwa;
-			this.namePwaShort          = this.module.namePwaShort;
-			this.color1                = this.module.color1;
-			this.position              = this.module.position;
-			this.languageMain          = this.module.languageMain;
-			this.releaseBuild          = this.module.releaseBuild;
-			this.releaseBuildApp       = this.module.releaseBuildApp;
-			this.releaseDate           = this.module.releaseDate;
-			this.dependsOn             = JSON.parse(JSON.stringify(this.module.dependsOn));
-			this.startForms            = JSON.parse(JSON.stringify(this.module.startForms));
-			this.languages             = JSON.parse(JSON.stringify(this.module.languages));
-			this.captions              = JSON.parse(JSON.stringify(this.module.captions));
+		reset(manuelReset) {
+			if(this.moduleSchema !== false && (manuelReset || !this.deepIsEqual(this.moduleCopy,this.moduleSchema))) {
+				this.module     = JSON.parse(JSON.stringify(this.moduleSchema));
+				this.moduleCopy = JSON.parse(JSON.stringify(this.moduleSchema));
+			}
 		},
 		
 		// actions
 		addStartForm() {
-			this.startForms.push({
-				position:this.startForms.length,
+			this.module.startForms.push({
+				position:this.module.startForms.length,
 				formId:null,
 				roleId:null
 			});
 		},
 		applyNullString(key,value) {
-			this[key] = value === '' ? null : value;
+			this.module[key] = value === '' ? null : value;
 		},
 		goBack() {
 			window.history.back();
 		},
 		toggleDependsOn(moduleId,state) {
-			let pos = this.dependsOn.indexOf(moduleId);
-			
-			if(pos === -1 && state)
-				this.dependsOn.push(moduleId);
-			else if(pos !== -1 && !state)
-				this.dependsOn.splice(pos,1);
+			const pos = this.module.dependsOn.indexOf(moduleId);
+			if     (pos === -1 && state)  this.module.dependsOn.push(moduleId);
+			else if(pos !== -1 && !state) this.module.dependsOn.splice(pos,1);
 		},
 
 		// presentation
@@ -591,39 +535,13 @@ export default {
 		
 		// backend calls
 		set() {
-			this.languages.sort(); // for change comparisons
-			
-			let requests = [
-				ws.prepare('module','set',{
-					id:this.id,
-					parentId:this.parentId,
-					formId:this.formId,
-					iconId:this.iconId,
-					iconIdPwa1:this.iconIdPwa1,
-					iconIdPwa2:this.iconIdPwa2,
-					jsFunctionIdOnLogin:this.jsFunctionIdOnLogin,
-					pgFunctionIdLoginSync:this.pgFunctionIdLoginSync,
-					name:this.name,
-					namePwa:this.namePwa,
-					namePwaShort:this.namePwaShort,
-					color1:this.color1,
-					position:this.position,
-					languageMain:this.languageMain,
-					releaseBuild:this.releaseBuild,
-					releaseBuildApp:this.releaseBuildApp,
-					releaseDate:this.releaseDate,
-					releaseLogCategories:this.module.releaseLogCategories,
-					releases:this.module.releases,
-					dependsOn:this.dependsOn,
-					startForms:this.startForms,
-					languages:this.languages,
-					articleIdsHelp:this.module.articleIdsHelp,
-					captions:this.captions
-				}),
+			// for module change comparissons
+			this.module.languages.sort();
+
+			ws.sendMultiple([
+				ws.prepare('module','set',this.module),
 				ws.prepare('schema','check',{moduleId:this.id})
-			];
-			
-			ws.sendMultiple(requests,true).then(
+			],true).then(
 				() => this.$root.schemaReload(this.id),
 				this.$root.genericError
 			);

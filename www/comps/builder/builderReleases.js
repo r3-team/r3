@@ -84,7 +84,7 @@ const MyBuilderReleaseLogs = {
 
 		// stores
 		capGen:  s => s.$store.getters.captions.generic,
-		settings:s => s.$store.getters.settings,
+		settings:s => s.$store.getters.settings
 	},
 	methods:{
 		// externals

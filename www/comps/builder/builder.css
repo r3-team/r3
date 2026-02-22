@@ -295,25 +295,17 @@
 
 /* module */
 .builder-module{}
-.builder-module .item-list{
-	display:flex;
-	flex-flow:row wrap;
-	align-items:center;
-	max-width:900px;
-	margin:0px 0px 12px 0px;
-	gap:6px;
-}
-.builder-module .item-list .item{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	gap:5px;
-}
 .builder-module .dragAnchor{
 	width:24px;
 	height:24px;
 	cursor:pointer;
     filter:var(--image-filter);
+}
+.builder-module-depends-list{
+	max-width:500px;
+	display:flex;
+	flex-flow:row wrap;
+	gap:0px 8px;
 }
 
 /* color inputs */
