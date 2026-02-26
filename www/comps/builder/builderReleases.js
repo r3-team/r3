@@ -29,30 +29,32 @@ const MyBuilderReleaseLogs = {
 			</div>
 		</td>
 	</tr>
-	<tr v-if="show" v-for="(c,i) in categories">
-		<td class="minimum"> </td>
-		<td class="minimum topAligned">
-			<my-button image="add.png" @trigger="add(i)" v-if="isEdit" :caption="c" :naked="true" />
-			<my-label  image="dash.png" v-if="!isEdit" :caption="c" />
-		</td>
-		<td class="topAligned">
-			<draggable handle=".dragAnchor" itemKey="id" animation="100" class="builder-release-logs"
-				v-model="logsByCategoryIndex[i]"
-				@change="update"
-				:fallbackOnBody="true"
-				:group="String(build) + '_' + String(i)"
-			>
-				<template #item="{element,index}">
-					<div class="builder-release-log">
-						<img v-if="isEdit" class="dragAnchor" src="images/drag.png" />
-						<textarea class="long startAsOneLine" v-if="isEdit" v-model="element.content" @input="updateAfterWait"></textarea>
-						<my-label image="dot.png" v-if="!isEdit" :caption="element.content" />
-						<my-button image="cancel.png" @trigger="del(i,index)" v-if="isEdit" :naked="true" />
-					</div>
-				</template>
-			</draggable>
-		</td>
-	</tr>`,
+	<template v-for="(c,i) in categories">
+		<tr v-if="show && (isEdit || logsByCategoryIndex[i].length !== 0)">
+			<td class="minimum"> </td>
+			<td class="minimum topAligned">
+				<my-button image="add.png" @trigger="add(i)" v-if="isEdit" :caption="c" :naked="true" />
+				<my-label  image="dash.png" v-if="!isEdit" :caption="c" />
+			</td>
+			<td class="topAligned">
+				<draggable handle=".dragAnchor" itemKey="id" animation="100" class="builder-release-logs"
+					v-model="logsByCategoryIndex[i]"
+					@change="update"
+					:fallbackOnBody="true"
+					:group="String(build) + '_' + String(i)"
+				>
+					<template #item="{element,index}">
+						<div class="builder-release-log">
+							<img v-if="isEdit" class="dragAnchor" src="images/drag.png" />
+							<textarea class="long startAsOneLine" v-if="isEdit" v-model="element.content" @input="updateAfterWait"></textarea>
+							<my-label image="dot.png" v-if="!isEdit" :caption="element.content" />
+							<my-button image="cancel.png" @trigger="del(i,index)" v-if="isEdit" :naked="true" />
+						</div>
+					</template>
+				</draggable>
+			</td>
+		</tr>
+	</template>`,
 	emits:['delete','update:modelValue'],
 	props:{
 		build:     { type:Number,  required:true },
