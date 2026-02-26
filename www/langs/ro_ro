@@ -1628,6 +1628,8 @@
 			"pwaHint": "REI3 applications can be installed on desktop computers and mobile devices as progressive web apps (PWA) from inside modern browsers. They are then listed as installed applications, get their own icons and shortcuts and behave similar to native applications.",
 			"release": "Deployment",
 			"releaseDate": "Data lansării",
+			"releaseLogCategories": "Version history categories",
+			"releaseLogCategoriesHint": "There are the global categories for the version history. Changes here will affect existing histories.",
 			"startFormByRole": "Start form by role",
 			"startFormByRoleHint": "The first start form is used that matches a role of the current user. Overwrites the default start form.",
 			"startFormDefault": "Start form",
@@ -1811,6 +1813,11 @@
 			"title": "Relații",
 			"titleOne": "Relația '{NAME}'",
 			"triggers": "Declanșatoare ({CNT})"
+		},
+		"releases": {
+			"button": {
+				"goToCategories": "Change categories"
+			}
 		},
 		"role": {
 			"access": "Acces",

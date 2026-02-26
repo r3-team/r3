@@ -1628,6 +1628,8 @@
 			"pwaHint": "يمكن تثبيت تطبيقات REI3 على أجهزة الكمبيوتر المكتبية والأجهزة المحمولة كتطبيقات ويب تقدمية (PWA) من داخل المتصفحات الحديثة. ",
 			"release": "النشر",
 			"releaseDate": "تاريخ الافراج عنه",
+			"releaseLogCategories": "Version history categories",
+			"releaseLogCategoriesHint": "There are the global categories for the version history. Changes here will affect existing histories.",
 			"startFormByRole": "ابدأ النموذج حسب الدور",
 			"startFormByRoleHint": "يتم استخدام نموذج البداية الأول الذي يطابق دور تسجيل الدخول الحالي. ",
 			"startFormDefault": "ابدأ النموذج",
@@ -1811,6 +1813,11 @@
 			"title": "العلاقات",
 			"titleOne": "العلاقة '{NAME}'",
 			"triggers": "المشغلات ({CNT})"
+		},
+		"releases": {
+			"button": {
+				"goToCategories": "Change categories"
+			}
 		},
 		"role": {
 			"access": "وصول",

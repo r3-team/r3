@@ -423,6 +423,33 @@ export default {
 					
 					<tr><td colspan="3"><b>{{ capApp.release }}</b></td></tr>
 					<tr>
+						<td>{{ capApp.releaseLogCategories }}</td>
+						<td>
+							<div class="column gap">
+								<div class="row gap" v-for="(c,i) in module.releaseLogCategories">
+									<input
+										v-model="module.releaseLogCategories[i]"
+										:disabled="readonly"
+									/>
+									<my-button image="cancel.png"
+										v-if="i === module.releaseLogCategories.length - 1"
+										@trigger="module.releaseLogCategories.pop()"
+										:active="!readonly"
+										:naked="true"
+									/>
+								</div>
+								<div>
+									<my-button image="add.png"
+										@trigger="module.releaseLogCategories.push('')"
+										:active="!readonly"
+										:caption="capGen.button.add"
+									/>
+								</div>
+							</div>
+						</td>
+						<td>{{ capApp.releaseLogCategoriesHint }}</td>
+					</tr>
+					<tr>
 						<td>{{ capApp.releaseDate }}</td>
 						<td colspan="2"><input :value="displayReleaseDate" disabled="disabled" /></td>
 					</tr>

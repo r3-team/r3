@@ -1628,6 +1628,8 @@
 			"pwaHint": "REI3 应用程序可以在现代浏览器内部作为渐进式 Web 应用程序（PWA）安装到台式计算机和移动设备上。然后它们将列为已安装的应用程序，获得自己的图标和快捷方式，并且行为类似于本机应用程序。",
 			"release": "部署",
 			"releaseDate": "发布日期",
+			"releaseLogCategories": "Version history categories",
+			"releaseLogCategoriesHint": "There are the global categories for the version history. Changes here will affect existing histories.",
 			"startFormByRole": "按角色启动表单",
 			"startFormByRoleHint": "The first start form is used that matches a role of the current user. Overwrites the default start form.",
 			"startFormDefault": "启动表单",
@@ -1811,6 +1813,11 @@
 			"title": "关系",
 			"titleOne": "关系'{NAME}'",
 			"triggers": "触发器（{CNT}）"
+		},
+		"releases": {
+			"button": {
+				"goToCategories": "Change categories"
+			}
 		},
 		"role": {
 			"access": "访问权限",

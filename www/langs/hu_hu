@@ -1628,6 +1628,8 @@
 			"pwaHint": "Az REI3 alkalmazások progresszív webalkalmazásként (PWA) is telepíthetők asztali számítógépeken és mobil eszközökön a modern böngészők segítségével. Megjelennek a telepített alkalmazások között, saját ikonokkal és hivatkozásokkal rendelkeznek, és hasonlóan viselkednek a natív alkalmazásokhoz.",
 			"release": "Kiadás",
 			"releaseDate": "Kiadás dátuma",
+			"releaseLogCategories": "Version history categories",
+			"releaseLogCategoriesHint": "There are the global categories for the version history. Changes here will affect existing histories.",
 			"startFormByRole": "Indító űrlap szerep szerint",
 			"startFormByRoleHint": "The first start form is used that matches a role of the current user. Overwrites the default start form.",
 			"startFormDefault": "Alapértelmezett indító űrlap",
@@ -1811,6 +1813,11 @@
 			"title": "Relációk",
 			"titleOne": "Reláció \"{NAME}\"",
 			"triggers": "Triggerek ({CNT})"
+		},
+		"releases": {
+			"button": {
+				"goToCategories": "Change categories"
+			}
 		},
 		"role": {
 			"access": "Hozzáférés",

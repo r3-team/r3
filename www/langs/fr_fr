@@ -1628,6 +1628,8 @@
 			"pwaHint": "Les applications REI3 peuvent être installées sur les ordinateurs de bureau et les appareils mobiles sous la forme d'applications web progressives (PWA) depuis l'intérieur des navigateurs modernes. Elles sont ensuite répertoriées comme des applications installées, obtiennent leurs propres icônes et raccourcis et se comportent de manière similaire aux applications natives.",
 			"release": "Déploiement",
 			"releaseDate": "Date de sortie",
+			"releaseLogCategories": "Version history categories",
+			"releaseLogCategoriesHint": "There are the global categories for the version history. Changes here will affect existing histories.",
 			"startFormByRole": "Formulaire de démarrage par rôle",
 			"startFormByRoleHint": "Le premier formulaire de démarrage utilisé est celui qui correspond à un rôle de la connexion actuelle. Remplace le formulaire de démarrage par défaut.",
 			"startFormDefault": "Formulaire de démarrage",
@@ -1811,6 +1813,11 @@
 			"title": "Relations",
 			"titleOne": "Relation '{NAME}'",
 			"triggers": "Déclencheurs ({CNT})"
+		},
+		"releases": {
+			"button": {
+				"goToCategories": "Change categories"
+			}
 		},
 		"role": {
 			"access": "Accès",

@@ -151,6 +151,14 @@ export default {
 					:caption="capGen.button.refresh"
 				/>
 			</div>
+			<div class="area nowrap">
+				<my-button image="open.png"
+					@trigger="openModule"
+					:active="!isChanged"
+					:caption="capApp.button.goToCategories"
+				/>
+			</div>
+			<div class="area nowrap"></div>
 		</div>
 		
 		<div class="content no-padding default-inputs" v-if="module">
@@ -222,6 +230,9 @@ export default {
 		// actions
 		del(build) {
 			this.releases = this.releases.filter(v => v.build !== build);
+		},
+		openModule() {
+			this.$router.push('/builder/module/'+this.id);
 		},
 		reset(manuelReset) {
 			if(manuelReset || !this.deepIsEqual(this.releasesCopy,this.releasesSchema)) {
