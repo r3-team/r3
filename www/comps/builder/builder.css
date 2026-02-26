@@ -462,6 +462,20 @@
 }
 
 /* releases */
+.builder-releases-table{
+	width:100%;
+}
+.builder-releases-table tr td{
+	padding:2px 6px;
+	background-color:var(--color-input);
+	border-bottom:1px solid var(--color-border);
+}
+.builder-releases-table tr td.topAligned{
+	vertical-align:top;
+}
+.builder-releases-table tr.grouping td{
+	background-color:var(--color-list-row-even);
+}
 .builder-release-logs{
 	display:flex;
 	flex-flow:column nowrap;

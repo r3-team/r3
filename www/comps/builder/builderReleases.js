@@ -4,23 +4,25 @@ import {getUnixFormat}         from '../shared/time.js';
 
 const MyBuilderReleaseLogs = {
 	name:'my-builder-release-logs',
-	template:`<tr>
+	template:`<tr class="grouping">
 		<td colspan="3">
 			<div class="row gap-large">
+				<my-label v-if="showAll" :caption="title" />
 				<my-button
+					v-if="!showAll"
 					@trigger="show = !show"
 					:caption="title"
 					:image="show ? 'triangleDown.png' : 'triangleRight.png'"
 					:naked="true"
 				/>
 				<my-button
-					v-if="show && !isZero"
+					v-if="(show || showAll) && !isZero"
 					@trigger="lock = !lock"
 					:caption="capGen.button.unlock"
 					:image="lock ? 'checkbox0.png' : 'checkbox1.png'"
 				/>
 				<my-button image="delete.png"
-					v-if="show && !isZero"
+					v-if="(show || showAll) && !isZero"
 					@trigger="$emit('delete',build)"
 					:active="isEdit"
 					:cancel="true"
@@ -30,7 +32,7 @@ const MyBuilderReleaseLogs = {
 		</td>
 	</tr>
 	<template v-for="(c,i) in categories">
-		<tr v-if="show && (isEdit || logsByCategoryIndex[i].length !== 0)">
+		<tr v-if="(show || showAll) && (isEdit || logsByCategoryIndex[i].length !== 0)">
 			<td class="minimum"> </td>
 			<td class="minimum topAligned">
 				<my-button image="add.png" @trigger="add(i)" v-if="isEdit" :caption="c" :naked="true" />
@@ -63,7 +65,8 @@ const MyBuilderReleaseLogs = {
 		date:      { type:Number,  required:true },
 		modelValue:{ type:Array,   required:true },
 		moduleName:{ type:String,  required:true },
-		readonly:  { type:Boolean, required:true }
+		readonly:  { type:Boolean, required:true },
+		showAll:   { type:Boolean, required:true }
 	},
 	watch:{
 		modelValue:{
@@ -154,6 +157,11 @@ export default {
 				/>
 			</div>
 			<div class="area nowrap">
+				<my-button
+					@trigger="showAll = !showAll"
+					:caption="capGen.button.showAll"
+					:image="showAll ? 'checkbox1.png' : 'checkbox0.png'"
+				/>
 				<my-button image="open.png"
 					@trigger="openModule"
 					:active="!isChanged"
@@ -164,7 +172,7 @@ export default {
 		</div>
 		
 		<div class="content no-padding default-inputs" v-if="module">
-			<table class="generic-table bright">
+			<table class="builder-releases-table">
 				<tbody>
 					<my-builder-release-logs :key="0"
 						v-model="releases[0].logs"
@@ -174,6 +182,7 @@ export default {
 						:date="releases[0].dateCreated"
 						:moduleName="module.name"
 						:readonly
+						:showAll
 					/>
 					<my-builder-release-logs
 						@delete="del"
@@ -186,6 +195,7 @@ export default {
 						:key="r.build"
 						:moduleName="module.name"
 						:readonly
+						:showAll
 					/>
 				</tbody>
 			</table>
@@ -198,7 +208,8 @@ export default {
 	data() {
 		return {
 			releases:false,
-			releasesCopy:false // copy of releases from schema when component last reset
+			releasesCopy:false, // copy of releases from schema when component last reset
+			showAll:false
 		};
 	},
 	watch:{
