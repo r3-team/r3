@@ -1867,7 +1867,13 @@
 			"titleRolesHint": "Festlegen, was man sehen und tun darf."
 		},
 		"transfer": {
-			"exportKeyBad": "Signierschlüssel scheint ungültig zu sein. Der private Schlüssel muss für die Signierung genutzt werden.",
+			"button": {
+				"storeE2ee": "Verschlüsselt speichern"
+			},
+			"dialog": {
+				"e2eeNotReady": "Um den privaten Schlüssel sicher zu speichern, wird Ende-Zu-Ende-Verschlüsselung (E2EE) verwendet; E2EE ist jedoch deaktiviert.<br /><br />E2EE kann in den persönlichen Einstellungen aktiviert werden.",
+				"exportKeyBad": "Signierschlüssel scheint ungültig zu sein. Der private Schlüssel muss für die Signierung genutzt werden."
+			},
 			"exportPrivateKeyHint": "Beispiel:\n-----BEGIN RSA PRIVATE KEY-----\nSCHLÜSSEL\n-----END RSA PRIVATE KEY-----",
 			"keyEntryOk0": "Privaten Schlüssel zur Signierung der Anwendung auswählen",
 			"keyEntryOk1": "Privater Schlüssel bereit zur Signierung",

@@ -1867,7 +1867,13 @@
 			"titleRolesHint": "Définissez ce que chacun peut faire ou voir."
 		},
 		"transfer": {
-			"exportKeyBad": "La clé de signature semble invalide. Assurez-vous d'utiliser la clé privée pour exporter les applications.",
+			"button": {
+				"storeE2ee": "Store encrypted"
+			},
+			"dialog": {
+				"e2eeNotReady": "To store your private key securely, end-to-end-encryption (E2EE) is used; E2EE is currently disabled however.<br /><br />To enable E2EE, please visit your personal settings.",
+				"exportKeyBad": "La clé de signature semble invalide. Assurez-vous d'utiliser la clé privée pour exporter les applications."
+			},
 			"exportPrivateKeyHint": "Exemple:\n-----BEGIN RSA PRIVATE KEY-----\nCLÉ\n-----END RSA PRIVATE KEY-----",
 			"keyEntryOk0": "Choose a private key for signing the application",
 			"keyEntryOk1": "Private key ready to sign application",

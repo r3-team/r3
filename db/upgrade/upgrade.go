@@ -806,6 +806,19 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			INSERT INTO app.release (module_id, build, build_app, date_created)
 			SELECT id, 0, 0, 0
 			FROM app.module;
+
+			-- encrypted export key storage for logins
+			CREATE TABLE IF NOT EXISTS instance.login_export_key (
+				login_id integer NOT NULL,
+				data_enc text COLLATE pg_catalog."default" NOT NULL,
+				data_key_enc text COLLATE pg_catalog."default" NOT NULL,
+				CONSTRAINT login_export_key_pkey PRIMARY KEY (login_id),
+				CONSTRAINT login_export_key_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
 		`)
 		return "3.12", err
 	},

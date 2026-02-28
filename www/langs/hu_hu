@@ -1867,7 +1867,13 @@
 			"titleRolesHint": "Beállítani, hogy ki mit láthat és tehet meg."
 		},
 		"transfer": {
-			"exportKeyBad": "A hitelesítő kulcs érvénytelennek tűnik. Győződjön meg arról, hogy a privát kulcsot használja az exportáláshoz.",
+			"button": {
+				"storeE2ee": "Store encrypted"
+			},
+			"dialog": {
+				"e2eeNotReady": "To store your private key securely, end-to-end-encryption (E2EE) is used; E2EE is currently disabled however.<br /><br />To enable E2EE, please visit your personal settings.",
+				"exportKeyBad": "A hitelesítő kulcs érvénytelennek tűnik. Győződjön meg arról, hogy a privát kulcsot használja az exportáláshoz."
+			},
 			"exportPrivateKeyHint": "Példa:\n-----BEGIN RSA PRIVATE KEY-----\nKULCS\n-----END RSA PRIVATE KEY-----",
 			"keyEntryOk0": "Choose a private key for signing the application",
 			"keyEntryOk1": "Private key ready to sign application",

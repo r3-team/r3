@@ -408,6 +408,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return LoginDel_tx(ctx, tx, reqJson)
 		case "get":
 			return LoginGet_tx(ctx, tx, reqJson)
+		case "getExportKey":
+			return loginExportKeyGet_tx(ctx, tx, loginId)
 		case "getIsNotUnique":
 			return LoginGetIsNotUnique_tx(ctx, tx, reqJson)
 		case "getMembers":
@@ -424,6 +426,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return LoginResetTotp_tx(ctx, tx, reqJson)
 		case "set":
 			return LoginSet_tx(ctx, tx, reqJson)
+		case "setExportKey":
+			return loginExportKeySet_tx(ctx, tx, reqJson, loginId)
 		case "setMembers":
 			return LoginSetMembers_tx(ctx, tx, reqJson)
 		}

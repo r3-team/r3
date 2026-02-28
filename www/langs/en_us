@@ -1867,18 +1867,24 @@
 			"titleRolesHint": "Define what everyone can do or see."
 		},
 		"transfer": {
+			"button": {
+				"storeE2ee": "Store encrypted"
+			},
+			"dialog": {
+				"e2eeNotReady": "To store your private key securely, end-to-end-encryption (E2EE) is used; E2EE is currently disabled however.<br /><br />To enable E2EE, please visit your personal settings.",
+				"exportKeyBad": "Signing key seems invalid. Make sure to use the private key for exporting applications."
+			},
+			"exportPrivateKeyHint": "Example:\n-----BEGIN RSA PRIVATE KEY-----\nKEY\n-----END RSA PRIVATE KEY-----",
+			"keyEntryOk0": "Choose a private key for signing the application",
+			"keyEntryOk1": "Private key ready to sign application",
+			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
+			"moduleChangesOk1": "Application ready for transfer",
 			"option": {
 				"method": {
 					"fileDownload": "Download as file",
 					"repoUpload": "Commit to repository"
 				}
 			},
-			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
-			"moduleChangesOk1": "Application ready for transfer",
-			"keyEntryOk0": "Choose a private key for signing the application",
-			"keyEntryOk1": "Private key ready to sign application",
-			"exportKeyBad": "Signing key seems invalid. Make sure to use the private key for exporting applications.",
-			"exportPrivateKeyHint": "Example:\n-----BEGIN RSA PRIVATE KEY-----\nKEY\n-----END RSA PRIVATE KEY-----",
 			"selectModule": "Select application",
 			"transferStart": "Transfer application"
 		},

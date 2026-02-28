@@ -1867,7 +1867,13 @@
 			"titleRolesHint": "定义每个人可以做什么或看到什么。"
 		},
 		"transfer": {
-			"exportKeyBad": "签名密钥似乎无效。请确保在导出应用时使用私钥。",
+			"button": {
+				"storeE2ee": "Store encrypted"
+			},
+			"dialog": {
+				"e2eeNotReady": "To store your private key securely, end-to-end-encryption (E2EE) is used; E2EE is currently disabled however.<br /><br />To enable E2EE, please visit your personal settings.",
+				"exportKeyBad": "签名密钥似乎无效。请确保在导出应用时使用私钥。"
+			},
 			"exportPrivateKeyHint": "示例:\n-----BEGIN RSA PRIVATE KEY-----\n密钥\n-----END RSA PRIVATE KEY-----",
 			"keyEntryOk0": "Choose a private key for signing the application",
 			"keyEntryOk1": "Private key ready to sign application",
