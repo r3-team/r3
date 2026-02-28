@@ -2,7 +2,6 @@ import MyCodeEditor     from '../codeEditor.js';
 import MyInputColorWrap from '../inputColorWrap.js';
 import {srcBase64}      from '../shared/image.js';
 import {MyModuleSelect} from '../input.js';
-export {MyAdminCustom as default};
 
 const MyAdminCustomLogo = {
 	name:'my-admin-custom-logo',
@@ -29,10 +28,10 @@ const MyAdminCustomLogo = {
 		readonly:  { type:Boolean, required:true }
 	},
 	computed:{
-		hasValue:(s) => s.modelValue !== '',
+		hasValue:s => s.modelValue !== '',
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.admin.customizing
+		capApp:s => s.$store.getters.captions.admin.customizing
 	},
 	methods:{
 		// externals
@@ -54,7 +53,7 @@ const MyAdminCustomLogo = {
 	}
 };
 
-const MyAdminCustom = {
+export default {
 	name:'my-admin-custom',
 	components:{
 		MyAdminCustomLogo,
@@ -283,7 +282,7 @@ const MyAdminCustom = {
 		menuTitle:{ type:String, required:true }
 	},
 	computed:{
-		hasChanges:(s) => JSON.stringify(s.config) !== JSON.stringify(s.configInput)
+		hasChanges:s => JSON.stringify(s.config) !== JSON.stringify(s.configInput)
 			|| JSON.stringify(s.pwaDomainMap) !== JSON.stringify(s.pwaDomainMapInput),
 		
 		// inputs
@@ -309,7 +308,7 @@ const MyAdminCustom = {
 				this.pwaDomainMapInput = map;
 			}
 		},
-		pwaModuleIdsUsed:(s) => {
+		pwaModuleIdsUsed:s => {
 			let out = [];
 			for(let pd of s.pwaDomains) {
 				out.push(pd.moduleId);
@@ -318,11 +317,11 @@ const MyAdminCustom = {
 		},
 		
 		// stores
-		activated:   (s) => s.$store.getters['local/activated'],
-		capApp:      (s) => s.$store.getters.captions.admin.customizing,
-		capGen:      (s) => s.$store.getters.captions.generic,
-		config:      (s) => s.$store.getters.config,
-		pwaDomainMap:(s) => s.$store.getters.pwaDomainMap
+		activated:   s => s.$store.getters['local/activated'],
+		capApp:      s => s.$store.getters.captions.admin.customizing,
+		capGen:      s => s.$store.getters.captions.generic,
+		config:      s => s.$store.getters.config,
+		pwaDomainMap:s => s.$store.getters.pwaDomainMap
 	},
 	data() {
 		return {

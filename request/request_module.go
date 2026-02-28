@@ -14,9 +14,7 @@ import (
 func ModuleCheckChange_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var (
 		err error
-		req struct {
-			Id uuid.UUID `json:"id"`
-		}
+		req uuid.UUID
 		res struct {
 			ModuleIdMapChanged map[uuid.UUID]bool `json:"moduleIdMapChanged"`
 		}
@@ -25,7 +23,7 @@ func ModuleCheckChange_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessag
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	res.ModuleIdMapChanged, err = transfer.GetModuleChangedWithDependencies_tx(ctx, tx, req.Id)
+	res.ModuleIdMapChanged, err = transfer.GetModuleChangedWithDependencies_tx(ctx, tx, req)
 	if err != nil {
 		return nil, err
 	}

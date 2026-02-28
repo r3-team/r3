@@ -63,10 +63,8 @@ const MyBoolStringNumber = {
 
 const MyModuleSelect = {
 	name:'my-module-select',
-	template:`<select
-		@change="$emit('update:modelValue',$event.target.value)"
-		:value="modelValue"
-	>
+	template:`<select v-model="value">
+		<option value="" v-if="allowEmpty">-</option>
 		<option
 			v-for="m in modules.filter(v => !moduleIdsFilter.includes(v.id) && !moduleIdMapMeta[v.id].hidden)"
 			:disabled="!getModuleIsValid(m)"
@@ -74,10 +72,11 @@ const MyModuleSelect = {
 		>{{ getModuleName(m) }}</option>
 	</select>`,
 	props:{
-		preSelectOne:        { type:Boolean, required:false, default:true },     // pre select the first valid module
-		moduleIdsFilter:     { type:Array,   required:false, default:() => [] }, // remove modules with given IDs
-		modelValue:          { required:true }, // module ID
-		showOnlyIfAssignable:{ type:Boolean, required:false, default:false }     // include only modules with assignable roles
+		allowEmpty:          { type:Boolean,       required:false, default:false },
+		preSelectOne:        { type:Boolean,       required:false, default:true },     // pre select the first valid module
+		moduleIdsFilter:     { type:Array,         required:false, default:() => [] }, // remove modules with given IDs
+		modelValue:          { type:[String,null], required:true }, // module ID
+		showOnlyIfAssignable:{ type:Boolean,       required:false, default:false }     // include only modules with assignable roles
 	},
 	emits:['update:modelValue'],
 	mounted() {
@@ -93,8 +92,14 @@ const MyModuleSelect = {
 		}
 	},
 	computed:{
-		modules:        (s) => s.$store.getters['schema/modules'],
-		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta,
+		value:{
+			get()  { return this.modelValue === null ? '' : this.modelValue; },
+			set(v) { return this.$emit('update:modelValue', v === '' ? null : v); }
+		},
+
+		// stores
+		modules:        s => s.$store.getters['schema/modules'],
+		moduleIdMapMeta:s => s.$store.getters.moduleIdMapMeta,
 	},
 	methods:{
 		// externals

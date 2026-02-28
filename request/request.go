@@ -622,7 +622,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		case "addVersion":
 			return TransferAddVersion_tx(ctx, tx, reqJson)
 		case "storeExportKey":
-			return TransferStoreExportKey(reqJson)
+			return TransferStoreExportKey(reqJson, loginId)
 		}
 	case "variable":
 		switch action {

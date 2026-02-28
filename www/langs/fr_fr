@@ -1572,15 +1572,10 @@
 		},
 		"module": {
 			"button": {
-				"check": "Vérifier l'exportation",
-				"export": "Exporter",
-				"exportKeySet": "Stocker la clé en mémoire",
 				"graph": "Graphique de dépendance",
 				"keyCreate": "Générer",
 				"loginSyncCreate": "New user sync function",
-				"manageApps": "Gérer les applications",
-				"repo": "Installer depuis le référentiel",
-				"versionCreate": "Créer une nouvelle version"
+				"manageApps": "Gérer les applications"
 			},
 			"clientEventsHint": "REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
 			"color": "Couleur",
@@ -1588,15 +1583,6 @@
 			"dependsOn": "Basé sur",
 			"dependsOnAdd": "Ajouter une application",
 			"dependsOnHint": "Utilisez d'autres applications comme base pour la vôtre. Cela permet la réutilisation ou l'extension des relations, des formulaires, etc. existants.",
-			"export": "Transfert - Exporter l'application vers un fichier",
-			"exportKeyBad": "La clé de signature semble invalide. Assurez-vous d'utiliser la clé privée pour exporter les applications.",
-			"exportKeyEmpty": "Une clé de signature est requise pour l'exportation",
-			"exportKeySet": "Clé stockée en mémoire",
-			"exportOwner": "Exporter les modifications",
-			"exportPrivateKeyHint": "Exemple:\n-----BEGIN RSA PRIVATE KEY-----\nCLÉ\n-----END RSA PRIVATE KEY-----",
-			"exportState": "État de l'exportation",
-			"exportStateNok": "Modifications par rapport à la version actuelle",
-			"exportStateOk": "Prêt",
 			"graphDependsOn": "Dépend de : {COUNT}",
 			"iconHint": "Les icônes sont disponibles une fois qu'elles ont été ajoutées à cette application. Les icônes des applications sur lesquelles sont basées peuvent également être utilisées.",
 			"iconPwa": "Icônes de l'application",
@@ -1635,7 +1621,6 @@
 			"startFormDefault": "Formulaire de démarrage",
 			"startFormDefaultHint": "Formulaire affiché lorsque l'utilisateur ouvre l'application.",
 			"title": "Application '{NAME}'",
-			"titleAll": "Applications",
 			"titleHint": "Le titre de l'application, visible par les utilisateurs lorsqu'ils travaillent avec votre application."
 		},
 		"navigationCaptionMap": "Captions",
@@ -1880,6 +1865,22 @@
 			"titleRelationsHint": "Pour stocker et ajouter des données aux enregistrements.",
 			"titleRoles": "Préparer les rôles",
 			"titleRolesHint": "Définissez ce que chacun peut faire ou voir."
+		},
+		"transfer": {
+			"exportKeyBad": "La clé de signature semble invalide. Assurez-vous d'utiliser la clé privée pour exporter les applications.",
+			"exportPrivateKeyHint": "Exemple:\n-----BEGIN RSA PRIVATE KEY-----\nCLÉ\n-----END RSA PRIVATE KEY-----",
+			"keyEntryOk0": "Choose a private key for signing the application",
+			"keyEntryOk1": "Private key ready to sign application",
+			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
+			"moduleChangesOk1": "Application ready for transfer",
+			"option": {
+				"method": {
+					"fileDownload": "Download as file",
+					"repoUpload": "Commit to repository"
+				}
+			},
+			"selectModule": "Select application",
+			"transferStart": "Transfer application"
 		},
 		"variable": {
 			"dialog": {
@@ -2566,6 +2567,7 @@
 		"tip": "Tip",
 		"title": "Titre",
 		"token": "Jeton",
+		"transfer": "Transfer",
 		"type": "Type",
 		"unassigned": "Non attribué",
 		"uninstall": "Uninstall",
@@ -2580,6 +2582,7 @@
 		"versionApp": "Version de l'application",
 		"versionAppNew": "New application version",
 		"versionHistory": "Version history",
+		"versionNew": "New version",
 		"versionPlatform": "Version de la plateforme",
 		"visibility": "Visibility",
 		"visible": "Visible",

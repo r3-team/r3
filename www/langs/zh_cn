@@ -1572,15 +1572,10 @@
 		},
 		"module": {
 			"button": {
-				"check": "检查导出",
-				"export": "导出",
-				"exportKeySet": "在内存中存储密钥",
 				"graph": "依赖图",
 				"keyCreate": "生成密钥",
 				"loginSyncCreate": "New user sync function",
-				"manageApps": "管理应用",
-				"repo": "从仓库安装",
-				"versionCreate": "创建新版本"
+				"manageApps": "管理应用"
 			},
 			"clientEventsHint": "REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
 			"color": "颜色",
@@ -1588,15 +1583,6 @@
 			"dependsOn": "构建于",
 			"dependsOnAdd": "添加应用",
 			"dependsOnHint": "使用其他应用作为自己的基础。这样可以重用或扩展现有关系、表单等内容。",
-			"export": "传输 - 将应用导出到文件",
-			"exportKeyBad": "签名密钥似乎无效。请确保在导出应用时使用私钥。",
-			"exportKeyEmpty": "导出需要签名密钥",
-			"exportKeySet": "密钥已存储在内存中",
-			"exportOwner": "导出更改",
-			"exportPrivateKeyHint": "示例:\n-----BEGIN RSA PRIVATE KEY-----\n密钥\n-----END RSA PRIVATE KEY-----",
-			"exportState": "导出状态",
-			"exportStateNok": "与当前版本的更改",
-			"exportStateOk": "准备就绪",
 			"graphDependsOn": "依赖于：{COUNT}",
 			"iconHint": "图标可在添加到该应用程序后使用。也可以使用构建应用程序的应用程序的图标。",
 			"iconPwa": "应用程序图标",
@@ -1635,7 +1621,6 @@
 			"startFormDefault": "启动表单",
 			"startFormDefaultHint": "用户打开应用程序时显示的表单。",
 			"title": "应用程序 '{NAME}'",
-			"titleAll": "应用程序",
 			"titleHint": "应用程序标题，用户在使用您的应用程序时可见。"
 		},
 		"navigationCaptionMap": "标题",
@@ -1880,6 +1865,22 @@
 			"titleRelationsHint": "存储和添加数据到记录中。",
 			"titleRoles": "准备角色",
 			"titleRolesHint": "定义每个人可以做什么或看到什么。"
+		},
+		"transfer": {
+			"exportKeyBad": "签名密钥似乎无效。请确保在导出应用时使用私钥。",
+			"exportPrivateKeyHint": "示例:\n-----BEGIN RSA PRIVATE KEY-----\n密钥\n-----END RSA PRIVATE KEY-----",
+			"keyEntryOk0": "Choose a private key for signing the application",
+			"keyEntryOk1": "Private key ready to sign application",
+			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
+			"moduleChangesOk1": "Application ready for transfer",
+			"option": {
+				"method": {
+					"fileDownload": "Download as file",
+					"repoUpload": "Commit to repository"
+				}
+			},
+			"selectModule": "Select application",
+			"transferStart": "Transfer application"
 		},
 		"variable": {
 			"dialog": {
@@ -2566,6 +2567,7 @@
 		"tip": "Tip",
 		"title": "标题",
 		"token": "令牌",
+		"transfer": "Transfer",
 		"type": "类型",
 		"unassigned": "未分配的",
 		"uninstall": "Uninstall",
@@ -2580,6 +2582,7 @@
 		"versionApp": "应用程序版本",
 		"versionAppNew": "New application version",
 		"versionHistory": "Version history",
+		"versionNew": "New version",
 		"versionPlatform": "平台版本",
 		"visibility": "Visibility",
 		"visible": "Visible",

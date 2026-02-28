@@ -1572,15 +1572,10 @@
 		},
 		"module": {
 			"button": {
-				"check": "تحقق من التصدير",
-				"export": "يصدّر",
-				"exportKeySet": "تخزين المفتاح في الذاكرة",
 				"graph": "الرسم البياني للتبعية",
 				"keyCreate": "يولد",
 				"loginSyncCreate": "New user sync function",
-				"manageApps": "إدارة التطبيقات",
-				"repo": "التثبيت من المستودع",
-				"versionCreate": "إنشاء نسخة جديدة"
+				"manageApps": "إدارة التطبيقات"
 			},
 			"clientEventsHint": "يحتوي REI3 على تطبيق عميل، يمكن للمستخدمين تثبيته من إعداداتهم الشخصية. ",
 			"color": "لون",
@@ -1588,15 +1583,6 @@
 			"dependsOn": "يبني على",
 			"dependsOnAdd": "إضافة التطبيق",
 			"dependsOnHint": "استخدم التطبيقات الأخرى كأساس لتطبيقك الخاص. ",
-			"export": "نقل - تصدير التطبيق إلى ملف",
-			"exportKeyBad": "يبدو أن مفتاح التوقيع غير صالح. ",
-			"exportKeyEmpty": "مفتاح التوقيع مطلوب للتصدير",
-			"exportKeySet": "المفتاح المخزن في الذاكرة",
-			"exportOwner": "تصدير التغييرات",
-			"exportPrivateKeyHint": "مثال:\n",
-			"exportState": "دولة التصدير",
-			"exportStateNok": "التغييرات على الإصدار الحالي",
-			"exportStateOk": "مستعد",
 			"graphDependsOn": "يعتمد على: {COUNT}",
 			"iconHint": "تتوفر الرموز بمجرد إضافتها إلى هذا التطبيق. ",
 			"iconPwa": "أيقونات التطبيق",
@@ -1635,7 +1621,6 @@
 			"startFormDefault": "ابدأ النموذج",
 			"startFormDefaultHint": "النموذج الذي يظهر عندما يفتح المستخدم التطبيق.",
 			"title": "التطبيق '{NAME}'",
-			"titleAll": "التطبيقات",
 			"titleHint": "عنوان التطبيق، مرئي للمستخدمين عند العمل مع التطبيق الخاص بك."
 		},
 		"navigationCaptionMap": "التسميات التوضيحية",
@@ -1880,6 +1865,22 @@
 			"titleRelationsHint": "لتخزين وإضافة البيانات إلى السجلات.",
 			"titleRoles": "تحضير الأدوار",
 			"titleRolesHint": "حدد ما يمكن للجميع فعله أو رؤيته."
+		},
+		"transfer": {
+			"exportKeyBad": "يبدو أن مفتاح التوقيع غير صالح. ",
+			"exportPrivateKeyHint": "Example:\n-----BEGIN RSA PRIVATE KEY-----\nKEY\n-----END RSA PRIVATE KEY-----",
+			"keyEntryOk0": "Choose a private key for signing the application",
+			"keyEntryOk1": "Private key ready to sign application",
+			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
+			"moduleChangesOk1": "Application ready for transfer",
+			"option": {
+				"method": {
+					"fileDownload": "Download as file",
+					"repoUpload": "Commit to repository"
+				}
+			},
+			"selectModule": "Select application",
+			"transferStart": "Transfer application"
 		},
 		"variable": {
 			"dialog": {
@@ -2566,6 +2567,7 @@
 		"tip": "Tip",
 		"title": "عنوان",
 		"token": "رمز مميز",
+		"transfer": "Transfer",
 		"type": "يكتب",
 		"unassigned": "غير معين",
 		"uninstall": "إلغاء التثبيت",
@@ -2580,6 +2582,7 @@
 		"versionApp": "نسخة التطبيق",
 		"versionAppNew": "New application version",
 		"versionHistory": "Version history",
+		"versionNew": "New version",
 		"versionPlatform": "نسخة المنصة",
 		"visibility": "Visibility",
 		"visible": "Visible",

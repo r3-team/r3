@@ -30,7 +30,7 @@ import (
 // if the exported module had any changes, the module meta (version,
 //
 //	dependent app version, release date) will be updated
-func ExportToFile(ctx context.Context, moduleId uuid.UUID, zipFilePath string) error {
+func ExportToFile(ctx context.Context, moduleId uuid.UUID, exportKey string, zipFilePath string) error {
 
 	log.Info(log.ContextTransfer, fmt.Sprintf("start export for module %s", moduleId))
 
@@ -50,7 +50,7 @@ func ExportToFile(ctx context.Context, moduleId uuid.UUID, zipFilePath string) e
 	// export all modules as JSON files
 	var moduleJsonPaths []string
 	var moduleIdsExported []uuid.UUID
-	if err := export_tx(ctx, tx, moduleId, &moduleJsonPaths, &moduleIdsExported); err != nil {
+	if err := export_tx(ctx, tx, moduleId, exportKey, &moduleJsonPaths, &moduleIdsExported); err != nil {
 		return err
 	}
 
@@ -61,7 +61,7 @@ func ExportToFile(ctx context.Context, moduleId uuid.UUID, zipFilePath string) e
 	return tx.Commit(ctx)
 }
 
-func export_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, filePaths *[]string, moduleIdsExported *[]uuid.UUID) error {
+func export_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, exportKey string, filePaths *[]string, moduleIdsExported *[]uuid.UUID) error {
 
 	// ignore if already exported (dependent on modules can have similar dependencies)
 	if slices.Contains(*moduleIdsExported, moduleId) {
@@ -79,7 +79,7 @@ func export_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, filePaths *[]
 
 	// export all modules that this module is dependent on
 	for _, modId := range file.Content.Module.DependsOn {
-		if err := export_tx(ctx, tx, modId, filePaths, moduleIdsExported); err != nil {
+		if err := export_tx(ctx, tx, modId, exportKey, filePaths, moduleIdsExported); err != nil {
 			return err
 		}
 	}

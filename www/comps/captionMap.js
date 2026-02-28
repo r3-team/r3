@@ -522,138 +522,138 @@ export default {
 						<!-- relations -->
 						<my-caption-map-items icon="database.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsAttributesByRelations"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:levelMax="1"
 							:name="capGen.relations"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- forms -->
 						<my-caption-map-items icon="fileText.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsFieldsByForms"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:levelMax="2"
 							:name="capGen.forms"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- menu tabs -->
 						<my-caption-map-items icon="menu.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsMenusByMenuTabs"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:levelMax="2"
 							:name="capGen.menus"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- roles -->
 						<my-caption-map-items icon="personMultiple.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsRoles"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:name="capGen.roles"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- PG functions -->
 						<my-caption-map-items icon="codeDatabase.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsPgFunctions"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:name="capGen.pgFunctions"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- JS functions -->
 						<my-caption-map-items icon="codeScreen.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsJsFunctions"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:name="capGen.jsFunctions"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- search bars -->
 						<my-caption-map-items icon="search.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsSearchBars"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:levelMax="1"
 							:name="capGen.searchBars"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- collections -->
 						<my-caption-map-items icon="tray.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsCollections"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:levelMax="1"
 							:name="capGen.collections"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- login forms -->
 						<my-caption-map-items icon="personCog.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsLoginForms"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:name="capGen.loginForms"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- articles -->
 						<my-caption-map-items icon="question.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsArticles"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:name="capGen.articles"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- APIs -->
 						<my-caption-map-items icon="api.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsApis"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:levelMax="1"
 							:name="capGen.apis"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- widgets -->
 						<my-caption-map-items icon="tiles.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsWidgets"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:name="capGen.widgets"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- query choices -->
 						<my-caption-map-items icon="filter.png"
 							@update="storeChange"
-							:isCustom="isCustom"
+							:isCustom
 							:items="captionsQueryChoices"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:name="capGen.queryChoices"
-							:readonly="readonly"
+							:readonly
 						/>
 						<!-- client events -->
 						<my-caption-map-items icon="screen.png"
@@ -661,9 +661,9 @@ export default {
 							:isCustom="isCustom"
 							:items="captionsClientEvents"
 							:languages="showLanguageCodes"
-							:languagesCustom="languagesCustom"
+							:languagesCustom
 							:name="capGen.clientEvents"
-							:readonly="readonly"
+							:readonly
 						/>
 					</tbody>
 				</table>
@@ -672,19 +672,19 @@ export default {
 					v-if="showLanguageNew"
 					@close="showLanguageNew = false"
 					@create="setLanguagesCustom($event,true)"
-					:languages="languages"
-					:languagesCustom="languagesCustom"
-					:moduleId="moduleId"
+					:languages
+					:languagesCustom
+					:moduleId
 				/>
 				<my-caption-map-transfer
 					v-if="showTransfer"
 					@close="showTransfer = false"
 					@update="storeChange"
 					:captionMap="isCustom ? captionMapCustom : captionMap"
-					:isCustom="isCustom"
+					:isCustom
 					:isExport="showTransferMode === 'export'"
 					:languages="isCustom ? languagesCustom : languages"
-					:moduleId="moduleId"
+					:moduleId
 				/>
 			</div>
 		</div>
@@ -702,10 +702,10 @@ export default {
 			captionMapCustom:{}, // map of all custom captions
 			
 			// states
-			changes:[],               // change to caption value, key = entity ID (attribute, form, field, etc.)
+			changes:[],          // change to caption value, key = entity ID (attribute, form, field, etc.)
 			hasChanges:false,
 			isReady:false,
-			moduleId:null,            // current module to show caption map for
+			moduleId:null,       // current module to show caption map for
 			showLanguageCodes:[],
 			showLanguageNew:false,
 			showTransfer:false,

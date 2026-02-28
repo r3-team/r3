@@ -27,12 +27,10 @@ export default {
 			
 			<!-- module navigation -->
 			<div class="moduleSelect default-inputs transparent">
-				<my-module-select
-					v-model="moduleIdInput"
-				/>
+				<my-module-select v-model="moduleIdInput" />
 				<my-button image="upward.png"
-					@trigger="moduleIdInput = ''"
-					:active="moduleIdInput !== ''"
+					@trigger="moduleIdInput = null"
+					:active="moduleIdInput !== null"
 					:captionTitle="capApp.backHint"
 				/>
 			</div>
@@ -482,7 +480,7 @@ export default {
 		
 		// inputs
 		moduleIdInput:{
-			get()  { return !this.module ? '' : this.module.id; },
+			get()  { return !this.module ? null : this.module.id; },
 			set(v) {
 				if(v === '') this.$router.push(`/builder/modules`);
 				else         this.$router.push(`/builder/${this.navigation}/${v}`);

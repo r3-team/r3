@@ -1,7 +1,7 @@
-import srcBase64Icon         from '../shared/image.js';
-import {openLink}            from '../shared/generic.js';
-import {getUnixFormat}       from '../shared/time.js';
-import {getCaption}          from '../shared/language.js';
+import srcBase64Icon   from '../shared/image.js';
+import {openLink}      from '../shared/generic.js';
+import {getUnixFormat} from '../shared/time.js';
+import {getCaption}    from '../shared/language.js';
 
 export default {
 	name:'my-admin-modules-item',

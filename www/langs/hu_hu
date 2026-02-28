@@ -1572,15 +1572,10 @@
 		},
 		"module": {
 			"button": {
-				"check": "Export ellenőrzése",
-				"export": "Exportálás",
-				"exportKeySet": "Kulcs közvetítése",
 				"graph": "Függőségi diagram",
 				"keyCreate": "Létrehozás",
 				"loginSyncCreate": "New user sync function",
-				"manageApps": "Alkalmazások kezelése",
-				"repo": "Repository-ból telepítés",
-				"versionCreate": "Új verzió létrehozása"
+				"manageApps": "Alkalmazások kezelése"
 			},
 			"clientEventsHint": "REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
 			"color": "Szín",
@@ -1588,15 +1583,6 @@
 			"dependsOn": "Alapul",
 			"dependsOnAdd": "Alkalmazás hozzáadása",
 			"dependsOnHint": "Használja más alkalmazásokat alapnak saját alkalmazásához. Ez lehetővé teszi a meglévő kapcsolatok, űrlapok stb. újrahasználását vagy kibővítését.",
-			"export": "Átvitel - alkalmazás exportálása fájlba",
-			"exportKeyBad": "A hitelesítő kulcs érvénytelennek tűnik. Győződjön meg arról, hogy a privát kulcsot használja az exportáláshoz.",
-			"exportKeyEmpty": "Az exportáláshoz kulcs szükséges",
-			"exportKeySet": "Kulcs közvetítve",
-			"exportOwner": "Változtatások exportálása",
-			"exportPrivateKeyHint": "Példa:\n-----BEGIN RSA PRIVATE KEY-----\nKULCS\n-----END RSA PRIVATE KEY-----",
-			"exportState": "Exportálás állapota",
-			"exportStateNok": "Változtatások az aktuális verzióban",
-			"exportStateOk": "Kész",
 			"graphDependsOn": "Alapul szolgál: {COUNT}",
 			"iconHint": "Ikonok csak akkor érhetők el, ha hozzá vannak adva ehhez az alkalmazáshoz. Azok az ikonok is felhasználhatók, amelyek azon alkalmazásokon alapulnak, amelyekre épít.",
 			"iconPwa": "Alkalmazás ikonok",
@@ -1635,7 +1621,6 @@
 			"startFormDefault": "Alapértelmezett indító űrlap",
 			"startFormDefaultHint": "Az űrlap, amely akkor jelenik meg, amikor a felhasználó megnyitja az alkalmazást.",
 			"title": "Az alkalmazás \"{NAME}\"",
-			"titleAll": "Alkalmazások",
 			"titleHint": "Az alkalmazás címe, amely látható a felhasználók számára az alkalmazással való munka során."
 		},
 		"navigationCaptionMap": "Captions",
@@ -1880,6 +1865,22 @@
 			"titleRelationsHint": "Adatok tárolása és kapcsolódása.",
 			"titleRoles": "Szerepek előkészítése",
 			"titleRolesHint": "Beállítani, hogy ki mit láthat és tehet meg."
+		},
+		"transfer": {
+			"exportKeyBad": "A hitelesítő kulcs érvénytelennek tűnik. Győződjön meg arról, hogy a privát kulcsot használja az exportáláshoz.",
+			"exportPrivateKeyHint": "Példa:\n-----BEGIN RSA PRIVATE KEY-----\nKULCS\n-----END RSA PRIVATE KEY-----",
+			"keyEntryOk0": "Choose a private key for signing the application",
+			"keyEntryOk1": "Private key ready to sign application",
+			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
+			"moduleChangesOk1": "Application ready for transfer",
+			"option": {
+				"method": {
+					"fileDownload": "Download as file",
+					"repoUpload": "Commit to repository"
+				}
+			},
+			"selectModule": "Select application",
+			"transferStart": "Transfer application"
 		},
 		"variable": {
 			"dialog": {
@@ -2566,6 +2567,7 @@
 		"tip": "Tip",
 		"title": "Cím",
 		"token": "Token",
+		"transfer": "Transfer",
 		"type": "Típus",
 		"unassigned": "Unassigned",
 		"uninstall": "Uninstall",
@@ -2580,6 +2582,7 @@
 		"versionApp": "Alkalmazás verziója",
 		"versionAppNew": "New application version",
 		"versionHistory": "Version history",
+		"versionNew": "New version",
 		"versionPlatform": "Platformverzió",
 		"visibility": "Visibility",
 		"visible": "Visible",

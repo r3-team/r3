@@ -893,6 +893,9 @@ table td.maximum{
 .generic-table{
 	width:100%;
 }
+.generic-table.noGrow{
+	width:fit-content;
+}
 .generic-table>thead>tr>th,
 .generic-table>tbody>tr>td{
 	height:36px;

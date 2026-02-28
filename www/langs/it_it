@@ -1572,15 +1572,10 @@
 		},
 		"module": {
 			"button": {
-				"check": "Controlla l'esportazione",
-				"export": "Esporta",
-				"exportKeySet": "Memorizza la chiave in memoria",
 				"graph": "Grafico delle dipendenze",
 				"keyCreate": "Genera",
 				"loginSyncCreate": "New user sync function",
-				"manageApps": "Manage applications",
-				"repo": "Install from repository",
-				"versionCreate": "Crea nuova versione"
+				"manageApps": "Manage applications"
 			},
 			"clientEventsHint": "REI3 has a client application, which users can install from their personal settings. When running, the REI3 client application can open files uploaded to REI3 with local software. It can also react to certain events, like hotkeys by defining so-called 'client events'. These are generally used to send information from the client to REI3, either to update data by using backend functions or to interact with an open REI3 browser session by using frontend functions.",
 			"color": "Colore",
@@ -1588,15 +1583,6 @@
 			"dependsOn": "Builds on",
 			"dependsOnAdd": "Add application",
 			"dependsOnHint": "Use other applications as foundation for your own. This enables reuse or extension of existing relations, forms and so on.",
-			"export": "Trasferisci - Esporta l'applicazione in un file",
-			"exportKeyBad": "Signing key seems invalid. Make sure to use the private key for exporting applications.",
-			"exportKeyEmpty": "La chiave di firma è necessaria per l'esportazione",
-			"exportKeySet": "Chiave salvata in memoria",
-			"exportOwner": "Esporta modifiche",
-			"exportPrivateKeyHint": "Esempio:\n-----BEGIN RSA PRIVATE KEY-----\nKEY\n-----END RSA PRIVATE KEY-----",
-			"exportState": "Stato esportazione",
-			"exportStateNok": "Modifiche alla versione attuale",
-			"exportStateOk": "Pronto",
 			"graphDependsOn": "Dipende da: {COUNT}",
 			"iconHint": "Icons are available, once they have been added to this application. Icons from applications that are being built on, can also be used.",
 			"iconPwa": "Application icons",
@@ -1635,7 +1621,6 @@
 			"startFormDefault": "Start form",
 			"startFormDefaultHint": "Form that is shown, when user opens the application.",
 			"title": "Application '{NAME}'",
-			"titleAll": "Applicazioni",
 			"titleHint": "The application title, visible to users when working with your application."
 		},
 		"navigationCaptionMap": "Captions",
@@ -1880,6 +1865,22 @@
 			"titleRelationsHint": "To store and add data to records.",
 			"titleRoles": "Prepare roles",
 			"titleRolesHint": "Define what everyone can do or see."
+		},
+		"transfer": {
+			"exportKeyBad": "Signing key seems invalid. Make sure to use the private key for exporting applications.",
+			"exportPrivateKeyHint": "Esempio:\n-----BEGIN RSA PRIVATE KEY-----\nKEY\n-----END RSA PRIVATE KEY-----",
+			"keyEntryOk0": "Choose a private key for signing the application",
+			"keyEntryOk1": "Private key ready to sign application",
+			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
+			"moduleChangesOk1": "Application ready for transfer",
+			"option": {
+				"method": {
+					"fileDownload": "Download as file",
+					"repoUpload": "Commit to repository"
+				}
+			},
+			"selectModule": "Select application",
+			"transferStart": "Transfer application"
 		},
 		"variable": {
 			"dialog": {
@@ -2566,6 +2567,7 @@
 		"tip": "Tip",
 		"title": "Titolo",
 		"token": "Token",
+		"transfer": "Transfer",
 		"type": "Type",
 		"unassigned": "Unassigned",
 		"uninstall": "Uninstall",
@@ -2580,6 +2582,7 @@
 		"versionApp": "Versione applicazione",
 		"versionAppNew": "New application version",
 		"versionHistory": "Version history",
+		"versionNew": "New version",
 		"versionPlatform": "Versione Piattaforma",
 		"visibility": "Visibility",
 		"visible": "Visible",

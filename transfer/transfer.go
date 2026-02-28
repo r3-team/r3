@@ -31,13 +31,8 @@ import (
 )
 
 var (
-	exportKey string       // in memory storage for export key
 	import_mx sync.RWMutex // transfer import mutex
 )
-
-func StoreExportKey(key string) {
-	exportKey = key
-}
 
 func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
 	var exists bool

@@ -1572,15 +1572,10 @@
 		},
 		"module": {
 			"button": {
-				"check": "Export prüfen",
-				"export": "Exportieren",
-				"exportKeySet": "Schlüssel zwischenspeichern",
 				"graph": "Abhängigkeitsdiagramm",
 				"keyCreate": "Erzeugen",
 				"loginSyncCreate": "Neue Benutzer-Sync-Funktion",
-				"manageApps": "Anwendungen verwalten",
-				"repo": "Vom Repository installieren",
-				"versionCreate": "Neue Version erzeugen"
+				"manageApps": "Anwendungen verwalten"
 			},
 			"clientEventsHint": "REI3 hat eine Client-Anwendung, welche Benutzer über ihre persönlichen Einstellungen installieren können. Wenn diese läuft, kann sie in REI3 hochgeladene Dateien mit lokaler Software öffnen. Sie kann auch auf bestimmte Ereignisse wie z. B. Hotkey-Eingaben reagieren, indem sogenannte 'Client-Ereignisse' definiert werden. Diese Ereignisse werden idR. genutzt, um Informationen vom Client zu REI3 zu schicken - entweder um Daten zu aktualisieren mithilfe von Backend-Funktionen oder mit einer offenen REI3-Browser-Sitzung zu interagieren mithilfe von Frontend-Funktionen.",
 			"color": "Farbe",
@@ -1588,15 +1583,6 @@
 			"dependsOn": "Baut auf",
 			"dependsOnAdd": "Anwendung hinzufügen",
 			"dependsOnHint": "Verwenden Sie andere Anwendungen als Grundlage für Ihre eigenen. Dies ermöglicht die Wiederverwendung oder Erweiterung bestehender Relationen, Formulare und so weiter.",
-			"export": "Transfer - Anwendung in Datei exportieren",
-			"exportKeyBad": "Signierschlüssel scheint ungültig zu sein. Stelle sicher, dass du den privaten Schlüssel für den Export verwendest.",
-			"exportKeyEmpty": "Export erfordert einen Signierschlüssel",
-			"exportKeySet": "Schlüssel zwischengespeichert",
-			"exportOwner": "Änderungen exportieren",
-			"exportPrivateKeyHint": "Beispiel:\n-----BEGIN RSA PRIVATE KEY-----\nSCHLÜSSEL\n-----END RSA PRIVATE KEY-----",
-			"exportState": "Exportstatus",
-			"exportStateNok": "Änderungen an akt. Version",
-			"exportStateOk": "Bereit",
 			"graphDependsOn": "Abhängig von: {COUNT}",
 			"iconHint": "Icons sind verfügbar, sobald sie dieser Anwendung hinzugefügt worden sind. Icons von Anwendungen, auf denen aufgebaut wird, können ebenfalls genutzt werden.",
 			"iconPwa": "Anwendungs-Icons",
@@ -1635,7 +1621,6 @@
 			"startFormDefault": "Startformular",
 			"startFormDefaultHint": "Formular, das gezeigt wird, wenn Benutzer die Anwendung öffnet.",
 			"title": "Anwendung \"{NAME}\"",
-			"titleAll": "Anwendungen",
 			"titleHint": "Der Anwendungstitel, sichtbar für Benutzer, wenn sie mit der Anwendung arbeiten."
 		},
 		"navigationCaptionMap": "Beschriftungen",
@@ -1880,6 +1865,22 @@
 			"titleRelationsHint": "Um Datensätze zu speichern und Daten zuweisen.",
 			"titleRoles": "Rollen vorbereiten",
 			"titleRolesHint": "Festlegen, was man sehen und tun darf."
+		},
+		"transfer": {
+			"exportKeyBad": "Signierschlüssel scheint ungültig zu sein. Der private Schlüssel muss für die Signierung genutzt werden.",
+			"exportPrivateKeyHint": "Beispiel:\n-----BEGIN RSA PRIVATE KEY-----\nSCHLÜSSEL\n-----END RSA PRIVATE KEY-----",
+			"keyEntryOk0": "Privaten Schlüssel zur Signierung der Anwendung auswählen",
+			"keyEntryOk1": "Privater Schlüssel bereit zur Signierung",
+			"moduleChangesOk0": "Neue Version(en) für Anwendung oder eine ihrer Abhängigkeiten erstellen",
+			"moduleChangesOk1": "Anwendung bereit zum Transfer",
+			"option": {
+				"method": {
+					"fileDownload": "Als Datei herunterladen",
+					"repoUpload": "In ein Repository hochladen"
+				}
+			},
+			"selectModule": "Anwendung auswählen",
+			"transferStart": "Anwendung transferieren"
 		},
 		"variable": {
 			"dialog": {
@@ -2566,6 +2567,7 @@
 		"tip": "Tipp",
 		"title": "Titel",
 		"token": "Token",
+		"transfer": "Transfer",
 		"type": "Typ",
 		"unassigned": "Nicht zugewiesen",
 		"uninstall": "Deinstallieren",
@@ -2580,6 +2582,7 @@
 		"versionApp": "Anwendungsversion",
 		"versionAppNew": "Neue Anwendungsversion",
 		"versionHistory": "Versions-Historie",
+		"versionNew": "Neue Version",
 		"versionPlatform": "Plattformversion",
 		"visibility": "Sichtbarkeit",
 		"visible": "Sichtbar",

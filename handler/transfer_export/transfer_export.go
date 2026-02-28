@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"r3/cache"
 	"r3/config"
 	"r3/db"
 	"r3/handler"
@@ -40,6 +41,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	exportKey, err := cache.GetExportKey(login.Id)
+	if err != nil {
+		log.Error(log.ContextServer, genErr, err)
+		return
+	}
+
 	// get module ID
 	moduleId, err := handler.ReadUuidGetterFromUrl(r, "module_id")
 	if err != nil {
@@ -53,7 +60,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := transfer.ExportToFile(ctx, moduleId, filePath); err != nil {
+	if err := transfer.ExportToFile(ctx, moduleId, exportKey, filePath); err != nil {
 		log.Error(log.ContextServer, genErr, err)
 		return
 	}
