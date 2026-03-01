@@ -1875,7 +1875,7 @@
 				"exportKeyBad": "Signierschlüssel scheint ungültig zu sein. Der private Schlüssel muss für die Signierung genutzt werden."
 			},
 			"exportPrivateKeyHint": "Beispiel:\n-----BEGIN RSA PRIVATE KEY-----\nSCHLÜSSEL\n-----END RSA PRIVATE KEY-----",
-			"keyEntryOk0": "Privaten Schlüssel zur Signierung der Anwendung auswählen",
+			"keyEntryOk0": "Privaten Schlüssel zur Signierung der Anwendung eingeben",
 			"keyEntryOk1": "Privater Schlüssel bereit zur Signierung",
 			"moduleChangesOk0": "Neue Version(en) für Anwendung oder eine ihrer Abhängigkeiten erstellen",
 			"moduleChangesOk1": "Anwendung bereit zum Transfer",
@@ -1885,8 +1885,10 @@
 					"repoUpload": "In ein Repository hochladen"
 				}
 			},
+			"repositoryCredentialsOk0": "Repository-Zugangsdaten mit Schreibzugriff eingeben",
+			"repositoryCredentialsOk1": "Repository-Zugangsdaten bereit",
 			"selectModule": "Anwendung auswählen",
-			"transferStart": "Anwendung transferieren"
+			"transferTargetOk1": "Transferziel ausgewählt"
 		},
 		"variable": {
 			"dialog": {
@@ -2532,6 +2534,7 @@
 		"relations": "Relationen",
 		"relationship": "Beziehung",
 		"relationships": "Beziehungen",
+		"repository": "Repository",
 		"required": "Benötigt",
 		"resultRow": "Ergebniszeile",
 		"results": "{CNT} Ergebnisse",

@@ -89,7 +89,7 @@ export default {
 		get() {
 			ws.send('repo','get',{},true).then(
 				res => this.repos = res.payload,
-				this.genericError
+				this.$root.genericError
 			);
 		}
 	}

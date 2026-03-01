@@ -819,6 +819,26 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
+
+			-- encrypted repo credential storage for logins
+			CREATE TABLE IF NOT EXISTS instance.login_repo_cred (
+				login_id integer NOT NULL,
+				repo_id uuid NOT NULL,
+				data_key_enc text COLLATE pg_catalog."default" NOT NULL,
+				data_user_enc text COLLATE pg_catalog."default" NOT NULL,
+				data_pass_enc text COLLATE pg_catalog."default" NOT NULL,
+				CONSTRAINT login_repo_cred_pkey PRIMARY KEY (login_id,repo_id),
+				CONSTRAINT login_repo_cred_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_repo_cred_repo_id_fkey FOREIGN KEY (repo_id)
+					REFERENCES instance.repo (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
 		`)
 		return "3.12", err
 	},

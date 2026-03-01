@@ -435,6 +435,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		}
 	case "loginExportKey":
 		switch action {
+		case "del":
+			return request_login.ExportKeyDel_tx(ctx, tx, loginId)
 		case "get":
 			return request_login.ExportKeyGet_tx(ctx, tx, loginId)
 		case "set":
@@ -446,6 +448,15 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return request_login.FormDel_tx(ctx, tx, reqJson)
 		case "set":
 			return request_login.FormSet_tx(ctx, tx, reqJson)
+		}
+	case "loginRepoCred":
+		switch action {
+		case "del":
+			return request_login.RepoCredDel_tx(ctx, tx, reqJson, loginId)
+		case "get":
+			return request_login.RepoCredGet_tx(ctx, tx, reqJson, loginId)
+		case "set":
+			return request_login.RepoCredSet_tx(ctx, tx, reqJson, loginId)
 		}
 	case "loginSession":
 		switch action {

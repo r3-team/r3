@@ -13,30 +13,37 @@ export default {
 	name:'my-builder-transfer',
 	components:{MyModuleSelect},
 	template:`<div class="contentBox grow">
-		<div class="content flex column gap default-inputs">
+		<div class="content flex column gap default-inputs builder-transfer">
 			<div class="column gap">
 				<my-label
 					:caption="capApp.selectModule"
-					:image="id === null ? 'question.png' : 'ok.png'"
+					:image="moduleId === null ? 'question.png' : 'ok.png'"
 					:large="true"
 				/>
 				<my-module-select
-					v-model="id"
-					@update:modelValue="check"
+					v-model="moduleId"
+					@update:modelValue="checkModule"
 					:allowEmpty="true"
 					:preSelectOne="false"
 				/>
 			</div>
 
-			<template v-if="id !== null">
+			<template v-if="moduleId !== null">
 
 				<!-- change state -->
 				<div class="column gap">
-					<my-label
-						:caption="changesOk ? capApp.moduleChangesOk1 : capApp.moduleChangesOk0"
-						:image="changesOk ? 'ok.png' : 'question.png'"
-						:large="true"
-					/>
+					<div class="row gap space-between">
+						<my-label
+							:caption="changesOk ? capApp.moduleChangesOk1 : capApp.moduleChangesOk0"
+							:image="changesOk ? 'ok.png' : 'question.png'"
+							:large="true"
+						/>
+						<my-button image="refresh.png"
+							v-if="changesOk"
+							@trigger="checkModule"
+							:caption="capGen.button.refresh"
+						/>
+					</div>
 					<table class="generic-table bright noGrow input-custom" v-if="!changesOk">
 						<tbody>
 							<template v-for="(changed,moduleId) in moduleIdMapChanged">
@@ -63,51 +70,99 @@ export default {
 
 				<!-- private key for signing -->
 				<div class="column gap">
-					<my-label
-						:caption="isKeySet ? capApp.keyEntryOk1 : capApp.keyEntryOk0"
-						:image="isKeySet ? 'ok.png' : 'question.png'"
-						:large="true"
-					/>
+					<div class="row gap space-between">
+						<my-label
+							:caption="isExportKeySet ? capApp.keyEntryOk1 : capApp.keyEntryOk0"
+							:image="isExportKeySet ? 'ok.png' : 'question.png'"
+							:large="true"
+						/>
+						<my-button image="cancel.png"
+							v-if="isExportKeySet"
+							@trigger="resetKey"
+							:caption="capGen.button.reset"
+						/>
+					</div>
 					
 					<textarea
-						v-if="!isKeySet"
+						v-if="!isExportKeySet"
 						v-model="exportKeyPrivate"
 						:placeholder="capApp.exportPrivateKeyHint"
 					></textarea>
 					
-					<div class="row gap">
+					<div class="row gap-large" v-if="!isExportKeySet">
 						<my-button image="ok.png"
-							v-if="!isKeySet"
 							@trigger="setKey"
 							:active="exportKeyPrivate !== ''"
 							:caption="capGen.button.ok"
 						/>
 						<my-button-check
-							v-if="!isKeySet"
 							v-model="exportKeyPrivateAsE2ee"
 							:caption="capApp.button.storeE2ee"
-						/>
-						<my-button image="cancel.png"
-							v-if="isKeySet"
-							@trigger="isKeySet = false"
-							:caption="capGen.button.reset"
 						/>
 					</div>
 				</div>
 
 				<!-- start transfer -->
 				<div class="column gap">
-					<my-label image="box.png" :caption="capApp.transferStart" :large="true" />
-					<select v-model="method">
-						<option v-for="m in methods" :value="m">{{ capApp.option.method[m] }}</option>
+					<my-label image="ok.png"
+						:caption="capApp.transferTargetOk1"
+						:large="true"
+					/>
+					<select @input="transferTarget = $event.target.value; getRepoCred()" :value="transferTarget">
+						<option value="fileDownload">{{ capApp.option.method.fileDownload }}</option>
+						<optgroup :label="capApp.option.method.repoUpload">
+							<option v-for="r in repos.filter(v => v.active)" :value="r.id">{{ r.name }}</option>
+						</optgroup>
 					</select>
-					<div class="row gap">
-						<a target="_blank" v-if="method === 'fileDownload'" :href="href" :download="hrefName">
+
+					<!-- transfer: file download -->
+					<div class="row gap" v-if="transferTarget === 'fileDownload'">
+						<a target="_blank" :href="href" :download="hrefName">
 							<my-button image="download.png"
-								:active="isKeySet && changesOk"
-								:caption="capGen.button.ok"
+								:active="isExportKeySet && changesOk"
+								:caption="capGen.button.download"
 							/>
 						</a>
+					</div>
+
+					<!-- transfer: repo upload -->
+					<div class="column gap" v-if="repoId !== null">
+						<div class="row gap space-between">
+							<my-label
+								:caption="isRepoCredSet ? capApp.repositoryCredentialsOk1 : capApp.repositoryCredentialsOk0"
+								:image="isRepoCredSet ? 'ok.png' : 'question.png'"
+								:large="true"
+							/>
+							<my-button image="cancel.png"
+								v-if="isRepoCredSet"
+								@trigger="resetRepoCred"
+								:caption="capGen.button.reset"
+							/>
+						</div>
+						<template v-if="!isRepoCredSet">
+							<input type="text"     v-model="repoCredUser" :placeholder="capGen.username" />
+							<input type="passwort" v-model="repoCredPass" :placeholder="capGen.password" />
+							<div class="row gap-large">
+								<my-button image="ok.png"
+									@trigger="setRepoCred"
+									:active="repoCredUser !== '' && repoCredPass !== ''"
+									:caption="capGen.button.ok"
+								/>
+								<my-button-check
+									v-model="repoAsE2ee"
+									:caption="capApp.button.storeE2ee"
+								/>
+							</div>
+						</template>
+						<template v-if="isRepoCredSet">
+							<div class="row gap">
+								<my-button image="upload.png"
+									@trigger="commitToRepo"
+									:active="isExportKeySet"
+									:caption="capApp.option.method.repoUpload"
+								/>
+							</div>
+						</template>
 					</div>
 				</div>
 			</template>
@@ -127,10 +182,10 @@ export default {
 
 		// simple
 		changesOk:  s => s.moduleIdsChanged.length === 0,
-		href:       s => !s.isKeySet || !s.changesOk ? null : `/export/${s.hrefName}?token=${s.token}&module_id=${s.id}&date=${Math.floor(new Date().getTime() / 1000)}`,
+		href:       s => !s.isExportKeySet || !s.changesOk ? null : `/export/${s.hrefName}?token=${s.token}&module_id=${s.moduleId}&date=${Math.floor(new Date().getTime() / 1000)}`,
 		hrefName:   s => `${s.module.name}_${s.module.releaseBuild}.rei3`,
 		isE2eeReady:s => s.loginEncEnabled && !s.loginEncLocked,
-		methods:    s => ['fileDownload','repoUpload'],
+		repoId:     s => s.transferTarget === 'fileDownload' ? null : s.transferTarget,
 		
 		// stores
 		token:          s => s.$store.getters['local/token'],
@@ -143,25 +198,36 @@ export default {
 		loginEncLocked: s => s.$store.getters.loginEncLocked,
 		loginPrivateKey:s => s.$store.getters.loginPrivateKey,
 		loginPublicKey :s => s.$store.getters.loginPublicKey,
-		module:         s => s.moduleIdMap[s.id] !== undefined ? s.moduleIdMap[s.id] : false,
+		module:         s => s.moduleIdMap[s.moduleId] !== undefined ? s.moduleIdMap[s.moduleId] : false,
 		moduleIdMapMeta:s => s.$store.getters.moduleIdMapMeta
 	},
 	data() {
 		return {
-			exportKeyPrivate:'',
-			exportKeyPrivateAsE2ee:false,
-			id:null,
-			isKeySet:false,
-			method:'fileDownload',
-			moduleIdMapChanged:null
+			exportKeyPrivate:'',          // private key for export
+			exportKeyPrivateAsE2ee:false, // store export key via E2EE (to reuse in new session)
+			isExportKeySet:false,         // private key for export ready?
+			isRepoCredSet:false,          // credentials for repository upload ready?
+			moduleId:null,                // selected module
+			moduleIdMapChanged:null,      // list of module IDs that have changes
+			repoAsE2ee:false,             // store repository credentials via E2EE (to reuse in new session)
+			repoCredPass:'',
+			repoCredUser:'',
+			repos:[],
+			transferTarget:'fileDownload' // either 'fileDownload' or ID of repository to commit to
 		};
 	},
 	mounted() {
+		// fetch repos
+		ws.send('repo','get',{},true).then(
+			res => this.repos = res.payload,
+			this.$root.genericError
+		);
+
 		if(this.isE2eeReady) {
 			// fetch stored export key for current login
 			ws.send('loginExportKey','get',{},true).then(
 				res => {
-					if(res.payload.dataEnc === '')
+					if(res.payload === null)
 						return;
 
 					// if available, decrypt export key and apply it
@@ -192,25 +258,112 @@ export default {
 		rsaEncrypt,
 		srcBase64Icon,
 
-		// actions
+		// versioning
 		addVersion(moduleId) {
 			ws.send('transfer','addVersion',moduleId,true).then(
 				() => {
 					ws.send('schema','reload',{moduleId},true).then(
-						this.check,
+						this.checkModule,
 						this.$root.genericError
 					);
 				},
 				this.$root.genericError
 			);
 		},
-		check() {
-			if(this.id !== null) {
-				ws.send('module','checkChange',this.id,true).then(
+
+		// repository commit
+		commitToRepo() {
+
+		},
+
+		// repository credentials
+		getRepoCred() {
+			this.repoCredPass  = '';
+			this.repoCredUser  = '';
+			this.isRepoCredSet = false;
+			if(this.repoId === null)
+				return;
+
+			ws.send('loginRepoCred','get',this.repoId,true).then(
+				res => {
+					if(res.payload === null)
+						return;
+
+					const dataKeyEnc = res.payload.dataKeyEnc;
+					const passEnc    = res.payload.dataPassEnc;
+					const userEnc    = res.payload.dataUserEnc;
+					
+					this.rsaDecrypt(this.loginPrivateKey, dataKeyEnc).then(
+						dataKey => {
+							Promise.all([
+								this.aesGcmDecryptBase64WithPhrase(passEnc,dataKey),
+								this.aesGcmDecryptBase64WithPhrase(userEnc,dataKey)
+							]).then(
+								res => {
+									this.repoCredPass  = res[0];
+									this.repoCredUser  = res[1];
+									this.isRepoCredSet = true
+								},
+								console.warn
+							);
+						},
+						console.warn
+					);
+				},
+				this.$root.genericError
+			);
+		},
+		resetRepoCred() {
+			ws.send('loginRepoCred','del',this.repoId,true).then(
+				res => {
+					this.repoCredPass  = '';
+					this.repoCredUser  = '';
+					this.isRepoCredSet = false;
+				},
+				this.$root.genericError
+			);
+		},
+		setRepoCred() {
+			if(!this.repoAsE2ee)
+				return this.isRepoCredSet = true;
+
+			const dataKey = this.getRandomString(this.keyLength);
+			Promise.all([
+				this.rsaEncrypt(this.loginPublicKey,dataKey),
+				this.aesGcmEncryptBase64WithPhrase(this.repoCredPass,dataKey),
+				this.aesGcmEncryptBase64WithPhrase(this.repoCredUser,dataKey)
+			]).then(
+				res => {
+					ws.send('loginRepoCred','set',{
+						dataKeyEnc:res[0],
+						dataPassEnc:res[1],
+						dataUserEnc:res[2],
+						repoId:this.repoId
+					},true).then(
+						() => this.isRepoCredSet = true,
+						this.$root.genericError
+					);
+				},
+				this.$root.genericError
+			);
+		},
+
+		// module validation
+		checkModule() {
+			if(this.moduleId !== null) {
+				ws.send('module','checkChange',this.moduleId,true).then(
 					res => this.moduleIdMapChanged = res.payload.moduleIdMapChanged,
 					this.$root.genericError
 				);
 			}
+		},
+
+		// export key
+		resetKey() {
+			ws.send('loginExportKey','del',{},true).then(
+				() => this.isExportKeySet = false,
+				this.$root.genericError
+			);
 		},
 		setKey() {
 			if(!this.exportKeyPrivate.includes('-----BEGIN RSA PRIVATE KEY-----'))
@@ -240,7 +393,7 @@ export default {
 		setKeyForExport() {
 			ws.send('transfer','storeExportKey',this.exportKeyPrivate,true).then(
 				() => {
-					this.isKeySet         = true;
+					this.isExportKeySet   = true;
 					this.exportKeyPrivate = '';
 				},
 				this.$root.genericError

@@ -8,6 +8,10 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+func ExportKeyDel_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
+	return nil, login_exportKey.Del_tx(ctx, tx, loginId)
+}
+
 func ExportKeyGet_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
 	return login_exportKey.Get_tx(ctx, tx, loginId)
 }

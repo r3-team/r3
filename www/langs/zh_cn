@@ -1885,8 +1885,10 @@
 					"repoUpload": "Commit to repository"
 				}
 			},
+			"repositoryCredentialsOk0": "Enter repository credentials with write access",
+			"repositoryCredentialsOk1": "Repository credentials ready",
 			"selectModule": "Select application",
-			"transferStart": "Transfer application"
+			"transferTargetOk1": "Transfer target selected"
 		},
 		"variable": {
 			"dialog": {
@@ -2532,6 +2534,7 @@
 		"relations": "关联",
 		"relationship": "关系",
 		"relationships": "关系",
+		"repository": "Repository",
 		"required": "必填",
 		"resultRow": "Result row",
 		"results": "{CNT} 结果",
