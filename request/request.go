@@ -215,11 +215,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			}
 			return request_login.PasswortSet_tx(ctx, tx, reqJson, loginId)
 		}
-	case "loginRepoCred":
-		switch action {
-		case "get":
-		case "set":
-		}
 	case "loginSetting":
 		switch action {
 		case "get":

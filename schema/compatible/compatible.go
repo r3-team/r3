@@ -15,7 +15,6 @@ import (
 )
 
 // < 3.12
-// fix missing zero release
 func FixMissingZeroRelease(releases []types.Release) []types.Release {
 	if len(releases) == 0 {
 		releases = append(releases, types.Release{
@@ -26,6 +25,12 @@ func FixMissingZeroRelease(releases []types.Release) []types.Release {
 		})
 	}
 	return releases
+}
+func FixMissingReleaseLogCategories(categories []string) []string {
+	if len(categories) == 0 {
+		categories = append(categories, "Added", "Improved", "Fixed")
+	}
+	return categories
 }
 
 // < 3.11

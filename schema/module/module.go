@@ -129,8 +129,9 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 		return mod.Id, err
 	}
 
-	// fix imports < 3.12: Missing zero release
+	// fix imports < 3.12: Missing zero release & release log categories
 	mod.Releases = compatible.FixMissingZeroRelease(mod.Releases)
+	mod.ReleaseLogCategories = compatible.FixMissingReleaseLogCategories(mod.ReleaseLogCategories)
 
 	if len(mod.LanguageMain) != 5 {
 		return mod.Id, errors.New("language code must have 5 characters")

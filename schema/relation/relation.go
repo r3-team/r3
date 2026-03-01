@@ -64,9 +64,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	return err
 }
 func delPkSeq_tx(ctx context.Context, tx pgx.Tx, modName string, id uuid.UUID) error {
-	_, err := tx.Exec(ctx, fmt.Sprintf(`
-		DROP SEQUENCE "%s"."%s"
-	`, modName, schema.GetSequenceName(id)))
+	_, err := tx.Exec(ctx, fmt.Sprintf(`DROP SEQUENCE "%s"."%s"`, modName, schema.GetSequenceName(id)))
 	return err
 }
 
