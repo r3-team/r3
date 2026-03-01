@@ -1,4 +1,4 @@
-package request
+package request_login
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 )
 
 // user requests
-func LoginGetNames_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func GetNames_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		ByString     string  `json:"byString"`
@@ -30,7 +30,7 @@ func LoginGetNames_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (
 	}
 	return login.GetNames_tx(ctx, tx, req.Id, req.IdsExclude, req.ByString, req.NoLdapAssign)
 }
-func LoginDelTokenFixed_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func DelTokenFixed_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 	var req struct {
 		Id int64 `json:"id"`
 	}
@@ -39,10 +39,10 @@ func LoginDelTokenFixed_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessa
 	}
 	return nil, login.DelTokenFixed_tx(ctx, tx, loginId, req.Id)
 }
-func LoginGetTokensFixed_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
+func GetTokensFixed_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
 	return login.GetTokensFixed_tx(ctx, tx, loginId)
 }
-func LoginSetTokenFixed_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func SetTokenFixed_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 
 	var (
 		err error
@@ -66,7 +66,7 @@ func LoginSetTokenFixed_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessa
 }
 
 // admin requests
-func LoginDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func Del_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		Id int64 `json:"id"`
@@ -76,7 +76,7 @@ func LoginDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, 
 	}
 	return nil, login.Del_tx(ctx, tx, req.Id)
 }
-func LoginGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func Get_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var (
 		req struct {
@@ -105,7 +105,7 @@ func LoginGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, 
 
 	return res, err
 }
-func LoginGetIsNotUnique_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func GetIsNotUnique_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req struct {
 		LoginId int64  `json:"loginId"`
 		Content string `json:"content"`
@@ -116,7 +116,7 @@ func LoginGetIsNotUnique_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMess
 	}
 	return login_meta.GetIsNotUnique_tx(ctx, tx, req.LoginId, req.Content, req.Value)
 }
-func LoginGetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func GetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var (
 		err error
@@ -138,7 +138,7 @@ func LoginGetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage)
 	}
 	return res, nil
 }
-func LoginGetRecords_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func GetRecords_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		AttributeIdLookup uuid.UUID `json:"attributeIdLookup"`
@@ -152,7 +152,7 @@ func LoginGetRecords_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage)
 	}
 	return login.GetRecords_tx(ctx, tx, req.AttributeIdLookup, req.IdsExclude, req.ById, req.ByString)
 }
-func LoginSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func Set_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		Id               int64                       `json:"id"`
@@ -176,7 +176,7 @@ func LoginSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, 
 		pgtype.Int4{}, pgtype.Text{}, pgtype.Text{}, req.Name, req.Pass, req.Admin,
 		req.NoAuth, req.Active, req.TokenExpiryHours, req.Meta, req.RoleIds, req.Records)
 }
-func LoginSetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func SetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		RoleId   uuid.UUID `json:"roleId"`
@@ -188,7 +188,7 @@ func LoginSetMembers_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage)
 	}
 	return nil, login_role.SetRoleLogins_tx(ctx, tx, req.RoleId, req.LoginIds)
 }
-func LoginKick(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func Kick(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		Id int64 `json:"id"`
@@ -199,7 +199,7 @@ func LoginKick(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, er
 	}
 	return nil, cluster.LoginDisabled_tx(ctx, tx, true, req.Id)
 }
-func LoginReauth_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func Reauth_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		Id int64 `json:"id"`
@@ -210,10 +210,10 @@ func LoginReauth_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (an
 	}
 	return nil, cluster.LoginReauthorized_tx(ctx, tx, true, req.Id)
 }
-func LoginReauthAll_tx(ctx context.Context, tx pgx.Tx) (any, error) {
+func ReauthAll_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 	return nil, cluster.LoginReauthorizedAll_tx(ctx, tx, true)
 }
-func LoginResetTotp_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func ResetTotp_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req struct {
 		Id int64 `json:"id"`
 	}

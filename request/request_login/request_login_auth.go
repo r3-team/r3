@@ -1,4 +1,4 @@
-package request
+package request_login
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 
 // attempt login via user credentials
 // applies login ID, admin and no auth state to provided parameters if successful
-func LoginAuthUser(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
+func AuthUser(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
 
 	var req struct {
 		Username string `json:"username"`
@@ -29,7 +29,7 @@ func LoginAuthUser(ctx context.Context, reqJson json.RawMessage) (types.LoginAut
 
 // attempt login via Open ID Connect
 // applies login ID, admin to provided parameters if successful
-func LoginAuthOpenId(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
+func AuthOpenId(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
 
 	var req struct {
 		Code          string `json:"code"`
@@ -44,7 +44,7 @@ func LoginAuthOpenId(ctx context.Context, reqJson json.RawMessage) (types.LoginA
 
 // attempt login via JWT
 // applies login ID, admin and no auth state to provided parameters if successful
-func LoginAuthToken(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
+func AuthToken(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
 	var req string
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return types.LoginAuthResult{}, err
@@ -54,7 +54,7 @@ func LoginAuthToken(ctx context.Context, reqJson json.RawMessage) (types.LoginAu
 
 // attempt login via fixed token
 // applies login ID to provided parameters if successful
-func LoginAuthTokenFixed(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
+func AuthTokenFixed(ctx context.Context, reqJson json.RawMessage) (types.LoginAuthResult, error) {
 
 	var req struct {
 		LoginId    int64  `json:"loginId"`

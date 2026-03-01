@@ -1,4 +1,4 @@
-package request
+package request_login
 
 import (
 	"context"
@@ -8,11 +8,11 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func loginExportKeyGet_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
+func ExportKeyGet_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
 	return login_exportKey.Get_tx(ctx, tx, loginId)
 }
 
-func loginExportKeySet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func ExportKeySet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 	var req struct {
 		DataEnc    string `json:"dataEnc"`
 		DataKeyEnc string `json:"dataKeyEnc"`

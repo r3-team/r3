@@ -1,4 +1,4 @@
-package request
+package request_login
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func loginClientEventDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func ClientEventDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 	var req struct {
 		ClientEventId uuid.UUID `json:"clientEventId"`
 	}
@@ -20,11 +20,11 @@ func loginClientEventDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMess
 	return nil, login_clientEvent.Del_tx(ctx, tx, loginId, req.ClientEventId)
 }
 
-func loginClientEventGet_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
+func ClientEventGet_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
 	return login_clientEvent.Get_tx(ctx, tx, loginId)
 }
 
-func loginClientEventSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func ClientEventSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 	var req struct {
 		ClientEventId    uuid.UUID              `json:"clientEventId"`
 		LoginClientEvent types.LoginClientEvent `json:"loginClientEvent"`

@@ -159,7 +159,7 @@ export default {
 	mounted() {
 		if(this.isE2eeReady) {
 			// fetch stored export key for current login
-			ws.send('login','getExportKey',{},true).then(
+			ws.send('loginExportKey','get',{},true).then(
 				res => {
 					if(res.payload.dataEnc === '')
 						return;
@@ -229,7 +229,7 @@ export default {
 				this.rsaEncrypt(this.loginPublicKey,dataKey)
 			]).then(
 				res => {
-					ws.send('login','setExportKey',{dataEnc:res[0],dataKeyEnc:res[1]},true).then(
+					ws.send('loginExportKey','set',{dataEnc:res[0],dataKeyEnc:res[1]},true).then(
 						this.setKeyForExport,
 						this.$root.genericError
 					);

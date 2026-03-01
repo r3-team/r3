@@ -1,4 +1,4 @@
-package request
+package request_login
 
 import (
 	"context"
@@ -10,12 +10,12 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func LoginSettingsGet_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
+func SettingsGet_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
 	return login_setting.Get_tx(ctx, tx,
 		pgtype.Int8{Int64: loginId, Valid: true},
 		pgtype.Int8{})
 }
-func LoginSettingsSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func SettingsSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 	var req types.Settings
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err

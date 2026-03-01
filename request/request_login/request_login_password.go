@@ -1,4 +1,4 @@
-package request
+package request_login
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func loginPasswortSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func PasswortSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 
 	var req struct {
 		PwNew0 string `json:"pwNew0"`

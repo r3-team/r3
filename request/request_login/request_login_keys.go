@@ -1,4 +1,4 @@
-package request
+package request_login
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func LoginKeysGetPublic_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func KeysGetPublic_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 
 	var req struct {
 		LoginIds   []int64   `json:"loginIds"`
@@ -23,11 +23,11 @@ func LoginKeysGetPublic_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessa
 	return login_keys.GetPublic_tx(ctx, tx, req.RelationId, req.RecordIds, req.LoginIds)
 }
 
-func LoginKeysReset_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
+func KeysReset_tx(ctx context.Context, tx pgx.Tx, loginId int64) (any, error) {
 	return nil, login_keys.Reset_tx(ctx, tx, loginId)
 }
 
-func LoginKeysStore_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func KeysStore_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 
 	var req struct {
 		PrivateKeyEnc       string `json:"privateKeyEnc"`
@@ -42,7 +42,7 @@ func LoginKeysStore_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, 
 		req.PrivateKeyEnc, req.PrivateKeyEncBackup, req.PublicKey)
 }
 
-func LoginKeysStorePrivate_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func KeysStorePrivate_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 
 	var req struct {
 		PrivateKeyEnc string `json:"privateKeyEnc"`

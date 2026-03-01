@@ -14,6 +14,7 @@ import (
 	"r3/log"
 	"r3/login/login_session"
 	"r3/request"
+	"r3/request/request_login"
 	"r3/types"
 	"strings"
 	"sync"
@@ -354,17 +355,17 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 		switch req.Action {
 		case "openId": // authentication via Open ID Connect
-			login, err = request.LoginAuthOpenId(ctx, req.Payload)
+			login, err = request_login.AuthOpenId(ctx, req.Payload)
 
 		case "token": // authentication via JSON web token
-			login, err = request.LoginAuthToken(ctx, req.Payload)
+			login, err = request_login.AuthToken(ctx, req.Payload)
 
 		case "tokenFixed": // authentication via fixed token (fat-client only)
-			login, err = request.LoginAuthTokenFixed(ctx, req.Payload)
+			login, err = request_login.AuthTokenFixed(ctx, req.Payload)
 			client.device = types.WebsocketClientDeviceFatClient
 
 		case "user": // authentication via username + password (+ MFA if used)
-			login, err = request.LoginAuthUser(ctx, req.Payload)
+			login, err = request_login.AuthUser(ctx, req.Payload)
 		}
 
 		if err != nil {

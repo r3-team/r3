@@ -1,4 +1,4 @@
-package request
+package request_login
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func LoginSessionConcurrentGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
+func SessionConcurrentGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 	var err error
 	var res struct {
 		Full    int64 `json:"full"`
@@ -20,7 +20,7 @@ func LoginSessionConcurrentGet_tx(ctx context.Context, tx pgx.Tx) (any, error) {
 	return res, err
 }
 
-func LoginSessionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
+func SessionsGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req struct {
 		ByString pgtype.Text `json:"byString"`
 		Limit    int         `json:"limit"`

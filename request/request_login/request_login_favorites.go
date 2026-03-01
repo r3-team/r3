@@ -1,4 +1,4 @@
-package request
+package request_login
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func LoginAddFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func AddFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 	var req struct {
 		SrcFormId     uuid.UUID   `json:"srcFormId"`     // form that this favorite is created from
 		SrcFavoriteId pgtype.UUID `json:"srcFavoriteId"` // favorite that this favorite is created from (optional)
@@ -34,7 +34,7 @@ func LoginAddFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessag
 	return id, login_options.CopyToFavorite_tx(ctx, tx, loginId, req.IsMobile, req.SrcFormId, req.SrcFavoriteId, id)
 }
 
-func LoginGetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, isNoAuth bool) (any, error) {
+func GetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64, isNoAuth bool) (any, error) {
 	var (
 		err error
 		req struct {
@@ -63,7 +63,7 @@ func LoginGetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessag
 	return res, nil
 }
 
-func LoginSetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+func SetFavorites_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 	var req map[uuid.UUID][]types.LoginFavorite
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
