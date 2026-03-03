@@ -84,7 +84,7 @@ func RefreshAll_tx(ctx context.Context, tx pgx.Tx) error {
 // update internal module repository from external repository API
 func refresh_tx(ctx context.Context, tx pgx.Tx, r types.Repo) error {
 
-	token, err := httpGetAuthToken(r)
+	token, err := httpGetAuthToken(r.Url, r.FetchUserName, r.FetchUserPass, r.SkipVerify)
 	if err != nil {
 		return err
 	}

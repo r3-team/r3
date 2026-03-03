@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 	"r3/config"
-	"r3/types"
+	"r3/handler"
 )
 
 func httpCallGet(token string, url string, skipVerify bool, reqIf any, resIf any) error {
@@ -47,12 +47,12 @@ func httpCall(method string, token string, url string, skipVerify bool, reqIf an
 	if err != nil {
 		return err
 	}
+	defer httpRes.Body.Close()
 
 	if httpRes.StatusCode != http.StatusOK {
-		return fmt.Errorf("non-OK HTTP status code (%d)", httpRes.StatusCode)
+		return httpErrorGetMsg(httpRes)
 	}
 
-	defer httpRes.Body.Close()
 	bodyRaw, err := io.ReadAll(httpRes.Body)
 	if err != nil {
 		return err
@@ -60,21 +60,37 @@ func httpCall(method string, token string, url string, skipVerify bool, reqIf an
 	return json.Unmarshal(bodyRaw, resIf)
 }
 
-func httpGetAuthToken(r types.Repo) (string, error) {
+func httpGetAuthToken(urlBase, credUser, credPass string, skipVerify bool) (string, error) {
 
 	var req = struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
 	}{
-		Username: r.FetchUserName,
-		Password: r.FetchUserPass,
+		Username: credUser,
+		Password: credPass,
 	}
 
 	var res struct {
 		Token string `json:"token"`
 	}
-	if err := httpCallPost("", fmt.Sprintf("%s/api/auth", r.Url), r.SkipVerify, req, &res); err != nil {
+	if err := httpCallPost("", fmt.Sprintf("%s/api/auth", urlBase), skipVerify, req, &res); err != nil {
 		return "", err
 	}
 	return res.Token, nil
+}
+
+// attempts to parse REI3 error message from response if given (REI3 APIs & generic handlers provide { "error":"MESSAGE" } )
+func httpErrorGetMsg(res *http.Response) error {
+	errMsg := handler.ErrGeneral
+	bodyRaw, err := io.ReadAll(res.Body)
+	if err == nil {
+		var resErr struct {
+			Error string `json:"error"`
+		}
+		if err := json.Unmarshal(bodyRaw, &resErr); err == nil {
+			errMsg = resErr.Error
+		}
+	}
+	return fmt.Errorf("HTTP error code (%d), %s", res.StatusCode, errMsg)
+
 }

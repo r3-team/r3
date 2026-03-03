@@ -627,8 +627,8 @@ type RelationPolicy struct {
 	ActionUpdate     bool          `json:"actionUpdate"`
 }
 type Release struct {
-	Build       int          `json:"build"`
-	BuildApp    int          `json:"buildApp"`
+	Build       int64        `json:"build"`
+	BuildApp    int64        `json:"buildApp"`
 	DateCreated int64        `json:"dateCreated"`
 	Logs        []ReleaseLog `json:"logs"`
 }

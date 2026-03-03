@@ -10,6 +10,20 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+func RepoCommit(ctx context.Context, reqJson json.RawMessage, loginId int64) (any, error) {
+	var req struct {
+		CredPass string    `json:"credPass"`
+		CredUser string    `json:"credUser"`
+		FileName string    `json:"fileName"`
+		ModuleId uuid.UUID `json:"moduleId"`
+		RepoId   uuid.UUID `json:"repoId"`
+	}
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	return nil, repo.RepoCommit(ctx, loginId, req.RepoId, req.CredUser, req.CredPass, req.ModuleId, req.FileName)
+}
+
 func RepoDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var id uuid.UUID
 	if err := json.Unmarshal(reqJson, &id); err != nil {

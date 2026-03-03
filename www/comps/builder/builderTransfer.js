@@ -13,13 +13,15 @@ export default {
 	name:'my-builder-transfer',
 	components:{MyModuleSelect},
 	template:`<div class="contentBox grow">
-		<div class="content flex column gap default-inputs builder-transfer">
-			<div class="column gap">
-				<my-label
-					:caption="capApp.selectModule"
-					:image="moduleId === null ? 'question.png' : 'ok.png'"
-					:large="true"
-				/>
+		<div class="content default-inputs builder-transfer">
+			<div class="contentPart long">
+				<div class="contentPartHeader space-between">
+					<my-label
+						:caption="capApp.selectModule"
+						:image="moduleId === null ? 'question.png' : 'ok.png'"
+						:large="true"
+					/>
+				</div>
 				<my-module-select
 					v-model="moduleId"
 					@update:modelValue="checkModule"
@@ -31,8 +33,8 @@ export default {
 			<template v-if="moduleId !== null">
 
 				<!-- change state -->
-				<div class="column gap">
-					<div class="row gap space-between">
+				<div class="contentPart long">
+					<div class="contentPartHeader space-between">
 						<my-label
 							:caption="changesOk ? capApp.moduleChangesOk1 : capApp.moduleChangesOk0"
 							:image="changesOk ? 'ok.png' : 'question.png'"
@@ -44,7 +46,7 @@ export default {
 							:caption="capGen.button.refresh"
 						/>
 					</div>
-					<table class="generic-table bright noGrow input-custom" v-if="!changesOk">
+					<table class="generic-table" v-if="!changesOk">
 						<tbody>
 							<template v-for="(changed,moduleId) in moduleIdMapChanged">
 								<tr v-if="moduleIdMapMeta[moduleId].owner && changed">
@@ -56,7 +58,7 @@ export default {
 											/>
 										</div>
 									</td>
-									<td>
+									<td class="minimum">
 										<my-button image="add.png"
 											@trigger="addVersion(moduleId)"
 											:caption="capGen.versionNew"
@@ -69,8 +71,8 @@ export default {
 				</div>
 
 				<!-- private key for signing -->
-				<div class="column gap">
-					<div class="row gap space-between">
+				<div class="contentPart long">
+					<div class="contentPartHeader space-between">
 						<my-label
 							:caption="isExportKeySet ? capApp.keyEntryOk1 : capApp.keyEntryOk0"
 							:image="isExportKeySet ? 'ok.png' : 'question.png'"
@@ -82,63 +84,68 @@ export default {
 							:caption="capGen.button.reset"
 						/>
 					</div>
-					
-					<textarea
-						v-if="!isExportKeySet"
-						v-model="exportKeyPrivate"
-						:placeholder="capApp.exportPrivateKeyHint"
-					></textarea>
-					
-					<div class="row gap-large" v-if="!isExportKeySet">
-						<my-button image="ok.png"
-							@trigger="setKey"
-							:active="exportKeyPrivate !== ''"
-							:caption="capGen.button.ok"
-						/>
-						<my-button-check
-							v-model="exportKeyPrivateAsE2ee"
-							:caption="capApp.button.storeE2ee"
-						/>
+					<div class="column gap-large">
+						<textarea
+							v-if="!isExportKeySet"
+							v-model="exportKeyPrivate"
+							:placeholder="capApp.exportPrivateKeyHint"
+						></textarea>
+						
+						<div class="row gap-large" v-if="!isExportKeySet">
+							<my-button image="ok.png"
+								@trigger="setKey"
+								:active="exportKeyPrivate !== ''"
+								:caption="capGen.button.ok"
+							/>
+							<my-button-check
+								v-model="exportKeyPrivateAsE2ee"
+								:caption="capApp.button.storeE2ee"
+							/>
+						</div>
 					</div>
 				</div>
 
-				<!-- start transfer -->
-				<div class="column gap">
-					<my-label image="ok.png"
-						:caption="capApp.transferTargetOk1"
-						:large="true"
-					/>
-					<select @input="transferTarget = $event.target.value; getRepoCred()" :value="transferTarget">
-						<option value="fileDownload">{{ capApp.option.method.fileDownload }}</option>
-						<optgroup :label="capApp.option.method.repoUpload">
-							<option v-for="r in repos.filter(v => v.active)" :value="r.id">{{ r.name }}</option>
-						</optgroup>
-					</select>
-
-					<!-- transfer: file download -->
-					<div class="row gap" v-if="transferTarget === 'fileDownload'">
-						<a target="_blank" :href="href" :download="hrefName">
-							<my-button image="download.png"
-								:active="isExportKeySet && changesOk"
-								:caption="capGen.button.download"
-							/>
-						</a>
+				<!-- transfer method / file download -->
+				<div class="contentPart long">
+					<div class="contentPartHeader space-between">
+						<my-label image="ok.png"
+							:caption="capApp.transferTargetOk1"
+							:large="true"
+						/>
 					</div>
-
-					<!-- transfer: repo upload -->
-					<div class="column gap" v-if="repoId !== null">
-						<div class="row gap space-between">
-							<my-label
-								:caption="isRepoCredSet ? capApp.repositoryCredentialsOk1 : capApp.repositoryCredentialsOk0"
-								:image="isRepoCredSet ? 'ok.png' : 'question.png'"
-								:large="true"
-							/>
-							<my-button image="cancel.png"
-								v-if="isRepoCredSet"
-								@trigger="resetRepoCred"
-								:caption="capGen.button.reset"
-							/>
+					<div class="column gap-large">
+						<select @input="transferTarget = $event.target.value; getRepoCred()" :value="transferTarget">
+							<option value="fileDownload">{{ capApp.option.method.fileDownload }}</option>
+							<optgroup :label="capApp.option.method.repoUpload">
+								<option v-for="r in repos.filter(v => v.active)" :value="r.id">{{ r.name }}</option>
+							</optgroup>
+						</select>
+						<div class="row gap" v-if="transferTarget === 'fileDownload'">
+							<a target="_blank" :href="exportUrl" :download="exportName">
+								<my-button image="download.png"
+									:active="isExportKeySet && changesOk"
+									:caption="capGen.button.download"
+								/>
+							</a>
 						</div>
+					</div>
+				</div>
+
+				<!-- repo upload -->
+				<div class="contentPart long" v-if="repoId !== null">
+					<div class="contentPartHeader space-between">
+						<my-label
+							:caption="isRepoCredSet ? capApp.repositoryCredentialsOk1 : capApp.repositoryCredentialsOk0"
+							:image="isRepoCredSet ? 'ok.png' : 'question.png'"
+							:large="true"
+						/>
+						<my-button image="cancel.png"
+							v-if="isRepoCredSet"
+							@trigger="resetRepoCred"
+							:caption="capGen.button.reset"
+						/>
+					</div>
+					<div class="column gap-large">
 						<template v-if="!isRepoCredSet">
 							<input type="text"     v-model="repoCredUser" :placeholder="capGen.username" />
 							<input type="passwort" v-model="repoCredPass" :placeholder="capGen.password" />
@@ -157,7 +164,7 @@ export default {
 						<template v-if="isRepoCredSet">
 							<div class="row gap">
 								<my-button image="upload.png"
-									@trigger="commitToRepo"
+									@trigger="exportToRepo"
 									:active="isExportKeySet"
 									:caption="capApp.option.method.repoUpload"
 								/>
@@ -182,10 +189,11 @@ export default {
 
 		// simple
 		changesOk:  s => s.moduleIdsChanged.length === 0,
-		href:       s => !s.isExportKeySet || !s.changesOk ? null : `/export/${s.hrefName}?token=${s.token}&module_id=${s.moduleId}&date=${Math.floor(new Date().getTime() / 1000)}`,
-		hrefName:   s => `${s.module.name}_${s.module.releaseBuild}.rei3`,
+		exportName: s => `${s.module.name}_${s.module.releaseBuild}.rei3`,
+		exportUrl:  s => !s.isExportKeySet || !s.changesOk ? null : `/export/${s.exportName}?token=${s.token}&module_id=${s.moduleId}&date=${Math.floor(new Date().getTime() / 1000)}`,
 		isE2eeReady:s => s.loginEncEnabled && !s.loginEncLocked,
 		repoId:     s => s.transferTarget === 'fileDownload' ? null : s.transferTarget,
+		repoUrl:    s => s.repoId === null ? '' : s.repos.filter(v => v.id === s.repoId)[0].url,
 		
 		// stores
 		token:          s => s.$store.getters['local/token'],
@@ -272,8 +280,21 @@ export default {
 		},
 
 		// repository commit
-		commitToRepo() {
-
+		exportToRepo() {
+			ws.send('repo','commit',{
+				credPass:this.repoCredPass,
+				credUser:this.repoCredUser,
+				fileName:this.exportName,
+				moduleId:this.moduleId,
+				repoId:this.repoId
+			},true,true).then(
+				() => {
+					this.$store.commit('dialog',{
+						captionBody:this.capApp.dialog.repoCommitSuccess
+					});
+				},
+				this.$root.genericError
+			);
 		},
 
 		// repository credentials
@@ -315,7 +336,7 @@ export default {
 		},
 		resetRepoCred() {
 			ws.send('loginRepoCred','del',this.repoId,true).then(
-				res => {
+				() => {
 					this.repoCredPass  = '';
 					this.repoCredUser  = '';
 					this.isRepoCredSet = false;

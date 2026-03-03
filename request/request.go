@@ -583,6 +583,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		}
 	case "repo":
 		switch action {
+		case "commit":
+			return RepoCommit(ctx, reqJson, loginId)
 		case "del":
 			return RepoDel_tx(ctx, tx, reqJson)
 		case "get":

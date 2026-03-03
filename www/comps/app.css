@@ -596,15 +596,15 @@ hr{
 	flex-flow:row nowrap;
 	align-items:center;
 }
-.contentBox .content .contentPartHeader:last-child{
-	margin:0px;
+.contentBox .content .contentPartHeader.space-between{	
+	justify-content:space-between;
 }
-.contentBox .content .contentPartHeader img{
+.contentBox .content .contentPartHeader>img{
 	height:22px;
 	margin-right:9px;
 	filter:var(--image-filter);
 }
-.contentBox .content .contentPartHeader h1{
+.contentBox .content .contentPartHeader>h1{
 	margin:0px;
 }
 
@@ -892,9 +892,6 @@ table td.maximum{
 }
 .generic-table{
 	width:100%;
-}
-.generic-table.noGrow{
-	width:fit-content;
 }
 .generic-table>thead>tr>th,
 .generic-table>tbody>tr>td{

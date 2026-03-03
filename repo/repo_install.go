@@ -78,7 +78,7 @@ func download(repoId, fileId uuid.UUID) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	token, err := httpGetAuthToken(repo)
+	token, err := httpGetAuthToken(repo.Url, repo.FetchUserName, repo.FetchUserPass, repo.SkipVerify)
 	if err != nil {
 		return "", err
 	}
@@ -99,7 +99,7 @@ func download(repoId, fileId uuid.UUID) (string, error) {
 	defer httpRes.Body.Close()
 
 	if httpRes.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("non-OK HTTP status code (%d)", httpRes.StatusCode)
+		return "", httpErrorGetMsg(httpRes)
 	}
 
 	filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)

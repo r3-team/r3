@@ -1872,7 +1872,8 @@
 			},
 			"dialog": {
 				"e2eeNotReady": "To store your private key securely, end-to-end-encryption (E2EE) is used; E2EE is currently disabled however.<br /><br />To enable E2EE, please visit your personal settings.",
-				"exportKeyBad": "La clave de firma parece inválida. Asegúrate de usar la clave privada para exportar aplicaciones."
+				"exportKeyBad": "La clave de firma parece inválida. Asegúrate de usar la clave privada para exportar aplicaciones.",
+				"repoCommitSuccess": "Application file was uploaded and release committed successfully."
 			},
 			"exportPrivateKeyHint": "Ejemplo:\n-----BEGIN RSA PRIVATE KEY-----\nKEY\n-----END RSA PRIVATE KEY-----",
 			"keyEntryOk0": "Choose a private key for signing the application",
@@ -2015,6 +2016,11 @@
 			"005": "El sistema no pudo recuperar las claves de descifrado para los registros seleccionados.",
 			"006": "No todos los usuarios seleccionados tienen habilitado el cifrado de extremo a extremo - estos son: {NAMES}",
 			"007": "End-to-end encryption is waiting for your personal encryption password to be entered in the user settings."
+		},
+		"TRF": {
+			"001": "Application cannot be committed to repository, build in repository ({BUILD_REPO}) is newer or equal to local build number ({BUILD_LOCAL}).",
+			"002": "Application could not be found in target repository. The application as well as at least one release must already exist in the repository to enable delta checks.",
+			"003": "Application lookup in repository failed, too many records found."
 		},
 		"initCollection": "Error al cargar colecciones durante el inicio de sesión: {MSG}"
 	},

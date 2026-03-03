@@ -11,18 +11,18 @@ import (
 )
 
 func TransferAddVersion_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
-	var req uuid.UUID
-	if err := json.Unmarshal(reqJson, &req); err != nil {
+	var moduleId uuid.UUID
+	if err := json.Unmarshal(reqJson, &moduleId); err != nil {
 		return nil, err
 	}
-	return nil, transfer.AddVersion_tx(ctx, tx, req)
+	return nil, transfer.AddVersion_tx(ctx, tx, moduleId)
 }
 
 func TransferStoreExportKey(reqJson json.RawMessage, loginId int64) (any, error) {
-	var req string
-	if err := json.Unmarshal(reqJson, &req); err != nil {
+	var exportKey string
+	if err := json.Unmarshal(reqJson, &exportKey); err != nil {
 		return nil, err
 	}
-	cache.SetExportKey(loginId, req)
+	cache.SetExportKey(loginId, exportKey)
 	return nil, nil
 }

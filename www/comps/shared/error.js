@@ -136,5 +136,10 @@ export function resolveErrCode(message) {
 			case '006': return cap.replace('{NAMES}',data.names); break;
 		}
 	}
+	if(errContext === 'TRF') {
+		switch(errNumber) {
+			case '001': return cap.replace('{BUILD_LOCAL}',data.buildLocal).replace('{BUILD_REPO}',data.buildRepo); break;
+		}
+	}
 	return cap;
 }

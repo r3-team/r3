@@ -39,7 +39,7 @@ func getReleases_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) ([]types.Relea
 	}
 	return releases, nil
 }
-func getReleaseLogs_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, build int) ([]types.ReleaseLog, error) {
+func getReleaseLogs_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, build int64) ([]types.ReleaseLog, error) {
 
 	rows, err := tx.Query(ctx, `
 		SELECT category, content
@@ -66,7 +66,7 @@ func getReleaseLogs_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID, build int) 
 
 func setReleases_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, releases []types.Release) error {
 
-	buildsKeep := make([]int, 0)
+	buildsKeep := make([]int64, 0)
 	buildsKeep = append(buildsKeep, 0) // always keep zero release
 	for _, r := range releases {
 		if _, err := tx.Exec(ctx, `
@@ -87,7 +87,7 @@ func setReleases_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, releases
 	_, err := tx.Exec(ctx, `DELETE FROM app.release WHERE module_id = $1 AND build <> ALL($2)`, moduleId, buildsKeep)
 	return err
 }
-func setReleaseLogs_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, build int, logs []types.ReleaseLog) error {
+func setReleaseLogs_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, build int64, logs []types.ReleaseLog) error {
 
 	positionsKeep := make([]int, 0)
 	for i, l := range logs {
