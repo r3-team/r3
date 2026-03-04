@@ -266,7 +266,7 @@ export default {
 							<div class="row gap">
 								<my-button image="upload.png"
 									@trigger="exportToRepo"
-									:active="isExportKeySet"
+									:active="isExportKeySet && changesOk"
 									:caption="capApp.option.method.repoUpload"
 								/>
 							</div>
