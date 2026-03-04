@@ -51,6 +51,24 @@ func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
 	file.Content.Module.ReleaseBuild = file.Content.Module.ReleaseBuild + 1
 	file.Content.Module.ReleaseDate = tools.GetTimeUnix()
 
+	// update release info - take uncommited logs (build 0) and create a new release for them
+	anyReleaseLogs := false
+	for i, r := range file.Content.Module.Releases {
+		if r.Build == 0 {
+			if len(r.Logs) != 0 {
+				file.Content.Module.Releases = append(file.Content.Module.Releases, types.Release{
+					Build:       int64(file.Content.Module.ReleaseBuild),
+					BuildApp:    int64(file.Content.Module.ReleaseBuildApp),
+					DateCreated: file.Content.Module.ReleaseDate,
+					Logs:        r.Logs,
+				})
+				file.Content.Module.Releases[i].Logs = make([]types.ReleaseLog, 0)
+				anyReleaseLogs = true
+			}
+			break
+		}
+	}
+
 	// recreate hash with updated module meta
 	hashedStr, err := getModuleHashFromFile(file)
 	if err != nil {
@@ -61,18 +79,8 @@ func AddVersion_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) error {
 		return err
 	}
 
-	// if release logs exist for zero build (ie. current version), create a new release
-	var releaseZeroLogCnt int = 0
-	if err := tx.QueryRow(ctx, `
-		SELECT COUNT(*)
-		FROM app.release_log
-		WHERE module_id = $1
-		AND   build     = 0
-	`, moduleId).Scan(&releaseZeroLogCnt); err != nil {
-		return err
-	}
-
-	if releaseZeroLogCnt != 0 {
+	// update version info & release logs in DB
+	if anyReleaseLogs {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO app.release (module_id, build, build_app, date_created)
 			VALUES ($1,$2,$3,$4)

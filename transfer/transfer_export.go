@@ -114,8 +114,7 @@ func export_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, exportKey str
 	}
 
 	if hashedStr != hashedStrEx {
-		return fmt.Errorf("module '%s' has changes outside the current version, abort",
-			file.Content.Module.Name)
+		return fmt.Errorf("module '%s' has changes outside the current version, abort", file.Content.Module.Name)
 	}
 
 	// generate signature from content hash
