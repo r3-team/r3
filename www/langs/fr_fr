@@ -1589,9 +1589,6 @@
 			"iconPwaHint": "Icônes représentant l'application. Les deux icônes doivent être au format PNG et doivent avoir une taille spécifique (voir les entrées d'icônes) - ne pas suivre ces règles peut rendre l'installation de PWA impossible sur certains systèmes d'exploitation ou appareils.",
 			"jsFunctionIdOnLogin": "Session start function",
 			"jsFunctionIdOnLoginHint": "This frontend function is called when a user logs into the system. It can be used to initialize variables or update logs.",
-			"keyCreate": "Transfert - Générer une nouvelle paire de clés de signature",
-			"keyCreateInfo": "Assurez-vous de conserver la clé privée en toute sécurité à tout moment. La clé publique doit être importée dans les instances REI3 cibles pour accepter vos applications.",
-			"keyCreateLength": "Sélectionner la longueur de la clé",
 			"languageCode": "Code de langue",
 			"languageCodeHint": "en_us, zh_cn, de_de, fr_fr, ...",
 			"languageMain": "Langue de secours",
@@ -1868,6 +1865,7 @@
 		},
 		"transfer": {
 			"button": {
+				"generate": "Generate new key pair",
 				"storeE2ee": "Store encrypted"
 			},
 			"dialog": {
@@ -1876,6 +1874,9 @@
 				"repoCommitSuccess": "Application file was uploaded and release committed successfully."
 			},
 			"exportPrivateKeyHint": "Exemple:\n-----BEGIN RSA PRIVATE KEY-----\nCLÉ\n-----END RSA PRIVATE KEY-----",
+			"keyCreate": "Transfert - Générer une nouvelle paire de clés de signature",
+			"keyCreateInfo": "Assurez-vous de conserver la clé privée en toute sécurité à tout moment. La clé publique doit être importée dans les instances REI3 cibles pour accepter vos applications.",
+			"keyCreateLength": "Sélectionner la longueur de la clé",
 			"keyEntryOk0": "Choose a private key for signing the application",
 			"keyEntryOk1": "Private key ready to sign application",
 			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
@@ -2463,6 +2464,8 @@
 		"interval": "Intervalle",
 		"jsFunction": "Function (front)",
 		"jsFunctions": "Fonctions (front)",
+		"keyPrivate": "Private key",
+		"keyPublic": "Public key",
 		"label": "Étiquette",
 		"language": "Language",
 		"lengthChars": "Longueur (caractères)",

@@ -9,11 +9,106 @@ import {
 	rsaEncrypt
 } from '../shared/crypto.js';
 
+
+const MyBuilderTransferKeyCreate = {
+	name:'my-builder-transfer-key-create',
+	template:`<div class="app-sub-window" @click.self="$emit('close')">
+		<div class="builder-transfer-key-create float contentBox">
+			<div class="top lower">
+				<div class="area">
+					<img class="icon" src="images/add.png" />
+					<div class="caption">{{ capApp.keyCreate }}</div>
+				</div>
+				<div class="area">
+					<my-button image="cancel.png"
+						@trigger="$emit('close')"
+						:cancel="true"
+						:caption="capGen.button.close"
+					/>
+				</div>
+			</div>
+			<div class="content default-inputs gap column flex">
+			
+				<my-label :caption="capApp.keyCreateLength" />
+				<div class="row gap centered">
+					<select v-model="keyLength" :disabled="running">
+						<option value="2048">2048</option>
+						<option value="4096">4096</option>
+						<option value="8192">8192</option>
+						<option value="16384">16384</option>
+					</select>
+					<my-button
+						@trigger="createKey"
+						:active="!running"
+						:caption="capGen.button.ok"
+						:image="!running ? 'ok.png' : 'load.gif'"
+					/>
+				</div>
+				
+				<div class="column" v-if="keyPrivate !== ''">
+					<p><b>{{ capApp.keyCreateInfo }}</b></p>
+					<div class="row gap-large">
+						<div class="column grow gap">
+							<div class="row gap space-between">
+								<my-label image="key.png" :caption="capGen.keyPrivate" />
+								<my-button image="copyClipboard.png" @trigger="copyToClipboard(keyPrivate)" :caption="capGen.button.copyClipboard" />
+							</div>
+							<textarea :value="keyPrivate"></textarea>
+						</div>
+						<div class="column grow gap">
+							<div class="row gap space-between">
+								<my-label image="key.png" :caption="capGen.keyPublic" />
+								<my-button image="copyClipboard.png" @trigger="copyToClipboard(keyPublic)" :caption="capGen.button.copyClipboard" />
+							</div>
+							<textarea :value="keyPublic"></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>`,
+	emits:['close'],
+	computed:{
+		capApp:s => s.$store.getters.captions.builder.transfer,
+		capGen:s => s.$store.getters.captions.generic
+	},
+	data() {
+		return {
+			keyLength:'4096',
+			keyPrivate:'',
+			keyPublic:'',
+			running:false
+		};
+	},
+	methods:{
+		copyToClipboard(txt) {
+			navigator.clipboard.writeText(txt);
+		},
+		createKey() {
+			this.running = true;
+			ws.send('key','create',{keyLength:parseInt(this.keyLength)},true).then(
+				res => {
+					this.keyPrivate = res.payload.private;
+					this.keyPublic  = res.payload.public;
+					this.running    = false;
+				},
+				this.$root.genericError
+			);
+		}
+	}
+};
+
 export default {
 	name:'my-builder-transfer',
-	components:{MyModuleSelect},
+	components:{
+		MyBuilderTransferKeyCreate,
+		MyModuleSelect
+	},
 	template:`<div class="contentBox grow">
 		<div class="content default-inputs builder-transfer">
+
+			<my-builder-transfer-key-create v-if="showKeyCreate" @close="showKeyCreate = false" />
+
 			<div class="contentPart long">
 				<div class="contentPartHeader space-between">
 					<my-label
@@ -90,6 +185,12 @@ export default {
 							v-model="exportKeyPrivate"
 							:placeholder="capApp.exportPrivateKeyHint"
 						></textarea>
+						<div class="row">
+							<my-button image="add.png"
+								@trigger="showKeyCreate = true"
+								:caption="capApp.button.generate"
+							/>
+						</div>
 						
 						<div class="row gap-large" v-if="!isExportKeySet">
 							<my-button image="ok.png"
@@ -221,6 +322,7 @@ export default {
 			repoCredPass:'',
 			repoCredUser:'',
 			repos:[],
+			showKeyCreate:false,
 			transferTarget:'fileDownload' // either 'fileDownload' or ID of repository to commit to
 		};
 	},

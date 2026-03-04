@@ -148,26 +148,6 @@
 	flex-flow:column nowrap;
 	padding:0px 6px 0px 16px;
 }
-.builder-modules .key-create .key-pair-input{
-	display:flex;
-	flex-flow:row nowrap;
-}
-.builder-modules .key-create .key-pair-input select{
-	width:unset;
-	max-width:unset;
-	margin-right:12px;
-	flex:0 1 auto;
-}
-.builder-modules .key-create .key-pair{
-	display:flex;
-	flex-flow:row nowrap;
-}
-.builder-modules .key-create .key-pair textarea{
-	width:100%;
-	max-width:660px;
-	height:400px;
-	margin:6px 12px 6px 0px;
-}
 .builder-modules-graph{
 	flex:1 1 auto;
 	margin:10px;
@@ -286,6 +266,11 @@
 /* transfer */
 .builder-transfer{
 	max-width:530px;
+}
+.builder-transfer-key-create textarea{
+	width:100%;
+	max-width:660px;
+	height:400px;
 }
 
 /* main entity sub-windows */

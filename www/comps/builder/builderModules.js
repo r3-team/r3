@@ -1,67 +1,6 @@
 import MyBuilderTransfer from './builderTransfer.js';
 import srcBase64Icon     from '../shared/image.js';
 
-const MyBuilderModulesKeyCreate = {
-	name:'my-builder-modules-key-create',
-	template:`<div class="key-create contentBox grow">
-		
-		<div class="content default-inputs">
-		
-			<div class="key-pair-input">
-				<select v-model="keyLength" :disabled="running">
-					<option value="0">{{ capApp.keyCreateLength }}</option>
-					<option value="2048">2048</option>
-					<option value="4096">4096</option>
-					<option value="8192">8192</option>
-					<option value="16384">16384</option>
-				</select>
-				
-				<my-button
-					@trigger="createKey"
-					:active="keyLength !== '0' && !running"
-					:caption="capApp.button.keyCreate"
-					:image="!running ? 'key.png' : 'load.gif'"
-				/>
-			</div>
-			
-			<template v-if="keyPrivate !== ''">
-				<p>{{ capApp.keyCreateInfo }}</p>
-				
-				<div class="key-pair">
-					<textarea :value="keyPrivate"></textarea>
-					<textarea :value="keyPublic"></textarea>
-				</div>
-			</template>
-		</div>
-	</div>`,
-	computed:{
-		// stores
-		capApp:s => s.$store.getters.captions.builder.module,
-		capGen:s => s.$store.getters.captions.generic
-	},
-	data() {
-		return {
-			keyLength:'0',
-			keyPrivate:'',
-			keyPublic:'',
-			running:false
-		};
-	},
-	methods:{
-		createKey() {
-			ws.send('key','create',{keyLength:parseInt(this.keyLength)},true).then(
-				res => {
-					this.keyPrivate = res.payload.private;
-					this.keyPublic  = res.payload.public;
-					this.running    = false;
-				},
-				this.$root.genericError
-			);
-			this.running = true;
-		}
-	}
-};
-
 const MyBuilderModulesGraph = {
 	name:'my-builder-modules-graph',
 	components:{
@@ -135,7 +74,6 @@ export default {
 	name:'my-builder-modules',
 	components:{
 		MyBuilderModulesGraph,
-		MyBuilderModulesKeyCreate,
 		MyBuilderTransfer
 	},
 	template:`<div class="builder-modules">
@@ -145,10 +83,8 @@ export default {
 			:entriesIcon="tabs.icons"
 			:entriesText="tabs.texts"
 		/>
-		
-		<my-builder-modules-graph      v-if="tabTarget === 'dependencies'" />
-		<my-builder-modules-key-create v-if="false" />
-		<my-builder-transfer           v-if="tabTarget === 'transfer'"     />
+		<my-builder-modules-graph v-if="tabTarget === 'dependencies'" />
+		<my-builder-transfer      v-if="tabTarget === 'transfer'"     />
 
 		<div class="contentBox grow" v-if="tabTarget === 'modules'">
 			

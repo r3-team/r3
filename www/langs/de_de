@@ -1589,9 +1589,6 @@
 			"iconPwaHint": "Icons, welche die Anwendung repräsentieren. Beide Icons müssen PNG sein und eine spezifische Größe haben (s. Icon-Eingabefelder) - wenn diese nicht eingehalten werden, kann die Installation der PWA auf manchen Betriebssystemen fehlschlagen.",
 			"jsFunctionIdOnLogin": "Sitzungsstart-Funktion",
 			"jsFunctionIdOnLoginHint": "Diese Frontendfunktion wird ausgeführt, wenn ein Benutzer sich im System einloggt. Sie kann bspw. genutzt werden, um Variablen zu initalisieren oder Logs zu schreiben.",
-			"keyCreate": "Transfer - Neues Signierschlüsselpaar erzeugen",
-			"keyCreateInfo": "Stelle sicher, dass der private Schlüssel zu jeder Zeit sicher verwahrt wird. Der öffentliche Schlüssel muss in Zielinstanzen von REI3 importiert werden, bevor Anwendungen installiert werden können.",
-			"keyCreateLength": "Schlüssellänge auswählen",
 			"languageCode": "Sprach-Code",
 			"languageCodeHint": "en_us, zh_cn, de_de, ...",
 			"languageMain": "Rückfallsprache",
@@ -1868,6 +1865,7 @@
 		},
 		"transfer": {
 			"button": {
+				"generate": "Neues Schlüsselpaar erstellen",
 				"storeE2ee": "Verschlüsselt speichern"
 			},
 			"dialog": {
@@ -1876,6 +1874,9 @@
 				"repoCommitSuccess": "Anwendungsdatei wurde hochgeladen und Version erfolgreich eingechecked."
 			},
 			"exportPrivateKeyHint": "Beispiel:\n-----BEGIN RSA PRIVATE KEY-----\nSCHLÜSSEL\n-----END RSA PRIVATE KEY-----",
+			"keyCreate": "Transfer - Neues Signierschlüsselpaar erzeugen",
+			"keyCreateInfo": "Stelle sicher, dass der private Schlüssel zu jeder Zeit sicher verwahrt wird. Der öffentliche Schlüssel muss in Zielinstanzen von REI3 importiert werden, bevor Anwendungen installiert werden können.",
+			"keyCreateLength": "Schlüssellänge auswählen",
 			"keyEntryOk0": "Privaten Schlüssel zur Signierung der Anwendung eingeben",
 			"keyEntryOk1": "Privater Schlüssel bereit zur Signierung",
 			"moduleChangesOk0": "Neue Version(en) für Anwendung oder eine ihrer Abhängigkeiten erstellen",
@@ -2463,6 +2464,8 @@
 		"interval": "Intervall",
 		"jsFunction": "Funktion (front)",
 		"jsFunctions": "Funktionen (front)",
+		"keyPrivate": "Privater Schlüssel",
+		"keyPublic": "Öffentlicher Schlüssel",
 		"label": "Beschreibung",
 		"language": "Sprache",
 		"lengthChars": "Länge (Charakt.)",

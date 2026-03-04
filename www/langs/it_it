@@ -1589,9 +1589,6 @@
 			"iconPwaHint": "Icons that represent the application. Both icons must be PNG and must have a specific size (s. icon inputs) - not following these rules can cause the PWA to be not installable on some operating systems or devices.",
 			"jsFunctionIdOnLogin": "Session start function",
 			"jsFunctionIdOnLoginHint": "This frontend function is called when a user logs into the system. It can be used to initialize variables or update logs.",
-			"keyCreate": "Trasferimento - Genera nuova coppia chiavi per firma",
-			"keyCreateInfo": "Assicurati di tenere sempre al sicuro la chiave privata. La chiave pubblica deve essere importata nelle istanze REI3 di destinazione per accettare le tue applicazioni.",
-			"keyCreateLength": "Seleziona la lunghezza della chiave",
 			"languageCode": "Codice lingua",
 			"languageCodeHint": "en_us, zh_cn, de_de, ...",
 			"languageMain": "Fallback language",
@@ -1868,6 +1865,7 @@
 		},
 		"transfer": {
 			"button": {
+				"generate": "Generate new key pair",
 				"storeE2ee": "Store encrypted"
 			},
 			"dialog": {
@@ -1876,6 +1874,9 @@
 				"repoCommitSuccess": "Application file was uploaded and release committed successfully."
 			},
 			"exportPrivateKeyHint": "Esempio:\n-----BEGIN RSA PRIVATE KEY-----\nKEY\n-----END RSA PRIVATE KEY-----",
+			"keyCreate": "Trasferimento - Genera nuova coppia chiavi per firma",
+			"keyCreateInfo": "Assicurati di tenere sempre al sicuro la chiave privata. La chiave pubblica deve essere importata nelle istanze REI3 di destinazione per accettare le tue applicazioni.",
+			"keyCreateLength": "Seleziona la lunghezza della chiave",
 			"keyEntryOk0": "Choose a private key for signing the application",
 			"keyEntryOk1": "Private key ready to sign application",
 			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
@@ -2463,6 +2464,8 @@
 		"interval": "Interval",
 		"jsFunction": "Function (front)",
 		"jsFunctions": "Funzioni (front)",
+		"keyPrivate": "Private key",
+		"keyPublic": "Public key",
 		"label": "Label",
 		"language": "Language",
 		"lengthChars": "Lunghezza (carat.)",

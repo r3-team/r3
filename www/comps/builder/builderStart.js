@@ -1,6 +1,4 @@
-export {MyBuilderStart as default};
-
-let MyBuilderStartIcon = {
+const MyBuilderStartIcon = {
 	name:'my-builder-start-icon',
 	template:`<img class="builder-start-icon"
 		:class="{ bad:bad, small:small }"
@@ -12,7 +10,7 @@ let MyBuilderStartIcon = {
 	}
 };
 
-let MyBuilderStart = {
+export default {
 	name:'my-builder-start',
 	components:{MyBuilderStartIcon},
 	template:`<div class="builder-start contentBox grow" v-if="module">
@@ -153,14 +151,14 @@ let MyBuilderStart = {
 		readonly:{ type:Boolean, required:true }
 	},
 	computed:{
-		hasMenu:(s) => {
+		hasMenu:s => {
 			for(const mt of s.module.menuTabs) {
 				if(mt.menus.length !== 0)
 					return true;
 			}
 			return false;
 		},
-		hasMenuInRole:(s) => {
+		hasMenuInRole:s => {
 			for(let r of s.module.roles) {
 				if(Object.keys(r.accessMenus).length !== 0)
 					return true;
@@ -169,18 +167,18 @@ let MyBuilderStart = {
 		},
 		
 		// simple
-		hasForms:     (s) => s.module.forms.length !== 0,
-		hasRelations: (s) => s.module.relations.length !== 0,
-		hasRoles:     (s) => s.module.roles.length !== 1,
-		hasStartForm: (s) => s.module.formId !== null,
-		isHiddenAdmin:(s) => s.module && s.moduleIdMapMeta[s.id].hidden,
-		isVisible:    (s) => !s.isHiddenAdmin && s.hasStartForm && s.hasMenu && s.hasMenuInRole,
+		hasForms:     s => s.module.forms.length !== 0,
+		hasRelations: s => s.module.relations.length !== 0,
+		hasRoles:     s => s.module.roles.length !== 1,
+		hasStartForm: s => s.module.formId !== null,
+		isHiddenAdmin:s => s.module && s.moduleIdMapMeta[s.id].hidden,
+		isVisible:    s => !s.isHiddenAdmin && s.hasStartForm && s.hasMenu && s.hasMenuInRole,
 		
 		// stores
-		module:         (s) => s.moduleIdMap[s.id],
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:         (s) => s.$store.getters.captions.builder.start,
-		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta
+		module:         s => s.moduleIdMap[s.id],
+		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
+		capApp:         s => s.$store.getters.captions.builder.start,
+		moduleIdMapMeta:s => s.$store.getters.moduleIdMapMeta
 	},
 	methods:{
 		open(url) {

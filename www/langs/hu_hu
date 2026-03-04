@@ -1589,9 +1589,6 @@
 			"iconPwaHint": "Az alkalmazást képviselő ikonok. Mindkét ikon PNG formátumú kell, hogy legyen és meghatározott méretű (lásd a beviteli mezőket) - ha nem tartják be ezeket a méreteket, akkor az alkalmazás telepítése bizonyos operációs rendszereken sikertelen lehet.",
 			"jsFunctionIdOnLogin": "Session start function",
 			"jsFunctionIdOnLoginHint": "This frontend function is called when a user logs into the system. It can be used to initialize variables or update logs.",
-			"keyCreate": "Átvitel - Új hitelesítő kulcspár létrehozása",
-			"keyCreateInfo": "Győződjön meg róla, hogy a privát kulcsot mindig biztonságosan tárolja. A nyilvános kulcsot importálni kell a REI3 cél példányokba, mielőtt az alkalmazásokat telepíteni lehet.",
-			"keyCreateLength": "Kulcshossz kiválasztása",
 			"languageCode": "Nyelvkód",
 			"languageCodeHint": "en_us, zh_cn, de_de, hu_hu ...",
 			"languageMain": "Alapértelmezett nyelv",
@@ -1868,6 +1865,7 @@
 		},
 		"transfer": {
 			"button": {
+				"generate": "Generate new key pair",
 				"storeE2ee": "Store encrypted"
 			},
 			"dialog": {
@@ -1876,6 +1874,9 @@
 				"repoCommitSuccess": "Application file was uploaded and release committed successfully."
 			},
 			"exportPrivateKeyHint": "Példa:\n-----BEGIN RSA PRIVATE KEY-----\nKULCS\n-----END RSA PRIVATE KEY-----",
+			"keyCreate": "Átvitel - Új hitelesítő kulcspár létrehozása",
+			"keyCreateInfo": "Győződjön meg róla, hogy a privát kulcsot mindig biztonságosan tárolja. A nyilvános kulcsot importálni kell a REI3 cél példányokba, mielőtt az alkalmazásokat telepíteni lehet.",
+			"keyCreateLength": "Kulcshossz kiválasztása",
 			"keyEntryOk0": "Choose a private key for signing the application",
 			"keyEntryOk1": "Private key ready to sign application",
 			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
@@ -2463,6 +2464,8 @@
 		"interval": "Intervallum",
 		"jsFunction": "Function (front)",
 		"jsFunctions": "Függvények (elöl)",
+		"keyPrivate": "Private key",
+		"keyPublic": "Public key",
 		"label": "Label",
 		"language": "Language",
 		"lengthChars": "Hossz (karakterben)",

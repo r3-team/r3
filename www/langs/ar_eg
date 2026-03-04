@@ -1589,9 +1589,6 @@
 			"iconPwaHint": "الأيقونات التي تمثل التطبيق. ",
 			"jsFunctionIdOnLogin": "Session start function",
 			"jsFunctionIdOnLoginHint": "This frontend function is called when a user logs into the system. It can be used to initialize variables or update logs.",
-			"keyCreate": "النقل - إنشاء زوج مفاتيح توقيع جديد",
-			"keyCreateInfo": "تأكد من الحفاظ على المفتاح الخاص آمنًا في جميع الأوقات. ",
-			"keyCreateLength": "حدد طول المفتاح",
 			"languageCode": "رمز اللغة",
 			"languageCodeHint": "ar_eg، zh_cn، en_us، ...",
 			"languageMain": "لغة احتياطية",
@@ -1868,6 +1865,7 @@
 		},
 		"transfer": {
 			"button": {
+				"generate": "Generate new key pair",
 				"storeE2ee": "Store encrypted"
 			},
 			"dialog": {
@@ -1876,6 +1874,9 @@
 				"repoCommitSuccess": "Application file was uploaded and release committed successfully."
 			},
 			"exportPrivateKeyHint": "Example:\n-----BEGIN RSA PRIVATE KEY-----\nKEY\n-----END RSA PRIVATE KEY-----",
+			"keyCreate": "النقل - إنشاء زوج مفاتيح توقيع جديد",
+			"keyCreateInfo": "تأكد من الحفاظ على المفتاح الخاص آمنًا في جميع الأوقات. ",
+			"keyCreateLength": "حدد طول المفتاح",
 			"keyEntryOk0": "Choose a private key for signing the application",
 			"keyEntryOk1": "Private key ready to sign application",
 			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
@@ -2463,6 +2464,8 @@
 		"interval": "فاصلة",
 		"jsFunction": "الوظيفة (الجبهة)",
 		"jsFunctions": "الوظائف (الأمامية)",
+		"keyPrivate": "Private key",
+		"keyPublic": "Public key",
 		"label": "ملصق",
 		"language": "لغة",
 		"lengthChars": "الطول (الحرف)",

@@ -1589,9 +1589,6 @@
 			"iconPwaHint": "Iconos que representan la aplicación. Ambos iconos deben ser PNG y deben tener un tamaño específico (ver entradas de iconos) - no seguir estas reglas puede hacer que la PWA no sea instalable en algunos sistemas operativos o dispositivos.",
 			"jsFunctionIdOnLogin": "Función de inicio de sesión",
 			"jsFunctionIdOnLoginHint": "Esta función de frontend se llama cuando un usuario inicia sesión en el sistema. Puede usarse para inicializar variables o actualizar registros.",
-			"keyCreate": "Transferencia - Generar nuevo par de claves de firma",
-			"keyCreateInfo": "Asegúrate de mantener la clave privada segura en todo momento. La clave pública debe ser importada en las instancias de REI3 de destino para aceptar tus aplicaciones.",
-			"keyCreateLength": "Seleccionar longitud de clave",
 			"languageCode": "Código de idioma",
 			"languageCodeHint": "en_us, zh_cn, de_de, ...",
 			"languageMain": "Idioma de respaldo",
@@ -1868,6 +1865,7 @@
 		},
 		"transfer": {
 			"button": {
+				"generate": "Generate new key pair",
 				"storeE2ee": "Store encrypted"
 			},
 			"dialog": {
@@ -1876,6 +1874,9 @@
 				"repoCommitSuccess": "Application file was uploaded and release committed successfully."
 			},
 			"exportPrivateKeyHint": "Ejemplo:\n-----BEGIN RSA PRIVATE KEY-----\nKEY\n-----END RSA PRIVATE KEY-----",
+			"keyCreate": "Transferencia - Generar nuevo par de claves de firma",
+			"keyCreateInfo": "Asegúrate de mantener la clave privada segura en todo momento. La clave pública debe ser importada en las instancias de REI3 de destino para aceptar tus aplicaciones.",
+			"keyCreateLength": "Seleccionar longitud de clave",
 			"keyEntryOk0": "Choose a private key for signing the application",
 			"keyEntryOk1": "Private key ready to sign application",
 			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
@@ -2463,6 +2464,8 @@
 		"interval": "Intervalo",
 		"jsFunction": "Función (frontal)",
 		"jsFunctions": "Funciones (frontal)",
+		"keyPrivate": "Private key",
+		"keyPublic": "Public key",
 		"label": "Etiqueta",
 		"language": "Idioma",
 		"lengthChars": "Longitud (caracteres)",
