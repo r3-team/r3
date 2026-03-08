@@ -839,6 +839,27 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
+
+			-- relation title
+			ALTER TYPE app.caption_content ADD VALUE 'relationTitle';
+			
+			ALTER TABLE app.caption ADD COLUMN     relation_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_relation_id_fkey FOREIGN KEY (relation_id)
+				REFERENCES app.relation (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX fki_caption_relation_id_fkey ON app.caption USING BTREE (relation_id ASC NULLS LAST);
+
+			ALTER TABLE instance.caption ADD COLUMN     relation_id uuid;
+			ALTER TABLE instance.caption ADD CONSTRAINT caption_relation_id_fkey FOREIGN KEY (relation_id)
+				REFERENCES app.relation (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+
+			CREATE INDEX fki_caption_relation_id_fkey ON instance.caption USING BTREE (relation_id ASC NULLS LAST);
 		`)
 		return "3.12", err
 	},

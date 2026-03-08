@@ -150,7 +150,7 @@ export default {
 		};
 	},
 	computed:{
-		indexAttributeIdMapField:(s) => {
+		indexAttributeIdMapField:s => {
 			let out = {};
 			for(let k in s.fieldIdMapData) {
 				let f   = s.fieldIdMapData[k];
@@ -164,11 +164,11 @@ export default {
 		},
 		
 		// stores
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.formLog,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		settings:      (s) => s.$store.getters.settings,
-		token:         (s) => s.$store.getters['local/token']
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		capApp:        s => s.$store.getters.captions.formLog,
+		capGen:        s => s.$store.getters.captions.generic,
+		settings:      s => s.$store.getters.settings,
+		token:         s => s.$store.getters['local/token']
 	},
 	mounted() {
 		this.fieldIdMapOverwrite = this.getFieldOverwriteDefault();

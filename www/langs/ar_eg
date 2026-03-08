@@ -1793,6 +1793,7 @@
 			"retentionDays": "احتفظ به لمدة X أيام",
 			"retentionHint": "عدد (العدد) أو المدة (بالأيام) التي يتم الاحتفاظ بسجلات التغيير فيها.",
 			"title": "العلاقات",
+			"titleHint": "The title can be translated in available application languages. It is displayed when a relation is referenced in the user interface, such as when showing change logs.",
 			"titleOne": "العلاقة '{NAME}'",
 			"triggers": "المشغلات ({CNT})"
 		},

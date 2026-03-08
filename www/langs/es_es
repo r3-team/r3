@@ -1793,6 +1793,7 @@
 			"retentionDays": "Guardar durante X días",
 			"retentionHint": "Cuántos (recuento) o por cuánto tiempo (en días) se retienen los registros de cambios.",
 			"title": "Relaciones",
+			"titleHint": "The title can be translated in available application languages. It is displayed when a relation is referenced in the user interface, such as when showing change logs.",
 			"titleOne": "Relación '{NAME}'",
 			"triggers": "Disparadores ({CNT})"
 		},

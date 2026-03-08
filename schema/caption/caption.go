@@ -155,14 +155,18 @@ func GetDefaultContent(entity string) types.CaptionMap {
 		return types.CaptionMap{
 			"queryChoiceTitle": make(map[string]string),
 		}
-	case "searchBar":
+	case "relation":
 		return types.CaptionMap{
-			"searchBarTitle": make(map[string]string),
+			"relationTitle": make(map[string]string),
 		}
 	case "role":
 		return types.CaptionMap{
 			"roleTitle": make(map[string]string),
 			"roleDesc":  make(map[string]string),
+		}
+	case "searchBar":
+		return types.CaptionMap{
+			"searchBarTitle": make(map[string]string),
 		}
 	case "tab":
 		return types.CaptionMap{
@@ -229,6 +233,9 @@ func GetEntityName(content string) (schema.DbEntity, error) {
 
 	case "queryChoiceTitle":
 		return schema.DbQueryChoice, nil
+
+	case "relationTitle":
+		return schema.DbRelation, nil
 
 	case "roleTitle", "roleDesc":
 		return schema.DbRole, nil

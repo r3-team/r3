@@ -1793,6 +1793,7 @@
 			"retentionDays": "Tartson meg X napig",
 			"retentionHint": "Hány (szám) vagy mennyi ideig (napokban) tartson meg változástörténeti naplókat.",
 			"title": "Relációk",
+			"titleHint": "The title can be translated in available application languages. It is displayed when a relation is referenced in the user interface, such as when showing change logs.",
 			"titleOne": "Reláció \"{NAME}\"",
 			"triggers": "Triggerek ({CNT})"
 		},

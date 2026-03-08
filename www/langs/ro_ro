@@ -1793,6 +1793,7 @@
 			"retentionDays": "Păstrați timp de X zile",
 			"retentionHint": "How many (count) or how long (in days) change logs are retained for.",
 			"title": "Relații",
+			"titleHint": "The title can be translated in available application languages. It is displayed when a relation is referenced in the user interface, such as when showing change logs.",
 			"titleOne": "Relația '{NAME}'",
 			"triggers": "Declanșatoare ({CNT})"
 		},

@@ -232,8 +232,7 @@ func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributes 
 	}
 	return nil
 }
-func setLogRecord_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
-	loginId int64, recordId int64) (uuid.UUID, error) {
+func setLogRecord_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, loginId int64, recordId int64) (uuid.UUID, error) {
 
 	logId, err := uuid.NewV4()
 	if err != nil {

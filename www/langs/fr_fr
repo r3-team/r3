@@ -1793,6 +1793,7 @@
 			"retentionDays": "Conserver pendant X jours",
 			"retentionHint": "Combien (compter) ou combien de temps (en jours) les journaux des modifications sont conservés.",
 			"title": "Relations",
+			"titleHint": "The title can be translated in available application languages. It is displayed when a relation is referenced in the user interface, such as when showing change logs.",
 			"titleOne": "Relation '{NAME}'",
 			"triggers": "Déclencheurs ({CNT})"
 		},

@@ -1793,6 +1793,7 @@
 			"retentionDays": "保留 X 天",
 			"retentionHint": "保留多少次（计数）或多长时间（天）的变更日志。",
 			"title": "关系",
+			"titleHint": "The title can be translated in available application languages. It is displayed when a relation is referenced in the user interface, such as when showing change logs.",
 			"titleOne": "关系'{NAME}'",
 			"triggers": "触发器（{CNT}）"
 		},

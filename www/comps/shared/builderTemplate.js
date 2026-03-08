@@ -855,6 +855,16 @@ export function getTemplateRelation(moduleId,name,encryption) {
 		policies:[]
 	};
 };
+export function getTemplateRelationPolicy() {
+	return {
+		roleId:null,
+		pgFunctionIdExcl:null,
+		pgFunctionIdIncl:null,
+		actionDelete:false,
+		actionSelect:false,
+		actionUpdate:false
+	};
+};
 export function getTemplateReleaseLog(category) {
 	return {
 		category,

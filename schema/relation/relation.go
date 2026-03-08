@@ -6,6 +6,7 @@ import (
 	"r3/db/check"
 	"r3/schema"
 	"r3/schema/attribute"
+	"r3/schema/caption"
 	"r3/schema/pgFunction"
 	"r3/types"
 
@@ -100,6 +101,10 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Relatio
 	rows.Close()
 
 	for i, r := range relations {
+		relations[i].Captions, err = caption.Get_tx(ctx, tx, schema.DbRelation, r.Id, []string{"relationTitle"})
+		if err != nil {
+			return nil, err
+		}
 		relations[i].Policies, err = getPolicies_tx(ctx, tx, r.Id)
 		if err != nil {
 			return nil, err
@@ -189,6 +194,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation, fromLocal bool) 
 				return err
 			}
 		}
+	}
+
+	if err := caption.Set_tx(ctx, tx, rel.Id, rel.Captions); err != nil {
+		return err
 	}
 
 	// set policies

@@ -1,12 +1,14 @@
-import MyBuilderAttribute    from './builderAttribute.js';
-import MyBuilderPreset       from './builderPreset.js';
-import MyBuilderPgIndex      from './builderPgIndex.js';
-import MyBuilderPgTriggers   from './builderPgTriggers.js';
-import MyBuilderPresets      from './builderPresets.js';
-import MyInputOffset         from '../inputOffset.js';
-import {dialogDeleteAsk}     from '../shared/dialog.js';
-import {copyValueDialog}     from '../shared/generic.js';
-import {srcBase64}           from '../shared/image.js';
+import MyBuilderAttribute          from './builderAttribute.js';
+import MyBuilderCaption            from './builderCaption.js';
+import MyBuilderPreset             from './builderPreset.js';
+import MyBuilderPgIndex            from './builderPgIndex.js';
+import MyBuilderPgTriggers         from './builderPgTriggers.js';
+import MyBuilderPresets            from './builderPresets.js';
+import MyInputDecimal              from '../inputDecimal.js';
+import MyInputOffset               from '../inputOffset.js';
+import {getTemplateRelationPolicy} from '../shared/builderTemplate.js';
+import {dialogDeleteAsk}           from '../shared/dialog.js';
+import {srcBase64}                 from '../shared/image.js';
 import {
 	getAttributeIcon,
 	isAttributeFiles,
@@ -18,6 +20,10 @@ import {
 	getDependentModules,
 	getDependentAttributes
 } from '../shared/builder.js';
+import {
+	copyValueDialog,
+	deepIsEqual
+} from '../shared/generic.js';
 
 const MyBuilderRelationsItemPolicy = {
 	name:'my-builder-relations-item-policy',
@@ -108,8 +114,8 @@ const MyBuilderRelationsItemPolicy = {
 		},
 		
 		// stores
-		module:(s) => s.$store.getters['schema/moduleIdMap'][s.moduleId],
-		capApp:(s) => s.$store.getters.captions.builder.relation
+		module:s => s.$store.getters['schema/moduleIdMap'][s.moduleId],
+		capApp:s => s.$store.getters.captions.builder.relation
 	},
 	methods:{
 		// external
@@ -129,18 +135,20 @@ export default {
 	components:{
 		echarts:VueECharts,
 		MyBuilderAttribute,
+		MyBuilderCaption,
 		MyBuilderPreset,
 		MyBuilderPgIndex,
 		MyBuilderPgTriggers,
 		MyBuilderPresets,
 		MyBuilderRelationsItemPolicy,
+		MyInputDecimal,
 		MyInputOffset
 	},
 	template:`<div class="contentBox grow scroll">
 		<div class="top lower nowrap">
 			<div class="area">
 				<img class="icon" src="images/database.png" />
-				<h1 class="title">{{ capApp.titleOne.replace('{NAME}',name) }}</h1>
+				<h1 class="title">{{ capApp.titleOne.replace('{NAME}',relation.name) }}</h1>
 			</div>
 			<div class="area">
 				<div class="row gap default-inputs" v-if="['attributes','presets'].includes(tabTarget)">
@@ -177,8 +185,8 @@ export default {
 							:captionTitle="capGen.button.save"
 						/>
 						<my-button image="refresh.png"
-							@trigger="reset"
-							:active="hasChanges"
+							@trigger="reset(true)"
+							:active="isChanged"
 							:caption="capGen.button.refresh"
 						/>
 					</div>
@@ -202,16 +210,33 @@ export default {
 						<tbody>
 							<tr>
 								<td>{{ capGen.name }}</td>
-								<td><input class="long" v-model="name" :disabled="readonly" /></td>
+								<td><input class="long" v-model="relation.name" :disabled="readonly" /></td>
 								<td>{{ capApp.nameHint }}</td>
 							</tr>
 							<tr>
+								<td>{{ capGen.title }}</td>
+								<td>
+									<my-builder-caption
+										v-model="relation.captions.relationTitle"
+										:language="builderLanguage"
+										:readonly
+									/>
+								</td>
+								<td>{{ capApp.titleHint }}</td>
+							</tr>
+							<tr>
 								<td>{{ capGen.comments }}</td>
-								<td colspan="2"><textarea class="dynamic" v-model="comment" :disabled="readonly"></textarea></td>
+								<td colspan="2">
+									<textarea class="dynamic"
+										@input="relation.comment = $event.target.value !== '' ? $event.target.value : null"
+										:disabled="readonly"
+										:value="relation.comment"
+									></textarea>
+								</td>
 							</tr>
 							<tr>
 								<td>{{ capApp.encryption }}</td>
-								<td><my-bool v-model="encryption" :readonly="true" /></td>
+								<td><my-bool v-model="relation.encryption" :readonly="true" /></td>
 								<td>{{ capApp.encryptionHint }}</td>
 							</tr>
 							<tr>
@@ -221,11 +246,11 @@ export default {
 										<tbody>
 											<tr>
 												<td>{{ capApp.retentionCount }}</td>
-												<td><input v-model.number="retentionCount" :disabled="readonly" /></td>
+												<td><my-input-decimal v-model="relation.retentionCount" :min="0" :allowNull="true" :lengthFract="0" :readonly /></td>
 											</tr>
 											<tr>
 												<td>{{ capApp.retentionDays }}</td>
-												<td><input v-model.number="retentionDays" :disabled="readonly" /></td>
+												<td><my-input-decimal v-model="relation.retentionDays" :min="0" :allowNull="true" :lengthFract="0" :readonly /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -309,9 +334,9 @@ export default {
 					@nextLanguage="$emit('nextLanguage')"
 					@new-record="attributeIdEdit = null"
 					:attributeId="attributeIdEdit"
-					:builderLanguage="builderLanguage"
-					:readonly="readonly"
-					:relation="relation"
+					:builderLanguage
+					:readonly
+					:relation
 				/>
 			</div>
 			
@@ -375,9 +400,9 @@ export default {
 					v-if="indexIdEdit !== false"
 					@close="indexIdEdit = false"
 					:pgIndexId="indexIdEdit"
-					:builderLanguage="builderLanguage"
-					:readonly="readonly"
-					:relation="relation"
+					:builderLanguage
+					:readonly
+					:relation
 				/>
 			</div>
 			
@@ -386,23 +411,19 @@ export default {
 				<my-builder-pg-triggers
 					:contextEntity="'relation'"
 					:contextId="relation.id"
-					:readonly="readonly"
+					:readonly
 				/>
 			</div>
 			
 			<!-- presets -->
 			<div class="tab-content" v-if="tabTarget === 'presets'">
-				<my-builder-presets
-					:filter="nameFilter"
-					:relation="relation"
-					:readonly="readonly"
-				/>
+				<my-builder-presets :filter="nameFilter" :relation :readonly />
 			</div>
 			
 			<!-- policies -->
 			<div class="tab-content" v-if="tabTarget === 'policies'">
 				<table class="default-inputs">
-					<thead v-if="policies.length !== 0">
+					<thead v-if="relation.policies.length !== 0">
 						<tr>
 							<td></td>
 							<td></td>
@@ -423,20 +444,20 @@ export default {
 					</thead>
 					<draggable handle=".dragAnchor" tag="tbody" group="policies" itemKey="id" animation="100"
 						:fallbackOnBody="true"
-						:list="policies"
+						:list="relation.policies"
 					>
 						<template #item="{element,index}">
 							<my-builder-relations-item-policy
-								@remove="policies.splice(index,1)"
-								@update:modelValue="policies[index] = $event"
+								@remove="relation.policies.splice(index,1)"
+								@update:modelValue="relation.policies[index] = $event"
 								:modelValue="element"
 								:moduleId="relation.moduleId"
-								:readonly="readonly"
+								:readonly
 							/>
 						</template>
 					</draggable>
 				</table>
-				<p style="width:900px;" v-if="policies.length !== 0">
+				<p style="width:900px;" v-if="relation.policies.length !== 0">
 					{{ capApp.policyExplanation }}
 				</p>
 				
@@ -448,7 +469,7 @@ export default {
 					/>
 					<my-button image="save.png"
 						@trigger="set"
-						:active="!readonly && hasChanges"
+						:active="!readonly && isChanged"
 						:caption="capGen.button.save"
 						:captionTitle="capGen.button.save"
 					/>
@@ -514,8 +535,8 @@ export default {
 	},
 	emits:['createNew','nextLanguage'],
 	watch:{
-		relation:{
-			handler() { this.reset(); },
+		relationSchema:{
+			handler() { this.reset(false); },
 			immediate:true
 		},
 		tabTarget(vNew,vOld) {
@@ -526,16 +547,12 @@ export default {
 	data() {
 		return {
 			// inputs
-			attributeIdEdit:false,
-			comment:null,
-			encryption:false,
-			indexIdEdit:false,
-			name:'',
-			policies:[],
-			retentionCount:null,
-			retentionDays:null,
-			
+			relation:false,  // relation being edited in this component
+			relationCopy:{}, // copy of relation from schema when component last reset
+
 			// states
+			attributeIdEdit:false,
+			indexIdEdit:false,
 			nameFilter:'',
 			previewLimit:50,
 			previewOffset:0,
@@ -553,7 +570,7 @@ export default {
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	computed:{
-		tabCaptions:(s) => {
+		tabCaptions:s => {
 			let triggerCnt = 0;
 			for(const mod of s.modules) {
 				triggerCnt += mod.pgTriggers.filter(trg => trg.relationId === s.id).length;
@@ -571,7 +588,7 @@ export default {
 		},
 
 		// relationship graph
-		graphOption:(s) => {
+		graphOption:s => {
 			let edges = [];
 			let nodes = [{ // base relation
 				id:s.relation.id,
@@ -652,34 +669,31 @@ export default {
 				tooltip:{} // must be set
 			};
 		},
-		hasChanges:(s) => s.name          !== s.relation.name
-			|| s.comment                  !== s.relation.comment
-			|| s.encryption               !== s.relation.encryption
-			|| s.retentionCount           !== s.relation.retentionCount
-			|| s.retentionDays            !== s.relation.retentionDays
-			|| JSON.stringify(s.policies) !== JSON.stringify(s.relation.policies),
-		
+
 		// simple
-		attributesNotFiles:(s) => s.relation === false ? [] : s.relation.attributes.filter(v => !s.isAttributeFiles(v.content)),
-		canSave:           (s) => s.name !== '' && !s.readonly && s.hasChanges,
-		relation:          (s) => typeof s.relationIdMap[s.id] === 'undefined' ? false : s.relationIdMap[s.id],
+		attributesNotFiles:s => s.relation === false ? [] : s.relation.attributes.filter(v => !s.isAttributeFiles(v.content)),
+		canSave:           s => s.relation.name !== '' && !s.readonly && s.isChanged,
+		isChanged:         s => !s.deepIsEqual(s.relation,s.relationSchema),
+		relationSchema:    s => s.relationIdMap[s.id] === undefined ? false : s.relationIdMap[s.id],
 		
 		// stores
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		modules:       (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.relation,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		settings:      (s) => s.$store.getters.settings
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		modules:       s => s.$store.getters['schema/modules'],
+		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
+		capApp:        s => s.$store.getters.captions.builder.relation,
+		capGen:        s => s.$store.getters.captions.generic,
+		settings:      s => s.$store.getters.settings
 	},
 	methods:{
 		// externals
 		copyValueDialog,
+		deepIsEqual,
 		dialogDeleteAsk,
 		getAttributeIcon,
 		getDependentAttributes,
+		getTemplateRelationPolicy,
 		isAttributeFiles,
 		isAttributeRelationship,
 		isAttributeRelationship11,
@@ -704,14 +718,7 @@ export default {
 		
 		// actions
 		addPolicy() {
-			this.policies.push({
-				roleId:null,
-				pgFunctionIdExcl:null,
-				pgFunctionIdIncl:null,
-				actionDelete:false,
-				actionSelect:false,
-				actionUpdate:false
-			});
+			this.relation.policies.push(this.getTemplateRelationPolicy());
 		},
 		handleHotkeys(e) {
 			if(e.ctrlKey && e.key === 's') {
@@ -735,16 +742,14 @@ export default {
 			this.previewOffset = 0;
 			this.getPreview();
 		},
-		reset() {
-			this.name           = this.relation.name;
-			this.comment        = this.relation.comment;
-			this.encryption     = this.relation.encryption;
-			this.retentionCount = this.relation.retentionCount;
-			this.retentionDays  = this.relation.retentionDays;
-			this.policies       = JSON.parse(JSON.stringify(this.relation.policies));
-			
-			if(this.tabTarget === 'data')
-				this.previewReload();
+		reset(manuelReset) {
+			if(this.relationSchema !== false && (manuelReset || !this.deepIsEqual(this.relationCopy,this.relationSchema))) {
+				this.relation     = JSON.parse(JSON.stringify(this.relationSchema));
+				this.relationCopy = JSON.parse(JSON.stringify(this.relationSchema));
+
+				if(this.tabTarget === 'data')
+					this.previewReload();
+			}
 		},
 		
 		// backend calls
@@ -771,16 +776,7 @@ export default {
 			);
 		},
 		set() {
-			ws.send('relation','set',{
-				id:this.id,
-				moduleId:this.relation.moduleId,
-				name:this.name,
-				comment:this.comment === '' ? null : this.comment,
-				encryption:this.relation.encryption,
-				retentionCount:this.retentionCount === '' ? null : this.retentionCount,
-				retentionDays:this.retentionDays === '' ? null : this.retentionDays,
-				policies:this.policies
-			},true).then(
+			ws.send('relation','set',this.relation,true).then(
 				() => {
 					this.$root.schemaReload(this.relation.moduleId);
 					this.showProperties = false;

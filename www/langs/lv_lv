@@ -1793,6 +1793,7 @@
 			"retentionDays": "Keep for X days",
 			"retentionHint": "How many (count) or how long (in days) change logs are retained for.",
 			"title": "Relations",
+			"titleHint": "The title can be translated in available application languages. It is displayed when a relation is referenced in the user interface, such as when showing change logs.",
 			"titleOne": "Relation '{NAME}'",
 			"triggers": "Triggers ({CNT})"
 		},

@@ -610,10 +610,11 @@ type Relation struct {
 	Encryption     bool             `json:"encryption"`     // relation supports encrypted attribute values
 	RetentionCount pgtype.Int4      `json:"retentionCount"` // minimum number of retained change events
 	RetentionDays  pgtype.Int4      `json:"retentionDays"`  // minimum age of retained change events
-	Attributes     []Attribute      `json:"attributes"`     // read only, all relation attributes
-	Indexes        []PgIndex        `json:"indexes"`        // read only, all relation indexes
-	Policies       []RelationPolicy `json:"policies"`       // read only, all relation policies
-	Presets        []Preset         `json:"presets"`        // read only, all relation presets
+	Captions       CaptionMap       `json:"captions"`
+	Attributes     []Attribute      `json:"attributes"` // read only, all relation attributes
+	Indexes        []PgIndex        `json:"indexes"`    // read only, all relation indexes
+	Policies       []RelationPolicy `json:"policies"`   // read only, all relation policies
+	Presets        []Preset         `json:"presets"`    // read only, all relation presets
 
 	// legacy
 	Triggers []PgTrigger `json:"triggers"` // moved to module pgTriggers
