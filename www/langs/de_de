@@ -1062,6 +1062,8 @@
 				}
 			},
 			"presetOpen": "Vord. Datensatz öffnen",
+			"recordTitle": "Datensatztitel anzeigen",
+			"recordTitleHint": "Zeigt einen Namen oder Bezeichner des geöffneten Datensatzes. Datensatztitel müssen in der Relation konfiguriert sein.",
 			"scale": "UI-Skalierung",
 			"subQuery": "Sub-Query",
 			"systemDefaults": {
@@ -1788,6 +1790,11 @@
 			"presets": "Vordefinierte Datensätze ({CNT})",
 			"preview": "Datenansicht",
 			"previewLimit": "Datensätze/Seite",
+			"recordTitle": "Datensatztitel",
+			"recordTitleHint": [
+				"Ein Datensatztitel dient zur Identifizierung einzelner Datensätze, wenn diese bspw. in der Änderungshistorie oder im Formulartitel angezeigt werden.",
+				"Ein Datensatztitel besteht aus einem oder mehreren Attributwerten der gleichen Relation, in einer gewählten Reihenfolge. Textwerte, wie Namen oder Bezeichner, sind normalerweise gut für diesen Zweck geeignet."
+			],
 			"retention": "Änderungshistorie",
 			"retentionCount": "X Änderungen behalten",
 			"retentionDays": "Für X Tage behalten",

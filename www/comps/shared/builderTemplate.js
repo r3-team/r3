@@ -576,6 +576,7 @@ export function getTemplateForm(moduleId,name) {
 		iconId:null,
 		name:name,
 		noDataActions:false,
+		recordTitle:true,
 		query:getTemplateQuery(),
 		fields:[],
 		functions:[],
@@ -849,10 +850,15 @@ export function getTemplateRelation(moduleId,name,encryption) {
 		moduleId:moduleId,
 		name:name,
 		comment:null,
+		attributes:[],
+		attributeIdsTitle:[],
 		encryption:encryption,
 		retentionCount:null,
 		retentionDays:null,
-		policies:[]
+		policies:[],
+		captions:{
+			relationTitle:{}
+		}
 	};
 };
 export function getTemplateRelationPolicy() {

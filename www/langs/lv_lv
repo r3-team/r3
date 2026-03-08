@@ -1062,6 +1062,8 @@
 				}
 			},
 			"presetOpen": "Open preset",
+			"recordTitle": "Show record title",
+			"recordTitleHint": "Shows a name or label of the opened record. Record titles must be configured on the relation.",
 			"scale": "UI scale",
 			"subQuery": "Sub query",
 			"systemDefaults": {
@@ -1788,6 +1790,11 @@
 			"presets": "Preset records ({CNT})",
 			"preview": "Data view",
 			"previewLimit": "Records/page",
+			"recordTitle": "Record title",
+			"recordTitleHint": [
+				"A record title serves to identify individual records, when they are shown in places like the change log or in a form title.",
+				"A record title consists of one or more attribute values from the same relation, in a chosen order. Text values, such as names or labels, are usually best for this purpose."
+			],
 			"retention": "Change log",
 			"retentionCount": "Keep X changes",
 			"retentionDays": "Keep for X days",

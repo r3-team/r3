@@ -72,15 +72,19 @@ func delPkSeq_tx(ctx context.Context, tx pgx.Tx, modName string, id uuid.UUID) e
 func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Relation, error) {
 
 	rows, err := tx.Query(ctx, `
-		SELECT id, name, comment, encryption, retention_count, retention_days, (
+		SELECT r.id, r.name, r.comment, r.encryption, r.retention_count, r.retention_days, (
 			SELECT id
 			FROM app.attribute
-			WHERE relation_id = app.relation.id
+			WHERE relation_id = r.id
 			AND name = $1
+		),(
+			SELECT ARRAY_AGG(attribute_id ORDER BY position ASC)
+			FROM app.relation_record_title
+			WHERE relation_id = r.id
 		)
-		FROM app.relation
-		WHERE module_id = $2
-		ORDER BY name ASC
+		FROM app.relation AS r
+		WHERE r.module_id = $2
+		ORDER BY r.name ASC
 	`, schema.PkName, moduleId)
 	if err != nil {
 		return nil, err
@@ -90,8 +94,13 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.Relatio
 	relations := make([]types.Relation, 0)
 	for rows.Next() {
 		var r types.Relation
-		if err := rows.Scan(&r.Id, &r.Name, &r.Comment, &r.Encryption, &r.RetentionCount, &r.RetentionDays, &r.AttributeIdPk); err != nil {
+		if err := rows.Scan(&r.Id, &r.Name, &r.Comment, &r.Encryption, &r.RetentionCount,
+			&r.RetentionDays, &r.AttributeIdPk, &r.AttributeIdsTitle); err != nil {
+
 			return nil, err
+		}
+		if r.AttributeIdsTitle == nil {
+			r.AttributeIdsTitle = make([]uuid.UUID, 0)
 		}
 		r.ModuleId = moduleId
 		r.Attributes = make([]types.Attribute, 0)
@@ -194,6 +203,25 @@ func Set_tx(ctx context.Context, tx pgx.Tx, rel types.Relation, fromLocal bool) 
 				return err
 			}
 		}
+	}
+
+	// update record title attributes
+	for i, id := range rel.AttributeIdsTitle {
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO app.relation_record_title (relation_id, position, attribute_id)
+			VALUES ($1,$2,$3)
+			ON CONFLICT (relation_id, position)
+			DO UPDATE SET attribute_id = $3
+		`, rel.Id, i, id); err != nil {
+			return err
+		}
+	}
+	if _, err := tx.Exec(ctx, `
+		DELETE FROM app.relation_record_title
+		WHERE relation_id =  $1
+		AND   position    >= $2
+	`, rel.Id, len(rel.AttributeIdsTitle)); err != nil {
+		return err
 	}
 
 	if err := caption.Set_tx(ctx, tx, rel.Id, rel.Captions); err != nil {

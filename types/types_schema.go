@@ -339,6 +339,7 @@ type Form struct {
 	IconId         pgtype.UUID    `json:"iconId"`
 	Name           string         `json:"name"`
 	NoDataActions  bool           `json:"noDataActions"` // disables record manipulation actions (new/save/delete)
+	RecordTitle    bool           `json:"recordTitle"`   // show record title in form header
 	Query          Query          `json:"query"`
 	Fields         []any          `json:"fields"`
 	Actions        []FormAction   `json:"actions"`
@@ -602,19 +603,20 @@ type PresetValue struct {
 	Value         pgtype.Text `json:"value"`
 }
 type Relation struct {
-	Id             uuid.UUID        `json:"id"`
-	ModuleId       uuid.UUID        `json:"moduleId"`
-	AttributeIdPk  uuid.UUID        `json:"attributeIdPk"`  // read only, ID of PK attribute
-	Name           string           `json:"name"`           // unique (within module) relation name
-	Comment        pgtype.Text      `json:"comment"`        // author comment
-	Encryption     bool             `json:"encryption"`     // relation supports encrypted attribute values
-	RetentionCount pgtype.Int4      `json:"retentionCount"` // minimum number of retained change events
-	RetentionDays  pgtype.Int4      `json:"retentionDays"`  // minimum age of retained change events
-	Captions       CaptionMap       `json:"captions"`
-	Attributes     []Attribute      `json:"attributes"` // read only, all relation attributes
-	Indexes        []PgIndex        `json:"indexes"`    // read only, all relation indexes
-	Policies       []RelationPolicy `json:"policies"`   // read only, all relation policies
-	Presets        []Preset         `json:"presets"`    // read only, all relation presets
+	Id                uuid.UUID        `json:"id"`
+	ModuleId          uuid.UUID        `json:"moduleId"`
+	AttributeIdPk     uuid.UUID        `json:"attributeIdPk"`  // read only, ID of PK attribute
+	Name              string           `json:"name"`           // unique (within module) relation name
+	Comment           pgtype.Text      `json:"comment"`        // author comment
+	Encryption        bool             `json:"encryption"`     // relation supports encrypted attribute values
+	RetentionCount    pgtype.Int4      `json:"retentionCount"` // minimum number of retained change events
+	RetentionDays     pgtype.Int4      `json:"retentionDays"`  // minimum age of retained change events
+	Captions          CaptionMap       `json:"captions"`
+	Attributes        []Attribute      `json:"attributes"`        // read only, all relation attributes
+	AttributeIdsTitle []uuid.UUID      `json:"attributeIdsTitle"` // ordered list of attributes that are used as record title
+	Indexes           []PgIndex        `json:"indexes"`           // read only, all relation indexes
+	Policies          []RelationPolicy `json:"policies"`          // read only, all relation policies
+	Presets           []Preset         `json:"presets"`           // read only, all relation presets
 
 	// legacy
 	Triggers []PgTrigger `json:"triggers"` // moved to module pgTriggers

@@ -1062,6 +1062,8 @@
 				}
 			},
 			"presetOpen": "Ouvrir le préréglage",
+			"recordTitle": "Show record title",
+			"recordTitleHint": "Shows a name or label of the opened record. Record titles must be configured on the relation.",
 			"scale": "Échelle de l'interface utilisateur",
 			"subQuery": "Sous-requête",
 			"systemDefaults": {
@@ -1788,6 +1790,11 @@
 			"presets": "Enregistrements prédéfinis ({CNT})",
 			"preview": "Vue des données",
 			"previewLimit": "Enregistrements/page",
+			"recordTitle": "Record title",
+			"recordTitleHint": [
+				"A record title serves to identify individual records, when they are shown in places like the change log or in a form title.",
+				"A record title consists of one or more attribute values from the same relation, in a chosen order. Text values, such as names or labels, are usually best for this purpose."
+			],
 			"retention": "Journal des modifications",
 			"retentionCount": "Conserver X modifications",
 			"retentionDays": "Conserver pendant X jours",

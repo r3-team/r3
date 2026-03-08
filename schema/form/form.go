@@ -162,7 +162,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 	}
 
 	rows, err := tx.Query(ctx, fmt.Sprintf(`
-		SELECT id, preset_id_open, icon_id, field_id_focus, name, no_data_actions, ARRAY(
+		SELECT id, preset_id_open, icon_id, field_id_focus, name, no_data_actions, record_title, ARRAY(
 			SELECT article_id
 			FROM app.article_form
 			WHERE form_id = f.id
@@ -183,7 +183,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 		var f types.Form
 
 		if err := rows.Scan(&f.Id, &f.PresetIdOpen, &f.IconId, &f.FieldIdFocus,
-			&f.Name, &f.NoDataActions, &f.ArticleIdsHelp); err != nil {
+			&f.Name, &f.NoDataActions, &f.RecordTitle, &f.ArticleIdsHelp); err != nil {
 
 			return nil, err
 		}
@@ -192,7 +192,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, ids []uuid.UUID)
 	}
 	rows.Close()
 
-	// collect form query, fields, functions, states and captions
+	// collect sub entities
 	for i, form := range forms {
 		form.Query, err = query.Get_tx(ctx, tx, schema.DbForm, form.Id, 0, 0, 0)
 		if err != nil {
@@ -230,13 +230,13 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO app.form (id, module_id, preset_id_open, icon_id,
-			field_id_focus, name, no_data_actions)
-		VALUES ($1,$2,$3,$4,$5,$6,$7)
+			field_id_focus, name, no_data_actions, record_title)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 		ON CONFLICT (id)
 		DO UPDATE SET preset_id_open = $3, icon_id = $4, field_id_focus = $5,
-			name = $6, no_data_actions = $7
-	`, frm.Id, frm.ModuleId, frm.PresetIdOpen, frm.IconId,
-		frm.FieldIdFocus, frm.Name, frm.NoDataActions); err != nil {
+			name = $6, no_data_actions = $7, record_title = $8
+	`, frm.Id, frm.ModuleId, frm.PresetIdOpen, frm.IconId, frm.FieldIdFocus,
+		frm.Name, frm.NoDataActions, frm.RecordTitle); err != nil {
 
 		return err
 	}

@@ -860,6 +860,29 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				DEFERRABLE INITIALLY DEFERRED;
 
 			CREATE INDEX fki_caption_relation_id_fkey ON instance.caption USING BTREE (relation_id ASC NULLS LAST);
+
+			-- record title
+			CREATE TABLE IF NOT EXISTS app.relation_record_title (
+				relation_id uuid NOT NULL,
+				attribute_id uuid NOT NULL,
+				position int NOT NULL,
+				CONSTRAINT relation_record_title_pkey PRIMARY KEY (relation_id, position),
+				CONSTRAINT relation_record_title_relation_id_fkey FOREIGN KEY (relation_id)
+					REFERENCES app.relation (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT relation_record_title_attribute_id_fkey FOREIGN KEY (attribute_id)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX fki_relation_record_title_relation_id_fkey  ON app.relation_record_title USING BTREE (relation_id  ASC NULLS LAST);
+			CREATE INDEX fki_relation_record_title_attribute_id_fkey ON app.relation_record_title USING BTREE (attribute_id ASC NULLS LAST);
+
+			ALTER TABLE app.form ADD   COLUMN record_title BOOL NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.form ALTER COLUMN record_title DROP DEFAULT;
 		`)
 		return "3.12", err
 	},

@@ -11,9 +11,13 @@ import {dialogDeleteAsk}           from '../shared/dialog.js';
 import {srcBase64}                 from '../shared/image.js';
 import {
 	getAttributeIcon,
+	isAttributeDecimal,
 	isAttributeFiles,
+	isAttributeInteger,
 	isAttributeRelationship,
 	isAttributeRelationship11,
+	isAttributeString,
+	isAttributeUuid,
 	isAttributeWithLength
 } from '../shared/attribute.js';
 import {
@@ -235,9 +239,24 @@ export default {
 								</td>
 							</tr>
 							<tr>
-								<td>{{ capApp.encryption }}</td>
-								<td><my-bool v-model="relation.encryption" :readonly="true" /></td>
-								<td>{{ capApp.encryptionHint }}</td>
+								<td>{{ capApp.recordTitle }}</td>
+								<td>
+									<div class="column gap">
+										<select @input="recordTitleAttributeAdd($event.target.value)" :value="recordTitleAttributeId">
+											<option value="">[{{ capGen.button.add }}]</option>
+											<option v-for="a in attributesRecordTitleCandidates" :value="a.id">{{ a.name }}</option>
+										</select>
+										<div class="row gap">
+											<my-button image="delete.png"
+												v-for="id in relation.attributeIdsTitle"
+												@trigger="recordTitleAttributeRemove(id)"
+												:caption="attributeIdMap[id].name"
+												:naked="true"
+											/>
+										</div>
+									</div>
+								</td>
+								<td v-html="capApp.recordTitleHint.join('<br /><br />')"></td>
 							</tr>
 							<tr>
 								<td>{{ capApp.retention }}</td>
@@ -256,6 +275,11 @@ export default {
 									</table>
 								</td>
 								<td>{{ capApp.retentionHint }}</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.encryption }}</td>
+								<td><my-bool v-model="relation.encryption" :readonly="true" /></td>
+								<td>{{ capApp.encryptionHint }}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -408,11 +432,7 @@ export default {
 			
 			<!-- triggers -->
 			<div class="tab-content" v-if="tabTarget === 'triggers'">
-				<my-builder-pg-triggers
-					:contextEntity="'relation'"
-					:contextId="relation.id"
-					:readonly
-				/>
+				<my-builder-pg-triggers :contextEntity="'relation'" :contextId="relation.id" :readonly />
 			</div>
 			
 			<!-- presets -->
@@ -559,6 +579,7 @@ export default {
 			previewRows:[],
 			previewRowCount:0,
 			previewValueLength:50,
+			recordTitleAttributeId:'',
 			showProperties:false,
 			tabTarget:'attributes'
 		};
@@ -570,6 +591,19 @@ export default {
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	computed:{
+		attributesRecordTitleCandidates:s => {
+			let out = [];
+			for(const a of s.relation.attributes) {
+				if(!s.relation.attributeIdsTitle.includes(a.id) && a.contentUse === 'default' && (
+						s.isAttributeString(a.content) || s.isAttributeDecimal(a.content) ||
+						s.isAttributeInteger(a.content) || s.isAttributeUuid(a.content)
+					)
+				) {
+					out.push(a);
+				}
+			}
+			return out;
+		},
 		tabCaptions:s => {
 			let triggerCnt = 0;
 			for(const mod of s.modules) {
@@ -694,9 +728,13 @@ export default {
 		getAttributeIcon,
 		getDependentAttributes,
 		getTemplateRelationPolicy,
+		isAttributeDecimal,
 		isAttributeFiles,
+		isAttributeInteger,
 		isAttributeRelationship,
 		isAttributeRelationship11,
+		isAttributeString,
+		isAttributeUuid,
 		isAttributeWithLength,
 		srcBase64,
 		
@@ -741,6 +779,15 @@ export default {
 		previewReload() {
 			this.previewOffset = 0;
 			this.getPreview();
+		},
+		recordTitleAttributeAdd(id) {
+			this.relation.attributeIdsTitle.push(id);
+			this.recordTitleAttributeId = '';
+		},
+		recordTitleAttributeRemove(id) {
+			const pos = this.relation.attributeIdsTitle.indexOf(id);
+			if(pos !== -1)
+				this.relation.attributeIdsTitle.splice(pos,1);
 		},
 		reset(manuelReset) {
 			if(this.relationSchema !== false && (manuelReset || !this.deepIsEqual(this.relationCopy,this.relationSchema))) {

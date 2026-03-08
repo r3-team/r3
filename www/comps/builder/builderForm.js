@@ -338,7 +338,16 @@ export default {
 							</tr>
 							<tr>
 								<td>{{ capApp.noDataActions }}</td>
-								<td><my-bool v-model="form.noDataActions" :readonly="readonly" /></td>
+								<td><my-bool v-model="form.noDataActions" :readonly /></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.recordTitle }}</td>
+								<td>
+									<div class="column gap">
+										<my-bool v-model="form.recordTitle" :readonly />
+										<span style="max-width:320px;">{{ capApp.recordTitleHint }}</span>
+									</div>
+								</td>
 							</tr>
 							<tr>
 								<td>{{ capApp.presetOpen }}</td>

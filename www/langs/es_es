@@ -1062,6 +1062,8 @@
 				}
 			},
 			"presetOpen": "Abrir preset",
+			"recordTitle": "Show record title",
+			"recordTitleHint": "Shows a name or label of the opened record. Record titles must be configured on the relation.",
 			"scale": "Escala de UI",
 			"subQuery": "Subconsulta",
 			"systemDefaults": {
@@ -1788,6 +1790,11 @@
 			"presets": "Registros predefinidos ({CNT})",
 			"preview": "Vista de datos",
 			"previewLimit": "Registros/página",
+			"recordTitle": "Record title",
+			"recordTitleHint": [
+				"A record title serves to identify individual records, when they are shown in places like the change log or in a form title.",
+				"A record title consists of one or more attribute values from the same relation, in a chosen order. Text values, such as names or labels, are usually best for this purpose."
+			],
 			"retention": "Registro de cambios",
 			"retentionCount": "Guardar X cambios",
 			"retentionDays": "Guardar durante X días",

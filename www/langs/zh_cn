@@ -1062,6 +1062,8 @@
 				}
 			},
 			"presetOpen": "打开预设",
+			"recordTitle": "Show record title",
+			"recordTitleHint": "Shows a name or label of the opened record. Record titles must be configured on the relation.",
 			"scale": "UI比例",
 			"subQuery": "子查询",
 			"systemDefaults": {
@@ -1788,6 +1790,11 @@
 			"presets": "预设记录（{CNT}）",
 			"preview": "数据视图",
 			"previewLimit": "每页记录数",
+			"recordTitle": "Record title",
+			"recordTitleHint": [
+				"A record title serves to identify individual records, when they are shown in places like the change log or in a form title.",
+				"A record title consists of one or more attribute values from the same relation, in a chosen order. Text values, such as names or labels, are usually best for this purpose."
+			],
 			"retention": "变更日志",
 			"retentionCount": "保留 X 次变更",
 			"retentionDays": "保留 X 天",
