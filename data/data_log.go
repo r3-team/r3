@@ -79,20 +79,27 @@ func DelLogsBackground() error {
 }
 
 // get data change logs for specified record and attributes
-func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordId int64,
-	attributeIds []uuid.UUID, loginId int64) ([]types.DataLog, error) {
-
-	logs := make([]types.DataLog, 0)
+func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordId int64, attributeIds []uuid.UUID, loginId int64) ([]types.DataLog, error) {
 
 	// check for authorized access, READ(1) for GET
 	for _, attributeId := range attributeIds {
 		if !authorizedAttribute(loginId, attributeId, types.AccessRead) {
-			return logs, errors.New(handler.ErrUnauthorized)
+			return nil, errors.New(handler.ErrUnauthorized)
 		}
 	}
 
 	rows, err := tx.Query(ctx, `
-		SELECT d.id, d.relation_id, d.date_change, l.name, lm.name_display
+		SELECT d.id, d.relation_id, d.date_change, l.name, lm.name_display, (
+			SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
+				'attributeId',   attribute_id,
+				'attributeIdNm', attribute_id_nm,
+				'outsideIn',     outside_in,
+				'value',         value
+			))
+			FROM instance.data_log_value
+			WHERE data_log_id = d.id
+			AND   attribute_id = ANY($2)
+		)
 		FROM instance.data_log as d
 		LEFT JOIN instance.login      AS l  ON l.id        = d.login_id_wofk
 		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
@@ -105,60 +112,33 @@ func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordId int64,
 		ORDER BY d.date_change DESC
 	`, recordId, attributeIds)
 	if err != nil {
-		return logs, err
+		return nil, err
 	}
+	defer rows.Close()
 
+	logs := make([]types.DataLog, 0)
 	for rows.Next() {
 		var l types.DataLog
 		var name pgtype.Text
 		var nameDisplay pgtype.Text
+		var valuesJson []byte
 
-		if err := rows.Scan(&l.Id, &l.RelationId, &l.DateChange, &name, &nameDisplay); err != nil {
-			return logs, err
+		if err := rows.Scan(&l.Id, &l.RelationId, &l.DateChange, &name, &nameDisplay, &valuesJson); err != nil {
+			return nil, err
 		}
+
 		l.RecordId = recordId
-		l.LoginName = name.String
 		if nameDisplay.Valid && nameDisplay.String != "" {
 			l.LoginName = nameDisplay.String
+		} else {
+			l.LoginName = name.String
+		}
+		if err := json.Unmarshal(valuesJson, &l.Attributes); err != nil {
+			return nil, err
 		}
 		logs = append(logs, l)
 	}
-	rows.Close()
-
-	for i, log := range logs {
-		log.Attributes, err = getLogValues_tx(ctx, tx, log.Id, attributeIds)
-		if err != nil {
-			return logs, err
-		}
-		logs[i] = log
-	}
 	return logs, nil
-}
-func getLogValues_tx(ctx context.Context, tx pgx.Tx, logId uuid.UUID,
-	attributeIds []uuid.UUID) ([]types.DataSetAttribute, error) {
-
-	attributes := make([]types.DataSetAttribute, 0)
-
-	rows, err := tx.Query(ctx, `
-		SELECT attribute_id, attribute_id_nm, outside_in, value
-		FROM instance.data_log_value
-		WHERE data_log_id = $1
-		AND attribute_id = ANY($2)
-	`, logId, attributeIds)
-	if err != nil {
-		return attributes, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var a types.DataSetAttribute
-
-		if err := rows.Scan(&a.AttributeId, &a.AttributeIdNm, &a.OutsideIn, &a.Value); err != nil {
-			return attributes, err
-		}
-		attributes = append(attributes, a)
-	}
-	return attributes, nil
 }
 
 // set data change log for specific record that was either created or updated
@@ -261,8 +241,7 @@ func setLogRecord_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	}
 
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO instance.data_log (id, relation_id,
-			login_id_wofk, record_id_wofk, date_change)
+		INSERT INTO instance.data_log (id, relation_id, login_id_wofk, record_id_wofk, date_change)
 		VALUES ($1,$2,$3,$4,$5)
 	`, logId, relationId, loginId, recordId, tools.GetTimeUnix()); err != nil {
 		return logId, err
@@ -286,8 +265,7 @@ func setLogValue_tx(ctx context.Context, tx pgx.Tx, logId uuid.UUID, atr types.D
 	}
 
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO instance.data_log_value
-			(data_log_id, attribute_id, attribute_id_nm, outside_in, value)
+		INSERT INTO instance.data_log_value (data_log_id, attribute_id, attribute_id_nm, outside_in, value)
 		VALUES ($1,$2,$3,$4,$5)
 	`, logId, atr.AttributeId, atr.AttributeIdNm, atr.OutsideIn, valueInput); err != nil {
 		return err
