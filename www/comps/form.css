@@ -29,6 +29,22 @@
 	border-left:1px solid #000;
 }
 
+/* record title */
+.form-record-title{
+	height:30px;
+	line-height:30px;;
+	padding:0px calc(var(--spacing) / 2);
+	border:1px solid var(--color-border);
+	border-radius:var(--border-input-radius);
+	background-color:var(--color-input-disabled);
+	box-shadow:var(--shadow-input);
+
+	min-width:0px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
+}
+
 /* form actions */
 .form-actions-left{
 	flex:1 1 auto;

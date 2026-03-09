@@ -116,6 +116,9 @@ export default {
 					</transition>
 				</div>
 
+				<!-- record title -->
+				<div class="form-record-title" v-if="recordTitle !== ''">{{ recordTitle }}</div>
+				
 				<my-form-actions
 					v-if="!hasBarLower && hasFormActions"
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
@@ -285,8 +288,8 @@ export default {
 					:isAloneInForm="isSingleField"
 					:joinsIndexMap
 					:key="f.id"
-					:moduleId="moduleId"
-					:values="values"
+					:moduleId
+					:values
 					:variableIdMapLocal
 				/>
 			</div>
@@ -461,6 +464,13 @@ export default {
 			};
 			parseFields(s.fields);
 
+			// add record title values
+			for(const atrId of s.attributeIdsRecordTitle) {
+				const ia = s.getIndexAttributeId(0,atrId,false,null);
+				if(out[ia] === undefined)
+					out[ia] = null;
+			}
+
 			// apply default values, set for attributes (usually via getters/arguments)
 			for(let k in out) {
 				const d = s.getDetailsFromIndexAttributeId(k);
@@ -474,73 +484,6 @@ export default {
 					out[k] = [s.attributeIdMapDef[d.attributeIdNm]];
 			}
 			return out;
-		},
-
-		// simple
-		bgStyle:       (s) => s.isPopUp || s.isWidget ? '' : `background-color:${s.colorMenu.toString()};`,
-		hasBarLower:   (s) => !s.isWidget && s.isData && !s.form.noDataActions,
-		hasBarWidget:  (s) => s.isWidget && s.hasFormActions,
-		hasChanges:    (s) => s.fieldIdsChanged.length !== 0,
-		hasChangesBulk:(s) => s.fieldIdsTouched.length !== 0 && s.isBulkUpdate,
-		hasFormActions:(s) => s.form.actions.filter(v => (s.entityIdMapEffect.formAction[v.id]?.state !== undefined ? s.entityIdMapEffect.formAction[v.id].state : v.state) !== 'hidden').length > 0,
-		helpAvailable: (s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
-		isBulkUpdate:  (s) => s.isData && s.recordIds.length > 1,
-		isData:        (s) => s.relationId !== null,
-		isNew:         (s) => s.recordIds.length === 0,
-		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','kanban','list','tabs','variable'].includes(s.fields[0].content),
-		menuActive:    (s) => s.formIdMapMenu[s.form.id] === undefined ? null : s.formIdMapMenu[s.form.id],
-		warnUnsaved:   (s) => s.hasChanges && !s.form.noDataActions && !s.blockInputs && s.settings.warnUnsaved,
-
-		// permissions
-		mayCreate:(s) => !s.badLoad && s.joinsIndexesCrt.length !== 0,
-		mayDelete:(s) => !s.badLoad && s.joinsIndexesDel.length !== 0,
-		mayNew:   (s) => !s.badLoad && s.joinsIndexesNew.length !== 0,
-		mayUpdate:(s) => !s.badLoad && s.joinsIndexesSet.length !== 0,
-
-		// buttons
-		buttonDelShown:      (s) => !s.isBulkUpdate && s.showButtonDel && (s.buttonDelUsable || s.layoutElements.includes('dataActionReadonly')),
-		buttonDelUsable:     (s) => !s.buttonsReadonly && s.mayDelete,
-		buttonGoBackShown:   (s) => s.isData && !s.isMobile && !s.isPopUp,
-		buttonGoBackUsable:  (s) => !s.buttonsReadonly && !s.isAtHistoryStart,
-		buttonNewShown:      (s) => !s.isBulkUpdate && s.showButtonNew && (s.buttonNewUsable || s.layoutElements.includes('dataActionReadonly')),
-		buttonNewUsable:     (s) => !s.buttonsReadonly && s.mayNew && (!s.isNew || s.hasChanges),
-		buttonSaveShown:     (s) => !s.isBulkUpdate && (s.buttonSaveUsable     || s.layoutElements.includes('dataActionReadonly')),
-		buttonSaveShownBulk: (s) => s.isBulkUpdate  && (s.buttonSaveUsableBulk || s.layoutElements.includes('dataActionReadonly')),
-		buttonSaveShownClose:(s) => s.buttonSaveShown && !s.isAtHistoryStart && !s.isMobile,
-		buttonSaveShownNew:  (s) => s.buttonSaveShown && s.buttonNewShown && !s.isMobile,
-		buttonSaveUsable:    (s) => !s.buttonsReadonly && (s.mayUpdate || s.mayCreate)    && s.hasChanges,
-		buttonSaveUsableBulk:(s) => !s.buttonsReadonly && (s.mayUpdate || s.isBulkUpdate) && s.hasChangesBulk,
-		buttonsReadonly:     (s) => s.blockInputs || s.changingRecord,
-
-		// general entities
-		fieldIdMapData:    (s) => s.getDataFieldMap(s.fields),
-		fields:            (s) => s.form.fields,
-		filters:           (s) => s.form.query !== null ? s.form.query.filters : [],
-		form:              (s) => s.formIdMap[s.formId],
-		formStateIdMap:    (s) => s.getFormStateIdMap(s.form.states),
-		joins:             (s) => s.form.query !== null ? s.fillRelationRecordIds(s.form.query.joins) : [],
-		relationId:        (s) => s.form.query !== null ? s.form.query.relationId : null,
-		relationsJoined:   (s) => s.getRelationsJoined(s.joins),
-		joinsIndexMap:     (s) => s.getJoinsIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet,s.entityIdMapEffect.form.data),
-		joinsIndexMapNoOpt:(s) => s.getJoinsIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet,0),
-		joinsIndexesCrt:   (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordCreate); },
-		joinsIndexesDel:   (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordDelete); },
-		joinsIndexesNew:   (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordNew); },
-		joinsIndexesSet:   (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordUpdate); },
-		iconSrc:(s) => {
-			if(s.favoriteId  !== null) return 'images/star1.png';
-			if(s.form.iconId !== null) return s.srcBase64(s.iconIdMap[s.form.iconId].file);
-			
-			return s.menuActive !== null && s.menuActive.iconId !== null && s.menuActive.formId === s.form.id
-				? s.srcBase64(s.iconIdMap[s.menuActive.iconId].file)
-				: 'images/fileText.png';
-		},
-		fieldIdMapOptions:(s) => {
-			const base = s.isMobile ? s.loginOptionsMobile : s.loginOptions;
-			if(s.favoriteId === null)
-				return base.fieldIdMap;
-
-			return base.favoriteIdMap[s.favoriteId]?.fieldIdMap === undefined ? {} : base.favoriteIdMap[s.favoriteId].fieldIdMap;
 		},
 		
 		// presentation
@@ -589,6 +532,24 @@ export default {
 				});
 			}
 			return group;
+		},
+		iconSrc:(s) => {
+			if(s.favoriteId  !== null) return 'images/star1.png';
+			if(s.form.iconId !== null) return s.srcBase64(s.iconIdMap[s.form.iconId].file);
+			
+			return s.menuActive !== null && s.menuActive.iconId !== null && s.menuActive.formId === s.form.id
+				? s.srcBase64(s.iconIdMap[s.menuActive.iconId].file)
+				: 'images/fileText.png';
+		},
+		recordTitle:(s) => {
+			let out = [];
+			for(const atrId of s.attributeIdsRecordTitle) {
+				const ia = s.getIndexAttributeId(0,atrId,false,null);
+
+				if(s.values[ia] !== undefined && s.values[ia] !== null)
+					out.push(`${s.values[ia]}`);
+			}
+			return out.join(' ');
 		},
 		title:(s) => {
 			if(s.titleOverwrite !== null)
@@ -830,6 +791,13 @@ export default {
 			}
 			return out;
 		},
+		fieldIdMapOptions:(s) => {
+			const base = s.isMobile ? s.loginOptionsMobile : s.loginOptions;
+			if(s.favoriteId === null)
+				return base.fieldIdMap;
+
+			return base.favoriteIdMap[s.favoriteId]?.fieldIdMap === undefined ? {} : base.favoriteIdMap[s.favoriteId].fieldIdMap;
+		},
 		fieldIdMapProcessed:(s) => {
 			let out = s.getFieldProcessedDefault();
 			const getChoiceFilters = (choices,choiceId) => {
@@ -881,6 +849,59 @@ export default {
 			parseFields(s.fields);
 			return out;
 		},
+
+		// simple
+		bgStyle:       (s) => s.isPopUp || s.isWidget ? '' : `background-color:${s.colorMenu.toString()};`,
+		hasBarLower:   (s) => !s.isWidget && s.isData && !s.form.noDataActions,
+		hasBarWidget:  (s) => s.isWidget && s.hasFormActions,
+		hasChanges:    (s) => s.fieldIdsChanged.length !== 0,
+		hasChangesBulk:(s) => s.fieldIdsTouched.length !== 0 && s.isBulkUpdate,
+		hasFormActions:(s) => s.form.actions.filter(v => (s.entityIdMapEffect.formAction[v.id]?.state !== undefined ? s.entityIdMapEffect.formAction[v.id].state : v.state) !== 'hidden').length > 0,
+		helpAvailable: (s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
+		isBulkUpdate:  (s) => s.isData && s.recordIds.length > 1,
+		isData:        (s) => s.relationId !== null,
+		isNew:         (s) => s.recordIds.length === 0,
+		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','kanban','list','tabs','variable'].includes(s.fields[0].content),
+		menuActive:    (s) => s.formIdMapMenu[s.form.id] === undefined ? null : s.formIdMapMenu[s.form.id],
+		warnUnsaved:   (s) => s.hasChanges && !s.form.noDataActions && !s.blockInputs && s.settings.warnUnsaved,
+
+		// permissions
+		mayCreate:(s) => !s.badLoad && s.joinsIndexesCrt.length !== 0,
+		mayDelete:(s) => !s.badLoad && s.joinsIndexesDel.length !== 0,
+		mayNew:   (s) => !s.badLoad && s.joinsIndexesNew.length !== 0,
+		mayUpdate:(s) => !s.badLoad && s.joinsIndexesSet.length !== 0,
+
+		// buttons
+		buttonDelShown:      (s) => !s.isBulkUpdate && s.showButtonDel && (s.buttonDelUsable || s.layoutElements.includes('dataActionReadonly')),
+		buttonDelUsable:     (s) => !s.buttonsReadonly && s.mayDelete,
+		buttonGoBackShown:   (s) => s.isData && !s.isMobile && !s.isPopUp,
+		buttonGoBackUsable:  (s) => !s.buttonsReadonly && !s.isAtHistoryStart,
+		buttonNewShown:      (s) => !s.isBulkUpdate && s.showButtonNew && (s.buttonNewUsable || s.layoutElements.includes('dataActionReadonly')),
+		buttonNewUsable:     (s) => !s.buttonsReadonly && s.mayNew && (!s.isNew || s.hasChanges),
+		buttonSaveShown:     (s) => !s.isBulkUpdate && (s.buttonSaveUsable     || s.layoutElements.includes('dataActionReadonly')),
+		buttonSaveShownBulk: (s) => s.isBulkUpdate  && (s.buttonSaveUsableBulk || s.layoutElements.includes('dataActionReadonly')),
+		buttonSaveShownClose:(s) => s.buttonSaveShown && !s.isAtHistoryStart && !s.isMobile,
+		buttonSaveShownNew:  (s) => s.buttonSaveShown && s.buttonNewShown && !s.isMobile,
+		buttonSaveUsable:    (s) => !s.buttonsReadonly && (s.mayUpdate || s.mayCreate)    && s.hasChanges,
+		buttonSaveUsableBulk:(s) => !s.buttonsReadonly && (s.mayUpdate || s.isBulkUpdate) && s.hasChangesBulk,
+		buttonsReadonly:     (s) => s.blockInputs || s.changingRecord,
+
+		// general entities
+		attributeIdsRecordTitle:(s) => !s.isData || !s.form.recordTitle ? [] : s.relationIdMap[s.relationId].attributeIdsTitle,
+		fieldIdMapData:         (s) => s.getDataFieldMap(s.fields),
+		fields:                 (s) => s.form.fields,
+		filters:                (s) => s.form.query !== null ? s.form.query.filters : [],
+		form:                   (s) => s.formIdMap[s.formId],
+		formStateIdMap:         (s) => s.getFormStateIdMap(s.form.states),
+		joins:                  (s) => s.form.query !== null ? s.fillRelationRecordIds(s.form.query.joins) : [],
+		relationId:             (s) => s.form.query !== null ? s.form.query.relationId : null,
+		relationsJoined:        (s) => s.getRelationsJoined(s.joins),
+		joinsIndexMap:          (s) => s.getJoinsIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet,s.entityIdMapEffect.form.data),
+		joinsIndexMapNoOpt:     (s) => s.getJoinsIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet,0),
+		joinsIndexesCrt:        (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordCreate); },
+		joinsIndexesDel:        (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordDelete); },
+		joinsIndexesNew:        (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordNew); },
+		joinsIndexesSet:        (s) => { return Object.values(s.joinsIndexMap).filter(v => v.recordUpdate); },
 		
 		// stores
 		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
@@ -1688,9 +1709,7 @@ export default {
 			if(recordId === null) {
 				for(let e of expressions) {
 					this.valueSet(
-						this.getIndexAttributeId(
-							e.index,e.attributeId,e.outsideIn,e.attributeIdNm
-						),
+						this.getIndexAttributeId(e.index,e.attributeId,e.outsideIn,e.attributeIdNm),
 						null,true,false
 					);
 				}

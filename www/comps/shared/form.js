@@ -38,7 +38,7 @@ export async function getRowsDecrypted(rows,expressions) {
 	for(let i = 0, j = rows.length; i < j; i++) {
 		// keep encryption keys, multiple attributes can be encrypted on the same relation
 		// key: relation index, value: decrypted base64 key
-		let keysByRelIndex  = {};
+		let keysByRelIndex = {};
 		
 		try{
 			for(let exprIndex in encExprIndexMapRelIndex) {
