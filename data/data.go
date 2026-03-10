@@ -15,30 +15,36 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// check whether access to attribute is authorized
-// cases: getting or setting attribute values
-func authorizedAttribute(loginId int64, attributeId uuid.UUID, accessRequested types.Access) bool {
+// check whether access (DELETE, READ, WRITE) to attributes is authorized
+// returns false, if any attribute access is prohibited
+func authorizedAttributes(loginId int64, attributeIds []uuid.UUID, accessRequested types.Access) bool {
 
 	m, err := cache.GetAccessById(loginId)
 	if err != nil {
 		return false
 	}
 
-	// use attribute access first if specified (more specific access wins)
-	if access, exists := m.Attribute[attributeId]; exists {
-		return access >= accessRequested
-	}
+	for _, attributeId := range attributeIds {
 
-	// use relation access otherwise (inherited access)
-	atr, exists := cache.AttributeIdMap[attributeId]
-	if !exists {
+		// use attribute access first if specified (more specific access wins)
+		if access, exists := m.Attribute[attributeId]; exists && access >= accessRequested {
+			continue
+		}
+
+		// use relation access otherwise (inherited access)
+		atr, exists := cache.AttributeIdMap[attributeId]
+		if !exists {
+			return false
+		}
+
+		if access, exists := m.Relation[atr.RelationId]; exists && access >= accessRequested {
+			continue
+		}
+
+		// no access to attribute or relation
 		return false
 	}
-
-	if access, exists := m.Relation[atr.RelationId]; exists {
-		return access >= accessRequested
-	}
-	return false
+	return true
 }
 
 // check whether access to relation is authorized

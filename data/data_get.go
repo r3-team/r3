@@ -277,10 +277,14 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 
 	// check for access permissions, unless it´s a system task (login ID = -1)
 	if loginId != -1 {
+		attributeIdsReadAccess := make([]uuid.UUID, 0)
 		for _, expr := range data.Expressions {
-			if expr.AttributeId.Valid && !authorizedAttribute(loginId, expr.AttributeId.Bytes, types.AccessRead) {
-				return "", errors.New(handler.ErrUnauthorized)
+			if expr.AttributeId.Valid {
+				attributeIdsReadAccess = append(attributeIdsReadAccess, expr.AttributeId.Bytes)
 			}
+		}
+		if !authorizedAttributes(loginId, attributeIdsReadAccess, types.AccessRead) {
+			return "", errors.New(handler.ErrUnauthorized)
 		}
 	}
 

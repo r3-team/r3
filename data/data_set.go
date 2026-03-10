@@ -61,16 +61,12 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 			return indexRecordIds, errors.New(handler.ErrUnauthorized)
 		}
 
-		// check write access for updating attribute values
+		// check write access for updating attribute values & check for protected preset record values
+		attributeIdsWriteAccess := make([]uuid.UUID, len(dataSet.Attributes))
 		for _, attribute := range dataSet.Attributes {
+			attributeIdsWriteAccess = append(attributeIdsWriteAccess, attribute.AttributeId)
 
-			if !authorizedAttribute(loginId, attribute.AttributeId, types.AccessWrite) {
-				return indexRecordIds, errors.New(handler.ErrUnauthorized)
-			}
-
-			// check for protected preset record values
 			for _, preset := range rel.Presets {
-
 				if cache.GetPresetRecordId(preset.Id) != dataSet.RecordId {
 					continue
 				}
@@ -82,12 +78,13 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 						if !exists {
 							return indexRecordIds, handler.ErrSchemaUnknownAttribute(attribute.AttributeId)
 						}
-
-						return indexRecordIds, fmt.Errorf("cannot change attribute value '%s' of protected preset '%s'",
-							atr.Name, preset.Name)
+						return indexRecordIds, fmt.Errorf("cannot change attribute value '%s' of protected preset '%s'", atr.Name, preset.Name)
 					}
 				}
 			}
+		}
+		if !authorizedAttributes(loginId, attributeIdsWriteAccess, types.AccessWrite) {
+			return indexRecordIds, errors.New(handler.ErrUnauthorized)
 		}
 
 		// set data for record of given relation index
