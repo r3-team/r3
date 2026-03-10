@@ -663,7 +663,7 @@ export default {
 			@set-valid="(...args) => $emit('set-valid',...args)"
 			@set-value="(...args) => $emit('set-value',...args)"
 			:isBulkUpdate
-			:entityIdMapEffect="entityIdMapEffect"
+			:entityIdMapEffect
 			:favoriteId
 			:field="f"
 			:fieldIdsChanged

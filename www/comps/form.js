@@ -2,6 +2,7 @@ import MyArticles                    from './articles.js';
 import MyField                       from './field.js';
 import MyFormActions                 from './formActions.js';
 import MyFormLog                     from './formLog.js';
+import MyFormLogNeo                  from './formLogNeo.js';
 import {getAttributeFileVersionHref} from './shared/attribute.js';
 import {getCollectionValues}         from './shared/collection.js';
 import {getColumnsProcessed}         from './shared/column.js';
@@ -64,7 +65,8 @@ export default {
 		MyArticles,
 		MyField,
 		MyFormActions,
-		MyFormLog
+		MyFormLog,
+		MyFormLogNeo
 	},
 	template:`<div class="form-wrap"
 		:class="{ float:isPopUpFloating, fullscreen:popUpFullscreen, popUp:isPopUp }"
@@ -124,7 +126,7 @@ export default {
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
 					@open-doc="openDoc"
 					@open-form="openForm"
-					:entityIdMapEffect="entityIdMapEffect"
+					:entityIdMapEffect
 					:formActions="form.actions"
 					:formId
 					:moduleId
@@ -227,7 +229,7 @@ export default {
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
 					@open-doc="openDoc"
 					@open-form="openForm"
-					:entityIdMapEffect="entityIdMapEffect"
+					:entityIdMapEffect
 					:formActions="form.actions"
 					:formId
 					:moduleId
@@ -248,7 +250,7 @@ export default {
 					@execute-function="jsFunctionRun($event,[],exposedFunctions)"
 					@open-doc="openDoc"
 					@open-form="openForm"
-					:entityIdMapEffect="entityIdMapEffect"
+					:entityIdMapEffect
 					:formActions="form.actions"
 					:formId
 					:moduleId
@@ -297,7 +299,7 @@ export default {
 		
 		<!-- form change logs -->
 		<my-form-log
-			v-if="showLog"
+			v-if="false && showLog"
 			@close-log="toggleLog"
 			:entityIdMapEffect
 			:fieldIdMapData
@@ -310,6 +312,14 @@ export default {
 			:values
 			:variableIdMapLocal
 		/>
+		<my-form-log-neo
+			v-if="showLog"
+			@close="toggleLog"
+			:entityIdMapEffect
+			:fields
+			:formLoading="loading"
+			:joinsIndexMap
+		/>
 		
 		<!-- form help articles -->
 		<my-articles class="form-help"
@@ -317,7 +327,7 @@ export default {
 			@close="toggleHelp"
 			:form="form"
 			:isFloat="isPopUpFloating"
-			:moduleId="moduleId"
+			:moduleId
 		/>
 	</div>`,
 	props:{

@@ -62,7 +62,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 		}
 
 		// check write access for updating attribute values & check for protected preset record values
-		attributeIdsWriteAccess := make([]uuid.UUID, len(dataSet.Attributes))
+		attributeIdsWriteAccess := make([]uuid.UUID, 0)
 		for _, attribute := range dataSet.Attributes {
 			attributeIdsWriteAccess = append(attributeIdsWriteAccess, attribute.AttributeId)
 

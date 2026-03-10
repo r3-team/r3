@@ -79,17 +79,17 @@ func DelLogsBackground() error {
 }
 
 // get data change logs for specified record and attributes
-func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordId int64, attributeIds []uuid.UUID, loginId int64) ([]types.DataLog, error) {
+func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordIds []int64, attributeIds []uuid.UUID, loginId int64) ([]types.DataLog, error) {
 
-	// check for authorized access, READ(1) for GET
-	for _, attributeId := range attributeIds {
-		if !authorizedAttribute(loginId, attributeId, types.AccessRead) {
-			return nil, errors.New(handler.ErrUnauthorized)
-		}
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
+	if !authorizedAttributes(loginId, attributeIds, types.AccessRead) {
+		return nil, errors.New(handler.ErrUnauthorized)
 	}
 
 	rows, err := tx.Query(ctx, `
-		SELECT d.id, d.relation_id, d.date_change, l.name, lm.name_display, (
+		SELECT d.id, d.relation_id, d.record_id_wofk, d.date_change, l.name, lm.name_display, (
 			SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
 				'attributeId',   attribute_id,
 				'attributeIdNm', attribute_id_nm,
@@ -97,20 +97,19 @@ func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordId int64, attributeIds []u
 				'value',         value
 			))
 			FROM instance.data_log_value
-			WHERE data_log_id = d.id
+			WHERE data_log_id  = d.id
 			AND   attribute_id = ANY($2)
 		)
 		FROM instance.data_log as d
 		LEFT JOIN instance.login      AS l  ON l.id        = d.login_id_wofk
 		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
-		WHERE d.record_id_wofk = $1
+		WHERE d.record_id_wofk = ANY($1)
 		AND d.id IN (
 			SELECT data_log_id
 			FROM instance.data_log_value
 			WHERE attribute_id = ANY($2)
 		)
-		ORDER BY d.date_change DESC
-	`, recordId, attributeIds)
+	`, recordIds, attributeIds)
 	if err != nil {
 		return nil, err
 	}
@@ -123,11 +122,10 @@ func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordId int64, attributeIds []u
 		var nameDisplay pgtype.Text
 		var valuesJson []byte
 
-		if err := rows.Scan(&l.Id, &l.RelationId, &l.DateChange, &name, &nameDisplay, &valuesJson); err != nil {
+		if err := rows.Scan(&l.Id, &l.RelationId, &l.RecordId, &l.DateChange, &name, &nameDisplay, &valuesJson); err != nil {
 			return nil, err
 		}
 
-		l.RecordId = recordId
 		if nameDisplay.Valid && nameDisplay.String != "" {
 			l.LoginName = nameDisplay.String
 		} else {
