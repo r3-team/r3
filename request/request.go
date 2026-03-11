@@ -115,6 +115,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 			return DataGetKeys_tx(ctx, tx, reqJson, loginId)
 		case "getLog":
 			return DataLogGet_tx(ctx, tx, reqJson, loginId)
+		case "getRecordTitles":
+			return DataGetRecordTitles_tx(ctx, tx, reqJson, loginId)
 		case "set":
 			return DataSet_tx(ctx, tx, reqJson, loginId)
 		case "setKeys":

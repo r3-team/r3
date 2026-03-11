@@ -71,7 +71,6 @@ func DataDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId
 	return nil, data.Del_tx(ctx, tx, req.RelationId, req.RecordId, loginId)
 }
 
-// data log
 func DataLogGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 
 	var req struct {
@@ -85,7 +84,6 @@ func DataLogGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, logi
 	return data.GetLogs_tx(ctx, tx, req.RecordIds, req.AttributeIds, loginId)
 }
 
-// data SQL
 func DataSqlGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 
 	var req types.DataGet
@@ -100,7 +98,6 @@ func DataSqlGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, logi
 	return query, nil
 }
 
-// data keys
 func DataGetKeys_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 
 	var req struct {
@@ -125,4 +122,12 @@ func DataSetKeys_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (an
 		return nil, err
 	}
 	return nil, data_enc.SetKeys_tx(ctx, tx, req.RelationId, req.RecordId, req.EncKeys)
+}
+
+func DataGetRecordTitles_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
+	var relationIdMapRecordIds map[uuid.UUID][]int64
+	if err := json.Unmarshal(reqJson, &relationIdMapRecordIds); err != nil {
+		return nil, err
+	}
+	return data.GetRecordTitles_tx(ctx, tx, relationIdMapRecordIds, loginId)
 }

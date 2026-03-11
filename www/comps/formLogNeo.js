@@ -1,13 +1,19 @@
 import {getUnixFormat} from './shared/time.js';
+import {
+	isAttributeRelationship,
+	isAttributeRelationship11,
+	isAttributeRelationshipN1
+} from './shared/attribute.js';
+
 export default {
 	name:'my-form-log-neo',
 	template:`<div class="app-sub-window under-header" @mousedown.left.self="$emit('close')">
-		<div class="contentBox float">
+		<div class="contentBox form-log-neo float">
 			<table>
 				<thead>
 					<tr>
 						<td>{{ capGen.date }}</td>
-						<td>-</td>
+						<td>{{ capGen.username }}</td>
 						<td>{{ capGen.record }}</td>
 						<td>{{ capGen.value }}</td>
 					</tr>
@@ -16,13 +22,28 @@ export default {
 					<tr v-for="l in logs">
 						<td>{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}</td>
 						<td>{{ l.loginName }}</td>
-						<td>{{ l.relationId + '_' + l.recordId }}</td>
+						<td>{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined
+							? relationIdMapRecordIdMapTitle[l.relationId][l.recordId]
+							: 'UNKNOWN'
+						}}</td>
 						<td>
 							<table>
 								<tbody>
 									<tr v-for="a in l.attributes">
-										<td>{{ a.id }}</td>
-										<td>{{ a.value }}</td>
+										<template v-if="a.relationId === null">
+											<td>{{ attributeIdMap[a.attributeId].name }}</td>
+											<td>{{ a.value !== null ? a.value : capGen.button.empty }}</td>
+										</template>
+										<template v-if="a.relationId !== null">
+											<td>{{ a.attributeIdNm === null ? attributeIdMap[a.attributeId].name : attributeIdMap[a.attributeIdNm].name }}</td>
+											<td>
+												<div class="row gap">
+													<div class="form-log-neo-record-title"
+														v-for="v in a.value.filter(v => relationIdMapRecordIdMapTitle[a.relationId]?.[v] !== undefined)"
+													>{{ relationIdMapRecordIdMapTitle[a.relationId]?.[v] }}</div>
+												</div>
+											</td>
+										</template>
 									</tr>
 								</tbody>
 							</table>
@@ -45,7 +66,8 @@ export default {
 	emits:['close'],
 	data() {
 		return {
-			logs:[]
+			logs:[],
+			relationIdMapRecordIdMapTitle:{}
 		};
 	},
 	computed:{
@@ -76,7 +98,7 @@ export default {
 							}
 						break;
 						case 'list':
-
+							// fetch only records, if their relation has record titles
 						break;
 					}
 				}
@@ -98,8 +120,10 @@ export default {
 		},
 
 		// stores
-		capGen:  s => s.$store.getters.captions.generic,
-		settings:s => s.$store.getters.settings
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		capGen:        s => s.$store.getters.captions.generic,
+		settings:      s => s.$store.getters.settings
 	},
 	mounted() {
 		this.get(false);
@@ -107,6 +131,9 @@ export default {
 	methods:{
 		// externals
 		getUnixFormat,
+		isAttributeRelationship,
+		isAttributeRelationship11,
+		isAttributeRelationshipN1,
 
 		// actions
 
@@ -132,7 +159,55 @@ export default {
 			ws.sendMultiple(requests,true).then(
 				async responses => {
 					let logs = [];
+					let relationIdMapRecordIds = {};
+					const addRelationRecordIds = (relationId,recordIds) => {
+
+						// skip if the record of the log relation does not have a title
+						if(this.relationIdMap[relationId].attributeIdsTitle.length === 0)
+							return;
+
+						if(relationIdMapRecordIds[relationId] === undefined)
+							relationIdMapRecordIds[relationId] = [];
+
+						for(const id of recordIds) {
+							if(!relationIdMapRecordIds[relationId].includes(id))
+								relationIdMapRecordIds[relationId].push(id);
+						}
+					};
+
 					for(const res of responses) {
+
+						// store record IDs for record title retrieval
+						for(const l of res.payload) {
+							addRelationRecordIds(l.relationId,[l.recordId]);
+
+							// parse records from relationship attribute values
+							for(const a of l.attributes) {
+								a.relationId = null;
+								a.value      = JSON.parse(a.value);
+
+								if(a.value === null)
+									continue;
+
+								const atr = this.attributeIdMap[a.attributeId];
+
+								if(!this.isAttributeRelationship(atr.content))
+									continue;
+
+								const isSingleValue = this.isAttributeRelationship11(atr.content)
+									|| (this.isAttributeRelationshipN1(atr.content) && a.outsideIn !== true);
+								
+								if(isSingleValue) {
+									a.relationId = a.outsideIn ? atr.relationId : atr.relationshipId;
+									a.value      = [a.value];
+									addRelationRecordIds(a.relationId,a.value);
+								} else {
+									// multi values are always outside-in
+									a.relationId    = a.attributeIdNm === null ? atr.relationId : this.attributeIdMap[a.attributeIdNm].relationshipId;
+									addRelationRecordIds(a.relationId,a.value);
+								}
+							}
+						}
 
 						// decrypt values
 
@@ -143,10 +218,17 @@ export default {
 					logs.sort((a,b) => a.dateChange - b.dateChange);
 
 					// fetch record titles
+					ws.send('data','getRecordTitles',relationIdMapRecordIds,true).then(
+						res => {
+							// store fetched record titles
+							this.relationIdMapRecordIdMapTitle = res.payload;
 
-					// apply processed logs
-					if(!isNextPage) this.logs = logs;
-					else            this.logs.concat(logs);
+							// apply processed logs
+							if(!isNextPage) this.logs = logs;
+							else            this.logs.concat(logs);
+						},
+						this.$root.genericError
+					);
 				},
 				this.$root.genericError
 			);

@@ -129,6 +129,16 @@
 	width:100%;
 }
 
+/* data change log neo */
+.form-log-neo{
+
+}
+.form-log-neo-record-title{
+	padding:2px 4px;
+	background-color:var(--color-input-disabled);
+	border-radius:var(--border-input-radius);
+}
+
 /* context help */
 .form-help{
 	flex:1 0 auto;

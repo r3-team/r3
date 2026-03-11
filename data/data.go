@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"r3/cache"
 	"r3/handler"
@@ -160,8 +161,7 @@ func getPolicyValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 }
 
 // get applicable policy filter (e. g. WHERE clause) for data call
-func getPolicyFilter(loginId int64, action string, tableAlias string,
-	policies []types.RelationPolicy) (string, error) {
+func getPolicyFilter(loginId int64, action string, tableAlias string, policies []types.RelationPolicy) (string, error) {
 
 	if len(policies) == 0 {
 		return "", nil
@@ -201,4 +201,67 @@ func getFunctionName(pgFunctionId uuid.UUID) (string, error) {
 		return "", handler.ErrSchemaUnknownModule(fnc.ModuleId)
 	}
 	return fmt.Sprintf(`"%s"."%s"`, mod.Name, fnc.Name), nil
+}
+
+func GetRecordTitles_tx(ctx context.Context, tx pgx.Tx, relationIdMapRecordIds map[uuid.UUID][]int64, loginId int64) (map[uuid.UUID]map[int64]string, error) {
+
+	relationIdMapRecordIdMapTitle := make(map[uuid.UUID]map[int64]string)
+
+	for relId, recordIds := range relationIdMapRecordIds {
+
+		cache.Schema_mx.RLock()
+		rel, relExists := cache.RelationIdMap[relId]
+		mod, modExists := cache.ModuleIdMap[rel.ModuleId]
+		cache.Schema_mx.RUnlock()
+
+		if !relExists {
+			return nil, handler.ErrSchemaUnknownRelation(relId)
+		}
+		if !modExists {
+			return nil, handler.ErrSchemaUnknownModule(rel.ModuleId)
+		}
+
+		if len(rel.AttributeIdsTitle) == 0 {
+			return nil, fmt.Errorf("record title is not defined for relation '%s'", rel.Name)
+		}
+
+		if !authorizedAttributes(loginId, rel.AttributeIdsTitle, types.AccessRead) {
+			return nil, errors.New(handler.ErrUnauthorized)
+		}
+
+		attrNames := make([]string, 0)
+		for _, atrId := range rel.AttributeIdsTitle {
+			cache.Schema_mx.RLock()
+			atr, exists := cache.AttributeIdMap[atrId]
+			cache.Schema_mx.RUnlock()
+
+			attrNames = append(attrNames, atr.Name)
+
+			if !exists {
+				return nil, handler.ErrSchemaUnknownAttribute(atrId)
+			}
+		}
+
+		rows, err := tx.Query(ctx, fmt.Sprintf(`
+			SELECT %s, ARRAY_TO_STRING(ARRAY[%s], ', ')
+			FROM %s.%s
+			WHERE %s = ANY($1)
+		`, schema.PkName, strings.Join(attrNames, ", "), mod.Name, rel.Name, schema.PkName), recordIds)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		relationIdMapRecordIdMapTitle[relId] = make(map[int64]string)
+		for rows.Next() {
+			var recordId int64
+			var recordTitle string
+			if err := rows.Scan(&recordId, &recordTitle); err != nil {
+				return nil, err
+			}
+			relationIdMapRecordIdMapTitle[relId][recordId] = recordTitle
+		}
+		rows.Close()
+	}
+	return relationIdMapRecordIdMapTitle, nil
 }
