@@ -662,9 +662,9 @@ export default {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'clipboard','close-inline','dropdown-show','open-form','open-form-bulk',
-		'record-count-change','record-removed','records-selected','records-selected-original',
-		'set-args','set-column-ids-by-user','set-collection-indexes','set-login-option'
+		'clipboard','close-inline','dropdown-show','open-form','open-form-bulk','record-count-change',
+		'record-removed','records-selected','records-selected-original','set-args','set-column-ids-by-user',
+		'set-collection-indexes','set-index-record-ids','set-login-option'
 	],
 	data() {
 		return {
@@ -729,7 +729,7 @@ export default {
 			if(!s.checkDataOptions(1,s.dataOptions))
 				return false;
 
-			for(let join of s.joins) {
+			for(const join of s.joins) {
 				if(join.applyDelete)
 					return true;
 			}
@@ -984,6 +984,20 @@ export default {
 						: this.$refs[this.refTabindex+String(this.rows.length-1)][0].focus();
 				}
 			}
+		},
+		updateRecordIdsLoaded() {
+			let indexMapRecordIds = {};
+			for(const j of this.joins) {
+				indexMapRecordIds[j.index] = [];
+			}
+			for(const r of this.rows) {
+				for(const ind in r.indexRecordIds) {
+					if(r.indexRecordIds[ind] !== null)
+						indexMapRecordIds[ind].push(r.indexRecordIds[ind]);
+				}
+			}
+			this.$emit('set-index-record-ids',indexMapRecordIds);
+			this.$emit('record-count-change',this.count);
 		},
 		
 		// presentation
@@ -1426,7 +1440,7 @@ export default {
 							this.rows  = rows;
 							this.selectReset();
 							this.reloadAggregations(false);
-							this.$emit('record-count-change',this.count);
+							this.updateRecordIdsLoaded();
 						},
 						this.consoleError
 					);

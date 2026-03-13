@@ -1,3 +1,4 @@
+import {getColumnAttributeIdsForLogs} from './shared/column.js';
 import {getUnixFormat} from './shared/time.js';
 import {
 	isAttributeRelationship,
@@ -36,13 +37,14 @@ export default {
 										</template>
 										<template v-if="a.relationId !== null">
 											<td>{{ a.attributeIdNm === null ? attributeIdMap[a.attributeId].name : attributeIdMap[a.attributeIdNm].name }}</td>
-											<td>
+											<td v-if="a.value !== null">
 												<div class="row gap">
 													<div class="form-log-neo-record-title"
 														v-for="v in a.value.filter(v => relationIdMapRecordIdMapTitle[a.relationId]?.[v] !== undefined)"
 													>{{ relationIdMapRecordIdMapTitle[a.relationId]?.[v] }}</div>
 												</div>
 											</td>
+											<td v-if="a.value === null">{{ capGen.button.empty }}</td>
 										</template>
 									</tr>
 								</tbody>
@@ -54,9 +56,10 @@ export default {
 		</div>
 	</div>`,
 	props:{
-		entityIdMapEffect:{ type:Object, required:true },
-		fields:           { type:Array,  required:true },
-		joinsIndexMap:    { type:Object, required:true },
+		entityIdMapEffect:          { type:Object, required:true },
+		fields:                     { type:Array,  required:true },
+		fieldIdMapIndexMapRecordIds:{ type:Object, required:true },
+		joinsIndexMap:              { type:Object, required:true },
 
 		/*
 		indexMapRecordKey:  { type:Object,  required:true },
@@ -98,7 +101,48 @@ export default {
 							}
 						break;
 						case 'list':
-							// fetch only records, if their relation has record titles
+							if(f.query === null || s.fieldIdMapIndexMapRecordIds[f.id] === undefined)
+								continue;
+
+							for(const k in s.fieldIdMapIndexMapRecordIds[f.id]) {
+								const index = parseInt(k);
+								const join  = f.query.joins.find(v => v.index === index);
+
+								if(join === undefined)
+									continue;
+
+								// fetch only records, if their relation has record titles
+								const rel = s.relationIdMap[join.relationId];
+								if(rel.attributeIdsTitle.length === 0)
+									continue;
+
+								out.push({
+									fieldId:f.id,
+									index:index,
+									recordIds:s.fieldIdMapIndexMapRecordIds[f.id][index],
+									attributeIds:s.getColumnAttributeIdsForLogs(f.columns,index)
+								});
+							}
+
+							// add relationship attributes
+							for(const join of f.query.joins) {
+								if(join.attributeId === null)
+									continue;
+
+								const src = out.find(v => v.fieldId === f.id && v.index === join.index);
+								if(src === undefined)
+									continue;
+
+								const atr = s.attributeIdMap[join.attributeId];
+								if(atr.relationId === join.relationId) {
+									src.attributeIds.push(join.attributeId);
+									continue;
+								}
+
+								const srcFrom = out.find(v => v.fieldId === f.id && v.index === join.indexFrom);
+								if(srcFrom !== undefined)
+									srcFrom.attributeIds.push(join.attributeId);
+							}
 						break;
 					}
 				}
@@ -130,6 +174,7 @@ export default {
 	},
 	methods:{
 		// externals
+		getColumnAttributeIdsForLogs,
 		getUnixFormat,
 		isAttributeRelationship,
 		isAttributeRelationship11,
@@ -186,11 +231,9 @@ export default {
 								a.relationId = null;
 								a.value      = JSON.parse(a.value);
 
-								if(a.value === null)
-									continue;
-
 								const atr = this.attributeIdMap[a.attributeId];
 
+								// process relationship values
 								if(!this.isAttributeRelationship(atr.content))
 									continue;
 
@@ -199,13 +242,15 @@ export default {
 								
 								if(isSingleValue) {
 									a.relationId = a.outsideIn ? atr.relationId : atr.relationshipId;
-									a.value      = [a.value];
-									addRelationRecordIds(a.relationId,a.value);
+									if(a.value !== null)
+										a.value = [a.value];
 								} else {
 									// multi values are always outside-in
-									a.relationId    = a.attributeIdNm === null ? atr.relationId : this.attributeIdMap[a.attributeIdNm].relationshipId;
-									addRelationRecordIds(a.relationId,a.value);
+									a.relationId = a.attributeIdNm === null ? atr.relationId : this.attributeIdMap[a.attributeIdNm].relationshipId;
 								}
+
+								if(a.value !== null)
+									addRelationRecordIds(a.relationId,a.value);
 							}
 						}
 
@@ -217,7 +262,7 @@ export default {
 					// sort logs by date change (separate requests are sorted individually, but not together)
 					logs.sort((a,b) => a.dateChange - b.dateChange);
 
-					// fetch record titles
+					// fetch title for loaded record and relationship values
 					ws.send('data','getRecordTitles',relationIdMapRecordIds,true).then(
 						res => {
 							// store fetched record titles

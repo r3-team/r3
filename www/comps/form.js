@@ -270,6 +270,7 @@ export default {
 					@open-doc="openDoc"
 					@open-form="openForm"
 					@set-form-args="setFormArgs"
+					@set-index-record-ids="fieldSetIndexMapRecords"
 					@set-touched="fieldSetTouched"
 					@set-valid="fieldSetValid"
 					@set-value="valueSetByField"
@@ -317,6 +318,7 @@ export default {
 			@close="toggleLog"
 			:entityIdMapEffect
 			:fields
+			:fieldIdMapIndexMapRecordIds
 			:formLoading="loading"
 			:joinsIndexMap
 		/>
@@ -395,6 +397,7 @@ export default {
 			// form data
 			fieldIdsInvalid:[],           // field IDs with invalid values
 			fieldIdsTouched:[],           // field IDs that were touched (changed their value in some way)
+			fieldIdMapIndexMapRecordIds:{}, // record IDs for data fields (lists mainly), mapped by their join index on the field query
 			fieldIdMapOverwrite:{         // overwrites for fields
 				caption:{}, chart:{}, error:{}, order:{}
 			},
@@ -1058,6 +1061,7 @@ export default {
 			// reset form behaviour and load record
 			this.blockInputs = false;
 			this.firstLoad   = false;
+			this.fieldIdMapIndexMapRecordIds = {};
 			this.fieldIdMapOverwrite = this.getFieldOverwriteDefault();
 			this.timerClearAll();
 			this.closePopUp();
@@ -1225,6 +1229,9 @@ export default {
 			const inputEl = searchEl.querySelector('[data-is-input="1"]');
 			if(inputEl !== null)
 				inputEl.focus();
+		},
+		fieldSetIndexMapRecords(fieldId,m) {
+			this.fieldIdMapIndexMapRecordIds[fieldId] = m;
 		},
 		fieldSetTouched(fieldId) {
 			this.fieldIdsTouched.push(fieldId);

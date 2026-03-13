@@ -232,6 +232,7 @@ export default {
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-column-ids-by-user="setColumnIdsByUser"
 					@set-collection-indexes="setCollectionIndexes"
+					@set-index-record-ids="$emit('set-index-record-ids',field.id,$event)"
 					@set-login-option="setLoginOption"
 					:autoRenewDefault="field.autoRenew"
 					:caption="isAlone ? caption : ''"
@@ -304,6 +305,7 @@ export default {
 							@open-form="(...args) => $emit('open-form',...args)"
 							@set-counter="(...args) => setTabCounter(i,args[0],args[1])"
 							@set-form-args="(...args) => $emit('set-form-args',...args)"
+							@set-index-record-ids="(...args) => $emit('set-index-record-ids',...args)"
 							@set-touched="(...args) => $emit('set-touched',...args)"
 							@set-valid="(...args) => $emit('set-valid',...args)"
 							@set-value="(...args) => $emit('set-value',...args)"
@@ -659,6 +661,7 @@ export default {
 			@open-form="(...args) => $emit('open-form',...args)"
 			@set-counter="(...args) => $emit('set-counter',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
+			@set-index-record-ids="(...args) => $emit('set-index-record-ids',...args)"
 			@set-touched="(...args) => $emit('set-touched',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
 			@set-value="(...args) => $emit('set-value',...args)"
@@ -715,7 +718,7 @@ export default {
 	},
 	emits:[
 		'clipboard','execute-function','open-doc','open-form','set-form-args',
-		'set-counter','set-touched','set-valid','set-value'
+		'set-counter','set-index-record-ids','set-touched','set-valid','set-value'
 	],
 	data() {
 		return {
