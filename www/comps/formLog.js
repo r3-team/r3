@@ -5,6 +5,9 @@ import {srcBase64}                     from './shared/image.js';
 import {getCaption}                    from './shared/language.js';
 import {getUnixFormat}                 from './shared/time.js';
 import {
+	getAttributeFileHref,
+	getAttributeFileVersionHref,
+	isAttributeFiles,
 	isAttributeRelationship,
 	isAttributeRelationship11,
 	isAttributeRelationshipN1
@@ -30,33 +33,34 @@ export default {
 							<tr>
 								<th>{{ capGen.date }}</th>
 								<th>{{ capGen.username }}</th>
-								<th v-if="!isSingleFieldSource">{{ capGen.source }}</th>
-								<th>{{ capGen.record }}</th>
+								<th v-if="!isSingleSource">{{ capGen.source }}</th>
+								<th v-if="!isSingleSourceForm">{{ capGen.record }}</th>
 								<th>{{ capGen.field }}</th>
 								<th>{{ capGen.value }}</th>
 							</tr>
 						</thead>
 						<tbody>
-							<template v-for="(l,li) in logs.filter(v => !sourceFieldIdsHide.includes(sources[v.sourceIndex].fieldId))">
+							<tr v-if="logsShown.length === 0"><td colspan="6">{{ capGen.nothingThere }}</td></tr>
+
+							<template v-for="(l,li) in logsShown">
 								<tr v-for="(a,i) in l.attributes" :class="{ 'row-contrast':li % 2 === 0 }">
 									<!-- log info -->
 									<template v-if="i === 0">
-										<td :rowspan="l.attributes.length">{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}</td>
-										<td :rowspan="l.attributes.length">{{ l.loginName }}</td>
-										<td :rowspan="l.attributes.length" v-if="!isSingleFieldSource">
+										<td class="minimum" :rowspan="l.attributes.length">{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}</td>
+										<td class="minimum" :rowspan="l.attributes.length">{{ l.loginName }}</td>
+										<td class="minimum" :rowspan="l.attributes.length" v-if="!isSingleSource">
 											<div class="form-log-source">
 												<img :src="sources[l.sourceIndex].image" />
 												<span>{{ sources[l.sourceIndex].title }}</span>
 											</div>
 										</td>
-										<td :rowspan="l.attributes.length">{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined
-											? relationIdMapRecordIdMapTitle[l.relationId][l.recordId]
-											: 'UNKNOWN'
-										}}</td>
+										<td class="minimum" :rowspan="l.attributes.length"  v-if="!isSingleSourceForm">
+											{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined ? relationIdMapRecordIdMapTitle[l.relationId][l.recordId] : '-' }}
+										</td>
 									</template>
 
 									<!-- log values -->
-									<td>
+									<td class="minimum">
 										<my-label
 											v-if="sources[l.sourceIndex].attributeIdMapIcon[a.attributeId] !== null"
 											:caption="sources[l.sourceIndex].attributeIdMapTitle[a.attributeId]"
@@ -67,16 +71,45 @@ export default {
 											:caption="sources[l.sourceIndex].attributeIdMapTitle[a.attributeId]"
 										/>
 									</td>
-									<td v-if="a.relationId === null">{{ a.value !== null ? a.value : capGen.button.empty }}</td>
-									<template v-if="a.relationId !== null">
-										<td v-if="a.value !== null">
-											<div class="row gap wrap">
-												<div class="form-log-record-title"
-													v-for="v in a.value.filter(v => relationIdMapRecordIdMapTitle[a.relationId]?.[v] !== undefined)"
-												>{{ relationIdMapRecordIdMapTitle[a.relationId]?.[v] }}</div>
-											</div>
+									<td v-if="a.value === null">
+										<span class="form-log-empty-value">[{{ capGen.button.empty }}]</span>
+									</td>
+
+									<template v-if="a.value !== null">
+										<template v-if="!sources[l.sourceIndex].attributeIdsFiles.includes(a.attributeId)">
+											<td v-if="a.relationId === null">
+												<my-value-rich :attributeId="a.attributeId" :length="80" :value="a.value" />
+											</td>
+											<td v-if="a.relationId !== null">
+												<div class="row gap wrap">
+													<div class="form-log-record-title"
+														v-for="v in a.value.filter(v => relationIdMapRecordIdMapTitle[a.relationId]?.[v] !== undefined)"
+													>{{ relationIdMapRecordIdMapTitle[a.relationId]?.[v] }}</div>
+												</div>
+											</td>
+										</template>
+										<td v-else>
+											<table>
+												<tbody>
+													<tr v-for="(c,fileId) in a.value.fileIdMapChange">
+														<td v-if="c.action === 'create'">{{ capApp.fileCreated }}</td>
+														<td v-if="c.action === 'delete'">{{ capApp.fileDeleted }}</td>
+														<td v-if="c.action === 'rename'">{{ capApp.fileRenamed }}</td>
+														<td v-if="c.action === 'update'">{{ capApp.fileUpdated }}</td>
+														<td>
+															<!-- latest file version -->
+															<a target="_blank" v-if="c.action !== 'update'" :href="getAttributeFileHref(a.attributeId,fileId,c.name,token)">
+																<my-button image="download.png" :caption="c.name" :naked="true" />
+															</a>
+															<!-- specific file version -->
+															<a target="_blank" v-else :href="getAttributeFileVersionHref(a.attributeId,fileId,c.name,c.version,token)">
+																<my-button image="download.png" :caption="c.name + ' (v' + c.version + ')'" :naked="true" />
+															</a>
+														</td>
+													</tr>
+												</tbody>
+											</table>
 										</td>
-										<td v-if="a.value === null">{{ capGen.button.empty }}</td>
 									</template>
 								</tr>
 							</template>
@@ -84,7 +117,7 @@ export default {
 					</table>
 				</div>
 				<div class="form-log-sidebar">
-					<div class="column gap" v-if="!isSingleFieldSource">
+					<div class="column gap" v-if="!isSingleSource">
 						<my-label image="filter.png" :caption="capGen.sources" :large="true" />
 						<my-button
 							v-for="fieldId in sourcesFieldIds"
@@ -177,6 +210,9 @@ export default {
 
 								if(!isNm && atr.encrypted)
 									src.attributeIdsEnc.push(f.attributeId);
+
+								if(s.isAttributeFiles(atr.content))
+									src.attributeIdsFiles.push(f.attributeId);
 							}
 						break;
 						case 'list':
@@ -219,6 +255,9 @@ export default {
 										src.attributeIds.push(c.attributeId);
 										src.attributeIdMapIcon[c.attributeId]  = atr.iconId;
 										src.attributeIdMapTitle[c.attributeId] = s.getColumnTitle(c,s.moduleId);
+
+										if(s.isAttributeFiles(atr.content))
+											src.attributeIdsFiles.push(c.attributeId);
 									}
 								}
 								out.push(src);
@@ -270,7 +309,7 @@ export default {
 			}
 			return out;
 		},
-		isSingleFieldSource:s => {
+		isSingleSource:s => {
 			let srcFieldIdLast;
 			for(const src of s.sources) {
 				if(srcFieldIdLast === undefined) {
@@ -284,10 +323,15 @@ export default {
 			return true;
 		},
 
+		// simple
+		isSingleSourceForm:s => s.isSingleSource && (s.sources.length === 0 || s.sources[0].fieldId === null),
+		logsShown:         s => s.logs.filter(v => !s.sourceFieldIdsHide.includes(s.sources[v.sourceIndex].fieldId)),
+
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
 		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		token:         s => s.$store.getters['local/token'],
 		capApp:        s => s.$store.getters.captions.formLog,
 		capGen:        s => s.$store.getters.captions.generic,
 		settings:      s => s.$store.getters.settings
@@ -299,9 +343,12 @@ export default {
 		// externals
 		aesGcmDecryptBase64WithPhrase,
 		consoleError,
+		getAttributeFileHref,
+		getAttributeFileVersionHref,
 		getCaption,
 		getColumnTitle,
 		getUnixFormat,
+		isAttributeFiles,
 		isAttributeRelationship,
 		isAttributeRelationship11,
 		isAttributeRelationshipN1,
@@ -311,6 +358,7 @@ export default {
 			return { fieldId, index, image, recordIds, title,
 				attributeIds:[],
 				attributeIdsEnc:[],
+				attributeIdsFiles:[],
 				attributeIdMapIcon:{},
 				attributeIdMapTitle:{}
 			};
@@ -341,7 +389,7 @@ export default {
 					continue;
 
 				// if multiple sources exist, we require a title to differentiate them
-				if(!this.isSingleFieldSource && src.title === '')
+				if(!this.isSingleSource && src.title === '')
 					continue;
 
 				requests.push(ws.prepare('data','getLog',{

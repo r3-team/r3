@@ -94,8 +94,10 @@
 
 /* data change log */
 .form-log{
-	width:95%;
-	height:95%;
+	min-width:300px;
+	max-width:95%;
+	min-height:400px;
+	max-height:95%;
 }
 .form-log-record-title{
 	padding:2px 4px;
@@ -111,6 +113,7 @@
 .form-log-table{
 	flex:2 2 auto;
 	overflow:auto;
+	line-height:24px;
 }
 .form-log-sidebar{
 	flex:1 1 auto;
@@ -127,6 +130,10 @@
 	width:24px;
 	height:24px;
 	filter:var(--image-filter);
+}
+.form-log-empty-value{
+	font-style:italic;
+	color:var(--color-font-disabled);
 }
 
 /* context help */
