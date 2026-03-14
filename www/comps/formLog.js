@@ -1,341 +1,453 @@
-import MyField                         from './field.js';
+import {getColumnTitle}                from './shared/column.js';
 import {aesGcmDecryptBase64WithPhrase} from './shared/crypto.js';
 import {consoleError}                  from './shared/error.js';
-import {getFieldOverwriteDefault}      from './shared/field.js';
+import {srcBase64}                     from './shared/image.js';
 import {getCaption}                    from './shared/language.js';
 import {getUnixFormat}                 from './shared/time.js';
 import {
-	getAttributeFileHref,
-	getAttributeFileVersionHref,
-	getDetailsFromIndexAttributeId,
-	getIndexAttributeId,
-	getIndexAttributeIdByField,
-	isAttributeFiles
+	isAttributeRelationship,
+	isAttributeRelationship11,
+	isAttributeRelationshipN1
 } from './shared/attribute.js';
 
 export default {
 	name:'my-form-log',
-	components:{MyField},
-	template:`<div class="form-log contentBox" :class="{ 'float':isPopUpFloating }">
-		<div class="top">
-			<div class="area">
-				<img class="icon" src="images/time.png" />
-				<h1>{{ capApp.title }}</h1>
-			</div>
-			
-			<div class="area">
-				<my-button image="cancel.png"
-					@trigger="$emit('close-log')"
-					:cancel="true"
-				/>
-			</div>
-		</div>
-		<div class="top lower">
-			<div class="area">
-				<my-button 
-					@trigger="toggleAll"
-					:active="logs.length !== 0"
-					:caption="capApp.button.showAll.replace('{CNT}',logs.length)"
-					:image="logsShown.length === logs.length ? 'triangleDown.png' : 'triangleRight.png'"
-				/>
-			</div>
-		</div>
-		
-		<div class="log-entries">
-			<span v-if="logs.length === 0">{{ capGen.nothingThere }}</span>
-			
-			<div class="entry" v-for="(l,i) in logs">
-				<div>
-					<my-button
-						@trigger="toggleLog(i)"
-						:caption="displayTitle(i,l.dateChange,l.loginName)"
-						:naked="true"
-					/>
+	template:`<div class="app-sub-window under-header" @mousedown.left.self="$emit('close')">
+		<div class="contentBox scroll float form-log">
+			<div class="top">
+				<div class="area nowrap">
+					<img class="icon" src="images/time.png" />
+					<h1>{{ capApp.title }}</h1>
 				</div>
-				
-				<div class="log-fields" v-if="logsShown.includes(i)">
-					<template v-for="(v,ia) in l.values">
-						
-						<!-- regular attribute logs -->
-						<my-field flexDirParent="column"
-							v-if="!isFiles(ia)"
-							:entityIdMapEffect
-							:field="indexAttributeIdMapField[ia]"
-							:fieldIdMapOptions
-							:fieldIdMapOverwrite
-							:fieldIdMapProcessed
-							:formBadSave="false"
-							:formBlockInputs="false"
-							:formIsEmbedded="true"
-							:formLoading="loading"
-							:logViewer="true"
-							:isAloneInForm="false"
-							:joinsIndexMap
-							:key="indexAttributeIdMapField[ia].id"
-							:moduleId
-							:values="{ ...values, ...l.values }"
-							:variableIdMapLocal
+				<div class="area">
+					<my-button image="cancel.png" @trigger="$emit('close')" :cancel="true" />
+				</div>
+			</div>
+			<div class="form-log-content">
+				<div class="form-log-table">
+					<table class="generic-table auto-height sticky-top bright topAligned">
+						<thead>
+							<tr>
+								<th>{{ capGen.date }}</th>
+								<th>{{ capGen.username }}</th>
+								<th v-if="!isSingleFieldSource">{{ capGen.source }}</th>
+								<th>{{ capGen.record }}</th>
+								<th>{{ capGen.field }}</th>
+								<th>{{ capGen.value }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							<template v-for="(l,li) in logs.filter(v => !sourceFieldIdsHide.includes(sources[v.sourceIndex].fieldId))">
+								<tr v-for="(a,i) in l.attributes" :class="{ 'row-contrast':li % 2 === 0 }">
+									<!-- log info -->
+									<template v-if="i === 0">
+										<td :rowspan="l.attributes.length">{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}</td>
+										<td :rowspan="l.attributes.length">{{ l.loginName }}</td>
+										<td :rowspan="l.attributes.length" v-if="!isSingleFieldSource">
+											<div class="form-log-source">
+												<img :src="sources[l.sourceIndex].image" />
+												<span>{{ sources[l.sourceIndex].title }}</span>
+											</div>
+										</td>
+										<td :rowspan="l.attributes.length">{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined
+											? relationIdMapRecordIdMapTitle[l.relationId][l.recordId]
+											: 'UNKNOWN'
+										}}</td>
+									</template>
+
+									<!-- log values -->
+									<td>
+										<my-label
+											v-if="sources[l.sourceIndex].attributeIdMapIcon[a.attributeId] !== null"
+											:caption="sources[l.sourceIndex].attributeIdMapTitle[a.attributeId]"
+											:imageBase64="srcBase64(iconIdMap[sources[l.sourceIndex].attributeIdMapIcon[a.attributeId]].file)"
+										/>
+										<my-label image="icon_missing.png"
+											v-if="sources[l.sourceIndex].attributeIdMapIcon[a.attributeId] === null"
+											:caption="sources[l.sourceIndex].attributeIdMapTitle[a.attributeId]"
+										/>
+									</td>
+									<td v-if="a.relationId === null">{{ a.value !== null ? a.value : capGen.button.empty }}</td>
+									<template v-if="a.relationId !== null">
+										<td v-if="a.value !== null">
+											<div class="row gap wrap">
+												<div class="form-log-record-title"
+													v-for="v in a.value.filter(v => relationIdMapRecordIdMapTitle[a.relationId]?.[v] !== undefined)"
+												>{{ relationIdMapRecordIdMapTitle[a.relationId]?.[v] }}</div>
+											</div>
+										</td>
+										<td v-if="a.value === null">{{ capGen.button.empty }}</td>
+									</template>
+								</tr>
+							</template>
+						</tbody>
+					</table>
+				</div>
+				<div class="form-log-sidebar">
+					<div class="column gap" v-if="!isSingleFieldSource">
+						<my-label image="filter.png" :caption="capGen.sources" :large="true" />
+						<my-button
+							v-for="fieldId in sourcesFieldIds"
+							@trigger="sourceToggle(fieldId)"
+							:caption="getSourceTitleByFieldId(fieldId)"
+							:images="[sourceFieldIdsHide.includes(fieldId) ? 'checkbox0.png' : 'checkbox1.png', fieldId === null ? 'fileText.png' : 'files_list2.png']"
+							:modelValue="!sourceFieldIdsHide.includes(fieldId)"
+							:naked="true"
 						/>
-						
-						<!-- file attribute logs -->
-						<div class="field readonly" v-else>
-							<div class="field-caption">
-								{{ displayFieldCaption(indexAttributeIdMapField[ia]) }}
-							</div>
-							<div class="field-content intent data disabled">
-								<table class="file-changes">
-									<tbody>
-										<tr v-for="(c,fileId) in v.fileIdMapChange">
-											<td v-if="c.action === 'create'">{{ capApp.fileCreated }}</td>
-											<td v-if="c.action === 'delete'">{{ capApp.fileDeleted }}</td>
-											<td v-if="c.action === 'rename'">{{ capApp.fileRenamed }}</td>
-											<td v-if="c.action === 'update'">{{ capApp.fileUpdated }}</td>
-											<td>
-												<!-- latest file version -->
-												<a target="_blank"
-													v-if="c.action !== 'update'"
-													:href="getAttributeFileHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,token)"
-												>
-													<my-button image="download.png"
-														:caption="c.name"
-														:naked="true"
-													/>
-												</a>
-												<!-- specific file version -->
-												<a target="_blank"
-													v-else
-													:href="getAttributeFileVersionHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,c.version,token)"
-												>
-													<my-button image="download.png"
-														:caption="c.name + ' (v' + c.version + ')'"
-														:naked="true"
-													/>
-												</a>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</template>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>`,
 	props:{
-		entityIdMapEffect:  { type:Object,  required:true },
-		fieldIdMapData:     { type:Object,  required:true },
-		fieldIdMapProcessed:{ type:Object,  required:true },
-		formLoading:        { type:Boolean, required:true },
-		isPopUpFloating:    { type:Boolean, required:true },
-		indexMapRecordKey:  { type:Object,  required:true },
-		joinsIndexMap:      { type:Object,  required:true },
-		moduleId:           { type:String,  required:true },
-		values:             { type:Object,  required:true },
-		variableIdMapLocal: { type:Object,  required:true }
+		entityIdMapEffect:          { type:Object, required:true },
+		fields:                     { type:Array,  required:true },
+		fieldIdMapIndexMapRecordIds:{ type:Object, required:true },
+		fieldIdMapOverwrite:        { type:Object, required:true },
+		formIconSrc:                { type:String, required:true },
+		formTitle:                  { type:String, required:true },
+		indexMapRecordKey:          { type:Object, required:true },
+		joinsIndexMap:              { type:Object, required:true },
+		moduleId:                   { type:String, required:true }
 	},
-	emits:['close-log'],
-	watch:{
-		formLoading(v) {
-			if(!v) this.get();
-		}
-	},
+	emits:['close'],
 	data() {
 		return {
-			fieldIdMapOptions:{},
-			fieldIdMapOverwrite:{},
-			loading:false,
 			logs:[],
-			logsShown:[]
+			sourceFieldIdsHide:[],
+			relationIdMapRecordIdMapTitle:{}
 		};
 	},
 	computed:{
-		indexAttributeIdMapField:s => {
-			let out = {};
-			for(let k in s.fieldIdMapData) {
-				let f   = s.fieldIdMapData[k];
-				let ia1 = s.getIndexAttributeIdByField(f,false);
-				let ia2 = s.getIndexAttributeIdByField(f,true);
-				
-				if(typeof ia1 !== 'undefined') out[ia1] = f;
-				if(typeof ia2 !== 'undefined') out[ia2] = f;
+		// a source requests data logs for a number of record IDs and defined attributes
+		// sources can either be the current form itself or a number of list fields on the form
+		// which attributes are requested depends on the requestor (form = visible data fields, list = available columns)
+		// a data log request runs for specific record IDs for a single relation, with shared attributes to retrieve
+		//  both form & list fields can have multiple sources if they join multiple relations
+		sources:s => {
+			let out = [];
+
+			const parseFields = (fields,tabTitle) => {
+				for(const f of fields) {
+					switch(f.content) {
+						case 'container':
+							parseFields(f.fields,'');
+						break;
+						case 'tabs':
+							for(const t of f.tabs) {
+								parseFields(t.fields,s.getCaption('tabTitle',s.moduleId,t.id,t.captions,''));
+							}
+						break;
+						case 'data':
+							// if field join index is available & field is accessible
+							const src = out.find(v => v.fieldId === null && v.index === f.index);
+							if(src !== undefined && !src.attributeIds.includes(f.attributeId)) {
+		
+								const state = s.entityIdMapEffect.field[f.id] !== undefined
+									? s.entityIdMapEffect.field[f.id] : f.state;
+								
+								if(state === 'hidden')
+									continue;
+
+								const isNm = f.attributeIdNm !== undefined && f.attributeIdNm !== null;
+								const atr  = isNm ? s.attributeIdMap[f.attributeIdNm] : s.attributeIdMap[f.attributeId];
+
+								if(isNm || s.isAttributeRelationship(atr.content)) {
+									// fetch only relationship attributes, if their relation has record titles
+									const rel = s.relationIdMap[atr.relationshipId];
+									if(rel.attributeIdsTitle.length === 0)
+										continue;
+								}
+
+								let title  = '';
+								let iconId = f.iconId !== null ? f.iconId : atr.iconId;
+								
+								if(s.fieldIdMapOverwrite.caption[f.id] !== undefined)
+									title = s.fieldIdMapOverwrite.caption[f.id];
+
+								if(title === '')
+									title = s.getCaption('fieldTitle',s.moduleId,f.id,f.captions);
+
+								if(title === '')
+									title = s.getCaption('attributeTitle',s.moduleId,f.attributeId,atr.captions,atr.name);
+								
+								src.attributeIds.push(f.attributeId);
+								src.attributeIdMapIcon[f.attributeId]  = iconId;
+								src.attributeIdMapTitle[f.attributeId] = title;
+
+								if(!isNm && atr.encrypted)
+									src.attributeIdsEnc.push(f.attributeId);
+							}
+						break;
+						case 'list':
+							// lists are their own data log source if they have records loaded
+							if(f.query === null || s.fieldIdMapIndexMapRecordIds[f.id] === undefined)
+								continue;
+
+							for(const k in s.fieldIdMapIndexMapRecordIds[f.id]) {
+								const index = parseInt(k);
+								const join  = f.query.joins.find(v => v.index === index);
+
+								if(join === undefined)
+									continue;
+
+								// fetch only records, if their relation has record titles
+								const rel = s.relationIdMap[join.relationId];
+								if(rel.attributeIdsTitle.length === 0)
+									continue;
+
+								let title = '';
+								if(title === '')
+									title = s.getCaption('fieldTitle',s.moduleId,f.id,f.captions);
+								
+								if(title === '')
+									title = tabTitle;
+
+								if(title === '')
+									title = s.getCaption('relationTitle',s.moduleId,rel.id,rel.captions);
+
+								let src = s.getSourceTemplate(f.id,index,s.fieldIdMapIndexMapRecordIds[f.id][index],'images/files_list2.png',title);
+								for(const c of f.columns) {
+									if(!c.subQuery && c.index === index) {
+										const atr = s.attributeIdMap[c.attributeId];
+
+										// encrypted change logs are not supported for sub lists, keys are not available
+										// it would require providing keys during data log GET call to implement this
+										if(atr.encrypted)
+											continue;
+
+										src.attributeIds.push(c.attributeId);
+										src.attributeIdMapIcon[c.attributeId]  = atr.iconId;
+										src.attributeIdMapTitle[c.attributeId] = s.getColumnTitle(c,s.moduleId);
+									}
+								}
+								out.push(src);
+							}
+
+							// add relationship attributes
+							for(const join of f.query.joins) {
+								if(join.attributeId === null)
+									continue;
+
+								const src = out.find(v => v.fieldId === f.id && v.index === join.index);
+								if(src === undefined)
+									continue;
+
+								const atr   = s.attributeIdMap[join.attributeId];
+								const title = s.getCaption('attributeTitle',s.moduleId,atr.id,atr.captions,atr.name);
+								if(atr.relationId === join.relationId) {
+									src.attributeIds.push(atr.id);
+									src.attributeIdMapIcon[atr.id]  = atr.iconId;
+									src.attributeIdMapTitle[atr.id] = title;
+									continue;
+								}
+
+								const srcFrom = out.find(v => v.fieldId === f.id && v.index === join.indexFrom);
+								if(srcFrom !== undefined) {
+									srcFrom.attributeIds.push(atr.id);
+									srcFrom.attributeIdMapIcon[atr.id]  = atr.iconId;
+									srcFrom.attributeIdMapTitle[atr.id] = title;
+								}
+							}
+						break;
+					}
+				}
+			};
+			
+			for(const k in s.joinsIndexMap) {	
+				const j = s.joinsIndexMap[k];
+				if(j.recordId !== 0)
+					out.push(s.getSourceTemplate(null,j.index,[j.recordId],s.formIconSrc,s.formTitle));
+			}
+			parseFields(s.fields,'');
+			return out;
+		},
+		sourcesFieldIds:s => {
+			let out = [];
+			for(const src of s.sources) {
+				if(!out.includes(src.fieldId))
+					out.push(src.fieldId);
 			}
 			return out;
 		},
-		
+		isSingleFieldSource:s => {
+			let srcFieldIdLast;
+			for(const src of s.sources) {
+				if(srcFieldIdLast === undefined) {
+					srcFieldIdLast = src.fieldId;
+					continue;
+				}
+
+				if(srcFieldIdLast !== src.fieldId)
+					return false;
+			}
+			return true;
+		},
+
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		capApp:        s => s.$store.getters.captions.formLog,
 		capGen:        s => s.$store.getters.captions.generic,
-		settings:      s => s.$store.getters.settings,
-		token:         s => s.$store.getters['local/token']
+		settings:      s => s.$store.getters.settings
 	},
 	mounted() {
-		this.fieldIdMapOverwrite = this.getFieldOverwriteDefault();
-		this.get();
+		this.get(false);
 	},
 	methods:{
 		// externals
 		aesGcmDecryptBase64WithPhrase,
 		consoleError,
-		getAttributeFileHref,
-		getAttributeFileVersionHref,
 		getCaption,
-		getDetailsFromIndexAttributeId,
-		getFieldOverwriteDefault,
-		getIndexAttributeId,
-		getIndexAttributeIdByField,
+		getColumnTitle,
 		getUnixFormat,
-		isAttributeFiles,
-		
-		// presentation
-		displayFieldCaption(f) {
-			const atr = this.attributeIdMap[f.attributeId];
-			return this.getCaption('fieldTitle',this.moduleId,f.id,f.captions,
-				this.getCaption('attributeTitle',this.moduleId,atr.Id,atr.captions,atr.name));
+		isAttributeRelationship,
+		isAttributeRelationship11,
+		isAttributeRelationshipN1,
+		srcBase64,
+
+		getSourceTemplate(fieldId,index,recordIds,image,title) {
+			return { fieldId, index, image, recordIds, title,
+				attributeIds:[],
+				attributeIdsEnc:[],
+				attributeIdMapIcon:{},
+				attributeIdMapTitle:{}
+			};
 		},
-		displayTitle(i,unixTime,name) {
-			if(name === '') name = this.capApp.deletedUser;
-			let prefix = this.logsShown.includes(i) ? '\u2BC6' : '\u2BC8';
-			let format = [this.settings.dateFormat,'H:i:S'];
-			return `${prefix} ${this.getUnixFormat(unixTime,format.join(' '))} (${name})`;
-		},
-		isFiles(ia) {
-			let d = this.getDetailsFromIndexAttributeId(ia);
-			let a = this.attributeIdMap[d.attributeId];
-			return this.isAttributeFiles(a.content);
-		},
-		
-		// actions
-		toggleLog(i) {
-			const pos = this.logsShown.indexOf(i);
-			
-			if(pos === -1) this.logsShown.push(i);
-			else           this.logsShown.splice(pos,1);
-			
-			this.loading = true;
-			this.releaseLoadingOnNextTick();
-		},
-		toggleAll() {
-			if(this.logsShown.length < this.logs.length) {
-				for(let i = this.logs.length - 1; i >= 0; i--) {
-					this.logsShown.push(i);
-				}
-				this.loading = true;
-				this.releaseLoadingOnNextTick();
-				return;
+		getSourceTitleByFieldId(fieldId) {
+			for(const src of this.sources) {
+				if(fieldId === src.fieldId)
+					return src.title;
 			}
-			this.logsShown = [];
+			return '';
 		},
-		releaseLoadingOnNextTick() {
-			this.$nextTick(function() {
-				this.loading = false;
-			});
+
+		// actions
+		sourceToggle(fieldId) {
+			const pos = this.sourceFieldIdsHide.indexOf(fieldId);
+			if(pos === -1) this.sourceFieldIdsHide.push(fieldId);
+			else           this.sourceFieldIdsHide.splice(pos,1);
 		},
-		reset() {
-			this.logs      = [];
-			this.logsShown = [];
-		},
-		
+
 		// backend calls
-		get() {
-			if(this.formLoading)
-				return;
-			
-			let attributeIdsEnc = [];
-			let requests        = [];
-			
-			for(let index in this.joinsIndexMap) {
-				let j = this.joinsIndexMap[index];
-				
-				// only get logs for relations that can be changed on this form
-				if(!j.applyCreate && !j.applyUpdate)
+		get(isNextPage) {
+			let requests = [];
+
+			// copy sources in cases it changes before responses come back (need to match request response to each source)
+			for(let i = 0, j = this.sources.length; i < j; i++) {
+				const src = this.sources[i];
+				if(src.recordIds.length === 0 || src.attributeIds.length === 0)
 					continue;
-				
-				// request log data for attributes on this form
-				let attributeIds = [];
-				for(let k in this.values) {
-					let d = this.getDetailsFromIndexAttributeId(k);
-					
-					if(d.index !== parseInt(index))
-						continue;
-					
-					const a = this.attributeIdMap[d.attributeId];
-					
-					if(a.encrypted)
-						attributeIdsEnc.push(a.id);
-					
-					attributeIds.push(a.id);
-				}
-				
-				// get logs for this relation if any attributes are available and record is set
-				if(attributeIds.length !== 0 && j.recordId !== 0)
-					requests.push(ws.prepare('data','getLog',{
-						recordId:j.recordId,
-						index:parseInt(index),
-						attributeIds:attributeIds
-					}));
+
+				// if multiple sources exist, we require a title to differentiate them
+				if(!this.isSingleFieldSource && src.title === '')
+					continue;
+
+				requests.push(ws.prepare('data','getLog',{
+					recordIds:src.recordIds,
+					attributeIds:src.attributeIds,
+					sourceIndex:i
+				}));
 			}
 			
 			if(requests.length === 0)
-				return this.reset();
-			
+				return;
+
 			ws.sendMultiple(requests,true).then(
-				async (res) => {
-					this.loading = true;
-					this.reset();
-					
-					// store logs grouped by composite key of date+login ID
-					// each log connects to a single relation - a change spanning multiple relations is therefore grouped
-					let logsGrouped = {};
-					let parseLogsForRelation = async (logs,request) => {
-						for(const l of logs) {
-							let g = `${l.dateChange}_${l.loginName}`;
-							
-							if(typeof logsGrouped[g] === 'undefined')
-								logsGrouped[g] = {
-									dateChange:l.dateChange,
-									loginName:l.loginName,
-									values:{}
-								};
-							
-							for(const a of l.attributes) {
-								let value = JSON.parse(a.value);
-								
-								if(attributeIdsEnc.includes(a.attributeId)) {
-									const keyStr = this.indexMapRecordKey[request.index];
-									
-									if(typeof keyStr === 'undefined')
-										throw new Error('no data key for record');
-									
-									value = await this.aesGcmDecryptBase64WithPhrase(value,keyStr);
-								}
-								
-								logsGrouped[g].values[this.getIndexAttributeId(
-									request.index,
-									a.attributeId,
-									a.outsideIn,
-									a.attributeIdNm
-								)] = value;
-							}
+				async responses => {
+					let logsCombined = []; // logs from all data log requests combined
+					let logIdsParsed = []; // logs can be fetched twice, if multiple sources refer to the same records
+					let relationIdMapRecordIds = {};
+					const addRelationRecordIds = (relationId,recordIds) => {
+
+						// skip if the record of the log relation does not have a title
+						if(this.relationIdMap[relationId].attributeIdsTitle.length === 0)
+							return;
+
+						if(relationIdMapRecordIds[relationId] === undefined)
+							relationIdMapRecordIds[relationId] = [];
+
+						for(const id of recordIds) {
+							if(!relationIdMapRecordIds[relationId].includes(id))
+								relationIdMapRecordIds[relationId].push(id);
 						}
 					};
-					
-					for(let i = 0, j = res.length; i < j; i++) {
-						try      { await parseLogsForRelation(res[i].payload,requests[i].payload); }
-						catch(e) {
-							this.consoleError(e); // full error for troubleshooting
-							this.$root.genericErrorWithFallback(e.message,'SEC','003');
-							return;
+					const parseLogValues = async (attributeValues,src) => {
+						for(const a of attributeValues) {
+							a.relationId = null;
+							a.value      = JSON.parse(a.value);
+
+							const atr = this.attributeIdMap[a.attributeId];
+							if(!this.isAttributeRelationship(atr.content)) {
+								if(a.value !== null && src.attributeIdsEnc.includes(atr.id)) {
+									// decrypt encrypted attribute value
+									const keyStr = this.indexMapRecordKey[src.index];
+									if(keyStr === undefined)
+										throw new Error('no data key for record');
+
+									a.value = await this.aesGcmDecryptBase64WithPhrase(a.value,keyStr);
+								}
+								continue;
+							}
+
+							// process relationship values
+							const isSingleValue = this.isAttributeRelationship11(atr.content)
+								|| (this.isAttributeRelationshipN1(atr.content) && a.outsideIn !== true);
+							
+							if(isSingleValue) {
+								a.relationId = a.outsideIn ? atr.relationId : atr.relationshipId;
+								if(a.value !== null)
+									a.value = [a.value];
+							} else {
+								// multi values are always outside-in
+								a.relationId = a.attributeIdNm === null ? atr.relationId : this.attributeIdMap[a.attributeIdNm].relationshipId;
+							}
+
+							if(a.value !== null)
+								addRelationRecordIds(a.relationId,a.value);
 						}
+					};
+
+					for(let i = 0, j = responses.length; i < j; i++) {
+						const res  = responses[i];
+						const req  = requests[i];
+						const logs = [];
+
+						for(const log of res.payload) {
+							if(logIdsParsed.includes(log.id))
+								continue;
+
+							logIdsParsed.push(log.id);
+							log.sourceIndex = req.payload.sourceIndex;
+							const src = this.sources[log.sourceIndex];
+							addRelationRecordIds(log.relationId,[log.recordId]);
+							
+							try      { await parseLogValues(log.attributes,src); }
+							catch(e) {
+								this.consoleError(e); // full error for troubleshooting
+								this.$root.genericErrorWithFallback(e.message,'SEC','003');
+								return;
+							}
+							logs.push(log);
+						}
+						logsCombined = logsCombined.concat(logs);
 					}
-					
-					// sort groups by their composite key, effectively sorting by date
-					let keys = Object.keys(logsGrouped).sort().reverse();
-					for(let i = 0, j = keys.length; i < j; i++) {
-						this.logs.push(logsGrouped[keys[i]]);
-					}
-					this.releaseLoadingOnNextTick();
+
+					// sort logs by date change (separate requests are sorted individually, but not together)
+					logsCombined.sort((a,b) => b.dateChange - a.dateChange);
+
+					// fetch titles for loaded records and relationship values
+					ws.send('data','getRecordTitles',relationIdMapRecordIds,true).then(
+						res => {
+							this.relationIdMapRecordIdMapTitle = res.payload;
+
+							// apply processed logs once record titles are ready
+							if(!isNextPage) this.logs = logsCombined;
+							else            this.logs.concat(logsCombined);
+						},
+						this.$root.genericError
+					);
 				},
 				this.$root.genericError
 			);

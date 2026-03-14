@@ -900,6 +900,12 @@ table td.maximum{
 	border-bottom:1px solid var(--color-border);
 	background-color:var(--color-bg);
 }
+.generic-table.auto-height>thead>tr>th,
+.generic-table.auto-height>tbody>tr>td{
+	height:auto;
+}
+.generic-table.topAligned>thead>tr>th,
+.generic-table.topAligned>tbody>tr>td,
 .generic-table>thead>tr>th.topAligned,
 .generic-table>tbody>tr>td.topAligned{
 	vertical-align:top;
@@ -915,6 +921,12 @@ table td.maximum{
 	position:sticky;
 	top:0px;
 	z-index:var(--z-index-admin-table-sticky-top);
+}
+.generic-table.rows-contrast>tbody>tr:nth-child(even) td{
+	background-color:var(--color-list-row-even);
+}
+.generic-table>tbody>tr.row-contrast td{
+	background-color:var(--color-list-row-even);
 }
 .generic-table>thead>tr>th .mixed-header{
 	display:flex;

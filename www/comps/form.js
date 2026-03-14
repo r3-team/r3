@@ -2,7 +2,6 @@ import MyArticles                    from './articles.js';
 import MyField                       from './field.js';
 import MyFormActions                 from './formActions.js';
 import MyFormLog                     from './formLog.js';
-import MyFormLogNeo                  from './formLogNeo.js';
 import {getAttributeFileVersionHref} from './shared/attribute.js';
 import {getCollectionValues}         from './shared/collection.js';
 import {getColumnsProcessed}         from './shared/column.js';
@@ -65,8 +64,7 @@ export default {
 		MyArticles,
 		MyField,
 		MyFormActions,
-		MyFormLog,
-		MyFormLogNeo
+		MyFormLog
 	},
 	template:`<div class="form-wrap"
 		:class="{ float:isPopUpFloating, fullscreen:popUpFullscreen, popUp:isPopUp }"
@@ -300,27 +298,14 @@ export default {
 		
 		<!-- form change logs -->
 		<my-form-log
-			v-if="false && showLog"
-			@close-log="toggleLog"
-			:entityIdMapEffect
-			:fieldIdMapData
-			:fieldIdMapProcessed
-			:formLoading="loading"
-			:isPopUpFloating
-			:indexMapRecordKey
-			:joinsIndexMap
-			:moduleId
-			:values
-			:variableIdMapLocal
-		/>
-		<my-form-log-neo
 			v-if="showLog"
 			@close="toggleLog"
 			:entityIdMapEffect
 			:fields
 			:fieldIdMapIndexMapRecordIds
 			:fieldIdMapOverwrite
-			:formLoading="loading"
+			:formIconSrc="iconSrc"
+			:formTitle="title"
 			:indexMapRecordKey
 			:joinsIndexMap
 			:moduleId
