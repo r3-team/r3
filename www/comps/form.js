@@ -321,6 +321,7 @@ export default {
 			:fieldIdMapIndexMapRecordIds
 			:fieldIdMapOverwrite
 			:formLoading="loading"
+			:indexMapRecordKey
 			:joinsIndexMap
 			:moduleId
 		/>

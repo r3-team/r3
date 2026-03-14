@@ -1,7 +1,9 @@
-import {getColumnTitle} from './shared/column.js';
-import {srcBase64}      from './shared/image.js';
-import {getCaption}     from './shared/language.js';
-import {getUnixFormat}  from './shared/time.js';
+import {getColumnTitle}                from './shared/column.js';
+import {aesGcmDecryptBase64WithPhrase} from './shared/crypto.js';
+import {consoleError}                  from './shared/error.js';
+import {srcBase64}                     from './shared/image.js';
+import {getCaption}                    from './shared/language.js';
+import {getUnixFormat}                 from './shared/time.js';
 import {
 	isAttributeRelationship,
 	isAttributeRelationship11,
@@ -42,8 +44,13 @@ export default {
 							<!-- log values -->
 							<td>
 								<my-label
+									v-if="sources[l.sourceIndex].attributeIdMapIcon[a.attributeId] !== null"
 									:caption="sources[l.sourceIndex].attributeIdMapTitle[a.attributeId]"
-									:imageBase64="sources[l.sourceIndex].attributeIdMapIcon[a.attributeId] !== null ? srcBase64(iconIdMap[sources[l.sourceIndex].attributeIdMapIcon[a.attributeId]].file) : ''"
+									:imageBase64="srcBase64(iconIdMap[sources[l.sourceIndex].attributeIdMapIcon[a.attributeId]].file)"
+								/>
+								<my-label image="icon_missing.png"
+									v-if="sources[l.sourceIndex].attributeIdMapIcon[a.attributeId] === null"
+									:caption="sources[l.sourceIndex].attributeIdMapTitle[a.attributeId]"
 								/>
 							</td>
 							<td v-if="a.relationId === null">{{ a.value !== null ? a.value : capGen.button.empty }}</td>
@@ -68,12 +75,9 @@ export default {
 		fields:                     { type:Array,  required:true },
 		fieldIdMapIndexMapRecordIds:{ type:Object, required:true },
 		fieldIdMapOverwrite:        { type:Object, required:true },
+		indexMapRecordKey:          { type:Object, required:true },
 		joinsIndexMap:              { type:Object, required:true },
-		moduleId:                   { type:String,  required:true }
-
-		/*
-		indexMapRecordKey:  { type:Object,  required:true },
-		*/
+		moduleId:                   { type:String, required:true }
 	},
 	emits:['close'],
 	data() {
@@ -83,7 +87,12 @@ export default {
 		};
 	},
 	computed:{
-		sources:s => { // [ { fieldId:null, index:0, recordIds:[], attributeIds:[], attributeIdMapTitle:{'123':'Title'} } ]
+		// a source requests data logs for a number of record IDs and defined attributes
+		// sources can either be the current form itself or a number of list fields on the form
+		// which attributes are requested depends on the requestor (form = visible data fields, list = available columns)
+		// a data log request runs for specific record IDs for a single relation, with shared attributes to retrieve
+		//  both form & list fields can have multiple sources if they join multiple relations
+		sources:s => {
 			let out = [];
 
 			const parseFields = (fields,tabTitle) => {
@@ -105,25 +114,37 @@ export default {
 								const state = s.entityIdMapEffect.field[f.id] !== undefined
 									? s.entityIdMapEffect.field[f.id] : f.state;
 								
-								if(state !== 'hidden') {
-									const atr = f.attributeIdNm !== undefined && f.attributeIdNm !== null
-										? s.attributeIdMap[f.attributeIdNm] : s.attributeIdMap[f.attributeId];
-									let title  = '';
-									let iconId = f.iconId !== null ? f.iconId : atr.iconId;
-									
-									if(s.fieldIdMapOverwrite.caption[f.id] !== undefined)
-										title = s.fieldIdMapOverwrite.caption[f.id];
+								if(state === 'hidden')
+									continue;
 
-									if(title === '')
-										title = s.getCaption('fieldTitle',s.moduleId,f.id,f.captions);
+								const isNm = f.attributeIdNm !== undefined && f.attributeIdNm !== null;
+								const atr  = isNm ? s.attributeIdMap[f.attributeIdNm] : s.attributeIdMap[f.attributeId];
 
-									if(title === '')
-										title = s.getCaption('attributeTitle',s.moduleId,f.attributeId,atr.captions,atr.name);
-									
-									src.attributeIds.push(f.attributeId);
-									src.attributeIdMapIcon[f.attributeId]  = iconId;
-									src.attributeIdMapTitle[f.attributeId] = title;
+								if(isNm || s.isAttributeRelationship(atr.content)) {
+									// fetch only relationship attributes, if their relation has record titles
+									const rel = s.relationIdMap[atr.relationshipId];
+									if(rel.attributeIdsTitle.length === 0)
+										continue;
 								}
+
+								let title  = '';
+								let iconId = f.iconId !== null ? f.iconId : atr.iconId;
+								
+								if(s.fieldIdMapOverwrite.caption[f.id] !== undefined)
+									title = s.fieldIdMapOverwrite.caption[f.id];
+
+								if(title === '')
+									title = s.getCaption('fieldTitle',s.moduleId,f.id,f.captions);
+
+								if(title === '')
+									title = s.getCaption('attributeTitle',s.moduleId,f.attributeId,atr.captions,atr.name);
+								
+								src.attributeIds.push(f.attributeId);
+								src.attributeIdMapIcon[f.attributeId]  = iconId;
+								src.attributeIdMapTitle[f.attributeId] = title;
+
+								if(!isNm && atr.encrypted)
+									src.attributeIdsEnc.push(f.attributeId);
 							}
 						break;
 						case 'list':
@@ -153,19 +174,16 @@ export default {
 								if(title === '')
 									title = s.getCaption('relationTitle',s.moduleId,rel.id,rel.captions);
 
-								let src = {
-									fieldId:f.id,
-									index:index,
-									image:'files_list2.png',
-									recordIds:s.fieldIdMapIndexMapRecordIds[f.id][index],
-									title:title,
-									attributeIds:[],
-									attributeIdMapIcon:{},
-									attributeIdMapTitle:{}
-								};
+								let src = s.getSourceTemplate(f.id,index,s.fieldIdMapIndexMapRecordIds[f.id][index],'files_list2.png',title);
 								for(const c of f.columns) {
 									if(!c.subQuery && c.index === index) {
 										const atr = s.attributeIdMap[c.attributeId];
+
+										// encrypted change logs are not supported for sub lists, keys are not available
+										// it would require providing keys during data log GET call to implement this
+										if(atr.encrypted)
+											continue;
+
 										src.attributeIds.push(c.attributeId);
 										src.attributeIdMapIcon[c.attributeId]  = atr.iconId;
 										src.attributeIdMapTitle[c.attributeId] = s.getColumnTitle(c,s.moduleId);
@@ -208,16 +226,7 @@ export default {
 				const j = s.joinsIndexMap[k];
 
 				if(j.recordId !== 0)
-					out.push({
-						fieldId:null,
-						index:j.index,
-						image:'fileText.png',
-						recordIds:[j.recordId],
-						title:s.capGen.form,
-						attributeIds:[],
-						attributeIdMapIcon:{},
-						attributeIdMapTitle:{}
-					});
+					out.push(s.getSourceTemplate(null,j.index,[j.recordId],'fileText.png',s.capGen.form));
 			}
 			parseFields(s.fields,'');
 			return out;
@@ -248,6 +257,8 @@ export default {
 	},
 	methods:{
 		// externals
+		aesGcmDecryptBase64WithPhrase,
+		consoleError,
 		getCaption,
 		getColumnTitle,
 		getUnixFormat,
@@ -256,7 +267,14 @@ export default {
 		isAttributeRelationshipN1,
 		srcBase64,
 
-		// actions
+		getSourceTemplate(fieldId,index,recordIds,image,title) {
+			return { fieldId, index, image, recordIds, title,
+				attributeIds:[],
+				attributeIdsEnc:[],
+				attributeIdMapIcon:{},
+				attributeIdMapTitle:{}
+			};
+		},
 
 		// backend calls
 		get(isNextPage) {
@@ -300,58 +318,69 @@ export default {
 								relationIdMapRecordIds[relationId].push(id);
 						}
 					};
+					const parseLogValues = async (attributeValues,src) => {
+						for(const a of attributeValues) {
+							a.relationId = null;
+							a.value      = JSON.parse(a.value);
+
+							const atr = this.attributeIdMap[a.attributeId];
+							if(!this.isAttributeRelationship(atr.content)) {
+								if(a.value !== null && src.attributeIdsEnc.includes(atr.id)) {
+									// decrypt encrypted attribute value
+									const keyStr = this.indexMapRecordKey[src.index];
+									if(keyStr === undefined)
+										throw new Error('no data key for record');
+
+									a.value = await this.aesGcmDecryptBase64WithPhrase(a.value,keyStr);
+								}
+								continue;
+							}
+
+							// process relationship values
+							const isSingleValue = this.isAttributeRelationship11(atr.content)
+								|| (this.isAttributeRelationshipN1(atr.content) && a.outsideIn !== true);
+							
+							if(isSingleValue) {
+								a.relationId = a.outsideIn ? atr.relationId : atr.relationshipId;
+								if(a.value !== null)
+									a.value = [a.value];
+							} else {
+								// multi values are always outside-in
+								a.relationId = a.attributeIdNm === null ? atr.relationId : this.attributeIdMap[a.attributeIdNm].relationshipId;
+							}
+
+							if(a.value !== null)
+								addRelationRecordIds(a.relationId,a.value);
+						}
+					};
 
 					for(let i = 0, j = responses.length; i < j; i++) {
 						const res = responses[i];
 						const req = requests[i];
-
-						// store record IDs for record title retrieval
-						for(const l of res.payload) {
-							l.sourceIndex = req.payload.sourceIndex;
-							addRelationRecordIds(l.relationId,[l.recordId]);
-
-							// parse records from relationship attribute values
-							for(const a of l.attributes) {
-								a.relationId = null;
-								a.value      = JSON.parse(a.value);
-
-								// process relationship values
-								const atr = this.attributeIdMap[a.attributeId];
-								if(!this.isAttributeRelationship(atr.content))
-									continue;
-
-								const isSingleValue = this.isAttributeRelationship11(atr.content)
-									|| (this.isAttributeRelationshipN1(atr.content) && a.outsideIn !== true);
-								
-								if(isSingleValue) {
-									a.relationId = a.outsideIn ? atr.relationId : atr.relationshipId;
-									if(a.value !== null)
-										a.value = [a.value];
-								} else {
-									// multi values are always outside-in
-									a.relationId = a.attributeIdNm === null ? atr.relationId : this.attributeIdMap[a.attributeIdNm].relationshipId;
-								}
-
-								if(a.value !== null)
-									addRelationRecordIds(a.relationId,a.value);
+						for(const logs of res.payload) {
+							logs.sourceIndex = req.payload.sourceIndex;
+							const src = this.sources[logs.sourceIndex];
+							addRelationRecordIds(logs.relationId,[logs.recordId]);
+							
+							try      { await parseLogValues(logs.attributes,src); }
+							catch(e) {
+								this.consoleError(e); // full error for troubleshooting
+								this.$root.genericErrorWithFallback(e.message,'SEC','003');
+								return;
 							}
 						}
-
-						// decrypt values
-
 						logs = logs.concat(res.payload);
 					}
 
 					// sort logs by date change (separate requests are sorted individually, but not together)
 					logs.sort((a,b) => a.dateChange - b.dateChange);
 
-					// fetch title for loaded record and relationship values
+					// fetch titles for loaded records and relationship values
 					ws.send('data','getRecordTitles',relationIdMapRecordIds,true).then(
 						res => {
-							// store fetched record titles
 							this.relationIdMapRecordIdMapTitle = res.payload;
 
-							// apply processed logs
+							// apply processed logs once record titles are ready
 							if(!isNextPage) this.logs = logs;
 							else            this.logs.concat(logs);
 						},
