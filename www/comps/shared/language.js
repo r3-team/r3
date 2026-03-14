@@ -21,6 +21,9 @@ export function getCaptionMapName(content) {
 		case 'articleTitle':     return 'articleIdMap';     break;
 		case 'attributeTitle':   return 'attributeIdMap';   break;
 		case 'clientEventTitle': return 'clientEventIdMap'; break;
+		case 'docTitle':         return 'docIdMap';         break;
+		case 'docColumnTitle':   return 'docColumnIdMap';   break;
+		case 'docFieldText':     return 'docFieldIdMap';    break;
 		case 'columnTitle':      return 'columnIdMap';      break;
 		case 'fieldHelp':        // fallthrough
 		case 'fieldTitle':       return 'fieldIdMap';       break;
@@ -33,6 +36,7 @@ export function getCaptionMapName(content) {
 		case 'moduleTitle':      return 'moduleIdMap';      break;
 		case 'pgFunctionTitle':  return 'pgFunctionIdMap';  break;
 		case 'queryChoiceTitle': return 'queryChoiceIdMap'; break;
+		case 'relationTitle':    return 'relationIdMap';    break;
 		case 'roleDesc':         // fallthrough
 		case 'roleTitle':        return 'roleIdMap';        break;
 		case 'searchBarTitle':   return 'searchBarIdMap';   break;
