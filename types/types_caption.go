@@ -7,6 +7,9 @@ type CaptionMapsAll struct {
 	AttributeIdMap   map[uuid.UUID]CaptionMap `json:"attributeIdMap"`
 	ClientEventIdMap map[uuid.UUID]CaptionMap `json:"clientEventIdMap"`
 	ColumnIdMap      map[uuid.UUID]CaptionMap `json:"columnIdMap"`
+	DocIdMap         map[uuid.UUID]CaptionMap `json:"docIdMap"`
+	DocColumnIdMap   map[uuid.UUID]CaptionMap `json:"docColumnIdMap"`
+	DocFieldIdMap    map[uuid.UUID]CaptionMap `json:"docFieldIdMap"`
 	FieldIdMap       map[uuid.UUID]CaptionMap `json:"fieldIdMap"`
 	FormIdMap        map[uuid.UUID]CaptionMap `json:"formIdMap"`
 	FormActionIdMap  map[uuid.UUID]CaptionMap `json:"formActionIdMap"`
@@ -17,6 +20,7 @@ type CaptionMapsAll struct {
 	ModuleIdMap      map[uuid.UUID]CaptionMap `json:"moduleIdMap"`
 	PgFunctionIdMap  map[uuid.UUID]CaptionMap `json:"pgFunctionIdMap"`
 	QueryChoiceIdMap map[uuid.UUID]CaptionMap `json:"queryChoiceIdMap"`
+	RelationIdMap    map[uuid.UUID]CaptionMap `json:"relationIdMap"`
 	RoleIdMap        map[uuid.UUID]CaptionMap `json:"roleIdMap"`
 	SearchBarIdMap   map[uuid.UUID]CaptionMap `json:"searchBarIdMap"`
 	TabIdMap         map[uuid.UUID]CaptionMap `json:"tabIdMap"`
