@@ -135,9 +135,9 @@ export default {
 				
 				<div class="form-bar-layout-check" ref="formBarUpperCheck" />
 				<div class="area nowrap">
-					<template v-if="isData && !isBulkUpdate">
+					<template v-if="!isBulkUpdate">
 						<my-button image="refresh.png"
-							v-if="!isMobile"
+							v-if="isData && !isMobile"
 							@trigger="get"
 							@trigger-middle="openForm(recordIds,null,null,true)"
 							:active="!isNew"
@@ -146,7 +146,7 @@ export default {
 						<my-button image="time.png"
 							v-if="hasLog"
 							@trigger="toggleLog"
-							:active="!isNew"
+							:active="!isNew || !isData"
 							:captionTitle="capApp.button.logHint"
 						/>
 					</template>
@@ -319,8 +319,10 @@ export default {
 			:entityIdMapEffect
 			:fields
 			:fieldIdMapIndexMapRecordIds
+			:fieldIdMapOverwrite
 			:formLoading="loading"
 			:joinsIndexMap
+			:moduleId
 		/>
 		
 		<!-- form help articles -->

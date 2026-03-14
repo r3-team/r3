@@ -1,5 +1,7 @@
-import {getColumnAttributeIdsForLogs} from './shared/column.js';
-import {getUnixFormat} from './shared/time.js';
+import {getColumnTitle} from './shared/column.js';
+import {srcBase64}      from './shared/image.js';
+import {getCaption}     from './shared/language.js';
+import {getUnixFormat}  from './shared/time.js';
 import {
 	isAttributeRelationship,
 	isAttributeRelationship11,
@@ -15,42 +17,48 @@ export default {
 					<tr>
 						<td>{{ capGen.date }}</td>
 						<td>{{ capGen.username }}</td>
+						<td v-if="!isSingleFieldSource">{{ capGen.source }}</td>
 						<td>{{ capGen.record }}</td>
+						<td>{{ capGen.name }}</td>
 						<td>{{ capGen.value }}</td>
 					</tr>
 				</thead>
 				<tbody>
-					<tr v-for="l in logs">
-						<td>{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}</td>
-						<td>{{ l.loginName }}</td>
-						<td>{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined
-							? relationIdMapRecordIdMapTitle[l.relationId][l.recordId]
-							: 'UNKNOWN'
-						}}</td>
-						<td>
-							<table>
-								<tbody>
-									<tr v-for="a in l.attributes">
-										<template v-if="a.relationId === null">
-											<td>{{ attributeIdMap[a.attributeId].name }}</td>
-											<td>{{ a.value !== null ? a.value : capGen.button.empty }}</td>
-										</template>
-										<template v-if="a.relationId !== null">
-											<td>{{ a.attributeIdNm === null ? attributeIdMap[a.attributeId].name : attributeIdMap[a.attributeIdNm].name }}</td>
-											<td v-if="a.value !== null">
-												<div class="row gap">
-													<div class="form-log-neo-record-title"
-														v-for="v in a.value.filter(v => relationIdMapRecordIdMapTitle[a.relationId]?.[v] !== undefined)"
-													>{{ relationIdMapRecordIdMapTitle[a.relationId]?.[v] }}</div>
-												</div>
-											</td>
-											<td v-if="a.value === null">{{ capGen.button.empty }}</td>
-										</template>
-									</tr>
-								</tbody>
-							</table>
-						</td>
-					</tr>
+					<template v-for="l in logs">
+						<tr v-for="(a,i) in l.attributes">
+							<!-- log info -->
+							<template v-if="i === 0">
+								<td :rowspan="l.attributes.length">{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}</td>
+								<td :rowspan="l.attributes.length">{{ l.loginName }}</td>
+								<td :rowspan="l.attributes.length" v-if="!isSingleFieldSource">
+									<my-label :caption="sources[l.sourceIndex].title" :image="sources[l.sourceIndex].image" />
+								</td>
+								<td :rowspan="l.attributes.length">{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined
+									? relationIdMapRecordIdMapTitle[l.relationId][l.recordId]
+									: 'UNKNOWN'
+								}}</td>
+							</template>
+
+							<!-- log values -->
+							<td>
+								<my-label
+									:caption="sources[l.sourceIndex].attributeIdMapTitle[a.attributeId]"
+									:imageBase64="sources[l.sourceIndex].attributeIdMapIcon[a.attributeId] !== null ? srcBase64(iconIdMap[sources[l.sourceIndex].attributeIdMapIcon[a.attributeId]].file) : ''"
+								/>
+							</td>
+							<td v-if="a.relationId === null">{{ a.value !== null ? a.value : capGen.button.empty }}</td>
+							<template v-if="a.relationId !== null">
+								<td v-if="a.value !== null">
+									<div class="row gap">
+										<div class="form-log-neo-record-title"
+											v-for="v in a.value.filter(v => relationIdMapRecordIdMapTitle[a.relationId]?.[v] !== undefined)"
+										>{{ relationIdMapRecordIdMapTitle[a.relationId]?.[v] }}</div>
+									</div>
+								</td>
+								<td v-if="a.value === null">{{ capGen.button.empty }}</td>
+							</template>
+						</tr>
+					</template>
 				</tbody>
 			</table>
 		</div>
@@ -59,11 +67,12 @@ export default {
 		entityIdMapEffect:          { type:Object, required:true },
 		fields:                     { type:Array,  required:true },
 		fieldIdMapIndexMapRecordIds:{ type:Object, required:true },
+		fieldIdMapOverwrite:        { type:Object, required:true },
 		joinsIndexMap:              { type:Object, required:true },
+		moduleId:                   { type:String,  required:true }
 
 		/*
 		indexMapRecordKey:  { type:Object,  required:true },
-		moduleId:           { type:String,  required:true }
 		*/
 	},
 	emits:['close'],
@@ -74,18 +83,18 @@ export default {
 		};
 	},
 	computed:{
-		sources:s => { // [ { fieldId:null, index:0, recordIds:[], attributeIds:[] } ]
+		sources:s => { // [ { fieldId:null, index:0, recordIds:[], attributeIds:[], attributeIdMapTitle:{'123':'Title'} } ]
 			let out = [];
 
-			const parseFields = fields => {
+			const parseFields = (fields,tabTitle) => {
 				for(const f of fields) {
 					switch(f.content) {
 						case 'container':
-							parseFields(f.fields);
+							parseFields(f.fields,'');
 						break;
 						case 'tabs':
 							for(const t of f.tabs) {
-								parseFields(t.fields);
+								parseFields(t.fields,s.getCaption('tabTitle',s.moduleId,t.id,t.captions,''));
 							}
 						break;
 						case 'data':
@@ -96,11 +105,29 @@ export default {
 								const state = s.entityIdMapEffect.field[f.id] !== undefined
 									? s.entityIdMapEffect.field[f.id] : f.state;
 								
-								if(state !== 'hidden')
+								if(state !== 'hidden') {
+									const atr = f.attributeIdNm !== undefined && f.attributeIdNm !== null
+										? s.attributeIdMap[f.attributeIdNm] : s.attributeIdMap[f.attributeId];
+									let title  = '';
+									let iconId = f.iconId !== null ? f.iconId : atr.iconId;
+									
+									if(s.fieldIdMapOverwrite.caption[f.id] !== undefined)
+										title = s.fieldIdMapOverwrite.caption[f.id];
+
+									if(title === '')
+										title = s.getCaption('fieldTitle',s.moduleId,f.id,f.captions);
+
+									if(title === '')
+										title = s.getCaption('attributeTitle',s.moduleId,f.attributeId,atr.captions,atr.name);
+									
 									src.attributeIds.push(f.attributeId);
+									src.attributeIdMapIcon[f.attributeId]  = iconId;
+									src.attributeIdMapTitle[f.attributeId] = title;
+								}
 							}
 						break;
 						case 'list':
+							// lists are their own data log source if they have records loaded
 							if(f.query === null || s.fieldIdMapIndexMapRecordIds[f.id] === undefined)
 								continue;
 
@@ -116,12 +143,35 @@ export default {
 								if(rel.attributeIdsTitle.length === 0)
 									continue;
 
-								out.push({
+								let title = '';
+								if(title === '')
+									title = s.getCaption('fieldTitle',s.moduleId,f.id,f.captions);
+								
+								if(title === '')
+									title = tabTitle;
+
+								if(title === '')
+									title = s.getCaption('relationTitle',s.moduleId,rel.id,rel.captions);
+
+								let src = {
 									fieldId:f.id,
 									index:index,
+									image:'files_list2.png',
 									recordIds:s.fieldIdMapIndexMapRecordIds[f.id][index],
-									attributeIds:s.getColumnAttributeIdsForLogs(f.columns,index)
-								});
+									title:title,
+									attributeIds:[],
+									attributeIdMapIcon:{},
+									attributeIdMapTitle:{}
+								};
+								for(const c of f.columns) {
+									if(!c.subQuery && c.index === index) {
+										const atr = s.attributeIdMap[c.attributeId];
+										src.attributeIds.push(c.attributeId);
+										src.attributeIdMapIcon[c.attributeId]  = atr.iconId;
+										src.attributeIdMapTitle[c.attributeId] = s.getColumnTitle(c,s.moduleId);
+									}
+								}
+								out.push(src);
 							}
 
 							// add relationship attributes
@@ -133,15 +183,21 @@ export default {
 								if(src === undefined)
 									continue;
 
-								const atr = s.attributeIdMap[join.attributeId];
+								const atr   = s.attributeIdMap[join.attributeId];
+								const title = s.getCaption('attributeTitle',s.moduleId,atr.id,atr.captions,atr.name);
 								if(atr.relationId === join.relationId) {
-									src.attributeIds.push(join.attributeId);
+									src.attributeIds.push(atr.id);
+									src.attributeIdMapIcon[atr.id]  = atr.iconId;
+									src.attributeIdMapTitle[atr.id] = title;
 									continue;
 								}
 
 								const srcFrom = out.find(v => v.fieldId === f.id && v.index === join.indexFrom);
-								if(srcFrom !== undefined)
-									srcFrom.attributeIds.push(join.attributeId);
+								if(srcFrom !== undefined) {
+									srcFrom.attributeIds.push(atr.id);
+									srcFrom.attributeIdMapIcon[atr.id]  = atr.iconId;
+									srcFrom.attributeIdMapTitle[atr.id] = title;
+								}
 							}
 						break;
 					}
@@ -155,16 +211,34 @@ export default {
 					out.push({
 						fieldId:null,
 						index:j.index,
+						image:'fileText.png',
 						recordIds:[j.recordId],
-						attributeIds:[]
+						title:s.capGen.form,
+						attributeIds:[],
+						attributeIdMapIcon:{},
+						attributeIdMapTitle:{}
 					});
 			}
-			parseFields(s.fields);
+			parseFields(s.fields,'');
 			return out;
+		},
+		isSingleFieldSource:s => {
+			let srcFieldIdLast;
+			for(const src of s.sources) {
+				if(srcFieldIdLast === undefined) {
+					srcFieldIdLast = src.fieldId;
+					continue;
+				}
+
+				if(srcFieldIdLast !== src.fieldId)
+					return false;
+			}
+			return true;
 		},
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		capGen:        s => s.$store.getters.captions.generic,
 		settings:      s => s.$store.getters.settings
@@ -174,11 +248,13 @@ export default {
 	},
 	methods:{
 		// externals
-		getColumnAttributeIdsForLogs,
+		getCaption,
+		getColumnTitle,
 		getUnixFormat,
 		isAttributeRelationship,
 		isAttributeRelationship11,
 		isAttributeRelationshipN1,
+		srcBase64,
 
 		// actions
 
@@ -187,14 +263,19 @@ export default {
 			let requests = [];
 
 			// copy sources in cases it changes before responses come back (need to match request response to each source)
-			const sources = JSON.parse(JSON.stringify(this.sources));
-			for(const src of sources) {
+			for(let i = 0, j = this.sources.length; i < j; i++) {
+				const src = this.sources[i];
 				if(src.recordIds.length === 0 || src.attributeIds.length === 0)
+					continue;
+
+				// if multiple sources exist, we require a title to differentiate them
+				if(!this.isSingleFieldSource && src.title === '')
 					continue;
 
 				requests.push(ws.prepare('data','getLog',{
 					recordIds:src.recordIds,
-					attributeIds:src.attributeIds
+					attributeIds:src.attributeIds,
+					sourceIndex:i
 				}));
 			}
 			
@@ -220,10 +301,13 @@ export default {
 						}
 					};
 
-					for(const res of responses) {
+					for(let i = 0, j = responses.length; i < j; i++) {
+						const res = responses[i];
+						const req = requests[i];
 
 						// store record IDs for record title retrieval
 						for(const l of res.payload) {
+							l.sourceIndex = req.payload.sourceIndex;
 							addRelationRecordIds(l.relationId,[l.recordId]);
 
 							// parse records from relationship attribute values
@@ -231,9 +315,8 @@ export default {
 								a.relationId = null;
 								a.value      = JSON.parse(a.value);
 
-								const atr = this.attributeIdMap[a.attributeId];
-
 								// process relationship values
+								const atr = this.attributeIdMap[a.attributeId];
 								if(!this.isAttributeRelationship(atr.content))
 									continue;
 

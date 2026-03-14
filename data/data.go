@@ -235,7 +235,7 @@ func GetRecordTitles_tx(ctx context.Context, tx pgx.Tx, relationIdMapRecordIds m
 			atr, exists := cache.AttributeIdMap[atrId]
 			cache.Schema_mx.RUnlock()
 
-			attrNames = append(attrNames, atr.Name)
+			attrNames = append(attrNames, fmt.Sprintf("\"%s\"", atr.Name))
 
 			if !exists {
 				return nil, handler.ErrSchemaUnknownAttribute(atrId)

@@ -2578,6 +2578,7 @@
 		"size": "Tamaño",
 		"sizeX": "Width",
 		"sizeY": "Height",
+		"source": "Source",
 		"spacing": "Spacing",
 		"spacingCell": "Cell spacing",
 		"sqlPreview": "Vista previa SQL",

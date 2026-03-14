@@ -2578,6 +2578,7 @@
 		"size": "Größe",
 		"sizeX": "Breite",
 		"sizeY": "Höhe",
+		"source": "Quelle",
 		"spacing": "Abstände",
 		"spacingCell": "Zellabstände",
 		"sqlPreview": "SQL-Vorschau",

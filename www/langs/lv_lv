@@ -2578,6 +2578,7 @@
 		"size": "Izmērs",
 		"sizeX": "Width",
 		"sizeY": "Height",
+		"source": "Source",
 		"spacing": "Spacing",
 		"spacingCell": "Cell spacing",
 		"sqlPreview": "SQL preview",

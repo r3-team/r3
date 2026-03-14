@@ -473,7 +473,7 @@ export default {
 				<my-input-rating
 					v-if="isRating"
 					v-model="value"
-					:iconId="iconId"
+					:iconId
 					:max="field.max !== null ? field.max : 5"
 					:readonly="isReadonly"
 				/>
@@ -635,7 +635,7 @@ export default {
 			@trigger="triggerButton(false)"
 			@trigger-middle="triggerButton(true)"
 			:active="!isReadonly"
-			:caption="caption"
+			:caption
 			:imageBase64="iconId ? srcBase64(iconIdMap[iconId].file) : ''"
 		/>
 		

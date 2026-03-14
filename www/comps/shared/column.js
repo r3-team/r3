@@ -217,12 +217,3 @@ export function getOrderIndexesFromColumnBatch(columnBatch,columns,orders) {
 	}
 	return orderIndexesUsed;
 };
-
-export function getColumnAttributeIdsForLogs(columns,filterIndex) {
-	let out = [];
-	for(const c of columns) {
-		if(!c.subQuery && (filterIndex === undefined || filterIndex === c.index))
-			out.push(c.attributeId);
-	}
-	return out;
-};
