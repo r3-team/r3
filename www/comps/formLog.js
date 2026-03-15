@@ -1,3 +1,4 @@
+import MyInputRichtext                 from './inputRichtext.js';
 import {getColumnTitle}                from './shared/column.js';
 import {aesGcmDecryptBase64WithPhrase} from './shared/crypto.js';
 import {consoleError}                  from './shared/error.js';
@@ -13,8 +14,106 @@ import {
 	isAttributeRelationshipN1
 } from './shared/attribute.js';
 
+const myFormLogLabel = {
+	name:'my-form-log-label',
+	template:`<my-label
+		:caption="caption"
+		:image="iconId === null ? 'icon_missing.png' : ''"
+		:imageBase64="iconId === null ? '' : srcBase64(iconIdMap[iconId].file)"
+		:large
+	/>`,
+	props:{
+		caption:{ type:String,        required:true },
+		iconId: { type:[String,null], required:true },
+		large:  { type:Boolean,       required:false, default:false }
+	},
+	computed:{
+		iconIdMap:s => s.$store.getters['schema/iconIdMap']
+	},
+	methods:{
+		srcBase64
+	}
+};
+
+const myFormLogValue = {
+	name:'my-form-log-value',
+	components:{ MyInputRichtext },
+	template:`
+	<span class="form-log-value-empty"
+		v-if="isNull"
+	>[{{ capGen.button.empty }}]</span>
+
+	<template v-if="!isNull">
+		<my-value-rich v-if="isValueRegular" :attributeId :key="attributeId" :length="80" :value />
+
+		<div class="form-log-value-richtext" v-if="showLarge && isRichtext">
+			<my-input-richtext :modelValue="value" :readonly="true" />
+		</div>
+
+		<div class="row gap wrap" v-if="isRelationship">
+			<div class="form-log-value-record-title"
+				v-for="v in value.filter(v => relationIdMapRecordIdMapTitle[relationId]?.[v] !== undefined)"
+			>{{ relationIdMapRecordIdMapTitle[relationId]?.[v] }}</div>
+		</div>
+
+		<table v-if="isFiles">
+			<tbody>
+				<tr v-for="(c,fileId) in value.fileIdMapChange">
+					<td v-if="c.action === 'create'">{{ capApp.fileCreated }}</td>
+					<td v-if="c.action === 'delete'">{{ capApp.fileDeleted }}</td>
+					<td v-if="c.action === 'rename'">{{ capApp.fileRenamed }}</td>
+					<td v-if="c.action === 'update'">{{ capApp.fileUpdated }}</td>
+					<td>
+						<!-- latest file version -->
+						<a target="_blank" v-if="c.action !== 'update'" :href="getAttributeFileHref(attributeId,fileId,c.name,token)">
+							<my-button image="download.png" :caption="c.name" :naked="true" />
+						</a>
+						<!-- specific file version -->
+						<a target="_blank" v-else :href="getAttributeFileVersionHref(attributeId,fileId,c.name,c.version,token)">
+							<my-button image="download.png" :caption="c.name + ' (v' + c.version + ')'" :naked="true" />
+						</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</template>
+	`,
+	props:{
+		attributeId:                  { type:String,        required:true },
+		isFiles:                      { type:Boolean,       required:true },
+		relationId:                   { type:[String,null], required:true }, // set if attribute is relationship, relation of target records
+		relationIdMapRecordIdMapTitle:{ type:Object,        required:true },
+		showLarge:                    { type:Boolean,       required:false, default:false },
+		value:                        { required:true }
+	},
+	emits:[],
+	computed:{
+		isLarge:       s => s.isRichtext,
+		isNull:        s => s.value === null,
+		isRelationship:s => s.relationId !== null,
+		isRichtext:    s => s.attribute.contentUse === 'richtext',
+		isValueRegular:s => !s.isFiles && !s.isRelationship && (!s.showLarge || !s.isLarge),
+
+		// stores
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		token:         s => s.$store.getters['local/token'],
+		attribute:     s => s.attributeIdMap[s.attributeId],
+		capApp:        s => s.$store.getters.captions.formLog,
+		capGen:        s => s.$store.getters.captions.generic
+	},
+	methods:{
+		// externals
+		getAttributeFileHref,
+		getAttributeFileVersionHref
+	}
+};
+
 export default {
 	name:'my-form-log',
+	components:{
+		myFormLogLabel,
+		myFormLogValue
+	},
 	template:`<div class="app-sub-window under-header" @mousedown.left.self="$emit('close')">
 		<div class="contentBox scroll float form-log">
 			<div class="top">
@@ -42,10 +141,11 @@ export default {
 						<tbody>
 							<tr v-if="logsShown.length === 0"><td colspan="6">{{ capGen.nothingThere }}</td></tr>
 
-							<template v-for="(l,li) in logsShown">
+							<template v-for="(l,li) in logsShown" :key="l.id">
 								<tr v-for="(a,i) in l.attributes"
-									@click="logsShowIndexToggle(li)"
+									@click="logsShowToggle(li,a.attributeId)"
 									:class="{ 'row-contrast':li % 2 === 0, 'row-clickable':true }"
+									:key="a.attributeId"
 								>
 									<!-- log info -->
 									<template v-if="i === 0">
@@ -64,56 +164,20 @@ export default {
 
 									<!-- log values -->
 									<td class="minimum">
-										<my-label
-											v-if="sources[l.sourceIndex].attributeIdMapIcon[a.attributeId] !== null"
+										<my-form-log-label
 											:caption="sources[l.sourceIndex].attributeIdMapTitle[a.attributeId]"
-											:imageBase64="srcBase64(iconIdMap[sources[l.sourceIndex].attributeIdMapIcon[a.attributeId]].file)"
-										/>
-										<my-label image="icon_missing.png"
-											v-if="sources[l.sourceIndex].attributeIdMapIcon[a.attributeId] === null"
-											:caption="sources[l.sourceIndex].attributeIdMapTitle[a.attributeId]"
+											:iconId="sources[l.sourceIndex].attributeIdMapIcon[a.attributeId]"
 										/>
 									</td>
-									<td v-if="a.value === null">
-										<span class="form-log-empty-value">[{{ capGen.button.empty }}]</span>
+									<td>
+										<my-form-log-value
+											:attributeId="a.attributeId"
+											:isFiles="sources[l.sourceIndex].attributeIdsFiles.includes(a.attributeId)"
+											:relationId="a.relationId"
+											:relationIdMapRecordIdMapTitle
+											:value="a.value"
+										/>
 									</td>
-
-									<template v-if="a.value !== null">
-										<template v-if="!sources[l.sourceIndex].attributeIdsFiles.includes(a.attributeId)">
-											<td v-if="a.relationId === null">
-												<my-value-rich :attributeId="a.attributeId" :length="80" :value="a.value" />
-											</td>
-											<td v-if="a.relationId !== null">
-												<div class="row gap wrap">
-													<div class="form-log-record-title"
-														v-for="v in a.value.filter(v => relationIdMapRecordIdMapTitle[a.relationId]?.[v] !== undefined)"
-													>{{ relationIdMapRecordIdMapTitle[a.relationId]?.[v] }}</div>
-												</div>
-											</td>
-										</template>
-										<td v-else>
-											<table>
-												<tbody>
-													<tr v-for="(c,fileId) in a.value.fileIdMapChange">
-														<td v-if="c.action === 'create'">{{ capApp.fileCreated }}</td>
-														<td v-if="c.action === 'delete'">{{ capApp.fileDeleted }}</td>
-														<td v-if="c.action === 'rename'">{{ capApp.fileRenamed }}</td>
-														<td v-if="c.action === 'update'">{{ capApp.fileUpdated }}</td>
-														<td>
-															<!-- latest file version -->
-															<a target="_blank" v-if="c.action !== 'update'" :href="getAttributeFileHref(a.attributeId,fileId,c.name,token)">
-																<my-button image="download.png" :caption="c.name" :naked="true" />
-															</a>
-															<!-- specific file version -->
-															<a target="_blank" v-else :href="getAttributeFileVersionHref(a.attributeId,fileId,c.name,c.version,token)">
-																<my-button image="download.png" :caption="c.name + ' (v' + c.version + ')'" :naked="true" />
-															</a>
-														</td>
-													</tr>
-												</tbody>
-											</table>
-										</td>
-									</template>
 								</tr>
 							</template>
 						</tbody>
@@ -129,6 +193,21 @@ export default {
 							:images="[sourceFieldIdsHide.includes(fieldId) ? 'checkbox0.png' : 'checkbox1.png', fieldId === null ? 'fileText.png' : 'files_list2.png']"
 							:modelValue="!sourceFieldIdsHide.includes(fieldId)"
 							:naked="true"
+						/>
+					</div>
+					<div class="column grow gap" v-if="logAttributeValueShow !== null">
+						<my-form-log-label
+							:caption="sources[logsShown[logsShownIndexOpen].sourceIndex].attributeIdMapTitle[logAttributeValueShow.attributeId]"
+							:iconId="sources[logsShown[logsShownIndexOpen].sourceIndex].attributeIdMapIcon[logAttributeValueShow.attributeId]"
+							:large="true"
+						/>
+						<my-form-log-value
+							:attributeId="logAttributeValueShow.attributeId"
+							:isFiles="sources[logsShown[logsShownIndexOpen].sourceIndex].attributeIdsFiles.includes(logAttributeValueShow.attributeId)"
+							:relationId="logAttributeValueShow.relationId"
+							:relationIdMapRecordIdMapTitle
+							:showLarge=true
+							:value="logAttributeValueShow.value"
 						/>
 					</div>
 				</div>
@@ -150,6 +229,7 @@ export default {
 	data() {
 		return {
 			logs:[],
+			logsShownAttributeId:null,
 			logsShownIndexOpen:null,
 			sourceFieldIdsHide:[],
 			relationIdMapRecordIdMapTitle:{}
@@ -205,11 +285,9 @@ export default {
 								if(s.fieldIdMapOverwrite.caption[f.id] !== undefined)
 									title = s.fieldIdMapOverwrite.caption[f.id];
 
-								if(title === '')
-									title = s.getCaption('fieldTitle',s.moduleId,f.id,f.captions);
-
-								if(title === '')
-									title = s.getCaption('attributeTitle',s.moduleId,f.attributeId,atr.captions,atr.name);
+								if(title === '') title = s.getCaption('fieldTitle',s.moduleId,f.id,f.captions);
+								if(title === '') title = tabTitle;
+								if(title === '') title = s.getCaption('attributeTitle',s.moduleId,f.attributeId,atr.captions,atr.name);
 								
 								src.attributeIds.push(f.attributeId);
 								src.attributeIdMapIcon[f.attributeId]  = iconId;
@@ -329,6 +407,17 @@ export default {
 			}
 			return true;
 		},
+		logAttributeValueShow:s => {
+			if(s.logsShownIndexOpen === null || s.logsShownAttributeId === null)
+				return null;
+
+			const log = s.logsShown[s.logsShownIndexOpen];
+			if(log === undefined)
+				return null;
+
+			const a = log.attributes.find(v => v.attributeId === s.logsShownAttributeId);
+			return a === undefined ? null : a;
+		},
 
 		// simple
 		isSingleSourceForm:s => s.isSingleSource && (s.sources.length === 0 || s.sources[0].fieldId === null),
@@ -336,9 +425,7 @@ export default {
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		iconIdMap:     s => s.$store.getters['schema/iconIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
-		token:         s => s.$store.getters['local/token'],
 		capApp:        s => s.$store.getters.captions.formLog,
 		capGen:        s => s.$store.getters.captions.generic,
 		settings:      s => s.$store.getters.settings
@@ -350,8 +437,6 @@ export default {
 		// externals
 		aesGcmDecryptBase64WithPhrase,
 		consoleError,
-		getAttributeFileHref,
-		getAttributeFileVersionHref,
 		getCaption,
 		getColumnTitle,
 		getUnixFormat,
@@ -359,7 +444,6 @@ export default {
 		isAttributeRelationship,
 		isAttributeRelationship11,
 		isAttributeRelationshipN1,
-		srcBase64,
 
 		getSourceTemplate(fieldId,index,recordIds,image,title) {
 			return { fieldId, index, image, recordIds, title,
@@ -382,8 +466,10 @@ export default {
 		},
 
 		// actions
-		logsShowIndexToggle(index) {
-			this.logsShownIndexOpen = this.logsShownIndexOpen !== index ? index : null;
+		logsShowToggle(index,attributeId) {
+			const sameRow = this.logsShownIndexOpen === index && this.logsShownAttributeId === attributeId;
+			this.logsShownAttributeId = sameRow ? null : attributeId;
+			this.logsShownIndexOpen   = sameRow ? null : index;
 		},
 		sourceToggle(fieldId) {
 			const pos = this.sourceFieldIdsHide.indexOf(fieldId);

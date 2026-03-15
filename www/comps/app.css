@@ -928,6 +928,13 @@ table td.maximum{
 .generic-table>tbody>tr.row-contrast td{
 	background-color:var(--color-list-row-even);
 }
+.generic-table>tbody>tr.row-clickable:hover>td{
+	cursor:pointer;
+	outline:none;
+	filter:brightness(90%);
+	box-shadow:inset 0 -2px 0 0 var(--color-accent3-alt);
+	transition:filter 0.2s, box-shadow 0.5s;
+}
 .generic-table>thead>tr>th .mixed-header{
 	display:flex;
 	flex-flow:row nowrap;
