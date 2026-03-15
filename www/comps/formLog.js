@@ -43,7 +43,10 @@ export default {
 							<tr v-if="logsShown.length === 0"><td colspan="6">{{ capGen.nothingThere }}</td></tr>
 
 							<template v-for="(l,li) in logsShown">
-								<tr v-for="(a,i) in l.attributes" :class="{ 'row-contrast':li % 2 === 0 }">
+								<tr v-for="(a,i) in l.attributes"
+									@click="logsShowIndexToggle(li)"
+									:class="{ 'row-contrast':li % 2 === 0, 'row-clickable':true }"
+								>
 									<!-- log info -->
 									<template v-if="i === 0">
 										<td class="minimum" :rowspan="l.attributes.length">{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}</td>
@@ -117,7 +120,7 @@ export default {
 					</table>
 				</div>
 				<div class="form-log-sidebar">
-					<div class="column gap" v-if="!isSingleSource">
+					<div class="column gap" v-if="!isSingleSource && logsShownIndexOpen === null">
 						<my-label image="filter.png" :caption="capGen.sources" :large="true" />
 						<my-button
 							v-for="fieldId in sourcesFieldIds"
@@ -147,6 +150,7 @@ export default {
 	data() {
 		return {
 			logs:[],
+			logsShownIndexOpen:null,
 			sourceFieldIdsHide:[],
 			relationIdMapRecordIdMapTitle:{}
 		};
@@ -159,16 +163,15 @@ export default {
 		//  both form & list fields can have multiple sources if they join multiple relations
 		sources:s => {
 			let out = [];
-
-			const parseFields = (fields,tabTitle) => {
+			const parseFields = (fields,isFirstField,tabTitle) => {
 				for(const f of fields) {
 					switch(f.content) {
 						case 'container':
-							parseFields(f.fields,'');
+							parseFields(f.fields,false,'');
 						break;
 						case 'tabs':
 							for(const t of f.tabs) {
-								parseFields(t.fields,s.getCaption('tabTitle',s.moduleId,t.id,t.captions,''));
+								parseFields(t.fields,false,s.getCaption('tabTitle',s.moduleId,t.id,t.captions,''));
 							}
 						break;
 						case 'data':
@@ -184,11 +187,15 @@ export default {
 
 								const isNm = f.attributeIdNm !== undefined && f.attributeIdNm !== null;
 								const atr  = isNm ? s.attributeIdMap[f.attributeIdNm] : s.attributeIdMap[f.attributeId];
+								const rel  = s.relationIdMap[s.joinsIndexMap[f.index].relationId];
+
+								if(!s.relationHasRetention(rel))
+									continue;
 
 								if(isNm || s.isAttributeRelationship(atr.content)) {
 									// fetch only relationship attributes, if their relation has record titles
-									const rel = s.relationIdMap[atr.relationshipId];
-									if(rel.attributeIdsTitle.length === 0)
+									const relShip = s.relationIdMap[atr.relationshipId];
+									if(relShip.attributeIdsTitle.length === 0)
 										continue;
 								}
 
@@ -227,20 +234,20 @@ export default {
 								if(join === undefined)
 									continue;
 
-								// fetch only records, if their relation has record titles
+								// for list fields, we need both a title for the source as well as record titles
+								// otherwise it´s not possible to see what a change belongs to
 								const rel = s.relationIdMap[join.relationId];
-								if(rel.attributeIdsTitle.length === 0)
+								if(rel.attributeIdsTitle.length === 0 || !s.relationHasRetention(rel))
 									continue;
 
 								let title = '';
-								if(title === '')
-									title = s.getCaption('fieldTitle',s.moduleId,f.id,f.captions);
-								
-								if(title === '')
-									title = tabTitle;
+								if(title === '') title = s.getCaption('fieldTitle',s.moduleId,f.id,f.captions);
+								if(title === '') title = tabTitle;
+								if(title === '') title = s.getCaption('relationTitle',s.moduleId,rel.id,rel.captions);
+								if(title === '' && isFirstField) title = s.formTitle;
 
 								if(title === '')
-									title = s.getCaption('relationTitle',s.moduleId,rel.id,rel.captions);
+									continue;
 
 								let src = s.getSourceTemplate(f.id,index,s.fieldIdMapIndexMapRecordIds[f.id][index],'images/files_list2.png',title);
 								for(const c of f.columns) {
@@ -298,7 +305,7 @@ export default {
 				if(j.recordId !== 0)
 					out.push(s.getSourceTemplate(null,j.index,[j.recordId],s.formIconSrc,s.formTitle));
 			}
-			parseFields(s.fields,'');
+			parseFields(s.fields,true,'');
 			return out;
 		},
 		sourcesFieldIds:s => {
@@ -370,8 +377,14 @@ export default {
 			}
 			return '';
 		},
+		relationHasRetention(rel) {
+			return (rel.retentionCount !== null && rel.retentionCount !== 0) || (rel.retentionDays !== null && rel.retentionDays !== 0);
+		},
 
 		// actions
+		logsShowIndexToggle(index) {
+			this.logsShownIndexOpen = this.logsShownIndexOpen !== index ? index : null;
+		},
 		sourceToggle(fieldId) {
 			const pos = this.sourceFieldIdsHide.indexOf(fieldId);
 			if(pos === -1) this.sourceFieldIdsHide.push(fieldId);

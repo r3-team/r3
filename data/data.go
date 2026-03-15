@@ -65,7 +65,7 @@ func authorizedRelation(loginId int64, relationId uuid.UUID, accessRequested typ
 
 // check whether a relation uses logging
 func relationUsesLogging(retentionCount pgtype.Int4, retentionDays pgtype.Int4) bool {
-	return retentionCount.Valid || retentionDays.Valid
+	return (retentionCount.Valid && retentionCount.Int32 != 0) || (retentionDays.Valid && retentionDays.Int32 != 0)
 }
 
 // get the names of policy blacklist & whitelist functions (empty strings if no functions are available)
