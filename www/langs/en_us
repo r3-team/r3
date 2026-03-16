@@ -2193,7 +2193,6 @@
 		"bulkTouched": "Value will be updated",
 		"button": {
 			"favorite": "Save form as favorite",
-			"fullscreenHint": "Toggle fullscreen mode",
 			"help": "Help",
 			"helpHint": "Show help pages",
 			"log": "Logs",
@@ -2440,6 +2439,7 @@
 		"forms": "Forms",
 		"formActions": "Form actions",
 		"formOpen": "Open form",
+		"fullscreenSwitchTo": "Toggle fullscreen mode",
 		"functions": "Functions",
 		"gap": "Gap",
 		"global": "Global",

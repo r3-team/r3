@@ -2193,7 +2193,6 @@
 		"bulkTouched": "Value will be updated",
 		"button": {
 			"favorite": "Save form as favorite",
-			"fullscreenHint": "Toggle fullscreen mode",
 			"help": "Ajutor",
 			"helpHint": "Afișați paginile de ajutor",
 			"log": "Jurnale",
@@ -2440,6 +2439,7 @@
 		"formActions": "Form actions",
 		"formOpen": "Open form",
 		"forms": "Formulare",
+		"fullscreenSwitchTo": "Toggle fullscreen mode",
 		"functions": "Functions",
 		"gap": "Gap",
 		"global": "Global",

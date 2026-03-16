@@ -935,6 +935,9 @@ table td.maximum{
 	box-shadow:inset 0 -2px 0 0 var(--color-accent3-alt);
 	transition:filter 0.2s, box-shadow 0.5s;
 }
+.generic-table>tbody>tr.row-clickable.row-selected>td{
+	filter:brightness(80%);
+}
 .generic-table>thead>tr>th .mixed-header{
 	display:flex;
 	flex-flow:row nowrap;

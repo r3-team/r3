@@ -2193,7 +2193,6 @@
 		"bulkTouched": "Wert wird aktualisiert",
 		"button": {
 			"favorite": "Formular als Favorit speichern",
-			"fullscreenHint": "Vollbildmodus wechseln",
 			"help": "Hilfe",
 			"helpHint": "Hilfeseiten anzeigen",
 			"log": "Historie",
@@ -2440,6 +2439,7 @@
 		"formActions": "Formularaktionen",
 		"formOpen": "Formular öffnen",
 		"forms": "Formulare",
+		"fullscreenSwitchTo": "In Vollbildmodus wechseln",
 		"functions": "Funktionen",
 		"gap": "Abstand",
 		"global": "Global",

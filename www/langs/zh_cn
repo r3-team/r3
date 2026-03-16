@@ -2193,7 +2193,6 @@
 		"bulkTouched": "值将被更新",
 		"button": {
 			"favorite": "Save form as favorite",
-			"fullscreenHint": "切换全屏模式",
 			"help": "帮助",
 			"helpHint": "显示帮助页面",
 			"log": "日志",
@@ -2440,6 +2439,7 @@
 		"formActions": "Form actions",
 		"formOpen": "打开表单",
 		"forms": "表单",
+		"fullscreenSwitchTo": "切换全屏模式",
 		"functions": "Functions",
 		"gap": "Gap",
 		"global": "Global",

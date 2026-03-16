@@ -2193,7 +2193,6 @@
 		"bulkTouched": "سيتم تحديث القيمة",
 		"button": {
 			"favorite": "Save form as favorite",
-			"fullscreenHint": "تبديل وضع ملء الشاشة",
 			"help": "يساعد",
 			"helpHint": "عرض صفحات المساعدة",
 			"log": "سجلات",
@@ -2440,6 +2439,7 @@
 		"formActions": "Form actions",
 		"formOpen": "فتح النموذج",
 		"forms": "النماذج",
+		"fullscreenSwitchTo": "تبديل وضع ملء الشاشة",
 		"functions": "Functions",
 		"gap": "Gap",
 		"global": "Global",

@@ -170,7 +170,7 @@ export default {
 					<my-button
 						v-if="isPopUp && !isMobile"
 						@trigger="popUpFullscreen = !popUpFullscreen"
-						:captionTitle="capApp.button.fullscreenHint"
+						:captionTitle="capGen.fullscreenSwitchTo"
 						:image="popUpFullscreen ? 'shrink.png' : 'expand.png'"
 					/>
 					<my-button image="builder.png"

@@ -2193,7 +2193,6 @@
 		"bulkTouched": "La valeur sera mise à jour",
 		"button": {
 			"favorite": "Save form as favorite",
-			"fullscreenHint": "Basculer en mode plein écran",
 			"help": "Aide",
 			"helpHint": "Afficher les pages d'aide",
 			"log": "Journaux",
@@ -2440,6 +2439,7 @@
 		"formActions": "Form actions",
 		"formOpen": "Ouvrir le formulaire",
 		"forms": "Formulaires",
+		"fullscreenSwitchTo": "Basculer en mode plein écran",
 		"functions": "Functions",
 		"gap": "Gap",
 		"global": "Global",

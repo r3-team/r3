@@ -17,7 +17,7 @@ import {
 const myFormLogLabel = {
 	name:'my-form-log-label',
 	template:`<my-label
-		:caption="caption"
+		:caption
 		:image="iconId === null ? 'icon_missing.png' : ''"
 		:imageBase64="iconId === null ? '' : srcBase64(iconIdMap[iconId].file)"
 		:large
@@ -38,49 +38,48 @@ const myFormLogLabel = {
 const myFormLogValue = {
 	name:'my-form-log-value',
 	components:{ MyInputRichtext },
-	template:`
-	<span class="form-log-value-empty"
-		v-if="isNull"
-	>[{{ capGen.button.empty }}]</span>
+	template:`<div class="form-log-value" :class="{ showRegularValue:showLarge && !isRichtext }">
+		<span class="form-log-value-empty" v-if="isNull">[{{ capGen.button.empty }}]</span>
 
-	<template v-if="!isNull">
-		<my-value-rich v-if="isValueRegular" :attributeId :key="attributeId" :length="80" :value />
+		<template v-if="!isNull">
+			<my-value-rich v-if="isValueRegular" :attributeId :key="attributeId" :length="60" :value />
 
-		<div class="form-log-value-richtext" v-if="showLarge && isRichtext">
-			<my-input-richtext :modelValue="value" :readonly="true" />
-		</div>
+			<div class="form-log-value-richtext" v-if="showLarge && isRichtext" :class="{ fullscreen:isFullscreen }">
+				<my-input-richtext :modelValue="value" :readonly="true" />
+			</div>
 
-		<div class="row gap wrap" v-if="isRelationship">
-			<div class="form-log-value-record-title"
-				v-for="v in value.filter(v => relationIdMapRecordIdMapTitle[relationId]?.[v] !== undefined)"
-			>{{ relationIdMapRecordIdMapTitle[relationId]?.[v] }}</div>
-		</div>
+			<div class="row gap wrap" v-if="isRelationship">
+				<div class="form-log-value-record-title"
+					v-for="v in value.filter(v => relationIdMapRecordIdMapTitle[relationId]?.[v] !== undefined)"
+				>{{ relationIdMapRecordIdMapTitle[relationId]?.[v] }}</div>
+			</div>
 
-		<table v-if="isFiles">
-			<tbody>
-				<tr v-for="(c,fileId) in value.fileIdMapChange">
-					<td v-if="c.action === 'create'">{{ capApp.fileCreated }}</td>
-					<td v-if="c.action === 'delete'">{{ capApp.fileDeleted }}</td>
-					<td v-if="c.action === 'rename'">{{ capApp.fileRenamed }}</td>
-					<td v-if="c.action === 'update'">{{ capApp.fileUpdated }}</td>
-					<td>
-						<!-- latest file version -->
-						<a target="_blank" v-if="c.action !== 'update'" :href="getAttributeFileHref(attributeId,fileId,c.name,token)">
-							<my-button image="download.png" :caption="c.name" :naked="true" />
-						</a>
-						<!-- specific file version -->
-						<a target="_blank" v-else :href="getAttributeFileVersionHref(attributeId,fileId,c.name,c.version,token)">
-							<my-button image="download.png" :caption="c.name + ' (v' + c.version + ')'" :naked="true" />
-						</a>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</template>
-	`,
+			<table v-if="isFiles">
+				<tbody>
+					<tr v-for="(c,fileId) in value.fileIdMapChange">
+						<td v-if="c.action === 'create'">{{ capApp.fileCreated }}</td>
+						<td v-if="c.action === 'delete'">{{ capApp.fileDeleted }}</td>
+						<td v-if="c.action === 'rename'">{{ capApp.fileRenamed }}</td>
+						<td v-if="c.action === 'update'">{{ capApp.fileUpdated }}</td>
+						<td>
+							<!-- latest file version -->
+							<a target="_blank" v-if="c.action !== 'update'" :href="getAttributeFileHref(attributeId,fileId,c.name,token)">
+								<my-button image="download.png" :caption="c.name" :naked="true" />
+							</a>
+							<!-- specific file version -->
+							<a target="_blank" v-else :href="getAttributeFileVersionHref(attributeId,fileId,c.name,c.version,token)">
+								<my-button image="download.png" :caption="c.name + ' (v' + c.version + ')'" :naked="true" />
+							</a>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</template>
+	</div>`,
 	props:{
 		attributeId:                  { type:String,        required:true },
 		isFiles:                      { type:Boolean,       required:true },
+		isFullscreen:                 { type:Boolean,       required:false, default:false },
 		relationId:                   { type:[String,null], required:true }, // set if attribute is relationship, relation of target records
 		relationIdMapRecordIdMapTitle:{ type:Object,        required:true },
 		showLarge:                    { type:Boolean,       required:false, default:false },
@@ -108,21 +107,79 @@ const myFormLogValue = {
 	}
 };
 
-export default {
-	name:'my-form-log',
+const myFormLogValueSidebar = {
+	name:'my-form-log-value-sidebar',
 	components:{
 		myFormLogLabel,
 		myFormLogValue
 	},
+	template:`<div class="form-log-value-sidebar" v-if="attributeValue !== null">
+		<div class="form-log-value-sidebar-title">
+			<div class="row gap">
+				<my-button image="cancel.png" @trigger="$emit('close')" />
+				<my-form-log-label
+					:caption="source.attributeIdMapTitle[attributeValue.attributeId]"
+					:iconId="source.attributeIdMapIcon[attributeValue.attributeId]"
+					:large="true"
+				/>
+			</div>
+			<my-button-check @update:modelValue="$emit('filter')" :caption="capGen.button.filter" :modelValue="isFiltered" />
+		</div>
+		<div class="form-log-value-sidebar-title-sub">
+			{{ log.loginName + ', ' + getUnixFormat(log.dateChange,settings.dateFormat + ' H:i:S') }}
+		</div>
+		<my-form-log-value
+			:attributeId="attributeValue.attributeId"
+			:isFiles="source.attributeIdsFiles.includes(attributeValue.attributeId)"
+			:isFullscreen
+			:relationId="attributeValue.relationId"
+			:relationIdMapRecordIdMapTitle
+			:showLarge=true
+			:value="attributeValue.value"
+		/>
+	</div>`,
+	emits:['filter','close'],
+	props:{
+		attributeId:                  { type:String,  required:true },
+		isFiltered:                   { type:Boolean, required:true },
+		isFullscreen:                 { type:Boolean, required:true },
+		log:                          { type:Object,  required:true },
+		relationIdMapRecordIdMapTitle:{ type:Object,  required:true },
+		source:                       { type:Object,  required:true }
+	},
+	computed:{
+		attributeValue:s => {
+			const a = s.log.attributes.find(v => v.attributeId === s.attributeId);
+			return a === undefined ? null : a;
+		},
+
+		// stores
+		settings:s => s.$store.getters.settings,
+		capGen:  s => s.$store.getters.captions.generic
+	},
+	methods:{
+		// externals
+		getUnixFormat
+	}
+};
+
+export default {
+	name:'my-form-log',
+	components:{
+		myFormLogLabel,
+		myFormLogValue,
+		myFormLogValueSidebar
+	},
 	template:`<div class="app-sub-window under-header" @mousedown.left.self="$emit('close')">
-		<div class="contentBox scroll float form-log">
-			<div class="top">
+		<div class="contentBox scroll float form-log" :class="{ fullscreen:showFullscreen }">
+			<div class="top lower">
 				<div class="area nowrap">
 					<img class="icon" src="images/time.png" />
 					<h1>{{ capApp.title }}</h1>
 				</div>
 				<div class="area">
-					<my-button image="cancel.png" @trigger="$emit('close')" :cancel="true" />
+					<my-button v-if="!isMobile" @trigger="showFullscreen = !showFullscreen" :captionTitle="capGen.fullscreenSwitchTo" :image="showFullscreen ? 'shrink.png' : 'expand.png'" />
+					<my-button image="cancel.png" @trigger="$emit('close')" :caption="capGen.button.close" :cancel="true" />
 				</div>
 			</div>
 			<div class="form-log-content">
@@ -142,22 +199,23 @@ export default {
 							<tr v-if="logsShown.length === 0"><td colspan="6">{{ capGen.nothingThere }}</td></tr>
 
 							<template v-for="(l,li) in logsShown" :key="l.id">
-								<tr v-for="(a,i) in l.attributes"
-									@click="logsShowToggle(li,a.attributeId)"
-									:class="{ 'row-contrast':li % 2 === 0, 'row-clickable':true }"
+								<tr
+									v-for="(a,i) in l.attributes.filter(v => !isSidebarLogFilter || v.attributeId === logShownAttributeId)"
+									@click="logShownSidebarSet(l.id,a.attributeId)"
+									:class="{ 'row-contrast':li % 2 === 0, 'row-clickable':true, 'row-selected':li === logShownId && a.attributeId === logShownAttributeId }"
 									:key="a.attributeId"
 								>
 									<!-- log info -->
 									<template v-if="i === 0">
-										<td class="minimum" :rowspan="l.attributes.length">{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}</td>
-										<td class="minimum" :rowspan="l.attributes.length">{{ l.loginName }}</td>
-										<td class="minimum" :rowspan="l.attributes.length" v-if="!isSingleSource">
+										<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1">{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}</td>
+										<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1">{{ l.loginName }}</td>
+										<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1" v-if="!isSingleSource">
 											<div class="form-log-source">
 												<img :src="sources[l.sourceIndex].image" />
 												<span>{{ sources[l.sourceIndex].title }}</span>
 											</div>
 										</td>
-										<td class="minimum" :rowspan="l.attributes.length"  v-if="!isSingleSourceForm">
+										<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1"  v-if="!isSingleSourceForm">
 											{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined ? relationIdMapRecordIdMapTitle[l.relationId][l.recordId] : '-' }}
 										</td>
 									</template>
@@ -183,8 +241,8 @@ export default {
 						</tbody>
 					</table>
 				</div>
-				<div class="form-log-sidebar">
-					<div class="column gap" v-if="!isSingleSource && logsShownIndexOpen === null">
+				<div class="form-log-sidebar" v-if="!isSingleSource || isSidebarLogShown">
+					<div class="column gap" v-if="!isSidebarLogShown">
 						<my-label image="filter.png" :caption="capGen.sources" :large="true" />
 						<my-button
 							v-for="fieldId in sourcesFieldIds"
@@ -195,21 +253,17 @@ export default {
 							:naked="true"
 						/>
 					</div>
-					<div class="column grow gap" v-if="logAttributeValueShow !== null">
-						<my-form-log-label
-							:caption="sources[logsShown[logsShownIndexOpen].sourceIndex].attributeIdMapTitle[logAttributeValueShow.attributeId]"
-							:iconId="sources[logsShown[logsShownIndexOpen].sourceIndex].attributeIdMapIcon[logAttributeValueShow.attributeId]"
-							:large="true"
-						/>
-						<my-form-log-value
-							:attributeId="logAttributeValueShow.attributeId"
-							:isFiles="sources[logsShown[logsShownIndexOpen].sourceIndex].attributeIdsFiles.includes(logAttributeValueShow.attributeId)"
-							:relationId="logAttributeValueShow.relationId"
-							:relationIdMapRecordIdMapTitle
-							:showLarge=true
-							:value="logAttributeValueShow.value"
-						/>
-					</div>
+					<my-form-log-value-sidebar
+						v-if="isSidebarLogShown"
+						@close="logShownSidebarSet(null,null)"
+						@filter="logShownFilterValue = !logShownFilterValue"
+						:attributeId="logShownAttributeId"
+						:isFiltered="logShownFilterValue"
+						:isFullscreen="showFullscreen"
+						:log="logShownSidebar"
+						:relationIdMapRecordIdMapTitle
+						:source="sources[logShownSidebar.sourceIndex]"
+					/>
 				</div>
 			</div>
 		</div>
@@ -229,8 +283,10 @@ export default {
 	data() {
 		return {
 			logs:[],
-			logsShownAttributeId:null,
-			logsShownIndexOpen:null,
+			logShownAttributeId:null,
+			logShownId:null,
+			logShownFilterValue:true, // if true, hide all logs/attribute values that are not shown in the sidebar
+			showFullscreen:false,
 			sourceFieldIdsHide:[],
 			relationIdMapRecordIdMapTitle:{}
 		};
@@ -407,27 +463,23 @@ export default {
 			}
 			return true;
 		},
-		logAttributeValueShow:s => {
-			if(s.logsShownIndexOpen === null || s.logsShownAttributeId === null)
-				return null;
-
-			const log = s.logsShown[s.logsShownIndexOpen];
-			if(log === undefined)
-				return null;
-
-			const a = log.attributes.find(v => v.attributeId === s.logsShownAttributeId);
-			return a === undefined ? null : a;
+		logShownSidebar:s => {
+			const l = s.logsShown.find(v => v.id === s.logShownId);
+			return l === undefined ? null : l;
 		},
 
 		// simple
+		isSidebarLogFilter:s => s.logShownFilterValue && s.isSidebarLogShown,
+		isSidebarLogShown: s => s.logShownId !== null && s.logShownAttributeId !== null,
 		isSingleSourceForm:s => s.isSingleSource && (s.sources.length === 0 || s.sources[0].fieldId === null),
-		logsShown:         s => s.logs.filter(v => !s.sourceFieldIdsHide.includes(s.sources[v.sourceIndex].fieldId)),
+		logsShown:         s => s.logs.filter(v => !s.sourceFieldIdsHide.includes(s.sources[v.sourceIndex].fieldId) && (!s.isSidebarLogFilter || v.attributes.findIndex(w => w.attributeId === s.logShownAttributeId) !== -1)),
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		capApp:        s => s.$store.getters.captions.formLog,
 		capGen:        s => s.$store.getters.captions.generic,
+		isMobile:      s => s.$store.getters.isMobile,
 		settings:      s => s.$store.getters.settings
 	},
 	mounted() {
@@ -466,10 +518,9 @@ export default {
 		},
 
 		// actions
-		logsShowToggle(index,attributeId) {
-			const sameRow = this.logsShownIndexOpen === index && this.logsShownAttributeId === attributeId;
-			this.logsShownAttributeId = sameRow ? null : attributeId;
-			this.logsShownIndexOpen   = sameRow ? null : index;
+		logShownSidebarSet(logId,attributeId) {
+			this.logShownAttributeId = attributeId;
+			this.logShownId          = logId;
 		},
 		sourceToggle(fieldId) {
 			const pos = this.sourceFieldIdsHide.indexOf(fieldId);

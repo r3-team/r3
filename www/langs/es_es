@@ -2193,7 +2193,6 @@
 		"bulkTouched": "El valor será actualizado",
 		"button": {
 			"favorite": "Guardar formulario como favorito",
-			"fullscreenHint": "Alternar modo pantalla completa",
 			"help": "Ayuda",
 			"helpHint": "Mostrar páginas de ayuda",
 			"log": "Registros",
@@ -2440,6 +2439,7 @@
 		"formActions": "Acciones de formulario",
 		"formOpen": "Abrir formulario",
 		"forms": "Formularios",
+		"fullscreenSwitchTo": "Alternar modo pantalla completa",
 		"functions": "Funciones",
 		"gap": "Gap",
 		"global": "Global",
