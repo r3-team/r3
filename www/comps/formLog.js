@@ -509,7 +509,7 @@ export default {
 		getSourceTitleByFieldId(fieldId) {
 			for(const src of this.sources) {
 				if(fieldId === src.fieldId)
-					return src.title;
+					return `${src.title} (${String(src.recordIds.length)})`;
 			}
 			return '';
 		},
