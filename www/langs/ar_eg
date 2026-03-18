@@ -2221,7 +2221,7 @@
 	},
 	"formLog": {
 		"button": {
-			"showAll": "إظهار الكل ({CNT})"
+			"filterByAttribute": "Show only changes for selected field"
 		},
 		"deletedUser": "المستخدم المحذوف",
 		"fileCreated": "تمت إضافة الملف",

@@ -64,11 +64,19 @@ const myFormLogValue = {
 						<td>
 							<!-- latest file version -->
 							<a target="_blank" v-if="c.action !== 'update'" :href="getAttributeFileHref(attributeId,fileId,c.name,token)">
-								<my-button image="download.png" :caption="c.name" :naked="true" />
+								<my-button image="download.png"
+									:caption="getFileName(c.name,null)"
+									:captionTitle="c.name"
+									:naked="true"
+								/>
 							</a>
 							<!-- specific file version -->
 							<a target="_blank" v-else :href="getAttributeFileVersionHref(attributeId,fileId,c.name,c.version,token)">
-								<my-button image="download.png" :caption="c.name + ' (v' + c.version + ')'" :naked="true" />
+								<my-button image="download.png"
+									:caption="getFileName(c.name,c.version)"
+									:captionTitle="c.name + ' (v' + c.version + ')'"
+									:naked="true"
+								/>
 							</a>
 						</td>
 					</tr>
@@ -103,7 +111,15 @@ const myFormLogValue = {
 	methods:{
 		// externals
 		getAttributeFileHref,
-		getAttributeFileVersionHref
+		getAttributeFileVersionHref,
+
+		// presentation
+		getFileName(name,version) {
+			if(name.length > 30)
+				name = name.substring(0,27) + '...';
+
+			return version === null ? name : `${name} (v${version})`;
+		}
 	}
 };
 
@@ -114,19 +130,22 @@ const myFormLogValueSidebar = {
 		myFormLogValue
 	},
 	template:`<div class="form-log-value-sidebar" v-if="attributeValue !== null">
+		<div class="row gap center space-between" v-if="recordTitle !== null">
+			<my-label :caption="recordTitle" :imageBase64="source.image" :large="true" />
+			<my-button image="cancel.png" v-if="recordTitle !== null" @trigger="$emit('close')" />
+		</div>
+
 		<div class="form-log-value-sidebar-title">
-			<div class="row gap">
-				<my-button image="cancel.png" @trigger="$emit('close')" />
-				<my-form-log-label
-					:caption="source.attributeIdMapTitle[attributeValue.attributeId]"
-					:iconId="source.attributeIdMapIcon[attributeValue.attributeId]"
-					:large="true"
-				/>
-			</div>
-			<my-button-check @update:modelValue="$emit('filter')" :caption="capGen.button.filter" :modelValue="isFiltered" />
+			<my-form-log-label
+				:caption="source.attributeIdMapTitle[attributeValue.attributeId]"
+				:iconId="source.attributeIdMapIcon[attributeValue.attributeId]"
+				:large="true"
+			/>
+			<my-button image="cancel.png" v-if="recordTitle === null" @trigger="$emit('close')" />
 		</div>
 		<div class="form-log-value-sidebar-title-sub">
-			{{ log.loginName + ', ' + getUnixFormat(log.dateChange,settings.dateFormat + ' H:i:S') }}
+			<span v-if="log.loginName !== ''">{{ log.loginName }}</span>
+			<span>{{ getUnixFormat(log.dateChange,settings.dateFormat + ' H:i:S') }}</span>
 		</div>
 		<my-form-log-value
 			:attributeId="attributeValue.attributeId"
@@ -138,11 +157,11 @@ const myFormLogValueSidebar = {
 			:value="attributeValue.value"
 		/>
 	</div>`,
-	emits:['filter','close'],
+	emits:['close'],
 	props:{
 		attributeId:                  { type:String,  required:true },
-		isFiltered:                   { type:Boolean, required:true },
 		isFullscreen:                 { type:Boolean, required:true },
+		isSingleSource:               { type:Boolean, required:true },
 		log:                          { type:Object,  required:true },
 		relationIdMapRecordIdMapTitle:{ type:Object,  required:true },
 		source:                       { type:Object,  required:true }
@@ -151,6 +170,10 @@ const myFormLogValueSidebar = {
 		attributeValue:s => {
 			const a = s.log.attributes.find(v => v.attributeId === s.attributeId);
 			return a === undefined ? null : a;
+		},
+		recordTitle:s => {
+			return !s.isSingleSource && s.relationIdMapRecordIdMapTitle[s.log.relationId]?.[s.log.recordId] !== undefined
+				? s.capGen.record + ': ' + s.relationIdMapRecordIdMapTitle[s.log.relationId]?.[s.log.recordId] : null;
 		},
 
 		// stores
@@ -183,63 +206,77 @@ export default {
 				</div>
 			</div>
 			<div class="form-log-content">
-				<div class="form-log-table">
-					<table class="generic-table auto-height sticky-top bright topAligned">
-						<thead>
-							<tr>
-								<th>{{ capGen.date }}</th>
-								<th>{{ capGen.username }}</th>
-								<th v-if="!isSingleSource">{{ capGen.source }}</th>
-								<th v-if="!isSingleSourceForm">{{ capGen.record }}</th>
-								<th>{{ capGen.field }}</th>
-								<th>{{ capGen.value }}</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-if="logsShown.length === 0"><td colspan="6">{{ capGen.nothingThere }}</td></tr>
-
-							<template v-for="(l,li) in logsShown" :key="l.id">
-								<tr
-									v-for="(a,i) in l.attributes.filter(v => !isSidebarLogFilter || v.attributeId === logShownAttributeId)"
-									@click="logShownSidebarSet(l.id,a.attributeId)"
-									:class="{ 'row-contrast':li % 2 === 0, 'row-clickable':true, 'row-selected':li === logShownId && a.attributeId === logShownAttributeId }"
-									:key="a.attributeId"
-								>
-									<!-- log info -->
-									<template v-if="i === 0">
-										<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1">{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}</td>
-										<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1">{{ l.loginName }}</td>
-										<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1" v-if="!isSingleSource">
-											<div class="form-log-source">
-												<img :src="sources[l.sourceIndex].image" />
-												<span>{{ sources[l.sourceIndex].title }}</span>
-											</div>
-										</td>
-										<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1"  v-if="!isSingleSourceForm">
-											{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined ? relationIdMapRecordIdMapTitle[l.relationId][l.recordId] : '-' }}
-										</td>
-									</template>
-
-									<!-- log values -->
-									<td class="minimum">
-										<my-form-log-label
-											:caption="sources[l.sourceIndex].attributeIdMapTitle[a.attributeId]"
-											:iconId="sources[l.sourceIndex].attributeIdMapIcon[a.attributeId]"
-										/>
-									</td>
-									<td>
-										<my-form-log-value
-											:attributeId="a.attributeId"
-											:isFiles="sources[l.sourceIndex].attributeIdsFiles.includes(a.attributeId)"
-											:relationId="a.relationId"
-											:relationIdMapRecordIdMapTitle
-											:value="a.value"
-										/>
-									</td>
+				<div class="form-log-content-table">
+					<div class="form-log-table">
+						<table class="generic-table auto-height sticky-top bright topAligned">
+							<thead>
+								<tr>
+									<th>{{ capGen.date }}</th>
+									<th>{{ capGen.username }}</th>
+									<th v-if="!isSingleSource">{{ capGen.source }}</th>
+									<th v-if="!isSingleSourceForm">{{ capGen.record }}</th>
+									<th>{{ capGen.field }}</th>
+									<th>{{ capGen.value }}</th>
 								</tr>
-							</template>
-						</tbody>
-					</table>
+							</thead>
+							<tbody>
+								<tr v-if="logsShown.length === 0"><td colspan="6">{{ capGen.nothingThere }}</td></tr>
+
+								<template v-for="(l,li) in logsShown" :key="l.id">
+									<tr
+										v-for="(a,i) in l.attributes.filter(v => !isSidebarLogFilter || v.attributeId === logShownAttributeId)"
+										@click="logShownSidebarSet(l.id,a.attributeId)"
+										:class="{ 'row-contrast':li % 2 === 0, 'row-clickable':true, 'row-selected':l.id === logShownId && a.attributeId === logShownAttributeId }"
+										:key="a.attributeId"
+									>
+										<!-- log info -->
+										<template v-if="i === 0">
+											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1">
+												{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}
+												</td>
+											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1">
+												<span v-if="l.loginName !== ''">{{ l.loginName }}</span>
+												<span v-if="l.loginName === ''"><i>[{{ capApp.deletedUser }}]</i></span>
+											</td>
+											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1" v-if="!isSingleSource">
+												<div class="form-log-source">
+													<img :src="sources[l.sourceIndex].image" />
+													<span>{{ sources[l.sourceIndex].title }}</span>
+												</div>
+											</td>
+											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1"  v-if="!isSingleSourceForm">
+												{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined ? relationIdMapRecordIdMapTitle[l.relationId][l.recordId] : '-' }}
+											</td>
+										</template>
+
+										<!-- log values -->
+										<td class="minimum">
+											<my-form-log-label
+												:caption="sources[l.sourceIndex].attributeIdMapTitle[a.attributeId]"
+												:iconId="sources[l.sourceIndex].attributeIdMapIcon[a.attributeId]"
+											/>
+										</td>
+										<td>
+											<my-form-log-value
+												:attributeId="a.attributeId"
+												:isFiles="sources[l.sourceIndex].attributeIdsFiles.includes(a.attributeId)"
+												:relationId="a.relationId"
+												:relationIdMapRecordIdMapTitle
+												:value="a.value"
+											/>
+										</td>
+									</tr>
+								</template>
+							</tbody>
+						</table>
+					</div>
+					<div class="form-log-options" v-if="isSidebarLogShown">
+						<my-button
+							@trigger="logShownFilterValue = !logShownFilterValue"
+							:caption="capApp.button.filterByAttribute"
+							:image="logShownFilterValue ? 'checkbox1.png' : 'checkbox0.png'"
+						/>
+					</div>
 				</div>
 				<div class="form-log-sidebar" v-if="!isSingleSource || isSidebarLogShown">
 					<div class="column gap" v-if="!isSidebarLogShown">
@@ -256,10 +293,9 @@ export default {
 					<my-form-log-value-sidebar
 						v-if="isSidebarLogShown"
 						@close="logShownSidebarSet(null,null)"
-						@filter="logShownFilterValue = !logShownFilterValue"
 						:attributeId="logShownAttributeId"
-						:isFiltered="logShownFilterValue"
 						:isFullscreen="showFullscreen"
+						:isSingleSource="isSingleSourceForm"
 						:log="logShownSidebar"
 						:relationIdMapRecordIdMapTitle
 						:source="sources[logShownSidebar.sourceIndex]"
@@ -467,12 +503,15 @@ export default {
 			const l = s.logsShown.find(v => v.id === s.logShownId);
 			return l === undefined ? null : l;
 		},
+		logsShown:s => {
+			return s.logs.filter(v => !s.sourceFieldIdsHide.includes(s.sources[v.sourceIndex].fieldId)
+				&& (!s.isSidebarLogFilter || v.attributes.findIndex(w => w.attributeId === s.logShownAttributeId) !== -1));
+		},
 
 		// simple
 		isSidebarLogFilter:s => s.logShownFilterValue && s.isSidebarLogShown,
 		isSidebarLogShown: s => s.logShownId !== null && s.logShownAttributeId !== null,
 		isSingleSourceForm:s => s.isSingleSource && (s.sources.length === 0 || s.sources[0].fieldId === null),
-		logsShown:         s => s.logs.filter(v => !s.sourceFieldIdsHide.includes(s.sources[v.sourceIndex].fieldId) && (!s.isSidebarLogFilter || v.attributes.findIndex(w => w.attributeId === s.logShownAttributeId) !== -1)),
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],

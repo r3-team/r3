@@ -2221,7 +2221,7 @@
 	},
 	"formLog": {
 		"button": {
-			"showAll": "Afficher tout ({CNT})"
+			"filterByAttribute": "Show only changes for selected field"
 		},
 		"deletedUser": "Utilisateur supprimé",
 		"fileCreated": "Fichier ajouté",

@@ -2221,7 +2221,7 @@
 	},
 	"formLog": {
 		"button": {
-			"showAll": "显示全部 ({CNT})"
+			"filterByAttribute": "Show only changes for selected field"
 		},
 		"deletedUser": "已删除用户",
 		"fileCreated": "添加文件",

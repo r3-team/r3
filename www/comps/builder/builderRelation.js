@@ -242,7 +242,7 @@ export default {
 								<td>{{ capApp.recordTitle }}</td>
 								<td>
 									<div class="column gap">
-										<select @input="recordTitleAttributeAdd($event.target.value)" :value="recordTitleAttributeId">
+										<select @input="recordTitleAttributeAdd($event.target.value)" :disabled="readonly" :value="recordTitleAttributeId">
 											<option value="">[{{ capGen.button.add }}]</option>
 											<option v-for="a in attributesRecordTitleCandidates" :value="a.id">{{ a.name }}</option>
 										</select>
@@ -250,6 +250,7 @@ export default {
 											<my-button image="delete.png"
 												v-for="id in relation.attributeIdsTitle"
 												@trigger="recordTitleAttributeRemove(id)"
+												:active="!readonly"
 												:caption="attributeIdMap[id].name"
 												:naked="true"
 											/>

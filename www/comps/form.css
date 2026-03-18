@@ -94,7 +94,7 @@
 
 /* data change log */
 .form-log{
-	min-width:300px;
+	min-width:60%;
 	max-width:95%;
 	min-height:60%;
 	max-height:95%;
@@ -111,10 +111,23 @@
 	flex:1 1 auto;
 	overflow:auto;
 }
-.form-log-table{
+.form-log-content-table{
 	flex:2 2 auto;
-	overflow:auto;
 	line-height:24px;
+	overflow:auto;
+	display:flex;
+	flex-flow:column nowrap;
+}
+.form-log-table{
+	overflow:auto;
+}
+.form-log-options{
+	display:flex;
+	flex-flow:column nowrap;
+	justify-content:center;
+	align-items:center;
+	border-top:1px solid var(--color-border);
+	padding:var(--spacing) 0px;
 }
 .form-log-sidebar{
 	flex:1 1 auto;
@@ -187,7 +200,10 @@
 	align-items:center;
 }
 .form-log-value-sidebar-title-sub{
-	text-align:right;
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:flex-end;
+	gap:calc(var(--spacing) / 2);
 	font-size:95%;
 	font-style:italic;
 	margin-bottom:10px;
