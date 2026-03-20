@@ -1,3 +1,5 @@
+
+import {srcBase64NoExt} from '../comps/shared/image.js';
 export {MyStoreLocal as default};
 
 const MyStoreLocal = {
@@ -249,14 +251,14 @@ const MyStoreLocal = {
 	},
 	getters:{
 		customLogo:(state) => !state.activated || state.companyLogo === ''
-			? 'images/logo.png' : `data:image;base64,${state.companyLogo}`,
+			? 'images/logo.png' : srcBase64NoExt(state.companyLogo),
 		
 		customLogoUrl:(state) => !state.activated || state.companyLogoUrl === ''
 			? 'https://rei3.de/' : state.companyLogoUrl,
 			
 		loginBackground:(state) => state.companyLoginImage === ''
 			? `background-image:url('../images/backgrounds/${state.loginBackground}.webp');`
-			: `background-image:url(data:image;base64,${state.companyLoginImage});`,
+			: `background-image:url(${srcBase64NoExt(state.companyLoginImage)});`,
 		
 		// simple getters    
 		activated:          (state) => state.activated,
