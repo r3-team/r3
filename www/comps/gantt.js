@@ -70,26 +70,16 @@ const MyGanttLineRecord = {
 		hasUpdate:    { type:Boolean,required:true },
 		indexesHidden:{ type:Array,  required:true }, // hidden column indexes (either it is hidden or used as Gantt group)
 		isDays:       { type:Boolean,required:true },
+		isFullDay:    { type:Boolean,required:true },
 		pxPerSec:     { type:Number, required:true }, // pixel per second on gantt
 		row:          { type:Object, required:true },
 		values:       { type:Array,  required:true }
 	},
 	emits:['record-selected'],
 	computed:{
-		isFullDay() {
-			return this.isUnixUtcZero(this.getUnixFromDate(this.date0))
-				&& this.isUnixUtcZero(this.getUnixFromDate(this.date1));
-		},
 		style() {
 			let d0 = new Date(this.date0.getTime());
 			let d1 = new Date(this.date1.getTime());
-			
-			// apply offset fix for UTC date values
-			if(this.isFullDay) {
-				d0 = this.getDateShifted(d0,true);
-				d1 = this.getDateShifted(d1,true);
-				d1.setDate(d1.getDate()+1);
-			}
 			
 			// limit record date to gantt presentation range
 			if(this.date0Range > d0) d0 = this.date0Range;
@@ -106,8 +96,8 @@ const MyGanttLineRecord = {
 				secOffset += secDst0 - secDst1;
 			}
 			
-			let offset = secOffset * this.pxPerSec;
-			let width  = secWidth  * this.pxPerSec;
+			const offset = secOffset * this.pxPerSec;
+			const width  = secWidth  * this.pxPerSec;
 			
 			if(width < 1)
 				return 'display:none';
@@ -126,9 +116,6 @@ const MyGanttLineRecord = {
 		// externals
 		colorAdjustBg,
 		colorMakeContrastFont,
-		getDateShifted,
-		getUnixFromDate,
-		isUnixUtcZero,
 		
 		// actions
 		clickRecord(middleClick) {
@@ -146,15 +133,16 @@ const MyGanttLine = {
 			v-for="(r,i) in records"
 			@record-selected="(...args) => $emit('record-selected',...args)"
 			:color="r.color"
-			:columns="columns"
+			:columns
 			:date0="r.date0"
-			:date0Range="date0Range"
+			:date0Range
 			:date1="r.date1"
-			:date1Range="date1Range"
-			:hasUpdate="hasUpdate"
-			:indexesHidden="indexesHidden"
-			:isDays="isDays"
-			:pxPerSec="pxPerSec"
+			:date1Range
+			:hasUpdate
+			:indexesHidden
+			:isDays
+			:isFullDay="r.isFullDay"
+			:pxPerSec
 			:key="i+'_'+r.row.indexRecordIds['0']"
 			:row="r.row"
 			:values="r.values"
@@ -593,12 +581,14 @@ const MyGantt = {
 		getCaption,
 		getDateFormat,
 		getDateFromUnix,
+		getDateShifted,
 		getQueryExpressions,
 		getQueryExpressionsDateRange,
 		getQueryFiltersDateRange,
 		getRelationsJoined,
 		getUnixFromDate,
 		getUnixShifted,
+		isUnixUtcZero,
 		routeChangeFieldReload,
 		routeParseParams,
 		srcBase64Icon,
@@ -784,20 +774,15 @@ const MyGantt = {
 		},
 		getFreeLineIndex(lines,date0,date1) {
 			let index;
-			
 			for(let i = 0, j = lines.length; i < j; i++) {
 				index = i;
-				
-				for(let x = 0, y = lines[i].length; x < y; x++) {
-					let r = lines[i][x];
-					
-					if(date0 <= r.date1 && r.date0 <= date1) {
-						// another record´s date range overlaps, line is not suitable
+				for(const record of lines[i]) {
+					// if another record´s date range overlaps, line is not suitable
+					if(date0 < record.date1 && record.date0 < date1) {
 						index = -1;
 						break;
 					}
 				}
-				
 				if(index !== -1)
 					return index;
 			}
@@ -831,9 +816,6 @@ const MyGantt = {
 					this.groups = [];
 					
 					// parse result rows to gantt groups
-					let color            = null;
-					let date0            = 0;
-					let date1            = 0;
 					let groups           = []; // groups 
 					let groupBy          = []; // group by criteria (can be identical to label)
 					let groupColumns     = []; // group column values
@@ -845,11 +827,10 @@ const MyGantt = {
 						groupColumns = [];
 						
 						// collect special calendar values first
-						date0 = this.getDateFromUnix(r.values[0]);
-						date1 = this.getDateFromUnix(r.values[1]);
-						
-						if(this.hasColor)
-							color = r.values[2];
+						let date0       = this.getDateFromUnix(r.values[0]);
+						let date1       = this.getDateFromUnix(r.values[1]);
+						const color     = this.hasColor ? r.values[2] : null;
+						const isFullDay = this.isUnixUtcZero(r.values[0]) && this.isUnixUtcZero(r.values[1]);
 						
 						// parse non-calendar expression values
 						values = this.hasColor ? r.values.slice(3) : r.values.slice(2);
@@ -870,7 +851,7 @@ const MyGantt = {
 								vertical:this.columns[i].flags.vertical
 							});
 						}
-						let name = groupBy.join(' ');
+						const name = groupBy.join(' ');
 						
 						// add group if not there yet
 						if(groupIndexByName[name] === undefined) {
@@ -880,6 +861,13 @@ const MyGantt = {
 								columns:groupColumns,
 								vertical:groupColumns.length === 0 ? false : groupColumns[0].vertical
 							});
+						}
+
+						// apply shift to local time for fullday records
+						if(isFullDay) {
+							date0 = this.getDateShifted(date0,true);
+							date1 = this.getDateShifted(date1,true);
+							date1.setDate(date1.getDate()+1);
 						}
 						
 						// check in which line record fits (no overlapping)
@@ -893,6 +881,7 @@ const MyGantt = {
 							color:color,
 							date0:date0,
 							date1:date1,
+							isFullDay:isFullDay,
 							row:r,
 							values:values
 						});
