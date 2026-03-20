@@ -70,7 +70,6 @@ const MyGanttLineRecord = {
 		hasUpdate:    { type:Boolean,required:true },
 		indexesHidden:{ type:Array,  required:true }, // hidden column indexes (either it is hidden or used as Gantt group)
 		isDays:       { type:Boolean,required:true },
-		isFullDay:    { type:Boolean,required:true },
 		pxPerSec:     { type:Number, required:true }, // pixel per second on gantt
 		row:          { type:Object, required:true },
 		values:       { type:Array,  required:true }
@@ -141,7 +140,6 @@ const MyGanttLine = {
 			:hasUpdate
 			:indexesHidden
 			:isDays
-			:isFullDay="r.isFullDay"
 			:pxPerSec
 			:key="i+'_'+r.row.indexRecordIds['0']"
 			:row="r.row"
@@ -881,7 +879,6 @@ const MyGantt = {
 							color:color,
 							date0:date0,
 							date1:date1,
-							isFullDay:isFullDay,
 							row:r,
 							values:values
 						});
