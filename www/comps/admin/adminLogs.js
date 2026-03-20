@@ -203,6 +203,7 @@ export default {
 				if(d.getHours() === 0 && d.getMinutes() === 0 && d.getSeconds() === 0)
 					this.unixTo += 86399;
 			}
+			this.offset = 0;
 			this.get();
 		},
 		showMessage(index) {
