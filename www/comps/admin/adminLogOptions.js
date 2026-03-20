@@ -3,7 +3,7 @@ import {dialogCloseAsk} from '../shared/dialog.js';
 export default {
 	name:'my-admin-log-options',
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="closeAsk">
-		<div class="contentBox admin-log-options float">
+		<div class="contentBox admin-log-options float scroll">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/fileText.png" />
