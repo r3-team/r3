@@ -165,7 +165,7 @@ const MyGantt = {
 		MyGanttLine,
 		MyInputCollection
 	},
-	template:`<div class="gantt" :class="{ isSingleField:isSingleField }" v-if="ready">
+	template:`<div class="gantt-wrap" :class="{ isSingleField:isSingleField }" v-if="ready">
 		
 		<!-- header -->
 		<div class="top lower">
@@ -269,39 +269,14 @@ const MyGantt = {
 		</div>
 		
 		<!-- gantt content -->
-		<div class="gantt-content">
-			<div class="gantt-data">
-				<div class="gantt-labels" v-if="showGroupLabels">
-					<div class="gantt-label-entry"></div>
-					<div class="gantt-label-entry"
-						v-for="(g,k) in groups"
-						:key="k"
-						:style="styleLabel(g)"
-					>
-						<div class="columnBatch" :class="{ vertical:g.vertical }">
-							<my-value-rich class="context-calendar-gantt"
-								v-for="c in g.columns.filter(v => v.value !== null)"
-								:attribute-id="columns[c.index].attributeId"
-								:bold="columns[c.index].flags.bold"
-								:boolAtrIcon="columns[c.index].flags.boolAtrIcon"
-								:display="columns[c.index].display"
-								:italic="columns[c.index].flags.italic"
-								:key="c.index"
-								:length="columns[c.index].length"
-								:monospace="columns[c.index].flags.monospace"
-								:noShrink="columns[c.index].flags.noShrink"
-								:noThousandsSep="columns[c.index].flags.noThousandsSep"
-								:value="c.value"
-							/>
-						</div>
-					</div>
-				</div>
-				
-				<div class="gantt-lines" ref="content">
-					<div class="gantt-headers">
+		<div class="gantt">
+			<div class="gantt-content">
+				<div class="gantt-header">
+					<div class="gantt-header-labels" v-if="showGroupLabels" :style="styleHeaderLabels"></div>
+					<div class="gantt-header-dates">
 						
 						<!-- header meta line: shows groupings of step entities (hours->days, days->months) -->
-						<div class="gantt-header">
+						<div class="gantt-header-dates-upper">
 							<div class="gantt-header-item"
 								v-for="i in headerItemsMeta"
 								:style="'width:'+stepPixels*i.steps+'px'"
@@ -311,7 +286,7 @@ const MyGantt = {
 						</div>
 						
 						<!-- header line: shows step entities (hours, days, ...) -->
-						<div class="gantt-header lower">
+						<div class="gantt-header-dates-lower">
 							<div class="gantt-header-item lower"
 								v-for="i in headerItems"
 								@mousedown.left="clickHeaderItem(i.unixTime,true)"
@@ -324,26 +299,54 @@ const MyGantt = {
 							</div>
 						</div>
 					</div>
-					
-					<div class="gantt-group" v-for="(g,i) in groups">
-						<my-gantt-line
-							v-for="(l,li) in g.lines"
-							@record-selected="(...args) => $emit('open-form',[args[0]],[],args[1])"
-							:class="{ 'show-line':li === g.lines.length-1 }"
-							:columns="columns"
-							:date0Range="date0"
-							:date1Range="date1"
-							:hasUpdate="hasUpdate"
-							:indexesHidden="group0LabelExpressionIndexes"
-							:isDays="isDays"
-							:pxPerSec="pxPerSec"
-							:key="i+'_'+li"
-							:style="styleLine"
-							:records="l"
-						/>
+				</div>
+				<div class="gantt-data">
+					<div class="gantt-labels" v-if="showGroupLabels" ref="labels">
+						<div class="gantt-label"
+							v-for="(g,k) in groups"
+							:key="k"
+							:style="styleLabel(g)"
+						>
+							<div class="columnBatch" :class="{ vertical:g.vertical }">
+								<my-value-rich class="context-calendar-gantt"
+									v-for="c in g.columns.filter(v => v.value !== null)"
+									:attribute-id="columns[c.index].attributeId"
+									:bold="columns[c.index].flags.bold"
+									:boolAtrIcon="columns[c.index].flags.boolAtrIcon"
+									:display="columns[c.index].display"
+									:italic="columns[c.index].flags.italic"
+									:key="c.index"
+									:length="columns[c.index].length"
+									:monospace="columns[c.index].flags.monospace"
+									:noShrink="columns[c.index].flags.noShrink"
+									:noThousandsSep="columns[c.index].flags.noThousandsSep"
+									:value="c.value"
+								/>
+							</div>
+						</div>
 					</div>
-					<div class="nothing-there" v-if="isEmpty">
-						{{ capGen.nothingThere }}
+					<div class="gantt-lines" ref="content">
+						
+						<div class="gantt-group" v-for="(g,i) in groups">
+							<my-gantt-line
+								v-for="(l,li) in g.lines"
+								@record-selected="(...args) => $emit('open-form',[args[0]],[],args[1])"
+								:class="{ 'show-line':li === g.lines.length-1 }"
+								:columns="columns"
+								:date0Range="date0"
+								:date1Range="date1"
+								:hasUpdate="hasUpdate"
+								:indexesHidden="group0LabelExpressionIndexes"
+								:isDays="isDays"
+								:pxPerSec="pxPerSec"
+								:key="i+'_'+li"
+								:style="styleLine"
+								:records="l"
+							/>
+						</div>
+						<div class="nothing-there" v-if="isEmpty">
+							{{ capGen.nothingThere }}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -403,6 +406,8 @@ const MyGantt = {
 			groups:[],              // gantt groups, by defined column, each with its lines of records
 			headerItems:[],
 			headerItemsMeta:[],
+			labelsWidthPixels:180,  // width of label side bar in px
+			lastResizeFromLabels:false, // true, if the last setSteps() was executed due to size change in labels
 			linePixels:30,          // line height in pixels
 			page:0,                 // which page we are on (0: default, 1: next, -1: prev)
 			ready:false,            // component ready to be used
@@ -496,17 +501,18 @@ const MyGantt = {
 		},
 		
 		// simple
-		expressions:    (s) => s.getQueryExpressions(s.columns),
-		hasChoices:     (s) => s.choices.length > 1,
-		hasColor:       (s) => s.attributeIdColor !== null,
-		hasCreate:      (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
-		hasUpdate:      (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
-		isDays:         (s) => s.stepType === 'days',
-		isEmpty:        (s) => s.groups.length === 0,
-		isHours:        (s) => s.stepType === 'hours',
-		joins:          (s) => s.fillRelationRecordIds(s.query.joins),
-		stepPixels:     (s) => s.stepBase * s.stepZoom,
-		styleHeaderItem:(s) => `width:${s.stepPixels}px;`,
+		expressions:      (s) => s.getQueryExpressions(s.columns),
+		hasChoices:       (s) => s.choices.length > 1,
+		hasColor:         (s) => s.attributeIdColor !== null,
+		hasCreate:        (s) => s.checkDataOptions(4,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasUpdate:        (s) => s.checkDataOptions(2,s.dataOptions) && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate && s.hasOpenForm,
+		isDays:           (s) => s.stepType === 'days',
+		isEmpty:          (s) => s.groups.length === 0,
+		isHours:          (s) => s.stepType === 'hours',
+		joins:            (s) => s.fillRelationRecordIds(s.query.joins),
+		stepPixels:       (s) => s.stepBase * s.stepZoom,
+		styleHeaderItem:  (s) => `width:${s.stepPixels}px;`,
+		styleHeaderLabels:(s) => `flex-basis:${s.labelsWidthPixels}px;`,
 
 		// login options
 		choiceId:       (s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
@@ -535,6 +541,7 @@ const MyGantt = {
 		this.$watch('popUpFormInline',this.resized);
 		this.$watch('stepType',() => {
 			this.page = 0;
+			this.lastResizeFromLabels = false;
 			this.paramsUpdate(true);
 			this.$nextTick(() => this.setSteps(true));
 		});
@@ -549,6 +556,7 @@ const MyGantt = {
 				this.get();
 		});
 		this.$watch(() => [this.showGroupLabels,this.stepZoom],() => {
+			this.lastResizeFromLabels = false;
 			this.$nextTick(() => this.setSteps(false));
 		});
 		if(this.usesPageHistory) {
@@ -692,11 +700,13 @@ const MyGantt = {
 		},
 		pageChange(factor) {
 			this.page += factor;
+			this.lastResizeFromLabels = false;
 			this.paramsUpdate(true);
 			this.get();
 		},
 		resized() {
 			clearTimeout(this.resizeTimer);
+			this.lastResizeFromLabels = false;
 			this.resizeTimer = setTimeout(() => this.setSteps(false),150);
 		},
 		scrollToNow() {
@@ -891,6 +901,21 @@ const MyGantt = {
 						if(this.page === 0)
 							this.scrollToNow();
 					}
+
+					// check if label size has changed with new content
+					this.$nextTick(() => {
+						if(this.$refs.labels === null)
+							return;
+						
+						const labelsWidth = this.$refs.labels.getBoundingClientRect().width;
+						if(this.labelsWidthPixels !== labelsWidth) {
+							this.labelsWidthPixels = labelsWidth;
+							if(!this.lastResizeFromLabels) {
+								this.lastResizeFromLabels = true;
+								this.$nextTick(() => this.setSteps(false));
+							}
+						}
+					});
 				},
 				this.$root.genericError
 			);

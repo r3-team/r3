@@ -1,4 +1,4 @@
-.gantt{
+.gantt-wrap{
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
@@ -6,90 +6,70 @@
 	box-shadow:1px 1px 4px var(--color-shade);
     overflow:auto;
 }
-.gantt.isSingleField{
+.gantt-wrap.isSingleField{
 	border-radius:0px;
 }
-.gantt input.zoom-factor{
+.gantt-wrap input.zoom-factor{
 	width:90px !important;
 	padding:0px !important;
 }
-.gantt .date-range-label{
+.gantt-wrap .date-range-label{
 	font-size:110%;
 }
-.gantt .nothing-there{
+.gantt-wrap .nothing-there{
 	padding:12px;
 	text-align:center;
 	font-size:110%;
 	font-style:italic;
 }
 
-/* left side bar, showing all labels for each line */
-.gantt-labels{
-	flex:0 0 180px; /* base size is important to calculate Gantt content width */
-	display:flex;
-	flex-flow:column nowrap;
-	border-right:1px solid var(--color-border);
-	background-color:var(--color-bg);
-}
-.gantt-label-entry{
-	flex:0 0 auto;
-	height:30px;
-	line-height:30px;
-	display:flex;
-	flex-flow:row nowrap;
-	gap:6px;
-	box-sizing:border-box;
-	border-bottom:1px solid var(--color-border);
-}
-.gantt-label-entry:first-child{
-	height:60px; /* double line height */
-}
-.gantt-group{
-	background-color:var(--color-input);
-}
-
-
-/* main content, showing header + all lines */
-.gantt-content{
+.gantt{
 	flex: 1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
 	overflow:auto;
+
+	--gantt-line-height:30px;
 }
-.gantt-content .form-wrap.popUp{
+.gantt .form-wrap.popUp{
 	flex:1 1 auto;
 	width:100%;
 }
-.gantt-data{
-	flex: 1 1 auto;
+
+/* header */
+.gantt-header{
+	flex: 0 0 auto;
 	display:flex;
 	flex-flow:row nowrap;
-	overflow:auto;
-}
-
-/* headers */
-.gantt-headers{
-	flex:0 0 auto;
-	height:60px;
-	position:relative;
-	background-color:var(--color-bg);
-}
-.gantt-header{
-	height:30px;
 	position:absolute;
 	top:0px;
+	right:0px;
+	left:0px;
+	border-bottom:1px solid var(--color-border);
+}
+.gantt-header-dates{
+	flex:1 1 auto;
+	position:relative;
+	display:flex;
+	flex-flow:column nowrap;
+}
+.gantt-header-dates-upper{
+	height:var(--gantt-line-height);
 	display:flex;
 	flex-flow:row nowrap;
 	box-sizing:border-box;
+	background-color:var(--color-bg);
 	border-bottom:1px solid var(--color-border);
 }
-.gantt-header.lower{
-	top:30px;
-	border-bottom:1px solid var(--color-border);
+.gantt-header-dates-lower{
+	height:var(--gantt-line-height);
+	background-color:var(--color-bg);
+	display:flex;
+	flex-flow:row nowrap;
 }
 .gantt-header-item{
-	height:30px;
-	line-height:30px;
+	height:var(--gantt-line-height);
+	line-height:var(--gantt-line-height);
 	padding:0px 6px;
 	flex:0 0 auto;
 	overflow:hidden;
@@ -108,13 +88,60 @@
 .gantt-header-item.lower{
 	text-align:center;
 	padding:0px;
-	border-bottom:1px solid var(--color-border);
 }
 .gantt-header-item.today{
 	font-weight:bold;
 }
 .gantt-header-item.weekend{
 	background-color:var(--color-accent2);
+}
+.gantt-header-labels{
+	flex:0 0 180px;
+	height:calc(var(--gantt-line-height) * 2);
+	display:flex;
+	flex-flow:column nowrap;
+	background-color:var(--color-bg);
+	border-right:1px solid var(--color-border);
+	box-sizing:border-box;
+}
+
+/* labels */
+.gantt-labels{
+	flex:0 0 180px;
+	height:fit-content;
+	display:flex;
+	flex-flow:column nowrap;
+	border-right:1px solid var(--color-border);
+	box-sizing:border-box;
+}
+.gantt-label{
+	flex:0 0 auto;
+	height:var(--gantt-line-height);
+	line-height:var(--gantt-line-height);
+	display:flex;
+	flex-flow:row nowrap;
+	gap:6px;
+	box-sizing:border-box;
+	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-bg);
+}
+
+/* data */
+.gantt-content{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:column nowrap;
+	position:relative;
+	overflow-x:hidden;
+	overflow-y:auto;
+}
+.gantt-data{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+	overflow-x:hidden;
+	overflow-y:auto;
+	margin-top:calc(var(--gantt-line-height) * 2);
 }
 
 /* lines */
@@ -124,8 +151,8 @@
 	flex-flow:column nowrap;
 }
 .gantt-line{
-	height:30px;
-	line-height:30px;
+	height:var(--gantt-line-height);
+	line-height:var(--gantt-line-height);
 	position:relative;
 	box-sizing:border-box;
 	background-position:-1px 0px;
@@ -172,4 +199,7 @@
 .gantt-line-record .record-values:hover{
 	color:var(--color-font-bright) !important;
 	background-color:rgba(0,0,0,0.7) !important;
+}
+.gantt-group{
+	background-color:var(--color-input);
 }
