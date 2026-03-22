@@ -1283,6 +1283,7 @@
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Löscht Ende-Zu-Ende-Datenschlüssel für Datensätze, auf die ein Benutzer keinen Zugriff mehr hat. Dies macht Entschlüsselung für den Benutzer unmöglich.",
 				"data_log_comment_create": "instance.data_log_comment_create({ARGS}) => VOID<br /><br />Erzeugt einen Kommentar in der Änderungshistorie des definierten Datensatzes in der gewählten Relation. Ein Kommentar kann ein beliebiger Textwert sein - simples HTML wird ebenfalls unterstützt.<br /><br />Kommentare, so wie die Änderungshistorie allgemein, werden gelöscht, wenn die Aufbewahrungsrichtlinien erfüllt worden sind.<br /><br />Um festzulegen, dass ein Kommentar von einem bestimmten Benutzer gekommen ist, kann die Benutzer-ID angegeben werden; wenn die Benutzer-ID als NULL gesetzt ist, wird das System als Sender festgelegt.",
+				"data_log_delete": "instance.data_log_delete({ARGS}) => VOID<br /><br />Löscht die Änderungshistorie des definierten Datensatzes in der gewählten Relation.",
 				"file_export": "instance.file_export({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Export einer Datei auf Festplatte. Relevante Parameter:<ul><li>file_id: Datei zu exportieren - die Datei-ID kann via instance.files_get() gefunden werden</li><li>file_path: Wohin die Datei exportiert werden soll (muss in einen Dateinamen enden)</li><li>file_version: Version der Datei, die exportiert werden soll (NULL = aktuellste Version)</li><li>overwrite: Überschreiben, wenn am definierten Dateipfad bereits eine Datei existiert</li></ul><p>Der Dateipfad ist immer relativ zum Exportpfad, der in der Serverkonfigurationsdatei definiert ist. Aus Sicherheitsgründen werden absolute Pfade nicht unterstützt.</p>",
 				"file_export_text": "instance.file_export_text({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Export eines UTF8-Textes als Datei auf Festplatte. Relevante Parameter:<ul><li>file_path: Wohin die Datei exportiert werden soll (muss in einen Dateinamen enden)</li><li>file_text_content: UTF8 Textinhalt</li><li>overwrite: Überschreiben, wenn am definierten Dateipfad bereits eine Datei existiert</li></ul><p>Der Dateipfad ist immer relativ zum Exportpfad, der in der Serverkonfigurationsdatei definiert ist. Aus Sicherheitsgründen werden absolute Pfade nicht unterstützt.</p>",
 				"file_import": "instance.file_import({ARGS}) => INTEGER<br /><br />Erstellt einen Dateiverarbeitungsjob, zum Import einer Datei von Festplatte. Relevante Parameter:<ul><li>file_path: Von wo die Datei importiert werden soll (muss in einen Dateinamen enden)</li><li>attribute_id: ID des Dateien-Attributes, dass die Datei empfängt</li><li>record_id: ID des Datensatzes, dessen Dateien-Attributwert aktualisiert wird (NULL = neuer Datensatz)</li></ul><p>Die Quelldatei wird nach erfolgreichen Import gelöscht.</p><p>Der Dateipfad ist immer relativ zum Importpfad, der in der Serverkonfigurationsdatei definiert ist. Aus Sicherheitsgründen werden absolute Pfade nicht unterstützt.</p>",
@@ -1329,6 +1330,10 @@
 					"record_id BIGINT",
 					"user_id INTEGER",
 					"comment TEXT"
+				],
+				"data_log_delete": [
+					"relation_id UUID",
+					"record_id BIGINT"
 				],
 				"file_export": [
 					"file_id UUID",

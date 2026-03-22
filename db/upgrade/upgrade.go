@@ -889,10 +889,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.data_log ALTER COLUMN login_id_wofk DROP NOT NULL;
 			
 			CREATE OR REPLACE FUNCTION instance.data_log_comment_create(
-				relation_id uuid,
-				record_id bigint,
-				login_id integer,
-				comment text)
+				_relation_id uuid,
+				_record_id bigint,
+				_login_id integer,
+				_comment text)
 				RETURNS void
 				LANGUAGE 'plpgsql'
 				COST 100
@@ -900,12 +900,33 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			AS $BODY$
 			DECLARE
 			BEGIN
-				IF comment IS NULL THEN
+				IF _comment IS NULL THEN
 					RETURN;
 				END IF;
 
 				INSERT INTO instance.data_log (id, relation_id, record_id_wofk, login_id_wofk, comment, date_change)
-				VALUES(gen_random_uuid(), relation_id, record_id, login_id, comment, EXTRACT(EPOCH FROM NOW()));
+				VALUES(gen_random_uuid(), _relation_id, _record_id, _login_id, _comment, EXTRACT(EPOCH FROM NOW()));
+			END;
+			$BODY$;
+
+			-- data log deletion
+			CREATE OR REPLACE FUNCTION instance.data_log_delete(
+				_relation_id uuid,
+				_record_id bigint)
+				RETURNS void
+				LANGUAGE 'plpgsql'
+				COST 100
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				IF _relation_id IS NULL OR _record_id IS NULL THEN
+					RETURN;
+				END IF;
+
+				DELETE FROM instance.data_log
+				WHERE relation_id    = _relation_id
+				AND   record_id_wofk = _record_id;
 			END;
 			$BODY$;
 		`)

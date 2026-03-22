@@ -689,8 +689,8 @@ export default {
 			holderRelationIdsOpen:[],    // opened relation placeholders (shows attributes)
 			holderRelationText:'',       // text filter for module relations
 			instanceFunctionIds:[
-				'abort_show_message','clean_up_e2ee_keys','data_log_comment_create','file_export',
-				'file_export_text','file_import','file_import_text','file_link','file_text_read',
+				'abort_show_message','clean_up_e2ee_keys','data_log_comment_create','data_log_delete',
+				'file_export','file_export_text','file_import','file_import_text','file_link','file_text_read',
 				'file_text_write','file_unlink','files_get','get_e2ee_data_key_enc','get_language_code',
 				'get_name','get_public_hostname','get_role_ids','get_user_id','has_role','has_role_any',
 				'log_error','log_info','log_warning','mail_delete','mail_delete_after_attach',
