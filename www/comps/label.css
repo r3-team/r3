@@ -43,3 +43,8 @@
 	width:24px;
 	height:24px;
 }
+
+/* wrap */
+.label.wrap span{
+	text-wrap:auto;
+}

@@ -94,9 +94,9 @@
 
 /* data change log */
 .form-log{
-	min-width:60%;
+	min-width:75%;
 	max-width:95%;
-	min-height:60%;
+	min-height:75%;
 	max-height:95%;
 }
 .form-log.fullscreen{
@@ -120,6 +120,7 @@
 }
 .form-log-table{
 	overflow:auto;
+	flex:1 1 auto;
 }
 .form-log-options{
 	display:flex;
@@ -138,6 +139,10 @@
 	padding:var(--spacing);
 	border-left:1px solid var(--color-border);
 }
+.form-log-sidebar.underTable{
+	flex-grow:0;
+	border-top:1px solid var(--color-border);
+}
 .form-log-source{
 	display:flex;
 	flex-flow:row nowrap;
@@ -154,13 +159,18 @@
 	display:flex;
 	flex-flow:row nowrap;
 }
-.form-log-value.showRegularValue{
-	flex:0 1 auto;
+.form-log-value.large{
 	padding:var(--spacing);
 	border:1px solid var(--color-border);
 	border-radius:var(--border-input-radius);
 	background-color:var(--color-input-disabled);
 	box-shadow:var(--shadow-input);
+}
+.form-log-value.noGrow{
+	flex-grow:0;
+}
+.form-log-value.noPadding{
+	padding:0px;
 }
 .form-log-value-empty{
 	font-style:italic;
@@ -178,10 +188,6 @@
 	display:flex;
 	flex-flow:row nowrap;
 	max-width:800px;
-	border:1px solid var(--color-border);
-	border-radius:var(--border-input-radius);
-	background-color:var(--color-input-disabled);
-	box-shadow:var(--shadow-input);
 }
 .form-log-value-richtext.fullscreen{
 	max-width:1200px;
@@ -253,6 +259,27 @@
 	padding:10px 0px 0px;
 	max-width:unset !important;
 	max-height:unset !important;
+}
+.is-mobile .form-log{
+	width:100%;
+	height:100%;
+	max-width:unset;
+	min-width:unset;
+	max-height:unset;
+	min-height:unset;
+}
+.is-mobile .form-log-content{
+	flex-flow:column nowrap; /* moves sidebar under table */
+}
+.is-mobile .form-log-record-title{
+	max-width:120px;
+	min-width:0px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
+}
+.is-mobile .form-log-value:not(.large){
+	max-width:200px;
 }
 
 /* combined mobile & user overwrites */

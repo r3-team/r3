@@ -95,7 +95,7 @@ export default {
 		
 		<!-- form proper -->
 		<div class="form contentBox grow scroll"
-			v-if="!isMobile || (!showLog && !showHelp)"
+			v-if="!isMobile || !showHelp"
 			:class="{ float:isPopUpFloating }"
 		>
 			<!-- title bar upper -->

@@ -22,6 +22,7 @@ const myFormLogLabel = {
 		:image="iconId === null ? 'icon_missing.png' : ''"
 		:imageBase64="iconId === null ? '' : srcBase64(iconIdMap[iconId].file)"
 		:large
+		:wrap="isMobile"
 	/>`,
 	props:{
 		caption:{ type:String,        required:true },
@@ -29,7 +30,8 @@ const myFormLogLabel = {
 		large:  { type:Boolean,       required:false, default:false }
 	},
 	computed:{
-		iconIdMap:s => s.$store.getters['schema/iconIdMap']
+		iconIdMap:s => s.$store.getters['schema/iconIdMap'],
+		isMobile: s => s.$store.getters.isMobile
 	},
 	methods:{
 		srcBase64
@@ -39,7 +41,7 @@ const myFormLogLabel = {
 const myFormLogValue = {
 	name:'my-form-log-value',
 	components:{ MyInputRichtext },
-	template:`<div class="form-log-value" :class="{ showRegularValue:showLarge && !isRichtext }">
+	template:`<div class="form-log-value" :class="{ noGrow:showLarge && !isRichtext, large:showLarge, noPadding:isRichtext }">
 		<span class="form-log-value-empty" v-if="isNull">[{{ capGen.button.empty }}]</span>
 
 		<template v-if="!isNull">
@@ -210,7 +212,7 @@ export default {
 		myFormLogValue,
 		myFormLogValueSidebar
 	},
-	template:`<div class="app-sub-window under-header" @mousedown.left.self="$emit('close')">
+	template:`<div class="app-sub-window" @mousedown.left.self="$emit('close')" :class="{ 'under-header':!isMobile }">
 		<div class="contentBox scroll float form-log" :class="{ fullscreen:showFullscreen }">
 			<div class="top lower">
 				<div class="area nowrap">
@@ -223,7 +225,7 @@ export default {
 				</div>
 			</div>
 			<div class="form-log-content">
-				<div class="form-log-content-table">
+				<div class="form-log-content-table" v-if="isLogTableVisible">
 					<div class="form-log-options" v-if="isSidebarLogShown">
 						<my-button
 							@trigger="logShownFilter = !logShownFilter"
@@ -240,8 +242,8 @@ export default {
 							<thead>
 								<tr>
 									<th>{{ capGen.date }}</th>
-									<th>{{ capGen.username }}</th>
-									<th v-if="!isSingleSource">{{ capGen.source }}</th>
+									<th v-if="!isMobile">{{ capGen.username }}</th>
+									<th v-if="!isSingleSourceActive">{{ capGen.source }}</th>
 									<th v-if="!isSingleSourceForm">{{ capGen.record }}</th>
 									<th>{{ capGen.field }}</th>
 									<th>{{ capGen.value }}</th>
@@ -260,20 +262,22 @@ export default {
 										:key="l.id"
 									>
 										<!-- log info -->
-										<td class="minimum">{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}</td>
-										<td class="minimum">
+										<td class="minimum">{{ getDateFormatted(l.dateChange) }}</td>
+										<td class="minimum" v-if="!isMobile">
 											<span v-if="!l.isSystem && l.loginName !== ''">{{ l.loginName }}</span>
 											<span v-if="!l.isSystem && l.loginName === ''"><i>[{{ capApp.deletedUser }}]</i></span>
 											<span v-if="l.isSystem"><i>[{{ capGen.system }}]</i></span>
 										</td>
-										<td class="minimum" v-if="!isSingleSource">
+										<td class="minimum" v-if="!isSingleSourceActive">
 											<div class="form-log-source">
 												<img :src="sources[l.sourceIndex].image" />
-												<span>{{ sources[l.sourceIndex].title }}</span>
+												<span v-if="!isMobile">{{ sources[l.sourceIndex].title }}</span>
 											</div>
 										</td>
 										<td class="minimum" v-if="!isSingleSourceForm">
-											{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined ? relationIdMapRecordIdMapTitle[l.relationId][l.recordId] : '-' }}
+											<div class="form-log-record-title">
+												{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined ? relationIdMapRecordIdMapTitle[l.relationId][l.recordId] : '-' }}
+											</div>
 										</td>
 										<td class="minimum"><i>[{{ capGen.comment }}]</i></td>
 										<td>{{ getCommentPreview(l.comment) }}</td>
@@ -290,20 +294,22 @@ export default {
 										<!-- log info -->
 										<template v-if="i === 0">
 											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1">
-												{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}
+												{{ getDateFormatted(l.dateChange) }}
 											</td>
-											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1">
+											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1" v-if="!isMobile">
 												<span v-if="l.loginName !== ''">{{ l.loginName }}</span>
 												<span v-if="l.loginName === ''"><i>[{{ capApp.deletedUser }}]</i></span>
 											</td>
-											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1" v-if="!isSingleSource">
+											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1" v-if="!isSingleSourceActive">
 												<div class="form-log-source">
 													<img :src="sources[l.sourceIndex].image" />
-													<span>{{ sources[l.sourceIndex].title }}</span>
+													<span v-if="!isMobile">{{ sources[l.sourceIndex].title }}</span>
 												</div>
 											</td>
 											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1"  v-if="!isSingleSourceForm">
-												{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined ? relationIdMapRecordIdMapTitle[l.relationId][l.recordId] : '-' }}
+												<div class="form-log-record-title">
+													{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined ? relationIdMapRecordIdMapTitle[l.relationId][l.recordId] : '-' }}
+												</div>
 											</td>
 										</template>
 
@@ -329,8 +335,8 @@ export default {
 						</table>
 					</div>
 				</div>
-				<div class="form-log-sidebar" v-if="!isSingleSource || isSidebarLogShown">
-					<div class="column gap" v-if="!isSidebarLogShown">
+				<div class="form-log-sidebar" v-if="isSidebarSourcesShown || isSidebarLogShown" :class="{ underTable:isMobile && isSidebarSourcesShown }">
+					<div class="column gap" v-if="isSidebarSourcesShown">
 						<my-label image="filter.png" :caption="capGen.sources" :large="true" />
 						<my-button
 							v-for="fieldId in sourcesFieldIds"
@@ -564,9 +570,12 @@ export default {
 		},
 
 		// simple
-		isSidebarLogFilter:s => s.logShownFilter && (s.logShownAttributeId !== null || s.logShownComment !== false),
-		isSidebarLogShown: s => s.logShownSidebar !== null,
-		isSingleSourceForm:s => s.isSingleSource && (s.sources.length === 0 || s.sources[0].fieldId === null),
+		isLogTableVisible:    s => !s.isMobile || !s.isSidebarLogShown,
+		isSidebarLogFilter:   s => s.logShownFilter && (s.logShownAttributeId !== null || s.logShownComment !== false),
+		isSidebarLogShown:    s => s.logShownSidebar !== null,
+		isSidebarSourcesShown:s => !s.isSingleSource && !s.isSidebarLogShown,
+		isSingleSourceActive: s => s.isSingleSource || s.sourceFieldIdsHide.length === s.sourcesFieldIds.length - 1,
+		isSingleSourceForm:   s => s.isSingleSource && (s.sources.length === 0 || s.sources[0].fieldId === null),
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
@@ -599,6 +608,9 @@ export default {
 		getCommentPreview(comment) {
 			comment = this.getHtmlStripped(comment);
 			return comment.length > 120 ? `${comment.substring(0,117)}...` : comment;
+		},
+		getDateFormatted(unix) {
+			return this.getUnixFormat(unix,this.settings.dateFormat + (this.isMobile ? '' : ' H:i:S'));
 		},
 		getSourceTemplate(fieldId,index,relationId,recordIds,image,title) {
 			return { fieldId, index, image, relationId, recordIds, title,
