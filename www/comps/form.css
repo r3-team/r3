@@ -123,11 +123,12 @@
 }
 .form-log-options{
 	display:flex;
-	flex-flow:column nowrap;
-	justify-content:center;
+	flex-flow:row wrap;
+	justify-content:space-between;
 	align-items:center;
-	border-top:1px solid var(--color-border);
-	padding:var(--spacing) 0px;
+	gap:var(--spacing);
+	border-bottom:1px solid var(--color-border);
+	padding:var(--spacing);
 }
 .form-log-sidebar{
 	flex:1 1 auto;
@@ -166,9 +167,11 @@
 	color:var(--color-font-disabled);
 }
 .form-log-value-record-title{
-	padding:2px 4px;
-	background-color:var(--color-input-disabled);
+	padding:1px 3px;
+	border:1px solid var(--color-border);
 	border-radius:var(--border-input-radius);
+	background-color:var(--color-input-disabled);
+	box-shadow:var(--shadow-input);
 }
 .form-log-value-richtext{
 	flex:1 1 auto;
@@ -207,6 +210,15 @@
 	font-size:95%;
 	font-style:italic;
 	margin-bottom:10px;
+}
+.form-log-value-sidebar-comment{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+	border:1px solid var(--color-border);
+	border-radius:var(--border-input-radius);
+	background-color:var(--color-input-disabled);
+	box-shadow:var(--shadow-input);
 }
 
 /* context help */

@@ -883,6 +883,31 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			ALTER TABLE app.form ADD   COLUMN record_title BOOL NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.form ALTER COLUMN record_title DROP DEFAULT;
+
+			-- data log comments
+			ALTER TABLE instance.data_log ADD COLUMN comment TEXT;
+			ALTER TABLE instance.data_log ALTER COLUMN login_id_wofk DROP NOT NULL;
+			
+			CREATE OR REPLACE FUNCTION instance.data_log_comment_create(
+				relation_id uuid,
+				record_id bigint,
+				login_id integer,
+				comment text)
+				RETURNS void
+				LANGUAGE 'plpgsql'
+				COST 100
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				IF comment IS NULL THEN
+					RETURN;
+				END IF;
+
+				INSERT INTO instance.data_log (id, relation_id, record_id_wofk, login_id_wofk, comment, date_change)
+				VALUES(gen_random_uuid(), relation_id, record_id, login_id, comment, EXTRACT(EPOCH FROM NOW()));
+			END;
+			$BODY$;
 		`)
 		return "3.12", err
 	},

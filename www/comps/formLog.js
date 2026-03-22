@@ -2,6 +2,7 @@ import MyInputRichtext                 from './inputRichtext.js';
 import {getColumnTitle}                from './shared/column.js';
 import {aesGcmDecryptBase64WithPhrase} from './shared/crypto.js';
 import {consoleError}                  from './shared/error.js';
+import {getHtmlStripped}               from './shared/generic.js';
 import {srcBase64}                     from './shared/image.js';
 import {getCaption}                    from './shared/language.js';
 import {getUnixFormat}                 from './shared/time.js';
@@ -127,27 +128,39 @@ const myFormLogValueSidebar = {
 	name:'my-form-log-value-sidebar',
 	components:{
 		myFormLogLabel,
-		myFormLogValue
+		myFormLogValue,
+		MyInputRichtext
 	},
-	template:`<div class="form-log-value-sidebar" v-if="attributeValue !== null">
-		<div class="row gap center space-between" v-if="recordTitle !== null">
+	template:`<div class="form-log-value-sidebar" v-if="isReady">
+		<div class="row gap-large center space-between" v-if="recordTitle !== null">
 			<my-label :caption="recordTitle" :imageBase64="source.image" :large="true" />
-			<my-button image="cancel.png" v-if="recordTitle !== null" @trigger="$emit('close')" />
+			<my-button image="cancel.png" v-if="recordTitle !== null" @trigger="$emit('close')" :captionTitle="capApp.button.closeSidebar" />
 		</div>
 
 		<div class="form-log-value-sidebar-title">
 			<my-form-log-label
-				:caption="source.attributeIdMapTitle[attributeValue.attributeId]"
+				v-if="isValueAttribute"
+				:caption="capGen.field + ': ' + source.attributeIdMapTitle[attributeValue.attributeId]"
 				:iconId="source.attributeIdMapIcon[attributeValue.attributeId]"
 				:large="true"
 			/>
-			<my-button image="cancel.png" v-if="recordTitle === null" @trigger="$emit('close')" />
+			<my-label image="feedback.png"
+				v-if="!isValueAttribute"
+				:caption="capGen.comment"
+				:large="true"
+			/>
+			<my-button image="cancel.png" v-if="recordTitle === null" @trigger="$emit('close')" :captionTitle="capApp.button.closeSidebar" />
 		</div>
 		<div class="form-log-value-sidebar-title-sub">
 			<span v-if="log.loginName !== ''">{{ log.loginName }}</span>
 			<span>{{ getUnixFormat(log.dateChange,settings.dateFormat + ' H:i:S') }}</span>
 		</div>
+		
+		<div class="form-log-value-sidebar-comment" v-if="isValueComment">
+			<my-input-richtext :modelValue="log.comment" :readonly="true" />
+		</div>
 		<my-form-log-value
+			v-if="isValueAttribute"
 			:attributeId="attributeValue.attributeId"
 			:isFiles="source.attributeIdsFiles.includes(attributeValue.attributeId)"
 			:isFullscreen
@@ -159,12 +172,12 @@ const myFormLogValueSidebar = {
 	</div>`,
 	emits:['close'],
 	props:{
-		attributeId:                  { type:String,  required:true },
-		isFullscreen:                 { type:Boolean, required:true },
-		isSingleSource:               { type:Boolean, required:true },
-		log:                          { type:Object,  required:true },
-		relationIdMapRecordIdMapTitle:{ type:Object,  required:true },
-		source:                       { type:Object,  required:true }
+		attributeId:                  { type:[String,null], required:true },
+		isFullscreen:                 { type:Boolean,       required:true },
+		isSingleSource:               { type:Boolean,       required:true },
+		log:                          { type:Object,        required:true },
+		relationIdMapRecordIdMapTitle:{ type:Object,        required:true },
+		source:                       { type:Object,        required:true }
 	},
 	computed:{
 		attributeValue:s => {
@@ -175,9 +188,13 @@ const myFormLogValueSidebar = {
 			return !s.isSingleSource && s.relationIdMapRecordIdMapTitle[s.log.relationId]?.[s.log.recordId] !== undefined
 				? s.capGen.record + ': ' + s.relationIdMapRecordIdMapTitle[s.log.relationId]?.[s.log.recordId] : null;
 		},
+		isReady:         s => s.isValueComment || s.attributeValue !== null,
+		isValueAttribute:s => s.attributeId !== null,
+		isValueComment:  s => s.log.comment !== null,
 
 		// stores
 		settings:s => s.$store.getters.settings,
+		capApp:  s => s.$store.getters.captions.formLog,
 		capGen:  s => s.$store.getters.captions.generic
 	},
 	methods:{
@@ -207,6 +224,17 @@ export default {
 			</div>
 			<div class="form-log-content">
 				<div class="form-log-content-table">
+					<div class="form-log-options" v-if="isSidebarLogShown">
+						<my-button
+							@trigger="logShownFilter = !logShownFilter"
+							:caption="capApp.button.filterByAttribute"
+							:image="logShownFilter ? 'checkbox1.png' : 'checkbox0.png'"
+						/>
+						<my-button image="cancel.png"
+							@trigger="logShownSidebarSet(null,null,false)"
+							:caption="capApp.button.closeSidebar"
+						/>
+					</div>
 					<div class="form-log-table">
 						<table class="generic-table auto-height sticky-top bright topAligned">
 							<thead>
@@ -223,17 +251,47 @@ export default {
 								<tr v-if="logsShown.length === 0"><td colspan="6">{{ capGen.nothingThere }}</td></tr>
 
 								<template v-for="(l,li) in logsShown" :key="l.id">
-									<tr
+
+									<!-- log line for comment -->
+									<tr class="row-clickable"
+										v-if="l.comment !== null"
+										@click="logShownSidebarSet(l.id,null,true)"
+										:class="{ 'row-contrast':li % 2 === 0, 'row-selected':l.id === logShownId && null === logShownAttributeId }"
+										:key="l.id"
+									>
+										<!-- log info -->
+										<td class="minimum">{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}</td>
+										<td class="minimum">
+											<span v-if="!l.isSystem && l.loginName !== ''">{{ l.loginName }}</span>
+											<span v-if="!l.isSystem && l.loginName === ''"><i>[{{ capApp.deletedUser }}]</i></span>
+											<span v-if="l.isSystem"><i>[{{ capGen.system }}]</i></span>
+										</td>
+										<td class="minimum" v-if="!isSingleSource">
+											<div class="form-log-source">
+												<img :src="sources[l.sourceIndex].image" />
+												<span>{{ sources[l.sourceIndex].title }}</span>
+											</div>
+										</td>
+										<td class="minimum" v-if="!isSingleSourceForm">
+											{{ relationIdMapRecordIdMapTitle[l.relationId]?.[l.recordId] !== undefined ? relationIdMapRecordIdMapTitle[l.relationId][l.recordId] : '-' }}
+										</td>
+										<td class="minimum"><i>[{{ capGen.comment }}]</i></td>
+										<td>{{ getCommentPreview(l.comment) }}</td>
+									</tr>
+
+									<!-- log line(s) for attribute values -->
+									<tr class="row-clickable"
+										v-if="l.comment === null"
 										v-for="(a,i) in l.attributes.filter(v => !isSidebarLogFilter || v.attributeId === logShownAttributeId)"
-										@click="logShownSidebarSet(l.id,a.attributeId)"
-										:class="{ 'row-contrast':li % 2 === 0, 'row-clickable':true, 'row-selected':l.id === logShownId && a.attributeId === logShownAttributeId }"
-										:key="a.attributeId"
+										@click="logShownSidebarSet(l.id,a.attributeId,false)"
+										:class="{ 'row-contrast':li % 2 === 0, 'row-selected':l.id === logShownId && a.attributeId === logShownAttributeId }"
+										:key="'l.id' + '_' + 'a.attributeId'"
 									>
 										<!-- log info -->
 										<template v-if="i === 0">
 											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1">
 												{{ getUnixFormat(l.dateChange,settings.dateFormat + ' H:i:S') }}
-												</td>
+											</td>
 											<td class="minimum" :rowspan="!isSidebarLogFilter ? l.attributes.length : 1">
 												<span v-if="l.loginName !== ''">{{ l.loginName }}</span>
 												<span v-if="l.loginName === ''"><i>[{{ capApp.deletedUser }}]</i></span>
@@ -270,13 +328,6 @@ export default {
 							</tbody>
 						</table>
 					</div>
-					<div class="form-log-options" v-if="isSidebarLogShown">
-						<my-button
-							@trigger="logShownFilterValue = !logShownFilterValue"
-							:caption="capApp.button.filterByAttribute"
-							:image="logShownFilterValue ? 'checkbox1.png' : 'checkbox0.png'"
-						/>
-					</div>
 				</div>
 				<div class="form-log-sidebar" v-if="!isSingleSource || isSidebarLogShown">
 					<div class="column gap" v-if="!isSidebarLogShown">
@@ -292,7 +343,7 @@ export default {
 					</div>
 					<my-form-log-value-sidebar
 						v-if="isSidebarLogShown"
-						@close="logShownSidebarSet(null,null)"
+						@close="logShownSidebarSet(null,null,false)"
 						:attributeId="logShownAttributeId"
 						:isFullscreen="showFullscreen"
 						:isSingleSource="isSingleSourceForm"
@@ -320,8 +371,9 @@ export default {
 		return {
 			logs:[],
 			logShownAttributeId:null,
+			logShownComment:false,
 			logShownId:null,
-			logShownFilterValue:true, // if true, hide all logs/attribute values that are not shown in the sidebar
+			logShownFilter:true, // only show logs if they match the log in the sidebar (by attribute ID or if they also show a comment)
 			showFullscreen:false,
 			sourceFieldIdsHide:[],
 			relationIdMapRecordIdMapTitle:{}
@@ -419,7 +471,7 @@ export default {
 								if(title === '')
 									continue;
 
-								let src = s.getSourceTemplate(f.id,index,s.fieldIdMapIndexMapRecordIds[f.id][index],'images/files_list2.png',title);
+								let src = s.getSourceTemplate(f.id,index,join.relationId,s.fieldIdMapIndexMapRecordIds[f.id][index],'images/files_list2.png',title);
 								for(const c of f.columns) {
 									if(!c.subQuery && c.index === index) {
 										const atr = s.attributeIdMap[c.attributeId];
@@ -473,7 +525,7 @@ export default {
 			for(const k in s.joinsIndexMap) {	
 				const j = s.joinsIndexMap[k];
 				if(j.recordId !== 0)
-					out.push(s.getSourceTemplate(null,j.index,[j.recordId],s.formIconSrc,s.formTitle));
+					out.push(s.getSourceTemplate(null,j.index,j.relationId,[j.recordId],s.formIconSrc,s.formTitle));
 			}
 			parseFields(s.fields,true,'');
 			return out;
@@ -505,12 +557,15 @@ export default {
 		},
 		logsShown:s => {
 			return s.logs.filter(v => !s.sourceFieldIdsHide.includes(s.sources[v.sourceIndex].fieldId)
-				&& (!s.isSidebarLogFilter || v.attributes.findIndex(w => w.attributeId === s.logShownAttributeId) !== -1));
+				&& !s.isSidebarLogFilter
+				|| (s.logShownAttributeId !== null && v.attributes.findIndex(w => w.attributeId === s.logShownAttributeId) !== -1)
+				|| (s.logShownComment     === true && v.comment !== null)
+			);
 		},
 
 		// simple
-		isSidebarLogFilter:s => s.logShownFilterValue && s.isSidebarLogShown,
-		isSidebarLogShown: s => s.logShownId !== null && s.logShownAttributeId !== null,
+		isSidebarLogFilter:s => s.logShownFilter && (s.logShownAttributeId !== null || s.logShownComment !== false),
+		isSidebarLogShown: s => s.logShownSidebar !== null,
 		isSingleSourceForm:s => s.isSingleSource && (s.sources.length === 0 || s.sources[0].fieldId === null),
 
 		// stores
@@ -530,14 +585,19 @@ export default {
 		consoleError,
 		getCaption,
 		getColumnTitle,
+		getHtmlStripped,
 		getUnixFormat,
 		isAttributeFiles,
 		isAttributeRelationship,
 		isAttributeRelationship11,
 		isAttributeRelationshipN1,
 
-		getSourceTemplate(fieldId,index,recordIds,image,title) {
-			return { fieldId, index, image, recordIds, title,
+		getCommentPreview(comment) {
+			comment = this.getHtmlStripped(comment);
+			return comment.length > 120 ? `${comment.substring(0,117)}...` : comment;
+		},
+		getSourceTemplate(fieldId,index,relationId,recordIds,image,title) {
+			return { fieldId, index, image, relationId, recordIds, title,
 				attributeIds:[],
 				attributeIdsEnc:[],
 				attributeIdsFiles:[],
@@ -557,8 +617,9 @@ export default {
 		},
 
 		// actions
-		logShownSidebarSet(logId,attributeId) {
+		logShownSidebarSet(logId,attributeId,showComment) {
 			this.logShownAttributeId = attributeId;
+			this.logShownComment     = showComment;
 			this.logShownId          = logId;
 		},
 		sourceToggle(fieldId) {
@@ -582,8 +643,9 @@ export default {
 					continue;
 
 				requests.push(ws.prepare('data','getLog',{
-					recordIds:src.recordIds,
+					relationId:src.relationId,
 					attributeIds:src.attributeIds,
+					recordIds:src.recordIds,
 					sourceIndex:i
 				}));
 			}

@@ -1282,6 +1282,7 @@
 			"helpPg": {
 				"abort_show_message": "instance.abort_show_message({ARGS}) => VOID<br /><br />Aborts the operation and sends a message to the executing user, which is displayed in the user interface.",
 				"clean_up_e2ee_keys": "instance.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Deletes end-to-end encryption data keys for records that a user has no longer access to. This makes decryption impossible for the user.",
+				"data_log_comment_create": "instance.data_log_comment_create({ARGS}) => VOID<br /><br />Creates a comment in the change log history for the given record in the chosen relation. A comment can be any text value, including simple HTML.<br /><br />Comments, as all change logs, are removed when log retention settings are satisfied.<br /><br />To define that a comment came from a specific user, a user ID can be provided; if the user ID is NULL, the comment is defined to have come from the system.",
 				"file_export": "instance.file_export({ARGS}) => INTEGER<br /><br />Creates a file processing job to export a given file to disk. Relevant parameters:<ul><li>file_id: File to export, file ID can be retrieved via instance.files_get()</li><li>file_path: Where to export the file to (must end in a filename)</li><li>file_version: Version of the file to export (NULL = latest version)</li><li>overwrite: Overwrite file if one already exists at the defined filepath</li></ul><p>The filepath is always relative to the export path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
 				"file_export_text": "instance.file_export_text({ARGS}) => INTEGER<br /><br />Creates a file processing job to export a given text as a UTF8 text file to disk. Relevant parameters:<ul><li>file_path: Where to export the file to (must end in a filename)</li><li>file_text_content: UTF8 text content</li><li>overwrite: Overwrite file if one already exists at the defined filepath</li></ul><p>The filepath is always relative to the export path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
 				"file_import": "instance.file_import({ARGS}) => INTEGER<br /><br />Creates a file processing job to import a file from disk. Relevant parameters:<ul><li>file_path: Where to import the file from (must end in a filename)</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul><p>The source file is deleted, if the import is successful.</p><p>The filepath is always relative to the import path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
@@ -1322,6 +1323,12 @@
 					"user_id INTEGER",
 					"relation_id UUID",
 					"record_ids_access INTEGER[]"
+				],
+				"data_log_comment_create": [
+					"relation_id UUID",
+					"record_id BIGINT",
+					"user_id INTEGER",
+					"comment TEXT"
 				],
 				"file_export": [
 					"file_id UUID",
@@ -2221,6 +2228,7 @@
 	},
 	"formLog": {
 		"button": {
+			"closeSidebar": "Close sidebar",
 			"filterByAttribute": "Show only changes for selected field"
 		},
 		"deletedUser": "deleted User",
@@ -2385,6 +2393,7 @@
 		"columnsActive": "Active columns",
 		"columnsAvailable": "Available columns",
 		"columnSettings": "Column settings",
+		"comment": "Comment",
 		"comments": "Comments",
 		"conditions": "Conditions",
 		"content": "Content",
@@ -2587,6 +2596,7 @@
 		"state": "State",
 		"status": "Status",
 		"styles": "Styles",
+		"system": "System",
 		"systemModes": "System modes",
 		"tab": "Tab",
 		"text": "Text",

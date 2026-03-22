@@ -79,7 +79,7 @@ func DelLogsBackground() error {
 }
 
 // get data change logs for specified record and attributes
-func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordIds []int64, attributeIds []uuid.UUID, loginId int64) ([]types.DataLog, error) {
+func GetLogs_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributeIds []uuid.UUID, recordIds []int64, loginId int64) ([]types.DataLog, error) {
 
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
@@ -89,27 +89,35 @@ func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordIds []int64, attributeIds 
 	}
 
 	rows, err := tx.Query(ctx, `
-		SELECT d.id, d.relation_id, d.record_id_wofk, d.date_change, l.name, lm.name_display, (
-			SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
-				'attributeId',   attribute_id,
-				'attributeIdNm', attribute_id_nm,
-				'outsideIn',     outside_in,
-				'value',         value
-			))
-			FROM instance.data_log_value
-			WHERE data_log_id  = d.id
-			AND   attribute_id = ANY($2)
-		)
+		SELECT d.id, d.relation_id, d.record_id_wofk, d.date_change, d.comment, COALESCE(lm.name_display, l.name, ''), d.login_id_wofk IS NULL,
+			CASE
+				WHEN d.comment IS NULL THEN (
+					SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
+						'attributeId',   attribute_id,
+						'attributeIdNm', attribute_id_nm,
+						'outsideIn',     outside_in,
+						'value',         value
+					))
+					FROM instance.data_log_value
+					WHERE data_log_id  = d.id
+					AND   attribute_id = ANY($3)
+				)
+				ELSE '[]'::JSONB
+			END
 		FROM instance.data_log as d
 		LEFT JOIN instance.login      AS l  ON l.id        = d.login_id_wofk
 		LEFT JOIN instance.login_meta AS lm ON lm.login_id = l.id
-		WHERE d.record_id_wofk = ANY($1)
-		AND d.id IN (
-			SELECT data_log_id
-			FROM instance.data_log_value
-			WHERE attribute_id = ANY($2)
+		WHERE d.relation_id    = $1
+		AND   d.record_id_wofk = ANY($2)
+		AND (
+			d.comment is NOT NULL
+			OR d.id IN (
+				SELECT data_log_id
+				FROM instance.data_log_value
+				WHERE attribute_id = ANY($3)
+			)
 		)
-	`, recordIds, attributeIds)
+	`, relationId, recordIds, attributeIds)
 	if err != nil {
 		return nil, err
 	}
@@ -118,18 +126,9 @@ func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordIds []int64, attributeIds 
 	logs := make([]types.DataLog, 0)
 	for rows.Next() {
 		var l types.DataLog
-		var name pgtype.Text
-		var nameDisplay pgtype.Text
 		var valuesJson []byte
-
-		if err := rows.Scan(&l.Id, &l.RelationId, &l.RecordId, &l.DateChange, &name, &nameDisplay, &valuesJson); err != nil {
+		if err := rows.Scan(&l.Id, &l.RelationId, &l.RecordId, &l.DateChange, &l.Comment, &l.LoginName, &l.IsSystem, &valuesJson); err != nil {
 			return nil, err
-		}
-
-		if nameDisplay.Valid && nameDisplay.String != "" {
-			l.LoginName = nameDisplay.String
-		} else {
-			l.LoginName = name.String
 		}
 		if err := json.Unmarshal(valuesJson, &l.Attributes); err != nil {
 			return nil, err

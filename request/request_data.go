@@ -74,14 +74,15 @@ func DataDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId
 func DataLogGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {
 
 	var req struct {
-		RecordIds    []int64     `json:"recordIds"`
+		RelationId   uuid.UUID   `json:"relationId"`
 		AttributeIds []uuid.UUID `json:"attributeIds"`
+		RecordIds    []int64     `json:"recordIds"`
 	}
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return data.GetLogs_tx(ctx, tx, req.RecordIds, req.AttributeIds, loginId)
+	return data.GetLogs_tx(ctx, tx, req.RelationId, req.AttributeIds, req.RecordIds, loginId)
 }
 
 func DataSqlGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage, loginId int64) (any, error) {

@@ -137,12 +137,18 @@ type DataSetResult struct {
 	IndexRecordIds map[int]int64 `json:"indexRecordIds"` // IDs of relation records, key: relation index
 }
 
-// data LOG request
+// data LOG request - includes either a list of changed attribute values or a comment set from an instance function
 type DataLog struct {
-	Id         uuid.UUID          `json:"id"`
-	RelationId uuid.UUID          `json:"relationId"`
-	RecordId   int64              `json:"recordId"`
-	DateChange int64              `json:"dateChange"`
-	LoginName  string             `json:"loginName"`
+	Id         uuid.UUID `json:"id"`
+	RelationId uuid.UUID `json:"relationId"`
+	RecordId   int64     `json:"recordId"`
+	DateChange int64     `json:"dateChange"`
+	LoginName  string    `json:"loginName"`
+	IsSystem   bool      `json:"isSystem"` // data log was created by the system
+
+	// if changed attribute values
 	Attributes []DataSetAttribute `json:"attributes"`
+
+	// if record comment - in this case, no attribute values exist
+	Comment pgtype.Text `json:"comment"`
 }
