@@ -395,6 +395,12 @@ export default {
 			let out = [];
 			const parseFields = (fields,isFirstField,tabTitle) => {
 				for(const f of fields) {
+					const state = s.entityIdMapEffect.field[f.id] !== undefined
+						? s.entityIdMapEffect.field[f.id] : f.state;
+					
+					if(state === 'hidden')
+						continue;
+
 					switch(f.content) {
 						case 'container':
 							parseFields(f.fields,false,'');
@@ -405,15 +411,9 @@ export default {
 							}
 						break;
 						case 'data':
-							// if field join index is available & field is accessible
+							// if field join index is available
 							const src = out.find(v => v.fieldId === null && v.index === f.index);
 							if(src !== undefined && !src.attributeIds.includes(f.attributeId)) {
-		
-								const state = s.entityIdMapEffect.field[f.id] !== undefined
-									? s.entityIdMapEffect.field[f.id] : f.state;
-								
-								if(state === 'hidden')
-									continue;
 
 								const isNm = f.attributeIdNm !== undefined && f.attributeIdNm !== null;
 								const atr  = isNm ? s.attributeIdMap[f.attributeIdNm] : s.attributeIdMap[f.attributeId];
