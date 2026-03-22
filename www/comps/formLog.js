@@ -577,7 +577,11 @@ export default {
 		settings:      s => s.$store.getters.settings
 	},
 	mounted() {
+		window.addEventListener('keydown',this.handleHotkeys);
 		this.get(false);
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
 		// externals
@@ -617,6 +621,16 @@ export default {
 		},
 
 		// actions
+		handleHotkeys(e) {
+			if(e.key === 'Escape') {
+				e.preventDefault();
+
+				if(this.isSidebarLogShown)
+					return this.logShownSidebarSet(null,null,false);
+				
+				this.$emit('close');
+			}
+		},
 		logShownSidebarSet(logId,attributeId,showComment) {
 			this.logShownAttributeId = attributeId;
 			this.logShownComment     = showComment;
