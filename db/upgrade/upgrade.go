@@ -887,6 +887,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- data log comments
 			ALTER TABLE instance.data_log ADD COLUMN comment TEXT;
 			ALTER TABLE instance.data_log ALTER COLUMN login_id_wofk DROP NOT NULL;
+			CREATE INDEX IF NOT EXISTS fki_data_log_relation_id_fkey ON instance.data_log USING btree (relation_id ASC NULLS LAST);
 			
 			CREATE OR REPLACE FUNCTION instance.data_log_comment_create(
 				_relation_id uuid,
