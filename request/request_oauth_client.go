@@ -49,11 +49,13 @@ func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 		// flow can only be defined during insert, as a flow used for Open ID Connect is unusable for something else and vice-versa
 		if err := tx.QueryRow(ctx, `
 			INSERT INTO instance.oauth_client (login_template_id, name, flow, client_id, client_secret,
-				date_expiry, scopes, provider_url, redirect_url, token_url, claim_roles, claim_username)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+				date_expiry, scopes, provider_url, redirect_url, token_url, claim_admin, claim_admin_value,
+				claim_roles, claim_username)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
 			RETURNING id
 		`, req.LoginTemplateId, req.Name, req.Flow, req.ClientId, req.ClientSecret, req.DateExpiry, req.Scopes,
-			req.ProviderUrl, req.RedirectUrl, req.TokenUrl, req.ClaimRoles, req.ClaimUsername).Scan(&req.Id); err != nil {
+			req.ProviderUrl, req.RedirectUrl, req.TokenUrl, req.ClaimAdmin, req.ClaimAdminValue, req.ClaimRoles,
+			req.ClaimUsername).Scan(&req.Id); err != nil {
 
 			return nil, err
 		}
@@ -61,11 +63,12 @@ func OauthClientSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) 
 		if _, err := tx.Exec(ctx, `
 			UPDATE instance.oauth_client
 			SET login_template_id = $1, name = $2, client_id = $3, client_secret = $4, date_expiry = $5,
-				scopes = $6, provider_url = $7, redirect_url = $8, token_url = $9,
-				claim_roles = $10, claim_username = $11
-			WHERE id = $12
+				scopes = $6, provider_url = $7, redirect_url = $8, token_url = $9, claim_admin = $10,
+				claim_admin_value = $11, claim_roles = $12, claim_username = $13
+			WHERE id = $14
 		`, req.LoginTemplateId, req.Name, req.ClientId, req.ClientSecret, req.DateExpiry, req.Scopes,
-			req.ProviderUrl, req.RedirectUrl, req.TokenUrl, req.ClaimRoles, req.ClaimUsername, req.Id); err != nil {
+			req.ProviderUrl, req.RedirectUrl, req.TokenUrl, req.ClaimAdmin, req.ClaimAdminValue, req.ClaimRoles,
+			req.ClaimUsername, req.Id); err != nil {
 
 			return nil, err
 		}

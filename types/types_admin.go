@@ -95,6 +95,8 @@ type OauthClient struct {
 	LoginTemplateId  pgtype.Int8       `json:"loginTemplateId"`  // template for new logins (applies login settings)
 	LoginMetaMap     LoginMeta         `json:"loginMetaMap"`     // map claim key <-> login meta data key
 	LoginRolesAssign []LoginRoleAssign `json:"loginRolesAssign"` // assign login roles based on claim content
+	ClaimAdmin       pgtype.Text       `json:"claimAdmin"`       // name of claim that contains value to assign instance admin permission
+	ClaimAdminValue  pgtype.Text       `json:"claimAdminValue"`  // expected value of admin claim, must match precisely
 	ClaimRoles       pgtype.Text       `json:"claimRoles"`       // name of claim that contains JSON array values for role mapping, such as { "roles":["my_role1", "my_role2", ...], ... }
 	ClaimUsername    pgtype.Text       `json:"claimUsername"`
 	ProviderUrl      pgtype.Text       `json:"providerUrl"`

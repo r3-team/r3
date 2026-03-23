@@ -980,6 +980,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					RETURN 0;
 				END;
 			$BODY$;
+
+			-- OpenID, admin claim
+			ALTER TABLE instance.oauth_client ADD COLUMN claim_admin       TEXT;
+			ALTER TABLE instance.oauth_client ADD COLUMN claim_admin_value TEXT;
 		`)
 		return "3.12", err
 	},

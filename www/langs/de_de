@@ -460,6 +460,8 @@
 				"defaultO365": "Standardwerte: Exchange Online",
 				"defaultOpenId": "Standardwerte: Open ID Connect"
 			},
+			"claimAdmin": "Admin-Claim",
+			"claimAdminHint": "Name des Claim-Feldes, welches Adminberechtigungen auf der REI3-Instanz gewährt, wenn der erwartete Stringwert dem Feldwert entspricht. Wenn ein Admin-Claim gesetzt ist, muss dieser für alle Benutzer inkludiert sein.",
 			"claimRoles": "Rollen-Claim",
 			"claimRolesHint": "Name des Claim-Feldes, welches Benutzerrollen oder -gruppen beinhaltet. Wenn gesetzt, können REI3-Rollen zu Werten in diesem Claim zugeordnet werden. Wert muss ein JSON-String-Array sein, wie z. B.: [\"alle-benutzer\", \"abteilung-it\"]",
 			"claimUsername": "Benutzer-Claim",
@@ -2633,6 +2635,7 @@
 		"url": "URL",
 		"username": "Benutzername",
 		"value": "Wert",
+		"valueExpected": "Erwarteter Wert",
 		"variable": "Variable",
 		"variables": "Variabeln",
 		"version": "Version",

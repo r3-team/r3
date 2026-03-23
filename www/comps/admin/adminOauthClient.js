@@ -37,7 +37,7 @@ export default {
 					<my-button image="refresh.png"
 						v-if="!isNew"
 						@trigger="reset"
-						:active="hasChanges"
+						:active="isChanged"
 						:caption="capGen.button.refresh"
 					/>
 					<my-button image="add.png"
@@ -160,6 +160,24 @@ export default {
 								<td>{{ capApp.claimUsernameHint }}</td>
 							</tr>
 							<tr>
+								<td>{{ capApp.claimAdmin }}</td>
+								<td>
+									<div class="column gap">
+										<input v-model="inputs.claimAdmin"      :disabled="readonly" :placeholder="capGen.name" />
+										<input v-model="inputs.claimAdminValue" :disabled="readonly" :placeholder="capGen.valueExpected" />
+										<div class="row">
+											<my-button image="cancel.png"
+												@trigger="inputs.claimAdmin = null; inputs.claimAdminValue = null"
+												:active="inputs.claimAdmin !== null && inputs.claimAdmin !== ''"
+												:cancel="true"
+												:caption="capGen.button.clear"
+											/>
+										</div>
+									</div>
+								</td>
+								<td>{{ capApp.claimAdminHint }}</td>
+							</tr>
+							<tr>
 								<td>{{ capApp.claimRoles }}</td>
 								<td colspan="2">
 									<div class="column gap">
@@ -222,7 +240,7 @@ export default {
 		canSave:s =>
 			s.ready &&
 			!s.readonly &&
-			s.hasChanges &&
+			s.isChanged &&
 			s.inputs.name          !== '' &&
 			s.inputs.clientId      !== '' &&
 			s.inputs.clientSecret  !== '' &&
@@ -242,6 +260,8 @@ export default {
 			loginTemplateId:null,
 			loginMetaMap:{},
 			loginRolesAssign:[],
+			claimAdmin:null,
+			claimAdminValue:null,
 			claimRoles:null,
 			claimUsername:null,
 			providerUrl:null,
@@ -250,7 +270,7 @@ export default {
 		} : s.oauthClientIdMap[s.id],
 		
 		// simple
-		hasChanges:        s => !s.deepIsEqual(s.inputsOrg,s.inputs),
+		isChanged:         s => !s.deepIsEqual(s.inputsOrg,s.inputs),
 		isClaimRolesSet:   s => s.inputs.claimRoles !== null && s.inputs.claimRoles !== '',
 		isFlowAuthCodePkce:s => s.inputs.flow === 'authCodePkce',
 		isFlowClientCreds: s => s.inputs.flow === 'clientCreds',
@@ -311,24 +331,16 @@ export default {
 		},
 		set() {
 			if(!this.canSave) return;
+
+			if(this.inputs.claimAdmin      === '') this.inputs.claimAdmin      = null;
+			if(this.inputs.claimAdminValue === '') this.inputs.claimAdminValue = null;
+			if(this.inputs.claimRoles      === '') this.inputs.claimRoles      = null;
+			if(this.inputs.claimUsername   === '') this.inputs.claimUsername   = null;
+			if(this.inputs.providerUrl     === '') this.inputs.providerUrl     = null;
+			if(this.inputs.redirectUrl     === '') this.inputs.redirectUrl     = null;
+			if(this.inputs.tokenUrl        === '') this.inputs.tokenUrl        = null;
 			
-			ws.send('oauthClient','set',{
-				id:this.id,
-				name:this.inputs.name,
-				flow:this.inputs.flow,
-				clientId:this.inputs.clientId,
-				clientSecret:this.inputs.clientSecret,
-				dateExpiry:this.inputs.dateExpiry,
-				scopes:this.inputs.scopes,
-				loginMetaMap:this.inputs.loginMetaMap,
-				loginRolesAssign:this.inputs.loginRolesAssign,
-				loginTemplateId:this.inputs.loginTemplateId,
-				claimRoles:   this.inputs.claimRoles    !== '' ? this.inputs.claimRoles    : null,
-				claimUsername:this.inputs.claimUsername !== '' ? this.inputs.claimUsername : null,
-				providerUrl:  this.inputs.providerUrl   !== '' ? this.inputs.providerUrl   : null,
-				redirectUrl:  this.inputs.redirectUrl   !== '' ? this.inputs.redirectUrl   : null,
-				tokenUrl:     this.inputs.tokenUrl      !== '' ? this.inputs.tokenUrl      : null
-			},true).then(
+			ws.send('oauthClient','set',this.inputs,true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);

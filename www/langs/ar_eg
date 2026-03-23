@@ -460,6 +460,8 @@
 				"defaultO365": "Defaults: Exchange Online",
 				"defaultOpenId": "Defaults: Open ID Connect"
 			},
+			"claimAdmin": "Admin claim",
+			"claimAdminHint": "Name of claim field, which grants admin permission on the REI3 instance, if the expected string value matches the field value exactly. If an admin claim is set, it must be included for all users.",
 			"claimRoles": "Roles claim",
 			"claimRolesHint": "Name of the claim field, which contains user roles or groups. If set, REI3 roles can be mapped to values in this claim. Value must be a JSON string array, such as: [\"all-users\", \"department-it\"]",
 			"claimUsername": "Username claim",
@@ -2633,6 +2635,7 @@
 		"url": "URL",
 		"username": "اسم المستخدم",
 		"value": "Value",
+		"valueExpected": "Expected value",
 		"variable": "Variable",
 		"variables": "Variables",
 		"version": "إصدار",
