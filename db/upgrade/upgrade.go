@@ -932,7 +932,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			END;
 			$BODY$;
 
-			-- nmail account: no authentication option
+			-- mail account: no authentication option
 			ALTER TYPE instance.mail_account_auth_method ADD VALUE 'none';
 
 			-- mail account: plain connect method
@@ -941,6 +941,12 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.mail_account ALTER COLUMN connect_method DROP DEFAULT;
 			UPDATE instance.mail_account SET connect_method = 'starttls' WHERE start_tls = TRUE;
 			ALTER TABLE instance.mail_account DROP COLUMN start_tls;
+
+			-- mail account: SMIME signing for SMTP
+			ALTER TABLE instance.mail_account ADD   COLUMN smime_path_crt TEXT;
+			ALTER TABLE instance.mail_account ADD   COLUMN smime_path_key TEXT;
+			ALTER TABLE instance.mail_account ADD   COLUMN smime_sign BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.mail_account ALTER COLUMN smime_sign DROP DEFAULT;
 		`)
 		return "3.12", err
 	},

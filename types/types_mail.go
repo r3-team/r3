@@ -34,8 +34,15 @@ type MailAccount struct {
 	SendAs        string      `json:"sendAs"`
 	HostName      string      `json:"hostName"`
 	HostPort      int64       `json:"hostPort"`
-	OauthClientId pgtype.Int4 `json:"oauthClientId"` // oauth client, if authmethod XOAUTH2 is used
 	Comment       pgtype.Text `json:"comment"`
+
+	// authmethod XOAUTH2
+	OauthClientId pgtype.Int4 `json:"oauthClientId"`
+
+	// SMTP signing key/cert, in PEM format, under config->paths->certificates
+	SmimePathCrt pgtype.Text `json:"smimePathCrt"`
+	SmimePathKey pgtype.Text `json:"smimePathKey"`
+	SmimeSign    bool        `json:"smimeSign"`
 }
 type MailFile struct {
 	Id   uuid.UUID `json:"id"`

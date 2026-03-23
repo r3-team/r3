@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"r3/cache"
 	"r3/config"
 	"r3/data"
@@ -212,6 +213,24 @@ func do(m types.Mail) error {
 			fileList = append(fileList, fmt.Sprintf("%s (%dkb)", f.Name, fileInfo.Size()/1024))
 
 			msg.AttachFile(filePath, getAttachedFileWithName(f.Name))
+		}
+	}
+
+	// sign with SMIME
+	if ma.SmimeSign {
+		if !ma.SmimePathCrt.Valid || !ma.SmimePathKey.Valid {
+			return fmt.Errorf("failed to sign message, either certificate or key path is not set")
+		}
+
+		smimeKeyPair, err := tls.LoadX509KeyPair(
+			filepath.Join(config.File.Paths.Certificates, ma.SmimePathCrt.String),
+			filepath.Join(config.File.Paths.Certificates, ma.SmimePathKey.String))
+
+		if err != nil {
+			return err
+		}
+		if err := msg.SignWithTLSCertificate(&smimeKeyPair); err != nil {
+			return err
 		}
 	}
 

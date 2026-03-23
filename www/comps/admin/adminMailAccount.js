@@ -1,3 +1,4 @@
+import {deepIsEqual} from '../shared/generic.js';
 import {
 	dialogCloseAsk,
 	dialogDeleteAsk
@@ -30,7 +31,7 @@ export default {
 					<my-button image="refresh.png"
 						v-if="!isNew"
 						@trigger="reset"
-						:active="hasChanges"
+						:active="isChanged"
 						:caption="capGen.button.refresh"
 					/>
 					<my-button image="add.png"
@@ -117,6 +118,23 @@ export default {
 							<td><input v-model="inputs.sendAs" /></td>
 							<td><span v-html="capApp.accountSendAsHint" /></td>
 						</tr>
+						<tr v-if="isSmtp">
+							<td>{{ capApp.accountSmimeSign }}*</td>
+							<td>
+								<table>
+									<tbody>
+										<tr><td><my-bool v-model="inputs.smimeSign" /></td></tr>
+										<tr v-if="isSmimeSign">
+											<td><input v-model="inputs.smimePathCrt" :placeholder="capGen.file + ': ' + capGen.certificate" /></td>
+										</tr>
+										<tr v-if="isSmimeSign">
+											<td><input v-model="inputs.smimePathKey" :placeholder="capGen.file + ': ' + capGen.keyPrivate" /></td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+							<td><span v-if="isSmimeSign" v-html="capApp.accountSmimeSignHint" /></td>
+						</tr>
 						<tr>
 							<td>{{ capGen.encryption }}*</td>
 							<td>
@@ -166,13 +184,6 @@ export default {
 		};
 	},
 	computed:{
-		hasChanges:s => {
-			for(let k in s.inputsOrg) {
-				if(JSON.stringify(s.inputsOrg[k]) !== JSON.stringify(s.inputs[k]))
-					return true;
-			}
-			return false;
-		},
 		inputsOrg:s => s.isNew ? {
 			id:0,
 			name:'',
@@ -185,13 +196,16 @@ export default {
 			sendAs:'',
 			hostName:'',
 			hostPort:465,
-			oauthClientId:null
+			oauthClientId:null,
+			smimeSign:false,
+			smimePathCrt:null,
+			smimePathKey:null
 		} : s.mailAccountIdMap[s.id],
 		
 		// simple states
 		canSave:s =>
 			s.isReady &&
-			s.hasChanges &&
+			s.isChanged &&
 			s.inputs.name     !== '' &&
 			s.inputs.mode     !== '' &&
 			s.inputs.hostName !== '' &&
@@ -199,11 +213,20 @@ export default {
 				s.isNoAuth ||
 				(s.isOauth && s.inputs.oauthClientId !== null && s.inputs.username !== '') ||
 				(s.inputs.password !== '' && s.inputs.username !== '')
+			) && (
+				!s.isSmtp ||
+				!s.isSmimeSign ||
+				(
+					s.inputs.smimePathCrt !== null && s.inputs.smimePathCrt !== '' &&
+					s.inputs.smimePathKey !== null && s.inputs.smimePathKey !== ''
+				)
 			),
-		isNew:   s => s.id                === 0,
-		isNoAuth:s => s.inputs.authMethod === 'none',
-		isOauth: s => s.inputs.authMethod === 'xoauth2',
-		isSmtp:  s => s.inputs.mode       === 'smtp',
+		isChanged:  s => !s.deepIsEqual(s.inputsOrg,s.inputs),
+		isNew:      s => s.id                === 0,
+		isNoAuth:   s => s.inputs.authMethod === 'none',
+		isOauth:    s => s.inputs.authMethod === 'xoauth2',
+		isSmimeSign:s => s.inputs.smimeSign,
+		isSmtp:     s => s.inputs.mode       === 'smtp',
 		
 		// stores
 		capApp:s => s.$store.getters.captions.admin.mails,
@@ -217,6 +240,7 @@ export default {
 	},
 	methods:{
 		// externals
+		deepIsEqual,
 		dialogCloseAsk,
 		dialogDeleteAsk,
 
@@ -235,7 +259,7 @@ export default {
 		
 		// actions
 		closeAsk() {
-			this.dialogCloseAsk(this.close,this.hasChanges);
+			this.dialogCloseAsk(this.close,this.isChanged);
 		},
 		close() {
 			this.$emit('close');
@@ -253,29 +277,18 @@ export default {
 		
 		// backend calls
 		del() {
-			ws.send('mailAccount','del',{id:this.id},true).then(
+			ws.send('mailAccount','del',this.id,true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);
 		},
 		set() {
-			if(this.inputs.comment === '')
-				this.inputs.comment = null;
+			// set nulls where applicable
+			if(this.inputs.comment === '')      this.inputs.comment      = null;
+			if(this.inputs.smimePathCrt === '') this.inputs.smimePathCrt = null;
+			if(this.inputs.smimePathKey === '') this.inputs.smimePathKey = null;
 
-			ws.send('mailAccount','set',{
-				id:this.id,
-				name:this.inputs.name,
-				comment:this.inputs.comment,
-				mode:this.inputs.mode,
-				connectMethod:this.inputs.connectMethod,
-				authMethod:this.inputs.authMethod,
-				username:this.inputs.username,
-				password:this.inputs.password,
-				sendAs:this.inputs.sendAs,
-				hostName:this.inputs.hostName,
-				hostPort:this.inputs.hostPort,
-				oauthClientId:this.inputs.oauthClientId
-			},true).then(
+			ws.send('mailAccount','set',this.inputs,true).then(
 				this.reloadAndClose,
 				this.$root.genericError
 			);
