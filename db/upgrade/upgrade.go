@@ -947,6 +947,39 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE instance.mail_account ADD   COLUMN smime_path_key TEXT;
 			ALTER TABLE instance.mail_account ADD   COLUMN smime_sign BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.mail_account ALTER COLUMN smime_sign DROP DEFAULT;
+
+			-- file_text_read function with callback value
+			ALTER TYPE  instance.file_spool_content ADD VALUE 'textReadCb';
+			ALTER TABLE instance.file_spool         ADD COLUMN callback_value TEXT;
+			CREATE FUNCTION instance.file_text_read_cb(
+				pg_function_id uuid,
+				callback_value TEXT,
+				file_id uuid,
+				file_version integer DEFAULT NULL)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.file_spool (
+						content,
+						date,
+						pg_function_id,
+						file_id,
+						file_version,
+						callback_value
+					)
+					VALUES(
+						'textReadCb',
+						EXTRACT(EPOCH FROM NOW()),
+						pg_function_id,
+						file_id,
+						file_version,
+						callback_value
+					);
+					RETURN 0;
+				END;
+			$BODY$;
 		`)
 		return "3.12", err
 	},

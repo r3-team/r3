@@ -1295,6 +1295,7 @@
 				"file_import_text": "instance.file_import_text({ARGS}) => INTEGER<br /><br />Creates a file processing job to import a text from a UTF8 text file on disk. Relevant parameters:<ul><li>file_path: Where to import the text file from (must end in a filename)</li><li>callback_function_id: ID of backend function that is called with the imported text, it must have two parameters: file_name TEXT, file_content TEXT</li></ul><p>The source file is deleted, if the import is successful.</p><p>The filepath is always relative to the import path, defined in the server configuration file. For security reasons, absolute paths are not supported.</p>",
 				"file_link": "instance.file_link({ARGS}) => باطل<br /><br />ربط ملف موجود بسجل آخر (يضاف إلى سمة الملف المختار). <br /><br />عند إعادة تسمية الملف أو حذفه، يؤثر التغيير فقط على رابط الملف. ",
 				"file_text_read": "instance.file_text_read({ARGS}) => INTEGER<br /><br />Creates a file processing job to send the content of a UTF8 text file to a callback function. Relevant parameters:<ul><li>callback_function_id: ID of backend function that is called, it must have one parameter: file_content TEXT</li><li>file_id: File to read content from, file ID can be retrieved via instance.files_get()</li><li>file_version: Version of the file to read from (NULL = latest version)</li></ul>",
+				"file_text_read_cb": "instance.file_text_read_cb({ARGS}) => INTEGER<br /><br />Creates a file processing job to send the content of a UTF8 text file to a callback function. Relevant parameters:<ul><li>callback_function_id: ID of backend function that is called, it must have two parameters: file_content TEXT, callback_value TEXT</li><li>callback_value: Text value to be sent to the callback function for processing after the file has been read.</li><li>file_id: File to read content from, file ID can be retrieved via instance.files_get()</li><li>file_version: Version of the file to read from (NULL = latest version)</li></ul>",
 				"file_text_write": "instance.file_text_write({ARGS}) => INTEGER<br /><br />Creates a file processing job to create a new UTF8 text file. Relevant parameters:<ul><li>file_name: Name of the file to be created</li><li>file_text_content: UTF8 text content</li><li>attribute_id: ID of files attribute that receives the file</li><li>record_id: ID of record to update files attribute value of (NULL = new record)</li></ul>",
 				"file_unlink": "instance.file_unlink({ARGS}) => VOID<br /><br />Unlinks an existing file from the files attribute of a specified record. The removed link is a hardlink, meaning that the actual file is kept as long as it is still linked to at least one other records file attribute.",
 				"files_get": "instance.files_get({ARGS}) => instance.file_meta[]<br /><br />إرجاع بيانات التعريف للملفات من سمة الملف المختار وسجله (يمكن أن يتضمن الملفات المحذوفة اختياريًا).<br /><br />يتكون النوع الذي تم إرجاعه \"instance.file_meta\" من:<blockquote>معرف UUID,<br />تسجيل الدخول_id_creator عدد صحيح،<br />نص التجزئة,<br />نص الاسم,<br />size_kb عدد صحيح،<br />الإصدار عدد صحيح،<br />date_change بيجينت،<br />date_delete BIGINT</blockquote>",
@@ -1368,6 +1369,12 @@
 				],
 				"file_text_read": [
 					"callback_function_id UUID",
+					"file_id UUID",
+					"file_version INTEGER DEFAULT NULL"
+				],
+				"file_text_read_cb": [
+					"callback_function_id UUID",
+					"callback_value TEXT",
 					"file_id UUID",
 					"file_version INTEGER DEFAULT NULL"
 				],

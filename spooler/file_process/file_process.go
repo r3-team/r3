@@ -38,12 +38,13 @@ type run struct {
 	FileVersion     pgtype.Int8
 	FileTextContent pgtype.Text
 	Overwrite       pgtype.Bool
+	CallbackValue   pgtype.Text
 }
 
 func DoAll() error {
 	rows, err := db.Pool.Query(context.Background(), `
-		SELECT id, attribute_id, file_id, pg_function_id, record_id_wofk,
-			content, file_path, file_text_content, file_version, overwrite
+		SELECT id, attribute_id, file_id, pg_function_id, record_id_wofk, content,
+			file_path, file_text_content, file_version, overwrite, callback_value
 		FROM instance.file_spool
 		ORDER BY date DESC
 	`)
@@ -55,8 +56,8 @@ func DoAll() error {
 	runs := make([]run, 0)
 	for rows.Next() {
 		var r run
-		if err := rows.Scan(&r.Id, &r.AttributeId, &r.FileId, &r.PgFunctionId, &r.RecordIdWofk,
-			&r.Content, &r.FilePath, &r.FileTextContent, &r.FileVersion, &r.Overwrite); err != nil {
+		if err := rows.Scan(&r.Id, &r.AttributeId, &r.FileId, &r.PgFunctionId, &r.RecordIdWofk, &r.Content,
+			&r.FilePath, &r.FileTextContent, &r.FileVersion, &r.Overwrite, &r.CallbackValue); err != nil {
 
 			return err
 		}
@@ -78,7 +79,9 @@ func DoAll() error {
 		case "importText": // disk (text file) -> string
 			runErr = doImportText(r.FilePath.String, r.PgFunctionId.Bytes)
 		case "textRead": // attribute (text file) -> string
-			runErr = doTextRead(r.FileId.Bytes, r.FileVersion, r.PgFunctionId.Bytes)
+			runErr = doTextRead(r.FileId.Bytes, r.FileVersion, r.PgFunctionId.Bytes, false, pgtype.Text{})
+		case "textReadCb": // attribute (text file) -> string
+			runErr = doTextRead(r.FileId.Bytes, r.FileVersion, r.PgFunctionId.Bytes, true, r.CallbackValue)
 		case "textWrite": // string -> attribute (text file)
 			runErr = doTextWrite(r.FilePath.String, r.FileTextContent.String, r.AttributeId.Bytes, r.RecordIdWofk)
 		}
