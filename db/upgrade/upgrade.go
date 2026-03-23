@@ -94,7 +94,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		nothing yet
+		ALTER TABLE instance.mail_account ALTER COLUMN connect_method
+			TYPE instance.mail_account_connect_method USING connect_method::TEXT::instance.mail_account_connect_method;
 	*/
 
 	"3.11": func(ctx context.Context, tx pgx.Tx) (string, error) {
@@ -930,6 +931,16 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				AND   record_id_wofk = _record_id;
 			END;
 			$BODY$;
+
+			-- nmail account: no authentication option
+			ALTER TYPE instance.mail_account_auth_method ADD VALUE 'none';
+
+			-- mail account: plain connect method
+			CREATE TYPE instance.mail_account_connect_method AS ENUM ('starttls', 'tls', 'plain');
+			ALTER TABLE instance.mail_account ADD   COLUMN connect_method TEXT NOT NULL DEFAULT 'tls';
+			ALTER TABLE instance.mail_account ALTER COLUMN connect_method DROP DEFAULT;
+			UPDATE instance.mail_account SET connect_method = 'starttls' WHERE start_tls = TRUE;
+			ALTER TABLE instance.mail_account DROP COLUMN start_tls;
 		`)
 		return "3.12", err
 	},

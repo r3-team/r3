@@ -60,7 +60,7 @@ export default {
 						<tr>
 							<td>{{ capApp.accountMode }}*</td>
 							<td>
-								<select v-model="inputs.mode">
+								<select v-model="inputs.mode" :disabled="!isNew">
 									<option value="smtp">SMTP</option>
 									<option value="imap">IMAP</option>
 								</select>
@@ -74,19 +74,21 @@ export default {
 								<select v-model="inputs.authMethod">
 									<option value="plain">{{ capApp.option.authMethod.plain }}</option>
 									<option value="xoauth2">{{ capApp.option.authMethod.xoauth2 }}</option>
-									<option value="login" :disabled="!isSmtp">{{ capApp.option.authMethod.login }}</option>
+									<option value="login" v-if="isSmtp">{{ capApp.option.authMethod.login }}</option>
+									<option value="none"  v-if="isSmtp">[{{ capApp.option.authMethod.none }}]</option>
 								</select>
 							</td>
 							<td v-if="inputs.authMethod === 'login'">{{ capApp.accountAuthMethodHintLogin }}</td>
 							<td v-if="inputs.authMethod === 'plain'">{{ capApp.accountAuthMethodHintPlain }}</td>
 							<td v-if="inputs.authMethod === 'xoauth2'">{{ capApp.accountAuthMethodHintXOAuth2 }}</td>
+							<td v-if="inputs.authMethod === 'none'">{{ capApp.accountAuthMethodHintNone }}</td>
 						</tr>
-						<tr>
+						<tr v-if="!isNoAuth">
 							<td>{{ capApp.accountUser }}*</td>
 							<td><input v-model="inputs.username" /></td>
 							<td></td>
 						</tr>
-						<tr v-if="!isOauth">
+						<tr v-if="!isNoAuth && !isOauth">
 							<td>{{ capApp.accountPass }}*</td>
 							<td><input v-model="inputs.password" type="password" /></td>
 							<td></td>
@@ -118,12 +120,10 @@ export default {
 						<tr>
 							<td>{{ capGen.encryption }}*</td>
 							<td>
-								<select
-									@change="inputs.startTls = $event.target.value === 'starttls'"
-									:value="inputs.startTls ? 'starttls' : 'ssl'"
-								>
-									<option value="starttls">{{ capApp.option.encryption.starttls }}</option>
-									<option value="ssl">{{ capApp.option.encryption.ssl }}</option>
+								<select v-model="inputs.connectMethod">
+									<option value="tls">{{ capApp.option.connectMethod.tls }}</option>
+									<option value="starttls">{{ capApp.option.connectMethod.starttls }}</option>
+									<option value="plain" v-if="isSmtp">[{{ capApp.option.connectMethod.plain }}]</option>
 								</select>
 							</td>
 							<td></td>
@@ -166,22 +166,22 @@ export default {
 		};
 	},
 	computed:{
-		hasChanges:(s) => {
+		hasChanges:s => {
 			for(let k in s.inputsOrg) {
 				if(JSON.stringify(s.inputsOrg[k]) !== JSON.stringify(s.inputs[k]))
 					return true;
 			}
 			return false;
 		},
-		inputsOrg:(s) => s.isNew ? {
+		inputsOrg:s => s.isNew ? {
 			id:0,
 			name:'',
 			comment:null,
 			mode:'smtp',
+			connectMethod:'tls',
 			authMethod:'plain',
 			username:'',
 			password:'',
-			startTls:false,
 			sendAs:'',
 			hostName:'',
 			hostPort:465,
@@ -189,28 +189,25 @@ export default {
 		} : s.mailAccountIdMap[s.id],
 		
 		// simple states
-		canSave:(s) =>
+		canSave:s =>
 			s.isReady &&
 			s.hasChanges &&
 			s.inputs.name     !== '' &&
 			s.inputs.mode     !== '' &&
 			s.inputs.hostName !== '' &&
 			s.inputs.hostPort !== '' && (
-				(
-					s.inputs.authMethod    === 'xoauth2' &&
-					s.inputs.oauthClientId !== null
-				) || (
-					s.inputs.authMethod !== 'xoauth2' &&
-					s.inputs.password   !== ''
-				)
+				s.isNoAuth ||
+				(s.isOauth && s.inputs.oauthClientId !== null && s.inputs.username !== '') ||
+				(s.inputs.password !== '' && s.inputs.username !== '')
 			),
-		isNew:  (s) => s.id                === 0,
-		isOauth:(s) => s.inputs.authMethod === 'xoauth2',
-		isSmtp: (s) => s.inputs.mode       === 'smtp',
+		isNew:   s => s.id                === 0,
+		isNoAuth:s => s.inputs.authMethod === 'none',
+		isOauth: s => s.inputs.authMethod === 'xoauth2',
+		isSmtp:  s => s.inputs.mode       === 'smtp',
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.admin.mails,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:s => s.$store.getters.captions.admin.mails,
+		capGen:s => s.$store.getters.captions.generic
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);
@@ -270,10 +267,10 @@ export default {
 				name:this.inputs.name,
 				comment:this.inputs.comment,
 				mode:this.inputs.mode,
+				connectMethod:this.inputs.connectMethod,
 				authMethod:this.inputs.authMethod,
 				username:this.inputs.username,
 				password:this.inputs.password,
-				startTls:this.inputs.startTls,
 				sendAs:this.inputs.sendAs,
 				hostName:this.inputs.hostName,
 				hostPort:this.inputs.hostPort,

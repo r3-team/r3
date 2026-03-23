@@ -337,6 +337,7 @@
 			"account": "电子邮件帐户",
 			"accountAuthMethod": "认证方法",
 			"accountAuthMethodHintLogin": "通过用户名和密码进行基本认证。用于兼容旧版 SMTP 对 Office 365 的认证。",
+			"accountAuthMethodHintNone": "No authentication. Generally not recommended.",
 			"accountAuthMethodHintPlain": "通过用户名和密码进行基本认证。",
 			"accountAuthMethodHintXOAuth2": "通过 OAuth 2.0 进行认证，有时称为“现代身份验证”。某些提供商要求使用此方法来访问其服务。",
 			"accountHost": "主机名",
@@ -372,12 +373,14 @@
 			"option": {
 				"authMethod": {
 					"login": "LOGIN（O365 旧版 SMTP）",
+					"none": "NONE",
 					"plain": "PLAIN",
 					"xoauth2": "OAUTH 2.0"
 				},
-				"encryption": {
-					"ssl": "SSL/TLS",
-					"starttls": "STARTTLS"
+				"connectMethod": {
+					"plain": "PLAIN",
+					"starttls": "STARTTLS",
+					"tls": "SSL/TLS"
 				}
 			},
 			"subject": "主题",

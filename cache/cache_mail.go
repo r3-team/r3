@@ -54,8 +54,8 @@ func GetMailAccountsExist() bool {
 func LoadMailAccountMap_tx(ctx context.Context, tx pgx.Tx) error {
 
 	rows, err := tx.Query(ctx, `
-		SELECT id, oauth_client_id, name, mode, auth_method, username,
-			password, start_tls, send_as, host_name, host_port, comment
+		SELECT id, oauth_client_id, name, mode, connect_method, auth_method,
+			username, password, send_as, host_name, host_port, comment
 		FROM instance.mail_account
 	`)
 	if err != nil {
@@ -71,7 +71,7 @@ func LoadMailAccountMap_tx(ctx context.Context, tx pgx.Tx) error {
 		var ma types.MailAccount
 
 		if err := rows.Scan(&ma.Id, &ma.OauthClientId, &ma.Name, &ma.Mode,
-			&ma.AuthMethod, &ma.Username, &ma.Password, &ma.StartTls,
+			&ma.ConnectMethod, &ma.AuthMethod, &ma.Username, &ma.Password,
 			&ma.SendAs, &ma.HostName, &ma.HostPort, &ma.Comment); err != nil {
 
 			return err

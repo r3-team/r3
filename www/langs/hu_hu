@@ -337,6 +337,7 @@
 			"account": "E-mail fiók",
 			"accountAuthMethod": "Hitelesítési mód",
 			"accountAuthMethodHintLogin": "Basic authentication via username & password. Compatibility option for legacy SMTP authentication against Office 365.",
+			"accountAuthMethodHintNone": "No authentication. Generally not recommended.",
 			"accountAuthMethodHintPlain": "Basic authentication via username & password.",
 			"accountAuthMethodHintXOAuth2": "Authentication via OAuth 2.0, sometimes called 'Modern Authentication'. Required by some providers to access their services.",
 			"accountHost": "Kiszolgáló",
@@ -372,12 +373,14 @@
 			"option": {
 				"authMethod": {
 					"login": "LOGIN (O365 Legacy SMTP-hez)",
+					"none": "NONE",
 					"plain": "PLAIN",
 					"xoauth2": "OAUTH 2.0"
 				},
-				"encryption": {
-					"ssl": "SSL/TLS",
-					"starttls": "STARTTLS"
+				"connectMethod": {
+					"plain": "PLAIN",
+					"starttls": "STARTTLS",
+					"tls": "SSL/TLS"
 				}
 			},
 			"subject": "Tárgy",

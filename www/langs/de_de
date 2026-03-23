@@ -337,6 +337,7 @@
 			"account": "E-Mail-Account",
 			"accountAuthMethod": "Authentifizierungsmethode",
 			"accountAuthMethodHintLogin": "Basis-Authentifizierung via Benutzername und Passwort. Kompatibilitätsoption für Legacy-SMTP-Authentifizierung gegenüber Office 365.",
+			"accountAuthMethodHintNone": "Ohne Authentifizierung. Grundsätzlich nicht empfohlen.",
 			"accountAuthMethodHintPlain": "Basis-Authentifizierung via Benutzername und Passwort.",
 			"accountAuthMethodHintXOAuth2": "Authentifizierung über OAuth 2.0, manchmal auch \"Moderne Authentifizierung\" genannt. Wird von einigen Anbietern für den Zugriff auf ihre Dienste benötigt.",
 			"accountHost": "Hostname",
@@ -372,12 +373,14 @@
 			"option": {
 				"authMethod": {
 					"login": "LOGIN (O365 legacy SMTP)",
+					"none": "Keine",
 					"plain": "PLAIN",
 					"xoauth2": "OAUTH 2.0"
 				},
-				"encryption": {
-					"ssl": "SSL/TLS",
-					"starttls": "STARTTLS"
+				"connectMethod": {
+					"plain": "Keine",
+					"starttls": "STARTTLS",
+					"tls": "SSL/TLS"
 				}
 			},
 			"subject": "Betreff",

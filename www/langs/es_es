@@ -337,6 +337,7 @@
 			"account": "Cuenta de correo",
 			"accountAuthMethod": "Método de autenticación",
 			"accountAuthMethodHintLogin": "Autenticación básica mediante nombre de usuario y contraseña. Opción de compatibilidad para la autenticación SMTP heredada de Office 365.",
+			"accountAuthMethodHintNone": "No authentication. Generally not recommended.",
 			"accountAuthMethodHintPlain": "Autenticación básica mediante nombre de usuario y contraseña.",
 			"accountAuthMethodHintXOAuth2": "Autenticación mediante OAuth 2.0, a veces llamada 'Autenticación moderna'. Requerida por algunos proveedores para acceder a sus servicios.",
 			"accountHost": "Nombre del host",
@@ -372,12 +373,14 @@
 			"option": {
 				"authMethod": {
 					"login": "LOGIN (SMTP heredado de O365)",
+					"none": "NONE",
 					"plain": "PLAIN",
 					"xoauth2": "OAUTH 2.0"
 				},
-				"encryption": {
-					"ssl": "SSL/TLS",
-					"starttls": "STARTTLS"
+				"connectMethod": {
+					"plain": "PLAIN",
+					"starttls": "STARTTLS",
+					"tls": "SSL/TLS"
 				}
 			},
 			"subject": "Asunto",

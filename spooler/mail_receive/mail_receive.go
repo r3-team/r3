@@ -77,12 +77,13 @@ func do(ma types.MailAccount) error {
 	// start IMAP client
 	var c *client.Client
 	var err error
+	var isStarttls = ma.ConnectMethod == "starttls"
 
-	// STARTTLS starts with unencrypted connection then upgrades
-	// non-STARTTLS starts with encrypted connection
-	if ma.StartTls {
+	if isStarttls {
+		// STARTTLS starts with unencrypted connection then upgrades
 		c, err = client.Dial(fmt.Sprintf("%s:%d", ma.HostName, ma.HostPort))
 	} else {
+		// non-STARTTLS starts with encrypted connection
 		c, err = client.DialTLS(fmt.Sprintf("%s:%d", ma.HostName, ma.HostPort), nil)
 	}
 	if err != nil {
@@ -90,8 +91,8 @@ func do(ma types.MailAccount) error {
 	}
 	defer c.Logout()
 
-	// STARTTLS upgrade to encrypted connection
-	if ma.StartTls {
+	if isStarttls {
+		// upgrade to encrypted connection
 		if err := c.StartTLS(&tls.Config{ServerName: ma.HostName}); err != nil {
 			return err
 		}

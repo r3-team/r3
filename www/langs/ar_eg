@@ -337,6 +337,7 @@
 			"account": "حساب البريد الإلكتروني",
 			"accountAuthMethod": "طريقة المصادقة",
 			"accountAuthMethodHintLogin": "المصادقة الأساسية عبر اسم المستخدم وكلمة المرور. ",
+			"accountAuthMethodHintNone": "No authentication. Generally not recommended.",
 			"accountAuthMethodHintPlain": "المصادقة الأساسية عبر اسم المستخدم وكلمة المرور.",
 			"accountAuthMethodHintXOAuth2": "المصادقة عبر OAuth 2.0، والتي تسمى أحيانًا \"المصادقة الحديثة\". ",
 			"accountHost": "اسم المضيف",
@@ -372,12 +373,14 @@
 			"option": {
 				"authMethod": {
 					"login": "تسجيل الدخول (O365 SMTP القديم)",
+					"none": "NONE",
 					"plain": "سهل",
 					"xoauth2": "أوث 2.0"
 				},
-				"encryption": {
-					"ssl": "طبقة المقابس الآمنة/طبقة النقل الآمنة",
-					"starttls": "ستارتلس"
+				"connectMethod": {
+					"plain": "PLAIN",
+					"starttls": "ستارتلس",
+					"tls": "طبقة المقابس الآمنة/طبقة النقل الآمنة"
 				}
 			},
 			"subject": "موضوع",

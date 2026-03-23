@@ -26,11 +26,11 @@ type Mail struct {
 type MailAccount struct {
 	Id            int32       `json:"id"`
 	Name          string      `json:"name"`
-	Mode          string      `json:"mode"`       // smtp/imap
-	AuthMethod    string      `json:"authMethod"` // plain/login/XOAUTH2 (login is used in O365 legacy SMTP authentication)
+	Mode          string      `json:"mode"`          // smtp/imap
+	ConnectMethod string      `json:"connectMethod"` // starttls/tls/plain
+	AuthMethod    string      `json:"authMethod"`    // plain/login/XOAUTH2/none (login is used in O365 legacy SMTP authentication)
 	Username      string      `json:"username"`
 	Password      string      `json:"password"`
-	StartTls      bool        `json:"startTls"`
 	SendAs        string      `json:"sendAs"`
 	HostName      string      `json:"hostName"`
 	HostPort      int64       `json:"hostPort"`
