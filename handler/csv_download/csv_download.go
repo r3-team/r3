@@ -41,11 +41,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	commaChar, err := handler.ReadGetterFromUrl(r, "comma_char")
-	if err != nil {
-		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
-		return
-	}
 	dateFormat, err := handler.ReadGetterFromUrl(r, "date_format")
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
@@ -106,12 +101,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	charDec, err := handler.ReadGetterFromUrlOptional(r, "charDec")
+	charComma, err := handler.ReadGetterFromUrl(r, "char_comma")
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
-	charThou, err := handler.ReadGetterFromUrlOptional(r, "charThou")
+	charDec, err := handler.ReadGetterFromUrlOptional(r, "char_dec")
+	if err != nil {
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
+		return
+	}
+	charThou, err := handler.ReadGetterFromUrlOptional(r, "char_thou")
 	if err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
@@ -192,7 +192,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	writer := csv.NewWriter(file)
-	writer.Comma, _ = utf8.DecodeRuneInString(commaChar)
+	writer.Comma, _ = utf8.DecodeRuneInString(charComma)
 
 	// place header line
 	if !ignoreHeader {
@@ -349,8 +349,6 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 
 		stringValues := make([]string, len(rows[i].Values))
 		for pos, value := range rows[i].Values {
-			fmt.Printf("value: %v, %T\n", value, value)
-
 			switch v := value.(type) {
 			case nil:
 				stringValues[pos] = ""

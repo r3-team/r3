@@ -25,7 +25,8 @@ export default {
 				</tr>
 				<tr>
 					<td>{{ capApp.csvCommaChar }}</td>
-					<td><input v-model="commaChar" /></td>
+					<td><input maxlength="1" size="1" @input="setOption('csvCharComma',$event.target.value)" :value="charComma" />
+					</td>
 				</tr>
 				<tr v-if="hasTime">
 					<td>{{ capApp.csvTime }}</td>
@@ -34,7 +35,7 @@ export default {
 				<tr v-if="hasDate">
 					<td>{{ capApp.csvDate }}</td>
 					<td>
-						<select v-model="dateFormat">
+						<select @input="setOption('csvDateFormat',$event.target.value)" :value="dateFormat">
 							<option value="Y-m-d">{{ capGen.dateFormat0 }}</option>
 							<option value="Y/m/d">{{ capGen.dateFormat1 }}</option>
 							<option value="d.m.Y">{{ capGen.dateFormat2 }}</option>
@@ -46,7 +47,7 @@ export default {
 				<tr v-if="hasDatetime">
 					<td>{{ capApp.csvDatetime }}</td>
 					<td>
-						<select v-model="dateFormat">
+						<select @input="setOption('csvDateFormat',$event.target.value)" :value="dateFormat">
 							<option value="Y-m-d">{{ capGen.dateFormat0 + ' ' + capApp.csvTimeHint }}</option>
 							<option value="Y/m/d">{{ capGen.dateFormat1 + ' ' + capApp.csvTimeHint }}</option>
 							<option value="d.m.Y">{{ capGen.dateFormat2 + ' ' + capApp.csvTimeHint }}</option>
@@ -70,11 +71,11 @@ export default {
 				</tr>
 				<tr v-if="hasDecimal">
 					<td>{{ capGen.numberSepThousand }}</td>
-					<td><input v-model="charThou" /></td>
+					<td><input maxlength="1" size="1" @input="setOption('csvCharThou',$event.target.value)" :value="charThou" /></td>
 				</tr>
 				<tr v-if="hasDecimal">
 					<td>{{ capGen.numberSepDecimal }}</td>
-					<td><input v-model="charDec" /></td>
+					<td><input maxlength="1" size="1" @input="setOption('csvCharDec',$event.target.value)" :value="charDec" /></td>
 				</tr>
 				<tr v-if="action === 'export'">
 					<td>{{ capApp.csvTotalLimit }}</td>
@@ -110,20 +111,17 @@ export default {
 		isExport:     { type:Boolean,required:true },
 		isImport:     { type:Boolean,required:true },
 		joins:        { type:Array,  required:true },
+		loginOptions: { type:Object, required:true },
 		orders:       { type:Array,  required:true },
 		query:        { type:Object, required:true }
 	},
-	emits:['reload'],
+	emits:['reload','set-login-option'],
 	data() {
 		return {
 			action:'',               // CSV action (export/import)
 			boolNative:true,         // use native bool strings (true/false) or translations (yes/no, ...)
 			cacheDenialTimeout:null, // timer do refresh cache denial timestamp
 			cacheDenialTimestamp:0,  // unix timestamp, used for CSV export cache denial
-			charDec:'.',
-			charThou:'',
-			commaChar:',',
-			dateFormat:'Y-m-d',
 			fileElm:null,
 			fileSet:false,
 			hasBool:false,
@@ -138,8 +136,7 @@ export default {
 		};
 	},
 	mounted() {
-		this.action     = this.isExport ? 'export' : 'import';
-		this.dateFormat = this.settings.dateFormat;
+		this.action = this.isExport ? 'export' : 'import';
 		
 		for(let i = 0, j = this.columns.length; i < j; i++) {
 			const atr = this.attributeIdMap[this.columns[i].attributeId];
@@ -155,7 +152,7 @@ export default {
 		clearInterval(this.setCacheDenialTimestamp);
 	},
 	computed:{
-		columnsCsv:(s) => {
+		columnsCsv:s => {
 			let out = [];
 			for(const c of s.columnsSorted) {
 				// only keep relevant data
@@ -166,7 +163,7 @@ export default {
 			}
 			return out;
 		},
-		columnsSorted:(s) => {
+		columnsSorted:s => {
 			let out = [];
 			for(const b of s.columnBatches) {
 				for(const columnIndex of b.columnIndexes) {
@@ -175,14 +172,14 @@ export default {
 			}
 			return out;
 		},
-		exportHref:(s) => {
+		exportHref:s => {
 			const getters = [
 				`token=${s.token}`,
 				`bool_false=${s.boolNative ? 'false' : s.capGen.option.no}`,
 				`bool_true=${s.boolNative ? 'true' : s.capGen.option.yes}`,
-				`charDec=${encodeURIComponent(s.charDec)}`,
-				`charThou=${encodeURIComponent(s.charThou)}`,
-				`comma_char=${encodeURIComponent(s.commaChar)}`,
+				`char_comma=${encodeURIComponent(s.charComma)}`,
+				`char_dec=${encodeURIComponent(s.charDec)}`,
+				`char_thou=${encodeURIComponent(s.charThou)}`,
 				`date_format=${encodeURIComponent(s.dateFormat)}`,
 				`timezone=${encodeURIComponent(s.timezone)}`,
 				`ignore_header=${s.hasHeader ? 'false' : 'true'}`,
@@ -198,16 +195,22 @@ export default {
 			return `/csv/download/export.csv?${getters.join('&')}`;
 		},
 
+		// inputs
+		charComma: s => s.$root.getOrFallback(s.loginOptions,'csvCharComma',','),
+		charDec:   s => s.$root.getOrFallback(s.loginOptions,'csvCharDec','.'),
+		charThou:  s => s.$root.getOrFallback(s.loginOptions,'csvCharThou',''),
+		dateFormat:s => s.$root.getOrFallback(s.loginOptions,'csvDateFormat',s.settings.dateFormat),
+
 		// simple
-		expressions:(s) => s.getQueryExpressions(s.columnsSorted),
-		timezone:   (s) => Intl.DateTimeFormat().resolvedOptions().timeZone,
+		expressions:s => s.getQueryExpressions(s.columnsSorted),
+		timezone:   s => Intl.DateTimeFormat().resolvedOptions().timeZone,
 		
 		// stores
-		token:         (s) => s.$store.getters['local/token'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.list,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		settings:      (s) => s.$store.getters.settings
+		token:         s => s.$store.getters['local/token'],
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		capApp:        s => s.$store.getters.captions.list,
+		capGen:        s => s.$store.getters.captions.generic,
+		settings:      s => s.$store.getters.settings
 	},
 	methods:{
 		// externals
@@ -226,6 +229,10 @@ export default {
 		setMessage(msg,isError) {
 			this.message      = msg;
 			this.messageError = isError;
+		},
+		setOption(name,value) {
+			if(value !== '')
+				this.$emit('set-login-option',name,value);
 		},
 		send() {
 			let formData    = new FormData();
@@ -258,7 +265,7 @@ export default {
 			formData.append('boolTrue',this.boolNative ? 'true' : this.capGen.option.yes);
 			formData.append('dateFormat',this.dateFormat);
 			formData.append('timezone',this.timezone);
-			formData.append('commaChar',this.commaChar);
+			formData.append('charComma',this.charComma);
 			formData.append('ignoreHeader',this.hasHeader ? 'true' : 'false');
 			formData.append('file',this.fileElm.files[0]);
 			httpRequest.open('POST','csv/upload',true);

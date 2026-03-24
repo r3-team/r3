@@ -549,9 +549,9 @@ export default {
 					:attributeId="field.attributeId"
 					:countAllowed="field.max !== null ? field.max : 0"
 					:fieldId="field.id"
-					:formLoading="formLoading"
-					:isHidden="isHidden"
-					:loginOptions="loginOptions"
+					:formLoading
+					:isHidden
+					:loginOptions
 					:readonly="isReadonly"
 					:recordId="joinsIndexMap[field.index].recordId"
 					:showGallery="field.display === 'gallery'"

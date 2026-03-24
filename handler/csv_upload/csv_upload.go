@@ -44,7 +44,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// loop form reader until empty
 	// fixed order: token, columns, lookups, joins, boolTrue, dateFormat,
-	//  timezone, commaChar, ignoreHeader, file
+	//  timezone, charComma, ignoreHeader, file
 	var token string
 	var columns []types.Column
 	var lookups []types.QueryLookup
@@ -52,7 +52,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var boolTrue string
 	var dateFormat string
 	var timezone string
-	var commaChar string
+	var charComma string
 	var ignoreHeader bool
 
 	res := struct {
@@ -90,8 +90,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			dateFormat = handler.GetStringFromPart(part)
 		case "timezone":
 			timezone = handler.GetStringFromPart(part)
-		case "commaChar":
-			commaChar = handler.GetStringFromPart(part)
+		case "charComma":
+			charComma = handler.GetStringFromPart(part)
 		case "ignoreHeader":
 			ignoreHeader = handler.GetStringFromPart(part) == "true"
 		}
@@ -134,9 +134,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// read file
-		res.Count, err = importFromCsv(ctx, filePath, login.Id, boolTrue, dateFormat,
-			timezone, commaChar, ignoreHeader, columns, joins, lookups)
-
+		res.Count, err = importFromCsv(ctx, filePath, login.Id, boolTrue, dateFormat, timezone, charComma, ignoreHeader, columns, joins, lookups)
 		if err != nil {
 			err, expectedErr := handler.ConvertToErrCode(err, !login.Admin)
 			res.Error = err.Error()
@@ -158,9 +156,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 // import all lines from CSV, optionally skipping a header line
 // returns to which line it got
-func importFromCsv(ctx context.Context, filePath string, loginId int64, boolTrue string,
-	dateFormat string, timezone string, commaChar string, ignoreHeader bool, columns []types.Column,
-	joins []types.QueryJoin, lookups []types.QueryLookup) (int, error) {
+func importFromCsv(ctx context.Context, filePath string, loginId int64, boolTrue string, dateFormat string, timezone string,
+	charComma string, ignoreHeader bool, columns []types.Column, joins []types.QueryJoin, lookups []types.QueryLookup) (int, error) {
 
 	log.Info(log.ContextCsv, fmt.Sprintf("starts import from file '%s' via upload", filePath))
 
@@ -182,7 +179,7 @@ func importFromCsv(ctx context.Context, filePath string, loginId int64, boolTrue
 
 	// parse CSV file
 	reader := csv.NewReader(file)
-	reader.Comma, _ = utf8.DecodeRuneInString(commaChar)
+	reader.Comma, _ = utf8.DecodeRuneInString(charComma)
 	reader.Comment = '#'
 	reader.FieldsPerRecord = len(columns)
 	reader.TrimLeadingSpace = true

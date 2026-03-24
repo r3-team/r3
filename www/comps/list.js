@@ -79,12 +79,14 @@ export default {
 					<my-list-csv
 						v-if="showCsv"
 						@reload="get"
+						@set-login-option="(...args) => $emit('set-login-option',args[0],args[1])"
 						:columns="columns"
 						:columnBatches="columnBatches"
 						:filters="filtersCombined"
 						:isExport="csvExport"
 						:isImport="csvImport"
 						:joins="relationsJoined"
+						:loginOptions
 						:orders="orders"
 						:query="query"
 					/>
