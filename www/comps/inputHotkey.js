@@ -3,19 +3,17 @@ export default {
 	template:`<div class="input-hotkey gap default-inputs" :class="{ column:twoLines, row:!twoLines }">
 		<div class="row gap">
 			<select class="dynamic" v-model="modifier1Input" :disabled="readonly">
-				<option v-for="v in modifierKeys"
+				<option v-for="v in hotkeyMod.filter(v => allKeys || !hotkeyModExcl.includes(v))"
 					:disabled="v === modifier2Input"
 					:value="v"
-				>{{ capApp.modifier[v] }}</option>
+				>{{ capGen.option.modifierKey[v] }}</option>
 			</select>
 			<select class="dynamic" v-model="modifier2Input" :disabled="readonly">
-				<option value=""
-					:disabled="modifier1 === null"
-				>-</option>
-				<option v-for="v in modifierKeys"
+				<option value="" :disabled="modifier1 === null">-</option>
+				<option v-for="v in hotkeyMod.filter(v => allKeys || !hotkeyModExcl.includes(v))"
 					:disabled="v === modifier1Input"
 					:value="v"
-				>{{ capApp.modifier[v] }}</option>
+				>{{ capGen.option.modifierKey[v] }}</option>
 			</select>
 		</div>
 		<input maxlength="1" size="1"
@@ -26,18 +24,14 @@ export default {
 		/>
 	</div>`,
 	props:{
-		char:      { required:true }, // null if empty
-		modifier1: { required:true }, // null if empty
-		modifier2: { required:true }, // null if empty
-		readonly:  { type:Boolean, required:false, default:false },
-		twoLines:  { type:Boolean, required:false, default:false }
+		allKeys:  { type:Boolean,       required:false, default:false },
+		char:     { type:[String,null], required:true },
+		modifier1:{ type:[String,null], required:true },
+		modifier2:{ type:[String,null], required:true },
+		readonly: { type:Boolean,       required:false, default:false },
+		twoLines: { type:Boolean,       required:false, default:false }
 	},
 	emits:['update:char', 'update:modifier1', 'update:modifier2'],
-	data() {
-		return {
-			modifierKeys:['ALT','CMD','CTRL','SHIFT']
-		};
-	},
 	computed:{
 		charInput:{
 			get()  { return this.char !== null ? this.char : ''; },
@@ -56,6 +50,9 @@ export default {
 		},
 
 		// stores
-		capApp:(s) => s.$store.getters.captions.input.hotkey
+		capApp:       s => s.$store.getters.captions.input.hotkey,
+		capGen:       s => s.$store.getters.captions.generic,
+		hotkeyMod:    s => s.$store.getters.constants.hotkeyMod,
+		hotkeyModExcl:s => s.$store.getters.hotkeyModExcl
 	}
 };

@@ -62,6 +62,7 @@
 				"pleaseRead": "يرجى القراءة قبل الحفظ",
 				"productionMode": "يتم استخدام وضع الصيانة لتحديث التطبيقات أو تثبيتها أو إزالتها من النظام.<br /><br />التبديل إلى وضع الصيانة سوف <b>تسجيل الخروج لجميع المستخدمين دون أذونات المسؤول</b>."
 			},
+			"hotkeyModAvailable": "In some environments, it can be helpful to deactivate certain modifiers for global hotkeys to avoid interfering with other applications. Disabled keys are not available to users.",
 			"icsDaysPost": "استبعاد الأحداث بعد التاريخ الحالي (بالأيام)",
 			"icsDaysPre": "استبعاد الأحداث قبل التاريخ الحالي (بالأيام)",
 			"icsDownload": "تمكين اشتراكات التقويم",
@@ -81,6 +82,7 @@
 			"pwTitle": "إعدادات كلمة المرور",
 			"title": "تكوين النظام",
 			"titleGeneral": "عام",
+			"titleGlobalHotkeys": "Global hotkeys",
 			"titleIcs": "اشتراكات التقويم",
 			"titleLoginBackgrounds": "خلفيات تسجيل الدخول",
 			"titleLogins": "تسجيلات الدخول",
@@ -2537,6 +2539,12 @@
 		"numberSepThousand": "فاصل الآلاف",
 		"option": {
 			"all": "الجميع",
+			"modifierKey": {
+				"ALT": "بديل",
+				"CMD": "فوز/كمد",
+				"CTRL": "كنترول",
+				"SHIFT": "يحول"
+			},
 			"no": "لا",
 			"numberSeparator": {
 				"apos": "الفاصلة العليا (')",
@@ -2740,13 +2748,7 @@
 			"unsaved": "(غير محفوظ)"
 		},
 		"hotkey": {
-			"charHint": "حرف واحد (من a إلى z، من 0 إلى 9)",
-			"modifier": {
-				"ALT": "بديل",
-				"CMD": "فوز/كمد",
-				"CTRL": "كنترول",
-				"SHIFT": "يحول"
-			}
+			"charHint": "حرف واحد (من a إلى z، من 0 إلى 9)"
 		},
 		"iframe": {
 			"empty": "لم يتم تعيين عنوان URL - لا يوجد شيء لإظهاره"

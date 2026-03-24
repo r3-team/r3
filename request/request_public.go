@@ -35,6 +35,7 @@ func PublicGet() (any, error) {
 		CompanyName            string                            `json:"companyName"`
 		CompanyWelcome         string                            `json:"companyWelcome"`
 		Css                    string                            `json:"css"`
+		HotkeyModExcl          []string                          `json:"hotkeyModExcl"`
 		LanguageCodes          []string                          `json:"languageCodes"`
 		LoginBackground        uint64                            `json:"loginBackground"`
 		Mirror                 bool                              `json:"mirror"`
@@ -62,6 +63,7 @@ func PublicGet() (any, error) {
 		CompanyName:            config.GetString("companyName"),
 		CompanyWelcome:         config.GetString("companyWelcome"),
 		Css:                    config.GetString("css"),
+		HotkeyModExcl:          config.GetStringSlice("hotkeyModExcl"),
 		LanguageCodes:          cache.GetCaptionLanguageCodes(),
 		LoginBackground:        loginBackground,
 		Mirror:                 config.File.Mirror,

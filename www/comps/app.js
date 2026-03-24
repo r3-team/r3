@@ -644,6 +644,7 @@ export default {
 					this.$store.commit('schema/presetIdMapRecordId',res.payload.presetIdMapRecordId);
 					this.$store.commit('captionMapCustom',res.payload.captionMapCustom);
 					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
+					this.$store.commit('hotkeyModExcl',res.payload.hotkeyModExcl);
 					this.$store.commit('mirrorMode',res.payload.mirror);
 					this.$store.commit('moduleIdMapMeta',res.payload.moduleIdMapMeta);
 					this.$store.commit('oauthClientIdMapOpenId',res.payload.oauthClientIdMapOpenId);

@@ -86,6 +86,7 @@ export default {
 									v-model:char="values.hotkeyChar"
 									v-model:modifier1="values.hotkeyModifier1"
 									v-model:modifier2="values.hotkeyModifier2"
+									:allKeys="true"
 									:readonly="readonly"
 									:twoLines="true"
 								/>

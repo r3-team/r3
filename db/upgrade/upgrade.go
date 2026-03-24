@@ -984,6 +984,10 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- OpenID, admin claim
 			ALTER TABLE instance.oauth_client ADD COLUMN claim_admin       TEXT;
 			ALTER TABLE instance.oauth_client ADD COLUMN claim_admin_value TEXT;
+
+			-- config: disable modifier keys
+			INSERT INTO instance.config (name,value) VALUES ('hotkeyModExcl','[]');
+			UPDATE instance.config SET value = '[]' WHERE name = 'adminMails' AND value = '';
 		`)
 		return "3.12", err
 	},

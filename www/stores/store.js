@@ -37,6 +37,7 @@ const MyStore = Vuex.createStore({
 		constants:{                    // constant variables, codes/messages/IDs
 			dragFieldContent:'dragDropPrevField', // content name for drag&drop preview fields
 			kdfIterations:10000,       // number of iterations for PBKDF2 key derivation function
+			keyLength:64,              // length of new symmetric keys for data encryption
 			languageCodesOfficial:[    // officially supported language codes
 				'en_us','de_de'
 			],
@@ -48,7 +49,7 @@ const MyStore = Vuex.createStore({
 				noAuth:'noAuth',
 				oauth:'oauth'
 			},
-			keyLength:64,              // length of new symmetric keys for data encryption
+			hotkeyMod:['ALT','CMD','CTRL','SHIFT'], // modifier keys for hotkeys
 			scrollFormId:'form-scroll' // ID of form page element (to recover scroll position during routing)
 		},
 		dialogCaptionTop:'',
@@ -63,6 +64,7 @@ const MyStore = Vuex.createStore({
 			fileIds:[]
 		},
 		globalSearchInput:null,
+		hotkeyModExcl:[],              // disabled modifier keys for hotkeys
 		isAdmin:false,                 // user is admin
 		isAtDialog:false,              // app shows generic dialog
 		isAtFavorites:false,           // is the favorites menu entry active?
@@ -282,6 +284,7 @@ const MyStore = Vuex.createStore({
 		dropdownElm:             (state,payload) => state.dropdownElm              = payload,
 		filesCopy:               (state,payload) => state.filesCopy                = payload,
 		globalSearchInput:       (state,payload) => state.globalSearchInput        = payload,
+		hotkeyModExcl:           (state,payload) => state.hotkeyModExcl            = payload,
 		isAdmin:                 (state,payload) => state.isAdmin                  = payload,
 		isAtDialog:              (state,payload) => state.isAtDialog               = payload,
 		isAtFavorites:           (state,payload) => state.isAtFavorites            = payload,
@@ -461,6 +464,7 @@ const MyStore = Vuex.createStore({
 		dropdownElm:             (state) => state.dropdownElm,
 		filesCopy:               (state) => state.filesCopy,
 		globalSearchInput:       (state) => state.globalSearchInput,
+		hotkeyModExcl:           (state) => state.hotkeyModExcl,
 		isAdmin:                 (state) => state.isAdmin,
 		isAllowedMfa:            (state) => state.loginType === state.constants.loginType.local || state.loginType === state.constants.loginType.ldap,
 		isAllowedPwChange:       (state) => state.loginType === state.constants.loginType.local,

@@ -107,7 +107,7 @@ export default {
 		MyAdminRepoInstallModule,
 		MyInputOffset
 	},
-	template:`<div class="admin-repo-install contentBox grow">
+	template:`<div class="admin-repo-install contentBox scroll grow">
 		
 		<div class="top lower">
 			<div class="area nowrap">

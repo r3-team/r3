@@ -62,6 +62,7 @@
 				"pleaseRead": "Lūdzu, lasiet pirms saglabāšanas",
 				"productionMode": "Uzturēšanas režīms tiek izmantots, lai atjauninātu, instalētu vai noņemtu lietotnes no sistēmas.<br /><br />Pārslēgšanās uz uzturēšanas režīmu <b>izlogos ārā visus lietotājus bez administratīvām atļaujām</b>."
 			},
+			"hotkeyModAvailable": "In some environments, it can be helpful to deactivate certain modifiers for global hotkeys to avoid interfering with other applications. Disabled keys are not available to users.",
 			"icsDaysPost": "Izslēgt notikumus pēc pašreizējās datuma (dienās)",
 			"icsDaysPre": "Izslēgt notikumus pirms pašreizējās datuma (dienās)",
 			"icsDownload": "Iespējot kalendāra abonēšanu",
@@ -81,6 +82,7 @@
 			"pwTitle": "Paroles iestatījumi",
 			"title": "Sistēmas konfigurācija",
 			"titleGeneral": "Vispārīgi",
+			"titleGlobalHotkeys": "Global hotkeys",
 			"titleIcs": "Kalendāra abonēšana",
 			"titleLoginBackgrounds": "Pieteikšanās fona attēli",
 			"titleLogins": "Users",
@@ -2537,6 +2539,12 @@
 		"numberSepThousand": "Tūkstošu atdalītājs",
 		"option": {
 			"all": "visi",
+			"modifierKey": {
+				"ALT": "alt",
+				"CMD": "win/cmd",
+				"CTRL": "ctrl",
+				"SHIFT": "shift"
+			},
 			"no": "nē",
 			"numberSeparator": {
 				"apos": "Apostrophe (')",
@@ -2740,13 +2748,7 @@
 			"unsaved": "(unsaved)"
 		},
 		"hotkey": {
-			"charHint": "1 character (a-z, 0-9)",
-			"modifier": {
-				"ALT": "alt",
-				"CMD": "win/cmd",
-				"CTRL": "ctrl",
-				"SHIFT": "shift"
-			}
+			"charHint": "1 character (a-z, 0-9)"
 		},
 		"iframe": {
 			"empty": "No URL set - nothing to show"

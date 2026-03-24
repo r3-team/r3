@@ -62,6 +62,7 @@
 				"pleaseRead": "Si prega di leggere prima di salvare",
 				"productionMode": "La modalità di manutenzione viene utilizzata per aggiornare, installare o rimuovere applicazioni dal sistema.<br /><br />Il passaggio alla modalità di manutenzione <b>disconnetterà tutti gli utenti senza autorizzazioni di amministratore</b>."
 			},
+			"hotkeyModAvailable": "In some environments, it can be helpful to deactivate certain modifiers for global hotkeys to avoid interfering with other applications. Disabled keys are not available to users.",
 			"icsDaysPost": "Escludi eventi dopo la data corrente (in giorni)",
 			"icsDaysPre": "Escludi eventi prima la data corrente (in giorni)",
 			"icsDownload": "Abilita iscrizioni al calendario",
@@ -81,6 +82,7 @@
 			"pwTitle": "Impostazioni password",
 			"title": "Configurazione di sistema",
 			"titleGeneral": "Generale",
+			"titleGlobalHotkeys": "Global hotkeys",
 			"titleIcs": "Iscrizioni al calendario",
 			"titleLoginBackgrounds": "Login backgrounds",
 			"titleLogins": "Users",
@@ -2537,6 +2539,12 @@
 		"numberSepThousand": "Thousands separator",
 		"option": {
 			"all": "all",
+			"modifierKey": {
+				"ALT": "alt",
+				"CMD": "win/cmd",
+				"CTRL": "ctrl",
+				"SHIFT": "shift"
+			},
 			"no": "no",
 			"numberSeparator": {
 				"apos": "Apostrophe (')",
@@ -2740,13 +2748,7 @@
 			"unsaved": "(unsaved)"
 		},
 		"hotkey": {
-			"charHint": "1 character (a-z, 0-9)",
-			"modifier": {
-				"ALT": "alt",
-				"CMD": "win/cmd",
-				"CTRL": "ctrl",
-				"SHIFT": "shift"
-			}
+			"charHint": "1 character (a-z, 0-9)"
 		},
 		"iframe": {
 			"empty": "No URL set - nothing to show"

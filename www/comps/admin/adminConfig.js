@@ -278,7 +278,7 @@ export default {
 				
 				<div class="column">
 					<my-button image="cancel.png"
-						v-for="(c,i) in adminMailContacts"
+						v-for="(c,i) in adminMails"
 						@trigger="adminMailDel(i)"
 						:caption="c"
 						:naked="true"
@@ -296,6 +296,26 @@ export default {
 						@trigger="adminMailAdd"
 						:active="adminMailInput !== ''"
 					/>
+				</div>
+			</div>
+			
+			<!-- client events -->
+			<div class="contentPart">
+				<div class="contentPartHeader">
+					<img class="icon" src="images/screen.png" />
+					<h1>{{ capApp.titleGlobalHotkeys }}</h1>
+				</div>
+
+				<div class="column wrap gap-large">
+					<span>{{ capApp.hotkeyModAvailable }}</span>
+					<div class="row gap-large wrap">
+						<my-button-check
+							v-for="k in hotkeyMod"
+							@trigger="hotkeyModExclToggle(k)"
+							:caption="capGen.option.modifierKey[k]"
+							:modelValue="!hotkeyModExcl.includes(k)"
+						/>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -330,7 +350,7 @@ export default {
 		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	computed:{
-		updateCheckText:(s) => {
+		updateCheckText:s => {
 			if(s.config.updateCheckVersion === '')
 				return s.capApp.updateCheckUnknown;
 			
@@ -342,21 +362,25 @@ export default {
 			
 			return s.capApp.updateCheckNewer;
 		},
+
+		// values
+		adminMails:      s => JSON.parse(s.configInput.adminMails),
+		hotkeyModExcl:   s => JSON.parse(s.configInput.hotkeyModExcl),
+		loginBackgrounds:s => JSON.parse(s.configInput.loginBackgrounds),
 		
 		// simple
-		adminMailContacts:(s) => s.configInput.adminMails === '' ? [] : JSON.parse(s.configInput.adminMails),
-		hasChanges:       (s) => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
-		loginBackgrounds: (s) => JSON.parse(s.configInput.loginBackgrounds),
+		hasChanges:s => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
 		
 		// stores
-		appVersion:  (s) => s.$store.getters['local/appVersion'],
-		token:       (s) => s.$store.getters['local/token'],
-		config:      (s) => s.$store.getters.config,
-		license:     (s) => s.$store.getters.license,
-		licenseDays: (s) => s.$store.getters.licenseDays,
-		licenseValid:(s) => s.$store.getters.licenseValid,
-		capApp:      (s) => s.$store.getters.captions.admin.config,
-		capGen:      (s) => s.$store.getters.captions.generic
+		appVersion:  s => s.$store.getters['local/appVersion'],
+		token:       s => s.$store.getters['local/token'],
+		capApp:      s => s.$store.getters.captions.admin.config,
+		capGen:      s => s.$store.getters.captions.generic,
+		config:      s => s.$store.getters.config,
+		hotkeyMod:   s => s.$store.getters.constants.hotkeyMod,
+		license:     s => s.$store.getters.license,
+		licenseDays: s => s.$store.getters.licenseDays,
+		licenseValid:s => s.$store.getters.licenseValid
 	},
 	methods:{
 		// externals
@@ -371,15 +395,22 @@ export default {
 		adminMailAdd() {
 			if(this.adminMailInput === '') return;
 			
-			let v = JSON.parse(JSON.stringify(this.adminMailContacts));
+			let v = JSON.parse(JSON.stringify(this.adminMails));
 			v.push(this.adminMailInput);
 			this.configInput.adminMails = JSON.stringify(v);
 			this.adminMailInput = '';
 		},
 		adminMailDel(index) {
-			let v = JSON.parse(JSON.stringify(this.adminMailContacts));
+			let v = JSON.parse(JSON.stringify(this.adminMails));
 			v.splice(index,1);
 			this.configInput.adminMails = JSON.stringify(v);
+		},
+		hotkeyModExclToggle(key) {
+			let   v   = JSON.parse(JSON.stringify(this.hotkeyModExcl));
+			const pos = v.indexOf(key);
+			if(pos === -1) v.push(key);
+			else           v.splice(pos,1);
+			this.configInput.hotkeyModExcl = JSON.stringify(v);
 		},
 		informBuilderMode() {
 			if(this.configInput.builderMode === '0')

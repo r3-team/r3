@@ -27,6 +27,18 @@ func ConfigGet() (any, error) {
 		res[name] = config.GetString(name)
 	}
 
+	for _, name := range config.NamesStringSlice {
+
+		if slices.Contains(ignore, name) {
+			continue
+		}
+		json, err := json.Marshal(config.GetStringSlice(name))
+		if err != nil {
+			return nil, err
+		}
+		res[name] = string(json)
+	}
+
 	for _, name := range config.NamesUint64 {
 
 		if slices.Contains(ignore, name) {
@@ -69,6 +81,16 @@ func ConfigSet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any,
 
 		if slices.Contains(config.NamesString, name) {
 			if err := config.SetString_tx(ctx, tx, name, value); err != nil {
+				return nil, err
+			}
+		} else if slices.Contains(config.NamesStringSlice, name) {
+
+			var val []string
+			if err := json.Unmarshal([]byte(value), &val); err != nil {
+				return nil, err
+			}
+
+			if err := config.SetStringSlice_tx(ctx, tx, name, val); err != nil {
 				return nil, err
 			}
 		} else if slices.Contains(config.NamesUint64, name) {

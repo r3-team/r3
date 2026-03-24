@@ -62,6 +62,7 @@
 				"pleaseRead": "Kérjük, olvassa el a mentés előtt",
 				"productionMode": "A karbantartási mód az alkalmazások frissítéséhez, telepítéséhez vagy eltávolításához szolgál.<br /><br />A karbantartási mód aktiválásakor <b>MINDEN nem adminisztrátor felhasználót kijelentkeztet</b>."
 			},
+			"hotkeyModAvailable": "In some environments, it can be helpful to deactivate certain modifiers for global hotkeys to avoid interfering with other applications. Disabled keys are not available to users.",
 			"icsDaysPost": "Bejegyzések az aktuális dátum után kizárva (napokban)",
 			"icsDaysPre": "Bejegyzések az aktuális dátum előtt kizárva (napokban)",
 			"icsDownload": "Naptár előfizetések engedélyezése",
@@ -81,6 +82,7 @@
 			"pwTitle": "Jelszó beállítások",
 			"title": "Rendszerbeállítások",
 			"titleGeneral": "Általános",
+			"titleGlobalHotkeys": "Global hotkeys",
 			"titleIcs": "Naptár előfizetések",
 			"titleLoginBackgrounds": "Login backgrounds",
 			"titleLogins": "Users",
@@ -2537,6 +2539,12 @@
 		"numberSepThousand": "Thousands separator",
 		"option": {
 			"all": "mind",
+			"modifierKey": {
+				"ALT": "alt",
+				"CMD": "win/cmd",
+				"CTRL": "ctrl",
+				"SHIFT": "shift"
+			},
 			"no": "nem",
 			"numberSeparator": {
 				"apos": "Apostrophe (')",
@@ -2740,13 +2748,7 @@
 			"unsaved": "(nem mentett)"
 		},
 		"hotkey": {
-			"charHint": "1 character (a-z, 0-9)",
-			"modifier": {
-				"ALT": "alt",
-				"CMD": "win/cmd",
-				"CTRL": "ctrl",
-				"SHIFT": "shift"
-			}
+			"charHint": "1 character (a-z, 0-9)"
 		},
 		"iframe": {
 			"empty": "Nincs URL beállítva - nincs megjelenítendő tartalom"

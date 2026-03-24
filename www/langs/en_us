@@ -62,6 +62,7 @@
 				"pleaseRead": "Please read before saving",
 				"productionMode": "The maintenance mode is used to update, install or remove applications from the system.<br /><br />Switching to maintenance mode will <b>logout all users without admin permissions</b>."
 			},
+			"hotkeyModAvailable": "In some environments, it can be helpful to deactivate certain modifiers for global hotkeys to avoid interfering with other applications. Disabled keys are not available to users.",
 			"icsDaysPost": "Exclude events after current date (in days)",
 			"icsDaysPre": "Exclude events before current date (in days)",
 			"icsDownload": "Enable calendar subscriptions",
@@ -81,6 +82,7 @@
 			"pwTitle": "Password settings",
 			"title": "System configuration",
 			"titleGeneral": "General",
+			"titleGlobalHotkeys": "Global hotkeys",
 			"titleIcs": "Calendar subscriptions",
 			"titleLoginBackgrounds": "Login backgrounds",
 			"titleLogins": "Users",
@@ -2537,6 +2539,12 @@
 		"numberSepThousand": "Thousands separator",
 		"option": {
 			"all": "all",
+			"modifierKey": {
+				"ALT": "alt",
+				"CMD": "win/cmd",
+				"CTRL": "ctrl",
+				"SHIFT": "shift"
+			},
 			"no": "no",
 			"numberSeparator": {
 				"apos": "Apostrophe (')",
@@ -2740,13 +2748,7 @@
 			"unsaved": "(unsaved)"
 		},
 		"hotkey": {
-			"charHint": "1 character (a-z, 0-9)",
-			"modifier": {
-				"ALT": "alt",
-				"CMD": "win/cmd",
-				"CTRL": "ctrl",
-				"SHIFT": "shift"
-			}
+			"charHint": "1 character (a-z, 0-9)"
 		},
 		"iframe": {
 			"empty": "No URL set - nothing to show"

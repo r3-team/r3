@@ -62,6 +62,7 @@
 				"pleaseRead": "Bitte vor dem Speichern lesen",
 				"productionMode": "Der Wartungsmodus wird genutzt, um Anwendungen zu aktualisieren, installieren oder zu entfernen.<br /><br />Beim Aktivieren des Wartungsmodus werden <b>alle Benutzer ohne Adminrechte abgemeldet</b>."
 			},
+			"hotkeyModAvailable": "In manchen Umgebungen kann es hilfreich sein, bestimmte Sondertasten zu deaktivieren, um Konflikte mit anderen Anwendungen zu vermeiden. Hier deaktivierte Tasten stehen Benutzern nicht mehr zur Verfügung.",
 			"icsDaysPost": "Einträge nach akt. Datum exkludieren (in Tagen)",
 			"icsDaysPre": "Einträge vor akt. Datum exkludieren (in Tagen)",
 			"icsDownload": "Kalender-Abonnements aktivieren",
@@ -81,6 +82,7 @@
 			"pwTitle": "Passworteinstellungen",
 			"title": "Systemkonfiguration",
 			"titleGeneral": "Allgemein",
+			"titleGlobalHotkeys": "Globale Hotkeys",
 			"titleIcs": "Kalender-Abonnements",
 			"titleLoginBackgrounds": "Anmeldung, Hintergrundbilder",
 			"titleLogins": "Benutzer",
@@ -2537,6 +2539,12 @@
 		"numberSepThousand": "Tausender-Trennzeichen",
 		"option": {
 			"all": "alle",
+			"modifierKey": {
+				"ALT": "alt",
+				"CMD": "win/cmd",
+				"CTRL": "strg",
+				"SHIFT": "umschalt"
+			},
 			"no": "nein",
 			"numberSeparator": {
 				"apos": "Apostroph (')",
@@ -2740,13 +2748,7 @@
 			"unsaved": "(ungespeichert)"
 		},
 		"hotkey": {
-			"charHint": "1 Zeichen (a-z, 0-9)",
-			"modifier": {
-				"ALT": "alt",
-				"CMD": "win/cmd",
-				"CTRL": "strg",
-				"SHIFT": "umschalt"
-			}
+			"charHint": "1 Zeichen (a-z, 0-9)"
 		},
 		"iframe": {
 			"empty": "Keine URL gesetzt - nichts anzuzeigen"

@@ -13,7 +13,7 @@ export default {
 		MyAdminRepoKeys,
 		MyArticles
 	},
-	template:`<div class="contentBox admin-modules grow">
+	template:`<div class="contentBox scroll admin-modules grow">
 		
 		<!-- application help window -->
 		<div class="app-sub-window under-header" v-if="moduleIdShowHelp !== null" @mousedown.self="moduleIdShowHelp = null">
@@ -24,156 +24,154 @@ export default {
 			/>
 		</div>
 
-		<div class="content no-padding">
-			<my-tabs
-				v-model="tabTarget"
-				:entries="['modules','installFromRepo','installFromFile','repos','keys']"
-				:entriesIcon="['images/builder.png','images/box.png','images/upload.png','images/boxMultiple.png','images/key.png']"
-				:entriesText="[capApp.installedApps,capApp.repoInstallFrom,capApp.import,capApp.reposManage,capApp.publicKeys]"
-			/>
+		<my-tabs
+			v-model="tabTarget"
+			:entries="['modules','installFromRepo','installFromFile','repos','keys']"
+			:entriesIcon="['images/builder.png','images/box.png','images/upload.png','images/boxMultiple.png','images/key.png']"
+			:entriesText="[capApp.installedApps,capApp.repoInstallFrom,capApp.import,capApp.reposManage,capApp.publicKeys]"
+		/>
 
-			<my-admin-repos        v-if="tabTarget === 'repos'" />
-			<my-admin-repo-install v-if="tabTarget === 'installFromRepo'" />
-			<my-admin-repo-keys    v-if="tabTarget === 'keys'" />
+		<my-admin-repos        v-if="tabTarget === 'repos'" />
+		<my-admin-repo-install v-if="tabTarget === 'installFromRepo'" />
+		<my-admin-repo-keys    v-if="tabTarget === 'keys'" />
 
-			<template v-if="tabTarget === 'installFromFile'">
-				<div class="content">
-					<div class="column gap">
-						<my-label :caption="capApp.import" image="upload.png" :large="true" />
-						<br />
-						<input type="file"
-							@change="fileToUpload = $event.target.files[0]"
-							:disabled="!canUploadFile"
-						/>
-						<br />
-						<div class="row">
-							<my-button
-								@trigger="importModule"
-								:active="canUploadFile && fileToUpload !== null"
-								:caption="capGen.button.apply"
-								:image="fileUploading ? 'load.gif' : 'ok.png'"
-							/>
-						</div>
-					</div>
-				</div>
-			</template>
-
-			<template v-if="tabTarget === 'modules'">
-				<div class="top lower">
-					<div class="area">
-						<my-button image="save.png"
-							@trigger="set"
-							:active="hasChanges && !productionMode"
-							:caption="capGen.button.save"
-						/>
+		<template v-if="tabTarget === 'installFromFile'">
+			<div class="content">
+				<div class="column gap">
+					<my-label :caption="capApp.import" image="upload.png" :large="true" />
+					<br />
+					<input type="file"
+						@change="fileToUpload = $event.target.files[0]"
+						:disabled="!canUploadFile"
+					/>
+					<br />
+					<div class="row">
 						<my-button
-							@trigger="installAll"
-							:active="moduleIdsUpdate.length !== 0 && !installStarted && !productionMode"
-							:caption="capApp.button.updateAll.replace('{COUNT}',moduleIdsUpdate.length)"
-							:image="!installStarted ? 'download.png' : 'load.gif'"
-						/>
-					</div>
-					<div class="area">
-						<my-button image="refresh.png"
-							@trigger="updateRepo"
-							:active="modules.length !== 0"
-							:caption="capApp.button.repositoryRefresh"
+							@trigger="importModule"
+							:active="canUploadFile && fileToUpload !== null"
+							:caption="capGen.button.apply"
+							:image="fileUploading ? 'load.gif' : 'ok.png'"
 						/>
 					</div>
 				</div>
+			</div>
+		</template>
+
+		<template v-if="tabTarget === 'modules'">
+			<div class="top lower">
+				<div class="area">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="hasChanges && !productionMode"
+						:caption="capGen.button.save"
+					/>
+					<my-button
+						@trigger="installAll"
+						:active="moduleIdsUpdate.length !== 0 && !installStarted && !productionMode"
+						:caption="capApp.button.updateAll.replace('{COUNT}',moduleIdsUpdate.length)"
+						:image="!installStarted ? 'download.png' : 'load.gif'"
+					/>
+				</div>
+				<div class="area">
+					<my-button image="refresh.png"
+						@trigger="updateRepo"
+						:active="modules.length !== 0"
+						:caption="capApp.button.repositoryRefresh"
+					/>
+				</div>
+			</div>
+			
+			<div class="content no-padding">
 				
-				<div class="content no-padding">
-					
-					<!-- production mode notice -->
-					<p class="message error" v-if="productionMode">
-						{{ capApp.productionMode }}
-					</p>
-					
-					<p class="message" v-if="modules.length === 0">
-						<i>{{ capGen.nothingInstalled }}</i>
-					</p>
-					
-					<!-- installed modules -->
-					<table class="generic-table bright sticky-top" v-if="modules.length !== 0">
-						<thead>
-							<tr>
-								<th class="noWrap" colspan="2">
-									<div class="mixed-header">
-										<img src="images/module.png" />
-										<span>{{ capGen.application }}</span>
-									</div>
-								</th>
-								<th class="noWrap">
-									<div class="mixed-header">
-										<img src="images/calendar.png" />
-										<span>{{ capApp.releaseDate }}</span>
-									</div>
-								</th>
-								<th class="noWrap">
-									<div class="mixed-header">
-										<img src="images/download.png" />
-										<span>{{ capApp.update }}</span>
-									</div>
-								</th>
-								<th class="noWrap">
-									<div class="mixed-header">
-										<img src="images/question.png" />
-										<span>{{ capGen.help }}</span>
-									</div>
-								</th>
-								<th class="noWrap">
-									<div class="mixed-header">
-										<img src="images/time.png" />
-										<span>{{ capApp.changeLog }}</span>
-									</div>
-								</th>
-								<th class="noWrap" v-if="builderEnabled">
-									<div class="mixed-header">
-										<img src="images/warning.png" />
-										<span>{{ capGen.readonly }}</span>
-									</div>
-								</th>
-								<th class="noWrap">
-									<div class="mixed-header">
-										<img src="images/visible0.png" />
-										<span>{{ capApp.hidden }}</span>
-									</div>
-								</th>
-								<th class="noWrap">
-									<div class="mixed-header">
-										<img src="images/sort.png" />
-										<span>{{ capApp.position }}</span>
-									</div>
-								</th>
-								<th>
-									<div class="mixed-header">
-										<img src="images/ok.png" />
-										<span>{{ capGen.actions }}</span>
-									</div>
-								</th>
-								<th class="maximum"></th>
-							</tr>
-						</thead>
-						<tbody>
-							<my-admin-modules-item
-								v-for="(m,i) in modules"
-								@change="updateMeta"
-								@install="install"
-								@showHelp="showHelp"
-								@showLog="showLog"
-								@shownWarning="warningShown = true"
-								:installStarted="installStarted"
-								:key="m.id"
-								:module="m"
-								:options="moduleIdMapMeta[m.id]"
-								:repoModules
-								:warningShown
-							/>
-						</tbody>
-					</table>
-				</div>
-			</template>
-		</div>
+				<!-- production mode notice -->
+				<p class="message error" v-if="productionMode">
+					{{ capApp.productionMode }}
+				</p>
+				
+				<p class="message" v-if="modules.length === 0">
+					<i>{{ capGen.nothingInstalled }}</i>
+				</p>
+				
+				<!-- installed modules -->
+				<table class="generic-table bright sticky-top" v-if="modules.length !== 0">
+					<thead>
+						<tr>
+							<th class="noWrap" colspan="2">
+								<div class="mixed-header">
+									<img src="images/module.png" />
+									<span>{{ capGen.application }}</span>
+								</div>
+							</th>
+							<th class="noWrap">
+								<div class="mixed-header">
+									<img src="images/calendar.png" />
+									<span>{{ capApp.releaseDate }}</span>
+								</div>
+							</th>
+							<th class="noWrap">
+								<div class="mixed-header">
+									<img src="images/download.png" />
+									<span>{{ capApp.update }}</span>
+								</div>
+							</th>
+							<th class="noWrap">
+								<div class="mixed-header">
+									<img src="images/question.png" />
+									<span>{{ capGen.help }}</span>
+								</div>
+							</th>
+							<th class="noWrap">
+								<div class="mixed-header">
+									<img src="images/time.png" />
+									<span>{{ capApp.changeLog }}</span>
+								</div>
+							</th>
+							<th class="noWrap" v-if="builderEnabled">
+								<div class="mixed-header">
+									<img src="images/warning.png" />
+									<span>{{ capGen.readonly }}</span>
+								</div>
+							</th>
+							<th class="noWrap">
+								<div class="mixed-header">
+									<img src="images/visible0.png" />
+									<span>{{ capApp.hidden }}</span>
+								</div>
+							</th>
+							<th class="noWrap">
+								<div class="mixed-header">
+									<img src="images/sort.png" />
+									<span>{{ capApp.position }}</span>
+								</div>
+							</th>
+							<th>
+								<div class="mixed-header">
+									<img src="images/ok.png" />
+									<span>{{ capGen.actions }}</span>
+								</div>
+							</th>
+							<th class="maximum"></th>
+						</tr>
+					</thead>
+					<tbody>
+						<my-admin-modules-item
+							v-for="(m,i) in modules"
+							@change="updateMeta"
+							@install="install"
+							@showHelp="showHelp"
+							@showLog="showLog"
+							@shownWarning="warningShown = true"
+							:installStarted="installStarted"
+							:key="m.id"
+							:module="m"
+							:options="moduleIdMapMeta[m.id]"
+							:repoModules
+							:warningShown
+						/>
+					</tbody>
+				</table>
+			</div>
+		</template>
 	</div>`,
 	props:{
 		menuTitle:{ type:String, required:true }

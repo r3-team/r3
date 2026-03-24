@@ -62,6 +62,7 @@
 				"pleaseRead": "Veuillez lire avant d'enregistrer",
 				"productionMode": "Le mode de maintenance est utilisé pour mettre à jour, installer ou supprimer des applications du système.<br /><br />Passer en mode maintenance va <b>déconnecter tous les utilisateurs sans permissions d'administration</b>."
 			},
+			"hotkeyModAvailable": "In some environments, it can be helpful to deactivate certain modifiers for global hotkeys to avoid interfering with other applications. Disabled keys are not available to users.",
 			"icsDaysPost": "Exclure les événements après la date actuelle (en jours)",
 			"icsDaysPre": "Exclure les événements avant la date actuelle (en jours)",
 			"icsDownload": "Activer les abonnements calendaires",
@@ -81,6 +82,7 @@
 			"pwTitle": "Paramètres du mot de passe",
 			"title": "Configuration du système",
 			"titleGeneral": "Général",
+			"titleGlobalHotkeys": "Global hotkeys",
 			"titleIcs": "Abonnements calendaires",
 			"titleLoginBackgrounds": "Arrière-plans de connexion",
 			"titleLogins": "Users",
@@ -2537,6 +2539,12 @@
 		"numberSepThousand": "Séparateur de milliers",
 		"option": {
 			"all": "tous",
+			"modifierKey": {
+				"ALT": "alt",
+				"CMD": "win/cmd",
+				"CTRL": "ctrl",
+				"SHIFT": "shift"
+			},
 			"no": "non",
 			"numberSeparator": {
 				"apos": "Apostrophe (')",
@@ -2740,13 +2748,7 @@
 			"unsaved": "(non sauvegardé)"
 		},
 		"hotkey": {
-			"charHint": "1 character (a-z, 0-9)",
-			"modifier": {
-				"ALT": "alt",
-				"CMD": "win/cmd",
-				"CTRL": "ctrl",
-				"SHIFT": "shift"
-			}
+			"charHint": "1 character (a-z, 0-9)"
 		},
 		"iframe": {
 			"empty": "Aucune URL définie - rien à afficher"
