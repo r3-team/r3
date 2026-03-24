@@ -84,11 +84,9 @@ func GetBytesFromPart(part *multipart.Part) []byte {
 	return buf.Bytes()
 }
 func ReadUuidGetterFromUrl(r *http.Request, name string) (uuid.UUID, error) {
-	u := uuid.Nil
-
 	keys, exists := r.URL.Query()[name]
 	if !exists || len(keys[0]) < 1 {
-		return u, fmt.Errorf("missing getter '%s'", name)
+		return uuid.Nil, fmt.Errorf("missing getter '%s'", name)
 	}
 	return uuid.FromString(keys[0])
 }
@@ -102,6 +100,13 @@ func ReadInt64GetterFromUrl(r *http.Request, name string) (int64, error) {
 func ReadGetterFromUrl(r *http.Request, name string) (string, error) {
 	keys, exists := r.URL.Query()[name]
 	if !exists || len(keys[0]) < 1 {
+		return "", fmt.Errorf("missing getter: %s", name)
+	}
+	return keys[0], nil
+}
+func ReadGetterFromUrlOptional(r *http.Request, name string) (string, error) {
+	keys, exists := r.URL.Query()[name]
+	if !exists {
 		return "", fmt.Errorf("missing getter: %s", name)
 	}
 	return keys[0], nil

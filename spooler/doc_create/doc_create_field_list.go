@@ -314,9 +314,9 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 					case "numeric":
 						switch column.AggregatorRow.String {
 						case "avg":
-							text = tools.FormatFloat(columnIndexMapAggValueNum[i]/float64(columnIndexMapAggValueCnt[i]), atr.LengthFract, columnIndexMapFontFooter[i].NumberSepDec, columnIndexMapFontFooter[i].NumberSepTho)
+							text = tools.FormatFloatNumber(columnIndexMapAggValueNum[i]/float64(columnIndexMapAggValueCnt[i]), atr.LengthFract, columnIndexMapFontFooter[i].NumberSepDec, columnIndexMapFontFooter[i].NumberSepTho)
 						case "max", "min", "sum":
-							text = tools.FormatFloat(columnIndexMapAggValueNum[i], atr.LengthFract, columnIndexMapFontFooter[i].NumberSepDec, columnIndexMapFontFooter[i].NumberSepTho)
+							text = tools.FormatFloatNumber(columnIndexMapAggValueNum[i], atr.LengthFract, columnIndexMapFontFooter[i].NumberSepDec, columnIndexMapFontFooter[i].NumberSepTho)
 						}
 					case "integer", "bigint":
 						switch column.AggregatorRow.String {

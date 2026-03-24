@@ -106,6 +106,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
 		return
 	}
+	charDec, err := handler.ReadGetterFromUrlOptional(r, "charDec")
+	if err != nil {
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
+		return
+	}
+	charThou, err := handler.ReadGetterFromUrlOptional(r, "charThou")
+	if err != nil {
+		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
+		return
+	}
 	var columns []types.CsvExportColumn
 	if err := json.Unmarshal([]byte(columnsString), &columns); err != nil {
 		handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
@@ -265,7 +275,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		total, err := dataToCsv(ctx, writer, get, locUser, boolTrue, boolFalse,
-			dateFormat, columnAttributeContentUse, login.Id)
+			dateFormat, charDec, charThou, columnAttributeContentUse, login.Id)
 
 		if err != nil {
 			handler.AbortRequest(w, handler.ContextCsvDownload, err, handler.ErrGeneral)
@@ -295,7 +305,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUser *time.Location, boolTrue string,
-	boolFalse string, dateFormat string, columnAttributeContentUse []string, loginId int64) (int64, error) {
+	boolFalse string, dateFormat string, charDec string, charThou string, columnAttributeContentUse []string, loginId int64) (int64, error) {
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
@@ -332,13 +342,15 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 		case "time":
 			return time.Unix(value, 0).UTC().Format("15:04:05")
 		}
-		return fmt.Sprintf("%v", value)
+		return tools.FormatStringNumber(fmt.Sprintf("%v", value), "", charThou)
 	}
 
 	for i, j := 0, len(rows); i < j; i++ {
 
 		stringValues := make([]string, len(rows[i].Values))
 		for pos, value := range rows[i].Values {
+			fmt.Printf("value: %v, %T\n", value, value)
+
 			switch v := value.(type) {
 			case nil:
 				stringValues[pos] = ""
@@ -354,12 +366,14 @@ func dataToCsv(ctx context.Context, writer *csv.Writer, get types.DataGet, locUs
 				stringValues[pos] = parseIntegerValues(columnAttributeContentUse[pos], int64(v))
 			case int64:
 				stringValues[pos] = parseIntegerValues(columnAttributeContentUse[pos], v)
+			case float32, float64:
+				stringValues[pos] = tools.FormatStringNumber(fmt.Sprintf("%g", v), charDec, charThou)
 			case pgtype.Numeric:
-				b, err := json.Marshal(v)
+				f, err := v.Float64Value()
 				if err != nil {
 					return 0, err
 				}
-				stringValues[pos] = string(b)
+				stringValues[pos] = tools.FormatFloatNumber(f.Float64, -1, charDec, charThou)
 			default:
 				stringValues[pos] = fmt.Sprintf("%v", value)
 			}

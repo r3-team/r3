@@ -1,3 +1,4 @@
+import {isAttributeDecimal}  from './shared/attribute.js';
 import {resolveErrCode}      from './shared/error.js';
 import {getQueryExpressions} from './shared/query.js';
 
@@ -67,6 +68,14 @@ export default {
 						</select>
 					</td>
 				</tr>
+				<tr v-if="hasDecimal">
+					<td>{{ capGen.numberSepThousand }}</td>
+					<td><input v-model="charThou" /></td>
+				</tr>
+				<tr v-if="hasDecimal">
+					<td>{{ capGen.numberSepDecimal }}</td>
+					<td><input v-model="charDec" /></td>
+				</tr>
 				<tr v-if="action === 'export'">
 					<td>{{ capApp.csvTotalLimit }}</td>
 					<td><input v-model.number="totalLimit" /></td>
@@ -111,6 +120,8 @@ export default {
 			boolNative:true,         // use native bool strings (true/false) or translations (yes/no, ...)
 			cacheDenialTimeout:null, // timer do refresh cache denial timestamp
 			cacheDenialTimestamp:0,  // unix timestamp, used for CSV export cache denial
+			charDec:'.',
+			charThou:'',
 			commaChar:',',
 			dateFormat:'Y-m-d',
 			fileElm:null,
@@ -118,6 +129,7 @@ export default {
 			hasBool:false,
 			hasDate:false,
 			hasDatetime:false,
+			hasDecimal:false,
 			hasHeader:true,
 			hasTime:false,
 			message:'',
@@ -130,11 +142,12 @@ export default {
 		this.dateFormat = this.settings.dateFormat;
 		
 		for(let i = 0, j = this.columns.length; i < j; i++) {
-			let atr = this.attributeIdMap[this.columns[i].attributeId];
-			if(atr.content    === 'boolean')  this.hasBool     = true;
-			if(atr.contentUse === 'date')     this.hasDate     = true; 
-			if(atr.contentUse === 'datetime') this.hasDatetime = true;
-			if(atr.contentUse === 'time')     this.hasTime     = true;
+			const atr = this.attributeIdMap[this.columns[i].attributeId];
+			if(this.isAttributeDecimal(atr.content)) this.hasDecimal  = true;
+			if(atr.content    === 'boolean')         this.hasBool     = true;
+			if(atr.contentUse === 'date')            this.hasDate     = true; 
+			if(atr.contentUse === 'datetime')        this.hasDatetime = true;
+			if(atr.contentUse === 'time')            this.hasTime     = true;
 		}
 		this.cacheDenialTimeout = setInterval(this.setCacheDenialTimestamp,1000);
 	},
@@ -167,6 +180,8 @@ export default {
 				`token=${s.token}`,
 				`bool_false=${s.boolNative ? 'false' : s.capGen.option.no}`,
 				`bool_true=${s.boolNative ? 'true' : s.capGen.option.yes}`,
+				`charDec=${encodeURIComponent(s.charDec)}`,
+				`charThou=${encodeURIComponent(s.charThou)}`,
 				`comma_char=${encodeURIComponent(s.commaChar)}`,
 				`date_format=${encodeURIComponent(s.dateFormat)}`,
 				`timezone=${encodeURIComponent(s.timezone)}`,
@@ -197,6 +212,7 @@ export default {
 	methods:{
 		// externals
 		getQueryExpressions,
+		isAttributeDecimal,
 		resolveErrCode,
 		
 		// actions

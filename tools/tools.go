@@ -28,10 +28,15 @@ func Substring(s string, start, end int) string {
 	return s[index0:]
 }
 
-func FormatFloat(f float64, decCount int, charDec string, charThou string) string {
+func FormatFloatNumber(f float64, decCount int, charDec string, charThou string) string {
+	if decCount == -1 {
+		return FormatStringNumber(fmt.Sprintf("%g", f), charDec, charThou)
+	}
+	return FormatStringNumber(fmt.Sprintf("%.*f", decCount, f), charDec, charThou)
+}
 
-	// format with default string formatting (ie. -12.0033)
-	s := fmt.Sprintf("%.*f", decCount, f)
+// for decimals, expects default float formatting (ie. -42930.0033)
+func FormatStringNumber(s string, charDec string, charThou string) string {
 
 	// split integer and decimal
 	parts := strings.Split(s, ".")
@@ -43,15 +48,17 @@ func FormatFloat(f float64, decCount int, charDec string, charThou string) strin
 	}
 
 	// add thousands separator
-	// stop before dash character if negative number
-	lastChar := 0
-	if f < 0 {
-		lastChar = 1
-	}
-	for i := len(sInt) - 3; i > lastChar; i -= 3 {
-		sInt = sInt[:i] + charThou + sInt[i:]
-	}
+	if charThou != "" && len(sInt) > 0 {
 
+		// stop before dash character if negative number
+		lastChar := 0
+		if string(sInt[0]) == "-" {
+			lastChar = 1
+		}
+		for i := len(sInt) - 3; i > lastChar; i -= 3 {
+			sInt = sInt[:i] + charThou + sInt[i:]
+		}
+	}
 	if sDec == "" {
 		return sInt
 	}

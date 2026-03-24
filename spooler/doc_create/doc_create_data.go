@@ -128,7 +128,7 @@ func getAttributeString(font types.DocFont, atr types.Attribute, valueIf any) (b
 		if err != nil {
 			return false, "", err
 		}
-		return true, tools.FormatFloat(f.Float64, atr.LengthFract, font.NumberSepDec, font.NumberSepTho), nil
+		return true, tools.FormatFloatNumber(f.Float64, atr.LengthFract, font.NumberSepDec, font.NumberSepTho), nil
 
 	default:
 		return false, "", fmt.Errorf("failed to add field, no definition for attribute content '%s'", atr.Content)
