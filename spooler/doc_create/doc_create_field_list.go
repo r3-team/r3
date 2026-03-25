@@ -241,7 +241,7 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 			var sizeYCell float64 = 0
 			var cellLines int = 1
 
-			isString, str, err := getAttributeString(font, atr, row.Values[i])
+			isString, str, err := getAttributeString(font, atr, true, row.Values[i])
 			if err != nil {
 				return err
 			}

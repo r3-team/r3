@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"golang.org/x/net/html"
 )
 
 func getStringClean(s string, prefix, postfix string, lengthChars int) string {
@@ -247,6 +248,76 @@ func getBorderSize(b types.DocBorder) (float64, float64, float64, float64, float
 	return b.Size, sizeT, sizeR, sizeB, sizeL, bSizeCell
 }
 
+func getTextFromHtml(htmlString string) (string, error) {
+
+	var out strings.Builder
+	var anyTextWritten bool = false
+	var intentChars = "    "
+	var traverse func(n *html.Node, intentLevel int)
+
+	traverse = func(n *html.Node, intentLevel int) {
+
+		switch n.Type {
+		case html.DocumentNode, html.ElementNode:
+
+			switch n.Data {
+			case "p":
+				if anyTextWritten {
+					out.WriteString("\n")
+				}
+			case "ol", "ul":
+				if anyTextWritten {
+					out.WriteString("\n")
+				}
+				intentLevel++
+			}
+
+			var ctrChildren int
+			var hasChildList bool = false
+			for c := n.FirstChild; c != nil; c = c.NextSibling {
+
+				if c.Data == "ol" || c.Data == "ul" {
+					hasChildList = true
+				}
+				if c.Data == "li" {
+					if n.Data == "ol" {
+						out.WriteString(fmt.Sprintf("%s%d. ", strings.Repeat(intentChars, intentLevel), ctrChildren+1))
+					} else {
+						out.WriteString(fmt.Sprintf("%s• ", strings.Repeat(intentChars, intentLevel)))
+					}
+				}
+				traverse(c, intentLevel)
+
+				if c.Type == html.DocumentNode || c.Type == html.ElementNode {
+					ctrChildren++
+				}
+			}
+
+			switch n.Data {
+			case "br":
+				out.WriteString("\n")
+			case "p":
+				out.WriteString("\n")
+			case "li":
+				if !hasChildList {
+					out.WriteString("\n")
+				}
+			}
+
+		case html.TextNode:
+			out.WriteString(n.Data)
+			anyTextWritten = true
+		}
+	}
+
+	n, err := html.Parse(strings.NewReader(strings.ReplaceAll(htmlString, "\n", "")))
+	if err != nil {
+		return "", err
+	}
+	traverse(n, -1)
+	return strings.TrimSuffix(out.String(), "\n"), nil
+}
+
 func setBorder(doc *doc, b types.DocBorder) {
 
 	if b.Color.Valid {
@@ -302,7 +373,7 @@ func setFont(doc *doc, f types.DocFont) {
 	doc.p.SetFont(f.Family, f.Style.String, f.Size)
 }
 
-func setFontStyleIfMissing(doc *doc, f types.DocFont, style string) types.DocFont {
+func setFontStyleIfMissing(f types.DocFont, style string) types.DocFont {
 	if !f.Style.Valid || !strings.Contains(f.Style.String, style) {
 		f.Style.Valid = true
 		f.Style.String = f.Style.String + style
@@ -310,7 +381,7 @@ func setFontStyleIfMissing(doc *doc, f types.DocFont, style string) types.DocFon
 	return f
 }
 
-func setFontSizeByFactor(doc *doc, f types.DocFont, factor float64) types.DocFont {
+func setFontSizeByFactor(f types.DocFont, factor float64) types.DocFont {
 	f.Size *= factor
 	return f
 }

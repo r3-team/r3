@@ -21,7 +21,7 @@ func addFieldData(doc *doc, f types.DocFieldData, font types.DocFont, flowHorizo
 		return handler.ErrSchemaUnknownAttribute(f.AttributeId)
 	}
 
-	isString, str, err := getAttributeString(font, atr, v)
+	isString, str, err := getAttributeString(font, atr, false, v)
 	if err != nil {
 		return err
 	}

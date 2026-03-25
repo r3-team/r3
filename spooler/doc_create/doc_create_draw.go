@@ -244,13 +244,13 @@ func drawHtmlTraverse(doc *doc, fontParent types.DocFont, lineHeightDef float64,
 			}
 			switch n.Data {
 			case "h1":
-				font = setFontSizeByFactor(doc, font, 1.4)
+				font = setFontSizeByFactor(font, 1.4)
 			case "h2":
-				font = setFontSizeByFactor(doc, font, 1.25)
+				font = setFontSizeByFactor(font, 1.25)
 			case "h3":
-				font = setFontSizeByFactor(doc, font, 1.15)
+				font = setFontSizeByFactor(font, 1.15)
 			case "h4":
-				font = setFontStyleIfMissing(doc, font, "B")
+				font = setFontStyleIfMissing(font, "B")
 			}
 		case "p":
 			if !firstChild {
@@ -274,11 +274,11 @@ func drawHtmlTraverse(doc *doc, fontParent types.DocFont, lineHeightDef float64,
 			doc.p.CellFormat(sizeX, lineHeightDef, listChars, "", 0, "R", false, 0, "")
 			doc.p.SetX(pageMarginL)
 		case "b", "strong":
-			font = setFontStyleIfMissing(doc, font, "B")
+			font = setFontStyleIfMissing(font, "B")
 		case "i", "em":
-			font = setFontStyleIfMissing(doc, font, "I")
+			font = setFontStyleIfMissing(font, "I")
 		case "s":
-			font = setFontStyleIfMissing(doc, font, "S")
+			font = setFontStyleIfMissing(font, "S")
 		}
 
 		var ctrChildren int

@@ -56,7 +56,7 @@ func getDataDoc(ctx context.Context, doc *doc, loginId int64, recordIdDoc int64,
 }
 
 // returns whether an attribute value can be returned as string and the string value itself if valid
-func getAttributeString(font types.DocFont, atr types.Attribute, valueIf any) (bool, string, error) {
+func getAttributeString(font types.DocFont, atr types.Attribute, convertHtmlToString bool, valueIf any) (bool, string, error) {
 
 	if valueIf == nil {
 		return true, "", nil
@@ -78,7 +78,16 @@ func getAttributeString(font types.DocFont, atr types.Attribute, valueIf any) (b
 			return true, v, nil
 		case "color":
 			return true, fmt.Sprintf("#%s", v), nil
-		case "barcode", "drawing", "richtext":
+		case "richtext":
+			if convertHtmlToString {
+				s, err := getTextFromHtml(v)
+				if err != nil {
+					return false, "", err
+				}
+				return true, s, nil
+			}
+			return false, "", nil
+		case "barcode", "drawing":
 			return false, "", nil
 		}
 	case "boolean":
