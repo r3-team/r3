@@ -1,9 +1,11 @@
 import {isAttributeDecimal}  from './shared/attribute.js';
 import {resolveErrCode}      from './shared/error.js';
 import {getQueryExpressions} from './shared/query.js';
+import MyInputNumberSep      from './inputNumberSep.js';
 
 export default {
 	name:'my-list-csv',
+	components:{ MyInputNumberSep },
 	template:`
 		<p v-if="action === 'export'">{{ capApp.message.csvExport }}</p>
 		<p v-if="action === 'import'">{{ capApp.message.csvImport.replace('{COUNT}',columns.length) }}</p>
@@ -25,7 +27,7 @@ export default {
 				</tr>
 				<tr>
 					<td>{{ capApp.csvCommaChar }}</td>
-					<td><input maxlength="1" size="1" @input="setOption('csvCharComma',$event.target.value)" :value="charComma" />
+					<td><input maxlength="1" size="1" @input="setOption('csvCharComma',$event.target.value)" v-model="charComma" />
 					</td>
 				</tr>
 				<tr v-if="hasTime">
@@ -71,11 +73,17 @@ export default {
 				</tr>
 				<tr v-if="hasDecimal">
 					<td>{{ capGen.numberSepThousand }}</td>
-					<td><input maxlength="1" size="1" @input="setOption('csvCharThou',$event.target.value)" :value="charThou" /></td>
+					<td>
+						<my-input-number-sep
+							@update:modelValue="setOption('csvCharThou',$event === '0' ? '' : $event)"
+							:modelValue="charThou === '' ? '0' : charThou"
+							:allowNone="true"
+						/>
+					</td>
 				</tr>
 				<tr v-if="hasDecimal">
 					<td>{{ capGen.numberSepDecimal }}</td>
-					<td><input maxlength="1" size="1" @input="setOption('csvCharDec',$event.target.value)" :value="charDec" /></td>
+					<td><my-input-number-sep @update:modelValue="setOption('csvCharDec',$event)" :modelValue="charDec" :allowNone="false" /></td>
 				</tr>
 				<tr v-if="action === 'export'">
 					<td>{{ capApp.csvTotalLimit }}</td>
@@ -96,13 +104,13 @@ export default {
 			<my-button image="upload.png"
 				v-if="action === 'import'"
 				@trigger="send"
-				:active="fileSet"
+				:active="fileSet && charComma !== ''"
 				:caption="capGen.button.import"
 			/>
 		</div>
 		
-		<a download="export.csv" v-if="action === 'export'" :href="exportHref">
-			<my-button image="download.png" :caption="capGen.button.export" />
+		<a download="export.csv" v-if="action === 'export'" :href="charComma !== '' ? exportHref : null">
+			<my-button image="download.png" :active="charComma !== ''" :caption="capGen.button.export" />
 		</a>`,
 	props:{
 		columns:      { type:Array,  required:true },
@@ -122,6 +130,7 @@ export default {
 			boolNative:true,         // use native bool strings (true/false) or translations (yes/no, ...)
 			cacheDenialTimeout:null, // timer do refresh cache denial timestamp
 			cacheDenialTimestamp:0,  // unix timestamp, used for CSV export cache denial
+			charComma:',',
 			fileElm:null,
 			fileSet:false,
 			hasBool:false,
@@ -136,7 +145,8 @@ export default {
 		};
 	},
 	mounted() {
-		this.action = this.isExport ? 'export' : 'import';
+		this.action    = this.isExport ? 'export' : 'import';
+		this.charComma = this.$root.getOrFallback(this.loginOptions,'csvCharComma',',');
 		
 		for(let i = 0, j = this.columns.length; i < j; i++) {
 			const atr = this.attributeIdMap[this.columns[i].attributeId];
@@ -196,7 +206,6 @@ export default {
 		},
 
 		// inputs
-		charComma: s => s.$root.getOrFallback(s.loginOptions,'csvCharComma',','),
 		charDec:   s => s.$root.getOrFallback(s.loginOptions,'csvCharDec','.'),
 		charThou:  s => s.$root.getOrFallback(s.loginOptions,'csvCharThou',''),
 		dateFormat:s => s.$root.getOrFallback(s.loginOptions,'csvDateFormat',s.settings.dateFormat),
@@ -231,8 +240,7 @@ export default {
 			this.messageError = isError;
 		},
 		setOption(name,value) {
-			if(value !== '')
-				this.$emit('set-login-option',name,value);
+			this.$emit('set-login-option',name,value);
 		},
 		send() {
 			let formData    = new FormData();
