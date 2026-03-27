@@ -215,7 +215,7 @@ export default {
 			:columns="field.columns"
 			:columnIdShow
 			:groupName="field.id+'_columns'"
-			:hasCaptions="isList"
+			:hasCaptions="isList || isKanban"
 		/>
 		
 		<!-- nested fields in container -->
