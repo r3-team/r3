@@ -10,7 +10,6 @@ import {
 	getUnixNowDate,
 	isUnixUtcZero
 } from './shared/time.js';
-export {MyCalendarDays as default};
 
 const MyCalendarDaysEvent = {
 	name:'my-calendar-days-event',
@@ -58,76 +57,82 @@ const MyCalendarDaysEvent = {
 	emits:['click','click-middle','clipboard']
 };
 
-const MyCalendarDays = {
+export default {
 	name:'my-calendar-days',
 	components:{ MyCalendarDaysEvent },
 	template:`<div class="calendar-days">
-		<div class="days full">
-			<div class="calendar-days-labels fullDay">
-				<div class="header"></div>
-				<span v-if="!isInput && events.fullDays.length !== 0"
-					:style="events.fullDaysHeight"
-				>{{ capApp.fullDay }}</span>
+		<div class="calendar-days-line header" :class="{ 'is-input':isInput }">
+			<div class="calendar-days-labels"></div>
+			<div class="calendar-days-line-content">
+				<div v-for="d in events.fullDays" class="calendar-days-line-day" :class="{ today:d.today }" v-html="d.caption"></div>
 			</div>
-			<div v-for="d in events.fullDays" class="day" :class="{ weekend:d.weekend }">
-				<div class="header" v-html="d.caption" :class="{ today:d.today }"></div>
-				<div class="events-full" :style="events.fullDaysHeight">
-					
-					<!-- date input (days) -->
-					<div class="dayInput"
-						@mousedown.left="dateClick(d.unix,true,true)"
-						@mouseover="dateHover(d.unix)"
-						@mouseup.left="dateClick(d.unix,false,true)"
-						:class="{ active:dateInputActive(d.unix,true), clickable:hasCreate || isInput }"
-					></div>
-					
-					<my-calendar-days-event class="full"
-						v-for="ei in d.eventIndexes"
-						@click="eventClick(events.fullDaysEvents[ei].row,false)"
-						@click-middle="eventClick(events.fullDaysEvents[ei].row,true)"
-						@clipboard="$emit('clipboard')"
-						:columns="columns"
-						:columnBatches="columnBatches"
-						:hasUpdate="hasUpdate"
-						:row="events.fullDaysEvents[ei].row"
-						:style="events.fullDaysEvents[ei].style"
-						:styleCard="events.fullDaysEvents[ei].styleCard"
-						:values="events.fullDaysEvents[ei].values"
-					/>
+		</div>
+		<div class="calendar-days-line full" v-if="!isInput">
+			<div class="calendar-days-labels">
+				<span v-if="!isInput && events.fullDays.length !== 0" :style="events.fullDaysHeight">{{ capApp.fullDay }}</span>
+			</div>
+			<div class="calendar-days-line-content">
+				<div class="calendar-days-line-day" v-for="d in events.fullDays" :class="{ weekend:d.weekend }">
+					<div class="events-full" :style="events.fullDaysHeight">
+						
+						<!-- date input (days) -->
+						<div class="dayInput"
+							@mousedown.left="dateClick(d.unix,true,true)"
+							@mouseover="dateHover(d.unix)"
+							@mouseup.left="dateClick(d.unix,false,true)"
+							:class="{ active:dateInputActive(d.unix,true), clickable:hasCreate || isInput }"
+						></div>
+						
+						<my-calendar-days-event class="full"
+							v-for="ei in d.eventIndexes"
+							@click="eventClick(events.fullDaysEvents[ei].row,false)"
+							@click-middle="eventClick(events.fullDaysEvents[ei].row,true)"
+							@clipboard="$emit('clipboard')"
+							:columns="columns"
+							:columnBatches="columnBatches"
+							:hasUpdate="hasUpdate"
+							:row="events.fullDaysEvents[ei].row"
+							:style="events.fullDaysEvents[ei].style"
+							:styleCard="events.fullDaysEvents[ei].styleCard"
+							:values="events.fullDaysEvents[ei].values"
+						/>
+					</div>
 				</div>
 			</div>
 		</div>
-		<div class="days">
+		<div class="calendar-days-line" :class="{ 'is-input':isInput }">
 			<div class="calendar-days-labels">
 				<span v-for="i in 24" :style="heightHourStyle" :ref="refHourLabel + i">
 					{{ getStringFilled(i-1,2,'0')+':00' }}
 				</span>
 			</div>
-			<div class="day" v-for="(d,i) in events.partDays" :class="{ weekend:d.weekend }">
-				
-				<!-- date input (hours) -->
-				<div class="hourInput"
-					v-for="h in d.hours"
-					@mousedown.left="dateClick(h,true,false)"
-					@mouseover="dateHover(h)"
-					@mouseup.left="dateClick(h,false,false)"
-					:class="{ active:dateInputActive(h,false), clickable:hasCreate || isInput }"
-					:style="heightHourStyle"
-				></div>
-				
-				<my-calendar-days-event
-					v-for="e in d.events"
-					@click="eventClick(e.row,false)"
-					@click-middle="eventClick(e.row,true)"
-					@clipboard="$emit('clipboard')"
-					:columns="columns"
-					:columnBatches="columnBatches"
-					:hasUpdate="hasUpdate"
-					:row="e.row"
-					:style="e.style"
-					:styleCard="e.styleCard"
-					:values="e.values"
-				/>
+			<div class="calendar-days-line-content">
+				<div class="calendar-days-line-day" v-for="(d,i) in events.partDays" :class="{ weekend:d.weekend }">
+					
+					<!-- date input (hours) -->
+					<div class="hourInput"
+						v-for="h in d.hours"
+						@mousedown.left="dateClick(h,true,false)"
+						@mouseover="dateHover(h)"
+						@mouseup.left="dateClick(h,false,false)"
+						:class="{ active:dateInputActive(h,false), clickable:hasCreate || isInput }"
+						:style="heightHourStyle"
+					></div>
+					
+					<my-calendar-days-event
+						v-for="e in d.events"
+						@click="eventClick(e.row,false)"
+						@click-middle="eventClick(e.row,true)"
+						@clipboard="$emit('clipboard')"
+						:columns="columns"
+						:columnBatches="columnBatches"
+						:hasUpdate="hasUpdate"
+						:row="e.row"
+						:style="e.style"
+						:styleCard="e.styleCard"
+						:values="e.values"
+					/>
+				</div>
 			</div>
 		</div>
 	</div>`,
@@ -158,7 +163,7 @@ const MyCalendarDays = {
 		};
 	},
 	computed:{
-		events:(s) => {
+		events:s => {
 			const unix0Cal    = Math.floor(s.date0.getTime() / 1000); // unix start of calendar
 			const unix0CalDay = Math.floor(s.date0.getTime() / 1000) - s.date0.getTimezoneOffset()*60;
 			const dayLabel    = s.isMobile || s.isInput ? 'weekDayShort' : 'weekDay';
@@ -352,26 +357,26 @@ const MyCalendarDays = {
 		},
 		
 		// simple
-		columnBatches:   (s) => s.getColumnBatches(null,s.columns,[],[],[],false),
-		heightHourPx:    (s) => (s.isInput ? 3 : 11) * s.zoom,
-		heightHourPxFull:(s) => 9 * s.zoom,
-		heightHourStyle: (s) => `height:${s.heightHourPx}px;`,
-		unixSelect0:     (s) => s.dateSelect0 !== null ? Math.floor(s.dateSelect0.getTime() / 1000) : 0,
-		unixSelect1:     (s) => s.dateSelect1 !== null ? Math.floor(s.dateSelect1.getTime() / 1000) : 0,
+		columnBatches:   s => s.getColumnBatches(null,s.columns,[],[],[],false),
+		heightHourPx:    s => (s.isInput ? 3 : 11) * s.zoom,
+		heightHourPxFull:s => 9 * s.zoom,
+		heightHourStyle: s => `height:${s.heightHourPx}px;`,
+		unixSelect0:     s => s.dateSelect0 !== null ? Math.floor(s.dateSelect0.getTime() / 1000) : 0,
+		unixSelect1:     s => s.dateSelect1 !== null ? Math.floor(s.dateSelect1.getTime() / 1000) : 0,
 		
 		// stores
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.calendar,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		isMobile:      (s) => s.$store.getters.isMobile,
-		settings:      (s) => s.$store.getters.settings
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		capApp:        s => s.$store.getters.captions.calendar,
+		capGen:        s => s.$store.getters.captions.generic,
+		isMobile:      s => s.$store.getters.isMobile,
+		settings:      s => s.$store.getters.settings
 	},
 	mounted() {
 		if(!this.isInput) {
 			// scroll to 07:00
 			const el = this.$refs[this.refHourLabel + 8];
 			
-			if(typeof el !== 'undefined')
+			if(el !== undefined)
 				el[0].scrollIntoView();
 		}
 	},

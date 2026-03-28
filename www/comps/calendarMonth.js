@@ -12,7 +12,7 @@ import {
 
 export default {
 	name:'my-calendar-month',
-	template:`<div class="calendar-month">
+	template:`<div class="calendar-month" :class="{ 'is-input':isInput }">
 		
 		<!-- week day header -->
 		<div class="days">

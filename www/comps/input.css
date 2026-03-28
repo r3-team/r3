@@ -463,32 +463,6 @@
 	line-height:28px;
 }
 
-/* calendar overwrites (month/days views) */
-.input-date-dropdown.calendar-month .day{
-	min-height:unset !important;
-	line-height:16px;
-}
-.input-date-dropdown.calendar-month .days .item{
-	padding:0px;
-	text-align:center;
-}
-.input-date-dropdown.calendar-month .day h1{
-	margin:4px 6px;
-	text-align:center;
-	font-size:100%;
-	color:var(--color-font) !important;
-}
-
-.input-date-dropdown.calendar-days .header,
-.input-date-dropdown.calendar-days .calendar-days-labels span{
-	padding:0px 3px;
-	font-size:80%;
-	line-height:100%;
-}
-.input-date-dropdown.calendar-days .header{
-	font-size:90%;
-}
-
 /* UUID input */
 .input-uuid{
 	flex:1 1 auto;

@@ -311,38 +311,38 @@ const MyCalendar = {
 		</div>
 		
 		<div class="calendar-content">
-			<my-calendar-days class="scroll"
+			<my-calendar-days
 				v-if="!isMonth"
 				@clipboard="$emit('clipboard')"
 				@date-selected="dateSelected"
 				@open-form="(...args) => $emit('open-form',...args)"
-				:columns="columns"
-				:date="date"
-				:date0="date0"
-				:date1="date1"
-				:daysShow="daysShow"
+				:columns
+				:date
+				:date0
+				:date1
+				:daysShow
 				:hasColor="attributeIdColor !== null"
-				:hasCreate="hasCreate"
-				:hasUpdate="hasUpdate"
+				:hasCreate
+				:hasUpdate
 				:isRange="true"
-				:rows="rows"
-				:zoom="zoom"
+				:rows
+				:zoom
 			/>
 			<my-calendar-month class="scroll"
 				v-if="isMonth"
 				@date-selected="dateSelected"
 				@open-form="(...args) => $emit('open-form',...args)"
 				:columns="columns"
-				:date="date"
-				:date0="date0"
-				:date1="date1"
-				:dateSelect0="dateSelect0"
-				:dateSelect1="dateSelect1"
+				:date
+				:date0
+				:date1
+				:dateSelect0
+				:dateSelect1
 				:hasColor="attributeIdColor !== null"
-				:hasCreate="hasCreate"
-				:hasUpdate="hasUpdate"
+				:hasCreate
+				:hasUpdate
 				:isRange="true"
-				:rows="rows"
+				:rows
 			/>
 			
 			<!-- inline form -->

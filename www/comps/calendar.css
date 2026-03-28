@@ -34,15 +34,14 @@
 
 /* days view */
 .calendar-days{
+	--calendar-days-label-width:60px;
+	--calendar-days-header-height:30px;
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
 }
-.calendar-days.scroll{
-	overflow:auto;
-}
 .calendar-days-labels{
-	width:60px;
+	flex:0 0 60px;
 	display:flex;
 	flex-flow:column nowrap;
 }
@@ -54,59 +53,67 @@
 	background-color:var(--color-bg);
 	border-bottom:1px dotted var(--color-border);
 }
-.calendar-days-labels.fullDay span{
-	overflow:hidden;
-	border-bottom:none;
+.calendar-days-line-content{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
 }
-.calendar-days .days{
+.calendar-days-line,
+.calendar-days-line-full,
+.calendar-days-line-header{
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
 	border-bottom:1px solid var(--color-border);
 	background-color:var(--color-input);
+	align-items:flex-start;
+	overflow-x:hidden;
+	overflow-y:scroll;
 }
-.calendar-days .days.full{
+.calendar-days-line.full{
 	flex:0 0 auto;
+	max-height:40%;
 	border-bottom:2px solid var(--color-border);
-	position:sticky;
-	top:0px;
-	z-index:var(--z-index-calendar-days-full-days);
 }
-.calendar-days .day{
-	flex:1 1 0px;
+.calendar-days-line.header{
+	flex:0 0 auto;
+	min-height:var(--calendar-days-header-height);
+	line-height:var(--calendar-days-header-height);
+	text-align:center;
+	background-color:var(--color-bg);
+}
+.calendar-days-line.is-input{
+	font-size:80%;
+	line-height:unset;
+	min-height:unset;
+	overflow:hidden;
+}
+.calendar-days-line.header.is-input{
+	font-size:90%;
+}
+.calendar-days-line-day{
+	flex:1 0 0px;
 	position:relative;
 	border-left:1px solid var(--color-border);
 	display:flex;
 	flex-flow:column nowrap;
 }
-.calendar-days .day.weekend{
+.calendar-days-line-day.weekend{
 	background-color:var(--color-accent2);
 }
-.calendar-days .header{
-	flex:1 1 auto;
-	min-height:30px;
-	text-align:center;
-	line-height:30px;
-	background-color:var(--color-bg);
-	border-bottom:1px solid var(--color-border);
-}
-.calendar-days .header.today{
-	font-weight:bold;
-	text-decoration:underline;
-}
-.calendar-days .events-full{
+.calendar-days-line .events-full{
 	flex:0 0 auto;
 	position:relative;
 }
-.calendar-days .eventWrap{
+.calendar-days-line .eventWrap{
 	position:absolute;
 	display:flex;
 	flex-flow:column nowrap;
 }
-.calendar-days .eventWrap.full{
+.calendar-days-line .eventWrap.full{
 	z-index:var(--z-index-calendar-days-full-day);
 }
-.calendar-days .event{
+.calendar-days-line .event{
 	flex:1 1 auto;
 	margin:2px;
 	padding:3px 5px;
@@ -119,33 +126,35 @@
 	flex-flow:column nowrap;
 	gap:5px;
 }
-.calendar-days .event.clickable:hover,
-.calendar-days .event.clickable:focus{
+.calendar-days-line .event.clickable:hover,
+.calendar-days-line .event.clickable:focus{
 	filter:grayscale(5%) brightness(95%);
 	border-left:2px solid var(--color-border);
 }
-.calendar-days .event.clickable:active{
+.calendar-days-line .event.clickable:active{
 	margin:3px;
 }
-.calendar-days .dayInput{
+.calendar-days-line .dayInput{
 	height:100%;
 }
-.calendar-days .dayInput,
-.calendar-days .hourInput{
+.calendar-days-line .dayInput,
+.calendar-days-line .hourInput{
+	flex:0 0 auto;
 	opacity:0.9;
 	box-sizing:border-box;
 	border-bottom:1px dotted var(--color-border);
 }
-.calendar-days .dayInput.clickable.active,
-.calendar-days .hourInput.clickable.active{
+.calendar-days-line .dayInput.clickable.active,
+.calendar-days-line .hourInput.clickable.active{
 	background-color:var(--color-input);
 	filter:brightness(80%);
 }
-.calendar-days .dayInput.clickable:hover,
-.calendar-days .hourInput.clickable:hover{
+.calendar-days-line .dayInput.clickable:hover,
+.calendar-days-line .hourInput.clickable:hover{
 	background-color:var(--color-input);
 	filter:brightness(90%);
 }
+
 
 /* month view */
 .calendar-month{
@@ -216,6 +225,21 @@
 	color:var(--color-font);
 	font-weight:bold;
 	text-decoration:underline;
+}
+.calendar-month.is-input .days{
+	flex:0 1 auto;
+	padding:4px 0px;
+	text-align:center;
+	line-height:unset;
+}
+.calendar-month.is-input .day{
+	min-height:unset;
+}
+.calendar-month.is-input .day h1{
+	margin:4px 6px;
+	text-align:center;
+	font-size:100%;
+	color:var(--color-font);
 }
 
 /* full day event */

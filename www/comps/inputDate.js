@@ -465,31 +465,31 @@ export default {
 				</div>
 			</div>
 			
-			<my-calendar-days class="input-date-dropdown"
+			<my-calendar-days
 				v-if="!viewMonth"
 				@set-date="date = $event"
 				@date-selected="dateSet"
-				:date="date"
-				:date0="date0"
-				:date1="date1"
-				:dateSelect0="dateSelect0"
-				:dateSelect1="dateSelect1"
+				:date
+				:date0
+				:date1
+				:dateSelect0
+				:dateSelect1
 				:daysShow="7"
 				:isInput="true"
-				:isRange="isRange"
+				:isRange
 			/>
-			<my-calendar-month class="input-date-dropdown"
+			<my-calendar-month
 				v-if="viewMonth"
 				@set-date="date = $event"
 				@date-selected="dateSetByMonthView"
-				:date="date"
-				:date0="date0"
-				:date1="date1"
-				:dateSelect0="dateSelect0"
-				:dateSelect1="dateSelect1"
+				:date
+				:date0
+				:date1
+				:dateSelect0
+				:dateSelect1
 				:inputTime="isTime"
 				:isInput="true"
-				:isRange="isRange"
+				:isRange
 			/>
 		</teleport>
 	</div>`,
