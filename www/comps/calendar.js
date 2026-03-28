@@ -7,6 +7,7 @@ import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
 import {
 	getDateAtUtcZero,
+	getDateFormatNoYear,
 	getDateFromWeek,
 	getUnixFromDate,
 	getWeeksInYear,
@@ -65,7 +66,11 @@ const MyCalendarDateSelect = {
 			v-if="isWeek"
 			v-model="weekInput"
 		>
-			<option v-for="i in weeksInYear" :value="i">
+			<option
+				v-for="i in weeksInYear"
+				:title="weekInputTitle(i,yearInput)"
+				:value="i"
+			>
 				{{ capApp.option.calendarWeek + ' ' + i }}
 			</option>
 		</select>
@@ -120,13 +125,14 @@ const MyCalendarDateSelect = {
 		},
 		
 		// simple
-		isDays:     (s) => s.daysShow === 1 || s.daysShow === 3,
-		isMonth:    (s) => s.daysShow === 42,
-		isWeek:     (s) => s.daysShow === 5 || s.daysShow === 7,
-		weeksInYear:(s) => s.isWeek ? s.getWeeksInYear(s.modelValue.getFullYear()) : 0,
+		isDays:     s => s.daysShow === 1 || s.daysShow === 3,
+		isMonth:    s => s.daysShow === 42,
+		isWeek:     s => s.daysShow === 5 || s.daysShow === 7,
+		weeksInYear:s => s.isWeek ? s.getWeeksInYear(s.modelValue.getFullYear()) : 0,
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.calendar
+		capApp:  s => s.$store.getters.captions.calendar,
+		settings:s => s.$store.getters.settings
 	},
 	emits:['update:modelValue'],
 	mounted() {
@@ -139,9 +145,21 @@ const MyCalendarDateSelect = {
 	},
 	methods:{
 		// external
+		getDateFormatNoYear,
 		getDateFromWeek,
 		getWeek,
 		getWeeksInYear,
+
+		// presentation
+		weekInputTitle(week,year) {
+			const d0 = getDateFromWeek(week,year);
+			if(this.settings.sundayFirstDow)
+				d0.setDate(d0.getDate()-1);
+
+			const d1 = new Date(d0.getTime())
+			d1.setDate(d1.getDate()+6);
+			return `${this.getDateFormatNoYear(d0,this.settings.dateFormat)} - ${this.getDateFormatNoYear(d1,this.settings.dateFormat)}`;
+		},
 		
 		// actions
 		handleHotkeys(e) {
