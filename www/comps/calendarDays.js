@@ -100,9 +100,9 @@ export default {
 				</div>
 			</div>
 		</div>
-		<div class="calendar-days-line" :class="{ 'is-input':isInput }">
+		<div class="calendar-days-line" :class="{ 'is-input':isInput }" ref="days">
 			<div class="calendar-days-labels">
-				<span v-for="i in 24" :style="heightHourStyle" :ref="refHourLabel + i">
+				<span v-for="i in 24" :style="heightHourStyle">
 					{{ getStringFilled(i-1,2,'0')+':00' }}
 				</span>
 			</div>
@@ -155,7 +155,7 @@ export default {
 	emits:['clipboard','date-selected','open-form'],
 	data() {
 		return {
-			refHourLabel:'hourLabel',
+			scrolledToStart:false,
 			unixInput0:null,       // dates being hovered over for event input, start
 			unixInput1:null,       // dates being hovered over for event input, end
 			unixInputActive:false, // activated on first mousedown over an empty date input
@@ -361,6 +361,7 @@ export default {
 		heightHourPx:    s => (s.isInput ? 3 : 11) * s.zoom,
 		heightHourPxFull:s => 9 * s.zoom,
 		heightHourStyle: s => `height:${s.heightHourPx}px;`,
+		isWithData:      s => s.rows.length !== 0,
 		unixSelect0:     s => s.dateSelect0 !== null ? Math.floor(s.dateSelect0.getTime() / 1000) : 0,
 		unixSelect1:     s => s.dateSelect1 !== null ? Math.floor(s.dateSelect1.getTime() / 1000) : 0,
 		
@@ -373,11 +374,17 @@ export default {
 	},
 	mounted() {
 		if(!this.isInput) {
-			// scroll to 07:00
-			const el = this.$refs[this.refHourLabel + 8];
-			
-			if(el !== undefined)
-				el[0].scrollIntoView();
+			this.$watch('events',() => {
+				// scroll to 07:00 if data is already loaded
+				if(this.scrolledToStart || !this.isWithData)
+					return;
+
+				this.$nextTick(() => {
+					this.scrolledToStart = true;
+					if(this.$refs.days !== undefined)
+						this.$refs.days.scrollTo(0,this.heightHourPx * 7);	
+				});
+			});
 		}
 	},
 	methods:{
