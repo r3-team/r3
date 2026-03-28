@@ -63,7 +63,7 @@ func Copy_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, n
 
 			// replace IDs inside fields
 			// first run: field IDs
-			// second run: IDs for (sub)queries, columns, tabs
+			// second run: IDs for (sub)queries, columns, tabs, fields referencing other fields (openDoc)
 			fieldIf, err = replaceFieldIds(ctx, tx, fieldIf, idMapReplaced, runs == 0)
 			if err != nil {
 				return err
@@ -280,17 +280,25 @@ func Set_tx(ctx context.Context, tx pgx.Tx, frm types.Form) error {
 }
 
 // form duplication
-func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf interface{},
-	idMapReplaced map[uuid.UUID]uuid.UUID, setFieldIds bool) (interface{}, error) {
-
+func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf any, idMapReplaced map[uuid.UUID]uuid.UUID, setFieldIds bool) (any, error) {
 	var err error
+
+	// replace field ID to attach doc to if it was replaced
+	replaceOpenDoc := func(openDoc types.OpenDoc) types.OpenDoc {
+		if !openDoc.FieldIdAddTo.Valid {
+			return openDoc
+		}
+		if _, exists := idMapReplaced[openDoc.FieldIdAddTo.Bytes]; exists {
+			openDoc.FieldIdAddTo = pgtype.UUID{Bytes: idMapReplaced[openDoc.FieldIdAddTo.Bytes], Valid: true}
+		}
+		return openDoc
+	}
 
 	// replace form ID to open if it was replaced (field opening its own form)
 	replaceOpenForm := func(openForm types.OpenForm) types.OpenForm {
 		if openForm.FormIdOpen == uuid.Nil {
 			return openForm
 		}
-
 		if _, exists := idMapReplaced[openForm.FormIdOpen]; exists {
 			openForm.FormIdOpen = idMapReplaced[openForm.FormIdOpen]
 		}
@@ -312,6 +320,7 @@ func replaceFieldIds(ctx context.Context, tx pgx.Tx, fieldIf interface{},
 				return nil, err
 			}
 		} else {
+			field.OpenDoc = replaceOpenDoc(field.OpenDoc)
 			field.OpenForm = replaceOpenForm(field.OpenForm)
 		}
 
