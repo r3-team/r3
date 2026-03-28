@@ -1,4 +1,5 @@
-import MyBuilderFormInput from './builderFormInput.js';
+import {getDependentModules} from '../shared/builder.js';
+import MyBuilderFormInput    from './builderFormInput.js';
 import {
 	getTemplateApi,
 	getTemplateCollection,
@@ -46,6 +47,23 @@ export default {
 				<!-- additional options -->
 				<div class="options" v-if="showOptions">
 					<h2>{{ capApp.options }}</h2>
+					
+					<!-- doc: duplicate document -->
+					<template v-if="entity === 'doc'">
+						<div class="row centered gap">
+							<span>{{ capApp.docIdDuplicate }}</span>
+							<select v-model="inputs.docIdDuplicate">
+								<option value="">-</option>
+								<option v-for="d in module.docs" :value="d.id">{{ d.name }}</option>
+								<optgroup
+									v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.docs.length !== 0)"
+									:label="mod.name"
+								>
+									<option v-for="d in mod.docs" :value="d.id">{{ d.name }}</option>
+								</optgroup>
+							</select>
+						</div>
+					</template>
 					
 					<!-- form: duplicate form -->
 					<template v-if="entity === 'form'">
@@ -141,6 +159,9 @@ export default {
 			inputs:{
 				// all
 				name:'',
+
+				// doc
+				docIdDuplicate:'',
 				
 				// form
 				formIdDuplicate:null,
@@ -248,7 +269,7 @@ export default {
 		// simple
 		canSave:    (s) => s.inputs.name !== '' && !s.nameTaken && !s.nameTooLong,
 		nameTooLong:(s) => s.inputs.name !== '' && s.inputs.name.length > s.nameMaxLength,
-		showOptions:(s) => ['form','jsFunction','pgFunction','relation','variable'].includes(s.entity),
+		showOptions:(s) => ['doc','form','jsFunction','pgFunction','relation','variable'].includes(s.entity),
 		
 		// stores
 		module:     (s) => s.moduleIdMap[s.moduleId],
@@ -275,6 +296,7 @@ export default {
 	},
 	methods:{
 		// externals
+		getDependentModules,
 		getTemplateApi,
 		getTemplateCollection,
 		getTemplateDoc,
@@ -301,7 +323,6 @@ export default {
 			switch(this.entity) {
 				case 'api':	       request = this.getTemplateApi(this.module.id,this.inputs.name); break;
 				case 'collection': request = this.getTemplateCollection(this.module.id,this.inputs.name); break;
-				case 'doc':        request = this.getTemplateDoc(this.module.id,this.builderLanguage,this.inputs.name); break;
 				case 'jsFunction': request = this.getTemplateJsFunction(this.moduleId,this.inputs.formId,this.inputs.name); break;
 				case 'module':     request = this.getTemplateModule(this.inputs.name); break;
 				case 'pgFunction': request = this.getTemplatePgFunction(this.moduleId,this.inputs.name,this.inputs.template,this.inputs.isTrigger); break;
@@ -310,6 +331,19 @@ export default {
 				case 'searchBar':  request = this.getTemplateSearchBar(this.moduleId,this.inputs.name); break;
 				case 'variable':   request = this.getTemplateVariable(this.moduleId,this.inputs.formId,this.inputs.name); break;
 				case 'widget':     request = this.getTemplateWidget(this.moduleId,this.inputs.name); break;
+				case 'doc':        
+					if(this.inputs.docIdDuplicate !== '') {
+						action = 'copy';
+						request = {
+							id:this.inputs.docIdDuplicate,
+							moduleId:this.moduleId,
+							newName:this.inputs.name
+						};
+						dependencyCheck = true;
+					} else {
+						request = this.getTemplateDoc(this.module.id,this.builderLanguage,this.inputs.name);
+					}
+				break;
 				case 'form':
 					if(this.inputs.formIdDuplicate !== null) {
 						action = 'copy';

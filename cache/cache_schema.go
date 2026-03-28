@@ -363,7 +363,7 @@ func updateSchemaCache_tx(ctx context.Context, tx pgx.Tx, moduleIds []uuid.UUID)
 		// get documents
 		log.Info(log.ContextCache, "load documents")
 
-		mod.Docs, err = doc.Get_tx(ctx, tx, mod.Id)
+		mod.Docs, err = doc.Get_tx(ctx, tx, mod.Id, []uuid.UUID{})
 		if err != nil {
 			return err
 		}

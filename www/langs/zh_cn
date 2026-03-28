@@ -1657,6 +1657,7 @@
 			"api": "新API",
 			"collection": "新集合",
 			"doc": "New PDF",
+			"docIdDuplicate": "Copy PDF",
 			"form": "新表单",
 			"formIdDuplicate": "复制表单",
 			"jsFunction": "新前端函数",

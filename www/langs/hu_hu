@@ -1657,6 +1657,7 @@
 			"api": "Új API",
 			"collection": "Új gyűjtemény",
 			"doc": "New PDF",
+			"docIdDuplicate": "Copy PDF",
 			"form": "Új űrlap",
 			"formIdDuplicate": "Copy form",
 			"jsFunction": "Új frontend funkció",

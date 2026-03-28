@@ -60,7 +60,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, docId uuid.UUID) ([]types.DocPage, e
 			return nil, err
 		}
 
-		p.DocId = docId
 		if len(m) == 4 {
 			p.Margin.T = m[0]
 			p.Margin.R = m[1]

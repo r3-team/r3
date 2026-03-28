@@ -335,6 +335,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		}
 	case "doc":
 		switch action {
+		case "copy":
+			return DocCopy_tx(ctx, tx, reqJson)
 		case "del":
 			return DocDel_tx(ctx, tx, reqJson)
 		case "set":

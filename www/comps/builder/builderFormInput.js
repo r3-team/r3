@@ -36,7 +36,7 @@ export default {
 		},
 		
 		// stores
-		capGen:(s) => s.$store.getters.captions.generic
+		capGen:s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals

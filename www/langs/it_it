@@ -1657,6 +1657,7 @@
 			"api": "New API",
 			"collection": "New collection",
 			"doc": "New PDF",
+			"docIdDuplicate": "Copy PDF",
 			"form": "New form",
 			"formIdDuplicate": "Copy form",
 			"jsFunction": "New Frontend function",

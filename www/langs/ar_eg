@@ -1657,6 +1657,7 @@
 			"api": "واجهة برمجة التطبيقات الجديدة",
 			"collection": "مجموعة جديدة",
 			"doc": "New PDF",
+			"docIdDuplicate": "Copy PDF",
 			"form": "شكل جديد",
 			"formIdDuplicate": "نسخ النموذج",
 			"jsFunction": "وظيفة الواجهة الأمامية الجديدة",

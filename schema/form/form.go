@@ -33,8 +33,7 @@ func Copy_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, n
 	form.Name = newName
 	form.ModuleId = moduleId
 
-	// replace IDs with new ones
-	// keep association between old (replaced) and new ID
+	// replace IDs with new ones, keep association between old (replaced) and new ID
 	idMapReplaced := make(map[uuid.UUID]uuid.UUID)
 
 	form.Id, err = schema.ReplaceUuid(form.Id, idMapReplaced)

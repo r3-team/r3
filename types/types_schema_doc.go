@@ -179,7 +179,6 @@ type DocMarginPadding struct {
 }
 type DocPage struct {
 	Id          uuid.UUID        `json:"id"`
-	DocId       uuid.UUID        `json:"docId"`
 	FieldFlow   DocFieldFlow     `json:"fieldFlow"`
 	Size        string           `json:"size"` // "A1", "A2", "A3", "A4", "A5", "A6", "A7", "Letter", "Legal"
 	Margin      DocMarginPadding `json:"margin"`
