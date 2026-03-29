@@ -828,6 +828,7 @@
 			},
 			"button": {
 				"addPage": "Seite hinzufügen",
+				"movePage": "Seite bewegen",
 				"selectParent": "Feld darüber"
 			},
 			"dialog": {

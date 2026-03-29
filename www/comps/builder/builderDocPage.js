@@ -93,6 +93,15 @@ export default {
 			<table class="generic-table-vertical default-inputs">
 				<tbody>
 					<tr>
+						<td>{{ capApp.button.movePage }}</td>
+						<td>
+							<div class="row gap">
+								<my-button image="pagePrev.png" @trigger="$emit('move0')" :active="!readonly && !isPageFirst" />
+								<my-button image="pageNext.png" @trigger="$emit('move1')" :active="!readonly && !isPageLast"  />
+							</div>
+						</td>
+					</tr>
+					<tr>
 						<td>{{ capGen.showDefault1 }}</td>
 						<td><my-bool v-model="page.state" :disabled="readonly"/></td>
 					</tr>
@@ -172,7 +181,7 @@ export default {
 		readonly:       { type:Boolean,       required:true },
 		zoom:           { type:Number,        required:true }
 	},
-	emits:['setFieldIdOptions','update:modelValue'],
+	emits:['move0','move1','setFieldIdOptions','update:modelValue'],
 	computed:{
 		margin:s => {
 			let out = JSON.parse(JSON.stringify(s.page.margin));
@@ -192,6 +201,8 @@ export default {
 		footerInherit:s => s.page.footer.docPageIdInherit !== null,
 		header:       s => s.page.header.active ? s.page.header : false,
 		headerInherit:s => s.page.header.docPageIdInherit !== null,
+		isPageFirst:  s => s.pages.findIndex(v => v.id === s.page.id) === 0,
+		isPageLast:   s => s.pages.findIndex(v => v.id === s.page.id) === s.pages.length -1,
 		pageSizeX:    s => s.page.orientation === 'portrait' ? pageSizeMapMm[s.page.size][0] : pageSizeMapMm[s.page.size][1],
 		pageSizeY:    s => s.page.orientation === 'portrait' ? pageSizeMapMm[s.page.size][1] : pageSizeMapMm[s.page.size][0],
 		pageSizes:    s => Object.keys(pageSizeMapMm),

@@ -110,6 +110,8 @@ export default {
 				<!-- page -->
 				<my-builder-doc-page
 					v-model="pageActive"
+					@move0="pageMove(false)"
+					@move1="pageMove(true)"
 					@setFieldIdOptions="sideFieldIdShow = $event"
 					:builderLanguage
 					:elmPageOptions="$refs.pageOptions"
@@ -415,7 +417,11 @@ export default {
 			this.resetPageTab();
 		},
 		pageMove(forward) {
+			if(forward && this.pageIndexActive < this.doc.pages.length-1)
+				this.doc.pages.splice(this.pageIndexActive+1,0,this.doc.pages.splice(this.pageIndexActive,1)[0]);
 
+			if(!forward && this.pageIndexActive > 0)
+				this.doc.pages.splice(this.pageIndexActive-1,0,this.doc.pages.splice(this.pageIndexActive,1)[0]);
 		},
 		reset(manuelReset) {
 			if(this.docSchema !== false && (manuelReset || !this.deepIsEqual(this.docCopy,this.docSchema))) {
