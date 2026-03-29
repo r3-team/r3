@@ -61,7 +61,7 @@ export function getDocFieldIcon(field) {
 		case 'flow': return 'layout.png'; break;
 		case 'gridFooter': // fallthrough
 		case 'gridHeader': // fallthrough
-		case 'grid': return 'layout.png'; break;
+		case 'grid': return 'dots.png'; break;
 		case 'list': return 'files_list2.png'; break;
 		case 'text': return 'code.png'; break;
 	}

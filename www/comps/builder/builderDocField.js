@@ -99,6 +99,7 @@ export default {
 				v-model="f"
 				@dragChildEnd="dragChildEnd(f.id)"
 				@dragChildEnter="dragChildEnter(i)"
+				@remove="remove(f.id)"
 				@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 				@setFieldIdOptionsParent="$emit('setFieldIdOptions',field.id)"
 				:builderLanguage
@@ -127,8 +128,9 @@ export default {
 					<h2>{{ titleBar }}</h2>
 				</div>
 				<div class="area">
-					<my-button image="upward.png"   @trigger="$emit('setFieldIdOptionsParent')" :active="isChild" :caption="capApp.button.selectParent" />
 					<my-button image="visible1.png" @trigger="copyValueDialog(field.content,field.id,field.id)" :caption="capGen.id" />
+					<my-button image="upward.png"   @trigger="$emit('setFieldIdOptionsParent')" :active="isChild" :caption="capApp.button.selectParent" />
+					<my-button image="delete.png"   @trigger="$emit('remove')" :active="!isRoot" />
 					<my-button image="cancel.png"
 						@trigger="$emit('setFieldIdOptions',null)"
 						:cancel="true"
@@ -499,7 +501,7 @@ export default {
 			sizeYOnMousedown:0   // to check whether element was resized
 		};
 	},
-	emits:['dragChildEnd','dragChildEnter','setFieldIdOptions','setFieldIdOptionsParent','update:modelValue'],
+	emits:['dragChildEnd','dragChildEnter','remove','setFieldIdOptions','setFieldIdOptionsParent','update:modelValue'],
 	computed:{
 		classFields:s => {
 			return {
@@ -681,6 +683,13 @@ export default {
 				this.field.sizeX = sizeX;
 				this.field.sizeY = sizeY;
 			}
+		},
+
+		// field actions
+		remove(fieldId) {
+			const pos = this.field.fields.findIndex(v => v.id === fieldId);
+			if(pos !== -1)
+				this.field.fields.splice(pos,1);
 		},
 
 		// drag & drop

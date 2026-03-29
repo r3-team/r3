@@ -828,7 +828,7 @@
 			},
 			"button": {
 				"addPage": "Seite hinzufügen",
-				"selectParent": "Feld darüber auswählen"
+				"selectParent": "Feld darüber"
 			},
 			"dialog": {
 				"delete": "Bist du sicher, dass du dieses Dokument löschen möchtest?"

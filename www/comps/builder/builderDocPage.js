@@ -15,7 +15,7 @@ const pageSizeMapMm = {
 	'A6':    [105,148],
 	'A7':    [74,105],
 	'Legal': [216,356],
-	'Letter':[216,279],
+	'Letter':[216,279]
 };
 
 export default {
