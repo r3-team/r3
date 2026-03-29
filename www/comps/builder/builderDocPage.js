@@ -103,7 +103,7 @@ export default {
 					</tr>
 					<tr>
 						<td>{{ capGen.showDefault1 }}</td>
-						<td><my-bool v-model="page.state" :disabled="readonly"/></td>
+						<td><my-bool v-model="page.state" :readonly /></td>
 					</tr>
 					<tr>
 						<td>{{ capGen.size }}</td>

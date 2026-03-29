@@ -48,7 +48,7 @@ const MyBuilderDocBorder = {
 			<td>
 				<div class="row gap centered">
 					<my-input-range   class="short" @update:modelValue="$emit('update:size',$event)" :modelValue="size" :readonly :min="0" :max="20" :step="0.1" />
-					<my-input-decimal class="short" @update:modelValue="$emit('update:size',$event)" :modelValue="size" :allowNull="false" :max="20" :length="4" :lengthFract="2" />
+					<my-input-decimal class="short" @update:modelValue="$emit('update:size',$event)" :modelValue="size" :allowNull="false" :disabled="readonly" :max="20" :length="4" :lengthFract="2" />
 					<span>mm</span>
 				</div>
 			</td>
@@ -58,13 +58,13 @@ const MyBuilderDocBorder = {
 			<td>
 				<div class="row gap centered">
 					<span>{{ capApp.cap }}</span>
-					<select class="dynamic" @input="$emit('update:styleCap',$event.target.value)" :value="styleCap">
+					<select class="dynamic" @input="$emit('update:styleCap',$event.target.value)" :disabled="readonly" :value="styleCap">
 						<option value="butt"  >{{ capApp.style.cap.butt }}</option>
 						<option value="square">{{ capApp.style.cap.square }}</option>
 						<option value="round" >{{ capApp.style.cap.round }}</option>
 					</select>
 					<span>{{ capApp.join }}</span>
-					<select class="dynamic"@input="$emit('update:styleJoin',$event.target.value)" :value="styleJoin">
+					<select class="dynamic"@input="$emit('update:styleJoin',$event.target.value)" :disabled="readonly" :value="styleJoin">
 						<option value="miter">{{ capApp.style.join.miter }}</option>
 						<option value="bevel">{{ capApp.style.join.bevel }}</option>
 						<option value="round">{{ capApp.style.join.round }}</option>
@@ -122,10 +122,20 @@ const MyBuilderDocHeaderFooter = {
 	},
 	template:`<tr>
 		<td>
-			<my-button-check @update:modelValue="setActive" :caption="isHeader ? capGen.header : capGen.footer" :modelValue="active" :readonly />
+			<my-button-check
+				@update:modelValue="setActive"
+				:caption="isHeader ? capGen.header : capGen.footer"
+				:modelValue="active"
+				:readonly
+			/>
 		</td>
 		<td>
-			<select v-if="active" @input="setPageIdInherit($event.target.value)" :value="pageIdInherit !== null ? pageIdInherit : ''">
+			<select
+				v-if="active"
+				@input="setPageIdInherit($event.target.value)"
+				:disabled="readonly"
+				:value="pageIdInherit !== null ? pageIdInherit : ''"
+			>
 				<option value="">[{{ capApp.inheritNone }}]</option>
 				<option
 					v-for="(p,i) in pages"

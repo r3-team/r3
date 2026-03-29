@@ -130,7 +130,7 @@ export default {
 				<div class="area">
 					<my-button image="visible1.png" @trigger="copyValueDialog(field.content,field.id,field.id)" :caption="capGen.id" />
 					<my-button image="upward.png"   @trigger="$emit('setFieldIdOptionsParent')" :active="isChild" :caption="capApp.button.selectParent" />
-					<my-button image="delete.png"   @trigger="$emit('remove')" :active="!isRoot" />
+					<my-button image="delete.png"   @trigger="$emit('remove')" :active="!isRoot && !readonly" />
 					<my-button image="cancel.png"
 						@trigger="$emit('setFieldIdOptions',null)"
 						:cancel="true"

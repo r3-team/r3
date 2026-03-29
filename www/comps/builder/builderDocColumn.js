@@ -115,7 +115,7 @@ export default {
 							<td>{{ capGen.lengthChars }}</td>
 							<td>
 								<my-input-decimal class="short" v-if="column.length !== 0" v-model="column.length" :min="0" :allowNull="false" :lengthFract="0" :readonly />
-								<my-button v-else @trigger="column.length = 50" :caption="capGen.noLimit" :naked="true" />
+								<my-button v-else @trigger="column.length = 50" :active="!readonly" :caption="capGen.noLimit" :naked="true" />
 							</td>
 						</tr>
 						<tr>
@@ -124,12 +124,13 @@ export default {
 								<div class="row gap centered" v-if="column.sizeX !== 0">
 									<my-input-range   class="short" v-model="column.sizeX" :min="1" :max="sizeXMax" :readonly :step="0.1" />
 									<my-input-decimal class="short" v-model="column.sizeX" :min="1" :max="sizeXMax" :readonly :allowNull="false" :length="5" :lengthFract="2" />
-									<my-button image="cancel.png" :active="column.sizeX !== 0" :naked="true" @trigger="column.sizeX = 0" />
+									<my-button image="cancel.png" :active="column.sizeX !== 0 && !readonly" :naked="true" @trigger="column.sizeX = 0" />
 									<span>mm</span>
 								</div>
 								<my-button
 									v-else
 									@trigger="column.sizeX = 50"
+									:active="!readonly"
 									:caption="capGen.automatic"
 									:naked="true"
 								/>

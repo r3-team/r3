@@ -204,7 +204,7 @@ export default {
 							<tr>
 								<td>{{ capGen.language }}</td>
 								<td>
-									<select class="long" v-model="doc.language">
+									<select class="long" v-model="doc.language" :disabled="readonly">
 										<option v-for="l in module.languages" :value="l">{{ l }}</option>
 									</select>
 								</td>
