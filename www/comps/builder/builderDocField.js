@@ -40,6 +40,7 @@ export default {
 		MyInputDecimal,
 		MyInputRange
 	},
+	inject:['dragData','dragFieldIdSet'],
 	template:`<div class="builder-doc-field" ref="field"
 		@click.stop
 		@dragenter="dragEnter"
@@ -484,7 +485,6 @@ export default {
 			beingDragged:false,
 			borderSizeEmpty:0.2, // default border size, if 0 is given but border is drawn
 			columnIdOptions:null,
-			dragEnterCounter:0,
 			dragType:'doc-field',
 			draggedInSameParent:false,
 			filtersDisable:[
@@ -500,6 +500,12 @@ export default {
 			sizeXOnMousedown:0,  // to check whether element was resized
 			sizeYOnMousedown:0   // to check whether element was resized
 		};
+	},
+	watch:{
+		dragFieldId(v) {
+			if(v !== this.field.id)
+				this.dragPreviewRemove();
+		}
 	},
 	emits:['dragChildEnd','dragChildEnter','remove','setFieldIdOptions','setFieldIdOptionsParent','update:modelValue'],
 	computed:{
@@ -597,6 +603,7 @@ export default {
 
 		// simple
 		attribute:     s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
+		dragFieldId:   s => s.dragData.dragFieldId,
 		dragTypeColumn:s => `doc-column_${s.field.id}`,
 		isChild:       s => s.isChildFlow || s.isChildGrid,
 		isData:        s => s.field.content === 'data',
@@ -703,7 +710,7 @@ export default {
 			}
 		},
 		dragPreviewUpdate(index) {
-			if(this.isFlow) {
+			if(this.isFlow && this.dragFieldId === this.field.id) {
 				this.dragPreviewRemove();
 				this.field.fields.splice(index,0,this.getTemplateDocField(this.dragContent,null,null));
 			}
@@ -768,35 +775,23 @@ export default {
 				
 				return;
 			}
-
 			e.stopPropagation();
-			this.dragEnterCounter++;
 
-			if(this.dragEnterCounter === 1)
+			if(this.dragFieldId !== this.field.id) {
+				this.dragFieldIdSet(this.field.id);
 				this.dragPreviewUpdate(this.field.fields.length);
+			}
 		},
 		dragLeave(e) {
-			if(!e.dataTransfer.types.includes(this.dragType))
-				return e.stopPropagation();
-
-			if(!this.isWithFields)
-				return;
-
-			e.stopPropagation();
-			this.dragEnterCounter--;
-
-			if(this.dragEnterCounter === 0)
-				this.dragPreviewRemove();
+			if(this.isWithFields || !e.dataTransfer.types.includes(this.dragType))
+				e.stopPropagation();
 		},
 		drop(e) {
-			if(!this.isWithFields)
-				return;
-
-			if(!e.dataTransfer.types.includes(this.dragType))
+			if(!this.isWithFields || !e.dataTransfer.types.includes(this.dragType))
 				return;
 			
 			e.stopPropagation();
-			this.dragEnterCounter = 0;
+			this.dragFieldIdSet(null);
 			
 			const field         = JSON.parse(e.dataTransfer.getData('application/json'));
 			const fieldsElm     = this.$refs.fields;

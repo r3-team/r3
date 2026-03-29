@@ -27,6 +27,12 @@ export default {
 		MyBuilderDocMarginPadding,
 		MyInputDecimal
 	},
+	provide() {
+		return {
+			dragData:this.dragData,
+			dragFieldIdSet:id => { this.dragData.dragFieldId = id }
+		};
+	},
 	template:`<div class="builder-doc-page" v-if="page !== false" @dragover.prevent @drop.stop="drop" @click.stop="$emit('setFieldIdOptions',null)" :class="{ clickable:fieldIdOptions !== null }">
 		<div class="builder-doc-page-outer" :style="stylePage">
 
@@ -182,6 +188,13 @@ export default {
 		zoom:           { type:Number,        required:true }
 	},
 	emits:['move0','move1','setFieldIdOptions','update:modelValue'],
+	data() {
+		return {
+			dragData:{
+				fieldId:null // ID of field being dragged
+			}
+		};
+	},
 	computed:{
 		margin:s => {
 			let out = JSON.parse(JSON.stringify(s.page.margin));
