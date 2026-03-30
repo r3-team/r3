@@ -18,6 +18,7 @@ const MyBuilderReleaseLogs = {
 				<my-button
 					v-if="(show || showAll) && !isZero"
 					@trigger="lock = !lock"
+					:active="!readonly"
 					:caption="capGen.button.unlock"
 					:image="lock ? 'checkbox0.png' : 'checkbox1.png'"
 				/>
