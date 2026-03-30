@@ -158,28 +158,101 @@ export default {
 				<div class="row gap default-inputs" v-if="['attributes','presets'].includes(tabTarget)">
 					<input v-model="nameFilter" :placeholder="capGen.threeDots" />
 				</div>
-				<my-button image="editBox.png"
-					@trigger="showProperties = true"
-					:caption="capGen.properties"
+			</div>
+			<div class="area">
+				<my-button image="visible1.png"
+					@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
+					:caption="capGen.id"
+				/>
+				<my-button image="delete.png"
+					@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
+					:active="!readonly"
+					:cancel="true"
+					:caption="capGen.button.delete"
+					:captionTitle="capGen.button.delete"
 				/>
 			</div>
 		</div>
 
-		<!-- relation properties -->
-		<div class="app-sub-window under-header" v-if="showProperties" @mousedown.self="showProperties = false">
-			<div class="contentBox float">
-				<div class="top">
-					<div class="area nowrap">
-						<img class="icon" src="images/database.png" />
-						<h1 class="title">{{ capGen.properties }}</h1>
-					</div>
-					<div class="area">
-						<my-button image="cancel.png"
-							@trigger="showProperties = false"
-							:cancel="true"
-						/>
+		<div class="content no-padding builder-relation">
+			<my-tabs
+				v-model="tabTarget"
+				:entries="['attributes','properties','indexes','triggers','presets','policies','relationships','data']"
+				:entriesText="tabCaptions"
+			/>
+			
+			<!-- attributes -->
+			<div class="generic-entry-list tab-content" v-if="tabTarget === 'attributes'">
+				<div class="entry"
+					v-if="!readonly"
+					@click="attributeIdEdit = null"
+					:class="{ clickable:!readonly }"
+				>
+					<div class="row gap centered">
+						<img class="icon" src="images/add.png" />
+						<span>{{ capGen.button.new }}</span>
 					</div>
 				</div>
+				
+				<div class="entry clickable"
+					@click="attributeIdEdit = atr.id"
+					v-for="atr in relation.attributes.filter(v => nameFilter === '' || v.name.includes(nameFilter.toLowerCase()))"
+				>
+					<my-button
+						:active="false"
+						:captionTitle="capApp.attributeContent"
+						:image="getAttributeIcon(atr.content,atr.contentUse,false,false)"
+						:naked="true"
+					/>
+					<div class="lines">
+						<span>{{ atr.name }}</span>
+						<span class="subtitle" v-if="typeof atr.captions.attributeTitle[builderLanguage] !== 'undefined'">
+							[{{ atr.captions.attributeTitle[builderLanguage] }}]
+						</span>
+					</div>
+					<my-button image="lock.png"
+						v-if="atr.encrypted"
+						:active="false"
+						:captionTitle="capApp.attributeEncrypted"
+						:naked="true"
+					/>
+					<my-button
+						v-if="isAttributeWithLength(atr.content) && atr.length !== 0"
+						:active="false"
+						:caption="'['+String(atr.length)+']'"
+						:captionTitle="capApp.attributeLength"
+						:naked="true"
+					/>
+					<my-button image="asterisk.png"
+						v-if="!atr.nullable"
+						:active="false"
+						:captionTitle="capApp.attributeNotNullable"
+						:naked="true"
+					/>
+					<my-button
+						:active="false"
+						:captionTitle="atr.iconId === null ? capApp.attributeNoIcon : capGen.icon"
+						:image="atr.iconId === null ? 'icon_missing.png' : ''"
+						:imageBase64="atr.iconId !== null ? srcBase64(iconIdMap[atr.iconId].file) : ''"
+						:naked="true"
+					/>
+				</div>
+				
+				<!-- attribute dialog -->
+				<my-builder-attribute
+					v-if="attributeIdEdit !== false"
+					@close="attributeIdEdit = false"
+					@nextLanguage="$emit('nextLanguage')"
+					@new-record="attributeIdEdit = null"
+					:attributeId="attributeIdEdit"
+					:builderLanguage
+					:readonly
+					:relation
+				/>
+			</div>
+
+			<!-- properties -->
+			<div class="contentBox" v-if="tabTarget === 'properties'">
 				<div class="top lower">
 					<div class="area">
 						<my-button image="save.png"
@@ -192,19 +265,6 @@ export default {
 							@trigger="reset(true)"
 							:active="isChanged"
 							:caption="capGen.button.refresh"
-						/>
-					</div>
-					<div class="area">
-						<my-button image="visible1.png"
-							@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
-							:caption="capGen.id"
-						/>
-						<my-button image="delete.png"
-							@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
-							:active="!readonly"
-							:cancel="true"
-							:caption="capGen.button.delete"
-							:captionTitle="capGen.button.delete"
 						/>
 					</div>
 				</div>
@@ -285,84 +345,6 @@ export default {
 						</tbody>
 					</table>
 				</div>
-			</div>
-		</div>
-		
-		<div class="content no-padding builder-relation">
-			<my-tabs
-				v-model="tabTarget"
-				:entries="['attributes','indexes','triggers','presets','policies','relationships','data']"
-				:entriesText="tabCaptions"
-			/>
-			
-			<!-- attributes -->
-			<div class="generic-entry-list tab-content" v-if="tabTarget === 'attributes'">
-				<div class="entry"
-					v-if="!readonly"
-					@click="attributeIdEdit = null"
-					:class="{ clickable:!readonly }"
-				>
-					<div class="row gap centered">
-						<img class="icon" src="images/add.png" />
-						<span>{{ capGen.button.new }}</span>
-					</div>
-				</div>
-				
-				<div class="entry clickable"
-					@click="attributeIdEdit = atr.id"
-					v-for="atr in relation.attributes.filter(v => nameFilter === '' || v.name.includes(nameFilter.toLowerCase()))"
-				>
-					<my-button
-						:active="false"
-						:captionTitle="capApp.attributeContent"
-						:image="getAttributeIcon(atr.content,atr.contentUse,false,false)"
-						:naked="true"
-					/>
-					<div class="lines">
-						<span>{{ atr.name }}</span>
-						<span class="subtitle" v-if="typeof atr.captions.attributeTitle[builderLanguage] !== 'undefined'">
-							[{{ atr.captions.attributeTitle[builderLanguage] }}]
-						</span>
-					</div>
-					<my-button image="lock.png"
-						v-if="atr.encrypted"
-						:active="false"
-						:captionTitle="capApp.attributeEncrypted"
-						:naked="true"
-					/>
-					<my-button
-						v-if="isAttributeWithLength(atr.content) && atr.length !== 0"
-						:active="false"
-						:caption="'['+String(atr.length)+']'"
-						:captionTitle="capApp.attributeLength"
-						:naked="true"
-					/>
-					<my-button image="asterisk.png"
-						v-if="!atr.nullable"
-						:active="false"
-						:captionTitle="capApp.attributeNotNullable"
-						:naked="true"
-					/>
-					<my-button
-						:active="false"
-						:captionTitle="atr.iconId === null ? capApp.attributeNoIcon : capGen.icon"
-						:image="atr.iconId === null ? 'icon_missing.png' : ''"
-						:imageBase64="atr.iconId !== null ? srcBase64(iconIdMap[atr.iconId].file) : ''"
-						:naked="true"
-					/>
-				</div>
-				
-				<!-- attribute dialog -->
-				<my-builder-attribute
-					v-if="attributeIdEdit !== false"
-					@close="attributeIdEdit = false"
-					@nextLanguage="$emit('nextLanguage')"
-					@new-record="attributeIdEdit = null"
-					:attributeId="attributeIdEdit"
-					:builderLanguage
-					:readonly
-					:relation
-				/>
 			</div>
 			
 			<!-- indexes -->
@@ -581,7 +563,6 @@ export default {
 			previewRowCount:0,
 			previewValueLength:50,
 			recordTitleAttributeId:'',
-			showProperties:false,
 			tabTarget:'attributes'
 		};
 	},
@@ -613,6 +594,7 @@ export default {
 
 			return [
 				s.capApp.attributes.replace('{CNT}',s.relation.attributes.length),
+				s.capGen.properties,
 				s.capApp.indexes.replace('{CNT}',s.relation.indexes.length),
 				s.capApp.triggers.replace('{CNT}',triggerCnt),
 				s.capApp.presets.replace('{CNT}',s.relation.presets.length),
@@ -761,14 +743,8 @@ export default {
 		},
 		handleHotkeys(e) {
 			if(e.ctrlKey && e.key === 's') {
-				if(this.showProperties && this.canSave)
+				if(this.tabTarget === 'properties' && this.canSave)
 					this.set();
-
-				e.preventDefault();
-			}
-			if(e.key === 'Escape') {
-				if(this.showProperties)
-					this.showProperties = false;
 
 				e.preventDefault();
 			}
@@ -825,10 +801,7 @@ export default {
 		},
 		set() {
 			ws.send('relation','set',this.relation,true).then(
-				() => {
-					this.$root.schemaReload(this.relation.moduleId);
-					this.showProperties = false;
-				},
+				() => { this.$root.schemaReload(this.relation.moduleId); },
 				this.$root.genericError
 			);
 		}
