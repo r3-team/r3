@@ -254,15 +254,40 @@ const MyBuilderApiPreview = {
 			if(this.isAttributeRelationship(content)) value = 456;
 			if(this.isAttributeUuid(content))         value = '064fc31d-479d-450d-22cd-71f874df3a50';
 			if(this.isAttributeBoolean(content))      value = true;
-			if(this.isAttributeFiles(content))
-				value = [{
-	                "changed":1677925664,
-	                "hash":"FILE_HASH",
-	                "id":"FILE_UUID",
-	                "name":"FILE_NAME",
-	                "size":240,
-	                "version":0
-	            }];
+			if(this.isAttributeFiles(content)) {
+				if(this.isPost) {
+					value = {
+						fileIdMapChange:{
+							"342acecc-2422-4af7-aa9a-ef9879fbffab":{
+								"action":"create",
+								"name":"MyFirstFile.txt",
+								"version":0
+							},
+							"fc72198c-5d4e-400c-b4f5-2acc0dc279d4":{
+								"action":"create",
+								"name":"MySecondFile.txt",
+								"version":0
+							}
+						}
+					};
+				} else {
+					value = [{
+						"changed":1677925664,
+						"hash":"FILE_HASH",
+						"id":"342acecc-2422-4af7-aa9a-ef9879fbffab",
+						"name":"MyFirstFile.txt",
+						"size":240,
+						"version":0
+					},{
+						"changed":1677925669,
+						"hash":"FILE_HASH",
+						"id":"fc72198c-5d4e-400c-b4f5-2acc0dc279d4",
+						"name":"MySecondFile.txt",
+						"size":390,
+						"version":0
+					}];
+				}
+			}
 			
 			if(aggregator !== null) {
 				switch(aggregator) {
