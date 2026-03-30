@@ -185,7 +185,7 @@ export default {
 							v-model="exportKeyPrivate"
 							:placeholder="capApp.exportPrivateKeyHint"
 						></textarea>
-						<div class="row">
+						<div class="row" v-if="!isExportKeySet">
 							<my-button image="add.png"
 								@trigger="showKeyCreate = true"
 								:caption="capApp.button.generate"
