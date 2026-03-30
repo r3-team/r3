@@ -56,7 +56,7 @@ export function getJsFunctionsProcessed(fncs,filter) {
 	let formIdMap = MyStore.getters['schema/formIdMap'];
 	filter        = filter.toLowerCase();
 	
-	for(let fnc of fncs) {
+	for(const fnc of fncs) {
 		if(filter !== '') {
 			if(fnc.formId === null && !fnc.name.toLowerCase().includes(filter))
 				continue;
@@ -72,8 +72,12 @@ export function getJsFunctionsProcessed(fncs,filter) {
 		else                    outForm.push(fnc);
 	}
 	
-	// sort by form name
-	outForm.sort((a,b) => (formIdMap[a.formId].name > formIdMap[b.formId].name) ? 1 : -1);
+	// sort by form name, then by function name
+	outForm.sort((a,b) => {
+		const prioFormName = formIdMap[a.formId].name.localeCompare(formIdMap[b.formId].name);
+		const prioFncName  = a.name.localeCompare(b.name);
+		return prioFormName || prioFncName;
+	});
 	
 	// order: generic then functions assigned to a form
 	return outGlobal.concat(outForm);

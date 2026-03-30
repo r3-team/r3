@@ -1,7 +1,6 @@
 import {getJsFunctionsProcessed} from '../shared/builder.js';
-export {MyBuilderJsFunctions as default};
 
-const MyBuilderJsFunctions = {
+export default {
 	name:'my-builder-js-functions',
 	template:`<div class="contentBox grow builder-functions">
 		
@@ -64,14 +63,14 @@ const MyBuilderJsFunctions = {
 		};
 	},
 	computed:{
-		jsFunctions:(s) => s.getJsFunctionsProcessed(s.module.jsFunctions,s.filter),
+		jsFunctions:s => s.getJsFunctionsProcessed(s.module.jsFunctions,s.filter),
 		
 		// stores
-		module:     (s) => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		formIdMap:  (s) => s.$store.getters['schema/formIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.function,
-		capGen:     (s) => s.$store.getters.captions.generic
+		module:     s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:  s => s.$store.getters['schema/formIdMap'],
+		capApp:     s => s.$store.getters.captions.builder.function,
+		capGen:     s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// external

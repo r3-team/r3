@@ -1,6 +1,4 @@
-export {MyBuilderPgFunctions as default};
-
-let MyBuilderPgFunctions = {
+export default {
 	name:'my-builder-pg-functions',
 	template:`<div class="contentBox grow builder-functions">
 		
@@ -74,16 +72,16 @@ let MyBuilderPgFunctions = {
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			filter:''
 		};
 	},
 	computed:{
 		// stores
-		module:     (s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.function,
-		capGen:     (s) => s.$store.getters.captions.generic
+		module:     s => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
+		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
+		capApp:     s => s.$store.getters.captions.builder.function,
+		capGen:     s => s.$store.getters.captions.generic
 	}
 };
