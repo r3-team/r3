@@ -41,9 +41,7 @@ func clusterProcessEvents() error {
 	events := make([]types.ClusterEvent, 0)
 	for rows.Next() {
 		var e types.ClusterEvent
-		if err := rows.Scan(&e.Content, &e.Payload, &e.Target.Address,
-			&e.Target.Device, &e.Target.LoginId); err != nil {
-
+		if err := rows.Scan(&e.Content, &e.Payload, &e.Target.Address, &e.Target.Device, &e.Target.LoginId); err != nil {
 			return err
 		}
 		events = append(events, e)

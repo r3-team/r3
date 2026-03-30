@@ -988,6 +988,31 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			-- config: disable modifier keys
 			INSERT INTO instance.config (name,value) VALUES ('hotkeyModExcl','[]');
 			UPDATE instance.config SET value = '[]' WHERE name = 'adminMails' AND value = '';
+
+			-- fix fickle update_collection instance function
+			CREATE OR REPLACE FUNCTION instance.update_collection(
+				collection_id UUID,
+				login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[])
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+				COST 100
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				INSERT INTO instance_cluster.node_event (node_id,content,payload)
+				SELECT
+					id,
+					'collectionUpdated',
+					JSONB_BUILD_OBJECT(
+						'collectionId', collection_id,
+						'loginIds', COALESCE(login_ids, ARRAY[]::INTEGER[])
+					)::TEXT
+				FROM instance_cluster.node;
+				
+				RETURN 0;
+			END;
+			$BODY$;
 		`)
 		return "3.12", err
 	},
