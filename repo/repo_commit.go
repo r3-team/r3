@@ -90,14 +90,21 @@ func RepoCommit(ctx context.Context, loginId int64, repoId uuid.UUID, credUser, 
 	}
 
 	var logHtml strings.Builder
+	var logHide bool = true
+
 	logHtml.WriteString("<ul>")
 	for i, logs := range categoryIndexMapLogs {
 		if len(logs) == 0 {
 			continue
 		}
 		logHtml.WriteString(fmt.Sprintf("<li>%s<ul><li>%s</li></ul></li>", mod.ReleaseLogCategories[i], strings.Join(logs, "</li><li>")))
+		logHide = false
 	}
 	logHtml.WriteString("</ul>")
+
+	if logHide {
+		logHtml.Reset()
+	}
 
 	// export module file
 	filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)
@@ -116,10 +123,11 @@ func RepoCommit(ctx context.Context, loginId int64, repoId uuid.UUID, credUser, 
 	}
 
 	// upload module release with module file
-	return repoCommitAttach(repo.Url, repo.SkipVerify, token, repoModuleId, mod, fileId, fileName, logHtml.String())
+	return repoCommitAttach(repo.Url, repo.SkipVerify, token, repoModuleId, mod, fileId, fileName, logHtml.String(), logHide)
 }
 
-func repoCommitAttach(baseUrl string, skipVerify bool, token string, repoModuleId int64, mod types.Module, fileId uuid.UUID, fileName string, log string) error {
+func repoCommitAttach(baseUrl string, skipVerify bool, token string, repoModuleId int64,
+	mod types.Module, fileId uuid.UUID, fileName string, log string, logHide bool) error {
 
 	url, err := url.JoinPath(baseUrl, "api/lsw_repo/module_release_new_commit/v1")
 	if err != nil {
@@ -146,7 +154,7 @@ func repoCommitAttach(baseUrl string, skipVerify bool, token string, repoModuleI
 			PlatformBuild: int64(mod.ReleaseBuildApp),
 			ReleaseDate:   mod.ReleaseDate,
 			Log:           log,
-			LogHide:       false,
+			LogHide:       logHide,
 			File: types.DataSetFileChanges{
 				FileIdMapChange: map[uuid.UUID]types.DataSetFileChange{
 					fileId: {
@@ -197,33 +205,24 @@ func repoCommitUploadFile(baseUrl string, skipVerify bool, token, filePath, file
 	defer file.Close()
 
 	// write content
-	body := bytes.Buffer{}
-	writer := multipart.NewWriter(&body)
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
 
-	fields := map[string]io.Reader{
-		"token":       strings.NewReader(token),
-		"attributeId": strings.NewReader(moduleReleaseFileId),
-		"fileId":      strings.NewReader(uuid.Nil.String()),
-		"file":        file,
+	if err := writer.WriteField("token", token); err != nil {
+		return uuid.Nil, err
 	}
-	for key, r := range fields {
-		var fw io.Writer
-		if x, ok := r.(io.Closer); ok {
-			defer x.Close()
-		}
-
-		if _, ok := r.(*os.File); ok {
-			if fw, err = writer.CreateFormFile(key, fileName); err != nil {
-				return uuid.Nil, err
-			}
-		} else {
-			if fw, err = writer.CreateFormField(key); err != nil {
-				return uuid.Nil, err
-			}
-		}
-		if _, err = io.Copy(fw, r); err != nil {
-			return uuid.Nil, err
-		}
+	if err := writer.WriteField("attributeId", moduleReleaseFileId); err != nil {
+		return uuid.Nil, err
+	}
+	if err := writer.WriteField("fileId", uuid.Nil.String()); err != nil {
+		return uuid.Nil, err
+	}
+	part, err := writer.CreateFormFile("file", fileName)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	if _, err := io.Copy(part, file); err != nil {
+		return uuid.Nil, err
 	}
 	if err := writer.Close(); err != nil {
 		return uuid.Nil, err
@@ -235,7 +234,7 @@ func repoCommitUploadFile(baseUrl string, skipVerify bool, token, filePath, file
 		return uuid.Nil, err
 	}
 
-	httpReq, err := http.NewRequest("POST", url, &body)
+	httpReq, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return uuid.Nil, err
 	}
