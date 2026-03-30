@@ -25,7 +25,7 @@ var (
 		"instanceId", "licenseFile", "publicHostName", "proxyUrl", "repoPublicKeys",
 		"systemMsgText", "tokenSecret", "updateCheckUrl", "updateCheckVersion"}
 
-	NamesStringSlice = []string{"adminMails", "hotkeyModExcl"}
+	NamesStringSlice = []string{"adminMailAddresses", "hotkeyModExcl"}
 
 	NamesUint64 = []string{"backupDaily", "backupMonthly", "backupWeekly",
 		"backupCountDaily", "backupCountMonthly", "backupCountWeekly",

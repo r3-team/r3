@@ -987,7 +987,14 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			-- config: disable modifier keys
 			INSERT INTO instance.config (name,value) VALUES ('hotkeyModExcl','[]');
-			UPDATE instance.config SET value = '[]' WHERE name = 'adminMails' AND value = '';
+
+			-- migrate adminMails config option
+			INSERT INTO instance.config (name,value) VALUES ('adminMailAddresses',(
+				SELECT CASE WHEN value = '' THEN '[]' ELSE value END
+				FROM instance.config
+				WHERE name = 'adminMails'
+			));
+			DELETE FROM instance.config WHERE name = 'adminMails';
 
 			-- fix fickle update_collection instance function
 			CREATE OR REPLACE FUNCTION instance.update_collection(

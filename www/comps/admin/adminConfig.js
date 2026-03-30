@@ -278,7 +278,7 @@ export default {
 				
 				<div class="column">
 					<my-button image="cancel.png"
-						v-for="(c,i) in adminMails"
+						v-for="(c,i) in adminMailAddresses"
 						@trigger="adminMailDel(i)"
 						:caption="c"
 						:naked="true"
@@ -364,9 +364,9 @@ export default {
 		},
 
 		// values
-		adminMails:      s => JSON.parse(s.configInput.adminMails),
-		hotkeyModExcl:   s => JSON.parse(s.configInput.hotkeyModExcl),
-		loginBackgrounds:s => JSON.parse(s.configInput.loginBackgrounds),
+		adminMailAddresses:s => JSON.parse(s.configInput.adminMailAddresses),
+		hotkeyModExcl:     s => JSON.parse(s.configInput.hotkeyModExcl),
+		loginBackgrounds:  s => JSON.parse(s.configInput.loginBackgrounds),
 		
 		// simple
 		hasChanges:s => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
@@ -395,15 +395,15 @@ export default {
 		adminMailAdd() {
 			if(this.adminMailInput === '') return;
 			
-			let v = JSON.parse(JSON.stringify(this.adminMails));
+			let v = JSON.parse(JSON.stringify(this.adminMailAddresses));
 			v.push(this.adminMailInput);
-			this.configInput.adminMails = JSON.stringify(v);
+			this.configInput.adminMailAddresses = JSON.stringify(v);
 			this.adminMailInput = '';
 		},
 		adminMailDel(index) {
-			let v = JSON.parse(JSON.stringify(this.adminMails));
+			let v = JSON.parse(JSON.stringify(this.adminMailAddresses));
 			v.splice(index,1);
-			this.configInput.adminMails = JSON.stringify(v);
+			this.configInput.adminMailAddresses = JSON.stringify(v);
 		},
 		hotkeyModExclToggle(key) {
 			let   v   = JSON.parse(JSON.stringify(this.hotkeyModExcl));

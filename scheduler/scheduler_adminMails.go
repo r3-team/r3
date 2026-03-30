@@ -2,7 +2,6 @@ package scheduler
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"r3/config"
 	"r3/db"
@@ -37,16 +36,7 @@ func adminMails() error {
 
 	var sendMail = func(subject string, body string, dateExpiration int64, reason string) error {
 		// get mail receivers
-		if config.GetString("adminMails") == "" {
-			log.Warning(log.ContextServer, "cannot send admin notification mails", fmt.Errorf("no mail receivers defined"))
-			return nil
-		}
-
-		var toList []string
-		if err := json.Unmarshal([]byte(config.GetString("adminMails")), &toList); err != nil {
-			return fmt.Errorf("cannot read admin mail receivers, %s", err.Error())
-		}
-
+		toList := config.GetStringSlice("adminMailAddresses")
 		if len(toList) == 0 {
 			log.Warning(log.ContextServer, "cannot send admin notification mails", fmt.Errorf("no mail receivers defined"))
 			return nil
