@@ -780,8 +780,8 @@ export default {
 		},
 		
 		// simple
-		fncSchema:    s => s.pgFunctionIdMap[s.id] === undefined ? false : s.pgFunctionIdMap[s.id],
 		execArgInputs:s => s.fnc.codeArgs.trim() === '' ? [] : s.fnc.codeArgs.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/),
+		fncSchema:    s => s.pgFunctionIdMap[s.id] === undefined ? false : s.pgFunctionIdMap[s.id],
 		isChanged:    s => !s.deepIsEqual(s.fnc,s.fncSchema),
 		module:       s => s.fnc === false ? false : s.moduleIdMap[s.fnc.moduleId],
 		modulesDoc:   s => s.getDependentModules(s.module).filter(v => v.docs.length        !== 0),
