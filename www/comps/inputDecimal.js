@@ -66,9 +66,11 @@ export default {
 			}
 
 			const cursorPos     = e.target.selectionStart;
+			const isPaste       = e.inputType === 'insertFromPaste';
+			const isDrop        = e.inputType === 'insertFromDrop';
 			const isInitialChar = t.length === 1;
 
-			if(this.hasFract && !isInitialChar && !t.includes('.')) {
+			if(this.hasFract && !isInitialChar && !isPaste && !isDrop && !t.includes('.')) {
 				// required decimal char removed, reset value & input, let cursor move
 				// if entire input is 1 char, user replaced text by typing after selecting all, which is fine
 				e.target.value = this.getNumberAsText(this.modelValue);
