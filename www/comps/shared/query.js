@@ -176,13 +176,15 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,glob
 					collectionIdMapIndexFilter[s.collectionId]);
 			break;
 			case 'subQuery':
-				s.query.expressions = getSubQueryFilterExpressions(s);
-				s.query.filters     = getQueryFiltersProcessed(
-					s.query.filters,joinsIndexMap,globalSearch,globalSearchDict,dataFieldIdMap,
-					fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,
-					recordMayUpdate,collectionIdMapIndexFilter,variableIdMapLocal
-				);
-				s.query.limit = s.query.fixedLimit;
+				if(s.query !== null) {
+					s.query.expressions = getSubQueryFilterExpressions(s);
+					s.query.filters     = getQueryFiltersProcessed(
+						s.query.filters,joinsIndexMap,globalSearch,globalSearchDict,dataFieldIdMap,
+						fieldIdsChanged,fieldIdsInvalid,fieldValues,recordMayCreate,recordMayDelete,
+						recordMayUpdate,collectionIdMapIndexFilter,variableIdMapLocal
+					);
+					s.query.limit = s.query.fixedLimit;
+				}
 			break;
 			case 'true':     s.value = true; break;
 			case 'variable': s.value = variableValueGet(s.variableId,variableIdMapLocal); break;
@@ -232,10 +234,12 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,globalSearch,glob
 			delete(s.query);
 			delete(s.queryAggregator);
 		} else {
-			delete(s.query.choices);
-			delete(s.query.fixedLimit);
-			delete(s.query.id);
-			delete(s.query.lookups);
+			if(s.query !== null) {
+				delete(s.query.choices);
+				delete(s.query.fixedLimit);
+				delete(s.query.id);
+				delete(s.query.lookups);
+			}
 		}
 		delete(s.collectionId);
 		delete(s.columnId);

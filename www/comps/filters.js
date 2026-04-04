@@ -654,7 +654,7 @@ const MyFilterSide = {
 			set(v) { this.set('presetId',v); }
 		},
 		query:{
-			get()  { return this.modelValue.query; },
+			get()  { return this.modelValue.query !== null ? this.modelValue.query : this.getTemplateQuery(); },
 			set(v) { this.set('query',v); }
 		},
 		queryAggregator:{
