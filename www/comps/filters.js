@@ -110,26 +110,24 @@ const MyFilterOperator = {
 		
 		<!-- operators in user mode -->
 		<template v-if="!builderMode">
-			<template v-if="!onlyFts">
-				<option value="=" >{{ capApp.option.operator.eq }}</option>
-				<option value="<>">{{ capApp.option.operator.ne }}</option>
-			</template>
+			<option value="=" >{{ capApp.option.operator.eq }}</option>
+			<option value="<>">{{ capApp.option.operator.ne }}</option>
 			
-			<template v-if="!onlyString && !onlyFts">
+			<template v-if="!onlyString">
 				<option value="<" >{{ capApp.option.operator.st }}</option>
 				<option value=">" >{{ capApp.option.operator.lt }}</option>
 				<option value="<=">{{ capApp.option.operator.se }}</option>
 				<option value=">=">{{ capApp.option.operator.le }}</option>
 			</template>
 			
-			<template v-if="!onlyDates && !onlyFts">
-				<option value="ILIKE"    >{{ capApp.option.operator.ilike     }}</option>
-				<option value="LIKE"     >{{ capApp.option.operator.like      }}</option>
-				<option value="NOT ILIKE">{{ capApp.option.operator.not_ilike }}</option>
-				<option value="NOT LIKE" >{{ capApp.option.operator.not_like  }}</option>
+			<template v-if="!onlyDates">
+				<option value="ILIKE"           >{{ capApp.option.operator.ilike     }}</option>
+				<option value="LIKE"            >{{ capApp.option.operator.like      }}</option>
+				<option value="@@" v-if="hasFts">{{ capApp.option.operator.fts       }}</option>
+				<option value="NOT ILIKE"       >{{ capApp.option.operator.not_ilike }}</option>
+				<option value="NOT LIKE"        >{{ capApp.option.operator.not_like  }}</option>
 			</template>
 			
-			<option v-if="onlyFts" value="@@">{{ capApp.option.operator.fts }}</option>
 			
 			<option value="IS NULL"    >{{ capApp.option.operator.null     }}</option>
 			<option value="IS NOT NULL">{{ capApp.option.operator.not_null }}</option>
@@ -143,9 +141,9 @@ const MyFilterOperator = {
 	},
 	props:{
 		builderMode:{ type:Boolean, required:true },                 // only show in Builder mode (e. g. not for regular users)
+		hasFts:     { type:Boolean, required:false, default:false }, // show full text search operators
 		modelValue: { type:String,  required:true },
 		onlyDates:  { type:Boolean, required:false, default:false }, // only show operators that can be used for date values (e. g. unix time)
-		onlyFts:    { type:Boolean, required:false, default:false }, // only show full text search operators
 		onlyString: { type:Boolean, required:false, default:false }  // only show string operators
 	},
 	emits:['update:modelValue'],
@@ -825,8 +823,8 @@ const MyFilter = {
 		<my-filter-operator class="operator"
 			v-model="operatorInput"
 			:builderMode
+			:hasFts="side0ColumFtsMode !== null"
 			:onlyDates="side0ColumDate || side0ColumTime"
-			:onlyFts="side0ColumFtsMode !== null"
 			:onlyString="isStringInput"
 		/>
 		<my-button image="question.png"
@@ -898,9 +896,6 @@ const MyFilter = {
 	watch:{
 		side0ColumFtsMode:{
 			handler(ftsMode) {
-				if(ftsMode !== null && this.operator !== '@@')
-					return this.operatorInput = '@@';
-				
 				if(ftsMode === null && this.operator === '@@')
 					return this.operatorInput = '=';
 			},
@@ -961,7 +956,7 @@ const MyFilter = {
 		
 		// states
 		side0Column:(s) => {
-			for(let c of s.columns) {
+			for(const c of s.columns) {
 				if(c.index === s.side0.attributeIndex && c.attributeId === s.side0.attributeId)
 					return c;
 			}

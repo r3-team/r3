@@ -199,7 +199,7 @@ export default {
 		},
 		
 		// returns column of the column batch that is used for filtering (null if none is available)
-		columnUsedFilter:(s) => {
+		columnUsedFilter:s => {
 			for(let ind of s.columnBatch.columnIndexes) {
 				let c = s.columns[ind];
 				let a = s.attributeIdMap[c.attributeId];
@@ -215,7 +215,7 @@ export default {
 		},
 		
 		// indexes of column user filters that this column is responsible for
-		columnFilterIndexes:(s) => {
+		columnFilterIndexes:s => {
 			if(!s.isValidFilter)
 				return [];
 			
@@ -232,28 +232,28 @@ export default {
 		},
 		
 		// simple
-		aggrColumn:       (s) => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns),
-		canOpen:          (s) => s.rowCount > 1 || s.isFiltered,
-		canOrder:         (s) => s.columnBatch.columnIndexesSortBy.length !== 0,
-		dropdownShow:     (s) => s.dropdownElm === s.$refs.content,
-		filtersColumnThis:(s) => s.filtersColumn.filter((v,i) => s.columnFilterIndexes.includes(i)),
-		isDateOrTime:     (s) => s.isValidFilter && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
-		isFiltered:       (s) => s.columnFilterIndexes.length !== 0,
-		isOrdered:        (s) => s.columnBatch.orderIndexesUsed.length !== 0 && !s.isOrderedOrginal,
-		isOrderedAsc:     (s) => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
-		isValidFilter:    (s) => s.columnUsedFilter !== null,
-		showFilterAny:    (s) => s.showFilterItems || s.showFilterText,
-		showFilterItems:  (s) => s.values.length != 0,
-		showFilterText:   (s) => !s.isDateOrTime && s.isValidFilter,
-		showIconFilter:   (s) => s.isValidFilter && s.isFiltered,
-		showIconOrder:    (s) => s.isOrdered && !s.isOrderedOrginal,
+		aggrColumn:       s => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns),
+		canOpen:          s => s.rowCount > 1 || s.isFiltered,
+		canOrder:         s => s.columnBatch.columnIndexesSortBy.length !== 0,
+		dropdownShow:     s => s.dropdownElm === s.$refs.content,
+		filtersColumnThis:s => s.filtersColumn.filter((v,i) => s.columnFilterIndexes.includes(i)),
+		isDateOrTime:     s => s.isValidFilter && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
+		isFiltered:       s => s.columnFilterIndexes.length !== 0,
+		isOrdered:        s => s.columnBatch.orderIndexesUsed.length !== 0 && !s.isOrderedOrginal,
+		isOrderedAsc:     s => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
+		isValidFilter:    s => s.columnUsedFilter !== null,
+		showFilterAny:    s => s.showFilterItems || s.showFilterText,
+		showFilterItems:  s => s.values.length != 0,
+		showFilterText:   s => !s.isDateOrTime && s.isValidFilter,
+		showIconFilter:   s => s.isValidFilter && s.isFiltered,
+		showIconOrder:    s => s.isOrdered && !s.isOrderedOrginal,
 		
 		// stores
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.list,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		dateFormat:    (s) => s.$store.getters.settings.dateFormat,
-		dropdownElm:   (s) => s.$store.getters.dropdownElm
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		capApp:        s => s.$store.getters.captions.list,
+		capGen:        s => s.$store.getters.captions.generic,
+		dateFormat:    s => s.$store.getters.settings.dateFormat,
+		dropdownElm:   s => s.$store.getters.dropdownElm
 	},
 	methods:{
 		// externals
