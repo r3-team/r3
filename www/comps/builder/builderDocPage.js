@@ -30,7 +30,7 @@ export default {
 	provide() {
 		return {
 			dragData:this.dragData,
-			dragFieldIdSet:id => { this.dragData.dragFieldId = id }
+			dragFieldIdSet:id => { this.dragData.fieldId = id }
 		};
 	},
 	template:`<div class="builder-doc-page" v-if="page !== false" @dragover.prevent @drop.stop="drop" @click.stop="$emit('setFieldIdOptions',null)" :class="{ clickable:fieldIdOptions !== null }">
@@ -238,6 +238,8 @@ export default {
 				const field = JSON.parse(e.dataTransfer.getData('application/json'));
 				if(field.id === this.fieldIdOptions)
 					this.$emit('setFieldIdOptions',null);
+
+				this.dragData.fieldId = null;
 			}
 		},
 		getPageMarginById(id) {

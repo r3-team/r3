@@ -603,7 +603,7 @@ export default {
 
 		// simple
 		attribute:     s => s.isData ? s.attributeIdMap[s.field.attributeId] : null,
-		dragFieldId:   s => s.dragData.dragFieldId,
+		dragFieldId:   s => s.dragData.fieldId,
 		dragTypeColumn:s => `doc-column_${s.field.id}`,
 		isChild:       s => s.isChildFlow || s.isChildGrid,
 		isData:        s => s.field.content === 'data',
