@@ -1917,6 +1917,7 @@
 			"keyCreateLength": "Schlüssellänge auswählen",
 			"keyEntryOk0": "Privaten Schlüssel zur Signierung der Anwendung eingeben",
 			"keyEntryOk1": "Privater Schlüssel bereit zur Signierung",
+			"keyStoreHint": "Ende-zu-Ende-Verschlüsselung wird zur sicheren Speicherung genutzt. Diese Verschlüsselung ist nur so stark wie die Benutzeranmeldung. NICHT mit Standard-Zugangsdaten verwenden!",
 			"moduleChangesOk0": "Neue Version(en) für Anwendung oder eine ihrer Abhängigkeiten erstellen",
 			"moduleChangesOk1": "Anwendung bereit zum Transfer",
 			"option": {

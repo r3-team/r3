@@ -1917,6 +1917,7 @@
 			"keyCreateLength": "Seleccionar longitud de clave",
 			"keyEntryOk0": "Choose a private key for signing the application",
 			"keyEntryOk1": "Private key ready to sign application",
+			"keyStoreHint": "End-to-end encryption is used for secure storage. This encryption is only as strong as your authentication. Do NOT use with default credentials!",
 			"moduleChangesOk0": "Create new version(s) for the application or its dependencies",
 			"moduleChangesOk1": "Application ready for transfer",
 			"option": {

@@ -203,6 +203,10 @@ export default {
 								:caption="capApp.button.storeE2ee"
 							/>
 						</div>
+						<my-label
+							v-if="!isExportKeySet && exportKeyPrivateAsE2ee"
+							:caption="capApp.keyStoreHint"
+						/>
 					</div>
 				</div>
 
@@ -261,6 +265,10 @@ export default {
 									:caption="capApp.button.storeE2ee"
 								/>
 							</div>
+							<my-label
+								v-if="repoAsE2ee"
+								:caption="capApp.keyStoreHint"
+							/>
 						</template>
 						<template v-if="isRepoCredSet">
 							<div class="row gap">
