@@ -250,6 +250,33 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 			name1.String)
 	}
 
+	// check button fields, form actions with external document access
+	if err := tx.QueryRow(ctx, `
+		SELECT COUNT(*), STRING_AGG(COALESCE(ff.name, af.name), ', '), STRING_AGG(d.name, ', ')
+		FROM       app.open_doc    AS o
+		INNER JOIN app.doc         AS d  ON d.id  = o.doc_id_open
+		LEFT JOIN  app.field       AS f  ON f.id  = o.field_id
+		LEFT JOIN  app.form        AS ff ON ff.id = f.form_id
+		LEFT JOIN  app.form_action AS a  ON a.id  = o.form_action_id
+		LEFT JOIN  app.form        AS af ON af.id = a.form_id
+		WHERE (ff.module_id = $1 OR af.module_id = $1)
+
+		-- dependency
+		AND d.module_id <> $1
+		AND d.module_id NOT IN (
+			SELECT module_id_on
+			FROM app.module_depends
+			WHERE module_id = $1
+		)
+	`, moduleId).Scan(&cnt, &name1, &name2); err != nil {
+		return err
+	}
+
+	if cnt != 0 {
+		return fmt.Errorf("dependency check failed, field(s) & form action(s) on form(s) '%s' opening document(s) '%s' from independent module(s)",
+			name1.String, name2.String)
+	}
+
 	// check attribute relationships with external relations
 	if err := tx.QueryRow(ctx, `
 		SELECT COUNT(*), STRING_AGG(CONCAT(r.name, '.', a.name), ', ')
@@ -286,6 +313,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 			CASE
 				WHEN q.api_id        IS NOT NULL THEN FORMAT('API "%s"', a.name)
 				WHEN q.collection_id IS NOT NULL THEN FORMAT('collection "%s"', c.name)
+				WHEN q.doc_id        IS NOT NULL THEN FORMAT('PDF "%s"', d.name)
 				WHEN q.field_id      IS NOT NULL THEN FORMAT('field in form "%s"', lf.name)
 				WHEN q.form_id       IS NOT NULL THEN FORMAT('form "%s"', f.name)
 				WHEN q.search_bar_id IS NOT NULL THEN FORMAT('search bar "%s"', s.name)
@@ -294,6 +322,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 		FROM app.query AS q
 		LEFT JOIN app.api        AS a  ON a.id  = q.api_id        -- query for API
 		LEFT JOIN app.collection AS c  ON c.id  = q.collection_id -- query for collection
+		LEFT JOIN app.doc        AS d  ON d.id  = q.doc_id        -- query for document
 		LEFT JOIN app.form       AS f  ON f.id  = q.form_id       -- query for form
 		LEFT JOIN app.field      AS l  ON l.id  = q.field_id      -- query for list/data field
 		LEFT JOIN app.form       AS lf ON lf.id = l.form_id       -- form of list/data field
@@ -305,6 +334,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 				OR lf.module_id = m.id
 				OR a.module_id  = m.id
 				OR c.module_id  = m.id
+				OR d.module_id  = m.id
 				OR s.module_id  = m.id
 			)
 		
@@ -585,7 +615,7 @@ func ValidateDependency_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) e
 	}
 
 	if cnt != 0 {
-		return fmt.Errorf("dependency check failed, accessing %d icons(s) from independent module(s), check application, attribute, collection, search bar, menu & field icons", cnt)
+		return fmt.Errorf("dependency check failed, accessing %d icons(s) from independent module(s), check application, attribute, collection, search bar, menu, form & field icons", cnt)
 	}
 
 	// check PG function access to external pgFunctions/modules/relations/attributes
