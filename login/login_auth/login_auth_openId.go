@@ -130,10 +130,6 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 			return types.LoginAuthResult{}, err
 		}
 	}
-
-	if err := preAuthChecks(l.Id, l.Admin, limited, !newLogin); err != nil {
-		return types.LoginAuthResult{}, err
-	}
 	// read mapped login meta data from ID token claims
 	var claimsIf any
 	if err := idToken.Claims(&claimsIf); err != nil {
@@ -182,6 +178,10 @@ func OpenId(ctx context.Context, oauthClientId int32, code string, codeVerifier 
 			l.Admin = adminNew
 			adminChanged = true
 		}
+	}
+
+	if err := preAuthChecks(l.Id, l.Admin, limited, !newLogin); err != nil {
+		return types.LoginAuthResult{}, err
 	}
 
 	// role assignment via claim
