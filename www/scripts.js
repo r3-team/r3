@@ -99,6 +99,16 @@ const MyRouter = VueRouter.createRouter({
 		redirect:'/admin/config',
 		component:MyAdmin,
 		children:[
+			{
+				path:'modules-file',
+				component:MyAdminModules,
+				meta:{ target:'file' }
+			},
+			{
+				path:'modules-repo',
+				component:MyAdminModules,
+				meta:{ target:'repo' }
+			},
 			{ path:'backups',         component:MyAdminBackups },
 			{ path:'caption-map',     component:MyAdminCaptionMap },
 			{ path:'cluster',         component:MyAdminCluster },

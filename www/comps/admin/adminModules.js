@@ -189,6 +189,11 @@ export default {
 		};
 	},
 	mounted() {
+		if(this.$route.meta !== undefined && this.$route.meta.target !== undefined) {
+			if(this.$route.meta.target === 'repo') this.tabTarget = 'installFromRepo';
+			if(this.$route.meta.target === 'file') this.tabTarget = 'installFromFile';
+		}
+		
 		this.getRepo();
 		this.$store.commit('pageTitle',this.menuTitle);
 		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});

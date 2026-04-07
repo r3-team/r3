@@ -191,8 +191,8 @@ export default {
 		},
 		
 		// routing
-		goToApps()   { this.$router.push('/admin/modules'); },
+		goToApps()   { this.$router.push('/admin/modules-file'); },
 		goToLogins() { this.$router.push('/admin/logins'); },
-		goToRepo()   { this.$router.push('/admin/repo'); }
+		goToRepo()   { this.$router.push('/admin/modules-repo'); }
 	}
 };
