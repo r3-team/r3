@@ -174,6 +174,8 @@ func (hub *hubType) start() {
 			var err error = nil
 			jsonMsg := []byte{}      // message back to client
 			singleRecipient := false // message is only sent to single recipient (first valid one)
+			kick := false
+			kickNonAdmin := false
 
 			switch event.Content {
 			case "clientEventsChanged":
@@ -192,6 +194,10 @@ func (hub *hubType) start() {
 			case "keystrokesRequested":
 				jsonMsg, err = prepareUnrequested("keystrokesRequested", event.Payload)
 				singleRecipient = true
+			case "kick":
+				kick = true
+			case "kickNonAdmin":
+				kickNonAdmin = true
 			case "renew":
 				jsonMsg, err = prepareUnrequested("reauthorized", nil)
 			case "schemaLoaded":
@@ -243,11 +249,13 @@ func (hub *hubType) start() {
 
 			for _, client := range clientsSend {
 
-				// disconnect and do not send message if kicked
-				if event.Content == "kick" || (event.Content == "kickNonAdmin" && !client.admin) {
-					clientRemove(client, true)
+				if kick || kickNonAdmin {
+					if kick || (kickNonAdmin && !client.admin) {
+						clientRemove(client, true)
+					}
 					continue
 				}
+
 				go client.write(jsonMsg)
 
 				if singleRecipient {
