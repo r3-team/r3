@@ -2707,7 +2707,7 @@
 			"installFileDesc": "Telepítse a helyi REI3-fájlokból. Offline rendszerekhez vagy saját alkalmazásokhoz.<br /><br />A nyilvános REI3-alkalmazások fájljait hivatalos <a href=\"https://rei3.de/en/downloads\" target=\"_blank\">Repository</a> oldalról lehet letölteni.",
 			"installRepo": "Repositoryból",
 			"installRepoDesc": "<b>Internet-hozzáférés szükséges</b><br /><br />Telepítse az alkalmazásokat a hivatalos REI3 Repositoryból. A Repository friss verziókat kínál a nyilvános REI3-alkalmazásokhoz.<br /><br />Minden alkalmazás ellenőrzött és digitálisan aláírt.",
-			"intro": "Üdvözöljük a REI3-ban<br /><br />Jelenleg nincsenek telepített alkalmazások. A REI3 használatához válasszon az alábbi telepítési lehetőségek közül.",
+			"intro": "Üdvözöljük a REI3-ban<br /><br />Jelenleg nincsenek telepített alkalmazások. A REI3 használatához válasszon az alábbi telepítési lehetőségek közül.<br /><br />Or visit <a href=\"https://rei3.de/en/docs/builder\" target=\"_blank\">our docs</a> to learn how to build your own REI3 applications.",
 			"title": "Beállítás"
 		}
 	},

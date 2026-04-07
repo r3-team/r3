@@ -2707,7 +2707,7 @@
 			"installFileDesc": "从本地 REI3 文件安装应用程序。适用于离线系统或自制应用程序。<br /><br />可从官方<a href=\"https://rei3.de/en/downloads\" target=\"_blank\">存储库</a>下载公开提供的 REI3 应用程序的文件。",
 			"installRepo": "从存储库安装",
 			"installRepoDesc": "<b>需要互联网访问</b><br /><br />从官方 REI3 存储库安装应用程序。存储库包含公开提供的 REI3 应用程序的当前版本。<br /><br />所有应用程序均经过审查并进行数字签名。",
-			"intro": "欢迎来到 REI3<br /><br />当前尚未安装任何应用程序。要开始使用 REI3，请从下面的安装选项中选择一个。",
+			"intro": "欢迎来到 REI3<br /><br />当前尚未安装任何应用程序。要开始使用 REI3，请从下面的安装选项中选择一个。<br /><br />Or visit <a href=\"https://rei3.de/en/docs/builder\" target=\"_blank\">our docs</a> to learn how to build your own REI3 applications.",
 			"title": "设置"
 		}
 	},

@@ -2707,7 +2707,7 @@
 			"installFileDesc": "تثبيت التطبيقات من ملفات REI3 المحلية. <br /><br />يمكن تنزيل ملفات تطبيقات REI3 المعروضة للعامة من الموقع الرسمي <a href=\"https://rei3.de/en/downloads\" target=\"_blank\">مستودع</a>.",
 			"installRepo": "من المستودع",
 			"installRepoDesc": "<b>الوصول إلى الإنترنت مطلوب</b><br /><br />قم بتثبيت التطبيقات من مستودع REI3 الرسمي. <br /><br />تتم مراجعة كافة الطلبات وتوقيعها رقميا.",
-			"intro": "مرحبا بكم في REI3<br /><br />لا يوجد حاليا أي تطبيقات مثبتة. ",
+			"intro": "مرحبا بكم في REI3<br /><br />لا يوجد حاليا أي تطبيقات مثبتة.<br /><br />Or visit <a href=\"https://rei3.de/en/docs/builder\" target=\"_blank\">our docs</a> to learn how to build your own REI3 applications.",
 			"title": "يثبت"
 		}
 	},

@@ -2707,7 +2707,7 @@
 			"installFileDesc": "Instala aplicaciones desde archivos locales de REI3. Para sistemas sin conexión o aplicaciones autogeneradas.<br /><br />Los archivos de las aplicaciones públicas de REI3 se pueden descargar desde el <a href=\"https://rei3.de/en/downloads\" target=\"_blank\">repositorio oficial</a>.",
 			"installRepo": "Desde repositorio",
 			"installRepoDesc": "<b>Se requiere acceso a Internet</b><br /><br />Instala aplicaciones desde el repositorio oficial de REI3. El repositorio contiene versiones actuales de las aplicaciones públicas de REI3.<br /><br />Todas las aplicaciones son revisadas y firmadas digitalmente.",
-			"intro": "Bienvenido a REI3<br /><br />Actualmente no hay aplicaciones instaladas. Para comenzar a usar REI3, elige una de las opciones de instalación a continuación.",
+			"intro": "Bienvenido a REI3<br /><br />Actualmente no hay aplicaciones instaladas. Para comenzar a usar REI3, elige una de las opciones de instalación a continuación.<br /><br />Or visit <a href=\"https://rei3.de/en/docs/builder\" target=\"_blank\">our docs</a> to learn how to build your own REI3 applications.",
 			"title": "Configuración"
 		}
 	},
