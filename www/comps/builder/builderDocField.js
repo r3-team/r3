@@ -693,7 +693,7 @@ export default {
 		},
 		removeIndex(index) {
 			for(let i = 0, j = this.field.columns.length; i < j; i++) {
-				if(this.field.columns[i].attributeIndex === index && !this.field.columns[i].subQuery) {
+				if(!this.field.columns[i].subQuery && this.field.columns[i].attributeIndex === index) {
 					this.field.columns.splice(i,1);
 					i--; j--;
 				}

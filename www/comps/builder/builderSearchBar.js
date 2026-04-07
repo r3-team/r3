@@ -310,7 +310,7 @@ export default {
 		},
 		removeIndex(index) {
 			for(let i = 0, j = this.searchBar.columns.length; i < j; i++) {
-				if(this.searchBar.columns[i].index === index) {
+				if(!this.searchBar.columns[i].subQuery && this.searchBar.columns[i].index === index) {
 					this.searchBar.columns.splice(i,1);
 					i--; j--;
 				}

@@ -615,7 +615,7 @@ export default {
 		queryRemoveIndex(index) {
 			let colsCloned = JSON.parse(JSON.stringify(this.field.columns));
 			for(let i = 0, j = colsCloned.length; i < j; i++) {
-				if(colsCloned[i].index === index) {
+				if(!colsCloned[i].subQuery && colsCloned[i].index === index) {
 					colsCloned.splice(i,1);
 					i--; j--;
 				}

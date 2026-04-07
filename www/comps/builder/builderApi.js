@@ -698,7 +698,7 @@ export default {
 		},
 		removeIndex(index) {
 			for(let i = 0, j = this.api.columns.length; i < j; i++) {
-				if(this.api.columns[i].index === index) {
+				if(!this.api.columns[i].subQuery && this.api.columns[i].index === index) {
 					this.api.columns.splice(i,1);
 					i--; j--;
 				}
