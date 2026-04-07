@@ -146,7 +146,7 @@ export default {
 				<!-- content -->
 				<div class="content grow" v-if="tabTarget === 'content'">
 					<my-builder-query
-						@index-removed=""
+						@index-removed="removeIndex($event)"
 						@update:modelValue="doc.query = $event"
 						:allowChoices="false"
 						:allowFixedLimit="false"
@@ -422,6 +422,33 @@ export default {
 
 			if(!forward && this.pageIndexActive > 0)
 				this.doc.pages.splice(this.pageIndexActive-1,0,this.doc.pages.splice(this.pageIndexActive,1)[0]);
+		},
+		removeIndex(index) {
+			const clear = f => {
+				for(let i = 0, j = f.fields.length; i < j; i++) {
+					switch(f.fields[i].content) {
+						case 'data':
+							if(f.fields[i].attributeIndex === index) {
+								f.fields.splice(i,1);
+								i--; j--;
+							}
+						break;
+						case 'flow': f.fields[i] = clear(f.fields[i]); break;
+						case 'grid': f.fields[i] = clear(f.fields[i]); break;
+					}
+				}
+				return f;
+			};
+
+			for(let i = 0, j = this.doc.pages.length; i < j; i++) {
+				this.doc.pages[i].fieldFlow = clear(this.doc.pages[i].fieldFlow);
+
+				if(this.doc.pages[i].header.fieldGrid !== null)
+					this.doc.pages[i].header.fieldGrid = clear(this.doc.pages[i].header.fieldGrid);
+
+				if(this.doc.pages[i].footer.fieldGrid !== null)
+					this.doc.pages[i].footer.fieldGrid = clear(this.doc.pages[i].footer.fieldGrid);
+			}
 		},
 		reset(manuelReset) {
 			if(this.docSchema !== false && (manuelReset || !this.deepIsEqual(this.docCopy,this.docSchema))) {
