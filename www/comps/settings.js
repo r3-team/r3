@@ -19,7 +19,6 @@ import {
 	pemImportPrivateEnc,
 	rsaGenerateKeys
 } from './shared/crypto.js';
-export {MySettings as default};
 
 const MySettingsEncryption = {
 	name:'my-settings-encryption',
@@ -1207,7 +1206,7 @@ const MySettingsFixedTokens = {
 	}
 };
 
-const MySettings = {
+export default {
 	name:'my-settings',
 	components:{
 		MyInputColorWrap,
@@ -1499,13 +1498,23 @@ const MySettings = {
 		settings:             (s) => s.$store.getters.settings
 	},
 	mounted() {
+		window.addEventListener('keydown',this.handleHotkeys);
 		this.settingsInput = JSON.parse(JSON.stringify(this.settings));
-		this.$nextTick(function() {
-			this.settingsLoaded = true;
-		});
+		this.$nextTick(() => { this.settingsLoaded = true; });
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
 		// externals
-		setSetting
+		setSetting,
+
+		// actions
+		handleHotkeys(e) {
+			if(e.key === 'Escape') {
+				this.$emit('close');
+				e.preventDefault();
+			}
+		},
 	}
 };
