@@ -200,6 +200,7 @@ export default {
 							:formId="id"
 							:modelValue="query"
 							:moduleId="module.id"
+							:readonly
 						/>
 						
 						<!-- 1:n join warning -->

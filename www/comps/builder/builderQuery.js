@@ -18,7 +18,6 @@ import {
 	getDependentAttributes,
 	getDependentModules
 } from '../shared/builder.js';
-export {MyBuilderQuery as default};
 
 const MyBuilderQueryFilter = {
 	name:'my-builder-query-filter',
@@ -43,7 +42,7 @@ const MyBuilderQueryFilter = {
 			</template>
 			<my-button image="add.png"
 				@trigger="add(indexTarget)"
-				:active="indexTarget === 0 || indexTargets.includes(indexTarget)"
+				:active="(indexTarget === 0 || indexTargets.includes(indexTarget)) && !readonly"
 				:caption="capGen.button.add"
 				:naked="true"
 			/>
@@ -69,6 +68,7 @@ const MyBuilderQueryFilter = {
 				:joinsParents
 				:modelValue="filters"
 				:moduleId
+				:readonly
 			/>
 		</template>
 	</div>`,
@@ -81,7 +81,8 @@ const MyBuilderQueryFilter = {
 		joins:          { type:Array,   required:true },
 		joinsParents:   { type:Array,   required:true },
 		modelValue:     { type:Array,   required:true },
-		moduleId:       { type:String,  required:true }
+		moduleId:       { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	data() {
 		return {
@@ -91,7 +92,7 @@ const MyBuilderQueryFilter = {
 	},
 	emits:['update:modelValue'],
 	computed:{
-		filtersByIndexMap:(s) => {
+		filtersByIndexMap:s => {
 			let out = {};
 			for(const f of s.modelValue) {
 				if(out[f.index] === undefined)
@@ -101,7 +102,7 @@ const MyBuilderQueryFilter = {
 			}
 			return out;
 		},
-		indexTargets:(s) => {
+		indexTargets:s => {
 			let out = [];
 			for(const j of s.joins.filter(v => v.index !== 0)) {
 				out.push(j.index);
@@ -110,11 +111,11 @@ const MyBuilderQueryFilter = {
 		},
 
 		// simple
-		visible:(s) => s.show && s.modelValue.length !== 0,
+		visible:s => s.show && s.modelValue.length !== 0,
 
 		// stores
-		capApp:(s) => s.$store.getters.captions.builder.query,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:s => s.$store.getters.captions.builder.query,
+		capGen:s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -170,27 +171,31 @@ const MyBuilderQueryChoice = {
 				:caption="capApp.choice"
 				:naked="true"
 			/>
-			<input v-model="nameInput" :placeholder="capGen.name" />
+			<input v-model="nameInput" :disabled="readonly" :placeholder="capGen.name" />
 			
 			<my-builder-caption
 				@update:modelValue="updateCaption('queryChoiceTitle',$event)"
 				:contentName="capGen.title"
 				:language="builderLanguage"
 				:modelValue="choice.captions.queryChoiceTitle"
+				:readonly
 			/>
 			
 			<my-button image="arrowDown.png"
 				v-if="moveDown"
 				@trigger="$emit('move-down')"
+				:active="!readonly"
 				:naked="true"
 			/>
 			<my-button image="arrowUp.png"
 				v-if="moveUp"
 				@trigger="$emit('move-up')"
+				:active="!readonly"
 				:naked="true"
 			/>
 			<my-button image="cancel.png"
 				@trigger="$emit('remove')"
+				:active="!readonly"
 				:naked="true"
 			/>
 		</div>
@@ -205,21 +210,23 @@ const MyBuilderQueryChoice = {
 			:joins
 			:joinsParents
 			:moduleId
+			:readonly
 		/>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		expertMode:     { type:Boolean,required:true },
-		choice:         { type:Object, required:true },
-		entityIdMapRef: { type:Object, required:true },
-		fieldIdMap:     { type:Object, required:true },
-		filtersDisable: { type:Array,  required:true },
-		formId:         { type:String, required:true },
-		joins:          { type:Array,  required:true },
-		joinsParents:   { type:Array,  required:true },
-		moduleId:       { type:String, required:true },
-		moveDown:       { type:Boolean,required:true },
-		moveUp:         { type:Boolean,required:true }
+		builderLanguage:{ type:String,  required:true },
+		expertMode:     { type:Boolean, required:true },
+		choice:         { type:Object,  required:true },
+		entityIdMapRef: { type:Object,  required:true },
+		fieldIdMap:     { type:Object,  required:true },
+		filtersDisable: { type:Array,   required:true },
+		formId:         { type:String,  required:true },
+		joins:          { type:Array,   required:true },
+		joinsParents:   { type:Array,   required:true },
+		moduleId:       { type:String,  required:true },
+		moveDown:       { type:Boolean, required:true },
+		moveUp:         { type:Boolean, required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	emits:['move-down','move-up','remove','update'],
 	computed:{
@@ -233,8 +240,8 @@ const MyBuilderQueryChoice = {
 		},
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.builder.query,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:s => s.$store.getters.captions.builder.query,
+		capGen:s => s.$store.getters.captions.generic
 	},
 	methods:{
 		updateCaption(content,value) {
@@ -254,7 +261,7 @@ const MyBuilderQueryLookupItem = {
 	name:'my-builder-query-lookup-item',
 	template:`<div class="query-lookup-item">
 		<span>{{ join.index + ') ' + relationIdMap[join.relationId].name }}</span>
-		<select v-model="value">
+		<select v-model="value" :disabled="readonly">
 			<option :value="null">-</option>
 			<option v-for="pgIndex in pgIndexCandidates" :value="pgIndex.id">
 				{{ displayPgIndexDesc(pgIndex) }}
@@ -262,8 +269,9 @@ const MyBuilderQueryLookupItem = {
 		</select>
 	</div>`,
 	props:{
-		join:      { type:Object, required:true },
-		modelValue:{ required:true }
+		join:      { type:Object,  required:true },
+		modelValue:{ required:true },
+		readonly:  { type:Boolean, required:true }
 	},
 	emits:['update:modelValue'],
 	computed:{
@@ -271,7 +279,7 @@ const MyBuilderQueryLookupItem = {
 			get()  { return this.modelValue; },
 			set(v) { this.$emit('update:modelValue',v); }
 		},
-		pgIndexCandidates:(s) => {
+		pgIndexCandidates:s => {
 			let out = [];
 			let rel = s.relationIdMap[s.join.relationId];
 			for(let index of rel.indexes) {
@@ -282,8 +290,8 @@ const MyBuilderQueryLookupItem = {
 		},
 		
 		// stores
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap']
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap']
 	},
 	methods:{
 		displayPgIndexDesc(pgIndex) {
@@ -302,21 +310,23 @@ const MyBuilderQueryLookups = {
 	components:{MyBuilderQueryLookupItem},
 	template:`<div class="query-lookups">
 		<my-builder-query-lookup-item
-			v-for="j in joins"
 			@update:modelValue="setValueForJoin(j,$event)"
+			v-for="j in joins"
 			:join="j"
 			:key="j.index"
 			:modelValue="getValueForJoin(j)"
+			:readonly
 		/>
 	</div>`,
 	props:{
-		joins:  { type:Array, required:true },
-		lookups:{ type:Array, required:true } // [{pgIndexId:123,index:0},{...}]
+		joins:   { type:Array,   required:true },
+		lookups: { type:Array,   required:true }, // [{pgIndexId:123,index:0},{...}]
+		readonly:{ type:Boolean, required:true }
 	},
 	emits:['update'],
 	computed:{
 		// stores
-		capApp:(s) => s.$store.getters.captions.builder.query
+		capApp:s => s.$store.getters.captions.builder.query
 	},
 	methods:{
 		getValueForJoin(join) {
@@ -353,6 +363,7 @@ const MyBuilderQueryOrderItem = {
 		<!-- index attribute -->
 		<select
 			@change="setIndexAttribute($event.target.value)"
+			:disabled="readonly"
 			:value="indexInput+'_'+attributeIdInput"
 		>
 			<option value="0_null">-</option>
@@ -362,7 +373,7 @@ const MyBuilderQueryOrderItem = {
 		</select>
 		
 		<!-- direction -->
-		<select v-model="ascendingInput">
+		<select v-model="ascendingInput" :disabled="readonly">
 			<option :value="true">{{ capGen.option.sortAsc }}</option>
 			<option :value="false">{{ capGen.option.sortDesc }}</option>
 		</select>
@@ -370,6 +381,7 @@ const MyBuilderQueryOrderItem = {
 		<!-- delete -->
 		<my-button image="cancel.png"
 			@trigger="$emit('remove')"
+			:active="!readonly"
 			:naked="true"
 		/>
 	</div>`,
@@ -377,7 +389,8 @@ const MyBuilderQueryOrderItem = {
 		ascending:  { type:Boolean, required:true },
 		attributeId:{ required:true },
 		index:      { type:Number,  required:true },
-		joins:      { type:Array,   required:true }
+		joins:      { type:Array,   required:true },
+		readonly:   { type:Boolean, required:true }
 	},
 	emits:['remove','set-ascending','set-attribute-id','set-index'],
 	computed:{
@@ -439,11 +452,13 @@ const MyBuilderQueryOrders = {
 			:index="o.index"
 			:joins="joins"
 			:key="i"
+			:readonly
 		/>
 	</div>`,
 	props:{
-		joins: { type:Array, required:true },
-		orders:{ type:Array, required:true }
+		joins:   { type:Array,   required:true },
+		orders:  { type:Array,   required:true },
+		readonly:{ type:Boolean, required:true }
 	},
 	emits:['update'],
 	computed:{
@@ -668,7 +683,7 @@ const MyBuilderQueryNestedJoin = {
 	}
 };
 
-const MyBuilderQuery = {
+export default {
 	name:'my-builder-query',
 	components:{
 		MyBuilderQueryChoice,
@@ -698,7 +713,7 @@ const MyBuilderQuery = {
 			
 			<select
 				v-show="showRelations"
-				v-if="relationId === null"
+				v-if="relationId === null && !readonly"
 				@input="set('relationId',$event.target.value === '' ? null : $event.target.value)"
 				:value="relationId === null ? '' : relationId"
 			>
@@ -732,7 +747,7 @@ const MyBuilderQuery = {
 				:joinRelationId="relationsNested.joinRelationId"
 				:key="relationsNested.index"
 				:module="module"
-				:readonly="!allowJoinEdit"
+				:readonly="!allowJoinEdit || readonly"
 			/>
 		</div>
 		
@@ -749,6 +764,7 @@ const MyBuilderQuery = {
 				/>
 				<my-button image="add.png"
 					@trigger="orderAdd"
+					:active="!readonly"
 					:caption="capGen.button.add"
 					:naked="true"
 				/>
@@ -758,6 +774,7 @@ const MyBuilderQuery = {
 				@update="set('orders',$event)"
 				:joins="joins"
 				:orders="orders"
+				:readonly
 			/>
 		</div>
 		
@@ -774,6 +791,7 @@ const MyBuilderQuery = {
 				:joinsParents
 				:moduleId
 				:modelValue="filters"
+				:readonly
 			/>
 		</div>
 		
@@ -792,6 +810,7 @@ const MyBuilderQuery = {
 					<my-button image="question.png" @trigger="showChoicesHelp" />
 					<my-button image="add.png"
 						@trigger="choiceAdd"
+						:active="!readonly"
 						:caption="capGen.button.add"
 						:naked="true"
 					/>
@@ -810,7 +829,7 @@ const MyBuilderQuery = {
 				@move-up="choiceMove(i,false)"
 				@remove="choiceRemove(i)"
 				@update="choiceApply(i,$event)"
-				:builderLanguage="builderLanguage"
+				:builderLanguage
 				:choice="choices[i]"
 				:expertMode
 				:entityIdMapRef
@@ -823,6 +842,7 @@ const MyBuilderQuery = {
 				:moduleId
 				:moveDown="i < choices.length - 1"
 				:moveUp="i !== 0"
+				:readonly
 			/>
 		</div>
 		
@@ -842,8 +862,9 @@ const MyBuilderQuery = {
 			<my-builder-query-lookups
 				v-show="showLookups"
 				@update="set('lookups',$event)"
-				:joins="joins"
-				:lookups="lookups"
+				:joins
+				:lookups
+				:readonly
 			/>
 		</div>
 		
@@ -858,12 +879,14 @@ const MyBuilderQuery = {
 			<my-button
 				v-if="fixedLimit === 0"
 				@trigger="set('fixedLimit',10)"
+				:active="!readonly"
 				:caption="capApp.fixedLimit0"
 				:naked="true"
 			/>
 			<input class="short"
 				v-if="fixedLimit !== 0"
 				@input="set('fixedLimit',isNaN(parseInt($event.target.value)) ? 0 : parseInt($event.target.value))"
+				:disabled="readonly"
 				:value="fixedLimit"
 			/>
 		</div>
@@ -883,6 +906,7 @@ const MyBuilderQuery = {
 		joinsParents:   { type:Array,   required:false, default:() => [] },          // each item is an array of joins from a parent query
 		modelValue:     { type:Object,  required:true },                             // { choices:[], filters:[], fixedLimit:0, joins:[], lookups:[], orders:[], relationId:'' }
 		moduleId:       { type:String,  required:true },
+		readonly:       { type:Boolean, required:false, default:false },
 		relationIdStart:{ required:false, default:null }                             // when query starts with a defined relation
 	},
 	emits:['index-removed','update:modelValue'],
