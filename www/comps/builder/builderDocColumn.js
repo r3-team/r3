@@ -64,6 +64,7 @@ export default {
 						:joinsParents="[joinsParent]"
 						:modelValue="query"
 						:moduleId
+						:readonly
 					/>
 				</div>
 				<br />

@@ -9,7 +9,7 @@ export default {
 	props:{
 		itemsFilter:{ type:Array,         required:false, default:() => [] },
 		modelValue: { type:[String,null], required:true },
-		readonly:   { type:Boolean,       required:false, default:false }
+		readonly:   { type:Boolean,       required:true }
 	},
 	data() {
 		return {
@@ -24,6 +24,6 @@ export default {
 		},
 
 		// stores
-		capGen:(s) => s.$store.getters.captions.generic
+		capGen:s => s.$store.getters.captions.generic
 	}
 };

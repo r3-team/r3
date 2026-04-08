@@ -47,6 +47,7 @@ const MyBuilderPresetValue = {
 		</td>
 		<td colspan="2" v-if="!exists">
 			<my-button image="edit.png"
+				v-if="!readonly"
 				@trigger="$emit('set',null,false,null)"
 				:caption="capApp.valueNotSet"
 				:naked="true"
@@ -163,12 +164,12 @@ export default {
 									<div class="row gap">
 										<my-button image="edit.png"
 											@trigger="childAllAddMissing"
-											:active="values.values.length < attributesValid.length"
+											:active="values.values.length < attributesValid.length && !readonly"
 											:caption="capApp.addMissing"
 										/>
 										<my-button image="lock.png"
 											@trigger="childAllToggleProtected"
-											:active="values.values.length !== 0 && attributesValid.length !== 0"
+											:active="values.values.length !== 0 && attributesValid.length !== 0 && !readonly"
 											:caption="capApp.toggleProtected"
 										/>
 									</div>

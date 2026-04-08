@@ -133,9 +133,10 @@ export default {
 								:allowFixedLimit="false"
 								:allowFilters="false"
 								:allowJoinEdit="false"
-								:builderLanguage="builderLanguage"
+								:builderLanguage
 								:modelValue="form.query"
 								:moduleId="form.moduleId"
+								:readonly
 							/>
 						</div>
 						

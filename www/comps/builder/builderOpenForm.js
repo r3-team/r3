@@ -120,7 +120,7 @@ export default {
 		joinsIndexMapField:{ type:Object,        required:false, default:function() { return {}; } },
 		modelValue:        { type:[Object,null], required:true },
 		module:            { type:Object,        required:true },
-		readonly:          { type:Boolean,       required:false, default:false }
+		readonly:          { type:Boolean,       required:true }
 	},
 	emits:['update:modelValue'],
 	data() {

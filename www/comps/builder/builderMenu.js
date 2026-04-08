@@ -231,6 +231,7 @@ const MyBuilderMenuTabOptions = {
 						@update:modelValue="set('captions',{menuTabTitle:$event})"
 						:language="builderLanguage"
 						:modelValue="modelValue.captions.menuTabTitle"
+						:readonly
 					/>
 				</td>
 			</tr>
@@ -240,17 +241,19 @@ const MyBuilderMenuTabOptions = {
 					<my-builder-icon-input
 						@input="set('iconId',$event)"
 						:icon-id-selected="modelValue.iconId"
-						:module="module"
+						:module
 						:title="capGen.icon"
+						:readonly
 					/>
 				</td>
 			</tr>
 		</tbody>
 	</table>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		module:         { type:Object, required:true },
-		modelValue:     { type:Object, required:true }
+		builderLanguage:{ type:String,  required:true },
+		module:         { type:Object,  required:true },
+		modelValue:     { type:Object,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	emits:['update:modelValue'],
 	computed:{
@@ -328,11 +331,11 @@ export default {
 					<div class="row gap">
 						<my-button image="pagePrev.png"
 							@trigger="moveTab(false)"
-							:active="menuTabsIndexShown !== 0"
+							:active="menuTabsIndexShown !== 0 && !readonly"
 						/>
 						<my-button image="pageNext.png"
 							@trigger="moveTab(true)"
-							:active="menuTabsIndexShown !== menuTabs.length-1"
+							:active="menuTabsIndexShown !== menuTabs.length-1 && !readonly"
 						/>
 						<my-button image="delete.png"
 							@trigger="del"
@@ -347,6 +350,7 @@ export default {
 					v-model="menuTabShown"
 					:builderLanguage="builderLanguage"
 					:module="module"
+					:readonly
 				/>
 				
 				<!-- actions -->

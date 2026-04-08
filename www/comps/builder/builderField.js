@@ -42,7 +42,7 @@ export default {
 		:key="field.id"
 		:style="cssStyleParent"
 	>
-		<div class="builder-field-header" :class="{ dragAnchor:!moveActive && !noMovement }">
+		<div class="builder-field-header" :class="{ dragAnchor:!moveActive && !noMovement && !readonly }">
 			<!-- field icon -->
 			<div class="builder-field-button"
 				@click="openSettings('properties')"
@@ -63,6 +63,7 @@ export default {
 			<!-- container actions 1 -->
 			<template v-if="!isTemplate && !moveActive && isContainer">
 				<img class="action clickable"
+					v-if="!readonly"
 					@click="$emit('field-property-set','direction',toggleDir(field.direction))"
 					@click.prevent.right="$emit('field-property-set','direction',toggleDir(field.direction))"
 					:src="field.direction === 'row' ? 'images/flexRow.png' : 'images/flexColumn.png'"
@@ -70,7 +71,7 @@ export default {
 				/>
 				
 				<img class="action clickable"
-					v-if="field.fields.length > 1"
+					v-if="field.fields.length > 1 && !readonly"
 					@click="$emit('field-property-set','wrap',!field.wrap)"
 					@click.prevent.right="$emit('field-property-set','wrap',!field.wrap)"
 					:src="field.wrap ? 'images/wrap1.png' : 'images/wrap0.png'"
@@ -88,14 +89,14 @@ export default {
 			
 			<!-- display: field is hidden -->
 			<img class="action clickable" src="images/visible0.png"
-				v-if="!isTemplate && !moveActive && field.state === 'hidden'"
+				v-if="!isTemplate && !moveActive && field.state === 'hidden' && !readonly"
 				@click="$emit('field-property-set','state','default')"
 				:title="capApp.hidden"
 			/>
 			
 			<!-- action: move this field -->
 			<img class="action mover"
-				v-if="!noMovement && (!moveActive || fieldMoveList[fieldMoveIndex].id === field.id || !isTemplate)"
+				v-if="!noMovement && (!moveActive || fieldMoveList[fieldMoveIndex].id === field.id || !isTemplate) && !readonly"
 				@click="$emit('field-move',null,false)"
 				:class="{ 'on-hover':!moveActive, selected:moveActive && fieldMoveList[fieldMoveIndex].id === field.id }"
 				:src="!moveActive ? 'images/arrowRight.png' : 'images/arrowDown.png'"
@@ -104,7 +105,7 @@ export default {
 			
 			<!-- action: move target inside container -->
 			<img class="action clickable" src="images/arrowInside.png"
-				v-if="!isTemplate && ['container','tabs'].includes(field.content) && moveActive && fieldMoveList[fieldMoveIndex].id !== field.id"
+				v-if="!isTemplate && ['container','tabs'].includes(field.content) && moveActive && fieldMoveList[fieldMoveIndex].id !== field.id && !readonly"
 				@click="$emit('field-move',parentChildren,true)"
 				:title="capApp.fieldMoveInside"
 			/>
@@ -115,7 +116,7 @@ export default {
 					
 					<!-- toggle: show on mobile -->
 					<img class="action clickable"
-						v-if="!moveActive"
+						v-if="!moveActive && !readonly"
 						@click="$emit('field-property-set','onMobile',!field.onMobile)"
 						:src="field.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
 						:title="capApp.onMobile+': '+field.onMobile"
@@ -124,6 +125,7 @@ export default {
 					<!-- container actions 2 -->
 					<template v-if="!moveActive && isContainer">
 						<div class="clickable"
+							v-if="!readonly"
 							@click="$emit('field-property-set','basis',toggleSize(field.basis,50,300))"
 							@click.prevent.right="$emit('field-property-set','basis',toggleSize(field.basis,-50))"
 							:title="capApp.flexSize"
@@ -132,6 +134,7 @@ export default {
 						</div>
 						
 						<div class="clickable"
+							v-if="!readonly"
 							@click="$emit('field-property-set','grow',toggleSize(field.grow,1,1))"
 							@click.prevent.right="$emit('field-property-set','grow',toggleSize(field.grow,-1))"
 							:title="capApp.flexSizeGrow"
@@ -140,6 +143,7 @@ export default {
 						</div>
 						
 						<div class="clickable"
+							v-if="!readonly"
 							@click="$emit('field-property-set','shrink',toggleSize(field.shrink,1,1))"
 							@click.prevent.right="$emit('field-property-set','shrink',toggleSize(field.shrink,-1))"
 							:title="capApp.flexSizeShrink"
@@ -155,10 +159,12 @@ export default {
 						:contentName="title"
 						:dynamicSize="true"
 						:language="builderLanguage"
+						:readonly
 					/>
 					
 					<!-- action: remove field -->
 					<img class="action on-hover end clickable" src="images/delete.png"
+						v-if="!readonly"
 						@click="$emit('field-remove',field.id)"
 					/>
 				</div>
@@ -201,6 +207,7 @@ export default {
 				:isTemplate="false"
 				:joinsIndexMap
 				:moduleId
+				:readonly
 				:uiScale
 			/>
 		</div>
@@ -216,6 +223,7 @@ export default {
 			:columnIdShow
 			:groupName="field.id+'_columns'"
 			:hasCaptions="isList || isKanban"
+			:readonly
 		/>
 		
 		<!-- nested fields in container -->
@@ -240,6 +248,7 @@ export default {
 			:isTemplate
 			:joinsIndexMap
 			:moduleId
+			:readonly
 			:uiScale
 		/>
 
@@ -297,6 +306,7 @@ export default {
 						:formId
 						:joinsIndexMap
 						:moduleId
+						:readonly
 					/>
 					
 					<!-- field query (relationship inputs, lists, calendars, charts, ...) -->
@@ -313,6 +323,7 @@ export default {
 							:formId
 							:modelValue="query"
 							:moduleId
+							:readonly
 							:relationIdStart
 						/>
 
@@ -332,6 +343,7 @@ export default {
 								:columns="field.columns"
 								:groupName="'batches_' + field.id + '_columns'"
 								:joins="query.joins"
+								:readonly
 							/>
 						</div>
 					</template>
@@ -360,6 +372,7 @@ export default {
 						:joinsParents="[query.joins]"
 						:modelValue="columnShowQuery"
 						:moduleId
+						:readonly
 					/>
 				</div>
 				<my-builder-column-options
@@ -370,6 +383,7 @@ export default {
 					:hasCaptions="field.content === 'list'"
 					:moduleId
 					:onlyData="false"
+					:readonly
 				/>
 			</template>
 		</teleport>
@@ -395,6 +409,7 @@ export default {
 		joinsIndexMap:  { type:Object,        required:true },
 		moduleId:       { type:String,        required:true },
 		noMovement:     { type:Boolean,       required:true },
+		readonly:       { type:Boolean,       required:true },
 		uiScale:        { type:Number,        required:true }
 	},
 	emits:['createNew','field-id-show','field-move','field-move-store','field-property-set','field-remove'],

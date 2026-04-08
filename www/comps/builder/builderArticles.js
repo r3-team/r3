@@ -307,6 +307,7 @@ export default {
 							
 							<my-button image="cancel.png"
 								@trigger="articleRemove(element)"
+								:active="!readonly"
 								:naked="true"
 							/>
 						</div>

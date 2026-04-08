@@ -297,6 +297,7 @@ export default {
 							@update:modelValue="field.captions.fieldTitle = $event;set('captions',field.captions)"
 							:language="builderLanguage"
 							:modelValue="field.captions.fieldTitle"
+							:readonly
 						/>
 					</td>
 				</tr>
@@ -308,6 +309,7 @@ export default {
 							:language="builderLanguage"
 							:modelValue="field.captions.fieldHelp"
 							:multiLine="true"
+							:readonly
 						/>
 					</td>
 				</tr>
@@ -319,6 +321,7 @@ export default {
 							:icon-id-selected="field.iconId"
 							:module
 							:title="capGen.icon"
+							:readonly
 						/>
 					</td>
 				</tr>
@@ -327,6 +330,7 @@ export default {
 					<td>
 						<select
 							@input="set('state',$event.target.value)"
+							:disabled="readonly"
 							:value="field.state"
 						>
 							<option value="hidden">{{ capGen.hidden }}</option>
@@ -345,6 +349,7 @@ export default {
 								@update:modelValue="set('onMobile',$event)"
 								:caption="capApp.onMobile"
 								:modelValue="field.onMobile"
+								:readonly
 							/>
 						</div>
 					</td>
@@ -357,6 +362,7 @@ export default {
 							<my-bool
 								@update:modelValue="set('richtext',$event)"
 								:modelValue="field.richtext"
+								:readonly
 							/>
 						</td>
 					</tr>
@@ -367,6 +373,7 @@ export default {
 									@update:modelValue="field.captions.fieldTitle = $event;set('captions',field.captions)"
 									:language="builderLanguage"
 									:modelValue="field.captions.fieldTitle"
+									:readonly
 									:richtext="true"
 								/>
 							</div>
@@ -377,6 +384,7 @@ export default {
 						<td>
 							<select
 								@input="setInt('size',$event.target.value,false)"
+								:disabled="readonly"
 								:value="field.size"
 							>
 								<option value="1">h1</option>
@@ -414,6 +422,7 @@ export default {
 						<td>
 							<input
 								@input="setInt('min',$event.target.value,true)"
+								:disabled="readonly"
 								:value="field.min"
 							/>
 						</td>
@@ -423,6 +432,7 @@ export default {
 						<td>
 							<input
 								@input="setInt('max',$event.target.value,true)"
+								:disabled="readonly"
 								:value="field.max"
 							/>
 						</td>
@@ -432,6 +442,7 @@ export default {
 						<td>
 							<select
 								@input="set('display',$event.target.value)"
+								:disabled="readonly"
 								:value="field.display"
 							>
 								<option v-for="o in displayOptions" :value="o">{{ capApp.option.display[o] }}</option>
@@ -443,6 +454,7 @@ export default {
 						<td>
 							<input
 								@input="setNull('regexCheck',$event.target.value)"
+								:disabled="readonly"
 								:value="field.regexCheck"
 							/>
 						</td>
@@ -456,6 +468,7 @@ export default {
 								<select
 									v-if="systemDefaults.length !== 0"
 									@input="set('def',$event.target.value)"
+									:disabled="readonly"
 									:value="systemDefaultUsed ? field.def : ''"
 								>
 									<option value="">[{{ capApp.systemDefaults.fixed }}]</option>
@@ -464,6 +477,7 @@ export default {
 								<input
 									v-if="!systemDefaultUsed"
 									@input="set('def',$event.target.value)"
+									:disabled="readonly"
 									:value="field.def"
 								/>
 							</div>
@@ -480,7 +494,7 @@ export default {
 								:fixedCollection="false"
 								:flagsEnable="[]"
 								:module
-								:readonly="false"
+								:readonly
 								:showOnMobile="false"
 							/>
 						</td>
@@ -489,7 +503,7 @@ export default {
 						<td>{{ capApp.fieldDefaultPresetIds }}</td>
 						<td>
 							<div class="column gap">
-								<select @change="presetIdAdd($event.target.value)">
+								<select @change="presetIdAdd($event.target.value)" :disabled="readonly">
 									<option value="">-</option>
 									<template v-for="p in presetIdMap">
 										<option
@@ -504,6 +518,7 @@ export default {
 									<my-button image="cancel.png"
 										v-for="presetId in field.defPresetIds"
 										@trigger="presetIdRemove(presetId)"
+										:active="!readonly"
 										:caption="presetIdMap[presetId].name"
 										:key="presetId"
 									/>
@@ -518,6 +533,7 @@ export default {
 						<td>
 							<select
 								@input="setNull('attributeIdAlt',$event.target.value)"
+								:disabled="readonly"
 								:value="field.attributeIdAlt"
 							>
 								<option value="">-</option>
@@ -535,6 +551,7 @@ export default {
 						<td>
 							<select
 								@input="setNull('attributeIdAlt',$event.target.value)"
+								:disabled="readonly"
 								:value="field.attributeIdAlt"
 							>
 								<option value="">-</option>
@@ -555,6 +572,7 @@ export default {
 							<td>
 							<input
 								@input="setInt('autoSelect',$event.target.value,false)"
+								:disabled="readonly"
 								:placeholder="capApp.autoSelectHint"
 								:value="field.autoSelect"
 							/>
@@ -574,38 +592,42 @@ export default {
 									@update:modelValue="setFlags('clipboard',$event)"
 									:caption="capGen.clipboard"
 									:modelValue="field.flags.includes('clipboard')"
+									:readonly
 								/>
 								<my-button-check
 									v-if="!isDrawing"
 									@update:modelValue="setFlags('monospace',$event)"
 									:caption="capGen.monospace"
 									:modelValue="field.flags.includes('monospace')"
+									:readonly
 								/>
 								<my-button-check
 									v-if="isIFrame || isBarcode || isDrawing"
 									@update:modelValue="setFlags('hideInputs',$event)"
 									:caption="capApp.fieldFlags.hideInputs"
 									:modelValue="field.flags.includes('hideInputs')"
+									:readonly
 								/>
 							</template>
 							<template v-if="isRelationship">
 								<my-button-check
 									@update:modelValue="setFlags('relCategory',$event)"
-									:active="!field.flags.includes('relFlow')"
 									:caption="capApp.fieldFlags.relCategory"
 									:modelValue="field.flags.includes('relCategory')"
+									:readonly="field.flags.includes('relFlow') || readonly"
 								/>
 								<my-button-check
 									@update:modelValue="setFlags('relFlow',$event)"
-									:active="!field.flags.includes('relCategory') && !isRelationship1N"
 									:caption="capApp.fieldFlags.relFlow"
 									:modelValue="field.flags.includes('relFlow')"
+									:readonly="field.flags.includes('relCategory') || isRelationship1N || readonly"
 								/>
 								<my-button-check
 									v-if="!isVariable"
 									@update:modelValue="set('filterQuick',$event)"
 									:caption="capApp.filterQuick"
 									:modelValue="field.filterQuick"
+									:readonly
 								/>
 							</template>
 						</div>
@@ -615,7 +637,7 @@ export default {
 				<tr v-if="isData && !isFiles && !isDrawing && !isRelationship && !isDate && !isDatetime && !isTime && !isIFrame">
 					<td>{{ capGen.alignment }}</td>
 					<td>
-						<select v-model="alignment">
+						<select v-model="alignment" :disabled="readonly">
 							<option value="def">{{ capGen.alignmentHor.left }}</option>
 							<option value="end">{{ capGen.alignmentHor.right }}</option>
 						</select>
@@ -628,6 +650,7 @@ export default {
 						<td>
 							<select
 								@input="setIndexAttribute('date0',$event.target.value)"
+								:disabled="readonly"
 								:value="getIndexAttributeId(field.indexDate0,field.attributeIdDate0,false,null)"
 							>
 								<option :value="getIndexAttributeId(null,null,false,null)">-</option>
@@ -650,6 +673,7 @@ export default {
 						<td>
 							<select
 								@input="setIndexAttribute('date1',$event.target.value)"
+								:disabled="readonly"
 								:value="getIndexAttributeId(field.indexDate1,field.attributeIdDate1,false,null)"
 							>
 								<option :value="getIndexAttributeId(null,null,false,null)">-</option>
@@ -672,6 +696,7 @@ export default {
 						<td>
 							<select
 								@input="setIndexAttribute('color',$event.target.value)"
+								:disabled="readonly"
 								:value="getIndexAttributeId(field.indexColor,field.attributeIdColor,false,null)"
 							>
 								<option :value="getIndexAttributeId(null,null,false,null)">-</option>
@@ -695,6 +720,7 @@ export default {
 							<td>
 								<select
 									@input="setInt('days',$event.target.value,false)"
+									:disabled="readonly"
 									:value="field.days"
 								>
 									<option :value="1" >{{ capCal.option.days1  }}</option>
@@ -711,6 +737,7 @@ export default {
 								<my-bool
 									@update:modelValue="set('daysToggle',$event)"
 									:modelValue="field.daysToggle"
+									:readonly
 								/>
 							</td>
 						</tr>
@@ -725,6 +752,7 @@ export default {
 							<td>
 								<select
 									@input="setNull('ganttSteps',$event.target.value)"
+									:disabled="readonly"
 									:value="field.ganttSteps"
 								>
 									<option value="days" >{{ capApp.option.ganttStepsDays }}</option>
@@ -738,6 +766,7 @@ export default {
 								<my-bool
 									@update:modelValue="set('ganttStepsToggle',$event)"
 									:modelValue="field.ganttStepsToggle"
+									:readonly
 								/>
 							</td>
 						</tr>
@@ -748,6 +777,7 @@ export default {
 							<my-bool
 								@update:modelValue="set('ics',$event)"
 								:modelValue="field.ics"
+								:readonly
 							/>
 						</td>
 					</tr>
@@ -757,6 +787,7 @@ export default {
 							<td>
 								<input
 									@input="setInt('dateRange0',$event.target.value * 86400,false)"
+									:disabled="readonly"
 									:placeholder="capApp.dateRangeHint"
 									:value="field.dateRange0 / 86400"
 								/>
@@ -767,6 +798,7 @@ export default {
 							<td>
 								<input
 									@input="setInt('dateRange1',$event.target.value * 86400,false)"
+									:disabled="readonly"
 									:placeholder="capApp.dateRangeHint"
 									:value="field.dateRange1 / 86400"
 								/>
@@ -782,19 +814,22 @@ export default {
 							<div class="row gap" v-if="field.basis !== 0">
 								<input class="short"
 									@input="setInt('basis',$event.target.value,false)"
+									:disabled="readonly"
 									:value="field.basis"
 								/>
 								<my-button image="add.png"
 									@trigger="setInt('basis',field.basis+50,false)"
+									:active="!readonly"
 								/>
 								<my-button image="remove.png"
 									@trigger="setInt('basis',field.basis-50,false)"
-									:active="field.basis >= 50"
+									:active="field.basis >= 50 && !readonly"
 								/>
 							</div>
 							<my-button
 								v-if="field.basis === 0"
 								@trigger="setInt('basis',300,false)"
+								:active="!readonly"
 								:caption="capApp.fieldSize0"
 								:naked="true"
 							/>
@@ -806,14 +841,16 @@ export default {
 							<div class="row gap">
 								<input class="short"
 									@input="setInt('grow',$event.target.value,false)"
+									:disabled="readonly"
 									:value="field.grow"
 								/>
 								<my-button image="add.png"
 									@trigger="setInt('grow',field.grow+1,false)"
+									:active="!readonly"
 								/>
 								<my-button image="remove.png"
 									@trigger="setInt('grow',field.grow-1,false)"
-									:active="field.grow > 0"
+									:active="field.grow > 0 && !readonly"
 								/>
 							</div>
 						</td>
@@ -823,6 +860,7 @@ export default {
 						<td>
 							<input
 								@input="setInt('perMax',$event.target.value,false)"
+								:disabled="readonly"
 								:value="field.perMax"
 							/>
 						</td>
@@ -833,14 +871,16 @@ export default {
 							<div class="row gap">
 								<input class="short"
 									@input="setInt('shrink',$event.target.value,false)"
+									:disabled="readonly"
 									:value="field.shrink"
 								/>
 								<my-button image="add.png"
 									@trigger="setInt('shrink',field.shrink+1,false)"
+									:active="!readonly"
 								/>
 								<my-button image="remove.png"
 									@trigger="setInt('shrink',field.shrink-1,false)"
-									:active="field.shrink > 0"
+									:active="field.shrink > 0 && !readonly"
 								/>
 							</div>
 						</td>
@@ -850,6 +890,7 @@ export default {
 						<td>
 							<input
 								@input="setInt('perMin',$event.target.value,false)"
+								:disabled="readonly"
 								:value="field.perMin"
 							/>
 						</td>
@@ -863,6 +904,7 @@ export default {
 							<div class="row gap">
 								<select
 									@input="set('direction',$event.target.value)"
+									:disabled="readonly"
 									:value="field.direction"
 								>
 									<option value="row">{{ capGen.row }}</option>
@@ -870,6 +912,7 @@ export default {
 								</select>
 								<my-button
 									@trigger="set('direction',field.direction === 'row' ? 'column' : 'row' )"
+									:active="!readonly"
 									:captionTitle="capGen.direction+': '+field.direction"
 									:image="field.direction === 'row' ? 'flexRow.png' : 'flexColumn.png'"
 								/>
@@ -883,6 +926,7 @@ export default {
 								<my-bool
 									@update:modelValue="set('wrap',$event)"
 									:modelValue="field.wrap"
+									:readonly
 								/>
 								<my-button
 									:active="false"
@@ -899,6 +943,7 @@ export default {
 							<div class="row gap">
 								<select
 									@input="set('justifyContent',$event.target.value)"
+									:disabled="readonly"
 									:value="field.justifyContent"
 								>
 									<option value="flex-start">flex-start</option>
@@ -923,6 +968,7 @@ export default {
 							<div class="row gap">
 								<select
 									@input="set('alignItems',$event.target.value)"
+									:disabled="readonly"
 									:value="field.alignItems"
 								>
 									<option value="flex-start">flex-start</option>
@@ -946,7 +992,7 @@ export default {
 							<div class="row gap">
 								<select
 									@input="set('alignContent',$event.target.value)"
-									:disabled="!field.wrap"
+									:disabled="!field.wrap || readonly"
 									:value="field.alignContent"
 								>
 									<option value="flex-start">flex-start</option>
@@ -975,6 +1021,7 @@ export default {
 								<span>{{ capApp.tabs }}</span>
 								<my-button image="add.png"
 									@trigger="tabAdd(i)"
+									:active="!readonly"
 									:caption="capGen.button.add"
 									:naked="true"
 								/>
@@ -997,24 +1044,27 @@ export default {
 									>
 										<template #item="{element,index}">
 											<tr>
-												<td><img class="action dragAnchor" src="images/drag.png" /></td>
+												<td><img class="action dragAnchor" src="images/drag.png" v-if="!readonly" /></td>
 												<td>T{{ typeof entityIdMapRef.tab[element.id] !== 'undefined' ? entityIdMapRef.tab[element.id] : '' }}</td>
 												<td>
 													<my-builder-caption
 														@update:modelValue="element.captions.tabTitle = $event;set('tabs',field.tabs)"
 														:language="builderLanguage"
 														:modelValue="element.captions.tabTitle"
+														:readonly
 													/>
 												</td>
 												<td>
 													<my-bool
 														@update:modelValue="element.contentCounter = $event;set('tabs',field.tabs)"
 														:modelValue="element.contentCounter"
+														:readonly
 													/>
 												</td>
 												<td>
 													<select class="short"
 														@input="element.state = $event.target.value;set('tabs',field.tabs)"
+														:disabled="readonly"
 														:value="element.state"
 													>
 														<option value="hidden">{{ capGen.hidden }}</option>
@@ -1024,7 +1074,7 @@ export default {
 												<td>
 													<my-button image="cancel.png"
 														@trigger="field.tabs.splice(index,1);set('tabs',field.tabs)"
-														:active="field.tabs.length > 1"
+														:active="field.tabs.length > 1 && !readonly"
 														:naked="true"
 													/>
 												</td>
@@ -1044,6 +1094,7 @@ export default {
 							<div class="row gap">
 								<select
 									@input="setInt('relationIndexData',$event.target.value,true)"
+									:disabled="readonly"
 									:value="field.relationIndexData === null ? '' : field.relationIndexData"
 								>
 									<option value="">-</option>
@@ -1064,6 +1115,7 @@ export default {
 							<div class="row gap">
 								<select
 									@input="setInt('relationIndexAxisX',$event.target.value,true)"
+									:disabled="readonly"
 									:value="field.relationIndexAxisX === null ? '' : field.relationIndexAxisX"
 								>
 									<option value="">-</option>
@@ -1084,6 +1136,7 @@ export default {
 							<div class="row gap">
 								<select
 									@input="setInt('relationIndexAxisY',$event.target.value,true)"
+									:disabled="readonly"
 									:value="field.relationIndexAxisY === null ? '' : field.relationIndexAxisY"
 								>
 									<option value="">-</option>
@@ -1104,6 +1157,7 @@ export default {
 							<div class="row gap">
 								<select
 									@input="setNull('attributeIdSort',$event.target.value)"
+									:disabled="readonly"
 									:value="field.attributeIdSort === null ? '' : field.attributeIdSort"
 								>
 									<option value="">-</option>
@@ -1132,6 +1186,7 @@ export default {
 						<td>
 							<select
 								@input="set('layout',$event.target.value)"
+								:disabled="readonly"
 								:value="field.layout"
 							>
 								<option value="table">table</option>
@@ -1144,6 +1199,7 @@ export default {
 						<td>
 							<input
 								@input="setInt('resultLimit',$event.target.value,false)"
+								:disabled="readonly"
 								:value="field.resultLimit"
 							/>
 						</td>
@@ -1154,12 +1210,14 @@ export default {
 							<input
 								v-if="field.autoRenew !== null"
 								@input="setInt('autoRenew',$event.target.value,true)"
+								:disabled="readonly"
 								:placeholder="capApp.autoRenewHint"
 								:value="field.autoRenew"
 							/>
 							<my-button
 								v-else
 								@trigger="setInt('autoRenew',300,false)"
+								:active="!readonly"
 								:caption="capApp.autoRenew0"
 								:naked="true"
 							/>
@@ -1171,6 +1229,7 @@ export default {
 							<my-bool
 								@update:modelValue="set('filterQuick',$event)"
 								:modelValue="field.filterQuick"
+								:readonly
 							/>
 						</td>
 					</tr>
@@ -1180,6 +1239,7 @@ export default {
 							<my-bool
 								@update:modelValue="set('csvImport',$event)"
 								:modelValue="field.csvImport"
+								:readonly
 							/>
 						</td>
 					</tr>
@@ -1189,6 +1249,7 @@ export default {
 							<my-bool
 								@update:modelValue="set('csvExport',$event)"
 								:modelValue="field.csvExport"
+								:readonly
 							/>
 						</td>
 					</tr>
@@ -1209,6 +1270,7 @@ export default {
 						<div class="row gap">
 							<select
 								@input="setNull('variableId',$event.target.value)"
+								:disabled="readonly"
 								:value="field.variableId"
 							>
 								<option value="">-</option>
@@ -1228,6 +1290,7 @@ export default {
 							<my-button image="add.png"
 								v-if="field.variableId === null"
 								@trigger="$emit('createNew','variable',{formId:formId})"
+								:active="!readonly"
 								:captionTitle="capGen.button.new"
 							/>
 							<my-button image="open.png"
@@ -1247,6 +1310,7 @@ export default {
 						<div class="row gap">
 							<select
 								@input="setNull('jsFunctionId',$event.target.value)"
+								:disabled="readonly"
 								:value="field.jsFunctionId"
 							>
 								<option value="">-</option>
@@ -1268,6 +1332,7 @@ export default {
 							<my-button image="add.png"
 								v-if="field.jsFunctionId === null"
 								@trigger="$emit('createNew','jsFunction',{formId:formId})"
+								:active="!readonly"
 								:captionTitle="capGen.button.new"
 							/>
 							<my-button image="open.png"
@@ -1292,6 +1357,7 @@ export default {
 							:joinsIndexMapField
 							:modelValue="field.openForm"
 							:module
+							:readonly
 						/>
 					</td>
 				</tr>
@@ -1308,6 +1374,7 @@ export default {
 							:joinsIndexMapField
 							:modelValue="field.openFormBulk"
 							:module
+							:readonly
 						/>
 					</td>
 				</tr>
@@ -1322,7 +1389,7 @@ export default {
 							:joinsIndexMap
 							:modelValue="field.openDoc"
 							:module
-							:readonly="false"
+							:readonly
 						/>
 					</td>
 				</tr>
@@ -1335,6 +1402,7 @@ export default {
 								<span>{{ capApp.collectionTitle }}</span>
 								<my-button image="add.png"
 									@trigger="collectionAdd"
+									:active="!readonly"
 									:caption="capGen.button.add"
 									:naked="true"
 								/>
@@ -1352,7 +1420,7 @@ export default {
 									:fixedCollection="false"
 									:flagsEnable="['multiValue']"
 									:module
-									:readonly="false"
+									:readonly
 									:showOnMobile="false"
 								/>
 								<span v-if="field.collections.length !== 0">{{ capApp.collectionHint }}</span>
@@ -1364,13 +1432,14 @@ export default {
 		</table>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		dataFields:     { type:Array,  required:true },
-		entityIdMapRef: { type:Object, required:true },
-		field:          { type:Object, required:true },
-		formId:         { type:String, required:true },
-		joinsIndexMap:  { type:Object, required:true },
-		moduleId:       { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		dataFields:     { type:Array,   required:true },
+		entityIdMapRef: { type:Object,  required:true },
+		field:          { type:Object,  required:true },
+		formId:         { type:String,  required:true },
+		joinsIndexMap:  { type:Object,  required:true },
+		moduleId:       { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	emits:['createNew','set'],
 	computed:{

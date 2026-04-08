@@ -1,8 +1,7 @@
 import srcBase64Icon       from '../shared/image.js';
 import {getCaptionForLang} from '../shared/language.js';
-export {MyBuilderMenuTabSelect as default};
 
-const MyBuilderMenuTabSelect = {
+export default {
 	name:'my-builder-menu-tab-select',
 	template:`<my-tabs
 		@update:modelValue="$emit('update:modelValue',$event)"
@@ -18,7 +17,7 @@ const MyBuilderMenuTabSelect = {
 	},
 	emits:['update:modelValue'],
 	computed:{
-		tabs:(s) => {
+		tabs:s => {
 			let indx = [];
 			let imgs = [];
 			let caps = [];
@@ -37,7 +36,7 @@ const MyBuilderMenuTabSelect = {
 		},
 
 		// stores
-		capGen:(s) => s.$store.getters.captions.generic
+		capGen:s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals

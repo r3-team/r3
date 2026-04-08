@@ -39,6 +39,7 @@ export default {
 				:joinsIndexMap
 				:moduleId
 				:noMovement
+				:readonly
 				:uiScale
 			/>
 		</template>
@@ -64,6 +65,7 @@ export default {
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
 		moduleId:       { type:String,  required:true },
 		noMovement:     { type:Boolean, required:false, default:false },
+		readonly:       { type:Boolean, required:true },
 		uiScale:        { type:Number,  required:false, default:100 }
 	},
 	emits:['createNew','field-id-show','field-remove','field-move-store'],

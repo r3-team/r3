@@ -175,7 +175,7 @@ const MyFilterConnector = {
 			get()  { return this.modelValue; },
 			set(v) { this.$emit('update:modelValue',v); }
 		},
-		capApp:(s) => s.$store.getters.captions.filter
+		capApp:s => s.$store.getters.captions.filter
 	}
 };
 
@@ -501,6 +501,7 @@ const MyFilterSide = {
 				:joinsParents="joinsParents.concat([joins])"
 				:modelValue="query"
 				:moduleId
+				:readonly
 			/>
 			<template v-if="query.relationId !== null">
 				<br />

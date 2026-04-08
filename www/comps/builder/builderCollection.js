@@ -106,11 +106,12 @@ export default {
 							@columns-set="collection.columns = $event"
 							@column-id-show="toggleColumnOptions($event)"
 							:builderLanguage
-							:columnIdShow="columnIdShow"
+							:columnIdShow
 							:columns="collection.columns"
 							:hasBatches="false"
 							:hasCaptions="true"
 							:hasStyling="false"
+							:readonly
 						/>
 					</div>
 					
@@ -122,6 +123,7 @@ export default {
 								:allowRelationships="true"
 								:columns="collection.columns"
 								:joins="query.joins"
+								:readonly
 							/>
 						</div>
 					</div>
@@ -155,6 +157,7 @@ export default {
 					:filtersDisable="filtersDisable"
 					:modelValue="query"
 					:moduleId="module.id"
+					:readonly
 				/>
 				
 				<!-- column settings -->
@@ -171,6 +174,7 @@ export default {
 						:filtersDisable="filtersDisable"
 						:joinsParents="[query.joins]"
 						:moduleId="module.id"
+						:readonly
 					/>
 					<my-builder-column-options
 						@set="(...args) => columnSet(args[0],args[1])"
@@ -179,6 +183,7 @@ export default {
 						:hasCaptions="true"
 						:moduleId="module.id"
 						:onlyData="true"
+						:readonly
 					/>
 				</template>
 			</div>

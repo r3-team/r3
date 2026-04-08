@@ -471,6 +471,7 @@ export default {
 						/>
 						<my-button image="upload.png"
 							@trigger="showTransferMode = 'import';showTransfer = true"
+							:active="!readonly"
 							:caption="capGen.button.import"
 						/>
 					</div>

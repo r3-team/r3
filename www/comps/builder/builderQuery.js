@@ -906,7 +906,7 @@ export default {
 		joinsParents:   { type:Array,   required:false, default:() => [] },          // each item is an array of joins from a parent query
 		modelValue:     { type:Object,  required:true },                             // { choices:[], filters:[], fixedLimit:0, joins:[], lookups:[], orders:[], relationId:'' }
 		moduleId:       { type:String,  required:true },
-		readonly:       { type:Boolean, required:false, default:false },
+		readonly:       { type:Boolean, required:true },
 		relationIdStart:{ required:false, default:null }                             // when query starts with a defined relation
 	},
 	emits:['index-removed','update:modelValue'],

@@ -335,10 +335,10 @@ const MyBuilderDocFontLineFactor = {
 const MyBuilderDocFontStyles = {
 	name:'my-builder-doc-font-styles',
 	template:`<div class="row gap centered">
-		<my-button-check @update:modelValue="set('B',$event)" :caption="capApp.styleBold"      :modelValue="valueString.includes('B')" :readonly="readonly" />
-		<my-button-check @update:modelValue="set('I',$event)" :caption="capApp.styleItalic"    :modelValue="valueString.includes('I')" :readonly="readonly" />
-		<my-button-check @update:modelValue="set('U',$event)" :caption="capApp.styleUnderline" :modelValue="valueString.includes('U')" :readonly="readonly" />
-		<my-button-check @update:modelValue="set('S',$event)" :caption="capApp.styleStrikeout" :modelValue="valueString.includes('S')" :readonly="readonly" />
+		<my-button-check @update:modelValue="set('B',$event)" :caption="capApp.styleBold"      :modelValue="valueString.includes('B')" :readonly />
+		<my-button-check @update:modelValue="set('I',$event)" :caption="capApp.styleItalic"    :modelValue="valueString.includes('I')" :readonly />
+		<my-button-check @update:modelValue="set('U',$event)" :caption="capApp.styleUnderline" :modelValue="valueString.includes('U')" :readonly />
+		<my-button-check @update:modelValue="set('S',$event)" :caption="capApp.styleStrikeout" :modelValue="valueString.includes('S')" :readonly />
 	</div>`,
 	props:{
 		modelValue:{ type:[String,null], required:true },

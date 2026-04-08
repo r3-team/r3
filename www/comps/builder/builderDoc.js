@@ -154,6 +154,7 @@ export default {
 						:filtersDisable
 						:modelValue="query"
 						:moduleId="doc.moduleId"
+						:readonly
 					/>
 
 					<br />

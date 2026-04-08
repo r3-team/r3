@@ -164,6 +164,7 @@ export default {
 						:filtersDisable
 						:modelValue="query"
 						:moduleId
+						:readonly
 					/>
 					<div class="builder-doc-templates">
 						<div class="builder-doc-template" draggable="true"

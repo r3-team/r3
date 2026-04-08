@@ -20,7 +20,7 @@ export const MyBuilderColumns = {
 	>
 		<!-- computed column batch -->
 		<template #item="{element:batch,index:batchIndex}">
-			<div class="builder-column-batch dragBatch">
+			<div class="builder-column-batch" :class="{ dragBatch:!readonly }">
 				<div class="builder-column-batch-options">
 					<img class="icon move" src="images/column.png" :title="capApp.columnBatch" />
 					
@@ -35,14 +35,16 @@ export const MyBuilderColumns = {
 						:dynamicSize="true"
 						:language="builderLanguage"
 						:modelValue="batch.columns[0].captions.columnTitle"
+						:readonly
 					/>
 					<img class="icon clickable"
-						v-if="hasStyling"
+						v-if="hasStyling && !readonly"
 						@click="toggleVertical(batch.columns[0])"
 						:src="batch.columns[0].styles.includes('vertical') ? 'images/flexColumn.png' : 'images/flexRow.png'"
 						:title="capApp.columnBatchDir"
 					/>
 					<img class="icon clickable" src="images/delete.png"
+						v-if="!readonly"
 						@click="batchRemove(batchIndex)"
 						:title="capGen.button.delete"
 					/>
@@ -56,7 +58,7 @@ export const MyBuilderColumns = {
 					:group="groupColumns"
 				>
 					<template #item="{element:column}">
-				   	 	<div class="builder-field column column-wrap dragAnchor" :class="{ selected:columnIdShow === column.id }">
+				   	 	<div class="builder-field column column-wrap" :class="{ dragAnchor:!readonly, selected:columnIdShow === column.id }">
 							<div class="builder-field-header">
 								<my-button
 									@trigger="$emit('column-id-show',column.id,'properties')"
@@ -68,14 +70,13 @@ export const MyBuilderColumns = {
 									@trigger="$emit('column-id-show',column.id,'content')"
 									:naked="true"
 								/>
-								<div class="title word-break"
-									:title="getItemTitleColumn(column,false)"
-								>
+								<div class="title word-break" :title="getItemTitleColumn(column,false)">
 									{{ getItemTitleColumn(column,false) }}
 								</div>
 								
 								<div class="row centered gap">
 									<div class="clickable"
+										v-if="!readonly"
 										@click="columnSetBy(column.id,'basis',toggleSize(column.basis,25))"
 										@click.prevent.right="columnSetBy(column.id,'basis',toggleSize(column.basis,-25))"
 										:title="capApp.columnSize"
@@ -83,17 +84,17 @@ export const MyBuilderColumns = {
 										<span>{{ getFlexBasis(column.basis) }}</span>
 									</div>
 									<img class="action clickable" src="images/visible0.png"
-										v-if="column.hidden"
+										v-if="column.hidden && !readonly"
 										@click="columnSetBy(column.id,'hidden',false)"
 										:title="capGen.showDefault0"
 									/>
 									<img class="action clickable" src="images/smartphoneOff.png"
-										v-if="!column.hidden && !column.onMobile"
+										v-if="!column.hidden && !column.onMobile && !readonly"
 										@click="columnSetBy(column.id,'onMobile',true)"
 										:title="capGen.showDefaultMobile0"
 									/>
 									<img class="action end clickable" src="images/columnOff.png"
-										v-if="batch.columns.length !== 1"
+										v-if="batch.columns.length !== 1 && !readonly"
 										@click="columnSetBy(column.id,'batch',null)"
 										:title="capApp.columnBatchOff"
 									/>
@@ -113,7 +114,8 @@ export const MyBuilderColumns = {
 		groupName:      { type:String,  required:true },
 		hasBatches:     { type:Boolean, required:false, default:true },
 		hasCaptions:    { type:Boolean, required:true },
-		hasStyling:     { type:Boolean, required:false, default:true } // display/formatting options
+		hasStyling:     { type:Boolean, required:false, default:true }, // display/formatting options
+		readonly:       { type:Boolean, required:true }
 	},
 	emits:['column-id-show','columns-set'],
 	computed:{
@@ -166,11 +168,11 @@ export const MyBuilderColumns = {
 		},
 		
 		// drag groups must be unique or else batches/columns could be moved between separate entities
-		groupBatches:(s) => {
+		groupBatches:s => {
 			let name = `batches_${s.groupName}`;
 			return { name:name, pull:[name], put:[name] };
 		},
-		groupColumns:(s) => {
+		groupColumns:s => {
 			return {
 				name:s.groupName,
 				pull:s.hasBatches ? [s.groupName] : false,
@@ -179,10 +181,10 @@ export const MyBuilderColumns = {
 		},
 		
 		// stores
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.form,
-		capGen:        (s) => s.$store.getters.captions.generic
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		capApp:        s => s.$store.getters.captions.builder.form,
+		capGen:        s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -232,10 +234,11 @@ export const MyBuilderColumnTemplates = {
 		:group="groupName"
 	>
 		<template #item="{element:b}">
-			<div class="builder-column-batch dragAnchor">
+			<div class="builder-column-batch" :class="{ dragAnchor:!readonly }">
 				
 				<div v-for="c in b.columns" class="builder-column-batch-options">
 					<img class="icon clickable" src="images/add.png"
+						v-if="!readonly"
 						@click="$emit('column-add',c)"
 						:title="capGen.button.add"
 					/>
@@ -255,7 +258,8 @@ export const MyBuilderColumnTemplates = {
 		allowRelationships:{ type:Boolean, required:false, default:false },
 		columns:           { type:Array,   required:true },
 		groupName:         { type:String,  required:true },
-		joins:             { type:Array,   required:true }
+		joins:             { type:Array,   required:true },
+		readonly:          { type:Boolean, required:true }
 	},
 	emits:['column-add'],
 	computed:{

@@ -91,6 +91,7 @@ export default {
 							:columnIdShow
 							:columns="searchBar.columns"
 							:hasCaptions="true"
+							:readonly
 						/>
 					</div>
 					
@@ -101,6 +102,7 @@ export default {
 								@column-add="searchBar.columns.push($event)"
 								:columns="searchBar.columns"
 								:joins="query.joins"
+								:readonly
 							/>
 						</div>
 					</div>
@@ -130,10 +132,11 @@ export default {
 					:allowChoices="false"
 					:allowLookups="false"
 					:allowOrders="true"
-					:builderLanguage="builderLanguage"
-					:filtersDisable="filtersDisable"
+					:builderLanguage
+					:filtersDisable
 					:modelValue="query"
 					:moduleId="module.id"
+					:readonly
 				/>
 
 				<!-- SQL preview -->
@@ -163,19 +166,21 @@ export default {
 						v-model="columnShow.query"
 						:allowChoices="false"
 						:allowOrders="true"
-						:builderLanguage="builderLanguage"
-						:filtersDisable="filtersDisable"
+						:builderLanguage
+						:filtersDisable
 						:joinsParents="[query.joins]"
 						:moduleId="module.id"
+						:readonly
 					/>
 					
 					<my-builder-column-options
 						@set="(...args) => columnSet(args[0],args[1])"
-						:builderLanguage="builderLanguage"
+						:builderLanguage
 						:column="columnShow"
 						:hasCaptions="true"
 						:moduleId="module.id"
 						:onlyData="false"
+						:readonly
 					/>
 				</template>
 			</div>

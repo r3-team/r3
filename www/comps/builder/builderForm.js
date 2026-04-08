@@ -163,6 +163,7 @@ export default {
 					:isTemplate="false"
 					:joinsIndexMap
 					:moduleId="module.id"
+					:readonly
 					:uiScale
 				/>
 			</div>
@@ -248,6 +249,7 @@ export default {
 									:formId="id"
 									:isTemplate="true"
 									:moduleId="module.id"
+									:readonly
 								/>
 								<my-builder-fields flexDirParent="column"
 									v-if="fieldsShow === 'edit'"
@@ -272,6 +274,7 @@ export default {
 									:joinsIndexMap
 									:moduleId="module.id"
 									:noMovement="true"
+									:readonly
 								/>
 							</div>
 						</div>

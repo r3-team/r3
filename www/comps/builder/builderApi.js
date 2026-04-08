@@ -429,6 +429,7 @@ export default {
 							:hasBatches="false"
 							:hasCaptions="true"
 							:hasStyling="false"
+							:readonly
 						/>
 					</div>
 					
@@ -440,6 +441,7 @@ export default {
 								:allowRelationships="true"
 								:columns="api.columns"
 								:joins="query.joins"
+								:readonly
 							/>
 						</div>
 					</div>
@@ -473,6 +475,7 @@ export default {
 					:filtersDisable
 					:modelValue="query"
 					:moduleId="module.id"
+					:readonly
 				/>
 				
 				<!-- column settings -->
@@ -489,6 +492,7 @@ export default {
 						:filtersDisable
 						:joinsParents="[query.joins]"
 						:moduleId="module.id"
+						:readonly
 					/>
 					<my-builder-column-options
 						@set="(...args) => columnSet(args[0],args[1])"
@@ -497,6 +501,7 @@ export default {
 						:hasCaptions="true"
 						:moduleId="module.id"
 						:onlyData="true"
+						:readonly
 					/>
 				</template>
 			</div>
@@ -547,7 +552,7 @@ export default {
 						</tr>
 						<tr>
 							<td>{{ capApp.verboseDef }}</td>
-							<td><my-bool v-model="api.verboseDef" /></td>
+							<td><my-bool v-model="api.verboseDef" :readonly /></td>
 							<td>{{ capApp.verboseDefHint }}</td>
 						</tr>
 						<tr v-if="warnings.length !== 0">
@@ -566,17 +571,17 @@ export default {
 										<tbody>
 											<tr>
 												<td>GET</td>
-												<td><my-bool v-model="api.hasGet" /></td>
+												<td><my-bool v-model="api.hasGet" :readonly /></td>
 												<td>{{ capApp.hint.get }}</td>
 											</tr>
 											<tr>
 												<td>POST</td>
-												<td><my-bool v-model="api.hasPost" /></td>
+												<td><my-bool v-model="api.hasPost" :readonly /></td>
 												<td>{{ capApp.hint.post }}</td>
 											</tr>
 											<tr>
 												<td>DELETE</td>
-												<td><my-bool v-model="api.hasDelete" /></td>
+												<td><my-bool v-model="api.hasDelete" :readonly /></td>
 												<td>{{ capApp.hint.delete }}</td>
 											</tr>
 										</tbody>
