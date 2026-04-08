@@ -30,10 +30,10 @@ export default {
 	},
 	emits:['set-unix-from','set-unix-to'],
 	computed:{
-		dropdownShow:(s) => s.dropdownElm === s.$refs.content,
+		dropdownShow:s => s.dropdownElm === s.$refs.content,
 
 		// stores
-		dropdownElm:(s) => s.$store.getters.dropdownElm
+		dropdownElm:s => s.$store.getters.dropdownElm
 	},
 	methods:{
 		dropdownSet(state) {

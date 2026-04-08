@@ -284,6 +284,7 @@ export default {
 						:entityIdMapRef
 						:fieldIdMap
 						:form
+						:readonly
 					/>
 
 					<!-- form actions -->
