@@ -33,7 +33,7 @@ export default {
 		</div>
 		<div class="row gap centered" v-if="active && fieldsAddToList.length !== 0">
 			<span>{{ capGen.button.addToField }}</span>
-			<select class="auto" v-model="fieldIdAddTo">
+			<select class="auto" v-model="fieldIdAddTo" :disabled="readonly">
 				<option value="">-</option>
 				<option v-for="f in fieldsAddToList" :value="f.id">{{ getItemTitle(f.attributeId,f.index) }}</option>
 			</select>

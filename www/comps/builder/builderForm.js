@@ -65,16 +65,16 @@ export default {
 						<my-builder-icon-input
 							@input="form.iconId = $event"
 							:icon-id-selected="form.iconId"
-							:module="module"
+							:module
 							:title="capApp.icon"
-							:readonly="readonly"
+							:readonly
 						/>
 						<my-builder-caption class="title"
 							v-model="form.captions.formTitle"
 							:contentName="capApp.formTitle"
 							:language="builderLanguage"
 							:longInput="true"
-							:readonly="readonly"
+							:readonly
 						/>
 					</div>
 					
@@ -295,6 +295,7 @@ export default {
 						:dataFields
 						:formId="id"
 						:joinsIndexMap
+						:readonly
 					/>
 					
 					<!-- form functions -->

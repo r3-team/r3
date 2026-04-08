@@ -16,7 +16,7 @@ const MyBuilderFormAction = {
 	},
 	template:`<div class="builder-form-action default-inputs">
 		<div class="builder-form-action-top">
-			<img class="dragAnchor" src="images/drag.png" />
+			<img v-if="!readonly" class="dragAnchor" src="images/drag.png" />
 			<b>A{{ position }}</b>
 			<my-button
 				@trigger="open = !open"
@@ -27,21 +27,24 @@ const MyBuilderFormAction = {
 			<my-builder-icon-input
 				@input="iconId = $event"
 				:icon-id-selected="iconId"
-				:module="module"
+				:module
+				:readonly
 			/>
 			<my-builder-caption
 				v-model="captions.formActionTitle"
 				:contentName="capGen.title"
 				:language="builderLanguage"
+				:readonly
 			/>
 			<span>{{ capGen.state }}</span>
-			<select v-model="state" class="auto">
+			<select v-model="state" class="auto" :disabled="readonly">
 				<option value="hidden">{{ capGen.hidden }}</option>
 				<option value="default">{{ capGen.default }}</option>
 				<option value="readonly">{{ capGen.readonly }}</option>
 			</select>
 			<my-button image="delete.png"
 				@trigger="$emit('remove')"
+				:active="!readonly"
 				:cancel="true"
 				:captionTitle="capGen.button.delete"
 			/>
@@ -53,7 +56,7 @@ const MyBuilderFormAction = {
 					<td>{{ capGen.button.functionExec }}</td>
 					<td>
 						<div class="row gap centered">
-							<select v-model="jsFunctionId">
+							<select v-model="jsFunctionId" :disabled="readonly">
 								<option value="">-</option>
 								<option v-for="f in module.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
 									:value="f.id"
@@ -70,6 +73,7 @@ const MyBuilderFormAction = {
 							<my-button image="add.png"
 								v-if="jsFunctionId === ''"
 								@trigger="$emit('createNew','jsFunction',{formId:formId})"
+								:active="!readonly"
 								:captionTitle="capGen.button.create"
 							/>
 							<my-button image="open.png"
@@ -89,7 +93,7 @@ const MyBuilderFormAction = {
 							:allowAllForms="true"
 							:joinsIndexMap
 							:module
-							:readonly="false"
+							:readonly
 						/>
 					</td>
 				</tr>
@@ -101,7 +105,7 @@ const MyBuilderFormAction = {
 							:dataFields
 							:joinsIndexMap
 							:module
-							:readonly="false"
+							:readonly
 						/>
 					</td>
 				</tr>
@@ -109,12 +113,13 @@ const MyBuilderFormAction = {
 		</table>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		dataFields:     { type:Array,  required:true },
-		formId:         { type:String, required:true },
-		joinsIndexMap:  { type:Object, required:true },
-		position:       { type:Number, required:true },
-		modelValue:     { type:Object, required:true }
+		builderLanguage:{ type:String,  required:true },
+		dataFields:     { type:Array,   required:true },
+		formId:         { type:String,  required:true },
+		joinsIndexMap:  { type:Object,  required:true },
+		position:       { type:Number,  required:true },
+		modelValue:     { type:Object,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	emits:['createNew','remove','update:modelValue'],
 	data() {
@@ -179,7 +184,7 @@ export default {
 	name:'my-builder-form-actions',
 	components:{ MyBuilderFormAction },
 	template:`<div class="builder-form-actions">
-		<div><my-button image="add.png" @trigger="add" :caption="capGen.button.add" /></div>
+		<div><my-button image="add.png" @trigger="add" :active="!readonly" :caption="capGen.button.add" /></div>
 		<br />
 
 		<draggable handle=".dragAnchor" tag="div" group="actions" itemKey="id" animation="100"
@@ -199,16 +204,18 @@ export default {
 					:key="index"
 					:modelValue="element"
 					:position="index"
+					:readonly
 				/>
 			</template>
 		</draggable>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		dataFields:     { type:Array,  required:true },
-		formId:         { type:String, required:true },
-		joinsIndexMap:  { type:Object, required:true },
-		modelValue:     { type:Array,  required:true }
+		builderLanguage:{ type:String,  required:true },
+		dataFields:     { type:Array,   required:true },
+		formId:         { type:String,  required:true },
+		joinsIndexMap:  { type:Object,  required:true },
+		modelValue:     { type:Array,   required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	emits:['createNew','update:modelValue'],
 	computed:{
