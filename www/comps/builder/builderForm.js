@@ -304,6 +304,7 @@ export default {
 						v-model="form.functions"
 						@createNew="(...args) => $emit('createNew',...args)"
 						:formId="id"
+						:readonly
 					/>
 
 					<!-- form properties -->
