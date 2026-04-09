@@ -2454,7 +2454,8 @@
 		"encryption": "Encryption",
 		"error": {
 			"nameTaken": "Name is already taken, please choose another.",
-			"nameTooLong": "Name is too long, max. allowed length is {LEN} characters."
+			"nameTooLong": "Name is too long, max. allowed length is {LEN} characters.",
+			"noSecureContext": "The REI3 Builder requires a secure context to work correctly. Either access the system via HTTPS or on localhost."
 		},
 		"errorTitle": "Eroare",
 		"event": "Event",

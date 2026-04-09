@@ -76,6 +76,7 @@ const MyStore = Vuex.createStore({
 		isAtModule:false,              // app currently shows a module (instead of Builder, admin panel, settings, etc.)
 		isCollapsedMenuApp:false,      // app menu is collapsed
 		isMobile:false,                // app runs on small screen (probably mobile)
+		isSecureContext:false,         // app runs in secure context (HTTPS or local access)
 		isWithoutMenuApp:false,        // session does not have an app menu, set via getter param (menu-app=0), 
 		isWithoutMenuHeader:false,     // session does not have a header menu, set via getter param (menu-header=0)
 		keyDownHandlers:[],            // global handlers, reacting for key down events (for hotkey events)
@@ -297,6 +298,7 @@ const MyStore = Vuex.createStore({
 		isCollapsedMenuApp:      (state,payload) => state.isCollapsedMenuApp       = payload,
 		isMobile:                (state,payload) => state.isMobile                 = payload,
 		isNoAuth:                (state,payload) => state.isNoAuth                 = payload,
+		isSecureContext:         (state,payload) => state.isSecureContext          = payload,
 		isWithoutMenuApp:        (state,payload) => state.isWithoutMenuApp         = payload,
 		isWithoutMenuHeader:     (state,payload) => state.isWithoutMenuHeader      = payload,
 		loginHasClient:          (state,payload) => state.loginHasClient           = payload,
@@ -479,6 +481,7 @@ const MyStore = Vuex.createStore({
 		isCollapsedMenuApp:      (state) => state.isCollapsedMenuApp,
 		isMobile:                (state) => state.isMobile,
 		isNoAuth:                (state) => state.loginType === state.constants.loginType.noAuth,
+		isSecureContext:         (state) => state.isSecureContext,
 		isWithoutMenuApp:        (state) => state.isWithoutMenuApp,
 		isWithoutMenuHeader:     (state) => state.isWithoutMenuHeader,
 		keyDownHandlers:         (state) => state.keyDownHandlers,

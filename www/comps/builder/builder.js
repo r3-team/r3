@@ -378,12 +378,6 @@ export default {
 			:presets="createNewPresets"
 		/>
 	</div>`,
-	created() {
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.nextLanguage,key:'q',keyCtrl:true});
-	},
-	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.nextLanguage);
-	},
 	data() {
 		return {
 			builderLanguage:'',   // selected language for translations
@@ -396,19 +390,23 @@ export default {
 			showHelp:false
 		};
 	},
-	mounted() {
-		this.$store.commit('pageTitle',this.capApp.pageTitle);
-		
-		if(!this.builderEnabled)
-			return this.$router.push('/');
-		
-		this.isReady = true;
-	},
 	watch:{
 		$route:{
 			handler(val) {
 				if(val.hash === '')
 					this.showHelp = false;
+
+				if(!this.isSecureContext) {
+					this.$store.commit('dialog',{
+						captionBody:this.capGen.error.noSecureContext,
+						captionTop:this.capGen.errorTitle,
+						image:'lockOpen.png'
+					});
+					return this.$router.push('/');
+				}
+				
+				if(!this.builderEnabled)
+					return this.$router.push('/');
 				
 				if(typeof val.meta.nav === 'undefined') {
 					this.moduleId = '';
@@ -420,8 +418,8 @@ export default {
 				this.navigation = val.meta.nav;
 				
 				// ascertain module ID to be loaded
-				let isModule    = ['module','start'].includes(val.meta.target);
-				let targetIdMap = this.moduleIdMap;
+				const isModule    = ['module','start'].includes(val.meta.target);
+				let   targetIdMap = this.moduleIdMap;
 				
 				if(!isModule) {
 					switch(val.meta.target) {
@@ -433,14 +431,14 @@ export default {
 						case 'relation':    targetIdMap = this.relationIdMap;   break;
 						case 'role':        targetIdMap = this.roleIdMap;       break;
 						case 'pg-function': targetIdMap = this.pgFunctionIdMap; break;
-						case 'search-bar':  targetIdMap = this.searchBarIdMap; break;
+						case 'search-bar':  targetIdMap = this.searchBarIdMap;  break;
 						case 'variable':    targetIdMap = this.variableIdMap;   break;
 						case 'widget':      targetIdMap = this.widgetIdMap;     break;
 					}
 				}
 				
 				// reroute if invalid target (usually navigating back to deleted entity)
-				if(typeof targetIdMap[val.params.id] === 'undefined') {
+				if(targetIdMap[val.params.id] === undefined) {
 					this.$router.replace('/builder/modules');
 					this.isReady = false;
 					return;
@@ -516,8 +514,18 @@ export default {
 		capGen:           s => s.$store.getters.captions.generic,
 		colorMenu:        s => s.$store.getters.colorMenu,
 		globalSearchInput:s => s.$store.getters.globalSearchInput,
+		isSecureContext:  s => s.$store.getters.isSecureContext,
 		moduleIdMapMeta:  s => s.$store.getters.moduleIdMapMeta,
 		settings:         s => s.$store.getters.settings
+	},
+	created() {
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.nextLanguage,key:'q',keyCtrl:true});
+	},
+	unmounted() {
+		this.$store.commit('keyDownHandlerDel',this.nextLanguage);
+	},
+	mounted() {
+		this.$store.commit('pageTitle',this.capApp.pageTitle);
 	},
 	methods:{
 		// externals

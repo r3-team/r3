@@ -2454,7 +2454,8 @@
 		"encryption": "التشفير",
 		"error": {
 			"nameTaken": "الاسم مأخوذ بالفعل، يرجى اختيار اسم آخر.",
-			"nameTooLong": "Name is too long, max. allowed length is {LEN} characters."
+			"nameTooLong": "Name is too long, max. allowed length is {LEN} characters.",
+			"noSecureContext": "The REI3 Builder requires a secure context to work correctly. Either access the system via HTTPS or on localhost."
 		},
 		"errorTitle": "خطأ",
 		"event": "حدث",

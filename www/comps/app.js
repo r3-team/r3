@@ -404,6 +404,7 @@ export default {
 		isAtFeedback:       (s) => s.$store.getters.isAtFeedback,
 		isAtModule:         (s) => s.$store.getters.isAtModule,
 		isMobile:           (s) => s.$store.getters.isMobile,
+		isSecureContext:    (s) => s.$store.getters.isSecureContext,
 		isWithoutMenuHeader:(s) => s.$store.getters.isWithoutMenuHeader,
 		keyDownHandlers:    (s) => s.$store.getters.keyDownHandlers,
 		loginEncLocked:     (s) => s.$store.getters.loginEncLocked,
@@ -430,6 +431,7 @@ export default {
 		setInterval(this.sessionExpireCheck,1000); // session expiration check
 		this.wsConnect();                          // connect to backend via websocket
 		this.resized();
+		this.$store.commit('isSecureContext', window.isSecureContext);
 
 		// register globally accessible functions
 		this.$store.commit('appFunctionsRegister',[
@@ -751,7 +753,7 @@ export default {
 					this.$store.commit('access',res[4].payload);
 					this.$store.commit('loginHasClient',res[5].payload);
 					
-					if(res[6].payload.privateEnc !== null && res[6].payload.privateEncBackup !== null) {
+					if(this.isSecureContext && res[6].payload.privateEnc !== null && res[6].payload.privateEncBackup !== null) {
 						this.$store.commit('loginPrivateKey',null);
 						this.$store.commit('loginPrivateKeyEnc',res[6].payload.privateEnc);
 						this.$store.commit('loginPrivateKeyEncBackup',res[6].payload.privateEncBackup);
