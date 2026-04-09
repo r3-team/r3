@@ -1,4 +1,4 @@
-<p><em>Updated 2025-07-07</em></p>
+<p><em>Updated 2026-04-09</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -54,16 +54,14 @@
 <li><a href="#calling-apis">Calling APIs</a></li>
 </ol></li>
 <li><a href="#search-bars">Search bars</a></li>
+<li><a href="#pdf-generation">PDF generation</a>
+<ol type="1">
+<li><a href="#generating-pdfs-via-templates">From defined templates</a></li>
+<li><a href="#generating-pdfs-via-html">From dynamic HTML</a></li>
+</ol></li>
 <li><a href="#collections">Collections</a></li>
 <li><a href="#widgets">Widgets</a></li>
 <li><a href="#client-events">Client-Events</a></li>
-<li><a href="#end-to-end-encryption">End-to-end encryption</a>
-<ol type="1">
-<li><a href="#how-to-use">How to use</a></li>
-<li><a href="#encrypt-for-multiple-users">Encrypt for multiple users</a></li>
-<li><a href="#encrypt-for-groups">Encrypt for groups</a></li>
-<li><a href="#limitations">Limitations</a></li>
-</ol></li>
 <li><a href="#building-on-applications">Building on applications</a>
 <ol type="1">
 <li><a href="#extension-scenarios">Extension scenarios</a>
@@ -87,6 +85,13 @@
 <li><a href="#working-with-emails">Working with emails</a></li>
 <li><a href="#date-and-time-management">Date and time management</a></li>
 <li><a href="#user-sync">User sync</a></li>
+<li><a href="#end-to-end-encryption">End-to-end encryption</a>
+<ol type="1">
+<li><a href="#how-to-use">How to use</a></li>
+<li><a href="#encrypt-for-multiple-users">Encrypt for multiple users</a></li>
+<li><a href="#encrypt-for-groups">Encrypt for groups</a></li>
+<li><a href="#limitations">Limitations</a></li>
+</ol></li>
 <li><a href="#csv-import-and-export">CSV import and export</a></li>
 <li><a href="#troubleshooting">Troubleshooting</a></li>
 </ol>
@@ -144,13 +149,18 @@
 <p><img src="en_us_builder_pics/relations.webp" alt="Relations" /></p>
 <p>The following options are available for relations:</p>
 <ul>
-<li>Name: The internal name of the relation; it should reflect the contents of the relation and must be unique within the application.</li>
+<li>Name: The internal name of the relation; it should reflect the contents of the relation and must be unique within the application. It is not shown to any user.</li>
+<li>Title: A <a href="#translations">translated</a> title - displayed in change logs if not overwritten.</li>
+<li>Record title: Defines a label to identify a given record. A record title can consist of one ore multiple attribute values on the given relation. This is an optional setting, enabling two features:
+<ul>
+<li>With a defined record title, and enabled change logs (s. below), changes to records can be shown from inside list fields. The record title is then used to display, what record was affected by the change.</li>
+<li>A record title, if defined, can also be displayed on <a href="#forms">data forms</a> when opening a record. This can help identify the record being shown / edited.</li>
+</ul></li>
 <li>E2E encryption: This enables <a href="#end-to-end-encryption">end-to-end encryption</a> or E2EE for this relation. E2EE has benefits and drawbacks and should only be enabled were needed. This settings cannot be changed later for this relation. Please read the corresponding <a href="#end-to-end-encryption">chapter</a> before enabling it.</li>
-<li>Policies: Are used to control, which records of a relation are accessible to which user based on filtering done on the backend - <a href="#policies">more details</a>.</li>
 <li>Change log: <a href="#change-logs">Data retention settings</a> for the relation.</li>
 </ul>
 <p><img src="en_us_builder_pics/relation.webp" alt="Relation settings" /></p>
-<p>Relations are central to managing data in REI3. They contain all records, their values (following their <a href="#attributes">attributes</a>), <a href="#indexing">indexes</a> (mostly for performance tuning), <a href="#presets">presets</a> (predefined records) and <a href="#triggers">triggers</a> (automatically executed backend functions).</p>
+<p>Relations are central to managing data in REI3. They contain all records, their values (following their <a href="#attributes">attributes</a>), <a href="#indexing">indexes</a> (mostly for performance tuning), <a href="#presets">presets</a> (predefined records), <a href="#policies">policies</a> (record level access control) and <a href="#triggers">triggers</a> (automatically executed backend functions).</p>
 <h2 id="attributes">Attributes</h2>
 <p>Once a relation has been created, you can create attributes for it. An attribute is a data field, which is available to every record in a relation. A relation called 'contacts' might have attributes such as 'email', 'phone_number' and 'works_at_company'.</p>
 <p><img src="en_us_builder_pics/attributes.webp" alt="Attributes" /></p>
@@ -444,6 +454,7 @@ END IF;</code></pre>
 <li>Button fields
 <ul>
 <li>Open form: Navigates to or opens a form as pop-up window.</li>
+<li>Create PDF: Generates a PDF file from the selected PDF template. If a files attribute is available on the current form, the generated PDF can be placed in it, to be previewed and then commit by the user by saving changes. Alternatively, the PDF file is just generated and then opened/downloaded for the user, depending on browser settings.</li>
 <li>Function on click: Executes a <a href="#frontend-functions">frontend function</a> when the button is triggered.</li>
 </ul></li>
 <li><a href="#data-display-fields">Data display fields</a></li>
@@ -544,7 +555,7 @@ END IF;</code></pre>
 </ul>
 <p>If multiple states would apply to the same field the last one is used. Form states are executed in order of their description, so numbered prefixes can be used to achieve a desired state execution order.</p>
 <h3 id="form-actions">Form actions</h3>
-<p>With form actions, authors can place important actions in a standardized location - this is in the form action bar, next to the record edit actions (new, save, etc.). Form actions work similar to buttons, executing a frontend function when activated. They can also be controlled via <a href="#form-states">form states</a>, managing whether they are visible at all or just readonly.</p>
+<p>With form actions, authors can place important actions in a standardized location - this is in the form action bar, next to the record edit actions (new, save, etc.). Form actions work similar to buttons, executing frontend functions, opening forms or generating PDFs when clicked on. They can also be controlled via <a href="#form-states">form states</a>, managing whether they are visible at all or just readonly.</p>
 <h2 id="queries">Queries</h2>
 <p>To show or manipulate data, REI3 components (like <a href="#forms">forms</a>, <a href="#data-display-fields">data display fields</a> or <a href="#apis">APIs</a>) need to know how to access data. This is done by defining data access queries or 'queries' for short. Queries control how data is retrieved and (if desired) updated or deleted.</p>
 <p>To define a query, you start by selecting a <a href="#relations">relation</a> - this is the 'base relation' or relation index 0. A relation index is a number, that uniquely identifies a specific relation within a query. Once a base relation is set, we can connect or 'join' multiple relations if they are linked with <a href="#relationships">relationship attributes</a>, with each receiving a unique index number.</p>
@@ -737,11 +748,11 @@ END IF;</code></pre>
 <li>POST /api/[application_name]/[api_name]/v[api_version]</li>
 <li>DELETE /api/[application_name]/[api_name]/v[api_version]/[record_id]</li>
 </ul>
-<p>Examples, of how these calls are executed and what they return are shown live inside the API editor. A session token is returned after a successful authentication call (see first call above) and must be included in all successive calls to the API as Bearer Token. The session length follows the maximum user session length set in the REI3 admin interface.</p>
-<p>There is no defined limit in the amount of APIs an application can offer - only the API names must be unique within the application. To update an API without breaking existing calls, a new version can be created. The new version will be identical to the previous iteration but have a version counter incremented by one. After applying the desired changes to the new version, both old and new API versions can be used simultaneously. API versions can also be separately deleted when they are no longer needed.</p>
+<p>Examples, of how these calls are executed and what they return are shown live inside the API editor. A session token is returned after a successful authentication call (see first call above) and must be included in all successive calls to the API as Bearer Token. The session length follows the maximum user session length set in the REI3 admin interface. If needed, it is possible to set different maximum session lengths for individual API users in the admin panel.</p>
+<p>There is no defined limit in the amount of APIs an application can offer - only the API names must be unique within the application. To update an API without breaking existing calls, a new version can be created. The new version will be identical to the previous iteration but has its version counter incremented by one. After applying the desired changes to the new version, both old and new API versions can be used simultaneously. API versions can also be separately deleted when they are no longer needed.</p>
 <p>Some considerations:</p>
 <ul>
-<li>APIs use the same roles, policies and so on, that regular users do; the same options to give and restrict access to relations and specific records are therefore available.</li>
+<li>APIs use the same <a href="#roles-and-access-management">roles</a> and <a href="#policies">policies</a> as regular users; the same options to give and restrict access to relations and specific records are therefore available.</li>
 <li>Sub queries can be used in GET calls but will cause POST calls to fail.</li>
 <li>To affect any record on any relation, the corresponding options (CREATE/UPDATE/DELETE) must be enabled for relations in the API query.</li>
 <li>When API calls affect records, <a href="#triggers">relation triggers</a> will fire accordingly. It is not relevant to the system whether changes are made by a user on a form or by an external script/system via API.</li>
@@ -750,8 +761,8 @@ END IF;</code></pre>
 <h2 id="calling-apis">Calling APIs</h2>
 <p>REI3 can either serve APIs as a server (s. <a href="#apis">APIs</a> above) or execute API calls against an external REST server. Calling APIs can be done in either <a href="#frontend-functions">frontend functions</a> or <a href="#backend-functions">backend functions</a>.</p>
 <ul>
-<li>Calling REST APIs on the frontend is just JavaScript, so any tutorial on how to execute REST calls in JavaScript can be used. Frontend functions can call backend functions to retrieve things like credentials or tokens, stored in relations.</li>
-<li>Calling REST APIs on the backend is done by the REI3 server. When creating new backend functions you can select from a list of templates, which includes examples of REST calls for authentication, sending data with authentication headers and how to handle JSON responses. REST calls are executed asynchronously so a callback function (e. g. another backend function) is used to handle REST responses if needed.</li>
+<li>Calling REST APIs on the frontend is just JavaScript, so any tutorial on how to execute REST calls in JavaScript can be used. Frontend functions can call backend functions to retrieve things like credentials or tokens, stored in relations. Issues with CORS restriction might however limit what REST calls can be executed from inside the REI3 frontend (ie. the user´s browser), especially if the REST endpoints are on different domains than the REI3 system - for this reason, executing REST calls via the REI3 backend is usually a better choice.</li>
+<li>Calling REST APIs on the backend is done by the REI3 server. When creating new backend functions, you can select from a list of templates, which includes examples of REST calls for authentication, sending data with authentication headers, how to handle JSON responses and how to send files via formData. REST calls are executed asynchronously, meaning that the system stores a REST call job to be executed. REST calls can fail due to many reasons, such as network issues or general timeouts. If an action is required after a REST call executed (successfully or otherwise), a callback function (e. g. another backend function) can be specified to handle the REST response.</li>
 </ul>
 <p>REI3 instances can exchange data, with one instance offering APIs as server with the other calling these APIs as client to receive or update records.</p>
 <h1 id="search-bars">Search bars</h1>
@@ -761,6 +772,49 @@ END IF;</code></pre>
 <p>Full-text search works differently to regular lookups. They do not compare individual characters, but words or names instead. If the language of a text is defined, they can even break words down to their roots to match words of the same stem - for example, <code>baking</code> as search input would also find results for <code>baked</code>. To define a language, a dictionary attribute is needed on the same relation as the text. It is then filled by either your application or users on a form - it also needs to be included in the <a href="#text-indexing">text index definition</a>. If the language is not defined, a 'simple' full-text search is executed, which still works the same way but can only work with direct matches - ie. the names or words must match the search input exactly.</p>
 <p>Large texts make full-text search a requirement - they allow for fast enough lookups even in very large data sets with large texts. They also enable advanced search features, such as excluding certain words, making sure that words follow each other and so on. More details can be found in all user interfaces that offer full-text search in REI3.</p>
 <p>For a search bar to be available to users, it must be assigned to a <a href="#roles-and-access-management">role</a>.</p>
+<h1 id="pdf-generation">PDF generation</h1>
+<p>Many applications require export to PDF. REI3 offers two ways to generate PDF files:</p>
+<ol type="1">
+<li><a href="#generating-pdfs-via-templates">Generated from defined PDF templates</a> - created with the integrated, visual PDF editor.</li>
+<li><a href="#generating-pdfs-via-html">Generated from dynamic HTML content</a> - created directly by application authors.</li>
+</ol>
+<p>Both approaches have their merits, the following chapters explain how they are used and for which requirements each works best.</p>
+<h2 id="generating-pdfs-via-templates">Generating PDFs via templates</h2>
+<p>REI3 offers a visual PDF editor, which generates PDFs on the server. Benefits are:</p>
+<ul>
+<li>Direct editing of PDF templates inside the REI3 Builder.</li>
+<li>Strong integration with REI3 features, such as access to data from relations, support for joined relations &amp; sub queries. Defined PDF templates can also be started via <a href="#field-settings">button fields</a> or <a href="#form-actions">form actions</a>.</li>
+<li>Support for varied page sizes, headers &amp; footers as well as definable document states.</li>
+<li>Styles and options can be overwritten via attribute values, allowing use of the same PDF templates but with different styling applied.</li>
+<li>Options to create PDFs event based or on a schedule via backend functions - including the option to generate an email containing the new PDF file as attachment.</li>
+<li>Automatic conversion of REI3 native content, such as uploaded images, drawings/signatures and barcodes for display in PDF.</li>
+</ul>
+<h3 id="when-to-use">When to use</h3>
+<p>The integrated PDF editor should be the primary tool for most PDF needs. It is fast, can run independently of any user action and provides strictly formatted but adjustable templates. REI3 also takes care of many behind-the-scene data operations to make creating PDFs easier.</p>
+<h3 id="how-to-use">How to use</h3>
+<p>Start by going into <a href="#the-builder">the Builder</a> and opening the PDF menu. Here PDF templates can be created or updated. A PDF template is made up of core document properties (title, author, font style, margins, ...) as well as pages and states.</p>
+<p>Pages define what a PDF document contains. Each page can be of different size, orientation, contain different styling and so on. Any option, not overwritten for a page, is inherited from the document; this means that a font family defined for the document is applied to all pages, unless individual pages define a different one. To print something on a page, fields are used.</p>
+<p>Fields are the elements that bring layouts or content to pages. Layout fields, such as flows or grids, define how content is displayed on a page:</p>
+<ul>
+<li>Flow layout fields serve dynamic content. Everything put into a flow field takes up as much space as it needs; following elements in the same flow field are displayed after one another. Each page contains a single flow field as root, in which the document content is placed; if absolute positioning is preferred, a single large grid field, taking the entire page size, can be used.</li>
+<li>Grid layout fields serve placement of fixed size content. A grid field has itself a fixed size, offering a grid to place other fields inside it. Grids are useful for things like letter heads. A snap size setting exists, to enable easy alignment of elements inside a grid.</li>
+</ul>
+<p>Both flow &amp; grid fields can be set to shrink vertically if empty; this means that they take up only as much space as they need for their child elements, even if they are set to be larger. This can be useful for elements with borders, shrinking their size if dynamic, or conditional elements, do not take as much space as is available.</p>
+<p>Data fields are available, based on the defined document query (s. below); they display content from the loaded record directly on the page. Depending on the attribute type, this can be text, numbers, dates - or things like images (only PNG/JPGs are supported), drawings or barcodes. Lastly, list fields serve to load additional data in a list format, which can be filtered by the currently loaded record.</p>
+<p>Every document can, but does not have to, include a <a href="#queries">query</a>. A query loads data from a relation, optionally joining other relations via <a href="#relationships">relationship attributes</a>. For a query to work, it needs to know which record to load from the defined relation. A record is provided automatically, when a PDF document is opened via <a href="#form-actions">form action</a> or <a href="#field-settings">button field</a>. If a query is defined, and a record can be loaded, its attribute values can be placed as data fields on the PDF document, can be used as filter condition in document states and as value for overwriting styles/options. A common scenario is to load a base record in the document query (such as a document record), place some general content from this record (document number, date, ...), and then load additional records in list fields, filtered to the base record (such as positions of the current document record).</p>
+<p>Document states allow for both pages and fields to be shown/hidden based on defined conditions. This can be used to only show certain content if the document is of a certain type; in this case conditions evaluating presets are often used (example: if document is of type 'Invoice' show invoice positions).</p>
+<p>Many styles/options in child elements (pages in document, fields in page, ...) can be overwritten, such as setting different font sizes for header labels or using a different font family for number columns. When overwriting, values can be provided directly (ie. set this value for this child element) or via attribute (ie. set this value for this child element based on the current attribute value of the loaded record). If both direct overwrite and overwrite via attribute are set at the same time, the attribute overwrite will win if the attribute value is not empty (NULL); this makes the direct overwrite a fallback in case the attribute value overwrite is not set.</p>
+<h2 id="generating-pdfs-via-html">Generating PDFs via HTML</h2>
+<p>In addition to the <a href="#generating-pdfs-via-templates">visual PDF editor</a>, REI3 offers PDF generation via HTML content. This works by generating a PDF from given HTML inside the executing user´s browser. The HTML content, including content for headers/footers, must be generated by the REI3 application - this is usually done by fetching and then processing data in <a href="#functions">front- &amp; backend functions</a>, to finally generate HTML. Benefits of this approach are:</p>
+<ul>
+<li>No limit what can be displayed. As long as it´s valid HTML, and the <a href="https://github.com/parallax/jsPDF">library generating the PDF</a> supports it, the PDF file is generated. While the <a href="#generating-pdfs-via-templates">visual PDF editor</a> supports many display and styling options, there can always be that one option that the integrated editor does not currently have.</li>
+</ul>
+<h3 id="when-to-use-1">When to use</h3>
+<p>Generating PDFs from HTML gives a lot of freedom. But it also requires quite a bit of work, as data must be fetched, processed and valid HTML generated. It also only works inside the executing user´s browser - so no scheduled generation and possible issues due to browser settings. HTML to PDF conversion also is not perfect, with known issues including HTML as cell content in complex lists. This option exists for niche requirements, where the visual PDF editor is too limited.</p>
+<h3 id="how-to-use-1">How to use</h3>
+<p>In any frontend function, call either <code>app.pdf_create()</code> or <code>app.pdf_create_utf8()</code> instance function, to generate a PDF file from HTML. Both provide context help, showing which options are available and what arguments to provide.</p>
+<p>These functions can be called with or without defining a files attribute and record ID. If no files attribute is defined, the PDF is opened in a preview window, allowing manual download. If a files attribute is given, the PDF file is uploaded after generation and then attached to the defined record ID.</p>
+<p>Separate HTML content can be provided for PDF content, header and footer. Mixing of page sizes or orientation is not supported when generating PDFs via HTML.</p>
 <h1 id="collections">Collections</h1>
 <p>A collection is a data store that is available on the frontend, which can be accessed by other frontend elements (like <a href="#field-settings">form fields</a> or <a href="#frontend-functions">frontend-functions</a>). It contains data based on a defined <a href="#queries">query</a>. Depending on the selected <a href="#columns">columns</a> and <a href="#query-filters">filters</a>, a collection will retrieve records and their values.</p>
 <p>Collections are retrieved when a user logs into the system and updated when user permissions change; collections can also be updated directly by executing a <a href="#functions">function</a>. When updating a collection via a frontend function, only the current user will be affected - updating from a backend function can however affect one, many or all users.</p>
@@ -788,32 +842,6 @@ END IF;</code></pre>
 <p>Each client event can execute either a back- or frontend function and can then provide one or more arguments. These can be things like the currently open window title or the contents of the user´s clipboard.</p>
 <p>When using frontend functions, an active REI3 session must be running on the same computer as the REI3 client - events are only forwarded to the same origin point. Backend functions directly interact with the REI3 server, only requiring that the REI3 client is connected to it.</p>
 <p>Hotkeys for client events must be enabled by each individual user in their personal settings and can be re-assigned there as well.</p>
-<h1 id="end-to-end-encryption">End-to-end encryption</h1>
-<p>Encryption can be used to protect sensitive data. Various forms of encryption exist to address different scenarios and risk levels. End-to-end encryption (or E2EE) is especially useful as it protects data whether or not the system is running and independent of the privilege level of a bad actor. What makes E2EE so powerful is that data is being encrypted for only the individuals that may access that data - not even the server itself can read or act on the data.</p>
-<p>Usually, end-to-end encryption is harder to implement as it can be complex; with REI3, its integrated into the platform and can be used by any REI3 application with little effort. However, some <a href="#limitations">limitations</a> exist as encrypted data is not accessible to REI3 on the backend (server side).</p>
-<p>For more information on how end-to-end encryption is implemented in REI3, please take a look at the <a href="https://rei3.de/downloads/docs/REI3_e2ee_concept.pdf">concept document</a>.</p>
-<p>Beware! Because E2EE blocks even the system itself from reading the data, only users that already have access to it may read or re-encrypt the data for others. Neither administrators, nor the REI3 developers can access encrypted data for which privileged users have lost access to.</p>
-<h2 id="how-to-use">How to use</h2>
-<p>Application authors can enable E2EE for a new <a href="#relations">relation</a> within the Builder. With encryption enabled, new <a href="#attributes">attributes</a> of a relation can be set to be encrypted. After that, data will be automatically encrypted for the current user when saved on <a href="#forms">data forms</a> and decrypted when accessed by things like <a href="#data-display-fields">lists</a>.</p>
-<p>For E2EE to work, users that work with encrypted data need to setup their personal encryption once inside the user settings interface. If they attempt to work with encrypted data without that setup, an error message will be shown.</p>
-<p><img src="en_us_builder_pics/settings_e2ee.webp" alt="E2EE user settings" /></p>
-<p>When a user attempts to read encrypted data that was not encrypted for it, an error message is shown. It is up to the application author to filter records, based on things like record ownership or group membership, to make data accessible to only privileged users.</p>
-<h2 id="encrypt-for-multiple-users">Encrypt for multiple users</h2>
-<p>By default, REI3 encrypts for the current user only. Sometimes sensitive data needs to be shared between individuals or groups however. For this, REI3 can receive a list of users to encrypt data for. This is done by calling a specific <a href="#frontend-functions">frontend-function</a> when a list of privileged users is set or updated.</p>
-<p>Example: A record is by default accessible to its creator and should be encrypted as such; this works automatically once the relation and specific attributes are set to be encrypted. The creator can however share access with others by selecting a list of contacts from its organization within a relationship input field. When this field is updated, the frontend function 'app.set_e2ee_by_user_ids(user_ids)' is called with an array of user IDs from the selected contacts. As not every contact is necessarily connected to a user (see <a href="#user-sync">user sync</a>), the relationship input should be filtered to contacts with assigned users. With user IDs set by the frontend function, REI3 will automatically encrypt the data for all affected users. If any selected users do not have encryption enabled, an error message will be shown.</p>
-<h2 id="encrypt-for-groups">Encrypt for groups</h2>
-<p>A bit more work but also supported: Encrypt data for groups instead of specific individuals.</p>
-<p>There are generally two scenarios:</p>
-<ul>
-<li>Assign a group to a record to have access to that record. In this case, a <a href="#frontend-functions">frontend function</a> would call a <a href="#backend-functions">backend function</a> to resolve all user IDs from all members of this group. It would then use the result to call the function 'app.set_e2ee_by_user_ids(user_ids)' to encrypt data for all group members.</li>
-<li>Assign members to a group that already has access to specific records. In this case, we would update encryption for one or many records on a different relation. For this the <a href="#frontend-functions">frontend function</a> 'app.set_e2ee_by_user_ids_and_relation(user_ids,relation_id,record_ids)' exists. You would still set the user IDs (all current group members + all other users that already have access), the relation ID (the relation of the encrypted record) and the record IDs (IDs of records that the group has access to).</li>
-</ul>
-<p>The REI3 'Password Safe' application includes implementations of all of the above cases and can be used as a reference.</p>
-<p><img src="en_us_builder_pics/e2ee_function.webp" alt="E2EE function" /></p>
-<h2 id="limitations">Limitations</h2>
-<p>Because E2EE only allows specific individuals to access encrypted data, the REI3 system itself cannot use it for things like filtering or sorting. Full-text search over encrypted data is possible with the use of both <a href="#backend-functions">backend functions</a> to retrieve and <a href="#frontend-functions">frontend functions</a> to decrypt and then search through plain data. It is however necessary that the user executing those functions is privileged to access that data; without it being encrypted for this particular user, the data cannot be decrypted and therefore not processed.</p>
-<p>Additionally, E2EE in REI3 requires additional overhead in the form of computation time for the en-/decryption itself, as well as space to store individual user´s decryption keys.</p>
-<p>Because of the given limitations, E2EE should only be enabled where necessary - enabling it for everything will result in worse system performance and user experience.</p>
 <h1 id="building-on-applications">Building on applications</h1>
 <p>A major feature of REI3 is the ability to build on other applications. To access data, user interfaces, roles and more to extend functionality or to better meet niche requirements. Building on applications enables anyone to re-use parts of applications while adding their own, unique features. No license or permission is required to extend an existing application. Multiple applications can build on the same, original application, using the same or different sets of components.</p>
 <p>If you want to extend another application, you create a new application that has access to the application you want to extend. This is done in the Builder start page by selecting a dependency with 'Depends on' when creating/updating an application. This enables access to different parts of the original, dependent upon application - to keep things simple, we will call this the 'parent application' from here on.</p>
@@ -912,6 +940,32 @@ END IF;</code></pre>
 <p>The chosen user sync function is called by REI3 whenever a user is updated or deleted - regardless if that happens manually in the admin panel or automatically during a user import from LDAP. The user sync function contains both the event (user was 'UPDATED' or 'DELETED') as well as user meta data (user ID, username, is_admin, is_active, email, department, mobile phone, etc.).</p>
 <p>When creating the sync function from the 'Application' page in the Builder, or when selecting the 'User sync function' template in the 'New backend function' UI, it contains a full example on how synced user data can be applied to relations in an application. The specific implementation is however up to the author, as applications can work very differently. The only important part is that the user ID is ultimately stored in the 'user relation' and does not exist twice; a <a href="#indexing">unique index</a> can help to ensure this.</p>
 <p><img src="en_us_builder_pics/user_sync2.webp" alt="User sync" /></p>
+<h1 id="end-to-end-encryption">End-to-end encryption</h1>
+<p>Encryption can be used to protect sensitive data. Various forms of encryption exist to address different scenarios and risk levels. End-to-end encryption (or E2EE) is especially useful as it protects data whether or not the system is running and independent of the privilege level of a bad actor. What makes E2EE so powerful is that data is being encrypted for only the individuals that may access that data - not even the server itself can read or act on the data.</p>
+<p>Usually, end-to-end encryption is harder to implement as it can be complex; with REI3, its integrated into the platform and can be used by any REI3 application with little effort. However, some <a href="#limitations">limitations</a> exist as encrypted data is not accessible to REI3 on the backend (server side).</p>
+<p>For more information on how end-to-end encryption is implemented in REI3, please take a look at the <a href="https://rei3.de/downloads/docs/REI3_e2ee_concept.pdf">concept document</a>.</p>
+<p>Beware! Because E2EE blocks even the system itself from reading the data, only users that already have access to it may read or re-encrypt the data for others. Neither administrators, nor the REI3 developers can access encrypted data for which privileged users have lost access to.</p>
+<h2 id="how-to-use-2">How to use</h2>
+<p>Application authors can enable E2EE for a new <a href="#relations">relation</a> within the Builder. With encryption enabled, new <a href="#attributes">attributes</a> of a relation can be set to be encrypted. After that, data will be automatically encrypted for the current user when saved on <a href="#forms">data forms</a> and decrypted when accessed by things like <a href="#data-display-fields">lists</a>.</p>
+<p>For E2EE to work, users that work with encrypted data need to setup their personal encryption once inside the user settings interface. If they attempt to work with encrypted data without that setup, an error message will be shown.</p>
+<p><img src="en_us_builder_pics/settings_e2ee.webp" alt="E2EE user settings" /></p>
+<p>When a user attempts to read encrypted data that was not encrypted for it, an error message is shown. It is up to the application author to filter records, based on things like record ownership or group membership, to make data accessible to only privileged users.</p>
+<h2 id="encrypt-for-multiple-users">Encrypt for multiple users</h2>
+<p>By default, REI3 encrypts for the current user only. Sometimes sensitive data needs to be shared between individuals or groups however. For this, REI3 can receive a list of users to encrypt data for. This is done by calling a specific <a href="#frontend-functions">frontend-function</a> when a list of privileged users is set or updated.</p>
+<p>Example: A record is by default accessible to its creator and should be encrypted as such; this works automatically once the relation and specific attributes are set to be encrypted. The creator can however share access with others by selecting a list of contacts from its organization within a relationship input field. When this field is updated, the frontend function 'app.set_e2ee_by_user_ids(user_ids)' is called with an array of user IDs from the selected contacts. As not every contact is necessarily connected to a user (see <a href="#user-sync">user sync</a>), the relationship input should be filtered to contacts with assigned users. With user IDs set by the frontend function, REI3 will automatically encrypt the data for all affected users. If any selected users do not have encryption enabled, an error message will be shown.</p>
+<h2 id="encrypt-for-groups">Encrypt for groups</h2>
+<p>A bit more work but also supported: Encrypt data for groups instead of specific individuals.</p>
+<p>There are generally two scenarios:</p>
+<ul>
+<li>Assign a group to a record to have access to that record. In this case, a <a href="#frontend-functions">frontend function</a> would call a <a href="#backend-functions">backend function</a> to resolve all user IDs from all members of this group. It would then use the result to call the function 'app.set_e2ee_by_user_ids(user_ids)' to encrypt data for all group members.</li>
+<li>Assign members to a group that already has access to specific records. In this case, we would update encryption for one or many records on a different relation. For this the <a href="#frontend-functions">frontend function</a> 'app.set_e2ee_by_user_ids_and_relation(user_ids,relation_id,record_ids)' exists. You would still set the user IDs (all current group members + all other users that already have access), the relation ID (the relation of the encrypted record) and the record IDs (IDs of records that the group has access to).</li>
+</ul>
+<p>The REI3 'Password Safe' application includes implementations of all of the above cases and can be used as a reference.</p>
+<p><img src="en_us_builder_pics/e2ee_function.webp" alt="E2EE function" /></p>
+<h2 id="limitations">Limitations</h2>
+<p>Because E2EE only allows specific individuals to access encrypted data, the REI3 system itself cannot use it for things like filtering or sorting. Full-text search over encrypted data is possible with the use of both <a href="#backend-functions">backend functions</a> to retrieve and <a href="#frontend-functions">frontend functions</a> to decrypt and then search through plain data. It is however necessary that the user executing those functions is privileged to access that data; without it being encrypted for this particular user, the data cannot be decrypted and therefore not processed.</p>
+<p>Additionally, E2EE in REI3 requires additional overhead in the form of computation time for the en-/decryption itself, as well as space to store individual user´s decryption keys.</p>
+<p>Because of the given limitations, E2EE should only be enabled where necessary - enabling it for everything will result in worse system performance and user experience.</p>
 <h1 id="csv-import-and-export">CSV import and export</h1>
 <p>Importing and exporting large data sets with CSV is done by enabling CSV options on any list field. After CSV options are enabled, CSV actions are available on the list field UI. There some things to consider when working with CSV:</p>
 <ul>
