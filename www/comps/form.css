@@ -33,12 +33,13 @@
 .form-record-title{
 	height:30px;
 	line-height:30px;;
-	padding:0px calc(var(--spacing) / 2);
+	padding:0px calc(var(--spacing) / 1.6);
 	border:1px solid var(--color-border);
 	border-radius:var(--border-input-radius);
 	background-color:var(--color-input-disabled);
 	box-shadow:var(--shadow-input);
 
+	max-width:500px;
 	min-width:0px;
 	text-overflow:ellipsis;
 	white-space:nowrap;
