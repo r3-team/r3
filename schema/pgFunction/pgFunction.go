@@ -287,11 +287,11 @@ func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntit
 		var f types.PgFunction
 		if err := tx.QueryRow(ctx, `
 			SELECT id, module_id, name, code_args, code_function, code_returns,
-				is_frontend_exec, is_login_sync, is_trigger, volatility
+				is_frontend_exec, is_login_sync, is_trigger, volatility, cost
 			FROM app.pg_function
 			WHERE id = $1
 		`, id).Scan(&f.Id, &f.ModuleId, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns,
-			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility); err != nil {
+			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility, &f.Cost); err != nil {
 
 			return err
 		}
