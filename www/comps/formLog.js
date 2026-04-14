@@ -465,7 +465,7 @@ export default {
 								// for list fields, we need both a title for the source as well as record titles
 								// otherwise it´s not possible to see what a change belongs to
 								const rel = s.relationIdMap[join.relationId];
-								if(rel.attributeIdsTitle.length === 0 || !s.relationHasRetention(rel))
+								if(rel.attributeIdsTitle.length === 0)
 									continue;
 
 								let title = '';
