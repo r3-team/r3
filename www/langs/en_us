@@ -2404,6 +2404,7 @@
 		},
 		"category": "Category",
 		"certificate": "Certificate",
+		"changedBy": "Changed by",
 		"clientEvent": "Client event",
 		"clientEvents": "Client events",
 		"clipboard": "Clipboard",

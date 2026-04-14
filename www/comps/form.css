@@ -132,6 +132,13 @@
 	border-bottom:1px solid var(--color-border);
 	padding:var(--spacing);
 }
+.form-log-record-title{
+	max-width:320px;
+	min-width:0px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
+}
 .form-log-sidebar{
 	flex:1 1 auto;
 	min-width:320px;
@@ -274,10 +281,6 @@
 }
 .is-mobile .form-log-record-title{
 	max-width:120px;
-	min-width:0px;
-	text-overflow:ellipsis;
-	white-space:nowrap;
-	overflow:hidden;
 }
 .is-mobile .form-log-value:not(.large){
 	max-width:200px;

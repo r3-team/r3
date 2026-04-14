@@ -242,7 +242,7 @@ export default {
 							<thead>
 								<tr>
 									<th>{{ capGen.date }}</th>
-									<th v-if="!isMobile">{{ capGen.username }}</th>
+									<th v-if="!isMobile">{{ capGen.changedBy }}</th>
 									<th v-if="!isSingleSourceActive">{{ capGen.source }}</th>
 									<th v-if="!isSingleSourceForm">{{ capGen.record }}</th>
 									<th>{{ capGen.field }}</th>

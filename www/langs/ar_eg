@@ -2404,6 +2404,7 @@
 		},
 		"category": "فئة",
 		"certificate": "Certificate",
+		"changedBy": "Changed by",
 		"clientEvent": "حدث العميل",
 		"clientEvents": "أحداث العميل",
 		"clipboard": "الحافظة",

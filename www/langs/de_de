@@ -2404,6 +2404,7 @@
 		},
 		"category": "Kategorie",
 		"certificate": "Zertifikat",
+		"changedBy": "Geändert von",
 		"clientEvent": "Client-Ereignis",
 		"clientEvents": "Client-Ereignisse",
 		"clipboard": "Zwischenablage",

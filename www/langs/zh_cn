@@ -2404,6 +2404,7 @@
 		},
 		"category": "类别",
 		"certificate": "Certificate",
+		"changedBy": "Changed by",
 		"clientEvent": "Client event",
 		"clientEvents": "Client events",
 		"clipboard": "剪贴板",
