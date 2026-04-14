@@ -1130,14 +1130,14 @@ export default {
 			if(changed)    this.valuesNew[indexAttributeId] = value;
 			if(isOriginal) this.valuesOld[indexAttributeId] = JSON.parse(JSON.stringify(value));
 			
-			// update joined data, if relevant (because relationship value changed or defaults were loaded)
+			// update joined data, if relevant (relationship value changed or defaults were loaded)
 			if(updateJoins && (changed || isOriginal)) {
 				const d = this.getDetailsFromIndexAttributeId(indexAttributeId);
 				if(d.outsideIn) return;
 				
 				// get data from sub joins if relationship attribute value has changed
 				for(let k in this.joinsIndexMap) {
-					if(this.joinsIndexMap[k].attributeId === d.attributeId)
+					if(this.joinsIndexMap[k].attributeId === d.attributeId && this.joinsIndexMap[k].indexFrom === d.index)
 						this.getFromSubJoin(this.joinsIndexMap[k],value);
 				}
 			}
@@ -1753,7 +1753,7 @@ export default {
 				res => {
 					this.valueSetByRows(res.payload.rows,expressions).then(
 						() => this.triggerEventAfter('open'),
-						err => this.$root.genericError
+						this.$root.genericError
 					);
 				},
 				this.$root.genericError
