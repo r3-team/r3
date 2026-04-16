@@ -653,11 +653,11 @@ const MyKanban = {
 			
 			for(let r of rows) {
 				const recordId = r.indexRecordIds[relationIndex];
-				if(typeof recordId === 'undefined')
+				if(recordId === undefined)
 					return [];
 				
 				// store first occurrence of record only
-				if(recordId === null || typeof recordIdMapValues[recordId] !== 'undefined')
+				if(recordId === null || recordIdMapValues[recordId] !== undefined)
 					continue;
 				
 				let values = [];
@@ -724,10 +724,10 @@ const MyKanban = {
 					
 					// stop if no rows or relation indexes for either axis is invalid
 					if(res.payload.rows.length === 0 ||
-						res.payload.rows[0].indexRecordIds[this.relationIndexAxisX] === 'undefined' ||
+						res.payload.rows[0].indexRecordIds[this.relationIndexAxisX] === undefined ||
 						(
 							this.relationIndexAxisY !== null &&
-							res.payload.rows[0].indexRecordIds[this.relationIndexAxisY] === 'undefined'
+							res.payload.rows[0].indexRecordIds[this.relationIndexAxisY] === undefined
 						)
 					) {
 						this.$emit('record-count-change',0);
