@@ -1,6 +1,6 @@
 module r3
 
-go 1.24.4
+go 1.25.0
 
 require (
 	github.com/arran4/golang-ical v0.3.2
@@ -23,7 +23,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.14.1
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
 	github.com/jackc/pgx-gofrs-uuid v0.0.0-20230224015001-1d428863c2e2
-	github.com/jackc/pgx/v5 v5.7.5
+	github.com/jackc/pgx/v5 v5.9.0
 	github.com/wneessen/go-mail v0.7.2
 	github.com/xlzd/gotp v0.1.0
 	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
