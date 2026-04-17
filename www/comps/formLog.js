@@ -238,7 +238,7 @@ export default {
 						/>
 					</div>
 					<div class="form-log-table">
-						<table class="generic-table auto-height sticky-top bright topAligned">
+						<table class="generic-table auto-height sticky-top no-wrap-text-header bright topAligned">
 							<thead>
 								<tr>
 									<th>{{ capGen.date }}</th>

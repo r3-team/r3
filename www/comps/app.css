@@ -921,6 +921,9 @@ table td.maximum{
 	top:0px;
 	z-index:var(--z-index-admin-table-sticky-top);
 }
+.generic-table.no-wrap-text-header>thead>tr>th{
+	text-wrap:nowrap;
+}
 .generic-table.rows-contrast>tbody>tr:nth-child(even) td{
 	background-color:var(--color-list-row-even);
 }
