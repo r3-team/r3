@@ -86,6 +86,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, id pgtype.UUID, target string) (type
 		module_id,
 		pg_function_id,
 		query_choice_id,
+		relation_id,
 		role_id,
 		search_bar_id,
 		tab_id,
