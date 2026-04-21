@@ -3,7 +3,7 @@ export default {
 	template:`<div class="admin-repo-keys contentBox grow">
 		<div class="top lower">
 			<div class="area">
-				<my-button image="refresh.png" @trigger="set"   :active="isChanged" :caption="capGen.button.save" />
+				<my-button image="save.png"    @trigger="set"   :active="isChanged" :caption="capGen.button.save" />
 				<my-button image="refresh.png" @trigger="reset" :active="isChanged" :caption="capGen.button.refresh" />
 			</div>
 		</div>
