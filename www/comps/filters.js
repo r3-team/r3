@@ -529,14 +529,14 @@ const MyFilterSide = {
 								<!-- sub query aggregator input -->
 								<select v-model="queryAggregator" :disabled="readonly">
 									<option value=""     >-</option>
-									<option value="array">{{ capGen.option.aggArray }}</option>
-									<option value="avg"  >{{ capGen.option.aggAvg }}</option>
-									<option value="count">{{ capGen.option.aggCount }}</option>
-									<option value="json" >{{ capGen.option.aggJson }}</option>
-									<option value="list" >{{ capGen.option.aggList }}</option>
-									<option value="max"  >{{ capGen.option.aggMax }}</option>
-									<option value="min"  >{{ capGen.option.aggMin }}</option>
-									<option value="sum"  >{{ capGen.option.aggSum }}</option>
+									<option value="array">{{ capGen.aggregatorItem.array }}</option>
+									<option value="avg"  >{{ capGen.aggregatorItem.avg }}</option>
+									<option value="count">{{ capGen.aggregatorItem.count }}</option>
+									<option value="json" >{{ capGen.aggregatorItem.json }}</option>
+									<option value="list" >{{ capGen.aggregatorItem.list }}</option>
+									<option value="max"  >{{ capGen.aggregatorItem.max }}</option>
+									<option value="min"  >{{ capGen.aggregatorItem.min }}</option>
+									<option value="sum"  >{{ capGen.aggregatorItem.sum }}</option>
 								</select>
 							</td>
 						</tr>
