@@ -89,7 +89,11 @@ func GetLogs_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributeI
 	}
 
 	rows, err := tx.Query(ctx, `
-		SELECT d.id, d.relation_id, d.record_id_wofk, d.date_change, d.comment, COALESCE(lm.name_display, l.name, ''), d.login_id_wofk IS NULL,
+		SELECT d.id, d.relation_id, d.record_id_wofk, d.date_change, d.comment, d.login_id_wofk IS NULL,
+			CASE
+				WHEN lm.name_display IS NOT NULL AND lm.name_display <> '' THEN lm.name_display
+				ELSE COALESCE(l.name, '')
+			END,
 			CASE
 				WHEN d.comment IS NULL THEN (
 					SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
@@ -127,7 +131,7 @@ func GetLogs_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributeI
 	for rows.Next() {
 		var l types.DataLog
 		var valuesJson []byte
-		if err := rows.Scan(&l.Id, &l.RelationId, &l.RecordId, &l.DateChange, &l.Comment, &l.LoginName, &l.IsSystem, &valuesJson); err != nil {
+		if err := rows.Scan(&l.Id, &l.RelationId, &l.RecordId, &l.DateChange, &l.Comment, &l.IsSystem, &l.LoginName, &valuesJson); err != nil {
 			return nil, err
 		}
 		if err := json.Unmarshal(valuesJson, &l.Attributes); err != nil {
