@@ -52,6 +52,14 @@ func getConditionsResult(ctx context.Context, doc *doc, recordIdDoc int64, condi
 			operator = "=="
 		case "<>":
 			operator = "!="
+
+		// nil operators
+		case "IS NULL":
+			operator = "=="
+			evalValues[s1Placeholder] = nil
+		case "IS NOT NULL":
+			operator = "!="
+			evalValues[s1Placeholder] = nil
 		}
 
 		// ( expr0 < expr1 )
