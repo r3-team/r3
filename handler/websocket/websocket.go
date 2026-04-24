@@ -3,6 +3,7 @@ package websocket
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -23,6 +24,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 // a websocket client
@@ -425,6 +427,11 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 func processReturnErr(err error, isAdmin bool, loginId int64, transNr uint64) error {
 	returnErr, isExpected := handler.ConvertToErrCode(err, !isAdmin)
 	if !isExpected {
+		var pgxErr *pgconn.PgError
+		if errors.As(err, &pgxErr) {
+			// add PGX context details to error log
+			err = errors.Join(err, fmt.Errorf("CONTEXT: %s", pgxErr.Where))
+		}
 		log.Warning(log.ContextWebsocket, fmt.Sprintf("TRANSACTION %d failure (login ID %d)", transNr, loginId), err)
 	}
 	return returnErr
