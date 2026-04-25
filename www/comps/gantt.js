@@ -260,7 +260,6 @@ const MyGantt = {
 				</select>
 				
 				<my-button image="calendarDot.png"
-					v-if="!isMobile"
 					@trigger="scrollToNow"
 					:caption="!isMobile ? capApp.now : ''"
 					:captionTitle="capApp.nowHint"
