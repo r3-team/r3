@@ -456,6 +456,8 @@ export default {
 				this.doc     = JSON.parse(JSON.stringify(this.docSchema));
 				this.docCopy = JSON.parse(JSON.stringify(this.docSchema));
 
+				this.sideFieldIdShow = null;
+
 				if(this.doc.pages.findIndex(v => v.id === this.tabPageIdShow) === -1)
 					this.resetPageTab();
 			}
