@@ -1,7 +1,8 @@
-import MyStore       from '../../stores/store.js';
-import {formOpen}    from './form.js';
-import {generatePdf} from './pdf.js';
-import {openLink}    from './generic.js';
+import MyStore          from '../../stores/store.js';
+import {formOpen}       from './form.js';
+import {generatePdf}    from './pdf.js';
+import {openLink}       from './generic.js';
+import {resolveErrCode} from './error.js';
 import {
 	getCollectionMultiValues,
 	updateCollections
@@ -66,7 +67,7 @@ const exposedFunctionsGlobal = {
 		return new Promise((resolve,reject) => {
 			ws.send('pgFunction','exec',{id:id,args:args}).then(
 				res => resolve(res.payload),
-				err => reject(err)
+				err => reject(resolveErrCode(err))
 			);
 		});
 	},
