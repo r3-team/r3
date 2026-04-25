@@ -1,5 +1,6 @@
 import MyBuilderCaption       from './builderCaption.js';
 import MyBuilderIconInput     from './builderIconInput.js';
+import {getUuidV4}            from '../shared/crypto.js';
 import {getFieldMap}          from '../shared/form.js';
 import {copyValueDialog}      from '../shared/generic.js';
 import {getTemplateAttribute} from '../shared/builderTemplate.js';
@@ -525,6 +526,7 @@ export default {
 		getFieldMap,
 		getItemTitle,
 		getTemplateAttribute,
+		getUuidV4,
 		isAttributeBoolean,
 		isAttributeFiles,
 		isAttributeFloat,
@@ -694,7 +696,7 @@ export default {
 					
 					if(saveAndNew) {
 						this.$emit('new-record');
-						this.values.id   = null;
+						this.values.id   = this.getUuidV4();
 						this.values.name = '';
 						this.resetOrg();
 						return;
