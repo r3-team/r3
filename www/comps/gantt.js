@@ -272,7 +272,10 @@ const MyGantt = {
 		<div class="gantt">
 			<div class="gantt-content">
 				<div class="gantt-header">
-					<div class="gantt-header-labels" v-if="showGroupLabels" :style="styleHeaderLabels"></div>
+					<div class="gantt-header-labels" v-if="showGroupLabels" :style="styleGroupLabel">
+						<my-button image="remove.png" @trigger="groupWidthSet(false)" :active="groupWidth > groupWidthMin" :naked="true" />
+						<my-button image="add.png"    @trigger="groupWidthSet(true)"  :naked="true" />
+					</div>
 					<div class="gantt-header-dates">
 						
 						<!-- header meta line: shows groupings of step entities (hours->days, days->months) -->
@@ -301,7 +304,7 @@ const MyGantt = {
 					</div>
 				</div>
 				<div class="gantt-data">
-					<div class="gantt-labels" v-if="showGroupLabels" ref="labels">
+					<div class="gantt-labels" v-if="showGroupLabels" :style="styleGroupLabel">
 						<div class="gantt-label"
 							v-for="(g,k) in groups"
 							:key="k"
@@ -406,8 +409,7 @@ const MyGantt = {
 			groups:[],              // gantt groups, by defined column, each with its lines of records
 			headerItems:[],
 			headerItemsMeta:[],
-			labelsWidthPixels:180,  // width of label side bar in px
-			lastResizeFromLabels:false, // true, if the last setSteps() was executed due to size change in labels
+			groupWidthMin:80,       // minimum group label width in pixels
 			linePixels:30,          // line height in pixels
 			page:0,                 // which page we are on (0: default, 1: next, -1: prev)
 			ready:false,            // component ready to be used
@@ -512,10 +514,11 @@ const MyGantt = {
 		joins:            (s) => s.fillRelationRecordIds(s.query.joins),
 		stepPixels:       (s) => s.stepBase * s.stepZoom,
 		styleHeaderItem:  (s) => `width:${s.stepPixels}px;`,
-		styleHeaderLabels:(s) => `flex-basis:${s.labelsWidthPixels}px;`,
+		styleGroupLabel:  (s) => `width:${s.groupWidth > s.groupWidthMin ? s.groupWidth : s.groupWidthMin}px;`,
 
 		// login options
 		choiceId:       (s) => s.$root.getOrFallback(s.loginOptions,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		groupWidth:     (s) => s.$root.getOrFallback(s.loginOptions,'ganttGroupWidth',180),
 		stepType:       (s) => s.$root.getOrFallback(s.loginOptions,'ganttStepType',s.stepTypeDefault), // gantt step type (hours, days)
 		stepZoom:       (s) => s.$root.getOrFallback(s.loginOptions,'ganttStepZoom',7),                 // zoom factor for step, 7 is default (7*8=56)
 		showGroupLabels:(s) => s.$root.getOrFallback(s.loginOptions,'ganttShowGroupLabels',true),
@@ -541,7 +544,6 @@ const MyGantt = {
 		this.$watch('popUpFormInline',this.resized);
 		this.$watch('stepType',() => {
 			this.page = 0;
-			this.lastResizeFromLabels = false;
 			this.paramsUpdate(true);
 			this.$nextTick(() => this.setSteps(true));
 		});
@@ -556,7 +558,6 @@ const MyGantt = {
 				this.get();
 		});
 		this.$watch(() => [this.showGroupLabels,this.stepZoom],() => {
-			this.lastResizeFromLabels = false;
 			this.$nextTick(() => this.setSteps(false));
 		});
 		if(this.usesPageHistory) {
@@ -698,15 +699,17 @@ const MyGantt = {
 			if(unix < this.unixInput0) this.unixInput0 = unix;
 			else                       this.unixInput1 = unix;
 		},
+		groupWidthSet(add) {
+			this.$emit('set-login-option','ganttGroupWidth',add ? this.groupWidth + 20 : this.groupWidth - 20);
+			this.resized();
+		},
 		pageChange(factor) {
 			this.page += factor;
-			this.lastResizeFromLabels = false;
 			this.paramsUpdate(true);
 			this.get();
 		},
 		resized() {
 			clearTimeout(this.resizeTimer);
-			this.lastResizeFromLabels = false;
 			this.resizeTimer = setTimeout(() => this.setSteps(false),150);
 		},
 		scrollToNow() {
@@ -901,21 +904,6 @@ const MyGantt = {
 						if(this.page === 0)
 							this.scrollToNow();
 					}
-
-					// check if label size has changed with new content
-					this.$nextTick(() => {
-						if(this.$refs.labels === null)
-							return;
-						
-						const labelsWidth = this.$refs.labels.getBoundingClientRect().width;
-						if(this.labelsWidthPixels !== labelsWidth) {
-							this.labelsWidthPixels = labelsWidth;
-							if(!this.lastResizeFromLabels) {
-								this.lastResizeFromLabels = true;
-								this.$nextTick(() => this.setSteps(false));
-							}
-						}
-					});
 				},
 				this.$root.genericError
 			);

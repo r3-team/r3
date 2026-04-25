@@ -96,10 +96,13 @@
 	background-color:var(--color-accent2);
 }
 .gantt-header-labels{
-	flex:0 0 180px;
+	flex:0 0 auto;
 	height:calc(var(--gantt-line-height) * 2);
+	padding:10px;
 	display:flex;
-	flex-flow:column nowrap;
+	flex-flow:row wrap;
+	align-items:center;
+	justify-content:space-between;
 	background-color:var(--color-bg);
 	border-right:1px solid var(--color-border);
 	box-sizing:border-box;
@@ -107,7 +110,7 @@
 
 /* labels */
 .gantt-labels{
-	flex:0 0 180px;
+	flex:0 0 auto;
 	height:fit-content;
 	display:flex;
 	flex-flow:column nowrap;
@@ -115,7 +118,7 @@
 	box-sizing:border-box;
 }
 .gantt-label{
-	flex:0 0 auto;
+	flex:1 1 auto;
 	height:var(--gantt-line-height);
 	line-height:var(--gantt-line-height);
 	display:flex;
