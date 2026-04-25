@@ -718,9 +718,8 @@ export default {
 		resetRouteParams() {
 			let params = { fieldIdShow:{ parse:'string', value:null } };
 			this.routeParseParams(params);
-			
-			if(params.fieldIdShow.value !== null)
-				this.fieldIdShow = params.fieldIdShow.value;
+
+			this.fieldIdShow = params.fieldIdShow.value !== null ? params.fieldIdShow.value : null;
 		},
 		setFieldShow(fieldId) {
 			this.fieldIdShow = fieldId === this.fieldIdShow ? null : fieldId;
