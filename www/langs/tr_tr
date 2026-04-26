@@ -1,0 +1,2990 @@
+{
+	"admin": {
+		"backups": {
+			"count": "Sürümleri sakla",
+			"daily": "Günlük",
+			"dir": "Hedef dizin*",
+			"dirNote": "*Bu yolun ayrı bir ağ konumunu gösterdiğinden veya içeriğinin düzenli olarak ikinci bir sisteme kopyalandığından emin olun. Bu, sistemin tamamen arızalanması durumunda kurtarma için gereklidir.",
+			"full": "Tam yedekleme",
+			"list": "Yedekleme setleri",
+			"monthly": "Her 30 günde bir",
+			"title": "Entegre tam yedeklemeler",
+			"weekly": "Haftalık"
+		},
+		"cluster": {
+			"button": {
+				"shutdown": "Kapat"
+			},
+			"configNodeMissing": "Küme düğümünün X saniye sonra kaybolduğu varsayıldı",
+			"dateCheckIn": "Son giriş",
+			"dateStarted": "Düğüm başlatıldı",
+			"dialog": {
+				"delete": "Bu küme düğümünü silmek istediğinizden emin misiniz?<br /><br />Silinen bir düğüm yeniden başlatılırsa ve hâlâ küme veritabanına erişimi varsa, kendisini bir küme düğümü olarak yeniden kaydeder.",
+				"shutdown": "Bu küme düğümünü kapatmak istediğinizden emin misiniz?<br /><br />Bir küme düğümü bu arabirimden yeniden başlatılamaz."
+			},
+			"hostname": "Ana makine adı",
+			"statMemory": "Bellek kullanımı",
+			"title": {
+				"config": "Genel yapılandırma",
+				"connected": "bağlı",
+				"master": "Küme yöneticisi",
+				"missing": "eksik",
+				"nodes": "Küme düğümleri",
+				"offline": "çevrimdışı"
+			}
+		},
+		"config": {
+			"adminMailsDesc": "Çalışan bir e-posta hesabı mevcutsa sistem önemli olaylarla ilgili bildirimler gönderecektir. Bunlar şu anda:",
+			"adminMailsHint": "Alıcı e-posta adresini ekleyin",
+			"adminMailsList": [
+				"Kayıtlı OAuth istemcilerinin sona ermesi yaklaşıyor.",
+				"Aktif bir REI3 Professional lisansının sona ermesi yaklaşıyor."
+			],
+			"adminMailsTitle": "Yönetici bildirimleri",
+			"appVersion": "Platform sürümü",
+			"bruteforceAttempts": "Denemelerden sonra ana bilgisayarları engelle",
+			"bruteforceCountBlocked": "Engellenen ana bilgisayarlar",
+			"bruteforceCountTracked": "Takip edilen ana bilgisayarlar",
+			"bruteforceDesc": "<p>Bu özellik, istemcilerin geçersiz kimlik doğrulamayla tekrar tekrar sisteme erişmeye çalışması durumunda istemcileri engeller. Genel erişimin mümkün olduğu bulutta çalışma için mantıklıdır.</p><p>Yerel dağıtımlar için veya sistem ters proxy ile çalıştırılıyorsa mantıklı değildir.</p>",
+			"bruteforceProtection": "Kaba kuvvet korumasını etkinleştir",
+			"bruteforceTitle": "Kaba kuvvet koruması",
+			"builderMode": "Oluşturucu modu",
+			"button": {
+				"apply": "Değişiklikleri uygula"
+			},
+			"dbTimeoutCsv": "Veritabanı zaman aşımı: Toplu işleme (CSV)",
+			"dbTimeoutDataRest": "Veritabanı zaman aşımı: Veri istekleri (REST)",
+			"dbTimeoutDataWs": "Veritabanı zaman aşımı: Veri istekleri (HTTP/WS)",
+			"dbTimeoutHint": "Saniyeler içinde",
+			"dbTimeoutIcs": "Veritabanı zaman aşımı: Takvim indirmeleri (ICS)",
+			"dialog": {
+				"builderMode": "Builder, uygulamaları oluşturmak veya değiştirmek için kullanılır.<br /><br />Uygulamaların değiştirilmesi veri kaybına neden olabilir ve üretim ortamlarında <b>ASLA</b> yapılmamalıdır.<br /><br />Oluşturucuyu güvenli bir şekilde kullanmak için lütfen REI3'ün özel bir örneğini kullanın; hazır ve test edilmiş uygulamalar daha sonra bir üretim sistemine aktarılabilir.<br /><br />Daha fazla bilgi edinmek için lütfen <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank\">Builder belgelerine</a> bakın.",
+				"pleaseRead": "Lütfen kaydetmeden önce okuyun",
+				"productionMode": "Bakım modu, uygulamaları sistemden güncellemek, yüklemek veya kaldırmak için kullanılır.<br /><br />Bakım moduna geçiş <b>yönetici izinleri olmayan tüm kullanıcıların oturumunu kapatacaktır</b>."
+			},
+			"hotkeyModAvailable": "Bazı ortamlarda, diğer uygulamalara müdahale edilmesini önlemek amacıyla genel kısayol tuşlarına yönelik belirli değiştiricilerin devre dışı bırakılması yararlı olabilir. Devre dışı bırakılan anahtarlar kullanıcılar tarafından kullanılamaz.",
+			"icsDaysPost": "Geçerli tarihten sonraki etkinlikleri hariç tut (gün olarak)",
+			"icsDaysPre": "Geçerli tarihten önceki etkinlikleri hariç tut (gün olarak)",
+			"icsDownload": "Takvim aboneliklerini etkinleştir",
+			"licenseState": "Lisans durumu",
+			"licenseStateNok": "Aktif lisans yok",
+			"licenseStateOk": "{COUNT} gün daha geçerli",
+			"productionMode": "Bakım modu",
+			"proxyUrl": "Vekil URL",
+			"proxyUrlDesc": "'http://my-proxy.intern:8080' veya 'https://user:pass@my-proxy:8080'. gibi bir proxy URL",
+			"publicHostName": "Genel ana makine adı",
+			"publicHostNameDesc": "E-posta bildirimleri gibi durumlarda sisteme geri bağlanmak için kullanılır. 'Dahili-sistem.yerel' veya 'genel-sistem.com' gibi protokolsüz tam adres olmalıdır.",
+			"pwForceDigit": "Rakam gerektir",
+			"pwForceLower": "Küçük harf gerektir",
+			"pwForceSpecial": "Özel karakterler gerektir",
+			"pwForceUpper": "Büyük harf gerektir",
+			"pwLengthMin": "Minimum uzunluk",
+			"pwTitle": "Şifre ayarları",
+			"title": "Sistem konfigürasyonu",
+			"titleGeneral": "Genel",
+			"titleGlobalHotkeys": "Küresel kısayol tuşları",
+			"titleIcs": "Takvim abonelikleri",
+			"titleLoginBackgrounds": "Giriş arka planları",
+			"titleLogins": "Kullanıcılar",
+			"titleMail": "Posta gönder",
+			"titlePerformance": "Performans",
+			"tokenExpiryHours": "Maks. saat cinsinden oturum süresi",
+			"updateCheck": "Sürüm durumu",
+			"updateCheckCurrent": "Akım",
+			"updateCheckNewer": "Keskin kenar",
+			"updateCheckOlder": "Güncelleme mevcut",
+			"updateCheckUnknown": "Bilinmiyor"
+		},
+		"customizing": {
+			"appName": "Örnek adı",
+			"appNameHint": "Oturum açma sayfasında gösterilen REI3 örneğinin adı.",
+			"appNameShort": "Kısa ad",
+			"appNameShortHint": "Örnek adının, sayfa başlığında ve aşamalı web uygulaması (PWA) olarak yüklenmişse etiket olarak gösterilen kısa sürümü.",
+			"companyColorHeader": "Başlık rengi (başlık)",
+			"companyColorHeaderHint": "Başlık için sabit bir renk ayarlar; uygulama renkleri göz ardı edilir.",
+			"companyColorLogin": "Başlık rengi (giriş)",
+			"companyColorLoginHint": "Oturum açma ekranındaki varsayılan rengin üzerine yazar.",
+			"companyLoginImage": "Arka plan resmi",
+			"companyLoginImageHint": "JPG veya PNG dosyası, maks. 256kb. Giriş sayfasında arka plan resmi olarak kullanılır.",
+			"companyLogo": "Şirket logosu",
+			"companyLogoHint": "JPG veya PNG dosyası, maks. 64kb. Giriş ve başlangıç ​​sayfasında gösterilir.",
+			"companyLogoUrl": "Şirket logosu bağlantısı",
+			"companyLogoUrlDesc": "Geçerli herhangi bir URL",
+			"companyLogoUrlHint": "Firma logosuna tıklandığında açılan link.",
+			"companyName": "Firma Adı",
+			"companyNameHint": "Giriş sayfasında gösterilen şirket adı.",
+			"companyWelcome": "Hoş geldiniz metni",
+			"companyWelcomeHint": "Giriş sayfasında gösterilen kısa bir karşılama metni. HTML metin biçimlendirmesi ve bağlantılar için kullanılabilir.",
+			"error": {
+				"fileTooLarge": "Dosya çok büyük, maks. izin verilen boyut: {SIZE} kb."
+			},
+			"iconPwa1": "Simge, küçük",
+			"iconPwa1Hint": "Aşamalı web uygulaması simgeleri için kullanılan resim. PNG dosyası olmalı, maks. 128kb ve tam olarak 192x192 piksel boyutunda.",
+			"iconPwa2": "Simge, büyük",
+			"iconPwa2Hint": "Aşamalı web uygulaması simgeleri için kullanılan resim. PNG dosyası olmalı, maks. 128kb ve tam olarak 512x512 piksel boyutunda.",
+			"pwaDomain": "Doğrudan uygulama erişimi",
+			"pwaDomainHint": "Yalnızca alt alan adı ('my-app.my-domain.com'dan 'my-app'de olduğu gibi)",
+			"pwaDomainHint1": "Bireysel uygulamalara doğrudan erişilebilir ve PWA'lar olarak cihazlara ayrı ayrı kurulabilir. Daha sonra kendi başlangıç ​​sayfalarına, simgelere ve özel gezinmeye sahip olurlar. Bu, REI3 sistemine farklı etki alanları üzerinden erişilebilmesi için her uygulama için bir alt etki alanı DNS kaydı gerektirir. Ayrıca, HTTPS isteklerine doğru şekilde yanıt verebilmek için REI3 sunucusunda bir joker karakter sertifikası gerektirir.<br /><br />Hem DNS kayıtları hem de joker karakter sertifikası hazır olduğunda, lütfen istediğiniz her uygulama için bir alt etki alanı girin.",
+			"pwaDomainHint2": "Genel REI3 sistemine ulaşmak için bu listede olmayan bir alt alanın mevcut olduğundan emin olun. Aksi takdirde, her uygulama alt etki alanı yalnızca belirli bir uygulamaya erişim sağladığından yönetici kullanıcı arayüzüne erişiminiz olmaz.",
+			"titleCaptions": "Altyazılar",
+			"titleColors": "Renkler",
+			"titleCss": "Özel CSS kuralları",
+			"titleLoginPage": "Giriş sayfası",
+			"titleLogos": "Logolar",
+			"titlePwas": "Aşamalı web uygulamaları (PWA'lar)",
+			"tokenKeepEnable": "Kullanıcıların oturum açmış kalmasına izin ver",
+			"tokenKeepEnableHint": "Kapatılırsa, giriş sayfasındaki 'oturum açık kal' seçeneği kaldırılır. Bu seçenek olmadığında kullanıcılar sisteme her erişimde kimlik doğrulaması yapmak zorunda kalır. Bu ayar, takvim abonelikleri veya REI3 istemcileri gibi cihaz erişimini etkilemez."
+		},
+		"files": {
+			"deleteDate": "Dosya silindi",
+			"fileVersionsKeepCount": "En az X dosya sürümünü saklayın",
+			"fileVersionsKeepDays": "Dosya sürümlerini en az X gün boyunca saklayın",
+			"filesKeepDaysDeleted": "Silinen dosyaları X gün boyunca sakla",
+			"titleConfig": "Genel yapılandırma",
+			"titleDeleted": "Silinen dosyalar"
+		},
+		"ldaps": {
+			"assignRoles": "Rolleri grup üyeliğine göre ayarlayın<br />(manuel rol atamasını devre dışı bırakır)",
+			"bindUserDn": "Kullanıcı DN'sini bağla",
+			"bindUserDnHint": "Örnek: CN=salt okunur,OU=Kullanıcı,DC=şirketim,DC=yerel",
+			"bindUserPw": "Kullanıcı şifresini bağla",
+			"button": {
+				"import": "Kullanıcıları şimdi içe aktarın",
+				"new": "Bağlantı ekle",
+				"test": "Bağlantıyı test edin"
+			},
+			"description": "Bu LDAP bağlantısı, kullanıcıları içe aktarır ve LDAP kimlik bilgileriyle kimlik doğrulamayı etkinleştirir. <br />LDAP grup üyelikleri, rolleri otomatik olarak atamak için kullanılabilir.",
+			"dialog": {
+				"delete": "Bu LDAP bağlantısını silmek istediğinizden emin misiniz?",
+				"importPlanned": "İçe aktarma işinin hemen yürütülmesi planlandı",
+				"testDone": "Bağlantı testi başarılı oldu"
+			},
+			"groupDnHint": "Örnek: CN=Yönetici_Kullanıcı,OU=Grup,DC=şirketim,DC=yerel",
+			"host": "Ev sahibi",
+			"hostHint": "LDAP ana bilgisayar adı",
+			"keyAttribute": "Benzersiz anahtar özelliği",
+			"keyAttributeHint": "Örnek: objectGUID",
+			"loginAttribute": "Kullanıcı adı özelliği",
+			"loginAttributeHint": "Örnek: sAMAccountName",
+			"loginMetaMap": "Kullanıcı ayrıntılarını LDAP öznitelikleriyle eşleyin",
+			"memberAttribute": "Üye özelliği",
+			"memberAttributeHint": "Örnek: memberOf",
+			"msAdExt": "Microsoft AD uzantıları",
+			"msAdExtHint": "İç içe grup üyelikleri, kullanıcı hesabı kontrolü",
+			"nameHint": "Benzersiz ad",
+			"port": "Liman",
+			"portHint": "SSL/TLS için varsayılan olarak 389, 636",
+			"searchClass": "Nesne sınıfı",
+			"searchClassHint": "Örnek: kullanıcı",
+			"searchDn": "DN'yi ara",
+			"searchDnHint": "Örnek: OU=Kullanıcı,DC=şirketim,DC=yerel",
+			"starttls": "StartTLS'yi kullanın",
+			"template": "Kullanıcı şablonu",
+			"title": "Bağlantı oluştur/düzenle",
+			"titleRoles": "Grup üyeliği başına roller",
+			"tls": "SSL/TLS'yi kullanın",
+			"tlsVerify": "TLS'yi doğrulayın"
+		},
+		"license": {
+			"active": "Yüklü lisans",
+			"button": {
+				"delete": "Lisans dosyasını kaldır"
+			},
+			"clientId": "Müşteri Kimliği",
+			"currentState": "Mevcut değerler",
+			"dialog": {
+				"delete": "Lisans dosyasını kaldırmak istediğinizden emin misiniz? REI3 Professional'ı yeniden etkinleştirmek için geçerli bir lisans dosyasının yüklenmesi gerekir."
+			},
+			"extCommunity": "REI3 Topluluk Forumu",
+			"extLicense": "REI3 Profesyonel",
+			"intro": "REI3 tamamen <a href=\"https://github.com/r3-team/r3\" target=\"_blank\">açık kaynaktır</a> ve ücretsiz olarak kullanılabilir.<br /><br />Kurumsal özelliklere veya desteğe ihtiyaç duyanlar için <b>REI3 Professional</b> var. Her büyüklükteki kuruluş için uygun fiyatlı olacak şekilde fiyatlandırılır ve genellikle benzer düşük kodlu tekliflerden çok daha düşük maliyetlidir.<br /><br />Sürekli gelişimi desteklerken, REI3 Professional müşterileri aynı zamanda tüm özellikleri etkinleştirebilir ve REI3'ün ana geliştiricisi olan Lean Softworks'ten destek alabilir.",
+			"introMore": "Daha fazla bilgi:",
+			"licenseExpired": "Lisansın süresi doldu",
+			"licenseId": "Lisans Kimliği",
+			"loginCount": "Eşzamanlı kullanıcılar",
+			"loginCountLimited": "Eşzamanlı kullanıcılar (sınırlı)",
+			"registeredFor": "Şunun için kayıtlı:",
+			"untilDays": "Günlerce geçerli",
+			"upload": "Lisans dosyasını yükleyin:",
+			"validUntil": "Şu tarihe kadar geçerlidir:"
+		},
+		"login": {
+			"admin": "Yönetici",
+			"button": {
+				"resetMfa": "MFA'yı sıfırla"
+			},
+			"dialog": {
+				"delete": "Bu kullanıcıyı silmek istediğinizden emin misiniz?<br /><br />Bu işlem geri alınamaz.</b>",
+				"notUniqueName": "Aynı kullanıcı adı zaten farklı bir kullanıcıya atanmış.",
+				"resetTotp": "Bu, bu kullanıcı için tüm çok faktörlü kimlik doğrulama (MFA) yöntemlerini sıfırlayacaktır. Böylece sisteme erişim yalnızca kullanıcı adı ve parolayla mümkün olur.<br /><br />MFA'nın sıfırlanmasının uçtan uca şifreleme üzerinde hiçbir etkisi yoktur.<br /><br />Devam etmek istiyor musunuz?"
+			},
+			"error": {
+				"uniqueConstraint": "Kullanıcı adı benzersiz olmalı"
+			},
+			"hint": {
+				"active": "Devre dışı bırakıldığında aktif oturumlar sonlandırılacaktır.",
+				"admin": "Yönetici ayrıcalıkları uygulamaların ve kullanıcıların yönetimini içerir. Yöneticiler ayrıca bakım ve oluşturucu modlarını da etkinleştirebilir.",
+				"name": "Kullanıcı adı - sistem içinde benzersiz olmalıdır.",
+				"noAuth": "Genel kullanıcılar kimlik doğrulama gerektirmez. Sistem erişimi yalnızca URL ile mümkündür.",
+				"password": "Bu, bu kullanıcının mevcut şifresinin üzerine yazılacaktır. Çok faktörlü kimlik doğrulama bu değişiklikten etkilenmez. Kullanıcı ilgili yedekleme kodunu sağlayana kadar uçtan uca şifreleme (E2EE) kullanılamayacaktır.",
+				"tokenExpiryHours": "Maks. için genel ayarın üzerine yazar. oturum süresi."
+			},
+			"ldap": "LDAP atandı",
+			"ldapAssignActive": "Roller LDAP grup üyeliklerine göre atanır",
+			"ldapMeta": "Ayrıntılar LDAP aracılığıyla içe aktarılır",
+			"limited": "Sınırlı kullanıcı",
+			"limitedDesc": "Bir kullanıcıya en fazla tek bir rol atanmışsa, 'sınırlı' kullanıcı olarak sayılır. İstek işleme veya form gönderme gibi şeyler için bir uygulamanın yalnızca bölümlerine erişimin gerekli olduğu durumlarda kullanışlıdır.<br /><br />Sınırlı kullanıcılar yönetici veya genel erişime sahip olamaz ve ayrı bir lisans havuzundan yararlanamaz.",
+			"noAuth": "Genel erişim",
+			"oauth": "OAuth istemcisi",
+			"oauthAssignActive": "Roller, kimlik belirteci talebine göre atanır",
+			"oauthMeta": "Ayrıntılar kimlik belirteci taleplerine göre belirlenir",
+			"password": "Yeni şifre belirle",
+			"roleContentAdmin": "Yönetici",
+			"roleContentOther": "Özel",
+			"roleContentUser": "Kullanıcı",
+			"roles": "Roller ({COUNT})",
+			"title": "Kullanıcı '{NAME}'",
+			"titleLimited": "Sınırlı kullanıcı '{NAME}'",
+			"titleNew": "Yeni kullanıcı",
+			"titles": {
+				"active": "Aktif",
+				"admin": "Yönetici",
+				"ldap": "LDAP",
+				"limited": "Sınırlı",
+				"name": "İsim",
+				"noAuth": "Halk",
+				"oauth": "OAuth istemcisi"
+			},
+			"tokenExpiryHours": "Maks. saat cinsinden oturum süresi"
+		},
+		"loginMeta": {
+			"dialog": {
+				"notUniqueEmail": "Aynı e-posta adresi farklı bir kullanıcıya da atandı."
+			},
+			"department": "Departman",
+			"email": "E-posta",
+			"location": "Konum",
+			"nameDisplay": "Ekran adı",
+			"nameFore": "Adı",
+			"nameSur": "Soyadı",
+			"notes": "Tanım",
+			"organization": "Organizasyon",
+			"phone": "Telefon",
+			"phoneFax": "Faks",
+			"phoneLandline": "Sabit hat",
+			"phoneMobile": "Mobil"
+		},
+		"loginSessions": {
+			"noData": "Mevcut oturum yok",
+			"option": {
+				"browser": "Tarayıcı oturumu",
+				"fatClient": "REI3 İstemci"
+			},
+			"titles": {
+				"address": "Adres",
+				"admin": "Yönetici",
+				"date": "Başlatıldı",
+				"device": "Cihaz",
+				"limited": "Sınırlı",
+				"loginDepartment": "Departman",
+				"loginDisplay": "Ekran adı",
+				"loginName": "Kullanıcı adı",
+				"noAuth": "Halk",
+				"nodeName": "Küme düğümü"
+			}
+		},
+		"loginTemplate": {
+			"dialog": {
+				"delete": "Bu kullanıcı şablonunu silmek istediğinizden emin misiniz?<br /><br />Bu işlem geri alınamaz.</b>"
+			},
+			"global": "Genel kullanıcı şablonu. Başka bir şablon seçilmediği takdirde bu şablondaki ayarlar yeni kullanıcılara uygulanır.",
+			"title": "Kullanıcı şablonu '{NAME}'",
+			"titleNew": "Yeni kullanıcı şablonu"
+		},
+		"logs": {
+			"context": "Bağlam",
+			"contextLabel": {
+				"api": "API'si",
+				"backup": "Yedekleme",
+				"cache": "Önbellek",
+				"cluster": "Küme",
+				"csv": "CSV içe/dışa aktarma",
+				"doc": "PDF yaratıcısı",
+				"file": "Dosya işleme",
+				"imager": "Görüntü işleme",
+				"ldap": "LDAP",
+				"mail": "Posta",
+				"module": "Uygulamalar",
+				"oauth": "OAuth istemcisi",
+				"scheduler": "Zamanlayıcı",
+				"server": "Sunucu",
+				"transfer": "Aktarım",
+				"websocket": "Websocket istemcileri"
+			},
+			"date": "Zaman damgası",
+			"keepDays": "Günlükleri tut (gün olarak)",
+			"level": "Seviye",
+			"level1": "Hata",
+			"level2": "Uyarı",
+			"level3": "Bilgi",
+			"logLevel": "Günlük düzeyi",
+			"logLevel1": "Yalnızca hatalar",
+			"logLevel2": "Hatalar ve uyarılar",
+			"logLevel3": "Her şey",
+			"message": "Mesaj",
+			"module": "Başvuru",
+			"node": "Küme düğümü"
+		},
+		"mails": {
+			"account": "E-posta hesabı",
+			"accountAuthMethod": "Kimlik doğrulama yöntemi",
+			"accountAuthMethodHintLogin": "Kullanıcı adı ve şifre ile temel kimlik doğrulama. Office 365'e karşı eski SMTP kimlik doğrulaması için uyumluluk seçeneği.",
+			"accountAuthMethodHintNone": "Kimlik doğrulama yok. Genellikle tavsiye edilmez.",
+			"accountAuthMethodHintPlain": "Kullanıcı adı ve şifre ile temel kimlik doğrulama.",
+			"accountAuthMethodHintXOAuth2": "OAuth 2.0 aracılığıyla kimlik doğrulama, bazen 'Modern Kimlik Doğrulama' olarak da adlandırılır. Bazı sağlayıcıların hizmetlerine erişmesi için gereklidir.",
+			"accountHost": "Ana makine adı",
+			"accountMode": "Bağlayıcı",
+			"accountModeHintImap": "IMAP bağlayıcısı yüklenir ve ardından seçilen posta kutusundan <b>iletileri</b> siler. Yalnızca özel bir posta kutusuyla kullanılmalı ve kişisel posta hesaplarına erişim için kullanılmamalıdır.",
+			"accountModeHintSmtp": "SMTP bağlayıcısı e-posta mesajları gönderir.",
+			"accountOauth": "OAuth istemcisi",
+			"accountOauthHint": "Burada seçilebilmesi için bir OAuth istemcisinin oluşturulması gerekir. 'OAuth istemcileri' menü girişini kontrol edin.",
+			"accountPass": "Şifre",
+			"accountPort": "Liman",
+			"accountSendAs": "Adresi gönder",
+			"accountSendAsHint": "Bu, iletilerin hangi e-posta adresiyle gönderileceğini tanımlar. Bu genellikle posta kutusunun birincil e-posta adresidir, ancak bazıları farklı gönderme adreslerine izin verir.<br /><br />Gönderme adresini şu şekilde ayarlayarak isteğe bağlı olarak gönderen için bir görünen ad belirleyebilirsiniz:<br /><code><b>\"Görünen Adım\" &lt;my-email@my-host.com&gt;</b></code>",
+			"accountSmimeSign": "S/MIME ile imzalayın",
+			"accountSmimeSignHint": "Dosyalar, REI3 yapılandırma dosyasında ('config.json') tanımlanan sertifika yolunda bulunmalıdır.",
+			"accountTest": "E-postayı test edin",
+			"accountUser": "Kullanıcı adı",
+			"accounts": "E-posta hesapları",
+			"attachmentsNoPreview": "yalnızca gelenler için görünür",
+			"attempts": "Denemeleri gönder",
+			"bccList": "BCC",
+			"body": "Vücut",
+			"button": {
+				"attemptsReset": "Gönderme denemelerini sıfırla"
+			},
+			"ccList": "CC",
+			"dialog": {
+				"delete": "Bu e-posta hesabını silmek istediğinizden emin misiniz?<br /><br />Bu işlem geri alınamaz.</b>"
+			},
+			"dir": "Yön",
+			"dirIn": "İÇİNDE",
+			"dirOut": "DIŞARI",
+			"files": "Ekler",
+			"noMailsInSpool": "E-posta biriktiricisi boş.",
+			"noMailsInTraffic": "Kayıtlı e-posta trafiği yok.",
+			"option": {
+				"authMethod": {
+					"login": "GİRİŞ (O365 eski SMTP)",
+					"none": "HİÇBİRİ",
+					"plain": "OVA",
+					"xoauth2": "YEMİN 2.0"
+				},
+				"connectMethod": {
+					"plain": "OVA",
+					"starttls": "BAŞLANGIÇ TLS",
+					"tls": "SSL/TLS"
+				}
+			},
+			"subject": "Ders",
+			"testAccount": "Hesap seçin",
+			"testOk": "Test e-postası biriktiriciye başarıyla eklendi.",
+			"testRecipient": "Alıcı adresi",
+			"testSubject": "Ders",
+			"title": "E-posta hesabı '{NAME}'",
+			"titleNew": "Yeni e-posta hesabı",
+			"toList": "İle",
+			"trafficKeepDays": "Verileri sakla (gün cinsinden)"
+		},
+		"modules": {
+			"button": {
+				"repositoryRefresh": "Güncellemeler için depoları kontrol edin",
+				"update": "v{VERSION}'ye güncelleme",
+				"updateAll": "Tümünü güncelle ({COUNT})"
+			},
+			"changeLog": "Günlüğü değiştir",
+			"dialog": {
+				"delete": "Bu uygulamayı silmek istediğinizden emin misiniz? Bu işlem aynı zamanda sisteminizdeki tüm verileri de silecektir.<br /><br /><b>Bu işlem mevcut yedeklemeler olmadan geri alınamaz.</b>{APPS}",
+				"deleteApps": "<br /><br />Aşağıdaki uygulamalar buna bağlıdır ve ayrıca silinecektir:<ul>{LIST}</ul>",
+				"deleteMulti": "Bu eylem <b>kalıcı olarak</b> <b>{COUNT} uygulamalarını </b> ve ilgili verileri silecektir.<br /><br />Gerçekten devam etmek istiyor musunuz?",
+				"deleteTitle": "'{APP}' uygulamasının kalıcı olarak silinmesi",
+				"deleteRepo": "Bu depoyu silmek istediğinizden emin misiniz?",
+				"owner": "Orijinal yazar değilseniz, yazarın yeni bir sürümü yüklendiğinde tüm değişiklikler KAYBOLACAKTIR. Bu aynı zamanda VERİ KAYBI ile de sonuçlanabilir.<br /><br />Diğer yazarların uygulamalarını değiştirmek/genişletmek istiyorsanız, bunu 'onların üzerine inşa ederek' güvenli bir şekilde yapabilirsiniz - daha fazla ayrıntı için lütfen Builder belgelerine bakın.",
+				"ownerTitle": "Uyarı - lütfen dikkatlice okuyun!"
+			},
+			"error": {
+				"installFailed": "Uygulamanın güncellenmesi başarısız oldu. Tek bir uygulamayı güncellerken eksik bağımlılıklar sorunlara neden olabilir; bunları çözmek için lütfen tüm uygulamaları birlikte güncellemeyi deneyin.<br /><br />Hata mesajı: {ERROR}",
+				"uploadFailed": "Yüklenen dosyadan uygulama eklenemedi. Lütfen 'Her Şey'e aktarımlar için günlük düzeyini artırın ve tekrar deneyin; ayrıntılar daha sonra sistem günlüklerinde görünecektir."
+			},
+			"hidden": "Gizlenmiş",
+			"installedApps": "Yüklü uygulamalar",
+			"import": "Dosyadan yükle",
+			"position": "Menüde sipariş ver",
+			"productionMode": "Uygulamalar yalnızca bakım modu etkinken değiştirilebilir.",
+			"publicKeys": "Güvenilir anahtarlar",
+			"releaseDate": "Yayın tarihi",
+			"repoFeedback": "Anonim kullanıcı geri bildirimine izin ver",
+			"repoInstallFrom": "Depodan yükle",
+			"repoNotIncluded": "müsait değil",
+			"repoOutdatedApp": "platform yükseltmesi gerekli",
+			"repoSkipVerify": "Güvenilmeyen sertifikalara izin ver",
+			"repoTitle": "'{NAME}' deposu",
+			"repoTitleNew": "Yeni depo",
+			"repoUpToDate": "en son sürüm",
+			"reposManage": "Depoları yönet",
+			"update": "Güncelleme",
+			"updateDone": "Güncelleme başarıyla uygulandı"
+		},
+		"navigationActivation": "Aktivasyon",
+		"navigationBackups": "Yedeklemeler",
+		"navigationCaptionMap": "Çeviriler",
+		"navigationCluster": "Küme",
+		"navigationConfig": "Sistem",
+		"navigationCustom": "Özelleştirme",
+		"navigationFiles": "Dosyalar",
+		"navigationLdaps": "LDAP-Konektörler",
+		"navigationLicense": "Profesyonel",
+		"navigationLoginSessions": "Kullanıcı oturumları",
+		"navigationLoginTemplates": "Kullanıcı şablonları",
+		"navigationLogins": "Kullanıcılar",
+		"navigationLogs": "Günlükler",
+		"navigationMailAccounts": "E-posta hesapları",
+		"navigationMailSpooler": "E-posta biriktiricisi",
+		"navigationMailTraffic": "E-posta trafiği",
+		"navigationModules": "Uygulamalar",
+		"navigationOauthClients": "OAuth istemcileri",
+		"navigationRoles": "Üyelikler",
+		"navigationScheduler": "Zamanlayıcı",
+		"navigationSystemMsg": "Sistem mesajı",
+		"oauthClient": {
+			"button": {
+				"defaultO365": "Varsayılanlar: Exchange Online",
+				"defaultOpenId": "Varsayılanlar: ID Connect'i Aç"
+			},
+			"claimAdmin": "Yönetici talebi",
+			"claimAdminHint": "Beklenen dize değeri alan değeriyle tam olarak eşleşiyorsa REI3 örneğinde yönetici izni veren talep alanının adı. Bir yönetici talebi ayarlandıysa tüm kullanıcılar için dahil edilmesi gerekir.",
+			"claimRoles": "Roller iddiası",
+			"claimRolesHint": "Kullanıcı rollerini veya gruplarını içeren talep alanının adı. Ayarlanırsa REI3 rolleri bu iddiadaki değerlerle eşlenebilir. Değer bir JSON dize dizisi olmalıdır; örneğin: [\"tüm kullanıcılar\", \"departman-it\"]",
+			"claimUsername": "Kullanıcı adı talebi",
+			"claimUsernameHint": "Kullanıcı adını içeren talep alanının adı. Doldurulmalıdır. Kullanıcı adları OAuth istemcisi için benzersiz olmalıdır.",
+			"clientId": "Müşteri Kimliği",
+			"clientIdHint": "OAuth2 istemcisi oluşturulurken sağlayıcı tarafında oluşturulur.",
+			"clientSecret": "İstemci sırrı",
+			"clientSecretHint": "OAuth2 istemcisi oluşturulurken veya oluşturulduktan sonra sağlayıcı tarafında oluşturulur. Gizli olmalı, istemci sertifikaları desteklenmiyor.",
+			"dateExpiry": "Son kullanma tarihi",
+			"dateExpiryHint": "Son kullanma tarihi yaklaştığında yönetici kişilerine bildirimde bulunmak.",
+			"dialog": {
+				"delete": "Bu OAuth istemcisini silmek istediğinizden emin misiniz?<br /><br />Bu eylem geri alınamaz.</b>"
+			},
+			"flow": "OAuth akışı",
+			"loginMetaMap": "Talepler yoluyla kullanıcı ayrıntılarını güncelleme",
+			"nameHint": "REI3 içindeki bu OAuth istemcisine başvuruda bulunacak dahili bir ad.",
+			"option": {
+				"flow": {
+					"authCodePkce": "PKCE ile Kimlik Doğrulama Kodu",
+					"clientCreds": "İstemci kimlik bilgileri"
+				},
+				"flowHint": {
+					"authCodePkce": "<p>Bu akış, Keycloak veya Microsoft Entra ID gibi harici kimlik sağlayıcıları aracılığıyla kullanıcıların kimliğini doğrulamak için REI3'de kullanılır.</p><p>'Kod Değişimi için Proof Key'li Kimlik Doğrulama Kodu' bir Açık Kimlik Bağlantı akışıdır. Kullanıcılar bir kimlik sağlayıcıyla kimlik doğrulaması yapmaya yönlendirilir. Kimlik doğrulamanın ardından kullanıcı, kimlik ve kullanıcı meta verilerinin doğrulanmasıyla REI3'e geri yönlendirilir.</p>",
+					"clientCreds": "<p>Bu akış, REI3'de Exchange Online gibi bir hizmette kimlik doğrulaması yapmak için kullanılır.</p><p>'İstemci Kimlik Bilgileri', REI3'ün posta kutusu gibi korumalı kaynaklara erişim almak için bir hizmet sağlayıcıya karşı kimlik doğrulamasını yaptığı bir OAuth 2.0 akışıdır. 'Müşteri Kimlik Bilgileri' akışı yoluyla erişilen herhangi bir kaynak istemciye ait olmalıdır (bu durumda REI3) - kullanıcı kaynaklarına doğrudan veya adına erişmek için tasarlanmamıştır.</p><p>Bu akış şu anda yalnızca posta kaynaklarına erişim için kullanılmaktadır.</p>"
+				}
+			},
+			"providerUrl": "Sağlayıcı URL",
+			"providerUrlHint": "OAuth hizmet keşfi için seçilen sağlayıcının URL'si, genellikle 'Verici URL' olarak adlandırılır.",
+			"redirectUrl": "URL'yi yönlendir",
+			"redirectUrlHint": "Kimlik doğrulamanın ardından kullanıcılar buraya yönlendirilir. REI3'ün URL oturum açma adı olmalıdır. Ayrıca servis sağlayıcınıza kayıtlı olmanız gerekir.",
+			"scopes": "Kapsamlar",
+			"scopesHint": "Kapsamlar sağlayıcıya OAuth istemcisinin ne yapmak veya neye erişmek istediğini söyler. Bunlar sağlayıcı tarafından tanımlanır ve kullanılabilir olmaları için müşteriye atanmaları gerekir; mevcut kapsamların listesi için lütfen sağlayıcının belgelerine bakın.",
+			"title": "OAuth istemcisi '{NAME}'",
+			"titleNew": "Yeni OAuth istemcisi",
+			"tokenUrl": "Jeton URL",
+			"tokenUrlExample": "Exchange Online örneği: https://login.microsoftonline.com/YOUR_TENANT_NAME/oauth2/v2.0/token",
+			"tokenUrlHint": "OAuth2 belirteçlerinin oluşturulduğu yerin URL'si. Bunlar sağlayıcınız tarafından belgelenmiştir."
+		},
+		"repo": {
+			"author": "tarafından {NAME}",
+			"button": {
+				"install": "Düzenlemek",
+				"installed": "Yüklendi",
+				"showInstalled": "Yüklü olanı göster"
+			},
+			"fetchDone": "Uygulama başarıyla yüklendi.<br /><br />Erişim elde etmek için roller atanmalıdır.",
+			"maintenanceBlock": "Yalnızca bakım modunda kurulum",
+			"notCompatible": "Platform yükseltmesi gerekli",
+			"publicKeyAdd": "Yeni ortak anahtar ekle",
+			"publicKeyHint": "Örnek:\n-----RSA BAŞLANGIÇ GENEL ANAHTARI-----\nANAHTAR\n-----SON RSA KAMU ANAHTARI-----",
+			"publicKeysTrustedDesc": "REI3, uygulamaların yalnızca bu anahtarların sahipleri tarafından imzalanması durumunda yüklenmesine izin verecektir.",
+			"supportPage": "Web sitesi"
+		},
+		"roles": {
+			"addLogin": "Kullanıcı ekle",
+			"button": {
+				"all": "Tümünü göster",
+				"descriptions": "Açıklamalar"
+			},
+			"descriptionEmpty": "Açıklama mevcut değil"
+		},
+		"scheduler": {
+			"button": {
+				"runNow": "Anında yürütmeyi planlayın",
+				"runNowHint": "Görev mümkün olan en kısa sürede yürütülecektir."
+			},
+			"dateAttempt": "Son başlangıç",
+			"dateSuccess": "Son başarılı tamamlama",
+			"functions": "Uygulama görevleri",
+			"interval": "Yürütme aralığı",
+			"intervalSeconds": "Yürütme aralığı (saniye cinsinden)",
+			"intervalTypeDays": "gün(ler)",
+			"intervalTypeHours": "saat)",
+			"intervalTypeMinutes": "dakika(lar)",
+			"intervalTypeMonths": "ay(lar)",
+			"intervalTypeSeconds": "saniye(ler)",
+			"intervalTypeWeeks": "hafta(lar)",
+			"intervalTypeYears": "yıl(lar)",
+			"mirrorMode": "Bu örnek için ayna modu etkindir. Seçilen sistem görevleri devre dışı bırakıldı.",
+			"names": {
+				"adminMails": "Yönetici bildirim postaları",
+				"backupRun": "Entegre yedeklemeleri yönetin",
+				"cleanupBruteforce": "Bruteforce önbelleğini temizleme",
+				"cleanupDataLogs": "Süresi dolmuş değişiklik günlüklerini temizleme",
+				"cleanupFiles": "Süresi dolmuş dosya yüklemelerini temizleme",
+				"cleanupLogs": "Süresi dolmuş sistem günlüklerini temizleme",
+				"cleanupMailTraffic": "Süresi dolmuş e-posta trafiği girişlerini temizleme",
+				"cleanupTempDir": "Geçici dizini temizle",
+				"clusterCheckIn": "Küme girişi",
+				"clusterProcessEvents": "Küme olayı işleme",
+				"dbOptimize": "Veritabanı optimizasyonu",
+				"docsGenerate": "PDF belgeleri oluştur",
+				"filesProcess": "Dosya işi işleme",
+				"httpCertRenew": "Güncellendiyse SSL sertifikasını yeniden yükleyin",
+				"importLdapLogins": "Kullanıcıları LDAP aracılığıyla içe aktarın",
+				"mailAttach": "E-posta eki aktarımı",
+				"mailRetrieve": "E-posta alımı",
+				"mailSend": "E-posta gönderimi",
+				"repoCheck": "Depo güncellemesini yürüt",
+				"restExecute": "REST çağrılarını yürüt",
+				"systemMsgMaintenance": "Sistem mesajından sonra bakım modunu etkinleştirin",
+				"updateCheck": "Platform güncellemelerini kontrol edin"
+			},
+			"scheduleLine": "Her {VALUE} {TYPE}",
+			"scheduleLineDayMonths": "{DAY} üzerinde.",
+			"scheduleLineDayWeeks": "{DAY} üzerinde. hafta içi",
+			"scheduleLineDayYears": "{DAY} üzerinde. yılın",
+			"scheduleLineTime": "{HH}'de:{MM}:{SS}",
+			"systemTasks": "Sistem görevleri (genel)",
+			"systemTasksNode": "Sistem görevleri (küme düğümleri)"
+		},
+		"systemMsg": {
+			"date0": "Şuradan göster:",
+			"date1": "Şu tarihe kadar göster:",
+			"description": "Yöneticiler bu özelliği, kullanıcıları planlı kesintiler gibi olaylar hakkında bilgilendirmek için kullanabilir. Hem giriş yapan hem de yeni oturum başlatan kullanıcılar mesajı alacaktır.<br /><br />Zaman dilimi aktifken mesaj değiştirilirse güncellenmiş sürüm kullanıcılara tekrar gösterilecektir.",
+			"maintenance": "Bakıma geç",
+			"maintenanceHint": "Etkinleştirilirse, 'şu tarihe kadar göster'e ulaşıldığında sistem bakım moduna geçecektir. Bakım moduna geçiş gerçekleşmeden 30 dakika önce kullanıcılar bir geri sayım sayacını görebilecek.",
+			"state": {
+				"date0Set": "Mesaj <b>{DATE}</b>'den başlayarak gösterilecektir.",
+				"date1Set": "Mesaj <b>{DATE}</b> tarihine kadar gösterilecektir.",
+				"datesSet": "Mesaj <b>{DATE0}</b> ve <b>{DATE1}</b> arasında gösterilecektir.",
+				"unset": "<b>Mesaj aktif değil</b>"
+			},
+			"text": "Mesaj"
+		},
+		"title": "Yönetici",
+		"titleDocs": "Yönetici belgeleri"
+	},
+	"articles": {
+		"button": {
+			"pdf": "PDF"
+		},
+		"form": "Form yardımı",
+		"module": "Uygulama yardımı",
+		"title": "Yardım sayfaları",
+		"toc": "İçindekiler"
+	},
+	"builder": {
+		"api": {
+			"button": {
+				"versionNew": "Yeni sürüm",
+				"versionNewHint": "Bu API'yi yeni bir sürüm numarasıyla çoğaltır."
+			},
+			"calls": "Aramalar",
+			"content": "API türü",
+			"contentValue": "REST",
+			"dialog": {
+				"delete": "Bu API'yi silmek istediğinizden emin misiniz?"
+			},
+			"hint": {
+				"auth": "Daha fazla istek için geçerli bir erişim belirteci almak üzere bir kimlik doğrulama çağrısı gereklidir. Belirteç, maksimum değerin ardından geçerlidir. oturum süresi, sistem yapılandırmasında ayarlanır.",
+				"delete": "Mevcut bir kaydı ve başka ilişkiler birleştirilmişse bağlı kayıtları siler. İlişkilerin etkilenmesi için 'SİL' seçeneğinin etkinleştirilmesi gerekir.",
+				"get": "Mevcut bir kayıttan (kayıt kimliği verilmişse) veya bir veya daha fazla birleştirilmiş ilişkiden elde edilen tüm kayıtlardan değerleri döndürür.",
+				"post": "Bir kaydı ve diğer ilişkilerin birleştirilmesi durumunda bağlı kayıtları oluşturur veya günceller. İlişkilerin etkilenmesi için 'CREATE'/'UPDATE' seçeneklerinin etkinleştirilmesi gerekir."
+			},
+			"httpMethods": "HTTP yöntemleri",
+			"limitDef": "Varsayılan sonuç sayısını GET",
+			"limitDefHint": "'Limit' parametresi ('limit=1000' gibi) üzerine yazılmamışsa varsayılan sonuç sayısı.",
+			"limitMax": "Maksimum sonuç sayısını AL",
+			"limitMaxHint": "Bir GET çağrısıyla döndürülen en yüksek sonuç sayısı.",
+			"nameHint": "API adı REST çağrısının kendisinde kullanılır. Çağrı değiştirilirse güncellenmelidir.",
+			"preview": {
+				"call": "Arama",
+				"empty": "<empty>",
+				"headers": "Başlıklar",
+				"httpMethod": "HTTP yöntemi",
+				"limitHint": "İstenen sonuç sayısı.",
+				"offsetHint": "İstenen sonuç ofseti - belirtilen sayıdan sonra gelen sonuçları gösterir.",
+				"params": "Parametreler",
+				"recordId": "Kayıt Kimliği",
+				"recordIdHintDelete": "Gerekli. İlgili kayıt silinir.",
+				"recordIdHintGet": "İsteğe bağlı. Kullanılırsa yalnızca tek bir kayıt döndürülür.",
+				"request": "Örnek isteyin (gövde)",
+				"requestHintPost": "Ayrıntılı mod devre dışı bırakılırsa değer sırası etkin sütunlarla aynı olmalıdır.",
+				"response": "Yanıt örneği (gövde)",
+				"responseHintPost": "POST yanıtları, etkilenen her ilişkinin kayıt kimliklerini döndürür (ilişki birleştirme dizinine göre). Kayıt kimliği mevcut (güncellendiyse) veya yeni (oluşturulduysa) olacaktır.<br /><br />Kayıtları güncellemek istiyorsanız kayıt aramalarını (\"İçerik\" sekmesi) tanımladığınızdan emin olun.",
+				"verboseHint": "Etkinleştirilirse POST istekleri ve GET yanıtları, sıralı değer listeleri yerine varlık adlarını kullanır. Aşağıda bir önizleme görmek için bu seçeneği etkinleştirin."
+			},
+			"title": "API'ler",
+			"titleOne": "API '{NAME}'",
+			"verboseDef": "Ayrıntılı mod",
+			"verboseDefHint": "Parametre olarak ayarlanmadıysa ayrıntılı mod için varsayılan ayar.",
+			"versionHint": "Bu API'nin sürüm numarası. Sürümler genellikle eski çağrıları bozmadan yeni özellikler sunmak için kullanılır. Aynı ada ve sürüm numarasına sahip iki API bulunamaz.",
+			"warning": {
+				"noData": "API'nin çalışması için en az 1 ilişkinin seçilmesi (\"İçerik\" sekmesi) ve en az 1 sütunun aktif olması gerekir.",
+				"postNoUpdate": "POST çağrıları, kayıt aramaları olmadan kayıtları güncelleyemiyor (\"İçerik\" sekmesi). En az 1 ilişki, kayıt araması olmadan 'GÜNCELLEME' olarak ayarlandı.",
+				"postSubQuery": "Alt sorgular dahil edilirse POST çağrıları başarısız olur. En az 1 sütun bir alt sorgudur."
+			},
+			"warnings": "Uyarılar"
+		},
+		"articles": {
+			"addArticle": "Makale ekle",
+			"assignTo": "Ata",
+			"body": "İçerik",
+			"dialog": {
+				"delete": "Bu makaleyi silmek istediğinizden emin misiniz?"
+			},
+			"new": "Yeni makale",
+			"option": {
+				"assignForm": "Form bağlamı yardımı",
+				"assignModule": "Uygulama yardım sayfası"
+			},
+			"title": "Yardım makaleleri",
+			"titleAssign": "Makaleleri atayın",
+			"titleAssigned": "Atandı"
+		},
+		"attribute": {
+			"bigint": "Büyük değerler",
+			"bigintDates": "2038'den sonraki destek tarihleri",
+			"bigintDatesHint": "Daha fazla depolama alanı gerektirir ancak Ocak 2038'den sonraki tarih değerlerine izin verir.",
+			"bigintHint": "Daha fazla depolama alanına ihtiyaç duyuyor ancak 2,14 milyarın üzerindeki değerleri destekliyor.",
+			"content": "Veritabanı türü",
+			"contentHint": "Uzmanlar için bilgiler.",
+			"datetimes": "Tarih ve saat",
+			"defaults": "Varsayılan değer",
+			"defaultsHint": "Başka bir değer verilmediği takdirde varsayılan değer kullanılacaktır.",
+			"dialog": {
+				"delete": "Bu özelliği silmek istediğinizden emin misiniz? Bu işlem aynı zamanda sisteminizdeki tüm verileri silecektir.<br /><br /><b>Bu işlem mevcut yedeklemeler olmadan geri alınamaz.</b>",
+				"deleteCheckFailed": "Özellik silinemez; ona yapılan referanslar hâlâ mevcuttur"
+			},
+			"doublePrecision": "Yüksek hassasiyet",
+			"doublePrecisionHint": "Daha fazla depolama alanına ihtiyaç duyar, ancak 6'dan fazla ondalık basamak hassasiyetini destekler (en az 15'e kadar).",
+			"edit": "Özellik '{NAME}'",
+			"encrypted": "Şifreli",
+			"encryptedHint": "Mevcut veya diğer tanımlı kullanıcılar için öznitelik değerlerini şifreleyin. Uçtan uca şifreleme kullanır; kullanıcılar kimlik bilgilerine ve yedek anahtarlara erişimi kaybederse hiç kimse verileri kurtaramaz. Bu özelliği kullanmadan önce lütfen belgeleri okuyun. Yalnızca metin nitelikleri için kullanılabilir.",
+			"expert": "Uzman seçenekleri",
+			"iconHint": "Üzerine yazılmamışsa giriş alanlarında gösterilir.",
+			"lengthFiles": "Maks. KB cinsinden boyut",
+			"lengthFract0": "Ondalık noktadan önce",
+			"lengthFract1": "Ondalık basamaklar",
+			"lengthFractHint": "Maks. değer: {C0}.{C1}",
+			"lengthFractHintMax": "Basamak sayısı 0 olarak ayarlanırsa sayısal değerler sınırlandırılmaz ve tanımlanmış bir ondalık basamağa yuvarlanmaz.",
+			"lengthNumeric": "Hane sayısı",
+			"lengthText": "Maks. karakterler",
+			"nameHint": "Ad, dahili referans görevi görür; kullanıcılara gösterilmez.",
+			"new": "Yeni özellik",
+			"nullable": "Değeri olmalı",
+			"nullableHint": "Etkinleştirilirse bu değer hiçbir zaman boş olmamalıdır. Bu öznitelik için girişler varsayılan olarak zorunludur.",
+			"onDelete": "Silindiğinde yapılacak işlem",
+			"onUpdate": "Değiştirildiğinde yapılacak işlem",
+			"option": {
+				"barcode": "Barkod/QR kodu",
+				"boolean": "Evet/hayır",
+				"color": "Renk",
+				"date": "Tarih",
+				"datetime": "Tarih + saat",
+				"decimal": "Sayı, ondalık",
+				"defaults": {
+					"date": "Güncel tarih (sunucu saati)",
+					"datetime": "Geçerli tarih + saat",
+					"fixed": "Özel değer",
+					"uuid": "Yeni UUID"
+				},
+				"drawing": "Çizim",
+				"files": "Dosyalar",
+				"float": "Sayı, kayan",
+				"iframe": "iframe",
+				"number": "Sayı, tam",
+				"regconfig": "Metin arama sözlüğü",
+				"relationship1": "İlişki, tek değer",
+				"relationship11": "İlişki, bire bir (1:1)",
+				"relationshipActionsHints": {
+					"CASCADE": "Bu ilişki özniteliği tarafından başvurulan bir kayıt siliniyorsa, silme işlemini basamaklandırın. Bu, bu öznitelik aracılığıyla ilişki içinde olan tüm kayıtların, başvurulan kayıt silinirken otomatik olarak silindiği anlamına gelir. Ana öğeyle birlikte alt öğelerin de silinmesi, ebeveyn-çocuk ilişkileri için çok kullanışlıdır.",
+					"NO ACTION": "Bu ilişki özniteliği tarafından başvurulan bir kayıt siliniyorsa silme işlemini engelleyin. Başvurulan kayıt yalnızca ilişkiden kaldırıldıktan sonra silinebilir.",
+					"RESTRICT": "EYLEM YOK'a benzer ancak genellikle yalnızca özel kullanım durumlarıyla ilgilidir. NO EYLEM gibi, başvurulan bir kayıt siliniyorsa eylemi engeller. Ancak NO EYLEM'in aksine, bu hemen yapılır ve bir veritabanı işleminin sonunda yapılmaz.",
+					"SET NULL": "Bu ilişki özniteliği tarafından başvurulan bir kayıt siliniyorsa, başvuruyu kaldırır. Bu yalnızca bu özelliğin boş olması durumunda mümkündür ('bir değere sahip olmalıdır' olarak ayarlanmamışsa)."
+				},
+				"relationshipActionsHintsOnUpdate": "'Silindiğinde yapılacak işlem' ayarıyla aynı şekilde çalışır. Silme işleminden farklı olarak bu ayar, bu ilişki özniteliği tarafından başvurulan bir kaydın birincil anahtarı (\"kimlik\") değiştirildiğinde ne olacağını etkiler. Birincil anahtarları güncellemenin birkaç nedeni olduğundan nadiren kullanılır.",
+				"relationshipN": "İlişki, çoklu değer",
+				"relationshipN1": "İlişki, çoktan bire (n:1)",
+				"richtext": "Biçimlendirmeli metin",
+				"text": "Metin",
+				"textarea": "Metin, birden çok satır",
+				"time": "Zaman",
+				"uuid": "Evrensel olarak benzersiz tanımlayıcı"
+			},
+			"relationshipId": "ile ilişki",
+			"titleHint": "Başlık mevcut uygulama dillerine çevrilebilir. Bir alan veya sütun başlığının üzerine yazılmamışsa kullanıcılara gösterilir.",
+			"usedFor": "Değer türü",
+			"usedForHint": {
+				"barcode": "Bir barkod veya QR kodu değeri. Çeşitli formatları saklayabilir. İlgili girişler, barkodları / QR kodlarını taramak için kullanılabilir, aynı zamanda bunları mevcut değere göre de oluşturabilir.",
+				"boolean": "Doğru/yanlış değeri. Basit evet/hayır değerleri için kullanılır. Boş bir değere izin verilirse 3 olası değer bulunur: doğru/yanlış/boş.",
+				"color": "Renk değerleri. Çoğu görünümde, atanmış bir kategoriye göre bir kaydın önemi gibi özelliklerini göstermek için çıktıları biçimlendirmek için kullanılabilir.",
+				"date": "Bir tarih değeri. Doğum tarihi veya satın alma tarihi gibi yalnızca tarih değerleri için kullanılır.",
+				"datetime": "Zaman bileşenli bir tarih değeri. Etkinlikler, randevular vb. için kullanılır. Takvimlerde kullanılması halinde tam veya kısmi günlük etkinlikler yönetilebilir.",
+				"decimal": "Genellikle para birimi tutarları için kullanılan ondalık değerler.",
+				"drawing": "Fare veya dokunma girişiyle oluşturulan basit bir çizim. Genellikle imzalar için kullanılır.",
+				"files": "Bir veya daha fazla dosya. Maksimuma bağlı olarak dosya sayısı/boyutu ayarları sayesinde kullanıcılar dosyaları kalıcı olarak depolayabilir. İstemci uygulamasıyla dosyalar doğrudan düzenleme için yerel olarak açılabilir.",
+				"float": "Kayan ondalıklı sayı değerleri. Çoğunlukla pahalı hesaplamalar için kullanılır.",
+				"iframe": "Web sitesi gibi harici bir kaynağı göstermek için kullanılan URL değeri.",
+				"number": "Sayaçlar, öncelikler, referans numaraları vb. gibi tam sayı değerleri.",
+				"regconfig": "Tam metin arama dizini için sözlük. Kullanılabilir sözlükler veritabanı sistemine bağlıdır (s. Postgres sözlükleri). Örnekler: İngilizce, Almanca, Fransızca, İspanyolca, Rumence. 'Basit' değeri daha az kullanışlı ancak dilden bağımsız arama için kullanılabilir.",
+				"relationship11": "Bir ilişkiyi diğerine bağlar. Bire bir ilişkiler (1:1), bir ilişkinin yalnızca bir kaydının diğerindeki aynı kayda referans vermesine izin verir. Örnekler: Bir sınıfın öğretmeni veya araba sahibi.",
+				"relationshipN1": "Bir ilişkiyi diğerine bağlar. Çoka-bir ilişkiler (n:1), bir ilişkinin birden fazla kaydının diğerindeki aynı kayda referans vermesine olanak tanır. Örnekler: Bir sınıfa katılan öğrenciler veya bir kuruluşun çalışanları.",
+				"richtext": "Birden çok satır biçimlendirilmiş metin. PDF veya e-posta oluşturmaya yönelik belge şablonlarının yanı sıra daha büyük makaleler için de kullanışlıdır. Başlıklar, bağlantılar, tablolar, resimler ve daha fazlasını içerebilir.",
+				"text": "Tek satırlık metin. İsimler, e-posta adresleri, telefon numaraları, adresler vb. için kullanılabilir.",
+				"textarea": "Çok satırlı metin. Daha büyük miktarda metin için. Açıklamalar veya notlar için kullanışlıdır.",
+				"time": "Bir zaman değeri. Tarihten bağımsız olarak yalnızca saat/dakika/saniyeye ihtiyaç duyulduğunda kullanılır.",
+				"uuid": "Evrensel olarak benzersiz tanımlayıcı değeri (UUIDv4). UUID'lerin, oluşturuldukları sistemden bağımsız olarak iki kez var olma olasılıkları istatistiksel olarak son derece düşüktür. Çoğunlukla bağlantısız sistemlerdeki kayıtları benzersiz şekilde tanımlamak veya bunlara referans vermek için kullanılır."
+			}
+		},
+		"backHint": "Uygulamaya genel bakışa geri dönün",
+		"clientEvent": {
+			"action": {
+				"callJsFunction": "Ön uç işlevini yürüt",
+				"callPgFunction": "Arka uç işlevini yürütün"
+			},
+			"arguments": {
+				"clipboard": "Pano içeriği, boşsa boş",
+				"hostname": "İstemciyi çalıştıran bilgisayarın ana bilgisayar adı",
+				"username": "Şu anda oturum açmış olan kullanıcının kullanıcı adı",
+				"windowTitle": "Şu anda açık olan pencerenin başlığı"
+			},
+			"argumentsHint": "Bağımsız değişkenler, istemci uygulaması tarafından seçilen işleve burada tanımlanan sırayla sağlanır.",
+			"dialog": {
+				"delete": "Bu müşteri etkinliğini silmek istediğinizden emin misiniz?"
+			},
+			"event": {
+				"onConnect": "İstemci bağlanır",
+				"onDisconnect": "İstemcinin bağlantısı kesiliyor",
+				"onHotkey": "İstemci kısayol tuşuna tepki veriyor"
+			},
+			"hotkeyHint": "Bu istemci olayının dinlediği varsayılan kısayol tuşu. Kullanıcılar tarafından kişisel ayarlarında üzerine yazılabilir.",
+			"title": "Müşteri etkinliği",
+			"titleHint": "Kullanıcılara kişisel ayarlarında görünür.",
+			"titleNew": "Yeni müşteri etkinliği"
+		},
+		"collection": {
+			"dialog": {
+				"delete": "Bu koleksiyonu silmek istediğinizden emin misiniz?"
+			},
+			"inHeader": "Başlıkta göster",
+			"previewHint": "Oturum açmış kullanıcı için koleksiyon değerleri. Koleksiyonlar, atanan roller içinde etkinleştirildiyse, sayfa yüklendiğinde (yeniden yüklemek için F5) alınır.",
+			"title": "Koleksiyonlar",
+			"titleOne": "Koleksiyon '{NAME}'"
+		},
+		"collectionInput": {
+			"collection": "Koleksiyon",
+			"column": "Sütundaki değer(ler)",
+			"multiValue": "Çoklu giriş",
+			"noDisplayEmpty": "Boşsa gizle",
+			"onMobile": "Mobil cihazda göster",
+			"showRowCount": "Bunun yerine sonuç sayısını göster"
+		},
+		"doc": {
+			"border": {
+				"cap": "Kap",
+				"cell": "Hücre sınırı",
+				"join": "Katılmak",
+				"style": {
+					"cap": {
+						"butt": "popo",
+						"round": "Yuvarlak",
+						"square": "Kare"
+					},
+					"join": {
+						"bevel": "Eğim",
+						"miter": "Gönye",
+						"round": "Yuvarlak"
+					}
+				}
+			},
+			"button": {
+				"addPage": "Sayfa ekle",
+				"movePage": "Sayfayı taşı",
+				"selectParent": "Yukarıdaki alan"
+			},
+			"dialog": {
+				"delete": "Bu belgeyi silmek istediğinizden emin misiniz?"
+			},
+			"field": {
+				"content": {
+					"flow": "Akış düzeni",
+					"grid": "Izgara düzeni",
+					"text": "Metin"
+				}
+			},
+			"font": {
+				"align": "Hizala",
+				"bool": "Boole etiketleri",
+				"color": "Renk",
+				"dateFormat": "Tarih formatı",
+				"family": "Aile",
+				"familyInternational": "Uluslararası",
+				"familyMonospace": "Tek uzay",
+				"familySansSerif": "Sans serif",
+				"familySerif": "Serif",
+				"lineFactor": "Satır yüksekliği",
+				"numberSepDec": "Ondalık ayırıcı",
+				"numberSepTho": "Binlik ayırıcı",
+				"style": "Stiller",
+				"styleBold": "Gözü pek",
+				"styleItalic": "İtalik",
+				"styleStrikeout": "Üstü çizili",
+				"styleUnderline": "Altı çizili"
+			},
+			"grid": {
+				"sizeSnap": "Izgaraya yapışma boyutu"
+			},
+			"placeholders": {
+				"{DATE_TODAY}": "Güncel tarih",
+				"{DATETIME_NOW}": "Geçerli tarih ve saat",
+				"{PAGE_CUR}": "Geçerli sayfa numarası",
+				"{PAGE_END}": "Toplam sayfa sayısı",
+				"{TIME_NOW}": "Geçerli saat"
+			},
+			"warning": {
+				"flowRow": "Yön 'satırı' yalnızca tek metin satırlarını destekler.<br />Resimler veya çok satırlı metin, sütun akışı veya ızgara alanı gerektirir."
+			},
+			"headerRowRepeat": "Sayfa sonunda başlık satırını tekrarla",
+			"headerRowShow": "Başlık satırını göster",
+			"inheritFrom": "Şuradan devral:",
+			"inheritNone": "Bu sayfa için ayarla",
+			"rowMinHeight": "Minimum satır yüksekliği",
+			"setData": "Özellik değerine göre üzerine yaz",
+			"setValue": "Manuel olarak üzerine yaz",
+			"shrinkY": "Boşsa dikey olarak küçültün",
+			"sidebarPage": "Sayfa: {NAME}",
+			"tabStates": "Eyaletler ({CNT})",
+			"titleOne": "PDF '{NAME}'"
+		},
+		"form": {
+			"autoRenew": "Otomatik yenileme",
+			"autoRenew0": "aktif değil",
+			"autoRenewHint": "saniyeler içinde",
+			"autoSelect": "Kayıtları otomatik seç",
+			"autoSelectHint": "0=kapalı, 2=ilk iki, -3=son üç",
+			"button": {
+				"layoutColumns": "{CNT} sütunları"
+			},
+			"chart": {
+				"axisType": "Eksen tipi",
+				"axisTypeCategory": "Kategori",
+				"axisTypeLog": "Kayıt",
+				"axisTypeTime": "Zaman",
+				"axisTypeValue": "Değer",
+				"help": "Grafikler <a href=\"https://echarts.apache.org/en/index.html\" target=\"_blank\">Apache ECharts</a> ile oluşturulur. Bir veri kümesi kaynağı, alan veri sorgusu tarafından doldurulur; değerlere sütun indeksi tarafından başvurulur (0 ilk sütundur). Diğer seri türleri (çubuk, çizgi, ... dışında) kullanılabilir (bkz. <a href=\"https://echarts.apache.org/en/option.html\" target=\"_blank\">E Grafik seçenekleri</a>).",
+				"serieColumnTooltip": "Araç ipucu sütunu",
+				"serieColumnX": "X ekseni sütunu",
+				"serieColumnY": "Y ekseni için sütun",
+				"serieTypeBar": "Çubuk",
+				"serieTypeLine": "Astar",
+				"serieTypePie": "Pasta",
+				"serieTypeScatter": "Dağılım",
+				"series": "Seri"
+			},
+			"collectionHint": "*Koleksiyon yalnızca veri sorgulamada filtre kriteri olarak seçilirse etkilenir.",
+			"collectionIdDef": "Koleksiyondaki varsayılan değer(ler)",
+			"collectionTitle": "Koleksiyonu filtrele",
+			"columnBatch": "Sütun grubu (genişletmek için sütunları sürükleyip bırakın)",
+			"columnBatchDir": "Sütun hizalaması (sol-sağ, yukarı-aşağı)",
+			"columnBatchOff": "Sütunu gruptan kaldır",
+			"columnBoolAtrIcon": "DOĞRU ise özellik simgesini göster",
+			"columnClipboard": "Pano",
+			"columnLengthFiles": "Dosya sayısı",
+			"columnNoShrink": "Küçülmez",
+			"columnNoThousandsSep": "Binlik ayırıcı yok",
+			"columnPreviewLarge": "Büyük önizleme",
+			"columnSize": "Boyut (piksel)",
+			"columnTitle": "Başlık",
+			"columnWrap": "Metin sarma",
+			"containerContent": "Kapsayıcı içeriği",
+			"csvExport": "CSV dışa aktarma",
+			"csvImport": "CSV içe aktarma",
+			"date0": "Başlangıç ​​tarihi",
+			"date1": "Tarih",
+			"dateColor": "Renk",
+			"dateRange0": "Günler öncesindeki olaylar",
+			"dateRange1": "Günler sonra yaşanan olaylar",
+			"dateRangeHint": "geçerli tarihe göre",
+			"days": "Varsayılan görünüm",
+			"daysToggle": "Kullanıcı görünümü değiştirebilir",
+			"dialog": {
+				"delete": "Bu formu silmek istediğinizden emin misiniz?"
+			},
+			"display": "Görüntülemek",
+			"dragDrop": "Forma eklemek için sağdaki seçimden sürükleyip bırakarak alanları buraya yerleştirin.",
+			"effectData": {
+				"d-1": "Hiçbir şey",
+				"d0": "varsayılan",
+				"d1": "silmek",
+				"d2": "güncelleme",
+				"d3": "güncelle + sil",
+				"d4": "yaratmak",
+				"d5": "oluştur + sil",
+				"d6": "oluştur + güncelle",
+				"d7": "oluştur + güncelle + sil"
+			},
+			"error": {
+				"formStateFieldRemovedCondition": "Silinen alana hâlâ '{NAME}' form durumunun koşulu olarak başvuruluyor.",
+				"formStateFieldRemovedEffect": "Silinen alana hâlâ '{NAME}' form durumunun etkisi olarak başvuruluyor."
+			},
+			"fieldAttributeIdAltDateTo": "Tarih (dönem)",
+			"fieldAttributeIdAltRichtextFiles": "Zengin metin dosyası erişimi",
+			"fieldDefault": "Varsayılan değer",
+			"fieldDefaultPresetIds": "Varsayılan ön ayar(lar)",
+			"fieldHelp": "Yardım metni",
+			"fieldIcon": "Alan simgesi",
+			"fieldIdFocus": "Alan odağını yüke göre ayarla",
+			"fieldIdFocusEmpty": "[İlk giriş alanı]",
+			"fieldMax": "Maks. değer/uzunluk",
+			"fieldMin": "Min. değer/uzunluk",
+			"fieldMoveInside": "Seçili alanı bu alanın içine taşı",
+			"fieldMoveSource": "Bu alanı taşı",
+			"fieldMoveTarget": "Seçili alanı bu alanın arkasına taşı",
+			"fieldOptions": "Alan seçenekleri",
+			"fieldRegexCheck": "RegEx ile doğrula",
+			"fieldSize": "Temel boyut (piksel)",
+			"fieldSize0": "otomatik",
+			"fieldsEditInputs": "Girişleri düzenle",
+			"fieldFlags": {
+				"hideInputs": "Girişleri gizle",
+				"relCategory": "Kategori ekranı",
+				"relFlow": "İlerleme akışı ekranı"
+			},
+			"fileExt": "Dosya uzantısı",
+			"fileName": "Dosya adı",
+			"fileSize": "Dosya boyutu",
+			"filterExpert": "Uzman filtresi",
+			"filterQuick": "Hızlı filtre",
+			"flexAlignContent": "İçeriği hizalayın",
+			"flexAlignContentHint": "Çizgileri çapraz eksen içerisine yerleştirin (kapsayıcı sarabiliyorsa ve içeriğin birden fazla satırı varsa)",
+			"flexAlignItems": "Öğeleri hizala",
+			"flexAlignItemsHint": "Kapsayıcı içeriğini çapraz eksene yerleştirin",
+			"flexJustifyContent": "İçeriği haklı göster",
+			"flexJustifyContentHint": "Kapsayıcı içeriğini ana eksene yerleştirin",
+			"flexSizeGrow": "Büyüme faktörü",
+			"flexSizeMax": "(yüzde) kadar büyür",
+			"flexSizeMin": "(yüzde) kadar küçülür",
+			"flexSizeShrink": "Küçültme faktörü",
+			"flexWrap": "İçeriği sar",
+			"formTitle": "Form başlığı",
+			"functions": {
+				"event": "Etkinlik",
+				"help": {
+					"formLoadedAfter": "Bu olay, bir form açıldıktan ve geçerli form kaydı yüklendikten sonra yürütülür. Ayrıca herhangi bir form kaydı bulunmadığında da yürütülür (eğer yeni kayıt veya form, kayıtları hiç işlemiyorsa).<br /><br />Bu olay aynı zamanda bir kayıt kaydedildikten veya silindikten sonra, bu eylemlerden sonra form yeniden yüklendiğinden yürütülür; bu durumlarda, önce 'kayıt kaydedildi/silindi' olayları işlenir ve ardından 'form yüklendi' olayı işlenir.<br /><br />Bu olay, mevcut kayıtların değerlerinin üzerine yazmak veya yeni kayıtlar için varsayılan değerleri ayarlamak için kullanılabilir.",
+					"formLoadedBefore": "Bu olay, bir form açıldığında ancak geçerli form kaydı yüklenmeden önce yürütülür. Ayrıca herhangi bir form kaydı bulunmadığında da yürütülür (eğer yeni kayıt veya form, kayıtları hiç işlemiyorsa).<br /><br />Bu olay aynı zamanda bir kayıt kaydedildikten veya silindikten sonra, bu eylemlerden sonra form yeniden yüklendiğinden yürütülür; bu durumlarda, önce 'kayıt kaydedildi/silindi' olayları işlenir ve ardından 'form yüklendi' olayı işlenir.<br /><br />Form kaydını yüklediğinde, bu olay tarafından değiştirilen alan değerlerinin hemen üzerine yazıldığını unutmayın. Mevcut bir kaydın değerlerinin üzerine yazmak için 'form yüklendikten sonra' olayını kullanın.",
+					"recordDeletedAfter": "Bu olay, kullanıcı geçerli form kaydını başarıyla sildikten sonra yürütülür.",
+					"recordDeletedBefore": "Bu olay, kullanıcı geçerli form kaydını silmeye çalıştığında, ancak silme işlemi sunucuda yürütülmeden önce yürütülür.",
+					"recordSavedAfter": "Bu olay, kullanıcı form kaydını başarıyla kaydettikten sonra yürütülür. Bu, hem yeni hem de mevcut kayıtlar için işe yarar.<br /><br />Bir kayıt başarılı bir kaydetme işleminden sonra yeniden yüklendiğinden, 'form yüklendi' olayı bu olay tamamlandıktan sonra da yürütülür.",
+					"recordSavedBefore": "Bu olay, kullanıcı geçerli form kaydını kaydetmeye çalıştığında ancak değişiklikler sunucuya gönderilmeden önce yürütülür. Bu, hem yeni hem de mevcut kayıtlar için işe yarar.<br /><br />Bu olay, sunucuya gönderilmeden önce kayıt değerlerinin üzerine yazılması gerekiyorsa kullanışlıdır.<br /><br />Bir değişiklik günlüğü kullanılırsa, üzerine yazılan değerler geçerli kullanıcı tarafından uygulandığı şekilde gösterilmeye devam edecektir."
+				},
+				"jsFunctionId": "Ön uç işlevini yürüt",
+				"option": {
+					"delete": "Form kaydı silindi",
+					"open": "Form yüklendi",
+					"save": "Form kaydı kaydedildi"
+				},
+				"warning": {
+					"noJsFunction": "En az bir etkinliğe atanmış ön uç işlevi yok."
+				}
+			},
+			"gantt": "Gantt",
+			"ganttBatch": "Gantt grubu",
+			"ganttNotes": "İlk sütun toplu grup sonuçlarını gruplandırır.",
+			"ganttSteps": "Gantt aralığı",
+			"ganttStepsToggle": "Gantt aralığı geçişi",
+			"headerRichtext": "Zengin metin",
+			"headerSize": "Boyut",
+			"helpText": "Yardım metni",
+			"hidden": "Alan varsayılan olarak gizlidir",
+			"icon": "Form simgesi",
+			"ics": "iCAL abonelikleri",
+			"jsFunctionButton": "Tıklandığında işlev",
+			"jsFunctionData": "Değer değişikliğindeki işlev",
+			"kanban": {
+				"attributeIdSort": "Kart sıralama özelliği (isteğe bağlı)",
+				"attributeIdSortHelp": "Kullanıldığı takdirde bu nitelik değeri, kartın Kanban sütunundaki konumuna göre Kanban kartı kaydı için güncellenecektir. Bu, kullanıcıların kart siparişlerini Kanbans içinde tutmasına olanak tanır.<br /><br />Bu özellikten yararlanmak için alan içeriğinin bu özelliğe göre artan düzende sıralanması gerekir; ilk önce bir Kanban sütun/satır değerine ve ardından kart sıralama özelliğine göre sıralama için geçerlidir.<br /><br />Aynı kayıtlara diğer sütunlar/satırlarla birden fazla Kanban'da erişiliyorsa, farklı bir sıralama özelliği gereklidir - aksi takdirde kart sıralaması Kanban düzenine bağlı olarak hatalı olacaktır.",
+				"columnBatchX": "Kanban sütunu (ilişki: '{REL}')",
+				"columnBatchY": "Kanban satırı (ilişki: '{REL}')",
+				"relationIndexAxisX": "Kanban sütunları",
+				"relationIndexAxisXHelp": "Mevcut her kaydın Kanban sütunu olarak kullanıldığı ilişki. Bu ilişkinin Kanban kartları ilişkisine n:1 oranında birleştirilmesi gerekir.<br /><br />Kartların Kanban sütunları arasında taşınmasıyla ilişki değeri güncellenir.<br /><br />Alan verisi seçiminde, ilk toplu sütundaki değerler Kanban sütun etiketleri olarak kullanılır.",
+				"relationIndexAxisY": "Kanban satırları (isteğe bağlı)",
+				"relationIndexAxisYHelp": "Mevcut her kaydın Kanban satırı olarak kullanıldığı ilişki. Kullanıldığı takdirde Kanban iki boyutlu hale gelir (sütunlar ve satırlar). Bu ilişkinin Kanban kartları ilişkisine n:1 oranında eklenmesi gerekir.<br /><br />Kartların Kanban satırları arasında taşınmasıyla ilişki değeri güncellenir.<br /><br />Alan verisi seçimi içinde, ikinci toplu sütundaki değerler Kanban satır etiketleri olarak kullanılır.",
+				"relationIndexData": "Kanban kartları",
+				"relationIndexDataHelp": "Mevcut her kaydın bir Kanban kartı olarak görüntülendiği ilişki. Kart, diğer birleştirilmiş ilişkilerden değerleri gösterebilir - ancak kartın kendisi için, seçilen ilişkiden bir kayıt olmalıdır.<br /><br />Alan veri seçimi içinde, sütun gruplarından gelen değerler (Kanban sütununa/satırına atanmamış) Kanban kartında görüntülenir."
+			},
+			"layout": "Liste düzeni",
+			"layoutCreate": "Basit düzen oluşturun:",
+			"limit": "Sonuç sayısı",
+			"new": "Yeni form",
+			"noDataActions": "Veri işlemi yok",
+			"onMobile": "Mobil görünümde",
+			"openForm": "Formu aç",
+			"openFormBulk": "Formu aç<br />(toplu düzenleme)",
+			"option": {
+				"display": {
+					"color": "renk",
+					"default": "varsayılan",
+					"email": "e-posta",
+					"gallery": "galeri",
+					"hidden": "gizlenmiş",
+					"login": "kullanıcı (kullanımdan kaldırıldı)",
+					"password": "şifre",
+					"phone": "telefon",
+					"rating": "derecelendirme",
+					"slider": "değer kaydırıcısı",
+					"url": "URL"
+				},
+				"dataOptions": "İlişki ayarlarının üzerine yaz",
+				"ganttStepsDays": "günler",
+				"ganttStepsHours": "saat",
+				"style": {
+					"bold": "Gözü pek",
+					"italic": "İtalik"
+				}
+			},
+			"presetOpen": "Ön ayarı aç",
+			"recordTitle": "Kayıt başlığını göster",
+			"recordTitleHint": "Açılan kaydın adını veya etiketini gösterir. İlişkide kayıt başlıklarının yapılandırılması gerekir.",
+			"scale": "Kullanıcı arayüzü ölçeği",
+			"subQuery": "Alt sorgu",
+			"systemDefaults": {
+				"false": "'Hayır' değeri",
+				"fixed": "Özel değer",
+				"true": "'Evet' değeri",
+				"{CURR_DATE}": "Güncel tarih",
+				"{CURR_DATE_DD}": "Sayı olarak mevcut gün, 31'deki gibi",
+				"{CURR_DATE_MM}": "Sayı olarak cari ay, 12 gibi (Ocak = 1, Aralık = 12)",
+				"{CURR_DATE_YYYY}": "Sayı olarak cari yıl, 1921'deki gibi",
+				"{CURR_DATETIME}": "Geçerli tarih ve saat",
+				"{CURR_TIME}": "Geçerli saat"
+			},
+			"tabActions": "Eylemler ({CNT})",
+			"tabContentCounter": "Tezgah",
+			"tabContentCounterHint": "Sekme başlığındaki alan değerlerinin toplu sayısını gösterir (liste satırları, dosya sayıları vb.)",
+			"tabFunctions": "İşlevler ({CNT})",
+			"tabStates": "Eyaletler ({CNT})",
+			"tabs": "Sekmeler",
+			"title": "Formlar",
+			"titleOne": "'{NAME}' Formu",
+			"warning": {
+				"calendarNoDateFromTo": "'Başlangıç ​​tarihi' veya 'tarih bitişi' için hiçbir özellik seçilmedi. Bir takvim alanının çalışması için her ikisi de gereklidir.",
+				"columnNoSubQueryAttribute": "Bir alt sorgu sütunu için ilişki ve özellik seçilmedi.",
+				"joinN1": "İlişkilerin bir form üzerinde birleştirilmesi, birden fazla bağlantılı kaydın aynı anda güncellenmesine hizmet eder. Ancak bir form, ilişki başına yalnızca tek bir kaydı işleyebilir.<br /><br />Birleştirme için 1:n ilişkisinin kullanılması, tek bir ilişkide birden fazla kaydın bulunmasına yol açabilir. Böyle bir durumda form bir hata gösterecektir.<br /><br />Form içeriği, her ilişkinin hiçbir zaman 1'den fazla kayda sahip olamayacak şekilde filtrelenmesi durumunda, birleşimler için 1:n ilişkilerinin kullanılması geçerlidir.",
+				"joinN1Hint": "Uyarı! Form içeriğinde 1:n birleşimi algılandı",
+				"queryColumnsNotSet": "Görüntülenen sütun yok. Verileri göstermek için herhangi bir sütun ekleyin.",
+				"queryRelationNotSet": "Hiçbir ilişki seçilmedi. Alanın verilere erişimi yok."
+			}
+		},
+		"function": {
+			"attributeNotNull": "{ATR} (değere sahip olmalıdır)",
+			"button": {
+				"addNew": "YENİ önek",
+				"addOld": "ESKİ önek",
+				"clear": "Seçimi temizle",
+				"details": "Detaylar",
+				"template": "Şablon"
+			},
+			"code": "İşlev gövdesi",
+			"codeArgs": "Argümanlar",
+			"codeArgsHintJs": "isteğe bağlı, 'var1, var2, ...'",
+			"codeArgsHintPg": "isteğe bağlı, 'var1 tamsayı, var2 bool, ...'",
+			"codeReturns": "İade",
+			"codeReturnsHintJs": "isteğe bağlı, 'sayı', 'dizi',...",
+			"codeReturnsHintPg": "'metin', 'tamsayı',...",
+			"cost": "Maliyet",
+			"costHelp": "<b>EUzman ayarı</b><p>Maliyet, sorgu planlamasını optimize etmeye yarayan tahmini bir değerdir. Bu değerin değiştirilmesi, sorgu planlayıcıya bu işlevin uzun (pahalı/yüksek maliyetli) veya kısa (ucuz/düşük maliyetli) çalışmasının beklenip beklenmediğini bildirerek performansı optimize etmeye yardımcı olabilir.</p><p>Sorgu planlayıcı daha sonra önce diğer şeyleri değerlendirerek gereksiz yürütmelerden kaçınacağından karmaşık işlevler (ilişki politikaları gibi) için daha yüksek değerler mantıklı olabilir.</p>",
+			"collectionId": "[Koleksiyon seçin]",
+			"dialog": {
+				"delete": "Bu işlevi silmek istediğinizden emin misiniz?"
+			},
+			"entityInput": "<b>upgrade-safe</b> sözdizimini kullanmak için yer tutucuyu seçin ve işlev gövdesine tıklayın.",
+			"exec": "Uygulamak",
+			"execResponse": "Cevap",
+			"fieldsOnlyData": "Yalnızca veri",
+			"form": "Forma atandı",
+			"functionsBackend": "Arka uç işlevleri",
+			"functionsFrontend": "Ön uç işlevleri",
+			"helpJs": {
+				"block_inputs": "app.block_inputs({ARGS}) => UNDEFINED<br /><br />Mevcut formdaki tüm girişleri engeller veya engellemeyi kaldırır.",
+				"client_execute_keystrokes": "app.client_execute_keystrokes({ARGS}) => UNDEFINED<br /><br />REI3 tarayıcı oturumuyla aynı bilgisayarda kurulu ve çalışan bir REI3 istemcisine, tuş vuruşlarının bir listesini yürütmek için bir istek gönderir. Bu tuş vuruşları 'Merhaba Dünya!' gibi bir dizeyle tanımlanır.<br /><br />Bazı özel tuşlar (ALT-TAB, TAB, ENTER, ESCAPE) da desteklenir ve şu şekilde kullanılabilir:<br />'Merhaba,{ENTER}Nasılsın?'",
+				"collection_update": "app.collection_update({ARGS}) => UNDEFINED<br /><br />Belirtilen koleksiyon için değerleri günceller.",
+				"copy_to_clipboard": "app.copy_to_clipboard({ARGS}) => UNDEFINED<br /><br />Metni kullanıcıların panosuna kopyalar.",
+				"dialog_show": "app.dialog_show({ARGS}) => PROMISE<br /><br />Belirtilen başlık ve içeriğe sahip bir diyalog gösterir. Başlık basit bir metin dizesidir, içerik ise metin veya HTML olabilir.<br /><br />Düğmeler bir dize listesiyle tanımlanır. Hiçbiri tanımlanmadıysa, basit bir Tamam düğmesi gösterilir.<br /><br />Döndürülen değer, tıklanan düğmenin dizinidir. Yani ilk buton tıklanırsa değer 0 olur. İkinci buton tıklanırsa 1 olur ve böyle devam eder.<br /><br /><b>Example</b><br />app.dialog_show(<blockquote>'Lütfen onaylayın',<br />'Bunu gerçekten silmek istiyor musunuz öğe?',<br />['Evet', 'İşlemi iptal et']</blockquote>).then(<blockquote>res => { if(res === 0) { console.log('Evet'e tıklandı!'); } }</blockquote>);",
+				"form_close": "app.form_close() => UNDEFINED<br /><br />Formu kapatır (eğer değişken veya alt form ise), aksi halde tarayıcı geçmişine geri döner.",
+				"form_open": "app.form_open({ARGS}) => UNDEFINED<br /><br />Bir formu doğrudan yeni bir tarayıcı sekmesinde veya açılır pencere olarak açar.<br /><br />Yeni form, doğrudan açılırsa (sekme veya açılır pencere olarak değil), 'replace_history' argümanı 'true' olarak ayarlanmadığı sürece tarayıcı geçmişine eklenir.",
+				"form_parent_refresh": "app.form_parent_refresh() => UNDEFINED<br /><br />Yalnızca alt formlarda (örn. kayan pencere veya alt form) kullanıldığında alakalıdır.<br /><br />Bir alt formda bir kayıt değiştirildiğinde, ana form otomatik olarak kendini yeniler; bu, yeni oluşturulan bir kaydı gösteren bir ilişki girişi veya değişen verileri gösterecek şekilde kendini güncelleyen bir liste alanı olabilir.<br /><br />Bazı durumlarda, örneğin değişiklikleri bir arka uç işlevi aracılığıyla yürütürken, sistem ne olduğunu veya bir şeyin değişip değişmediğini bilmediğinden bu otomatik olarak yapılamaz. Bu işlev, ana forma, değişen verileri gösterecek şekilde kendisini yenilemesi konusunda bilgi verir. Bu, ilişki girişini ve listeler veya takvimler gibi veri alanlarını günceller; kaydedilmemiş değişiklikler olabileceğinden form kaydını yeniden yüklemez.",
+				"form_set_title": "app.form_set_title({ARGS}) => UNDEFINED<br /><br />Geçerli form başlığının üzerine yazar. Orijinal form başlığına sıfırlamak için <i>null</i> olarak ayarlayın.",
+				"form_show_message": "app.form_show_message({ARGS}) => UNDEFINED<br /><br />Form başlığını geçici olarak özel bir mesajla değiştirir. İkinci argüman, mesajın ne kadar süreyle gösterileceğini milisaniye cinsinden tanımlar (varsayılan olarak 3000).",
+				"get_e2ee_data_key": "app.get_e2ee_data_key({ARGS}) => STRING<br /><br />Decrypts, geçerli kullanıcının özel anahtarıyla birlikte veri anahtarı sağladı.",
+				"get_e2ee_data_value": "app.get_e2ee_data_value({ARGS}) => STRING<br /><br />Sağlanan veri anahtarıyla veri değerinin şifresini çözer.",
+				"get_language_code": "app.get_language_code() => STRING<br /><br />Geçerli kullanıcının 5 harfli dil kodunu ('en_us', ...) döndürür.",
+				"get_preset_record_id": "app.get_preset_record_id({ARGS}) => NUMBER<br /><br />Verilen ön ayarla ilişkili kaydın kimliğini döndürür.",
+				"get_record_id": "app.get_record_id({ARGS}) => NUMBER|ARRAY<br /><br />Belirtilen ilişki indeksi için açık formun kayıt kimliğini döndürür (0 varsayılandır).<br /><br />Form toplu düzenleme modunda kullanılırsa, yalnızca ilişki indeksi 0'ın kayıt kimlikleri kullanılabilir - bu durumda, kullanılan tüm kayıt kimlikleri için bir dizi döndürülür.",
+				"get_role_ids": "app.get_role_ids() => ARRAY<br /><br />Geçerli kullanıcı için atanmış tüm rol kimliklerini döndürür (iç içe roller dahil).",
+				"get_url_query_string": "app.get_url_query_string() => STRING<br /><br />Geçerli sorgu parametrelerini döndürür, örneğin: <br />'?arg1=hello&arg2=world'",
+				"get_user_id": "app.get_user_id() => NUMBER<br /><br />Geçerli kullanıcının kimliğini döndürür.",
+				"global_search_start": "app.global_search_start({ARGS}) => Verilen arama girişiyle genel aramayı açar. Hiçbir arama girişi tanımlanmadıysa geçerli metin seçimi kullanılır.",
+				"go_back": "app.go_back() => UNDEFINED<br /><br />ETarayıcıya geri gezinme işlemini yürütür.",
+				"has_role": "app.has_role({ARGS}) => BOOLEAN<br /><br />Geçerli kullanıcıya atanmış rol varsa (iç içe roller dahildir) doğru değerini döndürür.",
+				"logoff": "app.logoff() => UNDEFINED<br /><br />Geçerli kullanıcının oturumunu kapatır. Bu, oturum açma sayfasının gösterilmesine ve kullanıcının devam etmek için yeniden kimlik doğrulaması yapmaya zorlanmasına neden olur.<br /><br />Yeniden kimlik doğrulamanın ardından, önceden açık olan form gösterilecektir. Bu istenmiyorsa, önce başka bir form açın ve ardından oturumu kapatın.",
+				"pdf_create": "app.pdf_create({ARGS}) => PROMISE<br /><br />Verilen HTML şablonlarından ve CSS stillerinden bir PDF dosyası oluşturur. Parametreler:<ul><li>filename: '.pdf' ile biten herhangi bir dosya adı</li><li>pageFormat: Sayfanın formatı, örneğin: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' veya 'landscape'</li><li>pageMarginX: Piksel cinsinden yatay sayfa kenar boşlukları, tek sayı (sol ve sağ taraf) veya dizi (ilk değer sol taraf, ikinci değer sağ taraf)</li><li>pageMarginY: Piksel cinsinden dikey sayfa kenar boşlukları, tek sayı (üst ve alt) veya dizi (ilk değer üst, ikinci değer alt)</li><li>htmlBaşlık: HTML şablonu, her sayfanın üstüne uygulanır</li><li>htmlGövde: HTML şablonu, belgeyi doldurur</li><li>htmlAltbilgi: HTML şablonu, her sayfanın altına uygulanır page</li><li>cssStyles: CSS kuralları, HTML şablonlarına uygulanır</li><li>attachAttributeId: İsteğe bağlı, aşağıya bakın.</li><li>attachRecordId: İsteğe bağlı, bkz. aşağıda.</li></ul>Varsayılan olarak PDF belgesi, kullanıcının önizlemeyi görebileceği ve dosyayı indirebileceği yeni bir pencerede oluşturulur. 'attachAttributeId' ve 'attachRecordId' ayarlandıysa, PDF dosyası bunun yerine seçilen kaydın seçilen dosya özniteliğine hemen eklenir.<br /><br /> '{PAGE_CUR}' ve '{PAGE_END}' yer tutucuları, geçerli ve toplam sayfayı görüntülemek için hem üst bilgi hem de alt bilgi HTML şablonlarında kullanılabilir. sayılar. '{PAGE_BREAK}', sayfa sonunu zorlamak için gövde HTML şablonunda kullanılabilir.",
+				"pdf_create_utf8": "app.pdf_create_utf8({ARGS}) => PROMISE<br /><br />Verilen HTML şablonlarından ve CSS stillerinden UTF8 yazı tipine (daha büyük PDF dosyası ancak daha fazla karakter desteği) sahip bir PDF dosyası oluşturur. Parametreler:<ul><li>utf8_font: Hangi yazı tipinin kullanılacağı. Seçenekler: 'temel' (çoğu batı dili için), 'arapça', 'japonca', 'korece', 'simplified_chinese', 'thai'</li><li>filename: '.pdf'</li><li>pageFormat ile biten herhangi bir dosya adı: Sayfanın formatı, örneğin: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'dikey' veya 'yatay'</li><li>pageMarginX: Piksel cinsinden yatay sayfa kenar boşlukları, tek sayı (sol ve sağ taraf) veya dizi (ilk değer sol taraf, ikinci değer sağ taraf)</li><li>pageMarginY: Piksel cinsinden dikey sayfa kenar boşlukları, tek sayı (üst ve alt) veya dizi (ilk değer üst, ikinci değer alt)</li><li>htmlBaşlık: HTML şablonu, her sayfanın üstüne uygulanır</li><li>htmlGövde: HTML şablonu, belgeyi doldurur</li><li>htmlAltbilgi: HTML şablon, her sayfanın altına uygulanır</li><li>cssStyles: CSS kuralları, HTML şablonlarına uygulanır</li><li>attachAttributeId: İsteğe bağlı, aşağıya bakın.</li><li>attachRecordId: İsteğe bağlı, bkz. aşağıda.</li></ul>Varsayılan olarak PDF belgesi, kullanıcının önizlemeyi görebileceği ve dosyayı indirebileceği yeni bir pencerede oluşturulur. 'attachAttributeId' ve 'attachRecordId' ayarlandıysa, PDF dosyası bunun yerine seçilen kaydın seçilen dosya özniteliğine hemen eklenir.<br /><br /> '{PAGE_CUR}' ve '{PAGE_END}' yer tutucuları, geçerli ve toplam sayfayı görüntülemek için hem üst bilgi hem de alt bilgi HTML şablonlarında kullanılabilir. sayılar. '{PAGE_BREAK}', sayfa sonunu zorlamak için gövde HTML şablonunda kullanılabilir.",
+				"record_delete": "app.record_delete() => UNDEFINED<br /><br />Geçerli form kaydını siler.",
+				"record_new": "app.record_new() => UNDEFINED<br /><br />Yeni kayıt açar.",
+				"record_reload": "app.record_reload() => UNDEFINED<br /><br />Mevcut form kaydını yeniden yükler.",
+				"record_save": "app.record_save() => UNDEFINED<br /><br />Geçerli form kaydını kaydeder.",
+				"record_save_new": "app.record_save_new() => UNDEFINED<br /><br />Geçerli form kaydını kaydeder ve ardından yeni bir kayıt açar.",
+				"set_e2ee_by_user_ids": "app.set_e2ee_by_user_ids({ARGS}) => UNDEFINED<br /><br />Çağrıldığında, uçtan uca şifreleme bir sonraki form kaydında güncellenir. Şifrelemenin etkin olduğu formdaki ilişkilere ait veri anahtarları, tanımlanan her kullanıcının ortak anahtarıyla şifrelenecektir. Bu, kullanıcılar için bu kayıtların şifresinin daha sonra çözülmesine olanak tanır.<br /><br />Bu işlev kullanılmazsa, şifre çözme yalnızca yaratıcı için mümkündür.",
+				"set_e2ee_by_user_ids_and_relation": "app.set_e2ee_by_user_ids_and_relation({ARGS}) => UNDEFINED<br /><br />Çağrıldığında, bir sonraki form kaydında belirtilen ilişki ve kayıtlar için uçtan uca şifreleme güncellenir. İlişki kayıtlarına ait veri anahtarları, tanımlanan her kullanıcının ortak anahtarı ile şifrelenecektir. Bu, kullanıcılar için bu kayıtların daha sonra şifresinin çözülmesine olanak tanır.",
+				"timer_clear": "app.timer_clear({ARGS}) => UNDEFINED<br /><br />Adaha önce 'app.timer_set()' ile oluşturulmuş, verilen adda bir zamanlayıcıyı iptal eder.",
+				"timer_clear_global": "app.timer_clear_global({ARGS}) => UNDEFINED<br /><br />Adaha önce 'app.timer_set_global()' ile oluşturulmuş, verilen adla global bir zamanlayıcıyı iptal eder.",
+				"timer_set": "app.timer_set({ARGS}) => UNDEFINED<br /><br />Emilisaniye cinsinden belirtilen süreden sonra belirli bir işlevi çalıştırır. 'isInterval' TRUE olarak ayarlanırsa işlev tekrar tekrar çağrılır.<br /><br />A zamanlayıcı her zaman geçerli forma bağlıdır. Formu sıfırlarken veya formdan ayrılırken zamanlayıcılar da sıfırlanır.<br /><br />Her zamanlayıcının benzersiz bir adı olmalıdır; bu ad, daha sonra zamanlayıcıyı 'timer_clear()' ile iptal etmek için kullanılabilir; aynı ada sahip zamanlayıcılar birbirinin üzerine yazar.",
+				"timer_set_global": "app.timer_set_global({ARGS}) => UNDEFINED<br /><br />Emilisaniye cinsinden belirtilen süreden sonra belirli bir işlevi çalıştırır. 'isInterval' TRUE olarak ayarlanırsa, işlev tekrar tekrar çağrılır. <br /><br />A genel zamanlayıcı, geçerli bağlam (başlatıldığı form gibi) kapalı olsa bile devam eder.<br /><br />Her zamanlayıcının, daha sonra zamanlayıcıyı 'timer_clear_global()' ile iptal etmek için kullanılabilecek benzersiz bir adı olmalıdır; Aynı uygulamadaki aynı ada sahip global zamanlayıcılar birbirlerinin üzerine yazar.",
+				"url_open_as_tab": "app.url_open_as_tab({ARGS}) => UNDEFINED<br /><br />Verilen URL'yi yeni bir tarayıcı sekmesinde açar.",
+				"url_open_as_window": "app.url_open_as_window({ARGS}) => UNDEFINED<br /><br />Verilen URL'yi yeni bir tarayıcı penceresinde açar. URL'nin gerçekten bir pencerede açılıp açılmayacağı tarayıcı ayarlarına bağlıdır. Aynı şey 'genişlik', 'yükseklik', 'üst' ve 'sol' parametreleri için de geçerlidir; bunlar tarayıcıya yönelik göz ardı edilebilecek önerilerdir."
+			},
+			"helpJsArgs": {
+				"block_inputs": [
+					"Block_input BOOLEAN"
+				],
+				"client_execute_keystrokes": [
+					"tuş vuruşları STRING"
+				],
+				"collection_update": [
+					"koleksiyon_id NUMBER"
+				],
+				"copy_to_clipboard": [
+					"değer STRING"
+				],
+				"dialog_show": [
+					"başlık STRING",
+					"içerik STRING",
+					"düğmeler DİZİSİ"
+				],
+				"form_open": [
+					"form_id STRING",
+					"kayıt_id NUMBER",
+					"new_tab BOOLEAN",
+					"açılır BOOLE",
+					"max_height NUMBER",
+					"max_width NUMBER",
+					"change_history BOOLEAN"
+				],
+				"form_set_title": [
+					"başlık STRING"
+				],
+				"form_show_message": [
+					"mesaj STRING",
+					"milisaniye NUMBER"
+				],
+				"get_e2ee_data_key": [
+					"data_key_encrypted STRING"
+				],
+				"get_e2ee_data_value": [
+					"data_key STRING",
+					"data_value_encrypted STRING"
+				],
+				"get_preset_record_id": [
+					"preset_id STRING"
+				],
+				"get_record_id": [
+					"ilişki_index NUMBER"
+				],
+				"global_search_start": [
+					"search_input METİN"
+				],
+				"has_role": [
+					"role_id STRING"
+				],
+				"pdf_create": [
+					"dosya adı STRING",
+					"page_format STRING",
+					"page_orientation STRING",
+					"page_marginX SAYI || SIRALAMAK",
+					"page_marginY SAYI || SIRALAMAK",
+					"html_header STRING",
+					"html_body STRING",
+					"html_footer STRING",
+					"css_styles STRING",
+					"attach_attribute_id STRING",
+					"attach_record_id NUMBER"
+				],
+				"pdf_create_utf8": [
+					"utf8_font STRING",
+					"dosya adı STRING",
+					"page_format STRING",
+					"page_orientation STRING",
+					"page_marginX SAYI || SIRALAMAK",
+					"page_marginY SAYI || SIRALAMAK",
+					"html_header STRING",
+					"html_body STRING",
+					"html_footer STRING",
+					"css_styles STRING",
+					"attach_attribute_id STRING",
+					"attach_record_id NUMBER"
+				],
+				"set_e2ee_by_user_ids": [
+					"user_ids DİZİSİ"
+				],
+				"set_e2ee_by_user_ids_and_relation": [
+					"user_ids DİZİSİ",
+					"ilişki_id STRING",
+					"kayıt_idleri DİZİSİ"
+				],
+				"timer_clear": [
+					"ad STRING"
+				],
+				"timer_clear_global": [
+					"ad STRING"
+				],
+				"timer_set": [
+					"ad STRING",
+					"is_interval BOOLEAN",
+					"fonksiyon İŞLEV",
+					"milisaniye NUMBER"
+				],
+				"timer_set_global": [
+					"ad STRING",
+					"is_interval BOOLEAN",
+					"fonksiyon İŞLEV",
+					"milisaniye NUMBER"
+				],
+				"url_open_as_tab": [
+					"URL STRING"
+				],
+				"url_open_as_window": [
+					"URL STRING",
+					"genişlik NUMBER",
+					"yükseklik NUMBER",
+					"üst NUMBER",
+					"NUMBER sola"
+				]
+			},
+			"helpPg": {
+				"abort_show_message": "example.abort_show_message({ARGS}) => VOID<br /><br />Aİşlemi iptal eder ve yürütücü kullanıcıya kullanıcı arayüzünde görüntülenen bir mesaj gönderir.",
+				"clean_up_e2ee_keys": "example.clean_up_e2ee_keys({ARGS}) => VOID<br /><br />Kullanıcının artık erişemediği kayıtlar için uçtan uca şifreleme veri anahtarlarını siler. Bu, kullanıcı için şifre çözmeyi imkansız hale getirir.",
+				"data_log_comment_create": "example.data_log_comment_create({ARGS}) => VOID<br /><br />Seçilen ilişkide verilen kayıt için değişiklik günlüğü geçmişinde bir yorum oluşturur. Bir yorum, basit HTML dahil herhangi bir metin değeri olabilir.<br /><br />Yorumlar, tüm değişiklik günlükleri günlük tutma ayarları karşılandığında kaldırıldığından.<br /><br />Bir yorumun belirli bir kullanıcıdan geldiğini tanımlamak için bir kullanıcı kimliği sağlanabilir; Kullanıcı ID'si NULL ise yorumun sistemden geldiği tanımlanır.",
+				"data_log_delete": "example.data_log_delete({ARGS}) => VOID<br /><br />Seçilen ilişkide verilen kayıt için değişiklik günlüğü geçmişini siler.",
+				"file_export": "example.file_export({ARGS}) => INTEGER<br /><br />Belirli bir dosyayı diske aktarmak için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>file_id: Dışa aktarılacak dosya, dosya kimliği example.files_get() aracılığıyla alınabilir </li><li>file_path: Dosyanın nereye aktarılacağı (bir dosya adı ile bitmelidir)</li><li>file_version: Dışa aktarılacak dosyanın sürümü (NULL = en son) sürüm)</li><li>üzerine yaz: Tanımlanan dosya yolunda zaten mevcutsa dosyanın üzerine yaz</li></ul><p>Dosya yolu her zaman sunucu yapılandırma dosyasında tanımlanan dışa aktarma yoluna göredir. Güvenlik nedeniyle mutlak yollar desteklenmez.</p>",
+				"file_export_text": "example.file_export_text({ARGS}) => INTEGER<br /><br />Belirli bir metni UTF8 metin dosyası olarak diske aktarmak için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>dosya_yolu: Dosyanın dışa aktarılacağı yer (bir dosya adıyla bitmelidir)</li><li>dosya_metin_içeriği: UTF8 metin içeriği</li><li>üzerine yaz: Tanımlanan konumda zaten varsa dosyanın üzerine yaz dosyayolu</li></ul><p>Dosya yolu her zaman sunucu yapılandırma dosyasında tanımlanan dışa aktarma yoluna göredir. Güvenlik nedeniyle mutlak yollar desteklenmez.</p>",
+				"file_import": "example.file_import({ARGS}) => INTEGER<br /><br />Diskten bir dosyayı içe aktarmak için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>file_path: Dosyanın nereden içe aktarılacağı (bir dosya adıyla bitmelidir)</li><li>attribute_id: dosyayı alan dosya özniteliğinin kimliği</li><li>record_id: Dosya öznitelik değerini güncellemek için kaydın kimliği (NULL = yeni) kayıt)</li></ul><p>İçe aktarma başarılı olursa kaynak dosya silinir.</p><p>Dosya yolu her zaman sunucu yapılandırma dosyasında tanımlanan içe aktarma yoluna görelidir. Güvenlik nedeniyle mutlak yollar desteklenmez.</p>",
+				"file_import_text": "example.file_import_text({ARGS}) => INTEGER<br /><br />Diskteki UTF8 metin dosyasından bir metni içe aktarmak için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>dosya_yolu: Metin dosyasının nereden içe aktarılacağı (bir dosya adıyla bitmelidir)</li><li>callback_function_id: İçe aktarılan metinle çağrılan arka uç işlevinin kimliği, iki parametreye sahip olmalıdır: dosya_adı TEXT, dosya_içeriği TEXT</li></ul><p>Kaynak içe aktarma başarılı olursa dosya silinir.</p><p>Dosya yolu her zaman sunucu yapılandırma dosyasında tanımlanan içe aktarma yoluna göredir. Güvenlik nedeniyle mutlak yollar desteklenmez.</p>",
+				"file_link": "example.file_link({ARGS}) => VOID<br /><br />Mevcut bir dosyayı başka bir kayda bağlar (seçilen dosya niteliğine eklenir). Bu bağlantı bir sabit bağlantıdır, yani aynı dosyaya erişilmektedir.<br /><br />Dosyayı yeniden adlandırırken veya silerken, değişiklik yalnızca dosya bağlantısını etkiler. Silme işlemine bakılmaksızın, gerçek dosya, bir dosya bağlantısı olduğu sürece saklanır.",
+				"file_text_read": "example.file_text_read({ARGS}) => INTEGER<br /><br />UTF8 metin dosyasının içeriğini geri çağırma metni değerine sahip bir geri çağırma işlevine göndermek için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>callback_function_id: Çağrılan arka uç fonksiyonunun kimliği, bir parametreye sahip olmalıdır: file_content TEXT</li><li>file_id: İçeriği okunacak dosya, dosya kimliği example.files_get() aracılığıyla alınabilir.</li><li>file_version: Okunacak dosyanın sürümü (NULL = en son) versiyon)</li></ul>",
+				"file_text_read_cb": "example.file_text_read_cb({ARGS}) => INTEGER<br /><br />UTF8 metin dosyasının içeriğini bir geri çağırma işlevine göndermek için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>callback_function_id: Çağrılan arka uç fonksiyonunun kimliği, iki parametreye sahip olmalıdır: file_content TEXT, callback_value TEXT</li><li>callback_value: Dosya okunduktan sonra işlenmek üzere geri çağırma fonksiyonuna gönderilecek metin değeri.</li><li>file_id: Okunacak dosya içerik, dosya kimliği example.files_get()</li><li>file_version aracılığıyla alınabilir: Okunacak dosyanın sürümü (NULL = en son sürüm)</li></ul>",
+				"file_text_write": "example.file_text_write({ARGS}) => INTEGER<br /><br />Yeni bir UTF8 metin dosyası oluşturmak için bir dosya işleme işi oluşturur. İlgili parametreler:<ul><li>file_name: Oluşturulacak dosyanın adı</li><li>file_text_content: UTF8 metin içeriği</li><li>attribute_id: dosyayı alan dosya özniteliğinin kimliği</li><li>record_id: Dosyaları güncellemek için kaydın kimliği (NULL = yeni kayıt)</li></ul> özellik değeri",
+				"file_unlink": "example.file_unlink({ARGS}) => VOID<br /><br />Belirtilen bir kaydın files özelliğinden mevcut bir dosyanın bağlantısını kaldırır. Kaldırılan bağlantı bir sabit bağlantıdır; yani asıl dosya, en az bir başka kayıt dosyası niteliğine hâlâ bağlı olduğu sürece tutulur.",
+				"files_get": "example.files_get({ARGS}) => example.file_meta[]<br /><br />Seçilen dosya özelliğinden ve kayıttan dosyalar için meta verileri döndürür (isteğe bağlı olarak silinmiş dosyaları içerebilir).<br /><br />Döndürülen 'instance.file_meta' türü şunlardan oluşur:<blockquote>id UUID,<br />user_id_creator TAM SAYI,<br />hash METİN,<br />adı METİN,<br />size_kb TAM SAYI,<br />version TAM SAYI,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
+				"get_e2ee_data_key_enc": "example.get_e2ee_data_key_enc({ARGS}) => TEXT<br /><br />Verilen ilişki kaydı ve seçilen kullanıcı için şifrelenmiş veri anahtarını döndürür. Veri anahtarları, ona erişimi olan her kullanıcı için ayrı kayıtlar için mevcuttur. İlgili kullanıcı özel anahtarıyla ön uçta şifreleri çözülebilir.",
+				"get_language_code": "example.get_language_code() => TEXT<br /><br />Kullanıcının veri arka ucuna erişmek için kullanılan 5 harfli dil kodunu ('en_us', ...) döndürür.",
+				"get_name": "example.get_name() => TEXT<br /><br />Yönetici panelinin özelleştirme penceresinde tanımlanan örnek adını döndürür.",
+				"get_preset_record_id": "example.get_preset_record_id({ARGS}) => BIGINT<br /><br />Verilen ön ayarla ilişkili kaydın kimliğini döndürür.",
+				"get_public_hostname": "example.get_public_hostname() => TEXT<br /><br />Sistem yapılandırmasında tanımlanan örneğin genel ana bilgisayar adını döndürür.",
+				"get_role_ids": "instance.get_role_ids({ARGS}) => UUID[]<br /><br />Belirtilen kullanıcıya atanan rol kimliklerinin bir dizisini alın.<br /><br />'Devralınan' DOĞRU olarak ayarlanırsa üst roller dahil edilir. İç içe üyelikler tamamen çözümlenir.",
+				"get_user_id": "example.get_user_id() => INTEGER<br /><br />İşlemi yürüten kullanıcının kimliğini döndürür.",
+				"has_role": "example.has_role({ARGS}) => BOOLEAN<br /><br />Belirtilen kullanıcıya belirtilen rol kimliğinin atanıp atanmadığını döndürür. <br /><br />'Devralınan' DOĞRU olarak ayarlanırsa üst roller dahil edilir. İç içe üyelikler tamamen çözümlendi.<br /><br />Eörnek: SELECT example.has_role(1,'00000000-0000-0000-0000-000000000001',FALSE)",
+				"has_role_any": "example.has_role_any({ARGS}) => BOOLEAN<br /><br />Belirtilen kullanıcıya, belirtilen rol kimliklerinden herhangi birinin atanmış olup olmadığını döndürür. <br /><br />'Devralınan' DOĞRU olarak ayarlanırsa üst roller dahil edilir. İç içe üyelikler tamamen çözümlenmiştir.<br /><br />EÖrnek: SEÇ example.has_role_any(1,ARRAY['00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002']::UUID[],FALSE)",
+				"log_error": "example.log_error({ARGS}) => VOID<br /><br />Logs hata mesajı. Uygulama adı çözülebiliyorsa günlük onunla ilişkilendirilir.",
+				"log_info": "example.log_error({ARGS}) => VOID<br /><br />Logs bilgi mesajı. Uygulama adı çözülebiliyorsa günlük onunla ilişkilendirilir.",
+				"log_warning": "example.log_error({ARGS}) => VOID<br /><br />Logs uyarı mesajı. Uygulama adı çözülebiliyorsa günlük onunla ilişkilendirilir.",
+				"mail_delete": "example.mail_delete({ARGS}) => INTEGER<br /><br />Ekler de dahil olmak üzere belirtilen e-postayı siler.",
+				"mail_delete_after_attach": "example.mail_delete_after_attach({ARGS}) => INTEGER<br /><br />Belirtilen kaydın dosya niteliğine eklenecek e-posta eklerini işaretleyin; e-posta ve ekleri daha sonra silinir.",
+				"mail_get_next": "example.mail_get_next({ARGS}) => example.mail<br /><br />Posta biriktiricisinden bir sonraki gelen e-postayı döndürür; E-posta yoksa NULL değerini döndürür. Bir hesap adı belirtildiğinde, yalnızca verilen hesapla alınan postaları döndürür.<br /><br />Döndürülen 'instance.mail' türü aşağıdakilerden oluşur:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>ABir e-posta işlendikten sonra silinmelidir; ya doğrudan (mail_delete) ya da eklerini kaydettikten sonra (mail_delete_after_attach).",
+				"mail_send": "example.mail_send({ARGS}) => INTEGER<br /><br />Posta biriktiricisi için giden bir e-posta oluşturur. İsteğe bağlı parametreler:<ul><li>Kime/CC/BCC alıcılarının virgülle ayrılmış listesi (bunlardan biri ayarlanmalıdır)</li><li>Gönderilecek posta hesabı adı (belirtilmemişse rastgele hesap kullanılır)</li><li>Dosya özelliği ve içinden dosyaların ekleneceği kayıt</li></ul>",
+				"rest_call": "example.rest_call({ARGS}) => INTEGER<br /><br />A Anında yürütülmek üzere dahili biriktiriciye bir HTTP REST çağrısı ekler. Desteklenen yöntemler şunlardır: DELETE, GET, PATCH, POST, PUT.<br /><br />URL gerekirse sorgu parametrelerini içerebilir.<br /><br />Başlıklar JSONB olarak sağlanmalıdır - her anahtar değer çifti bir başlıkla sonuçlanacaktır.<br /><br />TLS/SSL için geçerlilik kontrolü aşağıdaki durumlarda devre dışı bırakılabilir: gerekli.<br /><br />REST yanıtının işlenmesi gerekiyorsa, geri arama için başka bir arka uç işlevi ayarlanabilir. Bu geri çağırma fonksiyonunun üç argümanı olmalıdır: INTEGER (HTTP durum kodu için), TEXT (HTTP yanıt gövdesi), TEXT (geri arama değeri).<br /><br />Instance.rest_call(...) içinde bir 'geri arama değeri' ayarlanmışsa, geri arama işlevine aktarılacaktır - bu, birden fazla aramanın sırayla yürütülmesi gerektiğinde kullanışlıdır (veri aramasından önce kimlik doğrulama gibi).",
+				"rest_get_placeholder_file_base64": "example.rest_get_placeholder_file_base64({ARGS}) => TEXT<br /><br />Örnek.rest_call(...) içindeki istek gövdesinde kullanıldığında REST çağrı yürütme sırasında belirtilen dosyanın içeriğiyle (BASE64 olarak kodlanmış) değiştirilen bir yer tutucu metni döndürür.<br /><br />Dosya kimliği ve sürümü alınabilir Mevcut bir kayıt ve dosya özniteliğine eklenen dosyalar arasında döngü yapan example.files_get(...) aracılığıyla.",
+				"rest_get_placeholder_file_raw": "example.rest_get_placeholder_file_raw({ARGS}) => TEXT<br /><br />Örnek.rest_call(...) içindeki istek gövdesinde kullanıldığında, REST çağrısı yürütme sırasında belirtilen dosyanın ham içeriğiyle (formData gibi istekler için) değiştirilen bir yer tutucu metni döndürür.<br /><br />Dosya kimliği ve sürümü şu yolla alınabilir: example.files_get(...), mevcut bir kayıt ve dosya özniteliğine eklenen dosyalar arasında döngü yapar.",
+				"update_collection": "example.update_collection({ARGS}) => INTEGER<br /><br />Belirtilen koleksiyonu güncellemek için bağlı istemcileri bilgilendirir. Kullanıcı kimlikleri verilirse yalnızca bu kullanıcılara ait istemciler etkilenir.",
+				"user_meta_set": "example.user_meta_set({ARGS}) => INTEGER<br /><br />Seçilen kullanıcı için meta verileri ayarlar.",
+				"user_sync_all": "example.user_sync_all({ARGS}) => INTEGER<br /><br />Etanımlanan arka uç işleviyle tüm kullanıcı meta verilerinin senkronizasyonunu yürütür.<br /><br />Önceden mevcut kullanıcıları, uygulama yüklendikten sonra bir uygulamayla senkronize etmek için kullanışlıdır.<br /><br />Çalışmak için, uygulama yapılandırmasında bir kullanıcı senkronizasyon arka uç işlevi ayarlanmalıdır. Oluşturucudaki sayfa; gerekli uygulama kimliğini de burada bulabilirsiniz."
+			},
+			"helpPgArgs": {
+				"abort_show_message": [
+					"mesaj METİN"
+				],
+				"clean_up_e2ee_keys": [
+					"user_id INTEGER",
+					"ilişki_id UUID",
+					"Record_ids_access INTEGER[]"
+				],
+				"data_log_comment_create": [
+					"ilişki_id UUID",
+					"Record_id BIGINT",
+					"user_id INTEGER",
+					"yorum METİN"
+				],
+				"data_log_delete": [
+					"ilişki_id UUID",
+					"Record_id BIGINT"
+				],
+				"file_export": [
+					"dosya_id UUID",
+					"dosya_yolu METİN",
+					"file_version INTEGER DEFAULT NULL",
+					"BOOLE VARSAYILAN YANLIŞ üzerine yaz"
+				],
+				"file_export_text": [
+					"dosya_yolu METİN",
+					"file_text_content METİN",
+					"BOOLE VARSAYILAN YANLIŞ üzerine yaz"
+				],
+				"file_import": [
+					"dosya_yolu METİN",
+					"özellik_kimliği UUID",
+					"Record_id BIGINT DEFAULT NULL"
+				],
+				"file_import_text": [
+					"dosya_yolu METİN",
+					"callback_function_id UUID"
+				],
+				"file_link": [
+					"dosya_id UUID",
+					"dosya_adı TEXT",
+					"özellik_kimliği UUID",
+					"Record_id BIGINT"
+				],
+				"file_text_read": [
+					"callback_function_id UUID",
+					"dosya_id UUID",
+					"file_version INTEGER DEFAULT NULL"
+				],
+				"file_text_read_cb": [
+					"callback_function_id UUID",
+					"callback_value TEXT",
+					"dosya_id UUID",
+					"file_version INTEGER DEFAULT NULL"
+				],
+				"file_text_write": [
+					"dosya_adı TEXT",
+					"file_text_content METİN",
+					"özellik_kimliği UUID",
+					"Record_id BIGINT DEFAULT NULL"
+				],
+				"file_unlink": [
+					"dosya_id UUID",
+					"özellik_kimliği UUID",
+					"Record_id BIGINT"
+				],
+				"files_get": [
+					"özellik_kimliği UUID",
+					"Record_id BIGINT",
+					"include_deleted BOOLEAN VARSAYILAN YANLIŞ"
+				],
+				"get_e2ee_data_key_enc": [
+					"user_id INTEGER",
+					"ilişki_id UUID",
+					"Record_id BIGINT"
+				],
+				"get_preset_record_id": [
+					"preset_id UUID"
+				],
+				"get_role_ids": [
+					"user_id INTEGER",
+					"devralınan BOOLE DEFAULT FALSE"
+				],
+				"has_role": [
+					"user_id INTEGER",
+					"role_id UUID",
+					"devralınan BOOLE DEFAULT FALSE"
+				],
+				"has_role_any": [
+					"user_id INTEGER",
+					"role_ids UUID[]",
+					"devralınan BOOLE DEFAULT FALSE"
+				],
+				"log_error": [
+					"mesaj METİN",
+					"app_name METİN VARSAYILAN BOŞ"
+				],
+				"log_info": [
+					"mesaj METİN",
+					"app_name METİN VARSAYILAN BOŞ"
+				],
+				"log_warning": [
+					"mesaj METİN",
+					"app_name METİN VARSAYILAN BOŞ"
+				],
+				"mail_delete": [
+					"mail_id INTEGER"
+				],
+				"mail_delete_after_attach": [
+					"mail_id INTEGER",
+					"attach_record_id BIGINT",
+					"attach_attribute_id UUID"
+				],
+				"mail_get_next": [
+					"hesap_adı METİN VARSAYILAN BOŞ"
+				],
+				"mail_send": [
+					"konu METİN",
+					"gövde METİN",
+					"to_list METİN VARSAYILAN ''",
+					"cc_list METİN VARSAYILAN ''",
+					"bcc_list METİN VARSAYILAN ''",
+					"hesap_adı METİN VARSAYILAN BOŞ",
+					"attach_record_id BÜYÜK VARSAYILAN BOŞ",
+					"attach_attribute_id UUID VARSAYILAN BOŞ"
+				],
+				"pdf_create_attach": [
+					"load_record_id BÜYÜK",
+					"attach_record_id BIGINT",
+					"attach_attribute_id UUID",
+					"callback_function_id UUID VARSAYILAN BOŞ",
+					"callback_value METİN VARSAYILAN BOŞ"
+				],
+				"pdf_create_export": [
+					"load_record_id BÜYÜK",
+					"dosya_yolu METİN",
+					"BOOLE VARSAYILAN YANLIŞ üzerine yaz",
+					"callback_function_id UUID VARSAYILAN BOŞ",
+					"callback_value METİN VARSAYILAN BOŞ"
+				],
+				"rest_call": [
+					"yöntem METİN",
+					"url METİN",
+					"gövde METİN",
+					"başlıklar JSONB DEFAULT NULL",
+					"tls_skip_verify BOOLEAN VARSAYILAN YANLIŞ",
+					"callback_function_id UUID VARSAYILAN BOŞ",
+					"callback_value METİN VARSAYILAN BOŞ"
+				],
+				"rest_get_placeholder_file_base64": [
+					"dosya_id UUID",
+					"sürüm TAM SAYI VARSAYILAN 0"
+				],
+				"rest_get_placeholder_file_raw": [
+					"dosya_id UUID",
+					"sürüm TAM SAYI VARSAYILAN 0"
+				],
+				"update_collection": [
+					"koleksiyon_id",
+					"user_ids TAM SAYI[] VARSAYILAN DİZİ[]::TAM SAYI[]"
+				],
+				"user_meta_set": [
+					"user_id INTEGER",
+					"departman METİN",
+					"e-posta METİN",
+					"konum METİN",
+					"name_display TEXT",
+					"name_fore TEXT",
+					"name_sur METİN",
+					"notlar METİN",
+					"organizasyon METİN",
+					"telefon_faks METİN",
+					"telefon_sabit hat METİN",
+					"telefon_mobile METİN"
+				],
+				"user_sync_all": [
+					"application_id UUID"
+				]
+			},
+			"intervalAtDayForMonths": "günde",
+			"intervalAtDayForWeeks": "hafta içi",
+			"intervalAtDayForYears": "günde",
+			"intervalAtTime": "zamanında",
+			"intervalEvery": "Her",
+			"isFrontendExec": "Ön uç çağrısı",
+			"isLoginSync": "Kullanıcı senkronizasyonu",
+			"isTrigger": "Tetiklemek",
+			"language": "Dil",
+			"languageJs": "JavaScript",
+			"languagePg": "PL/pgSQL",
+			"new": "Yeni işlev",
+			"option": {
+				"fieldGetFileLinks": "Dosya bağlantılarını oku",
+				"fieldGetFileLinksHint": "Yüklenen dosyalara ilişkin indirme URL'lerinin dizisini döndürür; yalnızca geçerli kullanıcı oturumu için geçerlidir.",
+				"fieldGetValueChanged": "Değer değişti mi?",
+				"fieldSetCaption": "Başlık yaz",
+				"fieldSetChart": "ECharts seçenek nesnesini yaz",
+				"fieldSetError": "Hata mesajı yaz",
+				"fieldSetFocus": "Alan girişine atla",
+				"fieldSetOrder": "Üst öğede alan sırasını ayarla",
+				"intervalDays": "Günler",
+				"intervalHours": "Saat",
+				"intervalMinutes": "dakika",
+				"intervalMonths": "Aylar",
+				"intervalSeconds": "Saniye",
+				"intervalWeeks": "Haftalar",
+				"intervalYears": "Yıllar"
+			},
+			"placeholderDoc": "PDF'ler",
+			"placeholderDocHelp": [
+				"Önceden tanımlanmış PDF'ler oluşturmak için yer tutucular - dosya aktarımı olarak veya bir dosya niteliğine iliştirilmiş olarak.",
+				"PDF belgesinde bir veri sorgusu varsa (PDF tanımındaki 'İçerik' sekmesine bakın), oluşturma sırasında yüklenmek üzere bir kayıt kimliği sağlanabilir.",
+				"Dosya olarak dışa aktarırken, 'fileExport' yolu REI3 yapılandırma dosyasında ('config.json') tanımlanmalıdır.",
+				"Bir dosya özniteliğine eklerken, verilen özniteliğin ve kayıt kimliğinin her ikisinin de mevcut olması gerekir.",
+				"Oluşturma, zamanlayıcı (s. 'Sistem görevleri', REI3 yönetici paneli) aracılığıyla eşzamansız olarak gerçekleşir; işlev PDF oluşturmanın tamamlanmasını beklemez.",
+				"Oluşturma tamamlandıktan sonra e-posta göndermek gibi bazı eylemleri gerçekleştirmek için başka bir arka uç işlevi çağrılabilir. Bir bağlam sağlamak için geri çağırma işlevine bir geri çağırma değeri sağlanabilir. Geri çağırma işlevi, geri çağırma değeriyle doldurulmuş tek bir TEXT parametresine sahip olmalıdır."
+			],
+			"placeholderFncBackend": "İşlevler (arka uç)",
+			"placeholderFncBackendHelp": "Arka uç işlevleri için yer tutucular - ifade olarak ('SELECT function_abc()') veya doğrudan ('PERFORM function_abc()') kullanılır.",
+			"placeholderFncFrontend": "İşlevler (ön uç)",
+			"placeholderFncInstance": "İşlevler (örnek)",
+			"placeholderFncInstanceHelp": "REI3 örneğindeki işlevler için yer tutucular; bunlar, dosya veya posta işleme gibi sistem özelliklerine erişim sağlar.",
+			"placeholderPresets": "Önceden ayarlanmış kayıt kimlikleri",
+			"placeholderPresetsHelp": "Seçilen ön ayar için mevcut olan kaydın kimliği (BIGINT olarak) için yer tutucular.<br /><br />Ön ayar korunmuyorsa kullanıcılar tarafından silinmiş olabilir. Bu durumda 'null' döndürülür.",
+			"placeholderRelations": "İlişkiler",
+			"placeholderRelationsHelp": "İlişkiler ve nitelikler için yer tutucular - SQL istekleri için kullanılır (SELECT/INSERT/UPDATE/DELETE).",
+			"placeholdersCollections": "Koleksiyonlar",
+			"placeholdersFormFields": "Form alanları",
+			"placeholdersVariables": "Değişkenler",
+			"runOnce": "Bir kere",
+			"runRegular": "Düzenli olarak",
+			"runType": "Uygulamak",
+			"schedules": "Programlar",
+			"title": "Fonksiyonlar",
+			"titleJs": "Ön uç işlevleri",
+			"titleJsOne": "Ön uç işlevi '{NAME}'",
+			"titlePg": "Arka uç işlevleri",
+			"titlePgOne": "Arka uç işlevi '{NAME}'",
+			"triggers": "Tetikleyiciler",
+			"value": "DEĞER",
+			"valueInit": "IS_CHANGED_TRUE_FALSE",
+			"volatility": "Volatilite",
+			"volatilityHelp": "<b>EUzman ayarı</b><p>Volatility, işlev sonuçlarının nasıl/önbelleğe alınıp alınamayacağını tanımlamak için kullanılır.</p><ul><li>'VOLATILE', işlevin önbelleğe almayı devre dışı bırakarak veritabanında değişiklikler yapabileceğini söyleyen en güvenli seçenektir.</li><li>'STABLE' işlevleri önbelleğe alınabilir veritabanında değişiklik yapmadıkları için bir işlem içinde. Bu, özellikle ilişki politikaları için çok daha iyi bir performansla sonuçlanır. </li><li>'IMMUTABLE' işlevleri, aynı girdi için aynı sonucu sağlamak üzere gereklidir. Veri tabanı durumundan bağımsız olarak herhangi bir girdinin sonucunun aynı olmasını sağlamak için veritabanında değişiklik yapmalarına izin verilmez ve hatta veri okumamalıdırlar.</li></ul><p>Resmi <a target=\"_blank\" href=\"https://www.postgresql.org/docs/current/xfunc-volatility.html\">docs</a>.</p>'de daha fazla bilgi bulunmaktadır."
+		},
+		"icon": {
+			"add": "Simge dosyası ekle/düzenle",
+			"addHelp": "Yalnızca maksimum PNG dosyaları. 64kb desteklenmektedir. Simgeler her zaman kare şeklinde olmalıdır.",
+			"nameHint": "İsteğe bağlı simge adı",
+			"title": "Simgeler"
+		},
+		"language": "Çeviri",
+		"languageNextHint": "Sonraki dile geç (kısayol tuşu: CTRL + q)",
+		"loginForm": {
+			"attributeLogin": "Giriş özelliği",
+			"attributeLookup": "Arama özelliği",
+			"formOpen": "Açılacak form",
+			"newLoginForm": "Yeni giriş formu",
+			"title": "Giriş formları",
+			"titleDepr": "Oturum açma formları REI3.9 itibarıyla kullanımdan kaldırılmıştır. Bir süre daha çalışmaya devam edecek olsalar da, lütfen kullanıcı senkronizasyon mekanizmasına (s. Builder belgeleri) geçmeyi düşünün."
+		},
+		"menu": {
+			"button": {
+				"add": "Giriş ekle",
+				"addTab": "Sekme ekle",
+				"delete": "Sekmeyi sil"
+			},
+			"collections": "Koleksiyon değerlerini menüde göster",
+			"copy": "Tüm menü öğelerini şuradan kopyalayın:",
+			"formId": "- Formu seç -",
+			"showChildrenHint": "Alt girişleri varsayılan olarak göster",
+			"title": "Menüler",
+			"titleMenuTab": "Sekme özellikleri"
+		},
+		"module": {
+			"button": {
+				"graph": "Bağımlılık grafiği",
+				"keyCreate": "Oluştur",
+				"loginSyncCreate": "Yeni kullanıcı senkronizasyon işlevi",
+				"manageApps": "Uygulamaları yönet"
+			},
+			"clientEventsHint": "REI3, kullanıcıların kişisel ayarlarından yükleyebilecekleri bir istemci uygulamasına sahiptir. REI3 istemci uygulaması çalışırken, yerel yazılımla REI3'e yüklenen dosyaları açabilir. Ayrıca, 'istemci olaylarını' tanımlayarak kısayol tuşları gibi belirli olaylara da tepki verebilir. Bunlar genellikle istemciden REI3'e bilgi göndermek, arka uç işlevlerini kullanarak verileri güncellemek veya ön uç işlevlerini kullanarak açık bir REI3 tarayıcı oturumuyla etkileşim kurmak için kullanılır.",
+			"color": "Renk",
+			"colorHint": "Birincil uygulama rengi - özelleştirme ve/veya kullanıcı ayarları nedeniyle üzerine yazılmadığı takdirde başlıkta ve menüde gösterilir. Sistem stilleri soluk, koyu renkler (koyu pastel) için optimize edilmiştir.",
+			"dependsOn": "Üzerine inşa edilmiştir",
+			"dependsOnAdd": "Uygulama ekle",
+			"dependsOnHint": "Diğer uygulamaları kendi uygulamalarınız için temel olarak kullanın. Bu, mevcut ilişkilerin, formların vb. yeniden kullanılmasını veya genişletilmesini sağlar.",
+			"graphDependsOn": "Bağımlı olduğu yer: {COUNT}",
+			"iconHint": "Simgeler bu uygulamaya eklendikten sonra kullanılabilir. Üzerine inşa edilen uygulamaların simgeleri de kullanılabilir.",
+			"iconPwa": "Uygulama simgeleri",
+			"iconPwaHint": "Uygulamayı temsil eden simgeler. Her iki simge de PNG olmalı ve belirli bir boyuta (s. simge girişleri) sahip olmalıdır - bu kurallara uyulmaması, PWA'nin bazı işletim sistemlerine veya aygıtlara yüklenememesine neden olabilir.",
+			"jsFunctionIdOnLogin": "Oturum başlatma işlevi",
+			"jsFunctionIdOnLoginHint": "Bu ön uç işlevi, bir kullanıcı sisteme giriş yaptığında çağrılır. Değişkenleri başlatmak veya günlükleri güncellemek için kullanılabilir.",
+			"languageCode": "Dil kodu",
+			"languageCodeHint": "en_us, zh_cn, de_de, ...",
+			"languageMain": "Geri dönüş dili",
+			"languageMainHint": "Seçilen kullanıcı dili uygulamanız tarafından sunulmuyorsa kullanılır.",
+			"languages": "Uygulama dilleri",
+			"languagesHint": "Uygulamanın mevcut olduğu diller.",
+			"nameHint": "Bu uygulamanın referans adı. Adın REI3 sistemi içinde benzersiz olması gerekir; bu nedenle kuruluşunuzun adını temel alan bir önek kullanmayı düşünün.",
+			"nameHolder": "iş_zamanlayıcı, envanter_planlayıcı, ...",
+			"namePwa": "Başvuru başlığı",
+			"namePwaHint": "Yüklü uygulamalar listesinde gösterilen tam uygulama başlığı. En fazla 60 karakter uzunluğunda olabilir. Çeviri mümkün değil.",
+			"namePwaShort": "Kısa başlık",
+			"namePwaShortHint": "Genellikle mobil cihazların ana ekranlarında ve simgeler etiketi olarak gösterilen, uygulama başlığının daha kısa versiyonu. En fazla 12 karakter uzunluğunda olabilir. Çeviri mümkün değil.",
+			"parent": "Atandı",
+			"parentHint": "Başka bir uygulamaya atandığında menülerde ve genel bakışlarda alt öğe olarak görüntülenecektir; başka bir işlevsel değişiklik yoktur. Uygulamalar yalnızca üzerine inşa edildikleri uygulamalara atanabilir.",
+			"pgFunctionIdLoginSync": "Kullanıcı senkronizasyon işlevi",
+			"pgFunctionIdLoginSyncHint": "Bir kullanıcı her oluşturulduğunda veya verileri güncellendiğinde (kullanıcı adı, adı, soyadı, e-posta, kuruluş vb.) kullanıcı senkronizasyon işlevi çağrılır. Sistem kullanıcıları değiştiğinde ek kayıtların oluşturulmasını veya güncellenmesini gerektiren uygulamalar için kullanışlıdır. Ayrıca 'instance.user_sync_all()' örnek işleviyle mevcut tüm kullanıcılar için de tetiklenebilir.",
+			"position": "Varsayılan konum",
+			"positionHint": "Uygulamanın başlıktaki konumu (önce küçük olanlar). Sistem yöneticileri tarafından üzerine yazılabilir.",
+			"pwa": "Aşamalı web uygulaması (PWA)",
+			"pwaHint": "REI3 uygulamaları, modern tarayıcıların içinden aşamalı web uygulamaları (PWA) olarak masaüstü bilgisayarlara ve mobil cihazlara kurulabilir. Daha sonra yüklü uygulamalar olarak listelenirler, kendi simgelerini ve kısayollarını alırlar ve yerel uygulamalara benzer şekilde davranırlar.",
+			"release": "Dağıtım",
+			"releaseDate": "Yayın tarihi",
+			"releaseLogCategories": "Sürüm geçmişi kategorileri",
+			"releaseLogCategoriesHint": "Sürüm geçmişi için genel kategoriler vardır. Buradaki değişiklikler mevcut geçmişleri etkileyecektir.",
+			"startFormByRole": "Formu role göre başlat",
+			"startFormByRoleHint": "Geçerli kullanıcının rolüyle eşleşen ilk başlangıç ​​formu kullanılır. Varsayılan başlangıç ​​formunun üzerine yazar.",
+			"startFormDefault": "Formu başlat",
+			"startFormDefaultHint": "Kullanıcı uygulamayı açtığında gösterilen form.",
+			"title": "Uygulama '{NAME}'",
+			"titleHint": "Uygulamanızla çalışırken kullanıcıların görebileceği uygulama başlığı."
+		},
+		"navigationCaptionMap": "Altyazılar",
+		"navigationFilterHint": "Metne göre filtrele",
+		"navigationStart": "İlk adımlar",
+		"new": {
+			"api": "Yeni API",
+			"collection": "Yeni koleksiyon",
+			"doc": "Yeni PDF",
+			"docIdDuplicate": "PDF'yi kopyala",
+			"form": "Yeni form",
+			"formIdDuplicate": "Formu kopyala",
+			"jsFunction": "Yeni Ön Uç işlevi",
+			"jsFunctionFormId": "Forma atandı",
+			"jsFunctionFormIdHint": "Atanan işlevler, form alanlarına okuma veya yazma gibi işlemleri yapmak için formla etkileşime girebilir. Atanırsa işlev yalnızca seçilen formda kullanılabilir ve diğer ön uç işlevlerinde yeniden kullanılamaz. Bu ayar daha sonra değiştirilemez.",
+			"message": {
+				"api": "<p>API adı, API çağrısının bir parçası olarak kullanılacaktır. Daha sonra değiştirilebilir.</p>",
+				"module": "<p>Lütfen uygulamanız için bir ad seçin. Bu ad, REI3 sistemi içindeki uygulamanızı benzersiz şekilde tanımlamaya yarar. Kullanıcılar tarafından görülemez.</p><h3>Eörnekler:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Çünkü uygulama adları Benzersiz olması gerekir; kuruluşunuzun adını taşıyan bir önek kullanmanız yardımcı olabilir. Kuruluşunuzun adı 'Modern Fashion Limited' ise önek olarak 'mfl' kullanabilirsiniz ('mfl_shift_planner'da olduğu gibi).</p>",
+				"relation": "<p>A ilişki adı, içinde depolananları yansıtmalıdır. Bir içinde benzersiz olmalı application.</p><h3>Eörnekler:</h3><ul><li>event</li><li>Event_attendance</li><li>location</li><li>location_event</li></ul>"
+			},
+			"module": "Yeni uygulama",
+			"options": "Ek seçenekler",
+			"pgFunction": "Yeni arka uç işlevi",
+			"pgFunctionTemplate": "Şablonu kullan",
+			"pgFunctionTrigger": "Tetiklemek",
+			"pgFunctionTriggerHint": "Bu arka uç işlevini tetikleyici yapar. Kayıtların oluşturulması, güncellenmesi veya silinmesi gibi veritabanındaki olaylara tepki vermek için bir ilişki içinde bir tetikleyiciye başvurulabilir. Bu ayar daha sonra değiştirilemez.",
+			"relation": "Yeni ilişki",
+			"relationEncryption": "Uçtan Uca Şifreleme",
+			"relationEncryptionHint": "Bu ilişkideki öznitelikler için uçtan uca şifrelemeyi (E2EE) etkinleştirir. E2EE'nin avantajları ve dezavantajları vardır; lütfen kullanmadan önce Builder belgelerini dikkatlice okuyun. Bu ayar daha sonra değiştirilemez.",
+			"role": "Yeni rol",
+			"searchBar": "Yeni arama çubuğu",
+			"template": {
+				"loginSync": "Kullanıcı senkronizasyon işlevi",
+				"mailsFromSpooler": "E-posta işleme (gelen)",
+				"restAuthRequest": "REST kimlik doğrulaması (JSON aracılığıyla)",
+				"restAuthResponse": "REST kimlik doğrulama yanıtı geri araması",
+				"restDataResponse": "REST veri yanıtı geri araması",
+				"restFileAttachViaREI3API": "REI3 API aracılığıyla REST dosyası ekleme",
+				"restFileUploadToREI3": "REST dosyasını REI3'e yükleme"
+			},
+			"variable": "Yeni değişken",
+			"variableFormId": "Forma atandı",
+			"variableFormIdHint": "Bir forma değişken atamak onu belirli bir forma bağlar. Daha sonra yalnızca bu formda kullanılabilir ve form kapatıldığında değerleri sıfırlanır.<br /><br />Bir forma değişken atanmaması, onu 'genel' yapar ve dolayısıyla geçerli kullanıcı oturumunda kalıcı hale getirir.",
+			"widget": "Yeni widget"
+		},
+		"noOwner": "Uygulama salt okunur modda",
+		"openFormInput": {
+			"attributeApply": "Açılan formda varsayılan olarak kullan",
+			"maxHeight": "Maks. yükseklik (px)",
+			"maxWidth": "Maks. genişlik (px)",
+			"newRecord": "Yeni kayıtlarla ilişki kurma",
+			"newRecordHelp": "Bu alanla yeni bir kayıt oluşturulurken, mevcut formun kayıt kimliği, açılan formdaki bir alan için varsayılan değer olarak kullanılabilir. Bu genellikle bir ebeveyn-çocuk ilişkisi kurmak için kullanılır.<br /><br />EÖrnek: Geçerli form bir departmanı yönetir. Bu formdaki liste alanı bu departmanın çalışanlarını gösterir. Liste alanından departmana yeni personel oluşturulabilmesi istenmektedir. Bunu kolaylaştırmak için, departman kaydı (geçerli formdaki) çalışan formundaki (açık form) bir ilişki giriş alanına girdi olarak uygulanabilir. Bu örnekte, açılan formdaki giriş alanı 'çalışan.departman' 1:n ilişkisi özelliği olacaktır.",
+			"option": {
+				"float": "Yüzen pencere",
+				"inline": "Alan içindeki alt form",
+				"none": "Tam sayfa formu"
+			},
+			"relationIndexApply": "Mevcut forma kaydet"
+		},
+		"pageTitle": "İnşaatçı",
+		"pageTitleDocs": "Oluşturucu belgeleri",
+		"pgIndex": {
+			"attributes": "Nitelik(ler)",
+			"attributesHint": "Dizinin kapsadığı öznitelik(ler). Birden fazla verilirse, sıra belirli bir dizinin bir sorgu için kullanılıp kullanılmayacağına karar verir. Metin dizinleri şu anda yalnızca tek bir özelliği desteklemektedir.",
+			"description": {
+				"BTREE": "Hızlı aramalar için varsayılan dizin. Çoğu öznitelik değer türü için uygundur ancak birkaç paragraftan büyük metinler için uygun değildir.",
+				"GIN": "Çok büyük metinlerde bile hızlı arama yapılmasını sağlayan metin dizini. İlgili kelimeler, eş anlamlılar ve daha fazlası gibi dile özgü özellikleri desteklemek için bir sözlük özelliği kullanabilir; Örnek olarak, 'bilgisayar' araması aynı zamanda 'hesaplama' veya 'hesaplamak' için de sonuçlar bulacaktır."
+			},
+			"dialog": {
+				"delete": "Bu dizini silmek istediğinizden emin misiniz?"
+			},
+			"dictionary": "Sözlük özelliği (isteğe bağlı)",
+			"dictionaryHint": "Kullanıldığı takdirde bir metin dizini, metin aramalarını iyileştirmek için gelişmiş dil özelliklerini kullanabilecektir. 'Metin arama sözlüğü' değer türünün bir özelliği olmalıdır.",
+			"method": {
+				"BTREE": "Varsayılan dizin",
+				"GIN": "Metin dizini"
+			},
+			"noUpdate": "Mevcut indeksler değiştirilemez ancak istenildiği zaman güvenli bir şekilde yeniden oluşturulabilir. Veri boyutuna bağlı olarak indeks oluşturma işlemi biraz zaman alabilir.",
+			"system": "Bu indeks sistem tarafından yönetilmektedir ve doğrudan silinemez.",
+			"title": "Dizini görüntüle",
+			"titleNew": "Dizin oluştur",
+			"unique": "Eşsiz",
+			"uniqueHint": "Etkinleştirilirse, verilen özellik için aynı değer iki kez bulunamaz. Birden fazla özellik verilmişse, birleştirilmiş değer yalnızca bir kez mevcut olabilir."
+		},
+		"pgTrigger": {
+			"dialog": {
+				"delete": "Bu tetikleyiciyi silmek istediğinizden emin misiniz?"
+			},
+			"execute": "Uygulamak",
+			"fires": "Yangınlar",
+			"isDeferred": "ERTELENEN",
+			"onDelete": "SİLMEK",
+			"onInsert": "SOKMAK",
+			"onUpdate": "GÜNCELLEME",
+			"perRow": "HER SIRA",
+			"title": "Tetiklemek",
+			"titleNew": "Yeni tetikleyici"
+		},
+		"preset": {
+			"addMissing": "Tüm değerleri ayarla",
+			"dialog": {
+				"delete": "Bu ön ayar kaydını silmek istediğinizden emin misiniz?<br /><br /><b>UYARI!</b><br /><br />Yabancı anahtar tanımına bağlı olarak (GÜNCELLEME/SİLMEDE), ön ayar kayıtlarının silinmesi müşteri verilerinin kaybına (KADEMELİ) veya uygulama yükseltme sorunlarına (EYLEM YOK) neden olabilir."
+			},
+			"protected": "Korumalı",
+			"protectedHint": "Korumalı bir ön ayar kaydı oluşturulduktan sonra yalnızca Builder'da silinebilir. Korumalı ön ayarlar genellikle iş akışı durumları veya yapılandırma seçenekleri gibi uygulamanın çalışması için gereken veriler için kullanılır.<br /><br />Korunmayan ön ayarlar herhangi bir zamanda silinebilir; bunlar genellikle örnek veriler için kullanılır.<br /><br />Ön ayarlı kaydın koruma ayarına bakılmaksızın, değerleri de korunmadıkları sürece düzenlenebilir (aşağıya bakın).",
+			"title": "Ön ayarlı '{NAME}'",
+			"titleNew": "Yeni ön ayar",
+			"toggleProtected": "Tüm korunanları aç/kapat",
+			"valueNotSet": "Bu özelliğe bir değer ayarlamak için burayı tıklayın.",
+			"values": "Özellik değerleri"
+		},
+		"query": {
+			"choice": "Ayarlamak",
+			"choices": "Filtre setleri ({COUNT})*",
+			"choicesHint": "*İlk ayar varsayılan olarak etkindir; 2 veya daha fazlası mevcutsa seçim yapılabilir.",
+			"filters": "Filtreler ({COUNT})",
+			"filterChoicesHelp": "Filtre kümesi, kullanıcılar tarafından seçilebilen, önceden tanımlanmış bir dizi filtredir. Kullanıcının mevcut ihtiyacına göre farklı filtre kriterleri uygulamaya yarar.<br /><br />İlk filtre seti varsayılan olarak etkindir.<br /><br />Filtre setleri yalnızca en az 2 adet kullanılabilir olduğunda gösterilir.",
+			"filterJoin": "Filtrelenecek ilişki birleştirmeyi seçin. Sorgunun tamamını filtrelemek için boş bırakın.",
+			"filterJoinHelp": "Burada bir birleştirme numarası seçtiğinizde, filtre sorguya değil bunun yerine ilişki birleşimine eklenir.<br /><br />Bu, satırın tamamını kaldırmadan soldan birleştirilmiş bir ilişkideki istenmeyen kayıtları filtreleyebilir.<br /><br />Aynı zamanda 1:n ilişkilerini filtrelemek için de kullanışlıdır.",
+			"fixedLimit": "Sabit sonuç sınırı",
+			"fixedLimit0": "aktif değil",
+			"join": "Katılın: {NAME}",
+			"joinAddHint": "Bu ilişkiye başka bir ilişkiye katıl",
+			"joinApplyCreateHint": "Bu ilişkiyle ilgili kayıt oluştur",
+			"joinApplyDeleteHint": "Bu ilişkiye ilişkin kaydı sil",
+			"joinApplyUpdateHint": "Bu ilişkiyle ilgili kaydı güncelle",
+			"lookups": "Kayıt aramaları ({COUNT})",
+			"lookupsHelp": "Aramalar, veri içe aktarma sırasında kayıtları tanımlar (CSV/API POST).<ul><li>Herhangi bir benzersiz dizin arama olarak kullanılabilir (genellikle benzersiz bir ad) - benzersiz dizinler ilgili ilişkide tanımlanır.</li><li>Aramalar yalnızca değerleri içe aktarılan verilere dahilse çalışır.</li><li>Veriler sırasında kayıt oluşturmak/güncellemek için içe aktarma, istenen ilişkiler için 'CREATE'/'UPDATE' seçenekleri etkinleştirilmelidir (\"içerik\" sekmesi).</li><li>İlişki nitelikleri (n:1/1:1) arama olarak kullanılıyorsa, bunların ilişkileri birleştirilmeli ve kayıtları için aramalar tanımlanmalıdır.</li></ul>",
+			"orders": "Sıralama ({COUNT})",
+			"relations": "İlişkiler ({COUNT})",
+			"select": "Katılacak ilişkiyi seçin"
+		},
+		"relation": {
+			"attributeContent": "Değer türü",
+			"attributeEncrypted": "Değer uçtan uca şifrelenmiştir",
+			"attributeLength": "Maks. uzunluk/boyut",
+			"attributeNoIcon": "Tanımlanmış simge yok",
+			"attributeNotNullable": "Değeri olmalı",
+			"attributes": "Nitelikler ({CNT})",
+			"codeCondition": "Durum",
+			"dialog": {
+				"delete": "Bu ilişkiyi silmek istediğinizden emin misiniz? Bu işlem aynı zamanda sisteminizdeki tüm verileri silecektir.<br /><br /><b>Bu işlem mevcut yedeklemeler olmadan geri alınamaz.</b>"
+			},
+			"encryption": "E2E şifreleme",
+			"encryptionHint": "İlişki uçtan uca şifrelenmiş öznitelik değerlerini destekler.",
+			"external": "Referans veren ilişkiler ({CNT})",
+			"graph": "İlişki grafiği",
+			"graphBase": "Temel ilişki",
+			"indexAutoFki": "İlişki endeksi",
+			"indexPrimaryKey": "Birincil anahtar dizini",
+			"indexSystem": "Sistem dizini (sistem tarafından yönetilir)",
+			"indexText": "Metin dizini",
+			"indexUnique": "Eşsiz",
+			"indexes": "Endeksler ({CNT})",
+			"nameHint": "Bu ilişkinin referans adı. Bu uygulamada benzersiz olmalıdır.",
+			"policies": "Politikalar ({CNT})",
+			"policyActionDelete": "Silmek",
+			"policyActionSelect": "Seçme",
+			"policyActionUpdate": "Güncelleme",
+			"policyActions": "Aksiyon",
+			"policyExplanation": "Bu politika için girişimde bulunulan eylem etkinleştirilirse, geçerli kullanıcının rolüyle eşleşen ilk politika uygulanır. Örneğin bir role tam erişim vermek için, tüm eylemlerin etkin olduğu ve filtrelerin olmadığı bir politika en üste yerleştirilemez.",
+			"policyFunctionExcl": "Kayıt kimliklerini engelle",
+			"policyFunctionIncl": "Kayıt kimliklerine izin ver",
+			"policyFunctions": "Filtre işlevleri",
+			"policyNotSet": "filtrelenmemiş",
+			"presetProtected": "Korumalı",
+			"presetValues": "Değerler",
+			"presetValuesPreview": "Değerler önizlemesi",
+			"presets": "Önceden ayarlanmış kayıtlar ({CNT})",
+			"preview": "Veri görünümü",
+			"previewLimit": "Kayıtlar/sayfa",
+			"recordTitle": "Kayıt başlığı",
+			"recordTitleHint": [
+				"Kayıt başlığı, değişiklik günlüğü gibi yerlerde veya form başlığında gösterildiğinde tek tek kayıtları tanımlamaya yarar.",
+				"Bir kayıt başlığı, aynı ilişkiden seçilen bir sırada bir veya daha fazla öznitelik değerinden oluşur. Adlar veya etiketler gibi metin değerleri genellikle bu amaç için en iyisidir."
+			],
+			"retention": "Günlüğü değiştir",
+			"retentionCount": "X değişikliklerini koru",
+			"retentionDays": "X gün boyunca sakla",
+			"retentionHint": "Değişiklik günlüklerinin kaç adet (sayım) veya ne kadar süreyle (gün cinsinden) tutulduğu.",
+			"title": "İlişkiler",
+			"titleHint": "Başlık mevcut uygulama dillerine çevrilebilir. Değişiklik günlüklerini gösterirken olduğu gibi, kullanıcı arayüzünde bir ilişkiye başvurulduğunda görüntülenir.",
+			"titleOne": "İlişki '{NAME}'",
+			"triggers": "Tetikleyiciler ({CNT})"
+		},
+		"releases": {
+			"button": {
+				"goToCategories": "Kategorileri değiştir"
+			}
+		},
+		"role": {
+			"access": "Erişim",
+			"accessDelete": "Silmek",
+			"accessInherit": "[miras]",
+			"accessRead": "Okumak",
+			"accessWrite": "Yazmak",
+			"assignable": "Atanabilir",
+			"children": "Üyesi",
+			"content": "Tip",
+			"dialog": {
+				"delete": "Bu rolü silmek istediğinizden emin misiniz?"
+			},
+			"newRole": "Yeni rol",
+			"option": {
+				"contentAdmin": "Yönetici kullanıcı",
+				"contentEveryone": "[Herkese atandı]",
+				"contentOther": "Özel kullanıcı",
+				"contentUser": "Düzenli kullanıcı"
+			},
+			"title": "Roller",
+			"titleOne": "Rol '{NAME}'"
+		},
+		"searchBar": {
+			"dialog": {
+				"delete": "Bu arama çubuğunu silmek istediğinizden emin misiniz?"
+			},
+			"warning": {
+				"noSearchInput": "Arama sorgusunu uygulamak için en az bir 'Genel arama: Kullanıcı girişi' filtresi ekleyin"
+			},
+			"title": "Arama çubukları",
+			"titleOne": "Arama çubuğu '{NAME}'"
+		},
+		"start": {
+			"appVisible": "Uygulama, atanmış rollere sahip kullanıcılar tarafından görülebilir",
+			"appVisibleOff": "Uygulama kullanıcılar tarafından görülemiyor",
+			"button": {
+				"fix": "Düzeltmek"
+			},
+			"checkMenu": "En az bir menü girişi mevcut",
+			"checkMenuInRole": "Bir role en az bir menü erişimi atanmış",
+			"checkMenuInRoleOff": "Bir role menü erişimi atanmadı",
+			"checkMenuOff": "Menü girişi mevcut değil",
+			"checkNotHidden": "Uygulama gizlenmedi",
+			"checkNotHiddenOff": "Uygulama bir yönetici tarafından gizlendi",
+			"checkNotReadonly": "Uygulama yazılabilir",
+			"checkNotReadonlyOff": "Uygulama salt okunurdur",
+			"checkStartForm": "Başlangıç ​​formu tanımlandı",
+			"checkStartFormOff": "Başlangıç ​​formu tanımlı değil",
+			"checks": "Sistem kontrolleri",
+			"extCommunity": "REI3 forumu",
+			"extDocs": "REI3 belgeleri",
+			"needHelp": "Yardıma mı ihtiyacınız var?",
+			"title": "İlk adımlar",
+			"titleForms": "Form oluşturma",
+			"titleFormsHint": "Kayıtlarla çalışmak için kullanıcı arayüzleri oluşturun.",
+			"titleMenu": "Menü ayarlama",
+			"titleMenuHint": "Uygulamanız boyunca kullanıcılara rehberlik edin.",
+			"titleRelations": "İlişkileri tanımlayın",
+			"titleRelationsHint": "Kayıtlara veri depolamak ve eklemek için.",
+			"titleRoles": "Rolleri hazırlayın",
+			"titleRolesHint": "Herkesin ne yapabileceğini veya görebileceğini tanımlayın."
+		},
+		"transfer": {
+			"button": {
+				"generate": "Yeni anahtar çifti oluştur",
+				"storeE2ee": "Şifrelenmiş olarak saklayın"
+			},
+			"dialog": {
+				"e2eeNotReady": "Özel anahtarınızı güvenli bir şekilde saklamak için uçtan uca şifreleme (E2EE) kullanılır; Ancak E2EE şu anda devre dışı.<br /><br />E2EE'yi etkinleştirmek için lütfen kişisel ayarlarınızı ziyaret edin.",
+				"exportKeyBad": "İmza anahtarı geçersiz görünüyor. Uygulamaları dışa aktarmak için özel anahtarı kullandığınızdan emin olun.",
+				"repoCommitSuccess": "Uygulama dosyası yüklendi ve sürüm başarıyla tamamlandı."
+			},
+			"exportPrivateKeyHint": "Örnek:\n-----RSA ÖZEL ANAHTARINI BAŞLAYIN-----\nANAHTAR\n-----SON RSA ÖZEL ANAHTARI-----",
+			"keyCreate": "Aktar - Yeni imzalama anahtar çifti oluştur",
+			"keyCreateInfo": "Özel anahtarınızı her zaman güvende tuttuğunuzdan emin olun. Uygulamalarınızın kabul edilebilmesi için ortak anahtarın hedef REI3 bulut sunucularına aktarılması gerekir.",
+			"keyCreateLength": "Anahtar uzunluğunu seçin",
+			"keyEntryOk0": "Uygulamayı imzalamak için özel bir anahtar seçin",
+			"keyEntryOk1": "Uygulamayı imzalamaya hazır özel anahtar",
+			"keyStoreHint": "Güvenli depolama için uçtan uca şifreleme kullanılır. Bu şifreleme yalnızca kimlik doğrulamanız kadar güçlüdür. Varsayılan kimlik bilgileriyle KULLANMAYIN!",
+			"moduleChangesOk0": "Uygulama veya bağımlılıkları için yeni sürüm(ler) oluşturun",
+			"moduleChangesOk1": "Başvuru aktarıma hazır",
+			"option": {
+				"method": {
+					"fileDownload": "Dosya olarak indir",
+					"repoUpload": "Depoya taahhüt et"
+				}
+			},
+			"repositoryCredentialsOk0": "Yazma erişimi olan depo kimlik bilgilerini girin",
+			"repositoryCredentialsOk1": "Depo kimlik bilgileri hazır",
+			"selectModule": "Uygulamayı seçin",
+			"transferTargetOk1": "Aktarım hedefi seçildi"
+		},
+		"variable": {
+			"dialog": {
+				"delete": "Bu değişkeni silmek istediğinizden emin misiniz?"
+			},
+			"edit": "Değişken '{NAME}'",
+			"formIdHint": "Değişken yalnızca atanan formun bağlamında kullanılabilir.",
+			"global": "Küresel değişken",
+			"inputOptions": "Giriş alanı olarak kullanım ayarları",
+			"noPreview": "Form tarafından atanan değişkenler için önizleme mevcut değildir. Yalnızca açık form bağlamında var olurlar.",
+			"title": "Değişkenler"
+		},
+		"widget": {
+			"collectionHint": "Widget seçilen bir koleksiyonun içeriğini gösterecektir.",
+			"dialog": {
+				"delete": "Bu widget'ı silmek istediğinizden emin misiniz?"
+			},
+			"edit": "'{NAME}' widget'ı",
+			"formHint": "Widget seçilen formun içeriğini gösterecektir.",
+			"new": "Yeni widget",
+			"sizeHint": "Widget'lar, her biri 1 veya 2 döşemelik yer kaplayan döşemeler halinde görüntülenir.",
+			"title": "Widget'lar",
+			"titleHint": "Başlık mevcut uygulama dillerine çevrilebilir. Widget'ın üst kısmında görüntülenir."
+		}
+	},
+	"calendar": {
+		"button": {
+			"ganttShowLabels": "Gruplar",
+			"ganttShowLabelsHint": "Grupları göster/gizle",
+			"ganttToggleHint": "Gün ve saat modu arasında geçiş yapın",
+			"ics": "Erişim",
+			"icsHint": "Takvime harici uygulamadan erişme",
+			"icsPublish": "Kişisel kullanım için yayınlayın"
+		},
+		"fullDay": "Tam gün",
+		"icsDesc": "Bu takvime (iCalendar, ICS) abone olmak için bu URL'yi kullanın.",
+		"icsTokenNameHint": "Cihaz adı (isteğe bağlı)",
+		"month0": "Ocak",
+		"month1": "Şubat",
+		"month10": "Kasım",
+		"month11": "Aralık",
+		"month2": "Mart",
+		"month3": "Nisan",
+		"month4": "Mayıs",
+		"month5": "Haziran",
+		"month6": "Temmuz",
+		"month7": "Ağustos",
+		"month8": "Eylül",
+		"month9": "Ekim",
+		"now": "Şimdi",
+		"nowHint": "Geçerli saati/tarihi göster",
+		"option": {
+			"calendarWeek": "CW",
+			"days1": "1 gün",
+			"days3": "3 gün",
+			"days42": "Ay",
+			"days5": "Pzt-Cum",
+			"days7": "Hafta"
+		},
+		"today": "Bugün",
+		"todayHint": "Bugün göster/seç",
+		"weekDay0": "Pazar",
+		"weekDay1": "Pazartesi",
+		"weekDay2": "Salı",
+		"weekDay3": "Çarşamba",
+		"weekDay4": "Perşembe",
+		"weekDay5": "Cuma",
+		"weekDay6": "Cumartesi",
+		"weekDayShort0": "Güneş",
+		"weekDayShort1": "Pazartesi",
+		"weekDayShort2": "Salı",
+		"weekDayShort3": "Çar",
+		"weekDayShort4": "Per",
+		"weekDayShort5": "Cuma",
+		"weekDayShort6": "Doygunluk"
+	},
+	"captionMap": {
+		"export": "İçeriği dışa aktar",
+		"import": "İçeriği içe aktar",
+		"languagesApp": "Başvuru",
+		"languagesInstance": "Gelenek",
+		"newDesc": [
+			"Özel bir çeviri eklemek için beş harfli dil kodunu seçin, örneğin: en_us, de_de, ch_ch, it_it...",
+			"Mevcut bir çevirinin üzerine yazmak istiyorsanız mevcut bir dil kodunu da ekleyebilirsiniz."
+		],
+		"title": "Altyazı haritası",
+		"titleNew": "Özel çeviri ekle"
+	},
+	"error": {
+		"APP": {
+			"001": "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.",
+			"002": "İşlem izin verilen zaman dilimi içinde tamamlanamadı. Bu sık sık oluyorsa lütfen sistem yöneticinizle iletişime geçin.",
+			"003": "Eylem iptal edildi. Lütfen tekrar deneyin.",
+			"004": "Silmeye çalıştığınız kayıt korumalıdır; silinemez.",
+			"005": "Ad verilmediğinden varlık oluşturulamadı. Lütfen bir ad belirtin.",
+			"006": "Seçilen ad geçersiz. Lütfen...<ul><li>... adının <b>(a-z)</b>.</li><li>... harfiyle başladığından emin olun. En fazla <b>60</b> karakter uzunluğunda olduğundan.</li><li>... yalnızca küçük harfler içerir <b>(a-z)</b>, <b>(_)</b> veya <b>(0-9)</b> sayılarının altını çizer.</li></ul>EÖrnekler: depolama_envanteri_post21, tesis_adresi, iletişim_kitap",
+			"007": "Başvurulan bir modül bilinmiyor.",
+			"008": "Başvurulan bir ilişki bilinmemektedir.",
+			"009": "Başvurulan bir özellik bilinmiyor."
+		},
+		"CSV": {
+			"001": "Geçersiz sayı '{VALUE}' (tamsayı bekleniyordu).",
+			"002": "Geçersiz sayı '{VALUE}' (ondalık sayı bekleniyordu).",
+			"003": "Geçersiz tarih/saat değeri '{VALUE}', beklenen biçim: {EXPECT}.",
+			"004": "Desteklenmeyen özellik türü '{VALUE}'.",
+			"005": "Yanlış sayıda alan.",
+			"006": "Şifrelenmiş öznitelikler desteklenmez."
+		},
+		"DBS": {
+			"001": "{FNC_MSG}",
+			"002": "'{NAMES}' için seçilen değer zaten başka bir kayıt tarafından kullanılıyor. 'Benzersiz' olarak tanımlanır ve yalnızca bir kez kullanılabilir.",
+			"003": "Bu kullanıcı adı zaten alınmış.",
+			"004": "Kayıt silinemiyor - '{MOD}'de hâlâ '{ATR}' olarak referans veriliyor.",
+			"005": "'{NAME}', değişikliklerin kaydedilebilmesi için bir değer gerektirir.",
+			"006": "Mevcut özellik değerleri benzersiz olmadığından benzersiz dizin oluşturulamadı.",
+			"007": "Geçersiz değer türü nedeniyle değişiklikler kaydedilemiyor.",
+			"008": "Mevcut kayıtların henüz bir değeri olmadığından ve varsayılan tanımlanmadığından gerekli değere sahip özellik oluşturulamadı."
+		},
+		"SEC": {
+			"001": "Bu işlemi tamamlama veya bu kaynağa erişme yetkiniz yok.",
+			"002": "Sistem, uçtan uca şifreleme için kişisel anahtarınızın kilidini açamadı. Bu, birisi sizin için şifrenizi değiştirdiğinde veya siz şifrenizi bu uygulamanın dışında değiştirdiğinizde meydana gelebilir.<br /><br />Lütfen kullanıcı ayarlarını açın ve kişisel anahtarınıza tekrar erişim kazanmak için talimatları izleyin.",
+			"003": "Sistem kayıt değerlerini şifreleyemedi. Lütfen tekrar deneyin.",
+			"004": "Sistem kayıt değerlerinin şifresini çözemedi. Lütfen tekrar deneyin.",
+			"005": "Sistem seçilen kayıtlar için şifre çözme anahtarlarını alamadı.",
+			"006": "Seçilen kullanıcıların tamamında uçtan uca şifreleme etkin değil; bunlar: {NAMES}",
+			"007": "Uçtan uca şifreleme, kullanıcı ayarlarında kişisel şifreleme şifrenizin girilmesini beklemektedir."
+		},
+		"TRF": {
+			"001": "Uygulama depoya kaydedilemiyor; depodaki derleme ({BUILD_REPO}) daha yeni veya yerel derleme numarasına ({BUILD_LOCAL}) eşit.",
+			"002": "Uygulama hedef depoda bulunamadı. Delta kontrollerini etkinleştirmek için uygulamanın ve en az bir sürümün depoda zaten mevcut olması gerekir.",
+			"003": "Depoda uygulama araması başarısız oldu, çok fazla kayıt bulundu."
+		},
+		"initCollection": "Oturum açma sırasında koleksiyonlar yüklenemedi: {MSG}"
+	},
+	"feedback": {
+		"button": {
+			"moreInfo": "Daha fazla bilgi"
+		},
+		"info": {
+			"admin": "<b>Yöneticiler için bilgi:</b> Geri bildirim işlevi yönetici panelinde devre dışı bırakılabilir. Etkinleştirilirse, geri bildirim geçerli olarak seçilen depoya gönderilir. Kuruluşlar, uygulama sürümlerini yönetmek ve dahili geri bildirim almak için kendi havuzlarını (<a href=\"https://store.rei3.de/#/app/lsw_repo/form/31231ad0-71c6-4396-9685-102b414a6bfb/11?login=public\" target=\"_blank\">REI3 Repository</a> uygulamasıyla) çalıştırabilirler.",
+			"data": [
+				"Geri bildirim kategorisi (genel, hata/sorun, öneri, övgü)",
+				"Geri bildirim metni",
+				"Seçilen gülen yüz",
+				"Şu anda açık olan uygulama",
+				"Uygulama ve sistem sürüm numaraları",
+				"Geri bildirimde bulunan kullanıcının yönetici olup olmadığı",
+				"Aynı sistemden gelen geri bildirimleri bir araya getirmek için rastgele bir tanımlayıcı"
+			],
+			"personal": "Hiçbir kişisel bilgi gönderilmiyor. Yanıt almak istiyorsanız geri bildirim metninize iletişim bilgilerini ekleyebilirsiniz.",
+			"repoUrl": "Geri bildirim şu adrese gönderilecek:",
+			"repoUrlDefault": "<i>(bu sistem <a href=\"https://rei3.de/\" target=\"_blank\">REI3</a> geliştiricileri tarafından işletilmektedir)</i>",
+			"what": "Ne gönderiliyor?"
+		},
+		"moduleRelated": "Bu geri bildirim açık başvuru için mi? ({NAME})",
+		"option": {
+			"codeBug": "Hata / Sorun",
+			"codeGeneric": "Genel",
+			"codePraise": "Övmek",
+			"codeSuggestion": "Telkin"
+		},
+		"repoId": "Gönder",
+		"sendNok": "Geri bildirim gönderilemedi. Lütfen daha sonra tekrar deneyin.",
+		"sendOk": "Geri bildirim başarıyla gönderildi. Teşekkür ederim!",
+		"textHint": "Geri bildiriminiz",
+		"title": "Anonim geri bildirim gönder"
+	},
+	"filter": {
+		"add": "Eklemek",
+		"contentApi": "API'si",
+		"contentData": "Veri",
+		"contentDate": "Geçerli tarih/saat",
+		"contentForm": "Mevcut form",
+		"contentLogin": "Oturum açmış kullanıcı",
+		"dialog": {
+			"ftsHelp": "Tam metin araması, büyük metinlerdeki sözcüklere veya ifadelere dayalı eşleşmeleri hızlı bir şekilde bulabilir. Tam metin araması, belirli karakterleri aramak yerine, bir arama sorgusuyla eşleşmek için kelimeleri köklerine kadar ayırır.<br /><br />Aşağıdaki arama seçenekleri mevcuttur:<ul><li>Özel kelime</li><ul><li>Arama: <b>entry</b></li><li>'entry', 'giriş', 'girişler' veya 'liste girişleri' gibi kelimeleri içeren metinleri bulacaktır.</li><li>Geçerli eşleşme: 'İlgili tüm veri girişlerini kontrol ettim.'</li></ul><li>All kelimeler</li><ul><li>Arama: <b>kahve yapma</b></li><li>'kahve yapma', hem 'make' (\"yapma\" gibi) hem de \"kahve\" (\"kahve makinesi\" gibi) ile ilgili kelimeleri içeriyorsa metinleri bulacaktır. 'Makine' kendi kelime kökü olduğundan 'kahve makinesi'ni bulamaz.</li><li>Geçerli eşleşme: 'Makineyi tamir ettik, hâlâ berbat kahve yapıyor.'</li></ul><li>AHerhangi bir kelime</li><ul><li>Arama: <b>çay veya kahve</b></li><li>'çay veya kahve', 'çay' ('çay içen' gibi) veya 'kahve' ('kahve makinesi' gibi) ile ilgili kelimeler içeriyorsa metinleri bulacaktır.</li><li>Geçerli eşleşme: 'Kahve beni gün.'</li></ul><li>Kelimeler olmadan</li><ul><li>Arama: <b>tea -coffee</b></li><li>'tea -coffee', 'çay' ile ilgili kelimeler içeriyor ancak çayla ilgili kelimeler içermiyorsa metinleri bulacaktır. 'kahve'.</li><li>Geçerli eşleşme: 'Düzenli olarak çaydan hoşlanırım.'</li></ul><li>Sonraki kelimeler</li><ul><li>Arama: <b>\"yap kahve\"</b></li><li>'\"kahve yap\"' (çift tırnak içinde), 'make' ile ilgili kelimelerin ardından 'kahve' ile ilgili kelimelerin gelmesi durumunda metinleri bulacaktır. Sıra önemlidir - kelime sırası yanlış olduğundan 'kahve yapımı' içeren metinler dahil edilmeyecektir.</li><li>Geçerli eşleşme: 'Öğle yemeği molasını meslektaşlarım için kahve yaparak geçireceğim.'</li></ul></ul>"
+		},
+		"getterHint": "Parametre adı",
+		"javascriptHint": "Örn.: return new Date().getFullYear();",
+		"nestingMain": "Ana sorgu",
+		"nestingSub": "Alt sorgu",
+		"nowOffsetHint": "+/- X {MODE}",
+		"nowOffsetTitle": "Şu andan itibaren X gün/saat/dakika/saniye sonra ekleyin (pozitif sayı) veya kaldırın (negatif sayı).",
+		"operatorsArray": "Sıralamak",
+		"operatorsFts": "Tam metin araması",
+		"operatorsNull": "Boş değer",
+		"operatorsRegex": "Düzenli ifade",
+		"operatorsSets": "Alt küme",
+		"operatorsSize": "Sayı",
+		"operatorsText": "Metin",
+		"option": {
+			"connector": {
+				"AND": "VE",
+				"OR": "VEYA"
+			},
+			"content": {
+				"attribute": "bağlanmak",
+				"collection": "koleksiyon",
+				"field": "alan değeri",
+				"fieldChanged": "alan değiştirildi",
+				"fieldValid": "alan geçerli",
+				"formChanged": "formda kaydedilmemiş değişiklikler var",
+				"formState": "form durumu",
+				"getter": "URL parametresi",
+				"globalSearch": "kullanıcı arama girişi",
+				"javascript": "JavaScript",
+				"languageCode": "kullanıcı dili",
+				"login": "Kullanıcı kimliği",
+				"nowDate": "tarih",
+				"nowDatetime": "tarih + saat",
+				"nowTime": "zaman",
+				"preset": "önceden ayarlanmış kayıt",
+				"record": "kayıt kimliği",
+				"recordMayCreate": "kayıt oluşturulabilir",
+				"recordMayDelete": "kayıt silinebilir",
+				"recordMayUpdate": "kayıt güncellenebilir",
+				"recordNew": "kayıt yeni",
+				"role": "kullanıcının rolü var",
+				"subQuery": "alt sorgu",
+				"true": "gerçek değer",
+				"value": "sabit değer",
+				"variable": "değişken değer"
+			},
+			"contentHint": {
+				"attribute": "Geçerli sorgudaki değeri ilişkilendirin.",
+				"collection": "Seçilen koleksiyon sütunundan bir veya daha fazla değer. Birden fazla değeri karşılaştırırken '@>', '<@' veya '&&' operatörlerini kullanın.",
+				"field": "Geçerli alan değeri.",
+				"fieldChanged": "DOĞRU/YANLIŞ, alan değerinin değişip değişmediğine bağlı olarak.",
+				"fieldValid": "Alan değerinin o anda geçerli olup olmamasına bağlı olarak DOĞRU/YANLIŞ.",
+				"formChanged": "Formda halihazırda kaydedilmemiş değişikliklerin bulunup bulunmadığına bağlı olarak DOĞRU/YANLIŞ.",
+				"formState": "Seçilen form durumunun o anda etkin olup olmamasına bağlı olarak DOĞRU/YANLIŞ.",
+				"getter": "Bir URL parametresinin değeri, örneğin 'https://system?param=123'; 'param' adı ve '123' değeri.",
+				"globalSearch": "Genel arama giriş alanının metin değeri.",
+				"javascript": "Verilen Javascript ifadesinin dönüş değeri.",
+				"languageCode": "Geçerli kullanıcının seçilen kullanıcı dili kodu (en_us, de_de, ...).",
+				"login": "Geçerli kullanıcının kimliği (tamsayı).",
+				"nowDate": "Tarih değerleriyle karşılaştırılacak geçerli tarih (bugün).",
+				"nowDatetime": "Tarih + saat değerleriyle karşılaştırılacak geçerli tarih + saat (bugün bu saniyede).",
+				"nowTime": "Zaman değerleriyle karşılaştırılacak geçerli saat (bu saat/dakika/saniye).",
+				"preset": "Verilen ön ayarlı kaydın kimliği (tamsayı).",
+				"record": "Bu formdaki geçerli kaydın kimliği (tamsayı, ilişki 0).",
+				"recordMayCreate": "Yeni kayıt(lar) oluşturulabiliyorsa TRUE (ilişki izinlerine, birleştirme ayarlarına göre).",
+				"recordMayDelete": "Açık kayıt(lar) silinebiliyorsa DOĞRU (ilişki izinlerine, birleştirme ayarlarına, politikalara bağlı olarak).",
+				"recordMayUpdate": "Açık kayıt(lar) güncellenebiliyorsa TRUE (ilişki izinlerine, birleştirme ayarlarına, politikalara göre).",
+				"recordNew": "Geçerli kaydın bu formda yeni olup olmamasına bağlı olarak DOĞRU/YANLIŞ.",
+				"role": "Geçerli kullanıcıya verilen rolün atanıp atanmadığına bağlı olarak DOĞRU/YANLIŞ.",
+				"subQuery": "Verilen alt sorgunun dönüş değeri.",
+				"true": "Diğer TRUE değerleri ile karşılaştırılacak TRUE değeri.",
+				"value": "Karşılaştırılacak statik bir değer.",
+				"variable": "Geçerli değişken değeri."
+			},
+			"nowMode": {
+				"days": "günler",
+				"hours": "saat",
+				"minutes": "dk.",
+				"seconds": "sn."
+			},
+			"operator": {
+				"arrContained": "tarafından kapsanan",
+				"arrContains": "içerir",
+				"arrOverlap": "ile örtüşüyor",
+				"eq": "eşit",
+				"eqAny": "dahil",
+				"fts": "içerir (tam metin araması)",
+				"ilike": "içerir",
+				"le": "daha büyük/eşit",
+				"like": "içerir (eşleşme durumu)",
+				"lt": "daha büyük",
+				"ne": "eşit olmayan",
+				"neAll": "dahil değildir",
+				"not_ilike": "içermiyor",
+				"not_like": "içermiyor (eşleşme durumu)",
+				"not_null": "boş değil",
+				"null": "boş",
+				"rxMatch": "normal ifadeyle eşleşir (eşleşme durumu)",
+				"rxMatchI": "normal ifadeyle eşleşir",
+				"rxMatchNo": "normal ifadeyle eşleşmiyor (büyük/küçük harf eşleşiyor)",
+				"rxMatchNoI": "normal ifadeyle eşleşmiyor",
+				"se": "daha küçük/eşit",
+				"st": "daha küçük"
+			}
+		},
+		"queryAggregatorNull": "toplama yok",
+		"queryShow": "Alt sorguyu göster",
+		"searchDictionaryHint": "Kullanılan sözlük - arama girişini ve beklenen sonuç metinlerini yansıtmalıdır. Kullanıcı ayarlarına ek sözlükler eklenebilir.",
+		"searchDictionarySimple": "[Sözlük yok]",
+		"searchDictionarySimpleHint": "Bu seçenek, beklenen sonuç metinlerine atanmış bir sözlüğün olmadığı durumlar içindir.",
+		"subQueryAggregator": "Agrega",
+		"valueHint": "Metin veya sayı değeri"
+	},
+	"form": {
+		"bulkTouched": "Değer güncellenecek",
+		"button": {
+			"favorite": "Formu favori olarak kaydet",
+			"help": "Yardım",
+			"helpHint": "Yardım sayfalarını göster",
+			"log": "Günlükler",
+			"logHint": "Değişiklik günlüklerini aç",
+			"urlHint": "URL'yi panoya kopyala"
+		},
+		"dialog": {
+			"bulkEncrypted": "Şifrelenmiş veriler için toplu güncelleme şu anda desteklenmemektedir.",
+			"bulkMultiple": "Birden çok ilişkiyle toplu güncelleme şu anda desteklenmemektedir.",
+			"delete": "Bu kaydı <b>kalıcı olarak</b> silmek istediğinizden emin misiniz?",
+			"encrypted": "Alan içeriği sunucuya gönderilmeden önce sisteminizde şifrelenecektir.",
+			"new": "Kaydedilmemiş değişiklikler var.<br /><br />Hala yeni bir kayıt açmak istiyor musunuz?",
+			"newReset": "Bu, tüm girişlerinizi sıfırlayacaktır.<br /><br />Devam etmek istiyor musunuz?",
+			"prev": "Kaydedilmemiş değişiklikler var.<br /><br />Hala geri dönmek istiyor musun?",
+			"prevBrowser": "Kaydedilmemiş değişiklikler var; devam ederseniz bunlar kaybolacak. Hala devam etmek istiyor musun?"
+		},
+		"invalidInputs": "Girişleri kontrol edin!",
+		"message": {
+			"recordCreated": "Kayıt oluşturuldu",
+			"recordDeleted": "Kayıt silindi",
+			"recordEncrypting": "Kayıt şifreleniyor...",
+			"recordUpdated": "Kayıt güncellendi",
+			"recordValueCopied": "Panoya kopyalandı"
+		},
+		"noAccess": "Erişim yok"
+	},
+	"formLog": {
+		"button": {
+			"closeSidebar": "Kenar çubuğunu kapat",
+			"filterByAttribute": "Yalnızca seçili alan için değişiklikleri göster"
+		},
+		"deletedUser": "Kullanıcı silindi",
+		"fileCreated": "Dosya eklendi",
+		"fileDeleted": "Dosya silindi",
+		"fileRenamed": "Dosya yeniden adlandırıldı",
+		"fileUpdated": "Dosya güncellendi",
+		"title": "Günlükleri değiştir"
+	},
+	"fullTextSearch": {
+		"dictionary": {
+			"arabic": "Arapça",
+			"danish": "Danimarka",
+			"dutch": "Flemenkçe",
+			"english": "İngilizce",
+			"finnish": "Fince",
+			"french": "Fransızca",
+			"german": "Almanca",
+			"greek": "Yunan",
+			"hungarian": "Macarca",
+			"indonesian": "Endonezya dili",
+			"irish": "İrlandalı",
+			"italian": "İtalyan",
+			"lithuanian": "Litvanyalı",
+			"nepali": "Nepalce",
+			"norwegian": "Norveççe",
+			"portuguese": "Portekizce",
+			"romanian": "Romen",
+			"russian": "Rusça",
+			"spanish": "İspanyol",
+			"swedish": "İsveççe",
+			"tamil": "Tamilce",
+			"turkish": "Türkçe",
+			"simple": "[Seçilmedi]"
+		}
+	},
+	"generic": {
+		"action": "Aksiyon",
+		"actions": "Eylemler",
+		"active": "Aktif",
+		"after": "Sonrasında",
+		"aggregator": "Agrega",
+		"aggregatorItem": {
+			"array": "sıralamak",
+			"avg": "ortalama",
+			"count": "saymak",
+			"json": "JSON",
+			"list": "virgül listesi",
+			"max": "maksimum",
+			"min": "minimum",
+			"record": "[tek kayıt]",
+			"sum": "toplam"
+		},
+		"alignment": "Hizalama",
+		"alignmentHor": {
+			"center": "merkez",
+			"justify": "savunmak",
+			"left": "sol",
+			"right": "Sağ"
+		},
+		"alignmentVer": {
+			"bottom": "alt",
+			"middle": "orta",
+			"top": "tepe"
+		},
+		"api": "API'si",
+		"apis": "API'ler",
+		"appName": "REI3",
+		"appWebsite": "https://rei3.de",
+		"application": "Başvuru",
+		"applications": "Uygulamalar",
+		"arguments": "Argümanlar",
+		"articles": "Yardım makaleleri",
+		"attribute": "Bağlanmak",
+		"attributes": "Nitelikler",
+		"author": "Yazar",
+		"automatic": "otomatik",
+		"available": "Mevcut",
+		"before": "Önce",
+		"boolTrue": "Doğru",
+		"boolFalse": "YANLIŞ",
+		"border": "Sınır",
+		"bright": "Parlak",
+		"busy": "Çalışıyor - İptal etmek için burayı tıklayın",
+		"button": {
+			"add": "Ekle",
+			"addToField": "Alana ekle",
+			"all": "Tüm",
+			"apply": "Uygula",
+			"attach": "Eklemek",
+			"cancel": "İptal etmek",
+			"clear": "Temizlemek",
+			"close": "Kapat",
+			"copy": "Kopyala",
+			"copyClipboard": "Panoya kopyala",
+			"create": "Oluştur",
+			"createNew": "Oluştur+Yeni",
+			"delete": "Silmek",
+			"deleteHint": "Kaydı kalıcı olarak sil ve geri dön",
+			"deleteNewHint": "Kaydı sil ve yenisini aç",
+			"deleteSelected": "Seçileni sil",
+			"download": "İndirmek",
+			"edit": "Düzenlemek",
+			"editBulk": "Düzenle ({COUNT})",
+			"enable": "Olanak vermek",
+			"empty": "Boş",
+			"expert": "Gelişmiş",
+			"export": "İhracat",
+			"filter": "Filtre",
+			"filterHint": "Sonuçları filtrele",
+			"functionExec": "İşlevi yürüt",
+			"goBack": "Geri gitmek",
+			"hide": "Saklamak",
+			"import": "İçe aktarmak",
+			"new": "Yeni",
+			"newHint": "Yeni kayıt oluştur",
+			"ok": "Tamam",
+			"open": "Açık",
+			"openBuilder": "Builder Aç",
+			"paste": "Yapıştır",
+			"pdfCreate": "PDF'yi oluştur",
+			"read": "Okumak",
+			"refresh": "Yeniden yükle",
+			"refreshHint": "Kaydı yeniden yükle",
+			"relog0": "Daha sonra tekrar giriş yapın",
+			"relog1": "Şimdi yeniden giriş yapın",
+			"remove": "Kaldırmak",
+			"reset": "Sıfırla",
+			"restore": "Eski haline getirmek",
+			"retrieve": "Geri almak",
+			"save": "Kaydetmek",
+			"saveBulk": "Kaydet ({COUNT})",
+			"saveCloseHint": "Değişiklikleri kaydedin ve geri dönün",
+			"saveHint": "Değişiklikleri kaydet",
+			"saveNew": "Kaydet+Yeni",
+			"saveNewHint": "Değişiklikleri kaydedin ve yeni kayıt açın",
+			"selectAll": "Tümünü seç",
+			"selectAllShort": "Tüm",
+			"send": "Göndermek",
+			"show": "Göstermek",
+			"showAll": "Tümünü göster",
+			"tryAnyway": "Yine de dene",
+			"undo": "Geri al",
+			"unlock": "Kilidi aç",
+			"update": "Güncelleme",
+			"valueRead": "Değeri oku",
+			"valueWrite": "Değer yaz",
+			"zoomReset": "Yakınlaştırma düzeyini sıfırla"
+		},
+		"category": "Kategori",
+		"certificate": "Sertifika",
+		"changedBy": "Değiştiren:",
+		"clientEvent": "Müşteri etkinliği",
+		"clientEvents": "Müşteri etkinlikleri",
+		"clipboard": "Pano",
+		"collection": "Koleksiyon",
+		"collections": "Koleksiyonlar",
+		"color": "Renk",
+		"colorFill": "Rengi doldur",
+		"colorFillRowsEven": "Satırları eşit şekilde renkle doldurun",
+		"colorFillRowsOdd": "Dolgu rengi, tek satırlar",
+		"column": "Kolon",
+		"columns": "Sütunlar",
+		"columnsActive": "Aktif sütunlar",
+		"columnsAvailable": "Mevcut sütunlar",
+		"columnSettings": "Sütun ayarları",
+		"comment": "Yorum",
+		"comments": "Yorumlar",
+		"conditions": "Koşullar",
+		"content": "İçerik",
+		"contextHelp": "Bağlam yardımı",
+		"dark": "Karanlık",
+		"data": "Veri",
+		"dataRetrieval": "Veri alma",
+		"date": "Tarih",
+		"dateFormat0": "Y-a-g (2012-12-30)",
+		"dateFormat1": "Y/a/g (2012/12/30)",
+		"dateFormat2": "d.m.Y (30.12.2012)",
+		"dateFormat3": "g/a/Y (30/12/2012)",
+		"dateFormat4": "a/g/Y (30/12/2012)",
+		"default": "Varsayılan",
+		"defaultValue": "Varsayılan değer",
+		"description": "Tanım",
+		"details": "Detaylar",
+		"dialog": {
+			"close": "Kaydedilmemiş değişiklikler var. Devam ederseniz değişiklikleriniz kaybolacak.<br /><br />Devam etmek istiyor musunuz?",
+			"confirm": "Lütfen onaylayın",
+			"logoutComing": "Güvenlik nedeniyle, oturum açma kimlik bilgilerinizi arada sırada yeniden girmeniz gerekir.<br /><br /><b>{DATE}</b> adresinde oturumunuz otomatik olarak kapatılacaktır.<br /><br />Lütfen değişikliklerinizi bundan önce kaydedin.<br /><br />",
+			"logoutComingTitle": "Oturumu kapatmak üzeresiniz",
+			"maintenanceComing": "Sistemin <b>{DATE}</b> tarihinde bakım moduna geçmesi planlanıyor. Lütfen değişikliklerinizi bundan önce kaydedin.",
+			"systemMsg": "Sistem mesajı"
+		},
+		"direction": "Yön",
+		"disabled": "Etkin değil",
+		"displayed": "Görüntülendi",
+		"distincted": "Belirgin",
+		"document": "Belge",
+		"documents": "Belgeler",
+		"effects": "Efektler",
+		"encryption": "Şifreleme",
+		"error": {
+			"nameTaken": "Ad zaten alınmış, lütfen başka bir ad seçin.",
+			"nameTooLong": "Ad çok uzun, maks. izin verilen uzunluk {LEN} karakterdir.",
+			"noSecureContext": "REI3 Builder'ın doğru çalışması için güvenli bir bağlam gerekir. Sisteme HTTPS üzerinden veya localhost üzerinden erişin."
+		},
+		"errorTitle": "Hata",
+		"event": "Etkinlik",
+		"everything": "Her şey",
+		"expert": "Uzman",
+		"favorites": "Favoriler",
+		"favoritesEmpty": "Hiçbir favori kaydedilmedi",
+		"field": "Alan",
+		"fields": "Alanlar",
+		"filename": "Dosya adı",
+		"file": "Dosya",
+		"files": "Dosyalar",
+		"filters": "Filtreler",
+		"font": "Yazı tipi",
+		"footer": "Altbilgi",
+		"form": "Biçim",
+		"forms": "Formlar",
+		"formActions": "Form eylemleri",
+		"formOpen": "Formu aç",
+		"fullscreenSwitchTo": "Tam ekran modunu değiştir",
+		"functions": "Fonksiyonlar",
+		"gap": "Açıklık",
+		"global": "Küresel",
+		"globalSearch": "Küresel arama",
+		"groupBy": "Gruplandırma ölçütü",
+		"header": "Başlık",
+		"help": "Yardım",
+		"hidden": "Gizlenmiş",
+		"home": "Ev",
+		"homepage": "Ana sayfa",
+		"hotkey": "Kısayol tuşu",
+		"icon": "Simge",
+		"icons": "Simgeler",
+		"id": "İD",
+		"index": "Dizin",
+		"information": "Bilgi",
+		"inputDecimal": "Değer ondalık olmalıdır",
+		"inputInvalid": "Değer geçersiz",
+		"inputLarge": "Değer çok büyük (maks. {MAX})",
+		"inputLong": "Değer çok uzun (maks. {MAX})",
+		"inputRequired": "Gerekli giriş",
+		"inputSelectMore": "...sonuçları filtrelemek için metni girin",
+		"inputShort": "Değer çok kısa (min. {MIN})",
+		"inputSmall": "Değer çok küçük (min. {MIN})",
+		"inputTooFewFiles": "Çok az dosya",
+		"inputTooManyFiles": "Çok fazla dosya",
+		"inputs": "Girişler",
+		"install": "Düzenlemek",
+		"internalName": "Ad, dahili referans görevi görür; kullanıcılara gösterilmez.",
+		"interval": "Aralık",
+		"jsFunction": "İşlev (ön)",
+		"jsFunctions": "İşlevler (ön)",
+		"keyPrivate": "Özel anahtar",
+		"keyPublic": "Ortak anahtar",
+		"label": "Etiket",
+		"language": "Dil",
+		"lengthChars": "Uzunluk (karakter)",
+		"less": "Az",
+		"licenseRequired": "Lisans gerektirir",
+		"limit": "Sınır",
+		"list": "Liste",
+		"login": "Giriş yapmak",
+		"loginForm": "Giriş formu",
+		"loginForms": "Giriş formları",
+		"loginTemplate": "Kullanıcı şablonu",
+		"loginTemplateHint": "Yeni bir kullanıcı oluşturulduğunda, önceden tanımlanmış ayarlar seçilen şablondan bir kez uygulanır. Burada hiçbir şey seçilmezse global şablon kullanılır.",
+		"maintenance": "Bakım",
+		"manual": "Manuel",
+		"menu": "Menü",
+		"menus": "Menüler",
+		"menusSub": "Alt menüler",
+		"missingCaption": "EKSİK BAŞLIK",
+		"module": "Başvuru",
+		"monospace": "Tek uzay",
+		"more": "Daha",
+		"name": "İsim",
+		"noLimit": "sınır yok",
+		"notSaved": "Kaydedilmedi",
+		"notShown": "Gösterilmiyor",
+		"nothingInstalled": "Hiçbir uygulama yüklü değil.",
+		"nothingSelected": "Hiçbir şey seçilmedi",
+		"nothingThere": "Sonuç yok",
+		"notice": "Fark etme",
+		"numberSepDecimal": "Ondalık ayırıcı",
+		"numberSepThousand": "Binlik ayırıcı",
+		"option": {
+			"all": "Tümü",
+			"modifierKey": {
+				"ALT": "alternatif",
+				"CMD": "kazan/cmd",
+				"CTRL": "Ctrl",
+				"SHIFT": "vardiya"
+			},
+			"no": "HAYIR",
+			"numberSeparator": {
+				"apos": "Kesme işareti (')",
+				"comma": "Virgül (,)",
+				"dot": "Nokta (.)",
+				"mdot": "Orta nokta (·)",
+				"none": "[ayırıcı yok]",
+				"space": "Uzay ( )"
+			},
+			"size0": "en küçük",
+			"size1": "küçük",
+			"size2": "varsayılan",
+			"size3": "büyük",
+			"size4": "en büyük",
+			"sortAsc": "artan",
+			"sortDesc": "alçalan",
+			"yes": "Evet"
+		},
+		"optional": "İsteğe bağlı",
+		"options": "Seçenekler",
+		"order": "Emir",
+		"orientation": "Oryantasyon",
+		"orientationLandscape": "Manzara",
+		"orientationPortrait": "Portre",
+		"overwrite": "Üzerine yaz",
+		"overwrites": "Üzerine yazar",
+		"page": "Sayfa",
+		"password": "Şifre",
+		"pdf": "PDF",
+		"pdfs": "PDF'ler",
+		"pgFunction": "İşlev (geri)",
+		"pgFunctions": "İşlevler (geri)",
+		"placeholders": "Yer tutucular",
+		"postfix": "Sonek",
+		"prefix": "Önek",
+		"preview": "Önizleme",
+		"properties": "Özellikler",
+		"queryChoices": "Filtre setleri",
+		"readonly": "Salt okunur",
+		"record": "Kayıt",
+		"relation": "İlişki",
+		"relations": "İlişkiler",
+		"relationship": "İlişki",
+		"relationships": "İlişkiler",
+		"repository": "Depo",
+		"required": "Gerekli",
+		"results": "{CNT} sonuçları",
+		"resultsNone": "- sonuç yok -",
+		"resultsOf": "/ {CNT}",
+		"resultRow": "Sonuç satırı",
+		"returns": "İade",
+		"role": "Rol",
+		"roles": "Roller",
+		"row": "Sıra",
+		"rows": "Satırlar",
+		"search": "Aramak",
+		"searchBar": "Arama çubuğu",
+		"searchBars": "Arama çubukları",
+		"searchCompleted": "Arama tamamlandı",
+		"searchRunning": "Arama çalışıyor",
+		"selected": "Seçildi",
+		"selectedMaxOne": "Seçildi (maks. 1)",
+		"settings": "Ayarlar",
+		"shadows": "Gölgeler",
+		"showDefault0": "Varsayılan olarak gösterilmiyor",
+		"showDefault1": "Varsayılan olarak göster",
+		"showDefaultMobile0": "Mobil cihazlarda varsayılan olarak gösterilmez",
+		"showDefaultMobile1": "Mobil cihazlarda varsayılan olarak göster",
+		"size": "Boyut",
+		"sizeX": "Genişlik",
+		"sizeY": "Yükseklik",
+		"spacing": "Aralık",
+		"spacingCell": "Hücre aralığı",
+		"sqlPreview": "SQL önizleme",
+		"source": "Kaynak",
+		"sources": "Kaynaklar",
+		"standard": "Standart",
+		"state": "Durum",
+		"status": "Durum",
+		"styles": "Stiller",
+		"system": "Sistem",
+		"systemModes": "Sistem modları",
+		"tab": "Sekme",
+		"text": "Metin",
+		"textSearch": "Metin arama",
+		"threeDots": "...",
+		"tip": "Uç",
+		"title": "Başlık",
+		"token": "Jeton",
+		"transfer": "Aktarım",
+		"type": "Tip",
+		"unassigned": "Atanmamış",
+		"uninstall": "Kaldır",
+		"update": "Güncelleme",
+		"updated": "Güncellendi",
+		"url": "URL",
+		"username": "Kullanıcı adı",
+		"value": "Değer",
+		"valueExpected": "Beklenen değer",
+		"variable": "Değişken",
+		"variables": "Değişkenler",
+		"version": "Sürüm",
+		"versionApp": "Uygulama sürümü",
+		"versionAppNew": "Yeni uygulama sürümü",
+		"versionHistory": "Sürüm geçmişi",
+		"versionNew": "Yeni sürüm",
+		"versionPlatform": "Platform sürümü",
+		"visibility": "Görünürlük",
+		"visible": "Görünür",
+		"warnings": "Uyarılar",
+		"widget": "Widget",
+		"widgets": "Widget'lar",
+		"wrap": "Dürüm",
+		"zoom": "Yakınlaştır"
+	},
+	"globalSearch": {
+		"button": {
+			"dictReset": "Kullanıcı diline sıfırla",
+			"fullTextSearch": "Tam metin aramasını destekler",
+			"openAsPopUp": "Pop-up olarak aç",
+			"openAsPopUpMobile": "Aniden belirmek",
+			"showHeader": "Sütun başlıkları",
+			"showHeaderMobile": "Sütunlar"
+		},
+		"help": {
+			"ftsDict": [
+				"Arama sorgusunun hangi dilde yazılacağını tanımlar.",
+				"Bu, birkaç karakter içeren sözcüklerin veya adların bulunmasına yardımcı olmaz; ancak arama sorgusunun dilini bilerek sistem tam metin arama özelliklerinden yararlanabilir.",
+				"Tam metin araması desteklendiğinde, arama başlık çubuğunda ilgili bir mesaj görüntülenir; arama seçenekleri hakkında daha fazla ayrıntı almak için üzerine tıklayın."
+			],
+			"ftsDictTitle": "Giriş dilini arayın"
+		},
+		"inputPlaceholder": "İsimleri, kelimeleri veya e-posta adreslerini yazın",
+		"modulesInactive": "Ek arama seçenekleri",
+		"tips": [
+			"<b>CTRL + SHIFT + F</b> tuşlarına basılarak REI3'ün herhangi bir yerinden yeni bir arama başlatılabilir. Metin seçilirse arama girişi olarak kullanılacaktır.",
+			"İsimleri, kelimeleri veya e-posta adreslerini ararken bunları tam olarak yazın.",
+			"Çok dilli içerik aranıyorsa, arama sorgunuzun dilini (sağ üst köşe) ayarlamanız önemlidir.",
+			"'Yapma' ile 'yapma'yı eşleştirmek gibi dile özgü aramalar, içeriğin tanımlanmış bir dili varsa işe yarar. Bu genellikle makaleler için anlamlıdır ancak e-postalar için genellikle yapılmaz."
+		]
+	},
+	"home": {
+		"button": {
+			"goToApps": "Dosya içe aktarmayı aç",
+			"goToLogins": "Rolleri atayın",
+			"goToRepo": "Depoyu aç",
+			"installBundle": "Core Company'yi yükleyin"
+		},
+		"newVersion": "Bildirimi güncelle",
+		"newVersionText": "REI3'ün yeni bir sürümü mevcut.<br /><br /><a href=\"https://rei3.de/en/downloads\" target=\"_blank\">REI3'ü indirin v{VERSION}</a>",
+		"noAccess": "Henüz erişim izni verilmedi.<br />Lütfen sistem yöneticinizle iletişime geçin.",
+		"noAccessAdmin": "Erişim elde etmek için kullanıcınıza roller atayın.",
+		"noAccessTitle": "Uygulamalara erişim yok",
+		"wizard": {
+			"installBundle": "Çekirdek Şirket",
+			"installBundleDesc": "Her kuruluş için yararlı olan, önceden paketlenmiş bir dizi temel uygulama yükleyin. 'Çekirdek Şirket' seti şunları içerir:<ul><li>Yokluk yönetimi</li><li>Zaman takibi</li><li>Proje ve görev yönetimi</li><li>İstek yönetimi</li><li>A şifre güvenliği</li><li>IT varlığı yönetim</li></ul>AKurulumdan sonra, her birinin ilk kurulumu hakkında daha fazla bilgi edinmek için lütfen ayrı ayrı uygulama yardım sayfalarına göz atın.",
+			"installFile": "Dosyadan",
+			"installFileDesc": "Uygulamaları yerel REI3 dosyalarından yükleyin. Çevrimdışı sistemler veya kendi kendine yapılan uygulamalar için.<br /><br />Kamuya sunulan REI3 uygulamalarına ilişkin dosyalar, resmi <a href=\"https://rei3.de/en/downloads\" target=\"_blank\"> deposundan</a> indirilebilir.",
+			"installRepo": "Depodan",
+			"installRepoDesc": "<b>İnternet erişimi gereklidir</b><br /><br />Resmi REI3 deposundan uygulamaları yükleyin. Depo, halka açık REI3 uygulamalarının güncel sürümlerini içerir.<br /><br />Tüm uygulamalar incelenir ve dijital olarak imzalanır.",
+			"intro": "REI3'e hoş geldiniz<br /><br />Şu anda yüklü uygulama yok. REI3'ü kullanmaya başlamak için lütfen aşağıdaki kurulum seçeneklerinden birini seçin.<br /><br />Veya kendi REI3 uygulamalarınızı nasıl oluşturacağınızı öğrenmek için <a href=\"https://rei3.de/en/docs/builder\" target=\"_blank\">belgelerimizi</a> ziyaret edin.",
+			"title": "Kurulum"
+		}
+	},
+	"input": {
+		"barcode": {
+			"capture": "Kamera görüntüsünden kod yakalayın",
+			"deviceMissing": "'Kamera' türünde giriş cihazı bulunamadı. Lütfen tekrar deneyin.",
+			"deviceSelect": "Lütfen bir giriş cihazı seçin",
+			"formatInvalidValue": "Değer, seçilen format tarafından desteklenmiyor.",
+			"formatMissing": "Lütfen değeri görüntülemek için bir format seçin:",
+			"formatResetHint": "Değeri görüntülemek için kod biçimini değiştirin"
+		},
+		"date": {
+			"button": {
+				"todayHint": "Bugün/şimdi",
+				"viewHint": "Görünümü değiştir"
+			},
+			"dateFrom": "İtibaren",
+			"dateTo": "İle",
+			"fullDayHint": "Tüm gün seçimi",
+			"inputDay": "gg",
+			"inputHour": "--",
+			"inputMinute": "--",
+			"inputMonth": "mm",
+			"inputSecond": "--",
+			"inputYear": "yyyy"
+		},
+		"files": {
+			"button": {
+				"copyHint": "Seçilen dosyaları başka bir dosya girişine yapıştırmak için kopyalayın.",
+				"downloadHint": "Dosyayı indir",
+				"fileRequestHint": "Dosyayı bilgisayarınızda yerel olarak düzenleyin. R3 istemci uygulamasını gerektirir (kullanıcı ayarlarından yüklenebilir). Sistem bakım modundaysa çalışmaz.",
+				"pasteHint": "Kopyalanan dosyaları bu dosya girişine yapıştırın."
+			},
+			"dropTarget": "Yüklemek için dosyaları buraya bırakın",
+			"fileChanged": "Değiştirildi",
+			"fileName": "Dosya adı",
+			"fileSize": "Dosya boyutu",
+			"tooLarge": "'{NAME}' dosyası yüklenemiyor, maks. izin verilen boyut {SIZE}'dir.",
+			"unsaved": "(kaydedilmemiş)"
+		},
+		"hotkey": {
+			"charHint": "1 karakter (a-z, 0-9)"
+		},
+		"iframe": {
+			"empty": "URL ayarlanmadı - gösterilecek bir şey yok"
+		}
+	},
+	"list": {
+		"aggregators": "Sonuçları toplulaştır",
+		"autoRenew": "Otomatik yenileme",
+		"autoRenewInput": "Her X saniyede bir yenile",
+		"button": {
+			"aggregatorsHint": "Sonuçları toplulaştır",
+			"all": "Tüm",
+			"allHint": "Tüm sonuçları seç",
+			"autoRenew": "{VALUE}'ler",
+			"autoRenewHint": "Verileri her {VALUE} saniyede bir yenile",
+			"collapseHeader": "Liste başlığını göster/gizle",
+			"columnFilters": "Sütun filtrelerini göster (kaldırmak için sağ tıklayın)",
+			"columnOrderFlip": "Ters sıra (kaldırmak için sağ tıklayın)",
+			"csv": "CSV",
+			"csvHint": "Kayıtları virgülle ayrılmış değerler dosyası aracılığıyla içe/dışa aktarma"
+		},
+		"cardsCaptions": "Etiketleri göster",
+		"columnFilter": {
+			"contains": "İçerir"
+		},
+		"csvAction": "Aksiyon",
+		"csvBool": "Boole dizeleri",
+		"csvCommaChar": "Alan sınırlayıcı",
+		"csvDate": "Tarih formatı",
+		"csvDatetime": "Tarihsaat biçimi",
+		"csvFile": "CSV dosyası",
+		"csvHasHeader": "Başlık satırı",
+		"csvLineError": "{COUNT} satırında hata:",
+		"csvLoadError": "CSV dosyası yüklenemedi. Lütfen tekrar deneyin.",
+		"csvTime": "Zaman formatı",
+		"csvTimeHint": "15:04:05",
+		"csvTimezone": "Saat dilimi",
+		"csvTotalLimit": "Satır sayısı (0 = tümü)",
+		"dialog": {
+			"delete": "Seçilen kayıtları <b>kalıcı olarak</b> silmek istediğinizden emin misiniz?"
+		},
+		"displayMode": "Ekran modu",
+		"fetching": "Veriler alınıyor...",
+		"globalSettings": "Genel ayarlar",
+		"inputHintCreate": "Yeni kayıt oluştur",
+		"inputHintOpen": "Kaydı aç",
+		"inputHintRemove": "Kaydı kaldır",
+		"inputPlaceholderAdd": "...daha fazlasını ekle",
+		"message": {
+			"csvExport": "CSV dışa aktarımı filtreleri ve geçerli listeden sıralamayı kullanır.",
+			"csvImport": "CSV içe aktarma işlemi, aşağıda gösterilen listeden {COUNT} alanlarının her satır için aynı sırada olmasını gerektirir.",
+			"csvImportSuccess": "{COUNT} satırları içe aktarıldı",
+			"csvImportWarning": "Uyarı! Bu liste, verileri CSV dosyaları aracılığıyla içe aktarabilir. Bazı sütunlar gerekli olabilir; sırayı değiştirmek sorun yaratmaz ancak sütunları kaldırmak, içe aktarma işleminin başarısız olmasına neden olabilir."
+		},
+		"option": {
+			"csvExport": "ihracat",
+			"csvImport": "içe aktarmak",
+			"layoutCards": "Kartlar",
+			"layoutTable": "Masa"
+		},
+		"orderBy": "Sırala",
+		"pageLimit": "Sayfa başına sonuçlar",
+		"quick": "Sonuçları tüm sütunlarda filtrele"
+	},
+	"settings": {
+		"account": {
+			"button": {
+				"loginOptionsDel": "Tüm saha ayarlarını sıfırla"
+			},
+			"dialog": {
+				"loginOptionsDel": "<p>Bu, liste sıralama, görünür sütunlar, filtreler vb. gibi tüm alan ayarlarını varsayılan değerlerine sıfırlayacaktır.</p><p>Devam etmek istiyor musunuz?</p>"
+			},
+			"messagePwCurrentWrong": "Mevcut şifre geçersiz",
+			"messagePwDiff": "Şifreler eşleşmiyor",
+			"messagePwRequiresDigit": "Şifre bir rakam içermelidir",
+			"messagePwRequiresLower": "Şifre küçük harf içermelidir",
+			"messagePwRequiresSpecial": "Şifre özel bir karakter içermelidir (!, ?, #, vb.)",
+			"messagePwRequiresUpper": "Şifre büyük harf içermelidir",
+			"messagePwShort": "Şifre çok kısa",
+			"nodeName": "Bağlantılı olduğu yer: {NAME}",
+			"pwChangeNotAllowed": "Oturum açma verileri harici olarak yönetilir",
+			"pwNew0": "Yeni Şifre",
+			"pwNew1": "Yeni şifre (tekrarlandı)",
+			"pwOld": "Mevcut Şifre",
+			"titlePwChange": "Şifre değiştir"
+		},
+		"boolAsIcon": "Simgeler olarak Boolean değerleri",
+		"borders": "Kenarlıklar",
+		"bordersSquared": "Kare",
+		"button": {
+			"logout": "Oturumu kapat"
+		},
+		"clientEvents": {
+			"intro": "REI3 istemci uygulaması (bkz. 'Cihazlar') yüklüyse genel kısayol tuşlarını ayarlayabilirsiniz. Bunlar arka planda çalışırken REI3 ile etkileşimde bulunmak için kullanılır.",
+			"noEvents": "Şu anda kısayol tuşları sunan hiçbir REI3 uygulaması mevcut değil."
+		},
+		"colorClassicMode": "Renk şeması",
+		"colorClassicMode0": "Modern",
+		"colorClassicMode1": "Klasik",
+		"colorHeader": "Rengin üzerine yaz",
+		"colorHeaderSingle": "Vurgu rengi",
+		"colorMenu": "Rengin üzerine yaz",
+		"dark": "Karanlık mod",
+		"dateFormat": "Tarih formatı",
+		"encryption": {
+			"backupCode": "Yedekleme kodu",
+			"backupCodeDesc": "Yedek kod <b>çok önemli</b>; şifrenizi unutursanız erişimi yeniden sağlamaya yarar.",
+			"button": {
+				"createKeys": "Anahtar oluştur",
+				"resetKeys": "Kişisel anahtarları sıfırla",
+				"storeKeys": "Şifrelemeyi etkinleştir"
+			},
+			"confirmBackupCode": "Yedekleme kodunu güvenli bir konuma kopyaladım.",
+			"confirmEncryption": "Hem şifreme hem de yedek koduma erişimi kaybedersem, şifrelenmiş verilere kalıcı olarak erişilemez hale geleceğini anlıyorum.",
+			"description": "Uygulamalar, hassas verileri belirli kişilerin özel erişimi için şifreleyebilir. Verilerin şifrelenmesinden önce her kullanıcının kişisel anahtarlar oluşturması gerekir.",
+			"modulesEnc": "Şifreleme kullanan uygulamalar",
+			"newKeys": "Anahtarlar başarıyla oluşturuldu",
+			"newKeysDesc": "Kurulumu tamamlamak için kişisel yedekleme kodunuzu güvenli bir konuma kopyalayın.",
+			"noCredMasterKey": "Şifreleme şifresi",
+			"noCredMasterKeyChoose": "Kullanıcınızın kimliği harici bir sağlayıcı aracılığıyla doğrulanır. Uçtan uca şifrelemeyi etkinleştirmek için kişisel bir şifreleme şifresi seçmelisiniz.",
+			"noCredMasterKeyEnter": "Uçtan uca şifreleme, kişisel şifreleme şifrenizle korunur.",
+			"noCredMasterKeyFailed": "Şifreleme şifresi kabul edilmedi. Lütfen tekrar deneyin.<br /><br />Şifreleme şifrenizi unuttuysanız lütfen kurtarma seçenekleri için aşağıya bakın.",
+			"noCredMasterKeyNew": "Yeni şifreleme şifresi",
+			"prevPassword": "Önceki şifre",
+			"regainAccess": "Kişisel anahtarlara yeniden erişim kazanın",
+			"regainAccessDesc": "Önceki şifrenizi girerek kişisel anahtarlarınıza yeniden erişim sağlayabilirsiniz. Önceki şifrenizi bilmiyorsanız kişisel yedek kodunuzu kullanmanız gerekir.",
+			"resetAccess": "Kişisel anahtarları sıfırla",
+			"resetAccessDesc": "Önceki şifrenize veya yedek kodunuza erişiminiz yoksa, şifrelenmiş verilerinize erişimi kalıcı olarak kaybettiniz.<br /><br />Bu durumda, yeni verileri şifrelemek için kişisel anahtarlarınızı sıfırlamaya karar verebilirsiniz - bu, <b>NOT</b> daha önce şifrelenmiş verilere erişimi yeniden kuracaktır.",
+			"resetAccessHint": "Kişisel anahtarlarınızı sıfırlamak istediğinizden emin misiniz? Bunu yaparsanız eski yedek kodunuzu daha sonra bulsanız bile geri dönüş olmaz.",
+			"status": {
+				"inactive": "Etkin değil",
+				"locked": "Anahtarlar kilitli",
+				"noCryptoApi": "Bu özellik şu anda devre dışıdır; modern bir tarayıcının yanı sıra şifreli bir bağlantı (HTTPS) gerektirir",
+				"unlocked": "Kullanıma hazır"
+			}
+		},
+		"fontFamily": "Yazı tipi",
+		"fontSize": "Yazı tipi boyutu",
+		"formActionsAlign": "Form eylemlerini hizalama",
+		"headerCaptions": "Tam dolu",
+		"headerModules": "Uygulamaları göster",
+		"languageCode": "Dil",
+		"listColored": "Zıtlık",
+		"listRows": "Satırları listele",
+		"listSpaced": "Daha büyük",
+		"mobileScrollForm": "Mobil: Formun tamamını kaydır",
+		"pageTitle": "Ayarlar",
+		"pattern": "Arka plan deseni",
+		"spacing": "Aralık",
+		"sundayFirstDow": "Pazar haftanın 1. günüdür",
+		"tabRemember": "Son kullanılan sekmeyi aç",
+		"titleAccount": "Hesap",
+		"titleClientEvents": "Küresel kısayol tuşları",
+		"titleEncryption": "Uçtan uca şifreleme",
+		"titleFixedTokens": "Cihazlar",
+		"titleGeneral": "Genel",
+		"titleSubHeader": "Başlık menüsü",
+		"titleSubMenu": "Uygulama menüsü",
+		"titleSubMisc": "Çeşitli",
+		"titleSubNumbers": "Sayılar",
+		"titleTheme": "Tema",
+		"tokensFixed": {
+			"button": {
+				"loadApp": "Başvuru",
+				"loadCnf": "Yapılandırma dosyası"
+			},
+			"context": {
+				"client": "REI3 istemcisi",
+				"ics": "Takvim uygulaması",
+				"totp": "Çok faktörlü"
+			},
+			"device": {
+				"adminInfo": "Yöneticiler için <b>Bilgi:</b> REI3 istemci uygulaması, REI3 bakım modundayken çalışmaz.",
+				"installStep1": "Bir cihaz adı seçin:",
+				"installStep2": "Uygulama ve yapılandırma dosyasını aynı klasöre indirin:",
+				"installStep3": "Uygulamayı başlatın. Kendi kendine yüklenecek ve sistem tepsinizde görünecektir.",
+				"installStep4": "Artık indirilen uygulama ve yapılandırma dosyalarını silebilirsiniz.",
+				"intro0": "REI3 istemci uygulaması, ek işlevler sunan isteğe bağlı bir yazılım parçasıdır. Kurulduktan sonra aşağıdaki özellikler kullanılabilir:",
+				"intro1": "REI3'e yüklenen dosyalar doğrudan yerel yazılımla düzenlenebilir. Verilen dosya uzantısı için varsayılan bir uygulamanın seçili olduğundan emin olun. Windows'ta kullanılacak uygulamayı seçmek için Shift tuşunu basılı tutarak tıklayabilirsiniz.",
+				"intro2": "REI3 uygulamalarında eylemleri yürütmek için genel kısayol tuşları kullanılabilirken, REI3 arka planda çalışır.",
+				"nameHint": "'İş bilgisayarım'",
+				"os": "İşletim sistemi:",
+				"uninstallStep1": "REI3 istemci tepsisi simgesine sağ tıklayın ve 'kaldır' seçeneğini seçin.",
+				"uninstallStep2": "REI3 istemci uygulaması artık kaldırılmıştır.",
+				"updateStep1": "Yeni uygulama dosyasını indirin:",
+				"updateStep2": "Uygulamayı başlatın. Güncellemeyi yürütecek ve ardından sistem tepsinizde görünecektir.",
+				"updateStep3": "Artık indirilen uygulama dosyasını silebilirsiniz."
+			},
+			"message": {
+				"delete": "Bu girişi silmek istediğinizden emin misiniz? Bu geri alınamaz."
+			},
+			"mfa": {
+				"apps": [
+					"Google Kimlik Doğrulayıcı",
+					"Microsoft Kimlik Doğrulayıcı",
+					"Aegis Kimlik Doğrulayıcı",
+					"...veya TOTP'yi destekleyen herhangi bir uygulama"
+				],
+				"appsExample": "Bazı örnekler:",
+				"intro": "Çok faktörlü kimlik doğrulamayı (MFA) etkinleştirerek hesap güvenliğinizi artırabilirsiniz. MFA'yı etkinleştirmek için lütfen ayrı bir cihazdaki (akıllı telefon gibi) bir kimlik doğrulama uygulaması kullanın.",
+				"name": "Cihazınız için bir ad seçin",
+				"nameHint": "'Akıllı telefonum'",
+				"outro": "Bu hesabı kimlik doğrulayıcı uygulamanıza eklemek için QR kodunu kullanın. İşiniz bittiğinde bu pencereyi kapatın. MFA'yı birden fazla cihazla etkinleştirmek için bu işlemi tekrarlayabilirsiniz."
+			},
+			"titleAdd": "REI3 istemci uygulamasını yönetin",
+			"titleContext": "Kullanmak",
+			"titleDateCreate": "Oluşturuldu",
+			"titleMfa": "Çok faktörlü kimlik doğrulamayı ayarlayın",
+			"titleName": "Cihaz adı"
+		},
+		"translation": {
+			"community": "Topluluk çevirisi",
+			"official": "Resmi",
+			"other": "Sadece uygulama"
+		},
+		"warnUnsaved": "Kaydedilmemiş değişikliklere ilişkin uyarılar"
+	},
+	"widgets": {
+		"button": {
+			"groupAdd": "Grup ekle"
+		},
+		"flow": "Yön",
+		"groupNameNew": "Yeni widget grubu",
+		"option": {
+			"filterModule": "Uygulama widget'ları",
+			"filterSystem": "Sistem widget'ları",
+			"flowColumn": "yukarıdan aşağıya",
+			"flowRow": "soldan sağa"
+		},
+		"placeholder": "Bu gruba eklemek için widget'ları sürükleyip bırakın",
+		"width": "Genişlik"
+	}
+}
+
