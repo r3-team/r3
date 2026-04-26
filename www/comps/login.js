@@ -186,77 +186,94 @@ export default {
 			
 			// default messages
 			language:'en_US',
-			languages:['de','en_US'],
+			languages:['de','en_US','tr'],
 			message:{
 				authExt:{
 					de:'Externe Anmeldung',
-					en_US:'External login'
+					en_US:'External login',
+					tr:'Harici oturum açma'
 				},
 				authInt:{
 					de:'Interne Anmeldung',
-					en_US:'Internal login'
+					en_US:'Internal login',
+					tr:'Dahili oturum açma'
 				},
 				clusterNode:{
 					de:'Verbunden mit: ',
-					en_US:'Connected with: '
+					en_US:'Connected with: ',
+					tr:'Bağlanılan düğüm: '
 				},
 				error:{
 					de:'Ein Fehler ist aufgetreten - bitte erneut versuchen',
-					en_US:'An error occurred - please try again'
+					en_US:'An error occurred - please try again',
+					tr:'Bir hata oluştu - lütfen tekrar deneyin'
 				},
 				httpMode:{
 					de:'Verbindung ist nicht verschlüsselt',
-					en_US:'Connection is not encrypted'
+					en_US:'Connection is not encrypted',
+					tr:'Bağlantı şifreli değil'
 				},
 				license:{
 					'{ERR_LIC_001}':{
 						de:'Systemaktivierung ist abgelaufen - bitte den Systemadministrator kontaktieren',
-						en_US:'System activation has expired - please contact your system administrator'
+						en_US:'System activation has expired - please contact your system administrator',
+						tr:'Sistem aktivasyonunun süresi doldu - lütfen sistem yöneticinizle iletişime geçin'
 					},
 					'{ERR_LIC_002}':{
 						de:'Anzahl gleichzeitiger Benutzer erreicht - bitte den Systemadministrator kontaktieren',
-						en_US:'Concurrent user count reached - please contact your system administrator'
+						en_US:'Concurrent user count reached - please contact your system administrator',
+						tr:'Eşzamanlı kullanıcı sayısına ulaşıldı - lütfen sistem yöneticinizle iletişime geçin'
 					}
 				},
 				loading:{
 					de:'Am Laden...',
-					en_US:'Loading...'
+					en_US:'Loading...',
+					tr:'Yükleniyor...'
 				},
 				login:{
 					de:'Anmelden',
-					en_US:'Login'
+					en_US:'Login',
+					tr:'Oturum aç'
 				},
 				maintenanceMode:{
 					de:'Wartungsmodus ist aktiv',
-					en_US:'Maintenance mode is active'
+					en_US:'Maintenance mode is active',
+					tr:'Bakım modu etkin'
 				},
 				mfa:{
 					de:'Multi-Faktor-Anmeldung',
-					en_US:'Multi-factor login'
+					en_US:'Multi-factor login',
+					tr:'Çok faktörlü oturum açma'
 				},
 				mfaHint:{
 					de:'6-stelliger Validierungs-Code',
-					en_US:'6 digit validation code'
+					en_US:'6 digit validation code',
+					tr:'6 haneli doğrulama kodu'
 				},
 				password:{
 					de:'Passwort',
-					en_US:'Password'
+					en_US:'Password',
+					tr:'Parola'
 				},
 				sessionExpired:{
 					de:'Sitzung abgelaufen - bitte erneut anmelden',
-					en_US:'Session expired - please login again'
+					en_US:'Session expired - please login again',
+					tr:'Oturum süresi doldu - lütfen tekrar oturum açın'
 				},
 				stayLoggedIn:{
 					de:'Angemeldet bleiben',
-					en_US:'Stay logged in'
+					en_US:'Stay logged in',
+					tr:'Oturumu açık tut'
 				},
 				username:{
 					de:'Benutzername',
-					en_US:'Username'
+					en_US:'Username',
+					tr:'Kullanıcı adı'
 				},
 				wsBroken:{
 					de:'Warten auf Serververbindung...',
-					en_US:'Waiting for server connection...'
+					en_US:'Waiting for server connection...',
+					tr:'Sunucu bağlantısı bekleniyor...'
 				}
 			}
 		};
@@ -345,10 +362,6 @@ export default {
 		}
 	},
 	mounted() {
-		// overwrite language by browser setting
-		if(this.languages.includes(window.navigator.language))
-			this.language = window.navigator.language;
-		
 		// set page title
 		this.$store.commit('pageTitle',this.message.login[this.language]);
 		
