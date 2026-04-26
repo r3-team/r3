@@ -39,7 +39,7 @@ const MyStore = Vuex.createStore({
 			kdfIterations:10000,       // number of iterations for PBKDF2 key derivation function
 			keyLength:64,              // length of new symmetric keys for data encryption
 			languageCodesOfficial:[    // officially supported language codes
-				'en_us','de_de','tr_tr'
+				'en_us','de_de'
 			],
 			loginLimitedFactor:3,      // factor, how many limited logins are enabled for each full login
 			loginType:{                // all login types, as defined in the backend
