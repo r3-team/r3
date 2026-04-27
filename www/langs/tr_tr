@@ -258,10 +258,10 @@
 			"tokenExpiryHours": "Maks. saat cinsinden oturum süresi"
 		},
 		"loginMeta": {
+			"department": "Departman",
 			"dialog": {
 				"notUniqueEmail": "Aynı e-posta adresi farklı bir kullanıcıya da atandı."
 			},
-			"department": "Departman",
 			"email": "E-posta",
 			"location": "Konum",
 			"nameDisplay": "Ekran adı",
@@ -408,8 +408,8 @@
 				"delete": "Bu uygulamayı silmek istediğinizden emin misiniz? Bu işlem aynı zamanda sisteminizdeki tüm verileri de silecektir.<br /><br /><b>Bu işlem mevcut yedeklemeler olmadan geri alınamaz.</b>{APPS}",
 				"deleteApps": "<br /><br />Aşağıdaki uygulamalar buna bağlıdır ve ayrıca silinecektir:<ul>{LIST}</ul>",
 				"deleteMulti": "Bu eylem <b>kalıcı olarak</b> <b>{COUNT} uygulamalarını </b> ve ilgili verileri silecektir.<br /><br />Gerçekten devam etmek istiyor musunuz?",
-				"deleteTitle": "'{APP}' uygulamasının kalıcı olarak silinmesi",
 				"deleteRepo": "Bu depoyu silmek istediğinizden emin misiniz?",
+				"deleteTitle": "'{APP}' uygulamasının kalıcı olarak silinmesi",
 				"owner": "Orijinal yazar değilseniz, yazarın yeni bir sürümü yüklendiğinde tüm değişiklikler KAYBOLACAKTIR. Bu aynı zamanda VERİ KAYBI ile de sonuçlanabilir.<br /><br />Diğer yazarların uygulamalarını değiştirmek/genişletmek istiyorsanız, bunu 'onların üzerine inşa ederek' güvenli bir şekilde yapabilirsiniz - daha fazla ayrıntı için lütfen Builder belgelerine bakın.",
 				"ownerTitle": "Uyarı - lütfen dikkatlice okuyun!"
 			},
@@ -418,8 +418,8 @@
 				"uploadFailed": "Yüklenen dosyadan uygulama eklenemedi. Lütfen 'Her Şey'e aktarımlar için günlük düzeyini artırın ve tekrar deneyin; ayrıntılar daha sonra sistem günlüklerinde görünecektir."
 			},
 			"hidden": "Gizlenmiş",
-			"installedApps": "Yüklü uygulamalar",
 			"import": "Dosyadan yükle",
+			"installedApps": "Yüklü uygulamalar",
 			"position": "Menüde sipariş ver",
 			"productionMode": "Uygulamalar yalnızca bakım modu etkinken değiştirilebilir.",
 			"publicKeys": "Güvenilir anahtarlar",
@@ -863,27 +863,27 @@
 			"grid": {
 				"sizeSnap": "Izgaraya yapışma boyutu"
 			},
-			"placeholders": {
-				"{DATE_TODAY}": "Güncel tarih",
-				"{DATETIME_NOW}": "Geçerli tarih ve saat",
-				"{PAGE_CUR}": "Geçerli sayfa numarası",
-				"{PAGE_END}": "Toplam sayfa sayısı",
-				"{TIME_NOW}": "Geçerli saat"
-			},
-			"warning": {
-				"flowRow": "Yön 'satırı' yalnızca tek metin satırlarını destekler.<br />Resimler veya çok satırlı metin, sütun akışı veya ızgara alanı gerektirir."
-			},
 			"headerRowRepeat": "Sayfa sonunda başlık satırını tekrarla",
 			"headerRowShow": "Başlık satırını göster",
 			"inheritFrom": "Şuradan devral:",
 			"inheritNone": "Bu sayfa için ayarla",
+			"placeholders": {
+				"{DATETIME_NOW}": "Geçerli tarih ve saat",
+				"{DATE_TODAY}": "Güncel tarih",
+				"{PAGE_CUR}": "Geçerli sayfa numarası",
+				"{PAGE_END}": "Toplam sayfa sayısı",
+				"{TIME_NOW}": "Geçerli saat"
+			},
 			"rowMinHeight": "Minimum satır yüksekliği",
 			"setData": "Özellik değerine göre üzerine yaz",
 			"setValue": "Manuel olarak üzerine yaz",
 			"shrinkY": "Boşsa dikey olarak küçültün",
 			"sidebarPage": "Sayfa: {NAME}",
 			"tabStates": "Eyaletler ({CNT})",
-			"titleOne": "PDF '{NAME}'"
+			"titleOne": "PDF '{NAME}'",
+			"warning": {
+				"flowRow": "Yön 'satırı' yalnızca tek metin satırlarını destekler.<br />Resimler veya çok satırlı metin, sütun akışı veya ızgara alanı gerektirir."
+			}
 		},
 		"form": {
 			"autoRenew": "Otomatik yenileme",
@@ -960,6 +960,11 @@
 			"fieldAttributeIdAltRichtextFiles": "Zengin metin dosyası erişimi",
 			"fieldDefault": "Varsayılan değer",
 			"fieldDefaultPresetIds": "Varsayılan ön ayar(lar)",
+			"fieldFlags": {
+				"hideInputs": "Girişleri gizle",
+				"relCategory": "Kategori ekranı",
+				"relFlow": "İlerleme akışı ekranı"
+			},
 			"fieldHelp": "Yardım metni",
 			"fieldIcon": "Alan simgesi",
 			"fieldIdFocus": "Alan odağını yüke göre ayarla",
@@ -974,11 +979,6 @@
 			"fieldSize": "Temel boyut (piksel)",
 			"fieldSize0": "otomatik",
 			"fieldsEditInputs": "Girişleri düzenle",
-			"fieldFlags": {
-				"hideInputs": "Girişleri gizle",
-				"relCategory": "Kategori ekranı",
-				"relFlow": "İlerleme akışı ekranı"
-			},
 			"fileExt": "Dosya uzantısı",
 			"fileName": "Dosya adı",
 			"fileSize": "Dosya boyutu",
@@ -1050,6 +1050,7 @@
 			"openForm": "Formu aç",
 			"openFormBulk": "Formu aç<br />(toplu düzenleme)",
 			"option": {
+				"dataOptions": "İlişki ayarlarının üzerine yaz",
 				"display": {
 					"color": "renk",
 					"default": "varsayılan",
@@ -1063,7 +1064,6 @@
 					"slider": "değer kaydırıcısı",
 					"url": "URL"
 				},
-				"dataOptions": "İlişki ayarlarının üzerine yaz",
 				"ganttStepsDays": "günler",
 				"ganttStepsHours": "saat",
 				"style": {
@@ -1080,11 +1080,11 @@
 				"false": "'Hayır' değeri",
 				"fixed": "Özel değer",
 				"true": "'Evet' değeri",
-				"{CURR_DATE}": "Güncel tarih",
+				"{CURR_DATETIME}": "Geçerli tarih ve saat",
 				"{CURR_DATE_DD}": "Sayı olarak mevcut gün, 31'deki gibi",
 				"{CURR_DATE_MM}": "Sayı olarak cari ay, 12 gibi (Ocak = 1, Aralık = 12)",
 				"{CURR_DATE_YYYY}": "Sayı olarak cari yıl, 1921'deki gibi",
-				"{CURR_DATETIME}": "Geçerli tarih ve saat",
+				"{CURR_DATE}": "Güncel tarih",
 				"{CURR_TIME}": "Geçerli saat"
 			},
 			"tabActions": "Eylemler ({CNT})",
@@ -1120,9 +1120,9 @@
 			"codeReturns": "İade",
 			"codeReturnsHintJs": "isteğe bağlı, 'sayı', 'dizi',...",
 			"codeReturnsHintPg": "'metin', 'tamsayı',...",
+			"collectionId": "[Koleksiyon seçin]",
 			"cost": "Maliyet",
 			"costHelp": "<b>EUzman ayarı</b><p>Maliyet, sorgu planlamasını optimize etmeye yarayan tahmini bir değerdir. Bu değerin değiştirilmesi, sorgu planlayıcıya bu işlevin uzun (pahalı/yüksek maliyetli) veya kısa (ucuz/düşük maliyetli) çalışmasının beklenip beklenmediğini bildirerek performansı optimize etmeye yardımcı olabilir.</p><p>Sorgu planlayıcı daha sonra önce diğer şeyleri değerlendirerek gereksiz yürütmelerden kaçınacağından karmaşık işlevler (ilişki politikaları gibi) için daha yüksek değerler mantıklı olabilir.</p>",
-			"collectionId": "[Koleksiyon seçin]",
 			"dialog": {
 				"delete": "Bu işlevi silmek istediğinizden emin misiniz?"
 			},
@@ -1764,10 +1764,10 @@
 			"choice": "Ayarlamak",
 			"choices": "Filtre setleri ({COUNT})*",
 			"choicesHint": "*İlk ayar varsayılan olarak etkindir; 2 veya daha fazlası mevcutsa seçim yapılabilir.",
-			"filters": "Filtreler ({COUNT})",
 			"filterChoicesHelp": "Filtre kümesi, kullanıcılar tarafından seçilebilen, önceden tanımlanmış bir dizi filtredir. Kullanıcının mevcut ihtiyacına göre farklı filtre kriterleri uygulamaya yarar.<br /><br />İlk filtre seti varsayılan olarak etkindir.<br /><br />Filtre setleri yalnızca en az 2 adet kullanılabilir olduğunda gösterilir.",
 			"filterJoin": "Filtrelenecek ilişki birleştirmeyi seçin. Sorgunun tamamını filtrelemek için boş bırakın.",
 			"filterJoinHelp": "Burada bir birleştirme numarası seçtiğinizde, filtre sorguya değil bunun yerine ilişki birleşimine eklenir.<br /><br />Bu, satırın tamamını kaldırmadan soldan birleştirilmiş bir ilişkideki istenmeyen kayıtları filtreleyebilir.<br /><br />Aynı zamanda 1:n ilişkilerini filtrelemek için de kullanışlıdır.",
+			"filters": "Filtreler ({COUNT})",
 			"fixedLimit": "Sabit sonuç sınırı",
 			"fixedLimit0": "aktif değil",
 			"join": "Katılın: {NAME}",
@@ -1865,11 +1865,11 @@
 			"dialog": {
 				"delete": "Bu arama çubuğunu silmek istediğinizden emin misiniz?"
 			},
+			"title": "Arama çubukları",
+			"titleOne": "Arama çubuğu '{NAME}'",
 			"warning": {
 				"noSearchInput": "Arama sorgusunu uygulamak için en az bir 'Genel arama: Kullanıcı girişi' filtresi ekleyin"
-			},
-			"title": "Arama çubukları",
-			"titleOne": "Arama çubuğu '{NAME}'"
+			}
 		},
 		"start": {
 			"appVisible": "Uygulama, atanmış rollere sahip kullanıcılar tarafından görülebilir",
@@ -2282,11 +2282,11 @@
 			"portuguese": "Portekizce",
 			"romanian": "Romen",
 			"russian": "Rusça",
+			"simple": "[Seçilmedi]",
 			"spanish": "İspanyol",
 			"swedish": "İsveççe",
 			"tamil": "Tamilce",
-			"turkish": "Türkçe",
-			"simple": "[Seçilmedi]"
+			"turkish": "Türkçe"
 		}
 	},
 	"generic": {
@@ -2332,8 +2332,8 @@
 		"automatic": "otomatik",
 		"available": "Mevcut",
 		"before": "Önce",
-		"boolTrue": "Doğru",
 		"boolFalse": "YANLIŞ",
+		"boolTrue": "Doğru",
 		"border": "Sınır",
 		"bright": "Parlak",
 		"busy": "Çalışıyor - İptal etmek için burayı tıklayın",
@@ -2357,8 +2357,8 @@
 			"download": "İndirmek",
 			"edit": "Düzenlemek",
 			"editBulk": "Düzenle ({COUNT})",
-			"enable": "Olanak vermek",
 			"empty": "Boş",
+			"enable": "Olanak vermek",
 			"expert": "Gelişmiş",
 			"export": "İhracat",
 			"filter": "Filtre",
@@ -2415,10 +2415,10 @@
 		"colorFillRowsEven": "Satırları eşit şekilde renkle doldurun",
 		"colorFillRowsOdd": "Dolgu rengi, tek satırlar",
 		"column": "Kolon",
+		"columnSettings": "Sütun ayarları",
 		"columns": "Sütunlar",
 		"columnsActive": "Aktif sütunlar",
 		"columnsAvailable": "Mevcut sütunlar",
-		"columnSettings": "Sütun ayarları",
 		"comment": "Yorum",
 		"comments": "Yorumlar",
 		"conditions": "Koşullar",
@@ -2466,16 +2466,16 @@
 		"favoritesEmpty": "Hiçbir favori kaydedilmedi",
 		"field": "Alan",
 		"fields": "Alanlar",
-		"filename": "Dosya adı",
 		"file": "Dosya",
+		"filename": "Dosya adı",
 		"files": "Dosyalar",
 		"filters": "Filtreler",
 		"font": "Yazı tipi",
 		"footer": "Altbilgi",
 		"form": "Biçim",
-		"forms": "Formlar",
 		"formActions": "Form eylemleri",
 		"formOpen": "Formu aç",
+		"forms": "Formlar",
 		"fullscreenSwitchTo": "Tam ekran modunu değiştir",
 		"functions": "Fonksiyonlar",
 		"gap": "Açıklık",
@@ -2596,10 +2596,10 @@
 		"relationships": "İlişkiler",
 		"repository": "Depo",
 		"required": "Gerekli",
+		"resultRow": "Sonuç satırı",
 		"results": "{CNT} sonuçları",
 		"resultsNone": "- sonuç yok -",
 		"resultsOf": "/ {CNT}",
-		"resultRow": "Sonuç satırı",
 		"returns": "İade",
 		"role": "Rol",
 		"roles": "Roller",
@@ -2621,11 +2621,11 @@
 		"size": "Boyut",
 		"sizeX": "Genişlik",
 		"sizeY": "Yükseklik",
+		"source": "Kaynak",
+		"sources": "Kaynaklar",
 		"spacing": "Aralık",
 		"spacingCell": "Hücre aralığı",
 		"sqlPreview": "SQL önizleme",
-		"source": "Kaynak",
-		"sources": "Kaynaklar",
 		"standard": "Standart",
 		"state": "Durum",
 		"status": "Durum",
@@ -2987,4 +2987,3 @@
 		"width": "Genişlik"
 	}
 }
-
