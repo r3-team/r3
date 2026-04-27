@@ -545,6 +545,37 @@ func initSystem(ctx context.Context) error {
 	if err := login_session.LogsRemoveForNode_tx(ctx, tx); err != nil {
 		return err
 	}
+
+	// temporary fix introduced in 3.12.2
+	// instances that were upgraded from 3.11 to 3.12 did not receive rest_get_placeholder_file functions (because DB change was added to upgrade script '3.4->3.5' instead of '3.11->3.12')
+	// when 3.13 is released, we permanently fix this issue by addressing it in '3.12->3.13' script, in the meantime we fix it on every boot up
+	if _, err := tx.Exec(ctx, `
+		CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_base64(file_id uuid, version integer DEFAULT 0)
+			RETURNS text
+			LANGUAGE 'plpgsql'
+			COST 100
+			STABLE PARALLEL UNSAFE
+		AS $BODY$
+		DECLARE
+		BEGIN
+			RETURN FORMAT('{FILE_BASE64:%s|%s}', file_id::TEXT, version);
+		END;
+		$BODY$;
+
+		CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_raw(file_id uuid, version integer DEFAULT 0)
+			RETURNS text
+			LANGUAGE 'plpgsql'
+			COST 100
+			STABLE PARALLEL UNSAFE
+		AS $BODY$
+		DECLARE
+		BEGIN
+			RETURN FORMAT('{FILE_RAW:%s|%s}', file_id::TEXT, version);
+		END;
+		$BODY$;
+	`); err != nil {
+		return err
+	}
 	return tx.Commit(ctx)
 }
 

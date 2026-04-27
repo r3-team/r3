@@ -96,6 +96,30 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 	/*
 		ALTER TABLE instance.mail_account ALTER COLUMN connect_method
 			TYPE instance.mail_account_connect_method USING connect_method::TEXT::instance.mail_account_connect_method;
+
+		CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_base64(file_id uuid, version integer DEFAULT 0)
+			RETURNS text
+			LANGUAGE 'plpgsql'
+			COST 100
+			STABLE PARALLEL UNSAFE
+		AS $BODY$
+		DECLARE
+		BEGIN
+			RETURN FORMAT('{FILE_BASE64:%s|%s}', file_id::TEXT, version);
+		END;
+		$BODY$;
+
+		CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_raw(file_id uuid, version integer DEFAULT 0)
+			RETURNS text
+			LANGUAGE 'plpgsql'
+			COST 100
+			STABLE PARALLEL UNSAFE
+		AS $BODY$
+		DECLARE
+		BEGIN
+			RETURN FORMAT('{FILE_RAW:%s|%s}', file_id::TEXT, version);
+		END;
+		$BODY$;
 	*/
 
 	"3.11": func(ctx context.Context, tx pgx.Tx) (string, error) {
@@ -1018,6 +1042,31 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				FROM instance_cluster.node;
 				
 				RETURN 0;
+			END;
+			$BODY$;
+
+			-- REST call placeholder functions
+			CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_base64(file_id uuid, version integer DEFAULT 0)
+				RETURNS text
+				LANGUAGE 'plpgsql'
+				COST 100
+				STABLE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				RETURN FORMAT('{FILE_BASE64:%s|%s}', file_id::TEXT, version);
+			END;
+			$BODY$;
+
+			CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_raw(file_id uuid, version integer DEFAULT 0)
+				RETURNS text
+				LANGUAGE 'plpgsql'
+				COST 100
+				STABLE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				RETURN FORMAT('{FILE_RAW:%s|%s}', file_id::TEXT, version);
 			END;
 			$BODY$;
 		`)
@@ -3155,31 +3204,6 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 					FROM instance.preset_record
 					WHERE preset_id = _preset_id
 				);
-			END;
-			$BODY$;
-
-			-- REST call placeholder functions
-			CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_base64(file_id uuid, version integer DEFAULT 0)
-				RETURNS text
-				LANGUAGE 'plpgsql'
-				COST 100
-				STABLE PARALLEL UNSAFE
-			AS $BODY$
-			DECLARE
-			BEGIN
-				RETURN FORMAT('{FILE_BASE64:%s|%s}', file_id::TEXT, version);
-			END;
-			$BODY$;
-
-			CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_raw(file_id uuid, version integer DEFAULT 0)
-				RETURNS text
-				LANGUAGE 'plpgsql'
-				COST 100
-				STABLE PARALLEL UNSAFE
-			AS $BODY$
-			DECLARE
-			BEGIN
-				RETURN FORMAT('{FILE_RAW:%s|%s}', file_id::TEXT, version);
 			END;
 			$BODY$;
 		`)
