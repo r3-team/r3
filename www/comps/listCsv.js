@@ -65,9 +65,9 @@ export default {
 				<tr v-if="hasBool">
 					<td>{{ capApp.csvBool }}</td>
 					<td>
-						<select v-model="boolNative">
-							<option :value="true">true / false</option>
-							<option :value="false">{{ capGen.option.yes + ' / ' +capGen.option.no }}</option>
+						<select @input="setOption('csvBoolNative',$event.target.value === 'true')" :value="boolNative ? 'true' : 'false'">
+							<option value="true">true / false</option>
+							<option value="false">{{ capGen.option.yes + ' / ' +capGen.option.no }}</option>
 						</select>
 					</td>
 				</tr>
@@ -127,7 +127,6 @@ export default {
 	data() {
 		return {
 			action:'',               // CSV action (export/import)
-			boolNative:true,         // use native bool strings (true/false) or translations (yes/no, ...)
 			cacheDenialTimeout:null, // timer do refresh cache denial timestamp
 			cacheDenialTimestamp:0,  // unix timestamp, used for CSV export cache denial
 			charComma:',',
@@ -206,6 +205,7 @@ export default {
 		},
 
 		// inputs
+		boolNative:s => s.$root.getOrFallback(s.loginOptions,'csvBoolNative',true), // use native bool strings (true/false) or translations (yes/no, ...)
 		charDec:   s => s.$root.getOrFallback(s.loginOptions,'csvCharDec','.'),
 		charThou:  s => s.$root.getOrFallback(s.loginOptions,'csvCharThou',''),
 		dateFormat:s => s.$root.getOrFallback(s.loginOptions,'csvDateFormat',s.settings.dateFormat),
