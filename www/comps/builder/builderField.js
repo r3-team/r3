@@ -625,6 +625,7 @@ export default {
 				return this.tabTarget = tabTarget;
 
 			this.$emit('field-id-show',this.field.id);
+			this.columnIdShow = null;
 			this.tabTarget = tabTarget;
 		},
 		queryRemoveIndex(index) {
