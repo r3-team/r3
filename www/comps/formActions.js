@@ -1,5 +1,6 @@
-import {srcBase64}  from './shared/image.js';
-import {getCaption} from './shared/language.js';
+import {srcBase64}     from './shared/image.js';
+import {setGetterArgs} from './shared/form.js';
+import {getCaption}    from './shared/language.js';
 
 const MyFormAction = {
 	name:'my-form-action',
@@ -16,6 +17,7 @@ const MyFormAction = {
 		entityIdMapEffect:{ type:Object,  required:true },
 		formAction:       { type:Object,  required:true },
 		formId:           { type:String,  required:true },
+		joinsIndexMap:    { type:Object,  required:true },
 		large:            { type:Boolean, required:true },
 		moduleId:         { type:String,  required:true }
 	},
@@ -31,6 +33,7 @@ const MyFormAction = {
 	methods:{
 		// external
 		getCaption,
+		setGetterArgs,
 		srcBase64,
 
 		// actions
@@ -38,7 +41,21 @@ const MyFormAction = {
 			const fa = this.formAction;
 			if(fa.jsFunctionId !== null) this.$emit('execute-function',fa.jsFunctionId);
 			if(fa.openDoc      !== null) this.$emit('open-doc',fa.openDoc);
-			if(fa.openForm     !== null) this.$emit('open-form',[],fa.openForm,[],middleClick,null,false);
+
+			if(fa.openForm !== null) {
+				let getterArgs = [];
+
+				if(fa.openForm.attributeIdApply !== null
+					&& this.joinsIndexMap[fa.openForm.relationIndexApply] !== undefined
+					&& this.joinsIndexMap[fa.openForm.relationIndexApply].recordId !== 0
+				) {
+					const atrId    = fa.openForm.attributeIdApply;
+					const recordId = this.joinsIndexMap[fa.openForm.relationIndexApply].recordId;
+					
+					getterArgs = this.setGetterArgs(getterArgs,'attributes',`${atrId}_${recordId}`);
+				}
+				this.$emit('open-form',[],fa.openForm,getterArgs,middleClick,null,false);
+			}
 			this.$emit('executed');
 		}
 	}
@@ -59,8 +76,9 @@ export default {
 			:entityIdMapEffect
 			:formAction="a"
 			:formId
-			:moduleId
+			:joinsIndexMap
 			:large="false"
+			:moduleId
 		/>
 		<my-button image="open.png"
 			@trigger="showPopUp = true"
@@ -95,8 +113,9 @@ export default {
 							:entityIdMapEffect
 							:formAction="a"
 							:formId
-							:moduleId
+							:joinsIndexMap
 							:large="true"
+							:moduleId
 						/>
 					</div>
 				</div>
@@ -107,6 +126,7 @@ export default {
 		entityIdMapEffect:{ type:Object,  required:true },
 		formActions:      { type:Array,   required:true },
 		formId:           { type:String,  required:true },
+		joinsIndexMap:    { type:Object,  required:true },
 		moduleId:         { type:String,  required:true },
 		noSpace:          { type:Boolean, required:true }
 	},

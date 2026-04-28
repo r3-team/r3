@@ -91,6 +91,7 @@ const MyBuilderFormAction = {
 						<my-builder-open-form
 							v-model="openForm"
 							:allowAllForms="true"
+							:allowNewRecords="true"
 							:joinsIndexMap
 							:module
 							:readonly

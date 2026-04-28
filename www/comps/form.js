@@ -127,6 +127,7 @@ export default {
 					:entityIdMapEffect
 					:formActions="form.actions"
 					:formId
+					:joinsIndexMap
 					:moduleId
 					:noSpace="!layoutElements.includes('formActions')"
 				/>
@@ -230,6 +231,7 @@ export default {
 					:entityIdMapEffect
 					:formActions="form.actions"
 					:formId
+					:joinsIndexMap
 					:moduleId
 					:noSpace="!layoutElements.includes('formActions')"
 				/>
@@ -251,6 +253,7 @@ export default {
 					:entityIdMapEffect
 					:formActions="form.actions"
 					:formId
+					:joinsIndexMap
 					:moduleId
 					:noSpace="false"
 				/>
