@@ -623,7 +623,7 @@ export default {
 		isWithQuery:   s => s.isList,
 		query:         s => s.field.query !== null ? s.field.query : s.getTemplateQuery(),
 		title:         s => s.getDocFieldTitle(s.field),
-		titleBar:      s => `${s.capGen.field}: ${s.title}`,
+		titleBar:      s => `${s.capGen.field}: F${s.entityIdMapRef.field[s.field.id]}, ${s.title}`,
 
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
