@@ -90,17 +90,13 @@ export function getChoiceFilters(choices,choiceIdActive) {
 
 export function getDataFields(fields) {
 	let out = [];
-	for(let f of fields) {
+	for(const f of fields) {
 		switch(f.content) {
-			case 'container':
-				out = out.concat(getDataFields(f.fields));
-			break;
-			case 'data':
-				out.push(f);
-			break;
+			case 'container': out = out.concat(getDataFields(f.fields)); break;
+			case 'data':      out.push(f); break;
 			case 'tabs':
-				for(let t of f.tabs) {
-					out = Object.assign(out,getDataFields(t.fields))
+				for(const t of f.tabs) {
+					out = out.concat(getDataFields(t.fields));
 				}
 			break;
 		}
