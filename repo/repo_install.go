@@ -58,15 +58,17 @@ func InstallModules(ctx context.Context, moduleIds []uuid.UUID) error {
 func InstallModulesNewVersions(ctx context.Context) error {
 
 	// get all installed modules, that can be updated from repository
+	// only include modules that are compatible with the platform build
 	moduleIds := make([]uuid.UUID, 0)
 	if err := db.Pool.QueryRow(ctx, `
 		SELECT ARRAY_AGG(m.id)
 		FROM app.module           AS m
 		JOIN instance.repo_module AS rm ON rm.module_id_wofk = m.id
 		JOIN instance.repo        AS r  ON r.id              = rm.repo_id
-		WHERE rm.release_build > m.release_build
+		WHERE rm.release_build     >  m.release_build
+		AND   rm.release_build_app <= $1
 		AND   r.active
-	`).Scan(&moduleIds); err != nil {
+	`, config.GetAppVersion().Build).Scan(&moduleIds); err != nil {
 		return err
 	}
 	return InstallModules(ctx, moduleIds)
