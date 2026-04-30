@@ -341,7 +341,7 @@ export default {
 										</div>
 									</td>
 									<td class="default-inputs">
-										<input type="password" v-model="inputs.pass" :placeholder="capGen.threeDots" />
+										<input autocomplete="new-password" type="password" v-model="inputs.pass" :placeholder="capGen.threeDots" />
 									</td>
 									<td>{{ capApp.hint.password }}</td>
 								</tr>

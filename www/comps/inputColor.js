@@ -10,7 +10,7 @@ export default {
 	>
 		<div class="row gap grow centered" v-if="showInput">
 			<span>#</span>
-			<input class="input-color-text" data-is-input="1" type="text"
+			<input autocomplete="off" class="input-color-text" data-is-input="1" type="text"
 				v-model="input"
 				:disabled="readonly"
 				:placeholder="capGen.threeDots"
