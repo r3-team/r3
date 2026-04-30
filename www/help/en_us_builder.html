@@ -1,4 +1,4 @@
-<p><em>Updated 2026-04-09</em></p>
+<p><em>Updated 2026-04-30</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -636,6 +636,7 @@ END IF;</code></pre>
 <li>Text wrap: Text values wrap to a new line when space is insufficient. Can be combined with column size and length settings to control how text is displayed.</li>
 <li>Clipboard: Shows a copy-to-clipboard action inside the column.</li>
 <li>Display: Depending on the attribute type of a column, different display options are available. These serve to specify how to present attribute values.</li>
+<li>Show attribute icon if TRUE: Available on boolean columns. By default, boolean columns either show true/false labels or corresponding icons if the user enabled the setting 'Boolean values as icons'. When this option is enabled however, the boolean column will be empty if the current value is FALSE - and will show the icon of the boolean attribute when TRUE. This can be useful for icons that should only appear in certain cases, like warnings or other indicators.</li>
 <li>Data retrieval: Multiple options exist to configure, how column values are being retrieved.
 <ul>
 <li>Distinct: Useful when joining N:1 or N:M relationships or when using sub queries. Filters out duplicate values for the given column attribute.</li>
