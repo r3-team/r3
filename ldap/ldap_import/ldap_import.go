@@ -127,18 +127,18 @@ func run(ldapId int32) error {
 
 	for _, role := range ldap.LoginRolesAssign {
 
-		filters := fmt.Sprintf("(&(objectClass=%s))", ldap.SearchClass)
+		filters := fmt.Sprintf("(&(objectClass=%s)%s)", ldap.SearchClass, ldap.SearchFilter)
 
 		// set filters to search for group DN if role assignment is active
 		// group DN is empty if just users are queried
 		if ldap.AssignRoles && role.SearchString != "" {
 
 			if ldap.MsAdExt {
-				filters = fmt.Sprintf("(&(objectClass=%s)(%s:1.2.840.113556.1.4.1941:=%s))",
-					ldap.SearchClass, ldap.MemberAttribute, role.SearchString)
+				filters = fmt.Sprintf("(&(objectClass=%s)%s(%s:1.2.840.113556.1.4.1941:=%s))",
+					ldap.SearchClass, ldap.SearchFilter, ldap.MemberAttribute, role.SearchString)
 			} else {
-				filters = fmt.Sprintf("(&(objectClass=%s)(%s=%s))",
-					ldap.SearchClass, ldap.MemberAttribute, role.SearchString)
+				filters = fmt.Sprintf("(&(objectClass=%s)%s(%s=%s))",
+					ldap.SearchClass, ldap.SearchFilter, ldap.MemberAttribute, role.SearchString)
 			}
 		}
 

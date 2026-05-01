@@ -178,6 +178,8 @@
 			"searchClassHint": "Exemplu: user",
 			"searchDn": "Cauta DN",
 			"searchDnHint": "Exemplu: OU=User,DC=mycompany,DC=local",
+			"searchFilter": "Search Filter",
+			"searchFilterHint": "Example: (mailPrimaryAddress=*)",
 			"starttls": "Utilizați StartTLS",
 			"template": "User template",
 			"title": "Creați/editați conexiunea",

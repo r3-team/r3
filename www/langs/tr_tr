@@ -178,6 +178,8 @@
 			"searchClassHint": "Örnek: kullanıcı",
 			"searchDn": "DN'yi ara",
 			"searchDnHint": "Örnek: OU=Kullanıcı,DC=şirketim,DC=yerel",
+			"searchFilter": "Search Filter",
+			"searchFilterHint": "Example: (mailPrimaryAddress=*)",
 			"starttls": "StartTLS'yi kullanın",
 			"template": "Kullanıcı şablonu",
 			"title": "Bağlantı oluştur/düzenle",

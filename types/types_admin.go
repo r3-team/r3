@@ -67,6 +67,7 @@ type Ldap struct {
 	BindUserPw       string            `json:"bindUserPw"`       // password of bind user in clear text
 	SearchClass      string            `json:"searchClass"`      // object class to filter to, example: '(&(objectClass=user))'
 	SearchDn         string            `json:"searchDn"`         // root search DN, example: 'OU=User,DC=test,DC=local'
+	SearchFilter     string            `json:"searchFilter"`     // search filter, example: '(primaryMailAddress=*)'
 	KeyAttribute     string            `json:"keyAttribute"`     // name of attribute used as key, example: 'objectGUID'
 	LoginAttribute   string            `json:"loginAttribute"`   // name of attribute used as login, example: 'sAMAccountName'
 	MemberAttribute  string            `json:"memberAttribute"`  // name of attribute used as membership, example: 'memberOf'

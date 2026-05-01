@@ -153,6 +153,10 @@ export default {
 							<td><input v-model="inputs.searchClass" :placeholder="capApp.searchClassHint" /></td>
 						</tr>
 						<tr>
+							<td>{{ capApp.searchFilter }}</td>
+							<td><input v-model="inputs.searchFilter" :placeholder="capApp.searchFilterHint" /></td>
+						</tr>
+						<tr>
 							<td>{{ capApp.keyAttribute }}</td>
 							<td><input v-model="inputs.keyAttribute" :placeholder="capApp.keyAttributeHint" /></td>
 						</tr>
@@ -265,6 +269,7 @@ export default {
 				memberAttribute:'memberOf',
 				searchClass:'user',
 				searchDn:'',
+				searchFilter:'',
 				assignRoles:false,
 				msAdExt:true,
 				starttls:false,
@@ -358,6 +363,7 @@ export default {
 				memberAttribute:this.inputs.memberAttribute,
 				searchClass:this.inputs.searchClass,
 				searchDn:this.inputs.searchDn,
+				searchFilter:this.inputs.searchFilter,
 				assignRoles:this.inputs.assignRoles,
 				msAdExt:this.inputs.msAdExt,
 				starttls:this.inputs.starttls,

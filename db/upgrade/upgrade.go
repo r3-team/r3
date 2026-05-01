@@ -122,6 +122,13 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 		$BODY$;
 	*/
 
+	"3.12": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
+			-- ldap search filter
+			ALTER TABLE instance.ldap ADD COLUMN search_filter TEXT NOT NULL DEFAULT '';
+		`)
+		return "3.13", err
+	},
 	"3.11": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `
 			-- cleanup from last release
