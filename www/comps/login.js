@@ -71,6 +71,12 @@ export default {
 				<span>{{ message.license[licenseErrCode][language] }}</span>
 			</div>
 
+			<!-- invalid credentials -->
+			<div class="message warning" v-if="badAuth">
+				<img src="images/warning.png" />
+				<span>{{ message.badAuth[language] }}</span>
+			</div>
+
 			<!-- Open ID Connect OAUTH2 clients -->
 			<template v-if="!showMfa && hasOpenIdClients">
 				<div class="message">
@@ -195,6 +201,10 @@ export default {
 				authInt:{
 					de:'Interne Anmeldung',
 					en_US:'Internal login'
+				},
+				badAuth:{
+					de:'Ungültige Zugangsdaten',
+					en_US:'Invalid credentials'
 				},
 				clusterNode:{
 					de:'Verbunden mit: ',
