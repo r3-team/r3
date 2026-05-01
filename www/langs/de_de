@@ -178,6 +178,8 @@
 			"searchClassHint": "Beispiel: user",
 			"searchDn": "Such-DN",
 			"searchDnHint": "Beispiel: OU=User,DC=mycompany,DC=local",
+			"searchFilter": "Such-Filter",
+			"searchFilterHint": "Beispiel: (mailPrimaryAddress=*)",
 			"starttls": "StartTLS verwenden",
 			"template": "Benutzervorlage",
 			"title": "Verbindung erstellen/bearbeiten",

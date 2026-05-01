@@ -23,8 +23,8 @@ func Check(ldapId int32, username string, password string) error {
 	search, err := ldapConn.Search(goldap.NewSearchRequest(
 		ldap.SearchDn,
 		goldap.ScopeWholeSubtree, goldap.NeverDerefAliases, 0, 0, false,
-		fmt.Sprintf("(&(objectClass=%s)(%s=%s))", ldap.SearchClass,
-			ldap.LoginAttribute, username),
+		fmt.Sprintf("(&(objectClass=%s)%s(%s=%s))", ldap.SearchClass,
+			ldap.SearchFilter, ldap.LoginAttribute, username),
 		[]string{"dn"},
 		nil,
 	))

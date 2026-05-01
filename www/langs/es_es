@@ -178,6 +178,8 @@
 			"searchClassHint": "Ejemplo: user",
 			"searchDn": "DN de búsqueda",
 			"searchDnHint": "Ejemplo: OU=User,DC=mycompany,DC=local",
+			"searchFilter": "Search Filter",
+			"searchFilterHint": "Example: (mailPrimaryAddress=*)",
 			"starttls": "Usar StartTLS",
 			"template": "Plantilla de usuario",
 			"title": "Crear/editar conexión",

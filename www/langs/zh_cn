@@ -178,6 +178,8 @@
 			"searchClassHint": "示例：user",
 			"searchDn": "搜索 DN",
 			"searchDnHint": "示例：OU=User,DC=mycompany,DC=local",
+			"searchFilter": "Search Filter",
+			"searchFilterHint": "Example: (mailPrimaryAddress=*)",
 			"starttls": "使用 StartTLS",
 			"template": "User template",
 			"title": "创建/编辑连接",

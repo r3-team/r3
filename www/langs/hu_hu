@@ -178,6 +178,8 @@
 			"searchClassHint": "Példa: felhasználó",
 			"searchDn": "Keresési DN",
 			"searchDnHint": "Példa: OU=User,DC=mycompany,DC=local",
+			"searchFilter": "Search Filter",
+			"searchFilterHint": "Example: (mailPrimaryAddress=*)",
 			"starttls": "StartTLS használata",
 			"template": "User template",
 			"title": "Kapcsolat létrehozása/módosítása",

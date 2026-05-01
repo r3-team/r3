@@ -39,6 +39,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 			l.bind_user_pw,
 			l.search_class,
 			l.search_dn,
+			l.search_filter,
 			l.key_attribute,
 			l.login_attribute,
 			l.member_attribute,
@@ -72,6 +73,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx) ([]types.Ldap, error) {
 		var m types.LoginMeta
 		if err := rows.Scan(&l.Id, &l.LoginTemplateId, &l.Name, &l.Host,
 			&l.Port, &l.BindUserDn, &l.BindUserPw, &l.SearchClass, &l.SearchDn,
+			&l.SearchFilter,
 			&l.KeyAttribute, &l.LoginAttribute, &l.MemberAttribute,
 			&l.AssignRoles, &l.MsAdExt, &l.Starttls, &l.Tls, &l.TlsVerify,
 			&m.Department, &m.Email, &m.Location, &m.NameDisplay, &m.NameFore,
@@ -100,14 +102,15 @@ func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) error {
 			INSERT INTO instance.ldap (
 				login_template_id, name, host, port, bind_user_dn, bind_user_pw,
 				search_class, search_dn, key_attribute, login_attribute,
-				member_attribute, assign_roles, ms_ad_ext, starttls, tls, tls_verify
+				member_attribute, assign_roles, ms_ad_ext, starttls, tls, tls_verify,
+				search_filter
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
 			RETURNING id
 		`, l.LoginTemplateId, l.Name, l.Host, l.Port, l.BindUserDn, l.BindUserPw,
 			l.SearchClass, l.SearchDn, l.KeyAttribute, l.LoginAttribute,
 			l.MemberAttribute, l.AssignRoles, l.MsAdExt, l.Starttls, l.Tls,
-			l.TlsVerify).Scan(&l.Id); err != nil {
+			l.TlsVerify, l.SearchFilter).Scan(&l.Id); err != nil {
 
 			return err
 		}
@@ -118,12 +121,12 @@ func Set_tx(ctx context.Context, tx pgx.Tx, l types.Ldap) error {
 				bind_user_dn = $5, bind_user_pw = $6, search_class = $7,
 				search_dn = $8, key_attribute = $9, login_attribute = $10,
 				member_attribute = $11, assign_roles = $12, ms_ad_ext = $13,
-				starttls = $14, tls = $15, tls_verify = $16
-			WHERE id = $17
+				starttls = $14, tls = $15, tls_verify = $16, search_filter = $17
+			WHERE id = $18
 		`, l.LoginTemplateId, l.Name, l.Host, l.Port, l.BindUserDn, l.BindUserPw,
 			l.SearchClass, l.SearchDn, l.KeyAttribute, l.LoginAttribute,
 			l.MemberAttribute, l.AssignRoles, l.MsAdExt, l.Starttls, l.Tls,
-			l.TlsVerify, l.Id); err != nil {
+			l.TlsVerify, l.SearchFilter, l.Id); err != nil {
 
 			return err
 		}

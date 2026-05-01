@@ -178,6 +178,8 @@
 			"searchClassHint": "Piemērs: user",
 			"searchDn": "Meklēšanas DN",
 			"searchDnHint": "Piemērs: OU=Lietotājs,DC=manafirma,DC=locale",
+			"searchFilter": "Search Filter",
+			"searchFilterHint": "Example: (mailPrimaryAddress=*)",
 			"starttls": "Izmantot StartTLS",
 			"template": "User template",
 			"title": "Izveidot/rediģēt savienojumu",

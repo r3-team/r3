@@ -3262,6 +3262,7 @@ CREATE TABLE instance.ldap (
 	bind_user_pw text NOT NULL,
 	search_class text NOT NULL,
 	search_dn text NOT NULL,
+	search_filter text NOT NULL,
 	login_attribute text NOT NULL,
 	assign_roles boolean NOT NULL,
 	starttls boolean NOT NULL,

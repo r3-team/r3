@@ -178,6 +178,8 @@
 			"searchClassHint": "مثال: مستخدم",
 			"searchDn": "البحث في الاسم المميز",
 			"searchDnHint": "مثال: OU=المستخدم،DC=شركتي،DC=محلي",
+			"searchFilter": "Search Filter",
+			"searchFilterHint": "Example: (mailPrimaryAddress=*)",
 			"starttls": "استخدم StartTLS",
 			"template": "قالب تسجيل الدخول",
 			"title": "إنشاء/تحرير الاتصال",
