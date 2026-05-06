@@ -155,7 +155,7 @@ func GetModuleChangedWithDependencies_tx(ctx context.Context, tx pgx.Tx, moduleI
 func verifyCompatibilityWithApp(releaseBuildApp int) error {
 
 	if config.GetAppVersion().Build < releaseBuildApp {
-		return fmt.Errorf("module was released for application version %d (current version %d)",
+		return fmt.Errorf("application was released for platform build version %d (current build is %d)",
 			releaseBuildApp, config.GetAppVersion().Build)
 	}
 	return nil
