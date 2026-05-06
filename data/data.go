@@ -163,7 +163,7 @@ func getPolicyValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 // get applicable policy filter (e. g. WHERE clause) for data call
 func getPolicyFilter(loginId int64, action string, tableAlias string, policies []types.RelationPolicy) (string, error) {
 
-	if len(policies) == 0 {
+	if len(policies) == 0 || loginId == -1 {
 		return "", nil
 	}
 

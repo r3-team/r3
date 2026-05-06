@@ -29,6 +29,7 @@ func getDataDoc(ctx context.Context, doc *doc, loginId int64, recordIdDoc int64,
 		Filters:     data_query.ConvertQueryToDataFilter(q.Filters, loginId, language, recordIdDoc, make(map[string]string)),
 		Joins:       data_query.ConvertQueryToDataJoins(q.Joins),
 		Limit:       1,
+		GetPerm:     false,
 	}
 
 	// fetch data
