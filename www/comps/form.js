@@ -1372,22 +1372,15 @@ export default {
 						valNew = isDeleted ? null : recordId;
 					}
 					else {
-						let val = JSON.parse(JSON.stringify(this.values[ia]));
-
-						if(isDeleted && val !== null) {
-							const pos = val.indexOf(recordId);
-							if(pos !== -1) val.splice(pos,1);
-
-							valNew = val;
+						valNew = JSON.parse(JSON.stringify(this.values[ia]));
+						if(isDeleted && valNew !== null && valNew.indexOf(recordId) !== -1) {
+							valNew.splice(valNew.indexOf(recordId),1);
 						}
-						else if(isUpdated) {
-							if(val === null) {
-								valNew = [recordId];
-							}
-							else if(val.indexOf(recordId) === -1) {
-								val.push(recordId);
-								valNew = val;
-							}
+						else if(isUpdated && valNew === null) {
+							valNew = [recordId];
+						}
+						else if(isUpdated && valNew.indexOf(recordId) === -1) {
+							valNew.push(recordId);
 						}
 					}
 					this.valueSetByField(ia,valNew,false,true,field.id);
