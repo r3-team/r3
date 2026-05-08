@@ -87,6 +87,10 @@ export function getDependentModules(moduleSource) {
 	return MyStore.getters['schema/modules'].filter(v => v.id === moduleSource.id || moduleSource.dependsOn.includes(v.id));
 };
 
+export function getDependentOnModules(moduleSource) {
+	return MyStore.getters['schema/modules'].filter(v => v.id === moduleSource.id || v.dependsOn.includes(moduleSource.id));
+};
+
 export function getDependentAttributes(moduleSource) {
 	const modules = getDependentModules(moduleSource);
 	let atrs = [];
