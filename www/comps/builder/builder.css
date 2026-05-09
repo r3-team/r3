@@ -1113,8 +1113,12 @@
 .builder-schema-lookup{
 	width:95%;
 	min-width:300px;
-	max-width:900px;
+	max-width:1200px;
 	min-height:240px;
+}
+.builder-schema-lookup.fullscreen{
+	max-width:unset;
+	height:100%;
 }
 .builder-schema-lookup-module-items{
 	margin-top:8px;

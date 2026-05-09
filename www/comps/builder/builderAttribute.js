@@ -329,6 +329,7 @@ export default {
 			v-if="showLookup"
 			@close="showLookup = false"
 			:entityId="attributeId"
+			:entityName="values.name"
 			:module
 		/>
 	</div>`,

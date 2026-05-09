@@ -20,6 +20,7 @@ export function lookupReferences(moduleSource,entity,entityId) {
 
 			// main elements
 			apiIds:[],
+			collectionIds:[],
 			docIds:[],
 			formIds:[],
 			//jsFunctionIds:[],
@@ -140,6 +141,12 @@ function lookupReferencesAttribut(mod,atrId,lookups) {
 	for(const a of mod.apis) {
 		if(isInQuery(a.query) || isInColumns(a.columns)) {
 			lookups.apiIds.push(a.id);
+			lookups.anyResults = true;
+		}
+	}
+	for(const c of mod.collections) {
+		if(isInQuery(c.query) || isInColumns(c.columns)) {
+			lookups.collectionIds.push(c.id);
 			lookups.anyResults = true;
 		}
 	}
