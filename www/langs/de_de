@@ -1860,7 +1860,7 @@
 			"hint": {
 				"middleClickToTab": "Links können per Mittelklick als neuer Tab geöffnet werden"
 			},
-			"title": "Builder lookup: {NAME}"
+			"title": "Builder-Referenzprüfung: {NAME}"
 		},
 		"searchBar": {
 			"dialog": {
@@ -2649,12 +2649,15 @@
 		"title": "Titel",
 		"token": "Token",
 		"transfer": "Transfer",
+		"trigger": "Trigger",
+		"triggers": "Trigger",
 		"type": "Typ",
 		"unassigned": "Nicht zugewiesen",
 		"uninstall": "Deinstallieren",
 		"update": "Aktualisieren",
 		"updated": "Aktualisiert",
 		"url": "URL",
+		"userSync": "User sync",
 		"username": "Benutzername",
 		"value": "Wert",
 		"valueExpected": "Erwarteter Wert",

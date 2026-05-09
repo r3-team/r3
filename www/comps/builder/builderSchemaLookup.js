@@ -23,6 +23,18 @@ const MyBuilderSchemaLookupModule = {
 		<div class="builder-schema-lookup-module-items" v-if="show">
 			<table class="generic-table bright">
 				<tbody>
+					<tr v-if="lookups.moduleFncLoginSync">
+						<td class="minimum"><my-label image="personArrow.png" :caption="capGen.userSync" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									@trigger="open('loginSync',moduleId,null,false)"
+									@trigger-middle="open('loginSync',moduleId,null,true)"
+									:caption="moduleIdMap[moduleId].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="showApis && lookups.apiIds.length !== 0">
 						<td class="minimum"><my-label image="api.png" :caption="capGen.api" /></td>
 						<td>
@@ -49,6 +61,19 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="showJsFnc && lookups.jsFunctionIds.length !== 0">
+						<td class="minimum"><my-label image="codeScreen.png" :caption="capGen.functionFrontend" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.jsFunctionIds"
+									@trigger="open('jsFunction',id,null,false)"
+									@trigger-middle="open('jsFunction',id,null,true)"
+									:caption="jsFunctionIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="showPgFnc && lookups.pgFunctionIds.length !== 0">
 						<td class="minimum"><my-label image="codeDatabase.png" :caption="capGen.functionBackend" /></td>
 						<td>
@@ -71,6 +96,19 @@ const MyBuilderSchemaLookupModule = {
 									@trigger="open('pgIndex',indexIdMap[id].relationId,null,false)"
 									@trigger-middle="open('pgIndex',indexIdMap[id].relationId,null,true)"
 									:caption="relationIdMap[indexIdMap[id].relationId].name"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="showPgTriggers && lookups.pgTriggerIds.length !== 0">
+						<td class="minimum"><my-label image="databasePlay.png" :caption="capGen.trigger" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.pgTriggerIds"
+									@trigger="open('pgTrigger',pgTriggerIdMap[id].relationId,null,false)"
+									@trigger-middle="open('pgTrigger',pgTriggerIdMap[id].relationId,null,true)"
+									:caption="relationIdMap[pgTriggerIdMap[id].relationId].name"
 								/>
 							</div>
 						</td>
@@ -140,10 +178,13 @@ const MyBuilderSchemaLookupModule = {
 		showDocs:       { type:Boolean, required:true },
 		showFields:     { type:Boolean, required:true },
 		showForms:      { type:Boolean, required:true },
+		showJsFnc:      { type:Boolean, required:true },
 		showPgFnc:      { type:Boolean, required:true },
 		showPgIndex:    { type:Boolean, required:true },
+		showPgTriggers: { type:Boolean, required:true },
 		showSearchBars: { type:Boolean, required:true }
 	},
+	emits:['close'],
 	data() {
 		return {
 			show:true
@@ -165,8 +206,10 @@ const MyBuilderSchemaLookupModule = {
 		docIdMap:       s => s.$store.getters['schema/docIdMap'],
 		formIdMap:      s => s.$store.getters['schema/formIdMap'],
 		indexIdMap:     s => s.$store.getters['schema/indexIdMap'],
+		jsFunctionIdMap:s => s.$store.getters['schema/jsFunctionIdMap'],
 		moduleIdMap:    s => s.$store.getters['schema/moduleIdMap'],
 		pgFunctionIdMap:s => s.$store.getters['schema/pgFunctionIdMap'],
+		pgTriggerIdMap: s => s.$store.getters['schema/pgTriggerIdMap'],
 		relationIdMap:  s => s.$store.getters['schema/relationIdMap'],
 		searchBarIdMap: s => s.$store.getters['schema/searchBarIdMap'],
 		capGen:         s => s.$store.getters.captions.generic
@@ -202,14 +245,18 @@ const MyBuilderSchemaLookupModule = {
 				case 'doc':        url = `/builder/doc/${entityId}`; break;
 				case 'form':       url = `/builder/form/${entityId}`; break;
 				case 'field':      url = `/builder/form/${entityId}?fieldIdShow=${entityIdSub}`; break;
+				case 'jsFunction': url = `/builder/js-function/${entityId}`; break;
+				case 'loginSync':  url = `/builder/module/${entityId}`; break;
 				case 'pgFunction': url = `/builder/pg-function/${entityId}`; break;
 				case 'pgIndex':    url = `/builder/relation/${entityId}`; break;
+				case 'pgTrigger':  url = `/builder/relation/${entityId}`; break;
 				case 'searchBar':  url = `/builder/search-bar/${entityId}`; break;
 			}
 			if(middle)
 				return this.openLink('#'+url,true);
 			
 			this.$router.push(url);
+			this.$emit('close');
 		}
 	}
 };
@@ -246,8 +293,10 @@ export default {
 				<my-button-check v-model="showDocs"        :caption="capGen.pdfs" />
 				<my-button-check v-model="showForms"       :caption="capGen.forms" />
 				<my-button-check v-model="showFields"      :caption="capGen.fields" />
+				<my-button-check v-model="showJsFnc"       :caption="capGen.functionsFrontend" />
 				<my-button-check v-model="showPgFnc"       :caption="capGen.functionsBackend" />
 				<my-button-check v-model="showPgIndex"     :caption="capGen.indexes" />
+				<my-button-check v-model="showPgTriggers"  :caption="capGen.triggers" />
 				<my-button-check v-model="showSearchBars"  :caption="capGen.searchBars" />
 			</div>
 			<div class="content column scroll grow default-inputs">
@@ -270,6 +319,7 @@ export default {
 					/>
 					<my-builder-schema-lookup-module
 						v-for="(v,k) in moduleIdMapLookups"
+						@close="close"
 						:moduleId="k"
 						:lookups="v"
 						:showApis
@@ -277,8 +327,10 @@ export default {
 						:showDocs
 						:showFields
 						:showForms
+						:showJsFnc
 						:showPgFnc
 						:showPgIndex
+						:showPgTriggers
 						:showSearchBars
 					/>
 				</template>
@@ -306,8 +358,10 @@ export default {
 			showDocs:true,
 			showFields:true,
 			showForms:true,
+			showJsFnc:true,
 			showPgFnc:true,
 			showPgIndex:true,
+			showPgTriggers:true,
 			showSearchBars:true
 		};
 	},
@@ -316,7 +370,8 @@ export default {
 		title:s => {
 			let contentName = '';
 			switch(s.entity) {
-				case 'attribute': contentName = s.capGen.attribute; break;
+				case 'attribute':  contentName = s.capGen.attribute;       break;
+				case 'pgFunction': contentName = s.capGen.functionBackend; break;
 			}
 			return `${s.capApp.title.replace('{NAME}',contentName)} '${s.entityName}'`;
 		},

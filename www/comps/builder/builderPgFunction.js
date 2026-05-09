@@ -1,8 +1,10 @@
 import MyBuilderCaption                from './builderCaption.js';
 import MyBuilderPgTriggers             from './builderPgTriggers.js';
+import MyBuilderSchemaLookup           from './builderSchemaLookup.js';
 import MyCodeEditor                    from '../codeEditor.js';
 import {getTemplatePgFunctionSchedule} from '../shared/builderTemplate.js';
 import {dialogDeleteAsk}               from '../shared/dialog.js';
+import {getHasAnyReferences}           from '../shared/schemaLookup.js';
 import {
 	getAttributeIcon,
 	isAttributeFiles
@@ -129,6 +131,7 @@ export default {
 		MyBuilderCaption,
 		MyBuilderPgFunctionItemSchedule,
 		MyBuilderPgTriggers,
+		MyBuilderSchemaLookup,
 		MyCodeEditor
 	},
 	template:`<div class="builder-function" v-if="fnc !== false">
@@ -176,8 +179,12 @@ export default {
 						@trigger="copyValueDialog(fnc.name,id,id)"
 						:caption="capGen.id"
 					/>
+					<my-button image="builderLookup.png"
+						@trigger="showLookup = true"
+						:caption="capGen.references"
+					/>
 					<my-button image="delete.png"
-						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
+						@trigger="delCheck"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -634,6 +641,16 @@ export default {
 				</table>
 			</div>
 		</div>
+
+		<!-- schema lookup dialog -->
+		<my-builder-schema-lookup entity="pgFunction"
+			v-if="showLookup"
+			@close="showLookup = false"
+			:entityId="id"
+			:entityName="fnc.name"
+			:module
+			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
+		/>
 	</div>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
@@ -673,6 +690,7 @@ export default {
 			addOld:false,
 			entity:'relation', // selected placeholder entity (relation, attribute, pgFunction, instanceFunction)
 			entityId:null,
+			hasReferences:false,
 			holderDocIdsOpen:[],         // opened document placeholders (shows methods 'attach', 'export')
 			holderDocText:'',            // text filter for documents
 			holderFunctionModuleId:null, // module filter for backend functions
@@ -696,6 +714,7 @@ export default {
 			showHolderFncModule:false,
 			showHolderPreset:false,
 			showHolderRelation:false,
+			showLookup:false,
 			showPreview:false,
 			showSidebar:true,
 			tabTarget:'content'
@@ -808,6 +827,7 @@ export default {
 		getAttributeIcon,
 		getDependentModules,
 		getFunctionHelp,
+		getHasAnyReferences,
 		getTemplatePgFunctionSchedule,
 		getValidDbCharsForRx,
 		isAttributeFiles,
@@ -1087,6 +1107,13 @@ export default {
 		},
 		
 		// backend calls
+		delCheck() {
+			this.hasReferences = this.getHasAnyReferences(this.module,'pgFunction',this.id);
+			if(this.hasReferences)
+				return this.showLookup = true;
+
+			this.dialogDeleteAsk(this.del,this.capApp.dialog.delete);
+		},
 		del() {
 			ws.send('pgFunction','del',this.fnc.id,true).then(
 				() => {

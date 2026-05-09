@@ -1860,7 +1860,7 @@
 			"hint": {
 				"middleClickToTab": "Use middle-click to open links in a new browser tab"
 			},
-			"title": "Builder lookup: {NAME}"
+			"title": "Builder reference check: {NAME}"
 		},
 		"searchBar": {
 			"dialog": {
@@ -2649,12 +2649,15 @@
 		"title": "Titre",
 		"token": "Jeton",
 		"transfer": "Transfer",
+		"trigger": "Trigger",
+		"triggers": "Triggers",
 		"type": "Type",
 		"unassigned": "Non attribué",
 		"uninstall": "Uninstall",
 		"update": "Update",
 		"updated": "Updated",
 		"url": "URL",
+		"userSync": "User sync",
 		"username": "Nom d'utilisateur",
 		"value": "Value",
 		"valueExpected": "Expected value",

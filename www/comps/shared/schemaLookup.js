@@ -1,7 +1,7 @@
 import {getDependentOnModules} from './builder.js';
 //import MyStore               from '../../stores/store.js';
 
-const entities = ['attribute'];
+const entities = ['attribute','pgFunction'];
 
 export function getHasAnyReferences(moduleSource,entity,entityId) {
 	const o = getReferences(moduleSource,entity,entityId);
@@ -23,14 +23,19 @@ export function getReferences(moduleSource,entity,entityId) {
 		let lookups = {
 			anyResults:false,
 
+			// module definitions
+			moduleFncLoginSync:false,
+			moduleFncOnLogin:false,
+
 			// main elements
 			apiIds:[],
 			collectionIds:[],
 			docIds:[],
 			formIds:[],
-			//jsFunctionIds:[],
+			jsFunctionIds:[],
 			pgFunctionIds:[],
 			pgIndexIds:[],
+			pgTriggerIds:[],
 			searchBarIds:[],
 
 			// sub elements in forms
@@ -40,7 +45,8 @@ export function getReferences(moduleSource,entity,entityId) {
 		};
 
 		switch(entity) {
-			case 'attribute': getReferencesAttribut(mod,entityId,lookups); break;
+			case 'attribute':  getReferencesAttribut(mod,entityId,lookups);   break;
+			case 'pgFunction': getReferencesPgFunction(mod,entityId,lookups); break;
 		}
 
 		if(lookups.anyResults) {
@@ -49,6 +55,32 @@ export function getReferences(moduleSource,entity,entityId) {
 		}
 	}
 	return moduleIdMapLookups;
+};
+
+
+function getReferencesPgFunction(mod,fncId,lookups) {
+	for(const f of mod.pgFunctions) {
+		if(f.codeFunction.includes(`.[${fncId}](`)) {
+			lookups.pgFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
+	for(const f of mod.jsFunctions) {
+		if(f.codeFunction.includes(`.call_backend('${fncId}'`)) {
+			lookups.jsFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
+	for(const t of mod.pgTriggers) {
+		if(t.pgFunctionId === fncId) {
+			lookups.pgTriggerIds.push(t.id);
+			lookups.anyResults = true;
+		}
+	}
+	if(mod.pgFunctionIdLoginSync === fncId) {
+		lookups.moduleFncLoginSync = true;
+		lookups.anyResults = true;
+	}
 };
 
 function getReferencesAttribut(mod,atrId,lookups) {

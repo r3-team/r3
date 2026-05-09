@@ -1860,7 +1860,7 @@
 			"hint":{
 				"middleClickToTab": "Use middle-click to open links in a new browser tab"
 			},
-			"title": "Builder lookup: {NAME}"
+			"title": "Builder reference check: {NAME}"
 		},
 		"searchBar": {
 			"dialog": {
@@ -2649,6 +2649,8 @@
 		"title": "Title",
 		"token": "Token",
 		"transfer": "Transfer",
+		"trigger": "Trigger",
+		"triggers": "Triggers",
 		"type": "Type",
 		"unassigned": "Unassigned",
 		"uninstall": "Uninstall",
@@ -2656,6 +2658,7 @@
 		"updated": "Updated",
 		"url": "URL",
 		"username": "Username",
+		"userSync": "User sync",
 		"value": "Value",
 		"valueExpected": "Expected value",
 		"variable": "Variable",
