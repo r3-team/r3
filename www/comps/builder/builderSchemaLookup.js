@@ -1,4 +1,5 @@
 import {getItemTitle}     from '../shared/builder.js';
+import {getFieldIcon}     from '../shared/field.js';
 import {getFieldMap}      from '../shared/form.js';
 import {openLink}         from '../shared/generic.js';
 import {getCaption}       from '../shared/language.js';
@@ -20,69 +21,128 @@ const MyBuilderSchemaLookupModule = {
 			/>
 		</div>
 		<div class="builder-schema-lookup-module-items" v-if="show">
-			<my-button image="api.png"
-				v-for="id in lookups.apiIds"
-				@trigger="open('api',id,null,false)"
-				@trigger-middle="open('api',id,null,true)"
-				:caption="capGen.api + ': ' + apiIdMap[id].name"
-				:naked="true"
-			/>
-			<my-button image="document.png"
-				v-for="id in lookups.docIds"
-				@trigger="open('doc',id,null,false)"
-				@trigger-middle="open('doc',id,null,true)"
-				:caption="capGen.pdf + ': ' + docIdMap[id].name"
-				:naked="true"
-			/>
-			<my-button image="codeDatabase.png"
-				v-for="id in lookups.pgFunctionIds"
-				@trigger="open('pgFunction',id,null,false)"
-				@trigger-middle="open('pgFunction',id,null,true)"
-				:caption="capGen.functionBackend + ': ' + pgFunctionIdMap[id].name"
-				:naked="true"
-			/>
-			<my-button image="databaseAsterisk.png"
-				v-for="id in lookups.pgIndexIds"
-				@trigger="open('pgIndex',indexIdMap[id].relationId,null,false)"
-				@trigger-middle="open('pgIndex',indexIdMap[id].relationId,null,true)"
-				:caption="capGen.index + ': ' + relationIdMap[indexIdMap[id].relationId].name"
-				:naked="true"
-			/>
-			<my-button image="tray.png"
-				v-for="id in lookups.collectionIds"
-				@trigger="open('collection',id,null,false)"
-				@trigger-middle="open('collection',id,null,true)"
-				:caption="capGen.collection + ': ' + collectionIdMap[id].name"
-				:naked="true"
-			/>
-			<my-button image="search.png"
-				v-for="id in lookups.searchBarIds"
-				@trigger="open('searchBar',id,null,false)"
-				@trigger-middle="open('searchBar',id,null,true)"
-				:caption="capGen.searchBar + ': ' + searchBarIdMap[id].name"
-				:naked="true"
-			/>
-			<my-button image="fileText.png"
-				v-for="id in lookups.formIds"
-				@trigger="open('form',id,null,false)"
-				@trigger-middle="open('form',id,null,true)"
-				:caption="capGen.form + ': ' + formIdMap[id].name"
-				:naked="true"
-			/>
-			<template v-for="(fieldIds,formId) in lookups.formIdMapFieldIds">
-				<my-button image="fileText.png"
-					v-for="id in fieldIds"
-					@trigger="open('field',formId,id,false)"
-					@trigger-middle="open('field',formId,id,true)"
-					:caption="capGen.form + ': ' + formIdMap[formId].name + ', ' + getFieldLabel(id)"
-					:naked="true"
-				/>
-			</template>
+			<table class="generic-table bright">
+				<tbody>
+					<tr v-if="showApis && lookups.apiIds.length !== 0">
+						<td class="minimum"><my-label image="api.png" :caption="capGen.api" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.apiIds"
+									@trigger="open('api',id,null,false)"
+									@trigger-middle="open('api',id,null,true)"
+									:caption="apiIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="showDocs && lookups.docIds.length !== 0">
+						<td class="minimum"><my-label image="document.png" :caption="capGen.pdf" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.docIds"
+									@trigger="open('doc',id,null,false)"
+									@trigger-middle="open('doc',id,null,true)"
+									:caption="docIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="showPgFnc && lookups.pgFunctionIds.length !== 0">
+						<td class="minimum"><my-label image="codeDatabase.png" :caption="capGen.functionBackend" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.pgFunctionIds"
+									@trigger="open('pgFunction',id,null,false)"
+									@trigger-middle="open('pgFunction',id,null,true)"
+									:caption="pgFunctionIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="showPgIndex && lookups.pgIndexIds.length !== 0">
+						<td class="minimum"><my-label image="databaseAsterisk.png" :caption="capGen.index" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.pgIndexIds"
+									@trigger="open('pgIndex',indexIdMap[id].relationId,null,false)"
+									@trigger-middle="open('pgIndex',indexIdMap[id].relationId,null,true)"
+									:caption="relationIdMap[indexIdMap[id].relationId].name"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="showCollections && lookups.collectionIds.length !== 0">
+						<td class="minimum"><my-label image="tray.png" :caption="capGen.collection" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.collectionIds"
+									@trigger="open('collection',id,null,false)"
+									@trigger-middle="open('collection',id,null,true)"
+									:caption="collectionIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="showSearchBars && lookups.searchBarIds.length !== 0">
+						<td class="minimum"><my-label image="search.png" :caption="capGen.searchBar" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.searchBarIds"
+									@trigger="open('searchBar',id,null,false)"
+									@trigger-middle="open('searchBar',id,null,true)"
+									:caption="searchBarIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="showForms && lookups.formIds.length !== 0">
+						<td class="minimum"><my-label image="fileText.png" :caption="capGen.form" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.formIds"
+									@trigger="open('form',id,null,false)"
+									@trigger-middle="open('form',id,null,true)"
+									:caption="formIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="showFields" v-for="(fieldIds,formId) in lookups.formIdMapFieldIds">
+						<td class="minimum"><my-label image="fileText.png" :caption="capGen.form + ': ' + formIdMap[formId].name" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in fieldIds"
+									@trigger="open('field',formId,id,false)"
+									@trigger-middle="open('field',formId,id,true)"
+									:caption="getFieldLabel(id)"
+									:image="getFieldImage(id)"
+								/>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 	</div>`,
 	props:{
-		moduleId:{ type:String, required:true },
-		lookups: { type:Object, required:true }
+		moduleId:       { type:String,  required:true },
+		lookups:        { type:Object,  required:true },
+		showApis:       { type:Boolean, required:true },
+		showCollections:{ type:Boolean, required:true },
+		showDocs:       { type:Boolean, required:true },
+		showFields:     { type:Boolean, required:true },
+		showForms:      { type:Boolean, required:true },
+		showPgFnc:      { type:Boolean, required:true },
+		showPgIndex:    { type:Boolean, required:true },
+		showSearchBars: { type:Boolean, required:true }
 	},
 	data() {
 		return {
@@ -114,12 +174,17 @@ const MyBuilderSchemaLookupModule = {
 	methods:{
 		// externals
 		getCaption,
+		getFieldIcon,
 		getFieldMap,
 		getItemTitle,
 		openLink,
 		srcBase64Icon,
 
 		// presentation
+		getFieldImage(fieldId) {
+			const field = this.fieldIdMap[fieldId];
+			return field === undefined ? '' : this.getFieldIcon(field);
+		},
 		getFieldLabel(fieldId) {
 			const field = this.fieldIdMap[fieldId];
 			if(field === undefined)
@@ -175,7 +240,17 @@ export default {
 					/>
 				</div>
 			</div>
-			<div class="content column gap default-inputs">
+			<div class="contentBarTop row wrap gap-large justify-end">
+				<my-button-check v-model="showApis"        :caption="capGen.apis" />
+				<my-button-check v-model="showCollections" :caption="capGen.collections" />
+				<my-button-check v-model="showDocs"        :caption="capGen.pdfs" />
+				<my-button-check v-model="showForms"       :caption="capGen.forms" />
+				<my-button-check v-model="showFields"      :caption="capGen.fields" />
+				<my-button-check v-model="showPgFnc"       :caption="capGen.functionsBackend" />
+				<my-button-check v-model="showPgIndex"     :caption="capGen.indexes" />
+				<my-button-check v-model="showSearchBars"  :caption="capGen.searchBars" />
+			</div>
+			<div class="content column scroll grow default-inputs">
 				<my-label image="warning.png"
 					v-if="!ready"
 					:caption="capGen.loading"
@@ -187,9 +262,17 @@ export default {
 					v-for="(v,k) in moduleIdMapLookups"
 					:moduleId="k"
 					:lookups="v"
+					:showApis
+					:showCollections
+					:showDocs
+					:showFields
+					:showForms
+					:showPgFnc
+					:showPgIndex
+					:showSearchBars
 				/>
-				<br />
-				<br />
+			</div>
+			<div class="contentBarBottom row gap-large">
 				<my-label image="question.png" :caption="capApp.hint.middleClickToTab" />
 			</div>
 		</div>
@@ -205,7 +288,15 @@ export default {
 		return {
 			fullscreen:false,
 			moduleIdMapLookups:{},
-			ready:false
+			ready:false,
+			showApis:true,
+			showCollections:true,
+			showDocs:true,
+			showFields:true,
+			showForms:true,
+			showPgFnc:true,
+			showPgIndex:true,
+			showSearchBars:true
 		};
 	},
 	computed:{

@@ -71,6 +71,11 @@ export default {
 						:active="!isNew"
 						:caption="capGen.id"
 					/>
+					<my-button image="builderLookup.png"
+						@trigger="showLookup = true"
+						:active="!isNew"
+						:caption="capGen.references"
+					/>
 					<my-button image="delete.png"
 						@trigger="delCheck"
 						:active="!isNew && !isId && !readonly"

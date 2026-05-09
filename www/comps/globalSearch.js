@@ -434,7 +434,7 @@ const MyGlobalSearch = {
 						:module="m"
 					/>
 				</div>
-				<div class="global-search-message-bottom row gap-large" v-if="!isMobile">
+				<div class="contentBarBottom row gap-large" v-if="!isMobile">
 					<my-button image="arrowsSwitch.png" @trigger="nextTip" />
 					<my-label :caption="capGen.tip + ': ' + capApp.tips[tipIndex]" />
 				</div>
