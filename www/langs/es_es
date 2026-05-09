@@ -2444,6 +2444,7 @@
 			"logoutComing": "Por razones de seguridad, necesita volver a introducir sus credenciales de inicio de sesión de vez en cuando.<br /><br />Será desconectado automáticamente a las <b>{DATE}</b>.<br /><br />Por favor guarde sus cambios antes de entonces.<br /><br />",
 			"logoutComingTitle": "Está a punto de ser desconectado",
 			"maintenanceComing": "El sistema entrará en modo de mantenimiento a las <b>{DATE}</b>. Por favor guarde sus cambios antes de entonces.",
+			"referencesBlockDeletion": "Cannot proceed with deletion, references still exist.",
 			"systemMsg": "Mensaje del sistema"
 		},
 		"direction": "Dirección",

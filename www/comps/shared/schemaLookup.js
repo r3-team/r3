@@ -3,10 +3,15 @@ import {getDependentOnModules} from './builder.js';
 
 const entities = ['attribute'];
 
+export function getHasAnyReferences(moduleSource,entity,entityId) {
+	const o = getReferences(moduleSource,entity,entityId);
+	return Object.keys(o).length !== 0;
+};
+
 // goes through the given module and its dependencies
 // finds all references for chosen entity ('attribute', ...)
 // returns object with lookup results
-export function lookupReferences(moduleSource,entity,entityId) {
+export function getReferences(moduleSource,entity,entityId) {
 	if(!entities.includes(entity)) {
 		console.warn(`invalid entity for schema lookup: '${entity}'`);
 		return [];
@@ -35,7 +40,7 @@ export function lookupReferences(moduleSource,entity,entityId) {
 		};
 
 		switch(entity) {
-			case 'attribute': lookupReferencesAttribut(mod,entityId,lookups); break;
+			case 'attribute': getReferencesAttribut(mod,entityId,lookups); break;
 		}
 
 		if(lookups.anyResults) {
@@ -46,7 +51,7 @@ export function lookupReferences(moduleSource,entity,entityId) {
 	return moduleIdMapLookups;
 };
 
-function lookupReferencesAttribut(mod,atrId,lookups) {
+function getReferencesAttribut(mod,atrId,lookups) {
 	const isInColumns = columns => columns.some(v => v.attributeId === atrId || (v.subQuery && isInQuery(v.query,atrId)));
 	const isInFilters = filters =>
 		filters.some(v =>

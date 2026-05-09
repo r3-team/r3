@@ -2444,6 +2444,7 @@
 			"logoutComing": "Güvenlik nedeniyle, oturum açma kimlik bilgilerinizi arada sırada yeniden girmeniz gerekir.<br /><br /><b>{DATE}</b> adresinde oturumunuz otomatik olarak kapatılacaktır.<br /><br />Lütfen değişikliklerinizi bundan önce kaydedin.<br /><br />",
 			"logoutComingTitle": "Oturumu kapatmak üzeresiniz",
 			"maintenanceComing": "Sistemin <b>{DATE}</b> tarihinde bakım moduna geçmesi planlanıyor. Lütfen değişikliklerinizi bundan önce kaydedin.",
+			"referencesBlockDeletion": "Cannot proceed with deletion, references still exist.",
 			"systemMsg": "Sistem mesajı"
 		},
 		"direction": "Yön",

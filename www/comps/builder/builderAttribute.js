@@ -6,6 +6,7 @@ import {getFieldMap}          from '../shared/form.js';
 import {copyValueDialog}      from '../shared/generic.js';
 import {getTemplateAttribute} from '../shared/builderTemplate.js';
 import {dialogDeleteAsk}      from '../shared/dialog.js';
+import {getHasAnyReferences}  from '../shared/schemaLookup.js';
 import {
 	getDependentModules,
 	getItemTitle
@@ -336,6 +337,7 @@ export default {
 			:entityId="attributeId"
 			:entityName="values.name"
 			:module
+			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
 		/>
 	</div>`,
 	props:{
@@ -348,6 +350,7 @@ export default {
 	data() {
 		return {
 			defaultsOption:'fixed',
+			hasReferences:false,
 			showLookup:false,
 			
 			// attribute values
@@ -541,6 +544,7 @@ export default {
 		getAttributeIcon,
 		getDependentModules,
 		getFieldMap,
+		getHasAnyReferences,
 		getItemTitle,
 		getTemplateAttribute,
 		getUuidV4,
@@ -622,7 +626,11 @@ export default {
 		
 		// backend calls
 		delCheck() {
-			this.showLookup = true;
+			this.hasReferences = this.getHasAnyReferences(this.module,'attribute',this.attributeId);
+			if(this.hasReferences)
+				return this.showLookup = true;
+
+			this.dialogDeleteAsk(this.del,this.capApp.dialog.delete);
 		},
 		del() {
 			ws.send('attribute','del',this.attributeId,true).then(

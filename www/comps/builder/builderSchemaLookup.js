@@ -1,10 +1,10 @@
-import {getItemTitle}     from '../shared/builder.js';
-import {getFieldIcon}     from '../shared/field.js';
-import {getFieldMap}      from '../shared/form.js';
-import {openLink}         from '../shared/generic.js';
-import {getCaption}       from '../shared/language.js';
-import {lookupReferences} from '../shared/schemaLookup.js';
-import srcBase64Icon      from '../shared/image.js';
+import {getItemTitle}  from '../shared/builder.js';
+import {getFieldIcon}  from '../shared/field.js';
+import {getFieldMap}   from '../shared/form.js';
+import {openLink}      from '../shared/generic.js';
+import {getCaption}    from '../shared/language.js';
+import {getReferences} from '../shared/schemaLookup.js';
+import srcBase64Icon   from '../shared/image.js';
 
 const MyBuilderSchemaLookupModule = {
 	name:'my-builder-schema-lookup-module',
@@ -217,7 +217,7 @@ const MyBuilderSchemaLookupModule = {
 export default {
 	name:'my-builder-schema-lookup',
 	components:{ MyBuilderSchemaLookupModule },
-	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
+	template:`<div class="app-sub-window under-header" @mousedown.self="close">
 		<div class="contentBox builder-schema-lookup float" :class="{ fullscreen }">
 			<div class="top lower">
 				<div class="area nowrap">
@@ -235,7 +235,7 @@ export default {
 						:image="fullscreen ? 'shrink.png' : 'expand.png'"
 					/>
 					<my-button image="cancel.png"
-						@trigger="$emit('close')"
+						@trigger="close"
 						:cancel="true"
 					/>
 				</div>
@@ -251,26 +251,37 @@ export default {
 				<my-button-check v-model="showSearchBars"  :caption="capGen.searchBars" />
 			</div>
 			<div class="content column scroll grow default-inputs">
-				<my-label image="warning.png"
+				<my-label image="load.gif"
 					v-if="!ready"
 					:caption="capGen.loading"
-					:image="load.gif"
 					:large="true"
 				/>
-				<my-builder-schema-lookup-module
-					v-if="ready"
-					v-for="(v,k) in moduleIdMapLookups"
-					:moduleId="k"
-					:lookups="v"
-					:showApis
-					:showCollections
-					:showDocs
-					:showFields
-					:showForms
-					:showPgFnc
-					:showPgIndex
-					:showSearchBars
-				/>
+				<template v-if="ready">
+					<my-label
+						v-if="noResults"
+						:caption="capGen.nothingThere"
+						:large="true"
+					/>
+					<my-label image="warning.png"
+						v-if="!noResults && warningMsg !== null"
+						:caption="warningMsg"
+						:error="true"
+						:large="true"
+					/>
+					<my-builder-schema-lookup-module
+						v-for="(v,k) in moduleIdMapLookups"
+						:moduleId="k"
+						:lookups="v"
+						:showApis
+						:showCollections
+						:showDocs
+						:showFields
+						:showForms
+						:showPgFnc
+						:showPgIndex
+						:showSearchBars
+					/>
+				</template>
 			</div>
 			<div class="contentBarBottom row gap-large">
 				<my-label image="question.png" :caption="capApp.hint.middleClickToTab" />
@@ -278,10 +289,11 @@ export default {
 		</div>
 	</div>`,
 	props:{
-		entity:    { type:String, required:true },
-		entityId:  { type:String, required:true },
-		entityName:{ type:String, required:true },
-		module:    { type:Object, required:true }
+		entity:    { type:String,        required:true },
+		entityId:  { type:String,        required:true },
+		entityName:{ type:String,        required:true },
+		module:    { type:Object,        required:true },
+		warningMsg:{ type:[String,null], required:true }
 	},
 	emits:['close'],
 	data() {
@@ -300,6 +312,7 @@ export default {
 		};
 	},
 	computed:{
+		noResults:s => Object.keys(s.moduleIdMapLookups).length === 0,
 		title:s => {
 			let contentName = '';
 			switch(s.entity) {
@@ -314,15 +327,25 @@ export default {
 	},
 	mounted() {
 		this.refresh();
+		
+		this.$store.commit('keyDownHandlerSleep');
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape'});
+	},
+	unmounted() {
+		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerWake');
 	},
 	methods:{
 		// externals
-		lookupReferences,
+		getReferences,
 
 		// actions
+		close() {
+			this.$emit('close');
+		},
 		refresh() {
 			this.ready = false;
-			this.moduleIdMapLookups = this.lookupReferences(this.module,this.entity,this.entityId);
+			this.moduleIdMapLookups = this.getReferences(this.module,this.entity,this.entityId);
 			this.ready = true;
 		}
 	}

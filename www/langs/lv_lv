@@ -2444,6 +2444,7 @@
 			"logoutComing": "For security reasons, you need to re-enter your login credentials every now and then.<br /><br />You will be automatically logged off at <b>{DATE}</b>.<br /><br />Please save your changes before then.<br /><br />",
 			"logoutComingTitle": "You are about to be logged off",
 			"maintenanceComing": "The system is planned to go into maintenance mode at <b>{DATE}</b>. Please save your changes before then.",
+			"referencesBlockDeletion": "Cannot proceed with deletion, references still exist.",
 			"systemMsg": "System message"
 		},
 		"direction": "Direction",

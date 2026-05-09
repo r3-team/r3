@@ -2444,6 +2444,7 @@
 			"logoutComing": "Aus Sicherheitsgründen müssen Anmeldedaten hin und wieder neu eingegeben werden.<br /><br />Diese Benutzersitzung wird um <b>{DATE}</b> automatisch abgemeldet.<br /><br />Änderungen sollten vorher gespeichert werden.<br /><br />",
 			"logoutComingTitle": "Die Benutzersitzung wird bald abgemeldet",
 			"maintenanceComing": "Das System wird in einen geplanten Wartungsmodus gesetzt: <b>{DATE}</b>. Änderungen sollten vorher gespeichert werden.",
+			"referencesBlockDeletion": "Löschung kann nicht durchgeführt werden, es existieren noch Referenzen.",
 			"systemMsg": "Systemnachricht"
 		},
 		"direction": "Ausrichtung",
