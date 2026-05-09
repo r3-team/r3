@@ -681,8 +681,7 @@
 			"defaults": "Default value",
 			"defaultsHint": "A default value will be used if no other value is given.",
 			"dialog": {
-				"delete": "Vai tiešām vēlaties dzēst šo atribūtu? Tas arī dzēsīs visus tajā iekļautos datus no jūsu sistēmas.<br /><br /><b>Šī darbība ir neatgriezeniska bez esošajām rezervkopijām.</b>",
-				"deleteCheckFailed": "Atribūtu nevar dzēst - uz to joprojām eksistē atsauces"
+				"delete": "Vai tiešām vēlaties dzēst šo atribūtu? Tas arī dzēsīs visus tajā iekļautos datus no jūsu sistēmas.<br /><br /><b>Šī darbība ir neatgriezeniska bez esošajām rezervkopijām.</b>"
 			},
 			"doublePrecision": "High precision",
 			"doublePrecisionHint": "Needs more storage space, but supports more than 6 decimal digits of precision (at least up to 15).",
@@ -1131,8 +1130,6 @@
 			"execResponse": "Response",
 			"fieldsOnlyData": "Only data",
 			"form": "Assigned to form",
-			"functionsBackend": "Backend functions",
-			"functionsFrontend": "Frontend functions",
 			"helpJs": {
 				"block_inputs": "app.block_inputs({ARGS}) => UNDEFINED<br /><br />Blocks or unblocks all inputs on the current form.",
 				"client_execute_keystrokes": "app.client_execute_keystrokes({ARGS}) => UNDEFINED<br /><br />Sends a request to a REI3 client, installed and running on the same computer as the REI3 browser session, to execute a list of keystrokes. These keystrokes are defined by a string, such as 'Hello World!'.<br /><br />Some special keys (ALT-TAB, TAB, ENTER, ESCAPE) are also supported and can be used as such:<br />'Hello,{ENTER}How are you?'",
@@ -1562,9 +1559,7 @@
 			"runType": "Execution",
 			"schedules": "Schedules",
 			"title": "Functions",
-			"titleJs": "Frontend functions",
 			"titleJsOne": "Frontend function '{NAME}'",
-			"titlePg": "Backend functions",
 			"titlePgOne": "Backend function '{NAME}'",
 			"triggers": "Triggers",
 			"value": "VALUE",
@@ -1860,6 +1855,12 @@
 			},
 			"title": "Roles",
 			"titleOne": "Role '{NAME}'"
+		},
+		"schemaLookup": {
+			"hint": {
+				"middleClickToTab": "Use middle-click to open links in a new browser tab"
+			},
+			"title": "Builder lookup: {NAME}"
 		},
 		"searchBar": {
 			"dialog": {
@@ -2477,7 +2478,11 @@
 		"formOpen": "Open form",
 		"forms": "Forms",
 		"fullscreenSwitchTo": "Toggle fullscreen mode",
+		"functionBackend": "Backend function",
+		"functionFrontend": "Frontend function",
 		"functions": "Functions",
+		"functionsBackend": "Backend functions",
+		"functionsFrontend": "Frontend functions",
 		"gap": "Gap",
 		"global": "Global",
 		"globalSearch": "Global search",
@@ -2518,6 +2523,7 @@
 		"licenseRequired": "Nepieciešama licences",
 		"limit": "Limits",
 		"list": "List",
+		"loading": "Loading...",
 		"login": "Login",
 		"loginForm": "Pieteikšanās forma",
 		"loginForms": "Login forms",

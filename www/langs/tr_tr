@@ -681,8 +681,7 @@
 			"defaults": "Varsayılan değer",
 			"defaultsHint": "Başka bir değer verilmediği takdirde varsayılan değer kullanılacaktır.",
 			"dialog": {
-				"delete": "Bu özelliği silmek istediğinizden emin misiniz? Bu işlem aynı zamanda sisteminizdeki tüm verileri silecektir.<br /><br /><b>Bu işlem mevcut yedeklemeler olmadan geri alınamaz.</b>",
-				"deleteCheckFailed": "Özellik silinemez; ona yapılan referanslar hâlâ mevcuttur"
+				"delete": "Bu özelliği silmek istediğinizden emin misiniz? Bu işlem aynı zamanda sisteminizdeki tüm verileri silecektir.<br /><br /><b>Bu işlem mevcut yedeklemeler olmadan geri alınamaz.</b>"
 			},
 			"doublePrecision": "Yüksek hassasiyet",
 			"doublePrecisionHint": "Daha fazla depolama alanına ihtiyaç duyar, ancak 6'dan fazla ondalık basamak hassasiyetini destekler (en az 15'e kadar).",
@@ -1131,8 +1130,6 @@
 			"execResponse": "Cevap",
 			"fieldsOnlyData": "Yalnızca veri",
 			"form": "Forma atandı",
-			"functionsBackend": "Arka uç işlevleri",
-			"functionsFrontend": "Ön uç işlevleri",
 			"helpJs": {
 				"block_inputs": "app.block_inputs({ARGS}) => UNDEFINED<br /><br />Mevcut formdaki tüm girişleri engeller veya engellemeyi kaldırır.",
 				"client_execute_keystrokes": "app.client_execute_keystrokes({ARGS}) => UNDEFINED<br /><br />REI3 tarayıcı oturumuyla aynı bilgisayarda kurulu ve çalışan bir REI3 istemcisine, tuş vuruşlarının bir listesini yürütmek için bir istek gönderir. Bu tuş vuruşları 'Merhaba Dünya!' gibi bir dizeyle tanımlanır.<br /><br />Bazı özel tuşlar (ALT-TAB, TAB, ENTER, ESCAPE) da desteklenir ve şu şekilde kullanılabilir:<br />'Merhaba,{ENTER}Nasılsın?'",
@@ -1562,9 +1559,7 @@
 			"runType": "Uygulamak",
 			"schedules": "Programlar",
 			"title": "Fonksiyonlar",
-			"titleJs": "Ön uç işlevleri",
 			"titleJsOne": "Ön uç işlevi '{NAME}'",
-			"titlePg": "Arka uç işlevleri",
 			"titlePgOne": "Arka uç işlevi '{NAME}'",
 			"triggers": "Tetikleyiciler",
 			"value": "DEĞER",
@@ -1860,6 +1855,12 @@
 			},
 			"title": "Roller",
 			"titleOne": "Rol '{NAME}'"
+		},
+		"schemaLookup": {
+			"hint": {
+				"middleClickToTab": "Use middle-click to open links in a new browser tab"
+			},
+			"title": "Builder lookup: {NAME}"
 		},
 		"searchBar": {
 			"dialog": {
@@ -2477,7 +2478,11 @@
 		"formOpen": "Formu aç",
 		"forms": "Formlar",
 		"fullscreenSwitchTo": "Tam ekran modunu değiştir",
+		"functionBackend": "Backend function",
+		"functionFrontend": "Frontend function",
 		"functions": "Fonksiyonlar",
+		"functionsBackend": "Arka uç işlevleri",
+		"functionsFrontend": "Ön uç işlevleri",
 		"gap": "Açıklık",
 		"global": "Küresel",
 		"globalSearch": "Küresel arama",
@@ -2518,6 +2523,7 @@
 		"licenseRequired": "Lisans gerektirir",
 		"limit": "Sınır",
 		"list": "Liste",
+		"loading": "Loading...",
 		"login": "Giriş yapmak",
 		"loginForm": "Giriş formu",
 		"loginForms": "Giriş formları",

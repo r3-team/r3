@@ -10,14 +10,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func AttributeDelCheck_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
-	var req uuid.UUID
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	return attribute.DelCheck_tx(ctx, tx, req)
-}
-
 func AttributeDel_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (any, error) {
 	var req uuid.UUID
 	if err := json.Unmarshal(reqJson, &req); err != nil {

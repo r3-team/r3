@@ -681,8 +681,7 @@
 			"defaults": "القيمة الافتراضية",
 			"defaultsHint": "سيتم استخدام القيمة الافتراضية إذا لم يتم إعطاء قيمة أخرى.",
 			"dialog": {
-				"delete": "هل أنت متأكد أنك تريد حذف هذه السمة؟ <br /><br /><b>هذا الإجراء لا يمكن التراجع عنه بدون النسخ الاحتياطية الحالية.</b>",
-				"deleteCheckFailed": "لا يمكن حذف السمة - لا تزال الإشارات إليها موجودة"
+				"delete": "هل أنت متأكد أنك تريد حذف هذه السمة؟ <br /><br /><b>هذا الإجراء لا يمكن التراجع عنه بدون النسخ الاحتياطية الحالية.</b>"
 			},
 			"doublePrecision": "دقة عالية",
 			"doublePrecisionHint": "يحتاج إلى مساحة تخزين أكبر، ولكنه يدعم أكثر من 6 أرقام عشرية من الدقة (على الأقل حتى 15).",
@@ -1131,8 +1130,6 @@
 			"execResponse": "إجابة",
 			"fieldsOnlyData": "البيانات فقط",
 			"form": "المخصصة للنموذج",
-			"functionsBackend": "وظائف الخلفية",
-			"functionsFrontend": "وظائف الواجهة الأمامية",
 			"helpJs": {
 				"block_inputs": "app.block_inputs({ARGS}) => غير محدد<br /><br />حظر كافة المدخلات في النموذج الحالي أو إلغاء حظرها.",
 				"client_execute_keystrokes": "app.client_execute_keystrokes({ARGS}) => غير محدد<br /><br />يرسل طلبًا إلى عميل REI3، المثبت والعامل على نفس الكمبيوتر مثل جلسة متصفح REI3، لتنفيذ قائمة بضغطات المفاتيح. <br /><br />بعض المفاتيح الخاصة (ALT-TAB، TAB، ENTER، ESCAPE) مدعومة أيضًا ويمكن استخدامها على هذا النحو:<br />\"مرحبًا،{ENTER}كيف حالك؟\"",
@@ -1562,9 +1559,7 @@
 			"runType": "تنفيذ",
 			"schedules": "الجداول الزمنية",
 			"title": "وظائف",
-			"titleJs": "وظائف الواجهة الأمامية",
 			"titleJsOne": "وظيفة الواجهة الأمامية '{NAME}'",
-			"titlePg": "وظائف الخلفية",
 			"titlePgOne": "وظيفة الواجهة الخلفية '{NAME}'",
 			"triggers": "المشغلات",
 			"value": "قيمة",
@@ -1860,6 +1855,12 @@
 			},
 			"title": "الأدوار",
 			"titleOne": "الدور \"{NAME}\""
+		},
+		"schemaLookup": {
+			"hint": {
+				"middleClickToTab": "Use middle-click to open links in a new browser tab"
+			},
+			"title": "Builder lookup: {NAME}"
 		},
 		"searchBar": {
 			"dialog": {
@@ -2477,7 +2478,11 @@
 		"formOpen": "فتح النموذج",
 		"forms": "النماذج",
 		"fullscreenSwitchTo": "تبديل وضع ملء الشاشة",
+		"functionBackend": "Backend function",
+		"functionFrontend": "Frontend function",
 		"functions": "Functions",
+		"functionsBackend": "وظائف الخلفية",
+		"functionsFrontend": "وظائف الواجهة الأمامية",
 		"gap": "Gap",
 		"global": "Global",
 		"globalSearch": "Global search",
@@ -2518,6 +2523,7 @@
 		"licenseRequired": "يتطلب الترخيص",
 		"limit": "حد",
 		"list": "List",
+		"loading": "Loading...",
 		"login": "Login",
 		"loginForm": "نموذج تسجيل الدخول",
 		"loginForms": "نماذج تسجيل الدخول",

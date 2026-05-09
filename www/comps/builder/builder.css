@@ -1109,6 +1109,25 @@
 }
 
 
+/* schema lookup */
+.builder-schema-lookup{
+	width:95%;
+	min-width:300px;
+	max-width:900px;
+	min-height:240px;
+}
+.builder-schema-lookup-module-items{
+	margin-top:8px;
+	display:flex;
+	flex-flow:row wrap;
+	gap:calc(var(--spacing) / 2);
+	padding:calc(var(--spacing) / 2);
+	background-color:var(--color-input);
+	border:var(--border-input);
+	border-radius:var(--border-input-radius);
+	box-shadow:var(--shadow-input);
+}
+
 /* menus */
 .builder-menus{}
 .builder-menus .content{

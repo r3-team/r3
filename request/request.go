@@ -274,8 +274,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, address string, loginId int64, isAd
 		switch action {
 		case "del":
 			return AttributeDel_tx(ctx, tx, reqJson)
-		case "delCheck":
-			return AttributeDelCheck_tx(ctx, tx, reqJson)
 		case "set":
 			return AttributeSet_tx(ctx, tx, reqJson)
 		}

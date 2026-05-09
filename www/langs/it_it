@@ -681,8 +681,7 @@
 			"defaults": "Default value",
 			"defaultsHint": "A default value will be used if no other value is given.",
 			"dialog": {
-				"delete": "Sei sicuro di voler eliminare questo attributo? Questo eliminerà anche tutti i dati inclusi dal tuo sistema.<br /><br /><b>Questa azione è irreversibile senza backup correnti.</b>",
-				"deleteCheckFailed": "Attribute cannot be deleted - references to it still exist"
+				"delete": "Sei sicuro di voler eliminare questo attributo? Questo eliminerà anche tutti i dati inclusi dal tuo sistema.<br /><br /><b>Questa azione è irreversibile senza backup correnti.</b>"
 			},
 			"doublePrecision": "High precision",
 			"doublePrecisionHint": "Needs more storage space, but supports more than 6 decimal digits of precision (at least up to 15).",
@@ -1131,8 +1130,6 @@
 			"execResponse": "Response",
 			"fieldsOnlyData": "Only data",
 			"form": "Assigned to form",
-			"functionsBackend": "Funzioni backend",
-			"functionsFrontend": "Funzioni frontend",
 			"helpJs": {
 				"block_inputs": "app.block_inputs({ARGS}) => UNDEFINED<br /><br />Blocks or unblocks all inputs on the current form.",
 				"client_execute_keystrokes": "app.client_execute_keystrokes({ARGS}) => UNDEFINED<br /><br />Sends a request to a REI3 client, installed and running on the same computer as the REI3 browser session, to execute a list of keystrokes. These keystrokes are defined by a string, such as 'Hello World!'.<br /><br />Some special keys (ALT-TAB, TAB, ENTER, ESCAPE) are also supported and can be used as such:<br />'Hello,{ENTER}How are you?'",
@@ -1562,9 +1559,7 @@
 			"runType": "Execution",
 			"schedules": "Schedules",
 			"title": "Funzioni",
-			"titleJs": "Funzioni frontend",
 			"titleJsOne": "Funzioni frontend '{NAME}'",
-			"titlePg": "Funzioni backend",
 			"titlePgOne": "Funzioni backend '{NAME}'",
 			"triggers": "Triggers",
 			"value": "VALUE",
@@ -1860,6 +1855,12 @@
 			},
 			"title": "Ruoli",
 			"titleOne": "Role '{NAME}'"
+		},
+		"schemaLookup": {
+			"hint": {
+				"middleClickToTab": "Use middle-click to open links in a new browser tab"
+			},
+			"title": "Builder lookup: {NAME}"
 		},
 		"searchBar": {
 			"dialog": {
@@ -2477,7 +2478,11 @@
 		"formOpen": "Open form",
 		"forms": "Moduli",
 		"fullscreenSwitchTo": "Toggle fullscreen mode",
-		"functions": "Functions",
+		"functionBackend": "Backend function",
+		"functionFrontend": "Frontend function",
+		"functions": "Funzioni",
+		"functionsBackend": "Funzioni backend",
+		"functionsFrontend": "Funzioni frontend",
 		"gap": "Gap",
 		"global": "Global",
 		"globalSearch": "Global search",
@@ -2518,6 +2523,7 @@
 		"licenseRequired": "Richiede licenza",
 		"limit": "Limite",
 		"list": "List",
+		"loading": "Loading...",
 		"login": "Login",
 		"loginForm": "Login form",
 		"loginForms": "Modulo login",

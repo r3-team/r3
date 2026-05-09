@@ -1,5 +1,6 @@
 import MyBuilderCaption       from './builderCaption.js';
 import MyBuilderIconInput     from './builderIconInput.js';
+import MyBuilderSchemaLookup  from './builderSchemaLookup.js';
 import {getUuidV4}            from '../shared/crypto.js';
 import {getFieldMap}          from '../shared/form.js';
 import {copyValueDialog}      from '../shared/generic.js';
@@ -29,7 +30,8 @@ export default {
 	name:'my-builder-attribute',
 	components:{
 		MyBuilderCaption,
-		MyBuilderIconInput
+		MyBuilderIconInput,
+		MyBuilderSchemaLookup
 	},
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-attribute float" v-if="values !== null">
@@ -321,6 +323,14 @@ export default {
 				</table>
 			</div>
 		</div>
+
+		<!-- schema lookup dialog -->
+		<my-builder-schema-lookup entity="attribute"
+			v-if="showLookup"
+			@close="showLookup = false"
+			:entityId="attributeId"
+			:module
+		/>
 	</div>`,
 	props:{
 		attributeId:    { required:true },
@@ -332,6 +342,7 @@ export default {
 	data() {
 		return {
 			defaultsOption:'fixed',
+			showLookup:false,
 			
 			// attribute values
 			values:null,
@@ -605,74 +616,7 @@ export default {
 		
 		// backend calls
 		delCheck() {
-			ws.send('attribute','delCheck',this.attributeId,true).then(
-				res => {
-					const noDependencies =
-						res.payload.apiIds.length         === 0 &&
-						res.payload.collectionIds.length  === 0 &&
-						res.payload.formIds.length        === 0 &&
-						res.payload.pgIndexIds.length     === 0 &&
-						res.payload.loginFormNames.length === 0 &&
-						res.payload.fields.length         === 0;
-					
-					if(noDependencies)
-						return this.dialogDeleteAsk(this.del,this.capApp.dialog.delete);
-					
-					// display open dependencies
-					let dependencies = [];
-					for(let id of res.payload.apiIds) {
-						const api = this.apiIdMap[id];
-						const url = `#/builder/api/${id}`;
-						dependencies.push(`${this.moduleIdMap[api.moduleId].name}: ${this.capGen.api} <a href="${url}">'${api.name}'</a>`);
-					}
-					for(let id of res.payload.collectionIds) {
-						const col = this.collectionIdMap[id];
-						const url = `#/builder/collection/${id}`;
-						dependencies.push(`${this.moduleIdMap[col.moduleId].name}: ${this.capGen.collection} <a href="${url}">'${col.name}'</a>`);
-					}
-					for(let id of res.payload.formIds) {
-						const frm = this.formIdMap[id];
-						const url = `#/builder/form/${id}`;
-						dependencies.push(`${this.moduleIdMap[frm.moduleId].name}: ${this.capGen.form} <a href="${url}">'${frm.name}'</a>`);
-					}
-					for(let id of res.payload.pgIndexIds) {
-						const rel = this.relationIdMap[this.indexIdMap[id].relationId];
-						const url = `#/builder/relation/${rel.id}`;
-						dependencies.push(`${this.moduleIdMap[rel.moduleId].name}: ${this.capGen.index} <a href="${url}">'${rel.name}'</a>`);
-					}
-					for(let f of res.payload.fields) {
-						const form       = this.formIdMap[f.formId];
-						const fieldIdMap = this.getFieldMap(form.fields);
-						const field      = fieldIdMap[f.fieldId];
-						const url        = `#/builder/form/${f.formId}?fieldIdShow=${f.fieldId}`;
-						const label      = field.content !== 'data'
-							? field.content
-							: this.getItemTitle(field.attributeId,field.index,
-								false,field.attribute_id_nm);
-						
-						dependencies.push(`${this.moduleIdMap[form.moduleId].name}: ${this.capGen.field} <a href="${url}">'${label}'</a> (${this.capGen.form}: ${form.name})`);
-					}
-					for(let name of res.payload.loginFormNames) {
-						dependencies.push(`${this.capGen.loginForm}: '${name}'`);
-					}
-					
-					this.$store.commit('dialog',{
-						captionBody:`<ul><li>${dependencies.join('</li><li>')}</li></ul>`,
-						captionTop:`${this.capApp.dialog.deleteCheckFailed}`,
-						width:800,
-						buttons:[{
-							cancel:true,
-							caption:this.capGen.button.tryAnyway,
-							exec:this.del,
-							image:'delete.png'
-						},{
-							caption:this.capGen.button.cancel,
-							image:'cancel.png'
-						}]
-					});
-				},
-				this.$root.genericError
-			);
+			this.showLookup = true;
 		},
 		del() {
 			ws.send('attribute','del',this.attributeId,true).then(

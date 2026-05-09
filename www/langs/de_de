@@ -681,8 +681,7 @@
 			"defaults": "Standardwert",
 			"defaultsHint": "Ein Standardwert wird verwendet, wenn kein anderer Wert angegeben wird.",
 			"dialog": {
-				"delete": "Bist du sicher, dass du dieses Attribut löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelle Sicherung nicht rückgängig zu machen.</b>",
-				"deleteCheckFailed": "Attribut kann nicht gelöscht werden - Verweise darauf existieren noch"
+				"delete": "Bist du sicher, dass du dieses Attribut löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelle Sicherung nicht rückgängig zu machen.</b>"
 			},
 			"doublePrecision": "Hohe Genauigkeit",
 			"doublePrecisionHint": "Benötigt mehr Speicherplatz, unterstützt aber mehr als 6 Dezimalstellen Genauigkeit (mindestens bis zu 15).",
@@ -1131,8 +1130,6 @@
 			"execResponse": "Antwort",
 			"fieldsOnlyData": "Nur Daten",
 			"form": "An Formular zugewiesen",
-			"functionsBackend": "Backend-Funktionen",
-			"functionsFrontend": "Frontend-Funktionen",
 			"helpJs": {
 				"block_inputs": "app.block_inputs({ARGS}) => UNDEFINED<br /><br />Sperrt alle Eingaben auf dem aktuellen Formular oder gibt diese wieder frei.",
 				"client_execute_keystrokes": "app.client_execute_keystrokes({ARGS}) => UNDEFINED<br /><br />Sendet eine Anfrage an einen REI3-Client, installiert und aktiv auf dem gleichen Computer wie die REI3-Browser-Sitzung, eine Reihe an Tastatureingaben durchzuführen. Diese Eingaben werden durch einen String definiert, wie z. B. \"Hallo Welt!\".<br /><br />Einige Sondertasten (ALT-TAB, TAB, ENTER, ESCAPE) werden ebenfalls unterstützt und können wie folgt verwendet werden:<br />\"Hallo,{ENTER}wie geht es dir?\"",
@@ -1562,10 +1559,8 @@
 			"runType": "Ausführung",
 			"schedules": "Zeitpläne",
 			"title": "Funktionen",
-			"titleJs": "Frontend-Funktionen",
-			"titleJsOne": "Frontend-Funktionen \"{NAME}\"",
-			"titlePg": "Backend-Funktionen",
-			"titlePgOne": "Backend-Funktionen \"{NAME}\"",
+			"titleJsOne": "Frontend-Funktion \"{NAME}\"",
+			"titlePgOne": "Backend-Funktion \"{NAME}\"",
 			"triggers": "Trigger",
 			"value": "VALUE",
 			"valueInit": "IS_CHANGED_TRUE_FALSE",
@@ -1860,6 +1855,12 @@
 			},
 			"title": "Rollen",
 			"titleOne": "Role \"{NAME}\""
+		},
+		"schemaLookup": {
+			"hint": {
+				"middleClickToTab": "Links können per Mittelklick als neuer Tab geöffnet werden"
+			},
+			"title": "Builder lookup: {NAME}"
 		},
 		"searchBar": {
 			"dialog": {
@@ -2477,7 +2478,11 @@
 		"formOpen": "Formular öffnen",
 		"forms": "Formulare",
 		"fullscreenSwitchTo": "In Vollbildmodus wechseln",
+		"functionBackend": "Backend-Funktion",
+		"functionFrontend": "Frontend-Funktion",
 		"functions": "Funktionen",
+		"functionsBackend": "Backend-Funktionen",
+		"functionsFrontend": "Frontend-Funktionen",
 		"gap": "Abstand",
 		"global": "Global",
 		"globalSearch": "Globale Suche",
@@ -2518,6 +2523,7 @@
 		"licenseRequired": "Lizenz erforderlich",
 		"limit": "Anzahl",
 		"list": "Liste",
+		"loading": "Loading...",
 		"login": "Anmeldung",
 		"loginForm": "Anmeldeformular",
 		"loginForms": "Anmeldeformulare",

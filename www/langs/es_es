@@ -681,8 +681,7 @@
 			"defaults": "Valor predeterminado",
 			"defaultsHint": "Se usará un valor predeterminado si no se proporciona otro valor.",
 			"dialog": {
-				"delete": "¿Estás seguro de que deseas eliminar este atributo? Esto también eliminará todos los datos incluidos de tu sistema.<br /><br /><b>Esta acción es irreversible sin copias de seguridad actuales.</b>",
-				"deleteCheckFailed": "El atributo no se puede eliminar: todavía existen referencias a él"
+				"delete": "¿Estás seguro de que deseas eliminar este atributo? Esto también eliminará todos los datos incluidos de tu sistema.<br /><br /><b>Esta acción es irreversible sin copias de seguridad actuales.</b>"
 			},
 			"doublePrecision": "Alta precisión",
 			"doublePrecisionHint": "Necesita más espacio de almacenamiento, pero soporta más de 6 dígitos decimales de precisión (al menos hasta 15).",
@@ -1131,8 +1130,6 @@
 			"execResponse": "Respuesta",
 			"fieldsOnlyData": "Solo datos",
 			"form": "Asignado al formulario",
-			"functionsBackend": "Funciones de backend",
-			"functionsFrontend": "Funciones de frontend",
 			"helpJs": {
 				"block_inputs": "app.block_inputs({ARGS}) => UNDEFINED<br /><br />Bloquea o desbloquea todas las entradas en el formulario actual.",
 				"client_execute_keystrokes": "app.client_execute_keystrokes({ARGS}) => UNDEFINED<br /><br />Envía una solicitud a un cliente REI3, instalado y ejecutándose en el mismo ordenador que la sesión del navegador REI3, para ejecutar una lista de pulsaciones de teclas. Estas pulsaciones se definen mediante una cadena, como 'Hola Mundo!'.<br /><br />Algunas teclas especiales (ALT-TAB, TAB, ENTER, ESCAPE) también son compatibles y se pueden usar de la siguiente manera:<br />'Hola,{ENTER}¿Cómo estás?'",
@@ -1562,9 +1559,7 @@
 			"runType": "Ejecución",
 			"schedules": "Horarios",
 			"title": "Funciones",
-			"titleJs": "Funciones frontend",
 			"titleJsOne": "Función frontend '{NAME}'",
-			"titlePg": "Funciones backend",
 			"titlePgOne": "Función backend '{NAME}'",
 			"triggers": "Disparadores",
 			"value": "VALOR",
@@ -1860,6 +1855,12 @@
 			},
 			"title": "Roles",
 			"titleOne": "Rol '{NAME}'"
+		},
+		"schemaLookup": {
+			"hint": {
+				"middleClickToTab": "Use middle-click to open links in a new browser tab"
+			},
+			"title": "Builder lookup: {NAME}"
 		},
 		"searchBar": {
 			"dialog": {
@@ -2477,7 +2478,11 @@
 		"formOpen": "Abrir formulario",
 		"forms": "Formularios",
 		"fullscreenSwitchTo": "Alternar modo pantalla completa",
+		"functionBackend": "Backend function",
+		"functionFrontend": "Frontend function",
 		"functions": "Funciones",
+		"functionsBackend": "Funciones backend",
+		"functionsFrontend": "Funciones frontend",
 		"gap": "Gap",
 		"global": "Global",
 		"globalSearch": "Global search",
@@ -2518,6 +2523,7 @@
 		"licenseRequired": "Requiere licencia",
 		"limit": "Límite",
 		"list": "List",
+		"loading": "Loading...",
 		"login": "Iniciar sesión",
 		"loginForm": "Formulario de inicio de sesión",
 		"loginForms": "Formularios de inicio de sesión",

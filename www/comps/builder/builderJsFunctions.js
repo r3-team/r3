@@ -7,7 +7,7 @@ export default {
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" src="images/codeScreen.png" />
-				<h1 class="title">{{ capApp.titleJs }}</h1>
+				<h1 class="title">{{ capGen.functionsFrontend }}</h1>
 			</div>
 			<div class="area default-inputs">
 				<input v-model="filter" placeholder="..." />
@@ -64,9 +64,9 @@ export default {
 	},
 	computed:{
 		jsFunctions:s => s.getJsFunctionsProcessed(s.module.jsFunctions,s.filter),
+		module:     s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		
 		// stores
-		module:     s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
 		formIdMap:  s => s.$store.getters['schema/formIdMap'],
 		capApp:     s => s.$store.getters.captions.builder.function,

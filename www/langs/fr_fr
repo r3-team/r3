@@ -681,8 +681,7 @@
 			"defaults": "Valeur par défaut",
 			"defaultsHint": "Une valeur par défaut sera utilisée si aucune autre valeur n'est donnée.",
 			"dialog": {
-				"delete": "Êtes-vous sûr de vouloir supprimer cet attribut ? Cela supprimera également toutes les données incluses de votre système.<br /><br /><b>Cette action est irréversible sans sauvegardes actuelles.</b>",
-				"deleteCheckFailed": "L'attribut ne peut pas être supprimé - des références à celui-ci existent toujours"
+				"delete": "Êtes-vous sûr de vouloir supprimer cet attribut ? Cela supprimera également toutes les données incluses de votre système.<br /><br /><b>Cette action est irréversible sans sauvegardes actuelles.</b>"
 			},
 			"doublePrecision": "Haute précision",
 			"doublePrecisionHint": "Nécessite plus d'espace de stockage, mais prend en charge plus de 6 chiffres décimaux de précision (au moins jusqu'à 15).",
@@ -1131,8 +1130,6 @@
 			"execResponse": "Réponse",
 			"fieldsOnlyData": "Only data",
 			"form": "Assigné au formulaire",
-			"functionsBackend": "Fonctions côté serveur",
-			"functionsFrontend": "Fonctions côté client",
 			"helpJs": {
 				"block_inputs": "app.block_inputs({ARGS}) => NON DÉFINI<br /><br />Bloque ou débloque tous les champs du formulaire actuel.",
 				"client_execute_keystrokes": "app.client_execute_keystrokes({ARGS}) => UNDEFINED<br /><br />Sends a request to a REI3 client, installed and running on the same computer as the REI3 browser session, to execute a list of keystrokes. These keystrokes are defined by a string, such as 'Hello World!'.<br /><br />Some special keys (ALT-TAB, TAB, ENTER, ESCAPE) are also supported and can be used as such:<br />'Hello,{ENTER}How are you?'",
@@ -1562,9 +1559,7 @@
 			"runType": "Exécution",
 			"schedules": "Calendriers",
 			"title": "Fonctions",
-			"titleJs": "Fonctions côté client",
 			"titleJsOne": "Fonction côté client '{NAME}'",
-			"titlePg": "Fonctions côté serveur",
 			"titlePgOne": "Fonction côté serveur '{NAME}'",
 			"triggers": "Triggers",
 			"value": "VALEUR",
@@ -1860,6 +1855,12 @@
 			},
 			"title": "Rôles",
 			"titleOne": "Rôle '{NAME}'"
+		},
+		"schemaLookup": {
+			"hint": {
+				"middleClickToTab": "Use middle-click to open links in a new browser tab"
+			},
+			"title": "Builder lookup: {NAME}"
 		},
 		"searchBar": {
 			"dialog": {
@@ -2477,7 +2478,11 @@
 		"formOpen": "Ouvrir le formulaire",
 		"forms": "Formulaires",
 		"fullscreenSwitchTo": "Basculer en mode plein écran",
+		"functionBackend": "Backend function",
+		"functionFrontend": "Frontend function",
 		"functions": "Functions",
+		"functionsBackend": "Fonctions côté serveur",
+		"functionsFrontend": "Fonctions côté client",
 		"gap": "Gap",
 		"global": "Global",
 		"globalSearch": "Global search",
@@ -2518,6 +2523,7 @@
 		"licenseRequired": "Nécessite une licence",
 		"limit": "Limite",
 		"list": "List",
+		"loading": "Loading...",
 		"login": "Login",
 		"loginForm": "Formulaire de connexion",
 		"loginForms": "Formulaires de connexion",

@@ -4,6 +4,8 @@ import {getDependentOnModules} from './builder.js';
 const entities = ['attribute'];
 
 // goes through the given module and its dependencies
+// finds all references for chosen entity ('attribute', ...)
+// returns object with lookup results
 export function lookupReferences(moduleSource,entity,entityId) {
 	if(!entities.includes(entity)) {
 		console.warn(`invalid entity for schema lookup: '${entity}'`);
@@ -17,15 +19,13 @@ export function lookupReferences(moduleSource,entity,entityId) {
 			anyResults:false,
 
 			// main elements
+			apiIds:[],
 			docIds:[],
 			formIds:[],
 			//jsFunctionIds:[],
 			pgFunctionIds:[],
 			pgIndexIds:[],
 			searchBarIds:[],
-
-			// sub elements in docs
-			docIdMapStateIds:{},
 
 			// sub elements in forms
 			//formIdMapActionIds:{},
@@ -45,7 +45,7 @@ export function lookupReferences(moduleSource,entity,entityId) {
 	return moduleIdMapLookups;
 };
 
-export function lookupReferencesAttribut(mod,atrId,lookups) {
+function lookupReferencesAttribut(mod,atrId,lookups) {
 	const isInColumns = columns => columns.some(v => v.attributeId === atrId || (v.subQuery && isInQuery(v.query,atrId)));
 	const isInFilters = filters =>
 		filters.some(v =>
@@ -109,7 +109,40 @@ export function lookupReferencesAttribut(mod,atrId,lookups) {
 		}
 	};
 
+	const isInDocColumns = columns => columns.some(v => v.attributeId === atrId
+		|| (v.subQuery && isInQuery(v.query))
+		|| v.setsBody.some(s => s.attributeId === atrId)
+		|| v.setsFooter.some(s => s.attributeId === atrId)
+		|| v.setsHeader.some(s => s.attributeId === atrId));
+	
+	const isInDocField = field => {
+		if(field.sets.some(v => v.attributeId === atrId))
+			return true;
+
+		switch(field.content) {
+			case 'data': return field.attributeId === atrId; break;
+			case 'list': return isInDocColumns(field.columns) || isInQuery(field.query); break;
+			case 'grid':       // fallthrough
+			case 'gridFooter': // fallthrough
+			case 'gridHeader': // fallthrough
+			case 'flowBody':   // fallthrough
+			case 'flow':
+				for(const f of field.fields) {
+					if(isInDocField(f))
+						return true;
+				}
+			break;
+		}
+		return false;
+	};
+
 	// go through main entities
+	for(const a of mod.apis) {
+		if(isInQuery(a.query) || isInColumns(a.columns)) {
+			lookups.apiIds.push(a.id);
+			lookups.anyResults = true;
+		}
+	}
 	for(const f of mod.pgFunctions) {
 		if(f.codeFunction.includes(`(${atrId})`)) {
 			lookups.pgFunctionIds.push(f.id);
@@ -135,20 +168,22 @@ export function lookupReferencesAttribut(mod,atrId,lookups) {
 			lookups.formIds.push(f.id);
 			lookups.anyResults = true;
 		}
-
 		lookupInFields(f.id,f.fields);
 	}
 	for(const d of mod.docs) {
-		if(isInQuery(d.query)) {
+		if
+			(isInQuery(d.query) ||
+			d.sets.some(v => v.attributeId === atrId) ||
+			d.states.some(v => v.conditions.some(c => c.side0.attributeId === atrId || c.side1.attributeId === atrId)) ||
+			d.pages.some(v =>
+				v.sets.some(s => s.attributeId === atrId) ||
+				isInDocField(v.fieldFlow) ||
+				(v.header.active && isInDocField(v.header.fieldGrid)) ||
+				(v.footer.active && isInDocField(v.footer.fieldGrid))
+			)
+		) {
 			lookups.docIds.push(d.id);
 			lookups.anyResults = true;
 		}
-
-		// doc fields
-		// doc states
 	}
-};
-
-export function lookupByName(moduleIdSource) {
-
 };

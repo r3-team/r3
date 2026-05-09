@@ -681,8 +681,7 @@
 			"defaults": "Alapértelmezett Érték",
 			"defaultsHint": "Az alapértelmezett érték akkor használódik, ha más érték nincs megadva.",
 			"dialog": {
-				"delete": "Biztos vagy benne, hogy törölni szeretnéd ezt az attribútumot? Ez az összes inkludált adatot is törölni fogja.<br /><br /><b>Ez a művelet mentés nélkül nem visszavonható.</b>",
-				"deleteCheckFailed": "Attribute cannot be deleted - references to it still exist"
+				"delete": "Biztos vagy benne, hogy törölni szeretnéd ezt az attribútumot? Ez az összes inkludált adatot is törölni fogja.<br /><br /><b>Ez a művelet mentés nélkül nem visszavonható.</b>"
 			},
 			"doublePrecision": "Dupla Pontosság",
 			"doublePrecisionHint": "Több tárhelyet igényel, de több mint 6 tizedesjegy pontosságot támogat (legalább 15-ig).",
@@ -1131,8 +1130,6 @@
 			"execResponse": "Válasz",
 			"fieldsOnlyData": "Only data",
 			"form": "Űrlaphoz rendelve",
-			"functionsBackend": "Backend függvények",
-			"functionsFrontend": "Frontend függvények",
 			"helpJs": {
 				"block_inputs": "app.block_inputs({ARGS}) => UNDEFINED<br /><br />Az összes bemenetet letiltja vagy engedélyezi az aktuális űrlapon.",
 				"client_execute_keystrokes": "app.client_execute_keystrokes({ARGS}) => UNDEFINED<br /><br />Sends a request to a REI3 client, installed and running on the same computer as the REI3 browser session, to execute a list of keystrokes. These keystrokes are defined by a string, such as 'Hello World!'.<br /><br />Some special keys (ALT-TAB, TAB, ENTER, ESCAPE) are also supported and can be used as such:<br />'Hello,{ENTER}How are you?'",
@@ -1562,9 +1559,7 @@
 			"runType": "Végrehajtás típusa",
 			"schedules": "Ütemezések",
 			"title": "Függvények",
-			"titleJs": "Frontend függvények",
 			"titleJsOne": "Frontend függvények \"{NÉV}\"",
-			"titlePg": "Backend függvények",
 			"titlePgOne": "Backend függvények \"{NÉV}\"",
 			"triggers": "Triggers",
 			"value": "ÉRTÉK",
@@ -1860,6 +1855,12 @@
 			},
 			"title": "Szerepek",
 			"titleOne": "Szerep \"{NAME}\""
+		},
+		"schemaLookup": {
+			"hint": {
+				"middleClickToTab": "Use middle-click to open links in a new browser tab"
+			},
+			"title": "Builder lookup: {NAME}"
 		},
 		"searchBar": {
 			"dialog": {
@@ -2477,7 +2478,11 @@
 		"formOpen": "Űrlap Megnyitása",
 		"forms": "Űrlapok",
 		"fullscreenSwitchTo": "Váltás teljes képernyős módba",
+		"functionBackend": "Backend function",
+		"functionFrontend": "Frontend function",
 		"functions": "Functions",
+		"functionsBackend": "Backend függvények",
+		"functionsFrontend": "Frontend függvények",
 		"gap": "Gap",
 		"global": "Global",
 		"globalSearch": "Global search",
@@ -2518,6 +2523,7 @@
 		"licenseRequired": "Licenc szükséges",
 		"limit": "Korlát",
 		"list": "List",
+		"loading": "Loading...",
 		"login": "Login",
 		"loginForm": "Login form",
 		"loginForms": "Bejelentkezési űrlapok",

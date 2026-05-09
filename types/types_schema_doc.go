@@ -55,7 +55,7 @@ type DocColumn struct {
 }
 type DocField struct {
 	Id      uuid.UUID `json:"id"`
-	Content string    `json:"content"` // "data", "flow", "grid", "gridFooter", "gridHeader", "list", "text"
+	Content string    `json:"content"` // "data", "flow", "flowBody", "grid", "gridFooter", "gridHeader", "list", "text"
 	PosX    float64   `json:"posX"`    // X position (relative to parent), 0 if in flow parent
 	PosY    float64   `json:"posY"`    // Y position (relative to parent), 0 if in flow parent
 	SizeX   float64   `json:"sizeX"`   // width in mm (0 = parent width)

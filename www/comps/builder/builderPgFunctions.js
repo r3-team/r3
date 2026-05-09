@@ -5,7 +5,7 @@ export default {
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" src="images/codeDatabase.png" />
-				<h1 class="title">{{ capApp.titlePg }}</h1>
+				<h1 class="title">{{ capGen.functionsBackend }}</h1>
 			</div>
 			<div class="area default-inputs">
 				<input v-model="filter" placeholder="..." />
@@ -78,8 +78,9 @@ export default {
 		};
 	},
 	computed:{
+		module:s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
+		
 		// stores
-		module:     s => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
 		moduleIdMap:s => s.$store.getters['schema/moduleIdMap'],
 		capApp:     s => s.$store.getters.captions.builder.function,
 		capGen:     s => s.$store.getters.captions.generic
