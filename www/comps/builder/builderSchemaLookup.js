@@ -35,6 +35,18 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="lookups.moduleFncOnLogin">
+						<td class="minimum"><my-label image="person.png" :caption="capGen.sessionStart" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									@trigger="open('module',moduleId,null,false)"
+									@trigger-middle="open('module',moduleId,null,true)"
+									:caption="moduleIdMap[moduleId].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="lookups.moduleFncLoginSync">
 						<td class="minimum"><my-label image="personArrow.png" :caption="capGen.userSync" /></td>
 						<td>
@@ -151,12 +163,38 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
-					<tr v-if="showForms && lookups.formIds.length !== 0">
-						<td class="minimum"><my-label image="fileText.png" :caption="capGen.forms" /></td>
+					<tr v-if="showForms && lookups.formIdsQuery.length !== 0">
+						<td class="minimum"><my-label image="fileText.png" :caption="capGen.formQueries" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
-									v-for="id in lookups.formIds"
+									v-for="id in lookups.formIdsQuery"
+									@trigger="open('form',id,null,false)"
+									@trigger-middle="open('form',id,null,true)"
+									:caption="formIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="showForms && lookups.formIdsActions.length !== 0">
+						<td class="minimum"><my-label image="fileText.png" :caption="capGen.formActions" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.formIdsActions"
+									@trigger="open('form',id,null,false)"
+									@trigger-middle="open('form',id,null,true)"
+									:caption="formIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="showForms && lookups.formIdsFunctions.length !== 0">
+						<td class="minimum"><my-label image="fileText.png" :caption="capGen.formEvents" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.formIdsFunctions"
 									@trigger="open('form',id,null,false)"
 									@trigger-middle="open('form',id,null,true)"
 									:caption="formIdMap[id].name"
@@ -165,7 +203,7 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="showFields" v-for="(fieldIds,formId) in lookups.formIdMapFieldIds">
-						<td class="minimum"><my-label image="fileText.png" :caption="capGen.form + ': ' + formIdMap[formId].name" /></td>
+						<td class="minimum"><my-label image="fileText.png" :caption="capGen.formFields + ': ' + formIdMap[formId].name" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -304,7 +342,7 @@ export default {
 				<my-button-check v-model="showCollections" :caption="capGen.collections" />
 				<my-button-check v-model="showDocs"        :caption="capGen.pdfs" />
 				<my-button-check v-model="showForms"       :caption="capGen.forms" />
-				<my-button-check v-model="showFields"      :caption="capGen.fields" />
+				<my-button-check v-model="showFields"      :caption="capGen.formFields" />
 				<my-button-check v-model="showJsFnc"       :caption="capGen.functionsFrontend" />
 				<my-button-check v-model="showPgFnc"       :caption="capGen.functionsBackend" />
 				<my-button-check v-model="showPgIndex"     :caption="capGen.indexes" />
@@ -382,8 +420,9 @@ export default {
 		title:s => {
 			let contentName = '';
 			switch(s.entity) {
-				case 'attribute':  contentName = s.capGen.attribute;       break;
-				case 'pgFunction': contentName = s.capGen.functionBackend; break;
+				case 'attribute':  contentName = s.capGen.attribute;        break;
+				case 'jsFunction': contentName = s.capGen.functionFrontend; break;
+				case 'pgFunction': contentName = s.capGen.functionBackend;  break;
 			}
 			return `${s.capApp.title.replace('{NAME}',contentName)} '${s.entityName}'`;
 		},

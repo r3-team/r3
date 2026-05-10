@@ -1,8 +1,10 @@
-import MyBuilderCaption  from './builderCaption.js';
-import MyBuilderQuery    from './builderQuery.js';
-import MyCodeEditor      from '../codeEditor.js';
-import {dialogDeleteAsk} from '../shared/dialog.js';
-import {getFieldMap}     from '../shared/form.js';
+import MyBuilderCaption      from './builderCaption.js';
+import MyBuilderQuery        from './builderQuery.js';
+import MyBuilderSchemaLookup from './builderSchemaLookup.js';
+import MyCodeEditor          from '../codeEditor.js';
+import {dialogDeleteAsk}     from '../shared/dialog.js';
+import {getFieldMap}         from '../shared/form.js';
+import {getHasAnyReferences} from '../shared/schemaLookup.js';
 import {
 	getAttributeIcon,
 	isAttributeFiles
@@ -29,6 +31,7 @@ export default {
 	components:{
 		MyBuilderCaption,
 		MyBuilderQuery,
+		MyBuilderSchemaLookup,
 		MyCodeEditor
 	},
 	template:`<div class="builder-function" v-if="fnc !== false">
@@ -76,8 +79,12 @@ export default {
 						@trigger="copyValueDialog(fnc.name,id,id)"
 						:caption="capGen.id"
 					/>
+					<my-button image="builderLookup.png"
+						@trigger="showLookup = true"
+						:caption="capGen.references"
+					/>
 					<my-button image="delete.png"
-						@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
+						@trigger="delCheck"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -579,6 +586,16 @@ export default {
 				</template>
 			</div>
 		</div>
+
+		<!-- schema lookup dialog -->
+		<my-builder-schema-lookup entity="jsFunction"
+			v-if="showLookup"
+			@close="showLookup = false"
+			:entityId="id"
+			:entityName="fnc.name"
+			:module
+			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
+		/>
 	</div>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
@@ -633,6 +650,7 @@ export default {
 			entityId:null,
 			entityJsModuleId:null,
 			entityPgModuleId:null,
+			hasReferences:false,
 			holderCollectionFilter:'',
 			holderCollectionIdsOpen:[],
 			holderCollectionModuleId:null,
@@ -655,6 +673,7 @@ export default {
 			showHolderFncInstance:false,
 			showHolderPreset:false,
 			showHolderVariable:false,
+			showLookup:false,
 			showPreview:false,
 			showSidebar:true,
 			tabTarget:'content'
@@ -826,6 +845,7 @@ export default {
 		getFieldMap,
 		getFormEntityMapRef,
 		getFunctionHelp,
+		getHasAnyReferences,
 		getItemTitle,
 		getItemTitlePath,
 		getValidDbCharsForRx,
@@ -1141,6 +1161,13 @@ export default {
 		},
 		
 		// backend calls
+		delCheck() {
+			this.hasReferences = this.getHasAnyReferences(this.module,'jsFunction',this.id);
+			if(this.hasReferences)
+				return this.showLookup = true;
+
+			this.dialogDeleteAsk(this.del,this.capApp.dialog.delete);
+		},
 		del() {
 			ws.send('jsFunction','del',this.fnc.id,true).then(
 				() => {

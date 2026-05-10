@@ -1,7 +1,7 @@
 import {getDependentOnModules} from './builder.js';
 //import MyStore               from '../../stores/store.js';
 
-const entities = ['attribute','pgFunction'];
+const entities = ['attribute','jsFunction','pgFunction'];
 
 export function getHasAnyReferences(moduleSource,entity,entityId) {
 	const o = getReferences(moduleSource,entity,entityId);
@@ -9,7 +9,7 @@ export function getHasAnyReferences(moduleSource,entity,entityId) {
 };
 
 // goes through the given module and its dependencies
-// finds all references for chosen entity ('attribute', ...)
+// finds all references for chosen entity
 // returns object with lookup results
 export function getReferences(moduleSource,entity,entityId) {
 	if(!entities.includes(entity)) {
@@ -32,21 +32,24 @@ export function getReferences(moduleSource,entity,entityId) {
 			apiIds:[],
 			collectionIds:[],
 			docIds:[],
-			formIds:[],
 			jsFunctionIds:[],
 			pgFunctionIds:[],
 			pgIndexIds:[],
 			pgTriggerIds:[],
 			searchBarIds:[],
 
+			// forms if any sub elements match
+			formIdsActions:[],
+			formIdsFunctions:[],
+			formIdsQuery:[],
+
 			// sub elements in forms
-			//formIdMapActionIds:{},
-			//formIdMapStateIds:{},
 			formIdMapFieldIds:{}
 		};
 
 		switch(entity) {
 			case 'attribute':  getReferencesAttribut(mod,entityId,lookups);   break;
+			case 'jsFunction': getReferencesJsFunction(mod,entityId,lookups); break;
 			case 'pgFunction': getReferencesPgFunction(mod,entityId,lookups); break;
 		}
 
@@ -56,6 +59,67 @@ export function getReferences(moduleSource,entity,entityId) {
 		}
 	}
 	return moduleIdMapLookups;
+};
+
+function getReferencesJsFunction(mod,fncId,lookups) {
+
+	const lookupInFields = (formId,fields) => {
+		const add = fieldId => {
+			if(lookups.formIdMapFieldIds[formId] === undefined)
+				lookups.formIdMapFieldIds[formId] = [];
+	
+			lookups.formIdMapFieldIds[formId].push(fieldId);
+			lookups.anyResults = true;
+		};
+
+		for(const f of fields) {
+			switch(f.content) {
+				case 'button': // fallthrough
+				case 'data':   // fallthrough
+				case 'variable':
+					if(f.jsFunctionId === fncId)
+						add(f.id);
+				break;
+				case 'container':
+					lookupInFields(formId,f.fields);
+				break;
+				case 'tabs':
+					for(const t of f.tabs) {
+						lookupInFields(formId,t.fields);
+					}
+				break;
+			}
+		}
+	};
+
+	for(const f of mod.jsFunctions) {
+		if(f.codeFunction.includes(`.call_frontend('${fncId}'`)) {
+			lookups.jsFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
+	for(const e of mod.clientEvents) {
+		if(e.jsFunctionId === fncId) {
+			lookups.moduleClientEvents = true;
+			lookups.anyResults = true;
+			break;
+		}
+	}
+	for(const f of mod.forms) {
+		if(f.actions.some(v => v.jsFunctionId === fncId)) {
+			lookups.formIdsActions.push(f.id);
+			lookups.anyResults = true;
+		}
+		if(f.functions.some(v => v.jsFunctionId === fncId)) {
+			lookups.formIdsFunctions.push(f.id);
+			lookups.anyResults = true;
+		}
+		lookupInFields(f.id,f.fields);
+	}
+	if(mod.jsFunctionIdOnLogin === fncId) {
+		lookups.moduleFncOnLogin = true;
+		lookups.anyResults = true;
+	}
 };
 
 function getReferencesPgFunction(mod,fncId,lookups) {
@@ -216,7 +280,7 @@ function getReferencesAttribut(mod,atrId,lookups) {
 	}
 	for(const f of mod.forms) {
 		if(isInQuery(f.query)) {
-			lookups.formIds.push(f.id);
+			lookups.formIdsQuery.push(f.id);
 			lookups.anyResults = true;
 		}
 		lookupInFields(f.id,f.fields);
