@@ -24,6 +24,7 @@ export function getReferences(moduleSource,entity,entityId) {
 			anyResults:false,
 
 			// module definitions
+			moduleClientEvents:false,
 			moduleFncLoginSync:false,
 			moduleFncOnLogin:false,
 
@@ -57,7 +58,6 @@ export function getReferences(moduleSource,entity,entityId) {
 	return moduleIdMapLookups;
 };
 
-
 function getReferencesPgFunction(mod,fncId,lookups) {
 	for(const f of mod.pgFunctions) {
 		if(f.codeFunction.includes(`.[${fncId}](`)) {
@@ -75,6 +75,13 @@ function getReferencesPgFunction(mod,fncId,lookups) {
 		if(t.pgFunctionId === fncId) {
 			lookups.pgTriggerIds.push(t.id);
 			lookups.anyResults = true;
+		}
+	}
+	for(const e of mod.clientEvents) {
+		if(e.pgFunctionId === fncId) {
+			lookups.moduleClientEvents = true;
+			lookups.anyResults = true;
+			break;
 		}
 	}
 	if(mod.pgFunctionIdLoginSync === fncId) {

@@ -23,20 +23,32 @@ const MyBuilderSchemaLookupModule = {
 		<div class="builder-schema-lookup-module-items" v-if="show">
 			<table class="generic-table bright">
 				<tbody>
+					<tr v-if="lookups.moduleClientEvents">
+						<td class="minimum"><my-label image="screen.png" :caption="capGen.clientEvents" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									@trigger="open('module',moduleId,null,false)"
+									@trigger-middle="open('module',moduleId,null,true)"
+									:caption="moduleIdMap[moduleId].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="lookups.moduleFncLoginSync">
 						<td class="minimum"><my-label image="personArrow.png" :caption="capGen.userSync" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
-									@trigger="open('loginSync',moduleId,null,false)"
-									@trigger-middle="open('loginSync',moduleId,null,true)"
+									@trigger="open('module',moduleId,null,false)"
+									@trigger-middle="open('module',moduleId,null,true)"
 									:caption="moduleIdMap[moduleId].name"
 								/>
 							</div>
 						</td>
 					</tr>
 					<tr v-if="showApis && lookups.apiIds.length !== 0">
-						<td class="minimum"><my-label image="api.png" :caption="capGen.api" /></td>
+						<td class="minimum"><my-label image="api.png" :caption="capGen.apis" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -49,7 +61,7 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="showDocs && lookups.docIds.length !== 0">
-						<td class="minimum"><my-label image="document.png" :caption="capGen.pdf" /></td>
+						<td class="minimum"><my-label image="document.png" :caption="capGen.pdfs" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -62,7 +74,7 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="showJsFnc && lookups.jsFunctionIds.length !== 0">
-						<td class="minimum"><my-label image="codeScreen.png" :caption="capGen.functionFrontend" /></td>
+						<td class="minimum"><my-label image="codeScreen.png" :caption="capGen.functionsFrontend" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -75,7 +87,7 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="showPgFnc && lookups.pgFunctionIds.length !== 0">
-						<td class="minimum"><my-label image="codeDatabase.png" :caption="capGen.functionBackend" /></td>
+						<td class="minimum"><my-label image="codeDatabase.png" :caption="capGen.functionsBackend" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -88,7 +100,7 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="showPgIndex && lookups.pgIndexIds.length !== 0">
-						<td class="minimum"><my-label image="databaseAsterisk.png" :caption="capGen.index" /></td>
+						<td class="minimum"><my-label image="databaseAsterisk.png" :caption="capGen.indexes" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -101,7 +113,7 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="showPgTriggers && lookups.pgTriggerIds.length !== 0">
-						<td class="minimum"><my-label image="databasePlay.png" :caption="capGen.trigger" /></td>
+						<td class="minimum"><my-label image="databasePlay.png" :caption="capGen.triggers" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -114,7 +126,7 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="showCollections && lookups.collectionIds.length !== 0">
-						<td class="minimum"><my-label image="tray.png" :caption="capGen.collection" /></td>
+						<td class="minimum"><my-label image="tray.png" :caption="capGen.collections" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -127,7 +139,7 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="showSearchBars && lookups.searchBarIds.length !== 0">
-						<td class="minimum"><my-label image="search.png" :caption="capGen.searchBar" /></td>
+						<td class="minimum"><my-label image="search.png" :caption="capGen.searchBars" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -140,7 +152,7 @@ const MyBuilderSchemaLookupModule = {
 						</td>
 					</tr>
 					<tr v-if="showForms && lookups.formIds.length !== 0">
-						<td class="minimum"><my-label image="fileText.png" :caption="capGen.form" /></td>
+						<td class="minimum"><my-label image="fileText.png" :caption="capGen.forms" /></td>
 						<td>
 							<div class="row gap wrap">
 								<my-button image="open.png"
@@ -246,7 +258,7 @@ const MyBuilderSchemaLookupModule = {
 				case 'form':       url = `/builder/form/${entityId}`; break;
 				case 'field':      url = `/builder/form/${entityId}?fieldIdShow=${entityIdSub}`; break;
 				case 'jsFunction': url = `/builder/js-function/${entityId}`; break;
-				case 'loginSync':  url = `/builder/module/${entityId}`; break;
+				case 'module':     url = `/builder/module/${entityId}`; break;
 				case 'pgFunction': url = `/builder/pg-function/${entityId}`; break;
 				case 'pgIndex':    url = `/builder/relation/${entityId}`; break;
 				case 'pgTrigger':  url = `/builder/relation/${entityId}`; break;
