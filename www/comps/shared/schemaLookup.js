@@ -1,7 +1,7 @@
 import {getDependentOnModules} from './builder.js';
 //import MyStore               from '../../stores/store.js';
 
-const entities = ['attribute','jsFunction','pgFunction'];
+const entities = ['attribute','jsFunction','pgFunction','relation'];
 
 export function getHasAnyReferences(moduleSource,entity,entityId) {
 	const o = getReferences(moduleSource,entity,entityId);
@@ -38,6 +38,9 @@ export function getReferences(moduleSource,entity,entityId) {
 			pgTriggerIds:[],
 			searchBarIds:[],
 
+			// relations matched in relationships
+			relationIdsShips:[],
+
 			// forms if any sub elements match
 			formIdsActions:[],
 			formIdsFunctions:[],
@@ -51,6 +54,7 @@ export function getReferences(moduleSource,entity,entityId) {
 			case 'attribute':  getReferencesAttribut(mod,entityId,lookups);   break;
 			case 'jsFunction': getReferencesJsFunction(mod,entityId,lookups); break;
 			case 'pgFunction': getReferencesPgFunction(mod,entityId,lookups); break;
+			case 'relation':   getReferencesRelation(mod,entityId,lookups);   break;
 		}
 
 		if(lookups.anyResults) {
@@ -59,6 +63,87 @@ export function getReferences(moduleSource,entity,entityId) {
 		}
 	}
 	return moduleIdMapLookups;
+};
+
+function getReferencesRelation(mod,relId,lookups) {
+	const isInQuery = query =>
+		query !== null && (
+			query.relationId === relId ||
+			isInFilters(query.filters) ||
+			query.joins.some(v => v.relationId === relId) ||
+			query.choices.some(v => isInFilters(v.filters))
+		);
+	const isInColumns = columns => columns.some(v => v.subQuery && isInQuery(v.query));
+	const isInFilters = filters => filters.some(v => isInQuery(v.side0.query) || isInQuery(v.side1.query));
+	
+	const lookupInFields = (formId,fields) => {
+		const add = fieldId => {
+			if(lookups.formIdMapFieldIds[formId] === undefined)
+				lookups.formIdMapFieldIds[formId] = [];
+	
+			lookups.formIdMapFieldIds[formId].push(fieldId);
+			lookups.anyResults = true;
+		};
+
+		for(const f of fields) {
+			switch(f.content) {
+				case 'calendar': // fallthrough
+				case 'chart':    // fallthrough
+				case 'kanban':   // fallthrough
+				case 'list':     // fallthrough 
+				case 'variable':
+					if(isInQuery(f.query) || isInColumns(f.query))
+						add(f.id);
+				
+				case 'data':
+					if(f.outsideIn !== undefined && (isInQuery(f.query) || isInColumns(f.columns)))
+						add(f.id);
+				
+				case 'container':
+					lookupInFields(formId,f.fields);
+				break;
+				case 'tabs':
+					for(const t of f.tabs) {
+						lookupInFields(formId,t.fields);
+					}
+				break;
+			}
+		}
+	};
+	
+	// triggers, indexes & presets cascade with relation deletion
+	// checking for these references is as easy as clicking on the trigger/index/preset tab
+
+	for(const a of mod.apis) {
+		if(isInQuery(a.query) || isInColumns(a.columns)) {
+			lookups.apiIds.push(a.id);
+			lookups.anyResults = true;
+		}
+	}
+	for(const r of mod.relations) {
+		if(r.attributes.some(v => v.relationshipId === relId && v.relationId !== relId)) {
+			lookups.relationIdsShips.push(r.id);
+			lookups.anyResults = true;
+		}
+	}
+	for(const c of mod.collections) {
+		if(isInQuery(c.query) || isInColumns(c.columns)) {
+			lookups.collectionIds.push(c.id);
+			lookups.anyResults = true;
+		}
+	}
+	for(const f of mod.pgFunctions) {
+		if(f.codeFunction.includes(`}.[${relId}]`)) {
+			lookups.pgFunctionIds.push(f.id);
+			lookups.anyResults = true;
+		}
+	}
+	for(const s of mod.searchBars) {
+		if(isInQuery(s.query) || isInColumns(s.columns)) {
+			lookups.searchBarIds.push(s.id);
+			lookups.anyResults = true;
+		}
+	}
 };
 
 function getReferencesJsFunction(mod,fncId,lookups) {
@@ -155,7 +240,7 @@ function getReferencesPgFunction(mod,fncId,lookups) {
 };
 
 function getReferencesAttribut(mod,atrId,lookups) {
-	const isInColumns = columns => columns.some(v => v.attributeId === atrId || (v.subQuery && isInQuery(v.query,atrId)));
+	const isInColumns = columns => columns.some(v => v.attributeId === atrId || (v.subQuery && isInQuery(v.query)));
 	const isInFilters = filters =>
 		filters.some(v =>
 			v.side0.attributeId === atrId ||
@@ -265,7 +350,7 @@ function getReferencesAttribut(mod,atrId,lookups) {
 		}
 	}
 	for(const s of mod.searchBars) {
-		if(isInQuery(s.query) || isInColumns(s.columns,atrId)) {
+		if(isInQuery(s.query) || isInColumns(s.columns)) {
 			lookups.searchBarIds.push(s.id);
 			lookups.anyResults = true;
 		}

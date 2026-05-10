@@ -4,11 +4,13 @@ import MyBuilderPreset             from './builderPreset.js';
 import MyBuilderPgIndex            from './builderPgIndex.js';
 import MyBuilderPgTriggers         from './builderPgTriggers.js';
 import MyBuilderPresets            from './builderPresets.js';
+import MyBuilderSchemaLookup       from './builderSchemaLookup.js';
 import MyInputDecimal              from '../inputDecimal.js';
 import MyInputOffset               from '../inputOffset.js';
 import {getTemplateRelationPolicy} from '../shared/builderTemplate.js';
 import {dialogDeleteAsk}           from '../shared/dialog.js';
 import {srcBase64}                 from '../shared/image.js';
+import {getHasAnyReferences}       from '../shared/schemaLookup.js';
 import {
 	getAttributeIcon,
 	isAttributeDecimal,
@@ -145,6 +147,7 @@ export default {
 		MyBuilderPgTriggers,
 		MyBuilderPresets,
 		MyBuilderRelationsItemPolicy,
+		MyBuilderSchemaLookup,
 		MyInputDecimal,
 		MyInputOffset
 	},
@@ -164,8 +167,12 @@ export default {
 					@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
 					:caption="capGen.id"
 				/>
+				<my-button image="builderLookup.png"
+					@trigger="showLookup = true"
+					:caption="capGen.references"
+				/>
 				<my-button image="delete.png"
-					@trigger="dialogDeleteAsk(del,capApp.dialog.delete)"
+					@trigger="delCheck"
 					:active="!readonly"
 					:cancel="true"
 					:caption="capGen.button.delete"
@@ -530,6 +537,16 @@ export default {
 				</div>
 			</div>
 		</div>
+
+		<!-- schema lookup dialog -->
+		<my-builder-schema-lookup entity="relation"
+			v-if="showLookup"
+			@close="showLookup = false"
+			:entityId="id"
+			:entityName="relation.name"
+			:module
+			:warningMsg="hasReferences ? capGen.dialog.referencesBlockDeletion : null"
+		/>
 	</div>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
@@ -555,6 +572,7 @@ export default {
 
 			// states
 			attributeIdEdit:false,
+			hasReferences:false,
 			indexIdEdit:false,
 			nameFilter:'',
 			previewLimit:50,
@@ -563,6 +581,7 @@ export default {
 			previewRowCount:0,
 			previewValueLength:50,
 			recordTitleAttributeId:'',
+			showLookup:false,
 			tabTarget:'attributes'
 		};
 	},
@@ -618,7 +637,7 @@ export default {
 			}];
 			
 			// relationships to and from base relation
-			for(const a of s.getDependentAttributes(s.moduleIdMap[s.relation.moduleId])) {
+			for(const a of s.getDependentAttributes(s.module)) {
 				if(!s.isAttributeRelationship(a.content))
 					continue;
 				
@@ -691,6 +710,7 @@ export default {
 		attributesNotFiles:s => s.relation === false ? [] : s.relation.attributes.filter(v => !s.isAttributeFiles(v.content)),
 		canSave:           s => s.relation.name !== '' && !s.readonly && s.isChanged,
 		isChanged:         s => !s.deepIsEqual(s.relation,s.relationSchema),
+		module:            s => s.moduleIdMap[s.relation.moduleId],
 		relationSchema:    s => s.relationIdMap[s.id] === undefined ? false : s.relationIdMap[s.id],
 		
 		// stores
@@ -710,6 +730,7 @@ export default {
 		dialogDeleteAsk,
 		getAttributeIcon,
 		getDependentAttributes,
+		getHasAnyReferences,
 		getTemplateRelationPolicy,
 		isAttributeDecimal,
 		isAttributeFiles,
@@ -777,6 +798,13 @@ export default {
 		},
 		
 		// backend calls
+		delCheck() {
+			this.hasReferences = this.getHasAnyReferences(this.module,'relation',this.id);
+			if(this.hasReferences)
+				return this.showLookup = true;
+
+			this.dialogDeleteAsk(this.del,this.capApp.dialog.delete);
+		},
 		del() {
 			ws.send('relation','del',this.relation.id,true).then(
 				() => {

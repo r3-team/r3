@@ -59,6 +59,19 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
+					<tr v-if="showRelationships && lookups.relationIdsShips.length !== 0">
+						<td class="minimum"><my-label image="database.png" :caption="capGen.relationships" /></td>
+						<td>
+							<div class="row gap wrap">
+								<my-button image="open.png"
+									v-for="id in lookups.relationIdsShips"
+									@trigger="open('relation',id,null,false)"
+									@trigger-middle="open('relation',id,null,true)"
+									:caption="relationIdMap[id].name"
+								/>
+							</div>
+						</td>
+					</tr>
 					<tr v-if="showApis && lookups.apiIds.length !== 0">
 						<td class="minimum"><my-label image="api.png" :caption="capGen.apis" /></td>
 						<td>
@@ -85,7 +98,7 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
-					<tr v-if="showJsFnc && lookups.jsFunctionIds.length !== 0">
+					<tr v-if="showFunctions && lookups.jsFunctionIds.length !== 0">
 						<td class="minimum"><my-label image="codeScreen.png" :caption="capGen.functionsFrontend" /></td>
 						<td>
 							<div class="row gap wrap">
@@ -98,7 +111,7 @@ const MyBuilderSchemaLookupModule = {
 							</div>
 						</td>
 					</tr>
-					<tr v-if="showPgFnc && lookups.pgFunctionIds.length !== 0">
+					<tr v-if="showFunctions && lookups.pgFunctionIds.length !== 0">
 						<td class="minimum"><my-label image="codeDatabase.png" :caption="capGen.functionsBackend" /></td>
 						<td>
 							<div class="row gap wrap">
@@ -117,8 +130,8 @@ const MyBuilderSchemaLookupModule = {
 							<div class="row gap wrap">
 								<my-button image="open.png"
 									v-for="id in lookups.pgIndexIds"
-									@trigger="open('pgIndex',indexIdMap[id].relationId,null,false)"
-									@trigger-middle="open('pgIndex',indexIdMap[id].relationId,null,true)"
+									@trigger="open('relation',indexIdMap[id].relationId,null,false)"
+									@trigger-middle="open('relation',indexIdMap[id].relationId,null,true)"
 									:caption="relationIdMap[indexIdMap[id].relationId].name"
 								/>
 							</div>
@@ -130,8 +143,8 @@ const MyBuilderSchemaLookupModule = {
 							<div class="row gap wrap">
 								<my-button image="open.png"
 									v-for="id in lookups.pgTriggerIds"
-									@trigger="open('pgTrigger',pgTriggerIdMap[id].relationId,null,false)"
-									@trigger-middle="open('pgTrigger',pgTriggerIdMap[id].relationId,null,true)"
+									@trigger="open('relation',pgTriggerIdMap[id].relationId,null,false)"
+									@trigger-middle="open('relation',pgTriggerIdMap[id].relationId,null,true)"
 									:caption="relationIdMap[pgTriggerIdMap[id].relationId].name"
 								/>
 							</div>
@@ -221,18 +234,18 @@ const MyBuilderSchemaLookupModule = {
 		</div>
 	</div>`,
 	props:{
-		moduleId:       { type:String,  required:true },
-		lookups:        { type:Object,  required:true },
-		showApis:       { type:Boolean, required:true },
-		showCollections:{ type:Boolean, required:true },
-		showDocs:       { type:Boolean, required:true },
-		showFields:     { type:Boolean, required:true },
-		showForms:      { type:Boolean, required:true },
-		showJsFnc:      { type:Boolean, required:true },
-		showPgFnc:      { type:Boolean, required:true },
-		showPgIndex:    { type:Boolean, required:true },
-		showPgTriggers: { type:Boolean, required:true },
-		showSearchBars: { type:Boolean, required:true }
+		moduleId:         { type:String,  required:true },
+		lookups:          { type:Object,  required:true },
+		showApis:         { type:Boolean, required:true },
+		showCollections:  { type:Boolean, required:true },
+		showDocs:         { type:Boolean, required:true },
+		showFields:       { type:Boolean, required:true },
+		showForms:        { type:Boolean, required:true },
+		showFunctions:    { type:Boolean, required:true },
+		showPgIndex:      { type:Boolean, required:true },
+		showPgTriggers:   { type:Boolean, required:true },
+		showRelationships:{ type:Boolean, required:true },
+		showSearchBars:   { type:Boolean, required:true }
 	},
 	emits:['close'],
 	data() {
@@ -298,8 +311,7 @@ const MyBuilderSchemaLookupModule = {
 				case 'jsFunction': url = `/builder/js-function/${entityId}`; break;
 				case 'module':     url = `/builder/module/${entityId}`; break;
 				case 'pgFunction': url = `/builder/pg-function/${entityId}`; break;
-				case 'pgIndex':    url = `/builder/relation/${entityId}`; break;
-				case 'pgTrigger':  url = `/builder/relation/${entityId}`; break;
+				case 'relation':   url = `/builder/relation/${entityId}`; break;
 				case 'searchBar':  url = `/builder/search-bar/${entityId}`; break;
 			}
 			if(middle)
@@ -338,16 +350,16 @@ export default {
 				</div>
 			</div>
 			<div class="contentBarTop row wrap gap-large justify-end">
-				<my-button-check v-model="showApis"        :caption="capGen.apis" />
-				<my-button-check v-model="showCollections" :caption="capGen.collections" />
-				<my-button-check v-model="showDocs"        :caption="capGen.pdfs" />
-				<my-button-check v-model="showForms"       :caption="capGen.forms" />
-				<my-button-check v-model="showFields"      :caption="capGen.formFields" />
-				<my-button-check v-model="showJsFnc"       :caption="capGen.functionsFrontend" />
-				<my-button-check v-model="showPgFnc"       :caption="capGen.functionsBackend" />
-				<my-button-check v-model="showPgIndex"     :caption="capGen.indexes" />
-				<my-button-check v-model="showPgTriggers"  :caption="capGen.triggers" />
-				<my-button-check v-model="showSearchBars"  :caption="capGen.searchBars" />
+				<my-button-check v-model="showApis"          :caption="capGen.apis" />
+				<my-button-check v-model="showCollections"   :caption="capGen.collections" />
+				<my-button-check v-model="showDocs"          :caption="capGen.pdfs" />
+				<my-button-check v-model="showForms"         :caption="capGen.forms" />
+				<my-button-check v-model="showFields"        :caption="capGen.formFields" />
+				<my-button-check v-model="showFunctions"     :caption="capGen.functions" />
+				<my-button-check v-model="showPgIndex"       :caption="capGen.indexes" />
+				<my-button-check v-model="showPgTriggers"    :caption="capGen.triggers" />
+				<my-button-check v-model="showRelationships" :caption="capGen.relationships" />
+				<my-button-check v-model="showSearchBars"    :caption="capGen.searchBars" />
 			</div>
 			<div class="content column scroll grow default-inputs">
 				<my-label image="load.gif"
@@ -377,10 +389,10 @@ export default {
 						:showDocs
 						:showFields
 						:showForms
-						:showJsFnc
-						:showPgFnc
+						:showFunctions
 						:showPgIndex
 						:showPgTriggers
+						:showRelationships
 						:showSearchBars
 					/>
 				</template>
@@ -408,10 +420,10 @@ export default {
 			showDocs:true,
 			showFields:true,
 			showForms:true,
-			showJsFnc:true,
-			showPgFnc:true,
+			showFunctions:true,
 			showPgIndex:true,
 			showPgTriggers:true,
+			showRelationships:true,
 			showSearchBars:true
 		};
 	},
@@ -423,6 +435,7 @@ export default {
 				case 'attribute':  contentName = s.capGen.attribute;        break;
 				case 'jsFunction': contentName = s.capGen.functionFrontend; break;
 				case 'pgFunction': contentName = s.capGen.functionBackend;  break;
+				case 'relation':   contentName = s.capGen.relation;         break;
 			}
 			return `${s.capApp.title.replace('{NAME}',contentName)} '${s.entityName}'`;
 		},
