@@ -905,12 +905,19 @@ export default {
 		},
 		
 		// placeholders are used for storing entities via ID instead of name (which can change)
-		// attribute reference: (module.relation.attribute) <-> (ATR_ID)
-		// relation  reference: {module}[relation]          <-> {MOD_ID}[REL_ID]
-		// function  reference: {module}[function](...      <-> {MOD_ID}[FNC_IC](...
+		// attribute: (MOD_NAME.REL_NAME.ATR_NAME)              <-> (ATR_ID)
+		// relation:  {MOD_NAME}[REL_NAME]                      <-> {MOD_ID}[REL_ID]
+		// function:  {MOD_NAME}[FNC_NAME](...                  <-> {MOD_ID}[FNC_IC](...
+		// preset:    {PRESET::MOD_NAME.REL_NAME.PRS_NAME}      <-> instance.get_preset_record_id('PRS_ID')
+		// document:  {PDF_CREATE_ATTACH::MOD_NAME.DOC_NAME})() <-> instance.pdf_create_attach('DOC_ID')
+		//            {PDF_CREATE_EXPORT::MOD_NAME.DOC_NAME})() <-> instance.pdf_create_export('DOC_ID')
 		placeholdersSet(body) {
-			// replace attributes with placeholders
-			// stored in function text as: (ATR_ID)
+			// functions, relations & modules
+			body = body.replace(/\[([a-z0-9\-]{36})\]\(/g,(m,id) => this.pgFunctionIdMap[id] === undefined ? m : `[${this.pgFunctionIdMap[id].name}](`);
+			body = body.replace(/\[([a-z0-9\-]{36})\]/g,(m,id)   => this.relationIdMap[id]   === undefined ? m : `[${this.relationIdMap[id].name}]`);
+			body = body.replace(/\{([a-z0-9\-]{36})\}/g,(m,id)   => this.moduleIdMap[id]     === undefined ? m : `{${this.moduleIdMap[id].name}}`);
+
+			// attributes
 			body = body.replace(/\(([a-z0-9\-]{36})\)/g,(match,id) => {
 				const atr = this.attributeIdMap[id];
 				if(atr === undefined) return match;
@@ -919,28 +926,8 @@ export default {
 				const mod = this.moduleIdMap[rel.moduleId];
 				return `(${mod.name}.${rel.name}.${atr.name})`;
 			});
-			
-			// replace functions with placeholders
-			// stored in function text as: [FNC_ID](...
-			body = body.replace(/\[([a-z0-9\-]{36})\]\(/g,(match,id) => {
-				return `[${this.pgFunctionIdMap[id].name}](`;
-			});
-			
-			// replace relations with placeholders
-			// stored in function text as: [REL_ID]
-			body = body.replace(/\[([a-z0-9\-]{36})\]/g,(match,id) => {
-				return `[${this.relationIdMap[id].name}]`;
-			});
-			
-			// replace modules with placeholders
-			// stored in function text as: {MOD_ID}
-			body = body.replace(/\{([a-z0-9\-]{36})\}/g,(match,id) => {
-				return `{${this.moduleIdMap[id].name}}`;
-			});
 
-			// replace presets with placeholders
-			// stored in function text as: {PRESET::MOD_NAME.REL_NAME.PRESET_NAME}
-			// preset name may not include closed curly bracket '}'
+			// presets, name may not include closed curly bracket '}'
 			body = body.replace(/instance\.get_preset_record_id\(\'([a-z0-9\-]{36})\'\)/g,(match,presetId) => {
 				const prs = this.presetIdMap[presetId];
 				if(prs === undefined) return match;
@@ -955,7 +942,7 @@ export default {
 				return match;
 			});
 
-			// replace documents with placeholders
+			// documents instance.pdf_create_attach(... or instance.pdf_create_export(...
 			// stored in function text as: {PDF_CREATE_ATTACH::MOD_NAME.DOC_NAME})() or {PDF_CREATE_EXPORT::MOD_NAME.DOC_NAME})()
 			body = body.replace(/instance\.pdf_create_(attach|export)\(\'([a-z0-9\-]{36})\',/g,(match,mode,docId) => {
 				const doc = this.docIdMap[docId];
@@ -969,8 +956,7 @@ export default {
 		placeholdersUnset(body,previewMode) {
 			let dbChars = this.getValidDbCharsForRx();
 			
-			// replace attribute placeholders
-			// stored as: (module.relation.attribute)
+			// attributes
 			let pat = /\(([a-z][a-z0-9\_]+)\.([a-z][a-z0-9\_]+)\.([a-z][a-z0-9\_]+)\)/g;
 			body = body.replace(pat,(match,modName,relName,atrName) => {
 				
@@ -1011,8 +997,7 @@ export default {
 				return `(${atr.id})`;
 			});
 			
-			// replace function placeholders
-			// stored as: {module}[function](...
+			// functions
 			pat = /\{([a-z][a-z0-9\_]+)\}\.\[([a-z][a-z0-9\_]+)\]\(/g;
 			body = body.replace(pat,(match,modName,fncName) => {
 				
@@ -1041,8 +1026,7 @@ export default {
 				return `{${mod.id}}.[${fnc.id}](`;
 			});
 			
-			// replace relation placeholders
-			// stored as: {module}[relation]
+			// relations
 			pat = /\{([a-z][a-z0-9\_]+)\}\.\[([a-z][a-z0-9\_]+)\]/g;
 			body = body.replace(pat,(match,modName,relName) => {
 				
@@ -1071,8 +1055,7 @@ export default {
 				return `{${mod.id}}.[${rel.id}]`;
 			});
 
-			// replace preset placeholders
-			// stored as: {PRESET::MOD_NAME.REL_NAME.PRESET_NAME})
+			// presets
 			pat = new RegExp(`\\{PRESET\\:\\:(${dbChars})\\.(${dbChars})\\.([^\}]*)\\}`,'g');
 			body = body.replace(pat,(match,modName,relName,presetName) => {
 				const mod = this.moduleNameMap[modName];
@@ -1090,8 +1073,7 @@ export default {
 				return match;
 			});
 
-			// replace document placeholders
-			// stored as: {PDF_CREATE_ATTACH::MOD_NAME.DOC_NAME})(...) or {PDF_CREATE_EXPORT::MOD_NAME.DOC_NAME})(...)
+			// documents
 			pat = new RegExp(`\\{PDF_CREATE_(ATTACH|EXPORT)\\:\\:(${dbChars})\\.([^\}]*)\\}\\(`,'g');
 			body = body.replace(pat,(match,mode,modName,docName) => {
 				const mod = this.moduleNameMap[modName];
