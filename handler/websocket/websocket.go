@@ -379,7 +379,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		}
 
 		if err != nil {
-			log.Warning(log.ContextWebsocket, "failed to authenticate user", err)
+			log.Warning(log.ContextWebsocket, fmt.Sprintf("failed to authenticate user (IP %s)", client.address), err)
 			bruteforce.BadAttemptByHost(client.address)
 
 			if handler.CheckForLicenseErrCode(err) {
