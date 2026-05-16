@@ -92,13 +92,13 @@ function getReferencesRelation(mod,relId,lookups) {
 				case 'kanban':   // fallthrough
 				case 'list':     // fallthrough 
 				case 'variable':
-					if(isInQuery(f.query) || isInColumns(f.query))
+					if(isInQuery(f.query) || isInColumns(f.columns))
 						add(f.id);
-				
+				break;
 				case 'data':
 					if(f.outsideIn !== undefined && (isInQuery(f.query) || isInColumns(f.columns)))
 						add(f.id);
-				
+				break;
 				case 'container':
 					lookupInFields(formId,f.fields);
 				break;
@@ -131,6 +131,13 @@ function getReferencesRelation(mod,relId,lookups) {
 			lookups.collectionIds.push(c.id);
 			lookups.anyResults = true;
 		}
+	}
+	for(const f of mod.forms) {
+		if(isInQuery(f.query)) {
+			lookups.formIdsQuery.push(f.id);
+			lookups.anyResults = true;
+		}
+		lookupInFields(f.id,f.fields);
 	}
 	for(const f of mod.pgFunctions) {
 		if(f.codeFunction.includes(`}.[${relId}]`)) {
