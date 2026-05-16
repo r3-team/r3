@@ -220,7 +220,7 @@ func write(level int, logContext logContext, message string, err error) {
 
 	// log to CLI if available
 	if outputCli.Load() {
-		fmt.Printf("%s %s %s\n", tools.GetTimeSql(), logContextName[logContext], message)
+		fmt.Printf("%s %s %s\n", tools.GetTimeStringLocal(), logContextName[logContext], message)
 	}
 
 	// log to database if available
