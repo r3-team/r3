@@ -28,7 +28,12 @@ func authorizedAttributes(loginId int64, attributeIds []uuid.UUID, accessRequest
 	for _, attributeId := range attributeIds {
 
 		// use attribute access first if specified (more specific access wins)
-		if access, exists := m.Attribute[attributeId]; exists && access >= accessRequested {
+		access, exists := m.Attribute[attributeId];
+		if exists && access < accessRequested {
+			return false
+		}
+
+		if exists && access >= accessRequested {
 			continue
 		}
 
