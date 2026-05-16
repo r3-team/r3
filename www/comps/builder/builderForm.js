@@ -169,7 +169,7 @@ export default {
 			</div>
 		</div>
 		
-		<div class="contentBox sidebar scroll" v-if="showSidebar">
+		<div class="contentBox sidebar scroll" v-show="showSidebar">
 		
 			<!-- form builder sidebar -->
 			<div class="top lower" :class="{ clickable:sideFieldShow }" @click="fieldIdShow = null">
@@ -719,7 +719,9 @@ export default {
 			let params = { fieldIdShow:{ parse:'string', value:null } };
 			this.routeParseParams(params);
 
-			this.fieldIdShow = params.fieldIdShow.value !== null ? params.fieldIdShow.value : null;
+			this.$nextTick(() => {
+				this.fieldIdShow = params.fieldIdShow.value !== null ? params.fieldIdShow.value : null;
+			});
 		},
 		setFieldShow(fieldId) {
 			this.fieldIdShow = fieldId === this.fieldIdShow ? null : fieldId;

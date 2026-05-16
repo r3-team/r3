@@ -415,10 +415,10 @@ export default {
 	emits:['createNew','field-id-show','field-move','field-move-store','field-property-set','field-remove'],
 	data() {
 		return {
-			columnIdShow:null,        // currently open column
-			tabIndex:0,               // which tab index to show (tab fields)
-			tabTarget:'content',      // sidebar tab target for column (content, properties)
-			tabTargetColumn:'content' // sidebar tab target for field (content, properties)
+			columnIdShow:null,           // currently open column
+			tabIndex:0,                  // which tab index to show (tab fields)
+			tabTarget:'properties',      // sidebar tab target for column (content, properties)
+			tabTargetColumn:'properties' // sidebar tab target for field (content, properties)
 		};
 	},
 	computed:{
