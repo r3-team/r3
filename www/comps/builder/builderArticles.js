@@ -335,10 +335,6 @@ export default {
 	},
 	mounted() {
 		this.resetArticleNew();
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.assign,key:'s',keyCtrl:true});
-	},
-	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.assign);
 	},
 	data() {
 		return {
