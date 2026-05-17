@@ -84,6 +84,12 @@ func getConditionsResult(ctx context.Context, doc *doc, recordIdDoc int64, condi
 			operator = "!="
 			evalValues[s1Placeholder] = nil
 
+		// regex (case insensitive postgres posix operators are not supported, ie. ~* & !~*)
+		case "~": // regex match
+			operator = "=~"
+		case "!~": // regex not match
+			operator = "!~"
+
 		// substring
 		case "LIKE", "ILIKE":
 			operatorCustomFnc = true
