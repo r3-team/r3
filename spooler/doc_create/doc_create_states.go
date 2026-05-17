@@ -11,6 +11,27 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// custom functions for string evaluations
+func gvalStrContains(s, substr string) bool {
+	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
+}
+func gvalStrContainsCase(s, substr string) bool {
+	return strings.Contains(s, substr)
+}
+func gvalStrContainsNot(s, substr string) bool {
+	return !strings.Contains(strings.ToLower(s), strings.ToLower(substr))
+}
+func gvalStrContainsNotCase(s, substr string) bool {
+	return !strings.Contains(s, substr)
+}
+
+var evalExt = gval.Full(
+	gval.Function("ILIKE", gvalStrContains),
+	gval.Function("LIKE", gvalStrContainsCase),
+	gval.Function("NOTILIKE", gvalStrContainsNot),
+	gval.Function("NOTLIKE", gvalStrContainsNotCase),
+)
+
 func getConditionsResult(ctx context.Context, doc *doc, recordIdDoc int64, conditions []types.DocStateCondition) (bool, error) {
 
 	if len(conditions) == 0 {
@@ -47,6 +68,7 @@ func getConditionsResult(ctx context.Context, doc *doc, recordIdDoc int64, condi
 		evalValues[s1Placeholder] = s1
 
 		// convert operators where required
+		operatorCustomFnc := false
 		operator := c.Operator
 		switch c.Operator {
 		case "=":
@@ -54,28 +76,47 @@ func getConditionsResult(ctx context.Context, doc *doc, recordIdDoc int64, condi
 		case "<>":
 			operator = "!="
 
-		// nil operators
+		// nil
 		case "IS NULL":
 			operator = "=="
 			evalValues[s1Placeholder] = nil
 		case "IS NOT NULL":
 			operator = "!="
 			evalValues[s1Placeholder] = nil
+
+		// substring
+		case "LIKE", "ILIKE":
+			operatorCustomFnc = true
+		case "NOT LIKE", "NOT ILIKE":
+			operatorCustomFnc = true
+			operator = strings.ReplaceAll(operator, " ", "")
 		}
 
-		// ( expr0 < expr1 )
-		evalString = fmt.Sprintf("%s %s %s %s %s %s %s",
-			evalString,
-			connector,
-			strings.Repeat("(", c.Side0.Brackets),
-			s0Placeholder,
-			operator,
-			s1Placeholder,
-			strings.Repeat(")", c.Side1.Brackets))
+		if operatorCustomFnc {
+			// using custom functions for evaluation: LIKE(expr0,expr1)
+			evalString = fmt.Sprintf("%s %s %s %s(%s,%s) %s",
+				evalString,
+				connector,
+				strings.Repeat("(", c.Side0.Brackets),
+				operator,
+				s0Placeholder,
+				s1Placeholder,
+				strings.Repeat(")", c.Side1.Brackets))
+		} else {
+			// using simple expression comparisson: expr0 < expr1
+			evalString = fmt.Sprintf("%s %s %s %s %s %s %s",
+				evalString,
+				connector,
+				strings.Repeat("(", c.Side0.Brackets),
+				s0Placeholder,
+				operator,
+				s1Placeholder,
+				strings.Repeat(")", c.Side1.Brackets))
+		}
 	}
 
-	// ( expr0 < expr1 ) || ( expr2 == expr3 && expr4 == expr5 )
-	eval, err := gval.Full().NewEvaluable(evalString)
+	// ( expr0 < expr1 ) || ( expr2 == expr3 && expr4 == expr5 ) || ILIKE(expr6,expr7)
+	eval, err := evalExt.NewEvaluable(evalString)
 	if err != nil {
 		return false, err
 	}
