@@ -99,6 +99,7 @@ const MyBuilderDocState = {
 				v-model="state.conditions"
 				:builderMode="true"
 				:disableContent="filtersDisable"
+				:disableOperators="['~*','!~*','= ANY','<> ALL','@>','<@','&&','@@']"
 				:entityIdMapRef
 				:joins
 				:moduleId

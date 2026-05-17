@@ -15,6 +15,14 @@ import {
 	getDictByLang
 } from './shared/language.js';
 
+const operatorsArray = ['@>','<@','&&'];
+const operatorsFts   = ['@@'];
+const operatorsNull  = ['IS NULL','IS NOT NULL'];
+const operatorsRegex = ['~','~*','!~','!~*'];
+const operatorsSets  = ['= ANY','<> ALL'];
+const operatorsSize  = ['<','>','<=','>='];
+const operatorsText  = ['ILIKE','LIKE','NOT ILIKE','NOT LIKE'];
+
 const MyFilterBrackets = {
 	name:'my-filter-brackets',
 	template:`<my-button
@@ -65,48 +73,10 @@ const MyFilterOperator = {
 		
 		<!-- operators in Builder mode -->
 		<template v-if="builderMode">
-			<option value="="  :title="capApp.option.operator.eq">=</option>
-			<option value="<>" :title="capApp.option.operator.ne">&lt;&gt;</option>
-			
-			<optgroup :label="capApp.operatorsSize">
-				<option value="<"  :title="capApp.option.operator.st">&lt;</option>
-				<option value=">"  :title="capApp.option.operator.lt">&gt;</option>
-				<option value="<=" :title="capApp.option.operator.se">&lt;=</option>
-				<option value=">=" :title="capApp.option.operator.le">&gt;=</option>
-			</optgroup>
-			
-			<optgroup :label="capApp.operatorsText">
-				<option value="ILIKE"     :title="capApp.option.operator.ilike"    >ILIKE</option>
-				<option value="LIKE"      :title="capApp.option.operator.like"     >LIKE</option>
-				<option value="NOT ILIKE" :title="capApp.option.operator.not_ilike">NOT ILIKE</option>
-				<option value="NOT LIKE"  :title="capApp.option.operator.not_like" >NOT LIKE</option>
-			</optgroup>
-			
-			<optgroup :label="capApp.operatorsNull">
-				<option value="IS NULL"     :title="capApp.option.operator.null"    >IS NULL</option>
-				<option value="IS NOT NULL" :title="capApp.option.operator.not_null">IS NOT NULL</option>
-			</optgroup>
-			
-			<optgroup :label="capApp.operatorsSets">
-				<option value="= ANY"  :title="capApp.option.operator.eqAny">= ANY</option>
-				<option value="<> ALL" :title="capApp.option.operator.neAll">&lt;&gt; ALL</option>
-			</optgroup>
-			
-			<optgroup :label="capApp.operatorsRegex">
-				<option value="~"   :title="capApp.option.operator.rxMatch"   >~</option>
-				<option value="~*"  :title="capApp.option.operator.rxMatchI"  >~*</option>
-				<option value="!~"  :title="capApp.option.operator.rxMatchNo" >!~</option>
-				<option value="!~*" :title="capApp.option.operator.rxMatchNoI">!~*</option>
-			</optgroup>
-			
-			<optgroup :label="capApp.operatorsArray">
-				<option value="@>" :title="capApp.option.operator.arrContains" >@&gt;</option>
-				<option value="<@" :title="capApp.option.operator.arrContained">&lt;@</option>
-				<option value="&&" :title="capApp.option.operator.arrOverlap"  >&&</option>
-			</optgroup>
-			
-			<optgroup :label="capApp.operatorsFts">
-				<option value="@@" :title="capApp.option.operator.fts">@@</option>
+			<option v-for="op in optionsEqual.filter(v => !disableOperators.includes(v))" :title="getTitle(op)">{{ op }}</option>
+
+			<optgroup v-for="(operators,label) in optionGroups" :label>
+				<option v-for="op in operators" :title="getTitle(op)" :value="op">{{ op }}</option>
 			</optgroup>
 		</template>
 		
@@ -130,7 +100,6 @@ const MyFilterOperator = {
 				<option value="NOT LIKE"        >{{ capApp.option.operator.not_like  }}</option>
 			</template>
 			
-			
 			<option value="IS NULL"    >{{ capApp.option.operator.null     }}</option>
 			<option value="IS NOT NULL">{{ capApp.option.operator.not_null }}</option>
 		</template>
@@ -142,12 +111,13 @@ const MyFilterOperator = {
 		}
 	},
 	props:{
-		builderMode:{ type:Boolean, required:true },                 // only show in Builder mode (e. g. not for regular users)
-		hasFts:     { type:Boolean, required:false, default:false }, // show full text search operators
-		modelValue: { type:String,  required:true },
-		onlyDates:  { type:Boolean, required:false, default:false }, // only show operators that can be used for date values (e. g. unix time)
-		onlyString: { type:Boolean, required:false, default:false }, // only show string operators
-		readonly:   { type:Boolean, required:true }
+		builderMode:     { type:Boolean, required:true },                 // only show in Builder mode (e. g. not for regular users)
+		disableOperators:{ type:Array,   required:true },
+		hasFts:          { type:Boolean, required:false, default:false }, // show full text search operators
+		modelValue:      { type:String,  required:true },
+		onlyDates:       { type:Boolean, required:false, default:false }, // only show operators that can be used for date values (e. g. unix time)
+		onlyString:      { type:Boolean, required:false, default:false }, // only show string operators
+		readonly:        { type:Boolean, required:true }
 	},
 	emits:['update:modelValue'],
 	computed:{
@@ -155,7 +125,60 @@ const MyFilterOperator = {
 			get()  { return this.modelValue; },
 			set(v) { this.$emit('update:modelValue',v); }
 		},
+		optionsEqual:s => ['=','<>'],
+		optionGroups:s => {
+			let out = {};
+			const add = (label,operators) => {
+				let group = [];
+				for(const op of operators) {
+					if(!s.disableOperators.includes(op))
+						group.push(op);
+				}
+				if(group.length !== 0)
+					out[label] = group;
+			};
+
+			add(s.capApp.operatorsSize,operatorsSize);
+			add(s.capApp.operatorsText,operatorsText);
+			add(s.capApp.operatorsNull,operatorsNull);
+			add(s.capApp.operatorsSets,operatorsSets);
+			add(s.capApp.operatorsRegex,operatorsRegex);
+			add(s.capApp.operatorsArray,operatorsArray);
+			add(s.capApp.operatorsFts,operatorsFts);
+			return out;
+		},
+
+		// stores
 		capApp:s => s.$store.getters.captions.filter
+	},
+	methods:{
+		getTitle(op) {
+			switch(op) {
+				case '=':           return this.capApp.option.operator.eq; break;
+				case '<>':          return this.capApp.option.operator.ne; break;
+				case '<':           return this.capApp.option.operator.st; break;
+				case '>':           return this.capApp.option.operator.lt; break;
+				case '<=':          return this.capApp.option.operator.se; break;
+				case '>=':          return this.capApp.option.operator.le; break;
+				case 'ILIKE':       return this.capApp.option.operator.ilike; break;
+				case 'LIKE':        return this.capApp.option.operator.like; break;
+				case 'NOT ILIKE':   return this.capApp.option.operator.not_ilike; break;
+				case 'NOT LIKE':    return this.capApp.option.operator.not_like; break;
+				case 'IS NULL':     return this.capApp.option.operator.null; break;
+				case 'IS NOT NULL': return this.capApp.option.operator.not_null; break;
+				case '= ANY':       return this.capApp.option.operator.eqAny; break;
+				case '<> ALL':      return this.capApp.option.operator.neAll; break;
+				case '~':           return this.capApp.option.operator.rxMatch; break;
+				case '~*':          return this.capApp.option.operator.rxMatchI; break;
+				case '!~':          return this.capApp.option.operator.rxMatchNo; break;
+				case '!~*':         return this.capApp.option.operator.rxMatchNoI; break;
+				case '@>':          return this.capApp.option.operator.arrContains; break;
+				case '<@':          return this.capApp.option.operator.arrContained; break;
+				case '&&':          return this.capApp.option.operator.arrOverlap; break;
+				case '@@':          return this.capApp.option.operator.fts; break;
+			}
+			return '';
+		}
 	}
 };
 
@@ -837,6 +860,7 @@ const MyFilter = {
 		<my-filter-operator class="operator"
 			v-model="operatorInput"
 			:builderMode
+			:disableOperators
 			:hasFts="side0ColumFtsMode !== null"
 			:onlyDates="side0ColumDate || side0ColumTime"
 			:onlyString="isStringInput"
@@ -889,6 +913,7 @@ const MyFilter = {
 		columns:                { type:Array,   required:true },
 		columnBatches:          { type:Array,   required:true },
 		disableContent:         { type:Array,   required:true },
+		disableOperators:       { type:Array,   required:true },
 		entityIdMapRef:         { type:Object,  required:true },
 		fieldIdMap:             { type:Object,  required:true },
 		formId:                 { type:String,  required:true },
@@ -1049,6 +1074,7 @@ export default {
 					:columnBatches
 					:connector="element.connector"
 					:disableContent
+					:disableOperators
 					:entityIdMapRef
 					:fieldIdMap
 					:formId
@@ -1070,19 +1096,20 @@ export default {
 		</draggable>
 	</div>`,
 	props:{
-		builderMode:   { type:Boolean, required:false, default:false },
-		columns:       { type:Array,   required:false, default:() => [] },
-		columnBatches: { type:Array,   required:false, default:() => [] },
-		disableContent:{ type:Array,   required:false, default:() => [] }, // content to disable (attribute, record, field, true, ...)
-		entityIdMapRef:{ type:Object,  required:false, default:() => {return {}} },
-		fieldIdMap:    { type:Object,  required:false, default:() => {return {}} },
-		formId:        { type:String,  required:false, default:'' },
-		indexTarget:   { type:Number,  required:false, default:0 },
-		joins:         { type:Array,   required:false, default:() => [] },
-		joinsParents:  { type:Array,   required:false, default:() => [] },
-		modelValue:    { type:Array,   required:true },
-		moduleId:      { type:String,  required:false, default:'' },
-		readonly:      { type:Boolean, required:false, default:false }
+		builderMode:     { type:Boolean, required:false, default:false },
+		columns:         { type:Array,   required:false, default:() => [] },
+		columnBatches:   { type:Array,   required:false, default:() => [] },
+		disableContent:  { type:Array,   required:false, default:() => [] }, // content to disable (attribute, record, field, true, ...)
+		disableOperators:{ type:Array,   required:false, default:() => [] },
+		entityIdMapRef:  { type:Object,  required:false, default:() => {return {}} },
+		fieldIdMap:      { type:Object,  required:false, default:() => {return {}} },
+		formId:          { type:String,  required:false, default:'' },
+		indexTarget:     { type:Number,  required:false, default:0 },
+		joins:           { type:Array,   required:false, default:() => [] },
+		joinsParents:    { type:Array,   required:false, default:() => [] },
+		modelValue:      { type:Array,   required:true },
+		moduleId:        { type:String,  required:false, default:'' },
+		readonly:        { type:Boolean, required:false, default:false }
 	},
 	emits:['apply','update:modelValue'],
 	watch:{
