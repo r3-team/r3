@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/PaesslerAG/gval"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func getConditionsResult(ctx context.Context, doc *doc, recordIdDoc int64, conditions []types.DocStateCondition) (bool, error) {
@@ -91,6 +92,15 @@ func getConditionSideValue(doc *doc, recordIdDoc int64, s types.DocStateConditio
 		v, exists := doc.data[int(s.AttributeIndex.Int32)][s.AttributeId.Bytes]
 		if !exists {
 			return 0, fmt.Errorf("failed to retrieve value, attribute '%s' not found on relation index %d", s.AttributeId.Bytes, s.AttributeIndex.Int32)
+		}
+
+		switch vt := v.(type) {
+		case pgtype.Numeric:
+			var err error
+			v, err = getFloat64FromInterface(vt)
+			if err != nil {
+				return nil, err
+			}
 		}
 		return v, nil
 
