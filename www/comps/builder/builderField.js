@@ -292,7 +292,7 @@ export default {
 					:entriesIcon="['images/edit.png','images/database.png']"
 					:entriesText="[capGen.properties,capGen.content]"
 				/>
-				<div class="content grow" :class="{ 'no-padding':tabTarget === 'properties' }">
+				<div class="content flex column grow" :class="{ 'no-padding':tabTarget === 'properties' }">
 					
 					<!-- field options -->
 					<my-builder-field-options
@@ -359,7 +359,7 @@ export default {
 					:entriesIcon="['images/edit.png','images/database.png']"
 					:entriesText="[capGen.properties,capGen.content]"
 				/>
-				<div class="content no-shrink" v-if="columnShow.subQuery && tabTargetColumn === 'content'">
+				<div class="content flex column grow" v-if="columnShow.subQuery && tabTargetColumn === 'content'">
 					<my-builder-query
 						@update:modelValue="columnShow.query = $event"
 						:allowChoices="false"

@@ -388,7 +388,7 @@ export default {
 			</template>
 			
 			<!-- field options -->
-			<div class="content grow no-padding" ref="fieldOptions" v-show="sideFieldShow"></div>
+			<div class="content flex column grow no-padding" ref="fieldOptions" v-show="sideFieldShow"></div>
 		</div>
 	</div>`,
 	emits:['createNew'],
