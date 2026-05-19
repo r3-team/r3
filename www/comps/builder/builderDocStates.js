@@ -200,13 +200,13 @@ export default {
 			<div class="row centered gap default-inputs" v-if="states.length !== 0">
 				<input class="short" v-model="filter" :placeholder="capGen.button.filter" />
 				<select v-model="filterPageId">
-					<option value="">{{ capGen.field }}</option>
+					<option value="">{{ capGen.page }}</option>
 					<template v-for="(ref,pageId) in entityIdMapRef.page">
 						<option v-if="pageIdsUsed.includes(pageId)" :value="pageId">P{{ ref }}</option>
 					</template>
 				</select>
 				<select v-model="filterFieldId">
-					<option value="">{{ capGen.page }}</option>
+					<option value="">{{ capGen.field }}</option>
 					<template v-for="(ref,fieldId) in entityIdMapRef.field">
 						<option v-if="fieldIdsUsed.includes(fieldId)" :value="fieldId">F{{ ref }}</option>
 					</template>
