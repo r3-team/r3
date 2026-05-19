@@ -8,11 +8,11 @@ import {getNumberFormatted} from './shared/generic.js';
 export default {
 	name:'my-input-decimal',
 	template:`<input class="input input-decimal" inputmode="decimal" type="text"
-		@focus="focus"
 		@input="input"
+		@keyup="keyup"
 		:class="{ 'input-decimal-embedded':embedded }"
 		:disabled="readonly"
-		:placeholder="placeholder"
+		:placeholder
 		:value="getNumberAsText(modelValue)"
 	/>`,
 	props:{
@@ -50,12 +50,6 @@ export default {
 		},
 
 		// events
-		focus(e) {
-			if(this.hasFract && this.modelValue !== null && parseInt(this.modelValue) === 0) {
-				// current integer value is 0, move cursor after the 0
-				setTimeout(() => { e.target.setSelectionRange(1,1); }, 50);
-			}	
-		},
 		input(e) {
 			// trim, remove thousands seperator char, replace decimal char with dot
 			let t = e.target.value.trim().replaceAll(this.charTho,'').replaceAll(this.charDec,'.');
@@ -90,7 +84,12 @@ export default {
 			if(isNaN(n)) {
 				// not a number, reset input
 				e.target.value = this.getNumberAsText(this.modelValue);
-				return e.target.setSelectionRange(cursorPos,cursorPos);
+				// wait 2 animation frames before resetting selection
+				// fix for Firefox mobile, as virtual keyboard rejects immediate cursor manipulation
+				requestAnimationFrame(() => {
+					requestAnimationFrame(() => e.target.setSelectionRange(cursorPos,cursorPos));
+				});
+				return;
 			}
 
 			if(this.length !== 0) {
@@ -126,6 +125,14 @@ export default {
 				cursorPosNext = 0;
 
 			e.target.setSelectionRange(cursorPosNext,cursorPosNext);
+		}
+	},
+	keyup(e) {
+		// tabbed into input, if integer value is 0, move cursor after the 0
+		if(e.key === 'Tab' && this.hasFract && this.modelValue !== null && parseInt(this.modelValue) === 0) {
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => e.target.setSelectionRange(1,1));
+			});
 		}
 	}
 };
