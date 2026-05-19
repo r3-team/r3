@@ -272,8 +272,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64, q
 }
 
 // returns SQL query from data GET request (sub query if nesting level != 0)
-func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryArgs *[]any,
-	loginId int64, addRowCount bool, nestingLevel int) (string, error) {
+func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryArgs *[]any, loginId int64, addRowCount bool, nestingLevel int) (string, error) {
 
 	// check for access permissions, unless it´s a system task (login ID = -1)
 	if loginId != -1 {
@@ -293,6 +292,11 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 		inSelect   []string // select expressions
 		inWhere    []string // filters
 		isSubQuery = nestingLevel != 0
+
+		aggregationUsedAny        = false
+		groupByItems              = make([]string, 0)
+		relationIndexesHasGroupBy = make([]int, 0) // relation indexes for which a group by clause exists
+		relationIndexesRecordAggr = make([]int, 0) // relation indexes for which a record aggregation is used
 	)
 
 	// check source relation and module
@@ -334,9 +338,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 
 	// add filter for base relation policy if applicable
 	if loginId != -1 {
-		policyFilter, err := getPolicyFilter(loginId, "select",
-			getRelationCode(data.IndexSource, nestingLevel), rel.Policies)
-
+		policyFilter, err := getPolicyFilter(loginId, "select", getRelationCode(data.IndexSource, nestingLevel), rel.Policies)
 		if err != nil {
 			return "", err
 		}
@@ -349,15 +351,11 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 	queryWhere := strings.Replace(strings.Join(inWhere, ""), "AND", "WHERE", 1)
 
 	// add expressions
-	mapIndex_agg := make(map[int]bool)        // map of indexes with aggregation
-	mapIndex_aggRecords := make(map[int]bool) // map of indexes with record aggregation
 	for pos, expr := range data.Expressions {
 
-		// option: return NULL
+		// NULL expression
 		if expr.ReturnNull {
-			inSelect = append(inSelect, data_sql.GetExpression(
-				expr, "null", data_sql.GetExpressionAlias(pos)))
-
+			inSelect = append(inSelect, data_sql.GetExpression(expr, "null", data_sql.GetExpressionAlias(pos)))
 			continue
 		}
 
@@ -370,9 +368,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 				return "", err
 			}
 
-			inSelect = append(inSelect, data_sql.GetExpression(
-				expr, subQuery, data_sql.GetExpressionAlias(pos)))
-
+			inSelect = append(inSelect, data_sql.GetExpression(expr, subQuery, data_sql.GetExpressionAlias(pos)))
 			continue
 		}
 
@@ -384,28 +380,45 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 		inSelect = append(inSelect, line)
 
 		if expr.Aggregator.Valid {
-			mapIndex_agg[expr.Index] = true
+			aggregationUsedAny = true
+
+			if expr.Aggregator.String == "record" && !slices.Contains(relationIndexesRecordAggr, expr.Index) {
+				relationIndexesRecordAggr = append(relationIndexesRecordAggr, expr.Index)
+			}
 		}
-		if expr.Aggregator.String == "record" {
-			mapIndex_aggRecords[expr.Index] = true
+		if expr.GroupBy {
+			groupByItems = append(groupByItems, data_sql.GetExpressionAlias(pos))
+
+			if !slices.Contains(relationIndexesHasGroupBy, expr.Index) {
+				relationIndexesHasGroupBy = append(relationIndexesHasGroupBy, expr.Index)
+			}
 		}
 	}
 
-	// add expressions for relation tuple IDs after data GET expressions
+	// add expressions to retrieve relation tuple IDs after data GET expressions
+	// add group by tupel ID if record aggregation is used on the relation
 	if !isSubQuery {
-		for index, _ := range indexRelationIds {
+		for relationIndex := range indexRelationIds {
 
-			// if an aggregation function is used on any index, we cannot deliver record IDs
-			// unless a record aggregation functions is used on this specific relation index
-			_, recordAggExists := mapIndex_aggRecords[index]
-			if len(mapIndex_agg) != 0 && !recordAggExists {
+			// any grouping on a relation blocks record retrieval
+			// any aggregation blocks record retrieval unless record aggregation is used
+			aggregationByRecord := slices.Contains(relationIndexesRecordAggr, relationIndex)
+			if slices.Contains(relationIndexesHasGroupBy, relationIndex) || (aggregationUsedAny && !aggregationByRecord) {
 				continue
 			}
 
 			inSelect = append(inSelect, fmt.Sprintf(`"%s"."%s" AS %s`,
-				getRelationCode(index, nestingLevel),
+				getRelationCode(relationIndex, nestingLevel),
 				schema.PkName,
-				getTupleIdCode(index, nestingLevel)))
+				getTupleIdCode(relationIndex, nestingLevel)))
+
+			if aggregationByRecord {
+				// 'record' aggregator is an old option from before we had sub queries
+				// it exists to allow record tupels to still be retrievable, even if aggregation is used (by grouping by record ID automatically)
+				//  example: get company names (record aggr.) + count of employees per organization (count aggr.)
+				//  a regular group by does not necessarily work here as the company name might not be unique (multiple companies with same name)
+				groupByItems = append(groupByItems, getTupleIdCode(relationIndex, nestingLevel))
+			}
 		}
 	}
 
@@ -416,27 +429,6 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 
 	// build GROUP BY line
 	queryGroup := ""
-	groupByItems := make([]string, 0)
-	for i, expr := range data.Expressions {
-
-		if !expr.AttributeId.Valid || (!expr.GroupBy && !expr.Aggregator.Valid) {
-			continue
-		}
-
-		// group by record ID if record must be kept during aggregation
-		if expr.Aggregator.String == "record" {
-			relId := getTupleIdCode(expr.Index, nestingLevel)
-
-			if !slices.Contains(groupByItems, relId) {
-				groupByItems = append(groupByItems, relId)
-			}
-		}
-
-		// group by requested attribute
-		if expr.GroupBy {
-			groupByItems = append(groupByItems, data_sql.GetExpressionAlias(i))
-		}
-	}
 	if len(groupByItems) != 0 {
 		queryGroup = fmt.Sprintf("\nGROUP BY %s", strings.Join(groupByItems, ", "))
 	}
