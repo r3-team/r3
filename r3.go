@@ -74,6 +74,7 @@ var (
 		dynamicPort      bool
 		imageMagick      string
 		http             bool
+		keepWorkDir      bool
 		open             bool
 		run              bool
 		serviceName      string
@@ -119,6 +120,7 @@ func main() {
 	flag.BoolVar(&cli.dynamicPort, "dynamicport", false, "Start with a port provided by the operating system (combined with -run)")
 	flag.StringVar(&cli.imageMagick, "imagemagick", "", "Alternative location for the ImageMagick convert utility")
 	flag.BoolVar(&cli.http, "http", false, "Start with HTTP (not encrypted, for testing/development only, combined with -run)")
+	flag.BoolVar(&cli.keepWorkDir, "keepworkdir", false, "Do not change working directory to directory of executable")
 	flag.BoolVar(&cli.open, "open", false, fmt.Sprintf("Open URL of %s in default browser (combined with -run)", appName))
 	flag.BoolVar(&cli.run, "run", false, fmt.Sprintf("Run %s from within this console (see 'config.json' for configuration)", appName))
 	flag.BoolVar(&cli.debug, "debug", false, "Logs all events regardless of configured log level (combined with -run)")
@@ -173,14 +175,16 @@ func main() {
 	}
 
 	// get path for executable & change working dir to it
-	app, err := os.Executable()
-	if err != nil {
-		prg.logger.Error(err)
-		return
-	}
-	if err := os.Chdir(filepath.Dir(app)); err != nil {
-		prg.logger.Error(err)
-		return
+	if !cli.keepWorkDir {
+		appPath, err := os.Executable()
+		if err != nil {
+			prg.logger.Error(err)
+			return
+		}
+		if err := os.Chdir(filepath.Dir(appPath)); err != nil {
+			prg.logger.Error(err)
+			return
+		}
 	}
 
 	// load configuration from file
