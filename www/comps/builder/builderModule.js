@@ -79,11 +79,11 @@ export default {
 		MyInputColorWrap,
 		MyModuleSelect
 	},
-	template:`<div class="builder-module contentBox grow" v-if="module">
+	template:`<div class="builder-module contentBox grow" v-if="isReady">
 		<div class="top">
 			<div class="area nowrap">
 				<img class="icon" src="images/module.png" />
-				<h1 class="title">{{ capApp.title.replace('{NAME}',module.name) }}</h1>
+				<h1 class="title">{{ capApp.title.replace('{NAME}',inputs.name) }}</h1>
 			</div>
 		</div>
 		<div class="top lower">
@@ -101,7 +101,7 @@ export default {
 			</div>
 			<div class="area nowrap">
 				<my-button image="visible1.png"
-					@trigger="copyValueDialog(module.name,id,id)"
+					@trigger="copyValueDialog(inputs.name,id,id)"
 					:caption="capGen.id"
 				/>
 			</div>
@@ -112,14 +112,14 @@ export default {
 				<tbody>
 					<tr>
 						<td>{{ capGen.name }}</td>
-						<td><input v-model="module.name" :disabled="readonly" :placeholder="capApp.nameHolder" /></td>
+						<td><input v-model="inputs.name" :disabled="readonly" :placeholder="capApp.nameHolder" /></td>
 						<td>{{ capApp.nameHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capGen.title }}</td>
 						<td>
 							<my-builder-caption class="title"
-								v-model="module.captions.moduleTitle"
+								v-model="inputs.captions.moduleTitle"
 								:contentName="capGen.title"
 								:language="builderLanguage"
 								:readonly
@@ -132,7 +132,7 @@ export default {
 						<td>
 							<div class="builder-module-depends-list">
 								<my-button image="delete.png"
-									v-for="m in modules.filter(v => v.id !== id && module.dependsOn.includes(v.id))"
+									v-for="m in modules.filter(v => v.id !== id && inputs.dependsOn.includes(v.id))"
 									@trigger="toggleDependsOn(m.id,false)"
 									:active="!readonly"
 									:caption="m.name"
@@ -142,7 +142,7 @@ export default {
 							<my-module-select
 								v-if="!readonly"
 								@update:modelValue="toggleDependsOn($event,true)"
-								:moduleIdsFilter="module.dependsOn.concat([id])"
+								:moduleIdsFilter="inputs.dependsOn.concat([id])"
 								:modelValue="moduleIdDependsOnInput"
 								:preSelectOne="false"
 							/>
@@ -153,9 +153,9 @@ export default {
 						<td>{{ capGen.icon }}</td>
 						<td>
 							<my-builder-icon-input
-								@input="module.iconId = $event"
-								:icon-id-selected="module.iconId"
-								:module
+								@input="inputs.iconId = $event"
+								:icon-id-selected="inputs.iconId"
+								:module="moduleSchema"
 								:readonly
 							/>
 						</td>
@@ -163,16 +163,16 @@ export default {
 					</tr>
 					<tr>
 						<td>{{ capApp.color }}</td>
-						<td><my-input-color-wrap v-model="module.color1" :allowNull="true" :readonly /></td>
+						<td><my-input-color-wrap v-model="inputs.color1" :allowNull="true" :readonly /></td>
 						<td>{{ capApp.colorHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.parent }}</td>
 						<td>
-							<select v-model="module.parentId" :disabled="readonly">
+							<select v-model="inputs.parentId" :disabled="readonly">
 								<option :value="null">-</option>
 								<option
-									v-for="mod in getDependentModules(module).filter(v => v.id !== id && v.parentId === null)"
+									v-for="mod in getDependentModules(moduleSchema).filter(v => v.id !== id && v.parentId === null)"
 									:value="mod.id"
 								>
 									{{ mod.name }}
@@ -183,16 +183,16 @@ export default {
 					</tr>
 					<tr>
 						<td>{{ capApp.position }}</td>
-						<td><input class="short" v-model.number="module.position" :disabled="readonly" /></td>
+						<td><input class="short" v-model.number="inputs.position" :disabled="readonly" /></td>
 						<td>{{ capApp.positionHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.startFormDefault }}</td>
 						<td>
 							<my-builder-select-form
-								v-model="module.formId"
+								v-model="inputs.formId"
 								:allowAllForms="true"
-								:module
+								:module="moduleSchema"
 								:readonly
 							/>
 						</td>
@@ -204,14 +204,14 @@ export default {
 							<div class="column gap">
 								<draggable class="column gap" handle=".dragAnchor" group="start-forms" itemKey="id" animation="100"
 									:fallbackOnBody="true"
-									:list="module.startForms"
+									:list="inputs.startForms"
 								>
 									<template #item="{element,index}">
 										<my-builder-module-start-form
-											@remove="module.startForms.splice(index,1)"
-											@update:modelValue="module.startForms[index] = $event"
+											@remove="inputs.startForms.splice(index,1)"
+											@update:modelValue="inputs.startForms[index] = $event"
 											:modelValue="element"
-											:module
+											:module="moduleSchema"
 											:readonly
 										/>
 									</template>
@@ -232,21 +232,21 @@ export default {
 						<td>
 							<!-- language entry and header title -->
 							<div class="column gap">
-								<div class="row gap centered" v-for="(l,i) in module.languages">
+								<div class="row gap centered" v-for="(l,i) in inputs.languages">
 									<input type="text"
-										v-model="module.languages[i]"
+										v-model="inputs.languages[i]"
 										:disabled="readonly"
 										:placeholder="capApp.languageCodeHint"
 									/>
 									<my-button image="delete.png"
-										@trigger="module.languages.splice(i,1)"
+										@trigger="inputs.languages.splice(i,1)"
 										:active="!readonly"
 										:cancel="true"
 									/>
 								</div>
 								<div>
 									<my-button image="add.png"
-										@trigger="module.languages.push('')"
+										@trigger="inputs.languages.push('')"
 										:active="!readonly"
 										:caption="capGen.button.add"
 									/>
@@ -258,9 +258,9 @@ export default {
 					<tr>
 						<td>{{ capApp.languageMain }}</td>
 						<td>
-							<select v-model="module.languageMain" :disabled="readonly">
+							<select v-model="inputs.languageMain" :disabled="readonly">
 								<option
-									v-for="l in module.languages"
+									v-for="l in inputs.languages"
 									:value="l"
 								>{{ l }}</option>
 							</select>
@@ -277,7 +277,7 @@ export default {
 						<td>
 							<input maxlength="60"
 								:disabled="readonly"
-								:value="module.namePwa === null ? '' : module.namePwa"
+								:value="inputs.namePwa === null ? '' : inputs.namePwa"
 								@input="applyNullString('namePwa',$event.target.value)"
 							/>
 						</td>
@@ -288,7 +288,7 @@ export default {
 						<td>
 							<input maxlength="12"
 								:disabled="readonly"
-								:value="module.namePwaShort === null ? '' : module.namePwaShort"
+								:value="inputs.namePwaShort === null ? '' : inputs.namePwaShort"
 								@input="applyNullString('namePwaShort',$event.target.value)"
 							/>
 						</td>
@@ -300,17 +300,17 @@ export default {
 							<div class="row gap centered">
 								<span>192x192 px</span>
 								<my-builder-icon-input
-									@input="module.iconIdPwa1 = $event"
-									:icon-id-selected="module.iconIdPwa1"
-									:module
+									@input="inputs.iconIdPwa1 = $event"
+									:icon-id-selected="inputs.iconIdPwa1"
+									:module="moduleSchema"
 									:readonly
 								/>
 								<span></span>
 								<span>512x512 px</span>
 								<my-builder-icon-input
-									@input="module.iconIdPwa2 = $event"
-									:icon-id-selected="module.iconIdPwa2"
-									:module
+									@input="inputs.iconIdPwa2 = $event"
+									:icon-id-selected="inputs.iconIdPwa2"
+									:module="moduleSchema"
 									:readonly
 								/>
 							</div>
@@ -328,16 +328,16 @@ export default {
 								<select
 									@input="applyNullString('jsFunctionIdOnLogin',$event.target.value)"
 									:disabled="readonly"
-									:value="module.jsFunctionIdOnLogin === null ? '' : module.jsFunctionIdOnLogin"
+									:value="inputs.jsFunctionIdOnLogin === null ? '' : inputs.jsFunctionIdOnLogin"
 								>
 									<option value="">-</option>
-									<option v-for="fnc in module.jsFunctions.filter(v => v.formId === null)" :value="fnc.id">
+									<option v-for="fnc in moduleSchema.jsFunctions.filter(v => v.formId === null)" :value="fnc.id">
 										{{ fnc.name }}
 									</option>
 								</select>
 								<my-button image="open.png"
-									@trigger="$router.push('/builder/js-function/'+module.jsFunctionIdOnLogin)"
-									:active="module.jsFunctionIdOnLogin !== null"
+									@trigger="$router.push('/builder/js-function/'+inputs.jsFunctionIdOnLogin)"
+									:active="inputs.jsFunctionIdOnLogin !== null"
 									:captionTitle="capGen.button.open"
 								/>
 							</div>
@@ -352,16 +352,16 @@ export default {
 									<select
 										@input="applyNullString('pgFunctionIdLoginSync',$event.target.value)"
 										:disabled="readonly"
-										:value="module.pgFunctionIdLoginSync === null ? '' : module.pgFunctionIdLoginSync"
+										:value="inputs.pgFunctionIdLoginSync === null ? '' : inputs.pgFunctionIdLoginSync"
 									>
 										<option value="">-</option>
-										<option v-for="fnc in module.pgFunctions.filter(v => v.isLoginSync)" :value="fnc.id">
+										<option v-for="fnc in moduleSchema.pgFunctions.filter(v => v.isLoginSync)" :value="fnc.id">
 											{{ fnc.name }}
 										</option>
 									</select>
 									<my-button image="open.png"
-										@trigger="$router.push('/builder/pg-function/'+module.pgFunctionIdLoginSync)"
-										:active="module.pgFunctionIdLoginSync !== null"
+										@trigger="$router.push('/builder/pg-function/'+inputs.pgFunctionIdLoginSync)"
+										:active="inputs.pgFunctionIdLoginSync !== null"
 										:captionTitle="capGen.button.open"
 									/>
 								</div>
@@ -396,7 +396,7 @@ export default {
 									
 									<div class="entry clickable"
 										@click="clientEventIdEdit = ce.id"
-										v-for="ce in module.clientEvents"
+										v-for="ce in inputs.clientEvents"
 									>
 										<div class="row centered gap">
 											<div class="lines">
@@ -412,7 +412,7 @@ export default {
 										@newRecord="clientEventIdEdit = null"
 										:builderLanguage="builderLanguage"
 										:id="clientEventIdEdit"
-										:module
+										:module="moduleSchema"
 										:readonly
 									/>
 								</div>
@@ -426,21 +426,21 @@ export default {
 						<td>{{ capApp.releaseLogCategories }}</td>
 						<td>
 							<div class="column gap">
-								<div class="row gap" v-for="(c,i) in module.releaseLogCategories">
+								<div class="row gap" v-for="(c,i) in inputs.releaseLogCategories">
 									<input
-										v-model="module.releaseLogCategories[i]"
+										v-model="inputs.releaseLogCategories[i]"
 										:disabled="readonly"
 									/>
 									<my-button image="cancel.png"
-										v-if="i === module.releaseLogCategories.length - 1"
-										@trigger="module.releaseLogCategories.pop()"
+										v-if="i === inputs.releaseLogCategories.length - 1"
+										@trigger="inputs.releaseLogCategories.pop()"
 										:active="!readonly"
 										:naked="true"
 									/>
 								</div>
 								<div>
 									<my-button image="add.png"
-										@trigger="module.releaseLogCategories.push('')"
+										@trigger="inputs.releaseLogCategories.push('')"
 										:active="!readonly"
 										:caption="capGen.button.add"
 									/>
@@ -455,11 +455,11 @@ export default {
 					</tr>
 					<tr>
 						<td>{{ capGen.versionApp }}</td>
-						<td colspan="2"><input class="short" v-model="module.releaseBuild" disabled="disabled" /></td>
+						<td colspan="2"><input class="short" :value="moduleSchema.releaseBuild" disabled="disabled" /></td>
 					</tr>
 					<tr>
 						<td>{{ capGen.versionPlatform }}</td>
-						<td colspan="2"><input class="short" v-model="module.releaseBuildApp" disabled="disabled" /></td>
+						<td colspan="2"><input class="short" :value="moduleSchema.releaseBuildApp" disabled="disabled" /></td>
 					</tr>
 				</tbody>
 			</table>
@@ -478,8 +478,9 @@ export default {
 	},
 	data() {
 		return {
-			module:false,  // module being edited in this component
-			moduleCopy:{}, // copy of module from schema when component last reset
+			inputs:{},
+			inputsCopy:{}, // copy of inputs, to be compared against schema on change
+			isReady:false,
 			
 			// states
 			clientEventIdEdit:false,
@@ -491,8 +492,8 @@ export default {
 	},
 	computed:{
 		// simple
-		displayReleaseDate:s => s.module.releaseDate === 0 ? '-' : s.getUnixFormat(s.module.releaseDate,'Y-m-d H:i'),
-		isChanged:         s => !s.deepIsEqual(s.module,s.moduleSchema),
+		displayReleaseDate:s => s.moduleSchema.releaseDate === 0 ? '-' : s.getUnixFormat(s.moduleSchema.releaseDate,'Y-m-d H:i'),
+		isChanged:         s => !s.deepIsEqual(s.inputs,s.inputsCopy),
 		moduleSchema:      s => s.moduleIdMap[s.id] === undefined ? false : s.moduleIdMap[s.id],
 		
 		// stores
@@ -523,30 +524,61 @@ export default {
 		srcBase64Icon,
 		
 		reset(manuelReset) {
-			if(this.moduleSchema !== false && (manuelReset || !this.deepIsEqual(this.moduleCopy,this.moduleSchema))) {
-				this.module     = JSON.parse(JSON.stringify(this.moduleSchema));
-				this.moduleCopy = JSON.parse(JSON.stringify(this.moduleSchema));
+			if(this.moduleSchema === false)
+				return;
+
+			const inputsSchema = this.cloneInputs(this.moduleSchema);
+			if(manuelReset || !this.deepIsEqual(this.inputsCopy,inputsSchema)) {
+				this.inputs     = this.cloneInputs(inputsSchema);
+				this.inputsCopy = this.cloneInputs(inputsSchema);
+				this.isReady    = true;
 			}
 		},
 		
 		// actions
 		addStartForm() {
-			this.module.startForms.push({
-				position:this.module.startForms.length,
+			this.inputs.startForms.push({
+				position:this.inputs.startForms.length,
 				formId:null,
 				roleId:null
 			});
 		},
 		applyNullString(key,value) {
-			this.module[key] = value === '' ? null : value;
+			this.inputs[key] = value === '' ? null : value;
 		},
-		goBack() {
-			window.history.back();
+		cloneInputs(src) {
+			return {
+				id:src.id,
+				name:src.name,
+				iconId:src.iconId,
+				color1:src.color1,
+				parentId:src.parentId,
+				position:src.position,
+				formId:src.formId,
+				namePwa:src.namePwa,
+				namePwaShort:src.namePwaShort,
+				iconIdPwa1:src.iconIdPwa1,
+				iconIdPwa2:src.iconIdPwa2,
+				languageMain:src.languageMain,
+				jsFunctionIdOnLogin:src.jsFunctionIdOnLogin,
+				pgFunctionIdLoginSync:src.pgFunctionIdLoginSync,
+				articleIdsHelp:JSON.parse(JSON.stringify(src.articleIdsHelp)),
+				captions:JSON.parse(JSON.stringify(src.captions)),
+				dependsOn:JSON.parse(JSON.stringify(src.dependsOn)),
+				startForms:JSON.parse(JSON.stringify(src.startForms)),
+				languages:JSON.parse(JSON.stringify(src.languages)),
+				clientEvents:JSON.parse(JSON.stringify(src.clientEvents)),
+				releaseBuild:src.releaseBuild,
+				releaseBuildApp:src.releaseBuildApp,
+				releaseDate:src.releaseDate,
+				releases:JSON.parse(JSON.stringify(src.releases)),
+				releaseLogCategories:JSON.parse(JSON.stringify(src.releaseLogCategories))
+			};
 		},
 		toggleDependsOn(moduleId,state) {
-			const pos = this.module.dependsOn.indexOf(moduleId);
-			if     (pos === -1 && state)  this.module.dependsOn.push(moduleId);
-			else if(pos !== -1 && !state) this.module.dependsOn.splice(pos,1);
+			const pos = this.inputs.dependsOn.indexOf(moduleId);
+			if     (pos === -1 && state)  this.inputs.dependsOn.push(moduleId);
+			else if(pos !== -1 && !state) this.inputs.dependsOn.splice(pos,1);
 		},
 
 		// presentation
@@ -563,10 +595,10 @@ export default {
 		// backend calls
 		set() {
 			// for module change comparissons
-			this.module.languages.sort();
+			this.inputs.languages.sort();
 
 			ws.sendMultiple([
-				ws.prepare('module','set',this.module),
+				ws.prepare('module','set',this.inputs),
 				ws.prepare('schema','check',{moduleId:this.id})
 			],true).then(
 				() => this.$root.schemaReload(this.id),
@@ -575,7 +607,7 @@ export default {
 		},
 		setNewLoginSync() {
 			let fncName = 'user_sync';
-			for(let fnc of this.module.pgFunctions) {
+			for(let fnc of this.moduleSchema.pgFunctions) {
 				if(fnc.name === fncName) {
 					fncName = `user_sync_${this.getRandomInt(100000,200000)}`;
 					break;

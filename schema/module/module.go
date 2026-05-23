@@ -134,7 +134,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 	mod.ReleaseLogCategories = compatible.FixMissingReleaseLogCategories(mod.ReleaseLogCategories)
 
 	if len(mod.LanguageMain) != 5 {
-		return mod.Id, errors.New("language code must have 5 characters")
+		return mod.Id, errors.New("language code must have 5 characters, such as 'en_us' or 'de_de'")
 	}
 
 	known, err := schema.CheckId_tx(ctx, tx, mod.Id, schema.DbModule, "id")
@@ -173,9 +173,7 @@ func SetReturnId_tx(ctx context.Context, tx pgx.Tx, mod types.Module, fromLocal 
 		}
 
 		if mod.Name != nameEx {
-			if _, err := tx.Exec(ctx, fmt.Sprintf(`ALTER SCHEMA "%s" RENAME TO "%s"`,
-				nameEx, mod.Name)); err != nil {
-
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`ALTER SCHEMA "%s" RENAME TO "%s"`, nameEx, mod.Name)); err != nil {
 				return mod.Id, err
 			}
 
