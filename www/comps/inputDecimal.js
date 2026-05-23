@@ -9,7 +9,6 @@ export default {
 	name:'my-input-decimal',
 	template:`<input class="input input-decimal" inputmode="decimal" type="text"
 		@input="input"
-		@keyup="keyup"
 		:class="{ 'input-decimal-embedded':embedded }"
 		:disabled="readonly"
 		:placeholder
@@ -125,14 +124,6 @@ export default {
 				cursorPosNext = 0;
 
 			e.target.setSelectionRange(cursorPosNext,cursorPosNext);
-		}
-	},
-	keyup(e) {
-		// tabbed into input, if integer value is 0, move cursor after the 0
-		if(e.key === 'Tab' && this.hasFract && this.modelValue !== null && parseInt(this.modelValue) === 0) {
-			requestAnimationFrame(() => {
-				requestAnimationFrame(() => e.target.setSelectionRange(1,1));
-			});
 		}
 	}
 };
