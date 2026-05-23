@@ -350,7 +350,7 @@ export default {
 				<my-input-decimal
 					v-if="isDecimal"
 					v-model="value"
-					:allowNull="attribute.nullable"
+					:allowNull="true"
 					:embedded="true"
 					:length="attribute.length"
 					:lengthFract="attribute.lengthFract"
