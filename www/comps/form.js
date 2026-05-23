@@ -1102,11 +1102,12 @@ export default {
 			},initialWaitMs === undefined ? 300 : initialWaitMs);
 		},
 		routingGuard() {
+			// if form is full page or inline, route if unsaved changes are non-issue
 			const unsavedOk = !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
-			if(!this.isPopUp)
+			if(!this.isPopUpFloating)
 				return unsavedOk;
 
-			// always block routing if form is pop-up, just close if its allowed
+			// if form is floating pop-up, do not route, just close if unsaved changes are non-issue
 			if(unsavedOk)
 				this.close();
 
