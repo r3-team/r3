@@ -381,6 +381,7 @@ export default {
 			popUpFieldIdSrc:null,   // ID of field that pop-up form originated from
 			popUpFullscreen:false,  // set this pop-up form to fullscreen mode
 			recordActionFree:false, // set by DEL/SET calls before form functions, which can negate it to block following record actions
+			routingGuardSkip:false, // skip routing guard once
 			showHelp:false,         // show form context help
 			showLog:false,          // show data change log
 			titleOverwrite:null,    // custom form title, can be set via frontend function
@@ -1103,7 +1104,9 @@ export default {
 		},
 		routingGuard() {
 			// if form is full page or inline, route if unsaved changes are non-issue
-			const unsavedOk = !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
+			const unsavedOk = this.routingGuardSkip || !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
+			this.routingGuardSkip = false;
+
 			if(!this.isPopUpFloating)
 				return unsavedOk;
 
@@ -1291,7 +1294,7 @@ export default {
 			if(middle)
 				return this.openLink('#/builder/form/'+this.form.id,true);
 			
-			this.blockInputs = true;
+			this.routingGuardSkip = true;
 			this.$router.push('/builder/form/'+this.form.id);
 			this.$store.commit('popUpFormGlobal',null);
 		},
@@ -1326,7 +1329,7 @@ export default {
 		},
 		openNew(middleClick) {
 			if(!middleClick)
-				this.blockInputs = true;
+				this.routingGuardSkip = true;
 
 			this.openForm([],null,null,middleClick,null,false);
 		},
@@ -1350,7 +1353,7 @@ export default {
 			});
 		},
 		openPrev() {
-			this.blockInputs = true;
+			this.routingGuardSkip = true;
 			window.history.back();
 		},
 		popUpFormUpdate(change,recordId) {
