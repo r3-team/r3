@@ -364,7 +364,7 @@ function getReferencesAttribut(mod,atrId,lookups) {
 	}
 	for(const r of mod.relations) {
 		for(const pgi of r.indexes) {
-			if(pgi.attributes.some(v => v.attributeId === atrId)) {
+			if(!pgi.autoFki && !pgi.primaryKey && pgi.attributes.some(v => v.attributeId === atrId)) {
 				lookups.pgIndexIds.push(pgi.id);
 				lookups.anyResults = true;
 			}
