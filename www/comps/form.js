@@ -1489,7 +1489,7 @@ export default {
 			
 			// a pop-up/widget form can be reloaded by using itself as target (the same as regular forms)
 			// only valid if no pop-up option is used
-			if((this.isPopUp || this.isWidget) && openSameForm && openForm.popUpType !== null)
+			if((this.isPopUp || this.isWidget) && openSameForm && openForm.popUpType === null)
 				return this.$emit('records-open',recordIds);
 				
 			// a pop-up form can only open other floating pop-ups, otherwise navigation becomes confusing
