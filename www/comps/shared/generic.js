@@ -135,11 +135,9 @@ export function getNumberFormatted(v,length,lengthFract) {
 	if(length !== 0)
 		strNum = strNum.substring(0,isNeg ? length-lengthFract+1 : length-lengthFract);
 	
-	strNum = strNum.replace(/\B(?=(\d{3})+(?!\d))/g,MyStore.getters.numberSepThousand);
+	strNum = String(strNum.replace(/\B(?=(\d{3})+(?!\d))/g,MyStore.getters.numberSepThousand));
 
-	return hasFraction
-		? strNum + MyStore.getters.numberSepDecimal + strFraction
-		: strNum;
+	return hasFraction ? strNum + MyStore.getters.numberSepDecimal + strFraction : strNum;
 };
 
 export function getNilUuid() {
