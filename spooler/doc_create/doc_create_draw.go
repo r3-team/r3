@@ -175,12 +175,6 @@ func drawImageBase64(doc *doc, imgBase64 string, sizeX, sizeY float64) error {
 // if height is set to 0, font line height will be used
 func drawCellText(doc *doc, font types.DocFont, sizeX, sizeY float64, flowHorizontal bool, lineCount int, s string) {
 
-	// temporary workaround: fpdf does not allow mixing justify with any vertical alignment due to a bug (https://codeberg.org/go-pdf/fpdf/pulls/105)
-	// remove vertical alignment if justify is used - while this kills vertical alignment, justify should take precedence as it´s mostly used in flowing multi line texts
-	if strings.Contains(font.Align, "J") {
-		font.Align = "J"
-	}
-
 	if sizeY == 0 {
 		// height is known in some cases (like in list rows), if not calculate it
 		sizeY = getLineHeight(font)

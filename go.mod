@@ -20,7 +20,7 @@ require (
 )
 
 require (
-	codeberg.org/go-pdf/fpdf v0.12.0
+	codeberg.org/go-pdf/fpdf v0.12.1-0.20260527114131-49f5a634f68e
 	github.com/PaesslerAG/gval v1.2.4
 	github.com/coreos/go-oidc/v3 v3.18.0
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
