@@ -100,7 +100,7 @@ export default {
 				v-model="f"
 				@dragChildEnd="dragChildEnd(f.id)"
 				@dragChildEnter="dragChildEnter(i)"
-				@remove="remove(f.id)"
+				@remove="removeChild(f.id)"
 				@setFieldIdOptions="$emit('setFieldIdOptions',$event)"
 				@setFieldIdOptionsParent="$emit('setFieldIdOptions',field.id)"
 				:builderLanguage
@@ -131,7 +131,7 @@ export default {
 				<div class="area">
 					<my-button image="visible1.png" @trigger="copyValueDialog(field.content,field.id,field.id)" :caption="capGen.id" />
 					<my-button image="upward.png"   @trigger="$emit('setFieldIdOptionsParent')" :active="isChild" :caption="capApp.button.selectParent" />
-					<my-button image="delete.png"   @trigger="$emit('remove')" :active="!isRoot && !readonly" />
+					<my-button image="delete.png"   @trigger="remove" :active="!isRoot && !readonly" />
 					<my-button image="cancel.png"
 						@trigger="$emit('setFieldIdOptions',null)"
 						:cancel="true"
@@ -692,6 +692,19 @@ export default {
 				this.field.sizeY = sizeY;
 			}
 		},
+
+		// field actions
+		remove() {
+			this.$emit('remove');
+
+			if(this.isOptionsShow)
+				this.$emit('setFieldIdOptions',null);
+		},
+		removeChild(fieldId) {
+			const pos = this.field.fields.findIndex(v => v.id === fieldId);
+			if(pos !== -1)
+				this.field.fields.splice(pos,1);
+		},
 		removeIndex(index) {
 			for(let i = 0, j = this.field.columns.length; i < j; i++) {
 				if(!this.field.columns[i].subQuery && this.field.columns[i].attributeIndex === index) {
@@ -699,13 +712,6 @@ export default {
 					i--; j--;
 				}
 			}
-		},
-
-		// field actions
-		remove(fieldId) {
-			const pos = this.field.fields.findIndex(v => v.id === fieldId);
-			if(pos !== -1)
-				this.field.fields.splice(pos,1);
 		},
 
 		// drag & drop
