@@ -239,6 +239,7 @@
 	background-color:var(--color-bright);
 	border-right:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
+	overflow-x:auto;
 }
 .list-cards-entry .actions{
 	position:absolute;
@@ -277,7 +278,7 @@
 }
 .list-cards-entry table{
 	max-width:100%;
-	margin:var(--spacing) 50px 8px var(--spacing);
+	margin:var(--spacing) var(--spacing) calc(var(--spacing) / 2) var(--spacing);
 }
 .list-cards-entry td{
 	vertical-align:bottom;
