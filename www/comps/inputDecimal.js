@@ -28,24 +28,6 @@ export default {
 		modelValue: { type:[Number,null], required:true },
 		readonly:   { type:Boolean,       required:false, default:false }
 	},
-	watch:{
-		modelValue:{
-			handler(v) {
-				// numeric value did not change (also true if both are null)
-				if(v === this.valueNum)
-					return;
-
-				// only apply change, if numeric value changed (important for decimals with no length)
-				// 12 and 12.0 are the same number, but user might be typing trailing zeroes for a number like 12.03 or 12.003
-				// always applying the change would reset the input, even if the number value did not meaningfully change
-				if(v === null || this.valueNum === null || Number(v) !== Number(this.valueNum)) {
-					this.valueNum = v;
-					this.$refs.input.value = this.getNumberAsText(v);
-				}
-			},
-			immediate:true
-		},
-	},
 	computed:{
 		// simple
 		hasFract:   s => s.lengthFract !== 0,                                    // input has fixed fractional length (ie. 2 decimal places)
@@ -61,6 +43,11 @@ export default {
 		charTho:s => s.$store.getters.numberSepThousand
 	},
 	emits:['update:modelValue'],
+	mounted() {
+		// do not use 'immediate' on modelValue watcher, watcher can run before ref is set
+		this.valueParentLoad(this.modelValue);
+		this.$watch('modelValue',this.valueParentLoad);
+	},
 	methods:{
 		// externals
 		getNumberFormatted,
@@ -81,7 +68,22 @@ export default {
 				requestAnimationFrame(() => e.target.setSelectionRange(pos,pos));
 			});
 		},
-		update(v) {
+		valueParentLoad(v) {
+			// numeric value did not change (also true if both are null)
+			if(v === this.valueNum)
+				return;
+
+			// only apply change, if numeric value changed (important for decimals with no length)
+			// 12 and 12.0 are the same number, but user might be typing trailing zeroes for a number like 12.03 or 12.003
+			// always applying changes would reset the input, even if the number value did not meaningfully change
+			if(v === null || this.valueNum === null || Number(v) !== Number(this.valueNum)) {
+				this.valueNum = v;
+
+				if(this.$refs.input !== undefined)
+					this.$refs.input.value = this.getNumberAsText(v);
+			}
+		},
+		valueParentEmit(v) {
 			this.valueNum = v;
 
 			if(v !== this.modelValue)
@@ -94,7 +96,7 @@ export default {
 			let t = e.target.value.trim().replaceAll(this.charTho,'').replaceAll(this.charDec,'.');
 			if(t === '') {
 				// empty text input, clear value
-				this.update(this.allowNull ? null : 0);
+				this.valueParentEmit(this.allowNull ? null : 0);
 				return e.target.value = this.allowNull ? '' : this.getNumberAsText(0);
 			}
 
@@ -155,7 +157,7 @@ export default {
 			if(this.hasFract && n === 0 && this.allowNull && (isDeleteBack || isDeleteForw)) {
 				// in a fixed length number, if 0 is reached via deletion, empty input
 				e.target.value = '';
-				this.update(null);
+				this.valueParentEmit(null);
 				return;
 			}
 			
@@ -190,7 +192,7 @@ export default {
 				}
 				this.setCursor(e,cursorPos);
 			}
-			this.update(n);
+			this.valueParentEmit(n);
 		}
 	}
 };
