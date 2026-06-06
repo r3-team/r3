@@ -1,6 +1,9 @@
 import MyBuilderAggregatorInput from './builderAggregatorInput.js';
 import MyBuilderCaption         from './builderCaption.js';
 import MyBuilderQuery           from './builderQuery.js';
+import {getColumnIcon}          from '../shared/column.js';
+import {getItemTitleColumn}     from '../shared/builder.js';
+import {getTemplateQuery}       from '../shared/builderTemplate.js';
 import {
 	getIndexAttributeIdsByJoins,
 	isAttributeBoolean,
@@ -20,7 +23,21 @@ export default {
 		MyBuilderCaption,
 		MyBuilderQuery
 	},
-	template:`<table class="generic-table-vertical default-inputs">
+	template:`<div class="top lower">
+		<div class="area">
+			<img class="icon" src="images/dash.png" />
+			<img class="icon" :src="'images/' + getColumnIcon(column)" />
+			<h2>{{ capGen.column + ': ' + getItemTitleColumn(column,false) }}</h2>
+		</div>
+		<div class="area">
+			<my-button image="cancel.png"
+				@trigger="$emit('close')"
+				:cancel="true"
+				:captionTitle="capGen.button.close"
+			/>
+		</div>
+	</div>
+	<table class="generic-table-vertical default-inputs">
 		<tbody>
 			<tr v-if="hasCaptions">
 				<td>{{ capGen.title }}</td>
@@ -184,23 +201,43 @@ export default {
 				</tr>
 			</template>
 			<tr>
-				<td colspan="999"><b>{{ capGen.dataRetrieval }}</b></td>
+				<td colspan="999"><b>{{ capGen.dataAccess }}</b></td>
 			</tr>
-			<tr v-if="isSubQuery">
-				<td>{{ capGen.attribute }}*</td>
-				<td>
-					<select
-						@change="setIndexAttribute($event.target.value)"
-						:disabled="readonly"
-						:value="column.index+'_'+column.attributeId"
-					>
-						<option value="0_null">-</option>
-						<option v-for="ia in indexAttributeIds" :value="ia">
-							{{ getCaptionByIndexAttributeId(ia) }}
-						</option>
-					</select>
-				</td>
-			</tr>
+			<template v-if="isSubQuery">
+				<tr>
+					<td colspan="2">
+						<my-builder-query
+							@update:modelValue="set('query',$event)"
+							:allowChoices="false"
+							:allowOrders="true"
+							:builderLanguage
+							:entityIdMapRef
+							:fieldIdMap
+							:filtersDisable
+							:formId
+							:joinsParents
+							:modelValue="query"
+							:moduleId
+							:readonly
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capGen.attribute }}*</td>
+					<td>
+						<select
+							@change="setIndexAttribute($event.target.value)"
+							:disabled="readonly"
+							:value="column.index+'_'+column.attributeId"
+						>
+							<option value="0_null">-</option>
+							<option v-for="ia in indexAttributeIds" :value="ia">
+								{{ getCaptionByIndexAttributeId(ia) }}
+							</option>
+						</select>
+					</td>
+				</tr>
+			</template>
 			<tr>
 				<td>{{ capGen.aggregator }}</td>
 				<td>
@@ -235,15 +272,21 @@ export default {
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		column:         { type:Object,  required:true },
+		entityIdMapRef: { type:Object,  required:false, default:() => {return {}} },
+		fieldIdMap:     { type:Object,  required:false, default:() => {return {}} },
+		filtersDisable: { type:Array,   required:false, default:[] },
+		formId:         { type:String,  required:false, default:'' },
 		hasCaptions:    { type:Boolean, required:true },
+		joinsParents:   { type:Array,   required:false, default:[] },
 		moduleId:       { type:String,  required:true },
 		onlyData:       { type:Boolean, required:true }, // no display/formatting options
 		readonly:       { type:Boolean, required:true }
 	},
-	emits:['set'],
+	emits:['close','set'],
 	computed:{
 		attribute:s => typeof s.attributeIdMap[s.column.attributeId] === 'undefined'
 			? false : s.attributeIdMap[s.column.attributeId],
+		query:s => s.isSubQuery && s.column.query !== null ? s.column.query : s.getTemplateQuery(),
 		indexAttributeIds:s => !s.isSubQuery && s.column.query !== null
 			? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins,[]),
 		
@@ -285,7 +328,10 @@ export default {
 	methods:{
 		// externals
 		getCaptionByIndexAttributeId,
+		getColumnIcon,
 		getIndexAttributeIdsByJoins,
+		getItemTitleColumn,
+		getTemplateQuery,
 		isAttributeBoolean,
 		isAttributeFiles,
 		isAttributeInteger,

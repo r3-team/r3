@@ -1773,6 +1773,7 @@
 			"lookups": "Rekord-azonosítások ({COUNT})",
 			"lookupsHelp": "A rekord-azonosítások adatainak importálásakor (CSV/API POST) történik.<ul><li>Minden egyedi indexet használhat a rekord-azonosításhoz (általában egyedi név) - az egyedi indexek a megfelelő relációhoz vannak definiálva.</li><li>A rekord-azonosítás akkor működik, ha az index-értékek is benne vannak az importált adatokban.</li><li>A rekordok létrehozásához/frissítéséhez aktiválni kell a kívánt relációkhoz a \"Létrehozás\"/\"Frissítés\" beállításokat (Tartalom fül).</li><li>Ha kapcsolati attribútumokat (n:1/1:1) használnak a rekord-azonosításhoz, akkor azoknak a relációknak is kapcsolódniuk kell (join), és a rekord-azonosítást azok rekordjaira is aktiválni kell.</li></ul>",
 			"orders": "Sorrendek ({COUNT})",
+			"relationStart": "Select start relation",
 			"relations": "Relációk ({COUNT})",
 			"select": "Csatlakozni kívánt reláció kiválasztása"
 		},
@@ -2427,6 +2428,7 @@
 		"contextHelp": "Kontextussegítség",
 		"dark": "Dark",
 		"data": "Adat",
+		"dataAccess": "Data access",
 		"dataRetrieval": "Adatlekérdezés",
 		"date": "Dátum",
 		"dateFormat0": "É-h-n (2012-12-30)",
@@ -2600,6 +2602,7 @@
 		"prefix": "Prefix",
 		"preview": "Előnézet",
 		"properties": "Tulajdonságok",
+		"query": "Query",
 		"queryChoices": "Szűrő sorok",
 		"readonly": "Csak olvasható",
 		"record": "Rekord",

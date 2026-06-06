@@ -1774,6 +1774,7 @@
 			"lookupsHelp": "Lookups identify records during data imports (CSV/API POST).<ul><li>Any unique index can be used as lookup (often a unique name) - unique indexes are defined on the corresponding relation.</li><li>Lookups only work if their values are included in the imported data.</li><li>To create/update records during data import, 'CREATE'/'UPDATE' options must be enabled for the desired relations (tab 'content').</li><li>If relationship attributes (n:1/1:1) are used as lookups, their relations must be joined and lookups defined for their records.</li></ul>",
 			"orders": "Sorting ({COUNT})",
 			"relations": "Relations ({COUNT})",
+			"relationStart": "Select start relation",
 			"select": "Select relation to join"
 		},
 		"relation": {
@@ -2427,6 +2428,7 @@
 		"contextHelp": "Context help",
 		"dark": "Dark",
 		"data": "Data",
+		"dataAccess": "Data access",
 		"dataRetrieval": "Data retrieval",
 		"date": "Date",
 		"dateFormat0": "Y-m-d (2012-12-30)",
@@ -2600,6 +2602,7 @@
 		"prefix": "Prefix",
 		"preview": "Preview",
 		"properties": "Properties",
+		"query": "Query",
 		"queryChoices": "Filter sets",
 		"readonly": "Readonly",
 		"record": "Record",

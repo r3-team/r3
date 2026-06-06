@@ -450,158 +450,148 @@ export default {
 		</div>
 		
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
-			<div class="top lower">
+			<div class="top lower" :class="{ clickable:columnIdShow !== null }" @click="columnIdShow = null">
 				<div class="area">
-					<h1>{{ capGen.settings }}</h1>
+					<img class="icon" src="images/api.png" />
+					<h1>{{ capGen.api }}</h1>
 				</div>
 			</div>
 			
-			<my-tabs
-				v-model="tabTarget"
-				:entries="['content','calls','properties']"
-				:entriesIcon="['images/database.png','images/code.png','images/edit.png']"
-				:entriesText="[capGen.content,capApp.calls,capGen.properties]"
-			/>
-			
-			<!-- API content -->
-			<div class="content grow" v-if="tabTarget === 'content'">
-				<my-builder-query
-					@index-removed="removeIndex($event)"
-					@update:modelValue="api.query = $event"
-					:allowChoices="false"
-					:allowLookups="true"
-					:allowOrders="true"
-					:builderLanguage
-					:filtersDisable
-					:modelValue="query"
-					:moduleId="module.id"
-					:readonly
+			<template v-if="columnShow === false">
+				<my-tabs
+					v-model="tabTarget"
+					:entries="['content','calls','properties']"
+					:entriesText="[capGen.content,capApp.calls,capGen.properties]"
 				/>
-				
-				<!-- column settings -->
-				<template v-if="columnShow !== false">
-					<br />
-					<h3 class="selected-ref">{{ capGen.columnSettings }}</h3>
-					
+			
+				<!-- API content -->
+				<div class="content grow" v-if="tabTarget === 'content'">
 					<my-builder-query
-						v-if="columnShow.subQuery"
-						v-model="columnShow.query"
+						@index-removed="removeIndex($event)"
+						@update:modelValue="api.query = $event"
 						:allowChoices="false"
+						:allowLookups="true"
 						:allowOrders="true"
 						:builderLanguage
 						:filtersDisable
-						:joinsParents="[query.joins]"
+						:modelValue="query"
 						:moduleId="module.id"
 						:readonly
 					/>
-					<my-builder-column-options
-						@set="(...args) => columnSet(args[0],args[1])"
+				</div>
+				
+				<!-- calls -->
+				<div class="content no-padding" v-if="tabTarget === 'calls'">
+					<my-builder-api-preview
+						:api="api"
 						:builderLanguage
-						:column="columnShow"
-						:hasCaptions="true"
-						:moduleId="module.id"
-						:onlyData="true"
-						:readonly
+						:columns="api.columns"
+						:hasDelete="api.hasDelete"
+						:hasGet="api.hasGet"
+						:hasPost="api.hasPost"
+						:joins="query.joins"
+						:limitDef="api.limitDef"
+						:module
+						:name="api.name"
+						:verboseDef="api.verboseDef"
+						:version="api.version"
+						:warnings
 					/>
-				</template>
-			</div>
-			
-			<!-- calls -->
-			<div class="content no-padding" v-if="tabTarget === 'calls'">
-				<my-builder-api-preview
-					:api="api"
-					:builderLanguage
-					:columns="api.columns"
-					:hasDelete="api.hasDelete"
-					:hasGet="api.hasGet"
-					:hasPost="api.hasPost"
-					:joins="query.joins"
-					:limitDef="api.limitDef"
-					:module
-					:name="api.name"
-					:verboseDef="api.verboseDef"
-					:version="api.version"
-					:warnings
-				/>
-			</div>
-			
-			<!-- properties -->
-			<div class="content no-padding" v-if="tabTarget === 'properties'">
-				<table class="generic-table-vertical default-inputs">
-					<tbody>
-						<tr>
-							<td>{{ capGen.name }}</td>
-							<td><input v-model="api.name" :disabled="readonly" /></td>
-							<td>{{ capApp.nameHint }}</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.version }}</td>
-							<td><input v-model.number="api.version" :disabled="readonly" /></td>
-							<td>{{ capApp.versionHint }}</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.comments }}</td>
-							<td colspan="2">
-								<textarea class="long" @input="api.comment = $event.target.value !== '' ? $event.target.value : null" :disabled="readonly" :value="api.comment"></textarea>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.content }}</td>
-							<td><input disabled="disabled" :value="capApp.contentValue" /></td>
-							<td></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.verboseDef }}</td>
-							<td><my-bool v-model="api.verboseDef" :readonly /></td>
-							<td>{{ capApp.verboseDefHint }}</td>
-						</tr>
-						<tr v-if="warnings.length !== 0">
-							<td class="warnings">{{ capApp.warnings }}</td>
-							<td colspan="2">
-								<ul>
-									<li v-for="w in warnings">{{ w }}</li>
-								</ul>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.httpMethods }}</td>
-							<td colspan="2">
-								<div class="column">
-									<table>
-										<tbody>
-											<tr>
-												<td>GET</td>
-												<td><my-bool v-model="api.hasGet" :readonly /></td>
-												<td>{{ capApp.hint.get }}</td>
-											</tr>
-											<tr>
-												<td>POST</td>
-												<td><my-bool v-model="api.hasPost" :readonly /></td>
-												<td>{{ capApp.hint.post }}</td>
-											</tr>
-											<tr>
-												<td>DELETE</td>
-												<td><my-bool v-model="api.hasDelete" :readonly /></td>
-												<td>{{ capApp.hint.delete }}</td>
-											</tr>
-										</tbody>
-									</table>
-								</div>
-							</td>
-						</tr>
-						<tr v-if="api.hasGet">
-							<td>{{ capApp.limitDef }}</td>
-							<td><input v-model.number="api.limitDef" :disabled="readonly" /></td>
-							<td>{{ capApp.limitDefHint }}</td>
-						</tr>
-						<tr v-if="api.hasGet">
-							<td>{{ capApp.limitMax }}</td>
-							<td><input v-model.number="api.limitMax" :disabled="readonly" /></td>
-							<td>{{ capApp.limitMaxHint }}</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+				</div>
+				
+				<!-- properties -->
+				<div class="content no-padding" v-if="tabTarget === 'properties'">
+					<table class="generic-table-vertical default-inputs">
+						<tbody>
+							<tr>
+								<td>{{ capGen.name }}</td>
+								<td><input v-model="api.name" :disabled="readonly" /></td>
+								<td>{{ capApp.nameHint }}</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.version }}</td>
+								<td><input v-model.number="api.version" :disabled="readonly" /></td>
+								<td>{{ capApp.versionHint }}</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.comments }}</td>
+								<td colspan="2">
+									<textarea class="long" @input="api.comment = $event.target.value !== '' ? $event.target.value : null" :disabled="readonly" :value="api.comment"></textarea>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.content }}</td>
+								<td><input disabled="disabled" :value="capApp.contentValue" /></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.verboseDef }}</td>
+								<td><my-bool v-model="api.verboseDef" :readonly /></td>
+								<td>{{ capApp.verboseDefHint }}</td>
+							</tr>
+							<tr v-if="warnings.length !== 0">
+								<td class="warnings">{{ capApp.warnings }}</td>
+								<td colspan="2">
+									<ul>
+										<li v-for="w in warnings">{{ w }}</li>
+									</ul>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.httpMethods }}</td>
+								<td colspan="2">
+									<div class="column">
+										<table>
+											<tbody>
+												<tr>
+													<td>GET</td>
+													<td><my-bool v-model="api.hasGet" :readonly /></td>
+													<td>{{ capApp.hint.get }}</td>
+												</tr>
+												<tr>
+													<td>POST</td>
+													<td><my-bool v-model="api.hasPost" :readonly /></td>
+													<td>{{ capApp.hint.post }}</td>
+												</tr>
+												<tr>
+													<td>DELETE</td>
+													<td><my-bool v-model="api.hasDelete" :readonly /></td>
+													<td>{{ capApp.hint.delete }}</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</td>
+							</tr>
+							<tr v-if="api.hasGet">
+								<td>{{ capApp.limitDef }}</td>
+								<td><input v-model.number="api.limitDef" :disabled="readonly" /></td>
+								<td>{{ capApp.limitDefHint }}</td>
+							</tr>
+							<tr v-if="api.hasGet">
+								<td>{{ capApp.limitMax }}</td>
+								<td><input v-model.number="api.limitMax" :disabled="readonly" /></td>
+								<td>{{ capApp.limitMaxHint }}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</template>
+				
+			<!-- column options -->
+			<my-builder-column-options
+				v-if="columnShow !== false"
+				@close="columnIdShow = null"
+				@set="(...args) => columnSet(args[0],args[1])"
+				:builderLanguage
+				:column="columnShow"
+				:filtersDisable
+				:hasCaptions="true"
+				:joinsParents="[query.joins]"
+				:moduleId="module.id"
+				:onlyData="true"
+				:readonly
+			/>
 		</div>
 	</div>`,
 	props:{

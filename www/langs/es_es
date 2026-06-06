@@ -1773,6 +1773,7 @@
 			"lookups": "Búsquedas de registros ({COUNT})",
 			"lookupsHelp": "Las búsquedas identifican registros durante importaciones de datos (CSV/API POST).<ul><li>Cualquier índice único puede usarse como búsqueda (a menudo un nombre único) - los índices únicos se definen en la relación correspondiente.</li><li>Las búsquedas solo funcionan si sus valores están incluidos en los datos importados.</li><li>Para crear/actualizar registros durante la importación de datos, las opciones 'CREATE'/'UPDATE' deben estar habilitadas para las relaciones deseadas (pestaña 'contenido').</li><li>Si los atributos de relación (n:1/1:1) se usan como búsquedas, sus relaciones deben estar unidas y las búsquedas definidas para sus registros.</li></ul>",
 			"orders": "Ordenación ({COUNT})",
+			"relationStart": "Select start relation",
 			"relations": "Relaciones ({COUNT})",
 			"select": "Seleccionar relación para unir"
 		},
@@ -2427,6 +2428,7 @@
 		"contextHelp": "Ayuda contextual",
 		"dark": "Oscuro",
 		"data": "Datos",
+		"dataAccess": "Data access",
 		"dataRetrieval": "Recuperación de datos",
 		"date": "Fecha",
 		"dateFormat0": "Y-m-d (2012-12-30)",
@@ -2600,6 +2602,7 @@
 		"prefix": "Prefix",
 		"preview": "Vista previa",
 		"properties": "Propiedades",
+		"query": "Query",
 		"queryChoices": "Conjuntos de filtros",
 		"readonly": "Solo lectura",
 		"record": "Registro",

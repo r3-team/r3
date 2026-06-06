@@ -129,9 +129,11 @@ export default {
 					<h2>{{ titleBar }}</h2>
 				</div>
 				<div class="area">
-					<my-button image="visible1.png" @trigger="copyValueDialog(field.content,field.id,field.id)" :caption="capGen.id" />
-					<my-button image="upward.png"   @trigger="$emit('setFieldIdOptionsParent')" :active="isChild" :caption="capApp.button.selectParent" />
-					<my-button image="delete.png"   @trigger="remove" :active="!isRoot && !readonly" />
+					<template v-if="columnIdOptions === null">
+						<my-button image="visible1.png" @trigger="copyValueDialog(field.content,field.id,field.id)" :caption="capGen.id" />
+						<my-button image="upward.png"   @trigger="$emit('setFieldIdOptionsParent')" :active="isChild" :caption="capApp.button.selectParent" />
+						<my-button image="delete.png"   @trigger="remove" :active="!isRoot && !readonly" />
+					</template>
 					<my-button image="cancel.png"
 						@trigger="$emit('setFieldIdOptions',null)"
 						:cancel="true"
@@ -166,6 +168,8 @@ export default {
 						:moduleId
 						:readonly
 					/>
+					<br />
+					<h2>{{ capGen.columnsAvailable }}</h2>
 					<div class="builder-doc-templates">
 						<div class="builder-doc-template" draggable="true"
 							@dragstart="dragStartColumnTemplate($event,c)"

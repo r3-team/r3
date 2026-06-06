@@ -44,35 +44,72 @@ export default {
 				</div>
 			</div>
 
-			<my-tabs
-				v-if="isWithQuery"
-				v-model="tabTarget"
-				:entries="['properties','content']"
-				:entriesIcon="['images/edit.png','images/database.png']"
-				:entriesText="[capGen.properties,capGen.content]"
-			/>
-			
-			<template v-if="tabTarget === 'content'">
-				<div class="content grow">
-					<my-builder-query
-						v-if="column.subQuery"
-						@update:modelValue="column.query = $event"
-						:allowChoices="false"
-						:allowOrders="true"
-						:builderLanguage
-						:filtersDisable
-						:joinsParents="[joinsParent]"
-						:modelValue="query"
-						:moduleId
-						:readonly
-					/>
-				</div>
-				<br />
-				<table class="generic-table-vertical default-inputs">
-					<tbody>
-						<tr><td colspan="2"><b>{{ capGen.dataRetrieval }}</b></td></tr>
+			<table class="generic-table-vertical default-inputs">
+				<tbody>
+					<tr>
+						<td>{{ capGen.title }}</td>
+						<td>
+							<my-builder-caption
+								v-model="column.captions.docColumnTitle"
+								:contentName="capGen.title"
+								:language="builderLanguage"
+								:longInput="true"
+								:readonly
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capGen.prefix }}</td>
+						<td><input v-model="column.textPrefix" :disabled="readonly" /></td>
+					</tr>
+					<tr>
+						<td>{{ capGen.postfix }}</td>
+						<td><input v-model="column.textPostfix" :disabled="readonly" /></td>
+					</tr>
+					<tr>
+						<td>{{ capGen.lengthChars }}</td>
+						<td>
+							<my-input-decimal class="short" v-if="column.length !== 0" v-model="column.length" :min="0" :allowNull="false" :lengthFract="0" :readonly />
+							<my-button v-else @trigger="column.length = 50" :active="!readonly" :caption="capGen.noLimit" :naked="true" />
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capGen.sizeX }}</td>
+						<td>
+							<div class="row gap centered" v-if="column.sizeX !== 0">
+								<my-input-range   class="short" v-model="column.sizeX" :min="1" :max="sizeXMax" :readonly :step="0.1" />
+								<my-input-decimal class="short" v-model="column.sizeX" :min="1" :max="sizeXMax" :readonly :allowNull="false" :length="5" :lengthFract="2" />
+								<my-button image="cancel.png" :active="column.sizeX !== 0 && !readonly" :naked="true" @trigger="column.sizeX = 0" />
+								<span>mm</span>
+							</div>
+							<my-button
+								v-else
+								@trigger="column.sizeX = 50"
+								:active="!readonly"
+								:caption="capGen.automatic"
+								:naked="true"
+							/>
+						</td>
+					</tr>
+					<tr><td colspan="2"><b>{{ capGen.dataAccess }}</b></td></tr>
+					<template v-if="column.subQuery">
 						<tr>
-							<td>{{ capGen.attribute }}</td>
+							<td colspan="2">
+								<my-builder-query
+									@update:modelValue="column.query = $event"
+									:allowChoices="false"
+									:allowOrders="true"
+									:builderLanguage
+									:filtersDisable
+									:joinsParents="[joinsParent]"
+									:modelValue="query"
+									:moduleId
+									:readonly
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.attribute }}*</td>
 							<td>
 								<select
 									@input="setIndexAttribute($event.target.value)"
@@ -85,119 +122,66 @@ export default {
 								</select>
 							</td>
 						</tr>
-					</tbody>
-				</table>
-			</template>
-
-			<template v-if="tabTarget === 'properties' || !isWithQuery">
-				<table class="generic-table-vertical default-inputs">
-					<tbody>
-						<tr>
-							<td>{{ capGen.title }}</td>
-							<td>
-								<my-builder-caption
-									v-model="column.captions.docColumnTitle"
-									:contentName="capGen.title"
-									:language="builderLanguage"
-									:longInput="true"
-									:readonly
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.prefix }}</td>
-							<td><input v-model="column.textPrefix" :disabled="readonly" /></td>
-						</tr>
-						<tr>
-							<td>{{ capGen.postfix }}</td>
-							<td><input v-model="column.textPostfix" :disabled="readonly" /></td>
-						</tr>
-						<tr>
-							<td>{{ capGen.lengthChars }}</td>
-							<td>
-								<my-input-decimal class="short" v-if="column.length !== 0" v-model="column.length" :min="0" :allowNull="false" :lengthFract="0" :readonly />
-								<my-button v-else @trigger="column.length = 50" :active="!readonly" :caption="capGen.noLimit" :naked="true" />
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.sizeX }}</td>
-							<td>
-								<div class="row gap centered" v-if="column.sizeX !== 0">
-									<my-input-range   class="short" v-model="column.sizeX" :min="1" :max="sizeXMax" :readonly :step="0.1" />
-									<my-input-decimal class="short" v-model="column.sizeX" :min="1" :max="sizeXMax" :readonly :allowNull="false" :length="5" :lengthFract="2" />
-									<my-button image="cancel.png" :active="column.sizeX !== 0 && !readonly" :naked="true" @trigger="column.sizeX = 0" />
-									<span>mm</span>
-								</div>
-								<my-button
-									v-else
-									@trigger="column.sizeX = 50"
-									:active="!readonly"
-									:caption="capGen.automatic"
-									:naked="true"
-								/>
-							</td>
-						</tr>
-						<tr><td colspan="2"><b>{{ capGen.dataRetrieval }}</b></td></tr>
-						<tr>
-							<td>{{ capGen.aggregator }}</td>
-							<td><my-builder-aggregator-input v-model="column.aggregator" :readonly /></td>
-						</tr>
-						<tr>
-							<td>{{ capGen.options }}</td>
-							<td>
-								<div class="row gap centered">
-									<my-button-check v-model="column.distincted" :caption="capGen.distincted" :readonly />
-									<my-button-check v-model="column.groupBy"    :caption="capGen.groupBy"    :readonly />
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.resultRow }}</td>
-							<td><my-builder-aggregator-input v-model="column.aggregatorRow" :itemsFilter="['record','list','array']" :readonly /></td>
-						</tr>
-					</tbody>
-				</table>
-				
-				<div class="content grow">
-					<div class="builder-doc-sub-settings">
-						<my-tabs
-							v-model="tabTargetArea"
-							:entries="tabTargetAreaList.entries"
-							:entriesText="tabTargetAreaList.labels"
-						/>
-						<my-builder-doc-sets
-							v-if="tabTargetArea === 'body'"
-							v-model="column.setsBody"
-							:allowData="true"
-							:allowValue="true"
-							:joins
-							:readonly
-							:showFont="true"
-							:showText="true"
-						/>
-						<my-builder-doc-sets
-							v-if="tabTargetArea === 'header'"
-							v-model="column.setsHeader"
-							:allowData="true"
-							:allowValue="true"
-							:joins
-							:readonly
-							:showFont="true"
-							:showText="true"
-						/>
-						<my-builder-doc-sets
-							v-if="tabTargetArea === 'footer'"
-							v-model="column.setsFooter"
-							:allowData="true"
-							:allowValue="true"
-							:joins
-							:readonly
-							:showFont="true"
-							:showText="true"
-						/>
-					</div>
+					</template>
+					<tr>
+						<td>{{ capGen.aggregator }}</td>
+						<td><my-builder-aggregator-input v-model="column.aggregator" :readonly /></td>
+					</tr>
+					<tr>
+						<td>{{ capGen.options }}</td>
+						<td>
+							<div class="row gap centered">
+								<my-button-check v-model="column.distincted" :caption="capGen.distincted" :readonly />
+								<my-button-check v-model="column.groupBy"    :caption="capGen.groupBy"    :readonly />
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capGen.resultRow }}</td>
+						<td><my-builder-aggregator-input v-model="column.aggregatorRow" :itemsFilter="['record','list','array']" :readonly /></td>
+					</tr>
+				</tbody>
+			</table>
+			
+			<div class="content grow">
+				<div class="builder-doc-sub-settings">
+					<my-tabs
+						v-model="tabTargetArea"
+						:entries="tabTargetAreaList.entries"
+						:entriesText="tabTargetAreaList.labels"
+					/>
+					<my-builder-doc-sets
+						v-if="tabTargetArea === 'body'"
+						v-model="column.setsBody"
+						:allowData="true"
+						:allowValue="true"
+						:joins
+						:readonly
+						:showFont="true"
+						:showText="true"
+					/>
+					<my-builder-doc-sets
+						v-if="tabTargetArea === 'header'"
+						v-model="column.setsHeader"
+						:allowData="true"
+						:allowValue="true"
+						:joins
+						:readonly
+						:showFont="true"
+						:showText="true"
+					/>
+					<my-builder-doc-sets
+						v-if="tabTargetArea === 'footer'"
+						v-model="column.setsFooter"
+						:allowData="true"
+						:allowValue="true"
+						:joins
+						:readonly
+						:showFont="true"
+						:showText="true"
+					/>
 				</div>
-			</template>
+			</div>
 		</teleport>
 	</div>`,
 	props:{
@@ -221,7 +205,6 @@ export default {
 				'formState','getter','globalSearch','javascript','recordMayCreate',
 				'recordMayDelete','recordMayUpdate','recordNew','variable'
 			],
-			tabTarget:'properties',
 			tabTargetArea:'body'
 		};
 	},
@@ -245,7 +228,7 @@ export default {
 		// simple
 		icon:             s => s.getDocColumnIcon(s.column),
 		isWithQuery:      s => s.column.subQuery,
-		indexAttributeIds:s => !s.column.subQuery ? [] : s.getIndexAttributeIdsByJoins(s.query.joins,[]),
+		indexAttributeIds:s => s.column.subQuery ? s.getIndexAttributeIdsByJoins(s.query.joins,[]) : [],
 		query:            s => s.isWithQuery && s.column.query !== null ? s.column.query : s.getTemplateQuery(),
 		title:            s => s.getDocColumnTitle(s.column),
 		titleBar:         s => `${s.capGen.column}: ${s.title}`,

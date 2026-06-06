@@ -61,13 +61,8 @@ export const MyBuilderColumns = {
 				   	 	<div class="builder-field column column-wrap" :class="{ dragAnchor:!readonly, selected:columnIdShow === column.id }">
 							<div class="builder-field-header">
 								<my-button
-									@trigger="$emit('column-id-show',column.id,'properties')"
+									@trigger="$emit('column-id-show',column.id)"
 									:image="getColumnIcon(column)"
-									:naked="true"
-								/>
-								<my-button image="database.png"
-									v-if="column.subQuery"
-									@trigger="$emit('column-id-show',column.id,'content')"
 									:naked="true"
 								/>
 								<div class="title word-break" :title="getItemTitleColumn(column,false)">
@@ -198,7 +193,7 @@ export const MyBuilderColumns = {
 			// close column properties
 			for(const c of this.batches[i].columns) {
 				if(c.id === this.columnIdShow) {
-					this.$emit('column-id-show',null,'properties');
+					this.$emit('column-id-show',null);
 					break;
 				}
 			}

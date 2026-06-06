@@ -132,113 +132,103 @@ export default {
 		</div>
 		
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
-			<div class="top lower">
+			<div class="top lower" :class="{ clickable:columnIdShow !== null }" @click="columnIdShow = null">
 				<div class="area">
-					<h1>{{ capGen.settings }}</h1>
+					<img class="icon" src="images/tray.png" />
+					<h1>{{ capGen.collection }}</h1>
 				</div>
 			</div>
 			
-			<my-tabs
-				v-model="tabTarget"
-				:entries="['content','properties']"
-				:entriesIcon="['images/database.png','images/edit.png']"
-				:entriesText="[capGen.content,capGen.properties]"
-			/>
-			
-			<!-- collection content -->
-			<div class="content grow" v-if="tabTarget === 'content'">
-				<my-builder-query
-					@index-removed="removeIndex($event)"
-					@update:modelValue="collection.query = $event"
-					:allowChoices="false"
-					:allowLookups="false"
-					:allowOrders="true"
-					:builderLanguage="builderLanguage"
-					:filtersDisable="filtersDisable"
-					:modelValue="query"
-					:moduleId="module.id"
-					:readonly
+			<template v-if="columnShow === false">
+				<my-tabs
+					v-model="tabTarget"
+					:entries="['content','properties']"
+					:entriesText="[capGen.content,capGen.properties]"
 				/>
 				
-				<!-- column settings -->
-				<template v-if="columnShow !== false">
-					<br />
-					<h3 class="selected-ref">{{ capGen.columnSettings }}</h3>
-					
+				<!-- collection content -->
+				<div class="content grow" v-if="tabTarget === 'content'">
 					<my-builder-query
-						v-if="columnShow.subQuery"
-						v-model="columnShow.query"
+						@index-removed="removeIndex($event)"
+						@update:modelValue="collection.query = $event"
 						:allowChoices="false"
+						:allowLookups="false"
 						:allowOrders="true"
 						:builderLanguage
-						:filtersDisable="filtersDisable"
-						:joinsParents="[query.joins]"
+						:filtersDisable
+						:modelValue="query"
 						:moduleId="module.id"
 						:readonly
 					/>
-					<my-builder-column-options
-						@set="(...args) => columnSet(args[0],args[1])"
-						:builderLanguage
-						:column="columnShow"
-						:hasCaptions="true"
-						:moduleId="module.id"
-						:onlyData="true"
-						:readonly
-					/>
-				</template>
-			</div>
-			
-			<!-- collection properties -->
-			<div class="content no-padding" v-if="tabTarget === 'properties'">
-				<table class="generic-table-vertical default-inputs">
-					<tbody>
-						<tr>
-							<td>{{ capGen.name }}</td>
-							<td><input v-model="collection.name" :disabled="readonly" /></td>
-						</tr>
-						<tr>
-							<td>{{ capGen.icon }}</td>
-							<td>
-								<my-builder-icon-input
-									@input="collection.iconId = $event"
-									:iconIdSelected="collection.iconId"
-									:module
-									:title="capGen.icon"
-									:readonly
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<div class="column gap">
-									<span>{{ capApp.inHeader }}</span>
-									<my-button image="add.png"
-										@trigger="collectionAdd"
-										:active="!readonly"
-										:caption="capGen.button.add"
-										:naked="true"
+				</div>
+
+				<!-- collection properties -->
+				<div class="content no-padding" v-if="tabTarget === 'properties'">
+					<table class="generic-table-vertical default-inputs">
+						<tbody>
+							<tr>
+								<td>{{ capGen.name }}</td>
+								<td><input v-model="collection.name" :disabled="readonly" /></td>
+							</tr>
+							<tr>
+								<td>{{ capGen.icon }}</td>
+								<td>
+									<my-builder-icon-input
+										@input="collection.iconId = $event"
+										:iconIdSelected="collection.iconId"
+										:module
+										:title="capGen.icon"
+										:readonly
 									/>
-								</div>
-							</td>
-							<td>
-								<my-builder-collection-input
-									v-for="(c,i) in collection.inHeader"
-									@remove="collectionRemove(i)"
-									@update:consumer="collectionSet(i,$event)"
-									:allowFormOpen="true"
-									:allowRemove="true"
-									:consumer="c"
-									:fixedCollection="true"
-									:flagsEnable="['noDisplayEmpty','showRowCount']"
-									:module
-									:readonly
-									:showOnMobile="true"
-								/>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="column gap">
+										<span>{{ capApp.inHeader }}</span>
+										<my-button image="add.png"
+											@trigger="collectionAdd"
+											:active="!readonly"
+											:caption="capGen.button.add"
+											:naked="true"
+										/>
+									</div>
+								</td>
+								<td>
+									<my-builder-collection-input
+										v-for="(c,i) in collection.inHeader"
+										@remove="collectionRemove(i)"
+										@update:consumer="collectionSet(i,$event)"
+										:allowFormOpen="true"
+										:allowRemove="true"
+										:consumer="c"
+										:fixedCollection="true"
+										:flagsEnable="['noDisplayEmpty','showRowCount']"
+										:module
+										:readonly
+										:showOnMobile="true"
+									/>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</template>
+			
+			<!-- column options -->
+			<my-builder-column-options
+				v-if="columnShow !== false"
+				@close="columnIdShow = null"
+				@set="(...args) => columnSet(args[0],args[1])"
+				:builderLanguage
+				:column="columnShow"
+				:filtersDisable
+				:hasCaptions="true"
+				:joinsParents="[query.joins]"
+				:moduleId="module.id"
+				:onlyData="true"
+				:readonly
+			/>
 		</div>
 	</div>`,
 	props:{

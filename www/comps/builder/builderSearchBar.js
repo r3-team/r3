@@ -37,7 +37,7 @@ export default {
 		<div class="contentBox grow">
 			<div class="top">
 				<div class="area nowrap">
-					<img class="icon" src="images/tray.png" />
+					<img class="icon" src="images/search.png" />
 					<h1 class="title">
 						{{ capApp.titleOne.replace('{NAME}',searchBar.name) }}
 					</h1>
@@ -111,133 +111,122 @@ export default {
 		</div>
 		
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
-			<div class="top lower">
+			<div class="top lower" :class="{ clickable:columnIdShow !== null }" @click="columnIdShow = null">
 				<div class="area">
-					<h1>{{ capGen.settings }}</h1>
+					<img class="icon" src="images/search.png" />
+					<h1>{{ capGen.searchBar }}</h1>
 				</div>
 			</div>
 			
-			<my-tabs
-				v-model="tabTarget"
-				:entries="['content','properties']"
-				:entriesIcon="['images/database.png','images/edit.png']"
-				:entriesText="[capGen.content,capGen.properties]"
-			/>
-			
-			<!-- content -->
-			<div class="content grow" v-if="tabTarget === 'content'">
-				<my-builder-query
-					@index-removed="removeIndex($event)"
-					@update:modelValue="searchBar.query = $event"
-					:allowChoices="false"
-					:allowLookups="false"
-					:allowOrders="true"
-					:builderLanguage
-					:filtersDisable
-					:modelValue="query"
-					:moduleId="module.id"
-					:readonly
+			<template v-if="!columnShow">
+				<my-tabs
+					v-model="tabTarget"
+					:entries="['content','properties']"
+					:entriesText="[capGen.content,capGen.properties]"
 				/>
-
-				<!-- SQL preview -->
-				<div class="row">
-					<my-button image="code.png"
-						@trigger="getSqlPreview(query,searchBar.columns)"
-						:caption="capGen.sqlPreview"
-					/>
-				</div>
 				
-				<!-- no global search input warning -->
-				<template v-if="!anySearchInput">
-					<br />
-					<my-label image="warning.png"
-						:caption="capApp.warning.noSearchInput"
-						:error="true"
-					/>
-				</template>
-				
-				<!-- column settings -->
-				<template v-if="columnShow !== false">
-					<br />
-					<h3 class="selected-ref">{{ capGen.columnSettings }}</h3>
-					
+				<!-- content -->
+				<div class="content grow" v-if="tabTarget === 'content'">
 					<my-builder-query
-						v-if="columnShow.subQuery"
-						v-model="columnShow.query"
+						@index-removed="removeIndex($event)"
+						@update:modelValue="searchBar.query = $event"
 						:allowChoices="false"
+						:allowLookups="false"
 						:allowOrders="true"
 						:builderLanguage
 						:filtersDisable
-						:joinsParents="[query.joins]"
+						:modelValue="query"
 						:moduleId="module.id"
 						:readonly
 					/>
+
+					<!-- SQL preview -->
+					<div class="row" v-if="queryActive">
+						<my-button image="code.png"
+							@trigger="getSqlPreview(query,searchBar.columns)"
+							:caption="capGen.sqlPreview"
+						/>
+					</div>
 					
-					<my-builder-column-options
-						@set="(...args) => columnSet(args[0],args[1])"
-						:builderLanguage
-						:column="columnShow"
-						:hasCaptions="true"
-						:moduleId="module.id"
-						:onlyData="false"
-						:readonly
-					/>
-				</template>
-			</div>
-			
-			<!-- properties -->
-			<div class="content no-padding" v-if="tabTarget === 'properties'">
-				<table class="generic-table-vertical default-inputs">
-					<tbody>
-						<tr>
-							<td>{{ capGen.name }}</td>
-							<td><input v-model="searchBar.name" :disabled="readonly" /></td>
-						</tr>
-						<tr>
-							<td>{{ capGen.title }}</td>
-							<td>
-								<div class="row gap centered">
-									<my-builder-caption
-										v-model="searchBar.captions.searchBarTitle"
-										:dynamicSize="true"
-										:language="builderLanguage"
+					<!-- no global search input warning -->
+					<template v-if="!anySearchInput">
+						<br />
+						<my-label image="warning.png"
+							:caption="capApp.warning.noSearchInput"
+							:error="true"
+						/>
+					</template>
+				</div>
+				
+				<!-- properties -->
+				<div class="content no-padding" v-if="tabTarget === 'properties'">
+					<table class="generic-table-vertical default-inputs">
+						<tbody>
+							<tr>
+								<td>{{ capGen.name }}</td>
+								<td><input v-model="searchBar.name" :disabled="readonly" /></td>
+							</tr>
+							<tr>
+								<td>{{ capGen.title }}</td>
+								<td>
+									<div class="row gap centered">
+										<my-builder-caption
+											v-model="searchBar.captions.searchBarTitle"
+											:dynamicSize="true"
+											:language="builderLanguage"
+											:readonly
+										/>
+										<my-button image="languages.png"
+											@trigger="$emit('next-language')"
+											:active="module.languages.length > 1"
+										/>
+									</div>
+								</td>
+								<td>{{ capApp.titleHint }}</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.icon }}</td>
+								<td>
+									<my-builder-icon-input
+										@input="searchBar.iconId = $event"
+										:iconIdSelected="searchBar.iconId"
+										:module
+										:title="capGen.icon"
 										:readonly
 									/>
-									<my-button image="languages.png"
-										@trigger="$emit('next-language')"
-										:active="module.languages.length > 1"
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capGen.formOpen }}</td>
+								<td>
+									<my-builder-open-form
+										v-model="searchBar.openForm"
+										:allowAllForms="false"
+										:joinsIndexMapField="joinIndexMap"
+										:module
+										:readonly
 									/>
-								</div>
-							</td>
-							<td>{{ capApp.titleHint }}</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.icon }}</td>
-							<td>
-								<my-builder-icon-input
-									@input="searchBar.iconId = $event"
-									:iconIdSelected="searchBar.iconId"
-									:module
-									:title="capGen.icon"
-									:readonly
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capGen.formOpen }}</td>
-							<td>
-								<my-builder-open-form
-									v-model="searchBar.openForm"
-									:allowAllForms="false"
-									:joinsIndexMapField="joinIndexMap"
-									:module
-									:readonly
-								/>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</template>
+				
+			<!-- column options -->
+			<my-builder-column-options
+				v-if="columnShow !== false"
+				@close="columnIdShow = null"
+				@set="(...args) => columnSet(args[0],args[1])"
+				:builderLanguage
+				:column="columnShow"
+				:filtersDisable
+				:hasCaptions="true"
+				:joinsParents="[query.joins]"
+				:moduleId="module.id"
+				:onlyData="false"
+				:readonly
+			/>
 		</div>
 	</div>`,
 	props:{
@@ -284,6 +273,7 @@ export default {
 		joinIndexMap:   s => s.getJoinsIndexMap(s.query.joins),
 		module:         s => s.moduleIdMap[s.searchBar.moduleId],
 		query:          s => s.searchBar.query !== null ? s.searchBar.query : s.getTemplateQuery(),
+		queryActive:    s => s.searchBar.query !== null && s.searchBar.query.relationId !== null,
 		searchBarSchema:s => s.searchBarIdMap[s.id] === undefined ? false : s.searchBarIdMap[s.id],
 		
 		// stores

@@ -694,7 +694,30 @@ export default {
 	},
 	template:`<div class="builder-query default-inputs">
 		<div class="query-component">
-			<div class="query-title">
+			
+			<!-- start relation -->
+			<div class="row gap centered" v-if="relationId === null && !readonly">
+				<my-label :caption="capGen.query" image="database.png" />
+				<select
+					v-show="showRelations"
+					@input="set('relationId',$event.target.value === '' ? null : $event.target.value)"
+					:value="relationId === null ? '' : relationId"
+				>
+					<option value="">[{{ capApp.relationStart }}]</option>
+					<option v-for="rel in module.relations" :value="rel.id">{{ rel.name }}</option>
+					<optgroup
+						v-for="mod in getDependentModules(module).filter(v => v.id !== module.id)"
+						:label="mod.name"
+					>
+						<option v-for="rel in mod.relations" :value="rel.id">
+							{{ rel.name }}
+						</option>
+					</optgroup>
+				</select>
+			</div>
+
+			<!-- all joined relations, starting with source relation -->
+			<div class="query-title" v-if="relationId !== null">
 				<my-button
 					@trigger="showRelations = !showRelations"
 					:active="joins.length !== 0"
@@ -711,25 +734,6 @@ export default {
 				/>
 			</div>
 			
-			<select
-				v-show="showRelations"
-				v-if="relationId === null && !readonly"
-				@input="set('relationId',$event.target.value === '' ? null : $event.target.value)"
-				:value="relationId === null ? '' : relationId"
-			>
-				<option value="">-</option>
-				<option v-for="rel in module.relations" :value="rel.id">{{ rel.name }}</option>
-				<optgroup
-					v-for="mod in getDependentModules(module).filter(v => v.id !== module.id)"
-					:label="mod.name"
-				>
-					<option v-for="rel in mod.relations" :value="rel.id">
-						{{ rel.name }}
-					</option>
-				</optgroup>
-			</select>
-			
-			<!-- all joined relations, starting with source relation -->
 			<my-builder-query-nested-join
 				v-show="showRelations"
 				v-if="relationsNested !== false"

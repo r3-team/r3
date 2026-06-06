@@ -191,6 +191,8 @@ export default {
 					
 					<template v-if="tabTarget === 'content'">
 						<!-- form record query -->
+						<h2 v-if="!queryActive">{{ capGen.dataAccess }}</h2>
+
 						<my-builder-query
 							@index-removed="removeDataFields(form.fields,$event)"
 							@update:modelValue="form.query = $event"
@@ -527,6 +529,7 @@ export default {
 		joinsIndexMap:    s => s.getJoinsIndexMap(s.query.joins),
 		presetCandidates: s => s.relation === false ? [] : s.relationIdMap[s.query.relationId].presets,
 		query:            s => s.form.query !== null ? s.form.query : s.getTemplateQuery(),
+		queryActive:      s => s.form.query !== null && s.form.query.relationId !== null,
 		relation:         s => s.relationIdMap[s.query.relationId] === undefined ? false : s.relationIdMap[s.query.relationId],
 		sideFieldShow:    s => s.fieldIdShow !== null,
 		

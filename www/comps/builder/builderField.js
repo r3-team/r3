@@ -4,7 +4,6 @@ import MyBuilderFields        from './builderFields.js';
 import MyBuilderFieldOptions  from './builderFieldOptions.js';
 import MyBuilderQuery         from './builderQuery.js';
 import {getTemplateQuery}     from '../shared/builderTemplate.js';
-import {getColumnIcon}        from '../shared/column.js';
 import {getFlexBasis}         from '../shared/form.js';
 import {getJoinsIndexMap}     from '../shared/query.js';
 import {
@@ -14,7 +13,6 @@ import {
 import {
 	getFieldHasQuery,
 	getItemTitle,
-	getItemTitleColumn,
 	getSqlPreview
 } from '../shared/builder.js';
 import {
@@ -268,20 +266,6 @@ export default {
 					/>
 				</div>
 			</div>
-			<div class="top lower" v-if="columnShow !== false">
-				<div class="area">
-					<img class="icon" src="images/dash.png" />
-					<img class="icon" :src="'images/' + getColumnIcon(columnShow)" />
-					<h2>{{ capGen.column + ': ' + getItemTitleColumn(columnShow,false) }}</h2>
-				</div>
-				<div class="area">
-					<my-button image="cancel.png"
-						@trigger="columnIdShow = null"
-						:cancel="true"
-						:captionTitle="capGen.button.close"
-					/>
-				</div>
-			</div>
 
 			<!-- field properties -->
 			<template v-if="columnIdShow === null">
@@ -311,6 +295,8 @@ export default {
 					
 					<!-- field query (relationship inputs, lists, calendars, charts, ...) -->
 					<template v-if="hasQuery && tabTarget === 'content'">
+						<h2 v-if="!queryActive">{{ capGen.dataAccess }}</h2>
+
 						<my-builder-query
 							@index-removed="queryRemoveIndex($event)"
 							@update:modelValue="field.query = $event"
@@ -328,7 +314,7 @@ export default {
 						/>
 
 						<!-- SQL preview -->
-						<div class="row">
+						<div class="row" v-if="queryActive">
 							<my-button image="code.png"
 								@trigger="getSqlPreview(query,field.columns)"
 								:caption="capGen.sqlPreview"
@@ -352,35 +338,17 @@ export default {
 
 			<!-- column properties -->
 			<template v-if="columnShow !== false">
-				<my-tabs
-					v-if="columnShow.subQuery"
-					v-model="tabTargetColumn"
-					:entries="['properties','content']"
-					:entriesIcon="['images/edit.png','images/database.png']"
-					:entriesText="[capGen.properties,capGen.content]"
-				/>
-				<div class="content flex column grow" v-if="columnShow.subQuery && tabTargetColumn === 'content'">
-					<my-builder-query
-						@update:modelValue="columnShow.query = $event"
-						:allowChoices="false"
-						:allowOrders="true"
-						:builderLanguage
-						:entityIdMapRef
-						:fieldIdMap
-						:filtersDisable="['formState','getter','globalSearch']"
-						:formId
-						:joinsParents="[query.joins]"
-						:modelValue="columnShowQuery"
-						:moduleId
-						:readonly
-					/>
-				</div>
 				<my-builder-column-options
-					v-if="!columnShow.subQuery || tabTargetColumn === 'properties'"
+					@close="columnIdShow = null"
 					@set="(...args) => columnPropertySet(args[0],args[1])"
 					:builderLanguage
 					:column="columnShow"
+					:entityIdMapRef
+					:fieldIdMap
+					:filtersDisable="['formState','getter','globalSearch']"
+					:formId
 					:hasCaptions="field.content === 'list'"
+					:joinsParents="[query.joins]"
 					:moduleId
 					:onlyData="false"
 					:readonly
@@ -415,10 +383,9 @@ export default {
 	emits:['createNew','field-id-show','field-move','field-move-store','field-property-set','field-remove'],
 	data() {
 		return {
-			columnIdShow:null,           // currently open column
-			tabIndex:0,                  // which tab index to show (tab fields)
-			tabTarget:'properties',      // sidebar tab target for column (content, properties)
-			tabTargetColumn:'properties' // sidebar tab target for field (content, properties)
+			columnIdShow:null,     // currently open column
+			tabIndex:0,            // which tab index to show (tab fields)
+			tabTarget:'properties' // sidebar tab target for column (content, properties)
 		};
 	},
 	computed:{
@@ -548,7 +515,6 @@ export default {
 		},
 		
 		// simple
-		columnShowQuery: s => s.columnShow !== false && s.columnShow.subQuery && s.columnShow.query !== null ? s.columnShow.query : s.getTemplateQuery(),
 		hasQuery:        s => s.getFieldHasQuery(s.field),
 		isBarcode:       s => s.isData && s.attribute.contentUse === 'barcode',
 		isButton:        s => s.field.content === 'button',
@@ -573,6 +539,7 @@ export default {
 		moveActive:      s => s.fieldMoveList !== null,
 		parentChildren:  s => s.isContainer ? s.field.fields : (s.isTabs ? s.field.tabs[s.tabIndex].fields : []),
 		query:           s => s.hasQuery && s.field.query !== null ? s.field.query : s.getTemplateQuery(),
+		queryActive:     s => s.hasQuery && s.field.query !== null && s.field.query.relationId !== null,
 		reference:       s => s.isTemplate ? '' : 'F' + s.entityIdMapRef.field[s.field.id],
 		showColumns:     s => !s.isTemplate && s.hasQuery && s.fieldIdShow === s.field.id && s.tabTarget === 'content',
 		tabIndexShown:   s => s.isTabs && s.field.tabs.length > s.tabIndex ? s.tabIndex : 0,
@@ -591,13 +558,11 @@ export default {
 	},
 	methods:{
 		// externals
-		getColumnIcon,
 		getFieldHasQuery,
 		getFieldIcon,
 		getFieldTitle,
 		getFlexBasis,
 		getItemTitle,
-		getItemTitleColumn,
 		getJoinsIndexMap,
 		getSqlPreview,
 		getTemplateQuery,
@@ -613,12 +578,11 @@ export default {
 		columnPropertySet(name,value) {
 			this.columnShow[name] = value;
 		},
-		columnShowById(id,tabTarget) {
-			if(this.columnIdShow === id && this.tabTargetColumn === tabTarget)
+		columnShowById(id) {
+			if(this.columnIdShow === id)
 				return this.columnIdShow = null;
 
-			this.columnIdShow    = id;
-			this.tabTargetColumn = tabTarget;
+			this.columnIdShow = id;
 		},
 		openSettings(tabTarget) {
 			if(this.fieldIdShow === this.field.id && tabTarget !== this.tabTarget)

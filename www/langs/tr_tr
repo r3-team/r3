@@ -1773,6 +1773,7 @@
 			"lookups": "Kayıt aramaları ({COUNT})",
 			"lookupsHelp": "Aramalar, veri içe aktarma sırasında kayıtları tanımlar (CSV/API POST).<ul><li>Herhangi bir benzersiz dizin arama olarak kullanılabilir (genellikle benzersiz bir ad) - benzersiz dizinler ilgili ilişkide tanımlanır.</li><li>Aramalar yalnızca değerleri içe aktarılan verilere dahilse çalışır.</li><li>Veriler sırasında kayıt oluşturmak/güncellemek için içe aktarma, istenen ilişkiler için 'CREATE'/'UPDATE' seçenekleri etkinleştirilmelidir (\"içerik\" sekmesi).</li><li>İlişki nitelikleri (n:1/1:1) arama olarak kullanılıyorsa, bunların ilişkileri birleştirilmeli ve kayıtları için aramalar tanımlanmalıdır.</li></ul>",
 			"orders": "Sıralama ({COUNT})",
+			"relationStart": "Select start relation",
 			"relations": "İlişkiler ({COUNT})",
 			"select": "Katılacak ilişkiyi seçin"
 		},
@@ -2427,6 +2428,7 @@
 		"contextHelp": "Bağlam yardımı",
 		"dark": "Karanlık",
 		"data": "Veri",
+		"dataAccess": "Data access",
 		"dataRetrieval": "Veri alma",
 		"date": "Tarih",
 		"dateFormat0": "Y-a-g (2012-12-30)",
@@ -2600,6 +2602,7 @@
 		"prefix": "Önek",
 		"preview": "Önizleme",
 		"properties": "Özellikler",
+		"query": "Query",
 		"queryChoices": "Filtre setleri",
 		"readonly": "Salt okunur",
 		"record": "Kayıt",
