@@ -194,7 +194,7 @@ func drawCellText(doc *doc, font types.DocFont, sizeX, sizeY float64, flowHorizo
 		if flowHorizontal {
 			lnMode = 0
 		}
-		doc.p.CellFormat(sizeX, sizeY, s, "", lnMode, font.Align, false, 0, "")
+		doc.p.CellFormat(sizeX, sizeY, getStringBmpOnly(s), "", lnMode, font.Align, false, 0, "")
 	} else {
 		sizeYAllLines := getLineHeight(font) * float64(lineCount)
 		if sizeY > sizeYAllLines {
@@ -210,7 +210,7 @@ func drawCellText(doc *doc, font types.DocFont, sizeX, sizeY float64, flowHorizo
 				doc.p.SetXY(doc.p.GetX(), doc.p.GetY()+((sizeY-sizeYAllLines)/2))
 			}
 		}
-		doc.p.MultiCell(sizeX, font.Size*font.LineFactor*0.5, s, "", font.Align, false)
+		doc.p.MultiCell(sizeX, font.Size*font.LineFactor*0.5, getStringBmpOnly(s), "", font.Align, false)
 	}
 }
 
@@ -314,7 +314,7 @@ func drawHtmlTraverse(doc *doc, fontParent types.DocFont, lineHeightDef float64,
 		s := strings.ReplaceAll(n.Data, "\n", "")
 		if s != "" {
 			setFont(doc, fontParent)
-			doc.p.Write(lineHeightDef, s)
+			doc.p.Write(lineHeightDef, getStringBmpOnly(s))
 		}
 	}
 	return nil

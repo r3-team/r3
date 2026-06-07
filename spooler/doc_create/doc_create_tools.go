@@ -248,6 +248,18 @@ func getBorderSize(b types.DocBorder) (float64, float64, float64, float64, float
 	return b.Size, sizeT, sizeR, sizeB, sizeL, bSizeCell
 }
 
+// FPDF currently panics on characters outside of Basic Multilingual Plane (up to U+FFFF), s. https://codeberg.org/go-pdf/fpdf/issues/112
+// this functions returns '�' (U+FFFD) for characters over U+FFFF
+// this is not perfect, while BMP contains important languages (Japanese, Thai, etc.), some Chinese characters are outside of it
+func getStringBmpOnly(input string) string {
+	return strings.Map(func(r rune) rune {
+		if r > 0xFFFF {
+			return '�'
+		}
+		return r
+	}, input)
+}
+
 func getTextFromHtml(htmlString string) (string, error) {
 
 	var out strings.Builder
