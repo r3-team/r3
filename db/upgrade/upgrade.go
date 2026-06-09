@@ -94,34 +94,41 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		ALTER TABLE instance.mail_account ALTER COLUMN connect_method
-			TYPE instance.mail_account_connect_method USING connect_method::TEXT::instance.mail_account_connect_method;
-
-		CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_base64(file_id uuid, version integer DEFAULT 0)
-			RETURNS text
-			LANGUAGE 'plpgsql'
-			COST 100
-			STABLE PARALLEL UNSAFE
-		AS $BODY$
-		DECLARE
-		BEGIN
-			RETURN FORMAT('{FILE_BASE64:%s|%s}', file_id::TEXT, version);
-		END;
-		$BODY$;
-
-		CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_raw(file_id uuid, version integer DEFAULT 0)
-			RETURNS text
-			LANGUAGE 'plpgsql'
-			COST 100
-			STABLE PARALLEL UNSAFE
-		AS $BODY$
-		DECLARE
-		BEGIN
-			RETURN FORMAT('{FILE_RAW:%s|%s}', file_id::TEXT, version);
-		END;
-		$BODY$;
+		nothing yet
 	*/
 
+	"3.12": func(ctx context.Context, tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(ctx, `
+			-- cleanup from last release
+			ALTER TABLE instance.mail_account ALTER COLUMN connect_method
+				TYPE instance.mail_account_connect_method USING connect_method::TEXT::instance.mail_account_connect_method;
+
+			CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_base64(file_id uuid, version integer DEFAULT 0)
+				RETURNS text
+				LANGUAGE 'plpgsql'
+				COST 100
+				STABLE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				RETURN FORMAT('{FILE_BASE64:%s|%s}', file_id::TEXT, version);
+			END;
+			$BODY$;
+
+			CREATE OR REPLACE FUNCTION instance.rest_get_placeholder_file_raw(file_id uuid, version integer DEFAULT 0)
+				RETURNS text
+				LANGUAGE 'plpgsql'
+				COST 100
+				STABLE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				RETURN FORMAT('{FILE_RAW:%s|%s}', file_id::TEXT, version);
+			END;
+			$BODY$;
+		`)
+		return "3.13", err
+	},
 	"3.11": func(ctx context.Context, tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(ctx, `
 			-- cleanup from last release
