@@ -4,7 +4,7 @@ import (
 	"errors"
 	"r3/types"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 // replace given UUID with a new one while storing the state change in a given map (oldstate -> newstate)

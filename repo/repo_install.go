@@ -12,7 +12,7 @@ import (
 	"r3/tools"
 	"r3/transfer"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 // attribute ID of lsw_repo, module_release->file

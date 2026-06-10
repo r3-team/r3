@@ -1,6 +1,6 @@
 package types
 
-import "github.com/gofrs/uuid"
+import "github.com/gofrs/uuid/v5"
 
 type ModuleMeta struct {
 	Id              uuid.UUID `json:"id"`

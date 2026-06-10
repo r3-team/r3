@@ -1,6 +1,6 @@
 package types
 
-import "github.com/gofrs/uuid"
+import "github.com/gofrs/uuid/v5"
 
 type CaptionMapsAll struct {
 	ArticleIdMap     map[uuid.UUID]CaptionMap `json:"articleIdMap"`

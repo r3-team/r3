@@ -10,7 +10,7 @@ import (
 	"r3/login/login_auth"
 	"time"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 func HandlerConfig(w http.ResponseWriter, r *http.Request) {

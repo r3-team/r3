@@ -13,7 +13,7 @@ import (
 	"sync"
 
 	"github.com/gbrlsnchs/jwt/v3"
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
 

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"r3/login/login_keys"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
 

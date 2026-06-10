@@ -12,7 +12,7 @@ import (
 	"r3/schema"
 	"r3/tools"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 // optimize DB

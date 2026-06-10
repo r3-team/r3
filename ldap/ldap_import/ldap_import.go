@@ -14,7 +14,7 @@ import (
 	"unicode/utf8"
 
 	goldap "github.com/go-ldap/ldap/v3"
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 type loginType struct {

@@ -12,7 +12,7 @@ import (
 	"r3/handler"
 	"r3/log"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 func doImportText(filePath string, pgFunctionId uuid.UUID) error {

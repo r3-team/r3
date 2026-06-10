@@ -3,7 +3,7 @@ package schema
 import (
 	"fmt"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 // constants

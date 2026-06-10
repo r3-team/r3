@@ -14,7 +14,7 @@ import (
 	"r3/schema/icon"
 	"time"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {

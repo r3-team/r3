@@ -18,7 +18,7 @@ import (
 	"r3/types"
 	"strings"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 const moduleReleaseFileId string = "b28e8f5c-ebeb-4565-941b-4d942eedc588"

@@ -8,7 +8,7 @@ import (
 	"r3/tools"
 	"r3/types"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
 

@@ -6,7 +6,7 @@ import (
 	"r3/config"
 	"r3/types"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 func PublicGet() (any, error) {
