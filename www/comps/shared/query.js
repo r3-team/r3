@@ -14,16 +14,6 @@ import {
 	getUnixNowTime
 } from './time.js';
 
-let getQueryExpressionAttribute = function(column) {
-	return {
-		attributeId:column.attributeId,
-		index:column.index,
-		groupBy:column.groupBy,
-		aggregator:column.aggregator,
-		distincted:column.distincted
-	};
-};
-
 // map of joins keyed by relation index
 export function getJoinsIndexMap(joins) {
 	let map = {};
@@ -77,28 +67,58 @@ export function getRelationsJoined(joins) {
 };
 
 export function getQueryExpressions(columns) {
+	const getForAttribute = c => {
+		return {
+			attributeId:c.attributeId,
+			index:c.index,
+			groupBy:c.groupBy,
+			aggregator:c.aggregator,
+			distincted:c.distincted
+		};
+	};
+	const getForFncPg = c => {
+		return {
+			aggregator:c.aggregator,
+			arguments:c.arguments,
+			distincted:c.distincted,
+			groupBy:c.groupBy,
+			pgFunctionId:c.pgFunctionId
+		};
+	};
+	const getForFncScalar = c => {
+		return {
+			aggregator:c.aggregator,
+			arguments:c.arguments,
+			distincted:c.distincted,
+			groupBy:c.groupBy,
+			scalar:c.scalar
+		};
+	};
+
 	let out = [];
 	for(const c of columns) {
-		if(!c.subQuery) {
-			out.push(getQueryExpressionAttribute(c));
-			continue;
+		switch(c.content) {
+			case 'attribute':  out.push(getForAttribute(c)); break;
+			case 'fnc_pg':     out.push(getForFncPg(c)); break;
+			case 'fnc_scalar': out.push(getForFncScalar(c)); break;
+			case 'query':
+				// move expression aggregator to query (allows ORDER BY in aggregation)
+				let expr = getForAttribute(c);
+				expr.aggregator = null;
+				
+				out.push({
+					aggregator:c.aggregator,
+					query:{
+						relationId:c.query.relationId,
+						limit:c.query.fixedLimit,
+						joins:c.query.joins,
+						expressions:[expr],
+						filters:c.query.filters,
+						orders:c.query.orders
+					}
+				});
+			break;
 		}
-		
-		// move expression aggregator to query (allows ORDER BY in aggregation)
-		let expr = getQueryExpressionAttribute(c);
-		expr.aggregator = null;
-		
-		out.push({
-			aggregator:c.aggregator,
-			query:{
-				relationId:c.query.relationId,
-				limit:c.query.fixedLimit,
-				joins:c.query.joins,
-				expressions:[expr],
-				filters:c.query.filters,
-				orders:c.query.orders
-			}
-		});
 	}
 	return out;
 };
@@ -349,7 +369,7 @@ export function getIsContentInAnyFilter(filters,columns,content) {
 			return true;
 	}
 	for(const c of columns) {
-		if(c.subQuery && getIsContentInAnyFilter(c.query.filters,[],content))
+		if(c.content === 'query' && getIsContentInAnyFilter(c.query.filters,[],content))
 			return true;
 	}
 	return false;
@@ -367,7 +387,7 @@ export function getIsOperatorInAnyFilter(filters,columns,operator) {
 			return true;
 	}
 	for(const c of columns) {
-		if(c.subQuery && getIsOperatorInAnyFilter(c.query.filters,[],operator))
+		if(c.content === 'query' && getIsOperatorInAnyFilter(c.query.filters,[],operator))
 			return true;
 	}
 	return false;

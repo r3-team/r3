@@ -9,6 +9,7 @@ import (
 	"r3/data"
 	"r3/data/data_query"
 	"r3/handler"
+	"r3/schema"
 	"r3/types"
 	"strings"
 
@@ -50,9 +51,9 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 	}
 
 	// build expressions from columns
-	for _, column := range api.Columns {
+	for _, c := range api.Columns {
 		dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertColumnToExpression(
-			column, loginId, languageCodeLogin, recordId, getters.filters))
+			c, loginId, languageCodeLogin, recordId, getters.filters))
 	}
 
 	// apply filters
@@ -99,29 +100,29 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 		relIndexMapNames := make(map[int]string)
 		colRefByColumn := make([]string, len(api.Columns))
 		subQueryCtr := 0
-		for i, column := range api.Columns {
-			atr := cache.AttributeIdMap[column.AttributeId]
+		for i, c := range api.Columns {
+			atr := cache.AttributeIdMap[c.AttributeId]
 			rel := cache.RelationIdMap[atr.RelationId]
 			colRef := ""
 
-			if ref, exists := column.Captions["columnTitle"][languageCode]; exists {
+			if ref, exists := c.Captions["columnTitle"][languageCode]; exists {
 				colRef = ref
 			} else {
-				if column.SubQuery {
+				if c.Content == schema.ColumnContentQuery {
 					colRef = fmt.Sprintf("sub_query%d", subQueryCtr)
 					subQueryCtr++
 				} else {
 					colRef = atr.Name
 				}
 
-				if column.Aggregator.Valid {
-					colRef = fmt.Sprintf("%s (%s)", strings.ToUpper(column.Aggregator.String), colRef)
+				if c.Aggregator.Valid {
+					colRef = fmt.Sprintf("%s (%s)", strings.ToUpper(c.Aggregator.String), colRef)
 				}
 			}
 			colRefByColumn[i] = colRef
 
-			if _, exists := relIndexMapNames[column.Index]; !exists {
-				relIndexMapNames[column.Index] = rel.Name
+			if _, exists := relIndexMapNames[c.Index]; !exists {
+				relIndexMapNames[c.Index] = rel.Name
 			}
 		}
 

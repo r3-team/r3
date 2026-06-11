@@ -767,8 +767,11 @@ export default {
 		filtersQuickColumns:(s) => {
 			let out = [];
 			for(const c of s.columns) {
+				if(c.content !== 'attribute')
+					continue;
+
 				const a = s.attributeIdMap[c.attributeId];
-				if(s.isAttributeTextSearchable(a.content,a.contentUse) && !c.subQuery && (c.aggregator === null || c.aggregator === 'record'))
+				if(s.isAttributeTextSearchable(a.content,a.contentUse) && (c.aggregator === null || c.aggregator === 'record'))
 					out.push(c);
 			}
 			return out;
@@ -1190,7 +1193,7 @@ export default {
 				
 				for(const columnIndexSort of columnBatch.columnIndexesSortBy) {
 					const col = this.columns[columnIndexSort];
-					if(col.subQuery) {
+					if(col.content === 'query') {
 						orders.push({
 							ascending:directionAsc,
 							expressionPos:columnIndexSort // equal to expression index
@@ -1299,9 +1302,13 @@ export default {
 					br0 += f.side0.brackets;
 					br1 += f.side1.brackets;
 	
-					// only allow filters based on available columns
+					// only allow filters based on available columns (only side0 is relevant for user/column filters)
 					for(const c of columns) {
-						if(c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) {
+						if(
+							(c.content === 'attribute'  && c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) ||
+							(c.content === 'fnc_pg'     && c.pgFunctionId === f.side0.pgFunctionId && JSON.stringify(c.arguments) === JSON.stringify(f.side0.arguments)) ||
+							(c.content === 'fnc_scalar' && c.scalar === f.side0.scalar && JSON.stringify(c.arguments) === JSON.stringify(f.side0.arguments))
+						) {
 							out.push(f)
 							break;
 						}
@@ -1320,11 +1327,11 @@ export default {
 			if(this.isOrderedOrginal) return;
 
 			for(const o of this.orders) {
-				// order by expression position (= index of retrieved columns), is only used for sub query columns
+				// order by expression position (= index of retrieved columns), is used for non-attribute columns
 				if(typeof o.expressionPos !== 'undefined') {
 
 					// order is invalid, if column index does not exist or column is not a sub query
-					if(o.expressionPos > this.columns.length - 1 || !this.columns[o.expressionPos].subQuery)
+					if(o.expressionPos > this.columns.length - 1 || this.columns[o.expressionPos].content !== 'attribute')
 						return this.setOrders(this.ordersOriginal);
 					
 					continue;

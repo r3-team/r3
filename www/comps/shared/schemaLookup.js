@@ -73,7 +73,7 @@ function getReferencesRelation(mod,relId,lookups) {
 			query.joins.some(v => v.relationId === relId) ||
 			query.choices.some(v => isInFilters(v.filters))
 		);
-	const isInColumns = columns => columns.some(v => v.subQuery && isInQuery(v.query));
+	const isInColumns = columns => columns.some(v => v.content === 'query' && isInQuery(v.query));
 	const isInFilters = filters => filters.some(v => isInQuery(v.side0.query) || isInQuery(v.side1.query));
 	
 	const lookupInFields = (formId,fields) => {
@@ -247,7 +247,7 @@ function getReferencesPgFunction(mod,fncId,lookups) {
 };
 
 function getReferencesAttribut(mod,atrId,lookups) {
-	const isInColumns = columns => columns.some(v => v.attributeId === atrId || (v.subQuery && isInQuery(v.query)));
+	const isInColumns = columns => columns.some(v => v.attributeId === atrId || (v.content === 'query' && isInQuery(v.query)));
 	const isInFilters = filters =>
 		filters.some(v =>
 			v.side0.attributeId === atrId ||

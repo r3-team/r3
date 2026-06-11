@@ -338,7 +338,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 
 	// add filter for base relation policy if applicable
 	if loginId != -1 {
-		policyFilter, err := getPolicyFilter(loginId, "select", getRelationCode(data.IndexSource, nestingLevel), rel.Policies)
+		policyFilter, err := getPolicyFilter(loginId, "select", data_sql.GetRelationCode(data.IndexSource, nestingLevel), rel.Policies)
 		if err != nil {
 			return "", err
 		}
@@ -359,8 +359,37 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 			continue
 		}
 
-		// non-attribute expression
-		if !expr.AttributeId.Valid {
+		// scalar function expression
+		if expr.Scalar.Valid {
+			if !slices.Contains(data_sql.ScalarFunctions, expr.Scalar.String) {
+				return "", fmt.Errorf("unknown scalar function '%s'", expr.Scalar.String)
+			}
+			code, err := getArgumentCodes(expr.Arguments, queryArgs, nestingLevel)
+			if err != nil {
+				return "", err
+			}
+			inSelect = append(inSelect, data_sql.GetExpression(expr, fmt.Sprintf(`%s(%s)`, expr.Scalar.String, code), data_sql.GetExpressionAlias(pos)))
+			continue
+		}
+
+		// PG function expression
+		if expr.PgFunctionId.Valid {
+			code, err := getArgumentCodes(expr.Arguments, queryArgs, nestingLevel)
+			if err != nil {
+				return "", err
+			}
+			fnc, exists := cache.PgFunctionIdMap[expr.PgFunctionId.Bytes]
+			if !exists {
+				return "", handler.ErrSchemaUnknownPgFunction(expr.PgFunctionId.Bytes)
+			}
+			inSelect = append(inSelect, data_sql.GetExpression(expr, fmt.Sprintf(`"%s"."%s"(%s)`,
+				cache.ModuleIdMap[fnc.ModuleId].Name, fnc.Name, code), data_sql.GetExpressionAlias(pos)))
+
+			continue
+		}
+
+		// sub query expression
+		if expr.Query.RelationId != uuid.Nil {
 			indexRelationIdsSub := make(map[int]uuid.UUID)
 
 			subQuery, err := prepareQuery(expr.Query, indexRelationIdsSub, queryArgs, loginId, false, nestingLevel+1)
@@ -373,24 +402,26 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 		}
 
 		// attribute expression
-		line, err := getQuerySelect(pos, expr, nestingLevel)
-		if err != nil {
-			return "", err
-		}
-		inSelect = append(inSelect, line)
-
-		if expr.Aggregator.Valid {
-			aggregationUsedAny = true
-
-			if expr.Aggregator.String == "record" && !slices.Contains(relationIndexesRecordAggr, expr.Index) {
-				relationIndexesRecordAggr = append(relationIndexesRecordAggr, expr.Index)
+		if expr.AttributeId.Valid {
+			line, err := getQuerySelect(pos, expr, nestingLevel)
+			if err != nil {
+				return "", err
 			}
-		}
-		if expr.GroupBy {
-			groupByItems = append(groupByItems, data_sql.GetExpressionAlias(pos))
+			inSelect = append(inSelect, line)
 
-			if !slices.Contains(relationIndexesHasGroupBy, expr.Index) {
-				relationIndexesHasGroupBy = append(relationIndexesHasGroupBy, expr.Index)
+			if expr.Aggregator.Valid {
+				aggregationUsedAny = true
+
+				if expr.Aggregator.String == "record" && !slices.Contains(relationIndexesRecordAggr, expr.Index) {
+					relationIndexesRecordAggr = append(relationIndexesRecordAggr, expr.Index)
+				}
+			}
+			if expr.GroupBy {
+				groupByItems = append(groupByItems, data_sql.GetExpressionAlias(pos))
+
+				if !slices.Contains(relationIndexesHasGroupBy, expr.Index) {
+					relationIndexesHasGroupBy = append(relationIndexesHasGroupBy, expr.Index)
+				}
 			}
 		}
 	}
@@ -408,16 +439,16 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 			}
 
 			inSelect = append(inSelect, fmt.Sprintf(`"%s"."%s" AS %s`,
-				getRelationCode(relationIndex, nestingLevel),
+				data_sql.GetRelationCode(relationIndex, nestingLevel),
 				schema.PkName,
-				getTupleIdCode(relationIndex, nestingLevel)))
+				data_sql.GetTupleIdCode(relationIndex, nestingLevel)))
 
 			if aggregationByRecord {
 				// 'record' aggregator is an old option from before we had sub queries
 				// it exists to allow record tupels to still be retrievable, even if aggregation is used (by grouping by record ID automatically)
 				//  example: get company names (record aggr.) + count of employees per organization (count aggr.)
 				//  a regular group by does not necessarily work here as the company name might not be unique (multiple companies with same name)
-				groupByItems = append(groupByItems, getTupleIdCode(relationIndex, nestingLevel))
+				groupByItems = append(groupByItems, data_sql.GetTupleIdCode(relationIndex, nestingLevel))
 			}
 		}
 	}
@@ -450,7 +481,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 
 	// define relation code for source relation
 	// source relation might have index != 0 (for GET from joined relation)
-	relCode := getRelationCode(data.IndexSource, nestingLevel)
+	relCode := data_sql.GetRelationCode(data.IndexSource, nestingLevel)
 
 	// build final data retrieval SQL query
 	query := fmt.Sprintf(
@@ -478,7 +509,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 // 'outside in' is important in cases of self reference, where direction cannot be ascertained by attribute
 func getQuerySelect(exprPos int, expr types.DataGetExpression, nestingLevel int) (string, error) {
 
-	relCode := getRelationCode(expr.Index, nestingLevel)
+	relCode := data_sql.GetRelationCode(expr.Index, nestingLevel)
 
 	atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
 	if !exists {
@@ -509,7 +540,7 @@ func getQuerySelect(exprPos int, expr types.DataGetExpression, nestingLevel int)
 
 	if !expr.OutsideIn {
 		// attribute is from index relation
-		return data_sql.GetExpression(expr, getAttributeCode(relCode, atr.Name), alias), nil
+		return data_sql.GetExpression(expr, data_sql.GetAttributeCode(relCode, atr.Name), alias), nil
 	}
 
 	// attribute comes via relationship from other relation (or self reference from same relation)
@@ -575,10 +606,10 @@ func getQueryJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin, fi
 	// is join attribute on source relation? (direction of relationship)
 	var relIdTarget uuid.UUID // relation ID that is to be joined
 	var relIdSource = indexRelationIds[join.IndexFrom]
-	var relCodeSource = getRelationCode(join.IndexFrom, nestingLevel)
-	var relCodeTarget = getRelationCode(join.Index, nestingLevel) // relation code that is to be joined
-	var relCodeFrom string                                        // relation code of where join attribute is from
-	var relCodeTo string                                          // relation code of where join attribute is pointing to
+	var relCodeSource = data_sql.GetRelationCode(join.IndexFrom, nestingLevel)
+	var relCodeTarget = data_sql.GetRelationCode(join.Index, nestingLevel) // relation code that is to be joined
+	var relCodeFrom string                                                 // relation code of where join attribute is from
+	var relCodeTo string                                                   // relation code of where join attribute is pointing to
 
 	if atr.RelationId == relIdSource {
 		// join attribute comes from source relation, other relation is defined in relationship
@@ -608,7 +639,7 @@ func getQueryJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin, fi
 
 	// apply filter policy to JOIN if applicable
 	policyFilter, err := getPolicyFilter(loginId, "select",
-		getRelationCode(join.Index, nestingLevel), relTarget.Policies)
+		data_sql.GetRelationCode(join.Index, nestingLevel), relTarget.Policies)
 
 	if err != nil {
 		return "", err
@@ -687,12 +718,12 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]any, loginId int64, 
 			if !exists {
 				return "", handler.ErrSchemaUnknownAttribute(s.AttributeId.Bytes)
 			}
-			atrExpr := getAttributeCode(getRelationCode(s.AttributeIndex, s.AttributeNested), atr.Name)
+			atrExpr := data_sql.GetAttributeCode(data_sql.GetRelationCode(s.AttributeIndex, s.AttributeNested), atr.Name)
 
 			if isOpFts {
 				exprRegconfig := exprRegconfigSimple
 				if opFtsDictAtrId.Valid {
-					expr := getAttributeCode(getRelationCode(s.AttributeIndex, s.AttributeNested), cache.AttributeIdMap[opFtsDictAtrId.Bytes].Name)
+					expr := data_sql.GetAttributeCode(data_sql.GetRelationCode(s.AttributeIndex, s.AttributeNested), cache.AttributeIdMap[opFtsDictAtrId.Bytes].Name)
 					exprRegconfig = fmt.Sprintf("CASE WHEN %s IS NULL THEN %s ELSE %s END", expr, exprRegconfigSimple, expr)
 				}
 				return getFtsExpression(exprRegconfig, atrExpr, isSide0), nil
@@ -704,6 +735,31 @@ func getQueryWhere(filter types.DataGetFilter, queryArgs *[]any, loginId int64, 
 				return fmt.Sprintf("%s::TEXT", atrExpr), nil
 			}
 			return atrExpr, nil
+		}
+
+		// scalar function filter
+		if s.Scalar.Valid {
+			if !slices.Contains(data_sql.ScalarFunctions, s.Scalar.String) {
+				return "", fmt.Errorf("unknown scalar function '%s'", s.Scalar.String)
+			}
+			code, err := getArgumentCodes(s.Arguments, queryArgs, nestingLevel)
+			if err != nil {
+				return "", err
+			}
+			return fmt.Sprintf(`%s(%s)`, s.Scalar.String, code), nil
+		}
+
+		// PG function filter
+		if s.PgFunctionId.Valid {
+			code, err := getArgumentCodes(s.Arguments, queryArgs, nestingLevel)
+			if err != nil {
+				return "", err
+			}
+			fnc, exists := cache.PgFunctionIdMap[s.PgFunctionId.Bytes]
+			if !exists {
+				return "", handler.ErrSchemaUnknownPgFunction(s.PgFunctionId.Bytes)
+			}
+			return fmt.Sprintf(`"%s"."%s"(%s)`, cache.ModuleIdMap[fnc.ModuleId].Name, fnc.Name, code), nil
 		}
 
 		// fixed value filter
@@ -815,7 +871,7 @@ func getQueryLineOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 					return "", handler.ErrSchemaUnknownAttribute(ord.AttributeId.Bytes)
 				}
 
-				alias = getAttributeCode(getRelationCode(int(ord.Index.Int32), nestingLevel), atr.Name)
+				alias = data_sql.GetAttributeCode(data_sql.GetRelationCode(int(ord.Index.Int32), nestingLevel), atr.Name)
 			}
 
 		} else if ord.ExpressionPos.Valid {
@@ -833,32 +889,25 @@ func getQueryLineOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 	}
 	return fmt.Sprintf("\nORDER BY %s", strings.Join(orderItems, ", ")), nil
 }
+func getArgumentCodes(args []types.DataGetArg, queryArgs *[]any, nestingLevel int) (string, error) {
+	parts := make([]string, 0)
+	for _, arg := range args {
+		if arg.AttributeId.Valid {
+			atr, exists := cache.AttributeIdMap[arg.AttributeId.Bytes]
+			if !exists {
+				return "", handler.ErrSchemaUnknownAttribute(arg.AttributeId.Bytes)
+			}
+
+			parts = append(parts, data_sql.GetAttributeCode(data_sql.GetRelationCode(arg.AttributeIndex, nestingLevel), atr.Name))
+		} else {
+			*queryArgs = append(*queryArgs, arg.Value)
+			parts = append(parts, fmt.Sprintf("$%d::TEXT", len(*queryArgs)))
+		}
+	}
+	return strings.Join(parts, ", "), nil
+}
 
 // helpers
-
-// relation codes exist to uniquely reference a joined relation, even if the same relation is joined multiple times
-// example: relation 'person' can be joined twice as '_r0' and '_r1' as 'person' can be joined to itself as 'supervisor to'
-// a relation is referenced by '_r' + an integer (relation join index) + optionally '_l' + an integer for nesting (if sub query)
-// '_' prefix is protected (cannot be used for entity names)
-func getRelationCode(relationIndex int, nestingLevel int) string {
-	if nestingLevel == 0 {
-		return fmt.Sprintf("_r%d", relationIndex)
-	}
-	return fmt.Sprintf("_r%d_l%d", relationIndex, nestingLevel)
-}
-
-// tuple IDs are uniquely identified by the relation code + the fixed string 'id'
-func getTupleIdCode(relationIndex int, nestingLevel int) string {
-	return fmt.Sprintf("%sid", getRelationCode(relationIndex, nestingLevel))
-}
-
-// an attribute is referenced by the relation code + the attribute name
-// due to the relation code, this will always uniquely identify an attribute from a specific index
-// example: _r3.surname maps to person.surname from index 3
-func getAttributeCode(relationCode string, attributeName string) string {
-	return fmt.Sprintf(`"%s"."%s"`, relationCode, attributeName)
-}
-
 func getBrackets(count int, right bool) string {
 	if count == 0 {
 		return ""

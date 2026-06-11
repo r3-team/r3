@@ -27,12 +27,17 @@ type DataGetFilter struct {
 type DataGetFilterSide struct {
 	AttributeId     pgtype.UUID `json:"attributeId"`     // attribute ID, optional
 	AttributeIndex  int         `json:"attributeIndex"`  // attribute relation index
-	AttributeNested int         `json:"attributeNested"` // attribute nesting level (0 = main query, 1 = 1st sub query)
+	AttributeNested int         `json:"attributeNested"` // attribute nesting level (0 = main query, 1 = 1st level sub query, 2 = 2nd level sub query, etc.)
 	Brackets        int         `json:"brackets"`        // brackets before (side0) or after (side1)
 	FtsDict         pgtype.Text `json:"ftsDict"`         // chosen dictionary (postgres regconfig), is applied on fulltext comparisons (@@) for TSQUERY
 	Query           DataGet     `json:"query"`           // sub query, optional
 	QueryAggregator pgtype.Text `json:"queryAggregator"` // sub query aggregator, optional
 	Value           any         `json:"value"`           // fixed value, optional, filled by frontend with value of field/login ID/record/...
+
+	// only used in column filters
+	Arguments    []DataGetArg `json:"arguments"`    // for (scalar/PG) function expressions
+	PgFunctionId pgtype.UUID  `json:"pgFunctionId"` // ID of PG function to execute
+	Scalar       pgtype.Text  `json:"scalar"`       // built-in scaler functions (CONCAT, COALESCE, ...)
 }
 
 // a JOIN connects multiple relations via a relationship attribute
@@ -48,7 +53,17 @@ type DataGetJoin struct {
 	IndexFrom   int       `json:"indexFrom"`   // index from which this join was joined (0 = source relation join)
 }
 
-// an expression can currently be either an attribute or a sub query
+type DataGetArg struct {
+	// argument from attribute
+	AttributeId    pgtype.UUID `json:"attributeId"`    // ID of attribute to use as argument
+	AttributeIndex int         `json:"attributeIndex"` // attribute relation index
+
+	// argument as fixed text value
+	Value pgtype.Text `json:"value"`
+}
+
+// expression for retrieval via SELECT
+// can be an attribute, a sub query, or a PG function return
 type DataGetExpression struct {
 	// attribute expression
 	AttributeId   pgtype.UUID `json:"attributeId"`   // ID of attribute to retrieve
@@ -56,14 +71,19 @@ type DataGetExpression struct {
 	Index         int         `json:"index"`         // relation index attribute belongs to
 	OutsideIn     bool        `json:"outsideIn"`     // attribute comes from other relation
 
+	// function expression
+	PgFunctionId pgtype.UUID `json:"pgFunctionId"` // ID of PG function to execute
+
 	// sub query expression
 	Query DataGet `json:"query"` // a regular data GET request
 
 	// expression options
-	Aggregator pgtype.Text `json:"aggregator"` // set AGGREGATE function (min, max, avg, count, ...)
-	Distincted bool        `json:"distincted"` // set DISTINCT
-	GroupBy    bool        `json:"groupBy"`    // set GROUP BY
-	ReturnNull bool        `json:"returnNull"` // return NULL (ignores everything else)
+	Aggregator pgtype.Text  `json:"aggregator"` // aggregation (MIN, MAX, AVG, COUNT, ...)
+	Arguments  []DataGetArg `json:"arguments"`  // for (scalar/PG) function expressions
+	Distincted bool         `json:"distincted"` // DISTINCT
+	GroupBy    bool         `json:"groupBy"`    // GROUP BY
+	ReturnNull bool         `json:"returnNull"` // return NULL (ignores everything else)
+	Scalar     pgtype.Text  `json:"scalar"`     // built-in scaler functions (CONCAT, COALESCE, ...)
 }
 
 type DataGetOrder struct {

@@ -333,7 +333,7 @@ const MyBuilderApiPreview = {
 							if(typeof column.captions.columnTitle[this.builderLanguage] !== 'undefined') {
 								colRef = column.captions.columnTitle[this.builderLanguage];
 							} else {
-								colRef = !column.subQuery ? atr.name : `sub_query${subQueryCtr++}`;
+								colRef = column.content === 'query' ? `sub_query${subQueryCtr++}` : atr.name;
 								
 								if(column.aggregator !== null)
 									colRef = `${column.aggregator.toUpperCase()} (${colRef})`;
@@ -644,7 +644,7 @@ export default {
 			if(s.api.hasPost) {
 				// check sub queries in POST API
 				for(let c of s.api.columns) {
-					if(c.subQuery) {
+					if(c.content === 'query') {
 						out.push(s.capApp.warning.postSubQuery);
 						break;
 					}
@@ -693,7 +693,7 @@ export default {
 		},
 		removeIndex(index) {
 			for(let i = 0, j = this.api.columns.length; i < j; i++) {
-				if(!this.api.columns[i].subQuery && this.api.columns[i].index === index) {
+				if(this.api.columns[i].content === 'attribute' && this.api.columns[i].index === index) {
 					this.api.columns.splice(i,1);
 					i--; j--;
 				}

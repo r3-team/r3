@@ -8,6 +8,7 @@ import (
 	"r3/cache"
 	"r3/data/data_import"
 	"r3/handler"
+	"r3/schema"
 	"r3/types"
 	"strconv"
 	"strings"
@@ -17,8 +18,8 @@ import (
 
 func handlePost_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, r *http.Request, api types.Api, loginId int64, languageCode string, getters getter) (int, error, error) {
 
-	for _, column := range api.Columns {
-		if column.SubQuery {
+	for _, c := range api.Columns {
+		if c.Content == schema.ColumnContentQuery {
 			return http.StatusBadRequest, nil, fmt.Errorf("POST does not support sub queries")
 		}
 	}
@@ -56,16 +57,16 @@ func handlePost_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, r *htt
 			if err != nil {
 				return http.StatusBadRequest, nil, fmt.Errorf("invalid relation index '%s', integer expected", relStr)
 			}
-			for i, column := range api.Columns {
-				if column.Index != relIndex {
+			for i, c := range api.Columns {
+				if c.Index != relIndex {
 					continue
 				}
 
 				var colRef string
-				if ref, exists := column.Captions["columnTitle"][languageCode]; exists {
+				if ref, exists := c.Captions["columnTitle"][languageCode]; exists {
 					colRef = ref
 				} else {
-					colRef = cache.AttributeIdMap[column.AttributeId].Name
+					colRef = cache.AttributeIdMap[c.AttributeId].Name
 				}
 
 				if value, exists := columnNameMapValues[colRef]; exists {

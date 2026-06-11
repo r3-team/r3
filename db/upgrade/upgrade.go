@@ -94,7 +94,8 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 	// clean up on next release
 	/*
-		nothing yet
+		ALTER TABLE app.column ALTER COLUMN content
+			TYPE app.column_content USING content::TEXT::app.column_content;
 	*/
 
 	"3.12": func(ctx context.Context, tx pgx.Tx) (string, error) {
@@ -126,6 +127,49 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 				RETURN FORMAT('{FILE_RAW:%s|%s}', file_id::TEXT, version);
 			END;
 			$BODY$;
+
+			-- new expression options
+			CREATE TYPE app.column_content AS ENUM('attribute', 'query', 'fnc_scalar', 'fnc_pg');
+			CREATE TYPE app.scalar_function AS ENUM('COALESCE', 'CONCAT');
+
+			ALTER TABLE app.column ADD COLUMN content TEXT NOT NULL DEFAULT 'attribute';
+			ALTER TABLE app.column ALTER COLUMN content DROP DEFAULT;
+			UPDATE app.column
+			SET content = 'query'
+			WHERE sub_query;
+			ALTER TABLE app.column DROP COLUMN sub_query;
+
+			ALTER TABLE app.column ADD COLUMN scalar_function app.scalar_function;
+
+			ALTER TABLE app.column ADD COLUMN pg_function_id_call UUID;
+			ALTER TABLE app.column ADD CONSTRAINT pg_function_id_call_fkey FOREIGN KEY (pg_function_id_call)
+				REFERENCES app.pg_function (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_column_pg_function_id_call_fkey ON app.column USING btree (pg_function_id_call ASC NULLS LAST);
+
+			CREATE TABLE app.column_argument(
+				column_id uuid NOT NULL,
+				attribute_id uuid,
+				attribute_index integer,
+				value text COLLATE pg_catalog."default",
+				"position" integer NOT NULL,
+				CONSTRAINT column_argument_pkey PRIMARY KEY (column_id, "position"),
+				CONSTRAINT column_argument_attribute_id_fkey FOREIGN KEY (attribute_id)
+					REFERENCES app.attribute (id) MATCH SIMPLE
+					ON UPDATE NO ACTION
+					ON DELETE NO ACTION
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT column_argument_column_id_fkey FOREIGN KEY (column_id)
+					REFERENCES app."column" (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+
+			CREATE INDEX IF NOT EXISTS fki_column_argument_column_id_fkey    ON app.column_argument USING btree (column_id    ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_column_argument_attribute_id_fkey ON app.column_argument USING btree (attribute_id ASC NULLS LAST);
 		`)
 		return "3.13", err
 	},

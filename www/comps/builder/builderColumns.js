@@ -274,7 +274,7 @@ export const MyBuilderColumnTemplates = {
 						
 						out.push({
 							batch:null,
-							columns:[this.getTemplateColumn(atr.id,join.index,false)],
+							columns:[this.getTemplateColumn(atr.id,join.index,'attribute')],
 							vertical:false
 						});
 					}
@@ -283,14 +283,28 @@ export const MyBuilderColumnTemplates = {
 				// add sub query column
 				out.push({
 					batch:null,
-					columns:[this.getTemplateColumn(null,0,true)],
+					columns:[this.getTemplateColumn(null,0,'query')],
+					vertical:false
+				});
+				
+				// add scalar function column
+				out.push({
+					batch:null,
+					columns:[this.getTemplateColumn(null,0,'fnc_scalar')],
+					vertical:false
+				});
+				
+				// add PG function column
+				out.push({
+					batch:null,
+					columns:[this.getTemplateColumn(null,0,'fnc_pg')],
 					vertical:false
 				});
 				return out;
 			},
 			set() {}
 		},
-		indexAttributeIdsUsed:(s) => {
+		indexAttributeIdsUsed:s => {
 			let ids = [];
 			for(let c of s.columns) {
 				ids.push(s.getIndexAttributeId(c.index,c.attributeId,false,null));
@@ -299,9 +313,9 @@ export const MyBuilderColumnTemplates = {
 		},
 		
 		// stores
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capGen:        (s) => s.$store.getters.captions.generic
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		capGen:        s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals

@@ -97,11 +97,14 @@ export function getTemplateCollectionConsumer() {
 		openForm:null
 	};
 };
-export function getTemplateColumn(attributeId,index,subQuery) {
+export function getTemplateColumn(attributeId,index,content) {
 	return {
 		id:getUuidV4(),
+		content:content,
+		pgFunctionIdCall:null,
 		attributeId:attributeId,
 		index:index,
+		arguments:[],
 		batch:null,
 		basis:0,
 		length:0,
@@ -109,7 +112,7 @@ export function getTemplateColumn(attributeId,index,subQuery) {
 		groupBy:false,
 		aggregator:null,
 		distincted:false,
-		subQuery:subQuery,
+		scalar:content === 'fnc_scalar' ? 'CONCAT': null,
 		query:getTemplateQuery(),
 		hidden:false,
 		onMobile:true,

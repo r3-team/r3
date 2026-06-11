@@ -267,7 +267,8 @@ const MyFilterAttribute = {
 		// stores
 		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
-		capApp:        s => s.$store.getters.captions.filter
+		capApp:        s => s.$store.getters.captions.filter,
+		capGen:        s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -300,8 +301,8 @@ const MyFilterAttribute = {
 		},
 		getQueryLabel(nestingLevel) {
 			return nestingLevel === 0
-				? this.capApp.nestingMain
-				: this.capApp.nestingSub + ' ' + nestingLevel;
+				? this.capGen.queryMain
+				: this.capGen.querySub + ' ' + nestingLevel;
 		}
 	}
 };

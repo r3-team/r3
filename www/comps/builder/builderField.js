@@ -501,7 +501,7 @@ export default {
 				if(s.field.columns.length   === 0)    out.push(s.capApp.warning.queryColumnsNotSet);
 				
 				for(let c of s.field.columns) {
-					if(c.subQuery && c.attributeId === null) {
+					if(c.content === 'query' && c.attributeId === null) {
 						out.push(s.capApp.warning.columnNoSubQueryAttribute);
 						break;
 					}
@@ -595,7 +595,7 @@ export default {
 		queryRemoveIndex(index) {
 			let colsCloned = JSON.parse(JSON.stringify(this.field.columns));
 			for(let i = 0, j = colsCloned.length; i < j; i++) {
-				if(!colsCloned[i].subQuery && colsCloned[i].index === index) {
+				if(colsCloned[i].content === 'attribute' && colsCloned[i].index === index) {
 					colsCloned.splice(i,1);
 					i--; j--;
 				}

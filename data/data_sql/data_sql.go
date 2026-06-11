@@ -3,7 +3,34 @@ package data_sql
 import (
 	"fmt"
 	"r3/types"
+
+	"github.com/gofrs/uuid/v5"
 )
+
+var ScalarFunctions = []string{"COALESCE", "CONCAT"}
+
+// an attribute is referenced by the relation code + the attribute name
+// due to the relation code, this will always uniquely identify an attribute from a specific index
+// example: _r3.surname maps to person.surname from index 3
+func GetAttributeCode(relationCode string, attributeName string) string {
+	return fmt.Sprintf(`"%s"."%s"`, relationCode, attributeName)
+}
+
+// relation codes exist to uniquely reference a joined relation, even if the same relation is joined multiple times
+// example: relation 'person' can be joined twice as '_r0' and '_r1' as 'person' can be joined to itself as 'supervisor to'
+// a relation is referenced by '_r' + an integer (relation join index) + optionally '_l' + an integer for nesting (if sub query)
+// '_' prefix is protected (cannot be used for entity names)
+func GetRelationCode(relationIndex int, nestingLevel int) string {
+	if nestingLevel == 0 {
+		return fmt.Sprintf("_r%d", relationIndex)
+	}
+	return fmt.Sprintf("_r%d_l%d", relationIndex, nestingLevel)
+}
+
+// tuple IDs are uniquely identified by the relation code + the fixed string 'id'
+func GetTupleIdCode(relationIndex int, nestingLevel int) string {
+	return fmt.Sprintf("%sid", GetRelationCode(relationIndex, nestingLevel))
+}
 
 // alias for SELECT expression
 // set for all expressions, needed for grouped/aggregated/sub query expressions
@@ -16,10 +43,10 @@ func GetExpression(expr types.DataGetExpression, code string, alias string) stri
 	if expr.Distincted {
 		distinct = "DISTINCT "
 	}
-	aggregated := expr.Aggregator.Valid
-	subQuery := !expr.AttributeId.Valid
 
-	if aggregated {
+	subQuery := expr.Query.RelationId != uuid.Nil
+
+	if expr.Aggregator.Valid {
 		// build aggregation syntax
 		var prefix string
 		var postfix string

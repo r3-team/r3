@@ -52,7 +52,7 @@ export function getColumnsProcessed(columns,columnIdsByUser,joinsIndexMap,global
 		};
 
 		// resolve sub query filters
-		if(c.subQuery) {
+		if(c.content === 'query') {
 			c.query.filters = getQueryFiltersProcessed(c.query.filters,joinsIndexMap,globalSearch,
 				globalSearchDict,dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,fieldValues,
 				recordMayCreate,recordMayDelete,recordMayUpdate,{},variableIdMapLocal);
@@ -142,36 +142,46 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 };
 
 export function getColumnIcon(column) {
-	if(column.subQuery) return 'code.png';
-	
-	const atr = MyStore.getters['schema/attributeIdMap'][column.attributeId];
-	return `${getAttributeIcon(atr.content,atr.contentUse,false,false)}`;
+	switch(column.content) {
+		case 'attribute':
+			const atr = MyStore.getters['schema/attributeIdMap'][column.attributeId];
+			return `${getAttributeIcon(atr.content,atr.contentUse,false,false)}`;
+		break;
+		case 'query':      return 'code.png'; break;
+		case 'fnc_pg':     return 'code.png'; break;
+		case 'fnc_scalar': return 'code.png'; break;
+	}
+	return 'code.png';
 };
 
 export function getColumnIsFilterable(c) {
-	if(c.subQuery || (c.aggregator !== null && c.aggregator !== 'record'))
-		return false;
-	
-	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-	if(isAttributeFiles(atr.content) || atr.encrypted || atr.contentUse === 'color')
+	if(c.content === 'query' || (c.aggregator !== null && c.aggregator !== 'record'))
 		return false;
 
+	if(c.content === 'attribute') {
+		const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+		if(isAttributeFiles(atr.content) || atr.encrypted || atr.contentUse === 'color')
+			return false;
+	}
 	return true;
 };
 
 export function getColumnTitle(c,moduleId) {
-	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-	return getCaption('columnTitle',moduleId,c.id,c.captions,
-		getCaption('attributeTitle',moduleId,atr.id,atr.captions,atr.name));
+	let fallback = '';
+	if(c.content === 'attribute' || (c.content === 'query' && c.attributeId !== null)) {
+		const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+		fallback = getCaption('attributeTitle',moduleId,atr.id,atr.captions,atr.name);
+	}
+	return getCaption('columnTitle',moduleId,c.id,c.captions,fallback);
 };
 
 export function getColumnTitleForLang(c,language) {
-	// sub queries can have empty attribute ID when newly created
-	if(c.attributeId === null) return '';
-	
-	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-	return getCaptionForLang('columnTitle',language,c.id,c.captions,
-		getCaptionForLang('attributeTitle',language,atr.id,atr.captions,atr.name));
+	let fallback = '';
+	if(c.content === 'attribute' || (c.content === 'query' && c.attributeId !== null)) {
+		const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+		fallback = getCaptionForLang('attributeTitle',language,atr.id,atr.captions,atr.name);
+	}
+	return getCaptionForLang('columnTitle',language,c.id,c.captions,fallback);
 };
 
 export function getFirstColumnUsableAsAggregator(batch,columns) {
@@ -181,7 +191,7 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 		
 		// anything that can be counted can serve as aggregation
 		// sub queries and already aggregated columns are not supported
-		if(!c.subQuery
+		if(c.content !== 'query'
 			&& c.aggregator === null
 			&& !a.encrypted
 			&& a.contentUse !== 'color'
@@ -206,12 +216,12 @@ export function getOrderIndexesFromColumnBatch(columnBatch,columns,orders) {
 		for(let i = 0, j = orders.length; i < j; i++) {
 			const order = orders[i];
 			
-			if(col.subQuery && order.expressionPos === columnIndexSort) {
+			if(col.content === 'query' && order.expressionPos === columnIndexSort) {
 				orderIndexesUsed.push(i);
 				continue;
 			}
 			
-			if(order.attributeId === col.attributeId && order.index === col.index)
+			if(col.content === 'attribute' && order.attributeId === col.attributeId && order.index === col.index)
 				orderIndexesUsed.push(i);
 		}
 	}

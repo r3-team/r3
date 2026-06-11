@@ -479,7 +479,7 @@ export default {
 
 								let src = s.getSourceTemplate(f.id,index,join.relationId,s.fieldIdMapIndexMapRecordIds[f.id][index],'images/files_list2.png',title);
 								for(const c of f.columns) {
-									if(!c.subQuery && c.index === index) {
+									if(c.attribute && c.index === index) {
 										const atr = s.attributeIdMap[c.attributeId];
 
 										// encrypted change logs are not supported for sub lists, keys are not available

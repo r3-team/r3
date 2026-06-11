@@ -26,7 +26,7 @@ func ReplaceColumnIds(columns []types.Column, idMapReplaced map[uuid.UUID]uuid.U
 			return columns, err
 		}
 
-		if columns[i].SubQuery {
+		if columns[i].Content == ColumnContentQuery {
 			columns[i].Query, err = ReplaceQueryIds(columns[i].Query, idMapReplaced)
 			if err != nil {
 				return columns, err

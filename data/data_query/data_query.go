@@ -19,21 +19,20 @@ func ConvertColumnToExpression(column types.Column, loginId int64, languageCode 
 		Aggregator:  pgtype.Text{}, // aggregation is done on the expression containing the sub query
 		Distincted:  column.Distincted,
 	}
-	if !column.SubQuery {
-		return expr
+	if column.Content == "query" {
+		return types.DataGetExpression{
+			Aggregator: column.Aggregator, // aggregation is done here
+			Query: types.DataGet{
+				RelationId:  column.Query.RelationId.Bytes,
+				Joins:       ConvertQueryToDataJoins(column.Query.Joins),
+				Expressions: []types.DataGetExpression{expr},
+				Filters:     ConvertQueryToDataFilter(column.Query.Filters, loginId, languageCode, recordIdContext, getterKeyMapValue),
+				Orders:      ConvertQueryToDataOrders(column.Query.Orders),
+				Limit:       column.Query.FixedLimit,
+			},
+		}
 	}
-
-	return types.DataGetExpression{
-		Aggregator: column.Aggregator, // aggregation is done here
-		Query: types.DataGet{
-			RelationId:  column.Query.RelationId.Bytes,
-			Joins:       ConvertQueryToDataJoins(column.Query.Joins),
-			Expressions: []types.DataGetExpression{expr},
-			Filters:     ConvertQueryToDataFilter(column.Query.Filters, loginId, languageCode, recordIdContext, getterKeyMapValue),
-			Orders:      ConvertQueryToDataOrders(column.Query.Orders),
-			Limit:       column.Query.FixedLimit,
-		},
-	}
+	return expr
 }
 
 func ConvertDocumentColumnToExpression(column types.DocColumn, loginId int64, languageCode string, recordIdContext int64) types.DataGetExpression {
@@ -45,21 +44,20 @@ func ConvertDocumentColumnToExpression(column types.DocColumn, loginId int64, la
 		Aggregator:  pgtype.Text{}, // aggregation is done on the expression containing the sub query
 		Distincted:  column.Distincted,
 	}
-	if !column.SubQuery {
-		return expr
+	if column.SubQuery {
+		return types.DataGetExpression{
+			Aggregator: column.Aggregator, // aggregation for sub queries is done here
+			Query: types.DataGet{
+				RelationId:  column.Query.RelationId.Bytes,
+				Joins:       ConvertQueryToDataJoins(column.Query.Joins),
+				Expressions: []types.DataGetExpression{expr},
+				Filters:     ConvertQueryToDataFilter(column.Query.Filters, loginId, languageCode, recordIdContext, map[string]string{}),
+				Orders:      ConvertQueryToDataOrders(column.Query.Orders),
+				Limit:       column.Query.FixedLimit,
+			},
+		}
 	}
-
-	return types.DataGetExpression{
-		Aggregator: column.Aggregator, // aggregation for sub queries is done here
-		Query: types.DataGet{
-			RelationId:  column.Query.RelationId.Bytes,
-			Joins:       ConvertQueryToDataJoins(column.Query.Joins),
-			Expressions: []types.DataGetExpression{expr},
-			Filters:     ConvertQueryToDataFilter(column.Query.Filters, loginId, languageCode, recordIdContext, map[string]string{}),
-			Orders:      ConvertQueryToDataOrders(column.Query.Orders),
-			Limit:       column.Query.FixedLimit,
-		},
-	}
+	return expr
 }
 
 func ConvertSubQueryToDataGet(query types.Query, queryAggregator pgtype.Text, attributeId pgtype.UUID, attributeIndex int,

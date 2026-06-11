@@ -222,8 +222,14 @@ export function getItemTitleNoRelationship(attributeId,index) {
 
 export function getItemTitleColumn(column,withTitle) {
 	let name;
-	if(column.subQuery) name = `SubQuery`;
-	else                name = getItemTitle(column.attributeId,column.index,false,null);
+
+	switch(column.content) {
+		case 'attribute':  name = getItemTitle(column.attributeId,column.index,false,null); break;
+		case 'query':      name = MyStore.getters.captions.generic.querySub;        break;
+		case 'fnc_pg':     name = MyStore.getters.captions.generic.functionBackend; break;
+		case 'fnc_scalar': name = MyStore.getters.captions.generic.valueMulti;      break;
+		default:           name = '';                                               break;
+	}            
 	
 	if(withTitle && typeof column.captions.columnTitle[MyStore.getters.settings.languageCode] !== 'undefined')
 		name = `${name} (${column.captions.columnTitle[MyStore.getters.settings.languageCode]})`;

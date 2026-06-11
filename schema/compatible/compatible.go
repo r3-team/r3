@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"r3/schema"
 	"r3/types"
 	"slices"
 	"strings"
@@ -13,6 +14,18 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+// < 3.13
+func FixMissingColumnContent(column types.Column) types.Column {
+	if column.Content == "" {
+		if column.SubQuery {
+			column.Content = schema.ColumnContentQuery
+		} else {
+			column.Content = schema.ColumnContentAttribute
+		}
+	}
+	return column
+}
 
 // < 3.12
 func FixMissingZeroRelease(releases []types.Release) []types.Release {

@@ -200,15 +200,21 @@ export default {
 		
 		// returns column of the column batch that is used for filtering (null if none is available)
 		columnUsedFilter:s => {
-			for(let ind of s.columnBatch.columnIndexes) {
-				let c = s.columns[ind];
-				let a = s.attributeIdMap[c.attributeId];
-				
-				// ignore color/drawing display, sub query, aggregator, encrypted and file attribute columns
-				if(a.contentUse !== 'color' && a.contentUse !== 'drawing' && c.query === null && c.aggregator === null &&
-					!a.encrypted && !s.isAttributeFiles(a.content)) {
-					
-					return c;
+			for(const ind of s.columnBatch.columnIndexes) {
+				const c = s.columns[ind];
+
+				switch(c.content) {
+					case 'fnc_pg':     return c; break; // any PG function column can be used
+					case 'fnc_scalar': return c; break; // any scalar function column can be used
+					case 'attribute':
+						// ignore color/drawing display, sub query, aggregator, encrypted and file attribute columns
+						const a = s.attributeIdMap[c.attributeId];
+						if(a.contentUse !== 'color' && a.contentUse !== 'drawing' && c.query === null && c.aggregator === null &&
+							!a.encrypted && !s.isAttributeFiles(a.content)) {
+							
+							return c;
+						}
+					break;
 				}
 			}
 			return null;
@@ -219,14 +225,19 @@ export default {
 			if(!s.isValidFilter)
 				return [];
 			
-			let atrId    = s.columnUsedFilter.attributeId;
-			let atrIndex = s.columnUsedFilter.index;
-			let out      = [];
+			const c   = s.columnUsedFilter;
+			let   out = [];
 			
 			for(let i = 0, j = s.filtersColumn.length; i < j; i++) {
 				const f = s.filtersColumn[i];
-				if(f.side0.attributeId === atrId && f.side0.attributeIndex === atrIndex)
+				
+				if(
+					(c.content === 'attribute'  && c.attributeId === f.side0.attributeId && c.index === f.side0.attributeIndex) ||
+					(c.content === 'fnc_pg'     && c.pgFunctionId === f.side0.pgFunctionId && JSON.stringify(c.arguments) === JSON.stringify(f.side0.arguments)) ||
+					(c.content === 'fnc_scalar' && c.scalar === f.side0.scalar && JSON.stringify(c.arguments) === JSON.stringify(f.side0.arguments))
+				) {
 					out.push(i);
+				}
 			}
 			return out;
 		},
@@ -283,15 +294,30 @@ export default {
 
 		// helper
 		prepareDataGet() {
+			let expr = null;
+			switch(this.columnUsedFilter.content) {
+				case 'attribute':
+					expr = {
+						attributeId:this.columnUsedFilter.attributeId,
+						index:this.columnUsedFilter.index,
+						aggregator:'first',
+						distincted:true
+					};
+				break;
+				case 'fnc_scalar':
+					expr = {
+						arguments:this.columnUsedFilter.arguments,
+						scalar:this.columnUsedFilter.scalar,
+						aggregator:'first',
+						distincted:true
+					};
+				break;
+			}
+
 			return {
 				relationId:this.relationId,
 				joins:this.joins,
-				expressions:[{
-					attributeId:this.columnUsedFilter.attributeId,
-					index:this.columnUsedFilter.index,
-					aggregator:'first',
-					distincted:true
-				}],
+				expressions:[expr],
 				filters:this.filters.filter(v => {
 					// remove filters coming from this column batch
 					for(const f of this.filtersColumnThis) {
@@ -397,28 +423,30 @@ export default {
 			if(!this.isValidFilter)
 				return;
 			
-			const atrId     = this.columnUsedFilter.attributeId;
-			const atrIndex  = this.columnUsedFilter.index;
-			const filterTxt = this.inputTxt !== '';
-			
 			// remove existing filters for this column
 			let filters = JSON.parse(JSON.stringify(this.filtersColumn))
 				.filter((v,i) => !this.columnFilterIndexes.includes(i));
 
 			if(this.inputTxt !== '' || this.inputSel.length !== 0) {
+				
 				// add new filters for this column, if active
 				// NULL values are not allowed in '<> ALL' operator, will make entire set NULL if included
 				// remove NULL from original filter condition but add second NULL/NOT NULL condition to filter with it
-				const exclNull = !filterTxt && this.inputSel.includes(null);
+				const filterTxt = this.inputTxt !== '';
+				const column    = this.columnUsedFilter;
+				let   side0     = null;
+
+				switch(column.content) {
+					case 'attribute':  side0 = { attributeId:column.attributeId, attributeIndex:column.index };  break;
+					case 'fnc_pg':     side0 = { arguments:column.arguments, pgFunctionId:column.pgFunctionId }; break;
+					case 'fnc_scalar': side0 = { arguments:column.arguments, scalar:column.scalar };             break;
+				}
+
 				filters.push({
 					connector:'AND',
 					index:0,
 					operator:filterTxt ? 'ILIKE' : '<> ALL',
-					side0:{
-						attributeId:atrId,
-						attributeIndex:atrIndex,
-						brackets:1
-					},
+					side0:{...side0, ...{ brackets:1 } },
 					side1:{
 						brackets:filterTxt ? 1 : 0,
 						content:'value',
@@ -427,18 +455,14 @@ export default {
 				});
 				
 				if(!filterTxt) {
+					// item filter requires NULL/NOT NULL OR condition
+					const exclNull = this.inputSel.includes(null);
 					filters.push({
 						connector:exclNull ? 'AND' : 'OR',
 						index:0,
 						operator:exclNull ? 'IS NOT NULL' : 'IS NULL',
-						side0:{
-							attributeId:atrId,
-							attributeIndex:atrIndex,
-							brackets:0
-						},
-						side1:{
-							brackets:1
-						}
+						side0:{...side0, ...{ brackets:0 } },
+						side1:{ brackets:1 }
 					});
 				}
 			}

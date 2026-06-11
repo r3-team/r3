@@ -83,17 +83,30 @@ type CollectionConsumer struct {
 	NoDisplayEmpty bool `json:"noDisplayEmpty"` // moved to flags
 }
 type Column struct {
-	Id          uuid.UUID   `json:"id"`
-	AttributeId uuid.UUID   `json:"attributeId"`
-	Index       int         `json:"index"`      // attribute index
-	GroupBy     bool        `json:"groupBy"`    // group by column attribute value?
-	Aggregator  pgtype.Text `json:"aggregator"` // aggregator (SUM, COUNT, etc.)
-	Distincted  bool        `json:"distincted"` // attribute values are distinct?
-	SubQuery    bool        `json:"subQuery"`   // column uses sub query?
-	Query       Query       `json:"query"`      // sub query
-	Captions    CaptionMap  `json:"captions"`   // column titles
+	Id      uuid.UUID `json:"id"`
+	Content string    `json:"content"` // content of column (attribute, query, fnc_scalar, fnc_pg)
+
+	// attribute expression
+	AttributeId uuid.UUID `json:"attributeId"`
+	Index       int       `json:"index"` // attribute index
+
+	// PG function expression
+	PgFunctionId pgtype.UUID `json:"pgFunctionId"`
+
+	// scalar function expression
+	Scalar pgtype.Text `json:"scalar"` // built-in scalar function (COALESCE, CONCAT, ...)
+
+	// sub query expression
+	Query Query `json:"query"` // sub query
+
+	// expression options
+	Aggregator pgtype.Text `json:"aggregator"` // aggregator (SUM, COUNT, ...)
+	Arguments  []ColumnArg `json:"arguments"`  // for (scalar/PG) function expressions
+	Distincted bool        `json:"distincted"` // attribute values are distinct?
+	GroupBy    bool        `json:"groupBy"`    // group by column attribute value?
 
 	// presentation
+	Captions CaptionMap  `json:"captions"` // column titles
 	Basis    int         `json:"basis"`    // size basis (usually width)
 	Batch    pgtype.Int4 `json:"batch"`    // index of column batch (multiple columns as one)
 	Display  string      `json:"display"`  // how to display value (email, gallery, etc.)
@@ -105,8 +118,10 @@ type Column struct {
 	// legacy
 	BatchVertical bool `json:"batchVertical"`
 	Clipboard     bool `json:"clipboard"`
+	SubQuery      bool `json:"subQuery"` // column uses sub query?
 	Wrap          bool `json:"wrap"`
 }
+type ColumnArg DataGetArg
 type Deletion struct {
 	Id     uuid.UUID `json:"id"`
 	Entity string    `json:"entity"`
