@@ -72,6 +72,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 			if err != nil {
 				return nil, err
 			}
+		} else {
+			c.Arguments = make([]types.ColumnArg, 0)
 		}
 		columns[i] = c
 	}

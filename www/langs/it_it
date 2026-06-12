@@ -1508,6 +1508,7 @@
 			"intervalAtDayForYears": "at day",
 			"intervalAtTime": "alle ore",
 			"intervalEvery": "Every",
+			"isColumnExec": "Available in columns",
 			"isFrontendExec": "Chiamata frontend",
 			"isLoginSync": "User sync",
 			"isTrigger": "Trigger",

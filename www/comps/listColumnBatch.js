@@ -304,6 +304,14 @@ export default {
 						distincted:true
 					};
 				break;
+				case 'fnc_pg':
+					expr = {
+						arguments:this.columnUsedFilter.arguments,
+						pgFunctionId:this.columnUsedFilter.pgFunctionId,
+						aggregator:'first',
+						distincted:true
+					};
+				break;
 				case 'fnc_scalar':
 					expr = {
 						arguments:this.columnUsedFilter.arguments,

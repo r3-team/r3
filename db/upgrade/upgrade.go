@@ -170,6 +170,9 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 
 			CREATE INDEX IF NOT EXISTS fki_column_argument_column_id_fkey    ON app.column_argument USING btree (column_id    ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_column_argument_attribute_id_fkey ON app.column_argument USING btree (attribute_id ASC NULLS LAST);
+
+			ALTER TABLE app.pg_function ADD COLUMN is_column_exec boolean NOT NULL DEFAULT false;
+			ALTER TABLE app.pg_function ALTER COLUMN is_column_exec DROP DEFAULT;
 		`)
 		return "3.13", err
 	},

@@ -1508,6 +1508,7 @@
 			"intervalAtDayForYears": "günde",
 			"intervalAtTime": "zamanında",
 			"intervalEvery": "Her",
+			"isColumnExec": "Available in columns",
 			"isFrontendExec": "Ön uç çağrısı",
 			"isLoginSync": "Kullanıcı senkronizasyonu",
 			"isTrigger": "Tetiklemek",

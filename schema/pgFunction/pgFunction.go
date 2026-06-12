@@ -36,7 +36,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunction, error) {
 
 	rows, err := tx.Query(ctx, `
-		SELECT id, name, code_args, code_function, code_returns,
+		SELECT id, name, code_args, code_function, code_returns, is_column_exec,
 			is_frontend_exec, is_login_sync, is_trigger, volatility, cost
 		FROM app.pg_function
 		WHERE module_id = $1
@@ -51,7 +51,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, moduleId uuid.UUID) ([]types.PgFunct
 	for rows.Next() {
 		var f types.PgFunction
 
-		if err := rows.Scan(&f.Id, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns,
+		if err := rows.Scan(&f.Id, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns, &f.IsColumnExec,
 			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility, &f.Cost); err != nil {
 
 			return nil, err
@@ -149,9 +149,11 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 		if _, err := tx.Exec(ctx, `
 			UPDATE app.pg_function
 			SET name = $1, code_args = $2, code_function = $3, code_returns = $4,
-				is_frontend_exec = $5, volatility = $6, cost = $7
-			WHERE id = $8
-		`, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsFrontendExec, fnc.Volatility, fnc.Cost, fnc.Id); err != nil {
+				is_column_exec = $5, is_frontend_exec = $6, volatility = $7, cost = $8
+			WHERE id = $9
+		`, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsColumnExec,
+			fnc.IsFrontendExec, fnc.Volatility, fnc.Cost, fnc.Id); err != nil {
+
 			return err
 		}
 
@@ -182,10 +184,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, fnc types.PgFunction) error {
 		}
 	} else {
 		if _, err := tx.Exec(ctx, `
-			INSERT INTO app.pg_function (id, module_id, name, code_args, code_function,
-				code_returns, is_frontend_exec, is_login_sync, is_trigger, volatility, cost)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
-		`, fnc.Id, fnc.ModuleId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns,
+			INSERT INTO app.pg_function (id, module_id, name, code_args, code_function, code_returns,
+				is_column_exec, is_frontend_exec, is_login_sync, is_trigger, volatility, cost)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		`, fnc.Id, fnc.ModuleId, fnc.Name, fnc.CodeArgs, fnc.CodeFunction, fnc.CodeReturns, fnc.IsColumnExec,
 			fnc.IsFrontendExec, fnc.IsLoginSync, fnc.IsTrigger, fnc.Volatility, fnc.Cost); err != nil {
 
 			return err
@@ -286,11 +288,11 @@ func RecreateAffectedBy_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntit
 
 		var f types.PgFunction
 		if err := tx.QueryRow(ctx, `
-			SELECT id, module_id, name, code_args, code_function, code_returns,
+			SELECT id, module_id, name, code_args, code_function, code_returns, is_column_exec,
 				is_frontend_exec, is_login_sync, is_trigger, volatility, cost
 			FROM app.pg_function
 			WHERE id = $1
-		`, id).Scan(&f.Id, &f.ModuleId, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns,
+		`, id).Scan(&f.Id, &f.ModuleId, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns, &f.IsColumnExec,
 			&f.IsFrontendExec, &f.IsLoginSync, &f.IsTrigger, &f.Volatility, &f.Cost); err != nil {
 
 			return err

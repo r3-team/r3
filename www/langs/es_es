@@ -1508,6 +1508,7 @@
 			"intervalAtDayForYears": "en el día",
 			"intervalAtTime": "a la hora",
 			"intervalEvery": "Cada",
+			"isColumnExec": "Available in columns",
 			"isFrontendExec": "Llamada frontend",
 			"isLoginSync": "Sincronización de usuario",
 			"isTrigger": "Disparador",

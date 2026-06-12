@@ -2,7 +2,6 @@ import MyBuilderAggregatorInput from './builderAggregatorInput.js';
 import MyBuilderCaption         from './builderCaption.js';
 import MyBuilderQuery           from './builderQuery.js';
 import {getColumnIcon}          from '../shared/column.js';
-import {getItemTitleColumn}     from '../shared/builder.js';
 import {getTemplateQuery}       from '../shared/builderTemplate.js';
 import {
 	getIndexAttributeIdsByJoins,
@@ -12,6 +11,10 @@ import {
 	isAttributeString,
 	isAttributeUuid
 } from '../shared/attribute.js';
+import {
+	getDependentModules,
+	getItemTitleColumn
+} from '../shared/builder.js';
 import {
 	getCaptionByIndexAttributeId
 } from '../shared/query.js';
@@ -314,48 +317,64 @@ export default {
 					</td>
 				</tr>
 			</template>
-			<template v-if="isFncPg">
-				<tr>
-					<td>{{ capGen.functionBackend }}</td>
-					<td></td>
-				</tr>
-			</template>
-			<template v-if="isFncScalar">
-				<tr>
-					<td>{{ capGen.mode }}</td>
-					<td>
-						<select
-							@change="set('scalar',$event.target.value)"
-							:disabled="readonly"
-							:value="column.scalar"
+			<tr v-if="isFncPg">
+				<td>{{ capGen.functionBackend }}*</td>
+				<td>
+					<select
+						@input="set('pgFunctionId',$event.target.value === '' ? null : $event.target.value)"
+						:disabled="readonly"
+						:value="column.pgFunctionId === null ? '' : column.pgFunctionId"
+					>
+						<option value="">-</option>
+						<option v-for="fnc in module.pgFunctions.filter(v => v.isColumnExec)" :value="fnc.id">
+							{{ fnc.name }}
+						</option>
+						<optgroup
+							v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.pgFunctions.filter(v => v.isColumnExec).length !== 0)"
+							:label="mod.name"
 						>
-							<option value="CONCAT">{{ capGen.scalarFunction.CONCAT }}</option>
-							<option value="COALESCE">{{ capGen.scalarFunction.COALESCE }}</option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<div class="column gap">
-							<span>{{ capGen.values }}</span>
-							<my-button image="add.png"
-								@trigger="addValue"
-								:active="!readonly"
-								:caption="capGen.button.add"
-								:naked="true"
-							/>
-						</div>
-					</td>
-					<td>
-						<my-builder-column-options-arguments
-							@update:modelValue="set('arguments',$event)"
-							:joinsParents
-							:modelValue="column.arguments"
-							:readonly
+							<option v-for="fnc in mod.pgFunctions.filter(v => v.isColumnExec)" :value="fnc.id">
+								{{ fnc.name }}
+							</option>
+						</optgroup>
+					</select>
+				</td>
+			</tr>
+			<tr v-if="isFncScalar">
+				<td>{{ capGen.mode }}</td>
+				<td>
+					<select
+						@change="set('scalar',$event.target.value)"
+						:disabled="readonly"
+						:value="column.scalar"
+					>
+						<option value="CONCAT">{{ capGen.scalarFunction.CONCAT }}</option>
+						<option value="COALESCE">{{ capGen.scalarFunction.COALESCE }}</option>
+					</select>
+				</td>
+			</tr>
+			<tr v-if="isFncPg || isFncScalar">
+				<td>
+					<div class="column gap">
+						<span v-if="isFncScalar">{{ capGen.values }}</span>
+						<span v-if="isFncPg">{{ capGen.arguments }}</span>
+						<my-button image="add.png"
+							@trigger="addValue"
+							:active="!readonly"
+							:caption="capGen.button.add"
+							:naked="true"
 						/>
-					</td>
-				</tr>
-			</template>
+					</div>
+				</td>
+				<td>
+					<my-builder-column-options-arguments
+						@update:modelValue="set('arguments',$event)"
+						:joinsParents
+						:modelValue="column.arguments"
+						:readonly
+					/>
+				</td>
+			</tr>
 			<tr>
 				<td>{{ capGen.aggregator }}</td>
 				<td>
@@ -404,6 +423,7 @@ export default {
 	computed:{
 		attribute:s => typeof s.attributeIdMap[s.column.attributeId] === 'undefined'
 			? false : s.attributeIdMap[s.column.attributeId],
+		module:s => s.moduleIdMap[s.moduleId],
 		query:s => s.isSubQuery && s.column.query !== null ? s.column.query : s.getTemplateQuery(),
 		indexAttributeIds:s => !s.isSubQuery && s.column.query !== null
 			? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins,[]),
@@ -443,6 +463,7 @@ export default {
 		
 		// stores
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		moduleIdMap:   s => s.$store.getters['schema/moduleIdMap'],
 		capApp:        s => s.$store.getters.captions.builder.form,
 		capGen:        s => s.$store.getters.captions.generic
 	},
@@ -450,6 +471,7 @@ export default {
 		// externals
 		getCaptionByIndexAttributeId,
 		getColumnIcon,
+		getDependentModules,
 		getIndexAttributeIdsByJoins,
 		getItemTitleColumn,
 		getTemplateQuery,

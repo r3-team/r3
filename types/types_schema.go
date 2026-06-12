@@ -554,6 +554,7 @@ type PgFunction struct {
 	CodeArgs       string               `json:"codeArgs"`
 	CodeFunction   string               `json:"codeFunction"`
 	CodeReturns    string               `json:"codeReturns"`
+	IsColumnExec   bool                 `json:"isColumnExec"`   // can be used in columns
 	IsFrontendExec bool                 `json:"isFrontendExec"` // can be called from JS function
 	IsLoginSync    bool                 `json:"isLoginSync"`    // special login sync function
 	IsTrigger      bool                 `json:"isTrigger"`      // is relation TRIGGER function

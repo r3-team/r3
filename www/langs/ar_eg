@@ -1508,6 +1508,7 @@
 			"intervalAtDayForYears": "في اليوم",
 			"intervalAtTime": "في الوقت المناسب",
 			"intervalEvery": "كل",
+			"isColumnExec": "Available in columns",
 			"isFrontendExec": "مكالمة الواجهة الأمامية",
 			"isLoginSync": "User sync",
 			"isTrigger": "مشغل",

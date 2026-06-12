@@ -1508,6 +1508,7 @@
 			"intervalAtDayForYears": "év napján",
 			"intervalAtTime": "napszakor",
 			"intervalEvery": "Minden",
+			"isColumnExec": "Available in columns",
 			"isFrontendExec": "Frontend végrehajtás",
 			"isLoginSync": "User sync",
 			"isTrigger": "Eseményvezérelt",

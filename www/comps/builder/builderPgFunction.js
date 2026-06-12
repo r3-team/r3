@@ -611,10 +611,16 @@ export default {
 							<td>{{ capApp.isLoginSync }}</td>
 							<td><my-bool v-model="fnc.isLoginSync" :readonly="true" /></td>
 						</tr>
-						<tr v-if="!fnc.isTrigger && !fnc.isLoginSync">
-							<td>{{ capApp.isFrontendExec }}</td>
-							<td><my-bool v-model="fnc.isFrontendExec" :readonly="fnc.isTrigger || readonly" /></td>
-						</tr>
+						<template v-if="!fnc.isTrigger && !fnc.isLoginSync">
+							<tr>
+								<td>{{ capApp.isFrontendExec }}</td>
+								<td><my-bool v-model="fnc.isFrontendExec" :readonly /></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.isColumnExec }}</td>
+								<td><my-bool v-model="fnc.isColumnExec" :readonly /></td>
+							</tr>
+						</template>
 						<tr v-if="!fnc.isTrigger && !fnc.isLoginSync">
 							<td>
 								<div class="column">
