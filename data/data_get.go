@@ -428,7 +428,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID, queryA
 
 	// add expressions to retrieve relation tuple IDs after data GET expressions
 	// add group by tupel ID if record aggregation is used on the relation
-	if !isSubQuery {
+	if data.GetIds && !isSubQuery {
 		for relationIndex := range indexRelationIds {
 
 			// any grouping on a relation blocks record retrieval

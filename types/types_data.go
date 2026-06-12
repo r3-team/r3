@@ -107,7 +107,8 @@ type DataGet struct {
 	Orders      []DataGetOrder      `json:"orders"`      // result order criteria (keep order)
 	Limit       int                 `json:"limit"`       // result limit
 	Offset      int                 `json:"offset"`      // result offset
-	GetPerm     bool                `json:"getPerm"`     // get result permissions (SET/DEL) from relation policy, GET is ignored as results are filtered by it already
+	GetIds      bool                `json:"getIds"`      // retrieve record IDs for each relation
+	GetPerm     bool                `json:"getPerm"`     // retrieve permissions (SET/DEL) from relation policy, GET is ignored as results are filtered by it already
 	SearchDicts []string            `json:"searchDicts"` // list of fulltext search dictionaries (english, german, ...)
 }
 type DataGetResult struct {

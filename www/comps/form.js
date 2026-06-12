@@ -1647,6 +1647,7 @@ export default {
 				joins:this.relationsJoined,
 				expressions:expressions,
 				filters:filters,
+				getIds:true,
 				getPerm:true
 			},true).then(
 				res => {
@@ -1744,6 +1745,7 @@ export default {
 				joins:joins,
 				expressions:expressions,
 				filters:filters,
+				getIds:true,
 				getPerm:true
 			},true).then(
 				res => {

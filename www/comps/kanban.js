@@ -703,7 +703,8 @@ const MyKanban = {
 				joins:this.getRelationsJoined(this.joins),
 				expressions:this.expressions,
 				filters:this.filters.concat(this.choiceFilters),
-				orders:this.query.orders
+				orders:this.query.orders,
+				getIds:true
 			},true).then(
 				res => {
 					this.axisEntriesX = this.getAxisEntries(

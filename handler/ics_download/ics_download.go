@@ -91,6 +91,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	dataGet := types.DataGet{
 		RelationId:  f.Query.RelationId.Bytes,
 		IndexSource: 0,
+		GetIds:      true,
 	}
 
 	// join relations

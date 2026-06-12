@@ -130,7 +130,8 @@ export default {
 				expressions:this.getQueryExpressions(this.columns),
 				filters:this.filters,
 				orders:this.query.orders,
-				limit:this.limit
+				limit:this.limit,
+				getIds:true
 			},true).then(
 				res => {
 					// option overwrites

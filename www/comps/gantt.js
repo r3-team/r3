@@ -819,7 +819,8 @@ const MyGantt = {
 					this.attributeIdDate0,this.indexDate0,this.getUnixFromDate(this.date0),
 					this.attributeIdDate1,this.indexDate1,this.getUnixFromDate(this.date1)
 				)),
-				orders:this.query.orders
+				orders:this.query.orders,
+				getIds:true
 			},true).then(
 				res => {
 					// clear existing groups

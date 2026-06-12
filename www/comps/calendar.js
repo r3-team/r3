@@ -636,7 +636,8 @@ const MyCalendar = {
 					this.attributeIdDate0,this.indexDate0,dateStart,
 					this.attributeIdDate1,this.indexDate1,dateEnd
 				)),
-				orders:orders
+				orders:orders,
+				getIds:true
 			},true).then(
 				res => {
 					this.rows = res.payload.rows;

@@ -1439,7 +1439,8 @@ export default {
 				filters:this.filtersCombined,
 				orders:this.orders,
 				limit:this.limit,
-				offset:this.offset
+				offset:this.offset,
+				getIds:true
 			},this.blockDuringLoad).then(
 				res => {
 					const count = res.payload.count;
@@ -1493,7 +1494,8 @@ export default {
 				joins:this.relationsJoined,
 				expressions:this.expressions,
 				filters:filters,
-				orders:this.orders
+				orders:this.orders,
+				getIds:true
 			},false).then(
 				res => {
 					// apply results to input rows if all values are shown or specific record IDs were retrieved
