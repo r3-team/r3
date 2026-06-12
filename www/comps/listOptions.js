@@ -85,7 +85,7 @@ export default {
 											@click="clickColumnInBatch(columnsAll[ci].id,element)"
 											:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
 										>
-											{{ element.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : element.caption }}
+											{{ element.columnIndexes.length > 1 ? getColumnTitle(columnsAll[ci]) : element.caption }}
 										</div>
 									</div>
 								</div>
@@ -109,7 +109,7 @@ export default {
 											@click="clickColumnInBatch(columnsAll[ci].id,b)"
 											:class="{ notShown:!columnIdsShown.includes(columnsAll[ci].id) }"
 										>
-											{{ b.columnIndexes.length > 1 ? getTitle(columnsAll[ci]) : b.caption }}
+											{{ b.columnIndexes.length > 1 ? getColumnTitle(columnsAll[ci]) : b.caption }}
 										</div>
 									</div>
 								</div>
@@ -267,9 +267,36 @@ export default {
 			}
 			return false;
 		},
-		getTitle(column) {
-			const atr = this.attributeIdMap[column.attributeId];
-			return this.getCaption('attributeTitle',this.moduleId,atr.id,atr.captions,atr.name);
+		getColumnTitle(c) {
+			if(c.content === 'fnc_scalar') {
+				let parts = [];
+				for(const arg of c.arguments) {
+					if(arg.attributeId !== null) {
+						const atr = this.attributeIdMap[arg.attributeId];
+						parts.push(this.getCaption('attributeTitle',this.moduleId,atr.id,atr.captions,atr.name));
+					}
+				}
+				switch(c.scalar) {
+					case 'COALESCE': return parts.join('/'); break;
+					case 'CONCAT':   return parts.join('+');  break;
+					default:         return parts.join(','); break;
+				}
+			}
+			if(c.content === 'fnc_pg') {
+				let parts = [];
+				for(const arg of c.arguments) {
+					if(arg.attributeId !== null) {
+						const atr = this.attributeIdMap[arg.attributeId];
+						parts.push(this.getCaption('attributeTitle',this.moduleId,atr.id,atr.captions,atr.name));
+					}
+				}
+				return parts.join(',');
+			}
+			if(c.content === 'attribute' || (c.content === 'query' && c.attribute !== null)) {
+				const atr = this.attributeIdMap[c.attributeId];
+				return this.getCaption('attributeTitle',this.moduleId,atr.id,atr.captions,atr.name);
+			}
+			return '';
 		},
 
 		// actions
