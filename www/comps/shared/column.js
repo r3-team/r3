@@ -191,7 +191,7 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 		
 		// anything that can be counted can serve as aggregation
 		// sub queries and already aggregated columns are not supported
-		if(c.content !== 'query'
+		if(c.content === 'attribute'
 			&& c.aggregator === null
 			&& !a.encrypted
 			&& a.contentUse !== 'color'
