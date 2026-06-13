@@ -215,14 +215,12 @@ export function getOrderIndexesFromColumnBatch(columnBatch,columns,orders) {
 		
 		for(let i = 0, j = orders.length; i < j; i++) {
 			const order = orders[i];
-			
-			if(col.content === 'query' && order.expressionPos === columnIndexSort) {
+
+			if((col.content === 'attribute' && order.attributeId === col.attributeId && order.index === col.index) ||
+				(col.content !== 'attribute' && order.expressionPos === columnIndexSort)
+			) {
 				orderIndexesUsed.push(i);
-				continue;
 			}
-			
-			if(col.content === 'attribute' && order.attributeId === col.attributeId && order.index === col.index)
-				orderIndexesUsed.push(i);
 		}
 	}
 	return orderIndexesUsed;

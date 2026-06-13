@@ -1193,17 +1193,17 @@ export default {
 				
 				for(const columnIndexSort of columnBatch.columnIndexesSortBy) {
 					const col = this.columns[columnIndexSort];
-					if(col.content === 'query') {
+					if(col.content === 'attribute') {
 						orders.push({
 							ascending:directionAsc,
-							expressionPos:columnIndexSort // equal to expression index
+							attributeId:col.attributeId,
+							index:col.index
 						});
 					}
 					else {
 						orders.push({
 							ascending:directionAsc,
-							attributeId:col.attributeId,
-							index:col.index
+							expressionPos:columnIndexSort // equal to expression index
 						});
 					}
 				}
@@ -1330,8 +1330,8 @@ export default {
 				// order by expression position (= index of retrieved columns), is used for non-attribute columns
 				if(typeof o.expressionPos !== 'undefined') {
 
-					// order is invalid, if column index does not exist or column is not a sub query
-					if(o.expressionPos > this.columns.length - 1 || this.columns[o.expressionPos].content !== 'attribute')
+					// order is invalid, if column index does not exist or column is a attribute
+					if(o.expressionPos > this.columns.length - 1 || this.columns[o.expressionPos].content === 'attribute')
 						return this.setOrders(this.ordersOriginal);
 					
 					continue;

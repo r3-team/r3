@@ -2148,6 +2148,7 @@
 				"recordMayUpdate": "Datensatz darf aktualisiert werden",
 				"recordNew": "Datensatz ist neu",
 				"role": "Benutzer hat Rolle",
+				"subQuery": "sub query",
 				"true": "Wahrheitswert",
 				"value": "Fester Wert",
 				"variable": "Wert einer Variable"

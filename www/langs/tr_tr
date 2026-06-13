@@ -2148,6 +2148,7 @@
 				"recordMayUpdate": "kayıt güncellenebilir",
 				"recordNew": "kayıt yeni",
 				"role": "kullanıcının rolü var",
+				"subQuery": "alt sorgu",
 				"true": "gerçek değer",
 				"value": "sabit değer",
 				"variable": "değişken değer"

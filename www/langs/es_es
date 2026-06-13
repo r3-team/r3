@@ -2148,6 +2148,7 @@
 				"recordMayUpdate": "record may be updated",
 				"recordNew": "registro es nuevo",
 				"role": "usuario tiene rol",
+				"subQuery": "subconsulta",
 				"true": "valor verdadero",
 				"value": "valor fijo",
 				"variable": "valor variable"
