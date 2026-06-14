@@ -221,6 +221,7 @@ export default {
 			:columnIdShow
 			:groupName="field.id+'_columns'"
 			:hasCaptions="isList || isKanban"
+			:moduleId
 			:readonly
 		/>
 		

@@ -11,6 +11,7 @@ export default {
 				:columns
 				:columnBatches
 				:joins
+				:moduleId
 			/>
 		</div>
 		<div class="row space-between">
@@ -37,10 +38,11 @@ export default {
 		</div>
 	</div>`,
 	props:{
-		columns:      { type:Array, required:true },
-		columnBatches:{ type:Array, required:true },
-		filters:      { type:Array, required:true },
-		joins:        { type:Array, required:true }
+		columns:      { type:Array,  required:true },
+		columnBatches:{ type:Array,  required:true },
+		filters:      { type:Array,  required:true },
+		joins:        { type:Array,  required:true },
+		moduleId:     { type:String, required:true }
 	},
 	emits:['set-filters'],
 	data() {
@@ -75,21 +77,34 @@ export default {
 
 		// actions
 		add() {
-			let f = this.getTemplateQueryFilter();
+			let f     = this.getTemplateQueryFilter();
+			let isSet = false;
 			f.operator = 'ILIKE';
 			
 			// apply first available column
 			for(const b of this.columnBatches) {
 				for(const ci of b.columnIndexes) {
-					const column = this.columns[ci];
-					if(this.getColumnIsFilterable(column)) {
-						f.side0.attributeId    = column.attributeId;
-						f.side0.attributeIndex = column.index;
-						f.side0.content        = 'attribute';
+					const c = this.columns[ci];
+					if(this.getColumnIsFilterable(c)) {
+						switch(c.content) {
+							case 'attribute':
+								f.side0.attributeId    = c.attributeId;
+								f.side0.attributeIndex = c.index;
+							break;
+							case 'fnc_pg':
+								f.side0.pgFunctionId = c.pgFunctionId;
+								f.side0.arguments    = c.arguments;
+							break;
+							case 'fnc_scalar':
+								f.side0.scalar    = c.scalar;
+								f.side0.arguments = c.arguments;
+							break;
+						}
+						isSet = true;
 						break;
 					}
 				}
-				if(f.side0.attributeId !== null)
+				if(isSet)
 					break;
 			}
 			let v = JSON.parse(JSON.stringify(this.values));

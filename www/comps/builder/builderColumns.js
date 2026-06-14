@@ -8,7 +8,7 @@ import {
 } from '../shared/attribute.js';
 import {
 	getColumnIcon,
-	getColumnTitleForLang
+	getColumnTitle
 } from '../shared/column.js';
 
 export const MyBuilderColumns = {
@@ -31,7 +31,7 @@ export const MyBuilderColumns = {
 					<my-builder-caption class="caption"
 						v-if="hasCaptions"
 						@update:modelValue="batch.columns[0].captions = {columnTitle:$event}"
-						:contentName="getColumnTitleForLang(batch.columns[0],builderLanguage)"
+						:contentName="getColumnTitle(batch.columns[0],moduleId,builderLanguage)"
 						:dynamicSize="true"
 						:language="builderLanguage"
 						:modelValue="batch.columns[0].captions.columnTitle"
@@ -110,6 +110,7 @@ export const MyBuilderColumns = {
 		hasBatches:     { type:Boolean, required:false, default:true },
 		hasCaptions:    { type:Boolean, required:true },
 		hasStyling:     { type:Boolean, required:false, default:true }, // display/formatting options
+		moduleId:       { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
 	emits:['column-id-show','columns-set'],
@@ -184,7 +185,7 @@ export const MyBuilderColumns = {
 	methods:{
 		// externals
 		getColumnIcon,
-		getColumnTitleForLang,
+		getColumnTitle,
 		getFlexBasis,
 		getItemTitleColumn,
 		

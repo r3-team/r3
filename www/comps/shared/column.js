@@ -147,9 +147,9 @@ export function getColumnIcon(column) {
 			const atr = MyStore.getters['schema/attributeIdMap'][column.attributeId];
 			return `${getAttributeIcon(atr.content,atr.contentUse,false,false)}`;
 		break;
-		case 'query':      return 'code.png'; break;
-		case 'fnc_pg':     return 'code.png'; break;
-		case 'fnc_scalar': return 'code.png'; break;
+		case 'query':      return 'database.png';     break;
+		case 'fnc_pg':     return 'codeDatabase.png'; break;
+		case 'fnc_scalar': return 'code.png';         break;
 	}
 	return 'code.png';
 };
@@ -166,22 +166,56 @@ export function getColumnIsFilterable(c) {
 	return true;
 };
 
-export function getColumnTitle(c,moduleId) {
-	let fallback = '';
-	if(c.content === 'attribute' || (c.content === 'query' && c.attributeId !== null)) {
-		const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-		fallback = getCaption('attributeTitle',moduleId,atr.id,atr.captions,atr.name);
-	}
-	return getCaption('columnTitle',moduleId,c.id,c.captions,fallback);
+export function getColumnTitle(c,moduleId,languageForce) {
+	const captionColumn = languageForce !== undefined
+		? getCaptionForLang('columnTitle',languageForce,c.id,c.captions)
+		: getCaption('columnTitle',moduleId,c.id,c.captions);
+
+	return captionColumn !== '' ? captionColumn : getColumnTitleFallback(c,moduleId,languageForce);
 };
 
-export function getColumnTitleForLang(c,language) {
-	let fallback = '';
+export function getColumnTitleFallback(c,moduleId,languageForce) {
+	if(c.content === 'fnc_scalar') {
+		let parts = [];
+		for(const arg of c.arguments) {
+			if(arg.attributeId !== null) {
+				const atr = MyStore.getters['schema/attributeIdMap'][arg.attributeId];
+
+				if(languageForce !== undefined)
+					parts.push(getCaptionForLang('attributeTitle',languageForce,atr.id,atr.captions,atr.name));
+				else
+					parts.push(getCaption('attributeTitle',moduleId,atr.id,atr.captions,atr.name));
+			}
+		}
+		switch(c.scalar) {
+			case 'COALESCE': return parts.join('/'); break;
+			case 'CONCAT':   return parts.join('+');  break;
+			default:         return parts.join(','); break;
+		}
+	}
+	if(c.content === 'fnc_pg') {
+		let parts = [];
+		for(const arg of c.arguments) {
+			if(arg.attributeId !== null) {
+				const atr = MyStore.getters['schema/attributeIdMap'][arg.attributeId];
+				
+				if(languageForce !== undefined)
+					parts.push(getCaptionForLang('attributeTitle',languageForce,atr.id,atr.captions,atr.name));
+				else
+					parts.push(getCaption('attributeTitle',moduleId,atr.id,atr.captions,atr.name));
+			}
+		}
+		return parts.join(',');
+	}
 	if(c.content === 'attribute' || (c.content === 'query' && c.attributeId !== null)) {
 		const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-		fallback = getCaptionForLang('attributeTitle',language,atr.id,atr.captions,atr.name);
+		
+		if(languageForce !== undefined)
+			return getCaptionForLang('attributeTitle',languageForce,atr.id,atr.captions,atr.name);
+		else
+			return getCaption('attributeTitle',moduleId,atr.id,atr.captions,atr.name);
 	}
-	return getCaptionForLang('columnTitle',language,c.id,c.captions,fallback);
+	return '';
 };
 
 export function getFirstColumnUsableAsAggregator(batch,columns) {

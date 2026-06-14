@@ -17,7 +17,6 @@ import {layoutSettleSpace}         from './shared/layout.js';
 import {isAttributeTextSearchable} from './shared/attribute.js';
 import {
 	getColumnBatches,
-	getColumnTitle,
 	getOrderIndexesFromColumnBatch
 } from './shared/column.js';
 import {
@@ -87,8 +86,8 @@ export default {
 						:isImport="csvImport"
 						:joins="relationsJoined"
 						:loginOptions
-						:orders="orders"
-						:query="query"
+						:orders
+						:query
 					/>
 					<my-list-filters
 						v-if="showFilters"
@@ -96,7 +95,8 @@ export default {
 						:columns="columnsAll"
 						:columnBatches="columnBatchesAll"
 						:filters="filtersUser"
-						:joins="joins"
+						:joins
+						:moduleId
 					/>
 					<my-list-options
 						v-if="showOptions"
@@ -107,17 +107,17 @@ export default {
 						@set-column-ids-by-user="$emit('set-column-ids-by-user',$event)"
 						@set-layout="setLoginOption('layout',$event)"
 						@set-page-limit="setLoginOption('limit',$event)"
-						:autoRenew="autoRenew"
-						:cardsCaptions="cardsCaptions"
-						:columns="columns"
-						:columnsAll="columnsAll"
-						:columnBatches="columnBatches"
-						:columnBatchSort="columnBatchSort"
-						:csvImport="csvImport"
-						:hasPaging="hasPaging"
-						:layout="layout"
-						:limitDefault="limitDefault"
-						:moduleId="moduleId"
+						:autoRenew
+						:cardsCaptions
+						:columns
+						:columnsAll
+						:columnBatches
+						:columnBatchSort
+						:csvImport
+						:hasPaging
+						:layout
+						:limitDefault
+						:moduleId
 						:pageLimit="limit"
 					/>
 				</div>
@@ -945,7 +945,6 @@ export default {
 		fillRelationRecordIds,
 		getCaption,
 		getColumnBatches,
-		getColumnTitle,
 		getFiltersEncapsulated,
 		getOrderIndexesFromColumnBatch,
 		getQueryAttributesPkFilter,

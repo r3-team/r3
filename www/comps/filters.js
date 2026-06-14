@@ -3,13 +3,16 @@ import MyInputDateWrap                     from './inputDateWrap.js';
 import MyInputDictionary                   from './inputDictionary.js';
 import {isAttributeString}                 from './shared/attribute.js';
 import {getTemplateQuery}                  from './shared/builderTemplate.js';
-import {getColumnIsFilterable}             from './shared/column.js';
 import {getNestedIndexAttributeIdsByJoins} from './shared/query.js';
 import {
 	getDependentModules,
 	getItemTitleColumn,
 	getItemTitleNoRelationship
 } from './shared/builder.js';
+import {
+	getColumnIsFilterable,
+	getColumnTitleFallback
+} from './shared/column.js';
 import {
 	getCaption,
 	getDictByLang
@@ -205,49 +208,24 @@ const MyFilterConnector = {
 const MyFilterAttribute = {
 	name:'my-filter-attribute',
 	template:`<select v-model="value" :disabled="readonly">
-		<template v-if="columnsMode" v-for="b in columnBatches">
-
-			<!-- single column batch -->
-			<option
-				v-if="getColumnBatchIndexesValid(b).length === 1"
-				:value="getNestedIndexAttributeIdByColumnIndex(getColumnBatchIndexesValid(b)[0])"
-			>
-				{{ b.caption }}
-			</option>
-
-			<!-- multi column batch -->
-			<optgroup v-if="getColumnBatchIndexesValid(b).length > 1" :label="b.caption">
-				<option
-					v-for="ci in getColumnBatchIndexesValid(b)"
-					:value="getNestedIndexAttributeIdByColumnIndex(ci)"
-				>
-					{{ getAttributeCaption(columns[ci].attributeId) }}
-				</option>
-			</optgroup>
-		</template>
+		<option
+			v-if="!groupQueriesNested"
+			v-for="nia in nestedIndexAttributeIds"
+			:value="nia"
+		>
+			{{ getNestedIndexAttributeCaption(nia) }}
+		</option>
 		
-		<template v-if="!columnsMode">
+		<optgroup v-if="groupQueriesNested" v-for="n in nestingLevels" :label="getQueryLabel(n-1)">
 			<option
-				v-if="!groupQueriesNested"
-				v-for="nia in nestedIndexAttributeIds"
+				v-for="nia in nestedIndexAttributeIds.filter(v => v.substring(0,1) === String(n-1))"
 				:value="nia"
 			>
 				{{ getNestedIndexAttributeCaption(nia) }}
 			</option>
-			
-			<optgroup v-if="groupQueriesNested" v-for="n in nestingLevels" :label="getQueryLabel(n-1)">
-				<option
-					v-for="nia in nestedIndexAttributeIds.filter(v => v.substring(0,1) === String(n-1))"
-					:value="nia"
-				>
-					{{ getNestedIndexAttributeCaption(nia) }}
-				</option>
-			</optgroup>
-		</template>
+		</optgroup>
 	</select>`,
 	props:{
-		columns:                { type:Array,   required:true },
-		columnBatches:          { type:Array,   required:true },
 		groupQueriesNested:     { type:Boolean, required:false, default:false },
 		modelValue:             { type:String,  required:true },
 		nestedIndexAttributeIds:{ type:Array,   required:true },
@@ -260,12 +238,8 @@ const MyFilterAttribute = {
 			get()  { return this.modelValue; },
 			set(v) { this.$emit('update:modelValue',v); }
 		},
-
-		// simple
-		columnsMode:s => s.columns.length !== 0,
 		
 		// stores
-		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
 		capApp:        s => s.$store.getters.captions.filter,
 		capGen:        s => s.$store.getters.captions.generic
@@ -273,27 +247,8 @@ const MyFilterAttribute = {
 	methods:{
 		// externals
 		getCaption,
-		getColumnIsFilterable,
 		getItemTitleNoRelationship,
 
-		getAttributeCaption(attributeId) {
-			const atr = this.attributeIdMap[attributeId];
-			const rel = this.relationIdMap[atr.relationId];
-			return this.getCaption('attributeTitle',rel.moduleId,atr.id,atr.captions,atr.name);
-		},
-		getColumnBatchIndexesValid(columnBatch) {
-			let out = [];
-			for(const columnIndex of columnBatch.columnIndexes) {
-				if(this.getColumnIsFilterable(this.columns[columnIndex]))
-					out.push(columnIndex);
-			}
-			return out;
-		},
-		getNestedIndexAttributeIdByColumnIndex(columnIndex) {
-			if(columnIndex >= this.columns.length) return '';
-			const column = this.columns[columnIndex];
-			return `0_${column.index}_${column.attributeId}`;
-		},
 		getNestedIndexAttributeCaption(nestedIndexAttributeId) {
 			const v   = nestedIndexAttributeId.split('_');
 			const atr = this.attributeIdMap[v[2]];
@@ -307,11 +262,114 @@ const MyFilterAttribute = {
 	}
 };
 
+const MyFilterColumn = {
+	name:'my-filter-column',
+	template:`<select v-model="value" :disabled="readonly">
+		<template v-for="b in columnBatches">
+
+			<!-- single column batch -->
+			<option
+				v-if="getColumnBatchIndexesValid(b).length === 1"
+				:value="getColumnBatchIndexesValid(b)[0]"
+			>
+				{{ b.caption }}
+			</option>
+
+			<!-- multi column batch -->
+			<optgroup v-if="getColumnBatchIndexesValid(b).length > 1" :label="b.caption">
+				<option
+					v-for="ci in getColumnBatchIndexesValid(b)"
+					:value="ci"
+				>
+					{{ getColumnTitleFallback(columns[ci],moduleId) }}
+				</option>
+			</optgroup>
+		</template>
+	</select>`,
+	props:{
+		columns:       { type:Array,   required:true },
+		columnBatches: { type:Array,   required:true },
+		modelValue:    { type:Object,  required:true }, // entire filter side (required as we update different parts of it)
+		moduleId:      { type:String,  required:true },
+		readonly:      { type:Boolean, required:true }
+	},
+	emits:['update:modelValue'],
+	computed:{
+		value:{ // value = column index selected as filter
+			get() {
+				const v = this.modelValue;
+				for(let i = 0, j = this.columns.length; i < j; i++) {
+					const c = this.columns[i];
+					if(
+						(c.content === 'attribute'  && c.attributeId  === v.attributeId  && c.index === v.attributeIndex) ||
+						(c.content === 'fnc_pg'     && c.pgFunctionId === v.pgFunctionId && JSON.stringify(c.arguments) === JSON.stringify(v.arguments)) ||
+						(c.content === 'fnc_scalar' && c.scalar       === v.scalar       && JSON.stringify(c.arguments) === JSON.stringify(v.arguments))
+					) {
+						return String(i);
+					}
+				}
+				return null;
+			},
+			set(v) {
+				let   n = JSON.parse(JSON.stringify(this.modelValue));
+				const c = this.columns[parseInt(v)];
+
+				// clear invalid filter side values based on column content
+				if(c.content !== 'attribute') {
+					n.attributeId    = null;
+					n.attributeIndex = 0;
+				}
+
+				if(c.content !== 'fnc_pg')
+					n.pgFunctionId = null;
+
+				if(c.content !== 'fnc_scalar')
+					n.scalar = null;
+
+				if(c.content !== 'fnc_pg' && c.content !== 'fnc_scalar')
+					n.arguments = [];
+
+				// set filter side values
+				switch(c.content) {
+					case 'attribute':
+						n.attributeId    = c.attributeId;
+						n.attributeIndex = c.index;
+					break;
+					case 'fnc_pg':
+						n.pgFunctionId = c.pgFunctionId;
+						n.arguments    = c.arguments;
+					break;
+					case 'fnc_scalar':
+						n.scalar    = c.scalar;
+						n.arguments = c.arguments;
+					break;
+				}
+				this.$emit('update:modelValue',n);
+			}
+		}
+	},
+	methods:{
+		// externals
+		getColumnIsFilterable,
+		getColumnTitleFallback,
+		
+		getColumnBatchIndexesValid(columnBatch) {
+			let out = [];
+			for(const columnIndex of columnBatch.columnIndexes) {
+				if(this.getColumnIsFilterable(this.columns[columnIndex]))
+					out.push(columnIndex);
+			}
+			return out;
+		}
+	}
+};
+
 const MyFilterSide = {
 	name:'my-filter-side',
 	components:{
 		MyBuilderQuery,
 		MyFilterAttribute,
+		MyFilterColumn,
 		MyInputDateWrap
 	},
 	template:`<div class="filter-side">
@@ -376,119 +434,17 @@ const MyFilterSide = {
 					:captionTitle="capApp.queryShow"
 					:image="!showQuery ? 'visible0.png' : 'visible1.png'"
 				/>
-				
-				<!-- nested index attribute input -->
-				<my-filter-attribute
-					v-if="isAttribute"
-					v-model="nestedIndexAttribute"
+
+				<!-- column input -->
+				<my-filter-column
+					@update:modelValue="$emit('update:modelValue',$event)"
+					v-if="columnsMode && leftSide"
 					:columns
 					:columnBatches
-					:groupQueriesNested="nestingLevels !== 0 && !isSubQuery && builderMode"
-					:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
-					:nestingLevels
+					:modelValue
+					:moduleId
 					:readonly
 				/>
-				
-				<!-- collection input -->
-				<select v-model="collectionId" v-if="!columnsMode && isCollection" :disabled="readonly">
-					<option :value="null">-</option>
-					<option v-for="c in module.collections" :value="c.id">{{ c.name }}</option>
-					<optgroup
-						v-for="m in getDependentModules(module).filter(v => v.id !== module.id && v.collections.length !== 0)"
-						:label="m.name"
-					>
-						<option v-for="c in m.collections" :value="c.id">{{ c.name }}</option>
-					</optgroup>
-				</select>
-				
-				<!-- collection column input -->
-				<select v-model="columnId" v-if="!columnsMode && isCollection && collectionId !== null" :disabled="readonly">
-					<option :value="null">-</option>
-					<option v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
-						{{ getItemTitleColumn(c,true) }}
-					</option>
-				</select>
-				
-				<!-- field input -->
-				<select v-model="fieldId" v-if="!columnsMode && isField" :disabled="readonly">
-					<template v-for="(ref,fieldId) in entityIdMapRef.field">
-						<option
-							v-if="fieldIdMap[fieldId].content === 'data'"
-							:value="fieldId"
-						>F{{ ref }}</option>
-					</template>
-				</select>
-				
-				<!-- form state input -->
-				<select v-model="formStateId" v-if="!columnsMode && isFormState" :disabled="readonly">
-					<option
-						v-for="state in formIdMap[formId].states"
-						:value="state.id"
-					>{{ state.description }}</option>
-				</select>
-				
-				<!-- preset input -->
-				<select v-model="presetId" v-if="!columnsMode && isPreset" :disabled="readonly">
-					<option :value="null"></option>
-					<optgroup
-						v-for="r in module.relations.filter(v => v.presets.filter(p => p.protected).length !== 0)"
-						:label="r.name"
-					>
-						<option v-for="p in r.presets.filter(v => v.protected)" :value="p.id">
-							{{ p.name }}
-						</option>
-					</optgroup>
-					
-					<template v-for="m in getDependentModules(module).filter(v => v.id !== module.id)">
-						<optgroup
-							v-for="r in m.relations.filter(v => v.presets.filter(p => p.protected).length !== 0)"
-							:label="m.name + '.' + r.name"
-						>
-							<option v-for="p in r.presets.filter(v => v.protected)" :value="p.id">
-								{{ p.name }}
-							</option>
-						</optgroup>
-					</template>
-				</select>
-				
-				<!-- role input -->
-				<select v-model="roleId" v-if="!columnsMode && isRole" :disabled="readonly">
-					<option :value="null"></option>
-					<option v-for="r in module.roles" :value="r.id">
-						{{ r.name }}
-					</option>
-				</select>
-				
-				<!-- variable input -->
-				<select v-model="variableId" v-if="!columnsMode && isVariable" :disabled="readonly">
-					<option :value="null">-</option>
-					<optgroup :label="capGen.form">
-						<option v-for="v in module.variables.filter(v => v.formId === formId)" :value="v.id">
-							{{ formIdMap[formId].name + ': ' + v.name }}
-						</option>
-					</optgroup>
-					<optgroup :label="capGen.global">
-						<option v-for="v in module.variables.filter(v => v.formId === null)" :value="v.id">
-							{{ v.name }}
-						</option>
-					</optgroup>
-				</select>
-				
-				<!-- date offset input -->
-				<template v-if="!columnsMode && isAnyDate">
-					<input
-						v-model.number="nowOffset"
-						:disabled="readonly"
-						:placeholder="capApp.nowOffsetHint.replace('{MODE}',capApp.option.nowMode[nowOffsetMode])"
-						:title="capApp.nowOffsetTitle"
-					/>
-					<select v-model="nowOffsetMode" @change="changeOffsetMode" :disabled="readonly">
-						<option value="seconds">{{ capApp.option.nowMode.seconds }}</option>
-						<option value="minutes">{{ capApp.option.nowMode.minutes }}</option>
-						<option value="hours">{{ capApp.option.nowMode.hours }}</option>
-						<option value="days">{{ capApp.option.nowMode.days }}</option>
-					</select>
-				</template>
 				
 				<!-- fixed value input -->
 				<template v-if="isValue || isJavascript || isGetter">
@@ -507,6 +463,120 @@ const MyFilterSide = {
 						:isReadonly="readonly"
 						:unixFrom="valueFixTextDate"
 					/>
+				</template>
+				
+				<template v-if="!columnsMode">
+
+					<!-- nested index attribute input -->
+					<my-filter-attribute
+						v-if="isAttribute"
+						v-model="nestedIndexAttribute"
+						:groupQueriesNested="nestingLevels !== 0 && !isSubQuery && builderMode"
+						:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
+						:nestingLevels
+						:readonly
+					/>
+
+					<!-- collection input -->
+					<select v-model="collectionId" v-if="isCollection" :disabled="readonly">
+						<option :value="null">-</option>
+						<option v-for="c in module.collections" :value="c.id">{{ c.name }}</option>
+						<optgroup
+							v-for="m in getDependentModules(module).filter(v => v.id !== module.id && v.collections.length !== 0)"
+							:label="m.name"
+						>
+							<option v-for="c in m.collections" :value="c.id">{{ c.name }}</option>
+						</optgroup>
+					</select>
+
+					<!-- collection column input -->
+					<select v-model="columnId" v-if="isCollection && collectionId !== null" :disabled="readonly">
+						<option :value="null">-</option>
+						<option v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
+							{{ getItemTitleColumn(c,true) }}
+						</option>
+					</select>
+				
+					<!-- field input -->
+					<select v-model="fieldId" v-if="isField" :disabled="readonly">
+						<template v-for="(ref,fieldId) in entityIdMapRef.field">
+							<option
+								v-if="fieldIdMap[fieldId].content === 'data'"
+								:value="fieldId"
+							>F{{ ref }}</option>
+						</template>
+					</select>
+
+					<!-- form state input -->
+					<select v-model="formStateId" v-if="isFormState" :disabled="readonly">
+						<option
+							v-for="state in formIdMap[formId].states"
+							:value="state.id"
+						>{{ state.description }}</option>
+					</select>
+
+					<!-- preset input -->
+					<select v-model="presetId" v-if="isPreset" :disabled="readonly">
+						<option :value="null"></option>
+						<optgroup
+							v-for="r in module.relations.filter(v => v.presets.filter(p => p.protected).length !== 0)"
+							:label="r.name"
+						>
+							<option v-for="p in r.presets.filter(v => v.protected)" :value="p.id">
+								{{ p.name }}
+							</option>
+						</optgroup>
+						
+						<template v-for="m in getDependentModules(module).filter(v => v.id !== module.id)">
+							<optgroup
+								v-for="r in m.relations.filter(v => v.presets.filter(p => p.protected).length !== 0)"
+								:label="m.name + '.' + r.name"
+							>
+								<option v-for="p in r.presets.filter(v => v.protected)" :value="p.id">
+									{{ p.name }}
+								</option>
+							</optgroup>
+						</template>
+					</select>
+				
+					<!-- role input -->
+					<select v-model="roleId" v-if="isRole" :disabled="readonly">
+						<option :value="null"></option>
+						<option v-for="r in module.roles" :value="r.id">
+							{{ r.name }}
+						</option>
+					</select>
+					
+					<!-- variable input -->
+					<select v-model="variableId" v-if="isVariable" :disabled="readonly">
+						<option :value="null">-</option>
+						<optgroup :label="capGen.form">
+							<option v-for="v in module.variables.filter(v => v.formId === formId)" :value="v.id">
+								{{ formIdMap[formId].name + ': ' + v.name }}
+							</option>
+						</optgroup>
+						<optgroup :label="capGen.global">
+							<option v-for="v in module.variables.filter(v => v.formId === null)" :value="v.id">
+								{{ v.name }}
+							</option>
+						</optgroup>
+					</select>
+
+					<!-- date offset input -->
+					<template v-if="isAnyDate">
+						<input
+							v-model.number="nowOffset"
+							:disabled="readonly"
+							:placeholder="capApp.nowOffsetHint.replace('{MODE}',capApp.option.nowMode[nowOffsetMode])"
+							:title="capApp.nowOffsetTitle"
+						/>
+						<select v-model="nowOffsetMode" @change="changeOffsetMode" :disabled="readonly">
+							<option value="seconds">{{ capApp.option.nowMode.seconds }}</option>
+							<option value="minutes">{{ capApp.option.nowMode.minutes }}</option>
+							<option value="hours">{{ capApp.option.nowMode.hours }}</option>
+							<option value="days">{{ capApp.option.nowMode.days }}</option>
+						</select>
+					</template>
 				</template>
 			</template>
 		</div>
@@ -538,8 +608,6 @@ const MyFilterSide = {
 								<!-- sub query attribute input -->
 								<my-filter-attribute
 									v-model="nestedIndexAttribute"
-									:columns
-									:columnBatches
 									:groupQueriesNested="nestingLevels !== 0 && !isSubQuery && builderMode"
 									:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
 									:nestingLevels
@@ -1109,7 +1177,7 @@ export default {
 		joins:           { type:Array,   required:false, default:() => [] },
 		joinsParents:    { type:Array,   required:false, default:() => [] },
 		modelValue:      { type:Array,   required:true },
-		moduleId:        { type:String,  required:false, default:'' },
+		moduleId:        { type:String,  required:true },
 		readonly:        { type:Boolean, required:false, default:false }
 	},
 	emits:['apply','update:modelValue'],

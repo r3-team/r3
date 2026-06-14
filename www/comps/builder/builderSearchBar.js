@@ -91,6 +91,7 @@ export default {
 							:columnIdShow
 							:columns="searchBar.columns"
 							:hasCaptions="true"
+							:moduleId="module.id"
 							:readonly
 						/>
 					</div>

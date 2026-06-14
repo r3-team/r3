@@ -429,6 +429,7 @@ export default {
 							:hasBatches="false"
 							:hasCaptions="true"
 							:hasStyling="false"
+							:moduleId="module.id"
 							:readonly
 						/>
 					</div>
