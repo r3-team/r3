@@ -258,7 +258,7 @@ function getReferencesPgFunction(mod,fncId,lookups) {
 			}
 		}
 	};
-	
+
 	for(const f of mod.pgFunctions) {
 		if(f.codeFunction.includes(`.[${fncId}](`)) {
 			lookups.pgFunctionIds.push(f.id);
@@ -294,7 +294,11 @@ function getReferencesPgFunction(mod,fncId,lookups) {
 };
 
 function getReferencesAttribut(mod,atrId,lookups) {
-	const isInColumns = columns => columns.some(v => v.attributeId === atrId || (v.content === 'query' && isInQuery(v.query)));
+	const isInColumns = columns => columns.some(v => v.attributeId === atrId
+		|| (v.content === 'query'      && isInQuery(v.query))
+		|| (v.content === 'fnc_pg'     && v.arguments.some(a => a.attributeId === atrId))
+		|| (v.content === 'fnc_scalar' && v.arguments.some(a => a.attributeId === atrId))
+	);
 	const isInFilters = filters =>
 		filters.some(v =>
 			v.side0.attributeId === atrId ||
