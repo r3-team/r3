@@ -215,6 +215,50 @@ function getReferencesJsFunction(mod,fncId,lookups) {
 };
 
 function getReferencesPgFunction(mod,fncId,lookups) {
+	const isInColumns = columns => columns.some(v => v.pgFunctionId === fncId);
+	const lookupInFields = (formId,fields) => {
+		const add = fieldId => {
+			if(lookups.formIdMapFieldIds[formId] === undefined)
+				lookups.formIdMapFieldIds[formId] = [];
+	
+			lookups.formIdMapFieldIds[formId].push(fieldId);
+			lookups.anyResults = true;
+		};
+
+		for(const f of fields) {
+			switch(f.content) {
+				case 'calendar':
+					if(isInColumns(f.columns))
+						add(f.id);
+				break;
+				case 'chart':
+					if(isInColumns(f.columns))
+						add(f.id);
+				break;
+				case 'container':
+					lookupInFields(formId,f.fields);
+				break;
+				case 'data':
+					if(f.columns !== undefined && isInColumns(f.columns))
+						add(f.id);
+				break;
+				case 'kanban': 
+					if(isInColumns(f.columns))
+						add(f.id);
+				break;
+				case 'list':
+					if(isInColumns(f.columns))
+						add(f.id);
+				break;
+				case 'tabs':
+					for(const t of f.tabs) {
+						lookupInFields(formId,t.fields);
+					}
+				break;
+			}
+		}
+	};
+	
 	for(const f of mod.pgFunctions) {
 		if(f.codeFunction.includes(`.[${fncId}](`)) {
 			lookups.pgFunctionIds.push(f.id);
@@ -243,6 +287,9 @@ function getReferencesPgFunction(mod,fncId,lookups) {
 	if(mod.pgFunctionIdLoginSync === fncId) {
 		lookups.moduleFncLoginSync = true;
 		lookups.anyResults = true;
+	}
+	for(const f of mod.forms) {
+		lookupInFields(f.id,f.fields);
 	}
 };
 
