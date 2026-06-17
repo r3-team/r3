@@ -67,9 +67,10 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 	
 	let addColumn = (column,index) => {
 		// first non-encrypted/non-file attribute in batch can be sorted by
-		const atr     = MyStore.getters['schema/attributeIdMap'][column.attributeId];
-		const noSort  = atr.encrypted || isAttributeFiles(atr.content);
-		const isColor = atr.contentUse === 'color';
+		const isAtr   = column.content === 'attribute';
+		const atr     = isAtr ? MyStore.getters['schema/attributeIdMap'][column.attributeId] : null;
+		const isColor = isAtr ? atr.contentUse === 'color' : false;
+		const isSort  = isAtr ? !atr.encrypted && !isAttributeFiles(atr.content) : true;
 		
 		if(column.batch !== null) {
 			// assign column to existing batch if available
@@ -80,7 +81,7 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 				// add its own column index + sort setting + width to batch
 				batches[i].columnIndexes.push(index);
 				
-				if(!noSort) batches[i].columnIndexesSortBy.push(index);
+				if(isSort)  batches[i].columnIndexesSortBy.push(index);
 				if(isColor) batches[i].columnIndexColor = index;
 				
 				if(!batches[i].vertical)
@@ -100,7 +101,7 @@ export function getColumnBatches(moduleId,columns,columnIndexesIgnore,orders,sor
 			batchOrderIndex:batches.length,
 			caption:showCaptions && moduleId !== null ? getColumnTitle(column,moduleId) : null,
 			columnIndexes:[index],
-			columnIndexesSortBy:noSort ? [] : [index],
+			columnIndexesSortBy:isSort ? [index] : [],
 			columnIndexColor:!isColor ? -1 : index,
 			key:column.id,          // key is used to redo column batch components on change
 			orderIndexesSmallest:0, // smallest order index used to sort this column batch by

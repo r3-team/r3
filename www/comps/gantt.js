@@ -44,7 +44,7 @@ const MyGanttLineRecord = {
 			<template v-for="(v,i) in values">
 				<my-value-rich class="context-calendar-gantt"
 					v-if="!indexesHidden.includes(i) && v !== null"
-					:attribute-id="columns[i].attributeId"
+					:attributeId="columns[i].attributeId"
 					:basis="columns[i].basis"
 					:bold="columns[i].flags.bold"
 					:boolAtrIcon="columns[i].flags.boolAtrIcon"
@@ -312,7 +312,7 @@ const MyGantt = {
 							<div class="columnBatch" :class="{ vertical:g.vertical }">
 								<my-value-rich class="context-calendar-gantt"
 									v-for="c in g.columns.filter(v => v.value !== null)"
-									:attribute-id="columns[c.index].attributeId"
+									:attributeId="columns[c.index].attributeId"
 									:bold="columns[c.index].flags.bold"
 									:boolAtrIcon="columns[c.index].flags.boolAtrIcon"
 									:display="columns[c.index].display"

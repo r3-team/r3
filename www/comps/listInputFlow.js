@@ -14,7 +14,7 @@ export default {
 								v-if="r.values[ci] !== null"
 								:alignEnd="columns[ci].flags.alignEnd"
 								:alignMid="columns[ci].flags.alignMid"
-								:attribute-id="columns[ci].attributeId"
+								:attributeId="columns[ci].attributeId"
 								:basis="columns[ci].basis"
 								:bold="columns[ci].flags.bold"
 								:boolAtrIcon="columns[ci].flags.boolAtrIcon"
