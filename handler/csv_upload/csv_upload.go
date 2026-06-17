@@ -17,6 +17,7 @@ import (
 	"r3/handler"
 	"r3/log"
 	"r3/login/login_auth"
+	"r3/schema"
 	"r3/tools"
 	"r3/types"
 	"strconv"
@@ -242,8 +243,17 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 	// apply column value overwrites
 	for i, column := range columns {
 
+		// check for general errors: no attribute column, attribute not defined
+		if column.Content != schema.ColumnContentAttribute {
+			return handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnContentNoAtr)
+		}
+		if !column.AttributeId.Valid {
+			return handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnNoAttribute)
+		}
+
+		// check column attribute
 		cache.Schema_mx.RLock()
-		atr, exists := cache.AttributeIdMap[column.AttributeId]
+		atr, exists := cache.AttributeIdMap[column.AttributeId.Bytes]
 		cache.Schema_mx.RUnlock()
 
 		if !exists {
@@ -341,8 +351,6 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 		}
 	}
 
-	_, err = data_import.FromInterfaceValues_tx(ctx, tx, loginId,
-		valuesIn, columns, joins, lookups, indexMapPgIndexAttributeIds)
-
+	_, err = data_import.FromInterfaceValues_tx(ctx, tx, loginId, valuesIn, columns, joins, lookups, indexMapPgIndexAttributeIds)
 	return err
 }

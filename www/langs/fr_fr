@@ -649,6 +649,7 @@
 			"versionHint": "Numéro de version pour cette API. Les versions sont souvent utilisées pour offrir de nouvelles fonctionnalités sans casser les appels plus anciens. Deux APIs avec le même nom et le même numéro de version ne peuvent pas coexister.",
 			"warning": {
 				"noData": "Pour que l'API fonctionne, au moins 1 relation doit être sélectionnée (onglet 'Contenu') et au moins 1 colonne doit être active.",
+				"postFunction": "POST calls fail if any multi value or backend function column is used.",
 				"postNoUpdate": "Les appels POST échouent pour mettre à jour des enregistrements sans recherche d'enregistrement (onglet 'Contenu'). Au moins 1 relation est définie sur 'UPDATE' sans recherche d'enregistrement.",
 				"postSubQuery": "Les appels POST échouent si des sous-requêtes sont incluses. Au moins 1 colonne est une sous-requête."
 			},
@@ -2030,7 +2031,9 @@
 			"006": "Le nom choisi est invalide. Assurez-vous que le nom...<ul><li>... commence par une lettre <b>(a-z)</b>.</li><li>... a au plus <b>60</b> caractères de long.</li><li>... ne contient que des lettres minuscules <b>(a-z)</b>, des traits de soulignement <b>(_)</b> ou des chiffres <b>(0-9)</b>.</li></ul>Exemples : storage_inventory_post21, facility_address, contact_book",
 			"007": "Un module référencé est inconnu.",
 			"008": "Une relation référencée est inconnue.",
-			"009": "Un attribut référencé est inconnu."
+			"009": "Un attribut référencé est inconnu.",
+			"010": "A column does not include a valid attribute reference.",
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
 		},
 		"CSV": {
 			"001": "Numéro invalide '{VALUE}' (un entier était attendu).",

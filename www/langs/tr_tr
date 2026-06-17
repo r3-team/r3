@@ -649,6 +649,7 @@
 			"versionHint": "Bu API'nin sürüm numarası. Sürümler genellikle eski çağrıları bozmadan yeni özellikler sunmak için kullanılır. Aynı ada ve sürüm numarasına sahip iki API bulunamaz.",
 			"warning": {
 				"noData": "API'nin çalışması için en az 1 ilişkinin seçilmesi (\"İçerik\" sekmesi) ve en az 1 sütunun aktif olması gerekir.",
+				"postFunction": "POST calls fail if any multi value or backend function column is used.",
 				"postNoUpdate": "POST çağrıları, kayıt aramaları olmadan kayıtları güncelleyemiyor (\"İçerik\" sekmesi). En az 1 ilişki, kayıt araması olmadan 'GÜNCELLEME' olarak ayarlandı.",
 				"postSubQuery": "Alt sorgular dahil edilirse POST çağrıları başarısız olur. En az 1 sütun bir alt sorgudur."
 			},
@@ -2030,7 +2031,9 @@
 			"006": "Seçilen ad geçersiz. Lütfen...<ul><li>... adının <b>(a-z)</b>.</li><li>... harfiyle başladığından emin olun. En fazla <b>60</b> karakter uzunluğunda olduğundan.</li><li>... yalnızca küçük harfler içerir <b>(a-z)</b>, <b>(_)</b> veya <b>(0-9)</b> sayılarının altını çizer.</li></ul>EÖrnekler: depolama_envanteri_post21, tesis_adresi, iletişim_kitap",
 			"007": "Başvurulan bir modül bilinmiyor.",
 			"008": "Başvurulan bir ilişki bilinmemektedir.",
-			"009": "Başvurulan bir özellik bilinmiyor."
+			"009": "Başvurulan bir özellik bilinmiyor.",
+			"010": "A column does not include a valid attribute reference.",
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
 		},
 		"CSV": {
 			"001": "Geçersiz sayı '{VALUE}' (tamsayı bekleniyordu).",

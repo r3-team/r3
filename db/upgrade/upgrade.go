@@ -140,6 +140,7 @@ var upgradeFunctions = map[string]func(ctx context.Context, tx pgx.Tx) (string, 
 			ALTER TABLE app.column DROP COLUMN sub_query;
 
 			ALTER TABLE app.column ADD COLUMN scalar_function app.scalar_function;
+			ALTER TABLE app.column ALTER COLUMN attribute_id DROP NOT NULL;
 
 			ALTER TABLE app.column ADD COLUMN pg_function_id_call UUID;
 			ALTER TABLE app.column ADD CONSTRAINT pg_function_id_call_fkey FOREIGN KEY (pg_function_id_call)

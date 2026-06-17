@@ -17,7 +17,7 @@ func delArguments_tx(ctx context.Context, tx pgx.Tx, columnId uuid.UUID) error {
 	return err
 }
 
-func getArguments_tx(ctx context.Context, tx pgx.Tx, columnId uuid.UUID) ([]types.ColumnArg, error) {
+func getArguments_tx(ctx context.Context, tx pgx.Tx, columnId uuid.UUID) ([]types.DataGetArg, error) {
 
 	rows, err := tx.Query(ctx, `
 		SELECT attribute_id, attribute_index, value
@@ -30,9 +30,9 @@ func getArguments_tx(ctx context.Context, tx pgx.Tx, columnId uuid.UUID) ([]type
 	}
 	defer rows.Close()
 
-	args := make([]types.ColumnArg, 0)
+	args := make([]types.DataGetArg, 0)
 	for rows.Next() {
-		var a types.ColumnArg
+		var a types.DataGetArg
 		if err := rows.Scan(&a.AttributeId, &a.AttributeIndex, &a.Value); err != nil {
 			return nil, err
 		}
@@ -43,7 +43,7 @@ func getArguments_tx(ctx context.Context, tx pgx.Tx, columnId uuid.UUID) ([]type
 	return args, nil
 }
 
-func setArguments_tx(ctx context.Context, tx pgx.Tx, columnId uuid.UUID, args []types.ColumnArg) error {
+func setArguments_tx(ctx context.Context, tx pgx.Tx, columnId uuid.UUID, args []types.DataGetArg) error {
 
 	if err := delArguments_tx(ctx, tx, columnId); err != nil {
 		return err

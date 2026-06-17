@@ -649,6 +649,7 @@
 			"versionHint": "Número de versión para esta API. Las versiones a menudo se usan para ofrecer nuevas funciones sin romper llamadas anteriores. No pueden existir dos APIs con el mismo nombre y número de versión.",
 			"warning": {
 				"noData": "Para que la API funcione, se debe seleccionar al menos 1 relación (pestaña 'Contenido') y al menos 1 columna debe estar activa.",
+				"postFunction": "POST calls fail if any multi value or backend function column is used.",
 				"postNoUpdate": "Las llamadas POST fallan al actualizar registros sin búsquedas de registros (pestaña 'Contenido'). Al menos 1 relación está configurada en 'UPDATE' sin una búsqueda de registros.",
 				"postSubQuery": "Las llamadas POST fallan si se incluyen subconsultas. Al menos 1 columna es una subconsulta."
 			},
@@ -2030,7 +2031,9 @@
 			"006": "El nombre elegido no es válido. Por favor, asegúrese de que el nombre...<ul><li>... comienza con una letra <b>(a-z)</b>.</li><li>... tiene como máximo <b>60</b> caracteres de longitud.</li><li>... contiene solo letras minúsculas <b>(a-z)</b>, guiones bajos <b>(_)</b> o números <b>(0-9)</b>.</li></ul>Ejemplos: storage_inventory_post21, facility_address, contact_book",
 			"007": "Un módulo referenciado no es conocido.",
 			"008": "Una relación referenciada no es conocida.",
-			"009": "Un atributo referenciado no es conocido."
+			"009": "Un atributo referenciado no es conocido.",
+			"010": "A column does not include a valid attribute reference.",
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
 		},
 		"CSV": {
 			"001": "Número inválido '{VALUE}' (se esperaba un entero).",

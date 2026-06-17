@@ -73,7 +73,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 				return nil, err
 			}
 		} else {
-			c.Arguments = make([]types.ColumnArg, 0)
+			c.Arguments = make([]types.DataGetArg, 0)
 		}
 		columns[i] = c
 	}
@@ -104,10 +104,12 @@ func Set_tx(ctx context.Context, tx pgx.Tx, entity schema.DbEntity, entityId uui
 	for position, c := range columns {
 
 		// fix imports < 3.3: Migrate display option to attribute content use
-		var err error
-		c.Display, err = compatible.MigrateDisplayToContentUse_tx(ctx, tx, c.AttributeId, c.Display)
-		if err != nil {
-			return err
+		if c.AttributeId.Valid {
+			var err error
+			c.Display, err = compatible.MigrateDisplayToContentUse_tx(ctx, tx, c.AttributeId.Bytes, c.Display)
+			if err != nil {
+				return err
+			}
 		}
 
 		// fix imports < 3.8: Convert to new styles

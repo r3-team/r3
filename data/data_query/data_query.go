@@ -1,7 +1,9 @@
 package data_query
 
 import (
+	"fmt"
 	"r3/cache"
+	"r3/handler"
 	"r3/types"
 	"slices"
 	"time"
@@ -10,29 +12,58 @@ import (
 )
 
 func ConvertColumnToExpression(column types.Column, loginId int64, languageCode string,
-	recordIdContext int64, getterKeyMapValue map[string]string) types.DataGetExpression {
+	recordIdContext int64, getterKeyMapValue map[string]string) (types.DataGetExpression, error) {
 
-	expr := types.DataGetExpression{
-		AttributeId: pgtype.UUID{Bytes: column.AttributeId, Valid: true},
-		Index:       column.Index,
-		GroupBy:     column.GroupBy,
-		Aggregator:  pgtype.Text{}, // aggregation is done on the expression containing the sub query
-		Distincted:  column.Distincted,
-	}
-	if column.Content == "query" {
-		return types.DataGetExpression{
-			Aggregator: column.Aggregator, // aggregation is done here
-			Query: types.DataGet{
-				RelationId:  column.Query.RelationId.Bytes,
-				Joins:       ConvertQueryToDataJoins(column.Query.Joins),
-				Expressions: []types.DataGetExpression{expr},
-				Filters:     ConvertQueryToDataFilter(column.Query.Filters, loginId, languageCode, recordIdContext, getterKeyMapValue),
-				Orders:      ConvertQueryToDataOrders(column.Query.Orders),
-				Limit:       column.Query.FixedLimit,
-			},
+	switch column.Content {
+	case "attribute":
+		if !column.AttributeId.Valid {
+			return types.DataGetExpression{}, handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnNoAttribute)
 		}
+		return types.DataGetExpression{
+			AttributeId: pgtype.UUID{Bytes: column.AttributeId.Bytes, Valid: true},
+			Index:       column.Index,
+			GroupBy:     column.GroupBy,
+			Aggregator:  column.Aggregator,
+			Distincted:  column.Distincted,
+		}, nil
+	case "query":
+		if !column.AttributeId.Valid {
+			return types.DataGetExpression{}, handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnNoAttribute)
+		}
+		return types.DataGetExpression{
+			Aggregator: column.Aggregator, // aggregation is applied outside of sub query itself
+			Query: types.DataGet{
+				RelationId: column.Query.RelationId.Bytes,
+				Joins:      ConvertQueryToDataJoins(column.Query.Joins),
+				Expressions: []types.DataGetExpression{{
+					AttributeId: pgtype.UUID{Bytes: column.AttributeId.Bytes, Valid: true},
+					Index:       column.Index,
+					GroupBy:     column.GroupBy,
+					Distincted:  column.Distincted,
+				}},
+				Filters: ConvertQueryToDataFilter(column.Query.Filters, loginId, languageCode, recordIdContext, getterKeyMapValue),
+				Orders:  ConvertQueryToDataOrders(column.Query.Orders),
+				Limit:   column.Query.FixedLimit,
+			},
+		}, nil
+	case "fnc_pg":
+		return types.DataGetExpression{
+			PgFunctionId: column.PgFunctionId,
+			Arguments:    column.Arguments,
+			GroupBy:      column.GroupBy,
+			Aggregator:   column.Aggregator,
+			Distincted:   column.Distincted,
+		}, nil
+	case "fnc_scalar":
+		return types.DataGetExpression{
+			Scalar:     column.Scalar,
+			Arguments:  column.Arguments,
+			GroupBy:    column.GroupBy,
+			Aggregator: column.Aggregator,
+			Distincted: column.Distincted,
+		}, nil
 	}
-	return expr
+	return types.DataGetExpression{}, fmt.Errorf("invalid column content '%s'", column.Content)
 }
 
 func ConvertDocumentColumnToExpression(column types.DocColumn, loginId int64, languageCode string, recordIdContext int64) types.DataGetExpression {

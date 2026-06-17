@@ -27,7 +27,7 @@ const (
 	ContextDataDownloadThumb handlerContext = 100
 	ContextDataUpload        handlerContext = 110
 	ContextIconUpload        handlerContext = 120
-	ContextIcsUpload         handlerContext = 130
+	ContextIcsDownload       handlerContext = 130
 	ContextLicenseUpload     handlerContext = 140
 	ContextManifestDownload  handlerContext = 150
 	ContextWebsocket         handlerContext = 160
@@ -65,7 +65,7 @@ var (
 		ContextDataDownloadThumb: "data_download_thumb",
 		ContextDataUpload:        "data_upload",
 		ContextIconUpload:        "icon_upload",
-		ContextIcsUpload:         "ics_download",
+		ContextIcsDownload:       "ics_download",
 		ContextLicenseUpload:     "license_upload",
 		ContextManifestDownload:  "manifest_download",
 		ContextWebsocket:         "websocket",

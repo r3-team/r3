@@ -649,6 +649,7 @@
 			"versionHint": "Šim API ir versijas numurs. Versijas bieži tiek izmantotas, lai piedāvātu jaunas funkcijas, nebojājot vecākus pieprasījumus. Nevar pastāvēt divi API ar vienādu nosaukumu un versijas numuru.",
 			"warning": {
 				"noData": "Lai API darbotos, jābūt izvēlētai vismaz 1 saistībai (cilne 'Saturs') un jābūt aktīvai vismaz 1 kolonnai.",
+				"postFunction": "POST calls fail if any multi value or backend function column is used.",
 				"postNoUpdate": "POST pieprasījumi nevar atjaunināt ierakstus bez ieraksta meklējumiem (cilne 'Saturs'). Vismaz 1 saistība ir iestatīta kā 'ATJAUNINĀT' bez ieraksta meklējuma.",
 				"postSubQuery": "POST pieprasījumi neizdodas, ja tajos ietverti apakšizsaukumi. Vismaz 1 kolonna ir apakšizsaukums."
 			},
@@ -2030,7 +2031,9 @@
 			"006": "Izvēlētais nosaukums nav derīgs. Lūdzu, pārliecinieties, ka nosaukums...<ul><li>... sākas ar burtu <b>(a-z)</b>.</li><li>... ir vismaz <b>60</b> rakstzīmes garš.</li><li>... satur tikai mazos burtus <b>(a-z)</b>, apakšsvītras <b>(_)</b> vai ciparus <b>(0-9)</b>.</li></ul>Piemēri: storage_inventory_post21, facility_address, contact_book",
 			"007": "Atsauce uz moduli nav zināma.",
 			"008": "Atsauce uz attiecību nav zināma.",
-			"009": "Atsauce uz atribūtu nav zināma."
+			"009": "Atsauce uz atribūtu nav zināma.",
+			"010": "A column does not include a valid attribute reference.",
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
 		},
 		"CSV": {
 			"001": "Invalid number '{VALUE}' (expected an integer).",

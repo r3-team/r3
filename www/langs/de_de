@@ -649,6 +649,7 @@
 			"versionHint": "Versionsnummer für diese API. Versionen werden häufig verwendet, um neue Funktionen anzubieten, ohne ältere Aufrufe zu stören. Es dürfen keine zwei APIs mit demselben Namen & Versionsnummer existieren.",
 			"warning": {
 				"noData": "Damit die API arbeiten kann, muss mindestens 1 Relation ausgewählt (Tab \"Inhalt\") und 1 Spalte aktiv sein.",
+				"postFunction": "POST-Aufrufe schlagen fehl wenn Spalten mit mehreren Werten oder mit Backend-Funktionen genutzt werden.",
 				"postNoUpdate": "POST-Aufrufe können ohne Datensatzerkennung keine Datensätze aktualisieren (Tab \"Inhalt\"). Mindestens 1 Relation hat die Option \"Aktualisieren\" ohne Datensatzerkennung.",
 				"postSubQuery": "POST-Aufrufe schlagen fehl wenn eine SubQuery genutzt wird. Mindestens 1 Spalte ist eine SubQuery."
 			},
@@ -2030,7 +2031,9 @@
 			"006": "Der gewählte Name ist ungültig. Bitte stelle sicher, dass...<ul><li>... er mit einen Buchstaben beginnt <b>(a-z)</b>.</li><li>... maximal <b>60</b> Zeichen lang ist.</li><li>... nur kleingeschriebene Buchstaben <b>(a-z)</b>, Unterstriche <b>(_)</b> oder Nummern <b>(0-9)</b> beinhaltet.</li></ul>Beispiele: storage_inventory_post21, facility_address, contact_book",
 			"007": "Ein referenziertes Modul ist unbekannt.",
 			"008": "Eine referenzierte Relation ist unbekannt.",
-			"009": "Ein referenziertes Attribut ist unbekannt."
+			"009": "Ein referenziertes Attribut ist unbekannt.",
+			"010": "Einer Spalte fehlt eine valide Attributreferenz.",
+			"011": "Eine Spalte hat entweder mehrere Werte oder ist eine Backend-Funktion bzw. Unterabfrage - diese werden für Datenimport nicht unterstützt."
 		},
 		"CSV": {
 			"001": "Ungültige Nummer '{VALUE}' (Integer wird erwartet).",

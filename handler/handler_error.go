@@ -45,6 +45,8 @@ const (
 	ErrCodeAppUnknownModule         int = 7
 	ErrCodeAppUnknownRelation       int = 8
 	ErrCodeAppUnknownAttribute      int = 9
+	ErrCodeAppColumnNoAttribute     int = 10
+	ErrCodeAppColumnContentNoAtr    int = 11
 	ErrCodeCsvParseInt              int = 1
 	ErrCodeCsvParseFloat            int = 2
 	ErrCodeCsvParseDateTime         int = 3

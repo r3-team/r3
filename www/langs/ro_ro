@@ -649,6 +649,7 @@
 			"versionHint": "Version number for this API. Versions are often used to offer new features without breaking older calls. No two APIs with the same name & version number may exist.",
 			"warning": {
 				"noData": "For the API to work, at least 1 relation must be selected (tab 'Content') and at least 1 column must be active.",
+				"postFunction": "POST calls fail if any multi value or backend function column is used.",
 				"postNoUpdate": "POST calls fail to update records without record lookups (tab 'Content'). At least 1 relation is set to 'UPDATE' without a record lookup.",
 				"postSubQuery": "POST calls fail if sub queries are included. At least 1 column is a sub query."
 			},
@@ -2030,7 +2031,9 @@
 			"006": "Numele ales este nevalid. Vă rugăm să vă asigurați că numele...<ul><li>... începe cu o literă <b>(a-z)</b>.</li><li>... este de cel mult <b>60</b> caractere ca lungime.</li><li>... conține doar litere mici <b>(a-z)</b>, linie jos <b>(_)</b> sau numere <b>(0-9)</b>.</li></ul>Exemple: storage_inventory_post21, facility_address, contact_book",
 			"007": "Modulul la care se face referire nu este cunoscut.",
 			"008": "Relația la care se face referire nu este cunoscută.",
-			"009": "Atributul la care se face referire nu este cunoscut."
+			"009": "Atributul la care se face referire nu este cunoscut.",
+			"010": "A column does not include a valid attribute reference.",
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
 		},
 		"CSV": {
 			"001": "Număr nevalid '{VALUE}' (număr întreg așteptat).",

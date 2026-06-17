@@ -649,6 +649,7 @@
 			"versionHint": "Version number for this API. Versions are often used to offer new features without breaking older calls. No two APIs with the same name & version number may exist.",
 			"warning": {
 				"noData": "For the API to work, at least 1 relation must be selected (tab 'Content') and at least 1 column must be active.",
+				"postFunction": "POST calls fail if any multi value or backend function column is used.",
 				"postNoUpdate": "POST calls fail to update records without record lookups (tab 'Content'). At least 1 relation is set to 'UPDATE' without a record lookup.",
 				"postSubQuery": "POST calls fail if sub queries are included. At least 1 column is a sub query."
 			},
@@ -2030,7 +2031,9 @@
 			"006": "Il nome scelto non è valido. Assicurarsi che il nome ...<ul><li>... inizi con una lettera <b>(a-z)</b>.</li><li>... non sia più lungo di <b>60</b> caratteri.</li><li>... contenga solo lettere minuscole <b>(a-z)</b>, sottolineato <b>(_)</b> o numeri <b>(0-9)</b>.</li></ul>Esempio: storage_inventory_post21, facility_address, contact_book",
 			"007": "Il modulo referenziato non esiste.",
 			"008": "La relazione referenziata non esiste.",
-			"009": "L'attributo referenziato non esiste."
+			"009": "L'attributo referenziato non esiste.",
+			"010": "A column does not include a valid attribute reference.",
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
 		},
 		"CSV": {
 			"001": "Numero non valido '{VALUE}' (intero previsto).",

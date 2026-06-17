@@ -644,12 +644,12 @@ export default {
 			}
 			if(s.api.hasPost) {
 				// check sub queries in POST API
-				for(let c of s.api.columns) {
-					if(c.content === 'query') {
-						out.push(s.capApp.warning.postSubQuery);
-						break;
-					}
-				}
+				if(s.api.columns.some(v => v.content === 'query'))
+					out.push(s.capApp.warning.postSubQuery);
+				
+				if(s.api.columns.some(v => v.content === 'fnc_pg' || v.content === 'fnc_scalar'))
+					out.push(s.capApp.warning.postFunction);
+
 				// check missing record lookups
 				for(let j of s.query.joins) {
 					if(!j.applyUpdate) continue;

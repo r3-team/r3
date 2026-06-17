@@ -28,7 +28,10 @@ func ResolveQueryLookups(joins []types.QueryJoin, lookups []types.QueryLookup) m
 				continue
 			}
 
+			cache.Schema_mx.RLock()
 			rel, exists := cache.RelationIdMap[join.RelationId]
+			cache.Schema_mx.RUnlock()
+
 			if !exists {
 				continue
 			}
@@ -78,9 +81,19 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64, value
 	// parse all column values
 	for i, column := range columns {
 
-		atr, exists := cache.AttributeIdMap[column.AttributeId]
+		if column.Content != schema.ColumnContentAttribute {
+			return nil, handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnContentNoAtr)
+		}
+		if !column.AttributeId.Valid {
+			return nil, handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnNoAttribute)
+		}
+
+		cache.Schema_mx.RLock()
+		atr, exists := cache.AttributeIdMap[column.AttributeId.Bytes]
+		cache.Schema_mx.RUnlock()
+
 		if !exists {
-			return indexRecordIds, handler.ErrSchemaUnknownAttribute(column.AttributeId)
+			return indexRecordIds, handler.ErrSchemaUnknownAttribute(column.AttributeId.Bytes)
 		}
 		if atr.Encrypted {
 			return indexRecordIds, errors.New("cannot handle value for encrypted attribute")
@@ -88,7 +101,7 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64, value
 
 		dataSet := dataSetsByIndex[column.Index]
 		dataSet.Attributes = append(dataSet.Attributes, types.DataSetAttribute{
-			AttributeId:   column.AttributeId,
+			AttributeId:   column.AttributeId.Bytes,
 			AttributeIdNm: pgtype.UUID{},
 			OutsideIn:     false,
 			Value:         valuesIn[i],
@@ -135,7 +148,9 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64, value
 
 			for _, pgIndexAtrId := range pgIndexAtrIds {
 
+				cache.Schema_mx.RLock()
 				pgIndexAtr := cache.AttributeIdMap[pgIndexAtrId]
+				cache.Schema_mx.RUnlock()
 
 				if !schema.IsContentRelationship(pgIndexAtr.Content) {
 					// PG index attribute is non-relationship, can directly be used
@@ -178,11 +193,17 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64, value
 			}
 
 			// execute lookup as values for all PG index attributes were found
+			cache.Schema_mx.RLock()
 			rel, exists := cache.RelationIdMap[join.RelationId]
+			cache.Schema_mx.RUnlock()
+
 			if !exists {
 				return indexRecordIds, handler.ErrSchemaUnknownAttribute(join.RelationId)
 			}
+
+			cache.Schema_mx.RLock()
 			mod := cache.ModuleIdMap[rel.ModuleId]
+			cache.Schema_mx.RUnlock()
 
 			namesWhere := make([]string, 0)
 			for i, name := range names {
@@ -224,10 +245,17 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64, value
 		// only on joins != -1, as primary record should throw an error if it cannot be imported
 		if join.IndexFrom != -1 {
 			for _, setAtr := range dataSet.Attributes {
+
+				cache.Schema_mx.RLock()
 				atr := cache.AttributeIdMap[setAtr.AttributeId]
+				cache.Schema_mx.RUnlock()
 
 				if !atr.Nullable && setAtr.Value == nil {
+
+					cache.Schema_mx.RLock()
 					rel := cache.RelationIdMap[atr.RelationId]
+					cache.Schema_mx.RUnlock()
+
 					log.Info(log.ContextCsv, fmt.Sprintf("skips record on relation '%s', no value set for required attribute '%s'",
 						rel.Name, atr.Name))
 
@@ -259,7 +287,10 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64, value
 			continue
 		}
 
+		cache.Schema_mx.RLock()
 		joinAtr, exists := cache.AttributeIdMap[dataSet.AttributeId]
+		cache.Schema_mx.RUnlock()
+
 		if !exists {
 			return indexRecordIds, handler.ErrSchemaUnknownAttribute(dataSet.AttributeId)
 		}

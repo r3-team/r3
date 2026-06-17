@@ -40,17 +40,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// parse getters
 	fieldId, err := handler.ReadUuidGetterFromUrl(r, "field_id")
 	if err != nil {
-		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsDownload, err, handler.ErrGeneral)
 		return
 	}
 	loginIdRequested, err := handler.ReadInt64GetterFromUrl(r, "login_id")
 	if err != nil {
-		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsDownload, err, handler.ErrGeneral)
 		return
 	}
 	tokenFixed, err := handler.ReadGetterFromUrl(r, "token_fixed")
 	if err != nil {
-		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsDownload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -62,7 +62,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// authenticate via fixed token
 	login, err := login_auth.TokenFixed(ctx, loginIdRequested, "ics", tokenFixed)
 	if err != nil {
-		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrAuthFailed)
+		handler.AbortRequest(w, handler.ContextIcsDownload, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return
 	}
@@ -70,20 +70,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// start DB transaction
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
-		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsDownload, err, handler.ErrGeneral)
 		return
 	}
 	defer tx.Rollback(ctx)
 
 	if err := db.SetSessionConfig_tx(ctx, tx, login.Id); err != nil {
-		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsDownload, err, handler.ErrGeneral)
 		return
 	}
 
 	// get calendar field details from cache
 	f, err := cache.GetCalendarField_tx(ctx, tx, fieldId)
 	if err != nil {
-		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsDownload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -192,31 +192,42 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// add event summary expressions
 	for _, column := range f.Columns {
 
-		cache.Schema_mx.RLock()
-		atr, exists := cache.AttributeIdMap[column.AttributeId]
-		cache.Schema_mx.RUnlock()
+		if column.Content == schema.ColumnContentAttribute {
+			if !column.AttributeId.Valid {
+				handler.AbortRequest(w, handler.ContextIcsDownload, handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnNoAttribute), handler.ErrGeneral)
+				return
+			}
 
-		if !exists {
-			handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
+			cache.Schema_mx.RLock()
+			atr, exists := cache.AttributeIdMap[column.AttributeId.Bytes]
+			cache.Schema_mx.RUnlock()
+
+			if !exists {
+				handler.AbortRequest(w, handler.ContextIcsDownload, handler.ErrSchemaUnknownAttribute(column.AttributeId.Bytes), handler.ErrGeneral)
+				return
+			}
+			if schema.IsContentFiles(atr.Content) {
+				continue
+			}
+		}
+
+		expr, err := data_query.ConvertColumnToExpression(column, login.Id, login.LanguageCode, 0, make(map[string]string))
+		if err != nil {
+			handler.AbortRequest(w, handler.ContextIcsDownload, err, handler.ErrGeneral)
 			return
 		}
-		if schema.IsContentFiles(atr.Content) {
-			continue
-		}
-
-		dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertColumnToExpression(
-			column, login.Id, login.LanguageCode, 0, make(map[string]string)))
+		dataGet.Expressions = append(dataGet.Expressions, expr)
 	}
 
 	// get data
 	var query string
 	results, _, err := data.Get_tx(ctx, tx, dataGet, login.Id, &query)
 	if err != nil {
-		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsDownload, err, handler.ErrGeneral)
 		return
 	}
 	if err := tx.Commit(ctx); err != nil {
-		handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
+		handler.AbortRequest(w, handler.ContextIcsDownload, err, handler.ErrGeneral)
 		return
 	}
 
@@ -239,7 +250,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				WHERE id = $1
 			)
 		`, f.OpenForm.FormIdOpen).Scan(&modName, &modNameParent); err != nil {
-			handler.AbortRequest(w, handler.ContextIcsUpload, err, handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextIcsDownload, err, handler.ErrGeneral)
 			return
 		}
 
@@ -269,7 +280,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		recordId, exists := result.IndexRecordIds[f.IndexDate0]
 		if !exists {
-			handler.AbortRequest(w, handler.ContextIcsUpload, errors.New("record ID not found on date relation"),
+			handler.AbortRequest(w, handler.ContextIcsDownload, errors.New("record ID not found on date relation"),
 				handler.ErrGeneral)
 
 			return
@@ -289,7 +300,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			reflect.TypeOf(result.Values[0]).String() != "int64" ||
 			reflect.TypeOf(result.Values[1]).String() != "int64" {
 
-			handler.AbortRequest(w, handler.ContextIcsUpload, errors.New("invalid values for date"), handler.ErrGeneral)
+			handler.AbortRequest(w, handler.ContextIcsDownload, errors.New("invalid values for date"), handler.ErrGeneral)
 			return
 		}
 

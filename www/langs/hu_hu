@@ -649,6 +649,7 @@
 			"versionHint": "Verziószám az adott API-hoz. A verziókat gyakran használják új funkciók kínálásához anélkül, hogy megzavarnák az előző hívásokat. Két azonos nevű és verziójú API nem létezhet.",
 			"warning": {
 				"noData": "Az API működéséhez legalább 1 kapcsolatot (Tartalom fül) és 1 oszlopot kell kiválasztani.",
+				"postFunction": "POST calls fail if any multi value or backend function column is used.",
 				"postNoUpdate": "A POST hívások nem képesek rekordok frissítésére rekord-azonosítás nélkül (Tartalom fül). Legalább 1 kapcsolatnak be kell állítani az \"Frissítés\" lehetőséget rekord-azonosítás nélkül.",
 				"postSubQuery": "A POST hívások nem működnek, ha egy alkérdés van használva. Legalább 1 oszlop alkérdés."
 			},
@@ -2030,7 +2031,9 @@
 			"006": "A kiválasztott név érvénytelen. Kérjük, győződjön meg róla, hogy...<ul><li>...betűvel kezdődik <b>(a-z)</b>.</li><li>...legfeljebb <b>60</b> karakter hosszú.</li><li>...csak kisbetűs karakterek <b>(a-z)</b>, aláhúzásjel <b>(_)</b> vagy számok <b>(0-9)</b> találhatók benne.</li></ul>Példák: storage_inventory_post21, facility_address, contact_book",
 			"007": "Egy hivatkozott modul ismeretlen.",
 			"008": "Egy hivatkozott kapcsolat ismeretlen.",
-			"009": "Egy hivatkozott attribútum ismeretlen."
+			"009": "Egy hivatkozott attribútum ismeretlen.",
+			"010": "A column does not include a valid attribute reference.",
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
 		},
 		"CSV": {
 			"001": "Érvénytelen szám '{VALUE}' (egész számra számítás szükséges).",

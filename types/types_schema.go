@@ -87,8 +87,8 @@ type Column struct {
 	Content string    `json:"content"` // content of column (attribute, query, fnc_scalar, fnc_pg)
 
 	// attribute expression
-	AttributeId uuid.UUID `json:"attributeId"`
-	Index       int       `json:"index"` // attribute index
+	AttributeId pgtype.UUID `json:"attributeId"`
+	Index       int         `json:"index"` // attribute index
 
 	// PG function expression
 	PgFunctionId pgtype.UUID `json:"pgFunctionId"`
@@ -100,10 +100,10 @@ type Column struct {
 	Query Query `json:"query"` // sub query
 
 	// expression options
-	Aggregator pgtype.Text `json:"aggregator"` // aggregator (SUM, COUNT, ...)
-	Arguments  []ColumnArg `json:"arguments"`  // for (scalar/PG) function expressions
-	Distincted bool        `json:"distincted"` // attribute values are distinct?
-	GroupBy    bool        `json:"groupBy"`    // group by column attribute value?
+	Aggregator pgtype.Text  `json:"aggregator"` // aggregator (SUM, COUNT, ...)
+	Arguments  []DataGetArg `json:"arguments"`  // for (scalar/PG) function expressions
+	Distincted bool         `json:"distincted"` // attribute values are distinct?
+	GroupBy    bool         `json:"groupBy"`    // group by column attribute value?
 
 	// presentation
 	Captions CaptionMap  `json:"captions"` // column titles
@@ -121,7 +121,6 @@ type Column struct {
 	SubQuery      bool `json:"subQuery"` // column uses sub query?
 	Wrap          bool `json:"wrap"`
 }
-type ColumnArg DataGetArg
 type Deletion struct {
 	Id     uuid.UUID `json:"id"`
 	Entity string    `json:"entity"`

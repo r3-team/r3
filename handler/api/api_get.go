@@ -38,7 +38,15 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 	}
 
 	// resolve relation joins
+	relIndexMapRef := make(map[int]string)
 	for _, join := range api.Query.Joins {
+		if getters.verbose {
+			cache.Schema_mx.RLock()
+			rel := cache.RelationIdMap[join.RelationId]
+			cache.Schema_mx.RUnlock()
+
+			relIndexMapRef[join.Index] = fmt.Sprintf("%d(%s)", join.Index, rel.Name)
+		}
 		if join.Index == 0 {
 			continue
 		}
@@ -52,8 +60,11 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 
 	// build expressions from columns
 	for _, c := range api.Columns {
-		dataGet.Expressions = append(dataGet.Expressions, data_query.ConvertColumnToExpression(
-			c, loginId, languageCodeLogin, recordId, getters.filters))
+		expr, err := data_query.ConvertColumnToExpression(c, loginId, languageCodeLogin, recordId, getters.filters)
+		if err != nil {
+			return http.StatusServiceUnavailable, err, fmt.Errorf(handler.ErrGeneral)
+		}
+		dataGet.Expressions = append(dataGet.Expressions, expr)
 	}
 
 	// apply filters
@@ -62,13 +73,17 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 
 	// add record filter
 	if recordId != 0 {
+		cache.Schema_mx.RLock()
+		rel := cache.RelationIdMap[api.Query.RelationId.Bytes]
+		cache.Schema_mx.RUnlock()
+
 		dataGet.Filters = append(dataGet.Filters, types.DataGetFilter{
 			Connector: "AND",
 			Index:     0,
 			Operator:  "=",
 			Side0: types.DataGetFilterSide{
 				AttributeId: pgtype.UUID{
-					Bytes: cache.RelationIdMap[api.Query.RelationId.Bytes].AttributeIdPk,
+					Bytes: rel.AttributeIdPk,
 					Valid: true,
 				},
 			},
@@ -97,22 +112,54 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 		}
 	} else {
 		// prepare keys for row template object: { "0(person)":{"firstname":"Hans", ...}, "1(department)":{"name":"IT"}...}
-		relIndexMapNames := make(map[int]string)
 		colRefByColumn := make([]string, len(api.Columns))
 		subQueryCtr := 0
 		for i, c := range api.Columns {
-			atr := cache.AttributeIdMap[c.AttributeId]
-			rel := cache.RelationIdMap[atr.RelationId]
-			colRef := ""
 
+			colRef := ""
 			if ref, exists := c.Captions["columnTitle"][languageCode]; exists {
+				// column title exists, use it
 				colRef = ref
 			} else {
-				if c.Content == schema.ColumnContentQuery {
+				// fallbacks
+				switch c.Content {
+				case schema.ColumnContentAttribute:
+					if !c.AttributeId.Valid {
+						return http.StatusServiceUnavailable, nil, handler.CreateErrCode(handler.ErrContextApp, handler.ErrCodeAppColumnNoAttribute)
+					}
+					cache.Schema_mx.RLock()
+					atr := cache.AttributeIdMap[c.AttributeId.Bytes]
+					cache.Schema_mx.RUnlock()
+
+					colRef = atr.Name
+
+				case schema.ColumnContentFncPg, schema.ColumnContentFncScalar:
+					parts := make([]string, 0)
+					for _, arg := range c.Arguments {
+						if arg.AttributeId.Valid {
+							cache.Schema_mx.RLock()
+							atr := cache.AttributeIdMap[arg.AttributeId.Bytes]
+							cache.Schema_mx.RUnlock()
+
+							parts = append(parts, atr.Name)
+						}
+					}
+					if c.Content == schema.ColumnContentFncScalar {
+						switch c.Scalar.String {
+						case "COALESCE":
+							colRef = strings.Join(parts, "/")
+						case "CONCAT":
+							colRef = strings.Join(parts, "+")
+						default:
+							colRef = strings.Join(parts, ",")
+						}
+					} else {
+						colRef = strings.Join(parts, ",")
+					}
+
+				case schema.ColumnContentQuery:
 					colRef = fmt.Sprintf("sub_query%d", subQueryCtr)
 					subQueryCtr++
-				} else {
-					colRef = atr.Name
 				}
 
 				if c.Aggregator.Valid {
@@ -120,23 +167,16 @@ func handleGet_tx(ctx context.Context, tx pgx.Tx, w http.ResponseWriter, api typ
 				}
 			}
 			colRefByColumn[i] = colRef
-
-			if _, exists := relIndexMapNames[c.Index]; !exists {
-				relIndexMapNames[c.Index] = rel.Name
-			}
 		}
 
 		for _, result := range results {
 			row := make(map[string]map[string]any)
 			for i, value := range result.Values {
 
-				relIndex := api.Columns[i].Index
-				relRef := fmt.Sprintf("%d(%s)", relIndex, relIndexMapNames[relIndex])
-
+				relRef := relIndexMapRef[api.Columns[i].Index]
 				if _, exists := row[relRef]; !exists {
 					row[relRef] = make(map[string]any)
 				}
-
 				row[relRef][colRefByColumn[i]] = value
 			}
 			rows = append(rows, row)

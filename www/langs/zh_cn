@@ -649,6 +649,7 @@
 			"versionHint": "此API的版本号。版本通常用于提供新功能而不会破坏旧调用。不能存在两个具有相同名称和版本号的API。",
 			"warning": {
 				"noData": "为了使API正常工作，必须至少选择1个关系（“内容”标签），并且至少激活1个列。",
+				"postFunction": "POST calls fail if any multi value or backend function column is used.",
 				"postNoUpdate": "没有记录查找（“内容”标签）的情况下，POST调用无法更新记录。至少设置1个关系为“UPDATE”，但没有记录查找。",
 				"postSubQuery": "如果包括子查询，POST调用将失败。至少1个列是子查询。"
 			},
@@ -2030,7 +2031,9 @@
 			"006": "所选名称无效。请确保名称...<ul><li>... 以字母 <b>(a-z)</b> 开头。</li><li>... 最多为 <b>60</b> 个字符长。</li><li>... 仅包含小写字母 <b>(a-z)</b>、下划线 <b>(_)</b> 或数字 <b>(0-9)</b>。</li></ul>示例：storage_inventory_post21, facility_address, contact_book",
 			"007": "引用的模块未知。",
 			"008": "引用的关系未知。",
-			"009": "引用的属性未知。"
+			"009": "引用的属性未知。",
+			"010": "A column does not include a valid attribute reference.",
+			"011": "A column is either a multi value, backend function or sub query column - these are not supported for importing data."
 		},
 		"CSV": {
 			"001": "无效数字“{VALUE}”（应为整数）。",
