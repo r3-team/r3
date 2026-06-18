@@ -34,6 +34,10 @@ func addFieldList(ctx context.Context, doc *doc, loginId int64, recordIdDoc int6
 	}
 	defer tx.Rollback(ctx)
 
+	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+		return err
+	}
+
 	dataGet := types.DataGet{
 		RelationId:  f.Query.RelationId.Bytes,
 		IndexSource: 0,

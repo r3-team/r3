@@ -22,6 +22,10 @@ func getDataDoc(ctx context.Context, doc *doc, loginId int64, recordIdDoc int64,
 	}
 	defer tx.Rollback(ctx)
 
+	if err := db.SetSessionConfig_tx(ctx, tx, loginId); err != nil {
+		return err
+	}
+
 	dataGet := types.DataGet{
 		RelationId:  q.RelationId.Bytes,
 		IndexSource: 0,
