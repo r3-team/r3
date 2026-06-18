@@ -55,6 +55,9 @@ func FormatStringNumber(s string, charDec string, charThou string) string {
 		if string(sInt[0]) == "-" {
 			lastChar = 1
 		}
+		if charThou == "0" {
+			charThou = ""
+		}
 		for i := len(sInt) - 3; i > lastChar; i -= 3 {
 			sInt = sInt[:i] + charThou + sInt[i:]
 		}

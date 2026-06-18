@@ -110,7 +110,7 @@ func getAttributeString(font types.DocFont, atr types.Attribute, convertHtmlToSt
 	case "integer", "bigint":
 		switch atr.ContentUse {
 		case "default":
-			return true, fmt.Sprintf("%d", valueIf), nil
+			return true, tools.FormatStringNumber(fmt.Sprintf("%d", valueIf), font.NumberSepDec, font.NumberSepTho), nil
 		case "date", "datetime":
 			tUnix, err := getInt64FromInterface(valueIf)
 			if err != nil {
