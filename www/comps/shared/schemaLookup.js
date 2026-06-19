@@ -38,7 +38,8 @@ export function getReferences(moduleSource,entity,entityId) {
 			pgTriggerIds:[],
 			searchBarIds:[],
 
-			// relations matched in relationships
+			// relations matched in policies/relationships
+			relationIdsPolicies:[],
 			relationIdsShips:[],
 
 			// forms if any sub elements match
@@ -215,6 +216,12 @@ function getReferencesJsFunction(mod,fncId,lookups) {
 };
 
 function getReferencesPgFunction(mod,fncId,lookups) {
+	for(const r of mod.relations) {
+		if(r.policies.some(v => fncId === v.pgFunctionIdExcl || fncId === v.pgFunctionIdIncl)) {
+			lookups.relationIdsPolicies.push(r.id);
+			lookups.anyResults = true;
+		}
+	}
 	for(const f of mod.pgFunctions) {
 		if(f.codeFunction.includes(`.[${fncId}](`)) {
 			lookups.pgFunctionIds.push(f.id);

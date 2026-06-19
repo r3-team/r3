@@ -2598,6 +2598,7 @@
 		"pgFunction": "Function (back)",
 		"pgFunctions": "函数（后端）",
 		"placeholders": "Placeholders",
+		"policies": "Policies",
 		"postfix": "Postfix",
 		"prefix": "Prefix",
 		"preview": "预览",
