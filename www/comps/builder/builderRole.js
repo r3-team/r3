@@ -23,7 +23,7 @@ const MyBuilderRoleAccessMenu = {
 			<my-bool
 				@update:modelValue="$emit('apply',menu.id,access === 1 ? -1 : 1)"
 				:modelValue="access === 1 ? true : false"
-				:readonly="readonly"
+				:readonly
 			/>
 		</td>
 		<td class="maximum"></td>
@@ -34,14 +34,14 @@ const MyBuilderRoleAccessMenu = {
 		v-for="m in menu.menus"
 		@apply="(...args) => $emit('apply',...args)"
 		@toggle="(...args) => $emit('toggle',...args)"
-		:builderLanguage="builderLanguage"
+		:builderLanguage
 		:depth="depth + 1"
-		:idMapAccess="idMapAccess"
+		:idMapAccess
 		:key="m.id"
 		:menu="m"
-		:menuIdsShow="menuIdsShow"
-		:readonly="readonly"
-		:role="role"
+		:menuIdsShow
+		:readonly
+		:role
 	/>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
@@ -57,11 +57,11 @@ const MyBuilderRoleAccessMenu = {
 		return { showSubs:false };
 	},
 	computed:{
-		access:   (s) => typeof s.idMapAccess[s.menu.id] === 'undefined' ? -1 : s.idMapAccess[s.menu.id],
-		style:    (s) => `margin-left:${s.depth * 30}px;`,
-		subsExist:(s) => s.menu.menus.length !== 0,
-		subsShow: (s) => s.menuIdsShow.includes(s.menu.id),
-		title:    (s) => {
+		access:   s => typeof s.idMapAccess[s.menu.id] === 'undefined' ? -1 : s.idMapAccess[s.menu.id],
+		style:    s => `margin-left:${s.depth * 30}px;`,
+		subsExist:s => s.menu.menus.length !== 0,
+		subsShow: s => s.menuIdsShow.includes(s.menu.id),
+		title:    s => {
 			// 1st preference: proper menu title
 			if(typeof s.menu.captions.menuTitle[s.builderLanguage] !== 'undefined')
 				return s.menu.captions.menuTitle[s.builderLanguage];
@@ -77,8 +77,8 @@ const MyBuilderRoleAccessMenu = {
 		},
 		
 		// stores
-		formIdMap:(s) => s.$store.getters['schema/formIdMap'],
-		capGen:   (s) => s.$store.getters.captions.generic
+		formIdMap:s => s.$store.getters['schema/formIdMap'],
+		capGen:   s => s.$store.getters.captions.generic
 	}
 };
 
@@ -101,21 +101,21 @@ const MyBuilderRoleAccessRelation = {
 			<my-bool caption0="R" caption1="R"
 				@update:modelValue="setRelation(1)"
 				:modelValue="access >= 1"
-				:readonly="readonly"
+				:readonly
 			/>
 		</td>
 		<td>
 			<my-bool caption0="W" caption1="W"
 				@update:modelValue="setRelation(2)"
 				:modelValue="access >= 2"
-				:readonly="readonly"
+				:readonly
 			/>
 		</td>
 		<td>
 			<my-bool caption0="D" caption1="D"
 				@update:modelValue="setRelation(3)"
 				:modelValue="access === 3"
-				:readonly="readonly"
+				:readonly
 			/>
 		</td>
 		<td class="maximum"></td>
@@ -141,7 +141,7 @@ const MyBuilderRoleAccessRelation = {
 				v-if="attributeIdMapAccessParsed[atr.id] !== -1"
 				@update:modelValue="setAttribute(1,atr.id)"
 				:modelValue="attributeIdMapAccessParsed[atr.id] >= 1"
-				:readonly="readonly"
+				:readonly
 			/>
 		</td>
 		<td>
@@ -149,7 +149,7 @@ const MyBuilderRoleAccessRelation = {
 				v-if="attributeIdMapAccessParsed[atr.id] !== -1"
 				@update:modelValue="setAttribute(2,atr.id)"
 				:modelValue="attributeIdMapAccessParsed[atr.id] === 2"
-				:readonly="readonly"
+				:readonly
 			/>
 		</td>
 		<td></td>
@@ -165,9 +165,9 @@ const MyBuilderRoleAccessRelation = {
 	},
 	emits:['apply-attribute','apply-relation','relation-selected'],
 	computed:{
-		access:(s) => s.relationIdMapAccess[s.relation.id] === undefined
+		access:s => s.relationIdMapAccess[s.relation.id] === undefined
 			? -1 : s.relationIdMapAccess[s.relation.id],
-		attributeIdMapAccessParsed:(s) => {
+		attributeIdMapAccessParsed:s => {
 			let out = {};
 			for(let a of s.relation.attributes) {
 				if(typeof s.attributeIdMapAccess[a.id] === 'undefined') {
@@ -178,7 +178,7 @@ const MyBuilderRoleAccessRelation = {
 			}
 			return out;
 		},
-		brokenInheritance:(s) => {
+		brokenInheritance:s => {
 			for(let key in s.attributeIdMapAccessParsed) {
 				if(s.attributeIdMapAccessParsed[key] !== -1)
 					return true;
@@ -187,19 +187,17 @@ const MyBuilderRoleAccessRelation = {
 		},
 		
 		// stores
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.role
+		relationIdMap: s => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:s => s.$store.getters['schema/attributeIdMap'],
+		capApp:        s => s.$store.getters.captions.builder.role
 	},
 	methods:{
 		setAttribute(access,attributeId) {
 			this.$emit('apply-attribute',attributeId,this.attributeIdMapAccessParsed[attributeId] >= access ? access - 1 : access);
 		},
 		setRelation(access) {
-			if(access === 1 && this.access !== -1)
-				return this.$emit('apply-relation',this.relation.id,-1);
-
-			this.$emit('apply-relation',this.relation.id,this.access >= access ? access - 1 : access);
+			const n = access <= this.access ? access - 1 : access;
+			this.$emit('apply-relation',this.relation.id, n !== 0 ? n : -1);
 		}
 	}
 };
@@ -212,7 +210,7 @@ const MyBuilderRoleAccessSimple = {
 			<my-bool
 				@update:modelValue="$emit('apply',id,access === 1 ? -1 : 1)"
 				:modelValue="access === 1 ? true : false"
-				:readonly="readonly"
+				:readonly
 			/>
 		</td>
 		<td class="maximum"></td>
@@ -228,8 +226,8 @@ const MyBuilderRoleAccessSimple = {
 	},
 	emits:['apply'],
 	computed:{
-		access: (s) => s.idMapAccess[s.id] === undefined ? -1 : s.idMapAccess[s.id],
-		caption:(s) => s.captionTitle !== '' && s.captions[s.captionTitle][s.builderLanguage] !== undefined
+		access: s => s.idMapAccess[s.id] === undefined ? -1 : s.idMapAccess[s.id],
+		caption:s => s.captionTitle !== '' && s.captions[s.captionTitle][s.builderLanguage] !== undefined
 			? s.captions[s.captionTitle][s.builderLanguage]
 			: s.name
 	}
@@ -257,7 +255,7 @@ export default {
 					:contentName="capGen.title"
 					:language="builderLanguage"
 					:longInput="true"
-					:readonly="readonly"
+					:readonly
 				/>
 			</div>
 			<div class="area nowrap"></div>
@@ -342,8 +340,8 @@ export default {
 								:attributeIdMapAccess="accessAttributes"
 								:key="role.id + '_' + rel.id"
 								:relation="rel"
-								:role="role"
-								:readonly="readonly"
+								:role
+								:readonly
 								:relationIdMapAccess="accessRelations"
 								:showEntries="relationIdsShown.includes(rel.id)"
 							/>
@@ -355,7 +353,7 @@ export default {
 							<div class="builder-role-menu-tab-select"></div>
 							<my-builder-menu-tab-select
 								v-model="menuTabsIndexShown"
-								:builderLanguage="builderLanguage"
+								:builderLanguage
 								:menuTabs="module.menuTabs"
 							/>
 						</div>
@@ -387,14 +385,14 @@ export default {
 										v-for="men in mt.menus"
 										@apply="(...args) => apply('menu',args[0],args[1])"
 										@toggle="toggleMenu"
-										:builderLanguage="builderLanguage"
+										:builderLanguage
 										:depth="0"
 										:idMapAccess="accessMenus"
 										:key="role.id + '_' + men.id"
 										:menu="men"
-										:menuIdsShow="menuIdsShow"
-										:role="role"
-										:readonly="readonly"
+										:menuIdsShow
+										:role
+										:readonly
 									/>
 								</template>
 							</tbody>
@@ -413,13 +411,13 @@ export default {
 							<my-builder-role-access-simple
 								v-for="e in module.clientEvents"
 								@apply="(...args) => apply('clientEvent',args[0],args[1])"
-								:builderLanguage="builderLanguage"
+								:builderLanguage
 								:captions="e.captions"
 								:captionTitle="'clientEventTitle'"
 								:id="e.id"
 								:idMapAccess="accessClientEvents"
 								:key="role.id + '_' + e.id"
-								:readonly="readonly"
+								:readonly
 							/>
 						</tbody>
 					</table>
@@ -436,12 +434,12 @@ export default {
 							<my-builder-role-access-simple
 								v-for="e in module.collections"
 								@apply="(...args) => apply('collection',args[0],args[1])"
-								:builderLanguage="builderLanguage"
+								:builderLanguage
 								:id="e.id"
 								:idMapAccess="accessCollections"
 								:key="role.id + '_' + e.id"
 								:name="e.name"
-								:readonly="readonly"
+								:readonly
 							/>
 						</tbody>
 					</table>
@@ -458,12 +456,12 @@ export default {
 							<my-builder-role-access-simple
 								v-for="e in module.apis"
 								@apply="(...args) => apply('api',args[0],args[1])"
-								:builderLanguage="builderLanguage"
+								:builderLanguage
 								:id="e.id"
 								:idMapAccess="accessApis"
 								:key="role.id + '_' + e.id"
 								:name="e.name + '(v' + e.version + ')'"
-								:readonly="readonly"
+								:readonly
 							/>
 						</tbody>
 					</table>
@@ -480,14 +478,14 @@ export default {
 							<my-builder-role-access-simple
 								v-for="e in module.searchBars"
 								@apply="(...args) => apply('searchBar',args[0],args[1])"
-								:builderLanguage="builderLanguage"
+								:builderLanguage
 								:captions="e.captions"
 								:captionTitle="'searchBarTitle'"
 								:id="e.id"
 								:idMapAccess="accessSearchBars"
 								:key="role.id + '_' + e.id"
 								:name="e.name"
-								:readonly="readonly"
+								:readonly
 							/>
 						</tbody>
 					</table>
@@ -504,14 +502,14 @@ export default {
 							<my-builder-role-access-simple
 								v-for="e in module.widgets"
 								@apply="(...args) => apply('widget',args[0],args[1])"
-								:builderLanguage="builderLanguage"
+								:builderLanguage
 								:captions="e.captions"
 								:captionTitle="'widgetTitle'"
 								:id="e.id"
 								:idMapAccess="accessWidgets"
 								:key="role.id + '_' + e.id"
 								:name="e.name"
-								:readonly="readonly"
+								:readonly
 							/>
 						</tbody>
 					</table>
@@ -534,7 +532,7 @@ export default {
 										v-model="captions.roleTitle"
 										:contentName="capGen.title"
 										:language="builderLanguage"
-										:readonly="readonly"
+										:readonly
 									/>
 								</td>
 							</tr>
@@ -546,7 +544,7 @@ export default {
 										:contentName="capGen.description"
 										:language="builderLanguage"
 										:multiLine="true"
-										:readonly="readonly"
+										:readonly
 									/>
 								</td>
 							</tr>
@@ -565,7 +563,7 @@ export default {
 							</tr>
 							<tr>
 								<td>{{ capApp.assignable }}</td>
-								<td><my-bool v-model="assignable" :readonly="readonly" /></td>
+								<td><my-bool v-model="assignable" :readonly /></td>
 							</tr>
 							<tr>
 								<td>{{ capApp.children }}</td>
@@ -647,7 +645,7 @@ export default {
 		};
 	},
 	computed:{
-		hasChanges:(s) =>
+		hasChanges:s =>
 			s.name          !== s.role.name
 			|| s.content    !== s.role.content
 			|| s.assignable !== s.role.assignable
@@ -661,7 +659,7 @@ export default {
 			|| JSON.stringify(s.accessSearchBars)   !== JSON.stringify(s.role.accessSearchBars)
 			|| JSON.stringify(s.accessWidgets)      !== JSON.stringify(s.role.accessWidgets)
 			|| JSON.stringify(s.captions)           !== JSON.stringify(s.role.captions),
-		menuIdsAll:(s) => {
+		menuIdsAll:s => {
 			let out = [];
 			const getChildren = function(menus) {
 				for(const m of menus) {
@@ -677,7 +675,7 @@ export default {
 			}
 			return out;
 		},
-		tabCaptions:(s) => {
+		tabCaptions:s => {
 			return [
 				`${s.capGen.data} (${s.module.relations.length})`,
 				`${s.capGen.menus} (${s.module.menuTabs.length})`,
@@ -690,17 +688,17 @@ export default {
 		},
 		
 		// simple
-		canSave:   (s) => s.hasChanges && !s.readonly,
-		isEveryone:(s) => s.role.name === 'everyone',
-		module:    (s) => s.role === false ? false : s.moduleIdMap[s.role.moduleId],
-		role:      (s) => typeof s.roleIdMap[s.id] === 'undefined' ? false : s.roleIdMap[s.id],
+		canSave:   s => s.hasChanges && !s.readonly,
+		isEveryone:s => s.role.name === 'everyone',
+		module:    s => s.role === false ? false : s.moduleIdMap[s.role.moduleId],
+		role:      s => typeof s.roleIdMap[s.id] === 'undefined' ? false : s.roleIdMap[s.id],
 		
 		// stores
-		moduleIdMap: (s) => s.$store.getters['schema/moduleIdMap'],
-		roleIdMap:   (s) => s.$store.getters['schema/roleIdMap'],
-		appFunctions:(s) => s.$store.getters.appFunctions,
-		capApp:      (s) => s.$store.getters.captions.builder.role,
-		capGen:      (s) => s.$store.getters.captions.generic
+		moduleIdMap: s => s.$store.getters['schema/moduleIdMap'],
+		roleIdMap:   s => s.$store.getters['schema/roleIdMap'],
+		appFunctions:s => s.$store.getters.appFunctions,
+		capApp:      s => s.$store.getters.captions.builder.role,
+		capGen:      s => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
