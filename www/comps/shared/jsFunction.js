@@ -226,9 +226,14 @@ export function jsFunctionRun(jsFunctionId,args,exposedFunctionsContext) {
 		})
 	};
 
-	return Function(argNames,code)({
-		...exposedFunctionsGlobal, // globally available functions
-		...exposedFunctionsModule, // functions available for module of running function
-		...exposedFunctionsContext // functions available in calling context
-	}, ...args);
+	try {
+		return Function(argNames,code)({
+			...exposedFunctionsGlobal, // globally available functions
+			...exposedFunctionsModule, // functions available for module of running function
+			...exposedFunctionsContext // functions available in calling context
+		}, ...args);
+	} catch(err) {
+		console.error(`frontend function '${fnc.name}()' failed to execute,`, err)
+		return null;
+	}
 };
